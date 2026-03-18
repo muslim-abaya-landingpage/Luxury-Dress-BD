@@ -1299,36 +1299,45 @@ let isAutoSlideActive = true;
 let checkoutTracked = false;
 let cart = {};
 const products = [
+    // Baby Pink Floral Series
     { id: 'DR-01', name: 'Baby Pink Floral', img: 'Baby-Pink-Floral-Print.JPG', price: 550 },
     { id: 'DR-02', name: 'Baby Pink Floral (2)', img: 'Baby-Pink-Floral-Print..JPG', price: 550 },
-    { id: 'DR-03', name: 'Baby Pink Floral (3)', img: 'Baby-Pink-Floral-Print...JPG', price: 550 },
-    { id: 'DR-04', name: 'Baby Pink Floral (4)', img: 'Baby-Pink-Floral-Print....JPG', price: 550 },
-    { id: 'DR-05', name: 'Baby Pink Floral (5)', img: 'Baby-Pink-Floral-Print.....JPG', price: 550 },
-    { id: 'DR-06', name: 'Baby Pink Floral (6)', img: 'Baby-Pink-Floral-Print......JPG', price: 550 },
-    { id: 'DR-07', name: 'Baby Pink Floral (7)', img: 'Baby-Pink-Floral-Print.......JPG', price: 550 },
-    { id: 'DR-08', name: 'Black Base Rose', img: 'Black-Base-Rose-Floral.JPG', price: 550 },
-    { id: 'DR-09', name: 'Black Base Rose (2)', img: 'Black-Base-Rose-Floral..JPG', price: 550 },
-    { id: 'DR-10', name: 'Black Base Rose (3)', img: 'Black-Base-Rose-Floral...JPG', price: 550 },
-    { id: 'DR-11', name: 'Black Base Rose (4)', img: 'Black-Base-Rose-Floral....JPG', price: 550 },
-    { id: 'DR-12', name: 'Black Base Rose (5)', img: 'Black-Base-Rose-Floral.....JPG', price: 550 },
-    { id: 'DR-13', name: 'Black Base Rose (6)', img: 'Black-Base-Rose-Floral......JPG', price: 550 },
-    { id: 'DR-14', name: 'Black Base Rose (7)', img: 'Black-Base-Rose-Floral.......JPG', price: 550 },
-    { id: 'DR-15', name: 'Black Base Rose (8)', img: 'Black-Base-Rose-Floral........JPG', price: 550 },
+    { id: 'DR-03', name: 'Baby Pink Floral (3)', img: 'Baby-Pink-Floral-Print....JPG', price: 550 },
+    { id: 'DR-04', name: 'Baby Pink Floral (4)', img: 'Baby-Pink-Floral-Print.....JPG', price: 550 },
+    { id: 'DR-05', name: 'Baby Pink Floral (5)', img: 'Baby-Pink-Floral-Print......JPG', price: 550 },
+    { id: 'DR-06', name: 'Baby Pink Floral (6)', img: 'Baby-Pink-Floral-Print.......JPG', price: 550 },
+
+    // Black Base Rose Series
+    { id: 'DR-07', name: 'Black Base Rose', img: 'Black-Base-Rose-Floral.JPG', price: 550 },
+    { id: 'DR-08', name: 'Black Base Rose (2)', img: 'Black-Base-Rose-Floral.JPG', price: 550 },
+    { id: 'DR-09', name: 'Black Base Rose (3)', img: 'Black-Base-Rose-Floral..JPG', price: 550 },
+    { id: 'DR-10', name: 'Black Base Rose (4)', img: 'Black-Base-Rose-Floral...JPG', price: 550 },
+    { id: 'DR-11', name: 'Black Base Rose (5)', img: 'Black-Base-Rose-Floral....JPG', price: 550 },
+    { id: 'DR-12', name: 'Black Base Rose (6)', img: 'Black-Base-Rose-Floral.....JPG', price: 550 },
+    { id: 'DR-13', name: 'Black Base Rose (7)', img: 'Black-Base-Rose-Floral......JPG', price: 550 },
+    { id: 'DR-14', name: 'Black Base Rose (8)', img: 'Black-Base-Rose-Floral.......JPG', price: 550 },
+    { id: 'DR-15', name: 'Black Base Rose (9)', img: 'Black-Base-Rose-Floral........JPG', price: 550 },
+
+    // Black White Polka Series
     { id: 'DR-16', name: 'Black White Polka', img: 'Black-White-Polka-Dots.JPG', price: 550 },
-    { id: 'DR-17', name: 'Black White Polka (2)', img: 'Black-White-Polka-Dots..JPG', price: 550 },
-    { id: 'DR-18', name: 'Black White Polka (3)', img: 'Black-White-Polka-Dots...JPG', price: 550 },
-    { id: 'DR-19', name: 'Black White Polka (4)', img: 'Black-White-Polka-Dots....JPG', price: 550 },
-    { id: 'DR-20', name: 'Black White Polka (5)', img: 'Black-White-Polka-Dots.....JPG', price: 550 },
-    { id: 'DR-21', name: 'Black White Polka (6)', img: 'Black-White-Polka-Dots......JPG', price: 550 },
-    { id: 'DR-22', name: 'Black White Polka (7)', img: 'Black-White-Polka-Dots.......JPG', price: 550 },
+    { id: 'DR-17', name: 'Black White Polka (2)', img: 'Black-White-Polka-Dots.JPG', price: 550 },
+    { id: 'DR-18', name: 'Black White Polka (3)', img: 'Black-White-Polka-Dots..JPG', price: 550 },
+    { id: 'DR-19', name: 'Black White Polka (4)', img: 'Black-White-Polka-Dots...JPG', price: 550 },
+    { id: 'DR-20', name: 'Black White Polka (5)', img: 'Black-White-Polka-Dots....JPG', price: 550 },
+    { id: 'DR-21', name: 'Black White Polka (6)', img: 'Black-White-Polka-Dots.....JPG', price: 550 },
+    { id: 'DR-22', name: 'Black White Polka (7)', img: 'Black-White-Polka-Dots......JPG', price: 550 },
+
+    // Royal Blue Golden Series
     { id: 'DR-23', name: 'Royal Blue Golden', img: 'Royal-Blue-Golden-Floral-Print.JPG', price: 550 },
-    { id: 'DR-24', name: 'Royal Blue Golden (2)', img: 'Royal-Blue-Golden-Floral-Print..JPG', price: 550 },
-    { id: 'DR-25', name: 'Royal Blue Golden (3)', img: 'Royal-Blue-Golden-Floral-Print...JPG', price: 550 },
+    { id: 'DR-24', name: 'Royal Blue Golden (2)', img: 'Royal-Blue-Golden-Floral-Print.JPG', price: 550 },
+    { id: 'DR-25', name: 'Royal Blue Golden (3)', img: 'Royal-Blue-Golden-Floral-Print..JPG', price: 550 },
     { id: 'DR-26', name: 'Royal Blue Golden (4)', img: 'Royal-Blue-Golden-Floral-Print....JPG', price: 550 },
     { id: 'DR-27', name: 'Royal Blue Golden (5)', img: 'Royal-Blue-Golden-Floral-Print.....JPG', price: 550 },
+
+    // Royal Blue White Polka Series
     { id: 'DR-28', name: 'Royal Blue Polka', img: 'Royal-Blue-White-Polka-Dots.JPG', price: 550 },
-    { id: 'DR-29', name: 'Royal Blue Polka (2)', img: 'Royal-Blue-White-Polka-Dots..JPG', price: 550 },
-    { id: 'DR-30', name: 'Royal Blue Polka (3)', img: 'Royal-Blue-White-Polka-Dots...JPG', price: 550 },
+    { id: 'DR-29', name: 'Royal Blue Polka (2)', img: 'Royal-Blue-White-Polka-Dots.JPG', price: 550 },
+    { id: 'DR-30', name: 'Royal Blue Polka (3)', img: 'Royal-Blue-White-Polka-Dots..JPG', price: 550 },
     { id: 'DR-31', name: 'Royal Blue Polka (4)', img: 'Royal-Blue-White-Polka-Dots....JPG', price: 550 },
     { id: 'DR-32', name: 'Royal Blue Polka (5)', img: 'Royal-Blue-White-Polka-Dots.....JPG', price: 550 }
 ];
