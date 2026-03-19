@@ -1344,24 +1344,6 @@ const products = [
     { id: 'DR-31', name: 'Royal Blue Polka (4)', img: 'Royal-Blue-White-Polka-Dots....JPG', price: 550 },
     { id: 'DR-32', name: 'Royal Blue Polka (5)', img: 'Royal-Blue-White-Polka-Dots.....JPG', price: 550 }
 ];
-	const productContainer = document.getElementById('product-grid'); // আপনার কন্টেইনারের নাম অনুযায়ী পরিবর্তন করুন
-products.forEach((product, index) => {
-    const productHTML = `
-        <div class="product-card">
-            <img 
-                src="images/${product.img}" 
-                alt="${product.name}" 
-                /* প্রথম ১-২টি ইমেজ বাদে বাকি সবগুলোতে lazy loading হবে */
-                ${index > 1 ? 'loading="lazy"' : ''} 
-                width="300" 
-                height="400">
-            <h3>${product.name}</h3>
-            <p>দাম: ৳${product.price}</p>
-            <button onclick="addToCart('${product.id}')">Buy Now</button>
-        </div>
-    `;
-    productContainer.innerHTML += productHTML;
-});
 function trackFB(event, data = {}) {
     if (typeof fbq !== 'undefined') {
         fbq('track', event, data);
