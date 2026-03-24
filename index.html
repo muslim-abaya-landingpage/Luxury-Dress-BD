@@ -2,6 +2,7 @@
 <html lang="bn">
 <head>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="https://res.cloudinary.com/dyjth9smc/image/upload/f_auto,q_auto,w_600/v1773129749/Baby-Pink-Floral-Print_ejbtpf.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <meta charset="UTF-8">
@@ -37,7 +38,7 @@ html, body {
     z-index: 999999 !important;
     transition: 0.3s ease;
     box-shadow: -5px 0 15px rgba(0,0,0,0.1);
-    display: block !important; 
+    display: block !important; /* hidden
 }
 .mobile-nav-panel.active {
     right: 0;
@@ -58,6 +59,7 @@ html, body {
 <meta name="description" content="Premium Muslim Abaya 2 Piece Collection. Soft Georgette Fabric. Cash on Delivery Available All Over Bangladesh.">
 <meta property="og:title" content="Muslim Abaya Premium Collection">
 <meta property="og:description" content="Premium Muslim Abaya 2 Piece Collection">
+<meta property="og:image" content="https://res.cloudinary.com/dyjth9smc/image/upload/v1773129749/Baby-Pink-Floral-Print_ejbtpf.jpg">
 <meta property="og:type" content="product">
 <meta property="og:url" content="https://muslimabaya.com/">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -87,6 +89,7 @@ html, body {
         <li><a href="#">KARCHUPI</a></li>
         <li><a href="#">KAFTAN</a></li>
         <li><a href="#">HIJAB</a></li>
+	<li><a href="#main-video-section">VIDEO</a></li>
     </ul>
 </nav>
 <div class="nav-icons" style="display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding-right: 10px;">
@@ -147,10 +150,12 @@ html, body {
         <li><a href="#" onclick="toggleAbayaMenu()">ABAYA</a></li>
         <li><a href="#" onclick="toggleAbayaMenu()">COVER UP</a></li>
         <li><a href="#" onclick="toggleAbayaMenu()">TOPS/KURTI</a></li>
+	<li><a href="javascript:void(0)" onclick="openVideo()">VIDEO</a></li>
         <li><a href="#" onclick="toggleAbayaMenu()">EMBROIDERY</a></li>
         <li><a href="#" onclick="toggleAbayaMenu()">KARCHUPI</a></li>
         <li><a href="#" onclick="toggleAbayaMenu()">KAFTAN</a></li>
         <li><a href="#" onclick="toggleAbayaMenu()">HIJAB</a></li>
+	<li><a href="javascript:void(0)" onclick="toggleAndOpenVideo()">VIDEO</a></li>
     </ul>
 </header>
 <style>
@@ -213,6 +218,7 @@ header {
     flex-shrink: 0;
     white-space: nowrap;
 }
+
 .brand-text-logo a {
     text-decoration: none !important;
     color: #000 !important;
@@ -936,16 +942,19 @@ input, select {
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     transition: all 0.4s ease;
 }
+
 .cart-toast.show {
     visibility: visible;
     opacity: 1;
     bottom: 70px;
 }
+
 .toast-text {
     font-weight: 700 !important;
     font-size: 14px !important;
     white-space: nowrap;
 }
+
 .toast-icon {
     width: 24px;
     height: 24px;
@@ -983,41 +992,47 @@ body {
     <div class="toast-icon"><i class="fas fa-shopping-bag"></i></div>
     <div class="toast-text" style="font-weight:1000; font-size:18px;">চমৎকার পছন্দ! পণ্যটি সফলভাবে সংগ্রহে যোগ করা হয়েছে</div>
 </div>
-<div style="flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 25px;">
-<div style="display: flex; align-items: center; justify-content: flex-start; gap: 15px;">
-                    <div style="background: #000; padding: 10px; border-radius: 50%; display: flex; flex-shrink: 0;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+<section id="main-video-section" style="background-color: #ffffff; padding: 15px 15px; text-align: center; font-family: 'Hind Siliguri', sans-serif; scroll-margin-top: 100px;">
+    
+    <div style="max-width: 1100px; margin: 0 auto;">
+        
+        <h2 style="font-size: 28px; font-weight: 700; color: #000; margin-bottom: 5px; letter-spacing: -0.2px;">
+            ভিডিওতে আমাদের ড্রেসের কোয়ালিটি দেখুন
+        </h2>
+
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 30px;">
+            
+            <div style="flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 20px;">
+                <div style="display: flex; align-items: center; justify-content: flex-end; gap: 15px;">
+                    <div style="text-align: right;">
+                        <h4 style="margin: 5; font-size: 18px; color: #000; font-weight: 700;">রাজকীয় আভিজাত্য</h4>
+                        <p style="margin: 5px 0 0; font-size: 14px; color: #555; line-height: 1.5;">আপনার ব্যক্তিত্বে যোগ করবে নতুন মাত্রা।</p>
                     </div>
-                    <div style="text-align: left;">
-                        <h4 style="margin: 0; font-size: 18px; color: #000; font-weight: 700;">প্রিমিয়াম কোয়ালিটি</h4>
-                        <p style="margin: 5px 0 0; font-size: 14px; color: #555;">সেরা ফেব্রিক এবং নিখুঁত ফিনিশিং।</p>
+                    <div style="background: #000; padding: 10px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                     </div>
                 </div>
-                <div style="display: flex; align-items: center; justify-content: flex-start; gap: 15px;">
-                    <div style="background: #000; padding: 10px; border-radius: 50%; display: flex; flex-shrink: 0;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                <div style="display: flex; align-items: center; justify-content: flex-end; gap: 15px;">
+                    <div style="text-align: right;">
+                        <h4 style="margin: 0; font-size: 18px; color: #000; font-weight: 700;">সরাসরি যাচাই</h4>
+                        <p style="margin: 5px 0 0; font-size: 14px; color: #555; line-height: 1.5;">ভিডিওতে দেখে কোয়ালিটি নিশ্চিত হন।</p>
                     </div>
-                    <div style="text-align: left;">
-                        <h4 style="margin: 0; font-size: 18px; color: #000; font-weight: 700;">দ্রুত ডেলিভারি</h4>
-                        <p style="margin: 5px 0 0; font-size: 14px; color: #555;">সারা বাংলাদেশে ক্যাশ অন ডেলিভারি।</p>
+                    <div style="background: #000; padding: 10px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                     </div>
                 </div>
             </div>
 
-        </div>
-    </div>
-</section>
-<div style="flex: 0 0 280px; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.1); background: #000; border: 1px solid #eee;">
-                <div style="position: relative; padding-top: 177.77%; height: 0;">
-                    <iframe 
-                        src="https://www.youtube.com/embed/xVqgaPqY-YA?modestbranding=1&rel=0&showinfo=0" 
-                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" 
-                        allowfullscreen>
-                    </iframe>
+            <div style="flex: 0 0 260px; border-radius: 15px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.1); border: 1px solid #eee; background: #000;">
+                <div style="position: relative; padding-top: 177.77%;">
+		<iframe 
+    src="https://www.youtube.com/embed/xVqgaPqY-YA?modestbranding=1&rel=0&showinfo=0" 
+    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" 
+    allowfullscreen>
+</iframe>
                 </div>
             </div>
 
-        </div> </div> </section>
             <div style="flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 20px;">
                 <div style="display: flex; align-items: center; justify-content: flex-start; gap: 15px;">
                     <div style="background: #000; padding: 10px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
@@ -1059,7 +1074,8 @@ body {
     <div class="big-view">
     <div class="price-tag">৳ 550</div>
     
-    <img id="view"         
+    <img id="view" 
+         src="https://res.cloudinary.com/dyjth9smc/image/upload/f_auto,q_auto,w_600/v1773129749/Baby-Pink-Floral-Print_ejbtpf.jpg" 
          width="600" 
          height="750" 
          fetchpriority="high" 
@@ -1139,12 +1155,14 @@ body {
         margin: 0 auto;
         font-family: 'Hind Siliguri', sans-serif;
     }
+
     @media (min-width: 768px) {
         .astra-feature-wrapper {
             grid-template-columns: repeat(4, 1fr);
             gap: 25px;
         }
     }
+
     .astra-feature-card {
         background: #ffffff;
         border: 1px solid #eeeeee;
@@ -1154,11 +1172,13 @@ body {
         transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
         box-shadow: 0 4px 10px rgba(0,0,0,0.02);
     }
+
     .astra-feature-card:hover {
         transform: translateY(-8px);
         box-shadow: 0 12px 30px rgba(0,0,0,0.07);
-        border-color: #000;
+        border-color: #000; /* হোভার করলে বর্ডার কালো হবে */
     }
+
     .astra-icon-box {
         width: 55px;
         height: 55px;
@@ -1171,14 +1191,17 @@ body {
         border-radius: 50%;
         transition: 0.3s;
     }
+
     .astra-icon-box i {
         font-size: 22px;
-        color: #333;
+        color: #333; /* আইকন কালার থিমের সাথে মিল রেখে */
     }
+
     .astra-feature-card:hover .astra-icon-box {
         background: #000;
         color: #fff;
     }
+
     .astra-feature-card:hover .astra-icon-box i {
         color: #fff;
     }
@@ -1276,45 +1299,36 @@ let isAutoSlideActive = true;
 let checkoutTracked = false;
 let cart = {};
 const products = [
-    // Baby Pink Floral Series
     { id: 'DR-01', name: 'Baby Pink Floral', img: 'Baby-Pink-Floral-Print.JPG', price: 550 },
     { id: 'DR-02', name: 'Baby Pink Floral (2)', img: 'Baby-Pink-Floral-Print..JPG', price: 550 },
-    { id: 'DR-03', name: 'Baby Pink Floral (3)', img: 'Baby-Pink-Floral-Print....JPG', price: 550 },
-    { id: 'DR-04', name: 'Baby Pink Floral (4)', img: 'Baby-Pink-Floral-Print.....JPG', price: 550 },
-    { id: 'DR-05', name: 'Baby Pink Floral (5)', img: 'Baby-Pink-Floral-Print......JPG', price: 550 },
-    { id: 'DR-06', name: 'Baby Pink Floral (6)', img: 'Baby-Pink-Floral-Print.......JPG', price: 550 },
-
-    // Black Base Rose Series
-    { id: 'DR-07', name: 'Black Base Rose', img: 'Black-Base-Rose-Floral.JPG', price: 550 },
-    { id: 'DR-08', name: 'Black Base Rose (2)', img: 'Black-Base-Rose-Floral.JPG', price: 550 },
-    { id: 'DR-09', name: 'Black Base Rose (3)', img: 'Black-Base-Rose-Floral..JPG', price: 550 },
-    { id: 'DR-10', name: 'Black Base Rose (4)', img: 'Black-Base-Rose-Floral...JPG', price: 550 },
-    { id: 'DR-11', name: 'Black Base Rose (5)', img: 'Black-Base-Rose-Floral....JPG', price: 550 },
-    { id: 'DR-12', name: 'Black Base Rose (6)', img: 'Black-Base-Rose-Floral.....JPG', price: 550 },
-    { id: 'DR-13', name: 'Black Base Rose (7)', img: 'Black-Base-Rose-Floral......JPG', price: 550 },
-    { id: 'DR-14', name: 'Black Base Rose (8)', img: 'Black-Base-Rose-Floral.......JPG', price: 550 },
-    { id: 'DR-15', name: 'Black Base Rose (9)', img: 'Black-Base-Rose-Floral........JPG', price: 550 },
-
-    // Black White Polka Series
+    { id: 'DR-03', name: 'Baby Pink Floral (3)', img: 'Baby-Pink-Floral-Print...JPG', price: 550 },
+    { id: 'DR-04', name: 'Baby Pink Floral (4)', img: 'Baby-Pink-Floral-Print....JPG', price: 550 },
+    { id: 'DR-05', name: 'Baby Pink Floral (5)', img: 'Baby-Pink-Floral-Print.....JPG', price: 550 },
+    { id: 'DR-06', name: 'Baby Pink Floral (6)', img: 'Baby-Pink-Floral-Print......JPG', price: 550 },
+    { id: 'DR-07', name: 'Baby Pink Floral (7)', img: 'Baby-Pink-Floral-Print.......JPG', price: 550 },
+    { id: 'DR-08', name: 'Black Base Rose', img: 'Black-Base-Rose-Floral.JPG', price: 550 },
+    { id: 'DR-09', name: 'Black Base Rose (2)', img: 'Black-Base-Rose-Floral..JPG', price: 550 },
+    { id: 'DR-10', name: 'Black Base Rose (3)', img: 'Black-Base-Rose-Floral...JPG', price: 550 },
+    { id: 'DR-11', name: 'Black Base Rose (4)', img: 'Black-Base-Rose-Floral....JPG', price: 550 },
+    { id: 'DR-12', name: 'Black Base Rose (5)', img: 'Black-Base-Rose-Floral.....JPG', price: 550 },
+    { id: 'DR-13', name: 'Black Base Rose (6)', img: 'Black-Base-Rose-Floral......JPG', price: 550 },
+    { id: 'DR-14', name: 'Black Base Rose (7)', img: 'Black-Base-Rose-Floral.......JPG', price: 550 },
+    { id: 'DR-15', name: 'Black Base Rose (8)', img: 'Black-Base-Rose-Floral........JPG', price: 550 },
     { id: 'DR-16', name: 'Black White Polka', img: 'Black-White-Polka-Dots.JPG', price: 550 },
-    { id: 'DR-17', name: 'Black White Polka (2)', img: 'Black-White-Polka-Dots.JPG', price: 550 },
-    { id: 'DR-18', name: 'Black White Polka (3)', img: 'Black-White-Polka-Dots..JPG', price: 550 },
+    { id: 'DR-17', name: 'Black White Polka (2)', img: 'Black-White-Polka-Dots..JPG', price: 550 },
+    { id: 'DR-18', name: 'Black White Polka (3)', img: 'Black-White-Polka-Dots...JPG', price: 550 },
     { id: 'DR-19', name: 'Black White Polka (4)', img: 'Black-White-Polka-Dots....JPG', price: 550 },
     { id: 'DR-20', name: 'Black White Polka (5)', img: 'Black-White-Polka-Dots.....JPG', price: 550 },
     { id: 'DR-21', name: 'Black White Polka (6)', img: 'Black-White-Polka-Dots......JPG', price: 550 },
     { id: 'DR-22', name: 'Black White Polka (7)', img: 'Black-White-Polka-Dots.......JPG', price: 550 },
-
-    // Royal Blue Golden Series
     { id: 'DR-23', name: 'Royal Blue Golden', img: 'Royal-Blue-Golden-Floral-Print.JPG', price: 550 },
-    { id: 'DR-24', name: 'Royal Blue Golden (2)', img: 'Royal-Blue-Golden-Floral-Print.JPG', price: 550 },
-    { id: 'DR-25', name: 'Royal Blue Golden (3)', img: 'Royal-Blue-Golden-Floral-Print..JPG', price: 550 },
+    { id: 'DR-24', name: 'Royal Blue Golden (2)', img: 'Royal-Blue-Golden-Floral-Print..JPG', price: 550 },
+    { id: 'DR-25', name: 'Royal Blue Golden (3)', img: 'Royal-Blue-Golden-Floral-Print...JPG', price: 550 },
     { id: 'DR-26', name: 'Royal Blue Golden (4)', img: 'Royal-Blue-Golden-Floral-Print....JPG', price: 550 },
     { id: 'DR-27', name: 'Royal Blue Golden (5)', img: 'Royal-Blue-Golden-Floral-Print.....JPG', price: 550 },
-
-    // Royal Blue White Polka Series
     { id: 'DR-28', name: 'Royal Blue Polka', img: 'Royal-Blue-White-Polka-Dots.JPG', price: 550 },
-    { id: 'DR-29', name: 'Royal Blue Polka (2)', img: 'Royal-Blue-White-Polka-Dots.JPG', price: 550 },
-    { id: 'DR-30', name: 'Royal Blue Polka (3)', img: 'Royal-Blue-White-Polka-Dots..JPG', price: 550 },
+    { id: 'DR-29', name: 'Royal Blue Polka (2)', img: 'Royal-Blue-White-Polka-Dots..JPG', price: 550 },
+    { id: 'DR-30', name: 'Royal Blue Polka (3)', img: 'Royal-Blue-White-Polka-Dots...JPG', price: 550 },
     { id: 'DR-31', name: 'Royal Blue Polka (4)', img: 'Royal-Blue-White-Polka-Dots....JPG', price: 550 },
     { id: 'DR-32', name: 'Royal Blue Polka (5)', img: 'Royal-Blue-White-Polka-Dots.....JPG', price: 550 }
 ];
@@ -1410,6 +1424,7 @@ function manualSelect(index, id) {
     clearInterval(autoSlideInterval);
     selectProduct(index, id, true);
 }
+
 function selectProduct(index, id, shouldScroll = true) {
     currentIdx = index;
     const nextImgSrc = products[index].img.replace('/upload/', '/upload/f_auto,q_auto,w_600/');
@@ -1946,10 +1961,13 @@ body {
         padding-top: 130px !important;
     }
 }
+/* মেইন কন্টেন্ট যেন মেনুবারের নিচে না ঢুকে যায় */
 .main-grid, .product-section {
     margin-top: 20px !important;
     position: relative !important;
 }
+
+/* বড় ভিউ বা মেইন ছবির মাথা ঠিক করা */
 .big-view {
     margin-top: 10px !important;
 }
@@ -2070,6 +2088,61 @@ function updateCartIcon(total) {
             cartBadge.style.display = 'none';
         }
     }
+}
+</script>
+<!--Start of Tawk.to Script-->
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/69b72cf73428411c3739f106/1jjpofa09';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
+</script>
+<!--End of Tawk.to Script-->
+<style>
+html {
+    scroll-behavior: smooth;
+}
+
+html, body {
+    overflow-x: hidden !important;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+<div id="videoModal" style="display: none; position: fixed; z-index: 999999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); align-items: center; justify-content: center;">
+    <div style="position: relative; width: 90%; max-width: 400px;">
+        <span onclick="closeVideo()" style="position: absolute; top: -50px; right: 0; color: #fff; font-size: 40px; cursor: pointer; font-weight: bold;">&times;</span>
+        <div style="position: relative; padding-bottom: 177.78%; height: 0; overflow: hidden; border-radius: 15px; background: #000;">
+            <iframe id="modalIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        </div>
+    </div>
+</div>
+<script>
+// ভিডিও ওপেন করার ফাংশন
+function openVideo() {
+    var modal = document.getElementById("videoModal");
+    var iframe = document.getElementById("modalIframe");
+    iframe.src = "https://www.youtube.com/embed/xVqgaPqY-YA?autoplay=1&rel=0&modestbranding=1";
+    modal.style.display = "flex";
+}
+
+// ভিডিও বন্ধ করার ফাংশন
+function closeVideo() {
+    var modal = document.getElementById("videoModal");
+    var iframe = document.getElementById("modalIframe");
+    iframe.src = ""; 
+    modal.style.display = "none";
+}
+
+// মোবাইল মেনু বন্ধ করে ভিডিও ওপেন করা
+function toggleAndOpenVideo() {
+    toggleAbayaMenu(); 
+    setTimeout(openVideo, 300);
 }
 let currentAnn = 0;
 const annSlides = document.querySelectorAll('.ann-slide');
