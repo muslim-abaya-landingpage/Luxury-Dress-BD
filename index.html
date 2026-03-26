@@ -930,6 +930,11 @@ input, select {
     letter-spacing: 0.5px;
     font-size: 20px !important;
 }
+.call-order-box a[href="#orderForm"] {
+    background: linear-gradient(#000) !important;
+    letter-spacing: 0.5px;
+    font-size: 20px !important;
+}
 .cart-toast {
     position: fixed;
     bottom: 50px; 
@@ -1103,12 +1108,97 @@ body {
 </div>
     <div class="product-list-sidebar" id="sidebarList"></div>
 </div>
-<div class="call-order-box">
-<p style="font-size: 18px; color: #000; margin-bottom: 5px;">প্রয়োজনে আমাদের কাস্টমার কেয়ারের সাথে কথা বলুন</p>
-<a href="tel:01971642683" class="call-link"><i class="fas fa-phone-volume"></i> 01971642683</a>
-<a href="#orderForm" style="display: block; margin-top: 10px; padding: 10px; background:#000; color:#fff; text-decoration: none; border-radius: 8px; font-weight: bold;">
-   <i class="fas fa-arrow-down"></i> অর্ডার করতে এখানে ক্লিক করুন
-</a>			
+<div class="whatsapp-btn-container" style="margin: 20px 0; text-align: center;">
+    <a href="https://wa.me/8801551642683?text= আমি মুসলিম আবায়া থেকে একটি ড্রেস অর্ডার করতে চাই।" 
+       class="reality-whatsapp-btn" 
+       target="_blank">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 448 512" style="fill: white;">
+            <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-5.5-2.8-23.2-8.5-44.2-27.1-16.4-14.6-27.4-32.7-30.6-38.1-3.2-5.4-.3-8.3 2.4-11.1 2.5-2.5 5.5-6.5 8.3-9.7 2.8-3.3 3.7-5.6 5.5-9.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 13.2 5.7 23.5 9.2 31.6 11.8 13.3 4.2 25.4 3.6 35 2.2 10.7-1.5 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/>
+        </svg>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@700&display=swap" rel="stylesheet">
+<style>
+    /* বাটনগুলোকে পাশাপাশি রাখার কন্টেইনার */
+    .button-row-wrapper {
+        display: flex;
+        gap: 10px; 
+        justify-content: center; /* বাটনের ভিতরের কন্টেন্ট সেন্টারে রাখবে */
+        margin: 20px auto;      /* এটি পুরো কন্টেইনারকে পেইজের মাঝখানে (সেন্টারে) আনবে */
+        width: 100%;
+        max-width: 500px;       /* ২টা বাটনের জন্য ৫০০px যথেষ্ট, এতে দেখতে প্রিমিয়াম লাগে */
+    }
+
+    /* কমন বাটন স্টাইল */
+    .premium-action-btn {
+        flex: 1; 
+        color: white !important;
+        text-decoration: none !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 16px 10px;
+        border-radius: 8px; 
+        font-family: 'Hind Siliguri', sans-serif;
+        font-size: 18px; 
+        font-weight: 700;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .whatsapp-btn-style {
+        background: #25D366;
+        box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+        animation: realityPulse 2s infinite ease-in-out;
+    }
+
+    .call-btn-style {
+        background: #1a367c;
+        box-shadow: 0 4px 15px rgba(26, 54, 124, 0.4);
+        animation: callPulse 2s infinite ease-in-out;
+    }
+
+    .premium-action-btn:hover {
+        transform: scale(1.03);
+        opacity: 0.9;
+    }
+
+    @keyframes realityPulse {
+        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5); }
+        70% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(37, 211, 102, 0); }
+        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+    }
+
+    @keyframes callPulse {
+        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(26, 54, 124, 0.5); }
+        70% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(26, 54, 124, 0); }
+        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(26, 54, 124, 0); }
+    }
+
+    @media (max-width: 480px) {
+        .premium-action-btn {
+            font-size: 14px;
+            padding: 12px 5px;
+            gap: 5px;
+        }
+        .button-row-wrapper {
+            gap: 8px;
+            padding: 0 10px; /* মোবাইলে দুই পাশে সামান্য জায়গা রাখার জন্য */
+        }
+    }
+</style>
+<div class="button-row-wrapper">
+    <a href="https://wa.me/8801787791264?text=অর্ডার_করতে_চাই" target="_blank" class="premium-action-btn whatsapp-btn-style">
+        <i class="fab fa-whatsapp"></i> 
+        <span>WhatsApp</span>
+    </a>
+
+    <a href="tel:01551642683" class="premium-action-btn call-btn-style">
+        <i class="fas fa-phone-alt" style="transform: rotate(0deg);"></i> 
+        <span>Call Order</span>
+    </a>
 </div>
 <div class="astra-premium-details" style="font-family: 'Inter', sans-serif; max-width: 100%; margin: 20px auto; background: #fff; border-radius: 8px; border: 1px solid #e1e1e1; overflow: hidden;">
     
@@ -1150,7 +1240,7 @@ body {
                 <td class="astra-value">৩৭ - ৩৮ ইঞ্চি</td>
             </tr>
             <tr>
-                <td class="astra-label"><i class="fas fa-tshirt astra-icon"></i> হাতার মাপ</td>
+                <td class="astra-label"><i class="fas fa-tshirt astra-icon"></i> হাতার লং </td>
                 <td class="astra-value">থ্রী কোয়ার্টার</td>
             </tr>
         </table>
@@ -1187,7 +1277,7 @@ body {
     .astra-feature-card:hover {
         transform: translateY(-8px);
         box-shadow: 0 12px 30px rgba(0,0,0,0.07);
-        border-color: #000; /* হোভার করলে বর্ডার কালো হবে */
+        border-color: #000;
     }
 
     .astra-icon-box {
@@ -1205,7 +1295,7 @@ body {
 
     .astra-icon-box i {
         font-size: 22px;
-        color: #333; /* আইকন কালার থিমের সাথে মিল রেখে */
+        color: #333;
     }
 
     .astra-feature-card:hover .astra-icon-box {
@@ -1222,7 +1312,7 @@ body {
         color: #333;
         margin: 0;
         line-height: 1.2;
-        text-transform: uppercase; /* অ্যাস্ট্রা স্টাইল অনুযায়ী */
+        text-transform: uppercase;
         letter-spacing: 0.5px;
     }
 </style>
@@ -1257,14 +1347,13 @@ body {
 </div>
 <div class="form-section">
     <div class="order-card" id="orderForm">
-        <h3 style="text-align: center; color:#000; margin-bottom: 15px; font-weight: 700;">আপনার অর্ডারটি আমরা দ্রুত পৌঁছে দেব, শুধু নিচের ঘরগুলো পূরণ করুন</h3>
+        <h3 style="text-align: center; color:#000; margin-bottom: 15px; font-weight: 800;">আপনার অর্ডারটি আমরা দ্রুত পৌঁছে দেব, শুধু নিচের ঘরগুলো পূরণ করুন</h3>
 
         <form id="orderFormMain">
             <input type="text" id="userName" placeholder="আপনার নাম" onfocus="trackInitiateCheckout()" required>
             <input type="number" id="userPhone" placeholder="মোবাইল নম্বর" onfocus="trackInitiateCheckout()" required>
             <input type="text" id="userAddr" placeholder="বিস্তারিত ঠিকানা" onfocus="trackInitiateCheckout()" required>
-	    <input type="email" id="userEmail" placeholder="আপনার ইমেল (অপশনাল)" onfocus="trackInitiateCheckout()">
-            <select id="userArea" onchange="calc()" required>
+	        <select id="userArea" onchange="calc()" required>
                 <option value="">ডেলিভারি এরিয়া নির্বাচন করুন</option>
                 <option value="80">ঢাকা সিটি (৮০৳)</option>
                 <option value="150">ঢাকার বাহিরে (১৫০৳)</option>
@@ -1310,11 +1399,11 @@ let isAutoSlideActive = true;
 let checkoutTracked = false;
 let cart = {};
 const filteredProducts = [
-    { id: 'DR-01', name: 'Baby Pink Floral', img: 'Baby-Pink-Floral-Print.JPG', price: 550 },
-    { id: 'DR-08', name: 'Black Base Rose', img: 'Black-Base-Rose-Floral.JPG', price: 550 },
-    { id: 'DR-16', name: 'Black White Polka', img: 'Black-White-Polka-Dots.JPG', price: 550 },
-    { id: 'DR-23', name: 'Royal Blue Golden', img: 'Royal-Blue-Golden-Floral-Print.JPG', price: 550 },
-    { id: 'DR-28', name: 'Royal Blue Polka', img: 'Royal-Blue-White-Polka-Dots.JPG', price: 550 }
+    { id: 'DR-01', name: 'Baby Pink Floral', img: 'Baby-Pink-Floral-Print.webp', price: 550 },
+    { id: 'DR-08', name: 'Black Base Rose', img: 'Black-Base-Rose-Floral.webp', price: 550 },
+    { id: 'DR-16', name: 'Black White Polka', img: 'Black-White-Polka-Dots.webp', price: 550 },
+    { id: 'DR-23', name: 'Royal Blue Golden', img: 'Royal-Blue-Golden-Floral-Print.webp', price: 550 },
+    { id: 'DR-28', name: 'Royal Blue Polka', img: 'Royal-Blue-White-Polka-Dots.webp', price: 550 }
 ];
 function trackFB(event, data = {}) {
     if (typeof fbq !== 'undefined') {
@@ -1945,13 +2034,10 @@ body {
         padding-top: 130px !important;
     }
 }
-/* মেইন কন্টেন্ট যেন মেনুবারের নিচে না ঢুকে যায় */
 .main-grid, .product-section {
     margin-top: 20px !important;
     position: relative !important;
 }
-
-/* বড় ভিউ বা মেইন ছবির মাথা ঠিক করা */
 .big-view {
     margin-top: 10px !important;
 }
@@ -1966,7 +2052,7 @@ body {
         </div>
         <div class="anz-col-links">
             <h3 class="anz-title">About Us</h3>
-            <ul style="list-style: none; padding: 0; font-size: 14px; line-height: 1;">
+            <ul style="list-style: none; padding: 0; font-size: 14px; line-height: 1.5;">
                 <li><a href="#" style="text-decoration: none; color: #333;">About Us</a></li>
                 <li><a href="#" style="text-decoration: none; color: #333;">Order Tracking</a></li>
                 <li><a href="#" style="text-decoration: none; color: #333;">Contact Us</a></li>
@@ -2019,7 +2105,7 @@ body {
             <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" style="height: 20px;">
             <img src="https://www.bkash.com/uploads/2021/02/bKash-Logo.png" style="height: 20px;">
             <img src="https://upload.wikimedia.org/wikipedia/commons/d/d1/Nagad_Logo.svg" style="height: 20px;">
-            <div style="font-size: 14px; font-weight: bold; color: #000;">SSLCOMMERZ</div>
+            <div style="font-size: 16px; font-weight: bold; color: #000;">SSLCOMMERZ</div>
         </div>
     </div>
 </div>
@@ -2117,5 +2203,9 @@ function moveAnnouncement(n) {
 }
 setInterval(() => moveAnnouncement(1), 4000);
 </script>
+<a href="tel:01551642683" class="floating-call">
+    <i class="fas fa-phone-alt"></i>
+</a>
+
 </body> 
 </html>
