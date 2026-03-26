@@ -10,7 +10,7 @@
     <link rel="preload" as="image" href="Baby-Pink-Floral-Print.webp">
     
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
     j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
@@ -815,10 +815,6 @@ color: #333;
 }
         .order-btn { width: 100%; padding: 16px; background: #000; color: #f5f5f5; border: none; border-radius: 0px; font-weight:bold; font-size: 20px; cursor: pointer; transition: 0.3s; }
         .order-btn:disabled { background: #fff; cursor: not-allowed; }
-
-        .floating-call { position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; background: #000; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; z-index: 999; text-decoration: none; animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
-
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; }
         .success-card { background: #fff; width: 90%; max-width: 400px; padding: 30px; border-radius: 25px; text-align: center; animation: slideUp 0.4s ease-out; }
         @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -995,6 +991,16 @@ header {
 body {
     padding-top: 70px !important;
 }
+@media screen and (max-width: 600px) {
+    .anz-col-brand { 
+        padding-right: 0px !important; /* মোবাইলে অতিরিক্ত প্যাডিং বাদ দিন */
+        min-width: 100%;
+    }
+    .anz-col-links, .anz-col-contact {
+        min-width: 100%;
+        text-align: left; /* মোবাইলেও বামে থাকবে */
+    }
+}
 </style>
 </head>
 <div id="cartToast" class="cart-toast">
@@ -1062,12 +1068,10 @@ body {
                     </div>
                 </div>
             </div>
-
         </div>
-
         <div style="margin-top: 10px;">
             <a href="#orderForm" style="display: inline-block; padding: 16px 50px; background-color: #000; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 18px; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-                🛒 এখনই অর্ডার করুন
+                🛒 এখনই অর্ডার করুন !
             </a>
         </div>
     </div>
@@ -1075,14 +1079,11 @@ body {
 <body>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-ML7RL6BR"
 height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
-<a href="tel:01971642683" class="floating-call"><i class="fas fa-phone-alt"></i></a>
 <div class="container">
 <div class="main-grid">
 <div class="product-section">
 <div id="premium-collection" class="display-area">
 <div class="big-view">
-<div class="price-tag">৳ 550</div>
-
 <div class="big-view">
 <div class="price-tag">৳ ৫৫০ </div>
 <img id="view" 
@@ -1183,11 +1184,11 @@ target="_blank">
 <div class="button-row-wrapper">
     <a href="https://wa.me/8801787791264?text=অর্ডার_করতে_চাই" target="_blank" class="premium-action-btn whatsapp-btn-style">
         <i class="fab fa-whatsapp"></i> 
-        <span>WhatsApp</span>
+        <span>Order on WhatsApp</span>
     </a>
     <a href="tel:01551642683" class="premium-action-btn call-btn-style">
         <i class="fas fa-phone-alt" style="transform: rotate(0deg);"></i> 
-        <span>Call Order</span>
+        <span>Call for order</span>
     </a>
 </div>
 <div class="astra-premium-details" style="font-family: 'Inter', sans-serif; max-width: 100%; margin: 20px auto; background: #fff; border-radius: 8px; border: 1px solid #e1e1e1; overflow: hidden;">
@@ -1244,9 +1245,9 @@ target="_blank">
         padding: 20px 10px;
         max-width: 1200px;
         margin: 0 auto;
-        font-family: 'Hind Siliguri', sans-serif;
-    }
-
+        body {
+   	font-family: 'Poppins', 'Hind Siliguri', sans-serif !important;
+}
     @media (min-width: 768px) {
         .astra-feature-wrapper {
             grid-template-columns: repeat(4, 1fr);
@@ -1389,11 +1390,11 @@ let isAutoSlideActive = true;
 let checkoutTracked = false;
 let cart = {};
 const products = [
-    { id: 'DR-01', name: 'Baby Pink Floral', img: 'Baby-Pink-Floral-Print.webp', price: 2190 },
-    { id: 'DR-08', name: 'Black Base Rose', img: 'Black-Base-Rose-Floral.webp', price: 2190 },
-    { id: 'DR-16', name: 'Black White Polka', img: 'Black-White-Polka-Dots.webp', price: 2190 },
-    { id: 'DR-23', name: 'Royal Blue Golden', img: 'Royal-Blue-Golden-Floral-Print.webp', price: 2190 },
-    { id: 'DR-28', name: 'Royal Blue Polka', img: 'Royal-Blue-White-Polka-Dots.webp', price: 2190 }
+    { id: 'DR-01', name: 'Baby Pink Floral', img: 'Baby-Pink-Floral-Print.webp', price: 550 },
+    { id: 'DR-08', name: 'Black Base Rose', img: 'Black-Base-Rose-Floral.webp', price: 550 },
+    { id: 'DR-16', name: 'Black White Polka', img: 'Black-White-Polka-Dots.webp', price: 550 },
+    { id: 'DR-23', name: 'Royal Blue Golden', img: 'Royal-Blue-Golden-Floral-Print.webp', price: 550 },
+    { id: 'DR-28', name: 'Royal Blue Polka', img: 'Royal-Blue-White-Polka-Dots.webp', price: 550 }
 ];
 function trackFB(event, data = {}) {
     if (typeof fbq !== 'undefined') {
@@ -1822,9 +1823,16 @@ function removeFromCart(productId) {
     .contact-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 14px; color: #333; }
     .contact-row img { width: 16px; margin-top: 0px; }
     .anz-socials { display: flex; gap: 5px; margin-top: 5px; }
-    .anz-social-link { width: 32px; height: 32px; background: #000; border-radius: 20%; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+    .anz-social-link { width: 32px; height: 32px; background: #000; border-radius: 20%; display: flex; align-items: center; justify-content: center; 
+     transition: 0.3s; }
     .anz-social-link:hover { opacity: 0.7; }
     .anz-social-link svg { width: 16px; height: 30px; fill: #fff; }
+    .anz-col-links { 
+    flex: 0.6; 
+    min-width: 180px; 
+    margin-bottom: 5px;
+    text-align: left;
+}
 .newsletter-form { 
     display: flex; 
     margin-bottom: 5px; 
