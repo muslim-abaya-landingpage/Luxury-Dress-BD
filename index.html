@@ -1338,7 +1338,7 @@ target="_blank">
 </div>
 <div class="form-section">
     <div class="order-card" id="orderForm">
-        <h3 style="text-align: center; color:#000; margin-bottom: 15px; font-weight: 800;">আপনার অর্ডারটি আমরা দ্রুত পৌঁছে দেব, শুধু নিচের ঘরগুলো পূরণ করুন</h3>
+        <h3 style="text-align: center; color:#000; margin-bottom: 15px; font-weight: 800;">অর্ডারটি কনফার্ম করতে নিচের ফর্মটি পূরণ করুন</h3>
 
         <form id="orderFormMain">
             <input type="text" id="userName" placeholder="আপনার নাম" onfocus="trackInitiateCheckout()" required>
@@ -1467,12 +1467,11 @@ card.innerHTML = `
                 <button type="button" class="action-btn btn-cart" onclick="updateQty('${p.id}', 1); showToast()" style="padding: 8px 2px; font-size: 11px; white-space: nowrap;">
                     Add to Cart
                 </button>
-                
-                <a href="#orderForm" style="text-decoration: none;">
-                    <button type="button" class="action-btn btn-buy" style="width: 100%; padding: 8px 2px; font-size: 11px;">
-                        Buy Now
-                    </button>
-                </a>
+                <a href="checkout.html" style="text-decoration: none;">
+    <button type="button" class="action-btn btn-buy" style="width: 100%; padding: 8px 2px; font-size: 11px;">
+        Buy Now
+    </button>
+</a>
             </div>
             <a href="https://wa.me/+8801787791264" class="action-btn btn-msg-full" style="display: block; text-decoration: none; margin-top: 5px; text-align: center; padding: 8px; font-size: 12px;">
                 Send Message
