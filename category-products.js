@@ -193,6 +193,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 550,
       color: "pink",
+      colorLabel: "Baby Pink Light Pink",
       fabric: "এলেক্স সফট জর্জেট",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
       detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
@@ -204,6 +205,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 550,
       color: "pink",
+      colorLabel: "Baby Pink Floral",
       fabric: "এলেক্স সফট জর্জেট",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
       detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
@@ -215,6 +217,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 550,
       color: "black",
+      colorLabel: "Black Base Rose Floral",
       fabric: "এলেক্স সফট জর্জেট",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
       detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
@@ -226,6 +229,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 550,
       color: "black",
+      colorLabel: "Black White Polka",
       fabric: "এলেক্স সফট জর্জেট",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
       detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
@@ -237,6 +241,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 550,
       color: "blue",
+      colorLabel: "Royal Blue Golden Floral",
       fabric: "এলেক্স সফট জর্জেট",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
       detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
@@ -248,6 +253,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 550,
       color: "green",
+      colorLabel: "Sage Green Mint Green",
       fabric: "এলেক্স সফট জর্জেট",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
       detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
@@ -259,6 +265,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 550,
       color: "pink",
+      colorLabel: "Pink Floral Co-ord Set",
       fabric: "এলেক্স সফট জর্জেট",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
       detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
@@ -329,12 +336,12 @@ window.CATEGORY_PRODUCTS = {
     }
   ],
   kaftan: [
-    { name: "Kaftan Al Laiba V1", image: "images/Baby-Pink-Floral-Print.jpeg", link: "index.html", price: 1990, color: "beige" },
-    { name: "Romanian Baloch", image: "images/Black-Base-Rose-Floral.jpeg", link: "index.html", price: 1990, color: "black" },
-    { name: "Afghani Kantaha Kaftan", image: "images/Royal-Blue-Golden-Floral-Print.jpeg", link: "index.html", price: 1750, color: "blue" },
-    { name: "Kaftan An Naimah", image: "images/pink-floral-printed-co-ord-set.jpeg", link: "index.html", price: 1650, color: "pink" },
-    { name: "Kaftan An Nawmi", image: "images/Black-White-Polka-Dots.jpeg", link: "index.html", price: 1550, color: "white" },
-    { name: "Irani Fabiha Kaftan", image: "images/Baby-Pink-Floral-Print.jpeg", link: "index.html", price: 1890, color: "green" }
+    { id: "KAF-01", name: "Kaftan Al Laiba V1", image: "images/Baby-Pink-Floral-Print.jpeg", link: "index.html", price: 1990, color: "beige", colorLabel: "Copper Beige Kaftan" },
+    { id: "KAF-02", name: "Romanian Baloch", image: "images/Black-Base-Rose-Floral.jpeg", link: "index.html", price: 1990, color: "black", colorLabel: "Classic Black Kaftan" },
+    { id: "KAF-03", name: "Afghani Kantaha Kaftan", image: "images/Royal-Blue-Golden-Floral-Print.jpeg", link: "index.html", price: 1750, color: "blue", colorLabel: "Royal Blue Kaftan" },
+    { id: "KAF-04", name: "Kaftan An Naimah", image: "images/pink-floral-printed-co-ord-set.jpeg", link: "index.html", price: 1650, color: "pink", colorLabel: "Rose Pink Kaftan" },
+    { id: "KAF-05", name: "Kaftan An Nawmi", image: "images/Black-White-Polka-Dots.jpeg", link: "index.html", price: 1550, color: "white", colorLabel: "Soft White Kaftan" },
+    { id: "KAF-06", name: "Irani Fabiha Kaftan", image: "images/Baby-Pink-Floral-Print.jpeg", link: "index.html", price: 1890, color: "green", colorLabel: "Olive Green Kaftan" }
   ],
   hijab: [
     {

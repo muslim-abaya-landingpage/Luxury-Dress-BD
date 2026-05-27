@@ -4,7 +4,7 @@ function ensureCategoryStyles() {
   var link = document.createElement("link");
   link.id = "category-sidebar-css";
   link.rel = "stylesheet";
-  link.href = "category-sidebar.css?v=20260528d";
+  link.href = "category-sidebar.css?v=20260528e";
   document.head.appendChild(link);
 }
 
@@ -44,18 +44,29 @@ function escapeHtml(str) {
 
 
 
-function getProductColors(products) {
+function getProductFilterKey(p, idx) {
+  if (p.colorFilter) return String(p.colorFilter);
+  if (p.id) return String(p.id);
+  if (p.color) return String(p.color) + "-" + String(idx);
+  return "item-" + String(idx);
+}
 
-  var set = {};
+function getProductColorLabel(p) {
+  if (p.colorLabel) return p.colorLabel;
+  var colorMap = window.FILTER_COLOR_MAP || {};
+  if (p.color && colorMap[p.color] && colorMap[p.color].label) {
+    return colorMap[p.color].label;
+  }
+  return p.name || "Color";
+}
 
-  products.forEach(function (p) {
-
-    if (p.color) set[p.color] = true;
-
+function getProductColorOptions(products) {
+  return products.map(function (p, idx) {
+    return {
+      key: getProductFilterKey(p, idx),
+      label: getProductColorLabel(p)
+    };
   });
-
-  return Object.keys(set);
-
 }
 
 
@@ -108,23 +119,19 @@ function buildShopSidebar(categoryKey, products) {
 
   var bounds = getPriceBounds(products);
 
-  var colors = getProductColors(products);
+  var colorOptions = getProductColorOptions(products);
 
-  var colorMap = window.FILTER_COLOR_MAP || {};
-
-  var colorChecks = colors.length
-    ? colors
-        .map(function (c) {
-          var meta = colorMap[c] || { label: c };
-          var label = meta.label || c;
+  var colorChecks = colorOptions.length
+    ? colorOptions
+        .map(function (opt) {
           return (
             "<label class='color-filter-option'>" +
             "<input type='checkbox' class='color-filter-check' value='" +
-            escapeHtml(c) +
+            escapeHtml(opt.key) +
             "'>" +
             "<span class='color-filter-box' aria-hidden='true'></span>" +
             "<span class='color-filter-name'>" +
-            escapeHtml(label) +
+            escapeHtml(opt.label) +
             "</span>" +
             "</label>"
           );
@@ -641,7 +648,10 @@ function renderCategory(categoryKey) {
 
       if (filterState.subcatIdx !== null && filterState.subcatIdx !== idx) show = false;
 
-      if (filterState.colors.length && (!p.color || filterState.colors.indexOf(p.color) === -1)) show = false;
+      if (filterState.colors.length) {
+        var filterKey = getProductFilterKey(p, idx);
+        if (filterState.colors.indexOf(filterKey) === -1) show = false;
+      }
 
       if (filterState.priceMin !== null && price < filterState.priceMin) show = false;
 
