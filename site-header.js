@@ -17,7 +17,7 @@
     '<a href="help.html">Help</a> | <a href="signup.html">Sign Up</a> | <a href="signin.html">Sign In</a>' +
     '</div></div></div>' +
     '<div class="header-middle-nav"><div class="custom-container nav-row">' +
-    '<div class="brand-text-logo"><a href="index.html">MUSLIM ABAYA</a></div>' +
+    '<div class="brand-text-logo"><a href="/">MUSLIM ABAYA</a></div>' +
     '<nav class="desktop-menu"><ul>' +
     '<li><a href="abaya.html">ABAYA</a></li>' +
     '<li><a href="cover-up.html">COVER UP</a></li>' +
@@ -30,7 +30,7 @@
     '<li><a href="video.html">VIDEO</a></li>' +
     '</ul></nav>' +
     '<div class="nav-icons">' +
-    '<a href="index.html" aria-label="Search">' + ICON_SEARCH + '</a>' +
+    '<a href="/" aria-label="Search">' + ICON_SEARCH + '</a>' +
     '<button type="button" class="cart-drawer-trigger" data-cart-trigger="1" style="position:relative" aria-label="Cart">' + ICON_BAG + '<span id="cart-count">0</span></button>' +
     '<a href="https://wa.me/8801971642683" target="_blank" rel="noopener" aria-label="Message">' + ICON_CHAT + '</a>' +
     '<a href="checkout.html" aria-label="Account">' + ICON_USER + '</a>' +
@@ -60,7 +60,7 @@
     '<li><a href="hijab.html" onclick="window.toggleAbayaMenu()">HIJAB</a></li>' +
     '<li><a href="video.html" onclick="window.toggleAbayaMenu()">VIDEO</a></li>' +
     '<li><a href="category.html" onclick="window.toggleAbayaMenu()">ALL CATEGORIES</a></li>' +
-    '<li><a href="index.html" onclick="window.toggleAbayaMenu()">HOME</a></li>' +
+    '<li><a href="/" onclick="window.toggleAbayaMenu()">HOME</a></li>' +
     '</ul></div>';
 
   var annIdx = 0;
