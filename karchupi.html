@@ -7,8 +7,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="site-header.css">
   <link rel="stylesheet" href="site-footer.css">
+  <link rel="stylesheet" href="category-sidebar.css" id="category-sidebar-css">
   <style>
     .wrap { max-width: 1240px; margin: 0 auto; padding: 16px 12px 24px; }
+    html:not(.category-ready) #list { visibility: hidden; min-height: 55vh; }
   </style>
 </head>
 <body>
@@ -22,10 +24,6 @@
   <script src="category-products.js"></script>
   <script src="category-renderer.js"></script>
   <script src="site-footer.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      renderCategory("karchupi");
-    });
-  </script>
+  <script>renderCategory("karchupi");</script>
 </body>
 </html>

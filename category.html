@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="site-header.css">
   <link rel="stylesheet" href="site-footer.css">
   <link rel="stylesheet" href="category-hub.css">
+  <style>html:not(.category-ready) #list { visibility: hidden; min-height: 55vh; }</style>
 </head>
 <body>
   <div id="site-header-mount"></div>
@@ -20,10 +21,6 @@
   <script src="category-products.js"></script>
   <script src="category-renderer.js"></script>
   <script src="site-footer.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      renderAllCategories();
-    });
-  </script>
+  <script>renderAllCategories();</script>
 </body>
 </html>

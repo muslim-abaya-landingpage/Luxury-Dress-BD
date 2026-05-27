@@ -1,19 +1,15 @@
 function ensureCategoryStyles() {
+  if (document.getElementById("category-sidebar-css")) return;
+  if (document.querySelector('link[href*="category-sidebar.css"]')) return;
+  var link = document.createElement("link");
+  link.id = "category-sidebar-css";
+  link.rel = "stylesheet";
+  link.href = "category-sidebar.css";
+  document.head.appendChild(link);
+}
 
-  if (!document.getElementById("category-sidebar-css")) {
-
-    var link = document.createElement("link");
-
-    link.id = "category-sidebar-css";
-
-    link.rel = "stylesheet";
-
-    link.href = "category-sidebar.css";
-
-    document.head.appendChild(link);
-
-  }
-
+function markCategoryReady() {
+  document.documentElement.classList.add("category-ready");
 }
 
 
@@ -446,6 +442,7 @@ function renderAllCategories() {
 
     "</div>";
 
+  markCategoryReady();
 }
 
 
@@ -458,7 +455,10 @@ function renderCategory(categoryKey) {
 
   var root = document.getElementById("list");
 
-  if (!root) return;
+  if (!root) {
+    markCategoryReady();
+    return;
+  }
 
   root.className = "";
 
@@ -543,7 +543,10 @@ function renderCategory(categoryKey) {
 
 
 
-  if (!products.length) return;
+  if (!products.length) {
+    markCategoryReady();
+    return;
+  }
 
 
 
@@ -914,6 +917,8 @@ function renderCategory(categoryKey) {
       });
     });
   }
+
+  markCategoryReady();
 }
 
 
