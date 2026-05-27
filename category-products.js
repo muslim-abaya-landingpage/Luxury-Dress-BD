@@ -259,12 +259,12 @@ window.CATEGORY_NAV = [
 ];
 
 window.FILTER_COLOR_MAP = {
-  all: { label: "All", hex: "transparent" },
+  all: { label: "All Colors", hex: "transparent" },
   maroon: { label: "Maroon", hex: "#7a2348" },
-  black: { label: "Black", hex: "#111111" },
-  white: { label: "White", hex: "#f5f5f5" },
-  pink: { label: "Pink", hex: "#f4b4c4" },
-  blue: { label: "Blue", hex: "#4a6fa5" },
-  green: { label: "Green", hex: "#6b8f71" },
-  beige: { label: "Beige", hex: "#d4c4a8" }
+  black: { label: "Classic Black", hex: "#111111" },
+  white: { label: "Soft White", hex: "#f5f5f5" },
+  pink: { label: "Rose Pink", hex: "#f4b4c4" },
+  blue: { label: "Royal Blue", hex: "#4a6fa5" },
+  green: { label: "Olive Green", hex: "#6b8f71" },
+  beige: { label: "Copper Beige", hex: "#d4c4a8" }
 };

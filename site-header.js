@@ -1,5 +1,17 @@
 (function () {
   var GTM_ID = 'GTM-ML7RL6BR';
+
+  function getSiteRoot() {
+    var path = window.location.pathname || '/';
+    var slash = path.lastIndexOf('/');
+    if (slash <= 0) return '/';
+    return path.slice(0, slash + 1);
+  }
+
+  function siteAsset(file) {
+    var root = getSiteRoot();
+    return root + String(file || '').replace(/^\//, '');
+  }
   var ICON_SEARCH =
     '<svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"/><path d="M21 21l-4.5-4.5"/></svg>';
   var ICON_BAG =
@@ -144,7 +156,7 @@
           return;
         }
         var s = document.createElement('script');
-        s.src = 'category-products.js';
+        s.src = siteAsset('category-products.js');
         s.async = true;
         s.onload = function () { resolve(); };
         s.onerror = function () { resolve(); };
@@ -217,7 +229,7 @@
         .slice(0, 8)
         .map(function (item) {
           var q = encodeURIComponent(input.value.trim());
-          var href = item.href + (q ? '?q=' + q : '');
+          var href = siteAsset(item.href) + (q ? '?q=' + q : '');
           return '<li><a href="' + href + '">' + item.name.replace(/</g, '&lt;') + '</a></li>';
         })
         .join('');
@@ -273,10 +285,15 @@
         if (!q) return;
         ensureProductCatalog(function () {
           if (!catalog.length) catalog = flattenCatalog();
-          var first = catalog.find(function (item) {
-            return item.name.toLowerCase().indexOf(q.toLowerCase()) !== -1;
-          });
-          window.location.href = (first ? first.href : 'abaya.html') + '?q=' + encodeURIComponent(q);
+          var qLower = q.toLowerCase();
+          var first = null;
+          for (var i = 0; i < catalog.length; i++) {
+            if (catalog[i].name.toLowerCase().indexOf(qLower) !== -1) {
+              first = catalog[i];
+              break;
+            }
+          }
+          window.location.href = siteAsset(first ? first.href : 'abaya.html') + '?q=' + encodeURIComponent(q);
         });
       });
     }
@@ -289,6 +306,7 @@
     document.body.classList.add('global-layout');
     updateCartBadge();
     initSiteSearch();
+    ensureProductCatalog(function () {});
     if (annTimer) clearInterval(annTimer);
     annTimer = setInterval(function () { window.moveAnnouncement(1); }, 4000);
   }

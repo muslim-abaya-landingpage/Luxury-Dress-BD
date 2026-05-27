@@ -68,84 +68,8 @@ html, body {
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" media="print" onload="this.media='all'">
 </head>
 <body>
-<header class="abaya-main-header">
-    <div class="header-top-bar">
-        <div class="custom-container">
-            <div class="top-bar-content">
-                <a href="help.html">Help</a> | <a href="signup.html">Sign Up</a> | <a href="signin.html">Sign In</a>
-            </div>
-        </div>
-    </div>
-    <div class="header-middle-nav">
-        <div class="custom-container nav-row">
-            <div class="brand-text-logo">
-                <a href="index.html">MUSLIM ABAYA</a>
-            </div>
-            <nav class="desktop-menu">
-    <ul>
-        <li><a href="abaya.html">ABAYA</a></li>
-        <li><a href="cover-up.html">COVER UP</a></li>
-        <li><a href="tops-kurti.html">TOPS/KURTI</a></li>
-        <li><a href="premium-two-piece.html">PREMIUM TWO-PIECE</a></li>
-        <li><a href="embroidery.html">EMBROIDERY</a></li>
-        <li><a href="karchupi.html">KARCHUPI</a></li>
-        <li><a href="kaftan.html">KAFTAN</a></li>
-        <li><a href="hijab.html">HIJAB</a></li>
-	<li><a href="video.html">VIDEO</a></li>
-    </ul>
-</nav> 
-<div class="nav-icons">
-    <a href="javascript:void(0)" onclick="toggleSearchBar(event)" class="nav-icon-btn" aria-label="Search">
-        <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"/><path d="M21 21l-4.5-4.5"/></svg>
-    </a>
-    <button type="button" class="cart-drawer-trigger nav-icon-btn" data-cart-trigger="1" style="position: relative;" aria-label="Cart">
-        <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 7a4 4 0 1 1 8 0"/><path d="M6 9h12a2 2 0 0 1 2 2v7a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-7a2 2 0 0 1 2-2z"/><circle cx="9" cy="14" r="0.6" fill="currentColor" stroke="none"/><circle cx="15" cy="14" r="0.6" fill="currentColor" stroke="none"/></svg>
-        <span id="cart-count" style="position: absolute; top: -5px; right: -8px; background: #FF0000; color: #fff; font-size: 10px; width: 16px; height: 16px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-weight: bold; border: 1px solid #fff;">0</span>
-    </button>
-    <a href="https://wa.me/8801971642683" target="_blank" rel="noopener" class="nav-icon-btn" aria-label="Message">
-        <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 3H6a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h3l3 3 3-3h3a3 3 0 0 0 3-3V6a3 3 0 0 0-3-3z"/><path d="M8 11h.01M12 11h.01M16 11h.01" stroke-width="2.5"/></svg>
-    </a>
-    <a href="checkout.html" class="nav-icon-btn" aria-label="Account">
-        <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4.5"/></svg>
-    </a>
-    <button type="button" onclick="toggleAbayaMenu()" class="nav-icon-btn nav-menu-btn" aria-label="Menu">
-        <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-    </button>
-</div>
-</div>
-<div class="header-announcement-bar">
-    <div class="custom-container announcement-slider">
-        <button type="button" class="slider-arrow left-arrow" onclick="moveAnnouncement(-1)">
-            <i class="fas fa-chevron-left"></i>
-        </button>
-        <div class="announcement-content">
-            <div class="ann-slide active">EID COLLECTION 2026 – WHERE ELEGANCE MEETS CELEBRATION</div>
-            <div class="ann-slide">🚚 সারা দেশে দ্রুত ডেলিভারি সুবিধা , 💵 ক্যাশ অন হোম ডেলিভারিতে নিশ্চিন্ত শপিং ✨</div>
-            <div class="ann-slide">🛍️ ৩টি ড্রেস কিনুন, উপভোগ করুন একদম ফ্রি ডেলিভারি সুবিধা! 💖</div>
-        </div>
-        <button type="button" class="slider-arrow right-arrow" onclick="moveAnnouncement(1)">
-            <i class="fas fa-chevron-right"></i>
-        </button>
-    </div>
-</div>
-   <div class="mobile-nav-panel" id="mobileMenuPanel">
-    <div style="padding: 15px 20px; background: #fff; border-bottom: 1px solid #eee; display: flex; justify-content: flex-end; align-items: center;">
-        <button onclick="toggleAbayaMenu()" style="background: none; border: none; font-size: 28px; cursor: pointer; color: #333;">&times;</button>
-    </div>
-    <ul style="list-style: none; padding: 0; margin: 0;">
-        <li><a href="abaya.html" onclick="toggleAbayaMenu()">ABAYA</a></li>
-        <li><a href="cover-up.html" onclick="toggleAbayaMenu()">COVER UP</a></li>
-        <li><a href="tops-kurti.html" onclick="toggleAbayaMenu()">TOPS/KURTI</a></li>
-        <li><a href="premium-two-piece.html" onclick="toggleAbayaMenu()">PREMIUM TWO-PIECE</a></li>
-        <li><a href="embroidery.html" onclick="toggleAbayaMenu()">EMBROIDERY</a></li>
-        <li><a href="karchupi.html" onclick="toggleAbayaMenu()">KARCHUPI</a></li>
-        <li><a href="kaftan.html" onclick="toggleAbayaMenu()">KAFTAN</a></li>
-        <li><a href="hijab.html" onclick="toggleAbayaMenu()">HIJAB</a></li>
-	<li><a href="video.html" onclick="toggleAbayaMenu()">VIDEO</a></li>
-        <li><a href="category.html" onclick="toggleAbayaMenu()">ALL CATEGORIES</a></li>
-    </ul>
-   </div>
-</header>
+<div id="site-header-mount"></div>
+<script src="site-header.js?v=20260528d"></script>
 <style>
 @media (min-width: 850px) {
     .display-area {
@@ -445,14 +369,16 @@ color: #333;
     top: 10px;
     right: 10px;
     z-index: 3;
-    background: #111;
+    background: linear-gradient(135deg, #d32f2f 0%, #9a1b1b 100%);
     color: #fff;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    padding: 5px 10px;
+    padding: 6px 11px;
     line-height: 1;
+    border-radius: 3px;
+    box-shadow: 0 2px 10px rgba(154, 27, 27, 0.35);
     pointer-events: none;
 }
 
@@ -1496,22 +1422,6 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="cart-utils.js"></script>
 <script src="cart-drawer.js?v=20260528b"></script>
 <script>
-let annIdx = 0;
-const annSlides = document.querySelectorAll('.ann-slide');
-
-function showAnnSlide(index) {
-    annSlides.forEach(s => s.classList.remove('active'));
-    annIdx = index;
-    if (annIdx >= annSlides.length) annIdx = 0;
-    if (annIdx < 0) annIdx = annSlides.length - 1;
-    annSlides[annIdx].classList.add('active');
-}
-function moveAnnouncement(step) {
-    showAnnSlide(annIdx + step);
-}
-setInterval(() => {
-    moveAnnouncement(1);
-}, 3000);
 let currentIdx = 0;
 let autoSlideInterval;
 let isAutoSlideActive = true;
@@ -2170,16 +2080,11 @@ body {
 <div id="site-footer-mount"></div>
 <script src="site-footer.js"></script>
 <script>
-    function toggleAbayaMenu() {
-        const menu = document.getElementById('mobileMenuPanel');
-        const overlay = document.getElementById('menuOverlay');
-        if (!menu) return;
-        const willOpen = !menu.classList.contains('active');
-        if (willOpen && typeof closeCartDrawer === 'function') closeCartDrawer();
-        menu.classList.toggle('active');
-        if (overlay) overlay.classList.toggle('active');
-    }
 function updateCartIcon(total) {
+    if (typeof window.updateCartBadge === 'function') {
+        window.updateCartBadge();
+        return;
+    }
     const cartBadge = document.getElementById('cart-count');
     if (cartBadge) {
         if (total > 0) {

@@ -4,7 +4,7 @@ function ensureCategoryStyles() {
   var link = document.createElement("link");
   link.id = "category-sidebar-css";
   link.rel = "stylesheet";
-  link.href = "category-sidebar.css?v=20260528c";
+  link.href = "category-sidebar.css?v=20260528d";
   document.head.appendChild(link);
 }
 
@@ -112,41 +112,25 @@ function buildShopSidebar(categoryKey, products) {
 
   var colorMap = window.FILTER_COLOR_MAP || {};
 
-  var swatches =
-
-    "<button type='button' class='color-swatch active' data-color='all' title='All colors' aria-label='All colors'></button>" +
-
-    colors
-
-      .map(function (c) {
-
-        var meta = colorMap[c] || { hex: "#ccc", label: c };
-
-        return (
-
-          "<button type='button' class='color-swatch' data-color='" +
-
-          escapeHtml(c) +
-
-          "' style='background:" +
-
-          meta.hex +
-
-          "' title='" +
-
-          escapeHtml(meta.label) +
-
-          "' aria-label='" +
-
-          escapeHtml(meta.label) +
-
-          "'></button>"
-
-        );
-
-      })
-
-      .join("");
+  var colorChecks = colors.length
+    ? colors
+        .map(function (c) {
+          var meta = colorMap[c] || { label: c };
+          var label = meta.label || c;
+          return (
+            "<label class='color-filter-option'>" +
+            "<input type='checkbox' class='color-filter-check' value='" +
+            escapeHtml(c) +
+            "'>" +
+            "<span class='color-filter-box' aria-hidden='true'></span>" +
+            "<span class='color-filter-name'>" +
+            escapeHtml(label) +
+            "</span>" +
+            "</label>"
+          );
+        })
+        .join("")
+    : "<p class='color-filter-empty'>No colors listed for this category.</p>";
 
 
 
@@ -227,9 +211,9 @@ function buildShopSidebar(categoryKey, products) {
 
     "<h4>Color</h4>" +
 
-    "<div class='color-swatches' id='colorSwatches'>" +
+    "<div class='color-filter-list' id='colorFilters'>" +
 
-    swatches +
+    colorChecks +
 
     "</div>" +
 
@@ -573,7 +557,7 @@ function renderCategory(categoryKey) {
 
 
 
-  var filterState = { subcatIdx: null, color: "all", priceMin: null, priceMax: null };
+  var filterState = { subcatIdx: null, colors: [], priceMin: null, priceMax: null };
 
 
 
@@ -657,7 +641,7 @@ function renderCategory(categoryKey) {
 
       if (filterState.subcatIdx !== null && filterState.subcatIdx !== idx) show = false;
 
-      if (filterState.color !== "all" && p.color !== filterState.color) show = false;
+      if (filterState.colors.length && (!p.color || filterState.colors.indexOf(p.color) === -1)) show = false;
 
       if (filterState.priceMin !== null && price < filterState.priceMin) show = false;
 
@@ -801,30 +785,17 @@ function renderCategory(categoryKey) {
 
 
 
-  var swatchWrap = document.getElementById("colorSwatches");
+  var colorFilterWrap = document.getElementById("colorFilters");
 
-  if (swatchWrap) {
-
-    swatchWrap.addEventListener("click", function (ev) {
-
-      var btn = ev.target.closest(".color-swatch");
-
-      if (!btn) return;
-
-      swatchWrap.querySelectorAll(".color-swatch").forEach(function (b) {
-
-        b.classList.remove("active");
-
+  if (colorFilterWrap) {
+    colorFilterWrap.addEventListener("change", function (ev) {
+      if (!ev.target.classList.contains("color-filter-check")) return;
+      filterState.colors = [];
+      colorFilterWrap.querySelectorAll(".color-filter-check:checked").forEach(function (cb) {
+        filterState.colors.push(cb.value);
       });
-
-      btn.classList.add("active");
-
-      filterState.color = btn.getAttribute("data-color") || "all";
-
       applyFilters();
-
     });
-
   }
 
 
@@ -893,7 +864,7 @@ function renderCategory(categoryKey) {
   }
   if (filterPanel) {
     filterPanel.addEventListener("click", function (ev) {
-      if (ev.target.closest(".subcat-link, [data-filter-all], .color-swatch")) {
+      if (ev.target.closest(".subcat-link, [data-filter-all], .color-filter-option")) {
         if (window.matchMedia("(max-width: 960px)").matches) {
           setFilterDrawer(false);
         }
