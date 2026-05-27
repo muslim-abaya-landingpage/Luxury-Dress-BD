@@ -122,25 +122,49 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 12px 22px;
+      padding: 12px 18px;
       font-size: 14px;
       font-weight: 700;
       text-decoration: none;
       border-radius: 6px;
       font-family: inherit;
       border: 1px solid #111;
+      flex: 1 1 160px;
+      min-width: 140px;
+      box-sizing: border-box;
+      line-height: 1.35;
+      text-align: center;
+      white-space: normal;
     }
-    .about-btn-primary {
+    .about-btn-primary,
+    .about-btn-primary:link,
+    .about-btn-primary:visited,
+    .about-btn-primary:hover,
+    .about-btn-primary:active {
       background: #111;
-      color: #fff;
+      color: #fff !important;
+      -webkit-text-fill-color: #fff;
     }
-    .about-btn-secondary {
+    .about-btn-secondary,
+    .about-btn-secondary:link,
+    .about-btn-secondary:visited,
+    .about-btn-secondary:hover,
+    .about-btn-secondary:active {
       background: #fff;
-      color: #111;
+      color: #111 !important;
+      -webkit-text-fill-color: #111;
     }
     @media (max-width: 560px) {
       .about-highlights {
         grid-template-columns: 1fr;
+      }
+      .about-actions {
+        flex-direction: column;
+      }
+      .about-btn {
+        width: 100%;
+        flex: none;
+        min-width: 0;
       }
     }
   </style>
