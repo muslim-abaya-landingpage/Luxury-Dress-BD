@@ -17,7 +17,7 @@
     '</div>' +
     '<div class="anz-col-contact">' +
     '<h3 class="anz-title">Contact Us</h3>' +
-    '<div class="contact-row"><img src="https://cdn-icons-png.flaticon.com/512/732/732200.png" alt=""><span>muslimabaya@gmail.com</span></div>' +
+    '<div class="contact-row"><img src="https://cdn-icons-png.flaticon.com/512/732/732200.png" alt=""><span>muslimabeya@gmail.com</span></div>' +
     '<div class="contact-row"><img src="https://cdn-icons-png.flaticon.com/512/724/724664.png" alt=""><span>+880 1971-642683</span></div>' +
     '<div class="contact-row"><img src="https://cdn-icons-png.flaticon.com/512/484/484167.png" alt=""><span>832, West Rasulpur, Dhaka-1211, Bangladesh</span></div>' +
     '</div>' +
