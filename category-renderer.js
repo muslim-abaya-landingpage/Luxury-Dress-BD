@@ -1,0 +1,821 @@
+function ensureCategoryStyles() {
+
+  if (!document.getElementById("category-sidebar-css")) {
+
+    var link = document.createElement("link");
+
+    link.id = "category-sidebar-css";
+
+    link.rel = "stylesheet";
+
+    link.href = "category-sidebar.css";
+
+    document.head.appendChild(link);
+
+  }
+
+}
+
+
+
+function getCategoryNavList() {
+
+  if (window.CATEGORY_NAV && window.CATEGORY_NAV.length) {
+
+    return window.CATEGORY_NAV.filter(function (c) { return c.key !== "video"; });
+
+  }
+
+  return [];
+
+}
+
+
+
+function escapeHtml(str) {
+
+  return String(str || "")
+
+    .replace(/&/g, "&amp;")
+
+    .replace(/</g, "&lt;")
+
+    .replace(/>/g, "&gt;")
+
+    .replace(/"/g, "&quot;");
+
+}
+
+
+
+function getProductColors(products) {
+
+  var set = {};
+
+  products.forEach(function (p) {
+
+    if (p.color) set[p.color] = true;
+
+  });
+
+  return Object.keys(set);
+
+}
+
+
+
+function getPriceBounds(products) {
+
+  var min = 0;
+
+  var max = 5000;
+
+  if (products.length) {
+
+    var prices = products.map(function (p) { return parseInt(p.price, 10) || 550; });
+
+    min = Math.min.apply(null, prices);
+
+    max = Math.max.apply(null, prices);
+
+    if (min === max) max = min + 500;
+
+  }
+
+  return { min: min, max: max };
+
+}
+
+
+
+function buildShopSidebar(categoryKey, products) {
+
+  var subLinks =
+
+    "<a href='#' class='sidebar-all-cat active' data-filter-all='1'>All Category</a>" +
+
+    products.map(function (p, i) {
+
+      return (
+
+        "<a href='#' class='subcat-link' data-subcat-idx='" + i + "'>" +
+
+        escapeHtml(p.name) +
+
+        "</a>"
+
+      );
+
+    }).join("");
+
+
+
+  var bounds = getPriceBounds(products);
+
+  var colors = getProductColors(products);
+
+  var colorMap = window.FILTER_COLOR_MAP || {};
+
+  var swatches =
+
+    "<button type='button' class='color-swatch active' data-color='all' title='All colors' aria-label='All colors'></button>" +
+
+    colors
+
+      .map(function (c) {
+
+        var meta = colorMap[c] || { hex: "#ccc", label: c };
+
+        return (
+
+          "<button type='button' class='color-swatch' data-color='" +
+
+          escapeHtml(c) +
+
+          "' style='background:" +
+
+          meta.hex +
+
+          "' title='" +
+
+          escapeHtml(meta.label) +
+
+          "' aria-label='" +
+
+          escapeHtml(meta.label) +
+
+          "'></button>"
+
+        );
+
+      })
+
+      .join("");
+
+
+
+  return (
+
+    "<aside class='shop-sidebar'>" +
+
+    "<a class='sidebar-home' href='index.html'>&lsaquo; Home</a>" +
+
+    "<nav class='shop-cats' id='shopSubcats'>" +
+
+    subLinks +
+
+    "</nav>" +
+
+    "<div class='sidebar-filter'>" +
+
+    "<h4>Price Range</h4>" +
+
+    "<div class='price-slider-wrap'>" +
+
+    "<div class='price-track'><div class='price-track-fill' id='priceTrackFill'></div></div>" +
+
+    "<input type='range' id='priceMin' min='" +
+
+    bounds.min +
+
+    "' max='" +
+
+    bounds.max +
+
+    "' value='" +
+
+    bounds.min +
+
+    "' aria-label='Minimum price'>" +
+
+    "<input type='range' id='priceMax' min='" +
+
+    bounds.min +
+
+    "' max='" +
+
+    bounds.max +
+
+    "' value='" +
+
+    bounds.max +
+
+    "' aria-label='Maximum price'>" +
+
+    "</div>" +
+
+    "<div class='price-labels'>" +
+
+    "<span>Min &#2547; <span id='priceMinLabel'>" +
+
+    bounds.min +
+
+    "</span></span>" +
+
+    "<span>Max &#2547; <span id='priceMaxLabel'>" +
+
+    bounds.max +
+
+    "</span></span>" +
+
+    "</div>" +
+
+    "</div>" +
+
+    "<div class='sidebar-filter'>" +
+
+    "<h4>Color</h4>" +
+
+    "<div class='color-swatches' id='colorSwatches'>" +
+
+    swatches +
+
+    "</div>" +
+
+    "</div>" +
+
+    "</aside>"
+
+  );
+
+}
+
+
+
+function buildProductCard(p, idx, waLink, detailMode) {
+
+  var productPrice = parseInt(p.price, 10) || 550;
+
+  var priceText = "\u09F3" + productPrice;
+  var fabricText = escapeHtml(p.fabric || (detailMode ? "দুবাই চেরি" : "Premium Georgette"));
+  var sizes = Array.isArray(p.sizes) && p.sizes.length
+    ? p.sizes
+    : detailMode
+      ? ["50", "52", "54", "56"]
+      : ["Free Size"];
+  var sizeOptions = sizes
+    .map(function (s, i) {
+      return "<option value='" + escapeHtml(s) + "'" + (i === 0 ? " selected" : "") + ">" + escapeHtml(s) + "</option>";
+    })
+    .join("");
+
+  var colorAttr = p.color ? " data-color='" + escapeHtml(p.color) + "'" : "";
+
+  if (detailMode) {
+    return (
+      '<article class="premium-card premium-card-detail" data-product-idx="' +
+      idx +
+      '" data-price="' +
+      productPrice +
+      '"' +
+      colorAttr +
+      ">" +
+      '<div class="detail-media">' +
+      '<img src="' +
+      escapeHtml(p.image) +
+      '" alt="' +
+      escapeHtml(p.name) +
+      '" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=\'images/Baby-Pink-Floral-Print.jpeg\'">' +
+      "</div>" +
+      '<div class="detail-content">' +
+      "<h3>" +
+      escapeHtml(p.name) +
+      "</h3>" +
+      '<p class="detail-price">' +
+      priceText +
+      "</p>" +
+      "<p class='detail-note'>ফেব্রিক্স: " +
+      fabricText +
+      (p.detailNote ? " | " + escapeHtml(p.detailNote) : " | শুধু বোরকা") +
+      "</p>" +
+      "<label class='card-size-label detail-size-label'>সাইজ: <select class='card-size-select' data-size-idx='" +
+      idx +
+      "'>" +
+      sizeOptions +
+      "</select></label>" +
+      '<div class="detail-actions">' +
+      '<button type="button" class="msg-btn btn-add-cart" data-product-idx="' +
+      idx +
+      '" data-action="add">কার্টে যোগ</button>' +
+      '<button type="button" class="msg-btn btn-buy-now" data-product-idx="' +
+      idx +
+      '" data-action="buy-now">অর্ডার করুন</button>' +
+      "<a href='" +
+      waLink +
+      "?text=" +
+      encodeURIComponent(p.name + " অর্ডার করতে চাই") +
+      "' target='_blank' rel='noopener' class='msg-btn btn-msg'>মেসেজ করুন</a>" +
+      "</div>" +
+      "</div>" +
+      "</article>"
+    );
+  }
+
+  return (
+
+    '<article class="card premium-card" data-product-idx="' +
+
+    idx +
+
+    '" data-price="' +
+
+    productPrice +
+
+    '"' +
+
+    colorAttr +
+
+    ">" +
+
+    '<div class="img-wrap">' +
+
+    '<img src="' +
+
+    escapeHtml(p.image) +
+
+    '" alt="' +
+
+    escapeHtml(p.name) +
+
+    '" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=\'images/Baby-Pink-Floral-Print.jpeg\'">' +
+
+    "</div>" +
+
+    '<div class="card-foot">' +
+
+    '<div class="card-meta">' +
+
+    "<h3>" +
+
+    escapeHtml(p.name) +
+
+    "</h3>" +
+
+    '<span class="card-price">' +
+
+    priceText +
+
+    "</span>" +
+
+    "</div>" +
+
+    '<div class="card-extra">' +
+    "<p class='card-fabric'>ফেব্রিক্স: " + fabricText + "</p>" +
+    (p.detailNote ? "<p class='card-length'>" + escapeHtml(p.detailNote) + "</p>" : "") +
+    "<label class='card-size-label'>সাইজ: <select class='card-size-select' data-size-idx='" + idx + "'>" + sizeOptions + "</select></label>" +
+    "</div>" +
+
+    '<div class="card-bar card-bar-split">' +
+    '<button type="button" class="msg-btn btn-add-cart" data-product-idx="' + idx + '" data-action="add">কার্টে যোগ</button>' +
+    '<button type="button" class="msg-btn btn-buy-now" data-product-idx="' + idx + '" data-action="buy-now">অর্ডার করুন</button>' +
+    "</div>" +
+
+    "</div>" +
+
+    "</article>"
+
+  );
+
+}
+
+
+
+function renderAllCategories() {
+
+  var root = document.getElementById("list");
+
+  if (!root) return;
+
+  root.className = "cat-hub-page";
+
+  var nav = window.CATEGORY_NAV || [];
+
+  var tiles = nav.map(function (c) {
+
+    var img = c.image || "images/Baby-Pink-Floral-Print.jpeg";
+
+    return (
+
+      "<a class='cat-hub-item' href='" +
+
+      c.href +
+
+      "'>" +
+
+      "<div class='cat-hub-circle'><img src='" +
+
+      img +
+
+      "' alt='" +
+
+      escapeHtml(c.label) +
+
+      "' loading='lazy' decoding='async' onerror=\"this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg'\"></div>" +
+
+      "<span class='cat-hub-label'>" +
+
+      escapeHtml(c.label) +
+
+      "</span></a>"
+
+    );
+
+  }).join("");
+
+  root.innerHTML =
+
+    "<nav class='cat-hub-breadcrumb' aria-label='Breadcrumb'>" +
+
+    "<a href='index.html'>Home</a><span>&rsaquo;</span><strong>All Categories</strong></nav>" +
+
+    "<h1 class='cat-hub-title'>All Categories</h1>" +
+
+    "<div class='cat-hub-grid'>" +
+
+    tiles +
+
+    "</div>";
+
+}
+
+
+
+function renderCategory(categoryKey) {
+
+  ensureCategoryStyles();
+
+
+
+  var root = document.getElementById("list");
+
+  if (!root) return;
+
+  root.className = "";
+
+
+
+  var allProducts = window.CATEGORY_PRODUCTS || {};
+
+  var products = (allProducts[categoryKey] || []).slice();
+
+  var categoryMeta = window.CATEGORY_META || {};
+
+  var title = (categoryMeta[categoryKey] && categoryMeta[categoryKey].title) || categoryKey.toUpperCase();
+
+  var waLink = (window.SITE_MEDIA && window.SITE_MEDIA.whatsappOrderLink) || "https://wa.me/8801971642683";
+
+
+
+  var breadcrumb =
+
+    "<nav class='shop-breadcrumb' aria-label='Breadcrumb'>" +
+
+    "<a href='index.html'>Home</a><span>&rsaquo;</span><a href='category.html'>Category</a><span>&rsaquo;</span><strong>" +
+
+    escapeHtml(title) +
+
+    "</strong></nav>";
+
+
+
+  var sidebar = buildShopSidebar(categoryKey, products);
+
+  var detailMode = false;
+  var cards = products.map(function (p, idx) {
+
+    return buildProductCard(p, idx, waLink, detailMode);
+
+  }).join("");
+
+
+
+  root.innerHTML =
+
+    breadcrumb +
+
+    "<div class='shop-layout'>" +
+
+    sidebar +
+
+    "<section class='shop-main'>" +
+
+    "<div class='shop-top'><h2 class='shop-title'>" +
+
+    escapeHtml(title) +
+
+    "</h2><span class='shop-count' id='shopCount'>" +
+
+    products.length +
+
+    " items</span></div>" +
+
+    "<div class='product-grid" + (detailMode ? " product-grid-detail" : "") + "' id='productGrid'>" +
+
+    (cards || "<p class='filter-empty'>এই ক্যাটাগরিতে এখনো কোনো প্রোডাক্ট যোগ করা হয়নি।</p>") +
+
+    "</div></section></div>" +
+
+    "<div id='cartMiniMsg' class='cart-mini-msg'>কার্টে যুক্ত হয়েছে</div>";
+
+
+
+  if (!products.length) return;
+
+
+
+  var selectedQty = {};
+
+  products.forEach(function (_, i) {
+
+    selectedQty[i] = 1;
+
+  });
+
+
+
+  var filterState = { subcatIdx: null, color: "all", priceMin: null, priceMax: null };
+
+
+
+  function addProductToCart(item, qtyToAdd, sizeValue) {
+
+    var cat = typeof findCatalogByName === "function" ? findCatalogByName(item.name) : null;
+    var pickedSize = sizeValue || "50";
+    var cartName = item.name + " (Size " + pickedSize + ")";
+
+    var line = {
+
+      id: item.id || (cat ? cat.id : ""),
+
+      name: cartName,
+
+      price: parseInt(item.price, 10) || 550,
+
+      quantity: parseInt(qtyToAdd, 10) || 1,
+
+      image: item.image || (cat && cat.image) || ""
+
+    };
+
+    var updated = [];
+    if (typeof addOrMergeStoreCartItem === "function") {
+      updated = addOrMergeStoreCartItem(typeof loadStoreCart === "function" ? loadStoreCart() : [], line);
+    }
+    if (typeof afterCartMutation === "function") afterCartMutation(updated);
+
+    if (typeof pushTrackingEvent === "function") {
+      pushTrackingEvent("AddToCart", {
+        content_ids: [line.id || item.name],
+        content_name: item.name,
+        value: line.price,
+        currency: "BDT",
+        quantity: line.quantity
+      });
+    }
+
+    var msg = document.getElementById("cartMiniMsg");
+
+    if (msg) {
+
+      msg.classList.add("show");
+
+      setTimeout(function () {
+
+        msg.classList.remove("show");
+
+      }, 1400);
+
+    }
+
+  }
+
+
+
+  function applyFilters() {
+
+    var grid = document.getElementById("productGrid");
+
+    var countEl = document.getElementById("shopCount");
+
+    if (!grid) return;
+
+    var cardsEls = grid.querySelectorAll(".premium-card");
+
+    var visible = 0;
+
+    cardsEls.forEach(function (card) {
+
+      var idx = parseInt(card.getAttribute("data-product-idx"), 10);
+
+      var p = products[idx];
+
+      if (!p) return;
+
+      var price = parseInt(p.price, 10) || 550;
+
+      var show = true;
+
+      if (filterState.subcatIdx !== null && filterState.subcatIdx !== idx) show = false;
+
+      if (filterState.color !== "all" && p.color !== filterState.color) show = false;
+
+      if (filterState.priceMin !== null && price < filterState.priceMin) show = false;
+
+      if (filterState.priceMax !== null && price > filterState.priceMax) show = false;
+
+      card.classList.toggle("is-hidden", !show);
+
+      if (show) visible++;
+
+    });
+
+    if (countEl) countEl.textContent = visible + " items";
+
+    var empty = grid.querySelector(".filter-empty-dynamic");
+
+    if (empty) empty.remove();
+
+    if (visible === 0) {
+
+      var el = document.createElement("p");
+
+      el.className = "filter-empty filter-empty-dynamic";
+
+      el.textContent = "এই ফিল্টারে কোনো প্রোডাক্ট পাওয়া যায়নি।";
+
+      grid.appendChild(el);
+
+    }
+
+  }
+
+
+
+  function updatePriceTrack() {
+
+    var minInput = document.getElementById("priceMin");
+
+    var maxInput = document.getElementById("priceMax");
+
+    var fill = document.getElementById("priceTrackFill");
+
+    if (!minInput || !maxInput || !fill) return;
+
+    var min = parseInt(minInput.min, 10);
+
+    var max = parseInt(minInput.max, 10);
+
+    var lo = parseInt(minInput.value, 10);
+
+    var hi = parseInt(maxInput.value, 10);
+
+    if (lo > hi) {
+
+      var t = lo;
+
+      lo = hi;
+
+      hi = t;
+
+      minInput.value = lo;
+
+      maxInput.value = hi;
+
+    }
+
+    filterState.priceMin = lo;
+
+    filterState.priceMax = hi;
+
+    var minLbl = document.getElementById("priceMinLabel");
+
+    var maxLbl = document.getElementById("priceMaxLabel");
+
+    if (minLbl) minLbl.textContent = String(lo);
+
+    if (maxLbl) maxLbl.textContent = String(hi);
+
+    var range = max - min || 1;
+
+    var left = ((lo - min) / range) * 100;
+
+    var width = ((hi - lo) / range) * 100;
+
+    fill.style.left = left + "%";
+
+    fill.style.width = width + "%";
+
+    applyFilters();
+
+  }
+
+
+
+  var priceMin = document.getElementById("priceMin");
+
+  var priceMax = document.getElementById("priceMax");
+
+  if (priceMin) priceMin.addEventListener("input", updatePriceTrack);
+
+  if (priceMax) priceMax.addEventListener("input", updatePriceTrack);
+
+  updatePriceTrack();
+
+
+
+  var subcatNav = document.getElementById("shopSubcats");
+
+  if (subcatNav) {
+
+    subcatNav.addEventListener("click", function (ev) {
+      var allCat = ev.target.closest("[data-filter-all]");
+      if (allCat) {
+        ev.preventDefault();
+        filterState.subcatIdx = null;
+        subcatNav.querySelectorAll("a").forEach(function (a) {
+          a.classList.remove("active");
+        });
+        allCat.classList.add("active");
+        applyFilters();
+        return;
+      }
+      var subLink = ev.target.closest(".subcat-link");
+      if (!subLink) return;
+      ev.preventDefault();
+      var idx = parseInt(subLink.getAttribute("data-subcat-idx"), 10);
+      if (filterState.subcatIdx === idx) {
+        filterState.subcatIdx = null;
+        subLink.classList.remove("active");
+        var allLink = subcatNav.querySelector("[data-filter-all]");
+        if (allLink) allLink.classList.add("active");
+      } else {
+        filterState.subcatIdx = idx;
+        subcatNav.querySelectorAll("a").forEach(function (a) {
+          a.classList.remove("active");
+        });
+        subLink.classList.add("active");
+      }
+      applyFilters();
+    });
+  }
+
+
+
+  var swatchWrap = document.getElementById("colorSwatches");
+
+  if (swatchWrap) {
+
+    swatchWrap.addEventListener("click", function (ev) {
+
+      var btn = ev.target.closest(".color-swatch");
+
+      if (!btn) return;
+
+      swatchWrap.querySelectorAll(".color-swatch").forEach(function (b) {
+
+        b.classList.remove("active");
+
+      });
+
+      btn.classList.add("active");
+
+      filterState.color = btn.getAttribute("data-color") || "all";
+
+      applyFilters();
+
+    });
+
+  }
+
+
+
+  root.addEventListener("click", function (ev) {
+
+    var actionEl = ev.target.closest("[data-action]");
+
+    if (!actionEl) return;
+
+    var idx = parseInt(actionEl.getAttribute("data-product-idx"), 10);
+
+    if (isNaN(idx) || !products[idx]) return;
+    var sizeEl = root.querySelector("[data-size-idx='" + idx + "']");
+    var selectedSize = sizeEl ? sizeEl.value : "50";
+
+    if (actionEl.getAttribute("data-action") === "add") {
+      ev.preventDefault();
+      addProductToCart(products[idx], 1, selectedSize);
+      return;
+    }
+    if (actionEl.getAttribute("data-action") === "buy-now") {
+      ev.preventDefault();
+      addProductToCart(products[idx], 1, selectedSize);
+      window.location.href = "checkout.html";
+    }
+  });
+
+  if (typeof afterCartMutation === "function") {
+    afterCartMutation(typeof loadStoreCart === "function" ? loadStoreCart() : []);
+  }
+}
+
+

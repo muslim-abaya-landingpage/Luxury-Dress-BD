@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kaftan Collection | Muslim Abaya</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="site-header.css">
+  <link rel="stylesheet" href="site-footer.css">
+  <style>
+    .wrap { max-width: 1240px; margin: 0 auto; padding: 16px 12px 24px; }
+  </style>
+</head>
+<body>
+  <div id="site-header-mount"></div>
+  <main class="wrap">
+    <div id="list"></div>
+  </main>
+  <div id="site-footer-mount"></div>
+  <script src="cart-utils.js"></script>
+  <script src="site-header.js"></script>
+  <script src="category-products.js"></script>
+  <script src="category-renderer.js"></script>
+  <script src="site-footer.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      renderCategory("kaftan");
+    });
+  </script>
+</body>
+</html>

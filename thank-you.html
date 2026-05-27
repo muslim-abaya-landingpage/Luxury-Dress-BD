@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ধন্যবাদ - Luxury Dress BD</title>
+    
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-ML7RL6BR');</script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="site-header.css">
+    <link rel="stylesheet" href="site-footer.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+<style>
+    body {
+        font-family: 'Hind Siliguri', sans-serif;
+        margin: 0;
+        min-height: 100vh;
+        background: radial-gradient(circle at top, #fff6dd 0%, #f8f9fb 45%, #eef2f8 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 20px 0 0;
+        text-align: center;
+        color: #1f2937;
+    }
+    #site-footer-mount { width: 100%; margin-top: 24px; }
+    .container {
+        background: rgba(255,255,255,.92);
+        border: 1px solid #ececec;
+        backdrop-filter: blur(4px);
+        width: min(560px, 100%);
+        border-radius: 24px;
+        padding: 34px 24px;
+        box-shadow: 0 20px 40px rgba(0,0,0,.08);
+    }
+    .icon {
+        width: 78px;
+        height: 78px;
+        margin: 0 auto 16px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-size: 38px;
+        color: #16a34a;
+        background: #ecfdf3;
+        border: 2px solid #bbf7d0;
+    }
+    .thank-message { margin: 0; font-size: 20px; line-height: 1.65; color: #374151; font-weight: 600; }
+    .actions { margin-top: 24px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+    .btn {
+        text-decoration: none;
+        font-weight: 700;
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-size: 16px;
+        border: 1px solid #111;
+    }
+    .btn-dark { background: #111; color: #fff; }
+    .btn-light { background: #fff; color: #111; border-color: #d1d5db; }
+</style>
+
+    <script src="cart-utils.js"></script>
+    <script>
+      (function () {
+        function readCartTotal() {
+          var keys = ['secured_checkout_cart', 'cart', 'user_cart'];
+          for (var i = 0; i < keys.length; i++) {
+            try {
+              var raw = localStorage.getItem(keys[i]);
+              if (!raw) continue;
+              var arr = JSON.parse(raw);
+              if (!Array.isArray(arr)) continue;
+              var total = 0;
+              arr.forEach(function (line) {
+                var qty = parseInt(line.quantity, 10) || 0;
+                var price = parseFloat(line.price) || 0;
+                total += qty * price;
+              });
+              if (total > 0) return total;
+            } catch (e) {}
+          }
+          return 550;
+        }
+        var fallbackValue = readCartTotal();
+        if (typeof pushPurchaseCompleteEvent === 'function') {
+          pushPurchaseCompleteEvent({ order_value: fallbackValue, currency: 'BDT' });
+        } else {
+          window.dataLayer = window.dataLayer || [];
+          window.dataLayer.push({ event: 'purchase_complete', order_value: fallbackValue, currency: 'BDT' });
+        }
+        if (typeof clearOrderTracking === 'function') clearOrderTracking();
+      })();
+    </script>
+</head>
+<body>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-ML7RL6BR"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <div id="site-header-mount"></div>
+
+    <div class="container">
+        <div class="icon"><i class="fas fa-check"></i></div>
+        <p class="thank-message">ধন্যবাদ! আপনার অর্ডার আমরা পেয়েছি। আমাদের প্রতিনিধি খুব শীঘ্রই ফোন করে কনফার্ম করবেন।</p>
+        <div class="actions">
+            <a href="index.html" class="btn btn-dark"><i class="fas fa-shopping-bag"></i> আরও কেনাকাটা করুন</a>
+            <a href="checkout.html" class="btn btn-light">অর্ডার স্ট্যাটাস দেখুন</a>
+        </div>
+    </div>
+    <script>
+        localStorage.removeItem('cart');
+        localStorage.removeItem('user_cart');
+        localStorage.removeItem('secured_checkout_cart');
+        sessionStorage.removeItem('cart');
+    </script>
+    <div id="site-footer-mount"></div>
+    <script src="site-header.js"></script>
+    <script src="site-footer.js"></script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Successful - Muslim Abaya</title>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="site-header.css">
+    <link rel="stylesheet" href="site-footer.css">
+    <style>
+        :root { --primary-orange: #f16522; --success-green: #28a745; }
+        body { 
+            font-family: 'Hind Siliguri', sans-serif; 
+            background-color: #f7f9fc; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            justify-content: flex-start; 
+            min-height: 100vh; 
+            text-align: center;
+            padding: 24px 0 0;
+        }
+        #site-footer-mount { width: 100%; margin-top: 24px; }
+        .success-card {
+            background: #fff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 90%;
+        }
+        .icon-box {
+            width: 80px;
+            height: 80px;
+            background: #e8f5e9;
+            color: var(--success-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 20px;
+        }
+        h1 { color: #333; margin-bottom: 10px; }
+        p { color: #666; line-height: 1.6; margin-bottom: 25px; }
+        .order-id {
+            background: #f1f1f1;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+        .btn-home {
+            background: var(--primary-orange);
+            color: #fff;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            display: inline-block;
+            transition: 0.3s;
+        }
+        .btn-home:hover { opacity: 0.9; transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+<div id="site-header-mount"></div>
+
+<div class="success-card">
+    <div class="icon-box">✓</div>
+    <h1>অর্ডার সফল হয়েছে!</h1>
+    <p>আপনার অর্ডারটি আমরা পেয়েছি। খুব শীঘ্রই আমাদের একজন প্রতিনিধি আপনার মোবাইল নম্বরে কল করে অর্ডারটি কনফার্ম করবেন।</p>
+    
+    <div class="order-id">অর্ডার নম্বর: #<span id="order-id-display"></span></div>
+    
+    <br>
+    <a href="index.html" class="btn-home">কেনাকাটা চালিয়ে যান</a>
+</div>
+
+<script>
+    // ডাইনামিক অর্ডার নম্বর জেনারেট করা (ঐচ্ছিক)
+    const randomID = Math.floor(100000 + Math.random() * 900000);
+    document.getElementById('order-id-display').innerText = randomID;
+
+    // অর্ডার সফল হওয়ার পর কার্ট খালি করে দেওয়া
+    localStorage.removeItem('cart');
+    localStorage.removeItem('user_cart');
+    localStorage.removeItem('secured_checkout_cart');
+    sessionStorage.removeItem('cart');
+</script>
+<div id="site-footer-mount"></div>
+<script src="site-header.js"></script>
+<script src="site-footer.js"></script>
+</body>
+</html>

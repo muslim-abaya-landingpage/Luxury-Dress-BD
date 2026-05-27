@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-ML7RL6BR');</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>চেকআউট - MUSLIM ABAYA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="site-header.css">
+    <link rel="stylesheet" href="site-footer.css">
+    <style>
+        :root { 
+            --primary-color: #1a1a1a; 
+            --accent: #f28c1b;
+            --accent-dark: #de7f16;
+            --border: #e8e8e8;
+            --text: #333;
+            --text-muted: #6b7280;
+        }
+        body { 
+            font-family: 'Hind Siliguri', 'Segoe UI', sans-serif; 
+            background-color: #f5f5f5; 
+            margin: 0; 
+            padding: 0 0 24px; 
+            color: var(--text);
+            font-size: 15px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+        .container { 
+            max-width: 1140px; 
+            margin: 0 auto; 
+            padding: 16px 14px; 
+        }
+        .checkout-page-head {
+            text-align: center;
+            margin: 8px 0 20px;
+        }
+        .checkout-page-head h1 {
+            margin: 0 0 6px;
+            font-size: 28px;
+            font-weight: 700;
+            color: #111;
+        }
+        .checkout-breadcrumb {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+        .checkout-breadcrumb a {
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+        .checkout-breadcrumb a:hover { color: var(--accent); }
+        .order-summary { 
+            background: transparent;
+            padding: 0;
+            margin: 0;
+            border: none;
+            box-shadow: none;
+        }
+        .order-review-toolbar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+        }
+        .order-review-toolbar a {
+            color: #dc2626;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .gb-order-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+        .gb-order-row {
+            display: grid;
+            grid-template-columns: 72px 1fr auto auto 40px;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .gb-order-row:last-child { border-bottom: none; }
+        .gb-order-thumb {
+            width: 64px;
+            height: 64px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+            background: #fff;
+            flex-shrink: 0;
+        }
+        .gb-order-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .gb-order-thumb-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: #999;
+        }
+        .gb-order-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #111;
+            line-height: 1.4;
+            margin: 0;
+        }
+        .gb-order-qty {
+            display: inline-flex;
+            align-items: center;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            overflow: hidden;
+            background: #fff;
+        }
+        .gb-order-qty button {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #fff;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+            color: #333;
+            padding: 0;
+        }
+        .gb-order-qty button:hover { background: #f3f4f6; }
+        .gb-order-qty span {
+            min-width: 36px;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 600;
+            border-left: 1px solid #d1d5db;
+            border-right: 1px solid #d1d5db;
+            padding: 4px 6px;
+        }
+        .gb-order-price {
+            font-size: 15px;
+            font-weight: 700;
+            color: #111;
+            white-space: nowrap;
+            min-width: 72px;
+            text-align: right;
+        }
+        .gb-order-delete {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 4px;
+            background: #fee2e2;
+            color: #dc2626;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            flex-shrink: 0;
+        }
+        .gb-order-delete:hover { background: #fecaca; }
+        .gb-order-delete svg { width: 18px; height: 18px; }
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 15px;
+            color: var(--text);
+        }
+        .summary-item strong { font-weight: 700; color: #111; }
+        @media (max-width: 640px) {
+            .gb-order-row {
+                grid-template-columns: 56px 1fr auto 36px;
+                grid-template-rows: auto auto;
+                gap: 8px 10px;
+            }
+            .gb-order-thumb { width: 56px; height: 56px; grid-row: 1 / 3; }
+            .gb-order-name { grid-column: 2 / 4; }
+            .gb-order-qty { grid-column: 2; }
+            .gb-order-price { grid-column: 3; font-size: 14px; }
+            .gb-order-delete { grid-column: 4; grid-row: 1; align-self: start; }
+        }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #444; font-size: 14px; }
+        input, textarea, select { 
+            width: 100%; 
+            padding: 14px; 
+            border: 1px solid #ddd; 
+            border-radius: 10px; 
+            box-sizing: border-box; 
+            font-size: 15px;
+            transition: 0.3s;
+        }
+        input:focus, select:focus, textarea:focus { border-color: var(--accent); outline: none; background: #fff; }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px dashed #ccc;
+            font-weight: bold;
+            font-size: 18px;
+            color: var(--primary-color);
+        }
+        .btn-confirm { 
+            background-color: var(--accent); 
+            color: white; 
+            border: none; 
+            width: 100%; 
+            padding: 16px; 
+            font-size: 17px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            transition: 0.2s; 
+            font-weight: 700; 
+            margin-top: 15px;
+            font-family: inherit;
+            letter-spacing: 0.03em;
+        }
+        .btn-confirm:hover { background-color: var(--accent-dark); }
+        .btn-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
+        .checkout-grid {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 20px;
+            align-items: start;
+        }
+        .top-cat-bar {
+            background: #062733;
+            color: #fff;
+            border-radius: 0;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .top-cat-bar a {
+            color: #e5f6ff;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .3px;
+            padding: 3px 4px;
+            border-radius: 4px;
+        }
+        .top-cat-bar a:hover {
+            background: rgba(255,255,255,.12);
+            color: #fff;
+        }
+        .card-block {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 18px 20px;
+            margin-bottom: 16px;
+        }
+        .section-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            margin: 0 0 16px 0;
+            color: #111;
+            font-weight: 700;
+            font-family: inherit;
+        }
+        .section-label::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: var(--accent);
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+        .section-label .label-meta {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .section-label > span,
+        .section-label .section-label-inner {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .pm-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .pm-option {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            background: #fff;
+        }
+        .pm-option input { width: auto; margin: 0; }
+        .pm-option.active { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+        .payment-panel {
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        .payment-fields { display: grid; gap: 8px; }
+        .payment-fields input, .payment-fields select { font-size: 14px; padding: 10px; margin-bottom: 0; }
+        .coupon-row { display:flex; gap:8px; }
+        .coupon-row input { flex:1; }
+        .coupon-btn {
+            border:1px solid #d1d5db;
+            background:#fff;
+            border-radius:8px;
+            padding:0 14px;
+            cursor:pointer;
+            font-weight:700;
+        }
+        .terms-box {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #4b5563;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        .terms-box input { width: auto; margin-top: 2px; }
+        .sticky-order-bar {
+            display: none;
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9999;
+            background: #fff;
+            border-top: 1px solid #e5e7eb;
+            padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+        }
+        .sticky-order-btn {
+            width: 100%;
+            background: var(--accent);
+            border: none;
+            color: #fff;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+        @media (max-width: 900px) {
+            .checkout-grid { grid-template-columns: 1fr; }
+            .sticky-order-bar { display: block; }
+            body { padding-bottom: 74px; }
+        }
+    </style>
+</head>
+<body>
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-ML7RL6BR"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<div id="site-header-mount"></div>
+<div class="container">
+    <div class="checkout-page-head">
+        <h1>Checkout</h1>
+        <nav class="checkout-breadcrumb" aria-label="Breadcrumb">
+            <a href="index.html">Home</a> &gt; Checkout
+        </nav>
+    </div>
+    <div class="checkout-grid">
+        <div>
+            <div class="card-block">
+                <h3 class="section-label">
+                    <span class="section-label-inner">
+                        <span>Order review</span>
+                        <span id="orderReviewMeta" class="label-meta"></span>
+                    </span>
+                </h3>
+                <div class="order-review-toolbar" id="clearCartWrap"></div>
+                <div class="order-summary" id="orderSummary"></div>
+            </div>
+            <div class="card-block">
+                <h3 class="section-label"><span>Shipping Address</span></h3>
+                <form id="orderForm">
+                    <div class="form-group">
+                        <label>আপনার নাম</label>
+                        <input type="text" id="userName" placeholder="পুরো নাম লিখুন" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>মোবাইল নম্বর</label>
+                        <input type="tel" id="userPhone" placeholder="01XXXXXXXXX" required pattern="[0-9]{11}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>ডেলিভারি ঠিকানা</label>
+                        <textarea id="userAddr" rows="3" placeholder="গ্রাম/বাসা, থানা, জেলা" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>ডেলিভারি জেলা</label>
+                        <select id="userArea" required>
+                            <option value="">জেলা নির্বাচন করুন</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>থানা / উপজেলা (Optional)</label>
+                        <input type="text" id="userThana" placeholder="থানা / উপজেলা লিখুন">
+                    </div>
+                    <button type="submit" id="submitBtn" class="btn-confirm">PLACE ORDER</button>
+                </form>
+            </div>
+        </div>
+        <aside>
+            <div class="card-block">
+                <h3 class="section-label"><span>Payment method</span></h3>
+                <div class="pm-grid">
+                    <label class="pm-option active" data-pm="cod"><input type="radio" name="paymentMethod" value="Cash On Delivery" checked> Cash On Delivery</label>
+                    <label class="pm-option" data-pm="bkash"><input type="radio" name="paymentMethod" value="bKash"> bKash</label>
+                    <label class="pm-option" data-pm="nagad"><input type="radio" name="paymentMethod" value="Nagad"> Nagad</label>
+                    <label class="pm-option" data-pm="bank"><input type="radio" name="paymentMethod" value="Bank Transfer"> Bank Transfer</label>
+                </div>
+                <div id="paymentInfo" class="payment-panel">পেমেন্ট মোড: Cash On Delivery (পণ্য হাতে পেয়ে টাকা দিন)।</div>
+                <div class="payment-fields">
+                    <input type="text" id="senderNumber" placeholder="পেমেন্ট নম্বর (bKash/Nagad) - ঐচ্ছিক">
+                    <input type="text" id="paymentTxnId" placeholder="Transaction ID / Reference - ঐচ্ছিক">
+                    <input type="text" id="bankRef" placeholder="ব্যাংক স্লিপ/রেফারেন্স নম্বর - Bank হলে দিন">
+                </div>
+            </div>
+            <div class="card-block">
+                <h3 class="section-label"><span>Have any coupon or gift voucher?</span></h3>
+                <div class="coupon-row">
+                    <input type="text" id="couponCode" placeholder="Coupon / Voucher Code">
+                    <button type="button" id="applyCouponBtn" class="coupon-btn">Apply</button>
+                </div>
+                <div id="couponMsg" style="margin-top:8px; font-size:12px; color:#6b7280;"></div>
+            </div>
+            <div class="card-block">
+                <h3 class="section-label"><span>Order total</span></h3>
+                <div class="summary-item"><span>Sub total</span><strong id="side-subtotal">৳0</strong></div>
+                <div class="summary-item"><span>Delivery cost</span><strong id="side-delivery">৳0</strong></div>
+                <div class="summary-item"><span>ডিজাইন সংখ্যা</span><strong id="side-design">0</strong></div>
+                <div class="summary-item" id="side-qty-row"><span>মোট পিস</span><strong id="side-qty">0</strong></div>
+                <hr style="border:0;border-top:1px solid #e5e7eb; margin:12px 0;">
+                <div class="summary-item" style="font-size:20px; font-weight:700;"><span>Total</span><strong id="side-total">৳0</strong></div>
+            </div>
+            <div class="card-block" style="font-size:13px; color:#4b5563;">
+                <strong style="display:block; margin-bottom:8px;">Bank Account Details</strong>
+                <div>Bank Name: United Commercial Bank PLC</div>
+                <div>Name: MUSLIM ABAYA</div>
+                <div>Branch: Kamrangirchar Branch</div>
+                <div>Account Number: 7862141000038155</div>
+                <hr style="border:0;border-top:1px dashed #ddd; margin:10px 0;">
+                <div>bKash: 01551642683</div>
+                <div>Nagad: 01551642683</div>
+                <div style="margin-top:8px;">
+                    ব্যাংকে পেমেন্ট করলে: Account Name, Account Number, Bank Name, Branch Name, Transaction/Slip Ref যুক্ত করুন।
+                </div>
+            </div>
+            <div class="card-block">
+                <h3 class="section-label"><span>Special notes <span style="font-size:13px;font-weight:600;color:#6b7280;">(Optional)</span></span></h3>
+                <textarea id="specialNotes" rows="3" maxlength="200" placeholder="আপনার কোনো বিশেষ নির্দেশনা থাকলে লিখুন"></textarea>
+                <div style="font-size:12px; color:#6b7280; text-align:right;"><span id="noteCount">0</span>/200</div>
+                <label class="terms-box">
+                    <input type="checkbox" id="agreeTerms">
+                    <span>I have read and agree to the <a href="terms.html">Terms and Conditions</a>, <a href="refund.html">Privacy Policy & Refund and Return Policy</a>.</span>
+                </label>
+            </div>
+        </aside>
+    </div>
+</div>
+<div class="sticky-order-bar">
+    <button type="button" class="sticky-order-btn" id="stickyOrderBtn">PLACE ORDER</button>
+</div>
+
+<script src="cart-utils.js"></script>
+<script>
+    const ORDER_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzmjgiLnI3WP21q6xHxMvFETAwvqmeMOjJXHifdxQpBk72BuPNuLZS78mUt4tcPVZLR/exec';
+    const MAX_PRODUCT_SLOTS = 20;
+
+    (function initDistrictSelect() {
+        var sel = document.getElementById('userArea');
+        if (!sel || sel.getAttribute('data-districts-built') === '1') return;
+        sel.setAttribute('data-districts-built', '1');
+        var sub = { 'গাজীপুর': 1, 'নারায়ণগঞ্জ': 1, 'নরসিংদী': 1, 'মুন্সীগঞ্জ': 1, 'মানিকগঞ্জ': 1 };
+        var all = ['ঢাকা', 'গাজীপুর', 'নারায়ণগঞ্জ', 'নরসিংদী', 'টাঙ্গাইল', 'কিশোরগঞ্জ', 'ময়মনসিংহ', 'শেরপুর', 'জামালপুর', 'নেত্রকোনা', 'মানিকগঞ্জ', 'মুন্সীগঞ্জ', 'মাদারীপুর', 'রাজবাড়ী', 'ফরিদপুর', 'গোপালগঞ্জ', 'শরীয়তপুর', 'চট্টগ্রাম', 'কুমিল্লা', 'চাঁদপুর', 'ফেনী', 'ব্রাহ্মণবাড়িয়া', 'নোয়াখালী', 'লক্ষ্মীপুর', 'কক্সবাজার', 'খাগড়াছড়ি', 'রাঙ্গামাটি', 'বান্দরবান', 'রাজশাহী', 'নওগাঁ', 'নাটোর', 'চাঁপাইনবাবগঞ্জ', 'পাবনা', 'সিরাজগঞ্জ', 'জয়পুরহাট', 'বগুড়া', 'রংপুর', 'দিনাজপুর', 'পঞ্চগড়', 'নীলফামারী', 'লালমনিরহাট', 'কুড়িগ্রাম', 'গাইবান্ধা', 'ঠাকুরগাঁও', 'সিলেট', 'সুনামগঞ্জ', 'হবিগঞ্জ', 'মৌলভীবাজার', 'খুলনা', 'বাগেরহাট', 'সাতক্ষীরা', 'নড়াইল', 'যশোর', 'মাগুরা', 'ঝিনাইদহ', 'কুষ্টিয়া', 'চুয়াডাঙ্গা', 'মেহেরপুর', 'বরিশাল', 'পটুয়াখালী', 'ভোলা', 'বরগুনা', 'ঝালকাঠি', 'পিরোজপুর'];
+        function feeFor(name) {
+            if (name === 'ঢাকা') return 80;
+            if (sub[name]) return 100;
+            return 150;
+        }
+        function addGroup(label) {
+            var og = document.createElement('optgroup');
+            og.label = label;
+            sel.appendChild(og);
+            return og;
+        }
+        function addOpt(parent, name, fee) {
+            var o = document.createElement('option');
+            o.value = String(fee);
+            o.setAttribute('data-district', name);
+            o.textContent = name;
+            parent.appendChild(o);
+        }
+        var dh = addGroup('ঢাকা');
+        var sd = addGroup('সাব-ঢাকা');
+        var ot = addGroup('ঢাকার বাহিরে');
+        var dhaka = [], suba = [], outa = [];
+        for (var i = 0; i < all.length; i++) {
+            var n = all[i];
+            var f = feeFor(n);
+            if (f === 80) dhaka.push(n);
+            else if (f === 100) suba.push(n);
+            else outa.push(n);
+        }
+        dhaka.sort(function (a, b) { return a.localeCompare(b, 'bn'); });
+        suba.sort(function (a, b) { return a.localeCompare(b, 'bn'); });
+        outa.sort(function (a, b) { return a.localeCompare(b, 'bn'); });
+        dhaka.forEach(function (n) { addOpt(dh, n, 80); });
+        suba.forEach(function (n) { addOpt(sd, n, 100); });
+        outa.forEach(function (n) { addOpt(ot, n, 150); });
+    })();
+
+    function loadCart() {
+        if (typeof loadStoreCart === 'function') {
+            var lines = loadStoreCart();
+            if (typeof normalizeStoreCart === 'function') {
+                lines = normalizeStoreCart(lines);
+                if (typeof persistStoreCart === 'function') persistStoreCart(lines);
+            }
+            return lines;
+        }
+        return [];
+    }
+
+    var cart = loadCart();
+    var summaryDiv = document.getElementById('orderSummary');
+    var areaSelect = document.getElementById('userArea');
+
+    function cartQty() {
+        var totalQty = 0;
+        cart.forEach(function(item) { totalQty += (parseInt(item.quantity, 10) || 1); });
+        return totalQty;
+    }
+
+    function persistCart() {
+        if (typeof persistStoreCart === 'function') {
+            cart = persistStoreCart(cart);
+        }
+        if (typeof refreshCartBadgeUI === 'function') {
+            refreshCartBadgeUI(cart);
+        } else if (typeof window.updateCartBadge === 'function') {
+            window.updateCartBadge(cart);
+        }
+    }
+
+    function cartSubtotal() {
+        var t = 0;
+        cart.forEach(function(item) { t += (parseInt(item.price, 10) || 0) * (parseInt(item.quantity, 10) || 1); });
+        return t;
+    }
+
+    function shippingCharge() {
+        var q = cartQty();
+        if (q === 0 || q >= 3) return 0; // ৩ পিস বা তার বেশি হলে ফ্রি ডেলিভারি
+        return parseInt(areaSelect.value, 10) || 0;
+    }
+
+    function grandTotal() {
+        return cartSubtotal() + shippingCharge();
+    }
+
+    function productsLabel() {
+        return cart.map(function(item) {
+            return item.name + ' (' + (parseInt(item.quantity, 10) || 1) + 'টি)';
+        }).join(', ');
+    }
+
+    function formatBdt(amount) {
+        var n = parseInt(amount, 10) || 0;
+        return '৳' + n.toLocaleString('en-BD');
+    }
+
+    var TRASH_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
+
+    function buildProductSlots() {
+        var slots = [];
+        cart.forEach(function(item) {
+            var qty = parseInt(item.quantity, 10) || 1;
+            slots.push(item.name + ' x' + qty + ' = ৳' + ((parseInt(item.price, 10) || 0) * qty));
+        });
+        while (slots.length < MAX_PRODUCT_SLOTS) {
+            slots.push('');
+        }
+        return slots.slice(0, MAX_PRODUCT_SLOTS);
+    }
+
+    function displayOrder() {
+        if (!summaryDiv) return;
+        
+        if (cart.length === 0) {
+            summaryDiv.innerHTML = "<p style='text-align:center;color:#b45309;padding:10px;'>আপনার কার্টে কোনো পণ্য নেই। <a href=\"index.html\" style=\"color:#1a1a1a;font-weight:700;\">মূল পেজে ফিরে</a> পণ্য সিলেক্ট করুন।</p>";
+            var subBtn = document.getElementById('submitBtn');
+            if (subBtn) subBtn.disabled = true;
+            return;
+        }
+
+        var q = cartQty();
+        var sub = cartSubtotal();
+        var ship = shippingCharge();
+        var grand = grandTotal();
+        var designCount = cart.length;
+        var sideSubtotal = document.getElementById('side-subtotal');
+        var sideDelivery = document.getElementById('side-delivery');
+        var sideTotal = document.getElementById('side-total');
+        if (sideSubtotal) sideSubtotal.textContent = formatBdt(sub);
+        if (sideDelivery) sideDelivery.textContent = (q >= 3 ? formatBdt(0) : formatBdt(ship));
+        if (sideTotal) sideTotal.textContent = formatBdt(grand);
+        var sideQty = document.getElementById('side-qty');
+        var sideDesign = document.getElementById('side-design');
+        if (sideQty) sideQty.textContent = q + ' টি';
+        if (sideDesign) sideDesign.textContent = designCount + ' টি';
+
+        var itemsHtml = '';
+        cart.forEach(function(item, idx) {
+            var qty = parseInt(item.quantity, 10) || 1;
+            var unitPrice = parseInt(item.price, 10) || 0;
+            var lineTotal = unitPrice * qty;
+            var imgUrl = (typeof resolveStoreItemImage === 'function') ? resolveStoreItemImage(item) : (item.image || '');
+            var thumbInner = imgUrl
+                ? '<img src="' + imgUrl + '" alt="" loading="lazy" onerror="this.parentElement.innerHTML=\'<span class=gb-order-thumb-placeholder>👜</span>\'">'
+                : '<span class="gb-order-thumb-placeholder">👜</span>';
+            itemsHtml +=
+                '<div class="gb-order-row">' +
+                '<div class="gb-order-thumb">' + thumbInner + '</div>' +
+                '<p class="gb-order-name">' + item.name + '</p>' +
+                '<div class="gb-order-qty">' +
+                '<button type="button" data-cart-action="dec" data-cart-idx="' + idx + '" aria-label="পরিমাণ কমান">−</button>' +
+                '<span>' + qty + '</span>' +
+                '<button type="button" data-cart-action="inc" data-cart-idx="' + idx + '" aria-label="পরিমাণ বাড়ান">+</button>' +
+                '</div>' +
+                '<div class="gb-order-price">' + formatBdt(lineTotal) + '</div>' +
+                '<button type="button" class="gb-order-delete" data-cart-action="remove" data-cart-idx="' + idx + '" aria-label="প্রোডাক্ট মুছুন" title="মুছুন">' + TRASH_SVG + '</button>' +
+                '</div>';
+        });
+
+        var metaEl = document.getElementById('orderReviewMeta');
+        if (metaEl) metaEl.textContent = designCount + ' items · ' + q + ' pcs';
+
+        summaryDiv.innerHTML = '<div class="gb-order-list">' + itemsHtml + '</div>';
+        
+        var subBtn = document.getElementById('submitBtn');
+        if (subBtn) subBtn.disabled = false;
+    }
+
+    if (summaryDiv) {
+        summaryDiv.addEventListener('click', function(e) {
+            var el = e.target.closest('[data-cart-action]');
+            if (!el) return;
+            var idx = parseInt(el.getAttribute('data-cart-idx'), 10);
+            if (isNaN(idx) || !cart[idx]) return;
+            var action = el.getAttribute('data-cart-action');
+            if (action === 'inc') {
+                cart[idx].quantity = (parseInt(cart[idx].quantity, 10) || 1) + 1;
+            }
+            if (action === 'dec') {
+                var cur = parseInt(cart[idx].quantity, 10) || 1;
+                if (cur <= 1) cart.splice(idx, 1);
+                else cart[idx].quantity = cur - 1;
+            }
+            if (action === 'remove') cart.splice(idx, 1);
+            persistCart();
+            displayOrder();
+        });
+    }
+
+    var clearWrap = document.getElementById('clearCartWrap');
+    if (clearWrap && cart.length > 0) {
+        clearWrap.innerHTML = '<a href="#" onclick="if(typeof clearStoreCart===\'function\'){clearStoreCart();} try{sessionStorage.removeItem(\'muslim_abaya_home_cart_active\');}catch(e){} if(typeof refreshCartBadgeUI===\'function\'){refreshCartBadgeUI([]);} else if(typeof window.updateCartBadge===\'function\'){window.updateCartBadge([]);} location.reload(); return false;">কার্ট খালি করুন</a>';
+    } else if (clearWrap) {
+        clearWrap.innerHTML = '';
+    }
+
+    if (areaSelect) {
+        areaSelect.addEventListener('change', displayOrder);
+    }
+    (function initPaymentBox() {
+        var info = document.getElementById('paymentInfo');
+        var details = {
+            'Cash On Delivery': 'পেমেন্ট মোড: Cash On Delivery (পণ্য হাতে পেয়ে টাকা দিন)।',
+            'bKash': 'bKash নাম্বার: 01551642683 - পেমেন্টের পর Transaction ID দিন।',
+            'Nagad': 'Nagad নাম্বার: 01551642683 - পেমেন্টের পর Transaction ID দিন।',
+            'Bank Transfer': 'Bank: United Commercial Bank PLC, A/C: 7862141000038155, Branch: Kamrangirchar Branch'
+        };
+        document.querySelectorAll('.pm-option').forEach(function(opt) {
+            opt.addEventListener('click', function() {
+                document.querySelectorAll('.pm-option').forEach(function(o){ o.classList.remove('active'); });
+                opt.classList.add('active');
+                var radio = opt.querySelector('input[type="radio"]');
+                if (radio) {
+                    radio.checked = true;
+                    if (info) info.textContent = details[radio.value] || '';
+                }
+            });
+        });
+    })();
+    (function initExtras() {
+        var applyBtn = document.getElementById('applyCouponBtn');
+        var couponInput = document.getElementById('couponCode');
+        var couponMsg = document.getElementById('couponMsg');
+        if (applyBtn && couponInput && couponMsg) {
+            applyBtn.addEventListener('click', function() {
+                var code = (couponInput.value || '').trim();
+                couponMsg.textContent = code ? 'কুপন "' + code + '" নোট করা হয়েছে (ম্যানুয়াল ভেরিফিকেশন হবে)।' : 'কুপন কোড দিন।';
+            });
+        }
+        var notes = document.getElementById('specialNotes');
+        var noteCount = document.getElementById('noteCount');
+        if (notes && noteCount) {
+            notes.addEventListener('input', function() { noteCount.textContent = String(notes.value.length); });
+        }
+        var stickyBtn = document.getElementById('stickyOrderBtn');
+        if (stickyBtn) {
+            stickyBtn.addEventListener('click', function() {
+                var form = document.getElementById('orderForm');
+                if (form) form.requestSubmit();
+            });
+        }
+    })();
+
+    var orderForm = document.getElementById('orderForm');
+    if (orderForm) {
+        orderForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if (cart.length === 0) {
+                alert('কার্ট খালি। আবার পণ্য নির্বাচন করুন।');
+                return;
+            }
+
+            var nameInput = document.getElementById('userName');
+            var phoneInput = document.getElementById('userPhone');
+            var addrInput = document.getElementById('userAddr');
+            var phoneValue = String(phoneInput.value || '').trim().replace(/\s+/g, '');
+            var nameValue = String(nameInput.value || '').trim();
+            var addrValue = String(addrInput.value || '').trim();
+
+            if (nameValue.length < 2) {
+                alert('অনুগ্রহ করে সঠিক নাম লিখুন।');
+                nameInput.focus();
+                return;
+            }
+            if (!/^01\d{9}$/.test(phoneValue)) {
+                alert('সঠিক ১১ সংখ্যার মোবাইল নম্বর লিখুন (01XXXXXXXXX)।');
+                phoneInput.focus();
+                return;
+            }
+            if (addrValue.length < 8) {
+                alert('অনুগ্রহ করে সম্পূর্ণ ঠিকানা লিখুন।');
+                addrInput.focus();
+                return;
+            }
+            if (!areaSelect.value) {
+                alert('অনুগ্রহ করে ডেলিভারি জেলা নির্বাচন করুন।');
+                areaSelect.focus();
+                return;
+            }
+            var agreeTerms = document.getElementById('agreeTerms');
+            if (agreeTerms && !agreeTerms.checked) {
+                alert('অর্ডার সম্পন্ন করতে Terms and Conditions এ সম্মতি দিন।');
+                agreeTerms.focus();
+                return;
+            }
+
+            var btn = document.getElementById('submitBtn');
+            if (btn) {
+                btn.innerText = 'প্রসেসিং...';
+                btn.disabled = true;
+            }
+
+            var qTotal = cartQty();
+            var gTotal = String(grandTotal());
+            var areaOpt = areaSelect.options[areaSelect.selectedIndex];
+            var districtParam = areaOpt.getAttribute('data-district') || areaOpt.textContent.split('(')[0].trim();
+
+            const formData = new URLSearchParams();
+            formData.append('Name', nameValue);
+            formData.append('Phone', phoneValue);
+            formData.append('Address', addrValue);
+            formData.append('District', districtParam);
+            formData.append('Thana', (document.getElementById('userThana').value || '').trim());
+            formData.append('Quantity', String(qTotal));
+            formData.append('Design', productsLabel());
+            formData.append('Total', String(gTotal));
+            formData.append('EventID', 'order_' + Date.now());
+            formData.append('ProductSlotCount', String(MAX_PRODUCT_SLOTS));
+            var selectedPayment = document.querySelector('input[name="paymentMethod"]:checked');
+            formData.append('PaymentMethod', selectedPayment ? selectedPayment.value : 'Cash On Delivery');
+            formData.append('SenderNumber', (document.getElementById('senderNumber').value || '').trim());
+            formData.append('TransactionID', (document.getElementById('paymentTxnId').value || '').trim());
+            formData.append('BankReference', (document.getElementById('bankRef').value || '').trim());
+            formData.append('CouponCode', (document.getElementById('couponCode').value || '').trim());
+            formData.append('SpecialNotes', (document.getElementById('specialNotes').value || '').trim());
+            var slots = buildProductSlots();
+            for (var i = 0; i < MAX_PRODUCT_SLOTS; i++) {
+                formData.append('Product_' + (i + 1), slots[i]);
+            }
+
+            fetch(ORDER_SCRIPT_URL, {
+                method: 'POST',
+                body: formData,
+                mode: 'no-cors'
+            })
+            .then(function () {
+                var eventId = 'order_' + Date.now();
+                if (typeof saveOrderTracking === 'function') {
+                    saveOrderTracking({
+                        first_name: nameValue,
+                        phone: phoneValue,
+                        order_value: parseFloat(gTotal) || 0,
+                        order_items: productsLabel(),
+                        transaction_id: eventId,
+                        currency: 'BDT'
+                    });
+                }
+                if (typeof clearStoreCart === 'function') clearStoreCart();
+                try { sessionStorage.removeItem('muslim_abaya_home_cart_active'); } catch (e) {}
+                window.location.href = 'thank-you.html';
+            })
+            .catch(function () {
+                alert('সংযোগ সমস্যা। আবার চেষ্টা করুন।');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = 'অর্ডার সম্পন্ন করুন';
+                }
+            });
+        });
+    }
+
+    window.addEventListener('storeCartUpdated', function (e) {
+        var lines = e.detail && e.detail.lines;
+        if (!Array.isArray(lines)) return;
+        cart = lines;
+        displayOrder();
+        var clearWrap = document.getElementById('clearCartWrap');
+        if (clearWrap && cart.length > 0) {
+            clearWrap.innerHTML = '<a href="#" onclick="if(typeof clearStoreCart===\'function\'){clearStoreCart();} try{sessionStorage.removeItem(\'muslim_abaya_home_cart_active\');}catch(err){} if(typeof refreshCartBadgeUI===\'function\'){refreshCartBadgeUI([]);} else if(typeof window.updateCartBadge===\'function\'){window.updateCartBadge([]);} location.reload(); return false;">কার্ট খালি করুন</a>';
+        } else if (clearWrap) {
+            clearWrap.innerHTML = '';
+        }
+    });
+
+    window.addEventListener('DOMContentLoaded', function() {
+        displayOrder();
+        persistCart();
+        if (typeof pushTrackingEvent === 'function') {
+            pushTrackingEvent('InitiateCheckout', { currency: 'BDT' });
+        }
+    });
+</script>
+<div id="site-footer-mount"></div>
+<script src="cart-utils.js"></script>
+<script src="site-header.js"></script>
+<script src="site-footer.js"></script>
+</body>
+</html>

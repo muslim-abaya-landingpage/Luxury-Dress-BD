@@ -1,0 +1,324 @@
+/* Shared site footer — premium layout */
+.anz-footer {
+  background: linear-gradient(180deg, #fafafa 0%, #f5f5f5 100%);
+  border-top: 1px solid #e8e8e8;
+  font-family: "Hind Siliguri", "Inter", "Helvetica Neue", Arial, sans-serif;
+  color: #1a1a1a;
+  margin-top: 32px;
+  overflow-x: hidden;
+}
+
+.anz-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.3fr 0.8fr 1.05fr 1fr;
+  gap: 20px 22px;
+  padding: 36px 24px 28px;
+  box-sizing: border-box;
+  align-items: start;
+}
+
+.anz-col-brand,
+.anz-col-links,
+.anz-col-contact,
+.anz-col-newsletter {
+  min-width: 0;
+}
+
+.anz-logo {
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0 0 10px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: #111;
+}
+
+.anz-title {
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0 0 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #111;
+}
+
+.anz-text {
+  font-size: 15px;
+  line-height: 1.65;
+  color: #4a4a4a;
+  margin: 0;
+  max-width: 340px;
+}
+
+.anz-col-links ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.anz-col-links li {
+  margin-bottom: 6px;
+}
+
+.anz-col-links li:last-child {
+  margin-bottom: 0;
+}
+
+.anz-col-links a {
+  text-decoration: none;
+  color: #3d3d3d;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+  transition: color 0.2s ease;
+}
+
+.anz-col-links a:hover {
+  color: #000;
+}
+
+.contact-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 15px;
+  color: #3d3d3d;
+  line-height: 1.45;
+}
+
+.contact-row:last-of-type {
+  margin-bottom: 0;
+}
+
+.contact-row img {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  opacity: 0.9;
+}
+
+.anz-newsletter-note {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #5a5a5a;
+  margin: 0 0 10px;
+}
+
+.newsletter-form {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+  max-width: 300px;
+  box-sizing: border-box;
+}
+
+.newsletter-form input {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  margin: 0;
+  padding: 0 14px;
+  border: 1px solid #d4d4d4;
+  border-radius: 6px;
+  outline: none;
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 40px;
+  color: #111;
+  background: #fff;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.newsletter-form input::placeholder {
+  color: #9ca3af;
+}
+
+.newsletter-form input:focus {
+  border-color: #111;
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.06);
+}
+
+.newsletter-form button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  height: 40px;
+  margin: 0;
+  padding: 0 18px;
+  border: 1px solid #111;
+  border-radius: 6px;
+  background: #111;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: inherit;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  line-height: 1;
+  box-sizing: border-box;
+  vertical-align: middle;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.newsletter-form button:hover:not(:disabled) {
+  background: #fff;
+  color: #111;
+}
+
+.newsletter-form button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.newsletter-form button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.anz-socials {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.anz-social-link {
+  width: 34px;
+  height: 34px;
+  background: #111;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.anz-social-link:hover {
+  opacity: 0.82;
+  transform: translateY(-1px);
+}
+
+.anz-social-link svg {
+  width: 15px;
+  height: 15px;
+  fill: #fff;
+}
+
+.anz-bottom {
+  border-top: 1px solid #e5e5e5;
+  padding: 14px 24px;
+  text-align: center;
+  background: #f0f0f0;
+}
+
+.anz-bottom p {
+  margin: 0;
+  font-size: 13px;
+  color: #5c5c5c;
+  letter-spacing: 0.02em;
+}
+
+.subscribe-success {
+  display: none;
+  margin-top: 10px;
+  max-width: 300px;
+  padding: 12px 12px 12px 40px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(17, 24, 39, 0.05);
+  position: relative;
+  animation: subscribeFadeIn 0.35s ease;
+}
+
+.subscribe-success.show {
+  display: block;
+}
+
+.subscribe-success-icon {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #111;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.subscribe-success-title {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #111;
+}
+
+.subscribe-success-text {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+@keyframes subscribeFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1024px) {
+  .anz-container {
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 20px;
+    padding: 32px 20px 24px;
+  }
+
+  .anz-col-brand {
+    grid-column: 1 / -1;
+  }
+
+  .anz-text {
+    max-width: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .anz-container {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 28px 16px 22px;
+  }
+
+  .newsletter-form {
+    max-width: none;
+  }
+
+  .anz-logo {
+    font-size: 22px;
+  }
+
+  .anz-text,
+  .anz-col-links a,
+  .contact-row {
+    font-size: 14px;
+  }
+}
