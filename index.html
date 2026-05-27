@@ -847,6 +847,70 @@ color: #333;
 }
 .order-btn { width: 100%; padding: 16px; background: #000; color: #f5f5f5; border: none; border-radius: 0px; font-weight:bold; font-size: 20px; cursor: pointer; transition: 0.3s; }
 .order-btn:disabled { background: #fff; cursor: not-allowed; }
+
+.checkout-cta-card {
+    background: #fff;
+    border: 1px solid #e8e8e8;
+    border-radius: 10px;
+    padding: 20px 18px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+}
+.checkout-cta-title {
+    text-align: center;
+    color: #111;
+    margin: 0 0 10px;
+    font-weight: 800;
+    font-size: 20px;
+}
+.checkout-cta-note,
+.checkout-cta-hint {
+    font-size: 14px;
+    line-height: 1.55;
+    color: #555;
+    text-align: center;
+    margin: 0 0 14px;
+}
+.checkout-cta-hint {
+    font-size: 13px;
+    margin: 12px 0 16px;
+    color: #666;
+}
+.checkout-cta-btn {
+    width: 100%;
+    padding: 15px 16px;
+    background: #111;
+    color: #fff !important;
+    border: none;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 17px;
+    cursor: pointer;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    transition: background 0.2s ease;
+}
+.checkout-cta-btn:hover {
+    background: #333;
+}
+.checkout-cta-btn-secondary {
+    width: 100%;
+    padding: 12px 16px;
+    background: #f5f5f5;
+    color: #111;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    font-family: inherit;
+}
+.checkout-cta-btn-secondary:hover {
+    background: #ebebeb;
+}
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; }
 .success-card { background: #fff; width: 90%; max-width: 400px; padding: 30px; border-radius: 25px; text-align: center; animation: slideUp 0.4s ease-out; }
 @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -947,7 +1011,7 @@ body {
 input, select {
     margin-bottom: 8px !important;
 }
-.call-order-box a[href="#orderForm"] {
+.call-order-box a[href="checkout.html"] {
     background: linear-gradient(#000) !important;
     letter-spacing: 0.5px;
     font-size: 20px !important;
@@ -1181,7 +1245,7 @@ text-align: left;
         </div>
 
         <div class="lux-video-cta">
-            <a href="#orderForm" class="lux-btn lux-btn-primary">এখনই অর্ডার করুন</a>
+            <a href="checkout.html" class="lux-btn lux-btn-primary" onclick="if(typeof goToCheckout==='function'){goToCheckout(event);}">এখনই অর্ডার করুন</a>
             <a href="https://www.youtube.com/watch?v=Wyrw0gzKMqk" target="_blank" rel="noopener" class="lux-btn lux-btn-secondary">YouTube-এ ভিডিও দেখুন</a>
         </div>
     </div>
@@ -1484,43 +1548,20 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 </div>
 <div class="form-section">
-    <div class="order-card" id="orderForm">
-        <h3 style="text-align: center; color:#000; margin-bottom: 15px; font-weight: 800;">অর্ডারটি কনফার্ম করতে নিচের ফর্মটি পূরণ করুন</h3>
-
-        <form id="orderFormMain">
-            <input type="text" id="userName" placeholder="আপনার নাম" onfocus="trackInitiateCheckout()" required>
-            <input type="number" id="userPhone" placeholder="মোবাইল নম্বর" onfocus="trackInitiateCheckout()" required>
-            <input type="text" id="userAddr" placeholder="বিস্তারিত ঠিকানা" onfocus="trackInitiateCheckout()" required>
-            <label for="userArea" style="display:block; font-size:14px; font-weight:700; margin-bottom:6px; color:#333;">ডেলিভারি জেলা</label>
-	        <select id="userArea" onchange="calc()" required>
-                <option value="">জেলা নির্বাচন করুন</option>
-            </select>
-            <div class="summary-chart">
-                <div class="summary-row"><span>পণ্যের দাম:</span><span>৳ <span id="sub-total">0</span></span></div>
-                <div class="summary-row"><span>পরিমাণ:</span><span><span id="q-total">0</span> টি</span></div>
-                <div class="summary-row"><span>ডেলিভারি চার্জ:</span><span>৳ <span id="ship-charge">0</span></span></div>
-                <div class="summary-row total"><span>মোট বিল:</span><span>৳ <span id="grand-total">0</span></span></div>
-            </div>
-            <button type="submit" class="order-btn" id="submitBtn">
-                <i class="fas fa-shopping-bag"></i> এখনই অর্ডার করুন
-            </button>
-        </form>
-<div class="modal-overlay" id="successModal">
-    <div class="success-card">
-        <div class="success-icon">
-            <i class="fas fa-check-circle"></i>
+    <div class="order-card checkout-cta-card" id="orderForm">
+        <h3 class="checkout-cta-title">আপনার কার্ট</h3>
+        <p class="checkout-cta-note">পণ্য কার্টে যোগ করুন, তারপর চেকআউট পেজে ডেলিভারি তথ্য দিন ও অর্ডার সম্পন্ন করুন।</p>
+        <div class="summary-chart">
+            <div class="summary-row"><span>পণ্যের দাম:</span><span>৳ <span id="sub-total">0</span></span></div>
+            <div class="summary-row"><span>পরিমাণ:</span><span><span id="q-total">0</span> টি</span></div>
+            <div class="summary-row"><span>ডেলিভারি:</span><span id="ship-charge">—</span></div>
+            <div class="summary-row total"><span>পণ্যের মোট:</span><span>৳ <span id="grand-total">0</span></span></div>
         </div>
-
-        <h2>অর্ডার সফল হয়েছে!</h2>
-
-        <p>
-            ধন্যবাদ! আপনার অর্ডারটি আমরা পেয়েছি। 
-            আমাদের প্রতিনিধি খুব শীঘ্রই আপনার সাথে যোগাযোগ করবেন।
-        </p>
-
-        <button class="close-success-btn" onclick="closeModal()">
-		আমি আপনার অর্ডারটি কনফার্ম করছি।
-		</button>
+        <p class="checkout-cta-hint">৩টি পণ্যে ডেলিভারি ফ্রি • মোট বিল চেকআউটে নিশ্চিত হবে</p>
+        <button type="button" class="checkout-cta-btn" id="goCheckoutBtn" onclick="goToCheckout(event)">
+            <i class="fas fa-shopping-bag"></i> চেকআউটে যান
+        </button>
+        <button type="button" class="checkout-cta-btn-secondary" onclick="openHomeCartDrawer()">কার্ট দেখুন</button>
     </div>
 </div>
 
@@ -1528,48 +1569,6 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="cart-utils.js"></script>
 <script src="cart-drawer.js?v=20260528b"></script>
 <script>
-(function initDistrictSelect() {
-    var sel = document.getElementById('userArea');
-    if (!sel || sel.getAttribute('data-districts-built') === '1') return;
-    sel.setAttribute('data-districts-built', '1');
-    var sub = { 'গাজীপুর': 1, 'নারায়ণগঞ্জ': 1, 'নরসিংদী': 1, 'মুন্সীগঞ্জ': 1, 'মানিকগঞ্জ': 1 };
-    var all = ['ঢাকা', 'গাজীপুর', 'নারায়ণগঞ্জ', 'নরসিংদী', 'টাঙ্গাইল', 'কিশোরগঞ্জ', 'ময়মনসিংহ', 'শেরপুর', 'জামালপুর', 'নেত্রকোনা', 'মানিকগঞ্জ', 'মুন্সীগঞ্জ', 'মাদারীপুর', 'রাজবাড়ী', 'ফরিদপুর', 'গোপালগঞ্জ', 'শরীয়তপুর', 'চট্টগ্রাম', 'কুমিল্লা', 'চাঁদপুর', 'ফেনী', 'ব্রাহ্মণবাড়িয়া', 'নোয়াখালী', 'লক্ষ্মীপুর', 'কক্সবাজার', 'খাগড়াছড়ি', 'রাঙ্গামাটি', 'বান্দরবান', 'রাজশাহী', 'নওগাঁ', 'নাটোর', 'চাঁপাইনবাবগঞ্জ', 'পাবনা', 'সিরাজগঞ্জ', 'জয়পুরহাট', 'বগুড়া', 'রংপুর', 'দিনাজপুর', 'পঞ্চগড়', 'নীলফামারী', 'লালমনিরহাট', 'কুড়িগ্রাম', 'গাইবান্ধা', 'ঠাকুরগাঁও', 'সিলেট', 'সুনামগঞ্জ', 'হবিগঞ্জ', 'মৌলভীবাজার', 'খুলনা', 'বাগেরহাট', 'সাতক্ষীরা', 'নড়াইল', 'যশোর', 'মাগুরা', 'ঝিনাইদহ', 'কুষ্টিয়া', 'চুয়াডাঙ্গা', 'মেহেরপুর', 'বরিশাল', 'পটুয়াখালী', 'ভোলা', 'বরগুনা', 'ঝালকাঠি', 'পিরোজপুর'];
-    function feeFor(name) {
-        if (name === 'ঢাকা') return 80;
-        if (sub[name]) return 100;
-        return 150;
-    }
-    function addGroup(label) {
-        var og = document.createElement('optgroup');
-        og.label = label;
-        sel.appendChild(og);
-        return og;
-    }
-    function addOpt(parent, name, fee) {
-        var o = document.createElement('option');
-        o.value = String(fee);
-        o.setAttribute('data-district', name);
-        o.textContent = name;
-        parent.appendChild(o);
-    }
-    var dh = addGroup('ঢাকা');
-    var sd = addGroup('সাব-ঢাকা');
-    var ot = addGroup('ঢাকার বাহিরে');
-    var dhaka = [], suba = [], outa = [];
-    for (var i = 0; i < all.length; i++) {
-        var n = all[i];
-        var f = feeFor(n);
-        if (f === 80) dhaka.push(n);
-        else if (f === 100) suba.push(n);
-        else outa.push(n);
-    }
-    dhaka.sort(function (a, b) { return a.localeCompare(b, 'bn'); });
-    suba.sort(function (a, b) { return a.localeCompare(b, 'bn'); });
-    outa.sort(function (a, b) { return a.localeCompare(b, 'bn'); });
-    dhaka.forEach(function (n) { addOpt(dh, n, 80); });
-    suba.forEach(function (n) { addOpt(sd, n, 100); });
-    outa.forEach(function (n) { addOpt(ot, n, 150); });
-})();
 let annIdx = 0;
 const annSlides = document.querySelectorAll('.ann-slide');
 
@@ -1894,20 +1893,40 @@ function calc(syncCart) {
             q += qty;
         }
     });
-    let areaValue = parseInt(document.getElementById('userArea').value) || 0;
-    let shipCharge = (q >= 3) ? 0 : areaValue; 
-    if(q === 0) shipCharge = 0;
+    var shipEl = document.getElementById('ship-charge');
     document.getElementById('sub-total').innerText = subtotal;
     document.getElementById('q-total').innerText = q;
-    updateCartIcon(q); 
-
-    if(q >= 3 && q > 0) {
-        document.getElementById('ship-charge').innerHTML = `<span style="color:green; font-weight:bold;">ফ্রি</span>`;
-    } else {
-        document.getElementById('ship-charge').innerText = shipCharge;
+    updateCartIcon(q);
+    if (shipEl) {
+        if (q === 0) {
+            shipEl.textContent = '—';
+        } else if (q >= 3) {
+            shipEl.innerHTML = '<span style="color:green;font-weight:bold;">ফ্রি</span>';
+        } else {
+            shipEl.textContent = 'চেকআউটে নির্ধারিত';
+        }
     }
-    document.getElementById('grand-total').innerText = q > 0 ? (subtotal + shipCharge) : 0;
+    document.getElementById('grand-total').innerText = q > 0 ? subtotal : 0;
     if (syncCart !== false) syncHomeCartToCheckout();
+}
+function goToCheckout(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    var q = 0;
+    products.forEach(function (p) {
+        q += getCartQty(p.id);
+    });
+    if (q === 0) {
+        alert('অনুগ্রহ করে অন্তত একটি পণ্য কার্টে যোগ করুন।');
+        return;
+    }
+    syncHomeCartToCheckout();
+    trackInitiateCheckout();
+    window.location.href = 'checkout.html';
+}
+function openHomeCartDrawer() {
+    var btn = document.querySelector('[data-cart-trigger]');
+    if (btn) btn.click();
+    else if (typeof window.openCartDrawer === 'function') window.openCartDrawer();
 }
 function updateCartIcon(total) {
     const cartBadge = document.getElementById('cart-count');
@@ -1919,9 +1938,6 @@ function updateCartIcon(total) {
             cartBadge.style.display = 'none';
         }
     }
-}
-function closeModal() {
-    window.location.href = 'thank-you.html'; 
 }
 function changeProduct(dir) {
     currentIdx += dir;
@@ -1943,83 +1959,6 @@ function showToast() {
         toast.classList.remove('show');
     }, 4000);
 }
-document.getElementById('orderFormMain').onsubmit = function(e) {
-    e.preventDefault();
-    
-    const qTotal = parseInt(document.getElementById('q-total').innerText);
-    const gTotal = document.getElementById('grand-total').innerText;
-    
-    if (qTotal === 0) {
-        alert('অনুগ্রহ করে অন্তত একটি পণ্য ব্যাগে যুক্ত করুন।');
-        return;
-    }
-    const submitBtn = document.getElementById('submitBtn');
-    submitBtn.disabled = true;
-    submitBtn.innerText = "⏳ আপনার অর্ডার প্রসেস করা হচ্ছে… অনুগ্রহ করে অপেক্ষা করুন ✨";
-    let productDetails = [];
-    products.forEach(p => {
-        if (cart[p.id] > 0) {
-            productDetails.push(`${p.name} (${cart[p.id]})`);
-        }
-    });
-    const itemsLabel = productDetails.join(', ');
-    var eventId = 'order_' + Date.now();
-    if (typeof saveOrderTracking === 'function') {
-        saveOrderTracking({
-            first_name: document.getElementById('userName').value.trim(),
-            phone: String(document.getElementById('userPhone').value).trim(),
-            order_value: parseFloat(gTotal) || 0,
-            order_items: itemsLabel,
-            transaction_id: eventId,
-            currency: 'BDT'
-        });
-    }
-    if (typeof pushPurchaseCompleteEvent === 'function') {
-        pushPurchaseCompleteEvent();
-    } else {
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({
-            'event': 'purchase_complete',
-            'order_value': parseFloat(gTotal),
-            'order_items': itemsLabel,
-            'currency': 'BDT',
-            'transaction_id': eventId
-        });
-    }
-    const orderScriptURL = 'https://script.google.com/macros/s/AKfycby3rel9pZo-Gpp_zHPGOnxG6ufHF5sJs6Y221O8OhnynUNndpLzBU4ajiglh1Q3l-8/exec';
-    var areaSel = document.getElementById('userArea');
-    var areaOpt = areaSel.options[areaSel.selectedIndex];
-    var districtParam = areaOpt.getAttribute('data-district') || areaOpt.textContent.split('(')[0].trim();
-    const formData = new URLSearchParams();
-    formData.append('Name', document.getElementById('userName').value.trim());
-    formData.append('Phone', String(document.getElementById('userPhone').value).trim());
-    formData.append('Address', document.getElementById('userAddr').value.trim());
-    formData.append('District', districtParam);
-    formData.append('Quantity', String(qTotal));
-    formData.append('Design', itemsLabel);
-    formData.append('Total', String(gTotal));
-    formData.append('EventID', 'order_' + Date.now());
-
-    fetch(orderScriptURL, { 
-        method: 'POST', 
-        body: formData,
-        mode: 'no-cors'
-    })
-    .then(() => {
-        document.getElementById('successModal').style.display = 'flex';
-        submitBtn.disabled = false;
-        submitBtn.innerText = "এখনই অর্ডার করুন";
-        document.getElementById('orderFormMain').reset();
-        cart = {};
-        renderSidebar();
-        calc();
-    })
-    .catch(error => {
-        alert('দুঃখিত, সংযোগ সমস্যার কারণে অর্ডারটি নেওয়া সম্ভব হয়নি।');
-        submitBtn.disabled = false;
-        submitBtn.innerText = "এখনই অর্ডার করুন";
-    });
-};
 function removeFromCart(productId) {
     if (getCartQty(productId) > 0) {
         cart[productId] = 0;
