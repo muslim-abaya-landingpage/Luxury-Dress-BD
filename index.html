@@ -409,90 +409,99 @@ color: #333;
     margin: 0;
     font-family: 'Hind Siliguri', sans-serif;
 }
-.product-actions {
+/* Anzaar-style product card actions (homepage grid) */
+.product-info {
+    padding: 8px 4px 4px;
+    background: #fff;
+}
+
+.product-meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.product-card-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #222;
+    line-height: 1.35;
+    flex: 1;
+    min-width: 0;
+}
+
+.product-card-price {
+    font-size: 13px;
+    font-weight: 700;
+    color: #111;
+    white-space: nowrap;
+}
+
+.product-actions-anzaar,
+.card-actions-anzaar {
     display: flex;
     flex-direction: column;
-    gap:3px;
-    margin-top:3px;    
-    padding:0px;
-    padding-bottom:3px;
+    gap: 6px;
+    width: 100%;
 }
-.btn-cart {
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+
+.product-actions-row,
+.card-actions-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
 }
-.btn-cart, .btn-buy {
-    font-size: 11px !important;
-    padding: 14px 2px !important;
-    text-align: center;
-    font-weight:700
-}
-.action-btn {
+
+.anzaar-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 12px 1px;
-    font-size: 18px;
-    font-weight: 500;
+    min-height: 42px;
+    padding: 10px 6px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: inherit;
+    text-align: center;
     text-decoration: none;
+    border-radius: 0;
+    border: 1px solid #e5e5e5;
     cursor: pointer;
-    border-radius: 1px;
-    border: none;
-    transition: 0.5s;
+    box-sizing: border-box;
+    transition: background 0.15s ease, color 0.15s ease;
+    white-space: nowrap;
 }
-.btn-cart {
-    background: #000;
-    color: #495057;
-    font-weight: 550
+
+.anzaar-btn-cart {
+    background: #f5f5f5;
+    color: #111;
 }
-.btn-buy {
-    background: #000;
+
+.anzaar-btn-cart.is-active,
+.anzaar-btn-cart:hover {
+    background: #ebebeb;
+}
+
+.anzaar-btn-buy {
+    background: #111;
     color: #fff;
-    font-weight: 600;
+    border-color: #111;
 }
-.btn-msg-full {
-    background: #e9ecef;
-    color: #495057;
+
+.anzaar-btn-buy:hover {
+    background: #333;
+    border-color: #333;
+}
+
+.anzaar-btn-msg {
+    background: #f5f5f5;
+    color: #111;
     width: 100%;
-    font-weight: 600;
-}
-.action-btn:hover {
-    opacity: 0.9;
-    font-weight: 600;
-}
-.action-btn i {
-    font-size: 60px;
-    color: #495057;
-    font-weight: 600;
-}
-.btn-cart:hover {
-    background: #e2e8f0;
-    font-weight: 600;
-}
-.btn-msg {
-    background: #7c3aed;
-    color: #495057;
-    font-weight: 600;
-    font-size: 18px;
-
-}
-.btn-msg:hover {
-    background: #6d28d9;
-    font-weight: 550;
-    font-size: 18px;
-}
-.btn-cart {
-    background: #f1f5f9;
-    color: #495057;
-    border: 1px solid #e2e8f0;
-    font-size: 18px;
 }
 
-.btn-cart:hover {
-    background: #000;
-    font-weight: 600;
-    font-size: 20px;
+.anzaar-btn-msg:hover {
+    background: #ebebeb;
 }
 .item-card.in-cart {
     box-shadow: 0 0 0 2px #111;
@@ -735,7 +744,7 @@ color: #333;
     width: 100% !important; 
     min-width: 20px!important;
     background: #fff; 
-    border-radius: 50px; 
+    border-radius: 0; 
     border: 0px solid #f0f0f0;
     padding: 0px; 
     text-align: center; 
@@ -1796,26 +1805,21 @@ card.innerHTML = `
         <img src="${thumbImg}" onclick="manualSelect(${i}, '${p.id}')" alt="${p.name}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg';" style="width: 100%; display: block; border-radius:20px;">
     </div>
 
-    <div class="product-info" style="padding: 5px 5px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <span style="font-size: 14px; color: #444; font-weight: 600;">${p.name}</span>
-	    <span style="font-size: 14px; color: #000; font-weight: 800;">দাম: ৳${p.price}</span>
+    <div class="product-info">
+        <div class="product-meta-row">
+            <span class="product-card-name">${p.name}</span>
+            <span class="product-card-price">৳${p.price}</span>
         </div>
-
-        <div class="product-actions">
-            <div class="top-actions" style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-<button type="button" class="action-btn btn-cart${inCart ? ' btn-cart-active' : ''}" 
-onclick="toggleProductCart('${p.id}')" 
-style="padding: 8px 2px; font-size: 11px; white-space: nowrap;">
-    ${inCart ? 'কার্ট থেকে সরান' : 'Add to Cart'}
-</button>
-    <button type="button" class="action-btn btn-buy" onclick="buyNowFromCard('${p.id}')" style="width: 100%; padding: 8px 2px; font-size: 11px;">
-        Buy Now
-    </button>
+        <div class="product-actions-anzaar">
+            <div class="product-actions-row">
+                <button type="button" class="anzaar-btn anzaar-btn-cart${inCart ? ' is-active' : ''}"
+                    onclick="toggleProductCart('${p.id}')">
+                    ${inCart ? 'Remove' : 'Add to Cart'}
+                </button>
+                <button type="button" class="anzaar-btn anzaar-btn-buy" onclick="buyNowFromCard('${p.id}')">Buy Now</button>
             </div>
-            <a href="https://wa.me/+8801971642683" class="action-btn btn-msg-full" style="display: block; text-decoration: none; margin-top: 5px; text-align: center; padding: 8px; font-size: 12px;">
-                Send Message
-            </a>
+            <a href="https://wa.me/8801971642683?text=${encodeURIComponent(p.name + ' অর্ডার করতে চাই')}"
+                target="_blank" rel="noopener" class="anzaar-btn anzaar-btn-msg">Send Message</a>
         </div>
     </div>
 `;
@@ -2384,9 +2388,10 @@ html, body {
         font-size: 13px !important;
         line-height: 1.35 !important;
     }
-    .product-actions .action-btn {
-        padding: 9px 4px !important;
+    .anzaar-btn {
         font-size: 11px !important;
+        min-height: 40px !important;
+        padding: 9px 4px !important;
     }
 }
 

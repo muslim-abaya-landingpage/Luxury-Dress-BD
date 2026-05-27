@@ -371,15 +371,13 @@ function buildProductCard(p, idx, waLink, detailMode) {
     "</div>" +
     "<select class='card-size-select card-size-mobile' data-size-idx='" + idx + "' aria-hidden='true' tabindex='-1'>" + sizeOptions + "</select>" +
 
-    '<div class="card-bar card-bar-anzaar">' +
-    '<button type="button" class="btn-cart-icon" data-product-idx="' + idx + '" data-action="add" aria-label="কার্টে যোগ">' +
-    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M6 6L5 3H2"/></svg></button>' +
-    "<a href='" + waLink + "?text=" + encodeURIComponent(p.name + " অর্ডার করতে চাই") +
-    "' target='_blank' rel='noopener' class='msg-btn btn-send-msg'>Send Message</a>" +
+    '<div class="card-actions-anzaar">' +
+    '<div class="card-actions-row">' +
+    '<button type="button" class="anzaar-btn anzaar-btn-cart" data-product-idx="' + idx + '" data-action="add">Add to Cart</button>' +
+    '<button type="button" class="anzaar-btn anzaar-btn-buy" data-product-idx="' + idx + '" data-action="buy-now">Buy Now</button>' +
     "</div>" +
-    '<div class="card-bar card-bar-split card-bar-desktop">' +
-    '<button type="button" class="msg-btn btn-add-cart" data-product-idx="' + idx + '" data-action="add">কার্টে যোগ</button>' +
-    '<button type="button" class="msg-btn btn-buy-now" data-product-idx="' + idx + '" data-action="buy-now">অর্ডার করুন</button>' +
+    "<a href='" + waLink + "?text=" + encodeURIComponent(p.name + " অর্ডার করতে চাই") +
+    "' target='_blank' rel='noopener' class='anzaar-btn anzaar-btn-msg'>Send Message</a>" +
     "</div>" +
 
     "</div>" +
