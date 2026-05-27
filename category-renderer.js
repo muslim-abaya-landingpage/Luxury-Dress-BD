@@ -158,6 +158,11 @@ function buildShopSidebar(categoryKey, products) {
 
     "<aside class='shop-sidebar'>" +
 
+    "<div class='shop-filter-head'>" +
+    "<strong>Filter</strong>" +
+    "<button type='button' class='shop-filter-close' id='shopFilterClose' aria-label='Close filters'>&times;</button>" +
+    "</div>" +
+
     "<a class='sidebar-home' href='index.html'>&lsaquo; Home</a>" +
 
     "<nav class='shop-cats' id='shopSubcats'>" +
@@ -359,13 +364,20 @@ function buildProductCard(p, idx, waLink, detailMode) {
 
     "</div>" +
 
-    '<div class="card-extra">' +
+    '<div class="card-extra card-extra-desktop">' +
     "<p class='card-fabric'>ফেব্রিক্স: " + fabricText + "</p>" +
     (p.detailNote ? "<p class='card-length'>" + escapeHtml(p.detailNote) + "</p>" : "") +
     "<label class='card-size-label'>সাইজ: <select class='card-size-select' data-size-idx='" + idx + "'>" + sizeOptions + "</select></label>" +
     "</div>" +
+    "<select class='card-size-select card-size-mobile' data-size-idx='" + idx + "' aria-hidden='true' tabindex='-1'>" + sizeOptions + "</select>" +
 
-    '<div class="card-bar card-bar-split">' +
+    '<div class="card-bar card-bar-anzaar">' +
+    '<button type="button" class="btn-cart-icon" data-product-idx="' + idx + '" data-action="add" aria-label="কার্টে যোগ">' +
+    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M6 6L5 3H2"/></svg></button>' +
+    "<a href='" + waLink + "?text=" + encodeURIComponent(p.name + " অর্ডার করতে চাই") +
+    "' target='_blank' rel='noopener' class='msg-btn btn-send-msg'>Send Message</a>" +
+    "</div>" +
+    '<div class="card-bar card-bar-split card-bar-desktop">' +
     '<button type="button" class="msg-btn btn-add-cart" data-product-idx="' + idx + '" data-action="add">কার্টে যোগ</button>' +
     '<button type="button" class="msg-btn btn-buy-now" data-product-idx="' + idx + '" data-action="buy-now">অর্ডার করুন</button>' +
     "</div>" +
@@ -493,9 +505,23 @@ function renderCategory(categoryKey) {
 
     breadcrumb +
 
+    "<div class='shop-mobile-toolbar'>" +
+    "<button type='button' class='shop-filter-open' id='shopFilterOpen' aria-expanded='false' aria-controls='shopFilterPanel'>" +
+    "<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' aria-hidden='true'><path d='M4 6h16M7 12h10M10 18h4'/></svg>" +
+    "Filter</button>" +
+    "<label class='shop-sort-wrap'>Sort By" +
+    "<select id='shopSort' class='shop-sort-select' aria-label='Sort products'>" +
+    "<option value='default'>Default</option>" +
+    "<option value='price-asc'>Price: Low to High</option>" +
+    "<option value='price-desc'>Price: High to Low</option>" +
+    "<option value='name-asc'>Name: A-Z</option>" +
+    "</select></label></div>" +
+
+    "<div class='shop-filter-backdrop' id='shopFilterBackdrop' hidden></div>" +
+
     "<div class='shop-layout'>" +
 
-    sidebar +
+    sidebar.replace("class='shop-sidebar'", "class='shop-sidebar' id='shopFilterPanel'") +
 
     "<section class='shop-main'>" +
 
@@ -798,7 +824,10 @@ function renderCategory(categoryKey) {
     var idx = parseInt(actionEl.getAttribute("data-product-idx"), 10);
 
     if (isNaN(idx) || !products[idx]) return;
-    var sizeEl = root.querySelector("[data-size-idx='" + idx + "']");
+    var sizeEl =
+      root.querySelector(".card-extra-desktop [data-size-idx='" + idx + "']") ||
+      root.querySelector(".card-size-mobile[data-size-idx='" + idx + "']") ||
+      root.querySelector("[data-size-idx='" + idx + "']");
     var selectedSize = sizeEl ? sizeEl.value : "50";
 
     if (actionEl.getAttribute("data-action") === "add") {
@@ -815,6 +844,77 @@ function renderCategory(categoryKey) {
 
   if (typeof afterCartMutation === "function") {
     afterCartMutation(typeof loadStoreCart === "function" ? loadStoreCart() : []);
+  }
+
+  var filterOpen = document.getElementById("shopFilterOpen");
+  var filterPanel = document.getElementById("shopFilterPanel");
+  var filterBackdrop = document.getElementById("shopFilterBackdrop");
+
+  function setFilterDrawer(open) {
+    if (!filterPanel) return;
+    document.body.classList.toggle("shop-filter-open", open);
+    filterPanel.classList.toggle("is-open", open);
+    if (filterBackdrop) {
+      filterBackdrop.hidden = !open;
+      filterBackdrop.classList.toggle("is-visible", open);
+    }
+    if (filterOpen) filterOpen.setAttribute("aria-expanded", open ? "true" : "false");
+  }
+
+  if (filterOpen) {
+    filterOpen.addEventListener("click", function () {
+      setFilterDrawer(!document.body.classList.contains("shop-filter-open"));
+    });
+  }
+  var filterClose = document.getElementById("shopFilterClose");
+  if (filterClose) {
+    filterClose.addEventListener("click", function () {
+      setFilterDrawer(false);
+    });
+  }
+  if (filterBackdrop) {
+    filterBackdrop.addEventListener("click", function () {
+      setFilterDrawer(false);
+    });
+  }
+  if (filterPanel) {
+    filterPanel.addEventListener("click", function (ev) {
+      if (ev.target.closest(".subcat-link, [data-filter-all], .color-swatch")) {
+        if (window.matchMedia("(max-width: 960px)").matches) {
+          setFilterDrawer(false);
+        }
+      }
+    });
+  }
+
+  var sortSelect = document.getElementById("shopSort");
+  if (sortSelect) {
+    sortSelect.addEventListener("change", function () {
+      var grid = document.getElementById("productGrid");
+      if (!grid) return;
+      var cards = Array.prototype.slice.call(grid.querySelectorAll(".premium-card:not(.premium-card-detail)"));
+      var mode = sortSelect.value;
+      cards.sort(function (a, b) {
+        var ia = parseInt(a.getAttribute("data-product-idx"), 10);
+        var ib = parseInt(b.getAttribute("data-product-idx"), 10);
+        var pa = products[ia];
+        var pb = products[ib];
+        if (!pa || !pb) return 0;
+        if (mode === "price-asc") {
+          return (parseInt(pa.price, 10) || 0) - (parseInt(pb.price, 10) || 0);
+        }
+        if (mode === "price-desc") {
+          return (parseInt(pb.price, 10) || 0) - (parseInt(pa.price, 10) || 0);
+        }
+        if (mode === "name-asc") {
+          return String(pa.name || "").localeCompare(String(pb.name || ""));
+        }
+        return ia - ib;
+      });
+      cards.forEach(function (card) {
+        grid.appendChild(card);
+      });
+    });
   }
 }
 
