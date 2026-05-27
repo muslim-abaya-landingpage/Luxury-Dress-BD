@@ -9,53 +9,70 @@
     })(window,document,'script','dataLayer','GTM-ML7RL6BR');</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>চেকআউট - MUSLIM ABAYA</title>
-    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="site-header.css">
     <link rel="stylesheet" href="site-footer.css">
     <style>
-        :root { 
-            --primary-color: #1a1a1a; 
-            --accent: #f28c1b;
-            --accent-dark: #de7f16;
-            --border: #e8e8e8;
-            --text: #333;
-            --text-muted: #6b7280;
+        :root {
+            --ink: #111111;
+            --ink-soft: #3d3d3d;
+            --muted: #6b6b6b;
+            --line: #e6e2dc;
+            --bg: #f4f2ef;
+            --card: #ffffff;
+            --gold: #b8952e;
+            --gold-soft: #f8f3e8;
+            --shadow: 0 12px 40px rgba(17, 17, 17, 0.06);
+            --shadow-sm: 0 4px 16px rgba(17, 17, 17, 0.05);
+            --radius: 14px;
         }
-        body { 
-            font-family: 'Hind Siliguri', 'Segoe UI', sans-serif; 
-            background-color: #f5f5f5; 
-            margin: 0; 
-            padding: 0 0 24px; 
-            color: var(--text);
+        body {
+            font-family: 'Hind Siliguri', 'Segoe UI', sans-serif;
+            background: linear-gradient(180deg, #faf9f7 0%, var(--bg) 120px);
+            margin: 0;
+            padding: 0 0 32px;
+            color: var(--ink-soft);
             font-size: 15px;
-            line-height: 1.5;
+            line-height: 1.55;
             -webkit-font-smoothing: antialiased;
         }
-        .container { 
-            max-width: 1140px; 
-            margin: 0 auto; 
-            padding: 16px 14px; 
+        .container {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 20px 16px 28px;
         }
         .checkout-page-head {
             text-align: center;
-            margin: 8px 0 20px;
+            margin: 4px 0 28px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--line);
         }
         .checkout-page-head h1 {
-            margin: 0 0 6px;
-            font-size: 28px;
+            margin: 0 0 8px;
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(30px, 5vw, 40px);
             font-weight: 700;
-            color: #111;
+            color: var(--ink);
+            letter-spacing: 0.02em;
+        }
+        .checkout-subtitle {
+            margin: 0 0 10px;
+            font-size: 15px;
+            color: var(--muted);
+            font-weight: 500;
         }
         .checkout-breadcrumb {
-            font-size: 14px;
-            color: var(--text-muted);
+            font-size: 13px;
+            color: var(--muted);
+            letter-spacing: 0.02em;
         }
         .checkout-breadcrumb a {
-            color: var(--text-muted);
+            color: var(--muted);
             text-decoration: none;
+            transition: color 0.2s ease;
         }
-        .checkout-breadcrumb a:hover { color: var(--accent); }
-        .order-summary { 
+        .checkout-breadcrumb a:hover { color: var(--ink); }
+        .order-summary {
             background: transparent;
             padding: 0;
             margin: 0;
@@ -65,13 +82,19 @@
         .order-review-toolbar {
             display: flex;
             justify-content: flex-end;
-            margin-bottom: 10px;
+            margin: -4px 0 12px;
         }
         .order-review-toolbar a {
-            color: #dc2626;
+            color: #9a3412;
             font-size: 13px;
             font-weight: 600;
             text-decoration: none;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: background 0.2s ease;
+        }
+        .order-review-toolbar a:hover {
+            background: #fef2f2;
         }
         .gb-order-list {
             display: flex;
@@ -80,21 +103,22 @@
         }
         .gb-order-row {
             display: grid;
-            grid-template-columns: 72px 1fr auto auto 40px;
+            grid-template-columns: 76px 1fr auto auto 44px;
             align-items: center;
             gap: 14px;
-            padding: 14px 0;
-            border-bottom: 1px solid var(--border);
+            padding: 16px 0;
+            border-bottom: 1px solid var(--line);
         }
         .gb-order-row:last-child { border-bottom: none; }
         .gb-order-thumb {
-            width: 64px;
-            height: 64px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
+            width: 72px;
+            height: 88px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
             overflow: hidden;
-            background: #fff;
+            background: #fafafa;
             flex-shrink: 0;
+            box-shadow: var(--shadow-sm);
         }
         .gb-order-thumb img {
             width: 100%;
@@ -114,69 +138,74 @@
         .gb-order-name {
             font-size: 15px;
             font-weight: 600;
-            color: #111;
-            line-height: 1.4;
+            color: var(--ink);
+            line-height: 1.45;
             margin: 0;
         }
         .gb-order-qty {
             display: inline-flex;
             align-items: center;
-            border: 1px solid #d1d5db;
-            border-radius: 4px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
             overflow: hidden;
-            background: #fff;
+            background: #fafafa;
         }
         .gb-order-qty button {
-            width: 32px;
-            height: 32px;
+            width: 34px;
+            height: 34px;
             border: none;
-            background: #fff;
+            background: transparent;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 17px;
             line-height: 1;
-            color: #333;
+            color: var(--ink);
             padding: 0;
+            transition: background 0.15s ease;
         }
-        .gb-order-qty button:hover { background: #f3f4f6; }
+        .gb-order-qty button:hover { background: #eee; }
         .gb-order-qty span {
-            min-width: 36px;
+            min-width: 38px;
             text-align: center;
-            font-size: 15px;
-            font-weight: 600;
-            border-left: 1px solid #d1d5db;
-            border-right: 1px solid #d1d5db;
-            padding: 4px 6px;
+            font-size: 14px;
+            font-weight: 700;
+            border-left: 1px solid var(--line);
+            border-right: 1px solid var(--line);
+            padding: 6px 8px;
         }
         .gb-order-price {
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 700;
-            color: #111;
+            color: var(--ink);
             white-space: nowrap;
-            min-width: 72px;
+            min-width: 80px;
             text-align: right;
         }
         .gb-order-delete {
-            width: 36px;
-            height: 36px;
-            border: none;
-            border-radius: 4px;
-            background: #fee2e2;
-            color: #dc2626;
+            width: 40px;
+            height: 40px;
+            border: 1px solid #f5d0d0;
+            border-radius: 10px;
+            background: #fff;
+            color: #b91c1c;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 0;
             flex-shrink: 0;
+            transition: background 0.2s ease, border-color 0.2s ease;
         }
-        .gb-order-delete:hover { background: #fecaca; }
+        .gb-order-delete:hover {
+            background: #fef2f2;
+            border-color: #fecaca;
+        }
         .gb-order-delete svg { width: 18px; height: 18px; }
         .summary-item {
             display: flex;
             justify-content: space-between;
             margin-bottom: 10px;
             font-size: 15px;
-            color: var(--text);
+            color: var(--ink-soft);
         }
         .summary-item strong { font-weight: 700; color: #111; }
         @media (max-width: 640px) {
@@ -191,50 +220,78 @@
             .gb-order-price { grid-column: 3; font-size: 14px; }
             .gb-order-delete { grid-column: 4; grid-row: 1; align-self: start; }
         }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; color: #444; font-size: 14px; }
-        input, textarea, select { 
-            width: 100%; 
-            padding: 14px; 
-            border: 1px solid #ddd; 
-            border-radius: 10px; 
-            box-sizing: border-box; 
+        .form-group { margin-bottom: 18px; }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--ink);
+            font-size: 13px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            box-sizing: border-box;
             font-size: 15px;
-            transition: 0.3s;
-        }
-        input:focus, select:focus, textarea:focus { border-color: var(--accent); outline: none; background: #fff; }
-        .total-row {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 15px;
-            padding-top: 10px;
-            border-top: 1px dashed #ccc;
-            font-weight: bold;
-            font-size: 18px;
-            color: var(--primary-color);
-        }
-        .btn-confirm { 
-            background-color: var(--accent); 
-            color: white; 
-            border: none; 
-            width: 100%; 
-            padding: 16px; 
-            font-size: 17px; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            transition: 0.2s; 
-            font-weight: 700; 
-            margin-top: 15px;
             font-family: inherit;
-            letter-spacing: 0.03em;
+            background: #fcfcfb;
+            color: var(--ink);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
         }
-        .btn-confirm:hover { background-color: var(--accent-dark); }
-        .btn-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
+        input::placeholder, textarea::placeholder {
+            color: #9ca3af;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--ink);
+            outline: none;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.06);
+        }
+        .btn-confirm {
+            background: var(--ink);
+            color: #fff;
+            border: none;
+            width: 100%;
+            padding: 17px 20px;
+            font-size: 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.15s ease;
+            font-weight: 700;
+            margin-top: 8px;
+            font-family: inherit;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+        .btn-confirm:hover {
+            background: #2a2a2a;
+            transform: translateY(-1px);
+        }
+        .btn-confirm:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            transform: none;
+        }
         .checkout-grid {
             display: grid;
-            grid-template-columns: 1.15fr 0.85fr;
-            gap: 20px;
+            grid-template-columns: minmax(0, 1.1fr) minmax(300px, 0.9fr);
+            gap: 24px;
             align-items: start;
+        }
+        .checkout-aside {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+        @media (min-width: 901px) {
+            .checkout-aside {
+                position: sticky;
+                top: 100px;
+            }
         }
         .top-cat-bar {
             background: #062733;
@@ -261,34 +318,50 @@
             color: #fff;
         }
         .card-block {
-            background: #fff;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 18px 20px;
-            margin-bottom: 16px;
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 22px 22px;
+            margin-bottom: 18px;
+            box-shadow: var(--shadow-sm);
+        }
+        .card-block-premium {
+            border-color: #ddd5c4;
+            background: linear-gradient(180deg, #fff 0%, #fdfcf9 100%);
+        }
+        .card-block-muted {
+            background: #faf9f7;
+            border-style: dashed;
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--muted);
         }
         .section-label {
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 18px;
-            margin: 0 0 16px 0;
-            color: #111;
+            font-size: 17px;
+            margin: 0 0 18px 0;
+            color: var(--ink);
             font-weight: 700;
             font-family: inherit;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--line);
         }
         .section-label::before {
             content: '';
-            width: 4px;
-            height: 20px;
-            background: var(--accent);
+            width: 3px;
+            height: 18px;
+            background: linear-gradient(180deg, var(--gold) 0%, #8f7424 100%);
             border-radius: 2px;
             flex-shrink: 0;
         }
         .section-label .label-meta {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
-            color: var(--text-muted);
+            color: var(--muted);
+            text-transform: none;
+            letter-spacing: 0;
         }
         .section-label > span,
         .section-label .section-label-inner {
@@ -306,39 +379,98 @@
             margin-bottom: 10px;
         }
         .pm-option {
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            padding: 10px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 12px 14px;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             font-size: 14px;
             font-weight: 600;
-            background: #fff;
+            background: #fcfcfb;
+            transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
         }
-        .pm-option input { width: auto; margin: 0; }
-        .pm-option.active { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+        .pm-option input { width: auto; margin: 0; accent-color: var(--ink); }
+        .pm-option:hover { border-color: #ccc; background: #fff; }
+        .pm-option.active {
+            border-color: var(--ink);
+            background: var(--gold-soft);
+            box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.08);
+        }
         .payment-panel {
-            background: #fafafa;
-            border: 1px solid #eee;
+            background: var(--gold-soft);
+            border: 1px solid #e8dfc8;
             border-radius: 10px;
-            padding: 10px;
+            padding: 12px 14px;
             font-size: 13px;
-            line-height: 1.5;
+            line-height: 1.55;
+            margin-bottom: 12px;
+            color: var(--ink-soft);
+        }
+        .payment-fields { display: grid; gap: 10px; }
+        .payment-fields input, .payment-fields select {
+            font-size: 14px;
+            padding: 12px 14px;
+            margin-bottom: 0;
+        }
+        .coupon-row { display: flex; gap: 10px; }
+        .coupon-row input { flex: 1; }
+        .coupon-btn {
+            border: 1px solid var(--ink);
+            background: #fff;
+            color: var(--ink);
+            border-radius: 10px;
+            padding: 0 18px;
+            cursor: pointer;
+            font-weight: 700;
+            font-family: inherit;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+        .coupon-btn:hover {
+            background: var(--ink);
+            color: #fff;
+        }
+        .order-total-box {
+            background: var(--ink);
+            color: #fff;
+            border-radius: 12px;
+            padding: 18px 18px;
+            margin-top: 8px;
+        }
+        .order-total-box .summary-item {
+            color: rgba(255, 255, 255, 0.85);
             margin-bottom: 10px;
         }
-        .payment-fields { display: grid; gap: 8px; }
-        .payment-fields input, .payment-fields select { font-size: 14px; padding: 10px; margin-bottom: 0; }
-        .coupon-row { display:flex; gap:8px; }
-        .coupon-row input { flex:1; }
-        .coupon-btn {
-            border:1px solid #d1d5db;
-            background:#fff;
-            border-radius:8px;
-            padding:0 14px;
-            cursor:pointer;
-            font-weight:700;
+        .order-total-box .summary-item strong {
+            color: #fff;
+        }
+        .order-total-box .summary-item.total-final {
+            font-size: 20px;
+            margin: 14px 0 0;
+            padding-top: 14px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .order-total-box .summary-item.total-final strong {
+            font-size: 22px;
+            color: var(--gold);
+        }
+        .checkout-trust {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 14px;
+        }
+        .checkout-trust span {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #f3f1ed;
+            color: var(--muted);
+            border: 1px solid var(--line);
         }
         .terms-box {
             margin-top: 10px;
@@ -356,25 +488,45 @@
             right: 0;
             bottom: 0;
             z-index: 9999;
-            background: #fff;
-            border-top: 1px solid #e5e7eb;
-            padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--line);
+            padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+            box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.08);
         }
         .sticky-order-btn {
             width: 100%;
-            background: var(--accent);
+            background: var(--ink);
             border: none;
             color: #fff;
             border-radius: 10px;
-            padding: 12px;
-            font-size: 16px;
+            padding: 14px;
+            font-size: 15px;
             font-weight: 800;
             cursor: pointer;
+            font-family: inherit;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .empty-cart-msg {
+            text-align: center;
+            padding: 28px 16px;
+            background: var(--gold-soft);
+            border-radius: 12px;
+            border: 1px dashed #dcc9a0;
+            color: var(--ink-soft);
+        }
+        .empty-cart-msg a {
+            color: var(--ink);
+            font-weight: 700;
         }
         @media (max-width: 900px) {
-            .checkout-grid { grid-template-columns: 1fr; }
+            .checkout-grid { grid-template-columns: 1fr; gap: 16px; }
+            .checkout-aside { position: static; }
             .sticky-order-bar { display: block; }
-            body { padding-bottom: 74px; }
+            body { padding-bottom: 82px; }
+            .card-block { padding: 18px 16px; }
+            #orderForm .btn-confirm { display: none; }
         }
     </style>
 </head>
@@ -384,17 +536,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div id="site-header-mount"></div>
 <div class="container">
     <div class="checkout-page-head">
-        <h1>Checkout</h1>
+        <h1>চেকআউট</h1>
+        <p class="checkout-subtitle">নিরাপদ ও দ্রুত অর্ডার — ক্যাশ অন ডেলিভারি সুবিধা</p>
         <nav class="checkout-breadcrumb" aria-label="Breadcrumb">
-            <a href="index.html">Home</a> &gt; Checkout
+            <a href="/">Home</a> <span aria-hidden="true">&rsaquo;</span> Checkout
         </nav>
+        <div class="checkout-trust" style="justify-content:center; margin-top:14px;">
+            <span>Secure order</span>
+            <span>COD available</span>
+            <span>Fast support</span>
+        </div>
     </div>
     <div class="checkout-grid">
         <div>
             <div class="card-block">
                 <h3 class="section-label">
                     <span class="section-label-inner">
-                        <span>Order review</span>
+                        <span>অর্ডার সারাংশ</span>
                         <span id="orderReviewMeta" class="label-meta"></span>
                     </span>
                 </h3>
@@ -402,7 +560,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <div class="order-summary" id="orderSummary"></div>
             </div>
             <div class="card-block">
-                <h3 class="section-label"><span>Shipping Address</span></h3>
+                <h3 class="section-label"><span>ডেলিভারি তথ্য</span></h3>
                 <form id="orderForm">
                     <div class="form-group">
                         <label>আপনার নাম</label>
@@ -429,13 +587,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         <label>থানা / উপজেলা (Optional)</label>
                         <input type="text" id="userThana" placeholder="থানা / উপজেলা লিখুন">
                     </div>
-                    <button type="submit" id="submitBtn" class="btn-confirm">PLACE ORDER</button>
+                    <button type="submit" id="submitBtn" class="btn-confirm">অর্ডার কনফার্ম করুন</button>
                 </form>
             </div>
         </div>
-        <aside>
+        <aside class="checkout-aside">
             <div class="card-block">
-                <h3 class="section-label"><span>Payment method</span></h3>
+                <h3 class="section-label"><span>পেমেন্ট পদ্ধতি</span></h3>
                 <div class="pm-grid">
                     <label class="pm-option active" data-pm="cod"><input type="radio" name="paymentMethod" value="Cash On Delivery" checked> Cash On Delivery</label>
                     <label class="pm-option" data-pm="bkash"><input type="radio" name="paymentMethod" value="bKash"> bKash</label>
@@ -450,24 +608,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 </div>
             </div>
             <div class="card-block">
-                <h3 class="section-label"><span>Have any coupon or gift voucher?</span></h3>
+                <h3 class="section-label"><span>কুপন / ভাউচার</span></h3>
                 <div class="coupon-row">
                     <input type="text" id="couponCode" placeholder="Coupon / Voucher Code">
                     <button type="button" id="applyCouponBtn" class="coupon-btn">Apply</button>
                 </div>
                 <div id="couponMsg" style="margin-top:8px; font-size:12px; color:#6b7280;"></div>
             </div>
-            <div class="card-block">
-                <h3 class="section-label"><span>Order total</span></h3>
-                <div class="summary-item"><span>Sub total</span><strong id="side-subtotal">৳0</strong></div>
-                <div class="summary-item"><span>Delivery cost</span><strong id="side-delivery">৳0</strong></div>
-                <div class="summary-item"><span>ডিজাইন সংখ্যা</span><strong id="side-design">0</strong></div>
+            <div class="card-block card-block-premium">
+                <h3 class="section-label"><span>অর্ডার মোট</span></h3>
+                <div class="summary-item"><span>পণ্যের মূল্য</span><strong id="side-subtotal">৳0</strong></div>
+                <div class="summary-item"><span>ডেলিভারি চার্জ</span><strong id="side-delivery">৳0</strong></div>
+                <div class="summary-item"><span>পণ্যের ধরন</span><strong id="side-design">0</strong></div>
                 <div class="summary-item" id="side-qty-row"><span>মোট পিস</span><strong id="side-qty">0</strong></div>
-                <hr style="border:0;border-top:1px solid #e5e7eb; margin:12px 0;">
-                <div class="summary-item" style="font-size:20px; font-weight:700;"><span>Total</span><strong id="side-total">৳0</strong></div>
+                <div class="order-total-box">
+                    <div class="summary-item total-final"><span>সর্বমোট</span><strong id="side-total">৳0</strong></div>
+                </div>
+                <p style="margin:12px 0 0; font-size:12px; color:var(--muted); text-align:center;">৩টি পণ্যে ডেলিভারি ফ্রি</p>
             </div>
-            <div class="card-block" style="font-size:13px; color:#4b5563;">
-                <strong style="display:block; margin-bottom:8px;">Bank Account Details</strong>
+            <div class="card-block card-block-muted">
+                <strong style="display:block; margin-bottom:10px; color:var(--ink); font-size:14px;">ব্যাংক / মোবাইল ব্যাংকিং</strong>
                 <div>Bank Name: United Commercial Bank PLC</div>
                 <div>Name: MUSLIM ABAYA</div>
                 <div>Branch: Kamrangirchar Branch</div>
@@ -480,7 +640,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 </div>
             </div>
             <div class="card-block">
-                <h3 class="section-label"><span>Special notes <span style="font-size:13px;font-weight:600;color:#6b7280;">(Optional)</span></span></h3>
+                <h3 class="section-label"><span>বিশেষ নির্দেশনা <span style="font-size:13px;font-weight:600;color:var(--muted);">(ঐচ্ছিক)</span></span></h3>
                 <textarea id="specialNotes" rows="3" maxlength="200" placeholder="আপনার কোনো বিশেষ নির্দেশনা থাকলে লিখুন"></textarea>
                 <div style="font-size:12px; color:#6b7280; text-align:right;"><span id="noteCount">0</span>/200</div>
                 <label class="terms-box">
@@ -492,7 +652,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 </div>
 <div class="sticky-order-bar">
-    <button type="button" class="sticky-order-btn" id="stickyOrderBtn">PLACE ORDER</button>
+    <button type="button" class="sticky-order-btn" id="stickyOrderBtn">অর্ডার কনফার্ম করুন</button>
 </div>
 
 <script src="cart-utils.js"></script>
@@ -621,9 +781,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (!summaryDiv) return;
         
         if (cart.length === 0) {
-            summaryDiv.innerHTML = "<p style='text-align:center;color:#b45309;padding:10px;'>আপনার কার্টে কোনো পণ্য নেই। <a href=\"index.html\" style=\"color:#1a1a1a;font-weight:700;\">মূল পেজে ফিরে</a> পণ্য সিলেক্ট করুন।</p>";
+            summaryDiv.innerHTML = "<div class='empty-cart-msg'>আপনার কার্টে কোনো পণ্য নেই।<br><a href=\"category.html\">কালেকশন দেখুন</a> বা <a href=\"/\">হোমপেজে ফিরুন</a>।</div>";
+            var metaElEmpty = document.getElementById('orderReviewMeta');
+            if (metaElEmpty) metaElEmpty.textContent = '';
             var subBtn = document.getElementById('submitBtn');
             if (subBtn) subBtn.disabled = true;
+            var sideSubtotal = document.getElementById('side-subtotal');
+            var sideDelivery = document.getElementById('side-delivery');
+            var sideTotal = document.getElementById('side-total');
+            if (sideSubtotal) sideSubtotal.textContent = formatBdt(0);
+            if (sideDelivery) sideDelivery.textContent = formatBdt(0);
+            if (sideTotal) sideTotal.textContent = formatBdt(0);
             return;
         }
 
