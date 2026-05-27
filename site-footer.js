@@ -4,12 +4,12 @@
     '<div class="anz-container">' +
     '<div class="anz-col-brand">' +
     '<h2 class="anz-logo">Muslim Abaya</h2>' +
-    '<p class="anz-text">Welcome to Muslim Abaya, where modern sophistication meets timeless elegance. Our collection blends bold designs with refined details, featuring luxurious fabrics and unique embellishments.</p>' +
+    '<p class="anz-text">Muslim Abaya — বাংলাদেশের প্রিমিয়াম মডেস্ট ফ্যাশন ব্র্যান্ড। আবায়া, কাফতান, হিজাব ও টু-পিস কালেকশনে আধুনিক ডিজাইন, আরামদায়ক ফেব্রিক ও ক্যাশ অন ডেলিভারি সুবিধা।</p>' +
     '</div>' +
     '<div class="anz-col-links">' +
     '<h3 class="anz-title">About Us</h3>' +
     '<ul>' +
-    '<li><a href="index.html">About Us</a></li>' +
+    '<li><a href="about.html">About Us</a></li>' +
     '<li><a href="checkout.html">Order Tracking</a></li>' +
     '<li><a href="refund.html">Refund Policy</a></li>' +
     '<li><a href="terms.html">Terms &amp; Conditions</a></li>' +
