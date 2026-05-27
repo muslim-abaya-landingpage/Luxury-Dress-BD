@@ -44,29 +44,35 @@ function escapeHtml(str) {
 
 
 
-function getProductFilterKey(p, idx) {
-  if (p.colorFilter) return String(p.colorFilter);
-  if (p.id) return String(p.id);
-  if (p.color) return String(p.color) + "-" + String(idx);
-  return "item-" + String(idx);
-}
-
-function getProductColorLabel(p) {
-  if (p.colorLabel) return p.colorLabel;
-  var colorMap = window.FILTER_COLOR_MAP || {};
-  if (p.color && colorMap[p.color] && colorMap[p.color].label) {
-    return colorMap[p.color].label;
-  }
-  return p.name || "Color";
+/** Unique color keys from products → one checkbox each (auto when `color` is set in category-products.js). */
+function formatColorKeyLabel(key) {
+  return String(key)
+    .replace(/-/g, " ")
+    .replace(/\b\w/g, function (ch) {
+      return ch.toUpperCase();
+    });
 }
 
 function getProductColorOptions(products) {
-  return products.map(function (p, idx) {
-    return {
-      key: getProductFilterKey(p, idx),
-      label: getProductColorLabel(p)
-    };
+  var colorMap = window.FILTER_COLOR_MAP || {};
+  var seen = {};
+  var options = [];
+
+  products.forEach(function (p) {
+    var key = String(p.color || "").trim();
+    if (!key || seen[key]) return;
+    seen[key] = true;
+    options.push({
+      key: key,
+      label: (colorMap[key] && colorMap[key].label) || formatColorKeyLabel(key)
+    });
   });
+
+  options.sort(function (a, b) {
+    return a.label.localeCompare(b.label);
+  });
+
+  return options;
 }
 
 
@@ -648,9 +654,8 @@ function renderCategory(categoryKey) {
 
       if (filterState.subcatIdx !== null && filterState.subcatIdx !== idx) show = false;
 
-      if (filterState.colors.length) {
-        var filterKey = getProductFilterKey(p, idx);
-        if (filterState.colors.indexOf(filterKey) === -1) show = false;
+      if (filterState.colors.length && (!p.color || filterState.colors.indexOf(p.color) === -1)) {
+        show = false;
       }
 
       if (filterState.priceMin !== null && price < filterState.priceMin) show = false;

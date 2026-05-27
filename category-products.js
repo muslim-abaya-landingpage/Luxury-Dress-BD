@@ -420,6 +420,7 @@ window.CATEGORY_NAV = [
   { key: "video", href: "video.html", label: "VIDEO", image: "images/Royal-Blue-Golden-Floral-Print.jpeg" }
 ];
 
+/** Display names for product `color` keys — new colors auto-appear in filters when added to products. */
 window.FILTER_COLOR_MAP = {
   all: { label: "All Colors", hex: "transparent" },
   maroon: { label: "Maroon", hex: "#7a2348" },
