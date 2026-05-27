@@ -4,7 +4,7 @@ function ensureCategoryStyles() {
   var link = document.createElement("link");
   link.id = "category-sidebar-css";
   link.rel = "stylesheet";
-  link.href = "category-sidebar.css";
+  link.href = "category-sidebar.css?v=20260528c";
   document.head.appendChild(link);
 }
 
@@ -272,6 +272,7 @@ function buildProductCard(p, idx, waLink, detailMode) {
       colorAttr +
       ">" +
       '<div class="detail-media">' +
+      '<span class="product-sale-badge">Sale!</span>' +
       '<img src="' +
       escapeHtml(p.image) +
       '" alt="' +
@@ -329,7 +330,7 @@ function buildProductCard(p, idx, waLink, detailMode) {
     ">" +
 
     '<div class="img-wrap">' +
-
+    '<span class="product-sale-badge">Sale!</span>' +
     '<img src="' +
 
     escapeHtml(p.image) +
@@ -467,6 +468,18 @@ function renderCategory(categoryKey) {
   var allProducts = window.CATEGORY_PRODUCTS || {};
 
   var products = (allProducts[categoryKey] || []).slice();
+
+  var searchQ = "";
+  try {
+    searchQ = (new URLSearchParams(window.location.search).get("q") || "").trim().toLowerCase();
+  } catch (searchErr) {
+    searchQ = "";
+  }
+  if (searchQ) {
+    products = products.filter(function (p) {
+      return (p.name || "").toLowerCase().indexOf(searchQ) !== -1;
+    });
+  }
 
   var categoryMeta = window.CATEGORY_META || {};
 

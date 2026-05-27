@@ -30,12 +30,21 @@
     '<li><a href="video.html">VIDEO</a></li>' +
     '</ul></nav>' +
     '<div class="nav-icons">' +
-    '<a href="/" aria-label="Search">' + ICON_SEARCH + '</a>' +
+    '<button type="button" class="nav-icon-btn" id="navSearchOpen" aria-label="Search" aria-expanded="false">' + ICON_SEARCH + '</button>' +
     '<button type="button" class="cart-drawer-trigger" data-cart-trigger="1" style="position:relative" aria-label="Cart">' + ICON_BAG + '<span id="cart-count">0</span></button>' +
     '<a href="https://wa.me/8801971642683" target="_blank" rel="noopener" aria-label="Message">' + ICON_CHAT + '</a>' +
     '<a href="checkout.html" aria-label="Account">' + ICON_USER + '</a>' +
     '<button type="button" class="nav-menu-btn" onclick="window.toggleAbayaMenu()" aria-label="Menu">' + ICON_MENU + '</button>' +
     '</div></div></div>' +
+    '<div class="site-search-drawer" id="siteSearchDrawer" aria-hidden="true">' +
+    '<button type="button" class="site-search-close" id="siteSearchClose" aria-label="Close search">&times;</button>' +
+    '<div class="site-search-inner">' +
+    '<form class="site-search-form" id="siteSearchForm" role="search" autocomplete="off">' +
+  ICON_SEARCH +
+    '<input type="search" id="siteSearchInput" name="q" placeholder="Search" autocomplete="off" aria-label="Search products">' +
+    '</form>' +
+    '<ul class="site-search-results" id="siteSearchResults" hidden></ul>' +
+    '</div></div>' +
     '<div class="header-announcement-bar"><div class="custom-container announcement-slider">' +
     '<button type="button" class="slider-arrow left-arrow" onclick="window.moveAnnouncement(-1)" aria-label="Previous">&#8249;</button>' +
     '<div class="announcement-content">' +
@@ -119,12 +128,167 @@
     }
   }
 
+  var catalogLoadPromise = null;
+
+  function ensureProductCatalog(cb) {
+    if (window.CATEGORY_PRODUCTS && window.CATEGORY_NAV) {
+      cb();
+      return;
+    }
+    if (!catalogLoadPromise) {
+      catalogLoadPromise = new Promise(function (resolve) {
+        var existing = document.querySelector('script[src*="category-products.js"]');
+        if (existing) {
+          existing.addEventListener('load', resolve, { once: true });
+          if (window.CATEGORY_PRODUCTS) resolve();
+          return;
+        }
+        var s = document.createElement('script');
+        s.src = 'category-products.js';
+        s.async = true;
+        s.onload = function () { resolve(); };
+        s.onerror = function () { resolve(); };
+        document.head.appendChild(s);
+      });
+    }
+    catalogLoadPromise.then(cb);
+  }
+
+  function flattenCatalog() {
+    var all = window.CATEGORY_PRODUCTS || {};
+    var nav = window.CATEGORY_NAV || [];
+    var hrefByKey = {};
+    nav.forEach(function (n) {
+      if (n.key) hrefByKey[n.key] = n.href || 'abaya.html';
+    });
+    var out = [];
+    Object.keys(all).forEach(function (key) {
+      (all[key] || []).forEach(function (p) {
+        if (!p || !p.name) return;
+        out.push({
+          name: p.name,
+          href: hrefByKey[key] || 'abaya.html',
+          key: key
+        });
+      });
+    });
+    return out;
+  }
+
+  function initSiteSearch() {
+    var openBtn = document.getElementById('navSearchOpen');
+    var drawer = document.getElementById('siteSearchDrawer');
+    var closeBtn = document.getElementById('siteSearchClose');
+    var form = document.getElementById('siteSearchForm');
+    var input = document.getElementById('siteSearchInput');
+    var results = document.getElementById('siteSearchResults');
+    if (!openBtn || !drawer || !input) return;
+
+    var catalog = [];
+
+    function setSearchOpen(open) {
+      document.body.classList.toggle('site-search-open', open);
+      drawer.setAttribute('aria-hidden', open ? 'false' : 'true');
+      openBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (open) {
+        if (typeof window.closeCartDrawer === 'function') window.closeCartDrawer();
+        var menu = document.getElementById('mobileMenuPanel');
+        var overlay = document.getElementById('menuOverlay');
+        if (menu) menu.classList.remove('active');
+        if (overlay) overlay.classList.remove('active');
+        window.setTimeout(function () { input.focus(); }, 80);
+      } else {
+        input.value = '';
+        if (results) {
+          results.hidden = true;
+          results.innerHTML = '';
+        }
+      }
+    }
+
+    function renderResults(items) {
+      if (!results) return;
+      if (!items.length) {
+        results.hidden = true;
+        results.innerHTML = '';
+        return;
+      }
+      results.innerHTML = items
+        .slice(0, 8)
+        .map(function (item) {
+          var q = encodeURIComponent(input.value.trim());
+          var href = item.href + (q ? '?q=' + q : '');
+          return '<li><a href="' + href + '">' + item.name.replace(/</g, '&lt;') + '</a></li>';
+        })
+        .join('');
+      results.hidden = false;
+    }
+
+    function runSearch() {
+      var q = input.value.trim().toLowerCase();
+      if (!q) {
+        renderResults([]);
+        return;
+      }
+      ensureProductCatalog(function () {
+        if (!catalog.length) catalog = flattenCatalog();
+        var seen = {};
+        var matches = catalog.filter(function (item) {
+          if (item.name.toLowerCase().indexOf(q) === -1) return false;
+          var id = item.name + '|' + item.href;
+          if (seen[id]) return false;
+          seen[id] = true;
+          return true;
+        });
+        renderResults(matches);
+      });
+    }
+
+    openBtn.addEventListener('click', function () {
+      var willOpen = !document.body.classList.contains('site-search-open');
+      setSearchOpen(willOpen);
+      if (willOpen) ensureProductCatalog(function () { catalog = flattenCatalog(); });
+    });
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function () { setSearchOpen(false); });
+    }
+
+    drawer.addEventListener('click', function (e) {
+      if (e.target === drawer) setSearchOpen(false);
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && document.body.classList.contains('site-search-open')) {
+        setSearchOpen(false);
+      }
+    });
+
+    input.addEventListener('input', runSearch);
+
+    if (form) {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var q = input.value.trim();
+        if (!q) return;
+        ensureProductCatalog(function () {
+          if (!catalog.length) catalog = flattenCatalog();
+          var first = catalog.find(function (item) {
+            return item.name.toLowerCase().indexOf(q.toLowerCase()) !== -1;
+          });
+          window.location.href = (first ? first.href : 'abaya.html') + '?q=' + encodeURIComponent(q);
+        });
+      });
+    }
+  }
+
   function mountHeader() {
     var mount = document.getElementById('site-header-mount');
     if (!mount) return;
     mount.innerHTML = HEADER_HTML;
     document.body.classList.add('global-layout');
     updateCartBadge();
+    initSiteSearch();
     if (annTimer) clearInterval(annTimer);
     annTimer = setInterval(function () { window.moveAnnouncement(1); }, 4000);
   }
