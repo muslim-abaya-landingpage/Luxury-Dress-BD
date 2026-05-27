@@ -1,11 +1,29 @@
 /* Shared site header — all pages */
+#site-header-mount {
+  width: 100%;
+  max-width: 100%;
+  align-self: stretch;
+  flex-shrink: 0;
+}
+
 .abaya-main-header {
   position: sticky;
   top: 0;
   z-index: 10000;
   background: #fff;
   width: 100%;
+  max-width: 100%;
   border-bottom: 1px solid #ececec;
+}
+
+.header-top-bar,
+.header-middle-nav,
+.header-announcement-bar {
+  width: 100%;
+}
+
+.header-middle-nav .custom-container {
+  width: 100%;
 }
 
 .custom-container {
@@ -13,6 +31,7 @@
   margin: 0 auto;
   padding: 0 12px;
   box-sizing: border-box;
+  width: 100%;
 }
 
 .header-top-bar {
@@ -278,18 +297,97 @@ body.global-layout {
 }
 
 @media (max-width: 1023px) {
-  .brand-text-logo a {
-    font-size: 17px;
+  .custom-container {
+    max-width: 100%;
+    padding-left: 14px;
+    padding-right: 14px;
   }
 
-  .nav-row {
-    padding: 10px 10px;
-    gap: 8px;
+  .brand-text-logo {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .brand-text-logo a {
+    font-size: 16px;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .header-middle-nav .nav-row {
+    padding: 10px 0;
+    gap: 6px;
+    width: 100%;
+    justify-content: space-between;
   }
 
   .nav-icons {
-    gap: 7px;
-    padding-right: 2px;
+    gap: 6px;
+    padding-right: 0;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  .nav-icons a,
+  .nav-icons button,
+  .nav-icons .cart-drawer-trigger,
+  .nav-icon-btn {
+    width: 26px;
+    height: 26px;
+  }
+
+  .nav-icon-svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .header-announcement-bar {
+    padding: 10px 0;
+  }
+
+  .header-announcement-bar .custom-container {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .announcement-slider {
+    height: 48px;
+    max-width: 100%;
+    width: 100%;
+    padding: 0 40px;
+    margin: 0;
+  }
+
+  .ann-slide {
+    font-size: 13px;
+    line-height: 1.35;
+    padding-top: 4px;
+  }
+
+  .slider-arrow {
+    width: 30px;
+    height: 30px;
+    font-size: 12px;
+  }
+
+  .left-arrow {
+    left: 8px;
+  }
+
+  .right-arrow {
+    right: 8px;
+  }
+}
+
+@media (max-width: 380px) {
+  .brand-text-logo a {
+    font-size: 14px;
+  }
+
+  .nav-icons {
+    gap: 4px;
   }
 
   .nav-icons a,
@@ -298,21 +396,5 @@ body.global-layout {
   .nav-icon-btn {
     width: 24px;
     height: 24px;
-  }
-
-  .nav-icon-svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  .announcement-slider {
-    height: 50px;
-    padding: 0 44px;
-  }
-
-  .ann-slide {
-    font-size: 14px;
-    line-height: 1.35;
-    padding-top: 6px;
   }
 }

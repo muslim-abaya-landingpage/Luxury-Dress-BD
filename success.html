@@ -15,12 +15,13 @@
             margin: 0; 
             display: flex; 
             flex-direction: column;
-            align-items: center; 
+            align-items: stretch; 
             justify-content: flex-start; 
             min-height: 100vh; 
             text-align: center;
-            padding: 24px 0 0;
+            padding: 0 0 24px;
         }
+        #site-header-mount { width: 100%; }
         #site-footer-mount { width: 100%; margin-top: 24px; }
         .success-card {
             background: #fff;
@@ -28,7 +29,10 @@
             border-radius: 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             max-width: 500px;
-            width: 90%;
+            width: min(500px, calc(100% - 28px));
+            margin: 24px auto 0;
+            align-self: center;
+            box-sizing: border-box;
         }
         .icon-box {
             width: 80px;
