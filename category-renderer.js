@@ -4,7 +4,7 @@ function ensureCategoryStyles() {
   var link = document.createElement("link");
   link.id = "category-sidebar-css";
   link.rel = "stylesheet";
-  link.href = "category-sidebar.css?v=20260529a";
+  link.href = "category-sidebar.css?v=20260530";
   document.head.appendChild(link);
 }
 
@@ -497,7 +497,7 @@ function renderCategory(categoryKey) {
 
     "<nav class='shop-breadcrumb' aria-label='Breadcrumb'>" +
 
-    "<a href='index.html'>Home</a><span>&rsaquo;</span><a href='category.html'>Category</a><span>&rsaquo;</span><strong>" +
+    "<a href='/'>Home</a><span>&rsaquo;</span><a href='category.html'>Category</a><span>&rsaquo;</span><strong>" +
 
     escapeHtml(title) +
 
@@ -888,6 +888,37 @@ function renderCategory(categoryKey) {
   }
 
   markCategoryReady();
+  if (typeof window.syncSiteHeaderOffset === "function") {
+    window.syncSiteHeaderOffset();
+  }
 }
 
+function bootShopPage(run) {
+  function start() {
+    document.body.classList.add("shop-page");
+    run();
+    window.requestAnimationFrame(function () {
+      if (typeof window.syncSiteHeaderOffset === "function") {
+        window.syncSiteHeaderOffset();
+      }
+    });
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", start);
+  } else {
+    start();
+  }
+}
+
+window.bootShopCategory = function (categoryKey) {
+  bootShopPage(function () {
+    renderCategory(categoryKey);
+  });
+};
+
+window.bootAllCategories = function () {
+  bootShopPage(function () {
+    renderAllCategories();
+  });
+};
 

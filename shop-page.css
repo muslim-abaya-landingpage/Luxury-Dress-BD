@@ -1,0 +1,40 @@
+/* Shared layout for category / shop pages (not homepage) */
+html:not(.category-ready) #list {
+  visibility: hidden;
+  min-height: 55vh;
+}
+
+html.category-ready #list {
+  visibility: visible;
+}
+
+body.shop-page {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f7f7f7;
+}
+
+body.shop-page .wrap,
+body.shop-page > main {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 10px 16px 36px;
+  box-sizing: border-box;
+}
+
+body.shop-page #list {
+  width: 100%;
+}
+
+body.shop-page #site-footer-mount {
+  flex-shrink: 0;
+  width: 100%;
+}
+
+body.shop-page .shop-breadcrumb {
+  margin-top: 4px;
+}

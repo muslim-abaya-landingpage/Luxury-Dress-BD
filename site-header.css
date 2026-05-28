@@ -6,18 +6,14 @@
   flex-shrink: 0;
 }
 
-body.has-fixed-header #site-header-mount {
-  position: fixed;
+body.has-sticky-header #site-header-mount {
+  position: sticky;
   top: 0;
   left: 0;
   right: 0;
   z-index: 10001;
   background: #fff;
   box-shadow: 0 1px 0 #ececec;
-}
-
-body.has-fixed-header {
-  padding-top: var(--site-header-h, 132px);
 }
 
 .abaya-main-header {
@@ -27,12 +23,6 @@ body.has-fixed-header {
   width: 100%;
   max-width: 100%;
   border-bottom: 1px solid #ececec;
-}
-
-body:not(.has-fixed-header) #site-header-mount {
-  position: sticky;
-  top: 0;
-  z-index: 10000;
 }
 
 .header-top-bar,
