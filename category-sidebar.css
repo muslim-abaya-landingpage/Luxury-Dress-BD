@@ -22,9 +22,9 @@ html.category-ready #list {
   border-radius: 0;
   padding: 0 8px 0 0;
   position: sticky;
-  top: 96px;
+  top: calc(var(--site-header-h, 120px) + 12px);
   height: fit-content;
-  max-height: calc(100vh - 110px);
+  max-height: calc(100vh - var(--site-header-h, 120px) - 24px);
   overflow-y: auto;
 }
 
@@ -68,14 +68,23 @@ html.category-ready #list {
   background: transparent;
 }
 
-.shop-cats a.active {
+.shop-cats a.active,
+.shop-cats a.sidebar-cat-link.active {
   color: #111;
   font-weight: 700;
   background: transparent;
 }
 
-.shop-cats a.sidebar-all-cat {
-  font-weight: 600;
+.sidebar-filter-cats {
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.sidebar-filter-colors {
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e8e8e8;
 }
 
 .sidebar-filter {
@@ -203,6 +212,8 @@ html.category-ready #list {
 }
 
 .color-filter-name {
+  flex: 1;
+  min-width: 0;
   font-size: 14px;
   line-height: 1.35;
   color: #333;

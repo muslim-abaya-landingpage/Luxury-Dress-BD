@@ -6,14 +6,33 @@
   flex-shrink: 0;
 }
 
-.abaya-main-header {
-  position: sticky;
+body.has-fixed-header #site-header-mount {
+  position: fixed;
   top: 0;
-  z-index: 10000;
+  left: 0;
+  right: 0;
+  z-index: 10001;
+  background: #fff;
+  box-shadow: 0 1px 0 #ececec;
+}
+
+body.has-fixed-header {
+  padding-top: var(--site-header-h, 132px);
+}
+
+.abaya-main-header {
+  position: relative;
+  z-index: 1;
   background: #fff;
   width: 100%;
   max-width: 100%;
   border-bottom: 1px solid #ececec;
+}
+
+body:not(.has-fixed-header) #site-header-mount {
+  position: sticky;
+  top: 0;
+  z-index: 10000;
 }
 
 .header-top-bar,

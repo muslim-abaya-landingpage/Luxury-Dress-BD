@@ -299,14 +299,31 @@
     }
   }
 
+  function isHomePage() {
+    var path = window.location.pathname || '/';
+    var file = path.split('/').pop() || '';
+    return file === '' || file.toLowerCase() === 'index.html';
+  }
+
+  function syncFixedHeaderOffset() {
+    var mount = document.getElementById('site-header-mount');
+    if (!mount || !document.body.classList.contains('has-fixed-header')) return;
+    document.documentElement.style.setProperty('--site-header-h', mount.offsetHeight + 'px');
+  }
+
   function mountHeader() {
     var mount = document.getElementById('site-header-mount');
     if (!mount) return;
     mount.innerHTML = HEADER_HTML;
     document.body.classList.add('global-layout');
+    if (!isHomePage()) {
+      document.body.classList.add('has-fixed-header');
+    }
     updateCartBadge();
     initSiteSearch();
     ensureProductCatalog(function () {});
+    syncFixedHeaderOffset();
+    window.addEventListener('resize', syncFixedHeaderOffset);
     if (annTimer) clearInterval(annTimer);
     annTimer = setInterval(function () { window.moveAnnouncement(1); }, 4000);
   }

@@ -4,7 +4,7 @@ function ensureCategoryStyles() {
   var link = document.createElement("link");
   link.id = "category-sidebar-css";
   link.rel = "stylesheet";
-  link.href = "category-sidebar.css?v=20260528f";
+  link.href = "category-sidebar.css?v=20260529a";
   document.head.appendChild(link);
 }
 
@@ -15,15 +15,10 @@ function markCategoryReady() {
 
 
 function getCategoryNavList() {
-
   if (window.CATEGORY_NAV && window.CATEGORY_NAV.length) {
-
-    return window.CATEGORY_NAV.filter(function (c) { return c.key !== "video"; });
-
+    return window.CATEGORY_NAV;
   }
-
   return [];
-
 }
 
 
@@ -102,26 +97,20 @@ function getPriceBounds(products) {
 
 
 function buildShopSidebar(categoryKey, products) {
-
-  var subLinks =
-
-    "<a href='#' class='sidebar-all-cat active' data-filter-all='1'>All Category</a>" +
-
-    products.map(function (p, i) {
-
+  var catLinks = getCategoryNavList()
+    .map(function (c) {
+      var active = c.key === categoryKey ? " active" : "";
       return (
-
-        "<a href='#' class='subcat-link' data-subcat-idx='" + i + "'>" +
-
-        escapeHtml(p.name) +
-
+        "<a href='" +
+        escapeHtml(c.href || "#") +
+        "' class='sidebar-cat-link" +
+        active +
+        "'>" +
+        escapeHtml(c.label || c.key) +
         "</a>"
-
       );
-
-    }).join("");
-
-
+    })
+    .join("");
 
   var bounds = getPriceBounds(products);
 
@@ -155,13 +144,31 @@ function buildShopSidebar(categoryKey, products) {
     "<button type='button' class='shop-filter-close' id='shopFilterClose' aria-label='Close filters'>&times;</button>" +
     "</div>" +
 
-    "<a class='sidebar-home' href='index.html'>&lsaquo; Home</a>" +
+    "<a class='sidebar-home' href='/'>&lsaquo; Home</a>" +
 
-    "<nav class='shop-cats' id='shopSubcats'>" +
+    "<div class='sidebar-filter sidebar-filter-cats'>" +
 
-    subLinks +
+    "<h4>Categories</h4>" +
+
+    "<nav class='shop-cats' id='shopCategoryNav'>" +
+
+    catLinks +
 
     "</nav>" +
+
+    "</div>" +
+
+    "<div class='sidebar-filter sidebar-filter-colors'>" +
+
+    "<h4>Color</h4>" +
+
+    "<div class='color-filter-list' id='colorFilters'>" +
+
+    colorChecks +
+
+    "</div>" +
+
+    "</div>" +
 
     "<div class='sidebar-filter'>" +
 
@@ -214,18 +221,6 @@ function buildShopSidebar(categoryKey, products) {
     bounds.max +
 
     "</span></span>" +
-
-    "</div>" +
-
-    "</div>" +
-
-    "<div class='sidebar-filter'>" +
-
-    "<h4>Color</h4>" +
-
-    "<div class='color-filter-list' id='colorFilters'>" +
-
-    colorChecks +
 
     "</div>" +
 
@@ -569,7 +564,7 @@ function renderCategory(categoryKey) {
 
 
 
-  var filterState = { subcatIdx: null, colors: [], priceMin: null, priceMax: null };
+  var filterState = { colors: [], priceMin: null, priceMax: null };
 
 
 
@@ -650,8 +645,6 @@ function renderCategory(categoryKey) {
       var price = parseInt(p.price, 10) || 550;
 
       var show = true;
-
-      if (filterState.subcatIdx !== null && filterState.subcatIdx !== idx) show = false;
 
       if (filterState.colors.length && (!p.color || filterState.colors.indexOf(p.color) === -1)) {
         show = false;
@@ -761,44 +754,6 @@ function renderCategory(categoryKey) {
 
 
 
-  var subcatNav = document.getElementById("shopSubcats");
-
-  if (subcatNav) {
-
-    subcatNav.addEventListener("click", function (ev) {
-      var allCat = ev.target.closest("[data-filter-all]");
-      if (allCat) {
-        ev.preventDefault();
-        filterState.subcatIdx = null;
-        subcatNav.querySelectorAll("a").forEach(function (a) {
-          a.classList.remove("active");
-        });
-        allCat.classList.add("active");
-        applyFilters();
-        return;
-      }
-      var subLink = ev.target.closest(".subcat-link");
-      if (!subLink) return;
-      ev.preventDefault();
-      var idx = parseInt(subLink.getAttribute("data-subcat-idx"), 10);
-      if (filterState.subcatIdx === idx) {
-        filterState.subcatIdx = null;
-        subLink.classList.remove("active");
-        var allLink = subcatNav.querySelector("[data-filter-all]");
-        if (allLink) allLink.classList.add("active");
-      } else {
-        filterState.subcatIdx = idx;
-        subcatNav.querySelectorAll("a").forEach(function (a) {
-          a.classList.remove("active");
-        });
-        subLink.classList.add("active");
-      }
-      applyFilters();
-    });
-  }
-
-
-
   var colorFilterWrap = document.getElementById("colorFilters");
 
   if (colorFilterWrap) {
@@ -878,7 +833,7 @@ function renderCategory(categoryKey) {
   }
   if (filterPanel) {
     filterPanel.addEventListener("click", function (ev) {
-      if (ev.target.closest(".subcat-link, [data-filter-all], .color-filter-option")) {
+      if (ev.target.closest(".color-filter-option, .sidebar-cat-link")) {
         if (window.matchMedia("(max-width: 960px)").matches) {
           setFilterDrawer(false);
         }
