@@ -1,1 +1,44 @@
+# Homepage
 /index.html   /   301
+
+# Clean URLs (no .html in address bar)
+/abaya              /abaya.html              200
+/cover-up           /cover-up.html           200
+/tops-kurti         /tops-kurti.html         200
+/premium-two-piece  /premium-two-piece.html  200
+/embroidery         /embroidery.html         200
+/karchupi           /karchupi.html           200
+/kaftan             /kaftan.html             200
+/hijab              /hijab.html              200
+/video              /video.html              200
+/category           /category.html           200
+/checkout           /checkout.html           200
+/about              /about.html              200
+/help               /help.html               200
+/signin             /signin.html             200
+/signup             /signup.html             200
+/terms              /terms.html              200
+/refund             /refund.html             200
+/thank-you          /thank-you.html          200
+/success            /success.html            200
+
+# Redirect old .html links to clean URLs
+/abaya.html              /abaya              301
+/cover-up.html           /cover-up           301
+/tops-kurti.html         /tops-kurti         301
+/premium-two-piece.html  /premium-two-piece  301
+/embroidery.html         /embroidery         301
+/karchupi.html           /karchupi           301
+/kaftan.html             /kaftan             301
+/hijab.html              /hijab              301
+/video.html              /video              301
+/category.html           /category           301
+/checkout.html           /checkout           301
+/about.html              /about              301
+/help.html               /help               301
+/signin.html             /signin             301
+/signup.html             /signup             301
+/terms.html              /terms              301
+/refund.html             /refund             301
+/thank-you.html          /thank-you          301
+/success.html            /success            301

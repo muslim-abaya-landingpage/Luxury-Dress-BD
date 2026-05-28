@@ -497,7 +497,7 @@ function renderCategory(categoryKey) {
 
     "<nav class='shop-breadcrumb' aria-label='Breadcrumb'>" +
 
-    "<a href='/'>Home</a><span>&rsaquo;</span><a href='category.html'>Category</a><span>&rsaquo;</span><strong>" +
+    "<a href='/'>Home</a><span>&rsaquo;</span><a href='/category'>Category</a><span>&rsaquo;</span><strong>" +
 
     escapeHtml(title) +
 
@@ -808,7 +808,7 @@ function renderCategory(categoryKey) {
     if (actionEl.getAttribute("data-action") === "buy-now") {
       ev.preventDefault();
       addProductToCart(products[idx], 1, selectedSize);
-      window.location.href = "checkout.html";
+      window.location.href = "/checkout";
     }
   });
 

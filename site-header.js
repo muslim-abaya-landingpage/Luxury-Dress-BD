@@ -9,8 +9,10 @@
   }
 
   function siteAsset(file) {
+    var path = String(file || '');
+    if (path.charAt(0) === '/') return path;
     var root = getSiteRoot();
-    return root + String(file || '').replace(/^\//, '');
+    return root + path.replace(/^\//, '');
   }
   var ICON_SEARCH =
     '<svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"/><path d="M21 21l-4.5-4.5"/></svg>';
@@ -26,26 +28,26 @@
   var HEADER_HTML =
     '<header class="abaya-main-header">' +
     '<div class="header-top-bar"><div class="custom-container"><div class="top-bar-content">' +
-    '<a href="help.html">Help</a> | <a href="signup.html">Sign Up</a> | <a href="signin.html">Sign In</a>' +
+    '<a href="/help">Help</a> | <a href="/signup">Sign Up</a> | <a href="/signin">Sign In</a>' +
     '</div></div></div>' +
     '<div class="header-middle-nav"><div class="custom-container nav-row">' +
     '<div class="brand-text-logo"><a href="/">MUSLIM ABAYA</a></div>' +
     '<nav class="desktop-menu"><ul>' +
-    '<li><a href="abaya.html">ABAYA</a></li>' +
-    '<li><a href="cover-up.html">COVER UP</a></li>' +
-    '<li><a href="tops-kurti.html">TOPS/KURTI</a></li>' +
-    '<li><a href="premium-two-piece.html">PREMIUM TWO-PIECE</a></li>' +
-    '<li><a href="embroidery.html">EMBROIDERY</a></li>' +
-    '<li><a href="karchupi.html">KARCHUPI</a></li>' +
-    '<li><a href="kaftan.html">KAFTAN</a></li>' +
-    '<li><a href="hijab.html">HIJAB</a></li>' +
-    '<li><a href="video.html">VIDEO</a></li>' +
+    '<li><a href="/abaya">ABAYA</a></li>' +
+    '<li><a href="/cover-up">COVER UP</a></li>' +
+    '<li><a href="/tops-kurti">TOPS/KURTI</a></li>' +
+    '<li><a href="/premium-two-piece">PREMIUM TWO-PIECE</a></li>' +
+    '<li><a href="/embroidery">EMBROIDERY</a></li>' +
+    '<li><a href="/karchupi">KARCHUPI</a></li>' +
+    '<li><a href="/kaftan">KAFTAN</a></li>' +
+    '<li><a href="/hijab">HIJAB</a></li>' +
+    '<li><a href="/video">VIDEO</a></li>' +
     '</ul></nav>' +
     '<div class="nav-icons">' +
     '<button type="button" class="nav-icon-btn" id="navSearchOpen" aria-label="Search" aria-expanded="false">' + ICON_SEARCH + '</button>' +
     '<button type="button" class="cart-drawer-trigger" data-cart-trigger="1" style="position:relative" aria-label="Cart">' + ICON_BAG + '<span id="cart-count">0</span></button>' +
     '<a href="https://wa.me/8801971642683" target="_blank" rel="noopener" aria-label="Message">' + ICON_CHAT + '</a>' +
-    '<a href="checkout.html" aria-label="Account">' + ICON_USER + '</a>' +
+    '<a href="/checkout" aria-label="Account">' + ICON_USER + '</a>' +
     '<button type="button" class="nav-menu-btn" onclick="window.toggleAbayaMenu()" aria-label="Menu">' + ICON_MENU + '</button>' +
     '</div></div></div>' +
     '<div class="site-search-drawer" id="siteSearchDrawer" aria-hidden="true">' +
@@ -71,16 +73,16 @@
     '<div class="mobile-nav-panel" id="mobileMenuPanel">' +
     '<div class="mobile-nav-top"><button type="button" onclick="window.toggleAbayaMenu()" style="background:none;border:none;font-size:26px;cursor:pointer">&times;</button></div>' +
     '<ul>' +
-    '<li><a href="abaya.html" onclick="window.toggleAbayaMenu()">ABAYA</a></li>' +
-    '<li><a href="cover-up.html" onclick="window.toggleAbayaMenu()">COVER UP</a></li>' +
-    '<li><a href="tops-kurti.html" onclick="window.toggleAbayaMenu()">TOPS/KURTI</a></li>' +
-    '<li><a href="premium-two-piece.html" onclick="window.toggleAbayaMenu()">PREMIUM TWO-PIECE</a></li>' +
-    '<li><a href="embroidery.html" onclick="window.toggleAbayaMenu()">EMBROIDERY</a></li>' +
-    '<li><a href="karchupi.html" onclick="window.toggleAbayaMenu()">KARCHUPI</a></li>' +
-    '<li><a href="kaftan.html" onclick="window.toggleAbayaMenu()">KAFTAN</a></li>' +
-    '<li><a href="hijab.html" onclick="window.toggleAbayaMenu()">HIJAB</a></li>' +
-    '<li><a href="video.html" onclick="window.toggleAbayaMenu()">VIDEO</a></li>' +
-    '<li><a href="category.html" onclick="window.toggleAbayaMenu()">ALL CATEGORIES</a></li>' +
+    '<li><a href="/abaya" onclick="window.toggleAbayaMenu()">ABAYA</a></li>' +
+    '<li><a href="/cover-up" onclick="window.toggleAbayaMenu()">COVER UP</a></li>' +
+    '<li><a href="/tops-kurti" onclick="window.toggleAbayaMenu()">TOPS/KURTI</a></li>' +
+    '<li><a href="/premium-two-piece" onclick="window.toggleAbayaMenu()">PREMIUM TWO-PIECE</a></li>' +
+    '<li><a href="/embroidery" onclick="window.toggleAbayaMenu()">EMBROIDERY</a></li>' +
+    '<li><a href="/karchupi" onclick="window.toggleAbayaMenu()">KARCHUPI</a></li>' +
+    '<li><a href="/kaftan" onclick="window.toggleAbayaMenu()">KAFTAN</a></li>' +
+    '<li><a href="/hijab" onclick="window.toggleAbayaMenu()">HIJAB</a></li>' +
+    '<li><a href="/video" onclick="window.toggleAbayaMenu()">VIDEO</a></li>' +
+    '<li><a href="/category" onclick="window.toggleAbayaMenu()">ALL CATEGORIES</a></li>' +
     '<li><a href="/" onclick="window.toggleAbayaMenu()">HOME</a></li>' +
     '</ul></div>';
 
@@ -171,7 +173,7 @@
     var nav = window.CATEGORY_NAV || [];
     var hrefByKey = {};
     nav.forEach(function (n) {
-      if (n.key) hrefByKey[n.key] = n.href || 'abaya.html';
+      if (n.key) hrefByKey[n.key] = n.href || '/abaya';
     });
     var out = [];
     Object.keys(all).forEach(function (key) {
@@ -179,7 +181,7 @@
         if (!p || !p.name) return;
         out.push({
           name: p.name,
-          href: hrefByKey[key] || 'abaya.html',
+          href: hrefByKey[key] || '/abaya',
           key: key
         });
       });
@@ -293,7 +295,7 @@
               break;
             }
           }
-          window.location.href = siteAsset(first ? first.href : 'abaya.html') + '?q=' + encodeURIComponent(q);
+          window.location.href = (first ? first.href : '/abaya') + '?q=' + encodeURIComponent(q);
         });
       });
     }

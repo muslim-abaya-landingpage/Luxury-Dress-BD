@@ -437,15 +437,15 @@ window.CATEGORY_META = {
 
 /** Shared nav + hub tiles (anzaar-style All Categories page) */
 window.CATEGORY_NAV = [
-  { key: "abaya", href: "abaya.html", label: "ABAYA", image: "images/Baby-Pink-Floral-Print.jpeg" },
-  { key: "cover-up", href: "cover-up.html", label: "COVER UP", image: "images/Royal-Blue-Golden-Floral-Print.jpeg" },
-  { key: "kaftan", href: "kaftan.html", label: "KAFTAN", image: "images/Baby-Pink-Floral-Print.jpeg" },
-  { key: "tops-kurti", href: "tops-kurti.html", label: "TOPS/ KURTI", image: "images/Black-White-Polka-Dots.jpeg" },
-  { key: "hijab", href: "hijab.html", label: "HIJAB", image: "images/Black-White-Polka-Dots.jpeg" },
-  { key: "premium-two-piece", href: "premium-two-piece.html", label: "PREMIUM TWO-PIECE", image: "images/pink-floral-printed-co-ord-set.jpeg" },
-  { key: "embroidery", href: "embroidery.html", label: "EMBROIDERY", image: "images/Black-Base-Rose-Floral.jpeg" },
-  { key: "karchupi", href: "karchupi.html", label: "KARCHUPI", image: "images/Black-Base-Rose-Floral.jpeg" },
-  { key: "video", href: "video.html", label: "VIDEO", image: "images/Royal-Blue-Golden-Floral-Print.jpeg" }
+  { key: "abaya", href: "/abaya", label: "ABAYA", image: "images/Baby-Pink-Floral-Print.jpeg" },
+  { key: "cover-up", href: "/cover-up", label: "COVER UP", image: "images/Royal-Blue-Golden-Floral-Print.jpeg" },
+  { key: "kaftan", href: "/kaftan", label: "KAFTAN", image: "images/Baby-Pink-Floral-Print.jpeg" },
+  { key: "tops-kurti", href: "/tops-kurti", label: "TOPS/ KURTI", image: "images/Black-White-Polka-Dots.jpeg" },
+  { key: "hijab", href: "/hijab", label: "HIJAB", image: "images/Black-White-Polka-Dots.jpeg" },
+  { key: "premium-two-piece", href: "/premium-two-piece", label: "PREMIUM TWO-PIECE", image: "images/pink-floral-printed-co-ord-set.jpeg" },
+  { key: "embroidery", href: "/embroidery", label: "EMBROIDERY", image: "images/Black-Base-Rose-Floral.jpeg" },
+  { key: "karchupi", href: "/karchupi", label: "KARCHUPI", image: "images/Black-Base-Rose-Floral.jpeg" },
+  { key: "video", href: "/video", label: "VIDEO", image: "images/Royal-Blue-Golden-Floral-Print.jpeg" }
 ];
 
 /** Display names for product `color` keys — new colors auto-appear in filters when added to products. */
