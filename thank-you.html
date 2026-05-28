@@ -72,31 +72,17 @@
     <script src="cart-utils.js"></script>
     <script>
       (function () {
-        function readCartTotal() {
-          var keys = ['secured_checkout_cart', 'cart', 'user_cart'];
-          for (var i = 0; i < keys.length; i++) {
-            try {
-              var raw = localStorage.getItem(keys[i]);
-              if (!raw) continue;
-              var arr = JSON.parse(raw);
-              if (!Array.isArray(arr)) continue;
-              var total = 0;
-              arr.forEach(function (line) {
-                var qty = parseInt(line.quantity, 10) || 0;
-                var price = parseFloat(line.price) || 0;
-                total += qty * price;
-              });
-              if (total > 0) return total;
-            } catch (e) {}
-          }
-          return 550;
+        var saved = typeof readOrderTracking === 'function' ? readOrderTracking() : null;
+        var extra = {};
+        if (!saved || !saved.transaction_id) {
+          extra.transaction_id = 'order_' + Date.now();
+          extra.event_id = extra.transaction_id;
         }
-        var fallbackValue = readCartTotal();
         if (typeof pushPurchaseCompleteEvent === 'function') {
-          pushPurchaseCompleteEvent({ order_value: fallbackValue, currency: 'BDT' });
-        } else {
+          pushPurchaseCompleteEvent(extra);
+        } else if (saved) {
           window.dataLayer = window.dataLayer || [];
-          window.dataLayer.push({ event: 'purchase_complete', order_value: fallbackValue, currency: 'BDT' });
+          window.dataLayer.push(Object.assign({ event: 'purchase_complete' }, saved, extra));
         }
         if (typeof clearOrderTracking === 'function') clearOrderTracking();
       })();
@@ -111,8 +97,8 @@
         <div class="icon"><i class="fas fa-check"></i></div>
         <p class="thank-message">ধন্যবাদ! আপনার অর্ডার আমরা পেয়েছি। আমাদের প্রতিনিধি খুব শীঘ্রই ফোন করে কনফার্ম করবেন।</p>
         <div class="actions">
-            <a href="index.html" class="btn btn-dark"><i class="fas fa-shopping-bag"></i> আরও কেনাকাটা করুন</a>
-            <a href="checkout.html" class="btn btn-light">অর্ডার স্ট্যাটাস দেখুন</a>
+            <a href="/" class="btn btn-dark"><i class="fas fa-shopping-bag"></i> আরও কেনাকাটা করুন</a>
+            <a href="/checkout" class="btn btn-light">অর্ডার স্ট্যাটাস দেখুন</a>
         </div>
     </div>
     <script>

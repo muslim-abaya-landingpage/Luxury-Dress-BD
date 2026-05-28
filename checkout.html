@@ -1003,19 +1003,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             })
             .then(function () {
                 var eventId = 'order_' + Date.now();
+                var cartSnap = typeof buildCartTrackingSnapshot === 'function'
+                    ? buildCartTrackingSnapshot(cart)
+                    : { value: parseFloat(gTotal) || 0, currency: 'BDT' };
                 if (typeof saveOrderTracking === 'function') {
-                    saveOrderTracking({
+                    saveOrderTracking(Object.assign({}, cartSnap, {
                         first_name: nameValue,
                         phone: phoneValue,
                         order_value: parseFloat(gTotal) || 0,
+                        value: parseFloat(gTotal) || 0,
                         order_items: productsLabel(),
                         transaction_id: eventId,
+                        event_id: eventId,
                         currency: 'BDT'
-                    });
+                    }));
                 }
                 if (typeof clearStoreCart === 'function') clearStoreCart();
                 try { sessionStorage.removeItem('muslim_abaya_home_cart_active'); } catch (e) {}
-                window.location.href = 'thank-you.html';
+                window.location.href = '/thank-you';
             })
             .catch(function () {
                 alert('সংযোগ সমস্যা। আবার চেষ্টা করুন।');
@@ -1044,7 +1049,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         displayOrder();
         persistCart();
         if (typeof pushTrackingEvent === 'function') {
-            pushTrackingEvent('InitiateCheckout', { currency: 'BDT' });
+            var checkoutSnap = typeof buildCartTrackingSnapshot === 'function'
+                ? buildCartTrackingSnapshot(cart)
+                : { currency: 'BDT', value: cartSubtotal() };
+            pushTrackingEvent('InitiateCheckout', checkoutSnap);
         }
     });
 </script>

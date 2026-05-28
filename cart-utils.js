@@ -221,10 +221,115 @@
 
   var ORDER_TRACKING_KEY = "muslim_abaya_order_tracking";
 
+  /** E.164 for Meta / GTM (Bangladesh). */
+  function normalizePhoneE164(phone) {
+    var digits = String(phone || "").replace(/\D/g, "");
+    if (!digits) return "";
+    if (digits.indexOf("880") === 0 && digits.length >= 12) return digits.slice(0, 13);
+    if (digits.indexOf("01") === 0 && digits.length === 11) return "880" + digits.slice(1);
+    if (digits.length === 10 && digits.charAt(0) === "1") return "880" + digits;
+    return digits;
+  }
+
+  function splitFullName(name) {
+    var parts = String(name || "")
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+    if (!parts.length) return { user_first_name: "", user_last_name: "" };
+    if (parts.length === 1) return { user_first_name: parts[0], user_last_name: "" };
+    return { user_first_name: parts[0], user_last_name: parts.slice(1).join(" ") };
+  }
+
+  function cartLinesToContentIds(lines) {
+    if (!Array.isArray(lines)) return [];
+    return lines
+      .map(function (line) {
+        return line && (line.id || line.name) ? String(line.id || line.name) : "";
+      })
+      .filter(Boolean);
+  }
+
+  /** Standard fields for GTM → Meta Pixel (Advanced Matching). */
+  function applyMetaTrackingFields(payload) {
+    if (!payload || typeof payload !== "object") return {};
+    var out = {};
+    var k;
+    for (k in payload) {
+      if (Object.prototype.hasOwnProperty.call(payload, k)) out[k] = payload[k];
+    }
+
+    var phoneRaw = out.user_phone || out.phone || "";
+    var e164 = normalizePhoneE164(phoneRaw);
+    if (e164) {
+      out.user_phone = e164;
+      if (!out.phone) out.phone = phoneRaw;
+    }
+
+    var nameSrc = out.user_first_name || out.first_name || "";
+    if (nameSrc && !out.user_last_name) {
+      var split = splitFullName(nameSrc);
+      out.user_first_name = split.user_first_name;
+      if (split.user_last_name) out.user_last_name = split.user_last_name;
+    } else if (out.first_name && !out.user_first_name) {
+      var split2 = splitFullName(out.first_name);
+      out.user_first_name = split2.user_first_name;
+      if (split2.user_last_name) out.user_last_name = split2.user_last_name;
+    }
+
+    var email = out.user_email || out.email;
+    if (email) out.user_email = String(email).trim().toLowerCase();
+
+    var eventId = out.event_id || out.transaction_id || "";
+    if (eventId) {
+      out.event_id = String(eventId);
+      out.transaction_id = String(out.transaction_id || eventId);
+    }
+
+    if (typeof out.value === "undefined" && typeof out.order_value !== "undefined") {
+      out.value = parseFloat(out.order_value) || 0;
+    }
+    if (typeof out.order_value === "undefined" && typeof out.value !== "undefined") {
+      out.order_value = out.value;
+    }
+
+    if (!out.content_ids && out.content_id) {
+      out.content_ids = [String(out.content_id)];
+    }
+
+    out.currency = out.currency || "BDT";
+    return out;
+  }
+
+  function buildCartTrackingSnapshot(cartLines) {
+    var lines = Array.isArray(cartLines) ? cartLines : [];
+    var value = 0;
+    var contents = [];
+    lines.forEach(function (line) {
+      if (!line) return;
+      var q = parseInt(line.quantity, 10) || 1;
+      var price = parseInt(line.price, 10) || 0;
+      value += q * price;
+      contents.push({
+        id: line.id || line.name || "",
+        quantity: q,
+        item_price: price
+      });
+    });
+    return {
+      value: value,
+      order_value: value,
+      currency: "BDT",
+      content_ids: cartLinesToContentIds(lines),
+      contents: contents,
+      num_items: cartTotalQty(lines)
+    };
+  }
+
   function saveOrderTracking(payload) {
     if (!payload) return;
     try {
-      sessionStorage.setItem(ORDER_TRACKING_KEY, JSON.stringify(payload));
+      sessionStorage.setItem(ORDER_TRACKING_KEY, JSON.stringify(applyMetaTrackingFields(payload)));
     } catch (e) {}
   }
 
@@ -246,14 +351,14 @@
 
   function pushTrackingEvent(eventName, data) {
     if (!eventName) return;
-    var payload = { event: eventName };
+    var base = { event: eventName };
     if (data && typeof data === "object") {
       var k;
       for (k in data) {
-        if (Object.prototype.hasOwnProperty.call(data, k)) payload[k] = data[k];
+        if (Object.prototype.hasOwnProperty.call(data, k)) base[k] = data[k];
       }
     }
-    if (!payload.currency) payload.currency = "BDT";
+    var payload = applyMetaTrackingFields(base);
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push(payload);
     return payload;
@@ -271,17 +376,14 @@
         if (Object.prototype.hasOwnProperty.call(extra, k)) merged[k] = extra[k];
       }
     }
-    if (!merged.transaction_id) {
+    if (!merged.transaction_id && !merged.event_id) {
       merged.transaction_id = "order_" + Date.now();
     }
     merged.event = "purchase_complete";
-    merged.currency = merged.currency || "BDT";
-    if (typeof merged.order_value === "undefined" && typeof merged.value !== "undefined") {
-      merged.order_value = merged.value;
-    }
+    var payload = applyMetaTrackingFields(merged);
     window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push(merged);
-    return merged;
+    window.dataLayer.push(payload);
+    return payload;
   }
 
   global.refreshCartBadgeUI = refreshCartBadgeUI;
@@ -293,4 +395,7 @@
   global.clearOrderTracking = clearOrderTracking;
   global.pushPurchaseCompleteEvent = pushPurchaseCompleteEvent;
   global.pushTrackingEvent = pushTrackingEvent;
+  global.normalizePhoneE164 = normalizePhoneE164;
+  global.buildCartTrackingSnapshot = buildCartTrackingSnapshot;
+  global.applyMetaTrackingFields = applyMetaTrackingFields;
 })(typeof window !== "undefined" ? window : this);
