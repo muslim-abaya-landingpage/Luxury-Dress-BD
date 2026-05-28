@@ -7,6 +7,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 799,
       color: "maroon",
+      colorLabel: "Maroon",
       fabric: "দুবাই চেরি",
       sizes: ["50", "52", "54", "56"]
     },
@@ -17,6 +18,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 799,
       color: "maroon",
+      colorLabel: "Maroon",
       fabric: "দুবাই চেরি",
       sizes: ["50", "52", "54", "56"]
     },
@@ -27,6 +29,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 799,
       color: "maroon",
+      colorLabel: "Maroon",
       fabric: "দুবাই চেরি",
       sizes: ["50", "52", "54", "56"]
     },
@@ -37,6 +40,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 799,
       color: "black",
+      colorLabel: "Classic Black",
       fabric: "দুবাই চেরি",
       sizes: ["50", "52", "54", "56"]
     },
@@ -47,6 +51,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 799,
       color: "black",
+      colorLabel: "Classic Black",
       fabric: "দুবাই চেরি",
       sizes: ["50", "52", "54", "56"]
     },
@@ -57,6 +62,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 799,
       color: "black",
+      colorLabel: "Classic Black",
       fabric: "দুবাই চেরি",
       sizes: ["50", "52", "54", "56"]
     },
@@ -67,6 +73,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 1550,
       color: "black",
+      colorLabel: "Classic Black",
       fabric: "Dubai Cherry",
       sizes: ["50", "52", "54", "56"]
     },
@@ -77,6 +84,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 1550,
       color: "black",
+      colorLabel: "Classic Black",
       fabric: "Dubai Cherry",
       sizes: ["50", "52", "54", "56"]
     },
@@ -87,6 +95,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 1550,
       color: "black",
+      colorLabel: "Classic Black",
       fabric: "Dubai Cherry",
       sizes: ["50", "52", "54", "56"]
     },
@@ -97,6 +106,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 1650,
       color: "black",
+      colorLabel: "Classic Black",
       fabric: "Dubai Cherry",
       sizes: ["50", "52", "54", "56"]
     },
@@ -107,6 +117,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 1650,
       color: "black",
+      colorLabel: "Classic Black",
       fabric: "Dubai Cherry",
       sizes: ["50", "52", "54", "56"]
     },
@@ -117,6 +128,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 1650,
       color: "black",
+      colorLabel: "Classic Black",
       fabric: "Dubai Cherry",
       sizes: ["50", "52", "54", "56"]
     }
@@ -129,6 +141,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 550,
       color: "blue",
+      colorLabel: "Royal Blue Golden",
       fabric: "এলেক্স সফট জর্জেট",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"]
     },
@@ -139,6 +152,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 550,
       color: "pink",
+      colorLabel: "Baby Pink Floral",
       fabric: "এলেক্স সফট জর্জেট",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"]
     },
@@ -149,6 +163,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 550,
       color: "black",
+      colorLabel: "Black Base Rose",
       fabric: "এলেক্স সফট জর্জেট",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"]
     }
@@ -161,6 +176,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 550,
       color: "black",
+      colorLabel: "Black White Polka",
       fabric: "এলেক্স সফট জর্জেট",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"]
     },
@@ -171,6 +187,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 550,
       color: "pink",
+      colorLabel: "Baby Pink Floral",
       fabric: "এলেক্স সফট জর্জেট",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"]
     },
@@ -181,6 +198,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 550,
       color: "green",
+      colorLabel: "Sage Green Mint",
       fabric: "এলেক্স সফট জর্জেট",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"]
     }
@@ -279,6 +297,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 550,
       color: "blue",
+      colorLabel: "Royal Blue Golden",
       fabric: "এলেক্স সফট জর্জেট",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"]
     },
@@ -289,6 +308,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 550,
       color: "black",
+      colorLabel: "Black Base Rose",
       fabric: "এলেক্স সফট জর্জেট",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"]
     },
@@ -299,6 +319,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 550,
       color: "pink",
+      colorLabel: "Pink Floral",
       fabric: "এলেক্স সফট জর্জেট",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"]
     }
@@ -311,6 +332,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 550,
       color: "black",
+      colorLabel: "Black Base Rose",
       fabric: "এলেক্স সফট জর্জেট",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"]
     },
@@ -321,6 +343,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 550,
       color: "blue",
+      colorLabel: "Royal Blue Golden",
       fabric: "এলেক্স সফট জর্জেট",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"]
     },
@@ -331,6 +354,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 550,
       color: "pink",
+      colorLabel: "Baby Pink Floral",
       fabric: "এলেক্স সফট জর্জেট",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"]
     }
@@ -351,6 +375,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 550,
       color: "black",
+      colorLabel: "Classic Black Hijab",
       fabric: "সফট শিফন",
       sizes: ["ফ্রি সাইজ"]
     },
@@ -361,6 +386,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 550,
       color: "white",
+      colorLabel: "Soft White",
       fabric: "সফট শিফন",
       sizes: ["ফ্রি সাইজ"]
     },
@@ -371,6 +397,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 550,
       color: "pink",
+      colorLabel: "Rose Pink",
       fabric: "সফট শিফন",
       sizes: ["ফ্রি সাইজ"]
     },
@@ -381,6 +408,7 @@ window.CATEGORY_PRODUCTS = {
       link: "index.html",
       price: 550,
       color: "maroon",
+      colorLabel: "Maroon",
       fabric: "সফট শিফন",
       sizes: ["ফ্রি সাইজ"]
     }

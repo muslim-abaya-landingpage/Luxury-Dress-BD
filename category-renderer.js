@@ -48,18 +48,31 @@ function formatColorKeyLabel(key) {
     });
 }
 
+function getProductColorFilterKey(p) {
+  if (p.colorLabel) return String(p.colorLabel).trim();
+  if (p.color) return String(p.color).trim();
+  return "";
+}
+
+function getProductColorFilterLabel(p, colorMap) {
+  if (p.colorLabel) return String(p.colorLabel).trim();
+  if (p.color && colorMap[p.color] && colorMap[p.color].label) return colorMap[p.color].label;
+  if (p.color) return formatColorKeyLabel(p.color);
+  return "";
+}
+
 function getProductColorOptions(products) {
   var colorMap = window.FILTER_COLOR_MAP || {};
   var seen = {};
   var options = [];
 
   products.forEach(function (p) {
-    var key = String(p.color || "").trim();
+    var key = getProductColorFilterKey(p);
     if (!key || seen[key]) return;
     seen[key] = true;
     options.push({
       key: key,
-      label: (colorMap[key] && colorMap[key].label) || formatColorKeyLabel(key)
+      label: getProductColorFilterLabel(p, colorMap)
     });
   });
 
@@ -646,8 +659,11 @@ function renderCategory(categoryKey) {
 
       var show = true;
 
-      if (filterState.colors.length && (!p.color || filterState.colors.indexOf(p.color) === -1)) {
-        show = false;
+      if (filterState.colors.length) {
+        var productColorKey = getProductColorFilterKey(p);
+        if (!productColorKey || filterState.colors.indexOf(productColorKey) === -1) {
+          show = false;
+        }
       }
 
       if (filterState.priceMin !== null && price < filterState.priceMin) show = false;
