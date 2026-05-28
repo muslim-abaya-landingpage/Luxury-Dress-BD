@@ -479,8 +479,32 @@
             display: flex;
             align-items: flex-start;
             gap: 8px;
+            line-height: 1.6;
         }
-        .terms-box input { width: auto; margin-top: 2px; }
+        .terms-box input {
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+            flex-shrink: 0;
+            accent-color: var(--ink);
+            cursor: pointer;
+        }
+        .terms-box span { flex: 1; }
+        .terms-box a {
+            color: var(--ink);
+            font-weight: 700;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+        .terms-box a:hover { color: #000; }
+        .terms-error {
+            display: none;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #b91c1c;
+            font-weight: 600;
+        }
+        .terms-error.show { display: block; }
         .sticky-order-bar {
             display: none;
             position: fixed;
@@ -590,6 +614,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <button type="submit" id="submitBtn" class="btn-confirm">অর্ডার কনফার্ম করুন</button>
                 </form>
             </div>
+            <div class="card-block">
+                <h3 class="section-label"><span>বিশেষ নির্দেশনা <span style="font-size:13px;font-weight:600;color:var(--muted);">(ঐচ্ছিক)</span></span></h3>
+                <textarea id="specialNotes" rows="3" maxlength="200" placeholder="আপনার কোনো বিশেষ নির্দেশনা থাকলে লিখুন"></textarea>
+                <div style="font-size:12px; color:#6b7280; text-align:right;"><span id="noteCount">0</span>/200</div>
+                <label class="terms-box">
+                    <input type="checkbox" id="agreeTerms">
+                    <span>আমি <a href="terms.html" target="_blank" rel="noopener">Terms & Conditions</a> এবং <a href="refund.html" target="_blank" rel="noopener">Privacy / Refund Policy</a> পড়েছি এবং সম্মত আছি।</span>
+                </label>
+                <div id="termsError" class="terms-error">অর্ডার সম্পন্ন করতে Terms & Conditions-এ টিক দিন।</div>
+            </div>
         </div>
         <aside class="checkout-aside">
             <div class="card-block">
@@ -638,15 +672,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <div style="margin-top:8px;">
                     ব্যাংকে পেমেন্ট করলে: Account Name, Account Number, Bank Name, Branch Name, Transaction/Slip Ref যুক্ত করুন।
                 </div>
-            </div>
-            <div class="card-block">
-                <h3 class="section-label"><span>বিশেষ নির্দেশনা <span style="font-size:13px;font-weight:600;color:var(--muted);">(ঐচ্ছিক)</span></span></h3>
-                <textarea id="specialNotes" rows="3" maxlength="200" placeholder="আপনার কোনো বিশেষ নির্দেশনা থাকলে লিখুন"></textarea>
-                <div style="font-size:12px; color:#6b7280; text-align:right;"><span id="noteCount">0</span>/200</div>
-                <label class="terms-box">
-                    <input type="checkbox" id="agreeTerms">
-                    <span>I have read and agree to the <a href="terms.html">Terms and Conditions</a>, <a href="refund.html">Privacy Policy & Refund and Return Policy</a>.</span>
-                </label>
             </div>
         </aside>
     </div>
@@ -916,6 +941,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 if (form) form.requestSubmit();
             });
         }
+        var agreeTerms = document.getElementById('agreeTerms');
+        var termsError = document.getElementById('termsError');
+        if (agreeTerms && termsError) {
+            agreeTerms.addEventListener('change', function () {
+                if (agreeTerms.checked) termsError.classList.remove('show');
+            });
+        }
     })();
 
     var orderForm = document.getElementById('orderForm');
@@ -956,11 +988,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 return;
             }
             var agreeTerms = document.getElementById('agreeTerms');
+            var termsError = document.getElementById('termsError');
             if (agreeTerms && !agreeTerms.checked) {
-                alert('অর্ডার সম্পন্ন করতে Terms and Conditions এ সম্মতি দিন।');
+                if (termsError) termsError.classList.add('show');
                 agreeTerms.focus();
                 return;
             }
+            if (termsError) termsError.classList.remove('show');
 
             var btn = document.getElementById('submitBtn');
             if (btn) {
@@ -1026,7 +1060,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 alert('সংযোগ সমস্যা। আবার চেষ্টা করুন।');
                 if (btn) {
                     btn.disabled = false;
-                    btn.innerText = 'অর্ডার সম্পন্ন করুন';
+                    btn.innerText = 'অর্ডার কনফার্ম করুন';
                 }
             });
         });
@@ -1057,7 +1091,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     });
 </script>
 <div id="site-footer-mount"></div>
-<script src="cart-utils.js"></script>
 <script src="site-header.js"></script>
 <script src="site-footer.js"></script>
 </body>
