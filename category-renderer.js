@@ -4,7 +4,7 @@ function ensureCategoryStyles() {
   var link = document.createElement("link");
   link.id = "category-sidebar-css";
   link.rel = "stylesheet";
-  link.href = "category-sidebar.css?v=20260528e";
+  link.href = "category-sidebar.css?v=20260528f";
   document.head.appendChild(link);
 }
 
@@ -135,7 +135,6 @@ function buildShopSidebar(categoryKey, products) {
             "<input type='checkbox' class='color-filter-check' value='" +
             escapeHtml(opt.key) +
             "'>" +
-            "<span class='color-filter-box' aria-hidden='true'></span>" +
             "<span class='color-filter-name'>" +
             escapeHtml(opt.label) +
             "</span>" +
