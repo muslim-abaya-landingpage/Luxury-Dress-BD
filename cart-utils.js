@@ -349,6 +349,89 @@
     } catch (e) {}
   }
 
+  var TIKTOK_PIXEL_ID = "D6FK9GBC77UC649NNCP0";
+  var TIKTOK_EVENT_MAP = {
+    ViewContent: "ViewContent",
+    AddToCart: "AddToCart",
+    InitiateCheckout: "InitiateCheckout",
+    purchase_complete: "CompletePayment"
+  };
+
+  function ensureTikTokPixelLoaded() {
+    if (typeof window === "undefined" || window.__tiktokPixelInit) return;
+    window.__tiktokPixelInit = true;
+    !function (w, d, t) {
+      w.TiktokAnalyticsObject = t;
+      var ttq = (w[t] = w[t] || []);
+      ttq.methods = [
+        "page", "track", "identify", "instances", "debug", "on", "off", "once", "ready",
+        "alias", "group", "enableCookie", "disableCookie", "holdConsent", "revokeConsent", "grantConsent"
+      ];
+      ttq.setAndDefer = function (obj, method) {
+        obj[method] = function () {
+          obj.push([method].concat(Array.prototype.slice.call(arguments, 0)));
+        };
+      };
+      for (var i = 0; i < ttq.methods.length; i++) ttq.setAndDefer(ttq, ttq.methods[i]);
+      ttq.instance = function (id) {
+        var inst = ttq._i[id] || [];
+        for (var j = 0; j < ttq.methods.length; j++) ttq.setAndDefer(inst, ttq.methods[j]);
+        return inst;
+      };
+      ttq.load = function (id, opts) {
+        var src = "https://analytics.tiktok.com/i18n/pixel/events.js";
+        ttq._i = ttq._i || {};
+        ttq._i[id] = [];
+        ttq._i[id]._u = src;
+        ttq._t = ttq._t || {};
+        ttq._t[id] = +new Date();
+        ttq._o = ttq._o || {};
+        ttq._o[id] = opts || {};
+        var s = d.createElement("script");
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = src + "?sdkid=" + id + "&lib=" + t;
+        var first = d.getElementsByTagName("script")[0];
+        if (first && first.parentNode) first.parentNode.insertBefore(s, first);
+        else d.head.appendChild(s);
+      };
+      ttq.load(TIKTOK_PIXEL_ID);
+      ttq.page();
+    }(window, document, "ttq");
+  }
+
+  function buildTikTokTrackPayload(data) {
+    data = data || {};
+    var out = { currency: data.currency || "BDT" };
+    if (data.value != null) out.value = data.value;
+    else if (data.order_value != null) out.value = data.order_value;
+    var ids = data.content_ids;
+    if (ids) {
+      var first = Array.isArray(ids) ? ids[0] : ids;
+      if (first) out.content_id = String(first);
+    }
+    var tid = data.transaction_id || data.event_id;
+    if (tid) {
+      out.order_id = String(tid);
+      out.event_id = String(tid);
+    }
+    return out;
+  }
+
+  function pushToTikTok(eventName, data) {
+    var ttEvent = TIKTOK_EVENT_MAP[eventName];
+    if (!ttEvent) return;
+    ensureTikTokPixelLoaded();
+    var payload = buildTikTokTrackPayload(data);
+    try {
+      if (window.ttq && typeof window.ttq.track === "function") {
+        window.ttq.track(ttEvent, payload);
+      } else if (window.ttq) {
+        window.ttq.push(["track", ttEvent, payload]);
+      }
+    } catch (e) {}
+  }
+
   function pushTrackingEvent(eventName, data) {
     if (!eventName) return;
     var base = { event: eventName };
@@ -361,6 +444,7 @@
     var payload = applyMetaTrackingFields(base);
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push(payload);
+    pushToTikTok(eventName, payload);
     return payload;
   }
 
@@ -383,10 +467,16 @@
     var payload = applyMetaTrackingFields(merged);
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push(payload);
+    pushToTikTok("purchase_complete", payload);
     return payload;
   }
 
+  if (typeof window !== "undefined") {
+    ensureTikTokPixelLoaded();
+  }
+
   global.refreshCartBadgeUI = refreshCartBadgeUI;
+  global.ensureTikTokPixelLoaded = ensureTikTokPixelLoaded;
   global.markStoreCartSession = markStoreCartSession;
   global.clearStoreCartSession = clearStoreCartSession;
   global.afterCartMutation = afterCartMutation;
