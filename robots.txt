@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Checkout / post-purchase pages — avoid indexing thin or duplicate URLs
+Disallow: /checkout
+Disallow: /thank-you
+Disallow: /success
+
+Sitemap: https://muslimabaya.com/sitemap.xml

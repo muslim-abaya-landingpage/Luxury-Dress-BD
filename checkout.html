@@ -8,7 +8,9 @@
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-ML7RL6BR');</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>চেকআউট - MUSLIM ABAYA</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="canonical" href="https://muslimabaya.com/checkout">
+    <title>চেকআউট - Muslim Abaya | muslimabaya.com</title>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="site-header.css">
     <link rel="stylesheet" href="site-footer.css">
@@ -593,7 +595,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
                     <div class="form-group">
                         <label>মোবাইল নম্বর</label>
-                        <input type="tel" id="userPhone" placeholder="01XXXXXXXXX" required pattern="[0-9]{11}">
+                        <input type="tel" id="userPhone" placeholder="01XXXXXXXXX" required pattern="[0-9]{11}" autocomplete="tel">
+                    </div>
+
+                    <div class="form-group">
+                        <label>ইমেইল <span style="font-size:13px;font-weight:600;color:var(--muted);">(ঐচ্ছিক, ম্যাচিংয়ের জন্য)</span></label>
+                        <input type="email" id="userEmail" placeholder="name@gmail.com" autocomplete="email">
                     </div>
 
                     <div class="form-group">
@@ -962,8 +969,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
             var nameInput = document.getElementById('userName');
             var phoneInput = document.getElementById('userPhone');
+            var emailInput = document.getElementById('userEmail');
             var addrInput = document.getElementById('userAddr');
             var phoneValue = String(phoneInput.value || '').trim().replace(/\s+/g, '');
+            var emailValue = String((emailInput && emailInput.value) || '').trim().toLowerCase();
             var nameValue = String(nameInput.value || '').trim();
             var addrValue = String(addrInput.value || '').trim();
 
@@ -975,6 +984,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             if (!/^01\d{9}$/.test(phoneValue)) {
                 alert('সঠিক ১১ সংখ্যার মোবাইল নম্বর লিখুন (01XXXXXXXXX)।');
                 phoneInput.focus();
+                return;
+            }
+            if (emailValue && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
+                alert('সঠিক ইমেইল ঠিকানা লিখুন।');
+                if (emailInput) emailInput.focus();
                 return;
             }
             if (addrValue.length < 8) {
@@ -1010,6 +1024,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             const formData = new URLSearchParams();
             formData.append('Name', nameValue);
             formData.append('Phone', phoneValue);
+            if (emailValue) formData.append('Email', emailValue);
             formData.append('Address', addrValue);
             formData.append('District', districtParam);
             formData.append('Thana', (document.getElementById('userThana').value || '').trim());
@@ -1040,10 +1055,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 var cartSnap = typeof buildCartTrackingSnapshot === 'function'
                     ? buildCartTrackingSnapshot(cart)
                     : { value: parseFloat(gTotal) || 0, currency: 'BDT' };
+                if (typeof syncTikTokUserFromFormFields === 'function') {
+                    syncTikTokUserFromFormFields();
+                }
                 if (typeof saveOrderTracking === 'function') {
                     saveOrderTracking(Object.assign({}, cartSnap, {
                         first_name: nameValue,
                         phone: phoneValue,
+                        email: emailValue,
+                        user_email: emailValue,
                         order_value: parseFloat(gTotal) || 0,
                         value: parseFloat(gTotal) || 0,
                         order_items: productsLabel(),
@@ -1079,9 +1099,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         }
     });
 
+    function bindCheckoutTikTokMatchSync() {
+        ['userPhone', 'userEmail', 'userName'].forEach(function (id) {
+            var el = document.getElementById(id);
+            if (!el || el.getAttribute('data-tt-match-bound') === '1') return;
+            el.setAttribute('data-tt-match-bound', '1');
+            el.addEventListener('blur', function () {
+                if (typeof syncTikTokUserFromFormFields === 'function') {
+                    syncTikTokUserFromFormFields();
+                }
+            });
+        });
+    }
+
     window.addEventListener('DOMContentLoaded', function() {
         displayOrder();
         persistCart();
+        bindCheckoutTikTokMatchSync();
         if (typeof pushTrackingEvent === 'function') {
             var checkoutSnap = typeof buildCartTrackingSnapshot === 'function'
                 ? buildCartTrackingSnapshot(cart)

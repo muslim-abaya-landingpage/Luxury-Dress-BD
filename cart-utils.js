@@ -400,6 +400,45 @@
     }(window, document, "ttq");
   }
 
+  function formatTikTokPhoneE164(data) {
+    data = data || {};
+    var e164 = data.user_phone || normalizePhoneE164(data.phone || "");
+    if (!e164) return "";
+    var digits = String(e164).replace(/\D/g, "");
+    if (!digits) return "";
+    return "+" + digits;
+  }
+
+  function buildTikTokIdentifyPayload(data) {
+    data = data || {};
+    var out = {};
+    var email = String(data.user_email || data.email || "")
+      .trim()
+      .toLowerCase();
+    if (email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      out.email = email;
+    }
+    var phone = formatTikTokPhoneE164(data);
+    if (phone) out.phone_number = phone;
+    var ext = data.external_id || data.transaction_id || data.event_id;
+    if (!ext && phone) ext = phone.replace(/\D/g, "");
+    if (ext) out.external_id = String(ext);
+    return out;
+  }
+
+  function tikTokIdentify(data) {
+    var idPayload = buildTikTokIdentifyPayload(data);
+    if (!idPayload.email && !idPayload.phone_number && !idPayload.external_id) return;
+    ensureTikTokPixelLoaded();
+    try {
+      if (window.ttq && typeof window.ttq.identify === "function") {
+        window.ttq.identify(idPayload);
+      } else if (window.ttq) {
+        window.ttq.push(["identify", idPayload]);
+      }
+    } catch (e) {}
+  }
+
   function buildTikTokTrackPayload(data) {
     data = data || {};
     var out = { currency: data.currency || "BDT" };
@@ -415,6 +454,10 @@
       out.order_id = String(tid);
       out.event_id = String(tid);
     }
+    var match = buildTikTokIdentifyPayload(data);
+    if (match.email) out.email = match.email;
+    if (match.phone_number) out.phone_number = match.phone_number;
+    if (match.external_id) out.external_id = match.external_id;
     return out;
   }
 
@@ -422,6 +465,7 @@
     var ttEvent = TIKTOK_EVENT_MAP[eventName];
     if (!ttEvent) return;
     ensureTikTokPixelLoaded();
+    tikTokIdentify(data);
     var payload = buildTikTokTrackPayload(data);
     try {
       if (window.ttq && typeof window.ttq.track === "function") {
@@ -430,6 +474,20 @@
         window.ttq.push(["track", ttEvent, payload]);
       }
     } catch (e) {}
+  }
+
+  function syncTikTokUserFromFormFields() {
+    if (typeof document === "undefined") return;
+    var phoneEl = document.getElementById("userPhone");
+    var emailEl = document.getElementById("userEmail");
+    var nameEl = document.getElementById("userName");
+    var raw = {
+      phone: phoneEl ? phoneEl.value : "",
+      email: emailEl ? emailEl.value : "",
+      first_name: nameEl ? nameEl.value : ""
+    };
+    if (!raw.phone && !raw.email) return;
+    tikTokIdentify(applyMetaTrackingFields(raw));
   }
 
   function pushTrackingEvent(eventName, data) {
@@ -477,6 +535,8 @@
 
   global.refreshCartBadgeUI = refreshCartBadgeUI;
   global.ensureTikTokPixelLoaded = ensureTikTokPixelLoaded;
+  global.tikTokIdentify = tikTokIdentify;
+  global.syncTikTokUserFromFormFields = syncTikTokUserFromFormFields;
   global.markStoreCartSession = markStoreCartSession;
   global.clearStoreCartSession = clearStoreCartSession;
   global.afterCartMutation = afterCartMutation;
