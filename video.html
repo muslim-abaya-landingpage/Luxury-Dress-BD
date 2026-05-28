@@ -1,103 +1,284 @@
 <!DOCTYPE html>
-
 <html lang="bn">
-
 <head>
-
   <meta charset="UTF-8">
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Video Collection | Muslim Abaya</title>
-
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
-
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
   <link rel="stylesheet" href="site-header.css">
-
   <link rel="stylesheet" href="site-footer.css">
-
   <style>
-
-    .wrap { max-width: 900px; margin: 0 auto; padding: 16px 12px 24px; }
-
-    .breadcrumb { font-size:13px;color:#666;margin:0 0 14px;display:flex;flex-wrap:wrap;gap:6px;align-items:center; }
-
-    .breadcrumb a { color:#666; text-decoration:none; }
-
-    .breadcrumb strong { color:#111; }
-
-    .card { background:#fff; border:1px solid #e7e7e7; border-radius:12px; padding:18px; }
-
-    .video { position:relative; width:100%; padding-top:56.25%; border-radius:10px; overflow:hidden; background:#000; }
-
-    .video iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
-
-    .help { font-size:14px; color:#555; margin-top:12px; line-height:1.6; }
-
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 16px 12px 24px; }
+    .breadcrumb { font-size: 13px; color: #666; margin: 0 0 14px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .breadcrumb a { color: #666; text-decoration: none; }
+    .breadcrumb strong { color: #111; }
+    .card { background: #fff; border: 1px solid #e7e7e7; border-radius: 12px; padding: 18px; }
+    .page-title { margin: 0 0 16px; font-size: 22px; font-weight: 700; }
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .video-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 0;
+    }
+    .video-cell-title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #222;
+      line-height: 1.35;
+    }
+    .video-wrap {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #000;
+    }
+    .video-wrap iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+    .video-fallback {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      padding: 14px;
+      text-align: center;
+      color: #fff;
+      background: linear-gradient(160deg, #1a1a1a 0%, #333 100%);
+    }
+    .video-fallback.is-visible { display: flex; }
+    .video-fallback p { display: none; }
+    .video-fallback a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 38px;
+      padding: 0 14px;
+      background: #ff0000;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+    .help { font-size: 14px; color: #555; margin-top: 16px; line-height: 1.6; }
+    .local-note {
+      display: none;
+      margin-bottom: 14px;
+      padding: 10px 12px;
+      background: #fff8e6;
+      border: 1px solid #f0e0a8;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #6b5a2a;
+      line-height: 1.5;
+    }
+    .local-note.is-visible { display: block; }
+    .video-empty {
+      grid-column: 1 / -1;
+      padding: 24px;
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+      border: 1px dashed #ddd;
+      border-radius: 8px;
+    }
+    @media (max-width: 900px) {
+      .video-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 520px) {
+      .video-grid { grid-template-columns: 1fr; }
+    }
   </style>
-
 </head>
-
 <body>
-
   <div id="site-header-mount"></div>
-
   <main class="wrap">
-
     <nav class="breadcrumb" aria-label="Breadcrumb">
-
       <a href="/">Home</a><span>›</span><a href="/category">Category</a><span>›</span><strong>Video</strong>
-
     </nav>
-
     <div class="card">
-
-      <h1 id="videoTitle" style="margin:0 0 12px;font-size:22px;">ভিডিও কালেকশন</h1>
-
-      <div class="video">
-
-        <iframe id="featuredVideoFrame" src="" allowfullscreen title="Featured video"></iframe>
-
-      </div>
-
+      <h1 id="videoTitle" class="page-title">ভিডিও কালেকশন</h1>
+      <p id="localFileNote" class="local-note"></p>
+      <div id="videoGrid" class="video-grid" aria-live="polite"></div>
       <p id="videoHelp" class="help"></p>
-
     </div>
-
   </main>
-
   <div id="site-footer-mount"></div>
 
-  <script src="cart-utils.js"></script>
-  <script src="site-header.js"></script>
-
-  <script src="category-products.js"></script>
-
-  <script src="site-footer.js"></script>
-
+  <script defer src="cart-utils.js?v=20260530d"></script>
+  <script defer src="site-header.js?v=20260531"></script>
+  <script defer src="category-products.js"></script>
+  <script defer src="site-api-config.js"></script>
+  <script defer src="site-footer.js"></script>
   <script>
+    (function initVideoPage() {
+      document.querySelectorAll(".breadcrumb a[href]").forEach(function (a) {
+        var href = a.getAttribute("href") || "";
+        if (href.charAt(0) === "/" && typeof window.siteHref === "function") {
+          a.setAttribute("href", window.siteHref(href));
+        }
+      });
 
-    (function loadFeaturedVideo() {
+      function parseYouTubeId(input) {
+        var raw = String(input || "").trim();
+        if (!raw) return "";
+        if (/^[a-zA-Z0-9_-]{11}$/.test(raw)) return raw;
+        var m;
+        m = raw.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+        if (m) return m[1];
+        m = raw.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+        if (m) return m[1];
+        m = raw.match(/embed\/([a-zA-Z0-9_-]{11})/);
+        if (m) return m[1];
+        m = raw.match(/shorts\/([a-zA-Z0-9_-]{11})/);
+        if (m) return m[1];
+        return "";
+      }
+
+      function normalizeVideoList(cfg) {
+        var list = [];
+        if (cfg && Array.isArray(cfg.videos) && cfg.videos.length) {
+          cfg.videos.forEach(function (item, i) {
+            if (!item) return;
+            var id = item.videoId || parseYouTubeId(item.url || item.link || item.watchUrl);
+            if (!id) return;
+            list.push({
+              id: id,
+              title: item.title || "ভিডিও " + (i + 1),
+              watchUrl: item.watchUrl || item.url || "https://www.youtube.com/watch?v=" + id
+            });
+          });
+        } else if (cfg && (cfg.videoId || cfg.url || cfg.watchUrl)) {
+          var legacyId = cfg.videoId || parseYouTubeId(cfg.url || cfg.watchUrl);
+          if (legacyId) {
+            list.push({
+              id: legacyId,
+              title: cfg.title || "ভিডিও ১",
+              watchUrl: cfg.watchUrl || cfg.url || "https://www.youtube.com/watch?v=" + legacyId
+            });
+          }
+        }
+        return list;
+      }
+
+      function embedOrigin() {
+        if (location.protocol === "file:") return "https://muslimabaya.com";
+        try {
+          return location.origin || "https://muslimabaya.com";
+        } catch (e) {
+          return "https://muslimabaya.com";
+        }
+      }
+
+      function buildEmbedSrc(id) {
+        return (
+          "https://www.youtube.com/embed/" +
+          encodeURIComponent(id) +
+          "?rel=0&modestbranding=1&playsinline=1&origin=" +
+          encodeURIComponent(embedOrigin())
+        );
+      }
+
+      function escapeHtml(str) {
+        return String(str || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
 
       var cfg = (window.SITE_MEDIA && window.SITE_MEDIA.featuredVideo) || {};
+      var videos = normalizeVideoList(cfg);
+      var isLocalFile = location.protocol === "file:";
 
       var titleEl = document.getElementById("videoTitle");
-
-      var frame = document.getElementById("featuredVideoFrame");
-
+      var gridEl = document.getElementById("videoGrid");
       var helpEl = document.getElementById("videoHelp");
+      var localNote = document.getElementById("localFileNote");
 
       if (titleEl) titleEl.textContent = cfg.title || "ভিডিও কালেকশন";
+      if (helpEl) {
+        helpEl.textContent =
+          cfg.helpText ||
+          "রিয়েল ভিডিও দেখে প্রোডাক্টের কোয়ালিটি যাচাই করুন, তারপর অর্ডার করুন।";
+      }
 
-      if (frame) frame.src = cfg.embedUrl || "https://www.youtube-nocookie.com/embed/Wyrw0gzKMqk?rel=0&modestbranding=1";
+      if (isLocalFile && localNote) {
+        localNote.textContent =
+          "লোকাল ফাইল (file://) খোলায় এমবেড ভিডিও নাও চলতে পারে — প্রতিটি কার্ডের \"YouTube-এ দেখুন\" ব্যবহার করুন। লাইভ সাইটে সব ভিডিও গ্রিডে চলবে।";
+        localNote.classList.add("is-visible");
+      }
 
-      if (helpEl) helpEl.textContent = cfg.helpText || "রিয়েল ভিডিও দেখে প্রোডাক্টের কোয়ালিটি যাচাই করুন, তারপর অর্ডার করুন।";
+      if (!gridEl) return;
 
+      if (!videos.length) {
+        gridEl.innerHTML =
+          '<p class="video-empty">কোনো ভিডিও যোগ করা হয়নি। <code>category-products.js</code> → <code>SITE_MEDIA.featuredVideo.videos</code> তে YouTube লিংক যোগ করুন।</p>';
+        return;
+      }
+
+      gridEl.innerHTML = videos
+        .map(function (v, index) {
+          var safeTitle = escapeHtml(v.title);
+          var safeWatch = escapeHtml(v.watchUrl);
+          var iframeBlock = isLocalFile
+            ? ""
+            : '<iframe src="' +
+              buildEmbedSrc(v.id) +
+              '" title="' +
+              safeTitle +
+              '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>';
+          var fallbackClass = isLocalFile ? " is-visible" : "";
+          return (
+            '<article class="video-cell">' +
+            '<h2 class="video-cell-title">' +
+            safeTitle +
+            "</h2>" +
+            '<div class="video-wrap">' +
+            iframeBlock +
+            '<div class="video-fallback' +
+            fallbackClass +
+            '">' +
+            '<a href="' +
+            safeWatch +
+            '" target="_blank" rel="noopener noreferrer">YouTube-এ দেখুন</a>' +
+            "</div>" +
+            "</div>" +
+            "</article>"
+          );
+        })
+        .join("");
+
+      function syncBadge() {
+        if (typeof window.syncCartBadgeFromStore === "function") {
+          window.syncCartBadgeFromStore();
+        }
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", syncBadge);
+      } else {
+        syncBadge();
+      }
     })();
-
   </script>
-
 </body>
-
 </html>
-

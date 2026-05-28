@@ -4,44 +4,89 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sign In | Muslim Abaya</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="site-header.css">
   <link rel="stylesheet" href="site-footer.css">
-  <style>
-    .auth-wrap { max-width: 520px; margin: 0 auto; padding: 24px 12px 40px; }
-    .auth-card { background: #fff; border: 1px solid #ececec; border-radius: 10px; padding: 18px; }
-    .auth-card h1 { margin: 0 0 14px; font-size: 28px; }
-    .auth-field { margin-bottom: 12px; }
-    .auth-field label { display: block; font-size: 14px; font-weight: 700; margin-bottom: 5px; }
-    .auth-field input { width: 100%; height: 40px; border: 1px solid #d9d9d9; border-radius: 6px; padding: 0 10px; box-sizing: border-box; }
-    .auth-hint { margin-top: 4px; font-size: 12px; color: #666; }
-    .auth-btn { width: 100%; border: none; border-radius: 6px; height: 42px; background: #111; color: #fff; font-weight: 700; cursor: pointer; }
-    .auth-note { margin-top: 12px; font-size: 13px; color: #444; }
-  </style>
+  <link rel="stylesheet" href="auth-page.css">
 </head>
-<body>
+<body class="auth-page">
   <div id="site-header-mount"></div>
   <main class="auth-wrap">
     <section class="auth-card">
-      <h1>Sign In</h1>
-      <form>
+      <div class="auth-card-head">
+        <h1>Sign In</h1>
+        <p class="auth-lead">Welcome back — sign in to continue checkout faster.</p>
+      </div>
+      <form id="signinForm">
         <div class="auth-field">
           <label for="si-login">Email বা Mobile</label>
-          <input id="si-login" type="text" placeholder="name@gmail.com বা 017XXXXXXXX">
+          <input id="si-login" type="text" placeholder="name@gmail.com বা 017XXXXXXXX" required autocomplete="username">
           <p class="auth-hint">যে ইমেইল/মোবাইল দিয়ে অ্যাকাউন্ট খুলেছেন সেটাই দিন</p>
         </div>
         <div class="auth-field">
           <label for="si-pass">Password</label>
-          <input id="si-pass" type="password" placeholder="******">
+          <input id="si-pass" type="password" placeholder="******" required autocomplete="current-password">
           <p class="auth-hint">আপনার অ্যাকাউন্টের পাসওয়ার্ড লিখুন</p>
         </div>
-        <button type="button" class="auth-btn">Sign In</button>
-        <p class="auth-note">নতুন অ্যাকাউন্ট লাগবে? <a href="signup.html">Sign Up</a></p>
+        <button type="submit" class="auth-btn" id="signinBtn">Sign In</button>
+        <p class="auth-note">নতুন অ্যাকাউন্ট লাগবে? <a href="signup.html" id="signupLink">Sign Up</a></p>
       </form>
     </section>
   </main>
   <div id="site-footer-mount"></div>
   <script src="cart-utils.js"></script>
-  <script src="site-header.js"></script>
+  <script src="site-security.js"></script>
+  <script src="site-api-config.js"></script>
+  <script src="site-api-health.js"></script>
+  <script src="auth-config.js"></script>
+  <script src="auth-api.js"></script>
+  <script defer src="site-header.js?v=20260531"></script>
   <script src="site-footer.js"></script>
+  <script>
+    (function () {
+      if (typeof checkSiteApiHealth === 'function') {
+        checkSiteApiHealth().then(function (h) {
+          if (!h.ok) {
+            var b = document.createElement('p');
+            b.style.cssText = 'background:#fff3cd;padding:10px;border-radius:6px;font-size:13px;margin:0 0 12px';
+            b.innerHTML = (h.message || 'API বন্ধ') + ' — ফোল্ডারে <strong>START-HERE.bat</strong> ডাবল-ক্লিক করুন বা <a href="api-setup.html">api-setup</a>';
+            var card = document.querySelector('.auth-card');
+            if (card) card.insertBefore(b, card.firstChild);
+          }
+        });
+      }
+      var form = document.getElementById('signinForm');
+      if (!form) return;
+      var params = new URLSearchParams(window.location.search);
+      var nextUrl = params.get('next') || 'checkout.html';
+      var signupLink = document.getElementById('signupLink');
+      if (signupLink && params.get('next')) {
+        signupLink.href = 'signup.html?next=' + encodeURIComponent(params.get('next'));
+      }
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var login = document.getElementById('si-login').value.trim();
+        var pass = document.getElementById('si-pass').value;
+        if (!login || !pass) {
+          alert('ইমেইল/মোবাইল ও পাসওয়ার্ড দিন।');
+          return;
+        }
+        var btn = document.getElementById('signinBtn');
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+        MaAuth.login({ login: login, password: pass })
+          .then(function () {
+            window.location.href = nextUrl;
+          })
+          .catch(function (err) {
+            alert((err && err.message) || 'লগইন ব্যর্থ। ইমেইল/মোবাইল ও পাসওয়ার্ড চেক করুন।');
+          })
+          .finally(function () {
+            btn.disabled = false;
+            btn.textContent = 'Sign In';
+          });
+      });
+    })();
+  </script>
 </body>
 </html>

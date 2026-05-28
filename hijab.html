@@ -4,23 +4,34 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hijab Collection | Muslim Abaya</title>
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="site-header.css" as="style">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
   <link rel="stylesheet" href="site-header.css">
   <link rel="stylesheet" href="site-footer.css">
-  <link rel="stylesheet" href="shop-page.css?v=1">
-  <link rel="stylesheet" href="category-sidebar.css?v=20260530" id="category-sidebar-css">
+  <link rel="stylesheet" href="shop-page.css?v=20260605">
+  <link rel="stylesheet" href="category-sidebar.css?v=20260614" id="category-sidebar-css">
 </head>
-<body>
+<body data-shop-category="hijab">
   <div id="site-header-mount"></div>
   <main class="wrap">
     <div id="list"></div>
   </main>
   <div id="site-footer-mount"></div>
-  <script src="cart-utils.js"></script>
-  <script src="site-header.js"></script>
-  <script src="category-products.js"></script>
-  <script src="category-renderer.js"></script>
-  <script src="site-footer.js"></script>
-  <script>bootShopCategory("hijab");</script>
+  <script defer src="cart-utils.js?v=20260530d"></script>
+  <script defer src="site-header.js?v=20260531"></script>
+  <script defer src="product-catalog-sections.js?v=20260535"></script>
+  <script defer src="product-catalog-sync.js?v=20260608"></script>
+  <script defer src="product-config.js?v=20260605"></script>
+  <script defer src="product-utils.js?v=20260535"></script>
+  <script defer src="category-products.js?v=20260535"></script>
+  <script defer src="product-links-data.js?v=20260535"></script>
+  <script defer src="product-catalog-loader.js?v=20260535"></script>
+  <script defer src="category-renderer.js?v=20260614"></script>
+  <script defer src="site-api-config.js"></script>
+  <script defer src="site-footer.js"></script>
+  <script defer src="shop-category-boot.js?v=20260535"></script>
 </body>
 </html>

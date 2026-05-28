@@ -1,0 +1,191 @@
+.pl-admin {
+  margin: 0;
+  font-family: "Hind Siliguri", system-ui, sans-serif;
+  background: #f4f4f5;
+  color: #1a1a1a;
+  min-height: 100vh;
+}
+
+.pl-admin-header {
+  background: #111;
+  color: #fff;
+  padding: 20px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+.pl-admin-header h1 {
+  margin: 0 0 6px;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.pl-admin-header p {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+
+.pl-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.pl-btn {
+  border: none;
+  border-radius: 6px;
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.pl-btn-primary {
+  background: #c9a227;
+  color: #111;
+}
+
+.pl-btn-primary:hover {
+  background: #dbb42e;
+}
+
+.pl-btn-secondary {
+  background: #333;
+  color: #fff;
+}
+
+.pl-btn-secondary:hover {
+  background: #444;
+}
+
+.pl-main {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.pl-steps {
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 20px;
+  border: 1px solid #e5e5e5;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.pl-steps ol {
+  margin: 8px 0 0;
+  padding-left: 1.2rem;
+}
+
+.pl-section {
+  background: #fff;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  border: 1px solid #e5e5e5;
+  overflow: hidden;
+}
+
+.pl-section-head {
+  background: linear-gradient(90deg, #1a1a1a, #333);
+  color: #fff;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pl-section-head h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.pl-section-meta {
+  display: block;
+  font-size: 0.78rem;
+  opacity: 0.9;
+  margin-top: 4px;
+}
+
+.pl-preview-page {
+  color: #c9a227;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.pl-preview-page:hover {
+  text-decoration: underline;
+}
+
+.pl-section-body {
+  padding: 12px 16px 16px;
+}
+
+.pl-section-body label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #555;
+}
+
+.pl-section-body textarea {
+  width: 100%;
+  min-height: 120px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 10px;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+.pl-count {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 6px;
+}
+
+.pl-toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #111;
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+  z-index: 100;
+}
+
+.pl-toast.show {
+  opacity: 1;
+}
+
+.pl-back {
+  color: #c9a227;
+  text-decoration: none;
+  font-size: 0.85rem;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.pl-back:hover {
+  text-decoration: underline;
+}

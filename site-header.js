@@ -1,6 +1,24 @@
 (function () {
   var GTM_ID = 'GTM-ML7RL6BR';
 
+  (function injectEarlyHints() {
+    if (!document.head) return;
+    var added = {};
+    function hint(rel, href, crossOrigin) {
+      if (!href || added[href]) return;
+      added[href] = true;
+      var link = document.createElement('link');
+      link.rel = rel;
+      link.href = href;
+      if (crossOrigin) link.crossOrigin = 'anonymous';
+      document.head.appendChild(link);
+    }
+    hint('preconnect', 'https://fonts.googleapis.com');
+    hint('preconnect', 'https://fonts.gstatic.com', true);
+    hint('dns-prefetch', 'https://www.googletagmanager.com');
+    hint('dns-prefetch', 'https://www.youtube.com');
+  })();
+
   function getSiteRoot() {
     var path = window.location.pathname || '/';
     var slash = path.lastIndexOf('/');
@@ -14,6 +32,99 @@
     var root = getSiteRoot();
     return root + path.replace(/^\//, '');
   }
+
+  var SITE_ROUTE_FILES = {
+    '/': 'index.html',
+    '/abaya': 'abaya.html',
+    '/cover-up': 'cover-up.html',
+    '/tops-kurti': 'tops-kurti.html',
+    '/premium-two-piece': 'premium-two-piece.html',
+    '/embroidery': 'embroidery.html',
+    '/karchupi': 'karchupi.html',
+    '/kaftan': 'kaftan.html',
+    '/hijab': 'hijab.html',
+    '/video': 'video.html',
+    '/category': 'category.html',
+    '/checkout': 'checkout.html',
+    '/product-links': 'product-links.html',
+    '/product-manager': 'product-manager.html',
+    '/about': 'about.html',
+    '/help': 'help.html',
+    '/signin': 'signin.html',
+    '/signup': 'signup.html',
+    '/terms': 'terms.html',
+    '/refund': 'refund.html',
+    '/thank-you': 'thank-you.html',
+    '/success': 'success.html'
+  };
+
+  function siteHref(route) {
+    var r = String(route || '/').split('?')[0];
+    var query = String(route || '').indexOf('?') >= 0 ? '?' + String(route).split('?').slice(1).join('?') : '';
+    if (!r || r === '/') return siteAsset(SITE_ROUTE_FILES['/']) + query;
+    if (r.charAt(0) !== '/') r = '/' + r;
+    if (/\.html?$/i.test(r)) return siteAsset(r.replace(/^\//, '')) + query;
+    var file = SITE_ROUTE_FILES[r];
+    if (!file && window.CATALOG_SECTIONS) {
+      var sections = window.CATALOG_SECTIONS;
+      for (var si = 0; si < sections.length; si++) {
+        var sec = sections[si];
+        if (sec.path === r || "/" + sec.key === r) {
+          file = sec.page;
+          break;
+        }
+      }
+    }
+    return siteAsset(file || r.replace(/^\//, '') + '.html') + query;
+  }
+
+  function applyDynamicNavMenu() {
+    var sections = window.CATALOG_SECTIONS;
+    if (!sections || !sections.length) return;
+    var items = sections.map(function (sec) {
+      return { href: sec.path || "/" + sec.key, label: sec.menu };
+    });
+    items.push({ href: "/video", label: "VIDEO" });
+    var desktop = document.querySelector(".desktop-menu ul");
+    if (desktop) {
+      desktop.innerHTML = items
+        .map(function (it) {
+          return "<li><a href=\"" + it.href + "\">" + it.label + "</a></li>";
+        })
+        .join("");
+    }
+    var mobile = document.querySelector("#mobileMenuPanel ul");
+    if (mobile) {
+      mobile.innerHTML =
+        items
+          .map(function (it) {
+            return (
+              '<li><a href="' +
+              it.href +
+              '" onclick="window.toggleAbayaMenu()">' +
+              it.label +
+              "</a></li>"
+            );
+          })
+          .join("") +
+        '<li><a href="/category" onclick="window.toggleAbayaMenu()">ALL CATEGORIES</a></li>' +
+        '<li><a href="/" onclick="window.toggleAbayaMenu()">HOME</a></li>';
+    }
+    var mount = document.getElementById("site-header-mount");
+    if (mount) fixHeaderLinks(mount);
+  }
+
+  function fixHeaderLinks(root) {
+    if (!root) return;
+    root.querySelectorAll('a[href]').forEach(function (a) {
+      var href = a.getAttribute('href') || '';
+      if (!href || href.indexOf('http') === 0 || href.indexOf('mailto:') === 0 || href.indexOf('tel:') === 0 || href.indexOf('#') === 0) return;
+      if (href.charAt(0) === '/') a.setAttribute('href', siteHref(href));
+      else if (!/\.html?$/i.test(href) && href.indexOf('?') === -1 && href.indexOf('/') === -1) {
+        a.setAttribute('href', siteAsset(href));
+      }
+    });
+  }
   var ICON_SEARCH =
     '<svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"/><path d="M21 21l-4.5-4.5"/></svg>';
   var ICON_BAG =
@@ -24,6 +135,10 @@
     '<svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4.5"/></svg>';
   var ICON_MENU =
     '<svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>';
+  var ICON_CHEV_LEFT =
+    '<svg class="slider-arrow-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>';
+  var ICON_CHEV_RIGHT =
+    '<svg class="slider-arrow-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
 
   var HEADER_HTML =
     '<header class="abaya-main-header">' +
@@ -47,26 +162,28 @@
     '<button type="button" class="nav-icon-btn" id="navSearchOpen" aria-label="Search" aria-expanded="false">' + ICON_SEARCH + '</button>' +
     '<button type="button" class="cart-drawer-trigger" data-cart-trigger="1" style="position:relative" aria-label="Cart">' + ICON_BAG + '<span id="cart-count">0</span></button>' +
     '<a href="https://wa.me/8801971642683" target="_blank" rel="noopener" aria-label="Message">' + ICON_CHAT + '</a>' +
-    '<a href="/checkout" aria-label="Account">' + ICON_USER + '</a>' +
+    '<a href="/signin" aria-label="Account">' + ICON_USER + '</a>' +
     '<button type="button" class="nav-menu-btn" onclick="window.toggleAbayaMenu()" aria-label="Menu">' + ICON_MENU + '</button>' +
     '</div></div></div>' +
     '<div class="site-search-drawer" id="siteSearchDrawer" aria-hidden="true">' +
-    '<button type="button" class="site-search-close" id="siteSearchClose" aria-label="Close search">&times;</button>' +
-    '<div class="site-search-inner">' +
+    '<div class="custom-container site-search-inner">' +
+    '<div class="site-search-row">' +
     '<form class="site-search-form" id="siteSearchForm" role="search" autocomplete="off">' +
-  ICON_SEARCH +
+    ICON_SEARCH +
     '<input type="search" id="siteSearchInput" name="q" placeholder="Search" autocomplete="off" aria-label="Search products">' +
     '</form>' +
+    '<button type="button" class="site-search-close" id="siteSearchClose" aria-label="Close search">&times;</button>' +
+    '</div>' +
     '<ul class="site-search-results" id="siteSearchResults" hidden></ul>' +
     '</div></div>' +
     '<div class="header-announcement-bar"><div class="custom-container announcement-slider">' +
-    '<button type="button" class="slider-arrow left-arrow" onclick="window.moveAnnouncement(-1)" aria-label="Previous">&#8249;</button>' +
+    '<button type="button" class="slider-arrow left-arrow" onclick="window.moveAnnouncement(-1)" aria-label="Previous">' + ICON_CHEV_LEFT + '</button>' +
     '<div class="announcement-content">' +
     '<div class="ann-slide active">EID COLLECTION 2026 – WHERE ELEGANCE MEETS CELEBRATION</div>' +
     '<div class="ann-slide">সারা দেশে দ্রুত ডেলিভারি • ক্যাশ অন হোম ডেলিভারি</div>' +
     '<div class="ann-slide">৩টি ড্রেস কিনুন, ফ্রি ডেলিভারি সুবিধা</div>' +
     '</div>' +
-    '<button type="button" class="slider-arrow right-arrow" onclick="window.moveAnnouncement(1)" aria-label="Next">&#8250;</button>' +
+    '<button type="button" class="slider-arrow right-arrow" onclick="window.moveAnnouncement(1)" aria-label="Next">' + ICON_CHEV_RIGHT + '</button>' +
     '</div></div>' +
     '</header>' +
     '<div class="menu-overlay" id="menuOverlay" onclick="window.toggleAbayaMenu()"></div>' +
@@ -123,7 +240,7 @@
       if (Array.isArray(cartLines) && typeof cartTotalQty === 'function') {
         total = cartTotalQty(cartLines);
       } else if (typeof cartTotalQty === 'function' && typeof loadStoreCart === 'function') {
-        total = cartTotalQty(loadStoreCart());
+        total = cartTotalQty(loadStoreCart({ readOnly: true }));
       } else {
         var raw = localStorage.getItem('secured_checkout_cart') || localStorage.getItem('cart') || localStorage.getItem('user_cart') || '[]';
         var parsed = JSON.parse(raw);
@@ -151,18 +268,33 @@
     }
     if (!catalogLoadPromise) {
       catalogLoadPromise = new Promise(function (resolve) {
-        var existing = document.querySelector('script[src*="category-products.js"]');
-        if (existing) {
-          existing.addEventListener('load', resolve, { once: true });
-          if (window.CATEGORY_PRODUCTS) resolve();
+        if (window.CATEGORY_PRODUCTS && window.CATEGORY_NAV) {
+          resolve();
           return;
         }
-        var s = document.createElement('script');
-        s.src = siteAsset('category-products.js');
-        s.async = true;
-        s.onload = function () { resolve(); };
-        s.onerror = function () { resolve(); };
-        document.head.appendChild(s);
+        function loadScript(file) {
+          return new Promise(function (done) {
+            var src = siteAsset(file);
+            if (document.querySelector('script[src*="' + file.split('?')[0] + '"]')) {
+              done();
+              return;
+            }
+            var s = document.createElement('script');
+            s.src = src;
+            s.async = true;
+            s.onload = function () { done(); };
+            s.onerror = function () { done(); };
+            document.head.appendChild(s);
+          });
+        }
+        loadScript('product-catalog-sections.js?v=20260535')
+          .then(function () { return loadScript('product-catalog-sync.js?v=20260608'); })
+          .then(function () { return loadScript('product-config.js?v=20260535'); })
+          .then(function () { return loadScript('product-utils.js?v=20260535'); })
+          .then(function () { return loadScript('category-products.js?v=20260535'); })
+          .then(function () { return loadScript('product-links-data.js?v=20260535'); })
+          .then(function () { return loadScript('product-catalog-loader.js?v=20260535'); })
+          .then(resolve);
       });
     }
     catalogLoadPromise.then(cb);
@@ -220,6 +352,51 @@
       }
     }
 
+    function buildSearchMatches(query) {
+      var q = String(query || '').trim();
+      if (!q) return [];
+      var all = window.CATEGORY_PRODUCTS || {};
+      var meta = window.CATEGORY_META || {};
+      var nav = window.CATEGORY_NAV || [];
+      var hrefByKey = {};
+      nav.forEach(function (n) {
+        if (n.key) hrefByKey[n.key] = n.href || '/abaya';
+      });
+      if (window.maSearch) {
+        var terms = window.maSearch.getTerms(q);
+        var seen = {};
+        var out = [];
+        Object.keys(all).forEach(function (key) {
+          var catProducts = all[key] || [];
+          var categoryHit = window.maSearch.categoryMatches(key, meta, q);
+          catProducts.forEach(function (p) {
+            if (!p || !p.name) return;
+            var id = p.id || p.name;
+            if (seen[id]) return;
+            if (categoryHit || window.maSearch.productMatches(p, key, meta, q)) {
+              seen[id] = true;
+              out.push({
+                name: p.name,
+                href: hrefByKey[key] || '/abaya',
+                key: key
+              });
+            }
+          });
+        });
+        return out;
+      }
+      if (!catalog.length) catalog = flattenCatalog();
+      var qLower = q.toLowerCase();
+      var seenLegacy = {};
+      return catalog.filter(function (item) {
+        if (item.name.toLowerCase().indexOf(qLower) === -1) return false;
+        var id = item.name + '|' + item.href;
+        if (seenLegacy[id]) return false;
+        seenLegacy[id] = true;
+        return true;
+      });
+    }
+
     function renderResults(items) {
       if (!results) return;
       if (!items.length) {
@@ -228,10 +405,10 @@
         return;
       }
       results.innerHTML = items
-        .slice(0, 8)
+        .slice(0, 12)
         .map(function (item) {
           var q = encodeURIComponent(input.value.trim());
-          var href = siteAsset(item.href) + (q ? '?q=' + q : '');
+          var href = siteHref(item.href) + (q ? '?q=' + q : '');
           return '<li><a href="' + href + '">' + item.name.replace(/</g, '&lt;') + '</a></li>';
         })
         .join('');
@@ -239,22 +416,13 @@
     }
 
     function runSearch() {
-      var q = input.value.trim().toLowerCase();
+      var q = input.value.trim();
       if (!q) {
         renderResults([]);
         return;
       }
       ensureProductCatalog(function () {
-        if (!catalog.length) catalog = flattenCatalog();
-        var seen = {};
-        var matches = catalog.filter(function (item) {
-          if (item.name.toLowerCase().indexOf(q) === -1) return false;
-          var id = item.name + '|' + item.href;
-          if (seen[id]) return false;
-          seen[id] = true;
-          return true;
-        });
-        renderResults(matches);
+        renderResults(buildSearchMatches(q));
       });
     }
 
@@ -268,8 +436,10 @@
       closeBtn.addEventListener('click', function () { setSearchOpen(false); });
     }
 
-    drawer.addEventListener('click', function (e) {
-      if (e.target === drawer) setSearchOpen(false);
+    document.addEventListener('click', function (e) {
+      if (!document.body.classList.contains('site-search-open')) return;
+      if (drawer.contains(e.target) || openBtn.contains(e.target)) return;
+      setSearchOpen(false);
     });
 
     document.addEventListener('keydown', function (e) {
@@ -280,22 +450,31 @@
 
     input.addEventListener('input', runSearch);
 
+    try {
+      var urlQ = new URLSearchParams(window.location.search).get('q');
+      if (urlQ) input.value = urlQ;
+    } catch (prefillErr) {}
+
     if (form) {
       form.addEventListener('submit', function (e) {
         e.preventDefault();
         var q = input.value.trim();
         if (!q) return;
         ensureProductCatalog(function () {
-          if (!catalog.length) catalog = flattenCatalog();
-          var qLower = q.toLowerCase();
-          var first = null;
-          for (var i = 0; i < catalog.length; i++) {
-            if (catalog[i].name.toLowerCase().indexOf(qLower) !== -1) {
-              first = catalog[i];
-              break;
-            }
+          var href = '/abaya';
+          if (window.maSearch) {
+            href = window.maSearch.pickRedirectHref(
+              q,
+              window.CATEGORY_NAV,
+              window.CATEGORY_META,
+              window.CATEGORY_PRODUCTS
+            );
+          } else {
+            if (!catalog.length) catalog = flattenCatalog();
+            var matches = buildSearchMatches(q);
+            if (matches.length) href = matches[0].href;
           }
-          window.location.href = (first ? first.href : '/abaya') + '?q=' + encodeURIComponent(q);
+          window.location.href = siteHref(href) + '?q=' + encodeURIComponent(q);
         });
       });
     }
@@ -313,36 +492,148 @@
     document.documentElement.style.setProperty('--site-header-h', mount.offsetHeight + 'px');
   }
 
+  var prefetchedUrls = Object.create(null);
+  var prefetchTimer = 0;
+
+  function canPrefetch() {
+    try {
+      var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      if (conn && (conn.saveData || /(^2g$|^slow-2g$)/.test(String(conn.effectiveType || '')))) return false;
+    } catch (e) {}
+    return true;
+  }
+
+  function prefetchPage(url) {
+    if (!url || prefetchedUrls[url] || !canPrefetch()) return;
+    prefetchedUrls[url] = true;
+    var link = document.createElement('link');
+    link.rel = 'prefetch';
+    link.as = 'document';
+    link.href = url;
+    document.head.appendChild(link);
+  }
+
+  function resolveInternalUrl(anchor) {
+    if (!anchor) return '';
+    var href = anchor.getAttribute('href') || '';
+    if (!href || href.charAt(0) === '#' || /^mailto:|^tel:|^javascript:/i.test(href)) return '';
+    if (/^https?:\/\//i.test(href)) {
+      try {
+        var target = new URL(href, window.location.href);
+        if (target.origin !== window.location.origin) return '';
+        href = target.pathname + target.search;
+      } catch (err) {
+        return '';
+      }
+    }
+    if (href.charAt(0) === '/') return siteHref(href);
+    if (/\.html?$/i.test(href) || href.indexOf('?') >= 0) return siteAsset(href);
+    return '';
+  }
+
+  function initFastNavigation() {
+    if (!canPrefetch()) return;
+
+    var warmRoutes = [
+      '/',
+      '/abaya',
+      '/premium-two-piece',
+      '/embroidery',
+      '/karchupi',
+      '/kaftan',
+      '/hijab',
+      '/video',
+      '/category',
+      '/checkout'
+    ];
+
+    function warmPopularPages() {
+      warmRoutes.forEach(function (route) {
+        try {
+          prefetchPage(siteHref(route));
+        } catch (e) {}
+      });
+    }
+
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(warmPopularPages, { timeout: 2000 });
+    } else {
+      setTimeout(warmPopularPages, 800);
+    }
+
+    function schedulePrefetch(anchor) {
+      var url = resolveInternalUrl(anchor);
+      if (!url) return;
+      clearTimeout(prefetchTimer);
+      prefetchTimer = setTimeout(function () {
+        prefetchPage(url);
+      }, 45);
+    }
+
+    document.addEventListener('mouseover', function (ev) {
+      var anchor = ev.target && ev.target.closest ? ev.target.closest('a[href]') : null;
+      if (anchor) schedulePrefetch(anchor);
+    }, true);
+
+    document.addEventListener('touchstart', function (ev) {
+      var anchor = ev.target && ev.target.closest ? ev.target.closest('a[href]') : null;
+      if (anchor) schedulePrefetch(anchor);
+    }, { passive: true, capture: true });
+
+    document.addEventListener('focusin', function (ev) {
+      var anchor = ev.target && ev.target.closest ? ev.target.closest('a[href]') : null;
+      if (anchor) schedulePrefetch(anchor);
+    }, true);
+  }
+
   function mountHeader() {
     var mount = document.getElementById('site-header-mount');
     if (!mount) return;
     mount.innerHTML = HEADER_HTML;
+    fixHeaderLinks(mount);
     document.body.classList.add('global-layout');
     if (!isHomePage()) {
       document.body.classList.add('has-sticky-header');
     }
-    updateCartBadge();
+    if (typeof syncCartBadgeFromStore === "function") {
+      syncCartBadgeFromStore();
+    } else {
+      updateCartBadge();
+    }
     initSiteSearch();
-    ensureProductCatalog(function () {});
+    ensureProductCatalog(function () {
+      if (typeof window.syncCatalogFromSections === "function") {
+        window.syncCatalogFromSections();
+      }
+      applyDynamicNavMenu();
+    });
+    if (window.CATALOG_SECTIONS && window.CATALOG_SECTIONS.length) {
+      applyDynamicNavMenu();
+    }
     syncSiteHeaderOffset();
     window.addEventListener('resize', syncSiteHeaderOffset);
     if (annTimer) clearInterval(annTimer);
     annTimer = setInterval(function () { window.moveAnnouncement(1); }, 4000);
+    initFastNavigation();
   }
 
   window.updateCartBadge = updateCartBadge;
+  window.initFastNavigation = initFastNavigation;
+  window.prefetchPage = prefetchPage;
   window.syncSiteHeaderOffset = syncSiteHeaderOffset;
+  window.siteHref = siteHref;
+  window.siteAsset = siteAsset;
 
   function ensureCartDrawerAssets() {
-    if (document.querySelector('script[src*="cart-drawer.js?v=20260528b"]')) return;
-    if (!document.querySelector('link[href*="cart-drawer.css?v=20260528b"]')) {
+    if (document.querySelector('script[src*="cart-drawer.js?v=20260530d"]')) return;
+    if (!document.querySelector('link[href*="cart-drawer.css?v=20260530d"]')) {
       var link = document.createElement('link');
       link.rel = 'stylesheet';
-      link.href = 'cart-drawer.css?v=20260528b';
+      link.href = 'cart-drawer.css?v=20260530d';
       document.head.appendChild(link);
     }
     var s = document.createElement('script');
-    s.src = 'cart-drawer.js?v=20260528b';
+    s.src = 'cart-drawer.js?v=20260530d';
     s.defer = true;
     document.body.appendChild(s);
   }

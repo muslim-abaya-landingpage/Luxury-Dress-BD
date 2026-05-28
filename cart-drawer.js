@@ -21,7 +21,7 @@
   function loadLines() {
     var lines = [];
     if (typeof global.loadStoreCart === "function") {
-      lines = global.loadStoreCart().slice();
+      lines = global.loadStoreCart({ readOnly: true }).slice();
     }
     if (typeof global.normalizeStoreCart === "function") {
       lines = global.normalizeStoreCart(lines);

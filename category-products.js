@@ -1,22 +1,34 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════
+ *  প্রোডাক্ট যোগ/বাদ — শুধু এই ফাইল এডিট করুন (PRODUCT-GUIDE.md দেখুন)
+ *  • বাল্ক ছবি লিংক: product-links.html → product-links-data.js
+ *  • পুরো তথ্য: নিচের অ্যারেতে { id, name, image, price, ... }
+ *  • লিংক সার্ভার বদল: product-config.js → SITE_LINKS.images
+ *  • Abaya শুধু abaya: [] তে | Two-piece শুধু "premium-two-piece": [] তে
+ * ═══════════════════════════════════════════════════════════════════
+ */
 window.CATEGORY_PRODUCTS = {
+
+  /* ═══ ① আবায়া সারি · ABAYA · abaya.html · /abaya ═══ */
   abaya: [
     {
       id: "ABY-MAROON-1",
       name: "Maroon Abaya Set",
       image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Maroon%20Abaya%20Set...jpeg?raw=1",
       link: "index.html",
-      price: 799,
+      price: 999,
       color: "maroon",
       colorLabel: "Maroon",
       fabric: "দুবাই চেরি",
-      sizes: ["50", "52", "54", "56"]
+      sizes: ["50", "52", "54", "56"],
+      priceByType: { "Full Set": 999, "Abaya Only": 799 }
     },
     {
       id: "ABY-MAROON-2",
       name: "Maroon Abaya Set - Back",
       image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Maroon%20Abaya%20Set..jpeg?raw=1",
       link: "index.html",
-      price: 799,
+      price: 999,
       color: "maroon",
       colorLabel: "Maroon",
       fabric: "দুবাই চেরি",
@@ -27,44 +39,48 @@ window.CATEGORY_PRODUCTS = {
       name: "Maroon Abaya Set - Side",
       image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Maroon%20Abaya%20Set.jpeg?raw=1",
       link: "index.html",
-      price: 799,
+      price: 999,
       color: "maroon",
       colorLabel: "Maroon",
       fabric: "দুবাই চেরি",
-      sizes: ["50", "52", "54", "56"]
+      sizes: ["50", "52", "54", "56"],
+      priceByType: { "Full Set": 999, "Abaya Only": 799 }
     },
     {
       id: "ABY-BLACK-1",
       name: "Black Abaya Set",
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Black...jpg?raw=1",
+      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Black...jpeg?raw=1",
       link: "index.html",
-      price: 799,
+      price: 999,
       color: "black",
       colorLabel: "Classic Black",
       fabric: "দুবাই চেরি",
-      sizes: ["50", "52", "54", "56"]
+      sizes: ["50", "52", "54", "56"],
+      priceByType: { "Full Set": 999, "Abaya Only": 799 }
     },
     {
       id: "ABY-BLACK-2",
       name: "Black Abaya Set - Back",
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Black..jpg?raw=1",
+      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Black..jpeg?raw=1",
       link: "index.html",
-      price: 799,
+      price: 999,
       color: "black",
       colorLabel: "Classic Black",
       fabric: "দুবাই চেরি",
-      sizes: ["50", "52", "54", "56"]
+      sizes: ["50", "52", "54", "56"],
+      priceByType: { "Full Set": 999, "Abaya Only": 799 }
     },
     {
       id: "ABY-BLACK-3",
       name: "Black Abaya Set - Side",
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Black.jpg?raw=1",
+      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Black.jpeg?raw=1",
       link: "index.html",
-      price: 799,
+      price: 999,
       color: "black",
       colorLabel: "Classic Black",
       fabric: "দুবাই চেরি",
-      sizes: ["50", "52", "54", "56"]
+      sizes: ["50", "52", "54", "56"],
+      priceByType: { "Full Set": 999, "Abaya Only": 799 }
     },
     {
       id: "ABY-VERSACE-1",
@@ -75,7 +91,8 @@ window.CATEGORY_PRODUCTS = {
       color: "black",
       colorLabel: "Classic Black",
       fabric: "Dubai Cherry",
-      sizes: ["50", "52", "54", "56"]
+      sizes: ["50", "52", "54", "56"],
+      priceByType: { "Full Set": 1750, "Abaya Only": 1550 }
     },
     {
       id: "ABY-VERSACE-2",
@@ -86,7 +103,8 @@ window.CATEGORY_PRODUCTS = {
       color: "black",
       colorLabel: "Classic Black",
       fabric: "Dubai Cherry",
-      sizes: ["50", "52", "54", "56"]
+      sizes: ["50", "52", "54", "56"],
+      priceByType: { "Full Set": 1750, "Abaya Only": 1550 }
     },
     {
       id: "ABY-VERSACE-3",
@@ -97,7 +115,8 @@ window.CATEGORY_PRODUCTS = {
       color: "black",
       colorLabel: "Classic Black",
       fabric: "Dubai Cherry",
-      sizes: ["50", "52", "54", "56"]
+      sizes: ["50", "52", "54", "56"],
+      priceByType: { "Full Set": 1750, "Abaya Only": 1550 }
     },
     {
       id: "ABY-FLORAL-1",
@@ -108,7 +127,8 @@ window.CATEGORY_PRODUCTS = {
       color: "black",
       colorLabel: "Classic Black",
       fabric: "Dubai Cherry",
-      sizes: ["50", "52", "54", "56"]
+      sizes: ["50", "52", "54", "56"],
+      priceByType: { "Full Set": 1850, "Abaya Only": 1650 }
     },
     {
       id: "ABY-FLORAL-2",
@@ -119,7 +139,8 @@ window.CATEGORY_PRODUCTS = {
       color: "black",
       colorLabel: "Classic Black",
       fabric: "Dubai Cherry",
-      sizes: ["50", "52", "54", "56"]
+      sizes: ["50", "52", "54", "56"],
+      priceByType: { "Full Set": 1850, "Abaya Only": 1650 }
     },
     {
       id: "ABY-FLORAL-3",
@@ -130,9 +151,12 @@ window.CATEGORY_PRODUCTS = {
       color: "black",
       colorLabel: "Classic Black",
       fabric: "Dubai Cherry",
-      sizes: ["50", "52", "54", "56"]
+      sizes: ["50", "52", "54", "56"],
+      priceByType: { "Full Set": 1850, "Abaya Only": 1650 }
     }
   ],
+
+  /* ═══ ② কভার আপ সারি · COVER UP · cover-up.html ═══ */
   "cover-up": [
     {
       id: "COV-01",
@@ -168,6 +192,8 @@ window.CATEGORY_PRODUCTS = {
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"]
     }
   ],
+
+  /* ═══ ③ টপস/কুর্তি সারি · TOPS/KURTI · tops-kurti.html ═══ */
   "tops-kurti": [
     {
       id: "TOP-01",
@@ -203,6 +229,8 @@ window.CATEGORY_PRODUCTS = {
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"]
     }
   ],
+
+  /* ═══ ④ টু-পিস সারি · PREMIUM TWO-PIECE · premium-two-piece.html ═══ */
   "premium-two-piece": [
     {
       id: "DR-29",
@@ -289,6 +317,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
     }
   ],
+
+  /* ═══ ⑤ এম্ব্রয়ডারি সারি · EMBROIDERY · embroidery.html ═══ */
   embroidery: [
     {
       id: "EMB-01",
@@ -324,6 +354,8 @@ window.CATEGORY_PRODUCTS = {
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"]
     }
   ],
+
+  /* ═══ ⑥ কারচুপি সারি · KARCHUPI · karchupi.html ═══ */
   karchupi: [
     {
       id: "KAR-01",
@@ -359,6 +391,8 @@ window.CATEGORY_PRODUCTS = {
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"]
     }
   ],
+
+  /* ═══ ⑦ কাফতান সারি · KAFTAN · kaftan.html ═══ */
   kaftan: [
     { id: "KAF-01", name: "Kaftan Al Laiba V1", image: "images/Baby-Pink-Floral-Print.jpeg", link: "index.html", price: 1990, color: "beige", colorLabel: "Copper Beige Kaftan" },
     { id: "KAF-02", name: "Romanian Baloch", image: "images/Black-Base-Rose-Floral.jpeg", link: "index.html", price: 1990, color: "black", colorLabel: "Classic Black Kaftan" },
@@ -367,6 +401,8 @@ window.CATEGORY_PRODUCTS = {
     { id: "KAF-05", name: "Kaftan An Nawmi", image: "images/Black-White-Polka-Dots.jpeg", link: "index.html", price: 1550, color: "white", colorLabel: "Soft White Kaftan" },
     { id: "KAF-06", name: "Irani Fabiha Kaftan", image: "images/Baby-Pink-Floral-Print.jpeg", link: "index.html", price: 1890, color: "green", colorLabel: "Olive Green Kaftan" }
   ],
+
+  /* ═══ ⑧ হিজাব সারি · HIJAB · hijab.html ═══ */
   hijab: [
     {
       id: "HIJ-01",
@@ -416,11 +452,21 @@ window.CATEGORY_PRODUCTS = {
 };
 
 window.SITE_MEDIA = {
-  whatsappOrderLink: "https://wa.me/8801971642683",
+  whatsappOrderLink:
+    (window.SITE_LINKS && window.SITE_LINKS.order && window.SITE_LINKS.order.whatsapp) ||
+    "https://wa.me/8801971642683",
+  /**
+   * VIDEO পেজ — নতুন ভিডিও: videos[] তে এক লাইন যোগ করুন।
+   * url = YouTube লিংক অথবা videoId = শুধু ID। পেজে ৩টি করে সারি (লেয়ার) বানাবে।
+   */
   featuredVideo: {
     title: "ভিডিও কালেকশন",
-    embedUrl: "https://www.youtube-nocookie.com/embed/Wyrw0gzKMqk?rel=0&modestbranding=1",
-    helpText: "ভিডিও পরিবর্তন করতে `category-products.js` ফাইলের `window.SITE_MEDIA.featuredVideo.embedUrl` আপডেট করুন।"
+    helpText: "রিয়েল ভিডিও দেখে প্রোডাক্টের কোয়ালিটি যাচাই করুন, তারপর অর্ডার করুন।",
+    videos: [
+      { title: "কালেকশন ভিডিও ১", url: "https://www.youtube.com/watch?v=Wyrw0gzKMqk" }
+      // { title: "কালেকশন ভিডিও ২", url: "https://youtu.be/XXXXXXXXXXX" },
+      // { title: "কালেকশন ভিডিও ৩", videoId: "XXXXXXXXXXX" },
+    ]
   }
 };
 
@@ -459,3 +505,114 @@ window.FILTER_COLOR_MAP = {
   green: { label: "Olive Green", hex: "#6b8f71" },
   beige: { label: "Copper Beige", hex: "#d4c4a8" }
 };
+
+/** Shared product search — used by header search + category pages */
+(function (g) {
+  function normalize(text) {
+    return String(text || "")
+      .toLowerCase()
+      .replace(/-/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function getTerms(q) {
+    return normalize(q).split(" ").filter(Boolean);
+  }
+
+  function matchesAll(haystack, terms) {
+    if (!terms.length) return true;
+    var h = normalize(haystack);
+    return terms.every(function (term) {
+      return h.indexOf(term) !== -1;
+    });
+  }
+
+  function categoryHaystack(key, meta) {
+    var m = (meta && meta[key]) || {};
+    var nav = g.CATEGORY_NAV || [];
+    var navItem = nav.find(function (n) {
+      return n.key === key;
+    });
+    return [key, m.title || "", m.label || "", navItem && navItem.label ? navItem.label : ""].join(" ");
+  }
+
+  function productHaystack(p, key, meta) {
+    return [
+      p.name,
+      p.colorLabel,
+      p.color,
+      p.fabric,
+      p.description,
+      p.id,
+      p.detailNote,
+      categoryHaystack(key, meta)
+    ].join(" ");
+  }
+
+  function collectProducts(allProducts, query, meta) {
+    var terms = getTerms(query);
+    if (!terms.length) return [];
+    var list = [];
+    Object.keys(allProducts || {}).forEach(function (key) {
+      var catProducts = allProducts[key] || [];
+      var categoryHit = matchesAll(categoryHaystack(key, meta), terms);
+      catProducts.forEach(function (p) {
+        if (!p) return;
+        if (categoryHit || matchesAll(productHaystack(p, key, meta), terms)) {
+          list.push(p);
+        }
+      });
+    });
+    return list;
+  }
+
+  /** Search within one category only (abaya page → abaya products only). */
+  function collectProductsInCategory(allProducts, categoryKey, query, meta) {
+    var terms = getTerms(query);
+    var list = (allProducts && allProducts[categoryKey]) ? allProducts[categoryKey].slice() : [];
+    if (!terms.length) return list;
+    if (matchesAll(categoryHaystack(categoryKey, meta), terms)) return list;
+    return list.filter(function (p) {
+      return p && matchesAll(productHaystack(p, categoryKey, meta), terms);
+    });
+  }
+
+  function pickRedirectHref(query, nav, meta, allProducts) {
+    var terms = getTerms(query);
+    if (!terms.length) return "/category";
+    var hrefByKey = {};
+    (nav || []).forEach(function (n) {
+      if (n.key) hrefByKey[n.key] = n.href || "/abaya";
+    });
+    var bestKey = null;
+    var bestScore = -1;
+    Object.keys(allProducts || {}).forEach(function (key) {
+      var score = 0;
+      if (matchesAll(categoryHaystack(key, meta), terms)) score += 100;
+      (allProducts[key] || []).forEach(function (p) {
+        if (matchesAll(productHaystack(p, key, meta), terms)) score += 1;
+      });
+      if (score > bestScore) {
+        bestScore = score;
+        bestKey = key;
+      }
+    });
+    if (bestKey && hrefByKey[bestKey]) return hrefByKey[bestKey];
+    return "/category";
+  }
+
+  g.maSearch = {
+    getTerms: getTerms,
+    matchesAll: matchesAll,
+    collectProducts: collectProducts,
+    collectProductsInCategory: collectProductsInCategory,
+    pickRedirectHref: pickRedirectHref,
+    categoryMatches: function (key, meta, query) {
+      return matchesAll(categoryHaystack(key, meta), getTerms(query));
+    },
+    productMatches: function (p, key, meta, query) {
+      return matchesAll(productHaystack(p, key, meta), getTerms(query));
+    }
+  };
+})(window);

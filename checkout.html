@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -10,8 +10,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <link rel="canonical" href="https://muslimabaya.com/checkout">
-    <title>চেকআউট - Muslim Abaya | muslimabaya.com</title>
-    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <title>Checkout - Muslim Abaya | muslimabaya.com</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="site-header.css">
     <link rel="stylesheet" href="site-footer.css">
     <style>
@@ -29,7 +29,7 @@
             --radius: 14px;
         }
         body {
-            font-family: 'Hind Siliguri', 'Segoe UI', sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
             background: linear-gradient(180deg, #faf9f7 0%, var(--bg) 120px);
             margin: 0;
             padding: 0 0 32px;
@@ -41,25 +41,25 @@
         .container {
             max-width: 1180px;
             margin: 0 auto;
-            padding: 20px 16px 28px;
+            padding: 14px 16px 22px;
         }
         .checkout-page-head {
             text-align: center;
-            margin: 4px 0 28px;
-            padding-bottom: 20px;
+            margin: 0 0 16px;
+            padding-bottom: 12px;
             border-bottom: 1px solid var(--line);
         }
         .checkout-page-head h1 {
             margin: 0 0 8px;
-            font-family: 'Playfair Display', Georgia, serif;
-            font-size: clamp(30px, 5vw, 40px);
-            font-weight: 700;
-            color: var(--ink);
-            letter-spacing: 0.02em;
+            font-family: inherit;
+            font-size: clamp(28px, 4.5vw, 36px);
+            font-weight: 800;
+            color: #1e3a5f;
+            letter-spacing: -0.02em;
         }
         .checkout-subtitle {
-            margin: 0 0 10px;
-            font-size: 15px;
+            margin: 0 0 6px;
+            font-size: 14px;
             color: var(--muted);
             font-weight: 500;
         }
@@ -84,7 +84,7 @@
         .order-review-toolbar {
             display: flex;
             justify-content: flex-end;
-            margin: -4px 0 12px;
+            margin: -2px 0 8px;
         }
         .order-review-toolbar a {
             color: #9a3412;
@@ -105,10 +105,11 @@
         }
         .gb-order-row {
             display: grid;
-            grid-template-columns: 76px 1fr auto auto 44px;
-            align-items: center;
-            gap: 14px;
-            padding: 16px 0;
+            grid-template-columns: 76px 1fr auto 44px;
+            grid-template-rows: auto auto;
+            align-items: start;
+            gap: 10px 14px;
+            padding: 12px 0;
             border-bottom: 1px solid var(--line);
         }
         .gb-order-row:last-child { border-bottom: none; }
@@ -121,6 +122,7 @@
             background: #fafafa;
             flex-shrink: 0;
             box-shadow: var(--shadow-sm);
+            grid-row: 1 / 3;
         }
         .gb-order-thumb img {
             width: 100%;
@@ -137,12 +139,34 @@
             font-size: 22px;
             color: #999;
         }
+        .gb-order-main {
+            grid-column: 2;
+            grid-row: 1 / 3;
+            min-width: 0;
+        }
         .gb-order-name {
             font-size: 15px;
             font-weight: 600;
             color: var(--ink);
             line-height: 1.45;
-            margin: 0;
+            margin: 0 0 4px;
+        }
+        .gb-order-detail {
+            font-size: 13px;
+            color: var(--muted);
+            margin: 0 0 6px;
+            line-height: 1.45;
+        }
+        .gb-order-qty-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .gb-order-qty-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--ink);
         }
         .gb-order-qty {
             display: inline-flex;
@@ -175,14 +199,20 @@
             padding: 6px 8px;
         }
         .gb-order-price {
-            font-size: 16px;
+            grid-column: 3;
+            grid-row: 2;
+            align-self: center;
+            font-size: 15px;
             font-weight: 700;
             color: var(--ink);
             white-space: nowrap;
-            min-width: 80px;
+            min-width: 88px;
             text-align: right;
         }
         .gb-order-delete {
+            grid-column: 4;
+            grid-row: 1 / 3;
+            align-self: start;
             width: 40px;
             height: 40px;
             border: 1px solid #f5d0d0;
@@ -205,8 +235,8 @@
         .summary-item {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 15px;
+            margin-bottom: 6px;
+            font-size: 14px;
             color: var(--ink-soft);
         }
         .summary-item strong { font-weight: 700; color: #111; }
@@ -216,27 +246,27 @@
                 grid-template-rows: auto auto;
                 gap: 8px 10px;
             }
-            .gb-order-thumb { width: 56px; height: 56px; grid-row: 1 / 3; }
-            .gb-order-name { grid-column: 2 / 4; }
-            .gb-order-qty { grid-column: 2; }
-            .gb-order-price { grid-column: 3; font-size: 14px; }
-            .gb-order-delete { grid-column: 4; grid-row: 1; align-self: start; }
+            .gb-order-thumb { width: 56px; height: 70px; }
+            .gb-order-main { grid-column: 2; min-width: 0; }
+            .gb-order-price { grid-column: 3; grid-row: 2; font-size: 14px; }
+            .gb-order-delete { grid-column: 4; grid-row: 1; }
         }
-        .form-group { margin-bottom: 18px; }
+        .form-group { margin-bottom: 12px; }
+        .checkout-main .form-group:last-child { margin-bottom: 0; }
         label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             font-weight: 600;
             color: var(--ink);
-            font-size: 13px;
+            font-size: 12px;
             letter-spacing: 0.04em;
             text-transform: uppercase;
         }
         input, textarea, select {
             width: 100%;
-            padding: 14px 16px;
+            padding: 10px 12px;
             border: 1px solid var(--line);
-            border-radius: 10px;
+            border-radius: 8px;
             box-sizing: border-box;
             font-size: 15px;
             font-family: inherit;
@@ -253,41 +283,214 @@
             background: #fff;
             box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.06);
         }
-        .btn-confirm {
-            background: var(--ink);
+        textarea {
+            min-height: 72px;
+            resize: vertical;
+        }
+        .btn-place-order {
+            background: #f38120;
             color: #fff;
             border: none;
             width: 100%;
-            padding: 17px 20px;
-            font-size: 16px;
+            padding: 13px 16px;
+            font-size: 15px;
             border-radius: 10px;
             cursor: pointer;
-            transition: background 0.2s ease, transform 0.15s ease;
-            font-weight: 700;
-            margin-top: 8px;
+            transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+            font-weight: 800;
+            margin-top: 4px;
             font-family: inherit;
-            letter-spacing: 0.06em;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
+            box-shadow: 0 4px 14px rgba(243, 129, 32, 0.35);
         }
-        .btn-confirm:hover {
-            background: #2a2a2a;
+        .btn-place-order:hover {
+            background: #e07010;
             transform: translateY(-1px);
         }
-        .btn-confirm:disabled {
+        .btn-place-order:disabled {
             opacity: 0.45;
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
         }
-        .checkout-grid {
-            display: grid;
-            grid-template-columns: minmax(0, 1.1fr) minmax(300px, 0.9fr);
-            gap: 24px;
-            align-items: start;
+        .checkout-main {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-self: start;
         }
         .checkout-aside {
             display: flex;
             flex-direction: column;
+            gap: 10px;
+        }
+        .gb-panel {
+            background: #fff;
+            border: 1px solid #e8e8e8;
+            border-radius: 10px;
+            padding: 14px 16px;
+            box-shadow: 0 2px 10px rgba(17, 17, 17, 0.04);
+        }
+        .gb-panel-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            margin: 0 0 10px;
+            color: var(--ink);
+            padding: 0;
+            border: none;
+        }
+        .gb-panel-title::before {
+            content: '';
+            width: 3px;
+            height: 17px;
+            background: #f38120;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+        .gb-panel-plan {
+            background: #f5fafd;
+            border-color: #dceaf5;
+        }
+        .gb-panel-coupon {
+            padding: 12px 16px;
+        }
+        .gb-product-chart-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .gb-product-chart-table th,
+        .gb-product-chart-table td {
+            padding: 7px 6px;
+            border-bottom: 1px solid #f0f0f0;
+            text-align: left;
+        }
+        .gb-product-chart-table th {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .gb-product-chart-empty {
+            font-size: 12px;
+            line-height: 1.45;
+            margin: 0;
+            color: var(--muted);
+            padding: 8px 0;
+        }
+        .pm-cod-icon {
+            width: 52px;
+            height: 52px;
+            display: block;
+            flex-shrink: 0;
+        }
+        .gb-order-summary .summary-item {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .gb-order-summary .summary-total-row {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid var(--line);
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--ink);
+        }
+        .gb-order-summary .summary-total-row strong {
+            font-size: 18px;
+            color: var(--ink);
+        }
+        .gb-order-summary .summary-total-row span {
+            color: var(--ink);
+            font-weight: 700;
+        }
+        .coupon-toggle {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 0;
+            border: none;
+            background: none;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--ink-soft);
+            cursor: pointer;
+            text-align: left;
+        }
+        .coupon-toggle:hover { color: var(--ink); }
+        .coupon-toggle-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1px solid var(--line);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+        .coupon-panel.is-open .coupon-toggle-icon {
+            transform: rotate(180deg);
+            background: var(--gold-soft);
+        }
+        .coupon-panel-body {
+            display: none;
+            margin-top: 10px;
+        }
+        .coupon-panel.is-open .coupon-panel-body { display: block; }
+        .payment-extra.is-cod-hidden { display: none !important; }
+        .phone-row {
+            display: flex;
             gap: 0;
+            align-items: stretch;
+        }
+        .phone-code {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 10px;
+            border: 1px solid var(--line);
+            border-right: none;
+            border-radius: 8px 0 0 8px;
+            background: #f3f4f6;
+            font-weight: 700;
+            color: var(--ink);
+            font-size: 15px;
+        }
+        .phone-row input {
+            border-radius: 0 8px 8px 0;
+            flex: 1;
+            min-width: 0;
+        }
+        .sidebar-meta {
+            margin: 6px 0 0;
+            font-size: 12px;
+            color: var(--muted);
+            text-align: center;
+        }
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+        .checkout-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.1fr) minmax(300px, 0.9fr);
+            gap: 14px;
+            align-items: start;
         }
         @media (min-width: 901px) {
             .checkout-aside {
@@ -323,8 +526,8 @@
             background: var(--card);
             border: 1px solid var(--line);
             border-radius: var(--radius);
-            padding: 22px 22px;
-            margin-bottom: 18px;
+            padding: 14px 16px;
+            margin-bottom: 0;
             box-shadow: var(--shadow-sm);
         }
         .card-block-premium {
@@ -341,13 +544,13 @@
         .section-label {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 17px;
-            margin: 0 0 18px 0;
+            gap: 8px;
+            font-size: 15px;
+            margin: 0 0 10px 0;
             color: var(--ink);
             font-weight: 700;
             font-family: inherit;
-            padding-bottom: 12px;
+            padding-bottom: 8px;
             border-bottom: 1px solid var(--line);
         }
         .section-label::before {
@@ -374,47 +577,338 @@
             flex-wrap: wrap;
             gap: 8px;
         }
-        .pm-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 10px;
+        .sidebar-section .section-label::before {
+            background: #f38120;
         }
+        .pm-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .pm-row {
+            display: grid;
+            gap: 10px;
+        }
+        .pm-row-2 { grid-template-columns: 1fr 1fr; }
+        .pm-row-full { grid-template-columns: 1fr; }
         .pm-option {
-            border: 1px solid var(--line);
-            border-radius: 12px;
-            padding: 12px 14px;
+            position: relative;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 10px 12px;
+            min-height: 62px;
             cursor: pointer;
             display: flex;
+            flex-direction: row;
             align-items: center;
-            gap: 10px;
-            font-size: 14px;
+            gap: 12px;
+            font-size: 15px;
             font-weight: 600;
-            background: #fcfcfb;
+            color: #1f2937;
+            background: #fff;
+            text-align: left;
             transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+            user-select: none;
+            box-sizing: border-box;
         }
-        .pm-option input { width: auto; margin: 0; accent-color: var(--ink); }
-        .pm-option:hover { border-color: #ccc; background: #fff; }
+        .pm-option input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+            pointer-events: none;
+        }
+        .pm-option:hover {
+            border-color: #d1d5db;
+            background: #fafafa;
+        }
         .pm-option.active {
-            border-color: var(--ink);
-            background: var(--gold-soft);
-            box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.08);
+            border: 2px solid #f38120;
+            background: #f3f8fc;
+            padding: 13px 15px;
+            box-shadow: none;
+        }
+        .pm-body {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex: 1;
+            min-width: 0;
+        }
+        .pm-check {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #f38120;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: auto;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .pm-option.active .pm-check {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .pm-check svg {
+            width: 11px;
+            height: 9px;
+            display: block;
+        }
+        .pm-icon {
+            width: 52px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .pm-icon img.pm-logo-img {
+            width: 52px;
+            height: 52px;
+            display: block;
+            object-fit: contain;
+        }
+        .pm-option.pm-brand .pm-icon {
+            width: auto;
+            min-width: 48px;
+            max-width: 92px;
+        }
+        .pm-option.pm-brand .pm-icon img.pm-logo-img {
+            width: auto;
+            height: 38px;
+            max-width: 88px;
+        }
+        .pay-chart-logo {
+            height: 22px;
+            width: auto;
+            max-width: 72px;
+            display: block;
+            object-fit: contain;
+        }
+        .pay-chart td.pay-chart-brand {
+            width: 28%;
+        }
+        .checkout-login-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+            background: #fff;
+            border: 1px solid #f38120;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #374151;
+        }
+        .checkout-login-actions {
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        .btn-login-outline {
+            border: 1px solid #f38120;
+            color: #f38120;
+            background: #fff;
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 13px;
+        }
+        .btn-login-fill {
+            background: #f38120;
+            color: #fff;
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 13px;
+        }
+        .pay-plan-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .pay-plan-option {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #374151;
+            cursor: pointer;
+        }
+        .pay-plan-option input {
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+            flex-shrink: 0;
+            accent-color: #f38120;
+        }
+        .pm-label {
+            line-height: 1.3;
+            letter-spacing: 0;
+            font-weight: 600;
+            color: #111827;
+        }
+        @media (max-width: 520px) {
+            .pm-row-2 { grid-template-columns: 1fr; }
+            .pm-option { min-height: 68px; padding: 12px 14px; }
+            .pm-option.active { padding: 11px 13px; }
+            .pm-icon, .pm-icon svg { width: 46px; height: 46px; }
+            .pm-label { font-size: 14px; }
         }
         .payment-panel {
             background: var(--gold-soft);
             border: 1px solid #e8dfc8;
             border-radius: 10px;
-            padding: 12px 14px;
+            padding: 10px 12px;
             font-size: 13px;
-            line-height: 1.55;
-            margin-bottom: 12px;
+            line-height: 1.5;
+            margin-bottom: 8px;
             color: var(--ink-soft);
         }
-        .payment-fields { display: grid; gap: 10px; }
+        .payment-fields { display: grid; gap: 8px; margin-bottom: 10px; }
         .payment-fields input, .payment-fields select {
             font-size: 14px;
-            padding: 12px 14px;
+            padding: 10px 12px;
             margin-bottom: 0;
+        }
+        .pay-details {
+            margin-top: 2px;
+            padding-top: 10px;
+            border-top: 1px solid var(--line);
+        }
+        .pay-details-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        .pay-details-head strong {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--ink);
+            letter-spacing: 0.02em;
+        }
+        .pay-details-badge {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--gold);
+            background: var(--gold-soft);
+            border: 1px solid #e8dfc8;
+            padding: 4px 10px;
+            border-radius: 999px;
+        }
+        .pay-details-grid {
+            display: grid;
+            gap: 8px;
+        }
+        .pay-detail-card {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            overflow: hidden;
+            background: #fcfcfb;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .pay-detail-card.is-highlight {
+            border-color: var(--ink);
+            box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.06);
+            background: #fff;
+        }
+        .pay-detail-card-head {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--ink);
+            background: #f5f3f0;
+            border-bottom: 1px solid var(--line);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .pay-detail-card-head .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .dot-mfs { background: #e2136e; }
+        .dot-bank { background: #1e3a5f; }
+        .pay-chart {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .pay-chart tr:not(:last-child) td {
+            border-bottom: 1px solid #f0ebe4;
+        }
+        .pay-chart td {
+            padding: 7px 12px;
+            vertical-align: middle;
+        }
+        .pay-chart td:first-child {
+            width: 38%;
+            color: var(--muted);
+            font-weight: 600;
+        }
+        .pay-chart td:last-child {
+            color: var(--ink);
+            font-weight: 600;
+            word-break: break-all;
+        }
+        .pay-copy-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .pay-copy-btn {
+            flex-shrink: 0;
+            border: 1px solid var(--line);
+            background: #fff;
+            color: var(--ink);
+            font-size: 11px;
+            font-weight: 700;
+            font-family: inherit;
+            padding: 5px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s ease, border-color 0.2s ease;
+        }
+        .pay-copy-btn:hover {
+            background: var(--ink);
+            color: #fff;
+            border-color: var(--ink);
+        }
+        .pay-copy-btn.copied {
+            background: #166534;
+            border-color: #166534;
+            color: #fff;
+        }
+        .pay-details-note {
+            margin: 8px 0 0;
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--muted);
+            padding: 8px 10px;
+            background: #f8f7f5;
+            border-radius: 10px;
+            border-left: 3px solid var(--gold);
         }
         .coupon-row { display: flex; gap: 10px; }
         .coupon-row input { flex: 1; }
@@ -460,22 +954,22 @@
         .checkout-trust {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 14px;
+            gap: 6px;
+            margin-top: 8px;
         }
         .checkout-trust span {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.06em;
-            padding: 6px 10px;
+            padding: 4px 8px;
             border-radius: 999px;
             background: #f3f1ed;
             color: var(--muted);
             border: 1px solid var(--line);
         }
         .terms-box {
-            margin-top: 10px;
+            margin-top: 6px;
             font-size: 13px;
             color: #4b5563;
             display: flex;
@@ -488,7 +982,7 @@
             height: 18px;
             margin-top: 2px;
             flex-shrink: 0;
-            accent-color: var(--ink);
+            accent-color: #f38120;
             cursor: pointer;
         }
         .terms-box span { flex: 1; }
@@ -522,7 +1016,7 @@
         }
         .sticky-order-btn {
             width: 100%;
-            background: var(--ink);
+            background: #f38120;
             border: none;
             color: #fff;
             border-radius: 10px;
@@ -536,7 +1030,7 @@
         }
         .empty-cart-msg {
             text-align: center;
-            padding: 28px 16px;
+            padding: 16px 12px;
             background: var(--gold-soft);
             border-radius: 12px;
             border: 1px dashed #dcc9a0;
@@ -552,7 +1046,7 @@
             .sticky-order-bar { display: block; }
             body { padding-bottom: 82px; }
             .card-block { padding: 18px 16px; }
-            #orderForm .btn-confirm { display: none; }
+            #orderForm .btn-place-order { display: none; }
         }
     </style>
 </head>
@@ -562,23 +1056,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div id="site-header-mount"></div>
 <div class="container">
     <div class="checkout-page-head">
-        <h1>চেকআউট</h1>
-        <p class="checkout-subtitle">নিরাপদ ও দ্রুত অর্ডার — ক্যাশ অন ডেলিভারি সুবিধা</p>
+        <h1>Checkout</h1>
+        <p class="checkout-subtitle">Safe &amp; fast ordering — Cash on delivery available</p>
         <nav class="checkout-breadcrumb" aria-label="Breadcrumb">
-            <a href="/">Home</a> <span aria-hidden="true">&rsaquo;</span> Checkout
+            <a href="index.html">Home</a> <span aria-hidden="true">&rsaquo;</span> <span style="color:#f38120;font-weight:600;">Checkout</span>
         </nav>
-        <div class="checkout-trust" style="justify-content:center; margin-top:14px;">
+        <div class="checkout-trust" style="justify-content:center;">
             <span>Secure order</span>
             <span>COD available</span>
             <span>Fast support</span>
         </div>
     </div>
-    <div class="checkout-grid">
-        <div>
+    <div class="checkout-login-bar">
+        <span>Have any account? please login or register</span>
+        <div class="checkout-login-actions">
+            <a href="signin.html?next=checkout.html" class="btn-login-outline">Login</a>
+            <a href="signup.html?next=checkout.html" class="btn-login-fill">Register</a>
+        </div>
+    </div>
+    <form id="orderForm" class="checkout-grid" novalidate>
+        <div class="checkout-main">
             <div class="card-block">
                 <h3 class="section-label">
                     <span class="section-label-inner">
-                        <span>অর্ডার সারাংশ</span>
+                        <span>Order review</span>
                         <span id="orderReviewMeta" class="label-meta"></span>
                     </span>
                 </h3>
@@ -586,153 +1087,369 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <div class="order-summary" id="orderSummary"></div>
             </div>
             <div class="card-block">
-                <h3 class="section-label"><span>ডেলিভারি তথ্য</span></h3>
-                <form id="orderForm">
-                    <div class="form-group">
-                        <label>আপনার নাম</label>
-                        <input type="text" id="userName" placeholder="পুরো নাম লিখুন" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>মোবাইল নম্বর</label>
+                <h3 class="section-label"><span>Delivery address</span></h3>
+                <div class="form-group">
+                    <label for="userName">Your name</label>
+                    <input type="text" id="userName" placeholder="Full name" required>
+                </div>
+                <div class="form-group">
+                    <label for="userPhone">Mobile number</label>
+                    <div class="phone-row">
+                        <span class="phone-code" aria-hidden="true">88</span>
                         <input type="tel" id="userPhone" placeholder="01XXXXXXXXX" required pattern="[0-9]{11}" autocomplete="tel">
                     </div>
-
-                    <div class="form-group">
-                        <label>ইমেইল <span style="font-size:13px;font-weight:600;color:var(--muted);">(ঐচ্ছিক, ম্যাচিংয়ের জন্য)</span></label>
-                        <input type="email" id="userEmail" placeholder="name@gmail.com" autocomplete="email">
-                    </div>
-
-                    <div class="form-group">
-                        <label>ডেলিভারি ঠিকানা</label>
-                        <textarea id="userAddr" rows="3" placeholder="গ্রাম/বাসা, থানা, জেলা" required></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label>ডেলিভারি জেলা</label>
-                        <select id="userArea" required>
-                            <option value="">জেলা নির্বাচন করুন</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>থানা / উপজেলা (Optional)</label>
-                        <input type="text" id="userThana" placeholder="থানা / উপজেলা লিখুন">
-                    </div>
-                    <button type="submit" id="submitBtn" class="btn-confirm">অর্ডার কনফার্ম করুন</button>
-                </form>
-            </div>
-            <div class="card-block">
-                <h3 class="section-label"><span>বিশেষ নির্দেশনা <span style="font-size:13px;font-weight:600;color:var(--muted);">(ঐচ্ছিক)</span></span></h3>
-                <textarea id="specialNotes" rows="3" maxlength="200" placeholder="আপনার কোনো বিশেষ নির্দেশনা থাকলে লিখুন"></textarea>
-                <div style="font-size:12px; color:#6b7280; text-align:right;"><span id="noteCount">0</span>/200</div>
-                <label class="terms-box">
-                    <input type="checkbox" id="agreeTerms">
-                    <span>আমি <a href="terms.html" target="_blank" rel="noopener">Terms & Conditions</a> এবং <a href="refund.html" target="_blank" rel="noopener">Privacy / Refund Policy</a> পড়েছি এবং সম্মত আছি।</span>
-                </label>
-                <div id="termsError" class="terms-error">অর্ডার সম্পন্ন করতে Terms & Conditions-এ টিক দিন।</div>
+                </div>
+                <div class="form-group">
+                    <label for="userEmail">Email <span style="font-size:13px;font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0;">(Optional)</span></label>
+                    <input type="email" id="userEmail" placeholder="name@gmail.com" autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="userAddr">Delivery address</label>
+                    <textarea id="userAddr" rows="3" placeholder="House/Road, Area, Thana, District" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="userArea">Delivery district</label>
+                    <select id="userArea" required>
+                        <option value="">Select district</option>
+                    </select>
+                </div>
+                <div class="form-group form-group-last">
+                    <label for="userThana">Thana / Upazila <span style="font-size:13px;font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0;">(Optional)</span></label>
+                    <input type="text" id="userThana" placeholder="Thana / Upazila">
+                </div>
             </div>
         </div>
         <aside class="checkout-aside">
-            <div class="card-block">
-                <h3 class="section-label"><span>পেমেন্ট পদ্ধতি</span></h3>
-                <div class="pm-grid">
-                    <label class="pm-option active" data-pm="cod"><input type="radio" name="paymentMethod" value="Cash On Delivery" checked> Cash On Delivery</label>
-                    <label class="pm-option" data-pm="bkash"><input type="radio" name="paymentMethod" value="bKash"> bKash</label>
-                    <label class="pm-option" data-pm="nagad"><input type="radio" name="paymentMethod" value="Nagad"> Nagad</label>
-                    <label class="pm-option" data-pm="bank"><input type="radio" name="paymentMethod" value="Bank Transfer"> Bank Transfer</label>
+            <div class="gb-panel gb-panel-payment">
+                <h3 class="gb-panel-title">Payment method</h3>
+                <div class="pm-stack" role="radiogroup" aria-label="Select payment method">
+                    <div class="pm-row pm-row-2">
+                        <label class="pm-option active" data-pm="cod">
+                            <input type="radio" name="paymentMethod" value="Cash On Delivery" checked>
+                            <span class="pm-body">
+                                <span class="pm-icon" aria-hidden="true">
+                                    <svg class="pm-cod-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                        <rect x="4" y="32" width="26" height="20" rx="3" fill="#D4A574" stroke="#9A6B3F" stroke-width="1.2"/>
+                                        <rect x="34" y="20" width="24" height="18" rx="2" fill="#4ADE80" stroke="#16A34A" stroke-width="1.2"/>
+                                        <ellipse cx="20" cy="46" rx="11" ry="4.5" fill="#FCD9B6"/>
+                                        <path d="M11 46c2.5-7 9-11 17-11" stroke="#E8A87C" stroke-width="2.8" stroke-linecap="round"/>
+                                        <ellipse cx="48" cy="40" rx="10" ry="4" fill="#FCD9B6"/>
+                                        <path d="M39 40c3.5-8 11-12 19-12" stroke="#E8A87C" stroke-width="2.8" stroke-linecap="round"/>
+                                        <rect x="36" y="10" width="20" height="12" rx="2" fill="#86EFAC" stroke="#22C55E" stroke-width="1"/>
+                                        <circle cx="50" cy="16" r="6" fill="#FDE68A" stroke="#F59E0B" stroke-width="1"/>
+                                        <path d="M47 18h6v-4h-6z" fill="#16A34A"/>
+                                    </svg>
+                                </span>
+                                <span class="pm-label">Cash On Delivery</span>
+                            </span>
+                            <span class="pm-check" aria-hidden="true"><svg viewBox="0 0 12 10" fill="none"><path d="M1 5.2L4.2 8.5L11 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                        </label>
+                        <label class="pm-option" data-pm="bank">
+                            <input type="radio" name="paymentMethod" value="Bank Transfer">
+                            <span class="pm-body">
+                                <span class="pm-icon" aria-hidden="true">
+                                    <img src="assets/payment/online-card.svg" alt="" class="pm-logo-img" width="52" height="52" loading="lazy">
+                                </span>
+                                <span class="pm-label">Online Payment</span>
+                            </span>
+                            <span class="pm-check" aria-hidden="true"><svg viewBox="0 0 12 10" fill="none"><path d="M1 5.2L4.2 8.5L11 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                        </label>
+                    </div>
+                    <div class="pm-row pm-row-full">
+                        <label class="pm-option pm-brand" data-pm="bkash">
+                            <input type="radio" name="paymentMethod" value="bKash">
+                            <span class="pm-body">
+                                <span class="pm-icon" aria-hidden="true">
+                                    <img src="assets/payment/bkash.svg" alt="bKash" class="pm-logo-img" width="88" height="38" loading="lazy">
+                                </span>
+                                <span class="pm-label">Bkash</span>
+                            </span>
+                            <span class="pm-check" aria-hidden="true"><svg viewBox="0 0 12 10" fill="none"><path d="M1 5.2L4.2 8.5L11 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                        </label>
+                    </div>
+                    <div class="pm-row pm-row-full">
+                        <label class="pm-option pm-brand" data-pm="nagad">
+                            <input type="radio" name="paymentMethod" value="Nagad">
+                            <span class="pm-body">
+                                <span class="pm-icon" aria-hidden="true">
+                                    <img src="assets/payment/nagad.svg" alt="Nagad" class="pm-logo-img" width="88" height="38" loading="lazy">
+                                </span>
+                                <span class="pm-label">Nagad</span>
+                            </span>
+                            <span class="pm-check" aria-hidden="true"><svg viewBox="0 0 12 10" fill="none"><path d="M1 5.2L4.2 8.5L11 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                        </label>
+                    </div>
                 </div>
-                <div id="paymentInfo" class="payment-panel">পেমেন্ট মোড: Cash On Delivery (পণ্য হাতে পেয়ে টাকা দিন)।</div>
+                <div id="paymentExtra" class="payment-extra is-cod-hidden">
+                <div id="paymentInfo" class="payment-panel">Payment mode: Cash On Delivery — pay when you receive the product.</div>
                 <div class="payment-fields">
-                    <input type="text" id="senderNumber" placeholder="পেমেন্ট নম্বর (bKash/Nagad) - ঐচ্ছিক">
-                    <input type="text" id="paymentTxnId" placeholder="Transaction ID / Reference - ঐচ্ছিক">
-                    <input type="text" id="bankRef" placeholder="ব্যাংক স্লিপ/রেফারেন্স নম্বর - Bank হলে দিন">
+                    <input type="text" id="senderNumber" placeholder="Payment number (bKash/Nagad) - optional">
+                    <input type="text" id="paymentTxnId" placeholder="Transaction ID / Reference - optional">
+                    <input type="text" id="bankRef" placeholder="Bank slip / reference number - if paid by bank">
+                </div>
+                <div class="pay-details" id="payDetails">
+                    <div class="pay-details-head">
+                        <strong>Bank / Mobile banking</strong>
+                        <span class="pay-details-badge">Official account</span>
+                    </div>
+                    <div class="pay-details-grid">
+                        <div class="pay-detail-card pay-detail-mfs" data-pm-highlight="bkash,nagad">
+                            <div class="pay-detail-card-head"><span class="dot dot-mfs"></span> Mobile banking (Personal)</div>
+                            <table class="pay-chart" role="presentation">
+                                <tbody>
+                                    <tr>
+                                        <td class="pay-chart-brand"><img src="assets/payment/bkash.svg" alt="bKash" class="pay-chart-logo" loading="lazy"></td>
+                                        <td>
+                                            <div class="pay-copy-row">
+                                                <span>01551642683</span>
+                                                <button type="button" class="pay-copy-btn" data-copy="01551642683" aria-label="Copy bKash number">Copy</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="pay-chart-brand"><img src="assets/payment/nagad.svg" alt="Nagad" class="pay-chart-logo" loading="lazy"></td>
+                                        <td>
+                                            <div class="pay-copy-row">
+                                                <span>01551642683</span>
+                                                <button type="button" class="pay-copy-btn" data-copy="01551642683" aria-label="Copy Nagad number">Copy</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pay-detail-card pay-detail-bank" data-pm-highlight="bank">
+                            <div class="pay-detail-card-head"><span class="dot dot-bank"></span> Bank transfer</div>
+                            <table class="pay-chart" role="presentation">
+                                <tbody>
+                                    <tr><td>Bank</td><td>United Commercial Bank PLC</td></tr>
+                                    <tr><td>Account name</td><td>MUSLIM ABAYA</td></tr>
+                                    <tr><td>Branch</td><td>Kamrangirchar Branch</td></tr>
+                                    <tr>
+                                        <td>Account no.</td>
+                                        <td>
+                                            <div class="pay-copy-row">
+                                                <span>7862141000038155</span>
+                                                <button type="button" class="pay-copy-btn" data-copy="7862141000038155" aria-label="Copy account number">Copy</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <p class="pay-details-note">After payment, enter your Transaction ID / Reference in the fields above.</p>
+                </div>
                 </div>
             </div>
-            <div class="card-block">
-                <h3 class="section-label"><span>কুপন / ভাউচার</span></h3>
-                <div class="coupon-row">
-                    <input type="text" id="couponCode" placeholder="Coupon / Voucher Code">
-                    <button type="button" id="applyCouponBtn" class="coupon-btn">Apply</button>
-                </div>
-                <div id="couponMsg" style="margin-top:8px; font-size:12px; color:#6b7280;"></div>
+            <div class="gb-panel gb-panel-coupon coupon-panel" id="couponPanel">
+                    <button type="button" class="coupon-toggle" id="couponToggle" aria-expanded="false" aria-controls="couponPanelBody">
+                        <span>Have a coupon or voucher?</span>
+                        <span class="coupon-toggle-icon" aria-hidden="true">
+                            <svg width="12" height="8" viewBox="0 0 12 8" fill="none"><path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                        </span>
+                    </button>
+                    <div class="coupon-panel-body" id="couponPanelBody">
+                        <div class="coupon-row">
+                            <input type="text" id="couponCode" placeholder="Coupon / Voucher Code">
+                            <button type="button" id="applyCouponBtn" class="coupon-btn">Apply</button>
+                        </div>
+                        <div id="couponMsg" style="margin-top:8px; font-size:12px; color:#6b7280;"></div>
+                    </div>
             </div>
-            <div class="card-block card-block-premium">
-                <h3 class="section-label"><span>অর্ডার মোট</span></h3>
-                <div class="summary-item"><span>পণ্যের মূল্য</span><strong id="side-subtotal">৳0</strong></div>
-                <div class="summary-item"><span>ডেলিভারি চার্জ</span><strong id="side-delivery">৳0</strong></div>
-                <div class="summary-item"><span>পণ্যের ধরন</span><strong id="side-design">0</strong></div>
-                <div class="summary-item" id="side-qty-row"><span>মোট পিস</span><strong id="side-qty">0</strong></div>
-                <div class="order-total-box">
-                    <div class="summary-item total-final"><span>সর্বমোট</span><strong id="side-total">৳0</strong></div>
-                </div>
-                <p style="margin:12px 0 0; font-size:12px; color:var(--muted); text-align:center;">৩টি পণ্যে ডেলিভারি ফ্রি</p>
+            <div class="gb-panel gb-panel-summary">
+                    <div class="gb-order-summary">
+                        <div class="summary-item"><span>Sub total</span><strong id="side-subtotal">৳0</strong></div>
+                        <div class="summary-item"><span>Delivery cost</span><strong id="side-delivery">৳0</strong></div>
+                        <div class="summary-item summary-total-row"><span>Total</span><strong id="side-total">৳0 BDT</strong></div>
+                    </div>
+                    <span id="side-design" class="visually-hidden">0</span>
+                    <span id="side-qty" class="visually-hidden">0</span>
+                    <p class="sidebar-meta">Free delivery on 3 or more items</p>
             </div>
-            <div class="card-block card-block-muted">
-                <strong style="display:block; margin-bottom:10px; color:var(--ink); font-size:14px;">ব্যাংক / মোবাইল ব্যাংকিং</strong>
-                <div>Bank Name: United Commercial Bank PLC</div>
-                <div>Name: MUSLIM ABAYA</div>
-                <div>Branch: Kamrangirchar Branch</div>
-                <div>Account Number: 7862141000038155</div>
-                <hr style="border:0;border-top:1px dashed #ddd; margin:10px 0;">
-                <div>bKash: 01551642683</div>
-                <div>Nagad: 01551642683</div>
-                <div style="margin-top:8px;">
-                    ব্যাংকে পেমেন্ট করলে: Account Name, Account Number, Bank Name, Branch Name, Transaction/Slip Ref যুক্ত করুন।
-                </div>
+            <div class="gb-panel gb-panel-chart">
+                <h3 class="gb-panel-title">Product / fabric details</h3>
+                <div id="checkoutProductChart"></div>
+            </div>
+            <div class="gb-panel gb-panel-plan">
+                    <h3 class="gb-panel-title">Choose Payment Plan</h3>
+                    <div class="pay-plan-list" role="radiogroup" aria-label="Payment plan">
+                        <label class="pay-plan-option">
+                            <input type="radio" name="paymentPlan" value="50% advance">
+                            <span>50% advance payment confirms your order.</span>
+                        </label>
+                        <label class="pay-plan-option">
+                            <input type="radio" name="paymentPlan" value="75% advance">
+                            <span>75% advance payment confirms your order.</span>
+                        </label>
+                        <label class="pay-plan-option">
+                            <input type="radio" name="paymentPlan" value="Full payment advance" checked>
+                            <span>Full payment advance</span>
+                        </label>
+                    </div>
+            </div>
+            <div class="gb-panel gb-panel-notes">
+                    <h3 class="gb-panel-title">Special instructions <span style="font-size:13px;font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0;">(Optional)</span></h3>
+                    <textarea id="specialNotes" rows="3" maxlength="90" placeholder="Any special instructions for your order"></textarea>
+                    <div style="font-size:12px; color:#6b7280; text-align:right;"><span id="noteCount">0</span> / 90 characters</div>
+            </div>
+            <div class="gb-panel gb-panel-submit">
+                    <label class="terms-box" style="margin-top:0;">
+                        <input type="checkbox" id="agreeTerms">
+                        <span>I have read and agree to the <a href="terms.html" target="_blank" rel="noopener">Terms &amp; Conditions</a>, <a href="refund.html" target="_blank" rel="noopener">Privacy Policy</a> and <a href="refund.html" target="_blank" rel="noopener">Refund Policy</a>.</span>
+                    </label>
+                    <div id="termsError" class="terms-error">Please accept the Terms &amp; Conditions to place your order.</div>
+                    <button type="submit" id="submitBtn" class="btn-place-order">Place Order</button>
             </div>
         </aside>
-    </div>
+    </form>
 </div>
 <div class="sticky-order-bar">
-    <button type="button" class="sticky-order-btn" id="stickyOrderBtn">অর্ডার কনফার্ম করুন</button>
+    <button type="button" class="sticky-order-btn" id="stickyOrderBtn">Place Order</button>
 </div>
 
-<script src="cart-utils.js"></script>
+<script src="site-security.js"></script>
+<script src="site-api-config.js"></script>
+<script src="site-api-health.js"></script>
+<script src="auth-config.js"></script>
+<script src="auth-api.js"></script>
+<script src="cart-utils.js?v=20260530d"></script>
+<script defer src="site-header.js?v=20260531"></script>
 <script>
-    const ORDER_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzmjgiLnI3WP21q6xHxMvFETAwvqmeMOjJXHifdxQpBk72BuPNuLZS78mUt4tcPVZLR/exec';
+    const ORDER_SCRIPT_URL =
+      (typeof getSiteApiUrl === 'function' && getSiteApiUrl()) ||
+      (window.MA_AUTH_CONFIG && window.MA_AUTH_CONFIG.apiUrl) ||
+      '';
+
+    function getWhatsAppOrderLink(order) {
+        var wa = '8801971642683';
+        var lines = [
+            'নতুন অর্ডার — Muslim Abaya',
+            'নাম: ' + order.name,
+            'মোবাইল: ' + order.phone,
+            'ঠিকানা: ' + order.address,
+            'জেলা: ' + order.district
+        ];
+        if (order.thana) lines.push('থানা: ' + order.thana);
+        lines.push('পরিমাণ: ' + order.qty, 'মোট: ৳' + order.total, 'পণ্য: ' + order.products);
+        return 'https://wa.me/' + wa + '?text=' + encodeURIComponent(lines.join('\n'));
+    }
+
+    function finishCheckoutSuccess(nameValue, phoneValue, emailValue, gTotal) {
+        var eventId = 'order_' + Date.now();
+        var cartSnap = typeof buildCartTrackingSnapshot === 'function'
+            ? buildCartTrackingSnapshot(cart)
+            : { value: parseFloat(gTotal) || 0, currency: 'BDT' };
+        if (typeof syncTikTokUserFromFormFields === 'function') {
+            syncTikTokUserFromFormFields();
+        }
+        if (typeof saveOrderTracking === 'function') {
+            saveOrderTracking(Object.assign({}, cartSnap, {
+                first_name: nameValue,
+                phone: phoneValue,
+                email: emailValue,
+                user_email: emailValue,
+                order_value: parseFloat(gTotal) || 0,
+                value: parseFloat(gTotal) || 0,
+                order_items: productsLabel(),
+                transaction_id: eventId,
+                event_id: eventId,
+                currency: 'BDT'
+            }));
+        }
+        if (typeof clearStoreCart === 'function') clearStoreCart();
+        try { sessionStorage.removeItem('muslim_abaya_home_cart_active'); } catch (e) {}
+        window.location.href = pageLink('/thank-you');
+    }
+
+    function postOrderToSheet(formData, nameValue, phoneValue, emailValue, gTotal, btn) {
+        fetch(ORDER_SCRIPT_URL, {
+            method: 'POST',
+            body: formData,
+            mode: 'no-cors'
+        })
+            .then(function () {
+                finishCheckoutSuccess(nameValue, phoneValue, emailValue, gTotal);
+            })
+            .catch(function () {
+                alert('Connection error. Please try again or use WhatsApp.');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = 'Place Order';
+                }
+            });
+    }
     const MAX_PRODUCT_SLOTS = 20;
+
+    function pageLink(route) {
+        if (typeof window.siteHref === 'function') return window.siteHref(route);
+        var path = String(route || '/').split('?')[0];
+        var q = String(route || '').indexOf('?') >= 0 ? '?' + String(route).split('?').slice(1).join('?') : '';
+        var files = {
+            '/': 'index.html', '/category': 'category.html', '/abaya': 'abaya.html',
+            '/checkout': 'checkout.html'
+        };
+        if (!path || path === '/') return 'index.html' + q;
+        if (files[path]) return files[path] + q;
+        return path.replace(/^\//, '') + '.html' + q;
+    }
+
+    function escapeHtml(str) {
+        return String(str == null ? '' : str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    function orderItemDetail(item) {
+        var parts = [];
+        var color = item.colorLabel || item.color;
+        if (color) parts.push('Color: ' + color);
+        var fabric = item.fabric || item.material;
+        if (fabric) parts.push('Fabric: ' + fabric);
+        var size = item.size || item.selectedSize;
+        if (!size) {
+            var m = String(item.name || '').match(/\(Size\s+([^)]+)\)/i);
+            if (m) size = m[1];
+        }
+        if (size) parts.push('Size: ' + size);
+        var desc = String(item.description || '').trim();
+        if (desc && desc !== fabric) parts.push(desc);
+        return parts.join(' · ');
+    }
 
     (function initDistrictSelect() {
         var sel = document.getElementById('userArea');
         if (!sel || sel.getAttribute('data-districts-built') === '1') return;
         sel.setAttribute('data-districts-built', '1');
-        var sub = { 'গাজীপুর': 1, 'নারায়ণগঞ্জ': 1, 'নরসিংদী': 1, 'মুন্সীগঞ্জ': 1, 'মানিকগঞ্জ': 1 };
-        var all = ['ঢাকা', 'গাজীপুর', 'নারায়ণগঞ্জ', 'নরসিংদী', 'টাঙ্গাইল', 'কিশোরগঞ্জ', 'ময়মনসিংহ', 'শেরপুর', 'জামালপুর', 'নেত্রকোনা', 'মানিকগঞ্জ', 'মুন্সীগঞ্জ', 'মাদারীপুর', 'রাজবাড়ী', 'ফরিদপুর', 'গোপালগঞ্জ', 'শরীয়তপুর', 'চট্টগ্রাম', 'কুমিল্লা', 'চাঁদপুর', 'ফেনী', 'ব্রাহ্মণবাড়িয়া', 'নোয়াখালী', 'লক্ষ্মীপুর', 'কক্সবাজার', 'খাগড়াছড়ি', 'রাঙ্গামাটি', 'বান্দরবান', 'রাজশাহী', 'নওগাঁ', 'নাটোর', 'চাঁপাইনবাবগঞ্জ', 'পাবনা', 'সিরাজগঞ্জ', 'জয়পুরহাট', 'বগুড়া', 'রংপুর', 'দিনাজপুর', 'পঞ্চগড়', 'নীলফামারী', 'লালমনিরহাট', 'কুড়িগ্রাম', 'গাইবান্ধা', 'ঠাকুরগাঁও', 'সিলেট', 'সুনামগঞ্জ', 'হবিগঞ্জ', 'মৌলভীবাজার', 'খুলনা', 'বাগেরহাট', 'সাতক্ষীরা', 'নড়াইল', 'যশোর', 'মাগুরা', 'ঝিনাইদহ', 'কুষ্টিয়া', 'চুয়াডাঙ্গা', 'মেহেরপুর', 'বরিশাল', 'পটুয়াখালী', 'ভোলা', 'বরগুনা', 'ঝালকাঠি', 'পিরোজপুর'];
-        function feeFor(name) {
+        var subDhaka = { 'গাজীপুর': 1, 'নারায়ণগঞ্জ': 1, 'নরসিংদী': 1, 'মুন্সীগঞ্জ': 1, 'মানিকগঞ্জ': 1 };
+        var districts = [
+            'ঢাকা', 'গাজীপুর', 'নারায়ণগঞ্জ', 'নরসিংদী', 'টাঙ্গাইল', 'কিশোরগঞ্জ', 'ময়মনসিংহ', 'শেরপুর', 'জামালপুর', 'নেত্রকোনা',
+            'মানিকগঞ্জ', 'মুন্সীগঞ্জ', 'মাদারীপুর', 'রাজবাড়ী', 'ফরিদপুর', 'গোপালগঞ্জ', 'শরীয়তপুর',
+            'চট্টগ্রাম', 'কুমিল্লা', 'চাঁদপুর', 'ফেনী', 'ব্রাহ্মণবাড়িয়া', 'নোয়াখালী', 'লক্ষ্মীপুর', 'কক্সবাজার', 'খাগড়াছড়ি', 'রাঙ্গামাটি', 'বান্দরবান',
+            'রাজশাহী', 'নওগাঁ', 'নাটোর', 'চাঁপাইনবাবগঞ্জ', 'পাবনা', 'সিরাজগঞ্জ', 'জয়পুরহাট', 'বগুড়া',
+            'রংপুর', 'দিনাজপুর', 'পঞ্চগড়', 'নীলফামারী', 'লালমনিরহাট', 'কুড়িগ্রাম', 'গাইবান্ধা', 'ঠাকুরগাঁও',
+            'সিলেট', 'সুনামগঞ্জ', 'হবিগঞ্জ', 'মৌলভীবাজার',
+            'খুলনা', 'বাগেরহাট', 'সাতক্ষীরা', 'নড়াইল', 'যশোর', 'মাগুরা', 'ঝিনাইদহ', 'কুষ্টিয়া', 'চুয়াডাঙ্গা', 'মেহেরপুর',
+            'বরিশাল', 'পটুয়াখালী', 'ভোলা', 'বরগুনা', 'ঝালকাঠি', 'পিরোজপুর'
+        ];
+        function deliveryFee(name) {
             if (name === 'ঢাকা') return 80;
-            if (sub[name]) return 100;
+            if (subDhaka[name]) return 100;
             return 150;
         }
-        function addGroup(label) {
-            var og = document.createElement('optgroup');
-            og.label = label;
-            sel.appendChild(og);
-            return og;
-        }
-        function addOpt(parent, name, fee) {
-            var o = document.createElement('option');
-            o.value = String(fee);
-            o.setAttribute('data-district', name);
-            o.textContent = name;
-            parent.appendChild(o);
-        }
-        var dh = addGroup('ঢাকা');
-        var sd = addGroup('সাব-ঢাকা');
-        var ot = addGroup('ঢাকার বাহিরে');
-        var dhaka = [], suba = [], outa = [];
-        for (var i = 0; i < all.length; i++) {
-            var n = all[i];
-            var f = feeFor(n);
-            if (f === 80) dhaka.push(n);
-            else if (f === 100) suba.push(n);
-            else outa.push(n);
-        }
-        dhaka.sort(function (a, b) { return a.localeCompare(b, 'bn'); });
-        suba.sort(function (a, b) { return a.localeCompare(b, 'bn'); });
-        outa.sort(function (a, b) { return a.localeCompare(b, 'bn'); });
-        dhaka.forEach(function (n) { addOpt(dh, n, 80); });
-        suba.forEach(function (n) { addOpt(sd, n, 100); });
-        outa.forEach(function (n) { addOpt(ot, n, 150); });
+        var dhaka = 'ঢাকা';
+        var rest = districts.filter(function (d) { return d !== dhaka; });
+        rest.sort(function (a, b) { return a.localeCompare(b, 'bn'); });
+        var ordered = [dhaka].concat(rest);
+        ordered.forEach(function (name) {
+            var opt = document.createElement('option');
+            opt.value = String(deliveryFee(name));
+            opt.setAttribute('data-district', name);
+            opt.textContent = name;
+            sel.appendChild(opt);
+        });
     })();
 
     function loadCart() {
@@ -786,16 +1503,44 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function productsLabel() {
         return cart.map(function(item) {
-            return item.name + ' (' + (parseInt(item.quantity, 10) || 1) + 'টি)';
+            return item.name + ' (' + (parseInt(item.quantity, 10) || 1) + ' pcs)';
         }).join(', ');
     }
 
     function formatBdt(amount) {
         var n = parseInt(amount, 10) || 0;
-        return '৳' + n.toLocaleString('en-BD');
+        return '৳' + n.toLocaleString('en-BD', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
     var TRASH_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
+
+    function renderProductChart() {
+        var el = document.getElementById('checkoutProductChart');
+        if (!el) return;
+        if (!cart.length) {
+            el.innerHTML = '<p class="gb-product-chart-empty">Product details will appear here when items are in your cart.</p>';
+            return;
+        }
+        var rows = '';
+        cart.forEach(function (item) {
+            var qty = parseInt(item.quantity, 10) || 1;
+            var unit = parseInt(item.price, 10) || 0;
+            var size = item.size || item.selectedSize || '—';
+            var fabric = item.fabric || item.material || 'Premium Fabric';
+            rows +=
+                '<tr>' +
+                '<td>' + (item.name || 'Product') + '</td>' +
+                '<td>' + size + '</td>' +
+                '<td>' + fabric + '</td>' +
+                '<td>' + qty + '</td>' +
+                '<td>' + formatBdt(unit * qty) + '</td>' +
+                '</tr>';
+        });
+        el.innerHTML =
+            '<table class="gb-product-chart-table">' +
+            '<thead><tr><th>Product</th><th>Size</th><th>Fabric</th><th>Qty</th><th>Price</th></tr></thead>' +
+            '<tbody>' + rows + '</tbody></table>';
+    }
 
     function buildProductSlots() {
         var slots = [];
@@ -813,7 +1558,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (!summaryDiv) return;
         
         if (cart.length === 0) {
-            summaryDiv.innerHTML = "<div class='empty-cart-msg'>আপনার কার্টে কোনো পণ্য নেই।<br><a href=\"/category\">কালেকশন দেখুন</a> বা <a href=\"/\">হোমপেজে ফিরুন</a>।</div>";
+            summaryDiv.innerHTML = "<div class='empty-cart-msg'>Your cart is empty.<br><a href=\"" + pageLink('/category') + "\">Browse collection</a> or <a href=\"" + pageLink('/') + "\">Return home</a>.</div>";
             var metaElEmpty = document.getElementById('orderReviewMeta');
             if (metaElEmpty) metaElEmpty.textContent = '';
             var subBtn = document.getElementById('submitBtn');
@@ -823,7 +1568,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             var sideTotal = document.getElementById('side-total');
             if (sideSubtotal) sideSubtotal.textContent = formatBdt(0);
             if (sideDelivery) sideDelivery.textContent = formatBdt(0);
-            if (sideTotal) sideTotal.textContent = formatBdt(0);
+            if (sideTotal) sideTotal.textContent = formatBdt(0) + ' BDT';
+            renderProductChart();
             return;
         }
 
@@ -837,11 +1583,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var sideTotal = document.getElementById('side-total');
         if (sideSubtotal) sideSubtotal.textContent = formatBdt(sub);
         if (sideDelivery) sideDelivery.textContent = (q >= 3 ? formatBdt(0) : formatBdt(ship));
-        if (sideTotal) sideTotal.textContent = formatBdt(grand);
+        if (sideTotal) sideTotal.textContent = formatBdt(grand) + ' BDT';
         var sideQty = document.getElementById('side-qty');
         var sideDesign = document.getElementById('side-design');
-        if (sideQty) sideQty.textContent = q + ' টি';
-        if (sideDesign) sideDesign.textContent = designCount + ' টি';
+        if (sideQty) sideQty.textContent = String(q);
+        if (sideDesign) sideDesign.textContent = String(designCount);
 
         var itemsHtml = '';
         cart.forEach(function(item, idx) {
@@ -850,19 +1596,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             var lineTotal = unitPrice * qty;
             var imgUrl = (typeof resolveStoreItemImage === 'function') ? resolveStoreItemImage(item) : (item.image || '');
             var thumbInner = imgUrl
-                ? '<img src="' + imgUrl + '" alt="" loading="lazy" onerror="this.parentElement.innerHTML=\'<span class=gb-order-thumb-placeholder>👜</span>\'">'
+                ? '<img src="' + escapeHtml(imgUrl) + '" alt="" loading="lazy" onerror="this.parentElement.innerHTML=\'<span class=gb-order-thumb-placeholder>👜</span>\'">'
                 : '<span class="gb-order-thumb-placeholder">👜</span>';
+            var detail = orderItemDetail(item);
+            var detailHtml = detail ? '<p class="gb-order-detail">' + escapeHtml(detail) + '</p>' : '';
             itemsHtml +=
                 '<div class="gb-order-row">' +
                 '<div class="gb-order-thumb">' + thumbInner + '</div>' +
-                '<p class="gb-order-name">' + item.name + '</p>' +
+                '<div class="gb-order-main">' +
+                '<p class="gb-order-name">' + escapeHtml(item.name) + '</p>' +
+                detailHtml +
+                '<div class="gb-order-qty-row">' +
+                '<span class="gb-order-qty-label">Qty:</span>' +
                 '<div class="gb-order-qty">' +
-                '<button type="button" data-cart-action="dec" data-cart-idx="' + idx + '" aria-label="পরিমাণ কমান">−</button>' +
+                '<button type="button" data-cart-action="dec" data-cart-idx="' + idx + '" aria-label="Decrease quantity">−</button>' +
                 '<span>' + qty + '</span>' +
-                '<button type="button" data-cart-action="inc" data-cart-idx="' + idx + '" aria-label="পরিমাণ বাড়ান">+</button>' +
-                '</div>' +
+                '<button type="button" data-cart-action="inc" data-cart-idx="' + idx + '" aria-label="Increase quantity">+</button>' +
+                '</div></div></div>' +
                 '<div class="gb-order-price">' + formatBdt(lineTotal) + '</div>' +
-                '<button type="button" class="gb-order-delete" data-cart-action="remove" data-cart-idx="' + idx + '" aria-label="প্রোডাক্ট মুছুন" title="মুছুন">' + TRASH_SVG + '</button>' +
+                '<button type="button" class="gb-order-delete" data-cart-action="remove" data-cart-idx="' + idx + '" aria-label="Remove product" title="Remove">' + TRASH_SVG + '</button>' +
                 '</div>';
         });
 
@@ -870,6 +1622,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (metaEl) metaEl.textContent = designCount + ' items · ' + q + ' pcs';
 
         summaryDiv.innerHTML = '<div class="gb-order-list">' + itemsHtml + '</div>';
+        renderProductChart();
         
         var subBtn = document.getElementById('submitBtn');
         if (subBtn) subBtn.disabled = false;
@@ -898,7 +1651,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     var clearWrap = document.getElementById('clearCartWrap');
     if (clearWrap && cart.length > 0) {
-        clearWrap.innerHTML = '<a href="#" onclick="if(typeof clearStoreCart===\'function\'){clearStoreCart();} try{sessionStorage.removeItem(\'muslim_abaya_home_cart_active\');}catch(e){} if(typeof refreshCartBadgeUI===\'function\'){refreshCartBadgeUI([]);} else if(typeof window.updateCartBadge===\'function\'){window.updateCartBadge([]);} location.reload(); return false;">কার্ট খালি করুন</a>';
+        clearWrap.innerHTML = '<a href="#" onclick="if(typeof clearStoreCart===\'function\'){clearStoreCart();} try{sessionStorage.removeItem(\'muslim_abaya_home_cart_active\');}catch(e){} if(typeof refreshCartBadgeUI===\'function\'){refreshCartBadgeUI([]);} else if(typeof window.updateCartBadge===\'function\'){window.updateCartBadge([]);} location.reload(); return false;">Clear cart</a>';
     } else if (clearWrap) {
         clearWrap.innerHTML = '';
     }
@@ -909,31 +1662,76 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     (function initPaymentBox() {
         var info = document.getElementById('paymentInfo');
         var details = {
-            'Cash On Delivery': 'পেমেন্ট মোড: Cash On Delivery (পণ্য হাতে পেয়ে টাকা দিন)।',
-            'bKash': 'bKash নাম্বার: 01551642683 - পেমেন্টের পর Transaction ID দিন।',
-            'Nagad': 'Nagad নাম্বার: 01551642683 - পেমেন্টের পর Transaction ID দিন।',
-            'Bank Transfer': 'Bank: United Commercial Bank PLC, A/C: 7862141000038155, Branch: Kamrangirchar Branch'
+            'Cash On Delivery': 'Payment mode: Cash On Delivery — pay when you receive the product.',
+            'bKash': 'bKash Personal: 01551642683 — enter Transaction ID after payment.',
+            'Nagad': 'Nagad Personal: 01551642683 — enter Transaction ID after payment.',
+            'Bank Transfer': 'UCB PLC, A/C: 7862141000038155 — enter slip/reference number.'
         };
+        function highlightPayCards(pmKey) {
+            document.querySelectorAll('.pay-detail-card').forEach(function(card) {
+                var keys = (card.getAttribute('data-pm-highlight') || '').split(',');
+                var match = keys.indexOf(pmKey) !== -1;
+                card.classList.toggle('is-highlight', match);
+            });
+        }
+        function syncPaymentMethod(opt) {
+            document.querySelectorAll('.pm-option').forEach(function(o) { o.classList.remove('active'); });
+            opt.classList.add('active');
+            var radio = opt.querySelector('input[type="radio"]');
+            if (!radio) return;
+            radio.checked = true;
+            if (info) info.textContent = details[radio.value] || '';
+            var pmKey = opt.getAttribute('data-pm') || '';
+            highlightPayCards(pmKey);
+            var extra = document.getElementById('paymentExtra');
+            if (extra) extra.classList.toggle('is-cod-hidden', pmKey === 'cod');
+        }
         document.querySelectorAll('.pm-option').forEach(function(opt) {
-            opt.addEventListener('click', function() {
-                document.querySelectorAll('.pm-option').forEach(function(o){ o.classList.remove('active'); });
-                opt.classList.add('active');
-                var radio = opt.querySelector('input[type="radio"]');
-                if (radio) {
-                    radio.checked = true;
-                    if (info) info.textContent = details[radio.value] || '';
+            opt.addEventListener('click', function() { syncPaymentMethod(opt); });
+        });
+        var checked = document.querySelector('.pm-option input[type="radio"]:checked');
+        if (checked && checked.closest('.pm-option')) syncPaymentMethod(checked.closest('.pm-option'));
+        document.querySelectorAll('.pay-copy-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var text = btn.getAttribute('data-copy') || '';
+                if (!text) return;
+                function done() {
+                    btn.textContent = 'Copied';
+                    btn.classList.add('copied');
+                    setTimeout(function() {
+                        btn.textContent = 'Copy';
+                        btn.classList.remove('copied');
+                    }, 1600);
+                }
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(done).catch(function() {});
+                } else {
+                    var ta = document.createElement('textarea');
+                    ta.value = text;
+                    document.body.appendChild(ta);
+                    ta.select();
+                    try { document.execCommand('copy'); done(); } catch (e) {}
+                    document.body.removeChild(ta);
                 }
             });
         });
     })();
     (function initExtras() {
+        var couponToggle = document.getElementById('couponToggle');
+        var couponPanel = document.getElementById('couponPanel');
+        if (couponToggle && couponPanel) {
+            couponToggle.addEventListener('click', function() {
+                var open = couponPanel.classList.toggle('is-open');
+                couponToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            });
+        }
         var applyBtn = document.getElementById('applyCouponBtn');
         var couponInput = document.getElementById('couponCode');
         var couponMsg = document.getElementById('couponMsg');
         if (applyBtn && couponInput && couponMsg) {
             applyBtn.addEventListener('click', function() {
                 var code = (couponInput.value || '').trim();
-                couponMsg.textContent = code ? 'কুপন "' + code + '" নোট করা হয়েছে (ম্যানুয়াল ভেরিফিকেশন হবে)।' : 'কুপন কোড দিন।';
+                couponMsg.textContent = code ? 'Coupon "' + code + '" noted (manual verification).' : 'Enter a coupon code.';
             });
         }
         var notes = document.getElementById('specialNotes');
@@ -963,7 +1761,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             e.preventDefault();
 
             if (cart.length === 0) {
-                alert('কার্ট খালি। আবার পণ্য নির্বাচন করুন।');
+                alert('Your cart is empty. Please add products first.');
                 return;
             }
 
@@ -977,27 +1775,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             var addrValue = String(addrInput.value || '').trim();
 
             if (nameValue.length < 2) {
-                alert('অনুগ্রহ করে সঠিক নাম লিখুন।');
+                alert('Please enter a valid name.');
                 nameInput.focus();
                 return;
             }
             if (!/^01\d{9}$/.test(phoneValue)) {
-                alert('সঠিক ১১ সংখ্যার মোবাইল নম্বর লিখুন (01XXXXXXXXX)।');
+                alert('Enter a valid 11-digit mobile number (01XXXXXXXXX).');
                 phoneInput.focus();
                 return;
             }
             if (emailValue && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
-                alert('সঠিক ইমেইল ঠিকানা লিখুন।');
+                alert('Enter a valid email address.');
                 if (emailInput) emailInput.focus();
                 return;
             }
             if (addrValue.length < 8) {
-                alert('অনুগ্রহ করে সম্পূর্ণ ঠিকানা লিখুন।');
+                alert('Please enter your full delivery address.');
                 addrInput.focus();
                 return;
             }
             if (!areaSelect.value) {
-                alert('অনুগ্রহ করে ডেলিভারি জেলা নির্বাচন করুন।');
+                alert('Please select a delivery district.');
                 areaSelect.focus();
                 return;
             }
@@ -1012,7 +1810,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
             var btn = document.getElementById('submitBtn');
             if (btn) {
-                btn.innerText = 'প্রসেসিং...';
+                btn.innerText = 'Processing...';
                 btn.disabled = true;
             }
 
@@ -1022,6 +1820,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             var districtParam = areaOpt.getAttribute('data-district') || areaOpt.textContent.split('(')[0].trim();
 
             const formData = new URLSearchParams();
+            formData.append('RecordType', 'Order');
             formData.append('Name', nameValue);
             formData.append('Phone', phoneValue);
             if (emailValue) formData.append('Email', emailValue);
@@ -1035,6 +1834,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             formData.append('ProductSlotCount', String(MAX_PRODUCT_SLOTS));
             var selectedPayment = document.querySelector('input[name="paymentMethod"]:checked');
             formData.append('PaymentMethod', selectedPayment ? selectedPayment.value : 'Cash On Delivery');
+            var selectedPlan = document.querySelector('input[name="paymentPlan"]:checked');
+            formData.append('PaymentPlan', selectedPlan ? selectedPlan.value : 'Full payment advance');
             formData.append('SenderNumber', (document.getElementById('senderNumber').value || '').trim());
             formData.append('TransactionID', (document.getElementById('paymentTxnId').value || '').trim());
             formData.append('BankReference', (document.getElementById('bankRef').value || '').trim());
@@ -1045,43 +1846,40 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 formData.append('Product_' + (i + 1), slots[i]);
             }
 
-            fetch(ORDER_SCRIPT_URL, {
-                method: 'POST',
-                body: formData,
-                mode: 'no-cors'
-            })
-            .then(function () {
-                var eventId = 'order_' + Date.now();
-                var cartSnap = typeof buildCartTrackingSnapshot === 'function'
-                    ? buildCartTrackingSnapshot(cart)
-                    : { value: parseFloat(gTotal) || 0, currency: 'BDT' };
-                if (typeof syncTikTokUserFromFormFields === 'function') {
-                    syncTikTokUserFromFormFields();
-                }
-                if (typeof saveOrderTracking === 'function') {
-                    saveOrderTracking(Object.assign({}, cartSnap, {
-                        first_name: nameValue,
-                        phone: phoneValue,
-                        email: emailValue,
-                        user_email: emailValue,
-                        order_value: parseFloat(gTotal) || 0,
-                        value: parseFloat(gTotal) || 0,
-                        order_items: productsLabel(),
-                        transaction_id: eventId,
-                        event_id: eventId,
-                        currency: 'BDT'
-                    }));
-                }
-                if (typeof clearStoreCart === 'function') clearStoreCart();
-                try { sessionStorage.removeItem('muslim_abaya_home_cart_active'); } catch (e) {}
-                window.location.href = '/thank-you';
-            })
-            .catch(function () {
-                alert('সংযোগ সমস্যা। আবার চেষ্টা করুন।');
+            if (!ORDER_SCRIPT_URL) {
+                alert('অর্ডার API সেটআপ করা হয়নি। site-api-config.js এ Apps Script URL দিন।');
                 if (btn) {
                     btn.disabled = false;
-                    btn.innerText = 'অর্ডার কনফার্ম করুন';
+                    btn.innerText = 'Place Order';
                 }
+                return;
+            }
+
+            var orderWa = {
+                name: nameValue,
+                phone: phoneValue,
+                address: addrValue,
+                district: districtParam,
+                thana: (document.getElementById('userThana').value || '').trim(),
+                qty: String(qTotal),
+                total: gTotal,
+                products: productsLabel()
+            };
+
+            var healthCheck = typeof checkSiteApiHealth === 'function'
+                ? checkSiteApiHealth(true)
+                : Promise.resolve({ ok: true });
+
+            healthCheck.then(function (health) {
+                if (!health.ok) {
+                    if (confirm(
+                        (health.message || 'API এখন কাজ করছে না।') +
+                        '\n\nWhatsApp এ অর্ডার পাঠাবেন? (Sheet ঠিক না থাকলেও অর্ডার হারাবে না)'
+                    )) {
+                        window.open(getWhatsAppOrderLink(orderWa), '_blank', 'noopener');
+                    }
+                }
+                postOrderToSheet(formData, nameValue, phoneValue, emailValue, gTotal, btn);
             });
         });
     }
@@ -1112,6 +1910,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         });
     }
 
+    (function prefillSavedCustomer() {
+        function fillFromCustomer(c) {
+            if (!c) return;
+            var nameEl = document.getElementById('userName');
+            var phoneEl = document.getElementById('userPhone');
+            var emailEl = document.getElementById('userEmail');
+            if (c.name && nameEl && !nameEl.value) nameEl.value = c.name;
+            if (c.phone && phoneEl && !phoneEl.value) phoneEl.value = c.phone;
+            if (c.email && emailEl && !emailEl.value) emailEl.value = c.email;
+        }
+        try {
+            var raw = localStorage.getItem('ma_customer');
+            if (raw) fillFromCustomer(JSON.parse(raw));
+        } catch (err) {}
+        if (typeof MaAuth !== 'undefined' && MaAuth.verifySession) {
+            MaAuth.verifySession().then(function (s) {
+                if (s) fillFromCustomer(s);
+            });
+        }
+    })();
+
     window.addEventListener('DOMContentLoaded', function() {
         displayOrder();
         persistCart();
@@ -1125,7 +1944,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     });
 </script>
 <div id="site-footer-mount"></div>
-<script src="site-header.js"></script>
 <script src="site-footer.js"></script>
 </body>
 </html>

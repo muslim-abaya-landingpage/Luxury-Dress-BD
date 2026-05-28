@@ -52,10 +52,21 @@
       name: item.name,
       price: parseInt(item.price, 10) || (cat && cat.price) || 550,
       quantity: qty,
-      image: item.image || (cat && cat.image) || ""
+      image: item.image || (cat && cat.image) || "",
+      color: item.color || (cat && cat.color) || "",
+      colorLabel: item.colorLabel || (cat && cat.colorLabel) || "",
+      fabric: item.fabric || item.material || (cat && cat.fabric) || "",
+      description: item.description || (cat && cat.description) || "",
+      size: item.size || item.selectedSize || ""
     };
     line.image = resolveItemImage(line);
     return line;
+  }
+
+  function cartLineMergeKey(line) {
+    if (!line) return "";
+    if (line.id) return String(line.id) + "|" + String(line.size || "");
+    return String(line.name || "");
   }
 
   function normalizeArray(arr) {
@@ -64,7 +75,7 @@
     arr.forEach(function (raw) {
       var line = normalizeLine(raw);
       if (!line) return;
-      var key = line.id || line.name;
+      var key = cartLineMergeKey(line);
       if (!map[key]) {
         map[key] = line;
       } else {
@@ -104,23 +115,30 @@
     return [];
   }
 
-  function loadStoreCart() {
+  function loadStoreCart(options) {
+    var readOnly = options && options.readOnly === true;
     var keys = ["secured_checkout_cart", "category_cart_v2", "user_cart", "cart"];
     for (var i = 0; i < keys.length; i++) {
       var arr = parseStored(localStorage.getItem(keys[i]));
       if (arr.length > 0) {
-        persistStoreCart(arr);
+        if (!readOnly) persistStoreCart(arr);
         return arr;
       }
     }
     try {
       var sess = parseStored(sessionStorage.getItem("cart"));
       if (sess.length > 0) {
-        persistStoreCart(sess);
+        if (!readOnly) persistStoreCart(sess);
         return sess;
       }
     } catch (e2) {}
     return [];
+  }
+
+  function syncCartBadgeFromStore() {
+    var lines = loadStoreCart({ readOnly: true });
+    refreshCartBadgeUI(lines);
+    return lines;
   }
 
   function persistStoreCart(arr) {
@@ -169,9 +187,9 @@
     var list = normalizeArray(arr);
     var line = normalizeLine(item);
     if (!line) return list;
-    var key = line.id || line.name;
+    var key = cartLineMergeKey(line);
     var found = list.find(function (x) {
-      return (x.id && x.id === key) || x.name === line.name;
+      return cartLineMergeKey(x) === key;
     });
     if (found) {
       found.quantity = (parseInt(found.quantity, 10) || 0) + line.quantity;
@@ -183,6 +201,8 @@
 
   global.STORE_CATALOG = CATALOG;
   global.loadStoreCart = loadStoreCart;
+  global.syncCartBadgeFromStore = syncCartBadgeFromStore;
+  global.resetShopCartContext = global.resetShopCartContext || function () {};
   global.persistStoreCart = persistStoreCart;
   global.clearStoreCart = clearStoreCart;
   global.normalizeStoreCart = normalizeArray;

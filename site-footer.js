@@ -46,7 +46,11 @@
     '<div class="anz-bottom"><p>Copyright &copy; 2026 Muslim Abaya. All Rights Reserved.</p></div>' +
     '</footer>';
 
-  var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxQwF-LrnmuDBc_jURG3k3S1tKycGiT3LoB9tPuepqeVm3WCwxIyIVcb55hX1kW4Hyx/exec';
+  var SCRIPT_URL =
+    (typeof window.getSiteApiUrl === 'function' && window.getSiteApiUrl()) ||
+    (window.MA_SITE_API && window.MA_SITE_API.url) ||
+    (window.MA_AUTH_CONFIG && window.MA_AUTH_CONFIG.apiUrl) ||
+    '';
 
   function isEmail(value) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
@@ -81,6 +85,10 @@
       e.preventDefault();
       if (!contactInput || !isEmailOrPhone(contactInput.value)) {
         alert('অনুগ্রহ করে সঠিক ইমেইল অথবা মোবাইল নাম্বার দিন (উদাহরণ: 01712345678)।');
+        return;
+      }
+      if (!SCRIPT_URL) {
+        alert('সাইট API সেটআপ করা হয়নি। site-api-config.js এ Apps Script URL দিন।');
         return;
       }
       btn.disabled = true;

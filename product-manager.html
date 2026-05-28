@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>প্রোডাক্ট ম্যানেজার | Muslim Abaya</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="product-manager-admin.css">
+</head>
+<body class="pl-admin">
+  <header class="pl-admin-header">
+    <a class="pl-back" href="index.html">← সাইটে ফিরে যান</a>
+    <h1>প্রোডাক্ট ম্যানেজার</h1>
+    <p>সব ক্যাটাগরির <strong>দাম, সাইজ, রঙ, ফ্যাব্রিক, নাম</strong> এক জায়গায়। নতুন ক্যাটাগরি যোগ করতে পারবেন।</p>
+    <div class="pl-toolbar">
+      <button type="button" class="pl-btn pl-btn-primary" id="pmSave">সেভ করুন (ফাইল ডাউনলোড)</button>
+      <button type="button" class="pl-btn pl-btn-secondary" id="pmReload">সাইট থেকে রিলোড</button>
+      <a class="pl-btn pl-btn-secondary" href="product-links.html" style="text-decoration:none;display:inline-flex;align-items:center">ছবির লিংক →</a>
+    </div>
+  </header>
+
+  <main class="pl-main">
+    <div class="pl-steps">
+      <strong>কীভাবে ব্যবহার করবেন:</strong>
+      <ol>
+        <li>বামে ক্যাটাগরি বেছে নিন (① আবায়া … ⑧ হিজাব)</li>
+        <li>প্রতিটি প্রোডাক্টের <strong>দাম, ফ্যাব্রিক, রঙ, সাইজ</strong> এডিট করুন</li>
+        <li><strong>আবায়া Type দাম:</strong> Full Set / Abaya Only আলাদা বক্সে লিখুন → 「সব প্রোডাক্টে এই দাম লাগান」</li>
+        <li><strong>+ নতুন ক্যাটাগরি</strong> — মেনু নাম দিন, key ও HTML পেজ অটো তৈরি</li>
+        <li><strong>সেভ করুন</strong> → <code>category-products.js</code> + <code>product-catalog-sections.js</code> ডাউনলোড</li>
+        <li>প্রজেক্ট ফোল্ডারে ফাইল রিপ্লেস → <code>Ctrl+F5</code></li>
+      </ol>
+      <p style="margin:10px 0 0;font-size:0.85rem;color:#666">
+        শুধু ছবির URL বদলাতে: <a href="product-links.html">product-links.html</a> · বিস্তারিত: <code>PRODUCT-GUIDE.md</code>
+      </p>
+    </div>
+
+    <div class="pm-layout" id="pmLayout">
+      <aside class="pm-sidebar">
+        <h2>ক্যাটাগরি</h2>
+        <ul class="pm-cat-list" id="pmCatList"></ul>
+        <button type="button" class="pl-btn pl-btn-primary pm-add-cat" id="pmAddCategory">+ নতুন ক্যাটাগরি</button>
+      </aside>
+      <div class="pm-main" id="pmMain"></div>
+    </div>
+  </main>
+
+  <div class="pm-modal" id="pmCatModal" hidden>
+    <div class="pm-modal-box">
+      <h3 id="pmCatModalTitle">নতুন ক্যাটাগরি</h3>
+      <div class="pm-field" style="margin-bottom:10px">
+        <label>Key (ইংরেজি, ড্যাশ) — URL অংশ</label>
+        <input type="text" id="pmCatKey" placeholder="festive-special">
+      </div>
+      <div class="pm-field" style="margin-bottom:10px">
+        <label>মেনু (ইংরেজি)</label>
+        <input type="text" id="pmCatMenu" placeholder="FESTIVE SPECIAL">
+      </div>
+      <div class="pm-field" style="margin-bottom:10px">
+        <label>নাম (বাংলা)</label>
+        <input type="text" id="pmCatMenuBn" placeholder="ফেস্টিভ স্পেশাল">
+      </div>
+      <div class="pm-field" style="margin-bottom:10px">
+        <label>HTML ফাইল</label>
+        <input type="text" id="pmCatPage" placeholder="festive-special.html">
+      </div>
+      <div class="pm-field" style="margin-bottom:10px">
+        <label>URL পাথ</label>
+        <input type="text" id="pmCatPath" placeholder="/festive-special">
+      </div>
+      <div class="pm-modal-actions">
+        <button type="button" class="pl-btn pl-btn-secondary" id="pmCatModalClose">বাতিল</button>
+        <button type="button" class="pl-btn pl-btn-primary" id="pmCatSave">যোগ / আপডেট</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pl-toast" id="pmToast" role="status"></div>
+
+  <script src="product-catalog-sections.js"></script>
+  <script src="product-catalog-sync.js"></script>
+  <script src="product-config.js"></script>
+  <script src="product-utils.js"></script>
+  <script src="category-products.js"></script>
+  <script src="product-links-data.js"></script>
+  <script src="product-catalog-loader.js"></script>
+  <script src="product-manager-admin.js"></script>
+</body>
+</html>

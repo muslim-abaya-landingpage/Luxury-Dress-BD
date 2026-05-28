@@ -117,7 +117,7 @@ html, body {
 </head>
 <body>
 <div id="site-header-mount"></div>
-<script src="site-header.js?v=20260528e"></script>
+<script defer src="site-header.js?v=20260531"></script>
 <style>
 @media (min-width: 850px) {
     .display-area {
@@ -322,11 +322,23 @@ color: #333;
     .mobile-hide { display: none; }
     .nav-row { padding: 10px 10px; gap: 8px; }
     .brand-text-logo a { font-size: 14px; }
-    .nav-icons { gap: 6px; padding-right: 2px; }
+    .nav-icons { gap: 8px; padding-right: 2px; }
     .nav-icons .nav-icon-btn,
     .nav-icons .cart-drawer-trigger,
-    .nav-icons a { width: 24px; height: 24px; }
-    .nav-icons .nav-icon-svg { width: 20px; height: 20px; }
+    .nav-icons a {
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+        min-height: 28px;
+        flex: 0 0 auto;
+    }
+    .nav-icons .nav-icon-svg {
+        width: 22px;
+        height: 22px;
+        min-width: 22px;
+        min-height: 22px;
+        aspect-ratio: 1 / 1;
+    }
 }
 @media (min-width: 768px) and (max-width: 1023px) {
     .desktop-menu { display: none !important; }
@@ -1045,29 +1057,40 @@ text-align: left;
             border-radius: 16px;
             padding: 14px;
             display: flex;
-            gap: 10px;
+            gap: 12px;
             align-items: flex-start;
             box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+            min-width: 0;
         }
         .lux-feature-dot {
-            width: 34px;
-            height: 34px;
+            flex: 0 0 36px;
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
+            min-height: 36px;
             border-radius: 50%;
             background: linear-gradient(135deg, #d4af37, #a87d18);
-            flex-shrink: 0;
-            margin-top: 3px;
+            box-shadow: 0 2px 8px rgba(168, 125, 24, 0.35);
+            margin-top: 2px;
+            align-self: flex-start;
+        }
+        .lux-feature-body {
+            flex: 1 1 auto;
+            min-width: 0;
         }
         .lux-feature h4 {
             margin: 0 0 4px 0;
             font-size: 18px;
             color: #111;
             line-height: 1.3;
+            word-break: break-word;
         }
         .lux-feature p {
             margin: 0;
             font-size: 15px;
             color: #666;
-            line-height: 1.4;
+            line-height: 1.45;
+            word-break: break-word;
         }
         .lux-video-card {
             border-radius: 22px;
@@ -1108,8 +1131,37 @@ text-align: left;
         .lux-btn-secondary { background:#fff; color:#000; }
         @media (max-width: 960px) {
             .lux-video-title { font-size: 28px; }
-            .lux-video-grid { grid-template-columns: 1fr; }
+            .lux-video-subtitle { font-size: 15px; }
+            .lux-video-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
             .lux-video-wrap { padding: 20px 14px; }
+            .lux-feature {
+                align-items: center;
+                padding: 12px 14px;
+            }
+            .lux-feature-dot {
+                flex: 0 0 32px;
+                width: 32px;
+                height: 32px;
+                min-width: 32px;
+                min-height: 32px;
+                margin-top: 0;
+            }
+            .lux-feature h4 { font-size: 16px; }
+            .lux-feature p { font-size: 14px; }
+        }
+        @media (max-width: 400px) {
+            .lux-video-title { font-size: 22px; }
+            .lux-feature { gap: 10px; }
+            .lux-feature-dot {
+                flex: 0 0 28px;
+                width: 28px;
+                height: 28px;
+                min-width: 28px;
+                min-height: 28px;
+            }
         }
     </style>
     <div class="lux-video-wrap">
@@ -1119,15 +1171,15 @@ text-align: left;
         <div class="lux-video-grid">
             <div>
                 <div class="lux-feature">
-                    <div class="lux-feature-dot"></div>
-                    <div>
+                    <div class="lux-feature-dot" aria-hidden="true"></div>
+                    <div class="lux-feature-body">
                         <h4>রিয়েল ভিডিওতে আসল প্রোডাক্ট</h4>
                         <p>ছবি নয়, ভিডিওতে কাপড়ের ফিনিশিং ও ডিজাইন দেখে নিশ্চিত হোন।</p>
                     </div>
                 </div>
                 <div class="lux-feature" style="margin-top:12px;">
-                    <div class="lux-feature-dot"></div>
-                    <div>
+                    <div class="lux-feature-dot" aria-hidden="true"></div>
+                    <div class="lux-feature-body">
                         <h4>স্মার্ট, এলিগ্যান্ট এবং কমফোর্ট ফিট</h4>
                         <p>দৈনন্দিন ব্যবহার থেকে বিশেষ দিন—সব সময়েই মানানসই।</p>
                     </div>
@@ -1148,15 +1200,15 @@ text-align: left;
 
             <div>
                 <div class="lux-feature">
-                    <div class="lux-feature-dot"></div>
-                    <div>
+                    <div class="lux-feature-dot" aria-hidden="true"></div>
+                    <div class="lux-feature-body">
                         <h4>প্রিমিয়াম ফেব্রিক, যত্নসহকারে তৈরি</h4>
                         <p>সফট ফেব্রিক এবং ফাইন স্টিচিংয়ে বাড়তি আরাম ও দীর্ঘস্থায়িত্ব।</p>
                     </div>
                 </div>
                 <div class="lux-feature" style="margin-top:12px;">
-                    <div class="lux-feature-dot"></div>
-                    <div>
+                    <div class="lux-feature-dot" aria-hidden="true"></div>
+                    <div class="lux-feature-body">
                         <h4>দ্রুত ডেলিভারি ও সহজ অর্ডার</h4>
                         <p>পছন্দের ড্রেস সিলেক্ট করে এক ক্লিকে চেকআউটে গিয়ে নিরাপদে অর্ডার সম্পন্ন করুন।</p>
                     </div>
@@ -1469,7 +1521,7 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 
 <link rel="stylesheet" href="cart-drawer.css?v=20260528b">
-<script src="cart-utils.js"></script>
+<script src="cart-utils.js?v=20260530d"></script>
 <script src="cart-drawer.js?v=20260528b"></script>
 <script>
 let currentIdx = 0;
@@ -1889,27 +1941,36 @@ function removeFromCart(productId) {
 .ann-slide.active {
     display: block;
 }
-.slider-arrow {
+.announcement-slider .slider-arrow {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: #eeeeee;
-    border: none;
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 12px;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #555;
-    transition: 0.3s;
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    cursor: pointer;
+    color: #1e293b;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.1);
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     z-index: 10;
+    padding: 0;
 }
-.left-arrow { left: 0; }
-.right-arrow { right: 0; }
-.slider-arrow:hover { background: #ddd; }
+.announcement-slider .slider-arrow-svg {
+    width: 22px;
+    height: 22px;
+}
+.announcement-slider .left-arrow { left: 0; }
+.announcement-slider .right-arrow { right: 0; }
+.announcement-slider .slider-arrow:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.14);
+}
 @keyframes slideFade {
     from { opacity: 0; transform: translateY(5px); }
     to { opacity: 1; transform: translateY(0); }
@@ -2128,6 +2189,7 @@ body {
 }
 </style>
 <div id="site-footer-mount"></div>
+<script src="site-api-config.js"></script>
 <script src="site-footer.js"></script>
 <script>
 function updateCartIcon(total) {

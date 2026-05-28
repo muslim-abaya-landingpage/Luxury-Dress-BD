@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>প্রোডাক্ট লিংক ম্যানেজার | Muslim Abaya</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="product-links-admin.css">
+</head>
+<body class="pl-admin">
+  <header class="pl-admin-header">
+    <a class="pl-back" href="index.html">← সাইটে ফিরে যান</a>
+    <h1>প্রোডাক্ট লিংক ম্যানেজার</h1>
+    <p>প্রতিটি বক্স <strong>শুধু সেই ক্যাটাগরির পেজে</strong> লাগে — আবায়া বদলালে শুধু Abaya পেজ, টু-পিস বদলালে শুধু Two-piece পেজ।</p>
+    <div class="pl-toolbar">
+      <button type="button" class="pl-btn pl-btn-primary" id="plSave">সেভ করুন (ফাইল ডাউনলোড)</button>
+      <button type="button" class="pl-btn pl-btn-secondary" id="plImport">সাইট থেকে লিংক আনুন</button>
+      <button type="button" class="pl-btn pl-btn-secondary" id="plPreview">প্রিভিউ</button>
+      <a class="pl-btn pl-btn-secondary" href="product-manager.html" style="text-decoration:none;display:inline-flex;align-items:center">পূর্ণ প্রোডাক্ট ম্যানেজার →</a>
+    </div>
+  </header>
+
+  <main class="pl-main">
+    <div class="pl-steps">
+      <strong>কীভাবে ব্যবহার করবেন:</strong>
+      <ol>
+        <li>যে পেজ বদলাতে চান — শুধু <strong>সেই সারির</strong> বক্সে লিংক এডিট করুন (① আবায়া = শুধু <code>abaya.html</code>)</li>
+        <li><strong>সেভ করুন</strong> → <code>product-links-data.js</code> ডাউনলোড</li>
+        <li>ফাইল প্রজেক্টে রিপ্লেস → সংশ্লিষ্ট পেজে <code>Ctrl+F5</code></li>
+      </ol>
+      <p style="margin:12px 0 0;font-size:0.85rem;color:#c45a00">
+        <strong>মনে রাখুন:</strong> ④ টু-পিস বক্সের লিংক Abaya পেজে যাবে না। প্রতিটি সারি আলাদা।
+      </p>
+      <p style="margin:8px 0 0;font-size:0.85rem;color:#666">
+        লাইন ১ = ওই ক্যাটাগরির ১ নং প্রোডাক্টের ছবি · নাম/দাম: <code>category-products.js</code>
+      </p>
+    </div>
+
+    <div id="plSections"></div>
+  </main>
+
+  <div class="pl-toast" id="plToast" role="status"></div>
+
+  <script src="product-catalog-sections.js"></script>
+  <script src="product-catalog-sync.js"></script>
+  <script src="product-config.js"></script>
+  <script src="product-utils.js"></script>
+  <script src="category-products.js"></script>
+  <script src="product-links-data.js"></script>
+  <script src="product-catalog-loader.js"></script>
+  <script src="product-links-admin.js"></script>
+</body>
+</html>
