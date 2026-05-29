@@ -157,3 +157,58 @@ body.shop-page #site-footer-mount {
 body.shop-page .shop-breadcrumb {
   margin-top: 4px;
 }
+
+body.shop-page .shop-breadcrumb--mobile {
+  padding-left: 2px;
+}
+
+@media (min-width: 961px) {
+  :root {
+    --shop-footer-h: 140px;
+  }
+
+  body.shop-page:not(.shop-product-open) {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  body.shop-page:not(.shop-product-open) .wrap,
+  body.shop-page:not(.shop-product-open) > main {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 0;
+  }
+
+  body.shop-page:not(.shop-product-open) #list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  body.shop-page:not(.shop-product-open) #list > .shop-mobile-toolbar {
+    flex-shrink: 0;
+  }
+
+  body.shop-page:not(.shop-product-open) #list > .shop-layout {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  body.shop-page #site-footer-mount {
+    flex-shrink: 0;
+    position: sticky;
+    bottom: 0;
+    z-index: 9000;
+    width: 100%;
+    box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.1);
+  }
+
+  body.shop-page #site-footer-mount .anz-footer {
+    margin-top: 0;
+  }
+}

@@ -8,11 +8,57 @@ function ensureCategoryStyles() {
     link.rel = "stylesheet";
     document.head.appendChild(link);
   }
-  link.href = "category-sidebar.css?v=20260616";
+  link.href = "category-sidebar.css?v=20260617scroll";
+  var shopLink = document.querySelector('link[href*="shop-page.css"]');
+  if (shopLink) shopLink.href = "shop-page.css?v=20260617scroll";
+}
+
+function syncShopScrollHeights() {
+  if (!document.body || !document.body.classList.contains("shop-page")) return;
+  if (document.body.classList.contains("shop-product-open")) return;
+  var header = document.getElementById("site-header-mount");
+  var footer = document.getElementById("site-footer-mount");
+  var root = document.documentElement;
+  if (header && header.offsetHeight) {
+    root.style.setProperty("--site-header-h", header.offsetHeight + "px");
+  }
+  if (footer && footer.offsetHeight) {
+    root.style.setProperty("--shop-footer-h", footer.offsetHeight + "px");
+  }
+}
+
+function bindShopScrollHeights() {
+  if (window.__shopScrollHeightsBound) return;
+  window.__shopScrollHeightsBound = true;
+  syncShopScrollHeights();
+  window.addEventListener("resize", syncShopScrollHeights);
+  if (typeof ResizeObserver !== "undefined") {
+    var ro = new ResizeObserver(syncShopScrollHeights);
+    ["site-header-mount", "site-footer-mount"].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) ro.observe(el);
+    });
+  }
+  window.setTimeout(syncShopScrollHeights, 500);
+  window.setTimeout(syncShopScrollHeights, 1500);
 }
 
 function markCategoryReady() {
   document.documentElement.classList.add("category-ready");
+  bindShopScrollHeights();
+}
+
+function shopBreadcrumbVariants(html) {
+  return {
+    mobile: html.replace(
+      "class='shop-breadcrumb'",
+      "class='shop-breadcrumb shop-breadcrumb--mobile'"
+    ),
+    desktop: html.replace(
+      "class='shop-breadcrumb'",
+      "class='shop-breadcrumb shop-breadcrumb--desktop'"
+    ),
+  };
 }
 
 function shopHref(route) {
@@ -1809,9 +1855,15 @@ function renderCategory(categoryKey) {
 
 
 
+  var sidebarHtml = sidebar.replace(
+    "class='shop-sidebar'",
+    "class='shop-sidebar' id='shopFilterPanel'"
+  );
+  var crumbs = shopBreadcrumbVariants(breadcrumb);
+
   root.innerHTML =
 
-    breadcrumb +
+    crumbs.mobile +
 
     "<div class='shop-mobile-toolbar'>" +
     "<button type='button' class='shop-filter-open' id='shopFilterOpen' aria-expanded='false' aria-controls='shopFilterPanel'>" +
@@ -1829,7 +1881,7 @@ function renderCategory(categoryKey) {
 
     "<div class='shop-layout'>" +
 
-    sidebar.replace("class='shop-sidebar'", "class='shop-sidebar' id='shopFilterPanel'") +
+    "<div class='shop-sidebar-col'>" + crumbs.desktop + sidebarHtml + "</div>" +
 
     "<section class='shop-main'>" +
 

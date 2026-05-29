@@ -9,6 +9,14 @@ html.category-ready #list {
 }
 
 /* Anzaar-style category shop sidebar */
+.shop-breadcrumb--desktop {
+  display: none;
+}
+
+.shop-breadcrumb--mobile {
+  display: flex;
+}
+
 .shop-layout {
   display: grid;
   grid-template-columns: minmax(220px, 260px) 1fr;
@@ -719,6 +727,57 @@ button.img-wrap {
   background: #fafafa;
   border: 1px solid #eee;
   border-radius: 8px;
+}
+
+@media (min-width: 961px) {
+  .shop-breadcrumb--desktop {
+    display: flex;
+  }
+
+  .shop-breadcrumb--mobile {
+    display: none;
+  }
+
+  .shop-sidebar-col {
+    position: sticky;
+    top: var(--site-header-h, 72px);
+    align-self: start;
+    max-height: calc(100vh - var(--site-header-h, 72px) - var(--shop-footer-h, 0px));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 4px 8px 16px 14px;
+    box-sizing: border-box;
+  }
+
+  .shop-sidebar-col .shop-breadcrumb--desktop {
+    margin: 0 0 12px;
+    padding: 6px 0 10px;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #f7f7f7;
+  }
+
+  body.shop-page .shop-layout {
+    align-items: stretch;
+    min-height: 0;
+  }
+
+  body.shop-page:not(.shop-product-open) .shop-main {
+    overflow-y: auto;
+    max-height: calc(100vh - var(--site-header-h, 72px) - var(--shop-footer-h, 0px));
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 12px;
+  }
+
+  .shop-sidebar {
+    position: static;
+    top: auto;
+    max-height: none;
+    overflow: visible;
+    padding: 0;
+  }
 }
 
 @media (max-width: 1100px) {
