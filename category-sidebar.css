@@ -950,12 +950,14 @@ body.shop-product-open {
 
 body.shop-product-open .wrap,
 body.shop-product-open > main {
-  max-width: 1320px;
+  max-width: 1280px;
 }
 
 #list.shop-product-detail {
   width: 100%;
   background: #fff;
+  padding: 4px 0 40px;
+  box-sizing: border-box;
 }
 
 #list.shop-product-detail .pqv-anzaar {
@@ -1045,19 +1047,12 @@ body.shop-product-open > main {
   box-sizing: border-box;
 }
 
-#list.shop-product-detail {
-  padding: 4px 0 40px;
-  box-sizing: border-box;
-}
-
 .pqv-bottom {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 300px);
-  gap: 32px 40px;
-  margin-top: 28px;
+  margin-top: 0;
   padding-top: 24px;
   border-top: 1px solid #eee;
   align-items: start;
+  min-width: 0;
 }
 
 .pqv-bottom-main {
@@ -1075,6 +1070,7 @@ body.shop-product-open > main {
   color: #111;
   text-decoration: none;
   white-space: nowrap;
+  flex: 0 0 auto;
 }
 
 .pqv-jump-desc:hover {
@@ -1093,8 +1089,7 @@ body.shop-product-open > main {
 }
 
 .pqv-related {
-  border-left: 1px solid #eee;
-  padding-left: 20px;
+  min-width: 0;
 }
 
 .pqv-related-head {
@@ -1167,30 +1162,57 @@ body.shop-product-open > main {
 
 .pqv-anzaar {
   font-family: "Inter", "Hind Siliguri", system-ui, sans-serif;
-}
-
-.pqv-top {
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(280px, 420px);
-  gap: 24px 40px;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "gallery"
+    "panel"
+    "related"
+    "bottom";
+  gap: 20px;
+  width: 100%;
   align-items: start;
 }
 
+#list.shop-product-detail .pqv-gallery {
+  grid-area: gallery;
+}
+
+#list.shop-product-detail .pqv-panel {
+  grid-area: panel;
+}
+
+#list.shop-product-detail .pqv-related {
+  grid-area: related;
+}
+
+#list.shop-product-detail .pqv-bottom {
+  grid-area: bottom;
+}
+
 @media (min-width: 1024px) {
-  .pqv-top {
-    grid-template-columns: minmax(0, 1.12fr) minmax(340px, 460px);
-    gap: 32px 48px;
+  .pqv-anzaar {
+    grid-template-columns: minmax(260px, 440px) minmax(260px, 320px) minmax(200px, 240px);
+    grid-template-areas:
+      "gallery panel related"
+      "bottom bottom related";
+    column-gap: 28px;
+    row-gap: 24px;
   }
 
   #list.shop-product-detail .pqv-panel {
     position: sticky;
     top: 12px;
     align-self: start;
-    max-width: 460px;
+    max-width: 320px;
   }
 
-  #list.shop-product-detail .pqv-gallery {
-    max-width: 640px;
+  #list.shop-product-detail .pqv-related {
+    align-self: start;
+    position: sticky;
+    top: 12px;
+    border-left: 1px solid #eee;
+    padding-left: 20px;
   }
 }
 
@@ -1231,14 +1253,18 @@ body.shop-product-open > main {
 
 .pqv-main-wrap {
   position: relative;
+  width: 100%;
+  min-width: 0;
 }
 
 .pqv-main {
   position: relative;
-  aspect-ratio: 3 / 4;
-  max-height: min(72vh, 760px);
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  max-height: min(68vh, 620px);
   background: #f4f4f4;
   overflow: hidden;
+  isolation: isolate;
 }
 
 .pqv-nav {
@@ -1297,7 +1323,7 @@ body.shop-product-open > main {
 .pqv-zoom-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
   transform-origin: center center;
   transition: transform 0.12s ease-out;
@@ -1307,13 +1333,16 @@ body.shop-product-open > main {
 .pqv-main img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
 }
 
 .pqv-panel {
   padding-top: 0;
-  padding-right: 8px;
+  padding-right: 0;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
 }
 
 .pqv-title {
@@ -1497,8 +1526,10 @@ body.pqv-sc-open {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px 14px;
+  gap: 10px 12px;
   margin: 4px 0 16px;
+  width: 100%;
+  max-width: 100%;
 }
 
 .pqv-qty {
@@ -1654,10 +1685,6 @@ body.pqv-sc-open {
 }
 
 @media (max-width: 900px) {
-  .pqv-bottom {
-    grid-template-columns: 1fr;
-  }
-
   .pqv-related {
     border-left: none;
     padding-left: 0;
@@ -1679,11 +1706,6 @@ body.pqv-sc-open {
 
   .pqv-zoom-img {
     transition: none;
-  }
-
-  .pqv-top {
-    grid-template-columns: 1fr;
-    gap: 16px;
   }
 
   .pqv-gallery {

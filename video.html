@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
@@ -91,6 +91,33 @@
       line-height: 1.5;
     }
     .local-note.is-visible { display: block; }
+    .owner-stats {
+      margin: 0 0 12px auto;
+      max-width: 320px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: #f9fafb;
+      text-align: left;
+    }
+    .owner-stats h3 {
+      margin: 0 0 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #111827;
+    }
+    .owner-stats .n {
+      font-size: 20px;
+      font-weight: 700;
+      color: #111827;
+      margin-right: 8px;
+    }
+    .owner-stats .sub {
+      font-size: 12px;
+      color: #4b5563;
+      line-height: 1.45;
+      margin-top: 6px;
+    }
     .video-empty {
       grid-column: 1 / -1;
       padding: 24px;
@@ -102,9 +129,16 @@
     }
     @media (max-width: 900px) {
       .video-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .owner-stats {
+        margin: 0 0 12px;
+        max-width: 100%;
+      }
     }
     @media (max-width: 520px) {
       .video-grid { grid-template-columns: 1fr; }
+      .card { padding: 14px; }
+      .page-title { font-size: 20px; }
+      .owner-stats .n { font-size: 18px; }
     }
   </style>
 </head>
@@ -112,11 +146,17 @@
   <div id="site-header-mount"></div>
   <main class="wrap">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <a href="/">Home</a><span>›</span><a href="/category">Category</a><span>›</span><strong>Video</strong>
+      <a href="index.html">Home</a><span>›</span><a href="category.html">Category</a><span>›</span><strong>Video</strong>
     </nav>
     <div class="card">
       <h1 id="videoTitle" class="page-title">ভিডিও কালেকশন</h1>
       <p id="localFileNote" class="local-note"></p>
+      <div id="ownerStats" class="owner-stats" hidden>
+        <h3>Owner Dashboard (আজকের অর্ডার)</h3>
+        <div><span id="ownerTodayCount" class="n">0</span>টি অর্ডার</div>
+        <div id="ownerCourierCount" class="sub"></div>
+        <div id="ownerCourierNote" class="sub"></div>
+      </div>
       <div id="videoGrid" class="video-grid" aria-live="polite"></div>
       <p id="videoHelp" class="help"></p>
     </div>
@@ -124,19 +164,12 @@
   <div id="site-footer-mount"></div>
 
   <script defer src="cart-utils.js?v=20260530d"></script>
-  <script defer src="site-header.js?v=20260531"></script>
+  <script defer src="site-header.js?v=20260602"></script>
   <script defer src="category-products.js"></script>
-  <script defer src="site-api-config.js"></script>
-  <script defer src="site-footer.js"></script>
+  <script defer src="site-api-config.js?v=20260529"></script>
+  <script defer src="site-footer.js?v=20260529"></script>
   <script>
     (function initVideoPage() {
-      document.querySelectorAll(".breadcrumb a[href]").forEach(function (a) {
-        var href = a.getAttribute("href") || "";
-        if (href.charAt(0) === "/" && typeof window.siteHref === "function") {
-          a.setAttribute("href", window.siteHref(href));
-        }
-      });
-
       function parseYouTubeId(input) {
         var raw = String(input || "").trim();
         if (!raw) return "";
@@ -208,6 +241,10 @@
       var cfg = (window.SITE_MEDIA && window.SITE_MEDIA.featuredVideo) || {};
       var videos = normalizeVideoList(cfg);
       var isLocalFile = location.protocol === "file:";
+      var ownerStatsEl = document.getElementById("ownerStats");
+      var ownerTodayEl = document.getElementById("ownerTodayCount");
+      var ownerCourierEl = document.getElementById("ownerCourierCount");
+      var ownerCourierNoteEl = document.getElementById("ownerCourierNote");
 
       var titleEl = document.getElementById("videoTitle");
       var gridEl = document.getElementById("videoGrid");
@@ -225,6 +262,45 @@
         localNote.textContent =
           "লোকাল ফাইল (file://) খোলায় এমবেড ভিডিও নাও চলতে পারে — প্রতিটি কার্ডের \"YouTube-এ দেখুন\" ব্যবহার করুন। লাইভ সাইটে সব ভিডিও গ্রিডে চলবে।";
         localNote.classList.add("is-visible");
+      }
+
+      function getAdminToken() {
+        try {
+          var raw = localStorage.getItem("ma_admin_session");
+          if (!raw) return "";
+          var s = JSON.parse(raw);
+          if (!s || !s.token || s.role !== "admin") return "";
+          return String(s.token || "");
+        } catch (e) {
+          return "";
+        }
+      }
+
+      function getApiUrl() {
+        if (typeof window.getSiteApiUrl === "function") return window.getSiteApiUrl();
+        if (window.MA_SITE_API && window.MA_SITE_API.url) return window.MA_SITE_API.url;
+        return "";
+      }
+
+      function fetchOwnerStats() {
+        var token = getAdminToken();
+        var apiUrl = getApiUrl();
+        if (!ownerStatsEl || !token || !apiUrl) return;
+        var body = new URLSearchParams();
+        body.append("RecordType", "AdminTodayStats");
+        body.append("Token", token);
+        fetch(apiUrl, { method: "POST", mode: "cors", credentials: "omit", body: body })
+          .then(function (r) { return r.text(); })
+          .then(function (t) {
+            var res = {};
+            try { res = JSON.parse(String(t || "")); } catch (e) {}
+            if (!res.ok) return;
+            ownerTodayEl.textContent = String(res.todayCount || 0);
+            ownerCourierEl.textContent = "কুরিয়ারে পাঠানো: " + String(res.courierCount || 0) + " টি";
+            ownerCourierNoteEl.textContent = String(res.note || "");
+            ownerStatsEl.hidden = false;
+          })
+          .catch(function () {});
       }
 
       if (!gridEl) return;
@@ -278,6 +354,7 @@
       } else {
         syncBadge();
       }
+      fetchOwnerStats();
     })();
   </script>
 </body>

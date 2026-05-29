@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -1075,6 +1075,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
     </div>
     <form id="orderForm" class="checkout-grid" novalidate>
+        <input type="hidden" id="orderSiteTs" name="SiteTs" value="">
+        <div class="ma-hp" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;opacity:0">
+            <label for="orderHp">Website</label>
+            <input type="text" id="orderHp" name="_hp" tabindex="-1" autocomplete="off" value="">
+        </div>
         <div class="checkout-main">
             <div class="card-block">
                 <h3 class="section-label">
@@ -1296,9 +1301,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <div class="gb-panel gb-panel-submit">
                     <label class="terms-box" style="margin-top:0;">
                         <input type="checkbox" id="agreeTerms">
-                        <span>I have read and agree to the <a href="terms.html" target="_blank" rel="noopener">Terms &amp; Conditions</a>, <a href="refund.html" target="_blank" rel="noopener">Privacy Policy</a> and <a href="refund.html" target="_blank" rel="noopener">Refund Policy</a>.</span>
+                        <span>I have read and agree to the <a href="terms.html" target="_blank" rel="noopener">Terms &amp; Conditions</a>, <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a> and <a href="refund.html" target="_blank" rel="noopener">Refund Policy</a>.</span>
                     </label>
                     <div id="termsError" class="terms-error">Please accept the Terms &amp; Conditions to place your order.</div>
+                    <p class="checkout-trust-note" style="font-size:12px;color:#6b7280;line-height:1.55;margin:0 0 10px">COD অর্ডার ফোনে কনফার্ম করার পর পাঠানো হয়। bKash/Nagad অগ্রিম পেমেন্ট দ্রুত প্রসেসিংয়ে সাহায্য করে।</p>
                     <button type="submit" id="submitBtn" class="btn-place-order">Place Order</button>
             </div>
         </aside>
@@ -1309,12 +1315,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 
 <script src="site-security.js"></script>
-<script src="site-api-config.js"></script>
+<script src="site-api-config.js?v=20260529"></script>
 <script src="site-api-health.js"></script>
 <script src="auth-config.js"></script>
 <script src="auth-api.js"></script>
 <script src="cart-utils.js?v=20260530d"></script>
-<script defer src="site-header.js?v=20260531"></script>
+<script defer src="site-header.js?v=20260602"></script>
 <script>
     const ORDER_SCRIPT_URL =
       (typeof getSiteApiUrl === 'function' && getSiteApiUrl()) ||
@@ -1335,8 +1341,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         return 'https://wa.me/' + wa + '?text=' + encodeURIComponent(lines.join('\n'));
     }
 
-    function finishCheckoutSuccess(nameValue, phoneValue, emailValue, gTotal) {
-        var eventId = 'order_' + Date.now();
+    function finishCheckoutSuccess(nameValue, phoneValue, emailValue, gTotal, orderId) {
+        var eventId = orderId ? ('order_' + orderId) : ('order_' + Date.now());
         var cartSnap = typeof buildCartTrackingSnapshot === 'function'
             ? buildCartTrackingSnapshot(cart)
             : { value: parseFloat(gTotal) || 0, currency: 'BDT' };
@@ -1359,6 +1365,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         }
         if (typeof clearStoreCart === 'function') clearStoreCart();
         try { sessionStorage.removeItem('muslim_abaya_home_cart_active'); } catch (e) {}
+        if (orderId) {
+            try { sessionStorage.setItem('ma_last_order_id', orderId); } catch (e) {}
+        }
         window.location.href = pageLink('/thank-you');
     }
 
@@ -1366,10 +1375,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         fetch(ORDER_SCRIPT_URL, {
             method: 'POST',
             body: formData,
-            mode: 'no-cors'
+            mode: 'cors',
+            credentials: 'omit'
         })
-            .then(function () {
-                finishCheckoutSuccess(nameValue, phoneValue, emailValue, gTotal);
+            .then(function (res) { return res.text(); })
+            .then(function (text) {
+                if (text.indexOf('Success') !== 0) {
+                    var msg = text.indexOf('Error|') === 0
+                        ? text.slice(6)
+                        : 'অর্ডার পাঠানো যায়নি। আবার চেষ্টা করুন বা WhatsApp এ যোগাযোগ করুন।';
+                    alert(msg);
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerText = 'Place Order';
+                    }
+                    return;
+                }
+                var orderId = text.indexOf('|') !== -1 ? text.split('|')[1].trim() : '';
+                finishCheckoutSuccess(nameValue, phoneValue, emailValue, gTotal, orderId);
             })
             .catch(function () {
                 alert('Connection error. Please try again or use WhatsApp.');
@@ -1760,6 +1783,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         orderForm.addEventListener('submit', function(e) {
             e.preventDefault();
 
+            if (window.MaSecurity) {
+                if (!MaSecurity.guardSubmit('checkout-order', 3000)) {
+                    alert('অনুগ্রহ করে কিছুক্ষণ অপেক্ষা করে আবার চেষ্টা করুন।');
+                    return;
+                }
+                if (document.getElementById('orderHp') && document.getElementById('orderHp').value) {
+                    return;
+                }
+            }
+
             if (cart.length === 0) {
                 alert('Your cart is empty. Please add products first.');
                 return;
@@ -1773,7 +1806,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             var emailValue = String((emailInput && emailInput.value) || '').trim().toLowerCase();
             var nameValue = String(nameInput.value || '').trim();
             var addrValue = String(addrInput.value || '').trim();
+            var gTotalCheck = grandTotal();
 
+            if (window.MaSecurity && MaSecurity.validateOrderFields) {
+                var v = MaSecurity.validateOrderFields({
+                    name: nameValue,
+                    phone: phoneValue,
+                    address: addrValue,
+                    total: gTotalCheck
+                });
+                if (!v.ok) {
+                    alert(v.message);
+                    return;
+                }
+                nameValue = v.name;
+                phoneValue = v.phone;
+                addrValue = v.address;
+            } else {
             if (nameValue.length < 2) {
                 alert('Please enter a valid name.');
                 nameInput.focus();
@@ -1784,12 +1833,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 phoneInput.focus();
                 return;
             }
+            if (addrValue.length < 8) {
+                alert('Please enter your full delivery address.');
+                addrInput.focus();
+                return;
+            }
+            }
             if (emailValue && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
                 alert('Enter a valid email address.');
                 if (emailInput) emailInput.focus();
                 return;
             }
-            if (addrValue.length < 8) {
+            if (!window.MaSecurity && addrValue.length < 8) {
                 alert('Please enter your full delivery address.');
                 addrInput.focus();
                 return;
@@ -1821,6 +1876,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
             const formData = new URLSearchParams();
             formData.append('RecordType', 'Order');
+            formData.append('SiteTs', (document.getElementById('orderSiteTs') || {}).value || String(Date.now()));
+            formData.append('_hp', '');
             formData.append('Name', nameValue);
             formData.append('Phone', phoneValue);
             if (emailValue) formData.append('Email', emailValue);
@@ -1932,6 +1989,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     })();
 
     window.addEventListener('DOMContentLoaded', function() {
+        var tsEl = document.getElementById('orderSiteTs');
+        if (tsEl && window.MaSecurity && MaSecurity.getOrderFormTimestamp) {
+            tsEl.value = MaSecurity.getOrderFormTimestamp();
+        }
         displayOrder();
         persistCart();
         bindCheckoutTikTokMatchSync();
@@ -1944,6 +2005,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     });
 </script>
 <div id="site-footer-mount"></div>
-<script src="site-footer.js"></script>
+<script src="site-footer.js?v=20260529"></script>
 </body>
 </html>

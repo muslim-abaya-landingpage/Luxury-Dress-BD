@@ -10,7 +10,8 @@
     '<h3 class="anz-title">About Us</h3>' +
     '<ul>' +
     '<li><a href="about.html">About Us</a></li>' +
-    '<li><a href="checkout.html">Order Tracking</a></li>' +
+    '<li><a href="help.html#order-status">Order Help</a></li>' +
+    '<li><a href="privacy.html">Privacy Policy</a></li>' +
     '<li><a href="refund.html">Refund Policy</a></li>' +
     '<li><a href="terms.html">Terms &amp; Conditions</a></li>' +
     '</ul>' +
@@ -32,7 +33,7 @@
     '<div id="success-msg" class="subscribe-success" role="status">' +
     '<div class="subscribe-success-icon" aria-hidden="true">✓</div>' +
     '<p class="subscribe-success-title">সাবস্ক্রিপশন সম্পন্ন হয়েছে</p>' +
-    '<p class="subscribe-success-text">আপনার তথ্য সুরক্ষিতভাবে সংরক্ষণ করা হয়েছে। শীঘ্রই নতুন কালেকশন ও বিশেষ অফার জানানো হবে।</p>' +
+    '<p class="subscribe-success-text">আপনার তথ্য Google Sheet-এর <strong>Subscribe</strong> ট্যাবে সংরক্ষিত হয়েছে। শীঘ্রই নতুন কালেকশন ও অফার জানানো হবে।</p>' +
     '</div>' +
     '</form>' +
     '<div class="anz-socials">' +
@@ -46,11 +47,7 @@
     '<div class="anz-bottom"><p>Copyright &copy; 2026 Muslim Abaya. All Rights Reserved.</p></div>' +
     '</footer>';
 
-  var SCRIPT_URL =
-    (typeof window.getSiteApiUrl === 'function' && window.getSiteApiUrl()) ||
-    (window.MA_SITE_API && window.MA_SITE_API.url) ||
-    (window.MA_AUTH_CONFIG && window.MA_AUTH_CONFIG.apiUrl) ||
-    '';
+  var SUBSCRIBE_TIMEOUT_MS = 28000;
 
   function isEmail(value) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
@@ -72,6 +69,108 @@
     return digits.length >= 11 && digits.length <= 14 && digits.charAt(0) === '0';
   }
 
+  var nlSubmitAt = 0;
+
+  function isLocalFilePage() {
+    return window.location.protocol === 'file:' || window.location.protocol === 'blob:';
+  }
+
+  function getScriptUrl() {
+    return (
+      (typeof window.getSiteApiUrl === 'function' && window.getSiteApiUrl()) ||
+      (window.MA_SITE_API && window.MA_SITE_API.url) ||
+      (window.MA_AUTH_CONFIG && window.MA_AUTH_CONFIG.apiUrl) ||
+      ''
+    );
+  }
+
+  function ensureScriptUrl(cb) {
+    var url = getScriptUrl();
+    if (url) {
+      cb(url);
+      return;
+    }
+    if (document.querySelector('script[src*="site-api-config"]')) {
+      setTimeout(function () {
+        cb(getScriptUrl());
+      }, 50);
+      return;
+    }
+    var s = document.createElement('script');
+    s.src = 'site-api-config.js?v=20260529';
+    s.onload = function () {
+      cb(getScriptUrl());
+    };
+    s.onerror = function () {
+      cb('');
+    };
+    document.head.appendChild(s);
+  }
+
+  function subscribeOk(text) {
+    var t = String(text || '').trim();
+    if (t === 'Success') return true;
+    try {
+      var j = JSON.parse(t);
+      return !!(j && (j.ok === true || j.success === true));
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function buildSubscribeParams(contactValue) {
+    var params = new URLSearchParams();
+    params.append('RecordType', 'Subscribe');
+    params.append('contact', contactValue);
+    params.append('email', contactValue);
+    return params;
+  }
+
+  function sendSubscribe(apiUrl, contactValue) {
+    var params = buildSubscribeParams(contactValue);
+    var getUrl = apiUrl + (apiUrl.indexOf('?') >= 0 ? '&' : '?') + params.toString();
+    var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var timer = controller
+      ? setTimeout(function () {
+          try {
+            controller.abort();
+          } catch (e) {}
+        }, SUBSCRIBE_TIMEOUT_MS)
+      : null;
+
+    function clearTimer() {
+      if (timer) clearTimeout(timer);
+    }
+
+    return fetch(getUrl, {
+      method: 'GET',
+      mode: 'cors',
+      cache: 'no-store',
+      credentials: 'omit',
+      signal: controller ? controller.signal : undefined
+    })
+      .then(function (res) {
+        clearTimer();
+        return res.text().then(function (text) {
+          return { text: text, cors: true };
+        });
+      })
+      .catch(function (err) {
+        clearTimer();
+        if (err && err.name === 'AbortError') {
+          return Promise.reject(new Error('TIMEOUT'));
+        }
+        return fetch(apiUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          credentials: 'omit',
+          body: params
+        }).then(function () {
+          return { text: '', cors: false };
+        });
+      });
+  }
+
   function initNewsletter() {
     var form = document.getElementById('newsletter-form');
     if (!form || form.getAttribute('data-bound') === '1') return;
@@ -87,30 +186,76 @@
         alert('অনুগ্রহ করে সঠিক ইমেইল অথবা মোবাইল নাম্বার দিন (উদাহরণ: 01712345678)।');
         return;
       }
-      if (!SCRIPT_URL) {
-        alert('সাইট API সেটআপ করা হয়নি। site-api-config.js এ Apps Script URL দিন।');
+      if (window.MaSecurity && MaSecurity.guardSubmit && !MaSecurity.guardSubmit('newsletter', 5000)) {
         return;
       }
+      if (Date.now() - nlSubmitAt < 5000) return;
+      nlSubmitAt = Date.now();
+
+      if (isLocalFilePage()) {
+        alert(
+          'সাবস্ক্রাইব শিটে জমা হতে file:// কাজ করে না।\n\n' +
+            '① ADMIN-লোকাল-টেস্ট.bat চালিয়ে http://localhost:5500 থেকে সাবস্ক্রাইব করুন\n' +
+            'অথবা ② লাইভ সাইট muslimabaya.com থেকে করুন'
+        );
+        return;
+      }
+
       btn.disabled = true;
       btn.innerText = 'Processing...';
-      var payload = new URLSearchParams();
-      var contactValue = normalizeContactValue(contactInput.value);
-      payload.append('contact', contactValue);
-      payload.append('email', contactValue);
-      fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: payload })
-        .then(function () {
-          if (msg) {
-            msg.classList.add('show');
-            setTimeout(function () { msg.classList.remove('show'); }, 6000);
-          }
-          form.reset();
+
+      ensureScriptUrl(function (apiUrl) {
+        if (!apiUrl) {
           btn.disabled = false;
           btn.innerText = 'Subscribe';
-        })
-        .catch(function () {
-          btn.disabled = false;
-          btn.innerText = 'Subscribe';
-        });
+          alert('সাইট API URL নেই। site-api-config.js আপলোড করুন এবং Apps Script Web App URL দিন।');
+          return;
+        }
+
+        var contactValue = normalizeContactValue(contactInput.value);
+
+        sendSubscribe(apiUrl, contactValue)
+          .then(function (result) {
+            if (result.cors && subscribeOk(result.text)) {
+              if (msg) {
+                msg.classList.add('show');
+                setTimeout(function () {
+                  msg.classList.remove('show');
+                }, 6000);
+              }
+              form.reset();
+              return;
+            }
+            if (!result.cors) {
+              alert(
+                'অনুরোধ পাঠানো হয়েছে। ১–২ মিনিট পর Sheet-এ নিচের **Subscribe** ট্যাব দেখুন।\n\n' +
+                  'না থাকলে Apps Script → Deploy → Execute as: Me, Who has access: **Anyone** → New version।'
+              );
+              form.reset();
+              return;
+            }
+            alert(
+              'সাবস্ক্রাইব শিটে জমা হয়নি।\n\n' +
+                (result.text ? result.text.slice(0, 160) : 'API ত্রুটি') +
+                '\n\nApps Script → Deploy → Who has access: Anyone + New version চালু করুন।'
+            );
+          })
+          .catch(function (err) {
+            var hint =
+              err && err.message === 'TIMEOUT'
+                ? 'সার্ভার ধীর বা API URL ভুল।'
+                : 'নেটওয়ার্ক বা API বন্ধ।';
+            alert(
+              'সাবস্ক্রাইব পাঠানো যায়নি। ' +
+                hint +
+                '\n\nApps Script Deploy (Anyone) ও site-api-config.js URL চেক করুন।'
+            );
+          })
+          .finally(function () {
+            btn.disabled = false;
+            btn.innerText = 'Subscribe';
+          });
+      });
     });
   }
 

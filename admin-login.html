@@ -1,0 +1,100 @@
+﻿<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin Login | Muslim Abaya</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body class="adm-body">
+  <div class="adm-login-wrap">
+    <div class="adm-login-card">
+      <div class="adm-login-logo">
+        <h1>Muslim Abaya</h1>
+        <p>পরিচালনা প্যানেল — Admin Login</p>
+      </div>
+      <form id="adminLoginForm">
+        <div class="adm-field">
+          <label for="adm-login">ইমেইল বা মোবাইল</label>
+          <input id="adm-login" type="text" autocomplete="username" required placeholder="you@gmail.com বা 01XXXXXXXXX">
+        </div>
+        <div class="adm-field">
+          <label for="adm-pass">পাসওয়ার্ড</label>
+          <input id="adm-pass" type="password" autocomplete="current-password" required>
+        </div>
+        <button type="submit" class="adm-btn adm-btn-primary" id="admSubmit">Log In</button>
+        <p class="adm-msg" id="admMsg" role="alert"></p>
+      </form>
+      <p class="adm-login-foot">
+        <a href="index.html">← স্টোর সাইট</a><br>
+        প্রথমবার? Google Sheet → <strong>Muslim Abaya → Admin account তৈরি</strong>
+      </p>
+    </div>
+  </div>
+  <script src="site-api-config.js?v=20260529"></script>
+  <script src="admin-config.js"></script>
+  <script src="admin-api.js"></script>
+  <script>
+    (function () {
+      var params = new URLSearchParams(location.search);
+      var nextUrl = params.get("next") || "admin-dashboard.html";
+      if (
+        !/^admin-/.test(nextUrl) &&
+        nextUrl.indexOf("product-manager") !== 0 &&
+        nextUrl.indexOf("product-links") !== 0
+      ) {
+        nextUrl = "admin-dashboard.html";
+      }
+
+      MaAdmin.verifySession().then(function (s) {
+        if (s) location.replace(nextUrl);
+      });
+
+      var form = document.getElementById("adminLoginForm");
+      var msg = document.getElementById("admMsg");
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        msg.className = "adm-msg";
+        msg.textContent = "";
+        var btn = document.getElementById("admSubmit");
+        btn.disabled = true;
+        btn.textContent = "লগইন হচ্ছে…";
+        MaAdmin.login({
+          login: document.getElementById("adm-login").value.trim(),
+          password: document.getElementById("adm-pass").value
+        })
+          .then(function () {
+            location.href = nextUrl;
+          })
+          .catch(function (err) {
+            msg.className = "adm-msg err";
+            var t = String(err.message || err);
+            if (t === "NO_ADMIN") {
+              msg.textContent = "অ্যাডমিন অ্যাকাউন্ট নেই। Sheet-এ Muslim Abaya মেনু থেকে তৈরি করুন।";
+            } else if (t === "AUTH_NOT_CONFIGURED") {
+              msg.textContent = "Apps Script-এ AUTH_SECRET সেট করুন।";
+            } else if (t === "INVALID_PASSWORD" || t === "NOT_FOUND") {
+              msg.textContent =
+                "ইমেইল/মোবাইল বা পাসওয়ার্ড ভুল। Admins শীটে ইমেইল ঠিক আছে কিনা দেখুন (muslimabaya@gmail.com)।";
+            } else if (t === "DEPLOY_OLD" || t === "Success") {
+              msg.textContent =
+                "Apps Script এ নতুন কোড Deploy হয়নি। Deploy → Manage deployments → New version → Deploy।";
+            } else if (
+              t.indexOf("NetworkError") !== -1 ||
+              t.indexOf("Failed to fetch") !== -1
+            ) {
+              msg.textContent =
+                "file:// থেকে API কাজ করে না। scripts\\serve-local.bat চালান, অথবা muslimabaya.com/admin-login.html ব্যবহার করুন।";
+            } else {
+              msg.textContent = t || "লগইন ব্যর্থ।";
+            }
+            btn.disabled = false;
+            btn.textContent = "Log In";
+          });
+      });
+    })();
+  </script>
+</body>
+</html>

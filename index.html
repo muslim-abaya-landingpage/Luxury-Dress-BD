@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
@@ -8,7 +8,7 @@
     <link rel="preload" as="image" href="images/Baby-Pink-Floral-Print.jpeg">
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="site-header.css">
+    <link rel="stylesheet" href="site-header.css?v=20260603">
     <link rel="stylesheet" href="site-footer.css">
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -31,33 +31,6 @@ html, body {
     .cart-animate {
         animation: cartPop 0.3s ease-out forwards;
     }
-.mobile-nav-panel {
-    position: fixed;
-    top: 0;
-    left: -100%;
-    right: auto;
-    width: 280px;
-    height: 100vh;
-    background: #ffffff;
-    z-index: 999999 !important;
-    transition: left 0.3s ease;
-    box-shadow: 5px 0 15px rgba(0,0,0,0.1);
-    display: block !important;
-}
-.mobile-nav-panel.active {
-    left: 0;
-}
-.mobile-nav-panel ul li {
-    border-bottom: 1px solid #f0f0f0;
-}
-.mobile-nav-panel ul li a {
-    display: block;
-    padding: 15px 20px;
-    color: #333;
-    text-decoration: none;
-    font-size: 16px;
-    font-weight: 600;
-}
 </style>
 <meta name="description" content="Muslim Abaya (muslimabaya.com) – premium abaya, two-piece &amp; modest wear in Bangladesh. Soft georgette, COD nationwide. Order online at muslimabaya.">
 <meta name="robots" content="index, follow">
@@ -117,7 +90,7 @@ html, body {
 </head>
 <body>
 <div id="site-header-mount"></div>
-<script defer src="site-header.js?v=20260531"></script>
+<script defer src="site-header.js?v=20260603"></script>
 <style>
 @media (min-width: 850px) {
     .display-area {
@@ -131,233 +104,7 @@ html, body {
         flex: 1;
     }
 }
-.custom-container { max-width: 1400px; margin: 0 auto; padding: 0 10px; }
-.header-top-bar { background: #f5f5f5; border-bottom: 0.5px solid #f2f2f2; padding: 5px 0; }
-.top-bar-content { text-align: right; font-size: 14px; color: #555; font-family: sans-serif; }
-.top-bar-content a {text-decoration: none; color: inherit; margin: 0 3px; }
-header {
-    position: sticky;
-    top: 0;
-    z-index: 10000;
-    background: #fff;
-    width: 100%;
-}
-.header-top-bar, 
-.header-middle-nav, 
-.header-bottom-menu {
-    width: 100%;
-    display: block;
-}
-.nav-row { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    width: 100%;
-    padding: 25px 35px;
-    box-sizing: border-box;
-    gap: 15px;
-}
-.brand-text-logo {
-    flex-shrink: 0;
-    white-space: nowrap;
-}
-
-.brand-text-logo a {
-    text-decoration: none !important;
-    color: #000 !important;
-    font-size: 20px;
-    font-weight: 800;
-    text-transform: uppercase;
-}
-.desktop-menu {
-    flex-grow: 1;
-    display: flex;
-    justify-content: center;
-}
-.desktop-menu ul {
-    display: flex;
-    gap: 20px;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-.desktop-menu ul li a {
-    text-decoration: none;
-    color: #333;
-    font-size: 14px;
-    font-weight: 600;
-    text-transform: uppercase;
-    white-space: nowrap;
-}
-.header-icons {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    flex-shrink: 0;
-}
-.nav-row {
-    padding: 10px 15px;
-}
-@media screen and (min-width: 851px) and (max-width: 1250px) {
-    .desktop-menu a {
-        padding: 0 4px !important; 
-        font-size: 13px !important;
-    }
-    .header-icons {
-        display: flex !important;
-        gap: 5px !important;
-    }
-}
-@media screen and (max-width: 850px) {
-    .desktop-menu { 
-        display: none !important; 
-    }
-    .mobile-toggle { 
-        display: block !important; 
-    }
-}
-.desktop-menu ul { list-style: none; display: flex; gap: 10px; margin: 0; padding: 0; }
-.desktop-menu ul li a {
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    padding: 8px 5px;
-    color: #333;
-} 
-.desktop-menu ul li a {
-    text-decoration: none !important;
-    display: block;
-    white-space: nowrap;
-    font-size: 14px;
-    color: #333;
-    transition: 0.3s ease;
-}
-.desktop-menu ul li a:hover {
-color: #333;
-}
-.nav-icons {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
-    justify-content: flex-end;
-    padding-right: 6px;
-    min-height: 30px;
-}
-.nav-icons .nav-icon-btn,
-.nav-icons .cart-drawer-trigger,
-.nav-icons a {
-    width: 28px;
-    height: 28px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-.nav-icons .nav-menu-btn {
-    margin-right: 2px;
-}
-.icon-item { 
-    color: #333; 
-    font-size: 20px;
-    text-decoration: none; 
-    font-weight: 300;
-}
-.mobile-toggle { display: none; background: none; border: none; font-size: 25px; cursor: pointer; }
-.header-announcement-bar {
-    background-color: #f5f5f5;
-    padding: 8px 0; 
-    border-bottom: 1px solid #fff;
-    text-align: center;
-    font-size: 14px;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-}
-@media screen and (min-width: 1024px) {
-    .header-announcement-bar {
-        padding: 10px 0 !important;
-    }
-    
-    .announcement-slider {
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        position: relative;
-        max-width: 100% !important;
-    }
-    .announcement-content {
-        flex-grow: 1;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        text-align: center !important;
-    }
-
-    .ann-slide {
-        font-size: 16px !important;
-        font-weight: 600 !important;
-        color: #000 !important;
-        width: 100% !important;
-        text-align: center !important;
-    }
-	.slider-arrow {
-        position: absolute;
-        z-index: 10;
-    }
-    .left-arrow { left: 20px; }
-    .right-arrow { right: 20px; }
-}
-.header-announcement-bar p {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 400;
-    color: #fff;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-}
-@media (max-width: 767px) {
-    .desktop-menu { display: none !important; }
-    .mobile-toggle { display: block; }
-    .mobile-hide { display: none; }
-    .nav-row { padding: 10px 10px; gap: 8px; }
-    .brand-text-logo a { font-size: 14px; }
-    .nav-icons { gap: 8px; padding-right: 2px; }
-    .nav-icons .nav-icon-btn,
-    .nav-icons .cart-drawer-trigger,
-    .nav-icons a {
-        width: 28px;
-        height: 28px;
-        min-width: 28px;
-        min-height: 28px;
-        flex: 0 0 auto;
-    }
-    .nav-icons .nav-icon-svg {
-        width: 22px;
-        height: 22px;
-        min-width: 22px;
-        min-height: 22px;
-        aspect-ratio: 1 / 1;
-    }
-}
-@media (min-width: 768px) and (max-width: 1023px) {
-    .desktop-menu { display: none !important; }
-    .mobile-toggle { display: block; }
-    .brand-text-logo a { font-size: 20px; }
-    .desktop-menu ul { gap: 10px; }
-    .nav-row { padding: 10px 12px; }
-    .nav-icons { padding-right: 4px; gap: 8px; }
-}
-@media (min-width: 1024px) {
-    .brand-text-logo a { font-size: 24px; }
-    .desktop-menu { display: flex !important; }
-    .mobile-toggle { display: none; }
-    .mobile-hide { display: block; }
-}
-.mobile-nav-panel { display: none; background: #333; }
-.mobile-nav-panel.active { display: block; }
-.mobile-nav-panel ul { list-style: none; padding: 0; }
-.mobile-nav-panel ul li a { display: block; padding: 15px; border-bottom: 1px solid #f9f9f9; text-decoration: none; color: #000; font-weight: bold; }
+/* Site header/nav: site-header.css (do not duplicate here) */
 .feature-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -990,18 +737,7 @@ input, select {
     justify-content: center;
     color: #475569;
 }
-header {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0;
-    width: 100% !important;
-    z-index: 99999 !important;
-    background-color: white !important;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-body {
-    padding-top: 70px !important;
-}
+/* Sticky header spacing: site-header.css → body.has-sticky-header */
 @media screen and (max-width: 600px) {
     .anz-col-brand { 
         padding-right: 0px !important;
@@ -1229,8 +965,7 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="product-section">
 <div id="premium-collection" class="display-area">
 <div class="big-view">
-<div class="big-view">
-<div class="price-tag">৳ ৫৫০ </div>
+<div class="price-tag" id="homePriceTag">৳ ৫৫০</div>
 <img id="view" 
          src="images/Baby-Pink-Floral-Print.jpeg" 
          width="600" 
@@ -1239,7 +974,6 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
          loading="eager" 
          decoding="async" 
          alt="Muslim Abaya Premium Collection">
-</div>
 <button type="button" class="nav-arrow left" onclick="changeProduct(-1)" aria-label="Previous Product">
 <i class="fas fa-chevron-left"></i>
 </button>
@@ -1523,31 +1257,113 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
 <link rel="stylesheet" href="cart-drawer.css?v=20260528b">
 <script src="cart-utils.js?v=20260530d"></script>
 <script src="cart-drawer.js?v=20260528b"></script>
+<script src="product-config.js?v=20260604"></script>
+<script src="product-utils.js?v=20260604"></script>
+<script src="product-catalog-sections.js?v=20260604"></script>
+<script src="category-products.js?v=20260604"></script>
+<script src="product-links-data.js?v=20260604"></script>
+<script src="product-catalog-loader.js?v=20260604"></script>
 <script>
 let currentIdx = 0;
 let autoSlideInterval;
 let isAutoSlideActive = true;
 let checkoutTracked = false;
 let cart = {};
-const products = [
+const fallbackProducts = [
     { id: 'DR-01', name: 'Baby Pink Floral', img: 'images/Baby-Pink-Floral-Print.jpeg', price: 550 },
     { id: 'DR-08', name: 'Black Base Rose', img: 'images/Black-Base-Rose-Floral.jpeg', price: 550 },
     { id: 'DR-16', name: 'Black White Polka', img: 'images/Black-White-Polka-Dots.jpeg', price: 550 },
     { id: 'DR-23', name: 'Royal Blue Golden', img: 'images/Royal-Blue-Golden-Floral-Print.jpeg', price: 550 },
-    { id: 'DR-28', name: 'Pink Floral Printed Co-ord Set', img: 'images/pink-floral-printed-co-ord-set.jpeg', price: 550 },
-    {
-        id: 'DR-29',
-        name: 'Baby PinkLight Pink',
-        img: 'https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Baby%20PinkLight%20Pink.jpeg?raw=1',
-        price: 550
-    },
-    {
-        id: 'DR-30',
-        name: 'Sage GreenMint Green',
-        img: 'https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Sage%20GreenMint%20Green.jpeg?raw=1',
-        price: 550
-    }
+    { id: 'DR-28', name: 'Pink Floral Printed Co-ord Set', img: 'images/pink-floral-printed-co-ord-set.jpeg', price: 550 }
 ];
+let products = fallbackProducts.slice();
+
+function isPrimaryShowcaseName(name) {
+    var s = String(name || '').toLowerCase();
+    return s.indexOf(' - back') === -1 &&
+           s.indexOf('- back') === -1 &&
+           s.indexOf(' - side') === -1 &&
+           s.indexOf('- side') === -1;
+}
+
+function normalizeImageKey(url) {
+    var u = String(url || '').split('?')[0].split('#')[0];
+    try { u = decodeURIComponent(u); } catch (e) {}
+    var file = (u.split('/').pop() || u).toLowerCase();
+    return file.replace(/[^a-z0-9]/g, '');
+}
+
+function resolveHomeImage(p) {
+    var raw = p.image || p.img || '';
+    if (window.maCatalog && typeof window.maCatalog.resolveImageUrl === 'function') {
+        return window.maCatalog.resolveImageUrl(raw);
+    }
+    return raw;
+}
+
+function getHomeCategoryKeys() {
+    if (window.CATALOG_SECTIONS && window.CATALOG_SECTIONS.length) {
+        return window.CATALOG_SECTIONS.map(function (s) { return s.key; });
+    }
+    return Object.keys(window.CATEGORY_PRODUCTS || {});
+}
+
+/** সব ক্যাটাগরি (①–⑧) — রাউন্ড-রবিন; একই ছবি একবার (ডুপ্লিকেট নয়) */
+function buildProductsFromCatalog() {
+    var all = window.CATEGORY_PRODUCTS || {};
+    var catKeys = getHomeCategoryKeys();
+    var globalSeen = {};
+    var out = [];
+    var indices = {};
+    var i;
+    catKeys.forEach(function (k) { indices[k] = 0; });
+
+    var more = true;
+    var safety = 0;
+    while (more && safety < 600) {
+        more = false;
+        safety++;
+        for (i = 0; i < catKeys.length; i++) {
+            var key = catKeys[i];
+            var list = all[key] || [];
+            while (indices[key] < list.length) {
+                var p = list[indices[key]++];
+                if (!p || !p.name || !isPrimaryShowcaseName(p.name)) continue;
+                var img = resolveHomeImage(p);
+                if (!img) continue;
+                var imgKey = normalizeImageKey(img);
+                if (globalSeen[imgKey]) continue;
+                globalSeen[imgKey] = true;
+                var catLabel = key;
+                if (window.CATALOG_SECTIONS) {
+                    window.CATALOG_SECTIONS.some(function (s) {
+                        if (s.key === key) {
+                            catLabel = s.menuBn || s.menu || key;
+                            return true;
+                        }
+                        return false;
+                    });
+                }
+                out.push({
+                    id: String(p.id || (key + '-' + out.length)).trim(),
+                    name: String(p.name || 'Product').trim(),
+                    img: img,
+                    price: parseFloat(p.price) || 550,
+                    category: key,
+                    categoryLabel: catLabel
+                });
+                more = true;
+                break;
+            }
+        }
+    }
+    return out;
+}
+
+function hydrateHomeProducts() {
+    var fromCatalog = buildProductsFromCatalog();
+    if (fromCatalog.length) products = fromCatalog;
+}
 function trackFB(event, data) {
     if (typeof pushTrackingEvent === 'function') {
         pushTrackingEvent(event, data || {});
@@ -1648,10 +1464,11 @@ window.addEventListener('storeCartUpdated', function (e) {
     applyStoreLinesToHomeCart(lines);
 });
 window.onload = function() {
+    hydrateHomeProducts();
     trackFB('ViewContent', { content_type: 'product', currency: 'BDT' });
     initHomeCartFromStorage();
     renderSidebar();
-    selectProduct(0, products[0].id, false);
+    if (products.length) selectProduct(0, products[0].id, false);
     startAutoSlide();
     calc();
 };
@@ -1741,10 +1558,11 @@ card.innerHTML = `
             ✕
         </button>
         
-        <img src="${thumbImg}" onclick="manualSelect(${i}, '${p.id}')" alt="${p.name}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg';" style="width: 100%; display: block; border-radius:20px;">
+        <img class="home-product-thumb" src="${thumbImg}" onclick="manualSelect(${i}, '${p.id}')" alt="${p.name}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg';">
     </div>
 
     <div class="product-info">
+        ${p.categoryLabel ? '<span class="home-cat-tag">' + p.categoryLabel + '</span>' : ''}
         <div class="product-meta-row">
             <span class="product-card-name">${p.name}</span>
             <span class="product-card-price">৳${p.price}</span>
@@ -1773,9 +1591,13 @@ function manualSelect(index, id) {
 
 function selectProduct(index, id, shouldScroll = true) {
     currentIdx = index;
-    const nextImgSrc = products[index].img && products[index].img.indexOf('/upload/') !== -1
-        ? products[index].img.replace('/upload/', '/upload/f_auto,q_auto,w_600/')
-        : products[index].img;
+    const p = products[index];
+    if (!p) return;
+    const priceEl = document.getElementById('homePriceTag');
+    if (priceEl) priceEl.textContent = '৳ ' + p.price;
+    const nextImgSrc = p.img && p.img.indexOf('/upload/') !== -1
+        ? p.img.replace('/upload/', '/upload/f_auto,q_auto,w_600/')
+        : p.img;
     viewImg.classList.add('fade-out');
     setTimeout(() => {
         viewImg.src = nextImgSrc;
@@ -1976,21 +1798,6 @@ function removeFromCart(productId) {
     to { opacity: 1; transform: translateY(0); }
 }
     /* Footer styles: site-footer.css */
-@media (max-width: 768px) {
-    .desktop-menu {
-        display: none;
-        position: absolute;
-        top: 0px;
-        left: 0;
-        width: 100%;
-        background: #fff;
-        flex-direction: column;
-        z-index: 1000;
-    }
-    .desktop-menu.active {
-        display: flex !important;
-    }
-}
 .item-card {
     border: none !important;
     background: #fff;
@@ -2012,62 +1819,6 @@ function removeFromCart(productId) {
     color: #333;
     font-size: 30px;
     margin-top: 0px;
-    display: block;
-}
-.mobile-nav-panel {
-    position: fixed;
-    top: 0;
-    left: -100%; 
-    width: 280px;
-    height: 100vh;
-    background: #ffffff;
-    z-index: 999999;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 5px 0 15px rgba(0,0,0,0.1);
-    display: block !important; 
-    overflow-y: auto;
-}
-
-.mobile-nav-panel.active {
-    left: 0;
-}
-
-.mobile-nav-panel ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.mobile-nav-panel ul li a {
-    padding: 18px 20px;
-    border-bottom: 1px solid #f5f5f5;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    text-decoration: none;
-    color: #333;
-    font-size: 14px;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-.mobile-nav-panel ul li a::after {
-    content: '\f105';
-    font-family: 'Font Awesome 6 Free';
-    font-weight: 900;
-    color: #bbb;
-}
-.menu-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    z-index: 10000;
-    display: none;
-}
-
-.menu-overlay.active {
     display: block;
 }
 .item-card {
@@ -2117,22 +1868,8 @@ function removeFromCart(productId) {
     50% { transform: scale(1.05); } 
     100% { transform: scale(1); } 
 }
-.main-wrapper, 
-section.product-display-section {
-    padding-top: 100px !important;
-    display: flex !important;
-    align-items: flex-start !important;
-}
 .right-product-container {
     margin-top: 0 !important;
-}
-body {
-    padding-top: 150px !important;
-}
-@media screen and (max-width: 768px) {
-    body {
-        padding-top: 130px !important;
-    }
 }
 .main-grid, .product-section {
     margin-top: 20px !important;
@@ -2189,8 +1926,8 @@ body {
 }
 </style>
 <div id="site-footer-mount"></div>
-<script src="site-api-config.js"></script>
-<script src="site-footer.js"></script>
+<script src="site-api-config.js?v=20260529"></script>
+<script src="site-footer.js?v=20260529"></script>
 <script>
 function updateCartIcon(total) {
     if (typeof window.updateCartBadge === 'function') {
@@ -2231,10 +1968,6 @@ html, body {
     contain-intrinsic-size: 1px 900px;
 }
 
-#sidebarList img {
-    aspect-ratio: 3 / 4;
-    object-fit: cover;
-}
 
 @media (max-width: 768px) {
     .container { padding: 10px 8px !important; }
@@ -2275,7 +2008,105 @@ html, body {
     }
 }
 
-/* Minimal safe responsive fixes (no desktop redesign) */
+/* Home product section — centered, no duplicate squeeze */
+.container {
+    width: 100%;
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 16px;
+    padding-right: 16px;
+    box-sizing: border-box;
+}
+
+#premium-collection.display-area {
+    align-items: flex-start;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+/* Full product photos — main slider + grid (override older crop rules) */
+#premium-collection .big-view {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fafafa;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+#premium-collection #view {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: min(82vh, 900px);
+    aspect-ratio: auto;
+    object-fit: contain;
+    object-position: center center;
+}
+
+#premium-collection .home-product-thumb,
+#premium-collection .item-card img.home-product-thumb {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 340px;
+    aspect-ratio: auto !important;
+    object-fit: contain !important;
+    object-position: center top;
+    display: block;
+    border-radius: 8px;
+    background: #f9f9f9;
+}
+
+#premium-collection .home-cat-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #555;
+    background: #f0f0f0;
+    padding: 3px 8px;
+    margin-bottom: 4px;
+    border-radius: 3px;
+}
+
+@media (min-width: 1024px) {
+    #premium-collection.display-area {
+        display: grid !important;
+        flex-direction: unset !important;
+        grid-template-columns: minmax(0, 1.2fr) minmax(400px, 1fr);
+        gap: 20px;
+        align-items: start;
+    }
+    #premium-collection .big-view {
+        width: 100%;
+        min-height: 480px;
+        order: 0;
+    }
+    #premium-collection .product-list-sidebar {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 78vh;
+        overflow-y: auto;
+        padding-right: 4px;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 12px !important;
+        order: 1;
+        flex-direction: unset !important;
+    }
+}
+
+@media (max-width: 768px) {
+    #premium-collection #view {
+        max-height: 65vh;
+    }
+    #premium-collection .home-product-thumb {
+        max-height: 280px;
+    }
+}
+
 .ann-slide {
     font-family: 'Hind Siliguri', 'Inter', sans-serif !important;
     font-weight: 600 !important;

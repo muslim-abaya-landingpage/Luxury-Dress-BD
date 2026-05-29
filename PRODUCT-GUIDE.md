@@ -50,6 +50,19 @@
 
 ---
 
+## হোম পেইজ স্লাইডার (`index.html`)
+
+হোমে **সব ক্যাটাগরি** (① আবায়া → ⑧ হিজাব) থেকে প্রোডাক্ট দেখায় — `category-products.js` + `product-catalog-sections.js` থেকে **অটো**।  
+একই ছবি অনেক সারিতে থাকলে **একবার** দেখায় (ডাবল নয়)। নতুন সারি `CATALOG_SECTIONS`-এ যোগ করলে হোমেও আসে।
+
+| আপনি যা করেন | কোথায় |
+|--------------|--------|
+| যেকোনো সারিতে প্রোডাক্ট যোগ | `category-products.js` → সেই সারির `[ ... ]` |
+| ছবির লিংক (সারি অনুযায়ী) | `product-links.html` → সেভ → `product-links-data.js` |
+| নতুন ক্যাটাগরি সারি | `product-catalog-sections.js` + `category-products.js` + HTML পেজ |
+
+---
+
 ## এক জায়গা — `category-products.js`
 
 সব ক্যাটাগরি পেজ (`abaya.html`, `premium-two-piece.html`, …) এই ফাইল থেকে প্রোডাক্ট লোড করে।

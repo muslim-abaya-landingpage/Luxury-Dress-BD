@@ -1,0 +1,329 @@
+/* Muslim Abaya — Admin (WordPress-style login + dashboard) */
+:root {
+  --adm-bg: #f0f0f1;
+  --adm-card: #fff;
+  --adm-primary: #1a1a2e;
+  --adm-accent: #c9a227;
+  --adm-border: #dcdcde;
+  --adm-text: #1d2327;
+  --adm-muted: #646970;
+  --adm-danger: #b32d2e;
+  --adm-ok: #1e7a3c;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body.adm-body {
+  margin: 0;
+  font-family: "Hind Siliguri", system-ui, sans-serif;
+  background: var(--adm-bg);
+  color: var(--adm-text);
+  min-height: 100vh;
+}
+
+/* Login */
+.adm-login-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: linear-gradient(160deg, #1a1a2e 0%, #2d2d44 50%, #1a1a2e 100%);
+}
+
+.adm-login-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--adm-card);
+  border-radius: 8px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.25);
+  padding: 32px 28px 28px;
+}
+
+.adm-login-logo {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.adm-login-logo h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--adm-primary);
+}
+
+.adm-login-logo p {
+  margin: 6px 0 0;
+  font-size: 0.9rem;
+  color: var(--adm-muted);
+}
+
+.adm-field {
+  margin-bottom: 16px;
+}
+
+.adm-field label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.adm-field input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--adm-border);
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.adm-field input:focus {
+  outline: 2px solid var(--adm-accent);
+  border-color: var(--adm-accent);
+}
+
+.adm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.adm-btn-primary {
+  width: 100%;
+  background: var(--adm-primary);
+  color: #fff;
+}
+
+.adm-btn-primary:hover {
+  background: #2d2d44;
+}
+
+.adm-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.adm-btn-secondary {
+  background: #fff;
+  color: var(--adm-text);
+  border: 1px solid var(--adm-border);
+}
+
+.adm-btn-secondary:hover {
+  background: #f6f7f7;
+}
+
+.adm-msg {
+  font-size: 0.85rem;
+  margin: 12px 0 0;
+  padding: 10px;
+  border-radius: 4px;
+  display: none;
+}
+
+.adm-msg.err {
+  display: block;
+  background: #fcf0f1;
+  color: var(--adm-danger);
+  border: 1px solid #f0b8b9;
+}
+
+.adm-msg.ok {
+  display: block;
+  background: #edfaef;
+  color: var(--adm-ok);
+  border: 1px solid #b8e6c0;
+}
+
+.adm-login-foot {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--adm-muted);
+}
+
+.adm-login-foot a {
+  color: var(--adm-primary);
+}
+
+/* Shell */
+.adm-topbar {
+  background: var(--adm-primary);
+  color: #fff;
+  padding: 12px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.adm-topbar h1 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.adm-topbar-user {
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.adm-topbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.adm-topbar .adm-btn-secondary {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.35);
+  background: transparent;
+}
+
+.adm-topbar .adm-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.adm-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.adm-panel {
+  background: var(--adm-card);
+  border: 1px solid var(--adm-border);
+  border-radius: 8px;
+  padding: 18px;
+  margin-bottom: 20px;
+}
+
+.adm-panel h2 {
+  margin: 0 0 12px;
+  font-size: 1.05rem;
+}
+
+.adm-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.adm-table-wrap {
+  overflow: auto;
+  max-height: 65vh;
+  border: 1px solid var(--adm-border);
+  border-radius: 6px;
+}
+
+table.adm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.adm-table th,
+.adm-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--adm-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.adm-table th {
+  background: #f6f7f7;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  font-weight: 600;
+}
+
+.adm-table tr:hover td {
+  background: #fafafa;
+}
+
+.adm-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #f0f0f1;
+}
+
+.adm-badge.pending {
+  background: #fff8e5;
+  color: #996800;
+}
+
+.adm-badge.confirmed {
+  background: #e8f4fd;
+  color: #135e96;
+}
+
+.adm-badge.shipped {
+  background: #edfaef;
+  color: var(--adm-ok);
+}
+
+/* Link cards */
+.adm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.adm-link-card {
+  display: block;
+  padding: 16px;
+  background: var(--adm-card);
+  border: 1px solid var(--adm-border);
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+
+.adm-link-card:hover {
+  border-color: var(--adm-accent);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.adm-link-card strong {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 6px;
+  color: var(--adm-primary);
+}
+
+.adm-link-card span {
+  font-size: 0.82rem;
+  color: var(--adm-muted);
+}
+
+.adm-empty {
+  text-align: center;
+  padding: 32px;
+  color: var(--adm-muted);
+}
+
+@media (max-width: 640px) {
+  .adm-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

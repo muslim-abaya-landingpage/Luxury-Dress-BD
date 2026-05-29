@@ -5,5 +5,10 @@ Allow: /
 Disallow: /checkout
 Disallow: /thank-you
 Disallow: /success
+Disallow: /admin-login.html
+Disallow: /admin-dashboard.html
+Disallow: /admin-links.html
+Disallow: /product-manager.html
+Disallow: /product-links.html
 
 Sitemap: https://muslimabaya.com/sitemap.xml

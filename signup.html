@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sign Up | Muslim Abaya</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="site-header.css">
+  <link rel="stylesheet" href="site-header.css?v=20260606">
   <link rel="stylesheet" href="site-footer.css">
   <link rel="stylesheet" href="auth-page.css">
 </head>
@@ -55,14 +55,17 @@
   <div id="site-footer-mount"></div>
   <script src="cart-utils.js"></script>
   <script src="site-security.js"></script>
-  <script src="site-api-config.js"></script>
+  <script src="site-api-config.js?v=20260529"></script>
   <script src="site-api-health.js"></script>
   <script src="auth-config.js"></script>
   <script src="auth-api.js"></script>
-  <script defer src="site-header.js?v=20260531"></script>
-  <script src="site-footer.js"></script>
+  <script defer src="site-header.js?v=20260606"></script>
+  <script src="site-footer.js?v=20260529"></script>
   <script>
     (function () {
+      if (typeof showAuthApiNotice === 'function') {
+        showAuthApiNotice('.auth-card');
+      }
       var form = document.getElementById('signupForm');
       if (!form) return;
       var params = new URLSearchParams(window.location.search);
@@ -92,6 +95,10 @@
             window.location.href = nextUrl;
           })
           .catch(function (err) {
+            if (typeof isLocalPreview === 'function' && isLocalPreview()) {
+              alert(typeof getLocalFileAuthHint === 'function' ? getLocalFileAuthHint() : 'ADMIN-লোকাল-টেস্ট.bat চালিয়ে http://127.0.0.1/signup.html খুলুন।');
+              return;
+            }
             alert((err && err.message) || 'রেজিস্ট্রেশন ব্যর্থ। আবার চেষ্টা করুন।');
           })
           .finally(function () {

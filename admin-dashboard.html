@@ -1,0 +1,148 @@
+﻿<!DOCTYPE html>
+<html lang="bn" data-admin-guard="1">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>অর্ডার ড্যাশবোর্ড | Muslim Abaya Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body class="adm-body">
+  <header class="adm-topbar">
+    <div>
+      <h1>অর্ডার ড্যাশবোর্ড</h1>
+      <div class="adm-topbar-user" id="admUserLabel">—</div>
+    </div>
+    <div class="adm-topbar-actions">
+      <a class="adm-btn adm-btn-secondary" href="admin-links.html">সব লিংক</a>
+      <a class="adm-btn adm-btn-secondary" href="product-manager.html">প্রোডাক্ট</a>
+      <button type="button" class="adm-btn adm-btn-secondary" id="admRefresh">রিফ্রেশ</button>
+      <button type="button" class="adm-btn adm-btn-secondary" id="admLogout">লগআউট</button>
+    </div>
+  </header>
+
+  <main class="adm-main">
+    <section class="adm-panel">
+      <h2>সাম্প্রতিক অর্ডার (Online Order)</h2>
+      <div class="adm-toolbar">
+        <a class="adm-btn adm-btn-primary" id="admOpenSheet" href="#" target="_blank" rel="noopener">Google Sheet খুলুন</a>
+        <a class="adm-btn adm-btn-secondary" id="admOpenScript" href="#" target="_blank" rel="noopener">Apps Script</a>
+        <span id="admOrderCount" style="font-size:0.85rem;color:#646970;align-self:center"></span>
+      </div>
+      <div class="adm-table-wrap">
+        <table class="adm-table" id="admOrdersTable">
+          <thead>
+            <tr>
+              <th>সময়</th>
+              <th>Order ID</th>
+              <th>নাম</th>
+              <th>ফোন</th>
+              <th>মোট</th>
+              <th>Status</th>
+              <th>Payment</th>
+              <th>জেলা</th>
+              <th>পণ্য</th>
+            </tr>
+          </thead>
+          <tbody id="admOrdersBody">
+            <tr><td colspan="9" class="adm-empty">লোড হচ্ছে…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin:12px 0 0;font-size:0.8rem;color:#646970">
+        স্ট্যাটাস/ট্র্যাকিং বদলাতে Sheet-এ সম্পাদনা করুন। Steadfast: Sheet → Muslim Abaya মেনু।
+      </p>
+    </section>
+  </main>
+
+  <script src="site-api-config.js?v=20260529"></script>
+  <script src="admin-config.js"></script>
+  <script src="admin-api.js"></script>
+  <script src="admin-guard.js"></script>
+  <script>
+    (function () {
+      var session = null;
+
+      function statusClass(s) {
+        var x = String(s || "").toLowerCase();
+        if (x.indexOf("ship") !== -1) return "shipped";
+        if (x.indexOf("confirm") !== -1) return "confirmed";
+        return "pending";
+      }
+
+      function renderOrders(orders) {
+        var body = document.getElementById("admOrdersBody");
+        if (!orders || !orders.length) {
+          body.innerHTML = '<tr><td colspan="9" class="adm-empty">এখনো অর্ডার নেই।</td></tr>';
+          return;
+        }
+        body.innerHTML = orders
+          .map(function (o) {
+            return (
+              "<tr>" +
+              "<td>" + escapeHtml(o.time) + "</td>" +
+              "<td><strong>" + escapeHtml(o.orderId || "—") + "</strong></td>" +
+              "<td>" + escapeHtml(o.name) + "</td>" +
+              "<td>" + escapeHtml(o.phone) + "</td>" +
+              "<td>৳" + escapeHtml(o.total) + "</td>" +
+              '<td><span class="adm-badge ' + statusClass(o.status) + '">' + escapeHtml(o.status || "Pending") + "</span></td>" +
+              "<td>" + escapeHtml(o.payment || "") + "</td>" +
+              "<td>" + escapeHtml(o.district || "") + "</td>" +
+              "<td>" + escapeHtml((o.design || "").slice(0, 60)) + (o.design && o.design.length > 60 ? "…" : "") + "</td>" +
+              "</tr>"
+            );
+          })
+          .join("");
+      }
+
+      function escapeHtml(s) {
+        return String(s || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function loadOrders() {
+        document.getElementById("admOrdersBody").innerHTML =
+          '<tr><td colspan="9" class="adm-empty">লোড হচ্ছে…</td></tr>';
+        MaAdmin.fetchOrders(100)
+          .then(function (res) {
+            document.getElementById("admOrderCount").textContent =
+              res.count + " টি অর্ডার দেখানো হচ্ছে";
+            renderOrders(res.orders);
+            if (res.sheetUrl) {
+              document.getElementById("admOpenSheet").href = res.sheetUrl;
+            }
+            if (res.scriptUrl) {
+              document.getElementById("admOpenScript").href = res.scriptUrl;
+            }
+          })
+          .catch(function (err) {
+            document.getElementById("admOrdersBody").innerHTML =
+              '<tr><td colspan="9" class="adm-empty">লোড ব্যর্থ: ' +
+              escapeHtml(err.message || err) +
+              "</td></tr>";
+          });
+      }
+
+      MaAdminGuard.require().then(function (s) {
+        if (!s) return;
+        session = s;
+        document.getElementById("admUserLabel").textContent =
+          (s.name || "Admin") + (s.email ? " · " + s.email : "");
+        if (s.sheetUrl) document.getElementById("admOpenSheet").href = s.sheetUrl;
+        if (s.scriptUrl) document.getElementById("admOpenScript").href = s.scriptUrl;
+        loadOrders();
+      });
+
+      document.getElementById("admRefresh").addEventListener("click", loadOrders);
+      document.getElementById("admLogout").addEventListener("click", function () {
+        MaAdmin.logout();
+        location.href = "admin-login.html";
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,229 @@
+/* Product manager — shared with product-links look */
+@import url("product-links-admin.css");
+
+.pm-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.pm-sidebar {
+  position: sticky;
+  top: 12px;
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.pm-sidebar h2 {
+  margin: 0 0 10px;
+  font-size: 15px;
+}
+
+.pm-cat-list {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  max-height: 52vh;
+  overflow: auto;
+}
+
+.pm-cat-list li {
+  margin-bottom: 4px;
+}
+
+.pm-cat-btn {
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: #f8f8f8;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.pm-cat-btn.is-active {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+.pm-cat-btn small {
+  display: block;
+  opacity: 0.75;
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.pm-add-cat {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.pm-main {
+  min-width: 0;
+}
+
+.pm-cat-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.pm-cat-head h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.pm-product-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pm-product-card {
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.pm-product-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #fafafa;
+  border-bottom: 1px solid #eee;
+}
+
+.pm-product-head strong {
+  font-size: 14px;
+}
+
+.pm-product-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px 14px;
+  padding: 12px;
+}
+
+.pm-field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 4px;
+}
+
+.pm-field input,
+.pm-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.pm-field-wide {
+  grid-column: 1 / -1;
+}
+
+.pm-empty {
+  padding: 24px;
+  text-align: center;
+  color: #666;
+  border: 1px dashed #ccc;
+  border-radius: 8px;
+}
+
+.pm-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.pm-modal[hidden] {
+  display: none !important;
+}
+
+.pm-modal-box {
+  width: min(480px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  background: #fff;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.pm-modal-box h3 {
+  margin: 0 0 14px;
+}
+
+.pm-modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.pm-links-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.pm-links-row a {
+  color: #1565c0;
+}
+
+.pm-type-price-banner {
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  background: #f8f6f0;
+  border: 1px solid #e8e0d0;
+  border-radius: 8px;
+}
+
+.pm-type-price-banner h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.pm-type-hint {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: #666;
+}
+
+.pm-type-price-grid {
+  margin-bottom: 10px;
+}
+
+@media (max-width: 800px) {
+  .pm-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .pm-sidebar {
+    position: static;
+    max-height: none;
+  }
+}

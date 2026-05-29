@@ -20,6 +20,7 @@
 /signin             /signin.html             200
 /signup             /signup.html             200
 /terms              /terms.html              200
+/privacy            /privacy.html            200
 /refund             /refund.html             200
 /thank-you          /thank-you.html          200
 /success            /success.html            200
@@ -41,6 +42,7 @@
 /signin.html             /signin             301
 /signup.html             /signup             301
 /terms.html              /terms              301
+/privacy.html            /privacy            301
 /refund.html             /refund             301
 /thank-you.html          /thank-you          301
 /success.html            /success            301

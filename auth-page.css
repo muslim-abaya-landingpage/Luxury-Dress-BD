@@ -1,6 +1,41 @@
 /* Sign in / Sign up — matches checkout & site brand */
+html,
 body.auth-page {
   margin: 0;
+  padding-top: 0 !important;
+}
+
+body.auth-page #site-header-mount {
+  margin: 0;
+  padding: 0;
+}
+
+.auth-api-notice {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.auth-api-notice a {
+  color: inherit;
+  font-weight: 600;
+}
+
+.auth-api-notice-info {
+  background: #e8f4fc;
+  border: 1px solid #b6d4fe;
+  color: #0c4a6e;
+}
+
+.auth-api-notice-warn {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  color: #664d03;
+}
+
+body.auth-page {
   font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   font-size: 15px;
   line-height: 1.55;

@@ -5,7 +5,6 @@ $quickFile = Join-Path $root "apps-script\Fix-doGet.gs"
 $fullFile = Join-Path $root "Code.gs"
 $scriptId = "1LFd_vDAiSJMdWrHJf2s_7fEVVxTt6g6q8cEVWfhVJhYJN-xpNcTFExCD"
 $editorUrl = "https://script.google.com/home/projects/$scriptId/edit"
-$deployUrl = "https://script.google.com/home/projects/$scriptId/deployments"
 
 Add-Type -AssemblyName System.Windows.Forms
 if ($Quick) {
@@ -59,7 +58,7 @@ Editor-এ:
 পুরো কোড কপি হয়েছে।
 
 Code.gs → Ctrl+A → Ctrl+V → Save
-Deploy → New version
+Deploy → Manage deployments → Edit → New version → Deploy
 "@,
     "সম্পূর্ণ ঠিক",
     "OK",
@@ -67,5 +66,4 @@ Deploy → New version
   )
 }
 
-Start-Process $deployUrl
 Start-Process (Join-Path $root "api-setup.html")

@@ -7,7 +7,6 @@ if (-not (Test-Path $codeFile)) {
 
 $scriptId = "1LFd_vDAiSJMdWrHJf2s_7fEVVxTt6g6q8cEVWfhVJhYJN-xpNcTFExCD"
 $editorUrl = "https://script.google.com/home/projects/$scriptId/edit"
-$deployUrl = "https://script.google.com/home/projects/$scriptId/deployments"
 
 if (-not (Test-Path $codeFile)) {
   Write-Host "Code.gs not found in $root"
@@ -26,8 +25,10 @@ Apps Script Editor খুলেছে।
 এখন শুধু:
 Ctrl+A → Ctrl+V → Ctrl+S
 
-তারপর OK চাপুন — Deploy পেজ খুলবে।
-সেখানে Edit → New version → Deploy করুন।
+তারপর OK চাপুন।
+
+Editor-এ উপরে ডানে নীল **Deploy** বাটন:
+Deploy → Manage deployments → Edit → New version → Deploy
 "@
 
 [void][System.Windows.Forms.MessageBox]::Show(
@@ -36,4 +37,3 @@ Ctrl+A → Ctrl+V → Ctrl+S
   "OK",
   "Information"
 )
-Start-Process $deployUrl

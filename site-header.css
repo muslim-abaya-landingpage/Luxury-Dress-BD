@@ -4,6 +4,8 @@
   max-width: 100%;
   align-self: stretch;
   flex-shrink: 0;
+  margin: 0;
+  padding: 0;
 }
 
 body.has-sticky-header #site-header-mount {
@@ -14,6 +16,11 @@ body.has-sticky-header #site-header-mount {
   z-index: 10001;
   background: #fff;
   box-shadow: 0 1px 0 #ececec;
+}
+
+/* Sticky header stays in document flow — no body padding (that caused empty gap above header) */
+html {
+  scroll-padding-top: var(--site-header-h, 72px);
 }
 
 .abaya-main-header {
@@ -66,22 +73,117 @@ body.has-sticky-header #site-header-mount {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 12px 12px;
+  padding: 12px 8px;
   box-sizing: border-box;
-  gap: 10px;
+  gap: 8px;
+}
+
+/* Logo | centered menu | icons — avoids menu crushed to the right */
+@media (min-width: 1024px) {
+  .header-middle-nav .custom-container.nav-row,
+  .header-middle-nav .nav-row.custom-container {
+    display: grid;
+    grid-template-columns: minmax(120px, auto) minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 12px;
+    row-gap: 8px;
+    padding: 10px 12px;
+    justify-content: unset;
+  }
+
+  .brand-text-logo {
+    justify-self: start;
+  }
+
+  .desktop-menu {
+    display: flex !important;
+    justify-content: center;
+    align-self: center;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    overflow: visible;
+  }
+
+  .desktop-menu ul {
+    flex-wrap: wrap;
+    justify-content: center;
+    align-content: center;
+    row-gap: 6px;
+    column-gap: 8px;
+    max-width: 100%;
+  }
+
+  .desktop-menu ul li a {
+    font-size: 11px;
+    letter-spacing: 0.3px;
+    padding: 2px 4px;
+    height: auto;
+    line-height: 1.25;
+  }
+
+  .nav-icons {
+    justify-self: end;
+  }
+}
+
+@media (min-width: 1200px) {
+  .desktop-menu ul {
+    column-gap: 12px;
+    row-gap: 4px;
+  }
+
+  .desktop-menu ul li a {
+    font-size: 12px;
+    letter-spacing: 0.4px;
+  }
+}
+
+@media (min-width: 1360px) {
+  .desktop-menu ul li a {
+    font-size: 13px;
+    letter-spacing: 0.45px;
+  }
+
+  .desktop-menu ul {
+    column-gap: 14px;
+    flex-wrap: nowrap;
+  }
 }
 
 .brand-text-logo {
   flex-shrink: 0;
 }
 
-.brand-text-logo a {
+.brand-text-logo a,
+.brand-logo-link {
   text-decoration: none;
   color: #000;
-  font-size: 22px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.brand-logo-img {
+  display: block;
+  width: auto;
+  height: 44px;
+  max-width: min(260px, 52vw);
+  object-fit: contain;
+  image-rendering: -webkit-optimize-contrast;
+}
+
+.brand-logo-fallback {
+  display: none;
+  font-size: 20px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.06em;
+  color: #111;
+  line-height: 1.1;
+}
+
+.brand-logo-link.brand-logo-failed .brand-logo-fallback {
+  display: inline-block;
 }
 
 .desktop-menu {
@@ -332,6 +434,10 @@ body.global-layout {
   .desktop-menu {
     display: flex;
   }
+
+  .nav-menu-btn {
+    display: none !important;
+  }
 }
 
 @media (max-width: 1023px) {
@@ -352,6 +458,11 @@ body.global-layout {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .brand-logo-img {
+    height: 34px;
+    max-width: min(190px, 50vw);
   }
 
   .header-middle-nav .nav-row {
@@ -430,6 +541,11 @@ body.global-layout {
 @media (max-width: 380px) {
   .brand-text-logo a {
     font-size: 14px;
+  }
+
+  .brand-logo-img {
+    height: 30px;
+    max-width: min(160px, 46vw);
   }
 
   .nav-icons {

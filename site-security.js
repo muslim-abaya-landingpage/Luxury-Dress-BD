@@ -48,11 +48,34 @@
     return true;
   }
 
+  var MIN_ORDER_BDT = 100;
+
+  function validateOrderFields(fields) {
+    var name = sanitizeText(fields.name, 80);
+    var phone = normalizePhoneBd(fields.phone);
+    var address = sanitizeText(fields.address, 400);
+    var total = parseFloat(String(fields.total || "0").replace(/[^\d.]/g, "")) || 0;
+    if (name.length < 2) return { ok: false, message: "সঠিক নাম লিখুন।" };
+    if (!phone) return { ok: false, message: "সঠিক ১১ ডিজিট মোবাইল নম্বর দিন (01XXXXXXXXX)।" };
+    if (address.length < 8) return { ok: false, message: "সম্পূর্ণ ডেলিভারি ঠিকানা লিখুন।" };
+    if (total < MIN_ORDER_BDT) {
+      return { ok: false, message: "ন্যূনতম অর্ডার ৳" + MIN_ORDER_BDT + "।" };
+    }
+    return { ok: true, name: name, phone: phone, address: address, total: total };
+  }
+
+  function getOrderFormTimestamp() {
+    return String(Date.now());
+  }
+
   g.MaSecurity = {
     sanitizeText: sanitizeText,
     validateEmail: validateEmail,
     normalizePhoneBd: normalizePhoneBd,
     checkPasswordStrength: checkPasswordStrength,
-    guardSubmit: guardSubmit
+    guardSubmit: guardSubmit,
+    validateOrderFields: validateOrderFields,
+    getOrderFormTimestamp: getOrderFormTimestamp,
+    MIN_ORDER_BDT: MIN_ORDER_BDT
   };
 })(window);

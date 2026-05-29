@@ -1,0 +1,148 @@
+﻿<!DOCTYPE html>
+<html lang="bn" data-admin-guard="1">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>পরিচালনা লিংক | Muslim Abaya Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body class="adm-body">
+  <header class="adm-topbar">
+    <div>
+      <h1>পরিচালনা — সব লিংক</h1>
+      <div class="adm-topbar-user" id="admUserLabel">—</div>
+    </div>
+    <div class="adm-topbar-actions">
+      <a class="adm-btn adm-btn-secondary" href="admin-dashboard.html">অর্ডার</a>
+      <button type="button" class="adm-btn adm-btn-secondary" id="admLogout">লগআউট</button>
+    </div>
+  </header>
+
+  <main class="adm-main">
+    <section class="adm-panel">
+      <h2>দৈনিক কাজ (Bookmark)</h2>
+      <div class="adm-grid" id="admLinkGrid"></div>
+    </section>
+    <section class="adm-panel">
+      <h2>সাইট টুল (লগইন লাগে)</h2>
+      <div class="adm-grid">
+        <a class="adm-link-card" href="product-manager.html">
+          <strong>প্রোডাক্ট ম্যানেজার</strong>
+          <span>দাম, সাইজ, ক্যাটাগরি — ফাইল ডাউনলোড করে হোস্টিং-এ আপলোড</span>
+        </a>
+        <a class="adm-link-card" href="product-links.html">
+          <strong>প্রোডাক্ট ছবির লিংক</strong>
+          <span>ক্যাটাগরি অনুযায়ী ইমেজ URL</span>
+        </a>
+        <a class="adm-link-card" href="api-setup.html">
+          <strong>API সেটআপ / টেস্ট</strong>
+          <span>Web app ঠিক আছে কিনা</span>
+        </a>
+      </div>
+    </section>
+    <section class="adm-panel">
+      <h2>PC সোর্স (ডেভেলপার)</h2>
+      <p style="margin:0;font-size:0.85rem;color:#646970">
+        <code>scripts\clasp-push.bat</code> · <code>দৈনিক-চেকলিস্ট.md</code> — শুধু কোড বদলালে।
+        অর্ডার চালানোর জন্য D ড্রাইভ লাগে না।
+      </p>
+    </section>
+  </main>
+
+  <script src="site-api-config.js?v=20260529"></script>
+  <script src="admin-config.js"></script>
+  <script src="admin-api.js"></script>
+  <script src="admin-guard.js"></script>
+  <script>
+    (function () {
+      var cfg = window.MA_ADMIN_CONFIG || {};
+      var links = [
+        {
+          title: "অর্ডার ড্যাশবোর্ড",
+          desc: "সাইট থেকে অর্ডার তালিকা (এই সাইটে)",
+          href: "admin-dashboard.html",
+          internal: true
+        },
+        {
+          title: "Google Sheet — অর্ডার শিট",
+          desc: "মূল তালিকা, Status, Tracking",
+          href: "#sheet",
+          sheet: true
+        },
+        {
+          title: "Apps Script — অর্ডার শিট",
+          desc: "কোড, Deploy, Script properties",
+          href: cfg.scriptProjectUrl
+        },
+        {
+          title: "API টেস্ট",
+          desc: "Muslim Abaya API OK",
+          href: cfg.apiTestUrl
+        },
+        {
+          title: "Apps Script API (clasp)",
+          desc: "Google Apps Script API ON",
+          href: cfg.userSettingsUrl
+        },
+        {
+          title: "স্টোর সাইট",
+          desc: "muslimabaya.com",
+          href: cfg.siteUrl
+        },
+        {
+          title: "Checkout",
+          desc: "টেস্ট অর্ডার",
+          href: cfg.checkoutUrl
+        },
+        {
+          title: "Steadfast API",
+          desc: "Api-Key / Secret",
+          href: "https://steadfast.com.bd/user/api"
+        }
+      ];
+
+      function escapeHtml(s) {
+        return String(s || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+
+      MaAdminGuard.require().then(function (s) {
+        if (!s) return;
+        document.getElementById("admUserLabel").textContent =
+          (s.name || "Admin") + (s.email ? " · " + s.email : "");
+        var grid = document.getElementById("admLinkGrid");
+        grid.innerHTML = links
+          .map(function (L) {
+            var href = L.href;
+            if (L.sheet && s.sheetUrl) href = s.sheetUrl;
+            if (L.internal) href = L.href;
+            var target = L.internal ? "_self" : "_blank";
+            return (
+              '<a class="adm-link-card" href="' +
+              escapeHtml(href) +
+              '" target="' +
+              target +
+              '" rel="noopener">' +
+              "<strong>" +
+              escapeHtml(L.title) +
+              "</strong>" +
+              "<span>" +
+              escapeHtml(L.desc) +
+              "</span></a>"
+            );
+          })
+          .join("");
+      });
+
+      document.getElementById("admLogout").addEventListener("click", function () {
+        MaAdmin.logout();
+        location.href = "admin-login.html";
+      });
+    })();
+  </script>
+</body>
+</html>

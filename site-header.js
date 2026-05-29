@@ -26,11 +26,34 @@
     return path.slice(0, slash + 1);
   }
 
+  /** Always relative paths — works on file:// and https:// */
   function siteAsset(file) {
-    var path = String(file || '');
-    if (path.charAt(0) === '/') return path;
-    var root = getSiteRoot();
-    return root + path.replace(/^\//, '');
+    return String(file || '').replace(/^\//, '');
+  }
+
+  function routeToHtmlFile(route) {
+    var full = String(route || '/');
+    var query =
+      full.indexOf('?') >= 0 ? '?' + full.split('?').slice(1).join('?') : '';
+    var r = full.split('?')[0];
+    var htmlName = r.match(/([^/\\]+\.html?)$/i);
+    if (htmlName) return htmlName[1] + query;
+    if (!r || r === '/') return 'index.html' + query;
+    r = r.replace(/^\/[A-Za-z]:\/+/, '').replace(/^\/+/, '');
+    if (r.charAt(0) !== '/') r = '/' + r;
+    if (/\.html?$/i.test(r)) return r.replace(/^\//, '') + query;
+    var file = SITE_ROUTE_FILES[r];
+    if (!file && window.CATALOG_SECTIONS) {
+      var sections = window.CATALOG_SECTIONS;
+      for (var si = 0; si < sections.length; si++) {
+        var sec = sections[si];
+        if (sec.path === r || '/' + sec.key === r) {
+          file = sec.page;
+          break;
+        }
+      }
+    }
+    return (file || r.replace(/^\//, '') + '.html') + query;
   }
 
   var SITE_ROUTE_FILES = {
@@ -59,23 +82,7 @@
   };
 
   function siteHref(route) {
-    var r = String(route || '/').split('?')[0];
-    var query = String(route || '').indexOf('?') >= 0 ? '?' + String(route).split('?').slice(1).join('?') : '';
-    if (!r || r === '/') return siteAsset(SITE_ROUTE_FILES['/']) + query;
-    if (r.charAt(0) !== '/') r = '/' + r;
-    if (/\.html?$/i.test(r)) return siteAsset(r.replace(/^\//, '')) + query;
-    var file = SITE_ROUTE_FILES[r];
-    if (!file && window.CATALOG_SECTIONS) {
-      var sections = window.CATALOG_SECTIONS;
-      for (var si = 0; si < sections.length; si++) {
-        var sec = sections[si];
-        if (sec.path === r || "/" + sec.key === r) {
-          file = sec.page;
-          break;
-        }
-      }
-    }
-    return siteAsset(file || r.replace(/^\//, '') + '.html') + query;
+    return routeToHtmlFile(route);
   }
 
   function applyDynamicNavMenu() {
@@ -110,8 +117,7 @@
         '<li><a href="/category" onclick="window.toggleAbayaMenu()">ALL CATEGORIES</a></li>' +
         '<li><a href="/" onclick="window.toggleAbayaMenu()">HOME</a></li>';
     }
-    var mount = document.getElementById("site-header-mount");
-    if (mount) fixHeaderLinks(mount);
+    fixAllPageLinks();
   }
 
   function fixHeaderLinks(root) {
@@ -119,11 +125,19 @@
     root.querySelectorAll('a[href]').forEach(function (a) {
       var href = a.getAttribute('href') || '';
       if (!href || href.indexOf('http') === 0 || href.indexOf('mailto:') === 0 || href.indexOf('tel:') === 0 || href.indexOf('#') === 0) return;
-      if (href.charAt(0) === '/') a.setAttribute('href', siteHref(href));
-      else if (!/\.html?$/i.test(href) && href.indexOf('?') === -1 && href.indexOf('/') === -1) {
-        a.setAttribute('href', siteAsset(href));
+      if (href.charAt(0) === '/' || /^\/[A-Za-z]:/.test(href)) {
+        a.setAttribute('href', siteHref(href));
+        return;
+      }
+      if (!/\.html?$/i.test(href) && href.indexOf('?') === -1 && href.indexOf('/') === -1) {
+        a.setAttribute('href', siteHref('/' + href));
       }
     });
+  }
+
+  /** Breadcrumb / body links — href="/" works on Netlify; file:// needs real .html paths */
+  function fixAllPageLinks() {
+    fixHeaderLinks(document.body);
   }
   var ICON_SEARCH =
     '<svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"/><path d="M21 21l-4.5-4.5"/></svg>';
@@ -146,7 +160,9 @@
     '<a href="/help">Help</a> | <a href="/signup">Sign Up</a> | <a href="/signin">Sign In</a>' +
     '</div></div></div>' +
     '<div class="header-middle-nav"><div class="custom-container nav-row">' +
-    '<div class="brand-text-logo"><a href="/">MUSLIM ABAYA</a></div>' +
+    '<div class="brand-text-logo"><a href="/" class="brand-logo-link" aria-label="Muslim Abaya Home">' +
+    '<img class="brand-logo-img" data-src="assets/logo-muslim-abaya.svg" alt="" width="240" height="44" decoding="async">' +
+  '<span class="brand-logo-fallback" aria-hidden="true">MUSLIM ABAYA</span></a></div>' +
     '<nav class="desktop-menu"><ul>' +
     '<li><a href="/abaya">ABAYA</a></li>' +
     '<li><a href="/cover-up">COVER UP</a></li>' +
@@ -526,8 +542,8 @@
         return '';
       }
     }
-    if (href.charAt(0) === '/') return siteHref(href);
-    if (/\.html?$/i.test(href) || href.indexOf('?') >= 0) return siteAsset(href);
+    if (href.charAt(0) === '/' || /^\/[A-Za-z]:/.test(href)) return siteHref(href);
+    if (/\.html?$/i.test(href) || href.indexOf('?') >= 0) return href;
     return '';
   }
 
@@ -590,6 +606,14 @@
     var mount = document.getElementById('site-header-mount');
     if (!mount) return;
     mount.innerHTML = HEADER_HTML;
+    mount.querySelectorAll(".brand-logo-img[data-src]").forEach(function (img) {
+      var link = img.closest(".brand-logo-link");
+      img.src = siteAsset(img.getAttribute("data-src") || "assets/logo-muslim-abaya.svg");
+      img.onerror = function () {
+        img.style.display = "none";
+        if (link) link.classList.add("brand-logo-failed");
+      };
+    });
     fixHeaderLinks(mount);
     document.body.classList.add('global-layout');
     if (!isHomePage()) {
@@ -615,6 +639,7 @@
     if (annTimer) clearInterval(annTimer);
     annTimer = setInterval(function () { window.moveAnnouncement(1); }, 4000);
     initFastNavigation();
+    fixAllPageLinks();
   }
 
   window.updateCartBadge = updateCartBadge;
@@ -623,6 +648,7 @@
   window.syncSiteHeaderOffset = syncSiteHeaderOffset;
   window.siteHref = siteHref;
   window.siteAsset = siteAsset;
+  window.fixAllPageLinks = fixAllPageLinks;
 
   function ensureCartDrawerAssets() {
     if (document.querySelector('script[src*="cart-drawer.js?v=20260530d"]')) return;

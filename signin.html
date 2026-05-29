@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sign In | Muslim Abaya</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="site-header.css">
+  <link rel="stylesheet" href="site-header.css?v=20260606">
   <link rel="stylesheet" href="site-footer.css">
   <link rel="stylesheet" href="auth-page.css">
 </head>
@@ -36,24 +36,16 @@
   <div id="site-footer-mount"></div>
   <script src="cart-utils.js"></script>
   <script src="site-security.js"></script>
-  <script src="site-api-config.js"></script>
+  <script src="site-api-config.js?v=20260529"></script>
   <script src="site-api-health.js"></script>
   <script src="auth-config.js"></script>
   <script src="auth-api.js"></script>
-  <script defer src="site-header.js?v=20260531"></script>
-  <script src="site-footer.js"></script>
+  <script defer src="site-header.js?v=20260606"></script>
+  <script src="site-footer.js?v=20260529"></script>
   <script>
     (function () {
-      if (typeof checkSiteApiHealth === 'function') {
-        checkSiteApiHealth().then(function (h) {
-          if (!h.ok) {
-            var b = document.createElement('p');
-            b.style.cssText = 'background:#fff3cd;padding:10px;border-radius:6px;font-size:13px;margin:0 0 12px';
-            b.innerHTML = (h.message || 'API বন্ধ') + ' — ফোল্ডারে <strong>START-HERE.bat</strong> ডাবল-ক্লিক করুন বা <a href="api-setup.html">api-setup</a>';
-            var card = document.querySelector('.auth-card');
-            if (card) card.insertBefore(b, card.firstChild);
-          }
-        });
+      if (typeof showAuthApiNotice === 'function') {
+        showAuthApiNotice('.auth-card');
       }
       var form = document.getElementById('signinForm');
       if (!form) return;
@@ -79,6 +71,10 @@
             window.location.href = nextUrl;
           })
           .catch(function (err) {
+            if (typeof isLocalPreview === 'function' && isLocalPreview()) {
+              alert(typeof getLocalFileAuthHint === 'function' ? getLocalFileAuthHint() : 'ADMIN-লোকাল-টেস্ট.bat চালিয়ে http://127.0.0.1/signin.html খুলুন।');
+              return;
+            }
             alert((err && err.message) || 'লগইন ব্যর্থ। ইমেইল/মোবাইল ও পাসওয়ার্ড চেক করুন।');
           })
           .finally(function () {

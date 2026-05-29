@@ -8,7 +8,7 @@ function ensureCategoryStyles() {
     link.rel = "stylesheet";
     document.head.appendChild(link);
   }
-  link.href = "category-sidebar.css?v=20260615";
+  link.href = "category-sidebar.css?v=20260616";
 }
 
 function markCategoryReady() {
@@ -40,7 +40,9 @@ function fixShopPageLinks(root) {
       href.indexOf("#") === 0
     )
       return;
-    if (href.charAt(0) === "/") a.setAttribute("href", shopHref(href));
+    if (href.charAt(0) === "/" || /^\/[A-Za-z]:/.test(href)) {
+      a.setAttribute("href", shopHref(href));
+    }
   });
 }
 
@@ -865,15 +867,14 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
 
   return (
     '<div class="pqv-anzaar">' +
-    '<div class="pqv-top">' +
     '<div class="pqv-gallery">' +
     '<div class="pqv-thumbs">' +
     buildPqvThumbsHtml(gallery, p.name) +
     "</div>" +
     '<div class="pqv-main-wrap">' +
+    '<div class="pqv-main pqv-zoom-stage">' +
     '<button type="button" class="pqv-nav pqv-nav-prev" data-pqv-nav="prev" aria-label="Previous image" hidden>' +
     '<span aria-hidden="true">&#10094;</span></button>' +
-    '<div class="pqv-main pqv-zoom-stage">' +
     '<img id="pqvMainImg" class="pqv-zoom-img" src="' +
     imgSrc +
     '" alt="' +
@@ -881,10 +882,9 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     '" onerror="this.onerror=null;this.src=\'' +
     imgFallback.replace(/'/g, "\\'") +
     '\'">' +
-    "</div>" +
     '<button type="button" class="pqv-nav pqv-nav-next" data-pqv-nav="next" aria-label="Next image" hidden>' +
     '<span aria-hidden="true">&#10095;</span></button>' +
-    "</div></div>" +
+    "</div></div></div>" +
     '<div class="pqv-panel">' +
     '<button type="button" class="pqv-panel-back" data-pqv-close="1">&lsaquo; Back to products</button>' +
     '<h1 id="pqvTitle" class="pqv-title">' +
@@ -927,7 +927,8 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     "?text=" +
     encodeURIComponent(p.name + " অর্ডার করতে চাই") +
     '" target="_blank" rel="noopener">Send Message</a>' +
-    "</div></div></div>" +
+    "</div></div>" +
+    relatedHtml +
     '<div class="pqv-bottom" id="pqvDescBlock">' +
     '<div class="pqv-bottom-main">' +
     '<div class="pqv-tabs">' +
@@ -940,9 +941,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     "</div>" +
     '<div class="pqv-tab-panel" data-panel="spec">' +
     specRows +
-    "</div></div></div>" +
-    relatedHtml +
-    "</div></div>"
+    "</div></div></div></div></div>"
   );
 }
 

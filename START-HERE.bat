@@ -3,6 +3,7 @@ chcp 65001 >nul
 title Muslim Abaya — API ঠিক করুন
 cd /d "%~dp0"
 echo.
+echo  গাইড: APPS-SCRIPT-দৈনিক-কাজ.md
 echo  API ঠিক করা হচ্ছে — Editor + Deploy খুলবে...
 echo  Editor-এ: + Script ^> Fix-doGet ^> Ctrl+V ^> Save ^> Deploy New version
 echo.
