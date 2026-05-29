@@ -253,7 +253,9 @@ function getProductShortNote(p, categoryKey) {
   var notes =
     window.SITE_LINKS &&
     window.SITE_LINKS.productShortNotes;
-  if (notes && categoryKey && notes[categoryKey]) return notes[categoryKey];
+  if (notes && categoryKey && Object.prototype.hasOwnProperty.call(notes, categoryKey)) {
+    return notes[categoryKey];
+  }
   if (notes && notes.default) return notes.default;
   return "* ছবিতে রং সামান্য পার্থক্য হতে পারে। লাইটিংয়ের কারণে প্রকৃত রং একটু আলাদা দেখাতে পারে।";
 }
@@ -840,7 +842,8 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
       "</button></div></div>"
     : "";
 
-  var shortNote = escapeHtml(getProductShortNote(p, categoryKey));
+  var shortNoteRaw = String(getProductShortNote(p, categoryKey) || "").trim();
+  var shortNote = shortNoteRaw ? escapeHtml(shortNoteRaw) : "";
   var stockCount = allProducts && allProducts.length ? allProducts.length : 1;
   var stockText = stockCount + " Products Available";
 
@@ -895,9 +898,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     '">' +
     priceText +
     "</p>" +
-    '<p class="pqv-note">' +
-    shortNote +
-    "</p>" +
+    (shortNote ? '<p class="pqv-note">' + shortNote + "</p>" : "") +
     typeField +
     colorField +
     '<div class="pqv-field pqv-field-size"><div class="pqv-field-head"><span class="pqv-field-label">Size</span>' +

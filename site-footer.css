@@ -303,9 +303,25 @@
 
 @media (max-width: 600px) {
   .anz-container {
-    grid-template-columns: 1fr;
-    gap: 16px;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 18px;
     padding: 28px 16px 22px;
+  }
+
+  .anz-col-brand {
+    grid-column: 1 / -1;
+  }
+
+  .anz-col-links {
+    grid-column: 1;
+  }
+
+  .anz-col-contact {
+    grid-column: 2;
+  }
+
+  .anz-col-newsletter {
+    grid-column: 1 / -1;
   }
 
   .newsletter-form {

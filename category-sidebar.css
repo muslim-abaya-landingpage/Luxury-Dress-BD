@@ -1735,3 +1735,63 @@ body.pqv-sc-open {
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 600px) {
+  #list.shop-product-detail {
+    padding: 0 14px 28px;
+  }
+
+  .pqv-panel-back {
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: #555;
+  }
+
+  .pqv-title {
+    font-size: 26px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .pqv-price {
+    font-size: 24px;
+    margin-bottom: 14px;
+  }
+
+  .pqv-note {
+    margin-bottom: 12px;
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  .pqv-main {
+    max-height: min(52vh, 440px);
+    background: #f7f7f7;
+  }
+
+  .pqv-opt-btn {
+    min-height: 40px;
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+
+  .pqv-act {
+    min-height: 50px;
+    font-size: 15px;
+    border-radius: 4px;
+  }
+
+  .pqv-act-buy {
+    order: -1;
+  }
+
+  .pqv-actions-row {
+    gap: 8px;
+  }
+
+  .pqv-related-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+}
