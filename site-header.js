@@ -276,7 +276,7 @@
     '</div></div></div>' +
     '<div class="header-middle-nav"><div class="custom-container nav-row">' +
     '<div class="brand-text-logo"><a href="/" class="brand-logo-link" aria-label="Muslim Abaya Home">' +
-    '<img class="brand-logo-img" data-src="assets/logo-muslim-abaya.svg" alt="" width="240" height="44" decoding="async">' +
+    '<img class="brand-logo-img" src="assets/logo-muslim-abaya.svg" alt="Muslim Abaya" width="240" height="44" decoding="async" fetchpriority="high">' +
   '<span class="brand-logo-fallback" aria-hidden="true">MUSLIM ABAYA</span></a></div>' +
     '<nav class="desktop-menu" aria-label="Main"><ul></ul></nav>' +
     '<div class="nav-icons">' +

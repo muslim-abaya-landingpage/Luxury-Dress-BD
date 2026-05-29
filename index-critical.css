@@ -8,11 +8,18 @@ body {
 }
 
 #site-header-mount {
-  min-height: 72px;
+  min-height: 148px;
 }
 
 body.has-sticky-header #site-header-mount {
-  min-height: 72px;
+  min-height: 148px;
+}
+
+@media (min-width: 1024px) {
+  #site-header-mount,
+  body.has-sticky-header #site-header-mount {
+    min-height: 118px;
+  }
 }
 
 * {
@@ -70,6 +77,18 @@ body {
   padding: 8px;
   box-sizing: border-box;
   min-height: 280px;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  max-height: min(70vh, 900px);
+}
+
+#sidebarList {
+  min-height: 100px;
+}
+
+#main-video-section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 480px;
 }
 
 #view,

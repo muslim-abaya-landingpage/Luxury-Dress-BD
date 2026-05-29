@@ -381,36 +381,7 @@ html.category-ready #list {
 
   .premium-card .img-wrap:hover .card-img-primary,
   .premium-card:hover .card-img-primary {
-    transform: scale(1.05);
-  }
-}
-
-.premium-card .card-quick-peek {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  z-index: 4;
-  transform: translate(-50%, -50%) scale(0.94);
-  opacity: 0;
-  padding: 10px 20px;
-  background: rgba(255, 255, 255, 0.97);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: #111;
-  pointer-events: none;
-  transition: opacity 0.28s ease, transform 0.28s ease;
-  white-space: nowrap;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-}
-
-@media (hover: hover) {
-  .premium-card .img-wrap:hover .card-quick-peek,
-  .premium-card:hover .card-quick-peek {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
+    transform: scale(1.04);
   }
 }
 
@@ -461,51 +432,23 @@ button.img-wrap {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  padding: 10px 8px 8px;
+  padding: 10px 8px 10px;
   background: #fff;
   border-top: none;
 }
 
-.premium-card .card-title-text {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.4;
-  color: #111;
-  font-family: "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  letter-spacing: 0.02em;
-  transition: color 0.2s ease;
-}
-
-@media (hover: hover) {
-  .premium-card:hover .card-title-text {
-    color: #444;
-  }
-}
-
-.premium-card .card-price {
-  font-size: 15px;
-  font-weight: 700;
-  color: #111;
-  white-space: nowrap;
-  flex-shrink: 0;
-  letter-spacing: 0.01em;
-}
-
 .premium-card .card-meta {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: space-between;
   align-items: flex-start;
-  gap: 4px;
-  margin-bottom: 8px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 .premium-card .card-title-btn {
   flex: 1;
-  width: 100%;
+  width: auto;
   min-width: 0;
   margin: 0;
   padding: 0;
@@ -515,6 +458,36 @@ button.img-wrap {
   text-align: left;
   font: inherit;
   color: inherit;
+}
+
+.premium-card .card-title-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: #222;
+  font-family: "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: 0.01em;
+  transition: color 0.2s ease;
+}
+
+@media (hover: hover) {
+  .premium-card:hover .card-title-text {
+    color: #555;
+  }
+}
+
+.premium-card .card-price {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111;
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: 0;
+  padding-top: 1px;
 }
 
 .premium-card .card-specs {
@@ -614,28 +587,36 @@ button.img-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 38px;
-  padding: 9px 6px;
-  font-size: 13px;
+  min-height: 40px;
+  padding: 10px 8px;
+  font-size: 12px;
   font-weight: 600;
   font-family: inherit;
   text-align: center;
   text-decoration: none;
-  border-radius: 0;
-  border: 1px solid #e5e5e5;
+  border-radius: 2px;
+  border: 1px solid #e6e6e6;
   cursor: pointer;
   box-sizing: border-box;
   transition: background 0.15s ease, color 0.15s ease;
   white-space: nowrap;
 }
 
+.anzaar-btn-ico {
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
 .anzaar-btn-cart {
-  background: #f5f5f5;
-  color: #111;
+  background: #f3f3f3;
+  color: #333;
+  gap: 6px;
 }
 
 .anzaar-btn-cart:hover {
-  background: #ebebeb;
+  background: #e9e9e9;
 }
 
 .anzaar-btn-buy {
@@ -650,13 +631,13 @@ button.img-wrap {
 }
 
 .anzaar-btn-msg {
-  background: #f5f5f5;
-  color: #111;
+  background: #f3f3f3;
+  color: #333;
   width: 100%;
 }
 
 .anzaar-btn-msg:hover {
-  background: #ebebeb;
+  background: #e9e9e9;
 }
 
 .card-size-mobile {

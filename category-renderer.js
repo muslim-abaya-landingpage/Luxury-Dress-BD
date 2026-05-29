@@ -8,9 +8,9 @@ function ensureCategoryStyles() {
     link.rel = "stylesheet";
     document.head.appendChild(link);
   }
-  link.href = "category-sidebar.css?v=20260618premium";
+  link.href = "category-sidebar.css?v=20260619anzaar";
   var shopLink = document.querySelector('link[href*="shop-page.css"]');
-  if (shopLink) shopLink.href = "shop-page.css?v=20260618premium";
+  if (shopLink) shopLink.href = "shop-page.css?v=20260619anzaar";
 }
 
 function syncShopScrollHeights() {
@@ -1477,7 +1477,6 @@ function buildCardImageBlock(p, idx, categoryKey, allProducts) {
     '">' +
     hoverHtml +
     "</span>" +
-    '<span class="card-quick-peek">Quick View</span>' +
     "</button>"
   );
 }
@@ -1689,14 +1688,9 @@ function buildProductCard(p, idx, waLink, detailMode, categoryKey, allProducts) 
     sizeOptions +
     "</select>" +
     '<div class="card-actions-anzaar">' +
-    '<div class="card-actions-row">' +
     '<button type="button" class="anzaar-btn anzaar-btn-cart" data-product-idx="' +
     idx +
-    '" data-action="quickview">Add to Cart</button>' +
-    '<button type="button" class="anzaar-btn anzaar-btn-buy" data-product-idx="' +
-    idx +
-    '" data-action="buy-now">Buy Now</button>' +
-    "</div>" +
+    '" data-action="quickview"><span class="anzaar-btn-ico" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M6 6L5 3H2"/></svg></span> Add to Cart</button>' +
     "<a href='" +
     waLink +
     "?text=" +
