@@ -15,6 +15,7 @@
     j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-ML7RL6BR');</script>
+    <link rel="canonical" href="https://muslimabaya.com/">
     <title>Muslim Abaya | muslimabaya.com – Premium Abaya &amp; Modest Fashion Bangladesh</title>
     <style>
 html, body {
@@ -1308,9 +1309,7 @@ function resolveHomeImage(p) {
 
 function getHomeCategoryKeys() {
     if (window.CATALOG_SECTIONS && window.CATALOG_SECTIONS.length) {
-        return window.CATALOG_SECTIONS.filter(function (s) {
-            return s.enabled !== false;
-        }).map(function (s) { return s.key; });
+        return window.CATALOG_SECTIONS.map(function (s) { return s.key; });
     }
     return Object.keys(window.CATEGORY_PRODUCTS || {});
 }
@@ -1342,10 +1341,12 @@ function buildProductsFromCatalog() {
                 if (globalSeen[imgKey]) continue;
                 globalSeen[imgKey] = true;
                 var catLabel = key;
+                var catPath = '/' + key;
                 if (window.CATALOG_SECTIONS) {
                     window.CATALOG_SECTIONS.some(function (s) {
                         if (s.key === key) {
                             catLabel = s.menuBn || s.menu || key;
+                            catPath = s.path || catPath;
                             return true;
                         }
                         return false;
@@ -1364,7 +1365,8 @@ function buildProductsFromCatalog() {
                     img: img,
                     price: parseFloat(p.price) || 550,
                     category: key,
-                    categoryLabel: catLabel
+                    categoryLabel: catLabel,
+                    categoryPath: catPath
                 });
                 more = true;
                 break;
@@ -1377,6 +1379,12 @@ function buildProductsFromCatalog() {
 function hydrateHomeProducts() {
     var fromCatalog = buildProductsFromCatalog();
     if (fromCatalog.length) products = fromCatalog;
+}
+
+function homeCategoryHref(p) {
+    var route = (p && p.categoryPath) || '/';
+    if (typeof window.siteHref === 'function') return window.siteHref(route);
+    return route;
 }
 function trackFB(event, data) {
     if (typeof pushTrackingEvent === 'function') {
@@ -1595,7 +1603,7 @@ card.innerHTML = `
     </div>
 
     <div class="product-info">
-        ${p.categoryLabel ? '<span class="home-cat-tag">' + p.categoryLabel + '</span>' : ''}
+        ${p.categoryLabel ? '<a class="home-cat-tag" href="' + homeCategoryHref(p) + '" onclick="event.stopPropagation()">' + p.categoryLabel + '</a>' : ''}
         <div class="product-meta-row">
             <span class="product-card-name">${p.name}</span>
             <span class="product-card-price">৳${p.price}</span>
@@ -2097,6 +2105,11 @@ html, body {
     background: #f0f0f0;
     padding: 3px 8px;
     margin-bottom: 4px;
+    text-decoration: none;
+}
+#premium-collection a.home-cat-tag:hover {
+    background: #e8e0d5;
+    color: #333;
     border-radius: 3px;
 }
 

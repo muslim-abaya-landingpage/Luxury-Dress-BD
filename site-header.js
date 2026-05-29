@@ -1,6 +1,17 @@
 (function () {
   var GTM_ID = 'GTM-ML7RL6BR';
 
+  (function stripIndexHtmlFromUrl() {
+    try {
+      if (window.location.protocol === 'file:') return;
+      var path = window.location.pathname || '';
+      if (/\/index\.html$/i.test(path)) {
+        var clean = path.replace(/\/index\.html$/i, '/') || '/';
+        history.replaceState(null, '', clean + window.location.search + window.location.hash);
+      }
+    } catch (urlErr) {}
+  })();
+
   (function injectEarlyHints() {
     if (!document.head) return;
     var added = {};
@@ -29,6 +40,10 @@
   /** Always relative paths — works on file:// and https:// */
   function siteAsset(file) {
     return String(file || '').replace(/^\//, '');
+  }
+
+  function prefersCleanUrls() {
+    return window.location.protocol === 'https:' || window.location.protocol === 'http:';
   }
 
   function routeToHtmlFile(route) {
@@ -81,8 +96,23 @@
     '/success': 'success.html'
   };
 
+  var CLEAN_ROUTE_FROM_FILE = (function () {
+    var map = { 'index.html': '/' };
+    Object.keys(SITE_ROUTE_FILES).forEach(function (route) {
+      var file = SITE_ROUTE_FILES[route];
+      if (file && route !== '/') map[file] = route;
+    });
+    return map;
+  })();
+
   function siteHref(route) {
-    return routeToHtmlFile(route);
+    var file = routeToHtmlFile(route);
+    if (!prefersCleanUrls()) return file;
+    var q = file.indexOf('?') >= 0 ? file.slice(file.indexOf('?')) : '';
+    var base = q ? file.slice(0, file.indexOf('?')) : file;
+    var clean = CLEAN_ROUTE_FROM_FILE[base];
+    if (clean) return clean + q;
+    return file;
   }
 
   function buildNavMenuItems() {

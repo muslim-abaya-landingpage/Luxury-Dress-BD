@@ -213,6 +213,8 @@ function handleOnlineOrderPost_(e) {
   var notes = (param_(e, 'SpecialNotes') || '').trim();
   var district = param_(e, 'District') || validated.district || '';
 
+  ensureOnlineOrderHeaders_(sheet);
+
   appendRow_(sheet, [
     timestamp,
     validated.name,
@@ -251,6 +253,8 @@ function handleOnlineOrderPost_(e) {
 
 function onOpen() {
   try {
+    var orderSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
+    if (orderSheet) ensureOnlineOrderHeaders_(orderSheet);
     selfHealSteadfastBaseUrl_();
     selfHealAutoCourierSetup_();
     SpreadsheetApp.getUi()
@@ -266,20 +270,49 @@ function onOpen() {
   } catch (err) {}
 }
 
+function getOnlineOrderExtraHeaders_() {
+  return [
+    'অর্ডার আইডি',
+    'স্ট্যাটাস',
+    'ট্র্যাকিং',
+    'কনসাইনমেন্ট ID',
+    'কুরিয়ার স্ট্যাটাস',
+    'জেলা',
+    'পেমেন্ট',
+    'Txn / Sender',
+    'নোট'
+  ];
+}
+
+/** কলাম I–Q (৯–১৭) হেডার — অর্ডার লেখার আগে অটো চালায় */
+function ensureOnlineOrderHeaders_(sheet) {
+  if (!sheet) return;
+  var headers = getOnlineOrderExtraHeaders_();
+  var current = sheet.getRange(1, 9, 1, headers.length).getValues()[0];
+  var needsUpdate = false;
+  for (var i = 0; i < headers.length; i++) {
+    if (!String(current[i] || '').trim()) {
+      needsUpdate = true;
+      break;
+    }
+  }
+  if (!needsUpdate) return;
+  var headerRange = sheet.getRange(1, 9, 1, headers.length);
+  headerRange.setValues([headers]);
+  try {
+    headerRange
+      .setBackground('#f9a825')
+      .setFontColor('#111111')
+      .setFontWeight('bold')
+      .setHorizontalAlignment('center')
+      .setWrap(true);
+  } catch (fmtErr) {}
+}
+
 function setupOnlineOrderExtraHeaders() {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order') ||
     SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  sheet.getRange(1, 9, 1, 17).setValues([[
-    'Order ID',
-    'Status',
-    'Tracking',
-    'Consignment ID',
-    'Courier Status',
-    'District',
-    'Payment',
-    'Txn/Sender',
-    'Notes'
-  ]]);
+  ensureOnlineOrderHeaders_(sheet);
   SpreadsheetApp.getUi().alert('কলাম I–Q হেডার সেট হয়েছে (row 1)। A–H আগে থেকে থাকলে সেগুলো অপরিবর্তিত।');
 }
 
@@ -387,12 +420,14 @@ function tryAutoCourierForOrder_(ctx) {
     var keys = getSteadfastKeys_();
     if (!keys.apiKey || !keys.secretKey) return { ok: false, reason: 'KEYS_MISSING' };
 
+    var payment = String(ctx.payment || 'Cash On Delivery');
+    var codAmount = /cash\s*on\s*delivery/i.test(payment) ? (parseFloat(ctx.total) || 0) : 0;
     var payload = {
       invoice: String(ctx.orderId || ('MA-ROW-' + ctx.row)).replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 40),
       recipient_name: String(ctx.name || '').slice(0, 100),
       recipient_phone: normalizePhone_(ctx.phone),
       recipient_address: String(ctx.address || '').slice(0, 250),
-      cod_amount: parseFloat(ctx.total) || 0,
+      cod_amount: codAmount,
       note: 'Auto from website',
       item_description: String(ctx.design || '').slice(0, 200)
     };
@@ -547,12 +582,14 @@ function steadfastSendActiveRow() {
   }
   if (address.length > 250) address = address.slice(0, 250);
 
+  var payment = String(vals[14] || 'Cash On Delivery');
+  var codAmount = /cash\s*on\s*delivery/i.test(payment) ? total : 0;
   var payload = {
     invoice: invoice.replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 40),
     recipient_name: name.slice(0, 100),
     recipient_phone: phone,
     recipient_address: address,
-    cod_amount: total,
+    cod_amount: codAmount,
     note: 'Muslim Abaya',
     item_description: design.slice(0, 200)
   };
@@ -581,14 +618,16 @@ function steadfastSendActiveRow() {
     return;
   }
   var c = res.consignment;
-  sheet.getRange(row, 10, row, 13).setValues([[
+  sheet.getRange(row, 10, 1, 4).setValues([[
     'Shipped',
     c.tracking_code || '',
     c.consignment_id || '',
     c.status || 'in_review'
   ]]);
   SpreadsheetApp.getUi().alert(
-    'Parcel created!\nTracking: ' + (c.tracking_code || '—') + '\nConsignment: ' + (c.consignment_id || '—')
+    'Steadfast-এ পার্সেল তৈরি হয়েছে!\n\nTracking: ' + (c.tracking_code || '—') +
+      '\nConsignment: ' + (c.consignment_id || '—') +
+      '\n\nSteadfast ড্যাশবোর্ডে In Review / Pending তালিকায় দেখুন।'
   );
 }
 

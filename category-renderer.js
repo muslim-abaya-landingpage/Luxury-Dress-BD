@@ -22,7 +22,11 @@ function shopHref(route) {
     String(route || "").indexOf("?") >= 0
       ? "?" + String(route).split("?").slice(1).join("?")
       : "";
-  if (!r || r === "/") return "index.html" + query;
+  if (!r || r === "/") {
+    if (typeof window !== "undefined" && window.location && window.location.protocol !== "file:")
+      return "/" + query;
+    return "index.html" + query;
+  }
   if (r.charAt(0) === "/") r = r.slice(1);
   if (!/\.html?$/i.test(r)) r += ".html";
   return r + query;

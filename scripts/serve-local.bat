@@ -8,8 +8,13 @@ echo ========================================
 echo   Local server — file:// এর বদলে http://
 echo ========================================
 echo.
-echo Checkout (অর্ডার টেস্ট):
-echo   http://localhost:5500/checkout.html
+set "OPEN_PAGE=%~1"
+if "%OPEN_PAGE%"=="" set "OPEN_PAGE=checkout.html"
+
+echo সাইট:
+echo   http://localhost:5500/%OPEN_PAGE%
+echo প্রোডাক্ট এডিট:
+echo   http://localhost:5500/product-manager.html
 echo Admin:
 echo   http://localhost:5500/admin-login.html
 echo.
@@ -18,21 +23,21 @@ echo.
 
 where py >nul 2>&1
 if %errorlevel%==0 (
-  start "" "http://localhost:5500/checkout.html"
+  start "" "http://localhost:5500/%OPEN_PAGE%"
   py -m http.server 5500
   goto :done
 )
 
 where python >nul 2>&1
 if %errorlevel%==0 (
-  start "" "http://localhost:5500/checkout.html"
+  start "" "http://localhost:5500/%OPEN_PAGE%"
   python -m http.server 5500
   goto :done
 )
 
 where npx >nul 2>&1
 if %errorlevel%==0 (
-  start "" "http://localhost:5500/checkout.html"
+  start "" "http://localhost:5500/%OPEN_PAGE%"
   npx --yes serve -l 5500
   goto :done
 )

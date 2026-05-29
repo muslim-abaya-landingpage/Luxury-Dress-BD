@@ -15,29 +15,27 @@
 <body class="pl-admin" data-admin-guard="1">
   <header class="pl-admin-header">
     <a class="pl-back" href="admin-links.html">← Admin</a>
-    <a class="pl-back" href="index.html" style="margin-left:8px">স্টোর</a>
+    <a class="pl-back" href="/" style="margin-left:8px">স্টোর</a>
     <h1>প্রোডাক্ট ম্যানেজার</h1>
-    <p>সব ক্যাটাগরির <strong>দাম, সাইজ, রঙ, ফ্যাব্রিক, নাম</strong> এক জায়গায়। নতুন ক্যাটাগরি যোগ করতে পারবেন।</p>
+    <p>বামে <strong>ক্যাটাগরি বেছে</strong> প্রোডাক্ট যোগ করুন — সেই পেজে + <strong>হোমেও</strong> অটো যাবে। শুধু ছবি, দাম, সাইজ, রঙ লিখুন।</p>
     <div class="pl-toolbar">
       <button type="button" class="pl-btn pl-btn-primary" id="pmSave">সেভ করুন (ফাইল ডাউনলোড)</button>
       <button type="button" class="pl-btn pl-btn-secondary" id="pmReload">সাইট থেকে রিলোড</button>
-      <a class="pl-btn pl-btn-secondary" href="product-links.html" style="text-decoration:none;display:inline-flex;align-items:center">ছবির লিংক →</a>
+      <a class="pl-btn pl-btn-secondary" href="product-links.html" style="text-decoration:none;display:inline-flex;align-items:center" title="ঐচ্ছিক — একসাথে অনেক URL">বাল্ক ছবি →</a>
     </div>
   </header>
 
   <main class="pl-main">
     <div class="pl-steps">
-      <strong>কীভাবে ব্যবহার করবেন:</strong>
+      <strong>ক্যাটাগরি = বামের তালিকা (লিংক আলাদা লিখতে হয় না):</strong>
       <ol>
-        <li>বামে ক্যাটাগরি বেছে নিন (① আবায়া … ⑧ হিজাব)</li>
-        <li>প্রতিটি প্রোডাক্টের <strong>দাম, ফ্যাব্রিক, রঙ, সাইজ</strong> এডিট করুন</li>
-        <li><strong>আবায়া Type দাম:</strong> Full Set / Abaya Only আলাদা বক্সে লিখুন → 「সব প্রোডাক্টে এই দাম লাগান」</li>
-        <li><strong>+ নতুন ক্যাটাগরি</strong> — মেনু নাম দিন, key ও HTML পেজ অটো তৈরি</li>
-        <li><strong>সেভ করুন</strong> → <code>category-products.js</code> + <code>product-catalog-sections.js</code> ডাউনলোড</li>
-        <li>প্রজেক্ট ফোল্ডারে ফাইল রিপ্লেস → <code>Ctrl+F5</code></li>
+        <li><strong>① আবায়া</strong> বেছে প্রোডাক্ট যোগ → <code>abaya</code> পেজ + হোম</li>
+        <li><strong>④ টু-পিস</strong> বেছে যোগ → <code>premium-two-piece</code> পেজ + হোম</li>
+        <li><strong>⑤ এম্ব্রয়ডারি</strong> বেছে যোগ → <code>embroidery</code> পেজ + হোম (মেনুতে চাইলে <code>enabled: true</code>)</li>
+        <li>প্রতিটি প্রোডাক্টে: <strong>ছবি, দাম, সাইজ, রঙ</strong> → <strong>সেভ</strong> → ফাইল রিপ্লেস → Netlify</li>
       </ol>
       <p style="margin:10px 0 0;font-size:0.85rem;color:#666">
-        শুধু ছবির URL বদলাতে: <a href="product-links.html">product-links.html</a> · বিস্তারিত: <code>PRODUCT-GUIDE.md</code>
+        <code>প্রোডাক্ট-এডিট.bat</code> · গাইড: <code>প্রোডাক্ট-সহজ-গাইড.md</code>
       </p>
     </div>
 

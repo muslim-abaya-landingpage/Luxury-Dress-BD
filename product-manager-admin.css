@@ -68,6 +68,21 @@
   min-width: 0;
 }
 
+.pm-how-it-works {
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: #14532d;
+}
+
+.pm-how-it-works strong {
+  color: #166534;
+}
+
 .pm-cat-head {
   display: flex;
   flex-wrap: wrap;

@@ -30,6 +30,11 @@
     sections.forEach(function (sec) {
       if (!Array.isArray(products[sec.key])) products[sec.key] = [];
     });
+    window.CATEGORY_PRODUCTS = products;
+    if (typeof window.applyProductLinks === "function") {
+      window.applyProductLinks();
+      products = cloneJson(window.CATEGORY_PRODUCTS || {});
+    }
     if (!activeKey && sections[0]) activeKey = sections[0].key;
     loadCategoryTypePrices();
   }
@@ -97,7 +102,7 @@
       id: (sec.key.toUpperCase().replace(/-/g, "") || "CAT") + "-NEW-" + n,
       name: "New Product " + n,
       image: "images/Baby-Pink-Floral-Print.jpeg",
-      link: "index.html",
+      link: sec.path || "/" + sec.key,
       price: basePrice,
       color: "",
       colorLabel: "",
@@ -201,11 +206,17 @@
       sec.page +
       "</code> · URL: <code>" +
       (sec.path || "/" + sec.key) +
-      '</code></p><div class="pm-links-row">' +
+      '</code></p>' +
+      '<div class="pm-how-it-works">' +
+      "<strong>কীভাবে কাজ করে:</strong> বামে যে ক্যাটাগরি বেছে নিয়েছেন (<em>" +
+      escapeHtml(sec.menuBn || sec.menu) +
+      "</em>) — প্রোডাক্ট যোগ করলে সেটা <strong>সেই ক্যাটাগরি পেজে</strong> এবং <strong>হোম পেইজেও</strong> দেখাবে। " +
+      "আপনি শুধু লিখুন: ছবি, দাম, সাইজ, রঙ। আলাদা লিংক বা HTML লাগে না।" +
+      "</div>" +
+      '<div class="pm-links-row">' +
       '<a href="' +
       sec.page +
       '" target="_blank" rel="noopener">পেজ দেখুন →</a>' +
-      '<a href="product-links.html">ছবির লিংক এডিটর →</a>' +
       "</div></div>" +
       '<div><button type="button" class="pl-btn pl-btn-secondary" id="pmAddProduct">+ প্রোডাক্ট যোগ</button> ' +
       '<button type="button" class="pl-btn pl-btn-secondary" id="pmEditCat">ক্যাটাগরি এডিট</button></div></div>' +
@@ -472,7 +483,7 @@
   function productToJsLines(p, indent) {
     var ind = indent || "    ";
     var lines = [ind + "{"];
-    var order = ["id", "name", "image", "link", "price", "color", "colorLabel", "fabric", "sizes", "detailNote", "types"];
+    var order = ["id", "name", "image", "price", "color", "colorLabel", "fabric", "sizes", "detailNote", "types"];
     order.forEach(function (k) {
       if (p[k] == null || p[k] === "") return;
       if (k === "sizes" && Array.isArray(p.sizes)) {
@@ -597,6 +608,48 @@
     URL.revokeObjectURL(a.href);
   }
 
+  function collectProductLinkUrls() {
+    var data = {};
+    sections.forEach(function (sec) {
+      var urls = (products[sec.key] || [])
+        .map(function (p) {
+          return String(p.image || "").trim();
+        })
+        .filter(Boolean);
+      if (urls.length) data[sec.key] = urls;
+    });
+    return data;
+  }
+
+  function generateProductLinksFile() {
+    var data = collectProductLinkUrls();
+    var lines = [
+      "/**",
+      " * ═══ সব ক্যাটাগরির প্রোডাক্ট ছবির লিংক — এক জায়গা ═══",
+      " * এডিট: product-manager.html (প্রতি প্রোডাক্টে ছবির URL) → সেভ",
+      " * আপডেট: " + new Date().toISOString().slice(0, 10),
+      " */",
+      "window.PRODUCT_LINKS_DATA = {"
+    ];
+    sections.forEach(function (sec, idx) {
+      var key = sec.key;
+      var urls = data[key] || [];
+      var keyStr = /^[a-z_$][\w$]*$/i.test(key) ? key : '"' + key + '"';
+      lines.push("  " + keyStr + ": [");
+      urls.forEach(function (url) {
+        lines.push(
+          '    "' +
+            String(url).replace(/\\/g, "\\\\").replace(/"/g, '\\"') +
+            '",'
+        );
+      });
+      lines.push("  ]" + (idx < sections.length - 1 ? "," : ""));
+    });
+    lines.push("};");
+    lines.push("");
+    return lines.join("\n");
+  }
+
   function generateProductConfigFile() {
     var cfg = cloneJson(window.SITE_LINKS || {});
     if (!cfg.defaults) cfg.defaults = {};
@@ -618,15 +671,28 @@
     return lines.join("\n");
   }
 
+  function stripHomeLinksFromProducts() {
+    sections.forEach(function (sec) {
+      (products[sec.key] || []).forEach(function (p) {
+        var lk = String(p.link || "").trim();
+        if (!lk || lk === "/" || lk === "index.html" || lk === sec.path) delete p.link;
+      });
+    });
+  }
+
   function saveAll() {
+    stripHomeLinksFromProducts();
     download(generateSectionsFile(), "product-catalog-sections.js");
     setTimeout(function () {
       download(generateProductsFile(), "category-products.js");
     }, 400);
+    setTimeout(function () {
+      download(generateProductLinksFile(), "product-links-data.js");
+    }, 800);
     if (Object.keys(categoryTypePrices).length) {
       setTimeout(function () {
         download(generateProductConfigFile(), "product-config.js");
-      }, 800);
+      }, 1200);
     }
 
     var newSections = sections.filter(function (sec) {
@@ -649,7 +715,7 @@
     }
 
     toast(
-      "ফাইল ডাউনলোড হয়েছে — category-products.js + product-config.js প্রজেক্টে রিপ্লেস করুন" +
+      "৩টি ফাইল ডাউনলোড — category-products.js, product-links-data.js, sections (+ config) প্রজেক্টে রিপ্লেস → Netlify আপলোড" +
         (newSections.length ? " (+ নতুন HTML)" : "")
     );
   }

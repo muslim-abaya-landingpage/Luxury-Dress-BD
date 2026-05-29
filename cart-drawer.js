@@ -123,7 +123,7 @@
       if (typeof global.refreshCartBadgeUI === "function") global.refreshCartBadgeUI([]);
       else if (typeof global.updateCartBadge === "function") global.updateCartBadge([]);
       body.innerHTML =
-        '<p class="cart-drawer-empty">\u0995\u09BE\u09B0\u09CD\u099F\u09C7 \u0995\u09CB\u09A8\u09CB \u09AA\u09A3\u09CD\u09AF \u09A8\u09C7\u0987\u0964<br><a href="index.html" style="color:#f97316;font-weight:600;">\u09B6\u09AA\u09BF\u0982 \u0995\u09B0\u09C1\u09A8</a></p>';
+        '<p class="cart-drawer-empty">\u0995\u09BE\u09B0\u09CD\u099F\u09C7 \u0995\u09CB\u09A8\u09CB \u09AA\u09A3\u09CD\u09AF \u09A8\u09C7\u0987\u0964<br><a href="/" style="color:#f97316;font-weight:600;">\u09B6\u09AA\u09BF\u0982 \u0995\u09B0\u09C1\u09A8</a></p>';
       if (totalEl) totalEl.textContent = formatBdt(0);
       return;
     }

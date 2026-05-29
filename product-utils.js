@@ -81,7 +81,7 @@
   function resolveProductPageLink(product) {
     var cfg = getLinks().productPage || {};
     var raw = product.link || product.productUrl || product.page || "";
-    if (raw && raw !== "index.html") {
+    if (raw && raw !== "index.html" && raw !== "/") {
       if (/^https?:\/\//i.test(raw)) return raw;
       if (typeof g.siteHref === "function") return g.siteHref(raw);
       return raw;
@@ -98,7 +98,7 @@
 
   function hasExplicitProductLink(product) {
     var raw = product.link || product.productUrl || product.page || "";
-    return !!(raw && raw !== "index.html");
+    return !!(raw && raw !== "index.html" && raw !== "/");
   }
 
   function normalizeProductEntry(raw, categoryKey, index) {
