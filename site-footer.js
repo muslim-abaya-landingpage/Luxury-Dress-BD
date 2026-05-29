@@ -192,7 +192,7 @@
       "</div>" +
       "</div>" +
       "</div>" +
-      '<div class="anz-bottom"><p>Copyright &copy; 2026 Muslim Abaya. All Rights Reserved.</p></div>' +
+      '<div class="anz-bottom anz-footer-strip"><p>Copyright &copy; 2026 Muslim Abaya. All Rights Reserved.</p></div>' +
       "</footer>"
     );
   }

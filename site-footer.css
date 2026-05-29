@@ -16,6 +16,13 @@ body #ma-social-connect-mount {
   box-sizing: border-box;
 }
 
+body #ma-social-connect-mount .ma-footer-strip,
+body #ma-social-connect-mount .ma-social-connect,
+body #ma-social-connect-mount .ma-social-connect-inner {
+  width: 100%;
+  max-width: 100%;
+}
+
 #site-footer-mount {
   clear: both;
   min-height: 0;
@@ -70,11 +77,50 @@ body #ma-social-connect-mount {
 
 #ma-social-connect-mount + #site-footer-mount .anz-footer {
   margin-top: 0;
-  border-top: none;
+  border-top: 2px solid rgba(201, 169, 98, 0.22);
 }
 
 #ma-social-connect-mount:empty {
   display: none;
+}
+
+/* Copyright strip — separate 2in block, full width */
+.anz-footer-strip,
+.anz-bottom.anz-footer-strip {
+  height: 2in;
+  min-height: 2in;
+  max-height: 2in;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0 16px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  border-top: 2px solid rgba(201, 169, 98, 0.28);
+  background: #060606;
+  flex-shrink: 0;
+}
+
+.anz-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.anz-bottom p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.35;
+  color: #7a766e;
+  letter-spacing: 0.03em;
 }
 
 .anz-footer-trust {
@@ -402,33 +448,6 @@ a.anz-contact-link:hover {
   fill: #fff;
 }
 
-.anz-bottom {
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
-  width: 100%;
-  max-width: 100%;
-  height: 2in;
-  min-height: 2in;
-  max-height: 2in;
-  padding: 0 16px;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  background: rgba(0, 0, 0, 0.4);
-  margin: 0;
-  box-sizing: border-box;
-  overflow: hidden;
-}
-
-.anz-bottom p {
-  margin: 0;
-  font-size: 13px;
-  line-height: 1.35;
-  color: #7a766e;
-  letter-spacing: 0.03em;
-}
-
 #site-footer-mount .subscribe-success {
   display: none;
   margin-top: 10px;
@@ -553,9 +572,8 @@ a.anz-contact-link:hover {
     width: 100%;
   }
 
-  .anz-bottom {
-    width: 100%;
-    max-width: 100%;
+  .anz-footer-strip,
+  .anz-bottom.anz-footer-strip {
     height: 2in;
     min-height: 2in;
     max-height: 2in;

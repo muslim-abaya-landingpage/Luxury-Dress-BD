@@ -250,14 +250,16 @@
     if (!fb) return;
     mount.setAttribute("data-filled", "1");
     mount.innerHTML =
-      '<section class="ma-social-connect" aria-label="আমাদের সাথে যুক্ত থাকুন">' +
+      '<section class="ma-social-connect ma-footer-strip" aria-label="আমাদের সাথে যুক্ত থাকুন">' +
       '<div class="ma-social-connect-inner">' +
-      "<h2>Facebook ও Instagram এ আমাদের পেজ</h2>" +
-      "<p>নতুন কালেকশন, লাইভ ও অফার সবার আগে পেতে ফলো করুন — ওয়েবসাইট ও সোশ্যাল মিডিয়ায় একই ব্র্যান্ড।</p>" +
+      '<div class="ma-strip-copy">' +
+      "<strong>Facebook ও Instagram</strong>" +
+      "<span>নতুন কালেকশন ও অফার — ফলো করুন</span>" +
+      "</div>" +
       '<div class="ma-social-connect-actions">' +
       '<a class="ma-social-btn ma-social-btn-fb" href="' +
       escHtml(fb) +
-      '" target="_blank" rel="noopener noreferrer">Facebook পেজ ফলো করুন</a>' +
+      '" target="_blank" rel="noopener noreferrer">Facebook</a>' +
       (SOCIAL.instagram
         ? '<a class="ma-social-btn ma-social-btn-ig" href="' +
           escHtml(SOCIAL.instagram) +
