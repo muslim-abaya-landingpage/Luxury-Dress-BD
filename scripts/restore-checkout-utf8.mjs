@@ -104,8 +104,12 @@ html = html.replace(
 
 html = html.replace(
   /function formatBdt\(amount\) \{\s*var n = parseInt\(amount, 10\) \|\| 0;\s*return '[^']*' \+/,
-  "function formatBdt(amount) {\n        if (typeof window.formatBdt === 'function') return window.formatBdt(amount);\n        var n = parseInt(amount, 10) || 0;\n        return '\\u09F3' +"
+  "function formatBdtCheckout(amount) {\n        if (typeof window.formatBdt === 'function') return window.formatBdt(amount);\n        var n = parseInt(amount, 10) || 0;\n        return '\\u09F3' +"
 );
+
+html = html.replace(/\bformatBdt\(/g, "formatBdtCheckout(");
+html = html.replace(/function formatBdtCheckoutCheckout/g, "function formatBdtCheckout");
+html = html.replace(/window\.formatBdtCheckout\(/g, "window.formatBdt(");
 
 html = html.replace(
   /<p class="delivery-fee-hint">[\s\S]*?<\/p>/,

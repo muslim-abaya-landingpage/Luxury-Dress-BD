@@ -1869,7 +1869,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         }).join(', ');
     }
 
-    function formatBdt(amount) {
+    function formatBdtCheckout(amount) {
         if (typeof window.formatBdt === 'function') return window.formatBdt(amount);
         var n = parseInt(amount, 10) || 0;
         return '\u09F3' + n.toLocaleString('en-BD', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -1896,7 +1896,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 '<td>' + size + '</td>' +
                 '<td>' + fabric + '</td>' +
                 '<td>' + qty + '</td>' +
-                '<td>' + formatBdt(unit * qty) + '</td>' +
+                '<td>' + formatBdtCheckout(unit * qty) + '</td>' +
                 '</tr>';
         });
         el.innerHTML =
@@ -1929,9 +1929,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             var sideSubtotal = document.getElementById('side-subtotal');
             var sideDelivery = document.getElementById('side-delivery');
             var sideTotal = document.getElementById('side-total');
-            if (sideSubtotal) sideSubtotal.textContent = formatBdt(0);
-            if (sideDelivery) sideDelivery.textContent = formatBdt(0);
-            if (sideTotal) sideTotal.textContent = formatBdt(0) + ' BDT';
+            if (sideSubtotal) sideSubtotal.textContent = formatBdtCheckout(0);
+            if (sideDelivery) sideDelivery.textContent = formatBdtCheckout(0);
+            if (sideTotal) sideTotal.textContent = formatBdtCheckout(0) + ' BDT';
             renderProductChart();
             return;
         }
@@ -1944,9 +1944,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var sideSubtotal = document.getElementById('side-subtotal');
         var sideDelivery = document.getElementById('side-delivery');
         var sideTotal = document.getElementById('side-total');
-        if (sideSubtotal) sideSubtotal.textContent = formatBdt(sub);
-        if (sideDelivery) sideDelivery.textContent = (q >= 3 ? formatBdt(0) : formatBdt(ship));
-        if (sideTotal) sideTotal.textContent = formatBdt(grand) + ' BDT';
+        if (sideSubtotal) sideSubtotal.textContent = formatBdtCheckout(sub);
+        if (sideDelivery) sideDelivery.textContent = (q >= 3 ? formatBdtCheckout(0) : formatBdtCheckout(ship));
+        if (sideTotal) sideTotal.textContent = formatBdtCheckout(grand) + ' BDT';
         var sideQty = document.getElementById('side-qty');
         var sideDesign = document.getElementById('side-design');
         if (sideQty) sideQty.textContent = String(q);
@@ -1976,7 +1976,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 '<span>' + qty + '</span>' +
                 '<button type="button" data-cart-action="inc" data-cart-idx="' + idx + '" aria-label="Increase quantity">+</button>' +
                 '</div></div></div>' +
-                '<div class="gb-order-price">' + formatBdt(lineTotal) + '</div>' +
+                '<div class="gb-order-price">' + formatBdtCheckout(lineTotal) + '</div>' +
                 '<button type="button" class="gb-order-delete" data-cart-action="remove" data-cart-idx="' + idx + '" aria-label="Remove product" title="Remove">' + TRASH_SVG + '</button>' +
                 '</div>';
         });
@@ -2324,6 +2324,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 ? MaSecurity.getOrderFormTimestamp()
                 : String(Date.now());
         }
+        cart = loadCart();
         displayOrder();
         persistCart();
         bindCheckoutTikTokMatchSync();
