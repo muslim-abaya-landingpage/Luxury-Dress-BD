@@ -83,9 +83,9 @@ html {
   .header-middle-nav .custom-container.nav-row,
   .header-middle-nav .nav-row.custom-container {
     display: grid;
-    grid-template-columns: minmax(100px, auto) minmax(0, 1fr) minmax(156px, max-content);
+    grid-template-columns: minmax(0, 200px) minmax(0, 1fr) minmax(148px, max-content);
     align-items: center;
-    column-gap: 10px;
+    column-gap: 12px;
     row-gap: 8px;
     padding: 10px 12px;
     justify-content: unset;
@@ -94,6 +94,12 @@ html {
   .brand-text-logo {
     justify-self: start;
     min-width: 0;
+    max-width: 200px;
+  }
+
+  .brand-logo-img {
+    max-width: 200px;
+    height: 40px;
   }
 
   .desktop-menu {
@@ -103,9 +109,9 @@ html {
     min-width: 0;
     width: 100%;
     max-width: 100%;
-    overflow: hidden;
+    overflow: visible;
     box-sizing: border-box;
-    padding-right: 4px;
+    padding: 0 6px;
   }
 
   .desktop-menu ul {
@@ -116,7 +122,7 @@ html {
     column-gap: 6px;
     max-width: 100%;
     margin: 0;
-    padding: 0;
+    padding: 0 8px;
     box-sizing: border-box;
   }
 
