@@ -2,7 +2,7 @@ import { execSync } from "child_process";
 import fs from "fs";
 
 const SRC = "7721f89";
-const VER = "20260530ft6";
+const VER = "20260530ft7";
 
 function toHtmlEntities(str) {
   return String(str)

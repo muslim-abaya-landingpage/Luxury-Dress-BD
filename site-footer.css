@@ -14,6 +14,18 @@ body #ma-social-connect-mount {
   margin-right: calc(50% - 50vw);
   padding: 0;
   box-sizing: border-box;
+  position: relative;
+  left: 0;
+  right: 0;
+}
+
+body #site-footer-mount .anz-footer,
+body #site-footer-mount .anz-footer-trust,
+body #site-footer-mount .anz-footer-main,
+body #site-footer-mount .anz-bottom {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 body #ma-social-connect-mount .ma-footer-strip,
@@ -87,13 +99,13 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   display: none;
 }
 
-/* Copyright strip — separate 1.5in block, full width, centered */
+/* Copyright strip — separate 2in block, full width, centered */
 .anz-footer-strip,
 .anz-bottom.anz-footer-strip,
 #site-footer-mount .anz-bottom.anz-footer-strip {
-  height: 1.5in;
-  min-height: 1.5in;
-  max-height: 1.5in;
+  height: 2in;
+  min-height: 2in;
+  max-height: 2in;
   width: 100%;
   max-width: 100%;
   margin: 0;
@@ -583,9 +595,9 @@ a.anz-contact-link:hover {
   .anz-footer-strip,
   .anz-bottom.anz-footer-strip,
   #site-footer-mount .anz-bottom.anz-footer-strip {
-    height: 1.5in;
-    min-height: 1.5in;
-    max-height: 1.5in;
+    height: 2in;
+    min-height: 2in;
+    max-height: 2in;
     padding: 0 14px;
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
