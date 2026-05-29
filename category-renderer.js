@@ -8,9 +8,9 @@ function ensureCategoryStyles() {
     link.rel = "stylesheet";
     document.head.appendChild(link);
   }
-  link.href = "category-sidebar.css?v=20260617scroll";
+  link.href = "category-sidebar.css?v=20260618layout";
   var shopLink = document.querySelector('link[href*="shop-page.css"]');
-  if (shopLink) shopLink.href = "shop-page.css?v=20260617scroll";
+  if (shopLink) shopLink.href = "shop-page.css?v=20260618layout";
 }
 
 function syncShopScrollHeights() {

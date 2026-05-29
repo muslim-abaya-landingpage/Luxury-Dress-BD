@@ -18,7 +18,7 @@ body.shop-page {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #f7f7f7;
+  background: #efefef;
   font-family: var(--font-ui-mixed);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -179,6 +179,7 @@ body.shop-page .shop-breadcrumb--mobile {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    padding: 12px 20px 0;
     padding-bottom: 0;
   }
 
