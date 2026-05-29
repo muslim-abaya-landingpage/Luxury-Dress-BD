@@ -1,9 +1,8 @@
 /* Home + site-wide social connect (SEO / organic discovery) */
 #ma-social-connect-mount {
-  width: 100vw;
-  max-width: 100vw;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
   padding: 0;
   background: #0a0a0a;
   border-top: 1px solid rgba(201, 169, 98, 0.22);
@@ -13,20 +12,26 @@
 
 .ma-social-connect {
   width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 18px 16px 0;
+  max-width: 100%;
+  margin: 0;
+  padding: 14px 0 0;
   box-sizing: border-box;
 }
 
 .ma-social-connect-inner {
   background: linear-gradient(135deg, #141414 0%, #1f1a12 100%);
-  border: 1px solid rgba(201, 169, 98, 0.28);
-  border-radius: 10px;
-  padding: 16px 18px 18px;
+  border-top: 1px solid rgba(201, 169, 98, 0.28);
+  border-bottom: 1px solid rgba(201, 169, 98, 0.28);
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
+  padding: 16px 16px 18px;
   text-align: center;
   color: #f5f0e6;
   font-family: "Hind Siliguri", "Inter", sans-serif;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .ma-social-connect-inner h2 {

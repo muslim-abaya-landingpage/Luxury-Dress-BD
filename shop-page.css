@@ -152,7 +152,10 @@ a.card-img-link img {
 
 body.shop-page #site-footer-mount {
   flex-shrink: 0;
-  width: 100%;
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
 }
 
 body.shop-page .shop-breadcrumb {
