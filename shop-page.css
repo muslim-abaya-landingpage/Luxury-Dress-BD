@@ -8,6 +8,24 @@ html.category-ready #list {
   visibility: visible;
 }
 
+#list.shop-cat-switching .shop-main {
+  opacity: 0.35;
+  transition: opacity 0.18s ease;
+}
+
+#list.shop-cat-switching .shop-sidebar-col {
+  opacity: 1;
+}
+
+#list.shop-cat-switching .shop-main .product-grid {
+  transition: opacity 0.18s ease;
+}
+
+html.category-ready #list:not(.shop-cat-switching) .shop-main {
+  opacity: 1;
+  transition: opacity 0.22s ease;
+}
+
 :root {
   --font-product-en: "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-ui-mixed: "Hind Siliguri", "Inter", system-ui, sans-serif;
