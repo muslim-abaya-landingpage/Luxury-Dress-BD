@@ -69,6 +69,10 @@
       });
 
     g.CATEGORY_NAV = navFromSections.concat(extras);
+
+    if (typeof g.applyDynamicNavMenu === "function") {
+      g.applyDynamicNavMenu();
+    }
   }
 
   syncCatalogFromSections();

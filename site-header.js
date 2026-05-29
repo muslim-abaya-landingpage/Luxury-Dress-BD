@@ -319,43 +319,83 @@
 
   var catalogLoadPromise = null;
 
+  function catalogReady() {
+    return !!(
+      window.CATALOG_SECTIONS &&
+      window.CATALOG_SECTIONS.length &&
+      window.CATEGORY_PRODUCTS
+    );
+  }
+
+  function waitForCatalogReady(done, tries) {
+    if (catalogReady() || (tries || 0) > 150) {
+      done();
+      return;
+    }
+    setTimeout(function () {
+      waitForCatalogReady(done, (tries || 0) + 1);
+    }, 25);
+  }
+
   function ensureProductCatalog(cb) {
-    if (window.CATEGORY_PRODUCTS && window.CATEGORY_NAV) {
+    function finish() {
+      if (typeof window.syncCatalogFromSections === "function") {
+        window.syncCatalogFromSections();
+      }
       cb();
+    }
+    if (catalogReady()) {
+      finish();
       return;
     }
     if (!catalogLoadPromise) {
       catalogLoadPromise = new Promise(function (resolve) {
-        if (window.CATEGORY_PRODUCTS && window.CATEGORY_NAV) {
-          resolve();
-          return;
-        }
         function loadScript(file) {
           return new Promise(function (done) {
-            var src = siteAsset(file);
-            if (document.querySelector('script[src*="' + file.split('?')[0] + '"]')) {
-              done();
+            var base = file.split("?")[0];
+            var existing = document.querySelector('script[src*="' + base + '"]');
+            if (existing) {
+              waitForCatalogReady(done, 0);
               return;
             }
-            var s = document.createElement('script');
-            s.src = src;
+            var s = document.createElement("script");
+            s.src = siteAsset(file);
             s.async = true;
-            s.onload = function () { done(); };
-            s.onerror = function () { done(); };
+            s.onload = function () {
+              s.setAttribute("data-loaded", "1");
+              done();
+            };
+            s.onerror = function () {
+              done();
+            };
             document.head.appendChild(s);
           });
         }
-        loadScript('product-catalog-sections.js?v=20260530d')
-          .then(function () { return loadScript('product-catalog-sync.js?v=20260608'); })
-          .then(function () { return loadScript('product-config.js?v=20260535'); })
-          .then(function () { return loadScript('product-utils.js?v=20260535'); })
-          .then(function () { return loadScript('category-products.js?v=20260535'); })
-          .then(function () { return loadScript('product-links-data.js?v=20260535'); })
-          .then(function () { return loadScript('product-catalog-loader.js?v=20260535'); })
-          .then(resolve);
+        loadScript("product-catalog-sections.js?v=20260530d")
+          .then(function () {
+            return loadScript("product-catalog-sync.js?v=20260608");
+          })
+          .then(function () {
+            return loadScript("product-config.js?v=20260535");
+          })
+          .then(function () {
+            return loadScript("product-utils.js?v=20260535");
+          })
+          .then(function () {
+            return loadScript("category-products.js?v=20260535");
+          })
+          .then(function () {
+            return loadScript("product-links-data.js?v=20260535");
+          })
+          .then(function () {
+            return loadScript("product-catalog-loader.js?v=20260535");
+          })
+          .then(function () {
+            waitForCatalogReady(resolve, 0);
+          });
       });
     }
-    catalogLoadPromise.then(cb);
+    catalogLoadPromise.then(finish);
   }
 
   function flattenCatalog() {
@@ -668,14 +708,8 @@
     }
     initSiteSearch();
     ensureProductCatalog(function () {
-      if (typeof window.syncCatalogFromSections === "function") {
-        window.syncCatalogFromSections();
-      }
       applyDynamicNavMenu();
     });
-    if (window.CATALOG_SECTIONS && window.CATALOG_SECTIONS.length) {
-      applyDynamicNavMenu();
-    }
     syncSiteHeaderOffset();
     window.addEventListener('resize', syncSiteHeaderOffset);
     if (annTimer) clearInterval(annTimer);
@@ -691,6 +725,7 @@
   window.siteHref = siteHref;
   window.siteAsset = siteAsset;
   window.fixAllPageLinks = fixAllPageLinks;
+  window.applyDynamicNavMenu = applyDynamicNavMenu;
 
   function ensureCartDrawerAssets() {
     if (document.querySelector('script[src*="cart-drawer.js?v=20260530d"]')) return;
