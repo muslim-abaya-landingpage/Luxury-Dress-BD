@@ -3,6 +3,20 @@ html,
 body {
   margin: 0;
   padding: 0;
+  background: #fff;
+}
+
+#site-footer-mount {
+  clear: both;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  background: #0a0a0a;
+}
+
+#site-footer-mount:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 /* Edge-to-edge: breaks out of any centered parent */
@@ -33,11 +47,6 @@ body #ma-social-connect-mount .ma-social-connect,
 body #ma-social-connect-mount .ma-social-connect-inner {
   width: 100%;
   max-width: 100%;
-}
-
-#site-footer-mount {
-  clear: both;
-  min-height: 0;
 }
 
 #site-footer-mount .anz-footer {
@@ -99,7 +108,7 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   display: none;
 }
 
-/* Copyright strip — separate 2in block, full width, centered */
+/* Copyright strip — 2in tall, full width, text vertically centered */
 .anz-footer-strip,
 .anz-bottom.anz-footer-strip,
 #site-footer-mount .anz-bottom.anz-footer-strip {
@@ -112,9 +121,8 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   padding: 0 16px;
   padding-bottom: env(safe-area-inset-bottom, 0px);
   box-sizing: border-box;
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
+  display: grid !important;
+  place-items: center;
   text-align: center;
   overflow: hidden;
   border-top: 2px solid rgba(201, 169, 98, 0.28);
@@ -124,23 +132,26 @@ body #ma-social-connect-mount .ma-social-connect-inner {
 }
 
 .anz-bottom {
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  border-top: none;
   width: 100%;
   max-width: 100%;
   margin: 0;
+  padding: 0;
   box-sizing: border-box;
   overflow: hidden;
 }
 
 .anz-bottom p {
-  margin: 0 auto;
-  width: 100%;
+  margin: 0;
+  padding: 0;
+  width: auto;
   max-width: 100%;
   text-align: center !important;
   font-size: 13px;
   line-height: 1.35;
   color: #7a766e;
   letter-spacing: 0.03em;
+  flex: 0 0 auto;
 }
 
 .anz-footer-trust {
