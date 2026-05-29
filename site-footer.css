@@ -73,6 +73,9 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   max-width: 100%;
   overflow-x: hidden;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 
 #ma-social-connect-mount + #site-footer-mount .anz-footer {
@@ -84,19 +87,20 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   display: none;
 }
 
-/* Copyright strip — separate 2in block, full width */
+/* Copyright strip — separate 1.5in block, full width, centered */
 .anz-footer-strip,
-.anz-bottom.anz-footer-strip {
-  height: 2in;
-  min-height: 2in;
-  max-height: 2in;
+.anz-bottom.anz-footer-strip,
+#site-footer-mount .anz-bottom.anz-footer-strip {
+  height: 1.5in;
+  min-height: 1.5in;
+  max-height: 1.5in;
   width: 100%;
   max-width: 100%;
   margin: 0;
   padding: 0 16px;
   padding-bottom: env(safe-area-inset-bottom, 0px);
   box-sizing: border-box;
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
   text-align: center;
@@ -104,6 +108,7 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   border-top: 2px solid rgba(201, 169, 98, 0.28);
   background: #060606;
   flex-shrink: 0;
+  align-self: stretch;
 }
 
 .anz-bottom {
@@ -116,7 +121,10 @@ body #ma-social-connect-mount .ma-social-connect-inner {
 }
 
 .anz-bottom p {
-  margin: 0;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 100%;
+  text-align: center !important;
   font-size: 13px;
   line-height: 1.35;
   color: #7a766e;
@@ -573,10 +581,11 @@ a.anz-contact-link:hover {
   }
 
   .anz-footer-strip,
-  .anz-bottom.anz-footer-strip {
-    height: 2in;
-    min-height: 2in;
-    max-height: 2in;
+  .anz-bottom.anz-footer-strip,
+  #site-footer-mount .anz-bottom.anz-footer-strip {
+    height: 1.5in;
+    min-height: 1.5in;
+    max-height: 1.5in;
     padding: 0 14px;
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }

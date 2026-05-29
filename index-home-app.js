@@ -374,7 +374,7 @@ sidebar.appendChild(card);
 function manualSelect(index, id) {
     isAutoSlideActive = false;
     clearInterval(autoSlideInterval);
-    selectProduct(index, id, true);
+    selectProduct(index, id, true, { forceHero: true });
 }
 
 function setHomePriceTag(price) {
@@ -406,9 +406,10 @@ function shouldDeferHeroSwap(nextSrc) {
     return false;
 }
 
-function applyHeroImage(nextImgSrc, animate) {
+function applyHeroImage(nextImgSrc, animate, options) {
+    options = options || {};
     if (!viewImg || !nextImgSrc) return;
-    if (shouldDeferHeroSwap(nextImgSrc)) return;
+    if (!options.forceHero && shouldDeferHeroSwap(nextImgSrc)) return;
     if (!animate) {
         viewImg.src = nextImgSrc;
         viewImg.classList.remove('fade-out');
@@ -433,7 +434,7 @@ function selectProduct(index, id, shouldScroll, options) {
         ? p.img.replace('/upload/', '/upload/f_auto,q_auto,w_600/')
         : p.img;
     var animate = options.animate !== false;
-    applyHeroImage(nextImgSrc, animate);
+    applyHeroImage(nextImgSrc, animate, options);
     document.querySelectorAll('.item-card').forEach(el => el.classList.remove('active'));
     const selectedCard = document.getElementById(`card-${id}`);
     if (selectedCard) {
@@ -503,10 +504,12 @@ function updateCartIcon(total) {
     }
 }
 function changeProduct(dir) {
+    isAutoSlideActive = false;
+    clearInterval(autoSlideInterval);
     currentIdx += dir;
     if (currentIdx >= products.length) currentIdx = 0;
     if (currentIdx < 0) currentIdx = products.length - 1;
-    selectProduct(currentIdx, products[currentIdx].id, false);
+    selectProduct(currentIdx, products[currentIdx].id, false, { forceHero: true, animate: true });
 }
 function startAutoSlide() {
     autoSlideInterval = setInterval(() => {
@@ -537,6 +540,12 @@ function removeFromCart(productId) {
 window.hydrateHomeProducts = hydrateHomeProducts;
 window.renderSidebar = renderSidebar;
 window.selectProduct = selectProduct;
+window.changeProduct = changeProduct;
+window.manualSelect = manualSelect;
+window.toggleProductCart = toggleProductCart;
+window.buyNowFromCard = buyNowFromCard;
+window.updateQty = updateQty;
+window.removeFromCart = removeFromCart;
 window.__homeRefreshCatalog = function (opts) {
     opts = opts || {};
     hydrateHomeProducts();

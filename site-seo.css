@@ -10,9 +10,9 @@
 /* Shared 2 inch footer strips — full width */
 .ma-footer-strip,
 #ma-social-connect-mount .ma-footer-strip {
-  height: 2in;
-  min-height: 2in;
-  max-height: 2in;
+  height: 1.5in;
+  min-height: 1.5in;
+  max-height: 1.5in;
   width: 100%;
   max-width: 100%;
   margin: 0;
