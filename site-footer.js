@@ -7,14 +7,15 @@
     address: "832, West Rasulpur, Dhaka-1211, Bangladesh"
   };
 
+  var SVG_ATTR = ' width="18" height="18" focusable="false" aria-hidden="true"';
   var ICON_MAIL =
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg>';
+    "<svg" + SVG_ATTR + ' viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg>';
   var ICON_PHONE =
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 4h4l2 5-2 1a11 11 0 0 0 5 5l1-2 5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>';
+    "<svg" + SVG_ATTR + ' viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h4l2 5-2 1a11 11 0 0 0 5 5l1-2 5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>';
   var ICON_PIN =
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>';
+    "<svg" + SVG_ATTR + ' viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>';
   var ICON_WA =
-    '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>';
+    "<svg" + SVG_ATTR + ' viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>';
 
   function esc(s) {
     return String(s == null ? "" : s)
@@ -42,11 +43,11 @@
       );
     }
     return sections
+      .filter(function (sec) {
+        return sec.enabled !== false;
+      })
       .map(function (sec) {
         var label = sec.menuBn || sec.menu || sec.key;
-        if (sec.enabled === false) {
-          return '<li><span class="anz-soon" title="শীঘ্রই">' + esc(label) + "</span></li>";
-        }
         var href = footerHref(sec.path || "/" + sec.key);
         return '<li><a href="' + esc(href) + '">' + esc(label) + "</a></li>";
       })
@@ -57,12 +58,12 @@
     return (
       '<footer class="anz-footer">' +
       '<div class="anz-footer-trust">' +
-      '<div class="anz-container anz-trust-inner">' +
+      '<div class="anz-trust-inner">' +
       '<div class="anz-trust-item"><span class="anz-trust-dot" aria-hidden="true"></span><span>ক্যাশ অন ডেলিভারি</span></div>' +
       '<div class="anz-trust-item"><span class="anz-trust-dot" aria-hidden="true"></span><span>সারাদেশে ডেলিভারি</span></div>' +
       '<div class="anz-trust-item"><span class="anz-trust-dot" aria-hidden="true"></span><span>সহজ রিটার্ন নীতি</span></div>' +
       "</div></div>" +
-      '<div class="anz-container anz-footer-main">' +
+      '<div class="anz-footer-main">' +
       '<div class="anz-col-brand">' +
       '<h2 class="anz-logo">Muslim Abaya</h2>' +
       '<p class="anz-text">বাংলাদেশের প্রিমিয়াম মডেস্ট ফ্যাশন — আবায়া, টু-পিস, এম্ব্রয়ডারি ও আরও। আরামদায়ক ফেব্রিক, ভিডিওতে আসল প্রোডাক্ট, ক্যাশ অন ডেলিভারি।</p>' +

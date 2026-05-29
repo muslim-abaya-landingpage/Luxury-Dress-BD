@@ -1,4 +1,30 @@
 /* Muslim Abaya — premium footer */
+#site-footer-mount {
+  width: 100%;
+  clear: both;
+}
+
+#site-footer-mount .anz-footer {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#site-footer-mount .anz-footer svg {
+  display: block;
+  width: 18px !important;
+  height: 18px !important;
+  max-width: 20px !important;
+  max-height: 20px !important;
+  flex-shrink: 0;
+}
+
+#site-footer-mount .anz-social-link svg {
+  width: 16px !important;
+  height: 16px !important;
+  max-width: 16px !important;
+  max-height: 16px !important;
+}
+
 .anz-footer {
   background: linear-gradient(165deg, #141414 0%, #0d0d0d 48%, #1a1814 100%);
   border-top: 1px solid rgba(201, 169, 98, 0.22);
@@ -39,7 +65,8 @@
   box-shadow: 0 0 8px rgba(201, 169, 98, 0.55);
 }
 
-.anz-footer-main {
+.anz-footer-main,
+.anz-footer .anz-container {
   max-width: 1200px;
   margin: 0 auto;
   display: grid;
@@ -48,6 +75,7 @@
   padding: 40px 24px 32px;
   box-sizing: border-box;
   align-items: start;
+  width: 100%;
 }
 
 .anz-col-brand,
