@@ -1040,6 +1040,129 @@
             color: var(--ink);
             font-weight: 700;
         }
+        .delivery-fee-hint {
+            margin: 8px 0 0;
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--muted);
+            font-weight: 500;
+        }
+        .local-file-banner {
+            display: none;
+            max-width: 1180px;
+            margin: 0 auto 12px;
+            padding: 12px 16px;
+            background: #fff8e6;
+            border: 1px solid #e8c96a;
+            border-radius: 12px;
+            color: #5c4a12;
+            font-size: 13px;
+            line-height: 1.55;
+        }
+        .local-file-banner.is-visible { display: block; }
+        .local-file-banner strong { color: #3d3208; }
+        .local-file-banner a {
+            color: #1e3a5f;
+            font-weight: 700;
+            text-decoration: underline;
+        }
+        .checkout-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 10050;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .checkout-modal.is-open { display: flex; }
+        .checkout-modal-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(17, 17, 17, 0.45);
+            backdrop-filter: blur(4px);
+        }
+        .checkout-modal-panel {
+            position: relative;
+            width: min(440px, 100%);
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: 0 24px 64px rgba(17, 17, 17, 0.18);
+            padding: 24px 22px 20px;
+            text-align: center;
+            animation: checkoutModalIn 0.22s ease;
+        }
+        @keyframes checkoutModalIn {
+            from { opacity: 0; transform: translateY(12px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .checkout-modal-close {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            border: none;
+            background: transparent;
+            font-size: 22px;
+            line-height: 1;
+            color: var(--muted);
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+        .checkout-modal-icon {
+            width: 52px;
+            height: 52px;
+            margin: 0 auto 12px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 800;
+        }
+        .checkout-modal-icon--info { background: #e8f0fe; color: #1e3a5f; }
+        .checkout-modal-icon--warn { background: #fff4e5; color: #b45309; }
+        .checkout-modal-icon--error { background: #fdecec; color: #b91c1c; }
+        .checkout-modal-icon--success { background: #e8f7ee; color: #15803d; }
+        .checkout-modal-title {
+            margin: 0 0 8px;
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--ink);
+            letter-spacing: -0.02em;
+        }
+        .checkout-modal-message {
+            margin: 0 0 18px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--ink-soft);
+        }
+        .checkout-modal-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .checkout-modal-btn {
+            width: 100%;
+            border: 1px solid var(--line);
+            background: #fff;
+            color: var(--ink);
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .checkout-modal-btn--primary {
+            background: #f38120;
+            border-color: #f38120;
+            color: #fff;
+        }
+        .checkout-modal-btn--wa {
+            background: #25d366;
+            border-color: #25d366;
+            color: #fff;
+        }
         @media (max-width: 900px) {
             .checkout-grid { grid-template-columns: 1fr; gap: 16px; }
             .checkout-aside { position: static; }
@@ -1053,6 +1176,12 @@
 <body>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-ML7RL6BR"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<div id="localFileBanner" class="local-file-banner" role="alert">
+    <strong>টেস্ট মোড:</strong> ফাইল হিসেবে খোলা আছে (<code>file://</code>) — অর্ডার ও ভিডিও এভাবে কাজ করবে না।
+    <strong>ADMIN-লোকাল-টেস্ট.bat</strong> চালিয়ে
+    <a href="http://localhost:5500/checkout.html">localhost:5500</a> ব্যবহার করুন, অথবা লাইভ
+    <a href="https://muslimabaya.com/checkout" target="_blank" rel="noopener">muslimabaya.com/checkout</a>।
+</div>
 <div id="site-header-mount"></div>
 <div class="container">
     <div class="checkout-page-head">
@@ -1117,6 +1246,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <select id="userArea" required>
                         <option value="">Select district</option>
                     </select>
+                    <p class="delivery-fee-hint">ঢাকা ৳80 · অন্যান্য জেলা ৳150 · ৩+ পিসে ফ্রি ডেলিভারি</p>
                 </div>
                 <div class="form-group form-group-last">
                     <label for="userThana">Thana / Upazila <span style="font-size:13px;font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0;">(Optional)</span></label>
@@ -1314,18 +1444,131 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <button type="button" class="sticky-order-btn" id="stickyOrderBtn">Place Order</button>
 </div>
 
+<div id="checkoutModal" class="checkout-modal" role="dialog" aria-modal="true" aria-labelledby="checkoutModalTitle" aria-hidden="true">
+    <div class="checkout-modal-backdrop" data-checkout-modal-close></div>
+    <div class="checkout-modal-panel">
+        <button type="button" class="checkout-modal-close" data-checkout-modal-close aria-label="বন্ধ">&times;</button>
+        <div id="checkoutModalIcon" class="checkout-modal-icon checkout-modal-icon--info" aria-hidden="true">i</div>
+        <h2 id="checkoutModalTitle" class="checkout-modal-title"></h2>
+        <p id="checkoutModalMessage" class="checkout-modal-message"></p>
+        <div id="checkoutModalActions" class="checkout-modal-actions"></div>
+    </div>
+</div>
+
 <script src="site-security.js"></script>
-<script src="site-api-config.js?v=20260610"></script>
+<script src="site-api-config.js?v=20260530"></script>
 <script src="site-api-health.js?v=20260610"></script>
 <script src="auth-config.js"></script>
 <script src="auth-api.js"></script>
-<script src="cart-utils.js?v=20260609"></script>
+<script src="cart-utils.js?v=20260530"></script>
 <script defer src="site-header.js?v=20260602"></script>
 <script>
     const ORDER_SCRIPT_URL =
       (typeof getSiteApiUrl === 'function' && getSiteApiUrl()) ||
       (window.MA_AUTH_CONFIG && window.MA_AUTH_CONFIG.apiUrl) ||
       '';
+
+    function isLocalFilePage() {
+        return window.location.protocol === 'file:' || window.location.protocol === 'blob:';
+    }
+
+    function closeCheckoutModal() {
+        var modal = document.getElementById('checkoutModal');
+        if (!modal) return;
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    function openCheckoutModal(opts) {
+        var modal = document.getElementById('checkoutModal');
+        var titleEl = document.getElementById('checkoutModalTitle');
+        var msgEl = document.getElementById('checkoutModalMessage');
+        var iconEl = document.getElementById('checkoutModalIcon');
+        var actionsEl = document.getElementById('checkoutModalActions');
+        if (!modal || !titleEl || !msgEl || !actionsEl) return;
+        var variant = (opts && opts.variant) || 'info';
+        var icons = { info: 'i', warn: '!', error: '×', success: '✓' };
+        titleEl.textContent = (opts && opts.title) || '';
+        msgEl.textContent = (opts && opts.message) || '';
+        if (iconEl) {
+            iconEl.className = 'checkout-modal-icon checkout-modal-icon--' + variant;
+            iconEl.textContent = icons[variant] || 'i';
+        }
+        actionsEl.innerHTML = '';
+        var actions = (opts && opts.actions) || [{ label: 'ঠিক আছে', primary: true }];
+        actions.forEach(function (action) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'checkout-modal-btn';
+            if (action.wa) btn.classList.add('checkout-modal-btn--wa');
+            else if (action.primary) btn.classList.add('checkout-modal-btn--primary');
+            btn.textContent = action.label || 'OK';
+            btn.addEventListener('click', function () {
+                if (typeof action.onClick === 'function') action.onClick();
+                else closeCheckoutModal();
+            });
+            actionsEl.appendChild(btn);
+        });
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        var firstBtn = actionsEl.querySelector('button');
+        if (firstBtn) firstBtn.focus();
+    }
+
+    function checkoutAlert(message, focusEl) {
+        openCheckoutModal({
+            title: 'দয়া করে চেক করুন',
+            message: message,
+            variant: 'warn',
+            actions: [{
+                label: 'ঠিক আছে',
+                primary: true,
+                onClick: function () {
+                    closeCheckoutModal();
+                    if (focusEl && focusEl.focus) focusEl.focus();
+                }
+            }]
+        });
+    }
+
+    function showLocalFileBlockedModal() {
+        openCheckoutModal({
+            title: 'এখানে অর্ডার পাঠানো যাবে না',
+            message: 'ফাইল হিসেবে (file://) খোলা থাকলে অর্ডার API কাজ করে না। ADMIN-লোকাল-টেস্ট.bat চালিয়ে localhost ব্যবহার করুন, অথবা muslimabaya.com এ অর্ডার দিন।',
+            variant: 'warn',
+            actions: [
+                {
+                    label: 'লাইভ সাইটে চেকআউট',
+                    primary: true,
+                    onClick: function () {
+                        window.open('https://muslimabaya.com/checkout', '_blank', 'noopener');
+                        closeCheckoutModal();
+                    }
+                },
+                {
+                    label: 'বন্ধ',
+                    onClick: closeCheckoutModal
+                }
+            ]
+        });
+    }
+
+    (function initCheckoutModalUi() {
+        var modal = document.getElementById('checkoutModal');
+        if (!modal) return;
+        modal.querySelectorAll('[data-checkout-modal-close]').forEach(function (el) {
+            el.addEventListener('click', closeCheckoutModal);
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && modal.classList.contains('is-open')) closeCheckoutModal();
+        });
+        if (isLocalFilePage()) {
+            var banner = document.getElementById('localFileBanner');
+            if (banner) banner.classList.add('is-visible');
+        }
+    })();
 
     function getWhatsAppOrderLink(order) {
         var wa = '8801971642683';
@@ -1378,12 +1621,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
 
     function offerWhatsAppOrder(orderWa, reason) {
-        var msg =
-            (reason || 'অর্ডার পাঠানো যায়নি।') +
-            '\n\nWhatsApp এ অর্ডার পাঠাবেন? (Sheet এ না গেলেও অর্ডার হারাবে না)';
-        if (confirm(msg)) {
-            window.open(getWhatsAppOrderLink(orderWa), '_blank', 'noopener');
-        }
+        openCheckoutModal({
+            title: 'অর্ডার অনলাইনে যায়নি',
+            message: (reason || 'অর্ডার পাঠানো যায়নি।') + ' WhatsApp এ পাঠালেও অর্ডার হারাবে না — আমরা দেখে নেব।',
+            variant: 'error',
+            actions: [
+                {
+                    label: 'WhatsApp এ পাঠান',
+                    wa: true,
+                    primary: true,
+                    onClick: function () {
+                        window.open(getWhatsAppOrderLink(orderWa), '_blank', 'noopener');
+                        closeCheckoutModal();
+                    }
+                },
+                {
+                    label: 'আবার চেষ্টা',
+                    onClick: closeCheckoutModal
+                }
+            ]
+        });
     }
 
     function postOrderViaIframe(formData) {
@@ -1461,14 +1718,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             .catch(function () {
                 postOrderViaIframe(formData)
                     .then(function () {
-                        if (confirm(
-                            'অর্ডার পাঠানোর চেষ্টা হয়েছে (ব্যাকআপ পদ্ধতি)।\n\n' +
-                                'thank-you পেজে যেতে OK চাপুন। Sheet এ ১–২ মিনিট পর দেখুন।'
-                        )) {
-                            finishCheckoutSuccess(nameValue, phoneValue, emailValue, gTotal, '');
-                        } else {
-                            offerWhatsAppOrder(orderWa, 'API সংযোগ ব্যর্থ। Apps Script Deploy (Anyone) চেক করুন।');
-                        }
+                        offerWhatsAppOrder(
+                            orderWa,
+                            'অর্ডার পাঠানোর চেষ্টা হয়েছে। Sheet এ ১–২ মিনিট পর দেখুন। না গেলে WhatsApp এ পাঠান।'
+                        );
                         resetOrderButton(btn);
                     })
                     .catch(function () {
@@ -1524,11 +1777,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var sel = document.getElementById('userArea');
         if (!sel || sel.getAttribute('data-districts-built') === '1') return;
         sel.setAttribute('data-districts-built', '1');
-        var subDhaka = {
-            'গাজীপুর': 1, 'নারায়ণগঞ্জ': 1, 'নরসিংদী': 1, 'মুন্সীগঞ্জ': 1, 'মানিকগঞ্জ': 1,
-            'টাঙ্গাইল': 1, 'কিশোরগঞ্জ': 1, 'ময়মনসিংহ': 1, 'ফরিদপুর': 1, 'রাজবাড়ী': 1,
-            'মাদারীপুর': 1, 'গোপালগঞ্জ': 1, 'শরীয়তপুর': 1, 'জামালপুর': 1, 'শেরপুর': 1, 'নেত্রকোনা': 1
-        };
         var dhakaNearby = [
             'গাজীপুর', 'নারায়ণগঞ্জ', 'নরসিংদী', 'মুন্সীগঞ্জ', 'মানিকগঞ্জ',
             'টাঙ্গাইল', 'কিশোরগঞ্জ', 'ময়মনসিংহ', 'ফরিদপুর', 'রাজবাড়ী', 'মাদারীপুর',
@@ -1545,9 +1793,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             'বরিশাল', 'পটুয়াখালী', 'ভোলা', 'বরগুনা', 'ঝালকাঠি', 'পিরোজপুর'
         ];
         function deliveryFee(name) {
-            if (name === 'ঢাকা') return 80;
-            if (subDhaka[name]) return 100;
-            return 150;
+            return name === 'ঢাকা' ? 80 : 150;
         }
         var nearbySet = {};
         dhakaNearby.forEach(function (d) { nearbySet[d] = 1; });
@@ -1563,7 +1809,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             var opt = document.createElement('option');
             opt.value = String(deliveryFee(name));
             opt.setAttribute('data-district', name);
-            opt.textContent = name;
+            opt.textContent = name === 'ঢাকা' ? name + ' (৳80)' : name;
             sel.appendChild(opt);
         });
     })();
@@ -1581,9 +1827,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
 
     var cart = loadCart();
-    if (window.location.protocol === 'file:' || window.location.protocol === 'blob:') {
-        console.warn('Checkout: file:// এ কার্ট কখনও কখনও ভুল দেখাতে পারে। ADMIN-লোকাল-টেস্ট.bat → http://localhost:5500 ব্যবহার করুন।');
-    }
     var summaryDiv = document.getElementById('orderSummary');
     var areaSelect = document.getElementById('userArea');
 
@@ -1879,9 +2122,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         orderForm.addEventListener('submit', function(e) {
             e.preventDefault();
 
+            if (isLocalFilePage()) {
+                showLocalFileBlockedModal();
+                return;
+            }
+
             if (window.MaSecurity) {
                 if (!MaSecurity.guardSubmit('checkout-order', 3000)) {
-                    alert('অনুগ্রহ করে কিছুক্ষণ অপেক্ষা করে আবার চেষ্টা করুন।');
+                    checkoutAlert('অনুগ্রহ করে কিছুক্ষণ অপেক্ষা করে আবার চেষ্টা করুন।');
                     return;
                 }
                 if (document.getElementById('orderHp') && document.getElementById('orderHp').value) {
@@ -1890,7 +2138,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             }
 
             if (cart.length === 0) {
-                alert('Your cart is empty. Please add products first.');
+                checkoutAlert('কার্ট খালি। আগে প্রোডাক্ট যোগ করুন।');
                 return;
             }
 
@@ -1912,7 +2160,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     total: gTotalCheck
                 });
                 if (!v.ok) {
-                    alert(v.message);
+                    checkoutAlert(v.message);
                     return;
                 }
                 nameValue = v.name;
@@ -1920,34 +2168,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 addrValue = v.address;
             } else {
             if (nameValue.length < 2) {
-                alert('Please enter a valid name.');
-                nameInput.focus();
+                checkoutAlert('সঠিক নাম লিখুন।', nameInput);
                 return;
             }
             if (!/^01\d{9}$/.test(phoneValue)) {
-                alert('Enter a valid 11-digit mobile number (01XXXXXXXXX).');
-                phoneInput.focus();
+                checkoutAlert('১১ ডিজিটের মোবাইল নম্বর দিন (01XXXXXXXXX)।', phoneInput);
                 return;
             }
             if (addrValue.length < 8) {
-                alert('Please enter your full delivery address.');
-                addrInput.focus();
+                checkoutAlert('সম্পূর্ণ ডেলিভারি ঠিকানা লিখুন।', addrInput);
                 return;
             }
             }
             if (emailValue && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
-                alert('Enter a valid email address.');
-                if (emailInput) emailInput.focus();
+                checkoutAlert('সঠিক ইমেইল দিন।', emailInput);
                 return;
             }
             if (!window.MaSecurity && addrValue.length < 8) {
-                alert('Please enter your full delivery address.');
-                addrInput.focus();
+                checkoutAlert('সম্পূর্ণ ডেলিভারি ঠিকানা লিখুন।', addrInput);
                 return;
             }
             if (!areaSelect.value) {
-                alert('Please select a delivery district.');
-                areaSelect.focus();
+                checkoutAlert('ডেলিভারি জেলা সিলেক্ট করুন।', areaSelect);
                 return;
             }
             var agreeTerms = document.getElementById('agreeTerms');
@@ -1968,11 +2210,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             var qTotal = cartQty();
             var gTotal = String(grandTotal());
             var areaOpt = areaSelect.options[areaSelect.selectedIndex];
-            var districtParam = areaOpt.getAttribute('data-district') || areaOpt.textContent.split('(')[0].trim();
+            var districtParam = areaOpt.getAttribute('data-district') ||
+                areaOpt.textContent.split('(')[0].split('—')[0].trim();
 
             const formData = new URLSearchParams();
             formData.append('RecordType', 'Order');
-            formData.append('SiteTs', (document.getElementById('orderSiteTs') || {}).value || String(Date.now()));
+            var siteTsEl = document.getElementById('orderSiteTs');
+            var siteTsVal = siteTsEl && siteTsEl.value ? siteTsEl.value : String(Date.now() - 5000);
+            if (siteTsEl && !siteTsEl.value) siteTsEl.value = siteTsVal;
+            formData.append('SiteTs', siteTsVal);
             formData.append('_hp', '');
             formData.append('Name', nameValue);
             formData.append('Phone', phoneValue);
@@ -2000,7 +2246,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             }
 
             if (!ORDER_SCRIPT_URL) {
-                alert('অর্ডার API সেটআপ করা হয়নি। site-api-config.js এ Apps Script URL দিন।');
+                checkoutAlert('অর্ডার API সেটআপ করা হয়নি। site-api-config.js এ Apps Script URL দিন।');
                 if (btn) {
                     btn.disabled = false;
                     btn.innerText = 'Place Order';
@@ -2072,8 +2318,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     window.addEventListener('DOMContentLoaded', function() {
         var tsEl = document.getElementById('orderSiteTs');
-        if (tsEl && window.MaSecurity && MaSecurity.getOrderFormTimestamp) {
-            tsEl.value = MaSecurity.getOrderFormTimestamp();
+        if (tsEl) {
+            tsEl.value = (window.MaSecurity && MaSecurity.getOrderFormTimestamp)
+                ? MaSecurity.getOrderFormTimestamp()
+                : String(Date.now());
         }
         displayOrder();
         persistCart();

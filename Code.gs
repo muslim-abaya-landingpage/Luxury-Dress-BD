@@ -121,7 +121,7 @@ function validateOrderInput_(e) {
 
   var siteTs = parseInt(param_(e, 'SiteTs'), 10);
   var ageMs = Date.now() - siteTs;
-  if (!siteTs || ageMs < 3500) throw new Error('TOO_FAST');
+  if (!siteTs || ageMs < 1200) throw new Error('TOO_FAST');
   if (ageMs > 30 * 60 * 1000) throw new Error('EXPIRED');
 
   var name = String(param_(e, 'Name') || '').replace(/\s+/g, ' ').trim();
@@ -202,14 +202,13 @@ function handleOnlineOrderPost_(e) {
     charge = districtChargeMap[validated.district] || 150;
   }
 
-  var row = sheet.getLastRow() + 1;
   var totalStr = String(validated.total);
   var payment = param_(e, 'PaymentMethod') || 'Cash On Delivery';
   var txn = (param_(e, 'TransactionID') || param_(e, 'SenderNumber') || '').trim();
   var notes = (param_(e, 'SpecialNotes') || '').trim();
   var district = param_(e, 'District') || validated.district || '';
 
-  sheet.getRange(row, 1, row, 17).setValues([[
+  appendRow_(sheet, [
     timestamp,
     validated.name,
     validated.phone,
@@ -227,8 +226,7 @@ function handleOnlineOrderPost_(e) {
     payment,
     txn,
     notes
-  ]]);
-  sheet.getRange(row, 3).setNumberFormat('@');
+  ]);
 
   try {
     sendToFacebookCAPI({
@@ -525,7 +523,7 @@ function steadfastSendActiveRow() {
     SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   var row = sheet.getActiveCell().getRow();
   if (row < 1) return;
-  var vals = sheet.getRange(row, 1, row, 17).getValues()[0];
+  var vals = sheet.getRange(row, 1, 1, 17).getValues()[0];
   var name = String(vals[1] || '').trim();
   var phone = normalizePhone_(vals[2]);
   var address = String(vals[5] || '').trim();
@@ -651,22 +649,7 @@ function updateOrderFromSteadfastWebhook_(payload) {
 }
 
 function getDistrictChargeMap_() {
-  return {
-    'ঢাকা': 80,
-    'গাজীপুর': 100, 'নারায়ণগঞ্জ': 100, 'নরসিংদী': 100, 'মুন্সীগঞ্জ': 100, 'মানিকগঞ্জ': 100,
-    'টাঙ্গাইল': 150, 'কিশোরগঞ্জ': 150, 'ময়মনসিংহ': 150, 'শেরপুর': 150, 'জামালপুর': 150, 'নেত্রকোনা': 150,
-    'মাদারীপুর': 150, 'রাজবাড়ী': 150, 'ফরিদপুর': 150, 'গোপালগঞ্জ': 150, 'শরীয়তপুর': 150,
-    'চট্টগ্রাম': 150, 'কুমিল্লা': 150, 'চাঁদপুর': 150, 'ফেনী': 150, 'ব্রাহ্মণবাড়িয়া': 150,
-    'নোয়াখালী': 150, 'লক্ষ্মীপুর': 150, 'কক্সবাজার': 150, 'খাগড়াছড়ি': 150, 'রাঙ্গামাটি': 150, 'বান্দরবান': 150,
-    'রাজশাহী': 150, 'নওগাঁ': 150, 'নাটোর': 150, 'চাঁপাইনবাবগঞ্জ': 150, 'পাবনা': 150, 'সিরাজগঞ্জ': 150,
-    'জয়পুরহাট': 150, 'বগুড়া': 150,
-    'রংপুর': 150, 'দিনাজপুর': 150, 'পঞ্চগড়': 150, 'নীলফামারী': 150, 'লালমনিরহাট': 150, 'কুড়িগ্রাম': 150,
-    'গাইবান্ধা': 150, 'ঠাকুরগাঁও': 150,
-    'সিলেট': 150, 'সুনামগঞ্জ': 150, 'হবিগঞ্জ': 150, 'মৌলভীবাজার': 150,
-    'খুলনা': 150, 'বাগেরহাট': 150, 'সাতক্ষীরা': 150, 'নড়াইল': 150, 'যশোর': 150, 'মাগুরা': 150,
-    'ঝিনাইদহ': 150, 'কুষ্টিয়া': 150, 'চুয়াডাঙ্গা': 150, 'মেহেরপুর': 150,
-    'বরিশাল': 150, 'পটুয়াখালী': 150, 'ভোলা': 150, 'বরগুনা': 150, 'ঝালকাঠি': 150, 'পিরোজপুর': 150
-  };
+  return { 'ঢাকা': 80 };
 }
 
 function sendToFacebookCAPI(data, eventID) {

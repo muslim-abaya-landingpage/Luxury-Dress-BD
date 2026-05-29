@@ -89,6 +89,11 @@ html, body {
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" media="print" onload="this.media='all'">
 </head>
 <body>
+<div id="localFileBanner" style="display:none;max-width:1180px;margin:10px auto 0;padding:10px 14px;background:#fff8e6;border:1px solid #e8c96a;border-radius:10px;font-size:13px;line-height:1.5;color:#5c4a12;text-align:center">
+    <strong>টেস্ট:</strong> ফাইল হিসেবে খোলা — ভিডিও/অর্ডার কাজ নাও করতে পারে। <strong>ADMIN-লোকাল-টেস্ট.bat</strong> চালিয়ে
+    <a href="http://localhost:5500/index.html" style="font-weight:700">localhost:5500</a> ব্যবহার করুন।
+</div>
+<script>(function(){if(location.protocol==='file:'){var b=document.getElementById('localFileBanner');if(b)b.style.display='block';}})();</script>
 <div id="site-header-mount"></div>
 <script defer src="site-header.js?v=20260603"></script>
 <style>
