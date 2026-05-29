@@ -1051,6 +1051,18 @@ function onGlobalShopCartClick(ev) {
   if (action === "buy-now") {
     var checkoutHref =
       typeof window.siteHref === "function" ? window.siteHref("/checkout") : "checkout.html";
+    var cartLines =
+      typeof loadStoreCart === "function" ? loadStoreCart({ readOnly: true }) : [];
+    if (!cartLines.length) {
+      alert("অনুগ্রহ করে অন্তত একটি পণ্য কার্টে যোগ করুন।");
+      return;
+    }
+    if (typeof flushStoreCartForCheckout === "function") {
+      flushStoreCartForCheckout(cartLines);
+    } else if (typeof persistStoreCart === "function") {
+      persistStoreCart(cartLines);
+      if (typeof markStoreCartSession === "function") markStoreCartSession();
+    }
     window.location.href = checkoutHref;
   }
 }
@@ -1418,6 +1430,28 @@ function getCategoryFallbackImage(categoryKey) {
   return fallbacks[categoryKey] || "images/Baby-Pink-Floral-Print.jpeg";
 }
 
+function isPrimaryHubProductName(name) {
+  var s = String(name || "").toLowerCase();
+  return (
+    s.indexOf(" - back") === -1 &&
+    s.indexOf("- back") === -1 &&
+    s.indexOf(" - side") === -1 &&
+    s.indexOf("- side") === -1
+  );
+}
+
+/** All Categories টাইল — category-products.js থেকে প্রথম মূল ছবি (অটো আপডেট) */
+function getCategoryHubImage(categoryKey) {
+  var list = (window.CATEGORY_PRODUCTS && window.CATEGORY_PRODUCTS[categoryKey]) || [];
+  for (var i = 0; i < list.length; i++) {
+    var p = list[i];
+    if (!p || !p.image || !isPrimaryHubProductName(p.name)) continue;
+    var img = resolveCardImageSrc(p);
+    if (img) return img;
+  }
+  return getCategoryFallbackImage(categoryKey);
+}
+
 function buildCardSpecsBlock(p, fabricText, sizeOptions, idx) {
   var lengthVal = p.detailNote ? String(p.detailNote).replace(/^লং:\s*/i, "").trim() : "";
   var chips =
@@ -1611,11 +1645,15 @@ function renderAllCategories() {
 
   root.className = "cat-hub-page";
 
+  if (typeof window.syncCatalogFromSections === "function") {
+    window.syncCatalogFromSections();
+  }
+
   var nav = window.CATEGORY_NAV || [];
 
   var tiles = nav.map(function (c) {
 
-    var img = c.image || "images/Baby-Pink-Floral-Print.jpeg";
+    var img = getCategoryHubImage(c.key) || c.image || "images/Baby-Pink-Floral-Print.jpeg";
 
     return (
 

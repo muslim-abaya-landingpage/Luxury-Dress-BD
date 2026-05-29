@@ -46,9 +46,15 @@
     if (!item || !item.name) return null;
     var qty = parseInt(item.quantity, 10);
     if (isNaN(qty) || qty < 1) return null;
-    var cat = item.id ? CATALOG.find(function (p) { return p.id === item.id; }) : findByName(item.name);
+    var lineId = String(item.id || "").trim();
+    var cat = lineId
+      ? CATALOG.find(function (p) {
+          return p.id === lineId;
+        })
+      : findByName(item.name);
+    if (!cat && item.name) cat = findByName(item.name);
     var line = {
-      id: item.id || (cat && cat.id) || "",
+      id: lineId || (cat && cat.id) || "",
       name: item.name,
       price: parseInt(item.price, 10) || (cat && cat.price) || 550,
       quantity: qty,
@@ -118,21 +124,33 @@
   function loadStoreCart(options) {
     var readOnly = options && options.readOnly === true;
     var keys = ["secured_checkout_cart", "category_cart_v2", "user_cart", "cart"];
-    for (var i = 0; i < keys.length; i++) {
-      var arr = parseStored(localStorage.getItem(keys[i]));
-      if (arr.length > 0) {
-        if (!readOnly) persistStoreCart(arr);
-        return arr;
+    var best = [];
+    var bestQty = 0;
+    keys.forEach(function (key) {
+      var arr = parseStored(localStorage.getItem(key));
+      var q = cartTotalQty(arr);
+      if (arr.length > best.length || (arr.length === best.length && q > bestQty)) {
+        best = arr;
+        bestQty = q;
       }
+    });
+    if (!best.length) {
+      try {
+        best = parseStored(sessionStorage.getItem("cart"));
+      } catch (e2) {}
     }
+    if (best.length > 0 && !readOnly) persistStoreCart(best);
+    return best;
+  }
+
+  function flushStoreCartForCheckout(lines) {
+    var normalized = normalizeArray(lines || []);
+    persistStoreCart(normalized);
+    markStoreCartSession();
     try {
-      var sess = parseStored(sessionStorage.getItem("cart"));
-      if (sess.length > 0) {
-        if (!readOnly) persistStoreCart(sess);
-        return sess;
-      }
-    } catch (e2) {}
-    return [];
+      sessionStorage.setItem("ma_checkout_cart_ts", String(Date.now()));
+    } catch (e) {}
+    return normalized;
   }
 
   function syncCartBadgeFromStore() {
@@ -199,6 +217,32 @@
     return persistStoreCart(list);
   }
 
+  /** Homepage cart object → checkout lines (all selected products + qty). */
+  function buildLinesFromHomeCart(cartObj, productList) {
+    var lines = [];
+    if (!cartObj || typeof cartObj !== "object" || !Array.isArray(productList)) {
+      return normalizeArray(lines);
+    }
+    Object.keys(cartObj).forEach(function (id) {
+      var qty = parseInt(cartObj[id], 10) || 0;
+      if (qty <= 0) return;
+      var p = productList.find(function (x) {
+        return x && x.id === id;
+      });
+      if (!p) return;
+      lines.push({
+        id: p.id,
+        name: p.name,
+        price: parseInt(p.price, 10) || 550,
+        quantity: qty,
+        image: p.img || p.image || "",
+        category: p.category || "",
+        categoryLabel: p.categoryLabel || ""
+      });
+    });
+    return normalizeArray(lines);
+  }
+
   global.STORE_CATALOG = CATALOG;
   global.loadStoreCart = loadStoreCart;
   global.syncCartBadgeFromStore = syncCartBadgeFromStore;
@@ -209,6 +253,8 @@
   global.homeCartObjectToArray = objectToArray;
   global.cartTotalQty = cartTotalQty;
   global.addOrMergeStoreCartItem = addOrMergeItem;
+  global.buildLinesFromHomeCart = buildLinesFromHomeCart;
+  global.flushStoreCartForCheckout = flushStoreCartForCheckout;
   global.findCatalogByName = findByName;
   global.resolveStoreItemImage = resolveItemImage;
 

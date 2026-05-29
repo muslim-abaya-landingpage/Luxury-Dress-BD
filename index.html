@@ -1255,7 +1255,7 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 
 <link rel="stylesheet" href="cart-drawer.css?v=20260528b">
-<script src="cart-utils.js?v=20260530d"></script>
+<script src="cart-utils.js?v=20260609"></script>
 <script src="cart-drawer.js?v=20260528b"></script>
 <script src="product-config.js?v=20260604"></script>
 <script src="product-utils.js?v=20260604"></script>
@@ -1344,8 +1344,15 @@ function buildProductsFromCatalog() {
                         return false;
                     });
                 }
+                var baseId = String(p.id || (key + '-' + out.length)).trim();
+                var uid = baseId;
+                var dupeN = 0;
+                while (out.some(function (x) { return x.id === uid; })) {
+                    dupeN += 1;
+                    uid = baseId + '-v' + dupeN;
+                }
                 out.push({
-                    id: String(p.id || (key + '-' + out.length)).trim(),
+                    id: uid,
                     name: String(p.name || 'Product').trim(),
                     img: img,
                     price: parseFloat(p.price) || 550,
@@ -1394,46 +1401,51 @@ function initHomeCartFromStorage() {
     var fresh = {};
     products.forEach(function (p) { fresh[p.id] = 0; });
 
-    var restore = false;
-    try { restore = sessionStorage.getItem(HOME_CART_SESSION_KEY) === '1'; } catch (e) {}
-
-    if (restore && typeof loadStoreCart === 'function') {
-        var lines = loadStoreCart();
+    var lines = typeof loadStoreCart === 'function' ? loadStoreCart({ readOnly: true }) : [];
+    if (lines.length) {
         lines.forEach(function (line) {
+            var qty = parseInt(line.quantity, 10) || 0;
+            if (qty <= 0) return;
             var match = products.find(function (p) {
-                return (line.id && p.id === line.id) || p.name === line.name;
+                return (line.id && p.id === line.id) ||
+                    (line.name && p.name && String(p.name).trim() === String(line.name).trim());
             });
-            if (match) fresh[match.id] = Math.max(0, parseInt(line.quantity, 10) || 0);
+            if (match) {
+                fresh[match.id] = (fresh[match.id] || 0) + qty;
+            }
         });
-        if (!lines.length) {
-            clearHomeCartSession();
-            if (typeof clearStoreCart === 'function') clearStoreCart();
-        }
-    } else if (typeof clearStoreCart === 'function') {
-        clearHomeCartSession();
-        clearStoreCart();
     }
     cart = fresh;
-    if (!homeCartHasItems()) {
+    if (homeCartHasItems()) {
+        markHomeCartActive();
+    } else {
+        clearHomeCartSession();
         if (typeof refreshCartBadgeUI === 'function') refreshCartBadgeUI([]);
         else if (typeof updateCartBadge === 'function') updateCartBadge([]);
     }
 }
 
+function getHomeCartLines() {
+    if (typeof buildLinesFromHomeCart === 'function') {
+        return buildLinesFromHomeCart(cart, products);
+    }
+    return products.map(function (p) {
+        var qty = getCartQty(p.id);
+        if (qty <= 0) return null;
+        return { id: p.id, name: p.name, price: p.price, quantity: qty, image: p.img };
+    }).filter(Boolean);
+}
+
 function syncHomeCartAfterChange() {
-    if (homeCartHasItems()) {
+    var arr = getHomeCartLines();
+    if (arr.length) {
         markHomeCartActive();
-        syncHomeCartToCheckout();
+        if (typeof persistStoreCart === 'function') persistStoreCart(arr);
     } else {
         clearHomeCartSession();
         if (typeof clearStoreCart === 'function') clearStoreCart();
     }
     if (typeof afterCartMutation === 'function') {
-        var arr = products.map(function (p) {
-            var qty = getCartQty(p.id);
-            if (qty <= 0) return null;
-            return { id: p.id, name: p.name, price: p.price, quantity: qty, image: p.img };
-        }).filter(Boolean);
         afterCartMutation(arr);
     }
 }
@@ -1479,12 +1491,7 @@ function addToCart(productId) {
 }
 function syncHomeCartToCheckout() {
     if (typeof persistStoreCart !== 'function') return;
-    var arr = products.map(function (p) {
-        var qty = parseInt(cart[p.id], 10) || 0;
-        if (qty <= 0) return null;
-        return { id: p.id, name: p.name, price: p.price, quantity: qty, image: p.img };
-    }).filter(Boolean);
-    persistStoreCart(arr);
+    persistStoreCart(getHomeCartLines());
 }
 function getCartQty(productId) {
     return parseInt(cart[productId], 10) || 0;
@@ -1507,12 +1514,31 @@ function toggleProductCart(productId) {
 function addProductSelection(productId) {
     toggleProductCart(productId);
 }
-function buyNowFromCard(productId) {
-    if (getCartQty(productId) < 1) cart[productId] = 1;
-    markHomeCartActive();
-    syncHomeCartToCheckout();
+function goToCheckoutPage() {
+    var lines = getHomeCartLines();
+    var pcs = 0;
+    lines.forEach(function (line) {
+        pcs += parseInt(line.quantity, 10) || 0;
+    });
+    if (!lines.length || !pcs) {
+        alert('অনুগ্রহ করে অন্তত একটি পণ্য কার্টে যোগ করুন।');
+        return;
+    }
+    if (typeof flushStoreCartForCheckout === 'function') {
+        flushStoreCartForCheckout(lines);
+    } else {
+        syncHomeCartToCheckout();
+        if (typeof markStoreCartSession === 'function') markStoreCartSession();
+    }
     trackInitiateCheckout();
-    window.location.href = 'checkout.html';
+    window.location.href = typeof window.siteHref === 'function' ? window.siteHref('/checkout') : 'checkout.html';
+}
+
+function buyNowFromCard(productId, ev) {
+    if (ev && ev.preventDefault) ev.preventDefault();
+    if (ev && ev.stopPropagation) ev.stopPropagation();
+    if (getCartQty(productId) < 1) cart[productId] = 1;
+    goToCheckoutPage();
 }
 function trackInitiateCheckout() {
     if (!checkoutTracked) {
@@ -1568,12 +1594,17 @@ card.innerHTML = `
             <span class="product-card-price">৳${p.price}</span>
         </div>
         <div class="product-actions-anzaar">
+            <div class="home-card-qty" style="display:${inCart ? 'flex' : 'none'};align-items:center;justify-content:center;gap:8px;margin-bottom:8px;">
+                <button type="button" class="qty-btn" onclick="event.stopPropagation();updateQty('${p.id}', -1)">−</button>
+                <span class="qty-input" style="min-width:28px;text-align:center;font-weight:700;">${qty}</span>
+                <button type="button" class="qty-btn" onclick="event.stopPropagation();updateQty('${p.id}', 1)">+</button>
+            </div>
             <div class="product-actions-row">
                 <button type="button" class="anzaar-btn anzaar-btn-cart${inCart ? ' is-active' : ''}"
-                    onclick="toggleProductCart('${p.id}')">
+                    onclick="event.stopPropagation();toggleProductCart('${p.id}')">
                     ${inCart ? 'Remove' : 'Add to Cart'}
                 </button>
-                <button type="button" class="anzaar-btn anzaar-btn-buy" onclick="buyNowFromCard('${p.id}')">Buy Now</button>
+                <button type="button" class="anzaar-btn anzaar-btn-buy" onclick="buyNowFromCard('${p.id}', event)">Buy Now</button>
             </div>
             <a href="https://wa.me/8801971642683?text=${encodeURIComponent(p.name + ' অর্ডার করতে চাই')}"
                 target="_blank" rel="noopener" class="anzaar-btn anzaar-btn-msg">Send Message</a>
@@ -1655,17 +1686,7 @@ function calc(syncCart) {
 }
 function goToCheckout(e) {
     if (e && e.preventDefault) e.preventDefault();
-    var q = 0;
-    products.forEach(function (p) {
-        q += getCartQty(p.id);
-    });
-    if (q === 0) {
-        alert('অনুগ্রহ করে অন্তত একটি পণ্য কার্টে যোগ করুন।');
-        return;
-    }
-    syncHomeCartToCheckout();
-    trackInitiateCheckout();
-    window.location.href = 'checkout.html';
+    goToCheckoutPage();
 }
 function openHomeCartDrawer() {
     var btn = document.querySelector('[data-cart-trigger]');

@@ -1056,11 +1056,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div id="site-header-mount"></div>
 <div class="container">
     <div class="checkout-page-head">
+        <nav class="checkout-breadcrumb" aria-label="Breadcrumb">
+            <a href="index.html">Home</a>
+        </nav>
         <h1>Checkout</h1>
         <p class="checkout-subtitle">Safe &amp; fast ordering — Cash on delivery available</p>
-        <nav class="checkout-breadcrumb" aria-label="Breadcrumb">
-            <a href="index.html">Home</a> <span aria-hidden="true">&rsaquo;</span> <span style="color:#f38120;font-weight:600;">Checkout</span>
-        </nav>
         <div class="checkout-trust" style="justify-content:center;">
             <span>Secure order</span>
             <span>COD available</span>
@@ -1319,7 +1319,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="site-api-health.js"></script>
 <script src="auth-config.js"></script>
 <script src="auth-api.js"></script>
-<script src="cart-utils.js?v=20260530d"></script>
+<script src="cart-utils.js?v=20260609"></script>
 <script defer src="site-header.js?v=20260602"></script>
 <script>
     const ORDER_SCRIPT_URL =
@@ -1488,6 +1488,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
 
     var cart = loadCart();
+    if (window.location.protocol === 'file:' || window.location.protocol === 'blob:') {
+        console.warn('Checkout: file:// এ কার্ট কখনও কখনও ভুল দেখাতে পারে। ADMIN-লোকাল-টেস্ট.bat → http://localhost:5500 ব্যবহার করুন।');
+    }
     var summaryDiv = document.getElementById('orderSummary');
     var areaSelect = document.getElementById('userArea');
 

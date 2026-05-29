@@ -18,15 +18,31 @@
       }
     });
 
-    var navFromSections = sections.map(function (sec) {
-      var list = g.CATEGORY_PRODUCTS[sec.key] || [];
-      var img = "images/Baby-Pink-Floral-Print.jpeg";
+    function isPrimaryName(name) {
+      var s = String(name || "").toLowerCase();
+      return (
+        s.indexOf(" - back") === -1 &&
+        s.indexOf("- back") === -1 &&
+        s.indexOf(" - side") === -1 &&
+        s.indexOf("- side") === -1
+      );
+    }
+
+    function hubImageForKey(key) {
+      var list = g.CATEGORY_PRODUCTS[key] || [];
       for (var i = 0; i < list.length; i++) {
-        if (list[i] && list[i].image) {
-          img = list[i].image;
-          break;
+        var p = list[i];
+        if (!p || !p.image || !isPrimaryName(p.name)) continue;
+        if (g.maCatalog && typeof g.maCatalog.resolveImageUrl === "function") {
+          return g.maCatalog.resolveImageUrl(p.image);
         }
+        return p.image;
       }
+      return "";
+    }
+
+    var navFromSections = sections.map(function (sec) {
+      var img = hubImageForKey(sec.key) || "images/Baby-Pink-Floral-Print.jpeg";
       return {
         key: sec.key,
         href: sec.path || "/" + sec.key,

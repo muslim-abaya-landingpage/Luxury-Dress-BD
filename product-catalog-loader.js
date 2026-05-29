@@ -10,4 +10,7 @@
 
   window.applyProductLinks = applyProductLinks;
   applyProductLinks();
+  if (typeof window.syncCatalogFromSections === "function") {
+    window.syncCatalogFromSections();
+  }
 })();
