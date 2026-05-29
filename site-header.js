@@ -1,5 +1,32 @@
 (function () {
   var GTM_ID = 'GTM-ML7RL6BR';
+  var SEO_VER = '20260531seo';
+
+  (function bootSiteSeo() {
+    if (window.__maSiteSeoBoot) return;
+    window.__maSiteSeoBoot = true;
+    function loadScript(src, next) {
+      var s = document.createElement('script');
+      s.src = src;
+      s.async = true;
+      s.onload = function () { if (next) next(); };
+      s.onerror = function () { if (next) next(); };
+      (document.head || document.documentElement).appendChild(s);
+    }
+    loadScript('site-seo-config.js?v=' + SEO_VER, function () {
+      loadScript('site-seo.js?v=' + SEO_VER, function () {
+        if (window.MaSiteSeo && typeof window.MaSiteSeo.apply === 'function') {
+          window.MaSiteSeo.apply();
+        }
+      });
+    });
+  })();
+
+  function getSocialUrl(key, fallback) {
+    var seo = window.SITE_SEO;
+    if (seo && seo.social && seo.social[key]) return seo.social[key];
+    return fallback;
+  }
 
   (function stripIndexHtmlFromUrl() {
     try {
@@ -218,9 +245,12 @@
   var ICON_CHEV_RIGHT =
     '<svg class="slider-arrow-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
 
-  var HEADER_HTML =
+  function buildHeaderHtml() {
+    var fbUrl = getSocialUrl('facebook', 'https://www.facebook.com/luxurydressofficial');
+    return (
     '<header class="abaya-main-header">' +
     '<div class="header-top-bar"><div class="custom-container"><div class="top-bar-content">' +
+    '<a href="' + fbUrl + '" target="_blank" rel="noopener noreferrer">Facebook</a> | ' +
     '<a href="/help">Help</a> | <a href="/signup">Sign Up</a> | <a href="/signin">Sign In</a>' +
     '</div></div></div>' +
     '<div class="header-middle-nav"><div class="custom-container nav-row">' +
@@ -259,7 +289,9 @@
     '<div class="menu-overlay" id="menuOverlay" onclick="window.toggleAbayaMenu()"></div>' +
     '<div class="mobile-nav-panel" id="mobileMenuPanel">' +
     '<div class="mobile-nav-top"><button type="button" onclick="window.toggleAbayaMenu()" style="background:none;border:none;font-size:26px;cursor:pointer">&times;</button></div>' +
-    '<ul></ul></div>';
+    '<ul></ul></div>'
+    );
+  }
 
   var annIdx = 0;
   var annTimer = null;
@@ -687,7 +719,7 @@
   function mountHeader() {
     var mount = document.getElementById('site-header-mount');
     if (!mount) return;
-    mount.innerHTML = HEADER_HTML;
+    mount.innerHTML = buildHeaderHtml();
     mount.querySelectorAll(".brand-logo-img[data-src]").forEach(function (img) {
       var link = img.closest(".brand-logo-link");
       img.src = siteAsset(img.getAttribute("data-src") || "assets/logo-muslim-abaya.svg");

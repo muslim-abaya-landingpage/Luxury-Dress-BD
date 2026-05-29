@@ -10,5 +10,7 @@ Disallow: /admin-dashboard.html
 Disallow: /admin-links.html
 Disallow: /product-manager.html
 Disallow: /product-links.html
+Disallow: /signin
+Disallow: /signup
 
 Sitemap: https://muslimabaya.com/sitemap.xml

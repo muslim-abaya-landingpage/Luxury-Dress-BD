@@ -1,4 +1,12 @@
 (function () {
+  var SEO = window.SITE_SEO || {};
+  var SOCIAL = SEO.social || {
+    facebook: "https://www.facebook.com/luxurydressofficial",
+    instagram: "https://www.instagram.com/luxurydressbd/",
+    youtube: "https://www.youtube.com/@luxurydressbd",
+    tiktok: "https://www.tiktok.com/@muslimabayabd"
+  };
+
   var CONTACT = {
     email: "muslimabeya@gmail.com",
     phone: "+880 1971-642683",
@@ -144,11 +152,25 @@
       '<p class="subscribe-success-text">আপনার তথ্য সংরক্ষিত হয়েছে। শীঘ্রই নতুন কালেকশন জানানো হবে।</p>' +
       "</div>" +
       "</form>" +
+      '<div class="anz-fb-follow">' +
+      '<p class="anz-fb-follow-title">Facebook পেজে ফলো করুন — নতুন কালেকশন ও অফার</p>' +
+      '<a href="' +
+      esc(SOCIAL.facebook) +
+      '" target="_blank" rel="noopener noreferrer" class="anz-fb-follow-btn">Facebook পেজ খুলুন</a>' +
+      "</div>" +
       '<div class="anz-socials">' +
-      '<a href="https://www.facebook.com/luxurydressofficial" target="_blank" rel="noopener" class="anz-social-link" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 16.9913 5.65684 21.1283 10.4375 21.8785V14.8906H7.89844V12H10.4375V9.79688C10.4375 7.29063 11.9305 5.90625 14.2146 5.90625C15.3082 5.90625 16.4531 6.10156 16.4531 6.10156V8.5625H15.1922C13.95 8.5625 13.5625 9.33333 13.5625 10.1242V12H16.3359L15.8926 14.8906H13.5625V21.8785C18.3432 21.1283 22 16.9913 22 12Z"/></svg></a>' +
-      '<a href="https://www.youtube.com/@luxurydressbd" target="_blank" rel="noopener" class="anz-social-link" aria-label="YouTube"><svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>' +
-      '<a href="https://www.instagram.com/luxurydressbd/" target="_blank" rel="noopener" class="anz-social-link" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>' +
-      '<a href="https://www.tiktok.com/@muslimabayabd" target="_blank" rel="noopener" class="anz-social-link" aria-label="TikTok"><svg viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.28-2.26.74-4.63 2.58-5.91 1.05-.72 2.3-1.13 3.55-1.14 1.25-.01 2.5.3 3.59 1.01.01-1.24-.01-2.48.01-3.72-1.02-.69-2.22-1.03-3.45-1.01-1.41.02-2.81.48-3.92 1.36-1.62 1.25-2.58 3.24-2.54 5.27.02 2.21 1.23 4.31 3.12 5.47 1.22.76 2.66 1.15 4.1 1.05 2.15-.08 4.17-1.33 5.18-3.23.51-.95.77-2.03.78-3.11.02-4.99-.01-9.98.02-14.97z"/></svg></a>' +
+      '<a href="' +
+      esc(SOCIAL.facebook) +
+      '" target="_blank" rel="noopener" class="anz-social-link" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 16.9913 5.65684 21.1283 10.4375 21.8785V14.8906H7.89844V12H10.4375V9.79688C10.4375 7.29063 11.9305 5.90625 14.2146 5.90625C15.3082 5.90625 16.4531 6.10156 16.4531 6.10156V8.5625H15.1922C13.95 8.5625 13.5625 9.33333 13.5625 10.1242V12H16.3359L15.8926 14.8906H13.5625V21.8785C18.3432 21.1283 22 16.9913 22 12Z"/></svg></a>' +
+      '<a href="' +
+      esc(SOCIAL.youtube) +
+      '" target="_blank" rel="noopener" class="anz-social-link" aria-label="YouTube"><svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>' +
+      '<a href="' +
+      esc(SOCIAL.instagram) +
+      '" target="_blank" rel="noopener" class="anz-social-link" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>' +
+      '<a href="' +
+      esc(SOCIAL.tiktok) +
+      '" target="_blank" rel="noopener" class="anz-social-link" aria-label="TikTok"><svg viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.28-2.26.74-4.63 2.58-5.91 1.05-.72 2.3-1.13 3.55-1.14 1.25-.01 2.5.3 3.59 1.01.01-1.24-.01-2.48.01-3.72-1.02-.69-2.22-1.03-3.45-1.01-1.41.02-2.81.48-3.92 1.36-1.62 1.25-2.58 3.24-2.54 5.27.02 2.21 1.23 4.31 3.12 5.47 1.22.76 2.66 1.15 4.1 1.05 2.15-.08 4.17-1.33 5.18-3.23.51-.95.77-2.03.78-3.11.02-4.99-.01-9.98.02-14.97z"/></svg></a>' +
       "</div>" +
       "</div>" +
       "</div>" +

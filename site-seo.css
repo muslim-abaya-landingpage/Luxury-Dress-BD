@@ -1,0 +1,98 @@
+/* Home + site-wide social connect (SEO / organic discovery) */
+.ma-social-connect {
+  max-width: 1180px;
+  margin: 32px auto 0;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+.ma-social-connect-inner {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2418 100%);
+  border: 1px solid rgba(201, 169, 98, 0.35);
+  border-radius: 16px;
+  padding: 28px 24px;
+  text-align: center;
+  color: #f5f0e6;
+  font-family: "Hind Siliguri", "Inter", sans-serif;
+}
+
+.ma-social-connect-inner h2 {
+  margin: 0 0 10px;
+  font-size: clamp(1.15rem, 3vw, 1.45rem);
+  font-weight: 700;
+  color: #fff;
+}
+
+.ma-social-connect-inner p {
+  margin: 0 0 20px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.82);
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.ma-social-connect-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.ma-social-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 22px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 15px;
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ma-social-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+.ma-social-btn-fb {
+  background: #1877f2;
+  color: #fff;
+}
+
+.ma-social-btn-ig {
+  background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+  color: #fff;
+}
+
+#site-footer-mount .anz-fb-follow {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#site-footer-mount .anz-fb-follow-title {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #e8dcc8;
+}
+
+#site-footer-mount .anz-fb-follow-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #1877f2;
+  color: #fff !important;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+#site-footer-mount .anz-fb-follow-btn:hover {
+  background: #166fe5;
+}
