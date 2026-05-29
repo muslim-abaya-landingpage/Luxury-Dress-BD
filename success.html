@@ -1,14 +1,16 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Successful - Muslim Abaya</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="site-header.css?v=20260530c">
-    <link rel="stylesheet" href="site-footer.css?v=20260530ft8" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="site-footer.css?v=20260530ft8"></noscript>
-<style>
+    <link rel="stylesheet" href="site-footer.css?v=20260530ft9" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="site-footer.css?v=20260530ft9"></noscript>
+    <style>
         :root { --primary-orange: #f16522; --success-green: #28a745; }
         body { 
             font-family: 'Hind Siliguri', sans-serif; 
@@ -76,22 +78,22 @@
 <div id="site-header-mount"></div>
 
 <div class="success-card">
-    <div class="icon-box">?</div>
-    <h1>?????? ??? ?????!</h1>
-    <p>????? ???????? ???? ??????? ??? ?????? ?????? ???? ????????? ????? ?????? ?????? ?? ??? ???????? ??????? ??????</p>
+    <div class="icon-box">&#10003;</div>
+    <h1>&#2437;&#2480;&#2509;&#2465;&#2494;&#2480; &#2488;&#2475;&#2482; &#2489;&#2527;&#2503;&#2459;&#2503;!</h1>
+    <p>&#2438;&#2474;&#2472;&#2494;&#2480; &#2437;&#2480;&#2509;&#2465;&#2494;&#2480;&#2463;&#2495; &#2438;&#2478;&#2480;&#2494; &#2474;&#2503;&#2527;&#2503;&#2459;&#2495;&#2404; &#2454;&#2497;&#2476; &#2486;&#2496;&#2456;&#2509;&#2480;&#2439; &#2438;&#2478;&#2494;&#2470;&#2503;&#2480; &#2447;&#2453;&#2460;&#2472; &#2474;&#2509;&#2480;&#2468;&#2495;&#2472;&#2495;&#2471;&#2495; &#2438;&#2474;&#2472;&#2494;&#2480; &#2478;&#2507;&#2476;&#2494;&#2439;&#2482; &#2472;&#2478;&#2509;&#2476;&#2480;&#2503; &#2453;&#2482; &#2453;&#2480;&#2503; &#2437;&#2480;&#2509;&#2465;&#2494;&#2480;&#2463;&#2495; &#2453;&#2472;&#2475;&#2494;&#2480;&#2509;&#2478; &#2453;&#2480;&#2476;&#2503;&#2472;&#2404;</p>
     
-    <div class="order-id">?????? ?????: #<span id="order-id-display"></span></div>
+    <div class="order-id">&#2437;&#2480;&#2509;&#2465;&#2494;&#2480; &#2472;&#2478;&#2509;&#2476;&#2480;: #<span id="order-id-display"></span></div>
     
     <br>
-    <a href="/" class="btn-home">???????? ?????? ???</a>
+    <a href="/" class="btn-home">&#2453;&#2503;&#2472;&#2494;&#2453;&#2494;&#2463;&#2494; &#2458;&#2494;&#2482;&#2495;&#2527;&#2503; &#2479;&#2494;&#2472;</a>
 </div>
 
 <script>
-    // ???????? ?????? ????? ??????? ??? (??????)
+    // ডাইনামিক অর্ডার নম্বর জেনারেট করা (ঐচ্ছিক)
     const randomID = Math.floor(100000 + Math.random() * 900000);
     document.getElementById('order-id-display').innerText = randomID;
 
-    // ?????? ??? ????? ?? ????? ???? ??? ?????
+    // অর্ডার সফল হওয়ার পর কার্ট খালি করে দেওয়া
     localStorage.removeItem('cart');
     localStorage.removeItem('user_cart');
     localStorage.removeItem('secured_checkout_cart');

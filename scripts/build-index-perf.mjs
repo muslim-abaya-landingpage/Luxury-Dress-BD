@@ -4,7 +4,7 @@ import fs from "fs";
 const SRC = "7721f89";
 const VER = "20260530sale";
 const FOOTER_JS = "site-footer.js?v=20260629post";
-const FOOTER_CSS = "site-footer.css?v=20260530ft8";
+const FOOTER_CSS = "site-footer.css?v=20260530ft9";
 
 function deferCss(href) {
   return (
@@ -47,24 +47,19 @@ html = html.replace(
     <link rel="stylesheet" href="site-header.css?v=20260531logo">`
 );
 html = html.replace(/site-footer\.css\?v=[^"]+/, `site-footer.css?v=${FOOTER_CSS}`);
-html = html.replace(/site-seo\.css\?v=[^"]+/, `site-seo.css?v=${VER}`);
+html = html.replace(/\s*<link rel="stylesheet" href="site-seo\.css[^>]+>\s*/g, "\n");
+html = html.replace(/site-seo\.js\?v=[^"]+/, "site-seo.js?v=20260601nosc");
 
 if (!html.includes("index-critical.css")) {
   html = html.replace(
-    `site-seo.css?v=${VER}">`,
-    `site-seo.css?v=${VER}">
+    `site-footer.css?v=${FOOTER_CSS}">`,
+    `site-footer.css?v=${FOOTER_CSS}">
     ${deferCss(`site-footer.css?v=${FOOTER_CSS}`)}
-    ${deferCss(`site-seo.css?v=${VER}`)}
     ${deferCss(`qty-stepper.css?v=${VER}`)}
     ${deferCss("cart-drawer.css?v=20260528b")}
     <link rel="stylesheet" href="index-critical.css?v=${VER}">
     <link rel="preload" href="index-home.css?v=${VER}" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="index-home.css?v=${VER}"></noscript>`
-  );
-  // site-seo was duplicated — remove blocking duplicate, keep deferred only
-  html = html.replace(
-    new RegExp(`<link rel="stylesheet" href="site-seo\\.css\\?v=${VER}">\\s*`),
-    ""
   );
   html = html.replace(
     new RegExp(`<link rel="stylesheet" href="site-footer\\.css\\?v=${FOOTER_CSS}">\\s*`),
@@ -105,7 +100,7 @@ if (videoMatch) {
   const videoBlock = videoMatch[0];
   html = html.replace(videoRe, "");
   html = html.replace(
-    /(<div id="ma-social-connect-mount">)/,
+    /(<div id="site-footer-mount">)/,
     videoBlock + "\n$1"
   );
 }
@@ -155,8 +150,8 @@ html = html.replace(
   '$1decoding="sync"'
 );
 
-// Defer non-critical CSS (footer, seo, cards)
-for (const base of ["site-footer", "site-seo", "index-home-cards"]) {
+// Defer non-critical CSS (footer, cards)
+for (const base of ["site-footer", "index-home-cards"]) {
   const re = new RegExp(
     `<link rel="stylesheet" href="${base}\\.css\\?v=[^"]+">\\s*`,
     "g"
@@ -174,12 +169,12 @@ html = html.replace(
   (m) => {
     if (html.includes("site-footer.css")) return m;
     return (
-      `${deferCss(`site-footer.css?v=${VER}`)}\n    ${deferCss(`site-seo.css?v=${VER}`)}\n    ${m}`
+      `${deferCss(`site-footer.css?v=${VER}`)}\n    ${m}`
     );
   }
 );
 
-// Sales sticky bar removed — footer flows directly after social connect
+// Sales sticky bar removed — footer flows directly after main content
 
 // Extract large inline catalog script
 const mainScriptRe =

@@ -123,12 +123,11 @@ out = out.replace(
   '<script defer src="site-footer.js'
 );
 
-// Footer mounts fix (ensure before video modal)
-if (!out.includes("ma-social-connect-mount")) {
+// Footer mount (no separate social follow strip)
+if (!out.includes("site-footer-mount")) {
   out = out.replace(
     /<div id="videoModal"/,
-    `<div id="ma-social-connect-mount"></div>
-<div id="site-footer-mount"></div>
+    `<div id="site-footer-mount"></div>
 
 <div id="videoModal"`
   );

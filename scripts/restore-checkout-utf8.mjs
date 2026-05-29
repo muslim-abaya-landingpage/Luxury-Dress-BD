@@ -38,6 +38,28 @@ function escapeBnJsStrings(block) {
   });
 }
 
+function applyCheckoutLocations(source) {
+  let html = source;
+  if (html.includes("checkout-locations.js")) return html;
+
+  html = html.replace(
+    /<input type="text" id="userThana" placeholder="Thana \/ Upazila">/,
+    '<select id="userThana">\n                        <option value="">Select upazila / thana</option>\n                    </select>'
+  );
+
+  html = html.replace(
+    /<script src="cart-utils\.js\?v=20260530"><\/script>/,
+    '<script src="cart-utils.js?v=20260530"></script>\n<script src="checkout-locations.js?v=20260630th"></script>'
+  );
+
+  html = html.replace(
+    /sel\.appendChild\(opt\);\s*\n\s*\}\);\s*\n\s*\}\)\(\);/,
+    "sel.appendChild(opt);\n        });\n        if (typeof window.refreshCheckoutThanaSelect === 'function') {\n            window.refreshCheckoutThanaSelect();\n        }\n    })();"
+  );
+
+  return html;
+}
+
 function applyProEmptyCartUi(source) {
   let html = source;
   if (html.includes("buildEmptyCartHtml")) return html;
@@ -235,6 +257,7 @@ html = html.replace(
 );
 
 html = applyProEmptyCartUi(html);
+html = applyCheckoutLocations(html);
 
 fs.writeFileSync("checkout.html", html, { encoding: "utf8" });
 
@@ -246,6 +269,14 @@ console.log("checkout.html Bengali chars:", bn, "???? blocks:", bad, "html entit
 if (bad > 0) process.exit(1);
 if (!out.includes("delivery-fee-hint") || !out.includes("\\u09")) {
   console.error("ASCII-safe district escapes missing");
+  process.exit(1);
+}
+if (!out.includes("checkout-locations-data.js")) {
+  console.error("Checkout location data embed missing");
+  process.exit(1);
+}
+if (!out.includes("checkout-locations.js")) {
+  console.error("Checkout location select missing");
   process.exit(1);
 }
 if (!out.includes("buildEmptyCartHtml")) {

@@ -351,10 +351,10 @@ card.innerHTML = `
             <span class="product-card-price">${"\u09F3"}${p.price}</span>
         </div>
         <div class="product-actions-anzaar">
-            <div class="home-card-qty" style="display:${inCart ? 'flex' : 'none'};align-items:center;justify-content:center;gap:8px;margin-bottom:8px;">
-                <button type="button" class="qty-btn" aria-label="পরিমাণ কমান" onclick="event.stopPropagation();updateQty('${p.id}', -1)">−</button>
-                <span class="qty-input" style="min-width:28px;text-align:center;font-weight:700;">${qty}</span>
-                <button type="button" class="qty-btn" aria-label="পরিমাণ বাড়ান" onclick="event.stopPropagation();updateQty('${p.id}', 1)">+</button>
+            <div class="ma-qty-stepper home-card-qty${inCart ? " is-visible" : ""}" role="group" aria-label="Quantity">
+                <button type="button" class="ma-qty-stepper__btn" aria-label="পরিমাণ কমান"${qty <= 1 ? " disabled" : ""} onclick="event.stopPropagation();updateQty('${p.id}', -1)">−</button>
+                <span class="ma-qty-stepper__value" id="qty-${p.id}" aria-live="polite">${qty}</span>
+                <button type="button" class="ma-qty-stepper__btn" aria-label="পরিমাণ বাড়ান" onclick="event.stopPropagation();updateQty('${p.id}', 1)">+</button>
             </div>
             <div class="product-actions-row">
                 <button type="button" class="anzaar-btn anzaar-btn-cart${inCart ? ' is-active' : ''}"
@@ -465,7 +465,10 @@ function updateQty(id, val) {
     clearInterval(autoSlideInterval); 
     
     const qtyInput = document.getElementById(`qty-${id}`);
-    if (qtyInput) qtyInput.value = cart[id];
+    if (qtyInput) {
+        if ("value" in qtyInput) qtyInput.value = cart[id];
+        else qtyInput.textContent = cart[id];
+    }
     
     if (getCartQty(id) > 0) {
         let productIndex = products.findIndex(p => p.id === id);

@@ -108,13 +108,13 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   display: none;
 }
 
-/* Copyright strip — 2in tall, full width, text vertically centered */
+/* Copyright strip — 0.5in tall, full width, text vertically centered */
 .anz-footer-strip,
 .anz-bottom.anz-footer-strip,
 #site-footer-mount .anz-bottom.anz-footer-strip {
-  height: 2in;
-  min-height: 2in;
-  max-height: 2in;
+  height: 0.5in;
+  min-height: 0.5in;
+  max-height: 0.5in;
   width: 100%;
   max-width: 100%;
   margin: 0;
@@ -606,9 +606,9 @@ a.anz-contact-link:hover {
   .anz-footer-strip,
   .anz-bottom.anz-footer-strip,
   #site-footer-mount .anz-bottom.anz-footer-strip {
-    height: 2in;
-    min-height: 2in;
-    max-height: 2in;
+    height: 0.5in;
+    min-height: 0.5in;
+    max-height: 0.5in;
     padding: 0 14px;
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }

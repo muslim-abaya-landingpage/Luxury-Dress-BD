@@ -243,31 +243,6 @@
       .replace(/"/g, "&quot;");
   }
 
-  function injectSocialConnectBlock() {
-    var mount = document.getElementById("ma-social-connect-mount");
-    if (!mount || mount.getAttribute("data-filled") === "1") return;
-    var fb = SOCIAL.facebook;
-    if (!fb) return;
-    mount.setAttribute("data-filled", "1");
-    mount.innerHTML =
-      '<section class="ma-social-connect ma-footer-strip" aria-label="আমাদের সাথে যুক্ত থাকুন">' +
-      '<div class="ma-social-connect-inner">' +
-      '<div class="ma-strip-copy">' +
-      "<strong>Facebook ও Instagram</strong>" +
-      "<span>নতুন কালেকশন ও অফার — ফলো করুন</span>" +
-      "</div>" +
-      '<div class="ma-social-connect-actions">' +
-      '<a class="ma-social-btn ma-social-btn-fb" href="' +
-      escHtml(fb) +
-      '" target="_blank" rel="noopener noreferrer">Facebook</a>' +
-      (SOCIAL.instagram
-        ? '<a class="ma-social-btn ma-social-btn-ig" href="' +
-          escHtml(SOCIAL.instagram) +
-          '" target="_blank" rel="noopener noreferrer">Instagram</a>'
-        : "") +
-      "</div></div></section>";
-  }
-
   function apply() {
     var path = normalizePath(global.location && global.location.pathname);
     var info = resolvePageMeta();
@@ -278,7 +253,7 @@
     }
 
     if (path === "/") {
-      injectSocialConnectBlock();
+      /* Social follow strip removed — footer newsletter icons are enough */
     }
 
     global.__maSiteSeoApplied = true;

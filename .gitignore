@@ -4,3 +4,9 @@ desktop.ini
 *.log
 .env
 .env.*
+
+# Dependencies
+node_modules/
+
+# Local cache / scratch
+.cache/

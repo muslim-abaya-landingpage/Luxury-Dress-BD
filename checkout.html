@@ -12,7 +12,7 @@
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
     <link rel="stylesheet" href="site-header.css?v=20260530c">
-    <link rel="stylesheet" href="site-footer.css?v=20260530ft8">
+    <link rel="stylesheet" href="site-footer.css?v=20260530ft9">
     <style>
         :root {
             --ink: #111111;
@@ -1298,7 +1298,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 </div>
                 <div class="form-group form-group-last">
                     <label for="userThana">Thana / Upazila <span style="font-size:13px;font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0;">(Optional)</span></label>
-                    <input type="text" id="userThana" placeholder="Thana / Upazila">
+                    <select id="userThana">
+                        <option value="">Select upazila / thana</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -1509,6 +1511,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="auth-config.js"></script>
 <script src="auth-api.js"></script>
 <script src="cart-utils.js?v=20260530"></script>
+<script src="checkout-locations.js?v=20260630th"></script>
 <script defer src="site-header.js?v=20260531nav"></script>
 <script>
     const ORDER_SCRIPT_URL =
@@ -1860,6 +1863,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             opt.textContent = name === '\u09a2\u09be\u0995\u09be' ? name + ' (\u09f380)' : name;
             sel.appendChild(opt);
         });
+        if (typeof window.refreshCheckoutThanaSelect === 'function') {
+            window.refreshCheckoutThanaSelect();
+        }
     })();
 
     function loadCart() {
