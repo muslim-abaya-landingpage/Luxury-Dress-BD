@@ -637,12 +637,6 @@
     }
   }
 
-  function isHomePage() {
-    var path = window.location.pathname || '/';
-    var file = path.split('/').pop() || '';
-    return file === '' || file.toLowerCase() === 'index.html';
-  }
-
   function syncSiteHeaderOffset() {
     var mount = document.getElementById('site-header-mount');
     if (!mount) return;
@@ -757,9 +751,7 @@
     });
     fixHeaderLinks(mount);
     document.body.classList.add('global-layout');
-    if (!isHomePage()) {
-      document.body.classList.add('has-sticky-header');
-    }
+    document.body.classList.add('has-sticky-header');
     if (typeof syncCartBadgeFromStore === "function") {
       syncCartBadgeFromStore();
     } else {
