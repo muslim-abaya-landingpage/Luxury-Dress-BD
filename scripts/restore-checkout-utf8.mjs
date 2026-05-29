@@ -38,6 +38,107 @@ function escapeBnJsStrings(block) {
   });
 }
 
+function applyProEmptyCartUi(source) {
+  let html = source;
+  if (html.includes("buildEmptyCartHtml")) return html;
+
+  html = html.replace(
+    /\.empty-cart-msg \{[\s\S]*?\}\n        \.empty-cart-msg a \{[\s\S]*?\}/,
+    `        .empty-cart-msg {
+            text-align: center;
+            padding: 22px 18px;
+            background: #fafafa;
+            border-radius: 12px;
+            border: 1px solid var(--line);
+            color: var(--ink-soft);
+        }
+        .empty-cart-title {
+            margin: 0 0 6px;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--ink);
+            letter-spacing: -0.01em;
+        }
+        .empty-cart-desc {
+            margin: 0 0 16px;
+            font-size: 13px;
+            line-height: 1.55;
+            color: var(--muted);
+            max-width: 360px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .empty-cart-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        .empty-cart-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 38px;
+            padding: 0 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        }
+        .empty-cart-btn-primary {
+            background: var(--ink);
+            color: #fff;
+            border: 1px solid var(--ink);
+        }
+        .empty-cart-btn-primary:hover {
+            background: #333;
+            border-color: #333;
+        }
+        .empty-cart-btn-ghost {
+            background: #fff;
+            color: var(--ink);
+            border: 1px solid var(--line);
+        }
+        .empty-cart-btn-ghost:hover {
+            border-color: #bbb;
+            background: #fff;
+        }`
+  );
+
+  const buildFn = `
+    function buildEmptyCartHtml() {
+        return (
+            '<div class="empty-cart-msg">' +
+            '<p class="empty-cart-title">' + '\\u0995\\u09BE\\u09B0\\u09CD\\u099F\\u09C7 \\u098F\\u0996\\u09A8\\u09CB \\u0995\\u09CB\\u09A8\\u09CB \\u09AA\\u09A3\\u09CD\\u09AF \\u09A8\\u09C7\\u0987' + '</p>' +
+            '<p class="empty-cart-desc">' + '\\u0986\\u09AC\\u09BE\\u09AF\\u09BC\\u09BE \\u0995\\u09BE\\u09B2\\u09C7\\u0995\\u09B6\\u09A8 \\u09A5\\u09C7\\u0995\\u09C7 \\u09AA\\u099B\\u09A8\\u09CD\\u09A6\\u09C7\\u09B0 \\u09AA\\u09A3\\u09CD\\u09AF \\u09AF\\u09CB\\u09A7 \\u0995\\u09B0\\u09C1\\u09A8\\u0964 \\u0995\\u09CD\\u09AF\\u09BE\\u09B6 \\u0985\\u09A8 \\u09A1\\u09C7\\u09B2\\u09BF\\u09AD\\u09BE\\u09B0\\u09BF\\u09A4\\u09C7 \\u0985\\u09B0\\u09A1\\u09BE\\u09B0 \\u0995\\u09B0\\u09C1\\u09A8\\u0964' + '</p>' +
+            '<div class="empty-cart-actions">' +
+            '<a href="' + pageLink('/category') + '" class="empty-cart-btn empty-cart-btn-primary">' + '\\u0995\\u09BE\\u09B2\\u09C7\\u0995\\u09B6\\u09A8 \\u09A6\\u09C7\\u0996\\u09C1\\u09A8' + '</a>' +
+            '<a href="' + pageLink('/') + '" class="empty-cart-btn empty-cart-btn-ghost">' + '\\u09B9\\u09CB\\u09AE\\u09C7 \\u09AB\\u09BF\\u09B0\\u09C7 \\u09AF\\u09BE\\u09A8' + '</a>' +
+            '</div></div>'
+        );
+    }
+`;
+
+  html = html.replace(
+    /function displayOrder\(\) \{\s*if \(!summaryDiv\) return;\s*\n\s*if \(cart\.length === 0\) \{\s*summaryDiv\.innerHTML = [\s\S]*?return;\s*\}/,
+    buildFn +
+      `
+    function displayOrder() {
+        if (!summaryDiv) return;
+        
+        if (cart.length === 0) {
+            summaryDiv.innerHTML = buildEmptyCartHtml();`
+  );
+
+  html = html.replace(
+    /return false;">Clear cart<\/a>/g,
+    'return false;">\\u0995\\u09BE\\u09B0\\u09CD\\u099F \\u0996\\u09BE\\u09B2\\u09BF \\u0995\\u09B0\\u09C1\\u09A8</a>'
+  );
+
+  return html;
+}
+
 let html = execSync(`git show ${SRC}:checkout.html`, {
   encoding: "utf8",
   maxBuffer: 20 * 1024 * 1024,
@@ -133,6 +234,8 @@ html = html.replace(
   (block) => escapeBnJsStrings(block)
 );
 
+html = applyProEmptyCartUi(html);
+
 fs.writeFileSync("checkout.html", html, { encoding: "utf8" });
 
 const out = fs.readFileSync("checkout.html", "utf8");
@@ -143,5 +246,9 @@ console.log("checkout.html Bengali chars:", bn, "???? blocks:", bad, "html entit
 if (bad > 0) process.exit(1);
 if (!out.includes("delivery-fee-hint") || !out.includes("\\u09")) {
   console.error("ASCII-safe district escapes missing");
+  process.exit(1);
+}
+if (!out.includes("buildEmptyCartHtml")) {
+  console.error("Pro empty cart UI missing");
   process.exit(1);
 }
