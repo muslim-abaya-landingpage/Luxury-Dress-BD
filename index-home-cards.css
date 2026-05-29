@@ -1,14 +1,42 @@
-/* Homepage product sidebar cards — pro grid, full width in column */
+/* Homepage — hero fills left; product list column fixed 5in */
+
+#premium-collection.display-area {
+  padding: 4px !important;
+  gap: 10px !important;
+  box-sizing: border-box;
+}
+
+#premium-collection .big-view {
+  padding: 0 !important;
+  margin: 0 !important;
+  background: #f7f7f7;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+#premium-collection #view {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 360px;
+  max-height: min(82vh, 900px);
+  object-fit: cover !important;
+  object-position: center top;
+  display: block;
+  border-radius: 8px;
+  background: #f7f7f7;
+}
 
 #premium-collection .product-list-sidebar {
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 12px !important;
-  width: 100% !important;
-  max-width: 100% !important;
+  gap: 8px !important;
+  width: 5in !important;
+  max-width: 5in !important;
+  min-width: 0;
   padding: 0 !important;
   box-sizing: border-box;
   align-content: start;
+  flex: 0 0 5in;
 }
 
 #premium-collection .item-card {
@@ -152,12 +180,36 @@
 
 @media (min-width: 1024px) {
   #premium-collection.display-area {
-    grid-template-columns: minmax(0, 1.15fr) minmax(320px, 420px) !important;
-    gap: 16px !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 5in !important;
+    gap: 12px !important;
+    align-items: start;
+  }
+
+  #premium-collection .big-view {
+    width: 100%;
+    min-height: 480px;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
   }
 
   #premium-collection .product-list-sidebar {
+    width: 5in !important;
+    max-width: 5in !important;
+    min-width: 5in !important;
+    max-height: 78vh;
+    overflow-y: auto;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  #premium-collection .product-list-sidebar {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    flex: none !important;
   }
 }
 

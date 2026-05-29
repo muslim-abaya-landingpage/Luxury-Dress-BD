@@ -1331,21 +1331,22 @@ html, body {
 /* Full product photos — main slider + grid (override older crop rules) */
 #premium-collection .big-view {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #fafafa;
-    padding: 8px;
+    align-items: stretch;
+    justify-content: stretch;
+    background: #f7f7f7;
+    padding: 0;
     box-sizing: border-box;
 }
 
 #premium-collection #view {
     width: 100%;
     max-width: 100%;
-    height: auto;
+    height: 100%;
+    min-height: 360px;
     max-height: min(82vh, 900px);
     aspect-ratio: auto;
-    object-fit: contain;
-    object-position: center center;
+    object-fit: cover;
+    object-position: center top;
 }
 
 #premium-collection .home-product-thumb,
@@ -1383,8 +1384,8 @@ html, body {
     #premium-collection.display-area {
         display: grid !important;
         flex-direction: unset !important;
-        grid-template-columns: minmax(0, 1.2fr) minmax(400px, 1fr);
-        gap: 20px;
+        grid-template-columns: minmax(0, 1fr) 5in;
+        gap: 12px;
         align-items: start;
     }
     #premium-collection .big-view {
@@ -1393,13 +1394,14 @@ html, body {
         order: 0;
     }
     #premium-collection .product-list-sidebar {
-        width: 100% !important;
-        max-width: 100% !important;
+        width: 5in !important;
+        max-width: 5in !important;
+        min-width: 5in !important;
         max-height: 78vh;
         overflow-y: auto;
-        padding-right: 4px;
+        padding-right: 2px;
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 12px !important;
+        gap: 8px !important;
         order: 1;
         flex-direction: unset !important;
     }
