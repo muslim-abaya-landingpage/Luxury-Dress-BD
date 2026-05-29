@@ -28,6 +28,7 @@
   }
 
   function writeCache(ok, detail) {
+    if (!ok && detail === "NETWORK") return;
     try {
       sessionStorage.setItem(
         CACHE_KEY,
@@ -58,12 +59,17 @@
         return res.text();
       })
       .then(function (text) {
-        if (text.indexOf("Muslim Abaya API OK") !== -1) {
+        var t = String(text || "");
+        if (
+          t.indexOf("Muslim Abaya API OK") !== -1 ||
+          t.indexOf("API OK") !== -1 ||
+          (t.indexOf('"ok":true') !== -1 && t.indexOf("Subscribed") === -1)
+        ) {
           var ok = { ok: true, message: "API ঠিক আছে।" };
           writeCache(true, "");
           return ok;
         }
-        if (text.indexOf("doGet") !== -1) {
+        if (t.indexOf("doGet") !== -1) {
           var err = {
             ok: false,
             error: "NO_DOGET",

@@ -78,14 +78,14 @@ html {
   gap: 8px;
 }
 
-/* Logo | centered menu | icons — avoids menu crushed to the right */
+/* Logo | centered menu | icons — menu must not bleed under search/cart icons */
 @media (min-width: 1024px) {
   .header-middle-nav .custom-container.nav-row,
   .header-middle-nav .nav-row.custom-container {
     display: grid;
-    grid-template-columns: minmax(120px, auto) minmax(0, 1fr) auto;
+    grid-template-columns: minmax(100px, auto) minmax(0, 1fr) minmax(156px, max-content);
     align-items: center;
-    column-gap: 12px;
+    column-gap: 10px;
     row-gap: 8px;
     padding: 10px 12px;
     justify-content: unset;
@@ -93,6 +93,7 @@ html {
 
   .brand-text-logo {
     justify-self: start;
+    min-width: 0;
   }
 
   .desktop-menu {
@@ -102,7 +103,9 @@ html {
     min-width: 0;
     width: 100%;
     max-width: 100%;
-    overflow: visible;
+    overflow: hidden;
+    box-sizing: border-box;
+    padding-right: 4px;
   }
 
   .desktop-menu ul {
@@ -110,8 +113,11 @@ html {
     justify-content: center;
     align-content: center;
     row-gap: 6px;
-    column-gap: 8px;
+    column-gap: 6px;
     max-width: 100%;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
   }
 
   .desktop-menu ul li a {
@@ -124,6 +130,26 @@ html {
 
   .nav-icons {
     justify-self: end;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 4;
+    background: #fff;
+    padding-left: 10px;
+    margin-left: 2px;
+    box-shadow: -10px 0 10px 0 #fff;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1319px) {
+  .desktop-menu ul li a {
+    font-size: 10px;
+    letter-spacing: 0.2px;
+    padding: 2px 3px;
+  }
+
+  .desktop-menu ul {
+    column-gap: 5px;
+    row-gap: 4px;
   }
 }
 

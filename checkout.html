@@ -12,7 +12,7 @@
     <link rel="canonical" href="https://muslimabaya.com/checkout">
     <title>Checkout - Muslim Abaya | muslimabaya.com</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="site-header.css">
+    <link rel="stylesheet" href="site-header.css?v=20260610">
     <link rel="stylesheet" href="site-footer.css">
     <style>
         :root {
@@ -1316,7 +1316,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <script src="site-security.js"></script>
 <script src="site-api-config.js?v=20260529"></script>
-<script src="site-api-health.js"></script>
+<script src="site-api-health.js?v=20260610"></script>
 <script src="auth-config.js"></script>
 <script src="auth-api.js"></script>
 <script src="cart-utils.js?v=20260609"></script>
@@ -1371,35 +1371,53 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         window.location.href = pageLink('/thank-you');
     }
 
-    function postOrderToSheet(formData, nameValue, phoneValue, emailValue, gTotal, btn) {
+    function resetOrderButton(btn) {
+        if (!btn) return;
+        btn.disabled = false;
+        btn.innerText = 'Place Order';
+    }
+
+    function offerWhatsAppOrder(orderWa, reason) {
+        var msg =
+            (reason || 'অর্ডার পাঠানো যায়নি।') +
+            '\n\nWhatsApp এ অর্ডার পাঠাবেন? (Sheet এ না গেলেও অর্ডার হারাবে না)';
+        if (confirm(msg)) {
+            window.open(getWhatsAppOrderLink(orderWa), '_blank', 'noopener');
+        }
+    }
+
+    function postOrderToSheet(formData, nameValue, phoneValue, emailValue, gTotal, btn, orderWa) {
         fetch(ORDER_SCRIPT_URL, {
             method: 'POST',
             body: formData,
             mode: 'cors',
-            credentials: 'omit'
+            credentials: 'omit',
+            cache: 'no-store'
         })
-            .then(function (res) { return res.text(); })
-            .then(function (text) {
-                if (text.indexOf('Success') !== 0) {
-                    var msg = text.indexOf('Error|') === 0
-                        ? text.slice(6)
-                        : 'অর্ডার পাঠানো যায়নি। আবার চেষ্টা করুন বা WhatsApp এ যোগাযোগ করুন।';
-                    alert(msg);
-                    if (btn) {
-                        btn.disabled = false;
-                        btn.innerText = 'Place Order';
-                    }
+            .then(function (res) {
+                return res.text().then(function (text) {
+                    return { ok: res.ok, text: text };
+                });
+            })
+            .then(function (result) {
+                var text = String(result.text || '').trim();
+                if (text.indexOf('Success') === 0) {
+                    var orderId = text.indexOf('|') !== -1 ? text.split('|')[1].trim() : '';
+                    finishCheckoutSuccess(nameValue, phoneValue, emailValue, gTotal, orderId);
                     return;
                 }
-                var orderId = text.indexOf('|') !== -1 ? text.split('|')[1].trim() : '';
-                finishCheckoutSuccess(nameValue, phoneValue, emailValue, gTotal, orderId);
+                var msg = text.indexOf('Error|') === 0
+                    ? text.slice(6).trim()
+                    : (text ? text.slice(0, 160) : 'অর্ডার Sheet এ জমা হয়নি।');
+                offerWhatsAppOrder(orderWa, msg);
+                resetOrderButton(btn);
             })
             .catch(function () {
-                alert('Connection error. Please try again or use WhatsApp.');
-                if (btn) {
-                    btn.disabled = false;
-                    btn.innerText = 'Place Order';
-                }
+                offerWhatsAppOrder(
+                    orderWa,
+                    'API সংযোগ ব্যর্থ। ইন্টারনেট চেক করুন অথবা Apps Script Deploy (Anyone) দেখুন।'
+                );
+                resetOrderButton(btn);
             });
     }
     const MAX_PRODUCT_SLOTS = 20;
@@ -1926,21 +1944,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 products: productsLabel()
             };
 
-            var healthCheck = typeof checkSiteApiHealth === 'function'
-                ? checkSiteApiHealth(true)
-                : Promise.resolve({ ok: true });
-
-            healthCheck.then(function (health) {
-                if (!health.ok) {
-                    if (confirm(
-                        (health.message || 'API এখন কাজ করছে না।') +
-                        '\n\nWhatsApp এ অর্ডার পাঠাবেন? (Sheet ঠিক না থাকলেও অর্ডার হারাবে না)'
-                    )) {
-                        window.open(getWhatsAppOrderLink(orderWa), '_blank', 'noopener');
-                    }
-                }
-                postOrderToSheet(formData, nameValue, phoneValue, emailValue, gTotal, btn);
-            });
+            postOrderToSheet(formData, nameValue, phoneValue, emailValue, gTotal, btn, orderWa);
         });
     }
 
