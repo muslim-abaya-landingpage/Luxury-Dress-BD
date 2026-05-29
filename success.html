@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
@@ -6,7 +6,7 @@
     <title>Order Successful - Muslim Abaya</title>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="site-header.css?v=20260530c">
-    <link rel="stylesheet" href="site-footer.css?v=20260531wa">
+    <link rel="stylesheet" href="site-footer.css?v=20260531ft">
     <style>
         :root { --primary-orange: #f16522; --success-green: #28a745; }
         body { 
@@ -75,30 +75,30 @@
 <div id="site-header-mount"></div>
 
 <div class="success-card">
-    <div class="icon-box">✓</div>
-    <h1>অর্ডার সফল হয়েছে!</h1>
-    <p>আপনার অর্ডারটি আমরা পেয়েছি। খুব শীঘ্রই আমাদের একজন প্রতিনিধি আপনার মোবাইল নম্বরে কল করে অর্ডারটি কনফার্ম করবেন।</p>
+    <div class="icon-box">?</div>
+    <h1>?????? ??? ?????!</h1>
+    <p>????? ???????? ???? ??????? ??? ?????? ?????? ???? ????????? ????? ?????? ?????? ?? ??? ???????? ??????? ??????</p>
     
-    <div class="order-id">অর্ডার নম্বর: #<span id="order-id-display"></span></div>
+    <div class="order-id">?????? ?????: #<span id="order-id-display"></span></div>
     
     <br>
-    <a href="/" class="btn-home">কেনাকাটা চালিয়ে যান</a>
+    <a href="/" class="btn-home">???????? ?????? ???</a>
 </div>
 
 <script>
-    // ডাইনামিক অর্ডার নম্বর জেনারেট করা (ঐচ্ছিক)
+    // ???????? ?????? ????? ??????? ??? (??????)
     const randomID = Math.floor(100000 + Math.random() * 900000);
     document.getElementById('order-id-display').innerText = randomID;
 
-    // অর্ডার সফল হওয়ার পর কার্ট খালি করে দেওয়া
+    // ?????? ??? ????? ?? ????? ???? ??? ?????
     localStorage.removeItem('cart');
     localStorage.removeItem('user_cart');
     localStorage.removeItem('secured_checkout_cart');
     sessionStorage.removeItem('cart');
 </script>
 <div id="site-footer-mount"></div>
-<script defer src="site-header.js?v=20260531nav"></script>
+<script defer src="site-header.js?v=20260531perf"></script>
 <script src="site-api-config.js?v=20260529"></script>
-<script src="site-footer.js?v=20260531wa"></script>
+<script src="site-footer.js?v=20260531fb1"></script>
 </body>
 </html>

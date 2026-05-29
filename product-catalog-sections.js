@@ -3,7 +3,8 @@
  * product-links-data.js ও category-products.js এ একই ক্রম (①→⑧)
  *
  * enabled: true  → মেনুতে লিংক + হোম/All Categories-এ দেখাবে
- * enabled: false → মেনুতে শুধু নাম (Coming soon), লিংক নেই — প্রোডাক্ট সেটআপ后 true করুন
+ * enabled: false → প্রোডাক্ট না থাকলে মেনুতে ধূসর (Coming soon)
+ * প্রোডাক্ট যোগ (category-products.js) করলে enabled:false হলেও মেনু অটো সক্রিয় হবে
  */
 window.CATALOG_SECTIONS = [
   {

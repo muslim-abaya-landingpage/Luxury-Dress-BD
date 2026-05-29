@@ -8,16 +8,66 @@ html.category-ready #list {
   visibility: visible;
 }
 
+:root {
+  --font-product-en: "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-ui-mixed: "Hind Siliguri", "Inter", system-ui, sans-serif;
+}
+
 body.shop-page {
   margin: 0;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   background: #f7f7f7;
-  font-family: "Inter", "Hind Siliguri", system-ui, sans-serif;
+  font-family: var(--font-ui-mixed);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+}
+
+/* প্রোডাক্টের ইংরেজি নাম/লেবেল — স্পষ্ট ল্যাটিন ফন্ট */
+body.shop-page :lang(en),
+body.shop-page [lang="en"] {
+  font-family: var(--font-product-en);
+  font-variant-ligatures: none;
+  font-feature-settings: "kern" 1, "liga" 0;
+  letter-spacing: 0.02em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body.shop-page .card-title-text,
+body.shop-page .pqv-title,
+body.shop-page .pqv-related-name,
+body.shop-page .pqv-price,
+body.shop-page .pqv-related-price,
+body.shop-page .premium-card .card-price,
+body.shop-page .pqv-opt-btn,
+body.shop-page .pqv-type-opt,
+body.shop-page .pqv-related-head h3,
+body.shop-page .pqv-tab,
+body.shop-page .pqv-panel-back,
+body.shop-page .pqv-field-label,
+body.shop-page .pqv-stock,
+body.shop-page .premium-card .card-spec-v,
+body.shop-page .premium-card .card-spec-chip,
+body.shop-page .premium-card-detail .detail-content h3,
+body.shop-page .premium-card-detail .detail-price {
+  font-family: var(--font-product-en);
+  font-variant-ligatures: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body.shop-page .pqv-title {
+  font-weight: 600;
+  letter-spacing: 0.015em;
+  line-height: 1.25;
+}
+
+body.shop-page .card-title-text {
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 body.shop-page .wrap,

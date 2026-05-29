@@ -41,6 +41,24 @@
     return routeOrFile;
   }
 
+  function categoryHasProducts(key) {
+    if (window.maCatalog && typeof window.maCatalog.categoryHasProducts === "function") {
+      return window.maCatalog.categoryHasProducts(key);
+    }
+    var list = (window.CATEGORY_PRODUCTS || {})[key];
+    return (
+      Array.isArray(list) &&
+      list.some(function (p) {
+        return p && (p.image || p.name);
+      })
+    );
+  }
+
+  function sectionShowsInFooter(sec) {
+    if (sec.enabled !== false) return true;
+    return categoryHasProducts(sec.key);
+  }
+
   function buildShopLinksHtml() {
     var sections = window.CATALOG_SECTIONS || [];
     if (!sections.length) {
@@ -54,9 +72,7 @@
       );
     }
     return sections
-      .filter(function (sec) {
-        return sec.enabled !== false;
-      })
+      .filter(sectionShowsInFooter)
       .map(function (sec) {
         var label = sec.menuBn || sec.menu || sec.key;
         var href = footerHref(sec.path || "/" + sec.key);
@@ -152,12 +168,6 @@
       '<p class="subscribe-success-text">আপনার তথ্য সংরক্ষিত হয়েছে। শীঘ্রই নতুন কালেকশন জানানো হবে।</p>' +
       "</div>" +
       "</form>" +
-      '<div class="anz-fb-follow">' +
-      '<p class="anz-fb-follow-title">Facebook পেজে ফলো করুন — নতুন কালেকশন ও অফার</p>' +
-      '<a href="' +
-      esc(SOCIAL.facebook) +
-      '" target="_blank" rel="noopener noreferrer" class="anz-fb-follow-btn">Facebook পেজ খুলুন</a>' +
-      "</div>" +
       '<div class="anz-socials">' +
       '<a href="' +
       esc(SOCIAL.facebook) +

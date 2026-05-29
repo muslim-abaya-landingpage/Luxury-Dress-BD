@@ -37,8 +37,12 @@
   border-top: 1px solid rgba(201, 169, 98, 0.22);
   font-family: "Hind Siliguri", "Inter", "Helvetica Neue", Arial, sans-serif;
   color: #e8e4dc;
-  margin-top: 40px;
+  margin-top: 16px;
   overflow-x: hidden;
+}
+
+#ma-social-connect-mount + #site-footer-mount .anz-footer {
+  margin-top: 0;
 }
 
 .anz-footer-trust {
@@ -50,15 +54,15 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 10px 28px;
-  padding: 14px 20px !important;
+  gap: 6px 20px;
+  padding: 8px 16px !important;
 }
 
 .anz-trust-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
+  gap: 6px;
+  font-size: 12px;
   font-weight: 600;
   color: #c9a962;
   letter-spacing: 0.02em;
@@ -78,8 +82,8 @@
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1.35fr 0.75fr 0.8fr 1.05fr 1.05fr;
-  gap: 24px 20px;
-  padding: 40px 24px 32px;
+  gap: 14px 16px;
+  padding: 22px 20px 18px;
   box-sizing: border-box;
   align-items: start;
   width: 100%;
@@ -94,9 +98,9 @@
 }
 
 .anz-logo {
-  font-size: 22px;
+  font-size: 19px;
   font-weight: 800;
-  margin: 0 0 12px;
+  margin: 0 0 6px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   line-height: 1.2;
@@ -104,32 +108,32 @@
 }
 
 .anz-title {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  margin: 0 0 14px;
+  margin: 0 0 8px;
   text-transform: uppercase;
   letter-spacing: 0.14em;
   color: #c9a962;
 }
 
 .anz-text {
-  font-size: 14px;
-  line-height: 1.7;
+  font-size: 13px;
+  line-height: 1.5;
   color: #a8a49c;
-  margin: 0 0 16px;
+  margin: 0 0 10px;
   max-width: 320px;
 }
 
 .anz-wa-cta {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border-radius: 8px;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 6px;
   background: #25d366;
   color: #fff !important;
   text-decoration: none;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   transition: transform 0.15s ease, box-shadow 0.2s ease;
   box-shadow: 0 4px 14px rgba(37, 211, 102, 0.25);
@@ -140,8 +144,8 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   background: #fff;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
@@ -165,7 +169,7 @@
 }
 
 .anz-link-list li {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .anz-link-list li:last-child {
@@ -175,9 +179,9 @@
 .anz-link-list a {
   text-decoration: none;
   color: #d4d0c8;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
-  line-height: 1.45;
+  line-height: 1.35;
   transition: color 0.2s ease;
 }
 
@@ -194,9 +198,9 @@
 .anz-contact-link {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  margin-bottom: 10px;
-  font-size: 14px;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 13px;
   color: #d4d0c8;
   line-height: 1.5;
   text-decoration: none;
@@ -216,8 +220,8 @@ a.anz-contact-link:hover {
 }
 
 .anz-contact-icon {
-  width: 36px;
-  height: 36px;
+  width: 30px;
+  height: 30px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -236,16 +240,16 @@ a.anz-contact-link:hover {
 .anz-contact-link > span:last-child {
   flex: 1;
   min-width: 0;
-  padding-top: 7px;
+  padding-top: 4px;
   overflow-wrap: anywhere;
   word-break: break-word;
 }
 
 .anz-newsletter-note {
-  font-size: 13px;
-  line-height: 1.55;
+  font-size: 12px;
+  line-height: 1.45;
   color: #8a867e;
-  margin: 0 0 12px;
+  margin: 0 0 8px;
 }
 
 .newsletter-form {
@@ -260,9 +264,9 @@ a.anz-contact-link:hover {
 .newsletter-form input {
   flex: 1;
   min-width: 0;
-  height: 42px;
+  height: 36px;
   margin: 0;
-  padding: 0 14px;
+  padding: 0 12px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
   outline: none;
@@ -288,14 +292,14 @@ a.anz-contact-link:hover {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  height: 42px;
+  height: 36px;
   margin: 0;
-  padding: 0 16px;
+  padding: 0 12px;
   border: 1px solid #c9a962;
-  border-radius: 8px;
+  border-radius: 6px;
   background: #c9a962;
   color: #111;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   font-family: inherit;
   letter-spacing: 0.08em;
@@ -317,14 +321,14 @@ a.anz-contact-link:hover {
 
 .anz-socials {
   display: flex;
-  gap: 8px;
-  margin-top: 14px;
+  gap: 6px;
+  margin-top: 8px;
   flex-wrap: wrap;
 }
 
 .anz-social-link {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
@@ -348,7 +352,7 @@ a.anz-contact-link:hover {
 
 .anz-bottom {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 16px 24px;
+  padding: 10px 16px;
   text-align: center;
   background: rgba(0, 0, 0, 0.35);
 }
@@ -416,7 +420,7 @@ a.anz-contact-link:hover {
 @media (max-width: 1100px) {
   .anz-footer-main {
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 22px 18px;
+    gap: 14px 14px;
   }
 
   .anz-col-brand {
@@ -431,8 +435,8 @@ a.anz-contact-link:hover {
 @media (max-width: 640px) {
   .anz-footer-main {
     grid-template-columns: 1fr 1fr;
-    gap: 20px 16px;
-    padding: 32px 16px 24px;
+    gap: 14px 12px;
+    padding: 18px 14px 14px;
   }
 
   .anz-col-brand {
@@ -458,8 +462,8 @@ a.anz-contact-link:hover {
   .anz-trust-inner {
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
-    padding: 12px 16px !important;
+    gap: 6px;
+    padding: 8px 14px !important;
   }
 
   .anz-logo {

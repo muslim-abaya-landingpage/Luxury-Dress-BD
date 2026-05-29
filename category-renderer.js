@@ -472,7 +472,7 @@ function buildPqvRelatedHtml(p, idx, allProducts, categoryKey) {
         '<img src="' +
         escapeHtml(resolveCardImageSrc(rp)) +
         '" alt="" loading="lazy">' +
-        '<div class="pqv-related-meta"><span class="pqv-related-name">' +
+        '<div class="pqv-related-meta"><span class="pqv-related-name" lang="en">' +
         escapeHtml(rp.name) +
         '</span><span class="pqv-related-price">' +
         price +
@@ -886,7 +886,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     imgSrc +
     '" alt="' +
     escapeHtml(p.name) +
-    '" onerror="this.onerror=null;this.src=\'' +
+    '" fetchpriority="high" decoding="async" onerror="this.onerror=null;this.src=\'' +
     imgFallback.replace(/'/g, "\\'") +
     '\'">' +
     '<button type="button" class="pqv-nav pqv-nav-next" data-pqv-nav="next" aria-label="Next image" hidden>' +
@@ -894,7 +894,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     "</div></div></div>" +
     '<div class="pqv-panel">' +
     '<button type="button" class="pqv-panel-back" data-pqv-close="1">&lsaquo; Back to products</button>' +
-    '<h1 id="pqvTitle" class="pqv-title">' +
+    '<h1 id="pqvTitle" class="pqv-title" lang="en">' +
     escapeHtml(p.name) +
     "</h1>" +
     '<p class="pqv-price" id="pqvPrice" data-price="' +
@@ -911,10 +911,10 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     buildPqvOptionPills(sizes, idx, "pqv-size-opt", "data-size-value", formatSizeLabel) +
     "</div></div>" +
     '<div class="pqv-qty-row">' +
-    '<div class="pqv-qty">' +
-    '<button type="button" class="pqv-qty-btn" data-pqv-qty="minus" aria-label="Decrease">−</button>' +
-    '<input type="text" id="pqvQty" class="pqv-qty-input" value="1" inputmode="numeric" pattern="[0-9]*" lang="en" autocomplete="off" aria-label="Quantity">' +
-    '<button type="button" class="pqv-qty-btn" data-pqv-qty="plus" aria-label="Increase">+</button>' +
+    '<div class="ma-qty-stepper pqv-qty" role="group" aria-label="Quantity">' +
+    '<button type="button" class="ma-qty-stepper__btn pqv-qty-btn" data-pqv-qty="minus" aria-label="Decrease quantity">−</button>' +
+    '<input type="text" id="pqvQty" class="ma-qty-stepper__input pqv-qty-input" value="1" inputmode="numeric" pattern="[0-9]*" lang="en" autocomplete="off" aria-label="Quantity">' +
+    '<button type="button" class="ma-qty-stepper__btn pqv-qty-btn" data-pqv-qty="plus" aria-label="Increase quantity">+</button>' +
     "</div>" +
     '<span class="pqv-stock">' +
     escapeHtml(stockText) +
@@ -1600,7 +1600,7 @@ function buildProductCard(p, idx, waLink, detailMode, categoryKey) {
     '<div class="card-meta">' +
     '<button type="button" class="card-title-btn js-quickview-trigger" data-product-idx="' +
     idx +
-    '"><span class="card-title-text">' +
+    '"><span class="card-title-text" lang="en">' +
     escapeHtml(p.name) +
     "</span></button>" +
     '<span class="card-price">' +

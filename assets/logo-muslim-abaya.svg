@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 56" role="img" aria-label="Muslim Abaya">
-  <text x="2" y="20" font-family="Georgia, 'Times New Roman', serif" font-size="12" font-weight="500" letter-spacing="0.26em" fill="#1a1a1a">MUSLIM</text>
-  <text x="2" y="46" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="700" letter-spacing="0.08em" fill="#111111">ABAYA</text>
-  <rect x="2" y="51" width="150" height="2" fill="#c9a227" rx="1"/>
+  <text x="8" y="20" font-family="Georgia, 'Times New Roman', serif" font-size="12" font-weight="500" letter-spacing="0.26em" fill="#1a1a1a">MUSLIM</text>
+  <text x="8" y="46" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="700" letter-spacing="0.08em" fill="#111111">ABAYA</text>
+  <rect x="8" y="51" width="150" height="2" fill="#c9a227" rx="1"/>
 </svg>

@@ -1,0 +1,132 @@
+/* Muslim Abaya — Quantity Pro stepper (home, cart, product detail) */
+.ma-qty-stepper {
+  display: inline-flex;
+  align-items: stretch;
+  max-width: 100%;
+  border: 1px solid #d4d4d4;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.ma-qty-stepper__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: #f7f7f7;
+  color: #111;
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ma-qty-stepper__btn:hover {
+  background: #ebebeb;
+}
+
+.ma-qty-stepper__btn:active {
+  background: #111;
+  color: #fff;
+}
+
+.ma-qty-stepper__btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.ma-qty-stepper__input,
+.ma-qty-stepper__value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  width: 44px;
+  height: 36px;
+  margin: 0;
+  padding: 0 4px;
+  border: none;
+  border-left: 1px solid #e5e5e5;
+  border-right: 1px solid #e5e5e5;
+  background: #fff;
+  text-align: center;
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums lining-nums;
+  color: #111;
+  line-height: 1;
+}
+
+.ma-qty-stepper__input {
+  outline: none;
+  -moz-appearance: textfield;
+}
+
+.ma-qty-stepper__input:focus {
+  background: #fafafa;
+  box-shadow: inset 0 0 0 1px #111;
+}
+
+.ma-qty-stepper__input::-webkit-outer-spin-button,
+.ma-qty-stepper__input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Home product cards — full width */
+.home-card-qty.ma-qty-stepper {
+  display: none;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.home-card-qty.ma-qty-stepper.is-visible {
+  display: inline-flex;
+}
+
+.item-card.in-cart .home-card-qty.ma-qty-stepper {
+  display: inline-flex;
+}
+
+/* Cart drawer */
+.cart-drawer-qty.ma-qty-stepper {
+  flex-shrink: 0;
+}
+
+/* Product quick view */
+.pqv-qty.ma-qty-stepper {
+  flex-shrink: 0;
+}
+
+.pqv-qty-row .ma-qty-stepper {
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .ma-qty-stepper__btn {
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+    font-size: 17px;
+  }
+
+  .ma-qty-stepper__input,
+  .ma-qty-stepper__value {
+    height: 34px;
+    min-width: 36px;
+    width: 40px;
+    font-size: 14px;
+  }
+}

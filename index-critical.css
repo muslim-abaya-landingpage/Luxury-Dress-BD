@@ -1,0 +1,201 @@
+/* Above-the-fold — Muslim Abaya homepage */
+html,
+body {
+  overflow-x: hidden !important;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#site-header-mount {
+  min-height: 72px;
+}
+
+body.has-sticky-header #site-header-mount {
+  min-height: 72px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Hind Siliguri", sans-serif;
+  background: #fff;
+  color: #495057;
+  padding-bottom: 80px;
+}
+
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.main-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.display-area {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #fff;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.big-view {
+  flex: 1;
+  text-align: center;
+  position: relative;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border-radius: 10px;
+}
+
+#premium-collection .big-view {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  padding: 8px;
+  box-sizing: border-box;
+  min-height: 280px;
+}
+
+#view,
+#premium-collection #view {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: min(70vh, 900px);
+  aspect-ratio: 4 / 5;
+  object-fit: contain;
+  object-position: center center;
+  border-radius: 5px;
+  display: block;
+  background: #fff;
+}
+
+.price-tag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: linear-gradient(135deg, #ef4444, #7c3aed);
+  color: #fff;
+  padding: 8px;
+  font-weight: 800;
+  font-size: 18px;
+  z-index: 2;
+}
+
+@media (min-width: 850px) {
+  .display-area {
+    flex-direction: row;
+  }
+  .product-list-sidebar {
+    width: 150px;
+    order: 0;
+  }
+  .big-view {
+    flex: 1;
+  }
+}
+
+@media (min-width: 1024px) {
+  #premium-collection.display-area {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.2fr) minmax(400px, 1fr);
+    gap: 20px;
+    align-items: start;
+  }
+  #premium-collection .product-list-sidebar {
+    width: 100% !important;
+    max-height: 78vh;
+    overflow-y: auto;
+  }
+}
+
+@keyframes cartPop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.cart-animate {
+  animation: cartPop 0.3s ease-out forwards;
+}
+
+/* YouTube facade (no iframe until click) */
+.lux-video-ratio {
+  position: relative;
+  padding-top: 177.77%;
+  background: #000;
+}
+
+.lux-video-facade {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  background: #000;
+  display: block;
+}
+
+.lux-video-facade img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.lux-video-play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 68px;
+  height: 48px;
+  background: rgba(0, 0, 0, 0.75);
+  border-radius: 12px;
+  pointer-events: none;
+}
+
+.lux-video-play::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-35%, -50%);
+  border: 14px solid transparent;
+  border-left: 22px solid #fff;
+}
+
+.lux-video-ratio iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}

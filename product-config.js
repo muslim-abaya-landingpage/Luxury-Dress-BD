@@ -56,7 +56,14 @@ window.SITE_LINKS = {
         typePriceGap: 200
       },
       "premium-two-piece": {
-        types: ["Full Set", "Top Only", "Bottom Only"]
+        price: 550,
+        types: ["Full Set", "Top Only", "Bottom Only"],
+        typePriceGap: 0,
+        priceByType: {
+          "Full Set": 550,
+          "Top Only": 550,
+          "Bottom Only": 550
+        }
       },
       "cover-up": {
         types: ["Full Set", "Cover Up Only"]

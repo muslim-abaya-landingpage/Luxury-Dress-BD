@@ -41,10 +41,22 @@
       return "";
     }
 
+    function sectionShowsInNav(sec) {
+      if (sec.enabled !== false) return true;
+      if (g.maCatalog && typeof g.maCatalog.categoryHasProducts === "function") {
+        return g.maCatalog.categoryHasProducts(sec.key);
+      }
+      var list = (g.CATEGORY_PRODUCTS || {})[sec.key];
+      return (
+        Array.isArray(list) &&
+        list.some(function (p) {
+          return p && (p.image || p.name);
+        })
+      );
+    }
+
     var navFromSections = sections
-      .filter(function (sec) {
-        return sec.enabled !== false;
-      })
+      .filter(sectionShowsInNav)
       .map(function (sec) {
         var img = hubImageForKey(sec.key) || "images/Baby-Pink-Floral-Print.jpeg";
         return {

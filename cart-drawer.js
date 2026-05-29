@@ -160,16 +160,16 @@
         '" aria-label="\u09B8\u09B0\u09BE\u09A8">\u00D7</button>' +
         "</div>" +
         '<div class="cart-drawer-controls">' +
-        '<div class="cart-drawer-qty">' +
-        '<button type="button" data-drawer-action="dec" data-drawer-idx="' +
+        '<div class="ma-qty-stepper cart-drawer-qty" role="group" aria-label="Quantity">' +
+        '<button type="button" class="ma-qty-stepper__btn" data-drawer-action="dec" data-drawer-idx="' +
         idx +
-        '" aria-label="\u0995\u09AE\u09BE\u09A8">\u2212</button>' +
-        "<span>" +
+        '" aria-label="Decrease quantity">\u2212</button>' +
+        '<span class="ma-qty-stepper__value" aria-live="polite">' +
         qty +
         "</span>" +
-        '<button type="button" data-drawer-action="inc" data-drawer-idx="' +
+        '<button type="button" class="ma-qty-stepper__btn" data-drawer-action="inc" data-drawer-idx="' +
         idx +
-        '" aria-label="\u09AC\u09BE\u09A1\u09BC\u09BE\u09A8">+</button>' +
+        '" aria-label="Increase quantity">+</button>' +
         "</div>" +
         '<span class="cart-drawer-line-price">' +
         qty +

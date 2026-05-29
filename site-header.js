@@ -4,6 +4,7 @@
 
   (function bootSiteSeo() {
     if (window.__maSiteSeoBoot) return;
+    if (document.documentElement.getAttribute("data-seo-managed") === "full") return;
     window.__maSiteSeoBoot = true;
     function loadScript(src, next) {
       var s = document.createElement('script');
@@ -55,6 +56,7 @@
     hint('preconnect', 'https://fonts.gstatic.com', true);
     hint('dns-prefetch', 'https://www.googletagmanager.com');
     hint('dns-prefetch', 'https://www.youtube.com');
+    hint('dns-prefetch', 'https://cdnjs.cloudflare.com');
   })();
 
   function getSiteRoot() {
@@ -142,6 +144,25 @@
     return file;
   }
 
+  function categoryHasProducts(key) {
+    if (window.maCatalog && typeof window.maCatalog.categoryHasProducts === "function") {
+      return window.maCatalog.categoryHasProducts(key);
+    }
+    var list = (window.CATEGORY_PRODUCTS || {})[key];
+    return (
+      Array.isArray(list) &&
+      list.some(function (p) {
+        return p && (p.image || p.name);
+      })
+    );
+  }
+
+  /** মেনু সক্রিয়: enabled:true অথবা ওই ক্যাটাগরিতে অন্তত ১টি প্রোডাক্ট */
+  function navItemEnabledForSection(sec) {
+    if (sec && sec.key && categoryHasProducts(sec.key)) return true;
+    return sec.enabled !== false;
+  }
+
   function buildNavMenuItems() {
     var sections = window.CATALOG_SECTIONS || [];
     var extras = window.SITE_NAV_EXTRAS || [];
@@ -149,7 +170,7 @@
       return {
         href: sec.path || "/" + sec.key,
         label: sec.menu,
-        enabled: sec.enabled !== false
+        enabled: navItemEnabledForSection(sec)
       };
     });
     extras.forEach(function (ex) {
@@ -405,10 +426,10 @@
         }
         loadScript("product-catalog-sections.js?v=20260530d")
           .then(function () {
-            return loadScript("product-catalog-sync.js?v=20260608");
+            return loadScript("product-catalog-sync.js?v=20260531nav2");
           })
           .then(function () {
-            return loadScript("product-config.js?v=20260535");
+            return loadScript("product-config.js?v=20260531price");
           })
           .then(function () {
             return loadScript("product-utils.js?v=20260535");
@@ -740,7 +761,14 @@
     }
     initSiteSearch();
     ensureProductCatalog(function () {
-      applyDynamicNavMenu();
+      var applyNav = function () {
+        applyDynamicNavMenu();
+      };
+      if (typeof window.requestIdleCallback === "function") {
+        window.requestIdleCallback(applyNav, { timeout: 600 });
+      } else {
+        applyNav();
+      }
     });
     syncSiteHeaderOffset();
     window.addEventListener('resize', syncSiteHeaderOffset);
@@ -767,6 +795,12 @@
       link.href = 'cart-drawer.css?v=20260530d';
       document.head.appendChild(link);
     }
+    if (!document.querySelector('link[href*="qty-stepper.css"]')) {
+      var qtyCss = document.createElement('link');
+      qtyCss.rel = 'stylesheet';
+      qtyCss.href = 'qty-stepper.css?v=20260531qty';
+      document.head.appendChild(qtyCss);
+    }
     var s = document.createElement('script');
     s.src = 'cart-drawer.js?v=20260530d';
     s.defer = true;
@@ -774,30 +808,46 @@
   }
 
   function ensureGtmLoaded() {
+    if (window.__maGtmLoaded) return;
     var hasInlineGtm = !!document.querySelector('script[src*="googletagmanager.com/gtm.js?id=' + GTM_ID + '"]');
-    if (hasInlineGtm) return;
+    if (hasInlineGtm) {
+      window.__maGtmLoaded = true;
+      return;
+    }
+    window.__maGtmLoaded = true;
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
-    var firstScript = document.getElementsByTagName('script')[0];
     var gtmScript = document.createElement('script');
     gtmScript.async = true;
     gtmScript.src = 'https://www.googletagmanager.com/gtm.js?id=' + GTM_ID;
-    if (firstScript && firstScript.parentNode) {
-      firstScript.parentNode.insertBefore(gtmScript, firstScript);
+    document.head.appendChild(gtmScript);
+  }
+
+  /** GTM পেজ লোডের পর — প্রথম পেইন্ট দ্রুত */
+  function scheduleDeferredGtm() {
+    if (window.__maGtmScheduled) return;
+    window.__maGtmScheduled = true;
+    var run = function () {
+      ensureGtmLoaded();
+    };
+    if (typeof window.requestIdleCallback === 'function') {
+      window.requestIdleCallback(run, { timeout: 3000 });
     } else {
-      document.head.appendChild(gtmScript);
+      window.addEventListener('load', function () {
+        setTimeout(run, 1200);
+      });
     }
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () {
-      ensureGtmLoaded();
-      mountHeader();
-      ensureCartDrawerAssets();
-    });
-  } else {
-    ensureGtmLoaded();
+  function runHeaderBoot() {
     mountHeader();
     ensureCartDrawerAssets();
+    scheduleDeferredGtm();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', runHeaderBoot);
+  } else {
+    runHeaderBoot();
   }
 })();

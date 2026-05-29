@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
@@ -6,7 +6,7 @@
   <title>Sign In | Muslim Abaya</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="site-header.css?v=20260530c">
-  <link rel="stylesheet" href="site-footer.css?v=20260531wa">
+  <link rel="stylesheet" href="site-footer.css?v=20260531ft">
   <link rel="stylesheet" href="auth-page.css">
 </head>
 <body class="auth-page">
@@ -15,21 +15,21 @@
     <section class="auth-card">
       <div class="auth-card-head">
         <h1>Sign In</h1>
-        <p class="auth-lead">Welcome back — sign in to continue checkout faster.</p>
+        <p class="auth-lead">Welcome back � sign in to continue checkout faster.</p>
       </div>
       <form id="signinForm">
         <div class="auth-field">
-          <label for="si-login">Email বা Mobile</label>
-          <input id="si-login" type="text" placeholder="name@gmail.com বা 017XXXXXXXX" required autocomplete="username">
-          <p class="auth-hint">যে ইমেইল/মোবাইল দিয়ে অ্যাকাউন্ট খুলেছেন সেটাই দিন</p>
+          <label for="si-login">Email ?? Mobile</label>
+          <input id="si-login" type="text" placeholder="name@gmail.com ?? 017XXXXXXXX" required autocomplete="username">
+          <p class="auth-hint">?? ?????/?????? ???? ?????????? ??????? ????? ???</p>
         </div>
         <div class="auth-field">
           <label for="si-pass">Password</label>
           <input id="si-pass" type="password" placeholder="******" required autocomplete="current-password">
-          <p class="auth-hint">আপনার অ্যাকাউন্টের পাসওয়ার্ড লিখুন</p>
+          <p class="auth-hint">????? ???????????? ????????? ?????</p>
         </div>
         <button type="submit" class="auth-btn" id="signinBtn">Sign In</button>
-        <p class="auth-note">নতুন অ্যাকাউন্ট লাগবে? <a href="signup.html" id="signupLink">Sign Up</a></p>
+        <p class="auth-note">???? ?????????? ?????? <a href="signup.html" id="signupLink">Sign Up</a></p>
       </form>
     </section>
   </main>
@@ -40,8 +40,8 @@
   <script src="site-api-health.js"></script>
   <script src="auth-config.js"></script>
   <script src="auth-api.js"></script>
-  <script defer src="site-header.js?v=20260531nav"></script>
-  <script src="site-footer.js?v=20260531wa"></script>
+  <script defer src="site-header.js?v=20260531perf"></script>
+  <script src="site-footer.js?v=20260531fb1"></script>
   <script>
     (function () {
       if (typeof showAuthApiNotice === 'function') {
@@ -60,7 +60,7 @@
         var login = document.getElementById('si-login').value.trim();
         var pass = document.getElementById('si-pass').value;
         if (!login || !pass) {
-          alert('ইমেইল/মোবাইল ও পাসওয়ার্ড দিন।');
+          alert('?????/?????? ? ????????? ????');
           return;
         }
         var btn = document.getElementById('signinBtn');
@@ -72,10 +72,10 @@
           })
           .catch(function (err) {
             if (typeof isLocalPreview === 'function' && isLocalPreview()) {
-              alert(typeof getLocalFileAuthHint === 'function' ? getLocalFileAuthHint() : 'ADMIN-লোকাল-টেস্ট.bat চালিয়ে http://127.0.0.1/signin.html খুলুন।');
+              alert(typeof getLocalFileAuthHint === 'function' ? getLocalFileAuthHint() : 'ADMIN-?????-?????.bat ??????? http://127.0.0.1/signin.html ??????');
               return;
             }
-            alert((err && err.message) || 'লগইন ব্যর্থ। ইমেইল/মোবাইল ও পাসওয়ার্ড চেক করুন।');
+            alert((err && err.message) || '???? ??????? ?????/?????? ? ?????????? ??? ?????');
           })
           .finally(function () {
             btn.disabled = false;

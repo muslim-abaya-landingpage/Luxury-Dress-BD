@@ -142,7 +142,7 @@
       var css = document.createElement("link");
       css.id = "ma-seo-css";
       css.rel = "stylesheet";
-      css.href = "site-seo.css?v=20260531seo";
+      css.href = "site-seo.css?v=20260531b";
       document.head.appendChild(css);
     }
     if (/\/signin$|\/signup$/.test(info.path)) {

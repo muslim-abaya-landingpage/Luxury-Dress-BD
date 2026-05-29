@@ -6,6 +6,7 @@
   flex-shrink: 0;
   margin: 0;
   padding: 0;
+  min-height: 72px;
 }
 
 body.has-sticky-header #site-header-mount {
@@ -73,7 +74,7 @@ html {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 12px 8px;
+  padding: 12px 16px;
   box-sizing: border-box;
   gap: 8px;
 }
@@ -497,6 +498,7 @@ body.global-layout {
   .brand-text-logo {
     flex: 1 1 auto;
     min-width: 0;
+    padding-left: 2px;
   }
 
   .brand-text-logo a {
@@ -513,10 +515,11 @@ body.global-layout {
   }
 
   .header-middle-nav .nav-row {
-    padding: 10px 0;
+    padding: 10px 16px;
     gap: 6px;
     width: 100%;
     justify-content: space-between;
+    box-sizing: border-box;
   }
 
   .nav-icons {
