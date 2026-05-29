@@ -258,13 +258,16 @@ html.category-ready #list {
   font-size: clamp(22px, 3vw, 30px);
   font-weight: 800;
   margin: 0;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+  color: #111;
 }
 
 .shop-count {
-  font-size: 13px;
-  color: #666;
+  font-size: 12px;
+  color: #888;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .shop-breadcrumb {
@@ -312,13 +315,21 @@ html.category-ready #list {
 .premium-card {
   display: flex;
   flex-direction: column;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   overflow: hidden;
   background: #fff;
-  transition: opacity 0.2s ease;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease, border-color 0.2s ease;
   min-width: 0;
+}
+
+@media (hover: hover) {
+  .premium-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 36px rgba(17, 17, 17, 0.1);
+    border-color: #d8d8d8;
+  }
 }
 
 .premium-card.is-hidden {
@@ -328,10 +339,79 @@ html.category-ready #list {
 .premium-card .img-wrap {
   position: relative;
   overflow: hidden;
-  background: #f7f7f7;
+  background: #f3f3f3;
   aspect-ratio: 3 / 4;
   flex-shrink: 0;
   width: 100%;
+}
+
+.premium-card .card-img-stack {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.premium-card .card-img-primary,
+.premium-card .card-img-hover {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: opacity 0.45s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.premium-card .card-img-hover {
+  opacity: 0;
+  z-index: 1;
+}
+
+.premium-card .card-img-primary {
+  z-index: 0;
+}
+
+@media (hover: hover) {
+  .premium-card .img-wrap:hover .card-img-hover,
+  .premium-card:hover .card-img-hover {
+    opacity: 1;
+  }
+
+  .premium-card .img-wrap:hover .card-img-primary,
+  .premium-card:hover .card-img-primary {
+    transform: scale(1.05);
+  }
+}
+
+.premium-card .card-quick-peek {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 4;
+  transform: translate(-50%, -50%) scale(0.94);
+  opacity: 0;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #111;
+  pointer-events: none;
+  transition: opacity 0.28s ease, transform 0.28s ease;
+  white-space: nowrap;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+@media (hover: hover) {
+  .premium-card .img-wrap:hover .card-quick-peek,
+  .premium-card:hover .card-quick-peek {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 
 .premium-card img {
@@ -381,9 +461,38 @@ button.img-wrap {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  padding: 8px 6px 6px;
+  padding: 10px 8px 8px;
   background: #fff;
-  border-top: 1px solid #f0f0f0;
+  border-top: none;
+}
+
+.premium-card .card-title-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #111;
+  font-family: "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: 0.02em;
+  transition: color 0.2s ease;
+}
+
+@media (hover: hover) {
+  .premium-card:hover .card-title-text {
+    color: #444;
+  }
+}
+
+.premium-card .card-price {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111;
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: 0.01em;
 }
 
 .premium-card .card-meta {
@@ -406,27 +515,6 @@ button.img-wrap {
   text-align: left;
   font: inherit;
   color: inherit;
-}
-
-.premium-card .card-title-text {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.35;
-  color: #111;
-  font-family: "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  letter-spacing: 0.02em;
-}
-
-.premium-card .card-price {
-  font-size: 15px;
-  font-weight: 700;
-  color: #111;
-  white-space: nowrap;
-  flex-shrink: 0;
 }
 
 .premium-card .card-specs {
@@ -508,11 +596,18 @@ button.img-wrap {
 }
 
 .card-actions-anzaar {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   width: 100%;
-  margin-top: 0;
+  margin-top: 2px;
+}
+
+.card-actions-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  width: 100%;
 }
 
 .anzaar-btn {
@@ -807,12 +902,7 @@ button.img-wrap {
   }
 
   .product-grid {
-    gap: 18px 14px;
-  }
-
-  .premium-card {
-    border: 1px solid #efefef;
-    border-radius: 6px;
+    gap: 20px 16px;
   }
 }
 

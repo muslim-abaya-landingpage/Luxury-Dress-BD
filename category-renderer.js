@@ -8,9 +8,9 @@ function ensureCategoryStyles() {
     link.rel = "stylesheet";
     document.head.appendChild(link);
   }
-  link.href = "category-sidebar.css?v=20260618layout";
+  link.href = "category-sidebar.css?v=20260618premium";
   var shopLink = document.querySelector('link[href*="shop-page.css"]');
-  if (shopLink) shopLink.href = "shop-page.css?v=20260618layout";
+  if (shopLink) shopLink.href = "shop-page.css?v=20260618premium";
 }
 
 function syncShopScrollHeights() {
@@ -1439,6 +1439,49 @@ function buildShopSidebar(categoryKey, products) {
 
 
 
+function resolveCardHoverImage(p, allProducts) {
+  var gallery = collectGalleryImages(p, allProducts || []);
+  var main = resolveCardImageSrc(p);
+  for (var i = 0; i < gallery.length; i++) {
+    if (gallery[i] && gallery[i] !== main) return gallery[i];
+  }
+  return "";
+}
+
+function buildCardImageBlock(p, idx, categoryKey, allProducts) {
+  var main = resolveCardImageSrc(p);
+  var hover = resolveCardHoverImage(p, allProducts);
+  var imgFallback = getCategoryFallbackImage(categoryKey || "");
+  var fb = imgFallback.replace(/'/g, "\\'");
+  var errOn = "this.onerror=null;this.src='" + fb + "'";
+  var hoverHtml = hover
+    ? '<img class="card-img-hover" src="' +
+      escapeHtml(hover) +
+      '" alt="" loading="lazy" decoding="async" aria-hidden="true" onerror="this.removeAttribute(\'src\')">'
+    : "";
+
+  return (
+    '<button type="button" class="img-wrap js-quickview-trigger" data-product-idx="' +
+    idx +
+    '" aria-label="' +
+    escapeHtml("View " + p.name) +
+    '">' +
+    '<span class="product-sale-badge">Sale!</span>' +
+    '<span class="card-img-stack">' +
+    '<img class="card-img-primary" src="' +
+    escapeHtml(main) +
+    '" alt="' +
+    escapeHtml(p.name) +
+    '" loading="lazy" decoding="async" onerror="' +
+    errOn +
+    '">' +
+    hoverHtml +
+    "</span>" +
+    '<span class="card-quick-peek">Quick View</span>' +
+    "</button>"
+  );
+}
+
 function resolveCardImageSrc(p) {
   if (!p) return "";
   if (window.maCatalog && typeof window.maCatalog.resolveImageUrl === "function") {
@@ -1551,7 +1594,7 @@ function buildDetailSpecsBlock(p, fabricText, sizeOptions, idx) {
   );
 }
 
-function buildProductCard(p, idx, waLink, detailMode, categoryKey) {
+function buildProductCard(p, idx, waLink, detailMode, categoryKey, allProducts) {
 
   var defaultType = getDefaultProductType(p, categoryKey);
   var productPrice = resolveProductPrice(p, categoryKey, defaultType);
@@ -1628,20 +1671,7 @@ function buildProductCard(p, idx, waLink, detailMode, categoryKey) {
     '"' +
     colorAttr +
     ">" +
-    '<button type="button" class="img-wrap js-quickview-trigger" data-product-idx="' +
-    idx +
-    '" aria-label="' +
-    escapeHtml("View " + p.name) +
-    '">' +
-    '<span class="product-sale-badge">Sale!</span>' +
-    '<img src="' +
-    escapeHtml(resolveCardImageSrc(p)) +
-    '" alt="' +
-    escapeHtml(p.name) +
-    '" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=\'' +
-    imgFallback.replace(/'/g, "\\'") +
-    '\'">' +
-    "</button>" +
+    buildCardImageBlock(p, idx, categoryKey, allProducts) +
     '<div class="card-foot">' +
     '<div class="card-meta">' +
     '<button type="button" class="card-title-btn js-quickview-trigger" data-product-idx="' +
@@ -1659,9 +1689,14 @@ function buildProductCard(p, idx, waLink, detailMode, categoryKey) {
     sizeOptions +
     "</select>" +
     '<div class="card-actions-anzaar">' +
+    '<div class="card-actions-row">' +
     '<button type="button" class="anzaar-btn anzaar-btn-cart" data-product-idx="' +
     idx +
     '" data-action="quickview">Add to Cart</button>' +
+    '<button type="button" class="anzaar-btn anzaar-btn-buy" data-product-idx="' +
+    idx +
+    '" data-action="buy-now">Buy Now</button>' +
+    "</div>" +
     "<a href='" +
     waLink +
     "?text=" +
@@ -1849,7 +1884,7 @@ function renderCategory(categoryKey) {
   var detailMode = false;
   var cards = products.map(function (p, idx) {
 
-    return buildProductCard(p, idx, waLink, detailMode, categoryKey);
+    return buildProductCard(p, idx, waLink, detailMode, categoryKey, products);
 
   }).join("");
 
