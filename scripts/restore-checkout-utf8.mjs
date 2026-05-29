@@ -2,7 +2,7 @@ import { execSync } from "child_process";
 import fs from "fs";
 
 const SRC = "7721f89";
-const VER = "20260620ft";
+const VER = "20260530ft6";
 let html = execSync(`git show ${SRC}:checkout.html`, {
   encoding: "utf8",
   maxBuffer: 20 * 1024 * 1024,
