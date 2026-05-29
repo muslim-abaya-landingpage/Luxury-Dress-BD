@@ -9,6 +9,10 @@
  * ঐচ্ছিক: FB_ACCESS_TOKEN, FB_PIXEL_ID
  */
 
+function doOptions() {
+  return ContentService.createTextOutput('').setMimeType(ContentService.MimeType.TEXT);
+}
+
 function doGet(e) {
   try {
     var type = param_(e, 'RecordType');

@@ -1315,7 +1315,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 
 <script src="site-security.js"></script>
-<script src="site-api-config.js?v=20260529"></script>
+<script src="site-api-config.js?v=20260610"></script>
 <script src="site-api-health.js?v=20260610"></script>
 <script src="auth-config.js"></script>
 <script src="auth-api.js"></script>
@@ -1386,6 +1386,52 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         }
     }
 
+    function postOrderViaIframe(formData) {
+        return new Promise(function (resolve, reject) {
+            if (!ORDER_SCRIPT_URL) {
+                reject(new Error('NO_URL'));
+                return;
+            }
+            var frameName = 'maOrderSubmitFrame';
+            var iframe = document.getElementById('maOrderSubmitFrame');
+            if (!iframe) {
+                iframe = document.createElement('iframe');
+                iframe.name = frameName;
+                iframe.id = frameName;
+                iframe.title = 'Order submit';
+                iframe.style.cssText = 'position:absolute;width:1px;height:1px;opacity:0;border:0';
+                iframe.setAttribute('aria-hidden', 'true');
+                document.body.appendChild(iframe);
+            }
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = ORDER_SCRIPT_URL;
+            form.target = frameName;
+            form.acceptCharset = 'UTF-8';
+            form.style.display = 'none';
+            formData.forEach(function (value, key) {
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = value;
+                form.appendChild(input);
+            });
+            var settled = false;
+            function finish(ok) {
+                if (settled) return;
+                settled = true;
+                window.clearTimeout(timer);
+                try { form.remove(); } catch (e) {}
+                if (ok) resolve();
+                else reject(new Error('IFRAME_FAIL'));
+            }
+            iframe.onload = function () { finish(true); };
+            var timer = window.setTimeout(function () { finish(true); }, 6000);
+            document.body.appendChild(form);
+            form.submit();
+        });
+    }
+
     function postOrderToSheet(formData, nameValue, phoneValue, emailValue, gTotal, btn, orderWa) {
         fetch(ORDER_SCRIPT_URL, {
             method: 'POST',
@@ -1413,11 +1459,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 resetOrderButton(btn);
             })
             .catch(function () {
-                offerWhatsAppOrder(
-                    orderWa,
-                    'API সংযোগ ব্যর্থ। ইন্টারনেট চেক করুন অথবা Apps Script Deploy (Anyone) দেখুন।'
-                );
-                resetOrderButton(btn);
+                postOrderViaIframe(formData)
+                    .then(function () {
+                        if (confirm(
+                            'অর্ডার পাঠানোর চেষ্টা হয়েছে (ব্যাকআপ পদ্ধতি)।\n\n' +
+                                'thank-you পেজে যেতে OK চাপুন। Sheet এ ১–২ মিনিট পর দেখুন।'
+                        )) {
+                            finishCheckoutSuccess(nameValue, phoneValue, emailValue, gTotal, '');
+                        } else {
+                            offerWhatsAppOrder(orderWa, 'API সংযোগ ব্যর্থ। Apps Script Deploy (Anyone) চেক করুন।');
+                        }
+                        resetOrderButton(btn);
+                    })
+                    .catch(function () {
+                        offerWhatsAppOrder(
+                            orderWa,
+                            'API সংযোগ ব্যর্থ। ইন্টারনেট চেক করুন বা WhatsApp এ অর্ডার পাঠান।'
+                        );
+                        resetOrderButton(btn);
+                    });
             });
     }
     const MAX_PRODUCT_SLOTS = 20;
@@ -1464,8 +1524,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var sel = document.getElementById('userArea');
         if (!sel || sel.getAttribute('data-districts-built') === '1') return;
         sel.setAttribute('data-districts-built', '1');
-        var subDhaka = { 'গাজীপুর': 1, 'নারায়ণগঞ্জ': 1, 'নরসিংদী': 1, 'মুন্সীগঞ্জ': 1, 'মানিকগঞ্জ': 1 };
-        var districts = [
+        var subDhaka = {
+            'গাজীপুর': 1, 'নারায়ণগঞ্জ': 1, 'নরসিংদী': 1, 'মুন্সীগঞ্জ': 1, 'মানিকগঞ্জ': 1,
+            'টাঙ্গাইল': 1, 'কিশোরগঞ্জ': 1, 'ময়মনসিংহ': 1, 'ফরিদপুর': 1, 'রাজবাড়ী': 1,
+            'মাদারীপুর': 1, 'গোপালগঞ্জ': 1, 'শরীয়তপুর': 1, 'জামালপুর': 1, 'শেরপুর': 1, 'নেত্রকোনা': 1
+        };
+        var dhakaNearby = [
+            'গাজীপুর', 'নারায়ণগঞ্জ', 'নরসিংদী', 'মুন্সীগঞ্জ', 'মানিকগঞ্জ',
+            'টাঙ্গাইল', 'কিশোরগঞ্জ', 'ময়মনসিংহ', 'ফরিদপুর', 'রাজবাড়ী', 'মাদারীপুর',
+            'গোপালগঞ্জ', 'শরীয়তপুর', 'জামালপুর', 'শেরপুর', 'নেত্রকোনা'
+        ];
+        var allDistricts = [
             'ঢাকা', 'গাজীপুর', 'নারায়ণগঞ্জ', 'নরসিংদী', 'টাঙ্গাইল', 'কিশোরগঞ্জ', 'ময়মনসিংহ', 'শেরপুর', 'জামালপুর', 'নেত্রকোনা',
             'মানিকগঞ্জ', 'মুন্সীগঞ্জ', 'মাদারীপুর', 'রাজবাড়ী', 'ফরিদপুর', 'গোপালগঞ্জ', 'শরীয়তপুর',
             'চট্টগ্রাম', 'কুমিল্লা', 'চাঁদপুর', 'ফেনী', 'ব্রাহ্মণবাড়িয়া', 'নোয়াখালী', 'লক্ষ্মীপুর', 'কক্সবাজার', 'খাগড়াছড়ি', 'রাঙ্গামাটি', 'বান্দরবান',
@@ -1480,10 +1549,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             if (subDhaka[name]) return 100;
             return 150;
         }
-        var dhaka = 'ঢাকা';
-        var rest = districts.filter(function (d) { return d !== dhaka; });
+        var nearbySet = {};
+        dhakaNearby.forEach(function (d) { nearbySet[d] = 1; });
+        var nearbyOrdered = dhakaNearby.filter(function (d) {
+            return allDistricts.indexOf(d) !== -1;
+        });
+        var rest = allDistricts.filter(function (d) {
+            return d !== 'ঢাকা' && !nearbySet[d];
+        });
         rest.sort(function (a, b) { return a.localeCompare(b, 'bn'); });
-        var ordered = [dhaka].concat(rest);
+        var ordered = ['ঢাকা'].concat(nearbyOrdered, rest);
         ordered.forEach(function (name) {
             var opt = document.createElement('option');
             opt.value = String(deliveryFee(name));
