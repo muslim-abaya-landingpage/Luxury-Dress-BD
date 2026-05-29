@@ -172,21 +172,9 @@ html = html.replace(
   }
 );
 
-// Sales sticky bar — mobile conversion
-if (!html.includes("ma-sales-sticky")) {
-  html = html.replace(
-    /<div id="site-footer-mount"><\/div>/,
-    `<div id="maSalesSticky" class="ma-sales-sticky" role="region" aria-label="দ্রুত অর্ডার">
-    <a href="checkout.html" class="ma-sales-sticky__order" onclick="if(typeof goToCheckoutPage==='function'){goToCheckoutPage();return false;}">অর্ডার করুন</a>
-    <a href="https://wa.me/8801787791264?text=${encodeURIComponent("অর্ডার করতে চাই")}" class="ma-sales-sticky__wa" target="_blank" rel="noopener noreferrer">WhatsApp</a>
-    <a href="/abaya" class="ma-sales-sticky__shop">কালেকশন</a>
-</div>
-<div id="site-footer-mount"></div>
-    ${deferCss(`index-sales-sticky.css?v=${VER}`)}`
-  );
-}
+// Sales sticky bar removed — footer flows directly after social connect
 
-// Extract large inline catalog script → external file (parse / TBT)
+// Extract large inline catalog script
 const mainScriptRe =
   /<script>\s*\nlet currentIdx = 0;[\s\S]*?function removeFromCart\(productId\) \{[\s\S]*?\n\}\s*\n<\/script>/;
 const scriptMatch = html.match(mainScriptRe);

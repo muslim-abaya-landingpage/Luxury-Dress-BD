@@ -294,6 +294,7 @@ function buyNowFromCard(productId, ev) {
     if (ev && ev.preventDefault) ev.preventDefault();
     if (ev && ev.stopPropagation) ev.stopPropagation();
     if (getCartQty(productId) < 1) cart[productId] = 1;
+    syncHomeCartAfterChange();
     goToCheckoutPage();
 }
 function trackInitiateCheckout() {

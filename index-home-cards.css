@@ -1,4 +1,34 @@
 /* Homepage sidebar cards — compact names + plain price (no circle) */
+
+/* Card width — 4 inch fixed */
+#premium-collection .product-list-sidebar {
+  display: grid !important;
+  grid-template-columns: repeat(2, 4in) !important;
+  justify-content: center;
+  gap: 10px !important;
+  width: auto !important;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+#premium-collection .item-card {
+  width: 4in !important;
+  max-width: 4in !important;
+  min-width: 0;
+  flex: none !important;
+  box-sizing: border-box;
+}
+
+@media (max-width: 520px) {
+  #premium-collection .product-list-sidebar {
+    grid-template-columns: min(4in, 100%) !important;
+  }
+  #premium-collection .item-card {
+    width: min(4in, 100%) !important;
+    max-width: min(4in, 100%) !important;
+  }
+}
+
 .product-card-name {
   font-size: 12px !important;
   font-weight: 600 !important;

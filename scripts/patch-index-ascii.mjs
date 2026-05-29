@@ -21,16 +21,14 @@ if (!html.includes('role="status"')) {
   );
 }
 
-if (!html.includes("index-sales-sticky.css")) {
-  html = html.replace(
-    /(<noscript><link rel="stylesheet" href="index-home\.css[^>]+><\/noscript>)/,
-    `$1\n    <link rel="stylesheet" href="index-sales-sticky.css?v=${VER}" media="print" onload="this.media='all'">\n    <noscript><link rel="stylesheet" href="index-sales-sticky.css?v=${VER}"></noscript>`
-  );
-}
+html = html.replace(
+  /<div id="maSalesSticky"[\s\S]*?<\/div>\s*(?=<div id="site-footer-mount">)/,
+  ""
+);
 
 html = html.replace(
-  /<div id="site-footer-mount"><\/div>\s*<link rel="stylesheet" href="index-sales-sticky\.css[^>]+>\s*<noscript>[\s\S]*?<\/noscript>\s*(?=<script defer src="site-seo-config)/,
-  "<div id=\"site-footer-mount\"></div>\n"
+  /<link rel="stylesheet" href="index-sales-sticky\.css[^>]+>\s*<noscript>[\s\S]*?<\/noscript>\s*/g,
+  ""
 );
 
 html = html.replace(

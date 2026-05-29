@@ -1,14 +1,19 @@
 /* Home + site-wide social connect (SEO / organic discovery) */
 #ma-social-connect-mount {
   width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
   background: #0a0a0a;
   border-top: 1px solid rgba(201, 169, 98, 0.22);
+  box-sizing: border-box;
 }
 
 .ma-social-connect {
+  width: 100%;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 14px 28px 0;
+  padding: 18px 16px 0;
   box-sizing: border-box;
 }
 
@@ -16,26 +21,26 @@
   background: linear-gradient(135deg, #141414 0%, #1f1a12 100%);
   border: 1px solid rgba(201, 169, 98, 0.28);
   border-radius: 10px;
-  padding: 12px 14px 14px;
+  padding: 16px 18px 18px;
   text-align: center;
   color: #f5f0e6;
   font-family: "Hind Siliguri", "Inter", sans-serif;
 }
 
 .ma-social-connect-inner h2 {
-  margin: 0 0 6px;
-  font-size: clamp(1rem, 2.8vw, 1.2rem);
+  margin: 0 0 8px;
+  font-size: clamp(1.125rem, 2.5vw, 1.35rem);
   font-weight: 700;
   color: #fff;
-  line-height: 1.35;
+  line-height: 1.4;
 }
 
 .ma-social-connect-inner p {
-  margin: 0 0 12px;
-  font-size: 13px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.82);
-  max-width: 480px;
+  margin: 0 0 14px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.88);
+  max-width: 520px;
   margin-left: auto;
   margin-right: auto;
 }
@@ -43,7 +48,7 @@
 .ma-social-connect-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
   justify-content: center;
 }
 
@@ -51,10 +56,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 9px 16px;
+  padding: 11px 20px;
   border-radius: 8px;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 15px;
   text-decoration: none;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }

@@ -203,7 +203,7 @@ html, body {
 }  
         :root { --primary: #7c3aed; --bg: #fdfbf7; --white: #ffffff; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Hind Siliguri', sans-serif; background: #fff; color: #495057; padding-bottom: 80px; }
+        body { font-family: 'Hind Siliguri', sans-serif; background: #fff; color: #495057; padding-bottom: 0; }
         .promo-bar {
             background: linear-gradient(90deg, #fff, #000);
             color: white;
@@ -1237,12 +1237,11 @@ html, body {
     padding: 0;
 }
 
-/* Performance + mobile-friendly overrides */
+/* Performance — below-fold sections only (not footer) */
 #main-video-section,
-.astra-feature-wrapper,
-.anz-footer {
+.astra-feature-wrapper {
     content-visibility: auto;
-    contain-intrinsic-size: 1px 900px;
+    contain-intrinsic-size: auto 480px;
 }
 
 

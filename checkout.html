@@ -11,7 +11,7 @@
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
     <link rel="stylesheet" href="site-header.css?v=20260530c">
-    <link rel="stylesheet" href="site-footer.css?v=20260623ft">
+    <link rel="stylesheet" href="site-footer.css?v=20260629full">
     <style>
         :root {
             --ink: #111111;
@@ -1513,9 +1513,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="site-api-health.js?v=20260610"></script>
 <script src="auth-config.js"></script>
 <script src="auth-api.js"></script>
-<script src="cart-utils.js?v=20260623cart"></script>
+<script src="cart-utils.js?v=20260629cart"></script>
 <script defer src="site-header.js?v=20260531nav"></script>
 <script>
+    var __cartFormatBdt = (typeof window.formatBdt === 'function') ? window.formatBdt : null;
+    function formatCheckoutBdt(amount) {
+        if (__cartFormatBdt) return __cartFormatBdt(amount);
+        var n = parseInt(amount, 10) || 0;
+        return '\u09F3' + n.toLocaleString('en-BD', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
     const ORDER_SCRIPT_URL =
       (typeof getSiteApiUrl === 'function' && getSiteApiUrl()) ||
       (window.MA_AUTH_CONFIG && window.MA_AUTH_CONFIG.apiUrl) ||
@@ -1923,12 +1930,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         }).join(', ');
     }
 
-    function formatBdt(amount) {
-        if (typeof window.formatBdt === 'function') return window.formatBdt(amount);
-        var n = parseInt(amount, 10) || 0;
-        return '\u09F3' + n.toLocaleString('en-BD', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-
     var TRASH_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
 
     function renderProductChart() {
@@ -1950,7 +1951,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 '<td>' + size + '</td>' +
                 '<td>' + fabric + '</td>' +
                 '<td>' + qty + '</td>' +
-                '<td>' + formatBdt(unit * qty) + '</td>' +
+                '<td>' + formatCheckoutBdt(unit * qty) + '</td>' +
                 '</tr>';
         });
         el.innerHTML =
@@ -1975,7 +1976,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         return (
             '<div class="empty-cart-msg">' +
             '<p class="empty-cart-title">' + '\u0995\u09BE\u09B0\u09CD\u099F\u09C7 \u098F\u0996\u09A8\u09CB \u0995\u09CB\u09A8\u09CB \u09AA\u09A3\u09CD\u09AF \u09A8\u09C7\u0987' + '</p>' +
-            '<p class="empty-cart-desc">' + '\u0986\u09AC\u09BE\u09AF\u09BC\u09BE \u0995\u09BE\u09B2\u09C7\u0995\u09B6\u09A8 \u09A5\u09C7\u0995\u09C7 \u09AA\u099B\u09A8\u09CD\u09A6\u09C7\u09B0 \u09AA\u09A3\u09CD\u09AF \u09AF\u09CB\u09A7 \u0995\u09B0\u09C1\u09A8\u0964 \u0995\u09CD\u09AF\u09BE\u09B6 \u0985\u09A8 \u09A1\u09C7\u09B2\u09BF\u09AD\u09BE\u09B0\u09BF\u09A4\u09C7 \u0985\u09B0\u09A1\u09BE\u09B0 \u0995\u09B0\u09C1\u09A8\u0964' + '</p>' +
+            '<p class="empty-cart-desc">' + '\u0986\u09AC\u09BE\u09AF\u09BC\u09BE \u0995\u09BE\u09B2\u09C7\u0995\u09B6\u09A8 \u09A5\u09C7\u0995\u09C7 \u09AA\u099B\u09A8\u09CD\u09A6\u09C7\u09B0 \u09AA\u09A3\u09CD\u09AF \u09AF\u09CB\u0997 \u0995\u09B0\u09C1\u09A8\u0964 \u0995\u09CD\u09AF\u09BE\u09B6 \u0985\u09A8 \u09A1\u09C7\u09B2\u09BF\u09AD\u09BE\u09B0\u09BF\u09A4\u09C7 \u0985\u09B0\u09A1\u09BE\u09B0 \u0995\u09B0\u09C1\u09A8\u0964' + '</p>' +
             '<div class="empty-cart-actions">' +
             '<a href="' + pageLink('/category') + '" class="empty-cart-btn empty-cart-btn-primary">' + '\u0995\u09BE\u09B2\u09C7\u0995\u09B6\u09A8 \u09A6\u09C7\u0996\u09C1\u09A8' + '</a>' +
             '<a href="' + pageLink('/') + '" class="empty-cart-btn empty-cart-btn-ghost">' + '\u09B9\u09CB\u09AE\u09C7 \u09AB\u09BF\u09B0\u09C7 \u09AF\u09BE\u09A8' + '</a>' +
@@ -1995,9 +1996,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             var sideSubtotal = document.getElementById('side-subtotal');
             var sideDelivery = document.getElementById('side-delivery');
             var sideTotal = document.getElementById('side-total');
-            if (sideSubtotal) sideSubtotal.textContent = formatBdt(0);
-            if (sideDelivery) sideDelivery.textContent = formatBdt(0);
-            if (sideTotal) sideTotal.textContent = formatBdt(0) + ' BDT';
+            if (sideSubtotal) sideSubtotal.textContent = formatCheckoutBdt(0);
+            if (sideDelivery) sideDelivery.textContent = formatCheckoutBdt(0);
+            if (sideTotal) sideTotal.textContent = formatCheckoutBdt(0) + ' BDT';
             renderProductChart();
             return;
         }
@@ -2010,9 +2011,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var sideSubtotal = document.getElementById('side-subtotal');
         var sideDelivery = document.getElementById('side-delivery');
         var sideTotal = document.getElementById('side-total');
-        if (sideSubtotal) sideSubtotal.textContent = formatBdt(sub);
-        if (sideDelivery) sideDelivery.textContent = (q >= 3 ? formatBdt(0) : formatBdt(ship));
-        if (sideTotal) sideTotal.textContent = formatBdt(grand) + ' BDT';
+        if (sideSubtotal) sideSubtotal.textContent = formatCheckoutBdt(sub);
+        if (sideDelivery) sideDelivery.textContent = (q >= 3 ? formatCheckoutBdt(0) : formatCheckoutBdt(ship));
+        if (sideTotal) sideTotal.textContent = formatCheckoutBdt(grand) + ' BDT';
         var sideQty = document.getElementById('side-qty');
         var sideDesign = document.getElementById('side-design');
         if (sideQty) sideQty.textContent = String(q);
@@ -2042,7 +2043,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 '<span>' + qty + '</span>' +
                 '<button type="button" data-cart-action="inc" data-cart-idx="' + idx + '" aria-label="Increase quantity">+</button>' +
                 '</div></div></div>' +
-                '<div class="gb-order-price">' + formatBdt(lineTotal) + '</div>' +
+                '<div class="gb-order-price">' + formatCheckoutBdt(lineTotal) + '</div>' +
                 '<button type="button" class="gb-order-delete" data-cart-action="remove" data-cart-idx="' + idx + '" aria-label="Remove product" title="Remove">' + TRASH_SVG + '</button>' +
                 '</div>';
         });
