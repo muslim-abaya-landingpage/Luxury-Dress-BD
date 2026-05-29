@@ -1,7 +1,7 @@
 import fs from "fs";
 
+const FOOTER_CSS = "site-footer.css?v=20260530ft2";
 const FOOTER_JS = "site-footer.js?v=20260629post";
-const FOOTER_CSS = "site-footer.css?v=20260629sub";
 
 function deferCss(href) {
   return (

@@ -3,8 +3,8 @@ import fs from "fs";
 
 const SRC = "7721f89";
 const VER = "20260530sale";
-const FOOTER_JS = "20260629post";
-const FOOTER_CSS = "20260629sub";
+const FOOTER_JS = "site-footer.js?v=20260629post";
+const FOOTER_CSS = "site-footer.css?v=20260530ft2";
 
 function deferCss(href) {
   return (
