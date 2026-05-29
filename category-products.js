@@ -4,7 +4,8 @@
  *  • বাল্ক ছবি লিংক: product-links.html → product-links-data.js
  *  • পুরো তথ্য: নিচের অ্যারেতে { id, name, image, price, ... }
  *  • লিংক সার্ভার বদল: product-config.js → SITE_LINKS.images
- *  • Abaya শুধু abaya: [] তে | Two-piece শুধু "premium-two-piece": [] তে
+ *  • Abaya → abaya:[] | Two-piece → "premium-two-piece":[] | খালি ক্যাটাগরি → []
+ *  • product-links-data শুধু ছবি আপডেট করে; নতুন প্রোডাক্ট শুধু এখানে + ম্যানেজার থেকে
  * ═══════════════════════════════════════════════════════════════════
  */
 window.CATEGORY_PRODUCTS = {
@@ -156,79 +157,11 @@ window.CATEGORY_PRODUCTS = {
     }
   ],
 
-  /* ═══ ② কভার আপ সারি · COVER UP · cover-up.html ═══ */
-  "cover-up": [
-    {
-      id: "COV-01",
-      name: "Royal Blue Golden Cover Up",
-      image: "images/Royal-Blue-Golden-Floral-Print.jpeg",
-      link: "/",
-      price: 550,
-      color: "blue",
-      colorLabel: "Royal Blue Golden",
-      fabric: "এলেক্স সফট জর্জেট",
-      sizes: ["বডি ৪২ (ফ্রি সাইজ)"]
-    },
-    {
-      id: "COV-02",
-      name: "Baby Pink Floral Cover Up",
-      image: "images/Baby-Pink-Floral-Print.jpeg",
-      link: "/",
-      price: 550,
-      color: "pink",
-      colorLabel: "Baby Pink Floral",
-      fabric: "এলেক্স সফট জর্জেট",
-      sizes: ["বডি ৪২ (ফ্রি সাইজ)"]
-    },
-    {
-      id: "COV-03",
-      name: "Black Base Rose Cover Up",
-      image: "images/Black-Base-Rose-Floral.jpeg",
-      link: "/",
-      price: 550,
-      color: "black",
-      colorLabel: "Black Base Rose",
-      fabric: "এলেক্স সফট জর্জেট",
-      sizes: ["বডি ৪২ (ফ্রি সাইজ)"]
-    }
-  ],
+  /* ═══ ② কভার আপ — খালি (প্রোডাক্ট-এডিট.bat থেকে যোগ করুন) ═══ */
+  "cover-up": [],
 
-  /* ═══ ③ টপস/কুর্তি সারি · TOPS/KURTI · tops-kurti.html ═══ */
-  "tops-kurti": [
-    {
-      id: "TOP-01",
-      name: "Black White Polka Kurti",
-      image: "images/Black-White-Polka-Dots.jpeg",
-      link: "/",
-      price: 550,
-      color: "black",
-      colorLabel: "Black White Polka",
-      fabric: "এলেক্স সফট জর্জেট",
-      sizes: ["বডি ৪২ (ফ্রি সাইজ)"]
-    },
-    {
-      id: "TOP-02",
-      name: "Baby Pink Floral Kurti",
-      image: "images/Baby-Pink-Floral-Print.jpeg",
-      link: "/",
-      price: 550,
-      color: "pink",
-      colorLabel: "Baby Pink Floral",
-      fabric: "এলেক্স সফট জর্জেট",
-      sizes: ["বডি ৪২ (ফ্রি সাইজ)"]
-    },
-    {
-      id: "TOP-03",
-      name: "Sage Green Mint Kurti",
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Sage%20GreenMint%20Green.jpeg?raw=1",
-      link: "/",
-      price: 550,
-      color: "green",
-      colorLabel: "Sage Green Mint",
-      fabric: "এলেক্স সফট জর্জেট",
-      sizes: ["বডি ৪২ (ফ্রি সাইজ)"]
-    }
-  ],
+  /* ═══ ③ টপস/কুর্তি — খালি ═══ */
+  "tops-kurti": [],
 
   /* ═══ ④ টু-পিস সারি · PREMIUM TWO-PIECE · premium-two-piece.html ═══ */
   "premium-two-piece": [
@@ -318,137 +251,17 @@ window.CATEGORY_PRODUCTS = {
     }
   ],
 
-  /* ═══ ⑤ এম্ব্রয়ডারি সারি · EMBROIDERY · embroidery.html ═══ */
-  embroidery: [
-    {
-      id: "EMB-01",
-      name: "Royal Blue Golden Embroidery",
-      image: "images/Royal-Blue-Golden-Floral-Print.jpeg",
-      link: "/",
-      price: 550,
-      color: "blue",
-      colorLabel: "Royal Blue Golden",
-      fabric: "এলেক্স সফট জর্জেট",
-      sizes: ["বডি ৪২ (ফ্রি সাইজ)"]
-    },
-    {
-      id: "EMB-02",
-      name: "Black Base Rose Embroidery",
-      image: "images/Black-Base-Rose-Floral.jpeg",
-      link: "/",
-      price: 550,
-      color: "black",
-      colorLabel: "Black Base Rose",
-      fabric: "এলেক্স সফট জর্জেট",
-      sizes: ["বডি ৪২ (ফ্রি সাইজ)"]
-    },
-    {
-      id: "EMB-03",
-      name: "Pink Floral Embroidery Set",
-      image: "images/pink-floral-printed-co-ord-set.jpeg",
-      link: "/",
-      price: 550,
-      color: "pink",
-      colorLabel: "Pink Floral",
-      fabric: "এলেক্স সফট জর্জেট",
-      sizes: ["বডি ৪২ (ফ্রি সাইজ)"]
-    }
-  ],
+  /* ═══ ⑤ এম্ব্রয়ডারি — খালি ═══ */
+  embroidery: [],
 
-  /* ═══ ⑥ কারচুপি সারি · KARCHUPI · karchupi.html ═══ */
-  karchupi: [
-    {
-      id: "KAR-01",
-      name: "Black Base Rose Karchupi",
-      image: "images/Black-Base-Rose-Floral.jpeg",
-      link: "/",
-      price: 550,
-      color: "black",
-      colorLabel: "Black Base Rose",
-      fabric: "এলেক্স সফট জর্জেট",
-      sizes: ["বডি ৪২ (ফ্রি সাইজ)"]
-    },
-    {
-      id: "KAR-02",
-      name: "Royal Blue Golden Karchupi",
-      image: "images/Royal-Blue-Golden-Floral-Print.jpeg",
-      link: "/",
-      price: 550,
-      color: "blue",
-      colorLabel: "Royal Blue Golden",
-      fabric: "এলেক্স সফট জর্জেট",
-      sizes: ["বডি ৪২ (ফ্রি সাইজ)"]
-    },
-    {
-      id: "KAR-03",
-      name: "Baby Pink Floral Karchupi",
-      image: "images/Baby-Pink-Floral-Print.jpeg",
-      link: "/",
-      price: 550,
-      color: "pink",
-      colorLabel: "Baby Pink Floral",
-      fabric: "এলেক্স সফট জর্জেট",
-      sizes: ["বডি ৪২ (ফ্রি সাইজ)"]
-    }
-  ],
+  /* ═══ ⑥ কারচুপি — খালি ═══ */
+  karchupi: [],
 
-  /* ═══ ⑦ কাফতান সারি · KAFTAN · kaftan.html ═══ */
-  kaftan: [
-    { id: "KAF-01", name: "Kaftan Al Laiba V1", image: "images/Baby-Pink-Floral-Print.jpeg", link: "/", price: 1990, color: "beige", colorLabel: "Copper Beige Kaftan" },
-    { id: "KAF-02", name: "Romanian Baloch", image: "images/Black-Base-Rose-Floral.jpeg", link: "/", price: 1990, color: "black", colorLabel: "Classic Black Kaftan" },
-    { id: "KAF-03", name: "Afghani Kantaha Kaftan", image: "images/Royal-Blue-Golden-Floral-Print.jpeg", link: "/", price: 1750, color: "blue", colorLabel: "Royal Blue Kaftan" },
-    { id: "KAF-04", name: "Kaftan An Naimah", image: "images/pink-floral-printed-co-ord-set.jpeg", link: "/", price: 1650, color: "pink", colorLabel: "Rose Pink Kaftan" },
-    { id: "KAF-05", name: "Kaftan An Nawmi", image: "images/Black-White-Polka-Dots.jpeg", link: "/", price: 1550, color: "white", colorLabel: "Soft White Kaftan" },
-    { id: "KAF-06", name: "Irani Fabiha Kaftan", image: "images/Baby-Pink-Floral-Print.jpeg", link: "/", price: 1890, color: "green", colorLabel: "Olive Green Kaftan" }
-  ],
+  /* ═══ ⑦ কাফতান — খালি ═══ */
+  kaftan: [],
 
-  /* ═══ ⑧ হিজাব সারি · HIJAB · hijab.html ═══ */
-  hijab: [
-    {
-      id: "HIJ-01",
-      name: "Classic Black Hijab",
-      image: "images/Black-White-Polka-Dots.jpeg",
-      link: "/",
-      price: 550,
-      color: "black",
-      colorLabel: "Classic Black Hijab",
-      fabric: "সফট শিফন",
-      sizes: ["ফ্রি সাইজ"]
-    },
-    {
-      id: "HIJ-02",
-      name: "Soft White Hijab",
-      image: "images/Black-White-Polka-Dots.jpeg",
-      link: "/",
-      price: 550,
-      color: "white",
-      colorLabel: "Soft White",
-      fabric: "সফট শিফন",
-      sizes: ["ফ্রি সাইজ"]
-    },
-    {
-      id: "HIJ-03",
-      name: "Rose Pink Hijab",
-      image: "images/Baby-Pink-Floral-Print.jpeg",
-      link: "/",
-      price: 550,
-      color: "pink",
-      colorLabel: "Rose Pink",
-      fabric: "সফট শিফন",
-      sizes: ["ফ্রি সাইজ"]
-    },
-    {
-      id: "HIJ-04",
-      name: "Maroon Premium Hijab",
-      image: "images/Black-Base-Rose-Floral.jpeg",
-      link: "/",
-      price: 550,
-      color: "maroon",
-      colorLabel: "Maroon",
-      fabric: "সফট শিফন",
-      sizes: ["ফ্রি সাইজ"]
-    }
-  ]
+  /* ═══ ⑧ হিজাব — খালি ═══ */
+  hijab: []
 };
 
 window.SITE_MEDIA = {

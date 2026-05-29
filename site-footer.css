@@ -1,25 +1,57 @@
-/* Shared site footer — premium layout */
+/* Muslim Abaya — premium footer */
 .anz-footer {
-  background: linear-gradient(180deg, #fafafa 0%, #f5f5f5 100%);
-  border-top: 1px solid #e8e8e8;
+  background: linear-gradient(165deg, #141414 0%, #0d0d0d 48%, #1a1814 100%);
+  border-top: 1px solid rgba(201, 169, 98, 0.22);
   font-family: "Hind Siliguri", "Inter", "Helvetica Neue", Arial, sans-serif;
-  color: #1a1a1a;
-  margin-top: 32px;
+  color: #e8e4dc;
+  margin-top: 40px;
   overflow-x: hidden;
 }
 
-.anz-container {
+.anz-footer-trust {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.anz-trust-inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 28px;
+  padding: 14px 20px !important;
+}
+
+.anz-trust-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #c9a962;
+  letter-spacing: 0.02em;
+}
+
+.anz-trust-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #c9a962;
+  box-shadow: 0 0 8px rgba(201, 169, 98, 0.55);
+}
+
+.anz-footer-main {
   max-width: 1200px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1.3fr 0.8fr 1.05fr 1fr;
-  gap: 20px 22px;
-  padding: 36px 24px 28px;
+  grid-template-columns: 1.35fr 0.75fr 0.8fr 1.05fr 1.05fr;
+  gap: 24px 20px;
+  padding: 40px 24px 32px;
   box-sizing: border-box;
   align-items: start;
 }
 
 .anz-col-brand,
+.anz-col-shop,
 .anz-col-links,
 .anz-col-contact,
 .anz-col-newsletter {
@@ -27,86 +59,146 @@
 }
 
 .anz-logo {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 800;
-  margin: 0 0 10px;
-  letter-spacing: 0.03em;
+  margin: 0 0 12px;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   line-height: 1.2;
-  color: #111;
+  color: #fff;
 }
 
 .anz-title {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
-  margin: 0 0 12px;
+  margin: 0 0 14px;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #111;
+  letter-spacing: 0.14em;
+  color: #c9a962;
 }
 
 .anz-text {
-  font-size: 15px;
-  line-height: 1.65;
-  color: #4a4a4a;
-  margin: 0;
-  max-width: 340px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #a8a49c;
+  margin: 0 0 16px;
+  max-width: 320px;
 }
 
-.anz-col-links ul {
+.anz-wa-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: #25d366;
+  color: #fff !important;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 14px rgba(37, 211, 102, 0.25);
+}
+
+.anz-wa-cta svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.anz-wa-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(37, 211, 102, 0.35);
+}
+
+.anz-link-list {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.anz-col-links li {
-  margin-bottom: 6px;
+.anz-link-list li {
+  margin-bottom: 8px;
 }
 
-.anz-col-links li:last-child {
+.anz-link-list li:last-child {
   margin-bottom: 0;
 }
 
-.anz-col-links a {
+.anz-link-list a {
   text-decoration: none;
-  color: #3d3d3d;
-  font-size: 15px;
+  color: #d4d0c8;
+  font-size: 14px;
   font-weight: 500;
-  line-height: 1.4;
+  line-height: 1.45;
   transition: color 0.2s ease;
 }
 
-.anz-col-links a:hover {
-  color: #000;
+.anz-link-list a:hover {
+  color: #fff;
 }
 
-.contact-row {
+.anz-soon {
+  font-size: 13px;
+  color: #6b6760;
+  font-weight: 500;
+}
+
+.anz-contact-link {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  margin-bottom: 8px;
-  font-size: 15px;
-  color: #3d3d3d;
-  line-height: 1.45;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #d4d0c8;
+  line-height: 1.5;
+  text-decoration: none;
+  transition: color 0.2s ease;
 }
 
-.contact-row:last-of-type {
+.anz-contact-link:last-child {
   margin-bottom: 0;
 }
 
-.contact-row img {
-  width: 17px;
-  height: 17px;
+a.anz-contact-link:hover {
+  color: #fff;
+}
+
+.anz-contact-static {
+  cursor: default;
+}
+
+.anz-contact-icon {
+  width: 36px;
+  height: 36px;
   flex-shrink: 0;
-  margin-top: 2px;
-  opacity: 0.9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #c9a962;
+}
+
+.anz-contact-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.anz-contact-link > span:last-child {
+  flex: 1;
+  min-width: 0;
+  padding-top: 7px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .anz-newsletter-note {
-  font-size: 14px;
-  line-height: 1.5;
-  color: #5a5a5a;
-  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #8a867e;
+  margin: 0 0 12px;
 }
 
 .newsletter-form {
@@ -114,35 +206,34 @@
   align-items: stretch;
   gap: 8px;
   width: 100%;
-  max-width: 300px;
+  max-width: 100%;
   box-sizing: border-box;
 }
 
 .newsletter-form input {
   flex: 1;
   min-width: 0;
-  height: 40px;
+  height: 42px;
   margin: 0;
   padding: 0 14px;
-  border: 1px solid #d4d4d4;
-  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
   outline: none;
   font-size: 14px;
   font-family: inherit;
-  line-height: 40px;
-  color: #111;
-  background: #fff;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
   box-sizing: border-box;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .newsletter-form input::placeholder {
-  color: #9ca3af;
+  color: #7a766e;
 }
 
 .newsletter-form input:focus {
-  border-color: #111;
-  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.06);
+  border-color: #c9a962;
+  box-shadow: 0 0 0 3px rgba(201, 169, 98, 0.15);
 }
 
 .newsletter-form button {
@@ -150,33 +241,26 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  height: 40px;
+  height: 42px;
   margin: 0;
-  padding: 0 18px;
-  border: 1px solid #111;
-  border-radius: 6px;
-  background: #111;
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
+  padding: 0 16px;
+  border: 1px solid #c9a962;
+  border-radius: 8px;
+  background: #c9a962;
+  color: #111;
+  font-size: 11px;
+  font-weight: 800;
   font-family: inherit;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
   white-space: nowrap;
-  line-height: 1;
-  box-sizing: border-box;
-  vertical-align: middle;
-  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 .newsletter-form button:hover:not(:disabled) {
-  background: #fff;
-  color: #111;
-}
-
-.newsletter-form button:active:not(:disabled) {
-  transform: scale(0.98);
+  background: transparent;
+  color: #c9a962;
 }
 
 .newsletter-form button:disabled {
@@ -187,56 +271,55 @@
 .anz-socials {
   display: flex;
   gap: 8px;
-  margin-top: 12px;
+  margin-top: 14px;
   flex-wrap: wrap;
 }
 
 .anz-social-link {
-  width: 34px;
-  height: 34px;
-  background: #111;
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.2s ease, transform 0.15s ease;
+  transition: background 0.2s ease, transform 0.15s ease;
 }
 
 .anz-social-link:hover {
-  opacity: 0.82;
+  background: #c9a962;
+  border-color: #c9a962;
   transform: translateY(-1px);
 }
 
 .anz-social-link svg {
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
   fill: #fff;
 }
 
 .anz-bottom {
-  border-top: 1px solid #e5e5e5;
-  padding: 14px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 16px 24px;
   text-align: center;
-  background: #f0f0f0;
+  background: rgba(0, 0, 0, 0.35);
 }
 
 .anz-bottom p {
   margin: 0;
-  font-size: 13px;
-  color: #5c5c5c;
-  letter-spacing: 0.02em;
+  font-size: 12px;
+  color: #6f6b63;
+  letter-spacing: 0.04em;
 }
 
 .subscribe-success {
   display: none;
-  margin-top: 10px;
-  max-width: 300px;
-  padding: 12px 12px 12px 40px;
+  margin-top: 12px;
+  padding: 12px 14px;
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  background: #fff;
-  box-shadow: 0 4px 14px rgba(17, 24, 39, 0.05);
-  position: relative;
+  border: 1px solid rgba(201, 169, 98, 0.35);
+  background: rgba(201, 169, 98, 0.08);
   animation: subscribeFadeIn 0.35s ease;
 }
 
@@ -245,32 +328,30 @@
 }
 
 .subscribe-success-icon {
-  position: absolute;
-  left: 12px;
-  top: 12px;
-  width: 20px;
-  height: 20px;
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  background: #111;
-  color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-  display: flex;
+  background: #c9a962;
+  color: #111;
+  font-size: 12px;
+  font-weight: 800;
   align-items: center;
   justify-content: center;
+  margin-bottom: 6px;
 }
 
 .subscribe-success-title {
   margin: 0 0 4px;
   font-size: 14px;
   font-weight: 700;
-  color: #111;
+  color: #fff;
 }
 
 .subscribe-success-text {
   margin: 0;
   font-size: 13px;
-  color: #6b7280;
+  color: #a8a49c;
   line-height: 1.5;
 }
 
@@ -285,11 +366,10 @@
   }
 }
 
-@media (max-width: 1024px) {
-  .anz-container {
-    grid-template-columns: 1fr 1fr;
-    gap: 18px 20px;
-    padding: 32px 20px 24px;
+@media (max-width: 1100px) {
+  .anz-footer-main {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 22px 18px;
   }
 
   .anz-col-brand {
@@ -301,40 +381,49 @@
   }
 }
 
-@media (max-width: 600px) {
-  .anz-container {
+@media (max-width: 640px) {
+  .anz-footer-main {
     grid-template-columns: 1fr 1fr;
-    gap: 14px 18px;
-    padding: 28px 16px 22px;
+    gap: 20px 16px;
+    padding: 32px 16px 24px;
   }
 
   .anz-col-brand {
     grid-column: 1 / -1;
   }
 
-  .anz-col-links {
+  .anz-col-shop {
     grid-column: 1;
   }
 
-  .anz-col-contact {
+  .anz-col-links {
     grid-column: 2;
+  }
+
+  .anz-col-contact {
+    grid-column: 1 / -1;
   }
 
   .anz-col-newsletter {
     grid-column: 1 / -1;
   }
 
-  .newsletter-form {
-    max-width: none;
+  .anz-trust-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px 16px !important;
   }
 
   .anz-logo {
-    font-size: 22px;
+    font-size: 20px;
   }
 
-  .anz-text,
-  .anz-col-links a,
-  .contact-row {
-    font-size: 14px;
+  .newsletter-form {
+    flex-direction: column;
+  }
+
+  .newsletter-form button {
+    width: 100%;
   }
 }

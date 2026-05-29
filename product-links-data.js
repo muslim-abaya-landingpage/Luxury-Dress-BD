@@ -1,8 +1,6 @@
 /**
- * ═══ প্রতিটি ক্যাটাগরির লিংক আলাদা (মিশে না) ═══
- * abaya → শুধু abaya.html | premium-two-piece → শুধু premium-two-piece.html
- * এডিট: product-links.html → সেভ → এই ফাইল রিপ্লেস
- * (নাম/দাম: category-products.js | CDN বদল: product-config.js)
+ * ছবির লিংক — শুধু category-products.js-এ যত প্রোডাক্ট আছে তত সারি (অতিরিক্ত সারি নতুন প্রোডাক্ট বানায় না)
+ * এডিট: product-manager.html → সেভ
  */
 window.PRODUCT_LINKS_DATA = {
   abaya: [
@@ -19,16 +17,8 @@ window.PRODUCT_LINKS_DATA = {
     "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Premium-Floral-Motif-Abaya-Set..jpeg?raw=1",
     "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Premium-Floral-Motif-Abaya-Set.jpeg?raw=1"
   ],
-  "cover-up": [
-    "images/Royal-Blue-Golden-Floral-Print.jpeg",
-    "images/Baby-Pink-Floral-Print.jpeg",
-    "images/Black-Base-Rose-Floral.jpeg"
-  ],
-  "tops-kurti": [
-    "images/Black-White-Polka-Dots.jpeg",
-    "images/Baby-Pink-Floral-Print.jpeg",
-    "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Sage%20GreenMint%20Green.jpeg?raw=1"
-  ],
+  "cover-up": [],
+  "tops-kurti": [],
   "premium-two-piece": [
     "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Baby%20PinkLight%20Pink.jpeg?raw=1",
     "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Baby-Pink-Floral-Print.jpeg?raw=1",
@@ -38,28 +28,8 @@ window.PRODUCT_LINKS_DATA = {
     "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Sage%20GreenMint%20Green.jpeg?raw=1",
     "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/pink-floral-printed-co-ord-set.jpeg?raw=1"
   ],
-  embroidery: [
-    "images/Royal-Blue-Golden-Floral-Print.jpeg",
-    "images/Black-Base-Rose-Floral.jpeg",
-    "images/pink-floral-printed-co-ord-set.jpeg"
-  ],
-  karchupi: [
-    "images/Black-Base-Rose-Floral.jpeg",
-    "images/Royal-Blue-Golden-Floral-Print.jpeg",
-    "images/Baby-Pink-Floral-Print.jpeg"
-  ],
-  kaftan: [
-    "images/Baby-Pink-Floral-Print.jpeg",
-    "images/Black-Base-Rose-Floral.jpeg",
-    "images/Royal-Blue-Golden-Floral-Print.jpeg",
-    "images/pink-floral-printed-co-ord-set.jpeg",
-    "images/Black-White-Polka-Dots.jpeg",
-    "images/Baby-Pink-Floral-Print.jpeg"
-  ],
-  hijab: [
-    "images/Black-White-Polka-Dots.jpeg",
-    "images/Black-White-Polka-Dots.jpeg",
-    "images/Baby-Pink-Floral-Print.jpeg",
-    "images/Black-Base-Rose-Floral.jpeg"
-  ]
+  embroidery: [],
+  karchupi: [],
+  kaftan: [],
+  hijab: []
 };

@@ -1746,13 +1746,7 @@ function renderCategory(categoryKey) {
     products = (allProducts[categoryKey] || []).slice();
   }
 
-  if (
-    categoryKey &&
-    !searchQ &&
-    typeof window.isCatalogSectionEnabled === "function" &&
-    !window.isCatalogSectionEnabled(categoryKey) &&
-    !products.length
-  ) {
+  if (categoryKey && !searchQ && !products.length) {
     var soonTitle =
       (categoryMeta[categoryKey] && categoryMeta[categoryKey].title) || categoryKey.toUpperCase();
     var soonCrumb =

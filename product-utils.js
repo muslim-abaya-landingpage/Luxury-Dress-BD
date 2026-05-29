@@ -175,8 +175,6 @@
         if (result[key][i]) {
           result[key][i].image = resolveImageUrl(url);
           result[key][i]._catalogNormalized = true;
-        } else {
-          result[key].push(normalizeProductEntry(url, key, i));
         }
       });
     });
@@ -222,14 +220,24 @@
     Object.keys(linkExtras).forEach(function (key) {
       if (!Array.isArray(linkExtras[key])) return;
       if (!result[key]) result[key] = [];
-      var start = result[key].length;
       linkExtras[key].forEach(function (url, i) {
-        if (!url) return;
-        result[key].push(normalizeProductEntry(url, key, start + i));
+        if (!url || !result[key][i]) return;
+        result[key][i].image = resolveImageUrl(url);
+        result[key][i]._catalogNormalized = true;
       });
     });
 
     return result;
+  }
+
+  function categoryHasProducts(key) {
+    var list = (g.CATEGORY_PRODUCTS || {})[key];
+    return (
+      Array.isArray(list) &&
+      list.some(function (p) {
+        return p && (p.image || p.name);
+      })
+    );
   }
 
   g.maCatalog = {
@@ -238,6 +246,7 @@
     hasExplicitProductLink: hasExplicitProductLink,
     normalizeProductEntry: normalizeProductEntry,
     normalizeAll: normalizeAll,
+    categoryHasProducts: categoryHasProducts,
     titleFromFileName: titleFromFileName
   };
 })(window);
