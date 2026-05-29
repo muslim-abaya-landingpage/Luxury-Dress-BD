@@ -1380,19 +1380,7 @@ function buildShopSidebar(categoryKey, products) {
 
     "</div>" +
 
-    "<div class='sidebar-filter sidebar-filter-colors'>" +
-
-    "<h4>Color</h4>" +
-
-    "<div class='color-filter-list' id='colorFilters'>" +
-
-    colorChecks +
-
-    "</div>" +
-
-    "</div>" +
-
-    "<div class='sidebar-filter'>" +
+    "<div class='sidebar-filter sidebar-filter-price'>" +
 
     "<h4>Price Range</h4>" +
 
@@ -1443,6 +1431,18 @@ function buildShopSidebar(categoryKey, products) {
     bounds.max +
 
     "</span></span>" +
+
+    "</div>" +
+
+    "</div>" +
+
+    "<div class='sidebar-filter sidebar-filter-colors'>" +
+
+    "<h4>Color</h4>" +
+
+    "<div class='color-filter-list' id='colorFilters'>" +
+
+    colorChecks +
 
     "</div>" +
 

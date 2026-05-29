@@ -1,4 +1,21 @@
 (function () {
+  function loadFontAwesome() {
+    if (document.querySelector("link[data-ma-fa]")) return;
+    var l = document.createElement("link");
+    l.rel = "stylesheet";
+    l.href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css";
+    l.setAttribute("data-ma-fa", "1");
+    document.head.appendChild(l);
+  }
+
+  function scheduleFa() {
+    if (typeof window.requestIdleCallback === "function") {
+      window.requestIdleCallback(loadFontAwesome, { timeout: 3500 });
+    } else {
+      window.addEventListener("load", loadFontAwesome, { once: true });
+    }
+  }
+
   var chain = [
     "product-config.js?v=20260604",
     "product-utils.js?v=20260604",
@@ -45,7 +62,9 @@
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", schedule, { once: true });
+    document.addEventListener("DOMContentLoaded", scheduleFa, { once: true });
   } else {
     schedule();
+    scheduleFa();
   }
 })();

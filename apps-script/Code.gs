@@ -13,24 +13,56 @@ function doOptions() {
   return ContentService.createTextOutput('').setMimeType(ContentService.MimeType.TEXT);
 }
 
+function normalizeSubscribeContact_(raw) {
+  var v = String(raw || '').trim();
+  if (!v) return '';
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return normalizeEmail_(v);
+  var phone = normalizePhone_(v);
+  if (phone.length >= 11 && phone.length <= 14 && phone.charAt(0) === '0') return phone;
+  return '';
+}
+
+function saveSubscribeContact_(contactRaw) {
+  var contact = normalizeSubscribeContact_(contactRaw);
+  if (!contact) {
+    return { ok: false, error: 'INVALID_CONTACT', message: 'সঠিক ইমেইল বা মোবাইল (01XXXXXXXXX) দিন।' };
+  }
+  try {
+    rateLimit_('sub_' + contact.slice(0, 48));
+  } catch (rl) {
+    return { ok: false, error: 'RATE_LIMIT', message: 'অনেকবার চেষ্টা। কিছুক্ষণ পর আবার করুন।' };
+  }
+  var sub = ensureSheet_('Subscribe', ['যোগাযোগ (ইমেইল/মোবাইল)', 'তারিখ ও সময়']);
+  var data = sub.getDataRange().getValues();
+  var key = contact.toLowerCase();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0] || '').trim().toLowerCase() === key) {
+      return { ok: true, message: 'Already subscribed', duplicate: true };
+    }
+  }
+  appendRow_(sub, [contact, new Date()]);
+  return { ok: true, message: 'Subscribed' };
+}
+
 function doGet(e) {
   try {
     var type = param_(e, 'RecordType');
     if (type === 'Subscribe') {
       var contact = String(param_(e, 'contact') || param_(e, 'email') || '').trim();
-      if (!contact) {
-        return jsonOut_({ ok: false, error: 'EMPTY_CONTACT', message: 'ইমেইল বা মোবাইল দিন।' });
-      }
-      var sub = ensureSheet_('Subscribe', ['Contact', 'Date & Time']);
-      appendRow_(sub, [contact, new Date()]);
-      return jsonOut_({ ok: true, message: 'Subscribed' });
+      var saved = saveSubscribeContact_(contact);
+      if (!saved.ok) return jsonOut_(saved);
+      return jsonOut_({ ok: true, message: 'Subscribed', sheet: 'Subscribe' });
     }
     if (type === 'AuthVerify' || type === 'AdminVerify') {
       var tok = param_(e, 'Token');
       if (type === 'AdminVerify') return jsonOut_(verifyAdminSession_(tok));
       return jsonOut_(verifySession_(tok));
     }
-  } catch (err) {}
+  } catch (err) {
+    if (param_(e, 'RecordType') === 'Subscribe') {
+      return jsonOut_({ ok: false, error: String(err.message || err) });
+    }
+  }
   return ContentService.createTextOutput('Muslim Abaya API OK').setMimeType(ContentService.MimeType.TEXT);
 }
 
@@ -73,12 +105,9 @@ function doPost(e) {
     }
     if (isSubscribe) {
       var contact = String(param_(e, 'contact') || param_(e, 'email') || '').trim();
-      if (!contact) {
-        return jsonOut_({ ok: false, error: 'EMPTY_CONTACT', message: 'ইমেইল বা মোবাইল দিন।' });
-      }
-      var sub = ensureSheet_('Subscribe', ['Contact', 'Date & Time']);
-      appendRow_(sub, [contact, new Date()]);
-      return jsonOut_({ ok: true, message: 'Subscribed' });
+      var saved = saveSubscribeContact_(contact);
+      if (!saved.ok) return jsonOut_(saved);
+      return jsonOut_({ ok: true, message: 'Subscribed', sheet: 'Subscribe' });
     }
 
     return handleOnlineOrderPost_(e);
@@ -782,7 +811,16 @@ function getParams_(e) {
 
 function param_(e, key) {
   if (!e) return '';
-  return getParams_(e)[key] || '';
+  var params = getParams_(e);
+  if (params[key]) return params[key];
+  var lower = String(key).toLowerCase();
+  var k;
+  for (k in params) {
+    if (Object.prototype.hasOwnProperty.call(params, k) && String(k).toLowerCase() === lower) {
+      return params[k];
+    }
+  }
+  return '';
 }
 
 function getAuthSecret_() {

@@ -161,14 +161,15 @@
       "</span></div>" +
       "</div>" +
       '<div class="anz-col-newsletter">' +
-      '<form id="newsletter-form">' +
-      '<h3 class="anz-title">Newsletter</h3>' +
-      '<p class="anz-newsletter-note">নতুন কালেকশন ও অফার — ইমেইল বা মোবাইল</p>' +
+      '<form id="newsletter-form" aria-labelledby="newsletter-heading" novalidate>' +
+      '<h3 class="anz-title" id="newsletter-heading">Newsletter</h3>' +
+      '<p class="anz-newsletter-note" id="newsletter-note">নতুন কালেকশন ও অফার — ইমেইল বা মোবাইল</p>' +
       '<div class="newsletter-form">' +
-      '<input type="text" name="contact" id="subscriber-contact" placeholder="Email or mobile" required autocomplete="email">' +
-      '<button type="submit" id="sub-btn">Subscribe</button>' +
+      '<label for="subscriber-contact" class="anz-visually-hidden">ইমেইল বা মোবাইল নম্বর</label>' +
+      '<input type="text" name="contact" id="subscriber-contact" placeholder="Email or mobile" required autocomplete="email" inputmode="email" aria-describedby="newsletter-note" aria-required="true">' +
+      '<button type="submit" id="sub-btn" aria-label="Newsletter সাবস্ক্রাইব">সাবস্ক্রাইব</button>' +
       "</div>" +
-      '<div id="success-msg" class="subscribe-success" role="status">' +
+      '<div id="success-msg" class="subscribe-success" role="status" aria-live="polite" aria-atomic="true">' +
       '<div class="subscribe-success-icon" aria-hidden="true">' +
       '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>' +
       '<p class="subscribe-success-title">সাবস্ক্রিপশন সম্পন্ন</p>' +
@@ -275,9 +276,57 @@
     return params;
   }
 
+  function postSubscribeViaIframe(apiUrl, contactValue) {
+    return new Promise(function (resolve, reject) {
+      var params = buildSubscribeParams(contactValue);
+      var frameName = "maSubscribeFrame";
+      var iframe = document.getElementById(frameName);
+      if (!iframe) {
+        iframe = document.createElement("iframe");
+        iframe.name = frameName;
+        iframe.id = frameName;
+        iframe.title = "Newsletter subscribe";
+        iframe.style.cssText = "position:absolute;width:1px;height:1px;opacity:0;border:0";
+        iframe.setAttribute("aria-hidden", "true");
+        document.body.appendChild(iframe);
+      }
+      var form = document.createElement("form");
+      form.method = "POST";
+      form.action = apiUrl;
+      form.target = frameName;
+      form.acceptCharset = "UTF-8";
+      form.style.display = "none";
+      params.forEach(function (value, key) {
+        var input = document.createElement("input");
+        input.type = "hidden";
+        input.name = key;
+        input.value = value;
+        form.appendChild(input);
+      });
+      var settled = false;
+      function finish(ok) {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timer);
+        try {
+          form.remove();
+        } catch (e) {}
+        if (ok) resolve({ text: "Success", cors: false, viaIframe: true });
+        else reject(new Error("IFRAME_FAIL"));
+      }
+      iframe.onload = function () {
+        finish(true);
+      };
+      var timer = window.setTimeout(function () {
+        finish(true);
+      }, 5000);
+      document.body.appendChild(form);
+      form.submit();
+    });
+  }
+
   function sendSubscribe(apiUrl, contactValue) {
     var params = buildSubscribeParams(contactValue);
-    var getUrl = apiUrl + (apiUrl.indexOf("?") >= 0 ? "&" : "?") + params.toString();
     var controller = typeof AbortController !== "undefined" ? new AbortController() : null;
     var timer = controller
       ? setTimeout(function () {
@@ -291,11 +340,13 @@
       if (timer) clearTimeout(timer);
     }
 
-    return fetch(getUrl, {
-      method: "GET",
+    return fetch(apiUrl, {
+      method: "POST",
       mode: "cors",
       cache: "no-store",
       credentials: "omit",
+      headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+      body: params.toString(),
       signal: controller ? controller.signal : undefined
     })
       .then(function (res) {
@@ -309,14 +360,7 @@
         if (err && err.name === "AbortError") {
           return Promise.reject(new Error("TIMEOUT"));
         }
-        return fetch(apiUrl, {
-          method: "POST",
-          mode: "no-cors",
-          credentials: "omit",
-          body: params
-        }).then(function () {
-          return { text: "", cors: false };
-        });
+        return postSubscribeViaIframe(apiUrl, contactValue);
       });
   }
 
@@ -351,12 +395,12 @@
       }
 
       btn.disabled = true;
-      btn.innerText = "Processing...";
+      btn.innerText = "পাঠানো হচ্ছে…";
 
       ensureScriptUrl(function (apiUrl) {
         if (!apiUrl) {
           btn.disabled = false;
-          btn.innerText = "Subscribe";
+          btn.innerText = "সাবস্ক্রাইব";
           alert("সাইট API URL নেই। site-api-config.js আপলোড করুন এবং Apps Script Web App URL দিন।");
           return;
         }
@@ -375,12 +419,31 @@
               form.reset();
               return;
             }
+            if (result.viaIframe || (!result.cors && subscribeOk(result.text))) {
+              if (msg) {
+                msg.classList.add("show");
+                setTimeout(function () {
+                  msg.classList.remove("show");
+                }, 6000);
+              }
+              form.reset();
+              return;
+            }
             if (!result.cors) {
               alert(
                 "অনুরোধ পাঠানো হয়েছে। ১–২ মিনিট পর Sheet-এর **Subscribe** ট্যাব দেখুন।\n\n" +
                   "না থাকলে Apps Script → Deploy → Anyone → New version।"
               );
               form.reset();
+              return;
+            }
+            var apiHint = String(result.text || "").trim();
+            if (apiHint === "Muslim Abaya API OK") {
+              alert(
+                "সাবস্ক্রাইব API পুরনো ভার্সন চালাচ্ছে।\n\n" +
+                  "Apps Script → Code.gs পেস্ট → Deploy → New version\n" +
+                  "তারপর site-footer.js আপলোড করুন।"
+              );
               return;
             }
             alert(
@@ -402,7 +465,7 @@
           })
           .finally(function () {
             btn.disabled = false;
-            btn.innerText = "Subscribe";
+            btn.innerText = "সাবস্ক্রাইব";
           });
       });
     });

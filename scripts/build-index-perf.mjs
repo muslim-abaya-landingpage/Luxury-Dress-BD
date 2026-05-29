@@ -222,6 +222,12 @@ html = html.replace(/index-youtube-lazy\.js\?v=[^"]+/g, `index-youtube-lazy.js?v
 html = html.replace(/index-critical\.css\?v=[^"]+/g, `index-critical.css?v=${VER}`);
 html = html.replace(/index-home\.css\?v=[^"]+/g, `index-home.css?v=${VER}`);
 
+// Font Awesome loads idle via index-catalog-defer.js (not render-blocking)
+html = html.replace(
+  /\n<link rel="stylesheet" href="https:\/\/cdnjs\.cloudflare\.com\/ajax\/libs\/font-awesome[^>]+>\s*/i,
+  "\n"
+);
+
 fs.writeFileSync("index.html", html.replace(/^\uFEFF/, ""), { encoding: "utf8" });
 
 let css = fs.readFileSync("index-home.css", "utf8");

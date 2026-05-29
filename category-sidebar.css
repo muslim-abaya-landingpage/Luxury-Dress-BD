@@ -89,10 +89,26 @@ html.category-ready #list {
   border-bottom: 1px solid #e8e8e8;
 }
 
+.sidebar-filter-price {
+  margin-bottom: 18px;
+  padding: 14px 14px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fafafa;
+  box-sizing: border-box;
+}
+
+.sidebar-filter-price h4 {
+  margin-bottom: 12px;
+}
+
 .sidebar-filter-colors {
   margin-bottom: 18px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #e8e8e8;
+  padding: 14px 14px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fff;
+  box-sizing: border-box;
 }
 
 .sidebar-filter {
