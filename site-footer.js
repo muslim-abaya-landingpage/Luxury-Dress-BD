@@ -65,10 +65,16 @@
       return (
         '<li><a href="' +
         esc(footerHref("/abaya")) +
-        '">Abaya</a></li>' +
+        '">আবায়া</a></li>' +
         '<li><a href="' +
         esc(footerHref("/premium-two-piece")) +
-        '">Two-piece</a></li>'
+        '">প্রিমিয়াম টু-পিস</a></li>' +
+        '<li><a href="' +
+        esc(footerHref("/embroidery")) +
+        '">এম্ব্রয়ডারি</a></li>' +
+        '<li><a href="' +
+        esc(footerHref("/kaftan")) +
+        '">কাফতান</a></li>'
       );
     }
     return sections
@@ -163,7 +169,8 @@
       '<button type="submit" id="sub-btn">Subscribe</button>' +
       "</div>" +
       '<div id="success-msg" class="subscribe-success" role="status">' +
-      '<div class="subscribe-success-icon" aria-hidden="true">✓</div>' +
+      '<div class="subscribe-success-icon" aria-hidden="true">' +
+      '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>' +
       '<p class="subscribe-success-title">সাবস্ক্রিপশন সম্পন্ন</p>' +
       '<p class="subscribe-success-text">আপনার তথ্য সংরক্ষিত হয়েছে। শীঘ্রই নতুন কালেকশন জানানো হবে।</p>' +
       "</div>" +
@@ -401,12 +408,34 @@
     });
   }
 
+  function refreshFooterShopLinks() {
+    var ul = document.getElementById("anz-footer-shop");
+    if (!ul) return;
+    var html = buildShopLinksHtml();
+    if (ul.innerHTML !== html) ul.innerHTML = html;
+  }
+
+  function waitForCatalogAndRefresh(tries) {
+    if (window.CATALOG_SECTIONS && window.CATALOG_SECTIONS.length) {
+      refreshFooterShopLinks();
+      return;
+    }
+    if ((tries || 0) > 200) return;
+    setTimeout(function () {
+      waitForCatalogAndRefresh((tries || 0) + 1);
+    }, 25);
+  }
+
   function mountFooter() {
     var mount = document.getElementById("site-footer-mount");
     if (!mount) return;
     mount.innerHTML = buildFooterHtml();
     initNewsletter();
+    waitForCatalogAndRefresh(0);
   }
+
+  window.refreshFooterShopLinks = refreshFooterShopLinks;
+  window.addEventListener("ma:catalog-ready", refreshFooterShopLinks);
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", mountFooter);

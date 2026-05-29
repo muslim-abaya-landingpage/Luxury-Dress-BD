@@ -1,8 +1,14 @@
 /* Home + site-wide social connect (SEO / organic discovery) */
+#ma-social-connect-mount {
+  width: 100%;
+  background: #0a0a0a;
+  border-top: 1px solid rgba(201, 169, 98, 0.22);
+}
+
 .ma-social-connect {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 20px 6px;
+  padding: 14px 28px 0;
   box-sizing: border-box;
 }
 

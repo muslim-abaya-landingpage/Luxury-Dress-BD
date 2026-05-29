@@ -30,7 +30,7 @@ body {
   font-family: "Hind Siliguri", sans-serif;
   background: #fff;
   color: #495057;
-  padding-bottom: 80px;
+  padding-bottom: 0;
 }
 
 .container {
@@ -109,12 +109,14 @@ body {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: linear-gradient(135deg, #ef4444, #7c3aed);
+  background: #111;
   color: #fff;
-  padding: 8px;
+  padding: 6px 12px;
   font-weight: 800;
-  font-size: 18px;
+  font-size: 16px;
   z-index: 2;
+  border-radius: 4px;
+  line-height: 1.2;
 }
 
 @media (min-width: 850px) {

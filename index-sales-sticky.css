@@ -1,0 +1,56 @@
+/* Mobile sticky order bar — conversion */
+.ma-sales-sticky {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 99990;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+  background: rgba(255, 255, 255, 0.96);
+  border-top: 1px solid #e5e7eb;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.08);
+  gap: 8px;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: stretch;
+}
+
+@media (max-width: 768px) {
+  .ma-sales-sticky {
+    display: grid;
+  }
+  body {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+.ma-sales-sticky a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 8px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  font-family: "Hind Siliguri", sans-serif;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.ma-sales-sticky__order {
+  background: #111;
+  color: #fff;
+}
+
+.ma-sales-sticky__wa {
+  background: #25d366;
+  color: #fff;
+}
+
+.ma-sales-sticky__shop {
+  background: #f3f4f6;
+  color: #111;
+  border: 1px solid #d1d5db;
+}

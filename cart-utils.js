@@ -36,11 +36,11 @@
 
   function resolveItemImage(item) {
     if (!item) return "";
+    var stored = String(item.image || item.img || "").trim();
+    if (stored) return stored;
     var cat = item.id ? CATALOG.find(function (p) { return p.id === item.id; }) : findByName(item.name);
-    var stored = String(item.image || "");
-    if (stored && stored.indexOf(PLACEHOLDER_IMG) === -1) return stored;
     if (cat && cat.image) return cat.image;
-    return stored;
+    return "";
   }
 
   function findByName(name) {

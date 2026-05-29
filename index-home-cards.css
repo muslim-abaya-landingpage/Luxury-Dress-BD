@@ -1,4 +1,4 @@
-/* Homepage sidebar cards — pro circle price + compact names */
+/* Homepage sidebar cards — compact names + plain price (no circle) */
 .product-card-name {
   font-size: 12px !important;
   font-weight: 600 !important;
@@ -17,25 +17,12 @@
 
 .product-card-price {
   flex-shrink: 0;
-  line-height: 0;
-}
-
-.product-price-circle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 44px;
-  height: 44px;
-  padding: 0 8px;
-  border-radius: 50%;
-  background: linear-gradient(145deg, #ef4444 0%, #9333ea 100%);
-  color: #fff !important;
-  font-size: 11px !important;
+  font-size: 14px !important;
   font-weight: 800 !important;
+  color: #111 !important;
   font-family: "Hind Siliguri", "Inter", sans-serif !important;
   white-space: nowrap;
-  box-shadow: 0 3px 10px rgba(147, 51, 234, 0.28);
-  border: 2px solid rgba(255, 255, 255, 0.85);
+  line-height: 1.3;
 }
 
 #premium-collection .home-cat-tag {
@@ -45,30 +32,19 @@
 #premium-collection .price-tag {
   top: 12px;
   right: 12px;
-  width: 62px;
-  height: 62px;
-  padding: 0;
-  border-radius: 50%;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  line-height: 1.05;
-  background: linear-gradient(145deg, #ef4444 0%, #9333ea 100%);
-  border: 2px solid rgba(255, 255, 255, 0.88);
-  box-shadow: 0 4px 14px rgba(147, 51, 234, 0.32);
-  font-size: inherit;
-}
-
-.price-tag-cur {
-  font-size: 11px;
-  font-weight: 700;
-  opacity: 0.95;
-}
-
-.price-tag-amt {
-  font-size: 15px;
+  width: auto;
+  height: auto;
+  padding: 6px 12px;
+  border-radius: 4px;
+  background: #111;
+  color: #fff;
+  font-size: 16px;
   font-weight: 800;
-  letter-spacing: -0.02em;
+  font-family: "Hind Siliguri", "Inter", sans-serif;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  animation: none;
+  line-height: 1.2;
 }
 
 #premium-collection .item-card span.product-card-name {
@@ -80,9 +56,10 @@
 }
 
 #premium-collection .item-card span.product-card-price {
-  display: inline-flex !important;
-  font-size: inherit !important;
-  font-weight: inherit !important;
+  display: inline !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  color: #111 !important;
 }
 
 #premium-collection .item-card span.qty-input {
@@ -95,16 +72,11 @@
   #premium-collection .product-card-name {
     font-size: 11px !important;
   }
-  .product-price-circle {
-    min-width: 40px;
-    height: 40px;
-    font-size: 10px !important;
+  .product-card-price {
+    font-size: 13px !important;
   }
   #premium-collection .price-tag {
-    width: 54px;
-    height: 54px;
-  }
-  .price-tag-amt {
-    font-size: 13px;
+    font-size: 14px;
+    padding: 5px 10px;
   }
 }

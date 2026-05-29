@@ -1,8 +1,8 @@
-import { execSync } from "child_process";
+import { execSync, spawnSync } from "child_process";
 import fs from "fs";
 
 const SRC = "7721f89";
-const VER = "20260619perf";
+const VER = "20260629pro";
 
 function deferCss(href) {
   return (
@@ -136,11 +136,62 @@ html = html.replace(
   '<span class="product-card-price">৳'
 );
 
+// Viewport — zoom allowed (PageSpeed a11y)
+html = html.replace(
+  /<meta name="viewport" content="[^"]*">/,
+  '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
+);
+
+// Hero LCP — sync decode, no lazy swap on first paint
+html = html.replace(
+  /(<img id="view"[\s\S]*?)decoding="async"/,
+  '$1decoding="sync"'
+);
+
+// Defer non-critical CSS (footer, seo, cards)
+for (const base of ["site-footer", "site-seo", "index-home-cards"]) {
+  const re = new RegExp(
+    `<link rel="stylesheet" href="${base}\\.css\\?v=[^"]+">\\s*`,
+    "g"
+  );
+  html = html.replace(re, "");
+}
+if (!html.includes("index-home-cards.css")) {
+  html = html.replace(
+    /(<link rel="stylesheet" href="index-critical\.css[^>]+>)/,
+    `$1\n    ${deferCss(`index-home-cards.css?v=${VER}`)}`
+  );
+}
+html = html.replace(
+  /(<link rel="stylesheet" href="index-critical\.css[^>]+>)/,
+  (m) => {
+    if (html.includes("site-footer.css")) return m;
+    return (
+      `${deferCss(`site-footer.css?v=${VER}`)}\n    ${deferCss(`site-seo.css?v=${VER}`)}\n    ${m}`
+    );
+  }
+);
+
+// Sales sticky bar — mobile conversion
+if (!html.includes("ma-sales-sticky")) {
+  html = html.replace(
+    /<div id="site-footer-mount"><\/div>/,
+    `<div id="maSalesSticky" class="ma-sales-sticky" role="region" aria-label="দ্রুত অর্ডার">
+    <a href="checkout.html" class="ma-sales-sticky__order" onclick="if(typeof goToCheckoutPage==='function'){goToCheckoutPage();return false;}">অর্ডার করুন</a>
+    <a href="https://wa.me/8801787791264?text=${encodeURIComponent("অর্ডার করতে চাই")}" class="ma-sales-sticky__wa" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+    <a href="/abaya" class="ma-sales-sticky__shop">কালেকশন</a>
+</div>
+<div id="site-footer-mount"></div>
+    ${deferCss(`index-sales-sticky.css?v=${VER}`)}`
+  );
+}
+
 // Extract large inline catalog script → external file (parse / TBT)
 const mainScriptRe =
   /<script>\s*\nlet currentIdx = 0;[\s\S]*?function removeFromCart\(productId\) \{[\s\S]*?\n\}\s*\n<\/script>/;
 const scriptMatch = html.match(mainScriptRe);
-if (scriptMatch) {
+const skipHomeAppExtract = fs.existsSync("index-home-app.js");
+if (scriptMatch && !skipHomeAppExtract) {
   let js = scriptMatch[0].replace(/^<script>\s*/, "").replace(/\s*<\/script>$/, "");
   js +=
     "\nwindow.hydrateHomeProducts = hydrateHomeProducts;\n" +
@@ -159,6 +210,15 @@ if (scriptMatch) {
     mainScriptRe,
     `<script defer src="index-home-app.js?v=${VER}"></script>`
   );
+} else if (skipHomeAppExtract) {
+  html = html.replace(mainScriptRe, "");
+  if (!html.includes("index-home-app.js")) {
+    html = html.replace(
+      /<script defer src="index-catalog-defer\.js[^>]+><\/script>/,
+      `$&\n<script defer src="index-home-app.js?v=${VER}"></script>`
+    );
+  }
+  html = html.replace(/index-home-app\.js\?v=[^"]+/g, `index-home-app.js?v=${VER}`);
 }
 
 if (!html.includes("index-youtube-lazy.js")) {
@@ -188,3 +248,8 @@ const bad = (html.match(/\?\?\?/g) || []).length;
 console.log("index.html Bengali:", bn, "???? blocks:", bad, "CSS bytes:", css.length);
 console.log("video after product:", html.indexOf("premium-collection") < html.indexOf("main-video-section"));
 if (bn < 800 || bad > 0) process.exit(1);
+
+spawnSync(process.execPath, ["scripts/patch-index-ascii.mjs"], {
+  stdio: "inherit",
+  cwd: process.cwd(),
+});

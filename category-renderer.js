@@ -8,9 +8,9 @@ function ensureCategoryStyles() {
     link.rel = "stylesheet";
     document.head.appendChild(link);
   }
-  link.href = "category-sidebar.css?v=20260620anzaar";
+  link.href = "category-sidebar.css?v=20260624pro";
   var shopLink = document.querySelector('link[href*="shop-page.css"]');
-  if (shopLink) shopLink.href = "shop-page.css?v=20260620anzaar";
+  if (shopLink) shopLink.href = "shop-page.css?v=20260624pro";
 }
 
 function syncShopScrollHeights() {
@@ -233,14 +233,22 @@ function getProductBaseName(name) {
 }
 
 function getProductTypes(p, categoryKey) {
-  if (Array.isArray(p.types) && p.types.length) return p.types;
-  var defs =
-    window.SITE_LINKS &&
-    window.SITE_LINKS.defaults &&
-    window.SITE_LINKS.defaults.byCategory;
-  var cat = defs && categoryKey && defs[categoryKey];
-  if (cat && Array.isArray(cat.types) && cat.types.length) return cat.types;
-  return [];
+  var types = [];
+  if (Array.isArray(p.types) && p.types.length) types = p.types.slice();
+  else {
+    var defs =
+      window.SITE_LINKS &&
+      window.SITE_LINKS.defaults &&
+      window.SITE_LINKS.defaults.byCategory;
+    var cat = defs && categoryKey && defs[categoryKey];
+    if (cat && Array.isArray(cat.types) && cat.types.length) types = cat.types.slice();
+  }
+  if (categoryKey === "premium-two-piece") {
+    types = types.filter(function (t) {
+      return t !== "Top Only" && t !== "Bottom Only";
+    });
+  }
+  return types;
 }
 
 function getCategoryDefaults(categoryKey) {
@@ -277,7 +285,19 @@ function resolveProductPrice(p, categoryKey, typeLabel) {
 }
 
 function formatBdtPrice(amount) {
-  return "\u09F3 " + (parseInt(amount, 10) || 0);
+  return "\u09F3" + (parseInt(amount, 10) || 0);
+}
+
+function colorLabelDiffersFromName(p, colorLabel) {
+  if (!colorLabel) return false;
+  var name = String(p && p.name ? p.name : "")
+    .trim()
+    .toLowerCase();
+  var color = String(colorLabel)
+    .replace(/<[^>]*>/g, "")
+    .trim()
+    .toLowerCase();
+  return color && color !== name;
 }
 
 var PQV_SIZE_LABELS = {
@@ -870,7 +890,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
   var chartBtn = chartUrl
     ? '<button type="button" class="pqv-size-chart-link" data-pqv-size-chart="1" data-chart-url="' +
       escapeHtml(chartUrl) +
-      '"><span class="pqv-size-chart-ico" aria-hidden="true">&#128207;</span> Size Chart</button>'
+      '">Size chart</button>'
     : "";
 
   var typeField =
@@ -880,15 +900,15 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
         "</div></div>"
       : "";
 
-  var colorField = colorLabel
-    ? '<div class="pqv-field"><span class="pqv-field-label">Color</span><div class="pqv-opt-group">' +
-      '<button type="button" class="pqv-opt-btn is-active" aria-pressed="true">' +
-      colorLabel +
-      "</button></div></div>"
-    : "";
+  var colorField =
+    colorLabel && colorLabelDiffersFromName(p, colorLabel)
+      ? '<div class="pqv-field"><span class="pqv-field-label">Color</span><div class="pqv-opt-group">' +
+        '<button type="button" class="pqv-opt-btn is-active" aria-pressed="true">' +
+        colorLabel +
+        "</button></div></div>"
+      : "";
 
   var shortNoteRaw = String(getProductShortNote(p, categoryKey) || "").trim();
-  var shortNote = shortNoteRaw ? escapeHtml(shortNoteRaw) : "";
   var stockText = "In Stock";
 
   var descHtml = getProductDescriptionHtml(p, categoryKey);
@@ -943,24 +963,24 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     '">' +
     priceText +
     "</p>" +
-    (shortNote ? '<p class="pqv-note">' + shortNote + "</p>" : "") +
+    '<div class="pqv-options">' +
     typeField +
     colorField +
     '<div class="pqv-field pqv-field-size"><div class="pqv-field-head"><span class="pqv-field-label">Size</span>' +
     chartBtn +
     '</div><div class="pqv-opt-group pqv-opt-group-wrap">' +
     buildPqvOptionPills(sizes, idx, "pqv-size-opt", "data-size-value", formatSizeLabel) +
-    "</div></div>" +
+    "</div></div></div>" +
     '<div class="pqv-qty-row">' +
+    '<span class="pqv-field-label pqv-qty-label">Quantity</span>' +
     '<div class="ma-qty-stepper pqv-qty" role="group" aria-label="Quantity">' +
-    '<button type="button" class="ma-qty-stepper__btn pqv-qty-btn" data-pqv-qty="minus" aria-label="Decrease quantity">−</button>' +
+    '<button type="button" class="ma-qty-stepper__btn pqv-qty-btn" data-pqv-qty="minus" aria-label="Decrease quantity">-</button>' +
     '<input type="text" id="pqvQty" class="ma-qty-stepper__input pqv-qty-input" value="1" inputmode="numeric" pattern="[0-9]*" lang="en" autocomplete="off" aria-label="Quantity">' +
     '<button type="button" class="ma-qty-stepper__btn pqv-qty-btn" data-pqv-qty="plus" aria-label="Increase quantity">+</button>' +
     "</div>" +
     '<span class="pqv-stock">' +
     escapeHtml(stockText) +
-    '</span>' +
-    '<a href="#pqvDescBlock" class="pqv-jump-desc">&#8595; Jump to Description</a></div>' +
+    "</span></div>" +
     '<div class="pqv-actions-row">' +
     '<button type="button" class="pqv-act pqv-act-cart" data-product-idx="' +
     idx +
@@ -968,12 +988,13 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     '<button type="button" class="pqv-act pqv-act-buy" data-product-idx="' +
     idx +
     '" data-action="buy-now">Buy Now</button>' +
-    '<a class="pqv-act pqv-act-msg" href="' +
+    "</div>" +
+    '<a class="pqv-act-msg-link" href="' +
     waLink +
     "?text=" +
-    encodeURIComponent(p.name + " অর্ডার করতে চাই") +
-    '" target="_blank" rel="noopener">Send Message</a>' +
-    "</div></div>" +
+    encodeURIComponent(p.name + " \u0985\u09B0\u09CD\u09A1\u09BE\u09B0 \u0995\u09B0\u09A4\u09C7 \u099A\u09BE\u09AF\u09BC") +
+    '" target="_blank" rel="noopener">WhatsApp \u0985\u09B0\u09CD\u09A1\u09BE\u09B0</a>' +
+    "</div>" +
     '<div class="pqv-bottom" id="pqvDescBlock">' +
     '<div class="pqv-bottom-main">' +
     '<div class="pqv-tabs">' +

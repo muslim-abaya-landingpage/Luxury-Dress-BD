@@ -102,6 +102,19 @@
 
     document.getElementById("cartDrawerBody").addEventListener("click", onBodyClick);
 
+    var checkoutLink = document.getElementById("cartDrawerCheckout");
+    if (checkoutLink) {
+      checkoutLink.addEventListener("click", function () {
+        var lines = loadLines();
+        if (lines.length && typeof global.flushStoreCartForCheckout === "function") {
+          global.flushStoreCartForCheckout(lines);
+        } else if (lines.length && typeof global.persistStoreCart === "function") {
+          global.persistStoreCart(lines);
+          if (typeof global.markStoreCartSession === "function") global.markStoreCartSession();
+        }
+      });
+    }
+
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape") closeCartDrawer();
     });

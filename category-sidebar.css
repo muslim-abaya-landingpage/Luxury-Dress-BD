@@ -1164,20 +1164,21 @@ body.shop-product-open > main {
 
 .pqv-panel-back {
   display: inline-block;
-  margin: 0 0 12px;
+  margin: 0 0 14px;
   padding: 0;
   border: none;
   background: transparent;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
-  color: #111;
+  color: #666;
   cursor: pointer;
   font-family: inherit;
   text-decoration: none;
+  letter-spacing: 0.02em;
 }
 
 .pqv-panel-back:hover {
-  color: #555;
+  color: #111;
 }
 
 .pqv-dialog {
@@ -1213,9 +1214,9 @@ body.shop-product-open > main {
 }
 
 .pqv-bottom {
-  margin-top: 28px;
-  padding-top: 0;
-  border-top: none;
+  margin-top: 4px;
+  padding-top: 18px;
+  border-top: 1px solid #eee;
   align-items: start;
   min-width: 0;
 }
@@ -1507,41 +1508,50 @@ body.shop-product-open > main {
 }
 
 .pqv-title {
-  margin: 0 0 8px;
-  font-size: clamp(24px, 2.6vw, 32px);
+  margin: 0 0 6px;
+  font-size: clamp(22px, 2.2vw, 28px);
   font-weight: 500;
-  line-height: 1.2;
+  line-height: 1.25;
   color: #111;
-  letter-spacing: 0.01em;
+  letter-spacing: -0.01em;
   font-family: Georgia, "Times New Roman", "Noto Serif Bengali", serif;
 }
 
 .pqv-price {
-  margin: 0 0 12px;
-  font-size: 20px;
-  font-weight: 600;
+  margin: 0 0 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #eee;
+  font-size: 22px;
+  font-weight: 700;
   color: #111;
-  letter-spacing: 0.01em;
+  letter-spacing: -0.02em;
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 .pqv-note {
-  margin: 0 0 16px;
-  max-width: 420px;
-  font-size: 12px;
-  color: #666;
-  line-height: 1.45;
+  display: none;
+}
+
+.pqv-options {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 16px;
 }
 
 .pqv-field {
-  margin-bottom: 14px;
+  margin-bottom: 0;
 }
 
 .pqv-field-label {
   display: block;
-  margin-bottom: 5px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #111;
+  margin-bottom: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #777;
 }
 
 .pqv-field-head {
@@ -1559,22 +1569,22 @@ body.shop-product-open > main {
 .pqv-size-chart-link {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
   border: none;
   background: transparent;
   padding: 0;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  color: #111;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #666;
   text-decoration: underline;
+  text-underline-offset: 2px;
   cursor: pointer;
   font-family: inherit;
 }
 
 .pqv-size-chart-ico {
-  font-size: 14px;
-  line-height: 1;
-  text-decoration: none;
+  display: none;
 }
 
 .pqv-size-chart-link:hover {
@@ -1648,21 +1658,21 @@ body.pqv-sc-open {
 .pqv-opt-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 
 .pqv-opt-btn {
-  min-height: 36px;
-  padding: 7px 14px;
-  border: 1px solid #c8c8c8;
-  border-radius: 2px;
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
   background: #fff;
-  color: #111;
+  color: #222;
   font-size: 13px;
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
 }
 
 .pqv-opt-btn:hover {
@@ -1670,8 +1680,10 @@ body.pqv-sc-open {
 }
 
 .pqv-opt-btn.is-active {
-  border: 2px solid #111;
-  padding: 5px 11px;
+  background: #111;
+  color: #fff;
+  border-color: #111;
+  padding: 8px 14px;
 }
 
 .pqv-opt-static {
@@ -1689,15 +1701,23 @@ body.pqv-sc-open {
   flex-wrap: wrap;
   align-items: center;
   gap: 10px 12px;
-  margin: 4px 0 16px;
+  margin: 0 0 18px;
   width: 100%;
   max-width: 100%;
+}
+
+.pqv-qty-label {
+  margin: 0;
+  flex: 1 1 100%;
 }
 
 .pqv-qty {
   display: inline-flex;
   align-items: center;
-  border: 1px solid #d8d8d8;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fff;
 }
 
 .pqv-qty-btn {
@@ -1733,13 +1753,15 @@ body.pqv-sc-open {
 }
 
 .pqv-stock {
-  font-size: 13px;
-  color: #444;
+  font-size: 12px;
+  font-weight: 600;
+  color: #2e7d32;
+  letter-spacing: 0.02em;
 }
 
 .pqv-actions-row {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: 10px;
   margin-bottom: 0;
 }
@@ -1748,24 +1770,25 @@ body.pqv-sc-open {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 46px;
-  padding: 10px 8px;
-  font-size: 14px;
-  font-weight: 600;
+  min-height: 44px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 700;
   font-family: inherit;
   text-align: center;
   text-decoration: none;
-  border: 1px solid #d0d0d0;
-  border-radius: 2px;
-  background: #f0f0f0;
+  border: 1px solid #111;
+  border-radius: 6px;
+  background: #fff;
   color: #111;
   cursor: pointer;
   box-sizing: border-box;
+  letter-spacing: 0.03em;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
-.pqv-act-cart:hover,
-.pqv-act-msg:hover {
-  background: #e5e5e5;
+.pqv-act-cart:hover {
+  background: #f5f5f5;
 }
 
 .pqv-act-buy {
@@ -1779,21 +1802,42 @@ body.pqv-sc-open {
   border-color: #333;
 }
 
+.pqv-act-msg-link {
+  display: block;
+  margin-top: 12px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.pqv-act-msg-link:hover {
+  color: #111;
+}
+
+.pqv-act-msg {
+  display: none;
+}
+
 .pqv-tabs {
   display: flex;
-  gap: 24px;
-  margin: 0 0 4px;
+  gap: 20px;
+  margin: 0 0 14px;
   padding: 0;
   border-bottom: 1px solid #eee;
 }
 
 .pqv-tab {
-  padding: 10px 0;
+  padding: 0 0 10px;
   margin-bottom: -1px;
   border: none;
   background: transparent;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: #888;
   cursor: pointer;
   border-bottom: 2px solid transparent;

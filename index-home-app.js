@@ -231,12 +231,14 @@ window.addEventListener('storeCartUpdated', function (e) {
 });
 window.onload = function() {
     hydrateHomeProducts();
-    trackFB('ViewContent', { content_type: 'product', currency: 'BDT' });
     initHomeCartFromStorage();
     renderSidebar();
-    if (products.length) selectProduct(0, products[0].id, false);
+    if (products.length) selectProduct(0, products[0].id, false, { animate: false });
     startAutoSlide();
     calc();
+    window.setTimeout(function () {
+        trackFB('ViewContent', { content_type: 'product', currency: 'BDT' });
+    }, 3500);
 };
 
 // কার্টে প্রোডাক্ট যোগ এবং মেমোরিতে (localStorage) সেভ করার ফাংশন
@@ -317,6 +319,7 @@ card.innerHTML = `
         <button type="button" 
                 onclick="removeFromCart('${p.id}')" 
                 class="premium-cancel-btn"
+                aria-label="কার্ট থেকে সরান"
                 style="position: absolute; 
                        top: 10px; 
                        right: 10px; 
@@ -344,13 +347,13 @@ card.innerHTML = `
     <div class="product-info">
         <div class="product-meta-row">
             <span class="product-card-name" lang="en">${p.name}</span>
-            <span class="product-card-price"><span class="product-price-circle">${"\u09F3"}${p.price}</span></span>
+            <span class="product-card-price">${"\u09F3"}${p.price}</span>
         </div>
         <div class="product-actions-anzaar">
             <div class="home-card-qty" style="display:${inCart ? 'flex' : 'none'};align-items:center;justify-content:center;gap:8px;margin-bottom:8px;">
-                <button type="button" class="qty-btn" onclick="event.stopPropagation();updateQty('${p.id}', -1)">−</button>
+                <button type="button" class="qty-btn" aria-label="পরিমাণ কমান" onclick="event.stopPropagation();updateQty('${p.id}', -1)">−</button>
                 <span class="qty-input" style="min-width:28px;text-align:center;font-weight:700;">${qty}</span>
-                <button type="button" class="qty-btn" onclick="event.stopPropagation();updateQty('${p.id}', 1)">+</button>
+                <button type="button" class="qty-btn" aria-label="পরিমাণ বাড়ান" onclick="event.stopPropagation();updateQty('${p.id}', 1)">+</button>
             </div>
             <div class="product-actions-row">
                 <button type="button" class="anzaar-btn anzaar-btn-cart${inCart ? ' is-active' : ''}"
@@ -376,12 +379,51 @@ function manualSelect(index, id) {
 function setHomePriceTag(price) {
     const priceEl = document.getElementById('homePriceTag');
     if (!priceEl) return;
-    priceEl.innerHTML =
-        '<span class="price-tag-cur">' + "\u09F3" + '</span>' +
-        '<span class="price-tag-amt">' + price + '</span>';
+    priceEl.textContent = "\u09F3" + price;
 }
 
-function selectProduct(index, id, shouldScroll = true) {
+var LCP_LOCK_MS = 10000;
+var lcpLockUntil = Date.now() + LCP_LOCK_MS;
+
+function isRemoteImageUrl(url) {
+    return /^https?:\/\//i.test(String(url || ''));
+}
+
+function sameImageFile(a, b) {
+    function tail(u) {
+        try {
+            u = decodeURIComponent(String(u || '').split('?')[0].split('#')[0]);
+        } catch (e) {}
+        return (u.split('/').pop() || u).toLowerCase();
+    }
+    return tail(a) === tail(b) && tail(a).length > 0;
+}
+
+function shouldDeferHeroSwap(nextSrc) {
+    if (Date.now() < lcpLockUntil && isRemoteImageUrl(nextSrc)) return true;
+    if (viewImg && viewImg.src && sameImageFile(viewImg.src, nextSrc)) return true;
+    return false;
+}
+
+function applyHeroImage(nextImgSrc, animate) {
+    if (!viewImg || !nextImgSrc) return;
+    if (shouldDeferHeroSwap(nextImgSrc)) return;
+    if (!animate) {
+        viewImg.src = nextImgSrc;
+        viewImg.classList.remove('fade-out');
+        return;
+    }
+    viewImg.classList.add('fade-out');
+    setTimeout(function () {
+        viewImg.src = nextImgSrc;
+        setTimeout(function () {
+            viewImg.classList.remove('fade-out');
+        }, 50);
+    }, 300);
+}
+
+function selectProduct(index, id, shouldScroll, options) {
+    options = options || {};
     currentIdx = index;
     const p = products[index];
     if (!p) return;
@@ -389,13 +431,8 @@ function selectProduct(index, id, shouldScroll = true) {
     const nextImgSrc = p.img && p.img.indexOf('/upload/') !== -1
         ? p.img.replace('/upload/', '/upload/f_auto,q_auto,w_600/')
         : p.img;
-    viewImg.classList.add('fade-out');
-    setTimeout(() => {
-        viewImg.src = nextImgSrc;
-        setTimeout(() => {
-            viewImg.classList.remove('fade-out');
-        }, 50);
-    }, 300);
+    var animate = options.animate !== false;
+    applyHeroImage(nextImgSrc, animate);
     document.querySelectorAll('.item-card').forEach(el => el.classList.remove('active'));
     const selectedCard = document.getElementById(`card-${id}`);
     if (selectedCard) {
@@ -499,11 +536,19 @@ function removeFromCart(productId) {
 window.hydrateHomeProducts = hydrateHomeProducts;
 window.renderSidebar = renderSidebar;
 window.selectProduct = selectProduct;
-window.__homeRefreshCatalog = function () {
+window.__homeRefreshCatalog = function (opts) {
+    opts = opts || {};
     hydrateHomeProducts();
     renderSidebar();
-    if (products.length) {
-        var idx = Math.min(currentIdx, products.length - 1);
-        selectProduct(idx, products[idx].id, false);
+    if (!products.length) return;
+    var idx = Math.min(currentIdx, products.length - 1);
+    if (opts.deferHero) {
+        selectProduct(idx, products[idx].id, false, { animate: false });
+        window.setTimeout(function () {
+            lcpLockUntil = 0;
+            selectProduct(idx, products[idx].id, false, { animate: false });
+        }, LCP_LOCK_MS);
+    } else {
+        selectProduct(idx, products[idx].id, false, { animate: false });
     }
 };

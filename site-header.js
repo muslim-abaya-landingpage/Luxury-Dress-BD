@@ -395,6 +395,12 @@
       if (typeof window.syncCatalogFromSections === "function") {
         window.syncCatalogFromSections();
       }
+      if (typeof window.refreshFooterShopLinks === "function") {
+        window.refreshFooterShopLinks();
+      }
+      try {
+        window.dispatchEvent(new CustomEvent("ma:catalog-ready"));
+      } catch (e) {}
       cb();
     }
     if (catalogReady()) {
@@ -788,7 +794,7 @@
   window.applyDynamicNavMenu = applyDynamicNavMenu;
 
   function ensureCartDrawerAssets() {
-    if (document.querySelector('script[src*="cart-drawer.js?v=20260530d"]')) return;
+    if (document.querySelector('script[src*="cart-drawer.js"]')) return;
     if (!document.querySelector('link[href*="cart-drawer.css?v=20260530d"]')) {
       var link = document.createElement('link');
       link.rel = 'stylesheet';
@@ -823,19 +829,23 @@
     document.head.appendChild(gtmScript);
   }
 
-  /** GTM পেজ লোডের পর — প্রথম পেইন্ট দ্রুত */
+  /** GTM — interaction or idle (LCP-friendly) */
   function scheduleDeferredGtm() {
     if (window.__maGtmScheduled) return;
     window.__maGtmScheduled = true;
-    var run = function () {
+    var fired = false;
+    function run() {
+      if (fired) return;
+      fired = true;
       ensureGtmLoaded();
-    };
+    }
+    ['pointerdown', 'keydown', 'touchstart', 'scroll'].forEach(function (ev) {
+      window.addEventListener(ev, run, { once: true, passive: true });
+    });
     if (typeof window.requestIdleCallback === 'function') {
-      window.requestIdleCallback(run, { timeout: 3000 });
+      window.requestIdleCallback(run, { timeout: 10000 });
     } else {
-      window.addEventListener('load', function () {
-        setTimeout(run, 1200);
-      });
+      window.setTimeout(run, 6000);
     }
   }
 

@@ -11,7 +11,7 @@
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
     <link rel="stylesheet" href="site-header.css?v=20260530c">
-    <link rel="stylesheet" href="site-footer.css?v=20260620ft">
+    <link rel="stylesheet" href="site-footer.css?v=20260623ft">
     <style>
         :root {
             --ink: #111111;
@@ -30,11 +30,14 @@
             font-family: 'Inter', 'Hind Siliguri', system-ui, -apple-system, 'Segoe UI', sans-serif;
             background: linear-gradient(180deg, #faf9f7 0%, var(--bg) 120px);
             margin: 0;
-            padding: 0 0 32px;
+            padding: 0;
             color: var(--ink-soft);
             font-size: 15px;
             line-height: 1.55;
             -webkit-font-smoothing: antialiased;
+        }
+        body.checkout-page #site-footer-mount {
+            margin-bottom: 0;
         }
         .container {
             max-width: 1180px;
@@ -1029,15 +1032,63 @@
         }
         .empty-cart-msg {
             text-align: center;
-            padding: 16px 12px;
-            background: var(--gold-soft);
+            padding: 22px 18px;
+            background: #fafafa;
             border-radius: 12px;
-            border: 1px dashed #dcc9a0;
+            border: 1px solid var(--line);
             color: var(--ink-soft);
         }
-        .empty-cart-msg a {
-            color: var(--ink);
+        .empty-cart-title {
+            margin: 0 0 6px;
+            font-size: 15px;
             font-weight: 700;
+            color: var(--ink);
+            letter-spacing: -0.01em;
+        }
+        .empty-cart-desc {
+            margin: 0 0 16px;
+            font-size: 13px;
+            line-height: 1.55;
+            color: var(--muted);
+            max-width: 360px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .empty-cart-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        .empty-cart-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 38px;
+            padding: 0 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        }
+        .empty-cart-btn-primary {
+            background: var(--ink);
+            color: #fff;
+            border: 1px solid var(--ink);
+        }
+        .empty-cart-btn-primary:hover {
+            background: #333;
+            border-color: #333;
+        }
+        .empty-cart-btn-ghost {
+            background: #fff;
+            color: var(--ink);
+            border: 1px solid var(--line);
+        }
+        .empty-cart-btn-ghost:hover {
+            border-color: #bbb;
+            background: #fff;
         }
         .delivery-fee-hint {
             margin: 8px 0 0;
@@ -1166,20 +1217,23 @@
             .checkout-grid { grid-template-columns: 1fr; gap: 16px; }
             .checkout-aside { position: static; }
             .sticky-order-bar { display: block; }
-            body { padding-bottom: 82px; }
+            body.checkout-page { padding-bottom: 0; }
+            body.checkout-page .container {
+                padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+            }
             .card-block { padding: 18px 16px; }
             #orderForm .btn-place-order { display: none; }
         }
     </style>
 </head>
-<body>
+<body class="checkout-page">
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-ML7RL6BR"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div id="localFileBanner" class="local-file-banner" role="alert">
-    <strong>টেস্ট মোড:</strong> ফাইল হিসেবে খোলা আছে (<code>file://</code>) — অর্ডার ও ভিডিও এভাবে কাজ করবে না।
-    <strong>ADMIN-লোকাল-টেস্ট.bat</strong> চালিয়ে
-    <a href="http://localhost:5500/checkout.html">localhost:5500</a> ব্যবহার করুন, অথবা লাইভ
-    <a href="https://muslimabaya.com/checkout" target="_blank" rel="noopener">muslimabaya.com/checkout</a>।
+    <strong>????? ???:</strong> ???? ?????? ???? ??? (<code>file://</code>) ? ?????? ? ????? ????? ??? ???? ???
+    <strong>ADMIN-?????-?????.bat</strong> ???????
+    <a href="http://localhost:5500/checkout.html">localhost:5500</a> ??????? ????, ???? ????
+    <a href="https://muslimabaya.com/checkout" target="_blank" rel="noopener">muslimabaya.com/checkout</a>?
 </div>
 <div id="site-header-mount"></div>
 <div class="container">
@@ -1188,7 +1242,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <a href="/">Home</a>
         </nav>
         <h1>Checkout</h1>
-        <p class="checkout-subtitle">Safe &amp; fast ordering — Cash on delivery available</p>
+        <p class="checkout-subtitle">Safe &amp; fast ordering ? Cash on delivery available</p>
         <div class="checkout-trust" style="justify-content:center;">
             <span>Secure order</span>
             <span>COD available</span>
@@ -1245,7 +1299,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <select id="userArea" required>
                         <option value="">Select district</option>
                     </select>
-                    <p class="delivery-fee-hint">ঢাকা ৳80 · অন্যান্য জেলা ৳150 · ৩+ পিসে ফ্রি ডেলিভারি</p>
+                    <p class="delivery-fee-hint">???? ?80 ? ???????? ???? ?150 ? ?+ ???? ???? ????????</p>
                 </div>
                 <div class="form-group form-group-last">
                     <label for="userThana">Thana / Upazila <span style="font-size:13px;font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0;">(Optional)</span></label>
@@ -1315,7 +1369,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     </div>
                 </div>
                 <div id="paymentExtra" class="payment-extra is-cod-hidden">
-                <div id="paymentInfo" class="payment-panel">Payment mode: Cash On Delivery — pay when you receive the product.</div>
+                <div id="paymentInfo" class="payment-panel">Payment mode: Cash On Delivery ? pay when you receive the product.</div>
                 <div class="payment-fields">
                     <input type="text" id="senderNumber" placeholder="Payment number (bKash/Nagad) - optional">
                     <input type="text" id="paymentTxnId" placeholder="Transaction ID / Reference - optional">
@@ -1433,7 +1487,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         <span>I have read and agree to the <a href="terms.html" target="_blank" rel="noopener">Terms &amp; Conditions</a>, <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a> and <a href="refund.html" target="_blank" rel="noopener">Refund Policy</a>.</span>
                     </label>
                     <div id="termsError" class="terms-error">Please accept the Terms &amp; Conditions to place your order.</div>
-                    <p class="checkout-trust-note" style="font-size:12px;color:#6b7280;line-height:1.55;margin:0 0 10px">COD অর্ডার ফোনে কনফার্ম করার পর পাঠানো হয়। bKash/Nagad অগ্রিম পেমেন্ট দ্রুত প্রসেসিংয়ে সাহায্য করে।</p>
+                    <p class="checkout-trust-note" style="font-size:12px;color:#6b7280;line-height:1.55;margin:0 0 10px">COD ?????? ???? ??????? ???? ?? ?????? ???? bKash/Nagad ?????? ??????? ????? ??????????? ??????? ????</p>
                     <button type="submit" id="submitBtn" class="btn-place-order">Place Order</button>
             </div>
         </aside>
@@ -1446,7 +1500,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div id="checkoutModal" class="checkout-modal" role="dialog" aria-modal="true" aria-labelledby="checkoutModalTitle" aria-hidden="true">
     <div class="checkout-modal-backdrop" data-checkout-modal-close></div>
     <div class="checkout-modal-panel">
-        <button type="button" class="checkout-modal-close" data-checkout-modal-close aria-label="বন্ধ">&times;</button>
+        <button type="button" class="checkout-modal-close" data-checkout-modal-close aria-label="????">&times;</button>
         <div id="checkoutModalIcon" class="checkout-modal-icon checkout-modal-icon--info" aria-hidden="true">i</div>
         <h2 id="checkoutModalTitle" class="checkout-modal-title"></h2>
         <p id="checkoutModalMessage" class="checkout-modal-message"></p>
@@ -1459,7 +1513,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="site-api-health.js?v=20260610"></script>
 <script src="auth-config.js"></script>
 <script src="auth-api.js"></script>
-<script src="cart-utils.js?v=20260530"></script>
+<script src="cart-utils.js?v=20260623cart"></script>
 <script defer src="site-header.js?v=20260531nav"></script>
 <script>
     const ORDER_SCRIPT_URL =
@@ -1487,7 +1541,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var actionsEl = document.getElementById('checkoutModalActions');
         if (!modal || !titleEl || !msgEl || !actionsEl) return;
         var variant = (opts && opts.variant) || 'info';
-        var icons = { info: 'i', warn: '!', error: '×', success: '✓' };
+        var icons = { info: 'i', warn: '!', error: '?', success: '?' };
         titleEl.textContent = (opts && opts.title) || '';
         msgEl.textContent = (opts && opts.message) || '';
         if (iconEl) {
@@ -1495,7 +1549,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             iconEl.textContent = icons[variant] || 'i';
         }
         actionsEl.innerHTML = '';
-        var actions = (opts && opts.actions) || [{ label: 'ঠিক আছে', primary: true }];
+        var actions = (opts && opts.actions) || [{ label: '??? ???', primary: true }];
         actions.forEach(function (action) {
             var btn = document.createElement('button');
             btn.type = 'button';
@@ -1518,11 +1572,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function checkoutAlert(message, focusEl) {
         openCheckoutModal({
-            title: 'দয়া করে চেক করুন',
+            title: '???? ??? ??? ????',
             message: message,
             variant: 'warn',
             actions: [{
-                label: 'ঠিক আছে',
+                label: '??? ???',
                 primary: true,
                 onClick: function () {
                     closeCheckoutModal();
@@ -1534,12 +1588,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function showLocalFileBlockedModal() {
         openCheckoutModal({
-            title: 'এখানে অর্ডার পাঠানো যাবে না',
-            message: 'ফাইল হিসেবে (file://) খোলা থাকলে অর্ডার API কাজ করে না। ADMIN-লোকাল-টেস্ট.bat চালিয়ে localhost ব্যবহার করুন, অথবা muslimabaya.com এ অর্ডার দিন।',
+            title: '????? ?????? ?????? ???? ??',
+            message: '???? ?????? (file://) ???? ????? ?????? API ??? ??? ??? ADMIN-?????-?????.bat ??????? localhost ??????? ????, ???? muslimabaya.com ? ?????? ????',
             variant: 'warn',
             actions: [
                 {
-                    label: 'লাইভ সাইটে চেকআউট',
+                    label: '???? ????? ??????',
                     primary: true,
                     onClick: function () {
                         window.open('https://muslimabaya.com/checkout', '_blank', 'noopener');
@@ -1547,7 +1601,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     }
                 },
                 {
-                    label: 'বন্ধ',
+                    label: '????',
                     onClick: closeCheckoutModal
                 }
             ]
@@ -1572,14 +1626,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     function getWhatsAppOrderLink(order) {
         var wa = '8801971642683';
         var lines = [
-            'নতুন অর্ডার — Muslim Abaya',
-            'নাম: ' + order.name,
-            'মোবাইল: ' + order.phone,
-            'ঠিকানা: ' + order.address,
-            'জেলা: ' + order.district
+            '???? ?????? ? Muslim Abaya',
+            '???: ' + order.name,
+            '??????: ' + order.phone,
+            '??????: ' + order.address,
+            '????: ' + order.district
         ];
-        if (order.thana) lines.push('থানা: ' + order.thana);
-        lines.push('পরিমাণ: ' + order.qty, 'মোট: ৳' + order.total, 'পণ্য: ' + order.products);
+        if (order.thana) lines.push('????: ' + order.thana);
+        lines.push('??????: ' + order.qty, '???: ?' + order.total, '????: ' + order.products);
         return 'https://wa.me/' + wa + '?text=' + encodeURIComponent(lines.join('\n'));
     }
 
@@ -1621,12 +1675,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function offerWhatsAppOrder(orderWa, reason) {
         openCheckoutModal({
-            title: 'অর্ডার অনলাইনে যায়নি',
-            message: (reason || 'অর্ডার পাঠানো যায়নি।') + ' WhatsApp এ পাঠালেও অর্ডার হারাবে না — আমরা দেখে নেব।',
+            title: '?????? ??????? ??????',
+            message: (reason || '?????? ?????? ???????') + ' WhatsApp ? ??????? ?????? ?????? ?? ? ???? ???? ????',
             variant: 'error',
             actions: [
                 {
-                    label: 'WhatsApp এ পাঠান',
+                    label: 'WhatsApp ? ?????',
                     wa: true,
                     primary: true,
                     onClick: function () {
@@ -1635,7 +1689,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     }
                 },
                 {
-                    label: 'আবার চেষ্টা',
+                    label: '???? ??????',
                     onClick: closeCheckoutModal
                 }
             ]
@@ -1710,7 +1764,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 }
                 var msg = text.indexOf('Error|') === 0
                     ? text.slice(6).trim()
-                    : (text ? text.slice(0, 160) : 'অর্ডার Sheet এ জমা হয়নি।');
+                    : (text ? text.slice(0, 160) : '?????? Sheet ? ??? ??????');
                 offerWhatsAppOrder(orderWa, msg);
                 resetOrderButton(btn);
             })
@@ -1719,14 +1773,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     .then(function () {
                         offerWhatsAppOrder(
                             orderWa,
-                            'অর্ডার পাঠানোর চেষ্টা হয়েছে। Sheet এ ১–২ মিনিট পর দেখুন। না গেলে WhatsApp এ পাঠান।'
+                            '?????? ??????? ?????? ??????? Sheet ? ??? ????? ?? ?????? ?? ???? WhatsApp ? ??????'
                         );
                         resetOrderButton(btn);
                     })
                     .catch(function () {
                         offerWhatsAppOrder(
                             orderWa,
-                            'API সংযোগ ব্যর্থ। ইন্টারনেট চেক করুন বা WhatsApp এ অর্ডার পাঠান।'
+                            'API ????? ??????? ????????? ??? ???? ?? WhatsApp ? ?????? ??????'
                         );
                         resetOrderButton(btn);
                     });
@@ -1769,7 +1823,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (size) parts.push('Size: ' + size);
         var desc = String(item.description || '').trim();
         if (desc && desc !== fabric) parts.push(desc);
-        return parts.join(' · ');
+        return parts.join(' ? ');
     }
 
     (function initDistrictSelect() {
@@ -1777,22 +1831,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (!sel || sel.getAttribute('data-districts-built') === '1') return;
         sel.setAttribute('data-districts-built', '1');
         var dhakaNearby = [
-            'গাজীপুর', 'নারায়ণগঞ্জ', 'নরসিংদী', 'মুন্সীগঞ্জ', 'মানিকগঞ্জ',
-            'টাঙ্গাইল', 'কিশোরগঞ্জ', 'ময়মনসিংহ', 'ফরিদপুর', 'রাজবাড়ী', 'মাদারীপুর',
-            'গোপালগঞ্জ', 'শরীয়তপুর', 'জামালপুর', 'শেরপুর', 'নেত্রকোনা'
+            '???????', '???????????', '???????', '??????????', '?????????',
+            '????????', '?????????', '?????????', '???????', '????????', '?????????',
+            '?????????', '?????????', '????????', '??????', '?????????'
         ];
         var allDistricts = [
-            'ঢাকা', 'গাজীপুর', 'নারায়ণগঞ্জ', 'নরসিংদী', 'টাঙ্গাইল', 'কিশোরগঞ্জ', 'ময়মনসিংহ', 'শেরপুর', 'জামালপুর', 'নেত্রকোনা',
-            'মানিকগঞ্জ', 'মুন্সীগঞ্জ', 'মাদারীপুর', 'রাজবাড়ী', 'ফরিদপুর', 'গোপালগঞ্জ', 'শরীয়তপুর',
-            'চট্টগ্রাম', 'কুমিল্লা', 'চাঁদপুর', 'ফেনী', 'ব্রাহ্মণবাড়িয়া', 'নোয়াখালী', 'লক্ষ্মীপুর', 'কক্সবাজার', 'খাগড়াছড়ি', 'রাঙ্গামাটি', 'বান্দরবান',
-            'রাজশাহী', 'নওগাঁ', 'নাটোর', 'চাঁপাইনবাবগঞ্জ', 'পাবনা', 'সিরাজগঞ্জ', 'জয়পুরহাট', 'বগুড়া',
-            'রংপুর', 'দিনাজপুর', 'পঞ্চগড়', 'নীলফামারী', 'লালমনিরহাট', 'কুড়িগ্রাম', 'গাইবান্ধা', 'ঠাকুরগাঁও',
-            'সিলেট', 'সুনামগঞ্জ', 'হবিগঞ্জ', 'মৌলভীবাজার',
-            'খুলনা', 'বাগেরহাট', 'সাতক্ষীরা', 'নড়াইল', 'যশোর', 'মাগুরা', 'ঝিনাইদহ', 'কুষ্টিয়া', 'চুয়াডাঙ্গা', 'মেহেরপুর',
-            'বরিশাল', 'পটুয়াখালী', 'ভোলা', 'বরগুনা', 'ঝালকাঠি', 'পিরোজপুর'
+            '????', '???????', '???????????', '???????', '????????', '?????????', '?????????', '??????', '????????', '?????????',
+            '?????????', '??????????', '?????????', '????????', '???????', '?????????', '?????????',
+            '?????????', '????????', '???????', '????', '????????????????', '?????????', '??????????', '?????????', '??????????', '??????????', '?????????',
+            '???????', '?????', '?????', '??????????????', '?????', '?????????', '?????????', '??????',
+            '?????', '????????', '???????', '?????????', '??????????', '??????????', '?????????', '?????????',
+            '?????', '?????????', '???????', '??????????',
+            '?????', '????????', '?????????', '??????', '????', '??????', '???????', '?????????', '???????????', '????????',
+            '??????', '??????????', '????', '??????', '???????', '????????'
         ];
         function deliveryFee(name) {
-            return name === 'ঢাকা' ? 80 : 150;
+            return name === '????' ? 80 : 150;
         }
         var nearbySet = {};
         dhakaNearby.forEach(function (d) { nearbySet[d] = 1; });
@@ -1800,15 +1854,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             return allDistricts.indexOf(d) !== -1;
         });
         var rest = allDistricts.filter(function (d) {
-            return d !== 'ঢাকা' && !nearbySet[d];
+            return d !== '????' && !nearbySet[d];
         });
         rest.sort(function (a, b) { return a.localeCompare(b, 'bn'); });
-        var ordered = ['ঢাকা'].concat(nearbyOrdered, rest);
+        var ordered = ['????'].concat(nearbyOrdered, rest);
         ordered.forEach(function (name) {
             var opt = document.createElement('option');
             opt.value = String(deliveryFee(name));
             opt.setAttribute('data-district', name);
-            opt.textContent = name === 'ঢাকা' ? name + ' (৳80)' : name;
+            opt.textContent = name === '????' ? name + ' (?80)' : name;
             sel.appendChild(opt);
         });
     })();
@@ -1854,7 +1908,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function shippingCharge() {
         var q = cartQty();
-        if (q === 0 || q >= 3) return 0; // ৩ পিস বা তার বেশি হলে ফ্রি ডেলিভারি
+        if (q === 0 || q >= 3) return 0;
+        if (!areaSelect) return 0;
         return parseInt(areaSelect.value, 10) || 0;
     }
 
@@ -1887,7 +1942,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         cart.forEach(function (item) {
             var qty = parseInt(item.quantity, 10) || 1;
             var unit = parseInt(item.price, 10) || 0;
-            var size = item.size || item.selectedSize || '—';
+            var size = item.size || item.selectedSize || '?';
             var fabric = item.fabric || item.material || 'Premium Fabric';
             rows +=
                 '<tr>' +
@@ -1908,7 +1963,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var slots = [];
         cart.forEach(function(item) {
             var qty = parseInt(item.quantity, 10) || 1;
-            slots.push(item.name + ' x' + qty + ' = ৳' + ((parseInt(item.price, 10) || 0) * qty));
+            slots.push(item.name + ' x' + qty + ' = ?' + ((parseInt(item.price, 10) || 0) * qty));
         });
         while (slots.length < MAX_PRODUCT_SLOTS) {
             slots.push('');
@@ -1916,11 +1971,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         return slots.slice(0, MAX_PRODUCT_SLOTS);
     }
 
+    function buildEmptyCartHtml() {
+        return (
+            '<div class="empty-cart-msg">' +
+            '<p class="empty-cart-title">' + '\u0995\u09BE\u09B0\u09CD\u099F\u09C7 \u098F\u0996\u09A8\u09CB \u0995\u09CB\u09A8\u09CB \u09AA\u09A3\u09CD\u09AF \u09A8\u09C7\u0987' + '</p>' +
+            '<p class="empty-cart-desc">' + '\u0986\u09AC\u09BE\u09AF\u09BC\u09BE \u0995\u09BE\u09B2\u09C7\u0995\u09B6\u09A8 \u09A5\u09C7\u0995\u09C7 \u09AA\u099B\u09A8\u09CD\u09A6\u09C7\u09B0 \u09AA\u09A3\u09CD\u09AF \u09AF\u09CB\u09A7 \u0995\u09B0\u09C1\u09A8\u0964 \u0995\u09CD\u09AF\u09BE\u09B6 \u0985\u09A8 \u09A1\u09C7\u09B2\u09BF\u09AD\u09BE\u09B0\u09BF\u09A4\u09C7 \u0985\u09B0\u09A1\u09BE\u09B0 \u0995\u09B0\u09C1\u09A8\u0964' + '</p>' +
+            '<div class="empty-cart-actions">' +
+            '<a href="' + pageLink('/category') + '" class="empty-cart-btn empty-cart-btn-primary">' + '\u0995\u09BE\u09B2\u09C7\u0995\u09B6\u09A8 \u09A6\u09C7\u0996\u09C1\u09A8' + '</a>' +
+            '<a href="' + pageLink('/') + '" class="empty-cart-btn empty-cart-btn-ghost">' + '\u09B9\u09CB\u09AE\u09C7 \u09AB\u09BF\u09B0\u09C7 \u09AF\u09BE\u09A8' + '</a>' +
+            '</div></div>'
+        );
+    }
+
     function displayOrder() {
         if (!summaryDiv) return;
         
         if (cart.length === 0) {
-            summaryDiv.innerHTML = "<div class='empty-cart-msg'>Your cart is empty.<br><a href=\"" + pageLink('/category') + "\">Browse collection</a> or <a href=\"" + pageLink('/') + "\">Return home</a>.</div>";
+            summaryDiv.innerHTML = buildEmptyCartHtml();
             var metaElEmpty = document.getElementById('orderReviewMeta');
             if (metaElEmpty) metaElEmpty.textContent = '';
             var subBtn = document.getElementById('submitBtn');
@@ -1958,8 +2025,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             var lineTotal = unitPrice * qty;
             var imgUrl = (typeof resolveStoreItemImage === 'function') ? resolveStoreItemImage(item) : (item.image || '');
             var thumbInner = imgUrl
-                ? '<img src="' + escapeHtml(imgUrl) + '" alt="" loading="lazy" onerror="this.parentElement.innerHTML=\'<span class=gb-order-thumb-placeholder>👜</span>\'">'
-                : '<span class="gb-order-thumb-placeholder">👜</span>';
+                ? '<img src="' + escapeHtml(imgUrl) + '" alt="" loading="lazy" class="gb-order-thumb-img">'
+                : '<span class="gb-order-thumb-placeholder" aria-hidden="true">&#128092;</span>';
             var detail = orderItemDetail(item);
             var detailHtml = detail ? '<p class="gb-order-detail">' + escapeHtml(detail) + '</p>' : '';
             itemsHtml +=
@@ -1971,7 +2038,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 '<div class="gb-order-qty-row">' +
                 '<span class="gb-order-qty-label">Qty:</span>' +
                 '<div class="gb-order-qty">' +
-                '<button type="button" data-cart-action="dec" data-cart-idx="' + idx + '" aria-label="Decrease quantity">−</button>' +
+                '<button type="button" data-cart-action="dec" data-cart-idx="' + idx + '" aria-label="Decrease quantity">-</button>' +
                 '<span>' + qty + '</span>' +
                 '<button type="button" data-cart-action="inc" data-cart-idx="' + idx + '" aria-label="Increase quantity">+</button>' +
                 '</div></div></div>' +
@@ -1981,13 +2048,52 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         });
 
         var metaEl = document.getElementById('orderReviewMeta');
-        if (metaEl) metaEl.textContent = designCount + ' items · ' + q + ' pcs';
+        if (metaEl) metaEl.textContent = designCount + ' items \u00B7 ' + q + ' pcs';
 
         summaryDiv.innerHTML = '<div class="gb-order-list">' + itemsHtml + '</div>';
+        summaryDiv.querySelectorAll('.gb-order-thumb-img').forEach(function (img) {
+            img.addEventListener('error', function () {
+                var parent = img.parentElement;
+                if (parent) {
+                    parent.innerHTML = '<span class="gb-order-thumb-placeholder" aria-hidden="true">&#128092;</span>';
+                }
+            });
+        });
         renderProductChart();
-        
+
         var subBtn = document.getElementById('submitBtn');
         if (subBtn) subBtn.disabled = false;
+    }
+
+    function refreshClearCartLink() {
+        var wrap = document.getElementById('clearCartWrap');
+        if (!wrap) return;
+        if (cart.length > 0) {
+            wrap.innerHTML = '<a href="#" onclick="if(typeof clearStoreCart===\'function\'){clearStoreCart();} try{sessionStorage.removeItem(\'muslim_abaya_home_cart_active\');}catch(e){} if(typeof refreshCartBadgeUI===\'function\'){refreshCartBadgeUI([]);} else if(typeof window.updateCartBadge===\'function\'){window.updateCartBadge([]);} location.reload(); return false;">Clear cart</a>';
+        } else {
+            wrap.innerHTML = '';
+        }
+    }
+
+    function bootCheckoutCartUI() {
+        cart = loadCart();
+        try {
+            displayOrder();
+        } catch (err) {
+            console.error('checkout displayOrder', err);
+            if (summaryDiv && cart.length) {
+                summaryDiv.innerHTML = '<div class="empty-cart-msg">Could not load cart preview. Please refresh the page.</div>';
+            }
+        }
+        refreshClearCartLink();
+        persistCart();
+        bindCheckoutTikTokMatchSync();
+        if (typeof pushTrackingEvent === 'function') {
+            var checkoutSnap = typeof buildCartTrackingSnapshot === 'function'
+                ? buildCartTrackingSnapshot(cart)
+                : { currency: 'BDT', value: cartSubtotal() };
+            pushTrackingEvent('InitiateCheckout', checkoutSnap);
+        }
     }
 
     if (summaryDiv) {
@@ -2011,12 +2117,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         });
     }
 
-    var clearWrap = document.getElementById('clearCartWrap');
-    if (clearWrap && cart.length > 0) {
-        clearWrap.innerHTML = '<a href="#" onclick="if(typeof clearStoreCart===\'function\'){clearStoreCart();} try{sessionStorage.removeItem(\'muslim_abaya_home_cart_active\');}catch(e){} if(typeof refreshCartBadgeUI===\'function\'){refreshCartBadgeUI([]);} else if(typeof window.updateCartBadge===\'function\'){window.updateCartBadge([]);} location.reload(); return false;">Clear cart</a>';
-    } else if (clearWrap) {
-        clearWrap.innerHTML = '';
-    }
+    refreshClearCartLink();
 
     if (areaSelect) {
         areaSelect.addEventListener('change', displayOrder);
@@ -2024,10 +2125,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     (function initPaymentBox() {
         var info = document.getElementById('paymentInfo');
         var details = {
-            'Cash On Delivery': 'Payment mode: Cash On Delivery — pay when you receive the product.',
-            'bKash': 'bKash Personal: 01551642683 — enter Transaction ID after payment.',
-            'Nagad': 'Nagad Personal: 01551642683 — enter Transaction ID after payment.',
-            'Bank Transfer': 'UCB PLC, A/C: 7862141000038155 — enter slip/reference number.'
+            'Cash On Delivery': 'Payment mode: Cash On Delivery ? pay when you receive the product.',
+            'bKash': 'bKash Personal: 01551642683 ? enter Transaction ID after payment.',
+            'Nagad': 'Nagad Personal: 01551642683 ? enter Transaction ID after payment.',
+            'Bank Transfer': 'UCB PLC, A/C: 7862141000038155 ? enter slip/reference number.'
         };
         function highlightPayCards(pmKey) {
             document.querySelectorAll('.pay-detail-card').forEach(function(card) {
@@ -2129,7 +2230,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
             if (window.MaSecurity) {
                 if (!MaSecurity.guardSubmit('checkout-order', 3000)) {
-                    checkoutAlert('অনুগ্রহ করে কিছুক্ষণ অপেক্ষা করে আবার চেষ্টা করুন।');
+                    checkoutAlert('??????? ??? ???????? ??????? ??? ???? ?????? ?????');
                     return;
                 }
                 if (document.getElementById('orderHp') && document.getElementById('orderHp').value) {
@@ -2138,7 +2239,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             }
 
             if (cart.length === 0) {
-                checkoutAlert('কার্ট খালি। আগে প্রোডাক্ট যোগ করুন।');
+                checkoutAlert('????? ????? ??? ????????? ??? ?????');
                 return;
             }
 
@@ -2168,28 +2269,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 addrValue = v.address;
             } else {
             if (nameValue.length < 2) {
-                checkoutAlert('সঠিক নাম লিখুন।', nameInput);
+                checkoutAlert('???? ??? ??????', nameInput);
                 return;
             }
             if (!/^01\d{9}$/.test(phoneValue)) {
-                checkoutAlert('১১ ডিজিটের মোবাইল নম্বর দিন (01XXXXXXXXX)।', phoneInput);
+                checkoutAlert('?? ??????? ?????? ????? ??? (01XXXXXXXXX)?', phoneInput);
                 return;
             }
             if (addrValue.length < 8) {
-                checkoutAlert('সম্পূর্ণ ডেলিভারি ঠিকানা লিখুন।', addrInput);
+                checkoutAlert('???????? ???????? ?????? ??????', addrInput);
                 return;
             }
             }
             if (emailValue && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
-                checkoutAlert('সঠিক ইমেইল দিন।', emailInput);
+                checkoutAlert('???? ????? ????', emailInput);
                 return;
             }
             if (!window.MaSecurity && addrValue.length < 8) {
-                checkoutAlert('সম্পূর্ণ ডেলিভারি ঠিকানা লিখুন।', addrInput);
+                checkoutAlert('???????? ???????? ?????? ??????', addrInput);
                 return;
             }
             if (!areaSelect.value) {
-                checkoutAlert('ডেলিভারি জেলা সিলেক্ট করুন।', areaSelect);
+                checkoutAlert('???????? ???? ??????? ?????', areaSelect);
                 return;
             }
             var agreeTerms = document.getElementById('agreeTerms');
@@ -2211,7 +2312,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             var gTotal = String(grandTotal());
             var areaOpt = areaSelect.options[areaSelect.selectedIndex];
             var districtParam = areaOpt.getAttribute('data-district') ||
-                areaOpt.textContent.split('(')[0].split('—')[0].trim();
+                areaOpt.textContent.split('(')[0].split('?')[0].trim();
 
             const formData = new URLSearchParams();
             formData.append('RecordType', 'Order');
@@ -2246,7 +2347,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             }
 
             if (!ORDER_SCRIPT_URL) {
-                checkoutAlert('অর্ডার API সেটআপ করা হয়নি। site-api-config.js এ Apps Script URL দিন।');
+                checkoutAlert('?????? API ????? ??? ?????? site-api-config.js ? Apps Script URL ????');
                 if (btn) {
                     btn.disabled = false;
                     btn.innerText = 'Place Order';
@@ -2274,12 +2375,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (!Array.isArray(lines)) return;
         cart = lines;
         displayOrder();
-        var clearWrap = document.getElementById('clearCartWrap');
-        if (clearWrap && cart.length > 0) {
-            clearWrap.innerHTML = '<a href="#" onclick="if(typeof clearStoreCart===\'function\'){clearStoreCart();} try{sessionStorage.removeItem(\'muslim_abaya_home_cart_active\');}catch(err){} if(typeof refreshCartBadgeUI===\'function\'){refreshCartBadgeUI([]);} else if(typeof window.updateCartBadge===\'function\'){window.updateCartBadge([]);} location.reload(); return false;">কার্ট খালি করুন</a>';
-        } else if (clearWrap) {
-            clearWrap.innerHTML = '';
-        }
+        refreshClearCartLink();
     });
 
     function bindCheckoutTikTokMatchSync() {
@@ -2316,25 +2412,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         }
     })();
 
-    window.addEventListener('DOMContentLoaded', function() {
+    function initCheckoutFormTimestamp() {
         var tsEl = document.getElementById('orderSiteTs');
         if (tsEl) {
             tsEl.value = (window.MaSecurity && MaSecurity.getOrderFormTimestamp)
                 ? MaSecurity.getOrderFormTimestamp()
                 : String(Date.now());
         }
-        displayOrder();
-        persistCart();
-        bindCheckoutTikTokMatchSync();
-        if (typeof pushTrackingEvent === 'function') {
-            var checkoutSnap = typeof buildCartTrackingSnapshot === 'function'
-                ? buildCartTrackingSnapshot(cart)
-                : { currency: 'BDT', value: cartSubtotal() };
-            pushTrackingEvent('InitiateCheckout', checkoutSnap);
-        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCheckoutFormTimestamp);
+    } else {
+        initCheckoutFormTimestamp();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bootCheckoutCartUI);
+    } else {
+        bootCheckoutCartUI();
+    }
+
+    window.addEventListener('pageshow', function (ev) {
+        if (ev.persisted) bootCheckoutCartUI();
     });
 </script>
 <div id="site-footer-mount"></div>
-<script src="site-footer.js?v=20260620ft"></script>
+<script src="site-footer.js?v=20260622ft"></script>
 </body>
 </html>

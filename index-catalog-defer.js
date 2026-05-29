@@ -10,7 +10,7 @@
 
   function afterCatalog() {
     if (typeof window.__homeRefreshCatalog === "function") {
-      window.__homeRefreshCatalog();
+      window.__homeRefreshCatalog({ deferHero: true });
     }
   }
 
@@ -37,12 +37,15 @@
 
   function schedule() {
     if (typeof window.requestIdleCallback === "function") {
-      window.requestIdleCallback(start, { timeout: 2800 });
+      window.requestIdleCallback(start, { timeout: 2000 });
     } else {
-      window.setTimeout(start, 1500);
+      window.setTimeout(start, 600);
     }
   }
 
-  if (document.readyState === "complete") schedule();
-  else window.addEventListener("load", schedule, { once: true });
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", schedule, { once: true });
+  } else {
+    schedule();
+  }
 })();
