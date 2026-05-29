@@ -85,37 +85,71 @@
     return routeToHtmlFile(route);
   }
 
-  function applyDynamicNavMenu() {
-    var sections = window.CATALOG_SECTIONS;
-    if (!sections || !sections.length) return;
+  function buildNavMenuItems() {
+    var sections = window.CATALOG_SECTIONS || [];
+    var extras = window.SITE_NAV_EXTRAS || [];
     var items = sections.map(function (sec) {
-      return { href: sec.path || "/" + sec.key, label: sec.menu };
+      return {
+        href: sec.path || "/" + sec.key,
+        label: sec.menu,
+        enabled: sec.enabled !== false
+      };
     });
-    items.push({ href: "/video", label: "VIDEO" });
+    extras.forEach(function (ex) {
+      items.push({
+        href: ex.path || "/" + ex.key,
+        label: ex.menu,
+        enabled: ex.enabled !== false
+      });
+    });
+    return items;
+  }
+
+  function renderNavMenuItem(it, mobile) {
+    var label = String(it.label || "");
+    if (it.enabled === false) {
+      return (
+        '<li><span class="nav-link-soon" aria-disabled="true" title="শীঘ্রই আসছে">' +
+        label +
+        "</span></li>"
+      );
+    }
+    var href = siteHref(it.href);
+    if (mobile) {
+      return (
+        '<li><a href="' +
+        href +
+        '" onclick="window.toggleAbayaMenu()">' +
+        label +
+        "</a></li>"
+      );
+    }
+    return '<li><a href="' + href + '">' + label + "</a></li>";
+  }
+
+  function applyDynamicNavMenu() {
+    var items = buildNavMenuItems();
+    if (!items.length) return;
     var desktop = document.querySelector(".desktop-menu ul");
     if (desktop) {
-      desktop.innerHTML = items
-        .map(function (it) {
-          return "<li><a href=\"" + it.href + "\">" + it.label + "</a></li>";
-        })
-        .join("");
+      desktop.innerHTML = items.map(function (it) {
+        return renderNavMenuItem(it, false);
+      }).join("");
     }
     var mobile = document.querySelector("#mobileMenuPanel ul");
     if (mobile) {
       mobile.innerHTML =
         items
           .map(function (it) {
-            return (
-              '<li><a href="' +
-              it.href +
-              '" onclick="window.toggleAbayaMenu()">' +
-              it.label +
-              "</a></li>"
-            );
+            return renderNavMenuItem(it, true);
           })
           .join("") +
-        '<li><a href="/category" onclick="window.toggleAbayaMenu()">ALL CATEGORIES</a></li>' +
-        '<li><a href="/" onclick="window.toggleAbayaMenu()">HOME</a></li>';
+        '<li><a href="' +
+        siteHref("/category") +
+        '" onclick="window.toggleAbayaMenu()">ALL CATEGORIES</a></li>' +
+        '<li><a href="' +
+        siteHref("/") +
+        '" onclick="window.toggleAbayaMenu()">HOME</a></li>';
     }
     fixAllPageLinks();
   }
@@ -163,17 +197,7 @@
     '<div class="brand-text-logo"><a href="/" class="brand-logo-link" aria-label="Muslim Abaya Home">' +
     '<img class="brand-logo-img" data-src="assets/logo-muslim-abaya.svg" alt="" width="240" height="44" decoding="async">' +
   '<span class="brand-logo-fallback" aria-hidden="true">MUSLIM ABAYA</span></a></div>' +
-    '<nav class="desktop-menu"><ul>' +
-    '<li><a href="/abaya">ABAYA</a></li>' +
-    '<li><a href="/cover-up">COVER UP</a></li>' +
-    '<li><a href="/tops-kurti">TOPS/KURTI</a></li>' +
-    '<li><a href="/premium-two-piece">PREMIUM TWO-PIECE</a></li>' +
-    '<li><a href="/embroidery">EMBROIDERY</a></li>' +
-    '<li><a href="/karchupi">KARCHUPI</a></li>' +
-    '<li><a href="/kaftan">KAFTAN</a></li>' +
-    '<li><a href="/hijab">HIJAB</a></li>' +
-    '<li><a href="/video">VIDEO</a></li>' +
-    '</ul></nav>' +
+    '<nav class="desktop-menu" aria-label="Main"><ul></ul></nav>' +
     '<div class="nav-icons">' +
     '<button type="button" class="nav-icon-btn" id="navSearchOpen" aria-label="Search" aria-expanded="false">' + ICON_SEARCH + '</button>' +
     '<button type="button" class="cart-drawer-trigger" data-cart-trigger="1" style="position:relative" aria-label="Cart">' + ICON_BAG + '<span id="cart-count">0</span></button>' +
@@ -205,19 +229,7 @@
     '<div class="menu-overlay" id="menuOverlay" onclick="window.toggleAbayaMenu()"></div>' +
     '<div class="mobile-nav-panel" id="mobileMenuPanel">' +
     '<div class="mobile-nav-top"><button type="button" onclick="window.toggleAbayaMenu()" style="background:none;border:none;font-size:26px;cursor:pointer">&times;</button></div>' +
-    '<ul>' +
-    '<li><a href="/abaya" onclick="window.toggleAbayaMenu()">ABAYA</a></li>' +
-    '<li><a href="/cover-up" onclick="window.toggleAbayaMenu()">COVER UP</a></li>' +
-    '<li><a href="/tops-kurti" onclick="window.toggleAbayaMenu()">TOPS/KURTI</a></li>' +
-    '<li><a href="/premium-two-piece" onclick="window.toggleAbayaMenu()">PREMIUM TWO-PIECE</a></li>' +
-    '<li><a href="/embroidery" onclick="window.toggleAbayaMenu()">EMBROIDERY</a></li>' +
-    '<li><a href="/karchupi" onclick="window.toggleAbayaMenu()">KARCHUPI</a></li>' +
-    '<li><a href="/kaftan" onclick="window.toggleAbayaMenu()">KAFTAN</a></li>' +
-    '<li><a href="/hijab" onclick="window.toggleAbayaMenu()">HIJAB</a></li>' +
-    '<li><a href="/video" onclick="window.toggleAbayaMenu()">VIDEO</a></li>' +
-    '<li><a href="/category" onclick="window.toggleAbayaMenu()">ALL CATEGORIES</a></li>' +
-    '<li><a href="/" onclick="window.toggleAbayaMenu()">HOME</a></li>' +
-    '</ul></div>';
+    '<ul></ul></div>';
 
   var annIdx = 0;
   var annTimer = null;
@@ -303,7 +315,7 @@
             document.head.appendChild(s);
           });
         }
-        loadScript('product-catalog-sections.js?v=20260535')
+        loadScript('product-catalog-sections.js?v=20260530d')
           .then(function () { return loadScript('product-catalog-sync.js?v=20260608'); })
           .then(function () { return loadScript('product-config.js?v=20260535'); })
           .then(function () { return loadScript('product-utils.js?v=20260535'); })

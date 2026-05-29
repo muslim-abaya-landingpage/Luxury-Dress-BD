@@ -1,6 +1,9 @@
 /**
  * ক্যাটাগরি সারি — মেনু ও HTML পেজের ম্যাপ (এক জায়গায় দেখুন)
  * product-links-data.js ও category-products.js এ একই ক্রম (①→⑧)
+ *
+ * enabled: true  → মেনুতে লিংক + হোম/All Categories-এ দেখাবে
+ * enabled: false → মেনুতে শুধু নাম (Coming soon), লিংক নেই — প্রোডাক্ট সেটআপ后 true করুন
  */
 window.CATALOG_SECTIONS = [
   {
@@ -9,7 +12,8 @@ window.CATALOG_SECTIONS = [
     menu: "ABAYA",
     menuBn: "আবায়া",
     page: "abaya.html",
-    path: "/abaya"
+    path: "/abaya",
+    enabled: true
   },
   {
     key: "cover-up",
@@ -17,7 +21,8 @@ window.CATALOG_SECTIONS = [
     menu: "COVER UP",
     menuBn: "কভার আপ",
     page: "cover-up.html",
-    path: "/cover-up"
+    path: "/cover-up",
+    enabled: false
   },
   {
     key: "tops-kurti",
@@ -25,7 +30,8 @@ window.CATALOG_SECTIONS = [
     menu: "TOPS/KURTI",
     menuBn: "টপস/কুর্তি",
     page: "tops-kurti.html",
-    path: "/tops-kurti"
+    path: "/tops-kurti",
+    enabled: false
   },
   {
     key: "premium-two-piece",
@@ -33,7 +39,8 @@ window.CATALOG_SECTIONS = [
     menu: "PREMIUM TWO-PIECE",
     menuBn: "প্রিমিয়াম টু-পিস",
     page: "premium-two-piece.html",
-    path: "/premium-two-piece"
+    path: "/premium-two-piece",
+    enabled: true
   },
   {
     key: "embroidery",
@@ -41,7 +48,8 @@ window.CATALOG_SECTIONS = [
     menu: "EMBROIDERY",
     menuBn: "এম্ব্রয়ডারি",
     page: "embroidery.html",
-    path: "/embroidery"
+    path: "/embroidery",
+    enabled: false
   },
   {
     key: "karchupi",
@@ -49,7 +57,8 @@ window.CATALOG_SECTIONS = [
     menu: "KARCHUPI",
     menuBn: "কারচুপি",
     page: "karchupi.html",
-    path: "/karchupi"
+    path: "/karchupi",
+    enabled: false
   },
   {
     key: "kaftan",
@@ -57,7 +66,8 @@ window.CATALOG_SECTIONS = [
     menu: "KAFTAN",
     menuBn: "কাফতান",
     page: "kaftan.html",
-    path: "/kaftan"
+    path: "/kaftan",
+    enabled: false
   },
   {
     key: "hijab",
@@ -65,6 +75,31 @@ window.CATALOG_SECTIONS = [
     menu: "HIJAB",
     menuBn: "হিজাব",
     page: "hijab.html",
-    path: "/hijab"
+    path: "/hijab",
+    enabled: false
   }
 ];
+
+/** মেনুতে অতিরিক্ত লিংক (ক্যাটালগ ছাড়া) */
+window.SITE_NAV_EXTRAS = [
+  {
+    key: "video",
+    menu: "VIDEO",
+    page: "video.html",
+    path: "/video",
+    enabled: false
+  }
+];
+
+window.isCatalogSectionEnabled = function (key) {
+  var sections = window.CATALOG_SECTIONS || [];
+  var extras = window.SITE_NAV_EXTRAS || [];
+  var i;
+  for (i = 0; i < sections.length; i++) {
+    if (sections[i].key === key) return sections[i].enabled !== false;
+  }
+  for (i = 0; i < extras.length; i++) {
+    if (extras[i].key === key) return extras[i].enabled !== false;
+  }
+  return true;
+};

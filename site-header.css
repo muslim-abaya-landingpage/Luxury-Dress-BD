@@ -258,6 +258,21 @@ html {
   color: #000;
 }
 
+.desktop-menu ul li .nav-link-soon,
+.mobile-nav-panel ul li .nav-link-soon {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 2px 4px;
+  font-size: inherit;
+  font-weight: 600;
+  letter-spacing: inherit;
+  color: #9ca3af;
+  cursor: default;
+  user-select: none;
+  white-space: nowrap;
+}
+
 .nav-icons {
   display: flex;
   align-items: center;

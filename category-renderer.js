@@ -1742,6 +1742,44 @@ function renderCategory(categoryKey) {
     products = (allProducts[categoryKey] || []).slice();
   }
 
+  if (
+    categoryKey &&
+    !searchQ &&
+    typeof window.isCatalogSectionEnabled === "function" &&
+    !window.isCatalogSectionEnabled(categoryKey) &&
+    !products.length
+  ) {
+    var soonTitle =
+      (categoryMeta[categoryKey] && categoryMeta[categoryKey].title) || categoryKey.toUpperCase();
+    var soonCrumb =
+      "<nav class='shop-breadcrumb' aria-label='Breadcrumb'>" +
+      "<a href='" +
+      escapeHtml(shopHref("/")) +
+      "'>Home</a><span>&rsaquo;</span><a href='" +
+      escapeHtml(shopHref("/category")) +
+      "'>Category</a><span>&rsaquo;</span><strong>" +
+      escapeHtml(soonTitle) +
+      "</strong></nav>";
+    root.innerHTML =
+      soonCrumb +
+      "<div class='shop-empty-soon'>" +
+      "<h1 class='shop-empty-soon-title'>" +
+      escapeHtml(soonTitle) +
+      "</h1>" +
+      "<p class='shop-empty-soon-text'>এই ক্যাটাগরির প্রোডাক্ট এখনো সেটআপ করা হয়নি। শীঘ্রই যোগ করা হবে।</p>" +
+      "<div class='shop-empty-soon-actions'>" +
+      "<a class='shop-empty-soon-btn' href='" +
+      escapeHtml(shopHref("/abaya")) +
+      "'>ABAYA দেখুন</a>" +
+      "<a class='shop-empty-soon-btn shop-empty-soon-btn--dark' href='" +
+      escapeHtml(shopHref("/premium-two-piece")) +
+      "'>PREMIUM TWO-PIECE</a>" +
+      "</div></div>";
+    fixShopPageLinks(root);
+    markCategoryReady();
+    return;
+  }
+
   var title = searchQ
     ? 'Search: "' + searchQ + '"'
     : (categoryMeta[categoryKey] && categoryMeta[categoryKey].title) || categoryKey.toUpperCase();

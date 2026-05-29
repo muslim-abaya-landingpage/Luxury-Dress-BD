@@ -41,19 +41,32 @@
       return "";
     }
 
-    var navFromSections = sections.map(function (sec) {
-      var img = hubImageForKey(sec.key) || "images/Baby-Pink-Floral-Print.jpeg";
-      return {
-        key: sec.key,
-        href: sec.path || "/" + sec.key,
-        label: sec.menu,
-        image: img
-      };
-    });
+    var navFromSections = sections
+      .filter(function (sec) {
+        return sec.enabled !== false;
+      })
+      .map(function (sec) {
+        var img = hubImageForKey(sec.key) || "images/Baby-Pink-Floral-Print.jpeg";
+        return {
+          key: sec.key,
+          href: sec.path || "/" + sec.key,
+          label: sec.menu,
+          image: img
+        };
+      });
 
-    var extras = (g.CATEGORY_NAV || []).filter(function (n) {
-      return n && n.key === "video";
-    });
+    var extras = (g.SITE_NAV_EXTRAS || [])
+      .filter(function (ex) {
+        return ex && ex.enabled !== false;
+      })
+      .map(function (ex) {
+        return {
+          key: ex.key,
+          href: ex.path || "/" + ex.key,
+          label: ex.menu,
+          image: ""
+        };
+      });
 
     g.CATEGORY_NAV = navFromSections.concat(extras);
   }
