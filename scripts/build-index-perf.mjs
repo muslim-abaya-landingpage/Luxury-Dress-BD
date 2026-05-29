@@ -4,7 +4,7 @@ import fs from "fs";
 const SRC = "7721f89";
 const VER = "20260530sale";
 const FOOTER_JS = "site-footer.js?v=20260629post";
-const FOOTER_CSS = "site-footer.css?v=20260530ft2";
+const FOOTER_CSS = "site-footer.css?v=20260530ft3";
 
 function deferCss(href) {
   return (

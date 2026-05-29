@@ -6,10 +6,12 @@ html {
 
 #site-footer-mount {
   width: 100%;
+  max-width: 100%;
   clear: both;
   margin: 0;
   padding: 0;
   min-height: 0;
+  box-sizing: border-box;
 }
 
 #site-footer-mount .anz-footer {
@@ -55,7 +57,10 @@ html {
   font-family: "Hind Siliguri", "Inter", "Helvetica Neue", Arial, sans-serif;
   color: #e8e4dc;
   margin: 0;
+  width: 100%;
+  max-width: 100%;
   overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 #ma-social-connect-mount + #site-footer-mount .anz-footer {
@@ -70,6 +75,9 @@ html {
 .anz-footer-trust {
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   background: rgba(255, 255, 255, 0.02);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .anz-trust-inner {
@@ -391,11 +399,12 @@ a.anz-contact-link:hover {
 
 .anz-bottom {
   border-top: 1px solid rgba(255, 255, 255, 0.07);
-  height: 2in;
-  min-height: 2in;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  min-height: 0;
   max-height: 2in;
-  padding: 0 28px;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding: 0.18in 16px calc(0.18in + env(safe-area-inset-bottom, 0px));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -539,10 +548,11 @@ a.anz-contact-link:hover {
   }
 
   .anz-bottom {
-    height: 2in;
-    min-height: 2in;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    min-height: 0;
     max-height: 2in;
-    padding: 0 14px;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding: 0.16in 14px calc(0.16in + env(safe-area-inset-bottom, 0px));
   }
 }

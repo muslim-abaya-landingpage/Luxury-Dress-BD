@@ -7,6 +7,7 @@
   background: #0a0a0a;
   border-top: 1px solid rgba(201, 169, 98, 0.22);
   box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .ma-social-connect {
