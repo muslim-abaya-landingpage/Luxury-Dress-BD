@@ -25,6 +25,13 @@
   max-height: 16px !important;
 }
 
+#site-footer-mount .anz-wa-cta .anz-wa-icon svg {
+  width: 22px !important;
+  height: 22px !important;
+  max-width: 22px !important;
+  max-height: 22px !important;
+}
+
 .anz-footer {
   background: linear-gradient(165deg, #141414 0%, #0d0d0d 48%, #1a1814 100%);
   border-top: 1px solid rgba(201, 169, 98, 0.22);
@@ -128,10 +135,22 @@
   box-shadow: 0 4px 14px rgba(37, 211, 102, 0.25);
 }
 
-.anz-wa-cta svg {
-  width: 18px;
-  height: 18px;
+.anz-wa-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+.anz-wa-icon svg {
+  display: block;
+  width: 22px;
+  height: 22px;
 }
 
 .anz-wa-cta:hover {
