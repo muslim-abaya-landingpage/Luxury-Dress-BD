@@ -3,6 +3,41 @@ import fs from "fs";
 
 const SRC = "7721f89";
 const VER = "20260530ft6";
+
+function toHtmlEntities(str) {
+  return String(str)
+    .split("")
+    .map((ch) => {
+      const c = ch.charCodeAt(0);
+      return c > 127 ? `&#${c};` : ch;
+    })
+    .join("");
+}
+
+function toJsUnicodeLiteral(str) {
+  return (
+    "'" +
+    String(str)
+      .split("")
+      .map((ch) => {
+        const c = ch.charCodeAt(0);
+        if (c <= 127 && ch !== "\\" && ch !== "'") return ch;
+        if (ch === "\\") return "\\\\";
+        if (ch === "'") return "\\'";
+        return "\\u" + c.toString(16).padStart(4, "0");
+      })
+      .join("") +
+    "'"
+  );
+}
+
+function escapeBnJsStrings(block) {
+  return block.replace(/'([^'\\]*(?:\\.[^'\\]*)*)'/g, (match, inner) => {
+    if (!/[\u0980-\u09FF]/.test(inner)) return match;
+    return toJsUnicodeLiteral(inner.replace(/\\'/g, "'"));
+  });
+}
+
 let html = execSync(`git show ${SRC}:checkout.html`, {
   encoding: "utf8",
   maxBuffer: 20 * 1024 * 1024,
@@ -17,6 +52,11 @@ if (bnBefore < 800) {
 html = html.replace(
   /<script>\(function\(w,d,s,l,i\)[\s\S]*?GTM-ML7RL6BR'\);<\/script>\s*/i,
   ""
+);
+
+html = html.replace(
+  /<meta charset="UTF-8">/,
+  '<meta charset="UTF-8">\n    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">'
 );
 
 html = html.replace(
@@ -67,9 +107,37 @@ html = html.replace(
   "function formatBdt(amount) {\n        if (typeof window.formatBdt === 'function') return window.formatBdt(amount);\n        var n = parseInt(amount, 10) || 0;\n        return '\\u09F3' +"
 );
 
+html = html.replace(
+  /<p class="delivery-fee-hint">[\s\S]*?<\/p>/,
+  (m) => {
+    const text = m.replace(/<[^>]+>/g, "").trim();
+    return `<p class="delivery-fee-hint">${toHtmlEntities(text)}</p>`;
+  }
+);
+
+html = html.replace(
+  /<p class="checkout-trust-note"[^>]*>[\s\S]*?<\/p>/,
+  (m) => {
+    const open = m.match(/^<p class="checkout-trust-note"[^>]*>/)[0];
+    const text = m.replace(/<[^>]+>/g, "").trim();
+    return `${open}${toHtmlEntities(text)}</p>`;
+  }
+);
+
+html = html.replace(
+  /\(function initDistrictSelect\(\) \{[\s\S]*?\}\)\(\);/,
+  (block) => escapeBnJsStrings(block)
+);
+
 fs.writeFileSync("checkout.html", html, { encoding: "utf8" });
 
-const bn = (html.match(/[\u0980-\u09FF]/g) || []).length;
-const bad = (html.match(/\?\?\?\?/g) || []).length;
-console.log("checkout.html Bengali:", bn, "???? blocks:", bad);
-if (bn < 800 || bad > 0) process.exit(1);
+const out = fs.readFileSync("checkout.html", "utf8");
+const bn = (out.match(/[\u0980-\u09FF]/g) || []).length;
+const bad = (out.match(/\?\?\?\?/g) || []).length;
+const entities = (out.match(/&#(\d+);/g) || []).length;
+console.log("checkout.html Bengali chars:", bn, "???? blocks:", bad, "html entities:", entities);
+if (bad > 0) process.exit(1);
+if (!out.includes("delivery-fee-hint") || !out.includes("\\u09")) {
+  console.error("ASCII-safe district escapes missing");
+  process.exit(1);
+}
