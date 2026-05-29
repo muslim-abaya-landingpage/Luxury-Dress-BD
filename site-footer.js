@@ -8,7 +8,7 @@
   };
 
   var CONTACT = {
-    email: "muslimabeya@gmail.com",
+    email: "muslimabaya@gmail.com",
     phone: "+880 1971-642683",
     phoneTel: "+8801971642683",
     whatsapp: "https://wa.me/8801971642683",

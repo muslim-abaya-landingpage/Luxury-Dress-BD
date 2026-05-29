@@ -342,10 +342,9 @@ card.innerHTML = `
     </div>
 
     <div class="product-info">
-        ${p.categoryLabel ? '<a class="home-cat-tag" href="' + homeCategoryHref(p) + '" onclick="event.stopPropagation()">' + p.categoryLabel + '</a>' : ''}
         <div class="product-meta-row">
-            <span class="product-card-name">${p.name}</span>
-            <span class="product-card-price">৳${p.price}</span>
+            <span class="product-card-name" lang="en">${p.name}</span>
+            <span class="product-card-price"><span class="product-price-circle">${"\u09F3"}${p.price}</span></span>
         </div>
         <div class="product-actions-anzaar">
             <div class="home-card-qty" style="display:${inCart ? 'flex' : 'none'};align-items:center;justify-content:center;gap:8px;margin-bottom:8px;">
@@ -374,12 +373,19 @@ function manualSelect(index, id) {
     selectProduct(index, id, true);
 }
 
+function setHomePriceTag(price) {
+    const priceEl = document.getElementById('homePriceTag');
+    if (!priceEl) return;
+    priceEl.innerHTML =
+        '<span class="price-tag-cur">' + "\u09F3" + '</span>' +
+        '<span class="price-tag-amt">' + price + '</span>';
+}
+
 function selectProduct(index, id, shouldScroll = true) {
     currentIdx = index;
     const p = products[index];
     if (!p) return;
-    const priceEl = document.getElementById('homePriceTag');
-    if (priceEl) priceEl.textContent = '৳ ' + p.price;
+    setHomePriceTag(p.price);
     const nextImgSrc = p.img && p.img.indexOf('/upload/') !== -1
         ? p.img.replace('/upload/', '/upload/f_auto,q_auto,w_600/')
         : p.img;

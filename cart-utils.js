@@ -3,6 +3,15 @@
  * Array: [{ id, name, price, quantity, image? }]
  */
 (function (global) {
+  var BDT = "\u09F3";
+
+  global.MA_BDT = BDT;
+  global.formatBdt = function formatBdt(amount) {
+    var n = Number(amount);
+    if (!isFinite(n)) n = 0;
+    return BDT + n.toLocaleString("en-BD", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  };
+
   var CATALOG = [
     { id: "DR-01", name: "Baby Pink Floral", price: 550, image: "images/Baby-Pink-Floral-Print.jpeg" },
     { id: "DR-08", name: "Black Base Rose", price: 550, image: "images/Black-Base-Rose-Floral.jpeg" },

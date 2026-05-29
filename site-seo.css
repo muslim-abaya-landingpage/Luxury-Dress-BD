@@ -1,21 +1,16 @@
 /* Home + site-wide social connect (SEO / organic discovery) */
 .ma-social-connect {
-  max-width: 1180px;
-  margin: 8px auto 0;
-  padding: 0 16px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px 6px;
   box-sizing: border-box;
 }
 
-/* ফুটারের সাথে জোড়া — দ্বিগুণ gap এড়াতে */
-#ma-social-connect-mount + #site-footer-mount .anz-footer {
-  margin-top: 0;
-}
-
 .ma-social-connect-inner {
-  background: linear-gradient(135deg, #1a1a1a 0%, #2d2418 100%);
-  border: 1px solid rgba(201, 169, 98, 0.35);
-  border-radius: 12px;
-  padding: 14px 16px 16px;
+  background: linear-gradient(135deg, #141414 0%, #1f1a12 100%);
+  border: 1px solid rgba(201, 169, 98, 0.28);
+  border-radius: 10px;
+  padding: 12px 14px 14px;
   text-align: center;
   color: #f5f0e6;
   font-family: "Hind Siliguri", "Inter", sans-serif;

@@ -8,10 +8,10 @@
     <title>Checkout - Muslim Abaya | muslimabaya.com</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
     <link rel="stylesheet" href="site-header.css?v=20260530c">
-    <link rel="stylesheet" href="site-footer.css?v=20260531ft">
+    <link rel="stylesheet" href="site-footer.css?v=20260620ft">
     <style>
         :root {
             --ink: #111111;
@@ -27,7 +27,7 @@
             --radius: 14px;
         }
         body {
-            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+            font-family: 'Inter', 'Hind Siliguri', system-ui, -apple-system, 'Segoe UI', sans-serif;
             background: linear-gradient(180deg, #faf9f7 0%, var(--bg) 120px);
             margin: 0;
             padding: 0 0 32px;
@@ -237,7 +237,8 @@
             font-size: 14px;
             color: var(--ink-soft);
         }
-        .summary-item strong { font-weight: 700; color: #111; }
+        .summary-item strong { font-weight: 700; color: #111; font-family: 'Hind Siliguri', 'Inter', sans-serif; }
+        #orderReviewMeta { font-family: 'Hind Siliguri', 'Inter', sans-serif; }
         @media (max-width: 640px) {
             .gb-order-row {
                 grid-template-columns: 56px 1fr auto 36px;
@@ -1175,10 +1176,10 @@
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-ML7RL6BR"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div id="localFileBanner" class="local-file-banner" role="alert">
-    <strong>????? ???:</strong> ???? ?????? ???? ??? (<code>file://</code>) ? ?????? ? ????? ????? ??? ???? ???
-    <strong>ADMIN-?????-?????.bat</strong> ???????
-    <a href="http://localhost:5500/checkout.html">localhost:5500</a> ??????? ????, ???? ????
-    <a href="https://muslimabaya.com/checkout" target="_blank" rel="noopener">muslimabaya.com/checkout</a>?
+    <strong>টেস্ট মোড:</strong> ফাইল হিসেবে খোলা আছে (<code>file://</code>) — অর্ডার ও ভিডিও এভাবে কাজ করবে না।
+    <strong>ADMIN-লোকাল-টেস্ট.bat</strong> চালিয়ে
+    <a href="http://localhost:5500/checkout.html">localhost:5500</a> ব্যবহার করুন, অথবা লাইভ
+    <a href="https://muslimabaya.com/checkout" target="_blank" rel="noopener">muslimabaya.com/checkout</a>।
 </div>
 <div id="site-header-mount"></div>
 <div class="container">
@@ -1187,7 +1188,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <a href="/">Home</a>
         </nav>
         <h1>Checkout</h1>
-        <p class="checkout-subtitle">Safe &amp; fast ordering ? Cash on delivery available</p>
+        <p class="checkout-subtitle">Safe &amp; fast ordering — Cash on delivery available</p>
         <div class="checkout-trust" style="justify-content:center;">
             <span>Secure order</span>
             <span>COD available</span>
@@ -1244,7 +1245,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <select id="userArea" required>
                         <option value="">Select district</option>
                     </select>
-                    <p class="delivery-fee-hint">???? ?80 ? ???????? ???? ?150 ? ?+ ???? ???? ????????</p>
+                    <p class="delivery-fee-hint">ঢাকা ৳80 · অন্যান্য জেলা ৳150 · ৩+ পিসে ফ্রি ডেলিভারি</p>
                 </div>
                 <div class="form-group form-group-last">
                     <label for="userThana">Thana / Upazila <span style="font-size:13px;font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0;">(Optional)</span></label>
@@ -1314,7 +1315,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     </div>
                 </div>
                 <div id="paymentExtra" class="payment-extra is-cod-hidden">
-                <div id="paymentInfo" class="payment-panel">Payment mode: Cash On Delivery ? pay when you receive the product.</div>
+                <div id="paymentInfo" class="payment-panel">Payment mode: Cash On Delivery — pay when you receive the product.</div>
                 <div class="payment-fields">
                     <input type="text" id="senderNumber" placeholder="Payment number (bKash/Nagad) - optional">
                     <input type="text" id="paymentTxnId" placeholder="Transaction ID / Reference - optional">
@@ -1392,9 +1393,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </div>
             <div class="gb-panel gb-panel-summary">
                     <div class="gb-order-summary">
-                        <div class="summary-item"><span>Sub total</span><strong id="side-subtotal">?0</strong></div>
-                        <div class="summary-item"><span>Delivery cost</span><strong id="side-delivery">?0</strong></div>
-                        <div class="summary-item summary-total-row"><span>Total</span><strong id="side-total">?0 BDT</strong></div>
+                        <div class="summary-item"><span>Sub total</span><strong id="side-subtotal">&#2547;0</strong></div>
+                        <div class="summary-item"><span>Delivery cost</span><strong id="side-delivery">&#2547;0</strong></div>
+                        <div class="summary-item summary-total-row"><span>Total</span><strong id="side-total">&#2547;0 BDT</strong></div>
                     </div>
                     <span id="side-design" class="visually-hidden">0</span>
                     <span id="side-qty" class="visually-hidden">0</span>
@@ -1432,7 +1433,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         <span>I have read and agree to the <a href="terms.html" target="_blank" rel="noopener">Terms &amp; Conditions</a>, <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a> and <a href="refund.html" target="_blank" rel="noopener">Refund Policy</a>.</span>
                     </label>
                     <div id="termsError" class="terms-error">Please accept the Terms &amp; Conditions to place your order.</div>
-                    <p class="checkout-trust-note" style="font-size:12px;color:#6b7280;line-height:1.55;margin:0 0 10px">COD ?????? ???? ??????? ???? ?? ?????? ???? bKash/Nagad ?????? ??????? ????? ??????????? ??????? ????</p>
+                    <p class="checkout-trust-note" style="font-size:12px;color:#6b7280;line-height:1.55;margin:0 0 10px">COD অর্ডার ফোনে কনফার্ম করার পর পাঠানো হয়। bKash/Nagad অগ্রিম পেমেন্ট দ্রুত প্রসেসিংয়ে সাহায্য করে।</p>
                     <button type="submit" id="submitBtn" class="btn-place-order">Place Order</button>
             </div>
         </aside>
@@ -1445,7 +1446,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div id="checkoutModal" class="checkout-modal" role="dialog" aria-modal="true" aria-labelledby="checkoutModalTitle" aria-hidden="true">
     <div class="checkout-modal-backdrop" data-checkout-modal-close></div>
     <div class="checkout-modal-panel">
-        <button type="button" class="checkout-modal-close" data-checkout-modal-close aria-label="????">&times;</button>
+        <button type="button" class="checkout-modal-close" data-checkout-modal-close aria-label="বন্ধ">&times;</button>
         <div id="checkoutModalIcon" class="checkout-modal-icon checkout-modal-icon--info" aria-hidden="true">i</div>
         <h2 id="checkoutModalTitle" class="checkout-modal-title"></h2>
         <p id="checkoutModalMessage" class="checkout-modal-message"></p>
@@ -1459,7 +1460,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="auth-config.js"></script>
 <script src="auth-api.js"></script>
 <script src="cart-utils.js?v=20260530"></script>
-<script defer src="site-header.js?v=20260531perf"></script>
+<script defer src="site-header.js?v=20260531nav"></script>
 <script>
     const ORDER_SCRIPT_URL =
       (typeof getSiteApiUrl === 'function' && getSiteApiUrl()) ||
@@ -1486,7 +1487,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var actionsEl = document.getElementById('checkoutModalActions');
         if (!modal || !titleEl || !msgEl || !actionsEl) return;
         var variant = (opts && opts.variant) || 'info';
-        var icons = { info: 'i', warn: '!', error: '?', success: '?' };
+        var icons = { info: 'i', warn: '!', error: '×', success: '✓' };
         titleEl.textContent = (opts && opts.title) || '';
         msgEl.textContent = (opts && opts.message) || '';
         if (iconEl) {
@@ -1494,7 +1495,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             iconEl.textContent = icons[variant] || 'i';
         }
         actionsEl.innerHTML = '';
-        var actions = (opts && opts.actions) || [{ label: '??? ???', primary: true }];
+        var actions = (opts && opts.actions) || [{ label: 'ঠিক আছে', primary: true }];
         actions.forEach(function (action) {
             var btn = document.createElement('button');
             btn.type = 'button';
@@ -1517,11 +1518,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function checkoutAlert(message, focusEl) {
         openCheckoutModal({
-            title: '???? ??? ??? ????',
+            title: 'দয়া করে চেক করুন',
             message: message,
             variant: 'warn',
             actions: [{
-                label: '??? ???',
+                label: 'ঠিক আছে',
                 primary: true,
                 onClick: function () {
                     closeCheckoutModal();
@@ -1533,12 +1534,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function showLocalFileBlockedModal() {
         openCheckoutModal({
-            title: '????? ?????? ?????? ???? ??',
-            message: '???? ?????? (file://) ???? ????? ?????? API ??? ??? ??? ADMIN-?????-?????.bat ??????? localhost ??????? ????, ???? muslimabaya.com ? ?????? ????',
+            title: 'এখানে অর্ডার পাঠানো যাবে না',
+            message: 'ফাইল হিসেবে (file://) খোলা থাকলে অর্ডার API কাজ করে না। ADMIN-লোকাল-টেস্ট.bat চালিয়ে localhost ব্যবহার করুন, অথবা muslimabaya.com এ অর্ডার দিন।',
             variant: 'warn',
             actions: [
                 {
-                    label: '???? ????? ??????',
+                    label: 'লাইভ সাইটে চেকআউট',
                     primary: true,
                     onClick: function () {
                         window.open('https://muslimabaya.com/checkout', '_blank', 'noopener');
@@ -1546,7 +1547,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     }
                 },
                 {
-                    label: '????',
+                    label: 'বন্ধ',
                     onClick: closeCheckoutModal
                 }
             ]
@@ -1571,14 +1572,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     function getWhatsAppOrderLink(order) {
         var wa = '8801971642683';
         var lines = [
-            '???? ?????? ? Muslim Abaya',
-            '???: ' + order.name,
-            '??????: ' + order.phone,
-            '??????: ' + order.address,
-            '????: ' + order.district
+            'নতুন অর্ডার — Muslim Abaya',
+            'নাম: ' + order.name,
+            'মোবাইল: ' + order.phone,
+            'ঠিকানা: ' + order.address,
+            'জেলা: ' + order.district
         ];
-        if (order.thana) lines.push('????: ' + order.thana);
-        lines.push('??????: ' + order.qty, '???: ?' + order.total, '????: ' + order.products);
+        if (order.thana) lines.push('থানা: ' + order.thana);
+        lines.push('পরিমাণ: ' + order.qty, 'মোট: ৳' + order.total, 'পণ্য: ' + order.products);
         return 'https://wa.me/' + wa + '?text=' + encodeURIComponent(lines.join('\n'));
     }
 
@@ -1620,12 +1621,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function offerWhatsAppOrder(orderWa, reason) {
         openCheckoutModal({
-            title: '?????? ??????? ??????',
-            message: (reason || '?????? ?????? ???????') + ' WhatsApp ? ??????? ?????? ?????? ?? ? ???? ???? ????',
+            title: 'অর্ডার অনলাইনে যায়নি',
+            message: (reason || 'অর্ডার পাঠানো যায়নি।') + ' WhatsApp এ পাঠালেও অর্ডার হারাবে না — আমরা দেখে নেব।',
             variant: 'error',
             actions: [
                 {
-                    label: 'WhatsApp ? ?????',
+                    label: 'WhatsApp এ পাঠান',
                     wa: true,
                     primary: true,
                     onClick: function () {
@@ -1634,7 +1635,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     }
                 },
                 {
-                    label: '???? ??????',
+                    label: 'আবার চেষ্টা',
                     onClick: closeCheckoutModal
                 }
             ]
@@ -1709,7 +1710,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 }
                 var msg = text.indexOf('Error|') === 0
                     ? text.slice(6).trim()
-                    : (text ? text.slice(0, 160) : '?????? Sheet ? ??? ??????');
+                    : (text ? text.slice(0, 160) : 'অর্ডার Sheet এ জমা হয়নি।');
                 offerWhatsAppOrder(orderWa, msg);
                 resetOrderButton(btn);
             })
@@ -1718,14 +1719,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     .then(function () {
                         offerWhatsAppOrder(
                             orderWa,
-                            '?????? ??????? ?????? ??????? Sheet ? ??? ????? ?? ?????? ?? ???? WhatsApp ? ??????'
+                            'অর্ডার পাঠানোর চেষ্টা হয়েছে। Sheet এ ১–২ মিনিট পর দেখুন। না গেলে WhatsApp এ পাঠান।'
                         );
                         resetOrderButton(btn);
                     })
                     .catch(function () {
                         offerWhatsAppOrder(
                             orderWa,
-                            'API ????? ??????? ????????? ??? ???? ?? WhatsApp ? ?????? ??????'
+                            'API সংযোগ ব্যর্থ। ইন্টারনেট চেক করুন বা WhatsApp এ অর্ডার পাঠান।'
                         );
                         resetOrderButton(btn);
                     });
@@ -1768,7 +1769,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (size) parts.push('Size: ' + size);
         var desc = String(item.description || '').trim();
         if (desc && desc !== fabric) parts.push(desc);
-        return parts.join(' ? ');
+        return parts.join(' · ');
     }
 
     (function initDistrictSelect() {
@@ -1776,22 +1777,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (!sel || sel.getAttribute('data-districts-built') === '1') return;
         sel.setAttribute('data-districts-built', '1');
         var dhakaNearby = [
-            '???????', '???????????', '???????', '??????????', '?????????',
-            '????????', '?????????', '?????????', '???????', '????????', '?????????',
-            '?????????', '?????????', '????????', '??????', '?????????'
+            'গাজীপুর', 'নারায়ণগঞ্জ', 'নরসিংদী', 'মুন্সীগঞ্জ', 'মানিকগঞ্জ',
+            'টাঙ্গাইল', 'কিশোরগঞ্জ', 'ময়মনসিংহ', 'ফরিদপুর', 'রাজবাড়ী', 'মাদারীপুর',
+            'গোপালগঞ্জ', 'শরীয়তপুর', 'জামালপুর', 'শেরপুর', 'নেত্রকোনা'
         ];
         var allDistricts = [
-            '????', '???????', '???????????', '???????', '????????', '?????????', '?????????', '??????', '????????', '?????????',
-            '?????????', '??????????', '?????????', '????????', '???????', '?????????', '?????????',
-            '?????????', '????????', '???????', '????', '????????????????', '?????????', '??????????', '?????????', '??????????', '??????????', '?????????',
-            '???????', '?????', '?????', '??????????????', '?????', '?????????', '?????????', '??????',
-            '?????', '????????', '???????', '?????????', '??????????', '??????????', '?????????', '?????????',
-            '?????', '?????????', '???????', '??????????',
-            '?????', '????????', '?????????', '??????', '????', '??????', '???????', '?????????', '???????????', '????????',
-            '??????', '??????????', '????', '??????', '???????', '????????'
+            'ঢাকা', 'গাজীপুর', 'নারায়ণগঞ্জ', 'নরসিংদী', 'টাঙ্গাইল', 'কিশোরগঞ্জ', 'ময়মনসিংহ', 'শেরপুর', 'জামালপুর', 'নেত্রকোনা',
+            'মানিকগঞ্জ', 'মুন্সীগঞ্জ', 'মাদারীপুর', 'রাজবাড়ী', 'ফরিদপুর', 'গোপালগঞ্জ', 'শরীয়তপুর',
+            'চট্টগ্রাম', 'কুমিল্লা', 'চাঁদপুর', 'ফেনী', 'ব্রাহ্মণবাড়িয়া', 'নোয়াখালী', 'লক্ষ্মীপুর', 'কক্সবাজার', 'খাগড়াছড়ি', 'রাঙ্গামাটি', 'বান্দরবান',
+            'রাজশাহী', 'নওগাঁ', 'নাটোর', 'চাঁপাইনবাবগঞ্জ', 'পাবনা', 'সিরাজগঞ্জ', 'জয়পুরহাট', 'বগুড়া',
+            'রংপুর', 'দিনাজপুর', 'পঞ্চগড়', 'নীলফামারী', 'লালমনিরহাট', 'কুড়িগ্রাম', 'গাইবান্ধা', 'ঠাকুরগাঁও',
+            'সিলেট', 'সুনামগঞ্জ', 'হবিগঞ্জ', 'মৌলভীবাজার',
+            'খুলনা', 'বাগেরহাট', 'সাতক্ষীরা', 'নড়াইল', 'যশোর', 'মাগুরা', 'ঝিনাইদহ', 'কুষ্টিয়া', 'চুয়াডাঙ্গা', 'মেহেরপুর',
+            'বরিশাল', 'পটুয়াখালী', 'ভোলা', 'বরগুনা', 'ঝালকাঠি', 'পিরোজপুর'
         ];
         function deliveryFee(name) {
-            return name === '????' ? 80 : 150;
+            return name === 'ঢাকা' ? 80 : 150;
         }
         var nearbySet = {};
         dhakaNearby.forEach(function (d) { nearbySet[d] = 1; });
@@ -1799,15 +1800,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             return allDistricts.indexOf(d) !== -1;
         });
         var rest = allDistricts.filter(function (d) {
-            return d !== '????' && !nearbySet[d];
+            return d !== 'ঢাকা' && !nearbySet[d];
         });
         rest.sort(function (a, b) { return a.localeCompare(b, 'bn'); });
-        var ordered = ['????'].concat(nearbyOrdered, rest);
+        var ordered = ['ঢাকা'].concat(nearbyOrdered, rest);
         ordered.forEach(function (name) {
             var opt = document.createElement('option');
             opt.value = String(deliveryFee(name));
             opt.setAttribute('data-district', name);
-            opt.textContent = name === '????' ? name + ' (?80)' : name;
+            opt.textContent = name === 'ঢাকা' ? name + ' (৳80)' : name;
             sel.appendChild(opt);
         });
     })();
@@ -1853,7 +1854,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function shippingCharge() {
         var q = cartQty();
-        if (q === 0 || q >= 3) return 0; // ? ??? ?? ??? ???? ??? ???? ????????
+        if (q === 0 || q >= 3) return 0; // ৩ পিস বা তার বেশি হলে ফ্রি ডেলিভারি
         return parseInt(areaSelect.value, 10) || 0;
     }
 
@@ -1868,8 +1869,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
 
     function formatBdt(amount) {
+        if (typeof window.formatBdt === 'function') return window.formatBdt(amount);
         var n = parseInt(amount, 10) || 0;
-        return '?' + n.toLocaleString('en-BD', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        return '\u09F3' + n.toLocaleString('en-BD', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
     var TRASH_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
@@ -1885,7 +1887,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         cart.forEach(function (item) {
             var qty = parseInt(item.quantity, 10) || 1;
             var unit = parseInt(item.price, 10) || 0;
-            var size = item.size || item.selectedSize || '?';
+            var size = item.size || item.selectedSize || '—';
             var fabric = item.fabric || item.material || 'Premium Fabric';
             rows +=
                 '<tr>' +
@@ -1906,7 +1908,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var slots = [];
         cart.forEach(function(item) {
             var qty = parseInt(item.quantity, 10) || 1;
-            slots.push(item.name + ' x' + qty + ' = ?' + ((parseInt(item.price, 10) || 0) * qty));
+            slots.push(item.name + ' x' + qty + ' = ৳' + ((parseInt(item.price, 10) || 0) * qty));
         });
         while (slots.length < MAX_PRODUCT_SLOTS) {
             slots.push('');
@@ -1956,8 +1958,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             var lineTotal = unitPrice * qty;
             var imgUrl = (typeof resolveStoreItemImage === 'function') ? resolveStoreItemImage(item) : (item.image || '');
             var thumbInner = imgUrl
-                ? '<img src="' + escapeHtml(imgUrl) + '" alt="" loading="lazy" onerror="this.parentElement.innerHTML=\'<span class=gb-order-thumb-placeholder>??</span>\'">'
-                : '<span class="gb-order-thumb-placeholder">??</span>';
+                ? '<img src="' + escapeHtml(imgUrl) + '" alt="" loading="lazy" onerror="this.parentElement.innerHTML=\'<span class=gb-order-thumb-placeholder>👜</span>\'">'
+                : '<span class="gb-order-thumb-placeholder">👜</span>';
             var detail = orderItemDetail(item);
             var detailHtml = detail ? '<p class="gb-order-detail">' + escapeHtml(detail) + '</p>' : '';
             itemsHtml +=
@@ -1969,7 +1971,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 '<div class="gb-order-qty-row">' +
                 '<span class="gb-order-qty-label">Qty:</span>' +
                 '<div class="gb-order-qty">' +
-                '<button type="button" data-cart-action="dec" data-cart-idx="' + idx + '" aria-label="Decrease quantity">-</button>' +
+                '<button type="button" data-cart-action="dec" data-cart-idx="' + idx + '" aria-label="Decrease quantity">−</button>' +
                 '<span>' + qty + '</span>' +
                 '<button type="button" data-cart-action="inc" data-cart-idx="' + idx + '" aria-label="Increase quantity">+</button>' +
                 '</div></div></div>' +
@@ -1979,7 +1981,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         });
 
         var metaEl = document.getElementById('orderReviewMeta');
-        if (metaEl) metaEl.textContent = designCount + ' items ? ' + q + ' pcs';
+        if (metaEl) metaEl.textContent = designCount + ' items · ' + q + ' pcs';
 
         summaryDiv.innerHTML = '<div class="gb-order-list">' + itemsHtml + '</div>';
         renderProductChart();
@@ -2022,10 +2024,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     (function initPaymentBox() {
         var info = document.getElementById('paymentInfo');
         var details = {
-            'Cash On Delivery': 'Payment mode: Cash On Delivery ? pay when you receive the product.',
-            'bKash': 'bKash Personal: 01551642683 ? enter Transaction ID after payment.',
-            'Nagad': 'Nagad Personal: 01551642683 ? enter Transaction ID after payment.',
-            'Bank Transfer': 'UCB PLC, A/C: 7862141000038155 ? enter slip/reference number.'
+            'Cash On Delivery': 'Payment mode: Cash On Delivery — pay when you receive the product.',
+            'bKash': 'bKash Personal: 01551642683 — enter Transaction ID after payment.',
+            'Nagad': 'Nagad Personal: 01551642683 — enter Transaction ID after payment.',
+            'Bank Transfer': 'UCB PLC, A/C: 7862141000038155 — enter slip/reference number.'
         };
         function highlightPayCards(pmKey) {
             document.querySelectorAll('.pay-detail-card').forEach(function(card) {
@@ -2127,7 +2129,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
             if (window.MaSecurity) {
                 if (!MaSecurity.guardSubmit('checkout-order', 3000)) {
-                    checkoutAlert('??????? ??? ???????? ??????? ??? ???? ?????? ?????');
+                    checkoutAlert('অনুগ্রহ করে কিছুক্ষণ অপেক্ষা করে আবার চেষ্টা করুন।');
                     return;
                 }
                 if (document.getElementById('orderHp') && document.getElementById('orderHp').value) {
@@ -2136,7 +2138,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             }
 
             if (cart.length === 0) {
-                checkoutAlert('????? ????? ??? ????????? ??? ?????');
+                checkoutAlert('কার্ট খালি। আগে প্রোডাক্ট যোগ করুন।');
                 return;
             }
 
@@ -2166,28 +2168,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 addrValue = v.address;
             } else {
             if (nameValue.length < 2) {
-                checkoutAlert('???? ??? ??????', nameInput);
+                checkoutAlert('সঠিক নাম লিখুন।', nameInput);
                 return;
             }
             if (!/^01\d{9}$/.test(phoneValue)) {
-                checkoutAlert('?? ??????? ?????? ????? ??? (01XXXXXXXXX)?', phoneInput);
+                checkoutAlert('১১ ডিজিটের মোবাইল নম্বর দিন (01XXXXXXXXX)।', phoneInput);
                 return;
             }
             if (addrValue.length < 8) {
-                checkoutAlert('???????? ???????? ?????? ??????', addrInput);
+                checkoutAlert('সম্পূর্ণ ডেলিভারি ঠিকানা লিখুন।', addrInput);
                 return;
             }
             }
             if (emailValue && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
-                checkoutAlert('???? ????? ????', emailInput);
+                checkoutAlert('সঠিক ইমেইল দিন।', emailInput);
                 return;
             }
             if (!window.MaSecurity && addrValue.length < 8) {
-                checkoutAlert('???????? ???????? ?????? ??????', addrInput);
+                checkoutAlert('সম্পূর্ণ ডেলিভারি ঠিকানা লিখুন।', addrInput);
                 return;
             }
             if (!areaSelect.value) {
-                checkoutAlert('???????? ???? ??????? ?????', areaSelect);
+                checkoutAlert('ডেলিভারি জেলা সিলেক্ট করুন।', areaSelect);
                 return;
             }
             var agreeTerms = document.getElementById('agreeTerms');
@@ -2209,7 +2211,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             var gTotal = String(grandTotal());
             var areaOpt = areaSelect.options[areaSelect.selectedIndex];
             var districtParam = areaOpt.getAttribute('data-district') ||
-                areaOpt.textContent.split('(')[0].split('?')[0].trim();
+                areaOpt.textContent.split('(')[0].split('—')[0].trim();
 
             const formData = new URLSearchParams();
             formData.append('RecordType', 'Order');
@@ -2244,7 +2246,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             }
 
             if (!ORDER_SCRIPT_URL) {
-                checkoutAlert('?????? API ????? ??? ?????? site-api-config.js ? Apps Script URL ????');
+                checkoutAlert('অর্ডার API সেটআপ করা হয়নি। site-api-config.js এ Apps Script URL দিন।');
                 if (btn) {
                     btn.disabled = false;
                     btn.innerText = 'Place Order';
@@ -2274,7 +2276,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         displayOrder();
         var clearWrap = document.getElementById('clearCartWrap');
         if (clearWrap && cart.length > 0) {
-            clearWrap.innerHTML = '<a href="#" onclick="if(typeof clearStoreCart===\'function\'){clearStoreCart();} try{sessionStorage.removeItem(\'muslim_abaya_home_cart_active\');}catch(err){} if(typeof refreshCartBadgeUI===\'function\'){refreshCartBadgeUI([]);} else if(typeof window.updateCartBadge===\'function\'){window.updateCartBadge([]);} location.reload(); return false;">????? ???? ????</a>';
+            clearWrap.innerHTML = '<a href="#" onclick="if(typeof clearStoreCart===\'function\'){clearStoreCart();} try{sessionStorage.removeItem(\'muslim_abaya_home_cart_active\');}catch(err){} if(typeof refreshCartBadgeUI===\'function\'){refreshCartBadgeUI([]);} else if(typeof window.updateCartBadge===\'function\'){window.updateCartBadge([]);} location.reload(); return false;">কার্ট খালি করুন</a>';
         } else if (clearWrap) {
             clearWrap.innerHTML = '';
         }
@@ -2333,6 +2335,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     });
 </script>
 <div id="site-footer-mount"></div>
-<script src="site-footer.js?v=20260531fb1"></script>
+<script src="site-footer.js?v=20260620ft"></script>
 </body>
 </html>

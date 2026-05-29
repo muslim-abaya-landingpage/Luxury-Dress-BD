@@ -18,7 +18,7 @@ body.shop-page {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #efefef;
+  background: #fff;
   font-family: var(--font-ui-mixed);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -37,9 +37,7 @@ body.shop-page [lang="en"] {
 }
 
 body.shop-page .card-title-text,
-body.shop-page .pqv-title,
 body.shop-page .pqv-related-name,
-body.shop-page .pqv-price,
 body.shop-page .pqv-related-price,
 body.shop-page .premium-card .card-price,
 body.shop-page .pqv-opt-btn,
@@ -59,10 +57,9 @@ body.shop-page .premium-card-detail .detail-price {
   -moz-osx-font-smoothing: grayscale;
 }
 
-body.shop-page .pqv-title {
-  font-weight: 600;
-  letter-spacing: 0.015em;
-  line-height: 1.25;
+body.shop-page .pqv-title,
+body.shop-page .pqv-price {
+  font-family: Georgia, "Times New Roman", "Noto Serif Bengali", serif;
 }
 
 body.shop-page .card-title-text {
@@ -160,56 +157,4 @@ body.shop-page .shop-breadcrumb {
 
 body.shop-page .shop-breadcrumb--mobile {
   padding-left: 2px;
-}
-
-@media (min-width: 961px) {
-  :root {
-    --shop-footer-h: 140px;
-  }
-
-  body.shop-page:not(.shop-product-open) {
-    height: 100vh;
-    overflow: hidden;
-  }
-
-  body.shop-page:not(.shop-product-open) .wrap,
-  body.shop-page:not(.shop-product-open) > main {
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    padding: 12px 20px 0;
-    padding-bottom: 0;
-  }
-
-  body.shop-page:not(.shop-product-open) #list {
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-
-  body.shop-page:not(.shop-product-open) #list > .shop-mobile-toolbar {
-    flex-shrink: 0;
-  }
-
-  body.shop-page:not(.shop-product-open) #list > .shop-layout {
-    flex: 1 1 auto;
-    min-height: 0;
-  }
-
-  body.shop-page #site-footer-mount {
-    flex-shrink: 0;
-    position: sticky;
-    bottom: 0;
-    z-index: 9000;
-    width: 100%;
-    box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.1);
-  }
-
-  body.shop-page #site-footer-mount .anz-footer {
-    margin-top: 0;
-  }
 }

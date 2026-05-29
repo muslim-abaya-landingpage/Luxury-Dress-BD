@@ -8,22 +8,17 @@ function ensureCategoryStyles() {
     link.rel = "stylesheet";
     document.head.appendChild(link);
   }
-  link.href = "category-sidebar.css?v=20260619anzaar";
+  link.href = "category-sidebar.css?v=20260620anzaar";
   var shopLink = document.querySelector('link[href*="shop-page.css"]');
-  if (shopLink) shopLink.href = "shop-page.css?v=20260619anzaar";
+  if (shopLink) shopLink.href = "shop-page.css?v=20260620anzaar";
 }
 
 function syncShopScrollHeights() {
   if (!document.body || !document.body.classList.contains("shop-page")) return;
-  if (document.body.classList.contains("shop-product-open")) return;
   var header = document.getElementById("site-header-mount");
-  var footer = document.getElementById("site-footer-mount");
   var root = document.documentElement;
   if (header && header.offsetHeight) {
     root.style.setProperty("--site-header-h", header.offsetHeight + "px");
-  }
-  if (footer && footer.offsetHeight) {
-    root.style.setProperty("--shop-footer-h", footer.offsetHeight + "px");
   }
 }
 
@@ -894,8 +889,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
 
   var shortNoteRaw = String(getProductShortNote(p, categoryKey) || "").trim();
   var shortNote = shortNoteRaw ? escapeHtml(shortNoteRaw) : "";
-  var stockCount = allProducts && allProducts.length ? allProducts.length : 1;
-  var stockText = stockCount + " Products Available";
+  var stockText = "In Stock";
 
   var descHtml = getProductDescriptionHtml(p, categoryKey);
   var relatedHtml = buildPqvRelatedHtml(p, idx, allProducts, categoryKey);
@@ -938,6 +932,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     '<button type="button" class="pqv-nav pqv-nav-next" data-pqv-nav="next" aria-label="Next image" hidden>' +
     '<span aria-hidden="true">&#10095;</span></button>' +
     "</div></div></div>" +
+    '<div class="pqv-panel-col">' +
     '<div class="pqv-panel">' +
     '<button type="button" class="pqv-panel-back" data-pqv-close="1">&lsaquo; Back to products</button>' +
     '<h1 id="pqvTitle" class="pqv-title" lang="en">' +
@@ -979,7 +974,6 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     encodeURIComponent(p.name + " অর্ডার করতে চাই") +
     '" target="_blank" rel="noopener">Send Message</a>' +
     "</div></div>" +
-    relatedHtml +
     '<div class="pqv-bottom" id="pqvDescBlock">' +
     '<div class="pqv-bottom-main">' +
     '<div class="pqv-tabs">' +
@@ -992,7 +986,9 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     "</div>" +
     '<div class="pqv-tab-panel" data-panel="spec">' +
     specRows +
-    "</div></div></div></div></div>"
+    "</div></div></div></div></div>" +
+    relatedHtml +
+    "</div>"
   );
 }
 
