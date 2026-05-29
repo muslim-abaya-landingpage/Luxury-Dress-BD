@@ -1,6 +1,6 @@
 import fs from "fs";
 
-const FOOTER_CSS = "site-footer.css?v=20260530ft3";
+const FOOTER_CSS = "site-footer.css?v=20260530ft4";
 const FOOTER_JS = "site-footer.js?v=20260629post";
 const HOME_CSS = "index-home.css?v=20260530ft2";
 
