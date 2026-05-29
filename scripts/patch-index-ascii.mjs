@@ -1,6 +1,6 @@
 import fs from "fs";
 
-const VER = "20260629pro";
+const VER = "20260530sale";
 let html = fs.readFileSync("index.html", { encoding: "utf8" });
 
 const bnBefore = (html.match(/[\u0980-\u09FF]/g) || []).length;

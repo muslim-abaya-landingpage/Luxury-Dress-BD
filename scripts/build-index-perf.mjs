@@ -2,7 +2,9 @@ import { execSync, spawnSync } from "child_process";
 import fs from "fs";
 
 const SRC = "7721f89";
-const VER = "20260629pro";
+const VER = "20260530sale";
+const FOOTER_JS = "20260629post";
+const FOOTER_CSS = "20260629sub";
 
 function deferCss(href) {
   return (
@@ -44,14 +46,14 @@ html = html.replace(
   `<link rel="preload" href="site-header.css?v=20260531logo" as="style">
     <link rel="stylesheet" href="site-header.css?v=20260531logo">`
 );
-html = html.replace(/site-footer\.css\?v=[^"]+/, `site-footer.css?v=${VER}`);
+html = html.replace(/site-footer\.css\?v=[^"]+/, `site-footer.css?v=${FOOTER_CSS}`);
 html = html.replace(/site-seo\.css\?v=[^"]+/, `site-seo.css?v=${VER}`);
 
 if (!html.includes("index-critical.css")) {
   html = html.replace(
     `site-seo.css?v=${VER}">`,
     `site-seo.css?v=${VER}">
-    ${deferCss(`site-footer.css?v=${VER}`)}
+    ${deferCss(`site-footer.css?v=${FOOTER_CSS}`)}
     ${deferCss(`site-seo.css?v=${VER}`)}
     ${deferCss(`qty-stepper.css?v=${VER}`)}
     ${deferCss("cart-drawer.css?v=20260528b")}
@@ -65,20 +67,25 @@ if (!html.includes("index-critical.css")) {
     ""
   );
   html = html.replace(
-    new RegExp(`<link rel="stylesheet" href="site-footer\\.css\\?v=${VER}">\\s*`),
+    new RegExp(`<link rel="stylesheet" href="site-footer\\.css\\?v=${FOOTER_CSS}">\\s*`),
     ""
   );
 }
 
-// Strip inline styles → external index-home.css (regenerate)
-const styles = [];
-html = html.replace(/<style>([\s\S]*?)<\/style>\s*/gi, (_, css) => {
-  styles.push(css.trim());
-  return "";
-});
-const homeCss =
-  "/* Muslim Abaya homepage */\n\n" + styles.join("\n\n/* --- */\n\n");
-fs.writeFileSync("index-home.css", homeCss, { encoding: "utf8" });
+// Strip inline styles → external index-home.css (skip if already extracted — preserves sale-badge etc.)
+const skipHomeCss = fs.existsSync("index-home.css");
+if (!skipHomeCss) {
+  const styles = [];
+  html = html.replace(/<style>([\s\S]*?)<\/style>\s*/gi, (_, css) => {
+    styles.push(css.trim());
+    return "";
+  });
+  const homeCss =
+    "/* Muslim Abaya homepage */\n\n" + styles.join("\n\n/* --- */\n\n");
+  fs.writeFileSync("index-home.css", homeCss, { encoding: "utf8" });
+} else {
+  html = html.replace(/<style>([\s\S]*?)<\/style>\s*/gi, "");
+}
 
 // YouTube click-to-load
 html = html.replace(
@@ -123,7 +130,7 @@ html = html.replace(/<script src="site-seo\.js/g, '<script defer src="site-seo.j
 html = html.replace(/<script src="site-api-config\.js/g, '<script defer src="site-api-config.js');
 html = html.replace(
   /<script src="site-footer\.js[^>]*><\/script>/,
-  `<script defer src="site-footer.js?v=20260531fb1"></script>`
+  `<script defer src="site-footer.js?v=${FOOTER_JS}"></script>`
 );
 
 // Currency in dynamic cards
@@ -230,16 +237,18 @@ html = html.replace(
 
 fs.writeFileSync("index.html", html.replace(/^\uFEFF/, ""), { encoding: "utf8" });
 
-let css = fs.readFileSync("index-home.css", "utf8");
-css = css.replace(/\.price-tag::before\s*\{[\s\S]*?\}/, `.price-tag::before {
+if (!skipHomeCss) {
+  let css = fs.readFileSync("index-home.css", "utf8");
+  css = css.replace(/\.price-tag::before\s*\{[\s\S]*?\}/, `.price-tag::before {
     content: "";
     display: none;
 }`);
-fs.writeFileSync("index-home.css", css, { encoding: "utf8" });
+  fs.writeFileSync("index-home.css", css, { encoding: "utf8" });
+}
 
 const bn = (html.match(/[\u0980-\u09FF]/g) || []).length;
 const bad = (html.match(/\?\?\?/g) || []).length;
-console.log("index.html Bengali:", bn, "???? blocks:", bad, "CSS bytes:", css.length);
+console.log("index.html Bengali:", bn, "???? blocks:", bad, "skipHomeCss:", skipHomeCss);
 console.log("video after product:", html.indexOf("premium-collection") < html.indexOf("main-video-section"));
 if (bn < 800 || bad > 0) process.exit(1);
 

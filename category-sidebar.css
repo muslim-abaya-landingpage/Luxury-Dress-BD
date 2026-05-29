@@ -411,22 +411,38 @@ html.category-ready #list {
 
 .product-sale-badge {
   position: absolute;
-  top: auto;
-  bottom: 10px;
-  left: 10px;
+  top: 8px;
+  left: 8px;
+  bottom: auto;
   right: auto;
   z-index: 3;
-  background: linear-gradient(135deg, #e53935 0%, #b71c1c 100%);
-  color: #fff;
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  background: rgba(17, 17, 17, 0.88);
+  color: #f5f0e6 !important;
+  font-size: 9px !important;
+  font-weight: 600 !important;
+  font-family: "Inter", "Segoe UI", sans-serif !important;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  padding: 5px 10px;
-  line-height: 1;
+  padding: 3px 7px;
+  line-height: 1.2;
   border-radius: 2px;
-  box-shadow: 0 2px 8px rgba(183, 28, 28, 0.3);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
   pointer-events: none;
+  margin: 0 !important;
+  width: auto !important;
+  max-width: calc(100% - 16px);
+  white-space: nowrap;
+}
+
+.premium-card .product-sale-badge,
+.premium-card .img-wrap .product-sale-badge,
+.premium-card .detail-media .product-sale-badge {
+  top: 8px;
+  left: 8px;
+  bottom: auto;
 }
 
 .premium-card .img-wrap,

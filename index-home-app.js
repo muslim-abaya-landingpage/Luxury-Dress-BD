@@ -316,7 +316,7 @@ function renderSidebar() {
             : p.img;
 card.innerHTML = `
     <div style="position: relative; overflow: hidden; border-radius: 8px;">
-        <span class="product-sale-badge">Sale!</span>
+        <span class="product-sale-badge">Sale</span>
         <button type="button" 
                 onclick="removeFromCart('${p.id}')" 
                 class="premium-cancel-btn"

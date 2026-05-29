@@ -1483,7 +1483,7 @@ function buildCardImageBlock(p, idx, categoryKey, allProducts) {
     '" aria-label="' +
     escapeHtml("View " + p.name) +
     '">' +
-    '<span class="product-sale-badge">Sale!</span>' +
+    '<span class="product-sale-badge">Sale</span>' +
     '<span class="card-img-stack">' +
     '<img class="card-img-primary" src="' +
     escapeHtml(main) +
@@ -1641,7 +1641,7 @@ function buildProductCard(p, idx, waLink, detailMode, categoryKey, allProducts) 
       colorAttr +
       ">" +
       '<div class="detail-media">' +
-      '<span class="product-sale-badge">Sale!</span>' +
+      '<span class="product-sale-badge">Sale</span>' +
       wrapProductImageLink(
         '<img src="' +
           escapeHtml(resolveCardImageSrc(p)) +

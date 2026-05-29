@@ -1,6 +1,6 @@
 import fs from "fs";
 
-const VER = "20260629price";
+const VER = "20260530sale";
 for (const f of fs.readdirSync(".").filter((x) => x.endsWith(".html"))) {
   let h = fs.readFileSync(f, "utf8");
   const n = h
