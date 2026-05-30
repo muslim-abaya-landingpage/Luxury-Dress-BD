@@ -123,25 +123,14 @@
             height: 15px;
             display: block;
         }
-        .checkout-clear-cart-btn__text {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 1px;
-            line-height: 1.15;
-            text-align: left;
-        }
-        .checkout-clear-cart-btn__en {
+        .checkout-clear-cart-btn__text,
+        .checkout-clear-cart-btn__label {
             font-size: 11px;
             font-weight: 700;
-            letter-spacing: 0.08em;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
             color: #7f1d1d;
-        }
-        .checkout-clear-cart-btn__bn {
-            font-size: 13px;
-            font-weight: 600;
-            color: #991b1b;
+            line-height: 1.2;
         }
         .gb-order-list {
             display: flex;
@@ -281,35 +270,45 @@
         .gb-order-size-select:focus { border-color: #111; }
         .gb-order-add-size-btn {
             display: inline-flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 1px;
-            margin-top: 4px;
-            padding: 7px 12px;
-            border: 1px dashed rgba(26, 26, 26, 0.22);
-            border-radius: 999px;
-            background: #fff;
-            color: #1a1a1a;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 8px;
+            padding: 10px 16px;
+            border: 1px solid rgba(26, 26, 26, 0.14);
+            border-radius: 8px;
+            background: linear-gradient(180deg, #ffffff 0%, #f5f5f5 100%);
+            color: #111;
             font-family: inherit;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.11em;
+            text-transform: uppercase;
             cursor: pointer;
-            transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.92);
+            transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease;
         }
         .gb-order-add-size-btn:hover {
-            border-color: rgba(26, 26, 26, 0.45);
-            background: #fafafa;
-            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+            border-color: rgba(26, 26, 26, 0.28);
+            background: linear-gradient(180deg, #fff 0%, #ececec 100%);
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
         }
-        .gb-order-add-size-btn__en {
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 0.07em;
-            text-transform: uppercase;
-            color: #444;
+        .gb-order-add-size-btn:active {
+            transform: translateY(1px);
         }
-        .gb-order-add-size-btn__bn {
-            font-size: 12px;
+        .gb-order-add-size-btn__icon {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #111;
+            color: #fff;
+            font-size: 14px;
             font-weight: 600;
-            color: #111;
+            line-height: 1;
+            flex-shrink: 0;
         }
         .gb-order-price {
             grid-column: 3;
@@ -2079,9 +2078,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             var currentLength = item.lengthSize || (typeof parseAbayaLengthSize === 'function' ? parseAbayaLengthSize(item.size || item.selectedSize) : lengthSizes[0]);
             var nextLen = getNextUnusedAbayaLength(item);
             var addSizeBtn = nextLen
-                ? '<button type="button" class="gb-order-add-size-btn" data-cart-action="add-abaya-size" data-cart-idx="' + idx + '" aria-label="Add another length size">' +
-                    '<span class="gb-order-add-size-btn__en">+ Add another size (' + escapeHtml(nextLen) + ')</span>' +
-                    '<span class="gb-order-add-size-btn__bn">+ আরেকটি Length যোগ করুন</span>' +
+                ? '<button type="button" class="gb-order-add-size-btn" data-cart-action="add-abaya-size" data-cart-idx="' + idx + '" aria-label="Add another size">' +
+                    '<span class="gb-order-add-size-btn__icon" aria-hidden="true">+</span>' +
+                    '<span>Add Another Size</span>' +
                     '</button>'
                 : '';
             return '<div class="gb-order-size-wrap gb-order-size-wrap--abaya">' +
@@ -2393,12 +2392,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             return;
         }
         clearWrap.innerHTML =
-            '<button type="button" class="checkout-clear-cart-btn" id="checkoutClearCartBtn" aria-label="Empty cart / কার্ট খালি করুন">' +
+            '<button type="button" class="checkout-clear-cart-btn" id="checkoutClearCartBtn" aria-label="Empty cart">' +
             '<span class="checkout-clear-cart-btn__icon">' + CLEAR_CART_ICON + '</span>' +
-            '<span class="checkout-clear-cart-btn__text">' +
-            '<span class="checkout-clear-cart-btn__en">Empty Cart</span>' +
-            '<span class="checkout-clear-cart-btn__bn">কার্ট খালি করুন</span>' +
-            '</span></button>';
+            '<span class="checkout-clear-cart-btn__label">Empty Cart</span>' +
+            '</button>';
         var btn = document.getElementById('checkoutClearCartBtn');
         if (btn) btn.addEventListener('click', clearCheckoutCart);
     }
