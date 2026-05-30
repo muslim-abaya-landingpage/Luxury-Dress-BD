@@ -155,6 +155,16 @@
       _catalogNormalized: true
     };
 
+    if (entry.priceByType && typeof entry.priceByType === "object") {
+      normalized.priceByType = entry.priceByType;
+    }
+    if (Array.isArray(entry.types) && entry.types.length) {
+      normalized.types = entry.types.slice();
+    }
+    if (entry.typePriceGap != null) {
+      normalized.typePriceGap = entry.typePriceGap;
+    }
+
     normalized.productUrl = resolveProductPageLink(normalized);
     return normalized;
   }
