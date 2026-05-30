@@ -133,6 +133,34 @@ function trackFB(event, data) {
         window.dataLayer.push(Object.assign({ event: event }, data || {}));
     }
 }
+
+let viewContentFired = false;
+function getCurrentHomeProduct() {
+    if (!products || !products.length) return null;
+    return products[currentIdx] || products[0] || null;
+}
+function fireHomeViewContent() {
+    if (viewContentFired) return;
+    viewContentFired = true;
+    var p = getCurrentHomeProduct();
+    var data = { content_type: 'product', currency: 'BDT' };
+    if (p) {
+        data.content_ids = [p.id];
+        data.content_name = p.name;
+        data.value = p.price || 550;
+    }
+    trackFB('ViewContent', data);
+}
+// Fire ViewContent early (not gated on heavy media/window.onload) so ad
+// visitors register it fast, and include product data for retargeting/DPA.
+(function scheduleHomeViewContent() {
+    function go() { window.setTimeout(fireHomeViewContent, 1500); }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', go, { once: true });
+    } else {
+        go();
+    }
+})();
 const sidebar = document.getElementById('sidebarList');
 const viewImg = document.getElementById('view');
 var HOME_CART_SESSION_KEY = 'muslim_abaya_home_cart_active';
@@ -236,9 +264,9 @@ window.onload = function() {
     if (products.length) selectProduct(0, products[0].id, false, { animate: false });
     startAutoSlide();
     calc();
-    window.setTimeout(function () {
-        trackFB('ViewContent', { content_type: 'product', currency: 'BDT' });
-    }, 3500);
+    // Fallback: ensure ViewContent fires even if the early scheduler missed.
+    // Guarded by viewContentFired so it never double-counts.
+    window.setTimeout(fireHomeViewContent, 800);
 };
 
 // কার্টে প্রোডাক্ট যোগ এবং মেমোরিতে (localStorage) সেভ করার ফাংশন
@@ -298,10 +326,24 @@ function buyNowFromCard(productId, ev) {
     goToCheckoutPage();
 }
 function trackInitiateCheckout() {
-    if (!checkoutTracked) {
-        trackFB('InitiateCheckout', { currency: 'BDT' });
-        checkoutTracked = true;
+    if (checkoutTracked) return;
+    checkoutTracked = true;
+    var data = { currency: 'BDT' };
+    var lines = getHomeCartLines();
+    if (typeof buildCartTrackingSnapshot === 'function') {
+        data = buildCartTrackingSnapshot(lines);
+    } else if (lines.length) {
+        var value = 0;
+        var ids = [];
+        lines.forEach(function (l) {
+            value += (parseInt(l.price, 10) || 0) * (parseInt(l.quantity, 10) || 1);
+            if (l.id) ids.push(String(l.id));
+        });
+        data.value = value;
+        data.order_value = value;
+        data.content_ids = ids;
     }
+    trackFB('InitiateCheckout', data);
 }
 function renderSidebar() {
     sidebar.innerHTML = '';
