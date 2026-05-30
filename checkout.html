@@ -383,6 +383,33 @@
             color: var(--muted);
             padding: 8px 0;
         }
+        .gb-cat-summary {
+            margin: 0 0 10px;
+            padding: 10px 12px;
+            background: #faf7f0;
+            border: 1px solid #efe7d6;
+            border-radius: 10px;
+        }
+        .gb-cat-summary-total {
+            font-size: 13px;
+            font-weight: 800;
+            color: #1f2937;
+            margin-bottom: 6px;
+        }
+        .gb-cat-summary-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 8px;
+        }
+        .gb-cat-chip {
+            font-size: 12.5px;
+            color: #374151;
+            background: #fff;
+            border: 1px solid #ececec;
+            border-radius: 999px;
+            padding: 3px 10px;
+        }
+        .gb-cat-chip b { color: #111; font-weight: 700; }
         .pm-cod-icon {
             width: 52px;
             height: 52px;
@@ -1936,6 +1963,71 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     var TRASH_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
 
+    // Price-based hint for items whose name carries no category keyword.
+    // Adjust here if base prices change.
+    var PRICE_CATEGORY_HINT = { 550: '\u09aa\u09cd\u09b0\u09bf\u09ae\u09bf\u09af\u09bc\u09be\u09ae \u099f\u09c1-\u09aa\u09bf\u09b8', 999: '\u0986\u09ac\u09be\u09af\u09bc\u09be', 1550: '\u0986\u09ac\u09be\u09af\u09bc\u09be' };
+
+    function toBnNum(n) {
+        return String(n).replace(/[0-9]/g, function (d) { return '\u09e6\u09e7\u09e8\u09e9\u09ea\u09eb\u09ec\u09ed\u09ee\u09ef'.charAt(+d); });
+    }
+
+    // Best-effort category from name/explicit fields, then price hint.
+    function inferProductCategory(item) {
+        if (!item) return '\u0985\u09a8\u09cd\u09af\u09be\u09a8\u09cd\u09af';
+        var hay = (
+            String(item.name || '') + ' ' +
+            String(item.category || '') + ' ' +
+            String(item.productType || '') + ' ' +
+            String(item._cartType || '') + ' ' +
+            String(item.categoryPath || '')
+        ).toLowerCase();
+        function has() {
+            for (var i = 0; i < arguments.length; i++) {
+                if (hay.indexOf(arguments[i]) !== -1) return true;
+            }
+            return false;
+        }
+        if (has('hijab', '\u09b9\u09bf\u099c\u09be\u09ac')) return '\u09b9\u09bf\u099c\u09be\u09ac';
+        if (has('kaftan', 'kaftaan', '\u0995\u09be\u09ab\u09a4\u09be\u09a8')) return '\u0995\u09be\u09ab\u09a4\u09be\u09a8';
+        if (has('karchupi', '\u0995\u09be\u09b0\u099a\u09c1\u09aa\u09bf')) return '\u0995\u09be\u09b0\u099a\u09c1\u09aa\u09bf';
+        if (has('embroidery', '\u098f\u09ae\u09cd\u09ac\u09cd\u09b0\u09af\u09bc\u09a1\u09be\u09b0\u09bf', '\u098f\u09ae\u09cd\u09ac\u09cd\u09b0\u09af\u09bc\u09a1\u09be\u09b0\u09c0')) return '\u098f\u09ae\u09cd\u09ac\u09cd\u09b0\u09af\u09bc\u09a1\u09be\u09b0\u09bf';
+        if (has('cover up', 'cover-up', 'coverup', '\u0995\u09ad\u09be\u09b0')) return '\u0995\u09ad\u09be\u09b0 \u0986\u09aa';
+        if (has('abaya', '\u0986\u09ac\u09be\u09af\u09bc\u09be')) return '\u0986\u09ac\u09be\u09af\u09bc\u09be';
+        if (has('two-piece', 'two piece', '2-piece', '2 piece', 'twopiece', 'co-ord', 'co ord', 'coord', '\u099f\u09c1-\u09aa\u09bf\u09b8', '\u099f\u09c1\u09aa\u09bf\u09b8', '\u0995\u09cb-\u0985\u09b0\u09cd\u09a1')) return '\u09aa\u09cd\u09b0\u09bf\u09ae\u09bf\u09af\u09bc\u09be\u09ae \u099f\u09c1-\u09aa\u09bf\u09b8';
+        if (has('kurti', 'kurta', 'kameez', 'tops', 'top ', '\u0995\u09c1\u09b0\u09cd\u09a4\u09bf', '\u099f\u09aa\u09b8')) return '\u099f\u09aa\u09b8/\u0995\u09c1\u09b0\u09cd\u09a4\u09bf';
+        var price = parseInt(item.price, 10) || 0;
+        if (PRICE_CATEGORY_HINT[price]) return PRICE_CATEGORY_HINT[price];
+        return '\u0985\u09a8\u09cd\u09af\u09be\u09a8\u09cd\u09af';
+    }
+
+    function buildCategorySummary() {
+        var groups = {};
+        var order = [];
+        cart.forEach(function (item) {
+            var cat = inferProductCategory(item);
+            var qty = parseInt(item.quantity, 10) || 1;
+            var unit = parseInt(item.price, 10) || 0;
+            if (!groups[cat]) { groups[cat] = { label: cat, count: 0, subtotal: 0 }; order.push(cat); }
+            groups[cat].count += qty;
+            groups[cat].subtotal += unit * qty;
+        });
+        return order.map(function (k) { return groups[k]; });
+    }
+
+    function buildCategorySummaryHtml() {
+        var summary = buildCategorySummary();
+        if (!summary.length) return '';
+        var totalQty = 0;
+        summary.forEach(function (g) { totalQty += g.count; });
+        var chips = summary.map(function (g) {
+            return '<span class="gb-cat-chip"><b>' + g.label + '</b> ' +
+                toBnNum(g.count) + '\u099f\u09bf \u00b7 ' + formatBdtCheckout(g.subtotal) + '</span>';
+        }).join('');
+        return '<div class="gb-cat-summary">' +
+            '<div class="gb-cat-summary-total">\u09ae\u09cb\u099f ' + toBnNum(totalQty) + '\u099f\u09bf \u09aa\u09a3\u09cd\u09af</div>' +
+            '<div class="gb-cat-summary-chips">' + chips + '</div></div>';
+    }
+
     function renderProductChart() {
         var el = document.getElementById('checkoutProductChart');
         if (!el) return;
@@ -1959,6 +2051,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 '</tr>';
         });
         el.innerHTML =
+            buildCategorySummaryHtml() +
             '<table class="gb-product-chart-table">' +
             '<thead><tr><th>Product</th><th>Size</th><th>Fabric</th><th>Qty</th><th>Price</th></tr></thead>' +
             '<tbody>' + rows + '</tbody></table>';
