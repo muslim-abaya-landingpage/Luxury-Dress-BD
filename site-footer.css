@@ -566,25 +566,59 @@ a.anz-contact-link:hover {
     margin-right: 0 !important;
     left: auto !important;
     right: auto !important;
+    height: 2in !important;
+    max-height: 2in !important;
+    min-height: 2in !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
   }
 
   #site-footer-mount .anz-footer {
     width: 100% !important;
     max-width: 100% !important;
-    height: 2in !important;
-    min-height: 2in !important;
+    height: 100% !important;
     max-height: 2in !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    -webkit-overflow-scrolling: touch;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
   }
 
-  /* Compact, premium mobile footer */
+  .anz-footer-trust {
+    flex: 0 0 auto;
+  }
+
+  .anz-trust-inner {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2px 8px;
+    padding: 4px 10px !important;
+  }
+
+  .anz-trust-item {
+    font-size: 10px;
+  }
+
   .anz-footer-main {
+    flex: 1 1 auto;
+    min-height: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
     grid-template-columns: 1fr 1fr;
-    gap: 8px 16px;
-    padding: 12px 16px 8px;
-    row-gap: 10px;
+    gap: 4px 8px;
+    padding: 6px 10px 4px !important;
+    row-gap: 4px;
+  }
+
+  .anz-col-brand,
+  .anz-col-shop,
+  .anz-col-links,
+  .anz-col-contact,
+  .anz-col-newsletter {
+    min-width: 0 !important;
   }
 
   .anz-col-brand {
@@ -607,113 +641,102 @@ a.anz-contact-link:hover {
     grid-column: 1 / -1;
   }
 
-  /* Brand block — tighter, smaller tagline (clamp to 2 lines) */
   .anz-logo {
-    font-size: 16px;
-    margin-bottom: 4px;
+    font-size: 13px;
+    margin-bottom: 2px;
   }
 
   .anz-text {
-    font-size: 12px;
-    line-height: 1.4;
-    margin-bottom: 8px;
+    font-size: 10px;
+    line-height: 1.3;
+    margin-bottom: 4px;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
 
   .anz-wa-cta {
-    padding: 6px 12px;
-    font-size: 13.5px;
+    padding: 4px 8px;
+    font-size: 11px;
   }
 
-  /* Section titles + links — denser */
   .anz-title {
-    font-size: 11px;
-    margin-bottom: 6px;
+    font-size: 9px;
+    margin-bottom: 3px;
   }
 
   .anz-link-list a {
-    font-size: 13px;
-    line-height: 1.4;
+    font-size: 11px;
+    line-height: 1.3;
   }
 
   .anz-link-list li {
-    margin-bottom: 1px;
+    margin-bottom: 0;
   }
 
-  /* Contact rows — compact */
   .anz-contact-link {
-    font-size: 13px;
-    margin-bottom: 5px;
-    gap: 8px;
+    font-size: 10px;
+    margin-bottom: 3px;
+    gap: 6px;
   }
 
   .anz-contact-icon {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
   }
 
-  /* Newsletter — inline field + button to save height */
   .anz-newsletter-note {
-    font-size: 12px;
-    margin-bottom: 6px;
+    font-size: 10px;
+    margin-bottom: 4px;
   }
 
   .newsletter-form {
     flex-direction: row;
     align-items: stretch;
-    gap: 6px;
+    gap: 4px;
   }
 
   .newsletter-form input {
     flex: 1;
     min-width: 0;
+    height: 28px;
+    padding: 0 8px;
+    font-size: 11px;
   }
 
   .newsletter-form button {
     width: auto;
     flex-shrink: 0;
-    padding: 0 14px;
+    height: 28px;
+    padding: 0 10px;
+    font-size: 11px;
   }
 
   .anz-socials {
-    margin-top: 8px;
-    gap: 8px;
+    margin-top: 4px;
+    gap: 4px;
   }
 
-  /* Trust strip — single compact line */
-  .anz-trust-inner {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 3px 12px;
-    padding: 6px 14px !important;
+  .anz-social-link {
+    width: 24px;
+    height: 24px;
   }
 
-  .anz-trust-item {
-    font-size: 11.5px;
-  }
-
-  /* Newsletter input — slimmer */
-  .newsletter-form input {
-    padding: 8px 12px 8px 40px;
-  }
-
-  /* Copyright bar — slimmer on mobile */
   .anz-footer-strip,
   .anz-bottom.anz-footer-strip,
   #site-footer-mount .anz-bottom.anz-footer-strip {
-    height: 36px;
-    min-height: 36px;
-    max-height: none;
-    padding: 0 14px;
+    flex: 0 0 auto;
+    height: 22px !important;
+    min-height: 22px !important;
+    max-height: 22px !important;
+    padding: 0 10px;
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   .anz-bottom p {
-    font-size: 11.5px;
+    font-size: 9px;
+    line-height: 1.2;
   }
 }
 

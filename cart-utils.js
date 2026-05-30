@@ -260,11 +260,11 @@
       var qty = parseInt(cartObj[id], 10) || 0;
       if (qty <= 0) return;
       var p = productList.find(function (x) {
-        return x && x.id === id;
+        return x && (x.id === id || x.catalogId === id);
       });
       if (!p) return;
       lines.push({
-        id: p.id,
+        id: p.catalogId || p.id,
         name: p.name,
         price: parseInt(p.price, 10) || 550,
         quantity: qty,

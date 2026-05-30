@@ -21,7 +21,7 @@ window.CATEGORY_PRODUCTS = {
       color: "maroon",
       colorLabel: "Maroon",
       fabric: "দুবাই চেরি",
-      sizes: ["50", "52", "54", "56"],
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: { "Full Set": 999, "Abaya Only": 799 }
     },
     {
@@ -33,7 +33,7 @@ window.CATEGORY_PRODUCTS = {
       color: "maroon",
       colorLabel: "Maroon",
       fabric: "দুবাই চেরি",
-      sizes: ["50", "52", "54", "56"]
+      sizes: ["44", "46", "48", "50", "52", "54", "56"]
     },
     {
       id: "ABY-MAROON-3",
@@ -44,7 +44,7 @@ window.CATEGORY_PRODUCTS = {
       color: "maroon",
       colorLabel: "Maroon",
       fabric: "দুবাই চেরি",
-      sizes: ["50", "52", "54", "56"],
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: { "Full Set": 999, "Abaya Only": 799 }
     },
     {
@@ -56,7 +56,7 @@ window.CATEGORY_PRODUCTS = {
       color: "black",
       colorLabel: "Classic Black",
       fabric: "দুবাই চেরি",
-      sizes: ["50", "52", "54", "56"],
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: { "Full Set": 999, "Abaya Only": 799 }
     },
     {
@@ -68,7 +68,7 @@ window.CATEGORY_PRODUCTS = {
       color: "black",
       colorLabel: "Classic Black",
       fabric: "দুবাই চেরি",
-      sizes: ["50", "52", "54", "56"],
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: { "Full Set": 999, "Abaya Only": 799 }
     },
     {
@@ -80,7 +80,7 @@ window.CATEGORY_PRODUCTS = {
       color: "black",
       colorLabel: "Classic Black",
       fabric: "দুবাই চেরি",
-      sizes: ["50", "52", "54", "56"],
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: { "Full Set": 999, "Abaya Only": 799 }
     },
     {
@@ -92,7 +92,7 @@ window.CATEGORY_PRODUCTS = {
       color: "black",
       colorLabel: "Classic Black",
       fabric: "Dubai Cherry",
-      sizes: ["50", "52", "54", "56"],
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: { "Full Set": 1750, "Abaya Only": 1550 }
     },
     {
@@ -104,7 +104,7 @@ window.CATEGORY_PRODUCTS = {
       color: "black",
       colorLabel: "Classic Black",
       fabric: "Dubai Cherry",
-      sizes: ["50", "52", "54", "56"],
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: { "Full Set": 1750, "Abaya Only": 1550 }
     },
     {
@@ -116,7 +116,7 @@ window.CATEGORY_PRODUCTS = {
       color: "black",
       colorLabel: "Classic Black",
       fabric: "Dubai Cherry",
-      sizes: ["50", "52", "54", "56"],
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: { "Full Set": 1750, "Abaya Only": 1550 }
     },
     {
@@ -128,7 +128,7 @@ window.CATEGORY_PRODUCTS = {
       color: "black",
       colorLabel: "Classic Black",
       fabric: "Dubai Cherry",
-      sizes: ["50", "52", "54", "56"],
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: { "Full Set": 1850, "Abaya Only": 1650 }
     },
     {
@@ -140,7 +140,7 @@ window.CATEGORY_PRODUCTS = {
       color: "black",
       colorLabel: "Classic Black",
       fabric: "Dubai Cherry",
-      sizes: ["50", "52", "54", "56"],
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: { "Full Set": 1850, "Abaya Only": 1650 }
     },
     {
@@ -152,7 +152,7 @@ window.CATEGORY_PRODUCTS = {
       color: "black",
       colorLabel: "Classic Black",
       fabric: "Dubai Cherry",
-      sizes: ["50", "52", "54", "56"],
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: { "Full Set": 1850, "Abaya Only": 1650 }
     },
     {
@@ -164,7 +164,7 @@ window.CATEGORY_PRODUCTS = {
       color: "black",
       colorLabel: "Classic Black",
       fabric: "Dubai Cherry",
-      sizes: ["50", "52", "54", "56"],
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: { "Full Set": 1350, "Abaya Only": 799 }
     },
     {
@@ -176,7 +176,7 @@ window.CATEGORY_PRODUCTS = {
       color: "black",
       colorLabel: "Classic Black",
       fabric: "Dubai Cherry",
-      sizes: ["50", "52", "54", "56"],
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: { "Full Set": 1350, "Abaya Only": 799 }
     },
     {
@@ -188,7 +188,7 @@ window.CATEGORY_PRODUCTS = {
       color: "black",
       colorLabel: "Classic Black",
       fabric: "Dubai Cherry",
-      sizes: ["50", "52", "54", "56"],
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: { "Full Set": 1350, "Abaya Only": 799 }
     },
     {
@@ -200,7 +200,7 @@ window.CATEGORY_PRODUCTS = {
       color: "black",
       colorLabel: "Classic Black",
       fabric: "Dubai Cherry",
-      sizes: ["50", "52", "54", "56"],
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: { "Full Set": 1350, "Abaya Only": 799 }
     }
   ],

@@ -1649,7 +1649,7 @@ function buildProductCard(p, idx, waLink, detailMode, categoryKey, allProducts) 
   var sizes = Array.isArray(p.sizes) && p.sizes.length
     ? p.sizes
     : detailMode
-      ? ["50", "52", "54", "56"]
+      ? ["44", "46", "48", "50", "52", "54", "56"]
       : ["Free Size"];
   var sizeOptions = sizes
     .map(function (s, i) {

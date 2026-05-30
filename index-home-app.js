@@ -3,6 +3,7 @@ let autoSlideInterval;
 let isAutoSlideActive = true;
 let checkoutTracked = false;
 let buyNowRedirecting = false;
+let homeCartSyncSuppress = false;
 let cart = {};
 const fallbackProducts = [
     { id: 'DR-01', name: 'Baby Pink Floral', img: 'images/Baby-Pink-Floral-Print.jpeg', price: 550 },
@@ -227,29 +228,44 @@ function homeCartHasItems() {
     return products.some(function (p) { return getCartQty(p.id) > 0; });
 }
 
-function initHomeCartFromStorage() {
+function findHomeProductForLine(line) {
+    if (!line) return null;
+    var lid = String(line.id || '').trim();
+    var lname = String(line.name || '').trim().toLowerCase();
+    return products.find(function (p) {
+        if (!p) return false;
+        if (lid && (p.id === lid || p.catalogId === lid)) return true;
+        if (lname && String(p.name || '').trim().toLowerCase() === lname) return true;
+        return false;
+    }) || null;
+}
+
+function rebuildCartFromStoreLines(lines) {
     var fresh = {};
     products.forEach(function (p) { fresh[p.id] = 0; });
-
-    var lines = typeof loadStoreCart === 'function' ? loadStoreCart({ readOnly: true }) : [];
-    if (lines.length) {
-        lines.forEach(function (line) {
-            var qty = parseInt(line.quantity, 10) || 0;
-            if (qty <= 0) return;
-            var match = products.find(function (p) {
-                return (line.id && p.id === line.id) ||
-                    (line.name && p.name && String(p.name).trim() === String(line.name).trim());
-            });
-            if (match) {
-                fresh[match.id] = (fresh[match.id] || 0) + qty;
-            }
-        });
-    }
+    (lines || []).forEach(function (line) {
+        var match = findHomeProductForLine(line);
+        if (!match) return;
+        var qty = parseInt(line.quantity, 10) || 0;
+        if (qty <= 0) return;
+        fresh[match.id] = (fresh[match.id] || 0) + qty;
+    });
     cart = fresh;
+}
+
+function remapHomeCartFromStore() {
+    var lines = typeof loadStoreCart === 'function' ? loadStoreCart({ readOnly: true }) : [];
+    rebuildCartFromStoreLines(lines);
     if (homeCartHasItems()) {
         markHomeCartActive();
     } else {
         clearHomeCartSession();
+    }
+}
+
+function initHomeCartFromStorage() {
+    remapHomeCartFromStore();
+    if (!homeCartHasItems()) {
         if (typeof refreshCartBadgeUI === 'function') refreshCartBadgeUI([]);
         else if (typeof updateCartBadge === 'function') updateCartBadge([]);
     }
@@ -268,6 +284,7 @@ function getHomeCartLines() {
 
 function syncHomeCartAfterChange() {
     var arr = getHomeCartLines();
+    homeCartSyncSuppress = true;
     if (arr.length) {
         markHomeCartActive();
         if (typeof persistStoreCart === 'function') persistStoreCart(arr);
@@ -278,18 +295,11 @@ function syncHomeCartAfterChange() {
     if (typeof afterCartMutation === 'function') {
         afterCartMutation(arr);
     }
+    homeCartSyncSuppress = false;
 }
 
 function applyStoreLinesToHomeCart(lines) {
-    var fresh = {};
-    products.forEach(function (p) { fresh[p.id] = 0; });
-    (lines || []).forEach(function (line) {
-        var match = products.find(function (p) {
-            return (line.id && p.id === line.id) || p.name === line.name;
-        });
-        if (match) fresh[match.id] = Math.max(0, parseInt(line.quantity, 10) || 0);
-    });
-    cart = fresh;
+    rebuildCartFromStoreLines(lines);
     if (homeCartHasItems()) {
         markHomeCartActive();
     } else {
@@ -301,12 +311,14 @@ function applyStoreLinesToHomeCart(lines) {
 }
 
 window.addEventListener('storeCartUpdated', function (e) {
+    if (homeCartSyncSuppress) return;
     var lines = e.detail && e.detail.lines;
     if (!Array.isArray(lines)) return;
     applyStoreLinesToHomeCart(lines);
 });
 window.onload = function() {
     hydrateHomeProducts();
+    bindHomeSidebarActions();
     initHomeCartFromStorage();
     renderSidebar();
     if (products.length) selectProduct(0, products[0].id, false, { animate: false });
@@ -380,20 +392,40 @@ function buyNowFromCard(productId, ev) {
 function addToCartFromCard(productId, ev) {
     if (ev && ev.preventDefault) ev.preventDefault();
     if (ev && ev.stopPropagation) ev.stopPropagation();
+    var p = products.find(function (x) { return x.id === productId; });
+    if (!p) return;
     var oldQty = getCartQty(productId);
-    cart[productId] = oldQty + 1;
-    if (cart[productId] > oldQty) {
-        var p = products.find(function (x) { return x.id === productId; });
+    var line = {
+        id: p.catalogId || p.id,
+        name: p.name,
+        price: parseInt(p.price, 10) || 550,
+        quantity: 1,
+        image: p.img || p.image || '',
+        category: p.category || '',
+        categoryLabel: p.categoryLabel || ''
+    };
+    homeCartSyncSuppress = true;
+    if (typeof addOrMergeStoreCartItem === 'function') {
+        var existing = typeof loadStoreCart === 'function' ? loadStoreCart({ readOnly: true }) : [];
+        var merged = addOrMergeStoreCartItem(existing, line);
+        rebuildCartFromStoreLines(merged);
+        markHomeCartActive();
+        if (typeof afterCartMutation === 'function') afterCartMutation(merged);
+    } else {
+        cart[productId] = oldQty + 1;
+        syncHomeCartAfterChange();
+    }
+    homeCartSyncSuppress = false;
+    if (getCartQty(productId) > oldQty) {
         trackFB('AddToCart', {
             content_ids: [productId],
-            content_name: p ? p.name : productId,
-            value: p ? p.price : 550,
+            content_name: p.name,
+            value: p.price || 550,
             currency: 'BDT'
         });
     }
     isAutoSlideActive = false;
     clearInterval(autoSlideInterval);
-    syncHomeCartAfterChange();
     renderSidebar();
     calc(false);
     const toast = document.getElementById('cartToast');
@@ -422,6 +454,21 @@ function trackInitiateCheckout() {
     }
     trackFB('InitiateCheckout', data);
 }
+function bindHomeSidebarActions() {
+    if (!sidebar || sidebar.getAttribute('data-home-cart-bound') === '1') return;
+    sidebar.setAttribute('data-home-cart-bound', '1');
+    sidebar.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-home-cart-action]');
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        var id = btn.getAttribute('data-product-id');
+        var action = btn.getAttribute('data-home-cart-action');
+        if (!id || !action) return;
+        if (action === 'add') addToCartFromCard(id, e);
+        else if (action === 'buy') buyNowFromCard(id, e);
+    }, true);
+}
 function renderSidebar() {
     sidebar.innerHTML = '';
     products.forEach((p, i) => {
@@ -444,8 +491,8 @@ function renderSidebar() {
                 <button type="button" class="ma-qty-stepper__btn" aria-label="পরিমাণ বাড়ান" onclick="event.stopPropagation();updateQty('${p.id}', 1)">+</button>
             </div>`;
         const actionsRowHtml = `<div class="product-actions-row">
-                <button type="button" class="anzaar-btn anzaar-btn-cart${inCart ? ' is-active' : ''}" onclick="addToCartFromCard('${p.id}', event)">Add to Cart</button>
-                <button type="button" class="anzaar-btn anzaar-btn-buy" onclick="buyNowFromCard('${p.id}', event)">Buy Now</button>
+                <button type="button" class="anzaar-btn anzaar-btn-cart${inCart ? ' is-active' : ''}" data-home-cart-action="add" data-product-id="${p.id}">Add to Cart</button>
+                <button type="button" class="anzaar-btn anzaar-btn-buy" data-home-cart-action="buy" data-product-id="${p.id}">Buy Now</button>
             </div>`;
 card.innerHTML = `
     <div style="position: relative; overflow: hidden; border-radius: 8px;">
@@ -678,7 +725,9 @@ window.removeFromCart = removeFromCart;
 window.__homeRefreshCatalog = function (opts) {
     opts = opts || {};
     hydrateHomeProducts();
+    remapHomeCartFromStore();
     renderSidebar();
+    calc(false);
     if (!products.length) return;
     var idx = Math.min(currentIdx, products.length - 1);
     if (opts.deferHero) {

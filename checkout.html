@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -12,7 +12,7 @@
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
     <link rel="stylesheet" href="site-header.css?v=20260530c">
-    <link rel="stylesheet" href="site-footer.css?v=20260530ft11">
+    <link rel="stylesheet" href="site-footer.css?v=20260531m2in">
     <style>
         :root {
             --ink: #111111;
@@ -1560,6 +1560,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="site-api-health.js?v=20260610"></script>
 <script src="auth-config.js"></script>
 <script src="auth-api.js"></script>
+<script src="product-config.js?v=20260613"></script>
 <script src="cart-utils.js?v=20260530cat"></script>
 <script src="checkout-locations.js?v=20260630th"></script>
 <script defer src="site-header.js?v=20260530gtmfix"></script>
@@ -1876,15 +1877,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function getCheckoutSizeOptions(item) {
         var raw = [];
+        var abayaSizes = ['44', '46', '48', '50', '52', '54', '56'];
         var selected = String((item && (item.size || item.selectedSize)) || '').trim();
         if (selected) raw.push(selected);
         var defs = window.SITE_LINKS && window.SITE_LINKS.defaults;
         var catKey = String((item && (item.category || item.categoryKey)) || '').trim();
+        if (!catKey && item && /abaya|আবায়া|আবায়া/i.test(String(item.name || ''))) {
+            catKey = 'abaya';
+        }
         if (defs && defs.byCategory && catKey && defs.byCategory[catKey] && Array.isArray(defs.byCategory[catKey].sizes)) {
             raw = raw.concat(defs.byCategory[catKey].sizes);
+        } else if (catKey === 'abaya') {
+            raw = raw.concat(abayaSizes);
         }
-        if (defs && Array.isArray(defs.sizes)) raw = raw.concat(defs.sizes);
-        if (!raw.length) raw = ['50', '52', '54', '56', 'Free Size'];
+        if (defs && Array.isArray(defs.sizes) && catKey !== 'abaya') raw = raw.concat(defs.sizes);
+        if (!raw.length) raw = abayaSizes.slice();
         var uniq = [];
         raw.forEach(function (s) {
             var v = String(s || '').trim();

@@ -103,6 +103,15 @@
 
 #premium-collection .product-actions-anzaar {
   gap: 4px !important;
+  position: relative;
+  z-index: 3;
+}
+
+#premium-collection .anzaar-btn {
+  position: relative;
+  z-index: 4;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 #premium-collection .product-actions-row {
