@@ -557,6 +557,28 @@ a.anz-contact-link:hover {
 }
 
 @media (max-width: 640px) {
+  body #site-footer-mount,
+  body #ma-social-connect-mount,
+  body.shop-page #site-footer-mount {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    left: auto;
+    right: auto;
+  }
+
+  #site-footer-mount .anz-footer {
+    width: 100%;
+    max-width: 100%;
+    height: 2in;
+    min-height: 2in;
+    max-height: 2in;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
   /* Compact, premium mobile footer */
   .anz-footer-main {
     grid-template-columns: 1fr 1fr;

@@ -2003,8 +2003,19 @@ body.pqv-sc-open {
   }
 
   .pqv-main {
-    max-height: min(52vh, 440px);
+    width: 100%;
+    max-height: none;
+    height: auto;
+    aspect-ratio: auto;
     background: #f7f7f7;
+  }
+
+  .pqv-main img,
+  .pqv-zoom-img {
+    width: 100%;
+    height: auto;
+    max-height: none;
+    object-fit: contain;
   }
 
   .pqv-opt-btn {
