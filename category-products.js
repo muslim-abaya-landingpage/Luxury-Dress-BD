@@ -154,6 +154,54 @@ window.CATEGORY_PRODUCTS = {
       fabric: "Dubai Cherry",
       sizes: ["50", "52", "54", "56"],
       priceByType: { "Full Set": 1850, "Abaya Only": 1650 }
+    },
+    {
+      id: "ABY-BUTTERFLY-1",
+      name: "Butterfly Abaya Set",
+      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Butterfly-Ababa....jpg?raw=1",
+      link: "/",
+      price: 799,
+      color: "black",
+      colorLabel: "Classic Black",
+      fabric: "Dubai Cherry",
+      sizes: ["50", "52", "54", "56"],
+      priceByType: { "Full Set": 1350, "Abaya Only": 799 }
+    },
+    {
+      id: "ABY-BUTTERFLY-2",
+      name: "Butterfly Abaya Set - Back",
+      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Butterfly-Ababa...jpg?raw=1",
+      link: "/",
+      price: 799,
+      color: "black",
+      colorLabel: "Classic Black",
+      fabric: "Dubai Cherry",
+      sizes: ["50", "52", "54", "56"],
+      priceByType: { "Full Set": 1350, "Abaya Only": 799 }
+    },
+    {
+      id: "ABY-BUTTERFLY-3",
+      name: "Butterfly Abaya Set - Side",
+      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Butterfly-Ababa..jpg?raw=1",
+      link: "/",
+      price: 799,
+      color: "black",
+      colorLabel: "Classic Black",
+      fabric: "Dubai Cherry",
+      sizes: ["50", "52", "54", "56"],
+      priceByType: { "Full Set": 1350, "Abaya Only": 799 }
+    },
+    {
+      id: "ABY-BUTTERFLY-4",
+      name: "Butterfly Abaya Set - Detail",
+      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Butterfly-Ababa.jpg?raw=1",
+      link: "/",
+      price: 799,
+      color: "black",
+      colorLabel: "Classic Black",
+      fabric: "Dubai Cherry",
+      sizes: ["50", "52", "54", "56"],
+      priceByType: { "Full Set": 1350, "Abaya Only": 799 }
     }
   ],
 
