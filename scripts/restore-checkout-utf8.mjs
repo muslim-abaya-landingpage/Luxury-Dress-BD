@@ -194,7 +194,7 @@ html = html.replace(/site-footer\.css\?v=[^"]+/, `site-footer.css?v=${VER}`);
 html = html.replace(/site-footer\.js\?v=[^"]+/, `site-footer.js?v=${VER}`);
 html = html.replace(
   /<script defer src="site-header\.js[^>]*>/,
-  '<script defer src="site-header.js?v=20260531nav">'
+  '<script defer src="site-header.js?v=20260530gtmfix">'
 );
 
 html = html.replace(

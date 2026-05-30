@@ -118,7 +118,7 @@ html = html.replace(
 );
 html = html.replace(
   /<script src="site-header\.js[^>]*><\/script>/,
-  `<script defer src="site-header.js?v=20260531nav"></script>`
+  `<script defer src="site-header.js?v=20260530gtmfix"></script>`
 );
 html = html.replace(/<script src="site-seo-config\.js/g, '<script defer src="site-seo-config.js');
 html = html.replace(/<script src="site-seo\.js/g, '<script defer src="site-seo.js');

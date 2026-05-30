@@ -51,7 +51,7 @@ html = html.replace(
   `<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" media="print" onload="this.media='all'">`
 );
 
-html = html.replace(/site-header\.js\?v=[^"]+/, "site-header.js?v=20260531perf");
+html = html.replace(/site-header\.js\?v=[^"]+/, "site-header.js?v=20260530gtmfix");
 html = html.replace(/site-footer\.js\?v=[^"]+/, "site-footer.js?v=20260629post");
 
 html = html.replace(/\s*<script>\(function\(w,d,s,l,i\)[\s\S]*?<\/script>\s*/m, "\n    ");
@@ -135,7 +135,7 @@ success = success.replace(
   `<link rel="stylesheet" href="site-footer.css?v=20260530ft8" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="site-footer.css?v=20260530ft8"></noscript>`
 );
-success = success.replace(/site-header\.js\?v=[^"]+/, "site-header.js?v=20260531perf");
+success = success.replace(/site-header\.js\?v=[^"]+/, "site-header.js?v=20260530gtmfix");
 success = success.replace(/site-footer\.js\?v=[^"]+/, "site-footer.js?v=20260629post");
 success = success.replace(/<a href="index\.html"/, '<a href="/"');
 

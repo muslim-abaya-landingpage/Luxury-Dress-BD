@@ -104,7 +104,7 @@ out = out.replace(
 // site-header defer + version
 out = out.replace(
   /<script src="site-header\.js[^>]*><\/script>/,
-  '<script defer src="site-header.js?v=20260531perf"></script>'
+  '<script defer src="site-header.js?v=20260530gtmfix"></script>'
 );
 out = out.replace(
   /<script src="site-seo-config\.js/g,

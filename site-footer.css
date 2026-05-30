@@ -557,10 +557,12 @@ a.anz-contact-link:hover {
 }
 
 @media (max-width: 640px) {
+  /* Compact, premium mobile footer */
   .anz-footer-main {
     grid-template-columns: 1fr 1fr;
-    gap: 12px 10px;
-    padding: 14px 14px 10px;
+    gap: 14px 18px;
+    padding: 16px 16px 12px;
+    row-gap: 16px;
   }
 
   .anz-col-brand {
@@ -583,16 +585,110 @@ a.anz-contact-link:hover {
     grid-column: 1 / -1;
   }
 
+  /* Brand block — tighter, smaller tagline */
+  .anz-logo {
+    font-size: 17px;
+    margin-bottom: 6px;
+  }
+
+  .anz-text {
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+
+  .anz-wa-cta {
+    padding: 7px 13px;
+    font-size: 14px;
+  }
+
+  /* Section titles + links — denser */
+  .anz-title {
+    font-size: 11px;
+    margin-bottom: 8px;
+  }
+
+  .anz-link-list a {
+    font-size: 13.5px;
+    line-height: 1.45;
+  }
+
+  .anz-link-list li {
+    margin-bottom: 2px;
+  }
+
+  /* Contact rows — compact */
+  .anz-contact-link {
+    font-size: 13.5px;
+    margin-bottom: 7px;
+    gap: 8px;
+  }
+
+  .anz-contact-icon {
+    width: 26px;
+    height: 26px;
+  }
+
+  /* Newsletter — inline field + button to save height */
+  .anz-newsletter-note {
+    font-size: 12.5px;
+    margin-bottom: 8px;
+  }
+
+  .newsletter-form {
+    flex-direction: row;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .newsletter-form input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .newsletter-form button {
+    width: auto;
+    flex-shrink: 0;
+    padding: 0 14px;
+  }
+
+  .anz-socials {
+    margin-top: 10px;
+  }
+
+  /* Trust strip — single compact line */
   .anz-trust-inner {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
     gap: 4px 12px;
-    padding: 6px 14px !important;
+    padding: 8px 14px !important;
   }
 
-  .anz-logo {
-    font-size: 18px;
+  .anz-trust-item {
+    font-size: 12px;
+  }
+
+  /* Copyright bar — slimmer on mobile */
+  .anz-footer-strip,
+  .anz-bottom.anz-footer-strip,
+  #site-footer-mount .anz-bottom.anz-footer-strip {
+    height: 44px;
+    min-height: 44px;
+    max-height: none;
+    padding: 0 14px;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .anz-bottom p {
+    font-size: 12px;
+  }
+}
+
+/* Very small phones — keep two-up shop/about, stack newsletter neatly */
+@media (max-width: 380px) {
+  .anz-footer-main {
+    gap: 12px 12px;
   }
 
   .newsletter-form {
@@ -601,15 +697,6 @@ a.anz-contact-link:hover {
 
   .newsletter-form button {
     width: 100%;
-  }
-
-  .anz-footer-strip,
-  .anz-bottom.anz-footer-strip,
-  #site-footer-mount .anz-bottom.anz-footer-strip {
-    height: 0.5in;
-    min-height: 0.5in;
-    max-height: 0.5in;
-    padding: 0 14px;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding: 0 12px;
   }
 }

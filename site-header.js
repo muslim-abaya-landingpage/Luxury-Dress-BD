@@ -834,11 +834,17 @@
     ['pointerdown', 'keydown', 'touchstart', 'scroll'].forEach(function (ev) {
       window.addEventListener(ev, run, { once: true, passive: true });
     });
+    // Hard cap: ad visitors who bounce in a few seconds must still register
+    // the Meta/GA4 PageView. Fires by 2.5s at the latest regardless of idle.
+    window.setTimeout(run, 2500);
     if (typeof window.requestIdleCallback === 'function') {
-      window.requestIdleCallback(run, { timeout: 10000 });
-    } else {
-      window.setTimeout(run, 6000);
+      window.requestIdleCallback(run, { timeout: 2500 });
     }
+    // Last-resort: fire before the user leaves so the pageview is never lost.
+    window.addEventListener('pagehide', run, { once: true });
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'hidden') run();
+    });
   }
 
   function runHeaderBoot() {

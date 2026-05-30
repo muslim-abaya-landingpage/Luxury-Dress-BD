@@ -10,8 +10,8 @@
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;700&display=swap" rel="stylesheet"></noscript>
     <link rel="stylesheet" href="site-header.css?v=20260530c">
-    <link rel="stylesheet" href="site-footer.css?v=20260530ft9" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="site-footer.css?v=20260530ft9"></noscript>
+    <link rel="stylesheet" href="site-footer.css?v=20260530ft10" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="site-footer.css?v=20260530ft10"></noscript>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" media="print" onload="this.media='all'">
     
 <style>
@@ -70,18 +70,51 @@
     <script src="cart-utils.js"></script>
     <script>
       (function () {
-        var saved = typeof readOrderTracking === 'function' ? readOrderTracking() : null;
-        var extra = {};
-        if (!saved || !saved.transaction_id) {
-          extra.transaction_id = 'order_' + Date.now();
-          extra.event_id = extra.transaction_id;
+        var FIRED_KEY = 'ma_purchase_fired_ids';
+        function firedIds() {
+          try { return JSON.parse(localStorage.getItem(FIRED_KEY) || '[]'); } catch (e) { return []; }
         }
+        function markFired(id) {
+          if (!id) return;
+          try {
+            var a = firedIds();
+            if (a.indexOf(id) === -1) {
+              a.push(id);
+              if (a.length > 50) a = a.slice(-50);
+              localStorage.setItem(FIRED_KEY, JSON.stringify(a));
+            }
+          } catch (e) {}
+        }
+
+        var saved = typeof readOrderTracking === 'function' ? readOrderTracking() : null;
+        var orderId = '';
+        try { orderId = sessionStorage.getItem('ma_last_order_id') || ''; } catch (e) {}
+
+        // Stable transaction id for this order (survives page refresh).
+        var txnId = (saved && (saved.transaction_id || saved.event_id)) ||
+                    (orderId ? ('order_' + orderId) : '');
+
+        // No real order context (direct visit / refresh after data cleared):
+        // do NOT fire a purchase, so we never create a phantom conversion.
+        if (!txnId) {
+          if (typeof clearOrderTracking === 'function') clearOrderTracking();
+          return;
+        }
+
+        // Already counted this order (e.g. page refresh) — skip to avoid double-counting.
+        if (firedIds().indexOf(txnId) !== -1) {
+          if (typeof clearOrderTracking === 'function') clearOrderTracking();
+          return;
+        }
+
+        var extra = { transaction_id: txnId, event_id: txnId };
         if (typeof pushPurchaseCompleteEvent === 'function') {
           pushPurchaseCompleteEvent(extra);
         } else if (saved) {
           window.dataLayer = window.dataLayer || [];
           window.dataLayer.push(Object.assign({ event: 'purchase_complete' }, saved, extra));
         }
+        markFired(txnId);
         if (typeof clearOrderTracking === 'function') clearOrderTracking();
       })();
     </script>
@@ -120,7 +153,7 @@
         })();
     </script>
     <div id="site-footer-mount"></div>
-    <script defer src="site-header.js?v=20260531perf"></script>
+    <script defer src="site-header.js?v=20260530gtmfix"></script>
     <script src="site-api-config.js?v=20260529"></script>
     <script src="site-footer.js?v=20260629post"></script>
 </body>
