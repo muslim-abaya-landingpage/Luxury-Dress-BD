@@ -166,6 +166,12 @@ function goToProductDetail(productId, ev) {
     var detailId = p.catalogId || p.id;
     window.location.href = base + '#p=' + encodeURIComponent(detailId);
 }
+/* হিরো (বড়) ছবিতে ট্যাপ করলে বর্তমান প্রোডাক্টের ডিটেইল ভিউ খোলে */
+function openCurrentProductDetail(ev) {
+    var p = products[currentIdx];
+    if (!p) return;
+    goToProductDetail(p.id, ev);
+}
 function trackFB(event, data) {
     if (typeof pushTrackingEvent === 'function') {
         pushTrackingEvent(event, data || {});
@@ -444,7 +450,7 @@ card.innerHTML = `
             ✕
         </button>
         
-        <img class="home-product-thumb" src="${thumbImg}" onclick="manualSelect(${i}, '${p.id}')" alt="${p.name}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg';">
+        <img class="home-product-thumb" src="${thumbImg}" style="cursor:pointer" onclick="goToProductDetail('${p.id}', event)" alt="${p.name}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg';">
     </div>
 
     <div class="product-info">
@@ -641,6 +647,7 @@ window.toggleProductCart = toggleProductCart;
 window.buyNowFromCard = buyNowFromCard;
 window.updateQty = updateQty;
 window.goToProductDetail = goToProductDetail;
+window.openCurrentProductDetail = openCurrentProductDetail;
 window.removeFromCart = removeFromCart;
 window.__homeRefreshCatalog = function (opts) {
     opts = opts || {};

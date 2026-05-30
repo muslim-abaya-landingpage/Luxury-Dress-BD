@@ -109,6 +109,8 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
          fetchpriority="high" 
          loading="eager" 
          decoding="sync" 
+         style="cursor:pointer"
+         onclick="if(typeof openCurrentProductDetail==='function'){openCurrentProductDetail(event);}"
          alt="Muslim Abaya Premium Collection">
 <button type="button" class="nav-arrow left" onclick="changeProduct(-1)" aria-label="Previous Product">
 <i class="fas fa-chevron-left"></i>
@@ -201,7 +203,7 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
 <script defer src="cart-utils.js?v=20260530cat"></script>
 <script defer src="cart-drawer.js?v=20260528b"></script>
 <script defer src="index-catalog-defer.js?v=20260530sale"></script>
-<script defer src="index-home-app.js?v=20260530detail"></script>
+<script defer src="index-home-app.js?v=20260530tap"></script>
 
 <section id="main-video-section" style="background:#fff; padding:25px 15px; scroll-margin-top:100px;">
     <div class="lux-video-wrap">
