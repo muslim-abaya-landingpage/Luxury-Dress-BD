@@ -45,7 +45,10 @@ window.CHECKOUT_UPAZILAS_BY_DISTRICT={"বরগুনা":["আমতলী","�
   var manualAliases = {
     "\u09a8\u09c7\u09a4\u09cd\u09b0\u0995\u09cb\u09a8\u09be": "\u09a8\u09c7\u09a4\u09cd\u09b0\u0995\u09cb\u09a3\u09be",
     "\u09ae\u09c1\u09a8\u09cd\u09b8\u09c0\u0997\u099e\u09cd\u099c": "\u09ae\u09c1\u09a8\u09cd\u09b8\u09bf\u0997\u09b0\u09c0",
-    "\u09a8\u09be\u09b0\u09be\u09af\u09bc\u09a3\u0997\u099e\u09cd\u099c": "\u09a8\u09be\u09df\u09bc\u09a3\u09b8\u09c0",
+    "\u09ae\u09af\u09bc\u09ae\u09a8\u09b8\u09bf\u0982\u09b9": "\u09ae\u09df\u09bc\u09ae\u09a8\u09b8\u09bf\u0982\u09b9",
+    "\u0995\u09c1\u09b7\u09cd\u099f\u09bf\u09af\u09bc\u09be": "\u09c7\u09b7\u09cd\u099f\u09bf\u09af\u09bc\u09be",
+    "\u099a\u09c1\u09af\u09bc\u09be\u09a1\u09be\u0999\u09cd\u09b7\u09be": "\u099a\u09c1\u09af\u09bc\u09be\u09a1\u09be\u0999\u09cd\u09b7\u09be",
+    "\u09aa\u099f\u09c1\u09af\u09bc\u09be\u0996\u09be\u09b2\u09c0": "\u09aa\u099f\u09c1\u09af\u09bc\u09be\u0996\u09be\u09b2\u09c0"
   };
 
   function findDistrictKey(name) {
@@ -136,32 +139,36 @@ window.CHECKOUT_UPAZILAS_BY_DISTRICT={"বরগুনা":["আমতলী","�
     return loadPromise;
   }
 
-  function init() {
+  function bindDistrictChange() {
+    if (!districtSelect || districtSelect.__thanaBound) return;
+    districtSelect.__thanaBound = true;
+    districtSelect.addEventListener("change", onDistrictChange);
+    districtSelect.addEventListener("input", onDistrictChange);
+  }
+
+  function initCheckoutLocationSelects() {
     districtSelect = document.getElementById("userArea");
     thanaSelect = document.getElementById("userThana");
-    if (!districtSelect || !thanaSelect) return;
+    if (!districtSelect || !thanaSelect) return false;
 
-    if (!districtSelect.__thanaBound) {
-      districtSelect.__thanaBound = true;
-      districtSelect.addEventListener("change", onDistrictChange);
-    }
+    bindDistrictChange();
 
-    loadData().then(function () {
+    return loadData().then(function () {
       onDistrictChange();
+      return true;
     });
   }
 
+  window.initCheckoutLocationSelects = initCheckoutLocationSelects;
   window.refreshCheckoutThanaSelect = function () {
-    if (!districtSelect) districtSelect = document.getElementById("userArea");
-    if (!thanaSelect) thanaSelect = document.getElementById("userThana");
-    loadData().then(function () {
-      onDistrictChange();
-    });
+    return initCheckoutLocationSelects();
   };
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
+    document.addEventListener("DOMContentLoaded", function () {
+      initCheckoutLocationSelects();
+    });
   } else {
-    init();
+    initCheckoutLocationSelects();
   }
 })();

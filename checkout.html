@@ -1562,7 +1562,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="auth-api.js"></script>
 <script src="product-config.js?v=20260613"></script>
 <script src="cart-utils.js?v=20260530cat"></script>
-<script src="checkout-locations.js?v=20260630th"></script>
+<script src="checkout-locations.js?v=20260630th2"></script>
 <script defer src="site-header.js?v=20260530gtmfix"></script>
 <script>
     const ORDER_SCRIPT_URL =
@@ -1940,7 +1940,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             opt.textContent = name === '\u09a2\u09be\u0995\u09be' ? name + ' (\u09f380)' : name;
             sel.appendChild(opt);
         });
-        if (typeof window.refreshCheckoutThanaSelect === 'function') {
+        if (typeof window.initCheckoutLocationSelects === 'function') {
+            window.initCheckoutLocationSelects();
+        } else if (typeof window.refreshCheckoutThanaSelect === 'function') {
             window.refreshCheckoutThanaSelect();
         }
     })();
