@@ -98,6 +98,10 @@
       category: item.category || item.categoryKey || (cat && cat.category) || categoryFromCatalog(lineId, item.name) || "",
       categoryLabel: item.categoryLabel || (cat && cat.categoryLabel) || ""
     };
+    if (item.lengthSize) line.lengthSize = String(item.lengthSize);
+    if (item.bodySize) line.bodySize = String(item.bodySize);
+    if (item.selectedSize) line.selectedSize = String(item.selectedSize);
+    if (item.productType) line.productType = String(item.productType);
     line.image = resolveItemImage(line);
     return line;
   }
