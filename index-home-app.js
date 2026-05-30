@@ -319,7 +319,7 @@ window.onload = function() {
 
 // কার্টে প্রোডাক্ট যোগ এবং মেমোরিতে (localStorage) সেভ করার ফাংশন
 function addToCart(productId) {
-    toggleProductCart(productId);
+    addToCartFromCard(productId);
 }
 function syncHomeCartToCheckout() {
     if (typeof persistStoreCart !== 'function') return;
@@ -344,7 +344,7 @@ function toggleProductCart(productId) {
     calc(false);
 }
 function addProductSelection(productId) {
-    toggleProductCart(productId);
+    addToCartFromCard(productId);
 }
 function goToCheckoutPage() {
     var lines = getHomeCartLines();
@@ -380,7 +380,27 @@ function buyNowFromCard(productId, ev) {
 function addToCartFromCard(productId, ev) {
     if (ev && ev.preventDefault) ev.preventDefault();
     if (ev && ev.stopPropagation) ev.stopPropagation();
-    updateQty(productId, 1);
+    var oldQty = getCartQty(productId);
+    cart[productId] = oldQty + 1;
+    if (cart[productId] > oldQty) {
+        var p = products.find(function (x) { return x.id === productId; });
+        trackFB('AddToCart', {
+            content_ids: [productId],
+            content_name: p ? p.name : productId,
+            value: p ? p.price : 550,
+            currency: 'BDT'
+        });
+    }
+    isAutoSlideActive = false;
+    clearInterval(autoSlideInterval);
+    syncHomeCartAfterChange();
+    renderSidebar();
+    calc(false);
+    const toast = document.getElementById('cartToast');
+    if (toast) {
+        toast.classList.add('show');
+        setTimeout(() => { toast.classList.remove('show'); }, 3000);
+    }
 }
 function trackInitiateCheckout() {
     if (checkoutTracked) return;

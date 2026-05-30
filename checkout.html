@@ -197,6 +197,24 @@
             border-right: 1px solid var(--line);
             padding: 6px 8px;
         }
+        .gb-order-size-wrap {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .gb-order-size-select {
+            min-width: 86px;
+            height: 34px;
+            padding: 0 10px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            background: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--ink);
+            outline: none;
+        }
+        .gb-order-size-select:focus { border-color: #111; }
         .gb-order-price {
             grid-column: 3;
             grid-row: 2;
@@ -1856,6 +1874,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         return parts.join(' · ');
     }
 
+    function getCheckoutSizeOptions(item) {
+        var raw = [];
+        var selected = String((item && (item.size || item.selectedSize)) || '').trim();
+        if (selected) raw.push(selected);
+        var defs = window.SITE_LINKS && window.SITE_LINKS.defaults;
+        var catKey = String((item && (item.category || item.categoryKey)) || '').trim();
+        if (defs && defs.byCategory && catKey && defs.byCategory[catKey] && Array.isArray(defs.byCategory[catKey].sizes)) {
+            raw = raw.concat(defs.byCategory[catKey].sizes);
+        }
+        if (defs && Array.isArray(defs.sizes)) raw = raw.concat(defs.sizes);
+        if (!raw.length) raw = ['50', '52', '54', '56', 'Free Size'];
+        var uniq = [];
+        raw.forEach(function (s) {
+            var v = String(s || '').trim();
+            if (!v) return;
+            if (uniq.indexOf(v) === -1) uniq.push(v);
+        });
+        return uniq;
+    }
+
     (function initDistrictSelect() {
         var sel = document.getElementById('userArea');
         if (!sel || sel.getAttribute('data-districts-built') === '1') return;
@@ -1951,7 +1989,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function productsLabel() {
         return cart.map(function(item) {
-            return item.name + ' (' + (parseInt(item.quantity, 10) || 1) + ' pcs)';
+            var size = String(item.size || item.selectedSize || '').trim();
+            var sizePart = size ? ' · Size: ' + size : '';
+            return item.name + sizePart + ' (' + (parseInt(item.quantity, 10) || 1) + ' pcs)';
         }).join(', ');
     }
 
@@ -2077,7 +2117,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var slots = [];
         cart.forEach(function(item) {
             var qty = parseInt(item.quantity, 10) || 1;
-            slots.push(item.name + ' x' + qty + ' = ৳' + ((parseInt(item.price, 10) || 0) * qty));
+            var size = String(item.size || item.selectedSize || '').trim();
+            var sizeText = size ? ' | Size: ' + size : '';
+            slots.push(item.name + sizeText + ' x' + qty + ' = ৳' + ((parseInt(item.price, 10) || 0) * qty));
         });
         while (slots.length < MAX_PRODUCT_SLOTS) {
             slots.push('');
@@ -2143,6 +2185,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 : '<span class="gb-order-thumb-placeholder">👜</span>';
             var detail = orderItemDetail(item);
             var detailHtml = detail ? '<p class="gb-order-detail">' + escapeHtml(detail) + '</p>' : '';
+            var selectedSize = String(item.size || item.selectedSize || '').trim();
+            var sizeOptions = getCheckoutSizeOptions(item);
+            var sizeControlHtml =
+                '<label class="gb-order-size-wrap">' +
+                '<span class="gb-order-qty-label">Size:</span>' +
+                '<select class="gb-order-size-select" data-cart-action="size" data-cart-idx="' + idx + '" aria-label="Change size">' +
+                sizeOptions.map(function (sizeOpt) {
+                    var isSelected = selectedSize
+                        ? selectedSize === String(sizeOpt)
+                        : String(sizeOpt) === String(sizeOptions[0] || '');
+                    return '<option value="' + escapeHtml(sizeOpt) + '"' + (isSelected ? ' selected' : '') + '>' +
+                        escapeHtml(sizeOpt) + '</option>';
+                }).join('') +
+                '</select></label>';
             itemsHtml +=
                 '<div class="gb-order-row">' +
                 '<div class="gb-order-thumb">' + thumbInner + '</div>' +
@@ -2155,7 +2211,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 '<button type="button" data-cart-action="dec" data-cart-idx="' + idx + '" aria-label="Decrease quantity">−</button>' +
                 '<span>' + qty + '</span>' +
                 '<button type="button" data-cart-action="inc" data-cart-idx="' + idx + '" aria-label="Increase quantity">+</button>' +
-                '</div></div></div>' +
+                '</div>' + sizeControlHtml + '</div></div>' +
                 '<div class="gb-order-price">' + formatBdtCheckout(lineTotal) + '</div>' +
                 '<button type="button" class="gb-order-delete" data-cart-action="remove" data-cart-idx="' + idx + '" aria-label="Remove product" title="Remove">' + TRASH_SVG + '</button>' +
                 '</div>';
@@ -2172,12 +2228,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
 
     if (summaryDiv) {
+        summaryDiv.addEventListener('change', function(e) {
+            var sel = e.target.closest('[data-cart-action="size"]');
+            if (!sel) return;
+            var idx = parseInt(sel.getAttribute('data-cart-idx'), 10);
+            if (isNaN(idx) || !cart[idx]) return;
+            var nextSize = String(sel.value || '').trim();
+            cart[idx].size = nextSize;
+            cart[idx].selectedSize = nextSize;
+            persistCart();
+            displayOrder();
+        });
         summaryDiv.addEventListener('click', function(e) {
             var el = e.target.closest('[data-cart-action]');
             if (!el) return;
             var idx = parseInt(el.getAttribute('data-cart-idx'), 10);
             if (isNaN(idx) || !cart[idx]) return;
             var action = el.getAttribute('data-cart-action');
+            if (action === 'size') return;
             if (action === 'inc') {
                 cart[idx].quantity = (parseInt(cart[idx].quantity, 10) || 1) + 1;
             }
