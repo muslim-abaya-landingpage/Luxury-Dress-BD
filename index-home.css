@@ -958,11 +958,11 @@ text-align: left;
     margin-bottom: 10px;
 }
 @media screen and (max-width: 600px) {
-    .anz-col-brand, 
-    .anz-col-links, 
-    .anz-col-contact {
+    #site-footer-mount .anz-col-brand,
+    #site-footer-mount .anz-col-links,
+    #site-footer-mount .anz-col-contact {
         text-align: left !important;
-        padding-left: 15px !important;
+        padding-left: 0 !important;
     }
 }
     .astra-feature-wrapper {
