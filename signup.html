@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
@@ -6,8 +6,8 @@
   <title>Sign Up | Muslim Abaya</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="site-header.css?v=20260530c">
-  <link rel="stylesheet" href="site-footer.css?v=20260531m2in" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="site-footer.css?v=20260531m2in"></noscript>
+  <link rel="stylesheet" href="site-footer.css?v=20260531foot3" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="site-footer.css?v=20260531foot3"></noscript>
 <link rel="stylesheet" href="auth-page.css">
 </head>
 <body class="auth-page auth-page-signup">
@@ -16,40 +16,40 @@
     <section class="auth-card">
       <div class="auth-card-head">
         <h1>Sign Up</h1>
-        <p class="auth-lead">Quick register — saved for faster checkout.</p>
+        <p class="auth-lead">Quick register � saved for faster checkout.</p>
       </div>
       <form id="signupForm">
         <div class="auth-field">
           <label for="su-name">Full Name</label>
-          <input id="su-name" type="text" placeholder="আপনার পূর্ণ নাম" autocomplete="name">
-          <p class="auth-hint">যেমন: Nusrat Jahan</p>
+          <input id="su-name" type="text" placeholder="????? ????? ???" autocomplete="name">
+          <p class="auth-hint">????: Nusrat Jahan</p>
         </div>
         <div class="auth-form-row-2">
           <div class="auth-field">
             <label for="su-mobile">Mobile</label>
             <input id="su-mobile" type="tel" placeholder="017XXXXXXXX" autocomplete="tel">
-            <p class="auth-hint">১১ ডিজিট</p>
+            <p class="auth-hint">?? ?????</p>
           </div>
           <div class="auth-field">
             <label for="su-email">Email</label>
             <input id="su-email" type="email" placeholder="name@gmail.com" autocomplete="email">
-            <p class="auth-hint">সঠিক ইমেইল</p>
+            <p class="auth-hint">???? ?????</p>
           </div>
         </div>
         <div class="auth-form-row-2">
           <div class="auth-field">
             <label for="su-pass">Password</label>
             <input id="su-pass" type="password" placeholder="******" autocomplete="new-password">
-            <p class="auth-hint">৬+ অক্ষর, অক্ষর ও সংখ্যা</p>
+            <p class="auth-hint">?+ ?????, ????? ? ??????</p>
           </div>
           <div class="auth-field">
             <label for="su-confirm">Confirm</label>
             <input id="su-confirm" type="password" placeholder="******" autocomplete="new-password">
-            <p class="auth-hint">আবার দিন</p>
+            <p class="auth-hint">???? ???</p>
           </div>
         </div>
         <button type="submit" class="auth-btn" id="signupBtn">Create Account</button>
-        <p class="auth-note">ইতিমধ্যে অ্যাকাউন্ট থাকলে <a href="signin.html" id="signinLink">Sign In</a></p>
+        <p class="auth-note">???????? ?????????? ????? <a href="signin.html" id="signinLink">Sign In</a></p>
       </form>
     </section>
   </main>
@@ -82,12 +82,12 @@
         var email = document.getElementById('su-email').value.trim();
         var pass = document.getElementById('su-pass').value;
         var confirm = document.getElementById('su-confirm').value;
-        if (name.length < 2) { alert('পূর্ণ নাম লিখুন।'); return; }
-        if (!/^01\d{9}$/.test(phone.replace(/\s+/g, ''))) { alert('সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন।'); return; }
-        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alert('সঠিক ইমেইল দিন।'); return; }
+        if (name.length < 2) { alert('????? ??? ??????'); return; }
+        if (!/^01\d{9}$/.test(phone.replace(/\s+/g, ''))) { alert('???? ?? ??????? ?????? ????? ????'); return; }
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alert('???? ????? ????'); return; }
         var strength = MaSecurity.checkPasswordStrength(pass);
         if (!strength.ok) { alert(strength.message); return; }
-        if (pass !== confirm) { alert('পাসওয়ার্ড মিলছে না।'); return; }
+        if (pass !== confirm) { alert('?????????? ????? ???'); return; }
         var btn = document.getElementById('signupBtn');
         btn.disabled = true;
         btn.textContent = 'Saving...';
@@ -97,10 +97,10 @@
           })
           .catch(function (err) {
             if (typeof isLocalPreview === 'function' && isLocalPreview()) {
-              alert(typeof getLocalFileAuthHint === 'function' ? getLocalFileAuthHint() : 'ADMIN-লোকাল-টেস্ট.bat চালিয়ে http://127.0.0.1/signup.html ব্যবহার করুন।');
+              alert(typeof getLocalFileAuthHint === 'function' ? getLocalFileAuthHint() : 'ADMIN-?????-?????.bat ??????? http://127.0.0.1/signup.html ??????? ?????');
               return;
             }
-            alert((err && err.message) || 'রেজিস্ট্রেশন ব্যর্থ। আবার চেষ্টা করুন।');
+            alert((err && err.message) || '???????????? ??????? ???? ?????? ?????');
           })
           .finally(function () {
             btn.disabled = false;

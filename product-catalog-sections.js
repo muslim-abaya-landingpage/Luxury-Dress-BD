@@ -11,7 +11,7 @@ window.CATALOG_SECTIONS = [
     key: "abaya",
     row: "①",
     menu: "ABAYA",
-    menuBn: "আবায়া",
+    menuBn: "আবায়া · বোরকা",
     page: "abaya.html",
     path: "/abaya",
     enabled: true

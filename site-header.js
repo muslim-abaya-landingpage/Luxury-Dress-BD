@@ -71,6 +71,46 @@
     return String(file || '').replace(/^\//, '');
   }
 
+  (function bootPwa() {
+    if (!document.head || window.location.protocol === "file:") return;
+    if (window.__maPwaBoot) return;
+    window.__maPwaBoot = true;
+    var v = "20260530pwa";
+    function headLink(rel, href, extra) {
+      var el = document.createElement("link");
+      el.rel = rel;
+      el.href = href;
+      if (extra) Object.keys(extra).forEach(function (k) {
+        el.setAttribute(k, extra[k]);
+      });
+      document.head.appendChild(el);
+    }
+    headLink("manifest", siteAsset("manifest.webmanifest?v=" + v));
+    var metaTheme = document.createElement("meta");
+    metaTheme.name = "theme-color";
+    metaTheme.content = "#1a1a1a";
+    document.head.appendChild(metaTheme);
+    var appleCap = document.createElement("meta");
+    appleCap.name = "apple-mobile-web-app-capable";
+    appleCap.content = "yes";
+    document.head.appendChild(appleCap);
+    var appleTitle = document.createElement("meta");
+    appleTitle.name = "apple-mobile-web-app-title";
+    appleTitle.content = "Muslim Abaya";
+    document.head.appendChild(appleTitle);
+    headLink("apple-touch-icon", siteAsset("images/Baby-Pink-Floral-Print.jpeg"));
+    headLink("stylesheet", siteAsset("pwa-install.css?v=" + v));
+    function loadPwaScript() {
+      if (document.querySelector('script[src*="pwa-install.js"]')) return;
+      var s = document.createElement("script");
+      s.src = siteAsset("pwa-install.js?v=" + v);
+      s.defer = true;
+      (document.body || document.documentElement).appendChild(s);
+    }
+    if (document.body) loadPwaScript();
+    else document.addEventListener("DOMContentLoaded", loadPwaScript);
+  })();
+
   function prefersCleanUrls() {
     return window.location.protocol === 'https:' || window.location.protocol === 'http:';
   }

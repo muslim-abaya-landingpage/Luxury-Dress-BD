@@ -8,7 +8,17 @@ function ensureCategoryStyles() {
     link.rel = "stylesheet";
     document.head.appendChild(link);
   }
-  link.href = "category-sidebar.css?v=20260630spa";
+  link.href = "category-sidebar.css?v=20260531anzaar";
+  var qtyLink =
+    document.getElementById("qty-stepper-css") ||
+    document.querySelector('link[href*="qty-stepper.css"]');
+  if (!qtyLink) {
+    qtyLink = document.createElement("link");
+    qtyLink.id = "qty-stepper-css";
+    qtyLink.rel = "stylesheet";
+    document.head.appendChild(qtyLink);
+  }
+  qtyLink.href = "qty-stepper.css?v=20260531qty2";
   var shopLink = document.querySelector('link[href*="shop-page.css"]');
   if (shopLink) shopLink.href = "shop-page.css?v=20260630spa";
 }
@@ -175,6 +185,8 @@ function shopAddProductToCart(item, qtyToAdd, sizeValue) {
       msg.classList.remove("show");
     }, 1400);
   }
+
+  refreshShopCardsAfterCartChange();
 }
 
 function resetShopCartContext() {
@@ -215,6 +227,125 @@ function getPqvQuantity(modal) {
   if (!modal) return 1;
   var qtyEl = modal.querySelector("#pqvQty");
   return parsePqvQtyValue(qtyEl ? qtyEl.value : 1);
+}
+
+function shopProductHasTypeChoice(p, categoryKey) {
+  return getProductTypes(p, categoryKey).length > 1;
+}
+
+function getShopCartQtyForProduct(p) {
+  if (!p) return 0;
+  var lines = typeof loadStoreCart === "function" ? loadStoreCart({ readOnly: true }) : [];
+  var pid = String(p.id || "").trim();
+  var baseName = getProductBaseName(p.name).toLowerCase();
+  var total = 0;
+  lines.forEach(function (line) {
+    if (!line) return;
+    if (pid && String(line.id || "").trim() === pid) {
+      total += parseInt(line.quantity, 10) || 0;
+      return;
+    }
+    var lineName = String(line.name || "").replace(/\s*\([^)]*\)\s*$/g, "").trim().toLowerCase();
+    if (baseName && lineName.indexOf(baseName) === 0) {
+      total += parseInt(line.quantity, 10) || 0;
+    }
+  });
+  return total;
+}
+
+function getShopCardQty(root, idx) {
+  if (!root) return 1;
+  var el = root.querySelector('.shop-card-qty-val[data-product-idx="' + idx + '"]');
+  return parsePqvQtyValue(el ? el.textContent : 1);
+}
+
+function setShopCardQty(root, idx, n) {
+  if (!root) return;
+  var qty = parsePqvQtyValue(n);
+  var val = root.querySelector('.shop-card-qty-val[data-product-idx="' + idx + '"]');
+  var minus = root.querySelector(
+    '.shop-card-qty-btn[data-shop-qty="minus"][data-product-idx="' + idx + '"]'
+  );
+  if (val) val.textContent = String(qty);
+  if (minus) minus.disabled = qty <= 1;
+}
+
+function buildShopCardQtyStepper(idx, qty, inCart) {
+  var q = parsePqvQtyValue(qty);
+  return (
+    '<div class="ma-qty-stepper shop-card-qty is-visible' +
+    (inCart ? " in-cart" : "") +
+    '" data-product-idx="' +
+    idx +
+    '" role="group" aria-label="পরিমান">' +
+    '<button type="button" class="ma-qty-stepper__btn shop-card-qty-btn" data-shop-qty="minus" data-product-idx="' +
+    idx +
+    '" aria-label="পরিমাণ কমান"' +
+    (q <= 1 ? " disabled" : "") +
+    ">−</button>" +
+    '<span class="ma-qty-stepper__value shop-card-qty-val" data-product-idx="' +
+    idx +
+    '" aria-live="polite">' +
+    q +
+    "</span>" +
+    '<button type="button" class="ma-qty-stepper__btn shop-card-qty-btn" data-shop-qty="plus" data-product-idx="' +
+    idx +
+    '" aria-label="পরিমাণ বাড়ান">+</button>' +
+    "</div>"
+  );
+}
+
+function refreshShopCardsAfterCartChange() {
+  var root = shopCartCtx.root;
+  var products = shopCartCtx.products;
+  if (!root || !products || !products.length) return;
+  if (shopCartCtx.gridHtml || getActivePqvScope()) return;
+  products.forEach(function (p, idx) {
+    var card = root.querySelector('.premium-card[data-product-idx="' + idx + '"]');
+    if (!card) return;
+    var cartQty = getShopCartQtyForProduct(p);
+    var displayQty = cartQty > 0 ? cartQty : getShopCardQty(root, idx);
+    card.classList.toggle("in-cart", cartQty > 0);
+    var stepper = card.querySelector(".shop-card-qty");
+    if (stepper) stepper.classList.toggle("in-cart", cartQty > 0);
+    setShopCardQty(root, idx, displayQty);
+    var addBtn = card.querySelector(".anzaar-btn-cart[data-product-idx='" + idx + "']");
+    if (addBtn) addBtn.classList.toggle("is-active", cartQty > 0);
+  });
+  syncShopCartBadge();
+}
+
+function changeShopCartProductQty(p, delta, categoryKey) {
+  var lines = typeof loadStoreCart === "function" ? loadStoreCart() : [];
+  var pid = String(p.id || "").trim();
+  var lineIdx = -1;
+  var i;
+  for (i = 0; i < lines.length; i++) {
+    if (pid && String(lines[i].id || "").trim() === pid) {
+      lineIdx = i;
+      break;
+    }
+  }
+  if (lineIdx === -1) {
+    if (delta > 0) {
+      var defaultSize = Array.isArray(p.sizes) && p.sizes.length ? p.sizes[0] : "50";
+      var defaultType = getDefaultProductType(p, categoryKey);
+      shopAddProductToCart(Object.assign({}, p, { _cartType: defaultType }), delta, defaultSize);
+    }
+    return;
+  }
+  var line = lines[lineIdx];
+  var newQty = (parseInt(line.quantity, 10) || 0) + delta;
+  var updated;
+  if (newQty <= 0) {
+    updated = lines.slice(0, lineIdx).concat(lines.slice(lineIdx + 1));
+  } else {
+    updated = lines.slice();
+    updated[lineIdx] = Object.assign({}, line, { quantity: newQty });
+  }
+  if (typeof persistStoreCart === "function") persistStoreCart(updated);
+  if (typeof afterCartMutation === "function") afterCartMutation(updated);
+  refreshShopCardsAfterCartChange();
 }
 
 function getSelectedTypeForIdx(scopeRoot, idx) {
@@ -714,6 +845,14 @@ function bindPqvInteractions(p, idx, categoryKey, scopeRoot) {
     });
   }
 
+  var jumpDesc = modal.querySelector("[data-pqv-jump-desc]");
+  if (jumpDesc) {
+    jumpDesc.addEventListener("click", function () {
+      var block = modal.querySelector("#pqvDescBlock");
+      if (block) block.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
   var qtyInput = modal.querySelector("#pqvQty");
   var minus = modal.querySelector("[data-pqv-qty='minus']");
   var plus = modal.querySelector("[data-pqv-qty='plus']");
@@ -865,6 +1004,7 @@ function closeProductQuickView(skipHistory) {
       history.back();
     }
     window.scrollTo(0, 0);
+    refreshShopCardsAfterCartChange();
     return;
   }
   var modal = document.getElementById("productQuickView");
@@ -965,6 +1105,9 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     '">' +
     priceText +
     "</p>" +
+    (shortNoteRaw
+      ? '<p class="pqv-note">' + escapeHtml(shortNoteRaw) + "</p>"
+      : "") +
     '<div class="pqv-options">' +
     typeField +
     colorField +
@@ -976,26 +1119,27 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     '<div class="pqv-qty-row">' +
     '<span class="pqv-field-label pqv-qty-label">Quantity</span>' +
     '<div class="ma-qty-stepper pqv-qty" role="group" aria-label="Quantity">' +
-    '<button type="button" class="ma-qty-stepper__btn pqv-qty-btn" data-pqv-qty="minus" aria-label="Decrease quantity">-</button>' +
+    '<button type="button" class="ma-qty-stepper__btn pqv-qty-btn" data-pqv-qty="minus" aria-label="Decrease quantity">−</button>' +
     '<input type="text" id="pqvQty" class="ma-qty-stepper__input pqv-qty-input" value="1" inputmode="numeric" pattern="[0-9]*" lang="en" autocomplete="off" aria-label="Quantity">' +
     '<button type="button" class="ma-qty-stepper__btn pqv-qty-btn" data-pqv-qty="plus" aria-label="Increase quantity">+</button>' +
     "</div>" +
     '<span class="pqv-stock">' +
     escapeHtml(stockText) +
-    "</span></div>" +
-    '<div class="pqv-actions-row">' +
+    "</span>" +
+    '<button type="button" class="pqv-jump-desc" data-pqv-jump-desc="1">Jump to Description <span aria-hidden="true">↓</span></button>' +
+    "</div>" +
+    '<div class="pqv-actions-row pqv-actions-row--three">' +
     '<button type="button" class="pqv-act pqv-act-cart" data-product-idx="' +
     idx +
     '" data-action="add">Add to Cart</button>' +
     '<button type="button" class="pqv-act pqv-act-buy" data-product-idx="' +
     idx +
     '" data-action="buy-now">Buy Now</button>' +
-    "</div>" +
-    '<a class="pqv-act-msg-link" href="' +
+    '<a class="pqv-act pqv-act-msg" href="' +
     waLink +
     "?text=" +
     encodeURIComponent(p.name + " \u0985\u09B0\u09CD\u09A1\u09BE\u09B0 \u0995\u09B0\u09A4\u09C7 \u099A\u09BE\u09AF\u09BC") +
-    '" target="_blank" rel="noopener">WhatsApp \u0985\u09B0\u09CD\u09A1\u09BE\u09B0</a>' +
+    '" target="_blank" rel="noopener">Send Message</a>' +
     "</div>" +
     '<div class="pqv-bottom" id="pqvDescBlock">' +
     '<div class="pqv-bottom-main">' +
@@ -1009,7 +1153,8 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     "</div>" +
     '<div class="pqv-tab-panel" data-panel="spec">' +
     specRows +
-    "</div></div></div></div></div>" +
+    "</div></div></div></div>" +
+    "</div></div>" +
     relatedHtml +
     "</div>"
   );
@@ -1028,11 +1173,14 @@ function openProductQuickView(idx) {
     shopCartCtx.gridClassName = root.className || "";
   }
 
+  var cardQty = getShopCardQty(root, idx);
   var html = buildQuickViewPanelHtml(products[idx], idx, waLink, categoryKey, products);
   root.className = (shopCartCtx.gridClassName || "") + " shop-product-detail";
   root.setAttribute("data-category-key", categoryKey);
   root.innerHTML = html;
   bindPqvInteractions(products[idx], idx, categoryKey, root);
+  var pqvQtyInput = root.querySelector("#pqvQty");
+  if (pqvQtyInput) setPqvQtyInput(pqvQtyInput, cardQty);
 
   var legacy = document.getElementById("productQuickView");
   if (legacy) {
@@ -1082,6 +1230,29 @@ function onGlobalShopCartClick(ev) {
     }
     if (!products || !products.length || !root.contains(ev.target)) return;
 
+    var qtyBtn = ev.target.closest("[data-shop-qty]");
+    if (qtyBtn && root.contains(qtyBtn)) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      var qIdx = parseInt(qtyBtn.getAttribute("data-product-idx"), 10);
+      if (isNaN(qIdx) || !products[qIdx]) return;
+      var categoryKey =
+        (document.body && document.body.getAttribute("data-shop-category")) || "";
+      var cartQty = getShopCartQtyForProduct(products[qIdx]);
+      if (cartQty > 0) {
+        changeShopCartProductQty(
+          products[qIdx],
+          qtyBtn.getAttribute("data-shop-qty") === "plus" ? 1 : -1,
+          categoryKey
+        );
+      } else {
+        var next =
+          getShopCardQty(root, qIdx) + (qtyBtn.getAttribute("data-shop-qty") === "plus" ? 1 : -1);
+        setShopCardQty(root, qIdx, next);
+      }
+      return;
+    }
+
     var quickTrigger = ev.target.closest(".js-quickview-trigger");
     if (quickTrigger && root.contains(quickTrigger)) {
       ev.preventDefault();
@@ -1108,10 +1279,19 @@ function onGlobalShopCartClick(ev) {
 
   if (action !== "add" && action !== "buy-now") return;
 
+  var categoryKey =
+    (document.body && document.body.getAttribute("data-shop-category")) || "";
+
+  if (action === "add" && !inProductView && shopProductHasTypeChoice(products[idx], categoryKey)) {
+    ev.preventDefault();
+    openProductQuickView(idx);
+    return;
+  }
+
   var scope = inProductView ? pqvScope : root;
   var selectedSize = getSelectedSizeForIdx(scope, idx);
   var selectedType = inProductView ? getSelectedTypeForIdx(scope, idx) : "";
-  var qty = inProductView ? getPqvQuantity(scope) : 1;
+  var qty = inProductView ? getPqvQuantity(scope) : getShopCardQty(root, idx);
 
   ev.preventDefault();
   ev.stopPropagation();
@@ -1689,6 +1869,7 @@ function buildProductCard(p, idx, waLink, detailMode, categoryKey, allProducts) 
       priceText +
       "</p>" +
       buildDetailSpecsBlock(p, fabricText, sizeOptions, idx) +
+      buildShopCardQtyStepper(idx, 1, getShopCartQtyForProduct(p) > 0) +
       '<div class="detail-actions">' +
       '<button type="button" class="msg-btn btn-add-cart" data-product-idx="' +
       idx +
@@ -1707,8 +1888,14 @@ function buildProductCard(p, idx, waLink, detailMode, categoryKey, allProducts) 
     );
   }
 
+  var cartQty = getShopCartQtyForProduct(p);
+  var cardQty = cartQty > 0 ? cartQty : 1;
+  var inCart = cartQty > 0;
+
   return (
-    '<article class="card premium-card" data-product-idx="' +
+    '<article class="card premium-card' +
+    (inCart ? " in-cart" : "") +
+    '" data-product-idx="' +
     idx +
     '" data-price="' +
     productPrice +
@@ -1733,9 +1920,12 @@ function buildProductCard(p, idx, waLink, detailMode, categoryKey, allProducts) 
     sizeOptions +
     "</select>" +
     '<div class="card-actions-anzaar">' +
-    '<button type="button" class="anzaar-btn anzaar-btn-cart" data-product-idx="' +
+    buildShopCardQtyStepper(idx, cardQty, inCart) +
+    '<button type="button" class="anzaar-btn anzaar-btn-cart' +
+    (inCart ? " is-active" : "") +
+    '" data-product-idx="' +
     idx +
-    '" data-action="quickview"><span class="anzaar-btn-ico" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M6 6L5 3H2"/></svg></span> Add to Cart</button>' +
+    '" data-action="add"><span class="anzaar-btn-ico" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M6 6L5 3H2"/></svg></span> Add to Cart</button>' +
     "<a href='" +
     waLink +
     "?text=" +
@@ -1964,6 +2154,7 @@ function bindShopCategoryControls(root, products) {
   }
 
   syncShopCartBadge();
+  refreshShopCardsAfterCartChange();
 
   if (!root.dataset.shopDrawerWired) {
     root.dataset.shopDrawerWired = "1";
