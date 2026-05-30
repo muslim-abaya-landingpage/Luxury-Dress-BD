@@ -49,7 +49,7 @@ function applyCheckoutLocations(source) {
 
   html = html.replace(
     /<script src="cart-utils\.js\?v=20260530"><\/script>/,
-    '<script src="cart-utils.js?v=20260530"></script>\n<script src="checkout-locations.js?v=20260630th"></script>'
+    '<script src="cart-utils.js?v=20260530cat"></script>\n<script src="checkout-locations.js?v=20260630th"></script>'
   );
 
   html = html.replace(

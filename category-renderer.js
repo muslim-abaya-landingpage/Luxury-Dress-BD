@@ -147,7 +147,9 @@ function shopAddProductToCart(item, qtyToAdd, sizeValue) {
     fabric: item.fabric || "",
     description: item.description || item.fabric || "",
     size: pickedSize,
-    productType: item._cartType || ""
+    productType: item._cartType || "",
+    category: item.category || categoryKey || "",
+    categoryLabel: item.categoryLabel || ""
   };
 
   var updated = [];

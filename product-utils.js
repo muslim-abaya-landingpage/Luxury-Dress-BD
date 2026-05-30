@@ -101,8 +101,18 @@
     return !!(raw && raw !== "index.html" && raw !== "/");
   }
 
+  function categoryLabelForKey(key) {
+    var secs = g.CATALOG_SECTIONS || [];
+    for (var i = 0; i < secs.length; i++) {
+      if (secs[i] && secs[i].key === key) return secs[i].menuBn || secs[i].menu || key;
+    }
+    return "";
+  }
+
   function normalizeProductEntry(raw, categoryKey, index) {
     if (raw && raw._catalogNormalized) {
+      if (raw.category == null) raw.category = categoryKey || "";
+      if (!raw.categoryLabel) raw.categoryLabel = categoryLabelForKey(categoryKey);
       return raw;
     }
 
@@ -140,6 +150,8 @@
       colorLabel: entry.colorLabel || "",
       detailNote: entry.detailNote || "",
       link: entry.link || entry.productUrl || entry.page || "",
+      category: entry.category || categoryKey || "",
+      categoryLabel: entry.categoryLabel || categoryLabelForKey(categoryKey),
       _catalogNormalized: true
     };
 

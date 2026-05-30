@@ -13,22 +13,24 @@
   };
 
   var CATALOG = [
-    { id: "DR-01", name: "Baby Pink Floral", price: 550, image: "images/Baby-Pink-Floral-Print.jpeg" },
-    { id: "DR-08", name: "Black Base Rose", price: 550, image: "images/Black-Base-Rose-Floral.jpeg" },
-    { id: "DR-16", name: "Black White Polka", price: 550, image: "images/Black-White-Polka-Dots.jpeg" },
-    { id: "DR-23", name: "Royal Blue Golden", price: 550, image: "images/Royal-Blue-Golden-Floral-Print.jpeg" },
-    { id: "DR-28", name: "Pink Floral Printed Co-ord Set", price: 550, image: "images/pink-floral-printed-co-ord-set.jpeg" },
+    { id: "DR-01", name: "Baby Pink Floral", price: 550, image: "images/Baby-Pink-Floral-Print.jpeg", category: "premium-two-piece" },
+    { id: "DR-08", name: "Black Base Rose", price: 550, image: "images/Black-Base-Rose-Floral.jpeg", category: "premium-two-piece" },
+    { id: "DR-16", name: "Black White Polka", price: 550, image: "images/Black-White-Polka-Dots.jpeg", category: "premium-two-piece" },
+    { id: "DR-23", name: "Royal Blue Golden", price: 550, image: "images/Royal-Blue-Golden-Floral-Print.jpeg", category: "premium-two-piece" },
+    { id: "DR-28", name: "Pink Floral Printed Co-ord Set", price: 550, image: "images/pink-floral-printed-co-ord-set.jpeg", category: "premium-two-piece" },
     {
       id: "DR-29",
       name: "Baby PinkLight Pink",
       price: 550,
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Baby%20PinkLight%20Pink.jpeg?raw=1"
+      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Baby%20PinkLight%20Pink.jpeg?raw=1",
+      category: "premium-two-piece"
     },
     {
       id: "DR-30",
       name: "Sage GreenMint Green",
       price: 550,
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Sage%20GreenMint%20Green.jpeg?raw=1"
+      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Sage%20GreenMint%20Green.jpeg?raw=1",
+      category: "premium-two-piece"
     }
   ];
 
@@ -49,6 +51,26 @@
       if (CATALOG[i].name.trim().toLowerCase() === n) return CATALOG[i];
     }
     return null;
+  }
+
+  /** Resolve a product's category key from the full catalog (when loaded). */
+  function categoryFromCatalog(id, name) {
+    var cats = (typeof window !== "undefined" && window.CATEGORY_PRODUCTS) || null;
+    if (!cats) return "";
+    var nid = String(id || "").trim();
+    var nname = String(name || "").trim().toLowerCase();
+    var keys = Object.keys(cats);
+    for (var i = 0; i < keys.length; i++) {
+      var list = cats[keys[i]];
+      if (!Array.isArray(list)) continue;
+      for (var j = 0; j < list.length; j++) {
+        var p = list[j];
+        if (!p) continue;
+        if (nid && String(p.id) === nid) return p.category || keys[i];
+        if (nname && String(p.name || "").trim().toLowerCase() === nname) return p.category || keys[i];
+      }
+    }
+    return "";
   }
 
   function normalizeLine(item) {
@@ -72,7 +94,9 @@
       colorLabel: item.colorLabel || (cat && cat.colorLabel) || "",
       fabric: item.fabric || item.material || (cat && cat.fabric) || "",
       description: item.description || (cat && cat.description) || "",
-      size: item.size || item.selectedSize || ""
+      size: item.size || item.selectedSize || "",
+      category: item.category || item.categoryKey || (cat && cat.category) || categoryFromCatalog(lineId, item.name) || "",
+      categoryLabel: item.categoryLabel || (cat && cat.categoryLabel) || ""
     };
     line.image = resolveItemImage(line);
     return line;
