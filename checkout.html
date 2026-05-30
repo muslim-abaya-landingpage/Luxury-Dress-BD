@@ -1683,7 +1683,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="product-config.js?v=20260602twopiece"></script>
 <script src="product-utils.js?v=20260602twopiece"></script>
 <script defer src="site-header.js?v=20260601en"></script>
-<script src="cart-utils.js?v=20260601addsize"></script>
+<script src="cart-utils.js?v=20260603purchase"></script>
 <script src="checkout-locations.js?v=20260630th2"></script>
 <script defer src="site-header.js?v=20260601en"></script>
 <script>
@@ -1830,6 +1830,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 currency: 'BDT'
             }));
         }
+        if (typeof pushPurchaseCompleteEvent === 'function') {
+            pushPurchaseCompleteEvent({
+                transaction_id: eventId,
+                event_id: eventId
+            });
+        }
         if (typeof clearStoreCart === 'function') clearStoreCart();
         try { sessionStorage.removeItem('muslim_abaya_home_cart_active'); } catch (e) {}
         if (orderId) {
@@ -1942,11 +1948,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             .catch(function () {
                 postOrderViaIframe(formData)
                     .then(function () {
-                        offerWhatsAppOrder(
-                            orderWa,
-                            'Order submit was attempted. Check the sheet in 1–2 minutes. If missing, send via WhatsApp.'
-                        );
-                        resetOrderButton(btn);
+                        var eventId = formData.get('EventID') || ('order_' + Date.now());
+                        var orderId = String(eventId).replace(/^order_/, '');
+                        finishCheckoutSuccess(nameValue, phoneValue, emailValue, gTotal, orderId);
                     })
                     .catch(function () {
                         offerWhatsAppOrder(

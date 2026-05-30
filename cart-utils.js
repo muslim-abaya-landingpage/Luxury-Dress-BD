@@ -323,6 +323,7 @@
   }
 
   var ORDER_TRACKING_KEY = "muslim_abaya_order_tracking";
+  var PURCHASE_FIRED_KEY = "ma_purchase_event_fired";
 
   /** E.164 for Meta / GTM (Bangladesh). */
   function normalizePhoneE164(phone) {
@@ -450,6 +451,50 @@
     try {
       sessionStorage.removeItem(ORDER_TRACKING_KEY);
     } catch (e) {}
+  }
+
+  function getPurchaseFiredId() {
+    try {
+      return sessionStorage.getItem(PURCHASE_FIRED_KEY) || "";
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function markPurchaseFired(transactionId) {
+    if (!transactionId) return;
+    try {
+      sessionStorage.setItem(PURCHASE_FIRED_KEY, String(transactionId));
+    } catch (e) {}
+  }
+
+  function pushPurchaseCompleteEvent(extra) {
+    var saved = readOrderTracking() || {};
+    var merged = {};
+    var k;
+    for (k in saved) {
+      if (Object.prototype.hasOwnProperty.call(saved, k)) merged[k] = saved[k];
+    }
+    if (extra && typeof extra === "object") {
+      for (k in extra) {
+        if (Object.prototype.hasOwnProperty.call(extra, k)) merged[k] = extra[k];
+      }
+    }
+    if (!merged.transaction_id && !merged.event_id) {
+      merged.transaction_id = "order_" + Date.now();
+    }
+    if (!merged.event_id) merged.event_id = merged.transaction_id;
+    var txKey = String(merged.transaction_id || merged.event_id || "");
+    if (txKey && getPurchaseFiredId() === txKey) {
+      return merged;
+    }
+    merged.event = "purchase_complete";
+    var payload = applyMetaTrackingFields(merged);
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push(payload);
+    pushToTikTok("purchase_complete", payload);
+    markPurchaseFired(txKey);
+    return payload;
   }
 
   var TIKTOK_PIXEL_ID = "D6FK9GBC77UC649NNCP0";
@@ -606,29 +651,6 @@
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push(payload);
     pushToTikTok(eventName, payload);
-    return payload;
-  }
-
-  function pushPurchaseCompleteEvent(extra) {
-    var saved = readOrderTracking() || {};
-    var merged = {};
-    var k;
-    for (k in saved) {
-      if (Object.prototype.hasOwnProperty.call(saved, k)) merged[k] = saved[k];
-    }
-    if (extra && typeof extra === "object") {
-      for (k in extra) {
-        if (Object.prototype.hasOwnProperty.call(extra, k)) merged[k] = extra[k];
-      }
-    }
-    if (!merged.transaction_id && !merged.event_id) {
-      merged.transaction_id = "order_" + Date.now();
-    }
-    merged.event = "purchase_complete";
-    var payload = applyMetaTrackingFields(merged);
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push(payload);
-    pushToTikTok("purchase_complete", payload);
     return payload;
   }
 
