@@ -234,6 +234,53 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   color: #c9a962;
 }
 
+.anz-foot-details {
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.anz-foot-details > summary.anz-title {
+  list-style: none;
+  cursor: default;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  user-select: none;
+}
+
+.anz-foot-details > summary.anz-title::-webkit-details-marker {
+  display: none;
+}
+
+.anz-foot-chevron {
+  display: none;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid #c9a962;
+  border-bottom: 2px solid #c9a962;
+  transform: rotate(45deg);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+  margin-top: -3px;
+}
+
+.anz-foot-details[open] > summary.anz-title .anz-foot-chevron {
+  transform: rotate(-135deg);
+  margin-top: 3px;
+}
+
+.anz-foot-panel-body {
+  padding: 0;
+}
+
+@media (min-width: 769px) {
+  .anz-foot-details > summary.anz-title {
+    pointer-events: none;
+  }
+}
+
 .anz-text {
   font-size: 15px;
   line-height: 1.55;
@@ -620,9 +667,29 @@ a.anz-contact-link:hover {
       "about"
       "contact"
       "newsletter";
-    gap: 22px;
-    padding: 22px 16px 18px !important;
+    gap: 10px;
+    padding: 14px 14px 12px !important;
     align-items: start;
+  }
+
+  .anz-foot-details > summary.anz-title {
+    cursor: pointer;
+    margin-bottom: 0;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .anz-foot-details[open] > summary.anz-title {
+    margin-bottom: 8px;
+    border-bottom-color: rgba(201, 169, 98, 0.22);
+  }
+
+  .anz-foot-chevron {
+    display: inline-block;
+  }
+
+  .anz-foot-details:not([open]) .anz-foot-panel-body {
+    display: none;
   }
 
   .anz-col-brand {
@@ -656,8 +723,36 @@ a.anz-contact-link:hover {
     grid-column: auto;
     display: block !important;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding-top: 18px;
+    padding-top: 12px;
     padding-left: 0 !important;
+  }
+
+  .anz-newsletter-note {
+    display: none;
+  }
+
+  .newsletter-form {
+    flex-direction: row;
+    align-items: stretch;
+    gap: 8px;
+    margin-top: 0;
+  }
+
+  .newsletter-form input {
+    flex: 1;
+    min-width: 0;
+    height: 38px;
+    padding: 0 10px;
+    font-size: 13px;
+  }
+
+  .newsletter-form button {
+    width: auto;
+    flex-shrink: 0;
+    height: 38px;
+    padding: 0 12px;
+    font-size: 12px;
+    white-space: nowrap;
   }
 
   .anz-col-brand,
@@ -675,12 +770,13 @@ a.anz-contact-link:hover {
   }
 
   .anz-text {
-    font-size: 13px;
-    line-height: 1.55;
-    margin-bottom: 12px;
-    display: block;
-    overflow: visible;
-    -webkit-line-clamp: unset;
+    font-size: 12px;
+    line-height: 1.45;
+    margin-bottom: 10px;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
   }
 
   .anz-wa-cta {
@@ -753,40 +849,8 @@ a.anz-contact-link:hover {
     max-height: 14px !important;
   }
 
-  .anz-newsletter-note {
-    display: block;
-    font-size: 12px;
-    line-height: 1.5;
-    margin-bottom: 10px;
-  }
-
-  .newsletter-form {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-    margin-top: 0;
-  }
-
-  .newsletter-form input {
-    width: 100%;
-    flex: none;
-    min-width: 0;
-    height: 42px;
-    padding: 0 12px;
-    font-size: 14px;
-    box-sizing: border-box;
-  }
-
-  .newsletter-form button {
-    width: 100%;
-    flex-shrink: 0;
-    height: 42px;
-    padding: 0 14px;
-    font-size: 13px;
-  }
-
   .anz-socials {
-    margin-top: 12px;
+    margin-top: 10px;
     gap: 8px;
     flex-wrap: wrap;
   }
@@ -822,6 +886,38 @@ a.anz-contact-link:hover {
   .anz-bottom p {
     font-size: 11px;
     line-height: 1.4;
+  }
+
+  body.auth-page #site-footer-mount .anz-footer-trust,
+  body.help-page #site-footer-mount .anz-footer-trust {
+    display: none;
+  }
+
+  body.auth-page #site-footer-mount .anz-col-brand .anz-text,
+  body.help-page #site-footer-mount .anz-col-brand .anz-text {
+    display: none;
+  }
+
+  body.auth-page #site-footer-mount .anz-col-newsletter,
+  body.help-page #site-footer-mount .anz-col-newsletter {
+    display: none !important;
+  }
+
+  body.auth-page #site-footer-mount .anz-footer-main,
+  body.help-page #site-footer-mount .anz-footer-main {
+    gap: 6px;
+    padding: 10px 14px 8px !important;
+  }
+
+  body.auth-page #site-footer-mount .anz-col-brand,
+  body.help-page #site-footer-mount .anz-col-brand {
+    text-align: center;
+  }
+
+  body.auth-page #site-footer-mount .anz-wa-cta,
+  body.help-page #site-footer-mount .anz-wa-cta {
+    max-width: none;
+    margin: 0 auto;
   }
 }
 

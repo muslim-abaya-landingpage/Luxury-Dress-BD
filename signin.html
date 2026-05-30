@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sign In | Muslim Abaya</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="site-header.css?v=20260530c">
-  <link rel="stylesheet" href="site-footer.css?v=20260602mobfoot2" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="site-footer.css?v=20260602mobfoot2"></noscript>
-<link rel="stylesheet" href="auth-page.css">
+  <link rel="stylesheet" href="site-footer.css?v=20260603footen" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="site-footer.css?v=20260603footen"></noscript>
+  <link rel="stylesheet" href="auth-page.css">
 </head>
 <body class="auth-page">
   <div id="site-header-mount"></div>
@@ -16,21 +16,21 @@
     <section class="auth-card">
       <div class="auth-card-head">
         <h1>Sign In</h1>
-        <p class="auth-lead">Welcome back � sign in to continue checkout faster.</p>
+        <p class="auth-lead">Welcome back — sign in to continue checkout faster.</p>
       </div>
       <form id="signinForm">
         <div class="auth-field">
-          <label for="si-login">Email ?? Mobile</label>
-          <input id="si-login" type="text" placeholder="name@gmail.com ?? 017XXXXXXXX" required autocomplete="username">
-          <p class="auth-hint">?? ?????/?????? ????? ???????????? ???????? ?? ????</p>
+          <label for="si-login">Email or Mobile</label>
+          <input id="si-login" type="text" placeholder="name@gmail.com or 017XXXXXXXX" required autocomplete="username">
+          <p class="auth-hint">Use the email or mobile number you registered with.</p>
         </div>
         <div class="auth-field">
           <label for="si-pass">Password</label>
-          <input id="si-pass" type="password" placeholder="******" required autocomplete="current-password">
-          <p class="auth-hint">????? ???????????? ?????????? ????</p>
+          <input id="si-pass" type="password" placeholder="Enter your password" required autocomplete="current-password">
+          <p class="auth-hint">Enter the password linked to your account.</p>
         </div>
         <button type="submit" class="auth-btn" id="signinBtn">Sign In</button>
-        <p class="auth-note">???? ?????????? ???? <a href="signup.html" id="signupLink">Sign Up</a></p>
+        <p class="auth-note">Don't have an account? <a href="signup.html" id="signupLink">Sign Up</a></p>
       </form>
     </section>
   </main>
@@ -42,7 +42,7 @@
   <script src="auth-config.js"></script>
   <script src="auth-api.js"></script>
   <script defer src="site-header.js?v=20260530gtmfix"></script>
-  <script src="site-footer.js?v=20260629post"></script>
+  <script src="site-footer.js?v=20260603footen"></script>
   <script>
     (function () {
       if (typeof showAuthApiNotice === 'function') {
@@ -61,22 +61,22 @@
         var login = document.getElementById('si-login').value.trim();
         var pass = document.getElementById('si-pass').value;
         if (!login || !pass) {
-          alert('?????/?????? ? ?????????? ????');
+          alert('Please enter your email/mobile and password.');
           return;
         }
         var btn = document.getElementById('signinBtn');
         btn.disabled = true;
-        btn.textContent = 'Saving...';
+        btn.textContent = 'Signing in...';
         MaAuth.login({ login: login, password: pass })
           .then(function () {
             window.location.href = nextUrl;
           })
           .catch(function (err) {
             if (typeof isLocalPreview === 'function' && isLocalPreview()) {
-              alert(typeof getLocalFileAuthHint === 'function' ? getLocalFileAuthHint() : 'ADMIN-?????-?????.bat ??????? http://127.0.0.1/signin.html ??????? ?????');
+              alert(typeof getLocalFileAuthHint === 'function' ? getLocalFileAuthHint() : 'Run the local server and open http://127.0.0.1/signin.html to test sign in.');
               return;
             }
-            alert((err && err.message) || '???? ??????? ?????/?????? ? ?????????? ??? ?????');
+            alert((err && err.message) || 'Sign in failed. Check your email/mobile and password.');
           })
           .finally(function () {
             btn.disabled = false;

@@ -273,3 +273,42 @@ body.auth-page-signup .auth-note {
     padding: 16px 14px 14px;
   }
 }
+
+@media (max-width: 768px) {
+  body.auth-page #site-footer-mount .anz-footer-trust,
+  body.help-page #site-footer-mount .anz-footer-trust {
+    display: none;
+  }
+
+  body.auth-page #site-footer-mount .anz-col-brand .anz-text,
+  body.help-page #site-footer-mount .anz-col-brand .anz-text {
+    display: none;
+  }
+
+  body.auth-page #site-footer-mount .anz-col-newsletter,
+  body.help-page #site-footer-mount .anz-col-newsletter {
+    display: none !important;
+  }
+
+  body.auth-page #site-footer-mount .anz-footer-main,
+  body.help-page #site-footer-mount .anz-footer-main {
+    gap: 6px;
+    padding: 10px 14px 8px !important;
+  }
+
+  body.auth-page #site-footer-mount .anz-col-brand,
+  body.help-page #site-footer-mount .anz-col-brand {
+    text-align: center;
+  }
+
+  body.auth-page #site-footer-mount .anz-wa-cta,
+  body.help-page #site-footer-mount .anz-wa-cta {
+    max-width: none;
+    margin: 0 auto;
+  }
+
+  body.auth-page .auth-wrap,
+  body.help-page .help-wrap {
+    padding-bottom: 16px;
+  }
+}

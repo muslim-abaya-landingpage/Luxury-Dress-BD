@@ -65,26 +65,41 @@
       return (
         '<li><a href="' +
         esc(footerHref("/abaya")) +
-        '">আবায়া</a></li>' +
+        '">Abaya</a></li>' +
         '<li><a href="' +
         esc(footerHref("/premium-two-piece")) +
-        '">প্রিমিয়াম টু-পিস</a></li>' +
+        '">Premium Two-piece</a></li>' +
         '<li><a href="' +
         esc(footerHref("/embroidery")) +
-        '">এম্ব্রয়ডারি</a></li>' +
+        '">Embroidery</a></li>' +
         '<li><a href="' +
         esc(footerHref("/kaftan")) +
-        '">কাফতান</a></li>'
+        '">Kaftan</a></li>'
       );
     }
     return sections
       .filter(sectionShowsInFooter)
       .map(function (sec) {
-        var label = sec.menuBn || sec.menu || sec.key;
+        var label = sec.menu || sec.menuBn || sec.key;
         var href = footerHref(sec.path || "/" + sec.key);
         return '<li><a href="' + esc(href) + '">' + esc(label) + "</a></li>";
       })
       .join("");
+  }
+
+  function footerPanel(title, innerHtml, colClass) {
+    return (
+      '<div class="' +
+      colClass +
+      '">' +
+      '<details class="anz-foot-details">' +
+      '<summary class="anz-title">' +
+      esc(title) +
+      '<span class="anz-foot-chevron" aria-hidden="true"></span></summary>' +
+      '<div class="anz-foot-panel-body">' +
+      innerHtml +
+      "</div></details></div>"
+    );
   }
 
   function buildFooterHtml() {
@@ -92,88 +107,73 @@
       '<footer class="anz-footer">' +
       '<div class="anz-footer-trust">' +
       '<div class="anz-trust-inner">' +
-      '<div class="anz-trust-item"><span class="anz-trust-dot" aria-hidden="true"></span><span>ক্যাশ অন ডেলিভারি</span></div>' +
-      '<div class="anz-trust-item"><span class="anz-trust-dot" aria-hidden="true"></span><span>সারাদেশে ডেলিভারি</span></div>' +
-      '<div class="anz-trust-item"><span class="anz-trust-dot" aria-hidden="true"></span><span>সহজ রিটার্ন নীতি</span></div>' +
+      '<div class="anz-trust-item"><span class="anz-trust-dot" aria-hidden="true"></span><span>Cash on Delivery</span></div>' +
+      '<div class="anz-trust-item"><span class="anz-trust-dot" aria-hidden="true"></span><span>Nationwide Delivery</span></div>' +
+      '<div class="anz-trust-item"><span class="anz-trust-dot" aria-hidden="true"></span><span>Easy Return Policy</span></div>' +
       "</div></div>" +
       '<div class="anz-footer-main">' +
       '<div class="anz-col-brand">' +
       '<h2 class="anz-logo">Muslim Abaya</h2>' +
-      '<p class="anz-text">বাংলাদেশের প্রিমিয়াম মডেস্ট ফ্যাশন — আবায়া, টু-পিস, এম্ব্রয়ডারি ও আরও। আরামদায়ক ফেব্রিক, ভিডিওতে আসল প্রোডাক্ট, ক্যাশ অন ডেলিভারি।</p>' +
+      '<p class="anz-text">Premium modest fashion in Bangladesh — abayas, two-piece sets &amp; embroidery. Comfortable fabrics, video-verified products, cash on delivery.</p>' +
       '<a class="anz-wa-cta" href="' +
       esc(CONTACT.whatsapp) +
       '" target="_blank" rel="noopener">' +
       ICON_WA +
-      "<span>WhatsApp অর্ডার</span></a>" +
+      "<span>WhatsApp Order</span></a>" +
       "</div>" +
-      '<div class="anz-col-shop">' +
-      '<h3 class="anz-title">Shop</h3>' +
-      '<ul class="anz-link-list" id="anz-footer-shop">' +
-      buildShopLinksHtml() +
-      "</ul>" +
-      "</div>" +
-      '<div class="anz-col-links">' +
-      '<h3 class="anz-title">About Us</h3>' +
-      '<ul class="anz-link-list">' +
-      '<li><a href="' +
-      esc(footerHref("/about")) +
-      '">About Us</a></li>' +
-      '<li><a href="' +
-      esc(footerHref("/help")) +
-      '#order-status">Order Help</a></li>' +
-      '<li><a href="' +
-      esc(footerHref("/privacy")) +
-      '">Privacy Policy</a></li>' +
-      '<li><a href="' +
-      esc(footerHref("/refund")) +
-      '">Refund Policy</a></li>' +
-      '<li><a href="' +
-      esc(footerHref("/terms")) +
-      '">Terms &amp; Conditions</a></li>' +
-      "</ul>" +
-      "</div>" +
-      '<div class="anz-col-contact">' +
-      '<h3 class="anz-title">Contact Us</h3>' +
-      '<a class="anz-contact-link" href="mailto:' +
-      esc(CONTACT.email) +
-      '">' +
-      '<span class="anz-contact-icon">' +
-      ICON_MAIL +
-      "</span>" +
-      "<span>" +
-      esc(CONTACT.email) +
-      "</span></a>" +
-      '<a class="anz-contact-link" href="tel:' +
-      esc(CONTACT.phoneTel) +
-      '">' +
-      '<span class="anz-contact-icon">' +
-      ICON_PHONE +
-      "</span>" +
-      "<span>" +
-      esc(CONTACT.phone) +
-      "</span></a>" +
-      '<div class="anz-contact-link anz-contact-static">' +
-      '<span class="anz-contact-icon">' +
-      ICON_PIN +
-      "</span>" +
-      "<span>" +
-      esc(CONTACT.address) +
-      "</span></div>" +
-      "</div>" +
+      footerPanel(
+        "Shop",
+        '<ul class="anz-link-list" id="anz-footer-shop">' + buildShopLinksHtml() + "</ul>",
+        "anz-col-shop"
+      ) +
+      footerPanel(
+        "About Us",
+        '<ul class="anz-link-list">' +
+          '<li><a href="' + esc(footerHref("/about")) + '">About Us</a></li>' +
+          '<li><a href="' + esc(footerHref("/help")) + '#order-status">Order Help</a></li>' +
+          '<li><a href="' + esc(footerHref("/privacy")) + '">Privacy Policy</a></li>' +
+          '<li><a href="' + esc(footerHref("/refund")) + '">Refund Policy</a></li>' +
+          '<li><a href="' + esc(footerHref("/terms")) + '">Terms &amp; Conditions</a></li>' +
+          "</ul>",
+        "anz-col-links"
+      ) +
+      footerPanel(
+        "Contact Us",
+        '<a class="anz-contact-link" href="mailto:' +
+          esc(CONTACT.email) +
+          '"><span class="anz-contact-icon">' +
+          ICON_MAIL +
+          "</span><span>" +
+          esc(CONTACT.email) +
+          "</span></a>" +
+          '<a class="anz-contact-link" href="tel:' +
+          esc(CONTACT.phoneTel) +
+          '"><span class="anz-contact-icon">' +
+          ICON_PHONE +
+          "</span><span>" +
+          esc(CONTACT.phone) +
+          "</span></a>" +
+          '<div class="anz-contact-link anz-contact-static"><span class="anz-contact-icon">' +
+          ICON_PIN +
+          "</span><span>" +
+          esc(CONTACT.address) +
+          "</span></div>",
+        "anz-col-contact"
+      ) +
       '<div class="anz-col-newsletter">' +
       '<form id="newsletter-form" aria-labelledby="newsletter-heading" novalidate>' +
       '<h3 class="anz-title" id="newsletter-heading">Newsletter</h3>' +
-      '<p class="anz-newsletter-note" id="newsletter-note">নতুন কালেকশন ও অফার — ইমেইল বা মোবাইল</p>' +
+      '<p class="anz-newsletter-note" id="newsletter-note">New collections &amp; offers — email or mobile</p>' +
       '<div class="newsletter-form">' +
-      '<label for="subscriber-contact" class="anz-visually-hidden">ইমেইল বা মোবাইল নম্বর</label>' +
+      '<label for="subscriber-contact" class="anz-visually-hidden">Email or mobile number</label>' +
       '<input type="text" name="contact" id="subscriber-contact" placeholder="Email or mobile" required autocomplete="email" inputmode="email" aria-describedby="newsletter-note" aria-required="true">' +
-      '<button type="submit" id="sub-btn" aria-label="Newsletter সাবস্ক্রাইব">সাবস্ক্রাইব</button>' +
+      '<button type="submit" id="sub-btn" aria-label="Subscribe to newsletter">Subscribe</button>' +
       "</div>" +
       '<div id="success-msg" class="subscribe-success" role="status" aria-live="polite" aria-atomic="true">' +
       '<div class="subscribe-success-icon" aria-hidden="true">' +
       '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>' +
-      '<p class="subscribe-success-title">সাবস্ক্রিপশন সম্পন্ন</p>' +
-      '<p class="subscribe-success-text">আপনার তথ্য সংরক্ষিত হয়েছে। শীঘ্রই নতুন কালেকশন জানানো হবে।</p>' +
+      '<p class="subscribe-success-title">Subscription complete</p>' +
+      '<p class="subscribe-success-text">Your details are saved. We will notify you about new collections soon.</p>' +
       "</div>" +
       "</form>" +
       '<div class="anz-socials">' +
@@ -376,7 +376,7 @@
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       if (!contactInput || !isEmailOrPhone(contactInput.value)) {
-        alert("অনুগ্রহ করে সঠিক ইমেইল অথবা মোবাইল নাম্বার দিন (উদাহরণ: 01712345678)।");
+        alert("Please enter a valid email or mobile number (e.g. 01712345678).");
         return;
       }
       if (window.MaSecurity && MaSecurity.guardSubmit && !MaSecurity.guardSubmit("newsletter", 5000)) {
@@ -387,21 +387,20 @@
 
       if (isLocalFilePage()) {
         alert(
-          "সাবস্ক্রাইব শিটে জমা হতে file:// কাজ করে না।\n\n" +
-            "① ADMIN-লোকাল-টেস্ট.bat চালিয়ে http://localhost:5500 থেকে সাবস্ক্রাইব করুন\n" +
-            "অথবা ② লাইভ সাইট muslimabaya.com থেকে করুন"
+          "Subscribe cannot save from a local file.\n\n" +
+            "Run your local server and open http://localhost:5500, or subscribe from muslimabaya.com."
         );
         return;
       }
 
       btn.disabled = true;
-      btn.innerText = "পাঠানো হচ্ছে…";
+      btn.innerText = "Subscribing...";
 
       ensureScriptUrl(function (apiUrl) {
         if (!apiUrl) {
           btn.disabled = false;
-          btn.innerText = "সাবস্ক্রাইব";
-          alert("সাইট API URL নেই। site-api-config.js আপলোড করুন এবং Apps Script Web App URL দিন।");
+          btn.innerText = "Subscribe";
+          alert("Site API URL is missing. Upload site-api-config.js with your Apps Script Web App URL.");
           return;
         }
 
@@ -431,8 +430,8 @@
             }
             if (!result.cors) {
               alert(
-                "অনুরোধ পাঠানো হয়েছে। ১–২ মিনিট পর Sheet-এর **Subscribe** ট্যাব দেখুন।\n\n" +
-                  "না থাকলে Apps Script → Deploy → Anyone → New version।"
+                "Request sent. Check the Subscribe tab in your Sheet in 1–2 minutes.\n\n" +
+                  "If nothing appears, redeploy Apps Script as Anyone with a new version."
               );
               form.reset();
               return;
@@ -440,32 +439,31 @@
             var apiHint = String(result.text || "").trim();
             if (apiHint === "Muslim Abaya API OK") {
               alert(
-                "সাবস্ক্রাইব API পুরনো ভার্সন চালাচ্ছে।\n\n" +
-                  "Apps Script → Code.gs পেস্ট → Deploy → New version\n" +
-                  "তারপর site-footer.js আপলোড করুন।"
+                "Subscribe API is running an old version.\n\n" +
+                  "Paste Code.gs in Apps Script, deploy a new version, then upload site-footer.js."
               );
               return;
             }
             alert(
-              "সাবস্ক্রাইব শিটে জমা হয়নি।\n\n" +
-                (result.text ? result.text.slice(0, 160) : "API ত্রুটি") +
-                "\n\nApps Script → Deploy → Who has access: Anyone + New version চালু করুন।"
+              "Subscribe did not save to the sheet.\n\n" +
+                (result.text ? result.text.slice(0, 160) : "API error") +
+                "\n\nRedeploy Apps Script with Who has access: Anyone and a new version."
             );
           })
           .catch(function (err) {
             var hint =
               err && err.message === "TIMEOUT"
-                ? "সার্ভার ধীর বা API URL ভুল।"
-                : "নেটওয়ার্ক বা API বন্ধ।";
+                ? "Server slow or API URL incorrect."
+                : "Network or API unavailable.";
             alert(
-              "সাবস্ক্রাইব পাঠানো যায়নি। " +
+              "Could not send subscribe request. " +
                 hint +
-                "\n\nApps Script Deploy (Anyone) ও site-api-config.js URL চেক করুন।"
+                "\n\nCheck Apps Script deploy (Anyone) and site-api-config.js URL."
             );
           })
           .finally(function () {
             btn.disabled = false;
-            btn.innerText = "সাবস্ক্রাইব";
+            btn.innerText = "Subscribe";
           });
       });
     });
@@ -489,11 +487,24 @@
     }, 25);
   }
 
+  function syncFooterPanels() {
+    var panels = document.querySelectorAll(".anz-foot-details");
+    var expand = window.innerWidth > 768;
+    panels.forEach(function (panel) {
+      panel.open = expand;
+    });
+  }
+
   function mountFooter() {
     var mount = document.getElementById("site-footer-mount");
     if (!mount) return;
     mount.innerHTML = buildFooterHtml();
     initNewsletter();
+    syncFooterPanels();
+    if (!window.__maFooterPanelBound) {
+      window.__maFooterPanelBound = true;
+      window.addEventListener("resize", syncFooterPanels);
+    }
     waitForCatalogAndRefresh(0);
   }
 
