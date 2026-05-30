@@ -2,6 +2,7 @@ let currentIdx = 0;
 let autoSlideInterval;
 let isAutoSlideActive = true;
 let checkoutTracked = false;
+let buyNowRedirecting = false;
 let cart = {};
 const fallbackProducts = [
     { id: 'DR-01', name: 'Baby Pink Floral', img: 'images/Baby-Pink-Floral-Print.jpeg', price: 550 },
@@ -368,9 +369,18 @@ function goToCheckoutPage() {
 function buyNowFromCard(productId, ev) {
     if (ev && ev.preventDefault) ev.preventDefault();
     if (ev && ev.stopPropagation) ev.stopPropagation();
+    if (buyNowRedirecting) return;
+    buyNowRedirecting = true;
+    setTimeout(function () { buyNowRedirecting = false; }, 1200);
     if (getCartQty(productId) < 1) cart[productId] = 1;
     syncHomeCartAfterChange();
     goToCheckoutPage();
+}
+
+function addToCartFromCard(productId, ev) {
+    if (ev && ev.preventDefault) ev.preventDefault();
+    if (ev && ev.stopPropagation) ev.stopPropagation();
+    updateQty(productId, 1);
 }
 function trackInitiateCheckout() {
     if (checkoutTracked) return;
@@ -413,13 +423,8 @@ function renderSidebar() {
                 <span class="ma-qty-stepper__value" id="qty-${p.id}" aria-live="polite">${qty}</span>
                 <button type="button" class="ma-qty-stepper__btn" aria-label="পরিমাণ বাড়ান" onclick="event.stopPropagation();updateQty('${p.id}', 1)">+</button>
             </div>`;
-        const actionsRowHtml = orderViaDetail
-            ? `<div class="product-actions-row">
-                <button type="button" class="anzaar-btn anzaar-btn-cart" onclick="goToProductDetail('${p.id}', event)">Add to Cart</button>
-                <button type="button" class="anzaar-btn anzaar-btn-buy" onclick="goToProductDetail('${p.id}', event)">Buy Now</button>
-            </div>`
-            : `<div class="product-actions-row">
-                <button type="button" class="anzaar-btn anzaar-btn-cart${inCart ? ' is-active' : ''}" onclick="event.stopPropagation();toggleProductCart('${p.id}')">${inCart ? 'Remove' : 'Add to Cart'}</button>
+        const actionsRowHtml = `<div class="product-actions-row">
+                <button type="button" class="anzaar-btn anzaar-btn-cart${inCart ? ' is-active' : ''}" onclick="addToCartFromCard('${p.id}', event)">Add to Cart</button>
                 <button type="button" class="anzaar-btn anzaar-btn-buy" onclick="buyNowFromCard('${p.id}', event)">Buy Now</button>
             </div>`;
 card.innerHTML = `
@@ -645,6 +650,7 @@ window.changeProduct = changeProduct;
 window.manualSelect = manualSelect;
 window.toggleProductCart = toggleProductCart;
 window.buyNowFromCard = buyNowFromCard;
+window.addToCartFromCard = addToCartFromCard;
 window.updateQty = updateQty;
 window.goToProductDetail = goToProductDetail;
 window.openCurrentProductDetail = openCurrentProductDetail;
