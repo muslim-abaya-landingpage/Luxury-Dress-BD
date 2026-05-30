@@ -565,6 +565,30 @@ button.img-wrap {
   width: 100%;
 }
 
+.premium-card .card-size-block--abaya {
+  gap: 10px;
+}
+
+.premium-card .card-size-block--abaya .card-size-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+}
+
+.premium-card .card-body-size-val {
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  background: #f7f7f7;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
 .premium-card .card-size-heading {
   font-size: 10px;
   font-weight: 700;

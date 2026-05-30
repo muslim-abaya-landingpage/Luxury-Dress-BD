@@ -75,6 +75,12 @@
       fabric: cat.fabric || base.fabric,
       sizes: cat.sizes ? cat.sizes.slice() : base.sizes
     };
+    if (categoryKey === "abaya" && cat.lengthSizes) {
+      out.lengthSizes = cat.lengthSizes.slice();
+      out.sizes = cat.lengthSizes.slice();
+      out.bodySize = cat.bodySize || "46";
+      out.bodySizeLabel = cat.bodySizeLabel || "46 [Free size]";
+    }
     return out;
   }
 
@@ -139,13 +145,20 @@
     }
 
     var imageSrc = entry.image || entry.img || entry.photo || entry.url || "";
+    var abayaDefs =
+      categoryKey === "abaya" && defs.byCategory && defs.byCategory.abaya
+        ? defs.byCategory.abaya
+        : null;
+    var defaultSizes = abayaDefs && abayaDefs.lengthSizes
+      ? abayaDefs.lengthSizes.slice()
+      : defs.sizes;
     var normalized = {
       id: entry.id || categoryKey + "-" + (index + 1),
       name: entry.name || titleFromFileName(fileNameFromUrl(imageSrc)),
       image: resolveImageUrl(imageSrc),
       price: parseInt(entry.price, 10) || defs.price || 550,
       fabric: entry.fabric || defs.fabric || "",
-      sizes: Array.isArray(entry.sizes) && entry.sizes.length ? entry.sizes.slice() : defs.sizes,
+      sizes: Array.isArray(entry.sizes) && entry.sizes.length ? entry.sizes.slice() : defaultSizes,
       color: entry.color || "",
       colorLabel: entry.colorLabel || "",
       detailNote: entry.detailNote || "",
@@ -163,6 +176,12 @@
     }
     if (entry.typePriceGap != null) {
       normalized.typePriceGap = entry.typePriceGap;
+    }
+
+    if (abayaDefs) {
+      normalized.sizes = abayaDefs.lengthSizes ? abayaDefs.lengthSizes.slice() : normalized.sizes;
+      normalized.bodySize = abayaDefs.bodySize || "46";
+      normalized.bodySizeLabel = abayaDefs.bodySizeLabel || "46 [Free size]";
     }
 
     normalized.productUrl = resolveProductPageLink(normalized);
@@ -261,6 +280,45 @@
       })
     );
   }
+
+  function getAbayaSizeConfig() {
+    var ab =
+      g.SITE_LINKS &&
+      g.SITE_LINKS.defaults &&
+      g.SITE_LINKS.defaults.byCategory &&
+      g.SITE_LINKS.defaults.byCategory.abaya;
+    return {
+      bodySize: (ab && ab.bodySize) || "46",
+      bodySizeLabel: (ab && ab.bodySizeLabel) || "46 [Free size]",
+      lengthSizes: (ab && ab.lengthSizes && ab.lengthSizes.slice()) || ["50", "52", "54", "56"]
+    };
+  }
+
+  function isAbayaProduct(p, categoryKey) {
+    var ck = String(categoryKey || (p && (p.category || "")) || "").trim();
+    if (ck === "abaya") return true;
+    if (p && /abaya|আবায়া|আবায়া/i.test(String(p.name || ""))) return true;
+    return false;
+  }
+
+  function formatAbayaCartSize(lengthSize) {
+    var cfg = getAbayaSizeConfig();
+    var len = String(lengthSize || cfg.lengthSizes[0] || "50").trim();
+    return "Body " + cfg.bodySizeLabel + " · Length " + len;
+  }
+
+  function parseAbayaLengthSize(sizeStr) {
+    var raw = String(sizeStr || "").trim();
+    var m = raw.match(/Length\s+(\d+)/i);
+    if (m) return m[1];
+    if (/^(50|52|54|56)$/.test(raw)) return raw;
+    return getAbayaSizeConfig().lengthSizes[0];
+  }
+
+  g.getAbayaSizeConfig = getAbayaSizeConfig;
+  g.isAbayaProduct = isAbayaProduct;
+  g.formatAbayaCartSize = formatAbayaCartSize;
+  g.parseAbayaLengthSize = parseAbayaLengthSize;
 
   g.maCatalog = {
     resolveImageUrl: resolveImageUrl,

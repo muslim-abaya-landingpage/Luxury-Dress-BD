@@ -201,6 +201,22 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            flex-wrap: wrap;
+        }
+        .gb-order-size-wrap--abaya {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+        }
+        .gb-order-size-body {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 600;
+        }
+        .gb-order-size-row {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
         .gb-order-size-select {
             min-width: 86px;
@@ -1560,7 +1576,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="site-api-health.js?v=20260610"></script>
 <script src="auth-config.js"></script>
 <script src="auth-api.js"></script>
-<script src="product-config.js?v=20260613"></script>
+<script src="product-config.js?v=20260601abaya"></script>
+<script src="product-utils.js?v=20260601abaya"></script>
 <script src="cart-utils.js?v=20260530cat"></script>
 <script src="checkout-locations.js?v=20260630th2"></script>
 <script defer src="site-header.js?v=20260530gtmfix"></script>
@@ -1864,20 +1881,67 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (color) parts.push('Color: ' + color);
         var fabric = item.fabric || item.material;
         if (fabric) parts.push('Fabric: ' + fabric);
-        var size = item.size || item.selectedSize;
-        if (!size) {
-            var m = String(item.name || '').match(/\(Size\s+([^)]+)\)/i);
-            if (m) size = m[1];
+        if (typeof isAbayaProduct === 'function' && isAbayaProduct(item, item.category || item.categoryKey)) {
+            var cfg = typeof getAbayaSizeConfig === 'function' ? getAbayaSizeConfig() : { bodySizeLabel: '46 [Free size]' };
+            var len = item.lengthSize || (typeof parseAbayaLengthSize === 'function' ? parseAbayaLengthSize(item.size || item.selectedSize) : '');
+            parts.push('Body Size: ' + (item.bodySize || cfg.bodySizeLabel));
+            if (len) parts.push('Length Size: ' + len);
+        } else {
+            var size = item.size || item.selectedSize;
+            if (!size) {
+                var m = String(item.name || '').match(/\(Size\s+([^)]+)\)/i);
+                if (m) size = m[1];
+            }
+            if (size) parts.push('Size: ' + size);
         }
-        if (size) parts.push('Size: ' + size);
         var desc = String(item.description || '').trim();
         if (desc && desc !== fabric) parts.push(desc);
         return parts.join(' · ');
     }
 
+    function getCheckoutLengthSizes(item) {
+        var cfg = typeof getAbayaSizeConfig === 'function' ? getAbayaSizeConfig() : { lengthSizes: ['50', '52', '54', '56'] };
+        var raw = cfg.lengthSizes.slice();
+        var selected = typeof parseAbayaLengthSize === 'function'
+            ? parseAbayaLengthSize((item && (item.lengthSize || item.size || item.selectedSize)) || '')
+            : '';
+        if (selected && raw.indexOf(selected) === -1) raw.unshift(selected);
+        return raw;
+    }
+
+    function buildCheckoutSizeControl(item, idx) {
+        if (typeof isAbayaProduct === 'function' && isAbayaProduct(item, item.category || item.categoryKey)) {
+            var cfg = typeof getAbayaSizeConfig === 'function' ? getAbayaSizeConfig() : { bodySizeLabel: '46 [Free size]', lengthSizes: ['50', '52', '54', '56'] };
+            var lengthSizes = getCheckoutLengthSizes(item);
+            var currentLength = item.lengthSize || (typeof parseAbayaLengthSize === 'function' ? parseAbayaLengthSize(item.size || item.selectedSize) : lengthSizes[0]);
+            return '<div class="gb-order-size-wrap gb-order-size-wrap--abaya">' +
+                '<span class="gb-order-size-body">Body Size: ' + escapeHtml(item.bodySize || cfg.bodySizeLabel) + '</span>' +
+                '<label class="gb-order-size-row">' +
+                '<span class="gb-order-qty-label">Length:</span>' +
+                '<select class="gb-order-size-select" data-cart-action="length-size" data-cart-idx="' + idx + '" aria-label="Change length size">' +
+                lengthSizes.map(function (sizeOpt) {
+                    var isSelected = String(sizeOpt) === String(currentLength);
+                    return '<option value="' + escapeHtml(sizeOpt) + '"' + (isSelected ? ' selected' : '') + '>' + escapeHtml(sizeOpt) + '</option>';
+                }).join('') +
+                '</select></label></div>';
+        }
+        var selectedSize = String(item.size || item.selectedSize || '').trim();
+        var sizeOptions = getCheckoutSizeOptions(item);
+        return '<label class="gb-order-size-wrap">' +
+            '<span class="gb-order-qty-label">Size:</span>' +
+            '<select class="gb-order-size-select" data-cart-action="size" data-cart-idx="' + idx + '" aria-label="Change size">' +
+            sizeOptions.map(function (sizeOpt) {
+                var isSelected = selectedSize
+                    ? selectedSize === String(sizeOpt)
+                    : String(sizeOpt) === String(sizeOptions[0] || '');
+                return '<option value="' + escapeHtml(sizeOpt) + '"' + (isSelected ? ' selected' : '') + '>' +
+                    escapeHtml(sizeOpt) + '</option>';
+            }).join('') +
+            '</select></label>';
+    }
+
     function getCheckoutSizeOptions(item) {
         var raw = [];
-        var abayaSizes = ['44', '46', '48', '50', '52', '54', '56'];
         var selected = String((item && (item.size || item.selectedSize)) || '').trim();
         if (selected) raw.push(selected);
         var defs = window.SITE_LINKS && window.SITE_LINKS.defaults;
@@ -1885,13 +1949,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (!catKey && item && /abaya|আবায়া|আবায়া/i.test(String(item.name || ''))) {
             catKey = 'abaya';
         }
+        if (catKey === 'abaya') {
+            return getCheckoutLengthSizes(item);
+        }
         if (defs && defs.byCategory && catKey && defs.byCategory[catKey] && Array.isArray(defs.byCategory[catKey].sizes)) {
             raw = raw.concat(defs.byCategory[catKey].sizes);
-        } else if (catKey === 'abaya') {
-            raw = raw.concat(abayaSizes);
         }
-        if (defs && Array.isArray(defs.sizes) && catKey !== 'abaya') raw = raw.concat(defs.sizes);
-        if (!raw.length) raw = abayaSizes.slice();
+        if (defs && Array.isArray(defs.sizes)) raw = raw.concat(defs.sizes);
+        if (!raw.length) raw = ['Free Size'];
         var uniq = [];
         raw.forEach(function (s) {
             var v = String(s || '').trim();
@@ -2194,20 +2259,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 : '<span class="gb-order-thumb-placeholder">👜</span>';
             var detail = orderItemDetail(item);
             var detailHtml = detail ? '<p class="gb-order-detail">' + escapeHtml(detail) + '</p>' : '';
-            var selectedSize = String(item.size || item.selectedSize || '').trim();
-            var sizeOptions = getCheckoutSizeOptions(item);
-            var sizeControlHtml =
-                '<label class="gb-order-size-wrap">' +
-                '<span class="gb-order-qty-label">Size:</span>' +
-                '<select class="gb-order-size-select" data-cart-action="size" data-cart-idx="' + idx + '" aria-label="Change size">' +
-                sizeOptions.map(function (sizeOpt) {
-                    var isSelected = selectedSize
-                        ? selectedSize === String(sizeOpt)
-                        : String(sizeOpt) === String(sizeOptions[0] || '');
-                    return '<option value="' + escapeHtml(sizeOpt) + '"' + (isSelected ? ' selected' : '') + '>' +
-                        escapeHtml(sizeOpt) + '</option>';
-                }).join('') +
-                '</select></label>';
+            var sizeControlHtml = buildCheckoutSizeControl(item, idx);
             itemsHtml +=
                 '<div class="gb-order-row">' +
                 '<div class="gb-order-thumb">' + thumbInner + '</div>' +
@@ -2238,13 +2290,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     if (summaryDiv) {
         summaryDiv.addEventListener('change', function(e) {
-            var sel = e.target.closest('[data-cart-action="size"]');
+            var sel = e.target.closest('[data-cart-action="size"], [data-cart-action="length-size"]');
             if (!sel) return;
             var idx = parseInt(sel.getAttribute('data-cart-idx'), 10);
             if (isNaN(idx) || !cart[idx]) return;
-            var nextSize = String(sel.value || '').trim();
-            cart[idx].size = nextSize;
-            cart[idx].selectedSize = nextSize;
+            var action = sel.getAttribute('data-cart-action');
+            if (action === 'length-size') {
+                var nextLength = String(sel.value || '').trim();
+                cart[idx].lengthSize = nextLength;
+                cart[idx].size = typeof formatAbayaCartSize === 'function'
+                    ? formatAbayaCartSize(nextLength)
+                    : nextLength;
+                cart[idx].selectedSize = cart[idx].size;
+                if (!cart[idx].bodySize && typeof getAbayaSizeConfig === 'function') {
+                    cart[idx].bodySize = getAbayaSizeConfig().bodySizeLabel;
+                }
+            } else {
+                var nextSize = String(sel.value || '').trim();
+                cart[idx].size = nextSize;
+                cart[idx].selectedSize = nextSize;
+            }
             persistCart();
             displayOrder();
         });

@@ -128,8 +128,18 @@ function syncShopCartBadge() {
   else if (typeof updateCartBadge === "function") updateCartBadge(lines);
 }
 
-function shopAddProductToCart(item, qtyToAdd, sizeValue) {
-  var pickedSizeEarly = sizeValue || "50";
+function shopAddProductToCart(item, qtyToAdd, sizeValue, categoryKeyOpt) {
+  var categoryKey =
+    categoryKeyOpt ||
+    (item && item.category) ||
+    (document.body && document.body.getAttribute("data-shop-category")) ||
+    "";
+  var isAbaya = typeof isAbayaProduct === "function" && isAbayaProduct(item, categoryKey);
+  var abayaCfg = isAbaya && typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig() : null;
+  var pickedLength =
+    String(sizeValue || "").trim() ||
+    (abayaCfg ? abayaCfg.lengthSizes[0] : "50");
+  var pickedSizeEarly = isAbaya ? pickedLength : pickedLength;
   var addGuardKey = (item.id || item.name || "") + "|" + pickedSizeEarly;
   var now = Date.now();
   if (addGuardKey === shopCartCtx.lastCartAddKey && now - shopCartCtx.lastCartAddAt < 450) return;
@@ -137,14 +147,16 @@ function shopAddProductToCart(item, qtyToAdd, sizeValue) {
   shopCartCtx.lastCartAddAt = now;
 
   var cat = typeof findCatalogByName === "function" ? findCatalogByName(item.name) : null;
-  var pickedSize = sizeValue || "50";
-  var categoryKey =
-    (document.body && document.body.getAttribute("data-shop-category")) || "";
+  var pickedSize = pickedLength;
   var pickedType = item._cartType || "";
   var unitPrice = resolveProductPrice(item, categoryKey, pickedType);
   var cartName = item.name;
   if (pickedType) cartName += " (" + pickedType + ")";
-  cartName += " (Size " + pickedSize + ")";
+  var sizeLabel =
+    isAbaya && typeof formatAbayaCartSize === "function"
+      ? formatAbayaCartSize(pickedLength)
+      : "Size " + pickedSize;
+  cartName += " (" + sizeLabel + ")";
 
   var line = {
     id: item.id || (cat ? cat.id : ""),
@@ -156,7 +168,12 @@ function shopAddProductToCart(item, qtyToAdd, sizeValue) {
     colorLabel: item.colorLabel || "",
     fabric: item.fabric || "",
     description: item.description || item.fabric || "",
-    size: pickedSize,
+    size:
+      isAbaya && typeof formatAbayaCartSize === "function"
+        ? formatAbayaCartSize(pickedLength)
+        : pickedSize,
+    lengthSize: isAbaya ? pickedLength : "",
+    bodySize: isAbaya && abayaCfg ? abayaCfg.bodySizeLabel : "",
     productType: item._cartType || "",
     category: item.category || categoryKey || "",
     categoryLabel: item.categoryLabel || ""
@@ -197,6 +214,10 @@ function resetShopCartContext() {
 function getSelectedSizeForIdx(scopeRoot, idx) {
   if (!scopeRoot) return "50";
   var activePill = scopeRoot.querySelector(
+    ".pqv-length-opt.is-active[data-product-idx='" + idx + "']"
+  );
+  if (activePill) return activePill.getAttribute("data-length-value") || "50";
+  activePill = scopeRoot.querySelector(
     ".pqv-size-opt.is-active[data-product-idx='" + idx + "']"
   );
   if (activePill) return activePill.getAttribute("data-size-value") || "50";
@@ -330,7 +351,7 @@ function changeShopCartProductQty(p, delta, categoryKey) {
     if (delta > 0) {
       var defaultSize = Array.isArray(p.sizes) && p.sizes.length ? p.sizes[0] : "50";
       var defaultType = getDefaultProductType(p, categoryKey);
-      shopAddProductToCart(Object.assign({}, p, { _cartType: defaultType }), delta, defaultSize);
+      shopAddProductToCart(Object.assign({}, p, { _cartType: defaultType }), delta, defaultSize, categoryKey);
     }
     return;
   }
@@ -804,9 +825,13 @@ function bindPqvInteractions(p, idx, categoryKey, scopeRoot) {
 
   bindPqvGalleryArrows(modal);
 
-  modal.querySelectorAll(".pqv-size-opt, .pqv-type-opt").forEach(function (btn) {
+  modal.querySelectorAll(".pqv-size-opt, .pqv-length-opt, .pqv-type-opt").forEach(function (btn) {
     btn.addEventListener("click", function () {
-      var groupClass = btn.classList.contains("pqv-type-opt") ? ".pqv-type-opt" : ".pqv-size-opt";
+      var groupClass = btn.classList.contains("pqv-type-opt")
+        ? ".pqv-type-opt"
+        : btn.classList.contains("pqv-length-opt")
+          ? ".pqv-length-opt"
+          : ".pqv-size-opt";
       modal.querySelectorAll(groupClass).forEach(function (b) {
         if (b.getAttribute("data-product-idx") !== String(idx)) return;
         b.classList.remove("is-active");
@@ -1024,7 +1049,14 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
   var imgSrc = escapeHtml(gallery[0] || resolveCardImageSrc(p));
   var priceText = formatBdtPrice(productPrice);
   var fabricText = escapeHtml(p.fabric || "Premium Georgette");
-  var sizes = Array.isArray(p.sizes) && p.sizes.length ? p.sizes : ["Free Size"];
+  var isAbaya = typeof isAbayaProduct === "function" && isAbayaProduct(p, categoryKey);
+  var abayaCfg = isAbaya && typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig() : null;
+  var sizes =
+    isAbaya && abayaCfg
+      ? abayaCfg.lengthSizes.slice()
+      : Array.isArray(p.sizes) && p.sizes.length
+        ? p.sizes
+        : ["Free Size"];
   var types = getProductTypes(p, categoryKey);
   var lengthVal = p.detailNote ? String(p.detailNote).replace(/^লং:\s*/i, "").trim() : "";
   var colorLabel = p.colorLabel ? escapeHtml(p.colorLabel) : p.color ? escapeHtml(p.color) : "";
@@ -1074,6 +1106,23 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     escapeHtml(p.id || "—") +
     "</strong></li></ul>";
 
+  var sizeField =
+    isAbaya && abayaCfg
+      ? '<div class="pqv-field pqv-field-body"><span class="pqv-field-label">Body Size</span><div class="pqv-opt-group">' +
+        '<button type="button" class="pqv-opt-btn is-active" aria-pressed="true" disabled>' +
+        escapeHtml(abayaCfg.bodySizeLabel) +
+        "</button></div></div>" +
+        '<div class="pqv-field pqv-field-size"><div class="pqv-field-head"><span class="pqv-field-label">Length Size</span>' +
+        chartBtn +
+        '</div><div class="pqv-opt-group pqv-opt-group-wrap">' +
+        buildPqvOptionPills(sizes, idx, "pqv-length-opt", "data-length-value", formatSizeLabel) +
+        "</div></div>"
+      : '<div class="pqv-field pqv-field-size"><div class="pqv-field-head"><span class="pqv-field-label">Size</span>' +
+        chartBtn +
+        '</div><div class="pqv-opt-group pqv-opt-group-wrap">' +
+        buildPqvOptionPills(sizes, idx, "pqv-size-opt", "data-size-value", formatSizeLabel) +
+        "</div></div>";
+
   return (
     '<div class="pqv-anzaar">' +
     '<div class="pqv-gallery">' +
@@ -1111,11 +1160,8 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     '<div class="pqv-options">' +
     typeField +
     colorField +
-    '<div class="pqv-field pqv-field-size"><div class="pqv-field-head"><span class="pqv-field-label">Size</span>' +
-    chartBtn +
-    '</div><div class="pqv-opt-group pqv-opt-group-wrap">' +
-    buildPqvOptionPills(sizes, idx, "pqv-size-opt", "data-size-value", formatSizeLabel) +
-    "</div></div></div>" +
+    sizeField +
+    "</div>" +
     '<div class="pqv-qty-row">' +
     '<span class="pqv-field-label pqv-qty-label">Quantity</span>' +
     '<div class="ma-qty-stepper pqv-qty" role="group" aria-label="Quantity">' +
@@ -1296,7 +1342,7 @@ function onGlobalShopCartClick(ev) {
   ev.preventDefault();
   ev.stopPropagation();
   var cartItem = Object.assign({}, products[idx], { _cartType: selectedType });
-  shopAddProductToCart(cartItem, qty, selectedSize);
+  shopAddProductToCart(cartItem, qty, selectedSize, categoryKey);
 
   if (action === "buy-now") {
     var checkoutHref =
@@ -1797,8 +1843,49 @@ function buildCardSpecsBlock(p, fabricText, sizeOptions, idx) {
   );
 }
 
-function buildDetailSpecsBlock(p, fabricText, sizeOptions, idx) {
+function buildAbayaSizeFields(idx, lengthSizes) {
+  var cfg = typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig() : { bodySizeLabel: "46 [Free size]", lengthSizes: ["50", "52", "54", "56"] };
+  var lengths = lengthSizes && lengthSizes.length ? lengthSizes : cfg.lengthSizes;
+  var sizeOptions = lengths
+    .map(function (s, i) {
+      return (
+        "<option value='" +
+        escapeHtml(s) +
+        "'" +
+        (i === 0 ? " selected" : "") +
+        ">" +
+        escapeHtml(typeof formatSizeLabel === "function" ? formatSizeLabel(s) : s) +
+        "</option>"
+      );
+    })
+    .join("");
+  return (
+    "<div class='card-size-block card-size-block--abaya'>" +
+    "<div class='card-size-row'><span class='card-size-heading'>Body Size</span>" +
+    "<span class='card-body-size-val'>" +
+    escapeHtml(cfg.bodySizeLabel) +
+    "</span></div>" +
+    "<div class='card-size-row'><span class='card-size-heading'>Length Size</span>" +
+    "<select class='card-size-select' data-size-idx='" +
+    idx +
+    "' aria-label='Length size'>" +
+    sizeOptions +
+    "</select></div></div>"
+  );
+}
+
+function buildDetailSpecsBlock(p, fabricText, sizeOptions, idx, categoryKey) {
   var lengthVal = p.detailNote ? String(p.detailNote).replace(/^লং:\s*/i, "").trim() : "";
+  var isAbaya = typeof isAbayaProduct === "function" && isAbayaProduct(p, categoryKey);
+  var sizeBlock = isAbaya
+    ? buildAbayaSizeFields(idx, typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig().lengthSizes : null)
+    : "<div class='card-size-block detail-size-block'>" +
+      "<span class='card-size-heading'>সাইজ</span>" +
+      "<select class='card-size-select' data-size-idx='" +
+      idx +
+      "' aria-label='সাইজ নির্বাচন'>" +
+      sizeOptions +
+      "</select></div>";
   return (
     "<ul class='detail-spec-list'>" +
     "<li><span class='detail-spec-k'>ফেব্রিক</span><span class='detail-spec-v'>" +
@@ -1808,13 +1895,7 @@ function buildDetailSpecsBlock(p, fabricText, sizeOptions, idx) {
       ? "<li><span class='detail-spec-k'>লং</span><span class='detail-spec-v'>" + escapeHtml(lengthVal) + "</span></li>"
       : "") +
     "</ul>" +
-    "<div class='card-size-block detail-size-block'>" +
-    "<span class='card-size-heading'>সাইজ</span>" +
-    "<select class='card-size-select' data-size-idx='" +
-    idx +
-    "' aria-label='সাইজ নির্বাচন'>" +
-    sizeOptions +
-    "</select></div>"
+    sizeBlock
   );
 }
 
@@ -1826,14 +1907,20 @@ function buildProductCard(p, idx, waLink, detailMode, categoryKey, allProducts) 
 
   var priceText = formatCardPriceText(p, categoryKey);
   var fabricText = escapeHtml(p.fabric || (detailMode ? "দুবাই চেরি" : "Premium Georgette"));
-  var sizes = Array.isArray(p.sizes) && p.sizes.length
-    ? p.sizes
-    : detailMode
-      ? ["44", "46", "48", "50", "52", "54", "56"]
-      : ["Free Size"];
+  var isAbaya = typeof isAbayaProduct === "function" && isAbayaProduct(p, categoryKey);
+  var abayaCfg = isAbaya && typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig() : null;
+  var sizes =
+    isAbaya && abayaCfg
+      ? abayaCfg.lengthSizes.slice()
+      : Array.isArray(p.sizes) && p.sizes.length
+        ? p.sizes
+        : detailMode
+          ? ["Free Size"]
+          : ["Free Size"];
   var sizeOptions = sizes
     .map(function (s, i) {
-      return "<option value='" + escapeHtml(s) + "'" + (i === 0 ? " selected" : "") + ">" + escapeHtml(s) + "</option>";
+      var label = isAbaya && typeof formatSizeLabel === "function" ? formatSizeLabel(s) : s;
+      return "<option value='" + escapeHtml(s) + "'" + (i === 0 ? " selected" : "") + ">" + escapeHtml(label) + "</option>";
     })
     .join("");
 
@@ -1868,7 +1955,7 @@ function buildProductCard(p, idx, waLink, detailMode, categoryKey, allProducts) 
       '<p class="detail-price">' +
       priceText +
       "</p>" +
-      buildDetailSpecsBlock(p, fabricText, sizeOptions, idx) +
+      buildDetailSpecsBlock(p, fabricText, sizeOptions, idx, categoryKey) +
       buildShopCardQtyStepper(idx, 1, getShopCartQtyForProduct(p) > 0) +
       '<div class="detail-actions">' +
       '<button type="button" class="msg-btn btn-add-cart" data-product-idx="' +

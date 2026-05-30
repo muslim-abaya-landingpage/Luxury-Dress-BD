@@ -47,7 +47,10 @@ window.SITE_LINKS = {
       abaya: {
         price: 999,
         fabric: "দুবাই চেরি",
-        sizes: ["44", "46", "48", "50", "52", "54", "56"],
+        bodySize: "46",
+        bodySizeLabel: "46 [Free size]",
+        lengthSizes: ["50", "52", "54", "56"],
+        sizes: ["50", "52", "54", "56"],
         types: ["Full Set", "Abaya Only"],
         priceByType: {
           "Full Set": 999,
