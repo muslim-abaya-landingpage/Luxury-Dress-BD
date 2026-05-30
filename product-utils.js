@@ -66,7 +66,7 @@
     var base = {
       price: defs.price,
       fabric: defs.fabric,
-      sizes: defs.sizes ? defs.sizes.slice() : ["বডি ৪২ (ফ্রি সাইজ)"]
+      sizes: defs.sizes ? defs.sizes.slice() : ["Body 42 (Free size)"]
     };
     var cat = defs.byCategory && defs.byCategory[categoryKey];
     if (!cat) return base;

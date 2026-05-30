@@ -1370,10 +1370,10 @@
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-ML7RL6BR"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div id="localFileBanner" class="local-file-banner" role="alert">
-    <strong>টেস্ট মোড:</strong> ফাইল হিসেবে খোলা আছে (<code>file://</code>) — অর্ডার ও ভিডিও এভাবে কাজ করবে না।
-    <strong>ADMIN-লোকাল-টেস্ট.bat</strong> চালিয়ে
-    <a href="http://localhost:5500/checkout.html">localhost:5500</a> ব্যবহার করুন, অথবা লাইভ
-    <a href="https://muslimabaya.com/checkout" target="_blank" rel="noopener">muslimabaya.com/checkout</a>।
+    <strong>Test mode:</strong> Opened as a local file (<code>file://</code>) — orders will not work this way.
+    Run <strong>ADMIN-লোকাল-টেস্ট.bat</strong> and use
+    <a href="http://localhost:5500/checkout.html">localhost:5500</a>, or order on live
+    <a href="https://muslimabaya.com/checkout" target="_blank" rel="noopener">muslimabaya.com/checkout</a>.
 </div>
 <div id="site-header-mount"></div>
 <div class="container">
@@ -1439,7 +1439,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <select id="userArea" required>
                         <option value="">Select district</option>
                     </select>
-                    <p class="delivery-fee-hint">&#2466;&#2494;&#2453;&#2494; &#2547;80 &#183; &#2437;&#2472;&#2509;&#2479;&#2494;&#2472;&#2509;&#2479; &#2460;&#2503;&#2482;&#2494; &#2547;150 &#183; &#2537;+ &#2474;&#2495;&#2488;&#2503; &#2475;&#2509;&#2480;&#2495; &#2465;&#2503;&#2482;&#2495;&#2477;&#2494;&#2480;&#2495;</p>
+                    <p class="delivery-fee-hint">Dhaka ৳80 · Other districts ৳150 · Free delivery on 3+ items</p>
                 </div>
                 <div class="form-group form-group-last">
                     <label for="userThana">Thana / Upazila <span style="font-size:13px;font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0;">(Optional)</span></label>
@@ -1629,7 +1629,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         <span>I have read and agree to the <a href="terms.html" target="_blank" rel="noopener">Terms &amp; Conditions</a>, <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a> and <a href="refund.html" target="_blank" rel="noopener">Refund Policy</a>.</span>
                     </label>
                     <div id="termsError" class="terms-error">Please accept the Terms &amp; Conditions to place your order.</div>
-                    <p class="checkout-trust-note" style="font-size:12px;color:#6b7280;line-height:1.55;margin:0 0 10px">COD &#2437;&#2480;&#2509;&#2465;&#2494;&#2480; &#2475;&#2507;&#2472;&#2503; &#2453;&#2472;&#2475;&#2494;&#2480;&#2509;&#2478; &#2453;&#2480;&#2494;&#2480; &#2474;&#2480; &#2474;&#2494;&#2464;&#2494;&#2472;&#2507; &#2489;&#2479;&#2492;&#2404; bKash/Nagad &#2437;&#2455;&#2509;&#2480;&#2495;&#2478; &#2474;&#2503;&#2478;&#2503;&#2472;&#2509;&#2463; &#2470;&#2509;&#2480;&#2497;&#2468; &#2474;&#2509;&#2480;&#2488;&#2503;&#2488;&#2495;&#2434;&#2479;&#2492;&#2503; &#2488;&#2494;&#2489;&#2494;&#2479;&#2509;&#2479; &#2453;&#2480;&#2503;&#2404;</p>
+                    <p class="checkout-trust-note" style="font-size:12px;color:#6b7280;line-height:1.55;margin:0 0 10px">Confirm your phone number after placing a COD order. bKash/Nagad payments are processed during business hours.</p>
                     <button type="submit" id="submitBtn" class="btn-place-order">Place Order</button>
             </div>
         </aside>
@@ -1642,7 +1642,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div id="checkoutModal" class="checkout-modal" role="dialog" aria-modal="true" aria-labelledby="checkoutModalTitle" aria-hidden="true">
     <div class="checkout-modal-backdrop" data-checkout-modal-close></div>
     <div class="checkout-modal-panel">
-        <button type="button" class="checkout-modal-close" data-checkout-modal-close aria-label="বন্ধ">&times;</button>
+        <button type="button" class="checkout-modal-close" data-checkout-modal-close aria-label="Close">&times;</button>
         <div id="checkoutModalIcon" class="checkout-modal-icon checkout-modal-icon--info" aria-hidden="true">i</div>
         <h2 id="checkoutModalTitle" class="checkout-modal-title"></h2>
         <p id="checkoutModalMessage" class="checkout-modal-message"></p>
@@ -1655,11 +1655,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="site-api-health.js?v=20260610"></script>
 <script src="auth-config.js"></script>
 <script src="auth-api.js"></script>
-<script src="product-config.js?v=20260601abaya"></script>
-<script src="product-utils.js?v=20260601abaya"></script>
+<script src="product-config.js?v=20260601en"></script>
+<script src="product-utils.js?v=20260601en"></script>
+<script defer src="site-header.js?v=20260601en"></script>
 <script src="cart-utils.js?v=20260601addsize"></script>
 <script src="checkout-locations.js?v=20260630th2"></script>
-<script defer src="site-header.js?v=20260530gtmfix"></script>
+<script defer src="site-header.js?v=20260601en"></script>
 <script>
     const ORDER_SCRIPT_URL =
       (typeof getSiteApiUrl === 'function' && getSiteApiUrl()) ||
@@ -1694,7 +1695,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             iconEl.textContent = icons[variant] || 'i';
         }
         actionsEl.innerHTML = '';
-        var actions = (opts && opts.actions) || [{ label: 'ঠিক আছে', primary: true }];
+        var actions = (opts && opts.actions) || [{ label: 'OK', primary: true }];
         actions.forEach(function (action) {
             var btn = document.createElement('button');
             btn.type = 'button';
@@ -1717,11 +1718,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function checkoutAlert(message, focusEl) {
         openCheckoutModal({
-            title: 'দয়া করে চেক করুন',
+            title: 'Please check',
             message: message,
             variant: 'warn',
             actions: [{
-                label: 'ঠিক আছে',
+                label: 'OK',
                 primary: true,
                 onClick: function () {
                     closeCheckoutModal();
@@ -1733,12 +1734,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function showLocalFileBlockedModal() {
         openCheckoutModal({
-            title: 'এখানে অর্ডার পাঠানো যাবে না',
-            message: 'ফাইল হিসেবে (file://) খোলা থাকলে অর্ডার API কাজ করে না। ADMIN-লোকাল-টেস্ট.bat চালিয়ে localhost ব্যবহার করুন, অথবা muslimabaya.com এ অর্ডার দিন।',
+            title: 'Orders cannot be sent here',
+            message: 'When opened as a local file (file://), the order API does not work. Run ADMIN-লোকাল-টেস্ট.bat and use localhost, or place your order on muslimabaya.com.',
             variant: 'warn',
             actions: [
                 {
-                    label: 'লাইভ সাইটে চেকআউট',
+                    label: 'Checkout on live site',
                     primary: true,
                     onClick: function () {
                         window.open('https://muslimabaya.com/checkout', '_blank', 'noopener');
@@ -1746,7 +1747,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     }
                 },
                 {
-                    label: 'বন্ধ',
+                    label: 'Close',
                     onClick: closeCheckoutModal
                 }
             ]
@@ -1771,14 +1772,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     function getWhatsAppOrderLink(order) {
         var wa = '8801971642683';
         var lines = [
-            'নতুন অর্ডার — Muslim Abaya',
-            'নাম: ' + order.name,
-            'মোবাইল: ' + order.phone,
-            'ঠিকানা: ' + order.address,
-            'জেলা: ' + order.district
+            'New order — Muslim Abaya',
+            'Name: ' + order.name,
+            'Mobile: ' + order.phone,
+            'Address: ' + order.address,
+            'District: ' + order.district
         ];
-        if (order.thana) lines.push('থানা: ' + order.thana);
-        lines.push('পরিমাণ: ' + order.qty, 'মোট: ৳' + order.total, 'পণ্য: ' + order.products);
+        if (order.thana) lines.push('Thana: ' + order.thana);
+        lines.push('Qty: ' + order.qty, 'Total: ৳' + order.total, 'Products: ' + order.products);
         return 'https://wa.me/' + wa + '?text=' + encodeURIComponent(lines.join('\n'));
     }
 
@@ -1820,12 +1821,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function offerWhatsAppOrder(orderWa, reason) {
         openCheckoutModal({
-            title: 'অর্ডার অনলাইনে যায়নি',
-            message: (reason || 'অর্ডার পাঠানো যায়নি।') + ' WhatsApp এ পাঠালেও অর্ডার হারাবে না — আমরা দেখে নেব।',
+            title: 'Order did not go through online',
+            message: (reason || 'The order could not be sent.') + ' You can also send it on WhatsApp — we will still process it.',
             variant: 'error',
             actions: [
                 {
-                    label: 'WhatsApp এ পাঠান',
+                    label: 'Send on WhatsApp',
                     wa: true,
                     primary: true,
                     onClick: function () {
@@ -1834,7 +1835,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     }
                 },
                 {
-                    label: 'আবার চেষ্টা',
+                    label: 'Try again',
                     onClick: closeCheckoutModal
                 }
             ]
@@ -1909,7 +1910,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 }
                 var msg = text.indexOf('Error|') === 0
                     ? text.slice(6).trim()
-                    : (text ? text.slice(0, 160) : 'অর্ডার Sheet এ জমা হয়নি।');
+                    : (text ? text.slice(0, 160) : 'Order was not saved to the sheet.');
                 offerWhatsAppOrder(orderWa, msg);
                 resetOrderButton(btn);
             })
@@ -1918,14 +1919,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     .then(function () {
                         offerWhatsAppOrder(
                             orderWa,
-                            'অর্ডার পাঠানোর চেষ্টা হয়েছে। Sheet এ ১–২ মিনিট পর দেখুন। না গেলে WhatsApp এ পাঠান।'
+                            'Order submit was attempted. Check the sheet in 1–2 minutes. If missing, send via WhatsApp.'
                         );
                         resetOrderButton(btn);
                     })
                     .catch(function () {
                         offerWhatsAppOrder(
                             orderWa,
-                            'API সংযোগ ব্যর্থ। ইন্টারনেট চেক করুন বা WhatsApp এ অর্ডার পাঠান।'
+                            'API connection failed. Check your internet or send the order via WhatsApp.'
                         );
                         resetOrderButton(btn);
                     });
@@ -2057,7 +2058,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (!source) return;
         var nextLen = getNextUnusedAbayaLength(source);
         if (!nextLen) {
-            alert('এই প্রোডাক্টের সব Length size ইতিমধ্যে কার্টে আছে।');
+            alert('All length sizes for this product are already in your cart.');
             return;
         }
         var newLine = buildAbayaDuplicateLine(source, nextLen);
@@ -2069,6 +2070,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         }
         if (typeof afterCartMutation === 'function') afterCartMutation(cart);
         displayOrder();
+    }
+
+    function formatCheckoutSizeLabel(size) {
+        var s = String(size || '').trim();
+        if (!s) return s;
+        if (s === 'বডি ৪২ (ফ্রি সাইজ)' || s === 'বডি 42 (ফ্রি সাইজ)') return 'Body 42 (Free size)';
+        return s
+            .replace(/[০-৯]/g, function (d) {
+                return String.fromCharCode(d.charCodeAt(0) - 2534 + 48);
+            })
+            .replace(/বডি/g, 'Body')
+            .replace(/ফ্রি সাইজ/g, 'Free size');
     }
 
     function buildCheckoutSizeControl(item, idx) {
@@ -2106,7 +2119,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     ? selectedSize === String(sizeOpt)
                     : String(sizeOpt) === String(sizeOptions[0] || '');
                 return '<option value="' + escapeHtml(sizeOpt) + '"' + (isSelected ? ' selected' : '') + '>' +
-                    escapeHtml(sizeOpt) + '</option>';
+                    escapeHtml(formatCheckoutSizeLabel(sizeOpt)) + '</option>';
             }).join('') +
             '</select></label>';
     }
@@ -2250,27 +2263,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     // Price-based hint for items whose name carries no category keyword.
     // Adjust here if base prices change.
-    var PRICE_CATEGORY_HINT = { 550: '\u09aa\u09cd\u09b0\u09bf\u09ae\u09bf\u09af\u09bc\u09be\u09ae \u099f\u09c1-\u09aa\u09bf\u09b8', 999: '\u0986\u09ac\u09be\u09af\u09bc\u09be', 1550: '\u0986\u09ac\u09be\u09af\u09bc\u09be' };
+    var PRICE_CATEGORY_HINT = { 550: 'Premium Two-piece', 999: 'Abaya', 1550: 'Abaya' };
 
-    function toBnNum(n) {
-        return String(n).replace(/[0-9]/g, function (d) { return '\u09e6\u09e7\u09e8\u09e9\u09ea\u09eb\u09ec\u09ed\u09ee\u09ef'.charAt(+d); });
-    }
-
-    // Canonical category key -> Bengali label (matches CATALOG_SECTIONS).
     var CATEGORY_KEY_LABELS = {
-        'abaya': '\u0986\u09ac\u09be\u09af\u09bc\u09be',
-        'cover-up': '\u0995\u09ad\u09be\u09b0 \u0986\u09aa',
-        'tops-kurti': '\u099f\u09aa\u09b8/\u0995\u09c1\u09b0\u09cd\u09a4\u09bf',
-        'premium-two-piece': '\u09aa\u09cd\u09b0\u09bf\u09ae\u09bf\u09af\u09bc\u09be\u09ae \u099f\u09c1-\u09aa\u09bf\u09b8',
-        'embroidery': '\u098f\u09ae\u09cd\u09ac\u09cd\u09b0\u09af\u09bc\u09a1\u09be\u09b0\u09bf',
-        'karchupi': '\u0995\u09be\u09b0\u099a\u09c1\u09aa\u09bf',
-        'kaftan': '\u0995\u09be\u09ab\u09a4\u09be\u09a8',
-        'hijab': '\u09b9\u09bf\u099c\u09be\u09ac'
+        'abaya': 'Abaya',
+        'cover-up': 'Cover Up',
+        'tops-kurti': 'Tops/Kurti',
+        'premium-two-piece': 'Premium Two-piece',
+        'embroidery': 'Embroidery',
+        'karchupi': 'Karchupi',
+        'kaftan': 'Kaftan',
+        'hijab': 'Hijab'
     };
 
-    // Best-effort category: explicit field (key/label) first, then name/price hint.
     function inferProductCategory(item) {
-        if (!item) return '\u0985\u09a8\u09cd\u09af\u09be\u09a8\u09cd\u09af';
+        if (!item) return 'Other';
         var key = String(item.category || item.categoryKey || '').trim().toLowerCase();
         if (key && CATEGORY_KEY_LABELS[key]) return CATEGORY_KEY_LABELS[key];
         var label = String(item.categoryLabel || '').trim();
@@ -2288,17 +2295,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             }
             return false;
         }
-        if (has('hijab', '\u09b9\u09bf\u099c\u09be\u09ac')) return '\u09b9\u09bf\u099c\u09be\u09ac';
-        if (has('kaftan', 'kaftaan', '\u0995\u09be\u09ab\u09a4\u09be\u09a8')) return '\u0995\u09be\u09ab\u09a4\u09be\u09a8';
-        if (has('karchupi', '\u0995\u09be\u09b0\u099a\u09c1\u09aa\u09bf')) return '\u0995\u09be\u09b0\u099a\u09c1\u09aa\u09bf';
-        if (has('embroidery', '\u098f\u09ae\u09cd\u09ac\u09cd\u09b0\u09af\u09bc\u09a1\u09be\u09b0\u09bf', '\u098f\u09ae\u09cd\u09ac\u09cd\u09b0\u09af\u09bc\u09a1\u09be\u09b0\u09c0')) return '\u098f\u09ae\u09cd\u09ac\u09cd\u09b0\u09af\u09bc\u09a1\u09be\u09b0\u09bf';
-        if (has('cover up', 'cover-up', 'coverup', '\u0995\u09ad\u09be\u09b0')) return '\u0995\u09ad\u09be\u09b0 \u0986\u09aa';
-        if (has('abaya', '\u0986\u09ac\u09be\u09af\u09bc\u09be')) return '\u0986\u09ac\u09be\u09af\u09bc\u09be';
-        if (has('two-piece', 'two piece', '2-piece', '2 piece', 'twopiece', 'co-ord', 'co ord', 'coord', '\u099f\u09c1-\u09aa\u09bf\u09b8', '\u099f\u09c1\u09aa\u09bf\u09b8', '\u0995\u09cb-\u0985\u09b0\u09cd\u09a1')) return '\u09aa\u09cd\u09b0\u09bf\u09ae\u09bf\u09af\u09bc\u09be\u09ae \u099f\u09c1-\u09aa\u09bf\u09b8';
-        if (has('kurti', 'kurta', 'kameez', 'tops', 'top ', '\u0995\u09c1\u09b0\u09cd\u09a4\u09bf', '\u099f\u09aa\u09b8')) return '\u099f\u09aa\u09b8/\u0995\u09c1\u09b0\u09cd\u09a4\u09bf';
+        if (has('hijab', '\u09b9\u09bf\u099c\u09abe\u09ac')) return 'Hijab';
+        if (has('kaftan', 'kaftaan', '\u0995\u09be\u09ab\u09a4\u09be\u09a8')) return 'Kaftan';
+        if (has('karchupi', '\u0995\u09be\u09b0\u099a\u09c1\u09aa\u09bf')) return 'Karchupi';
+        if (has('embroidery', '\u098f\u09ae\u09cd\u09ac\u09cd\u09b0\u09af\u09bc\u09a1\u09be\u09b0\u09bf', '\u098f\u09ae\u09cd\u09ac\u09cd\u09b0\u09af\u09bc\u09a1\u09be\u09b0\u09c0')) return 'Embroidery';
+        if (has('cover up', 'cover-up', 'coverup', '\u0995\u09ad\u09be\u09b0')) return 'Cover Up';
+        if (has('abaya', '\u0986\u09ac\u09be\u09af\u09bc\u09be')) return 'Abaya';
+        if (has('two-piece', 'two piece', '2-piece', '2 piece', 'twopiece', 'co-ord', 'co ord', 'coord', '\u099f\u09c1-\u09aa\u09bf\u09b8', '\u099f\u09c1\u09aa\u09bf\u09b8', '\u0995\u09cb-\u0985\u09b0\u09cd\u09a1')) return 'Premium Two-piece';
+        if (has('kurti', 'kurta', 'kameez', 'tops', 'top ', '\u0995\u09c1\u09b0\u09cd\u09a4\u09bf', '\u099f\u09aa\u09b8')) return 'Tops/Kurti';
         var price = parseInt(item.price, 10) || 0;
         if (PRICE_CATEGORY_HINT[price]) return PRICE_CATEGORY_HINT[price];
-        return '\u0985\u09a8\u09cd\u09af\u09be\u09a8\u09cd\u09af';
+        return 'Other';
     }
 
     function buildCategorySummary() {
@@ -2322,10 +2329,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         summary.forEach(function (g) { totalQty += g.count; });
         var chips = summary.map(function (g) {
             return '<span class="gb-cat-chip"><b>' + g.label + '</b> ' +
-                toBnNum(g.count) + '\u099f\u09bf \u00b7 ' + formatBdtCheckout(g.subtotal) + '</span>';
+                g.count + ' pcs · ' + formatBdtCheckout(g.subtotal) + '</span>';
         }).join('');
         return '<div class="gb-cat-summary">' +
-            '<div class="gb-cat-summary-total">\u09ae\u09cb\u099f ' + toBnNum(totalQty) + '\u099f\u09bf \u09aa\u09a3\u09cd\u09af</div>' +
+            '<div class="gb-cat-summary-total">Total ' + totalQty + ' items</div>' +
             '<div class="gb-cat-summary-chips">' + chips + '</div></div>';
     }
 
@@ -2678,7 +2685,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
             if (window.MaSecurity) {
                 if (!MaSecurity.guardSubmit('checkout-order', 3000)) {
-                    checkoutAlert('অনুগ্রহ করে কিছুক্ষণ অপেক্ষা করে আবার চেষ্টা করুন।');
+                    checkoutAlert('Please wait a moment and try again.');
                     return;
                 }
                 if (document.getElementById('orderHp') && document.getElementById('orderHp').value) {
@@ -2687,7 +2694,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             }
 
             if (cart.length === 0) {
-                checkoutAlert('কার্ট খালি। আগে প্রোডাক্ট যোগ করুন।');
+                checkoutAlert('Your cart is empty. Add products first.');
                 return;
             }
 
@@ -2717,28 +2724,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 addrValue = v.address;
             } else {
             if (nameValue.length < 2) {
-                checkoutAlert('সঠিক নাম লিখুন।', nameInput);
+                checkoutAlert('Please enter a valid name.', nameInput);
                 return;
             }
             if (!/^01\d{9}$/.test(phoneValue)) {
-                checkoutAlert('১১ ডিজিটের মোবাইল নম্বর দিন (01XXXXXXXXX)।', phoneInput);
+                checkoutAlert('Enter an 11-digit mobile number (01XXXXXXXXX).', phoneInput);
                 return;
             }
             if (addrValue.length < 8) {
-                checkoutAlert('সম্পূর্ণ ডেলিভারি ঠিকানা লিখুন।', addrInput);
+                checkoutAlert('Please enter your full delivery address.', addrInput);
                 return;
             }
             }
             if (emailValue && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
-                checkoutAlert('সঠিক ইমেইল দিন।', emailInput);
+                checkoutAlert('Please enter a valid email address.', emailInput);
                 return;
             }
             if (!window.MaSecurity && addrValue.length < 8) {
-                checkoutAlert('সম্পূর্ণ ডেলিভারি ঠিকানা লিখুন।', addrInput);
+                checkoutAlert('Please enter your full delivery address.', addrInput);
                 return;
             }
             if (!areaSelect.value) {
-                checkoutAlert('ডেলিভারি জেলা সিলেক্ট করুন।', areaSelect);
+                checkoutAlert('Please select a delivery district.', areaSelect);
                 return;
             }
             var agreeTerms = document.getElementById('agreeTerms');
@@ -2795,7 +2802,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             }
 
             if (!ORDER_SCRIPT_URL) {
-                checkoutAlert('অর্ডার API সেটআপ করা হয়নি। site-api-config.js এ Apps Script URL দিন।');
+                checkoutAlert('Order API is not configured. Add the Apps Script URL in site-api-config.js.');
                 if (btn) {
                     btn.disabled = false;
                     btn.innerText = 'Place Order';

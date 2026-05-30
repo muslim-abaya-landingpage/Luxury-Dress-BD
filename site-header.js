@@ -341,8 +341,8 @@
     '<button type="button" class="slider-arrow left-arrow" onclick="window.moveAnnouncement(-1)" aria-label="Previous">' + ICON_CHEV_LEFT + '</button>' +
     '<div class="announcement-content">' +
     '<div class="ann-slide active">EID COLLECTION 2026 – WHERE ELEGANCE MEETS CELEBRATION</div>' +
-    '<div class="ann-slide">সারা দেশে দ্রুত ডেলিভারি • ক্যাশ অন হোম ডেলিভারি</div>' +
-    '<div class="ann-slide">৩টি ড্রেস কিনুন, ফ্রি ডেলিভারি সুবিধা</div>' +
+    '<div class="ann-slide">Fast delivery nationwide • Cash on home delivery</div>' +
+    '<div class="ann-slide">Buy 3 dresses — free delivery</div>' +
     '</div>' +
     '<button type="button" class="slider-arrow right-arrow" onclick="window.moveAnnouncement(1)" aria-label="Next">' + ICON_CHEV_RIGHT + '</button>' +
     '</div></div>' +

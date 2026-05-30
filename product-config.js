@@ -42,7 +42,7 @@ window.SITE_LINKS = {
   defaults: {
     price: 550,
     fabric: "এলেক্স সফট জর্জেট",
-    sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
+    sizes: ["Body 42 (Free size)"],
     byCategory: {
       abaya: {
         price: 999,
