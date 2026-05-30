@@ -53,6 +53,34 @@ function getHomeCategoryKeys() {
     return Object.keys(window.CATEGORY_PRODUCTS || {}).filter(categoryHasProducts);
 }
 
+/** প্রোডাক্টে একাধিক অর্ডার-টাইপ আছে কিনা (যেমন আবায়া: Full Set / Abaya Only) */
+function homeProductHasTypeChoice(rawProduct, categoryKey) {
+    if (rawProduct && rawProduct.priceByType && Object.keys(rawProduct.priceByType).length > 1) return true;
+    if (Array.isArray(rawProduct && rawProduct.types) && rawProduct.types.length > 1) return true;
+    var defs = window.SITE_LINKS && window.SITE_LINKS.defaults && window.SITE_LINKS.defaults.byCategory;
+    var cat = defs && categoryKey && defs[categoryKey];
+    if (cat && Array.isArray(cat.types) && cat.types.length > 1) return true;
+    if (cat && cat.priceByType && Object.keys(cat.priceByType).length > 1) return true;
+    return false;
+}
+
+/** টাইপ-যুক্ত প্রোডাক্টের সর্বনিম্ন দাম ("৭৯৯ থেকে" দেখানোর জন্য) */
+function homeTypePriceFrom(rawProduct, categoryKey) {
+    var map = (rawProduct && rawProduct.priceByType) || null;
+    if (!map) {
+        var defs = window.SITE_LINKS && window.SITE_LINKS.defaults && window.SITE_LINKS.defaults.byCategory;
+        var cat = defs && categoryKey && defs[categoryKey];
+        map = cat && cat.priceByType;
+    }
+    if (map) {
+        var vals = Object.keys(map)
+            .map(function (k) { return parseInt(map[k], 10) || 0; })
+            .filter(function (v) { return v > 0; });
+        if (vals.length) return Math.min.apply(null, vals);
+    }
+    return 0;
+}
+
 /** সব ক্যাটাগরি (①–⑧) — রাউন্ড-রবিন; একই ছবি একবার (ডুপ্লিকেট নয়) */
 function buildProductsFromCatalog() {
     var all = window.CATEGORY_PRODUCTS || {};
@@ -100,12 +128,15 @@ function buildProductsFromCatalog() {
                 }
                 out.push({
                     id: uid,
+                    catalogId: baseId,
                     name: String(p.name || 'Product').trim(),
                     img: img,
                     price: parseFloat(p.price) || 550,
                     category: key,
                     categoryLabel: catLabel,
-                    categoryPath: catPath
+                    categoryPath: catPath,
+                    hasTypes: homeProductHasTypeChoice(p, key),
+                    typePriceFrom: homeTypePriceFrom(p, key)
                 });
                 more = true;
                 break;
@@ -124,6 +155,16 @@ function homeCategoryHref(p) {
     var route = (p && p.categoryPath) || '/';
     if (typeof window.siteHref === 'function') return window.siteHref(route);
     return route;
+}
+/* টাইপ-যুক্ত প্রোডাক্ট (যেমন আবায়া) — অর্ডারের আগে বড় ডিটেইল ভিউ খোলে
+   যেখানে Full Set / শুধু আবায়া + সাইজ বাছাই করা যায় */
+function goToProductDetail(productId, ev) {
+    if (ev && ev.stopPropagation) ev.stopPropagation();
+    var p = products.find(function (x) { return x.id === productId; });
+    if (!p) return;
+    var base = homeCategoryHref(p);
+    var detailId = p.catalogId || p.id;
+    window.location.href = base + '#p=' + encodeURIComponent(detailId);
 }
 function trackFB(event, data) {
     if (typeof pushTrackingEvent === 'function') {
@@ -356,6 +397,25 @@ function renderSidebar() {
         const thumbImg = p.img && p.img.indexOf('/upload/') !== -1
             ? p.img.replace('/upload/', '/upload/f_auto,q_auto,w_200,c_scale/')
             : p.img;
+        const orderViaDetail = !!p.hasTypes;
+        const priceHtml = orderViaDetail && p.typePriceFrom
+            ? `${"\u09F3"}${p.typePriceFrom} <span class="price-from-note">থেকে</span>`
+            : `${"\u09F3"}${p.price}`;
+        const qtyStepperHtml = orderViaDetail ? '' : `
+            <div class="ma-qty-stepper home-card-qty${inCart ? " is-visible" : ""}" role="group" aria-label="Quantity">
+                <button type="button" class="ma-qty-stepper__btn" aria-label="পরিমাণ কমান"${qty <= 1 ? " disabled" : ""} onclick="event.stopPropagation();updateQty('${p.id}', -1)">−</button>
+                <span class="ma-qty-stepper__value" id="qty-${p.id}" aria-live="polite">${qty}</span>
+                <button type="button" class="ma-qty-stepper__btn" aria-label="পরিমাণ বাড়ান" onclick="event.stopPropagation();updateQty('${p.id}', 1)">+</button>
+            </div>`;
+        const actionsRowHtml = orderViaDetail
+            ? `<div class="product-actions-row">
+                <button type="button" class="anzaar-btn anzaar-btn-cart" onclick="goToProductDetail('${p.id}', event)">Add to Cart</button>
+                <button type="button" class="anzaar-btn anzaar-btn-buy" onclick="goToProductDetail('${p.id}', event)">Buy Now</button>
+            </div>`
+            : `<div class="product-actions-row">
+                <button type="button" class="anzaar-btn anzaar-btn-cart${inCart ? ' is-active' : ''}" onclick="event.stopPropagation();toggleProductCart('${p.id}')">${inCart ? 'Remove' : 'Add to Cart'}</button>
+                <button type="button" class="anzaar-btn anzaar-btn-buy" onclick="buyNowFromCard('${p.id}', event)">Buy Now</button>
+            </div>`;
 card.innerHTML = `
     <div style="position: relative; overflow: hidden; border-radius: 8px;">
         <span class="product-sale-badge">Sale</span>
@@ -390,21 +450,11 @@ card.innerHTML = `
     <div class="product-info">
         <div class="product-meta-row">
             <span class="product-card-name" lang="en">${p.name}</span>
-            <span class="product-card-price">${"\u09F3"}${p.price}</span>
+            <span class="product-card-price">${priceHtml}</span>
         </div>
         <div class="product-actions-anzaar">
-            <div class="ma-qty-stepper home-card-qty${inCart ? " is-visible" : ""}" role="group" aria-label="Quantity">
-                <button type="button" class="ma-qty-stepper__btn" aria-label="পরিমাণ কমান"${qty <= 1 ? " disabled" : ""} onclick="event.stopPropagation();updateQty('${p.id}', -1)">−</button>
-                <span class="ma-qty-stepper__value" id="qty-${p.id}" aria-live="polite">${qty}</span>
-                <button type="button" class="ma-qty-stepper__btn" aria-label="পরিমাণ বাড়ান" onclick="event.stopPropagation();updateQty('${p.id}', 1)">+</button>
-            </div>
-            <div class="product-actions-row">
-                <button type="button" class="anzaar-btn anzaar-btn-cart${inCart ? ' is-active' : ''}"
-                    onclick="event.stopPropagation();toggleProductCart('${p.id}')">
-                    ${inCart ? 'Remove' : 'Add to Cart'}
-                </button>
-                <button type="button" class="anzaar-btn anzaar-btn-buy" onclick="buyNowFromCard('${p.id}', event)">Buy Now</button>
-            </div>
+            ${qtyStepperHtml}
+            ${actionsRowHtml}
             <a href="https://wa.me/8801971642683?text=${encodeURIComponent(p.name + ' অর্ডার করতে চাই')}"
                 target="_blank" rel="noopener" class="anzaar-btn anzaar-btn-msg">Send Message</a>
         </div>
@@ -590,6 +640,7 @@ window.manualSelect = manualSelect;
 window.toggleProductCart = toggleProductCart;
 window.buyNowFromCard = buyNowFromCard;
 window.updateQty = updateQty;
+window.goToProductDetail = goToProductDetail;
 window.removeFromCart = removeFromCart;
 window.__homeRefreshCatalog = function (opts) {
     opts = opts || {};

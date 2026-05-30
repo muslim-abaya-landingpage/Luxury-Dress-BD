@@ -1149,6 +1149,32 @@ if (!window.__maProductPopBound) {
   });
 }
 
+function findProductIdxById(id) {
+  var list = shopCartCtx.products || [];
+  var target = String(id);
+  for (var i = 0; i < list.length; i++) {
+    if (list[i] && String(list[i].id) === target) return i;
+  }
+  return -1;
+}
+
+/* হোম/বাইরে থেকে #p=<id> বা #p-<idx> দিয়ে এসে নির্দিষ্ট প্রোডাক্টের বড় ভিউ খোলে */
+function openProductFromLocationHash() {
+  var hash = window.location.hash || "";
+  var idx = -1;
+  var byId = hash.match(/^#p=(.+)$/);
+  if (byId) {
+    idx = findProductIdxById(decodeURIComponent(byId[1]));
+  } else {
+    var byIdx = hash.match(/^#p-(\d+)$/);
+    if (byIdx) idx = parseInt(byIdx[1], 10);
+  }
+  if (idx >= 0 && shopCartCtx.products && shopCartCtx.products[idx]) {
+    openProductQuickView(idx);
+  }
+}
+
+window.openProductFromLocationHash = openProductFromLocationHash;
 window.openProductQuickView = openProductQuickView;
 window.closeProductQuickView = closeProductQuickView;
 
@@ -2376,6 +2402,9 @@ function renderCategory(categoryKey) {
     if (typeof window.syncSiteHeaderOffset === "function") {
       window.syncSiteHeaderOffset();
     }
+    try {
+      openProductFromLocationHash();
+    } catch (hashErr) {}
   }
 }
 
