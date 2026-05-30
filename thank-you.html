@@ -1,18 +1,21 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <title>&#2471;&#2472;&#2509;&#2479;&#2476;&#2494;&#2470; - Muslim Abaya | muslimabaya.com</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;700&display=swap" rel="stylesheet"></noscript>
+    <title>ধন্যবাদ - Muslim Abaya | muslimabaya.com</title>
+    
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-ML7RL6BR');</script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="site-header.css?v=20260530c">
-    <link rel="stylesheet" href="site-footer.css?v=20260531foot3" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="site-footer.css?v=20260531foot3"></noscript>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="site-footer.css?v=20260531wa">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
 <style>
     body {
@@ -70,51 +73,18 @@
     <script src="cart-utils.js"></script>
     <script>
       (function () {
-        var FIRED_KEY = 'ma_purchase_fired_ids';
-        function firedIds() {
-          try { return JSON.parse(localStorage.getItem(FIRED_KEY) || '[]'); } catch (e) { return []; }
-        }
-        function markFired(id) {
-          if (!id) return;
-          try {
-            var a = firedIds();
-            if (a.indexOf(id) === -1) {
-              a.push(id);
-              if (a.length > 50) a = a.slice(-50);
-              localStorage.setItem(FIRED_KEY, JSON.stringify(a));
-            }
-          } catch (e) {}
-        }
-
         var saved = typeof readOrderTracking === 'function' ? readOrderTracking() : null;
-        var orderId = '';
-        try { orderId = sessionStorage.getItem('ma_last_order_id') || ''; } catch (e) {}
-
-        // Stable transaction id for this order (survives page refresh).
-        var txnId = (saved && (saved.transaction_id || saved.event_id)) ||
-                    (orderId ? ('order_' + orderId) : '');
-
-        // No real order context (direct visit / refresh after data cleared):
-        // do NOT fire a purchase, so we never create a phantom conversion.
-        if (!txnId) {
-          if (typeof clearOrderTracking === 'function') clearOrderTracking();
-          return;
+        var extra = {};
+        if (!saved || !saved.transaction_id) {
+          extra.transaction_id = 'order_' + Date.now();
+          extra.event_id = extra.transaction_id;
         }
-
-        // Already counted this order (e.g. page refresh) ? skip to avoid double-counting.
-        if (firedIds().indexOf(txnId) !== -1) {
-          if (typeof clearOrderTracking === 'function') clearOrderTracking();
-          return;
-        }
-
-        var extra = { transaction_id: txnId, event_id: txnId };
         if (typeof pushPurchaseCompleteEvent === 'function') {
           pushPurchaseCompleteEvent(extra);
         } else if (saved) {
           window.dataLayer = window.dataLayer || [];
           window.dataLayer.push(Object.assign({ event: 'purchase_complete' }, saved, extra));
         }
-        markFired(txnId);
         if (typeof clearOrderTracking === 'function') clearOrderTracking();
       })();
     </script>
@@ -126,13 +96,13 @@
 
     <div class="container">
         <div class="icon"><i class="fas fa-check"></i></div>
-        <p class="thank-message">&#2471;&#2472;&#2509;&#2479;&#2476;&#2494;&#2470;! &#2438;&#2474;&#2472;&#2494;&#2480; &#2437;&#2480;&#2509;&#2465;&#2494;&#2480; &#2438;&#2478;&#2480;&#2494; &#2474;&#2503;&#2527;&#2503;&#2459;&#2495;&#2404; &#2438;&#2478;&#2494;&#2470;&#2503;&#2480; &#2474;&#2509;&#2480;&#2468;&#2495;&#2472;&#2495;&#2471;&#2495; &#2454;&#2497;&#2476; &#2486;&#2496;&#2456;&#2509;&#2480;&#2439; &#2475;&#2507;&#2472; &#2453;&#2480;&#2503; &#2453;&#2472;&#2475;&#2494;&#2480;&#2509;&#2478; &#2453;&#2480;&#2476;&#2503;&#2472;&#2404;</p>
+        <p class="thank-message">ধন্যবাদ! আপনার অর্ডার আমরা পেয়েছি। আমাদের প্রতিনিধি খুব শীঘ্রই ফোন করে কনফার্ম করবেন।</p>
         <p id="orderIdLine" class="order-id-line" style="display:none;font-size:15px;color:#111;margin:12px 0 0;font-weight:700"></p>
-        <p style="font-size:14px;color:#6b7280;margin:10px 0 0;line-height:1.6">&#2437;&#2480;&#2509;&#2465;&#2494;&#2480; ID &#2488;&#2434;&#2480;&#2453;&#2509;&#2487;&#2467; &#2453;&#2480;&#2497;&#2472;&#2404; &#2453;&#2472;&#2475;&#2494;&#2480;&#2509;&#2478;&#2503;&#2486;&#2472; &#2453;&#2482; &#2536;&#2538; &#2456;&#2467;&#2509;&#2463;&#2494;&#2480; &#2478;&#2471;&#2509;&#2479;&#2503; &#2438;&#2488;&#2476;&#2503;&#2404;</p>
+        <p style="font-size:14px;color:#6b7280;margin:10px 0 0;line-height:1.6">অর্ডার ID সংরক্ষণ করুন। কনফার্মেশন কল ২৪ ঘণ্টার মধ্যে আসবে।</p>
         <div class="actions">
-            <a href="/" class="btn btn-dark"><i class="fas fa-shopping-bag"></i> &#2438;&#2480;&#2451; &#2453;&#2503;&#2472;&#2494;&#2453;&#2494;&#2463;&#2494; &#2453;&#2480;&#2497;&#2472;</a>
-            <a href="https://wa.me/8801971642683" class="btn btn-light" target="_blank" rel="noopener">WhatsApp &#2488;&#2494;&#2474;&#2507;&#2480;&#2509;&#2463;</a>
-            <a href="help.html#order-status" class="btn btn-light">&#2437;&#2480;&#2509;&#2465;&#2494;&#2480; &#2488;&#2509;&#2463;&#2509;&#2479;&#2494;&#2463;&#2494;&#2488;</a>
+            <a href="/" class="btn btn-dark"><i class="fas fa-shopping-bag"></i> আরও কেনাকাটা করুন</a>
+            <a href="https://wa.me/8801971642683" class="btn btn-light" target="_blank" rel="noopener">WhatsApp সাপোর্ট</a>
+            <a href="help.html#order-status" class="btn btn-light">অর্ডার স্ট্যাটাস</a>
         </div>
     </div>
     <script>
@@ -147,14 +117,14 @@
                 var el = document.getElementById('orderIdLine');
                 if (el) {
                     el.style.display = 'block';
-                    el.textContent = '\u0985\u09b0\u09cd\u09a1\u09be\u09b0 ID: ' + oid;
+                    el.textContent = 'অর্ডার ID: ' + oid;
                 }
             }
         })();
     </script>
     <div id="site-footer-mount"></div>
-    <script defer src="site-header.js?v=20260530gtmfix"></script>
+    <script defer src="site-header.js?v=20260531nav"></script>
     <script src="site-api-config.js?v=20260529"></script>
-    <script src="site-footer.js?v=20260629post"></script>
+    <script src="site-footer.js?v=20260531wa"></script>
 </body>
 </html>

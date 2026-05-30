@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
@@ -9,9 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <noscript><link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
   <link rel="stylesheet" href="site-header.css?v=20260530c">
-  <link rel="stylesheet" href="site-footer.css?v=20260531foot3" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="site-footer.css?v=20260531foot3"></noscript>
-<style>
+  <link rel="stylesheet" href="site-footer.css?v=20260531wa">
+  <style>
     .wrap { max-width: 1180px; margin: 0 auto; padding: 16px 12px 24px; }
     .breadcrumb { font-size: 13px; color: #666; margin: 0 0 14px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
     .breadcrumb a { color: #666; text-decoration: none; }
@@ -147,14 +146,14 @@
   <div id="site-header-mount"></div>
   <main class="wrap">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <a href="/">Home</a><span>?</span><a href="category.html">Category</a><span>?</span><strong>Video</strong>
+      <a href="/">Home</a><span>›</span><a href="category.html">Category</a><span>›</span><strong>Video</strong>
     </nav>
     <div class="card">
-      <h1 id="videoTitle" class="page-title">????? ???????</h1>
+      <h1 id="videoTitle" class="page-title">ভিডিও কালেকশন</h1>
       <p id="localFileNote" class="local-note"></p>
       <div id="ownerStats" class="owner-stats" hidden>
-        <h3>Owner Dashboard (????? ??????)</h3>
-        <div><span id="ownerTodayCount" class="n">0</span>?? ??????</div>
+        <h3>Owner Dashboard (আজকের অর্ডার)</h3>
+        <div><span id="ownerTodayCount" class="n">0</span>টি অর্ডার</div>
         <div id="ownerCourierCount" class="sub"></div>
         <div id="ownerCourierNote" class="sub"></div>
       </div>
@@ -164,11 +163,11 @@
   </main>
   <div id="site-footer-mount"></div>
 
-  <script defer src="cart-utils.js?v=20260530cat"></script>
-  <script defer src="site-header.js?v=20260530gtmfix"></script>
+  <script defer src="cart-utils.js?v=20260530d"></script>
+  <script defer src="site-header.js?v=20260531nav"></script>
   <script defer src="category-products.js"></script>
   <script defer src="site-api-config.js?v=20260529"></script>
-  <script defer src="site-footer.js?v=20260629post"></script>
+  <script defer src="site-footer.js?v=20260531wa"></script>
   <script>
     (function initVideoPage() {
       function parseYouTubeId(input) {
@@ -196,7 +195,7 @@
             if (!id) return;
             list.push({
               id: id,
-              title: item.title || "????? " + (i + 1),
+              title: item.title || "ভিডিও " + (i + 1),
               watchUrl: item.watchUrl || item.url || "https://www.youtube.com/watch?v=" + id
             });
           });
@@ -205,7 +204,7 @@
           if (legacyId) {
             list.push({
               id: legacyId,
-              title: cfg.title || "????? ?",
+              title: cfg.title || "ভিডিও ১",
               watchUrl: cfg.watchUrl || cfg.url || "https://www.youtube.com/watch?v=" + legacyId
             });
           }
@@ -252,16 +251,16 @@
       var helpEl = document.getElementById("videoHelp");
       var localNote = document.getElementById("localFileNote");
 
-      if (titleEl) titleEl.textContent = cfg.title || "????? ???????";
+      if (titleEl) titleEl.textContent = cfg.title || "ভিডিও কালেকশন";
       if (helpEl) {
         helpEl.textContent =
           cfg.helpText ||
-          "?????? ????? ???? ??????????? ????????? ????? ????, ????? ?????? ?????";
+          "রিয়েল ভিডিও দেখে প্রোডাক্টের কোয়ালিটি যাচাই করুন, তারপর অর্ডার করুন।";
       }
 
       if (isLocalFile && localNote) {
         localNote.textContent =
-          "????? ???? (file://) ????? ????? ????? ??? ???? ???? ? ??????? ??????? \"YouTube-? ?????\" ??????? ????? ???? ????? ?? ????? ?????? ?????";
+          "লোকাল ফাইল (file://) খোলায় এমবেড ভিডিও নাও চলতে পারে — প্রতিটি কার্ডের \"YouTube-এ দেখুন\" ব্যবহার করুন। লাইভ সাইটে সব ভিডিও গ্রিডে চলবে।";
         localNote.classList.add("is-visible");
       }
 
@@ -297,7 +296,7 @@
             try { res = JSON.parse(String(t || "")); } catch (e) {}
             if (!res.ok) return;
             ownerTodayEl.textContent = String(res.todayCount || 0);
-            ownerCourierEl.textContent = "????????? ??????: " + String(res.courierCount || 0) + " ??";
+            ownerCourierEl.textContent = "কুরিয়ারে পাঠানো: " + String(res.courierCount || 0) + " টি";
             ownerCourierNoteEl.textContent = String(res.note || "");
             ownerStatsEl.hidden = false;
           })
@@ -308,7 +307,7 @@
 
       if (!videos.length) {
         gridEl.innerHTML =
-          '<p class="video-empty">???? ????? ??? ??? ?????? <code>category-products.js</code> ? <code>SITE_MEDIA.featuredVideo.videos</code> ?? YouTube ???? ??? ?????</p>';
+          '<p class="video-empty">কোনো ভিডিও যোগ করা হয়নি। <code>category-products.js</code> → <code>SITE_MEDIA.featuredVideo.videos</code> তে YouTube লিংক যোগ করুন।</p>';
         return;
       }
 
@@ -336,7 +335,7 @@
             '">' +
             '<a href="' +
             safeWatch +
-            '" target="_blank" rel="noopener noreferrer">YouTube-? ?????</a>' +
+            '" target="_blank" rel="noopener noreferrer">YouTube-এ দেখুন</a>' +
             "</div>" +
             "</div>" +
             "</article>"

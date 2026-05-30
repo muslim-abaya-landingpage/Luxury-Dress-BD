@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
@@ -8,8 +8,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="site-header.css?v=20260530c">
-    <link rel="stylesheet" href="site-footer.css?v=20260531foot3" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="site-footer.css?v=20260531foot3"></noscript>
+    <link rel="stylesheet" href="site-footer.css?v=20260530ft9" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="site-footer.css?v=20260530ft9"></noscript>
     <style>
         :root { --primary-orange: #f16522; --success-green: #28a745; }
         body { 
@@ -89,11 +89,11 @@
 </div>
 
 <script>
-    // ???????? ?????? ????? ??????? ??? (??????)
+    // ডাইনামিক অর্ডার নম্বর জেনারেট করা (ঐচ্ছিক)
     const randomID = Math.floor(100000 + Math.random() * 900000);
     document.getElementById('order-id-display').innerText = randomID;
 
-    // ?????? ??? ????? ?? ????? ???? ??? ?????
+    // অর্ডার সফল হওয়ার পর কার্ট খালি করে দেওয়া
     localStorage.removeItem('cart');
     localStorage.removeItem('user_cart');
     localStorage.removeItem('secured_checkout_cart');
