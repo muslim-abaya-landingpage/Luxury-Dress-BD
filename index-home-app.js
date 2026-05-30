@@ -405,7 +405,7 @@ function renderSidebar() {
             : p.img;
         const orderViaDetail = !!p.hasTypes;
         const priceHtml = orderViaDetail && p.typePriceFrom
-            ? `${"\u09F3"}${p.typePriceFrom} <span class="price-from-note">থেকে</span>`
+            ? `${"\u09F3"}${p.typePriceFrom}`
             : `${"\u09F3"}${p.price}`;
         const qtyStepperHtml = orderViaDetail ? '' : `
             <div class="ma-qty-stepper home-card-qty${inCart ? " is-visible" : ""}" role="group" aria-label="Quantity">
