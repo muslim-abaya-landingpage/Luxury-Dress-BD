@@ -315,10 +315,50 @@
     return getAbayaSizeConfig().lengthSizes[0];
   }
 
+  function getTwoPieceSizeConfig() {
+    var tp =
+      g.SITE_LINKS &&
+      g.SITE_LINKS.defaults &&
+      g.SITE_LINKS.defaults.byCategory &&
+      g.SITE_LINKS.defaults.byCategory["premium-two-piece"];
+    return {
+      bodySizeLabel: (tp && tp.bodySizeLabel) || "42 (Free size)",
+      lengthSizeLabel: (tp && tp.lengthSizeLabel) || "37-38 inch",
+      lengthSizes: (tp && tp.lengthSizes && tp.lengthSizes.slice()) || ["37-38 inch"]
+    };
+  }
+
+  function isTwoPieceProduct(p, categoryKey) {
+    var ck = String(categoryKey || (p && (p.category || "")) || "").trim();
+    if (ck === "premium-two-piece") return true;
+    var id = String((p && p.id) || "").trim();
+    if (/^DR-\d+/i.test(id)) return true;
+    if (p && /two[\s-]?piece|co-ord|coord|টু[\s-]?পিস|টুপিস/i.test(String(p.name || ""))) return true;
+    return false;
+  }
+
+  function formatTwoPieceCartSize(lengthSizeOpt) {
+    var cfg = getTwoPieceSizeConfig();
+    var len = String(lengthSizeOpt || cfg.lengthSizeLabel || "37-38 inch").trim();
+    return "Body " + cfg.bodySizeLabel + " · Length " + len;
+  }
+
+  function parseTwoPieceLengthSize(sizeStr) {
+    var raw = String(sizeStr || "").trim();
+    var m = raw.match(/Length\s+([^)·]+)/i);
+    if (m) return String(m[1]).trim();
+    if (/37-38\s*inch/i.test(raw)) return "37-38 inch";
+    return getTwoPieceSizeConfig().lengthSizeLabel;
+  }
+
   g.getAbayaSizeConfig = getAbayaSizeConfig;
   g.isAbayaProduct = isAbayaProduct;
   g.formatAbayaCartSize = formatAbayaCartSize;
   g.parseAbayaLengthSize = parseAbayaLengthSize;
+  g.getTwoPieceSizeConfig = getTwoPieceSizeConfig;
+  g.isTwoPieceProduct = isTwoPieceProduct;
+  g.formatTwoPieceCartSize = formatTwoPieceCartSize;
+  g.parseTwoPieceLengthSize = parseTwoPieceLengthSize;
 
   g.maCatalog = {
     resolveImageUrl: resolveImageUrl,

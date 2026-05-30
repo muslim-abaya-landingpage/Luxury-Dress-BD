@@ -59,7 +59,11 @@ window.SITE_LINKS = {
         typePriceGap: 200
       },
       "premium-two-piece": {
-        price: 550
+        price: 550,
+        bodySizeLabel: "42 (Free size)",
+        lengthSizeLabel: "37-38 inch",
+        lengthSizes: ["37-38 inch"],
+        sizes: ["42 (Free size)"]
       },
       "cover-up": {
         types: ["Full Set", "Cover Up Only"]

@@ -130,6 +130,12 @@ function syncShopCartBadge() {
 
 function buildShopCartLineSizeKey(item, sizeValue, categoryKey) {
   var isAbaya = typeof isAbayaProduct === "function" && isAbayaProduct(item, categoryKey);
+  var isTwoPiece = typeof isTwoPieceProduct === "function" && isTwoPieceProduct(item, categoryKey);
+  if (isTwoPiece && typeof formatTwoPieceCartSize === "function") {
+    var tpCfg = typeof getTwoPieceSizeConfig === "function" ? getTwoPieceSizeConfig() : null;
+    var tpLen = String(sizeValue || "").trim() || (tpCfg ? tpCfg.lengthSizeLabel : "37-38 inch");
+    return formatTwoPieceCartSize(tpLen);
+  }
   var abayaCfg = isAbaya && typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig() : null;
   var pickedLength =
     String(sizeValue || "").trim() ||
@@ -162,11 +168,17 @@ function shopAddProductToCart(item, qtyToAdd, sizeValue, categoryKeyOpt) {
     (document.body && document.body.getAttribute("data-shop-category")) ||
     "";
   var isAbaya = typeof isAbayaProduct === "function" && isAbayaProduct(item, categoryKey);
+  var isTwoPiece = typeof isTwoPieceProduct === "function" && isTwoPieceProduct(item, categoryKey);
   var abayaCfg = isAbaya && typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig() : null;
+  var twoPieceCfg = isTwoPiece && typeof getTwoPieceSizeConfig === "function" ? getTwoPieceSizeConfig() : null;
   var pickedLength =
     String(sizeValue || "").trim() ||
-    (abayaCfg ? abayaCfg.lengthSizes[0] : "50");
-  var pickedSizeEarly = isAbaya ? pickedLength : pickedLength;
+    (isTwoPiece && twoPieceCfg
+      ? twoPieceCfg.lengthSizeLabel
+      : abayaCfg
+        ? abayaCfg.lengthSizes[0]
+        : "50");
+  var pickedSizeEarly = isAbaya || isTwoPiece ? pickedLength : pickedLength;
   var addGuardKey = (item.id || item.name || "") + "|" + pickedSizeEarly;
   var now = Date.now();
   if (addGuardKey === shopCartCtx.lastCartAddKey && now - shopCartCtx.lastCartAddAt < 450) return;
@@ -182,6 +194,8 @@ function shopAddProductToCart(item, qtyToAdd, sizeValue, categoryKeyOpt) {
   var sizeLabel =
     isAbaya && typeof formatAbayaCartSize === "function"
       ? formatAbayaCartSize(pickedLength)
+      : isTwoPiece && typeof formatTwoPieceCartSize === "function"
+        ? formatTwoPieceCartSize(pickedLength)
       : "Size " + pickedSize;
   cartName += " (" + sizeLabel + ")";
 
@@ -198,9 +212,16 @@ function shopAddProductToCart(item, qtyToAdd, sizeValue, categoryKeyOpt) {
     size:
       isAbaya && typeof formatAbayaCartSize === "function"
         ? formatAbayaCartSize(pickedLength)
+        : isTwoPiece && typeof formatTwoPieceCartSize === "function"
+          ? formatTwoPieceCartSize(pickedLength)
         : pickedSize,
-    lengthSize: isAbaya ? pickedLength : "",
-    bodySize: isAbaya && abayaCfg ? abayaCfg.bodySizeLabel : "",
+    lengthSize: isAbaya ? pickedLength : isTwoPiece && twoPieceCfg ? twoPieceCfg.lengthSizeLabel : "",
+    bodySize:
+      isAbaya && abayaCfg
+        ? abayaCfg.bodySizeLabel
+        : isTwoPiece && twoPieceCfg
+          ? twoPieceCfg.bodySizeLabel
+          : "",
     productType: item._cartType || "",
     category: item.category || categoryKey || "",
     categoryLabel: item.categoryLabel || ""
@@ -1077,10 +1098,14 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
   var priceText = formatBdtPrice(productPrice);
   var fabricText = escapeHtml(p.fabric || "Premium Georgette");
   var isAbaya = typeof isAbayaProduct === "function" && isAbayaProduct(p, categoryKey);
+  var isTwoPiece = typeof isTwoPieceProduct === "function" && isTwoPieceProduct(p, categoryKey);
   var abayaCfg = isAbaya && typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig() : null;
+  var twoPieceCfg = isTwoPiece && typeof getTwoPieceSizeConfig === "function" ? getTwoPieceSizeConfig() : null;
   var sizes =
     isAbaya && abayaCfg
       ? abayaCfg.lengthSizes.slice()
+      : isTwoPiece && twoPieceCfg
+        ? twoPieceCfg.lengthSizes.slice()
       : Array.isArray(p.sizes) && p.sizes.length
         ? p.sizes
         : ["Free Size"];
@@ -1144,6 +1169,17 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
         '</div><div class="pqv-opt-group pqv-opt-group-wrap">' +
         buildPqvOptionPills(sizes, idx, "pqv-length-opt", "data-length-value", formatSizeLabel) +
         "</div></div>"
+      : isTwoPiece && twoPieceCfg
+        ? '<div class="pqv-field pqv-field-body"><span class="pqv-field-label">Body Size</span><div class="pqv-opt-group">' +
+          '<button type="button" class="pqv-opt-btn is-active" aria-pressed="true" disabled>' +
+          escapeHtml(twoPieceCfg.bodySizeLabel) +
+          "</button></div></div>" +
+          '<div class="pqv-field pqv-field-size"><div class="pqv-field-head"><span class="pqv-field-label">Length Size</span>' +
+          chartBtn +
+          '</div><div class="pqv-opt-group pqv-opt-group-wrap">' +
+          '<button type="button" class="pqv-opt-btn is-active" aria-pressed="true" disabled>' +
+          escapeHtml(twoPieceCfg.lengthSizeLabel) +
+          "</button></div></div>"
       : '<div class="pqv-field pqv-field-size"><div class="pqv-field-head"><span class="pqv-field-label">Size</span>' +
         chartBtn +
         '</div><div class="pqv-opt-group pqv-opt-group-wrap">' +
@@ -1875,6 +1911,24 @@ function buildCardSpecsBlock(p, fabricText, sizeOptions, idx) {
   );
 }
 
+function buildTwoPieceSizeFields() {
+  var cfg =
+    typeof getTwoPieceSizeConfig === "function"
+      ? getTwoPieceSizeConfig()
+      : { bodySizeLabel: "42 (Free size)", lengthSizeLabel: "37-38 inch" };
+  return (
+    "<div class='card-size-block card-size-block--abaya card-size-block--twopiece'>" +
+    "<div class='card-size-row'><span class='card-size-heading'>Body Size</span>" +
+    "<span class='card-body-size-val'>" +
+    escapeHtml(cfg.bodySizeLabel) +
+    "</span></div>" +
+    "<div class='card-size-row'><span class='card-size-heading'>Length Size</span>" +
+    "<span class='card-body-size-val'>" +
+    escapeHtml(cfg.lengthSizeLabel) +
+    "</span></div></div>"
+  );
+}
+
 function buildAbayaSizeFields(idx, lengthSizes) {
   var cfg = typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig() : { bodySizeLabel: "46 [Free size]", lengthSizes: ["50", "52", "54", "56"] };
   var lengths = lengthSizes && lengthSizes.length ? lengthSizes : cfg.lengthSizes;
@@ -1909,8 +1963,11 @@ function buildAbayaSizeFields(idx, lengthSizes) {
 function buildDetailSpecsBlock(p, fabricText, sizeOptions, idx, categoryKey) {
   var lengthVal = p.detailNote ? String(p.detailNote).replace(/^লং:\s*/i, "").trim() : "";
   var isAbaya = typeof isAbayaProduct === "function" && isAbayaProduct(p, categoryKey);
+  var isTwoPiece = typeof isTwoPieceProduct === "function" && isTwoPieceProduct(p, categoryKey);
   var sizeBlock = isAbaya
     ? buildAbayaSizeFields(idx, typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig().lengthSizes : null)
+    : isTwoPiece
+      ? buildTwoPieceSizeFields()
     : "<div class='card-size-block detail-size-block'>" +
       "<span class='card-size-heading'>সাইজ</span>" +
       "<select class='card-size-select' data-size-idx='" +
@@ -1940,10 +1997,14 @@ function buildProductCard(p, idx, waLink, detailMode, categoryKey, allProducts) 
   var priceText = formatCardPriceText(p, categoryKey);
   var fabricText = escapeHtml(p.fabric || (detailMode ? "দুবাই চেরি" : "Premium Georgette"));
   var isAbaya = typeof isAbayaProduct === "function" && isAbayaProduct(p, categoryKey);
+  var isTwoPiece = typeof isTwoPieceProduct === "function" && isTwoPieceProduct(p, categoryKey);
   var abayaCfg = isAbaya && typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig() : null;
+  var twoPieceCfg = isTwoPiece && typeof getTwoPieceSizeConfig === "function" ? getTwoPieceSizeConfig() : null;
   var sizes =
     isAbaya && abayaCfg
       ? abayaCfg.lengthSizes.slice()
+      : isTwoPiece && twoPieceCfg
+        ? twoPieceCfg.lengthSizes.slice()
       : Array.isArray(p.sizes) && p.sizes.length
         ? p.sizes
         : detailMode
@@ -1951,7 +2012,12 @@ function buildProductCard(p, idx, waLink, detailMode, categoryKey, allProducts) 
           : ["Free Size"];
   var sizeOptions = sizes
     .map(function (s, i) {
-      var label = isAbaya && typeof formatSizeLabel === "function" ? formatSizeLabel(s) : s;
+      var label =
+        isAbaya && typeof formatSizeLabel === "function"
+          ? formatSizeLabel(s)
+          : isTwoPiece
+            ? s
+          : s;
       return "<option value='" + escapeHtml(s) + "'" + (i === 0 ? " selected" : "") + ">" + escapeHtml(label) + "</option>";
     })
     .join("");

@@ -116,6 +116,40 @@
   color: #fff;
 }
 
+@media (max-width: 768px) {
+  .ma-footer-strip,
+  #ma-social-connect-mount .ma-footer-strip {
+    height: auto;
+    min-height: 52px;
+    max-height: none;
+  }
+
+  .ma-social-connect-inner {
+    flex-direction: column;
+    justify-content: center;
+    padding: 10px 12px;
+    gap: 8px;
+    min-height: 52px;
+  }
+
+  .ma-strip-copy {
+    text-align: center;
+    align-items: center;
+  }
+
+  .ma-social-connect-actions {
+    justify-content: center;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .ma-social-btn {
+    height: 34px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+}
+
 @media (max-width: 520px) {
   .ma-social-connect-inner {
     flex-direction: column;
