@@ -128,6 +128,33 @@ function syncShopCartBadge() {
   else if (typeof updateCartBadge === "function") updateCartBadge(lines);
 }
 
+function buildShopCartLineSizeKey(item, sizeValue, categoryKey) {
+  var isAbaya = typeof isAbayaProduct === "function" && isAbayaProduct(item, categoryKey);
+  var abayaCfg = isAbaya && typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig() : null;
+  var pickedLength =
+    String(sizeValue || "").trim() ||
+    (abayaCfg ? abayaCfg.lengthSizes[0] : "50");
+  if (isAbaya && typeof formatAbayaCartSize === "function") {
+    return formatAbayaCartSize(pickedLength);
+  }
+  return pickedLength;
+}
+
+function shopCartHasMatchingLine(item, sizeValue, categoryKey) {
+  var id = String(item && item.id || "").trim();
+  if (!id) return false;
+  var sizeKey = buildShopCartLineSizeKey(item, sizeValue, categoryKey);
+  var mergeKey = id + "|" + sizeKey;
+  var lines = typeof loadStoreCart === "function" ? loadStoreCart({ readOnly: true }) : [];
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i];
+    if (!line) continue;
+    var lineKey = String(line.id || "") + "|" + String(line.size || line.selectedSize || "");
+    if (lineKey === mergeKey) return true;
+  }
+  return false;
+}
+
 function shopAddProductToCart(item, qtyToAdd, sizeValue, categoryKeyOpt) {
   var categoryKey =
     categoryKeyOpt ||
@@ -1342,15 +1369,17 @@ function onGlobalShopCartClick(ev) {
   ev.preventDefault();
   ev.stopPropagation();
   var cartItem = Object.assign({}, products[idx], { _cartType: selectedType });
-  shopAddProductToCart(cartItem, qty, selectedSize, categoryKey);
 
   if (action === "buy-now") {
+    if (!shopCartHasMatchingLine(cartItem, selectedSize, categoryKey)) {
+      shopAddProductToCart(cartItem, qty, selectedSize, categoryKey);
+    }
     var checkoutHref =
       typeof window.siteHref === "function" ? window.siteHref("/checkout") : "checkout.html";
     var cartLines =
       typeof loadStoreCart === "function" ? loadStoreCart({ readOnly: true }) : [];
     if (!cartLines.length) {
-      alert("অনুগ্রহ করে অন্তত একটি পণ্য কার্টে যোগ করুন।");
+      alert("Please add at least one product to your cart.");
       return;
     }
     if (typeof flushStoreCartForCheckout === "function") {
@@ -1360,7 +1389,10 @@ function onGlobalShopCartClick(ev) {
       if (typeof markStoreCartSession === "function") markStoreCartSession();
     }
     window.location.href = checkoutHref;
+    return;
   }
+
+  shopAddProductToCart(cartItem, qty, selectedSize, categoryKey);
 }
 
 if (!window.__maShopCartClickBound) {
