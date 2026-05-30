@@ -189,7 +189,7 @@
             font-size: 13px;
             color: var(--muted);
             margin: 0 0 6px;
-            line-height: 1.45;
+            line-height: 1.55;
         }
         .gb-order-qty-row {
             display: flex;
@@ -1980,15 +1980,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             .replace(/"/g, '&quot;');
     }
 
+    function formatCheckoutFabric(fabric) {
+        var f = String(fabric || '').trim();
+        if (!f) return '';
+        if (/এলেক্স\s*সফট\s*জর্জেট|alex\s*soft\s*georgette/i.test(f)) return 'Alex soft Georgette';
+        if (/দুবাই\s*চেরি|dubai\s*cherry/i.test(f)) return 'Dubai Cherry';
+        if (/premium\s*georgette/i.test(f)) return 'Premium Georgette';
+        return f;
+    }
+
     function orderItemDetail(item) {
-        var parts = [];
+        var lines = [];
         var color = item.colorLabel || item.color;
-        if (color) parts.push('Color: ' + color);
-        var fabric = item.fabric || item.material;
-        if (fabric) parts.push('Fabric: ' + fabric);
+        if (color) lines.push('Color: ' + String(color).trim());
+        var fabric = formatCheckoutFabric(item.fabric || item.material);
+        if (fabric) lines.push('Fabric: ' + fabric);
         var desc = String(item.description || '').trim();
-        if (desc && desc !== fabric) parts.push(desc);
-        return parts.join(' · ');
+        var fabricRaw = String(item.fabric || item.material || '').trim();
+        if (desc && desc !== fabricRaw) lines.push(desc);
+        return lines.map(function (line) { return escapeHtml(line); }).join('<br>');
     }
 
     function getCheckoutLengthSizes(item) {
@@ -2509,7 +2519,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 ? '<img src="' + escapeHtml(imgUrl) + '" alt="" loading="lazy" onerror="this.parentElement.innerHTML=\'<span class=gb-order-thumb-placeholder>👜</span>\'">'
                 : '<span class="gb-order-thumb-placeholder">👜</span>';
             var detail = orderItemDetail(item);
-            var detailHtml = detail ? '<p class="gb-order-detail">' + escapeHtml(detail) + '</p>' : '';
+            var detailHtml = detail ? '<p class="gb-order-detail">' + detail + '</p>' : '';
             var sizeControlHtml = buildCheckoutSizeControl(item, idx);
             itemsHtml +=
                 '<div class="gb-order-row" data-cart-idx="' + idx + '">' +
