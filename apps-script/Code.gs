@@ -190,15 +190,69 @@ function validateOrderInput_(e) {
     qty: qty,
     total: total,
     district: param_(e, 'District'),
-    design: slotItems.length ? slotItems.join(', ') : design
+    slotItems: slotItems,
+    design: slotItems.length ? formatOrderDesignLines_(slotItems) : design
   };
 }
 
+/** প্রতিটি প্রোডাক্ট আলাদা লাইনে — Sheet column G পড়তে সহজ */
+function formatOrderDesignLines_(slotItems) {
+  var lines = [];
+  var i;
+  for (i = 0; i < slotItems.length; i++) {
+    var raw = String(slotItems[i] || '').trim();
+    if (!raw) continue;
+    if (/^\d+\.\s/.test(raw)) {
+      lines.push(raw);
+    } else {
+      lines.push((lines.length + 1) + '. ' + raw);
+    }
+  }
+  return lines.join('\n');
+}
+
+function formatOnlineOrderProductCell_(sheet, row, designText) {
+  if (!sheet || !row || row < 2) return;
+  var text = String(designText || '').trim();
+  if (!text) return;
+  var cell = sheet.getRange(row, 7);
+  cell.setValue(text);
+  try {
+    cell.setWrap(true);
+    cell.setVerticalAlignment('top');
+    var lineCount = text.split('\n').length;
+    sheet.setRowHeight(row, Math.min(420, Math.max(72, lineCount * 20 + 16)));
+  } catch (fmtErr) {}
+}
+
+function buildCourierItemDescription_(ctx) {
+  var lines = [];
+  if (ctx && ctx.slotItems && ctx.slotItems.length) {
+    lines = ctx.slotItems.slice();
+  } else if (ctx && ctx.design) {
+    lines = String(ctx.design).split(/\n|,/).map(function (s) { return String(s || '').trim(); }).filter(Boolean);
+  }
+  var qty = parseInt(ctx && ctx.qty, 10) || 0;
+  var prefix = qty > 0 ? ('Total ' + qty + ' pcs · ') : '';
+  if (!lines.length) return prefix + String((ctx && ctx.design) || 'Muslim Abaya order').slice(0, 200);
+  var summary = lines.slice(0, 4).join(' | ');
+  if (lines.length > 4) summary += ' | +' + (lines.length - 4) + ' more';
+  return (prefix + summary).slice(0, 200);
+}
+
 function rateLimitOrder_(phone) {
+  var normalized = normalizePhone_(phone);
+  var bypassRaw = PropertiesService.getScriptProperties().getProperty('ORDER_RATE_LIMIT_BYPASS') || '01971642683';
+  var bypassParts = String(bypassRaw).split(/[,;\s]+/);
+  var b;
+  for (b = 0; b < bypassParts.length; b++) {
+    if (normalizePhone_(bypassParts[b]) === normalized) return;
+  }
   var cache = CacheService.getScriptCache();
-  var k = 'ord_' + String(phone || 'x');
+  var k = 'ord_' + String(normalized || 'x');
   var n = parseInt(cache.get(k) || '0', 10);
-  if (n >= 2) throw new Error('ORDER_RATE_LIMIT');
+  var maxOrders = parseInt(PropertiesService.getScriptProperties().getProperty('ORDER_RATE_LIMIT_MAX') || '6', 10);
+  if (n >= maxOrders) throw new Error('ORDER_RATE_LIMIT');
   cache.put(k, String(n + 1), 1800);
 }
 
@@ -265,8 +319,22 @@ function handleOnlineOrderPost_(e) {
     notes
   ]);
 
+  var newRow = sheet.getLastRow();
+  formatOnlineOrderProductCell_(sheet, newRow, validated.design);
   var imageUrls = collectOrderImageUrls_(e);
-  setOrderProductImages_(sheet, sheet.getLastRow(), imageUrls);
+  setOrderProductImages_(sheet, newRow, imageUrls);
+
+  maybeAutoCourierAfterWebOrder_(sheet, newRow, {
+    orderId: orderId,
+    name: validated.name,
+    phone: validated.phone,
+    address: validated.address,
+    design: validated.design,
+    slotItems: validated.slotItems || [],
+    qty: validated.qty,
+    total: parseFloat(totalStr) || 0,
+    payment: payment
+  });
 
   try {
     sendToFacebookCAPI({
@@ -298,9 +366,10 @@ function onOpen() {
       .addItem('Steadfast — selected row পাঠান', 'steadfastSendActiveRow')
       .addItem('Steadfast — balance দেখুন', 'steadfastShowBalance')
       .addItem('Steadfast API URL fix করুন', 'setSteadfastBaseUrlToApi_')
-      .addItem('Sheet headers (J–Q + ছবি R–W) সেট করুন', 'setupOnlineOrderExtraHeaders')
+      .addItem('Sheet headers (J–Q + ছবি R–AC) সেট করুন', 'setupOnlineOrderExtraHeaders')
       .addItem('Selected row — ছবি thumbnail ঠিক করুন', 'repairOnlineOrderImagesActiveRow')
-      .addItem('Auto courier trigger চালু করুন', 'setupAutoCourierEditTrigger')
+      .addItem('Auto courier — Confirmed হলে পাঠান', 'setupAutoCourierConfirmedMode')
+      .addItem('Auto courier — Order হলেই instant', 'setupAutoCourierInstantMode')
       .addSeparator()
       .addItem('Admin account তৈরি (প্রথমবার)', 'createFirstAdminFromMenu')
       .addToUi();
@@ -322,10 +391,13 @@ function getOnlineOrderExtraHeaders_() {
 }
 
 var ONLINE_ORDER_IMAGE_COL = 18;
-var ONLINE_ORDER_IMAGE_COUNT = 6;
+var ONLINE_ORDER_IMAGE_COUNT = 12;
 
 function getOnlineOrderImageHeaders_() {
-  return ['ছবি ১', 'ছবি ২', 'ছবি ৩', 'ছবি ৪', 'ছবি ৫', 'ছবি ৬'];
+  return [
+    'ছবি ১', 'ছবি ২', 'ছবি ৩', 'ছবি ৪', 'ছবি ৫', 'ছবি ৬',
+    'ছবি ৭', 'ছবি ৮', 'ছবি ৯', 'ছবি ১০', 'ছবি ১১', 'ছবি ১২'
+  ];
 }
 
 function collectOrderImageUrls_(e) {
@@ -618,7 +690,12 @@ function tryAutoCourierForOrder_(ctx) {
     if (!isAutoCourierEnabled_()) return { ok: false, reason: 'AUTO_OFF' };
 
     var keys = getSteadfastKeys_();
-    if (!keys.apiKey || !keys.secretKey) return { ok: false, reason: 'KEYS_MISSING' };
+    if (!keys.apiKey || !keys.secretKey) {
+      var missNote = 'AUTO_COURIER: API Key/Secret missing — Apps Script → Script properties';
+      var prevMiss = String(ctx.sheet.getRange(ctx.row, 17).getValue() || '');
+      ctx.sheet.getRange(ctx.row, 17).setValue(prevMiss ? (prevMiss + ' | ' + missNote) : missNote);
+      return { ok: false, reason: 'KEYS_MISSING' };
+    }
 
     var payment = String(ctx.payment || 'Cash On Delivery');
     var codAmount = /cash\s*on\s*delivery/i.test(payment) ? (parseFloat(ctx.total) || 0) : 0;
@@ -628,8 +705,8 @@ function tryAutoCourierForOrder_(ctx) {
       recipient_phone: normalizePhone_(ctx.phone),
       recipient_address: String(ctx.address || '').slice(0, 250),
       cod_amount: codAmount,
-      note: 'Auto from website',
-      item_description: String(ctx.design || '').slice(0, 200)
+      note: 'Order ' + String(ctx.orderId || '') + ' · Qty ' + String(ctx.qty || ''),
+      item_description: buildCourierItemDescription_(ctx)
     };
 
     if (!payload.recipient_name || !payload.recipient_phone || !payload.recipient_address) {
@@ -637,15 +714,27 @@ function tryAutoCourierForOrder_(ctx) {
     }
 
     var res = steadfastPlaceOrder_(payload);
-    if (!res || !res.consignment) {
-      var failMsg = String((res && (res.message || res.error)) || 'AUTO_FAIL');
+    var c = res && res.consignment ? res.consignment : null;
+    if (!c && res && res.tracking_code) {
+      c = {
+        tracking_code: res.tracking_code,
+        consignment_id: res.consignment_id || res.id || '',
+        status: res.status || 'in_review'
+      };
+    }
+    if (!c) {
+      var failMsg = String((res && (res.message || res.error || res.raw)) || 'AUTO_FAIL');
+      if (typeof res === 'object') {
+        try {
+          failMsg = JSON.stringify(res).slice(0, 160);
+        } catch (jsonErr) {}
+      }
       var prevNotes = String(ctx.sheet.getRange(ctx.row, 17).getValue() || '');
       var nextNotes = prevNotes ? (prevNotes + ' | ') : '';
       ctx.sheet.getRange(ctx.row, 17).setValue(nextNotes + 'AUTO_COURIER_FAIL:' + failMsg.slice(0, 120));
       return { ok: false, reason: 'API_FAIL', raw: res };
     }
 
-    var c = res.consignment;
     ctx.sheet.getRange(ctx.row, 10, 1, 4).setValues([[
       'Shipped',
       c.tracking_code || '',
@@ -673,7 +762,29 @@ function shouldAutoCourierOnConfirmed_() {
   return mode === 'confirmed';
 }
 
-function setupAutoCourierEditTrigger() {
+function shouldAutoCourierOnNewOrder_() {
+  if (!isAutoCourierEnabled_()) return false;
+  var mode = String(PropertiesService.getScriptProperties().getProperty('AUTO_COURIER_MODE') || 'confirmed').toLowerCase();
+  return mode === 'instant';
+}
+
+function maybeAutoCourierAfterWebOrder_(sheet, row, ctx) {
+  if (!shouldAutoCourierOnNewOrder_()) return;
+  tryAutoCourierForOrder_(Object.assign({ sheet: sheet, row: row }, ctx || {}));
+}
+
+function getAutoCourierStatusNote_() {
+  if (!isAutoCourierEnabled_()) {
+    return 'Auto courier OFF — Muslim Abaya menu থেকে চালু করুন।';
+  }
+  var mode = String(PropertiesService.getScriptProperties().getProperty('AUTO_COURIER_MODE') || 'confirmed').toLowerCase();
+  if (mode === 'instant') {
+    return 'Instant mode: website order → Steadfast auto (API key লাগবে)।';
+  }
+  return 'Confirmed mode: Status (J) = Confirmed করলে Steadfast auto।';
+}
+
+function setupAutoCourierEditTriggerInternal_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var ssId = ss.getId();
   var triggers = ScriptApp.getProjectTriggers();
@@ -687,10 +798,32 @@ function setupAutoCourierEditTrigger() {
     .forSpreadsheet(ssId)
     .onEdit()
     .create();
+}
+
+function setupAutoCourierConfirmedMode() {
+  PropertiesService.getScriptProperties().setProperty('AUTO_COURIER_MODE', 'confirmed');
+  PropertiesService.getScriptProperties().setProperty('AUTO_COURIER_ON', 'true');
+  setupAutoCourierEditTriggerInternal_();
   SpreadsheetApp.getUi().alert(
-    'Auto courier trigger চালু হয়েছে।\n\n' +
-    'এখন Online Order sheet-এ Status (কলাম J) = Confirmed করলে auto courier চেষ্টা করবে।'
+    'Confirmed mode চালু।\n\n' +
+    '① Website order → Status Pending\n' +
+    '② ফোনে verify → Status (J) = Confirmed\n' +
+    '③ Steadfast-এ auto পাঠাবে (Tracking K-তে)'
   );
+}
+
+function setupAutoCourierInstantMode() {
+  PropertiesService.getScriptProperties().setProperty('AUTO_COURIER_MODE', 'instant');
+  PropertiesService.getScriptProperties().setProperty('AUTO_COURIER_ON', 'true');
+  SpreadsheetApp.getUi().alert(
+    'Instant mode চালু।\n\n' +
+    'Website order Sheet-এ আসার সাথে সাথে Steadfast-এ পাঠানোর চেষ্টা করবে।\n\n' +
+    'Script properties-এ STEADFAST_API_KEY + STEADFAST_SECRET_KEY থাকতে হবে।'
+  );
+}
+
+function setupAutoCourierEditTrigger() {
+  setupAutoCourierConfirmedMode();
 }
 
 function hasAutoCourierTrigger_() {
@@ -1303,8 +1436,9 @@ function getAdminTodayStats_(e) {
     ok: true,
     todayCount: todayCount,
     courierCount: courierCount,
-    autoCourier: false,
-    note: 'কুরিয়ারে অটো এন্ট্রি এখন OFF (manual: Muslim Abaya menu থেকে Steadfast পাঠান)।'
+    autoCourier: isAutoCourierEnabled_(),
+    autoCourierMode: String(PropertiesService.getScriptProperties().getProperty('AUTO_COURIER_MODE') || 'confirmed'),
+    note: getAutoCourierStatusNote_()
   };
 }
 

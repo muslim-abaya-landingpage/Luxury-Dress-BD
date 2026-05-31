@@ -1923,17 +1923,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         }
     })();
 
+    function buildWhatsAppProductsList() {
+        return productsLabelMultiline();
+    }
+
     function getWhatsAppOrderLink(order) {
         var wa = '8801971642683';
         var lines = [
-            'New order ? Muslim Abaya',
+            'New order – Muslim Abaya',
             'Name: ' + order.name,
             'Mobile: ' + order.phone,
             'Address: ' + order.address,
             'District: ' + order.district
         ];
         if (order.thana) lines.push('Thana: ' + order.thana);
-        lines.push('Qty: ' + order.qty, 'Total: ৳' + order.total, 'Products: ' + order.products);
+        lines.push('Qty: ' + order.qty, 'Total: ৳' + order.total, 'Products:', order.products);
         return 'https://wa.me/' + wa + '?text=' + encodeURIComponent(lines.join('\n'));
     }
 
@@ -1980,7 +1984,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     function offerWhatsAppOrder(orderWa, reason) {
         openCheckoutModal({
             title: 'Order did not go through online',
-            message: (reason || 'The order could not be sent.') + ' You can also send it on WhatsApp ? we will still process it.',
+            message: (reason || 'The order could not be sent.') +
+                ' WhatsApp only sends a message — it does not save to the order sheet. Place the order online again when ready.',
             variant: 'error',
             actions: [
                 {
@@ -2089,7 +2094,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             });
     }
     const MAX_PRODUCT_SLOTS = 50;
-    const MAX_ORDER_IMAGES = 6;
+    const MAX_ORDER_IMAGES = 12;
 
     function pageLink(route) {
         if (typeof window.siteHref === 'function') return window.siteHref(route);
@@ -2400,12 +2405,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
 
     function productsLabel() {
-        return cart.map(function(item) {
-            var base = checkoutLineBaseName(item);
-            var size = checkoutLineSizeLabel(item);
-            var sizePart = size ? ' · ' + size : '';
-            return base + sizePart + ' (' + (parseInt(item.quantity, 10) || 1) + ' pcs)';
-        }).join(', ');
+        return productsLabelMultiline();
     }
 
     function formatBdtCheckout(amount) {
@@ -2520,19 +2520,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             '<tbody>' + rows + '</tbody></table>';
     }
 
+    function formatOrderSlotLine(index, item) {
+        var qty = parseInt(item.quantity, 10) || 1;
+        var unit = parseInt(item.price, 10) || 0;
+        var base = checkoutLineBaseName(item);
+        var size = checkoutLineSizeLabel(item);
+        var sizeText = size ? ' · ' + size : '';
+        return index + '. ' + base + sizeText + ' × ' + qty + ' pcs = ' + formatBdtCheckout(unit * qty);
+    }
+
     function buildProductSlots() {
         var slots = [];
-        cart.forEach(function(item) {
-            var qty = parseInt(item.quantity, 10) || 1;
-            var base = checkoutLineBaseName(item);
-            var size = checkoutLineSizeLabel(item);
-            var sizeText = size ? ' | ' + size : '';
-            slots.push(base + sizeText + ' x' + qty + ' = ?' + ((parseInt(item.price, 10) || 0) * qty));
+        cart.forEach(function(item, idx) {
+            slots.push(formatOrderSlotLine(idx + 1, item));
         });
         while (slots.length < MAX_PRODUCT_SLOTS) {
             slots.push('');
         }
         return slots.slice(0, MAX_PRODUCT_SLOTS);
+    }
+
+    function productsLabelMultiline() {
+        return cart.map(function (item, idx) {
+            return formatOrderSlotLine(idx + 1, item);
+        }).join('\n');
     }
 
     function buildProductImageSlots() {
@@ -3026,7 +3037,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 thana: (document.getElementById('userThana').value || '').trim(),
                 qty: String(qTotal),
                 total: gTotal,
-                products: productsLabel()
+                products: buildWhatsAppProductsList()
             };
 
             postOrderToSheet(formData, nameValue, phoneValue, emailValue, gTotal, btn, orderWa);
