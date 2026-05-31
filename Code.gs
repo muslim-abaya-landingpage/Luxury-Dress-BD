@@ -231,14 +231,142 @@ function buildCourierItemDescription_(ctx) {
   if (ctx && ctx.slotItems && ctx.slotItems.length) {
     lines = ctx.slotItems.slice();
   } else if (ctx && ctx.design) {
-    lines = String(ctx.design).split(/\n|,/).map(function (s) { return String(s || '').trim(); }).filter(Boolean);
+    lines = String(ctx.design).split(/\n/).map(function (s) { return String(s || '').trim(); }).filter(Boolean);
+    if (lines.length <= 1) {
+      lines = String(ctx.design).split(/,/).map(function (s) { return String(s || '').trim(); }).filter(Boolean);
+    }
   }
-  var qty = parseInt(ctx && ctx.qty, 10) || 0;
-  var prefix = qty > 0 ? ('Total ' + qty + ' pcs · ') : '';
-  if (!lines.length) return prefix + String((ctx && ctx.design) || 'Muslim Abaya order').slice(0, 200);
-  var summary = lines.slice(0, 4).join(' | ');
-  if (lines.length > 4) summary += ' | +' + (lines.length - 4) + ' more';
-  return (prefix + summary).slice(0, 200);
+  if (!lines.length) return String((ctx && ctx.design) || 'Muslim Abaya order').slice(0, 500);
+  return lines.slice(0, 10).join('\n').slice(0, 500);
+}
+
+function getProductCatalogUrl_() {
+  return PropertiesService.getScriptProperties().getProperty('PRODUCT_CATALOG_URL') ||
+    'https://muslimabaya.com/category-products.js';
+}
+
+function parseProductsFromCatalogJs_(text) {
+  var items = [];
+  var re = /\{\s*id:\s*"([^"]+)"[\s\S]*?name:\s*"((?:\\.|[^"\\])*)"[\s\S]*?price:\s*(\d+)/g;
+  var m;
+  var seen = {};
+  while ((m = re.exec(text)) !== null) {
+    var id = m[1];
+    var name = m[2].replace(/\\"/g, '"');
+    var price = parseInt(m[3], 10) || 0;
+    if (/ - Back$| - Side$/i.test(name)) continue;
+    var key = name.toLowerCase();
+    if (seen[key]) continue;
+    seen[key] = true;
+    var category = 'other';
+    if (/^ABY-/i.test(id)) category = 'abaya';
+    else if (/^DR-/i.test(id)) category = 'premium-two-piece';
+    items.push({ id: id, name: name, price: price, category: category });
+  }
+  items.sort(function (a, b) { return a.name.localeCompare(b.name); });
+  return items;
+}
+
+function fetchProductCatalog_() {
+  var cache = CacheService.getScriptCache();
+  var cached = cache.get('ma_product_catalog_v1');
+  if (cached) {
+    try { return JSON.parse(cached); } catch (cacheErr) {}
+  }
+  var url = getProductCatalogUrl_();
+  var res = UrlFetchApp.fetch(url, { muteHttpExceptions: true, followRedirects: true });
+  if (res.getResponseCode() >= 400) {
+    throw new Error('CATALOG_FETCH_FAIL HTTP ' + res.getResponseCode());
+  }
+  var items = parseProductsFromCatalogJs_(res.getContentText());
+  cache.put('ma_product_catalog_v1', JSON.stringify(items), 21600);
+  return items;
+}
+
+function getPickerCatalog() {
+  try {
+    return fetchProductCatalog_();
+  } catch (err) {
+    return [];
+  }
+}
+
+function getPickerSizeOptions() {
+  return {
+    abaya: { body: '46 [Free size]', lengths: ['50', '52', '54', '56'] },
+    'premium-two-piece': { body: '42 (Free size)', lengths: ['37-38 inch'] }
+  };
+}
+
+function designTextToSlotItems_(designText) {
+  return String(designText || '').split(/\n/).map(function (s) {
+    return String(s || '').trim();
+  }).filter(Boolean);
+}
+
+function fillActiveRowProductLines_(linesText) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order') ||
+    SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var row = sheet.getActiveCell().getRow();
+  if (row <= 1) throw new Error('Select a data row (row 2+)');
+  var text = String(linesText || '').trim();
+  if (!text) throw new Error('No product lines');
+  formatOnlineOrderProductCell_(sheet, row, text);
+  var lines = designTextToSlotItems_(text);
+  var totalQty = 0;
+  var totalAmt = 0;
+  var i;
+  for (i = 0; i < lines.length; i++) {
+    var line = lines[i];
+    var qm = line.match(/×\s*(\d+)\s*pcs/i);
+    var pm = line.match(/=\s*৳?\s*([\d,]+)/);
+    if (qm) totalQty += parseInt(qm[1], 10) || 0;
+    if (pm) totalAmt += parseFloat(String(pm[1]).replace(/,/g, '')) || 0;
+  }
+  if (totalQty > 0) sheet.getRange(row, 4).setValue(totalQty);
+  if (totalAmt > 0) sheet.getRange(row, 8).setValue(totalAmt);
+  return { ok: true, row: row, qty: totalQty, total: totalAmt };
+}
+
+function fillActiveRowProductLines(linesText) {
+  try {
+    return fillActiveRowProductLines_(linesText);
+  } catch (err) {
+    return { ok: false, error: String(err.message || err) };
+  }
+}
+
+function openProductPickerSidebar() {
+  var html = HtmlService.createHtmlOutputFromFile('ProductPicker')
+    .setTitle('Product Picker')
+    .setWidth(340);
+  SpreadsheetApp.getUi().showSidebar(html);
+}
+
+function syncProductListDropdown_() {
+  var items = fetchProductCatalog_();
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName('ProductList') || ss.insertSheet('ProductList');
+  sh.clear();
+  sh.getRange(1, 1, 1, 3).setValues([['Name', 'Price', 'Category']]);
+  if (items.length) {
+    var rows = items.map(function (p) { return [p.name, p.price, p.category]; });
+    sh.getRange(2, 1, items.length, 3).setValues(rows);
+  }
+  var orderSh = ss.getSheetByName('Online Order');
+  if (orderSh && items.length) {
+    var rule = SpreadsheetApp.newDataValidation()
+      .requireValueInRange(sh.getRange(2, 1, items.length + 1, 1), true)
+      .setAllowInvalid(true)
+      .build();
+    orderSh.getRange('G2:G1000').setDataValidation(rule);
+  }
+  SpreadsheetApp.getUi().alert(
+    'Product dropdown ready.\n\n' +
+    '• Column G = dropdown (' + items.length + ' products)\n' +
+    '• ProductList tab updated\n' +
+    '• Sidebar: Muslim Abaya → Product picker sidebar'
+  );
 }
 
 function rateLimitOrder_(phone) {
@@ -364,6 +492,9 @@ function onOpen() {
     selfHealAutoCourierSetup_();
     SpreadsheetApp.getUi()
       .createMenu('Muslim Abaya')
+      .addItem('Product picker sidebar (column G)', 'openProductPickerSidebar')
+      .addItem('Product dropdown — column G sync', 'syncProductListDropdown_')
+      .addSeparator()
       .addItem('Steadfast — selected row পাঠান', 'steadfastSendActiveRow')
       .addItem('Steadfast — balance দেখুন', 'steadfastShowBalance')
       .addItem('Steadfast API URL fix করুন', 'setSteadfastBaseUrlToApi_')
@@ -856,7 +987,7 @@ function steadfastRetryAutoActiveRow() {
     phone: String(vals[2] || ''),
     address: String(vals[5] || ''),
     design: String(vals[6] || ''),
-    slotItems: [],
+    slotItems: designTextToSlotItems_(String(vals[6] || '')),
     qty: parseInt(String(vals[3] || '0'), 10) || 0,
     total: parseFloat(String(vals[7] || '0').replace(/[^\d.]/g, '')) || 0,
     payment: String(vals[14] || 'Cash On Delivery')
@@ -967,6 +1098,8 @@ function autoCourierOnEditTrigger(e) {
       phone: String(vals[2] || ''),
       address: String(vals[5] || ''),
       design: String(vals[6] || ''),
+      slotItems: designTextToSlotItems_(String(vals[6] || '')),
+      qty: parseInt(String(vals[3] || '0'), 10) || 0,
       total: parseFloat(String(vals[7] || '0').replace(/[^\d.]/g, '')) || 0,
       payment: String(vals[14] || 'Cash On Delivery')
     });
@@ -1007,6 +1140,7 @@ function steadfastSendActiveRow() {
 
   var payment = String(vals[14] || 'Cash On Delivery');
   var codAmount = /cash\s*on\s*delivery/i.test(payment) ? total : 0;
+  var slotItems = designTextToSlotItems_(design);
   var payload = {
     invoice: invoice.replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 40),
     recipient_name: name.slice(0, 100),
@@ -1014,7 +1148,11 @@ function steadfastSendActiveRow() {
     recipient_address: address,
     cod_amount: codAmount,
     note: 'Muslim Abaya',
-    item_description: design.slice(0, 200)
+    item_description: buildCourierItemDescription_({
+      design: design,
+      slotItems: slotItems,
+      qty: parseInt(String(vals[3] || '0'), 10) || 0
+    })
   };
 
   var res;

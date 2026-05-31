@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Hind Siliguri, sans-serif; font-size: 13px; margin: 0; padding: 12px; color: #111; background: #fafafa; }
+    h2 { margin: 0 0 4px; font-size: 15px; }
+    p.sub { margin: 0 0 12px; color: #666; font-size: 12px; line-height: 1.4; }
+    label { display: block; font-weight: 600; margin: 10px 0 4px; font-size: 12px; }
+    select, input, textarea, button { width: 100%; font: inherit; }
+    select, input { padding: 8px 10px; border: 1px solid #ccc; border-radius: 8px; background: #fff; }
+    textarea { padding: 8px 10px; border: 1px solid #ccc; border-radius: 8px; min-height: 120px; resize: vertical; }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .btn { margin-top: 10px; padding: 10px 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    .btn-primary { background: #111; color: #fff; }
+    .btn-secondary { background: #fff; color: #111; border: 1px solid #ccc; }
+    .btn-add { background: #0d6b4d; color: #fff; margin-top: 8px; }
+    .lines { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 8px; min-height: 80px; white-space: pre-wrap; font-size: 12px; line-height: 1.45; }
+    .status { margin-top: 8px; font-size: 12px; color: #0d6b4d; min-height: 18px; }
+    .err { color: #b00020; }
+    #sizeWrap { display: none; }
+  </style>
+</head>
+<body>
+  <h2>Product Picker</h2>
+  <p class="sub">Dropdown দিয়ে product বেছে নিন — column G auto fill। Typing লাগবে না।</p>
+
+  <label for="cat">Category</label>
+  <select id="cat">
+    <option value="all">All products</option>
+    <option value="abaya">Abaya</option>
+    <option value="premium-two-piece">Two-piece</option>
+    <option value="other">Other</option>
+  </select>
+
+  <label for="product">Product</label>
+  <select id="product"><option value="">Loading…</option></select>
+
+  <div id="sizeWrap">
+    <div class="row2">
+      <div>
+        <label for="body">Body</label>
+        <input id="body" type="text" readonly>
+      </div>
+      <div>
+        <label for="length">Length</label>
+        <select id="length"></select>
+      </div>
+    </div>
+  </div>
+
+  <label for="qty">Qty</label>
+  <input id="qty" type="number" min="1" value="1">
+
+  <button type="button" class="btn btn-add" id="addBtn">+ Add to order lines</button>
+
+  <label for="linesOut">Order lines (column G)</label>
+  <textarea id="linesOut" placeholder="1. Maroon Abaya Set · Body 46 [Free size] · Length 50 × 1 pcs = ৳999"></textarea>
+
+  <button type="button" class="btn btn-primary" id="fillBtn">Write to selected row (G)</button>
+  <button type="button" class="btn btn-secondary" id="clearBtn">Clear lines</button>
+
+  <div class="status" id="status"></div>
+
+  <script>
+    var catalog = [];
+    var sizeOpts = {};
+    var lineCount = 0;
+
+    function $(id) { return document.getElementById(id); }
+    function setStatus(msg, isErr) {
+      var el = $('status');
+      el.textContent = msg || '';
+      el.className = 'status' + (isErr ? ' err' : '');
+    }
+
+    function formatLine(index, name, sizeText, qty, price) {
+      var q = parseInt(qty, 10) || 1;
+      var unit = parseInt(price, 10) || 0;
+      var sizePart = sizeText ? (' · ' + sizeText) : '';
+      return index + '. ' + name + sizePart + ' × ' + q + ' pcs = ৳' + (unit * q);
+    }
+
+    function formatSize(cat, lengthVal) {
+      if (cat === 'abaya') {
+        return 'Body ' + (sizeOpts.abaya && sizeOpts.abaya.body || '46 [Free size]') + ' · Length ' + lengthVal;
+      }
+      if (cat === 'premium-two-piece') {
+        return 'Body ' + (sizeOpts['premium-two-piece'] && sizeOpts['premium-two-piece'].body || '42 (Free size)') + ' · Length ' + lengthVal;
+      }
+      return '';
+    }
+
+    function filteredProducts() {
+      var cat = $('cat').value;
+      return catalog.filter(function (p) {
+        return cat === 'all' || p.category === cat;
+      });
+    }
+
+    function refreshProductSelect() {
+      var sel = $('product');
+      var list = filteredProducts();
+      sel.innerHTML = '';
+      if (!list.length) {
+        sel.innerHTML = '<option value="">No products</option>';
+        return;
+      }
+      list.forEach(function (p, i) {
+        var opt = document.createElement('option');
+        opt.value = String(i);
+        opt.textContent = p.name + ' — ৳' + p.price;
+        opt.dataset.cat = p.category;
+        sel.appendChild(opt);
+      });
+      updateSizeFields();
+    }
+
+    function updateSizeFields() {
+      var sel = $('product');
+      var idx = sel.value;
+      var wrap = $('sizeWrap');
+      if (idx === '') { wrap.style.display = 'none'; return; }
+      var p = filteredProducts()[parseInt(idx, 10)];
+      if (!p || (p.category !== 'abaya' && p.category !== 'premium-two-piece')) {
+        wrap.style.display = 'none';
+        return;
+      }
+      wrap.style.display = 'block';
+      var cfg = sizeOpts[p.category] || {};
+      $('body').value = cfg.body || '';
+      var lenSel = $('length');
+      lenSel.innerHTML = '';
+      (cfg.lengths || ['—']).forEach(function (l) {
+        var o = document.createElement('option');
+        o.value = l;
+        o.textContent = l;
+        lenSel.appendChild(o);
+      });
+    }
+
+    function addLine() {
+      var idx = $('product').value;
+      if (idx === '') { setStatus('Select a product first', true); return; }
+      var p = filteredProducts()[parseInt(idx, 10)];
+      var qty = $('qty').value;
+      var sizeText = '';
+      if (p.category === 'abaya' || p.category === 'premium-two-piece') {
+        sizeText = formatSize(p.category, $('length').value);
+      }
+      lineCount += 1;
+      var line = formatLine(lineCount, p.name, sizeText, qty, p.price);
+      var ta = $('linesOut');
+      ta.value = ta.value ? (ta.value + '\n' + line) : line;
+      setStatus('Added: ' + p.name);
+    }
+
+    function fillRow() {
+      var text = $('linesOut').value.trim();
+      if (!text) { setStatus('Add at least one product line', true); return; }
+      setStatus('Saving…');
+      $('fillBtn').disabled = true;
+      google.script.run
+        .withSuccessHandler(function (res) {
+          $('fillBtn').disabled = false;
+          if (res && res.ok) {
+            setStatus('Row ' + res.row + ' updated — Qty ' + res.qty + ', Total ৳' + res.total);
+          } else {
+            setStatus((res && res.error) || 'Failed', true);
+          }
+        })
+        .withFailureHandler(function (err) {
+          $('fillBtn').disabled = false;
+          setStatus(String(err && err.message ? err.message : err), true);
+        })
+        .fillActiveRowProductLines(text);
+    }
+
+    function boot() {
+      google.script.run
+        .withSuccessHandler(function (opts) { sizeOpts = opts || {}; })
+        .getPickerSizeOptions();
+      google.script.run
+        .withSuccessHandler(function (items) {
+          catalog = items || [];
+          refreshProductSelect();
+          setStatus(catalog.length + ' products loaded');
+        })
+        .withFailureHandler(function (err) {
+          setStatus('Catalog load failed: ' + err, true);
+        })
+        .getPickerCatalog();
+    }
+
+    $('cat').addEventListener('change', refreshProductSelect);
+    $('product').addEventListener('change', updateSizeFields);
+    $('addBtn').addEventListener('click', addLine);
+    $('fillBtn').addEventListener('click', fillRow);
+    $('clearBtn').addEventListener('click', function () {
+      $('linesOut').value = '';
+      lineCount = 0;
+      setStatus('Cleared');
+    });
+    boot();
+  </script>
+</body>
+</html>
