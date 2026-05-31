@@ -8,7 +8,7 @@ function ensureCategoryStyles() {
     link.rel = "stylesheet";
     document.head.appendChild(link);
   }
-  link.href = "category-sidebar.css?v=20260603cart14";
+  link.href = "category-sidebar.css?v=20260603vc14";
   var qtyLink =
     document.getElementById("qty-stepper-css") ||
     document.querySelector('link[href*="qty-stepper.css"]');
@@ -20,7 +20,7 @@ function ensureCategoryStyles() {
   }
   qtyLink.href = "qty-stepper.css?v=20260531qty2";
   var shopLink = document.querySelector('link[href*="shop-page.css"]');
-  if (shopLink) shopLink.href = "shop-page.css?v=20260603cart14";
+  if (shopLink) shopLink.href = "shop-page.css?v=20260603vc14";
 }
 
 function maShopBagIcon(size) {
@@ -35,6 +35,34 @@ function maShopBagIcon(size) {
     '<path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/>' +
     '<path d="M6 6L5 3H2"/></svg></span>'
   );
+}
+
+function fireShopViewContent(product, categoryKey) {
+  if (!product) return;
+  var cat =
+    categoryKey ||
+    (document.body && document.body.getAttribute("data-shop-category")) ||
+    "";
+  var defaultType =
+    typeof getDefaultProductType === "function" ? getDefaultProductType(product, cat) : "";
+  var price =
+    typeof resolveProductPrice === "function"
+      ? resolveProductPrice(product, cat, defaultType)
+      : parseInt(product.price, 10) || 0;
+  var payload = {
+    content_type: "product",
+    currency: "BDT",
+    content_ids: [String(product.id || product.name || "")],
+    content_name: String(product.name || ""),
+    value: price
+  };
+  if (cat) payload.content_category = cat;
+  if (typeof pushTrackingEvent === "function") {
+    pushTrackingEvent("ViewContent", payload);
+  } else if (typeof window !== "undefined") {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push(Object.assign({ event: "ViewContent" }, payload));
+  }
 }
 
 function displayFabricLabel(fabric, fallback) {
@@ -1328,6 +1356,7 @@ function openProductQuickView(idx) {
   if (history.pushState) {
     history.pushState({ maProduct: idx }, "", "#p-" + idx);
   }
+  fireShopViewContent(products[idx], categoryKey);
   updatePqvGalleryNav(root);
 }
 
