@@ -7,12 +7,15 @@ window.CHECKOUT_UPAZILAS_BY_DISTRICT={"বরগুনা":["আমতলী","�
 (function () {
   "use strict";
 
-  var MSG_PICK_DISTRICT =
-    "\u09aa\u09cd\u09b0\u09a5\u09ae\u09c7 \u099c\u09c7\u09b2\u09be \u09b8\u09bf\u09b2\u09c7\u0995\u09cd\u099f \u0995\u09b0\u09c1\u09a8";
-  var MSG_PICK_THANA =
-    "\u09a5\u09be\u09a8\u09be / \u0989\u09aa\u099c\u09c7\u09b2\u09be \u09a8\u09bf\u09b0\u09cd\u09ac\u09be\u099a\u09a8 \u0995\u09b0\u09c1\u09a8 (\u09ad\u09a8\u09cd\u099a\u09b2\u09bf\u0995)";
-  var MSG_NO_LIST =
-    "\u098f\u09b9\u09bf \u09a1\u09bf\u09b8\u09cd\u099f\u09cd\u09b0\u09bf\u0995\u09cd\u099f\u09c7\u09b0 \u09a4\u09be\u09b2\u09bf\u0995\u09be \u09aa\u09be\u09bf\u09af\u09bc\u09c7\u09a8\u09bf";
+  var MSG_PICK_DISTRICT = "Select district first";
+  var MSG_PICK_THANA = "Select upazila / thana (optional)";
+  var MSG_NO_LIST = "No list available for this district";
+
+  function upazilaLabelEn(name) {
+    var map = window.CHECKOUT_UPAZILA_BN_TO_EN;
+    if (map && map[name]) return map[name];
+    return name;
+  }
 
   var DATA_URL = "data/bd-upazilas-by-district.json";
   var districtSelect = null;
@@ -89,7 +92,7 @@ window.CHECKOUT_UPAZILAS_BY_DISTRICT={"বরগুনা":["আমতলী","�
     list.forEach(function (name) {
       var opt = document.createElement("option");
       opt.value = name;
-      opt.textContent = name;
+      opt.textContent = upazilaLabelEn(name);
       thanaSelect.appendChild(opt);
     });
   }
