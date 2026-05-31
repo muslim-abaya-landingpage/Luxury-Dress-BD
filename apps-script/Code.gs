@@ -243,6 +243,7 @@ function handleOnlineOrderPost_(e) {
   var district = param_(e, 'District') || validated.district || '';
 
   ensureOnlineOrderHeaders_(sheet);
+  ensureOnlineOrderImageHeaders_(sheet);
 
   appendRow_(sheet, [
     timestamp,
@@ -264,6 +265,9 @@ function handleOnlineOrderPost_(e) {
     notes
   ]);
 
+  var imageUrls = collectOrderImageUrls_(e);
+  setOrderImageFormulas_(sheet, sheet.getLastRow(), imageUrls);
+
   try {
     sendToFacebookCAPI({
       Name: validated.name,
@@ -283,7 +287,10 @@ function handleOnlineOrderPost_(e) {
 function onOpen() {
   try {
     var orderSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
-    if (orderSheet) ensureOnlineOrderHeaders_(orderSheet);
+    if (orderSheet) {
+      ensureOnlineOrderHeaders_(orderSheet);
+      ensureOnlineOrderImageHeaders_(orderSheet);
+    }
     selfHealSteadfastBaseUrl_();
     selfHealAutoCourierSetup_();
     SpreadsheetApp.getUi()
@@ -291,7 +298,7 @@ function onOpen() {
       .addItem('Steadfast — selected row পাঠান', 'steadfastSendActiveRow')
       .addItem('Steadfast — balance দেখুন', 'steadfastShowBalance')
       .addItem('Steadfast API URL fix করুন', 'setSteadfastBaseUrlToApi_')
-      .addItem('Sheet headers (J–Q) সেট করুন', 'setupOnlineOrderExtraHeaders')
+      .addItem('Sheet headers (J–Q + ছবি R–W) সেট করুন', 'setupOnlineOrderExtraHeaders')
       .addItem('Auto courier trigger চালু করুন', 'setupAutoCourierEditTrigger')
       .addSeparator()
       .addItem('Admin account তৈরি (প্রথমবার)', 'createFirstAdminFromMenu')
@@ -311,6 +318,40 @@ function getOnlineOrderExtraHeaders_() {
     'Txn / Sender',
     'নোট'
   ];
+}
+
+var ONLINE_ORDER_IMAGE_COL = 18;
+var ONLINE_ORDER_IMAGE_COUNT = 6;
+
+function getOnlineOrderImageHeaders_() {
+  return ['ছবি ১', 'ছবি ২', 'ছবি ৩', 'ছবি ৪', 'ছবি ৫', 'ছবি ৬'];
+}
+
+function collectOrderImageUrls_(e) {
+  var urls = [];
+  var i;
+  for (i = 1; i <= ONLINE_ORDER_IMAGE_COUNT; i++) {
+    var v = param_(e, 'Image_' + i);
+    if (v && String(v).trim()) urls.push(String(v).trim());
+  }
+  return urls;
+}
+
+function setOrderImageFormulas_(sheet, row, urls) {
+  if (!sheet || !row || row < 2 || !urls || !urls.length) return;
+  var hasAny = false;
+  for (var i = 0; i < urls.length && i < ONLINE_ORDER_IMAGE_COUNT; i++) {
+    var url = String(urls[i] || '').trim();
+    if (!url || url.indexOf('http') !== 0) continue;
+    var safeUrl = url.replace(/"/g, '%22');
+    sheet.getRange(row, ONLINE_ORDER_IMAGE_COL + i).setFormula('=IMAGE("' + safeUrl + '", 1)');
+    hasAny = true;
+  }
+  if (hasAny) {
+    try {
+      sheet.setRowHeight(row, 88);
+    } catch (heightErr) {}
+  }
 }
 
 /** কলাম I–Q (৯–১৭) হেডার — অর্ডার লেখার আগে অটো চালায় */
@@ -338,11 +379,40 @@ function ensureOnlineOrderHeaders_(sheet) {
   } catch (fmtErr) {}
 }
 
+function ensureOnlineOrderImageHeaders_(sheet) {
+  if (!sheet) return;
+  var headers = getOnlineOrderImageHeaders_();
+  var startCol = ONLINE_ORDER_IMAGE_COL;
+  var current = sheet.getRange(1, startCol, 1, headers.length).getValues()[0];
+  var needsUpdate = false;
+  for (var i = 0; i < headers.length; i++) {
+    if (String(current[i] || '').trim() !== headers[i]) {
+      needsUpdate = true;
+      break;
+    }
+  }
+  if (!needsUpdate) return;
+  var headerRange = sheet.getRange(1, startCol, 1, headers.length);
+  headerRange.setValues([headers]);
+  try {
+    headerRange
+      .setBackground('#e3f2fd')
+      .setFontColor('#111111')
+      .setFontWeight('bold')
+      .setHorizontalAlignment('center')
+      .setWrap(true);
+    for (var c = 0; c < headers.length; c++) {
+      sheet.setColumnWidth(startCol + c, 96);
+    }
+  } catch (imgHdrErr) {}
+}
+
 function setupOnlineOrderExtraHeaders() {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order') ||
     SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   ensureOnlineOrderHeaders_(sheet);
-  SpreadsheetApp.getUi().alert('কলাম I–Q হেডার সেট হয়েছে (row 1)। A–H আগে থেকে থাকলে সেগুলো অপরিবর্তিত।');
+  ensureOnlineOrderImageHeaders_(sheet);
+  SpreadsheetApp.getUi().alert('কলাম I–Q ও R–W (ছবি) হেডার সেট হয়েছে। A–H আগে থেকে থাকলে সেগুলো অপরিবর্তিত।');
 }
 
 function getSteadfastKeys_() {

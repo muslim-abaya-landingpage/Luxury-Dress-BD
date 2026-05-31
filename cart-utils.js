@@ -45,6 +45,26 @@
     return "";
   }
 
+  /** Full https URL for Google Sheet IMAGE() and external tools. */
+  function resolveAbsoluteStoreImageUrl(item) {
+    var raw = resolveItemImage(item);
+    if (!raw) return "";
+    raw = String(raw).trim();
+    if (/^https?:\/\//i.test(raw)) {
+      if (raw.indexOf("github.com") !== -1 && raw.indexOf("/blob/") !== -1) {
+        raw = raw.replace("https://github.com/", "https://raw.githubusercontent.com/").replace("/blob/", "/");
+        raw = raw.replace(/\?raw=1$/i, "");
+      }
+      return raw;
+    }
+    var origin = "https://muslimabaya.com";
+    if (typeof window !== "undefined" && window.location && window.location.protocol !== "file:") {
+      origin = String(window.location.origin || origin).replace(/\/$/, "");
+    }
+    if (raw.charAt(0) === "/") raw = raw.slice(1);
+    return origin + "/" + raw.replace(/^\.?\//, "");
+  }
+
   function findByName(name) {
     var n = String(name || "").trim().toLowerCase();
     for (var i = 0; i < CATALOG.length; i++) {
@@ -346,6 +366,7 @@
   global.flushStoreCartForCheckout = flushStoreCartForCheckout;
   global.findCatalogByName = findByName;
   global.resolveStoreItemImage = resolveItemImage;
+  global.resolveAbsoluteStoreImageUrl = resolveAbsoluteStoreImageUrl;
 
   function refreshCartBadgeUI(cartLines) {
     if (typeof global.updateCartBadge === "function") {

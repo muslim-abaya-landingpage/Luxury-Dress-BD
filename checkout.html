@@ -1800,7 +1800,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="product-config.js?v=20260603ennotes"></script>
 <script src="product-utils.js?v=20260602twopiece"></script>
 <script defer src="site-header.js?v=20260601en"></script>
-<script src="cart-utils.js?v=20260603cartqty"></script>
+<script src="cart-utils.js?v=20260603img"></script>
 <script src="checkout-location-labels.js?v=20260603loc"></script>
 <script src="checkout-locations.js?v=20260603loc"></script>
 <script>
@@ -2089,6 +2089,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             });
     }
     const MAX_PRODUCT_SLOTS = 20;
+    const MAX_ORDER_IMAGES = 6;
 
     function pageLink(route) {
         if (typeof window.siteHref === 'function') return window.siteHref(route);
@@ -2519,6 +2520,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             slots.push('');
         }
         return slots.slice(0, MAX_PRODUCT_SLOTS);
+    }
+
+    function buildProductImageSlots() {
+        var slots = [];
+        cart.forEach(function(item) {
+            if (slots.length >= MAX_ORDER_IMAGES) return;
+            var url = typeof resolveAbsoluteStoreImageUrl === 'function'
+                ? resolveAbsoluteStoreImageUrl(item)
+                : String(item.image || item.img || '').trim();
+            slots.push(url);
+        });
+        while (slots.length < MAX_ORDER_IMAGES) {
+            slots.push('');
+        }
+        return slots.slice(0, MAX_ORDER_IMAGES);
     }
 
     var CLEAR_CART_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>';
@@ -2974,6 +2990,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             var slots = buildProductSlots();
             for (var i = 0; i < MAX_PRODUCT_SLOTS; i++) {
                 formData.append('Product_' + (i + 1), slots[i]);
+            }
+            var imageSlots = buildProductImageSlots();
+            for (var imgIdx = 0; imgIdx < MAX_ORDER_IMAGES; imgIdx++) {
+                formData.append('Image_' + (imgIdx + 1), imageSlots[imgIdx] || '');
             }
 
             if (!ORDER_SCRIPT_URL) {
