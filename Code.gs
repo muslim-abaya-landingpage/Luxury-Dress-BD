@@ -164,7 +164,7 @@ function validateOrderInput_(e) {
   if (address.length < 8 || address.length > 400) throw new Error('INVALID_ADDRESS');
 
   var qty = parseInt(param_(e, 'Quantity'), 10) || 0;
-  if (qty < 1 || qty > 50) throw new Error('INVALID_QTY');
+  if (qty < 1 || qty > 500) throw new Error('INVALID_QTY');
 
   var total = parseFloat(String(param_(e, 'Total') || '0').replace(/[^\d.]/g, '')) || 0;
   if (total < 100) throw new Error('MIN_ORDER');
@@ -172,7 +172,7 @@ function validateOrderInput_(e) {
   var design = String(param_(e, 'Design') || '').trim();
   var slotItems = [];
   var i;
-  for (i = 1; i <= 20; i++) {
+  for (i = 1; i <= 50; i++) {
     var v = param_(e, 'Product_' + i);
     if (v && String(v).trim() !== '') slotItems.push(String(v).trim());
   }
@@ -294,6 +294,7 @@ function onOpen() {
       .addItem('Steadfast — balance দেখুন', 'steadfastShowBalance')
       .addItem('Steadfast API URL fix করুন', 'setSteadfastBaseUrlToApi_')
       .addItem('Sheet headers (J–Q + ছবি R–W) সেট করুন', 'setupOnlineOrderExtraHeaders')
+      .addItem('Selected row — ছবি thumbnail ঠিক করুন', 'repairOnlineOrderImagesActiveRow')
       .addItem('Auto courier trigger চালু করুন', 'setupAutoCourierEditTrigger')
       .addSeparator()
       .addItem('Admin account তৈরি (প্রথমবার)', 'createFirstAdminFromMenu')
@@ -332,6 +333,52 @@ function collectOrderImageUrls_(e) {
   return urls;
 }
 
+function normalizeOrderImageUrl_(url) {
+  var u = String(url || '').trim();
+  if (!u) return '';
+  if (u.indexOf('github.com') !== -1 && u.indexOf('/blob/') !== -1) {
+    u = u.replace(/^https:\/\/github\.com\//i, 'https://raw.githubusercontent.com/');
+    u = u.replace('/blob/', '/');
+    u = u.replace(/\?raw=1$/i, '').replace(/\?raw=true$/i, '');
+  }
+  return u;
+}
+
+function fetchOrderImageBlob_(url) {
+  var normalized = normalizeOrderImageUrl_(url);
+  var candidates = [];
+  if (normalized) candidates.push(normalized);
+  if (url && url !== normalized) candidates.push(String(url).trim());
+  var j;
+  for (j = 0; j < candidates.length; j++) {
+    var tryUrl = candidates[j];
+    if (!tryUrl || tryUrl.indexOf('http') !== 0) continue;
+    try {
+      var resp = UrlFetchApp.fetch(tryUrl, {
+        muteHttpExceptions: true,
+        followRedirects: true,
+        validateHttpsCertificates: true,
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; MuslimAbayaOrders/1.0)' }
+      });
+      if (resp.getResponseCode() !== 200) continue;
+      var blob = resp.getBlob();
+      if (!blob || !blob.getBytes().length) continue;
+      var ct = String(blob.getContentType() || '').toLowerCase();
+      if (ct.indexOf('text/html') !== -1) continue;
+      return blob;
+    } catch (fetchErr) {}
+  }
+  return null;
+}
+
+function setOrderImageCellPreview_(cell, url) {
+  var normalized = normalizeOrderImageUrl_(url);
+  if (!normalized || normalized.indexOf('http') !== 0) return false;
+  var safe = normalized.replace(/"/g, '""');
+  cell.setFormula('=IMAGE("' + safe + '", 1)');
+  return true;
+}
+
 function setOrderProductImages_(sheet, row, urls) {
   if (!sheet || !row || row < 2 || !urls || !urls.length) return;
   var hasAny = false;
@@ -342,34 +389,65 @@ function setOrderProductImages_(sheet, row, urls) {
     var cell = sheet.getRange(row, col);
     try {
       cell.clearContent();
-      var resp = UrlFetchApp.fetch(url, {
-        muteHttpExceptions: true,
-        followRedirects: true,
-        validateHttpsCertificates: true
-      });
-      if (resp.getResponseCode() !== 200) {
-        cell.setValue(url);
+      var blob = fetchOrderImageBlob_(url);
+      if (blob) {
+        var img = sheet.insertImage(blob, col, row);
+        img.setWidth(72).setHeight(72);
+        hasAny = true;
         continue;
       }
-      var blob = resp.getBlob();
-      if (!blob || !blob.getBytes().length) {
-        cell.setValue(url);
+      if (setOrderImageCellPreview_(cell, url)) {
+        hasAny = true;
         continue;
       }
-      var img = sheet.insertImage(blob, col, row);
-      img.setWidth(72).setHeight(72);
-      hasAny = true;
+      cell.setValue('Photo');
+      cell.setNote(url);
     } catch (imgErr) {
       try {
-        cell.setValue(url);
+        if (!setOrderImageCellPreview_(cell, url)) {
+          cell.setValue('Photo');
+          cell.setNote(url);
+        } else {
+          hasAny = true;
+        }
       } catch (cellErr) {}
     }
   }
   if (hasAny) {
     try {
       sheet.setRowHeight(row, 88);
+      for (var c = 0; c < ONLINE_ORDER_IMAGE_COUNT; c++) {
+        sheet.setColumnWidth(ONLINE_ORDER_IMAGE_COL + c, 96);
+      }
     } catch (heightErr) {}
   }
+}
+
+/** Selected row-এর R–W লিংক/নোট থেকে ছবি thumbnail বানায় */
+function repairOnlineOrderImagesActiveRow() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order') ||
+    SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var row = sheet.getActiveRange().getRow();
+  if (row < 2) {
+    SpreadsheetApp.getUi().alert('অর্ডার row সিলেক্ট করুন (row 2 বা নিচে)।');
+    return;
+  }
+  var urls = [];
+  var i;
+  for (i = 0; i < ONLINE_ORDER_IMAGE_COUNT; i++) {
+    var cell = sheet.getRange(row, ONLINE_ORDER_IMAGE_COL + i);
+    var note = String(cell.getNote() || '').trim();
+    var val = String(cell.getDisplayValue() || cell.getValue() || '').trim();
+    if (note.indexOf('http') === 0) urls.push(note);
+    else if (val.indexOf('http') === 0) urls.push(val);
+    else if (val && val !== 'Photo') urls.push(val);
+  }
+  if (!urls.length) {
+    SpreadsheetApp.getUi().alert('এই row-এ R–W তে কোনো ছবি URL পাওয়া যায়নি।');
+    return;
+  }
+  setOrderProductImages_(sheet, row, urls);
+  SpreadsheetApp.getUi().alert('Row ' + row + ': ছবি thumbnail আপডেট হয়েছে।');
 }
 
 /** কলাম I–Q (৯–১৭) হেডার — অর্ডার লেখার আগে অটো চালায় */

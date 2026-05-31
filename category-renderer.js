@@ -209,6 +209,66 @@ function shopCartHasMatchingLine(item, sizeValue, categoryKey) {
   return false;
 }
 
+function buildShopCartLineItem(item, qtyToAdd, sizeValue, categoryKeyOpt, selectedTypeOpt) {
+  var categoryKey =
+    categoryKeyOpt ||
+    (item && item.category) ||
+    (document.body && document.body.getAttribute("data-shop-category")) ||
+    "";
+  var isAbaya = typeof isAbayaProduct === "function" && isAbayaProduct(item, categoryKey);
+  var isTwoPiece = typeof isTwoPieceProduct === "function" && isTwoPieceProduct(item, categoryKey);
+  var abayaCfg = isAbaya && typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig() : null;
+  var twoPieceCfg = isTwoPiece && typeof getTwoPieceSizeConfig === "function" ? getTwoPieceSizeConfig() : null;
+  var pickedLength =
+    String(sizeValue || "").trim() ||
+    (isTwoPiece && twoPieceCfg
+      ? twoPieceCfg.lengthSizeLabel
+      : abayaCfg
+        ? abayaCfg.lengthSizes[0]
+        : "50");
+  var cat = typeof findCatalogByName === "function" ? findCatalogByName(item.name) : null;
+  var pickedSize = pickedLength;
+  var pickedType = selectedTypeOpt || item._cartType || "";
+  var unitPrice = resolveProductPrice(item, categoryKey, pickedType);
+  var cartName = item.name;
+  if (pickedType) cartName += " (" + pickedType + ")";
+  var sizeLabel =
+    isAbaya && typeof formatAbayaCartSize === "function"
+      ? formatAbayaCartSize(pickedLength)
+      : isTwoPiece && typeof formatTwoPieceCartSize === "function"
+        ? formatTwoPieceCartSize(pickedLength)
+        : "Size " + pickedSize;
+  cartName += " (" + sizeLabel + ")";
+
+  return {
+    id: item.id || (cat ? cat.id : ""),
+    name: cartName,
+    price: unitPrice,
+    quantity: parseInt(qtyToAdd, 10) || 1,
+    image: item.image || (cat && cat.image) || "",
+    color: item.color || "",
+    colorLabel: item.colorLabel || "",
+    fabric: item.fabric || "",
+    description: item.description || item.fabric || "",
+    size:
+      isAbaya && typeof formatAbayaCartSize === "function"
+        ? formatAbayaCartSize(pickedLength)
+        : isTwoPiece && typeof formatTwoPieceCartSize === "function"
+          ? formatTwoPieceCartSize(pickedLength)
+          : pickedSize,
+    lengthSize: isAbaya ? pickedLength : isTwoPiece && twoPieceCfg ? twoPieceCfg.lengthSizeLabel : "",
+    bodySize:
+      isAbaya && abayaCfg
+        ? abayaCfg.bodySizeLabel
+        : isTwoPiece && twoPieceCfg
+          ? twoPieceCfg.bodySizeLabel
+          : "",
+    productType: pickedType,
+    category: item.category || categoryKey || "",
+    categoryLabel: item.categoryLabel || ""
+  };
+}
+
 function shopAddProductToCart(item, qtyToAdd, sizeValue, categoryKeyOpt) {
   var categoryKey =
     categoryKeyOpt ||
@@ -233,47 +293,7 @@ function shopAddProductToCart(item, qtyToAdd, sizeValue, categoryKeyOpt) {
   shopCartCtx.lastCartAddKey = addGuardKey;
   shopCartCtx.lastCartAddAt = now;
 
-  var cat = typeof findCatalogByName === "function" ? findCatalogByName(item.name) : null;
-  var pickedSize = pickedLength;
-  var pickedType = item._cartType || "";
-  var unitPrice = resolveProductPrice(item, categoryKey, pickedType);
-  var cartName = item.name;
-  if (pickedType) cartName += " (" + pickedType + ")";
-  var sizeLabel =
-    isAbaya && typeof formatAbayaCartSize === "function"
-      ? formatAbayaCartSize(pickedLength)
-      : isTwoPiece && typeof formatTwoPieceCartSize === "function"
-        ? formatTwoPieceCartSize(pickedLength)
-      : "Size " + pickedSize;
-  cartName += " (" + sizeLabel + ")";
-
-  var line = {
-    id: item.id || (cat ? cat.id : ""),
-    name: cartName,
-    price: unitPrice,
-    quantity: parseInt(qtyToAdd, 10) || 1,
-    image: item.image || (cat && cat.image) || "",
-    color: item.color || "",
-    colorLabel: item.colorLabel || "",
-    fabric: item.fabric || "",
-    description: item.description || item.fabric || "",
-    size:
-      isAbaya && typeof formatAbayaCartSize === "function"
-        ? formatAbayaCartSize(pickedLength)
-        : isTwoPiece && typeof formatTwoPieceCartSize === "function"
-          ? formatTwoPieceCartSize(pickedLength)
-        : pickedSize,
-    lengthSize: isAbaya ? pickedLength : isTwoPiece && twoPieceCfg ? twoPieceCfg.lengthSizeLabel : "",
-    bodySize:
-      isAbaya && abayaCfg
-        ? abayaCfg.bodySizeLabel
-        : isTwoPiece && twoPieceCfg
-          ? twoPieceCfg.bodySizeLabel
-          : "",
-    productType: item._cartType || "",
-    category: item.category || categoryKey || "",
-    categoryLabel: item.categoryLabel || ""
-  };
+  var line = buildShopCartLineItem(item, qtyToAdd, sizeValue, categoryKeyOpt, item._cartType || "");
 
   var updated = [];
   if (typeof addOrMergeStoreCartItem === "function") {
@@ -296,13 +316,80 @@ function shopAddProductToCart(item, qtyToAdd, sizeValue, categoryKeyOpt) {
 
   if (typeof showCartAddedToast === "function") {
     showCartAddedToast({
-      name: item.name || cartName,
+      name: item.name || line.name,
       image: line.image,
       price: line.price
     });
   }
 
   refreshShopCardsAfterCartChange();
+}
+
+function parseWholesaleQtyValue(raw) {
+  var digits = toAsciiDigits(raw).replace(/\D/g, "");
+  var n = parseInt(digits, 10);
+  if (!n || n < 0) return 0;
+  if (n > 999) return 999;
+  return n;
+}
+
+function getPqvWholesaleEntries(scopeRoot) {
+  var out = [];
+  if (!scopeRoot) return out;
+  scopeRoot.querySelectorAll(".pqv-wh-qty-input[data-wh-size]").forEach(function (input) {
+    var qty = parseWholesaleQtyValue(input.value);
+    if (qty <= 0) return;
+    out.push({
+      size: input.getAttribute("data-wh-size") || "",
+      qty: qty
+    });
+  });
+  return out;
+}
+
+function shopAddBulkProductsToCart(item, entries, categoryKey, selectedType) {
+  if (!item || !entries || !entries.length) return 0;
+  var cart = typeof loadStoreCart === "function" ? loadStoreCart({ readOnly: true }) : [];
+  var addedLines = 0;
+  var totalQty = 0;
+  var firstLine = null;
+  entries.forEach(function (entry) {
+    var qty = parseInt(entry.qty, 10) || 0;
+    if (qty <= 0 || !entry.size) return;
+    var line = buildShopCartLineItem(item, qty, entry.size, categoryKey, selectedType || "");
+    if (typeof addOrMergeStoreCartItem === "function") {
+      cart = addOrMergeStoreCartItem(cart, line);
+    } else {
+      cart.push(line);
+    }
+    if (!firstLine) firstLine = line;
+    addedLines += 1;
+    totalQty += qty;
+  });
+  if (!addedLines) return 0;
+  if (typeof persistStoreCart === "function") persistStoreCart(cart);
+  if (typeof afterCartMutation === "function") afterCartMutation(cart);
+
+  if (typeof pushTrackingEvent === "function") {
+    pushTrackingEvent("AddToCart", {
+      content_ids: [firstLine && firstLine.id ? firstLine.id : item.name],
+      content_name: item.name,
+      value: firstLine ? firstLine.price * totalQty : 0,
+      currency: "BDT",
+      quantity: totalQty
+    });
+  }
+
+  if (typeof showCartAddedToast === "function") {
+    showCartAddedToast({
+      name: (item.name || "Product") + " · " + totalQty + " pcs (" + addedLines + " sizes)",
+      image: firstLine && firstLine.image ? firstLine.image : item.image,
+      price: firstLine ? firstLine.price : resolveProductPrice(item, categoryKey, selectedType || "")
+    });
+  }
+
+  refreshShopCardsAfterCartChange();
+  return totalQty;
 }
 
 function resetShopCartContext() {
@@ -1008,6 +1095,7 @@ function bindPqvInteractions(p, idx, categoryKey, scopeRoot) {
 
   bindPqvImageZoom(modal);
   bindPqvQtyInput(modal);
+  bindPqvWholesale(modal);
 
   var activeType =
     getSelectedTypeForIdx(modal, idx) || getDefaultProductType(p, categoryKey);
@@ -1140,6 +1228,115 @@ function closeProductQuickView(skipHistory) {
   if (body) body.innerHTML = "";
 }
 
+function buildPqvWholesaleSectionHtml(sizes, idx, isAbaya) {
+  var sizeLabel = isAbaya ? "Length" : "Size";
+  var rows = sizes
+    .map(function (sizeVal) {
+      var safeSize = escapeHtml(String(sizeVal));
+      return (
+        '<div class="pqv-wh-row">' +
+        '<span class="pqv-wh-size-label">' +
+        escapeHtml(sizeLabel) +
+        " " +
+        escapeHtml(formatSizeLabel(sizeVal)) +
+        "</span>" +
+        '<div class="ma-qty-stepper pqv-wh-qty" role="group" aria-label="Quantity for size ' +
+        safeSize +
+        '">' +
+        '<button type="button" class="ma-qty-stepper__btn pqv-wh-qty-btn" data-pqv-wh-qty="minus" data-wh-size="' +
+        safeSize +
+        '" aria-label="Decrease">−</button>' +
+        '<input type="text" class="ma-qty-stepper__input pqv-wh-qty-input" data-wh-size="' +
+        safeSize +
+        '" value="0" inputmode="numeric" pattern="[0-9]*" lang="en" autocomplete="off" aria-label="Quantity">' +
+        '<button type="button" class="ma-qty-stepper__btn pqv-wh-qty-btn" data-pqv-wh-qty="plus" data-wh-size="' +
+        safeSize +
+        '" aria-label="Increase">+</button>' +
+        "</div></div>"
+      );
+    })
+    .join("");
+  return (
+    '<div class="pqv-wholesale" id="pqvWholesale">' +
+    '<button type="button" class="pqv-wholesale-toggle" data-pqv-wh-toggle="1" aria-expanded="false">' +
+    '<span class="pqv-wholesale-toggle__title">Wholesale order</span>' +
+    '<span class="pqv-wholesale-toggle__hint">Multiple sizes · same color</span>' +
+    '<span class="pqv-wholesale-toggle__chev" aria-hidden="true">▼</span>' +
+    "</button>" +
+    '<div class="pqv-wholesale-panel" hidden>' +
+    '<p class="pqv-wholesale-hint">Enter quantity for each size. Leave 0 to skip. Example: Length 50 × 5, Length 52 × 10.</p>' +
+    '<div class="pqv-wholesale-grid">' +
+    rows +
+    "</div>" +
+    '<p class="pqv-wholesale-total">Total pieces: <strong id="pqvWhTotal">0</strong></p>' +
+    '<button type="button" class="pqv-act pqv-act-cart pqv-wholesale-add" data-product-idx="' +
+    idx +
+    '" data-action="add-bulk" disabled>Add all sizes to cart</button>' +
+    "</div></div>"
+  );
+}
+
+function updatePqvWholesaleTotal(modal) {
+  if (!modal) return;
+  var totalEl = modal.querySelector("#pqvWhTotal");
+  var addBtn = modal.querySelector("[data-action='add-bulk']");
+  if (!totalEl || !addBtn) return;
+  var total = 0;
+  modal.querySelectorAll(".pqv-wh-qty-input[data-wh-size]").forEach(function (input) {
+    total += parseWholesaleQtyValue(input.value);
+  });
+  totalEl.textContent = String(total);
+  addBtn.disabled = total <= 0;
+  addBtn.textContent = total > 0 ? "Add " + total + " pcs to cart" : "Add all sizes to cart";
+}
+
+function resetPqvWholesaleInputs(modal) {
+  if (!modal) return;
+  modal.querySelectorAll(".pqv-wh-qty-input[data-wh-size]").forEach(function (input) {
+    input.value = "0";
+  });
+  updatePqvWholesaleTotal(modal);
+}
+
+function bindPqvWholesale(modal) {
+  var block = modal.querySelector("#pqvWholesale");
+  if (!block || block.getAttribute("data-wh-bound") === "1") return;
+  block.setAttribute("data-wh-bound", "1");
+  var toggle = block.querySelector("[data-pqv-wh-toggle]");
+  var panel = block.querySelector(".pqv-wholesale-panel");
+  if (toggle && panel) {
+    toggle.addEventListener("click", function () {
+      var open = panel.hidden;
+      panel.hidden = !open;
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      toggle.classList.toggle("is-open", open);
+      if (open) updatePqvWholesaleTotal(modal);
+    });
+  }
+  block.addEventListener("click", function (ev) {
+    var btn = ev.target.closest("[data-pqv-wh-qty]");
+    if (!btn || !block.contains(btn)) return;
+    var sizeKey = btn.getAttribute("data-wh-size") || "";
+    var input = modal.querySelector('.pqv-wh-qty-input[data-wh-size="' + sizeKey + '"]');
+    if (!input) return;
+    var cur = parseWholesaleQtyValue(input.value);
+    var next = btn.getAttribute("data-pqv-wh-qty") === "plus" ? cur + 1 : Math.max(0, cur - 1);
+    input.value = String(next);
+    updatePqvWholesaleTotal(modal);
+  });
+  block.querySelectorAll(".pqv-wh-qty-input[data-wh-size]").forEach(function (input) {
+    input.addEventListener("input", function () {
+      input.value = String(parseWholesaleQtyValue(input.value));
+      updatePqvWholesaleTotal(modal);
+    });
+    input.addEventListener("blur", function () {
+      input.value = String(parseWholesaleQtyValue(input.value));
+      updatePqvWholesaleTotal(modal);
+    });
+  });
+  updatePqvWholesaleTotal(modal);
+}
+
 function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
   var defaultType = getDefaultProductType(p, categoryKey);
   var productPrice = resolveProductPrice(p, categoryKey, defaultType);
@@ -1237,6 +1434,9 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
         buildPqvOptionPills(sizes, idx, "pqv-size-opt", "data-size-value", formatSizeLabel) +
         "</div></div>";
 
+  var showWholesale = (isAbaya && sizes.length > 1) || (!isTwoPiece && sizes.length > 1);
+  var wholesaleHtml = showWholesale ? buildPqvWholesaleSectionHtml(sizes, idx, isAbaya) : "";
+
   return (
     '<div class="pqv-anzaar">' +
     '<div class="pqv-gallery">' +
@@ -1275,6 +1475,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     typeField +
     colorField +
     sizeField +
+    wholesaleHtml +
     "</div>" +
     '<div class="pqv-qty-row">' +
     '<span class="pqv-field-label pqv-qty-label">Quantity</span>' +
@@ -1440,10 +1641,26 @@ function onGlobalShopCartClick(ev) {
     return;
   }
 
-  if (action !== "add" && action !== "buy-now") return;
+  if (action !== "add" && action !== "buy-now" && action !== "add-bulk") return;
 
   var categoryKey =
     (document.body && document.body.getAttribute("data-shop-category")) || "";
+
+  if (action === "add-bulk") {
+    ev.preventDefault();
+    ev.stopPropagation();
+    var scopeBulk = inProductView ? pqvScope : root;
+    var selectedTypeBulk = inProductView ? getSelectedTypeForIdx(scopeBulk, idx) : "";
+    var entries = getPqvWholesaleEntries(scopeBulk);
+    if (!entries.length) {
+      alert("Enter quantity for at least one size.");
+      return;
+    }
+    var cartItemBulk = Object.assign({}, products[idx], { _cartType: selectedTypeBulk });
+    var addedQty = shopAddBulkProductsToCart(cartItemBulk, entries, categoryKey, selectedTypeBulk);
+    if (addedQty > 0 && scopeBulk) resetPqvWholesaleInputs(scopeBulk);
+    return;
+  }
 
   if (action === "add" && !inProductView && shopProductHasTypeChoice(products[idx], categoryKey)) {
     ev.preventDefault();
