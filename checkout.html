@@ -2553,6 +2553,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             var url = typeof resolveAbsoluteStoreImageUrl === 'function'
                 ? resolveAbsoluteStoreImageUrl(item)
                 : String(item.image || item.img || '').trim();
+            if (!url) return;
             slots.push(url);
         });
         while (slots.length < MAX_ORDER_IMAGES) {

@@ -413,6 +413,9 @@ function addToCartFromCard(productId, ev) {
         category: p.category || '',
         categoryLabel: p.categoryLabel || ''
     };
+    if (typeof enrichHomeCartLine === 'function') {
+        line = enrichHomeCartLine(p, line);
+    }
     homeCartSyncSuppress = true;
     if (typeof addOrMergeStoreCartItem === 'function') {
         var existing = typeof loadStoreCart === 'function' ? loadStoreCart({ readOnly: true }) : [];
@@ -489,11 +492,11 @@ function renderSidebar() {
         const priceHtml = orderViaDetail && p.typePriceFrom
             ? `${"\u09F3"}${p.typePriceFrom}`
             : `${"\u09F3"}${p.price}`;
-        const qtyStepperHtml = orderViaDetail ? '' : `
-            <div class="ma-qty-stepper home-card-qty${inCart ? " is-visible" : ""}" role="group" aria-label="Quantity">
-                <button type="button" class="ma-qty-stepper__btn" aria-label="পরিমাণ কমান"${qty <= 1 ? " disabled" : ""} onclick="event.stopPropagation();updateQty('${p.id}', -1)">−</button>
-                <span class="ma-qty-stepper__value" id="qty-${p.id}" aria-live="polite">${qty}</span>
-                <button type="button" class="ma-qty-stepper__btn" aria-label="পরিমাণ বাড়ান" onclick="event.stopPropagation();updateQty('${p.id}', 1)">+</button>
+        const qtyStepperHtml = `
+            <div class="ma-qty-stepper home-card-qty is-visible${inCart ? " in-cart" : ""}" role="group" aria-label="Quantity">
+                <button type="button" class="ma-qty-stepper__btn" aria-label="Decrease quantity"${qty <= 1 ? " disabled" : ""} onclick="event.stopPropagation();updateQty('${p.id}', -1)">−</button>
+                <span class="ma-qty-stepper__value" id="qty-${p.id}" aria-live="polite">${qty > 0 ? qty : 1}</span>
+                <button type="button" class="ma-qty-stepper__btn" aria-label="Increase quantity" onclick="event.stopPropagation();updateQty('${p.id}', 1)">+</button>
             </div>`;
         const actionsRowHtml = `<div class="product-actions-row">
                 <button type="button" class="anzaar-btn anzaar-btn-cart${inCart ? ' is-active' : ''}" data-home-cart-action="add" data-product-id="${p.id}">Add to Cart</button>
@@ -621,7 +624,9 @@ function selectProduct(index, id, shouldScroll, options) {
 }
 function updateQty(id, val) {
     let oldQty = getCartQty(id);
-    cart[id] = Math.max(0, oldQty + val);
+    let nextQty = oldQty + val;
+    if (oldQty <= 0 && val > 0) nextQty = 1;
+    cart[id] = Math.max(0, nextQty);
     if (val > 0) toastCartAdded(id);
     if (cart[id] > oldQty) {
         var p = products.find(function (x) { return x.id === id; });

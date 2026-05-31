@@ -68,6 +68,7 @@ function doGet(e) {
 
 function doPost(e) {
   try {
+    selfHealSteadfastBaseUrl_();
     selfHealAutoCourierSetup_();
     if (e && e.postData && e.postData.type && String(e.postData.type).indexOf('json') !== -1) {
       return handleSteadfastWebhookPost_(e);
@@ -370,6 +371,8 @@ function onOpen() {
       .addItem('Selected row — ছবি thumbnail ঠিক করুন', 'repairOnlineOrderImagesActiveRow')
       .addItem('Auto courier — Confirmed হলে পাঠান', 'setupAutoCourierConfirmedMode')
       .addItem('Auto courier — Order হলেই instant', 'setupAutoCourierInstantMode')
+      .addItem('Auto courier — status দেখুন', 'showAutoCourierStatus')
+      .addItem('Steadfast — selected row retry auto', 'steadfastRetryAutoActiveRow')
       .addSeparator()
       .addItem('Admin account তৈরি (প্রথমবার)', 'createFirstAdminFromMenu')
       .addToUi();
@@ -599,6 +602,8 @@ function getSteadfastKeys_() {
 
 function getSteadfastBaseUrls_(preferred) {
   var urls = [];
+  // packzy.com = Steadfast API mirror; resolves from Google Apps Script (steadfast.com.bd often DNS-fails)
+  var packzyBase = 'https://portal.packzy.com/api/v1';
   var apiBase = 'https://api.steadfast.com.bd/api/v1';
   var portalBase = 'https://portal.steadfast.com.bd/api/v1';
   function pushUnique(u) {
@@ -606,19 +611,20 @@ function getSteadfastBaseUrls_(preferred) {
     if (!x) return;
     if (urls.indexOf(x) === -1) urls.push(x);
   }
-  // api.* first — portal often fails DNS from Google servers
-  pushUnique(apiBase);
+  pushUnique(packzyBase);
   pushUnique(preferred);
+  pushUnique(apiBase);
   pushUnique(portalBase);
   return urls;
 }
 
-/** Prefer api.steadfast.com.bd when portal URL was saved or DNS fails */
+/** Prefer portal.packzy.com — steadfast.com.bd subdomains often fail DNS from Google servers */
 function selfHealSteadfastBaseUrl_() {
   var props = PropertiesService.getScriptProperties();
   var cur = String(props.getProperty('STEADFAST_BASE_URL') || '').replace(/\/+$/, '');
-  if (!cur || cur.indexOf('portal.steadfast.com.bd') !== -1) {
-    props.setProperty('STEADFAST_BASE_URL', 'https://api.steadfast.com.bd/api/v1');
+  var packzy = 'https://portal.packzy.com/api/v1';
+  if (!cur || cur.indexOf('steadfast.com.bd') !== -1) {
+    props.setProperty('STEADFAST_BASE_URL', packzy);
     return true;
   }
   return false;
@@ -670,8 +676,8 @@ function steadfastApiRequest_(method, path, payload) {
 }
 
 function setSteadfastBaseUrlToApi_() {
-  PropertiesService.getScriptProperties().setProperty('STEADFAST_BASE_URL', 'https://api.steadfast.com.bd/api/v1');
-  SpreadsheetApp.getUi().alert('STEADFAST_BASE_URL সেট করা হয়েছে: https://api.steadfast.com.bd/api/v1');
+  PropertiesService.getScriptProperties().setProperty('STEADFAST_BASE_URL', 'https://portal.packzy.com/api/v1');
+  SpreadsheetApp.getUi().alert('STEADFAST_BASE_URL সেট: https://portal.packzy.com/api/v1\n\n(Steadfast-এর official API mirror — Google Script DNS-এ কাজ করে)');
 }
 
 function steadfastPlaceOrder_(orderData) {
@@ -682,6 +688,24 @@ function isAutoCourierEnabled_() {
   var v = String(PropertiesService.getScriptProperties().getProperty('AUTO_COURIER_ON') || '').toLowerCase();
   if (!v) return true; // default ON for this project
   return v === '1' || v === 'true' || v === 'yes' || v === 'on';
+}
+
+/** Default instant — website order → Steadfast. Menu থেকে confirmed mode চালু করা যায়। */
+function getAutoCourierMode_() {
+  var raw = PropertiesService.getScriptProperties().getProperty('AUTO_COURIER_MODE');
+  if (raw === null || raw === undefined || String(raw).trim() === '') {
+    return 'instant';
+  }
+  return String(raw).toLowerCase().trim();
+}
+
+function appendAutoCourierNote_(sheet, row, note) {
+  if (!sheet || !row || !note) return;
+  try {
+    var prev = String(sheet.getRange(row, 17).getValue() || '');
+    if (prev.indexOf(note) !== -1) return;
+    sheet.getRange(row, 17).setValue(prev ? (prev + ' | ' + note) : note);
+  } catch (err) {}
 }
 
 function tryAutoCourierForOrder_(ctx) {
@@ -757,31 +781,97 @@ function tryAutoCourierForOrder_(ctx) {
 }
 
 function shouldAutoCourierOnConfirmed_() {
-  var mode = String(PropertiesService.getScriptProperties().getProperty('AUTO_COURIER_MODE') || '').toLowerCase();
-  if (!mode) return true; // default: confirmed mode
-  return mode === 'confirmed';
+  return getAutoCourierMode_() === 'confirmed';
 }
 
 function shouldAutoCourierOnNewOrder_() {
   if (!isAutoCourierEnabled_()) return false;
-  var mode = String(PropertiesService.getScriptProperties().getProperty('AUTO_COURIER_MODE') || 'confirmed').toLowerCase();
-  return mode === 'instant';
+  return getAutoCourierMode_() === 'instant';
 }
 
 function maybeAutoCourierAfterWebOrder_(sheet, row, ctx) {
-  if (!shouldAutoCourierOnNewOrder_()) return;
+  if (!isAutoCourierEnabled_()) {
+    appendAutoCourierNote_(sheet, row, 'AUTO_COURIER_OFF: Muslim Abaya menu → Instant mode');
+    return;
+  }
+  if (!shouldAutoCourierOnNewOrder_()) {
+    appendAutoCourierNote_(sheet, row, 'AUTO_COURIER: Confirmed mode — J=Confirmed করলে Steadfast');
+    return;
+  }
   tryAutoCourierForOrder_(Object.assign({ sheet: sheet, row: row }, ctx || {}));
 }
 
 function getAutoCourierStatusNote_() {
   if (!isAutoCourierEnabled_()) {
-    return 'Auto courier OFF — Muslim Abaya menu থেকে চালু করুন।';
+    return 'Auto courier OFF — Muslim Abaya menu থেকে Instant mode চালু করুন।';
   }
-  var mode = String(PropertiesService.getScriptProperties().getProperty('AUTO_COURIER_MODE') || 'confirmed').toLowerCase();
+  var mode = getAutoCourierMode_();
+  var keys = getSteadfastKeys_();
+  var keyOk = !!(keys.apiKey && keys.secretKey);
   if (mode === 'instant') {
-    return 'Instant mode: website order → Steadfast auto (API key লাগবে)।';
+    return keyOk
+      ? 'Instant mode ON: website order → Steadfast auto।'
+      : 'Instant mode ON কিন্তু STEADFAST_API_KEY/SECRET_KEY Script properties-এ নেই।';
   }
-  return 'Confirmed mode: Status (J) = Confirmed করলে Steadfast auto।';
+  return keyOk
+    ? 'Confirmed mode: Status (J) = Confirmed করলে Steadfast auto।'
+    : 'Confirmed mode ON কিন্তু Steadfast API key missing।';
+}
+
+function showAutoCourierStatus() {
+  var keys = getSteadfastKeys_();
+  var keyOk = !!(keys.apiKey && keys.secretKey);
+  var mode = getAutoCourierMode_();
+  var on = isAutoCourierEnabled_();
+  var triggerOk = hasAutoCourierTrigger_();
+  SpreadsheetApp.getUi().alert(
+    'Auto courier status\n\n' +
+    'ON: ' + (on ? 'Yes' : 'No') + '\n' +
+    'Mode: ' + mode + '\n' +
+    'Steadfast keys: ' + (keyOk ? 'Set ✓' : 'MISSING ✗') + '\n' +
+    'Confirmed edit trigger: ' + (triggerOk ? 'Yes' : 'No') + '\n\n' +
+    getAutoCourierStatusNote_()
+  );
+}
+
+function steadfastRetryAutoActiveRow() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order') ||
+    SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var row = sheet.getActiveCell().getRow();
+  if (row <= 1) {
+    SpreadsheetApp.getUi().alert('Data row সিলেক্ট করুন (row 2+)');
+    return;
+  }
+  var vals = sheet.getRange(row, 1, 1, 17).getValues()[0];
+  var tracking = String(vals[10] || '').trim();
+  if (tracking) {
+    SpreadsheetApp.getUi().alert('Tracking already exists: ' + tracking);
+    return;
+  }
+  var res = tryAutoCourierForOrder_({
+    sheet: sheet,
+    row: row,
+    orderId: String(vals[8] || ('MA-ROW-' + row)),
+    name: String(vals[1] || ''),
+    phone: String(vals[2] || ''),
+    address: String(vals[5] || ''),
+    design: String(vals[6] || ''),
+    slotItems: [],
+    qty: parseInt(String(vals[3] || '0'), 10) || 0,
+    total: parseFloat(String(vals[7] || '0').replace(/[^\d.]/g, '')) || 0,
+    payment: String(vals[14] || 'Cash On Delivery')
+  });
+  if (res && res.ok) {
+    SpreadsheetApp.getUi().alert('Steadfast OK!\nTracking: ' + (res.tracking || '—'));
+    return;
+  }
+  var note = String(sheet.getRange(row, 17).getValue() || '');
+  SpreadsheetApp.getUi().alert(
+    'Auto courier failed.\n\n' +
+    'Reason: ' + String((res && res.reason) || 'UNKNOWN') + '\n' +
+    (note ? ('Notes (Q): ' + note.slice(0, 200)) : '') + '\n\n' +
+    'Muslim Abaya → Steadfast balance / API URL fix চেক করুন।'
+  );
 }
 
 function setupAutoCourierEditTriggerInternal_() {
@@ -980,9 +1070,9 @@ function steadfastShowBalance() {
       'সম্ভাব্য কারণ: Steadfast API বন্ধ/নেটওয়ার্ক বা API Key ভুল।\n\n' +
       'যা করবেন:\n' +
       '1) Muslim Abaya → "Steadfast API URL fix করুন" (একবার)\n' +
-      '2) Apps Script → Deploy → Manage deployments → New version\n' +
-      '3) ১–২ মিনিট পর আবার "balance দেখুন"\n' +
-      '4) Steadfast merchant panel থেকে API Key/Secret ঠিক আছে কিনা দেখুন\n\n' +
+      '2) URL = portal.packzy.com/api/v1 (Steadfast mirror)\n' +
+      '3) Script properties → STEADFAST_API_KEY + STEADFAST_SECRET_KEY\n' +
+      '4) ১–২ মিনিট পর আবার "balance দেখুন"\n\n' +
       'Error: ' + String(err && err.message ? err.message : err)
     );
   }
@@ -1013,7 +1103,7 @@ function updateOrderFromSteadfastWebhook_(payload) {
   var i;
   for (i = 1; i < data.length; i++) {
     if (String(data[i][8] || '').trim() !== invoice) continue;
-    sheet.getRange(i + 1, 11, i + 1, 13).setValues([[
+    sheet.getRange(i + 1, 11, 1, 3).setValues([[
       payload.tracking_code || data[i][10] || '',
       payload.consignment_id || data[i][11] || '',
       payload.status || ''
@@ -1437,7 +1527,7 @@ function getAdminTodayStats_(e) {
     todayCount: todayCount,
     courierCount: courierCount,
     autoCourier: isAutoCourierEnabled_(),
-    autoCourierMode: String(PropertiesService.getScriptProperties().getProperty('AUTO_COURIER_MODE') || 'confirmed'),
+    autoCourierMode: getAutoCourierMode_(),
     note: getAutoCourierStatusNote_()
   };
 }

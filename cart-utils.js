@@ -36,11 +36,40 @@
 
   var PLACEHOLDER_IMG = "Baby-Pink-Floral-Print.jpeg";
 
+  function findCatalogProductFull(id, name) {
+    var nid = String(id || "").trim();
+    var nname = String(name || "").trim().toLowerCase();
+    var i;
+    for (i = 0; i < CATALOG.length; i++) {
+      if (nid && CATALOG[i].id === nid) return CATALOG[i];
+      if (nname && String(CATALOG[i].name || "").trim().toLowerCase() === nname) return CATALOG[i];
+    }
+    var cats = (typeof window !== "undefined" && window.CATEGORY_PRODUCTS) || {};
+    var keys = Object.keys(cats);
+    var k;
+    for (k = 0; k < keys.length; k++) {
+      var list = cats[keys[k]];
+      if (!Array.isArray(list)) continue;
+      for (i = 0; i < list.length; i++) {
+        var p = list[i];
+        if (!p) continue;
+        if (nid && String(p.id || "").trim() === nid) {
+          return Object.assign({ category: p.category || keys[k] }, p);
+        }
+        if (nname && String(p.name || "").trim().toLowerCase() === nname) {
+          return Object.assign({ category: p.category || keys[k] }, p);
+        }
+      }
+    }
+    return null;
+  }
+
   function resolveItemImage(item) {
     if (!item) return "";
     var stored = String(item.image || item.img || "").trim();
     if (stored) return stored;
     var cat = item.id ? CATALOG.find(function (p) { return p.id === item.id; }) : findByName(item.name);
+    if (!cat) cat = findCatalogProductFull(item.id, item.name);
     if (cat && cat.image) return cat.image;
     return "";
   }
@@ -330,6 +359,39 @@
     return persistStoreCart(list);
   }
 
+  /** Homepage / simple lines → full checkout line (size + image) */
+  function enrichHomeCartLine(homeProduct, line) {
+    if (!line) return line;
+    var out = Object.assign({}, line);
+    var catKey = (homeProduct && homeProduct.category) || out.category || "";
+    var full = findCatalogProductFull(out.id, out.name);
+    if (full && full.image) out.image = full.image;
+    if (!out.category && full && full.category) out.category = full.category;
+
+    if (typeof global.isAbayaProduct === "function" && global.isAbayaProduct(out, catKey)) {
+      var abCfg = typeof global.getAbayaSizeConfig === "function" ? global.getAbayaSizeConfig() : null;
+      if (abCfg) {
+        var abLen = out.lengthSize || abCfg.lengthSizes[0];
+        out.lengthSize = String(abLen);
+        out.bodySize = out.bodySize || abCfg.bodySizeLabel;
+        if (typeof global.formatAbayaCartSize === "function") {
+          out.size = global.formatAbayaCartSize(abLen);
+        }
+      }
+    } else if (typeof global.isTwoPieceProduct === "function" && global.isTwoPieceProduct(out, catKey)) {
+      var tpCfg = typeof global.getTwoPieceSizeConfig === "function" ? global.getTwoPieceSizeConfig() : null;
+      if (tpCfg) {
+        out.bodySize = out.bodySize || tpCfg.bodySizeLabel;
+        out.lengthSize = out.lengthSize || tpCfg.lengthSizeLabel;
+        if (typeof global.formatTwoPieceCartSize === "function") {
+          out.size = global.formatTwoPieceCartSize(out.lengthSize);
+        }
+      }
+    }
+    out.image = resolveItemImage(out);
+    return out;
+  }
+
   /** Homepage cart object → checkout lines (all selected products + qty). */
   function buildLinesFromHomeCart(cartObj, productList) {
     var lines = [];
@@ -343,7 +405,7 @@
         return x && (x.id === id || x.catalogId === id);
       });
       if (!p) return;
-      lines.push({
+      var line = enrichHomeCartLine(p, {
         id: p.catalogId || p.id,
         name: p.name,
         price: parseInt(p.price, 10) || 550,
@@ -352,6 +414,7 @@
         category: p.category || "",
         categoryLabel: p.categoryLabel || ""
       });
+      lines.push(line);
     });
     return normalizeArray(lines);
   }
@@ -367,6 +430,7 @@
   global.cartTotalQty = cartTotalQty;
   global.addOrMergeStoreCartItem = addOrMergeItem;
   global.buildLinesFromHomeCart = buildLinesFromHomeCart;
+  global.enrichHomeCartLine = enrichHomeCartLine;
   global.flushStoreCartForCheckout = flushStoreCartForCheckout;
   global.findCatalogByName = findByName;
   global.resolveStoreItemImage = resolveItemImage;
