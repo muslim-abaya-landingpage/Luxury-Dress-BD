@@ -694,12 +694,12 @@ button.img-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 48px;
-  padding: 12px 12px;
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 1.25;
-  font-family: inherit;
+  min-height: 50px;
+  padding: 12px 10px;
+  font-family: Inter, "Segoe UI", system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.2;
   text-align: center;
   text-decoration: none;
   border-radius: 4px;
@@ -713,9 +713,14 @@ button.img-wrap {
 
 .anzaar-btn-ico {
   display: inline-flex;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
+}
+
+.anzaar-btn-ico svg {
+  width: 20px;
+  height: 20px;
 }
 
 .anzaar-btn-cart {

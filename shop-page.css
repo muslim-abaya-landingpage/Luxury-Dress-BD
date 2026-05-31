@@ -68,11 +68,24 @@ body.shop-page .pqv-stock,
 body.shop-page .premium-card .card-spec-v,
 body.shop-page .premium-card .card-spec-chip,
 body.shop-page .premium-card-detail .detail-content h3,
-body.shop-page .premium-card-detail .detail-price {
+body.shop-page .premium-card-detail .detail-price,
+body.shop-page .anzaar-btn,
+body.shop-page .anzaar-btn-cart,
+body.shop-page .anzaar-btn-msg,
+body.shop-page .anzaar-btn-buy {
   font-family: var(--font-product-en);
   font-variant-ligatures: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+body.shop-page .anzaar-btn,
+body.shop-page .anzaar-btn-cart,
+body.shop-page .anzaar-btn-msg,
+body.shop-page .anzaar-btn-buy {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
 }
 
 body.shop-page .pqv-title {

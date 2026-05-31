@@ -2110,12 +2110,12 @@ function buildProductCard(p, idx, waLink, detailMode, categoryKey, allProducts) 
     (inCart ? " is-active" : "") +
     '" data-product-idx="' +
     idx +
-    '" data-action="add"><span class="anzaar-btn-ico" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M6 6L5 3H2"/></svg></span> Add to Cart</button>' +
+    '" data-action="add"><span class="anzaar-btn-ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M6 6L5 3H2"/></svg></span><span lang="en">Add to Cart</span></button>' +
     "<a href='" +
     waLink +
     "?text=" +
     encodeURIComponent(p.name + " অর্ডার করতে চাই") +
-    "' target='_blank' rel='noopener' class='anzaar-btn anzaar-btn-msg' onclick='event.stopPropagation()'>Send Message</a>" +
+    "' target='_blank' rel='noopener' class='anzaar-btn anzaar-btn-msg' onclick='event.stopPropagation()'><span lang='en'>Send Message</span></a>" +
     "</div></div></article>"
   );
 

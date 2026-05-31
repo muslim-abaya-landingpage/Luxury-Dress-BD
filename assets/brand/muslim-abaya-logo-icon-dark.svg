@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Muslim Abaya">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Muslim Abaya icon on dark">
   <defs>
     <linearGradient id="ma-gold" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#e8d5a3"/>
@@ -6,7 +6,7 @@
       <stop offset="100%" stop-color="#8f7428"/>
     </linearGradient>
   </defs>
-  <rect width="512" height="512" fill="#ffffff"/>
+  <rect width="512" height="512" fill="#111111"/>
   <circle cx="256" cy="256" r="200" fill="#111111"/>
   <circle cx="256" cy="256" r="186" fill="none" stroke="url(#ma-gold)" stroke-width="7"/>
   <path d="M256 124c-50 68-82 136-82 204 0 20 37 34 82 34s82-14 82-34c0-68-32-136-82-204z" fill="none" stroke="url(#ma-gold)" stroke-width="12" stroke-linejoin="round"/>
