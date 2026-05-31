@@ -374,7 +374,7 @@ function goToCheckoutPage() {
         pcs += parseInt(line.quantity, 10) || 0;
     });
     if (!lines.length || !pcs) {
-        alert('অনুগ্রহ করে অন্তত একটি পণ্য কার্টে যোগ করুন।');
+        alert('Please add at least one product to your cart.');
         return;
     }
     if (typeof flushStoreCartForCheckout === 'function') {
@@ -657,6 +657,16 @@ function calc(syncCart) {
     updateCartIcon(q);
     if (syncCart !== false) syncHomeCartToCheckout();
 }
+function goToShopFromVideo(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    var target = document.getElementById('premium-collection');
+    if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+    }
+    window.location.href =
+        typeof window.siteHref === 'function' ? window.siteHref('/category') : 'category.html';
+}
 function goToCheckout(e) {
     if (e && e.preventDefault) e.preventDefault();
     goToCheckoutPage();
@@ -722,6 +732,7 @@ window.updateQty = updateQty;
 window.goToProductDetail = goToProductDetail;
 window.openCurrentProductDetail = openCurrentProductDetail;
 window.removeFromCart = removeFromCart;
+window.goToShopFromVideo = goToShopFromVideo;
 window.__homeRefreshCatalog = function (opts) {
     opts = opts || {};
     hydrateHomeProducts();
