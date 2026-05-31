@@ -93,6 +93,20 @@ body.shop-page .anzaar-btn-cart {
   letter-spacing: 0.01em;
 }
 
+/* Abaya + Premium Two-piece: compact action labels */
+body.shop-page[data-shop-category="abaya"] .anzaar-btn-cart,
+body.shop-page[data-shop-category="abaya"] .anzaar-btn-msg,
+body.shop-page[data-shop-category="premium-two-piece"] .anzaar-btn-cart,
+body.shop-page[data-shop-category="premium-two-piece"] .anzaar-btn-msg,
+body.shop-page[data-shop-category="abaya"] .pqv-act-cart,
+body.shop-page[data-shop-category="abaya"] .pqv-act-msg,
+body.shop-page[data-shop-category="premium-two-piece"] .pqv-act-cart,
+body.shop-page[data-shop-category="premium-two-piece"] .pqv-act-msg {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
 body.shop-page .pqv-title {
   font-family: Georgia, "Times New Roman", "Noto Serif Bengali", serif;
 }

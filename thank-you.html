@@ -1,25 +1,21 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <title>??????? - Muslim Abaya | muslimabaya.com</title>
-    
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-ML7RL6BR');</script>
+    <title>Thank You - Muslim Abaya | muslimabaya.com</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Hind+Siliguri:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="site-header.css?v=20260603logo">
     <link rel="stylesheet" href="site-footer.css?v=20260603footen">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
+
 <style>
     body {
-        font-family: 'Hind Siliguri', sans-serif;
+        font-family: Inter, 'Hind Siliguri', sans-serif;
         margin: 0;
         min-height: 100vh;
         background: radial-gradient(circle at top, #fff6dd 0%, #f8f9fb 45%, #eef2f8 100%);
@@ -56,14 +52,39 @@
         background: #ecfdf3;
         border: 2px solid #bbf7d0;
     }
-    .thank-message { margin: 0; font-size: 20px; line-height: 1.65; color: #374151; font-weight: 600; }
-    .actions { margin-top: 24px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+    .thank-message {
+        margin: 0;
+        font-size: 18px;
+        line-height: 1.65;
+        color: #374151;
+        font-weight: 600;
+    }
+    .thank-sub {
+        font-size: 14px;
+        color: #6b7280;
+        margin: 10px 0 0;
+        line-height: 1.6;
+    }
+    .order-id-line {
+        display: none;
+        font-size: 15px;
+        color: #111;
+        margin: 12px 0 0;
+        font-weight: 700;
+    }
+    .actions {
+        margin-top: 24px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
     .btn {
         text-decoration: none;
         font-weight: 700;
         padding: 12px 20px;
         border-radius: 10px;
-        font-size: 16px;
+        font-size: 15px;
         border: 1px solid #111;
     }
     .btn-dark { background: #111; color: #fff; }
@@ -90,26 +111,27 @@
     </script>
 </head>
 <body>
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-ML7RL6BR"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div id="site-header-mount"></div>
 
     <div class="container">
         <div class="icon"><i class="fas fa-check"></i></div>
-        <p class="thank-message">???????! ????? ?????? ???? ??????? ?????? ????????? ??? ?????? ??? ??? ??????? ??????</p>
-        <p id="orderIdLine" class="order-id-line" style="display:none;font-size:15px;color:#111;margin:12px 0 0;font-weight:700"></p>
-        <p style="font-size:14px;color:#6b7280;margin:10px 0 0;line-height:1.6">?????? ID ??????? ????? ?????????? ?? ?? ?????? ????? ?????</p>
+        <p class="thank-message">Thank you! Your order has been received. We will contact you shortly to confirm delivery.</p>
+        <p id="orderIdLine" class="order-id-line"></p>
+        <p class="thank-sub">Save your order ID for reference, or track your order on our help page.</p>
         <div class="actions">
-            <a href="/" class="btn btn-dark"><i class="fas fa-shopping-bag"></i> ??? ???????? ????</a>
-            <a href="https://wa.me/8801971642683" class="btn btn-light" target="_blank" rel="noopener">WhatsApp ???????</a>
-            <a href="help.html#order-status" class="btn btn-light">?????? ?????????</a>
+            <a href="/" class="btn btn-dark"><i class="fas fa-shopping-bag"></i> Continue Shopping</a>
+            <a href="https://wa.me/8801971642683" class="btn btn-light" target="_blank" rel="noopener">WhatsApp Us</a>
+            <a href="help.html#order-status" class="btn btn-light">Track Order</a>
         </div>
     </div>
     <script>
-        localStorage.removeItem('cart');
-        localStorage.removeItem('user_cart');
-        localStorage.removeItem('secured_checkout_cart');
-        sessionStorage.removeItem('cart');
+        if (typeof clearStoreCart === 'function') {
+            clearStoreCart();
+        }
+        if (typeof clearStoreCartSession === 'function') {
+            clearStoreCartSession();
+        }
+        try { sessionStorage.removeItem('cart'); } catch (e) {}
         (function () {
             var oid = '';
             try { oid = sessionStorage.getItem('ma_last_order_id') || ''; } catch (e) {}
@@ -117,14 +139,14 @@
                 var el = document.getElementById('orderIdLine');
                 if (el) {
                     el.style.display = 'block';
-                    el.textContent = '?????? ID: ' + oid;
+                    el.textContent = 'Order ID: ' + oid;
                 }
             }
         })();
     </script>
     <div id="site-footer-mount"></div>
-    <script defer src="site-header.js?v=20260531nav"></script>
+    <script defer src="site-header.js?v=20260603logo"></script>
     <script src="site-api-config.js?v=20260529"></script>
-    <script src="site-footer.js?v=20260531wa"></script>
+    <script src="site-footer.js?v=20260603footen"></script>
 </body>
 </html>
