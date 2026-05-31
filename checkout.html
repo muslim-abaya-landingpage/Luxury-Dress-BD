@@ -1798,7 +1798,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="auth-config.js"></script>
 <script src="auth-api.js"></script>
 <script src="product-config.js?v=20260603ennotes"></script>
-<script src="product-utils.js?v=20260602twopiece"></script>
+<script src="product-utils.js?v=20260603sizelabel"></script>
 <script defer src="site-header.js?v=20260601en"></script>
 <script src="cart-utils.js?v=20260603img"></script>
 <script src="checkout-location-labels.js?v=20260603loc"></script>
@@ -2388,11 +2388,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         return cartSubtotal() + shippingCharge();
     }
 
+    function checkoutLineBaseName(item) {
+        if (typeof getCartLineBaseName === 'function') return getCartLineBaseName(item);
+        if (typeof stripSizeFromCartName === 'function') return stripSizeFromCartName(item.name);
+        return String(item.name || '');
+    }
+
+    function checkoutLineSizeLabel(item) {
+        if (typeof getCartLineSizeLabel === 'function') return getCartLineSizeLabel(item);
+        return String(item.size || item.selectedSize || item.lengthSize || '').trim();
+    }
+
     function productsLabel() {
         return cart.map(function(item) {
-            var size = String(item.size || item.selectedSize || '').trim();
-            var sizePart = size ? ' · Size: ' + size : '';
-            return item.name + sizePart + ' (' + (parseInt(item.quantity, 10) || 1) + ' pcs)';
+            var base = checkoutLineBaseName(item);
+            var size = checkoutLineSizeLabel(item);
+            var sizePart = size ? ' · ' + size : '';
+            return base + sizePart + ' (' + (parseInt(item.quantity, 10) || 1) + ' pcs)';
         }).join(', ');
     }
 
@@ -2490,7 +2502,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         cart.forEach(function (item) {
             var qty = parseInt(item.quantity, 10) || 1;
             var unit = parseInt(item.price, 10) || 0;
-            var size = item.size || item.selectedSize || '?';
+            var size = checkoutLineSizeLabel(item) || '?';
             var fabric = item.fabric || item.material || 'Premium Fabric';
             rows +=
                 '<tr>' +
@@ -2512,9 +2524,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var slots = [];
         cart.forEach(function(item) {
             var qty = parseInt(item.quantity, 10) || 1;
-            var size = String(item.size || item.selectedSize || '').trim();
-            var sizeText = size ? ' | Size: ' + size : '';
-            slots.push(item.name + sizeText + ' x' + qty + ' = ?' + ((parseInt(item.price, 10) || 0) * qty));
+            var base = checkoutLineBaseName(item);
+            var size = checkoutLineSizeLabel(item);
+            var sizeText = size ? ' | ' + size : '';
+            slots.push(base + sizeText + ' x' + qty + ' = ?' + ((parseInt(item.price, 10) || 0) * qty));
         });
         while (slots.length < MAX_PRODUCT_SLOTS) {
             slots.push('');

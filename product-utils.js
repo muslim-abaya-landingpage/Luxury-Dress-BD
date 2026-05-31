@@ -351,6 +351,38 @@
     return getTwoPieceSizeConfig().lengthSizeLabel;
   }
 
+  function stripSizeFromCartName(name) {
+    return String(name || "")
+      .replace(/\s*\(Body\s+[^)]+\)\s*$/i, "")
+      .replace(/\s*\(Size\s+[^)]+\)\s*$/i, "")
+      .trim();
+  }
+
+  function getCartLineSizeLabel(item) {
+    if (!item) return "";
+    var direct = String(item.size || item.selectedSize || "").trim();
+    if (direct) return direct;
+    var cat = item.category || item.categoryKey || "";
+    if (item.lengthSize) {
+      if (isAbayaProduct(item, cat)) return formatAbayaCartSize(item.lengthSize);
+      if (isTwoPieceProduct(item, cat)) return formatTwoPieceCartSize(item.lengthSize);
+      return String(item.lengthSize);
+    }
+    if (isAbayaProduct(item, cat)) {
+      var fromName = parseAbayaLengthSize(item.name || "");
+      if (fromName) return formatAbayaCartSize(fromName);
+    }
+    if (isTwoPieceProduct(item, cat)) {
+      var tpLen = parseTwoPieceLengthSize(item.name || "");
+      if (tpLen) return formatTwoPieceCartSize(tpLen);
+    }
+    return "";
+  }
+
+  function getCartLineBaseName(item) {
+    return stripSizeFromCartName(item && item.name);
+  }
+
   g.getAbayaSizeConfig = getAbayaSizeConfig;
   g.isAbayaProduct = isAbayaProduct;
   g.formatAbayaCartSize = formatAbayaCartSize;
@@ -359,6 +391,9 @@
   g.isTwoPieceProduct = isTwoPieceProduct;
   g.formatTwoPieceCartSize = formatTwoPieceCartSize;
   g.parseTwoPieceLengthSize = parseTwoPieceLengthSize;
+  g.stripSizeFromCartName = stripSizeFromCartName;
+  g.getCartLineSizeLabel = getCartLineSizeLabel;
+  g.getCartLineBaseName = getCartLineBaseName;
 
   var FABRIC_LABEL_EN = {
     "\u09a6\u09c1\u09ac\u09be\u0987 \u099a\u09c7\u09b0\u09bf": "Dubai Cherry",

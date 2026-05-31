@@ -122,6 +122,10 @@
     if (item.bodySize) line.bodySize = String(item.bodySize);
     if (item.selectedSize) line.selectedSize = String(item.selectedSize);
     if (item.productType) line.productType = String(item.productType);
+    if (!line.size && line.lengthSize && typeof global.getCartLineSizeLabel === "function") {
+      var rebuilt = global.getCartLineSizeLabel(line);
+      if (rebuilt) line.size = rebuilt;
+    }
     line.image = resolveItemImage(line);
     return line;
   }
