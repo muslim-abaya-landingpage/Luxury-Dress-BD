@@ -194,13 +194,18 @@ html {
   color: #000;
   display: inline-flex;
   align-items: center;
+  transition: opacity 0.2s ease;
+}
+
+.brand-logo-link:hover {
+  opacity: 0.88;
 }
 
 .brand-logo-img {
   display: block;
   width: auto;
-  height: 44px;
-  max-width: min(260px, 52vw);
+  height: 46px;
+  max-width: min(240px, 54vw);
   object-fit: contain;
   image-rendering: -webkit-optimize-contrast;
 }
@@ -510,8 +515,8 @@ body.global-layout {
   }
 
   .brand-logo-img {
-    height: 34px;
-    max-width: min(190px, 50vw);
+    height: 38px;
+    max-width: min(200px, 52vw);
   }
 
   .header-middle-nav .nav-row {

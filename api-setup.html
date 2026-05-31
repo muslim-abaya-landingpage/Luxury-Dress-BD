@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>API সেটআপ চেক | Muslim Abaya</title>
-  <link rel="stylesheet" href="site-header.css?v=20260530c">
+  <title>API ????? ??? | Muslim Abaya</title>
+  <link rel="stylesheet" href="site-header.css?v=20260603logo">
   <style>
     body { font-family: Inter, "Hind Siliguri", sans-serif; margin: 0; background: #f7f7f7; }
     .wrap { max-width: 640px; margin: 24px auto; padding: 0 16px 48px; }
@@ -27,29 +27,29 @@
   <div id="site-header-mount"></div>
   <div class="wrap">
     <div class="card">
-      <h1>API সংযোগ চেক</h1>
-      <p class="lead">অর্ডার, Sign Up, Newsletter — সব এক Apps Script URL ব্যবহার করে।</p>
-      <label for="apiUrl">Web App URL (Deploy থেকে)</label>
+      <h1>API ????? ???</h1>
+      <p class="lead">??????, Sign Up, Newsletter � ?? ?? Apps Script URL ??????? ????</p>
+      <label for="apiUrl">Web App URL (Deploy ????)</label>
       <input type="url" id="apiUrl" placeholder="https://script.google.com/macros/s/.../exec">
-      <button type="button" class="btn" id="testBtn">সংযোগ টেস্ট করুন</button>
+      <button type="button" class="btn" id="testBtn">????? ????? ????</button>
       <div id="status" class="status"></div>
     </div>
     <div class="card" style="border-color:#111">
-      <h2 style="font-size:16px;margin:0 0 10px">⚡ doGet not found? — ৩০ সেকেন্ডে ঠিক</h2>
-      <p style="font-size:14px;margin:0 0 12px">পুরনো Code.gs রেখে <strong>নতুন ফাইল</strong> যোগ করুন:</p>
+      <h2 style="font-size:16px;margin:0 0 10px">? doGet not found? � ?? ???????? ???</h2>
+      <p style="font-size:14px;margin:0 0 12px">????? Code.gs ???? <strong>???? ????</strong> ??? ????:</p>
       <ol>
-        <li>Windows-এ <strong>API-দ্রুত-ঠিক.bat</strong> ডাবল-ক্লিক → <strong>Yes</strong></li>
-        <li>Editor-এ <strong>+ → Script</strong> → নাম <code>Fix-doGet</code> → Ctrl+V → Save</li>
-        <li>Deploy → Manage → Edit → <strong>New version</strong> → Deploy</li>
+        <li>Windows-? <strong>API-?????-???.bat</strong> ????-????? ? <strong>Yes</strong></li>
+        <li>Editor-? <strong>+ ? Script</strong> ? ??? <code>Fix-doGet</code> ? Ctrl+V ? Save</li>
+        <li>Deploy ? Manage ? Edit ? <strong>New version</strong> ? Deploy</li>
       </ol>
-      <button type="button" class="btn" id="openBat" style="background:#2e7d32">API-দ্রুত-ঠিক.bat চালান</button>
+      <button type="button" class="btn" id="openBat" style="background:#2e7d32">API-?????-???.bat ?????</button>
     </div>
     <div class="card">
-      <h2 style="font-size:16px;margin:0 0 10px">সম্পূর্ণ সেটআপ (Sign Up সহ)</h2>
+      <h2 style="font-size:16px;margin:0 0 10px">???????? ????? (Sign Up ??)</h2>
       <ol>
-        <li><a href="apps-script-copy.html">apps-script-copy.html</a> → পুরো কোড → <code>Code.gs</code> Replace</li>
-        <li>Project Settings → <code>AUTH_SECRET</code> সেভ</li>
-        <li>Deploy → <strong>New version</strong></li>
+        <li><a href="apps-script-copy.html">apps-script-copy.html</a> ? ???? ??? ? <code>Code.gs</code> Replace</li>
+        <li>Project Settings ? <code>AUTH_SECRET</code> ???</li>
+        <li>Deploy ? <strong>New version</strong></li>
       </ol>
     </div>
   </div>
@@ -70,30 +70,30 @@
       document.getElementById("testBtn").addEventListener("click", function () {
         var url = (input.value || "").trim();
         if (!url) {
-          show("err", "URL দিন।");
+          show("err", "URL ????");
           return;
         }
-        show("wait", "চেক হচ্ছে…");
+        show("wait", "??? ?????�");
         fetch(url, { method: "GET", mode: "cors" })
           .then(function (r) {
             return r.text();
           })
           .then(function (text) {
             if (text.indexOf("Muslim Abaya API OK") !== -1) {
-              show("ok", "সংযোগ ঠিক আছে। checkout / signup এখন কাজ করবে।");
+              show("ok", "????? ??? ???? checkout / signup ??? ??? ?????");
             } else if (text.indexOf("doGet") !== -1) {
               show(
                 "err",
-                "পুরো কোড পেস্ট হয়নি। apps-script-copy.html খুলে সম্পূর্ণ কোড কপি করুন → Code.gs → Save → Deploy New version।"
+                "???? ??? ????? ?????? apps-script-copy.html ???? ???????? ??? ??? ???? ? Code.gs ? Save ? Deploy New version?"
               );
             } else {
-              show("err", "অপ্রত্যাশিত উত্তর: " + text.slice(0, 120));
+              show("err", "??????????? ?????: " + text.slice(0, 120));
             }
           })
           .catch(function () {
             show(
               "err",
-              "সংযোগ ব্যর্থ। Deploy করা আছে কিনা, URL সঠিক কিনা, এবং Who has access = Anyone কিনা দেখুন।"
+              "????? ??????? Deploy ??? ??? ????, URL ???? ????, ??? Who has access = Anyone ???? ??????"
             );
           });
       });
@@ -103,18 +103,18 @@
       saveBtn.className = "btn";
       saveBtn.style.marginLeft = "8px";
       saveBtn.style.background = "#444";
-      saveBtn.textContent = "URL কপি (ম্যানুয়াল সেভ)";
+      saveBtn.textContent = "URL ??? (?????????? ???)";
       saveBtn.addEventListener("click", function () {
         var url = (input.value || "").trim();
         if (!url) return;
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(url).then(function () {
             alert(
-              "URL কপি হয়েছে।\n\nsite-api-config.js খুলে url: এ পেস্ট করুন এবং সেভ করুন।"
+              "URL ??? ???????\n\nsite-api-config.js ???? url: ? ????? ???? ??? ??? ?????"
             );
           });
         } else {
-          prompt("এই URL site-api-config.js এ দিন:", url);
+          prompt("?? URL site-api-config.js ? ???:", url);
         }
       });
       document.getElementById("testBtn").after(saveBtn);
@@ -122,7 +122,7 @@
       var openBat = document.getElementById("openBat");
       if (openBat) {
         openBat.addEventListener("click", function () {
-          alert("ফোল্ডারে API-দ্রুত-ঠিক.bat ডাবল-ক্লিক করুন।");
+          alert("???????? API-?????-???.bat ????-????? ?????");
         });
       }
 

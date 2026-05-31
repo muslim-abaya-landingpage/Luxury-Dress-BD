@@ -694,9 +694,9 @@ button.img-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
-  padding: 11px 12px;
-  font-size: 14px;
+  min-height: 48px;
+  padding: 12px 12px;
+  font-size: 16px;
   font-weight: 600;
   line-height: 1.25;
   font-family: inherit;
@@ -713,8 +713,8 @@ button.img-wrap {
 
 .anzaar-btn-ico {
   display: inline-flex;
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
 }
 
@@ -1202,13 +1202,6 @@ button.img-wrap {
     min-width: 120px;
     max-width: 140px;
     padding-right: 24px;
-  }
-
-  .anzaar-btn {
-    font-size: 13px;
-    min-height: 42px;
-    padding: 10px 8px;
-    line-height: 1.3;
   }
 
   .card-actions-anzaar {

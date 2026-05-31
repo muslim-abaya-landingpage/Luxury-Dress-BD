@@ -1,5 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 56" role="img" aria-label="Muslim Abaya">
-  <text x="8" y="20" font-family="Georgia, 'Times New Roman', serif" font-size="12" font-weight="500" letter-spacing="0.26em" fill="#1a1a1a">MUSLIM</text>
-  <text x="8" y="46" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="700" letter-spacing="0.08em" fill="#111111">ABAYA</text>
-  <rect x="8" y="51" width="150" height="2" fill="#c9a227" rx="1"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 56" role="img" aria-label="Muslim Abaya">
+  <defs>
+    <linearGradient id="ma-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e8d5a3"/>
+      <stop offset="45%" stop-color="#c9a227"/>
+      <stop offset="100%" stop-color="#8f7428"/>
+    </linearGradient>
+  </defs>
+  <circle cx="28" cy="28" r="22" fill="#111111"/>
+  <circle cx="28" cy="28" r="20.5" fill="none" stroke="url(#ma-gold)" stroke-width="0.85"/>
+  <path d="M28 13.5c-5.5 7.5-9 15-9 22.5 0 2.2 4 3.8 9 3.8s9-1.6 9-3.8c0-7.5-3.5-15-9-22.5z" fill="none" stroke="url(#ma-gold)" stroke-width="1.35" stroke-linejoin="round"/>
+  <path d="M22 36.5h12" stroke="url(#ma-gold)" stroke-width="1.1" stroke-linecap="round"/>
+  <text x="58" y="17.5" font-family="Inter, Arial, sans-serif" font-size="9.5" font-weight="500" letter-spacing="0.36em" fill="#7a746c">MUSLIM</text>
+  <text x="58" y="41.5" font-family="Georgia, 'Times New Roman', serif" font-size="27" font-weight="600" letter-spacing="0.04em" fill="#111111">Abaya</text>
+  <rect x="58" y="46.5" width="92" height="1.5" fill="url(#ma-gold)" rx="0.75"/>
+  <rect x="58" y="49.5" width="58" height="0.75" fill="#c9a227" opacity="0.45" rx="0.375"/>
 </svg>

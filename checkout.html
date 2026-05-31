@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
-    <link rel="stylesheet" href="site-header.css?v=20260530c">
+    <link rel="stylesheet" href="site-header.css?v=20260603logo">
     <link rel="stylesheet" href="site-footer.css?v=20260603footen">
     <style>
         :root {
@@ -1395,8 +1395,8 @@
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-ML7RL6BR"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div id="localFileBanner" class="local-file-banner" role="alert">
-    <strong>Test mode:</strong> Opened as a local file (<code>file://</code>) — orders will not work this way.
-    Run <strong>ADMIN-লোকাল-টেস্ট.bat</strong> and use
+    <strong>Test mode:</strong> Opened as a local file (<code>file://</code>) � orders will not work this way.
+    Run <strong>ADMIN-?????-?????.bat</strong> and use
     <a href="http://localhost:5500/checkout.html">localhost:5500</a>, or order on live
     <a href="https://muslimabaya.com/checkout" target="_blank" rel="noopener">muslimabaya.com/checkout</a>.
 </div>
@@ -1407,7 +1407,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <a href="/">Home</a>
         </nav>
         <h1>Checkout</h1>
-        <p class="checkout-subtitle">Safe &amp; fast ordering — Cash on delivery available</p>
+        <p class="checkout-subtitle">Safe &amp; fast ordering � Cash on delivery available</p>
         <div class="checkout-trust" style="justify-content:center;">
             <span>Secure order</span>
             <span>COD available</span>
@@ -1464,7 +1464,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <select id="userArea" required>
                         <option value="">Select district</option>
                     </select>
-                    <p class="delivery-fee-hint">Dhaka ৳80 · Other districts ৳150 · Free delivery on 3+ items</p>
+                    <p class="delivery-fee-hint">Dhaka ?80 � Other districts ?150 � Free delivery on 3+ items</p>
                 </div>
                 <div class="form-group form-group-last">
                     <label for="userThana">Thana / Upazila <span style="font-size:13px;font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0;">(Optional)</span></label>
@@ -1536,7 +1536,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     </div>
                 </div>
                 <div id="paymentExtra" class="payment-extra is-cod-hidden">
-                <div id="paymentInfo" class="payment-panel">Payment mode: Cash On Delivery — pay when you receive the product.</div>
+                <div id="paymentInfo" class="payment-panel">Payment mode: Cash On Delivery � pay when you receive the product.</div>
                 <div class="payment-fields">
                     <input type="text" id="senderNumber" placeholder="Payment number (bKash/Nagad) - optional">
                     <input type="text" id="paymentTxnId" placeholder="Transaction ID / Reference - optional">
@@ -1713,7 +1713,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var actionsEl = document.getElementById('checkoutModalActions');
         if (!modal || !titleEl || !msgEl || !actionsEl) return;
         var variant = (opts && opts.variant) || 'info';
-        var icons = { info: 'i', warn: '!', error: '×', success: '✓' };
+        var icons = { info: 'i', warn: '!', error: '�', success: '?' };
         titleEl.textContent = (opts && opts.title) || '';
         msgEl.textContent = (opts && opts.message) || '';
         if (iconEl) {
@@ -1761,7 +1761,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     function showLocalFileBlockedModal() {
         openCheckoutModal({
             title: 'Orders cannot be sent here',
-            message: 'When opened as a local file (file://), the order API does not work. Run ADMIN-লোকাল-টেস্ট.bat and use localhost, or place your order on muslimabaya.com.',
+            message: 'When opened as a local file (file://), the order API does not work. Run ADMIN-?????-?????.bat and use localhost, or place your order on muslimabaya.com.',
             variant: 'warn',
             actions: [
                 {
@@ -1798,14 +1798,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     function getWhatsAppOrderLink(order) {
         var wa = '8801971642683';
         var lines = [
-            'New order — Muslim Abaya',
+            'New order � Muslim Abaya',
             'Name: ' + order.name,
             'Mobile: ' + order.phone,
             'Address: ' + order.address,
             'District: ' + order.district
         ];
         if (order.thana) lines.push('Thana: ' + order.thana);
-        lines.push('Qty: ' + order.qty, 'Total: ৳' + order.total, 'Products: ' + order.products);
+        lines.push('Qty: ' + order.qty, 'Total: ?' + order.total, 'Products: ' + order.products);
         return 'https://wa.me/' + wa + '?text=' + encodeURIComponent(lines.join('\n'));
     }
 
@@ -1854,7 +1854,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     function offerWhatsAppOrder(orderWa, reason) {
         openCheckoutModal({
             title: 'Order did not go through online',
-            message: (reason || 'The order could not be sent.') + ' You can also send it on WhatsApp — we will still process it.',
+            message: (reason || 'The order could not be sent.') + ' You can also send it on WhatsApp � we will still process it.',
             variant: 'error',
             actions: [
                 {
@@ -1988,8 +1988,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     function formatCheckoutFabric(fabric) {
         var f = String(fabric || '').trim();
         if (!f) return '';
-        if (/এলেক্স\s*সফট\s*জর্জেট|alex\s*soft\s*georgette/i.test(f)) return 'Alex soft Georgette';
-        if (/দুবাই\s*চেরি|dubai\s*cherry/i.test(f)) return 'Dubai Cherry';
+        if (/??????\s*???\s*??????|alex\s*soft\s*georgette/i.test(f)) return 'Alex soft Georgette';
+        if (/?????\s*????|dubai\s*cherry/i.test(f)) return 'Dubai Cherry';
         if (/premium\s*georgette/i.test(f)) return 'Premium Georgette';
         return f;
     }
@@ -2071,7 +2071,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var len = String(lengthSize || cfg.lengthSizes[0] || '50');
         var sizeStr = typeof formatAbayaCartSize === 'function'
             ? formatAbayaCartSize(len)
-            : ('Body ' + cfg.bodySizeLabel + ' · Length ' + len);
+            : ('Body ' + cfg.bodySizeLabel + ' � Length ' + len);
         var name = stripSizeFromCartName(sourceItem.name) + ' (' + sizeStr + ')';
         return {
             id: sourceItem.id || '',
@@ -2115,13 +2115,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     function formatCheckoutSizeLabel(size) {
         var s = String(size || '').trim();
         if (!s) return s;
-        if (s === 'বডি ৪২ (ফ্রি সাইজ)' || s === 'বডি 42 (ফ্রি সাইজ)') return 'Body 42 (Free size)';
+        if (s === '??? ?? (???? ????)' || s === '??? 42 (???? ????)') return 'Body 42 (Free size)';
         return s
-            .replace(/[০-৯]/g, function (d) {
+            .replace(/[?-?]/g, function (d) {
                 return String.fromCharCode(d.charCodeAt(0) - 2534 + 48);
             })
-            .replace(/বডি/g, 'Body')
-            .replace(/ফ্রি সাইজ/g, 'Free size');
+            .replace(/???/g, 'Body')
+            .replace(/???? ????/g, 'Free size');
     }
 
     function buildCheckoutSizeControl(item, idx) {
@@ -2180,7 +2180,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (selected) raw.push(selected);
         var defs = window.SITE_LINKS && window.SITE_LINKS.defaults;
         var catKey = String((item && (item.category || item.categoryKey)) || '').trim();
-        if (!catKey && item && /abaya|আবায়া|আবায়া/i.test(String(item.name || ''))) {
+        if (!catKey && item && /abaya|??????|?????/i.test(String(item.name || ''))) {
             catKey = 'abaya';
         }
         if (catKey === 'abaya') {
@@ -2263,7 +2263,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function shippingCharge() {
         var q = cartQty();
-        if (q === 0 || q >= 3) return 0; // ৩ পিস বা তার বেশি হলে ফ্রি ডেলিভারি
+        if (q === 0 || q >= 3) return 0; // ? ??? ?? ??? ???? ??? ???? ????????
         return parseInt(areaSelect.value, 10) || 0;
     }
 
@@ -2274,7 +2274,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     function productsLabel() {
         return cart.map(function(item) {
             var size = String(item.size || item.selectedSize || '').trim();
-            var sizePart = size ? ' · Size: ' + size : '';
+            var sizePart = size ? ' � Size: ' + size : '';
             return item.name + sizePart + ' (' + (parseInt(item.quantity, 10) || 1) + ' pcs)';
         }).join(', ');
     }
@@ -2355,7 +2355,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         summary.forEach(function (g) { totalQty += g.count; });
         var chips = summary.map(function (g) {
             return '<span class="gb-cat-chip"><b>' + g.label + '</b> ' +
-                g.count + ' pcs · ' + formatBdtCheckout(g.subtotal) + '</span>';
+                g.count + ' pcs � ' + formatBdtCheckout(g.subtotal) + '</span>';
         }).join('');
         return '<div class="gb-cat-summary">' +
             '<div class="gb-cat-summary-total">Total ' + totalQty + ' items</div>' +
@@ -2373,7 +2373,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         cart.forEach(function (item) {
             var qty = parseInt(item.quantity, 10) || 1;
             var unit = parseInt(item.price, 10) || 0;
-            var size = item.size || item.selectedSize || '—';
+            var size = item.size || item.selectedSize || '�';
             var fabric = item.fabric || item.material || 'Premium Fabric';
             rows +=
                 '<tr>' +
@@ -2397,7 +2397,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             var qty = parseInt(item.quantity, 10) || 1;
             var size = String(item.size || item.selectedSize || '').trim();
             var sizeText = size ? ' | Size: ' + size : '';
-            slots.push(item.name + sizeText + ' x' + qty + ' = ৳' + ((parseInt(item.price, 10) || 0) * qty));
+            slots.push(item.name + sizeText + ' x' + qty + ' = ?' + ((parseInt(item.price, 10) || 0) * qty));
         });
         while (slots.length < MAX_PRODUCT_SLOTS) {
             slots.push('');
@@ -2494,8 +2494,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             var lineTotal = unitPrice * qty;
             var imgUrl = (typeof resolveStoreItemImage === 'function') ? resolveStoreItemImage(item) : (item.image || '');
             var thumbInner = imgUrl
-                ? '<img src="' + escapeHtml(imgUrl) + '" alt="" loading="lazy" onerror="this.parentElement.innerHTML=\'<span class=gb-order-thumb-placeholder>👜</span>\'">'
-                : '<span class="gb-order-thumb-placeholder">👜</span>';
+                ? '<img src="' + escapeHtml(imgUrl) + '" alt="" loading="lazy" onerror="this.parentElement.innerHTML=\'<span class=gb-order-thumb-placeholder>??</span>\'">'
+                : '<span class="gb-order-thumb-placeholder">??</span>';
             var detail = orderItemDetail(item);
             var detailHtml = detail ? '<p class="gb-order-detail">' + detail + '</p>' : '';
             var sizeControlHtml = buildCheckoutSizeControl(item, idx);
@@ -2508,7 +2508,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 '<div class="gb-order-qty-row">' +
                 '<span class="gb-order-qty-label">Qty:</span>' +
                 '<div class="gb-order-qty">' +
-                '<button type="button" data-cart-action="dec" data-cart-idx="' + idx + '" aria-label="Decrease quantity">−</button>' +
+                '<button type="button" data-cart-action="dec" data-cart-idx="' + idx + '" aria-label="Decrease quantity">-</button>' +
                 '<span>' + qty + '</span>' +
                 '<button type="button" data-cart-action="inc" data-cart-idx="' + idx + '" aria-label="Increase quantity">+</button>' +
                 '</div>' + sizeControlHtml + '</div></div>' +
@@ -2518,7 +2518,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         });
 
         var metaEl = document.getElementById('orderReviewMeta');
-        if (metaEl) metaEl.textContent = designCount + ' items · ' + q + ' pcs';
+        if (metaEl) metaEl.textContent = designCount + ' items � ' + q + ' pcs';
 
         summaryDiv.innerHTML = '<div class="gb-order-list">' + itemsHtml + '</div>';
         renderProductChart();
@@ -2606,10 +2606,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     (function initPaymentBox() {
         var info = document.getElementById('paymentInfo');
         var details = {
-            'Cash On Delivery': 'Payment mode: Cash On Delivery — pay when you receive the product.',
-            'bKash': 'bKash Personal: 01551642683 — enter Transaction ID after payment.',
-            'Nagad': 'Nagad Personal: 01551642683 — enter Transaction ID after payment.',
-            'Bank Transfer': 'UCB PLC, A/C: 7862141000038155 — enter slip/reference number.'
+            'Cash On Delivery': 'Payment mode: Cash On Delivery � pay when you receive the product.',
+            'bKash': 'bKash Personal: 01551642683 � enter Transaction ID after payment.',
+            'Nagad': 'Nagad Personal: 01551642683 � enter Transaction ID after payment.',
+            'Bank Transfer': 'UCB PLC, A/C: 7862141000038155 � enter slip/reference number.'
         };
         function highlightPayCards(pmKey) {
             document.querySelectorAll('.pay-detail-card').forEach(function(card) {
@@ -2793,7 +2793,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             var gTotal = String(grandTotal());
             var areaOpt = areaSelect.options[areaSelect.selectedIndex];
             var districtParam = areaOpt.getAttribute('data-district') ||
-                areaOpt.textContent.split('(')[0].split('—')[0].trim();
+                areaOpt.textContent.split('(')[0].split('�')[0].trim();
 
             const formData = new URLSearchParams();
             formData.append('RecordType', 'Order');
