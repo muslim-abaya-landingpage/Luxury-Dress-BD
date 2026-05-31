@@ -1,4 +1,14 @@
 (function () {
+  function getShopCategoryKey() {
+    var root = document.documentElement;
+    var body = document.body;
+    return (
+      (root && root.getAttribute("data-shop-category")) ||
+      (body && body.getAttribute("data-shop-category")) ||
+      ""
+    );
+  }
+
   function boot(force) {
     if (typeof window.scheduleShopCategoryBoot === "function") {
       window.scheduleShopCategoryBoot(!!force);
@@ -7,7 +17,7 @@
     var body = document.body;
     if (!body || !window.CATEGORY_PRODUCTS) return;
     var hub = body.getAttribute("data-shop-hub");
-    var key = body.getAttribute("data-shop-category");
+    var key = getShopCategoryKey();
     if (hub === "1" && typeof window.bootAllCategories === "function") {
       window.bootAllCategories();
     } else if (key && typeof window.bootShopCategory === "function") {

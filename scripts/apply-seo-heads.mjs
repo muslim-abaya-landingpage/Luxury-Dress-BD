@@ -131,7 +131,7 @@ function patchCategory(file, cfg) {
   const fp = path.join(root, file);
   let html = fs.readFileSync(fp, "utf8");
   html = html.replace(/<html lang="bn">/, `<html lang="bn" data-shop-category="${cfg.key}">`);
-  html = html.replace(/<body data-shop-category="[^"]+">/, "<body>");
+  html = html.replace(/<body>/, `<body data-shop-category="${cfg.key}">`);
   html = html.replace(
     /<title>[^<]*<\/title>/,
     `<title>${cfg.title}</title>\n  ${seoBlock(cfg)}`

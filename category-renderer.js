@@ -23,6 +23,25 @@ function ensureCategoryStyles() {
   if (shopLink) shopLink.href = "shop-page.css?v=20260603vc14";
 }
 
+/** Category key on <html> (SEO) or <body> (legacy SPA). */
+function getShopCategoryKey() {
+  var root = document.documentElement;
+  var body = document.body;
+  return (
+    (root && root.getAttribute("data-shop-category")) ||
+    (body && body.getAttribute("data-shop-category")) ||
+    ""
+  );
+}
+
+function setShopCategoryKey(key) {
+  if (!key) return;
+  var root = document.documentElement;
+  var body = document.body;
+  if (root) root.setAttribute("data-shop-category", key);
+  if (body) body.setAttribute("data-shop-category", key);
+}
+
 function maShopBagIcon(size) {
   var s = parseInt(size, 10) || 18;
   return (
@@ -41,7 +60,7 @@ function fireShopViewContent(product, categoryKey) {
   if (!product) return;
   var cat =
     categoryKey ||
-    (document.body && document.body.getAttribute("data-shop-category")) ||
+    getShopCategoryKey() ||
     "";
   var defaultType =
     typeof getDefaultProductType === "function" ? getDefaultProductType(product, cat) : "";
@@ -213,7 +232,7 @@ function buildShopCartLineItem(item, qtyToAdd, sizeValue, categoryKeyOpt, select
   var categoryKey =
     categoryKeyOpt ||
     (item && item.category) ||
-    (document.body && document.body.getAttribute("data-shop-category")) ||
+    getShopCategoryKey() ||
     "";
   var isAbaya = typeof isAbayaProduct === "function" && isAbayaProduct(item, categoryKey);
   var isTwoPiece = typeof isTwoPieceProduct === "function" && isTwoPieceProduct(item, categoryKey);
@@ -273,7 +292,7 @@ function shopAddProductToCart(item, qtyToAdd, sizeValue, categoryKeyOpt) {
   var categoryKey =
     categoryKeyOpt ||
     (item && item.category) ||
-    (document.body && document.body.getAttribute("data-shop-category")) ||
+    getShopCategoryKey() ||
     "";
   var isAbaya = typeof isAbayaProduct === "function" && isAbayaProduct(item, categoryKey);
   var isTwoPiece = typeof isTwoPieceProduct === "function" && isTwoPieceProduct(item, categoryKey);
@@ -996,7 +1015,7 @@ function bindPqvInteractions(p, idx, categoryKey, scopeRoot) {
   var modal = scopeRoot || getActivePqvScope();
   if (!modal) return;
   categoryKey =
-    categoryKey || modal.getAttribute("data-category-key") || (document.body && document.body.getAttribute("data-shop-category")) || "";
+    categoryKey || modal.getAttribute("data-category-key") || getShopCategoryKey() || "";
   var mainImg = modal.querySelector("#pqvMainImg");
   var imgSrc = resolveCardImageSrc(p);
 
@@ -1529,7 +1548,7 @@ function openProductQuickView(idx) {
   var root = shopCartCtx.root || document.getElementById("list");
   if (!root) return;
   var waLink = (window.SITE_MEDIA && window.SITE_MEDIA.whatsappOrderLink) || "https://wa.me/8801971642683";
-  var categoryKey = (document.body && document.body.getAttribute("data-shop-category")) || "";
+  var categoryKey = getShopCategoryKey();
 
   if (!shopCartCtx.gridHtml && root.querySelector("#productGrid")) {
     shopCartCtx.gridHtml = root.innerHTML;
@@ -1601,7 +1620,7 @@ function onGlobalShopCartClick(ev) {
       var qIdx = parseInt(qtyBtn.getAttribute("data-product-idx"), 10);
       if (isNaN(qIdx) || !products[qIdx]) return;
       var categoryKey =
-        (document.body && document.body.getAttribute("data-shop-category")) || "";
+        getShopCategoryKey() || "";
       var cartQty = getShopCartQtyForProduct(products[qIdx]);
       if (cartQty > 0) {
         changeShopCartProductQty(
@@ -1644,7 +1663,7 @@ function onGlobalShopCartClick(ev) {
   if (action !== "add" && action !== "buy-now" && action !== "add-bulk") return;
 
   var categoryKey =
-    (document.body && document.body.getAttribute("data-shop-category")) || "";
+    getShopCategoryKey() || "";
 
   if (action === "add-bulk") {
     ev.preventDefault();
@@ -1750,7 +1769,7 @@ function getShopBootSpec() {
   var body = document.body;
   if (!body) return null;
   if (body.getAttribute("data-shop-hub") === "1") return { hub: true };
-  var key = body.getAttribute("data-shop-category");
+  var key = getShopCategoryKey();
   if (key) return { key: key };
   return null;
 }
@@ -2759,7 +2778,7 @@ function softSwitchShopCategory(categoryKey) {
   var sortSelect = root.querySelector("#shopSort");
   if (sortSelect) sortSelect.value = "default";
 
-  document.body.setAttribute("data-shop-category", categoryKey);
+  setShopCategoryKey(categoryKey);
   updateCategoryDocumentTitle(categoryKey);
 
   shopCartCtx.root = root;
@@ -2783,7 +2802,7 @@ function softSwitchShopCategory(categoryKey) {
 
 function navigateShopCategory(categoryKey, href, replaceState) {
   if (!categoryKey || !isSpaShopCategoryKey(categoryKey)) return false;
-  var current = document.body.getAttribute("data-shop-category");
+  var current = getShopCategoryKey();
   if (current === categoryKey && !replaceState) return true;
 
   var url = href || getCategoryPageUrl(categoryKey);
@@ -2803,7 +2822,7 @@ function initShopCategorySpaNav() {
   window.__shopCategorySpaInit = true;
 
   document.addEventListener("click", function (e) {
-    if (!document.body.getAttribute("data-shop-category")) return;
+    if (!getShopCategoryKey()) return;
     if (e.defaultPrevented || e.button !== 0) return;
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
 
@@ -2814,7 +2833,7 @@ function initShopCategorySpaNav() {
     if (!key || !isSpaShopCategoryKey(key)) return;
 
     e.preventDefault();
-    if (key === document.body.getAttribute("data-shop-category")) return;
+    if (key === getShopCategoryKey()) return;
 
     if (typeof window.toggleAbayaMenu === "function") {
       var menu = document.getElementById("mobileMenuPanel");
@@ -2825,16 +2844,16 @@ function initShopCategorySpaNav() {
   });
 
   window.addEventListener("popstate", function () {
-    if (!document.body.getAttribute("data-shop-category")) return;
+    if (!getShopCategoryKey()) return;
     var key = resolveCategoryKeyFromHref(window.location.pathname);
     if (key && isSpaShopCategoryKey(key)) {
-      document.body.setAttribute("data-shop-category", key);
+      setShopCategoryKey(key);
       updateCategoryDocumentTitle(key);
       softSwitchShopCategory(key);
     }
   });
 
-  var bootKey = document.body.getAttribute("data-shop-category");
+  var bootKey = getShopCategoryKey();
   if (bootKey && history.replaceState) {
     history.replaceState({ maShopCategory: bootKey }, "", window.location.href);
   }
