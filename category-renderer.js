@@ -243,12 +243,12 @@ function shopAddProductToCart(item, qtyToAdd, sizeValue, categoryKeyOpt) {
     });
   }
 
-  var msg = document.getElementById("cartMiniMsg");
-  if (msg) {
-    msg.classList.add("show");
-    setTimeout(function () {
-      msg.classList.remove("show");
-    }, 1400);
+  if (typeof showCartAddedToast === "function") {
+    showCartAddedToast({
+      name: item.name || cartName,
+      image: line.image,
+      price: line.price
+    });
   }
 
   refreshShopCardsAfterCartChange();
@@ -2752,7 +2752,7 @@ function renderCategory(categoryKey) {
 
     "</div></section></div>" +
 
-    "<div id='cartMiniMsg' class='cart-mini-msg'>কার্টে যুক্ত হয়েছে</div>";
+    "";
 
   fixShopPageLinks(root);
 

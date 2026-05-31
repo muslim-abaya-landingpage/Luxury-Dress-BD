@@ -14,6 +14,20 @@ const fallbackProducts = [
 ];
 let products = fallbackProducts.slice();
 
+function homeProductById(productId) {
+    return products.find(function (x) { return x.id === productId; }) || null;
+}
+
+function toastCartAdded(productId) {
+    if (typeof showCartAddedToast !== 'function') return;
+    var p = homeProductById(productId);
+    showCartAddedToast({
+        name: p ? p.name : productId,
+        image: p ? (p.img || p.image) : '',
+        price: p ? p.price : undefined
+    });
+}
+
 function isPrimaryShowcaseName(name) {
     var s = String(name || '').toLowerCase();
     return s.indexOf(' - back') === -1 &&
@@ -348,11 +362,7 @@ function toggleProductCart(productId) {
     }
     syncHomeCartAfterChange();
     renderSidebar();
-    const toast = document.getElementById('cartToast');
-    if (toast && getCartQty(productId) >= 1) {
-        toast.classList.add('show');
-        setTimeout(() => { toast.classList.remove('show'); }, 3000);
-    }
+    if (getCartQty(productId) >= 1) toastCartAdded(productId);
     calc(false);
 }
 function addProductSelection(productId) {
@@ -428,11 +438,7 @@ function addToCartFromCard(productId, ev) {
     clearInterval(autoSlideInterval);
     renderSidebar();
     calc(false);
-    const toast = document.getElementById('cartToast');
-    if (toast) {
-        toast.classList.add('show');
-        setTimeout(() => { toast.classList.remove('show'); }, 3000);
-    }
+    toastCartAdded(productId);
 }
 function trackInitiateCheckout() {
     if (checkoutTracked) return;
@@ -617,11 +623,7 @@ function selectProduct(index, id, shouldScroll, options) {
 function updateQty(id, val) {
     let oldQty = getCartQty(id);
     cart[id] = Math.max(0, oldQty + val);
-    if (val > 0) { 
-        const toast = document.getElementById('cartToast');
-        toast.classList.add('show');
-        setTimeout(() => { toast.classList.remove('show'); }, 3000);
-    }
+    if (val > 0) toastCartAdded(id);
     if (cart[id] > oldQty) {
         var p = products.find(function (x) { return x.id === id; });
         trackFB('AddToCart', {
@@ -692,22 +694,21 @@ function startAutoSlide() {
     }, 4000);
 }
 function showToast() {
-    const toast = document.getElementById('cartToast');
-    toast.classList.add('show');
-    setTimeout(() => {
-        toast.classList.remove('show');
-    }, 4000);
+    var p = products[currentIdx];
+    if (typeof showCartAddedToast === 'function' && p) {
+        showCartAddedToast({ name: p.name, image: p.img || p.image, price: p.price });
+    }
 }
 function removeFromCart(productId) {
     if (getCartQty(productId) > 0) {
+        var p = homeProductById(productId);
         cart[productId] = 0;
         syncHomeCartAfterChange();
-        renderSidebar();    
-        calc(false);             
-        const toast = document.getElementById('cartToast');
-        toast.querySelector('.toast-text').innerText = "প্রোডাক্টটি সফলভাবে অপসারণ করা হয়েছে।";
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 2000);
+        renderSidebar();
+        calc(false);
+        if (typeof showCartRemovedToast === 'function') {
+            showCartRemovedToast({ name: p ? p.name : productId });
+        }
     }
 }
 window.hydrateHomeProducts = hydrateHomeProducts;

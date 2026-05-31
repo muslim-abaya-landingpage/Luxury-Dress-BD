@@ -1,0 +1,159 @@
+.cart-added-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 10050;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: min(520px, calc(100vw - 24px));
+  padding: 12px 14px 12px 12px;
+  background: #faf9f7;
+  border: 1px solid #e8e4df;
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(17, 17, 17, 0.12);
+  transform: translateX(-50%) translateY(18px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 0.32s ease,
+    transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0.32s ease;
+}
+
+.cart-added-toast.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+
+.cart-added-toast__check {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #111;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cart-added-toast__check svg {
+  display: block;
+}
+
+.cart-added-toast__thumb {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #eee;
+  border: 1px solid #e8e4df;
+}
+
+.cart-added-toast__thumb.is-hidden {
+  display: none;
+}
+
+.cart-added-toast__body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.cart-added-toast__head {
+  margin: 0;
+  font-family: Inter, "Segoe UI", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.35;
+  color: #111;
+}
+
+.cart-added-toast__label {
+  font-weight: 600;
+}
+
+.cart-added-toast__sep {
+  font-weight: 400;
+  color: #666;
+}
+
+.cart-added-toast__name {
+  font-weight: 500;
+}
+
+.cart-added-toast__meta {
+  margin: 2px 0 0;
+  font-family: Inter, "Segoe UI", system-ui, sans-serif;
+  font-size: 12px;
+  line-height: 1.3;
+  color: #666;
+}
+
+.cart-added-toast__meta:empty {
+  display: none;
+}
+
+.cart-added-toast__view {
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 14px;
+  background: #111;
+  color: #fff;
+  font-family: Inter, "Segoe UI", system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s ease;
+}
+
+.cart-added-toast__view:hover {
+  background: #333;
+}
+
+.cart-added-toast__view:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: 2px;
+}
+
+.cart-added-toast.is-removed .cart-added-toast__check {
+  background: #555;
+}
+
+.cart-added-toast.is-removed .cart-added-toast__view {
+  display: none;
+}
+
+@media (max-width: 520px) {
+  .cart-added-toast {
+    bottom: 16px;
+    gap: 10px;
+    padding: 10px 12px 10px 10px;
+  }
+
+  .cart-added-toast__head {
+    font-size: 13px;
+  }
+
+  .cart-added-toast__view {
+    padding: 7px 12px;
+    font-size: 11px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cart-added-toast {
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+    transform: translateX(-50%);
+  }
+
+  .cart-added-toast.is-visible {
+    transform: translateX(-50%);
+  }
+}
