@@ -1662,9 +1662,9 @@ body.shop-product-open > main {
 .pqv-note {
   display: block;
   margin: 0 0 14px;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.55;
-  color: #666;
+  color: #555;
 }
 
 .pqv-options {
@@ -1945,11 +1945,11 @@ body.pqv-sc-open {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
-  padding: 10px 8px;
-  font-size: 12px;
+  min-height: 48px;
+  padding: 12px 10px;
+  font-size: 16px;
   font-weight: 700;
-  font-family: inherit;
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   text-align: center;
   text-decoration: none;
   border: 1px solid #111;
@@ -1986,11 +1986,11 @@ body.pqv-sc-open {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
-  padding: 10px 8px;
-  font-size: 12px;
+  min-height: 48px;
+  padding: 12px 10px;
+  font-size: 16px;
   font-weight: 700;
-  font-family: inherit;
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   text-align: center;
   text-decoration: none;
   border: 1px solid #ddd;

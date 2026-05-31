@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
@@ -13,23 +13,23 @@
     <div class="adm-login-card">
       <div class="adm-login-logo">
         <h1>Muslim Abaya</h1>
-        <p>পরিচালনা প্যানেল — Admin Login</p>
+        <p>???????? ??????? � Admin Login</p>
       </div>
       <form id="adminLoginForm">
         <div class="adm-field">
-          <label for="adm-login">ইমেইল বা মোবাইল</label>
-          <input id="adm-login" type="text" autocomplete="username" required placeholder="you@gmail.com বা 01XXXXXXXXX">
+          <label for="adm-login">????? ?? ??????</label>
+          <input id="adm-login" type="text" autocomplete="username" required placeholder="you@gmail.com ?? 01XXXXXXXXX">
         </div>
         <div class="adm-field">
-          <label for="adm-pass">পাসওয়ার্ড</label>
+          <label for="adm-pass">??????????</label>
           <input id="adm-pass" type="password" autocomplete="current-password" required>
         </div>
         <button type="submit" class="adm-btn adm-btn-primary" id="admSubmit">Log In</button>
         <p class="adm-msg" id="admMsg" role="alert"></p>
       </form>
       <p class="adm-login-foot">
-        <a href="/">← স্টোর সাইট</a><br>
-        প্রথমবার? Google Sheet → <strong>Muslim Abaya → Admin account তৈরি</strong>
+        <a href="/">? ????? ????</a><br>
+        ????????? Google Sheet ? <strong>Muslim Abaya ? Admin account ????</strong>
       </p>
     </div>
   </div>
@@ -60,7 +60,7 @@
         msg.textContent = "";
         var btn = document.getElementById("admSubmit");
         btn.disabled = true;
-        btn.textContent = "লগইন হচ্ছে…";
+        btn.textContent = "???? ?????�";
         MaAdmin.login({
           login: document.getElementById("adm-login").value.trim(),
           password: document.getElementById("adm-pass").value
@@ -72,23 +72,23 @@
             msg.className = "adm-msg err";
             var t = String(err.message || err);
             if (t === "NO_ADMIN") {
-              msg.textContent = "অ্যাডমিন অ্যাকাউন্ট নেই। Sheet-এ Muslim Abaya মেনু থেকে তৈরি করুন।";
+              msg.textContent = "???????? ?????????? ???? Sheet-? Muslim Abaya ???? ???? ???? ?????";
             } else if (t === "AUTH_NOT_CONFIGURED") {
-              msg.textContent = "Apps Script-এ AUTH_SECRET সেট করুন।";
+              msg.textContent = "Apps Script-? AUTH_SECRET ??? ?????";
             } else if (t === "INVALID_PASSWORD" || t === "NOT_FOUND") {
               msg.textContent =
-                "ইমেইল/মোবাইল বা পাসওয়ার্ড ভুল। Admins শীটে ইমেইল ঠিক আছে কিনা দেখুন (muslimabaya@gmail.com)।";
+                "?????/?????? ?? ?????????? ???? Admins ???? ????? ??? ??? ???? ????? (muslimabaya@gmail.com)?";
             } else if (t === "DEPLOY_OLD" || t === "Success") {
               msg.textContent =
-                "Apps Script এ নতুন কোড Deploy হয়নি। Deploy → Manage deployments → New version → Deploy।";
+                "Apps Script ? ???? ??? Deploy ?????? Deploy ? Manage deployments ? New version ? Deploy?";
             } else if (
               t.indexOf("NetworkError") !== -1 ||
               t.indexOf("Failed to fetch") !== -1
             ) {
               msg.textContent =
-                "file:// থেকে API কাজ করে না। scripts\\serve-local.bat চালান, অথবা muslimabaya.com/admin-login.html ব্যবহার করুন।";
+                "file:// ???? API ??? ??? ??? scripts\\serve-local.bat ?????, ???? muslimabaya.com/admin-login.html ??????? ?????";
             } else {
-              msg.textContent = t || "লগইন ব্যর্থ।";
+              msg.textContent = t || "???? ???????";
             }
             btn.disabled = false;
             btn.textContent = "Log In";

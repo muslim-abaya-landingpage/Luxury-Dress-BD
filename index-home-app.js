@@ -318,7 +318,6 @@ function applyStoreLinesToHomeCart(lines) {
         markHomeCartActive();
     } else {
         clearHomeCartSession();
-        if (typeof clearStoreCart === 'function') clearStoreCart();
     }
     renderSidebar();
     calc(false);

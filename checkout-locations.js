@@ -149,11 +149,28 @@ window.CHECKOUT_UPAZILAS_BY_DISTRICT={"বরগুনা":["আমতলী","�
     districtSelect.addEventListener("input", onDistrictChange);
   }
 
+  function populateCheckoutDistrictSelect() {
+    var sel = document.getElementById("userArea");
+    if (!sel || sel.getAttribute("data-districts-built") === "1") return false;
+    var list = window.CHECKOUT_DISTRICTS || [];
+    if (!list.length) return false;
+    sel.setAttribute("data-districts-built", "1");
+    list.forEach(function (row) {
+      var opt = document.createElement("option");
+      opt.value = String(row.fee);
+      opt.setAttribute("data-district", row.bn);
+      opt.textContent = row.en === "Dhaka" ? row.en + " (\u09f380)" : row.en;
+      sel.appendChild(opt);
+    });
+    return true;
+  }
+
   function initCheckoutLocationSelects() {
     districtSelect = document.getElementById("userArea");
     thanaSelect = document.getElementById("userThana");
     if (!districtSelect || !thanaSelect) return false;
 
+    populateCheckoutDistrictSelect();
     bindDistrictChange();
 
     return loadData().then(function () {
@@ -162,6 +179,7 @@ window.CHECKOUT_UPAZILAS_BY_DISTRICT={"বরগুনা":["আমতলী","�
     });
   }
 
+  window.populateCheckoutDistrictSelect = populateCheckoutDistrictSelect;
   window.initCheckoutLocationSelects = initCheckoutLocationSelects;
   window.refreshCheckoutThanaSelect = function () {
     return initCheckoutLocationSelects();

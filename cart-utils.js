@@ -130,12 +130,43 @@
     });
   }
 
+  function lookupProductById(id) {
+    var nid = String(id || "").trim();
+    if (!nid) return null;
+    var cat = CATALOG.find(function (p) {
+      return p.id === nid;
+    });
+    if (cat) return cat;
+    var cats = (typeof window !== "undefined" && window.CATEGORY_PRODUCTS) || null;
+    if (!cats) return null;
+    var keys = Object.keys(cats);
+    for (var i = 0; i < keys.length; i++) {
+      var list = cats[keys[i]];
+      if (!Array.isArray(list)) continue;
+      for (var j = 0; j < list.length; j++) {
+        var p = list[j];
+        if (p && String(p.id) === nid) {
+          return {
+            id: p.id,
+            name: p.name,
+            price: parseInt(p.price, 10) || 550,
+            image: p.image || p.img || "",
+            category: p.category || keys[i]
+          };
+        }
+      }
+    }
+    return null;
+  }
+
   function objectToArray(obj) {
     var arr = [];
     if (!obj || typeof obj !== "object" || Array.isArray(obj)) return arr;
+    var usedKeys = {};
     CATALOG.forEach(function (p) {
       var qty = parseInt(obj[p.id], 10) || 0;
       if (qty > 0) {
+        usedKeys[p.id] = true;
         arr.push({
           id: p.id,
           name: p.name,
@@ -145,37 +176,53 @@
         });
       }
     });
+    Object.keys(obj).forEach(function (key) {
+      if (usedKeys[key]) return;
+      var qty = parseInt(obj[key], 10) || 0;
+      if (qty <= 0) return;
+      var found = lookupProductById(key);
+      if (found) {
+        arr.push({
+          id: found.id,
+          name: found.name,
+          price: found.price,
+          quantity: qty,
+          image: found.image,
+          category: found.category || ""
+        });
+      }
+    });
     return arr;
   }
 
-  function parseStored(raw) {
+  function parseStoredRaw(raw) {
     if (!raw) return [];
     try {
       var parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) return normalizeArray(parsed);
+      if (Array.isArray(parsed)) return parsed;
       if (parsed && typeof parsed === "object") return objectToArray(parsed);
     } catch (e) {}
     return [];
   }
 
+  function parseStored(raw) {
+    return normalizeArray(parseStoredRaw(raw));
+  }
+
   function loadStoreCart(options) {
     var readOnly = options && options.readOnly === true;
     var keys = ["secured_checkout_cart", "category_cart_v2", "user_cart", "cart"];
-    var best = [];
-    var bestQty = 0;
+    var merged = [];
     keys.forEach(function (key) {
-      var arr = parseStored(localStorage.getItem(key));
-      var q = cartTotalQty(arr);
-      if (arr.length > best.length || (arr.length === best.length && q > bestQty)) {
-        best = arr;
-        bestQty = q;
-      }
+      var rawItems = parseStoredRaw(localStorage.getItem(key));
+      if (rawItems.length) merged = merged.concat(rawItems);
     });
-    if (!best.length) {
+    if (!merged.length) {
       try {
-        best = parseStored(sessionStorage.getItem("cart"));
+        merged = parseStoredRaw(sessionStorage.getItem("cart"));
       } catch (e2) {}
     }
+    var best = normalizeArray(merged);
     if (best.length > 0 && !readOnly) persistStoreCart(best);
     return best;
   }

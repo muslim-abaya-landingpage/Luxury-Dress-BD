@@ -1,52 +1,52 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="bn" data-admin-guard="1">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>পরিচালনা লিংক | Muslim Abaya Admin</title>
+  <title>???????? ???? | Muslim Abaya Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="admin.css">
 </head>
 <body class="adm-body">
   <header class="adm-topbar">
     <div>
-      <h1>পরিচালনা — সব লিংক</h1>
-      <div class="adm-topbar-user" id="admUserLabel">—</div>
+      <h1>???????? � ?? ????</h1>
+      <div class="adm-topbar-user" id="admUserLabel">�</div>
     </div>
     <div class="adm-topbar-actions">
-      <a class="adm-btn adm-btn-secondary" href="admin-dashboard.html">অর্ডার</a>
-      <button type="button" class="adm-btn adm-btn-secondary" id="admLogout">লগআউট</button>
+      <a class="adm-btn adm-btn-secondary" href="admin-dashboard.html">??????</a>
+      <button type="button" class="adm-btn adm-btn-secondary" id="admLogout">?????</button>
     </div>
   </header>
 
   <main class="adm-main">
     <section class="adm-panel">
-      <h2>দৈনিক কাজ (Bookmark)</h2>
+      <h2>????? ??? (Bookmark)</h2>
       <div class="adm-grid" id="admLinkGrid"></div>
     </section>
     <section class="adm-panel">
-      <h2>সাইট টুল (লগইন লাগে)</h2>
+      <h2>???? ??? (???? ????)</h2>
       <div class="adm-grid">
         <a class="adm-link-card" href="product-manager.html">
-          <strong>প্রোডাক্ট ম্যানেজার ⭐</strong>
-          <span>ছবি + দাম + সাইজ + রঙ — এক পেজ; HTML/checkout এডিট লাগে না</span>
+          <strong>????????? ????????? ?</strong>
+          <span>??? + ??? + ???? + ?? � ?? ???; HTML/checkout ???? ???? ??</span>
         </a>
         <a class="adm-link-card" href="product-links.html">
-          <strong>বাল্ক ছবির লিংক</strong>
-          <span>ঐচ্ছিক — অনেক URL একসাথে (সাধারণত ম্যানেজারই যথেষ্ট)</span>
+          <strong>????? ???? ????</strong>
+          <span>?????? � ???? URL ?????? (??????? ?????????? ??????)</span>
         </a>
         <a class="adm-link-card" href="api-setup.html">
-          <strong>API সেটআপ / টেস্ট</strong>
-          <span>Web app ঠিক আছে কিনা</span>
+          <strong>API ????? / ?????</strong>
+          <span>Web app ??? ??? ????</span>
         </a>
       </div>
     </section>
     <section class="adm-panel">
-      <h2>PC সোর্স (ডেভেলপার)</h2>
+      <h2>PC ????? (????????)</h2>
       <p style="margin:0;font-size:0.85rem;color:#646970">
-        <code>scripts\clasp-push.bat</code> · <code>দৈনিক-চেকলিস্ট.md</code> — শুধু কোড বদলালে।
-        অর্ডার চালানোর জন্য D ড্রাইভ লাগে না।
+        <code>scripts\clasp-push.bat</code> � <code>?????-????????.md</code> � ???? ??? ???????
+        ?????? ??????? ???? D ?????? ???? ???
       </p>
     </section>
   </main>
@@ -60,24 +60,24 @@
       var cfg = window.MA_ADMIN_CONFIG || {};
       var links = [
         {
-          title: "অর্ডার ড্যাশবোর্ড",
-          desc: "সাইট থেকে অর্ডার তালিকা (এই সাইটে)",
+          title: "?????? ??????????",
+          desc: "???? ???? ?????? ?????? (?? ?????)",
           href: "admin-dashboard.html",
           internal: true
         },
         {
-          title: "Google Sheet — অর্ডার শিট",
-          desc: "মূল তালিকা, Status, Tracking",
+          title: "Google Sheet � ?????? ???",
+          desc: "??? ??????, Status, Tracking",
           href: "#sheet",
           sheet: true
         },
         {
-          title: "Apps Script — অর্ডার শিট",
-          desc: "কোড, Deploy, Script properties",
+          title: "Apps Script � ?????? ???",
+          desc: "???, Deploy, Script properties",
           href: cfg.scriptProjectUrl
         },
         {
-          title: "API টেস্ট",
+          title: "API ?????",
           desc: "Muslim Abaya API OK",
           href: cfg.apiTestUrl
         },
@@ -87,13 +87,13 @@
           href: cfg.userSettingsUrl
         },
         {
-          title: "স্টোর সাইট",
+          title: "????? ????",
           desc: "muslimabaya.com",
           href: cfg.siteUrl
         },
         {
           title: "Checkout",
-          desc: "টেস্ট অর্ডার",
+          desc: "????? ??????",
           href: cfg.checkoutUrl
         },
         {
@@ -113,7 +113,7 @@
       MaAdminGuard.require().then(function (s) {
         if (!s) return;
         document.getElementById("admUserLabel").textContent =
-          (s.name || "Admin") + (s.email ? " · " + s.email : "");
+          (s.name || "Admin") + (s.email ? " � " + s.email : "");
         var grid = document.getElementById("admLinkGrid");
         grid.innerHTML = links
           .map(function (L) {

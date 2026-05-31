@@ -393,12 +393,10 @@
       } else if (typeof cartTotalQty === 'function' && typeof loadStoreCart === 'function') {
         total = cartTotalQty(loadStoreCart({ readOnly: true }));
       } else {
-        var raw = localStorage.getItem('secured_checkout_cart') || localStorage.getItem('cart') || localStorage.getItem('user_cart') || '[]';
+        var raw = localStorage.getItem('secured_checkout_cart') || localStorage.getItem('category_cart_v2') || localStorage.getItem('user_cart') || localStorage.getItem('cart') || '[]';
         var parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) {
           parsed.forEach(function (item) { total += parseInt(item.quantity, 10) || 0; });
-        } else if (parsed && typeof parsed === 'object') {
-          Object.keys(parsed).forEach(function (k) { total += parseInt(parsed[k], 10) || 0; });
         }
       }
     } catch (e) {}

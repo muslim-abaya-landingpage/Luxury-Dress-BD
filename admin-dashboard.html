@@ -1,32 +1,32 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="bn" data-admin-guard="1">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>অর্ডার ড্যাশবোর্ড | Muslim Abaya Admin</title>
+  <title>?????? ?????????? | Muslim Abaya Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="admin.css">
 </head>
 <body class="adm-body">
   <header class="adm-topbar">
     <div>
-      <h1>অর্ডার ড্যাশবোর্ড</h1>
-      <div class="adm-topbar-user" id="admUserLabel">—</div>
+      <h1>?????? ??????????</h1>
+      <div class="adm-topbar-user" id="admUserLabel">�</div>
     </div>
     <div class="adm-topbar-actions">
-      <a class="adm-btn adm-btn-secondary" href="admin-links.html">সব লিংক</a>
-      <a class="adm-btn adm-btn-secondary" href="product-manager.html">প্রোডাক্ট</a>
-      <button type="button" class="adm-btn adm-btn-secondary" id="admRefresh">রিফ্রেশ</button>
-      <button type="button" class="adm-btn adm-btn-secondary" id="admLogout">লগআউট</button>
+      <a class="adm-btn adm-btn-secondary" href="admin-links.html">?? ????</a>
+      <a class="adm-btn adm-btn-secondary" href="product-manager.html">?????????</a>
+      <button type="button" class="adm-btn adm-btn-secondary" id="admRefresh">???????</button>
+      <button type="button" class="adm-btn adm-btn-secondary" id="admLogout">?????</button>
     </div>
   </header>
 
   <main class="adm-main">
     <section class="adm-panel">
-      <h2>সাম্প্রতিক অর্ডার (Online Order)</h2>
+      <h2>?????????? ?????? (Online Order)</h2>
       <div class="adm-toolbar">
-        <a class="adm-btn adm-btn-primary" id="admOpenSheet" href="#" target="_blank" rel="noopener">Google Sheet খুলুন</a>
+        <a class="adm-btn adm-btn-primary" id="admOpenSheet" href="#" target="_blank" rel="noopener">Google Sheet ?????</a>
         <a class="adm-btn adm-btn-secondary" id="admOpenScript" href="#" target="_blank" rel="noopener">Apps Script</a>
         <span id="admOrderCount" style="font-size:0.85rem;color:#646970;align-self:center"></span>
       </div>
@@ -34,24 +34,24 @@
         <table class="adm-table" id="admOrdersTable">
           <thead>
             <tr>
-              <th>সময়</th>
+              <th>????</th>
               <th>Order ID</th>
-              <th>নাম</th>
-              <th>ফোন</th>
-              <th>মোট</th>
+              <th>???</th>
+              <th>???</th>
+              <th>???</th>
               <th>Status</th>
               <th>Payment</th>
-              <th>জেলা</th>
-              <th>পণ্য</th>
+              <th>????</th>
+              <th>????</th>
             </tr>
           </thead>
           <tbody id="admOrdersBody">
-            <tr><td colspan="9" class="adm-empty">লোড হচ্ছে…</td></tr>
+            <tr><td colspan="9" class="adm-empty">??? ?????�</td></tr>
           </tbody>
         </table>
       </div>
       <p style="margin:12px 0 0;font-size:0.8rem;color:#646970">
-        স্ট্যাটাস/ট্র্যাকিং বদলাতে Sheet-এ সম্পাদনা করুন। Steadfast: Sheet → Muslim Abaya মেনু।
+        ?????????/????????? ?????? Sheet-? ???????? ????? Steadfast: Sheet ? Muslim Abaya ?????
       </p>
     </section>
   </main>
@@ -74,7 +74,7 @@
       function renderOrders(orders) {
         var body = document.getElementById("admOrdersBody");
         if (!orders || !orders.length) {
-          body.innerHTML = '<tr><td colspan="9" class="adm-empty">এখনো অর্ডার নেই।</td></tr>';
+          body.innerHTML = '<tr><td colspan="9" class="adm-empty">???? ?????? ????</td></tr>';
           return;
         }
         body.innerHTML = orders
@@ -82,14 +82,14 @@
             return (
               "<tr>" +
               "<td>" + escapeHtml(o.time) + "</td>" +
-              "<td><strong>" + escapeHtml(o.orderId || "—") + "</strong></td>" +
+              "<td><strong>" + escapeHtml(o.orderId || "�") + "</strong></td>" +
               "<td>" + escapeHtml(o.name) + "</td>" +
               "<td>" + escapeHtml(o.phone) + "</td>" +
-              "<td>৳" + escapeHtml(o.total) + "</td>" +
+              "<td>?" + escapeHtml(o.total) + "</td>" +
               '<td><span class="adm-badge ' + statusClass(o.status) + '">' + escapeHtml(o.status || "Pending") + "</span></td>" +
               "<td>" + escapeHtml(o.payment || "") + "</td>" +
               "<td>" + escapeHtml(o.district || "") + "</td>" +
-              "<td>" + escapeHtml((o.design || "").slice(0, 60)) + (o.design && o.design.length > 60 ? "…" : "") + "</td>" +
+              "<td>" + escapeHtml((o.design || "").slice(0, 60)) + (o.design && o.design.length > 60 ? "�" : "") + "</td>" +
               "</tr>"
             );
           })
@@ -106,11 +106,11 @@
 
       function loadOrders() {
         document.getElementById("admOrdersBody").innerHTML =
-          '<tr><td colspan="9" class="adm-empty">লোড হচ্ছে…</td></tr>';
+          '<tr><td colspan="9" class="adm-empty">??? ?????�</td></tr>';
         MaAdmin.fetchOrders(100)
           .then(function (res) {
             document.getElementById("admOrderCount").textContent =
-              res.count + " টি অর্ডার দেখানো হচ্ছে";
+              res.count + " ?? ?????? ?????? ?????";
             renderOrders(res.orders);
             if (res.sheetUrl) {
               document.getElementById("admOpenSheet").href = res.sheetUrl;
@@ -121,7 +121,7 @@
           })
           .catch(function (err) {
             document.getElementById("admOrdersBody").innerHTML =
-              '<tr><td colspan="9" class="adm-empty">লোড ব্যর্থ: ' +
+              '<tr><td colspan="9" class="adm-empty">??? ??????: ' +
               escapeHtml(err.message || err) +
               "</td></tr>";
           });
@@ -131,7 +131,7 @@
         if (!s) return;
         session = s;
         document.getElementById("admUserLabel").textContent =
-          (s.name || "Admin") + (s.email ? " · " + s.email : "");
+          (s.name || "Admin") + (s.email ? " � " + s.email : "");
         if (s.sheetUrl) document.getElementById("admOpenSheet").href = s.sheetUrl;
         if (s.scriptUrl) document.getElementById("admOpenScript").href = s.scriptUrl;
         loadOrders();

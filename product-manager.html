@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>প্রোডাক্ট ম্যানেজার | Muslim Abaya</title>
+  <title>????????? ????????? | Muslim Abaya</title>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="product-manager-admin.css">
   <script src="site-api-config.js?v=20260529"></script>
@@ -14,36 +14,36 @@
 </head>
 <body class="pl-admin" data-admin-guard="1">
   <header class="pl-admin-header">
-    <a class="pl-back" href="admin-links.html">← Admin</a>
-    <a class="pl-back" href="/" style="margin-left:8px">স্টোর</a>
-    <h1>প্রোডাক্ট ম্যানেজার</h1>
-    <p>বামে <strong>ক্যাটাগরি বেছে</strong> প্রোডাক্ট যোগ করুন — সেই পেজে + <strong>হোমেও</strong> অটো যাবে। শুধু ছবি, দাম, সাইজ, রঙ লিখুন।</p>
+    <a class="pl-back" href="admin-links.html">? Admin</a>
+    <a class="pl-back" href="/" style="margin-left:8px">?????</a>
+    <h1>????????? ?????????</h1>
+    <p>???? <strong>????????? ????</strong> ????????? ??? ???? � ??? ???? + <strong>?????</strong> ??? ????? ???? ???, ???, ????, ?? ??????</p>
     <div class="pl-toolbar">
-      <button type="button" class="pl-btn pl-btn-primary" id="pmSave">সেভ করুন (ফাইল ডাউনলোড)</button>
-      <button type="button" class="pl-btn pl-btn-secondary" id="pmReload">সাইট থেকে রিলোড</button>
-      <a class="pl-btn pl-btn-secondary" href="product-links.html" style="text-decoration:none;display:inline-flex;align-items:center" title="ঐচ্ছিক — একসাথে অনেক URL">বাল্ক ছবি →</a>
+      <button type="button" class="pl-btn pl-btn-primary" id="pmSave">??? ???? (???? ???????)</button>
+      <button type="button" class="pl-btn pl-btn-secondary" id="pmReload">???? ???? ?????</button>
+      <a class="pl-btn pl-btn-secondary" href="product-links.html" style="text-decoration:none;display:inline-flex;align-items:center" title="?????? � ?????? ???? URL">????? ??? ?</a>
     </div>
   </header>
 
   <main class="pl-main">
     <div class="pl-steps">
-      <strong>ক্যাটাগরি = বামের তালিকা (লিংক আলাদা লিখতে হয় না):</strong>
+      <strong>????????? = ????? ?????? (???? ????? ????? ??? ??):</strong>
       <ol>
-        <li><strong>① আবায়া</strong> বেছে প্রোডাক্ট যোগ → <code>abaya</code> পেজ + হোম</li>
-        <li><strong>④ টু-পিস</strong> বেছে যোগ → <code>premium-two-piece</code> পেজ + হোম</li>
-        <li><strong>⑤ এম্ব্রয়ডারি</strong> বেছে যোগ → <code>embroidery</code> পেজ + হোম (মেনুতে চাইলে <code>enabled: true</code>)</li>
-        <li>প্রতিটি প্রোডাক্টে: <strong>ছবি, দাম, সাইজ, রঙ</strong> → <strong>সেভ</strong> → ফাইল রিপ্লেস → Netlify</li>
+        <li><strong>? ??????</strong> ???? ????????? ??? ? <code>abaya</code> ??? + ???</li>
+        <li><strong>? ??-???</strong> ???? ??? ? <code>premium-two-piece</code> ??? + ???</li>
+        <li><strong>? ????????????</strong> ???? ??? ? <code>embroidery</code> ??? + ??? (?????? ????? <code>enabled: true</code>)</li>
+        <li>??????? ??????????: <strong>???, ???, ????, ??</strong> ? <strong>???</strong> ? ???? ??????? ? Netlify</li>
       </ol>
       <p style="margin:10px 0 0;font-size:0.85rem;color:#666">
-        <code>প্রোডাক্ট-এডিট.bat</code> · গাইড: <code>প্রোডাক্ট-সহজ-গাইড.md</code>
+        <code>?????????-????.bat</code> � ????: <code>?????????-???-????.md</code>
       </p>
     </div>
 
     <div class="pm-layout" id="pmLayout">
       <aside class="pm-sidebar">
-        <h2>ক্যাটাগরি</h2>
+        <h2>?????????</h2>
         <ul class="pm-cat-list" id="pmCatList"></ul>
-        <button type="button" class="pl-btn pl-btn-primary pm-add-cat" id="pmAddCategory">+ নতুন ক্যাটাগরি</button>
+        <button type="button" class="pl-btn pl-btn-primary pm-add-cat" id="pmAddCategory">+ ???? ?????????</button>
       </aside>
       <div class="pm-main" id="pmMain"></div>
     </div>
@@ -51,30 +51,30 @@
 
   <div class="pm-modal" id="pmCatModal" hidden>
     <div class="pm-modal-box">
-      <h3 id="pmCatModalTitle">নতুন ক্যাটাগরি</h3>
+      <h3 id="pmCatModalTitle">???? ?????????</h3>
       <div class="pm-field" style="margin-bottom:10px">
-        <label>Key (ইংরেজি, ড্যাশ) — URL অংশ</label>
+        <label>Key (??????, ?????) � URL ???</label>
         <input type="text" id="pmCatKey" placeholder="festive-special">
       </div>
       <div class="pm-field" style="margin-bottom:10px">
-        <label>মেনু (ইংরেজি)</label>
+        <label>???? (??????)</label>
         <input type="text" id="pmCatMenu" placeholder="FESTIVE SPECIAL">
       </div>
       <div class="pm-field" style="margin-bottom:10px">
-        <label>নাম (বাংলা)</label>
-        <input type="text" id="pmCatMenuBn" placeholder="ফেস্টিভ স্পেশাল">
+        <label>??? (?????)</label>
+        <input type="text" id="pmCatMenuBn" placeholder="??????? ???????">
       </div>
       <div class="pm-field" style="margin-bottom:10px">
-        <label>HTML ফাইল</label>
+        <label>HTML ????</label>
         <input type="text" id="pmCatPage" placeholder="festive-special.html">
       </div>
       <div class="pm-field" style="margin-bottom:10px">
-        <label>URL পাথ</label>
+        <label>URL ???</label>
         <input type="text" id="pmCatPath" placeholder="/festive-special">
       </div>
       <div class="pm-modal-actions">
-        <button type="button" class="pl-btn pl-btn-secondary" id="pmCatModalClose">বাতিল</button>
-        <button type="button" class="pl-btn pl-btn-primary" id="pmCatSave">যোগ / আপডেট</button>
+        <button type="button" class="pl-btn pl-btn-secondary" id="pmCatModalClose">?????</button>
+        <button type="button" class="pl-btn pl-btn-primary" id="pmCatSave">??? / ?????</button>
       </div>
     </div>
   </div>

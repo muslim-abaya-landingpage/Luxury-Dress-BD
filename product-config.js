@@ -74,11 +74,11 @@ window.SITE_LINKS = {
   /** প্রোডাক্ট ডিটেইলে দামের নিচে ছোট নোট (Anzaar-style) */
   productShortNotes: {
     default:
-      "* ছবিতে রং সামান্য পার্থক্য হতে পারে। লাইটিংয়ের কারণে প্রকৃত রং একটু আলাদা দেখাতে পারে।",
+      "* Colors may vary slightly in photos. Lighting can make the actual shade look a little different.",
     abaya:
-      "* হিজাব অন্তর্ভুক্ত নয় (যদি না উল্লেখ করা থাকে)। ছবিতে রং সামান্য পার্থক্য হতে পারে।",
+      "* Hijab is not included (unless specified). Colors may vary slightly in photos.",
     "cover-up":
-      "* ইনার আবায়া/হিজাব অন্তর্ভুক্ত নয় যদি না উল্লেখ করা থাকে।",
+      "* Inner abaya/hijab is not included unless specified.",
     "premium-two-piece": ""
   },
   productNotes: {
