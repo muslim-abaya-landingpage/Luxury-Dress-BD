@@ -453,6 +453,43 @@
       out.content_ids = [String(out.content_id)];
     }
 
+    // Mirror keys expected by GTM Data Layer Variables (DLV - first_name, phone, etc.)
+    if (out.user_first_name && !out.first_name) out.first_name = out.user_first_name;
+    if (out.first_name && !out.user_first_name) out.user_first_name = out.first_name;
+    if (out.user_email && !out.email) out.email = out.user_email;
+    if (out.email && !out.user_email) out.user_email = String(out.email).trim().toLowerCase();
+
+    var qty = parseInt(out.quantity, 10) || 1;
+    if (!out.contents && Array.isArray(out.content_ids) && out.content_ids.length) {
+      out.contents = out.content_ids.map(function (id) {
+        return {
+          id: String(id),
+          quantity: qty,
+          item_price: typeof out.value === "number" ? out.value : parseFloat(out.value) || 0
+        };
+      });
+    }
+    if (!out.order_items) {
+      if (Array.isArray(out.contents) && out.contents.length) {
+        out.order_items = out.contents
+          .map(function (item) {
+            if (!item) return "";
+            var label = item.id || item.name || "";
+            var q = parseInt(item.quantity, 10) || 1;
+            return label ? label + " x" + q : "";
+          })
+          .filter(Boolean)
+          .join(", ");
+      } else if (out.content_name) {
+        out.order_items = String(out.content_name) + " x" + qty;
+      }
+    }
+    if (typeof out.num_items === "undefined" && Array.isArray(out.contents)) {
+      out.num_items = out.contents.reduce(function (sum, item) {
+        return sum + (parseInt(item && item.quantity, 10) || 1);
+      }, 0);
+    }
+
     out.currency = out.currency || "BDT";
     return out;
   }
