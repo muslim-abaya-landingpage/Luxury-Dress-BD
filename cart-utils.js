@@ -490,6 +490,22 @@
       }, 0);
     }
 
+    // Stape FB CAPI tags read eventModel.* from the dataLayer.
+    var eventValue =
+      typeof out.value !== "undefined" ? out.value : out.order_value;
+    var userData = {};
+    if (out.user_phone) userData.ph = out.user_phone;
+    if (out.user_email) userData.em = out.user_email;
+    if (out.user_first_name) userData.fn = out.user_first_name;
+    if (out.user_last_name) userData.ln = out.user_last_name;
+    out.eventModel = {
+      currency: out.currency || "BDT",
+      value: eventValue != null ? parseFloat(eventValue) || 0 : undefined,
+      items: Array.isArray(out.contents) ? out.contents : [],
+      transaction_id: out.transaction_id || out.event_id || "",
+      user_data: userData
+    };
+
     out.currency = out.currency || "BDT";
     return out;
   }
