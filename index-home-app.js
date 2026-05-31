@@ -497,7 +497,7 @@ function renderSidebar() {
             </div>`;
         const actionsRowHtml = `<div class="product-actions-row">
                 <button type="button" class="anzaar-btn anzaar-btn-cart${inCart ? ' is-active' : ''}" data-home-cart-action="add" data-product-id="${p.id}">Add to Cart</button>
-                <button type="button" class="anzaar-btn anzaar-btn-buy" data-home-cart-action="buy" data-product-id="${p.id}">Buy Now</button>
+                <button type="button" class="anzaar-btn anzaar-btn-buy" data-home-cart-action="buy" data-product-id="${p.id}"><i class="fas fa-shopping-bag" aria-hidden="true"></i> Buy Now</button>
             </div>`;
 card.innerHTML = `
     <div style="position: relative; overflow: hidden; border-radius: 8px;">

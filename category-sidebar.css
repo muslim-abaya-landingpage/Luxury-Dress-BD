@@ -738,6 +738,7 @@ button.img-wrap {
   background: #111;
   color: #fff;
   border-color: #111;
+  gap: 6px;
 }
 
 .anzaar-btn-buy:hover {
@@ -880,9 +881,30 @@ button.img-wrap {
   border-radius: 4px;
   padding: 11px 8px;
   text-align: center;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   text-decoration: none;
+}
+
+.ma-shop-bag-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.ma-shop-bag-ico svg {
+  display: block;
+}
+
+.premium-card-detail .detail-actions .btn-add-cart,
+.premium-card-detail .detail-actions .btn-buy-now {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 14px;
 }
 
 .premium-card-detail .detail-actions .btn-buy-now {
@@ -1947,6 +1969,7 @@ body.pqv-sc-open {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   min-height: 48px;
   padding: 12px 10px;
   font-size: 14px;
@@ -1973,6 +1996,7 @@ body.pqv-sc-open {
   background: #111;
   border-color: #111;
   color: #fff;
+  gap: 6px;
 }
 
 .pqv-act-buy:hover {

@@ -86,12 +86,7 @@ body.shop-page .anzaar-btn-buy {
 }
 
 body.shop-page .anzaar-btn-cart,
-body.shop-page .anzaar-btn-msg {
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-}
-
+body.shop-page .anzaar-btn-msg,
 body.shop-page .pqv-act-cart,
 body.shop-page .pqv-act-msg {
   font-size: 14px;

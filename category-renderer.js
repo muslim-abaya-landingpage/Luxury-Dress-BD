@@ -8,7 +8,7 @@ function ensureCategoryStyles() {
     link.rel = "stylesheet";
     document.head.appendChild(link);
   }
-  link.href = "category-sidebar.css?v=20260603btn14";
+  link.href = "category-sidebar.css?v=20260603cart14";
   var qtyLink =
     document.getElementById("qty-stepper-css") ||
     document.querySelector('link[href*="qty-stepper.css"]');
@@ -20,7 +20,21 @@ function ensureCategoryStyles() {
   }
   qtyLink.href = "qty-stepper.css?v=20260531qty2";
   var shopLink = document.querySelector('link[href*="shop-page.css"]');
-  if (shopLink) shopLink.href = "shop-page.css?v=20260603btn14";
+  if (shopLink) shopLink.href = "shop-page.css?v=20260603cart14";
+}
+
+function maShopBagIcon(size) {
+  var s = parseInt(size, 10) || 18;
+  return (
+    '<span class="ma-shop-bag-ico anzaar-btn-ico" aria-hidden="true">' +
+    '<svg width="' +
+    s +
+    '" height="' +
+    s +
+    '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+    '<path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/>' +
+    '<path d="M6 6L5 3H2"/></svg></span>'
+  );
 }
 
 function displayFabricLabel(fabric, fallback) {
@@ -1252,7 +1266,9 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     '" data-action="add">Add to Cart</button>' +
     '<button type="button" class="pqv-act pqv-act-buy" data-product-idx="' +
     idx +
-    '" data-action="buy-now">Buy Now</button>' +
+    '" data-action="buy-now">' +
+    maShopBagIcon(16) +
+    '<span lang="en">Buy Now</span></button>' +
     '<a class="pqv-act pqv-act-msg" href="' +
     waLink +
     "?text=" +
@@ -2070,7 +2086,9 @@ function buildProductCard(p, idx, waLink, detailMode, categoryKey, allProducts) 
       '" data-action="add">কার্টে যোগ</button>' +
       '<button type="button" class="msg-btn btn-buy-now" data-product-idx="' +
       idx +
-      '" data-action="buy-now">অর্ডার করুন</button>' +
+      '" data-action="buy-now">' +
+      maShopBagIcon(16) +
+      '<span lang="en">Order Now</span></button>' +
       "<a href='" +
       waLink +
       "?text=" +
