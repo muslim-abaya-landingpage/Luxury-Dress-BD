@@ -508,12 +508,38 @@
     waitForCatalogAndRefresh(0);
   }
 
+  function shouldSkipReviews() {
+    var p = String((window.location && window.location.pathname) || "/")
+      .replace(/\/index\.html$/i, "/")
+      .replace(/\.html$/i, "");
+    if (p.length > 1 && p.charAt(p.length - 1) === "/") p = p.slice(0, -1);
+    p = p || "/";
+    return /^\/(checkout|signin|signup|thank-you|success|privacy|terms|refund)(\/|$)/i.test(p);
+  }
+
+  function bootFooter() {
+    if (shouldSkipReviews()) {
+      mountFooter();
+      return;
+    }
+    var s = document.createElement("script");
+    s.src = "customer-reviews.js?v=20260531rev2";
+    s.onload = function () {
+      if (window.MaCustomerReviews && typeof window.MaCustomerReviews.mount === "function") {
+        window.MaCustomerReviews.mount();
+      }
+      mountFooter();
+    };
+    s.onerror = mountFooter;
+    (document.head || document.documentElement).appendChild(s);
+  }
+
   window.refreshFooterShopLinks = refreshFooterShopLinks;
   window.addEventListener("ma:catalog-ready", refreshFooterShopLinks);
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", mountFooter);
+    document.addEventListener("DOMContentLoaded", bootFooter);
   } else {
-    mountFooter();
+    bootFooter();
   }
 })();
