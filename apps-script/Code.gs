@@ -266,7 +266,7 @@ function handleOnlineOrderPost_(e) {
   ]);
 
   var imageUrls = collectOrderImageUrls_(e);
-  setOrderImageFormulas_(sheet, sheet.getLastRow(), imageUrls);
+  setOrderProductImages_(sheet, sheet.getLastRow(), imageUrls);
 
   try {
     sendToFacebookCAPI({
@@ -337,15 +337,38 @@ function collectOrderImageUrls_(e) {
   return urls;
 }
 
-function setOrderImageFormulas_(sheet, row, urls) {
+function setOrderProductImages_(sheet, row, urls) {
   if (!sheet || !row || row < 2 || !urls || !urls.length) return;
   var hasAny = false;
   for (var i = 0; i < urls.length && i < ONLINE_ORDER_IMAGE_COUNT; i++) {
     var url = String(urls[i] || '').trim();
     if (!url || url.indexOf('http') !== 0) continue;
-    var safeUrl = url.replace(/"/g, '%22');
-    sheet.getRange(row, ONLINE_ORDER_IMAGE_COL + i).setFormula('=IMAGE("' + safeUrl + '", 1)');
-    hasAny = true;
+    var col = ONLINE_ORDER_IMAGE_COL + i;
+    var cell = sheet.getRange(row, col);
+    try {
+      cell.clearContent();
+      var resp = UrlFetchApp.fetch(url, {
+        muteHttpExceptions: true,
+        followRedirects: true,
+        validateHttpsCertificates: true
+      });
+      if (resp.getResponseCode() !== 200) {
+        cell.setValue(url);
+        continue;
+      }
+      var blob = resp.getBlob();
+      if (!blob || !blob.getBytes().length) {
+        cell.setValue(url);
+        continue;
+      }
+      var img = sheet.insertImage(blob, col, row);
+      img.setWidth(72).setHeight(72);
+      hasAny = true;
+    } catch (imgErr) {
+      try {
+        cell.setValue(url);
+      } catch (cellErr) {}
+    }
   }
   if (hasAny) {
     try {
