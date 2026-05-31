@@ -51,38 +51,38 @@ window.SITE_SEO = {
   },
   categories: {
     abaya: {
-      title: "Abaya Collection | Muslim Abaya — কিনুন অনলাইন",
+      title: "Abaya Collection | Muslim Abaya — Buy Online Bangladesh",
       description:
-        "প্রিমিয়াম আবায়া কালেকশন — সফট জর্জেট, ক্যাশ অন ডেলিভারি সারা বাংলাদেশ। Muslim Abaya (muslimabaya.com)।"
+        "Premium abaya collection Bangladesh — soft georgette, modest styles, cash on delivery nationwide. Shop Muslim Abaya at muslimabaya.com."
     },
     "premium-two-piece": {
-      title: "Premium Two-Piece | Muslim Abaya",
+      title: "Premium Two-Piece Dress | Muslim Abaya — COD Bangladesh",
       description:
-        "প্রিমিয়াম টু-পিস কালেকশন — মডেস্ট ফ্যাশন, COD, muslimabaya.com।"
+        "Premium two-piece modest dress collection — floral prints, georgette fabric, cash on delivery all over Bangladesh. muslimabaya.com."
     },
     "cover-up": {
-      title: "Cover Up | Muslim Abaya",
-      description: "Cover up কালেকশন — Muslim Abaya বাংলাদেশ।"
+      title: "Cover Up Collection | Muslim Abaya Bangladesh",
+      description: "Modest cover up collection — Muslim Abaya Bangladesh. Order online with cash on delivery."
     },
     "tops-kurti": {
-      title: "Tops & Kurti | Muslim Abaya",
-      description: "টপস ও কুর্তি — Muslim Abaya।"
+      title: "Tops & Kurti | Muslim Abaya — Modest Fashion",
+      description: "Tops and kurti collection — modest fashion, COD Bangladesh. Muslim Abaya muslimabaya.com."
     },
     embroidery: {
-      title: "Embroidery | Muslim Abaya",
-      description: "এম্ব্রয়ডারি কালেকশন — Muslim Abaya।"
+      title: "Embroidery Abaya & Dress | Muslim Abaya",
+      description: "Embroidery abaya and dress collection — premium modest wear, cash on delivery Bangladesh."
     },
     karchupi: {
-      title: "Karchupi | Muslim Abaya",
-      description: "কারচুপি কালেকশন — Muslim Abaya।"
+      title: "Karchupi Collection | Muslim Abaya Bangladesh",
+      description: "Karchupi modest fashion collection — Muslim Abaya. Cash on delivery nationwide."
     },
     kaftan: {
-      title: "Kaftan | Muslim Abaya",
-      description: "কাফতান কালেকশন — Muslim Abaya।"
+      title: "Kaftan Collection | Muslim Abaya Bangladesh",
+      description: "Kaftan collection — modest fashion Bangladesh. Order with COD at muslimabaya.com."
     },
     hijab: {
-      title: "Hijab | Muslim Abaya",
-      description: "হিজাব কালেকশন — Muslim Abaya।"
+      title: "Hijab Collection | Muslim Abaya Bangladesh",
+      description: "Hijab collection — Muslim Abaya Bangladesh. Cash on delivery."
     }
   }
 };

@@ -1,16 +1,19 @@
 User-agent: *
 Allow: /
 
-# Checkout / post-purchase pages — avoid indexing thin or duplicate URLs
+# Checkout / post-purchase / admin — avoid indexing thin or private URLs
 Disallow: /checkout
 Disallow: /thank-you
 Disallow: /success
+Disallow: /signin
+Disallow: /signup
+Disallow: /admin/
 Disallow: /admin-login.html
 Disallow: /admin-dashboard.html
 Disallow: /admin-links.html
 Disallow: /product-manager.html
 Disallow: /product-links.html
-Disallow: /signin
-Disallow: /signup
+Disallow: /api-setup.html
+Disallow: /apps-script-copy.html
 
 Sitemap: https://muslimabaya.com/sitemap.xml

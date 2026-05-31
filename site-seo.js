@@ -80,8 +80,11 @@
     var pages = CFG.pages || {};
     if (pages[path]) return { path: path, meta: pages[path] };
 
+    var root = document.documentElement;
     var body = document.body;
-    var catKey = body && body.getAttribute("data-shop-category");
+    var catKey =
+      (root && root.getAttribute("data-shop-category")) ||
+      (body && body.getAttribute("data-shop-category"));
     if (catKey) {
       var cm = findCategoryMeta(catKey);
       if (cm) return { path: path, meta: cm, categoryKey: catKey };
@@ -142,7 +145,7 @@
       var css = document.createElement("link");
       css.id = "ma-seo-css";
       css.rel = "stylesheet";
-      css.href = "site-seo.css?v=20260602mobfoot2";
+      css.href = "site-seo.css?v=20260603seo";
       document.head.appendChild(css);
     }
     if (/\/signin$|\/signup$/.test(info.path)) {
@@ -201,6 +204,48 @@
     };
   }
 
+  function resolveProductImageUrl(p) {
+    if (!p) return DEFAULT_IMG;
+    var raw = p.image || p.img || "";
+    if (/^https?:\/\//i.test(raw)) return raw;
+    if (raw.charAt(0) === "/") return SITE + raw;
+    return SITE + "/" + String(raw).replace(/^\.\//, "");
+  }
+
+  function buildProductListSchema(path, categoryKey) {
+    var products =
+      categoryKey && global.CATEGORY_PRODUCTS && global.CATEGORY_PRODUCTS[categoryKey];
+    if (!products || !products.length) return null;
+    var list = products.slice(0, 36).map(function (p, i) {
+      var price = parseFloat(p.price) || 0;
+      return {
+        "@type": "ListItem",
+        position: i + 1,
+        item: {
+          "@type": "Product",
+          name: String(p.name || p.id || "Product"),
+          image: resolveProductImageUrl(p),
+          sku: String(p.id || ""),
+          brand: { "@type": "Brand", name: BRAND },
+          offers: {
+            "@type": "Offer",
+            price: price,
+            priceCurrency: "BDT",
+            availability: "https://schema.org/InStock",
+            url: pathToCanonical(path)
+          }
+        }
+      };
+    });
+    return {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      name: (CFG.categories && CFG.categories[categoryKey] && CFG.categories[categoryKey].title) || categoryKey,
+      numberOfItems: products.length,
+      itemListElement: list
+    };
+  }
+
   function buildCollectionSchema(path, categoryKey, label) {
     var count = 0;
     if (categoryKey && global.CATEGORY_PRODUCTS && global.CATEGORY_PRODUCTS[categoryKey]) {
@@ -232,6 +277,8 @@
         "ma-seo-collection",
         buildCollectionSchema(info.path, info.categoryKey, label)
       );
+      var itemList = buildProductListSchema(info.path, info.categoryKey);
+      if (itemList) upsertJsonLd("ma-seo-product-list", itemList);
     }
   }
 
@@ -244,6 +291,7 @@
   }
 
   function apply() {
+    if (global.__maSiteSeoApplied) return;
     var path = normalizePath(global.location && global.location.pathname);
     var info = resolvePageMeta();
 
@@ -260,8 +308,11 @@
   }
 
   function scheduleCategorySchemaRefresh() {
+    var root = document.documentElement;
     var body = document.body;
-    var key = body && body.getAttribute("data-shop-category");
+    var key =
+      (root && root.getAttribute("data-shop-category")) ||
+      (body && body.getAttribute("data-shop-category"));
     if (!key || homeSeoManaged()) return;
     var tries = 0;
     var timer = setInterval(function () {

@@ -1,10 +1,14 @@
 (function () {
   var GTM_ID = 'GTM-ML7RL6BR';
-  var SEO_VER = '20260531seo';
+  var SEO_VER = '20260603seo';
 
-  (function bootSiteSeo() {
+  (  function bootSiteSeo() {
     if (window.__maSiteSeoBoot) return;
     if (document.documentElement.getAttribute("data-seo-managed") === "full") return;
+    if (document.querySelector('script[src*="site-seo.js"]')) {
+      window.__maSiteSeoBoot = true;
+      return;
+    }
     window.__maSiteSeoBoot = true;
     function loadScript(src, next) {
       var s = document.createElement('script');
