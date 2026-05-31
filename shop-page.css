@@ -79,29 +79,21 @@ body.shop-page .anzaar-btn-buy {
   -moz-osx-font-smoothing: grayscale;
 }
 
-body.shop-page .anzaar-btn,
-body.shop-page .anzaar-btn-msg,
 body.shop-page .anzaar-btn-buy {
   font-size: 18px;
   font-weight: 700;
   letter-spacing: 0.01em;
 }
 
-body.shop-page .anzaar-btn-cart {
-  font-size: 16px;
-  font-weight: 700;
+body.shop-page .anzaar-btn-cart,
+body.shop-page .anzaar-btn-msg {
+  font-size: 14px;
+  font-weight: 600;
   letter-spacing: 0.01em;
 }
 
-/* Abaya + Premium Two-piece: compact action labels */
-body.shop-page[data-shop-category="abaya"] .anzaar-btn-cart,
-body.shop-page[data-shop-category="abaya"] .anzaar-btn-msg,
-body.shop-page[data-shop-category="premium-two-piece"] .anzaar-btn-cart,
-body.shop-page[data-shop-category="premium-two-piece"] .anzaar-btn-msg,
-body.shop-page[data-shop-category="abaya"] .pqv-act-cart,
-body.shop-page[data-shop-category="abaya"] .pqv-act-msg,
-body.shop-page[data-shop-category="premium-two-piece"] .pqv-act-cart,
-body.shop-page[data-shop-category="premium-two-piece"] .pqv-act-msg {
+body.shop-page .pqv-act-cart,
+body.shop-page .pqv-act-msg {
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.01em;

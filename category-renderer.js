@@ -8,7 +8,7 @@ function ensureCategoryStyles() {
     link.rel = "stylesheet";
     document.head.appendChild(link);
   }
-  link.href = "category-sidebar.css?v=20260531anzaar";
+  link.href = "category-sidebar.css?v=20260603btn14";
   var qtyLink =
     document.getElementById("qty-stepper-css") ||
     document.querySelector('link[href*="qty-stepper.css"]');
@@ -20,7 +20,7 @@ function ensureCategoryStyles() {
   }
   qtyLink.href = "qty-stepper.css?v=20260531qty2";
   var shopLink = document.querySelector('link[href*="shop-page.css"]');
-  if (shopLink) shopLink.href = "shop-page.css?v=20260630spa";
+  if (shopLink) shopLink.href = "shop-page.css?v=20260603btn14";
 }
 
 function displayFabricLabel(fabric, fallback) {

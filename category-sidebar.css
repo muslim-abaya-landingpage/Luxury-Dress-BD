@@ -727,7 +727,7 @@ button.img-wrap {
   background: #f3f3f3;
   color: #333;
   gap: 6px;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .anzaar-btn-cart:hover {
@@ -749,6 +749,7 @@ button.img-wrap {
   background: #f3f3f3;
   color: #333;
   width: 100%;
+  font-size: 14px;
 }
 
 .anzaar-btn-msg:hover {
@@ -1948,8 +1949,8 @@ body.pqv-sc-open {
   justify-content: center;
   min-height: 48px;
   padding: 12px 10px;
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
   font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   text-align: center;
   text-decoration: none;
@@ -1989,8 +1990,8 @@ body.pqv-sc-open {
   justify-content: center;
   min-height: 48px;
   padding: 12px 10px;
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
   font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   text-align: center;
   text-decoration: none;
