@@ -360,6 +360,26 @@
   g.formatTwoPieceCartSize = formatTwoPieceCartSize;
   g.parseTwoPieceLengthSize = parseTwoPieceLengthSize;
 
+  var FABRIC_LABEL_EN = {
+    "\u09a6\u09c1\u09ac\u09be\u0987 \u099a\u09c7\u09b0\u09bf": "Dubai Cherry",
+    "\u09a6\u09c1\u09ac\u09be\u0987\u099a\u09c7\u09b0\u09bf": "Dubai Cherry",
+    "\u098f\u09b2\u09c7\u0995\u09cd\u09b8 \u09b8\u09ab\u099f \u099c\u09b0\u09cd\u099c\u09c7\u099f": "Alex soft Georgette",
+    "\u09aa\u09cd\u09b0\u09bf\u09ae\u09bf\u09af\u09bc\u09be\u09ae \u099c\u09b0\u09cd\u099c\u09c7\u099f": "Premium Georgette"
+  };
+
+  function formatFabricLabelEn(fabric) {
+    var f = String(fabric || "").trim();
+    if (!f) return "";
+    if (FABRIC_LABEL_EN[f]) return FABRIC_LABEL_EN[f];
+    var low = f.toLowerCase();
+    if (low.indexOf("dubai") !== -1 && low.indexOf("cherry") !== -1) return "Dubai Cherry";
+    if (low.indexOf("alex") !== -1 && low.indexOf("georgette") !== -1) return "Alex soft Georgette";
+    if (/premium\s*georgette/i.test(f)) return "Premium Georgette";
+    return f;
+  }
+
+  g.formatFabricLabelEn = formatFabricLabelEn;
+
   g.maCatalog = {
     resolveImageUrl: resolveImageUrl,
     resolveProductPageLink: resolveProductPageLink,

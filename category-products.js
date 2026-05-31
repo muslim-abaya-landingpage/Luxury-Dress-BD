@@ -20,7 +20,7 @@ window.CATEGORY_PRODUCTS = {
       price: 999,
       color: "maroon",
       colorLabel: "Maroon",
-      fabric: "দুবাই চেরি",
+      fabric: "Dubai Cherry",
       sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: { "Full Set": 999, "Abaya Only": 799 }
     },
@@ -32,7 +32,7 @@ window.CATEGORY_PRODUCTS = {
       price: 999,
       color: "maroon",
       colorLabel: "Maroon",
-      fabric: "দুবাই চেরি",
+      fabric: "Dubai Cherry",
       sizes: ["44", "46", "48", "50", "52", "54", "56"]
     },
     {
@@ -43,7 +43,7 @@ window.CATEGORY_PRODUCTS = {
       price: 999,
       color: "maroon",
       colorLabel: "Maroon",
-      fabric: "দুবাই চেরি",
+      fabric: "Dubai Cherry",
       sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: { "Full Set": 999, "Abaya Only": 799 }
     },
@@ -55,7 +55,7 @@ window.CATEGORY_PRODUCTS = {
       price: 999,
       color: "black",
       colorLabel: "Classic Black",
-      fabric: "দুবাই চেরি",
+      fabric: "Dubai Cherry",
       sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: { "Full Set": 999, "Abaya Only": 799 }
     },
@@ -67,7 +67,7 @@ window.CATEGORY_PRODUCTS = {
       price: 999,
       color: "black",
       colorLabel: "Classic Black",
-      fabric: "দুবাই চেরি",
+      fabric: "Dubai Cherry",
       sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: { "Full Set": 999, "Abaya Only": 799 }
     },
@@ -79,7 +79,7 @@ window.CATEGORY_PRODUCTS = {
       price: 999,
       color: "black",
       colorLabel: "Classic Black",
-      fabric: "দুবাই চেরি",
+      fabric: "Dubai Cherry",
       sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: { "Full Set": 999, "Abaya Only": 799 }
     },
@@ -221,7 +221,7 @@ window.CATEGORY_PRODUCTS = {
       price: 550,
       color: "pink",
       colorLabel: "Baby Pink Light Pink",
-      fabric: "এলেক্স সফট জর্জেট",
+      fabric: "Alex soft Georgette",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
       detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
     },
@@ -233,7 +233,7 @@ window.CATEGORY_PRODUCTS = {
       price: 550,
       color: "pink",
       colorLabel: "Baby Pink Floral",
-      fabric: "এলেক্স সফট জর্জেট",
+      fabric: "Alex soft Georgette",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
       detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
     },
@@ -245,7 +245,7 @@ window.CATEGORY_PRODUCTS = {
       price: 550,
       color: "black",
       colorLabel: "Black Base Rose Floral",
-      fabric: "এলেক্স সফট জর্জেট",
+      fabric: "Alex soft Georgette",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
       detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
     },
@@ -257,7 +257,7 @@ window.CATEGORY_PRODUCTS = {
       price: 550,
       color: "black",
       colorLabel: "Black White Polka",
-      fabric: "এলেক্স সফট জর্জেট",
+      fabric: "Alex soft Georgette",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
       detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
     },
@@ -269,7 +269,7 @@ window.CATEGORY_PRODUCTS = {
       price: 550,
       color: "blue",
       colorLabel: "Royal Blue Golden Floral",
-      fabric: "এলেক্স সফট জর্জেট",
+      fabric: "Alex soft Georgette",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
       detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
     },
@@ -281,7 +281,7 @@ window.CATEGORY_PRODUCTS = {
       price: 550,
       color: "green",
       colorLabel: "Sage Green Mint Green",
-      fabric: "এলেক্স সফট জর্জেট",
+      fabric: "Alex soft Georgette",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
       detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
     },
@@ -293,7 +293,7 @@ window.CATEGORY_PRODUCTS = {
       price: 550,
       color: "pink",
       colorLabel: "Pink Floral Co-ord Set",
-      fabric: "এলেক্স সফট জর্জেট",
+      fabric: "Alex soft Georgette",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
       detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
     }

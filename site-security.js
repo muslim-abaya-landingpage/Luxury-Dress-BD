@@ -55,11 +55,15 @@
     var phone = normalizePhoneBd(fields.phone);
     var address = sanitizeText(fields.address, 400);
     var total = parseFloat(String(fields.total || "0").replace(/[^\d.]/g, "")) || 0;
-    if (name.length < 2) return { ok: false, message: "সঠিক নাম লিখুন।" };
-    if (!phone) return { ok: false, message: "সঠিক ১১ ডিজিট মোবাইল নম্বর দিন (01XXXXXXXXX)।" };
-    if (address.length < 8) return { ok: false, message: "সম্পূর্ণ ডেলিভারি ঠিকানা লিখুন।" };
+    if (name.length < 2) return { ok: false, message: "Please enter a valid name." };
+    if (!phone) {
+      return { ok: false, message: "Enter a valid 11-digit mobile number (01XXXXXXXXX)." };
+    }
+    if (address.length < 8) {
+      return { ok: false, message: "Please enter your full delivery address." };
+    }
     if (total < MIN_ORDER_BDT) {
-      return { ok: false, message: "ন্যূনতম অর্ডার ৳" + MIN_ORDER_BDT + "।" };
+      return { ok: false, message: "Minimum order amount is ৳" + MIN_ORDER_BDT + "." };
     }
     return { ok: true, name: name, phone: phone, address: address, total: total };
   }

@@ -23,6 +23,12 @@ function ensureCategoryStyles() {
   if (shopLink) shopLink.href = "shop-page.css?v=20260630spa";
 }
 
+function displayFabricLabel(fabric, fallback) {
+  var raw = String(fabric || "").trim() || String(fallback || "Premium Georgette").trim();
+  if (typeof formatFabricLabelEn === "function") return formatFabricLabelEn(raw);
+  return raw;
+}
+
 function syncShopScrollHeights() {
   if (!document.body || !document.body.classList.contains("shop-page")) return;
   var header = document.getElementById("site-header-mount");
@@ -229,7 +235,10 @@ function shopAddProductToCart(item, qtyToAdd, sizeValue, categoryKeyOpt) {
 
   var updated = [];
   if (typeof addOrMergeStoreCartItem === "function") {
-    updated = addOrMergeStoreCartItem(typeof loadStoreCart === "function" ? loadStoreCart() : [], line);
+    updated = addOrMergeStoreCartItem(
+      typeof loadStoreCart === "function" ? loadStoreCart({ readOnly: true }) : [],
+      line
+    );
   }
   if (typeof afterCartMutation === "function") afterCartMutation(updated);
 
@@ -385,7 +394,7 @@ function refreshShopCardsAfterCartChange() {
 }
 
 function changeShopCartProductQty(p, delta, categoryKey) {
-  var lines = typeof loadStoreCart === "function" ? loadStoreCart() : [];
+  var lines = typeof loadStoreCart === "function" ? loadStoreCart({ readOnly: true }) : [];
   var pid = String(p.id || "").trim();
   var lineIdx = -1;
   var i;
@@ -690,7 +699,7 @@ function getProductDescriptionHtml(p, categoryKey) {
     "<p><strong>" +
     escapeHtml(p.name) +
     "</strong> — " +
-    escapeHtml(p.fabric || "") +
+    escapeHtml(displayFabricLabel(p.fabric, "")) +
     "। প্রিমিয়াম মুসলিম ফ্যাশন, বাংলাদেশ জুড়ে ডেলিভারি।</p>"
   );
 }
@@ -1096,7 +1105,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
   var gallery = collectGalleryImages(p, allProducts || []);
   var imgSrc = escapeHtml(gallery[0] || resolveCardImageSrc(p));
   var priceText = formatBdtPrice(productPrice);
-  var fabricText = escapeHtml(p.fabric || "Premium Georgette");
+  var fabricText = escapeHtml(displayFabricLabel(p.fabric, "Premium Georgette"));
   var isAbaya = typeof isAbayaProduct === "function" && isAbayaProduct(p, categoryKey);
   var isTwoPiece = typeof isTwoPieceProduct === "function" && isTwoPieceProduct(p, categoryKey);
   var abayaCfg = isAbaya && typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig() : null;
@@ -1995,7 +2004,7 @@ function buildProductCard(p, idx, waLink, detailMode, categoryKey, allProducts) 
   var imgFallback = getCategoryFallbackImage(categoryKey || "");
 
   var priceText = formatCardPriceText(p, categoryKey);
-  var fabricText = escapeHtml(p.fabric || (detailMode ? "দুবাই চেরি" : "Premium Georgette"));
+  var fabricText = escapeHtml(displayFabricLabel(p.fabric, detailMode ? "Dubai Cherry" : "Premium Georgette"));
   var isAbaya = typeof isAbayaProduct === "function" && isAbayaProduct(p, categoryKey);
   var isTwoPiece = typeof isTwoPieceProduct === "function" && isTwoPieceProduct(p, categoryKey);
   var abayaCfg = isAbaya && typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig() : null;

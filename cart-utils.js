@@ -211,18 +211,23 @@
 
   function loadStoreCart(options) {
     var readOnly = options && options.readOnly === true;
+    /* One canonical read: persist mirrors the same JSON into every key — concatenating
+       all keys used to multiply quantity (e.g. 1 item × 4 keys → qty 4). */
     var keys = ["secured_checkout_cart", "category_cart_v2", "user_cart", "cart"];
-    var merged = [];
-    keys.forEach(function (key) {
-      var rawItems = parseStoredRaw(localStorage.getItem(key));
-      if (rawItems.length) merged = merged.concat(rawItems);
-    });
-    if (!merged.length) {
+    var best = [];
+    var i;
+    for (i = 0; i < keys.length; i++) {
+      var rawItems = parseStoredRaw(localStorage.getItem(keys[i]));
+      if (rawItems.length) {
+        best = normalizeArray(rawItems);
+        break;
+      }
+    }
+    if (!best.length) {
       try {
-        merged = parseStoredRaw(sessionStorage.getItem("cart"));
+        best = normalizeArray(parseStoredRaw(sessionStorage.getItem("cart")));
       } catch (e2) {}
     }
-    var best = normalizeArray(merged);
     if (best.length > 0 && !readOnly) persistStoreCart(best);
     return best;
   }
@@ -365,7 +370,7 @@
   function afterCartMutation(cartLines) {
     markStoreCartSession();
     var lines = cartLines;
-    if (!lines && typeof loadStoreCart === "function") lines = loadStoreCart();
+    if (!lines && typeof loadStoreCart === "function") lines = loadStoreCart({ readOnly: true });
     refreshCartBadgeUI(lines);
   }
 

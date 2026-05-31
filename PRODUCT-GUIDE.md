@@ -115,7 +115,7 @@
   price: 799,
   color: "maroon",
   colorLabel: "Maroon",
-  fabric: "দুবাই চেরি",
+  fabric: "Dubai Cherry",
   sizes: ["50", "52", "54", "56"]
 },
 ```

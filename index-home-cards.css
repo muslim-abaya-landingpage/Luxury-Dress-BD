@@ -261,6 +261,10 @@
   border-radius: 4px !important;
 }
 
+#premium-collection .anzaar-btn-cart {
+  font-size: 16px !important;
+}
+
 #premium-collection .anzaar-btn-msg {
   font-size: 12px !important;
   min-height: 40px !important;

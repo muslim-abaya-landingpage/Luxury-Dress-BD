@@ -41,12 +41,12 @@ window.SITE_LINKS = {
   },
   defaults: {
     price: 550,
-    fabric: "এলেক্স সফট জর্জেট",
+    fabric: "Alex soft Georgette",
     sizes: ["Body 42 (Free size)"],
     byCategory: {
       abaya: {
         price: 999,
-        fabric: "দুবাই চেরি",
+        fabric: "Dubai Cherry",
         bodySize: "46",
         bodySizeLabel: "46 [Free size]",
         lengthSizes: ["50", "52", "54", "56"],

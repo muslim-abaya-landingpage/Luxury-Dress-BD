@@ -1625,7 +1625,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <div id="paymentInfo" class="payment-panel">Payment mode: Cash On Delivery ? pay when you receive the product.</div>
                 <div class="payment-fields">
                     <input type="text" id="senderNumber" placeholder="Payment number (bKash/Nagad) - optional">
-                    <input type="text" id="paymentTxnId" placeholder="Transaction ID / Reference - optional">
+                    <input type="text" id="paymentTxnId" placeholder="Transaction ID / Reference (required for bKash, Nagad, Bank)">
                     <input type="text" id="bankRef" placeholder="Bank slip / reference number - if paid by bank">
                 </div>
                 <div class="pay-details" id="payDetails">
@@ -1771,7 +1771,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 </div>
 
-<script src="site-security.js"></script>
+<script src="site-security.js?v=20260603ord"></script>
 <script src="site-api-config.js?v=20260530"></script>
 <script src="site-api-health.js?v=20260610"></script>
 <script src="auth-config.js"></script>
@@ -1779,7 +1779,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="product-config.js?v=20260603ennotes"></script>
 <script src="product-utils.js?v=20260602twopiece"></script>
 <script defer src="site-header.js?v=20260601en"></script>
-<script src="cart-utils.js?v=20260603cartfix"></script>
+<script src="cart-utils.js?v=20260603cartqty"></script>
 <script src="checkout-location-labels.js?v=20260603loc"></script>
 <script src="checkout-locations.js?v=20260603loc"></script>
 <script>
@@ -1900,7 +1900,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             'District: ' + order.district
         ];
         if (order.thana) lines.push('Thana: ' + order.thana);
-        lines.push('Qty: ' + order.qty, 'Total: ?' + order.total, 'Products: ' + order.products);
+        lines.push('Qty: ' + order.qty, 'Total: ৳' + order.total, 'Products: ' + order.products);
         return 'https://wa.me/' + wa + '?text=' + encodeURIComponent(lines.join('\n'));
     }
 
@@ -2081,6 +2081,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
 
     function formatCheckoutFabric(fabric) {
+        if (typeof formatFabricLabelEn === 'function') {
+            return formatFabricLabelEn(fabric);
+        }
         var f = String(fabric || '').trim();
         if (!f) return '';
         var low = f.toLowerCase();
@@ -2356,7 +2359,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     function productsLabel() {
         return cart.map(function(item) {
             var size = String(item.size || item.selectedSize || '').trim();
-            var sizePart = size ? ' ? Size: ' + size : '';
+            var sizePart = size ? ' · Size: ' + size : '';
             return item.name + sizePart + ' (' + (parseInt(item.quantity, 10) || 1) + ' pcs)';
         }).join(', ');
     }
@@ -2600,7 +2603,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         });
 
         var metaEl = document.getElementById('orderReviewMeta');
-        if (metaEl) metaEl.textContent = designCount + ' items ? ' + q + ' pcs';
+        if (metaEl) metaEl.textContent = designCount + ' items · ' + q + ' pcs';
 
         summaryDiv.innerHTML = '<div class="gb-order-list">' + itemsHtml + '</div>';
         renderProductChart();
@@ -2688,10 +2691,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     (function initPaymentBox() {
         var info = document.getElementById('paymentInfo');
         var details = {
-            'Cash On Delivery': 'Payment mode: Cash On Delivery ? pay when you receive the product.',
-            'bKash': 'bKash Personal: 01551642683 ? enter Transaction ID after payment.',
-            'Nagad': 'Nagad Personal: 01551642683 ? enter Transaction ID after payment.',
-            'Bank Transfer': 'UCB PLC, A/C: 7862141000038155 ? enter slip/reference number.'
+            'Cash On Delivery': 'Payment mode: Cash on Delivery — pay when you receive your order.',
+            'bKash': 'bKash Personal: 01551642683 — enter Transaction ID after payment (required to place order).',
+            'Nagad': 'Nagad Personal: 01551642683 — enter Transaction ID after payment (required to place order).',
+            'Bank Transfer': 'UCB PLC, A/C: 7862141000038155 — enter slip/reference number (required to place order).'
         };
         function highlightPayCards(pmKey) {
             document.querySelectorAll('.pay-detail-card').forEach(function(card) {
@@ -2883,6 +2886,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 return;
             }
             if (termsError) termsError.classList.remove('show');
+
+            var selectedPaymentPre = document.querySelector('input[name="paymentMethod"]:checked');
+            var pmValuePre = selectedPaymentPre ? selectedPaymentPre.value : 'Cash On Delivery';
+            if (pmValuePre === 'bKash' || pmValuePre === 'Nagad' || pmValuePre === 'Bank Transfer') {
+                var txnElPre = document.getElementById('paymentTxnId');
+                var txnPre = (txnElPre && txnElPre.value || '').trim();
+                if (txnPre.length < 4) {
+                    checkoutAlert(
+                        'Enter your payment Transaction ID or bank reference (at least 4 characters).',
+                        txnElPre
+                    );
+                    return;
+                }
+            }
 
             var btn = document.getElementById('submitBtn');
             if (btn) {

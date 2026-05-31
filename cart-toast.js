@@ -4,7 +4,7 @@
  * showCartRemovedToast({ name? })
  */
 (function (global) {
-  var CSS_VER = "20260603toast";
+  var CSS_VER = "20260603cartqty";
   var HIDE_MS = 3200;
   var hideTimer = null;
 
@@ -24,7 +24,7 @@
 
   function cartItemCount() {
     if (typeof global.loadStoreCart !== "function") return 0;
-    var lines = global.loadStoreCart() || [];
+    var lines = global.loadStoreCart({ readOnly: true }) || [];
     var n = 0;
     for (var i = 0; i < lines.length; i++) {
       n += parseInt(lines[i].quantity, 10) || 0;

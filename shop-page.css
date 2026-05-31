@@ -80,10 +80,15 @@ body.shop-page .anzaar-btn-buy {
 }
 
 body.shop-page .anzaar-btn,
-body.shop-page .anzaar-btn-cart,
 body.shop-page .anzaar-btn-msg,
 body.shop-page .anzaar-btn-buy {
   font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+body.shop-page .anzaar-btn-cart {
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.01em;
 }
