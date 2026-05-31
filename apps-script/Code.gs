@@ -369,6 +369,34 @@ function syncProductListDropdown_() {
   );
 }
 
+function getOrderStatusOptions_() {
+  return ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled', 'Fake'];
+}
+
+function setupOrderStatusDropdown_(sheet) {
+  sheet = sheet || SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
+  if (!sheet) return false;
+  var options = getOrderStatusOptions_();
+  var rule = SpreadsheetApp.newDataValidation()
+    .requireValueInList(options, true)
+    .setAllowInvalid(false)
+    .build();
+  sheet.getRange('J2:J2000').setDataValidation(rule);
+  return true;
+}
+
+function setupOrderStatusDropdownFromMenu() {
+  if (!setupOrderStatusDropdown_()) {
+    SpreadsheetApp.getUi().alert('Online Order sheet পাওয়া যায়নি।');
+    return;
+  }
+  SpreadsheetApp.getUi().alert(
+    'Column J (Status) dropdown ready:\n\n' +
+    getOrderStatusOptions_().join(' · ') +
+    '\n\nConfirmed = Steadfast auto (Confirmed mode)\nShipped = courier পাঠানো হয়েছে'
+  );
+}
+
 function rateLimitOrder_(phone) {
   var normalized = normalizePhone_(phone);
   var bypassRaw = PropertiesService.getScriptProperties().getProperty('ORDER_RATE_LIMIT_BYPASS') || '01971642683';
@@ -450,6 +478,7 @@ function handleOnlineOrderPost_(e) {
 
   var newRow = sheet.getLastRow();
   formatOnlineOrderProductCell_(sheet, newRow, validated.design);
+  setupOrderStatusDropdown_(sheet);
   var imageUrls = collectOrderImageUrls_(e);
   setOrderProductImages_(sheet, newRow, imageUrls);
 
@@ -487,6 +516,7 @@ function onOpen() {
     if (orderSheet) {
       ensureOnlineOrderHeaders_(orderSheet);
       ensureOnlineOrderImageHeaders_(orderSheet);
+      setupOrderStatusDropdown_(orderSheet);
     }
     selfHealSteadfastBaseUrl_();
     selfHealAutoCourierSetup_();
@@ -494,6 +524,7 @@ function onOpen() {
       .createMenu('Muslim Abaya')
       .addItem('Product picker sidebar (column G)', 'openProductPickerSidebar')
       .addItem('Product dropdown — column G sync', 'syncProductListDropdown_')
+      .addItem('Status dropdown — column J (Pending/Confirmed…)', 'setupOrderStatusDropdownFromMenu')
       .addSeparator()
       .addItem('Steadfast — selected row পাঠান', 'steadfastSendActiveRow')
       .addItem('Steadfast — balance দেখুন', 'steadfastShowBalance')
@@ -719,7 +750,8 @@ function setupOnlineOrderExtraHeaders() {
     SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   ensureOnlineOrderHeaders_(sheet);
   ensureOnlineOrderImageHeaders_(sheet);
-  SpreadsheetApp.getUi().alert('কলাম I–Q ও R–W (ছবি) হেডার সেট হয়েছে। A–H আগে থেকে থাকলে সেগুলো অপরিবর্তিত।');
+  setupOrderStatusDropdown_(sheet);
+  SpreadsheetApp.getUi().alert('কলাম I–Q ও R–W (ছবি) হেডার সেট হয়েছে। A–H আগে থেকে থাকলে সেগুলো অপরিবর্তিত।\n\nColumn J status dropdown applied.');
 }
 
 function getSteadfastKeys_() {
