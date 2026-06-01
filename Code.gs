@@ -495,7 +495,7 @@ function handleOnlineOrderPost_(e) {
   });
 
   try {
-    sendToFacebookCAPI({
+    var capiRes = sendToFacebookCAPI({
       Name: validated.name,
       Phone: validated.phone,
       Email: param_(e, 'Email'),
@@ -508,8 +508,14 @@ function handleOnlineOrderPost_(e) {
       ClientUserAgent: param_(e, 'ClientUserAgent'),
       TestEventCode: param_(e, 'test_event_code') || param_(e, 'TestEventCode')
     }, eventID);
+    if (capiRes && !capiRes.ok) {
+      appendAutoCourierNote_(sheet, newRow, 'CAPI_FAIL:' + String(capiRes.code || 'UNKNOWN'));
+    } else if (capiRes && capiRes.ok) {
+      appendAutoCourierNote_(sheet, newRow, 'CAPI_OK');
+    }
   } catch (err) {
     console.log('CAPI Error: ' + err.message);
+    appendAutoCourierNote_(sheet, newRow, 'CAPI_ERR:' + String(err.message || err).slice(0, 80));
   }
 
   return ContentService.createTextOutput('Success|' + orderId).setMimeType(ContentService.MimeType.TEXT);
@@ -1296,13 +1302,28 @@ function getDistrictChargeMap_() {
   return { 'ঢাকা': 80 };
 }
 
-function sendToFacebookCAPI(data, eventID) {
+function getFacebookCapiConfig_() {
   var props = PropertiesService.getScriptProperties();
-  var accessToken = props.getProperty('FB_ACCESS_TOKEN');
-  var pixelId = props.getProperty('FB_PIXEL_ID');
-  if (!accessToken || !pixelId) return;
+  var accessToken =
+    props.getProperty('FB_ACCESS_TOKEN') ||
+    props.getProperty('META_ACCESS_TOKEN') ||
+    props.getProperty('FACEBOOK_ACCESS_TOKEN') ||
+    '';
+  var pixelId =
+    props.getProperty('FB_PIXEL_ID') ||
+    props.getProperty('META_PIXEL_ID') ||
+    props.getProperty('PIXEL_ID') ||
+    '';
+  return { accessToken: String(accessToken || '').trim(), pixelId: String(pixelId || '').trim() };
+}
 
-  var url = 'https://graph.facebook.com/v18.0/' + pixelId + '/events?access_token=' + accessToken;
+function sendToFacebookCAPI(data, eventID) {
+  var cfg = getFacebookCapiConfig_();
+  if (!cfg.accessToken || !cfg.pixelId) {
+    return { ok: false, code: 'CONFIG_MISSING' };
+  }
+
+  var url = 'https://graph.facebook.com/v18.0/' + cfg.pixelId + '/events?access_token=' + cfg.accessToken;
   var cleanPhone = String(data.Phone || '').replace(/[^0-9]/g, '');
   if (cleanPhone.indexOf('0') === 0) cleanPhone = '88' + cleanPhone;
   var cleanEmail = String(data.Email || '').trim().toLowerCase();
@@ -1342,12 +1363,28 @@ function sendToFacebookCAPI(data, eventID) {
   };
   if (testEventCode) payload.test_event_code = testEventCode;
 
-  UrlFetchApp.fetch(url, {
+  var res = UrlFetchApp.fetch(url, {
     method: 'post',
     contentType: 'application/json',
     payload: JSON.stringify(payload),
     muteHttpExceptions: true
   });
+  var code = res.getResponseCode();
+  var body = String(res.getContentText() || '');
+  var parsed = {};
+  try { parsed = JSON.parse(body); } catch (jsonErr) {}
+  if (code >= 400 || (parsed && parsed.error)) {
+    return {
+      ok: false,
+      code: 'META_HTTP_' + String(code),
+      message: body.slice(0, 200)
+    };
+  }
+  return {
+    ok: true,
+    code: 'OK',
+    eventsReceived: parsed && parsed.events_received != null ? parsed.events_received : ''
+  };
 }
 
 function SHA256_Hash(input) {
