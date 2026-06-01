@@ -1941,8 +1941,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         return 'https://wa.me/' + wa + '?text=' + encodeURIComponent(lines.join('\n'));
     }
 
-    function finishCheckoutSuccess(nameValue, phoneValue, emailValue, gTotal, orderId) {
-        var eventId = orderId ? ('order_' + orderId) : ('order_' + Date.now());
+    function finishCheckoutSuccess(nameValue, phoneValue, emailValue, gTotal, orderId, stableEventId) {
+        var eventId = stableEventId || (orderId ? ('order_' + orderId) : ('order_' + Date.now()));
         var cartSnap = typeof buildCartTrackingSnapshot === 'function'
             ? buildCartTrackingSnapshot(cart)
             : { value: parseFloat(gTotal) || 0, currency: 'BDT' };
@@ -2052,6 +2052,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
 
     function postOrderToSheet(formData, nameValue, phoneValue, emailValue, gTotal, btn, orderWa) {
+        var stableEventId = formData.get('EventID') || ('order_' + Date.now());
         fetch(ORDER_SCRIPT_URL, {
             method: 'POST',
             body: formData,
@@ -2068,7 +2069,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 var text = String(result.text || '').trim();
                 if (text.indexOf('Success') === 0) {
                     var orderId = text.indexOf('|') !== -1 ? text.split('|')[1].trim() : '';
-                    finishCheckoutSuccess(nameValue, phoneValue, emailValue, gTotal, orderId);
+                    finishCheckoutSuccess(nameValue, phoneValue, emailValue, gTotal, orderId, stableEventId);
                     return;
                 }
                 var msg = text.indexOf('Error|') === 0
@@ -2080,9 +2081,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             .catch(function () {
                 postOrderViaIframe(formData)
                     .then(function () {
-                        var eventId = formData.get('EventID') || ('order_' + Date.now());
-                        var orderId = String(eventId).replace(/^order_/, '');
-                        finishCheckoutSuccess(nameValue, phoneValue, emailValue, gTotal, orderId);
+                        var orderId = String(stableEventId).replace(/^order_/, '');
+                        finishCheckoutSuccess(nameValue, phoneValue, emailValue, gTotal, orderId, stableEventId);
                     })
                     .catch(function () {
                         offerWhatsAppOrder(
@@ -3001,7 +3001,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             formData.append('Quantity', String(qTotal));
             formData.append('Design', productsLabel());
             formData.append('Total', String(gTotal));
-            formData.append('EventID', 'order_' + Date.now());
+            var eventId = 'order_' + Date.now();
+            formData.append('EventID', eventId);
             formData.append('ProductSlotCount', String(MAX_PRODUCT_SLOTS));
             var selectedPayment = document.querySelector('input[name="paymentMethod"]:checked');
             formData.append('PaymentMethod', selectedPayment ? selectedPayment.value : 'Cash On Delivery');
@@ -3019,6 +3020,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             var imageSlots = buildProductImageSlots();
             for (var imgIdx = 0; imgIdx < MAX_ORDER_IMAGES; imgIdx++) {
                 formData.append('Image_' + (imgIdx + 1), imageSlots[imgIdx] || '');
+            }
+            if (typeof applyMetaTrackingFields === 'function') {
+                var metaPayload = applyMetaTrackingFields({
+                    phone: phoneValue,
+                    email: emailValue,
+                    first_name: nameValue,
+                    event_id: eventId,
+                    transaction_id: eventId,
+                    value: parseFloat(gTotal) || 0,
+                    currency: 'BDT'
+                }) || {};
+                if (metaPayload.fbc) formData.append('FBC', metaPayload.fbc);
+                if (metaPayload.fbp) formData.append('FBP', metaPayload.fbp);
+                if (metaPayload.external_id) formData.append('ExternalID', String(metaPayload.external_id));
+                if (metaPayload.event_source_url) formData.append('EventSourceUrl', String(metaPayload.event_source_url));
+                if (metaPayload.client_user_agent) formData.append('ClientUserAgent', String(metaPayload.client_user_agent));
             }
 
             if (!ORDER_SCRIPT_URL) {

@@ -222,7 +222,18 @@ function formatOnlineOrderProductCell_(sheet, row, designText) {
     cell.setWrap(true);
     cell.setVerticalAlignment('top');
     var lineCount = text.split('\n').length;
-    sheet.setRowHeight(row, Math.min(420, Math.max(72, lineCount * 20 + 16)));
+    var longest = 0;
+    var lines = text.split('\n');
+    var i;
+    for (i = 0; i < lines.length; i++) {
+      var len = String(lines[i] || '').length;
+      if (len > longest) longest = len;
+    }
+    // WhatsApp single-line orders should stay compact; multiline catalog orders can grow.
+    var visualLines = Math.max(lineCount, Math.ceil(longest / 42));
+    var minHeight = lineCount <= 1 ? 28 : 52;
+    var targetHeight = Math.min(260, Math.max(minHeight, visualLines * 18 + 10));
+    sheet.setRowHeight(row, targetHeight);
   } catch (fmtErr) {}
 }
 
@@ -343,6 +354,759 @@ function openProductPickerSidebar() {
   SpreadsheetApp.getUi().showSidebar(html);
 }
 
+function openWhatsappOrderMiniFormSidebar() {
+  var html = HtmlService.createHtmlOutputFromFile('WhatsAppOrderMiniForm')
+    .setTitle('WhatsApp Order Mini Form')
+    .setWidth(360);
+  SpreadsheetApp.getUi().showSidebar(html);
+}
+
+function openRealitySoftwareDashboard() {
+  var html = HtmlService.createHtmlOutputFromFile('RealityDashboard')
+    .setTitle('Reality Operations Dashboard')
+    .setWidth(430);
+  SpreadsheetApp.getUi().showSidebar(html);
+}
+
+function getRealityDashboardToken_() {
+  return PropertiesService.getUserProperties().getProperty('REALITY_DASH_TOKEN') || '';
+}
+
+function setRealityDashboardToken_(token) {
+  if (token) {
+    PropertiesService.getUserProperties().setProperty('REALITY_DASH_TOKEN', token);
+  } else {
+    PropertiesService.getUserProperties().deleteProperty('REALITY_DASH_TOKEN');
+  }
+}
+
+function verifyOpsSession_(token) {
+  var v = verifySession_(token);
+  if (!v.ok) return v;
+  var role = String(v.role || '').toLowerCase();
+  if (role !== 'admin' && role !== 'staff') {
+    return { ok: false, error: 'NOT_ALLOWED', message: 'Ops access denied.' };
+  }
+  return v;
+}
+
+function requireRealityAdminSession_() {
+  var token = getRealityDashboardToken_();
+  if (!token) throw new Error('AUTH_REQUIRED');
+  var v = verifyOpsSession_(token);
+  if (!v || !v.ok) {
+    setRealityDashboardToken_('');
+    throw new Error('AUTH_REQUIRED');
+  }
+  return v;
+}
+
+function isSingleOwnerMode_() {
+  var raw = PropertiesService.getScriptProperties().getProperty('SINGLE_OWNER_MODE');
+  if (raw === null || raw === undefined || String(raw).trim() === '') return true; // default ON for your use-case
+  var v = String(raw).toLowerCase().trim();
+  return v === '1' || v === 'true' || v === 'yes' || v === 'on';
+}
+
+function canManageProtectedOps_(session) {
+  var role = String((session && session.role) || '').toLowerCase();
+  if (role === 'admin') return true;
+  if (role === 'staff' && isSingleOwnerMode_()) return true;
+  return false;
+}
+
+function effectiveOpsRole_(session) {
+  var role = String((session && session.role) || '').toLowerCase();
+  if (role === 'staff' && canManageProtectedOps_(session)) return 'owner';
+  return role || 'staff';
+}
+
+function requireRealityManager_() {
+  var v = requireRealityAdminSession_();
+  if (!canManageProtectedOps_(v)) {
+    throw new Error('ADMIN_ONLY');
+  }
+  return v;
+}
+
+function realityGetAuthState() {
+  try {
+    var v = requireRealityAdminSession_();
+    return {
+      ok: true,
+      authenticated: true,
+      name: v.name || 'Admin',
+      email: v.email || '',
+      role: v.role || 'staff',
+      effectiveRole: effectiveOpsRole_(v),
+      canManageSettings: canManageProtectedOps_(v)
+    };
+  } catch (err) {
+    return { ok: true, authenticated: false };
+  }
+}
+
+function realityLogin(identifier, password) {
+  var login = String(identifier || '').trim();
+  var pass = String(password || '');
+  if (!login || !pass) return { ok: false, message: 'লগইন ও পাসওয়ার্ড দিন।' };
+  var res = loginAdmin_({
+    parameter: {
+      Login: login,
+      Password: pass
+    }
+  });
+  if (!res || !res.ok || !res.token) {
+    return { ok: false, message: (res && res.message) || 'লগইন ব্যর্থ।' };
+  }
+  setRealityDashboardToken_(res.token);
+  return { ok: true, name: res.name || 'Admin', email: res.email || '', role: res.role || 'staff' };
+}
+
+function realityLogout() {
+  setRealityDashboardToken_('');
+  return { ok: true };
+}
+
+function parseNumberOrZero_(value) {
+  return parseFloat(String(value || '0').replace(/[^\d.]/g, '')) || 0;
+}
+
+function getRealityDashboardData() {
+  var viewer = requireRealityAdminSession_();
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('Online Order');
+  if (!sheet) {
+    return { ok: false, error: 'NO_SHEET', message: 'Online Order শিট পাওয়া যায়নি।' };
+  }
+  var data = sheet.getDataRange().getValues();
+  var todayKey = Utilities.formatDate(new Date(), 'GMT+6', 'yyyy-MM-dd');
+  var stats = {
+    totalToday: 0,
+    pending: 0,
+    shipped: 0,
+    delivered: 0,
+    cancelled: 0,
+    todayRevenue: 0,
+    courierPending: 0
+  };
+  var recent = [];
+  var i;
+  for (i = data.length - 1; i >= 1; i--) {
+    var r = data[i];
+    if (!r || (!r[1] && !r[2])) continue;
+    var rowDay = dayKeyFromCell_(r[0]);
+    var orderStatus = String(r[9] || 'Pending').trim();
+    var orderStatusLc = orderStatus.toLowerCase();
+    var courierStatus = normalizeSteadfastDeliveryStatus_(String(r[12] || ''));
+    var total = parseNumberOrZero_(r[7]);
+    if (rowDay === todayKey) {
+      stats.totalToday++;
+      stats.todayRevenue += total;
+      if (orderStatusLc === 'pending') stats.pending++;
+      else if (orderStatusLc === 'shipped') stats.shipped++;
+      else if (orderStatusLc === 'delivered') stats.delivered++;
+      else if (orderStatusLc === 'cancelled') stats.cancelled++;
+      if (courierStatus === 'pending' || courierStatus === 'in_review' || courierStatus === 'approval_pending') {
+        stats.courierPending++;
+      }
+    }
+    if (recent.length < 25) {
+      recent.push({
+        row: i + 1,
+        time: formatCell_(r[0]),
+        orderId: String(r[8] || ''),
+        name: String(r[1] || ''),
+        phone: String(r[2] || ''),
+        district: String(r[13] || ''),
+        total: total,
+        status: orderStatus || 'Pending',
+        courierStatus: courierStatus || '',
+        tracking: String(r[10] || ''),
+        notes: String(r[16] || '')
+      });
+    }
+  }
+  return {
+    ok: true,
+    today: stats,
+    recent: recent,
+    sync: {
+      statusTrigger: hasSteadfastStatusSyncTrigger_(),
+      autoCourier: isAutoCourierEnabled_(),
+      autoCourierMode: getAutoCourierMode_(),
+      dailyBackupTrigger: hasDailySafetyBackupTrigger_(),
+      dailyBackupEnabled: isDailySafetyBackupEnabled_(),
+      backupSheetId: PropertiesService.getScriptProperties().getProperty('SAFETY_BACKUP_SPREADSHEET_ID') || ''
+    },
+    viewer: {
+      name: viewer.name || '',
+      email: viewer.email || '',
+      role: viewer.role || 'staff',
+      effectiveRole: effectiveOpsRole_(viewer),
+      canManageSettings: canManageProtectedOps_(viewer)
+    }
+  };
+}
+
+function realityRunStatusSyncNow() {
+  requireRealityAdminSession_();
+  var result = syncSteadfastCourierStatusesCore_({ limit: 120, includeFinal: false });
+  if (!result.ok) return result;
+  return {
+    ok: true,
+    scanned: result.scanned,
+    updated: result.updated,
+    failed: result.failed
+  };
+}
+
+function realitySetStatusSync(enabled) {
+  requireRealityManager_();
+  if (enabled) {
+    setupSteadfastStatusSyncTrigger();
+    return { ok: true, enabled: true };
+  }
+  disableSteadfastStatusSyncTrigger();
+  return { ok: true, enabled: false };
+}
+
+function realityRunSafetyBackupNow() {
+  requireRealityManager_();
+  return runSafetyBackupNow();
+}
+
+function realitySetDailyBackup(enabled) {
+  requireRealityManager_();
+  if (enabled) {
+    setupDailySafetyBackupTrigger();
+    return { ok: true, enabled: true };
+  }
+  disableDailySafetyBackupTrigger();
+  return { ok: true, enabled: false };
+}
+
+function realityOpenOrderRow(rowNumber) {
+  requireRealityAdminSession_();
+  var row = parseInt(rowNumber, 10);
+  if (!row || row < 2) return { ok: false, error: 'INVALID_ROW' };
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('Online Order');
+  if (!sheet) return { ok: false, error: 'NO_SHEET' };
+  ss.setActiveSheet(sheet);
+  sheet.setActiveRange(sheet.getRange(row, 1, 1, Math.max(1, sheet.getLastColumn())));
+  return { ok: true, row: row };
+}
+
+function realityChangeMyPassword(currentPassword, newPassword) {
+  var v = requireRealityAdminSession_();
+  var current = String(currentPassword || '');
+  var next = String(newPassword || '');
+  if (!current || !next) return { ok: false, message: 'Current/New password দিন।' };
+  if (next.length < 8) return { ok: false, message: 'নতুন পাসওয়ার্ড কমপক্ষে ৮ অক্ষর।' };
+
+  var admin = v.email ? findAdminByEmail_(v.email) : findAdminByPhone_(v.phone);
+  if (!admin) return { ok: false, message: 'Admin account পাওয়া যায়নি।' };
+  if (!verifyPassword_(current, admin.salt, admin.hash)) {
+    return { ok: false, message: 'Current password ভুল।' };
+  }
+  var hashed = hashPassword_(next);
+  var sheet = getAdminsSheet_();
+  sheet.getRange(admin.row, 4).setValue(hashed.hash);
+  sheet.getRange(admin.row, 5).setValue(hashed.salt);
+  if (sheet.getLastColumn() >= 9) sheet.getRange(admin.row, 9).setValue(new Date());
+  return { ok: true, message: 'Password updated.' };
+}
+
+function resetAdminPasswordFromMenu() {
+  var ui = SpreadsheetApp.getUi();
+  var idResp = ui.prompt('Admin reset', 'Email বা Phone দিন', ui.ButtonSet.OK_CANCEL);
+  if (idResp.getSelectedButton() !== ui.Button.OK) return;
+  var idRaw = String(idResp.getResponseText() || '').trim();
+  if (!idRaw) {
+    ui.alert('Email/Phone দিন।');
+    return;
+  }
+  var passResp = ui.prompt('New password', 'কমপক্ষে ৮ অক্ষর', ui.ButtonSet.OK_CANCEL);
+  if (passResp.getSelectedButton() !== ui.Button.OK) return;
+  var next = String(passResp.getResponseText() || '');
+  if (next.length < 8) {
+    ui.alert('পাসওয়ার্ড কমপক্ষে ৮ অক্ষর হতে হবে।');
+    return;
+  }
+  var target = null;
+  if (idRaw.indexOf('@') !== -1) target = findAdminByEmail_(normalizeEmail_(idRaw));
+  if (!target) target = findAdminByPhone_(normalizePhone_(idRaw));
+  if (!target) {
+    ui.alert('Admin account পাওয়া যায়নি।');
+    return;
+  }
+  var hashed = hashPassword_(next);
+  var sheet = getAdminsSheet_();
+  sheet.getRange(target.row, 4).setValue(hashed.hash);
+  sheet.getRange(target.row, 5).setValue(hashed.salt);
+  if (sheet.getLastColumn() >= 9) sheet.getRange(target.row, 9).setValue(new Date());
+  ui.alert('Password reset complete for: ' + (target.email || target.phone || 'admin'));
+}
+
+function hasDailySafetyBackupTrigger_() {
+  var triggers = ScriptApp.getProjectTriggers();
+  var i;
+  for (i = 0; i < triggers.length; i++) {
+    if (triggers[i].getHandlerFunction() === 'dailySafetyBackupTriggerHandler') return true;
+  }
+  return false;
+}
+
+function isDailySafetyBackupEnabled_() {
+  var raw = PropertiesService.getScriptProperties().getProperty('DAILY_BACKUP_ON');
+  if (raw === null || raw === undefined || String(raw).trim() === '') return true; // default ON
+  var v = String(raw).toLowerCase().trim();
+  return v === '1' || v === 'true' || v === 'yes' || v === 'on';
+}
+
+function getSafetyBackupSpreadsheet_() {
+  var props = PropertiesService.getScriptProperties();
+  var backupId = props.getProperty('SAFETY_BACKUP_SPREADSHEET_ID') || '';
+  if (backupId) {
+    try {
+      return SpreadsheetApp.openById(backupId);
+    } catch (err) {}
+  }
+  var backup = SpreadsheetApp.create('Luxury Dress Safety Backup');
+  props.setProperty('SAFETY_BACKUP_SPREADSHEET_ID', backup.getId());
+  return backup;
+}
+
+function copySheetToBackup_(sourceSheet, backupSpreadsheet, targetName) {
+  var target = backupSpreadsheet.getSheetByName(targetName);
+  if (!target) target = backupSpreadsheet.insertSheet(targetName);
+  target.clear();
+  var lastRow = sourceSheet.getLastRow();
+  var lastCol = sourceSheet.getLastColumn();
+  if (lastRow < 1 || lastCol < 1) return 0;
+  var vals = sourceSheet.getRange(1, 1, lastRow, lastCol).getValues();
+  target.getRange(1, 1, vals.length, vals[0].length).setValues(vals);
+  return vals.length - 1;
+}
+
+function runSafetyBackupNow() {
+  var src = SpreadsheetApp.getActiveSpreadsheet();
+  if (!src) return { ok: false, error: 'NO_SOURCE_SHEET' };
+  var backup = getSafetyBackupSpreadsheet_();
+  if (!backup) return { ok: false, error: 'NO_BACKUP_SHEET' };
+  if (src.getId() === backup.getId()) {
+    return { ok: false, error: 'BACKUP_SHEET_SAME_AS_SOURCE' };
+  }
+
+  var tabs = ['Online Order', 'Subscribe', 'Admins', 'Real Customer', 'Fake'];
+  var copied = [];
+  var totalRows = 0;
+  var i;
+  for (i = 0; i < tabs.length; i++) {
+    var s = src.getSheetByName(tabs[i]);
+    if (!s) continue;
+    var rows = copySheetToBackup_(s, backup, 'BKP_' + tabs[i]);
+    copied.push({ name: tabs[i], rows: rows });
+    totalRows += Math.max(0, rows);
+  }
+
+  var log = backup.getSheetByName('Backup Log');
+  if (!log) {
+    log = backup.insertSheet('Backup Log');
+    log.getRange(1, 1, 1, 6).setValues([['Time', 'Source Sheet ID', 'Copied Tabs', 'Rows', 'By', 'Note']]);
+  }
+  log.appendRow([
+    new Date(),
+    src.getId(),
+    copied.map(function (x) { return x.name; }).join(', '),
+    totalRows,
+    Session.getActiveUser().getEmail() || 'unknown',
+    'manual/auto backup'
+  ]);
+
+  return {
+    ok: true,
+    backupSpreadsheetId: backup.getId(),
+    backupSpreadsheetUrl: backup.getUrl(),
+    copiedTabs: copied,
+    totalRows: totalRows
+  };
+}
+
+function runSafetyBackupNowFromMenu() {
+  var res = runSafetyBackupNow();
+  if (!res.ok) {
+    SpreadsheetApp.getUi().alert('Safety backup failed: ' + String(res.error || 'UNKNOWN'));
+    return;
+  }
+  SpreadsheetApp.getUi().alert(
+    'Safety backup complete.\n\n' +
+    'Rows copied: ' + res.totalRows + '\n' +
+    'Backup sheet URL:\n' + res.backupSpreadsheetUrl
+  );
+}
+
+function dailySafetyBackupTriggerHandler() {
+  try {
+    runSafetyBackupNow();
+  } catch (err) {}
+}
+
+function setupDailySafetyBackupTriggerInternal_() {
+  var triggers = ScriptApp.getProjectTriggers();
+  var i;
+  for (i = 0; i < triggers.length; i++) {
+    if (triggers[i].getHandlerFunction() === 'dailySafetyBackupTriggerHandler') {
+      ScriptApp.deleteTrigger(triggers[i]);
+    }
+  }
+  ScriptApp.newTrigger('dailySafetyBackupTriggerHandler')
+    .timeBased()
+    .everyDays(1)
+    .atHour(2)
+    .create();
+}
+
+function setupDailySafetyBackupTrigger() {
+  PropertiesService.getScriptProperties().setProperty('DAILY_BACKUP_ON', 'true');
+  setupDailySafetyBackupTriggerInternal_();
+  SpreadsheetApp.getUi().alert('Daily safety backup ON (প্রতিদিন ১বার)।');
+}
+
+function disableDailySafetyBackupTrigger() {
+  PropertiesService.getScriptProperties().setProperty('DAILY_BACKUP_ON', 'false');
+  var triggers = ScriptApp.getProjectTriggers();
+  var removed = 0;
+  var i;
+  for (i = 0; i < triggers.length; i++) {
+    if (triggers[i].getHandlerFunction() === 'dailySafetyBackupTriggerHandler') {
+      ScriptApp.deleteTrigger(triggers[i]);
+      removed++;
+    }
+  }
+  SpreadsheetApp.getUi().alert(removed ? 'Daily safety backup OFF করা হয়েছে।' : 'Daily backup trigger আগে থেকেই OFF ছিল।');
+}
+
+function selfHealDailySafetyBackupTrigger_() {
+  try {
+    if (!isDailySafetyBackupEnabled_()) return;
+    if (hasDailySafetyBackupTrigger_()) return;
+    setupDailySafetyBackupTriggerInternal_();
+  } catch (err) {}
+}
+
+function parseWhatsappOrderTextForMiniForm(rawText) {
+  return parseWhatsappOrderText_(rawText);
+}
+
+function parseWhatsappOrderText_(rawText) {
+  var text = String(rawText || '').replace(/\r/g, '\n');
+  var lines = text.split('\n').map(function (line) {
+    return String(line || '').replace(/\s+/g, ' ').trim();
+  }).filter(Boolean);
+  var parsed = {
+    name: '',
+    phone: '',
+    district: '',
+    address: '',
+    design: '',
+    qty: '',
+    total: '',
+    payment: '',
+    txn: '',
+    notes: '',
+    confidence: 0
+  };
+
+  if (!lines.length) return parsed;
+
+  function parseMoney_(v) {
+    return parseFloat(String(v || '').replace(/[^\d.]/g, '')) || 0;
+  }
+
+  function parseQty_(v) {
+    var n = parseInt(String(v || '').replace(/[^\d]/g, ''), 10);
+    return n > 0 ? n : 0;
+  }
+
+  function normalizePayment_(v) {
+    var x = String(v || '').toLowerCase();
+    if (/cod|cash|ডেলিভারি/.test(x)) return 'Cash On Delivery';
+    if (/bkash|বিকাশ/.test(x)) return 'Bkash';
+    if (/nagad|নগদ/.test(x)) return 'Nagad';
+    if (/rocket|রকেট/.test(x)) return 'Rocket';
+    if (/card/.test(x)) return 'Card';
+    if (/bank/.test(x)) return 'Bank Transfer';
+    return String(v || '').trim();
+  }
+
+  var keyMap = {
+    name: ['name', 'customer name', 'নাম'],
+    phone: ['phone', 'mobile', 'contact', 'ফোন', 'মোবাইল'],
+    district: ['district', 'zilla', 'জেলা'],
+    address: ['address', 'ঠিকানা'],
+    design: ['product', 'item', 'design', 'পণ্য', 'প্রোডাক্ট', 'অর্ডার'],
+    qty: ['qty', 'quantity', 'পরিমাণ'],
+    total: ['total', 'amount', 'মোট'],
+    payment: ['payment', 'pay', 'পেমেন্ট'],
+    txn: ['txn', 'transaction', 'sender', 'trxid', 'ট্রানজ্যাকশন', 'রেফারেন্স'],
+    notes: ['note', 'notes', 'নোট']
+  };
+
+  var extractedCount = 0;
+  function assign_(key, value) {
+    var val = String(value || '').trim();
+    if (!val) return;
+    if (key === 'phone') {
+      val = normalizePhone_(val);
+      if (!val) return;
+    }
+    if (key === 'qty') {
+      var qtyNum = parseQty_(val);
+      if (qtyNum > 0) val = String(qtyNum);
+      else return;
+    }
+    if (key === 'total') {
+      var amount = parseMoney_(val);
+      if (amount > 0) val = String(amount);
+      else return;
+    }
+    if (key === 'payment') {
+      val = normalizePayment_(val) || 'Cash On Delivery';
+    }
+    if (!parsed[key]) extractedCount++;
+    parsed[key] = val;
+  }
+
+  var i;
+  for (i = 0; i < lines.length; i++) {
+    var line = lines[i];
+    var lowerLine = line.toLowerCase();
+    var matched = false;
+    var key;
+    for (key in keyMap) {
+      if (!Object.prototype.hasOwnProperty.call(keyMap, key)) continue;
+      var aliases = keyMap[key];
+      var a;
+      for (a = 0; a < aliases.length; a++) {
+        var label = aliases[a];
+        var re = new RegExp('^' + label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*[:\\-]\\s*(.+)$', 'i');
+        var m = line.match(re);
+        if (!m) continue;
+        assign_(key, m[1]);
+        matched = true;
+        break;
+      }
+      if (matched) break;
+    }
+    if (matched) continue;
+
+    // Flexible fallback patterns in free text
+    if (!parsed.phone) {
+      var phoneMatch = lowerLine.replace(/[^\d]/g, ' ').match(/\b(8801\d{9}|01\d{9})\b/);
+      if (phoneMatch) assign_('phone', phoneMatch[1]);
+    }
+    if (!parsed.qty) {
+      var q1 = line.match(/(?:qty|quantity|x|×)\s*[:=]?\s*(\d{1,3})/i);
+      if (q1) assign_('qty', q1[1]);
+    }
+    if (!parsed.total) {
+      var t1 = line.match(/(?:total|amount|মোট)\s*[:=]?\s*([৳\s\d,\.]+)/i);
+      if (t1) assign_('total', t1[1]);
+      else {
+        var t2 = line.match(/৳\s*([\d,]+)/);
+        if (t2) assign_('total', t2[1]);
+      }
+    }
+    if (!parsed.payment && /bkash|nagad|rocket|cash|cod|card|ডেলিভারি/i.test(lowerLine)) {
+      assign_('payment', line);
+    }
+    if (!parsed.address && /(road|rd|house|flat|thana|area|village|para|bazar|উপজেলা|থানা|রোড|বাড়ি|এলাকা)/i.test(lowerLine)) {
+      assign_('address', line);
+    }
+    if (!parsed.design && /abaya|hijab|dress|burqa|kaftan|item|design|product|পিস|গাউন|বোরকা/i.test(lowerLine)) {
+      assign_('design', line);
+    }
+    if (!parsed.name && i === 0 && !/order|অর্ডার|qty|total|phone|mobile|contact/i.test(lowerLine)) {
+      assign_('name', line);
+    }
+  }
+
+  // Pipe format fallback: ORDER|Name|Phone|District|Address|Product|Qty|Total|Payment
+  if ((!parsed.phone || !parsed.address) && text.indexOf('|') !== -1) {
+    var parts = text.split('|').map(function (p) { return String(p || '').trim(); });
+    if (parts.length >= 8) {
+      assign_('name', parts[1] || '');
+      assign_('phone', parts[2] || '');
+      assign_('district', parts[3] || '');
+      assign_('address', parts[4] || '');
+      assign_('design', parts[5] || '');
+      assign_('qty', parts[6] || '');
+      assign_('total', parts[7] || '');
+      assign_('payment', parts[8] || '');
+    }
+  }
+
+  // Free-text address fallback: pick best location-like line when no explicit "Address:" label exists.
+  if (!parsed.address) {
+    var addressCandidates = [];
+    for (i = 0; i < lines.length; i++) {
+      var lnRaw = String(lines[i] || '').trim();
+      var ln = lnRaw.toLowerCase();
+      if (!lnRaw) continue;
+      if (/\b(8801\d{9}|01\d{9})\b/.test(ln.replace(/[^\d]/g, ' '))) continue;
+      if (/(মোট|total|amount|qty|quantity|payment|pay|txn|transaction|sender)\s*[:=\-]/i.test(lnRaw)) continue;
+      if (/^(name|customer name|নাম)\s*[:=\-]/i.test(lnRaw)) continue;
+      if (/^(product|item|design|model|পণ্য|প্রোডাক্ট)\s*[:=\-]/i.test(lnRaw)) continue;
+      if (/[,،]/.test(lnRaw) || /(road|rd|house|flat|thana|area|village|para|bazar|upazila|district|উপজেলা|জেলা|থানা|রোড|বাড়ি|এলাকা|বাসা)/i.test(lnRaw)) {
+        addressCandidates.push(lnRaw.replace(/[.,\s]+$/, ''));
+      }
+    }
+    if (addressCandidates.length) {
+      // Prefer the last location-like line; in WhatsApp users often send location at the end.
+      assign_('address', addressCandidates[addressCandidates.length - 1]);
+    }
+  }
+
+  // If district is empty, infer from address tail (e.g., "kendua, netrokuna").
+  if (!parsed.district && parsed.address && /[,،]/.test(parsed.address)) {
+    var partsFromAddress = String(parsed.address).split(/[,،]/).map(function (p) {
+      return String(p || '').trim();
+    }).filter(Boolean);
+    if (partsFromAddress.length >= 2) {
+      assign_('district', partsFromAddress[partsFromAddress.length - 1]);
+    }
+  }
+
+  // Try to infer qty/total from design lines if present.
+  if (parsed.design) {
+    var dLines = String(parsed.design).split(/\n/);
+    var qtySum = 0;
+    var amountSum = 0;
+    var j;
+    for (j = 0; j < dLines.length; j++) {
+      var ln = dLines[j];
+      var q = ln.match(/(?:x|×)\s*(\d+)\s*(?:pcs|pc|পিস)?/i);
+      var amt = ln.match(/(?:=|৳)\s*([\d,]+)/);
+      if (q) qtySum += parseInt(q[1], 10) || 0;
+      if (amt) amountSum += parseFloat(String(amt[1]).replace(/,/g, '')) || 0;
+    }
+    if ((!parsed.qty || parsed.qty === '1') && qtySum > 0) parsed.qty = String(qtySum);
+    if (!parsed.total && amountSum > 0) parsed.total = String(amountSum);
+  }
+
+  if (!parsed.payment) parsed.payment = 'Cash On Delivery';
+  if (!parsed.qty) parsed.qty = '1';
+  if (parsed.phone) parsed.phone = normalizePhone_(parsed.phone);
+
+  var confidenceFields = ['name', 'phone', 'address', 'design', 'qty', 'total'];
+  var score = 0;
+  var s;
+  for (s = 0; s < confidenceFields.length; s++) {
+    if (String(parsed[confidenceFields[s]] || '').trim()) score++;
+  }
+  parsed.confidence = Math.round((score / confidenceFields.length) * 100);
+
+  if (!parsed.notes && extractedCount < 3) {
+    parsed.notes = 'Parser confidence low';
+  }
+
+  if (parsed.total) {
+    var rounded = Math.round(parseFloat(parsed.total) || 0);
+    if (rounded > 0) parsed.total = String(rounded);
+  }
+  if (parsed.qty) {
+    var finalQty = parseInt(parsed.qty, 10) || 1;
+    parsed.qty = String(finalQty > 0 ? finalQty : 1);
+  }
+
+  return parsed;
+}
+
+function submitWhatsappMiniOrder(payload) {
+  payload = payload || {};
+  var name = String(payload.name || '').trim();
+  var phone = normalizePhone_(payload.phone);
+  var district = String(payload.district || '').trim();
+  var address = String(payload.address || '').trim();
+  var design = String(payload.design || '').trim();
+  var qty = parseInt(String(payload.qty || '1').replace(/[^\d]/g, ''), 10) || 1;
+  var total = parseFloat(String(payload.total || '0').replace(/[^\d.]/g, '')) || 0;
+  var payment = String(payload.payment || 'Cash On Delivery').trim() || 'Cash On Delivery';
+  var txn = String(payload.txn || '').trim();
+  var notes = String(payload.notes || '').trim();
+  var sendCourierNow = !!payload.sendCourierNow;
+
+  if (!name || name.length < 2) return { ok: false, message: 'নাম দিন (কমপক্ষে ২ অক্ষর)।' };
+  if (!/^01\d{9}$/.test(phone)) return { ok: false, message: 'সঠিক ফোন দিন (01XXXXXXXXX)।' };
+  if (!address || address.length < 8) return { ok: false, message: 'সম্পূর্ণ ঠিকানা দিন।' };
+  if (!design) return { ok: false, message: 'প্রোডাক্ট/ডিজাইন লিখুন।' };
+  if (qty < 1) qty = 1;
+  if (total < 1) return { ok: false, message: 'মোট টাকার পরিমাণ দিন।' };
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('Online Order') || ss.insertSheet('Online Order');
+  ensureOnlineOrderHeaders_(sheet);
+  ensureOnlineOrderImageHeaders_(sheet);
+  setupOrderStatusDropdown_(sheet);
+
+  var now = new Date();
+  var timestamp = Utilities.formatDate(now, 'GMT+6', 'dd-MM-yyyy HH:mm:ss');
+  var orderId = generateOrderId_();
+  var districtChargeMap = getDistrictChargeMap_();
+  var charge = qty > 0 && qty < 3 ? (districtChargeMap[district] || 150) : 0;
+  var finalNotes = notes ? ('WhatsApp manual | ' + notes) : 'WhatsApp manual';
+
+  appendRow_(sheet, [
+    timestamp,
+    name,
+    phone,
+    qty,
+    charge,
+    address,
+    design,
+    String(total),
+    orderId,
+    'Pending',
+    '',
+    '',
+    '',
+    district,
+    payment,
+    txn,
+    finalNotes
+  ]);
+
+  var row = sheet.getLastRow();
+  formatOnlineOrderProductCell_(sheet, row, design);
+
+  var autoResult = { ok: false, reason: 'SKIPPED' };
+  if (sendCourierNow) {
+    autoResult = tryAutoCourierForOrder_({
+      sheet: sheet,
+      row: row,
+      orderId: orderId,
+      name: name,
+      phone: phone,
+      address: address,
+      design: design,
+      slotItems: designTextToSlotItems_(design),
+      qty: qty,
+      total: total,
+      payment: payment
+    });
+  }
+
+  return {
+    ok: true,
+    row: row,
+    orderId: orderId,
+    sentToCourier: !!(autoResult && autoResult.ok),
+    tracking: autoResult && autoResult.tracking ? autoResult.tracking : ''
+  };
+}
+
 function syncProductListDropdown_() {
   var items = fetchProductCatalog_();
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -379,7 +1143,8 @@ function setupOrderStatusDropdown_(sheet) {
   var options = getOrderStatusOptions_();
   var rule = SpreadsheetApp.newDataValidation()
     .requireValueInList(options, true)
-    .setAllowInvalid(false)
+    // Soft validation to avoid disruptive popup while operators are editing quickly.
+    .setAllowInvalid(true)
     .build();
   sheet.getRange('J2:J2000').setDataValidation(rule);
   return true;
@@ -498,8 +1263,14 @@ function handleOnlineOrderPost_(e) {
     sendToFacebookCAPI({
       Name: validated.name,
       Phone: validated.phone,
+      Email: param_(e, 'Email'),
       Total: totalStr,
-      Design: validated.design
+      Design: validated.design,
+      FBC: param_(e, 'FBC'),
+      FBP: param_(e, 'FBP'),
+      ExternalID: param_(e, 'ExternalID'),
+      EventSourceUrl: param_(e, 'EventSourceUrl'),
+      ClientUserAgent: param_(e, 'ClientUserAgent')
     }, eventID);
   } catch (err) {
     console.log('CAPI Error: ' + err.message);
@@ -512,22 +1283,26 @@ function handleOnlineOrderPost_(e) {
 
 function onOpen() {
   try {
-    var orderSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
-    if (orderSheet) {
-      ensureOnlineOrderHeaders_(orderSheet);
-      ensureOnlineOrderImageHeaders_(orderSheet);
-      setupOrderStatusDropdown_(orderSheet);
-    }
-    selfHealSteadfastBaseUrl_();
-    selfHealAutoCourierSetup_();
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    if (ss) PropertiesService.getScriptProperties().setProperty('ONLINE_ORDER_SHEET_ID', ss.getId());
+  } catch (idErr) {}
+  try {
     SpreadsheetApp.getUi()
       .createMenu('Muslim Abaya')
+      .addItem('Reality software dashboard', 'openRealitySoftwareDashboard')
       .addItem('Product picker sidebar (column G)', 'openProductPickerSidebar')
+      .addItem('WhatsApp order mini form', 'openWhatsappOrderMiniFormSidebar')
       .addItem('Product dropdown — column G sync', 'syncProductListDropdown_')
       .addItem('Status dropdown — column J (Pending/Confirmed…)', 'setupOrderStatusDropdownFromMenu')
       .addSeparator()
       .addItem('Steadfast — selected row পাঠান', 'steadfastSendActiveRow')
       .addItem('Steadfast — balance দেখুন', 'steadfastShowBalance')
+      .addItem('Steadfast — status sync now', 'steadfastSyncCourierStatusesNow')
+      .addItem('Steadfast — auto status sync ON (15m)', 'setupSteadfastStatusSyncTrigger')
+      .addItem('Steadfast — auto status sync OFF', 'disableSteadfastStatusSyncTrigger')
+      .addItem('Safety Backup — run now', 'runSafetyBackupNowFromMenu')
+      .addItem('Safety Backup — daily ON', 'setupDailySafetyBackupTrigger')
+      .addItem('Safety Backup — daily OFF', 'disableDailySafetyBackupTrigger')
       .addItem('Steadfast API URL fix করুন', 'setSteadfastBaseUrlToApi_')
       .addItem('Sheet headers (J–Q + ছবি R–AC) সেট করুন', 'setupOnlineOrderExtraHeaders')
       .addItem('Selected row — ছবি thumbnail ঠিক করুন', 'repairOnlineOrderImagesActiveRow')
@@ -536,9 +1311,24 @@ function onOpen() {
       .addItem('Auto courier — status দেখুন', 'showAutoCourierStatus')
       .addItem('Steadfast — selected row retry auto', 'steadfastRetryAutoActiveRow')
       .addSeparator()
+      .addItem('Admin password reset', 'resetAdminPasswordFromMenu')
       .addItem('Admin account তৈরি (প্রথমবার)', 'createFirstAdminFromMenu')
       .addToUi();
-  } catch (err) {}
+  } catch (menuErr) {}
+
+  try {
+    var orderSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
+    if (orderSheet) {
+      ensureOnlineOrderHeaders_(orderSheet);
+      ensureOnlineOrderImageHeaders_(orderSheet);
+      setupOrderStatusDropdown_(orderSheet);
+    }
+  } catch (sheetErr) {}
+
+  try { selfHealSteadfastBaseUrl_(); } catch (baseErr) {}
+  try { selfHealAutoCourierSetup_(); } catch (trgErr) {}
+  try { selfHealSteadfastStatusSyncTrigger_(); } catch (syncErr) {}
+  try { selfHealDailySafetyBackupTrigger_(); } catch (backupErr) {}
 }
 
 function getOnlineOrderExtraHeaders_() {
@@ -847,6 +1637,226 @@ function steadfastPlaceOrder_(orderData) {
   return steadfastApiRequest_('post', '/create_order', orderData);
 }
 
+function normalizeSteadfastDeliveryStatus_(status) {
+  var s = String(status || '').toLowerCase().trim();
+  if (!s) return '';
+  if (s === 'in_review') return 'pending';
+  if (s === 'unknown_approval_pending') return 'approval_pending';
+  return s;
+}
+
+function sheetOrderStatusFromCourier_(courierStatus, currentStatus) {
+  var s = normalizeSteadfastDeliveryStatus_(courierStatus);
+  var cur = String(currentStatus || '').trim();
+  if (!s) return cur || 'Pending';
+  if (s === 'delivered' || s === 'partial_delivered') return 'Delivered';
+  if (s === 'cancelled' || s === 'hold' || s === 'holded' || s === 'returned') return 'Cancelled';
+  return cur && (cur === 'Delivered' || cur === 'Cancelled') ? cur : 'Shipped';
+}
+
+function extractSteadfastDeliveryStatus_(res) {
+  if (!res) return '';
+  if (typeof res.delivery_status === 'string' && res.delivery_status) return res.delivery_status;
+  if (res.consignment && typeof res.consignment.status === 'string') return res.consignment.status;
+  if (typeof res.status === 'string' && res.status && !/^\d+$/.test(res.status)) return res.status;
+  return '';
+}
+
+function steadfastGetStatusByTrackingCode_(trackingCode) {
+  var code = String(trackingCode || '').trim();
+  if (!code) return null;
+  return steadfastApiRequest_('get', '/status_by_trackingcode/' + encodeURIComponent(code), null);
+}
+
+function steadfastGetStatusByConsignmentId_(consignmentId) {
+  var cid = String(consignmentId || '').trim();
+  if (!cid) return null;
+  return steadfastApiRequest_('get', '/status_by_cid/' + encodeURIComponent(cid), null);
+}
+
+function steadfastGetStatusByInvoice_(invoice) {
+  var inv = String(invoice || '').trim();
+  if (!inv) return null;
+  return steadfastApiRequest_('get', '/status_by_invoice/' + encodeURIComponent(inv), null);
+}
+
+function applySteadfastStatusToRow_(sheet, row, payload) {
+  if (!sheet || !row || row < 2 || !payload) return false;
+  var current = sheet.getRange(row, 1, 1, 17).getValues()[0];
+  var tracking = String(payload.tracking_code || current[10] || '').trim();
+  var cid = String(payload.consignment_id || current[11] || '').trim();
+  var courierStatus = normalizeSteadfastDeliveryStatus_(payload.status || payload.delivery_status || '');
+  if (!courierStatus) return false;
+  var orderStatus = sheetOrderStatusFromCourier_(courierStatus, current[9]);
+  sheet.getRange(row, 10, 1, 4).setValues([[
+    orderStatus,
+    tracking,
+    cid,
+    courierStatus
+  ]]);
+  return true;
+}
+
+function syncSteadfastStatusForRow_(sheet, row, vals) {
+  var tracking = String(vals[10] || '').trim();
+  var cid = String(vals[11] || '').trim();
+  var invoice = String(vals[8] || '').trim();
+  if (!tracking && !cid && !invoice) return { ok: false, reason: 'NO_IDS' };
+
+  var res = null;
+  try {
+    if (tracking) res = steadfastGetStatusByTrackingCode_(tracking);
+    if (!extractSteadfastDeliveryStatus_(res) && cid) res = steadfastGetStatusByConsignmentId_(cid);
+    if (!extractSteadfastDeliveryStatus_(res) && invoice) res = steadfastGetStatusByInvoice_(invoice);
+  } catch (err) {
+    return { ok: false, reason: String(err && err.message ? err.message : err) };
+  }
+
+  var status = extractSteadfastDeliveryStatus_(res);
+  if (!status) return { ok: false, reason: 'NO_STATUS' };
+  var applied = applySteadfastStatusToRow_(sheet, row, {
+    tracking_code: (res && (res.tracking_code || (res.consignment && res.consignment.tracking_code))) || tracking,
+    consignment_id: (res && (res.consignment_id || (res.consignment && res.consignment.consignment_id))) || cid,
+    delivery_status: status
+  });
+  return { ok: applied, status: normalizeSteadfastDeliveryStatus_(status) };
+}
+
+function syncSteadfastCourierStatusesCore_(opts) {
+  opts = opts || {};
+  var limit = parseInt(opts.limit, 10) || 40;
+  if (limit < 1) limit = 1;
+  if (limit > 200) limit = 200;
+  var includeFinal = !!opts.includeFinal;
+
+  var ss = getCourierSyncSpreadsheet_();
+  if (!ss) return { ok: false, error: 'NO_SPREADSHEET' };
+  var sheet = ss.getSheetByName('Online Order');
+  if (!sheet) return { ok: false, error: 'NO_SHEET' };
+  var data = sheet.getDataRange().getValues();
+  var scanned = 0;
+  var updated = 0;
+  var failed = 0;
+  var i;
+  for (i = data.length - 1; i >= 1; i--) {
+    if (scanned >= limit) break;
+    var r = data[i];
+    var rowNo = i + 1;
+    var jStatus = String(r[9] || '').toLowerCase().trim();
+    var courierStatus = String(r[12] || '').toLowerCase().trim();
+    if (!includeFinal && (jStatus === 'delivered' || jStatus === 'cancelled' || courierStatus === 'delivered' || courierStatus === 'cancelled')) {
+      continue;
+    }
+    if (!String(r[10] || '').trim() && !String(r[11] || '').trim() && !String(r[8] || '').trim()) {
+      continue;
+    }
+    scanned++;
+    var sres = syncSteadfastStatusForRow_(sheet, rowNo, r);
+    if (sres.ok) updated++;
+    else failed++;
+    Utilities.sleep(70);
+  }
+  return { ok: true, scanned: scanned, updated: updated, failed: failed };
+}
+
+function steadfastSyncCourierStatusesNow() {
+  var result = syncSteadfastCourierStatusesCore_({ limit: 80, includeFinal: false });
+  if (!result.ok) {
+    SpreadsheetApp.getUi().alert('Courier status sync failed: ' + String(result.error || 'UNKNOWN'));
+    return;
+  }
+  SpreadsheetApp.getUi().alert(
+    'Steadfast status sync complete.\n\n' +
+    'Scanned: ' + result.scanned + '\n' +
+    'Updated: ' + result.updated + '\n' +
+    'Failed: ' + result.failed
+  );
+}
+
+function steadfastStatusSyncTriggerHandler() {
+  try {
+    syncSteadfastCourierStatusesCore_({ limit: 40, includeFinal: false });
+  } catch (err) {}
+}
+
+function isSteadfastStatusSyncEnabled_() {
+  var raw = PropertiesService.getScriptProperties().getProperty('STEADFAST_STATUS_SYNC_ON');
+  if (raw === null || raw === undefined || String(raw).trim() === '') return true; // default ON
+  var v = String(raw).toLowerCase().trim();
+  return v === '1' || v === 'true' || v === 'yes' || v === 'on';
+}
+
+function hasSteadfastStatusSyncTrigger_() {
+  var triggers = ScriptApp.getProjectTriggers();
+  var i;
+  for (i = 0; i < triggers.length; i++) {
+    if (triggers[i].getHandlerFunction() === 'steadfastStatusSyncTriggerHandler') return true;
+  }
+  return false;
+}
+
+function setupSteadfastStatusSyncTriggerInternal_() {
+  var triggers = ScriptApp.getProjectTriggers();
+  var i;
+  for (i = 0; i < triggers.length; i++) {
+    if (triggers[i].getHandlerFunction() === 'steadfastStatusSyncTriggerHandler') {
+      ScriptApp.deleteTrigger(triggers[i]);
+    }
+  }
+  ScriptApp.newTrigger('steadfastStatusSyncTriggerHandler')
+    .timeBased()
+    .everyMinutes(15)
+    .create();
+}
+
+function selfHealSteadfastStatusSyncTrigger_() {
+  try {
+    if (!isSteadfastStatusSyncEnabled_()) return;
+    if (hasSteadfastStatusSyncTrigger_()) return;
+    setupSteadfastStatusSyncTriggerInternal_();
+  } catch (err) {}
+}
+
+function setupSteadfastStatusSyncTrigger() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  if (ss) {
+    PropertiesService.getScriptProperties().setProperty('ONLINE_ORDER_SHEET_ID', ss.getId());
+  }
+  PropertiesService.getScriptProperties().setProperty('STEADFAST_STATUS_SYNC_ON', 'true');
+  setupSteadfastStatusSyncTriggerInternal_();
+  SpreadsheetApp.getUi().alert('Steadfast auto status sync ON (every 15 minutes).');
+}
+
+function disableSteadfastStatusSyncTrigger() {
+  PropertiesService.getScriptProperties().setProperty('STEADFAST_STATUS_SYNC_ON', 'false');
+  var triggers = ScriptApp.getProjectTriggers();
+  var removed = 0;
+  var i;
+  for (i = 0; i < triggers.length; i++) {
+    if (triggers[i].getHandlerFunction() === 'steadfastStatusSyncTriggerHandler') {
+      ScriptApp.deleteTrigger(triggers[i]);
+      removed++;
+    }
+  }
+  SpreadsheetApp.getUi().alert(
+    removed
+      ? 'Steadfast auto status sync OFF করা হয়েছে।'
+      : 'Steadfast auto status sync trigger আগে থেকেই OFF ছিল।'
+  );
+}
+
+function getCourierSyncSpreadsheet_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  if (ss) return ss;
+  var ssId = PropertiesService.getScriptProperties().getProperty('ONLINE_ORDER_SHEET_ID') || '';
+  if (!ssId) return null;
+  try {
+    return SpreadsheetApp.openById(ssId);
+  } catch (err) {
+    return null;
+  }
+}
+
 function isAutoCourierEnabled_() {
   var v = String(PropertiesService.getScriptProperties().getProperty('AUTO_COURIER_ON') || '').toLowerCase();
   if (!v) return true; // default ON for this project
@@ -926,7 +1936,7 @@ function tryAutoCourierForOrder_(ctx) {
       'Shipped',
       c.tracking_code || '',
       c.consignment_id || '',
-      c.status || 'in_review'
+      normalizeSteadfastDeliveryStatus_(c.status || 'in_review')
     ]]);
     return {
       ok: true,
@@ -1215,7 +2225,7 @@ function steadfastSendActiveRow() {
     'Shipped',
     c.tracking_code || '',
     c.consignment_id || '',
-    c.status || 'in_review'
+    normalizeSteadfastDeliveryStatus_(c.status || 'in_review')
   ]]);
   SpreadsheetApp.getUi().alert(
     'Steadfast-এ পার্সেল তৈরি হয়েছে!\n\nTracking: ' + (c.tracking_code || '—') +
@@ -1266,21 +2276,27 @@ function handleSteadfastWebhookPost_(e) {
 
 function updateOrderFromSteadfastWebhook_(payload) {
   var invoice = String(payload.invoice || '').trim();
-  if (!invoice) return;
+  var tracking = String(payload.tracking_code || '').trim();
+  var cid = String(payload.consignment_id || '').trim();
+  if (!invoice && !tracking && !cid) return;
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
   if (!sheet) return;
   var data = sheet.getDataRange().getValues();
   var i;
   for (i = 1; i < data.length; i++) {
-    if (String(data[i][8] || '').trim() !== invoice) continue;
-    sheet.getRange(i + 1, 11, 1, 3).setValues([[
-      payload.tracking_code || data[i][10] || '',
-      payload.consignment_id || data[i][11] || '',
-      payload.status || ''
-    ]]);
-    if (payload.status === 'delivered') {
-      sheet.getRange(i + 1, 10).setValue('Delivered');
-    }
+    var rowInvoice = String(data[i][8] || '').trim();
+    var rowTracking = String(data[i][10] || '').trim();
+    var rowCid = String(data[i][11] || '').trim();
+    var hit = false;
+    if (invoice && rowInvoice === invoice) hit = true;
+    if (!hit && tracking && rowTracking === tracking) hit = true;
+    if (!hit && cid && rowCid === cid) hit = true;
+    if (!hit) continue;
+    applySteadfastStatusToRow_(sheet, i + 1, {
+      tracking_code: tracking || rowTracking || '',
+      consignment_id: cid || rowCid || '',
+      delivery_status: payload.status || payload.delivery_status || ''
+    });
     return;
   }
 }
@@ -1298,6 +2314,23 @@ function sendToFacebookCAPI(data, eventID) {
   var url = 'https://graph.facebook.com/v18.0/' + pixelId + '/events?access_token=' + accessToken;
   var cleanPhone = String(data.Phone || '').replace(/[^0-9]/g, '');
   if (cleanPhone.indexOf('0') === 0) cleanPhone = '88' + cleanPhone;
+  var cleanEmail = String(data.Email || '').trim().toLowerCase();
+  var cleanFbc = String(data.FBC || '').trim();
+  var cleanFbp = String(data.FBP || '').trim();
+  var cleanExternalId = String(data.ExternalID || '').trim().toLowerCase();
+  var sourceUrl = String(data.EventSourceUrl || '').trim();
+  var userAgent = String(data.ClientUserAgent || '').trim();
+  var userData = {
+    ph: [SHA256_Hash(cleanPhone)],
+    fn: [SHA256_Hash(String(data.Name || '').toLowerCase().trim())]
+  };
+  if (cleanEmail && cleanEmail.indexOf('@') !== -1) {
+    userData.em = [SHA256_Hash(cleanEmail)];
+  }
+  if (cleanFbc) userData.fbc = cleanFbc;
+  if (cleanFbp) userData.fbp = cleanFbp;
+  if (cleanExternalId) userData.external_id = [SHA256_Hash(cleanExternalId)];
+  if (userAgent) userData.client_user_agent = userAgent;
 
   var payload = {
     data: [{
@@ -1305,10 +2338,8 @@ function sendToFacebookCAPI(data, eventID) {
       event_time: Math.floor(Date.now() / 1000),
       event_id: eventID,
       action_source: 'website',
-      user_data: {
-        ph: [SHA256_Hash(cleanPhone)],
-        fn: [SHA256_Hash(String(data.Name || '').toLowerCase().trim())]
-      },
+      user_data: userData,
+      event_source_url: sourceUrl || undefined,
       custom_data: {
         currency: 'BDT',
         value: parseFloat(data.Total) || 0,
@@ -1459,7 +2490,10 @@ function getSessionsSheet_() {
 }
 
 function getAdminsSheet_() {
-  return ensureSheet_('Admins', ['Email', 'Phone', 'Name', 'PasswordHash', 'Salt', 'Status', 'CreatedAt']);
+  var sheet = ensureSheet_('Admins', ['Email', 'Phone', 'Name', 'PasswordHash', 'Salt', 'Status', 'CreatedAt', 'Role', 'UpdatedAt']);
+  if (!sheet.getRange(1, 8).getValue()) sheet.getRange(1, 8).setValue('Role');
+  if (!sheet.getRange(1, 9).getValue()) sheet.getRange(1, 9).setValue('UpdatedAt');
+  return sheet;
 }
 
 function findCustomerByEmail_(email) {
@@ -1548,7 +2582,16 @@ function findAdminByEmail_(email) {
   var target = normalizeEmail_(email);
   for (var i = 1; i < data.length; i++) {
     if (normalizeEmail_(data[i][0]) === target) {
-      return { email: data[i][0], phone: data[i][1], name: data[i][2], hash: data[i][3], salt: data[i][4], status: data[i][5] };
+      return {
+        row: i + 1,
+        email: data[i][0],
+        phone: data[i][1],
+        name: data[i][2],
+        hash: data[i][3],
+        salt: data[i][4],
+        status: data[i][5],
+        role: String(data[i][7] || 'admin').toLowerCase()
+      };
     }
   }
   return null;
@@ -1559,7 +2602,16 @@ function findAdminByPhone_(phone) {
   var target = normalizePhone_(phone);
   for (var i = 1; i < data.length; i++) {
     if (normalizePhone_(data[i][1]) === target) {
-      return { email: data[i][0], phone: data[i][1], name: data[i][2], hash: data[i][3], salt: data[i][4], status: data[i][5] };
+      return {
+        row: i + 1,
+        email: data[i][0],
+        phone: data[i][1],
+        name: data[i][2],
+        hash: data[i][3],
+        salt: data[i][4],
+        status: data[i][5],
+        role: String(data[i][7] || 'admin').toLowerCase()
+      };
     }
   }
   return null;
@@ -1592,7 +2644,8 @@ function loginAdmin_(e) {
   if (!verifyPassword_(password, user.salt, user.hash)) {
     return { ok: false, error: 'INVALID_PASSWORD', message: 'পাসওয়ার্ড ভুল।' };
   }
-  return createSession_({ email: user.email, phone: user.phone, name: user.name }, 'admin');
+  var role = (user.role === 'staff') ? 'staff' : 'admin';
+  return createSession_({ email: user.email, phone: user.phone, name: user.name }, role);
 }
 
 function verifySession_(token) {
@@ -1755,7 +2808,7 @@ function createFirstAdminFromMenu() {
     return;
   }
   var hashed = hashPassword_(password);
-  appendRow_(admins, [email, phone, name, hashed.hash, hashed.salt, 'active', new Date()]);
+  appendRow_(admins, [email, phone, name, hashed.hash, hashed.salt, 'active', new Date(), 'admin', new Date()]);
   ui.alert(
     'অ্যাডমিন তৈরি হয়েছে।\n\n' +
     'লগইন: আপনার সাইটে /admin-login.html\n' +

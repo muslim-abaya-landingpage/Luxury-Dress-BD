@@ -486,6 +486,98 @@
     return { user_first_name: parts[0], user_last_name: parts.slice(1).join(" ") };
   }
 
+  var META_FBC_STORAGE_KEY = "ma_meta_fbc";
+  var META_FBP_STORAGE_KEY = "ma_meta_fbp";
+
+  function readCookieValue(name) {
+    if (typeof document === "undefined") return "";
+    var escaped = String(name || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    var m = document.cookie.match(new RegExp("(?:^|; )" + escaped + "=([^;]*)"));
+    return m ? decodeURIComponent(m[1]) : "";
+  }
+
+  function writeCookieValue(name, value, days) {
+    if (typeof document === "undefined" || !name || !value) return;
+    var maxAge = Math.max(1, parseInt(days, 10) || 90) * 24 * 60 * 60;
+    document.cookie =
+      String(name) +
+      "=" +
+      encodeURIComponent(String(value)) +
+      "; path=/; max-age=" +
+      String(maxAge) +
+      "; samesite=lax";
+  }
+
+  function readMetaStorage(key) {
+    try {
+      return localStorage.getItem(key) || "";
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function writeMetaStorage(key, value) {
+    try {
+      localStorage.setItem(key, String(value || ""));
+    } catch (e) {}
+  }
+
+  function readFbclidFromUrl() {
+    if (typeof window === "undefined" || !window.location || !window.location.search) return "";
+    try {
+      return new URLSearchParams(window.location.search).get("fbclid") || "";
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function buildFbcFromFbclid(fbclid) {
+    var clickId = String(fbclid || "").trim();
+    if (!clickId) return "";
+    return "fb.1." + Math.floor(Date.now() / 1000) + "." + clickId;
+  }
+
+  function buildFallbackFbp() {
+    var rand = Math.floor(Math.random() * 10000000000);
+    return "fb.1." + Math.floor(Date.now() / 1000) + "." + rand;
+  }
+
+  function readStoredCustomerIdentity() {
+    var out = {};
+    if (typeof localStorage === "undefined") return out;
+    try {
+      var raw = localStorage.getItem("ma_customer");
+      if (!raw) return out;
+      var parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object") return out;
+      if (parsed.email) out.email = String(parsed.email).trim().toLowerCase();
+      if (parsed.phone) out.phone = String(parsed.phone);
+      if (parsed.name) out.name = String(parsed.name).trim();
+    } catch (e) {}
+    return out;
+  }
+
+  function ensureMetaBrowserIds() {
+    var cookieFbc = readCookieValue("_fbc");
+    var cookieFbp = readCookieValue("_fbp");
+    var savedFbc = readMetaStorage(META_FBC_STORAGE_KEY);
+    var savedFbp = readMetaStorage(META_FBP_STORAGE_KEY);
+    var fbclid = readFbclidFromUrl();
+    var nextFbc = cookieFbc || savedFbc;
+    if (fbclid) nextFbc = buildFbcFromFbclid(fbclid) || nextFbc;
+    if (nextFbc) {
+      writeMetaStorage(META_FBC_STORAGE_KEY, nextFbc);
+      writeCookieValue("_fbc", nextFbc, 90);
+    }
+    var nextFbp = cookieFbp || savedFbp;
+    if (!nextFbp) nextFbp = buildFallbackFbp();
+    if (nextFbp) {
+      writeMetaStorage(META_FBP_STORAGE_KEY, nextFbp);
+      writeCookieValue("_fbp", nextFbp, 90);
+    }
+    return { fbc: nextFbc || "", fbp: nextFbp || "" };
+  }
+
   function cartLinesToContentIds(lines) {
     if (!Array.isArray(lines)) return [];
     return lines
@@ -511,6 +603,21 @@
       if (!out.phone) out.phone = phoneRaw;
     }
 
+    if (!out.user_email || !out.user_phone || !out.user_first_name) {
+      var stored = readStoredCustomerIdentity();
+      if (stored.email && !out.user_email && !out.email) {
+        out.user_email = stored.email;
+      }
+      if (stored.phone && !out.user_phone && !out.phone) {
+        out.phone = stored.phone;
+        var fromStored = normalizePhoneE164(stored.phone);
+        if (fromStored) out.user_phone = fromStored;
+      }
+      if (stored.name && !out.user_first_name && !out.first_name) {
+        out.first_name = stored.name;
+      }
+    }
+
     var nameSrc = out.user_first_name || out.first_name || "";
     if (nameSrc && !out.user_last_name) {
       var split = splitFullName(nameSrc);
@@ -525,10 +632,21 @@
     var email = out.user_email || out.email;
     if (email) out.user_email = String(email).trim().toLowerCase();
 
+    var eventName = String(out.event || out.event_name || "").trim();
     var eventId = out.event_id || out.transaction_id || "";
+    if (!eventId && eventName) {
+      eventId =
+        eventName.toLowerCase().replace(/[^a-z0-9_]+/g, "_") +
+        "_" +
+        Date.now() +
+        "_" +
+        Math.floor(Math.random() * 1000000);
+    }
     if (eventId) {
       out.event_id = String(eventId);
-      out.transaction_id = String(out.transaction_id || eventId);
+      if (out.transaction_id || /purchase|checkout|order/i.test(eventName)) {
+        out.transaction_id = String(out.transaction_id || eventId);
+      }
     }
 
     if (typeof out.value === "undefined" && typeof out.order_value !== "undefined") {
@@ -536,6 +654,16 @@
     }
     if (typeof out.order_value === "undefined" && typeof out.value !== "undefined") {
       out.order_value = out.value;
+    }
+
+    var browserIds = ensureMetaBrowserIds();
+    if (!out.fbc && browserIds.fbc) out.fbc = browserIds.fbc;
+    if (!out.fbp && browserIds.fbp) out.fbp = browserIds.fbp;
+    if (!out.event_source_url && typeof window !== "undefined" && window.location) {
+      out.event_source_url = window.location.href;
+    }
+    if (!out.client_user_agent && typeof navigator !== "undefined") {
+      out.client_user_agent = navigator.userAgent || "";
     }
 
     if (!out.content_ids && out.content_id) {
@@ -547,6 +675,10 @@
     if (out.first_name && !out.user_first_name) out.user_first_name = out.first_name;
     if (out.user_email && !out.email) out.email = out.user_email;
     if (out.email && !out.user_email) out.user_email = String(out.email).trim().toLowerCase();
+    if (!out.external_id) {
+      if (out.user_phone) out.external_id = String(out.user_phone);
+      else if (out.user_email) out.external_id = String(out.user_email);
+    }
 
     var qty = parseInt(out.quantity, 10) || 1;
     if (!out.contents && Array.isArray(out.content_ids) && out.content_ids.length) {
@@ -587,7 +719,12 @@
     if (out.user_email) userData.em = out.user_email;
     if (out.user_first_name) userData.fn = out.user_first_name;
     if (out.user_last_name) userData.ln = out.user_last_name;
+    if (out.fbc) userData.fbc = out.fbc;
+    if (out.fbp) userData.fbp = out.fbp;
+    if (out.external_id) userData.external_id = out.external_id;
     out.eventModel = {
+      event_name: eventName || undefined,
+      event_id: out.event_id || "",
       currency: out.currency || "BDT",
       value: eventValue != null ? parseFloat(eventValue) || 0 : undefined,
       items: Array.isArray(out.contents) ? out.contents : [],

@@ -193,7 +193,11 @@ function trackFB(event, data) {
         pushTrackingEvent(event, data || {});
     } else {
         window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push(Object.assign({ event: event }, data || {}));
+        var payload = Object.assign({ event: event }, data || {});
+        if (typeof applyMetaTrackingFields === 'function') {
+            payload = applyMetaTrackingFields(payload);
+        }
+        window.dataLayer.push(payload);
     }
 }
 

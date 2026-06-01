@@ -498,8 +498,14 @@ function handleOnlineOrderPost_(e) {
     sendToFacebookCAPI({
       Name: validated.name,
       Phone: validated.phone,
+      Email: param_(e, 'Email'),
       Total: totalStr,
-      Design: validated.design
+      Design: validated.design,
+      FBC: param_(e, 'FBC'),
+      FBP: param_(e, 'FBP'),
+      ExternalID: param_(e, 'ExternalID'),
+      EventSourceUrl: param_(e, 'EventSourceUrl'),
+      ClientUserAgent: param_(e, 'ClientUserAgent')
     }, eventID);
   } catch (err) {
     console.log('CAPI Error: ' + err.message);
@@ -1298,6 +1304,23 @@ function sendToFacebookCAPI(data, eventID) {
   var url = 'https://graph.facebook.com/v18.0/' + pixelId + '/events?access_token=' + accessToken;
   var cleanPhone = String(data.Phone || '').replace(/[^0-9]/g, '');
   if (cleanPhone.indexOf('0') === 0) cleanPhone = '88' + cleanPhone;
+  var cleanEmail = String(data.Email || '').trim().toLowerCase();
+  var cleanFbc = String(data.FBC || '').trim();
+  var cleanFbp = String(data.FBP || '').trim();
+  var cleanExternalId = String(data.ExternalID || '').trim().toLowerCase();
+  var sourceUrl = String(data.EventSourceUrl || '').trim();
+  var userAgent = String(data.ClientUserAgent || '').trim();
+  var userData = {
+    ph: [SHA256_Hash(cleanPhone)],
+    fn: [SHA256_Hash(String(data.Name || '').toLowerCase().trim())]
+  };
+  if (cleanEmail && cleanEmail.indexOf('@') !== -1) {
+    userData.em = [SHA256_Hash(cleanEmail)];
+  }
+  if (cleanFbc) userData.fbc = cleanFbc;
+  if (cleanFbp) userData.fbp = cleanFbp;
+  if (cleanExternalId) userData.external_id = [SHA256_Hash(cleanExternalId)];
+  if (userAgent) userData.client_user_agent = userAgent;
 
   var payload = {
     data: [{
@@ -1305,10 +1328,8 @@ function sendToFacebookCAPI(data, eventID) {
       event_time: Math.floor(Date.now() / 1000),
       event_id: eventID,
       action_source: 'website',
-      user_data: {
-        ph: [SHA256_Hash(cleanPhone)],
-        fn: [SHA256_Hash(String(data.Name || '').toLowerCase().trim())]
-      },
+      user_data: userData,
+      event_source_url: sourceUrl || undefined,
       custom_data: {
         currency: 'BDT',
         value: parseFloat(data.Total) || 0,

@@ -80,7 +80,11 @@ function fireShopViewContent(product, categoryKey) {
     pushTrackingEvent("ViewContent", payload);
   } else if (typeof window !== "undefined") {
     window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push(Object.assign({ event: "ViewContent" }, payload));
+    var dlPayload = Object.assign({ event: "ViewContent" }, payload);
+    if (typeof applyMetaTrackingFields === "function") {
+      dlPayload = applyMetaTrackingFields(dlPayload);
+    }
+    window.dataLayer.push(dlPayload);
   }
 }
 

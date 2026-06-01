@@ -104,7 +104,11 @@
           pushPurchaseCompleteEvent(extra);
         } else if (saved) {
           window.dataLayer = window.dataLayer || [];
-          window.dataLayer.push(Object.assign({ event: 'purchase_complete' }, saved, extra));
+          var payload = Object.assign({ event: 'purchase_complete' }, saved, extra);
+          if (typeof applyMetaTrackingFields === 'function') {
+            payload = applyMetaTrackingFields(payload);
+          }
+          window.dataLayer.push(payload);
         }
         if (typeof clearOrderTracking === 'function') clearOrderTracking();
       })();
