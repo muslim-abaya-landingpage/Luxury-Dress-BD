@@ -3003,6 +3003,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             formData.append('Total', String(gTotal));
             var eventId = 'order_' + Date.now();
             formData.append('EventID', eventId);
+            try {
+                var testCode = new URLSearchParams(window.location.search).get('test_event_code');
+                if (testCode) formData.append('test_event_code', String(testCode));
+            } catch (e) {}
             formData.append('ProductSlotCount', String(MAX_PRODUCT_SLOTS));
             var selectedPayment = document.querySelector('input[name="paymentMethod"]:checked');
             formData.append('PaymentMethod', selectedPayment ? selectedPayment.value : 'Cash On Delivery');

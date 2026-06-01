@@ -1270,7 +1270,8 @@ function handleOnlineOrderPost_(e) {
       FBP: param_(e, 'FBP'),
       ExternalID: param_(e, 'ExternalID'),
       EventSourceUrl: param_(e, 'EventSourceUrl'),
-      ClientUserAgent: param_(e, 'ClientUserAgent')
+      ClientUserAgent: param_(e, 'ClientUserAgent'),
+      TestEventCode: param_(e, 'test_event_code') || param_(e, 'TestEventCode')
     }, eventID);
   } catch (err) {
     console.log('CAPI Error: ' + err.message);
@@ -2320,6 +2321,7 @@ function sendToFacebookCAPI(data, eventID) {
   var cleanExternalId = String(data.ExternalID || '').trim().toLowerCase();
   var sourceUrl = String(data.EventSourceUrl || '').trim();
   var userAgent = String(data.ClientUserAgent || '').trim();
+  var testEventCode = String(data.TestEventCode || '').trim();
   var userData = {
     ph: [SHA256_Hash(cleanPhone)],
     fn: [SHA256_Hash(String(data.Name || '').toLowerCase().trim())]
@@ -2348,6 +2350,7 @@ function sendToFacebookCAPI(data, eventID) {
       }
     }]
   };
+  if (testEventCode) payload.test_event_code = testEventCode;
 
   UrlFetchApp.fetch(url, {
     method: 'post',
