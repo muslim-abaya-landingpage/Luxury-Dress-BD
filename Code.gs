@@ -494,29 +494,9 @@ function handleOnlineOrderPost_(e) {
     payment: payment
   });
 
-  try {
-    var capiRes = sendToFacebookCAPI({
-      Name: validated.name,
-      Phone: validated.phone,
-      Email: param_(e, 'Email'),
-      Total: totalStr,
-      Design: validated.design,
-      FBC: param_(e, 'FBC'),
-      FBP: param_(e, 'FBP'),
-      ExternalID: param_(e, 'ExternalID'),
-      EventSourceUrl: param_(e, 'EventSourceUrl'),
-      ClientUserAgent: param_(e, 'ClientUserAgent'),
-      TestEventCode: param_(e, 'test_event_code') || param_(e, 'TestEventCode')
-    }, eventID);
-    if (capiRes && !capiRes.ok) {
-      appendAutoCourierNote_(sheet, newRow, 'CAPI_FAIL:' + String(capiRes.code || 'UNKNOWN'));
-    } else if (capiRes && capiRes.ok) {
-      appendAutoCourierNote_(sheet, newRow, 'CAPI_OK');
-    }
-  } catch (err) {
-    console.log('CAPI Error: ' + err.message);
-    appendAutoCourierNote_(sheet, newRow, 'CAPI_ERR:' + String(err.message || err).slice(0, 80));
-  }
+  // Purchase event should fire only after manual confirmation (J=Confirmed),
+  // so fake/test submissions do not pollute ads optimization.
+  appendAutoCourierNote_(sheet, newRow, 'META_PURCHASE_WAIT: set J=Confirmed');
 
   return ContentService.createTextOutput('Success|' + orderId).setMimeType(ContentService.MimeType.TEXT);
 }
@@ -1126,10 +1106,15 @@ function autoCourierOnEditTrigger(e) {
     if (range.getNumRows() !== 1 || range.getNumColumns() !== 1) return;
     var newStatus = String(range.getValue() || '').toLowerCase().trim();
     if (newStatus !== 'confirmed') return;
-    if (!isAutoCourierEnabled_() || !shouldAutoCourierOnConfirmed_()) return;
 
     var row = range.getRow();
     if (row <= 1) return;
+
+    // Send Purchase CAPI only after order is human-verified as Confirmed.
+    maybeSendConfirmedPurchaseCapiForRow_(sheet, row);
+
+    if (!isAutoCourierEnabled_() || !shouldAutoCourierOnConfirmed_()) return;
+
     var vals = sheet.getRange(row, 1, 1, 17).getValues()[0];
     var tracking = String(vals[10] || '').trim();
     var consignment = String(vals[11] || '').trim();
@@ -1156,6 +1141,45 @@ function autoCourierOnEditTrigger(e) {
     }
   } catch (err) {
     // Avoid breaking onEdit trigger execution.
+  }
+}
+
+function maybeSendConfirmedPurchaseCapiForRow_(sheet, row) {
+  if (!sheet || row <= 1) return { ok: false, code: 'ROW_INVALID' };
+  try {
+    var vals = sheet.getRange(row, 1, 1, 17).getValues()[0];
+    var status = String(vals[9] || '').toLowerCase().trim();
+    if (status !== 'confirmed') return { ok: false, code: 'NOT_CONFIRMED' };
+    var notes = String(vals[16] || '');
+    if (notes.indexOf('META_PURCHASE_SENT') !== -1) {
+      return { ok: true, code: 'ALREADY_SENT' };
+    }
+    if (notes.indexOf('Fake') !== -1 || status === 'fake' || status === 'cancelled') {
+      return { ok: false, code: 'SKIP_FAKE_OR_CANCEL' };
+    }
+    var orderId = String(vals[8] || ('MA-ROW-' + row)).trim();
+    var eventID = 'purchase_' + orderId;
+    var capiRes = sendToFacebookCAPI({
+      Name: String(vals[1] || ''),
+      Phone: String(vals[2] || ''),
+      Email: '',
+      Total: String(vals[7] || '0'),
+      Design: String(vals[6] || ''),
+      ExternalID: normalizePhone_(String(vals[2] || '')),
+      EventSourceUrl: 'https://muslimabaya.com/checkout',
+      ClientUserAgent: '',
+      TestEventCode: ''
+    }, eventID);
+    if (capiRes && capiRes.ok) {
+      appendAutoCourierNote_(sheet, row, 'CAPI_OK');
+      appendAutoCourierNote_(sheet, row, 'META_PURCHASE_SENT');
+      return { ok: true, code: 'SENT' };
+    }
+    appendAutoCourierNote_(sheet, row, 'CAPI_FAIL:' + String((capiRes && capiRes.code) || 'UNKNOWN'));
+    return { ok: false, code: (capiRes && capiRes.code) || 'UNKNOWN' };
+  } catch (err) {
+    appendAutoCourierNote_(sheet, row, 'CAPI_ERR:' + String(err.message || err).slice(0, 80));
+    return { ok: false, code: 'EXCEPTION' };
   }
 }
 
