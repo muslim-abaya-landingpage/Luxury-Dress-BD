@@ -290,7 +290,7 @@ window.CATEGORY_PRODUCTS = {
       name: "Pink Floral Printed Co-ord Set",
       image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/pink-floral-printed-co-ord-set.jpeg?raw=1",
       link: "/",
-      price: 550,
+      price: 650,
       color: "pink",
       colorLabel: "Pink Floral Co-ord Set",
       fabric: "Alex soft Georgette",
