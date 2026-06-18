@@ -1,68 +1,250 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Privacy Policy | Muslim Abaya</title>
-  <link rel="icon" href="assets/logo-muslim-abaya.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="assets/logo-muslim-abaya.svg">
-  <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://muslimabaya.com/privacy">
-  <meta name="description" content="Muslim Abaya privacy policy — muslimabaya.com.">
-  <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
-  <script src="site-seo-config.js?v=20260603seo"></script>
-  <script src="site-seo.js?v=20260603seo"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="assets/logo-muslim-abaya.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="assets/logo-muslim-abaya.svg">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://muslimabaya.com/privacy">
+    <meta name="description" content="Muslim Abaya privacy policy — muslimabaya.com.">
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
+    <script src="site-seo-config.js?v=20260603seo"></script>
+    <script src="site-seo.js?v=20260603seo"></script>
+    
+    <!-- মেইন থিমের লাক্সারি ফন্ট কম্বিনেশন -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="site-header.css?v=20260603logo">
     <link rel="stylesheet" href="site-footer.css?v=20260603footen" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="site-footer.css?v=20260603footen"></noscript>
-<style>
-        :root { --primary-orange: #f16522; --bg-gray: #f7f9fc; }
-        body { font-family: 'Hind Siliguri', sans-serif; background-color: var(--bg-gray); margin: 0; padding: 0; color: #333; line-height: 1.6; }
-        .policy-header { background: #fff; padding: 25px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-bottom: 3px solid var(--primary-orange); }
-        .policy-header h1 { color: var(--primary-orange); margin: 0; font-size: 28px; font-weight: 700; }
-        .container { max-width: 850px; margin: 40px auto; padding: 40px; background: #fff; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.07); border: 1px solid #eee; }
-        h2 { color: #111; font-size: 24px; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
-        h2::before { content: ""; width: 6px; height: 25px; background: var(--primary-orange); border-radius: 3px; }
-        .policy-content p { margin-bottom: 18px; color: #444; font-size: 18px; }
-        .policy-content ul { padding-left: 0; list-style: none; }
-        .policy-content li { margin-bottom: 15px; background: #fdfdfd; padding: 15px; border-radius: 8px; border-left: 4px solid var(--primary-orange); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .policy-content strong { color: #111; display: block; margin-bottom: 5px; }
-        .back-btn { display: inline-block; margin-top: 30px; padding: 12px 30px; background: var(--primary-orange); color: #fff; text-decoration: none; border-radius: 8px; font-weight: 700; transition: 0.3s; }
-        .back-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+    <noscript><link rel="stylesheet" href="site-footer.css?v=20260603footen"></noscript>
+    
+    <style>
+        /* --- মেইন থিমের সাথে ১০০% মিলিয়ে গ্লোবাল রিসেট --- */
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #fcfcfc; 
+            margin: 0; 
+            padding: 0; 
+            color: #2D2D2D; 
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .about-wrap { 
+            max-width: 840px; 
+            margin: 0 auto; 
+            padding: 40px 20px 80px; 
+        }
+        
+        /* মেইন থিম ব্রেডক্রাম্ব */
+        .about-breadcrumb {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #888;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .about-breadcrumb a { 
+            color: #888; 
+            text-decoration: none; 
+            transition: color 0.2s; 
+        }
+        .about-breadcrumb a:hover { 
+            color: #111; 
+        }
+        .about-breadcrumb strong { 
+            color: #111; 
+            font-weight: 600; 
+        }
+        .about-breadcrumb span { 
+            color: #ccc; 
+        }
+        
+        /* মেইন থিম সেকশন কার্ড */
+        .about-section {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        }
+        
+        /* মেইন থিম টাইপোগ্রাফি */
+        .about-section h1 { 
+            font-family: 'Playfair Display', serif;
+            color: #111; 
+            margin: 0 0 24px; 
+            font-size: clamp(28px, 5vw, 36px); 
+            font-weight: 700; 
+            letter-spacing: -0.01em;
+        }
+        
+        .about-section p { 
+            margin: 0 0 24px; 
+            color: #555; 
+            font-size: 15px; 
+            line-height: 1.75; 
+        }
+        
+        /* লিস্ট ও ইনার কার্ড স্টাইল */
+        .about-card ul { 
+            padding-left: 0; 
+            list-style: none; 
+            margin: 0 0 32px;
+        }
+        
+        .about-card li { 
+            margin-bottom: 16px; 
+            background: #fafafa; 
+            padding: 20px; 
+            border-radius: 10px; 
+            border-left: 3px solid #111; 
+            border-top: 1px solid rgba(0,0,0,0.01);
+            border-right: 1px solid rgba(0,0,0,0.01);
+            border-bottom: 1px solid rgba(0,0,0,0.01);
+            transition: all 0.2s ease;
+        }
+        .about-card li:hover {
+            background: #ffffff;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.03);
+            transform: translateX(2px);
+        }
+        
+        .about-card strong { 
+            color: #111; 
+            display: block; 
+            margin-bottom: 8px; 
+            font-size: 15px;
+            font-weight: 700;
+        }
+        
+        /* মেইন থিম বাটন গ্রুপ */
+        .about-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 35px;
+        }
+        
+        /* মেইন থিম বাটন সিএসএস (আন্ডারলাইন ছাড়া) */
+        .about-btn, 
+        .about-btn:link, 
+        .about-btn:visited, 
+        .about-btn:hover, 
+        .about-btn:active, 
+        .about-btn:focus { 
+            display: inline-flex; 
+            align-items: center;
+            justify-content: center;
+            padding: 16px 28px; 
+            font-size: 13px; 
+            font-weight: 700; 
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            text-decoration: none !important; 
+            border-radius: 8px; 
+            flex: 1 1 160px;
+            min-width: 140px;
+            box-sizing: border-box;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        
+        /* প্রাইমারি বাটন (ডার্ক) */
+        .about-btn-primary, .about-btn-primary:link, .about-btn-primary:visited {
+            background: #111111; 
+            color: #fff !important; 
+            border: 1px solid #111111;
+            box-shadow: 0 4px 14px rgba(17, 17, 17, 0.12);
+        }
+        .about-btn-primary:hover, .about-btn-primary:active { 
+            background: #2a2a2a; 
+            border-color: #2a2a2a;
+            color: #fff !important;
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 20px rgba(17, 17, 17, 0.2);
+        }
+        
+        /* সেকেন্ডারি বাটন (আউটলাইন) */
+        .about-btn-secondary, .about-btn-secondary:link, .about-btn-secondary:visited {
+            background: #ffffff;
+            color: #111111 !important;
+            border: 1px solid #e2e2e2;
+        }
+        .about-btn-secondary:hover, .about-btn-secondary:active {
+            border-color: #111111;
+            background: #fcfcfc;
+            color: #111111 !important;
+            transform: translateY(-2px);
+        }
+
+        /* রেসপনসিভ */
+        @media (max-width: 600px) {
+            .about-wrap { padding: 24px 16px 48px; }
+            .about-section { padding: 28px 20px; }
+            .about-actions { flex-direction: column; gap: 10px; }
+            .about-btn { width: 100%; flex: none; }
+        }
     </style>
 </head>
 <body>
     <div id="site-header-mount"></div>
 
-    <div class="policy-header">
-        <h1>Muslim Abaya</h1>
-    </div>
+    <main class="about-wrap">
+        <!-- মেইন থিম ব্রেডক্রাম্ব ন্যাভিগেশন -->
+        <nav class="about-breadcrumb" aria-label="Breadcrumb">
+            <a href="/">Home</a>
+            <span>&rsaquo;</span>
+            <strong>Privacy Policy</strong>
+        </nav>
 
-    <div class="container">
-        <h2>????????? ???? (Privacy Policy)</h2>
-
-        <div class="policy-content">
-            <p>Muslim Abaya (muslimabaya.com) ????? ??????????? ??????? ????? ???? ?????? ????? ???? ??????, ??????? ? ???????? ???? ?? ???? ???????? ?????? ???:</p>
+        <!-- মেইন থিম কার্ড কন্টেন্ট -->
+        <div class="about-section about-card">
+            <h1>Privacy Policy</h1>
+            <p>Muslim Abaya (muslimabaya.com) is deeply committed to protecting the privacy and personal data of our visitors and customers. By accessing or purchasing from our website, you agree to the collection and processing of your information as detailed below:</p>
 
             <ul>
-                <li><strong>?. ?? ?? ???? ?????? ???:</strong> ?????? ?? Sign Up ???? ???? ????? ???, ?????? ?????, ???????? ??????, ????? (??????) ??? ?????? ? ??????? ????????? ???? ?????? ??? ????</li>
-                <li><strong>?. ???? ?????? ????:</strong> ???? ??????? Google Sheets ? Google Apps Script-?? ??????? ??????? ??? ???? ?????????? ????? plain text-? ???? ??? ???</li>
-                <li><strong>?. ?????? ???????:</strong> ????????? ?????? ??????, ????????, ???????? ??????? ??? (????? ????????) ???? ???? ??????? ???? ???? ??????? ??? ????</li>
-                <li><strong>?. ???? ? ???????:</strong> Facebook Pixel, TikTok Pixel ? Google Tag Manager-?? ??????? ???????? ? ??????????????? ???? ???? ?????? ???? ?????? ??? ?????</li>
-                <li><strong>?. ???? ?????????:</strong> HTTPS, ????? ?????????, rate limit ??? ???? AUTH_SECRET ? API key ??????? ??? ???? ???????? ???? ????</li>
-                <li><strong>?. ????? ??????:</strong> ?????? ???? ????? ???? ?????? ?? ???? ????? ?????? WhatsApp/?????? ?????? ??????</li>
-                <li><strong>?. ???????:</strong> muslimabaya@gmail.com | +880 1971-642683 | WhatsApp: 01971642683</li>
+                <li>
+                    <strong>1. Information We Collect:</strong> 
+                    When you place an order, fill out a form, or sign up on our website, we collect personal details including your name, delivery address, phone number, email address (optional), ordered items, and payment preferences.
+                </li>
+                <li>
+                    <strong>2. Data Storage & Security:</strong> 
+                    Your submitted data is safely stored and processed using secure Google Sheets and Google Apps Script integrations. We never store passwords or sensitive financial credentials in plain text format.
+                </li>
+                <li>
+                    <strong>3. How We Use Your Data:</strong> 
+                    The information we collect is strictly used to process your orders efficiently, dispatch products via delivery services, provide tracking updates, and share promotional offers or exclusive updates regarding our brand.
+                </li>
+                <li>
+                    <strong>4. Cookies & Tracking Technologies:</strong> 
+                    To enhance your browsing experience and provide tailored advertisements, our website utilizes analytic tracking pixels including Facebook Pixel, TikTok Pixel, and Google Tag Manager.
+                </li>
+                <li>
+                    <strong>5. Technical Data Protection:</strong> 
+                    We implement strict industry-standard security protocols, including HTTPS encryption, secure API integrations, rate limiting, and robust AUTH_SECRET or API key authentications to prevent unauthorized access.
+                </li>
+                <li>
+                    <strong>6. Third-Party Sharing Policy:</strong> 
+                    We respect your privacy. Your personal information is never sold, traded, or shared with third parties for commercial use, except as required by law or necessary for courier services to successfully deliver your orders.
+                </li>
+                <li>
+                    <strong>7. Contact & Customer Support:</strong> 
+                    If you have any questions regarding this Privacy Policy, or if you wish to modify or request the deletion of your data, please contact us directly via email at muslimabaya@gmail.com or via Hotline / WhatsApp at +880 1971-642683.
+                </li>
             </ul>
 
-            <p style="font-size:15px;color:#666">??????? ?????: ?? ????</p>
-
-            <a href="checkout.html" class="back-btn">??????</a>
-            <a href="terms.html" class="back-btn" style="margin-left:10px">????????</a>
-            <a href="/" class="back-btn" style="margin-left:10px">???</a>
-        </div>
-    </div>
-
+            <p style="font-size:13px; color:#888; font-weight: 500; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em;">Last Updated: June 2026</p>
+<!-- ৩টি বাটন বদলে শুধুমাত্র ১টি প্রফেশনাল বাটন -->
+<div class="about-actions" style="justify-content: center; margin-top: 40px;">
+    <a href="/" class="about-btn about-btn-primary" style="max-width: 260px; width: 100%; flex: none;">Back to Shop</a>
+</div>
+</div>
+</main>
     <div id="site-footer-mount"></div>
     <script src="cart-utils.js"></script>
     <script defer src="site-header.js?v=20260603logo"></script>
