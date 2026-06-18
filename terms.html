@@ -1,91 +1,283 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Terms & Conditions | Muslim Abaya</title>
-  <link rel="icon" href="assets/logo-muslim-abaya.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="assets/logo-muslim-abaya.svg">
-  <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://muslimabaya.com/terms">
-  <meta name="description" content="Muslim Abaya terms and conditions — muslimabaya.com.">
-  <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
-  <script src="site-seo-config.js?v=20260603seo"></script>
-  <script src="site-seo.js?v=20260603seo"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="assets/logo-muslim-abaya.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="assets/logo-muslim-abaya.svg">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://muslimabaya.com/terms">
+    <meta name="description" content="Muslim Abaya terms and conditions — muslimabaya.com.">
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
+    <script src="site-seo-config.js?v=20260603seo"></script>
+    <script src="site-seo.js?v=20260603seo"></script>
+    
+    <!-- মেইন থিমের লাক্সারি ফন্ট কম্বিনেশন -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="site-header.css?v=20260603logo">
     <link rel="stylesheet" href="site-footer.css?v=20260603footen" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="site-footer.css?v=20260603footen"></noscript>
-<style>
-        :root { --primary-orange: #f16522; --bg-gray: #f7f9fc; }
-        body { font-family: 'Hind Siliguri', sans-serif; background-color: var(--bg-gray); margin: 0; padding: 0; color: #333; line-height: 1.6; }
+    <noscript><link rel="stylesheet" href="site-footer.css?v=20260603footen"></noscript>
+    
+    <style>
+        /* --- মেইন থিমের সাথে ১০০% মিলিয়ে গ্লোবাল রিসেট --- */
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #fcfcfc; 
+            margin: 0; 
+            padding: 0; 
+            color: #2D2D2D; 
+            -webkit-font-smoothing: antialiased;
+        }
         
-        /* Header */
-        .policy-header { background: #fff; padding: 25px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-bottom: 3px solid var(--primary-orange); }
-        .policy-header h1 { color: var(--primary-orange); margin: 0; font-size: 28px; font-weight: 700; }
+        .about-wrap { 
+            max-width: 840px; 
+            margin: 0 auto; 
+            padding: 40px 20px 80px; 
+        }
+        
+        /* মেইন থিম ব্রেডক্রাম্ব */
+        .about-breadcrumb {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #888;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .about-breadcrumb a { 
+            color: #888; 
+            text-decoration: none; 
+            transition: color 0.2s; 
+        }
+        .about-breadcrumb a:hover { 
+            color: #111; 
+        }
+        .about-breadcrumb strong { 
+            color: #111; 
+            font-weight: 600; 
+        }
+        .about-breadcrumb span { 
+            color: #ccc; 
+        }
+        
+        /* মেইন থিম সেকশন CARD */
+        .about-section {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        }
+        
+        /* মেইন থিম টাইপোগ্রাফি */
+        .about-section h1 { 
+            font-family: 'Playfair Display', serif;
+            color: #111; 
+            margin: 0 0 24px; 
+            font-size: clamp(28px, 5vw, 36px); 
+            font-weight: 700; 
+            letter-spacing: -0.01em;
+        }
+        
+        .about-section p { 
+            margin: 0 0 24px; 
+            color: #555; 
+            font-size: 15px; 
+            line-height: 1.75; 
+        }
+        
+        /* লিস্ট ও ইনার কার্ড স্টাইল */
+        .about-card ul { 
+            padding-left: 0; 
+            list-style: none; 
+            margin: 0 0 32px;
+        }
+        
+        .about-card li { 
+            margin-bottom: 16px; 
+            background: #fafafa; 
+            padding: 20px; 
+            border-radius: 10px; 
+            border-left: 3px solid #111; 
+            border-top: 1px solid rgba(0,0,0,0.01);
+            border-right: 1px solid rgba(0,0,0,0.01);
+            border-bottom: 1px solid rgba(0,0,0,0.01);
+            transition: all 0.2s ease;
+        }
+        .about-card li:hover {
+            background: #ffffff;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.03);
+            transform: translateX(2px);
+        }
+        
+        .about-card strong { 
+            color: #111; 
+            display: block; 
+            margin-bottom: 8px; 
+            font-size: 15px;
+            font-weight: 700;
+        }
 
-        .container { max-width: 850px; margin: 40px auto; padding: 40px; background: #fff; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.07); border: 1px solid #eee; }
+        /* প্রিমিয়াম মিনিমাল কন্টাক্ট বক্স */
+        .luxury-contact-box {
+            background: #fafafa;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 28px;
+            border-radius: 12px;
+            margin-top: 35px;
+        }
+        .luxury-contact-title {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 15px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: #111;
+        }
+        .luxury-contact-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+        .luxury-contact-item:last-of-type {
+            margin-bottom: 0;
+        }
         
-        h2 { color: #111; font-size: 24px; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
-        h2::before { content: ""; width: 6px; height: 25px; background: var(--primary-orange); border-radius: 3px; }
+        /* লোগো কেটে যাওয়া প্রতিরোধের জন্য ফিক্সড সিএসএস (Fix for image_8ff947.png) */
+        .luxury-logo {
+            height: 22px;
+            width: auto;
+            object-fit: contain;
+            display: block;
+        }
+        .luxury-contact-item p {
+            margin: 0;
+            font-weight: 600;
+            font-size: 15px;
+            color: #333;
+        }
         
-        .policy-content p { margin-bottom: 18px; color: #444; font-size: 18px; }
-        .policy-content ul { padding-left: 0; list-style: none; }
-        .policy-content li { margin-bottom: 15px; background: #fdfdfd; padding: 15px; border-radius: 8px; border-left: 4px solid var(--primary-orange); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .policy-content strong { color: #111; display: block; margin-bottom: 5px; }
+        /* মেইন থিম বাটন গ্রুপ */
+        .about-actions {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+        }
+        
+        /* মেইন থিম বাটন সিএসএস (আন্ডারলাইন ছাড়া) */
+        .about-btn, 
+        .about-btn:link, 
+        .about-btn:visited, 
+        .about-btn:hover, 
+        .about-btn:active, 
+        .about-btn:focus { 
+            display: inline-flex; 
+            align-items: center;
+            justify-content: center;
+            padding: 16px 28px; 
+            font-size: 13px; 
+            font-weight: 700; 
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            text-decoration: none !important; 
+            border-radius: 8px; 
+            max-width: 260px;
+            width: 100%;
+            flex: none;
+            box-sizing: border-box;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        
+        /* প্রাইমারি বাটন (ডার্ক) */
+        .about-btn-primary, .about-btn-primary:link, .about-btn-primary:visited {
+            background: #111111; 
+            color: #fff !important; 
+            border: 1px solid #111111;
+            box-shadow: 0 4px 14px rgba(17, 17, 17, 0.12);
+        }
+        .about-btn-primary:hover, .about-btn-primary:active { 
+            background: #2a2a2a; 
+            border-color: #2a2a2a;
+            color: #fff !important;
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 20px rgba(17, 17, 17, 0.2);
+        }
 
-        /* Real Icons Section */
-        .contact-box { background: #fff9f6; border: 1px solid #ffe0d1; padding: 25px; border-radius: 12px; margin-top: 35px; }
-        .contact-item { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
-        
-        /* Real Logo Styling */
-        .real-logo { width: 30px; height: 30px; object-fit: contain; }
-        .contact-item p { margin: 0; font-weight: 600; font-size: 16px; }
-
-        .back-btn { display: inline-block; margin-top: 30px; padding: 12px 30px; background: var(--primary-orange); color: #fff; text-decoration: none; border-radius: 8px; font-weight: 700; transition: 0.3s; }
-        .back-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+        /* রেসপনসিভ */
+        @media (max-width: 600px) {
+            .about-wrap { padding: 24px 16px 48px; }
+            .about-section { padding: 28px 20px; }
+            .about-btn { max-width: 100%; }
+        }
     </style>
 </head>
 <body>
     <div id="site-header-mount"></div>
 
-    <div class="policy-header">
-        <h1>Muslim Abaya</h1>
-    </div>
+    <main class="about-wrap">
+        <!-- ব্রেডক্রাম্ব ন্যাভিগেশন -->
+        <nav class="about-breadcrumb" aria-label="Breadcrumb">
+            <a href="/">Home</a>
+            <span>&rsaquo;</span>
+            <strong>Terms & Conditions</strong>
+        </nav>
 
-    <div class="container">
-        <h2>???????? (Terms & Conditions)</h2>
+        <!-- কার্ড কন্টেন্ট -->
+        <div class="about-section about-card">
+            <h1>Terms & Conditions</h1>
+            <p>Welcome to Muslim Abaya (muslimabaya.com). By accessing our website, browsing our collections, or placing an order, you agree to comply with and be bound by the following terms and conditions:</p>
 
-        <div class="policy-content">
-            <p>Muslim Abaya (muslimabaya.com)-?? ???????? ???? ??? ??????? ??? ????? ???????? ???? ???:</p>
-            
             <ul>
-                <li><strong>?. ?????? ????:</strong> ?????? ??? ? ?????? ???????? ???????? ?????? ???? ????????? ??? ? ???????? ??????? ???? ??? ??????? ???????? ????? ?????</li>
-                <li><strong>?. ????? ? ??????:</strong> ?? ????? ????????? ?????? (?) ?????????? ?????? ??????? ?????? ?? ????? ? ???????? ????? ???????? ???? ???? ?????? ?????? ????? ?? ????? ???? ?????? ??????? ????</li>
-                <li><strong>?. ??????? ??????:</strong> ????? ?? ???????? (COD) ???? bKash/Nagad/???????? ??????? ?????? ??????? ??? ????? ?????? ???????? ?????? ????? ?????? ????</li>
-                <li><strong>?. ???????? ????:</strong> ?????? ??????? ?�? ??? ??? ????? ????? ?�? ??? ???? ????? ????? ????????? ???? ? ???? ??-???? ??? ?????</li>
-                <li><strong>?. ??????? ? ???????:</strong> ???? ??? ?? ??????????? ??? ?????? ??????? ???? ???????? ??????? ?? ???????? ??? ????? ????????? ??????? ???? ?????? ????</li>
+                <li>
+                    <strong>1. User Account & Eligibility:</strong> 
+                    To order items, users must provide accurate, up-to-date, and complete information. Any fraudulent, misleading, or unauthorized account creation may result in immediate suspension of services.
+                </li>
+                <li>
+                    <strong>2. Orders & Stock Availability:</strong> 
+                    All product orders are subject to stock availability. In the rare event that an item is unavailable after an order is confirmed, we will promptly notify the customer to arrange a suitable replacement or initiate a refund.
+                </li>
+                <li>
+                    <strong>3. Pricing & Payment Options:</strong> 
+                    We offer flexible and secure transaction methods including Cash on Delivery (COD) across Bangladesh, as well as secure digital wallet options like bKash, Nagad, and leading mobile banking platforms.
+                </li>
+                <li>
+                    <strong>4. Delivery & Logistics:</strong> 
+                    Estimated delivery timeframes are provided for guidance purposes. While we strive to meet all schedules via our logistics partners, actual arrival dates may vary slightly due to courier processing times or unavoidable regional transit factors.
+                </li>
+                <li>
+                    <strong>5. Intellectual Property Rights:</strong> 
+                    All content featured on this platform, including brand assets, specific text descriptions, premium graphics, product images, layout designs, and custom logos, remains the exclusive property of Muslim Abaya.
+                </li>
             </ul>
 
-            <div class="contact-box">
-    <p style="margin-top: 0; font-weight: 700; color: var(--primary-orange);">????????? ??????? ????:</p>
-    
-    <div class="contact-item">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" class="real-logo">
-        <p>01971642683 (WhatsApp Help)</p>
-    </div>
-    
-    <div class="contact-item">
-        <img src="https://www.logo.wine/a/logo/BKash/BKash-Logo.wine.svg" alt="bKash" class="real-logo">
-        <p>01971642683 (bKash Personal)</p>
-    </div>
-</div>
+            <!-- কন্টাক্ট ও হেল্পলাইন বক্স (বিকাশ লোগো ফিক্সড ও রিয়াল লোগো লিংকে আপডেট করা) -->
+            <div class="luxury-contact-box">
+                <p class="luxury-contact-title">Customer Support & Queries</p>
+                
+                <div class="luxury-contact-item">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" class="luxury-logo">
+                    <p>+880 1971-642683 (WhatsApp Help)</p>
+                </div>
+                
+                <div class="luxury-contact-item">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/8/8c/BKash-Logo.logo.svg" alt="bKash" class="luxury-logo">
+                    <p>+880 1971-642683 (bKash Personal)</p>
+                </div>
+            </div>
 
-            <a href="checkout.html" class="back-btn">??????? ???? ???</a>
-            <a href="refund.html" class="back-btn" style="margin-left:10px;">??????? ????</a>
-            <a href="/" class="back-btn" style="margin-left:10px;">???</a>
+            <!-- ১টি প্রফেশনাল লাক্সারি বাটন -->
+            <div class="about-actions">
+                <a href="/" class="about-btn about-btn-primary">Back to Shop</a>
+            </div>
         </div>
-    </div>
+    </main>
 
     <div id="site-footer-mount"></div>
     <script defer src="site-header.js?v=20260603logo"></script>
