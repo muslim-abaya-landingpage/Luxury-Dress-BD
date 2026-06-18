@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,167 +12,241 @@
   <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
   <script src="site-seo-config.js?v=20260603seo"></script>
   <script src="site-seo.js?v=20260603seo"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- লাক্সারি ও আধুনিক ই-কমার্স ফন্ট কম্বিনেশন -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
   <link rel="stylesheet" href="site-header.css?v=20260603logo">
   <link rel="stylesheet" href="site-footer.css?v=20260603footen" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="site-footer.css?v=20260603footen"></noscript>
 <style>
-    .about-wrap {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 24px 16px 48px;
+    /* --- গ্লোবাল প্রিমিয়াম রিসেট --- */
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #fcfcfc;
+      color: #2D2D2D;
+      -webkit-font-smoothing: antialiased;
     }
+    
+    .about-wrap {
+      max-width: 840px;
+      margin: 0 auto;
+      padding: 40px 20px 80px;
+    }
+    
+    /* ব্রেডক্রাম্ব */
     .about-breadcrumb {
-      font-size: 13px;
-      color: #666;
-      margin: 0 0 20px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #888;
+      margin-bottom: 32px;
       display: flex;
-      flex-wrap: wrap;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
     .about-breadcrumb a {
-      color: #666;
+      color: #888;
       text-decoration: none;
+      transition: color 0.2s;
     }
     .about-breadcrumb a:hover {
       color: #111;
-      text-decoration: underline;
     }
     .about-breadcrumb strong {
       color: #111;
-      font-weight: 700;
+      font-weight: 600;
     }
     .about-breadcrumb span {
-      color: #bbb;
+      color: #ccc;
     }
-    .about-hero {
-      background: #fff;
-      border: 1px solid #ececec;
-      border-radius: 12px;
-      padding: 28px 24px;
-      margin-bottom: 18px;
+    
+    /* সেকশন কার্ড ডিজাইন */
+    .about-section {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      border-radius: 16px;
+      padding: 36px 36px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
     }
+    
+    /* হেডলাইন টাইপোগ্রাফি */
     .about-hero h1 {
-      margin: 0 0 12px;
-      font-size: clamp(26px, 4vw, 34px);
-      font-weight: 800;
-      color: #111;
-      letter-spacing: 0.02em;
-    }
-    .about-hero .lead {
-      margin: 0;
-      font-size: 17px;
-      line-height: 1.7;
-      color: #444;
-    }
-    .about-card {
-      background: #fff;
-      border: 1px solid #ececec;
-      border-radius: 12px;
-      padding: 22px 20px;
-      margin-bottom: 14px;
-    }
-    .about-card h2 {
-      margin: 0 0 12px;
-      font-size: 20px;
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(32px, 5vw, 42px);
       font-weight: 700;
       color: #111;
+      margin: 0 0 16px;
+      letter-spacing: -0.01em;
     }
-    .about-card p,
-    .about-card li {
-      margin: 0 0 10px;
-      color: #444;
-      line-height: 1.65;
+    
+    .about-section h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(22px, 4vw, 26px);
+      font-weight: 700;
+      color: #111;
+      margin: 0 0 16px;
+    }
+    
+    .about-hero .lead {
+      font-size: 16px;
+      line-height: 1.75;
+      color: #555;
+      margin: 0 0 28px;
+    }
+    
+    .about-section p {
       font-size: 15px;
+      line-height: 1.7;
+      color: #555;
+      margin: 0;
     }
+    
+    /* হাইলাইটস পিলস */
+    .about-highlights {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .about-pill {
+      background: #fafafa;
+      border: 1px solid #eeeeee;
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+      letter-spacing: 0.02em;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+    .about-pill:hover {
+      background: #ffffff;
+      border-color: #111;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    }
+    
+    /* লিস্ট স্টাইল */
     .about-card ul {
       margin: 0;
       padding-left: 20px;
     }
+    .about-card li {
+      font-size: 15px;
+      line-height: 1.7;
+      color: #555;
+      margin-bottom: 12px;
+      position: relative;
+    }
     .about-card li:last-child {
       margin-bottom: 0;
     }
-    .about-highlights {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-      margin-top: 14px;
-    }
-    .about-pill {
-      background: #f7f7f7;
-      border: 1px solid #e8e8e8;
-      border-radius: 8px;
-      padding: 12px 14px;
-      font-size: 14px;
-      font-weight: 600;
-      color: #222;
-      text-align: center;
-    }
+    
+    /* কন্টাক্ট ইনফো */
     .about-contact p {
-      margin: 0 0 8px;
+      margin-bottom: 12px;
+      font-size: 15px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
     }
     .about-contact a {
       color: #111;
       font-weight: 600;
       text-decoration: none;
+      border-bottom: 1px solid rgba(17,17,17,0.15);
+      transition: all 0.2s;
     }
     .about-contact a:hover {
-      text-decoration: underline;
+      border-bottom-color: #111;
+      color: #000;
     }
+    
+    /* অ্যাকশন বাটন এরিয়া */
     .about-actions {
-      margin-top: 20px;
+      margin-top: 28px;
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 14px;
     }
-    .about-btn {
+    
+    /* প্রিমিয়াম বাটন কোর সিএসএস */
+    .about-btn, 
+    .about-btn:link, 
+    .about-btn:visited, 
+    .about-btn:hover, 
+    .about-btn:active, 
+    .about-btn:focus {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 12px 18px;
-      font-size: 14px;
+      padding: 16px 28px;
+      font-size: 13px;
       font-weight: 700;
-      text-decoration: none;
-      border-radius: 6px;
-      font-family: inherit;
-      border: 1px solid #111;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none !important; /* আন্ডারলাইন সম্পূর্ণ নিষিদ্ধ */
+      border-radius: 8px;
       flex: 1 1 160px;
       min-width: 140px;
       box-sizing: border-box;
-      line-height: 1.35;
-      text-align: center;
-      white-space: normal;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
+    
+    /* ভিউ কালেকশন (ডার্ক) */
     .about-btn-primary,
     .about-btn-primary:link,
-    .about-btn-primary:visited,
+    .about-btn-primary:visited {
+      background: #111111;
+      color: #ffffff !important;
+      border: 1px solid #111111;
+      box-shadow: 0 4px 14px rgba(17, 17, 17, 0.12);
+    }
     .about-btn-primary:hover,
     .about-btn-primary:active {
-      background: #111;
-      color: #fff !important;
-      -webkit-text-fill-color: #fff;
+      background: #2a2a2a;
+      border-color: #2a2a2a;
+      color: #ffffff !important;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(17, 17, 17, 0.2);
     }
+    
+    /* হোয়াটসঅ্যাপ (লাইট টু ডার্ক হোভার) */
     .about-btn-secondary,
     .about-btn-secondary:link,
-    .about-btn-secondary:visited,
+    .about-btn-secondary:visited {
+      background: #ffffff;
+      color: #111111 !important;
+      border: 1px solid #111111;
+    }
     .about-btn-secondary:hover,
     .about-btn-secondary:active {
-      background: #fff;
-      color: #111 !important;
-      -webkit-text-fill-color: #111;
+      background: #111111;
+      color: #ffffff !important;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(17, 17, 17, 0.15);
     }
-    @media (max-width: 560px) {
+    
+    /* রেসপনসিভ হ্যান্ডলিং */
+    @media (max-width: 600px) {
+      .about-wrap {
+        padding: 24px 16px 48px;
+      }
+      .about-section {
+        padding: 24px 20px;
+      }
       .about-highlights {
         grid-template-columns: 1fr;
+        gap: 8px;
       }
       .about-actions {
         flex-direction: column;
+        gap: 10px;
       }
       .about-btn {
         width: 100%;
         flex: none;
-        min-width: 0;
       }
     }
   </style>
@@ -181,58 +255,64 @@
   <div id="site-header-mount"></div>
 
   <main class="about-wrap">
+    <!-- ব্রেডক্রাম্ব ন্যাভিগেশন -->
     <nav class="about-breadcrumb" aria-label="Breadcrumb">
       <a href="/">Home</a>
       <span>&rsaquo;</span>
       <strong>About Us</strong>
     </nav>
 
-    <section class="about-hero">
+    <!-- হিরো সেকশন -->
+    <section class="about-section about-hero">
       <h1>Muslim Abaya</h1>
       <p class="lead">
-        Muslim Abaya ??? ?????????? ???? ?????????? ?????? ?????? ?????????? ???? ????????? ???????,
-        ??????? ??????? ??? ??????? ??????? ??????, ??-???, ???????????? ? ??? ???? ????? ???? ??? �
-        ?? ?????????? ??????? ???? ????? ?????? ??????? ?? ???????? ????????
+        Muslim Abaya is a trusted premium online abaya and modest fashion brand in Bangladesh. We offer elegantly modern yet modest collections of burqas, abayas, hijabs, khimars, and modest attire. Our goal is to deliver top-quality clothing directly to your doorstep at competitive prices.
       </p>
       <div class="about-highlights">
-        <div class="about-pill">????? ?? ????????</div>
-        <div class="about-pill">???? ???? ????????</div>
-        <div class="about-pill">?????????? ???????</div>
-        <div class="about-pill">??? ??????? ????</div>
+        <div class="about-pill">Premium Quality</div>
+        <div class="about-pill">Cash on Delivery</div>
+        <div class="about-pill">Exclusive Collection</div>
+        <div class="about-pill">Fast Customer Support</div>
       </div>
     </section>
 
-    <section class="about-card">
-      <h2>?????? ????</h2>
+    <!-- মিশন সেকশন -->
+    <section class="about-section about-card">
+      <h2>Our Mission</h2>
       <p>
-        ?????? ?????? ???????? ???? ?????????? ? ??????? ?????? ????? ????? ???? ????? ???????
-        ??????? ???? ???? ?????? ????? ??? ???, ??? ???? ????????????? ??? ????????????? ???? ?? ???? ??????
+        Our journey began with a vision to boost the confidence of modern Muslim women by blending modesty with modern trends. We put the utmost emphasis on premium fabric selection and comfortable craftsmanship for each and every garment.
       </p>
     </section>
 
-    <section class="about-card">
-      <h2>??? Muslim Abaya?</h2>
+    <!-- বেনিফিট সেকশন -->
+    <section class="about-section about-card">
+      <h2>Why Choose Muslim Abaya?</h2>
       <ul>
-        <li>?????????? ??????? ? ??????? ??????? ?????? ??????</li>
-        <li>??????? ??? ???? ???? ??????? ???? ?????? ???? ??????</li>
-        <li>???? ???? ????? ??? ?????????</li>
-        <li>???? ????? ???? ???????? ?????? (????? ?? ????????)?</li>
-        <li>??? ??????? ???? ? ??????? ???????? ????????</li>
+        <li>International standard fabrics and premium stitching quality.</li>
+        <li>Customization facility tailored to your preferred size and details.</li>
+        <li>Guaranteed best-in-market products at fair pricing.</li>
+        <li>Check your product upon delivery before payment (Cash on Delivery).</li>
+        <li>Hassle-free exchange policy and a dedicated customer support team.</li>
       </ul>
     </section>
 
-    <section class="about-card about-contact">
-      <h2>???????</h2>
-      <p><strong>?????????:</strong> <a href="https://muslimabaya.com/">muslimabaya.com</a></p>
-      <p><strong>?????:</strong> <a href="mailto:muslimabaya@gmail.com">muslimabaya@gmail.com</a></p>
-      <p><strong>???????????? / ??:</strong> <a href="https://wa.me/8801971642683" target="_blank" rel="noopener">+880 1971-642683</a></p>
-      <p><strong>??????:</strong> ???, West Rasulpur, Dhaka-1211, Bangladesh</p>
-      <div class="about-actions">
-        <div style="margin: 20px 0; border-radius: 12px; overflow: hidden; border: 1px solid #ececec; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-  <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d41340.31145704525!2d90.47550405155724!3d23.67589287215278!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755b7dde9a78d1f%3A0x4445bc21d7619ae6!2sMUSLIM%20ABAYA!5e0!3m2!1sen!2sbd!4v1781811023346!5m2!1sen!2sbd" width="100%" height="350" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-</div>
-        <a href="category.html" class="about-btn about-btn-primary">??????? ?????</a>
-        <a href="https://wa.me/8801971642683" target="_blank" rel="noopener" class="about-btn about-btn-secondary">WhatsApp-? ?????</a>
+    <!-- কন্টাক্ট ও ম্যাপ সেকশন -->
+    <section class="about-section about-contact">
+      <h2>Contact Us</h2>
+      <p><strong>Website:</strong> <a href="https://muslimabaya.com/">muslimabaya.com</a></p>
+      <p><strong>Email:</strong> <a href="mailto:muslimabaya@gmail.com">muslimabaya@gmail.com</a></p>
+      <p><strong>Hotline / WhatsApp:</strong> <a href="https://wa.me/8801971642683" target="_blank" rel="noopener">+880 1971-642683</a></p>
+      <p><strong>Address:</strong> 832, West Rasulpur, Dhaka-1211, Bangladesh</p>
+      
+      <!-- গুগল ম্যাপস (লাক্সারি ফ্রেম) -->
+      <div style="margin: 32px 0 20px; width: 100%; border-radius: 14px; overflow: hidden; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 8px 30px rgba(0,0,0,0.03); display: block; clear: both;">
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d41340.31145704525!2d90.47550405155724!3d23.67589287215278!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755b7dde9a78d1f%3A0x4445bc21d7619ae6!2sMUSLIM%20ABAYA!5e0!3m2!1sen!2sbd!4v1781811023346!5m2!1sen!2sbd" width="100%" height="380" style="border:0; display:block;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+
+      <!-- কন্টাক্ট বাটন গ্রুপ -->
+      <div class="about-actions" style="clear: both; width: 100%;">
+        <a href="category.html" class="about-btn about-btn-primary">View Collection</a>
+        <a href="https://wa.me/8801971642683" target="_blank" rel="noopener" class="about-btn about-btn-secondary">Message on WhatsApp</a>
       </div>
     </section>
   </main>
