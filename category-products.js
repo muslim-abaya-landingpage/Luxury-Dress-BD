@@ -296,7 +296,7 @@ window.CATEGORY_PRODUCTS = {
       fabric: "Alex soft Georgette",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
       detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
-    }
+    },
     {
       id: "DR-29",
       name: "Black Floral Georgette Set",
