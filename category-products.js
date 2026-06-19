@@ -298,7 +298,7 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
     },
     {
-      id: "DR-29",
+      id: "DR-31",
       name: "Black Floral Georgette Set",
       image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/black-floral-georgette-two-piece-set-bangladesh.jpg?raw=1",
       link: "/",
