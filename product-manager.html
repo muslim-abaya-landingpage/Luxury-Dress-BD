@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>????????? ????????? | Muslim Abaya</title>
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+  <title>Product Manager | Muslim Abaya</title>
+  <!-- Google Fonts updated to support English -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="product-manager-admin.css">
   <script src="site-api-config.js?v=20260529"></script>
   <script src="admin-config.js"></script>
@@ -14,36 +15,36 @@
 </head>
 <body class="pl-admin" data-admin-guard="1">
   <header class="pl-admin-header">
-    <a class="pl-back" href="admin-links.html">? Admin</a>
-    <a class="pl-back" href="/" style="margin-left:8px">?????</a>
-    <h1>????????? ?????????</h1>
-    <p>???? <strong>????????? ????</strong> ????????? ??? ???? ó ??? ???? + <strong>?????</strong> ??? ????? ???? ???, ???, ????, ?? ??????</p>
+    <a class="pl-back" href="admin-links.html">‚Üê Admin</a>
+    <a class="pl-back" href="/" style="margin-left:8px">Home</a>
+    <h1>Product Manager</h1>
+    <p>Manage <strong>Luxury Dress BD</strong> product data ‚Äî Add/Edit + <strong>Sync</strong> to your website, store, menu, or database</p>
     <div class="pl-toolbar">
-      <button type="button" class="pl-btn pl-btn-primary" id="pmSave">??? ???? (???? ???????)</button>
-      <button type="button" class="pl-btn pl-btn-secondary" id="pmReload">???? ???? ?????</button>
-      <a class="pl-btn pl-btn-secondary" href="product-links.html" style="text-decoration:none;display:inline-flex;align-items:center" title="?????? ó ?????? ???? URL">????? ??? ?</a>
+      <button type="button" class="pl-btn pl-btn-primary" id="pmSave">Save Data (Push Changes)</button>
+      <button type="button" class="pl-btn pl-btn-secondary" id="pmReload">Reload Current Data</button>
+      <a class="pl-btn pl-btn-secondary" href="product-links.html" style="text-decoration:none;display:inline-flex;align-items:center" title="Categories ‚Äî Product Link URL">Product Links</a>
     </div>
   </header>
 
   <main class="pl-main">
     <div class="pl-steps">
-      <strong>????????? = ????? ?????? (???? ????? ????? ??? ??):</strong>
+      <strong>Instructions = Category Types (Pick the right folder):</strong>
       <ol>
-        <li><strong>? ??????</strong> ???? ????????? ??? ? <code>abaya</code> ??? + ???</li>
-        <li><strong>? ??-???</strong> ???? ??? ? <code>premium-two-piece</code> ??? + ???</li>
-        <li><strong>? ????????????</strong> ???? ??? ? <code>embroidery</code> ??? + ??? (?????? ????? <code>enabled: true</code>)</li>
-        <li>??????? ??????????: <strong>???, ???, ????, ??</strong> ? <strong>???</strong> ? ???? ??????? ? Netlify</li>
+        <li><strong>For Abaya:</strong> Go to folder <code>abaya</code> + JSON</li>
+        <li><strong>For Two-Piece:</strong> Go to folder <code>premium-two-piece</code> + JSON</li>
+        <li><strong>For Embroidery:</strong> Go to folder <code>embroidery</code> + JSON (Set property <code>enabled: true</code>)</li>
+        <li>Automatic Updates: <strong>Add, Edit, Delete, Or</strong> <strong>Sync</strong> to your Netlify deployment</li>
       </ol>
       <p style="margin:10px 0 0;font-size:0.85rem;color:#666">
-        <code>?????????-????.bat</code> ∑ ????: <code>?????????-???-????.md</code>
+        <code>product-catalog.bat</code> ¬∑ Data: <code>product-catalog-data.md</code>
       </p>
     </div>
 
     <div class="pm-layout" id="pmLayout">
       <aside class="pm-sidebar">
-        <h2>?????????</h2>
+        <h2>Categories</h2>
         <ul class="pm-cat-list" id="pmCatList"></ul>
-        <button type="button" class="pl-btn pl-btn-primary pm-add-cat" id="pmAddCategory">+ ???? ?????????</button>
+        <button type="button" class="pl-btn pl-btn-primary pm-add-cat" id="pmAddCategory">+ Add Category</button>
       </aside>
       <div class="pm-main" id="pmMain"></div>
     </div>
@@ -51,30 +52,30 @@
 
   <div class="pm-modal" id="pmCatModal" hidden>
     <div class="pm-modal-box">
-      <h3 id="pmCatModalTitle">???? ?????????</h3>
+      <h3 id="pmCatModalTitle">Edit Category</h3>
       <div class="pm-field" style="margin-bottom:10px">
-        <label>Key (??????, ?????) ó URL ???</label>
+        <label>Key (Unique, Slug) ‚Äî URL ID</label>
         <input type="text" id="pmCatKey" placeholder="festive-special">
       </div>
       <div class="pm-field" style="margin-bottom:10px">
-        <label>???? (??????)</label>
+        <label>Name (English)</label>
         <input type="text" id="pmCatMenu" placeholder="FESTIVE SPECIAL">
       </div>
       <div class="pm-field" style="margin-bottom:10px">
-        <label>??? (?????)</label>
-        <input type="text" id="pmCatMenuBn" placeholder="??????? ???????">
+        <label>Name (Native)</label>
+        <input type="text" id="pmCatMenuBn" placeholder="Festive Special">
       </div>
       <div class="pm-field" style="margin-bottom:10px">
-        <label>HTML ????</label>
+        <label>HTML Page</label>
         <input type="text" id="pmCatPage" placeholder="festive-special.html">
       </div>
       <div class="pm-field" style="margin-bottom:10px">
-        <label>URL ???</label>
+        <label>URL Path</label>
         <input type="text" id="pmCatPath" placeholder="/festive-special">
       </div>
       <div class="pm-modal-actions">
-        <button type="button" class="pl-btn pl-btn-secondary" id="pmCatModalClose">?????</button>
-        <button type="button" class="pl-btn pl-btn-primary" id="pmCatSave">??? / ?????</button>
+        <button type="button" class="pl-btn pl-btn-secondary" id="pmCatModalClose">Cancel</button>
+        <button type="button" class="pl-btn pl-btn-primary" id="pmCatSave">Save / Update</button>
       </div>
     </div>
   </div>
