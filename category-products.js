@@ -297,6 +297,18 @@ window.CATEGORY_PRODUCTS = {
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
       detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
     }
+    {
+      id: "DR-29",
+      name: "Black Floral Georgette Set",
+      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/black-floral-georgette-two-piece-set-bangladesh.jpg?raw=1",
+      link: "/",
+      price: 650,
+      color: "black",
+      colorLabel: "Black Floral",
+      fabric: "Premium Soft Georgette",
+      sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
+      detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
+    }
   ],
 
   /* ═══ ⑤ এম্ব্রয়ডারি — খালি ═══ */
