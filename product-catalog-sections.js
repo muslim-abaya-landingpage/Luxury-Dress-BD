@@ -32,7 +32,7 @@ window.CATALOG_SECTIONS = [
     menuBn: "টপস/কুর্তি",
     page: "tops-kurti.html",
     path: "/tops-kurti",
-    enabled: false
+    enabled: true
   },
   {
     key: "premium-two-piece",
