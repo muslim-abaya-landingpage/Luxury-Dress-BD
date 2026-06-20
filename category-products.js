@@ -209,7 +209,105 @@ window.CATEGORY_PRODUCTS = {
   "cover-up": [],
 
   /* ═══ ③ টপস/কুর্তি — খালি ═══ */
-  "tops-kurti": [],
+  "tops-kurti": [{
+  id: "KURTI-01",
+  name: "Classic Purple Lace-Work Kurti",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Classic%20Purple%20Lace-Work%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true",
+  link: "/",
+  price: 850,
+  color: "Purple",
+  fabric: "TC Cotton",
+  sizes: ["38", "40"],
+  detailNote: "আরামদায়ক ও স্টাইলিশ লেস-ওয়ার্ক কুর্তি! প্রিমিয়াম কটন ফেব্রিক। দৈর্ঘ্য: ৩৪ ইঞ্চি।"
+},
+{
+  id: "KURTI-02",
+  name: "Elegant Grey Leaf Print Kurti",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Elegant%20Grey%20Leaf%20Print%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true",
+  link: "/",
+  price: 850,
+  color: "Grey",
+  fabric: "TC Cotton",
+  sizes: ["38", "40"],
+  detailNote: "স্টাইলিশ লিফ প্রিন্ট ডিজাইন। আরামদায়ক ও ক্যাজুয়াল ব্যবহারের জন্য উপযুক্ত।"
+},
+{
+  id: "KURTI-03",
+  name: "Elegant Purple Floral Kurti",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Elegant%20Purple%20Floral%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true",
+  link: "/",
+  price: 850,
+  color: "Purple",
+  fabric: "TC Cotton",
+  sizes: ["38", "40"],
+  detailNote: "ট্রেন্ডি ফ্লোরাল প্রিন্ট ডিজাইন। অফিস বা ডেইলি ওয়্যারের জন্য পারফেক্ট।"
+},
+{
+  id: "KURTI-04",
+  name: "Elegant White Leaf Print Kurti",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Elegant%20White%20Leaf%20Print%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true",
+  link: "/",
+  price: 850,
+  color: "White",
+  fabric: "TC Cotton",
+  sizes: ["38", "40"],
+  detailNote: "সফট ও ব্রেথেবল ফেব্রিক। গরমে ব্যবহারের জন্য অত্যন্ত আরামদায়ক।"
+},
+{
+  id: "KURTI-05",
+  name: "Light Pink Soft Floral Kurti",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Light%20Pink%20Soft%20Floral%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true",
+  link: "/",
+  price: 850,
+  color: "Light Pink",
+  fabric: "TC Cotton",
+  sizes: ["38", "40"],
+  detailNote: "হালকা গোলাপি রঙের দারুণ ডিজাইন। দৈনন্দিন ব্যবহারের জন্য আদর্শ।"
+},
+{
+  id: "KURTI-06",
+  name: "Magenta Leaf Print Kurti",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Magenta%20Leaf%20Print%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true",
+  link: "/",
+  price: 850,
+  color: "Magenta",
+  fabric: "TC Cotton",
+  sizes: ["38", "40"],
+  detailNote: "আকর্ষণীয় মেজেন্টা কালার। সফট ফেব্রিক, তাই সারাদিন আরামদায়ক।"
+},
+{
+  id: "KURTI-07",
+  name: "Magenta Tassel Detail Kurti",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Magenta%20Tassel%20Detail%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true",
+  link: "/",
+  price: 850,
+  color: "Magenta",
+  fabric: "TC Cotton",
+  sizes: ["38", "40"],
+  detailNote: "ট্যাসেল ডিটেইলসহ প্রিমিয়াম ডিজাইন। স্টাইলিশ লুকের জন্য সেরা।"
+},
+{
+  id: "KURTI-08",
+  name: "Premium Pink Floral Lace-Work Kurti",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Premium%20Pink%20Floral%20Lace-Work%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true",
+  link: "/",
+  price: 850,
+  color: "Pink",
+  fabric: "TC Cotton",
+  sizes: ["38", "40"],
+  detailNote: "লেস-ওয়ার্ক ও ফ্লোরাল প্রিন্টের কম্বিনেশন। যেকোনো ক্যাজুয়াল প্রোগ্রামের জন্য দারুণ।"
+},
+{
+  id: "KURTI-09",
+  name: "Vibrant Magenta Floral Kurti",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Vibrant%20Magenta%20Floral%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true",
+  link: "/",
+  price: 850,
+  color: "Magenta",
+  fabric: "TC Cotton",
+  sizes: ["38", "40"],
+  detailNote: "ভাইব্রেন্ট কালার ডিজাইন। প্রিমিয়াম কটন ফেব্রিক, দৈর্ঘ্য ৩৪ ইঞ্চি।"
+}],
 
   /* ═══ ④ টু-পিস সারি · PREMIUM TWO-PIECE · premium-two-piece.html ═══ */
   "premium-two-piece": [
