@@ -18,7 +18,7 @@ window.CATALOG_SECTIONS = [
   },
   {
     key: "cover-up",
-    row: "②",
+    row: "④",
     menu: "COVER UP",
     menuBn: "কভার আপ",
     page: "cover-up.html",
@@ -36,7 +36,7 @@ window.CATALOG_SECTIONS = [
   },
   {
     key: "premium-two-piece",
-    row: "④",
+    row: "②",
     menu: "PREMIUM TWO-PIECE",
     menuBn: "প্রিমিয়াম টু-পিস",
     page: "premium-two-piece.html",
