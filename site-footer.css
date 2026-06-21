@@ -495,23 +495,27 @@ a.anz-contact-link:hover {
   cursor: wait;
 }
 
+/* আপনার বর্তমান কোডের এই অংশটুকু এভাবে পরিবর্তন করুন */
 .anz-socials {
-  display: flex;
-  gap: 5px;
-  margin-top: 7px;
-  flex-wrap: wrap;
+    display: flex !important;
+    flex-direction: row !important; /* এটিই আইকনগুলোকে পাশাপাশি আনবে */
+    gap: 8px !important;
+    margin-top: 7px !important;
+    flex-wrap: wrap !important;
+    justify-content: flex-start !important;
 }
 
+/* নিচের অংশটুকু একই রাখুন, শুধু !important যোগ করুন যাতে অন্য কোনো স্টাইল একে বাধা দিতে না পারে */
 .anz-social-link {
-  width: 30px;
-  height: 30px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s ease, transform 0.15s ease;
+    width: 30px !important;
+    height: 30px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 6px !important;
+    transition: background 0.2s ease, transform 0.15s ease !important;
 }
 
 .anz-social-link:hover {
