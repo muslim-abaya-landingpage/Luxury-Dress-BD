@@ -1,10 +1,12 @@
 (function () {
   var SEO = window.SITE_SEO || {};
   var SOCIAL = SEO.social || {
-    facebook: "https://www.facebook.com/luxurydressofficial",
+    facebook: "https://www.facebook.com/muslimabayaofficial", // এখানে সঠিক লিঙ্কটি দিন
     instagram: "https://www.instagram.com/luxurydressbd/",
     youtube: "https://www.youtube.com/@luxurydressbd",
-    tiktok: "https://www.tiktok.com/@muslimabayabd"
+    tiktok: "https://www.tiktok.com/@muslimabayabd",
+    linkedin: "https://www.linkedin.com/in/muslimabayabd", // নতুন লিঙ্কডইন লিঙ্ক
+    threads: "https://www.threads.net/@muslimabaya.shop"  // নতুন থ্রেডস লিঙ্ক
   };
 
   var CONTACT = {
