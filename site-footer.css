@@ -960,11 +960,12 @@ a.anz-contact-link:hover {
   }
 }
 .anz-socials {
-  display: flex;
-  gap: 8px; /* আইকনগুলোর মাঝের দূরত্ব */
-  margin-top: 10px;
-  flex-wrap: wrap; /* এটি আইকনগুলোকে নিচে নেমে যাওয়া থেকে বাঁচাবে */
-  justify-content: flex-start;
+    display: flex !important; /* এটি আইকনগুলোকে সারিবদ্ধ করে */
+    flex-direction: row !important; /* পাশাপাশি সাজানোর জন্য */
+    flex-wrap: wrap !important; /* জায়গা কম হলে নিচে নামবে */
+    gap: 8px !important; /* আইকনগুলোর মাঝের দূরত্ব */
+    margin-top: 10px !important;
+    justify-content: flex-start !important;
 }
 
 .anz-social-link {
