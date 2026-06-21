@@ -630,29 +630,6 @@ a.anz-contact-link:hover {
     white-space: normal;
     text-align: center;
   }
-.anz-social-link {
-    width: 34px !important;
-    height: 34px !important;
-    background: rgba(255, 255, 255, 0.06) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-radius: 6px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    transition: background 0.2s ease, transform 0.15s ease !important;
-}
-
-/* মাউস নিলে আইকনগুলোর রঙ পরিবর্তন হবে */
-.anz-social-link:hover {
-    background: #c9a962 !important;
-    border-color: #c9a962 !important;
-    transform: translateY(-1px) !important;
-}
-  .anz-trust-dot {
-    width: 5px;
-    height: 5px;
-  }
-
   .anz-footer-main {
     flex: 0 0 auto;
     min-height: 0 !important;
