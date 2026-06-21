@@ -960,21 +960,24 @@ a.anz-contact-link:hover {
   }
 }
 .anz-socials {
-    display: flex !important; /* এটি আইকনগুলোকে সারিবদ্ধ করে */
-    flex-direction: row !important; /* পাশাপাশি সাজানোর জন্য */
-    flex-wrap: wrap !important; /* জায়গা কম হলে নিচে নামবে */
-    gap: 8px !important; /* আইকনগুলোর মাঝের দূরত্ব */
-    margin-top: 10px !important;
-    justify-content: flex-start !important;
+    display: flex !important;           /* পাশাপাশি রাখার জন্য */
+    flex-direction: row !important;     /* নিশ্চিত করে যে আইকনগুলো সারি বরাবর থাকবে */
+    flex-wrap: wrap !important;         /* জায়গা শেষ হলে নতুন সারিতে যাবে */
+    gap: 8px !important;                /* আইকনগুলোর মাঝের দূরত্ব */
+    margin-top: 7px !important;
+    justify-content: flex-start !important; /* বাম থেকে সাজানো শুরু হবে */
+    align-items: center !important;     /* লম্বালম্বিভাবে মাঝখানে থাকবে */
+    width: 100% !important;             /* কন্টেইনারের পুরো জায়গা নেবে */
 }
 
 .anz-social-link {
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
+    width: 30px !important;
+    height: 30px !important;
+    display: flex !important;           /* আইকনটিকে বক্সের মাঝখানে রাখতে */
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 6px !important;
+    flex-shrink: 0 !important;          /* আইকনগুলো যেন সংকুচিত না হয় */
 }
