@@ -942,3 +942,12 @@ a.anz-contact-link:hover {
     padding: 0 12px;
   }
 }
+/* এটি আপনার site-footer.css ফাইলের সোশ্যাল আইকন সেকশনে রাখুন */
+#site-footer-mount .anz-social-link svg {
+    width: 16px !important;
+    height: 16px !important;
+    max-width: 16px !important;
+    max-height: 16px !important;
+    display: block !important;
+    fill: currentColor !important; 
+}
