@@ -154,23 +154,30 @@
   <div id="site-header-mount"></div>
   <main class="wrap">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <a href="/">Home</a><span>�</span><a href="category.html">Category</a><span>�</span><strong>Video</strong>
+      <a href="/">Home</a>
+      <span> / </span>
+      <a href="category.html">Category</a>
+      <span> / </span>
+      <strong>Video</strong>
     </nav>
-    <div class="card">
-      <h1 id="videoTitle" class="page-title">????? ???????</h1>
-      <p id="localFileNote" class="local-note"></p>
+    </main>
+</body>
+  <div class="card">
+    <h1 id="videoTitle" class="page-title">Video Management</h1>
+    <p id="localFileNote" class="local-note"></p>
       <div id="ownerStats" class="owner-stats" hidden>
-        <h3>Owner Dashboard (????? ??????)</h3>
-        <div><span id="ownerTodayCount" class="n">0</span>?? ??????</div>
-        <div id="ownerCourierCount" class="sub"></div>
-        <div id="ownerCourierNote" class="sub"></div>
+      <h3>Owner Dashboard (Analytics)</h3>
+      <div>
+        <span id="ownerTodayCount" class="n">0</span> orders today
       </div>
-      <div id="videoGrid" class="video-grid" aria-live="polite"></div>
-      <p id="videoHelp" class="help"></p>
+      <div id="ownerCourierCount" class="sub"></div>
+      <div id="ownerCourierNote" class="sub"></div>
     </div>
-  </main>
+    <div id="videoGrid" class="video-grid" aria-live="polite"></div>
+    <p id="videoHelp" class="help"></p>
+  </div>
+</main>
   <div id="site-footer-mount"></div>
-
   <script defer src="cart-utils.js?v=20260603cartqty"></script>
   <script defer src="site-header.js?v=20260531nav"></script>
   <script defer src="category-products.js"></script>
@@ -258,20 +265,18 @@
       var gridEl = document.getElementById("videoGrid");
       var helpEl = document.getElementById("videoHelp");
       var localNote = document.getElementById("localFileNote");
+if (titleEl) titleEl.textContent = cfg.title || "Video Gallery";
 
-      if (titleEl) titleEl.textContent = cfg.title || "????? ???????";
-      if (helpEl) {
-        helpEl.textContent =
-          cfg.helpText ||
-          "?????? ????? ???? ??????????? ????????? ????? ????, ????? ?????? ?????";
-      }
+if (helpEl) {
+  helpEl.textContent =
+    cfg.helpText || "Please wait while the content is loading, thank you for your patience.";
+}
 
-      if (isLocalFile && localNote) {
-        localNote.textContent =
-          "????? ???? (file://) ????? ????? ????? ??? ???? ???? � ??????? ??????? \"YouTube-? ?????\" ??????? ????? ???? ????? ?? ????? ?????? ?????";
-        localNote.classList.add("is-visible");
-      }
-
+if (isLocalFile && localNote) {
+  localNote.textContent =
+    "Local file (file://) detected. Features may be limited. To use full features, please upload the file to a server or web host.";
+  localNote.classList.add("is-visible");
+}
       function getAdminToken() {
         try {
           var raw = localStorage.getItem("ma_admin_session");
@@ -304,7 +309,7 @@
             try { res = JSON.parse(String(t || "")); } catch (e) {}
             if (!res.ok) return;
             ownerTodayEl.textContent = String(res.todayCount || 0);
-            ownerCourierEl.textContent = "????????? ??????: " + String(res.courierCount || 0) + " ??";
+            ownerCourierEl.textContent = "Courier Orders: " + String(res.courierCount || 0);
             ownerCourierNoteEl.textContent = String(res.note || "");
             ownerStatsEl.hidden = false;
           })
