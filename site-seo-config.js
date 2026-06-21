@@ -97,30 +97,35 @@ window.SITE_SEO = {
     if (!window.SITE_SEO) return;
 
     const schema = {
-        "@context": "https://schema.org",
-        "@type": "OnlineStore", // আপনার আবায়া ও টু-পিস ড্রেস ব্যবসার জন্য পারফেক্ট টাইপ
-        "name": window.SITE_SEO.brand,
-        "alternateName": window.SITE_SEO.brandBn,
-        "url": window.SITE_SEO.siteUrl,
-        "image": window.SITE_SEO.defaultImage,
+    "@context": "https://schema.org",
+    "@type": "OnlineStore",
+    "name": window.SITE_SEO.brand,
+    "alternateName": window.SITE_SEO.brandBn,
+    "url": window.SITE_SEO.siteUrl,
+    "image": window.SITE_SEO.defaultImage, // এটি ইমেজ এরর সমাধান করবে
+    "telephone": window.SITE_SEO.phone,
+    "priceRange": "$$",
+    "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Dhaka",
+        "addressCountry": "BD"
+    },
+    "contactPoint": {
+        "@type": "ContactPoint",
         "telephone": window.SITE_SEO.phone,
-        "priceRange": "$$", // মাঝারি বা এফোর্ডেবল প্রাইস রেঞ্জ বোঝাতে
-        "contactPoint": {
-            "@type": "ContactPoint",
-            "telephone": window.SITE_SEO.phone,
-            "contactType": "customer service",
-            "areaServed": "BD", // বাংলাদেশ জুড়ে ডেলিভারি
-            "availableLanguage": ["bn", "en"]
-        },
-      "sameAs": [
-            window.SITE_SEO.social.facebook,
-            window.SITE_SEO.social.instagram,
-            window.SITE_SEO.social.youtube,
-            window.SITE_SEO.social.tiktok,
-            window.SITE_SEO.social.linkedin,
-            window.SITE_SEO.social.threads
-        ]
-    };
+        "contactType": "customer service",
+        "areaServed": "BD",
+        "availableLanguage": ["bn", "en"]
+    },
+    "sameAs": [
+        window.SITE_SEO.social.facebook,
+        window.SITE_SEO.social.instagram,
+        window.SITE_SEO.social.youtube,
+        window.SITE_SEO.social.tiktok,
+        window.SITE_SEO.social.linkedin,
+        window.SITE_SEO.social.threads
+    ]
+};
 
     // স্ক্রিপ্ট এলিমেন্ট তৈরি করে হেডে যুক্ত করা
     const script = document.createElement('script');
