@@ -112,11 +112,13 @@ window.SITE_SEO = {
             "areaServed": "BD", // বাংলাদেশ জুড়ে ডেলিভারি
             "availableLanguage": ["bn", "en"]
         },
-        "sameAs": [
+      "sameAs": [
             window.SITE_SEO.social.facebook,
             window.SITE_SEO.social.instagram,
             window.SITE_SEO.social.youtube,
-            window.SITE_SEO.social.tiktok
+            window.SITE_SEO.social.tiktok,
+            window.SITE_SEO.social.linkedin,
+            window.SITE_SEO.social.threads
         ]
     };
 
