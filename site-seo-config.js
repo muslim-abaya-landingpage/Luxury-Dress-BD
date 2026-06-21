@@ -86,3 +86,41 @@ window.SITE_SEO = {
     }
   }
 };
+/**
+ * JSON-LD Schema Generator for Muslim Abaya (Online Store)
+ * এটি স্বয়ংক্রিয়ভাবে গুগলের জন্য ই-কমার্স রিলেটেড তথ্য তৈরি করবে
+ */
+(function() {
+    // নিশ্চিত হয়ে নেওয়া যে SEO অবজেক্টটি লোড হয়েছে
+    if (!window.SITE_SEO) return;
+
+    const schema = {
+        "@context": "https://schema.org",
+        "@type": "OnlineStore", // আপনার আবায়া ও টু-পিস ড্রেস ব্যবসার জন্য পারফেক্ট টাইপ
+        "name": window.SITE_SEO.brand,
+        "alternateName": window.SITE_SEO.brandBn,
+        "url": window.SITE_SEO.siteUrl,
+        "image": window.SITE_SEO.defaultImage,
+        "telephone": window.SITE_SEO.phone,
+        "priceRange": "$$", // মাঝারি বা এফোর্ডেবল প্রাইস রেঞ্জ বোঝাতে
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": window.SITE_SEO.phone,
+            "contactType": "customer service",
+            "areaServed": "BD", // বাংলাদেশ জুড়ে ডেলিভারি
+            "availableLanguage": ["bn", "en"]
+        },
+        "sameAs": [
+            window.SITE_SEO.social.facebook,
+            window.SITE_SEO.social.instagram,
+            window.SITE_SEO.social.youtube,
+            window.SITE_SEO.social.tiktok
+        ]
+    };
+
+    // স্ক্রিপ্ট এলিমেন্ট তৈরি করে হেডে যুক্ত করা
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.text = JSON.stringify(schema);
+    document.head.appendChild(script);
+})();
