@@ -10,10 +10,12 @@ window.SITE_SEO = {
   locale: "bn_BD",
   phone: "+8801971642683",
   social: {
-    facebook: "https://www.facebook.com/luxurydressofficial",
-    instagram: "https://www.instagram.com/luxurydressbd/",
-    youtube: "https://www.youtube.com/@luxurydressbd",
-    tiktok: "https://www.tiktok.com/@muslimabayabd"
+    facebook: "https://www.facebook.com/muslimabayaofficial/", // মেইন ফেসবুক পেজ
+    instagram: "https://www.instagram.com/muslimabaya.shop/",
+    youtube: "https://www.youtube.com/@luxurydress_shop",
+    tiktok: "https://www.tiktok.com/@muslimabaya.shop",
+    linkedin: "https://www.linkedin.com/in/muslimabayabd",
+    threads: "https://www.threads.com/@muslimabaya.shop"
   },
   pages: {
     "/about": {
