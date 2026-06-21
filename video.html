@@ -210,7 +210,7 @@
             if (!id) return;
             list.push({
               id: id,
-              title: item.title || "????? " + (i + 1),
+              title: item.title || "Item " + (i + 1),
               watchUrl: item.watchUrl || item.url || "https://www.youtube.com/watch?v=" + id
             });
           });
@@ -219,7 +219,7 @@
           if (legacyId) {
             list.push({
               id: legacyId,
-              title: cfg.title || "????? ?",
+              title: cfg.title || "Dashboard Title",
               watchUrl: cfg.watchUrl || cfg.url || "https://www.youtube.com/watch?v=" + legacyId
             });
           }
@@ -320,7 +320,7 @@ if (isLocalFile && localNote) {
 
       if (!videos.length) {
         gridEl.innerHTML =
-          '<p class="video-empty">???? ????? ??? ??? ?????? <code>category-products.js</code> ? <code>SITE_MEDIA.featuredVideo.videos</code> ?? YouTube ???? ??? ?????</p>';
+        '<p class="video-empty">No videos found. Please check <code>category-products.js</code> and verify that <code>SITE_MEDIA.featuredVideo.videos</code> contains valid YouTube links.</p>';
         return;
       }
 
