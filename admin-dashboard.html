@@ -1,32 +1,32 @@
 <!DOCTYPE html>
-<html lang="bn" data-admin-guard="1">
+<html lang="en" data-admin-guard="1">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>?????? ?????????? | Muslim Abaya Admin</title>
+  <title>Admin Dashboard | Muslim Abaya</title>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="admin.css">
 </head>
 <body class="adm-body">
   <header class="adm-topbar">
     <div>
-      <h1>?????? ??????????</h1>
-      <div class="adm-topbar-user" id="admUserLabel">—</div>
+      <h1>Admin Dashboard</h1>
+      <div class="adm-topbar-user" id="admUserLabel">â€”</div>
     </div>
     <div class="adm-topbar-actions">
-      <a class="adm-btn adm-btn-secondary" href="admin-links.html">?? ????</a>
-      <a class="adm-btn adm-btn-secondary" href="product-manager.html">?????????</a>
-      <button type="button" class="adm-btn adm-btn-secondary" id="admRefresh">???????</button>
-      <button type="button" class="adm-btn adm-btn-secondary" id="admLogout">?????</button>
+      <a class="adm-btn adm-btn-secondary" href="admin-links.html">Links</a>
+      <a class="adm-btn adm-btn-secondary" href="product-manager.html">Products</a>
+      <button type="button" class="adm-btn adm-btn-secondary" id="admRefresh">Refresh</button>
+      <button type="button" class="adm-btn adm-btn-secondary" id="admLogout">Logout</button>
     </div>
   </header>
 
   <main class="adm-main">
     <section class="adm-panel">
-      <h2>?????????? ?????? (Online Order)</h2>
+      <h2>Online Orders</h2>
       <div class="adm-toolbar">
-        <a class="adm-btn adm-btn-primary" id="admOpenSheet" href="#" target="_blank" rel="noopener">Google Sheet ?????</a>
+        <a class="adm-btn adm-btn-primary" id="admOpenSheet" href="#" target="_blank" rel="noopener">Open Google Sheet</a>
         <a class="adm-btn adm-btn-secondary" id="admOpenScript" href="#" target="_blank" rel="noopener">Apps Script</a>
         <span id="admOrderCount" style="font-size:0.85rem;color:#646970;align-self:center"></span>
       </div>
@@ -34,25 +34,22 @@
         <table class="adm-table" id="admOrdersTable">
           <thead>
             <tr>
-              <th>????</th>
+              <th>Time</th>
               <th>Order ID</th>
-              <th>???</th>
-              <th>???</th>
-              <th>???</th>
+              <th>Customer</th>
+              <th>Phone</th>
+              <th>Total</th>
               <th>Status</th>
               <th>Payment</th>
-              <th>????</th>
-              <th>????</th>
+              <th>District</th>
+              <th>Design</th>
             </tr>
           </thead>
           <tbody id="admOrdersBody">
-            <tr><td colspan="9" class="adm-empty">??? ?????…</td></tr>
+            <tr><td colspan="9" class="adm-empty">Loading ordersâ€¦</td></tr>
           </tbody>
         </table>
       </div>
-      <p style="margin:12px 0 0;font-size:0.8rem;color:#646970">
-        ?????????/????????? ?????? Sheet-? ???????? ????? Steadfast: Sheet ? Muslim Abaya ?????
-      </p>
     </section>
   </main>
 
@@ -74,7 +71,7 @@
       function renderOrders(orders) {
         var body = document.getElementById("admOrdersBody");
         if (!orders || !orders.length) {
-          body.innerHTML = '<tr><td colspan="9" class="adm-empty">???? ?????? ????</td></tr>';
+          body.innerHTML = '<tr><td colspan="9" class="adm-empty">No orders found</td></tr>';
           return;
         }
         body.innerHTML = orders
@@ -82,14 +79,14 @@
             return (
               "<tr>" +
               "<td>" + escapeHtml(o.time) + "</td>" +
-              "<td><strong>" + escapeHtml(o.orderId || "—") + "</strong></td>" +
+              "<td><strong>" + escapeHtml(o.orderId || "â€”") + "</strong></td>" +
               "<td>" + escapeHtml(o.name) + "</td>" +
               "<td>" + escapeHtml(o.phone) + "</td>" +
-              "<td>?" + escapeHtml(o.total) + "</td>" +
+              "<td>à§³" + escapeHtml(o.total) + "</td>" +
               '<td><span class="adm-badge ' + statusClass(o.status) + '">' + escapeHtml(o.status || "Pending") + "</span></td>" +
               "<td>" + escapeHtml(o.payment || "") + "</td>" +
               "<td>" + escapeHtml(o.district || "") + "</td>" +
-              "<td>" + escapeHtml((o.design || "").slice(0, 60)) + (o.design && o.design.length > 60 ? "…" : "") + "</td>" +
+              "<td>" + escapeHtml((o.design || "").slice(0, 60)) + (o.design && o.design.length > 60 ? "â€¦" : "") + "</td>" +
               "</tr>"
             );
           })
@@ -106,22 +103,18 @@
 
       function loadOrders() {
         document.getElementById("admOrdersBody").innerHTML =
-          '<tr><td colspan="9" class="adm-empty">??? ?????…</td></tr>';
+          '<tr><td colspan="9" class="adm-empty">Loading ordersâ€¦</td></tr>';
         MaAdmin.fetchOrders(100)
           .then(function (res) {
             document.getElementById("admOrderCount").textContent =
-              res.count + " ?? ?????? ?????? ?????";
+              res.count + " total orders found";
             renderOrders(res.orders);
-            if (res.sheetUrl) {
-              document.getElementById("admOpenSheet").href = res.sheetUrl;
-            }
-            if (res.scriptUrl) {
-              document.getElementById("admOpenScript").href = res.scriptUrl;
-            }
+            if (res.sheetUrl) document.getElementById("admOpenSheet").href = res.sheetUrl;
+            if (res.scriptUrl) document.getElementById("admOpenScript").href = res.scriptUrl;
           })
           .catch(function (err) {
             document.getElementById("admOrdersBody").innerHTML =
-              '<tr><td colspan="9" class="adm-empty">??? ??????: ' +
+              '<tr><td colspan="9" class="adm-empty">Error: ' +
               escapeHtml(err.message || err) +
               "</td></tr>";
           });
@@ -131,7 +124,7 @@
         if (!s) return;
         session = s;
         document.getElementById("admUserLabel").textContent =
-          (s.name || "Admin") + (s.email ? " · " + s.email : "");
+          (s.name || "Admin") + (s.email ? " Â· " + s.email : "");
         if (s.sheetUrl) document.getElementById("admOpenSheet").href = s.sheetUrl;
         if (s.scriptUrl) document.getElementById("admOpenScript").href = s.scriptUrl;
         loadOrders();
