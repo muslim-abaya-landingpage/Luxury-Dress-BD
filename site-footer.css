@@ -70,13 +70,6 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   flex-shrink: 0;
 }
 
-#site-footer-mount .anz-social-link svg {
-  width: 16px !important;
-  height: 16px !important;
-  max-width: 16px !important;
-  max-height: 16px !important;
-}
-
 #site-footer-mount .anz-wa-cta .anz-wa-icon svg {
   width: 22px !important;
   height: 22px !important;
