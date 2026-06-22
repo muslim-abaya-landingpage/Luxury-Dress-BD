@@ -934,3 +934,15 @@ a.anz-contact-link:hover {
     padding: 0 !important;
     display: block;
 }
+/* ফুটার এবং সোশ্যাল ডিভকে বডির ব্যাকগ্রাউন্ডের সাথে মিলিয়ে দেওয়া */
+html, body {
+    background-color: #0a0a0a !important;
+}
+
+#site-footer-mount, 
+#ma-social-connect-mount {
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+    background-color: #0a0a0a !important;
+}
