@@ -929,3 +929,8 @@ a.anz-contact-link:hover {
     color: #ffffff !important; /* আইকনের রঙ সাদা */
     font-size: 20px !important;
 }
+#site-footer-mount, #ma-social-connect-mount {
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block;
+}
