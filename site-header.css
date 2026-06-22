@@ -25,12 +25,13 @@ html {
 }
 
 .abaya-main-header {
-  position: relative;
-  z-index: 1;
-  background: #fff;
-  width: 100%;
-  max-width: 100%;
-  border-bottom: 1px solid #ececec;
+    position: sticky; /* আগে ছিল relative */
+    top: 0;           /* এটি যোগ করা হয়েছে */
+    z-index: 1000;    /* আগে ছিল 1 */
+    background: #fff;
+    width: 100%;
+    max-width: 100%;
+    border-bottom: 1px solid #ececec;
 }
 
 .header-top-bar,
