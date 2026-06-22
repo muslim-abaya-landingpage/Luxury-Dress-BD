@@ -928,3 +928,20 @@ html, body {
     display: block !important;
     background-color: #0a0a0a !important;
 }
+/* ফুটারকে সবসময় স্ক্রিনের মাপে রাখার জন্য */
+#site-footer-mount, 
+#ma-social-connect-mount {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden;
+}
+
+/* মোবাইলের জন্য কোনো বাড়তি গ্যাপ যেন না থাকে */
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden;
+  }
+}
