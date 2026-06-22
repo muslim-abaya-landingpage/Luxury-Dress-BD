@@ -916,32 +916,3 @@ a.anz-contact-link:hover {
     padding: 0 !important;
     display: block;
 }
-/* ফুটার এবং সোশ্যাল ডিভকে বডির ব্যাকগ্রাউন্ডের সাথে মিলিয়ে দেওয়া */
-html, body {
-    background-color: #0a0a0a !important;
-}
-
-#site-footer-mount, 
-#ma-social-connect-mount {
-    margin: 0 !important;
-    padding: 0 !important;
-    display: block !important;
-    background-color: #0a0a0a !important;
-}
-/* ফুটারকে সবসময় স্ক্রিনের মাপে রাখার জন্য */
-#site-footer-mount, 
-#ma-social-connect-mount {
-  width: 100% !important;
-  max-width: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  box-sizing: border-box !important;
-  overflow: hidden;
-}
-
-/* মোবাইলের জন্য কোনো বাড়তি গ্যাপ যেন না থাকে */
-@media (max-width: 768px) {
-  html, body {
-    overflow-x: hidden;
-  }
-}
