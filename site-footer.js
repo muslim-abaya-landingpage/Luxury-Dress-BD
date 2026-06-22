@@ -543,3 +543,21 @@
     bootFooter();
   }
 })();
+// সোশ্যাল লিঙ্কগুলো ফুটারে দেখানোর জন্য ফাংশন
+function renderSocialIcons() {
+    var mount = document.getElementById('ma-social-connect-mount');
+    if (!mount) return;
+
+    // সোশ্যাল লিঙ্কের আইকন বা টেক্সট তৈরি করা
+    var html = '<div style="display: flex; justify-content: center; gap: 15px; padding: 15px; flex-wrap: wrap;">';
+    for (var platform in SOCIAL) {
+        if (SOCIAL.hasOwnProperty(platform)) {
+            html += '<a href="' + SOCIAL[platform] + '" target="_blank" style="text-transform: capitalize; color: #fff; text-decoration: none;">' + platform + '</a>';
+        }
+    }
+    html += '</div>';
+    mount.innerHTML = html;
+}
+
+// ফুটার লোড হওয়ার সাথে সাথে এটি কল করুন
+window.addEventListener('load', renderSocialIcons);
