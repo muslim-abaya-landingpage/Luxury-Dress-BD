@@ -942,35 +942,3 @@ a.anz-contact-link:hover {
     padding: 0 12px;
   }
 }
-/* পুরো সাইটের জন্য ব্যাকগ্রাউন্ড কালো এবং গ্যাপ ঠিক করা */
-html, body {
-    margin: 0;
-    padding: 0;
-    background-color: #0a0a0a !important;
-    overflow-x: hidden;
-}
-
-/* ফুটার মাউন্ট ডিভ এবং সোশ্যাল মাউন্ট ডিভের লেআউট ঠিক করা */
-#site-footer-mount, 
-#ma-social-connect-mount {
-    width: 100% !important;
-    display: block !important;
-    background-color: #0a0a0a !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    box-sizing: border-box !important;
-}
-
-/* সোশ্যাল আইকনগুলোর জন্য সঠিক স্টাইল */
-.ma-social-connect {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    padding: 20px 0;
-}
-
-.ma-social-connect a {
-    color: #fff;
-    font-size: 20px;
-    text-decoration: none;
-}
