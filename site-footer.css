@@ -97,9 +97,10 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   border-top: 2px solid rgba(201, 169, 98, 0.22);
 }
 
-#ma-social-connect-mount:empty {
+/* #ma-social-connect-mount:empty {
     display: none;
-}
+} 
+*/
 
 /* Copyright strip — 0.5in tall, full width, text vertically centered */
 .anz-footer-strip,
