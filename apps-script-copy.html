@@ -2,25 +2,35 @@
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
-  <title>Apps Script কোড</title>
+ <title>Muslim Abaya | Apps Script Manager</title>
   <style>
     body { font-family: system-ui, sans-serif; margin: 16px; max-width: 960px; }
     textarea { width: 100%; height: 72vh; font: 11px Consolas, monospace; }
     button { margin-top: 10px; padding: 12px 20px; font-size: 15px; cursor: pointer; }
   </style>
+<script src="config.js"></script>
 </head>
 <body>
-  <h1>সম্পূর্ণ Apps Script কোড</h1>
-  <p>Editor-এ <strong>Ctrl+A</strong> → <strong>Ctrl+V</strong> → <strong>Save</strong> → Deploy <strong>New version</strong></p>
-  <textarea id="codeBox" readonly>/**
- * Muslim Abaya � ???????? Web App (?? ????? ????? ????)
- * Code.gs ? Ctrl+A ? Ctrl+V ? Save ? Deploy ? New version
+<h1>Complete Apps Script Code</h1>
+<p>In the Editor: <strong>Ctrl+A</strong> → <strong>Ctrl+V</strong> → <strong>Save</strong> → Deploy <strong>New version</strong></p>
+<textarea id="codeBox" readonly>
+/**
+ * Muslim Abaya — Backend Web App (Do not modify code manually)
+ * Instructions: Code.gs → Ctrl+A → Ctrl+V → Save → Deploy → New version
  *
- * Script properties:
- *   AUTH_SECRET � Sign Up
- *   STEADFAST_API_KEY, STEADFAST_SECRET_KEY � Steadfast Courier
- *   STEADFAST_WEBHOOK_TOKEN � webhook URL ?token=... (Apps Script header ???? ??)
- * ??????: FB_ACCESS_TOKEN, FB_PIXEL_ID
+ * Script properties needed:
+ *   AUTH_SECRET — For Sign Up
+ *   STEADFAST_API_KEY, STEADFAST_SECRET_KEY — Steadfast Courier
+ *   STEADFAST_WEBHOOK_TOKEN — For webhook URL (?token=...)
+ *   FB_ACCESS_TOKEN, FB_PIXEL_ID — For Facebook CAPI
+ */
+ *
+ /**
+ * Script properties required:
+ *   AUTH_SECRET — For user registration/auth
+ *   STEADFAST_API_KEY, STEADFAST_SECRET_KEY — For Steadfast Courier integration
+ *   STEADFAST_WEBHOOK_TOKEN — For webhook URL (?token=...) 
+ *   Others: FB_ACCESS_TOKEN, FB_PIXEL_ID — For Facebook CAPI
  */
 
 function doGet(e) {
@@ -71,31 +81,33 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.TEXT);
     }
     if (errCode === 'RATE_LIMIT') {
-      return jsonOut_({ ok: false, error: 'RATE_LIMIT', message: '??????? ??????? ???????? ?? ???? ?????' });
+      return jsonOut_({ 
+        ok: false, 
+        error: 'RATE_LIMIT', 
+        message: 'Temporarily blocked due to too many requests. Please wait for a while.' 
+      });
     }
     return jsonOut_({ ok: false, error: errCode });
   }
 }
 
-// -- Online Order (A�H + Order ID ???? I) --
-
+// -- Online Order (A–H + Order ID হিসেবে I) --
 function orderErrorMessage_(code) {
   var map = {
-    SPAM: '???? ???????',
-    TOO_FAST: '??????? ??? ???? ???? ??? ???? ?????? ?????',
-    EXPIRED: '???? ???? ??? ??????? ??? ???? ?????? ?????',
-    INVALID_NAME: '???? ??? ??????',
-    INVALID_PHONE: '???? ?? ????? ?????? ????? ??? (01XXXXXXXXX)?',
-    INVALID_ADDRESS: '???????? ???????? ?????? ??????',
-    INVALID_QTY: '?????? ?????? ???? ????',
-    MIN_ORDER: '??????? ?????? ?????',
-    EMPTY_CART: '?????? ???? ???? ????',
-    ORDER_RATE_LIMIT: '?? ????? ???? ??? ????? ?????? ??????? ?? ????? ?? ???? ?????? ?????',
-    DUPLICATE_ORDER: '??? ?????? ???????? ?????? ???????'
+    SPAM: 'Spam detected.',
+    TOO_FAST: 'You are submitting too fast. Please wait a few seconds.',
+    EXPIRED: 'The page session has expired. Please refresh the page.',
+    INVALID_NAME: 'Please enter a valid name.',
+    INVALID_PHONE: 'Invalid phone number! Please enter a valid number (e.g., 01XXXXXXXXX).',
+    INVALID_ADDRESS: 'Please provide a valid delivery address.',
+    INVALID_QTY: 'Invalid product quantity selected.',
+    MIN_ORDER: 'Minimum order amount not met.',
+    EMPTY_CART: 'Your cart is empty.',
+    ORDER_RATE_LIMIT: 'Too many orders from this device. Please wait a few minutes.',
+    DUPLICATE_ORDER: 'You have already placed this order.'
   };
-  return map[code] || '?????? ????? ??? ??????? WhatsApp ? ??????? ?????';
+  return map[code] || 'An unknown error occurred. Please contact us via WhatsApp for assistance.';
 }
-
 function validateOrderInput_(e) {
   if (param_(e, '_hp')) throw new Error('SPAM');
 
@@ -230,9 +242,9 @@ function onOpen() {
   try {
     SpreadsheetApp.getUi()
       .createMenu('Muslim Abaya')
-      .addItem('Steadfast � selected row ?????', 'steadfastSendActiveRow')
-      .addItem('Steadfast � balance ?????', 'steadfastShowBalance')
-      .addItem('Sheet headers (J�Q) ??? ????', 'setupOnlineOrderExtraHeaders')
+      .addItem('Steadfast — Send selected row', 'steadfastSendActiveRow')
+      .addItem('Steadfast — Check balance', 'steadfastShowBalance')
+      .addItem('Setup Sheet headers (J–Q)', 'setupOnlineOrderExtraHeaders')
       .addToUi();
   } catch (err) {}
 }
@@ -251,8 +263,7 @@ function setupOnlineOrderExtraHeaders() {
     'Txn/Sender',
     'Notes'
   ]]);
-  SpreadsheetApp.getUi().alert('???? I�Q ????? ??? ?????? (row 1)? A�H ??? ???? ????? ?????? ???????????');
-}
+  SpreadsheetApp.getUi().alert('Columns I–Q are now prepared (Row 1). Please ensure columns A–H are correctly filled for order information.');
 
 function getSteadfastKeys_() {
   var props = PropertiesService.getScriptProperties();
@@ -310,7 +321,7 @@ function steadfastSendActiveRow() {
   var tracking = String(vals[10] || '').trim();
 
   if (!name || !phone || !address) {
-    SpreadsheetApp.getUi().alert('???, ???, ?????? ???? � row ' + row);
+    SpreadsheetApp.getUi().alert('Error: Name, Phone, and Address are required for row ' + row);
     return;
   }
   if (tracking) {
@@ -342,7 +353,7 @@ function steadfastSendActiveRow() {
     c.status || 'in_review'
   ]]);
   SpreadsheetApp.getUi().alert(
-    'Parcel created!\nTracking: ' + (c.tracking_code || '�') + '\nConsignment: ' + (c.consignment_id || '�')
+    'Parcel created!\nTracking: ' + (c.tracking_code || '—') + '\nConsignment: ' + (c.consignment_id || '—')
   );
 }
 
@@ -390,20 +401,20 @@ function updateOrderFromSteadfastWebhook_(payload) {
 
 function getDistrictChargeMap_() {
   return {
-    '????': 80,
-    '???????': 100, '???????????': 100, '???????': 100, '??????????': 100, '?????????': 100,
-    '????????': 150, '?????????': 150, '?????????': 150, '??????': 150, '????????': 150, '?????????': 150,
-    '?????????': 150, '????????': 150, '???????': 150, '?????????': 150, '?????????': 150,
-    '?????????': 150, '????????': 150, '???????': 150, '????': 150, '????????????????': 150,
-    '?????????': 150, '??????????': 150, '?????????': 150, '??????????': 150, '??????????': 150, '?????????': 150,
-    '???????': 150, '?????': 150, '?????': 150, '??????????????': 150, '?????': 150, '?????????': 150,
-    '?????????': 150, '??????': 150,
-    '?????': 150, '????????': 150, '???????': 150, '?????????': 150, '??????????': 150, '??????????': 150,
-    '?????????': 150, '?????????': 150,
-    '?????': 150, '?????????': 150, '???????': 150, '??????????': 150,
-    '?????': 150, '????????': 150, '?????????': 150, '??????': 150, '????': 150, '??????': 150,
-    '???????': 150, '?????????': 150, '???????????': 150, '????????': 150,
-    '??????': 150, '??????????': 150, '????': 150, '??????': 150, '???????': 150, '????????': 150
+    'Dhaka': 80,
+    'Gazipur': 100, 'Narayanganj': 100, 'Munshiganj': 100, 'Manikganj': 100, 'Narsingdi': 100,
+    'Chattogram': 150, 'Coxs Bazar': 150, 'Cumilla': 150, 'Sylhet': 150, 'Rajshahi': 150, 'Khulna': 150,
+    'Barishal': 150, 'Rangpur': 150, 'Mymensingh': 150, 'Bogura': 150, 'Tangail': 150,
+    'Jashore': 150, 'Dinajpur': 150, 'Pabna': 150, 'Feni': 150, 'Brahmanbaria': 150,
+    'Noakhali': 150, 'Chandpur': 150, 'Lakshmipur': 150, 'Bandarban': 150, 'Rangamati': 150, 'Khagrachari': 150,
+    'Kishoreganj': 150, 'Jamalpur': 150, 'Sherpur': 150, 'Netrokona': 150, 'Gaibandha': 150, 'Kurigram': 150,
+    'Lalmonirhat': 150, 'Nilphamari': 150,
+    'Panchagarh': 150, 'Thakurgaon': 150, 'Joypurhat': 150, 'Naogaon': 150, 'Natore': 150, 'Sirajganj': 150,
+    'Chapainawabganj': 150, 'Kushtia': 150,
+    'Chuadanga': 150, 'Jhenaidah': 150, 'Magura': 150, 'Narail': 150,
+    'Rajbari': 150, 'Faridpur': 150, 'Gopalganj': 150, 'Madaripur': 150, 'Shariatpur': 150, 'Bagerhat': 150,
+    'Satkhira': 150, 'Meherpur': 150, 'Pirojpur': 150, 'Jhalokathi': 150,
+    'Bhola': 150, 'Patuakhali': 150, 'Barguna': 150, 'Habiganj': 150, 'Sunamganj': 150, 'Maulvibazar': 150
   };
 }
 
@@ -596,16 +607,23 @@ function createSession_(user) {
 
 function registerUser_(e) {
   if (!getAuthSecret_()) {
-    return { ok: false, error: 'AUTH_NOT_CONFIGURED', message: 'Apps Script ? AUTH_SECRET ??? ?????' };
+    return { ok: false, error: 'AUTH_NOT_CONFIGURED', message: 'AUTH_SECRET is not configured in Apps Script properties.' };
   }
   var name = param_(e, 'Name');
   var phone = normalizePhone_(param_(e, 'Phone'));
   var email = normalizeEmail_(param_(e, 'Email'));
   var password = param_(e, 'Password');
-  if (!name || !phone || !email || !password) return { ok: false, error: 'MISSING_FIELDS', message: '?? ???? ???? ?????' };
-  if (password.length < 8) return { ok: false, error: 'WEAK_PASSWORD', message: '?????????? ??????? ? ??????' };
-  if (findCustomerByEmail_(email)) return { ok: false, error: 'EMAIL_EXISTS', message: '?? ?????? ???????? ?????????? ????' };
-  if (findCustomerByPhone_(phone)) return { ok: false, error: 'PHONE_EXISTS', message: '?? ??????? ???????? ?????????? ????' };
+  if (!name || !phone || !email || !password) 
+      return { ok: false, error: 'MISSING_FIELDS', message: 'All fields are required.' };
+
+  if (password.length < 8) 
+      return { ok: false, error: 'WEAK_PASSWORD', message: 'Password must be at least 8 characters long.' };
+
+  if (findCustomerByEmail_(email)) 
+      return { ok: false, error: 'EMAIL_EXISTS', message: 'This email is already registered.' };
+
+  if (findCustomerByPhone_(phone)) 
+      return { ok: false, error: 'PHONE_EXISTS', message: 'This phone number is already registered.' };
   var hashed = hashPassword_(password);
   appendRow_(getCustomersSheet_(), [email, phone, name, hashed.hash, hashed.salt, 'active', new Date(), new Date()]);
   return createSession_({ email: email, phone: phone, name: name });
@@ -613,7 +631,7 @@ function registerUser_(e) {
 
 function loginUser_(e) {
   if (!getAuthSecret_()) {
-    return { ok: false, error: 'AUTH_NOT_CONFIGURED', message: 'Apps Script ? AUTH_SECRET ??? ?????' };
+    return { ok: false, error: 'AUTH_NOT_CONFIGURED', message: 'Apps Script AUTH_SECRET is not configured.' };
   }
   var email = normalizeEmail_(param_(e, 'Email'));
   var phone = normalizePhone_(param_(e, 'Phone'));
@@ -621,11 +639,11 @@ function loginUser_(e) {
   if (!email && login.indexOf('@') !== -1) email = normalizeEmail_(login);
   if (!phone && login && login.indexOf('@') === -1) phone = normalizePhone_(login);
   var password = param_(e, 'Password');
-  if ((!email && !phone) || !password) return { ok: false, error: 'MISSING_FIELDS', message: '?????/?????? ? ?????????? ????' };
+  if ((!email && !phone) || !password) return { ok: false, error: 'MISSING_FIELDS', message: 'Email/Phone and Password required.' };
   var user = email ? findCustomerByEmail_(email) : findCustomerByPhone_(phone);
-  if (!user) return { ok: false, error: 'NOT_FOUND', message: '?????????? ?????? ??????? Sign Up ?????' };
-  if (user.status === 'blocked') return { ok: false, error: 'BLOCKED', message: '?????????? ?????' };
-  if (!verifyPassword_(password, user.salt, user.hash)) return { ok: false, error: 'INVALID_PASSWORD', message: '?????????? ????' };
+  if (!user) return { ok: false, error: 'NOT_FOUND', message: 'Account not found, please Sign Up first.' };
+  if (user.status === 'blocked') return { ok: false, error: 'BLOCKED', message: 'Account is blocked.' };
+  if (!verifyPassword_(password, user.salt, user.hash)) return { ok: false, error: 'INVALID_PASSWORD', message: 'Invalid password.' };
   return createSession_({ email: user.email, phone: user.phone, name: user.name });
 }
 
@@ -643,11 +661,11 @@ function verifySession_(token) {
 }
 </textarea>
   <br>
-  <button type="button" id="copyBtn">সম্পূর্ণ কোড কপি</button>
+  <button type="button" id="copyBtn">Copy Full Code</button>
   <script>
     document.getElementById("copyBtn").onclick = function () {
       var t = document.getElementById("codeBox").value;
-      navigator.clipboard.writeText(t).then(function () { alert("কপি হয়েছে!"); });
+      navigator.clipboard.writeText(t).then(function () { alert("Code copied to clipboard!"); });
     };
   </script>
 </body>
