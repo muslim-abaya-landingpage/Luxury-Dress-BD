@@ -561,3 +561,20 @@ function renderSocialIcons() {
 
 // ফুটার লোড হওয়ার সাথে সাথে এটি কল করুন
 window.addEventListener('load', renderSocialIcons);
+// এই কোডটি site-footer.js এর শেষে বসান
+window.addEventListener('load', function() {
+    var mount = document.getElementById('ma-social-connect-mount');
+    if (!mount) return;
+
+    // SOCIAL ডেটা থেকে HTML তৈরি
+    var html = '<div style="display: flex; justify-content: center; gap: 20px; padding: 20px; background: #0a0a0a;">';
+    for (var key in SOCIAL) {
+        if (SOCIAL.hasOwnProperty(key)) {
+            html += '<a href="' + SOCIAL[key] + '" target="_blank" style="color: #fff; font-size: 18px; text-transform: capitalize;">' + key + '</a>';
+        }
+    }
+    html += '</div>';
+    
+    // এলিমেন্টে ইনজেক্ট করা
+    mount.innerHTML = html;
+});
