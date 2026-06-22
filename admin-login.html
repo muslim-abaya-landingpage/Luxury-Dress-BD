@@ -7,13 +7,14 @@
   <title>Admin Login | Muslim Abaya</title>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="admin.css">
+<script src="config.js"></script>
 </head>
 <body class="adm-body">
   <div class="adm-login-wrap">
     <div class="adm-login-card">
       <div class="adm-login-logo">
         <h1>Muslim Abaya</h1>
-        <p>???????? ??????? — Admin Login</p>
+        <p>???????? ??????? â€” Admin Login</p>
       </div>
       <form id="adminLoginForm">
         <div class="adm-field">
@@ -60,7 +61,7 @@
         msg.textContent = "";
         var btn = document.getElementById("admSubmit");
         btn.disabled = true;
-        btn.textContent = "???? ?????…";
+        btn.textContent = "???? ?????â€¦";
         MaAdmin.login({
           login: document.getElementById("adm-login").value.trim(),
           password: document.getElementById("adm-pass").value
