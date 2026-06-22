@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,33 +7,34 @@
   <title>Admin Login | Muslim Abaya</title>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="admin.css">
-<script src="config.js"></script>
+  <script src="config.js"></script>
 </head>
 <body class="adm-body">
   <div class="adm-login-wrap">
     <div class="adm-login-card">
       <div class="adm-login-logo">
         <h1>Muslim Abaya</h1>
-        <p>???????? ??????? — Admin Login</p>
+        <p>System Management — Admin Login</p>
       </div>
       <form id="adminLoginForm">
         <div class="adm-field">
-          <label for="adm-login">????? ?? ??????</label>
-          <input id="adm-login" type="text" autocomplete="username" required placeholder="you@gmail.com ?? 01XXXXXXXXX">
+          <label for="adm-login">Email or Mobile</label>
+          <input id="adm-login" type="text" autocomplete="username" required placeholder="you@gmail.com or 01XXXXXXXXX">
         </div>
         <div class="adm-field">
-          <label for="adm-pass">??????????</label>
+          <label for="adm-pass">Password</label>
           <input id="adm-pass" type="password" autocomplete="current-password" required>
         </div>
         <button type="submit" class="adm-btn adm-btn-primary" id="admSubmit">Log In</button>
         <p class="adm-msg" id="admMsg" role="alert"></p>
       </form>
       <p class="adm-login-foot">
-        <a href="/">? ????? ????</a><br>
-        ????????? Google Sheet ? <strong>Muslim Abaya ? Admin account ????</strong>
+        <a href="/">View Website</a><br>
+        System is running on Google Sheets. <strong>Please use your authorized Admin account.</strong>
       </p>
     </div>
   </div>
+
   <script src="site-api-config.js?v=20260529"></script>
   <script src="admin-config.js"></script>
   <script src="admin-api.js"></script>
@@ -41,11 +42,9 @@
     (function () {
       var params = new URLSearchParams(location.search);
       var nextUrl = params.get("next") || "admin-dashboard.html";
-      if (
-        !/^admin-/.test(nextUrl) &&
-        nextUrl.indexOf("product-manager") !== 0 &&
-        nextUrl.indexOf("product-links") !== 0
-      ) {
+      
+      // Validation Logic
+      if (!/^admin-/.test(nextUrl) && nextUrl.indexOf("product-manager") !== 0 && nextUrl.indexOf("product-links") !== 0) {
         nextUrl = "admin-dashboard.html";
       }
 
@@ -55,45 +54,43 @@
 
       var form = document.getElementById("adminLoginForm");
       var msg = document.getElementById("admMsg");
+
       form.addEventListener("submit", function (e) {
         e.preventDefault();
         msg.className = "adm-msg";
         msg.textContent = "";
+        
         var btn = document.getElementById("admSubmit");
         btn.disabled = true;
-        btn.textContent = "???? ?????…";
+        btn.textContent = "Logging in...";
+
         MaAdmin.login({
           login: document.getElementById("adm-login").value.trim(),
           password: document.getElementById("adm-pass").value
         })
-          .then(function () {
-            location.href = nextUrl;
-          })
-          .catch(function (err) {
-            msg.className = "adm-msg err";
-            var t = String(err.message || err);
-            if (t === "NO_ADMIN") {
-              msg.textContent = "???????? ?????????? ???? Sheet-? Muslim Abaya ???? ???? ???? ?????";
-            } else if (t === "AUTH_NOT_CONFIGURED") {
-              msg.textContent = "Apps Script-? AUTH_SECRET ??? ?????";
-            } else if (t === "INVALID_PASSWORD" || t === "NOT_FOUND") {
-              msg.textContent =
-                "?????/?????? ?? ?????????? ???? Admins ???? ????? ??? ??? ???? ????? (muslimabaya@gmail.com)?";
-            } else if (t === "DEPLOY_OLD" || t === "Success") {
-              msg.textContent =
-                "Apps Script ? ???? ??? Deploy ?????? Deploy ? Manage deployments ? New version ? Deploy?";
-            } else if (
-              t.indexOf("NetworkError") !== -1 ||
-              t.indexOf("Failed to fetch") !== -1
-            ) {
-              msg.textContent =
-                "file:// ???? API ??? ??? ??? scripts\\serve-local.bat ?????, ???? muslimabaya.com/admin-login.html ??????? ?????";
-            } else {
-              msg.textContent = t || "???? ???????";
-            }
-            btn.disabled = false;
-            btn.textContent = "Log In";
-          });
+        .then(function () {
+          location.href = nextUrl;
+        })
+        .catch(function (err) {
+          msg.className = "adm-msg err";
+          var t = String(err.message || err);
+          
+          if (t === "NO_ADMIN") {
+            msg.textContent = "Admin configuration not found. Please check your data in the Google Sheet.";
+          } else if (t === "AUTH_NOT_CONFIGURED") {
+            msg.textContent = "AUTH_SECRET is not configured in Apps Script.";
+          } else if (t === "INVALID_PASSWORD" || t === "NOT_FOUND") {
+            msg.textContent = "Invalid email or password. Please verify your credentials.";
+          } else if (t === "DEPLOY_OLD" || t === "Success") {
+            msg.textContent = "Please update to the latest version in Apps Script: Deploy > Manage deployments > New version > Deploy.";
+          } else if (t.indexOf("NetworkError") !== -1 || t.indexOf("Failed to fetch") !== -1) {
+            msg.textContent = "Cannot run via file:// protocol. Please access via your domain or a local server.";
+          } else {
+            msg.textContent = t || "An unexpected error occurred.";
+          }
+          btn.disabled = false;
+          btn.textContent = "Log In";
+        });
       });
     })();
   </script>
