@@ -786,3 +786,11 @@ body.site-search-open .site-search-drawer {
     padding-bottom: 6px;
   }
 }
+.is-sticky {
+  position: fixed !important;
+  top: 0;
+  width: 100%;
+  z-index: 9999;
+  background-color: #ffffff !important;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
