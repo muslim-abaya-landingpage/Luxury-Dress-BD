@@ -893,26 +893,3 @@ a.anz-contact-link:hover {
     padding: 0 12px;
   }
 }
-/* সোশ্যাল মিডিয়া আইকনগুলো দেখানোর জন্য চূড়ান্ত কোড */
-#ma-social-connect-mount {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    height: auto !important;
-    min-height: 50px !important;
-    margin-top: 20px !important;
-    width: 100% !important;
-    text-align: center !important;
-}
-
-#ma-social-connect-mount a {
-    display: inline-block !important;
-    margin: 0 10px !important;
-    color: #ffffff !important; /* আইকনের রঙ সাদা */
-    font-size: 20px !important;
-}
-#site-footer-mount, #ma-social-connect-mount {
-    margin: 0 !important;
-    padding: 0 !important;
-    display: block;
-}
