@@ -25,15 +25,19 @@ html {
 }
 
 .abaya-main-header {
-    position: sticky; /* আগে ছিল relative */
-    top: 0;           /* এটি যোগ করা হয়েছে */
-    z-index: 1000;    /* আগে ছিল 1 */
-    background: #fff;
+    position: fixed !important; /* sticky এর বদলে fixed ব্যবহার করছি */
+    top: 0;
+    left: 0;
     width: 100%;
-    max-width: 100%;
+    z-index: 9999;
+    background-color: #ffffff;
     border-bottom: 1px solid #ececec;
 }
 
+/* যেহেতু fixed হেডার জায়গা নেয় না, তাই নিচের কন্টেন্ট যাতে হেডারের নিচে ঢাকা না পড়ে তার জন্য এটি প্রয়োজন */
+body {
+    padding-top: 100px; /* আপনার হেডারের উচ্চতা অনুযায়ী এটি কম-বেশি করে নিন */
+}
 .header-top-bar,
 .header-middle-nav,
 .header-announcement-bar {
