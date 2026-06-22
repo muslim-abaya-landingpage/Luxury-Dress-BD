@@ -911,3 +911,14 @@ a.anz-contact-link:hover {
     padding: 0 12px;
   }
 }
+/* সোশ্যাল আইকনগুলো দৃশ্যমান করার জন্য */
+#ma-social-connect-mount,
+#ma-social-connect-mount .ma-footer-strip,
+#ma-social-connect-mount .ma-social-connect {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    min-height: 40px !important;
+    margin-top: 10px !important;
+}
