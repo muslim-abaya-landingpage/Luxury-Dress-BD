@@ -942,3 +942,7 @@ a.anz-contact-link:hover {
     padding: 0 12px;
   }
 }
+/* ড্রপডাউন মেনু লুকিয়ে রাখার জন্য */
+.footer-dropdown-content {
+    display: none;
+}
