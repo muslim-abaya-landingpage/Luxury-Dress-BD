@@ -24,28 +24,31 @@ html {
   scroll-padding-top: var(--site-header-h, 72px);
 }
 
+/* হেডারটিকে উপরে স্থির রাখার জন্য */
 .abaya-main-header {
-    position: fixed !important; /* sticky এর বদলে fixed ব্যবহার করছি */
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 9999;
-    background-color: #ffffff;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    z-index: 9999 !important;
+    background-color: #ffffff !important;
     border-bottom: 1px solid #ececec;
 }
 
-/* যেহেতু fixed হেডার জায়গা নেয় না, তাই নিচের কন্টেন্ট যাতে হেডারের নিচে ঢাকা না পড়ে তার জন্য এটি প্রয়োজন */
+/* এখানে body এর প্যাডিং বাদ দিয়ে সরাসরি হেডার ক্লাসে মার্জিন-বটম বা বডিকে প্যাডিং দিন */
 body {
-    padding-top: 100px; /* আপনার হেডারের উচ্চতা অনুযায়ী এটি কম-বেশি করে নিন */
+    padding-top: 130px !important; 
 }
+
+/* আপনার বাকি কোডগুলো একইভাবে থাকবে */
 .header-top-bar,
 .header-middle-nav,
 .header-announcement-bar {
-  width: 100%;
+    width: 100% !important;
 }
 
 .header-middle-nav .custom-container {
-  width: 100%;
+    width: 100% !important;
 }
 
 .custom-container {
