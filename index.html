@@ -259,5 +259,15 @@ function toggleAndOpenVideo() {
 }
 </script>
 <script defer src="index-youtube-lazy.js?v=20260530sale"></script>
+<script>
+  window.addEventListener('scroll', function() {
+    var header = document.querySelector(".abaya-main-header");
+    if (window.scrollY > 100) { // ১০০ পিক্সেল স্ক্রল করলে স্টিকি হবে
+      header.classList.add("is-sticky");
+    } else {
+      header.classList.remove("is-sticky");
+    }
+  });
+</script>
 </body>
 </html>
