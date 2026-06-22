@@ -543,3 +543,19 @@
     bootFooter();
   }
 })();
+window.addEventListener('load', function() {
+    var mount = document.getElementById('ma-social-connect-mount');
+    if (mount) {
+        // আইকন সেকশন রেন্ডার করা
+        mount.innerHTML = `
+            <div style="display: flex; justify-content: center; gap: 20px; padding: 20px; background: #0a0a0a; border-top: 1px solid #333;">
+                <a href="https://www.facebook.com/muslimabayaofficial" target="_blank" style="color: #fff; text-decoration: none;">Facebook</a>
+                <a href="https://www.instagram.com/luxurydressbd/" target="_blank" style="color: #fff; text-decoration: none;">Instagram</a>
+                <a href="https://www.youtube.com/@luxurydressbd" target="_blank" style="color: #fff; text-decoration: none;">YouTube</a>
+                <a href="https://www.tiktok.com/@muslimabayabd" target="_blank" style="color: #fff; text-decoration: none;">TikTok</a>
+                <a href="https://www.linkedin.com/in/muslimabayabd" target="_blank" style="color: #fff; text-decoration: none;">LinkedIn</a>
+                <a href="https://www.threads.net/@muslimabaya.shop" target="_blank" style="color: #fff; text-decoration: none;">Threads</a>
+            </div>
+        `;
+    }
+});
