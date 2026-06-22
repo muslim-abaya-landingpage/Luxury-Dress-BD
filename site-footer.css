@@ -70,6 +70,13 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   flex-shrink: 0;
 }
 
+#site-footer-mount .anz-social-link svg {
+  width: 16px !important;
+  height: 16px !important;
+  max-width: 16px !important;
+  max-height: 16px !important;
+}
+
 #site-footer-mount .anz-wa-cta .anz-wa-icon svg {
   width: 22px !important;
   height: 22px !important;
@@ -97,10 +104,9 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   border-top: 2px solid rgba(201, 169, 98, 0.22);
 }
 
-/* #ma-social-connect-mount:empty {
-    display: none;
-} 
-*/
+#ma-social-connect-mount:empty {
+  display: none;
+}
 
 /* Copyright strip — 0.5in tall, full width, text vertically centered */
 .anz-footer-strip,
@@ -489,6 +495,25 @@ a.anz-contact-link:hover {
   cursor: wait;
 }
 
+.anz-socials {
+  display: flex;
+  gap: 5px;
+  margin-top: 7px;
+  flex-wrap: wrap;
+}
+
+.anz-social-link {
+  width: 30px;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
 .anz-social-link:hover {
   background: #c9a962;
   border-color: #c9a962;
@@ -577,6 +602,24 @@ a.anz-contact-link:hover {
     max-width: none;
   }
 }
+
+@media (max-width: 768px) {
+  body #site-footer-mount,
+  body #ma-social-connect-mount,
+  body.shop-page #site-footer-mount {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    left: auto !important;
+    right: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    box-sizing: border-box !important;
+  }
+
   #site-footer-mount .anz-footer {
     width: 100% !important;
     max-width: 100% !important;
@@ -606,6 +649,12 @@ a.anz-contact-link:hover {
     white-space: normal;
     text-align: center;
   }
+
+  .anz-trust-dot {
+    width: 5px;
+    height: 5px;
+  }
+
   .anz-footer-main {
     flex: 0 0 auto;
     min-height: 0 !important;
@@ -892,27 +941,4 @@ a.anz-contact-link:hover {
     width: 100%;
     padding: 0 12px;
   }
-}
-/* সোশ্যাল মিডিয়া আইকনগুলো দেখানোর জন্য চূড়ান্ত কোড */
-#ma-social-connect-mount {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    height: auto !important;
-    min-height: 50px !important;
-    margin-top: 20px !important;
-    width: 100% !important;
-    text-align: center !important;
-}
-
-#ma-social-connect-mount a {
-    display: inline-block !important;
-    margin: 0 10px !important;
-    color: #ffffff !important; /* আইকনের রঙ সাদা */
-    font-size: 20px !important;
-}
-#site-footer-mount, #ma-social-connect-mount {
-    margin: 0 !important;
-    padding: 0 !important;
-    display: block;
 }
