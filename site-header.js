@@ -271,7 +271,7 @@
     '<svg class="slider-arrow-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
 
   function buildHeaderHtml() {
-    var fbUrl = getSocialUrl('facebook', 'https://www.facebook.com/luxurydressofficial');
+    var fbUrl = getSocialUrl('facebook', 'https://www.facebook.com/muslimabayaofficial');
     return (
     '<header class="abaya-main-header">' +
     '<div class="header-top-bar"><div class="custom-container"><div class="top-bar-content">' +
@@ -304,9 +304,9 @@
     '<div class="header-announcement-bar"><div class="custom-container announcement-slider">' +
     '<button type="button" class="slider-arrow left-arrow" onclick="window.moveAnnouncement(-1)" aria-label="Previous">' + ICON_CHEV_LEFT + '</button>' +
     '<div class="announcement-content">' +
-    '<div class="ann-slide active">EID COLLECTION 2026 – WHERE ELEGANCE MEETS CELEBRATION</div>' +
-    '<div class="ann-slide">Fast delivery nationwide • Cash on home delivery</div>' +
-    '<div class="ann-slide">Buy 3 dresses — free delivery</div>' +
+    '<div class="ann-slide active">PREMIUM MODEST WEAR – WHERE ELEGANCE MEETS EVERYDAY COMFORT</div>' +
+    '<div class="ann-slide">⭐ 4.9/5 Rated Premium Quality Abayas & Two-Pieces</div>' +
+    '<div class="ann-slide">Buy 3 dresses — get FREE delivery nationwide</div>' +
     '</div>' +
     '<button type="button" class="slider-arrow right-arrow" onclick="window.moveAnnouncement(1)" aria-label="Next">' + ICON_CHEV_RIGHT + '</button>' +
     '</div></div>' +
@@ -317,7 +317,6 @@
     '<ul></ul></div>'
     );
   }
-
   var annIdx = 0;
   var annTimer = null;
 
@@ -848,7 +847,6 @@
       if (document.visibilityState === 'hidden') run();
     });
   }
-
   function runHeaderBoot() {
     mountHeader();
     ensureCartDrawerAssets();
