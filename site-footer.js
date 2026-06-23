@@ -1,14 +1,12 @@
 (function () {
   var SEO = window.SITE_SEO || {};
-  var SOCIAL = SEO.social || {
-  facebook: "https://www.facebook.com/luxurydress.shop",
-  facebook: "https://www.facebook.com/muslimabayaofficial/"
+ var SOCIAL = SEO.social || {
+  facebook: "https://www.facebook.com/muslimabayaofficial/",
   instagram: "https://www.instagram.com/luxurydressbd/",
   youtube: "https://www.youtube.com/@luxurydressbd",
   tiktok: "https://www.tiktok.com/@muslimabayabd",
-  linkedin: "https://www.linkedin.com/in/muslimabayabd"  
+  linkedin: "https://www.linkedin.com/in/muslimabayabd"
 };
-
   var CONTACT = {
     email: "muslimabaya@gmail.com",
     phone: "+880 1971-642683",
