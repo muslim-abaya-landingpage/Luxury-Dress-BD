@@ -1,127 +1,386 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Order Help & FAQ | Muslim Abaya</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="robots" content="index, follow">
+  <meta name="description" content="Find answers to your questions about ordering, secure payment methods, delivery timelines, and returns at Muslim Abaya.">
+  <link rel="canonical" href="https://muslimabaya.com/help">
+  
+  <!-- Open Graph (Facebook/WhatsApp Sharing) -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Order Help & FAQ | Muslim Abaya">
+  <meta property="og:description" content="Everything you need to shop, pay, and track your Muslim Abaya order easily.">
+  <meta property="og:url" content="https://muslimabaya.com/help">
+  <meta property="og:image" content="https://muslimabaya.com/assets/og-faq-banner.jpg">
+
+  <!-- Icons & Favicon -->
   <link rel="icon" href="assets/logo-muslim-abaya.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="assets/logo-muslim-abaya.svg">
-  <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://muslimabaya.com/help">
-  <meta name="description" content="Order, delivery, payment and return help — Muslim Abaya (muslimabaya.com).">
   <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
-  <script src="site-seo-config.js?v=20260603seo"></script>
-  <script src="site-seo.js?v=20260603seo"></script>
+  
+  <!-- Fonts & Stylesheets -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="site-header.css?v=20260603logo">
-  <link rel="stylesheet" href="site-footer.css?v=20260603footen" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="site-footer.css?v=20260603footen"></noscript>
+  <link rel="stylesheet" href="site-footer.css?v=20260603footer" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="site-footer.css?v=20260603footer"></noscript>
+
   <style>
+    :root {
+      --primary-color: #1e3a5f;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --border-color: #e5e7eb;
+      --bg-card: #ffffff;
+    }
+
+    body {
+      background-color: #f9fafb;
+      margin: 0;
+      padding: 0;
+    }
+
     .help-wrap {
-      max-width: 920px;
+      max-width: 840px;
       margin: 0 auto;
-      padding: 28px 16px 48px;
+      padding: 40px 20px 60px;
       font-family: 'Inter', system-ui, sans-serif;
     }
+
     .help-hero {
-      margin-bottom: 24px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid #ececec;
+      text-align: center;
+      margin-bottom: 40px;
     }
+
     .help-hero h1 {
-      margin: 0 0 8px;
-      font-size: clamp(26px, 4vw, 32px);
-      font-weight: 800;
-      color: #1e3a5f;
-      letter-spacing: -0.02em;
-    }
-    .help-hero p {
-      margin: 0;
-      font-size: 15px;
-      line-height: 1.6;
-      color: #6b7280;
-      max-width: 640px;
-    }
-    .help-card {
-      background: #fff;
-      border: 1px solid #e6e2dc;
-      border-radius: 12px;
-      padding: 20px 20px 18px;
-      margin-bottom: 16px;
-      box-shadow: 0 4px 18px rgba(17, 17, 17, 0.04);
-    }
-    .help-card h2 {
       margin: 0 0 12px;
-      font-size: 18px;
+      font-size: clamp(28px, 5vw, 38px);
+      font-weight: 800;
+      color: var(--primary-color);
+      letter-spacing: -0.03em;
+    }
+
+    .help-hero p {
+      margin: 0 auto;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--text-muted);
+      max-width: 580px;
+    }
+
+    /* Premium Section Styling */
+    .faq-section {
+      margin-bottom: 32px;
+    }
+
+    .faq-section-title {
+      font-size: 19px;
       font-weight: 700;
-      color: #111;
+      color: var(--text-main);
+      margin: 0 0 16px 4px;
       letter-spacing: -0.01em;
     }
-    .help-card p,
-    .help-card li {
+
+    /* Premium Accordion Card */
+    .help-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.015);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+    }
+
+    .help-card:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 4px 20px rgba(30, 58, 95, 0.06);
+    }
+
+    /* Accordion Trigger Button */
+    .faq-question {
+      width: 100%;
+      text-align: left;
+      background: none;
+      border: none;
+      padding: 22px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* CSS Pure Premium Chevron/Arrow Icon */
+    .icon-chevron {
+      width: 10px;
+      height: 10px;
+      border-bottom: 2px solid #9ca3af;
+      border-right: 2px solid #9ca3af;
+      transform: rotate(-45deg); /* Points Right by default */
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s;
+      flex-shrink: 0;
+      margin-right: 4px;
+    }
+
+    .help-card:hover .icon-chevron {
+      border-color: var(--primary-color);
+    }
+
+    /* Active State (When card is open) */
+    .help-card.active {
+      border-color: var(--primary-color);
+      box-shadow: 0 4px 20px rgba(30, 58, 95, 0.04);
+    }
+
+    .help-card.active .icon-chevron {
+      transform: rotate(45deg); /* Turns smoothly to point Down */
+      border-color: var(--primary-color);
+    }
+
+    /* Content Area Animation */
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .faq-content-inner {
+      padding: 0 24px 24px;
       color: #374151;
-      line-height: 1.65;
-      font-size: 14px;
+      line-height: 1.75;
+      font-size: 14.5px;
+      border-top: 1px solid transparent;
     }
-    .help-card ul {
+
+    /* Smooth border fade-in inside active card */
+    .help-card.active .faq-content-inner {
+      border-top-color: #f1f5f9;
+    }
+
+    .faq-content-inner p {
       margin: 0;
-      padding-left: 18px;
     }
-    .help-card li { margin-bottom: 8px; }
-    .help-card li:last-child { margin-bottom: 0; }
-    .help-card strong { color: #111; font-weight: 600; }
+
+    .faq-content-inner ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .faq-content-inner li { 
+      margin-bottom: 12px; 
+    }
+    
+    .faq-content-inner li:last-child { 
+      margin-bottom: 0; 
+    }
+
+    .faq-content-inner strong { 
+      color: var(--text-main); 
+      font-weight: 600; 
+    }
+
     @media (max-width: 640px) {
-      .help-wrap { padding: 20px 12px 32px; }
-      .help-card { padding: 16px 14px; }
+      .help-wrap { padding: 24px 16px 40px; }
+      .faq-question { padding: 18px 20px; font-size: 15px; }
+      .faq-content-inner { padding: 0 20px 20px; font-size: 14px; }
     }
   </style>
-<script src="config.js"></script>
+
+  <!-- Google SEO FAQ Schema Markup -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How to place an order on Muslim Abaya?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Add items to your cart, open Checkout, fill in your name, mobile, district, thana, and full address, then tap Place Order."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do you offer Cash on Delivery (COD)?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, we offer Cash on Delivery across Bangladesh. You pay only when the parcel arrives at your doorstep, with no advance payment required."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What online payment options are available?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You can pay using bKash, Nagad, or cards at checkout. Please enter your mobile wallet account number and Transaction ID exactly as shown on your payment receipt."
+        }
+      }
+    ]
+  }
+  </script>
+  
+  <script src="site-seo-config.js?v=20260603seo"></script>
+  <script src="site-seo.js?v=20260603seo"></script>
+  <script src="config.js"></script>
 </head>
 <body class="help-page">
+
   <div id="site-header-mount"></div>
+
   <main class="help-wrap">
     <header class="help-hero">
       <h1>Order Help &amp; FAQ</h1>
-      <p>Everything you need to shop, pay, and track your Muslim Abaya order — in plain English.</p>
+      <p>Everything you need to shop, pay, and track your Muslim Abaya order easily in plain English.</p>
     </header>
-    <section class="help-card">
-      <h2>Account &amp; Checkout</h2>
-      <p>Create a free account with <strong>Sign Up</strong> to save your details for faster checkout. Returning customers can use <strong>Sign In</strong> with email or mobile and password. Your name, phone, and address are stored securely for repeat orders.</p>
-    </section>
-    <section class="help-card" id="order-status">
-      <h2>Ordering &amp; Payment</h2>
-      <ul>
-        <li><strong>How to order:</strong> Add items to cart, open Checkout, fill in your name, mobile, district, thana, and full address, then tap <strong>Place Order</strong>.</li>
-        <li><strong>Cash on Delivery (COD):</strong> Pay when the parcel arrives. No advance payment required for COD orders.</li>
-        <li><strong>Online payment:</strong> Select bKash, Nagad, or card at checkout. Enter your <strong>Sender Number</strong> and <strong>Transaction ID</strong> exactly as shown on your receipt.</li>
-        <li><strong>Order confirmation:</strong> Pending until verified; confirmed once our team checks payment or COD details.</li>
-        <li><strong>Delivery updates:</strong> After confirmation you will see a Thank You page. For urgent questions, message us on WhatsApp with your order name and mobile number.</li>
-        <li><strong>Returns &amp; defects:</strong> Report any faulty item within 24 hours with photos. We will arrange a fair solution under our Refund Policy.</li>
-      </ul>
-    </section>
-    <section class="help-card">
-      <h2>Sign Up — Field Guide</h2>
-      <ul>
-        <li><strong>Full Name:</strong> Your real name for delivery (e.g. Nusrat Jahan).</li>
-        <li><strong>Mobile Number:</strong> 11-digit Bangladesh number (e.g. 01712345678).</li>
-        <li><strong>Email:</strong> Active email for order updates (e.g. name@gmail.com).</li>
-        <li><strong>Password:</strong> At least 8 characters with letters and numbers.</li>
-        <li><strong>Confirm Password:</strong> Must match your password exactly.</li>
-      </ul>
-    </section>
-    <section class="help-card">
-      <h2>Sign In — Quick Guide</h2>
-      <ul>
-        <li><strong>Email or Mobile:</strong> Use whichever you registered with.</li>
-        <li><strong>Password:</strong> Enter your account password and tap Sign In.</li>
-      </ul>
-    </section>
+
+    <!-- Section 1 -->
+    <div class="faq-section">
+      <h2 class="faq-section-title">Account &amp; Checkout</h2>
+      
+      <div class="help-card">
+        <button class="faq-question" aria-expanded="false">
+          Account Registration &amp; Sign In
+          <span class="icon-chevron"></span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-content-inner">
+            <p>Create a free account with <strong>Sign Up</strong> to save your details for faster checkout. Returning customers can use <strong>Sign In</strong> with email or mobile and password. Your name, phone, and address are stored securely for repeat orders.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2 -->
+    <div class="faq-section">
+      <h2 class="faq-section-title">Ordering &amp; Payment</h2>
+      
+      <div class="help-card">
+        <button class="faq-question" aria-expanded="false">
+          How to Order &amp; Delivery Process
+          <span class="icon-chevron"></span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-content-inner">
+            <ul>
+              <li><strong>How to order:</strong> Add items to cart, open Checkout, fill in your name, mobile, district, thana, and full address, then tap <strong>Place Order</strong>.</li>
+              <li><strong>Order confirmation:</strong> Pending until verified; confirmed once our team checks payment or COD details.</li>
+              <li><strong>Delivery updates:</strong> After confirmation you will see a Thank You page. For urgent questions, message us on WhatsApp with your order name and mobile number.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="help-card">
+        <button class="faq-question" aria-expanded="false">
+          Payment Methods (COD &amp; Online)
+          <span class="icon-chevron"></span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-content-inner">
+            <ul>
+              <li><strong>Cash on Delivery (COD):</strong> Pay when the parcel arrives. No advance payment required for COD orders.</li>
+              <li><strong>Online payment:</strong> Select bKash, Nagad, or card at checkout. Enter your <strong>Sender Number</strong> and <strong>Transaction ID</strong> exactly as shown on your receipt.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="help-card">
+        <button class="faq-question" aria-expanded="false">
+          Returns &amp; Defective Items
+          <span class="icon-chevron"></span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-content-inner">
+            <p>Report any faulty item within 24 hours of delivery with clear photos. We will immediately arrange a fair solution or product replacement under our official Refund Policy.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3 -->
+    <div class="faq-section">
+      <h2 class="faq-section-title">Form Guides</h2>
+      
+      <div class="help-card">
+        <button class="faq-question" aria-expanded="false">
+          Sign Up — Field Guide
+          <span class="icon-chevron"></span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-content-inner">
+            <ul>
+              <li><strong>Full Name:</strong> Your real name for delivery (e.g. Nusrat Jahan).</li>
+              <li><strong>Mobile Number:</strong> 11-digit Bangladesh number (e.g. 01712345678).</li>
+              <li><strong>Email:</strong> Active email for order updates (e.g. name@gmail.com).</li>
+              <li><strong>Password:</strong> At least 8 characters with letters and numbers.</li>
+              <li><strong>Confirm Password:</strong> Must match your password exactly.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="help-card">
+        <button class="faq-question" aria-expanded="false">
+          Sign In — Quick Guide
+          <span class="icon-chevron"></span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-content-inner">
+            <ul>
+              <li><strong>Email or Mobile:</strong> Use whichever you registered with.</li>
+              <li><strong>Password:</strong> Enter your account password and tap Sign In.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
+
   <div id="site-footer-mount"></div>
+
+  <!-- JavaScript for Smooth Accordion & Chevron Rotation -->
+  <script>
+    document.querySelectorAll('.faq-question').forEach(button => {
+      button.addEventListener('click', () => {
+        const card = button.parentElement;
+        const answer = button.nextElementSibling;
+        const isExpanded = button.getAttribute('aria-expanded') === 'true';
+
+        // Close other open items
+        document.querySelectorAll('.help-card').forEach(otherCard => {
+          if (otherCard !== card) {
+            otherCard.classList.remove('active');
+            otherCard.querySelector('.faq-answer').style.maxHeight = null;
+            otherCard.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+          }
+        });
+
+        // Toggle current item
+        if (isExpanded) {
+          button.setAttribute('aria-expanded', 'false');
+          card.classList.remove('active');
+          answer.style.maxHeight = null;
+        } else {
+          button.setAttribute('aria-expanded', 'true');
+          card.classList.add('active');
+          answer.style.maxHeight = answer.scrollHeight + "px";
+        }
+      });
+    });
+  </script>
+
   <script src="cart-utils.js"></script>
   <script defer src="site-header.js?v=20260603logo"></script>
   <script src="site-api-config.js?v=20260529"></script>
-  <script src="site-footer.js?v=20260603footen"></script>
-<script src="config.js"></script>
+  <script src="site-footer.js?v=20260603footer"></script>
 </body>
 </html>
