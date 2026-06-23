@@ -383,15 +383,22 @@
         }
       });
     });
-  </script>
+ </script>
 
-  <script src="cart-utils.js"></script>
-  <script defer src="site-header.js?v=20260603logo"></script>
-  <script src="site-api-config.js?v=20260529"></script>
-  <script src="site-footer.js?v=20260603footer"></script>
 <script>
-    document.querySelectorAll('.faq-question').forEach(button => {
-      button.addEventListener('click', () => {
-        // ... আপনার আগের কোডগুলো ...
+  // ফাঁকা জায়গা চিরতরে দূর করার ম্যাজিক ট্রিক
+  window.addEventListener('DOMContentLoaded', () => {
+    const headerMount = document.getElementById('site-header-mount');
+    if (headerMount) {
+      headerMount.style.marginBottom = '0px';
+      headerMount.style.paddingBottom = '0px';
+    }
+  });
+</script>
+
+<script src="cart-utils.js"></script>
+<script defer src="site-header.js?v=20260603logo"></script>
+<script src="site-api-config.js?v=20260529"></script>
+<script src="site-footer.js?v=20260603footer"></script>
 </body>
-</html>
+  </html>
