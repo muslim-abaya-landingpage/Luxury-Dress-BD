@@ -613,7 +613,14 @@ html, body {
     right: 15px; 
 }
 body { 
-    background: #fdfdfd !important; 
+    /* ব্যাকগ্রাউন্ডে একটি সুন্দর রঙের সংমিশ্রণ (গ্রেডিয়েন্ট) */
+    background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%) !important; 
+    
+    /* ব্যাকগ্রাউন্ড যেন স্থির থাকে এবং পুরো স্ক্রিন জুড়ে থাকে */
+    background-attachment: fixed !important;
+    background-size: cover !important;
+    
+    /* টেক্সটের রং */
     color: #2d3436 !important; 
 }
 .brand-header { 
