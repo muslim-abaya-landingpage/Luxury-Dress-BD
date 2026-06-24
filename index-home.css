@@ -812,7 +812,11 @@ text-align: left;
         }
         .lux-video-ratio {
             position: relative;
-            padding-top: 177.77%;
+            padding-top: 100%;
+        }
+        .lux-video-wrap {
+            max-height: 200px; /* আপনার প্রয়োজন অনুযায়ী পিক্সেল কমিয়ে বা বাড়িয়ে দেখুন */
+            overflow: hidden;
         }
         .lux-video-ratio iframe {
             position: absolute;
