@@ -1167,13 +1167,26 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
     /* Footer styles: site-footer.css?v=20260531wa */
+/* এই পুরো অংশটুকু কপি করে আপনার বর্তমান কোডের বদলে বসিয়ে দিন */
+
 .item-card {
     border: none !important;
-    background: #fff;
+    /* গ্লাস ইফেক্টের জন্য এই ৩টি লাইন যোগ করা হয়েছে */
+    background: rgba(255, 255, 255, 0.3) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    
     transition: 0.3s;
     text-align: left;
-    padding: 0px;
+    padding: 10px; /* কার্ডের ভেতরের কন্টেন্ট যেন সুন্দর দেখায় */
+    box-shadow: none !important;
+    border-radius: 12px !important; /* কাঁচের কোণাগুলো গোল করার জন্য */
 }
+
+.item-card img {
+    border-radius: 8px !important; /* ছবির কোণা গোল করা */
+}
+
 .item-card span:not(.product-sale-badge):not(.product-card-name):not(.product-card-price):not(.qty-input) {
     font-family: 'Playfair Display', serif;
     font-size: 14px !important;
@@ -1183,21 +1196,13 @@ body {
     display: block;
     text-align: left;
 }
+
 .item-price {
     font-weight: 800;
     color: #333;
     font-size: 30px;
     margin-top: 0px;
     display: block;
-}
-.item-card {
-    border: none !important;
-    box-shadow: none !important;
-    text-align: left;
-}
-
-.item-card img {
-    border-radius: 0px !important;
 }
 
 .item-card .price {
