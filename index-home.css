@@ -472,9 +472,9 @@ body { font-family: 'Poppins', 'Hind Siliguri', sans-serif !important; }
 .astra-feature-card p { font-weight: 700; font-size: 14px; color: #333; margin: 0; line-height: 1.2; text-transform: uppercase; letter-spacing: 0.5px; }
 
 /* --- Announcement Slider --- */
-.announcement-slider { display: flex; align-items: center; justify-content: center; position: relative; height: 45px; max-width: 1100px; margin: 0 auto; }
+.announcement-slider { display: flex; align-items: center; justify-content: center; position: relative; height: 40px; max-width: 1100px; margin: 0 auto; }
 .announcement-content { position: relative; overflow: hidden; height: 35px; flex: 1; text-align: center; }
-.ann-slide { display: none; font-size: 12px; font-weight: 700; color: #000; position: absolute; width: 100%; left: 0; }
+.ann-slide { display: none; font-size: 20px; font-weight: 700; color: #000; position: absolute; width: 100%; left: 0; }
 .ann-slide.active { display: block; animation: rightToLeft 0.6s ease-out; }
 
 @keyframes rightToLeft {
