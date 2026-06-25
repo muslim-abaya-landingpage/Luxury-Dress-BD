@@ -11,11 +11,31 @@ html, body {
     background: linear-gradient(180deg, #fdfbf7 0%, #f4f1ea 100%) fixed !important; 
     color: #2d3436; 
 }
-/* --- Header & Layout --- */
-.promo-bar { background: linear-gradient(90deg, #fff, #000); color: white; text-align: center; padding: 8px; font-weight: 800; font-size: 18px; }
-.brand-header { text-align: center; padding: 20px 0; background: #fff; margin-bottom: 20px; border-radius: 12px; }
-.brand-name { font-size: 35px; font-weight: 800; color: #000; }
-.container { width: 100%; max-width: 1100px; margin: 0 auto; padding: 15px; }
+/* --- Header & Layout (একদম কম্প্যাক্ট করার জন্য) --- */
+.promo-bar { 
+    background: linear-gradient(90deg, #fff, #000); 
+    color: white; 
+    text-align: center; 
+    padding: 5px 0; /* প্যাডিং আরও কমিয়ে ৫px করা হলো */
+    font-weight: 800; 
+    font-size: 18px; 
+    margin: 0 !important; /* মার্জিন পুরোপুরি বন্ধ */
+}
+
+.brand-header { 
+    text-align: center; 
+    padding: 0 !important; /* একদম শূন্য করা হলো */
+    background: #fff; 
+    margin: 0 !important; /* মার্জিন পুরোপুরি বন্ধ */
+    border-radius: 0; /* বর্ডার রেডিয়াসও সরিয়ে দেওয়া হলো */
+}
+
+.container { 
+    width: 100%; 
+    max-width: 1100px; 
+    margin: 0 auto; 
+    padding: 0 15px !important; /* ওপরের প্যাডিং ০ করা হলো */
+}
 
 /* --- Product Display --- */
 .display-area { display: flex; flex-direction: column; gap: 10px; background: #fff; padding: 10px; border-radius: 10px; }
