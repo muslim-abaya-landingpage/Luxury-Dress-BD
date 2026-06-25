@@ -1,12 +1,15 @@
 /* --- Root Variables & Reset --- */
 :root { --primary: #7c3aed; --bg: #fdfbf7; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body {
-    overflow-x: hidden;
-    width: 100%;
-    font-family: 'Poppins', 'Hind Siliguri', sans-serif;
-    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) fixed;
-    color: #1e293b;
+html, body { 
+    overflow-x: hidden; 
+    width: 100%; 
+    font-family: 'Poppins', 'Hind Siliguri', sans-serif; 
+    /* প্রিমিয়াম অফ-হোয়াইট ব্যাকগ্রাউন্ড */
+    background-color: #fdfbf7 !important; 
+    /* একদম হালকা গ্রেডিয়েন্ট যা খুব বেশি চোখে লাগবে না */
+    background: linear-gradient(180deg, #fdfbf7 0%, #f4f1ea 100%) fixed !important; 
+    color: #2d3436; 
 }
 /* --- Header & Layout --- */
 .promo-bar { background: linear-gradient(90deg, #fff, #000); color: white; text-align: center; padding: 8px; font-weight: 800; font-size: 18px; }
