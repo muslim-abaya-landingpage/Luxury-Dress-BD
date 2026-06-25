@@ -312,9 +312,10 @@ input, select { width: 100%; padding: 12px; margin-bottom: 10px; border: 0.5px s
 .nav-arrow.left { left: 15px; }
 .nav-arrow.right { right: 15px; }
 
-/* --- Body & Layout --- */
-body { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%) fixed !important; background-size: cover !important; color: #2d3436 !important; }
-.brand-header { padding: 20px 0 !important; background: #ffffff !important; border-radius: 12px !important; }
+body { 
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%) fixed !important; 
+    color: #2d3436 !important; 
+}
 
 /* --- Details & Trust Badges --- */
 .details-box { background: #fff !important; padding: 15px 20px !important; border: 1px solid rgba(124, 58, 237, 0.1) !important; border-left: 6px solid #000 !important; position: relative; overflow: hidden; }
