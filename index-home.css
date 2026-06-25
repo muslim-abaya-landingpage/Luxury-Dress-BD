@@ -1,8 +1,13 @@
 /* --- Root Variables & Reset --- */
 :root { --primary: #7c3aed; --bg: #fdfbf7; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { overflow-x: hidden; width: 100%; font-family: 'Poppins', 'Hind Siliguri', sans-serif; background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%) fixed; color: #2d3436; }
-
+html, body {
+    overflow-x: hidden;
+    width: 100%;
+    font-family: 'Poppins', 'Hind Siliguri', sans-serif;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) fixed;
+    color: #1e293b;
+}
 /* --- Header & Layout --- */
 .promo-bar { background: linear-gradient(90deg, #fff, #000); color: white; text-align: center; padding: 8px; font-weight: 800; font-size: 18px; }
 .brand-header { text-align: center; padding: 20px 0; background: #fff; margin-bottom: 20px; border-radius: 12px; }
