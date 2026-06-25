@@ -5,11 +5,20 @@ html, body {
     overflow-x: hidden; 
     width: 100%; 
     font-family: 'Poppins', 'Hind Siliguri', sans-serif; 
-    /* প্রিমিয়াম অফ-হোয়াইট ব্যাকগ্রাউন্ড */
-    background-color: #fdfbf7 !important; 
-    /* একদম হালকা গ্রেডিয়েন্ট যা খুব বেশি চোখে লাগবে না */
-    background: linear-gradient(180deg, #fdfbf7 0%, #f4f1ea 100%) fixed !important; 
-    color: #2d3436; 
+    /* --- Premium Pro Background & Typography --- */
+html, body {
+    /* গ্লোবাল ব্যাকগ্রাউন্ড: অত্যন্ত সফট এবং ক্লিন লুক */
+    background-color: #f8f7f5 !important;
+    
+    /* প্রিমিয়াম গ্রেডিয়েন্ট: যা সাইটকে একটি ডেপথ (depth) দেবে */
+    background: linear-gradient(180deg, #ffffff 0%, #f4f3f0 100%) fixed !important;
+    
+    /* টেক্সট কালার: চোখের জন্য আরামদায়ক কিন্তু প্রিমিয়াম চারকোল টোন */
+    color: #333333 !important;
+    
+    /* বাড়তি সুবিধা: স্মুথ ফন্ট রেন্ডারিং */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 /* --- Header & Layout (একদম কম্প্যাক্ট করার জন্য) --- */
 .promo-bar { 
