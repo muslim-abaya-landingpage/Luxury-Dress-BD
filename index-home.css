@@ -880,70 +880,192 @@ html, body {
     from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: translateY(0); }
 }
-/* Premium Video Section Upgrade */
-.lux-video-wrap {
+/* ===============================
+   PREMIUM VIDEO SECTION 10/10
+================================= */
+
+.lux-video-wrap{
     position: relative;
     overflow: hidden;
-    background: linear-gradient(
-        135deg,
-        #fdfaf3 0%,
-        #ffffff 50%,
-        #f7f3eb 100%
-    ) !important;
-
-    border: 1px solid rgba(212,175,55,0.2);
+    padding: 40px 30px;
     border-radius: 30px;
+
+    background:
+        radial-gradient(circle at top left,
+        rgba(212,175,55,.18),
+        transparent 35%),
+        radial-gradient(circle at bottom right,
+        rgba(0,0,0,.05),
+        transparent 40%),
+        linear-gradient(
+            135deg,
+            #fffdf8 0%,
+            #ffffff 45%,
+            #f6f1e8 100%
+        );
+
+    border: 1px solid rgba(212,175,55,.15);
+
     box-shadow:
-        0 20px 50px rgba(0,0,0,0.08),
-        0 0 40px rgba(212,175,55,0.08);
+        0 25px 60px rgba(0,0,0,.08),
+        0 0 40px rgba(212,175,55,.08);
 }
 
-.lux-video-wrap::before {
-    content: "";
-    position: absolute;
-    top: -120px;
-    left: -120px;
-    width: 280px;
-    height: 280px;
-    border-radius: 50%;
-    background: radial-gradient(
-        rgba(212,175,55,0.18),
-        transparent 70%
-    );
+/* Decorative Glow */
+
+.lux-video-wrap::before{
+    content:"";
+    position:absolute;
+    width:280px;
+    height:280px;
+    top:-120px;
+    left:-120px;
+    border-radius:50%;
+    background:
+        radial-gradient(
+            rgba(212,175,55,.18),
+            transparent 70%
+        );
 }
 
-.lux-video-wrap::after {
-    content: "";
-    position: absolute;
-    bottom: -120px;
-    right: -120px;
-    width: 320px;
-    height: 320px;
-    border-radius: 50%;
-    background: radial-gradient(
-        rgba(0,0,0,0.06),
-        transparent 70%
-    );
+.lux-video-wrap::after{
+    content:"";
+    position:absolute;
+    width:320px;
+    height:320px;
+    bottom:-140px;
+    right:-140px;
+    border-radius:50%;
+    background:
+        radial-gradient(
+            rgba(0,0,0,.05),
+            transparent 70%
+        );
 }
 
-.lux-video-card {
-    transition: all .4s ease;
+/* Title */
+
+.lux-video-title{
+    font-size:42px !important;
+    font-weight:800 !important;
+    line-height:1.2;
+    color:#111;
+    margin-bottom:12px;
 }
 
-.lux-video-card:hover {
-    transform: translateY(-8px);
+.lux-video-subtitle{
+    font-size:18px;
+    color:#666;
+    margin-bottom:35px;
+}
+
+/* Video Grid */
+
+.lux-video-grid{
+    gap:28px !important;
+}
+
+/* Video Cards */
+
+.lux-video-card{
+    overflow:hidden;
+    border-radius:24px;
+    background:#fff;
+
+    border:2px solid rgba(255,255,255,.8);
+
     box-shadow:
-        0 25px 50px rgba(0,0,0,0.18),
-        0 0 30px rgba(212,175,55,0.25);
+        0 15px 35px rgba(0,0,0,.12);
+
+    transition:all .4s ease;
 }
 
-.lux-video-title {
-    font-size: 42px;
-    font-weight: 800;
+.lux-video-card:hover{
+    transform:translateY(-10px);
+
+    box-shadow:
+        0 30px 60px rgba(0,0,0,.18),
+        0 0 30px rgba(212,175,55,.20);
 }
 
-.lux-video-subtitle {
-    font-size: 18px;
-    color: #666;
+/* Video Thumbnail */
+
+.lux-video-card img,
+.lux-video-card iframe{
+    border-radius:20px;
 }
-    
+
+/* Feature Boxes */
+
+.lux-feature{
+    background:rgba(255,255,255,.88);
+    backdrop-filter:blur(20px);
+
+    border:1px solid rgba(212,175,55,.12);
+
+    border-radius:20px;
+
+    padding:18px;
+
+    box-shadow:
+        0 10px 25px rgba(0,0,0,.05);
+
+    transition:.4s ease;
+}
+
+.lux-feature:hover{
+    transform:translateY(-5px);
+
+    box-shadow:
+        0 20px 40px rgba(0,0,0,.10);
+}
+
+/* Golden Icon */
+
+.lux-feature-dot{
+    background:
+        linear-gradient(
+            135deg,
+            #f5d36b,
+            #c89c25
+        );
+
+    box-shadow:
+        0 8px 20px rgba(200,156,37,.35);
+}
+
+/* Feature Text */
+
+.lux-feature h4{
+    color:#111;
+    font-size:18px;
+    font-weight:700;
+}
+
+.lux-feature p{
+    color:#666;
+    font-size:15px;
+    line-height:1.6;
+}
+
+/* Mobile Responsive */
+
+@media(max-width:768px){
+
+    .lux-video-wrap{
+        padding:20px 15px;
+        border-radius:22px;
+    }
+
+    .lux-video-title{
+        font-size:28px !important;
+    }
+
+    .lux-video-subtitle{
+        font-size:15px;
+    }
+
+    .lux-video-grid{
+        gap:18px !important;
+    }
+}
