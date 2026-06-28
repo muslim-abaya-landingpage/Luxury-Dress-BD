@@ -460,6 +460,9 @@ input, select { margin-bottom: 8px !important; }
 
 /* --- Responsive & Global --- */
 body { font-family: 'Poppins', 'Hind Siliguri', sans-serif !important; }
+.lux-video-title{
+font-family:'Playfair Display', serif !important;
+}
 
 @media (min-width: 768px) {
     .astra-feature-wrapper { grid-template-columns: repeat(4, 1fr); gap: 25px; }
@@ -759,13 +762,14 @@ html, body {
     line-height: 1.35 !important;
 }
 
-.lux-video-title,
+.lux-video-title{
+    font-family:'Playfair Display', serif !important;
+}
+
 .lux-video-subtitle,
 .lux-feature h4,
-.lux-feature p {
-    font-family: 'Hind Siliguri', 'Inter', sans-serif !important;
-    letter-spacing: 0 !important;
-    word-spacing: 0.5px;
+.lux-feature p{
+    font-family:'Poppins','Hind Siliguri',sans-serif !important;
 }
 
 .lux-video-title {
