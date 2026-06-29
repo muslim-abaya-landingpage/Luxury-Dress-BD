@@ -1,11 +1,13 @@
 /* --- Root Variables & Reset --- */
 :root { --primary: #7c3aed; --bg: #fdfbf7; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { 
-    overflow-x: hidden; 
-    width: 100%; 
-    font-family: 'Poppins', 'Hind Siliguri', sans-serif; 
-    /* --- Premium Pro Background & Typography --- */
+html, body {
+    overflow-x: hidden;
+    width: 100%;
+    font-family: 'Poppins', 'Hind Siliguri', sans-serif;
+}
+
+/* --- Premium Pro Background & Typography --- */
 html, body {
     /* গ্লোবাল ব্যাকগ্রাউন্ড: অত্যন্ত সফট এবং ক্লিন লুক */
     background-color: #f8f7f5 !important;
@@ -796,7 +798,7 @@ html, body {
     .lux-feature p { font-size: 15px !important; }
 }
 
-/* --- Subscription Success Message --- */
+/* --- Subscription Success Component --- */
 .subscribe-success {
     display: none;
     margin-top: 12px;
