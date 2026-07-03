@@ -314,7 +314,8 @@ window.CATEGORY_PRODUCTS = {
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-yellow-tie-dye-cotton-maxi-dress-for-women.webp",
   link: "/",
   price: 350,
-  color: "Yellow",
+  color: "yellow",
+  colorLabel: "Yellow",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Attractive Tie-Dye design. Length: 43–44 Inches, Flare: 80 Inches"
@@ -325,7 +326,8 @@ window.CATEGORY_PRODUCTS = {
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/stylish-green-floral-cotton-midi-dress-womens-fashion.webp",
   link: "/",
   price: 350,
-  color: "Green",
+  color: "green",
+  colorLabel: "Green",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Stylish floral print midi dress. Length: 43–44 Inches, Flare: 80 Inches"
@@ -336,7 +338,8 @@ window.CATEGORY_PRODUCTS = {
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-cherry-print-cotton-one-piece-dress-for-women.webp",
   link: "/",
   price: 350,
-  color: "White",
+  color: "white",
+  colorLabel: "White",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Beautiful cherry print one-piece dress. Length: 43–44 Inches, Flare: 80 Inches"
@@ -347,7 +350,8 @@ window.CATEGORY_PRODUCTS = {
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-lavender-floral-cotton-one-piece-dress-for-women-muslimabaya%20(2).webp",
   link: "/",
   price: 350,
-  color: "White/Lavender",
+  color: "white",
+  colorLabel: "White / Lavender",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Soft lavender floral print. Length: 43–44 Inches, Flare: 80 Inches"
@@ -358,7 +362,8 @@ window.CATEGORY_PRODUCTS = {
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-maroon-block-print-cotton-one-piece-dress-for-women.webp",
   link: "/",
   price: 350,
-  color: "White/Maroon",
+  color: "white",
+  colorLabel: "White / Maroon",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Traditional block print design. Length: 43–44 Inches, Flare: 80 Inches"
@@ -369,7 +374,8 @@ window.CATEGORY_PRODUCTS = {
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-red-heart-print-cotton-one-piece-dress-for-women.webp",
   link: "/",
   price: 350,
-  color: "White/Red",
+  color: "white",
+  colorLabel: "White / Red",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Cute heart print pattern. Length: 43–44 Inches, Flare: 80 Inches"
@@ -380,7 +386,8 @@ window.CATEGORY_PRODUCTS = {
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/yellow-cotton-flared-one-piece-dress-for-women.webp",
   link: "/",
   price: 350,
-  color: "Yellow",
+  color: "yellow",
+  colorLabel: "Yellow",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Comfortable flared yellow dress. Length: 43–44 Inches, Flare: 80 Inches"
@@ -391,13 +398,14 @@ window.CATEGORY_PRODUCTS = {
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/yellow-striped-cotton-one-piece-dress-for-women.webp",
   link: "/",
   price: 350,
-  color: "Yellow",
+  color: "yellow",
+  colorLabel: "Yellow",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Striped design, casual wear. Length: 43–44 Inches, Flare: 80 Inches"
 }
 ],
-  /* ═══ ④ টু-পিস সারি · PREMIUM TWO-PIECE · premium-two-piece.html ═══ */
+/* ═══ ④ টু-পিস সারি · PREMIUM TWO-PIECE · premium-two-piece.html ═══ */
   "premium-two-piece": [
     {
       id: "DR-29",
@@ -562,6 +570,9 @@ window.FILTER_COLOR_MAP = {
   pink: { label: "Rose Pink", hex: "#f4b4c4" },
   blue: { label: "Royal Blue", hex: "#4a6fa5" },
   green: { label: "Olive Green", hex: "#6b8f71" },
+  yellow: { label: "Yellow", hex: "#FFD54F" },
+  red: { label: "Red", hex: "#E53935" },
+  lavender: { label: "Lavender", hex: "#B39DDB" },
   beige: { label: "Copper Beige", hex: "#d4c4a8" }
 };
 
