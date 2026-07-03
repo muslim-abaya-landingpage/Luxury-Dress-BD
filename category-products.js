@@ -442,7 +442,7 @@ window.CATEGORY_PRODUCTS = {
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Elegant white and lilac botanical print cotton one piece dress. Length: 43–44 Inches, Flare: 80 Inches"
-}
+},
  {
   id: "KURTI-20",
   name: "Premium Black Silver Floral Cotton One Piece Dress",
