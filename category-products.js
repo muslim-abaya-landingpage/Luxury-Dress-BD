@@ -396,7 +396,7 @@ window.CATEGORY_PRODUCTS = {
     sizes: ["M", "L"],
     detailNote: "স্ট্রাইপ ডিজাইন, ক্যাজুয়াল ওয়্যার।"
   }
-]
+],
 
   /* ═══ ④ টু-পিস সারি · PREMIUM TWO-PIECE · premium-two-piece.html ═══ */
   "premium-two-piece": [
