@@ -215,8 +215,8 @@
     }
 
     saveLines(drawerLines);
-
     renderDrawer();
+    openCartDrawer();
   }
 
   function closeMobileNavIfOpen() {
