@@ -531,15 +531,15 @@ window.CATEGORY_PRODUCTS = {
   {
   id: "DR-32",
   name: "Premium White Pink Floral Print Women's Co-ord Set",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-pink-floral-print-womens-co-ord-set-premium.webp",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/white-pink-floral-print-womens-co-ord-set-premium.webp?raw=1",
   link: "/",
   price: 650,
   color: "pink",
   colorLabel: "White & Pink",
   fabric: "Alex Soft Georgette",
-  sizes: ["Free Size (Fits up to Bust 42)"],
-  detailNote: "Premium white and pink floral print co-ord set. Length: 37–38 Inches."
-    },
+  sizes: ["Body 42 (Free Size)"],
+  detailNote: "Length: 37–38 Inches"
+},
   {
       id: "DR-31",
       name: "Black Floral Georgette Set",
