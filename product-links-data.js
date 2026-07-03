@@ -27,16 +27,16 @@ window.PRODUCT_LINKS_DATA = {
 "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Magenta%20Tassel%20Detail%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true",
 "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Premium%20Pink%20Floral%20Lace-Work%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true",
 "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Vibrant%20Magenta%20Floral%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true"],
-  "premium-two-piece": [
-    "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Baby%20PinkLight%20Pink.jpeg?raw=1",
-    "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Baby-Pink-Floral-Print.jpeg?raw=1",
-    "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Black-Base-Rose-Floral.jpeg?raw=1",
-    "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Black-White-Polka-Dots.jpeg?raw=1",
-    "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Royal-Blue-Golden-Floral-Print.jpeg?raw=1",
-    "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Sage%20GreenMint%20Green.jpeg?raw=1",
-    "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/pink-floral-printed-co-ord-set.jpeg?raw=1",
-    "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/black-floral-georgette-two-piece-set-bangladesh.jpg?raw=1"
-  ],
+ "premium-two-piece": [
+  "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Baby%20PinkLight%20Pink.jpeg?raw=1",
+  "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Baby-Pink-Floral-Print.jpeg?raw=1",
+  "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Black-Base-Rose-Floral.jpeg?raw=1",
+  "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Black-White-Polka-Dots.jpeg?raw=1",
+  "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Royal-Blue-Golden-Floral-Print.jpeg?raw=1",
+  "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Sage%20GreenMint%20Green.jpeg?raw=1",
+  "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/white-pink-floral-print-womens-co-ord-set-premium.webp?raw=true",
+  "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/black-floral-georgette-two-piece-set-bangladesh.jpg?raw=1"
+],
   embroidery: [],
   karchupi: [],
   kaftan: [],
