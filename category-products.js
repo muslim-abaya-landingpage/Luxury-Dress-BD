@@ -395,8 +395,7 @@ window.CATEGORY_PRODUCTS = {
     fabric: "Premium Cotton Fabric",
     sizes: ["34", "36", "38", "40", "42", "44", "46"],
     detailNote: "Striped design, casual wear. Length: 43–44 Inches, Flare: 80 Inches"
-  },
-                 
+  },                 
   /* ═══ ④ টু-পিস সারি · PREMIUM TWO-PIECE · premium-two-piece.html ═══ */
   "premium-two-piece": [
     {
