@@ -347,7 +347,7 @@ window.CATEGORY_PRODUCTS = {
 {
   id: "KURTI-13",
   name: "White & Lavender Floral Cotton Dress",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-lavender-floral-cotton-one-piece-dress-for-women-muslimabaya%20(2).webp",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-lavender-floral-cotton-one-piece-dress-for-women-muslimabaya.webp",
   link: "/",
   price: 350,
   color: "white",
@@ -404,8 +404,7 @@ window.CATEGORY_PRODUCTS = {
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Striped design, casual wear. Length: 43–44 Inches, Flare: 80 Inches"
 }
-],
-  
+],  
 /* ═══ ④ টু-পিস সারি · PREMIUM TWO-PIECE · premium-two-piece.html ═══ */
   "premium-two-piece": [
     {
