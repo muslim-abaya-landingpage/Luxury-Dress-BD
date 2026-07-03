@@ -506,78 +506,78 @@ window.CATEGORY_PRODUCTS = {
  ],
 /* ═══ ④ টু-পিস সারি · PREMIUM TWO-PIECE · premium-two-piece.html ═══ */
   "premium-two-piece": [
+  {
+    id: "DR-29",
+    name: "Baby Pink Light Pink Women's Two-Piece Set",
+    image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Baby%20PinkLight%20Pink.jpeg?raw=1",
+    link: "/",
+    price: 550,
+    color: "pink",
+    colorLabel: "Baby Pink / Light Pink",
+    fabric: "Alex Soft Georgette",
+    sizes: ["Body 42 (Free Size)"],
+    detailNote: "Length: 37–38 Inches"
+  },
+  {
+    id: "DR-01",
+    name: "Baby Pink Floral Print Women's Two-Piece Set",
+    image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Baby-Pink-Floral-Print.jpeg?raw=1",
+    link: "/",
+    price: 550,
+    color: "pink",
+    colorLabel: "Baby Pink Floral",
+    fabric: "Alex Soft Georgette",
+    sizes: ["Body 42 (Free Size)"],
+    detailNote: "Length: 37–38 Inches"
+  },
     {
-      id: "DR-29",
-      name: "Baby Pink Light Pink",
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Baby%20PinkLight%20Pink.jpeg?raw=1",
-      link: "/",
-      price: 550,
-      color: "pink",
-      colorLabel: "Baby Pink Light Pink",
-      fabric: "Alex soft Georgette",
-      sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
-      detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
-    },
+  id: "DR-08",
+  name: "Black Rose Floral Print Women's Two-Piece Set",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Black-Base-Rose-Floral.jpeg?raw=1",
+  link: "/",
+  price: 550,
+  color: "black",
+  colorLabel: "Black / Rose Floral",
+  fabric: "Alex Soft Georgette",
+  sizes: ["Body 42 (Free Size)"],
+  detailNote: "Length: 37–38 Inches"
+},
+{
+  id: "DR-16",
+  name: "Black White Polka Dot Women's Two-Piece Set",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Black-White-Polka-Dots.jpeg?raw=1",
+  link: "/",
+  price: 550,
+  color: "black",
+  colorLabel: "Black / White Polka Dot",
+  fabric: "Alex Soft Georgette",
+  sizes: ["Body 42 (Free Size)"],
+  detailNote: "Length: 37–38 Inches"
+},
     {
-      id: "DR-01",
-      name: "Baby Pink Floral",
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Baby-Pink-Floral-Print.jpeg?raw=1",
-      link: "/",
-      price: 550,
-      color: "pink",
-      colorLabel: "Baby Pink Floral",
-      fabric: "Alex soft Georgette",
-      sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
-      detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
-    },
-    {
-      id: "DR-08",
-      name: "Black Base Rose Floral",
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Black-Base-Rose-Floral.jpeg?raw=1",
-      link: "/",
-      price: 550,
-      color: "black",
-      colorLabel: "Black Base Rose Floral",
-      fabric: "Alex soft Georgette",
-      sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
-      detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
-    },
-    {
-      id: "DR-16",
-      name: "Black White Polka",
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Black-White-Polka-Dots.jpeg?raw=1",
-      link: "/",
-      price: 550,
-      color: "black",
-      colorLabel: "Black White Polka",
-      fabric: "Alex soft Georgette",
-      sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
-      detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
-    },
-    {
-      id: "DR-23",
-      name: "Royal Blue Golden Floral",
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Royal-Blue-Golden-Floral-Print.jpeg?raw=1",
-      link: "/",
-      price: 550,
-      color: "blue",
-      colorLabel: "Royal Blue Golden Floral",
-      fabric: "Alex soft Georgette",
-      sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
-      detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
-    },
-    {
-      id: "DR-30",
-      name: "Sage Green Mint Green",
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Sage%20GreenMint%20Green.jpeg?raw=1",
-      link: "/",
-      price: 550,
-      color: "green",
-      colorLabel: "Sage Green Mint Green",
-      fabric: "Alex soft Georgette",
-      sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
-      detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
-    },
+  id: "DR-23",
+  name: "Royal Blue Golden Floral Print Women's Two-Piece Set",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Royal-Blue-Golden-Floral-Print.jpeg?raw=1",
+  link: "/",
+  price: 550,
+  color: "blue",
+  colorLabel: "Royal Blue / Golden Floral",
+  fabric: "Alex Soft Georgette",
+  sizes: ["Body 42 (Free Size)"],
+  detailNote: "Length: 37–38 Inches"
+},
+{
+  id: "DR-30",
+  name: "Sage Green Mint Green Women's Two-Piece Set",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Sage%20GreenMint%20Green.jpeg?raw=1",
+  link: "/",
+  price: 550,
+  color: "green",
+  colorLabel: "Sage Green / Mint Green",
+  fabric: "Alex Soft Georgette",
+  sizes: ["Body 42 (Free Size)"],
+  detailNote: "Length: 37–38 Inches"
+},
   {
   id: "DR-32",
   name: "Premium White Pink Floral Print Women's Co-ord Set",
@@ -651,17 +651,17 @@ window.CATEGORY_PRODUCTS = {
   detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare"
 },
 {
-      id: "DR-31",
-      name: "Black Floral Georgette Set",
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/black-floral-georgette-two-piece-set-bangladesh.jpg?raw=1",
-      link: "/",
-      price: 650,
-      color: "black",
-      colorLabel: "Black Floral",
-      fabric: "Premium Soft Georgette",
-      sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
-      detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
-  }
+  id: "DR-31",
+  name: "Black Floral Georgette Set",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/black-floral-georgette-two-piece-set-bangladesh.jpg?raw=1",
+  link: "/",
+  price: 650,
+  color: "black",
+  colorLabel: "Black Floral",
+  fabric: "Premium Soft Georgette",
+  sizes: ["Body 42 (Free Size)"],
+  detailNote: "Length: 37–38 Inches"
+}
   ],
   /* ═══ ⑤ এম্ব্রয়ডারি — খালি ═══ */
   embroidery: [],
@@ -680,17 +680,22 @@ window.SITE_MEDIA = {
   whatsappOrderLink:
     (window.SITE_LINKS && window.SITE_LINKS.order && window.SITE_LINKS.order.whatsapp) ||
     "https://wa.me/8801971642683",
+
   /**
-   * VIDEO পেজ — নতুন ভিডিও: videos[] তে এক লাইন যোগ করুন।
-   * url = YouTube লিংক অথবা videoId = শুধু ID। পেজে ৩টি করে সারি (লেয়ার) বানাবে।
+   * VIDEO PAGE — Add a new entry to the videos[] array to display more videos.
+   * Use either:
+   * url = Full YouTube link
+   * or
+   * videoId = YouTube video ID only.
+   * The page automatically displays videos in rows of 3.
    */
   featuredVideo: {
-    title: "ভিডিও কালেকশন",
-    helpText: "রিয়েল ভিডিও দেখে প্রোডাক্টের কোয়ালিটি যাচাই করুন, তারপর অর্ডার করুন।",
+    title: "Video Collection",
+    helpText: "Watch real product videos to check the quality before placing your order.",
     videos: [
-      { title: "কালেকশন ভিডিও ১", url: "https://www.youtube.com/watch?v=Wyrw0gzKMqk" }
-      // { title: "কালেকশন ভিডিও ২", url: "https://youtu.be/XXXXXXXXXXX" },
-      // { title: "কালেকশন ভিডিও ৩", videoId: "XXXXXXXXXXX" },
+      { title: "Collection Video 1", url: "https://www.youtube.com/watch?v=Wyrw0gzKMqk" }
+      // { title: "Collection Video 2", url: "https://youtu.be/XXXXXXXXXXX" },
+      // { title: "Collection Video 3", videoId: "XXXXXXXXXXX" },
     ]
   }
 };
@@ -713,7 +718,7 @@ window.CATEGORY_NAV = [
   { key: "kaftan", href: "/kaftan", label: "KAFTAN", image: "images/Baby-Pink-Floral-Print.jpeg" },
   { key: "tops-kurti", href: "/tops-kurti", label: "TOPS/ KURTI", image: "images/Black-White-Polka-Dots.jpeg" },
   { key: "hijab", href: "/hijab", label: "HIJAB", image: "images/Black-White-Polka-Dots.jpeg" },
-  { key: "premium-two-piece", href: "/premium-two-piece", label: "PREMIUM TWO-PIECE", image: "images/pink-floral-printed-co-ord-set.jpeg" },
+  { key: "premium-two-piece", href: "/premium-two-piece", label: "PREMIUM TWO-PIECE", image: "images/premium-pink-floral-co-ord-set.webp" },
   { key: "embroidery", href: "/embroidery", label: "EMBROIDERY", image: "images/Black-Base-Rose-Floral.jpeg" },
   { key: "karchupi", href: "/karchupi", label: "KARCHUPI", image: "images/Black-Base-Rose-Floral.jpeg" },
   { key: "video", href: "/video", label: "VIDEO", image: "images/Royal-Blue-Golden-Floral-Print.jpeg" }
