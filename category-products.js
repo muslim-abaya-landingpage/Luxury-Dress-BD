@@ -208,203 +208,228 @@ window.CATEGORY_PRODUCTS = {
   /* ═══ ② কভার আপ — খালি (প্রোডাক্ট-এডিট.bat থেকে যোগ করুন) ═══ */
   "cover-up": [],
 
-  /* ═══ ③ টপস/কুর্তি — খালি ═══ */
-  "tops-kurti": [{
+  /* ═══ TOPS / KURTI LIST ═══ */
+
+"tops-kurti": [
+{
   id: "KURTI-01",
   name: "Classic Purple Lace-Work Kurti",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Classic%20Purple%20Lace-Work%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Classic%20Purple%20Lace-Work%20Kurti%20MUSLIM%20ABAYA.WebP?raw=true",
   link: "/",
   price: 250,
-  color: "Purple",
+  color: "purple",
+  colorLabel: "Purple",
   fabric: "TC Cotton",
   sizes: ["38", "40"],
-  detailNote: "আরামদায়ক ও স্টাইলিশ লেস-ওয়ার্ক কুর্তি! প্রিমিয়াম কটন ফেব্রিক। দৈর্ঘ্য: ৩৪ ইঞ্চি।"
+  detailNote: "Comfortable lace-work kurti made with premium cotton fabric. Length: 34 inches."
 },
 {
   id: "KURTI-02",
   name: "Elegant Grey Leaf Print Kurti",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Elegant%20Grey%20Leaf%20Print%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Elegant%20Grey%20Leaf%20Print%20Kurti%20MUSLIM%20ABAYA.WebP?raw=true",
   link: "/",
   price: 250,
-  color: "Grey",
+  color: "grey",
+  colorLabel: "Grey",
   fabric: "TC Cotton",
   sizes: ["38", "40"],
-  detailNote: "স্টাইলিশ লিফ প্রিন্ট ডিজাইন। আরামদায়ক ও ক্যাজুয়াল ব্যবহারের জন্য উপযুক্ত।"
+  detailNote: "Stylish leaf print design for daily wear."
 },
 {
   id: "KURTI-03",
   name: "Elegant Purple Floral Kurti",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Elegant%20Purple%20Floral%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Elegant%20Purple%20Floral%20Kurti%20MUSLIM%20ABAYA.WebP?raw=true",
   link: "/",
   price: 250,
-  color: "Purple",
+  color: "purple",
+  colorLabel: "Purple",
   fabric: "TC Cotton",
   sizes: ["38", "40"],
-  detailNote: "ট্রেন্ডি ফ্লোরাল প্রিন্ট ডিজাইন। অফিস বা ডেইলি ওয়্যারের জন্য পারফেক্ট।"
+  detailNote: "Floral printed kurti suitable for office and casual wear."
 },
 {
   id: "KURTI-04",
   name: "Elegant White Leaf Print Kurti",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Elegant%20White%20Leaf%20Print%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Elegant%20White%20Leaf%20Print%20Kurti%20MUSLIM%20ABAYA.WebP?raw=true",
   link: "/",
   price: 250,
-  color: "White",
+  color: "white",
+  colorLabel: "White",
   fabric: "TC Cotton",
   sizes: ["38", "40"],
-  detailNote: "সফট ও ব্রেথেবল ফেব্রিক। গরমে ব্যবহারের জন্য অত্যন্ত আরামদায়ক।"
+  detailNote: "Light and breathable cotton fabric perfect for summer."
 },
 {
   id: "KURTI-05",
-  name: "Light Pink Soft Floral Kurti",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Light%20Pink%20Soft%20Floral%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true",
+  name: "Light Pink Floral Kurti",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Light%20Pink%20Soft%20Floral%20Kurti%20MUSLIM%20ABAYA.WebP?raw=true",
   link: "/",
   price: 250,
-  color: "Light Pink",
+  color: "pink",
+  colorLabel: "Light Pink",
   fabric: "TC Cotton",
   sizes: ["38", "40"],
-  detailNote: "হালকা গোলাপি রঙের দারুণ ডিজাইন। দৈনন্দিন ব্যবহারের জন্য আদর্শ।"
+  detailNote: "Soft pink floral design for everyday comfort."
 },
+
 {
   id: "KURTI-06",
   name: "Magenta Leaf Print Kurti",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Magenta%20Leaf%20Print%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Magenta%20Leaf%20Print%20Kurti%20MUSLIM%20ABAYA.WebP?raw=true",
   link: "/",
   price: 250,
-  color: "Magenta",
+  color: "magenta",
+  colorLabel: "Magenta",
   fabric: "TC Cotton",
   sizes: ["38", "40"],
-  detailNote: "আকর্ষণীয় মেজেন্টা কালার। সফট ফেব্রিক, তাই সারাদিন আরামদায়ক।"
+  detailNote: "Soft cotton kurti with vibrant magenta color."
 },
+
 {
   id: "KURTI-07",
   name: "Magenta Tassel Detail Kurti",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Magenta%20Tassel%20Detail%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Magenta%20Tassel%20Detail%20Kurti%20MUSLIM%20ABAYA.WebP?raw=true",
   link: "/",
   price: 250,
-  color: "Magenta",
+  color: "magenta",
+  colorLabel: "Magenta",
   fabric: "TC Cotton",
   sizes: ["38", "40"],
-  detailNote: "ট্যাসেল ডিটেইলসহ প্রিমিয়াম ডিজাইন। স্টাইলিশ লুকের জন্য সেরা।"
+  detailNote: "Stylish tassel design kurti for modern look."
 },
+
 {
   id: "KURTI-08",
-  name: "Premium Pink Floral Lace-Work Kurti",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Premium%20Pink%20Floral%20Lace-Work%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true",
+  name: "Pink Floral Lace Work Kurti",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Premium%20Pink%20Floral%20Lace-Work%20Kurti%20MUSLIM%20ABAYA.WebP?raw=true",
   link: "/",
   price: 250,
-  color: "Pink",
+  color: "pink",
+  colorLabel: "Pink",
   fabric: "TC Cotton",
   sizes: ["38", "40"],
-  detailNote: "লেস-ওয়ার্ক ও ফ্লোরাল প্রিন্টের কম্বিনেশন। যেকোনো ক্যাজুয়াল প্রোগ্রামের জন্য দারুণ।"
+  detailNote: "Elegant lace work floral kurti design."
 },
+
 {
   id: "KURTI-09",
   name: "Vibrant Magenta Floral Kurti",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Vibrant%20Magenta%20Floral%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Vibrant%20Magenta%20Floral%20Kurti%20MUSLIM%20ABAYA.WebP?raw=true",
   link: "/",
   price: 250,
-  color: "Magenta",
+  color: "magenta",
+  colorLabel: "Magenta",
   fabric: "TC Cotton",
   sizes: ["38", "40"],
-  detailNote: "ভাইব্রেন্ট কালার ডিজাইন। প্রিমিয়াম কটন ফেব্রিক, দৈর্ঘ্য ৩৪ ইঞ্চি।"
+  detailNote: "Bright floral kurti for stylish daily wear."
 },
+
+/* ═══ FIXED DRESS ITEMS (YOU PROVIDED LINKS) ═══ */
+
 {
   id: "KURTI-10",
   name: "Premium Yellow Tie-Dye Cotton Maxi Dress",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-yellow-tie-dye-cotton-maxi-dress-for-women.webp",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/premium-yellow-tie-dye-cotton-maxi-dress-for-women.webp?raw=true",
   link: "/",
   price: 350,
   color: "yellow",
   colorLabel: "Yellow",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Attractive Tie-Dye design. Length: 43–44 Inches, Flare: 80 Inches"
+  detailNote: "Attractive tie-dye design maxi dress. Length: 43–44 inches, Flare: 80 inches."
 },
+
 {
   id: "KURTI-11",
   name: "Stylish Green Floral Cotton Midi Dress",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/stylish-green-floral-cotton-midi-dress-womens-fashion.webp",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/stylish-green-floral-cotton-midi-dress-womens-fashion.webp?raw=true",
   link: "/",
   price: 350,
   color: "green",
   colorLabel: "Green",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Stylish floral print midi dress. Length: 43–44 Inches, Flare: 80 Inches"
+  detailNote: "Floral printed midi dress in soft cotton fabric."
 },
+
 {
   id: "KURTI-12",
   name: "White Cherry Print Cotton One Piece",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-cherry-print-cotton-one-piece-dress-for-women.webp",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/white-cherry-print-cotton-one-piece-dress-for-women.webp?raw=true",
   link: "/",
   price: 350,
   color: "white",
   colorLabel: "White",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Beautiful cherry print one-piece dress. Length: 43–44 Inches, Flare: 80 Inches"
+  detailNote: "Beautiful cherry print one-piece dress."
 },
+
 {
   id: "KURTI-13",
-  name: "White & Lavender Floral Cotton Dress",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-lavender-floral-cotton-one-piece-dress-for-women-muslimabaya.webp",
+  name: "White Lavender Floral Cotton Dress",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/white-lavender-floral-cotton-one-piece-dress-for-women-muslimabaya.webp?raw=true",
   link: "/",
   price: 350,
   color: "white",
   colorLabel: "White / Lavender",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Soft lavender floral print. Length: 43–44 Inches, Flare: 80 Inches"
+  detailNote: "Soft lavender floral cotton dress."
 },
+
 {
   id: "KURTI-14",
   name: "White Maroon Block Print Cotton Dress",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-maroon-block-print-cotton-one-piece-dress-for-women.webp",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/white-maroon-block-print-cotton-one-piece-dress-for-women.webp?raw=true",
   link: "/",
   price: 350,
   color: "white",
   colorLabel: "White / Maroon",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Traditional block print design. Length: 43–44 Inches, Flare: 80 Inches"
+  detailNote: "Traditional block print cotton dress."
 },
+
 {
   id: "KURTI-15",
   name: "White Red Heart Print Cotton Dress",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-red-heart-print-cotton-one-piece-dress-for-women.webp",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/white-red-heart-print-cotton-one-piece-dress-for-women.webp?raw=true",
   link: "/",
   price: 350,
   color: "white",
   colorLabel: "White / Red",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Cute heart print pattern. Length: 43–44 Inches, Flare: 80 Inches"
+  detailNote: "Cute heart print cotton dress."
 },
+
 {
   id: "KURTI-16",
   name: "Yellow Cotton Flared One Piece",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/yellow-cotton-flared-one-piece-dress-for-women.webp",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/yellow-cotton-flared-one-piece-dress-for-women.webp?raw=true",
   link: "/",
   price: 350,
   color: "yellow",
   colorLabel: "Yellow",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Comfortable flared yellow dress. Length: 43–44 Inches, Flare: 80 Inches"
+  detailNote: "Comfortable flared cotton dress."
 },
+
 {
   id: "KURTI-17",
   name: "Yellow Striped Cotton One Piece",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/yellow-striped-cotton-one-piece-dress-for-women.webp",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/yellow-striped-cotton-one-piece-dress-for-women.webp?raw=true",
   link: "/",
   price: 350,
   color: "yellow",
   colorLabel: "Yellow",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Striped design, casual wear. Length: 43–44 Inches, Flare: 80 Inches"
+  detailNote: "Casual striped cotton dress."
 }
-],  
+],
 /* ═══ ④ টু-পিস সারি · PREMIUM TWO-PIECE · premium-two-piece.html ═══ */
   "premium-two-piece": [
     {
