@@ -452,8 +452,8 @@ window.CATEGORY_PRODUCTS = {
   color: "black",
   colorLabel: "Black / White",
   fabric: "Premium Cotton Fabric",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Elegant Black & White floral print puff sleeve maxi dress. Length: 48–50 Inches, Flare: 90 Inches."
+  sizes: ["34-46"],
+  detailNote: "Elegant Black & White floral print puff sleeve maxi dress. Length: 43–44 Inches, Flare: 80 Inches."
 }
  ],
 /* ═══ ④ টু-পিস সারি · PREMIUM TWO-PIECE · premium-two-piece.html ═══ */
