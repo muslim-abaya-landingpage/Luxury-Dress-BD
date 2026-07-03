@@ -591,6 +591,66 @@ window.CATEGORY_PRODUCTS = {
   detailNote: "Length: 37–38 Inches"
 },
   {
+  id: "DR-33",
+  name: "Premium Black Floral Women's Co-ord Set",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-black-floral-womens-co-ord-set-bangladesh.webp",
+  link: "/",
+  price: 650,
+  color: "black",
+  colorLabel: "Black",
+  fabric: "Alex Soft Georgette",
+  sizes: ["Body 42 (Free Size)"],
+  detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare"
+},
+  {
+  id: "DR-34",
+  name: "Premium Blue Floral Women's Co-ord Set",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-blue-floral-co-ord-set.webp",
+  link: "/",
+  price: 650,
+  color: "blue",
+  colorLabel: "Blue",
+  fabric: "Alex Soft Georgette",
+  sizes: ["Body 42 (Free Size)"],
+  detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare"
+},
+  {
+  id: "DR-35",
+  name: "Premium Navy Blue Floral Women's Co-ord Set",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-navy-blue-floral-co-ord-set.webp",
+  link: "/",
+  price: 650,
+  color: "navy",
+  colorLabel: "Navy Blue",
+  fabric: "Alex Soft Georgette",
+  sizes: ["Body 42 (Free Size)"],
+  detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare"
+},
+  {
+  id: "DR-36",
+  name: "Premium Pink Floral Women's Co-ord Set",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-pink-floral-co-ord-set.webp",
+  link: "/",
+  price: 650,
+  color: "pink",
+  colorLabel: "Pink",
+  fabric: "Alex Soft Georgette",
+  sizes: ["Body 42 (Free Size)"],
+  detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare"
+},
+  {
+  id: "DR-37",
+  name: "Premium Sky Blue Floral Women's Co-ord Set",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-sky-blue-floral-co-ord-set.webp",
+  link: "/",
+  price: 650,
+  color: "sky-blue",
+  colorLabel: "Sky Blue",
+  fabric: "Alex Soft Georgette",
+  sizes: ["Body 42 (Free Size)"],
+  detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare"
+},
+{
       id: "DR-31",
       name: "Black Floral Georgette Set",
       image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/black-floral-georgette-two-piece-set-bangladesh.jpg?raw=1",
@@ -601,8 +661,8 @@ window.CATEGORY_PRODUCTS = {
       fabric: "Premium Soft Georgette",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
       detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
-    }
-   ],
+  }
+  ],
   /* ═══ ⑤ এম্ব্রয়ডারি — খালি ═══ */
   embroidery: [],
 
