@@ -440,6 +440,18 @@ window.CATEGORY_PRODUCTS = {
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Premium sky blue botanical print cotton dress. Length: 43–44 Inches, Flare: 80 Inches"
+},
+  {
+  id: "KURTI-19",
+  name: "White Lilac Botanical Print Cotton One Piece Dress",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-lilac-botanical-print-cotton-one-piece-dress-for-women.webp",
+  link: "/",
+  price: 350,
+  color: "white",
+  colorLabel: "White / Lilac",
+  fabric: "Premium Cotton Fabric",
+  sizes: ["34", "36", "38", "40", "42", "44", "46"],
+  detailNote: "Elegant white and lilac botanical print cotton one piece dress. Length: 43–44 Inches, Flare: 80 Inches"
 }
 ],
 /* ═══ ④ টু-পিস সারি · PREMIUM TWO-PIECE · premium-two-piece.html ═══ */
