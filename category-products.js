@@ -727,6 +727,8 @@ window.FILTER_COLOR_MAP = {
   white: { label: "Soft White", hex: "#f5f5f5" },
   pink: { label: "Rose Pink", hex: "#f4b4c4" },
   blue: { label: "Royal Blue", hex: "#4a6fa5" },
+  navy: { label: "Navy Blue", hex: "#1E3A8A" },
+  "sky-blue": { label: "Sky Blue", hex: "#87CEEB" },
   green: { label: "Olive Green", hex: "#6b8f71" },
   yellow: { label: "Yellow", hex: "#FFD54F" },
   red: { label: "Red", hex: "#E53935" },
