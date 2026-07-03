@@ -528,19 +528,19 @@ window.CATEGORY_PRODUCTS = {
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
       detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
     },
-    {
-      id: "DR-28",
-      name: "Pink Floral Printed Co-ord Set",
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/pink-floral-printed-co-ord-set.jpeg?raw=1",
-      link: "/",
-      price: 650,
-      color: "pink",
-      colorLabel: "Pink Floral Co-ord Set",
-      fabric: "Alex soft Georgette",
-      sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
-      detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
+  {
+  id: "DR-32",
+  name: "Premium White Pink Floral Print Women's Co-ord Set",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-pink-floral-print-womens-co-ord-set-premium.webp",
+  link: "/",
+  price: 650,
+  color: "pink",
+  colorLabel: "White & Pink",
+  fabric: "Alex Soft Georgette",
+  sizes: ["Free Size (Fits up to Bust 42)"],
+  detailNote: "Premium white and pink floral print co-ord set. Length: 37–38 Inches."
     },
-    {
+  {
       id: "DR-31",
       name: "Black Floral Georgette Set",
       image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/black-floral-georgette-two-piece-set-bangladesh.jpg?raw=1",
