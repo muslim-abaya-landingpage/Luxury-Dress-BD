@@ -429,6 +429,18 @@ window.CATEGORY_PRODUCTS = {
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Casual striped cotton dress."
 }
+  {
+  id: "KURTI-18",
+  name: "Premium Sky Blue Botanical Print Cotton One Piece Dress",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/premium-sky-blue-botanical-print-cotton-one-piece-dress-for-women.webp?raw=true",
+  link: "/",
+  price: 350,
+  color: "blue",
+  colorLabel: "Sky Blue",
+  fabric: "Premium Cotton Fabric",
+  sizes: ["34", "36", "38", "40", "42", "44", "46"],
+  detailNote: "Premium sky blue botanical print cotton dress. Length: 43–44 Inches, Flare: 80 Inches"
+}
 ],
 /* ═══ ④ টু-পিস সারি · PREMIUM TWO-PIECE · premium-two-piece.html ═══ */
   "premium-two-piece": [
