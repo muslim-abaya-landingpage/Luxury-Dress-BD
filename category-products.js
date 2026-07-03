@@ -442,6 +442,18 @@ window.CATEGORY_PRODUCTS = {
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Elegant white and lilac botanical print cotton one piece dress. Length: 43–44 Inches, Flare: 80 Inches"
+},
+  {
+  id: "KURTI-20",
+  name: "Black White Floral Puff Sleeve Maxi Dress",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/black-white-floral-puff-sleeve-maxi-dress-modern-lifestyle.webp",
+  link: "/",
+  price: 350,
+  color: "black",
+  colorLabel: "Black / White",
+  fabric: "Premium Cotton Fabric",
+  sizes: ["34", "36", "38", "40", "42", "44", "46"],
+  detailNote: "Elegant black and white floral print puff sleeve maxi dress. Length: 48–50 Inches, Flare: 90 Inches"
 }
  ],
 /* ═══ ④ টু-পিস সারি · PREMIUM TWO-PIECE · premium-two-piece.html ═══ */
@@ -541,20 +553,8 @@ window.CATEGORY_PRODUCTS = {
       fabric: "Premium Soft Georgette",
       sizes: ["বডি ৪২ (ফ্রি সাইজ)"],
       detailNote: "লং: ৩৭-৩৮ ইঞ্চি"
-    },
-  {
-  id: "DR-33",
-  name: "Premium Black Silver Floral Cotton One Piece Dress",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-black-silver-floral-cotton-one-piece-dress-for-women-bangladesh.webp",
-  link: "/",
-  price: 350,
-  color: "black",
-  colorLabel: "Black / Silver",
-  fabric: "Premium Cotton Fabric",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Length: 43–44 Inches, Flare: 80 Inches"
-}
-  ],
+    }
+   ],
   /* ═══ ⑤ এম্ব্রয়ডারি — খালি ═══ */
   embroidery: [],
 
