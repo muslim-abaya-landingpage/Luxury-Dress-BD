@@ -454,6 +454,18 @@ window.CATEGORY_PRODUCTS = {
   fabric: "Premium Cotton Fabric",
   sizes: ["34-46"],
   detailNote: "Elegant Black & White floral print puff sleeve maxi dress. Length: 43–44 Inches, Flare: 80 Inches."
+},
+  {
+  id: "KURTI-21",
+  name: "White Yellow Floral Puff Sleeve Cotton Maxi Dress",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-yellow-floral-puff-sleeve-cotton-maxi-dress-premium-lifestyle.webp",
+  link: "/",
+  price: 350,
+  color: "white",
+  colorLabel: "White / Yellow",
+  fabric: "Premium Cotton Fabric",
+  sizes: ["34-46"],
+  detailNote: "Elegant White & Yellow floral print puff sleeve cotton maxi dress. Length: 43–44 Inches, Flare: 80 Inches."
 }
  ],
 /* ═══ ④ টু-পিস সারি · PREMIUM TWO-PIECE · premium-two-piece.html ═══ */
