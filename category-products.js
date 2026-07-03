@@ -428,7 +428,7 @@ window.CATEGORY_PRODUCTS = {
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Casual striped cotton dress."
-}
+},
   {
   id: "KURTI-18",
   name: "Premium Sky Blue Botanical Print Cotton One Piece Dress",
