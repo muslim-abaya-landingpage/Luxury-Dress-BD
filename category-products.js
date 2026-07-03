@@ -531,7 +531,7 @@ window.CATEGORY_PRODUCTS = {
   {
   id: "DR-32",
   name: "Premium White Pink Floral Print Women's Co-ord Set",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/white-pink-floral-print-womens-co-ord-set-premium.webp?raw=1",
+  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/white-pink-floral-print-womens-co-ord-set-premium.webp?raw=true",
   link: "/",
   price: 650,
   color: "pink",
