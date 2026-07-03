@@ -323,9 +323,6 @@ window.CATEGORY_PRODUCTS = {
   sizes: ["38", "40"],
   detailNote: "Bright floral kurti for stylish daily wear."
 },
-
-/* ═══ FIXED DRESS ITEMS (YOU PROVIDED LINKS) ═══ */
-
 {
   id: "KURTI-10",
   name: "Premium Yellow Tie-Dye Cotton Maxi Dress",
@@ -338,7 +335,6 @@ window.CATEGORY_PRODUCTS = {
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Attractive tie-dye design maxi dress. Length: 43–44 inches, Flare: 80 inches."
 },
-
 {
   id: "KURTI-11",
   name: "Stylish Green Floral Cotton Midi Dress",
@@ -351,7 +347,6 @@ window.CATEGORY_PRODUCTS = {
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Floral printed midi dress in soft cotton fabric."
 },
-
 {
   id: "KURTI-12",
   name: "White Cherry Print Cotton One Piece",
@@ -364,7 +359,6 @@ window.CATEGORY_PRODUCTS = {
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Beautiful cherry print one-piece dress."
 },
-
 {
   id: "KURTI-13",
   name: "White Lavender Floral Cotton Dress",
@@ -377,7 +371,6 @@ window.CATEGORY_PRODUCTS = {
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Soft lavender floral cotton dress."
 },
-
 {
   id: "KURTI-14",
   name: "White Maroon Block Print Cotton Dress",
@@ -390,7 +383,6 @@ window.CATEGORY_PRODUCTS = {
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Traditional block print cotton dress."
 },
-
 {
   id: "KURTI-15",
   name: "White Red Heart Print Cotton Dress",
@@ -403,7 +395,6 @@ window.CATEGORY_PRODUCTS = {
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Cute heart print cotton dress."
 },
-
 {
   id: "KURTI-16",
   name: "Yellow Cotton Flared One Piece",
@@ -416,7 +407,6 @@ window.CATEGORY_PRODUCTS = {
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Comfortable flared cotton dress."
 },
-
 {
   id: "KURTI-17",
   name: "Yellow Striped Cotton One Piece",
@@ -452,6 +442,18 @@ window.CATEGORY_PRODUCTS = {
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Elegant white and lilac botanical print cotton one piece dress. Length: 43–44 Inches, Flare: 80 Inches"
+}
+ {
+  id: "KURTI-20",
+  name: "Premium Black Silver Floral Cotton One Piece Dress",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-black-silver-floral-cotton-one-piece-dress-for-women-bangladesh.webp",
+  link: "/",
+  price: 350,
+  color: "black",
+  colorLabel: "Black / Silver",
+  fabric: "Premium Cotton Fabric",
+  sizes: ["34", "36", "38", "40", "42", "44", "46"],
+  detailNote: "Premium black silver floral cotton one piece dress. Length: 43–44 Inches, Flare: 80 Inches"
 }
 ],
 /* ═══ ④ টু-পিস সারি · PREMIUM TWO-PIECE · premium-two-piece.html ═══ */
