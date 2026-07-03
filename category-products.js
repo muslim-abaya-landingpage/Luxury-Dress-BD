@@ -313,91 +313,90 @@ window.CATEGORY_PRODUCTS = {
     name: "Premium Yellow Tie-Dye Cotton Maxi Dress",
     image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/premium-yellow-tie-dye-cotton-maxi-dress-for-women.webp.jpg?raw=true",
     link: "/",
-    price: 850,
+    price: 350,
     color: "Yellow",
-    fabric: "Cotton",
-    sizes: ["M", "L", "XL"],
-    detailNote: "আকর্ষণীয় টাই-ডাই ডিজাইন। আরামদায়ক কটন ফেব্রিক।"
+    fabric: "Premium Cotton Fabric",
+    sizes: ["34", "36", "38", "40", "42", "44", "46"],
+    detailNote: "Attractive Tie-Dye design. Length: 43–44 Inches, Flare: 80 Inches"
   },
   {
     id: "KURTI-11",
     name: "Stylish Green Floral Cotton Midi Dress",
     image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/stylish-green-floral-cotton-midi-dress-womens-fashion.webp.jpg?raw=true",
     link: "/",
-    price: 790,
+    price: 350,
     color: "Green",
-    fabric: "Cotton",
-    sizes: ["M", "L"],
-    detailNote: "ফ্লোরাল প্রিন্টের স্টাইলিশ মিডি ড্রেস। গ্রীষ্মের জন্য উপযুক্ত।"
+    fabric: "Premium Cotton Fabric",
+    sizes: ["34", "36", "38", "40", "42", "44", "46"],
+    detailNote: "Stylish floral print midi dress. Length: 43–44 Inches, Flare: 80 Inches"
   },
   {
     id: "KURTI-12",
     name: "White Cherry Print Cotton One Piece",
     image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/white-cherry-print-cotton-one-piece-dress-for-women.webp.jpg?raw=true",
     link: "/",
-    price: 750,
+    price: 350,
     color: "White",
-    fabric: "Cotton",
-    sizes: ["S", "M", "L"],
-    detailNote: "চেরি প্রিন্টের সুন্দর ওয়ান পিস ড্রেস।"
+    fabric: "Premium Cotton Fabric",
+    sizes: ["34", "36", "38", "40", "42", "44", "46"],
+    detailNote: "Beautiful cherry print one-piece dress. Length: 43–44 Inches, Flare: 80 Inches"
   },
   {
     id: "KURTI-13",
     name: "White & Lavender Floral Cotton Dress",
     image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/white-lavender-floral-cotton-one-piece-dress-for-women-muslimabaya.webp%20(2).webp?raw=true",
     link: "/",
-    price: 820,
+    price: 350,
     color: "White/Lavender",
-    fabric: "Cotton",
-    sizes: ["M", "L"],
-    detailNote: "সফট ল্যাভেন্ডার ফ্লোরাল প্রিন্ট।"
+    fabric: "Premium Cotton Fabric",
+    sizes: ["34", "36", "38", "40", "42", "44", "46"],
+    detailNote: "Soft lavender floral print. Length: 43–44 Inches, Flare: 80 Inches"
   },
   {
     id: "KURTI-14",
     name: "White Maroon Block Print Cotton Dress",
     image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/white-maroon-block-print-cotton-one-piece-dress-for-women.webp.jpg?raw=true",
     link: "/",
-    price: 890,
+    price: 350,
     color: "White/Maroon",
-    fabric: "Cotton",
-    sizes: ["M", "L", "XL"],
-    detailNote: "ঐতিহ্যবাহী ব্লক প্রিন্ট ডিজাইন।"
+    fabric: "Premium Cotton Fabric",
+    sizes: ["34", "36", "38", "40", "42", "44", "46"],
+    detailNote: "Traditional block print design. Length: 43–44 Inches, Flare: 80 Inches"
   },
   {
     id: "KURTI-15",
     name: "White Red Heart Print Cotton Dress",
     image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/white-red-heart-print-cotton-one-piece-dress-for-women.webp.jpg?raw=true",
     link: "/",
-    price: 720,
+    price: 350,
     color: "White/Red",
-    fabric: "Cotton",
-    sizes: ["M", "L"],
-    detailNote: "কিউট হার্ট প্রিন্ট প্যাটার্ন।"
+    fabric: "Premium Cotton Fabric",
+    sizes: ["34", "36", "38", "40", "42", "44", "46"],
+    detailNote: "Cute heart print pattern. Length: 43–44 Inches, Flare: 80 Inches"
   },
   {
     id: "KURTI-16",
     name: "Yellow Cotton Flared One Piece",
     image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/yellow-cotton-flared-one-piece-dress-for-women.webp.jpg?raw=true",
     link: "/",
-    price: 950,
+    price: 350,
     color: "Yellow",
-    fabric: "Cotton",
-    sizes: ["L", "XL"],
-    detailNote: "ফ্লেয়ারড ডিজাইনের আরামদায়ক হলুদ ড্রেস।"
+    fabric: "Premium Cotton Fabric",
+    sizes: ["34", "36", "38", "40", "42", "44", "46"],
+    detailNote: "Comfortable flared yellow dress. Length: 43–44 Inches, Flare: 80 Inches"
   },
   {
     id: "KURTI-17",
     name: "Yellow Striped Cotton One Piece",
     image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/yellow-striped-cotton-one-piece-dress-for-women.webp.jpg?raw=true",
     link: "/",
-    price: 780,
+    price: 350,
     color: "Yellow",
-    fabric: "Cotton",
-    sizes: ["M", "L"],
-    detailNote: "স্ট্রাইপ ডিজাইন, ক্যাজুয়াল ওয়্যার।"
-  }
-],
-
+    fabric: "Premium Cotton Fabric",
+    sizes: ["34", "36", "38", "40", "42", "44", "46"],
+    detailNote: "Striped design, casual wear. Length: 43–44 Inches, Flare: 80 Inches"
+  },
+                 
   /* ═══ ④ টু-পিস সারি · PREMIUM TWO-PIECE · premium-two-piece.html ═══ */
   "premium-two-piece": [
     {
