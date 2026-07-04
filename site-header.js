@@ -286,7 +286,7 @@
     '<div class="nav-icons">' +
     '<button type="button" class="nav-icon-btn" id="navSearchOpen" aria-label="Search" aria-expanded="false">' + ICON_SEARCH + '</button>' +
     '<button type="button" class="cart-drawer-trigger" data-cart-trigger="1" style="position:relative" aria-label="Cart">' + ICON_BAG + '<span id="cart-count">0</span></button>' +
-    '<a href="https://wa.me/8801971642683" target="_blank" rel="noopener" aria-label="Message">' + ICON_CHAT + '</a>' +
+    '<a href="https://wa.me/8801970831783" target="_blank" rel="noopener" aria-label="Message">' + ICON_CHAT + '</a>' +
     '<a href="/signin" aria-label="Account">' + ICON_USER + '</a>' +
     '<button type="button" class="nav-menu-btn" onclick="window.toggleAbayaMenu()" aria-label="Menu">' + ICON_MENU + '</button>' +
     '</div></div></div>' +
