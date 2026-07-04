@@ -10,8 +10,8 @@
   var CONTACT = {
     email: "muslimabaya@gmail.com",
     phone: "+880 1971-642683",
-    phoneTel: "+8801971642683",
-    whatsapp: "https://wa.me/8801971642683",
+    phoneTel: "+8801970831783",
+    whatsapp: "https://wa.me/8801970831783",
     address: "832, West Rasulpur, Dhaka-1211, Bangladesh"
   };
 
