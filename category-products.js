@@ -12,7 +12,7 @@ window.CATEGORY_PRODUCTS = {
 
   /* ═══ ① আবায়া সারি · ABAYA · abaya.html · /abaya ═══ */
   abaya: [
-    {
+  {
       id: "ABY-MAROON-1",
       name: "Maroon Abaya Set",
       image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Maroon%20Abaya%20Set...jpeg?raw=1",
