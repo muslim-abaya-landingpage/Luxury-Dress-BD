@@ -25,7 +25,7 @@ window.CATEGORY_PRODUCTS = {
       priceByType: { "Full Set": 999, "Abaya Only": 799 }
   },
     {
-    id: "ABY-BLK-3P-01",
+    id: "ABY-BLK-3P-02",
     name: "Premium Black 3 Part Abaya Set",
     image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-black-3-part-abaya-set-muslim-abaya-bd.webp",
     link: "/",
