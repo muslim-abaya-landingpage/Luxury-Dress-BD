@@ -576,7 +576,31 @@ window.CATEGORY_PRODUCTS = {
   fabric: "Premium Cotton Fabric",
   sizes: ["34-46"],
   detailNote: "Premium tribal print cotton two-piece set available in four elegant colors. Soft premium cotton fabric with stylish tribal doll print."
-}
+},
+  {
+  id: "KURTI-32",
+  name: "Premium Pink Floral Midi Dress",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-pink-floral-midi-dress-for-women-bangladesh.webp",
+  link: "/",
+  price: 450,
+  color: "pink",
+  colorLabel: "Pink Floral",
+  fabric: "Premium Cotton Fabric",
+  sizes: ["34-46"],
+  detailNote: "Premium cotton midi dress with elegant pink floral print. Soft, breathable fabric with a comfortable A-line fit for everyday wear."
+},
+{
+  id: "KURTI-33",
+  name: "Premium Yellow Striped Midi Dress",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-yellow-striped-midi-dress-women-bangladesh.webp",
+  link: "/",
+  price: 450,
+  color: "yellow",
+  colorLabel: "Yellow Striped",
+  fabric: "Premium Cotton Fabric",
+  sizes: ["34-46"],
+  detailNote: "Premium cotton midi dress featuring elegant yellow striped design. Soft, breathable fabric with a stylish and comfortable fit for daily wear."
+}  
  ],
 /* ═══ ④ টু-পিস সারি · PREMIUM TWO-PIECE · premium-two-piece.html ═══ */
   "premium-two-piece": [
