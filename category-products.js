@@ -514,6 +514,66 @@ window.CATEGORY_PRODUCTS = {
   fabric: "Premium Cotton Fabric",
   sizes: ["34-46"],
   detailNote: "Elegant black & white geometric print premium cotton one-piece kurti. Length: 43–44 Inches, Flare: 80 Inches."
+},
+  {
+  id: "KURTI-26",
+  name: "Premium Tribal Print Cotton One-Piece Maxi Dress - Black",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Tribal-Print-One-Piece-Black.webp",
+  link: "/",
+  price: 450,
+  color: "black",
+  colorLabel: "Black",
+  fabric: "Premium Cotton Fabric",
+  sizes: ["34-46"],
+  detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 43–44 inches, flare: 80 inches."
+},
+{
+  id: "KURTI-27",
+  name: "Premium Tribal Print Cotton One-Piece Maxi Dress - Cherry Red",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Tribal-Print-One-Piece-Cherry-Red.webp",
+  link: "/",
+  price: 450,
+  color: "red",
+  colorLabel: "Cherry Red",
+  fabric: "Premium Cotton Fabric",
+  sizes: ["34-46"],
+  detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 43–44 inches, flare: 80 inches."
+},
+{
+  id: "KURTI-28",
+  name: "Premium Tribal Print Cotton One-Piece Maxi Dress - Navy Blue",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Tribal-Print-One-Piece-Navy-Blue.webp",
+  link: "/",
+  price: 450,
+  color: "blue",
+  colorLabel: "Navy Blue",
+  fabric: "Premium Cotton Fabric",
+  sizes: ["34-46"],
+  detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 43–44 inches, flare: 80 inches."
+},
+{
+  id: "KURTI-29",
+  name: "Premium Tribal Print Cotton One-Piece Maxi Dress - Rust Brown",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Tribal-Print-One-Piece-Rust-Brown.webp",
+  link: "/",
+  price: 450,
+  color: "brown",
+  colorLabel: "Rust Brown",
+  fabric: "Premium Cotton Fabric",
+  sizes: ["34-46"],
+  detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 43–44 inches, flare: 80 inches."
+},
+{
+  id: "KURTI-30",
+  name: "Premium Tribal Print Women's Two-Piece Set",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Tribal-Print-Women's-Two-Piece-Set.webp",
+  link: "/",
+  price: 450,
+  color: "multicolor",
+  colorLabel: "Rust Brown / Black / Navy Blue / Cherry Red",
+  fabric: "Premium Cotton Fabric",
+  sizes: ["34-46"],
+  detailNote: "Premium tribal print cotton two-piece set available in four elegant colors. Soft premium cotton fabric with stylish tribal doll print."
 }
  ],
 /* ═══ ④ টু-পিস সারি · PREMIUM TWO-PIECE · premium-two-piece.html ═══ */
