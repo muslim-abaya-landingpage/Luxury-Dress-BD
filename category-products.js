@@ -34,6 +34,7 @@ window.CATEGORY_PRODUCTS = {
     colorLabel: "Black",
     fabric: "Premium Chiffon Georgette + Dubai Cherry",
     sizes: ["44", "46", "48", "50", "52", "54", "56"],
+    priceByType: { "Full Set": 1450, "Abaya Only": 1150 }
     detailNote: "3 Part Premium Abaya Set including Koti, Inner & Hijab. Premium Chiffon Georgette Koti and Hijab with Soft Dubai Cherry Inner."
   },
     {
