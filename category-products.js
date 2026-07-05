@@ -35,7 +35,7 @@ window.CATEGORY_PRODUCTS = {
     fabric: "Premium Chiffon Georgette + Dubai Cherry",
     sizes: ["44", "46", "48", "50", "52", "54", "56"],
     detailNote: "3 Part Premium Abaya Set including Koti, Inner & Hijab. Premium Chiffon Georgette Koti and Hijab with Soft Dubai Cherry Inner."
-},
+  },
     {
       id: "ABY-MAROON-3",
       name: "Maroon Abaya Set - Side",
