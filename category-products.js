@@ -502,6 +502,18 @@ window.CATEGORY_PRODUCTS = {
   fabric: "Premium Cotton Fabric",
   sizes: ["34-46"],
   detailNote: "Elegant Sage Green & White floral print cotton maxi dress. Length: 43–44 Inches, Flare: 80 Inches."
+},
+  {
+  id: "KURTI-25",
+  name: "Black White Geometric Print Cotton One Piece Kurti",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/black-white-geometric-print-cotton-one-piece-kurti-for-women-bangladesh.webp",
+  link: "/",
+  price: 350,
+  color: "black",
+  colorLabel: "Black / White",
+  fabric: "Premium Cotton Fabric",
+  sizes: ["34-46"],
+  detailNote: "Elegant black & white geometric print premium cotton one-piece kurti. Length: 43–44 Inches, Flare: 80 Inches."
 }
  ],
 /* ═══ ④ টু-পিস সারি · PREMIUM TWO-PIECE · premium-two-piece.html ═══ */
