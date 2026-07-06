@@ -11,11 +11,12 @@
 window.CATEGORY_PRODUCTS = {
 
   /* ═══ ① আবায়া সারি · ABAYA · abaya.html · /abaya ═══ */
+
   abaya: [
   {
       id: "ABY-MAROON-1",
       name: "Maroon Abaya Set",
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Maroon%20Abaya%20Set...jpeg?raw=1",
+      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Maroon%20Abaya%20Set...jpeg",
       link: "/",
       price: 999,
       color: "maroon",
@@ -24,22 +25,22 @@ window.CATEGORY_PRODUCTS = {
       sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: { "Full Set": 999, "Abaya Only": 799 }
   },
-{
-  "id": "ABY-BLK-3P-02",
-  "name": "Premium Black 3 Part Abaya Set",
-  "image": "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-black-3-part-abaya-set-muslim-abaya-bd.webp",
-  "link": "/",
-  "price": 1450,
-  "color": "black",
-  "colorLabel": "Black",
-  "fabric": "Premium Chiffon Georgette + Dubai Cherry",
-  "sizes": ["44", "46", "48", "50", "52", "54", "56"],
-  "priceByType": {
-    "Full Set": 1450,
-    "Abaya Only": 1150
+  {
+      id: "ABY-BLK-3P-02",
+      name: "Premium Black 3 Part Abaya Set",
+      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-black-3-part-abaya-set-muslim-abaya-bd.webp",
+      link: "/",
+      price: 1450,
+      color: "black",
+      colorLabel: "Black",
+      fabric: "Premium Chiffon Georgette + Dubai Cherry",
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
+      priceByType: {
+        "Full Set": 1450,
+        "Abaya Only": 1150
+      },
+      detailNote: "3 Part Premium Abaya Set including Koti, Inner & Hijab. Premium Chiffon Georgette Koti and Hijab with Soft Dubai Cherry Inner."
   },
-  "detailNote": "3 Part Premium Abaya Set including Koti, Inner & Hijab. Premium Chiffon Georgette Koti and Hijab with Soft Dubai Cherry Inner."
-},
   {
       id: "ABY-MAROON-3",
       name: "Maroon Abaya Set - Side",
@@ -51,7 +52,7 @@ window.CATEGORY_PRODUCTS = {
       fabric: "Dubai Cherry",
       sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: { "Full Set": 999, "Abaya Only": 799 }
-    },
+  },
     {
       id: "ABY-BLACK-1",
       name: "Black Abaya Set",
