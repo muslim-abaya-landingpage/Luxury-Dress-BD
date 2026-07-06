@@ -44,7 +44,7 @@ window.CATEGORY_PRODUCTS = {
   {
       id: "ABY-MAROON-3",
       name: "Maroon Abaya Set - Side",
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Maroon%20Abaya%20Set.jpeg?raw=1",
+      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Maroon%20Abaya%20Set.jpeg",
       link: "/",
       price: 999,
       color: "maroon",
@@ -53,10 +53,10 @@ window.CATEGORY_PRODUCTS = {
       sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: { "Full Set": 999, "Abaya Only": 799 }
   },
-    {
+  {
       id: "ABY-BLACK-1",
       name: "Black Abaya Set",
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Black...jpeg?raw=1",
+      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Black...jpeg",
       link: "/",
       price: 999,
       color: "black",
@@ -64,11 +64,11 @@ window.CATEGORY_PRODUCTS = {
       fabric: "Dubai Cherry",
       sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: { "Full Set": 999, "Abaya Only": 799 }
-    },
+  },
     {
       id: "ABY-BLACK-2",
       name: "Black Abaya Set - Back",
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Black..jpeg?raw=1",
+      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Black..jpeg",
       link: "/",
       price: 999,
       color: "black",
@@ -80,7 +80,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "ABY-BLACK-3",
       name: "Black Abaya Set - Side",
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Black.jpeg?raw=1",
+      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Black.jpeg",
       link: "/",
       price: 999,
       color: "black",
@@ -92,7 +92,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "ABY-VERSACE-1",
       name: "Versace Border Premium Abaya Set",
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Versace%20Border%20Premium%20Abaya%20Set...jpg?raw=1",
+      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Versace%20Border%20Premium%20Abaya%20Set...jpg",
       link: "/",
       price: 1550,
       color: "black",
@@ -104,7 +104,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "ABY-VERSACE-2",
       name: "Versace Border Premium Abaya Set - Back",
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Versace%20Border%20Premium%20Abaya%20Set..jpg?raw=1",
+      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Versace%20Border%20Premium%20Abaya%20Set..jpg",
       link: "/",
       price: 1550,
       color: "black",
@@ -116,7 +116,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "ABY-VERSACE-3",
       name: "Versace Border Premium Abaya Set - Side",
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Versace%20Border%20Premium%20Abaya%20Set.jpg?raw=1",
+      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Versace%20Border%20Premium%20Abaya%20Set.jpg",
       link: "/",
       price: 1550,
       color: "black",
@@ -128,7 +128,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "ABY-FLORAL-1",
       name: "Premium Floral Motif Abaya Set",
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Premium-Floral-Motif-Abaya-Set...jpeg?raw=1",
+      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Floral-Motif-Abaya-Set...jpeg",
       link: "/",
       price: 1650,
       color: "black",
@@ -140,7 +140,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "ABY-FLORAL-2",
       name: "Premium Floral Motif Abaya Set - Back",
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Premium-Floral-Motif-Abaya-Set..jpeg?raw=1",
+      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Floral-Motif-Abaya-Set..jpeg",
       link: "/",
       price: 1650,
       color: "black",
@@ -152,7 +152,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "ABY-FLORAL-3",
       name: "Premium Floral Motif Abaya Set - Side",
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Premium-Floral-Motif-Abaya-Set.jpeg?raw=1",
+      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Floral-Motif-Abaya-Set.jpeg",
       link: "/",
       price: 1650,
       color: "black",
@@ -164,7 +164,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "ABY-BUTTERFLY-1",
       name: "Butterfly Abaya Set",
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Butterfly-Ababa....jpg?raw=1",
+      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Butterfly-Ababa....jpg",
       link: "/",
       price: 799,
       color: "black",
@@ -176,7 +176,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "ABY-BUTTERFLY-2",
       name: "Butterfly Abaya Set - Back",
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Butterfly-Ababa...jpg?raw=1",
+      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Butterfly-Ababa...jpg",
       link: "/",
       price: 799,
       color: "black",
@@ -188,7 +188,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "ABY-BUTTERFLY-3",
       name: "Butterfly Abaya Set - Side",
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Butterfly-Ababa..jpg?raw=1",
+      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Butterfly-Ababa..jpg",
       link: "/",
       price: 799,
       color: "black",
@@ -200,7 +200,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "ABY-BUTTERFLY-4",
       name: "Butterfly Abaya Set - Detail",
-      image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Butterfly-Ababa.jpg?raw=1",
+      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Butterfly-Ababa.jpg",
       link: "/",
       price: 799,
       color: "black",
@@ -220,7 +220,7 @@ window.CATEGORY_PRODUCTS = {
 {
   id: "KURTI-01",
   name: "Classic Purple Lace-Work Kurti",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Classic%20Purple%20Lace-Work%20Kurti%20MUSLIM%20ABAYA.WebP?raw=true",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Classic%20Purple%20Lace-Work%20Kurti%20MUSLIM%20ABAYA.WebP",
   link: "/",
   price: 250,
   color: "purple",
@@ -232,7 +232,7 @@ window.CATEGORY_PRODUCTS = {
 {
   id: "KURTI-02",
   name: "Elegant Grey Leaf Print Kurti",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Elegant%20Grey%20Leaf%20Print%20Kurti%20MUSLIM%20ABAYA.WebP?raw=true",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Elegant%20Grey%20Leaf%20Print%20Kurti%20MUSLIM%20ABAYA.WebP",
   link: "/",
   price: 250,
   color: "grey",
@@ -244,7 +244,7 @@ window.CATEGORY_PRODUCTS = {
 {
   id: "KURTI-03",
   name: "Elegant Purple Floral Kurti",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Elegant%20Purple%20Floral%20Kurti%20MUSLIM%20ABAYA.WebP?raw=true",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Elegant%20Purple%20Floral%20Kurti%20MUSLIM%20ABAYA.WebP",
   link: "/",
   price: 250,
   color: "purple",
@@ -256,7 +256,7 @@ window.CATEGORY_PRODUCTS = {
 {
   id: "KURTI-04",
   name: "Elegant White Leaf Print Kurti",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Elegant%20White%20Leaf%20Print%20Kurti%20MUSLIM%20ABAYA.WebP?raw=true",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Elegant%20White%20Leaf%20Print%20Kurti%20MUSLIM%20ABAYA.WebP",
   link: "/",
   price: 250,
   color: "white",
@@ -268,7 +268,7 @@ window.CATEGORY_PRODUCTS = {
 {
   id: "KURTI-05",
   name: "Light Pink Floral Kurti",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Light%20Pink%20Soft%20Floral%20Kurti%20MUSLIM%20ABAYA.WebP?raw=true",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Light%20Pink%20Soft%20Floral%20Kurti%20MUSLIM%20ABAYA.WebP",
   link: "/",
   price: 250,
   color: "pink",
@@ -277,11 +277,10 @@ window.CATEGORY_PRODUCTS = {
   sizes: ["38", "40"],
   detailNote: "Soft pink floral design for everyday comfort."
 },
-
 {
   id: "KURTI-06",
   name: "Magenta Leaf Print Kurti",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Magenta%20Leaf%20Print%20Kurti%20MUSLIM%20ABAYA.WebP?raw=true",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Magenta%20Leaf%20Print%20Kurti%20MUSLIM%20ABAYA.WebP",
   link: "/",
   price: 250,
   color: "magenta",
@@ -290,11 +289,10 @@ window.CATEGORY_PRODUCTS = {
   sizes: ["38", "40"],
   detailNote: "Soft cotton kurti with vibrant magenta color."
 },
-
 {
   id: "KURTI-07",
   name: "Magenta Tassel Detail Kurti",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Magenta%20Tassel%20Detail%20Kurti%20MUSLIM%20ABAYA.WebP?raw=true",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Magenta%20Tassel%20Detail%20Kurti%20MUSLIM%20ABAYA.WebP",
   link: "/",
   price: 250,
   color: "magenta",
@@ -303,11 +301,10 @@ window.CATEGORY_PRODUCTS = {
   sizes: ["38", "40"],
   detailNote: "Stylish tassel design kurti for modern look."
 },
-
 {
   id: "KURTI-08",
   name: "Pink Floral Lace Work Kurti",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Premium%20Pink%20Floral%20Lace-Work%20Kurti%20MUSLIM%20ABAYA.WebP?raw=true",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium%20Pink%20Floral%20Lace-Work%20Kurti%20MUSLIM%20ABAYA.WebP",
   link: "/",
   price: 250,
   color: "pink",
@@ -316,11 +313,10 @@ window.CATEGORY_PRODUCTS = {
   sizes: ["38", "40"],
   detailNote: "Elegant lace work floral kurti design."
 },
-
 {
   id: "KURTI-09",
   name: "Vibrant Magenta Floral Kurti",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Vibrant%20Magenta%20Floral%20Kurti%20MUSLIM%20ABAYA.WebP?raw=true",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Vibrant%20Magenta%20Floral%20Kurti%20MUSLIM%20ABAYA.WebP",
   link: "/",
   price: 250,
   color: "magenta",
@@ -332,7 +328,7 @@ window.CATEGORY_PRODUCTS = {
 {
   id: "KURTI-10",
   name: "Premium Yellow Tie-Dye Cotton Maxi Dress",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/premium-yellow-tie-dye-cotton-maxi-dress-for-women.webp?raw=true",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-yellow-tie-dye-cotton-maxi-dress-for-women.webp",
   link: "/",
   price: 350,
   color: "yellow",
@@ -344,7 +340,7 @@ window.CATEGORY_PRODUCTS = {
 {
   id: "KURTI-11",
   name: "Stylish Green Floral Cotton Midi Dress",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/stylish-green-floral-cotton-midi-dress-womens-fashion.webp?raw=true",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/stylish-green-floral-cotton-midi-dress-womens-fashion.webp",
   link: "/",
   price: 350,
   color: "green",
@@ -356,7 +352,7 @@ window.CATEGORY_PRODUCTS = {
 {
   id: "KURTI-12",
   name: "White Cherry Print Cotton One Piece",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/white-cherry-print-cotton-one-piece-dress-for-women.webp?raw=true",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-cherry-print-cotton-one-piece-dress-for-women.webp",
   link: "/",
   price: 350,
   color: "white",
@@ -368,7 +364,7 @@ window.CATEGORY_PRODUCTS = {
 {
   id: "KURTI-13",
   name: "White Lavender Floral Cotton Dress",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/white-lavender-floral-cotton-one-piece-dress-for-women-muslimabaya.webp?raw=true",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-lavender-floral-cotton-one-piece-dress-for-women-muslimabaya.webp",
   link: "/",
   price: 350,
   color: "white",
@@ -380,7 +376,7 @@ window.CATEGORY_PRODUCTS = {
 {
   id: "KURTI-14",
   name: "White Maroon Block Print Cotton Dress",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/white-maroon-block-print-cotton-one-piece-dress-for-women.webp?raw=true",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-maroon-block-print-cotton-one-piece-dress-for-women.webp",
   link: "/",
   price: 350,
   color: "white",
@@ -392,7 +388,7 @@ window.CATEGORY_PRODUCTS = {
 {
   id: "KURTI-15",
   name: "White Red Heart Print Cotton Dress",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/white-red-heart-print-cotton-one-piece-dress-for-women.webp?raw=true",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-red-heart-print-cotton-one-piece-dress-for-women.webp",
   link: "/",
   price: 350,
   color: "white",
@@ -404,7 +400,7 @@ window.CATEGORY_PRODUCTS = {
 {
   id: "KURTI-16",
   name: "Yellow Cotton Flared One Piece",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/yellow-cotton-flared-one-piece-dress-for-women.webp?raw=true",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/yellow-cotton-flared-one-piece-dress-for-women.webp",
   link: "/",
   price: 350,
   color: "yellow",
@@ -416,7 +412,7 @@ window.CATEGORY_PRODUCTS = {
 {
   id: "KURTI-17",
   name: "Yellow Striped Cotton One Piece",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/yellow-striped-cotton-one-piece-dress-for-women.webp?raw=true",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/yellow-striped-cotton-one-piece-dress-for-women.webp",
   link: "/",
   price: 350,
   color: "yellow",
@@ -425,10 +421,10 @@ window.CATEGORY_PRODUCTS = {
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Casual striped cotton dress."
 },
-  {
+{
   id: "KURTI-18",
   name: "Premium Sky Blue Botanical Print Cotton One Piece Dress",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/premium-sky-blue-botanical-print-cotton-one-piece-dress-for-women.webp?raw=true",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-sky-blue-botanical-print-cotton-one-piece-dress-for-women.webp",
   link: "/",
   price: 350,
   color: "blue",
@@ -437,7 +433,7 @@ window.CATEGORY_PRODUCTS = {
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Premium sky blue botanical print cotton dress. Length: 43–44 Inches, Flare: 80 Inches"
 },
-  {
+{
   id: "KURTI-19",
   name: "White Lilac Botanical Print Cotton One Piece Dress",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-lilac-botanical-print-cotton-one-piece-dress-for-women.webp",
@@ -449,7 +445,7 @@ window.CATEGORY_PRODUCTS = {
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Elegant white and lilac botanical print cotton one piece dress. Length: 43–44 Inches, Flare: 80 Inches"
 },
-  {
+{
   id: "KURTI-20",
   name: "Black White Floral Puff Sleeve Maxi Dress",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/black-white-floral-puff-sleeve-maxi-dress-modern-lifestyle.webp",
@@ -461,7 +457,7 @@ window.CATEGORY_PRODUCTS = {
   sizes: ["34-46"],
   detailNote: "Elegant Black & White floral print puff sleeve maxi dress. Length: 43–44 Inches, Flare: 80 Inches."
 },
-  {
+{
   id: "KURTI-21",
   name: "White Yellow Floral Puff Sleeve Cotton Maxi Dress",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-yellow-floral-puff-sleeve-cotton-maxi-dress-premium-lifestyle.webp",
@@ -473,7 +469,7 @@ window.CATEGORY_PRODUCTS = {
   sizes: ["34-46"],
   detailNote: "Elegant White & Yellow floral print puff sleeve cotton maxi dress. Length: 43–44 Inches, Flare: 80 Inches."
 },
-  {
+{
   id: "KURTI-22",
   name: "Navy Blue White Floral Cotton Maxi Dress",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/navy-blue-white-floral-cotton-maxi-dress-premium-lifestyle.webp",
@@ -485,7 +481,7 @@ window.CATEGORY_PRODUCTS = {
   sizes: ["34-46"],
   detailNote: "Elegant Navy Blue & White floral print cotton maxi dress. Length: 43–44 Inches, Flare: 80 Inches."
 },
-  {
+{
   id: "KURTI-23",
   name: "Cream Black Floral Cotton Maxi Dress",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/cream-black-floral-cotton-maxi-dress-premium-lifestyle.webp",
@@ -497,7 +493,7 @@ window.CATEGORY_PRODUCTS = {
   sizes: ["34-46"],
   detailNote: "Elegant Cream & Black floral print cotton maxi dress. Length: 43–44 Inches, Flare: 80 Inches."
 },
-  {
+{
   id: "KURTI-24",
   name: "Sage Green White Floral Cotton Maxi Dress",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/sage-green-white-floral-cotton-maxi-dress-premium-lifestyle.webp",
@@ -509,7 +505,7 @@ window.CATEGORY_PRODUCTS = {
   sizes: ["34-46"],
   detailNote: "Elegant Sage Green & White floral print cotton maxi dress. Length: 43–44 Inches, Flare: 80 Inches."
 },
-  {
+{
   id: "KURTI-25",
   name: "Black White Geometric Print Cotton One Piece Kurti",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/black-white-geometric-print-cotton-one-piece-kurti-for-women-bangladesh.webp",
@@ -521,7 +517,7 @@ window.CATEGORY_PRODUCTS = {
   sizes: ["34-46"],
   detailNote: "Elegant black & white geometric print premium cotton one-piece kurti. Length: 43–44 Inches, Flare: 80 Inches."
 },
-  {
+{
   id: "KURTI-26",
   name: "Premium Tribal Print Cotton One-Piece Maxi Dress - Black",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Tribal-Print-One-Piece-Black.webp",
@@ -581,7 +577,7 @@ window.CATEGORY_PRODUCTS = {
   sizes: ["34-46"],
   detailNote: "Premium tribal print cotton two-piece set available in four elegant colors. Soft premium cotton fabric with stylish tribal doll print."
 },
-  {
+{
   id: "KURTI-32",
   name: "Premium Pink Floral Midi Dress",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-pink-floral-midi-dress-for-women-bangladesh.webp",
@@ -604,38 +600,38 @@ window.CATEGORY_PRODUCTS = {
   fabric: "Premium Cotton Fabric",
   sizes: ["34-46"],
   detailNote: "Premium cotton midi dress featuring elegant yellow striped design. Soft, breathable fabric with a stylish and comfortable fit for daily wear."
-}  
- ],
+}
+],
 /* ═══ ④ টু-পিস সারি · PREMIUM TWO-PIECE · premium-two-piece.html ═══ */
   "premium-two-piece": [
   {
-    id: "DR-29",
-    name: "Baby Pink Light Pink Women's Two-Piece Set",
-    image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Baby%20PinkLight%20Pink.jpeg?raw=1",
-    link: "/",
-    price: 550,
-    color: "pink",
-    colorLabel: "Baby Pink / Light Pink",
-    fabric: "Alex Soft Georgette",
-    sizes: ["Body 42 (Free Size)"],
-    detailNote: "Length: 37–38 Inches"
-  },
-  {
-    id: "DR-01",
-    name: "Baby Pink Floral Print Women's Two-Piece Set",
-    image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Baby-Pink-Floral-Print.jpeg?raw=1",
-    link: "/",
-    price: 550,
-    color: "pink",
-    colorLabel: "Baby Pink Floral",
-    fabric: "Alex Soft Georgette",
-    sizes: ["Body 42 (Free Size)"],
-    detailNote: "Length: 37–38 Inches"
-  },
-    {
+  id: "DR-29",
+  name: "Baby Pink Light Pink Women's Two-Piece Set",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Baby%20PinkLight%20Pink.jpeg",
+  link: "/",
+  price: 550,
+  color: "pink",
+  colorLabel: "Baby Pink / Light Pink",
+  fabric: "Alex Soft Georgette",
+  sizes: ["Body 42 (Free Size)"],
+  detailNote: "Length: 37–38 Inches"
+},
+{
+  id: "DR-01",
+  name: "Baby Pink Floral Print Women's Two-Piece Set",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Baby-Pink-Floral-Print.jpeg",
+  link: "/",
+  price: 550,
+  color: "pink",
+  colorLabel: "Baby Pink Floral",
+  fabric: "Alex Soft Georgette",
+  sizes: ["Body 42 (Free Size)"],
+  detailNote: "Length: 37–38 Inches"
+},
+{
   id: "DR-08",
   name: "Black Rose Floral Print Women's Two-Piece Set",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Black-Base-Rose-Floral.jpeg?raw=1",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Black-Base-Rose-Floral.jpeg",
   link: "/",
   price: 550,
   color: "black",
@@ -647,7 +643,7 @@ window.CATEGORY_PRODUCTS = {
 {
   id: "DR-16",
   name: "Black White Polka Dot Women's Two-Piece Set",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Black-White-Polka-Dots.jpeg?raw=1",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Black-White-Polka-Dots.jpeg",
   link: "/",
   price: 550,
   color: "black",
@@ -656,10 +652,10 @@ window.CATEGORY_PRODUCTS = {
   sizes: ["Body 42 (Free Size)"],
   detailNote: "Length: 37–38 Inches"
 },
-    {
+{
   id: "DR-23",
   name: "Royal Blue Golden Floral Print Women's Two-Piece Set",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Royal-Blue-Golden-Floral-Print.jpeg?raw=1",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Royal-Blue-Golden-Floral-Print.jpeg",
   link: "/",
   price: 550,
   color: "blue",
@@ -671,7 +667,7 @@ window.CATEGORY_PRODUCTS = {
 {
   id: "DR-30",
   name: "Sage Green Mint Green Women's Two-Piece Set",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Sage%20GreenMint%20Green.jpeg?raw=1",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Sage%20GreenMint%20Green.jpeg",
   link: "/",
   price: 550,
   color: "green",
@@ -680,10 +676,10 @@ window.CATEGORY_PRODUCTS = {
   sizes: ["Body 42 (Free Size)"],
   detailNote: "Length: 37–38 Inches"
 },
-  {
+{
   id: "DR-32",
   name: "Premium White Pink Floral Print Women's Co-ord Set",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/white-pink-floral-print-womens-co-ord-set-premium.webp?raw=true",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-pink-floral-print-womens-co-ord-set-premium.webp",
   link: "/",
   price: 650,
   color: "pink",
@@ -779,7 +775,7 @@ window.CATEGORY_PRODUCTS = {
 {
   id: "DR-31",
   name: "Black Floral Georgette Set",
-  image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/black-floral-georgette-two-piece-set-bangladesh.jpg?raw=1",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/black-floral-georgette-two-piece-set-bangladesh.jpg",
   link: "/",
   price: 650,
   color: "black",
@@ -788,7 +784,7 @@ window.CATEGORY_PRODUCTS = {
   sizes: ["Body 42 (Free Size)"],
   detailNote: "Length: 37–38 Inches"
 }
-  ],
+],
   /* ═══ ⑤ এম্ব্রয়ডারি — খালি ═══ */
   embroidery: [],
 
