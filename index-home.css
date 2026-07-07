@@ -414,15 +414,36 @@ input, select { margin-bottom: 8px !important; }
     .lux-video-title { font-size: 22px; }
     .lux-feature-dot { flex: 0 0 28px; width: 28px; height: 28px; }
 }
-/* --- Button Section --- */
-.button-row-wrapper { display: flex; gap: 12px; justify-content: center; margin: 2px auto 10px; width: 100%; max-width: 500px; }
-.premium-action-btn { flex: 1; color: white !important; text-decoration: none !important; display: inline-flex; align-items: center; justify-content: center; gap: 12px; padding: 16px 12px; border-radius: 8px; font-family: 'Hind Siliguri', sans-serif; font-size: 20px; font-weight: 700; transition: all 0.3s ease; border: 1px solid rgba(255, 255, 255, 0.22); cursor: pointer; position: relative; overflow: hidden; }
-.premium-action-btn i { font-size: 24px; line-height: 1; }
-.premium-action-btn span { line-height: 1.2; }
-.premium-action-btn:hover { transform: translateY(-2px); opacity: 1; }
+/* নতুন প্রফেশনাল বাটন স্টাইল */
+.button-row-wrapper {
+    display: flex !important;
+    gap: 8px !important;
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    margin: 15px 0 !important;
+}
 
-.whatsapp-btn-style { background: linear-gradient(180deg, #27d366 0%, #1ea14c 100%); box-shadow: 0 10px 22px rgba(24, 120, 58, 0.35); }
-.call-btn-style { background: linear-gradient(180deg, #244aa7 0%, #162d67 100%); box-shadow: 0 10px 22px rgba(19, 43, 105, 0.35); }
+.premium-action-btn {
+    flex: 1 1 30% !important;
+    min-width: 100px !important;
+    padding: 12px 5px !important;
+    border-radius: 6px !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
+    color: #fff !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    border: none !important;
+    cursor: pointer !important;
+}
+
+.whatsapp-btn-style { background: #25d366 !important; }
+.imo-btn-style { background: #0088cc !important; }
+.call-btn-style { background: #1a1a1a !important; }
 
 /* --- Footer & Contact Styling --- */
 .footer-section, .footer-section ul, .anz-col-brand, .anz-col-contact { text-align: left !important; }
