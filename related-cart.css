@@ -1,0 +1,45 @@
+/* related-cart.css এর সাথে নিচের অংশটি যোগ করুন */
+
+.related-item {
+    transition: transform 0.2s; /* হোভার করলে হালকা ইফেক্ট */
+}
+
+.related-item:hover {
+    transform: scale(1.02); /* মাউস নিলে সামান্য বড় হবে */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.add-btn {
+    width: 100%;
+    margin-top: 8px;
+    background: #000; /* আপনার ব্র্যান্ডিং অনুযায়ী রঙ পরিবর্তন করতে পারেন */
+    color: #fff;
+    border: none;
+    padding: 6px;
+    border-radius: 4px;
+    cursor: pointer;
+
+}
+
+.related-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 10px;
+}
+.related-wrapper {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.related-title {
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+.related-item {
+    border: 1px solid #f0f0f0;
+    border-radius: 8px;
+    padding: 8px;
+    transition: transform 0.2s;
+}

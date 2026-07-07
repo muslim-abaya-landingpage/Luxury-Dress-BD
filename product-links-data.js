@@ -1,50 +1,20 @@
-/**
- * ছবির লিংক — শুধু category-products.js-এ যত প্রোডাক্ট আছে তত সারি (অতিরিক্ত সারি নতুন প্রোডাক্ট বানায় না)
- * এডিট: product-manager.html → সেভ
- */
-window.PRODUCT_LINKS_DATA = {
-  abaya: [
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Maroon%20Abaya%20Set...jpeg",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-black-3-part-abaya-set-muslim-abaya-bd.webp",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Maroon%20Abaya%20Set.jpeg",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Black...jpeg",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Black..jpeg",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Black.jpeg",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Versace%20Border%20Premium%20Abaya%20Set...jpg",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Versace%20Border%20Premium%20Abaya%20Set..jpg",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Versace%20Border%20Premium%20Abaya%20Set.jpg",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Floral-Motif-Abaya-Set...jpeg",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Floral-Motif-Abaya-Set..jpeg",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Floral-Motif-Abaya-Set.jpeg"
-  ],
-  "cover-up": [],
-"tops-kurti": ["https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Classic%20Purple%20Lace-Work%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true",
-"https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Elegant%20Grey%20Leaf%20Print%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true",
-"https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Elegant%20Purple%20Floral%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true",
-"https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Elegant%20White%20Leaf%20Print%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true",
-"https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Light%20Pink%20Soft%20Floral%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true",
-"https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Magenta%20Leaf%20Print%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true",
-"https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Magenta%20Tassel%20Detail%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true",
-"https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Premium%20Pink%20Floral%20Lace-Work%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true",
-"https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Vibrant%20Magenta%20Floral%20Kurti%20%20MUSLIM%20ABAYA.WebP?raw=true"],
- "premium-two-piece": [
-  "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Baby%20PinkLight%20Pink.jpeg",
-  "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Baby-Pink-Floral-Print.jpeg",
-  "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Black-Base-Rose-Floral.jpeg",
-  "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Black-White-Polka-Dots.jpeg",
-  "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Royal-Blue-Golden-Floral-Print.jpeg",
-  "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Sage%20GreenMint%20Green.jpeg",
-  "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-pink-floral-print-womens-co-ord-set-premium.webp",
-  "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-black-floral-womens-co-ord-set-bangladesh.webp",
-  "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-blue-floral-co-ord-set.webp",
-  "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-navy-blue-floral-co-ord-set.webp",
-  "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-pink-floral-co-ord-set.webp",
-  "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-sky-blue-floral-co-ord-set.webp",
-  "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-black-floral-co-ord-set-gold-accent.webp",
-  "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/black-floral-georgette-two-piece-set-bangladesh.jpg"
-],
-  embroidery: [],
-  karchupi: [],
-  kaftan: [],
-  hijab: []
-};
+// related-products.js
+
+export function getRelatedProducts(currentCategory, limit = 4) {
+    // ১. আপনার কনফিগারেশন থেকে সংশ্লিষ্ট ক্যাটাগরিগুলো পাওয়া
+    const targetCategories = window.RELATED_PRODUCTS[currentCategory] || [];
+    
+    let recommendations = [];
+
+    // ২. প্রতিটি রিলেটেড ক্যাটাগরি থেকে প্রোডাক্ট লুপ করে সংগ্রহ করা
+    targetCategories.forEach(cat => {
+        const productsInCat = window.PRODUCT_LINKS_DATA[cat] || [];
+        
+        // প্রতি ক্যাটাগরি থেকে কিছু প্রোডাক্ট নেওয়া (যেমন: ২টা করে)
+        const items = productsInCat.slice(0, 2);
+        recommendations = [...recommendations, ...items];
+    });
+
+    // ৩. ডুপ্লিকেট রিমুভ করা এবং নির্দিষ্ট লিমিট সেট করা
+    return [...new Set(recommendations)].slice(0, limit);
+}
