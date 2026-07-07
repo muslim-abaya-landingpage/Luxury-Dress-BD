@@ -14,6 +14,7 @@
 .cart-drawer-overlay.is-open {
   opacity: 1;
   visibility: visible;
+  transition-delay: 0s;
 }
 
 /* Responsive width */
