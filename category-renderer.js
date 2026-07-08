@@ -1457,7 +1457,13 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
         buildPqvOptionPills(sizes, idx, "pqv-size-opt", "data-size-value", formatSizeLabel) +
         "</div></div>";
 
-  var showWholesale = (isAbaya && sizes.length > 1) || (!isTwoPiece && sizes.length > 1);
+  var isPanjabi =
+    typeof isPanjabiProduct === "function" &&
+    isPanjabiProduct(p, categoryKey);
+
+  var showWholesale =
+    ((isAbaya && sizes.length > 1) ||
+     (!isTwoPiece && !isPanjabi && sizes.length > 1));
   var wholesaleHtml = showWholesale ? buildPqvWholesaleSectionHtml(sizes, idx, isAbaya) : "";
 
   return (
@@ -2151,7 +2157,7 @@ function getCategoryFallbackImage(categoryKey) {
     embroidery: "images/Black-Base-Rose-Floral.jpeg",
     karchupi: "images/Black-Base-Rose-Floral.jpeg",
     kaftan: "images/Baby-Pink-Floral-Print.jpeg",
-    hijab: "images/Black-White-Polka-Dots.jpeg"
+    hijab: "images/Black-White-Polka-Dots.jpeg",    
   };
   return fallbacks[categoryKey] || "images/Baby-Pink-Floral-Print.jpeg";
 }
@@ -2177,32 +2183,36 @@ function getCategoryHubImage(categoryKey) {
   }
   return getCategoryFallbackImage(categoryKey);
 }
-
 function buildCardSpecsBlock(p, fabricText, sizeOptions, idx) {
-  var lengthVal = p.detailNote ? String(p.detailNote).replace(/^লং:\s*/i, "").trim() : "";
+  var lengthVal = p.detailNote ? String(p.detailNote).replace(/^Length:\s*/i, "").trim() : "";
   var chips =
     "<div class='card-spec-chips'>" +
-    "<span class='card-spec-chip'><span class='card-spec-k'>ফেব্রিক</span><span class='card-spec-v'>" +
+    "<span class='card-spec-chip'><span class='card-spec-k'>Fabric</span><span class='card-spec-v'>" +
     fabricText +
     "</span></span>";
+
   if (lengthVal) {
     chips +=
-      "<span class='card-spec-chip'><span class='card-spec-k'>লং</span><span class='card-spec-v'>" +
+      "<span class='card-spec-chip'><span class='card-spec-k'>Length</span><span class='card-spec-v'>" +
       escapeHtml(lengthVal) +
       "</span></span>";
   }
+
   chips += "</div>";
+
   return (
     "<div class='card-specs'>" +
     chips +
     "<div class='card-size-block'>" +
-    "<span class='card-size-heading'>সাইজ</span>" +
+    "<span class='card-size-heading'>Size</span>" +
     "<select class='card-size-select' data-size-idx='" +
     idx +
-    "' aria-label='সাইজ নির্বাচন'>" +
+    "' aria-label='Select Size'>" +
     sizeOptions +
     "</select></div></div>"
   );
+}
+
 }
 
 function buildTwoPieceSizeFields() {
@@ -2255,31 +2265,34 @@ function buildAbayaSizeFields(idx, lengthSizes) {
 }
 
 function buildDetailSpecsBlock(p, fabricText, sizeOptions, idx, categoryKey) {
-  var lengthVal = p.detailNote ? String(p.detailNote).replace(/^লং:\s*/i, "").trim() : "";
+  var lengthVal = p.detailNote ? String(p.detailNote).replace(/^Length:\s*/i, "").trim() : "";
   var isAbaya = typeof isAbayaProduct === "function" && isAbayaProduct(p, categoryKey);
   var isTwoPiece = typeof isTwoPieceProduct === "function" && isTwoPieceProduct(p, categoryKey);
+
   var sizeBlock = isAbaya
     ? buildAbayaSizeFields(idx, typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig().lengthSizes : null)
     : isTwoPiece
       ? buildTwoPieceSizeFields()
-    : "<div class='card-size-block detail-size-block'>" +
-      "<span class='card-size-heading'>সাইজ</span>" +
-      "<select class='card-size-select' data-size-idx='" +
-      idx +
-      "' aria-label='সাইজ নির্বাচন'>" +
-      sizeOptions +
-      "</select></div>";
+      : "<div class='card-size-block detail-size-block'>" +
+        "<span class='card-size-heading'>Size</span>" +
+        "<select class='card-size-select' data-size-idx='" +
+        idx +
+        "' aria-label='Select Size'>" +
+        sizeOptions +
+        "</select></div>";
+
   return (
     "<ul class='detail-spec-list'>" +
-    "<li><span class='detail-spec-k'>ফেব্রিক</span><span class='detail-spec-v'>" +
+    "<li><span class='detail-spec-k'>Fabric</span><span class='detail-spec-v'>" +
     fabricText +
     "</span></li>" +
     (lengthVal
-      ? "<li><span class='detail-spec-k'>লং</span><span class='detail-spec-v'>" + escapeHtml(lengthVal) + "</span></li>"
+      ? "<li><span class='detail-spec-k'>Length</span><span class='detail-spec-v'>" + escapeHtml(lengthVal) + "</span></li>"
       : "") +
     "</ul>" +
     sizeBlock
   );
+}
 }
 
 function buildProductCard(p, idx, waLink, detailMode, categoryKey, allProducts) {
@@ -2352,22 +2365,22 @@ function buildProductCard(p, idx, waLink, detailMode, categoryKey, allProducts) 
       '<div class="detail-actions">' +
       '<button type="button" class="msg-btn btn-add-cart" data-product-idx="' +
       idx +
-      '" data-action="add">কার্টে যোগ</button>' +
-      '<button type="button" class="msg-btn btn-buy-now" data-product-idx="' +
-      idx +
-      '" data-action="buy-now">' +
-      maShopBagIcon(16) +
-      '<span lang="en">Order Now</span></button>' +
-      "<a href='" +
-      waLink +
-      "?text=" +
-      encodeURIComponent(p.name + " অর্ডার করতে চাই") +
-      "' target='_blank' rel='noopener' class='msg-btn btn-msg'>মেসেজ করুন</a>" +
-      "</div>" +
-      "</div>" +
-      "</article>"
-    );
-  }
+      '" data-action="add">Add to Cart</button>' +
+'<button type="button" class="msg-btn btn-buy-now" data-product-idx="' +
+idx +
+'" data-action="buy-now">' +
+maShopBagIcon(16) +
+'<span lang="en">Order Now</span></button>' +
+"<a href='" +
+waLink +
+"?text=" +
+encodeURIComponent("I want to order " + p.name) +
+"' target='_blank' rel='noopener' class='msg-btn btn-msg'>Message Us</a>" +
+"</div>" +
+"</div>" +
+"</article>"
+);
+}
 
   var cartQty = getShopCartQtyForProduct(p);
   var cardQty = cartQty > 0 ? cartQty : 1;
@@ -2410,14 +2423,12 @@ function buildProductCard(p, idx, waLink, detailMode, categoryKey, allProducts) 
     "<a href='" +
     waLink +
     "?text=" +
-    encodeURIComponent(p.name + " অর্ডার করতে চাই") +
-    "' target='_blank' rel='noopener' class='anzaar-btn anzaar-btn-msg' onclick='event.stopPropagation()'><span lang='en'>Send Message</span></a>" +
-    "</div></div></article>"
-  );
+   encodeURIComponent("I want to order " + p.name) +
+"' target='_blank' rel='noopener' class='anzaar-btn anzaar-btn-msg' onclick='event.stopPropagation()'><span lang='en'>Send Message</span></a>" +
+"</div></div></article>"
+);
 
 }
-
-
 
 function getPageSearchQuery() {
   try {
@@ -2510,7 +2521,7 @@ function collectCategoryViewData(categoryKey) {
     ? 'Search: "' + searchQ + '"'
     : (categoryMeta[categoryKey] && categoryMeta[categoryKey].title) || categoryKey.toUpperCase();
 
-  var waLink = (window.SITE_MEDIA && window.SITE_MEDIA.whatsappOrderLink) || "https://wa.me/8801971642683";
+  var waLink = (window.SITE_MEDIA && window.SITE_MEDIA.whatsappOrderLink) || "https://wa.me/8801970831783";
 
   var breadcrumb = searchQ
     ? "<nav class='shop-breadcrumb' aria-label='Breadcrumb'>" +
@@ -2576,12 +2587,11 @@ function bindShopCategoryControls(root, products) {
     if (empty) empty.remove();
 
     if (visible === 0) {
-      var el = document.createElement("p");
-      el.className = "filter-empty filter-empty-dynamic";
-      el.textContent = "এই ফিল্টারে কোনো প্রোডাক্ট পাওয়া যায়নি।";
-      grid.appendChild(el);
-    }
-  }
+  var el = document.createElement("p");
+  el.className = "filter-empty filter-empty-dynamic";
+  el.textContent = "No products found for this filter.";
+  grid.appendChild(el);
+}
 
   function updatePriceTrack() {
     var minInput = root.querySelector("#priceMin");
@@ -2770,14 +2780,14 @@ function softSwitchShopCategory(categoryKey) {
       })
       .join("");
     grid.innerHTML =
-      cards ||
-      "<p class='filter-empty'>" +
-        (view.searchQ
-          ? 'No products found for "' + escapeHtml(view.searchQ) + '". Try another keyword or browse categories.'
-          : "এই ক্যাটাগরিতে এখনো কোনো প্রোডাক্ট যোগ করা হয়নি।") +
-        "</p>";
-    grid.className = "product-grid" + (view.detailMode ? " product-grid-detail" : "");
-  }
+  cards ||
+  "<p class='filter-empty'>" +
+    (view.searchQ
+      ? 'No products found for "' + escapeHtml(view.searchQ) + '". Try another keyword or browse categories.'
+      : "No products have been added to this category yet.") +
+    "</p>";
+
+grid.className = "product-grid" + (view.detailMode ? " product-grid-detail" : "");
 
   var sortSelect = root.querySelector("#shopSort");
   if (sortSelect) sortSelect.value = "default";
@@ -2970,22 +2980,21 @@ function renderCategory(categoryKey) {
     root.innerHTML =
       soonCrumb +
       "<div class='shop-empty-soon'>" +
-      "<h1 class='shop-empty-soon-title'>" +
-      escapeHtml(soonTitle) +
-      "</h1>" +
-      "<p class='shop-empty-soon-text'>এই ক্যাটাগরির প্রোডাক্ট এখনো সেটআপ করা হয়নি। শীঘ্রই যোগ করা হবে।</p>" +
-      "<div class='shop-empty-soon-actions'>" +
-      "<a class='shop-empty-soon-btn' href='" +
-      escapeHtml(shopHref("/abaya")) +
-      "'>ABAYA দেখুন</a>" +
-      "<a class='shop-empty-soon-btn shop-empty-soon-btn--dark' href='" +
-      escapeHtml(shopHref("/premium-two-piece")) +
-      "'>PREMIUM TWO-PIECE</a>" +
-      "</div></div>";
-    fixShopPageLinks(root);
-    markCategoryReady();
-    return;
-  }
+  "<h1 class='shop-empty-soon-title'>" +
+  escapeHtml(soonTitle) +
+  "</h1>" +
+  "<p class='shop-empty-soon-text'>Products in this category have not been set up yet. They will be added soon.</p>" +
+  "<div class='shop-empty-soon-actions'>" +
+  "<a class='shop-empty-soon-btn' href='" +
+  escapeHtml(shopHref("/abaya")) +
+  "'>View ABAYA</a>" +
+  "<a class='shop-empty-soon-btn shop-empty-soon-btn--dark' href='" +
+  escapeHtml(shopHref("/premium-two-piece")) +
+  "'>PREMIUM TWO-PIECE</a>" +
+  "</div></div>";
+fixShopPageLinks(root);
+markCategoryReady();
+return;
 
   var sidebar = buildShopSidebar(searchQ ? "" : categoryKey, products);
 
@@ -3035,21 +3044,21 @@ function renderCategory(categoryKey) {
 
     products.length +
 
-    " items</span></div>" +
+   " items</span></div>" +
 
-    "<div class='product-grid" + (detailMode ? " product-grid-detail" : "") + "' id='productGrid'>" +
+"<div class='product-grid" + (detailMode ? " product-grid-detail" : "") + "' id='productGrid'>" +
 
-    (cards ||
-      "<p class='filter-empty'>" +
-      (searchQ
-        ? 'No products found for "' + escapeHtml(searchQ) + '". Try another keyword or browse categories.'
-        : "এই ক্যাটাগরিতে এখনো কোনো প্রোডাক্ট যোগ করা হয়নি।") +
-      "</p>") +
+(cards ||
+  "<p class='filter-empty'>" +
+  (searchQ
+    ? 'No products found for "' + escapeHtml(searchQ) + '". Try another keyword or browse categories.'
+    : "No products have been added to this category yet.") +
+  "</p>") +
 
-    "</div></section></div>" +
+"</div></section></div>" +
 
-    "";
-
+"";
+    
   fixShopPageLinks(root);
 
   shopCartCtx.root = root;
