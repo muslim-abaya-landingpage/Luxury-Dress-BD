@@ -14,11 +14,22 @@
     <script src="site-seo.js?v=20260603seo"></script>
     
     <!-- মেইন থিমের লাক্সারি ফন্ট কম্বিনেশন -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="site-header.css?v=20260603logo">
-    <link rel="stylesheet" href="site-footer.css?v=20260603footen" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="site-footer.css?v=20260603footen"></noscript>
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- CSS -->
+<link rel="stylesheet" href="site-header.css?v=20260603logo">
+
+<link rel="preload"
+      href="site-footer.css?v=20260603footen"
+      as="style"
+      onload="this.onload=null;this.rel='stylesheet'">
+
+<noscript>
+    <link rel="stylesheet" href="site-footer.css?v=20260603footen">
+</noscript>
     
     <style>
         /* --- মেইন থিমের সাথে ১০০% মিলিয়ে গ্লোবাল রিসেট --- */
@@ -182,13 +193,102 @@
             transform: translateY(-2px);
         }
 
-        /* রেসপনসিভ */
-        @media (max-width: 600px) {
-            .about-wrap { padding: 24px 16px 48px; }
-            .about-section { padding: 28px 20px; }
-            .about-actions { flex-direction: column; gap: 10px; }
-            .about-btn { width: 100%; flex: none; }
-        }
+    /* ===== Responsive Improvements ===== */
+
+*,
+*::before,
+*::after{
+  box-sizing:border-box;
+}
+
+img{
+  max-width:100%;
+  height:auto;
+}
+
+.about-wrap{
+  width:min(100%,840px);
+  margin:auto;
+}
+
+.about-section{
+  overflow-wrap:break-word;
+}
+
+.about-actions{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+
+@media (max-width:768px){
+
+  .about-wrap{
+    padding:24px 16px 48px;
+  }
+
+  .about-section{
+    padding:24px 18px;
+    border-radius:14px;
+  }
+
+  .about-breadcrumb{
+    font-size:11px;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+
+  .about-section h1{
+    font-size:30px;
+    line-height:1.2;
+  }
+
+  .about-section p,
+  .about-card li{
+    font-size:15px;
+    line-height:1.8;
+  }
+
+  .about-card li{
+    padding:16px;
+  }
+
+  .about-btn{
+    width:100%;
+    min-width:0;
+    padding:15px 20px;
+  }
+}
+
+@media (max-width:480px){
+
+  .about-wrap{
+    padding:20px 12px 36px;
+  }
+
+  .about-section{
+    padding:20px 16px;
+    border-radius:12px;
+  }
+
+  .about-section h1{
+    font-size:26px;
+  }
+
+  .about-section p,
+  .about-card li{
+    font-size:14px;
+  }
+
+  .about-card strong{
+    font-size:14px;
+  }
+
+  .about-btn{
+    font-size:12px;
+    letter-spacing:.08em;
+  }
+}
     </style>
 <script src="config.js"></script>
 </head>
