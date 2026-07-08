@@ -35,7 +35,7 @@
 
     sections.forEach(function (sec) {
       var key = sec.key;
-      state[key] = urlsToLines(data[key]);
+     state[key] = urlsToLines(data[key] || []);
 
       var block = document.createElement("section");
       block.className = "pl-section";
@@ -137,9 +137,11 @@
     sections.forEach(function (sec) {
       var list = window.CATEGORY_PRODUCTS[sec.key] || [];
       state[sec.key] = urlsToLines(
-        list.map(function (p) {
-          return p.image || "";
-        })
+  list
+  .map(function (p) {
+    return p && p.image ? p.image : "";
+  })
+  .filter(Boolean)
       );
     });
     buildSections();
