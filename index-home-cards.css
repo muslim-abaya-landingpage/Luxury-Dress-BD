@@ -1,117 +1,77 @@
 /* Homepage — hero fills left; product list column fixed 5in */
-
+/* ১. মূল কন্টেইনার (স্লাইডার ও প্রোডাক্টের জন্য) */
 #premium-collection.display-area {
-  padding: 4px !important;
-  gap: 10px !important;
-  box-sizing: border-box;
+  display: block !important;
+  padding: 10px !important;
+  max-width: 1200px !important;
+  margin: 0 auto !important;
 }
 
+/* ২. বড় স্লাইডার (উপরে থাকবে) */
 #premium-collection .big-view {
-  padding: 0 !important;
-  margin: 0 !important;
-  background: #f7f7f7;
+  width: 100% !important;
+  margin-bottom: 20px !important;
+  border-radius: 8px !important;
   overflow: hidden;
-  border-radius: 8px;
 }
 
 #premium-collection #view {
   width: 100% !important;
   height: auto !important;
-  min-height: 420px;
-  max-height: min(88vh, 960px);
-  object-fit: contain !important;
-  object-position: center center;
-  display: block;
-  border-radius: 8px;
-  background: #f7f7f7;
+  aspect-ratio: 21 / 9; /* স্লাইডারের সঠিক রেশিও */
+  object-fit: cover !important;
 }
 
+/* ৩. প্রোডাক্ট গ্রিড (স্লাইডারের নিচে) */
 #premium-collection .product-list-sidebar {
   display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 6px !important;
-  width: 5in !important;
-  max-width: 5in !important;
-  min-width: 0;
-  padding: 0 !important;
-  box-sizing: border-box;
-  align-content: start;
-  flex: 0 0 5in;
-}
-
-#premium-collection .item-card {
+  grid-template-columns: repeat(3, 1fr) !important; /* ডেস্কটপে ৩ কলাম */
+  gap: 15px !important;
   width: 100% !important;
   max-width: 100% !important;
-  min-width: 0 !important;
-  flex: none !important;
-  box-sizing: border-box;
+}
+
+/* ৪. প্রতিটি প্রোডাক্ট কার্ড */
+#premium-collection .item-card {
+  width: 100% !important;
   border: 1px solid #ececec;
   border-radius: 8px;
-  overflow: hidden;
   background: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
-  justify-content: flex-start !important;
-  align-content: start;
+  transition: 0.3s;
 }
 
-#premium-collection .item-card:hover {
-  border-color: #ddd;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-}
-
-#premium-collection .item-card.active {
-  border-color: #c9a962;
-  box-shadow: 0 0 0 1px rgba(201, 169, 98, 0.35);
-}
-
-#premium-collection .item-card > div:first-child {
-  position: relative;
-  overflow: hidden;
-  background: #f5f5f5;
-  aspect-ratio: 1 / 1.5;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#premium-collection .home-product-thumb {
-  width: 100% !important;
-  height: 100% !important;
-  max-height: none !important;
-  aspect-ratio: auto !important;
-  object-fit: contain !important;
-  object-position: center center;
-  display: block;
-  border-radius: 0 !important;
-  margin: 0 !important;
-  background: #f5f5f5;
-}
-
-#premium-collection .product-info {
-  padding: 5px 6px 6px !important;
-  flex: 0 0 auto;
-}
-
-#premium-collection .product-meta-row {
-  flex-direction: column !important;
-  align-items: flex-start !important;
-  gap: 1px !important;
-  margin-bottom: 4px !important;
-}
-
-#premium-collection .product-actions-anzaar {
+/* ৫. বাটন সেকশন (যাতে না কাটে) */
+#premium-collection .product-actions-row {
+  display: flex !important;
   gap: 4px !important;
-  position: relative;
-  z-index: 3;
+  padding: 5px !important;
 }
 
 #premium-collection .anzaar-btn {
-  position: relative;
-  z-index: 4;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
+  flex: 1 !important;
+  height: 35px !important;
+  font-size: 11px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+/* ৬. রেসপন্সিভ সেটিংস */
+@media (max-width: 900px) {
+  #premium-collection .product-list-sidebar {
+    grid-template-columns: repeat(2, 1fr) !important; /* ট্যাবলেটে ২ কলাম */
+  }
+}
+
+@media (max-width: 500px) {
+  #premium-collection .product-list-sidebar {
+    grid-template-columns: repeat(2, 1fr) !important; /* মোবাইলেও ২ কলাম */
+    gap: 8px !important;
+  }
+  #premium-collection .anzaar-btn {
+    font-size: 10px !important; /* মোবাইলে ফন্ট ছোট */
+  }
 }
 
 #premium-collection .product-actions-row {
@@ -247,88 +207,87 @@
   font-weight: 700 !important;
   display: inline !important;
 }
-
 #premium-collection .product-actions-row {
-  gap: 6px !important;
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  gap: 4px !important;
+  width: 100% !important;
 }
 
 #premium-collection .anzaar-btn {
-  min-height: 40px !important;
-  height: auto !important;
-  padding: 10px 8px !important;
-  font-size: 12px !important;
-  line-height: 1.2 !important;
+  flex: 1 !important;
+  height: 34px !important;
+  padding: 0 4px !important;
+  font-size: 11px !important;
+  line-height: 1 !important;
   border-radius: 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
 }
 
 #premium-collection .anzaar-btn-cart {
-  font-size: 14px !important;
+  font-size: 11px !important; /* আগের 14px অনেক বড় ছিল */
 }
 
 #premium-collection .anzaar-btn-msg {
-  font-size: 12px !important;
-  min-height: 40px !important;
-  height: auto !important;
-  padding: 10px 8px !important;
-  line-height: 1.2 !important;
+  flex: 1 !important;
+  height: 34px !important;
+  padding: 0 4px !important;
+  font-size: 11px !important;
+  line-height: 1 !important;
 }
 
 @media (min-width: 1024px) {
   #premium-collection.display-area {
+    display: block !important; /* স্লাইডার উপরে এবং লিস্ট নিচে আনার জন্য */
+  }
+  
+  #premium-collection .product-list-sidebar {
     display: grid !important;
-    grid-template-columns: minmax(0, 1fr) 5in !important;
-    gap: 12px !important;
-    align-items: start;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important; /* ৩ কলামের জন্য */
+    gap: 15px !important;
+  }
+}
+
+/* ১. ডেস্কটপ লেআউট: স্লাইডার ও প্রোডাক্ট লিস্ট লম্বালম্বি সাজানো */
+@media (min-width: 1024px) {
+  #premium-collection.display-area {
+    display: block !important; /* গ্রিড থেকে ব্লকে রূপান্তর */
+    max-width: 1200px !important;
+    margin: 0 auto !important;
   }
 
   #premium-collection .big-view {
-    width: 100%;
-    min-height: 480px;
-    display: flex;
-    align-items: stretch;
-    justify-content: stretch;
+    width: 100% !important;
+    min-height: 400px !important;
+    margin-bottom: 20px !important;
   }
 
-  #premium-collection .product-list-sidebar {
-    width: 5in !important;
-    max-width: 5in !important;
-    min-width: 5in !important;
-    max-height: 78vh;
-    overflow-y: auto;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-}
-
-@media (max-width: 1023px) {
   #premium-collection .product-list-sidebar {
     width: 100% !important;
     max-width: 100% !important;
-    min-width: 0 !important;
-    flex: none !important;
+    min-width: 100% !important;
+    max-height: none !important; /* হাইট লিমিট সরিয়ে দেওয়া হলো */
+    overflow-y: visible !important;
+    /* ৩ কলামে সাজানো */
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   }
 }
 
+/* ২. ট্যাবলেট লেআউট: ২ কলাম */
+@media (max-width: 1023px) and (min-width: 769px) {
+  #premium-collection .product-list-sidebar {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* ৩. মোবাইল লেআউট: ২ কলাম (বর্তমান চাহিদা অনুযায়ী) */
 @media (max-width: 768px) {
   #premium-collection .product-list-sidebar {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-
-  .product-card-name {
-    font-size: 11px !important;
-  }
-
-  .product-card-price {
-    font-size: 14px !important;
-  }
-
-  #premium-collection .price-tag {
-    font-size: 14px;
-    padding: 5px 10px;
-  }
-}
-
-@media (max-width: 520px) {
-  #premium-collection .product-list-sidebar {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
   }
 }
