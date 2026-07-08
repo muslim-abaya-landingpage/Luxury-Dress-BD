@@ -240,25 +240,32 @@
   line-height: 1 !important;
 }
 
+/* ১. ডেস্কটপ লেআউট: স্লাইডার ও প্রোডাক্ট লিস্ট লম্বালম্বি ৩ কলামে */
 @media (min-width: 1024px) {
   #premium-collection.display-area {
     display: block !important; /* স্লাইডার উপরে এবং লিস্ট নিচে আনার জন্য */
-  }
-  
-  #premium-collection .product-list-sidebar {
-    display: grid !important;
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important; /* ৩ কলামের জন্য */
-    gap: 15px !important;
-  }
-}
-
-/* ১. ডেস্কটপ লেআউট: স্লাইডার ও প্রোডাক্ট লিস্ট লম্বালম্বি সাজানো */
-@media (min-width: 1024px) {
-  #premium-collection.display-area {
-    display: block !important; /* গ্রিড থেকে ব্লকে রূপান্তর */
     max-width: 1200px !important;
     margin: 0 auto !important;
   }
+
+  #premium-collection .big-view {
+    width: 100% !important;
+    min-height: 400px !important;
+    margin-bottom: 20px !important;
+  }
+
+  #premium-collection .product-list-sidebar {
+    display: grid !important;
+    /* ৩ কলামের জন্য */
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important; 
+    gap: 15px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    max-height: none !important; /* হাইট লিমিট সরিয়ে দেওয়া হলো */
+    overflow-y: visible !important;
+  }
+}
 
   #premium-collection .big-view {
     width: 100% !important;
