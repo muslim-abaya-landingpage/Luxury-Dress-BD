@@ -1557,7 +1557,7 @@ function openProductQuickView(idx) {
   if (!products || !products[idx]) return;
   var root = shopCartCtx.root || document.getElementById("list");
   if (!root) return;
-  var waLink = (window.SITE_MEDIA && window.SITE_MEDIA.whatsappOrderLink) || "https://wa.me/8801971642683";
+  var waLink = (window.SITE_MEDIA && window.SITE_MEDIA.whatsappOrderLink) || "https://wa.me/8801970831783";
   var categoryKey = getShopCategoryKey();
 
   if (!shopCartCtx.gridHtml && root.querySelector("#productGrid")) {
