@@ -786,7 +786,57 @@ kaftan: [],
 hijab: [],
 
 /* ═══ ⑨ পাঞ্জাবি — খালি ═══ */
-panjabi: []
+panjabi: [
+  {
+  id: "PB-01",
+  name: "Premium White Cotton Panjabi",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-white-cotton-panjabi-bangladesh.webp",
+  link: "/premium-white-cotton-panjabi",
+  price: 1050,
+  currency: "BDT",
+
+  category: "Men's Panjabi",
+  brand: "Muslim Abaya",
+
+  color: "white",
+  colorLabel: "Premium White",
+
+  fabric: "Premium Cotton (Garments Fabric)",
+  sleeve: "Full Sleeve",
+  fit: "Regular Fit",
+  collar: "Mandarin Collar",
+  buttons: "Durable Chinese Snap Buttons",
+
+  sizes: [
+    {
+      size: "M",
+      length: "40 Inches",
+      body: "42 Inches"
+    },
+    {
+      size: "L",
+      length: "42 Inches",
+      body: "44 Inches"
+    },
+    {
+      size: "XL",
+      length: "44 Inches",
+      body: "46 Inches"
+    }
+  ],
+  stock: "In Stock",
+  delivery: "Home Delivery Available All Over Bangladesh",
+  detailNote: "Premium quality cotton panjabi with elegant embroidery and durable Chinese snap buttons. Comfortable, breathable and perfect for Eid, Jummah, weddings, special occasions and daily wear.",
+  seo: {
+    title: "Premium White Cotton Panjabi for Men | Muslim Abaya Bangladesh",
+    slug: "premium-white-cotton-panjabi-bangladesh",
+    imageAlt: "Premium White Cotton Panjabi for Men in Bangladesh",
+    imageTitle: "Premium White Cotton Panjabi",
+    imageName: "premium-white-cotton-panjabi-bangladesh.webp",
+    metaDescription: "Buy Premium White Cotton Panjabi for men in Bangladesh. Made with premium garments cotton fabric, full sleeves, elegant embroidery and durable Chinese snap buttons. Price: ৳1050."
+  }
+}
+]
 };
 
 window.SITE_MEDIA = {
