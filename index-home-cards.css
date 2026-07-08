@@ -202,11 +202,6 @@
   color: #111;
 }
 
-#premium-collection .item-card span.qty-input {
-  font-size: 12px !important;
-  font-weight: 700 !important;
-  display: inline !important;
-}
 #premium-collection .product-actions-row {
   display: flex !important;
   flex-wrap: nowrap !important;
@@ -241,18 +236,19 @@
 }
 
 /* ১. ডেস্কটপ লেআউট: স্লাইডার ও প্রোডাক্ট লিস্ট লম্বালম্বি ৩ কলামে */
-@media (min-width: 1024px) {
-  #premium-collection.display-area {
-    display: block !important; /* স্লাইডার উপরে এবং লিস্ট নিচে আনার জন্য */
-    max-width: 1200px !important;
-    margin: 0 auto !important;
-  }
 
-  #premium-collection .big-view {
+@media (min-width: 1024px) {
+  #premium-collection .product-list-sidebar {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 15px !important;
     width: 100% !important;
-    min-height: 400px !important;
-    margin-bottom: 20px !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    max-height: none !important;
+    overflow-y: visible !important;
   }
+}
 
   #premium-collection .product-list-sidebar {
     display: grid !important;
