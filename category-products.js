@@ -773,23 +773,26 @@ window.CATEGORY_PRODUCTS = {
   detailNote: "Length: 37–38 Inches"
 }
 ],
-  /* ═══ ⑤ এম্ব্রয়ডারি — খালি ═══ */
-  embroidery: [],
+/* ═══ ⑤ এম্ব্রয়ডারি — খালি ═══ */
+embroidery: [],
 
-  /* ═══ ⑥ কারচুপি — খালি ═══ */
-  karchupi: [],
+/* ═══ ⑥ কারচুপি — খালি ═══ */
+karchupi: [],
 
-  /* ═══ ⑦ কাফতান — খালি ═══ */
-  kaftan: [],
+/* ═══ ⑦ কাফতান — খালি ═══ */
+kaftan: [],
 
-  /* ═══ ⑧ হিজাব — খালি ═══ */
-  hijab: []
+/* ═══ ⑧ হিজাব — খালি ═══ */
+hijab: [],
+
+/* ═══ ⑨ পাঞ্জাবি — খালি ═══ */
+panjabi: []
 };
 
 window.SITE_MEDIA = {
   whatsappOrderLink:
     (window.SITE_LINKS && window.SITE_LINKS.order && window.SITE_LINKS.order.whatsapp) ||
-    "https://wa.me/8801971642683",
+    "https://wa.me/8801970831783",
 
   /**
    * VIDEO PAGE — Add a new entry to the videos[] array to display more videos.
@@ -818,7 +821,8 @@ window.CATEGORY_META = {
   embroidery: { title: "EMBROIDERY" },
   karchupi: { title: "KARCHUPI" },
   kaftan: { title: "KAFTAN" },
-  hijab: { title: "HIJAB" }
+  hijab: { title: "HIJAB" },
+  panjabi: { title: "PANJABI" }
 };
 
 /** Shared nav + hub tiles (anzaar-style All Categories page) */
