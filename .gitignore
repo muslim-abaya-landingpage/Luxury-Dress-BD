@@ -1,26 +1,8 @@
-.DS_Store
-Thumbs.db
-desktop.ini
-*.log
-.env
-.env.*
-
-# Dependencies
 node_modules/
-
-# Local cache / scratch
-.cache/
-
-# Android / Capacitor / PWA (not used for this site)
-android/
-www/
-capacitor.config.json
-manifest.webmanifest
-sw.js
-offline.html
-pwa-install.js
-pwa-install.css
-package.json
-package-lock.json
-ANDROID-*.bat
-WEB-ANDROID-*.md
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example

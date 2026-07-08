@@ -250,35 +250,7 @@
   }
 }
 
-  #premium-collection .product-list-sidebar {
-    display: grid !important;
-    /* ৩ কলামের জন্য */
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important; 
-    gap: 15px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 100% !important;
-    max-height: none !important; /* হাইট লিমিট সরিয়ে দেওয়া হলো */
-    overflow-y: visible !important;
-  }
-}
 
-  #premium-collection .big-view {
-    width: 100% !important;
-    min-height: 400px !important;
-    margin-bottom: 20px !important;
-  }
-
-  #premium-collection .product-list-sidebar {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 100% !important;
-    max-height: none !important; /* হাইট লিমিট সরিয়ে দেওয়া হলো */
-    overflow-y: visible !important;
-    /* ৩ কলামে সাজানো */
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  }
-}
 
 /* ২. ট্যাবলেট লেআউট: ২ কলাম */
 @media (max-width: 1023px) and (min-width: 769px) {

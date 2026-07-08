@@ -1,0 +1,6 @@
+{
+  "name": "Muslim Abaya",
+  "description": "Premium Abaya, Two-Piece, and Modest Wear in Bangladesh with Nationwide Cash on Delivery.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

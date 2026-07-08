@@ -75,9 +75,82 @@
     return null;
   }
 
+  function findProductById(id) {
+    if (!id || !global.CATEGORY_PRODUCTS) return null;
+    for (var cat in global.CATEGORY_PRODUCTS) {
+      if (global.CATEGORY_PRODUCTS.hasOwnProperty(cat)) {
+        var list = global.CATEGORY_PRODUCTS[cat];
+        if (Array.isArray(list)) {
+          for (var i = 0; i < list.length; i++) {
+            var p = list[i];
+            if (p && (p.id === id || p.catalogId === id)) {
+              return {
+                product: p,
+                category: cat
+              };
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
   function resolvePageMeta() {
     var path = normalizePath(global.location && global.location.pathname);
     var pages = CFG.pages || {};
+
+    // Check if there is a product id specified in the query parameter or hash
+    var productId = null;
+    if (global.location) {
+      if (global.location.hash) {
+        var hashMatch = global.location.hash.match(/[#&]p=([^&]+)/);
+        if (hashMatch) {
+          try {
+            productId = decodeURIComponent(hashMatch[1]);
+          } catch (e) {}
+        }
+      }
+      if (!productId && global.location.search) {
+        var searchParams = new URLSearchParams(global.location.search);
+        productId = searchParams.get('p') || searchParams.get('product') || searchParams.get('id');
+      }
+    }
+
+    if (productId) {
+      var prodData = findProductById(productId);
+      if (prodData) {
+        var p = prodData.product;
+        var cat = prodData.category;
+        var pTitle = (p.nameEn || p.name || BRAND) + " | " + BRAND;
+        
+        var pDesc = (p.nameBn || p.name || "") + " - " + (p.fabricBn || p.fabric ? (p.fabricBn || p.fabric) + " কাপড়ের তৈরি প্রিমিয়াম আবায়া/মডেস্ট ড্রেস। " : "");
+        if (p.price) {
+          pDesc += "মূল্য: " + p.price + " BDT। ";
+        }
+        if (p.detailNote) {
+          pDesc += p.detailNote + " ";
+        } else if (p.descriptionBn) {
+          pDesc += p.descriptionBn + " ";
+        }
+        pDesc += "সারাদেশে ক্যাশ অন ডেলিভারি। এখনই অর্ডার করতে ভিজিট করুন মুসলিম আবায়া।";
+
+        return {
+          path: path,
+          meta: {
+            title: pTitle,
+            description: pDesc.trim(),
+            image: resolveProductImageUrl(p),
+            ogType: "product",
+            robots: "index, follow",
+            priceAmount: p.price
+          },
+          categoryKey: cat,
+          productId: productId
+        };
+      }
+    }
+
     if (pages[path]) return { path: path, meta: pages[path] };
 
     var root = document.documentElement;
@@ -132,6 +205,25 @@
     upsertMeta('meta[name="twitter:title"]', "name", "twitter:title", title);
     upsertMeta('meta[name="twitter:description"]', "name", "twitter:description", desc);
     upsertMeta('meta[name="twitter:image"]', "name", "twitter:image", image);
+
+    if (meta.ogType === "product") {
+      upsertMeta('meta[property="product:price:amount"]', "property", "product:price:amount", String(meta.priceAmount || ""));
+      upsertMeta('meta[property="product:price:currency"]', "property", "product:price:currency", "BDT");
+      upsertMeta('meta[property="product:availability"]', "property", "product:availability", "instock");
+      upsertMeta('meta[property="og:price:amount"]', "property", "og:price:amount", String(meta.priceAmount || ""));
+      upsertMeta('meta[property="og:price:currency"]', "property", "og:price:currency", "BDT");
+    } else {
+      var pa = document.querySelector('meta[property="product:price:amount"]');
+      if (pa) pa.parentNode.removeChild(pa);
+      var pc = document.querySelector('meta[property="product:price:currency"]');
+      if (pc) pc.parentNode.removeChild(pc);
+      var pav = document.querySelector('meta[property="product:availability"]');
+      if (pav) pav.parentNode.removeChild(pav);
+      var opa = document.querySelector('meta[property="og:price:amount"]');
+      if (opa) opa.parentNode.removeChild(opa);
+      var opc = document.querySelector('meta[property="og:price:currency"]');
+      if (opc) opc.parentNode.removeChild(opc);
+    }
 
     if (!document.querySelector('link[rel="sitemap"]')) {
       var sm = document.createElement("link");
@@ -291,17 +383,13 @@
   }
 
   function apply() {
-    if (global.__maSiteSeoApplied) return;
-    var path = normalizePath(global.location && global.location.pathname);
     var info = resolvePageMeta();
+    var path = normalizePath(global.location && global.location.pathname);
 
-    if (!homeSeoManaged()) {
+    // If we have a product ID, we ALWAYS apply product-specific meta and bypass homeSeoManaged()
+    if (info.productId || !homeSeoManaged()) {
       applyDocumentMeta(info);
       applyStructuredData(info);
-    }
-
-    if (path === "/") {
-      /* Social follow strip removed — footer newsletter icons are enough */
     }
 
     global.__maSiteSeoApplied = true;
@@ -313,18 +401,38 @@
     var key =
       (root && root.getAttribute("data-shop-category")) ||
       (body && body.getAttribute("data-shop-category"));
-    if (!key || homeSeoManaged()) return;
+
+    var hasProductId = false;
+    if (global.location) {
+      if (global.location.hash && global.location.hash.indexOf('p=') !== -1) {
+        hasProductId = true;
+      } else {
+        var searchParams = new URLSearchParams(global.location.search);
+        if (searchParams.get('p') || searchParams.get('product') || searchParams.get('id')) {
+          hasProductId = true;
+        }
+      }
+    }
+
+    if (!key && !hasProductId) return;
     var tries = 0;
     var timer = setInterval(function () {
       tries++;
       if (global.CATEGORY_PRODUCTS || tries > 40) {
         clearInterval(timer);
         if (global.CATEGORY_PRODUCTS) {
-          var info = resolvePageMeta();
-          applyStructuredData(info);
+          global.__maSiteSeoApplied = false;
+          apply();
         }
       }
     }, 150);
+  }
+
+  if (global.addEventListener) {
+    global.addEventListener("hashchange", function () {
+      global.__maSiteSeoApplied = false;
+      apply();
+    });
   }
 
   global.MaSiteSeo = { apply: apply, pathToCanonical: pathToCanonical };

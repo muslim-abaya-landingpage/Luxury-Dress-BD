@@ -33,6 +33,8 @@
 <meta name="robots" content="index, follow">
 <meta name="author" content="Muslim Abaya">
 <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
+<!-- Open Graph / Facebook Social Sharing Previews (Dynamically updated for products via site-seo.js) -->
+<meta property="fb:app_id" content=""> <!-- Replace with your Facebook App ID if you have one to remove the Facebook Debugger warning -->
 <meta property="og:site_name" content="Muslim Abaya">
 <meta property="og:locale" content="bn_BD">
 <meta property="og:title" content="Muslim Abaya | muslimabaya.com">
@@ -40,6 +42,8 @@
 <meta property="og:image" content="https://muslimabaya.com/images/Baby-Pink-Floral-Print.jpeg">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://muslimabaya.com/">
+
+<!-- Twitter Card Social Sharing Previews (Dynamically updated for products via site-seo.js) -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Muslim Abaya | muslimabaya.com">
 <meta name="twitter:description" content="Premium abaya &amp; modest fashion. COD Bangladesh.">
@@ -108,7 +112,7 @@
 </div>
 <script>(function(){if(location.protocol==='file:'){var b=document.getElementById('localFileBanner');if(b)b.style.display='block';}})();</script>
 <div id="site-header-mount"></div>
-<script defer src="site-header.js?v=20260603logo"></script>
+<script type="module" src="site-header.js?v=20260603logo"></script>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-ML7RL6BR"
 height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="container">
@@ -194,11 +198,13 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 </div>
 
-<script defer src="cart-utils.js?v=20260603homeqty"></script>
-<script defer src="cart-toast.js?v=20260603cartqty"></script>
-<script defer src="cart-drawer.js?v=20260528b"></script>
-<script defer src="index-catalog-defer.js?v=20260530sale"></script>
-<script defer src="index-home-app.js?v=20260603homeqty"></script>
+<script type="module" src="cart-utils.js?v=20260603homeqty"></script>
+<script type="module" src="cart-toast.js?v=20260603cartqty"></script>
+<script type="module" src="cart-drawer.js?v=20260528b"></script>
+<script type="module" src="related-cart.js?v=20260708"></script>
+<link rel="stylesheet" href="related-cart.css">
+<script type="module" src="index-catalog-defer.js?v=20260530sale"></script>
+<script type="module" src="index-home-app.js?v=20260603homeqty"></script>
 
 <section id="main-video-section" style="background:#fff; padding:25px 15px; scroll-margin-top:100px;">
     <div class="lux-video-wrap">
@@ -276,10 +282,10 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
 </section>
 
 <div id="site-footer-mount"></div>
-<script defer src="site-seo-config.js?v=20260603seo"></script>
-<script defer src="site-seo.js?v=20260603seo"></script>
-<script defer src="site-api-config.js?v=20260529"></script>
-<script defer src="site-footer.js?v=20260603footen"></script>
+<script type="module" src="site-seo-config.js?v=20260603seo"></script>
+<script type="module" src="site-seo.js?v=20260603seo"></script>
+<script type="module" src="site-api-config.js?v=20260529"></script>
+<script type="module" src="site-footer.js?v=20260603footen"></script>
 <script>
 function updateCartIcon(total) {
     if (typeof window.updateCartBadge === 'function') {
@@ -326,6 +332,6 @@ function toggleAndOpenVideo() {
     setTimeout(openVideo, 300);
 }
 </script>
-<script defer src="index-youtube-lazy.js?v=20260530sale"></script>
+<script type="module" src="index-youtube-lazy.js?v=20260530sale"></script>
 </body>
 </html>

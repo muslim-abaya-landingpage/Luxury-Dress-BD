@@ -1,4 +1,4 @@
-// product-links-data.js
+// related-products.js
 
 if (typeof window !== 'undefined') {
     window.RELATED_PRODUCTS = window.RELATED_PRODUCTS || {
