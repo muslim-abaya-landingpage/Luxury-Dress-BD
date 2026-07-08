@@ -331,12 +331,16 @@
   function isTwoPieceProduct(p, categoryKey) {
     var ck = String(categoryKey || (p && (p.category || "")) || "").trim();
     if (ck === "premium-two-piece") return true;
+
     var id = String((p && p.id) || "").trim();
     if (/^DR-\d+/i.test(id)) return true;
-    if (p && /two[\s-]?piece|co-ord|coord|টু[\s-]?পিস|টুপিস/i.test(String(p.name || ""))) return true;
-    return false;
-  }
 
+    if (p && /(two[\s-]?piece|co[\s-]?ord|coord|টু[\s-]?পিস|টুপিস)/i.test(String(p.name || ""))) {
+        return true;
+    }
+
+    return false;
+}
   function formatTwoPieceCartSize(lengthSizeOpt) {
     var cfg = getTwoPieceSizeConfig();
     var len = String(lengthSizeOpt || cfg.lengthSizeLabel || "37-38 inch").trim();
@@ -383,38 +387,43 @@
     return stripSizeFromCartName(item && item.name);
   }
 
-  g.getAbayaSizeConfig = getAbayaSizeConfig;
-  g.isAbayaProduct = isAbayaProduct;
-  g.formatAbayaCartSize = formatAbayaCartSize;
-  g.parseAbayaLengthSize = parseAbayaLengthSize;
-  g.getTwoPieceSizeConfig = getTwoPieceSizeConfig;
-  g.isTwoPieceProduct = isTwoPieceProduct;
-  g.formatTwoPieceCartSize = formatTwoPieceCartSize;
-  g.parseTwoPieceLengthSize = parseTwoPieceLengthSize;
-  g.stripSizeFromCartName = stripSizeFromCartName;
-  g.getCartLineSizeLabel = getCartLineSizeLabel;
-  g.getCartLineBaseName = getCartLineBaseName;
+g.getAbayaSizeConfig = getAbayaSizeConfig;
+g.isAbayaProduct = isAbayaProduct;
+g.formatAbayaCartSize = formatAbayaCartSize;
+g.parseAbayaLengthSize = parseAbayaLengthSize;
 
-  var FABRIC_LABEL_EN = {
-    "\u09a6\u09c1\u09ac\u09be\u0987 \u099a\u09c7\u09b0\u09bf": "Dubai Cherry",
-    "\u09a6\u09c1\u09ac\u09be\u0987\u099a\u09c7\u09b0\u09bf": "Dubai Cherry",
-    "\u098f\u09b2\u09c7\u0995\u09cd\u09b8 \u09b8\u09ab\u099f \u099c\u09b0\u09cd\u099c\u09c7\u099f": "Alex soft Georgette",
-    "\u09aa\u09cd\u09b0\u09bf\u09ae\u09bf\u09af\u09bc\u09be\u09ae \u099c\u09b0\u09cd\u099c\u09c7\u099f": "Premium Georgette"
-  };
+g.getTwoPieceSizeConfig = getTwoPieceSizeConfig;
+g.isTwoPieceProduct = isTwoPieceProduct;
+g.formatTwoPieceCartSize = formatTwoPieceCartSize;
+g.parseTwoPieceLengthSize = parseTwoPieceLengthSize;
 
-  function formatFabricLabelEn(fabric) {
-    var f = String(fabric || "").trim();
-    if (!f) return "";
-    if (FABRIC_LABEL_EN[f]) return FABRIC_LABEL_EN[f];
-    var low = f.toLowerCase();
-    if (low.indexOf("dubai") !== -1 && low.indexOf("cherry") !== -1) return "Dubai Cherry";
-    if (low.indexOf("alex") !== -1 && low.indexOf("georgette") !== -1) return "Alex soft Georgette";
-    if (/premium\s*georgette/i.test(f)) return "Premium Georgette";
-    return f;
-  }
+// Panjabi
+g.getPanjabiSizeConfig = getPanjabiSizeConfig;
+g.isPanjabiProduct = isPanjabiProduct;
+g.formatPanjabiCartSize = formatPanjabiCartSize;
+g.parsePanjabiSize = parsePanjabiSize;
 
+g.stripSizeFromCartName = stripSizeFromCartName;
+g.getCartLineSizeLabel = getCartLineSizeLabel;
+g.getCartLineBaseName = getCartLineBaseName;
+
+ var FABRIC_LABEL_EN = {
+  "dubai cherry": "Dubai Cherry",
+  "alex soft georgette": "Alex Soft Georgette",
+  "premium georgette": "Premium Georgette",
+  "premium cotton garments fabric": "Premium Cotton Garments Fabric",
+  "tc cotton": "TC Cotton",
+  "linen": "Linen",
+  "viscose": "Viscose",
+  "cotton": "Cotton"
+};
+
+function formatFabricLabelEn(fabric) {
+  var f = String(fabric || "").trim();
+  if (!f) return "";
+  return FABRIC_LABEL_EN[f.toLowerCase()] || f;
+}
   g.formatFabricLabelEn = formatFabricLabelEn;
-
   g.maCatalog = {
     resolveImageUrl: resolveImageUrl,
     resolveProductPageLink: resolveProductPageLink,
