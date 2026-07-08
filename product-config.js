@@ -64,37 +64,60 @@ window.SITE_LINKS = {
   },
 
   /**
-   * Default product values.
-   * Used whenever a product does not provide its own values.
-   */
-  defaults: {
-    price: 550,
-    fabric: "Alex Soft Georgette",
-    sizes: ["Body 42 (Free size)"],
+   defaults: {
+  price: 550,
+  fabric: "Alex Soft Georgette",
+  sizes: ["Body 42 (Free size)"],
 
-    byCategory: {
-      abaya: {
-        price: 999,
-        fabric: "Dubai Cherry",
-        bodySize: "46",
-        bodySizeLabel: "46 [Free size]",
-        lengthSizes: ["50", "52", "54", "56"],
-        sizes: ["50", "52", "54", "56"],
-        types: ["Full Set", "Abaya Only"],
-        priceByType: {
-          "Full Set": 999,
-          "Abaya Only": 799
+  byCategory: {
+    abaya: {
+      price: 999,
+      fabric: "Dubai Cherry",
+      bodySize: "46",
+      bodySizeLabel: "46 [Free size]",
+      lengthSizes: ["50", "52", "54", "56"],
+      sizes: ["50", "52", "54", "56"],
+      types: ["Full Set", "Abaya Only"],
+      priceByType: {
+        "Full Set": 999,
+        "Abaya Only": 799
+      },
+      typePriceGap: 200
+    },
+
+    "premium-two-piece": {
+      price: 550,
+      bodySizeLabel: "42 (Free size)",
+      lengthSizeLabel: "37–38 inch",
+      lengthSizes: ["37–38 inch"],
+      sizes: ["42 (Free size)"]
+    },
+
+    punjabi: {
+      price: 1800,
+      fabric: "Premium Cotton Garments Fabric",
+      embroidery: "Flat Thread Embroidery",
+      button: "Premium China Snap Button",
+
+      sizes: ["M", "L", "XL"],
+
+      sizeChart: {
+        M: {
+          long: "40",
+          body: "42"
         },
-        typePriceGap: 200
-      },
-
-      "premium-two-piece": {
-        price: 550,
-        bodySizeLabel: "42 (Free size)",
-        lengthSizeLabel: "37–38 inch",
-        lengthSizes: ["37–38 inch"],
-        sizes: ["42 (Free size)"]
-      },
+        L: {
+          long: "42",
+          body: "44"
+        },
+        XL: {
+          long: "44",
+          body: "46"
+        }
+      }
+    }
+  }
+}
 
       "cover-up": {
         types: ["Full Set", "Cover Up Only"]
@@ -113,19 +136,22 @@ window.SITE_LINKS = {
   /**
    * Short product notes displayed beneath the product price.
    */
-  productShortNotes: {
-    default:
-      "* Actual colors may vary slightly due to lighting conditions and individual screen settings.",
+productShortNotes: {
+  default:
+    "* Actual colors may vary slightly due to lighting conditions and individual screen settings.",
 
-    abaya:
-      "* Hijab is not included unless otherwise specified. Actual colors may vary slightly from the images.",
+  abaya:
+    "* Hijab is not included unless otherwise specified. Actual colors may vary slightly from the images.",
 
-    "cover-up":
-      "* Inner abaya and hijab are not included unless explicitly stated.",
+  "cover-up":
+    "* Inner abaya and hijab are not included unless explicitly stated.",
 
-    "premium-two-piece": ""
-  },
+  "premium-two-piece":
+    "* Actual colors may vary slightly due to lighting conditions and individual screen settings.",
 
+  punjabi:
+    "* Premium cotton garments fabric with fine embroidery. Actual colors may vary slightly due to lighting conditions and individual screen settings."
+},
   productNotes: {
     default:
       "<div class='pqv-desc-rich'>" +
