@@ -1,48 +1,77 @@
 /**
- * সাইটের সব লিংক এক জায়গা — এখানে বদলালে পুরো সাইটে লাগবে।
- * (ছবি CDN, WhatsApp, প্রোডাক্ট পেজ — ভবিষ্যতে)
+ * Central configuration for all site-wide links and resources.
+ * Update values here to apply changes across the entire website.
+ * (Images, CDN, WhatsApp, Product Pages, Size Charts, etc.)
  */
 window.SITE_LINKS = {
-  /** overlay = product-links-data.js এর লাইন অনুযায়ী ছবি বদলায় (এক পেজ থেকে সব ক্যাটাগরি) */
+  /**
+   * Catalog image handling mode.
+   * overlay = Replaces product images according to the matching order
+   * in product-links-data.js while preserving product information.
+   */
   catalog: {
     mode: "overlay"
   },
+
   images: {
-    /** শুধু ফাইলনাম দিলে: "dress.jpeg" → images/dress.jpeg */
+    /** Local image directory (filename → images/filename) */
     localBase: "images/",
-    /** GitHub raw — {file} = ফাইলনাম */
+
+    /** GitHub Raw image URL ({file} will be replaced with the filename) */
     githubTemplate:
       "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/{file}?raw=1",
-    /** পুরনো লিংক একসাথে বদলাতে (উদাহরণ):
-     *  { from: "https://old-cdn.com/", to: "https://new-cdn.com/" }
+
+    /**
+     * Global URL replacement rules.
+     * Useful when migrating images to a new CDN or storage provider.
+     *
+     * Example:
+     * { from: "https://old-cdn.com/", to: "https://new-cdn.com/" }
      */
     replace: []
   },
+
   productPage: {
-    /** এখনো প্রোডাক্ট ডিটেইল পেজ নেই — false রাখুন */
+    /** Product detail pages are currently disabled. */
     enabled: false,
+
+    /** Fallback destination */
     default: "/",
-    /** ভবিষ্যতে: "/product/{id}" */
+
+    /** Future URL pattern */
     pattern: "/product/{id}"
   },
+
   order: {
     whatsapp: "https://wa.me/8801971642683"
   },
-  /** Size Chart ছবি — ক্যাটাগরি অনুযায়ী বা default */
+
+  /**
+   * Size chart images.
+   * Supports both a default image and category-specific charts.
+   */
   sizeChart: {
     default:
       "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/size-chart.jpg?raw=1",
+
     byCategory: {
       abaya:
         "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/abaya-size-chart.jpg?raw=1",
+
       "premium-two-piece":
         "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/two-piece-size-chart.jpg?raw=1"
     }
   },
+
+  /**
+   * Default product values.
+   * Used whenever a product does not provide its own values.
+   */
   defaults: {
     price: 550,
-    fabric: "Alex soft Georgette",
+    fabric: "Alex Soft Georgette",
     sizes: ["Body 42 (Free size)"],
+
     byCategory: {
       abaya: {
         price: 999,
@@ -58,36 +87,56 @@ window.SITE_LINKS = {
         },
         typePriceGap: 200
       },
+
       "premium-two-piece": {
         price: 550,
         bodySizeLabel: "42 (Free size)",
-        lengthSizeLabel: "37-38 inch",
-        lengthSizes: ["37-38 inch"],
+        lengthSizeLabel: "37–38 inch",
+        lengthSizes: ["37–38 inch"],
         sizes: ["42 (Free size)"]
       },
+
       "cover-up": {
         types: ["Full Set", "Cover Up Only"]
       },
-      kaftan: { price: 1650 }
+
+      kaftan: {
+        price: 1650
+      }
+
+      // panjabi: {
+      //   price: 1800
+      // }
     }
   },
-  /** প্রোডাক্ট ডিটেইলে দামের নিচে ছোট নোট (Anzaar-style) */
+
+  /**
+   * Short product notes displayed beneath the product price.
+   */
   productShortNotes: {
     default:
-      "* Colors may vary slightly in photos. Lighting can make the actual shade look a little different.",
+      "* Actual colors may vary slightly due to lighting conditions and individual screen settings.",
+
     abaya:
-      "* Hijab is not included (unless specified). Colors may vary slightly in photos.",
+      "* Hijab is not included unless otherwise specified. Actual colors may vary slightly from the images.",
+
     "cover-up":
-      "* Inner abaya/hijab is not included unless specified.",
+      "* Inner abaya and hijab are not included unless explicitly stated.",
+
     "premium-two-piece": ""
   },
+
   productNotes: {
     default:
-      "<div class='pqv-desc-rich'><p><strong>দ্রষ্টব্য:</strong></p><ol>" +
-      "<li>প্রকৃত রং ও কাপড়ের গুণমান নিশ্চিত করতে সরাসরি দেখে নেওয়ার চেষ্টা করুন।</li>" +
-      "<li>লাইটিং ও স্ক্রিনের কারণে রং সামান্য পার্থক্য হতে পারে।</li>" +
-      "<li>অর্ডার কনফার্ম হলে পরিবর্তন/বাতিল সীমিত — বিস্তারিত নীতিমালা নিচে।</li>" +
-      "</ol><p><strong>ডেলিভারি:</strong> বাংলাদেশ জুড়ে হোম ডেলিভারি। ক্যাশ অন ডেলিভারি উপলব্ধ।</p>" +
-      "<p><strong>রিটার্ন:</strong> ত্রুটিপূর্ণ পণ্য ২৪ ঘণ্টার মধ্যে জানালে সমাধান করা হবে।</p></div>"
+      "<div class='pqv-desc-rich'>" +
+      "<p><strong>Important Information</strong></p>" +
+      "<ol>" +
+      "<li>We strive to present product colors and fabric textures as accurately as possible. However, slight variations may occur due to photography lighting and individual display settings.</li>" +
+      "<li>Please review your selected size carefully before confirming your order.</li>" +
+      "<li>Order modifications or cancellations may not be possible once the order has been confirmed.</li>" +
+      "</ol>" +
+      "<p><strong>Delivery:</strong> Nationwide home delivery across Bangladesh. Cash on Delivery (COD) is available.</p>" +
+      "<p><strong>Returns & Exchanges:</strong> If you receive a defective or incorrect product, please contact us within 24 hours of delivery for assistance.</p>" +
+      "</div>"
   }
 };
