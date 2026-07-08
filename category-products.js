@@ -816,13 +816,14 @@ window.SITE_MEDIA = {
 window.CATEGORY_META = {
   abaya: { title: "ABAYA" },
   "cover-up": { title: "COVER UP" },
-  "tops-kurti": { title: "TOPS/KURTI" },
+  "tops-kurti": { title: "TOPS/KURTI" }, // অথবা "TOPS/ KURTI"
   "premium-two-piece": { title: "PREMIUM TWO-PIECE" },
   embroidery: { title: "EMBROIDERY" },
   karchupi: { title: "KARCHUPI" },
   kaftan: { title: "KAFTAN" },
   hijab: { title: "HIJAB" },
-  panjabi: { title: "PANJABI" }
+  panjabi: { title: "PANJABI" },
+  video: { title: "VIDEO" } // মেটাতে 'video' যুক্ত করা হয়েছে
 };
 
 /** Shared nav + hub tiles (anzaar-style All Categories page) */
@@ -830,11 +831,12 @@ window.CATEGORY_NAV = [
   { key: "abaya", href: "/abaya", label: "ABAYA", image: "images/Baby-Pink-Floral-Print.jpeg" },
   { key: "cover-up", href: "/cover-up", label: "COVER UP", image: "images/Royal-Blue-Golden-Floral-Print.jpeg" },
   { key: "kaftan", href: "/kaftan", label: "KAFTAN", image: "images/Baby-Pink-Floral-Print.jpeg" },
-  { key: "tops-kurti", href: "/tops-kurti", label: "TOPS/ KURTI", image: "images/Black-White-Polka-Dots.jpeg" },
+  { key: "tops-kurti", href: "/tops-kurti", label: "TOPS/KURTI", image: "images/Black-White-Polka-Dots.jpeg" },
   { key: "hijab", href: "/hijab", label: "HIJAB", image: "images/Black-White-Polka-Dots.jpeg" },
   { key: "premium-two-piece", href: "/premium-two-piece", label: "PREMIUM TWO-PIECE", image: "images/premium-pink-floral-co-ord-set.webp" },
   { key: "embroidery", href: "/embroidery", label: "EMBROIDERY", image: "images/Black-Base-Rose-Floral.jpeg" },
   { key: "karchupi", href: "/karchupi", label: "KARCHUPI", image: "images/Black-Base-Rose-Floral.jpeg" },
+  { key: "panjabi", href: "/panjabi", label: "PANJABI", image: "images/panjabi-placeholder.jpeg" }, // যদি 'panjabi' নেভিগেশনে দেখাতে চান
   { key: "video", href: "/video", label: "VIDEO", image: "images/Royal-Blue-Golden-Floral-Print.jpeg" }
 ];
 
