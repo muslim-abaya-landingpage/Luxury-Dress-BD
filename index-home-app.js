@@ -7,10 +7,18 @@ let homeCartSyncSuppress = false;
 let cart = {};
 const fallbackProducts = [
     { id: 'DR-01', name: 'Baby Pink Floral', img: 'images/Baby-Pink-Floral-Print.jpeg', price: 550 },
-    { id: 'DR-08', name: 'Black Base Rose', img: 'images/Black-Base-Rose-Floral.jpeg', price: 550 },
-    { id: 'DR-16', name: 'Black White Polka', img: 'images/Black-White-Polka-Dots.jpeg', price: 550 },
-    { id: 'DR-23', name: 'Royal Blue Golden', img: 'images/Royal-Blue-Golden-Floral-Print.jpeg', price: 550 },
-    { id: 'DR-28', name: 'Pink Floral Printed Co-ord Set', img: 'images/pink-floral-printed-co-ord-set.jpeg', price: 550 }
+    { id: 'DR-02', name: 'Black Base Rose', img: 'images/Black-Base-Rose-Floral.jpeg', price: 550 },
+    { id: 'DR-13', name: 'Black White Polka', img: 'images/Black-White-Polka-Dots.jpeg', price: 550 },
+    { id: 'DR-24', name: 'Royal Blue Golden', img: 'images/Royal-Blue-Golden-Floral-Print.jpeg', price: 550 },
+    { id: 'DR-25', name: 'Pink Floral Printed Co-ord Set', img: 'images/pink-floral-printed-co-ord-set.jpeg', price: 550 },
+
+    // Punjabi
+    {
+        id: 'PN-1050',
+        name: 'Premium White Punjabi',
+        img: 'images/premium-white-islamic-mens-kurta-full-sleeve-outdoor-portrait-bangladesh.webp',
+        price: 1050
+    }
 ];
 let products = fallbackProducts.slice();
 
