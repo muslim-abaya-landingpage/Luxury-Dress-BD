@@ -25,19 +25,34 @@ function normalizeSubscribeContact_(raw) {
 function saveSubscribeContact_(contactRaw) {
   var contact = normalizeSubscribeContact_(contactRaw);
   if (!contact) {
-    return { ok: false, error: 'INVALID_CONTACT', message: 'সঠিক ইমেইল বা মোবাইল (01XXXXXXXXX) দিন।' };
+    return {
+      ok: false,
+      error: 'INVALID_CONTACT',
+      message: 'Please enter a valid email address or mobile number (01XXXXXXXXX).'
+    };
   }
+
   try {
     rateLimit_('sub_' + contact.slice(0, 48));
   } catch (rl) {
-    return { ok: false, error: 'RATE_LIMIT', message: 'অনেকবার চেষ্টা। কিছুক্ষণ পর আবার করুন।' };
+    return {
+      ok: false,
+      error: 'RATE_LIMIT',
+      message: 'Too many attempts. Please try again later.'
+    };
   }
-  var sub = ensureSheet_('Subscribe', ['যোগাযোগ (ইমেইল/মোবাইল)', 'তারিখ ও সময়']);
+
+  var sub = ensureSheet_('Subscribe', ['Contact (Email/Mobile)', 'Date & Time']);
   var data = sub.getDataRange().getValues();
   var key = contact.toLowerCase();
+
   for (var i = 1; i < data.length; i++) {
     if (String(data[i][0] || '').trim().toLowerCase() === key) {
-      return { ok: true, message: 'Already subscribed', duplicate: true };
+      return {
+        ok: true,
+        message: 'Already subscribed.',
+        duplicate: true
+      };
     }
   }
   appendRow_(sub, [contact, new Date()]);
@@ -126,29 +141,32 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.TEXT);
     }
     if (errCode === 'RATE_LIMIT') {
-      return jsonOut_({ ok: false, error: 'RATE_LIMIT', message: 'অনেকবার চেষ্টা। কিছুক্ষণ পর আবার করুন।' });
-    }
-    return jsonOut_({ ok: false, error: errCode });
-  }
+  return jsonOut_({
+    ok: false,
+    error: 'RATE_LIMIT',
+    message: 'Too many attempts. Please try again later.'
+  });
+}
+return jsonOut_({ ok: false, error: errCode });
 }
 
 // ── Online Order (A–H + Order ID কলাম I) ──
 
 function orderErrorMessage_(code) {
   var map = {
-    SPAM: 'অবৈধ অনুরোধ।',
-    TOO_FAST: 'অনুগ্রহ করে ফর্ম পূরণ করে আবার চেষ্টা করুন।',
-    EXPIRED: 'সেশন শেষ। পেজ রিফ্রেশ করে আবার অর্ডার করুন।',
-    INVALID_NAME: 'সঠিক নাম লিখুন।',
-    INVALID_PHONE: 'সঠিক ১১ ডিজিট মোবাইল নম্বর দিন (01XXXXXXXXX)।',
-    INVALID_ADDRESS: 'সম্পূর্ণ ডেলিভারি ঠিকানা লিখুন।',
-    INVALID_QTY: 'অর্ডার পরিমাণ সঠিক নয়।',
-    MIN_ORDER: 'ন্যূনতম অর্ডার ৳১০০।',
-    EMPTY_CART: 'কার্টে কোনো পণ্য নেই।',
-    ORDER_RATE_LIMIT: 'এই নম্বর থেকে খুব দ্রুত অর্ডার হয়েছে। ৩০ মিনিট পর আবার চেষ্টা করুন।',
-    DUPLICATE_ORDER: 'একই অর্ডার ইতিমধ্যে পাঠানো হয়েছে।'
+    SPAM: 'Invalid request.',
+    TOO_FAST: 'Please complete the form and try again.',
+    EXPIRED: 'Session expired. Please refresh the page and place your order again.',
+    INVALID_NAME: 'Please enter a valid name.',
+    INVALID_PHONE: 'Please enter a valid 11-digit mobile number (01XXXXXXXXX).',
+    INVALID_ADDRESS: 'Please enter your full delivery address.',
+    INVALID_QTY: 'Invalid order quantity.',
+    MIN_ORDER: 'Minimum order amount is ৳100.',
+    EMPTY_CART: 'Your cart is empty.',
+    ORDER_RATE_LIMIT: 'Orders from this number are being placed too quickly. Please try again after 30 minutes.',
+    DUPLICATE_ORDER: 'This order has already been submitted.'
   };
-  return map[code] || 'অর্ডার গ্রহণ করা যায়নি। WhatsApp এ যোগাযোগ করুন।';
+  return map[code] || 'Unable to process your order. Please contact us on WhatsApp.';
 }
 
 function validateOrderInput_(e) {
@@ -293,8 +311,23 @@ function getPickerCatalog() {
 
 function getPickerSizeOptions() {
   return {
-    abaya: { body: '46 [Free size]', lengths: ['50', '52', '54', '56'] },
-    'premium-two-piece': { body: '42 (Free size)', lengths: ['37-38 inch'] }
+    abaya: {
+      body: '46 [Free size]',
+      lengths: ['50', '52', '54', '56']
+    },
+
+    'premium-two-piece': {
+      body: '42 (Free size)',
+      lengths: ['37-38 inch']
+    },
+
+    panjabi: {
+      sizes: [
+        { label: 'M', body: '42', length: '40' },
+        { label: 'L', body: '44', length: '42' },
+        { label: 'XL', body: '46', length: '44' }
+      ]
+    }
   };
 }
 
@@ -399,7 +432,7 @@ function setupOrderStatusDropdownFromMenu() {
 
 function rateLimitOrder_(phone) {
   var normalized = normalizePhone_(phone);
-  var bypassRaw = PropertiesService.getScriptProperties().getProperty('ORDER_RATE_LIMIT_BYPASS') || '01971642683';
+  var bypassRaw = PropertiesService.getScriptProperties().getProperty('ORDER_RATE_LIMIT_BYPASS') || '01970831783';
   var bypassParts = String(bypassRaw).split(/[,;\s]+/);
   var b;
   for (b = 0; b < bypassParts.length; b++) {
@@ -536,15 +569,15 @@ function onOpen() {
 
 function getOnlineOrderExtraHeaders_() {
   return [
-    'অর্ডার আইডি',
-    'স্ট্যাটাস',
-    'ট্র্যাকিং',
-    'কনসাইনমেন্ট ID',
-    'কুরিয়ার স্ট্যাটাস',
-    'জেলা',
-    'পেমেন্ট',
+    'Order ID',
+    'Status',
+    'Tracking',
+    'Consignment ID',
+    'Courier Status',
+    'District',
+    'Payment',
     'Txn / Sender',
-    'নোট'
+    'Note'
   ];
 }
 
@@ -553,8 +586,8 @@ var ONLINE_ORDER_IMAGE_COUNT = 12;
 
 function getOnlineOrderImageHeaders_() {
   return [
-    'ছবি ১', 'ছবি ২', 'ছবি ৩', 'ছবি ৪', 'ছবি ৫', 'ছবি ৬',
-    'ছবি ৭', 'ছবি ৮', 'ছবি ৯', 'ছবি ১০', 'ছবি ১১', 'ছবি ১২'
+    'Image 1', 'Image 2', 'Image 3', 'Image 4', 'Image 5', 'Image 6',
+    'Image 7', 'Image 8', 'Image 9', 'Image 10', 'Image 11', 'Image 12'
   ];
 }
 
