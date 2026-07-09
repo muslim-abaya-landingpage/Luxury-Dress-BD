@@ -2586,7 +2586,7 @@ function bindShopCategoryControls(root, products) {
     var empty = grid.querySelector(".filter-empty-dynamic");
     if (empty) empty.remove();
 
-    if (visible === 0) {
+  if (visible === 0) {
   var el = document.createElement("p");
   el.className = "filter-empty filter-empty-dynamic";
   el.textContent = "No products found for this filter.";
@@ -2943,8 +2943,6 @@ function renderAllCategories() {
   markCategoryReady();
 }
 
-
-
 function renderCategory(categoryKey) {
 
   ensureCategoryStyles();
@@ -2995,7 +2993,7 @@ function renderCategory(categoryKey) {
 fixShopPageLinks(root);
 markCategoryReady();
 return;
-
+  }
   var sidebar = buildShopSidebar(searchQ ? "" : categoryKey, products);
 
   var cards = products.map(function (p, idx) {
