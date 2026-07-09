@@ -17,9 +17,66 @@ import {
   ArrowRight,
   Sparkles,
   Info,
-  Maximize2
+  Maximize2,
+  Lock,
+  Settings,
+  Database,
+  RefreshCw,
+  Edit,
+  PlusCircle,
+  LogOut,
+  CheckCircle,
+  TrendingUp,
+  Box,
+  Eye
 } from "lucide-react";
 import { CATEGORIES, PRODUCTS, Product, Category } from "./data/products";
+import { collection, getDocs, doc, setDoc, deleteDoc, updateDoc } from "firebase/firestore";
+import { db } from "./firebase";
+
+enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
+
+interface FirestoreErrorInfo {
+  error: string;
+  operationType: OperationType;
+  path: string | null;
+  authInfo: {
+    userId?: string | null;
+    email?: string | null;
+    emailVerified?: boolean | null;
+    isAnonymous?: boolean | null;
+    tenantId?: string | null;
+    providerInfo?: {
+      providerId?: string | null;
+      email?: string | null;
+    }[];
+  }
+}
+
+function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: null,
+      email: null,
+      emailVerified: null,
+      isAnonymous: null,
+      tenantId: null,
+      providerInfo: []
+    },
+    operationType,
+    path
+  };
+  console.error('Firestore Error: ', JSON.stringify(errInfo));
+  throw new Error(JSON.stringify(errInfo));
+}
 
 export default function App() {
   // Navigation & Category states
@@ -72,15 +129,15 @@ export default function App() {
   const heroSlides = [
     {
       title: "Elegant & Pure Modest Fashion",
-      subtitle: "প্রিমিয়াম দুবাই চেরি ও নিদা সিল্ক কাপড়ের আকর্ষণীয় আবায়া সংগ্রহ",
+      subtitle: "Exclusive abaya collections made of premium Dubai Cherry & Nida Silk fabrics",
       bg: "bg-stone-100",
-      accent: "থেকে শুরু ৳১,১০০"
+      accent: "Starting from BDT 1,100"
     },
     {
       title: "Authentic Dubai Quality",
-      subtitle: "কুচকুচে কালার গ্যারান্টি, রাজকীয় ফিনিশ এবং নিখুঁত দীর্ঘস্থায়ী সেলাই",
+      subtitle: "Guaranteed deep colors, royal finish, and flawless long-lasting stitching",
       bg: "bg-amber-50",
-      accent: "হ্যান্ড এমব্রয়ডারি স্পেশাল"
+      accent: "Hand Embroidery Special"
     }
   ];
 
@@ -104,23 +161,198 @@ export default function App() {
     }, 3000);
   };
 
+  // Firestore Products and Orders
+  const [dbProducts, setDbProducts] = useState<Product[]>(PRODUCTS);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [adminPassword, setAdminPassword] = useState("");
+  const [adminError, setAdminError] = useState("");
+  const [adminTab, setAdminTab] = useState<"orders" | "products">("orders");
+
+  // Product form state
+  const [isAddingProduct, setIsAddingProduct] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [productForm, setProductForm] = useState<Partial<Product>>({
+    id: "",
+    name: "",
+    price: 0,
+    category: "abaya",
+    fabric: "Dubai Cherry",
+    images: [""],
+    sizes: ["50", "52", "54", "56"],
+    color: "black",
+    colorLabel: "কালো",
+    description: ""
+  });
+
+  // Load products from Firestore on mount
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "products"));
+        const productsList: Product[] = [];
+        querySnapshot.forEach((doc) => {
+          productsList.push({ id: doc.id, ...doc.data() } as Product);
+        });
+        if (productsList.length > 0) {
+          setDbProducts(productsList);
+        } else {
+          setDbProducts(PRODUCTS);
+        }
+      } catch (err) {
+        console.error("Firestore Error fetching products:", err);
+        setDbProducts(PRODUCTS);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  const fetchOrders = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "orders"));
+      const ordersList: any[] = [];
+      querySnapshot.forEach((doc) => {
+        ordersList.push({ id: doc.id, ...doc.data() });
+      });
+      ordersList.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      setOrders(ordersList);
+    } catch (err) {
+      console.error("Firestore Error fetching orders:", err);
+    }
+  };
+
+  // Save/Add product in Firestore
+  const handleSaveProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!productForm.id || !productForm.name || !productForm.price) {
+      alert("অনুগ্রহ করে সব প্রয়োজনীয় তথ্য দিন।");
+      return;
+    }
+    try {
+      const cleanProduct: Product = {
+        id: productForm.id,
+        name: productForm.name,
+        price: Number(productForm.price),
+        category: productForm.category || "abaya",
+        fabric: productForm.fabric || "Dubai Cherry",
+        images: Array.isArray(productForm.images) ? productForm.images : [""],
+        sizes: productForm.sizes || ["50", "52", "54", "56"],
+        color: productForm.color || "black",
+        colorLabel: productForm.colorLabel || "কালো",
+        description: productForm.description || ""
+      };
+      await setDoc(doc(db, "products", cleanProduct.id), cleanProduct);
+      showToast("✅ প্রোডাক্ট সফলভাবে সেভ করা হয়েছে!");
+      setEditingProduct(null);
+      setIsAddingProduct(false);
+      setProductForm({
+        id: "",
+        name: "",
+        price: 0,
+        category: "abaya",
+        fabric: "Dubai Cherry",
+        images: [""],
+        sizes: ["50", "52", "54", "56"],
+        color: "black",
+        colorLabel: "কালো",
+        description: ""
+      });
+      
+      // Refresh products list
+      const querySnapshot = await getDocs(collection(db, "products"));
+      const list: Product[] = [];
+      querySnapshot.forEach((doc) => {
+        list.push({ id: doc.id, ...doc.data() } as Product);
+      });
+      setDbProducts(list);
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, "products");
+    }
+  };
+
+  // Delete product from Firestore
+  const handleDeleteProduct = async (prodId: string) => {
+    if (!window.confirm("আপনি কি নিশ্চিতভাবে এই প্রোডাক্টটি ডিলিট করতে চান?")) return;
+    try {
+      await deleteDoc(doc(db, "products", prodId));
+      showToast("🗑️ প্রোডাক্ট ডিলিট করা হয়েছে!");
+      
+      const querySnapshot = await getDocs(collection(db, "products"));
+      const list: Product[] = [];
+      querySnapshot.forEach((doc) => {
+        list.push({ id: doc.id, ...doc.data() } as Product);
+      });
+      if (list.length > 0) {
+        setDbProducts(list);
+      } else {
+        setDbProducts(PRODUCTS);
+      }
+    } catch (err) {
+      handleFirestoreError(err, OperationType.DELETE, `products/${prodId}`);
+    }
+  };
+
+  // Import Default Products to Firestore
+  const handleImportDefaultProducts = async () => {
+    if (!window.confirm("আপনি কি ডেটাবেজে ডিফল্ট প্রোডাক্টগুলো ইম্পোর্ট করতে চান?")) return;
+    try {
+      for (const p of PRODUCTS) {
+        await setDoc(doc(db, "products", p.id), p);
+      }
+      showToast("🎉 সকল ডিফল্ট প্রোডাক্ট সফলভাবে ইম্পোর্ট করা হয়েছে!");
+      
+      const querySnapshot = await getDocs(collection(db, "products"));
+      const list: Product[] = [];
+      querySnapshot.forEach((doc) => {
+        list.push({ id: doc.id, ...doc.data() } as Product);
+      });
+      setDbProducts(list);
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, "products");
+    }
+  };
+
+  // Update order status in Firestore
+  const handleUpdateOrderStatus = async (orderId: string, newStatus: string) => {
+    try {
+      await updateDoc(doc(db, "orders", orderId), { status: newStatus });
+      showToast(`📦 অর্ডার স্ট্যাটাস আপডেট করা হয়েছে: ${newStatus}`);
+      fetchOrders();
+    } catch (err) {
+      handleFirestoreError(err, OperationType.UPDATE, `orders/${orderId}`);
+    }
+  };
+
+  // Delete order from Firestore
+  const handleDeleteOrder = async (orderId: string) => {
+    if (!window.confirm("আপনি কি নিশ্চিতভাবে এই অর্ডারটি ডিলিট করতে চান?")) return;
+    try {
+      await deleteDoc(doc(db, "orders", orderId));
+      showToast("🗑️ অর্ডার ডিলিট করা হয়েছে!");
+      fetchOrders();
+    } catch (err) {
+      handleFirestoreError(err, OperationType.DELETE, `orders/${orderId}`);
+    }
+  };
+
   // WhatsApp WhatsApp Order Link
   const waBaseLink = "https://wa.me/8801970831783";
 
   // Compute color options dynamically based on products
   const colorOptions = useMemo(() => {
     const map: Record<string, string> = {};
-    PRODUCTS.forEach((p) => {
+    dbProducts.forEach((p) => {
       if (p.color && p.colorLabel) {
         map[p.color] = p.colorLabel;
       }
     });
     return Object.entries(map).map(([key, label]) => ({ key, label }));
-  }, []);
+  }, [dbProducts]);
 
   // Filter & Sort logic
   const filteredProducts = useMemo(() => {
-    let result = [...PRODUCTS];
+    let result = [...dbProducts];
 
     // Category Filter
     if (selectedCategory !== "all") {
@@ -157,7 +389,7 @@ export default function App() {
     }
 
     return result;
-  }, [selectedCategory, searchQuery, priceRange, selectedColors, sortMode]);
+  }, [selectedCategory, searchQuery, priceRange, selectedColors, sortMode, dbProducts]);
 
   // Pricing helper
   const getProductPrice = (product: Product, type?: string) => {
@@ -201,7 +433,7 @@ export default function App() {
       }
     });
 
-    showToast(`🛒 "${product.name}" (${finalSize}${finalType ? ` - ${finalType}` : ""}) কার্টে যুক্ত করা হয়েছে!`);
+    showToast(`🛒 "${product.name}" (${finalSize}${finalType ? ` - ${finalType}` : ""}) has been added to your cart!`);
   };
 
   // Add multiple wholesale sizes to cart
@@ -233,7 +465,7 @@ export default function App() {
     });
 
     if (linesToAdd.length === 0) {
-      alert("অনুগ্রহ করে অন্তত ১টি সাইজের জন্য পরিমাণ সেট করুন।");
+      alert("Please set quantity for at least one size.");
       return;
     }
 
@@ -253,7 +485,7 @@ export default function App() {
     // Reset wholesale quantities
     setWholesaleQuantities({});
     setIsWholesaleOpen(false);
-    showToast(`🛒 পাইকারি অর্ডারে মোট ${totalPiecesAdded} পিস কার্টে যুক্ত হয়েছে!`);
+    showToast(`🛒 A total of ${totalPiecesAdded} pieces have been added to your cart for wholesale!`);
   };
 
   // Cart action helpers
@@ -333,22 +565,22 @@ export default function App() {
   };
 
   // Submit checkout order
-  const handlePlaceOrder = (e: React.FormEvent) => {
+  const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (cart.length === 0) {
-      alert("আপনার কার্ট বর্তমানে খালি আছে।");
+      alert("Your cart is currently empty.");
       return;
     }
     if (!checkoutName.trim()) {
-      alert("অনুগ্রহ করে আপনার নাম লিখুন।");
+      alert("Please enter your name.");
       return;
     }
     if (!checkoutPhone.trim()) {
-      alert("অনুগ্রহ করে আপনার মোবাইল নাম্বারটি দিন।");
+      alert("Please enter your mobile phone number.");
       return;
     }
     if (!checkoutAddress.trim()) {
-      alert("অনুগ্রহ করে সম্পূর্ণ ডেলিভারি ঠিকানা লিখুন।");
+      alert("Please enter your complete delivery address.");
       return;
     }
 
@@ -358,32 +590,42 @@ export default function App() {
       name: checkoutName,
       phone: checkoutPhone,
       address: checkoutAddress,
-      area: deliveryArea === "inside" ? "Dhaka Inside" : "Dhaka Outside",
+      area: deliveryArea === "inside" ? "Inside Dhaka" : "Outside Dhaka",
       items: [...cart],
       subtotal: cartSubtotal,
       delivery: deliveryCharge,
       total: cartTotal,
-      date: new Date().toLocaleDateString("bn-BD")
+      date: new Date().toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' }),
+      status: "Pending",
+      timestamp: Date.now()
     };
 
     setOrderSuccess(newOrder);
 
+    // Save order data to Firestore asynchronously
+    try {
+      await setDoc(doc(db, "orders", orderId), newOrder);
+      console.log("Order saved to Firestore successfully!");
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, `orders/${orderId}`);
+    }
+
     // Build perfect WhatsApp checkout message
-    let messageText = `*নতুন আবায়া অর্ডার রিকোয়েস্ট (ID: ${orderId})*\n\n`;
-    messageText += `👤 *গ্রাহকের নাম:* ${checkoutName}\n`;
-    messageText += `📞 *মোবাইল:* ${checkoutPhone}\n`;
-    messageText += `📍 *ঠিকানা:* ${checkoutAddress}\n`;
-    messageText += `🚚 *ডেলিভারি এরিয়া:* ${deliveryArea === "inside" ? "ঢাকার ভেতরে" : "ঢাকার বাইরে"}\n\n`;
-    messageText += `🛍️ *পণ্য তালিকা:*\n`;
+    let messageText = `*New Abaya Order Request (ID: ${orderId})*\n\n`;
+    messageText += `👤 *Customer Name:* ${checkoutName}\n`;
+    messageText += `📞 *Mobile Phone:* ${checkoutPhone}\n`;
+    messageText += `📍 *Address:* ${checkoutAddress}\n`;
+    messageText += `🚚 *Delivery Area:* ${deliveryArea === "inside" ? "Inside Dhaka" : "Outside Dhaka"}\n\n`;
+    messageText += `🛍️ *Product List:*\n`;
 
     cart.forEach((item, index) => {
-      messageText += `${index + 1}. ${item.name} [সাইজ: ${item.size}${item.type ? `, টাইপ: ${item.type}` : ""}] x ${item.quantity} পিস - ৳${item.price * item.quantity}\n`;
+      messageText += `${index + 1}. ${item.name} [Size: ${item.size}${item.type ? `, Type: ${item.type}` : ""}] x ${item.quantity} pcs - BDT ${item.price * item.quantity}\n`;
     });
 
-    messageText += `\n💵 *মোট সাবটোটাল:* ৳${cartSubtotal}\n`;
-    messageText += `🚚 *ডেলিভারি চার্জ:* ৳${deliveryCharge}\n`;
-    messageText += `💰 *সর্বমোট বিল:* ৳${cartTotal}\n\n`;
-    messageText += `ধন্যবাদ! অনুগ্রহ করে অর্ডারটি কনফার্ম করুন।`;
+    messageText += `\n💵 *Subtotal:* BDT ${cartSubtotal}\n`;
+    messageText += `🚚 *Delivery Charge:* BDT ${deliveryCharge}\n`;
+    messageText += `💰 *Total Amount:* BDT ${cartTotal}\n\n`;
+    messageText += `Thank you! Please confirm the order.`;
 
     const waLink = `${waBaseLink}?text=${encodeURIComponent(messageText)}`;
     
@@ -432,9 +674,9 @@ export default function App() {
 
       {/* Top Banner Notice */}
       <div className="bg-[#1c1917] text-[#c5a880] text-center py-2 px-4 text-xs tracking-wider uppercase font-medium flex items-center justify-center gap-2">
-        <span>✨ সারা বাংলাদেশে ক্যাশ অন ডেলিভারি সুবিধা ✨</span>
+        <span>✨ Cash on Delivery Available Nationwide ✨</span>
         <span className="hidden sm:inline">|</span>
-        <span className="hidden sm:inline">অর্ডার করতে কল বা হোয়াটসঅ্যাপ করুন: ০১৯৭০৮৩১৭৮৩</span>
+        <span className="hidden sm:inline">Call or WhatsApp to Order: +8801970831783</span>
       </div>
 
       {/* Header */}
@@ -444,13 +686,13 @@ export default function App() {
           {/* Logo & Brand */}
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => { setSelectedCategory("all"); setSearchQuery(""); }}>
             <div className="w-10 h-10 rounded-full bg-stone-900 flex items-center justify-center text-[#c5a880] font-bold text-lg shadow-sm">
-              A
+              M
             </div>
             <div>
               <h1 className="text-xl font-bold tracking-tight text-stone-900 font-display">
-                ANZAAR <span className="text-[#c5a880] font-normal font-sans text-sm tracking-widest uppercase ml-1 block sm:inline">Premium Modest Wear</span>
+                MUSLIM ABAYA <span className="text-[#c5a880] font-normal font-sans text-sm tracking-widest uppercase ml-1 block sm:inline">Modest Wear</span>
               </h1>
-              <p className="text-[10px] text-stone-400 font-medium tracking-wide uppercase">Elite Elegance & Grace</p>
+              <p className="text-[10px] text-stone-400 font-medium tracking-wide uppercase">Premium Hijab & Abaya Collection</p>
             </div>
           </div>
 
@@ -461,7 +703,7 @@ export default function App() {
             </span>
             <input
               type="text"
-              placeholder="আবায়া, কুর্তি বা কালার দিয়ে খুঁজুন..."
+              placeholder="Search for abaya, kurti or colors..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-full text-sm focus:outline-hidden focus:ring-2 focus:ring-[#c5a880]/30 focus:border-[#c5a880] transition-all"
@@ -505,7 +747,7 @@ export default function App() {
                 : "bg-stone-50 text-stone-600 hover:bg-stone-100"
             }`}
           >
-            All Products (সব পণ্য)
+            All Products
           </button>
           {CATEGORIES.map((cat) => (
             <button
@@ -533,36 +775,36 @@ export default function App() {
             <div className="w-16 h-16 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-md shadow-emerald-200">
               <Check className="w-8 h-8 stroke-[3]" />
             </div>
-            <h2 className="text-2xl font-bold text-stone-900">আপনার অর্ডারটি সফলভাবে সাবমিট হয়েছে!</h2>
-            <p className="text-emerald-700 text-sm mt-1 font-semibold">অর্ডার আইডি: #{orderSuccess.orderId}</p>
+            <h2 className="text-2xl font-bold text-stone-900">Your order has been successfully submitted!</h2>
+            <p className="text-emerald-700 text-sm mt-1 font-semibold">Order ID: #{orderSuccess.orderId}</p>
             <p className="text-stone-600 text-sm mt-3 max-w-md mx-auto leading-relaxed">
-              আমরা আপনার তথ্য পেয়েছি। অনুগ্রহ করে নিশ্চিত করুন যে হোয়াটসঅ্যাপে অর্ডার ডিটেইলস পাঠানো হয়েছে। আমরা খুব শীঘ্রই আপনার সাথে যোগাযোগ করব।
+              We have received your information. Please make sure that you sent the order details on WhatsApp. We will contact you very soon.
             </p>
 
             <div className="mt-6 bg-white rounded-xl p-4 border border-stone-100 text-left text-sm max-w-md mx-auto space-y-2">
-              <p>👤 <strong>গ্রাহক:</strong> {orderSuccess.name}</p>
-              <p>📞 <strong>মোবাইল:</strong> {orderSuccess.phone}</p>
-              <p>📍 <strong>ঠিকানা:</strong> {orderSuccess.address}</p>
-              <p>💰 <strong>সর্বমোট বিল:</strong> <span className="font-bold text-stone-900">৳{orderSuccess.total}</span> (ক্যাশ অন ডেলিভারি)</p>
+              <p>👤 <strong>Customer:</strong> {orderSuccess.name}</p>
+              <p>📞 <strong>Phone:</strong> {orderSuccess.phone}</p>
+              <p>📍 <strong>Address:</strong> {orderSuccess.address}</p>
+              <p>💰 <strong>Total Bill:</strong> <span className="font-bold text-stone-900">BDT {orderSuccess.total}</span> (Cash on Delivery)</p>
             </div>
 
             <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
               <a
                 href={`${waBaseLink}?text=${encodeURIComponent(
-                  `হ্যালো, আমি অর্ডারটি কনফার্ম করতে চাই। আইডি: #${orderSuccess.orderId}`
+                  `Hello, I would like to confirm my order. ID: #${orderSuccess.orderId}`
                 )}`}
                 target="_blank"
                 rel="noopener"
                 className="w-full sm:w-auto bg-stone-900 hover:bg-stone-800 text-white font-medium text-sm px-6 py-3 rounded-full shadow-md transition-all flex items-center justify-center gap-2"
               >
-                <span>WhatsApp কনফার্ম করুন</span>
+                <span>Confirm on WhatsApp</span>
                 <ArrowRight className="w-4 h-4" />
               </a>
               <button
                 onClick={() => setOrderSuccess(null)}
                 className="w-full sm:w-auto bg-stone-100 hover:bg-stone-200 text-stone-700 font-medium text-sm px-6 py-3 rounded-full transition-all"
               >
-                নতুন করে শপিং করুন
+                Continue Shopping
               </button>
             </div>
           </div>
@@ -588,13 +830,13 @@ export default function App() {
               <div className="mt-6 sm:mt-8 flex flex-wrap items-center gap-3">
                 <button
                   onClick={() => {
-                    const abayaEl = document.getElementById("abaya-anchor");
-                    abayaEl?.scrollIntoView({ behavior: "smooth" });
-                    setSelectedCategory("abaya");
+                     const abayaEl = document.getElementById("abaya-anchor");
+                     abayaEl?.scrollIntoView({ behavior: "smooth" });
+                     setSelectedCategory("abaya");
                   }}
                   className="bg-stone-900 text-stone-50 hover:bg-stone-800 text-xs font-semibold tracking-wider uppercase px-5 py-3 rounded-full shadow-md transition-all"
                 >
-                  Shop Now (শপ করুন)
+                  Shop Now
                 </button>
                 <span className="text-stone-500 font-mono text-xs font-medium px-3 py-2 bg-white/60 border border-stone-200 rounded-full shadow-xs">
                   {heroSlides[heroSlideIdx].accent}
@@ -611,7 +853,7 @@ export default function App() {
           <aside className="hidden lg:block lg:col-span-1 bg-white border border-stone-150 p-6 rounded-2xl sticky top-[140px] shadow-xs">
             <h3 className="text-sm font-bold uppercase tracking-wider text-stone-800 mb-5 pb-2 border-b border-stone-100 flex items-center gap-2">
               <Filter className="w-4 h-4 text-stone-500" />
-              <span>পণ্য ফিল্টার করুন</span>
+              <span>Filter Products</span>
             </h3>
 
             {/* Category selection */}
@@ -628,11 +870,11 @@ export default function App() {
                 >
                   <span>All Products</span>
                   <span className="text-[10px] bg-stone-200/60 px-1.5 py-0.5 rounded-full font-mono">
-                    {PRODUCTS.length}
+                    {dbProducts.length}
                   </span>
                 </button>
                 {CATEGORIES.map((cat) => {
-                  const count = PRODUCTS.filter((p) => p.category === cat.key).length;
+                  const count = dbProducts.filter((p) => p.category === cat.key).length;
                   return (
                     <button
                       key={cat.key}
@@ -655,7 +897,7 @@ export default function App() {
 
             {/* Price Filter range */}
             <div className="mb-6">
-              <h4 className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3">Price Range (বাজেট)</h4>
+              <h4 className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3">Price Range</h4>
               <div className="space-y-4">
                 <input
                   type="range"
@@ -667,15 +909,15 @@ export default function App() {
                   className="w-full accent-stone-900 cursor-pointer h-1 bg-stone-200 rounded-lg appearance-none"
                 />
                 <div className="flex justify-between items-center text-xs text-stone-500 font-mono">
-                  <span>৳{priceRange[0]}</span>
-                  <span>Max: ৳{priceRange[1]}</span>
+                  <span>BDT {priceRange[0]}</span>
+                  <span>Max: BDT {priceRange[1]}</span>
                 </div>
               </div>
             </div>
 
             {/* Color Filters */}
             <div className="mb-6">
-              <h4 className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3">Color (রং)</h4>
+              <h4 className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3">Colors</h4>
               <div className="flex flex-wrap gap-2">
                 {colorOptions.map((color) => {
                   const isChecked = selectedColors.includes(color.key);
@@ -731,7 +973,7 @@ export default function App() {
                 }}
                 className="w-full py-2 bg-stone-50 hover:bg-stone-100 text-stone-700 text-xs font-semibold rounded-lg border border-stone-200 transition-colors"
               >
-                Clear All Filters (ফিল্টার মুছুন)
+                Clear All Filters
               </button>
             )}
           </aside>
@@ -774,10 +1016,10 @@ export default function App() {
                   onChange={(e) => setSortMode(e.target.value)}
                   className="flex-1 sm:flex-initial bg-stone-50 border border-stone-200 rounded-lg text-xs font-semibold px-3 py-2 focus:outline-hidden focus:ring-1 focus:ring-amber-500"
                 >
-                  <option value="default">Default Sort (সাধারণ)</option>
-                  <option value="price-asc">Price: Low to High (কম দাম)</option>
-                  <option value="price-desc">Price: High to Low (বেশি দাম)</option>
-                  <option value="name-asc">Name: A-Z (নামানুসারে)</option>
+                  <option value="default">Default Sort</option>
+                  <option value="price-asc">Price: Low to High</option>
+                  <option value="price-desc">Price: High to Low</option>
+                  <option value="name-asc">Name: A-Z</option>
                 </select>
               </div>
             </div>
@@ -788,9 +1030,9 @@ export default function App() {
                 <div className="w-16 h-16 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Info className="w-6 h-6 text-stone-400" />
                 </div>
-                <h4 className="text-lg font-bold text-stone-800">কোনো পণ্য পাওয়া যায়নি!</h4>
+                <h4 className="text-lg font-bold text-stone-800">No Products Found!</h4>
                 <p className="text-sm text-stone-500 max-w-sm mx-auto mt-1 leading-relaxed">
-                  আপনার নির্বাচিত ফিল্টার বা সার্চ কিওয়ার্ডের সাথে মেলে এমন কোনো পণ্য বর্তমানে নেই। অনুগ্রহ করে অন্য কিওয়ার্ড দিয়ে চেষ্টা করুন।
+                  There are currently no products matching your selected filters or search keyword. Please try with different keywords.
                 </p>
                 <button
                   onClick={() => {
@@ -801,7 +1043,7 @@ export default function App() {
                   }}
                   className="mt-5 bg-stone-900 hover:bg-stone-800 text-stone-50 px-5 py-2 rounded-full text-xs font-semibold shadow-xs"
                 >
-                  সব পণ্য ফিরে দেখুন
+                  View All Products
                 </button>
               </div>
             )}
@@ -886,11 +1128,11 @@ export default function App() {
                         {/* Pricing */}
                         <div className="mt-1 flex items-baseline gap-2">
                           <span className="text-base font-bold text-stone-950 font-mono">
-                            ৳{p.price}
+                            BDT {p.price}
                           </span>
                           {p.types && p.types.length > 1 && (
                             <span className="text-[10px] text-stone-400">
-                              (টাইপ অনুযায়ী পরিবর্তিত)
+                              (Varies by type)
                             </span>
                           )}
                         </div>
@@ -911,7 +1153,7 @@ export default function App() {
                               <Minus className="w-3 h-3" />
                             </button>
                             <span className="flex-1 text-center text-xs font-extrabold text-amber-950 font-mono">
-                              {currentCartQty} পিস কার্টে আছে
+                              {currentCartQty} pcs in cart
                             </span>
                             <button
                               onClick={() => {
@@ -929,7 +1171,7 @@ export default function App() {
                             className="w-full bg-stone-900 hover:bg-stone-800 text-stone-50 font-bold text-xs py-2.5 rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5"
                           >
                             <ShoppingCart className="w-3.5 h-3.5 text-[#c5a880]" />
-                            <span>Add to Cart (কার্টে যোগ করুন)</span>
+                            <span>Add to Cart</span>
                           </button>
                         )}
 
@@ -938,17 +1180,17 @@ export default function App() {
                             onClick={() => handleOpenQuickView(p)}
                             className="bg-stone-50 hover:bg-stone-100 text-stone-700 border border-stone-200 font-semibold text-xs py-2 rounded-xl transition-colors text-center"
                           >
-                            বিস্তারিত দেখুন
+                            View Details
                           </button>
                           <a
-                            href={`${waBaseLink}?text=${encodeURIComponent(
-                              `আসসালামু আলাইকুম, আমি এই প্রোডাক্টটি অর্ডার করতে আগ্রহী: ${p.name} (ID: ${p.id})`
-                            )}`}
+                             href={`${waBaseLink}?text=${encodeURIComponent(
+                               `Hello, I am interested in ordering this product: ${p.name} (ID: ${p.id})`
+                             )}`}
                             target="_blank"
                             rel="noopener"
                             className="bg-[#25D366] hover:bg-[#20ba56] text-white font-bold text-xs py-2 rounded-xl transition-colors text-center flex items-center justify-center gap-1"
                           >
-                            WhatsApp মেসেজ
+                            WhatsApp Message
                           </a>
                         </div>
                       </div>
@@ -1058,11 +1300,11 @@ export default function App() {
                     <div className="mt-2.5 flex items-center justify-between">
                       <div className="flex items-baseline gap-2">
                         <span className="text-2xl font-extrabold text-stone-950 font-mono">
-                          ৳{getProductPrice(selectedProduct, quickViewType)}
+                          BDT {getProductPrice(selectedProduct, quickViewType)}
                         </span>
                         {selectedProduct.priceByType && (
                           <span className="text-xs text-stone-500 font-medium">
-                            (টাইপ অনুযায়ী মূল্য)
+                            (Price varies by type)
                           </span>
                         )}
                       </div>
@@ -1082,7 +1324,7 @@ export default function App() {
                     {selectedProduct.types && selectedProduct.types.length > 1 && (
                       <div className="mt-5">
                         <span className="text-xs font-bold text-stone-400 uppercase tracking-wider block mb-2">
-                          Select Variant Type (ধরণ নির্বাচন)
+                          Select Variant Type
                         </span>
                         <div className="flex flex-wrap gap-2">
                           {selectedProduct.types.map((type) => (
@@ -1095,7 +1337,7 @@ export default function App() {
                                   : "bg-white text-stone-700 border-stone-200 hover:border-stone-400"
                               }`}
                             >
-                              {type} - ৳{getProductPrice(selectedProduct, type)}
+                              {type} - BDT {getProductPrice(selectedProduct, type)}
                             </button>
                           ))}
                         </div>
@@ -1106,13 +1348,13 @@ export default function App() {
                     <div className="mt-5">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs font-bold text-stone-400 uppercase tracking-wider">
-                          Select Size (সাইজ নির্বাচন)
+                          Select Size
                         </span>
                         <button
                           onClick={() => setShowSizeChartModal(true)}
                           className="text-[11px] font-bold text-amber-700 hover:underline"
                         >
-                          Size Chart (সাইজ গাইড)
+                          Size Chart
                         </button>
                       </div>
                       <div className="flex flex-wrap gap-2">
@@ -1149,9 +1391,9 @@ export default function App() {
                         >
                           <div>
                             <span className="text-xs font-bold text-stone-800 uppercase tracking-wider">
-                              Wholesale Order (পাইকারি অর্ডার)
+                              Wholesale Order
                             </span>
-                            <p className="text-[10px] text-stone-500">একাধিক সাইজ একসাথে একই কালার অর্ডার করুন</p>
+                            <p className="text-[10px] text-stone-500">Order multiple sizes of the same color together</p>
                           </div>
                           <ChevronRight
                             className={`w-4 h-4 text-stone-500 transition-transform duration-300 ${
@@ -1163,14 +1405,14 @@ export default function App() {
                         {isWholesaleOpen && (
                           <div className="p-4 bg-white border-t border-stone-200 animate-fade-in space-y-3">
                             <p className="text-[11px] text-stone-500 leading-relaxed">
-                              প্রতিটি সাইজের জন্য প্রয়োজনীয় পিস বসান। কার্টে সব পিস একসাথে জমা হবে।
+                              Specify the quantity for each size. All items will be added to the cart together.
                             </p>
                             <div className="space-y-2">
                               {selectedProduct.sizes.map((size) => {
                                 const val = wholesaleQuantities[size] || 0;
                                 return (
                                   <div key={size} className="flex items-center justify-between text-xs py-1.5 border-b border-stone-100">
-                                    <span className="font-semibold text-stone-700">সাইজ {size} ইঞ্চি</span>
+                                    <span className="font-semibold text-stone-700">Size {size} inches</span>
                                     <div className="flex items-center gap-1.5">
                                       <button
                                         onClick={() =>
@@ -1203,9 +1445,9 @@ export default function App() {
                               })}
                             </div>
                             <div className="pt-2 flex items-center justify-between border-t border-stone-200">
-                              <span className="text-xs font-semibold text-stone-600">মোট পিস:</span>
+                              <span className="text-xs font-semibold text-stone-600">Total Qty:</span>
                               <span className="font-bold text-stone-950 text-sm font-mono">
-                                {Object.values(wholesaleQuantities).reduce((sum: number, v: any) => sum + (v || 0), 0)} পিস
+                                {Object.values(wholesaleQuantities).reduce((sum: number, v: any) => sum + (v || 0), 0)} pcs
                               </span>
                             </div>
                             <button
@@ -1213,7 +1455,7 @@ export default function App() {
                               disabled={Object.values(wholesaleQuantities).reduce((sum: number, v: any) => sum + (v || 0), 0) === 0}
                               className="w-full py-2 bg-stone-900 text-stone-50 hover:bg-stone-800 disabled:bg-stone-200 disabled:text-stone-400 font-bold text-xs rounded-xl transition-all uppercase tracking-wider"
                             >
-                              পাইকারি সব একসাথে কার্টে যোগ করুন
+                              Add Wholesale Items to Cart
                             </button>
                           </div>
                         )}
@@ -1224,7 +1466,7 @@ export default function App() {
                     {!isWholesaleOpen && (
                       <div className="mt-5 flex items-center gap-4">
                         <span className="text-xs font-bold text-stone-400 uppercase tracking-wider">
-                          Quantity (পরিমাণ)
+                          Quantity
                         </span>
                         <div className="flex items-center bg-stone-100 rounded-xl p-1 border border-stone-200">
                           <button
@@ -1268,12 +1510,12 @@ export default function App() {
                       <button
                         onClick={() => {
                           if (isWholesaleOpen) {
-                            alert("পাইকারি অর্ডারে বাই নাও ব্যবহার করতে সব কার্টে এড করুন।");
+                            alert("To buy wholesale items, please add them to the cart.");
                           } else {
                             handleBuyNow(selectedProduct, quickViewSize, quickViewType, quickViewQty);
                           }
                         }}
-                        className="bg-[#800000] hover:bg-[#6c0000] text-white font-bold text-xs py-3 rounded-xl transition-colors uppercase tracking-wider shadow-sm flex items-center justify-center gap-2"
+                        className="bg-stone-900 hover:bg-stone-800 text-stone-50 font-bold text-xs py-3 rounded-xl transition-colors uppercase tracking-wider shadow-sm flex items-center justify-center gap-2"
                       >
                         <ShoppingBag className="w-4 h-4 text-white" />
                         <span>Buy Now</span>
@@ -1282,13 +1524,13 @@ export default function App() {
 
                     <a
                       href={`${waBaseLink}?text=${encodeURIComponent(
-                        `আসসালামু আলাইকুম, আমি সরাসরি এই পণ্যটি অর্ডার করতে চাই: ${selectedProduct.name} [সাইজ: ${quickViewSize}${quickViewType ? `, টাইপ: ${quickViewType}` : ""}] (পরিমাণ: ${quickViewQty} পিস)`
+                        `Hello, I would like to order this product: ${selectedProduct.name} [Size: ${quickViewSize}${quickViewType ? `, Type: ${quickViewType}` : ""}] (Quantity: ${quickViewQty} pcs)`
                       )}`}
                       target="_blank"
                       rel="noopener"
                       className="w-full bg-[#25D366] hover:bg-[#20ba56] text-white font-bold text-xs py-3.5 rounded-xl transition-colors text-center flex items-center justify-center gap-2"
                     >
-                      <span>অর্ডার করুন সরাসরি WhatsApp মেসেজে</span>
+                      <span>Order Directly on WhatsApp</span>
                     </a>
                   </div>
                 </div>
@@ -1305,7 +1547,7 @@ export default function App() {
                         : "border-transparent text-stone-400 hover:text-stone-600"
                     }`}
                   >
-                    Product Description (বিবরণ)
+                    Product Description
                   </button>
                   <button
                     onClick={() => setQuickViewTab("spec")}
@@ -1315,7 +1557,7 @@ export default function App() {
                         : "border-transparent text-stone-400 hover:text-stone-600"
                     }`}
                   >
-                    Specifications (স্পেসিফিকেশন)
+                    Specifications
                   </button>
                 </div>
 
@@ -1332,11 +1574,11 @@ export default function App() {
                   ) : (
                     <ul className="divide-y divide-stone-100 text-xs">
                       <li className="py-2.5 flex justify-between">
-                        <span className="text-stone-400 font-medium">Fabric (ফেব্রিক্স)</span>
+                        <span className="text-stone-400 font-medium">Fabric</span>
                         <strong className="text-stone-800">{selectedProduct.fabric}</strong>
                       </li>
                       <li className="py-2.5 flex justify-between">
-                        <span className="text-stone-400 font-medium">Color (রং)</span>
+                        <span className="text-stone-400 font-medium">Color</span>
                         <strong className="text-stone-800">{selectedProduct.colorLabel}</strong>
                       </li>
                       {selectedProduct.detailNote && (
@@ -1386,9 +1628,9 @@ export default function App() {
                       <div className="w-14 h-14 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-3">
                         <ShoppingBag className="w-5 h-5 text-stone-400" />
                       </div>
-                      <h4 className="text-sm font-bold text-stone-700">কার্টটি বর্তমানে খালি আছে!</h4>
+                      <h4 className="text-sm font-bold text-stone-700">Your cart is currently empty!</h4>
                       <p className="text-xs text-stone-400 max-w-xs mx-auto mt-1">
-                        অনুগ্রহ করে আপনার পছন্দের আবায়া শপ করুন এবং কার্টে যোগ করুন।
+                        Please shop for your favorite abayas and add them to the cart.
                       </p>
                       <button
                         onClick={() => {
@@ -1397,7 +1639,7 @@ export default function App() {
                         }}
                         className="mt-5 bg-stone-900 hover:bg-stone-800 text-stone-50 text-xs px-4 py-2 rounded-full font-semibold transition-colors"
                       >
-                        শপ করতে ফিরে যান
+                        Go Back to Shop
                       </button>
                     </div>
                   ) : (
@@ -1414,10 +1656,10 @@ export default function App() {
                                 {item.name}
                               </h5>
                               <p className="text-[10px] text-stone-400 mt-0.5">
-                                সাইজ: <span className="font-bold text-stone-700">{item.size}</span>
+                                Size: <span className="font-bold text-stone-700">{item.size}</span>
                                 {item.type && (
                                   <>
-                                    {" • "}ধরণ: <span className="font-bold text-stone-700">{item.type}</span>
+                                    {" • "}Type: <span className="font-bold text-stone-700">{item.type}</span>
                                   </>
                                 )}
                               </p>
@@ -1444,12 +1686,12 @@ export default function App() {
 
                                 <div className="flex items-center gap-2">
                                   <span className="text-xs font-bold text-stone-950 font-mono">
-                                    ৳{item.price * item.quantity}
+                                    BDT {item.price * item.quantity}
                                   </span>
                                   <button
                                     onClick={() => handleRemoveFromCart(item.id)}
                                     className="text-stone-300 hover:text-[#800000] p-1 transition-colors"
-                                    title="মুছে ফেলুন"
+                                    title="Remove"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
                                   </button>
@@ -1464,12 +1706,12 @@ export default function App() {
                       <form onSubmit={handlePlaceOrder} className="pt-4 border-t border-stone-150 space-y-4">
                         <h4 className="text-xs font-extrabold text-stone-400 uppercase tracking-widest flex items-center gap-1">
                           <MapPin className="w-3.5 h-3.5 text-amber-600" />
-                          <span>Delivery Address (ক্যাশ অন ডেলিভারি)</span>
+                          <span>Delivery Address (Cash on Delivery)</span>
                         </h4>
 
                         <div className="space-y-3">
                           <div>
-                            <label className="block text-[11px] font-bold text-stone-600 mb-1">আপনার নাম *</label>
+                            <label className="block text-[11px] font-bold text-stone-600 mb-1">Your Name *</label>
                             <div className="relative">
                               <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-stone-400">
                                 <User className="w-3.5 h-3.5" />
@@ -1477,7 +1719,7 @@ export default function App() {
                               <input
                                 type="text"
                                 required
-                                placeholder="উদা: ফারিয়া রহমান"
+                                placeholder="e.g. Faria Rahman"
                                 value={checkoutName}
                                 onChange={(e) => setCheckoutName(e.target.value)}
                                 className="w-full pl-9 pr-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs focus:ring-1 focus:ring-amber-500 focus:outline-hidden"
@@ -1486,7 +1728,7 @@ export default function App() {
                           </div>
 
                           <div>
-                            <label className="block text-[11px] font-bold text-stone-600 mb-1">মোবাইল নাম্বার *</label>
+                            <label className="block text-[11px] font-bold text-stone-600 mb-1">Mobile Number *</label>
                             <div className="relative">
                               <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-stone-400">
                                 <Phone className="w-3.5 h-3.5" />
@@ -1494,7 +1736,7 @@ export default function App() {
                               <input
                                 type="tel"
                                 required
-                                placeholder="উদা: ০১৭xxxxxxxx"
+                                placeholder="e.g. 017xxxxxxxx"
                                 value={checkoutPhone}
                                 onChange={(e) => setCheckoutPhone(e.target.value)}
                                 className="w-full pl-9 pr-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs focus:ring-1 focus:ring-amber-500 focus:outline-hidden font-mono"
@@ -1503,11 +1745,11 @@ export default function App() {
                           </div>
 
                           <div>
-                            <label className="block text-[11px] font-bold text-stone-600 mb-1">ডেলিভারি ঠিকানা *</label>
+                            <label className="block text-[11px] font-bold text-stone-600 mb-1">Delivery Address *</label>
                             <textarea
                               required
                               rows={2}
-                              placeholder="উদা: বাসা নং- ২৪, রোড নং- ৫, উত্তরা সেক্টর- ১০, ঢাকা।"
+                              placeholder="e.g. House 24, Road 5, Uttara Sector 10, Dhaka."
                               value={checkoutAddress}
                               onChange={(e) => setCheckoutAddress(e.target.value)}
                               className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs focus:ring-1 focus:ring-amber-500 focus:outline-hidden resize-none"
@@ -1515,7 +1757,7 @@ export default function App() {
                           </div>
 
                           <div>
-                            <span className="block text-[11px] font-bold text-stone-600 mb-1.5">ডেলিভারি এরিয়া</span>
+                            <span className="block text-[11px] font-bold text-stone-600 mb-1.5">Delivery Area</span>
                             <div className="grid grid-cols-2 gap-2">
                               <button
                                 type="button"
@@ -1526,7 +1768,7 @@ export default function App() {
                                     : "bg-white text-stone-700 border-stone-200"
                                 }`}
                               >
-                                ঢাকার ভেতর (৳৮০)
+                                Inside Dhaka (BDT 80)
                               </button>
                               <button
                                 type="button"
@@ -1537,7 +1779,7 @@ export default function App() {
                                     : "bg-white text-stone-700 border-stone-200"
                                 }`}
                               >
-                                ঢাকার বাইরে (৳১৫০)
+                                Outside Dhaka (BDT 150)
                               </button>
                             </div>
                           </div>
@@ -1546,25 +1788,25 @@ export default function App() {
                         {/* Order calculation overview */}
                         <div className="bg-stone-50 rounded-xl p-3 space-y-1.5 text-xs text-stone-600 border border-stone-100 font-medium">
                           <div className="flex justify-between">
-                            <span>Subtotal (সাবটোটাল):</span>
-                            <span className="font-bold text-stone-950 font-mono">৳{cartSubtotal}</span>
+                            <span>Subtotal:</span>
+                            <span className="font-bold text-stone-950 font-mono">BDT {cartSubtotal}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span>Delivery (ডেলিভারি চার্জ):</span>
-                            <span className="font-bold text-stone-950 font-mono">৳{deliveryCharge}</span>
+                            <span>Delivery Charge:</span>
+                            <span className="font-bold text-stone-950 font-mono">BDT {deliveryCharge}</span>
                           </div>
                           <div className="flex justify-between text-stone-950 pt-1.5 border-t border-stone-200 font-extrabold text-sm">
-                            <span>সর্বমোট বিল:</span>
-                            <span className="font-mono">৳{cartTotal}</span>
+                            <span>Total Bill:</span>
+                            <span className="font-mono">BDT {cartTotal}</span>
                           </div>
                         </div>
 
                         <button
                           type="submit"
-                          className="w-full bg-[#800000] hover:bg-[#6c0000] text-white py-3 rounded-xl text-xs font-bold uppercase tracking-wider shadow-md transition-all flex items-center justify-center gap-2"
+                          className="w-full bg-[#1c1917] hover:bg-[#2e2a27] text-[#c5a880] py-3 rounded-xl text-xs font-bold uppercase tracking-wider shadow-md transition-all flex items-center justify-center gap-2"
                         >
-                          <ShoppingBag className="w-4 h-4 text-white" />
-                          <span>কনফার্ম করুন (ক্যাশ অন ডেলিভারি)</span>
+                          <ShoppingBag className="w-4 h-4 text-[#c5a880]" />
+                          <span>Confirm Order (Cash on Delivery)</span>
                         </button>
                       </form>
                     </>
@@ -1588,7 +1830,7 @@ export default function App() {
                 <div className="p-4 border-b border-stone-150 flex items-center justify-between">
                   <h3 className="text-sm font-bold text-stone-950 flex items-center gap-1.5">
                     <Filter className="w-4 h-4 text-stone-600" />
-                    <span>পণ্য ফিল্টার করুন</span>
+                    <span>Filter Products</span>
                   </h3>
                   <button
                     onClick={() => setIsMobileFiltersOpen(false)}
@@ -1646,8 +1888,8 @@ export default function App() {
                         className="w-full accent-stone-900 cursor-pointer h-1 bg-stone-200 rounded-lg appearance-none"
                       />
                       <div className="flex justify-between items-center text-xs text-stone-500 font-mono">
-                        <span>৳0</span>
-                        <span>Max: ৳{priceRange[1]}</span>
+                        <span>BDT 0</span>
+                        <span>Max: BDT {priceRange[1]}</span>
                       </div>
                     </div>
                   </div>
@@ -1712,13 +1954,13 @@ export default function App() {
                     }}
                     className="w-full py-2 bg-white text-stone-700 text-xs font-semibold rounded-lg border border-stone-250 transition-colors"
                   >
-                    Clear All (ফিল্টার মুছুন)
+                    Clear All Filters
                   </button>
                   <button
                     onClick={() => setIsMobileFiltersOpen(false)}
                     className="w-full py-2 bg-stone-900 text-white text-xs font-semibold rounded-lg transition-colors"
                   >
-                    Apply Filters (ফিল্টার প্রয়োগ)
+                    Apply Filters
                   </button>
                 </div>
               </div>
@@ -1742,17 +1984,17 @@ export default function App() {
             <div className="p-6">
               <h3 className="text-base font-bold text-stone-900 tracking-tight flex items-center gap-2 mb-4 font-display">
                 <Info className="w-5 h-5 text-amber-700" />
-                <span>Size Chart & Measurement Guide (সাইজ গাইড)</span>
+                <span>Size Chart & Measurement Guide</span>
               </h3>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs divide-y divide-stone-200">
                   <thead className="bg-stone-50 font-bold text-stone-600">
                     <tr>
-                      <th className="py-2 px-3">Length (ঝুল)</th>
-                      <th className="py-2 px-3">Body Size (বডি)</th>
-                      <th className="py-2 px-3">Sleeve (হাতা)</th>
-                      <th className="py-2 px-3">Shoulder (কাধ)</th>
+                      <th className="py-2 px-3">Length</th>
+                      <th className="py-2 px-3">Body Size</th>
+                      <th className="py-2 px-3">Sleeve</th>
+                      <th className="py-2 px-3">Shoulder</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-stone-100 font-mono text-stone-700">
@@ -1785,8 +2027,8 @@ export default function App() {
               </div>
 
               <div className="mt-5 p-3.5 bg-stone-50 rounded-xl border border-stone-200 text-stone-500 text-[11px] space-y-1">
-                <p>💡 <strong>বিঃদ্রঃ:</strong> আমাদের সকল আবায়া স্ট্যান্ডার্ড বডি সাইজ ৪৪ থেকে ৪৬ ইঞ্চি ফ্রি সাইজ হিসেবে কভার করে। বেল্ট দিয়ে বডি এডজাস্ট করা যাবে সহজে।</p>
-                <p>হাতা বা ঝুল আপনার উচ্চতা অনুযায়ী নির্বাচন করুন।</p>
+                <p>💡 <strong>Note:</strong> All our abayas are standard free size covering body size 44 to 46 inches. It can be easily adjusted with the included belt.</p>
+                <p>Please choose the length according to your height.</p>
               </div>
 
               <button
@@ -1805,41 +2047,575 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <h4 className="text-stone-200 font-bold text-sm mb-3 font-display tracking-wide uppercase">
-              ANZAAR PREMIUM MODEST WEAR
+              MUSLIM ABAYA PREMIUM MODEST WEAR
             </h4>
             <p className="leading-relaxed text-stone-400 max-w-xs">
-              আভিজাত্য ও শালীনতার অপূর্ব মেলবন্ধনে তৈরি আমাদের প্রতিটি পোশাক প্রিমিয়াম ফেব্রিক্সের ও অনন্য কারুকাজের ছোঁয়ায় তৈরি।
+              Each of our garments is made with premium fabrics and unique handcrafting, combining elegance and modesty.
             </p>
           </div>
           <div>
             <h4 className="text-stone-200 font-bold text-sm mb-3 font-display tracking-wide uppercase">
-              Customer Support (গ্রাহক সেবা)
+              Customer Support
             </h4>
             <ul className="space-y-2">
               <li className="flex items-center gap-2">
                 <Phone className="w-3.5 h-3.5 text-[#c5a880]" />
-                <span>হেল্পলাইন: ০১৯৭০৮৩১৭৮৩ (সকাল ১০টা - রাত ১০টা)</span>
+                <span>Helpline: +8801970831783 (10 AM - 10 PM)</span>
               </li>
-              <li>• ২৪/৭ হোয়াটসঅ্যাপ সাপোর্ট সচল রয়েছে</li>
-              <li>• ৩ দিনের সহজ এক্সচেঞ্জ ও রিটার্ন পলিসি</li>
+              <li>• 24/7 WhatsApp Support is active</li>
+              <li>• 3 Days Easy Exchange & Return Policy</li>
             </ul>
           </div>
           <div>
             <h4 className="text-stone-200 font-bold text-sm mb-3 font-display tracking-wide uppercase">
-              Delivery Info (ডেলিভারি তথ্য)
+              Delivery Info
             </h4>
             <ul className="space-y-2">
-              <li>📍 ঢাকার ভেতরে ডেলিভারি সময়: ২৪-৪৮ ঘণ্টা</li>
-              <li>📍 ঢাকার বাইরে ডেলিভারি সময়: ২-৩ দিন</li>
-              <li>💵 কন্ডিশনাল ক্যাশ অন ডেলিভারি সুবিধা সারা বাংলাদেশ</li>
+              <li>📍 Delivery inside Dhaka: 24-48 Hours</li>
+              <li>📍 Delivery outside Dhaka: 2-3 Days</li>
+              <li>💵 Cash on Delivery available all over Bangladesh</li>
             </ul>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 mt-8 pt-6 border-t border-stone-800/60 text-center text-[11px] text-stone-500">
-          <p>© {new Date().getFullYear()} Anzaar Premium Modest Wear. All Rights Reserved.</p>
+        <div className="max-w-7xl mx-auto px-4 mt-8 pt-6 border-t border-stone-800/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-stone-500">
+          <p>© {new Date().getFullYear()} Muslim Abaya Premium Modest Wear. All Rights Reserved.</p>
+          <button
+            onClick={() => {
+              setShowAdminPanel(true);
+              setAdminPassword("");
+              setAdminError("");
+            }}
+            className="text-stone-600 hover:text-[#c5a880] transition-colors font-medium flex items-center gap-1 cursor-pointer"
+          >
+            <Lock className="w-3 h-3" />
+            <span>🔐 Admin Panel</span>
+          </button>
         </div>
       </footer>
+
+      {/* Stunning Interactive Dynamic Admin Panel Modal */}
+      {showAdminPanel && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-950/95 backdrop-blur-md flex flex-col font-sans text-stone-100">
+          
+          {/* Header Bar */}
+          <header className="bg-stone-900 border-b border-stone-800 px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-[#c5a880] flex items-center justify-center text-stone-950 font-bold">
+                M
+              </div>
+              <div>
+                <h2 className="text-sm font-bold tracking-tight text-[#c5a880] font-display flex items-center gap-2">
+                  <span>MUSLIM ABAYA ADMIN SYSTEM</span>
+                  <span className="text-[9px] bg-stone-800 border border-stone-700 text-stone-400 px-1.5 py-0.5 rounded-full uppercase tracking-wider font-mono">Dynamic Mode</span>
+                </h2>
+                <p className="text-[10px] text-stone-400">Real-time Product & Order Control Panel</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {isAdminLoggedIn && (
+                <button
+                  onClick={() => {
+                    setIsAdminLoggedIn(false);
+                    setOrders([]);
+                  }}
+                  className="flex items-center gap-1 bg-stone-800 hover:bg-stone-700 text-stone-300 px-3 py-1.5 rounded-lg text-xs font-semibold border border-stone-700 transition-colors"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Log Out</span>
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  setShowAdminPanel(false);
+                  setIsAddingProduct(false);
+                  setEditingProduct(null);
+                }}
+                className="p-1.5 bg-stone-800 hover:bg-stone-700 text-stone-300 rounded-full border border-stone-700 cursor-pointer transition-colors"
+                title="Close Control Panel"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </header>
+
+          {/* Login Screen if not logged in */}
+          {!isAdminLoggedIn ? (
+            <div className="flex-1 flex items-center justify-center p-4">
+              <div className="bg-stone-900 border border-stone-800 max-w-sm w-full rounded-2xl p-6 shadow-2xl space-y-6">
+                <div className="text-center space-y-2">
+                  <div className="w-12 h-12 bg-[#c5a880]/10 text-[#c5a880] rounded-full flex items-center justify-center mx-auto mb-3 border border-[#c5a880]/20">
+                    <Lock className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-base font-bold tracking-tight text-white font-display">Admin Security Login</h3>
+                  <p className="text-xs text-stone-400">Enter the password to access the dynamic database.</p>
+                </div>
+
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (adminPassword === "abaya" || adminPassword === "muslimabaya" || adminPassword === "muslimabaya2026" || adminPassword === "admin123") {
+                      setIsAdminLoggedIn(true);
+                      setAdminError("");
+                      fetchOrders();
+                    } else {
+                      setAdminError("Incorrect password! Please try again.");
+                    }
+                  }}
+                  className="space-y-4"
+                >
+                  <div>
+                    <label className="block text-[11px] text-stone-400 mb-1.5 font-bold">Secret Password (Passcode)</label>
+                    <input
+                      required
+                      type="password"
+                      placeholder="Enter password..."
+                      value={adminPassword}
+                      onChange={(e) => setAdminPassword(e.target.value)}
+                      className="w-full bg-stone-950 border border-stone-800 rounded-xl px-3 py-2.5 text-xs text-stone-100 focus:outline-none focus:ring-1 focus:ring-[#c5a880] focus:border-[#c5a880] font-mono text-center tracking-widest"
+                    />
+                  </div>
+
+                  {adminError && (
+                    <div className="text-red-400 text-[11px] font-medium bg-red-950/20 border border-red-900/30 rounded-lg p-2 text-center">
+                      ⚠️ {adminError}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="w-full bg-[#c5a880] hover:bg-[#b2956c] text-stone-950 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors shadow-lg cursor-pointer"
+                  >
+                    Login
+                  </button>
+                </form>
+
+                <div className="text-center text-[10px] text-stone-500">
+                  <p>💡 Tip: You can type <strong>muslimabaya2026</strong> as the password.</p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            // Logged in Control Panel Dashboard
+            <div className="flex-1 flex flex-col overflow-hidden bg-stone-950">
+              
+              {/* Quick Navigation & Stats Bar */}
+              <div className="bg-stone-900 border-b border-stone-800 px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
+                
+                {/* Tabs */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      setAdminTab("orders");
+                      fetchOrders();
+                    }}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border cursor-pointer ${
+                      adminTab === "orders"
+                        ? "bg-[#c5a880] text-stone-950 border-[#c5a880] shadow-md"
+                        : "bg-stone-850 text-stone-300 border-stone-700 hover:bg-stone-800"
+                    }`}
+                  >
+                    <ShoppingBag className="w-3.5 h-3.5" />
+                    <span>Order Management ({orders.length})</span>
+                  </button>
+                  <button
+                    onClick={() => setAdminTab("products")}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border cursor-pointer ${
+                      adminTab === "products"
+                        ? "bg-[#c5a880] text-stone-950 border-[#c5a880] shadow-md"
+                        : "bg-stone-850 text-stone-300 border-stone-700 hover:bg-stone-800"
+                    }`}
+                  >
+                    <Box className="w-3.5 h-3.5" />
+                    <span>Product Management ({dbProducts.length})</span>
+                  </button>
+                </div>
+
+                {/* Live Stats */}
+                <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-stone-300 bg-stone-950 px-4 py-2 rounded-xl border border-stone-800">
+                  <div className="flex items-center gap-1.5 border-r border-stone-800 pr-4">
+                    <Database className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Firebase Status: <strong className="text-emerald-400">Live</strong></span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <TrendingUp className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Total Sales: <strong className="text-[#c5a880]">BDT {orders.filter(o => o.status !== "Cancelled").reduce((sum, o) => sum + (o.total || 0), 0)}</strong></span>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Main Content Area (Scrollable) */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                
+                {/* 1. ORDERS TAB */}
+                {adminTab === "orders" && (
+                  <div className="space-y-4">
+                    
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-bold text-stone-200 uppercase tracking-widest flex items-center gap-2">
+                        <ShoppingBag className="w-4 h-4 text-[#c5a880]" />
+                        <span>Order Request List (Firestore)</span>
+                      </h3>
+                      <button
+                        onClick={fetchOrders}
+                        className="flex items-center gap-1.5 bg-stone-900 border border-stone-800 hover:bg-stone-800 text-stone-300 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer"
+                      >
+                        <RefreshCw className="w-3 h-3 animate-spin" />
+                        <span>Reload Orders</span>
+                      </button>
+                    </div>
+
+                    {orders.length === 0 ? (
+                      <div className="bg-stone-900 border border-stone-850 text-center py-12 rounded-2xl text-stone-400 text-xs space-y-2">
+                        <ShoppingBag className="w-8 h-8 text-stone-600 mx-auto" />
+                        <p>There are currently no orders in the database!</p>
+                        <p className="text-[11px] text-stone-500">When customers place new orders, they will be saved here automatically.</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {orders.map((order) => (
+                          <div
+                            key={order.orderId}
+                            className={`bg-stone-900 border rounded-2xl p-5 space-y-4 transition-all hover:border-[#c5a880]/30 shadow-md ${
+                              order.status === "Pending" ? "border-amber-500/20" :
+                              order.status === "Confirmed" ? "border-blue-500/20" :
+                              order.status === "Shipped" ? "border-purple-500/20" : "border-stone-800"
+                            }`}
+                          >
+                            
+                            {/* Order Card Header */}
+                            <div className="flex justify-between items-start border-b border-stone-800/80 pb-3">
+                              <div className="space-y-1">
+                                <span className="text-[10px] bg-stone-800 text-stone-300 border border-stone-750 px-2 py-0.5 rounded-md font-mono font-bold tracking-wider">
+                                  {order.orderId}
+                                </span>
+                                <p className="text-[11px] text-stone-400">{order.date} • {order.area}</p>
+                              </div>
+
+                              <span className={`text-[10px] font-bold px-2 py-1 rounded-md border font-mono uppercase ${
+                                order.status === "Pending" ? "bg-amber-500/10 text-amber-400 border-amber-500/30" :
+                                order.status === "Confirmed" ? "bg-blue-500/10 text-blue-400 border-blue-500/30" :
+                                order.status === "Shipped" ? "bg-purple-500/10 text-purple-400 border-purple-500/30" :
+                                "bg-red-500/10 text-red-400 border-red-500/30"
+                              }`}>
+                                {order.status}
+                              </span>
+                            </div>
+
+                            {/* Customer details */}
+                            <div className="space-y-1 text-xs text-stone-300">
+                              <p>👤 <strong>Name:</strong> {order.name}</p>
+                              <p>📞 <strong>Mobile:</strong> <a href={`tel:${order.phone}`} className="text-[#c5a880] hover:underline font-mono font-bold">{order.phone}</a></p>
+                              <p>📍 <strong>Address:</strong> {order.address}</p>
+                            </div>
+
+                            {/* Ordered Items */}
+                            <div className="bg-stone-950/80 rounded-xl p-3 border border-stone-850 space-y-2">
+                              <h4 className="text-[11px] font-bold text-stone-400 uppercase tracking-wider border-b border-stone-850 pb-1.5">Ordered Products:</h4>
+                              <div className="space-y-2 divide-y divide-stone-850/50">
+                                {order.items?.map((item: any, idx: number) => (
+                                  <div key={idx} className="flex justify-between items-center text-xs pt-1.5 first:pt-0">
+                                    <div className="space-y-0.5">
+                                      <p className="font-semibold text-stone-200">{item.name}</p>
+                                      <p className="text-[10px] text-stone-500">Size: {item.size} {item.type ? `| Type: ${item.type}` : ""}</p>
+                                    </div>
+                                    <span className="text-stone-300 font-mono text-[11px]">
+                                      {item.quantity} pcs x BDT {item.price} = BDT {item.quantity * item.price}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                              <div className="pt-2 border-t border-stone-850 flex justify-between items-center text-xs font-bold text-white">
+                                <span>Total Bill:</span>
+                                <span className="text-[#c5a880] font-mono font-extrabold text-sm">BDT {order.total} (incl. delivery)</span>
+                              </div>
+                            </div>
+
+                            {/* Order Status Action and deletion */}
+                            <div className="flex items-center gap-2 pt-2 border-t border-stone-800/60">
+                              <div className="flex-1">
+                                <select
+                                  value={order.status}
+                                  onChange={(e) => handleUpdateOrderStatus(order.orderId, e.target.value)}
+                                  className="w-full bg-stone-850 border border-stone-750 rounded-lg px-2 py-1.5 text-xs text-stone-200 focus:outline-none focus:border-[#c5a880]"
+                                >
+                                  <option value="Pending">Pending</option>
+                                  <option value="Confirmed">Confirmed</option>
+                                  <option value="Shipped">Shipped</option>
+                                  <option value="Cancelled">Cancelled</option>
+                                </select>
+                              </div>
+                              <button
+                                onClick={() => handleDeleteOrder(order.orderId)}
+                                className="p-2 bg-red-950/20 text-red-400 hover:bg-red-900 hover:text-white rounded-lg border border-red-900/30 transition-all cursor-pointer"
+                                title="Delete Order"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 2. PRODUCTS TAB */}
+                {adminTab === "products" && (
+                  <div className="space-y-6">
+                    
+                    {/* Header operations */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <h3 className="text-sm font-bold text-stone-200 uppercase tracking-widest flex items-center gap-2">
+                        <Box className="w-4 h-4 text-[#c5a880]" />
+                        <span>Product Inventory Control</span>
+                      </h3>
+                      
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={handleImportDefaultProducts}
+                          className="flex items-center gap-1.5 bg-stone-900 border border-stone-800 hover:bg-stone-800 text-[#c5a880] px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-colors"
+                          title="Import first run demo data to Firestore"
+                        >
+                          <Database className="w-3.5 h-3.5" />
+                          <span>Default Import</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setEditingProduct(null);
+                            setProductForm({
+                              id: `MBA-${100 + dbProducts.length + 1}`,
+                              name: "",
+                              price: 1550,
+                              category: "abaya",
+                              fabric: "Premium Dubai Cherry",
+                              images: [""],
+                              sizes: ["50", "52", "54", "56"],
+                              color: "black",
+                              colorLabel: "Black",
+                              description: "Elegant and stylish premium quality abaya dress."
+                            });
+                            setIsAddingProduct(true);
+                          }}
+                          className="flex items-center gap-1.5 bg-[#c5a880] hover:bg-[#b2956c] text-stone-950 px-3 py-1.5 rounded-lg text-xs font-bold shadow-md cursor-pointer transition-all"
+                        >
+                          <PlusCircle className="w-3.5 h-3.5" />
+                          <span>Add New Product</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Add/Edit Product Form overlay box */}
+                    {(isAddingProduct || editingProduct) && (
+                      <form onSubmit={handleSaveProduct} className="bg-stone-900 border border-[#c5a880]/30 rounded-2xl p-6 space-y-4 max-w-2xl mx-auto shadow-2xl relative animate-fade-in">
+                        <h3 className="text-sm font-bold text-[#c5a880] border-b border-stone-800 pb-3 flex items-center gap-2">
+                          <Settings className="w-4 h-4 text-[#c5a880]" />
+                          <span>{editingProduct ? "Edit Product Details" : "Add New Product"}</span>
+                        </h3>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[10px] font-bold text-stone-400 uppercase mb-1">Product Code (Unique ID) *</label>
+                            <input
+                              required
+                              disabled={!!editingProduct}
+                              type="text"
+                              placeholder="e.g. MBA-106"
+                              value={productForm.id || ""}
+                              onChange={(e) => setProductForm({ ...productForm, id: e.target.value })}
+                              className="w-full bg-stone-800 border border-stone-700 rounded-lg px-3 py-2 text-xs text-stone-100 focus:outline-none focus:border-[#c5a880] font-mono font-bold"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-stone-400 uppercase mb-1">Product Name *</label>
+                            <input
+                              required
+                              type="text"
+                              placeholder="e.g. Luxury Dubai Cherry Abaya"
+                              value={productForm.name || ""}
+                              onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
+                              className="w-full bg-stone-800 border border-stone-700 rounded-lg px-3 py-2 text-xs text-stone-100 focus:outline-none focus:border-[#c5a880]"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[10px] font-bold text-stone-400 uppercase mb-1">Price (BDT) *</label>
+                            <input
+                              required
+                              type="number"
+                              placeholder="e.g. 1550"
+                              value={productForm.price || ""}
+                              onChange={(e) => setProductForm({ ...productForm, price: Number(e.target.value) })}
+                              className="w-full bg-stone-800 border border-stone-700 rounded-lg px-3 py-2 text-xs text-stone-100 focus:outline-none focus:border-[#c5a880] font-mono"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-stone-400 uppercase mb-1">Category *</label>
+                            <select
+                              value={productForm.category || "abaya"}
+                              onChange={(e) => setProductForm({ ...productForm, category: e.target.value })}
+                              className="w-full bg-stone-800 border border-stone-700 rounded-lg px-3 py-2 text-xs text-stone-100 focus:outline-none focus:border-[#c5a880]"
+                            >
+                              {CATEGORIES.map((cat) => (
+                                <option key={cat.key} value={cat.key}>{cat.label}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[10px] font-bold text-stone-400 uppercase mb-1">Fabric *</label>
+                            <input
+                              required
+                              type="text"
+                              placeholder="e.g. Premium Dubai Cherry"
+                              value={productForm.fabric || ""}
+                              onChange={(e) => setProductForm({ ...productForm, fabric: e.target.value })}
+                              className="w-full bg-stone-800 border border-stone-700 rounded-lg px-3 py-2 text-xs text-stone-100 focus:outline-none focus:border-[#c5a880]"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-stone-400 uppercase mb-1">Color Code (Tailwind Color Key) *</label>
+                            <input
+                              required
+                              type="text"
+                              placeholder="e.g. black, maroon, emerald, pink"
+                              value={productForm.color || ""}
+                              onChange={(e) => setProductForm({ ...productForm, color: e.target.value })}
+                              className="w-full bg-stone-800 border border-stone-700 rounded-lg px-3 py-2 text-xs text-stone-100 focus:outline-none focus:border-[#c5a880] font-mono"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[10px] font-bold text-stone-400 uppercase mb-1">Color Label *</label>
+                            <input
+                              required
+                              type="text"
+                              placeholder="e.g. Black, Maroon, Bottle Green, Pink"
+                              value={productForm.colorLabel || ""}
+                              onChange={(e) => setProductForm({ ...productForm, colorLabel: e.target.value })}
+                              className="w-full bg-stone-800 border border-stone-700 rounded-lg px-3 py-2 text-xs text-stone-100 focus:outline-none focus:border-[#c5a880]"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-stone-400 uppercase mb-1">Image URL (Comma separated for multiple images) *</label>
+                            <input
+                              required
+                              type="text"
+                              placeholder="https://images.unsplash.com/..."
+                              value={productForm.images ? productForm.images.join(", ") : ""}
+                              onChange={(e) => setProductForm({ ...productForm, images: e.target.value.split(",").map(x => x.trim()).filter(Boolean) })}
+                              className="w-full bg-stone-800 border border-stone-700 rounded-lg px-3 py-2 text-xs text-stone-100 focus:outline-none focus:border-[#c5a880] font-mono"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-bold text-stone-400 uppercase mb-1">Product Sizes (Comma separated) *</label>
+                          <input
+                            required
+                            type="text"
+                            placeholder="e.g. 50, 52, 54, 56"
+                            value={productForm.sizes ? productForm.sizes.join(", ") : "50, 52, 54, 56"}
+                            onChange={(e) => setProductForm({ ...productForm, sizes: e.target.value.split(",").map(x => x.trim()).filter(Boolean) })}
+                            className="w-full bg-stone-800 border border-stone-700 rounded-lg px-3 py-2 text-xs text-stone-100 focus:outline-none focus:border-[#c5a880] font-mono"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-bold text-stone-400 uppercase mb-1">Product Description *</label>
+                          <textarea
+                            required
+                            rows={3}
+                            placeholder="Write product details description..."
+                            value={productForm.description || ""}
+                            onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
+                            className="w-full bg-stone-800 border border-stone-700 rounded-lg px-3 py-2 text-xs text-stone-100 focus:outline-none focus:border-[#c5a880]"
+                          ></textarea>
+                        </div>
+
+                        <div className="flex justify-end gap-2 pt-3 border-t border-stone-800/60">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsAddingProduct(false);
+                              setEditingProduct(null);
+                            }}
+                            className="px-4 py-2 bg-stone-800 text-stone-300 text-xs font-semibold rounded-lg hover:bg-stone-700 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="submit"
+                            className="px-5 py-2 bg-[#c5a880] text-stone-950 text-xs font-bold rounded-lg hover:bg-[#b2956c] transition-colors cursor-pointer"
+                          >
+                            Save Product
+                          </button>
+                        </div>
+                      </form>
+                    )}
+
+                    {/* Products Grid Inventory List */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                      {dbProducts.map((prod) => (
+                        <div key={prod.id} className="bg-stone-900 border border-stone-800 rounded-2xl overflow-hidden p-4 flex flex-col justify-between space-y-4">
+                          <div className="flex gap-3">
+                            <div className="w-16 h-20 rounded-lg bg-stone-800 overflow-hidden shrink-0 relative">
+                              <img src={prod.images[0]} alt={prod.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                              <span className="absolute bottom-1 right-1 bg-stone-950/80 text-[8px] px-1.5 py-0.5 rounded-sm font-mono text-stone-300 border border-stone-800">
+                                {prod.id}
+                              </span>
+                            </div>
+                            <div className="space-y-1">
+                              <h4 className="text-xs font-bold text-stone-100 line-clamp-2">{prod.name}</h4>
+                              <p className="text-[10px] text-[#c5a880] font-bold font-mono">BDT {prod.price}</p>
+                              <p className="text-[9px] text-stone-400 capitalize">Category: {prod.category} | {prod.fabric}</p>
+                              <div className="flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: prod.color === "black" ? "#000" : prod.color === "maroon" ? "#800000" : "#777" }}></span>
+                                <span className="text-[9px] text-stone-500">{prod.colorLabel}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex gap-2 pt-2 border-t border-stone-850/60">
+                            <button
+                              onClick={() => {
+                                  setEditingProduct(prod);
+                                  setProductForm(prod);
+                                  setIsAddingProduct(false);
+                              }}
+                              className="flex-1 flex items-center justify-center gap-1 py-1.5 bg-stone-800 hover:bg-stone-750 text-stone-300 text-[11px] font-semibold rounded-lg border border-stone-700 transition-colors cursor-pointer"
+                            >
+                              <Edit className="w-3 h-3 text-[#c5a880]" />
+                              <span>Edit</span>
+                            </button>
+                            <button
+                              onClick={() => handleDeleteProduct(prod.id)}
+                              className="py-1.5 px-3 bg-red-950/25 hover:bg-red-900 hover:text-white text-red-400 text-[11px] font-semibold rounded-lg border border-red-900/30 transition-colors cursor-pointer"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                  </div>
+                )}
+
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
