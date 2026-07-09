@@ -24,6 +24,7 @@
     <noscript><link rel="stylesheet" href="index-home-cards.css?v=20260603cart14"></noscript>
     <link rel="preload" href="index-home.css?v=20260603cart14" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="index-home.css?v=20260603cart14"></noscript>
+    <link rel="stylesheet" href="index-home-anzaar.css?v=20260709anz">
     <link rel="icon" href="assets/logo-muslim-abaya.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="assets/logo-muslim-abaya.svg">
     <meta name="theme-color" content="#111111">
@@ -115,31 +116,22 @@
 <script type="module" src="site-header.js?v=20260603logo"></script>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-ML7RL6BR"
 height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
-<div class="container">
-<div class="main-grid">
-<div class="product-section">
-<div id="premium-collection" class="display-area">
-<div class="big-view">
-<div class="price-tag" id="homePriceTag">BDT 0.00</div>
-<img id="view" 
-         src="images/Baby-Pink-Floral-Print.jpeg" 
-         width="600" 
-         height="750" 
-         fetchpriority="high" 
-         loading="eager" 
-         decoding="sync" 
-         style="cursor:pointer"
-         onclick="if(typeof openCurrentProductDetail==='function'){openCurrentProductDetail(event);}"
-         alt="Muslim Abaya Premium Collection">
-<button type="button" class="nav-arrow left" onclick="changeProduct(-1)" aria-label="Previous Product">
-<i class="fas fa-chevron-left"></i>
-</button>
-<button type="button" class="nav-arrow right" onclick="changeProduct(1)" aria-label="Next Product">
-<i class="fas fa-chevron-right"></i>
-</button>
+<!-- Full-width hero slider (populated from catalog by index-home-anzaar.js) -->
+<div id="homeHero" class="home-hero"></div>
+
+<!-- Quick category chips -->
+<nav id="homeCatnav" class="home-catnav" aria-label="Shop categories"></nav>
+
+<!-- Category product sections -->
+<main id="homeSections" class="home-sections"></main>
+
+<!-- Loading placeholder (hidden once sections render) -->
+<div id="homeSkeleton" class="home-skeleton" aria-hidden="true">
+  <div class="sk-row"><div class="sk-card"></div><div class="sk-card"></div><div class="sk-card"></div></div>
 </div>
-<div class="product-list-sidebar" id="sidebarList"></div>
-</div>
+
+<!-- Order actions + trust badges -->
+<section id="premium-collection" class="home-order-strip ah-wrap" style="scroll-margin-top:100px;">
 
     <div class="button-row-wrapper">
     <!-- WhatsApp Button -->
@@ -194,9 +186,7 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
     </div>
 </div>
-</div>
-</div>
-</div>
+</section>
 
 <script type="module" src="cart-utils.js?v=20260603homeqty"></script>
 <script type="module" src="cart-toast.js?v=20260603cartqty"></script>
@@ -204,7 +194,7 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
 <script type="module" src="related-cart.js?v=20260708"></script>
 <link rel="stylesheet" href="related-cart.css">
 <script type="module" src="index-catalog-defer.js?v=20260530sale"></script>
-<script type="module" src="index-home-app.js?v=20260603homeqty"></script>
+<script src="index-home-anzaar.js?v=20260709anz"></script>
 
 <section id="main-video-section" style="background:#fff; padding:25px 15px; scroll-margin-top:100px;">
     <div class="lux-video-wrap">
