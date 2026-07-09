@@ -2213,8 +2213,6 @@ function buildCardSpecsBlock(p, fabricText, sizeOptions, idx) {
   );
 }
 
-}
-
 function buildTwoPieceSizeFields() {
   var cfg =
     typeof getTwoPieceSizeConfig === "function"
@@ -2292,7 +2290,6 @@ function buildDetailSpecsBlock(p, fabricText, sizeOptions, idx, categoryKey) {
     "</ul>" +
     sizeBlock
   );
-}
 }
 
 function buildProductCard(p, idx, waLink, detailMode, categoryKey, allProducts) {
@@ -2591,7 +2588,8 @@ function bindShopCategoryControls(root, products) {
   el.className = "filter-empty filter-empty-dynamic";
   el.textContent = "No products found for this filter.";
   grid.appendChild(el);
-}
+    }
+  }
 
   function updatePriceTrack() {
     var minInput = root.querySelector("#priceMin");
@@ -2787,7 +2785,8 @@ function softSwitchShopCategory(categoryKey) {
       : "No products have been added to this category yet.") +
     "</p>";
 
-grid.className = "product-grid" + (view.detailMode ? " product-grid-detail" : "");
+    grid.className = "product-grid" + (view.detailMode ? " product-grid-detail" : "");
+  }
 
   var sortSelect = root.querySelector("#shopSort");
   if (sortSelect) sortSelect.value = "default";
