@@ -78,15 +78,6 @@ window.CATALOG_SECTIONS = [
     page: "hijab.html",
     path: "/hijab",
     enabled: false
-  },
-  {
-    key: "panjabi",
-    row: "⑧",
-    menu: "PANJABI",
-    menuBn: "পাঞ্জাবী",
-    page: "panjabi.html",
-    path: "/panjabi",
-    enabled: true
   }
 ];
 

@@ -1,15 +1,15 @@
 // product-links-data.js
 
-if (typeof window !== "undefined") {
-  window.RELATED_PRODUCTS = window.RELATED_PRODUCTS || {
-    "abaya": ["premium-two-piece", "tops-kurti", "panjabi"],
-    "premium-two-piece": ["abaya", "tops-kurti", "panjabi"],
-    "tops-kurti": ["premium-two-piece", "abaya", "panjabi"],
-    "cover-up": ["abaya", "premium-two-piece"],
-    "kaftan": ["abaya", "premium-two-piece"],
-    "hijab": ["abaya"],
-    "panjabi": ["abaya", "premium-two-piece", "tops-kurti"]
-  };
+if (typeof window !== 'undefined') {
+    window.RELATED_PRODUCTS = window.RELATED_PRODUCTS || {
+        'abaya': ['premium-two-piece', 'tops-kurti'],
+        'premium-two-piece': ['abaya', 'tops-kurti'],
+        'tops-kurti': ['premium-two-piece', 'abaya'],
+        'cover-up': ['abaya', 'premium-two-piece'],
+        'kaftan': ['abaya', 'premium-two-piece'],
+        'hijab': ['abaya'],
+        'panjabi': ['abaya']
+    };
 }
 
 function getRelatedProducts(currentCategory, limit = 4) {
@@ -20,9 +20,8 @@ function getRelatedProducts(currentCategory, limit = 4) {
     if (typeof window !== 'undefined' && !window.PRODUCT_LINKS_DATA && window.CATEGORY_PRODUCTS) {
         window.PRODUCT_LINKS_DATA = {};
         for (const catKey in window.CATEGORY_PRODUCTS) {
-    const list = window.CATEGORY_PRODUCTS[catKey] || [];
-    window.PRODUCT_LINKS_DATA[catKey] = list.map(p => p.image || p.img);
-}
+            window.PRODUCT_LINKS_DATA[catKey] = window.CATEGORY_PRODUCTS[catKey].map(p => p.image || p.img);
+        }
     }
 
     const linksData = (window.PRODUCT_LINKS_DATA) || {};
