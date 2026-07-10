@@ -20,10 +20,10 @@
   <link rel="stylesheet" href="site-header.css?v=20260603logo">
   <link rel="stylesheet" href="site-footer.css?v=20260603footen" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="site-footer.css?v=20260603footen"></noscript>
-<link rel="stylesheet" href="shop-page.css?v=20260603cart14" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="shop-page.css?v=20260603cart14" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="shop-page.css?v=20260603cart14"></noscript>
-<link rel="stylesheet" href="category-hub.css">
-<script src="config.js"></script>
+  <link rel="stylesheet" href="category-hub.css">
+  <script src="config.js"></script>
 </head>
 <body data-shop-hub="1">
   <div id="site-header-mount"></div>
@@ -31,19 +31,33 @@
     <div id="list"></div>
   </main>
   <div id="site-footer-mount"></div>
+
+  <script defer src="site-api-config.js?v=20260529"></script>
+  <script defer src="product-config.js?v=20260603ennotes"></script>
+
   <script defer src="cart-utils.js?v=20260603cartqty"></script>
   <script defer src="cart-toast.js?v=20260603cartqty"></script>
-  <script defer src="site-header.js?v=20260603logo"></script>
-  <script defer src="product-catalog-sections.js?v=20260530d"></script>
-  <script defer src="product-config.js?v=20260603ennotes"></script>
   <script defer src="product-utils.js?v=20260602twopiece"></script>
+  <script defer src="site-header.js?v=20260603logo"></script>
+
   <script defer src="category-products.js?v=20260535"></script>
-  <script defer src="product-catalog-sync.js?v=20260530d"></script>
   <script defer src="product-links-data.js?v=20260535"></script>
+  <script defer src="product-catalog-sections.js?v=20260530d"></script>
+
+  <script defer src="product-catalog-sync.js?v=20260530d"></script>
   <script defer src="product-catalog-loader.js?v=20260535"></script>
+
   <script defer src="category-renderer.js?v=20260603catfix"></script>
-  <script defer src="site-api-config.js?v=20260529"></script>
-  <script defer src="site-footer.js?v=20260603footen"></script>
   <script defer src="shop-category-boot.js?v=20260603catfix"></script>
+
+  <script defer src="site-footer.js?v=20260603footen"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      if (typeof window.bootAllCategories === "function") {
+        window.bootAllCategories();
+      }
+    });
+  </script>
 </body>
 </html>
