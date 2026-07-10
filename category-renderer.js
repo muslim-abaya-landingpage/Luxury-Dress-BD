@@ -40,8 +40,15 @@ function setShopCategoryKey(key) {
   var root = document.documentElement;
   var body = document.body;
   
-  root.setAttribute("data-shop-category", key);
-  body.setAttribute("data-shop-category", key);
+  // সেফটি কন্ডিশন: HTML উপাদানগুলো আসলেই রেডি কি না তা চেক করা
+  if (root && typeof root.setAttribute === "function") {
+    root.setAttribute("data-shop-category", key);
+  }
+  
+  if (body && typeof body.setAttribute === "function") {
+    body.setAttribute("data-shop-category", key);
+  }
+}
 } // অতিরিক্ত ব্র্যাকেটগুলো ফেলে দেওয়া হয়েছে
 
 function maShopBagIcon(size) {
