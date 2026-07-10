@@ -4,7 +4,7 @@ import { MessageSquare, Phone, MessageCircle } from "lucide-react";
 
 interface ActionButtonsProps {
   currentProduct: Product;
-  language: "en" | "bn";
+  language: "en" | "en";
 }
 
 export default function ActionButtons({ currentProduct, language }: ActionButtonsProps) {
@@ -13,11 +13,24 @@ export default function ActionButtons({ currentProduct, language }: ActionButton
   const rawNumber = "01970831783";
   
   const getEncodedText = () => {
-    const text = language === "en"
-      ? `Assalamu Alaikum. I want to order the "${currentProduct.nameEn}" Abaya.\n- Fabric: ${currentProduct.fabricEn}\n- Price: BDT ${currentProduct.price}\n- App URL: ${window.location.href}`
-      : `আসসালামু আলাইকুম। আমি আপনার "${currentProduct.nameBn}" আবায়াটি অর্ডার করতে চাই।\n- ফেব্রিক: ${currentProduct.fabricBn}\n- মূল্য: BDT ${currentProduct.price}\n- সাইট লিংক: ${window.location.href}`;
-    return encodeURIComponent(text);
-  };
+  const text = `Assalamu Alaikum.
+
+I would like to place an order for the following product:
+
+✨ Product: ${currentProduct.nameEn}
+🧵 Fabric: ${currentProduct.fabricEn}
+💰 Price: BDT ${currentProduct.price}
+
+🔗 Product Link:
+${window.location.href}
+
+Kindly confirm the availability of this product and guide me through the ordering process.
+
+Thank you!
+Best regards.`;
+
+  return encodeURIComponent(text);
+};
 
   return (
     <div className="mb-12">
