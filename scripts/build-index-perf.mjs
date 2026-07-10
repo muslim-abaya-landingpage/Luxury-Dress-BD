@@ -86,7 +86,7 @@ if (!skipHomeCss) {
 html = html.replace(
   /<div class="lux-video-ratio">\s*<iframe[\s\S]*?<\/iframe>\s*<\/div>/,
   `<div class="lux-video-ratio" id="luxVideoEmbed" data-video-id="Wyrw0gzKMqk">
-                <button type="button" class="lux-video-facade" aria-label="ভিডিও চালু করুন">
+               <button type="button" class="lux-video-facade" aria-label="Play video">
                     <img src="https://i.ytimg.com/vi/Wyrw0gzKMqk/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async">
                     <span class="lux-video-play" aria-hidden="true"></span>
                 </button>
