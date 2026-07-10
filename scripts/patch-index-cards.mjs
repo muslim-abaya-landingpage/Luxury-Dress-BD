@@ -20,4 +20,4 @@ h = h.replace(/index-home-cards\.css\?v=[^"]+/g, `index-home-cards.css?v=${VER}`
 h = h.replace(/index-home-app\.js\?v=[^"]+/g, `index-home-app.js?v=${VER}`);
 
 fs.writeFileSync("index.html", h, { encoding: "utf8" });
-console.log("ok", (h.match(/[\u0980-\u09FF]/g) || []).length, "bn");
+console.log("ok", (h.match(/[\u0980-\u09FF]/g) || []).length, "en");
