@@ -267,33 +267,38 @@ export default function ProductViewer({
                   </button>
                 ))}
               </div>
-              <p className="text-[11px] text-gray-400 mt-1.5">
-                {language === "en" ? "📏 Normal sizing: height 52 (5'1\"-5'3\"), 54 (5'3\"-5'5\"), 56 (5'5\"-5'7\"), 58 (5'7\"+)" : "📏 সাধারণ মাপ: ৫২ সাইজ (৫'১\"-৫'৩\"), ৫৪ সাইজ (৫'৩\"-৫'৫\"), ৫৬ সাইজ (৫'৫\"-৫'৭\"), ৫৮ সাইজ (৫'৭\" এর বেশি)"}
-              </p>
-            </div>
-          </div>
+<p className="text-[11px] text-gray-400 mt-1.5">
+  📏 Recommended sizes by height: 52 (5'1"–5'3"), 54 (5'3"–5'5"), 56 (5'5"–5'7"), 58 (5'7" and above)
+</p>
+</div>
+</div>
 
-          {/* Action CTAs: Add to Cart and Quick Booking */}
-          <div className="mt-8 pt-4 border-t border-gray-100 flex flex-col gap-3">
-            <button
-              onClick={() => onInstantBuy(currentProduct, selectedSize, selectedColor)}
-              className="w-full bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 text-white font-extrabold py-3.5 px-6 rounded-xl text-center shadow-lg hover:shadow-xl active:scale-[0.99] transition-all text-sm uppercase tracking-wider"
-              id="instant-buy-btn"
-            >
-              {language === "en" ? "⚡ Order Now (Cash on Delivery)" : "⚡ সরাসরি অর্ডার করুন (ক্যাশ অন ডেলিভারি)"}
-            </button>
+{/* Action CTAs: Add to Cart and Quick Booking */}
+<div className="mt-8 pt-4 border-t border-gray-100 flex flex-col gap-3">
+  <button
+    onClick={() => onInstantBuy(currentProduct, selectedSize, selectedColor)}
+    className="w-full bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 text-white font-extrabold py-3.5 px-6 rounded-xl text-center shadow-lg hover:shadow-xl active:scale-[0.99] transition-all text-sm uppercase tracking-wider"
+    id="instant-buy-btn"
+  >
+    ⚡ Order Now (Cash on Delivery)
+  </button>
 
-            <button
-              onClick={() => onAddToCart(currentProduct, selectedSize, selectedColor)}
-              className="w-full bg-white hover:bg-neutral-50 text-gray-900 border border-gray-300 font-bold py-3 px-6 rounded-xl text-center active:scale-[0.99] transition-all text-xs uppercase tracking-wider"
-              id="add-to-cart-btn"
-            >
-              {language === "en" ? "🛒 Add to Shopping Bag" : "🛒 শপিং ব্যাগে যুক্ত করুন"}
-            </button>
-          </div>
-        </div>
-      </div>
-
+           <button
+  onClick={async () => {
+    if (!selectedSize || !selectedColor) return;
+    // optionally: setAdding(true);
+    await onAddToCart(currentProduct, selectedSize, selectedColor);
+    // optionally: setAdding(false);
+  }}
+  className="w-full inline-flex justify-center items-center bg-white hover:bg-neutral-50 text-gray-900 border border-gray-300 font-bold py-3 px-6 rounded-xl active:scale-[0.99] transition-all text-xs uppercase tracking-wider"
+  id={`add-to-cart-btn-${currentProduct.id}`}
+  disabled={adding}
+>
+  {adding
+    ? "Adding..."
+    : "🛒 Add to Shopping Bag"}
+</button>
+            
       {/* Bullet features section */}
       <div className="bg-neutral-50 px-6 py-4 border-t border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-gray-500">
         {(language === "en" ? currentProduct.featuresEn : currentProduct.featuresBn).map((feat, i) => (
