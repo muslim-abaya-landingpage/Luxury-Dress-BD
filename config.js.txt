@@ -1,7 +1,7 @@
 const SITE_CONFIG = {
     // ব্র্যান্ড ইনফরমেশন
     businessName: "Muslim Abaya (মুসলিম আবায়া)",
-    phone: "01971642683",
+    phone: "01970831783",
     currency: "BDT",
     
     // ডেলিভারি সেটিংস
@@ -14,7 +14,7 @@ const SITE_CONFIG = {
     taxRate: 0,
     
     // সোশ্যাল মিডিয়া ও সাপোর্ট
-    supportWhatsApp: "https://wa.me/8801971642683",
+    supportWhatsApp: "https://wa.me/8801970831783",
     facebookPage: "https://facebook.com/muslimabaya",
     
     // এপিআই বা ডাটাবেজ পাথ
