@@ -785,25 +785,25 @@ kaftan: [],
 /* ═══ ⑧ হিজাব — খালি ═══ */
 hijab: [],
 
-/* ═══ ⑨ পাঞ্জাবি — খালি ═══ */
-{
-  id: "PAN-001",
-  name: "Premium White Islamic Panjabi",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-white-islamic-mens-kurta-full-sleeve-outdoor-portrait-bangladesh.webp",
-  link: "/",
-  price: 1450,
-  color: "white",
-  colorLabel: "White",
-  fabric: "Premium Cotton",
-  sizes: [
-    "M (Long 40 • Body 42)",
-    "L (Long 42 • Body 44)",
-    "XL (Long 44 • Body 46)"
-  ],
-  detailNote: "Premium Full Sleeve Islamic Panjabi"
-}
-};
-
+/* ═══ ⑨ পাঞ্জাবি ═══ */
+panjabi: [
+  {
+    id: "PAN-001",
+    name: "Premium White Islamic Panjabi",
+    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-white-islamic-mens-kurta-full-sleeve-outdoor-portrait-bangladesh.webp",
+    link: "/",
+    price: 1450,
+    color: "white",
+    colorLabel: "White",
+    fabric: "Premium Cotton",
+    sizes: [
+      "M (Long 40 • Body 42)",
+      "L (Long 42 • Body 44)",
+      "XL (Long 44 • Body 46)"
+    ],
+    detailNote: "Premium Full Sleeve Islamic Panjabi"
+  }
+],   // ← এটি থাকতে হবে
 window.SITE_MEDIA = {
   whatsappOrderLink:
     (window.SITE_LINKS && window.SITE_LINKS.order && window.SITE_LINKS.order.whatsapp) ||
