@@ -167,27 +167,30 @@
     if (sec && sec.key && categoryHasProducts(sec.key)) return true;
     return sec.enabled !== false;
   }
-
-  function buildNavMenuItems() {
+function buildNavMenuItems() {
     var sections = window.CATALOG_SECTIONS || [];
     var extras = window.SITE_NAV_EXTRAS || [];
+    
+    // ১. মূল ক্যাটাগরিগুলোর জন্য হ্যাশ (#) লিংক তৈরি (যেমন: #abaya, #panjabi)
     var items = sections.map(function (sec) {
       return {
-        href: sec.path || "/" + sec.key,
+        href: "#" + sec.key,
         label: sec.menu,
         enabled: navItemEnabledForSection(sec)
       };
     });
+    
+    // ২. অতিরিক্ত মেনুগুলোর জন্য হ্যাশ (#) লিংক তৈরি (যেমন: #main-video-section)
     extras.forEach(function (ex) {
       items.push({
-        href: ex.path || "/" + ex.key,
+        href: "#" + ex.key,
         label: ex.menu,
         enabled: ex.enabled !== false
       });
     });
+    
     return items;
-  }
-
+}  
   function renderNavMenuItem(it, mobile) {
     var label = String(it.label || "");
     if (it.enabled === false) {
