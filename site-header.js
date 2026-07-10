@@ -114,6 +114,7 @@
     '/karchupi': 'karchupi.html',
     '/kaftan': 'kaftan.html',
     '/hijab': 'hijab.html',
+    '/panjabi': 'panjabi.html',
     '/video': 'video.html',
     '/category': 'category.html',
     '/checkout': 'checkout.html',
@@ -191,7 +192,7 @@
     var label = String(it.label || "");
     if (it.enabled === false) {
       return (
-        '<li><span class="nav-link-soon" aria-disabled="true" title="শীঘ্রই আসছে">' +
+        '<li><span class="nav-link-soon" aria-disabled="true" title="Coming Soon">' +
         label +
         "</span></li>"
       );
@@ -304,9 +305,9 @@
     '<div class="header-announcement-bar"><div class="custom-container announcement-slider">' +
     '<button type="button" class="slider-arrow left-arrow" onclick="window.moveAnnouncement(-1)" aria-label="Previous">' + ICON_CHEV_LEFT + '</button>' +
     '<div class="announcement-content">' +
-    '<div class="ann-slide active">PREMIUM MODEST WEAR – WHERE ELEGANCE MEETS EVERYDAY COMFORT</div>' +
-    '<div class="ann-slide">⭐ 4.9/5 Rated Premium Quality Abayas & Two-Pieces</div>' +
-    '<div class="ann-slide">Buy 3 dresses — get FREE delivery nationwide</div>' +
+   '<div class="ann-slide active">💎 PREMIUM MODEST WEAR | TIMELESS ELEGANCE & EVERYDAY COMFORT</div>' +
+    '<div class="ann-slide">💎 Premium Modest Fashion | Elegant Abayas & Two-Piece Collections</div>' +
+    '<div class="ann-slide">🚚 Buy 3 Dresses & Enjoy FREE Nationwide Delivery</div>' +
     '</div>' +
     '<button type="button" class="slider-arrow right-arrow" onclick="window.moveAnnouncement(1)" aria-label="Next">' + ICON_CHEV_RIGHT + '</button>' +
     '</div></div>' +
