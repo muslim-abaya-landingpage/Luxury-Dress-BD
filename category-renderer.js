@@ -36,21 +36,21 @@ function getShopCategoryKey() {
 
 function setShopCategoryKey(key) {
   if (!key) return;
+  
   var root = document.documentElement;
   var body = document.body;
-  if (root) root.setAttribute("data-shop-category", key);
-  if (body) body.setAttribute("data-shop-category", key);
-}
+  
+  root.setAttribute("data-shop-category", key);
+  body.setAttribute("data-shop-category", key);
+} // অতিরিক্ত ব্র্যাকেটগুলো ফেলে দেওয়া হয়েছে
 
 function maShopBagIcon(size) {
-  var s = parseInt(size, 10) || 18;
+  // size না থাকলে বা ভুল থাকলে ডিফল্ট ১৮ হবে, লজিক একদম ঠিক আছে
+  var s = parseInt(size, 10) || 18; 
+  
   return (
     '<span class="ma-shop-bag-ico anzaar-btn-ico" aria-hidden="true">' +
-    '<svg width="' +
-    s +
-    '" height="' +
-    s +
-    '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+    '<svg width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
     '<path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/>' +
     '<path d="M6 6L5 3H2"/></svg></span>'
   );
@@ -507,10 +507,10 @@ function buildShopCardQtyStepper(idx, qty, inCart) {
     (inCart ? " in-cart" : "") +
     '" data-product-idx="' +
     idx +
-    '" role="group" aria-label="পরিমান">' +
+   '" role="group" aria-label="Quantity">' +
     '<button type="button" class="ma-qty-stepper__btn shop-card-qty-btn" data-shop-qty="minus" data-product-idx="' +
     idx +
-    '" aria-label="পরিমাণ কমান"' +
+    '" aria-label="Decrease quantity"' +
     (q <= 1 ? " disabled" : "") +
     ">−</button>" +
     '<span class="ma-qty-stepper__value shop-card-qty-val" data-product-idx="' +
@@ -520,7 +520,7 @@ function buildShopCardQtyStepper(idx, qty, inCart) {
     "</span>" +
     '<button type="button" class="ma-qty-stepper__btn shop-card-qty-btn" data-shop-qty="plus" data-product-idx="' +
     idx +
-    '" aria-label="পরিমাণ বাড়ান">+</button>' +
+    '" aria-label="Increase quantity">+</button>' +
     "</div>"
   );
 }
