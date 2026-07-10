@@ -171,9 +171,9 @@ function buildNavMenuItems() {
     var sections = window.CATALOG_SECTIONS || [];
     var extras = window.SITE_NAV_EXTRAS || [];
     
-    // ১. মূল ক্যাটাগরিগুলোর লিংক থেকে .html বা অন্য কিছু থাকলে তা পরিষ্কার করে শুধু আইডি রাখা
+    // ১. মূল ক্যাটাগরিগুলোর আইডি থেকে .html কেটে ফেলে একদম ফ্রেশ হ্যাশ (#) লিংক তৈরি
     var items = sections.map(function (sec) {
-      var cleanKey = sec.key.replace('.html', ''); // কোনো কারণে .html থাকলে তা মুছে দেবে
+      var cleanKey = String(sec.key || "").replace('.html', '').trim();
       return {
         href: "#" + cleanKey,
         label: sec.menu,
@@ -183,7 +183,7 @@ function buildNavMenuItems() {
     
     // ২. অতিরিক্ত মেনুগুলোর জন্য
     extras.forEach(function (ex) {
-      var cleanExtraKey = ex.key.replace('.html', '');
+      var cleanExtraKey = String(ex.key || "").replace('.html', '').trim();
       items.push({
         href: "#" + cleanExtraKey,
         label: ex.menu,
