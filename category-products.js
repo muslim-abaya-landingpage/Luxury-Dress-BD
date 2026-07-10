@@ -786,7 +786,15 @@ kaftan: [],
 hijab: [],
 
 /* ═══ ⑨ পাঞ্জাবি — খালি ═══ */
-panjabi: []
+panjabi: [
+  {
+    id: "panjabi-001",
+    name: "Premium White Panjabi",
+    image: "images/premium-white-islamic-mens-kurta-full-sleeve-outdoor-portrait-bangladesh.webp",
+    price: 1450,
+    category: "panjabi"
+  }
+]
 };
 
 window.SITE_MEDIA = {
