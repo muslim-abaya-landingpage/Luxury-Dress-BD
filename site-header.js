@@ -695,6 +695,7 @@
       '/karchupi',
       '/kaftan',
       '/hijab',
+      '/panjabi',
       '/video',
       '/category',
       '/checkout'
