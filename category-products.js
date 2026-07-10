@@ -11,7 +11,6 @@
 window.CATEGORY_PRODUCTS = {
 
   /* ═══ ① আবায়া সারি · ABAYA · abaya.html · /abaya ═══ */
-
   abaya: [
   {
       id: "ABY-MAROON-1",
@@ -792,7 +791,7 @@ panjabi: [
     name: "Premium White Islamic Panjabi",
     image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-white-islamic-mens-kurta-full-sleeve-outdoor-portrait-bangladesh.webp",
     link: "/",
-    price: 1450,
+    price: 1050,
     color: "white",
     colorLabel: "White",
     fabric: "Premium Cotton",
