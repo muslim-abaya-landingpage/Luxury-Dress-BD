@@ -362,7 +362,38 @@
     if (/37-38\s*inch/i.test(raw)) return "37-38 inch";
     return getTwoPieceSizeConfig().lengthSizeLabel;
   }
+function getPanjabiSizeConfig() {
+  var pj =
+    g.SITE_LINKS &&
+    g.SITE_LINKS.defaults &&
+    g.SITE_LINKS.defaults.byCategory &&
+    g.SITE_LINKS.defaults.byCategory.panjabi;
 
+  return {
+    sizes: (pj && pj.sizes && pj.sizes.slice()) || [
+      { value: "M", label: 'M (Long 40" • Body 42")' },
+      { value: "L", label: 'L (Long 42" • Body 44")' },
+      { value: "XL", label: 'XL (Long 44" • Body 46")' }
+    ]
+  };
+}
+
+function isPanjabiProduct(p, categoryKey) {
+  var ck = String(categoryKey || (p && (p.category || "")) || "").trim();
+  if (ck === "panjabi") return true;
+  if (p?.name?.toLowerCase().includes("panjabi")) return true;
+  return false;
+}
+
+function formatPanjabiCartSize(size) {
+  return String(size || "").trim().toUpperCase();
+}
+
+function parsePanjabiSize(sizeStr) {
+  var s = String(sizeStr || "").trim().toUpperCase();
+  if (s === "M" || s === "L" || s === "XL") return s;
+  return "M";
+}
   function stripSizeFromCartName(name) {
     return String(name || "")
       .replace(/\s*\(Body\s+[^)]+\)\s*$/i, "")
