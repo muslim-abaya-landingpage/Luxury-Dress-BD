@@ -185,12 +185,12 @@ if (!out.includes("index-youtube-lazy.js")) {
 }
 
 out = out.replace(/^\uFEFF/, "");
-out = out.replace(/^<!DOCTYPE html>\s*<html/, '<!DOCTYPE html>\n<html lang="bn" data-seo-managed="full">\n<html');
+out = out.replace(/^<!DOCTYPE html>\s*<html/, '<!DOCTYPE html>\n<html lang="en" data-seo-managed="full">\n<html');
 out = out.replace(
-  /^<!DOCTYPE html>\s*<html lang="bn" data-seo-managed="full">\s*<html lang="bn" data-seo-managed="full">/,
-  "<!DOCTYPE html>\n<html lang=\"bn\" data-seo-managed=\"full\">"
+  /^<!DOCTYPE html>\s*<html lang="en" data-seo-managed="full">\s*<html lang="en" data-seo-managed="full">/,
+  "<!DOCTYPE html>\n<html lang=\"en\" data-seo-managed=\"full\">"
 );
 
 fs.writeFileSync("index.html", out, { encoding: "utf8" });
-const bn = (out.match(/[\u0980-\u09FF]/g) || []).length;
-console.log("restored index.html, Bengali chars:", bn);
+const en = (out.match(/[\u0980-\u09FF]/g) || []).length;
+console.log("restored index.html, Bengali chars:", en);
