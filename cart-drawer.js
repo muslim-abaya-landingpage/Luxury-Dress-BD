@@ -40,22 +40,28 @@ function ensureCartDrawerHtml() {
   drawer.id = 'cart-drawer';
   drawer.innerHTML = `
     <div class="cart-drawer-head">
-      <h2>আপনার শপিং কার্ট</h2>
-      <button type="button" class="cart-drawer-close" aria-label="Close cart">বন্ধ করুন ×</button>
-    </div>
+  <h2>Your Shopping Cart</h2>
+  <button
+    type="button"
+    class="cart-drawer-close"
+    aria-label="Close shopping cart"
+  >
+    Close ×
+  </button>
+</div>
     <div class="cart-drawer-body">
       <div id="cart-items-list"></div>
       <div id="related-products-section" class="related-wrapper" style="display: none;">
-        <h3 class="related-title">আপনার জন্য আরও কিছু:</h3>
+        <h3 class="related-title">You May Also Like</h3>
         <div id="related-products-container" class="related-grid"></div>
       </div>
     </div>
     <div class="cart-drawer-foot">
       <div class="cart-drawer-total-row">
-        <span>সর্বমোট:</span>
+       <span>Total:</span>
         <strong id="cart-drawer-total-price">৳0</strong>
       </div>
-      <button type="button" class="cart-drawer-checkout">অর্ডার নিশ্চিত করুন</button>
+      <button type="button" class="cart-drawer-checkout">Proceed to Checkout</button>
     </div>
   `;
   document.body.appendChild(drawer);
@@ -104,7 +110,7 @@ window.renderCartList = function (cartItems) {
   if (!cartItems || cartItems.length === 0) {
     listContainer.innerHTML = `
       <div class="cart-drawer-empty">
-        <p>আপনার শপিং কার্ট খালি আছে।</p>
+        <p>Your shopping bag is currently empty.</p>
       </div>
     `;
     const totalEl = document.getElementById('cart-drawer-total-price');
