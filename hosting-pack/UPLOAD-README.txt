@@ -1,16 +1,16 @@
-﻿Muslim Abaya â€” Admin à¦¹à§‹à¦¸à§à¦Ÿà¦¿à¦‚ à¦ªà§à¦¯à¦¾à¦•
-================================
+Muslim Abaya — Admin Hosting Pack
+=================================
 
-à¦à¦‡ à¦«à§‹à¦²à§à¦¡à¦¾à¦°à§‡à¦° à¦¸à¦¬ à¦«à¦¾à¦‡à¦² à¦¸à¦¾à¦‡à¦Ÿà§‡à¦° à¦®à§‚à¦² à¦«à§‹à¦²à§à¦¡à¦¾à¦°à§‡ à¦†à¦ªà¦²à§‹à¦¡ à¦•à¦°à§à¦¨
-(à¦¯à§‡à¦–à¦¾à¦¨à§‡ index.html à¦†à¦›à§‡ â€” public_html / www)
+Upload all files in this folder to your website's root directory
+(where index.html is located — public_html / www).
 
-à¦²à¦—à¦‡à¦¨ URL:
+Login URL:
   https://muslimabaya.com/admin-login.html
 
-Apps Script (à¦…à¦¬à¦¶à§à¦¯):
-  Deploy â†’ Manage deployments â†’ New version â†’ Deploy
+Apps Script (Required):
+  Deploy → Manage deployments → Create a new version → Deploy
 
-à¦†à¦ªà¦²à§‹à¦¡ à¦•à¦°à¦¾ à¦«à¦¾à¦‡à¦² (14):
+Files to Upload (14):
 admin-login.html
 admin-dashboard.html
 admin-links.html
@@ -26,8 +26,8 @@ product-links-admin.css
 product-manager-admin.js
 product-links-admin.js
 
-à¦ªà§à¦°à§‹à¦¡à¦¾à¦•à§à¦Ÿ à¦®à§à¦¯à¦¾à¦¨à§‡à¦œà¦¾à¦° à¦šà¦¾à¦²à¦¾à¦¤à§‡ à¦¸à¦¾à¦‡à¦Ÿà§‡ à¦†à¦—à§‡ à¦¥à§‡à¦•à§‡ à¦¥à¦¾à¦•à¦¾ à¦²à¦¾à¦—à§‡:
-  category-products.js, product-config.js, product-catalog-*.js à¦‡à¦¤à§à¦¯à¦¾à¦¦à¦¿
-  (à¦‡à¦¤à¦¿à¦®à¦§à§à¦¯à§‡ à¦¸à¦¾à¦‡à¦Ÿà§‡ à¦¥à¦¾à¦•à¦²à§‡ à¦†à¦¬à¦¾à¦° à¦²à¦¾à¦—à§‡ à¦¨à¦¾)
+The Product Manager requires the following files to already exist on the site:
+  category-products.js, product-config.js, product-catalog-*.js, etc.
+  (If they are already present on the website, you do not need to upload them again.)
 
-à¦¤à¦¾à¦°à¦¿à¦–: 2026-05-29 15:33
+Date: 2026-05-29 15:33
