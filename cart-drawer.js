@@ -59,6 +59,34 @@ function ensureCartDrawerHtml() {
     </div>
   `;
   document.body.appendChild(drawer);
+// Open / Close drawer helpers
+window.openCartDrawer = function () {
+  drawer.classList.add('is-open');
+  overlay.classList.add('is-open');
+  document.body.classList.add('cart-drawer-open');
+};
+
+window.closeCartDrawer = function () {
+  drawer.classList.remove('is-open');
+  overlay.classList.remove('is-open');
+  document.body.classList.remove('cart-drawer-open');
+};
+
+// Close button
+const closeBtn = drawer.querySelector('.cart-drawer-close');
+if (closeBtn) {
+  closeBtn.addEventListener('click', window.closeCartDrawer);
+}
+
+// Click outside drawer
+overlay.addEventListener('click', window.closeCartDrawer);
+
+// ESC key support
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') {
+    window.closeCartDrawer();
+  }
+});
 
   // Setup click handler for checkout
   const checkoutBtn = drawer.querySelector('.cart-drawer-checkout');
