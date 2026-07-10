@@ -171,26 +171,28 @@ function buildNavMenuItems() {
     var sections = window.CATALOG_SECTIONS || [];
     var extras = window.SITE_NAV_EXTRAS || [];
     
-    // ১. মূল ক্যাটাগরিগুলোর জন্য হ্যাশ (#) লিংক তৈরি (যেমন: #abaya, #panjabi)
+    // ১. মূল ক্যাটাগরিগুলোর লিংক থেকে .html বা অন্য কিছু থাকলে তা পরিষ্কার করে শুধু আইডি রাখা
     var items = sections.map(function (sec) {
+      var cleanKey = sec.key.replace('.html', ''); // কোনো কারণে .html থাকলে তা মুছে দেবে
       return {
-        href: "#" + sec.key,
+        href: "#" + cleanKey,
         label: sec.menu,
         enabled: navItemEnabledForSection(sec)
       };
     });
     
-    // ২. অতিরিক্ত মেনুগুলোর জন্য হ্যাশ (#) লিংক তৈরি (যেমন: #main-video-section)
+    // ২. অতিরিক্ত মেনুগুলোর জন্য
     extras.forEach(function (ex) {
+      var cleanExtraKey = ex.key.replace('.html', '');
       items.push({
-        href: "#" + ex.key,
+        href: "#" + cleanExtraKey,
         label: ex.menu,
         enabled: ex.enabled !== false
       });
     });
     
     return items;
-}  
+}
   function renderNavMenuItem(it, mobile) {
     var label = String(it.label || "");
     if (it.enabled === false) {
