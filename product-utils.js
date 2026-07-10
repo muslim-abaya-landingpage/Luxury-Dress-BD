@@ -391,8 +391,20 @@ function formatPanjabiCartSize(size) {
 
 function parsePanjabiSize(sizeStr) {
   var s = String(sizeStr || "").trim().toUpperCase();
-  if (s === "M" || s === "L" || s === "XL") return s;
-  return "M";
+
+  if (s === "M") {
+    return { size: "M", length: '40"', body: '42"' };
+  }
+
+  if (s === "L") {
+    return { size: "L", length: '42"', body: '44"' };
+  }
+
+  if (s === "XL") {
+    return { size: "XL", length: '44"', body: '46"' };
+  }
+
+  return null;
 }
   function stripSizeFromCartName(name) {
     return String(name || "")
