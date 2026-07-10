@@ -47,15 +47,19 @@ window.__homeRefreshCatalog = function () {
   );
 }
 
+// Replace old livecheck version with new one
 out = out.replace(
   'site-footer.js?v=20260531wa',
   "site-footer.js?v=20260531fb1"
 );
 
+// Write the updated content back to index.html
 fs.writeFileSync("index.html", out, "utf8");
+
+// Log status and checks
 console.log(
   "ok",
-  out.includes("৫৫০"),
-  out.includes("প্রোডাক্টটি"),
-  out.includes("__homeRefreshCatalog")
+  out.includes("550"),         // does "550" exist in the output?
+  out.includes("this product"),  // does "this product" exist?
+  out.includes("__homeRefreshCatalog") // does "__homeRefreshCatalog" exist?
 );
