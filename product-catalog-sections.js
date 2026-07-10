@@ -11,43 +11,38 @@ window.CATALOG_SECTIONS = [
     key: "abaya",
     row: "①",
     menu: "ABAYA",
-    menuBn: "আবায়া · বোরকা",
     page: "abaya.html",
     path: "/abaya",
-    enabled: true
-  },
-  {
-    key: "cover-up",
-    row: "④",
-    menu: "COVER UP",
-    menuBn: "কভার আপ",
-    page: "cover-up.html",
-    path: "/cover-up",
-    enabled: false
-  },
-  {
-    key: "tops-kurti",
-    row: "③",
-    menu: "TOPS/KURTI",
-    menuBn: "টপস/কুর্তি",
-    page: "tops-kurti.html",
-    path: "/tops-kurti",
     enabled: true
   },
   {
     key: "premium-two-piece",
     row: "②",
     menu: "PREMIUM TWO-PIECE",
-    menuBn: "প্রিমিয়াম টু-পিস",
     page: "premium-two-piece.html",
     path: "/premium-two-piece",
     enabled: true
   },
   {
+    key: "tops-kurti",
+    row: "③",
+    menu: "TOPS/KURTI",
+    page: "tops-kurti.html",
+    path: "/tops-kurti",
+    enabled: true
+  },
+  {
+    key: "cover-up",
+    row: "④",
+    menu: "COVER UP",
+    page: "cover-up.html",
+    path: "/cover-up",
+    enabled: false
+  },
+  {
     key: "embroidery",
     row: "⑤",
     menu: "EMBROIDERY",
-    menuBn: "এম্ব্রয়ডারি",
     page: "embroidery.html",
     path: "/embroidery",
     enabled: false
@@ -56,7 +51,6 @@ window.CATALOG_SECTIONS = [
     key: "karchupi",
     row: "⑥",
     menu: "KARCHUPI",
-    menuBn: "কারচুপি",
     page: "karchupi.html",
     path: "/karchupi",
     enabled: false
@@ -65,7 +59,6 @@ window.CATALOG_SECTIONS = [
     key: "kaftan",
     row: "⑦",
     menu: "KAFTAN",
-    menuBn: "কাফতান",
     page: "kaftan.html",
     path: "/kaftan",
     enabled: false
@@ -74,13 +67,19 @@ window.CATALOG_SECTIONS = [
     key: "hijab",
     row: "⑧",
     menu: "HIJAB",
-    menuBn: "হিজাব",
     page: "hijab.html",
     path: "/hijab",
     enabled: false
+  },
+   {
+    key: "panjabi",
+    row: "⑧",
+    menu: "PANJABI",
+    page: "panjabi.html",
+    path: "/panjabi",
+    enabled: true
   }
 ];
-
 /** মেনুতে অতিরিক্ত লিংক (ক্যাটালগ ছাড়া) */
 window.SITE_NAV_EXTRAS = [
   {
