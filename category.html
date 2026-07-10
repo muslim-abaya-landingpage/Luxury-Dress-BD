@@ -10,22 +10,27 @@
   <link rel="canonical" href="https://muslimabaya.com/category">
   <meta name="description" content="Browse all categories — abaya, two-piece, embroidery and more. Premium modest fashion with COD in Bangladesh.">
   <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
+  
   <script src="site-seo-config.js?v=20260603seo"></script>
   <script src="site-seo.js?v=20260603seo"></script>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" href="site-header.css?v=20260603logo" as="style">
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <noscript><link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
+  
   <link rel="stylesheet" href="site-header.css?v=20260603logo">
   <link rel="stylesheet" href="site-footer.css?v=20260603footen" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="site-footer.css?v=20260603footen"></noscript>
   <link rel="stylesheet" href="shop-page.css?v=20260603cart14" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="shop-page.css?v=20260603cart14"></noscript>
   <link rel="stylesheet" href="category-hub.css">
+  
   <script src="config.js"></script>
 </head>
 <body data-shop-hub="1">
+
   <div id="site-header-mount"></div>
   <main>
     <div id="list"></div>
@@ -45,6 +50,7 @@
   <script defer src="product-catalog-sections.js?v=20260530d"></script>
 
   <script defer src="product-catalog-sync.js?v=20260530d"></script>
+
   <script defer src="product-catalog-loader.js?v=20260535"></script>
 
   <script defer src="category-renderer.js?v=20260603catfix"></script>
@@ -54,10 +60,15 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", function() {
+      // যদি shop-category-boot.js কোন কারণে ফায়ার না করে, এটি ব্যাকআপ হিসেবে কাজ করবে
       if (typeof window.bootAllCategories === "function") {
         window.bootAllCategories();
+      } else if (typeof window.applyProductLinks === "function") {
+        // লোডারকে ফোর্স রান করানোর চেষ্টা
+        window.applyProductLinks();
       }
     });
   </script>
+
 </body>
 </html>
