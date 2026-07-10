@@ -692,9 +692,8 @@ function getProductShortNote(p, categoryKey) {
     return notes[categoryKey];
   }
   if (notes && notes.default) return notes.default;
-  return "* ছবিতে রং সামান্য পার্থক্য হতে পারে। লাইটিংয়ের কারণে প্রকৃত রং একটু আলাদা দেখাতে পারে।";
-}
-
+  return "* \"Note: Product color may slightly vary due to photographic lighting sources.\"";
+  
 function formatCardPriceText(p, categoryKey) {
   var types = getProductTypes(p, categoryKey);
   if (types.length <= 1) {
@@ -854,13 +853,13 @@ function getProductDescriptionHtml(p, categoryKey) {
   if (window.SITE_LINKS && window.SITE_LINKS.productNotes && window.SITE_LINKS.productNotes.default) {
     return window.SITE_LINKS.productNotes.default;
   }
-  return (
-    "<p><strong>" +
-    escapeHtml(p.name) +
-    "</strong> — " +
-    escapeHtml(displayFabricLabel(p.fabric, "")) +
-    "। প্রিমিয়াম মুসলিম ফ্যাশন, বাংলাদেশ জুড়ে ডেলিভারি।</p>"
-  );
+ return (
+  "<p><strong>" +
+  escapeHtml(p.name) +
+  "</strong> — " +
+  escapeHtml(displayFabricLabel(p.fabric, "")) +
+  " | Premium Muslim Fashion, Delivering Nationwide Across Bangladesh.</p>"
+);
 }
 
 function buildPqvRelatedHtml(p, idx, allProducts, categoryKey) {
@@ -1875,8 +1874,6 @@ function escapeHtml(str) {
 
 }
 
-
-
 /** Unique color keys from products → one checkbox each (auto when `color` is set in category-products.js). */
 function formatColorKeyLabel(key) {
   return String(key)
@@ -1921,8 +1918,6 @@ function getProductColorOptions(products) {
   return options;
 }
 
-
-
 function getPriceBounds(products) {
 
   var min = 0;
@@ -1944,8 +1939,6 @@ function getPriceBounds(products) {
   return { min: min, max: max };
 
 }
-
-
 
 function buildShopSidebar(categoryKey, products) {
   var catLinks = getCategoryNavList()
@@ -1983,8 +1976,6 @@ function buildShopSidebar(categoryKey, products) {
         })
         .join("")
     : "<p class='color-filter-empty'>No colors listed for this category.</p>";
-
-
 
   return (
 
@@ -2083,9 +2074,7 @@ function buildShopSidebar(categoryKey, products) {
 
 }
 
-
-
-function resolveCardHoverImage(p, allProducts) {
+  function resolveCardHoverImage(p, allProducts) {
   var gallery = collectGalleryImages(p, allProducts || []);
   var main = resolveCardImageSrc(p);
   for (var i = 0; i < gallery.length; i++) {
@@ -2157,14 +2146,15 @@ function wrapProductImageLink(innerHtml, p) {
 
 function getCategoryFallbackImage(categoryKey) {
   var fallbacks = {
-    abaya: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Maroon%20Abaya%20Set.jpeg?raw=1",
+    abaya: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Maroon%20Abaya%20Set.jpeg",
     "premium-two-piece": "images/pink-floral-printed-co-ord-set.jpeg",
     "cover-up": "images/Royal-Blue-Golden-Floral-Print.jpeg",
     "tops-kurti": "images/Black-White-Polka-Dots.jpeg",
     embroidery: "images/Black-Base-Rose-Floral.jpeg",
     karchupi: "images/Black-Base-Rose-Floral.jpeg",
     kaftan: "images/Baby-Pink-Floral-Print.jpeg",
-    hijab: "images/Black-White-Polka-Dots.jpeg",    
+    hijab: "images/Black-White-Polka-Dots.jpeg",
+    panjabi: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-white-islamic-mens-kurta-full-sleeve-outdoor-portrait-bangladesh.webp"
   };
   return fallbacks[categoryKey] || "images/Baby-Pink-Floral-Print.jpeg";
 }
@@ -3031,43 +3021,27 @@ return;
     "<option value='price-desc'>Price: High to Low</option>" +
     "<option value='name-asc'>Name: A-Z</option>" +
     "</select></label></div>" +
-
     "<div class='shop-filter-backdrop' id='shopFilterBackdrop' hidden></div>" +
-
     "<div class='shop-layout'>" +
-
     "<div class='shop-sidebar-col'>" + crumbs.desktop + sidebarHtml + "</div>" +
-
     "<section class='shop-main'>" +
-
     "<div class='shop-top'><h2 class='shop-title'>" +
-
     escapeHtml(title) +
-
     "</h2><span class='shop-count' id='shopCount'>" +
-
     products.length +
-
    " items</span></div>" +
-
 "<div class='product-grid" + (detailMode ? " product-grid-detail" : "") + "' id='productGrid'>" +
-
 (cards ||
   "<p class='filter-empty'>" +
   (searchQ
     ? 'No products found for "' + escapeHtml(searchQ) + '". Try another keyword or browse categories.'
     : "No products have been added to this category yet.") +
   "</p>") +
-
 "</div></section></div>" +
-
 "";
-    
   fixShopPageLinks(root);
-
   shopCartCtx.root = root;
   shopCartCtx.products = products;
-
   if (!products.length) {
     markCategoryReady();
     syncShopCartBadge();
@@ -3109,19 +3083,16 @@ function bootShopPage(run) {
     start();
   }
 }
-
 window.bootShopCategory = function (categoryKey) {
   bootShopPage(function () {
     renderCategory(categoryKey);
   });
 };
-
 window.bootAllCategories = function () {
   bootShopPage(function () {
     renderAllCategories();
   });
 };
-
 scheduleShopCategoryBoot();
 
 window.addEventListener("load", function () {
@@ -3129,4 +3100,3 @@ window.addEventListener("load", function () {
     scheduleShopCategoryBoot(true);
   }
 });
-
