@@ -32,9 +32,9 @@
   </main>
   <div id="site-footer-mount"></div>
 
-  <script src="category-products.js?v=20260535"></script>
-  <script src="product-links-data.js?v=20260535"></script>
-  <script src="product-catalog-sections.js?v=20260530d"></script>
+  <script src="category-products.js?v=2026_final_fix"></script>
+  <script src="product-links-data.js?v=2026_final_fix"></script>
+  <script src="product-catalog-sections.js?v=2026_final_fix"></script>
 
   <script>
     window.maCatalog = window.maCatalog || {};
@@ -46,18 +46,18 @@
     window.PRODUCT_IMAGE_LISTS = window.PRODUCT_IMAGE_LISTS || window.PRODUCT_LINKS_DATA || {};
   </script>
 
-  <script src="site-api-config.js?v=20260529"></script>
-  <script src="product-config.js?v=20260603ennotes"></script>
-  <script src="product-utils.js?v=20260602twopiece"></script>
-  <script src="cart-utils.js?v=20260603cartqty"></script>
-  <script src="cart-toast.js?v=20260603cartqty"></script>
-  <script src="site-header.js?v=20260603logo"></script>
+  <script src="site-api-config.js?v=2026_final_fix"></script>
+  <script src="product-config.js?v=2026_final_fix"></script>
+  <script src="product-utils.js?v=2026_final_fix"></script>
+  <script src="cart-utils.js?v=2026_final_fix"></script>
+  <script src="cart-toast.js?v=2026_final_fix"></script>
+  <script src="site-header.js?v=2026_final_fix"></script>
 
-  <script src="product-catalog-sync.js?v=20260530d"></script>
-  <script src="product-catalog-loader.js?v=20260535"></script>
-  <script src="category-renderer.js?v=20260603catfix"></script>
-  <script src="site-footer.js?v=20260603footen"></script>
-  <script src="shop-category-boot.js?v=20260603catfix"></script>
+  <script src="product-catalog-sync.js?v=2026_final_fix"></script>
+  <script src="product-catalog-loader.js?v=2026_final_fix"></script>
+  <script src="category-renderer.js?v=2026_final_fix"></script>
+  <script src="site-footer.js?v=2026_final_fix"></script>
+  <script src="shop-category-boot.js?v=2026_final_fix"></script>
 
   <script>
     (function() {
@@ -69,15 +69,14 @@
         }
       }
       
-      // ডম লোড হলে রান হবে
       if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", forceStart);
       } else {
         forceStart();
       }
       
-      // ব্যাকআপ টাইমার: যদি অন্য ফাইল রেন্ডারিং স্লো করে, তবে ৫০০ মিলি-সেকেন্ড পর এটি ফোর্স রান করাবে
-      setTimeout(forceStart, 500);
+      // ব্যাকআপ টাইমার
+      setTimeout(forceStart, 600);
     })();
   </script>
 </body>
