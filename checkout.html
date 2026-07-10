@@ -1887,27 +1887,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         });
     }
 
-    function showLocalFileBlockedModal() {
-        openCheckoutModal({
-            title: 'Orders cannot be sent here',
-            message: 'When opened as a local file (file://), the order API does not work. Run ADMIN-?????-?????.bat and use localhost, or place your order on muslimabaya.com.',
-            variant: 'warn',
-            actions: [
-                {
-                    label: 'Checkout on live site',
-                    primary: true,
-                    onClick: function () {
-                        window.open('https://muslimabaya.com/checkout', '_blank', 'noopener');
-                        closeCheckoutModal();
-                    }
-                },
-                {
-                    label: 'Close',
-                    onClick: closeCheckoutModal
+   function showLocalFileBlockedModal() {
+    openCheckoutModal({
+        title: 'Checkout Unavailable',
+        message: 'This checkout page is running locally (file://), so orders cannot be submitted. To continue testing, start the local server with ADMIN-START-SERVER.bat and open the site via http://localhost. To place a real order, use the live checkout at https://muslimabaya.com.',
+        variant: 'warn',
+        actions: [
+            {
+                label: 'Open Live Checkout',
+                primary: true,
+                onClick: function () {
+                    closeCheckoutModal();
+                    window.open(
+                        'https://muslimabaya.com/checkout',
+                        '_blank',
+                        'noopener,noreferrer'
+                    );
                 }
-            ]
-        });
-    }
+            },
+            {
+                label: 'Close',
+                onClick: closeCheckoutModal
+            }
+        ]
+    });
+}
 
     (function initCheckoutModalUi() {
         var modal = document.getElementById('checkoutModal');
