@@ -192,9 +192,15 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
 <script type="module" src="cart-drawer.js?v=20260528b"></script>
 <link rel="stylesheet" href="related-cart.css">
 
+<!--  এই নতুন কোডটুকু বসিয়ে দিন (টাইমিং ঠিক করার জন্য) -->
 <script type="module" src="index-catalog-defer.js?v=20260530sale"></script>
-<script type="module" src="index-home-anzaar.js?v=20260709anz"></script>
-<script type="module" src="related-cart.js?v=20260708"></script>
+<script type="module">
+  // ক্যাটালগ ডেটা পুরোপুরি লোড হওয়া পর্যন্ত মেইন ফাইলটিকে ১ সেকেন্ড দেরি করানো হলো
+  setTimeout(() => {
+    import("./index-home-anzaar.js?v=20260709anz");
+    import("./related-cart.js?v=20260708");
+  }, 1000); 
+</script>
     
 <section id="main-video-section" style="background:#fff; padding:25px 15px; scroll-margin-top:100px;">
     <div class="lux-video-wrap">
