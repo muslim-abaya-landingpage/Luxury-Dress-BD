@@ -43,8 +43,6 @@ function setShopCategoryKey(key) {
     if (body && typeof body.setAttribute === "function") {
     body.setAttribute("data-shop-category", key);
   }
-}
-} // অতিরিক্ত ব্র্যাকেটগুলো ফেলে দেওয়া হয়েছে
 function maShopBagIcon(size) {
   // size না থাকলে বা ভুল থাকলে ডিফল্ট ১৮ হবে, লজিক একদম ঠিক আছে
   var s = parseInt(size, 10) || 18; 
