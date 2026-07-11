@@ -22,6 +22,7 @@ function ensureCategoryStyles() {
   var shopLink = document.querySelector('link[href*="shop-page.css"]');
   if (shopLink) shopLink.href = "shop-page.css?v=20260603vc14";
 }
+
 /** Category key on <html> (SEO) or <body> (legacy SPA). */
 function getShopCategoryKey() {
   var root = document.documentElement;
@@ -32,21 +33,25 @@ function getShopCategoryKey() {
     ""
   );
 }
+
 function setShopCategoryKey(key) {
   if (!key) return;
-    var root = document.documentElement;
+  var root = document.documentElement;
   var body = document.body;
-    // সেফটি কন্ডিশন: HTML উপাদানগুলো আসলেই রেডি কি না তা চেক করা
+  
+  // সেফটি কন্ডিশন: HTML উপাদানগুলো আসলেই রেডি কি না তা চেক করা
   if (root && typeof root.setAttribute === "function") {
     root.setAttribute("data-shop-category", key);
   }
-    if (body && typeof body.setAttribute === "function") {
+  if (body && typeof body.setAttribute === "function") {
     body.setAttribute("data-shop-category", key);
   }
+} // <--- এই ব্র্যাকেটটি অত্যন্ত জরুরি ছিল
+
 function maShopBagIcon(size) {
-  // size না থাকলে বা ভুল থাকলে ডিফল্ট ১৮ হবে, লজিক একদম ঠিক আছে
+  // size না থাকলে বা ভুল থাকলে ডিফল্ট ১৮ হবে
   var s = parseInt(size, 10) || 18; 
-    return (
+  return (
     '<span class="ma-shop-bag-ico anzaar-btn-ico" aria-hidden="true">' +
     '<svg width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
     '<path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/>' +
