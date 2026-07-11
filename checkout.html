@@ -560,6 +560,64 @@
             padding: 3px 10px;
         }
         .gb-cat-chip b { color: #111; font-weight: 700; }
+        .gb-panel-crosssell .gb-panel-title::before { background: var(--gold); }
+        .cross-sell-dots {
+            display: flex;
+            gap: 6px;
+            margin-left: auto;
+        }
+        .cross-sell-dots span {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--line);
+            cursor: pointer;
+            transition: background 0.15s ease, transform 0.15s ease;
+        }
+        .cross-sell-dots span.is-active {
+            background: var(--gold);
+            transform: scale(1.3);
+        }
+        .cross-sell-card {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .cross-sell-thumb {
+            width: 64px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #faf9f7;
+            border: 1px solid var(--line);
+            flex-shrink: 0;
+        }
+        .cross-sell-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .cross-sell-meta { min-width: 0; flex: 1; }
+        .cross-sell-name {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--ink);
+            margin: 0 0 5px;
+            line-height: 1.35;
+        }
+        .cross-sell-price { display: flex; align-items: baseline; gap: 7px; margin-bottom: 8px; }
+        .cross-sell-price .old { color: #9a9a9a; text-decoration: line-through; font-size: 12.5px; }
+        .cross-sell-price .now { color: var(--gold); font-weight: 700; font-size: 14.5px; }
+        .cross-sell-add {
+            border: 1px solid var(--ink);
+            background: #fff;
+            color: var(--ink);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 13px;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+        .cross-sell-add:hover { background: var(--ink); color: #fff; }
+        .cross-sell-add.is-added { border-color: #16a34a; color: #16a34a; }
+        .cross-sell-empty { font-size: 12px; color: var(--muted); margin: 0; }
         .pm-cod-icon {
             width: 52px;
             height: 52px;
@@ -1730,6 +1788,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <span id="side-qty" class="visually-hidden">0</span>
                     <p class="sidebar-meta">Free delivery on 3 or more items</p>
             </div>
+            <div class="gb-panel gb-panel-crosssell" id="crossSellPanel" style="display:none;">
+                <h3 class="gb-panel-title">
+                    <span>Customers also bought</span>
+                    <span class="cross-sell-dots" id="crossSellDots"></span>
+                </h3>
+                <div id="crossSellBody"></div>
+            </div>
             <div class="gb-panel gb-panel-chart">
                 <h3 class="gb-panel-title">Product / fabric details</h3>
                 <div id="checkoutProductChart"></div>
@@ -1800,6 +1865,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="auth-api.js"></script>
 <script src="product-config.js?v=20260603ennotes"></script>
 <script src="product-utils.js?v=20260603sizelabel"></script>
+<!-- Needed so "Customers also bought" has access to the real product catalog on this page -->
+<script src="category-products.js?v=20260603crosssell"></script>
+<script src="product-catalog-sync.js?v=20260603crosssell"></script>
+<script src="product-links-data.js?v=20260603crosssell"></script>
+<script src="product-catalog-loader.js?v=20260603crosssell"></script>
 <script defer src="site-header.js?v=20260601en"></script>
 <script src="cart-utils.js?v=20260603img"></script>
 <script src="checkout-location-labels.js?v=20260603loc"></script>
@@ -2757,10 +2827,163 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             if (action === 'remove') cart.splice(idx, 1);
             persistCart();
             displayOrder();
+            renderCrossSell();
         });
     }
 
     renderClearCartToolbar();
+
+    /* ================= Customers also bought (cross-sell) ================= */
+    var crossSellPool = [];
+    var crossSellIdx = 0;
+    var crossSellPanel = document.getElementById('crossSellPanel');
+    var crossSellBody = document.getElementById('crossSellBody');
+    var crossSellDots = document.getElementById('crossSellDots');
+
+    function isCrossSellShowcaseName(name) {
+        var s = String(name || '').toLowerCase();
+        return s.indexOf(' - back') === -1 && s.indexOf('- back') === -1 &&
+               s.indexOf(' - side') === -1 && s.indexOf('- side') === -1;
+    }
+
+    function crossSellImage(p) {
+        if (window.maCatalog && typeof window.maCatalog.resolveImageUrl === 'function') {
+            return window.maCatalog.resolveImageUrl(p.image || '');
+        }
+        return p.image || '';
+    }
+
+    function cartCategoryKeys() {
+        var keys = {};
+        cart.forEach(function (item) {
+            var k = String(item.category || item.categoryKey || '').trim();
+            if (k) keys[k] = true;
+        });
+        return Object.keys(keys);
+    }
+
+    function cartHasProductName(name) {
+        var target = String(name || '').trim().toLowerCase();
+        if (!target) return false;
+        return cart.some(function (item) {
+            return String(checkoutLineBaseName(item) || item.name || '').trim().toLowerCase() === target;
+        });
+    }
+
+    function buildCrossSellPool() {
+        var all = window.CATEGORY_PRODUCTS || {};
+        var priorityKeys = cartCategoryKeys();
+        var allKeys = Object.keys(all);
+        // prioritise categories already in the cart, then the rest
+        var orderedKeys = priorityKeys.concat(allKeys.filter(function (k) { return priorityKeys.indexOf(k) === -1; }));
+        var seenImg = {};
+        var out = [];
+        orderedKeys.forEach(function (key) {
+            var list = all[key] || [];
+            list.forEach(function (p) {
+                if (!p || !p.name || !isCrossSellShowcaseName(p.name)) return;
+                if (cartHasProductName(p.name)) return;
+                var img = crossSellImage(p);
+                if (!img || seenImg[img]) return;
+                seenImg[img] = true;
+                var meta = (window.CATEGORY_META && window.CATEGORY_META[key]) || {};
+                var priceFull = (p.priceByType && p.priceByType['Full Set']) || null;
+                out.push({
+                    name: p.name,
+                    image: img,
+                    price: parseInt(p.price, 10) || 0,
+                    oldPrice: priceFull && priceFull > p.price ? priceFull : null,
+                    category: key,
+                    categoryLabel: meta.title || key,
+                    fabric: p.fabric || ''
+                });
+            });
+        });
+        return out.slice(0, 8);
+    }
+
+    function refreshCrossSellPool() {
+        crossSellPool = buildCrossSellPool();
+        if (crossSellIdx >= crossSellPool.length) crossSellIdx = 0;
+    }
+
+    function renderCrossSellDots() {
+        if (!crossSellDots) return;
+        crossSellDots.innerHTML = crossSellPool.map(function (_, i) {
+            return '<span data-dot="' + i + '" class="' + (i === crossSellIdx ? 'is-active' : '') + '"></span>';
+        }).join('');
+    }
+
+    function renderCrossSellCard() {
+        if (!crossSellBody) return;
+        var p = crossSellPool[crossSellIdx];
+        if (!p) { crossSellBody.innerHTML = '<p class="cross-sell-empty">No suggestions right now.</p>'; return; }
+        crossSellBody.innerHTML =
+            '<div class="cross-sell-card">' +
+            '<div class="cross-sell-thumb"><img src="' + escapeHtml(p.image) + '" alt="" loading="lazy" onerror="this.style.opacity=0"></div>' +
+            '<div class="cross-sell-meta">' +
+            '<p class="cross-sell-name">' + escapeHtml(p.name) + '</p>' +
+            '<div class="cross-sell-price">' +
+            (p.oldPrice ? '<span class="old">' + formatBdtCheckout(p.oldPrice) + '</span>' : '') +
+            '<span class="now">' + formatBdtCheckout(p.price) + '</span>' +
+            '</div>' +
+            '<button type="button" class="cross-sell-add" data-cross-add>Add to cart</button>' +
+            '</div></div>';
+    }
+
+    function renderCrossSell() {
+        refreshCrossSellPool();
+        if (!crossSellPanel) return;
+        if (!crossSellPool.length) {
+            crossSellPanel.style.display = 'none';
+            return;
+        }
+        crossSellPanel.style.display = '';
+        renderCrossSellDots();
+        renderCrossSellCard();
+    }
+
+    // Delegated listeners are bound ONCE here (not inside renderCrossSell), so re-rendering
+    // the card/dots never stacks up duplicate handlers on the same click.
+    if (crossSellDots) {
+        crossSellDots.addEventListener('click', function (e) {
+            var dot = e.target.closest('[data-dot]');
+            if (!dot) return;
+            crossSellIdx = parseInt(dot.getAttribute('data-dot'), 10) || 0;
+            renderCrossSellDots();
+            renderCrossSellCard();
+        });
+    }
+    if (crossSellBody) {
+        crossSellBody.addEventListener('click', function (e) {
+            var btn = e.target.closest('[data-cross-add]');
+            if (!btn) return;
+            var p = crossSellPool[crossSellIdx];
+            if (!p) return;
+            var line = {
+                name: p.name,
+                price: p.price,
+                quantity: 1,
+                image: p.image,
+                category: p.category,
+                categoryLabel: p.categoryLabel,
+                fabric: p.fabric
+            };
+            if (typeof isAbayaProduct === 'function' && isAbayaProduct(p, p.category) && typeof formatAbayaCartSize === 'function') {
+                var abayaCfg = typeof getAbayaSizeConfig === 'function' ? getAbayaSizeConfig() : null;
+                var defaultLen = abayaCfg && abayaCfg.lengthSizes ? abayaCfg.lengthSizes[0] : '50';
+                line.lengthSize = defaultLen;
+                line.size = formatAbayaCartSize(defaultLen);
+            }
+            cart.push(line);
+            persistCart();
+            displayOrder();
+            btn.textContent = 'Added';
+            btn.classList.add('is-added');
+            renderCrossSell();
+        });
+    }
+    /* =============== end Customers also bought =============== */
 
     if (areaSelect) {
         areaSelect.addEventListener('change', displayOrder);
@@ -3073,6 +3296,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         cart = lines;
         displayOrder();
         renderClearCartToolbar();
+        renderCrossSell();
     });
 
     function bindCheckoutTikTokMatchSync() {
@@ -3119,6 +3343,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         cart = loadCart();
         displayOrder();
         persistCart();
+        renderCrossSell();
         bindCheckoutTikTokMatchSync();
         if (typeof pushTrackingEvent === 'function') {
             var checkoutSnap = typeof buildCartTrackingSnapshot === 'function'
