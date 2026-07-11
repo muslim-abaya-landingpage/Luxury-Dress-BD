@@ -407,11 +407,9 @@ function getSelectedSizeForIdx(scopeRoot, idx) {
   var sizeEl = scopeRoot.querySelector("[data-size-idx='" + idx + "']");
   return sizeEl ? sizeEl.value : "50";
 }
-function toAsciiDigits(str) {
-  return String(str || "").replace(/[০-৯]/g, function (d) {
-    return String.fromCharCode(d.charCodeAt(0) - 2534 + 48);
-  });
-}
+const toAsciiDigits = (str) => 
+  String(str || "").replace(/[০-৯]/g, d => String.fromCharCode(d.charCodeAt(0) - 2486));
+  
 function parsePqvQtyValue(raw) {
   var digits = toAsciiDigits(raw).replace(/\D/g, "");
   var n = parseInt(digits, 10);
@@ -2435,8 +2433,6 @@ function bindShopCategoryControls(root, products) {
         grid.appendChild(card);
       });
     });
-  }
-}
 function softSwitchShopCategory(categoryKey) {
   ensureCategoryStyles();
   var root = document.getElementById("list");
