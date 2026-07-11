@@ -18,7 +18,7 @@ window.CATALOG_SECTIONS = [
   },
   {
     key: "cover-up",
-    row: "④",
+    row: "②",
     menu: "COVER UP",
     menuBn: "কভার আপ",
     page: "cover-up.html",
@@ -26,21 +26,21 @@ window.CATALOG_SECTIONS = [
     enabled: false
   },
   {
-    key: "tops-kurti",
-    row: "③",
-    menu: "TOPS/KURTI",
-    menuBn: "টপস/কুর্তি",
-    page: "tops-kurti.html",
-    path: "/tops-kurti",
-    enabled: true
-  },
-  {
     key: "premium-two-piece",
-    row: "②",
+    row: "③",
     menu: "PREMIUM TWO-PIECE",
     menuBn: "প্রিমিয়াম টু-পিস",
     page: "premium-two-piece.html",
     path: "/premium-two-piece",
+    enabled: true
+  },
+  {
+    key: "tops-kurti",
+    row: "④",
+    menu: "TOPS/KURTI",
+    menuBn: "টপস/কুর্তি",
+    page: "tops-kurti.html",
+    path: "/tops-kurti",
     enabled: true
   },
   {
@@ -81,7 +81,7 @@ window.CATALOG_SECTIONS = [
   },
   {
     key: "panjabi",
-    row: "①",
+    row: "⑨",
     menu: "PANJABI",
     menuBn: "পাঞ্জাবী",
     page: "panjabi.html",
