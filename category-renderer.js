@@ -46,8 +46,7 @@ function setShopCategoryKey(key) {
   if (body && typeof body.setAttribute === "function") {
     body.setAttribute("data-shop-category", key);
   }
-} // <--- এই ব্র্যাকেটটি অত্যন্ত জরুরি ছিল
-
+// আপনার ফাইলের পরবর্তী ফাংশনটি ঠিক এখান থেকে স্বাভাবিকভাবে চলতে থাকবে...
 function maShopBagIcon(size) {
   // size না থাকলে বা ভুল থাকলে ডিফল্ট ১৮ হবে
   var s = parseInt(size, 10) || 18; 
