@@ -81,7 +81,7 @@ window.CATALOG_SECTIONS = [
   },
   {
     key: "panjabi",
-    row: "⑧",
+    row: "①",
     menu: "PANJABI",
     menuBn: "পাঞ্জাবী",
     page: "panjabi.html",
