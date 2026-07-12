@@ -82,12 +82,12 @@ window.SITE_LINKS = {
     "premium-two-piece": ""
   },
   productNotes: {
-    default:
-      "<div class='pqv-desc-rich'><p><strong>দ্রষ্টব্য:</strong></p><ol>" +
-      "<li>প্রকৃত রং ও কাপড়ের গুণমান নিশ্চিত করতে সরাসরি দেখে নেওয়ার চেষ্টা করুন।</li>" +
-      "<li>লাইটিং ও স্ক্রিনের কারণে রং সামান্য পার্থক্য হতে পারে।</li>" +
-      "<li>অর্ডার কনফার্ম হলে পরিবর্তন/বাতিল সীমিত — বিস্তারিত নীতিমালা নিচে।</li>" +
-      "</ol><p><strong>ডেলিভারি:</strong> বাংলাদেশ জুড়ে হোম ডেলিভারি। ক্যাশ অন ডেলিভারি উপলব্ধ।</p>" +
-      "<p><strong>রিটার্ন:</strong> ত্রুটিপূর্ণ পণ্য ২৪ ঘণ্টার মধ্যে জানালে সমাধান করা হবে।</p></div>"
-  }
+  default:
+    "<div class='pqv-desc-rich'><p><strong>Important Notice:</strong></p><ol>" +
+    "<li>Actual product color may vary slightly due to lighting conditions and your screen settings.</li>" +
+    "<li>Fabric texture and color may appear slightly different in person than in photographs.</li>" +
+    "<li>Once an order is confirmed, modifications or cancellations may be subject to our order policy.</li>" +
+    "</ol><p><strong>Delivery:</strong> Nationwide home delivery across Bangladesh. Cash on Delivery (COD) is available.</p>" +
+    "<p><strong>Returns:</strong> If you receive a defective product, please contact us within 24 hours of delivery for assistance.</p></div>"
+}
 };
