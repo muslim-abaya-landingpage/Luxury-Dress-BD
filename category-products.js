@@ -565,18 +565,6 @@ window.CATEGORY_PRODUCTS = {
   detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 43–44 inches, flare: 80 inches."
 },
 {
-  id: "KURTI-30",
-  name: "Premium Tribal Print Women's Two-Piece Set",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Tribal-Print-Women's-Two-Piece-Set.webp",
-  link: "/",
-  price: 450,
-  color: "multicolor",
-  colorLabel: "Rust Brown / Black / Navy Blue / Cherry Red",
-  fabric: "Premium Cotton Fabric",
-  sizes: ["34-46"],
-  detailNote: "Premium tribal print cotton two-piece set available in four elegant colors. Soft premium cotton fabric with stylish tribal doll print."
-},
-{
   id: "KURTI-32",
   name: "Premium Pink Floral Midi Dress",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-pink-floral-midi-dress-for-women-bangladesh.webp",
@@ -770,6 +758,18 @@ window.CATEGORY_PRODUCTS = {
   fabric: "Premium Soft Georgette",
   sizes: ["Body 42 (Free Size)"],
   detailNote: "Length: 37–38 Inches"
+},
+{
+  id: "KURTI-30",
+  name: "Premium Tribal Print Women's Two-Piece Set",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Tribal-Print-Women's-Two-Piece-Set.webp",
+  link: "/",
+  price: 450,
+  color: "multicolor",
+  colorLabel: "Rust Brown / Black / Navy Blue / Cherry Red",
+  fabric: "Premium Cotton Fabric",
+  sizes: ["34-46"],
+  detailNote: "Premium tribal print cotton two-piece set available in four elegant colors. Soft premium cotton fabric with stylish tribal doll print."
 }
 ],
 /* ═══ ⑤ এম্ব্রয়ডারি — খালি ═══ */
@@ -805,7 +805,7 @@ panjabi: [
   {
     id: "PAN-002",
     name: "Premium Off White Islamic Panjabi",
-    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-mens-off-white-cotton-panjabi-modern-1080x1350.webp",
+    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/premium-mens-off-white-cotton-panjabi-modern-1080x1350.webp",
     link: "/",
     price: 1050,
     color: "off-white",
@@ -821,7 +821,7 @@ panjabi: [
   {
     id: "PAN-003",
     name: "Premium White Cotton Panjabi",
-    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-white-cotton-panjabi-mens-islamic-fashion-modern-design-1080x1350.webp",
+    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/premium-white-cotton-panjabi-mens-islamic-fashion-modern-design-1080x1350.webp",
     link: "/",
     price: 1050,
     color: "white",

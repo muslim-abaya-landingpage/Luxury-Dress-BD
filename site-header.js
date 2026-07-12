@@ -170,27 +170,30 @@
 function buildNavMenuItems() {
     var sections = window.CATALOG_SECTIONS || [];
     var extras = window.SITE_NAV_EXTRAS || [];
-    
-    // ১. মূল ক্যাটাগরিগুলোর আইডি থেকে .html কেটে ফেলে একদম ফ্রেশ হ্যাশ (#) লিংক তৈরি
+
+    // মূল ক্যাটাগরিগুলোর জন্য আসল পেজ পাথ (sec.path, যেমন "/tops-kurti") ব্যবহার করা হচ্ছে —
+    // আগে এখানে "#" + key দিয়ে হ্যাশ-লিংক বানানো হতো, যেটা siteHref() দিয়ে গেলে
+    // "#tops-kurti.html"-এর মতো একটা অকেজো স্ট্রিং তৈরি করত। ব্রাউজার "#" দিয়ে শুরু হওয়া
+    // যেকোনো href-কে শুধু বর্তমান পেজের ভেতরের একটা fragment হিসেবে ধরে — তাই ক্লিক করলে
+    // পেজই বদলাতো না। এখন সঠিক পাথ ব্যবহার করা হচ্ছে, যাতে মেনু ক্লিক করলে আসল ক্যাটাগরি পেজে যায়।
     var items = sections.map(function (sec) {
-      var cleanKey = String(sec.key || "").replace('.html', '').trim();
+      var href = sec.path || ("/" + String(sec.key || "").replace(/\.html$/i, "").trim());
       return {
-        href: "#" + cleanKey,
+        href: href,
         label: sec.menu,
         enabled: navItemEnabledForSection(sec)
       };
     });
-    
-    // ২. অতিরিক্ত মেনুগুলোর জন্য
+
     extras.forEach(function (ex) {
-      var cleanExtraKey = String(ex.key || "").replace('.html', '').trim();
+      var href = ex.path || ("/" + String(ex.key || "").replace(/\.html$/i, "").trim());
       items.push({
-        href: "#" + cleanExtraKey,
+        href: href,
         label: ex.menu,
         enabled: ex.enabled !== false
       });
     });
-    
+
     return items;
 }
   function renderNavMenuItem(it, mobile) {
