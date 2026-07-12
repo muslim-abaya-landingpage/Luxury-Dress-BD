@@ -437,10 +437,7 @@ function buildNavMenuItems() {
             document.head.appendChild(s);
           });
         }
-        loadScript("product-catalog-sections.js?v=20260530d")
-          .then(function () {
-            return loadScript("product-catalog-sync.js?v=20260531nav2");
-          })
+        loadScript("product-catalog-sync.js?v=20260531nav2")
           .then(function () {
             return loadScript("product-config.js?v=20260531price");
           })

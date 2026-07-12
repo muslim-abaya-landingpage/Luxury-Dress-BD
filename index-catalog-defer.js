@@ -19,7 +19,7 @@
   var chain = [
     "product-config.js?v=20260604",
     "product-utils.js?v=20260604",
-    "product-catalog-sections.js?v=20260530d",
+    "product-catalog-sync.js?v=20260604",
     "category-products.js?v=20260604",
     "product-links-data.js?v=20260604",
     "product-catalog-loader.js?v=20260604",
