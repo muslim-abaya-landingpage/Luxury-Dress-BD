@@ -833,22 +833,6 @@ panjabi: [
       "XL (Long 44 • Body 46)"
     ],
     detailNote: "Premium Full Sleeve Islamic Panjabi"
-  },
-  {
-    id: "PAN-004",
-    name: "Premium White Cotton Panjabi",
-    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-white-cotton-panjabi-mens-islamic-fashion-modern-design-1080x1350.webp",
-    link: "/",
-    price: 1050,
-    color: "white",
-    colorLabel: "White",
-    fabric: "Premium Cotton",
-    sizes: [
-      "M (Long 40 • Body 42)",
-      "L (Long 42 • Body 44)",
-      "XL (Long 44 • Body 46)"
-    ],
-    detailNote: "Premium Full Sleeve Islamic Panjabi"
   }
 ],
 }; // <--- এই ক্লোজিং ব্র্যাকেটটি অত্যন্ত জরুরি, যা window.CATEGORY_PRODUCTS অবজেক্টকে শেষ করলো।
