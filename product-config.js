@@ -81,13 +81,17 @@ window.SITE_LINKS = {
       "* Inner abaya/hijab is not included unless specified.",
     "premium-two-piece": ""
   },
-  productNotes: {
+ productNotes: {
   default:
-    "<div class='pqv-desc-rich'><p><strong>Important Notice:</strong></p><ol>" +
+    "<div class='pqv-desc-rich'>" +
+    "<p><strong>Important Notice:</strong></p>" +
+    "<ol>" +
     "<li>Actual product color may vary slightly due to lighting conditions and your screen settings.</li>" +
     "<li>Fabric texture and color may appear slightly different in person than in photographs.</li>" +
     "<li>Once an order is confirmed, modifications or cancellations may be subject to our order policy.</li>" +
-    "</ol><p><strong>Delivery:</strong> Nationwide home delivery across Bangladesh. Cash on Delivery (COD) is available.</p>" +
-    "<p><strong>Returns:</strong> If you receive a defective product, please contact us within 24 hours of delivery for assistance.</p></div>"
+    "</ol>" +
+    "<p><strong>Delivery:</strong> Nationwide home delivery across Bangladesh. Cash on Delivery (COD) is available.</p>" +
+    "<p><strong>Returns:</strong> If you receive a defective product, please contact us within 24 hours of delivery for assistance.</p>" +
+    "</div>"
 }
 };
