@@ -1,5 +1,110 @@
 // cart-drawer.js
 
+function ensureCartDrawerRelatedStyles() {
+  if (document.getElementById('cart-drawer-related-style')) return;
+  const style = document.createElement('style');
+  style.id = 'cart-drawer-related-style';
+  style.textContent = `
+    .related-wrapper { border-top: 1px solid #ececec; padding-top: 14px; margin-top: 10px; }
+    .related-title { font-size: 14px; font-weight: 700; margin: 0 0 12px; color: #111; }
+    .related-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .related-card { border: 1px solid #ececec; border-radius: 10px; padding: 8px; text-align: left; }
+    .related-card-thumb { width: 100%; aspect-ratio: 4/5; border-radius: 6px; overflow: hidden; background: #f5f5f5; margin-bottom: 6px; }
+    .related-card-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .related-card-name { font-size: 12px; margin: 0 0 4px; color: #111; line-height: 1.3; min-height: 31px; }
+    .related-card-price { font-size: 13px; font-weight: 700; color: #b8952e; margin: 0 0 6px; }
+    .related-card-add { width: 100%; border: 1px solid #111; background: #fff; color: #111; font-size: 11px; font-weight: 600; padding: 6px 0; border-radius: 999px; cursor: pointer; }
+    .related-card-add:hover { background: #111; color: #fff; }
+  `;
+  document.head.appendChild(style);
+}
+
+window.addRelatedProductToCart = function (productId) {
+  const cats = window.CATEGORY_PRODUCTS || {};
+  let product = null;
+  let categoryKey = '';
+  for (const key in cats) {
+    const list = cats[key] || [];
+    const found = list.find(p => p && String(p.id) === String(productId));
+    if (found) {
+      product = found;
+      categoryKey = key;
+      break;
+    }
+  }
+  if (!product) return;
+
+  let existing = typeof window.loadStoreCart === 'function' ? window.loadStoreCart({ readOnly: true }) : [];
+  const already = existing.find(item => item.id === product.id && !item.size);
+  if (already) {
+    already.quantity = (parseInt(already.quantity, 10) || 0) + 1;
+  } else {
+    const meta = (window.CATEGORY_META && window.CATEGORY_META[categoryKey]) || {};
+    existing.push({
+      id: product.id,
+      name: product.name,
+      price: parseInt(product.price, 10) || 0,
+      quantity: 1,
+      image: product.image,
+      category: categoryKey,
+      categoryLabel: meta.title || categoryKey
+    });
+  }
+  const updated = typeof window.persistStoreCart === 'function' ? window.persistStoreCart(existing) : existing;
+  if (typeof window.afterCartMutation === 'function') {
+    window.afterCartMutation(updated);
+  } else {
+    window.updateCartDrawerUI(updated);
+  }
+  if (typeof window.showCartAddedToast === 'function') {
+    window.showCartAddedToast({ name: product.name, image: product.image, price: product.price });
+  }
+};
+
+window.renderCartDrawerRelated = function (cartItems) {
+  const section = document.getElementById('related-products-section');
+  const container = document.getElementById('related-products-container');
+  if (!section || !container) return;
+
+  if (!cartItems || !cartItems.length) {
+    section.style.display = 'none';
+    container.innerHTML = '';
+    return;
+  }
+
+  const inCart = {};
+  cartItems.forEach(item => { inCart[String(item.id)] = true; });
+
+  const primaryCategory = cartItems[0].category || cartItems[0].categoryKey || '';
+  let candidates = typeof window.getRelatedProducts === 'function'
+    ? window.getRelatedProducts(primaryCategory, 8) || []
+    : [];
+  candidates = candidates.filter(p => p && p.id && !inCart[String(p.id)]);
+
+  if (!candidates.length) {
+    section.style.display = 'none';
+    container.innerHTML = '';
+    return;
+  }
+  candidates = candidates.slice(0, 4);
+
+  container.innerHTML = candidates.map(p => {
+    const img = p.image || p.img || 'images/Baby-Pink-Floral-Print.jpeg';
+    const price = parseInt(p.price, 10) || 0;
+    const name = String(p.name || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const idAttr = String(p.id || '').replace(/'/g, "\\'");
+    return `
+      <div class="related-card">
+        <div class="related-card-thumb"><img src="${img}" alt="${name}" loading="lazy" onerror="this.src='images/Baby-Pink-Floral-Print.jpeg'"></div>
+        <p class="related-card-name">${name}</p>
+        <p class="related-card-price">৳${price}</p>
+        <button type="button" class="related-card-add" onclick="window.addRelatedProductToCart('${idAttr}')">Add to cart</button>
+      </div>
+    `;
+  }).join('');
+  section.style.display = '';
+};
+
 function findProductByImage(imgUrl) {
     const cats = window.CATEGORY_PRODUCTS || {};
     for (const catKey in cats) {
@@ -52,7 +157,7 @@ function ensureCartDrawerHtml() {
     <div class="cart-drawer-body">
       <div id="cart-items-list"></div>
       <div id="related-products-section" class="related-wrapper" style="display: none;">
-        <h3 class="related-title">You May Also Like</h3>
+        <h3 class="related-title">Customers also bought</h3>
         <div id="related-products-container" class="related-grid"></div>
       </div>
     </div>
@@ -65,6 +170,7 @@ function ensureCartDrawerHtml() {
     </div>
   `;
   document.body.appendChild(drawer);
+  ensureCartDrawerRelatedStyles();
 // Open / Close drawer helpers
 window.openCartDrawer = function () {
   drawer.classList.add('is-open');
@@ -197,6 +303,9 @@ window.updateCartDrawerUI = function (cartLines) {
     if (typeof window.renderCartList === 'function') {
       window.renderCartList(lines);
     }
+  }
+  if (typeof window.renderCartDrawerRelated === 'function') {
+    window.renderCartDrawerRelated(lines);
   }
 };
 
