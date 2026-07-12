@@ -851,7 +851,6 @@ panjabi: [
     detailNote: "Premium Full Sleeve Islamic Panjabi"
   }
 ],
-  ] // ← পাঞ্জাবি ক্যাটাগরির শেষ
 }; // <--- এই ক্লোজিং ব্র্যাকেটটি অত্যন্ত জরুরি, যা window.CATEGORY_PRODUCTS অবজেক্টকে শেষ করলো।
 
 window.SITE_MEDIA = {
