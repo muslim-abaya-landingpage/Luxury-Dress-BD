@@ -46,6 +46,7 @@ function setShopCategoryKey(key) {
   if (body && typeof body.setAttribute === "function") {
     body.setAttribute("data-shop-category", key);
   }
+}
 // আপনার ফাইলের পরবর্তী ফাংশনটি ঠিক এখান থেকে স্বাভাবিকভাবে চলতে থাকবে...
 function maShopBagIcon(size) {
   // size না থাকলে বা ভুল থাকলে ডিফল্ট ১৮ হবে
@@ -635,7 +636,8 @@ function getProductShortNote(p, categoryKey) {
   }
   if (notes && notes.default) return notes.default;
   return "* \"Note: Product color may slightly vary due to photographic lighting sources.\"";
-  function formatCardPriceText(p, categoryKey) {
+}
+function formatCardPriceText(p, categoryKey) {
   var types = getProductTypes(p, categoryKey);
   if (types.length <= 1) {
     return "\u09F3" + resolveProductPrice(p, categoryKey, "");
@@ -2433,6 +2435,8 @@ function bindShopCategoryControls(root, products) {
         grid.appendChild(card);
       });
     });
+  }
+}
 function softSwitchShopCategory(categoryKey) {
   ensureCategoryStyles();
   var root = document.getElementById("list");
