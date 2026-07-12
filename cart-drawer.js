@@ -216,6 +216,23 @@ if (typeof window !== 'undefined') {
   });
 }
 
+// Open the drawer when the bag icon (in the header, injected by site-header.js) is clicked.
+// This used to live only in related-cart.js, which is homepage-only — so on every other
+// page (category pages, checkout, etc.) clicking the bag icon did nothing. Bound once here,
+// delegated on document so it works no matter when the header markup gets injected.
+if (typeof document !== 'undefined' && !window.__cartDrawerOpenBound) {
+  window.__cartDrawerOpenBound = true;
+  document.addEventListener('click', function (e) {
+    const trigger = e.target.closest('.cart-drawer-trigger, [data-cart-trigger], .shopping-cart-icon');
+    if (!trigger) return;
+    e.preventDefault();
+    ensureCartDrawerHtml();
+    if (typeof window.openCartDrawer === 'function') {
+      window.openCartDrawer();
+    }
+  });
+}
+
 // Self initialize
 if (typeof document !== 'undefined') {
   if (document.readyState !== 'loading') {
