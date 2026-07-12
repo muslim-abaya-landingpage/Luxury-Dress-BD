@@ -15,6 +15,7 @@
 
   var heroTimer = null;
   var heroIdx = 0;
+  var heroTotalRef = 0;
 
   function $(id) {
     return document.getElementById(id);
@@ -277,26 +278,38 @@
     secs.forEach(function (s) {
       secByKey[s.key] = s;
     });
+    // Always refresh the lookup table the delegated listener reads from,
+    // even though the listener itself is only ever attached once (see guard below).
+    root.__ahSecByKey = secByKey;
 
-    root.addEventListener("click", function (e) {
-      var btn = e.target.closest("button[data-action='add']");
-      if (!btn) return;
-      e.preventDefault();
-      var card = btn.closest(".ah-card");
-      var section = btn.closest(".home-section");
-      if (!card || !section) return;
-      var pid = card.getAttribute("data-pid");
-      var key = section.getAttribute("data-cat");
-      var sec = secByKey[key];
-      if (!sec) return;
-      var list = (window.CATEGORY_PRODUCTS || {})[key] || [];
-      var p = list.find(function (x) {
-        return x && String(x.id) === String(pid);
+    // renderAll() can run more than once (catalog-ready retry loop in boot(),
+    // and index-catalog-defer.js's external window.__homeRefreshCatalog trigger
+    // can both fire). root's innerHTML gets replaced each time, but root itself
+    // is the SAME persistent element — without this guard, every extra render
+    // added another "click" listener on top of the old one, so a single tap on
+    // "Add to Cart" fired addToCart() twice (or more).
+    if (!root.__ahClickBound) {
+      root.__ahClickBound = true;
+      root.addEventListener("click", function (e) {
+        var btn = e.target.closest("button[data-action='add']");
+        if (!btn) return;
+        e.preventDefault();
+        var card = btn.closest(".ah-card");
+        var section = btn.closest(".home-section");
+        if (!card || !section) return;
+        var pid = card.getAttribute("data-pid");
+        var key = section.getAttribute("data-cat");
+        var sec = (root.__ahSecByKey || {})[key];
+        if (!sec) return;
+        var list = (window.CATEGORY_PRODUCTS || {})[key] || [];
+        var p = list.find(function (x) {
+          return x && String(x.id) === String(pid);
+        });
+        if (!p) return;
+        addToCart(sec, p);
+        btn.classList.add("is-active");
       });
-      if (!p) return;
-      addToCart(sec, p);
-      btn.classList.add("is-active");
-    });
+    }
 
     var arrows = root.querySelectorAll(".home-row-arrow");
     arrows.forEach(function (arrow) {
@@ -463,10 +476,14 @@
         startHero(hero, total);
       });
     });
-    hero.addEventListener("mouseenter", stopHero);
-    hero.addEventListener("mouseleave", function () {
-      startHero(hero, total);
-    });
+    if (!hero.__ahHoverBound) {
+      hero.__ahHoverBound = true;
+      hero.addEventListener("mouseenter", function () { stopHero(); });
+      hero.addEventListener("mouseleave", function () {
+        startHero(hero, heroTotalRef);
+      });
+    }
+    heroTotalRef = total;
     startHero(hero, total);
   }
 
