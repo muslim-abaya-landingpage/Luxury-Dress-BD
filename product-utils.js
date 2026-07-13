@@ -121,7 +121,14 @@
       if (!raw.categoryLabel) raw.categoryLabel = categoryLabelForKey(categoryKey);
       return raw;
     }
-
+    if (categoryKey === "panjabi" && (!raw.sizes || !raw.sizes.length)) {
+      raw.sizes = [
+        'M (Long 40" • Body 42")',
+        'L (Long 42" • Body 44")',
+        'XL (Long 44" • Body 46")',
+        'XXL (Long 46" • Body 48")'
+      ];
+    }
     var defs = categoryDefaults(categoryKey);
     var entry = raw;
 
@@ -335,7 +342,8 @@
     var id = String((p && p.id) || "").trim();
     if (/^DR-\d+/i.test(id)) return true;
 
-    const name = String(p?.name || "").toLowerCase();
+  // সঠিক কোড:
+  var name = String((p && p.name) || "").toLowerCase();
 
     if (
       name.includes("two piece") ||
@@ -378,10 +386,11 @@ function getPanjabiSizeConfig() {
   };
 }
 
-function isPanjabiProduct(p, categoryKey) {
-  var ck = String(categoryKey || (p && (p.category || "")) || "").trim();
+function isPanjabiProduct(product, categoryKey) {
+  const ck = String(categoryKey ?? product?.category ?? "").trim().toLowerCase();
   if (ck === "panjabi") return true;
-  if (p?.name?.toLowerCase().includes("panjabi")) return true;
+  const productName = String(product?.name ?? "").toLowerCase();
+  if (productName.includes("panjabi")) return true;
   return false;
 }
 
@@ -448,7 +457,6 @@ g.isTwoPieceProduct = isTwoPieceProduct;
 g.formatTwoPieceCartSize = formatTwoPieceCartSize;
 g.parseTwoPieceLengthSize = parseTwoPieceLengthSize;
 
-// এখানেই যোগ করুন
 g.getPanjabiSizeConfig = getPanjabiSizeConfig;
 g.isPanjabiProduct = isPanjabiProduct;
 g.formatPanjabiCartSize = formatPanjabiCartSize;
@@ -465,23 +473,22 @@ g.getCartLineBaseName = getCartLineBaseName;
   "Premium Cotton": "Premium Cotton"
 };
 
-  function formatFabricLabelEn(fabric) {
-    var f = String(fabric || "").trim();
-    if (!f) return "";
-    var low = f.toLowerCase();
-    if (low.indexOf("dubai") !== -1 && low.indexOf("cherry") !== -1) {
-        return "Dubai Cherry";
-    }
-    if (low.indexOf("alex") !== -1 && low.indexOf("georgette") !== -1) {
-        return "Alex Soft Georgette";
-    }
-    if (/premium\s*georgette/i.test(f)) {
-        return "Premium Georgette";
-    }
-    if (/premium\s*cotton/i.test(f)) {
-        return "Premium Cotton";
-    }
-    return f;
+ function formatFabricLabelEn(fabric) {
+  const f = String(fabric ?? "").trim();
+  if (!f) return "";
+  if (/dubai/i.test(f) && /cherry/i.test(f)) {
+    return "Dubai Cherry";
+  }
+  if (/alex/i.test(f) && /georgette/i.test(f)) {
+    return "Alex Soft Georgette";
+  }
+  if (/premium\s*georgette/i.test(f)) {
+    return "Premium Georgette";
+  }
+  if (/premium\s*cotton/i.test(f)) {
+    return "Premium Cotton";
+  }
+  return f;
 }
   g.formatFabricLabelEn = formatFabricLabelEn;
   g.maCatalog = {
