@@ -172,28 +172,36 @@ function ensureCartDrawerHtml() {
   document.body.appendChild(drawer);
   ensureCartDrawerRelatedStyles();
 // Open / Close drawer helpers
+const closeBtn = drawer.querySelector('.cart-drawer-close');
+
 window.openCartDrawer = function () {
-  drawer.classList.add('is-open');
-  overlay.classList.add('is-open');
+  const drawerEl = document.getElementById('cart-drawer');
+  const overlayEl = document.getElementById('cart-drawer-overlay');
+  if (!drawerEl || !overlayEl) return;
+
+  drawerEl.classList.add('is-open');
+  overlayEl.classList.add('is-open');
   document.body.classList.add('cart-drawer-open');
 };
 
 window.closeCartDrawer = function () {
-  drawer.classList.remove('is-open');
-  overlay.classList.remove('is-open');
+  const drawerEl = document.getElementById('cart-drawer');
+  const overlayEl = document.getElementById('cart-drawer-overlay');
+  if (!drawerEl || !overlayEl) return;
+
+  drawerEl.classList.remove('is-open');
+  overlayEl.classList.remove('is-open');
   document.body.classList.remove('cart-drawer-open');
 };
 
-// Close button
-const closeBtn = drawer.querySelector('.cart-drawer-close');
 if (closeBtn) {
   closeBtn.addEventListener('click', window.closeCartDrawer);
 }
 
-// Click outside drawer
-overlay.addEventListener('click', window.closeCartDrawer);
+if (overlay) {
+  overlay.addEventListener('click', window.closeCartDrawer);
+}
 
-// ESC key support
 document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape') {
     window.closeCartDrawer();
