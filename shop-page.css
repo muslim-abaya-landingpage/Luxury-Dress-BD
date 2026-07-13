@@ -211,3 +211,31 @@ body.shop-page .shop-breadcrumb {
 body.shop-page .shop-breadcrumb--mobile {
   padding-left: 2px;
 }
+
+/* Premium styling for Add to Cart / Buy Now / Send Message buttons */
+body.shop-page .anzaar-btn-cart,
+body.shop-page .anzaar-btn-msg,
+body.shop-page .anzaar-btn-buy {
+  border-radius: 10px;
+  padding: 14px 0;
+  border: 1.5px solid #111;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+body.shop-page .anzaar-btn-cart:hover,
+body.shop-page .anzaar-btn-msg:hover {
+  background: #f7f7f7;
+}
+
+body.shop-page .anzaar-btn-buy {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+body.shop-page .anzaar-btn-buy:hover {
+  background: #000;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.18);
+  transform: translateY(-1px);
+}
