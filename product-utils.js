@@ -381,7 +381,8 @@ function getPanjabiSizeConfig() {
     sizes: (pj && pj.sizes && pj.sizes.slice()) || [
       { value: "M", label: 'M (Long 40" • Body 42")' },
       { value: "L", label: 'L (Long 42" • Body 44")' },
-      { value: "XL", label: 'XL (Long 44" • Body 46")' }
+      { value: "XL", label: 'XL (Long 44" • Body 46")' },
+      { value: "XXL", label: 'XXL (Long 46" • Body 48")' }
     ]
   };
 }
@@ -411,6 +412,10 @@ function parsePanjabiSize(sizeStr) {
 
   if (s === "XL") {
     return { size: "XL", length: '44"', body: '46"' };
+  }
+
+  if (s === "XXL") {
+    return { size: "XXL", length: '46"', body: '48"' };
   }
 
   return null;
