@@ -113,61 +113,14 @@ body.auth-page-signup{
 .auth-field input:hover{
     border-color:#93c5fd;
 }
-
-.auth-field input:focus{
-    border-color:var(--accent-color);
-    box-shadow:0 0 0 5px rgba(37,99,235,.12);
-    transform:translateY(-2px);
-}
-
-.auth-hint{
-    margin-top:7px;
-    font-size:12px;
-    color:var(--text-muted);
-}
-
-.auth-form-row-2{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:22px;
-}
-
-@keyframes fadeUp{
-    from{
-        opacity:0;
-        transform:translateY(40px);
-    }
-    to{
-        opacity:1;
-        transform:translateY(0);
-    }
-}
-
-@media(max-width:768px){
-
-.auth-card{
-    padding:30px 22px;
-    border-radius:22px;
-}
-
-.auth-card-head h1{
-    font-size:30px;
-}
-
-.auth-form-row-2{
-    grid-template-columns:1fr;
-    gap:0;
-}
-
-}
     /* Smooth Input Glow */
-    .auth-field input:focus {
-      background-color: #ffffff;
-      border-color: var(--accent-color);
-      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+      .auth-field input:focus{
+      background-color:#ffffff;
+      border-color:var(--accent-color);
+      box-shadow:0 0 0 4px rgba(37,99,235,.12);
+      transform:translateY(-2px);
     }
-
-    .auth-hint {
+      .auth-hint {
       font-size: 12px;
       color: var(--text-muted);
       margin-top: 6px;
