@@ -172,36 +172,28 @@ function ensureCartDrawerHtml() {
   document.body.appendChild(drawer);
   ensureCartDrawerRelatedStyles();
 // Open / Close drawer helpers
-const closeBtn = drawer.querySelector('.cart-drawer-close');
-
 window.openCartDrawer = function () {
-  const drawerEl = document.getElementById('cart-drawer');
-  const overlayEl = document.getElementById('cart-drawer-overlay');
-  if (!drawerEl || !overlayEl) return;
-
-  drawerEl.classList.add('is-open');
-  overlayEl.classList.add('is-open');
+  drawer.classList.add('is-open');
+  overlay.classList.add('is-open');
   document.body.classList.add('cart-drawer-open');
 };
 
 window.closeCartDrawer = function () {
-  const drawerEl = document.getElementById('cart-drawer');
-  const overlayEl = document.getElementById('cart-drawer-overlay');
-  if (!drawerEl || !overlayEl) return;
-
-  drawerEl.classList.remove('is-open');
-  overlayEl.classList.remove('is-open');
+  drawer.classList.remove('is-open');
+  overlay.classList.remove('is-open');
   document.body.classList.remove('cart-drawer-open');
 };
 
+// Close button
+const closeBtn = drawer.querySelector('.cart-drawer-close');
 if (closeBtn) {
   closeBtn.addEventListener('click', window.closeCartDrawer);
 }
 
-if (overlay) {
-  overlay.addEventListener('click', window.closeCartDrawer);
-}
+// Click outside drawer
+overlay.addEventListener('click', window.closeCartDrawer);
 
+// ESC key support
 document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape') {
     window.closeCartDrawer();
@@ -258,14 +250,14 @@ window.renderCartList = function (cartItems) {
         <div class="cart-drawer-item-main">
           <div class="cart-drawer-item-top">
             <h3 class="cart-drawer-name">${item.name}</h3>
-            <button type="button" class="cart-drawer-remove" onclick="removeDrawerItem('${item.id}', '${item.size || ''}')">×</button>
+            <button type="button" class="cart-drawer-remove" onclick="removeDrawerItem(${index})">×</button>
           </div>
           ${sizeDetails ? `<div style="font-size: 11px; color: #666; margin-bottom: 6px;">${sizeDetails}</div>` : ''}
           <div class="cart-drawer-controls">
             <div class="cart-drawer-qty">
-              <button type="button" onclick="updateDrawerQty('${item.id}', '${item.size || ''}', -1)">-</button>
+              <button type="button" onclick="updateDrawerQty(${index}, -1)">-</button>
               <span>${qty}</span>
-              <button type="button" onclick="updateDrawerQty('${item.id}', '${item.size || ''}', 1)">+</button>
+              <button type="button" onclick="updateDrawerQty(${index}, 1)">+</button>
             </div>
             <span class="cart-drawer-line-price">৳${itemTotal}</span>
           </div>
@@ -279,27 +271,30 @@ window.renderCartList = function (cartItems) {
   if (totalEl) totalEl.innerText = '৳' + total;
 };
 
-window.updateDrawerQty = function (productId, size, change) {
+window.updateDrawerQty = function (index, change) {
   let existing = typeof window.loadStoreCart === 'function' ? window.loadStoreCart({ readOnly: true }) : [];
-  const found = existing.find(item => item.id === productId && (item.size || '') === size);
-  if (found) {
-    found.quantity = (parseInt(found.quantity, 10) || 0) + change;
-    if (found.quantity < 1) {
-      existing = existing.filter(item => !(item.id === productId && (item.size || '') === size));
-    }
-    const updated = typeof window.persistStoreCart === 'function' ? window.persistStoreCart(existing) : existing;
-    if (typeof window.afterCartMutation === 'function') {
-      window.afterCartMutation(updated);
-    }
+  if (!existing[index]) return;
+  existing[index].quantity = (parseInt(existing[index].quantity, 10) || 0) + change;
+  if (existing[index].quantity < 1) {
+    existing.splice(index, 1);
   }
-};
-
-window.removeDrawerItem = function (productId, size) {
-  let existing = typeof window.loadStoreCart === 'function' ? window.loadStoreCart({ readOnly: true }) : [];
-  existing = existing.filter(item => !(item.id === productId && (item.size || '') === size));
   const updated = typeof window.persistStoreCart === 'function' ? window.persistStoreCart(existing) : existing;
   if (typeof window.afterCartMutation === 'function') {
     window.afterCartMutation(updated);
+  } else {
+    window.updateCartDrawerUI(updated);
+  }
+};
+
+window.removeDrawerItem = function (index) {
+  let existing = typeof window.loadStoreCart === 'function' ? window.loadStoreCart({ readOnly: true }) : [];
+  if (!existing[index]) return;
+  existing.splice(index, 1);
+  const updated = typeof window.persistStoreCart === 'function' ? window.persistStoreCart(existing) : existing;
+  if (typeof window.afterCartMutation === 'function') {
+    window.afterCartMutation(updated);
+  } else {
+    window.updateCartDrawerUI(updated);
   }
 };
 
