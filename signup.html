@@ -1,248 +1,778 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign Up | Muslim Abaya</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="site-header.css?v=20260603logo">
-  <link rel="stylesheet" href="site-footer.css?v=20260603footen" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="site-footer.css?v=20260603footen"></noscript>
-  <link rel="stylesheet" href="auth-page.css">
-  <script src="config.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Modern UI Design Stylesheet -->
-  <style>
+<title>Sign Up | Muslim Abaya</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="site-header.css?v=20260603logo">
+<link rel="stylesheet" href="site-footer.css?v=20260603footen" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="site-footer.css?v=20260603footen"></noscript>
+
+<link rel="stylesheet" href="auth-page.css">
+
+<script src="config.js"></script>
+
+<style>
+
 :root{
-    --primary-color:#1d2d45;
-    --accent-color:#2563eb;
-    --accent-hover:#1d4ed8;
-    --bg-color:#eef3f9;
-    --card-bg:rgba(255,255,255,.85);
-    --text-main:#0f172a;
-    --text-muted:#64748b;
-    --border-color:#dbe4f0;
+
+    --primary:#1E293B;
+    --primary-dark:#0F172A;
+
+    --accent:#2563EB;
+    --accent-hover:#1D4ED8;
+
+    --bg:#F7F9FC;
+
+    --white:#ffffff;
+
+    --text:#0F172A;
+    --muted:#64748B;
+
+    --border:#E2E8F0;
+
+    --radius:26px;
+
 }
 
 *{
-    box-sizing:border-box;
+
+margin:0;
+padding:0;
+box-sizing:border-box;
+
 }
 
 body.auth-page-signup{
-    margin:0;
-    padding:0;
-    font-family:'Inter',sans-serif;
-    color:var(--text-main);
-    background:
-        radial-gradient(circle at top left,#dbeafe 0%,transparent 35%),
-        radial-gradient(circle at bottom right,#bfdbfe 0%,transparent 40%),
-        linear-gradient(135deg,#eef3f9,#f8fafc);
+
+font-family:'Inter',sans-serif;
+
+background:
+radial-gradient(circle at top left,#EEF5FF 0%,transparent 35%),
+radial-gradient(circle at bottom right,#DCEBFF 0%,transparent 35%),
+linear-gradient(135deg,#F8FAFC,#EEF4FB);
+
+color:var(--text);
+
 }
 
 .auth-wrap{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    min-height:calc(100vh - 120px);
-    padding:60px 20px;
+
+width:100%;
+
+min-height:calc(100vh - 120px);
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+padding:70px 20px;
+
 }
 
 .auth-card{
-    width:100%;
-    max-width:700px;
-    padding:50px;
-    border-radius:28px;
-    background:var(--card-bg);
-    backdrop-filter:blur(18px);
-    -webkit-backdrop-filter:blur(18px);
-    border:1px solid rgba(255,255,255,.45);
-    box-shadow:
-        0 30px 70px rgba(15,23,42,.08),
-        0 10px 25px rgba(15,23,42,.05);
-    animation:fadeUp .6s ease;
+
+width:100%;
+
+max-width:1100px;
+
+display:grid;
+
+grid-template-columns:46% 54%;
+
+background:rgba(255,255,255,.88);
+
+backdrop-filter:blur(22px);
+
+-webkit-backdrop-filter:blur(22px);
+
+border-radius:32px;
+
+overflow:hidden;
+
+border:1px solid rgba(255,255,255,.6);
+
+box-shadow:
+
+0 35px 80px rgba(15,23,42,.08),
+
+0 12px 30px rgba(15,23,42,.05);
+
+animation:fadeUp .6s ease;
+
+}
+
+.auth-left{
+
+background:linear-gradient(145deg,#1E3A8A,#2563EB);
+
+padding:70px 55px;
+
+display:flex;
+
+flex-direction:column;
+
+justify-content:center;
+
+align-items:flex-start;
+
+color:#fff;
+
+position:relative;
+
+overflow:hidden;
+
+}
+
+.auth-left::before{
+
+content:"";
+
+position:absolute;
+
+width:320px;
+height:320px;
+
+border-radius:50%;
+
+background:rgba(255,255,255,.08);
+
+top:-120px;
+left:-120px;
+
+}
+
+.auth-left::after{
+
+content:"";
+
+position:absolute;
+
+width:260px;
+height:260px;
+
+border-radius:50%;
+
+background:rgba(255,255,255,.06);
+
+right:-120px;
+bottom:-120px;
+
+}
+
+.auth-left>*{
+
+position:relative;
+
+z-index:2;
+
+}
+
+.auth-left h2{
+
+font-size:52px;
+
+font-weight:800;
+
+line-height:1.1;
+
+margin-bottom:20px;
+
+}
+
+.auth-left p{
+
+font-size:17px;
+
+line-height:1.9;
+
+opacity:.92;
+
+margin-bottom:35px;
+
+}
+.auth-left-btn{
+
+display:inline-flex;
+
+align-items:center;
+
+justify-content:center;
+
+width:190px;
+
+height:56px;
+
+border-radius:999px;
+
+background:#fff;
+
+color:#1E3A8A;
+
+font-weight:700;
+
+text-decoration:none;
+
+transition:.3s;
+
+}
+
+.auth-left-btn:hover{
+
+transform:translateY(-2px);
+
+}
+
+.auth-right{
+
+padding:65px;
+
+background:#fff;
+
 }
 
 .auth-card-head{
-    text-align:center;
-    margin-bottom:40px;
+
+text-align:center;
+
+margin-bottom:40px;
+
 }
 
 .auth-card-head h1{
-    margin:0 0 12px;
-    font-size:38px;
-    font-weight:800;
-    letter-spacing:-1px;
-    color:var(--text-main);
+
+font-size:46px;
+
+font-weight:800;
+
+margin-bottom:12px;
+
+color:var(--text);
+
 }
 
 .auth-lead{
-    font-size:15px;
-    color:var(--text-muted);
-    line-height:1.7;
+
+font-size:15px;
+
+color:var(--muted);
+
+line-height:1.8;
+
 }
 
 .auth-field{
-    display:flex;
-    flex-direction:column;
-    margin-bottom:24px;
+
+display:flex;
+
+flex-direction:column;
+
+margin-bottom:22px;
+
 }
 
 .auth-field label{
-    margin-bottom:8px;
-    font-size:14px;
-    font-weight:600;
-    color:var(--text-main);
+
+margin-bottom:8px;
+
+font-size:13px;
+
+font-weight:700;
+
+letter-spacing:.4px;
+
+text-transform:uppercase;
+
 }
 
 .auth-field input{
-    width:100%;
-    padding:16px 18px;
-    font-size:15px;
-    border:1.5px solid var(--border-color);
-    border-radius:14px;
-    background:#fff;
-    color:var(--text-main);
-    outline:none;
-    transition:.35s;
+
+width:100%;
+
+height:58px;
+
+padding:0 18px;
+
+font-size:15px;
+
+background:#F8FAFC;
+
+border:1.5px solid var(--border);
+
+border-radius:14px;
+
+outline:none;
+
+transition:.35s;
+
 }
 
 .auth-field input::placeholder{
-    color:#94a3b8;
+
+color:#94A3B8;
+
 }
 
 .auth-field input:hover{
-    border-color:#93c5fd;
+
+border-color:#93C5FD;
+
 }
-    /* Smooth Input Glow */
-      .auth-field input:focus{
-      background-color:#ffffff;
-      border-color:var(--accent-color);
-      box-shadow:0 0 0 4px rgba(37,99,235,.12);
-      transform:translateY(-2px);
-    }
-      .auth-hint {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 6px;
-      font-weight: 400;
-    }
 
-    /* Modern Two-column Row Setup */
-    .auth-form-row-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
+.auth-field input:focus{
 
-    /* Premium Accent Button */
-    .auth-btn {
-      width: 100%;
-      padding: 16px;
-      margin-top: 15px;
-      font-size: 15px;
-      font-weight: 700;
-      color: #ffffff;
-      background-color: var(--accent-color);
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
-    }
+background:#fff;
 
-    .auth-btn:hover {
-      background-color: var(--accent-hover);
-      transform: translateY(-1.5px);
-      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
-    }
+border-color:var(--accent);
 
-    .auth-btn:active {
-      transform: translateY(0);
-    }
+box-shadow:0 0 0 4px rgba(37,99,235,.12);
 
-    .auth-btn:disabled {
-      background-color: #94a3b8;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
+transform:translateY(-2px);
 
-    /* Bottom Redirect Note */
-    .auth-note {
-      text-align: center;
-      margin-top: 25px;
-      font-size: 14px;
-      color: var(--text-muted);
-    }
+}
 
-    .auth-note a {
-      color: var(--accent-color);
-      text-decoration: none;
-      font-weight: 600;
-      transition: color 0.2s ease;
-    }
+.auth-hint{
 
-    .auth-note a:hover {
-      color: var(--accent-hover);
-      text-decoration: underline;
-    }
+margin-top:7px;
 
-    /* Responsive/Mobile Optimizations */
-    @media (max-width: 768px) {
-      .auth-card {
-        padding: 30px 24px;
-        margin: 10px;
-      }
-      
-      .auth-form-row-2 {
-        grid-template-columns: 1fr; /* Stack columns into 1 on mobile */
-        gap: 0;
-      }
+font-size:12px;
+
+color:var(--muted);
+
+}
+
+.auth-form-row-2{
+
+display:grid;
+
+grid-template-columns:repeat(2,1fr);
+
+gap:20px;
+
+}
+
+@keyframes fadeUp{
+
+from{
+
+opacity:0;
+
+transform:translateY(35px);
+
+}
+
+to{
+
+opacity:1;
+
+transform:translateY(0);
+
+}
+
+}
+    /* Premium Button */
+
+.auth-btn{
+
+width:100%;
+
+height:58px;
+
+margin-top:20px;
+
+border:none;
+
+border-radius:999px;
+
+background:linear-gradient(135deg,#2563EB,#1D4ED8);
+
+color:#fff;
+
+font-size:16px;
+
+font-weight:700;
+
+letter-spacing:.3px;
+
+cursor:pointer;
+
+transition:.35s;
+
+box-shadow:0 12px 30px rgba(37,99,235,.28);
+
+}
+
+.auth-btn:hover{
+
+transform:translateY(-3px);
+
+box-shadow:0 18px 40px rgba(37,99,235,.35);
+
+}
+
+.auth-btn:active{
+
+transform:translateY(0);
+
+}
+
+.auth-btn:disabled{
+
+opacity:.65;
+
+cursor:not-allowed;
+
+transform:none;
+
+box-shadow:none;
+
+}
+
+/* Bottom Link */
+
+.auth-note{
+
+margin-top:28px;
+
+text-align:center;
+
+font-size:15px;
+
+color:var(--muted);
+
+}
+
+.auth-note a{
+
+color:var(--accent);
+
+font-weight:700;
+
+text-decoration:none;
+
+}
+
+.auth-note a:hover{
+
+text-decoration:underline;
+
+}
+
+/* Responsive */
+
+/* Laptop */
+@media (max-width:1200px){
+
+.auth-card{
+    max-width:1000px;
+    grid-template-columns:44% 56%;
+}
+
+.auth-left{
+    padding:55px 40px;
+}
+
+.auth-right{
+    padding:55px 40px;
+}
+
+.auth-left h2{
+    font-size:44px;
+}
+
+}
+
+/* Tablet */
+@media (max-width:992px){
+
+.auth-card{
+    max-width:900px;
+    grid-template-columns:42% 58%;
+}
+
+.auth-left{
+    padding:45px 30px;
+}
+
+.auth-right{
+    padding:45px 30px;
+}
+
+.auth-left h2{
+    font-size:38px;
+}
+
+.auth-card-head h1{
+    font-size:36px;
+}
+
+.auth-form-row-2{
+    grid-template-columns:1fr;
+    gap:0;
+}
+
+}
+
+/* Mobile */
+@media (max-width:768px){
+
+.auth-wrap{
+    padding:20px 15px;
+}
+
+.auth-card{
+    grid-template-columns:1fr;
+    border-radius:24px;
+}
+
+.auth-left{
+    display:flex;
+    align-items:center;
+    text-align:center;
+    padding:35px 25px;
+}
+
+.auth-left h2{
+    width:100%;
+    font-size:30px;
+}
+
+.auth-left p{
+    font-size:14px;
+}
+
+.auth-left .auth-left-btn{
+    width:100%;
+}
+
+.auth-right{
+    padding:30px 20px;
+}
+
+.auth-card-head h1{
+    font-size:30px;
+}
+
+.auth-form-row-2{
+    grid-template-columns:1fr;
+    gap:0;
+}
+
+.auth-btn{
+    height:54px;
+}
+
+}
+
+/* Small Mobile */
+@media (max-width:480px){
+
+.auth-wrap{
+    padding:15px 10px;
+}
+
+.auth-card{
+    border-radius:20px;
+}
+
+.auth-left{
+    padding:25px 18px;
+}
+
+.auth-right{
+
+padding:40px 28px;
+
+}
+
+}
+  .spinner{
+    width:18px;
+    height:18px;
+    display:inline-block;
+    margin-right:8px;
+    border:2px solid rgba(255,255,255,.35);
+    border-top-color:#fff;
+    border-radius:50%;
+    animation:spin .8s linear infinite;
+    vertical-align:middle;
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
     }
-  </style>
+}
+</style>
 </head>
 <body class="auth-page auth-page-signup">
-  <div id="site-header-mount"></div>
-  <main class="auth-wrap">
-    <section class="auth-card">
-      <div class="auth-card-head">
-        <h1>Sign Up</h1>
-        <p class="auth-lead">Quick register — saved for faster checkout.</p>
-      </div>
-      <form id="signupForm">
-        <div class="auth-field">
-          <label for="su-name">Full Name</label>
-          <input id="su-name" type="text" placeholder="Your full name" autocomplete="name">
-          <p class="auth-hint">Example: Nusrat Jahan</p>
+
+<div id="site-header-mount"></div>
+
+<main class="auth-wrap">
+
+<section class="auth-card">
+
+    <!-- Left Panel -->
+
+    <div class="auth-left">
+
+        <h2>Welcome<br>Back!</h2>
+
+        <p>
+            Join Muslim Abaya today to enjoy faster checkout,
+            secure orders and exclusive member offers.
+        </p>
+
+        <a href="signin.html" class="auth-left-btn">
+            Sign In
+        </a>
+
+    </div>
+
+    <!-- Right Panel -->
+
+    <div class="auth-right">
+
+        <div class="auth-card-head">
+
+            <h1>Create Account</h1>
+
+            <p class="auth-lead">
+                Create your account to continue shopping.
+            </p>
+
         </div>
-        <div class="auth-form-row-2">
-          <div class="auth-field">
-            <label for="su-mobile">Mobile</label>
-            <input id="su-mobile" type="tel" placeholder="017XXXXXXXX" autocomplete="tel">
-            <p class="auth-hint">11-digit Bangladesh mobile</p>
-          </div>
-          <div class="auth-field">
-            <label for="su-email">Email</label>
-            <input id="su-email" type="email" placeholder="name@gmail.com" autocomplete="email">
-            <p class="auth-hint">Valid email address</p>
-          </div>
-        </div>
-        <div class="auth-form-row-2">
-          <div class="auth-field">
-            <label for="su-pass">Password</label>
-            <input id="su-pass" type="password" placeholder="Create a password" autocomplete="new-password">
-            <p class="auth-hint">8+ characters with letters and numbers</p>
-          </div>
-          <div class="auth-field">
-            <label for="su-confirm">Confirm</label>
-            <input id="su-confirm" type="password" placeholder="Repeat password" autocomplete="new-password">
-            <p class="auth-hint">Must match password</p>
-          </div>
-        </div>
-        <button type="submit" class="auth-btn" id="signupBtn">Create Account</button>
-        <p class="auth-note">Already have an account? <a href="signin.html" id="signinLink">Sign In</a></p>
-      </form>
-    </section>
+
+        <form id="signupForm" autocomplete="on">
+
+            <div class="auth-field">
+
+                <label for="su-name">Full Name</label>
+
+                <input
+                    id="su-name"
+                    type="text"
+                    placeholder="Your full name"
+                    autocomplete="name">
+
+                <p class="auth-hint">
+                    Example: Nusrat Jahan
+                </p>
+
+            </div>
+
+            <div class="auth-form-row-2">
+
+                <div class="auth-field">
+
+                    <label for="su-mobile">Mobile</label>
+
+                    <input
+                        id="su-mobile"
+                        type="tel"
+                        placeholder="017XXXXXXXX"
+                        autocomplete="tel">
+
+                    <p class="auth-hint">
+                        11-digit Bangladesh mobile
+                    </p>
+
+                </div>
+
+                <div class="auth-field">
+
+                    <label for="su-email">Email</label>
+
+                    <input
+                        id="su-email"
+                        type="email"
+                        placeholder="name@gmail.com"
+                        autocomplete="email">
+
+                    <p class="auth-hint">
+                        Valid email address
+                    </p>
+
+                </div>
+
+            </div>
+
+     <div class="auth-form-row-2">
+
+    <div class="auth-field">
+
+        <label for="su-pass">Password</label>
+
+        <input
+            id="su-pass"
+            type="password"
+            placeholder="Create a password"
+            autocomplete="new-password"
+            required
+            minlength="8"
+            maxlength="64"
+            aria-label="Password">
+
+        <p class="auth-hint">
+            8+ characters with letters and numbers
+        </p>
+
+    </div>
+
+    <div class="auth-field">
+
+        <label for="su-confirm">Confirm Password</label>
+
+        <input
+            id="su-confirm"
+            type="password"
+            placeholder="Repeat password"
+            autocomplete="new-password"
+            required
+            minlength="8"
+            maxlength="64"
+            aria-label="Confirm Password">
+
+        <p class="auth-hint">
+            Must match password
+        </p>
+
+    </div>
+
+</div>
+            <button
+                type="submit"
+                class="auth-btn"
+                id="signupBtn">
+
+                Create Account
+
+            </button>
+
+            <p class="auth-note">
+
+                Already have an account?
+
+                <a href="signin.html" id="signinLink">
+
+                    Sign In
+
+                </a>
+
+            </p>
+
+        </form>
+
+    </div>
+
+</section>
   </main>
   <div id="site-footer-mount"></div>
   <script src="cart-utils.js"></script>
@@ -267,10 +797,17 @@ body.auth-page-signup{
         signinLink.href = 'signin.html?next=' + encodeURIComponent(params.get('next'));
       }
       form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        var name = document.getElementById('su-name').value.trim();
-        var phone = document.getElementById('su-mobile').value.trim();
-        var email = document.getElementById('su-email').value.trim();
+         e.preventDefault();
+         var name = document.getElementById('su-name').value.trim();
+         var phone = document
+        .getElementById('su-mobile')
+        .value
+        .replace(/\D/g, '');
+        var email = document
+        .getElementById('su-email')
+        .value
+        .trim()
+        .toLowerCase();
         var pass = document.getElementById('su-pass').value;
         var confirm = document.getElementById('su-confirm').value;
         if (name.length < 2) { alert('Please enter your full name.'); return; }
@@ -281,7 +818,8 @@ body.auth-page-signup{
         if (pass !== confirm) { alert('Passwords do not match.'); return; }
         var btn = document.getElementById('signupBtn');
         btn.disabled = true;
-        btn.textContent = 'Creating account...';
+        btn.innerHTML =
+        '<span class="spinner"></span> Creating Account...';
         MaAuth.register({ name: name, phone: phone, email: email, password: pass })
           .then(function () {
             window.location.href = nextUrl;
@@ -295,7 +833,7 @@ body.auth-page-signup{
           })
           .finally(function () {
             btn.disabled = false;
-            btn.textContent = 'Create Account';
+            btn.innerHTML='Create Account';
           });
       });
     })();
