@@ -7,7 +7,7 @@
 <title>Sign Up | Muslim Abaya</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="site-header.css?v=20260603logo">
 <link rel="stylesheet" href="site-footer.css?v=20260603footen" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="site-footer.css?v=20260603footen"></noscript>
@@ -15,763 +15,273 @@
 <link rel="stylesheet" href="auth-page.css">
 
 <script src="config.js"></script>
-
 <style>
-
-:root{
-
-    --primary:#1E293B;
-    --primary-dark:#0F172A;
-
-    --accent:#2563EB;
-    --accent-hover:#1D4ED8;
-
-    --bg:#F7F9FC;
-
-    --white:#ffffff;
-
-    --text:#0F172A;
-    --muted:#64748B;
-
-    --border:#E2E8F0;
-
-    --radius:26px;
-
-}
-
 *{
-
-margin:0;
-padding:0;
-box-sizing:border-box;
-
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Inter',sans-serif;    
 }
 
-body.auth-page-signup{
-
-font-family:'Inter',sans-serif;
-
-background:
-radial-gradient(circle at top left,#EEF5FF 0%,transparent 35%),
-radial-gradient(circle at bottom right,#DCEBFF 0%,transparent 35%),
-linear-gradient(135deg,#F8FAFC,#EEF4FB);
-
-color:var(--text);
-
-}
-
-.auth-wrap{
-
-width:100%;
-
-min-height:calc(100vh - 120px);
-
-display:flex;
-
-justify-content:center;
-
-align-items:center;
-
-padding:70px 20px;
-
-}
-
-.auth-card{
-
-width:100%;
-
-max-width:1100px;
-
-display:grid;
-
-grid-template-columns:46% 54%;
-
-background:rgba(255,255,255,.88);
-
-backdrop-filter:blur(22px);
-
--webkit-backdrop-filter:blur(22px);
-
-border-radius:32px;
-
-overflow:hidden;
-
-border:1px solid rgba(255,255,255,.6);
-
-box-shadow:
-
-0 35px 80px rgba(15,23,42,.08),
-
-0 12px 30px rgba(15,23,42,.05);
-
-animation:fadeUp .6s ease;
-
-}
-
-.auth-left{
-
-background:linear-gradient(145deg,#1E3A8A,#2563EB);
-
-padding:70px 55px;
-
-display:flex;
-
-flex-direction:column;
-
-justify-content:center;
-
-align-items:flex-start;
-
-color:#fff;
-
-position:relative;
-
-overflow:hidden;
-
-}
-
-.auth-left::before{
-
-content:"";
-
-position:absolute;
-
-width:320px;
-height:320px;
-
-border-radius:50%;
-
-background:rgba(255,255,255,.08);
-
-top:-120px;
-left:-120px;
-
-}
-
-.auth-left::after{
-
-content:"";
-
-position:absolute;
-
-width:260px;
-height:260px;
-
-border-radius:50%;
-
-background:rgba(255,255,255,.06);
-
-right:-120px;
-bottom:-120px;
-
-}
-
-.auth-left>*{
-
-position:relative;
-
-z-index:2;
-
-}
-
-.auth-left h2{
-
-font-size:52px;
-
-font-weight:800;
-
-line-height:1.1;
-
-margin-bottom:20px;
-
-}
-
-.auth-left p{
-
-font-size:17px;
-
-line-height:1.9;
-
-opacity:.92;
-
-margin-bottom:35px;
-
-}
-.auth-left-btn{
-
-display:inline-flex;
-
-align-items:center;
-
-justify-content:center;
-
-width:190px;
-
-height:56px;
-
-border-radius:999px;
-
-background:#fff;
-
-color:#1E3A8A;
-
-font-weight:700;
-
-text-decoration:none;
-
-transition:.3s;
-
-}
-
-.auth-left-btn:hover{
-
-transform:translateY(-2px);
-
-}
-
-.auth-right{
-
-padding:65px;
-
-background:#fff;
-
-}
-
-.auth-card-head{
-
-text-align:center;
-
-margin-bottom:40px;
-
-}
-
-.auth-card-head h1{
-
-font-size:46px;
-
-font-weight:800;
-
-margin-bottom:12px;
-
-color:var(--text);
-
-}
-
-.auth-lead{
-
-font-size:15px;
-
-color:var(--muted);
-
-line-height:1.8;
-
-}
-
-.auth-field{
-
-display:flex;
-
-flex-direction:column;
-
-margin-bottom:22px;
-
-}
-
-.auth-field label{
-
-margin-bottom:8px;
-
-font-size:13px;
-
-font-weight:700;
-
-letter-spacing:.4px;
-
-text-transform:uppercase;
-
-}
-
-.auth-field input{
-
-width:100%;
-
-height:58px;
-
-padding:0 18px;
-
-font-size:15px;
-
-background:#F8FAFC;
-
-border:1.5px solid var(--border);
-
-border-radius:14px;
-
-outline:none;
-
-transition:.35s;
-
-}
-
-.auth-field input::placeholder{
-
-color:#94A3B8;
-
-}
-
-.auth-field input:hover{
-
-border-color:#93C5FD;
-
-}
-
-.auth-field input:focus{
-
-background:#fff;
-
-border-color:var(--accent);
-
-box-shadow:0 0 0 4px rgba(37,99,235,.12);
-
-transform:translateY(-2px);
-
-}
-
-.auth-hint{
-
-margin-top:7px;
-
-font-size:12px;
-
-color:var(--muted);
-
-}
-
-.auth-form-row-2{
-
-display:grid;
-
-grid-template-columns:repeat(2,1fr);
-
-gap:20px;
-
-}
-
-@keyframes fadeUp{
-
-from{
-
-opacity:0;
-
-transform:translateY(35px);
-
-}
-
-to{
-
-opacity:1;
-
-transform:translateY(0);
-
-}
-
-}
-    /* Premium Button */
-
-.auth-btn{
-
-width:100%;
-
-height:58px;
-
-margin-top:20px;
-
-border:none;
-
-border-radius:999px;
-
-background:linear-gradient(135deg,#2563EB,#1D4ED8);
-
-color:#fff;
-
-font-size:16px;
-
-font-weight:700;
-
-letter-spacing:.3px;
-
-cursor:pointer;
-
-transition:.35s;
-
-box-shadow:0 12px 30px rgba(37,99,235,.28);
-
-}
-
-.auth-btn:hover{
-
-transform:translateY(-3px);
-
-box-shadow:0 18px 40px rgba(37,99,235,.35);
-
-}
-
-.auth-btn:active{
-
-transform:translateY(0);
-
-}
-
-.auth-btn:disabled{
-
-opacity:.65;
-
-cursor:not-allowed;
-
-transform:none;
-
-box-shadow:none;
-
-}
-
-/* Bottom Link */
-
-.auth-note{
-
-margin-top:28px;
-
-text-align:center;
-
-font-size:15px;
-
-color:var(--muted);
-
-}
-
-.auth-note a{
-
-color:var(--accent);
-
-font-weight:700;
-
-text-decoration:none;
-
-}
-
-.auth-note a:hover{
-
-text-decoration:underline;
-
-}
-
-/* Responsive */
-
-/* Laptop */
-@media (max-width:1200px){
-
-.auth-card{
-    max-width:1000px;
-    grid-template-columns:44% 56%;
-}
-
-.auth-left{
-    padding:55px 40px;
-}
-
-.auth-right{
-    padding:55px 40px;
-}
-
-.auth-left h2{
-    font-size:44px;
-}
-
-}
-
-/* Tablet */
-@media (max-width:992px){
-
-.auth-card{
-    max-width:900px;
-    grid-template-columns:42% 58%;
-}
-
-.auth-left{
-    padding:45px 30px;
-}
-
-.auth-right{
-    padding:45px 30px;
-}
-
-.auth-left h2{
-    font-size:38px;
-}
-
-.auth-card-head h1{
-    font-size:36px;
-}
-
-.auth-form-row-2{
-    grid-template-columns:1fr;
-    gap:0;
-}
-
-}
-
-/* Mobile */
-@media (max-width:768px){
-
-.auth-wrap{
-    padding:20px 15px;
-}
-
-.auth-card{
-    grid-template-columns:1fr;
-    border-radius:24px;
-}
-
-.auth-left{
+body{
     display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    background:#f6f1e8;
+}
+
+.container{
+    width:900px;
+    height:560px;
+    background:#f8f4ec;
+    border-radius:22px;
+    overflow:hidden;
+    display:flex;
+    box-shadow:
+        18px 18px 35px rgba(0,0,0,.08),
+        -10px -10px 25px rgba(255,255,255,.9);
+}
+
+.left{
+    width:50%;
+    position:relative;
+    display:flex;
+    justify-content:center;
     align-items:center;
     text-align:center;
-    padding:35px 25px;
+    background:#f7f2ea;
+    overflow:hidden;
 }
 
-.auth-left h2{
-    width:100%;
-    font-size:30px;
-}
-
-.auth-left p{
-    font-size:14px;
-}
-
-.auth-left .auth-left-btn{
-    width:100%;
-}
-
-.auth-right{
-    padding:30px 20px;
-}
-
-.auth-card-head h1{
-    font-size:30px;
-}
-
-.auth-form-row-2{
-    grid-template-columns:1fr;
-    gap:0;
-}
-
-.auth-btn{
-    height:54px;
-}
-
-}
-
-/* Small Mobile */
-@media (max-width:480px){
-
-.auth-wrap{
-    padding:15px 10px;
-}
-
-.auth-card{
-    border-radius:20px;
-}
-
-.auth-left{
-    padding:25px 18px;
-}
-
-.auth-right{
-
-padding:40px 28px;
-
-}
-
-}
-  .spinner{
-    width:18px;
-    height:18px;
-    display:inline-block;
-    margin-right:8px;
-    border:2px solid rgba(255,255,255,.35);
-    border-top-color:#fff;
+.left::before{
+    content:"";
+    position:absolute;
+    width:220px;
+    height:220px;
+    background:#f2eee5;
     border-radius:50%;
-    animation:spin .8s linear infinite;
-    vertical-align:middle;
+    top:-100px;
+    left:-70px;
+    box-shadow:
+    inset 8px 8px 12px rgba(0,0,0,.04),
+    inset -8px -8px 12px rgba(255,255,255,.8);
 }
 
-@keyframes spin{
-    to{
-        transform:rotate(360deg);
-    }
+.left::after{
+    content:"";
+    position:absolute;
+    width:250px;
+    height:250px;
+    background:#f2eee5;
+    border-radius:50%;
+    bottom:-140px;
+    left:-90px;
+    box-shadow:
+    inset 8px 8px 12px rgba(0,0,0,.04),
+    inset -8px -8px 12px rgba(255,255,255,.8);
+}
+
+.content{
+    z-index:5;
+    width:75%;
+}
+
+.content h2{
+    font-size:38px;
+    color:#1d1d1d;
+    margin-bottom:18px;
+}
+
+.content p{
+    color:#666;
+    line-height:1.8;
+    margin-bottom:35px;
+}
+
+.switch-btn{
+    border:none;
+    cursor:pointer;
+    background:#ece8e0;
+    color:#222;
+    padding:14px 45px;
+    border-radius:30px;
+    font-weight:600;
+    letter-spacing:1px;
+    box-shadow:
+    8px 8px 18px rgba(0,0,0,.08),
+    -8px -8px 18px rgba(255,255,255,.9);
+}
+
+.right{
+    width:50%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#f8f4ec;
+}
+
+.form-box{
+    width:78%;
+    text-align:center;
+}
+
+.form-box h2{
+    font-size:38px;
+    margin-bottom:20px;
+    color:#222;
+}
+
+.social{
+    display:flex;
+    justify-content:center;
+    gap:16px;
+    margin-bottom:25px;
+}
+
+.social a{
+    width:42px;
+    height:42px;
+    background:#f5f1ea;
+    border-radius:50%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    text-decoration:none;
+    color:#333;
+    font-weight:600;
+    box-shadow:
+    6px 6px 12px rgba(0,0,0,.08),
+    -6px -6px 12px rgba(255,255,255,.9);
+}
+
+.small{
+    color:#999;
+    font-size:12px;
+    letter-spacing:1px;
+    margin-bottom:20px;
+}
+
+.input-box{
+    width:100%;
+    margin-bottom:18px;
+}
+
+.input-box input{
+    width:100%;
+    padding:15px;
+    border:none;
+    outline:none;
+    background:#f5f1ea;
+    border-radius:10px;
+    box-shadow:
+    inset 3px 3px 6px rgba(0,0,0,.05),
+    inset -3px -3px 6px rgba(255,255,255,.9);
+}
+
+.signup-btn{
+    margin-top:12px;
+    border:none;
+    cursor:pointer;
+    padding:15px 60px;
+    border-radius:30px;
+    background:#1d2d45;
+    color:#fff;
+    font-weight:600;
+    letter-spacing:1px;
+    box-shadow:0 10px 20px rgba(29,45,69,.25);
+}
+
+.signup-btn:hover{
+    transform:translateY(-2px);
+}
+
+.switch-btn:hover{
+    transform:translateY(-2px);
+}
+
+@media(max-width:900px){
+
+.container{
+    width:95%;
+    height:auto;
+    flex-direction:column;
+}
+
+.left,
+.right{
+    width:100%;
+    padding:60px 20px;
+}
+
 }
 </style>
+
 </head>
-<body class="auth-page auth-page-signup">
+<body>
 
-<div id="site-header-mount"></div>
+<div class="container">
 
-<main class="auth-wrap">
+<div class="left">
+  <div class="content">
+    <h2>Welcome Back !</h2>
+    <p>
+      To keep connected with us please login
+      with your personal info
+    </p>
 
-<section class="auth-card">
-
-    <!-- Left Panel -->
-
-    <div class="auth-left">
-
-        <h2>Welcome<br>Back!</h2>
-
-        <p>
-            Join Muslim Abaya today to enjoy faster checkout,
-            secure orders and exclusive member offers.
-        </p>
-
-        <a href="signin.html" class="auth-left-btn">
-            Sign In
-        </a>
-
-    </div>
-
-    <!-- Right Panel -->
-
-    <div class="auth-right">
-
-        <div class="auth-card-head">
-
-            <h1>Create Account</h1>
-
-            <p class="auth-lead">
-                Create your account to continue shopping.
-            </p>
-
-        </div>
-
-        <form id="signupForm" autocomplete="on">
-
-            <div class="auth-field">
-
-                <label for="su-name">Full Name</label>
-
-                <input
-                    id="su-name"
-                    type="text"
-                    placeholder="Your full name"
-                    autocomplete="name">
-
-                <p class="auth-hint">
-                    Example: Nusrat Jahan
-                </p>
-
-            </div>
-
-            <div class="auth-form-row-2">
-
-                <div class="auth-field">
-
-                    <label for="su-mobile">Mobile</label>
-
-                    <input
-                        id="su-mobile"
-                        type="tel"
-                        placeholder="017XXXXXXXX"
-                        autocomplete="tel">
-
-                    <p class="auth-hint">
-                        11-digit Bangladesh mobile
-                    </p>
-
-                </div>
-
-                <div class="auth-field">
-
-                    <label for="su-email">Email</label>
-
-                    <input
-                        id="su-email"
-                        type="email"
-                        placeholder="name@gmail.com"
-                        autocomplete="email">
-
-                    <p class="auth-hint">
-                        Valid email address
-                    </p>
-
-                </div>
-
-            </div>
-
-     <div class="auth-form-row-2">
-
-    <div class="auth-field">
-
-        <label for="su-pass">Password</label>
-
-        <input
-            id="su-pass"
-            type="password"
-            placeholder="Create a password"
-            autocomplete="new-password"
-            required
-            minlength="8"
-            maxlength="64"
-            aria-label="Password">
-
-        <p class="auth-hint">
-            8+ characters with letters and numbers
-        </p>
-
-    </div>
-
-    <div class="auth-field">
-
-        <label for="su-confirm">Confirm Password</label>
-
-        <input
-            id="su-confirm"
-            type="password"
-            placeholder="Repeat password"
-            autocomplete="new-password"
-            required
-            minlength="8"
-            maxlength="64"
-            aria-label="Confirm Password">
-
-        <p class="auth-hint">
-            Must match password
-        </p>
-
-    </div>
-
+    <button class="switch-btn" id="signinLink" type="button"
+      onclick="window.location.href='signin.html'">
+      SIGN IN
+    </button>
+  </div>
 </div>
-            <button
-                type="submit"
-                class="auth-btn"
-                id="signupBtn">
 
-                Create Account
+<div class="right">
+  <div class="form-box">
+    <h2>Create Account</h2>
 
-            </button>
-
-            <p class="auth-note">
-
-                Already have an account?
-
-                <a href="signin.html" id="signinLink">
-
-                    Sign In
-
-                </a>
-
-            </p>
-
-        </form>
-
+    <div class="social">
+      <a href="https://www.facebook.com/muslimabayaofficial" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+        <i class="fab fa-facebook-f"></i>
+      </a>
+      <a href="https://www.linkedin.com/in/muslimabayabd/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+        <i class="fab fa-linkedin-in"></i>
+      </a>
+      <a href="https://x.com/muslimabayashop" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
+        <i class="fab fa-x-twitter"></i>
+      </a>
     </div>
 
+    <div class="small">OR USE EMAIL FOR REGISTRATION</div>
+
+    <form id="signupForm">
+      <div class="input-box">
+        <input type="text" id="su-name" placeholder="Name">
+      </div>
+
+      <div class="input-box">
+        <input type="text" id="su-mobile" placeholder="Mobile">
+      </div>
+
+      <div class="input-box">
+        <input type="email" id="su-email" placeholder="Email">
+      </div>
+
+      <div class="input-box">
+        <input type="password" id="su-pass" placeholder="Password">
+      </div>
+
+      <div class="input-box">
+        <input type="password" id="su-confirm" placeholder="Confirm Password">
+      </div>
+
+      <button class="signup-btn" id="signupBtn" type="submit">
+        SIGN UP
+      </button>
+    </form>
+  </div>
+</div>
 </section>
   </main>
   <div id="site-footer-mount"></div>
