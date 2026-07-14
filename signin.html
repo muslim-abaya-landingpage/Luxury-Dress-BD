@@ -1,90 +1,305 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign In | Muslim Abaya</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="site-header.css?v=20260603logo">
-  <link rel="stylesheet" href="site-footer.css?v=20260603footen" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="site-footer.css?v=20260603footen"></noscript>
-  <link rel="stylesheet" href="auth-page.css">
-<script src="config.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In / Sign Up | Muslim Abaya</title>
+<link rel="icon" href="assets/logo-muslim-abaya.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #f2efe9;
+    --panel: #eae6de;
+    --ink: #1c1c1c;
+    --muted: #8a8a86;
+    --grey-btn: #cfcac0;
+    --grey-btn-ink: #3a3a38;
+    --dark-btn: #1c2230;
+    --line: #d9d4c9;
+    --pink-glow: rgba(232, 180, 184, 0.35);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--bg);
+    font-family:"Poppins","Hind Siliguri",sans-serif;
+    padding:24px;
+  }
+  .auth-card{
+    position:relative;
+    width:900px;
+    max-width:100%;
+    min-height:520px;
+    background:var(--panel);
+    border-radius:22px;
+    box-shadow:0 30px 60px rgba(0,0,0,0.08);
+    overflow:hidden;
+    display:flex;
+  }
+  .auth-card::before{
+    content:"";
+    position:absolute;
+    top:-60px; left:-60px;
+    width:220px; height:220px;
+    border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, var(--pink-glow), transparent 70%);
+  }
+  .auth-card::after{
+    content:"";
+    position:absolute;
+    bottom:-80px; left:20%;
+    width:260px; height:260px;
+    border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, var(--pink-glow), transparent 70%);
+  }
+
+  .panel{
+    flex:1;
+    padding:56px 48px;
+    position:relative;
+    z-index:1;
+    transition:transform .5s ease, opacity .4s ease;
+  }
+  .panel-welcome{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    border-right:1px solid var(--line);
+  }
+  .panel-welcome h1{
+    font-size:30px;
+    font-weight:700;
+    color:var(--ink);
+    margin:0 0 14px;
+  }
+  .panel-welcome p{
+    font-size:14px;
+    color:var(--muted);
+    line-height:1.6;
+    margin:0 0 28px;
+    max-width:260px;
+  }
+  .btn-pill{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:13px 34px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    border:none;
+    cursor:pointer;
+    width:fit-content;
+  }
+  .btn-grey{ background:var(--grey-btn); color:var(--grey-btn-ink); }
+  .btn-grey:hover{ background:#c2bcb0; }
+  .btn-dark{ background:var(--dark-btn); color:#fff; }
+  .btn-dark:hover{ background:#12161f; }
+
+  .panel-form{ display:flex; flex-direction:column; justify-content:center; }
+  .panel-form h2{
+    font-size:26px;
+    font-weight:700;
+    color:var(--ink);
+    margin:0 0 18px;
+    text-align:center;
+  }
+  .socials{ display:flex; gap:10px; justify-content:center; margin-bottom:16px; }
+  .socials a{
+    width:36px; height:36px;
+    border-radius:50%;
+    background:#fff;
+    border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--ink);
+    font-size:14px;
+    text-decoration:none;
+  }
+  .divider{
+    text-align:center;
+    font-size:11px;
+    letter-spacing:0.08em;
+    color:var(--muted);
+    margin-bottom:18px;
+    text-transform:uppercase;
+  }
+  .field{
+    width:100%;
+    padding:13px 16px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:#fff;
+    font-size:14px;
+    font-family:inherit;
+    color:var(--ink);
+    margin-bottom:12px;
+  }
+  .field::placeholder{ color:#a9a49a; }
+  .field:focus{ outline:2px solid #b9b2a4; outline-offset:1px; }
+  .form-msg{
+    font-size:12.5px;
+    margin:-2px 0 10px;
+    min-height:16px;
+  }
+  .form-msg.is-error{ color:#b3261e; }
+  .form-msg.is-ok{ color:#1a7d3c; }
+  .submit-row{ display:flex; justify-content:center; margin-top:6px; }
+
+  /* Mobile view: stack panels, hide the inactive one */
+  @media (max-width: 720px){
+    .auth-card{ flex-direction:column; min-height:0; }
+    .panel-welcome{ border-right:none; border-bottom:1px solid var(--line); padding:40px 32px; text-align:center; align-items:center; }
+    .panel-welcome p{ max-width:none; }
+    .panel-welcome .btn-pill{ margin:0 auto; }
+    .panel-form{ padding:40px 32px; }
+    body[data-mode="signup"] .panel-welcome{ display:none; }
+    body[data-mode="signin"] .panel-form{ display:none; }
+  }
+
+  /* Desktop: slide between the two "modes" like the reference screenshot */
+  @media (min-width: 721px){
+    body[data-mode="signup"] .panel-welcome{ order:2; border-right:none; border-left:1px solid var(--line); }
+    body[data-mode="signup"] .panel-form{ order:1; }
+  }
+</style>
 </head>
-<body class="auth-page">
-  <div id="site-header-mount"></div>
-  <main class="auth-wrap">
-    <section class="auth-card">
-      <div class="auth-card-head">
-        <h1>Sign In</h1>
-        <p class="auth-lead">Welcome back — sign in to continue checkout faster.</p>
+<body data-mode="signup">
+
+  <div class="auth-card">
+    <div class="panel panel-welcome">
+      <h1 id="welcomeTitle">Welcome Back!</h1>
+      <p id="welcomeText">To keep connected with us please login with your personal info</p>
+      <button type="button" class="btn-pill btn-grey" id="toggleModeBtn">Sign In</button>
+    </div>
+
+    <div class="panel panel-form">
+      <h2 id="formTitle">Create Account</h2>
+
+      <div class="socials" aria-hidden="true">
+        <a href="#" tabindex="-1">f</a>
+        <a href="#" tabindex="-1">in</a>
+        <a href="#" tabindex="-1">X</a>
       </div>
-      <form id="signinForm">
-        <div class="auth-field">
-          <label for="si-login">Email or Mobile</label>
-          <input id="si-login" type="text" placeholder="name@gmail.com or 017XXXXXXXX" required autocomplete="username">
-          <p class="auth-hint">Use the email or mobile number you registered with.</p>
+      <p class="divider">or use email for registration</p>
+
+      <form id="signupForm">
+        <input class="field" type="text" name="name" placeholder="Name" autocomplete="name" required>
+        <input class="field" type="tel" name="phone" placeholder="Phone (e.g. 01XXXXXXXXX)" autocomplete="tel" required>
+        <input class="field" type="email" name="email" placeholder="Email" autocomplete="email" required>
+        <input class="field" type="password" name="password" placeholder="Password" autocomplete="new-password" required>
+        <p class="form-msg" id="signupMsg"></p>
+        <div class="submit-row">
+          <button type="submit" class="btn-pill btn-dark">Sign Up</button>
         </div>
-        <div class="auth-field">
-          <label for="si-pass">Password</label>
-          <input id="si-pass" type="password" placeholder="Enter your password" required autocomplete="current-password">
-          <p class="auth-hint">Enter the password linked to your account.</p>
-        </div>
-        <button type="submit" class="auth-btn" id="signinBtn">Sign In</button>
-        <p class="auth-note">Don't have an account? <a href="signup.html" id="signupLink">Sign Up</a></p>
       </form>
-    </section>
-  </main>
-  <div id="site-footer-mount"></div>
-  <script src="cart-utils.js"></script>
+
+      <form id="signinForm" style="display:none;">
+        <input class="field" type="text" name="login" placeholder="Email or phone" autocomplete="username" required>
+        <input class="field" type="password" name="password" placeholder="Password" autocomplete="current-password" required>
+        <p class="form-msg" id="signinMsg"></p>
+        <div class="submit-row">
+          <button type="submit" class="btn-pill btn-dark">Sign In</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="site-security.js"></script>
-  <script src="site-api-config.js?v=20260529"></script>
-  <script src="site-api-health.js"></script>
+  <script src="site-api-config.js"></script>
   <script src="auth-config.js"></script>
   <script src="auth-api.js"></script>
-  <script defer src="site-header.js?v=20260603logo"></script>
-  <script src="site-footer.js?v=20260603footen"></script>
   <script>
-    (function () {
-      if (typeof showAuthApiNotice === 'function') {
-        showAuthApiNotice('.auth-card');
+    var body = document.body;
+    var toggleBtn = document.getElementById('toggleModeBtn');
+    var welcomeTitle = document.getElementById('welcomeTitle');
+    var welcomeText = document.getElementById('welcomeText');
+    var formTitle = document.getElementById('formTitle');
+    var signupForm = document.getElementById('signupForm');
+    var signinForm = document.getElementById('signinForm');
+
+    function setMode(mode) {
+      body.setAttribute('data-mode', mode);
+      if (mode === 'signup') {
+        welcomeTitle.textContent = 'Welcome Back!';
+        welcomeText.textContent = 'To keep connected with us please login with your personal info';
+        toggleBtn.textContent = 'Sign In';
+        formTitle.textContent = 'Create Account';
+        signupForm.style.display = '';
+        signinForm.style.display = 'none';
+      } else {
+        welcomeTitle.textContent = 'Hello, Friend!';
+        welcomeText.textContent = "Enter your personal details and start your journey with us";
+        toggleBtn.textContent = 'Sign Up';
+        formTitle.textContent = 'Sign In';
+        signupForm.style.display = 'none';
+        signinForm.style.display = '';
       }
-      var form = document.getElementById('signinForm');
-      if (!form) return;
-      var params = new URLSearchParams(window.location.search);
-      var nextUrl = params.get('next') || 'checkout.html';
-      var signupLink = document.getElementById('signupLink');
-      if (signupLink && params.get('next')) {
-        signupLink.href = 'signup.html?next=' + encodeURIComponent(params.get('next'));
+    }
+
+    toggleBtn.addEventListener('click', function () {
+      setMode(body.getAttribute('data-mode') === 'signup' ? 'signin' : 'signup');
+    });
+
+    function afterLogin() {
+      var next = new URLSearchParams(window.location.search).get('next');
+      window.location.href = next || (typeof siteHref === 'function' ? siteHref('/') : 'index.html');
+    }
+
+    signupForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var msg = document.getElementById('signupMsg');
+      msg.className = 'form-msg';
+      msg.textContent = '';
+      var fd = new FormData(signupForm);
+      if (!window.MaAuth) {
+        msg.className = 'form-msg is-error';
+        msg.textContent = 'Auth service unavailable — please refresh and try again.';
+        return;
       }
-      form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        var login = document.getElementById('si-login').value.trim();
-        var pass = document.getElementById('si-pass').value;
-        if (!login || !pass) {
-          alert('Please enter your email/mobile and password.');
-          return;
-        }
-        var btn = document.getElementById('signinBtn');
-        btn.disabled = true;
-        btn.textContent = 'Signing in...';
-        MaAuth.login({ login: login, password: pass })
-          .then(function () {
-            window.location.href = nextUrl;
-          })
-          .catch(function (err) {
-            if (typeof isLocalPreview === 'function' && isLocalPreview()) {
-              alert(typeof getLocalFileAuthHint === 'function' ? getLocalFileAuthHint() : 'Run the local server and open http://127.0.0.1/signin.html to test sign in.');
-              return;
-            }
-            alert((err && err.message) || 'Sign in failed. Check your email/mobile and password.');
-          })
-          .finally(function () {
-            btn.disabled = false;
-            btn.textContent = 'Sign In';
-          });
+      window.MaAuth.register({
+        name: fd.get('name'),
+        phone: fd.get('phone'),
+        email: fd.get('email'),
+        password: fd.get('password')
+      }).then(function () {
+        msg.className = 'form-msg is-ok';
+        msg.textContent = 'Account created — redirecting...';
+        setTimeout(afterLogin, 600);
+      }).catch(function (err) {
+        msg.className = 'form-msg is-error';
+        msg.textContent = (err && err.message) || 'Could not create account. Please check your details.';
       });
-    })();
+    });
+
+    signinForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var msg = document.getElementById('signinMsg');
+      msg.className = 'form-msg';
+      msg.textContent = '';
+      var fd = new FormData(signinForm);
+      if (!window.MaAuth) {
+        msg.className = 'form-msg is-error';
+        msg.textContent = 'Auth service unavailable — please refresh and try again.';
+        return;
+      }
+      window.MaAuth.login({
+        login: fd.get('login'),
+        password: fd.get('password')
+      }).then(function () {
+        msg.className = 'form-msg is-ok';
+        msg.textContent = 'Signed in — redirecting...';
+        setTimeout(afterLogin, 500);
+      }).catch(function (err) {
+        msg.className = 'form-msg is-error';
+        msg.textContent = (err && err.message) || 'Sign in failed. Check your email/phone and password.';
+      });
+    });
   </script>
 </body>
 </html>
