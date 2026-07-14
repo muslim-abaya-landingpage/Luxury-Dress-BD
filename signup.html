@@ -9,7 +9,187 @@
   <link rel="stylesheet" href="site-footer.css?v=20260603footen" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="site-footer.css?v=20260603footen"></noscript>
   <link rel="stylesheet" href="auth-page.css">
-<script src="config.js"></script>
+  <script src="config.js"></script>
+
+  <!-- Modern UI Design Stylesheet -->
+  <style>
+    :root {
+      --primary-color: #1e293b; /* Deep slate slate for authority */
+      --accent-color: #2563eb;  /* Modern blue button */
+      --accent-hover: #1d4ed8;
+      --bg-color: #f8fafc;      /* Soft grayish-blue background */
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+    }
+
+    body.auth-page-signup {
+      background-color: var(--bg-color);
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      color: var(--text-main);
+    }
+
+    /* Outer Wrapper */
+    .auth-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: calc(100vh - 120px); /* Adjusts nicely between header and footer */
+      padding: 40px 20px;
+    }
+
+    /* Modern Glassmorphic Card */
+    .auth-card {
+      background: var(--card-bg);
+      width: 100%;
+      max-width: 650px;
+      padding: 45px 50px;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(15, 23, 42, 0.05), 
+                  0 5px 15px rgba(15, 23, 42, 0.02);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+
+    /* Headings */
+    .auth-card-head {
+      text-align: center;
+      margin-bottom: 35px;
+    }
+
+    .auth-card-head h1 {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 10px;
+      letter-spacing: -0.5px;
+    }
+
+    .auth-lead {
+      font-size: 15px;
+      color: var(--text-muted);
+    }
+
+    /* Form Layout Setup */
+    .auth-field {
+      margin-bottom: 22px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .auth-field label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    /* Beautiful Input Styling */
+    .auth-field input {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 14px;
+      border: 1.5px solid var(--border-color);
+      border-radius: 10px;
+      background-color: #fafbfd;
+      color: var(--text-main);
+      transition: all 0.25s ease;
+      outline: none;
+    }
+
+    .auth-field input::placeholder {
+      color: #94a3b8;
+    }
+
+    /* Smooth Input Glow */
+    .auth-field input:focus {
+      background-color: #ffffff;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    }
+
+    .auth-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      font-weight: 400;
+    }
+
+    /* Modern Two-column Row Setup */
+    .auth-form-row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    /* Premium Accent Button */
+    .auth-btn {
+      width: 100%;
+      padding: 16px;
+      margin-top: 15px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+      background-color: var(--accent-color);
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    }
+
+    .auth-btn:hover {
+      background-color: var(--accent-hover);
+      transform: translateY(-1.5px);
+      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+    }
+
+    .auth-btn:active {
+      transform: translateY(0);
+    }
+
+    .auth-btn:disabled {
+      background-color: #94a3b8;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* Bottom Redirect Note */
+    .auth-note {
+      text-align: center;
+      margin-top: 25px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .auth-note a {
+      color: var(--accent-color);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s ease;
+    }
+
+    .auth-note a:hover {
+      color: var(--accent-hover);
+      text-decoration: underline;
+    }
+
+    /* Responsive/Mobile Optimizations */
+    @media (max-width: 768px) {
+      .auth-card {
+        padding: 30px 24px;
+        margin: 10px;
+      }
+      
+      .auth-form-row-2 {
+        grid-template-columns: 1fr; /* Stack columns into 1 on mobile */
+        gap: 0;
+      }
+    }
+  </style>
 </head>
 <body class="auth-page auth-page-signup">
   <div id="site-header-mount"></div>
