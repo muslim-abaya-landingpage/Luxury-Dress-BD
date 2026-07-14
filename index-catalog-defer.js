@@ -36,9 +36,24 @@
       afterCatalog();
       return;
     }
+    var base = chain[i].split("?")[0];
+    // site-header.js loads several of these same files itself (for the nav menu).
+    // If it already added this script (or is in the middle of loading it), don't
+    // fetch and execute it a second time — just move on to the next one.
+    var existing = document.querySelector('script[src*="' + base + '"]');
+    if (existing) {
+      if (existing.getAttribute("data-loaded") === "1" || existing.hasAttribute("data-ma-loaded")) {
+        loadAt(i + 1);
+      } else {
+        existing.addEventListener("load", function () { loadAt(i + 1); }, { once: true });
+        existing.addEventListener("error", function () { loadAt(i + 1); }, { once: true });
+      }
+      return;
+    }
     var s = document.createElement("script");
     s.src = chain[i];
     s.defer = true;
+    s.setAttribute("data-ma-loaded", "");
     s.onload = function () {
       loadAt(i + 1);
     };

@@ -173,6 +173,10 @@ function ensureCartDrawerHtml() {
   ensureCartDrawerRelatedStyles();
 // Open / Close drawer helpers
 window.openCartDrawer = function () {
+  // Always refresh the list before showing — otherwise callers like the
+  // "View bag" button in cart-toast.js could open a drawer still showing
+  // whatever was rendered last (e.g. empty, from before the item was added).
+  window.updateCartDrawerUI();
   drawer.classList.add('is-open');
   overlay.classList.add('is-open');
   document.body.classList.add('cart-drawer-open');
