@@ -9,10 +9,13 @@
 
   opacity: 0;
   visibility: hidden;
+  
+  /* এটি যুক্ত করা হয়েছে */
+  pointer-events: none; 
 
   transition:
     opacity .35s ease,
-    visibility 0s linear .35s;
+    visibility .35s ease;
 
   will-change: opacity;
 }
@@ -20,6 +23,10 @@
 .cart-drawer-overlay.is-open {
   opacity: 1;
   visibility: visible;
+  
+  /* এটি যুক্ত করা হয়েছে */
+  pointer-events: auto; 
+  
   transition-delay: 0s;
 }
 
