@@ -45,6 +45,9 @@
     -10px 0 45px rgba(0,0,0,.12),
     -2px 0 10px rgba(0,0,0,.05);
 
+  /* এই লাইনটি নতুন যোগ করা হয়েছে */
+  transform: translateX(100%); 
+
   transition:
   transform .38s cubic-bezier(.22,1,.36,1);
   will-change: transform;
