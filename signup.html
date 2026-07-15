@@ -22,15 +22,15 @@
     box-sizing:border-box;
     font-family:'Inter',sans-serif;    
 }
-
 body {
     display: flex;
     flex-direction: column; /* এলিমেন্টগুলোকে ওপর-নিচে সাজাবে */
     align-items: center;
-    justify-content: space-between; /* ফর্ম মাঝে রাখবে এবং ফুটার নিচে ঠেলে দেবে */
+    justify-content: flex-start; /* 👈 space-between বদলে flex-start করুন, যা মোবাইল ফ্রেন্ডলি */
     min-height: 100vh;
     background: #f6f1e8;
 }
+
 .container {
     width: 900px;
     height: 560px;
@@ -42,8 +42,8 @@ body {
         18px 18px 35px rgba(0,0,0,.08),
         -10px -10px 25px rgba(255,255,255,.9);
     
-    /* 🔽 শুধু এই লাইনটি পরিবর্তন করুন 🔽 */
-    margin: auto 0 50px 0; /* নিচে ৫০ পিক্সেল ফাঁকা জায়গা তৈরি করবে */
+    /* 👈 ডেক্সটপে ফর্ম মাঝে থাকবে এবং নিচে গ্যাপ থাকবে */
+    margin: auto 0 50px 0; 
 }
 .left{
     width:50%;
