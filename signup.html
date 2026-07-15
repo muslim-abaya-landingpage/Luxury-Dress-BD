@@ -23,24 +23,26 @@
     font-family:'Inter',sans-serif;    
 }
 
-body{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    min-height:100vh;
-    background:#f6f1e8;
+body {
+    display: flex;
+    flex-direction: column; /* এলিমেন্টগুলোকে ওপর-নিচে সাজাবে */
+    align-items: center;
+    justify-content: space-between; /* ফর্ম মাঝে রাখবে এবং ফুটার নিচে ঠেলে দেবে */
+    min-height: 100vh;
+    background: #f6f1e8;
 }
 
-.container{
-    width:900px;
-    height:560px;
-    background:#f8f4ec;
-    border-radius:22px;
-    overflow:hidden;
-    display:flex;
+.container {
+    width: 900px;
+    height: 560px;
+    background: #f8f4ec;
+    border-radius: 22px;
+    overflow: hidden;
+    display: flex;
     box-shadow:
         18px 18px 35px rgba(0,0,0,.08),
         -10px -10px 25px rgba(255,255,255,.9);
+    margin: auto 0; /* ফর্মটিকে স্ক্রিনের একদম মাঝখানে (vertically center) রাখবে */
 }
 
 .left{
