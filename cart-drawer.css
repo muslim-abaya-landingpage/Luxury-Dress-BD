@@ -284,3 +284,23 @@
   color: #111;
   white-space: nowrap;
 }
+/* ==============================
+   CART DRAWER SCROLL FIX
+============================== */
+
+.cart-drawer-body{
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    padding-bottom: 140px;
+}
+
+.cart-drawer-footer{
+    position: sticky;
+    bottom: 0;
+    background: #fff;
+    border-top: 1px solid #eee;
+    padding: 16px 20px;
+    z-index: 50;
+    flex-shrink: 0;
+}
