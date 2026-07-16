@@ -41,16 +41,19 @@ window.CATEGORY_PRODUCTS = {
  {
   id: "ABY-BLACK-3",
   name: "Premium Black Gold Stone Work Abaya Set",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-black-nida-abaya-with-niqab-gold-embroidery-1080x1350.webp",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-black-gold-stone-work-abaya-1080x1350.webp",
   link: "/",
   price: 1650,
   color: "black",
-  colorLabel: "Black",
+  colorLabel: "Classic Black",
   fabric: "Original Cherry Clothing",
   sizes: ["44", "46", "48", "50", "52", "54", "56"],
-  priceByType: { "Full Set": 1650, "Abaya Only": 1350 }
-  },
-  {
+  priceByType: {
+    "Abaya Only": 1250,
+    "Full Set": 1650
+  }
+},
+{
   id: "ABY-BLACK-4",
   name: "Premium Black Silver Stone Work Abaya Set",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-black-silver-stone-work-abaya-1080x1350.webp",
@@ -60,7 +63,10 @@ window.CATEGORY_PRODUCTS = {
   colorLabel: "Classic Black",
   fabric: "Original Cherry Clothing",
   sizes: ["44", "46", "48", "50", "52", "54", "56"],
-  priceByType: { "Abaya Only": 1250,    "Full Set": 1650 }
+  priceByType: {
+    "Abaya Only": 1250,
+    "Full Set": 1650
+  }
 },
     {
       id: "ABY-BLACK-2",
