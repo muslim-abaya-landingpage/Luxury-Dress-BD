@@ -11,203 +11,216 @@
 window.CATEGORY_PRODUCTS = {
 
   /* ═══ ① আবায়া সারি · ABAYA · abaya.html · /abaya ═══ */
-  abaya: [
+ abaya: [
   {
-      id: "ABY-MAROON-1",
-      name: "Maroon Abaya Set",
-      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Maroon%20Abaya%20Set...jpeg",
-      link: "/",
-      price: 999,
-      color: "maroon",
-      colorLabel: "Maroon",
-      fabric: "Dubai Cherry",
-      sizes: ["44", "46", "48", "50", "52", "54", "56"],
-      priceByType: { "Full Set": 999, "Abaya Only": 799 }
+    id: "ABY-MAROON-1",
+    name: "Maroon Abaya Set",
+    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Maroon%20Abaya%20Set...jpeg",
+    link: "/",
+    price: 999,
+    color: "maroon",
+    colorLabel: "Maroon",
+    fabric: "Dubai Cherry",
+    sizes: ["44", "46", "48", "50", "52", "54", "56"],
+    priceByType: { "Abaya Only": 799, "Full Set": 999 }
   },
-  {
-      id: "ABY-BLK-3P-02",
-      name: "Premium Black 3 Part Abaya Set",
-      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-black-3-part-abaya-set-muslim-abaya-bd.webp",
-      link: "/",
-      price: 1450,
-      color: "black",
-      colorLabel: "Black",
-      fabric: "Premium Chiffon Georgette + Dubai Cherry",
-      sizes: ["44", "46", "48", "50", "52", "54", "56"],
-      priceByType: { "Full Set": 1450, "Abaya Only": 1150 }
-      },
-      detailNote: "3 Part Premium Abaya Set including Koti, Inner & Hijab. Premium Chiffon Georgette Koti and Hijab with Soft Dubai Cherry Inner."
-  },
- {
-  id: "ABY-BLACK-3",
-  name: "Premium Black Gold Stone Work Abaya Set",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-black-gold-stone-work-abaya-1080x1350.webp",
-  link: "/",
-  price: 1650,
-  color: "black",
-  colorLabel: "Classic Black",
-  fabric: "Original Cherry Clothing",
-  sizes: ["44", "46", "48", "50", "52", "54", "56"],
-  priceByType: { "Abaya Only": 1250, "Full Set": 1650 }
-},
-{
-  id: "ABY-BLACK-4",
-  name: "Premium Black Silver Stone Work Abaya Set",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-black-silver-stone-work-abaya-1080x1350.webp",
-  link: "/",
-  price: 1650,
-  color: "black",
-  colorLabel: "Classic Black",
-  fabric: "Original Cherry Clothing",
-  sizes: ["44", "46", "48", "50", "52", "54", "56"],
-  priceByType: { "Abaya Only": 1350, "Full Set": 1650 }
-},
-    {
-      id: "ABY-BLACK-5",
-      name: "Black Abaya Set - Back",
-      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Black..jpeg",
-      link: "/",
-      price: 999,
-      color: "black",
-      colorLabel: "Classic Black",
-      fabric: "Dubai Cherry",
-      sizes: ["44", "46", "48", "50", "52", "54", "56"],
-      priceByType: { "Full Set": 999, "Abaya Only": 799 }
-    },
-    {
-      id: "ABY-BLACK-6",
-      name: "Black Abaya Set - Side",
-      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Black.jpeg",
-      link: "/",
-      price: 999,
-      color: "black",
-      colorLabel: "Classic Black",
-      fabric: "Dubai Cherry",
-      sizes: ["44", "46", "48", "50", "52", "54", "56"],
-      priceByType: { "Full Set": 999, "Abaya Only": 799 }
-    },
-    {
-      id: "ABY-VERSACE-7",
-      name: "Versace Border Premium Abaya Set",
-      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Versace%20Border%20Premium%20Abaya%20Set...jpg",
-      link: "/",
-      price: 1550,
-      color: "black",
-      colorLabel: "Classic Black",
-      fabric: "Dubai Cherry",
-      sizes: ["44", "46", "48", "50", "52", "54", "56"],
-      priceByType: { "Full Set": 1750, "Abaya Only": 1550 }
-    },
-    {
-      id: "ABY-VERSACE-8",
-      name: "Versace Border Premium Abaya Set - Back",
-      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Versace%20Border%20Premium%20Abaya%20Set..jpg",
-      link: "/",
-      price: 1550,
-      color: "black",
-      colorLabel: "Classic Black",
-      fabric: "Dubai Cherry",
-      sizes: ["44", "46", "48", "50", "52", "54", "56"],
-      priceByType: { "Full Set": 1750, "Abaya Only": 1550 }
-    },
-    {
-      id: "ABY-VERSACE-9",
-      name: "Versace Border Premium Abaya Set - Side",
-      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Versace%20Border%20Premium%20Abaya%20Set.jpg",
-      link: "/",
-      price: 1550,
-      color: "black",
-      colorLabel: "Classic Black",
-      fabric: "Dubai Cherry",
-      sizes: ["44", "46", "48", "50", "52", "54", "56"],
-      priceByType: { "Full Set": 1750, "Abaya Only": 1550 }
-    },
-    {
-      id: "ABY-FLORAL-10",
-      name: "Premium Floral Motif Abaya Set",
-      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Floral-Motif-Abaya-Set...jpeg",
-      link: "/",
-      price: 1650,
-      color: "black",
-      colorLabel: "Classic Black",
-      fabric: "Dubai Cherry",
-      sizes: ["44", "46", "48", "50", "52", "54", "56"],
-      priceByType: { "Full Set": 1850, "Abaya Only": 1650 }
-    },
-    {
-      id: "ABY-FLORAL-11",
-      name: "Premium Floral Motif Abaya Set - Back",
-      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Floral-Motif-Abaya-Set..jpeg",
-      link: "/",
-      price: 1650,
-      color: "black",
-      colorLabel: "Classic Black",
-      fabric: "Dubai Cherry",
-      sizes: ["44", "46", "48", "50", "52", "54", "56"],
-      priceByType: { "Full Set": 1850, "Abaya Only": 1650 }
-    },
-    {
-      id: "ABY-FLORAL-12",
-      name: "Premium Floral Motif Abaya Set - Side",
-      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Floral-Motif-Abaya-Set.jpeg",
-      link: "/",
-      price: 1650,
-      color: "black",
-      colorLabel: "Classic Black",
-      fabric: "Dubai Cherry",
-      sizes: ["44", "46", "48", "50", "52", "54", "56"],
-      priceByType: { "Full Set": 1850, "Abaya Only": 1650 }
-    },
-    {
-      id: "ABY-BUTTERFLY-13",
-      name: "Butterfly Abaya Set",
-      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Butterfly-Ababa....jpg",
-      link: "/",
-      price: 799,
-      color: "black",
-      colorLabel: "Classic Black",
-      fabric: "Dubai Cherry",
-      sizes: ["44", "46", "48", "50", "52", "54", "56"],
-      priceByType: { "Full Set": 1350, "Abaya Only": 799 }
-    },
-    {
-      id: "ABY-BUTTERFLY-14",
-      name: "Butterfly Abaya Set - Back",
-      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Butterfly-Ababa...jpg",
-      link: "/",
-      price: 799,
-      color: "black",
-      colorLabel: "Classic Black",
-      fabric: "Dubai Cherry",
-      sizes: ["44", "46", "48", "50", "52", "54", "56"],
-      priceByType: { "Full Set": 1350, "Abaya Only": 799 }
-    },
-    {
-      id: "ABY-BUTTERFLY-15",
-      name: "Butterfly Abaya Set - Side",
-      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Butterfly-Ababa..jpg",
-      link: "/",
-      price: 799,
-      color: "black",
-      colorLabel: "Classic Black",
-      fabric: "Dubai Cherry",
-      sizes: ["44", "46", "48", "50", "52", "54", "56"],
-      priceByType: { "Full Set": 1350, "Abaya Only": 799 }
-    },
-    {
-      id: "ABY-BUTTERFLY-16",
-      name: "Butterfly Abaya Set - Detail",
-      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Butterfly-Ababa.jpg",
-      link: "/",
-      price: 799,
-      color: "black",
-      colorLabel: "Classic Black",
-      fabric: "Dubai Cherry",
-      sizes: ["44", "46", "48", "50", "52", "54", "56"],
-      priceByType: { "Full Set": 1350, "Abaya Only": 799 }
-    }
-  ],
 
+  {
+    id: "ABY-BLK-3P-02",
+    name: "Premium Black 3 Part Abaya Set",
+    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-black-3-part-abaya-set-muslim-abaya-bd.webp",
+    link: "/",
+    price: 1450,
+    color: "black",
+    colorLabel: "Classic Black",
+    fabric: "Premium Chiffon Georgette + Dubai Cherry",
+    sizes: ["44", "46", "48", "50", "52", "54", "56"],
+    priceByType: { "Abaya Only": 1150, "Full Set": 1450 },
+    detailNote: "3 Part Premium Abaya Set including Koti, Inner & Hijab. Premium Chiffon Georgette Koti and Hijab with Soft Dubai Cherry Inner."
+  },
+
+  {
+    id: "ABY-BLACK-3",
+    name: "Premium Black Gold Stone Work Abaya Set",
+    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-black-gold-stone-work-abaya-1080x1350.webp",
+    link: "/",
+    price: 1650,
+    color: "black",
+    colorLabel: "Classic Black",
+    fabric: "Original Cherry Clothing",
+    sizes: ["44", "46", "48", "50", "52", "54", "56"],
+    priceByType: { "Abaya Only": 1250, "Full Set": 1650 }
+  },
+
+  {
+    id: "ABY-BLACK-4",
+    name: "Premium Black Silver Stone Work Abaya Set",
+    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-black-silver-stone-work-abaya-1080x1350.webp",
+    link: "/",
+    price: 1650,
+    color: "black",
+    colorLabel: "Classic Black",
+    fabric: "Original Cherry Clothing",
+    sizes: ["44", "46", "48", "50", "52", "54", "56"],
+    priceByType: { "Abaya Only": 1250, "Full Set": 1650 }
+  },
+
+  {
+    id: "ABY-BLACK-5",
+    name: "Black Abaya Set - Back",
+    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Black..jpeg",
+    link: "/",
+    price: 999,
+    color: "black",
+    colorLabel: "Classic Black",
+    fabric: "Dubai Cherry",
+    sizes: ["44", "46", "48", "50", "52", "54", "56"],
+    priceByType: { "Abaya Only": 799, "Full Set": 999 }
+  },
+
+  {
+    id: "ABY-BLACK-6",
+    name: "Black Abaya Set - Side",
+    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Black.jpeg",
+    link: "/",
+    price: 999,
+    color: "black",
+    colorLabel: "Classic Black",
+    fabric: "Dubai Cherry",
+    sizes: ["44", "46", "48", "50", "52", "54", "56"],
+    priceByType: { "Abaya Only": 799, "Full Set": 999 }
+  },
+
+  {
+    id: "ABY-VERSACE-7",
+    name: "Versace Border Premium Abaya Set",
+    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Versace%20Border%20Premium%20Abaya%20Set...jpg",
+    link: "/",
+    price: 1750,
+    color: "black",
+    colorLabel: "Classic Black",
+    fabric: "Dubai Cherry",
+    sizes: ["44", "46", "48", "50", "52", "54", "56"],
+    priceByType: { "Abaya Only": 1550, "Full Set": 1750 }
+  },
+
+  {
+    id: "ABY-VERSACE-8",
+    name: "Versace Border Premium Abaya Set - Back",
+    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Versace%20Border%20Premium%20Abaya%20Set..jpg",
+    link: "/",
+    price: 1750,
+    color: "black",
+    colorLabel: "Classic Black",
+    fabric: "Dubai Cherry",
+    sizes: ["44", "46", "48", "50", "52", "54", "56"],
+    priceByType: { "Abaya Only": 1550, "Full Set": 1750 }
+  },
+
+  {
+    id: "ABY-VERSACE-9",
+    name: "Versace Border Premium Abaya Set - Side",
+    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Versace%20Border%20Premium%20Abaya%20Set.jpg",
+    link: "/",
+    price: 1750,
+    color: "black",
+    colorLabel: "Classic Black",
+    fabric: "Dubai Cherry",
+    sizes: ["44", "46", "48", "50", "52", "54", "56"],
+    priceByType: { "Abaya Only": 1550, "Full Set": 1750 }
+  },
+
+  {
+    id: "ABY-FLORAL-10",
+    name: "Premium Floral Motif Abaya Set",
+    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Floral-Motif-Abaya-Set...jpeg",
+    link: "/",
+    price: 1850,
+    color: "black",
+    colorLabel: "Classic Black",
+    fabric: "Dubai Cherry",
+    sizes: ["44", "46", "48", "50", "52", "54", "56"],
+    priceByType: { "Abaya Only": 1650, "Full Set": 1850 }
+  },
+
+  {
+    id: "ABY-FLORAL-11",
+    name: "Premium Floral Motif Abaya Set - Back",
+    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Floral-Motif-Abaya-Set..jpeg",
+    link: "/",
+    price: 1850,
+    color: "black",
+    colorLabel: "Classic Black",
+    fabric: "Dubai Cherry",
+    sizes: ["44", "46", "48", "50", "52", "54", "56"],
+    priceByType: { "Abaya Only": 1650, "Full Set": 1850 }
+  },
+
+  {
+    id: "ABY-FLORAL-12",
+    name: "Premium Floral Motif Abaya Set - Side",
+    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Floral-Motif-Abaya-Set.jpeg",
+    link: "/",
+    price: 1850,
+    color: "black",
+    colorLabel: "Classic Black",
+    fabric: "Dubai Cherry",
+    sizes: ["44", "46", "48", "50", "52", "54", "56"],
+    priceByType: { "Abaya Only": 1650, "Full Set": 1850 }
+  },
+
+  {
+    id: "ABY-BUTTERFLY-13",
+    name: "Butterfly Abaya Set",
+    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Butterfly-Ababa....jpg",
+    link: "/",
+    price: 1350,
+    color: "black",
+    colorLabel: "Classic Black",
+    fabric: "Dubai Cherry",
+    sizes: ["44", "46", "48", "50", "52", "54", "56"],
+    priceByType: { "Abaya Only": 799, "Full Set": 1350 }
+  },
+
+  {
+    id: "ABY-BUTTERFLY-14",
+    name: "Butterfly Abaya Set - Back",
+    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Butterfly-Ababa...jpg",
+    link: "/",
+    price: 1350,
+    color: "black",
+    colorLabel: "Classic Black",
+    fabric: "Dubai Cherry",
+    sizes: ["44", "46", "48", "50", "52", "54", "56"],
+    priceByType: { "Abaya Only": 799, "Full Set": 1350 }
+  },
+
+  {
+    id: "ABY-BUTTERFLY-15",
+    name: "Butterfly Abaya Set - Side",
+    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Butterfly-Ababa..jpg",
+    link: "/",
+    price: 1350,
+    color: "black",
+    colorLabel: "Classic Black",
+    fabric: "Dubai Cherry",
+    sizes: ["44", "46", "48", "50", "52", "54", "56"],
+    priceByType: { "Abaya Only": 799, "Full Set": 1350 }
+  },
+
+  {
+    id: "ABY-BUTTERFLY-16",
+    name: "Butterfly Abaya Set - Detail",
+    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Butterfly-Ababa.jpg",
+    link: "/",
+    price: 1350,
+    color: "black",
+    colorLabel: "Classic Black",
+    fabric: "Dubai Cherry",
+    sizes: ["44", "46", "48", "50", "52", "54", "56"],
+    priceByType: { "Abaya Only": 799, "Full Set": 1350 }
+  }
+],
   /* ═══ ② কভার আপ — খালি (প্রোডাক্ট-এডিট.bat থেকে যোগ করুন) ═══ */
   "cover-up": [],
 
