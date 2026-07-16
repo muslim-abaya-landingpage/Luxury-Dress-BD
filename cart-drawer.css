@@ -6,17 +6,14 @@
   -webkit-backdrop-filter: blur(4px);
 
   z-index: 1000100;
-
   opacity: 0;
   visibility: hidden;
   
   /* এটি যুক্ত করা হয়েছে */
   pointer-events: none; 
-
   transition:
-    opacity .35s ease,
-    visibility .35s ease;
-
+  opacity .35s ease,
+  visibility .35s ease;
   will-change: opacity;
 }
 
@@ -26,7 +23,6 @@
   
   /* এটি যুক্ত করা হয়েছে */
   pointer-events: auto; 
-  
   transition-delay: 0s;
 }
 
@@ -70,27 +66,20 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   padding: calc(20px + env(safe-area-inset-top, 0px)) 22px 18px;
-
   background: #fff;
   border-bottom: 1px solid #efefef;
-
   position: sticky;
   top: 0;
   z-index: 5;
-
   flex-shrink: 0;
 }
 
 .cart-drawer-head h2 {
   margin: 0;
-
   font-size: 20px;
   font-weight: 700;
-
   color: #111;
-
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
@@ -98,27 +87,22 @@
 .cart-drawer-close {
   width: 42px;
   height: 42px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   background: #fff;
   border: 1px solid #e8e8e8;
   border-radius: 50%;
-
   color: #222;
   font-size: 20px;
   font-weight: 400;
-
   cursor: pointer;
-
   transition:
-    background .25s ease,
-    color .25s ease,
-    border-color .25s ease,
-    transform .25s ease,
-    box-shadow .25s ease;
+  background .25s ease,
+  color .25s ease,
+  border-color .25s ease,
+  transform .25s ease,
+  box-shadow .25s ease;
 }
 
 .cart-drawer-close:hover {
