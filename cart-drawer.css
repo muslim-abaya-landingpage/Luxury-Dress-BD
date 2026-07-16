@@ -272,11 +272,14 @@
 .cart-drawer-foot{
     position: sticky;
     bottom: 0;
-    background: #fff;
-    border-top: 1px solid #eee;
-    padding: 16px 20px;
     z-index: 50;
     flex-shrink: 0;
+
+    background:#fff;
+    border-top:1px solid #ececec;
+    padding:18px 20px calc(18px + env(safe-area-inset-bottom));
+
+    box-shadow:0 -8px 20px rgba(0,0,0,.06);
 }
 .cart-cross-sell,
 .cart-recommendations,
@@ -319,4 +322,48 @@
 .customers-also-bought{
     max-height: 320px;
     overflow-y: auto;
+}
+/* ==============================
+   PREMIUM CHECKOUT BUTTON
+============================== */
+
+.cart-drawer-checkout{
+    width: 100%;
+    height: 52px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 14px;
+
+    background: #111;
+    color: #fff;
+
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: .3px;
+
+    cursor: pointer;
+
+    transition: all .3s ease;
+
+    box-shadow: 0 8px 24px rgba(0,0,0,.18);
+}
+
+.cart-drawer-checkout:hover{
+    background:#c8a96a;
+    color:#111;
+    transform:translateY(-2px);
+    box-shadow:0 12px 28px rgba(0,0,0,.22);
+}
+
+.cart-drawer-checkout:active{
+    transform:scale(.98);
+}
+
+.cart-drawer-checkout:focus-visible{
+    outline:none;
+    box-shadow:0 0 0 3px rgba(200,169,106,.35);
 }
