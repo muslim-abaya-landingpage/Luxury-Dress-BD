@@ -40,17 +40,17 @@ window.CATEGORY_PRODUCTS = {
       },
       detailNote: "3 Part Premium Abaya Set including Koti, Inner & Hijab. Premium Chiffon Georgette Koti and Hijab with Soft Dubai Cherry Inner."
   },
-  {
-      id: "ABY-MAROON-3",
-      name: "Maroon Abaya Set - Side",
-      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Maroon%20Abaya%20Set.jpeg",
-      link: "/",
-      price: 999,
-      color: "maroon",
-      colorLabel: "Maroon",
-      fabric: "Dubai Cherry",
-      sizes: ["44", "46", "48", "50", "52", "54", "56"],
-      priceByType: { "Full Set": 999, "Abaya Only": 799 }
+ {
+  id: "ABY-BLACK-1",
+  name: "Premium Black Gold Stone Work Abaya with Matching Plain Niqab",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-black-nida-abaya-with-niqab-gold-embroidery-1080x1350.webp",
+  link: "/",
+  price: 1650,
+  color: "black",
+  colorLabel: "Black",
+  fabric: "Original Cherry Clothing",
+  sizes: ["44", "46", "48", "50", "52", "54", "56"],
+  priceByType: { "Full Set": 1650, "Abaya Only": 1350 }
   },
   {
       id: "ABY-BLACK-1",
