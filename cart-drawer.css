@@ -210,22 +210,16 @@
 .cart-drawer-remove {
   width: 32px;
   height: 32px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   background: #fff;
   border: 1px solid #e6e6e6;
   border-radius: 50%;
-
   color: #777;
   font-size: 18px;
-
   cursor: pointer;
-
   transition: all .25s ease;
-
   flex-shrink: 0;
 }
 
@@ -255,15 +249,11 @@
 .cart-drawer-qty button {
   width: 38px;
   height: 38px;
-
   border: none;
   background: transparent;
-
   font-size: 18px;
   font-weight: 600;
-
   cursor: pointer;
-
   transition: background .25s ease;
 }
 
@@ -303,4 +293,10 @@
     padding: 16px 20px;
     z-index: 50;
     flex-shrink: 0;
+}
+.cart-cross-sell,
+.cart-recommendations,
+.customers-also-bought{
+    max-height: 380px;
+    overflow-y: auto;
 }
