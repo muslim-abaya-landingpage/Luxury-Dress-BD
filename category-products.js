@@ -48,10 +48,7 @@ window.CATEGORY_PRODUCTS = {
   colorLabel: "Classic Black",
   fabric: "Original Cherry Clothing",
   sizes: ["44", "46", "48", "50", "52", "54", "56"],
-  priceByType: {
-    "Abaya Only": 1250,
-    "Full Set": 1650
-  }
+  priceByType: { "Abaya Only": 1250, "Full Set": 1650 }
 },
 {
   id: "ABY-BLACK-4",
@@ -63,13 +60,10 @@ window.CATEGORY_PRODUCTS = {
   colorLabel: "Classic Black",
   fabric: "Original Cherry Clothing",
   sizes: ["44", "46", "48", "50", "52", "54", "56"],
-  priceByType: {
-    "Abaya Only": 1250,
-    "Full Set": 1650
-  }
+  priceByType: { "Abaya Only": 1350, "Full Set": 1650 }
 },
     {
-      id: "ABY-BLACK-2",
+      id: "ABY-BLACK-5",
       name: "Black Abaya Set - Back",
       image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Black..jpeg",
       link: "/",
@@ -81,7 +75,7 @@ window.CATEGORY_PRODUCTS = {
       priceByType: { "Full Set": 999, "Abaya Only": 799 }
     },
     {
-      id: "ABY-BLACK-3",
+      id: "ABY-BLACK-6",
       name: "Black Abaya Set - Side",
       image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Black.jpeg",
       link: "/",
@@ -93,7 +87,7 @@ window.CATEGORY_PRODUCTS = {
       priceByType: { "Full Set": 999, "Abaya Only": 799 }
     },
     {
-      id: "ABY-VERSACE-1",
+      id: "ABY-VERSACE-7",
       name: "Versace Border Premium Abaya Set",
       image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Versace%20Border%20Premium%20Abaya%20Set...jpg",
       link: "/",
@@ -105,7 +99,7 @@ window.CATEGORY_PRODUCTS = {
       priceByType: { "Full Set": 1750, "Abaya Only": 1550 }
     },
     {
-      id: "ABY-VERSACE-2",
+      id: "ABY-VERSACE-8",
       name: "Versace Border Premium Abaya Set - Back",
       image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Versace%20Border%20Premium%20Abaya%20Set..jpg",
       link: "/",
@@ -117,7 +111,7 @@ window.CATEGORY_PRODUCTS = {
       priceByType: { "Full Set": 1750, "Abaya Only": 1550 }
     },
     {
-      id: "ABY-VERSACE-3",
+      id: "ABY-VERSACE-9",
       name: "Versace Border Premium Abaya Set - Side",
       image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Versace%20Border%20Premium%20Abaya%20Set.jpg",
       link: "/",
@@ -129,7 +123,7 @@ window.CATEGORY_PRODUCTS = {
       priceByType: { "Full Set": 1750, "Abaya Only": 1550 }
     },
     {
-      id: "ABY-FLORAL-1",
+      id: "ABY-FLORAL-10",
       name: "Premium Floral Motif Abaya Set",
       image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Floral-Motif-Abaya-Set...jpeg",
       link: "/",
@@ -141,7 +135,7 @@ window.CATEGORY_PRODUCTS = {
       priceByType: { "Full Set": 1850, "Abaya Only": 1650 }
     },
     {
-      id: "ABY-FLORAL-2",
+      id: "ABY-FLORAL-11",
       name: "Premium Floral Motif Abaya Set - Back",
       image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Floral-Motif-Abaya-Set..jpeg",
       link: "/",
@@ -153,7 +147,7 @@ window.CATEGORY_PRODUCTS = {
       priceByType: { "Full Set": 1850, "Abaya Only": 1650 }
     },
     {
-      id: "ABY-FLORAL-3",
+      id: "ABY-FLORAL-12",
       name: "Premium Floral Motif Abaya Set - Side",
       image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Floral-Motif-Abaya-Set.jpeg",
       link: "/",
@@ -165,7 +159,7 @@ window.CATEGORY_PRODUCTS = {
       priceByType: { "Full Set": 1850, "Abaya Only": 1650 }
     },
     {
-      id: "ABY-BUTTERFLY-1",
+      id: "ABY-BUTTERFLY-13",
       name: "Butterfly Abaya Set",
       image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Butterfly-Ababa....jpg",
       link: "/",
@@ -177,7 +171,7 @@ window.CATEGORY_PRODUCTS = {
       priceByType: { "Full Set": 1350, "Abaya Only": 799 }
     },
     {
-      id: "ABY-BUTTERFLY-2",
+      id: "ABY-BUTTERFLY-14",
       name: "Butterfly Abaya Set - Back",
       image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Butterfly-Ababa...jpg",
       link: "/",
@@ -189,7 +183,7 @@ window.CATEGORY_PRODUCTS = {
       priceByType: { "Full Set": 1350, "Abaya Only": 799 }
     },
     {
-      id: "ABY-BUTTERFLY-3",
+      id: "ABY-BUTTERFLY-15",
       name: "Butterfly Abaya Set - Side",
       image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Butterfly-Ababa..jpg",
       link: "/",
@@ -201,7 +195,7 @@ window.CATEGORY_PRODUCTS = {
       priceByType: { "Full Set": 1350, "Abaya Only": 799 }
     },
     {
-      id: "ABY-BUTTERFLY-4",
+      id: "ABY-BUTTERFLY-16",
       name: "Butterfly Abaya Set - Detail",
       image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Butterfly-Ababa.jpg",
       link: "/",
