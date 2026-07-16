@@ -300,3 +300,39 @@
     max-height: 380px;
     overflow-y: auto;
 }
+/* ===== FINAL CHECKOUT FIX ===== */
+
+.cart-drawer{
+    display: flex;
+    flex-direction: column;
+}
+
+/* এই অংশ স্ক্রল হবে */
+.cart-drawer-body,
+.cart-items,
+.cart-drawer-content{
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    padding-bottom: 180px; /* Checkout এর জন্য জায়গা */
+}
+
+/* Checkout অংশ সবসময় নিচে থাকবে */
+.cart-drawer-footer,
+.cart-summary,
+.cart-checkout{
+    position: sticky;
+    bottom: 0;
+    background: #fff;
+    padding: 16px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid #e5e5e5;
+    z-index: 999;
+}
+
+/* Recommended products ছোট করে স্ক্রল */
+.cart-cross-sell,
+.cart-recommendations,
+.customers-also-bought{
+    max-height: 320px;
+    overflow-y: auto;
+}
