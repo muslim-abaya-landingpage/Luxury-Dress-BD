@@ -3,318 +3,342 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sign In / Sign Up | Muslim Abaya</title>
-<link rel="icon" href="assets/logo-muslim-abaya.svg" type="image/svg+xml">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg: #f2efe9;
-    --panel: #eae6de;
-    --ink: #1c1c1c;
-    --muted: #8a8a86;
-    --grey-btn: #cfcac0;
-    --grey-btn-ink: #3a3a38;
-    --dark-btn: #1c2230;
-    --line: #d9d4c9;
-    --pink-glow: rgba(232, 180, 184, 0.35);
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0;
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:var(--bg);
-    font-family:"Poppins","Hind Siliguri",sans-serif;
-    padding:24px;
-  }
-  .auth-card{
-    position:relative;
-    width:900px;
-    max-width:100%;
-    min-height:520px;
-    background:var(--panel);
-    border-radius:22px;
-    box-shadow:0 30px 60px rgba(0,0,0,0.08);
-    overflow:hidden;
-    display:flex;
-  }
-  .auth-card::before{
-    content:"";
-    position:absolute;
-    top:-60px; left:-60px;
-    width:220px; height:220px;
-    border-radius:50%;
-    background:radial-gradient(circle at 30% 30%, var(--pink-glow), transparent 70%);
-  }
-  .auth-card::after{
-    content:"";
-    position:absolute;
-    bottom:-80px; left:20%;
-    width:260px; height:260px;
-    border-radius:50%;
-    background:radial-gradient(circle at 30% 30%, var(--pink-glow), transparent 70%);
-  }
 
-  .panel{
-    flex:1;
-    padding:56px 48px;
-    position:relative;
-    z-index:1;
-    transition:transform .5s ease, opacity .4s ease;
-  }
-  .panel-welcome{
+<title>Sign In | Muslim Abaya</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="site-header.css?v=20260603logo">
+<link rel="stylesheet" href="site-footer.css?v=20260603footen" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="site-footer.css?v=20260603footen"></noscript>
+
+<link rel="stylesheet" href="auth-page.css">
+
+<script src="config.js"></script>
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Inter',sans-serif;    
+}
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    background: #f6f1e8;
+}
+
+.container {
+    width: 900px;
+    height: 560px;
+    background: #f8f4ec;
+    border-radius: 22px;
+    overflow: hidden;
+    display: flex;
+    box-shadow:
+        18px 18px 35px rgba(0,0,0,.08),
+        -10px -10px 25px rgba(255,255,255,.9);
+    margin: auto 0 50px 0; 
+}
+/* Sign In mirrors Sign Up's layout but swapped: form on the LEFT, welcome/switch on the RIGHT */
+.left{
+    width:50%;
     display:flex;
-    flex-direction:column;
     justify-content:center;
-    border-right:1px solid var(--line);
-  }
-  .panel-welcome h1{
-    font-size:30px;
-    font-weight:700;
-    color:var(--ink);
-    margin:0 0 14px;
-  }
-  .panel-welcome p{
-    font-size:14px;
-    color:var(--muted);
-    line-height:1.6;
-    margin:0 0 28px;
-    max-width:260px;
-  }
-  .btn-pill{
-    display:inline-flex;
     align-items:center;
+    background:#f8f4ec;
+}
+.right{
+    width:50%;
+    position:relative;
+    display:flex;
     justify-content:center;
-    padding:13px 34px;
-    border-radius:999px;
-    font-size:13px;
-    font-weight:700;
-    letter-spacing:0.06em;
-    text-transform:uppercase;
+    align-items:center;
+    text-align:center;
+    background:#f7f2ea;
+    overflow:hidden;
+}
+
+.right::before{
+    content:"";
+    position:absolute;
+    width:220px;
+    height:220px;
+    background:#f2eee5;
+    border-radius:50%;
+    top:-100px;
+    right:-70px;
+    box-shadow:
+    inset 8px 8px 12px rgba(0,0,0,.04),
+    inset -8px -8px 12px rgba(255,255,255,.8);
+}
+
+.right::after{
+    content:"";
+    position:absolute;
+    width:250px;
+    height:250px;
+    background:#f2eee5;
+    border-radius:50%;
+    bottom:-140px;
+    right:-90px;
+    box-shadow:
+    inset 8px 8px 12px rgba(0,0,0,.04),
+    inset -8px -8px 12px rgba(255,255,255,.8);
+}
+
+.content{
+    z-index:5;
+    width:75%;
+}
+
+.content h2{
+    font-size:38px;
+    color:#1d1d1d;
+    margin-bottom:18px;
+}
+
+.content p{
+    color:#666;
+    line-height:1.8;
+    margin-bottom:35px;
+}
+
+.switch-btn{
     border:none;
     cursor:pointer;
-    width:fit-content;
-  }
-  .btn-grey{ background:var(--grey-btn); color:var(--grey-btn-ink); }
-  .btn-grey:hover{ background:#c2bcb0; }
-  .btn-dark{ background:var(--dark-btn); color:#fff; }
-  .btn-dark:hover{ background:#12161f; }
+    background:#ece8e0;
+    color:#222;
+    padding:14px 45px;
+    border-radius:30px;
+    font-weight:600;
+    letter-spacing:1px;
+    box-shadow:
+    8px 8px 18px rgba(0,0,0,.08),
+    -8px -8px 18px rgba(255,255,255,.9);
+}
 
-  .panel-form{ display:flex; flex-direction:column; justify-content:center; }
-  .panel-form h2{
-    font-size:26px;
-    font-weight:700;
-    color:var(--ink);
-    margin:0 0 18px;
+.switch-btn:hover{
+    transform:translateY(-2px);
+}
+
+.form-box{
+    width:78%;
     text-align:center;
-  }
-  .socials{ display:flex; gap:10px; justify-content:center; margin-bottom:16px; }
-  .socials a{
-    width:36px; height:36px;
+}
+
+.form-box h2{
+    font-size:38px;
+    margin-bottom:20px;
+    color:#222;
+}
+
+.social{
+    display:flex;
+    justify-content:center;
+    gap:16px;
+    margin-bottom:25px;
+}
+
+.social a{
+    width:42px;
+    height:42px;
+    background:#f5f1ea;
     border-radius:50%;
-    background:#fff;
-    border:1px solid var(--line);
-    display:flex; align-items:center; justify-content:center;
-    color:var(--ink);
-    font-size:14px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
     text-decoration:none;
-  }
-  .divider{
-    text-align:center;
-    font-size:11px;
-    letter-spacing:0.08em;
-    color:var(--muted);
-    margin-bottom:18px;
-    text-transform:uppercase;
-  }
-  .field{
+    color:#333;
+    font-weight:600;
+    box-shadow:
+    6px 6px 12px rgba(0,0,0,.08),
+    -6px -6px 12px rgba(255,255,255,.9);
+}
+
+.small{
+    color:#999;
+    font-size:12px;
+    letter-spacing:1px;
+    margin-bottom:20px;
+}
+
+.input-box{
     width:100%;
-    padding:13px 16px;
-    border-radius:8px;
-    border:1px solid var(--line);
-    background:#fff;
-    font-size:14px;
-    font-family:inherit;
-    color:var(--ink);
-    margin-bottom:12px;
-  }
-  .field::placeholder{ color:#a9a49a; }
-  .field:focus{ outline:2px solid #b9b2a4; outline-offset:1px; }
-  .form-msg{
+    margin-bottom:18px;
+}
+
+.input-box input{
+    width:100%;
+    padding:15px;
+    border:none;
+    outline:none;
+    background:#f5f1ea;
+    border-radius:10px;
+    box-shadow:
+    inset 3px 3px 6px rgba(0,0,0,.05),
+    inset -3px -3px 6px rgba(255,255,255,.9);
+}
+
+.signup-btn{
+    margin-top:12px;
+    border:none;
+    cursor:pointer;
+    padding:15px 60px;
+    border-radius:30px;
+    background:#1d2d45;
+    color:#fff;
+    font-weight:600;
+    letter-spacing:1px;
+    box-shadow:0 10px 20px rgba(29,45,69,.25);
+}
+
+.signup-btn:hover{
+    transform:translateY(-2px);
+}
+
+.form-msg{
     font-size:12.5px;
-    margin:-2px 0 10px;
+    margin:-4px 0 12px;
     min-height:16px;
-  }
-  .form-msg.is-error{ color:#b3261e; }
-  .form-msg.is-ok{ color:#1a7d3c; }
-  .submit-row{ display:flex; justify-content:center; margin-top:6px; }
+}
+.form-msg.is-error{ color:#b3261e; }
+.form-msg.is-ok{ color:#1a7d3c; }
 
-  /* Mobile view: stack panels, hide the inactive one */
-  @media (max-width: 720px){
-    .auth-card{ flex-direction:column; min-height:0; }
-    .panel-welcome{ border-right:none; border-bottom:1px solid var(--line); padding:40px 32px; text-align:center; align-items:center; }
-    .panel-welcome p{ max-width:none; }
-    .panel-welcome .btn-pill{ margin:0 auto; }
-    .panel-form{ padding:40px 32px; }
-    body[data-mode="signup"] .panel-welcome{ display:none; }
-    body[data-mode="signin"] .panel-form{ display:none; }
-  }
+@media(max-width:900px){
 
-  /* Desktop: slide between the two "modes" like the reference screenshot */
-  @media (min-width: 721px){
-    body[data-mode="signup"] .panel-welcome{ order:2; border-right:none; border-left:1px solid var(--line); }
-    body[data-mode="signup"] .panel-form{ order:1; }
-  }
+.container{
+    width:95%;
+    height:auto;
+    flex-direction:column;
+    margin: 30px auto; 
+}
+
+.left,
+.right{
+    width:100%;
+    padding:60px 20px;
+}
+
+}
 </style>
+
 </head>
-<body data-mode="signup">
-<!-- Header Start -->
-<div id="site-header"></div>
-<!-- Header End -->
-  <div class="auth-card">
-    <div class="panel panel-welcome">
-      <h1 id="welcomeTitle">Welcome Back!</h1>
-      <p id="welcomeText">To keep connected with us please login with your personal info</p>
-      <button type="button" class="btn-pill btn-grey" id="toggleModeBtn">Sign In</button>
+<body>
+<div id="site-header-mount"></div>
+
+<div class="container">
+
+<div class="left">
+  <div class="form-box">
+    <h2>Sign In</h2>
+
+    <div class="social">
+      <a href="https://www.facebook.com/muslimabayaofficial" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+        <i class="fab fa-facebook-f"></i>
+      </a>
+      <a href="https://www.linkedin.com/in/muslimabayabd/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+        <i class="fab fa-linkedin-in"></i>
+      </a>
+      <a href="https://x.com/muslimabayashop" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
+        <i class="fab fa-x-twitter"></i>
+      </a>
     </div>
 
-    <div class="panel panel-form">
-      <h2 id="formTitle">Create Account</h2>
+    <div class="small">OR USE EMAIL / MOBILE TO SIGN IN</div>
 
-      <div class="socials" aria-hidden="true">
-        <a href="#" tabindex="-1">f</a>
-        <a href="#" tabindex="-1">in</a>
-        <a href="#" tabindex="-1">X</a>
+    <form id="signinForm">
+      <div class="input-box">
+        <input type="text" id="si-login" placeholder="Email or Mobile">
       </div>
-      <p class="divider">or use email for registration</p>
 
-      <form id="signupForm">
-        <input class="field" type="text" name="name" placeholder="Name" autocomplete="name" required>
-        <input class="field" type="tel" name="phone" placeholder="Phone (e.g. 01XXXXXXXXX)" autocomplete="tel" required>
-        <input class="field" type="email" name="email" placeholder="Email" autocomplete="email" required>
-        <input class="field" type="password" name="password" placeholder="Password" autocomplete="new-password" required>
-        <p class="form-msg" id="signupMsg"></p>
-        <div class="submit-row">
-          <button type="submit" class="btn-pill btn-dark">Sign Up</button>
-        </div>
-      </form>
+      <div class="input-box">
+        <input type="password" id="si-pass" placeholder="Password">
+      </div>
 
-      <form id="signinForm" style="display:none;">
-        <input class="field" type="text" name="login" placeholder="Email or phone" autocomplete="username" required>
-        <input class="field" type="password" name="password" placeholder="Password" autocomplete="current-password" required>
-        <p class="form-msg" id="signinMsg"></p>
-        <div class="submit-row">
-          <button type="submit" class="btn-pill btn-dark">Sign In</button>
-        </div>
-      </form>
-    </div>
+      <p class="form-msg" id="signinMsg"></p>
+
+      <button class="signup-btn" id="signinBtn" type="submit">
+        SIGN IN
+      </button>
+    </form>
   </div>
+</div>
 
+<div class="right">
+  <div class="content">
+    <h2>Hello, Friend!</h2>
+    <p>
+      Enter your personal details and
+      start your journey with us
+    </p>
+
+    <button class="switch-btn" id="signupLink" type="button"
+      onclick="window.location.href='signup.html'">
+      SIGN UP
+    </button>
+  </div>
+</div>
+
+</div> <div id="site-footer-mount"></div>
+<script src="cart-utils.js"></script>
   <script src="site-security.js"></script>
-  <script src="site-api-config.js"></script>
+  <script src="site-api-config.js?v=20260529"></script>
+  <script src="site-api-health.js"></script>
   <script src="auth-config.js"></script>
   <script src="auth-api.js"></script>
+  <script defer src="site-header.js?v=20260603logo"></script>
+  <script src="site-footer.js?v=20260603footen"></script>
   <script>
-    var body = document.body;
-    var toggleBtn = document.getElementById('toggleModeBtn');
-    var welcomeTitle = document.getElementById('welcomeTitle');
-    var welcomeText = document.getElementById('welcomeText');
-    var formTitle = document.getElementById('formTitle');
-    var signupForm = document.getElementById('signupForm');
-    var signinForm = document.getElementById('signinForm');
-
-    function setMode(mode) {
-      body.setAttribute('data-mode', mode);
-      if (mode === 'signup') {
-        welcomeTitle.textContent = 'Welcome Back!';
-        welcomeText.textContent = 'To keep connected with us please login with your personal info';
-        toggleBtn.textContent = 'Sign In';
-        formTitle.textContent = 'Create Account';
-        signupForm.style.display = '';
-        signinForm.style.display = 'none';
-      } else {
-        welcomeTitle.textContent = 'Hello, Friend!';
-        welcomeText.textContent = "Enter your personal details and start your journey with us";
-        toggleBtn.textContent = 'Sign Up';
-        formTitle.textContent = 'Sign In';
-        signupForm.style.display = 'none';
-        signinForm.style.display = '';
+    (function () {
+      if (typeof showAuthApiNotice === 'function') {
+        showAuthApiNotice('.form-box');
       }
-    }
-
-    toggleBtn.addEventListener('click', function () {
-      setMode(body.getAttribute('data-mode') === 'signup' ? 'signin' : 'signup');
-    });
-
-    function afterLogin() {
-      var next = new URLSearchParams(window.location.search).get('next');
-      window.location.href = next || (typeof siteHref === 'function' ? siteHref('/') : 'index.html');
-    }
-
-    signupForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var msg = document.getElementById('signupMsg');
-      msg.className = 'form-msg';
-      msg.textContent = '';
-      var fd = new FormData(signupForm);
-      if (!window.MaAuth) {
-        msg.className = 'form-msg is-error';
-        msg.textContent = 'Auth service unavailable — please refresh and try again.';
-        return;
+      var form = document.getElementById('signinForm');
+      if (!form) return;
+      var params = new URLSearchParams(window.location.search);
+      var nextUrl = params.get('next') || 'checkout.html';
+      var signupLink = document.getElementById('signupLink');
+      if (signupLink && params.get('next')) {
+        signupLink.onclick = function () {
+          window.location.href = 'signup.html?next=' + encodeURIComponent(params.get('next'));
+        };
       }
-      window.MaAuth.register({
-        name: fd.get('name'),
-        phone: fd.get('phone'),
-        email: fd.get('email'),
-        password: fd.get('password')
-      }).then(function () {
-        msg.className = 'form-msg is-ok';
-        msg.textContent = 'Account created — redirecting...';
-        setTimeout(afterLogin, 600);
-      }).catch(function (err) {
-        msg.className = 'form-msg is-error';
-        msg.textContent = (err && err.message) || 'Could not create account. Please check your details.';
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var msg = document.getElementById('signinMsg');
+        msg.className = 'form-msg';
+        msg.textContent = '';
+        var login = document.getElementById('si-login').value.trim();
+        var pass = document.getElementById('si-pass').value;
+        if (!login) { alert('Enter your email or mobile number.'); return; }
+        if (!pass) { alert('Enter your password.'); return; }
+        var btn = document.getElementById('signinBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Signing in...';
+        MaAuth.login({ login: login, password: pass })
+          .then(function () {
+            msg.className = 'form-msg is-ok';
+            msg.textContent = 'Signed in — redirecting...';
+            window.location.href = nextUrl;
+          })
+          .catch(function (err) {
+            if (typeof isLocalPreview === 'function' && isLocalPreview()) {
+              alert(typeof getLocalFileAuthHint === 'function' ? getLocalFileAuthHint() : 'Run the local server and open http://127.0.0.1/signin.html to test sign in.');
+              return;
+            }
+            msg.className = 'form-msg is-error';
+            msg.textContent = (err && err.message) || 'Sign in failed. Check your email/phone and password.';
+          })
+          .finally(function () {
+            btn.disabled = false;
+            btn.innerHTML = 'SIGN IN';
+          });
       });
-    });
-
-    signinForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var msg = document.getElementById('signinMsg');
-      msg.className = 'form-msg';
-      msg.textContent = '';
-      var fd = new FormData(signinForm);
-      if (!window.MaAuth) {
-        msg.className = 'form-msg is-error';
-        msg.textContent = 'Auth service unavailable — please refresh and try again.';
-        return;
-      }
-      window.MaAuth.login({
-        login: fd.get('login'),
-        password: fd.get('password')
-      }).then(function () {
-        msg.className = 'form-msg is-ok';
-        msg.textContent = 'Signed in — redirecting...';
-        setTimeout(afterLogin, 500);
-      }).catch(function (err) {
-        msg.className = 'form-msg is-error';
-        msg.textContent = (err && err.message) || 'Sign in failed. Check your email/phone and password.';
-      });
-    });
+    })();
   </script>
-<script>
-fetch("header.html")
-.then(r=>r.text())
-.then(html=>{
-    document.getElementById("site-header").innerHTML=html;
-});
-
-fetch("footer.html")
-.then(r=>r.text())
-.then(html=>{
-    document.getElementById("site-footer").innerHTML=html;
-});
-</script>
 </body>
 </html>
