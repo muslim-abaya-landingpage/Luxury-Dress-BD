@@ -1631,7 +1631,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <select id="userArea" required>
                         <option value="">Select district</option>
                     </select>
-                    <p class="delivery-fee-hint">Dhaka ?80 ? Other districts ?150 ? Free delivery on 3+ items</p>
+                    <p class="delivery-fee-hint">Dhaka ৳80 &middot; Other districts ৳150 &middot; Free delivery on 3+ items</p>
                 </div>
                 <div class="form-group form-group-last">
                     <label for="userThana">Thana / Upazila <span style="font-size:13px;font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0;">(Optional)</span></label>
@@ -2463,7 +2463,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function shippingCharge() {
         var q = cartQty();
-        if (q === 0 || q >= 3) return 0; // ? ??? ?? ??? ???? ??? ???? ????????
+        if (q === 0 || q >= 3) return 0; // 3 বা তার বেশি পণ্যে বিনামূল্যে ডেলিভারি
         return parseInt(areaSelect.value, 10) || 0;
     }
 
