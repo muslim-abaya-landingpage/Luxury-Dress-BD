@@ -20,14 +20,14 @@
     { id: "DR-28", name: "Pink Floral Printed Co-ord Set", price: 550, image: "images/pink-floral-printed-co-ord-set.jpeg", category: "premium-two-piece" },
     {
       id: "DR-29",
-      name: "Baby PinkLight Pink",
+      name: "Baby Pink / Light Pink",
       price: 550,
       image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Baby%20PinkLight%20Pink.jpeg?raw=1",
       category: "premium-two-piece"
     },
     {
       id: "DR-30",
-      name: "Sage GreenMint Green",
+      name: "Sage Green / Mint Green",
       price: 550,
       image: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/Sage%20GreenMint%20Green.jpeg?raw=1",
       category: "premium-two-piece"
