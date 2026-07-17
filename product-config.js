@@ -26,7 +26,7 @@ window.SITE_LINKS = {
     pattern: "/product/{id}"
   },
   order: {
-    whatsapp: "https://wa.me/8801971642683"
+    whatsapp: "https://wa.me/8801970831783"
   },
   /** Size Chart ছবি — ক্যাটাগরি অনুযায়ী বা default */
   sizeChart: {
