@@ -479,7 +479,7 @@ g.getCartLineBaseName = getCartLineBaseName;
 };
 
  function formatFabricLabelEn(fabric) {
-  const f = String(fabric ?? "").trim();
+  var f = String(fabric != null ? fabric : "").trim();
   if (!f) return "";
   if (/dubai/i.test(f) && /cherry/i.test(f)) {
     return "Dubai Cherry";
