@@ -65,18 +65,19 @@ window.CATEGORY_PRODUCTS = {
     priceByType: { "Abaya Only": 1250, "Full Set": 1650 }
   },
 
-  {
-    id: "ABY-BLACK-5",
-    name: "Black Abaya Set - Back",
-    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Black..jpeg",
-    link: "/",
-    price: 999,
-    color: "black",
-    colorLabel: "Classic Black",
-    fabric: "Dubai Cherry",
-    sizes: ["44", "46", "48", "50", "52", "54", "56"],
-    priceByType: { "Abaya Only": 799, "Full Set": 999 }
-  },
+ {
+  id: "ABY-BLACK-5",
+  name: "Dil Bahar Abaya Full Set",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/dil-bahar-black-stone-work-abaya-original-dubai-cherry-fabric-bangladesh.webp",
+  link: "/",
+  price: 1899,
+  color: "black",
+  colorLabel: "Classic Black",
+  fabric: "Original Dubai Cherry",
+  sizes: ["50", "52", "54", "56", "58"],
+  priceByType: { "Full Set": 1899 },
+  description: "Premium Original Dubai Cherry Fabric. Inner + Open Abaya + Matching Hijab. Beautiful All-Over Embroidery with a 200-Inch Flare."
+},
 
   {
     id: "ABY-BLACK-6",
