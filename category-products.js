@@ -217,7 +217,7 @@ window.CATEGORY_PRODUCTS = {
 {
   id: "KURTI-01",
   name: "Classic Purple Lace-Work Kurti",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Classic%20Purple%20Lace-Work%20Kurti%20MUSLIM%20ABAYA.WebP",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/a6e3af9c7beb66737b0d58b8ee90fdf8e62ebee6/images/Classic%20Purple%20Lace-Work%20Kurti%20%20MUSLIM%20ABAYA.WebP",
   link: "/",
   price: 250,
   color: "purple",
@@ -229,7 +229,7 @@ window.CATEGORY_PRODUCTS = {
 {
   id: "KURTI-02",
   name: "Elegant Grey Leaf Print Kurti",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Elegant%20Grey%20Leaf%20Print%20Kurti%20MUSLIM%20ABAYA.WebP",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/a6e3af9c7beb66737b0d58b8ee90fdf8e62ebee6/images/Elegant%20Grey%20Leaf%20Print%20Kurti%20%20MUSLIM%20ABAYA.WebP",
   link: "/",
   price: 250,
   color: "grey",
@@ -241,7 +241,7 @@ window.CATEGORY_PRODUCTS = {
 {
   id: "KURTI-03",
   name: "Elegant Purple Floral Kurti",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Elegant%20Purple%20Floral%20Kurti%20MUSLIM%20ABAYA.WebP",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/a6e3af9c7beb66737b0d58b8ee90fdf8e62ebee6/images/Elegant%20Purple%20Floral%20Kurti%20%20MUSLIM%20ABAYA.WebP",
   link: "/",
   price: 250,
   color: "purple",
@@ -253,7 +253,7 @@ window.CATEGORY_PRODUCTS = {
 {
   id: "KURTI-04",
   name: "Elegant White Leaf Print Kurti",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Elegant%20White%20Leaf%20Print%20Kurti%20MUSLIM%20ABAYA.WebP",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/a6e3af9c7beb66737b0d58b8ee90fdf8e62ebee6/images/Elegant%20White%20Leaf%20Print%20Kurti%20%20MUSLIM%20ABAYA.WebP",
   link: "/",
   price: 250,
   color: "white",
@@ -265,7 +265,7 @@ window.CATEGORY_PRODUCTS = {
 {
   id: "KURTI-05",
   name: "Light Pink Floral Kurti",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Light%20Pink%20Soft%20Floral%20Kurti%20MUSLIM%20ABAYA.WebP",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/a6e3af9c7beb66737b0d58b8ee90fdf8e62ebee6/images/Light%20Pink%20Soft%20Floral%20Kurti%20%20MUSLIM%20ABAYA.WebP",
   link: "/",
   price: 250,
   color: "pink",
@@ -277,7 +277,7 @@ window.CATEGORY_PRODUCTS = {
 {
   id: "KURTI-06",
   name: "Magenta Leaf Print Kurti",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Magenta%20Leaf%20Print%20Kurti%20MUSLIM%20ABAYA.WebP",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/a6e3af9c7beb66737b0d58b8ee90fdf8e62ebee6/images/Magenta%20Leaf%20Print%20Kurti%20%20MUSLIM%20ABAYA.WebP",
   link: "/",
   price: 250,
   color: "magenta",
@@ -289,7 +289,7 @@ window.CATEGORY_PRODUCTS = {
 {
   id: "KURTI-07",
   name: "Magenta Tassel Detail Kurti",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Magenta%20Tassel%20Detail%20Kurti%20MUSLIM%20ABAYA.WebP",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/a6e3af9c7beb66737b0d58b8ee90fdf8e62ebee6/images/Magenta%20Tassel%20Detail%20Kurti%20%20MUSLIM%20ABAYA.WebP",
   link: "/",
   price: 250,
   color: "magenta",
@@ -301,7 +301,7 @@ window.CATEGORY_PRODUCTS = {
 {
   id: "KURTI-08",
   name: "Pink Floral Lace Work Kurti",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium%20Pink%20Floral%20Lace-Work%20Kurti%20MUSLIM%20ABAYA.WebP",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/a6e3af9c7beb66737b0d58b8ee90fdf8e62ebee6/images/Premium%20Pink%20Floral%20Lace-Work%20Kurti%20%20MUSLIM%20ABAYA.WebP",
   link: "/",
   price: 250,
   color: "pink",
@@ -313,7 +313,7 @@ window.CATEGORY_PRODUCTS = {
 {
   id: "KURTI-09",
   name: "Vibrant Magenta Floral Kurti",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Vibrant%20Magenta%20Floral%20Kurti%20MUSLIM%20ABAYA.WebP",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/a6e3af9c7beb66737b0d58b8ee90fdf8e62ebee6/images/Vibrant%20Magenta%20Floral%20Kurti%20%20MUSLIM%20ABAYA.WebP",
   link: "/",
   price: 250,
   color: "magenta",
