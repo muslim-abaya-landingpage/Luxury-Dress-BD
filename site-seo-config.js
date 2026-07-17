@@ -8,7 +8,7 @@ window.SITE_SEO = {
   brandBn: "মুসলিম আবায়া",
   defaultImage: "https://muslimabaya.com/images/Baby-Pink-Floral-Print.jpeg",
   locale: "bn_BD",
-  phone: "+8801971642683",
+  phone: "+8801970831783",
   social: {
     facebook: "https://www.facebook.com/muslimabayaofficial/", // মেইন ফেসবুক পেজ
     instagram: "https://www.instagram.com/muslimabaya.shop/",
