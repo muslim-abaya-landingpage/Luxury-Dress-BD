@@ -24,9 +24,9 @@
 }
 body {
     display: flex;
-    flex-direction: column; /* এলিমেন্টগুলোকে ওপর-নিচে সাজাবে */
+    flex-direction: column;
     align-items: center;
-    justify-content: flex-start; /* 👈 space-between বদলে flex-start করুন, যা মোবাইল ফ্রেন্ডলি */
+    justify-content: flex-start;
     min-height: 100vh;
     background: #f6f1e8;
 }
@@ -41,8 +41,6 @@ body {
     box-shadow:
         18px 18px 35px rgba(0,0,0,.08),
         -10px -10px 25px rgba(255,255,255,.9);
-    
-    /* 👈 ডেক্সটপে ফর্ম মাঝে থাকবে এবং নিচে গ্যাপ থাকবে */
     margin: auto 0 50px 0; 
 }
 .left{
@@ -208,7 +206,6 @@ body {
     width:95%;
     height:auto;
     flex-direction:column;
-    /* 🔽 মোবাইলের জন্য ওপর-নিচে সুন্দর ফাঁকা জায়গা এবং ফুটার থেকে দূরত্ব বজায় রাখবে 🔽 */
     margin: 30px auto; 
 }
 
@@ -223,6 +220,7 @@ body {
 
 </head>
 <body>
+<div id="site-header-mount"></div>
 
 <div class="container">
 
@@ -299,7 +297,7 @@ body {
   <script>
     (function () {
       if (typeof showAuthApiNotice === 'function') {
-        showAuthApiNotice('.auth-card');
+        showAuthApiNotice('.form-box');
       }
       var form = document.getElementById('signupForm');
       if (!form) return;
@@ -307,7 +305,9 @@ body {
       var nextUrl = params.get('next') || 'checkout.html';
       var signinLink = document.getElementById('signinLink');
       if (signinLink && params.get('next')) {
-        signinLink.href = 'signin.html?next=' + encodeURIComponent(params.get('next'));
+        signinLink.onclick = function () {
+          window.location.href = 'signin.html?next=' + encodeURIComponent(params.get('next'));
+        };
       }
       form.addEventListener('submit', function (e) {
          e.preventDefault();
