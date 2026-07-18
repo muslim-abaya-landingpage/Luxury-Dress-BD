@@ -155,12 +155,12 @@ function ensureCartDrawerHtml() {
   </button>
 </div>
     <div class="cart-drawer-body">
-      <div id="cart-items-list"></div>
-      <div id="related-products-section" class="related-wrapper" style="display: none;">
-        <h3 class="related-title">Customers also bought</h3>
-        <div id="related-products-container" class="related-grid"></div>
-      </div>
-    </div>
+  <div id="cart-items-list" class="cart-items"></div>
+  <div id="related-products-section" class="related-wrapper" style="display: none;">
+  <h3 class="related-title">Customers also bought</h3>
+  <div id="related-products-container" class="related-grid"></div>
+  </div>
+</div>
     <div class="cart-drawer-foot">
       <div class="cart-drawer-total-row">
        <span>Total:</span>
