@@ -112,13 +112,12 @@
 
   window.addEventListener("storeCartUpdated", refreshBadge);
 
-})();
-
 window.updateCartBadge = (cartLines) => {
   const total = (cartLines || []).reduce(
-    (sum, item) => sum + (Number.parseInt(item.quantity, 10) || 0),
+    (sum, item) => sum + (parseInt(item.quantity, 10) || 0),
     0
   );
 
   setBadge(total);
 };
+})();
