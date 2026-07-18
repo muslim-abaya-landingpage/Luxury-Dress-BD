@@ -126,3 +126,20 @@
     justify-content:center;
     align-items:center;
 }
+#mobile-bottom-nav.mbn-bar{
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+
+    height: 64px !important;
+    max-height: 64px !important;
+    overflow: hidden !important;
+
+    background: #fff !important;
+    z-index: 2147483647 !important;
+}
