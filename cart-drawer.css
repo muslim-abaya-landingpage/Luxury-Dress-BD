@@ -411,23 +411,17 @@
 ==================================== */
 @media (max-width:768px){
 
-  .cart-drawer{
-      height:calc(100dvh - 64px);
-      bottom:64px;
-      top:auto;
-  }
-
   .cart-drawer-foot,
   .cart-drawer-footer,
   .cart-summary,
   .cart-checkout{
-      padding-bottom:calc(18px + env(safe-area-inset-bottom));
+      padding-bottom: calc(20px + 70px + env(safe-area-inset-bottom));
   }
 
   .cart-drawer-body,
   .cart-items,
   .cart-drawer-content{
-      padding-bottom:140px;
+      padding-bottom: 250px;
   }
 
 }
