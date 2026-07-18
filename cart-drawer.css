@@ -415,13 +415,13 @@
   .cart-drawer-footer,
   .cart-summary,
   .cart-checkout{
-      padding-bottom: calc(20px + 70px + env(safe-area-inset-bottom));
+      padding-bottom:calc(20px + 64px + env(safe-area-inset-bottom));
   }
 
   .cart-drawer-body,
   .cart-items,
   .cart-drawer-content{
-      padding-bottom: 250px;
+      padding-bottom:160px;
   }
 
 }
