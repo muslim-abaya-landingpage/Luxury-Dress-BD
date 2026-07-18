@@ -304,7 +304,7 @@
   function isAbayaProduct(p, categoryKey) {
     var ck = String(categoryKey || (p && (p.category || "")) || "").trim();
     if (ck === "abaya") return true;
-    if (p?.name?.toLowerCase().includes("abaya")) return true;
+    if (p && p.name && p.name.toLowerCase().indexOf("abaya") !== -1) return true;
     return false;
   }
 
@@ -388,9 +388,9 @@ function getPanjabiSizeConfig() {
 }
 
 function isPanjabiProduct(product, categoryKey) {
-  const ck = String(categoryKey ?? product?.category ?? "").trim().toLowerCase();
+  var ck = String(categoryKey != null ? categoryKey : (product && product.category != null ? product.category : "")).trim().toLowerCase();
   if (ck === "panjabi") return true;
-  const productName = String(product?.name ?? "").toLowerCase();
+  var productName = String(product && product.name != null ? product.name : "").toLowerCase();
   if (productName.includes("panjabi")) return true;
   return false;
 }
