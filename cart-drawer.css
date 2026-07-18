@@ -1,32 +1,34 @@
+/* ==============================
+   CART DRAWER OVERLAY
+============================== */
+
 .cart-drawer-overlay {
   position: fixed;
   inset: 0;
   background: rgba(17, 17, 17, .42);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-
   z-index: 1000100;
   opacity: 0;
   visibility: hidden;
-  
-  /* এটি যুক্ত করা হয়েছে */
-  pointer-events: none; 
+  pointer-events: none;
   transition:
-  opacity .35s ease,
-  visibility .35s ease;
+    opacity .35s ease,
+    visibility .35s ease;
   will-change: opacity;
 }
 
 .cart-drawer-overlay.is-open {
   opacity: 1;
   visibility: visible;
-  
-  /* এটি যুক্ত করা হয়েছে */
-  pointer-events: auto; 
+  pointer-events: auto;
   transition-delay: 0s;
 }
 
-/* Responsive width */
+/* ==============================
+   CART DRAWER — MERGED
+============================== */
+
 .cart-drawer {
   position: fixed;
   top: 0;
@@ -45,22 +47,23 @@
 
   overflow: hidden;
   box-shadow:
-    -10px 0 45px rgba(0,0,0,.12),
-    -2px 0 10px rgba(0,0,0,.05);
+    -10px 0 45px rgba(0, 0, 0, .12),
+    -2px  0 10px rgba(0, 0, 0, .05);
 
-  /* এই লাইনটি নতুন যোগ করা হয়েছে */
-  transform: translateX(100%); 
-
-  transition:
-  transform .38s cubic-bezier(.22,1,.36,1);
+  transform: translateX(100%);
+  transition: transform .38s cubic-bezier(.22, 1, .36, 1);
   will-change: transform;
 
-  font-family: "Hind Siliguri","Inter",system-ui,sans-serif;
+  font-family: "Hind Siliguri", "Inter", system-ui, sans-serif;
 }
 
 .cart-drawer.is-open {
   transform: translateX(0);
 }
+
+/* ==============================
+   CART DRAWER HEAD
+============================== */
 
 .cart-drawer-head {
   display: flex;
@@ -98,11 +101,11 @@
   font-weight: 400;
   cursor: pointer;
   transition:
-  background .25s ease,
-  color .25s ease,
-  border-color .25s ease,
-  transform .25s ease,
-  box-shadow .25s ease;
+    background .25s ease,
+    color .25s ease,
+    border-color .25s ease,
+    transform .25s ease,
+    box-shadow .25s ease;
 }
 
 .cart-drawer-close:hover {
@@ -110,17 +113,34 @@
   color: #fff;
   border-color: #111;
   transform: rotate(90deg);
-  box-shadow: 0 8px 20px rgba(0,0,0,.15);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .15);
 }
 
-.cart-drawer-close:active {
-  transform: scale(.95);
-}
+.cart-drawer-close:active  { transform: scale(.95); }
 
 .cart-drawer-close:focus-visible {
   outline: 2px solid #111;
   outline-offset: 3px;
 }
+
+/* ==============================
+   CART DRAWER BODY — MERGED
+   (এই অংশ স্ক্রল হবে)
+============================== */
+
+.cart-drawer-body,
+.cart-items,
+.cart-drawer-content {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding-bottom: 180px;
+}
+
+/* ==============================
+   CART DRAWER ITEMS
+============================== */
+
 .cart-drawer-item {
   display: flex;
   align-items: flex-start;
@@ -130,9 +150,9 @@
   transition: background .25s ease;
 }
 
-.cart-drawer-item:hover {
-  background: #fafafa;
-}
+.cart-drawer-item:hover      { background: #fafafa; }
+.cart-drawer-item:first-child { padding-top: 8px; }
+.cart-drawer-item:last-child  { border-bottom: none; padding-bottom: 10px; }
 
 .cart-drawer-item-main {
   flex: 1;
@@ -147,14 +167,9 @@
   margin-bottom: 10px;
 }
 
-.cart-drawer-item:first-child {
-  padding-top: 8px;
-}
-
-.cart-drawer-item:last-child {
-  border-bottom: none;
-  padding-bottom: 10px;
-}
+/* ==============================
+   CART THUMB
+============================== */
 
 .cart-drawer-thumb {
   flex-shrink: 0;
@@ -173,14 +188,16 @@
   transition: transform .35s ease;
 }
 
-.cart-drawer-item:hover .cart-drawer-thumb img {
-  transform: scale(1.05);
-}
+.cart-drawer-item:hover .cart-drawer-thumb img { transform: scale(1.05); }
 
 .cart-drawer-thumb-placeholder {
   font-size: 30px;
   opacity: .4;
 }
+
+/* ==============================
+   CART ITEM META
+============================== */
 
 .cart-drawer-name {
   margin: 0;
@@ -221,6 +238,10 @@
   flex-wrap: wrap;
 }
 
+/* ==============================
+   QTY STEPPER
+============================== */
+
 .cart-drawer-qty {
   display: inline-flex;
   align-items: center;
@@ -241,9 +262,7 @@
   transition: background .25s ease;
 }
 
-.cart-drawer-qty button:hover {
-  background: #f5f5f5;
-}
+.cart-drawer-qty button:hover { background: #f5f5f5; }
 
 .cart-drawer-qty span {
   min-width: 42px;
@@ -258,170 +277,117 @@
   color: #111;
   white-space: nowrap;
 }
+
 /* ==============================
-   CART DRAWER SCROLL FIX
+   RECOMMENDATIONS — MERGED
 ============================== */
 
-.cart-drawer-body{
-    flex: 1;
-    overflow-y: auto;
-    min-height: 0;
-    padding-bottom: 140px;
-}
-
-.cart-drawer-foot{
-    position: sticky;
-    bottom: 0;
-    z-index: 50;
-    flex-shrink: 0;
-
-    background:#fff;
-    border-top:1px solid #ececec;
-    padding:18px 20px calc(18px + env(safe-area-inset-bottom));
-
-    box-shadow:0 -8px 20px rgba(0,0,0,.06);
-}
 .cart-cross-sell,
 .cart-recommendations,
-.customers-also-bought{
-    max-height: 380px;
-    overflow-y: auto;
-}
-/* ===== FINAL CHECKOUT FIX ===== */
-
-.cart-drawer{
-    display: flex;
-    flex-direction: column;
+.customers-also-bought {
+  max-height: 320px;
+  overflow-y: auto;
 }
 
-/* এই অংশ স্ক্রল হবে */
-.cart-drawer-body,
-.cart-items,
-.cart-drawer-content{
-    flex: 1;
-    overflow-y: auto;
-    min-height: 0;
-    padding-bottom: 180px; /* Checkout এর জন্য জায়গা */
+/* ==============================
+   CART DRAWER FOOTER — MERGED
+   (sticky, সবসময় নিচে)
+============================== */
+
+.cart-drawer-foot {
+  position: sticky;
+  bottom: 0;
+  z-index: 50;
+  flex-shrink: 0;
+  background: #fff;
+  border-top: 1px solid #ececec;
+  padding: 18px 20px calc(18px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -8px 20px rgba(0, 0, 0, .06);
 }
 
-/* Checkout অংশ সবসময় নিচে থাকবে */
 .cart-drawer-footer,
 .cart-summary,
-.cart-checkout{
-    position: sticky;
-    bottom: 0;
-    background: #fff;
-    padding: 16px 20px calc(20px + env(safe-area-inset-bottom, 0px));
-    border-top: 1px solid #e5e5e5;
-    z-index: 999;
+.cart-checkout {
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  padding: 16px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid #e5e5e5;
+  z-index: 999;
 }
 
-/* Recommended products ছোট করে স্ক্রল */
-.cart-cross-sell,
-.cart-recommendations,
-.customers-also-bought{
-    max-height: 320px;
-    overflow-y: auto;
-}
 /* ==============================
-   PREMIUM CHECKOUT BUTTON
+   CART TOTAL
 ============================== */
 
-.cart-drawer-checkout{
-    width: 100%;
-    height: 52px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border: none;
-    border-radius: 14px;
-
-    background: #111;
-    color: #fff;
-
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: .3px;
-
-    cursor: pointer;
-
-    transition: all .3s ease;
-
-    box-shadow: 0 8px 24px rgba(0,0,0,.18);
+.cart-drawer-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 14px;
 }
 
-.cart-drawer-checkout:hover{
-    background:#c8a96a;
-    color:#111;
-    transform:translateY(-2px);
-    box-shadow:0 12px 28px rgba(0,0,0,.22);
+/* ==============================
+   CHECKOUT BUTTON — MERGED
+============================== */
+
+.cart-drawer-checkout {
+  width: 100%;
+  height: 52px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 14px;
+
+  background: #111;
+  color: #fff;
+
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: .3px;
+
+  cursor: pointer;
+  transition: all .3s ease;
+
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .18);
 }
 
-.cart-drawer-checkout:active{
-    transform:scale(.98);
+.cart-drawer-checkout:hover {
+  background: #c8a96a;
+  color: #111;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .22);
 }
 
-.cart-drawer-checkout:focus-visible{
-    outline:none;
-    box-shadow:0 0 0 3px rgba(200,169,106,.35);
-}
-.cart-drawer-total{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+.cart-drawer-checkout:active        { transform: scale(.98); }
 
-    font-size:18px;
-    font-weight:700;
-
-    margin-bottom:14px;
+.cart-drawer-checkout:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(200, 169, 106, .35);
 }
 
-.cart-drawer-checkout{
-    width:100%;
-    height:45px;
+/* ==============================
+   MOBILE NAVBAR CONFLICT FIX
+============================== */
 
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    border:none;
-    border-radius:14px;
-
-    background:#111;
-    color:#fff;
-
-    font-size:16px;
-    font-weight:700;
-
-    cursor:pointer;
-    transition:.3s;
-
-    box-shadow:0 8px 24px rgba(0,0,0,.18);
-}
-
-.cart-drawer-checkout:hover{
-    background:#c8a96a;
-    color:#111;
-    transform:translateY(-2px);
-}
-/* ====================================
-   FIX CART DRAWER FOR MOBILE NAVBAR
-==================================== */
-@media (max-width:768px){
+@media (max-width: 768px) {
 
   .cart-drawer-foot,
   .cart-drawer-footer,
   .cart-summary,
-  .cart-checkout{
-      padding-bottom:calc(20px + 64px + env(safe-area-inset-bottom));
+  .cart-checkout {
+    padding-bottom: calc(20px + 64px + env(safe-area-inset-bottom, 0px));
   }
 
   .cart-drawer-body,
   .cart-items,
-  .cart-drawer-content{
-      padding-bottom:160px;
+  .cart-drawer-content {
+    padding-bottom: 160px;
   }
 
 }
