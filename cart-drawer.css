@@ -297,7 +297,7 @@
 .cart-drawer-foot {
   position: sticky;
   bottom: 0;
-  z-index: 50;
+  z-index: 999;
   flex-shrink: 0;
   background: #fff;
   border-top: 1px solid #ececec;
@@ -308,12 +308,12 @@
 .cart-drawer-footer,
 .cart-summary,
 .cart-checkout {
-  position: sticky;
-  bottom: 0;
-  background: #fff;
-  padding: 16px 20px calc(20px + env(safe-area-inset-bottom, 0px));
-  border-top: 1px solid #e5e5e5;
-  z-index: 999;
+  position: static;
+  bottom: auto;
+  background: transparent;
+  padding: 0;
+  border-top: 0;
+  z-index: auto;
 }
 
 /* ==============================
@@ -377,17 +377,14 @@
 
 @media (max-width: 768px) {
 
-  .cart-drawer-foot,
-  .cart-drawer-footer,
-  .cart-summary,
-  .cart-checkout {
+  .cart-drawer-foot {
     padding-bottom: calc(20px + 64px + env(safe-area-inset-bottom, 0px));
   }
 
   .cart-drawer-body,
   .cart-items,
   .cart-drawer-content {
-    padding-bottom: 160px;
+    padding-bottom: 220px;
   }
 
 }
