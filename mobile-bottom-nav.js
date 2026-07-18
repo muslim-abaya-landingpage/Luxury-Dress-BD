@@ -1,6 +1,9 @@
 /**
  * mobile-bottom-nav.js
  * Fixed bottom nav bar (Home / Category / Cart / Call / Login) — mobile only.
+ * Styling lives in mobile-bottom-nav.css (link it in <head>) — this file only
+ * builds the markup and wires up the behavior, so there's one place to edit
+ * the look and one place to edit the logic.
  *
  * Defaults used (change the CONFIG block below if any of these aren't right):
  * - Home    -> site root
@@ -9,13 +12,14 @@
  * - Call    -> tel: link to the number already used in your footer
  * - Login   -> signin.html
  *
- * Add this ONE script tag to every page (right before </body>, after cart-utils.js
- * and site-header.js so window.loadStoreCart / toggleAbayaMenu / openCartDrawer exist):
- *   <script defer src="mobile-bottom-nav.js"></script>
+ * Add to every page:
+ *   In <head>:          <link rel="stylesheet" href="mobile-bottom-nav.css">
+ *   Before </body>:      <script defer src="mobile-bottom-nav.js"></script>
+ *   (after cart-utils.js and site-header.js so window.loadStoreCart /
+ *    toggleAbayaMenu / openCartDrawer already exist)
  */
 (function () {
   var CONFIG = {
-    color: "#b8952e",
     homeHref: "/",
     callNumber: "+8801970831783",
     loginHref: "signin.html"
@@ -23,38 +27,6 @@
 
   function siteHrefSafe(route) {
     return typeof window.siteHref === "function" ? window.siteHref(route) : route;
-  }
-
-  function ensureStyles() {
-    if (document.getElementById("mobile-bottom-nav-style")) return;
-    var style = document.createElement("style");
-    style.id = "mobile-bottom-nav-style";
-    style.textContent =
-      ".mbn-bar{display:none;}" +
-      "@media (max-width:768px){" +
-      "  .mbn-bar{" +
-      "    display:flex;position:fixed;left:0;right:0;bottom:0;z-index:2147483000;" +
-      "    background:#fff;border-top:1px solid #eee;" +
-      "    box-shadow:0 -2px 10px rgba(0,0,0,.06);" +
-      "    padding-bottom:env(safe-area-inset-bottom,0);" +
-      "  }" +
-      "  body{padding-bottom:64px;}" +
-      "  .cart-drawer-foot{padding-bottom:calc(20px + 64px + env(safe-area-inset-bottom));}" +
-      "}" +
-      ".mbn-item{" +
-      "  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;" +
-      "  gap:2px;padding:8px 4px 10px;background:none;border:none;cursor:pointer;" +
-      "  color:" + CONFIG.color + ";text-decoration:none;font-family:inherit;" +
-      "}" +
-      ".mbn-item svg{width:24px;height:24px;display:block;}" +
-      ".mbn-label{font-size:11.5px;font-weight:600;color:#111;}" +
-      ".mbn-cart-wrap{position:relative;}" +
-      ".mbn-badge{" +
-      "  position:absolute;top:-6px;right:-10px;min-width:17px;height:17px;padding:0 4px;" +
-      "  border-radius:999px;background:" + CONFIG.color + ";color:#fff;font-size:10.5px;" +
-      "  font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1;" +
-      "}";
-    document.head.appendChild(style);
   }
 
   var ICONS = {
@@ -67,7 +39,6 @@
 
   function ensureBar() {
     if (document.getElementById("mobile-bottom-nav")) return;
-    ensureStyles();
 
     var bar = document.createElement("nav");
     bar.id = "mobile-bottom-nav";
