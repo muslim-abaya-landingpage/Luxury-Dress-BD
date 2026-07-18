@@ -1126,7 +1126,73 @@ function ensureQuickViewModal() {
     });
   }
 }
+function ensureStickyOrderBarStyles() {
+  if (document.getElementById("sticky-order-bar-style")) return;
+  var style = document.createElement("style");
+  style.id = "sticky-order-bar-style";
+  style.textContent =
+    "#stickyOrderBar{position:fixed;left:0;right:0;bottom:64px;z-index:2147482900;" +
+    "background:#fff;border-top:1px solid #ececec;box-shadow:0 -3px 14px rgba(0,0,0,.08);" +
+    "display:none;padding:10px 14px;gap:10px;}" +
+    "@media (min-width:769px){#stickyOrderBar{display:none !important;}}" +
+    "#stickyOrderBar.is-visible{display:flex;}" +
+    "#stickyOrderBar .sob-btn{flex:1;border-radius:10px;border:1.5px solid #111;" +
+    "background:#fff;color:#111;font-size:13.5px;font-weight:700;padding:12px 0;cursor:pointer;" +
+    "font-family:inherit;text-align:center;text-decoration:none;}" +
+    "#stickyOrderBar .sob-buy{background:#111;color:#fff;}" +
+    "@media (max-width:768px){body.shop-product-open{padding-bottom:138px;}}";
+  document.head.appendChild(style);
+}
+
+var stickyOrderObserver = null;
+
+function initStickyOrderBar(root) {
+  teardownStickyOrderBar();
+  var actionsRow = root.querySelector(".pqv-actions-row");
+  if (!actionsRow || typeof IntersectionObserver !== "function") return;
+  ensureStickyOrderBarStyles();
+
+  var bar = document.getElementById("stickyOrderBar");
+  if (!bar) {
+    bar = document.createElement("div");
+    bar.id = "stickyOrderBar";
+    document.body.appendChild(bar);
+  }
+  bar.innerHTML =
+    '<button type="button" class="sob-btn sob-cart">Add to Cart</button>' +
+    '<button type="button" class="sob-btn sob-buy">Buy Now</button>';
+
+  bar.querySelector(".sob-cart").addEventListener("click", function () {
+    var realBtn = actionsRow.querySelector(".pqv-act-cart");
+    if (realBtn) realBtn.click();
+  });
+  bar.querySelector(".sob-buy").addEventListener("click", function () {
+    var realBtn = actionsRow.querySelector(".pqv-act-buy");
+    if (realBtn) realBtn.click();
+  });
+
+  stickyOrderObserver = new IntersectionObserver(
+    function (entries) {
+      entries.forEach(function (entry) {
+        var scrolledPast = entry.boundingClientRect.bottom < 0;
+        bar.classList.toggle("is-visible", scrolledPast);
+      });
+    },
+    { threshold: 0 }
+  );
+  stickyOrderObserver.observe(actionsRow);
+}
+
+function teardownStickyOrderBar() {
+  if (stickyOrderObserver) {
+    stickyOrderObserver.disconnect();
+    stickyOrderObserver = null;
+  }
+  var bar = document.getElementById("stickyOrderBar");
+  if (bar) bar.classList.remove("is-visible");
+}
 function closeProductQuickView(skipHistory) {
+  teardownStickyOrderBar();
   var root = shopCartCtx.root;
   if (root && shopCartCtx.gridHtml) {
     root.innerHTML = shopCartCtx.gridHtml;
@@ -1460,6 +1526,7 @@ function openProductQuickView(idx) {
   root.setAttribute("data-category-key", categoryKey);
   root.innerHTML = html;
   bindPqvInteractions(products[idx], idx, categoryKey, root);
+  initStickyOrderBar(root);
   var pqvQtyInput = root.querySelector("#pqvQty");
   if (pqvQtyInput) setPqvQtyInput(pqvQtyInput, cardQty);
   var legacy = document.getElementById("productQuickView");
