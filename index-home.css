@@ -1003,3 +1003,10 @@ body,
 .lux-feature{
     background:#ffffff !important;
 }
+/* --- Only Home Page Hero Section Fix --- */
+body.template-index main,
+body.home main,
+body.template-index #MainContent,
+body.template-index .main-content {
+    margin-top: 30px !important; /* শুধু হোম পেজের স্লাইডারটিকে নিচে নামাবে */
+}
