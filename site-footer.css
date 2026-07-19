@@ -1,9 +1,29 @@
 /* Muslim Abaya — full-width footer (all pages) */
+* {
+  box-sizing: border-box;
+}
+
 html,
 body {
-  margin: 0;
-  padding: 0;
+  margin: 0 !important;
+  padding: 0 !important;
   background: #fff;
+  overflow-x: hidden;
+}
+
+/* হেডার এবং স্লাইডারের মাঝখানের গ্যাপ দূর করতে */
+header, 
+.site-header,
+#shopify-section-header {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+main, 
+#MainContent, 
+.main-content {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
 }
 
 #site-footer-mount {
