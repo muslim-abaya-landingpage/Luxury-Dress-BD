@@ -11,19 +11,27 @@ body {
   overflow-x: hidden;
 }
 
-/* হেডার এবং স্লাইডারের মাঝখানের গ্যাপ দূর করতে */
+/* হেডার এবং স্লাইডারের মাঝখানের গ্যাপ স্বাভাবিক করা */
 header, 
 .site-header,
 #shopify-section-header {
-  margin-bottom: 0 !important;
+  margin-bottom: 10px !important; /* উপরে চেপে যাওয়া রোধ করতে ১০ পিক্সেল গ্যাপ দেওয়া হলো */
   padding-bottom: 0 !important;
 }
 
 main, 
 #MainContent, 
 .main-content {
-  margin-top: 0 !important;
+  margin-top: 15px !important; /* স্লাইডারের ওপরে সুন্দর একটা স্পেস তৈরি করবে */
   padding-top: 0 !important;
+}
+
+/* স্লাইডারের নিচের গ্যাপ ঠিক রাখতে */
+.main-content > div:first-child,
+#MainContent > div:first-child,
+.slideshow,
+.hero-slider {
+  margin-bottom: 30px !important;
 }
 
 #site-footer-mount {
