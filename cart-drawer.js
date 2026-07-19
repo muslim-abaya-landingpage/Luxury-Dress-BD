@@ -5,16 +5,37 @@ function ensureCartDrawerRelatedStyles() {
   const style = document.createElement('style');
   style.id = 'cart-drawer-related-style';
   style.textContent = `
-    .related-wrapper { border-top: 1px solid #ececec; padding-top: 14px; margin-top: 10px; }
-    .related-title { font-size: 14px; font-weight: 700; margin: 0 0 12px; color: #111; }
-    .related-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .related-card { border: 1px solid #ececec; border-radius: 10px; padding: 8px; text-align: left; }
-    .related-card-thumb { width: 100%; aspect-ratio: 4/5; border-radius: 6px; overflow: hidden; background: #f5f5f5; margin-bottom: 6px; }
-    .related-card-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .related-card-name { font-size: 12px; margin: 0 0 4px; color: #111; line-height: 1.3; min-height: 31px; }
-    .related-card-price { font-size: 13px; font-weight: 700; color: #b8952e; margin: 0 0 6px; }
-    .related-card-add { width: 100%; border: 1px solid #111; background: #fff; color: #111; font-size: 11px; font-weight: 600; padding: 6px 0; border-radius: 999px; cursor: pointer; }
+    .related-wrapper { border-top: 1px solid #ececec; padding-top: 16px; margin-top: 12px; }
+    .related-title { font-size: 14px; font-weight: 700; margin: 0 0 12px; color: #111; letter-spacing: -0.01em; }
+    .related-grid {
+      display: flex; gap: 12px; overflow-x: auto; overflow-y: hidden;
+      padding: 2px 2px 10px; margin: 0 -2px;
+      scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+    .related-grid::-webkit-scrollbar { height: 5px; }
+    .related-grid::-webkit-scrollbar-thumb { background: #e3d9c2; border-radius: 999px; }
+    .related-card {
+      flex: 0 0 132px; scroll-snap-align: start;
+      border: 1px solid #ececec; border-radius: 14px; padding: 9px;
+      text-align: left; background: #fff;
+      box-shadow: 0 1px 3px rgba(17,17,17,.04);
+      transition: box-shadow .2s ease, transform .2s ease;
+    }
+    .related-card:hover { box-shadow: 0 6px 18px rgba(17,17,17,.10); transform: translateY(-2px); }
+    .related-card-thumb { width: 100%; aspect-ratio: 4/5; border-radius: 10px; overflow: hidden; background: #f5f5f5; margin-bottom: 8px; position: relative; }
+    .related-card-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .3s ease; }
+    .related-card:hover .related-card-thumb img { transform: scale(1.04); }
+    .related-card-name { font-size: 12px; margin: 0 0 4px; color: #111; line-height: 1.3; min-height: 31px; font-weight: 500; }
+    .related-card-price { font-size: 13.5px; font-weight: 700; color: #b8952e; margin: 0 0 8px; }
+    .related-card-add {
+      width: 100%; border: 1.5px solid #111; background: #fff; color: #111;
+      font-size: 11px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase;
+      padding: 7px 0; border-radius: 999px; cursor: pointer;
+      transition: background .2s ease, color .2s ease;
+    }
     .related-card-add:hover { background: #111; color: #fff; }
+    .related-card-add.is-added { border-color: #16a34a; color: #16a34a; }
   `;
   document.head.appendChild(style);
 }
@@ -77,7 +98,7 @@ window.renderCartDrawerRelated = function (cartItems) {
 
   const primaryCategory = cartItems[0].category || cartItems[0].categoryKey || '';
   let candidates = typeof window.getRelatedProducts === 'function'
-    ? window.getRelatedProducts(primaryCategory, 8) || []
+    ? window.getRelatedProducts(primaryCategory, 20) || []
     : [];
   candidates = candidates.filter(p => p && p.id && !inCart[String(p.id)]);
 
@@ -86,7 +107,6 @@ window.renderCartDrawerRelated = function (cartItems) {
     container.innerHTML = '';
     return;
   }
-  candidates = candidates.slice(0, 4);
 
   container.innerHTML = candidates.map(p => {
     const img = p.image || p.img || 'images/Baby-Pink-Floral-Print.jpeg';
@@ -155,12 +175,12 @@ function ensureCartDrawerHtml() {
   </button>
 </div>
     <div class="cart-drawer-body">
-  <div id="cart-items-list" class="cart-items"></div>
-  <div id="related-products-section" class="related-wrapper" style="display: none;">
-  <h3 class="related-title">Customers also bought</h3>
-  <div id="related-products-container" class="related-grid"></div>
-  </div>
-</div>
+      <div id="cart-items-list"></div>
+      <div id="related-products-section" class="related-wrapper" style="display: none;">
+        <h3 class="related-title">Customers also bought</h3>
+        <div id="related-products-container" class="related-grid"></div>
+      </div>
+    </div>
     <div class="cart-drawer-foot">
       <div class="cart-drawer-total-row">
        <span>Total:</span>
