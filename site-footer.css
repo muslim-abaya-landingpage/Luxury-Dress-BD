@@ -15,14 +15,14 @@ body {
 header, 
 .site-header,
 #shopify-section-header {
-  margin-bottom: 14px !important; /* উপরে চেপে যাওয়া রোধ করতে ১০ পিক্সেল গ্যাপ দেওয়া হলো */
+  margin-bottom: 8px !important; /* উপরে চেপে যাওয়া রোধ করতে ১০ পিক্সেল গ্যাপ দেওয়া হলো */
   padding-bottom: 0 !important;
 }
 
 main, 
 #MainContent, 
 .main-content {
-  margin-top: 15px !important; /* স্লাইডারের ওপরে সুন্দর একটা স্পেস তৈরি করবে */
+  margin-top: 20px !important; /* স্লাইডারের ওপরে সুন্দর একটা স্পেস তৈরি করবে */
   padding-top: 0 !important;
 }
 
