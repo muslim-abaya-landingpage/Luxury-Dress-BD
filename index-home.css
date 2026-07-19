@@ -1002,10 +1002,10 @@ body,
     background:#ffffff !important;
 }
 
-/* --- Only Home Page Hero Section Fix --- */
-body.template-index #premium-collection,
-body.template-index .display-area,
-body.template-index .main-grid,
-body.template-index .big-view {
-    margin-top: 35px !important; /* স্লাইডারটিকে সম্পূর্ণভাবে ৩৫ পিক্সেল নিচে নামিয়ে দেবে */
+/* --- Announcement & Hero Section Alignment Fix --- */
+.announcement-slider,
+#shopify-section-announcement-bar,
+.announcement-bar {
+    margin-top: 15px !important;    /* অ্যানাউন্সমেন্ট বারটিকে হেডার থেকে নিচে নামাবে */
+    margin-bottom: 15px !important; /* স্লাইডারের ওপরে সুন্দর গ্যাপ তৈরি করবে */
 }
