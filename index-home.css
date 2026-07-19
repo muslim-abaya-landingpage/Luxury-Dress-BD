@@ -991,22 +991,23 @@ body {
   overflow-x: hidden;
 }
 
-/* হেডারের প্যাডিং ঠিক রাখা */
+/* হেডার এবং নোটিশ বারের দূরত্ব একদম স্বাভাবিক (কম্প্যাক্ট) রাখা */
 header, 
 .site-header,
-#shopify-section-header {
-  padding-bottom: 0 !important;
+#shopify-section-header,
+.announcement-slider,
+[class*="announcement"] {
+  margin-top: 0 !important;
   margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
 }
 
-/* অ্যানাউন্সমেন্ট বার ও স্লাইডারকে জোরপূর্বক নিচে নামানোর চূড়ান্ত ফিক্স */
-body [id*="announcement"],
-body [class*="announcement"],
-body .announcement-slider,
-body .announcement-content,
-body #premium-collection,
-body .main-grid {
-  margin-top: 25px !important; /* হেডার এবং নোটিশ বারের মাঝখানে নিখুঁত ২৫ পিক্সেল গ্যাপ তৈরি করবে */
+/* নোটিশ বার থেকে শুধুমাত্র নিচের মূল স্লাইডার/ব্যানারটিকে ধাক্কা দিয়ে নিচে নামানো */
+#premium-collection,
+.main-grid,
+.display-area,
+.big-view {
+  margin-top: 30px !important; /* এটি অ্যানাউন্সমেন্ট বার থেকে স্লাইডারকে ৩০ পিক্সেল নিচে নামাবে */
 }
 
 /* ফুটারের সাদা অংশ দূর করার মূল কোড */
