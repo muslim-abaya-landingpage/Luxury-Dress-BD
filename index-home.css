@@ -978,34 +978,43 @@ html, body {
         font-size: 15px;
     }
 }
-/* =========================
-   CLEAN WHITE BACKGROUND
-========================= */
+/* Muslim Abaya — full-width footer (all pages) & Layout Fix */
+* {
+  box-sizing: border-box;
+}
 
 html,
-body,
-.main-grid,
-.display-area,
-.big-view,
-#premium-collection .big-view,
-#premium-collection #view{
-    background:#ffffff !important;
-    background-image:none !important;
+body {
+  margin: 0 !important;
+  padding: 0 !important;
+  background: #fff;
+  overflow-x: hidden;
 }
 
-.item-card,
-.order-card,
-.details-box,
-.lux-video-wrap,
-.lux-video-card,
-.lux-feature{
-    background:#ffffff !important;
+/* হেডারের প্যাডিং ঠিক রাখা */
+header, 
+.site-header,
+#shopify-section-header {
+  padding-bottom: 0 !important;
 }
 
-/* --- Announcement & Hero Section Alignment Fix --- */
-.announcement-slider,
-#shopify-section-announcement-bar,
-.announcement-bar {
-    margin-top: 15px !important;    /* অ্যানাউন্সমেন্ট বারটিকে হেডার থেকে নিচে নামাবে */
-    margin-bottom: 15px !important; /* স্লাইডারের ওপরে সুন্দর গ্যাপ তৈরি করবে */
+/* মেইন সেকশনকে হেডার ও অ্যানাউন্সমেন্ট বারের নিচে স্বাভাবিক জায়গা দেওয়া */
+main, 
+#MainContent, 
+.main-content {
+  padding-top: 25px !important; /* এটি হোম পেজসহ সব পেজের কেটে যাওয়া বা চেপে যাওয়া ভাব দূর করবে */
+}
+
+/* ফুটারের সাদা অংশ দূর করার মূল কোড */
+#site-footer-mount {
+  clear: both;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  background: #0a0a0a;
+}
+
+#site-footer-mount:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
