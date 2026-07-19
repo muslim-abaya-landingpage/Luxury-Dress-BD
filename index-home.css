@@ -996,13 +996,17 @@ header,
 .site-header,
 #shopify-section-header {
   padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
 }
 
-/* মেইন সেকশনকে হেডার ও অ্যানাউন্সমেন্ট বারের নিচে স্বাভাবিক জায়গা দেওয়া */
+/* হোম পেজ এবং অন্যান্য পেজের মেইন গ্রিড ও স্লাইডারকে নিচে নামানোর মূল ফিক্স */
 main, 
 #MainContent, 
-.main-content {
-  padding-top: 25px !important; /* এটি হোম পেজসহ সব পেজের কেটে যাওয়া বা চেপে যাওয়া ভাব দূর করবে */
+.main-content,
+.main-grid,
+#premium-collection,
+.display-area {
+  padding-top: 30px !important; /* জোরপূর্বক স্লাইডার ও কন্টেন্টকে ৩০ পিক্সেল নিচে নামাবে */
 }
 
 /* ফুটারের সাদা অংশ দূর করার মূল কোড */
