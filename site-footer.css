@@ -880,8 +880,8 @@ a.anz-contact-link:hover {
     min-height: 44px !important;
     max-height: none !important;
     padding: 12px 16px;
-    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-  }
+    padding-bottom: 12px !important; /* এখানে পরিবর্তন করা হয়েছে */
+}
 
   .anz-bottom p {
     font-size: 11px;
