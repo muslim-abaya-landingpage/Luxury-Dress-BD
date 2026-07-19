@@ -15,7 +15,7 @@ body {
 header, 
 .site-header,
 #shopify-section-header {
-  margin-bottom: 10px !important; /* উপরে চেপে যাওয়া রোধ করতে ১০ পিক্সেল গ্যাপ দেওয়া হলো */
+  margin-bottom: 14px !important; /* উপরে চেপে যাওয়া রোধ করতে ১০ পিক্সেল গ্যাপ দেওয়া হলো */
   padding-bottom: 0 !important;
 }
 
