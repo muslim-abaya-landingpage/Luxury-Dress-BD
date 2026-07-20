@@ -684,6 +684,65 @@
         }
         .coupon-panel.is-open .coupon-panel-body { display: block; }
         .payment-extra.is-cod-hidden { display: none !important; }
+        .gb-panel-plan.is-cod-hidden { display: none !important; }
+        .checkout-steps {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            max-width: 640px;
+            margin: 14px auto 18px;
+            padding: 0 16px;
+        }
+        .checkout-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+        .checkout-step-num {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            background: #f1f1f1;
+            color: #888;
+            border: 1.5px solid #e4e4e4;
+            transition: background .2s ease, color .2s ease, border-color .2s ease;
+        }
+        .checkout-step-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #888;
+            white-space: nowrap;
+        }
+        .checkout-step.is-active .checkout-step-num,
+        .checkout-step.is-done .checkout-step-num {
+            background: var(--gold, #b8952e);
+            color: #fff;
+            border-color: var(--gold, #b8952e);
+        }
+        .checkout-step.is-active .checkout-step-label,
+        .checkout-step.is-done .checkout-step-label {
+            color: #111;
+        }
+        .checkout-step-line {
+            width: 40px;
+            height: 2px;
+            background: #e4e4e4;
+            flex-shrink: 0;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 480px) {
+            .checkout-step-line { width: 20px; }
+            .checkout-step-label { font-size: 10px; }
+        }
         .phone-row {
             display: flex;
             gap: 0;
@@ -1589,6 +1648,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <a href="signup.html?next=checkout.html" class="btn-login-fill">Register</a>
         </div>
     </div>
+    <div class="checkout-steps" id="checkoutSteps">
+        <a href="#orderSummary" class="checkout-step is-active" data-step="1">
+            <span class="checkout-step-num">1</span><span class="checkout-step-label">Review order</span>
+        </a>
+        <span class="checkout-step-line"></span>
+        <a href="#userName" class="checkout-step" data-step="2">
+            <span class="checkout-step-num">2</span><span class="checkout-step-label">Delivery info</span>
+        </a>
+        <span class="checkout-step-line"></span>
+        <a href="#paymentMethodPanel" class="checkout-step" data-step="3">
+            <span class="checkout-step-num">3</span><span class="checkout-step-label">Payment</span>
+        </a>
+    </div>
     <form id="orderForm" class="checkout-grid" novalidate>
         <input type="hidden" id="orderSiteTs" name="SiteTs" value="">
         <div class="ma-hp" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;opacity:0">
@@ -1643,7 +1715,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </div>
         </div>
         <aside class="checkout-aside">
-            <div class="gb-panel gb-panel-payment">
+            <div class="gb-panel gb-panel-payment" id="paymentMethodPanel">
                 <h3 class="gb-panel-title">Payment method</h3>
                 <div class="pm-stack" role="radiogroup" aria-label="Select payment method">
                     <div class="pm-row pm-row-2">
@@ -3018,6 +3090,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             highlightPayCards(pmKey);
             var extra = document.getElementById('paymentExtra');
             if (extra) extra.classList.toggle('is-cod-hidden', pmKey === 'cod');
+            var planPanel = document.querySelector('.gb-panel-plan');
+            if (planPanel) planPanel.classList.toggle('is-cod-hidden', pmKey === 'cod');
         }
         document.querySelectorAll('.pm-option').forEach(function(opt) {
             opt.addEventListener('click', function() { syncPaymentMethod(opt); });
@@ -3303,6 +3377,44 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         renderCrossSell();
     });
 
+    function initCheckoutSteps() {
+        var stepsBar = document.getElementById('checkoutSteps');
+        if (!stepsBar || typeof IntersectionObserver !== 'function') return;
+        var steps = Array.prototype.slice.call(stepsBar.querySelectorAll('.checkout-step'));
+        var sectionIds = ['orderSummary', 'userName', 'paymentMethodPanel'];
+        var sections = sectionIds
+            .map(function (id) { return document.getElementById(id); })
+            .filter(Boolean);
+        if (!sections.length) return;
+
+        function setActive(activeIdx) {
+            steps.forEach(function (step, i) {
+                step.classList.toggle('is-active', i === activeIdx);
+                step.classList.toggle('is-done', i < activeIdx);
+            });
+        }
+
+        var observer = new IntersectionObserver(
+            function (entries) {
+                entries.forEach(function (entry) {
+                    if (!entry.isIntersecting) return;
+                    var idx = sections.indexOf(entry.target);
+                    if (idx !== -1) setActive(idx);
+                });
+            },
+            { rootMargin: '-20% 0px -70% 0px', threshold: 0 }
+        );
+        sections.forEach(function (sec) { observer.observe(sec); });
+
+        stepsBar.addEventListener('click', function (e) {
+            var link = e.target.closest('.checkout-step');
+            if (!link) return;
+            e.preventDefault();
+            var target = document.querySelector(link.getAttribute('href'));
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    }
+
     function bindCheckoutTikTokMatchSync() {
         ['userPhone', 'userEmail', 'userName'].forEach(function (id) {
             var el = document.getElementById(id);
@@ -3349,6 +3461,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         persistCart();
         renderCrossSell();
         bindCheckoutTikTokMatchSync();
+        initCheckoutSteps();
         if (typeof pushTrackingEvent === 'function') {
             var checkoutSnap = typeof buildCartTrackingSnapshot === 'function'
                 ? buildCartTrackingSnapshot(cart)
