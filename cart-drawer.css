@@ -1,13 +1,14 @@
 /* ==============================
-   CART DRAWER OVERLAY
+    CART DRAWER OVERLAY
 ============================== */
 
 .cart-drawer-overlay {
   position: fixed;
   inset: 0;
   background: rgba(17, 17, 17, .42);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  /* ডাবল গ্লাস/ব্লার দূর করার জন্য নিচের দুটি লাইন বন্ধ করা হলো */
+  /* backdrop-filter: blur(4px); */
+  /* -webkit-backdrop-filter: blur(4px); */
   z-index: 1000100;
   opacity: 0;
   visibility: hidden;
@@ -124,8 +125,8 @@
 }
 
 /* ==============================
-   CART DRAWER BODY — MERGED
-   (এই অংশ স্ক্রল হবে)
+    CART DRAWER BODY — MERGED
+    (এই অংশ স্ক্রল হবে)
 ============================== */
 
 .cart-drawer-body,
@@ -135,8 +136,8 @@
   overflow-y: auto;
   min-height: 0;
   padding-bottom: 180px;
+  background-color: #ffffff; /* <- এই নতুন লাইনটি এখানে বসিয়ে দিন */
 }
-
 /* ==============================
    CART DRAWER ITEMS
 ============================== */
@@ -279,7 +280,7 @@
 }
 
 /* ==============================
-   RECOMMENDATIONS — MERGED
+    RECOMMENDATIONS — MERGED
 ============================== */
 
 .cart-cross-sell,
@@ -287,8 +288,15 @@
 .customers-also-bought {
   max-height: 320px;
   overflow-y: auto;
+  background: #ffffff !important; /* ব্যাকগ্রাউন্ড সলিড সাদা করা হলো */
+  padding: 10px;
 }
 
+/* রিকমেন্ডেশনের ভেতরের প্রোডাক্ট বক্সগুলোর জন্য */
+.customers-also-bought img, 
+.cart-recommendations img {
+  border-radius: 8px;
+}
 /* ==============================
    CART DRAWER FOOTER — MERGED
    (sticky, সবসময় নিচে)
