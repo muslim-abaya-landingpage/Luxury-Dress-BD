@@ -29,8 +29,8 @@
         z-index:2147483647;
     }
 
-    body{
-        padding-bottom:64px;
+    html body{
+        padding-bottom:64px !important;
     }
 
     .cart-drawer-foot,
@@ -61,7 +61,7 @@
     .mbn-bar{
         display:none !important;
     }
-    body{
+    html body{
         padding-bottom:0 !important;
     }
 }
