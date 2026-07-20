@@ -5,31 +5,54 @@ function ensureCartDrawerRelatedStyles() {
   const style = document.createElement('style');
   style.id = 'cart-drawer-related-style';
   style.textContent = `
-    .related-wrapper { border-top: 1px solid #ececec; padding-top: 16px; margin-top: 12px; }
-    .related-title { font-size: 14px; font-weight: 700; margin: 0 0 12px; color: #111; letter-spacing: -0.01em; }
+    .cart-drawer-body { overflow-x: hidden; }
+    .related-wrapper {
+      border-top: 1px solid rgba(17,17,17,.08);
+      padding: 16px 14px 14px;
+      margin: 12px -14px -14px;
+      overflow-x: hidden;
+      overflow-y: visible;
+      background: linear-gradient(135deg, rgba(184,149,46,.06), rgba(184,149,46,.015));
+    }
+    .related-title {
+      font-size: 13.5px; font-weight: 700; margin: 0 0 12px; padding-left: 2px;
+      color: #111; letter-spacing: -0.01em; text-transform: uppercase; font-size: 12px;
+    }
     .related-grid {
       display: flex; gap: 12px; overflow-x: auto; overflow-y: hidden;
-      padding: 2px 2px 10px; margin: 0 -2px;
+      padding: 4px 4px 12px; margin: 0 -4px;
       scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
-      scrollbar-width: thin;
+      scrollbar-width: thin; max-width: 100%;
     }
     .related-grid::-webkit-scrollbar { height: 5px; }
-    .related-grid::-webkit-scrollbar-thumb { background: #e3d9c2; border-radius: 999px; }
+    .related-grid::-webkit-scrollbar-thumb { background: rgba(184,149,46,.4); border-radius: 999px; }
     .related-card {
       flex: 0 0 132px; scroll-snap-align: start;
-      border: 1px solid #ececec; border-radius: 14px; padding: 9px;
-      text-align: left; background: #fff;
-      box-shadow: 0 1px 3px rgba(17,17,17,.04);
-      transition: box-shadow .2s ease, transform .2s ease;
+      border: 1px solid rgba(255,255,255,.6);
+      border-radius: 16px; padding: 9px;
+      text-align: left;
+      background: rgba(255,255,255,.55);
+      backdrop-filter: blur(14px) saturate(160%);
+      -webkit-backdrop-filter: blur(14px) saturate(160%);
+      box-shadow: 0 4px 16px rgba(17,17,17,.06), inset 0 1px 0 rgba(255,255,255,.5);
+      transition: box-shadow .25s ease, transform .25s ease, background .25s ease;
     }
-    .related-card:hover { box-shadow: 0 6px 18px rgba(17,17,17,.10); transform: translateY(-2px); }
-    .related-card-thumb { width: 100%; aspect-ratio: 4/5; border-radius: 10px; overflow: hidden; background: #f5f5f5; margin-bottom: 8px; position: relative; }
+    .related-card:hover {
+      box-shadow: 0 10px 26px rgba(17,17,17,.12), inset 0 1px 0 rgba(255,255,255,.6);
+      transform: translateY(-3px);
+      background: rgba(255,255,255,.72);
+    }
+    .related-card-thumb { width: 100%; aspect-ratio: 4/5; border-radius: 11px; overflow: hidden; background: rgba(245,245,245,.6); margin-bottom: 8px; position: relative; }
     .related-card-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .3s ease; }
-    .related-card:hover .related-card-thumb img { transform: scale(1.04); }
+    .related-card:hover .related-card-thumb img { transform: scale(1.05); }
     .related-card-name { font-size: 12px; margin: 0 0 4px; color: #111; line-height: 1.3; min-height: 31px; font-weight: 500; }
     .related-card-price { font-size: 13.5px; font-weight: 700; color: #b8952e; margin: 0 0 8px; }
     .related-card-add {
-      width: 100%; border: 1.5px solid #111; background: #fff; color: #111;
+      width: 100%; border: 1.5px solid rgba(17,17,17,.7);
+      background: rgba(255,255,255,.4);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      color: #111;
       font-size: 11px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase;
       padding: 7px 0; border-radius: 999px; cursor: pointer;
       transition: background .2s ease, color .2s ease;
