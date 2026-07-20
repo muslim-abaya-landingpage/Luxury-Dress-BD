@@ -794,7 +794,20 @@ karchupi: [],
 kaftan: [],
 
 /* ═══ ⑧ হিজাব — খালি ═══ */
-hijab: [],
+hijab: [
+{
+  id: "HIJAB-01",
+  name: "Premium Short Khimar Hijab – Dusty Pink",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-short-khimar-hijab-dusty-pink-soft-jersey.webp",
+  link: "/",
+  price: 150,
+  color: "dusty-pink",
+  colorLabel: "Dusty Pink",
+  fabric: "Premium Soft Jersey Fabric",
+  sizes: ["Free Size"],
+  detailNote: "Premium ready-to-wear short khimar hijab crafted from soft jersey fabric. Lightweight, breathable, stretchable, and comfortable for daily wear, prayer, office, university, and travel."
+}  
+],
 
 /* ═══ ⑨ পাঞ্জাবি ═══ */
 panjabi: [
