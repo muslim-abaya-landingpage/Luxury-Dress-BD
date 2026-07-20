@@ -1003,10 +1003,7 @@ header,
 }
 
 /* নোটিশ বার থেকে শুধুমাত্র নিচের মূল স্লাইডার/ব্যানারটিকে ধাক্কা দিয়ে নিচে নামানো */
-#premium-collection,
-.main-grid,
-.display-area,
-.big-view {
+#homeHero {
   margin-top: 30px !important; /* এটি অ্যানাউন্সমেন্ট বার থেকে স্লাইডারকে ৩০ পিক্সেল নিচে নামাবে */
 }
 
