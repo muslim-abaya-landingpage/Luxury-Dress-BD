@@ -192,27 +192,27 @@ backdrop-filter:blur(14px);
 .item-card,
 .product-card{
 
-    position:relative;
+     position:relative;
 
-    background:var(--glass-bg);
+     background:var(--glass-bg);
 
-    -webkit-backdrop-filter:blur(var(--glass-blur));
-    backdrop-filter:blur(var(--glass-blur));
+     -webkit-backdrop-filter:blur(var(--glass-blur));
+     backdrop-filter:blur(var(--glass-blur));
 
-    border:1px solid var(--glass-border);
+     border:1px solid var(--glass-border);
 
-    border-radius:20px;
+     border-radius:20px;
 
-    overflow:hidden;
+     overflow:hidden;
 
-    box-shadow:var(--glass-shadow);
+     box-shadow:var(--glass-shadow);
 
-    transition:
-    transform var(--transition),
-    box-shadow var(--transition),
-    border-color var(--transition);
+     transition:
+     transform var(--transition),
+     box-shadow var(--transition),
+     border-color var(--transition);
 
-    will-change:transform;
+     will-change:transform;
 
 }
 
@@ -223,11 +223,11 @@ backdrop-filter:blur(14px);
 .item-card:hover,
 .product-card:hover{
 
-    transform:translateY(-6px);
+     transform:translateY(-6px);
 
-    box-shadow:var(--glass-shadow-hover);
+     box-shadow:var(--glass-shadow-hover);
 
-    border-color:rgba(201,169,98,.35);
+     border-color:rgba(201,169,98,.35);
 
 }
 
@@ -238,11 +238,11 @@ backdrop-filter:blur(14px);
 .item-card img,
 .product-card img{
 
-    display:block;
+     display:block;
 
-    width:100%;
+     width:100%;
 
-    transition:transform .45s ease;
+     transition:transform .45s ease;
 
 }
 
@@ -251,7 +251,7 @@ backdrop-filter:blur(14px);
 .item-card:hover img,
 .product-card:hover img{
 
-    transform:scale(1.04);
+     transform:scale(1.04);
 
 }
 
@@ -262,9 +262,9 @@ backdrop-filter:blur(14px);
 .product-title,
 .product-name{
 
-    font-weight:600;
+     font-weight:600;
 
-    line-height:1.45;
+     line-height:1.45;
 
 }
 
@@ -273,9 +273,9 @@ backdrop-filter:blur(14px);
 .price,
 .product-price{
 
-    font-weight:700;
+     font-weight:700;
 
-    color:var(--brand);
+     color:var(--brand);
 
 }
 
@@ -284,25 +284,25 @@ backdrop-filter:blur(14px);
 .sale-badge,
 .discount-badge{
 
-    position:absolute;
+     position:absolute;
 
-    top:12px;
+     top:12px;
 
-    left:12px;
+     left:12px;
 
-    padding:6px 10px;
+     padding:6px 10px;
 
-    border-radius:999px;
+     border-radius:999px;
 
-    background:rgba(17,17,17,.75);
+     background:rgba(17,17,17,.75);
 
-    color:#fff;
+     color:#fff;
 
-    backdrop-filter:blur(12px);
+     backdrop-filter:blur(12px);
 
-    font-size:12px;
+     font-size:12px;
 
-    font-weight:600;
+     font-weight:600;
 
 }
 /* ==================================================
@@ -568,108 +568,122 @@ border-radius:14px;
 
 }
 /* =====================================================
-   STEP 7 - Premium Liquid Glass Cart Drawer
+   STEP 7 - Premium Liquid Glass Cart Drawer Fix
 ===================================================== */
 
-/* Overlay */
-
-.cart-drawer-overlay{
-
-background:rgba(15,15,15,.45);
-
--webkit-backdrop-filter:blur(8px);
-backdrop-filter:blur(8px);
-
+/* Overlay Backend */
+.cart-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99998;
+  background: rgba(15, 15, 15, 0.45);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-/* Drawer */
-
-.cart-drawer{
-
-background:rgba(255,255,255,.78);
-
--webkit-backdrop-filter:blur(22px);
-backdrop-filter:blur(22px);
-
-border-left:1px solid rgba(255,255,255,.30);
-
+.cart-drawer-overlay.is-active,
+.cart-drawer-overlay.open {
+  opacity: 1;
+  visibility: visible;
 }
 
-/* Header */
-
-.cart-drawer-head{
-
-background:rgba(255,255,255,.65);
-
--webkit-backdrop-filter:blur(18px);
-backdrop-filter:blur(18px);
-
+/* Master Fixed Drawer Layout */
+.cart-drawer {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 440px;
+  max-width: 100vw;
+  height: 100vh;
+  z-index: 99999;
+  display: flex !important;
+  flex-direction: column !important;
+  background: rgba(255, 255, 255, 0.82) !important;
+  -webkit-backdrop-filter: blur(22px);
+  backdrop-filter: blur(22px);
+  border-left: 1px solid rgba(255, 255, 255, 0.30);
+  box-shadow: -10px 0 35px rgba(0, 0, 0, 0.18);
+  transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Footer */
-
-.cart-drawer-foot{
-
-background:rgba(255,255,255,.72);
-
--webkit-backdrop-filter:blur(20px);
-backdrop-filter:blur(20px);
-
+.cart-drawer.is-open,
+.cart-drawer.open,
+.cart-drawer.active {
+  right: 0 !important;
 }
 
-/* Product Image */
-
-.cart-drawer-thumb{
-
-border-radius:16px;
-
-overflow:hidden;
-
+/* Fixed Header */
+.cart-drawer-head {
+  padding: 16px 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background: rgba(255, 255, 255, 0.65);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
 }
 
-/* Quantity */
-
-.cart-drawer-qty{
-
-background:rgba(255,255,255,.55);
-
-backdrop-filter:blur(10px);
-
-border:1px solid rgba(255,255,255,.25);
-
+.cart-drawer-head .close-btn, 
+.cart-drawer-head button,
+.cart-drawer-head a,
+.cart-drawer h2, .cart-drawer span {
+  z-index: 100001 !important;
+  cursor: pointer;
 }
 
-/* Checkout */
-
-.cart-drawer-checkout{
-
-background:rgba(17,17,17,.88);
-
-backdrop-filter:blur(12px);
-
-border-radius:16px;
-
+/* Scrollable Container Body */
+.cart-drawer-body {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  padding: 20px !important;
 }
 
-.cart-drawer-checkout:hover{
-
-background:var(--gold);
-
-color:#111;
-
+/* Internal Components */
+.cart-drawer-thumb {
+  border-radius: 16px;
+  overflow: hidden;
 }
 
-/* Mobile */
+.cart-drawer-qty {
+  background: rgba(255, 255, 255, .55);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, .25);
+}
 
+/* Sticky Footer Options */
+.cart-drawer-foot {
+  padding: 20px !important;
+  background: rgba(255, 255, 255, .72);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.cart-drawer-checkout {
+  background: rgba(17, 17, 17, .88);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  width: 100%;
+  display: block;
+  text-align: center;
+}
+
+.cart-drawer-checkout:hover {
+  background: var(--gold);
+  color: #111;
+}
+
+/* Mobile Responsive */
 @media(max-width:768px){
-
-.cart-drawer{
-
-width:100%;
-
+  .cart-drawer {
+    width: 100%;
+  }
 }
 
-}
 /* =====================================================
    STEP 8 - Search + Category + Filter
 ===================================================== */
@@ -680,19 +694,19 @@ width:100%;
 .search-box,
 .search-wrap{
 
-    position:relative;
+     position:relative;
 
-    background:rgba(255,255,255,.60);
+     background:rgba(255,255,255,.60);
 
-    border:1px solid rgba(255,255,255,.30);
+     border:1px solid rgba(255,255,255,.30);
 
-    border-radius:999px;
+     border-radius:999px;
 
-    -webkit-backdrop-filter:blur(16px);
-    backdrop-filter:blur(16px);
+     -webkit-backdrop-filter:blur(16px);
+     backdrop-filter:blur(16px);
 
-    box-shadow:
-    0 8px 24px rgba(0,0,0,.08);
+     box-shadow:
+     0 8px 24px rgba(0,0,0,.08);
 
 }
 
@@ -702,13 +716,13 @@ width:100%;
 .search-box input,
 .search-wrap input{
 
-    background:transparent;
+     background:transparent;
 
-    border:none;
+     border:none;
 
-    outline:none;
+     outline:none;
 
-    box-shadow:none;
+     box-shadow:none;
 
 }
 
@@ -718,19 +732,19 @@ width:100%;
 .category-pill,
 .ah-category{
 
-    background:rgba(255,255,255,.55);
+     background:rgba(255,255,255,.55);
 
-    border:1px solid rgba(255,255,255,.25);
+     border:1px solid rgba(255,255,255,.25);
 
-    border-radius:999px;
+     border-radius:999px;
 
-    -webkit-backdrop-filter:blur(14px);
-    backdrop-filter:blur(14px);
+     -webkit-backdrop-filter:blur(14px);
+     backdrop-filter:blur(14px);
 
-    transition:
-    background .25s ease,
-    transform .25s ease,
-    box-shadow .25s ease;
+     transition:
+     background .25s ease,
+     transform .25s ease,
+     box-shadow .25s ease;
 
 }
 
@@ -788,11 +802,11 @@ box-shadow:
 .cart-drawer,
 .cart-drawer-checkout{
 
-    transform:translateZ(0);
+     transform:translateZ(0);
 
-    backface-visibility:hidden;
+     backface-visibility:hidden;
 
-    will-change:transform;
+     will-change:transform;
 
 }
 
@@ -801,7 +815,7 @@ box-shadow:
 .ah-btn:active,
 .cart-drawer-checkout:active{
 
-    transform:scale(.97);
+     transform:scale(.97);
 
 }
 
@@ -809,7 +823,7 @@ box-shadow:
 
 .ah-card img{
 
-    transform-origin:center;
+     transform-origin:center;
 
 }
 
@@ -817,27 +831,27 @@ box-shadow:
 
 .ah-card::before{
 
-    content:"";
+     content:"";
 
-    position:absolute;
+     position:absolute;
 
-    top:0;
-    left:-120%;
+     top:0;
+     left:-120%;
 
-    width:70%;
-    height:100%;
+     width:70%;
+     height:100%;
 
-    background:
-    linear-gradient(
-        120deg,
-        transparent,
-        rgba(255,255,255,.35),
-        transparent
-    );
+     background:
+     linear-gradient(
+         120deg,
+         transparent,
+         rgba(255,255,255,.35),
+         transparent
+     );
 
-    transition:left .8s ease;
+     transition:left .8s ease;
 
-    pointer-events:none;
+     pointer-events:none;
 
 }
 
@@ -907,121 +921,4 @@ background:rgba(201,169,98,.28);
 
 color:#111;
 
-}
-/* =====================================================
-   Shopping Cart Drawer - Layout & Animation Fix
-===================================================== */
-
-/* ১. কার্ট ওভারলে (পেছনের আবছা অংশ) */
-.cart-drawer-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 9998;
-  background: rgba(15, 15, 15, 0.45);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  
-  /* ডিফল্ট অবস্থায় হাইড থাকবে */
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-
-.cart-drawer-overlay.is-active,
-.cart-drawer-overlay.open {
-  opacity: 1;
-  visibility: visible;
-}
-
-/* ২. কার্ট ড্রয়ার কন্টেইনার */
-.cart-drawer {
-  position: fixed;
-  top: 0;
-  right: -100%; /* ডিফল্ট অবস্থায় স্ক্রিনের বাইরে লুকিয়ে থাকবে */
-  width: 420px;
-  max-width: 100vw;
-  height: 100vh;
-  z-index: 9999;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-
-  background: rgba(255, 255, 255, 0.85);
-  -webkit-backdrop-filter: blur(22px);
-  backdrop-filter: blur(22px);
-  border-left: 1px solid rgba(255, 255, 255, 0.30);
-  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.15);
-
-  /* স্মুথ স্লাইডিং অ্যানিমেশন */
-  transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* ড্রয়ার যখন ওপেন হবে */
-.cart-drawer.is-open,
-.cart-drawer.open,
-.cart-drawer.active {
-  right: 0 !important; /* স্লাইড করে ভেতরে আসবে */
-}
-
-/* ৩. হেডার, বডি এবং ফুটার পজিশনিং */
-.cart-drawer-head {
-  padding: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.cart-drawer-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px;
-}
-
-.cart-drawer-foot {
-  padding: 20px;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  background: rgba(255, 255, 255, 0.72);
-}
-
-/* ৪. মোবাইল রেসপনসিভনেস */
-@media (max-width: 768px) {
-  .cart-drawer {
-    width: 100%;
-    right: -100%;
-  }
-}
-/* কার্ট ড্রয়ারের ভেতর কন্টেন্ট ও হেডার দৃশ্যমান করার ফিক্স */
-.cart-drawer {
-  display: flex !important;
-  flex-direction: column !important;
-  padding-top: 20px; /* ওপরে একটু স্পেস দেওয়া হলো যাতে ক্লোজ বাটন ঢাকা না পড়ে */
-}
-
-/* কার্ট ড্রয়ারের হেডার পজিশন */
-.cart-drawer-head {
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  padding: 10px 20px 20px 20px !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
-}
-
-/* ক্লোজ বাটনটি যাতে সবসময় সবার ওপরে এবং স্পষ্ট দেখা যায় */
-.cart-drawer-head .close-btn, 
-.cart-drawer-head button,
-.cart-drawer-head a {
-  cursor: pointer !important;
-  z-index: 10001 !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-
-/* প্রোডাক্ট লিস্ট ও সাজেস্টেড প্রোডাক্টের বডি স্ক্রল ফিক্স */
-.cart-drawer-body {
-  flex: 1 !important;
-  overflow-y: auto !important;
-  padding: 15px 20px !important;
-  padding-bottom: 100px; /* নিচের চেকাউট বাটনের জন্য সেফটি মার্জিন */
 }
