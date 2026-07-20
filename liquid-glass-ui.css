@@ -1,0 +1,910 @@
+/* =====================================================
+   Muslim Abaya - Liquid Glass UI v1.0
+   Base Variables + Browser Support
+===================================================== */
+
+:root{
+
+  /* Colors */
+  --glass-bg:rgba(255,255,255,.14);
+  --glass-bg-strong:rgba(255,255,255,.22);
+  --glass-border:rgba(255,255,255,.32);
+
+  --glass-shadow:
+  0 8px 24px rgba(0,0,0,.12);
+
+  --glass-shadow-hover:
+  0 18px 45px rgba(0,0,0,.18);
+
+  --glass-blur:14px;
+
+  --brand:#111111;
+  --gold:#C9A962;
+  --success:#25D366;
+
+  --radius:18px;
+
+  --transition:.28s cubic-bezier(.4,0,.2,1);
+
+}
+
+/* -----------------------------------
+   Browser Fallback
+------------------------------------ */
+
+@supports not ((backdrop-filter:blur(2px)) or (-webkit-backdrop-filter:blur(2px))){
+
+:root{
+
+--glass-bg:#ffffff;
+--glass-bg-strong:#ffffff;
+--glass-border:#e7e7e7;
+
+}
+
+}
+
+/* -----------------------------------
+   Accessibility
+------------------------------------ */
+
+:focus-visible{
+
+outline:2px solid var(--gold);
+outline-offset:3px;
+
+}
+
+/* -----------------------------------
+   Reduced Motion
+------------------------------------ */
+
+@media (prefers-reduced-motion:reduce){
+
+*{
+
+animation:none!important;
+transition:none!important;
+scroll-behavior:auto!important;
+
+}
+
+}
+
+/* -----------------------------------
+   Smooth Rendering
+------------------------------------ */
+
+*{
+
+-webkit-font-smoothing:antialiased;
+-moz-osx-font-smoothing:grayscale;
+
+}
+/* =====================================================
+   STEP 3 - Header & Navigation
+===================================================== */
+
+/* Sticky Header */
+.site-header,
+.header,
+header{
+
+position:sticky;
+top:0;
+z-index:9999;
+
+background:rgba(255,255,255,.72);
+
+-webkit-backdrop-filter:blur(18px);
+backdrop-filter:blur(18px);
+
+border-bottom:1px solid rgba(255,255,255,.28);
+
+box-shadow:0 6px 24px rgba(0,0,0,.08);
+
+transition:
+background var(--transition),
+box-shadow var(--transition);
+
+}
+
+/* Navigation */
+
+.site-header nav,
+.main-nav,
+.navbar{
+
+display:flex;
+align-items:center;
+
+}
+
+/* Navigation Links */
+
+.site-header a,
+.main-nav a,
+.navbar a{
+
+transition:
+color .25s ease,
+opacity .25s ease;
+
+}
+
+.site-header a:hover,
+.main-nav a:hover,
+.navbar a:hover{
+
+color:var(--gold);
+
+}
+
+/* Search */
+
+.search-box,
+.search-input,
+.header-search input{
+
+background:rgba(255,255,255,.48);
+
+-webkit-backdrop-filter:blur(14px);
+backdrop-filter:blur(14px);
+
+border:1px solid rgba(255,255,255,.35);
+
+border-radius:999px;
+
+transition:var(--transition);
+
+}
+
+.search-box:focus-within,
+.search-input:focus,
+.header-search input:focus{
+
+border-color:var(--gold);
+
+box-shadow:
+0 0 0 4px rgba(201,169,98,.15);
+
+}
+
+/* Mobile */
+
+@media (max-width:768px){
+
+.site-header,
+.header,
+header{
+
+backdrop-filter:blur(14px);
+-webkit-backdrop-filter:blur(14px);
+
+}
+
+}
+/* =====================================================
+   STEP 4 - Product Card (Safe Version)
+===================================================== */
+
+/* Main Product Card */
+.item-card,
+.product-card{
+
+    position:relative;
+
+    background:var(--glass-bg);
+
+    -webkit-backdrop-filter:blur(var(--glass-blur));
+    backdrop-filter:blur(var(--glass-blur));
+
+    border:1px solid var(--glass-border);
+
+    border-radius:20px;
+
+    overflow:hidden;
+
+    box-shadow:var(--glass-shadow);
+
+    transition:
+    transform var(--transition),
+    box-shadow var(--transition),
+    border-color var(--transition);
+
+    will-change:transform;
+
+}
+
+/* Desktop Hover */
+
+@media (hover:hover){
+
+.item-card:hover,
+.product-card:hover{
+
+    transform:translateY(-6px);
+
+    box-shadow:var(--glass-shadow-hover);
+
+    border-color:rgba(201,169,98,.35);
+
+}
+
+}
+
+/* Product Image */
+
+.item-card img,
+.product-card img{
+
+    display:block;
+
+    width:100%;
+
+    transition:transform .45s ease;
+
+}
+
+@media (hover:hover){
+
+.item-card:hover img,
+.product-card:hover img{
+
+    transform:scale(1.04);
+
+}
+
+}
+
+/* Product Name */
+
+.product-title,
+.product-name{
+
+    font-weight:600;
+
+    line-height:1.45;
+
+}
+
+/* Price */
+
+.price,
+.product-price{
+
+    font-weight:700;
+
+    color:var(--brand);
+
+}
+
+/* Sale Badge */
+
+.sale-badge,
+.discount-badge{
+
+    position:absolute;
+
+    top:12px;
+
+    left:12px;
+
+    padding:6px 10px;
+
+    border-radius:999px;
+
+    background:rgba(17,17,17,.75);
+
+    color:#fff;
+
+    backdrop-filter:blur(12px);
+
+    font-size:12px;
+
+    font-weight:600;
+
+}
+/* ==================================================
+   AH CARD - Liquid Glass
+================================================== */
+
+.ah-card{
+
+position:relative;
+
+background:rgba(255,255,255,.14);
+
+border:1px solid rgba(255,255,255,.28);
+
+border-radius:22px;
+
+overflow:hidden;
+
+-webkit-backdrop-filter:blur(14px);
+backdrop-filter:blur(14px);
+
+box-shadow:
+0 10px 28px rgba(0,0,0,.12);
+
+transition:
+transform .28s ease,
+box-shadow .28s ease;
+
+will-change:transform;
+
+}
+
+@media(hover:hover){
+
+.ah-card:hover{
+
+transform:translateY(-6px);
+
+box-shadow:
+0 20px 45px rgba(0,0,0,.18);
+
+}
+
+}
+
+/* IMAGE */
+
+.ah-card-media{
+
+overflow:hidden;
+
+display:block;
+
+}
+
+.ah-card img{
+
+transition:transform .45s ease;
+
+display:block;
+
+width:100%;
+
+}
+
+@media(hover:hover){
+
+.ah-card:hover img{
+
+transform:scale(1.04);
+
+}
+
+}
+
+/* Badge */
+
+.ah-card-badge{
+
+background:rgba(17,17,17,.75);
+
+color:#fff;
+
+padding:7px 12px;
+
+border-radius:999px;
+
+backdrop-filter:blur(12px);
+
+font-size:11px;
+
+font-weight:700;
+
+}
+
+/* Name */
+
+.ah-card-name{
+
+font-weight:600;
+
+line-height:1.45;
+
+text-decoration:none;
+
+}
+
+/* Price */
+
+.ah-card-price{
+
+font-size:18px;
+
+font-weight:700;
+
+color:#111;
+
+}
+/* ==================================================
+   STEP 6 - Premium Liquid Glass Buttons
+================================================== */
+
+/* Button Container */
+
+.ah-actions{
+
+display:flex;
+gap:10px;
+margin-top:14px;
+
+}
+
+/* Base Button */
+
+.ah-btn{
+
+position:relative;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+width:100%;
+height:46px;
+
+border-radius:16px;
+
+font-size:14px;
+font-weight:600;
+
+text-decoration:none;
+
+overflow:hidden;
+
+cursor:pointer;
+
+transition:
+transform .25s ease,
+box-shadow .25s ease,
+background .25s ease;
+
+-webkit-backdrop-filter:blur(14px);
+backdrop-filter:blur(14px);
+
+}
+
+/* Add To Cart */
+
+.ah-btn-cart{
+
+background:rgba(17,17,17,.88);
+
+color:#fff;
+
+border:1px solid rgba(255,255,255,.10);
+
+box-shadow:
+0 8px 20px rgba(0,0,0,.18);
+
+}
+
+/* WhatsApp */
+
+.ah-btn-msg{
+
+background:rgba(37,211,102,.90);
+
+color:#fff;
+
+border:1px solid rgba(255,255,255,.10);
+
+box-shadow:
+0 8px 20px rgba(37,211,102,.20);
+
+}
+
+/* Hover */
+
+@media (hover:hover){
+
+.ah-btn:hover{
+
+transform:translateY(-2px);
+
+}
+
+.ah-btn-cart:hover{
+
+background:#000;
+
+box-shadow:
+0 12px 28px rgba(0,0,0,.25);
+
+}
+
+.ah-btn-msg:hover{
+
+background:#1EBE5D;
+
+box-shadow:
+0 12px 28px rgba(37,211,102,.30);
+
+}
+
+}
+
+/* Active */
+
+.ah-btn:active{
+
+transform:scale(.98);
+
+}
+
+/* Keyboard Accessibility */
+
+.ah-btn:focus-visible{
+
+outline:2px solid var(--gold);
+outline-offset:3px;
+
+}
+
+/* Mobile */
+
+@media(max-width:768px){
+
+.ah-actions{
+
+gap:8px;
+
+}
+
+.ah-btn{
+
+height:42px;
+
+font-size:13px;
+
+border-radius:14px;
+
+}
+
+}
+/* =====================================================
+   STEP 7 - Premium Liquid Glass Cart Drawer
+===================================================== */
+
+/* Overlay */
+
+.cart-drawer-overlay{
+
+background:rgba(15,15,15,.45);
+
+-webkit-backdrop-filter:blur(8px);
+backdrop-filter:blur(8px);
+
+}
+
+/* Drawer */
+
+.cart-drawer{
+
+background:rgba(255,255,255,.78);
+
+-webkit-backdrop-filter:blur(22px);
+backdrop-filter:blur(22px);
+
+border-left:1px solid rgba(255,255,255,.30);
+
+}
+
+/* Header */
+
+.cart-drawer-head{
+
+background:rgba(255,255,255,.65);
+
+-webkit-backdrop-filter:blur(18px);
+backdrop-filter:blur(18px);
+
+}
+
+/* Footer */
+
+.cart-drawer-foot{
+
+background:rgba(255,255,255,.72);
+
+-webkit-backdrop-filter:blur(20px);
+backdrop-filter:blur(20px);
+
+}
+
+/* Product Image */
+
+.cart-drawer-thumb{
+
+border-radius:16px;
+
+overflow:hidden;
+
+}
+
+/* Quantity */
+
+.cart-drawer-qty{
+
+background:rgba(255,255,255,.55);
+
+backdrop-filter:blur(10px);
+
+border:1px solid rgba(255,255,255,.25);
+
+}
+
+/* Checkout */
+
+.cart-drawer-checkout{
+
+background:rgba(17,17,17,.88);
+
+backdrop-filter:blur(12px);
+
+border-radius:16px;
+
+}
+
+.cart-drawer-checkout:hover{
+
+background:var(--gold);
+
+color:#111;
+
+}
+
+/* Mobile */
+
+@media(max-width:768px){
+
+.cart-drawer{
+
+width:100%;
+
+}
+
+}
+/* =====================================================
+   STEP 8 - Search + Category + Filter
+===================================================== */
+
+/* Search */
+
+.ah-search,
+.search-box,
+.search-wrap{
+
+    position:relative;
+
+    background:rgba(255,255,255,.60);
+
+    border:1px solid rgba(255,255,255,.30);
+
+    border-radius:999px;
+
+    -webkit-backdrop-filter:blur(16px);
+    backdrop-filter:blur(16px);
+
+    box-shadow:
+    0 8px 24px rgba(0,0,0,.08);
+
+}
+
+/* Search Input */
+
+.ah-search input,
+.search-box input,
+.search-wrap input{
+
+    background:transparent;
+
+    border:none;
+
+    outline:none;
+
+    box-shadow:none;
+
+}
+
+/* Category Button */
+
+.category-chip,
+.category-pill,
+.ah-category{
+
+    background:rgba(255,255,255,.55);
+
+    border:1px solid rgba(255,255,255,.25);
+
+    border-radius:999px;
+
+    -webkit-backdrop-filter:blur(14px);
+    backdrop-filter:blur(14px);
+
+    transition:
+    background .25s ease,
+    transform .25s ease,
+    box-shadow .25s ease;
+
+}
+
+/* Hover */
+
+@media (hover:hover){
+
+.category-chip:hover,
+.category-pill:hover,
+.ah-category:hover{
+
+transform:translateY(-2px);
+
+background:rgba(255,255,255,.78);
+
+box-shadow:
+0 8px 18px rgba(0,0,0,.10);
+
+}
+
+}
+
+/* Active */
+
+.category-chip.active,
+.category-pill.active,
+.ah-category.active{
+
+background:#111;
+
+color:#fff;
+
+}
+
+/* Filter Color */
+
+.filter-color{
+
+border-radius:50%;
+
+border:2px solid rgba(255,255,255,.70);
+
+box-shadow:
+0 3px 10px rgba(0,0,0,.15);
+
+}
+/* =====================================================
+   STEP 9 - Premium Micro Animations
+===================================================== */
+
+/* Smooth GPU Rendering */
+
+.ah-card,
+.ah-btn,
+.cart-drawer,
+.cart-drawer-checkout{
+
+    transform:translateZ(0);
+
+    backface-visibility:hidden;
+
+    will-change:transform;
+
+}
+
+/* Button Press */
+
+.ah-btn:active,
+.cart-drawer-checkout:active{
+
+    transform:scale(.97);
+
+}
+
+/* Smooth Image Animation */
+
+.ah-card img{
+
+    transform-origin:center;
+
+}
+
+/* Card Shine */
+
+.ah-card::before{
+
+    content:"";
+
+    position:absolute;
+
+    top:0;
+    left:-120%;
+
+    width:70%;
+    height:100%;
+
+    background:
+    linear-gradient(
+        120deg,
+        transparent,
+        rgba(255,255,255,.35),
+        transparent
+    );
+
+    transition:left .8s ease;
+
+    pointer-events:none;
+
+}
+
+@media (hover:hover){
+
+.ah-card:hover::before{
+
+left:140%;
+
+}
+
+}
+
+/* Glass Glow */
+
+.ah-card:hover{
+
+box-shadow:
+
+0 18px 42px rgba(0,0,0,.16),
+
+0 0 0 1px rgba(255,255,255,.18) inset;
+
+}
+
+/* Button Glow */
+
+.ah-btn-cart:hover{
+
+box-shadow:
+
+0 10px 28px rgba(0,0,0,.25);
+
+}
+
+.ah-btn-msg:hover{
+
+box-shadow:
+
+0 10px 28px rgba(37,211,102,.30);
+
+}
+
+/* Checkout Glow */
+
+.cart-drawer-checkout:hover{
+
+box-shadow:
+
+0 12px 34px rgba(201,169,98,.35);
+
+}
+
+/* Smooth Scroll */
+
+html{
+
+scroll-behavior:smooth;
+
+}
+
+/* Selection */
+
+::selection{
+
+background:rgba(201,169,98,.28);
+
+color:#111;
+
+}
