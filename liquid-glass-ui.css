@@ -992,3 +992,36 @@ color:#111;
     right: -100%;
   }
 }
+/* কার্ট ড্রয়ারের ভেতর কন্টেন্ট ও হেডার দৃশ্যমান করার ফিক্স */
+.cart-drawer {
+  display: flex !important;
+  flex-direction: column !important;
+  padding-top: 20px; /* ওপরে একটু স্পেস দেওয়া হলো যাতে ক্লোজ বাটন ঢাকা না পড়ে */
+}
+
+/* কার্ট ড্রয়ারের হেডার পজিশন */
+.cart-drawer-head {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 10px 20px 20px 20px !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+/* ক্লোজ বাটনটি যাতে সবসময় সবার ওপরে এবং স্পষ্ট দেখা যায় */
+.cart-drawer-head .close-btn, 
+.cart-drawer-head button,
+.cart-drawer-head a {
+  cursor: pointer !important;
+  z-index: 10001 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* প্রোডাক্ট লিস্ট ও সাজেস্টেড প্রোডাক্টের বডি স্ক্রল ফিক্স */
+.cart-drawer-body {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  padding: 15px 20px !important;
+  padding-bottom: 100px; /* নিচের চেকাউট বাটনের জন্য সেফটি মার্জিন */
+}
