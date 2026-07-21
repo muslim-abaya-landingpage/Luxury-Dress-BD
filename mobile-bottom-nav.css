@@ -37,7 +37,13 @@
     .cart-drawer-footer,
     .cart-summary,
     .cart-checkout{
-        padding-bottom:calc(20px + 64px + env(safe-area-inset-bottom));
+        padding-bottom:calc(20px + 64px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    .cart-drawer-body,
+    .cart-items,
+    .cart-drawer-content{
+        padding-bottom:220px !important;
     }
 }
 
@@ -76,12 +82,12 @@
         bottom:calc(64px + 12px + env(safe-area-inset-bottom,0)) !important;
     }
 
-    /* Note: the cart drawer's Total/Checkout footer does NOT need an
-       override here — cart-drawer.css already has its own correct fix
-       (padding-bottom: 20px + 64px), which gives 84px of clearance versus
-       this bar's 64px height. Adding a second, different-mechanism override
-       here (as an earlier version of this file did) fought with that fix
-       instead of helping. */
+    /* Note: cart-drawer.css also has its own base padding-bottom rule on
+       .cart-drawer-foot (without !important). Depending on which stylesheet
+       loads later in <head>, that rule could silently win the cascade tie
+       and undo the 84px clearance above — which is what was actually
+       happening. The !important on the rule above guarantees this bar
+       never covers the checkout button, regardless of load order. */
 }
 
 .mbn-item{
