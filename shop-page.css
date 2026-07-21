@@ -294,20 +294,30 @@ body.shop-page .anzaar-btn-buy:hover {
   box-shadow: 0 10px 24px rgba(184,149,46,.45), inset 0 1px 0 rgba(255,255,255,.5);
 }
 
-/* qty stepper sits inside the same dark panel — make it match */
+/* qty stepper sits inside the same dark panel — make it match.
+   qty-stepper.css (a separate file) styles this component with a plain
+   white background; !important here guarantees our dark-glass look wins
+   regardless of which stylesheet loads later. */
 body.shop-page .card-actions-anzaar .ma-qty-stepper {
   position: relative;
   z-index: 1;
-  background: rgba(255,255,255,.08);
-  border: 1px solid rgba(255,255,255,.18);
-  border-radius: 10px;
+  background: rgba(255,255,255,.08) !important;
+  border: 1px solid rgba(255,255,255,.18) !important;
+  border-radius: 10px !important;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  overflow: hidden;
 }
 body.shop-page .card-actions-anzaar .ma-qty-stepper__value,
+body.shop-page .card-actions-anzaar .ma-qty-stepper__input,
 body.shop-page .card-actions-anzaar .ma-qty-stepper__btn {
-  color: #fff;
+  background: transparent !important;
+  color: #fff !important;
+  border: none !important;
 }
 body.shop-page .card-actions-anzaar .ma-qty-stepper__btn:hover {
-  background: rgba(255,255,255,.12);
+  background: rgba(255,255,255,.14) !important;
+}
+body.shop-page .card-actions-anzaar .ma-qty-stepper__btn:disabled {
+  color: rgba(255,255,255,.35) !important;
 }
