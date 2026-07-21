@@ -212,30 +212,102 @@ body.shop-page .shop-breadcrumb--mobile {
   padding-left: 2px;
 }
 
-/* Premium styling for Add to Cart / Buy Now / Send Message buttons */
+/* ================================================================
+   PREMIUM ORDER ACTIONS — dark glass panel with aurora glow
+   (scoped to the button cluster only — product photos stay untouched
+   so colors/fabric are still true-to-life)
+================================================================ */
+body.shop-page .card-actions-anzaar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 16px;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 140% at 0% 0%, rgba(184,149,46,.35), transparent 55%),
+    radial-gradient(120% 140% at 100% 100%, rgba(30,58,95,.30), transparent 55%),
+    #14140f;
+  box-shadow: 0 6px 18px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.06);
+}
+/* subtle animated aurora sheen sweeping across the panel */
+body.shop-page .card-actions-anzaar::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background: conic-gradient(from 0deg, transparent 0deg, rgba(184,149,46,.25) 60deg, transparent 140deg, rgba(30,58,95,.2) 220deg, transparent 320deg);
+  animation: anzaarAurora 9s linear infinite;
+  pointer-events: none;
+  opacity: .8;
+}
+@keyframes anzaarAurora {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.shop-page .card-actions-anzaar::before { animation: none; }
+}
+
 body.shop-page .anzaar-btn-cart,
 body.shop-page .anzaar-btn-msg,
 body.shop-page .anzaar-btn-buy {
+  position: relative;
+  z-index: 1;
   border-radius: 10px;
-  padding: 14px 0;
-  border: 1.5px solid #111;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  padding: 13px 0;
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.08);
+  color: #fff;
+  font-family: "Inter", "Hind Siliguri", system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: .01em;
+  backdrop-filter: blur(10px) saturate(140%);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
+  transition: transform .18s cubic-bezier(.2,.8,.2,1), box-shadow .2s ease, background .2s ease, border-color .2s ease;
 }
 
 body.shop-page .anzaar-btn-cart:hover,
 body.shop-page .anzaar-btn-msg:hover {
-  background: #f7f7f7;
+  background: rgba(255,255,255,.16);
+  border-color: rgba(255,255,255,.32);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.18);
+}
+body.shop-page .anzaar-btn-cart:active,
+body.shop-page .anzaar-btn-msg:active,
+body.shop-page .anzaar-btn-buy:active {
+  transform: translateY(0) scale(.97);
+  transition-duration: .08s;
 }
 
 body.shop-page .anzaar-btn-buy {
-  background: #111;
-  color: #fff;
-  border-color: #111;
+  background: linear-gradient(135deg, #d4af5a, #b8952e);
+  border-color: rgba(255,255,255,.35);
+  color: #14140f;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(184,149,46,.35), inset 0 1px 0 rgba(255,255,255,.4);
+}
+body.shop-page .anzaar-btn-buy:hover {
+  background: linear-gradient(135deg, #e2bd6c, #c6a13a);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(184,149,46,.45), inset 0 1px 0 rgba(255,255,255,.5);
 }
 
-body.shop-page .anzaar-btn-buy:hover {
-  background: #000;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.18);
-  transform: translateY(-1px);
+/* qty stepper sits inside the same dark panel — make it match */
+body.shop-page .card-actions-anzaar .ma-qty-stepper {
+  position: relative;
+  z-index: 1;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+body.shop-page .card-actions-anzaar .ma-qty-stepper__value,
+body.shop-page .card-actions-anzaar .ma-qty-stepper__btn {
+  color: #fff;
+}
+body.shop-page .card-actions-anzaar .ma-qty-stepper__btn:hover {
+  background: rgba(255,255,255,.12);
 }
