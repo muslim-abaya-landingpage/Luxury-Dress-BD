@@ -366,8 +366,8 @@
 }
 
 .cart-drawer-checkout:hover {
-  background: #c8a96a;
-  color: #111;
+  background: #333;
+  color: #fff;
   transform: translateY(-2px);
   box-shadow: 0 12px 28px rgba(0, 0, 0, .22);
 }
@@ -376,7 +376,7 @@
 
 .cart-drawer-checkout:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(200, 169, 106, .35);
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, .35);
 }
 
 /* ==============================

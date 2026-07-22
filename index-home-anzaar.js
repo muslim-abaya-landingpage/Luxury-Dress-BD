@@ -201,7 +201,6 @@
       "<a class='ah-card-media' href='" +
       escapeHtml(dHref) +
       "'>" +
-      "<span class='ah-card-badge'>Sale</span>" +
       "<img src='" +
       escapeHtml(img) +
       "' alt='" +
@@ -385,6 +384,9 @@
           "<div class='home-hero-slide" +
           (i === 0 ? " is-active" : "") +
           "'>" +
+          "<a class='home-hero-slide-link' href='" +
+          escapeHtml(link) +
+          "' style='display:block;width:100%;height:100%;'>" +
           "<img src='" +
           escapeHtml(img) +
           "' alt='" +
@@ -392,14 +394,7 @@
           "'" +
           (i === 0 ? " fetchpriority='high'" : " loading='lazy'") +
           " onerror=\"this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg'\">" +
-          "<div class='home-hero-cap'>" +
-          "<p class='eyebrow'>Eid Collection 2026</p>" +
-          "<h2 class='head'>Experience<br>the Elegance</h2>" +
-          "<p class='sub'>Premium modest wear crafted with comfort &amp; purity.</p>" +
-          "<a class='hero-btn' href='" +
-          escapeHtml(link) +
-          "'>Shop Now</a>" +
-          "</div>" +
+          "</a>" +
           "</div>"
         );
       })
