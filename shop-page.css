@@ -221,22 +221,22 @@ body.shop-page .card-actions-anzaar {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 10px;
-  border-radius: 16px;
+  gap: 7px;
+  padding: 9px;
+  border-radius: 18px;
   overflow: hidden;
   background:
-    radial-gradient(120% 140% at 0% 0%, rgba(184,149,46,.35), transparent 55%),
-    radial-gradient(120% 140% at 100% 100%, rgba(30,58,95,.30), transparent 55%),
-    #14140f;
-  box-shadow: 0 6px 18px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.06);
+    radial-gradient(120% 140% at 0% 0%, rgba(184,149,46,.28), transparent 55%),
+    radial-gradient(120% 140% at 100% 100%, rgba(30,58,95,.24), transparent 55%),
+    #17170f;
+  box-shadow: 0 6px 18px rgba(0,0,0,.14), inset 0 1px 0 rgba(255,255,255,.05);
 }
 /* subtle animated aurora sheen sweeping across the panel */
 body.shop-page .card-actions-anzaar::before {
   content: "";
   position: absolute;
   inset: -40%;
-  background: conic-gradient(from 0deg, transparent 0deg, rgba(184,149,46,.25) 60deg, transparent 140deg, rgba(30,58,95,.2) 220deg, transparent 320deg);
+  background: conic-gradient(from 0deg, transparent 0deg, rgba(184,149,46,.22) 60deg, transparent 140deg, rgba(30,58,95,.18) 220deg, transparent 320deg);
   animation: anzaarAurora 9s linear infinite;
   pointer-events: none;
   opacity: .8;
@@ -248,32 +248,49 @@ body.shop-page .card-actions-anzaar::before {
   body.shop-page .card-actions-anzaar::before { animation: none; }
 }
 
-body.shop-page .anzaar-btn-cart,
-body.shop-page .anzaar-btn-msg,
-body.shop-page .anzaar-btn-buy {
+/* PRIMARY — Add to Cart. The one action that should catch the eye. */
+body.shop-page .anzaar-btn-cart {
   position: relative;
   z-index: 1;
-  border-radius: 10px;
-  padding: 13px 0;
-  border: 1px solid rgba(255,255,255,.18);
-  background: rgba(255,255,255,.08);
-  color: #fff;
+  border-radius: 999px;
+  padding: 12px 0;
+  border: none;
+  background: linear-gradient(135deg, #e6c477, #b8952e);
+  color: #17170f;
   font-family: "Inter", "Hind Siliguri", system-ui, sans-serif;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: .01em;
-  backdrop-filter: blur(10px) saturate(140%);
-  -webkit-backdrop-filter: blur(10px) saturate(140%);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
-  transition: transform .18s cubic-bezier(.2,.8,.2,1), box-shadow .2s ease, background .2s ease, border-color .2s ease;
+  box-shadow: 0 4px 14px rgba(184,149,46,.4), inset 0 1px 0 rgba(255,255,255,.5);
+  transition: transform .18s cubic-bezier(.2,.8,.2,1), box-shadow .2s ease, background .2s ease;
+}
+body.shop-page .anzaar-btn-cart:hover {
+  background: linear-gradient(135deg, #f0d28c, #c6a13a);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(184,149,46,.5), inset 0 1px 0 rgba(255,255,255,.6);
 }
 
-body.shop-page .anzaar-btn-cart:hover,
-body.shop-page .anzaar-btn-msg:hover {
-  background: rgba(255,255,255,.16);
-  border-color: rgba(255,255,255,.32);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 18px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.18);
+/* SECONDARY — Send Message. Present, but quiet — a ghost/outline pill,
+   not a second dark box competing with the primary action. */
+body.shop-page .anzaar-btn-msg {
+  position: relative;
+  z-index: 1;
+  border-radius: 999px;
+  padding: 9px 0;
+  border: 1px solid rgba(255,255,255,.22);
+  background: transparent;
+  color: rgba(255,255,255,.75);
+  font-family: "Inter", "Hind Siliguri", system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 12.5px;
+  letter-spacing: .01em;
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
 }
+body.shop-page .anzaar-btn-msg:hover {
+  background: rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.4);
+  color: #fff;
+}
+
 body.shop-page .anzaar-btn-cart:active,
 body.shop-page .anzaar-btn-msg:active,
 body.shop-page .anzaar-btn-buy:active {
@@ -281,17 +298,24 @@ body.shop-page .anzaar-btn-buy:active {
   transition-duration: .08s;
 }
 
+/* Single-product detail page still has a real third action (Buy Now) —
+   keep it primary-styled there too, distinct from the plain Add to Cart. */
 body.shop-page .anzaar-btn-buy {
-  background: linear-gradient(135deg, #d4af5a, #b8952e);
-  border-color: rgba(255,255,255,.35);
-  color: #14140f;
+  position: relative;
+  z-index: 1;
+  border-radius: 999px;
+  padding: 13px 0;
+  border: none;
+  background: linear-gradient(135deg, #e6c477, #b8952e);
+  color: #17170f;
   font-weight: 700;
-  box-shadow: 0 4px 14px rgba(184,149,46,.35), inset 0 1px 0 rgba(255,255,255,.4);
+  box-shadow: 0 4px 14px rgba(184,149,46,.4), inset 0 1px 0 rgba(255,255,255,.5);
+  transition: transform .18s cubic-bezier(.2,.8,.2,1), box-shadow .2s ease, background .2s ease;
 }
 body.shop-page .anzaar-btn-buy:hover {
-  background: linear-gradient(135deg, #e2bd6c, #c6a13a);
+  background: linear-gradient(135deg, #f0d28c, #c6a13a);
   transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgba(184,149,46,.45), inset 0 1px 0 rgba(255,255,255,.5);
+  box-shadow: 0 10px 24px rgba(184,149,46,.5), inset 0 1px 0 rgba(255,255,255,.6);
 }
 
 /* qty stepper sits inside the same dark panel — make it match.
@@ -303,7 +327,7 @@ body.shop-page .card-actions-anzaar .ma-qty-stepper {
   z-index: 1;
   background: rgba(255,255,255,.08) !important;
   border: 1px solid rgba(255,255,255,.18) !important;
-  border-radius: 10px !important;
+  border-radius: 999px !important;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   overflow: hidden;
