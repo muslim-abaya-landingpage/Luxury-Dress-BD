@@ -1,0 +1,88 @@
+/* ==========================================================================
+   Muslim Abaya — Remove Item confirmation modal (reusable component)
+   Include on ANY page:
+     <link rel="stylesheet" href="remove-confirm-modal.css">
+     <script src="remove-confirm-modal.js"></script>
+   Then trigger it anywhere with:
+     window.openRemoveConfirm(itemName, function () { ...your actual removal code... });
+   ========================================================================== */
+
+.rm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 17, 17, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease;
+    z-index: 100050;
+    padding: 20px;
+}
+.rm-overlay.is-open {
+    opacity: 1;
+    visibility: visible;
+}
+.rm-modal {
+    background: #fff;
+    width: min(380px, 100%);
+    padding: 28px 26px 24px;
+    text-align: center;
+    border-radius: 6px;
+    transform: translateY(10px) scale(0.98);
+    transition: transform 0.22s ease;
+    font-family: var(--rm-font, 'Inter', 'Hind Siliguri', system-ui, sans-serif);
+}
+.rm-overlay.is-open .rm-modal {
+    transform: translateY(0) scale(1);
+}
+.rm-modal h3 {
+    margin: 0 0 8px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--rm-ink, #111111);
+}
+.rm-modal p {
+    margin: 0 0 22px;
+    font-size: 13.5px;
+    color: var(--rm-muted, #6b6b6b);
+    line-height: 1.6;
+}
+.rm-modal p strong {
+    color: var(--rm-ink, #111111);
+    font-weight: 600;
+}
+.rm-btn-row {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--rm-line, #ececec);
+    border-radius: 4px;
+    overflow: hidden;
+}
+.rm-btn {
+    flex: 1;
+    padding: 12px 0;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+.rm-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.rm-btn-cancel {
+    background: #f5f5f5;
+    color: var(--rm-ink, #111111);
+    border-right: 1px solid var(--rm-line, #ececec);
+}
+.rm-btn-cancel:hover { background: #ebebeb; }
+.rm-btn-confirm {
+    background: var(--rm-ink, #111111);
+    color: #fff;
+}
+.rm-btn-confirm:hover { background: #333333; }
+
+@media (max-width: 420px) {
+    .rm-modal { padding: 24px 20px 20px; }
+}
