@@ -55,72 +55,6 @@
   object-position: center 22%;
   display: block;
 }
-/* Caption overlay rendered by index-home-anzaar.js inside every slide.
-   These rules did not exist before, so the eyebrow/heading/CTA sat on the
-   page completely unstyled (default browser type, no positioning) — that
-   is what produced the "broken" stacked-text look under the hero image. */
-.home-hero-cap {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  z-index: 2;
-  max-width: 560px;
-  padding: 34px clamp(20px, 5vw, 56px) 40px;
-  color: #fff;
-  background: linear-gradient(0deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.15) 55%, rgba(0, 0, 0, 0) 100%);
-}
-.home-hero-cap .eyebrow {
-  margin: 0 0 10px;
-  font-family: var(--ah-sans);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.8);
-}
-.home-hero-cap .head {
-  margin: 0 0 10px;
-  font-family: "Playfair Display", var(--ah-sans);
-  font-weight: 700;
-  font-size: clamp(24px, 4vw, 42px);
-  line-height: 1.12;
-  letter-spacing: 0.01em;
-}
-.home-hero-cap .sub {
-  margin: 0 0 20px;
-  font-family: var(--ah-sans);
-  font-size: clamp(12px, 1.4vw, 14px);
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.85);
-  max-width: 420px;
-}
-.home-hero-cap .hero-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--ah-sans);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: #111;
-  background: #fff;
-  padding: 13px 28px;
-  border-radius: 999px;
-  text-decoration: none;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
-  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
-}
-.home-hero-cap .hero-btn:hover {
-  transform: translateY(-2px);
-  background: #f0f0f0;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-}
-@media (max-width: 560px) {
-  .home-hero-cap { padding: 22px 20px 26px; max-width: 100%; }
-  .home-hero-cap .sub { display: none; }
-}
-
 .home-hero-dots {
   position: absolute;
   z-index: 3;
@@ -308,7 +242,7 @@
   position: absolute;
   top: 10px;
   left: 10px;
-  background: #111;
+  background: #b12704;
   color: #fff;
   font-family: var(--ah-sans);
   font-size: 11px;
@@ -377,12 +311,9 @@
   background: #f5f5f5;
   color: #111;
 }
-.ah-btn-cart:hover {
-  background: #ebebeb;
-}
+.ah-btn-cart:hover,
 .ah-btn-cart.is-active {
-  background: #111;
-  color: #fff;
+  background: #ebebeb;
 }
 .ah-btn-cart svg { width: 16px; height: 16px; }
 .ah-btn-msg {

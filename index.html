@@ -20,11 +20,12 @@
     <link rel="stylesheet" href="cart-drawer.css?v=20260528b" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="cart-drawer.css?v=20260528b"></noscript>
     <link rel="stylesheet" href="index-critical.css?v=20260530sale">
-    <link rel="stylesheet" href="index-home-cards.css?v=20260603cart14" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="index-home-cards.css?v=20260603cart14"></noscript>
-    <link rel="preload" href="index-home.css?v=20260603cart14" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="index-home.css?v=20260603cart14"></noscript>
-    <link rel="stylesheet" href="index-home-ma.css?v=20260709anz">
+    <!-- index-home-cards.css and index-home.css removed: they styled an older
+         #premium-collection/.item-card product grid that this page no longer
+         renders (the homepage now uses index-home-anzaar.js -> .home-hero /
+         .ah-card). Keeping them loaded only added dead weight and stale
+         .anzaar-btn rules that could collide with the current cards. -->
+    <link rel="stylesheet" href="index-home-anzaar.css?v=20260724fix">
     <link rel="stylesheet" href="liquid-glass-ui.css?v=20260721">
     <link rel="icon" href="assets/logo-muslim-abaya.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="assets/logo-muslim-abaya.svg">
@@ -118,7 +119,7 @@
 <script type="module" src="site-header.js?v=20260603logo"></script>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-ML7RL6BR"
 height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- Full-width hero slider (populated from catalog by index-home-ma.js) -->
+<!-- Full-width hero slider (populated from catalog by index-home-anzaar.js) -->
 <div id="homeHero" class="home-hero"></div>
 
 <!-- Quick category chips -->
@@ -169,7 +170,7 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
     return !!(p && Object.keys(p).some(function (k) { return (p[k] || []).length; }));
   }
   function startHomeModules() {
-    import("./index-home-ma.js?v=20260709anz");
+    import("./index-home-anzaar.js?v=20260709anz");
     import("./related-cart.js?v=20260708");
   }
   if (catalogIsReady()) {

@@ -12,7 +12,7 @@ function ensureCartDrawerRelatedStyles() {
       margin: 12px -14px -14px;
       overflow-x: hidden;
       overflow-y: visible;
-      background: linear-gradient(135deg, rgba(184,149,46,.06), rgba(184,149,46,.015));
+      background: #faf9f7;
     }
     .related-title {
       font-size: 13.5px; font-weight: 700; margin: 0 0 12px; padding-left: 2px;
@@ -25,7 +25,7 @@ function ensureCartDrawerRelatedStyles() {
       scrollbar-width: thin; max-width: 100%;
     }
     .related-grid::-webkit-scrollbar { height: 5px; }
-    .related-grid::-webkit-scrollbar-thumb { background: rgba(184,149,46,.4); border-radius: 999px; }
+    .related-grid::-webkit-scrollbar-thumb { background: rgba(0,0,0,.18); border-radius: 999px; }
     .related-card {
       flex: 0 0 132px; scroll-snap-align: start;
       border: 1px solid rgba(255,255,255,.6);
@@ -46,7 +46,7 @@ function ensureCartDrawerRelatedStyles() {
     .related-card-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .3s ease; }
     .related-card:hover .related-card-thumb img { transform: scale(1.05); }
     .related-card-name { font-size: 12px; margin: 0 0 4px; color: #111; line-height: 1.3; min-height: 31px; font-weight: 500; }
-    .related-card-price { font-size: 13.5px; font-weight: 700; color: #b8952e; margin: 0 0 8px; }
+    .related-card-price { font-size: 13.5px; font-weight: 700; color: #111; margin: 0 0 8px; }
     .related-card-add {
       width: 100%; border: 1.5px solid rgba(17,17,17,.7);
       background: rgba(255,255,255,.4);

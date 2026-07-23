@@ -72,7 +72,7 @@
   function activeSections() {
     var secs = window.CATALOG_SECTIONS || [];
     return secs.filter(function (s) {
-      if (s.enabled === false && !categoryHasProducts(s.key)) return false;
+      if (s.enabled === false) return false;
       return categoryHasProducts(s.key);
     });
   }
@@ -201,6 +201,7 @@
       "<a class='ah-card-media' href='" +
       escapeHtml(dHref) +
       "'>" +
+      "<span class='ah-card-badge'>Sale</span>" +
       "<img src='" +
       escapeHtml(img) +
       "' alt='" +
@@ -307,6 +308,12 @@
         if (!p) return;
         addToCart(sec, p);
         btn.classList.add("is-active");
+        // Clear the "added" state after a moment so it doesn't stay
+        // visually stuck on this button forever after a single click.
+        clearTimeout(btn.__ahActiveTimer);
+        btn.__ahActiveTimer = setTimeout(function () {
+          btn.classList.remove("is-active");
+        }, 1500);
       });
     }
 
@@ -384,9 +391,6 @@
           "<div class='home-hero-slide" +
           (i === 0 ? " is-active" : "") +
           "'>" +
-          "<a class='home-hero-slide-link' href='" +
-          escapeHtml(link) +
-          "' style='display:block;width:100%;height:100%;'>" +
           "<img src='" +
           escapeHtml(img) +
           "' alt='" +
@@ -394,7 +398,14 @@
           "'" +
           (i === 0 ? " fetchpriority='high'" : " loading='lazy'") +
           " onerror=\"this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg'\">" +
-          "</a>" +
+          "<div class='home-hero-cap'>" +
+          "<p class='eyebrow'>Eid Collection 2026</p>" +
+          "<h2 class='head'>Experience<br>the Elegance</h2>" +
+          "<p class='sub'>Premium modest wear crafted with comfort &amp; purity.</p>" +
+          "<a class='hero-btn' href='" +
+          escapeHtml(link) +
+          "'>Shop Now</a>" +
+          "</div>" +
           "</div>"
         );
       })

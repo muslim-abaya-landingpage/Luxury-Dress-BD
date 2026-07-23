@@ -35,10 +35,11 @@ html {
     border-bottom: 1px solid #ececec;
 }
 
-/* এখানে body এর প্যাডিং বাদ দিয়ে সরাসরি হেডার ক্লাসে মার্জিন-বটম বা বডিকে প্যাডিং দিন */
-body {
-    padding-top: 130px !important; 
-}
+/* Fixed header sits inside the sticky #site-header-mount, which already
+   reserves space via min-height. A body padding-top here duplicated that
+   space AND collided with site-footer.css body{padding:0!important}
+   (same specificity, loaded right after this file -- footer rule was
+   winning the cascade tie and silently zeroing this out anyway). Removed. */
 
 /* আপনার বাকি কোডগুলো একইভাবে থাকবে */
 .header-top-bar,

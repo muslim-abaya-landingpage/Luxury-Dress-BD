@@ -52,7 +52,7 @@ function maShopBagIcon(size) {
   // size না থাকলে বা ভুল থাকলে ডিফল্ট ১৮ হবে
   var s = parseInt(size, 10) || 18; 
   return (
-    '<span class="ma-shop-bag-ico ma-btn-ico" aria-hidden="true">' +
+    '<span class="ma-shop-bag-ico anzaar-btn-ico" aria-hidden="true">' +
     '<svg width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
     '<path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/>' +
     '<path d="M6 6L5 3H2"/></svg></span>'
@@ -176,7 +176,7 @@ var shopCartCtx = {
 };
 function getActivePqvScope() {
   var root = shopCartCtx.root;
-  if (root && root.querySelector(".pqv-ma")) return root;
+  if (root && root.querySelector(".pqv-anzaar")) return root;
   var modal = document.getElementById("productQuickView");
   if (modal && !modal.hidden) return modal;
   return null;
@@ -502,7 +502,7 @@ function refreshShopCardsAfterCartChange() {
     var stepper = card.querySelector(".shop-card-qty");
     if (stepper) stepper.classList.toggle("in-cart", cartQty > 0);
     setShopCardQty(root, idx, displayQty);
-    var addBtn = card.querySelector(".ma-btn-cart[data-product-idx='" + idx + "']");
+    var addBtn = card.querySelector(".anzaar-btn-cart[data-product-idx='" + idx + "']");
     if (addBtn) addBtn.classList.toggle("is-active", cartQty > 0);
   });
   syncShopCartBadge();
@@ -1425,7 +1425,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
      (!isTwoPiece && !isPanjabi && sizes.length > 1));
   var wholesaleHtml = showWholesale ? buildPqvWholesaleSectionHtml(sizes, idx, isAbaya) : "";
   return (
-    '<div class="pqv-ma">' +
+    '<div class="pqv-anzaar">' +
     '<div class="pqv-gallery">' +
     '<div class="pqv-thumbs">' +
     buildPqvThumbsHtml(gallery, p.name) +
@@ -2224,18 +2224,18 @@ encodeURIComponent("I want to order " + p.name) +
     "' aria-hidden='true' tabindex='-1'>" +
     sizeOptions +
     "</select>" +
-    '<div class="card-actions-ma">' +
+    '<div class="card-actions-anzaar">' +
     buildShopCardQtyStepper(idx, cardQty, inCart) +
-    '<button type="button" class="ma-btn ma-btn-cart' +
+    '<button type="button" class="anzaar-btn anzaar-btn-cart' +
     (inCart ? " is-active" : "") +
     '" data-product-idx="' +
     idx +
-    '" data-action="add"><span class="ma-btn-ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M6 6L5 3H2"/></svg></span><span lang="en">Add to Cart</span></button>' +
+    '" data-action="add"><span class="anzaar-btn-ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M6 6L5 3H2"/></svg></span><span lang="en">Add to Cart</span></button>' +
     "<a href='" +
     waLink +
     "?text=" +
    encodeURIComponent("I want to order " + p.name) +
-"' target='_blank' rel='noopener' class='ma-btn ma-btn-msg' onclick='event.stopPropagation()'><span lang='en'>Send Message</span></a>" +
+"' target='_blank' rel='noopener' class='anzaar-btn anzaar-btn-msg' onclick='event.stopPropagation()'><span lang='en'>Send Message</span></a>" +
 "</div></div></article>"
 );
 
