@@ -225,20 +225,22 @@ body.shop-page .card-actions-anzaar {
   display: grid;
   grid-template-columns: 46px 1fr;
   grid-template-areas: "cart msg";
-  gap: 6px;
-  padding: 8px;
-  border-radius: 10px;
-  background: #f5f5f5;
-  border: 1px solid #ececec;
+  gap: 8px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  border: none;
 }
 /* Grid cards match the Anzaar reference exactly: just the cart icon
-   button and Send Message, one row. The qty stepper is not shown here
-   (it still appears in quick-view / the single-product detail page). */
+   button and Send Message, one row, no wrapping panel behind them.
+   The qty stepper is not shown here (it still appears in quick-view /
+   the single-product detail page). */
 body.shop-page .card-actions-anzaar .ma-qty-stepper { display: none; }
 body.shop-page .card-actions-anzaar .anzaar-btn-cart { grid-area: cart; }
 body.shop-page .card-actions-anzaar .anzaar-btn-msg { grid-area: msg; }
 
-/* PRIMARY — Add to Cart (icon-only, like the Anzaar reference) */
+/* PRIMARY — Add to Cart (icon-only, grey fill by default like the
+   Anzaar reference — not a white button sitting inside a grey box) */
 body.shop-page .anzaar-btn-cart {
   position: relative;
   z-index: 1;
@@ -247,8 +249,8 @@ body.shop-page .anzaar-btn-cart {
   justify-content: center;
   border-radius: 6px;
   padding: 12px 0;
-  border: 1px solid #e0e0e0;
-  background: #fff;
+  border: 1px solid #e3e3e3;
+  background: #eef0f1;
   color: #111;
   font-family: "Inter", "Hind Siliguri", system-ui, sans-serif;
   font-weight: 700;
@@ -265,17 +267,21 @@ body.shop-page .card-actions-anzaar .anzaar-btn-cart > span[lang="en"] {
   display: none;
 }
 body.shop-page .anzaar-btn-cart:hover {
-  background: #ebebeb;
+  background: #e2e5e6;
 }
 
-/* SECONDARY — Send Message. Same flat family, slightly muted. */
+/* SECONDARY — Send Message. Same grey fill as the cart button by
+   default, matching the Anzaar reference (not a white button). */
 body.shop-page .anzaar-btn-msg {
   position: relative;
   z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 6px;
-  padding: 9px 0;
-  border: 1px solid #e0e0e0;
-  background: #fff;
+  padding: 12px 0;
+  border: 1px solid #e3e3e3;
+  background: #eef0f1;
   color: #333;
   font-family: "Inter", "Hind Siliguri", system-ui, sans-serif;
   font-weight: 500;
@@ -284,7 +290,7 @@ body.shop-page .anzaar-btn-msg {
   transition: background .15s ease, color .15s ease;
 }
 body.shop-page .anzaar-btn-msg:hover {
-  background: #ebebeb;
+  background: #e2e5e6;
   color: #111;
 }
 
