@@ -223,24 +223,30 @@ body.shop-page .shop-breadcrumb--mobile {
 body.shop-page .card-actions-anzaar {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(78px, auto) 1fr;
-  grid-template-areas: "qty cart" "msg msg";
+  grid-template-columns: 46px 1fr;
+  grid-template-areas: "cart msg";
   gap: 6px;
   padding: 8px;
   border-radius: 10px;
   background: #f5f5f5;
   border: 1px solid #ececec;
 }
-body.shop-page .card-actions-anzaar .ma-qty-stepper { grid-area: qty; }
+/* Grid cards match the Anzaar reference exactly: just the cart icon
+   button and Send Message, one row. The qty stepper is not shown here
+   (it still appears in quick-view / the single-product detail page). */
+body.shop-page .card-actions-anzaar .ma-qty-stepper { display: none; }
 body.shop-page .card-actions-anzaar .anzaar-btn-cart { grid-area: cart; }
 body.shop-page .card-actions-anzaar .anzaar-btn-msg { grid-area: msg; }
 
-/* PRIMARY — Add to Cart */
+/* PRIMARY — Add to Cart (icon-only, like the Anzaar reference) */
 body.shop-page .anzaar-btn-cart {
   position: relative;
   z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 6px;
-  padding: 12px 6px;
+  padding: 12px 0;
   border: 1px solid #e0e0e0;
   background: #fff;
   color: #111;
@@ -251,7 +257,13 @@ body.shop-page .anzaar-btn-cart {
   white-space: nowrap;
   transition: background .15s ease;
 }
-body.shop-page .card-actions-anzaar .anzaar-btn-cart .anzaar-btn-ico { display: none; }
+body.shop-page .card-actions-anzaar .anzaar-btn-cart .anzaar-btn-ico {
+  display: inline-flex;
+  margin: 0;
+}
+body.shop-page .card-actions-anzaar .anzaar-btn-cart > span[lang="en"] {
+  display: none;
+}
 body.shop-page .anzaar-btn-cart:hover {
   background: #ebebeb;
 }
