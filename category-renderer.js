@@ -1426,6 +1426,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
   var wholesaleHtml = showWholesale ? buildPqvWholesaleSectionHtml(sizes, idx, isAbaya) : "";
   return (
     '<div class="pqv-anzaar">' +
+    '<div class="pqv-top">' +
     '<div class="pqv-gallery">' +
     '<div class="pqv-thumbs">' +
     buildPqvThumbsHtml(gallery, p.name) +
@@ -1491,6 +1492,10 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     encodeURIComponent(p.name + " \u0985\u09B0\u09CD\u09A1\u09BE\u09B0 \u0995\u09B0\u09A4\u09C7 \u099A\u09BE\u09AF\u09BC") +
     '" target="_blank" rel="noopener">Send Message</a>' +
     "</div>" +
+    "</div>" +
+    "</div>" +
+    "</div>" +
+    '<div class="pqv-bottom-row">' +
     '<div class="pqv-bottom" id="pqvDescBlock">' +
     '<div class="pqv-bottom-main">' +
     '<div class="pqv-tabs">' +
@@ -1504,8 +1509,8 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     '<div class="pqv-tab-panel" data-panel="spec">' +
     specRows +
     "</div></div></div></div>" +
-    "</div></div>" +
     relatedHtml +
+    "</div>" +
     "</div>"
   );
 }

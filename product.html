@@ -141,8 +141,24 @@
       .pd-actions { grid-template-columns: 1fr; }
     }
 
-    /* ---------- Tabs ---------- */
-    .pd-tabs-section { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 24px; }
+    /* ---------- Bottom section: Description/Specification (left) + Related Products (right) ----------
+       These two used to be separate full-width blocks stacked vertically. The Anzaar reference puts
+       them side by side in the same row, so they're now wrapped together in .pd-bottom-grid. */
+    .pd-bottom-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(260px, 1fr);
+      gap: 48px;
+      align-items: start;
+      margin-top: 48px;
+      border-top: 1px solid var(--line);
+      padding-top: 24px;
+    }
+    @media (max-width: 900px) {
+      .pd-bottom-grid { grid-template-columns: 1fr; gap: 28px; }
+    }
+
+    /* ---------- Tabs (left column) ---------- */
+    .pd-tabs-section { margin-top: 0; border-top: none; padding-top: 0; }
     .pd-tabs { display: flex; gap: 26px; border-bottom: 1px solid var(--line); margin-bottom: 20px; }
     .pd-tab { background: none; border: none; padding: 0 0 12px; font-size: 15px; font-weight: 700; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; }
     .pd-tab.active { color: var(--ink); border-bottom-color: var(--ink); }
@@ -155,15 +171,16 @@
     .pd-spec-table td:first-child { color: var(--muted); width: 160px; }
     .pd-spec-table td:last-child { color: var(--ink); font-weight: 600; }
 
-    /* ---------- Related products ---------- */
-    .pd-related { margin-top: 48px; }
+    /* ---------- Related products (right column) — vertical list, matching the Anzaar sidebar look ---------- */
+    .pd-related { margin-top: 0; }
     .pd-related-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; }
     .pd-related-head h2 { font-size: 20px; margin: 0; color: var(--ink); }
     .pd-related-head a { font-size: 13px; font-weight: 600; color: var(--ink); text-decoration: underline; }
-    .pd-related-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
-    .pd-rel-card { text-decoration: none; color: inherit; display: block; }
-    .pd-rel-card img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: var(--radius); background: var(--gold-soft); display: block; }
-    .pd-rel-card .name { font-size: 13px; font-weight: 600; color: var(--ink); margin: 8px 0 2px; }
+    .pd-related-row { display: flex; flex-direction: column; gap: 16px; }
+    .pd-rel-card { text-decoration: none; color: inherit; display: flex; gap: 12px; align-items: center; }
+    .pd-rel-card img { width: 64px; height: 82px; flex-shrink: 0; object-fit: cover; border-radius: var(--radius); background: var(--gold-soft); display: block; }
+    .pd-rel-card .pd-rel-info { min-width: 0; }
+    .pd-rel-card .name { font-size: 13px; font-weight: 600; color: var(--ink); margin: 0 0 4px; line-height: 1.35; }
     .pd-rel-card .price { font-size: 13px; font-weight: 700; color: var(--ink); }
 
     .pd-loading, .pd-notfound { padding: 80px 0; text-align: center; color: var(--muted); }
