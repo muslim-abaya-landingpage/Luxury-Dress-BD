@@ -465,28 +465,12 @@ function setShopCardQty(root, idx, n) {
   if (minus) minus.disabled = qty <= 1;
 }
 function buildShopCardQtyStepper(idx, qty, inCart) {
-  var q = parsePqvQtyValue(qty);
-  return (
-    '<div class="ma-qty-stepper shop-card-qty is-visible' +
-    (inCart ? " in-cart" : "") +
-    '" data-product-idx="' +
-    idx +
-   '" role="group" aria-label="Quantity">' +
-    '<button type="button" class="ma-qty-stepper__btn shop-card-qty-btn" data-shop-qty="minus" data-product-idx="' +
-    idx +
-    '" aria-label="Decrease quantity"' +
-    (q <= 1 ? " disabled" : "") +
-    ">−</button>" +
-    '<span class="ma-qty-stepper__value shop-card-qty-val" data-product-idx="' +
-    idx +
-    '" aria-live="polite">' +
-    q +
-    "</span>" +
-    '<button type="button" class="ma-qty-stepper__btn shop-card-qty-btn" data-shop-qty="plus" data-product-idx="' +
-    idx +
-    '" aria-label="Increase quantity">+</button>' +
-    "</div>"
-  );
+  // Removed: Anzaar's category/listing cards show only Add to Cart + Send
+  // Message, no per-card quantity stepper. Add to Cart adds qty 1 by
+  // default (getShopCardQty() already falls back to 1 when this element
+  // doesn't exist), and quantity can still be adjusted in the cart drawer
+  // or on the product detail page (pqv-qty stepper, unaffected by this).
+  return "";
 }
 function refreshShopCardsAfterCartChange() {
   var root = shopCartCtx.root;

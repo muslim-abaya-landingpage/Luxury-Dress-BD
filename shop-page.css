@@ -218,51 +218,41 @@ body.shop-page .shop-breadcrumb--mobile {
    so colors/fabric are still true-to-life)
 ================================================================ */
 body.shop-page .card-actions-anzaar {
-  position: relative;
   display: grid;
-  grid-template-columns: minmax(78px, auto) 1fr;
-  grid-template-areas: "qty cart" "msg msg";
+  grid-template-columns: 1fr;
+  grid-template-areas: "cart" "msg";
   gap: 6px;
-  padding: 8px;
-  border-radius: 8px;
-  overflow: hidden;
-  background: #fff;
-  border: 1px solid #ececec;
 }
-body.shop-page .card-actions-anzaar .ma-qty-stepper { grid-area: qty; }
 body.shop-page .card-actions-anzaar .anzaar-btn-cart { grid-area: cart; }
 body.shop-page .card-actions-anzaar .anzaar-btn-msg { grid-area: msg; }
 
-/* PRIMARY — Add to Cart. The one action that should catch the eye. */
+/* Add to Cart — flat, matches home page & checkout buttons */
 body.shop-page .anzaar-btn-cart {
   position: relative;
   z-index: 1;
-  border-radius: 4px;
+  border-radius: 0;
   padding: 12px 6px;
-  border: none;
-  background: #111;
-  color: #fff;
+  border: 1px solid #e5e5e5;
+  background: #f5f5f5;
+  color: #111;
   font-family: "Inter", "Hind Siliguri", system-ui, sans-serif;
   font-weight: 700;
   font-size: 12.5px;
   letter-spacing: .01em;
   white-space: nowrap;
-  transition: background .2s ease, transform .18s ease;
+  transition: background .15s ease;
 }
-/* the qty stepper right next to it already shows +/- controls, so the
-   cart icon is redundant here — dropping it keeps "Add to Cart" from
-   wrapping in the narrower grid cell */
-body.shop-page .card-actions-anzaar .anzaar-btn-cart .anzaar-btn-ico { display: none; }
 body.shop-page .anzaar-btn-cart:hover {
-  background: #333;
+  background: #ebebeb;
 }
 
-/* SECONDARY — Send Message. Present, but quiet — a ghost/outline pill,
-   not a second dark box competing with the primary action. */
+/* Send Message — same flat gray as Add to Cart, matches Anzaar's screenshot
+   where both buttons are the same tone (only Buy Now on the detail page
+   is black/primary) */
 body.shop-page .anzaar-btn-msg {
   position: relative;
   z-index: 1;
-  border-radius: 4px;
+  border-radius: 0;
   padding: 9px 0;
   border: 1px solid #e5e5e5;
   background: #f5f5f5;
@@ -271,59 +261,31 @@ body.shop-page .anzaar-btn-msg {
   font-weight: 500;
   font-size: 12.5px;
   letter-spacing: .01em;
-  transition: background .2s ease, border-color .2s ease;
+  transition: background .15s ease;
 }
 body.shop-page .anzaar-btn-msg:hover {
   background: #ebebeb;
-  border-color: #d0d0d0;
 }
 
 body.shop-page .anzaar-btn-cart:active,
 body.shop-page .anzaar-btn-msg:active,
 body.shop-page .anzaar-btn-buy:active {
-  transform: translateY(0) scale(.97);
+  transform: scale(.98);
   transition-duration: .08s;
 }
 
-/* Single-product detail page still has a real third action (Buy Now) —
-   keep it primary-styled there too, distinct from the plain Add to Cart. */
+/* Buy Now — the one black/primary button, product detail page only */
 body.shop-page .anzaar-btn-buy {
   position: relative;
   z-index: 1;
-  border-radius: 4px;
+  border-radius: 0;
   padding: 13px 0;
   border: none;
   background: #111;
   color: #fff;
   font-weight: 700;
-  transition: background .2s ease;
+  transition: background .15s ease;
 }
 body.shop-page .anzaar-btn-buy:hover {
   background: #333;
-}
-
-/* qty stepper sits inside the same dark panel — make it match.
-   qty-stepper.css (a separate file) styles this component with a plain
-   white background; !important here guarantees our dark-glass look wins
-   regardless of which stylesheet loads later. */
-body.shop-page .card-actions-anzaar .ma-qty-stepper {
-  position: relative;
-  z-index: 1;
-  background: #f5f5f5 !important;
-  border: 1px solid #e5e5e5 !important;
-  border-radius: 4px !important;
-  overflow: hidden;
-}
-body.shop-page .card-actions-anzaar .ma-qty-stepper__value,
-body.shop-page .card-actions-anzaar .ma-qty-stepper__input,
-body.shop-page .card-actions-anzaar .ma-qty-stepper__btn {
-  background: transparent !important;
-  color: #111 !important;
-  border: none !important;
-}
-body.shop-page .card-actions-anzaar .ma-qty-stepper__btn:hover {
-  background: #ebebeb !important;
-}
-body.shop-page .card-actions-anzaar .ma-qty-stepper__btn:disabled {
-  color: #bbb !important;
 }
