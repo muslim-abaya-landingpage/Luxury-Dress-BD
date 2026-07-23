@@ -162,6 +162,7 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
 <link rel="stylesheet" href="related-cart.css">
 
 <!--  এই নতুন কোডটুকু বসিয়ে দিন (টাইমিং ঠিক করার জন্য) -->
+<script src="hero-banner-config.js?v=20260724a"></script>
 <script type="module" src="index-catalog-defer.js?v=20260530sale"></script>
 <script type="module">
   // ক্যাটালগ ডেটা পুরোপুরি লোড হওয়া পর্যন্ত মেইন ফাইলটিকে ১ সেকেন্ড দেরি করানো হলো
@@ -192,55 +193,9 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
         <h2 class="lux-video-title">See Premium Finishing &amp; Royal Elegance in Our Dress Videos</h2>
         <p class="lux-video-subtitle">Watch real videos, check the details, then order with confidence.</p>
 
-       <div class="lux-video-grid">
-
-    <div class="lux-video-card">
-        <div class="lux-video-ratio" data-video-id="Wyrw0gzKMqk">
-            <button type="button" class="lux-video-facade">
-                <img src="https://i.ytimg.com/vi/Wyrw0gzKMqk/hqdefault.jpg" alt="Premium Two Piece video" loading="lazy" onerror="this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg';">
-                <span class="lux-video-play"></span>
-            </button>
-        </div>
-
-        <div class="video-content">
-            <h4>Premium Two Piece</h4>
-            <p>Real fabric and finishing details.</p>
-        </div>
-    </div>
-
-    <!-- TODO: replace VIDEO_ID_2 with the real YouTube video ID for this clip.
-         This placeholder is why this card shows a grey/broken thumbnail live. -->
-    <div class="lux-video-card">
-        <div class="lux-video-ratio" data-video-id="VIDEO_ID_2">
-            <button type="button" class="lux-video-facade">
-                <img src="https://i.ytimg.com/vi/VIDEO_ID_2/hqdefault.jpg" alt="Elegant Abaya video" loading="lazy" onerror="this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg';">
-                <span class="lux-video-play"></span>
-            </button>
-        </div>
-
-        <div class="video-content">
-            <h4>Elegant Abaya</h4>
-            <p>Premium quality showcase.</p>
-        </div>
-    </div>
-
-    <!-- TODO: replace VIDEO_ID_3 with the real YouTube video ID for this clip.
-         This placeholder is why this card shows a grey/broken thumbnail live. -->
-    <div class="lux-video-card">
-        <div class="lux-video-ratio" data-video-id="VIDEO_ID_3">
-            <button type="button" class="lux-video-facade">
-                <img src="https://i.ytimg.com/vi/VIDEO_ID_3/hqdefault.jpg" alt="Latest Collection video" loading="lazy" onerror="this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg';">
-                <span class="lux-video-play"></span>
-            </button>
-        </div>
-
-        <div class="video-content">
-            <h4>Latest Collection</h4>
-            <p>See actual product before ordering.</p>
-        </div>
-    </div>
-
-</div>
+       <div class="lux-video-grid" id="luxVideoGrid"></div>
+        <script src="video-config.js?v=20260724a"></script>
+        <script src="index-video-render.js?v=20260724a"></script>
         <div class="lux-video-cta">
             <a href="#premium-collection" class="lux-btn lux-btn-primary" onclick="if(typeof goToShopFromVideo==='function'){goToShopFromVideo(event);}"><i class="fas fa-shopping-bag" aria-hidden="true"></i> Order Now</a>
             <a href="https://www.youtube.com/watch?v=Wyrw0gzKMqk" target="_blank" rel="noopener" class="lux-btn lux-btn-secondary">Watch on YouTube</a>

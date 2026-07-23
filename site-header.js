@@ -1,6 +1,39 @@
 (function () {
   var GTM_ID = 'GTM-ML7RL6BR';
   var SEO_VER = '20260603seo';
+  var HEADER_CFG = window.SITE_HEADER_CONFIG || {};
+
+  var TOP_BAR_FACEBOOK_FALLBACK =
+    (HEADER_CFG.topBar && HEADER_CFG.topBar.facebookUrl) ||
+    'https://www.facebook.com/muslimabayaofficial';
+  var TOP_BAR_LINKS =
+    (HEADER_CFG.topBar && Array.isArray(HEADER_CFG.topBar.links) && HEADER_CFG.topBar.links.length)
+      ? HEADER_CFG.topBar.links
+      : [
+          { label: 'Help', href: '/help' },
+          { label: 'Sign Up', href: '/signup' },
+          { label: 'Sign In', href: '/signin' }
+        ];
+
+  var HEADER_BRAND = HEADER_CFG.brand || {
+    name: 'Muslim Abaya',
+    logoSrc: 'assets/logo-muslim-abaya.svg?v=20260603',
+    logoAlt: 'Muslim Abaya',
+    fallbackText: 'MUSLIM ABAYA'
+  };
+
+  var HEADER_WHATSAPP = HEADER_CFG.whatsapp || 'https://wa.me/8801970831783';
+
+  var SEARCH_PLACEHOLDER = (HEADER_CFG.search && HEADER_CFG.search.placeholder) || 'Search';
+
+  var ANNOUNCEMENTS =
+    Array.isArray(HEADER_CFG.announcements) && HEADER_CFG.announcements.length
+      ? HEADER_CFG.announcements
+      : [
+          '💎 PREMIUM MODEST WEAR | TIMELESS ELEGANCE & EVERYDAY COMFORT',
+          '💎 Premium Modest Fashion | Elegant Abayas & Two-Piece Collections',
+          '🚚 Buy 3 Dresses & Enjoy FREE Nationwide Delivery'
+        ];
 
   (  function bootSiteSeo() {
     if (window.__maSiteSeoBoot) return;
@@ -279,23 +312,35 @@ function buildNavMenuItems() {
   var ICON_CHEV_RIGHT =
     '<svg class="slider-arrow-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
 
+  function buildAnnouncementSlidesHtml() {
+    return ANNOUNCEMENTS.map(function (text, i) {
+      return '<div class="ann-slide' + (i === 0 ? ' active' : '') + '">' + text + '</div>';
+    }).join('');
+  }
+
+  function buildTopBarLinksHtml() {
+    return TOP_BAR_LINKS.map(function (l) {
+      return '<a href="' + l.href + '">' + l.label + '</a>';
+    }).join(' | ');
+  }
+
   function buildHeaderHtml() {
-    var fbUrl = getSocialUrl('facebook', 'https://www.facebook.com/muslimabayaofficial');
+    var fbUrl = getSocialUrl('facebook', TOP_BAR_FACEBOOK_FALLBACK);
     return (
     '<header class="abaya-main-header">' +
     '<div class="header-top-bar"><div class="custom-container"><div class="top-bar-content">' +
     '<a href="' + fbUrl + '" target="_blank" rel="noopener noreferrer">Facebook</a> | ' +
-    '<a href="/help">Help</a> | <a href="/signup">Sign Up</a> | <a href="/signin">Sign In</a>' +
+    buildTopBarLinksHtml() +
     '</div></div></div>' +
     '<div class="header-middle-nav"><div class="custom-container nav-row">' +
-    '<div class="brand-text-logo"><a href="/" class="brand-logo-link" aria-label="Muslim Abaya Home">' +
-    '<img class="brand-logo-img" src="assets/logo-muslim-abaya.svg?v=20260603" alt="Muslim Abaya" width="220" height="46" decoding="async" fetchpriority="high">' +
-  '<span class="brand-logo-fallback" aria-hidden="true">MUSLIM ABAYA</span></a></div>' +
+    '<div class="brand-text-logo"><a href="/" class="brand-logo-link" aria-label="' + HEADER_BRAND.name + ' Home">' +
+    '<img class="brand-logo-img" src="' + HEADER_BRAND.logoSrc + '" alt="' + HEADER_BRAND.logoAlt + '" width="220" height="46" decoding="async" fetchpriority="high">' +
+  '<span class="brand-logo-fallback" aria-hidden="true">' + HEADER_BRAND.fallbackText + '</span></a></div>' +
     '<nav class="desktop-menu" aria-label="Main"><ul></ul></nav>' +
     '<div class="nav-icons">' +
     '<button type="button" class="nav-icon-btn" id="navSearchOpen" aria-label="Search" aria-expanded="false">' + ICON_SEARCH + '</button>' +
     '<button type="button" class="cart-drawer-trigger" data-cart-trigger="1" style="position:relative" aria-label="Cart">' + ICON_BAG + '<span id="cart-count">0</span></button>' +
-    '<a href="https://wa.me/8801970831783" target="_blank" rel="noopener" aria-label="Message">' + ICON_CHAT + '</a>' +
+    '<a href="' + HEADER_WHATSAPP + '" target="_blank" rel="noopener" aria-label="Message">' + ICON_CHAT + '</a>' +
     '<a href="/signin" aria-label="Account">' + ICON_USER + '</a>' +
     '<button type="button" class="nav-menu-btn" onclick="window.toggleAbayaMenu()" aria-label="Menu">' + ICON_MENU + '</button>' +
     '</div></div></div>' +
@@ -304,7 +349,7 @@ function buildNavMenuItems() {
     '<div class="site-search-row">' +
     '<form class="site-search-form" id="siteSearchForm" role="search" autocomplete="off">' +
     ICON_SEARCH +
-    '<input type="search" id="siteSearchInput" name="q" placeholder="Search" autocomplete="off" aria-label="Search products">' +
+    '<input type="search" id="siteSearchInput" name="q" placeholder="' + SEARCH_PLACEHOLDER + '" autocomplete="off" aria-label="Search products">' +
     '</form>' +
     '<button type="button" class="site-search-close" id="siteSearchClose" aria-label="Close search">&times;</button>' +
     '</div>' +
@@ -313,9 +358,7 @@ function buildNavMenuItems() {
     '<div class="header-announcement-bar"><div class="custom-container announcement-slider">' +
     '<button type="button" class="slider-arrow left-arrow" onclick="window.moveAnnouncement(-1)" aria-label="Previous">' + ICON_CHEV_LEFT + '</button>' +
     '<div class="announcement-content">' +
-   '<div class="ann-slide active">💎 PREMIUM MODEST WEAR | TIMELESS ELEGANCE & EVERYDAY COMFORT</div>' +
-    '<div class="ann-slide">💎 Premium Modest Fashion | Elegant Abayas & Two-Piece Collections</div>' +
-    '<div class="ann-slide">🚚 Buy 3 Dresses & Enjoy FREE Nationwide Delivery</div>' +
+    buildAnnouncementSlidesHtml() +
     '</div>' +
     '<button type="button" class="slider-arrow right-arrow" onclick="window.moveAnnouncement(1)" aria-label="Next">' + ICON_CHEV_RIGHT + '</button>' +
     '</div></div>' +

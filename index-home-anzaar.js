@@ -132,8 +132,12 @@
   }
 
   function detailHref(sec, p) {
-    var base = href(sec.path || "/" + sec.key);
     var id = p.id || "";
+    var links = window.SITE_LINKS && window.SITE_LINKS.productPage;
+    if (links && links.enabled && links.pattern) {
+      return href(links.pattern.replace("{id}", encodeURIComponent(id)));
+    }
+    var base = href(sec.path || "/" + sec.key);
     return base + "#p=" + encodeURIComponent(id);
   }
 
@@ -383,6 +387,12 @@
     var items = heroProducts();
     if (!items.length) return;
 
+    var heroCfg = window.SITE_HERO_CONFIG || {};
+    var heroEyebrow = heroCfg.eyebrow || "Eid Collection 2026";
+    var heroHeading = heroCfg.heading || "Experience<br>the Elegance";
+    var heroSubtitle = heroCfg.subtitle || "Premium modest wear crafted with comfort &amp; purity.";
+    var heroBtnText = heroCfg.buttonText || "Shop Now";
+
     var slides = items
       .map(function (it, i) {
         var img = resolveImg(it.p);
@@ -399,12 +409,12 @@
           (i === 0 ? " fetchpriority='high'" : " loading='lazy'") +
           " onerror=\"this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg'\">" +
           "<div class='home-hero-cap'>" +
-          "<p class='eyebrow'>Eid Collection 2026</p>" +
-          "<h2 class='head'>Experience<br>the Elegance</h2>" +
-          "<p class='sub'>Premium modest wear crafted with comfort &amp; purity.</p>" +
+          "<p class='eyebrow'>" + heroEyebrow + "</p>" +
+          "<h2 class='head'>" + heroHeading + "</h2>" +
+          "<p class='sub'>" + heroSubtitle + "</p>" +
           "<a class='hero-btn' href='" +
           escapeHtml(link) +
-          "'>Shop Now</a>" +
+          "'>" + heroBtnText + "</a>" +
           "</div>" +
           "</div>"
         );

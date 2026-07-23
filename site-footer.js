@@ -1,19 +1,43 @@
 (function () {
   var SEO = window.SITE_SEO || {};
- var SOCIAL = SEO.social || {
+  var FOOTER_CFG = window.SITE_FOOTER_CONFIG || {};
+
+  var SOCIAL = SEO.social || FOOTER_CFG.social || {
   facebook: "https://www.facebook.com/muslimabayaofficial/",
   instagram: "https://www.instagram.com/luxurydressbd/",
   youtube: "https://www.youtube.com/@luxurydressbd",
   tiktok: "https://www.tiktok.com/@muslimabayabd",
   linkedin: "https://www.linkedin.com/in/muslimabayabd"
 };
-  var CONTACT = {
+  var CONTACT = FOOTER_CFG.contact || {
     email: "muslimabaya@gmail.com",
     phone: "+880 1970-831783",
     phoneTel: "+8801970831783",
     whatsapp: "https://wa.me/8801970831783",
     address: "832, West Rasulpur, Dhaka-1211, Bangladesh"
   };
+
+  var TRUST_BADGES =
+    Array.isArray(FOOTER_CFG.trustBadges) && FOOTER_CFG.trustBadges.length
+      ? FOOTER_CFG.trustBadges
+      : ["Cash on Delivery", "Nationwide Delivery", "Easy Return Policy"];
+
+  var BRAND = FOOTER_CFG.brand || {
+    name: "Muslim Abaya",
+    description:
+      "Premium modest fashion in Bangladesh — abayas, two-piece sets & embroidery. Comfortable fabrics, video-verified products, cash on delivery.",
+    whatsappCtaText: "WhatsApp Order"
+  };
+
+  var NEWSLETTER = FOOTER_CFG.newsletter || {
+    heading: "Newsletter",
+    note: "New collections &amp; offers — email or mobile",
+    successTitle: "Subscription complete",
+    successText: "Your details are saved. We will notify you about new collections soon."
+  };
+
+  var COPYRIGHT_HTML =
+    FOOTER_CFG.copyrightHtml || "Copyright &copy; 2026 Muslim Abaya. All Rights Reserved.";
 
   var SVG_ATTR = ' width="18" height="18" focusable="false" aria-hidden="true"';
   var ICON_MAIL =
@@ -102,24 +126,32 @@
     );
   }
 
+  function buildTrustBadgesHtml() {
+    return TRUST_BADGES.map(function (label) {
+      return (
+        '<div class="anz-trust-item"><span class="anz-trust-dot" aria-hidden="true"></span><span>' +
+        esc(label) +
+        "</span></div>"
+      );
+    }).join("");
+  }
+
   function buildFooterHtml() {
     return (
       '<footer class="anz-footer">' +
       '<div class="anz-footer-trust">' +
       '<div class="anz-trust-inner">' +
-      '<div class="anz-trust-item"><span class="anz-trust-dot" aria-hidden="true"></span><span>Cash on Delivery</span></div>' +
-      '<div class="anz-trust-item"><span class="anz-trust-dot" aria-hidden="true"></span><span>Nationwide Delivery</span></div>' +
-      '<div class="anz-trust-item"><span class="anz-trust-dot" aria-hidden="true"></span><span>Easy Return Policy</span></div>' +
+      buildTrustBadgesHtml() +
       "</div></div>" +
       '<div class="anz-footer-main">' +
       '<div class="anz-col-brand">' +
-      '<h2 class="anz-logo">Muslim Abaya</h2>' +
-      '<p class="anz-text">Premium modest fashion in Bangladesh — abayas, two-piece sets &amp; embroidery. Comfortable fabrics, video-verified products, cash on delivery.</p>' +
+      '<h2 class="anz-logo">' + esc(BRAND.name) + '</h2>' +
+      '<p class="anz-text">' + esc(BRAND.description) + '</p>' +
       '<a class="anz-wa-cta" href="' +
       esc(CONTACT.whatsapp) +
       '" target="_blank" rel="noopener">' +
       ICON_WA +
-      "<span>WhatsApp Order</span></a>" +
+      "<span>" + esc(BRAND.whatsappCtaText) + "</span></a>" +
       "</div>" +
       footerPanel(
         "Shop",
@@ -162,8 +194,8 @@
       ) +
       '<div class="anz-col-newsletter">' +
       '<form id="newsletter-form" aria-labelledby="newsletter-heading" novalidate>' +
-      '<h3 class="anz-title" id="newsletter-heading">Newsletter</h3>' +
-      '<p class="anz-newsletter-note" id="newsletter-note">New collections &amp; offers — email or mobile</p>' +
+      '<h3 class="anz-title" id="newsletter-heading">' + esc(NEWSLETTER.heading) + '</h3>' +
+      '<p class="anz-newsletter-note" id="newsletter-note">' + NEWSLETTER.note + '</p>' +
       '<div class="newsletter-form">' +
       '<label for="subscriber-contact" class="anz-visually-hidden">Email or mobile number</label>' +
       '<input type="text" name="contact" id="subscriber-contact" placeholder="Email or mobile" required autocomplete="email" inputmode="email" aria-describedby="newsletter-note" aria-required="true">' +
@@ -172,8 +204,8 @@
       '<div id="success-msg" class="subscribe-success" role="status" aria-live="polite" aria-atomic="true">' +
       '<div class="subscribe-success-icon" aria-hidden="true">' +
       '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>' +
-      '<p class="subscribe-success-title">Subscription complete</p>' +
-      '<p class="subscribe-success-text">Your details are saved. We will notify you about new collections soon.</p>' +
+      '<p class="subscribe-success-title">' + esc(NEWSLETTER.successTitle) + '</p>' +
+      '<p class="subscribe-success-text">' + esc(NEWSLETTER.successText) + '</p>' +
       "</div>" +
       "</form>" +
 '<div class="anz-socials">' +
@@ -200,7 +232,7 @@ esc(SOCIAL.linkedin) +
 "</div>" +
       "</div>" +
       "</div>" +
-      '<div class="anz-bottom anz-footer-strip"><p>Copyright &copy; 2026 Muslim Abaya. All Rights Reserved.</p></div>' +
+      '<div class="anz-bottom anz-footer-strip"><p>' + COPYRIGHT_HTML + '</p></div>' +
       "</footer>"
     );
   }

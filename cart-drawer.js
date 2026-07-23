@@ -28,30 +28,25 @@ function ensureCartDrawerRelatedStyles() {
     .related-grid::-webkit-scrollbar-thumb { background: rgba(0,0,0,.18); border-radius: 999px; }
     .related-card {
       flex: 0 0 132px; scroll-snap-align: start;
-      border: 1px solid rgba(255,255,255,.6);
-      border-radius: 16px; padding: 9px;
+      border: 1px solid #ececec;
+      border-radius: 10px; padding: 9px;
       text-align: left;
-      background: rgba(255,255,255,.55);
-      backdrop-filter: blur(14px) saturate(160%);
-      -webkit-backdrop-filter: blur(14px) saturate(160%);
-      box-shadow: 0 4px 16px rgba(17,17,17,.06), inset 0 1px 0 rgba(255,255,255,.5);
-      transition: box-shadow .25s ease, transform .25s ease, background .25s ease;
+      background: #ffffff;
+      box-shadow: none;
+      transition: box-shadow .25s ease, transform .25s ease;
     }
     .related-card:hover {
-      box-shadow: 0 10px 26px rgba(17,17,17,.12), inset 0 1px 0 rgba(255,255,255,.6);
+      box-shadow: 0 6px 18px rgba(0,0,0,.08);
       transform: translateY(-3px);
-      background: rgba(255,255,255,.72);
     }
-    .related-card-thumb { width: 100%; aspect-ratio: 4/5; border-radius: 11px; overflow: hidden; background: rgba(245,245,245,.6); margin-bottom: 8px; position: relative; }
+    .related-card-thumb { width: 100%; aspect-ratio: 4/5; border-radius: 8px; overflow: hidden; background: #f5f5f5; margin-bottom: 8px; position: relative; }
     .related-card-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .3s ease; }
     .related-card:hover .related-card-thumb img { transform: scale(1.05); }
     .related-card-name { font-size: 12px; margin: 0 0 4px; color: #111; line-height: 1.3; min-height: 31px; font-weight: 500; }
     .related-card-price { font-size: 13.5px; font-weight: 700; color: #111; margin: 0 0 8px; }
     .related-card-add {
-      width: 100%; border: 1.5px solid rgba(17,17,17,.7);
-      background: rgba(255,255,255,.4);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
+      width: 100%; border: 1.5px solid #111;
+      background: #fff;
       color: #111;
       font-size: 11px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase;
       padding: 7px 0; border-radius: 999px; cursor: pointer;
