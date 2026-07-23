@@ -346,66 +346,10 @@ body.shop-page .card-actions-anzaar .ma-qty-stepper__btn:disabled {
 }
 
 /* ================================================================
-   SINGLE-PRODUCT PAGE (quick-view panel) — Add to Cart / Buy Now /
-   Send Message. These are the real classes rendered on the page:
-   .pqv-act-cart / .pqv-act-buy / .pqv-act-msg inside .pqv-actions-row.
-   Matched to the flat Anzaar reference: Add to Cart and Send Message
-   share the same light-grey fill as the category-grid buttons; Buy Now
-   stays the one solid-black button, text only — no cart icon.
-================================================================ */
-body.shop-page .pqv-actions-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-}
-body.shop-page .pqv-act {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  border: none !important;
-  border-radius: 5px !important;
-  padding: 13px 6px !important;
-  font-family: "Inter", "Hind Siliguri", system-ui, sans-serif;
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: .01em;
-  text-decoration: none;
-  text-align: center;
-  white-space: nowrap;
-  transition: background .15s ease, color .15s ease;
-}
-body.shop-page .pqv-act-cart,
-body.shop-page .pqv-act-msg {
-  background: #e6e7eb !important;
-  color: #545454 !important;
-}
-body.shop-page .pqv-act-cart:hover,
-body.shop-page .pqv-act-msg:hover {
-  background: #dcdde2 !important;
-}
-body.shop-page .pqv-act-buy {
-  background: #111 !important;
-  color: #fff !important;
-}
-body.shop-page .pqv-act-buy:hover {
-  background: #333 !important;
-}
-/* Anzaar's Buy Now is text-only — hide the cart icon inside it */
-body.shop-page .pqv-act-buy .ma-shop-bag-ico {
-  display: none;
-}
-body.shop-page .pqv-act:active {
-  transform: scale(.98);
-  transition-duration: .08s;
-}
-
-/* Anzaar shows one plain "Size" field — no separate Body Size row.
+   Anzaar shows one plain "Size" field — no separate Body Size row.
    Hides the Body Size line on abaya/two-piece products; Length Size
-   (renamed by the heading already in place) remains as the one
-   size selector, matching the reference exactly. */
+   remains as the one size selector, matching the reference exactly.
+================================================================ */
 body.shop-page .pqv-field-body {
   display: none;
 }

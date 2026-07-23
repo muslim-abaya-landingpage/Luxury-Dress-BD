@@ -2090,10 +2090,10 @@ body.pqv-sc-open {
   font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   text-align: center;
   text-decoration: none;
-  border: 1px solid #111;
-  border-radius: 4px;
-  background: #fff;
-  color: #111;
+  border: none;
+  border-radius: 5px;
+  background: #e6e7eb;
+  color: #545454;
   cursor: pointer;
   box-sizing: border-box;
   letter-spacing: 0.02em;
@@ -2102,19 +2102,22 @@ body.pqv-sc-open {
 }
 
 .pqv-act-cart:hover {
-  background: #f5f5f5;
+  background: #dcdde2;
 }
 
 .pqv-act-buy {
   background: #111;
-  border-color: #111;
   color: #fff;
   gap: 6px;
 }
 
+/* Anzaar's Buy Now is text-only, no cart icon */
+.pqv-act-buy .ma-shop-bag-ico {
+  display: none;
+}
+
 .pqv-act-buy:hover {
   background: #333;
-  border-color: #333;
 }
 
 .pqv-act-msg-link {
@@ -2132,17 +2135,17 @@ body.pqv-sc-open {
   font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   text-align: center;
   text-decoration: none;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background: #f3f3f3;
-  color: #111;
+  border: none;
+  border-radius: 5px;
+  background: #e6e7eb;
+  color: #545454;
   cursor: pointer;
   box-sizing: border-box;
   line-height: 1.2;
 }
 
 .pqv-act-msg:hover {
-  background: #e9e9e9;
+  background: #dcdde2;
 }
 
 .pqv-bottom {
@@ -2336,7 +2339,7 @@ body.pqv-sc-open {
   .pqv-act {
     min-height: 50px;
     font-size: 15px;
-    border-radius: 4px;
+    border-radius: 5px;
   }
 
   .pqv-act-buy {
