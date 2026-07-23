@@ -1,10 +1,10 @@
 /* --- Root Variables & Reset --- */
-:root { --primary: #111111; --bg: #ffffff; }
+:root { --primary: #7c3aed; --bg: #fdfbf7; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {
     overflow-x: hidden;
     width: 100%;
-    font-family: 'Inter', 'Hind Siliguri', sans-serif;
+    font-family: 'Poppins', 'Hind Siliguri', sans-serif;
 }
 
 /* --- Premium Pro Background & Typography --- */
@@ -38,12 +38,12 @@ html, body {
 /* --- Product Display --- */
 .display-area { display: flex; flex-direction: column; gap: 10px; background: #fff; padding: 10px; border-radius: 10px; }
 .product-list-sidebar { display: grid; grid-template-columns: repeat(2, 1fr); gap: 3px; padding: 3px; }
-.item-card { background: #fff; border: 1px solid #ececec; padding: 10px; border-radius: 8px; text-align: center; cursor: pointer; transition: 0.3s; }
+.item-card { background: rgba(255, 255, 255, 0.3); backdrop-filter: blur(15px); padding: 10px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.3s; }
 .item-card img { width: 100%; aspect-ratio: 1 / 1.5; object-fit: cover; border-radius: 8px; }
 
 /* --- Action Buttons --- */
-.anzaar-btn { display: flex; align-items: center; justify-content: center; min-height: 38px; padding: 9px 6px; font-weight: 600; cursor: pointer; border: 1px solid #e5e5e5; }
-.anzaar-btn-buy { background: #111; color: #fff; }
+.ma-btn { display: flex; align-items: center; justify-content: center; min-height: 38px; padding: 9px 6px; font-weight: 600; cursor: pointer; border: 1px solid #e5e5e5; }
+.ma-btn-buy { background: #111; color: #fff; }
 .button-row-wrapper { display: flex; gap: 12px; justify-content: center; margin: 10px auto; width: 100%; max-width: 500px; }
 .premium-action-btn { flex: 1; padding: 16px 12px; border-radius: 8px; font-weight: 700; color: #fff; text-decoration: none; display: inline-flex; justify-content: center; align-items: center; }
 .whatsapp-btn-style { background: linear-gradient(180deg, #27d366 0%, #1ea14c 100%); }
@@ -66,7 +66,7 @@ html, body {
 }
 
 /* --- Global & Setup --- */
-:root { --primary: #111111; --bg: #ffffff; --white: #ffffff; }
+:root { --primary: #7c3aed; --bg: #fdfbf7; --white: #ffffff; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Hind Siliguri', sans-serif; background: #fff; color: #495057; padding-bottom: 0; }
 
@@ -93,8 +93,8 @@ body { font-family: 'Hind Siliguri', sans-serif; background: #fff; color: #49505
 }
 
 /* --- Product Actions --- */
-.product-actions-anzaar,
-.card-actions-anzaar {
+.product-actions-ma,
+.card-actions-ma {
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -105,11 +105,11 @@ body { font-family: 'Hind Siliguri', sans-serif; background: #fff; color: #49505
 .card-actions-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0;
+    gap: 6px;
 }
 
 /* --- Buttons --- */
-.anzaar-btn {
+.ma-btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -128,15 +128,15 @@ body { font-family: 'Hind Siliguri', sans-serif; background: #fff; color: #49505
     white-space: nowrap;
 }
 
-.anzaar-btn-cart { background: #f5f5f5; color: #111; font-size: 14px; }
-.anzaar-btn-cart.is-active,
-.anzaar-btn-cart:hover { background: #ebebeb; }
+.ma-btn-cart { background: #f5f5f5; color: #111; font-size: 14px; }
+.ma-btn-cart.is-active,
+.ma-btn-cart:hover { background: #ebebeb; }
 
-.anzaar-btn-buy { background: #111; color: #fff; border-color: #111; gap: 6px; }
-.anzaar-btn-buy:hover { background: #333; border-color: #333; }
+.ma-btn-buy { background: #111; color: #fff; border-color: #111; gap: 6px; }
+.ma-btn-buy:hover { background: #333; border-color: #333; }
 
-.anzaar-btn-msg { background: #f5f5f5; color: #111; width: 100%; }
-.anzaar-btn-msg:hover { background: #ebebeb; }
+.ma-btn-msg { background: #f5f5f5; color: #111; width: 100%; }
+.ma-btn-msg:hover { background: #ebebeb; }
 
 .btn-cart.btn-cart-active {
     background: #111 !important;
@@ -201,7 +201,7 @@ body { font-family: 'Hind Siliguri', sans-serif; background: #fff; color: #49505
 
 .badge-item:hover {
     transform: translateY(-5px);
-    border-color: #111;
+    border-color: #7c3aed;
 }
 
 /* Icon Styles */
@@ -264,7 +264,7 @@ body { font-family: 'Hind Siliguri', sans-serif; background: #fff; color: #49505
 .item-card span:not(.product-sale-badge):not(.product-card-name):not(.product-card-price):not(.qty-input) { font-size: 30px; font-weight: 800; display: block; color: #000; }
 
 /* --- Price Tag & Animation --- */
-.price-tag { position: absolute; top: 10px; right: 10px; background: #111; color: #fff; padding: 6px 12px; border-radius: 4px; font-weight: 800; font-size: 16px; z-index: 2; display: flex; align-items: center; }
+.price-tag { position: absolute; top: 10px; right: 10px; background: linear-gradient(135deg, #ef4444, #7c3aed); color: #fff; padding: 8px; border-radius: 0.5px; font-weight: 800; font-size: 18px; z-index: 2; display: flex; align-items: center; border: 1px solid rgba(255, 255, 255, 0.5); animation: pricePulse 3s infinite ease-in-out; }
 @keyframes pricePulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
 
 /* --- Order Card Inputs --- */
@@ -341,11 +341,11 @@ input, select { width: 100%; padding: 12px; margin-bottom: 10px; border: 0.5px s
 
 
 /* --- Details & Trust Badges --- */
-.details-box { background: #fff !important; padding: 15px 20px !important; border: 1px solid #ececec !important; border-left: 6px solid #000 !important; position: relative; overflow: hidden; }
-.details-box h4 { color: #111; font-weight: 800 !important; margin-bottom: 15px !important; }
+.details-box { background: #fff !important; padding: 15px 20px !important; border: 1px solid rgba(124, 58, 237, 0.1) !important; border-left: 6px solid #000 !important; position: relative; overflow: hidden; }
+.details-box h4 { background: linear-gradient(135deg, #7c3aed, #ef4444); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800 !important; margin-bottom: 15px !important; }
 
 .trust-badges { grid-template-columns: repeat(2, 1fr) !important; gap: 15px !important; margin: 25px 0 !important; }
-.badge-item { background: #fff !important; border: 1px solid #ececec !important; padding: 20px !important; transition: 0.3s !important; }
+.badge-item { background: rgba(255, 255, 255, 0.8) !important; backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.3) !important; padding: 20px !important; transition: 0.3s !important; }
 .badge-item p { font-weight: 600 !important; color: #000 !important; font-size: 10px !important; }
 
 /* --- Inputs & Order Button --- */
@@ -371,7 +371,7 @@ input, select { margin-bottom: 8px !important; }
     margin: 0 auto;
     border-radius: 24px;
     padding: 20px 22px;
-    background: #ffffff;
+    background: radial-gradient(circle at top left, #fef7e6, #ffffff 45%, #f8f8f8);
     border: 1px solid #ececec;
     box-shadow: 0 20px 50px rgba(0,0,0,0.08);
     /* সংশোধন: max-height: 30px; সরিয়ে ফেলা হয়েছে কারণ এটি আপনার পুরো কন্টেন্ট হাইড করে দিচ্ছিল */
@@ -468,7 +468,7 @@ input, select { margin-bottom: 8px !important; }
 /* --- Responsive & Global --- */
 body { font-family: 'Poppins', 'Hind Siliguri', sans-serif !important; }
 .lux-video-title{
-font-family:'Poppins','Hind Siliguri',sans-serif !important;
+font-family:'Playfair Display', serif !important;
 }
 
 @media (min-width: 768px) {
@@ -512,22 +512,24 @@ font-family:'Poppins','Hind Siliguri',sans-serif !important;
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* --- Item Card (flat, Anzaar-style) --- */
+/* --- Glassmorphism Item Card --- */
 .item-card {
-    border: 1px solid #ececec !important;
-    background: #fff !important;
+    border: none !important;
+    background: rgba(255, 255, 255, 0.3) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
     transition: 0.3s;
     text-align: left;
     padding: 10px;
     box-shadow: none !important;
-    border-radius: 8px !important;
+    border-radius: 12px !important;
 }
 
 /* --- Item Card & Image Styling --- */
-.item-card img { border-radius: 6px !important; }
+.item-card img { border-radius: 8px !important; }
 
 .item-card span:not(.product-sale-badge):not(.product-card-name):not(.product-card-price):not(.qty-input) {
-    font-family: 'Inter', 'Hind Siliguri', sans-serif;
+    font-family: 'Playfair Display', serif;
     font-size: 14px !important;
     font-weight: 600 !important;
     color: #000 !important;
@@ -572,11 +574,13 @@ font-family:'Poppins','Hind Siliguri',sans-serif !important;
 
 /* --- Glassmorphism Feature Box --- */
 .feature-glass-box {
-    background: #fff;
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
     padding: 20px;
-    border: 1px solid #ececec;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
     display: flex;
     align-items: center;
     gap: 15px;
@@ -636,8 +640,8 @@ html, body {
         font-size: 13px !important;
         line-height: 1.35 !important;
     }
-    .anzaar-btn { font-size: 12px !important; min-height: 40px !important; height: auto !important; padding: 10px 8px !important; }
-    .anzaar-btn-cart { font-size: 14px !important; }
+    .ma-btn { font-size: 12px !important; min-height: 40px !important; height: auto !important; padding: 10px 8px !important; }
+    .ma-btn-cart { font-size: 14px !important; }
 }
 
 @media (max-width: 480px) {
@@ -766,7 +770,7 @@ html, body {
 }
 
 .lux-video-title{
-    font-family:'Poppins','Hind Siliguri',sans-serif !important;
+    font-family:'Playfair Display', serif !important;
 }
 
 .lux-video-subtitle,

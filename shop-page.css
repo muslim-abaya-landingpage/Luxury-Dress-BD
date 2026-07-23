@@ -69,24 +69,24 @@ body.shop-page .premium-card .card-spec-v,
 body.shop-page .premium-card .card-spec-chip,
 body.shop-page .premium-card-detail .detail-content h3,
 body.shop-page .premium-card-detail .detail-price,
-body.shop-page .anzaar-btn,
-body.shop-page .anzaar-btn-cart,
-body.shop-page .anzaar-btn-msg,
-body.shop-page .anzaar-btn-buy {
+body.shop-page .ma-btn,
+body.shop-page .ma-btn-cart,
+body.shop-page .ma-btn-msg,
+body.shop-page .ma-btn-buy {
   font-family: var(--font-product-en);
   font-variant-ligatures: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-body.shop-page .anzaar-btn-buy {
+body.shop-page .ma-btn-buy {
   font-size: 18px;
   font-weight: 700;
   letter-spacing: 0.01em;
 }
 
-body.shop-page .anzaar-btn-cart,
-body.shop-page .anzaar-btn-msg,
+body.shop-page .ma-btn-cart,
+body.shop-page .ma-btn-msg,
 body.shop-page .pqv-act-cart,
 body.shop-page .pqv-act-msg {
   font-size: 14px;
@@ -217,75 +217,141 @@ body.shop-page .shop-breadcrumb--mobile {
    (scoped to the button cluster only — product photos stay untouched
    so colors/fabric are still true-to-life)
 ================================================================ */
-body.shop-page .card-actions-anzaar {
+body.shop-page .card-actions-ma {
+  position: relative;
   display: grid;
-  grid-template-columns: 1fr;
-  grid-template-areas: "cart" "msg";
+  grid-template-columns: minmax(78px, auto) 1fr;
+  grid-template-areas: "qty cart" "msg msg";
   gap: 6px;
+  padding: 8px;
+  border-radius: 16px;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 140% at 0% 0%, rgba(184,149,46,.28), transparent 55%),
+    radial-gradient(120% 140% at 100% 100%, rgba(30,58,95,.24), transparent 55%),
+    #17170f;
+  box-shadow: 0 6px 18px rgba(0,0,0,.14), inset 0 1px 0 rgba(255,255,255,.05);
 }
-body.shop-page .card-actions-anzaar .anzaar-btn-cart { grid-area: cart; }
-body.shop-page .card-actions-anzaar .anzaar-btn-msg { grid-area: msg; }
+body.shop-page .card-actions-ma .ma-qty-stepper { grid-area: qty; }
+body.shop-page .card-actions-ma .ma-btn-cart { grid-area: cart; }
+body.shop-page .card-actions-ma .ma-btn-msg { grid-area: msg; }
+/* subtle animated aurora sheen sweeping across the panel */
+body.shop-page .card-actions-ma::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background: conic-gradient(from 0deg, transparent 0deg, rgba(184,149,46,.22) 60deg, transparent 140deg, rgba(30,58,95,.18) 220deg, transparent 320deg);
+  animation: maAurora 9s linear infinite;
+  pointer-events: none;
+  opacity: .8;
+}
+@keyframes maAurora {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.shop-page .card-actions-ma::before { animation: none; }
+}
 
-/* Add to Cart — flat, matches home page & checkout buttons */
-body.shop-page .anzaar-btn-cart {
+/* PRIMARY — Add to Cart. The one action that should catch the eye. */
+body.shop-page .ma-btn-cart {
   position: relative;
   z-index: 1;
-  border-radius: 0;
+  border-radius: 999px;
   padding: 12px 6px;
-  border: 1px solid #e5e5e5;
-  background: #f5f5f5;
-  color: #111;
+  border: none;
+  background: linear-gradient(135deg, #e6c477, #b8952e);
+  color: #17170f;
   font-family: "Inter", "Hind Siliguri", system-ui, sans-serif;
   font-weight: 700;
   font-size: 12.5px;
   letter-spacing: .01em;
   white-space: nowrap;
-  transition: background .15s ease;
+  box-shadow: 0 4px 14px rgba(184,149,46,.4), inset 0 1px 0 rgba(255,255,255,.5);
+  transition: transform .18s cubic-bezier(.2,.8,.2,1), box-shadow .2s ease, background .2s ease;
 }
-body.shop-page .anzaar-btn-cart:hover {
-  background: #ebebeb;
+/* the qty stepper right next to it already shows +/- controls, so the
+   cart icon is redundant here — dropping it keeps "Add to Cart" from
+   wrapping in the narrower grid cell */
+body.shop-page .card-actions-ma .ma-btn-cart .ma-btn-ico { display: none; }
+body.shop-page .ma-btn-cart:hover {
+  background: linear-gradient(135deg, #f0d28c, #c6a13a);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(184,149,46,.5), inset 0 1px 0 rgba(255,255,255,.6);
 }
 
-/* Send Message — same flat gray as Add to Cart, matches Anzaar's screenshot
-   where both buttons are the same tone (only Buy Now on the detail page
-   is black/primary) */
-body.shop-page .anzaar-btn-msg {
+/* SECONDARY — Send Message. Present, but quiet — a ghost/outline pill,
+   not a second dark box competing with the primary action. */
+body.shop-page .ma-btn-msg {
   position: relative;
   z-index: 1;
-  border-radius: 0;
+  border-radius: 999px;
   padding: 9px 0;
-  border: 1px solid #e5e5e5;
-  background: #f5f5f5;
-  color: #111;
+  border: 1px solid rgba(255,255,255,.22);
+  background: transparent;
+  color: rgba(255,255,255,.75);
   font-family: "Inter", "Hind Siliguri", system-ui, sans-serif;
   font-weight: 500;
   font-size: 12.5px;
   letter-spacing: .01em;
-  transition: background .15s ease;
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
 }
-body.shop-page .anzaar-btn-msg:hover {
-  background: #ebebeb;
+body.shop-page .ma-btn-msg:hover {
+  background: rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.4);
+  color: #fff;
 }
 
-body.shop-page .anzaar-btn-cart:active,
-body.shop-page .anzaar-btn-msg:active,
-body.shop-page .anzaar-btn-buy:active {
-  transform: scale(.98);
+body.shop-page .ma-btn-cart:active,
+body.shop-page .ma-btn-msg:active,
+body.shop-page .ma-btn-buy:active {
+  transform: translateY(0) scale(.97);
   transition-duration: .08s;
 }
 
-/* Buy Now — the one black/primary button, product detail page only */
-body.shop-page .anzaar-btn-buy {
+/* Single-product detail page still has a real third action (Buy Now) —
+   keep it primary-styled there too, distinct from the plain Add to Cart. */
+body.shop-page .ma-btn-buy {
   position: relative;
   z-index: 1;
-  border-radius: 0;
+  border-radius: 999px;
   padding: 13px 0;
   border: none;
-  background: #111;
-  color: #fff;
+  background: linear-gradient(135deg, #e6c477, #b8952e);
+  color: #17170f;
   font-weight: 700;
-  transition: background .15s ease;
+  box-shadow: 0 4px 14px rgba(184,149,46,.4), inset 0 1px 0 rgba(255,255,255,.5);
+  transition: transform .18s cubic-bezier(.2,.8,.2,1), box-shadow .2s ease, background .2s ease;
 }
-body.shop-page .anzaar-btn-buy:hover {
-  background: #333;
+body.shop-page .ma-btn-buy:hover {
+  background: linear-gradient(135deg, #f0d28c, #c6a13a);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(184,149,46,.5), inset 0 1px 0 rgba(255,255,255,.6);
+}
+
+/* qty stepper sits inside the same dark panel — make it match.
+   qty-stepper.css (a separate file) styles this component with a plain
+   white background; !important here guarantees our dark-glass look wins
+   regardless of which stylesheet loads later. */
+body.shop-page .card-actions-ma .ma-qty-stepper {
+  position: relative;
+  z-index: 1;
+  background: rgba(255,255,255,.08) !important;
+  border: 1px solid rgba(255,255,255,.18) !important;
+  border-radius: 999px !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+body.shop-page .card-actions-ma .ma-qty-stepper__value,
+body.shop-page .card-actions-ma .ma-qty-stepper__input,
+body.shop-page .card-actions-ma .ma-qty-stepper__btn {
+  background: transparent !important;
+  color: #fff !important;
+  border: none !important;
+}
+body.shop-page .card-actions-ma .ma-qty-stepper__btn:hover {
+  background: rgba(255,255,255,.14) !important;
+}
+body.shop-page .card-actions-ma .ma-qty-stepper__btn:disabled {
+  color: rgba(255,255,255,.35) !important;
 }

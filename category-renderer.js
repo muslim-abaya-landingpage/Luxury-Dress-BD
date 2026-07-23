@@ -52,7 +52,7 @@ function maShopBagIcon(size) {
   // size না থাকলে বা ভুল থাকলে ডিফল্ট ১৮ হবে
   var s = parseInt(size, 10) || 18; 
   return (
-    '<span class="ma-shop-bag-ico anzaar-btn-ico" aria-hidden="true">' +
+    '<span class="ma-shop-bag-ico ma-btn-ico" aria-hidden="true">' +
     '<svg width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
     '<path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/>' +
     '<path d="M6 6L5 3H2"/></svg></span>'
@@ -176,7 +176,7 @@ var shopCartCtx = {
 };
 function getActivePqvScope() {
   var root = shopCartCtx.root;
-  if (root && root.querySelector(".pqv-anzaar")) return root;
+  if (root && root.querySelector(".pqv-ma")) return root;
   var modal = document.getElementById("productQuickView");
   if (modal && !modal.hidden) return modal;
   return null;
@@ -465,12 +465,28 @@ function setShopCardQty(root, idx, n) {
   if (minus) minus.disabled = qty <= 1;
 }
 function buildShopCardQtyStepper(idx, qty, inCart) {
-  // Removed: Anzaar's category/listing cards show only Add to Cart + Send
-  // Message, no per-card quantity stepper. Add to Cart adds qty 1 by
-  // default (getShopCardQty() already falls back to 1 when this element
-  // doesn't exist), and quantity can still be adjusted in the cart drawer
-  // or on the product detail page (pqv-qty stepper, unaffected by this).
-  return "";
+  var q = parsePqvQtyValue(qty);
+  return (
+    '<div class="ma-qty-stepper shop-card-qty is-visible' +
+    (inCart ? " in-cart" : "") +
+    '" data-product-idx="' +
+    idx +
+   '" role="group" aria-label="Quantity">' +
+    '<button type="button" class="ma-qty-stepper__btn shop-card-qty-btn" data-shop-qty="minus" data-product-idx="' +
+    idx +
+    '" aria-label="Decrease quantity"' +
+    (q <= 1 ? " disabled" : "") +
+    ">−</button>" +
+    '<span class="ma-qty-stepper__value shop-card-qty-val" data-product-idx="' +
+    idx +
+    '" aria-live="polite">' +
+    q +
+    "</span>" +
+    '<button type="button" class="ma-qty-stepper__btn shop-card-qty-btn" data-shop-qty="plus" data-product-idx="' +
+    idx +
+    '" aria-label="Increase quantity">+</button>' +
+    "</div>"
+  );
 }
 function refreshShopCardsAfterCartChange() {
   var root = shopCartCtx.root;
@@ -486,7 +502,7 @@ function refreshShopCardsAfterCartChange() {
     var stepper = card.querySelector(".shop-card-qty");
     if (stepper) stepper.classList.toggle("in-cart", cartQty > 0);
     setShopCardQty(root, idx, displayQty);
-    var addBtn = card.querySelector(".anzaar-btn-cart[data-product-idx='" + idx + "']");
+    var addBtn = card.querySelector(".ma-btn-cart[data-product-idx='" + idx + "']");
     if (addBtn) addBtn.classList.toggle("is-active", cartQty > 0);
   });
   syncShopCartBadge();
@@ -1409,7 +1425,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
      (!isTwoPiece && !isPanjabi && sizes.length > 1));
   var wholesaleHtml = showWholesale ? buildPqvWholesaleSectionHtml(sizes, idx, isAbaya) : "";
   return (
-    '<div class="pqv-anzaar">' +
+    '<div class="pqv-ma">' +
     '<div class="pqv-gallery">' +
     '<div class="pqv-thumbs">' +
     buildPqvThumbsHtml(gallery, p.name) +
@@ -2208,18 +2224,18 @@ encodeURIComponent("I want to order " + p.name) +
     "' aria-hidden='true' tabindex='-1'>" +
     sizeOptions +
     "</select>" +
-    '<div class="card-actions-anzaar">' +
+    '<div class="card-actions-ma">' +
     buildShopCardQtyStepper(idx, cardQty, inCart) +
-    '<button type="button" class="anzaar-btn anzaar-btn-cart' +
+    '<button type="button" class="ma-btn ma-btn-cart' +
     (inCart ? " is-active" : "") +
     '" data-product-idx="' +
     idx +
-    '" data-action="add"><span class="anzaar-btn-ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M6 6L5 3H2"/></svg></span><span lang="en">Add to Cart</span></button>' +
+    '" data-action="add"><span class="ma-btn-ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M6 6L5 3H2"/></svg></span><span lang="en">Add to Cart</span></button>' +
     "<a href='" +
     waLink +
     "?text=" +
    encodeURIComponent("I want to order " + p.name) +
-"' target='_blank' rel='noopener' class='anzaar-btn anzaar-btn-msg' onclick='event.stopPropagation()'><span lang='en'>Send Message</span></a>" +
+"' target='_blank' rel='noopener' class='ma-btn ma-btn-msg' onclick='event.stopPropagation()'><span lang='en'>Send Message</span></a>" +
 "</div></div></article>"
 );
 

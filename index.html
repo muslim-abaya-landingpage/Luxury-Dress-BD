@@ -24,7 +24,7 @@
     <noscript><link rel="stylesheet" href="index-home-cards.css?v=20260603cart14"></noscript>
     <link rel="preload" href="index-home.css?v=20260603cart14" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="index-home.css?v=20260603cart14"></noscript>
-    <link rel="stylesheet" href="index-home-anzaar.css?v=20260709anz">
+    <link rel="stylesheet" href="index-home-ma.css?v=20260709anz">
     <link rel="stylesheet" href="liquid-glass-ui.css?v=20260721">
     <link rel="icon" href="assets/logo-muslim-abaya.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="assets/logo-muslim-abaya.svg">
@@ -76,7 +76,8 @@
         "contactType": "customer service",
         "areaServed": "BD",
         "availableLanguage": ["bn", "en"]
-      },
+      }
+    },
 {
   "@type": "WebSite",
   "@id": "https://muslimabaya.com/#website",
@@ -117,7 +118,7 @@
 <script type="module" src="site-header.js?v=20260603logo"></script>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-ML7RL6BR"
 height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- Full-width hero slider (populated from catalog by index-home-anzaar.js) -->
+<!-- Full-width hero slider (populated from catalog by index-home-ma.js) -->
 <div id="homeHero" class="home-hero"></div>
 
 <!-- Quick category chips -->
@@ -168,7 +169,7 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
     return !!(p && Object.keys(p).some(function (k) { return (p[k] || []).length; }));
   }
   function startHomeModules() {
-    import("./index-home-anzaar.js?v=20260709anz");
+    import("./index-home-ma.js?v=20260709anz");
     import("./related-cart.js?v=20260708");
   }
   if (catalogIsReady()) {

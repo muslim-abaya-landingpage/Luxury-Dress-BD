@@ -898,7 +898,7 @@ window.CATEGORY_META = {
   video: { title: "VIDEO" } // মেটাতে 'video' যুক্ত করা হয়েছে
 };
 
-/** Shared nav + hub tiles (anzaar-style All Categories page) */
+/** Shared nav + hub tiles (muslim-abaya-style All Categories page) */
 window.CATEGORY_NAV = [
   { key: "abaya", href: "/abaya", label: "ABAYA", image: "images/Baby-Pink-Floral-Print.jpeg" },
   { key: "cover-up", href: "/cover-up", label: "COVER UP", image: "images/Royal-Blue-Golden-Floral-Print.jpeg" },

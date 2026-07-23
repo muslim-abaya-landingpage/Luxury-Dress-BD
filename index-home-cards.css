@@ -33,11 +33,17 @@
 
 /* ৪. প্রতিটি প্রোডাক্ট কার্ড */
 #premium-collection .item-card {
+  position: relative; /* needed so .price-tag's top/right anchors to the card */
   width: 100% !important;
   border: 1px solid #ececec;
   border-radius: 8px;
   background: #fff;
-  transition: 0.3s;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+#premium-collection .item-card:hover {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
 }
 
 /* ৫. বাটন সেকশন (যাতে না কাটে) */
@@ -47,7 +53,7 @@
   padding: 5px !important;
 }
 
-#premium-collection .anzaar-btn {
+#premium-collection .ma-btn {
   flex: 1 !important;
   height: 35px !important;
   font-size: 11px !important;
@@ -69,7 +75,7 @@
     grid-template-columns: repeat(2, 1fr) !important; /* মোবাইলেও ২ কলাম */
     gap: 8px !important;
   }
-  #premium-collection .anzaar-btn {
+  #premium-collection .ma-btn {
     font-size: 10px !important; /* মোবাইলে ফন্ট ছোট */
   }
 }
@@ -78,7 +84,7 @@
   gap: 4px !important;
 }
 
-.product-card-name {
+#premium-collection .product-card-name {
   font-size: 11px !important;
   font-weight: 600 !important;
   color: #222 !important;
@@ -95,7 +101,7 @@
   margin: 0 !important;
 }
 
-.product-card-price {
+#premium-collection .product-card-price {
   font-size: 13px !important;
   font-weight: 800 !important;
   color: #111 !important;
@@ -110,6 +116,7 @@
 }
 
 #premium-collection .price-tag {
+  position: absolute;
   top: 12px;
   right: 12px;
   width: auto;
@@ -209,7 +216,7 @@
   width: 100% !important;
 }
 
-#premium-collection .anzaar-btn {
+#premium-collection .ma-btn {
   flex: 1 !important;
   height: 34px !important;
   padding: 0 4px !important;
@@ -223,11 +230,11 @@
   overflow: hidden !important;
 }
 
-#premium-collection .anzaar-btn-cart {
+#premium-collection .ma-btn-cart {
   font-size: 11px !important; /* আগের 14px অনেক বড় ছিল */
 }
 
-#premium-collection .anzaar-btn-msg {
+#premium-collection .ma-btn-msg {
   flex: 1 !important;
   height: 34px !important;
   padding: 0 4px !important;
