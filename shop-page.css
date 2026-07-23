@@ -223,7 +223,7 @@ body.shop-page .shop-breadcrumb--mobile {
 body.shop-page .card-actions-anzaar {
   position: relative;
   display: grid;
-  grid-template-columns: 46px 1fr;
+  grid-template-columns: 56px 1fr;
   grid-template-areas: "cart msg";
   gap: 8px;
   padding: 0;
@@ -247,11 +247,11 @@ body.shop-page .anzaar-btn-cart {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
-  padding: 12px 0;
-  border: 1px solid #e3e3e3;
-  background: #eef0f1;
-  color: #111;
+  border-radius: 5px;
+  padding: 10px 0;
+  border: none;
+  background: #e6e7eb;
+  color: #545454;
   font-family: "Inter", "Hind Siliguri", system-ui, sans-serif;
   font-weight: 700;
   font-size: 12.5px;
@@ -266,8 +266,11 @@ body.shop-page .card-actions-anzaar .anzaar-btn-cart .anzaar-btn-ico {
 body.shop-page .card-actions-anzaar .anzaar-btn-cart > span[lang="en"] {
   display: none;
 }
+body.shop-page .anzaar-btn-cart .anzaar-btn-ico svg {
+  stroke: #545454;
+}
 body.shop-page .anzaar-btn-cart:hover {
-  background: #e2e5e6;
+  background: #dcdde2;
 }
 
 /* SECONDARY — Send Message. Same grey fill as the cart button by
@@ -278,11 +281,11 @@ body.shop-page .anzaar-btn-msg {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
-  padding: 12px 0;
-  border: 1px solid #e3e3e3;
-  background: #eef0f1;
-  color: #333;
+  border-radius: 5px;
+  padding: 10px 0;
+  border: none;
+  background: #e6e7eb;
+  color: #545454;
   font-family: "Inter", "Hind Siliguri", system-ui, sans-serif;
   font-weight: 500;
   font-size: 12.5px;
@@ -290,8 +293,8 @@ body.shop-page .anzaar-btn-msg {
   transition: background .15s ease, color .15s ease;
 }
 body.shop-page .anzaar-btn-msg:hover {
-  background: #e2e5e6;
-  color: #111;
+  background: #dcdde2;
+  color: #333;
 }
 
 body.shop-page .anzaar-btn-cart:active,
