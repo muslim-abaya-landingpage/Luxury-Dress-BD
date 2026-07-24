@@ -1,0 +1,144 @@
+/* ===========================
+   MUSLIM ABAYA — SIZE CHART
+   Restyled to match the site's flat Anzaar-style design tokens
+   (same colors/borders/radius as product.html, shop-page.css, etc.)
+=========================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --ink: #111111;
+  --ink-soft: #3d3d3d;
+  --muted: #6b6b6b;
+  --line: #ececec;
+  --bg: #ffffff;
+  --soft: #f5f5f5;
+  --radius: 6px;
+  --shadow-sm: 0 1px 3px rgba(17, 17, 17, 0.04);
+}
+
+body {
+  font-family: "Inter", "Hind Siliguri", system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--ink-soft);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Main */
+.size-chart {
+  max-width: 900px;
+  margin: 50px auto;
+  padding: 0 20px;
+}
+
+/* Heading */
+.chart-title {
+  text-align: center;
+  font-size: clamp(22px, 3.4vw, 30px);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin-bottom: 32px;
+}
+
+/* Card */
+.chart-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 28px;
+  background: var(--bg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Card heading — flat light bar instead of a solid black block,
+   matching the rest of the site's minimal Anzaar-style look */
+.card-title {
+  background: var(--soft);
+  color: var(--ink);
+  text-align: center;
+  padding: 14px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--line);
+}
+
+/* Table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+thead {
+  background: var(--bg);
+}
+
+th {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+th,
+td {
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--line);
+  text-align: center;
+}
+
+td {
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+/* Zebra */
+tbody tr:nth-child(even) {
+  background: #fafafa;
+}
+
+/* Hover */
+tbody tr {
+  transition: background 0.2s ease;
+}
+
+tbody tr:hover {
+  background: var(--soft);
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .size-chart {
+    margin: 32px auto;
+    padding: 0 14px;
+  }
+
+  .chart-title {
+    margin-bottom: 22px;
+  }
+
+  .card-title {
+    font-size: 13px;
+    padding: 12px 14px;
+  }
+
+  th,
+  td {
+    font-size: 13px;
+    padding: 10px 8px;
+  }
+}
