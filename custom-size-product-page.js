@@ -201,17 +201,21 @@
 
   /* ---------------- ক্লিক ইভেন্ট ---------------- */
 
-  document.addEventListener("click", function (ev) {
-    var btn = ev.target.closest("#pdSizeGroup .pd-option-btn");
-    if (!btn) return;
-    if (btn.getAttribute("data-val") === CUSTOM_SIZE_VALUE) {
-      openModal();
-    } else {
-      customData = null;
-      hideExtraChargeLine();
-      renderSizeHint();
-    }
-  });
+  document.addEventListener(
+    "click",
+    function (ev) {
+      var btn = ev.target.closest("#pdSizeGroup .pd-option-btn");
+      if (!btn) return;
+      if (btn.getAttribute("data-val") === CUSTOM_SIZE_VALUE) {
+        openModal();
+      } else {
+        customData = null;
+        hideExtraChargeLine();
+        renderSizeHint();
+      }
+    },
+    true
+  );
 
   // মাপ না দেওয়া পর্যন্ত Add to Cart / Buy Now আটকায় (capture phase-এ, product-page.js
   // এর নিজস্ব ক্লিক হ্যান্ডলারের আগেই চলে)
