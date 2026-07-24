@@ -6,7 +6,14 @@
   flex-shrink: 0;
   margin: 0;
   padding: 0;
-  min-height: 148px;
+  /* 148px is only a fallback for the very first paint, before site-header.js
+     has measured the real header and set --site-header-h. .abaya-main-header
+     is position:fixed, so it never pushes this box open on its own — this
+     min-height is the ONLY thing reserving room for it in the page flow.
+     If the real header (top bar + logo/menu row + announcement bar) is ever
+     taller than the fallback, the hero section right after this div starts
+     underneath the fixed header instead of below it. */
+  min-height: var(--site-header-h, 148px);
 }
 
 body.has-sticky-header #site-header-mount {
@@ -21,7 +28,7 @@ body.has-sticky-header #site-header-mount {
 
 /* Sticky header stays in document flow — no body padding (that caused empty gap above header) */
 html {
-  scroll-padding-top: var(--site-header-h, 72px);
+  scroll-padding-top: var(--site-header-h, 148px);
 }
 
 /* হেডারটিকে উপরে স্থির রাখার জন্য */
