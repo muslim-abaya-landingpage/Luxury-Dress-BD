@@ -65,7 +65,13 @@
   bottom: 0;
   z-index: 2;
   max-width: 560px;
-  padding: 34px clamp(20px, 5vw, 56px) 40px;
+  /* Left padding is wider than the right: .home-hero-arrow.prev sits at
+     left:26px and is 44px wide (ends at 70px), vertically centered in the
+     track. When the caption block is tall (2-line heading + subtitle +
+     button), its top edge reaches up into that same vertical band and the
+     eyebrow/heading text renders underneath the arrow. 84px clears it with
+     a small buffer. */
+  padding: 34px clamp(20px, 5vw, 56px) 40px clamp(84px, 9vw, 100px);
   color: #fff;
   background: linear-gradient(0deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.15) 55%, rgba(0, 0, 0, 0) 100%);
 }
@@ -115,6 +121,9 @@
   transform: translateY(-2px);
   background: #f0f0f0;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+@media (max-width: 900px) {
+  .home-hero-cap { padding-left: clamp(20px, 5vw, 56px); }
 }
 @media (max-width: 560px) {
   .home-hero-cap { padding: 22px 20px 26px; max-width: 100%; }
