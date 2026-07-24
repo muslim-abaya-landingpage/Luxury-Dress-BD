@@ -1,0 +1,196 @@
+/* ==========================================
+   Custom Size — modal styling (Muslim Abaya)
+   ========================================== */
+
+.csm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999999;
+  padding: 20px;
+  font-family: "Hind Siliguri", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.csm-overlay.active {
+  display: flex;
+}
+
+.csm-modal {
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 14px;
+  padding: 28px;
+  position: relative;
+  box-shadow: 0 15px 60px rgba(0, 0, 0, .18);
+}
+
+.csm-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: #f2f2f2;
+  color: #111;
+  cursor: pointer;
+  font-size: 20px;
+  transition: background .2s ease, color .2s ease;
+}
+
+.csm-close:hover {
+  background: #111;
+  color: #fff;
+}
+
+.csm-modal h2 {
+  margin: 0 0 4px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: #111;
+}
+
+.csm-subtitle {
+  text-align: center;
+  color: #6b6b6b;
+  margin: 0 0 22px;
+  font-size: 13px;
+}
+
+.csm-row {
+  display: flex;
+  gap: 12px;
+}
+
+.csm-field {
+  flex: 1;
+}
+
+.csm-field label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: #111;
+}
+
+.csm-field input {
+  width: 100%;
+  height: 46px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+
+.csm-note {
+  margin-top: 20px;
+}
+
+.csm-note label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  color: #111;
+}
+
+.csm-note textarea {
+  width: 100%;
+  height: 80px;
+  resize: none;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.csm-price {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 15px;
+  color: #111;
+}
+
+.csm-price strong {
+  font-size: 20px;
+}
+
+.csm-buttons {
+  margin-top: 18px;
+}
+
+.csm-save {
+  width: 100%;
+  height: 50px;
+  border: none;
+  border-radius: 10px;
+  background: #111;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .2s ease;
+}
+
+.csm-save:hover {
+  background: #333;
+}
+
+.csm-hint {
+  margin-top: 14px;
+  font-size: 11.5px;
+  color: #8a8a8a;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.csm-selected-hint {
+  margin-top: 10px;
+  font-size: 12.5px;
+  color: #333;
+  background: #f7f7f7;
+  border: 1px solid #ececec;
+  border-radius: 8px;
+  padding: 8px 10px;
+  width: 100%;
+}
+
+.csm-selected-hint .csm-edit-link {
+  background: none;
+  border: none;
+  color: #111;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  font-size: 12.5px;
+}
+
+@media (max-width: 480px) {
+  .csm-row {
+    flex-direction: column;
+  }
+  .csm-modal {
+    padding: 22px;
+  }
+}
+
+/* product.html — extra charge line shown right under the price */
+.csm-pd-extra-line {
+  font-size: 13px;
+  font-weight: 600;
+  color: #b12704;
+  margin: -4px 0 14px;
+}

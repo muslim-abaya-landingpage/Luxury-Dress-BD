@@ -283,6 +283,10 @@ window.renderCartList = function (cartItems) {
       if (sizeDetails) sizeDetails += ' | ';
       sizeDetails += `Color: ${item.colorLabel || item.color}`;
     }
+    if (item.customNote) {
+      if (sizeDetails) sizeDetails += ' | ';
+      sizeDetails += `Note: ${item.customNote}`;
+    }
 
     html += `
       <div class="cart-drawer-item" data-index="${index}" data-id="${item.id}" data-size="${item.size || ''}">
