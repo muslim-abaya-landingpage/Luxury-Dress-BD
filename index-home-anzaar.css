@@ -322,7 +322,7 @@
   padding: 12px 2px 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 .ah-card-name {
   font-family: var(--ah-sans);
@@ -335,7 +335,6 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: 2.7em;
 }
 .ah-card-name:hover { text-decoration: underline; }
 .ah-card-price {
