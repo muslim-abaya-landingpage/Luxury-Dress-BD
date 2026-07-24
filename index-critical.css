@@ -290,6 +290,60 @@ body {
   .lux-video-subtitle { font-size: 14px; margin-bottom: 18px; }
 }
 
+/* ==============================================================
+   ORDER ACTION BUTTONS — WhatsApp / IMO / Call for order
+   (rendered inside #premium-collection in index.html). This styling
+   used to live only in index-home.css, which was removed as dead
+   weight for the old product grid — but it was also the only place
+   these button classes were styled, so this section silently lost
+   its CSS and fell back to plain unstyled links. Restored here.
+================================================================= */
+.button-row-wrapper {
+  display: flex !important;
+  gap: 10px !important;
+  justify-content: center !important;
+  flex-wrap: wrap !important;
+  width: 100% !important;
+  max-width: 720px !important;
+  margin: 15px auto !important;
+  padding: 0 16px !important;
+  box-sizing: border-box !important;
+}
+
+.premium-action-btn {
+  flex: 1 1 30% !important;
+  min-width: 100px !important;
+  padding: 14px 8px !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+  color: #fff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: filter 0.15s ease, transform 0.15s ease !important;
+}
+
+.premium-action-btn:hover {
+  filter: brightness(1.08) !important;
+}
+.premium-action-btn:active {
+  transform: scale(0.98) !important;
+}
+
+.whatsapp-btn-style { background: #25d366 !important; }
+.imo-btn-style { background: #0088cc !important; }
+.call-btn-style { background: #1a1a1a !important; }
+
+@media (max-width: 480px) {
+  .premium-action-btn { font-size: 12.5px; padding: 12px 6px; gap: 5px; }
+  .premium-action-btn i { font-size: 16px; }
+  .button-row-wrapper { gap: 8px; padding: 0 10px; margin: 12px auto; }
+}
 /* YouTube facade (no iframe until click) */
 .lux-video-ratio {
   position: relative;
