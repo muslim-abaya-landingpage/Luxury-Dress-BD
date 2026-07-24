@@ -1,0 +1,292 @@
+/* ===========================
+   Custom Size Modal
+=========================== */
+
+.csm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+    padding: 20px;
+}
+
+.csm-overlay.active{
+    display:flex;
+}
+
+.csm-modal{
+    width:100%;
+    max-width:620px;
+    max-height:90vh;
+    overflow-y:auto;
+
+    background:#fff;
+    border-radius:18px;
+
+    padding:30px;
+
+    position:relative;
+
+    box-shadow:
+        0 15px 60px rgba(0,0,0,.18);
+}
+
+.csm-close{
+
+    position:absolute;
+
+    top:15px;
+    right:15px;
+
+    width:40px;
+    height:40px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:#f2f2f2;
+
+    cursor:pointer;
+
+    font-size:22px;
+
+}
+
+.csm-modal h2{
+
+    margin:0;
+
+    text-align:center;
+
+    font-size:28px;
+
+}
+
+.csm-subtitle{
+
+    text-align:center;
+
+    color:#666;
+
+    margin:8px 0 30px;
+
+}
+
+.csm-row{
+
+    display:flex;
+
+    gap:15px;
+
+}
+
+.csm-field{
+
+    flex:1;
+
+}
+
+.csm-field label{
+
+    display:block;
+
+    font-weight:600;
+
+    margin-bottom:8px;
+
+}
+
+.csm-field input{
+
+    width:100%;
+
+    height:50px;
+
+    border:1px solid #ddd;
+
+    border-radius:10px;
+
+    padding:0 14px;
+
+    font-size:16px;
+
+}
+
+.csm-note{
+
+    margin-top:25px;
+
+}
+
+.csm-note label{
+
+    display:block;
+
+    margin-bottom:10px;
+
+    font-weight:600;
+
+}
+
+.csm-note textarea{
+
+    width:100%;
+
+    height:100px;
+
+    resize:none;
+
+    border:1px solid #ddd;
+
+    border-radius:10px;
+
+    padding:12px;
+
+    font-size:15px;
+
+}
+
+.csm-price{
+
+    margin-top:25px;
+
+    text-align:center;
+
+    font-size:28px;
+
+    font-weight:700;
+
+}
+
+.csm-buttons{
+
+    display:flex;
+
+    gap:15px;
+
+    margin-top:25px;
+
+}
+
+.csm-buttons button{
+
+    flex:1;
+
+    height:55px;
+
+    border:none;
+
+    border-radius:12px;
+
+    cursor:pointer;
+
+    font-size:17px;
+
+    font-weight:700;
+
+}
+
+#csmBuyNow{
+
+    background:#111;
+
+    color:#fff;
+
+}
+
+#csmAddCart{
+
+    background:#ececec;
+
+}
+
+/* Responsive */
+
+@media(max-width:768px){
+
+    .csm-modal{
+
+        padding:20px;
+
+    }
+
+    .csm-row{
+
+        flex-direction:column;
+
+    }
+
+    .csm-price{
+
+        font-size:24px;
+
+    }
+
+    .csm-buttons{
+
+        flex-direction:column;
+
+    }
+
+}
+/* =======================
+   Tables
+======================= */
+
+.csm-table-wrap{
+
+    margin-top:35px;
+
+}
+
+.csm-table-wrap h3{
+
+    text-align:center;
+
+    margin-bottom:15px;
+
+    font-size:20px;
+
+}
+
+.csm-table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+    overflow:hidden;
+
+    border-radius:10px;
+
+}
+
+.csm-table th{
+
+    background:#111;
+
+    color:#fff;
+
+    padding:12px;
+
+}
+
+.csm-table td{
+
+    padding:10px;
+
+    text-align:center;
+
+    border:1px solid #ddd;
+
+}
+
+.csm-table tbody tr:nth-child(even){
+
+    background:#f7f7f7;
+
+}

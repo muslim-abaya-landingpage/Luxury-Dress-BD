@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="qty-stepper.css?v=20260531qty2">
   <link rel="stylesheet" href="mobile-bottom-nav.css">
   <link rel="stylesheet" href="remove-confirm-modal.css">
-  <link rel="stylesheet" href="custom-size.css?v=20260724a">
+  <link rel="stylesheet" href="custom-size-modal.css">
 
   <style>
     :root {
@@ -116,7 +116,33 @@
       background: #fff; font-size: 13.5px; font-weight: 600; color: var(--ink-soft); cursor: pointer;
     }
     .pd-option-btn.is-active { border-color: var(--ink); color: var(--ink); background: var(--gold-soft); }
-    .pd-size-chart-link { font-size: 12.5px; font-weight: 600; color: var(--ink); text-decoration: underline; margin-left: 6px; white-space: nowrap; }
+    .pd-custom-size-btn { font-weight: 700; }
+    .pd-size-chart-link { font-size: 12.5px; font-weight: 600; color: var(--ink); text-decoration: underline; margin-left: 6px; white-space: nowrap; background: none; border: none; padding: 0; cursor: pointer; font-family: inherit; }
+
+    /* ---------- Size chart modal (table-based, no external image) ---------- */
+    .pd-sc-overlay {
+      position: fixed; inset: 0; background: rgba(17,17,17,.5);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; visibility: hidden; transition: opacity .2s ease, visibility .2s ease;
+      z-index: 100200; padding: 20px;
+    }
+    .pd-sc-overlay.is-open { opacity: 1; visibility: visible; }
+    .pd-sc-dialog {
+      position: relative; width: min(560px, 100%); max-height: 85vh; overflow-y: auto;
+      background: #fff; border-radius: var(--radius); padding: 26px 22px; box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    }
+    .pd-sc-close {
+      position: absolute; top: 14px; right: 14px; width: 32px; height: 32px; border-radius: 50%;
+      border: 1px solid var(--line); background: #fff; font-size: 18px; cursor: pointer;
+    }
+    .pd-sc-title { font-size: 18px; font-weight: 700; color: var(--ink); text-align: center; margin-bottom: 18px; }
+    .pd-sc-card { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; margin-bottom: 18px; }
+    .pd-sc-card-title { background: var(--gold-soft); color: var(--ink); text-align: center; padding: 10px; font-size: 13px; font-weight: 700; text-transform: uppercase; border-bottom: 1px solid var(--line); }
+    .pd-sc-card table { width: 100%; border-collapse: collapse; }
+    .pd-sc-card th, .pd-sc-card td { padding: 10px 8px; text-align: center; font-size: 13.5px; border-bottom: 1px solid var(--line); }
+    .pd-sc-card th { color: var(--muted); font-weight: 700; text-transform: uppercase; font-size: 11.5px; }
+    .pd-sc-card tbody tr:last-child td { border-bottom: none; }
+    .pd-sc-card tbody tr:nth-child(even) { background: #fafafa; }
 
     .pd-qty-row { display: flex; align-items: center; gap: 16px; margin-bottom: 22px; }
     .pd-qty-stepper { display: flex; align-items: center; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
@@ -250,9 +276,9 @@
   <script defer src="site-footer-config.js?v=20260603footen"></script>
   <script defer src="site-footer.js?v=20260603footen"></script>
   <script defer src="remove-confirm-modal.js"></script>
+  <script defer src="custom-size-modal.js"></script>
   <script defer src="product-reviews.js?v=20260724a"></script>
   <script defer src="product-page.js?v=20260724b"></script>
-  <script defer src="custom-size-product-page.js?v=20260724a"></script>
   <script defer src="mobile-bottom-nav.js"></script>
 </body>
 </html>

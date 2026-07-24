@@ -219,17 +219,111 @@
       renderSizeOptions();
       updateSendMessageLink();
     });
-    var chartUrl =
+    var chartData =
       (window.SITE_LINKS &&
         window.SITE_LINKS.sizeChart &&
         (window.SITE_LINKS.sizeChart.byCategory || {})[state.category]) ||
       (window.SITE_LINKS && window.SITE_LINKS.sizeChart && window.SITE_LINKS.sizeChart.default);
-    if (chartUrl) {
+    if (chartData && Array.isArray(chartData.customSize) && chartData.customSize.length) {
+      var row = el.querySelector(".pd-option-row");
+      if (row && typeof window.openCustomSizeModal === "function") {
+        row.insertAdjacentHTML(
+          "beforeend",
+          "<button type='button' class='pd-option-btn pd-custom-size-btn' id='pdCustomSizeBtn'>Custom Size</button>"
+        );
+        var customBtn = document.getElementById("pdCustomSizeBtn");
+        if (customBtn) {
+          customBtn.addEventListener("click", function () {
+            window.openCustomSizeModal({
+              id: state.product.id,
+              name: state.product.name,
+              price: currentPrice(),
+              image: (state.galleryImages && state.galleryImages[0]) || state.product.image,
+              category: state.category
+            });
+          });
+        }
+      }
+    }
+    if (chartData) {
       el.querySelector(".pd-option-label").insertAdjacentHTML(
         "beforeend",
-        " <a class='pd-size-chart-link' href='" + escapeHtml(chartUrl) + "' target='_blank' rel='noopener'>Size Chart</a>"
+        " <button type='button' class='pd-size-chart-link' id='pdSizeChartBtn'>Size Chart</button>"
       );
+      var chartBtn = document.getElementById("pdSizeChartBtn");
+      if (chartBtn) {
+        chartBtn.addEventListener("click", function () {
+          openPdSizeChartModal(chartData);
+        });
+      }
     }
+  }
+
+  function buildPdSizeChartTableHtml(data) {
+    if (!data) return "";
+    var html = "";
+    if (Array.isArray(data.regularFit) && data.regularFit.length) {
+      html +=
+        '<div class="pd-sc-card"><div class="pd-sc-card-title">Regular Fit (Inch)</div>' +
+        "<table><thead><tr><th>Size</th><th>Length</th><th>Width</th><th>Sleeve</th></tr></thead><tbody>" +
+        data.regularFit
+          .map(function (row) {
+            return (
+              "<tr><td>" + escapeHtml(row.size) + "</td><td>" + escapeHtml(row.length) +
+              "</td><td>" + escapeHtml(row.width) + "</td><td>" + escapeHtml(row.sleeve) + "</td></tr>"
+            );
+          })
+          .join("") +
+        "</tbody></table></div>";
+    }
+    if (Array.isArray(data.customSize) && data.customSize.length) {
+      html +=
+        '<div class="pd-sc-card"><div class="pd-sc-card-title">Custom Size Charge</div>' +
+        "<table><thead><tr><th>Length</th><th>Extra</th><th>Width</th><th>Extra</th></tr></thead><tbody>" +
+        data.customSize
+          .map(function (row) {
+            return (
+              "<tr><td>" + escapeHtml(row.length) + "</td><td>" +
+              (row.lengthExtra ? "৳" + escapeHtml(row.lengthExtra) : "—") +
+              "</td><td>" + escapeHtml(row.width) + "</td><td>" +
+              (row.widthExtra ? "৳" + escapeHtml(row.widthExtra) : "—") + "</td></tr>"
+            );
+          })
+          .join("") +
+        "</tbody></table></div>";
+    }
+    return html;
+  }
+
+  function ensurePdSizeChartModal() {
+    if (document.getElementById("pdSizeChartModal")) return;
+    var el = document.createElement("div");
+    el.id = "pdSizeChartModal";
+    el.className = "pd-sc-overlay";
+    el.innerHTML =
+      '<div class="pd-sc-dialog" role="dialog" aria-modal="true" aria-label="Size chart">' +
+      '<button type="button" class="pd-sc-close" data-pd-sc-close="1" aria-label="Close">&times;</button>' +
+      '<div class="pd-sc-title">Size Chart</div>' +
+      '<div id="pdSizeChartBody"></div>' +
+      "</div>";
+    document.body.appendChild(el);
+    el.addEventListener("click", function (ev) {
+      if (ev.target === el || ev.target.closest("[data-pd-sc-close]")) {
+        el.classList.remove("is-open");
+      }
+    });
+    document.addEventListener("keydown", function (ev) {
+      if (ev.key === "Escape") el.classList.remove("is-open");
+    });
+  }
+
+  function openPdSizeChartModal(data) {
+    ensurePdSizeChartModal();
+    var modal = document.getElementById("pdSizeChartModal");
+    var body = document.getElementById("pdSizeChartBody");
+    if (!modal || !body) return;
+    body.innerHTML = buildPdSizeChartTableHtml(data);
+    modal.classList.add("is-open");
   }
 
   function renderQty() {
@@ -539,6 +633,74 @@
       "<p><a href='" + escapeHtml(href("/")) + "'>Go back to Home</a></p></div>";
   }
 
+  function ensureStickyOrderBarStyles() {
+    if (document.getElementById("sticky-order-bar-style")) return;
+    var style = document.createElement("style");
+    style.id = "sticky-order-bar-style";
+    style.textContent =
+      "#stickyOrderBar{position:fixed;left:0;right:0;bottom:64px;z-index:600;" +
+      "background:#fff;border-top:1px solid #ececec;box-shadow:0 -3px 14px rgba(0,0,0,.08);" +
+      "display:none;padding:10px 14px;gap:10px;}" +
+      "@media (min-width:769px){#stickyOrderBar{display:none !important;}}" +
+      "#stickyOrderBar.is-visible{display:flex;}" +
+      "#stickyOrderBar .sob-btn{flex:1;border-radius:10px;border:1.5px solid #111;" +
+      "background:#fff;color:#111;font-size:13.5px;font-weight:700;padding:12px 0;cursor:pointer;" +
+      "font-family:inherit;text-align:center;text-decoration:none;}" +
+      "#stickyOrderBar .sob-buy{background:#111;color:#fff;}" +
+      "@media (max-width:768px){body.pd-sticky-open{padding-bottom:138px;}}";
+    document.head.appendChild(style);
+  }
+
+  var stickyOrderObserver = null;
+
+  function initStickyOrderBar() {
+    teardownStickyOrderBar();
+    var actionsRow = document.querySelector(".pd-actions");
+    if (!actionsRow || typeof IntersectionObserver !== "function") return;
+    ensureStickyOrderBarStyles();
+
+    var bar = document.getElementById("stickyOrderBar");
+    if (!bar) {
+      bar = document.createElement("div");
+      bar.id = "stickyOrderBar";
+      document.body.appendChild(bar);
+    }
+    bar.innerHTML =
+      '<button type="button" class="sob-btn sob-cart">Add to Cart</button>' +
+      '<button type="button" class="sob-btn sob-buy">Buy Now</button>';
+
+    bar.querySelector(".sob-cart").addEventListener("click", function () {
+      var realBtn = $("pdAddCart");
+      if (realBtn) realBtn.click();
+    });
+    bar.querySelector(".sob-buy").addEventListener("click", function () {
+      var realBtn = $("pdBuyNow");
+      if (realBtn) realBtn.click();
+    });
+
+    stickyOrderObserver = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          var scrolledPast = entry.boundingClientRect.bottom < 0;
+          bar.classList.toggle("is-visible", scrolledPast);
+          document.body.classList.toggle("pd-sticky-open", scrolledPast);
+        });
+      },
+      { threshold: 0 }
+    );
+    stickyOrderObserver.observe(actionsRow);
+  }
+
+  function teardownStickyOrderBar() {
+    if (stickyOrderObserver) {
+      stickyOrderObserver.disconnect();
+      stickyOrderObserver = null;
+    }
+    var bar = document.getElementById("stickyOrderBar");
+    if (bar) bar.classList.remove("is-visible");
+    document.body.classList.remove("pd-sticky-open");
+  }
+
   function render() {
     renderShell();
     renderBreadcrumb();
@@ -562,6 +724,7 @@
     renderRelated(listForRelated);
     renderReviews();
     startReviewsAutoplay();
+    initStickyOrderBar();
   }
 
   function boot() {

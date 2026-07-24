@@ -28,25 +28,54 @@ window.SITE_LINKS = {
   order: {
     whatsapp: "https://wa.me/8801970831783"
   },
-  /** Size Chart ছবি — ক্যাটাগরি অনুযায়ী বা default
-   *  NOTE: "github.com/.../blob/...?raw=1" কখনোই সরাসরি ছবি হিসেবে লোড হয় না —
-   *  GitHub শুধু "?raw=true" প্যারামিটার মানে (raw=1 না), আর সেটাও একটা রিডাইরেক্ট,
-   *  যা <img> ট্যাগে অনেক সময় ব্লক/ফেইল হয়। তাই raw.githubusercontent.com এর
-   *  ডাইরেক্ট লিংক ব্যবহার করা হচ্ছে। সবচেয়ে ভালো/নির্ভরযোগ্য সমাধান হলো এই ছবি
-   *  গুলো নিজের images/ ফোল্ডারে রাখা (images/size-chart.jpg ইত্যাদি) — নিচে
-   *  সেই লোকাল অপশনও কমেন্ট করে দেওয়া আছে। */
+  /** Size Chart — এখন আর বাইরের কোনো ছবির (GitHub) উপর নির্ভর করে না।
+   *  আগে এখানে GitHub-এ হোস্ট করা ছবির লিংক ছিল, যেটা প্রায়ই লোড হতে
+   *  ব্যর্থ হচ্ছিল (ফাইল না থাকলে, GitHub রেট-লিমিট করলে, ইত্যাদি)।
+   *  তার বদলে এখন সরাসরি সংখ্যা/টেবিল ডেটা — কখনো ভাঙবে না, কোনো
+   *  নেটওয়ার্ক নির্ভরতা নেই। এখানে বদলালেই Size Chart মডালে বদলাবে। */
   sizeChart: {
-    default:
-      "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/size-chart.jpg",
+    default: {
+      regularFit: [
+        { size: "Small", length: 52, width: 42, sleeve: 21 },
+        { size: "Medium", length: 54, width: 44, sleeve: 22 },
+        { size: "Large", length: 56, width: 46, sleeve: 23 }
+      ],
+      customSize: [
+        { length: 57, lengthExtra: 0, width: 47, widthExtra: 0 },
+        { length: 58, lengthExtra: 0, width: 48, widthExtra: 0 },
+        { length: 59, lengthExtra: 250, width: 49, widthExtra: 250 },
+        { length: 60, lengthExtra: 250, width: 50, widthExtra: 250 },
+        { length: 61, lengthExtra: 250, width: 51, widthExtra: 250 },
+        { length: 62, lengthExtra: 450, width: 52, widthExtra: 250 },
+        { length: 63, lengthExtra: 450, width: 53, widthExtra: 250 },
+        { length: 64, lengthExtra: 450, width: 54, widthExtra: 250 },
+        { length: 65, lengthExtra: 450, width: 55, widthExtra: 250 },
+        { length: 66, lengthExtra: 450, width: 56, widthExtra: 250 },
+        { length: 67, lengthExtra: 450, width: 57, widthExtra: 250 },
+        { length: 68, lengthExtra: 450, width: 58, widthExtra: 250 }
+      ]
+    },
     byCategory: {
-      abaya:
-        "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/abaya-size-chart.jpg",
-      "premium-two-piece":
-        "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-size-chart.jpg"
-      /* লোকাল ছবি ব্যবহার করতে চাইলে (রিকমেন্ডেড — দ্রুত ও নির্ভরযোগ্য):
-      abaya: "abaya-size-chart.jpg",
-      "premium-two-piece": "two-piece-size-chart.jpg"
-      // এবং ছবি দুটো images/ ফোল্ডারে আপলোড করুন */
+      abaya: {
+        regularFit: [
+          { size: "Small", length: 50, width: 42, sleeve: 21 },
+          { size: "Medium", length: 52, width: 44, sleeve: 22 },
+          { size: "Large", length: 54, width: 46, sleeve: 23 },
+          { size: "Extra Large", length: 56, width: 48, sleeve: 24 }
+        ],
+        customSize: [
+          { length: 57, lengthExtra: 0, width: 47, widthExtra: 0 },
+          { length: 58, lengthExtra: 0, width: 48, widthExtra: 0 },
+          { length: 59, lengthExtra: 250, width: 49, widthExtra: 250 },
+          { length: 60, lengthExtra: 250, width: 50, widthExtra: 250 },
+          { length: 61, lengthExtra: 250, width: 51, widthExtra: 250 },
+          { length: 62, lengthExtra: 450, width: 52, widthExtra: 250 },
+          { length: 63, lengthExtra: 450, width: 53, widthExtra: 250 },
+          { length: 64, lengthExtra: 450, width: 54, widthExtra: 250 },
+          { length: 65, lengthExtra: 450, width: 55, widthExtra: 250 },
+          { length: 66, lengthExtra: 450, width: 56, widthExtra: 250 }
+        ]
+      }
     }
   },
   defaults: {

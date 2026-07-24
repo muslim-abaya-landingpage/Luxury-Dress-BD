@@ -658,15 +658,65 @@ function updatePqvPriceDisplay(modal, p, categoryKey, typeLabel) {
   el.textContent = formatBdtPrice(price);
   el.setAttribute("data-price", String(price));
 }
-function getSizeChartUrl(categoryKey) {
+function getSizeChartData(categoryKey) {
   var cfg = (window.SITE_LINKS && window.SITE_LINKS.sizeChart) || {};
-  var raw =
-    (cfg.byCategory && categoryKey && cfg.byCategory[categoryKey]) || cfg.default || "";
-  if (!raw) return "";
-  if (window.maCatalog && typeof window.maCatalog.resolveImageUrl === "function") {
-    return window.maCatalog.resolveImageUrl(raw);
+  var data = (cfg.byCategory && categoryKey && cfg.byCategory[categoryKey]) || cfg.default;
+  return data || null;
+}
+function escapeHtmlText(str) {
+  return String(str == null ? "" : str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+function buildSizeChartTableHtml(data) {
+  if (!data) return "";
+  var html = "";
+  if (Array.isArray(data.regularFit) && data.regularFit.length) {
+    html +=
+      '<div class="pqv-sc-card">' +
+      '<div class="pqv-sc-card-title">Regular Fit (Inch)</div>' +
+      "<table><thead><tr><th>Size</th><th>Length</th><th>Width</th><th>Sleeve</th></tr></thead><tbody>" +
+      data.regularFit
+        .map(function (row) {
+          return (
+            "<tr><td>" +
+            escapeHtmlText(row.size) +
+            "</td><td>" +
+            escapeHtmlText(row.length) +
+            "</td><td>" +
+            escapeHtmlText(row.width) +
+            "</td><td>" +
+            escapeHtmlText(row.sleeve) +
+            "</td></tr>"
+          );
+        })
+        .join("") +
+      "</tbody></table></div>";
   }
-  return raw;
+  if (Array.isArray(data.customSize) && data.customSize.length) {
+    html +=
+      '<div class="pqv-sc-card">' +
+      '<div class="pqv-sc-card-title">Custom Size Charge</div>' +
+      "<table><thead><tr><th>Length</th><th>Extra</th><th>Width</th><th>Extra</th></tr></thead><tbody>" +
+      data.customSize
+        .map(function (row) {
+          return (
+            "<tr><td>" +
+            escapeHtmlText(row.length) +
+            "</td><td>" +
+            (row.lengthExtra ? "৳" + escapeHtmlText(row.lengthExtra) : "—") +
+            "</td><td>" +
+            escapeHtmlText(row.width) +
+            "</td><td>" +
+            (row.widthExtra ? "৳" + escapeHtmlText(row.widthExtra) : "—") +
+            "</td></tr>"
+          );
+        })
+        .join("") +
+      "</tbody></table></div>";
+  }
+  return html;
 }
 function collectGalleryImages(product, allProducts) {
   if (Array.isArray(product.images) && product.images.length) {
@@ -866,8 +916,9 @@ function ensureSizeChartModal() {
     '<div class="pqv-sc-backdrop" data-sc-close="1"></div>' +
     '<div class="pqv-sc-dialog" role="dialog" aria-modal="true" aria-label="Size chart">' +
     '<button type="button" class="pqv-sc-close" data-sc-close="1" aria-label="Close">&times;</button>' +
-    '<img id="sizeChartImg" src="" alt="Size chart">' +
-    '<p id="sizeChartError" class="pqv-sc-error" hidden>Size chart image could not be loaded. Please try again later or contact us for size details.</p>' +
+    '<div class="pqv-sc-title">Size Chart</div>' +
+    '<div id="sizeChartBody"></div>' +
+    '<p id="sizeChartError" class="pqv-sc-error" hidden>Size chart is not available right now. Please contact us for size details.</p>' +
     "</div>";
   document.body.appendChild(el);
   el.addEventListener("click", function (ev) {
@@ -876,32 +927,18 @@ function ensureSizeChartModal() {
   document.addEventListener("keydown", function (ev) {
     if (ev.key === "Escape") closeSizeChartModal();
   });
-  var scImg = document.getElementById("sizeChartImg");
-  if (scImg) {
-    scImg.addEventListener("load", function () {
-      scImg.hidden = false;
-      var err = document.getElementById("sizeChartError");
-      if (err) err.hidden = true;
-    });
-    scImg.addEventListener("error", function () {
-      // Prevents the modal from collapsing into a tiny broken-image box —
-      // show a readable message instead of a dead <img>.
-      scImg.hidden = true;
-      var err = document.getElementById("sizeChartError");
-      if (err) err.hidden = false;
-    });
-  }
 }
-function openSizeChartModal(url) {
-  if (!url) return;
+function openSizeChartModal(categoryKey) {
   ensureSizeChartModal();
   var modal = document.getElementById("sizeChartModal");
-  var img = document.getElementById("sizeChartImg");
+  var body = document.getElementById("sizeChartBody");
   var err = document.getElementById("sizeChartError");
-  if (!modal || !img) return;
-  img.hidden = false;
-  if (err) err.hidden = true;
-  img.src = url;
+  if (!modal || !body) return;
+  var data = getSizeChartData(categoryKey);
+  var html = buildSizeChartTableHtml(data);
+  body.innerHTML = html;
+  body.hidden = !html;
+  if (err) err.hidden = !!html;
   modal.hidden = false;
   modal.setAttribute("aria-hidden", "false");
   document.body.classList.add("pqv-sc-open");
@@ -912,10 +949,6 @@ function closeSizeChartModal() {
   modal.hidden = true;
   modal.setAttribute("aria-hidden", "true");
   document.body.classList.remove("pqv-sc-open");
-  var img = document.getElementById("sizeChartImg");
-  if (img) img.src = "";
-  var err = document.getElementById("sizeChartError");
-  if (err) err.hidden = true;
 }
 function setPqvGallerySlide(modal, slideIndex) {
   if (!modal) return;
@@ -1015,8 +1048,19 @@ function bindPqvInteractions(p, idx, categoryKey, scopeRoot) {
   var chartBtn = modal.querySelector("[data-pqv-size-chart]");
   if (chartBtn) {
     chartBtn.addEventListener("click", function () {
-      var url = chartBtn.getAttribute("data-chart-url");
-      if (url) openSizeChartModal(url);
+      openSizeChartModal(chartBtn.getAttribute("data-chart-category") || "");
+    });
+  }
+  var customSizeBtnEl = modal.querySelector("[data-pqv-custom-size]");
+  if (customSizeBtnEl && typeof window.openCustomSizeModal === "function") {
+    customSizeBtnEl.addEventListener("click", function () {
+      window.openCustomSizeModal({
+        id: customSizeBtnEl.getAttribute("data-product-id"),
+        name: customSizeBtnEl.getAttribute("data-product-name"),
+        price: Number(customSizeBtnEl.getAttribute("data-product-price")) || 0,
+        image: customSizeBtnEl.getAttribute("data-product-image"),
+        category: customSizeBtnEl.getAttribute("data-category")
+      });
     });
   }
   var jumpDesc = modal.querySelector("[data-pqv-jump-desc]");
@@ -1152,7 +1196,7 @@ function ensureStickyOrderBarStyles() {
   var style = document.createElement("style");
   style.id = "sticky-order-bar-style";
   style.textContent =
-    "#stickyOrderBar{position:fixed;left:0;right:0;bottom:64px;z-index:2147482900;" +
+    "#stickyOrderBar{position:fixed;left:0;right:0;bottom:64px;z-index:600;" +
     "background:#fff;border-top:1px solid #ececec;box-shadow:0 -3px 14px rgba(0,0,0,.08);" +
     "display:none;padding:10px 14px;gap:10px;}" +
     "@media (min-width:769px){#stickyOrderBar{display:none !important;}}" +
@@ -1371,12 +1415,19 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
   var types = getProductTypes(p, categoryKey);
   var lengthVal = p.detailNote ? String(p.detailNote).replace(/^লং:\s*/i, "").trim() : "";
   var colorLabel = p.colorLabel ? escapeHtml(p.colorLabel) : p.color ? escapeHtml(p.color) : "";
-  var chartUrl = getSizeChartUrl(categoryKey);
-  var chartBtn = chartUrl
-    ? '<button type="button" class="pqv-size-chart-link" data-pqv-size-chart="1" data-chart-url="' +
-      escapeHtml(chartUrl) +
+  var chartData = getSizeChartData(categoryKey);
+  var chartBtn = chartData
+    ? '<button type="button" class="pqv-size-chart-link" data-pqv-size-chart="1" data-chart-category="' +
+      escapeHtml(categoryKey || "") +
       '">Size chart</button>'
     : "";
+  var customSizeBtn =
+    chartData && Array.isArray(chartData.customSize) && chartData.customSize.length
+      ? '<button type="button" class="pqv-opt-btn pqv-custom-size-btn" data-pqv-custom-size="1" ' +
+        'data-product-id="' + escapeHtml(p.id || "") + '" data-product-name="' + escapeHtml(p.name || "") + '" ' +
+        'data-product-price="' + productPrice + '" data-product-image="' + escapeHtml(imgSrc || "") + '" ' +
+        'data-category="' + escapeHtml(categoryKey || "") + '">Custom Size</button>'
+      : "";
   var typeField =
     types.length > 1
       ? '<div class="pqv-field"><span class="pqv-field-label">Type</span><div class="pqv-opt-group pqv-type-group">' +
@@ -1421,6 +1472,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
         chartBtn +
         '</div><div class="pqv-opt-group pqv-opt-group-wrap">' +
         buildPqvOptionPills(sizes, idx, "pqv-length-opt", "data-length-value", formatSizeLabel) +
+        customSizeBtn +
         "</div></div>"
       : isTwoPiece && twoPieceCfg
         ? '<div class="pqv-field pqv-field-body"><span class="pqv-field-label">Body Size</span><div class="pqv-opt-group">' +
@@ -1432,11 +1484,14 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
           '</div><div class="pqv-opt-group pqv-opt-group-wrap">' +
           '<button type="button" class="pqv-opt-btn is-active" aria-pressed="true" disabled>' +
           escapeHtml(twoPieceCfg.lengthSizeLabel) +
-          "</button></div></div>"
+          "</button>" +
+          customSizeBtn +
+          "</div></div>"
       : '<div class="pqv-field pqv-field-size"><div class="pqv-field-head"><span class="pqv-field-label">Size</span>' +
         chartBtn +
         '</div><div class="pqv-opt-group pqv-opt-group-wrap">' +
         buildPqvOptionPills(sizes, idx, "pqv-size-opt", "data-size-value", formatSizeLabel) +
+        customSizeBtn +
         "</div></div>";
   var isPanjabi =
     typeof isPanjabiProduct === "function" &&

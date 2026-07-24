@@ -353,7 +353,7 @@ backdrop-filter:blur(14px);
 .ah-actions{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:8px;
+  gap:4px;
   margin-top:10px;
 }
 
