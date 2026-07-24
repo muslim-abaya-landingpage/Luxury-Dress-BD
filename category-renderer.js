@@ -867,6 +867,7 @@ function ensureSizeChartModal() {
     '<div class="pqv-sc-dialog" role="dialog" aria-modal="true" aria-label="Size chart">' +
     '<button type="button" class="pqv-sc-close" data-sc-close="1" aria-label="Close">&times;</button>' +
     '<img id="sizeChartImg" src="" alt="Size chart">' +
+    '<p id="sizeChartError" class="pqv-sc-error" hidden>Size chart image could not be loaded. Please try again later or contact us for size details.</p>' +
     "</div>";
   document.body.appendChild(el);
   el.addEventListener("click", function (ev) {
@@ -875,13 +876,31 @@ function ensureSizeChartModal() {
   document.addEventListener("keydown", function (ev) {
     if (ev.key === "Escape") closeSizeChartModal();
   });
+  var scImg = document.getElementById("sizeChartImg");
+  if (scImg) {
+    scImg.addEventListener("load", function () {
+      scImg.hidden = false;
+      var err = document.getElementById("sizeChartError");
+      if (err) err.hidden = true;
+    });
+    scImg.addEventListener("error", function () {
+      // Prevents the modal from collapsing into a tiny broken-image box —
+      // show a readable message instead of a dead <img>.
+      scImg.hidden = true;
+      var err = document.getElementById("sizeChartError");
+      if (err) err.hidden = false;
+    });
+  }
 }
 function openSizeChartModal(url) {
   if (!url) return;
   ensureSizeChartModal();
   var modal = document.getElementById("sizeChartModal");
   var img = document.getElementById("sizeChartImg");
+  var err = document.getElementById("sizeChartError");
   if (!modal || !img) return;
+  img.hidden = false;
+  if (err) err.hidden = true;
   img.src = url;
   modal.hidden = false;
   modal.setAttribute("aria-hidden", "false");
@@ -895,6 +914,8 @@ function closeSizeChartModal() {
   document.body.classList.remove("pqv-sc-open");
   var img = document.getElementById("sizeChartImg");
   if (img) img.src = "";
+  var err = document.getElementById("sizeChartError");
+  if (err) err.hidden = true;
 }
 function setPqvGallerySlide(modal, slideIndex) {
   if (!modal) return;

@@ -11,6 +11,30 @@
       .replace(/"/g, "&quot;");
   }
 
+  function playVideo(videoId) {
+    if (!videoId || videoId.indexOf("VIDEO_ID_") === 0) return; // unset placeholder in video-config.js
+    var modal = document.getElementById("videoModal");
+    var iframe = document.getElementById("modalIframe");
+    if (!modal || !iframe) return;
+    iframe.src =
+      "https://www.youtube.com/embed/" + encodeURIComponent(videoId) + "?autoplay=1&rel=0&modestbranding=1";
+    modal.style.display = "flex";
+  }
+
+  function bindVideoGridClicks(grid) {
+    // Delegated on the grid container so it keeps working even though
+    // renderVideoGrid() rebuilds the cards' innerHTML.
+    if (grid.__luxVideoClickBound) return;
+    grid.__luxVideoClickBound = true;
+    grid.addEventListener("click", function (e) {
+      var facade = e.target.closest(".lux-video-facade");
+      if (!facade) return;
+      var ratio = facade.closest(".lux-video-ratio");
+      var videoId = ratio && ratio.getAttribute("data-video-id");
+      playVideo(videoId);
+    });
+  }
+
   function renderVideoGrid() {
     var grid = document.getElementById("luxVideoGrid");
     var videos = window.SITE_VIDEOS;
@@ -37,6 +61,8 @@
         );
       })
       .join("");
+
+    bindVideoGridClicks(grid);
   }
 
   if (document.readyState === "loading") {

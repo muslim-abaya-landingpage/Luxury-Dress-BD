@@ -1783,17 +1783,29 @@ body.pqv-sc-open {
 .pqv-sc-dialog {
   position: relative;
   z-index: 2;
+  width: min(720px, 100%);
+  min-width: 280px;
+  min-height: 160px;
   max-width: min(720px, 100%);
   max-height: min(90vh, 900px);
   background: #fff;
   padding: 12px;
   overflow: auto;
+  box-sizing: border-box;
 }
 
 .pqv-sc-dialog img {
   display: block;
   width: 100%;
   height: auto;
+}
+
+.pqv-sc-error {
+  margin: 40px 20px;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #444;
 }
 
 .pqv-sc-close {

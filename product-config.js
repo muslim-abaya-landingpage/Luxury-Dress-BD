@@ -28,15 +28,25 @@ window.SITE_LINKS = {
   order: {
     whatsapp: "https://wa.me/8801970831783"
   },
-  /** Size Chart ছবি — ক্যাটাগরি অনুযায়ী বা default */
+  /** Size Chart ছবি — ক্যাটাগরি অনুযায়ী বা default
+   *  NOTE: "github.com/.../blob/...?raw=1" কখনোই সরাসরি ছবি হিসেবে লোড হয় না —
+   *  GitHub শুধু "?raw=true" প্যারামিটার মানে (raw=1 না), আর সেটাও একটা রিডাইরেক্ট,
+   *  যা <img> ট্যাগে অনেক সময় ব্লক/ফেইল হয়। তাই raw.githubusercontent.com এর
+   *  ডাইরেক্ট লিংক ব্যবহার করা হচ্ছে। সবচেয়ে ভালো/নির্ভরযোগ্য সমাধান হলো এই ছবি
+   *  গুলো নিজের images/ ফোল্ডারে রাখা (images/size-chart.jpg ইত্যাদি) — নিচে
+   *  সেই লোকাল অপশনও কমেন্ট করে দেওয়া আছে। */
   sizeChart: {
     default:
-      "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/size-chart.jpg?raw=1",
+      "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/size-chart.jpg",
     byCategory: {
       abaya:
-        "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/abaya-size-chart.jpg?raw=1",
+        "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/abaya-size-chart.jpg",
       "premium-two-piece":
-        "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/images/two-piece-size-chart.jpg?raw=1"
+        "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-size-chart.jpg"
+      /* লোকাল ছবি ব্যবহার করতে চাইলে (রিকমেন্ডেড — দ্রুত ও নির্ভরযোগ্য):
+      abaya: "abaya-size-chart.jpg",
+      "premium-two-piece": "two-piece-size-chart.jpg"
+      // এবং ছবি দুটো images/ ফোল্ডারে আপলোড করুন */
     }
   },
   defaults: {

@@ -205,6 +205,7 @@
       state.selectedType = val;
       renderTypeOptions();
       renderPrice();
+      updateSendMessageLink();
     });
   }
 
@@ -216,6 +217,7 @@
     renderOptionGroup("pdSizeGroup", "Size", sizes, state.selectedSize, function (val) {
       state.selectedSize = val;
       renderSizeOptions();
+      updateSendMessageLink();
     });
     var chartUrl =
       (window.SITE_LINKS &&
@@ -425,6 +427,16 @@
     }
   }
 
+  function updateSendMessageLink() {
+    var msgLink = $("pdSendMsg");
+    if (!msgLink || !state.product) return;
+    var msgText =
+      "I want to order " + state.product.name +
+      (state.selectedSize ? " (Size: " + state.selectedSize + ")" : "") +
+      (state.selectedType ? " (" + state.selectedType + ")" : "");
+    msgLink.href = waLink() + "?text=" + encodeURIComponent(msgText);
+  }
+
   function wireActions() {
     $("pdQtyMinus").addEventListener("click", function () {
       state.qty = Math.max(1, state.qty - 1);
@@ -449,13 +461,7 @@
       addToCart(true);
       window.location.href = href("/checkout");
     });
-    var msgLink = $("pdSendMsg");
-    var msgText =
-      "I want to order " + state.product.name +
-      (state.selectedSize ? " (Size: " + state.selectedSize + ")" : "") +
-      (state.selectedType ? " (" + state.selectedType + ")" : "");
-    msgLink.href = waLink() + "?text=" + encodeURIComponent(msgText);
-    document.querySelector(".pd-gallery-arrow.prev, .pd-gallery-arrow.next");
+    updateSendMessageLink();
   }
 
   function renderShell() {
