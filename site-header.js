@@ -324,77 +324,49 @@ function buildNavMenuItems() {
     }).join(' | ');
   }
 
-  /** ================= SECTION 1: TOP BAR (Facebook + Help/Sign Up/Sign In) =================
-   *  বদলাতে হলে: site-header-config.js এর topBar.links / topBar.facebookUrl বদলান।
-   *  এই HTML structure শুধুমাত্র তখনই বদলাবেন যখন নতুন কোনো এলিমেন্ট (আইকন/লিংক) যোগ করতে হবে। */
-  function buildTopBarHtml() {
+  function buildHeaderHtml() {
     var fbUrl = getSocialUrl('facebook', TOP_BAR_FACEBOOK_FALLBACK);
     return (
-      '<div class="header-top-bar"><div class="custom-container"><div class="top-bar-content">' +
-      '<a href="' + fbUrl + '" target="_blank" rel="noopener noreferrer">Facebook</a> | ' +
-      buildTopBarLinksHtml() +
-      '</div></div></div>'
-    );
-  }
-
-  /** ================= SECTION 2: BRAND/LOGO + MAIN MENU + ICONS + SEARCH DRAWER =================
-   *  বদলাতে হলে: site-header-config.js এর brand{} / whatsapp / search.placeholder বদলান।
-   *  মেনু আইটেম আসে buildNavMenuItems()/applyDynamicNavMenu() থেকে (CATALOG_SECTIONS ভিত্তিক), এখানে না। */
-  function buildBrandNavHtml() {
-    return (
-      '<div class="header-middle-nav"><div class="custom-container nav-row">' +
-      '<div class="brand-text-logo"><a href="/" class="brand-logo-link" aria-label="' + HEADER_BRAND.name + ' Home">' +
-      '<img class="brand-logo-img" src="' + HEADER_BRAND.logoSrc + '" alt="' + HEADER_BRAND.logoAlt + '" width="220" height="46" decoding="async" fetchpriority="high">' +
-      '<span class="brand-logo-fallback" aria-hidden="true">' + HEADER_BRAND.fallbackText + '</span></a></div>' +
-      '<nav class="desktop-menu" aria-label="Main"><ul></ul></nav>' +
-      '<div class="nav-icons">' +
-      '<button type="button" class="nav-icon-btn" id="navSearchOpen" aria-label="Search" aria-expanded="false">' + ICON_SEARCH + '</button>' +
-      '<button type="button" class="cart-drawer-trigger" data-cart-trigger="1" style="position:relative" aria-label="Cart">' + ICON_BAG + '<span id="cart-count">0</span></button>' +
-      '<a href="' + HEADER_WHATSAPP + '" target="_blank" rel="noopener" aria-label="Message">' + ICON_CHAT + '</a>' +
-      '<a href="/signin" aria-label="Account">' + ICON_USER + '</a>' +
-      '<button type="button" class="nav-menu-btn" onclick="window.toggleAbayaMenu()" aria-label="Menu">' + ICON_MENU + '</button>' +
-      '</div></div></div>' +
-      '<div class="site-search-drawer" id="siteSearchDrawer" aria-hidden="true">' +
-      '<div class="custom-container site-search-inner">' +
-      '<div class="site-search-row">' +
-      '<form class="site-search-form" id="siteSearchForm" role="search" autocomplete="off">' +
-      ICON_SEARCH +
-      '<input type="search" id="siteSearchInput" name="q" placeholder="' + SEARCH_PLACEHOLDER + '" autocomplete="off" aria-label="Search products">' +
-      '</form>' +
-      '<button type="button" class="site-search-close" id="siteSearchClose" aria-label="Close search">&times;</button>' +
-      '</div>' +
-      '<ul class="site-search-results" id="siteSearchResults" hidden></ul>' +
-      '</div></div>'
-    );
-  }
-
-  /** ================= SECTION 3: ANNOUNCEMENT BAR (ঘুরতে থাকা স্লাইড) =================
-   *  বদলাতে হলে: site-header-config.js এর announcements[] অ্যারেতে যত খুশি লাইন যোগ/বাদ দিন। */
-  function buildAnnouncementBarHtml() {
-    return (
-      '<div class="header-announcement-bar"><div class="custom-container announcement-slider">' +
-      '<button type="button" class="slider-arrow left-arrow" onclick="window.moveAnnouncement(-1)" aria-label="Previous">' + ICON_CHEV_LEFT + '</button>' +
-      '<div class="announcement-content">' +
-      buildAnnouncementSlidesHtml() +
-      '</div>' +
-      '<button type="button" class="slider-arrow right-arrow" onclick="window.moveAnnouncement(1)" aria-label="Next">' + ICON_CHEV_RIGHT + '</button>' +
-      '</div></div>'
-    );
-  }
-
-  /** এই তিনটা সেকশন এখানে জোড়া লাগে — অর্ডার এখান থেকে বদলাতে পারবেন
-   *  (যেমন announcement bar কে top বারের ওপরে নিতে চাইলে এখানে সোয়াপ করুন)। */
-  function buildHeaderHtml() {
-    return (
-      '<header class="abaya-main-header">' +
-      buildTopBarHtml() +
-      buildBrandNavHtml() +
-      buildAnnouncementBarHtml() +
-      '</header>' +
-      '<div class="menu-overlay" id="menuOverlay" onclick="window.toggleAbayaMenu()"></div>' +
-      '<div class="mobile-nav-panel" id="mobileMenuPanel">' +
-      '<div class="mobile-nav-top"><button type="button" onclick="window.toggleAbayaMenu()" style="background:none;border:none;font-size:26px;cursor:pointer">&times;</button></div>' +
-      '<ul></ul></div>'
+    '<header class="abaya-main-header">' +
+    '<div class="header-top-bar"><div class="custom-container"><div class="top-bar-content">' +
+    '<a href="' + fbUrl + '" target="_blank" rel="noopener noreferrer">Facebook</a> | ' +
+    buildTopBarLinksHtml() +
+    '</div></div></div>' +
+    '<div class="header-middle-nav"><div class="custom-container nav-row">' +
+    '<div class="brand-text-logo"><a href="/" class="brand-logo-link" aria-label="' + HEADER_BRAND.name + ' Home">' +
+    '<img class="brand-logo-img" src="' + HEADER_BRAND.logoSrc + '" alt="' + HEADER_BRAND.logoAlt + '" width="220" height="46" decoding="async" fetchpriority="high">' +
+  '<span class="brand-logo-fallback" aria-hidden="true">' + HEADER_BRAND.fallbackText + '</span></a></div>' +
+    '<nav class="desktop-menu" aria-label="Main"><ul></ul></nav>' +
+    '<div class="nav-icons">' +
+    '<button type="button" class="nav-icon-btn" id="navSearchOpen" aria-label="Search" aria-expanded="false">' + ICON_SEARCH + '</button>' +
+    '<button type="button" class="cart-drawer-trigger" data-cart-trigger="1" style="position:relative" aria-label="Cart">' + ICON_BAG + '<span id="cart-count">0</span></button>' +
+    '<a href="' + HEADER_WHATSAPP + '" target="_blank" rel="noopener" aria-label="Message">' + ICON_CHAT + '</a>' +
+    '<a href="/signin" aria-label="Account">' + ICON_USER + '</a>' +
+    '<button type="button" class="nav-menu-btn" onclick="window.toggleAbayaMenu()" aria-label="Menu">' + ICON_MENU + '</button>' +
+    '</div></div></div>' +
+    '<div class="site-search-drawer" id="siteSearchDrawer" aria-hidden="true">' +
+    '<div class="custom-container site-search-inner">' +
+    '<div class="site-search-row">' +
+    '<form class="site-search-form" id="siteSearchForm" role="search" autocomplete="off">' +
+    ICON_SEARCH +
+    '<input type="search" id="siteSearchInput" name="q" placeholder="' + SEARCH_PLACEHOLDER + '" autocomplete="off" aria-label="Search products">' +
+    '</form>' +
+    '<button type="button" class="site-search-close" id="siteSearchClose" aria-label="Close search">&times;</button>' +
+    '</div>' +
+    '<ul class="site-search-results" id="siteSearchResults" hidden></ul>' +
+    '</div></div>' +
+    '<div class="header-announcement-bar"><div class="custom-container announcement-slider">' +
+    '<button type="button" class="slider-arrow left-arrow" onclick="window.moveAnnouncement(-1)" aria-label="Previous">' + ICON_CHEV_LEFT + '</button>' +
+    '<div class="announcement-content">' +
+    buildAnnouncementSlidesHtml() +
+    '</div>' +
+    '<button type="button" class="slider-arrow right-arrow" onclick="window.moveAnnouncement(1)" aria-label="Next">' + ICON_CHEV_RIGHT + '</button>' +
+    '</div></div>' +
+    '</header>' +
+    '<div class="menu-overlay" id="menuOverlay" onclick="window.toggleAbayaMenu()"></div>' +
+    '<div class="mobile-nav-panel" id="mobileMenuPanel">' +
+    '<div class="mobile-nav-top"><button type="button" onclick="window.toggleAbayaMenu()" style="background:none;border:none;font-size:26px;cursor:pointer">&times;</button></div>' +
+    '<ul></ul></div>'
     );
   }
   var annIdx = 0;
@@ -718,14 +690,21 @@ function buildNavMenuItems() {
   function syncSiteHeaderOffset() {
     var mount = document.getElementById('site-header-mount');
     if (!mount) return;
-    // .abaya-main-header is position:fixed, so it contributes ZERO height to
-    // #site-header-mount's own box — measuring mount.offsetHeight just echoes
-    // back the CSS min-height guess, not the header's real rendered height
-    // (which changes with wrapped menu items, longer top-bar text, etc).
-    // Measure the actual fixed header instead so the reserved space below it
-    // (and the hero section right after it) always matches reality.
-    var header = mount.querySelector('.abaya-main-header') || mount;
-    document.documentElement.style.setProperty('--site-header-h', header.offsetHeight + 'px');
+    // The header itself is position:fixed (see .abaya-main-header in
+    // site-header.css), so it's removed from normal document flow —
+    // measuring mount.offsetHeight here only reports the mount's own
+    // static placeholder height (min-height:148px), completely
+    // disconnected from the real header's rendered height. That mismatch
+    // is what let the fixed header float taller than its reserved space
+    // and cover the top of whatever came after it (e.g. the homepage
+    // hero banner). Measure the actual fixed header element instead, and
+    // push that real height back onto the placeholder so they always match.
+    var header = mount.querySelector('.abaya-main-header') || mount.firstElementChild;
+    var realHeight = header ? header.offsetHeight : mount.offsetHeight;
+    if (realHeight) {
+      mount.style.minHeight = realHeight + 'px';
+      document.documentElement.style.setProperty('--site-header-h', realHeight + 'px');
+    }
   }
 
   var prefetchedUrls = Object.create(null);
@@ -847,6 +826,7 @@ function buildNavMenuItems() {
     ensureProductCatalog(function () {
       var applyNav = function () {
         applyDynamicNavMenu();
+        syncSiteHeaderOffset();
       };
       if (typeof window.requestIdleCallback === "function") {
         window.requestIdleCallback(applyNav, { timeout: 600 });
@@ -856,9 +836,8 @@ function buildNavMenuItems() {
     });
     syncSiteHeaderOffset();
     window.addEventListener('resize', syncSiteHeaderOffset);
-    window.addEventListener('load', syncSiteHeaderOffset);
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(syncSiteHeaderOffset).catch(function () {});
+    if (document.fonts && typeof document.fonts.ready === 'object' && document.fonts.ready.then) {
+      document.fonts.ready.then(syncSiteHeaderOffset);
     }
     if (annTimer) clearInterval(annTimer);
     annTimer = setInterval(function () { window.moveAnnouncement(1); }, 4000);
