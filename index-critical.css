@@ -347,7 +347,7 @@ body {
 /* YouTube facade (no iframe until click) */
 .lux-video-ratio {
   position: relative;
-  padding-top: 177.77%;
+  padding-top: 66.67%; /* 3:2 ratio — 3 ইঞ্চি প্রস্থ : 2 ইঞ্চি উচ্চতা */
   background: #000;
 }
 
