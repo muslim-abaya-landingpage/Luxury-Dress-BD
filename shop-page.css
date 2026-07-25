@@ -223,7 +223,7 @@ body.shop-page .shop-breadcrumb--mobile {
 body.shop-page .card-actions-anzaar {
   position: relative;
   display: grid;
-  grid-template-columns: 56px 1fr;
+  grid-template-columns: 1fr 1fr;
   grid-template-areas: "cart msg";
   gap: 8px;
   padding: 0;
@@ -231,23 +231,31 @@ body.shop-page .card-actions-anzaar {
   background: transparent;
   border: none;
 }
-/* Grid cards match the Anzaar reference exactly: just the cart icon
-   button and Send Message, one row, no wrapping panel behind them.
-   The qty stepper is not shown here (it still appears in quick-view /
-   the single-product detail page). */
+/* Grid cards match the Anzaar reference exactly: Add to Cart and Send
+   Message sit side by side at equal width, both showing their full
+   label. The qty stepper is not shown here (it still appears in
+   quick-view / the single-product detail page). */
 body.shop-page .card-actions-anzaar .ma-qty-stepper { display: none; }
 body.shop-page .card-actions-anzaar .anzaar-btn-cart { grid-area: cart; }
 body.shop-page .card-actions-anzaar .anzaar-btn-msg { grid-area: msg; }
 
-/* PRIMARY — Add to Cart (icon-only, grey fill by default like the
-   Anzaar reference — not a white button sitting inside a grey box) */
+/* PRIMARY — Add to Cart. Flat grey fill like the Anzaar reference,
+   icon plus visible label, same width as Send Message. */
 body.shop-page .anzaar-btn-cart {
   position: relative;
   z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   border-radius: 0;
+  padding: 10px 0;
+  border: none;
+  background: #e6e7eb;
+  color: #545454;
+  font-family: "Inter", "Hind Siliguri", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 12.5px;
   letter-spacing: .01em;
   white-space: nowrap;
   transition: background .15s ease;
@@ -255,9 +263,6 @@ body.shop-page .anzaar-btn-cart {
 body.shop-page .card-actions-anzaar .anzaar-btn-cart .anzaar-btn-ico {
   display: inline-flex;
   margin: 0;
-}
-body.shop-page .card-actions-anzaar .anzaar-btn-cart > span[lang="en"] {
-  display: none;
 }
 body.shop-page .anzaar-btn-cart .anzaar-btn-ico svg {
   stroke: #545454;
@@ -275,6 +280,13 @@ body.shop-page .anzaar-btn-msg {
   align-items: center;
   justify-content: center;
   border-radius: 0;
+  padding: 10px 0;
+  border: none;
+  background: #e6e7eb;
+  color: #545454;
+  font-family: "Inter", "Hind Siliguri", system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 12.5px;
   letter-spacing: .01em;
   transition: background .15s ease, color .15s ease;
 }
@@ -297,6 +309,9 @@ body.shop-page .anzaar-btn-buy {
   position: relative;
   z-index: 1;
   border-radius: 0;
+  padding: 13px 0;
+  border: none;
+  background: #111;
   color: #fff;
   font-weight: 700;
   transition: background .15s ease;
