@@ -62,7 +62,6 @@ function categoryHasProducts(key) {
 function getHomeCategoryKeys() {
     if (window.CATALOG_SECTIONS && window.CATALOG_SECTIONS.length) {
         return window.CATALOG_SECTIONS.filter(function (s) {
-            if (s.enabled === false) return false;
             return categoryHasProducts(s.key);
         }).map(function (s) { return s.key; });
     }

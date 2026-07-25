@@ -72,7 +72,6 @@
   function activeSections() {
     var secs = window.CATALOG_SECTIONS || [];
     return secs.filter(function (s) {
-      if (s.enabled === false) return false;
       return categoryHasProducts(s.key);
     });
   }
