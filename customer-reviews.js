@@ -2,7 +2,7 @@
  * Muslim Abaya — Premium Pro client reviews (real Messenger / WhatsApp screenshots).
  */
 (function (global) {
-  var VERSION = "20260726rev4";
+  var VERSION = "20260726rev5";
   var SKIP_PATH =
     /^\/(checkout|signin|signup|thank-you|success|privacy|terms|refund)(\/|$)/i;
 
@@ -230,26 +230,31 @@
     var prevBtn = document.getElementById("maReviewsPrev");
     var nextBtn = document.getElementById("maReviewsNext");
     var index = 0;
-    var desktop = global.innerWidth > 960;
     var AUTOPLAY_MS = 3200;
     var autoplayTimer = null;
-    var isPaused = false;
+    var isHoverPaused = false;
+    var isOffscreen = false;
     var resumeTimer = null;
+
+    function isPausedNow() {
+      return isHoverPaused || isOffscreen;
+    }
 
     function wrap(i) {
       return ((i % cards.length) + cards.length) % cards.length;
     }
 
+    // IMPORTANT: only scroll the track horizontally (never the page).
+    // Using scrollIntoView() here previously moved the whole page
+    // vertically whenever the section wasn't fully in view, which
+    // yanked users down to the reviews while they were browsing
+    // products above. track.scrollTo() only affects this element.
     function scrollTo(i) {
       index = wrap(i);
       var card = cards[index];
       if (!card) return;
-      if (desktop) {
-        card.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-      } else {
-        var left = card.offsetLeft - (track.clientWidth - card.offsetWidth) / 2;
-        track.scrollTo({ left: left, behavior: "smooth" });
-      }
+      var left = card.offsetLeft - (track.clientWidth - card.offsetWidth) / 2;
+      track.scrollTo({ left: left, behavior: "smooth" });
       updateDots();
     }
 
@@ -268,7 +273,7 @@
       stopAutoplay();
       if (cards.length < 2) return;
       autoplayTimer = setInterval(function () {
-        if (isPaused) return;
+        if (isPausedNow()) return;
         scrollTo(index + 1); // right-to-left: next card slides in from the right
       }, AUTOPLAY_MS);
     }
@@ -281,19 +286,35 @@
     }
 
     function pauseThenResume() {
-      isPaused = true;
+      isHoverPaused = true;
       clearTimeout(resumeTimer);
       resumeTimer = setTimeout(function () {
-        isPaused = false;
+        isHoverPaused = false;
       }, AUTOPLAY_MS);
     }
 
-    track.addEventListener("mouseenter", function () { isPaused = true; });
-    track.addEventListener("mouseleave", function () { isPaused = false; });
-    track.addEventListener("touchstart", function () { isPaused = true; }, { passive: true });
+    track.addEventListener("mouseenter", function () { isHoverPaused = true; });
+    track.addEventListener("mouseleave", function () { isHoverPaused = false; });
+    track.addEventListener("touchstart", function () { isHoverPaused = true; }, { passive: true });
     track.addEventListener("touchend", pauseThenResume, { passive: true });
-    track.addEventListener("focusin", function () { isPaused = true; });
-    track.addEventListener("focusout", function () { isPaused = false; });
+    track.addEventListener("focusin", function () { isHoverPaused = true; });
+    track.addEventListener("focusout", function () { isHoverPaused = false; });
+
+    // Only auto-advance while the carousel is actually visible on
+    // screen. This is the main fix for the "forced scroll down"
+    // complaint: previously autoplay kept firing (and yanking the
+    // page) even while the user had scrolled up to look at products.
+    if ("IntersectionObserver" in global) {
+      var io = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            isOffscreen = !entry.isIntersecting;
+          });
+        },
+        { threshold: 0.2 }
+      );
+      io.observe(track);
+    }
 
     if (dotsWrap) {
       dotsWrap.innerHTML = "";
@@ -347,10 +368,6 @@
       },
       { passive: true }
     );
-
-    global.addEventListener("resize", function () {
-      desktop = global.innerWidth > 960;
-    });
 
     updateDots();
     startAutoplay();
