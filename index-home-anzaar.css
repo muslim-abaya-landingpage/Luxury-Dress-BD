@@ -348,6 +348,12 @@
   flex-direction: column;
   gap: 4px;
 }
+.ah-card-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
 .ah-card-name {
   font-family: var(--ah-sans);
   font-size: 14px;
@@ -355,13 +361,16 @@
   color: var(--ah-ink);
   line-height: 1.35;
   text-decoration: none;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 .ah-card-name:hover { text-decoration: underline; }
 .ah-card-price {
+  flex: 0 0 auto;
+  white-space: nowrap;
   font-family: var(--ah-sans);
   font-size: 16px;
   font-weight: 700;
@@ -454,7 +463,8 @@
   .home-row-arrow.prev { left: 2px; }
   .home-row-arrow.next { right: 2px; }
   .home-section-title { font-size: 17px; }
-  .ah-actions { grid-template-columns: 56px 1fr; }
-  .ah-btn-cart span { display: none; }
+  .ah-card-row { gap: 6px; }
+  .ah-card-price { font-size: 14px; }
+  .ah-actions { grid-template-columns: 1fr; }
   .home-skeleton .sk-row { grid-template-columns: repeat(2, 1fr); }
 }

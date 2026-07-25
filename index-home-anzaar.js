@@ -213,13 +213,15 @@
       "' loading='lazy' decoding='async' onerror=\"this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg'\">" +
       "</a>" +
       "<div class='ah-card-body'>" +
+      "<div class='ah-card-row'>" +
       "<a class='ah-card-name' href='" +
       escapeHtml(dHref) +
       "'>" +
       escapeHtml(p.name) +
       "</a>" +
-      "<div class='ah-card-price'>" +
+      "<span class='ah-card-price'>" +
       priceHtml(p) +
+      "</span>" +
       "</div>" +
       "<div class='ah-actions'>" +
       "<button type='button' class='ah-btn ah-btn-cart' data-action='add'>" +
