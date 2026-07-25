@@ -321,19 +321,31 @@
       });
     }
 
-    var arrows = root.querySelectorAll(".home-row-arrow");
-    arrows.forEach(function (arrow) {
-      arrow.addEventListener("click", function () {
-        var body = arrow.closest(".home-section-body");
-        if (!body) return;
-        var rowEl = body.querySelector(".home-row");
-        if (!rowEl) return;
-        var step = rowEl.clientWidth * 0.8;
-        rowEl.scrollBy({
-          left: arrow.classList.contains("next") ? step : -step,
-          behavior: "smooth"
+    var bodies = root.querySelectorAll(".home-section-body");
+    bodies.forEach(function (body) {
+      var rowEl = body.querySelector(".home-row");
+      var prevArrow = body.querySelector(".home-row-arrow.prev");
+      var nextArrow = body.querySelector(".home-row-arrow.next");
+      if (!rowEl) return;
+
+      function updateArrowState() {
+        var maxScroll = rowEl.scrollWidth - rowEl.clientWidth;
+        if (prevArrow) prevArrow.disabled = rowEl.scrollLeft <= 4;
+        if (nextArrow) nextArrow.disabled = rowEl.scrollLeft >= maxScroll - 4;
+      }
+
+      if (prevArrow) {
+        prevArrow.addEventListener("click", function () {
+          rowEl.scrollBy({ left: -rowEl.clientWidth * 0.8, behavior: "smooth" });
         });
-      });
+      }
+      if (nextArrow) {
+        nextArrow.addEventListener("click", function () {
+          rowEl.scrollBy({ left: rowEl.clientWidth * 0.8, behavior: "smooth" });
+        });
+      }
+      rowEl.addEventListener("scroll", updateArrowState, { passive: true });
+      updateArrowState();
     });
   }
 
