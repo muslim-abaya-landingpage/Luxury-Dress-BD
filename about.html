@@ -20,6 +20,9 @@
   <link rel="stylesheet" href="site-header.css?v=20260603logo">
   <link rel="stylesheet" href="site-footer.css?v=20260603footen" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="site-footer.css?v=20260603footen"></noscript>
+  <link rel="stylesheet" href="cart-drawer.css?v=20260528b" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="cart-drawer.css?v=20260528b"></noscript>
+  <link rel="stylesheet" href="mobile-bottom-nav.css">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -29,7 +32,7 @@
   "logo": "https://muslimabaya.com/assets/logo-muslim-abaya.svg",
   "contactPoint": {
     "@type": "ContactPoint",
-    "telephone": "+8801971642683",
+    "telephone": "+8801970831783",
     "contactType": "customer service"
   },
   "address": {
@@ -324,7 +327,7 @@
       <h2>Contact Us</h2>
       <p><strong>Website:</strong> <a href="https://muslimabaya.com/">muslimabaya.com</a></p>
       <p><strong>Email:</strong> <a href="mailto:muslimabaya@gmail.com">muslimabaya@gmail.com</a></p>
-      <p><strong>Hotline / WhatsApp:</strong> <a href="https://wa.me/8801971642683" target="_blank" rel="noopener">+880 1971-642683</a></p>
+      <p><strong>Hotline / WhatsApp:</strong> <a href="https://wa.me/8801970831783" target="_blank" rel="noopener">+880 1970-831783</a></p>
       <p><strong>Address:</strong> 832, West Rasulpur, Dhaka-1211, Bangladesh</p>
       
       <!-- গুগল ম্যাপস (লাক্সারি ফ্রেম) -->
@@ -334,8 +337,8 @@
 
     <!-- কন্টাক্ট বাটন গ্রুপ -->
       <div class="about-actions" style="clear: both; width: 100%;">
-        <a href="category.html" class="about-btn about-btn-primary">View Collection</a>
-        <a href="https://wa.me/8801971642683" target="_blank" rel="noopener" class="about-btn about-btn-secondary">Message on WhatsApp</a>
+        <a href="/" class="about-btn about-btn-primary">View Collection</a>
+        <a href="https://wa.me/8801970831783" target="_blank" rel="noopener" class="about-btn about-btn-secondary">Message on WhatsApp</a>
       </div>
     </section>
   </main>
@@ -343,9 +346,14 @@
   <div id="site-footer-mount"></div>
 
   <!-- এই অংশটুকু একদম সঠিক, অন্যগুলো মুছে দিন -->
-  <script defer src="cart-utils.js"></script>
+  <script defer src="cart-utils.js?v=20260603cartqty"></script>
+  <script defer src="cart-toast.js?v=20260603cartqty"></script>
+  <script defer src="cart-drawer.js?v=20260603cartqty"></script>
+  <script defer src="site-header-config.js?v=20260603logo"></script>
   <script defer src="site-header.js?v=20260603logo"></script>
   <script defer src="site-api-config.js?v=20260529"></script>
+  <script defer src="site-footer-config.js?v=20260603footen"></script>
   <script defer src="site-footer.js?v=20260603footen"></script>
+  <script defer src="mobile-bottom-nav.js"></script>
 </body>
 </html>
