@@ -1907,21 +1907,41 @@ function getPriceBounds(products) {
   }
   return { min: min, max: max };
 }
+function buildProductListHtml(products) {
+  function isPrimaryName(name) {
+    var s = String(name || "").toLowerCase();
+    return (
+      s.indexOf(" - back") === -1 &&
+      s.indexOf("- back") === -1 &&
+      s.indexOf(" - side") === -1 &&
+      s.indexOf("- side") === -1
+    );
+  }
+  var seen = {};
+  var items = [];
+  products.forEach(function (p, idx) {
+    if (!p || !p.name || !isPrimaryName(p.name)) return;
+    var key = String(p.name).trim().toLowerCase();
+    if (seen[key]) return;
+    seen[key] = true;
+    items.push({ name: p.name, idx: idx });
+  });
+  if (!items.length) return "";
+  return (
+    "<nav class='shop-product-list'>" +
+    items
+      .map(function (item) {
+        return (
+          "<a href='#p-" + item.idx + "' class='sidebar-product-link' data-idx='" + item.idx + "'>" +
+          escapeHtml(item.name) +
+          "</a>"
+        );
+      })
+      .join("") +
+    "</nav>"
+  );
+}
 function buildShopSidebar(categoryKey, products) {
-  var catLinks = getCategoryNavList()
-    .map(function (c) {
-      var active = c.key === categoryKey ? " active" : "";
-      return (
-        "<a href='" +
-        escapeHtml(shopHref(c.href || "#")) +
-        "' class='sidebar-cat-link" +
-        active +
-        "'>" +
-        escapeHtml(c.label || c.key) +
-        "</a>"
-      );
-    })
-    .join("");
   var bounds = getPriceBounds(products);
   var colorOptions = getProductColorOptions(products);
   var colorChecks = colorOptions.length
@@ -1947,12 +1967,8 @@ function buildShopSidebar(categoryKey, products) {
     "<button type='button' class='shop-filter-close' id='shopFilterClose' aria-label='Close filters'>&times;</button>" +
     "</div>" +
     "<a class='sidebar-home' href='" + escapeHtml(shopHref("/")) + "'>&lsaquo; Home</a>" +
-    "<div class='sidebar-filter sidebar-filter-cats'>" +
-    "<h4>Categories</h4>" +
-    "<nav class='shop-cats' id='shopCategoryNav'>" +
-    catLinks +
-    "</nav>" +
-    "</div>" +
+    "<a class='sidebar-all-category' href='" + escapeHtml(shopHref("/")) + "'>All Category</a>" +
+    buildProductListHtml(products) +
     "<div class='sidebar-filter sidebar-filter-price'>" +
     "<h4>Price Range</h4>" +
     "<div class='price-slider-wrap'>" +
@@ -2545,6 +2561,18 @@ function bindShopCategoryControls(root, products) {
     }
     if (filterPanel) {
       filterPanel.addEventListener("click", function (ev) {
+        var productLink = ev.target.closest(".sidebar-product-link");
+        if (productLink) {
+          ev.preventDefault();
+          var idx = parseInt(productLink.getAttribute("data-idx"), 10);
+          if (!isNaN(idx) && typeof window.openProductQuickView === "function") {
+            window.openProductQuickView(idx);
+          }
+          if (window.matchMedia("(max-width: 960px)").matches) {
+            setFilterDrawer(false);
+          }
+          return;
+        }
         if (ev.target.closest(".color-filter-option, .sidebar-cat-link")) {
           if (window.matchMedia("(max-width: 960px)").matches) {
             setFilterDrawer(false);
