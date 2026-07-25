@@ -118,7 +118,7 @@
   function priceHtml(p) {
     var from = typePriceFrom(p);
     if (from) {
-      return TK + from + "<span class='from'>থেকে</span>";
+      return TK + from;
     }
     return TK + (parseInt(p && p.price, 10) || 550);
   }
