@@ -1,3 +1,12 @@
+/* ============================================================================
+   category-sidebar.css — ফাইলের মূল অংশ:
+   - সাইডবার/ফিল্টার স্টাইল          (উপর থেকে শুরু)
+   - প্রোডাক্ট গ্রিড ও কার্ড           (".product-grid", ".premium-card")
+   - ★ কার্ট/Send Message বাটন        (".card-actions-anzaar")
+   - কুইক-ভিউ পপআপ (Quick View)      (".pqv-" দিয়ে শুরু ক্লাসগুলো)
+   - রেসপনসিভ/মোবাইল অ্যাডজাস্টমেন্ট  (@media কুয়েরিগুলো, সাধারণত ফাইলের শেষে)
+   ============================================================================ */
+
 /* Prevent unstyled flash before category JS renders */
 html:not(.category-ready) #list {
   visibility: hidden;
@@ -359,6 +368,9 @@ html.category-ready #list {
   display: none;
 }
 
+/* ----------------------------------------------------------------------
+   প্রোডাক্ট গ্রিড ও কার্ড
+   ---------------------------------------------------------------------- */
 .product-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -661,12 +673,41 @@ button.img-wrap {
   box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.08);
 }
 
+/* ----------------------------------------------------------------------
+   ★ কার্ট বাটন + Send Message বাটন (আইকন-অনলি কার্ট বাটন এখানে)
+   .anzaar-btn-cart-icon = ছোট স্কয়ার কার্ট আইকন বাটন
+   .anzaar-btn-msg       = Send Message বাটন
+   ---------------------------------------------------------------------- */
 .card-actions-anzaar {
   display: flex;
   flex-direction: column;
   gap: 6px;
   width: 100%;
   margin-top: 2px;
+}
+
+.card-actions-row2 {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  width: 100%;
+}
+
+.anzaar-btn-cart-icon {
+  flex: 0 0 auto;
+  width: 44px;
+  min-width: 44px;
+  padding: 0;
+  gap: 0;
+}
+
+.anzaar-btn-cart-icon .anzaar-btn-ico {
+  margin: 0 auto;
+}
+
+.card-actions-row2 .anzaar-btn-msg {
+  flex: 1 1 auto;
+  width: auto;
 }
 
 .shop-card-qty.ma-qty-stepper {
@@ -1310,6 +1351,9 @@ body.shop-product-open > main {
   display: none !important;
 }
 
+/* ----------------------------------------------------------------------
+   কুইক-ভিউ পপআপ (Quick View) — প্রোডাক্টে ক্লিক করলে যে পপআপ খোলে
+   ---------------------------------------------------------------------- */
 .pqv-toolbar {
   display: none !important;
 }

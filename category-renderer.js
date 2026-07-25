@@ -1,3 +1,29 @@
+/* ============================================================================
+   category-renderer.js — ফাইলের মূল সেকশনগুলো (উপর থেকে নিচে সাজানো):
+
+   1. CSS LINK করা / ক্যাটাগরি কী হেল্পার              (এখান থেকে শুরু)
+   2. কার্ট স্টেট ও কার্টে প্রোডাক্ট যোগ করার লজিক        ("shopCartCtx" থেকে)
+   3. কোয়ান্টিটি স্টেপার (+/- বাটন)                     ("buildShopCardQtyStepper")
+   4. কুইক-ভিউ মডাল — গ্যালারি/HTML বিল্ডার              ("collectGalleryImages")
+   5. কুইক-ভিউ মডাল — ইভেন্ট বাইন্ডিং                    ("bindPqvInteractions")
+   6. মোবাইল স্টিকি অর্ডার বার                          ("ensureStickyOrderBarStyles")
+   7. কুইক-ভিউ প্যানেলের সম্পূর্ণ HTML                    ("buildQuickViewPanelHtml")
+   8. গ্লোবাল ক্লিক হ্যান্ডলার (কার্ট/বাই নাউ ক্লিক ধরা)   ("onGlobalShopCartClick")
+   9. পেজ বুট/ইনিশিয়ালাইজেশন শিডিউলিং                   ("getShopBootSpec")
+   10. সাইডবার ও ফিল্টার (কালার, প্রাইস, ক্যাটাগরি লিস্ট)  ("getCategoryNavList")
+   11. ★ প্রোডাক্ট কার্ডের ছবি ব্লক                       ("buildCardImageBlock")
+   12. ★ প্রোডাক্ট কার্ডের মূল HTML — কার্ট বাটন/Send
+       Message/দাম/নাম সব এখানে তৈরি হয়                  ("buildProductCard")
+   13. URL / ক্যাটাগরি কী রাউটিং হেল্পার                 ("getPageSearchQuery")
+   14. ক্যাটাগরি পেজ কন্ট্রোল বাইন্ডিং (ফিল্টার/সর্ট)      ("bindShopCategoryControls")
+   15. SPA নেভিগেশন (মেনু ক্লিকে রিলোড ছাড়া পেজ বদলানো)   ("softSwitchShopCategory")
+   16. ★ ক্যাটাগরি পেজ রেন্ডার — পেজ লোড হলে এখান থেকেই
+       সব শুরু হয়                                        ("renderCategory")
+
+   ★ চিহ্নিত সেকশনগুলোই সবচেয়ে বেশি এডিট করা লাগতে পারে (বাটনের লেখা/আইকন,
+   কার্ড লেআউট)। বাকিগুলো মূলত ভেতরের লজিক — হাত না দেওয়াই ভালো।
+   ============================================================================ */
+
 function ensureCategoryStyles() {
   var link =
     document.getElementById("category-sidebar-css") ||
@@ -166,6 +192,11 @@ function fixShopPageLinks(root) {
     }
   });
 }
+/* ----------------------------------------------------------------------
+   SECTION 2: কার্ট স্টেট ও কার্টে প্রোডাক্ট যোগ করার লজিক
+   কোন প্রোডাক্ট কার্টে আছে, কত quantity, সাইজ/টাইপ অনুযায়ী মার্জ করা —
+   এই লজিক এখানে। সাধারণত এখানে হাত না দেওয়াই নিরাপদ।
+   ---------------------------------------------------------------------- */
 var shopCartCtx = {
   root: null,
   products: [],
@@ -464,6 +495,10 @@ function setShopCardQty(root, idx, n) {
   if (val) val.textContent = String(qty);
   if (minus) minus.disabled = qty <= 1;
 }
+/* ----------------------------------------------------------------------
+   SECTION 3: কোয়ান্টিটি স্টেপার (+ / - বাটন) — প্রোডাক্ট কার্টে থাকলে
+   এই ছোট বক্সটা দেখায় যাতে quantity বাড়ানো-কমানো যায়।
+   ---------------------------------------------------------------------- */
 function buildShopCardQtyStepper(idx, qty, inCart) {
   var q = parsePqvQtyValue(qty);
   return (
@@ -716,6 +751,11 @@ function buildSizeChartTableHtml(data) {
   }
   return html;
 }
+/* ----------------------------------------------------------------------
+   SECTION 4: কুইক-ভিউ মডাল — গ্যালারি ও অন্যান্য HTML বিল্ডার
+   প্রোডাক্টে ক্লিক করলে যে পপআপ (Quick View) খোলে, তার ছবি গ্যালারি,
+   সাইজ চার্ট, রিলেটেড প্রোডাক্ট ইত্যাদির HTML এখান থেকে তৈরি হয়।
+   ---------------------------------------------------------------------- */
 function collectGalleryImages(product, allProducts) {
   if (Array.isArray(product.images) && product.images.length) {
     return product.images
@@ -992,6 +1032,11 @@ function bindPqvGalleryArrows(modal) {
     else setPqvGallerySlide(modal, i + 1);
   });
 }
+/* ----------------------------------------------------------------------
+   SECTION 5: কুইক-ভিউ মডাল — ইভেন্ট বাইন্ডিং
+   পপআপের ভেতরের বাটন/সাইজ/কালার ক্লিক করলে কী হবে, সেই ইভেন্ট লিসেনার
+   এখানে সেট হয়।
+   ---------------------------------------------------------------------- */
 function bindPqvInteractions(p, idx, categoryKey, scopeRoot) {
   var modal = scopeRoot || getActivePqvScope();
   if (!modal) return;
@@ -1189,6 +1234,11 @@ function ensureQuickViewModal() {
     });
   }
 }
+/* ----------------------------------------------------------------------
+   SECTION 6: মোবাইল স্টিকি অর্ডার বার
+   কুইক-ভিউ পপআপে স্ক্রল করলে নিচে ফিক্সড "Add to Cart / Buy Now" বার
+   দেখানোর জন্য এই ফাংশনগুলো।
+   ---------------------------------------------------------------------- */
 function ensureStickyOrderBarStyles() {
   if (document.getElementById("sticky-order-bar-style")) return;
   var style = document.createElement("style");
@@ -1390,6 +1440,11 @@ function bindPqvWholesale(modal) {
   });
   updatePqvWholesaleTotal(modal);
 }
+/* ----------------------------------------------------------------------
+   SECTION 7: কুইক-ভিউ প্যানেলের সম্পূর্ণ HTML
+   প্রোডাক্ট পপআপের পুরো কাঠামো (ছবি, দাম, সাইজ, বাটন) এখানে জোড়া লাগানো
+   হয়ে একটা বড় HTML স্ট্রিং তৈরি হয়।
+   ---------------------------------------------------------------------- */
 function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
   var defaultType = getDefaultProductType(p, categoryKey);
   var productPrice = resolveProductPrice(p, categoryKey, defaultType);
@@ -1622,6 +1677,11 @@ function openProductQuickView(idx) {
   fireShopViewContent(products[idx], categoryKey);
   updatePqvGalleryNav(root);
 }
+/* ----------------------------------------------------------------------
+   SECTION 8: গ্লোবাল ক্লিক হ্যান্ডলার
+   পেজের যেকোনো জায়গায় কার্ট বাটন/বাই নাউ ক্লিক হলে সেটা এখানে ধরা হয়ে
+   সঠিক প্রোডাক্টের সাথে ম্যাচ করানো হয়।
+   ---------------------------------------------------------------------- */
 function onGlobalShopCartClick(ev) {
   if (ev.type === "click" && ev.isTrusted === false) return;
   if (ev.target.closest("[data-pqv-close]")) {
@@ -1784,6 +1844,10 @@ window.openProductQuickView = openProductQuickView;
 window.closeProductQuickView = closeProductQuickView;
 window.syncShopCartBadge = syncShopCartBadge;
 window.resetShopCartContext = resetShopCartContext;
+/* ----------------------------------------------------------------------
+   SECTION 9: পেজ বুট / ইনিশিয়ালাইজেশন শিডিউলিং
+   পেজ প্রথমবার লোড হওয়ার সময় কোন ক্যাটাগরি রেন্ডার হবে তা ঠিক করে।
+   ---------------------------------------------------------------------- */
 function getShopBootSpec() {
   var body = document.body;
   if (!body) return null;
@@ -1844,6 +1908,11 @@ window.addEventListener("pageshow", function () {
     scheduleShopCategoryBoot(true);
   }
 });
+/* ----------------------------------------------------------------------
+   SECTION 10: সাইডবার ও ফিল্টার
+   বাম পাশের ক্যাটাগরি লিস্ট, প্রাইস রেঞ্জ স্লাইডার, কালার ফিল্টার —
+   সব এই সেকশনের ফাংশনগুলো দিয়ে তৈরি হয়।
+   ---------------------------------------------------------------------- */
 function getCategoryNavList() {
   if (window.CATEGORY_NAV && window.CATEGORY_NAV.length) {
     return window.CATEGORY_NAV;
@@ -2012,6 +2081,10 @@ function buildShopSidebar(categoryKey, products) {
   }
   return "";
 }
+/* ----------------------------------------------------------------------
+   SECTION 11 ★: প্রোডাক্ট কার্ডের ছবি ব্লক
+   কার্ডের উপরের ছবি (হোভার করলে দ্বিতীয় ছবি দেখানো, sale ব্যাজ ইত্যাদি)।
+   ---------------------------------------------------------------------- */
 function buildCardImageBlock(p, idx, categoryKey, allProducts) {
   var main = resolveCardImageSrc(p);
   var hover = resolveCardHoverImage(p, allProducts);
@@ -2205,6 +2278,19 @@ function buildDetailSpecsBlock(p, fabricText, sizeOptions, idx, categoryKey) {
     sizeBlock
   );
 }
+/* ============================================================================
+   SECTION 12 ★★: প্রোডাক্ট কার্ডের মূল HTML (buildProductCard)
+   ক্যাটাগরি পেজে প্রতিটা প্রোডাক্টের কার্ড (ছবি, নাম, দাম, সাইজ, কার্ট
+   বাটন, Send Message বাটন) এই ফাংশন থেকেই তৈরি হয়।
+
+   এখানে দুইটা মোড আছে:
+   - detailMode = true  → বড় ডিটেইল কার্ড (Add to Cart লেখা সহ, Order Now,
+     Message Us — এই তিনটা বাটন)
+   - detailMode = false → সাধারণ গ্রিড কার্ড (নিচে "কার্ট বাটন" কমেন্ট দ্রষ্টব্য)
+
+   👉 কার্ট আইকন-বাটন ও "Send Message" বাটনের HTML নিচে খুঁজে নিন —
+      কমেন্ট "কার্ট বাটন + Send Message এখানে" লেখা জায়গাটায়।
+   ============================================================================ */
 function buildProductCard(p, idx, waLink, detailMode, categoryKey, allProducts) {
   var defaultType = getDefaultProductType(p, categoryKey);
   var productPrice = resolveProductPrice(p, categoryKey, defaultType);
@@ -2319,22 +2405,28 @@ encodeURIComponent("I want to order " + p.name) +
     "' aria-hidden='true' tabindex='-1'>" +
     sizeOptions +
     "</select>" +
+    // 👉 কার্ট বাটন + Send Message এখানে (গ্রিড কার্ড / non-detail মোড)
     '<div class="card-actions-anzaar">' +
     buildShopCardQtyStepper(idx, cardQty, inCart) +
-    '<button type="button" class="anzaar-btn anzaar-btn-cart' +
+    '<div class="card-actions-row2">' +
+    '<button type="button" class="anzaar-btn anzaar-btn-cart anzaar-btn-cart-icon' +
     (inCart ? " is-active" : "") +
     '" data-product-idx="' +
     idx +
-    '" data-action="add"><span class="anzaar-btn-ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M6 6L5 3H2"/></svg></span><span lang="en">Add to Cart</span></button>' +
+    '" data-action="add" aria-label="Add to Cart"><span class="anzaar-btn-ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M6 6L5 3H2"/></svg></span></button>' +
     "<a href='" +
     waLink +
     "?text=" +
    encodeURIComponent("I want to order " + p.name) +
 "' target='_blank' rel='noopener' class='anzaar-btn anzaar-btn-msg' onclick='event.stopPropagation()'><span lang='en'>Send Message</span></a>" +
-"</div></div></article>"
+"</div></div></div></article>"
 );
 
 }
+/* ----------------------------------------------------------------------
+   SECTION 13: URL / ক্যাটাগরি কী রাউটিং হেল্পার
+   URL থেকে সার্চ কোয়েরি, ক্যাটাগরি কী বের করা, লিংক ঠিক করা ইত্যাদি।
+   ---------------------------------------------------------------------- */
 function getPageSearchQuery() {
   try {
     return (new URLSearchParams(window.location.search).get("q") || "").trim();
@@ -2439,6 +2531,11 @@ function collectCategoryViewData(categoryKey) {
     detailMode: false
   };
 }
+/* ----------------------------------------------------------------------
+   SECTION 14: ক্যাটাগরি পেজ কন্ট্রোল বাইন্ডিং
+   ফিল্টার প্যানেল খোলা/বন্ধ, সর্ট ড্রপডাউন, প্রাইস স্লাইডার, কালার
+   চেকবক্স — এসবের ইভেন্ট এখানে বাইন্ড হয়।
+   ---------------------------------------------------------------------- */
 function bindShopCategoryControls(root, products) {
   if (!root || !products || !products.length) {
     syncShopCartBadge();
@@ -2611,6 +2708,11 @@ function bindShopCategoryControls(root, products) {
     });
   }
 }
+/* ----------------------------------------------------------------------
+   SECTION 15: SPA নেভিগেশন
+   মেনুতে ক্যাটাগরিতে ক্লিক করলে পুরো পেজ রিলোড না করে শুধু কন্টেন্ট
+   বদলে দেওয়ার লজিক (URL-ও আপডেট হয়, browser back/forward কাজ করে)।
+   ---------------------------------------------------------------------- */
 function softSwitchShopCategory(categoryKey) {
   ensureCategoryStyles();
   var root = document.getElementById("list");
@@ -2732,6 +2834,11 @@ function initShopCategorySpaNav() {
     history.replaceState({ maShopCategory: bootKey }, "", window.location.href);
   }
 }
+/* ============================================================================
+   SECTION 16 ★: ক্যাটাগরি পেজ রেন্ডার
+   পেজ লোড হলে এখান থেকেই সব শুরু হয়: সাইডবার + কার্ড গ্রিড বসানো,
+   breadcrumb বসানো, ইভেন্ট বাইন্ড করা।
+   ============================================================================ */
 function renderAllCategories() {
   var root = document.getElementById("list");
   if (!root) return;
