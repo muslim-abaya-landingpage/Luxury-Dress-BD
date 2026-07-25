@@ -2376,7 +2376,6 @@ encodeURIComponent("I want to order " + p.name) +
 );
 }
   var cartQty = getShopCartQtyForProduct(p);
-  var cardQty = cartQty > 0 ? cartQty : 1;
   var inCart = cartQty > 0;
   return (
     '<article class="card premium-card' +
@@ -2406,10 +2405,18 @@ encodeURIComponent("I want to order " + p.name) +
     sizeOptions +
     "</select>" +
     // 👉 কার্ট বাটন + Send Message এখানে (গ্রিড কার্ড / non-detail মোড)
+    // ⚠️ .anzaar-btn-cart ও .anzaar-btn-msg কে .card-actions-anzaar এর
+    // *সরাসরি সন্তান* (direct child) হতেই হবে — shop-page.css এই দুটো
+    // ক্লাসকে সরাসরি CSS grid-area ("cart"/"msg") তে বসায়। মাঝে কোনো
+    // wrapper <div> দিলে গ্রিড লেআউট ভেঙে যাবে (আগে একবার এই বাগ হয়েছিল)।
+    // 📝 এখানে কোয়ান্টিটি স্টেপার (+/-) বসানো হয় না ইচ্ছাকৃতভাবে — গ্রিড
+    // কার্ডে সেটা shop-page.css দিয়ে সবসময় display:none করা থাকে (শুধু
+    // quick-view/ডিটেইল পেজে দেখানো হয়)। আগে এখানেও stepper-এর HTML
+    // বসানো হতো, যার ফলে পেজ রিফ্রেশ করলে CSS লোড হওয়ার আগের এক ঝলকের
+    // জন্য stepper দেখা যেত, তারপর CSS লোড হলে হঠাৎ অদৃশ্য হয়ে যেত (এটাই
+    // "রিফ্রেশ দিলে পরিমাণ দেখা যায় আবার নাই হয়ে যায়" সমস্যার কারণ ছিল)।
     '<div class="card-actions-anzaar">' +
-    buildShopCardQtyStepper(idx, cardQty, inCart) +
-    '<div class="card-actions-row2">' +
-    '<button type="button" class="anzaar-btn anzaar-btn-cart anzaar-btn-cart-icon' +
+    '<button type="button" class="anzaar-btn anzaar-btn-cart' +
     (inCart ? " is-active" : "") +
     '" data-product-idx="' +
     idx +
@@ -2419,7 +2426,7 @@ encodeURIComponent("I want to order " + p.name) +
     "?text=" +
    encodeURIComponent("I want to order " + p.name) +
 "' target='_blank' rel='noopener' class='anzaar-btn anzaar-btn-msg' onclick='event.stopPropagation()'><span lang='en'>Send Message</span></a>" +
-"</div></div></div></article>"
+"</div></div></article>"
 );
 
 }

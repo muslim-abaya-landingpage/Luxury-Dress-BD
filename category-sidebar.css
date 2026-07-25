@@ -2,7 +2,8 @@
    category-sidebar.css — ফাইলের মূল অংশ:
    - সাইডবার/ফিল্টার স্টাইল          (উপর থেকে শুরু)
    - প্রোডাক্ট গ্রিড ও কার্ড           (".product-grid", ".premium-card")
-   - ★ কার্ট/Send Message বাটন        (".card-actions-anzaar")
+   - কার্ট/Send Message বাটন (fallback) (".card-actions-anzaar" —
+     আসল লেআউট/সাইজ shop-page.css তে, ওখানেই এডিট করুন)
    - কুইক-ভিউ পপআপ (Quick View)      (".pqv-" দিয়ে শুরু ক্লাসগুলো)
    - রেসপনসিভ/মোবাইল অ্যাডজাস্টমেন্ট  (@media কুয়েরিগুলো, সাধারণত ফাইলের শেষে)
    ============================================================================ */
@@ -674,9 +675,13 @@ button.img-wrap {
 }
 
 /* ----------------------------------------------------------------------
-   ★ কার্ট বাটন + Send Message বাটন (আইকন-অনলি কার্ট বাটন এখানে)
-   .anzaar-btn-cart-icon = ছোট স্কয়ার কার্ট আইকন বাটন
-   .anzaar-btn-msg       = Send Message বাটন
+   ★ কার্ট বাটন + Send Message বাটন — লেআউট/সাইজ shop-page.css তে!
+   .card-actions-anzaar এর আসল লেআউট (গ্রিড কলাম, বাটনের প্রস্থ, রং) এখানে
+   না, shop-page.css ফাইলে ঠিক হয় ("body.shop-page .card-actions-anzaar")
+   কারণ ওই সিলেক্টরটা বেশি specific বলে সবসময় জিতে যায়। এখানে শুধু একটা
+   fallback/base রাখা আছে (shop-page.css লোড না হলে)। কার্ট বাটন ছোট/বড়
+   করতে বা Send Message-এর প্রস্থ পাল্টাতে চাইলে shop-page.css-এর "ORDER
+   ACTIONS" সেকশনে যান, এখানে না।
    ---------------------------------------------------------------------- */
 .card-actions-anzaar {
   display: flex;
@@ -684,30 +689,6 @@ button.img-wrap {
   gap: 6px;
   width: 100%;
   margin-top: 2px;
-}
-
-.card-actions-row2 {
-  display: flex !important;
-  align-items: stretch;
-  gap: 6px;
-  width: 100%;
-}
-
-.anzaar-btn-cart-icon {
-  flex: 0 0 auto !important;
-  width: 44px !important;
-  min-width: 44px;
-  padding: 0;
-  gap: 0;
-}
-
-.anzaar-btn-cart-icon .anzaar-btn-ico {
-  margin: 0 auto;
-}
-
-.card-actions-row2 .anzaar-btn-msg {
-  flex: 1 1 auto !important;
-  width: auto !important;
 }
 
 .shop-card-qty.ma-qty-stepper {
