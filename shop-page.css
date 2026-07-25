@@ -247,14 +247,7 @@ body.shop-page .anzaar-btn-cart {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 5px;
-  padding: 10px 0;
-  border: none;
-  background: #e6e7eb;
-  color: #545454;
-  font-family: "Inter", "Hind Siliguri", system-ui, sans-serif;
-  font-weight: 700;
-  font-size: 12.5px;
+  border-radius: 0;
   letter-spacing: .01em;
   white-space: nowrap;
   transition: background .15s ease;
@@ -281,14 +274,7 @@ body.shop-page .anzaar-btn-msg {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 5px;
-  padding: 10px 0;
-  border: none;
-  background: #e6e7eb;
-  color: #545454;
-  font-family: "Inter", "Hind Siliguri", system-ui, sans-serif;
-  font-weight: 500;
-  font-size: 12.5px;
+  border-radius: 0;
   letter-spacing: .01em;
   transition: background .15s ease, color .15s ease;
 }
@@ -310,10 +296,7 @@ body.shop-page .anzaar-btn-buy:active {
 body.shop-page .anzaar-btn-buy {
   position: relative;
   z-index: 1;
-  border-radius: 6px;
-  padding: 13px 0;
-  border: none;
-  background: #111;
+  border-radius: 0;
   color: #fff;
   font-weight: 700;
   transition: background .15s ease;
@@ -328,7 +311,7 @@ body.shop-page .card-actions-anzaar .ma-qty-stepper {
   z-index: 1;
   background: #fff !important;
   border: 1px solid #e0e0e0 !important;
-  border-radius: 6px !important;
+  border-radius: 0 !important;
   overflow: hidden;
 }
 body.shop-page .card-actions-anzaar .ma-qty-stepper__value,
