@@ -202,6 +202,14 @@ body.shop-page #site-footer-mount {
     margin-left: 0 !important;
     margin-right: 0 !important;
   }
+
+  body.shop-page .card-actions-anzaar {
+    grid-template-columns: 56px 1fr;
+  }
+
+  body.shop-page .anzaar-btn-cart > span[lang="en"] {
+    display: none;
+  }
 }
 
 body.shop-page .shop-breadcrumb {

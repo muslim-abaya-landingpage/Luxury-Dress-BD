@@ -454,6 +454,7 @@
   .home-row-arrow.prev { left: 2px; }
   .home-row-arrow.next { right: 2px; }
   .home-section-title { font-size: 17px; }
-  .ah-actions { grid-template-columns: 1fr; }
+  .ah-actions { grid-template-columns: 56px 1fr; }
+  .ah-btn-cart span { display: none; }
   .home-skeleton .sk-row { grid-template-columns: repeat(2, 1fr); }
 }
