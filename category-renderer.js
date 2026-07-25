@@ -646,9 +646,7 @@ function formatCardPriceText(p, categoryKey) {
     return resolveProductPrice(p, categoryKey, t);
   });
   var min = Math.min.apply(null, prices);
-  var max = Math.max.apply(null, prices);
-  if (min === max) return "\u09F3" + min;
-  return "\u09F3" + min + " – " + max;
+  return "\u09F3" + min;
 }
 function updatePqvPriceDisplay(modal, p, categoryKey, typeLabel) {
   if (!modal || !p) return;
@@ -2846,7 +2844,7 @@ return;
     "<section class='shop-main'>" +
     "<div class='shop-top'><h2 class='shop-title'>" +
     escapeHtml(title) +
-    "</h2><span class='shop-count' id='shopCount'>" +
+    "</h2><span class='shop-count' id='shopCount' hidden>" +
     products.length +
    " items</span></div>" +
 "<div class='product-grid" + (detailMode ? " product-grid-detail" : "") + "' id='productGrid'>" +
