@@ -171,33 +171,52 @@
 /* ---------- Category chip nav ---------- */
 .home-catnav {
   max-width: var(--ah-max);
-  margin: 8px auto 4px;
-  padding: 6px 16px 2px;
+  margin: 14px auto 6px;
+  padding: 0 16px;
+}
+.home-catnav-inner {
   display: flex;
-  gap: 10px;
+  align-items: center;
+  gap: 24px;
+  border: 1px solid var(--ah-line);
+  border-radius: 8px;
+  padding: 14px 20px;
   overflow-x: auto;
   scrollbar-width: none;
+  white-space: nowrap;
 }
-.home-catnav::-webkit-scrollbar { display: none; }
-.home-catnav a {
+.home-catnav-inner::-webkit-scrollbar { display: none; }
+.home-catnav-label {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--ah-sans);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ah-ink);
+  padding-right: 20px;
+  border-right: 1px solid var(--ah-line);
+}
+.home-catnav-label svg { width: 9px; height: 9px; flex: 0 0 auto; }
+.home-catnav-inner a {
   flex: 0 0 auto;
   font-family: var(--ah-sans);
   font-size: 13px;
   font-weight: 500;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
-  color: var(--ah-ink);
+  color: #333;
   text-decoration: none;
-  padding: 8px 16px;
-  border: 1px solid var(--ah-line);
-  border-radius: 999px;
   white-space: nowrap;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  transition: color 0.15s ease;
 }
-.home-catnav a:hover {
-  background: var(--ah-accent);
-  color: #fff;
-  border-color: var(--ah-accent);
+.home-catnav-inner a:hover {
+  color: var(--ah-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 /* ---------- Section ---------- */
@@ -283,10 +302,6 @@
   background: #fff;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.24);
   transform: translateY(-50%) scale(1.05);
-}
-.home-row-arrow:disabled {
-  opacity: 0;
-  pointer-events: none;
 }
 
 /* ---------- Product card ---------- */
@@ -429,6 +444,9 @@
   .home-row-arrow { width: 36px; height: 36px; font-size: 17px; }
 }
 @media (max-width: 560px) {
+  .home-catnav-inner { padding: 11px 14px; gap: 16px; }
+  .home-catnav-label { font-size: 12px; padding-right: 14px; }
+  .home-catnav-inner a { font-size: 12px; }
   .home-hero-track { aspect-ratio: 4 / 5; border-radius: 10px; }
   .home-hero-slide img { object-position: center 18%; }
   .home-row { grid-auto-columns: calc((100% - 16px) / 2); gap: 16px; }

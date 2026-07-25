@@ -328,12 +328,6 @@
       var nextArrow = body.querySelector(".home-row-arrow.next");
       if (!rowEl) return;
 
-      function updateArrowState() {
-        var maxScroll = rowEl.scrollWidth - rowEl.clientWidth;
-        if (prevArrow) prevArrow.disabled = rowEl.scrollLeft <= 4;
-        if (nextArrow) nextArrow.disabled = rowEl.scrollLeft >= maxScroll - 4;
-      }
-
       if (prevArrow) {
         prevArrow.addEventListener("click", function () {
           rowEl.scrollBy({ left: -rowEl.clientWidth * 0.8, behavior: "smooth" });
@@ -344,8 +338,6 @@
           rowEl.scrollBy({ left: rowEl.clientWidth * 0.8, behavior: "smooth" });
         });
       }
-      rowEl.addEventListener("scroll", updateArrowState, { passive: true });
-      updateArrowState();
     });
   }
 
@@ -355,7 +347,7 @@
     if (!nav) return;
     var secs = activeSections();
     if (!secs.length) return;
-    nav.innerHTML = secs
+    var links = secs
       .map(function (s) {
         return (
           "<a href='" +
@@ -366,6 +358,14 @@
         );
       })
       .join("");
+    nav.innerHTML =
+      "<div class='home-catnav-inner'>" +
+      "<span class='home-catnav-label'>Women" +
+      "<svg viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg' aria-hidden='true'>" +
+      "<path d='M1 1l4 4 4-4' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/>" +
+      "</svg></span>" +
+      links +
+      "</div>";
   }
 
   /* ---------------- Hero slider ---------------- */
