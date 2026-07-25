@@ -2,7 +2,7 @@
  * Muslim Abaya — Premium Pro client reviews (real Messenger / WhatsApp screenshots).
  */
 (function (global) {
-  var VERSION = "20260726rev5";
+  var VERSION = "20260726rev6";
   var SKIP_PATH =
     /^\/(checkout|signin|signup|thank-you|success|privacy|terms|refund)(\/|$)/i;
 
