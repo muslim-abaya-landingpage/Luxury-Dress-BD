@@ -19,6 +19,9 @@
     <link rel="stylesheet" href="site-header.css?v=20260603logo">
     <link rel="stylesheet" href="site-footer.css?v=20260603footen" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="site-footer.css?v=20260603footen"></noscript>
+    <link rel="stylesheet" href="cart-drawer.css?v=20260528b" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="cart-drawer.css?v=20260528b"></noscript>
+    <link rel="stylesheet" href="mobile-bottom-nav.css">
     
     <style>
         /* --- মেইন থিমের সাথে ১০০% মিলিয়ে গ্লোবাল রিসেট --- */
@@ -283,8 +286,14 @@
     </main>
 
     <div id="site-footer-mount"></div>
+    <script src="cart-utils.js?v=20260603cartqty"></script>
+    <script src="cart-toast.js?v=20260603cartqty"></script>
+    <script src="cart-drawer.js?v=20260603cartqty"></script>
+    <script defer src="site-header-config.js?v=20260603logo"></script>
     <script defer src="site-header.js?v=20260603logo"></script>
     <script src="site-api-config.js?v=20260529"></script>
+    <script defer src="site-footer-config.js?v=20260603footen"></script>
     <script src="site-footer.js?v=20260603footen"></script>
+    <script defer src="mobile-bottom-nav.js"></script>
 </body>
 </html>
