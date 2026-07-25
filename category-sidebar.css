@@ -687,15 +687,15 @@ button.img-wrap {
 }
 
 .card-actions-row2 {
-  display: flex;
+  display: flex !important;
   align-items: stretch;
   gap: 6px;
   width: 100%;
 }
 
 .anzaar-btn-cart-icon {
-  flex: 0 0 auto;
-  width: 44px;
+  flex: 0 0 auto !important;
+  width: 44px !important;
   min-width: 44px;
   padding: 0;
   gap: 0;
@@ -706,8 +706,8 @@ button.img-wrap {
 }
 
 .card-actions-row2 .anzaar-btn-msg {
-  flex: 1 1 auto;
-  width: auto;
+  flex: 1 1 auto !important;
+  width: auto !important;
 }
 
 .shop-card-qty.ma-qty-stepper {
