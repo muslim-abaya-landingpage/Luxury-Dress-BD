@@ -2,7 +2,7 @@
  * Muslim Abaya — Premium Pro client reviews (real Messenger / WhatsApp screenshots).
  */
 (function (global) {
-  var VERSION = "20260531rev2";
+  var VERSION = "20260726rev4";
   var SKIP_PATH =
     /^\/(checkout|signin|signup|thank-you|success|privacy|terms|refund)(\/|$)/i;
 
@@ -97,20 +97,8 @@
   }
 
   function reviewCard(r) {
-    var alt = esc(r.name) + " — real " + esc(r.platform) + " review for Muslim Abaya";
     return (
       '<article class="ma-review-shot-card">' +
-      '<div class="ma-review-shot-frame">' +
-      '<div class="ma-review-shot-chrome">' +
-      '<span class="ma-review-shot-dot"></span><span class="ma-review-shot-dot"></span><span class="ma-review-shot-dot"></span>' +
-      '<span class="ma-review-shot-label">Real Client Chat</span></div>' +
-      '<div class="ma-review-shot-img-wrap">' +
-      '<img src="' +
-      esc(r.image) +
-      '" alt="' +
-      alt +
-      '" width="360" height="640" loading="lazy" decoding="async" class="ma-review-shot-img">' +
-      "</div></div>" +
       '<div class="ma-review-shot-body">' +
       '<div class="ma-review-top">' +
       '<div class="ma-review-avatar" aria-hidden="true">' +
@@ -243,9 +231,17 @@
     var nextBtn = document.getElementById("maReviewsNext");
     var index = 0;
     var desktop = global.innerWidth > 960;
+    var AUTOPLAY_MS = 3200;
+    var autoplayTimer = null;
+    var isPaused = false;
+    var resumeTimer = null;
+
+    function wrap(i) {
+      return ((i % cards.length) + cards.length) % cards.length;
+    }
 
     function scrollTo(i) {
-      index = Math.max(0, Math.min(cards.length - 1, i));
+      index = wrap(i);
       var card = cards[index];
       if (!card) return;
       if (desktop) {
@@ -263,9 +259,41 @@
       dots.forEach(function (dot, i) {
         dot.classList.toggle("is-active", i === index);
       });
-      if (prevBtn) prevBtn.disabled = index <= 0;
-      if (nextBtn) nextBtn.disabled = index >= cards.length - 1;
+      // Infinite loop — arrows and autoplay always stay active.
+      if (prevBtn) prevBtn.disabled = false;
+      if (nextBtn) nextBtn.disabled = false;
     }
+
+    function startAutoplay() {
+      stopAutoplay();
+      if (cards.length < 2) return;
+      autoplayTimer = setInterval(function () {
+        if (isPaused) return;
+        scrollTo(index + 1); // right-to-left: next card slides in from the right
+      }, AUTOPLAY_MS);
+    }
+
+    function stopAutoplay() {
+      if (autoplayTimer) {
+        clearInterval(autoplayTimer);
+        autoplayTimer = null;
+      }
+    }
+
+    function pauseThenResume() {
+      isPaused = true;
+      clearTimeout(resumeTimer);
+      resumeTimer = setTimeout(function () {
+        isPaused = false;
+      }, AUTOPLAY_MS);
+    }
+
+    track.addEventListener("mouseenter", function () { isPaused = true; });
+    track.addEventListener("mouseleave", function () { isPaused = false; });
+    track.addEventListener("touchstart", function () { isPaused = true; }, { passive: true });
+    track.addEventListener("touchend", pauseThenResume, { passive: true });
+    track.addEventListener("focusin", function () { isPaused = true; });
+    track.addEventListener("focusout", function () { isPaused = false; });
 
     if (dotsWrap) {
       dotsWrap.innerHTML = "";
@@ -283,8 +311,18 @@
       }
     }
 
-    if (prevBtn) prevBtn.addEventListener("click", function () { scrollTo(index - 1); });
-    if (nextBtn) nextBtn.addEventListener("click", function () { scrollTo(index + 1); });
+    if (prevBtn) {
+      prevBtn.addEventListener("click", function () {
+        scrollTo(index - 1);
+        pauseThenResume();
+      });
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener("click", function () {
+        scrollTo(index + 1);
+        pauseThenResume();
+      });
+    }
 
     var scrollTimer;
     track.addEventListener(
@@ -313,6 +351,9 @@
     global.addEventListener("resize", function () {
       desktop = global.innerWidth > 960;
     });
+
+    updateDots();
+    startAutoplay();
   }
 
   function ensureCss() {
