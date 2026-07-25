@@ -26,15 +26,17 @@
   <!-- Fonts & Stylesheets -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="site-header.css?v=20260603logo">
-  <link rel="stylesheet" href="site-footer.css?v=20260603footer" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="site-footer.css?v=20260603footer"></noscript>
+  <link rel="stylesheet" href="site-footer.css?v=20260603footen" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="site-footer.css?v=20260603footen"></noscript>
+  <link rel="stylesheet" href="cart-drawer.css?v=20260528b" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="cart-drawer.css?v=20260528b"></noscript>
 
   <style>
     :root {
-      --primary-color: #1e3a5f;
-      --text-main: #111827;
-      --text-muted: #6b7280;
-      --border-color: #e5e7eb;
+      --primary-color: #111111;
+      --text-main: #111111;
+      --text-muted: #6b6b6b;
+      --border-color: #ececec;
       --bg-card: #ffffff;
     }
 
@@ -105,7 +107,7 @@
 
     .help-card:hover {
       border-color: #cbd5e1;
-      box-shadow: 0 4px 20px rgba(30, 58, 95, 0.06);
+      box-shadow: 0 4px 20px rgba(17, 17, 17, 0.06);
     }
 
     /* Accordion Trigger Button */
@@ -129,8 +131,8 @@
     .icon-chevron {
       width: 10px;
       height: 10px;
-      border-bottom: 2px solid #9ca3af;
-      border-right: 2px solid #9ca3af;
+      border-bottom: 2px solid #9a9a9a;
+      border-right: 2px solid #9a9a9a;
       transform: rotate(-45deg); /* Points Right by default */
       transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s;
       flex-shrink: 0;
@@ -144,7 +146,7 @@
     /* Active State (When card is open) */
     .help-card.active {
       border-color: var(--primary-color);
-      box-shadow: 0 4px 20px rgba(30, 58, 95, 0.04);
+      box-shadow: 0 4px 20px rgba(17, 17, 17, 0.04);
     }
 
     .help-card.active .icon-chevron {
@@ -161,7 +163,7 @@
 
     .faq-content-inner {
       padding: 0 24px 24px;
-      color: #374151;
+      color: #3d3d3d;
       line-height: 1.75;
       font-size: 14.5px;
       border-top: 1px solid transparent;
@@ -169,7 +171,7 @@
 
     /* Smooth border fade-in inside active card */
     .help-card.active .faq-content-inner {
-      border-top-color: #f1f5f9;
+      border-top-color: #f5f5f5;
     }
 
     .faq-content-inner p {
@@ -397,10 +399,14 @@
   });
 </script>
 
-<script src="cart-utils.js"></script>
+<script src="cart-utils.js?v=20260603cartqty"></script>
+<script src="cart-toast.js?v=20260603cartqty"></script>
+<script src="cart-drawer.js?v=20260603cartqty"></script>
+<script defer src="site-header-config.js?v=20260603logo"></script>
 <script defer src="site-header.js?v=20260603logo"></script>
 <script src="site-api-config.js?v=20260529"></script>
-<script src="site-footer.js?v=20260603footer"></script>
+<script defer src="site-footer-config.js?v=20260603footen"></script>
+<script src="site-footer.js?v=20260603footen"></script>
 <script defer src="mobile-bottom-nav.js"></script>  
 </body>
   </html>
