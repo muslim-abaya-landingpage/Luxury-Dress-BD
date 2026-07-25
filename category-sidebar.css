@@ -513,7 +513,7 @@ button.img-wrap {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  padding: 10px 8px 10px;
+  padding: 10px 8px 16px;
   background: #fff;
   border-top: none;
 }
@@ -1244,7 +1244,7 @@ button.img-wrap {
   }
 
   .premium-card .card-foot {
-    padding: 10px 8px 8px;
+    padding: 10px 8px 14px;
   }
 
   .premium-card .card-meta {
