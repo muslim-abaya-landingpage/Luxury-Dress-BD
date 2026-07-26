@@ -93,6 +93,8 @@
     hint('preconnect', 'https://fonts.gstatic.com', true);
     hint('dns-prefetch', 'https://www.googletagmanager.com');
     hint('dns-prefetch', 'https://www.youtube.com');
+    hint('dns-prefetch', 'https://www.youtube-nocookie.com');
+    hint('preconnect', 'https://i.ytimg.com');
     hint('dns-prefetch', 'https://cdnjs.cloudflare.com');
   })();
 

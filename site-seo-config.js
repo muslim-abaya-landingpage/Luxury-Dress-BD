@@ -85,6 +85,11 @@ window.SITE_SEO = {
     hijab: {
       title: "Hijab Collection | Muslim Abaya Bangladesh",
       description: "Hijab collection — Muslim Abaya Bangladesh. Cash on delivery."
+    },
+    panjabi: {
+      title: "Premium White Cotton Panjabi for Men | Muslim Abaya Bangladesh",
+      description:
+        "Buy Premium White Cotton Panjabi for Men in Bangladesh. Made from premium cotton garments fabric with full sleeves and Chinese snap buttons. Fast nationwide delivery and Cash on Delivery available."
     }
   }
 };

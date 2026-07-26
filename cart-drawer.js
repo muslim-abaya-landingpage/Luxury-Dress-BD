@@ -155,20 +155,14 @@ function findProductByImage(imgUrl) {
     return null;
 }
 
-if (typeof window !== 'undefined') {
-    window.addToCart = function (productIdOrImgUrl) {
-        if (typeof productIdOrImgUrl === 'string' && (productIdOrImgUrl.includes('/') || productIdOrImgUrl.includes('.'))) {
-            const product = findProductByImage(productIdOrImgUrl);
-            if (product) {
-                window.addToCartFromCard(product.id);
-            } else {
-                console.error("Product not found for image URL:", productIdOrImgUrl);
-            }
-        } else {
-            window.addToCartFromCard(productIdOrImgUrl);
-        }
-    };
-}
+// Note: a window.addToCart(productIdOrImgUrl) wrapper used to live here and
+// called window.addToCartFromCard(...) — a function that only ever existed
+// in index-home-app.js, which is not loaded anywhere on the site. Nothing
+// currently calls window.addToCart, so it was removed rather than fixed to
+// call a real handler; each page (home, category, product) has its own
+// local add-to-cart implementation already. If you need a single global
+// entry point again, wire it to window.addOrMergeStoreCartItem (from
+// cart-utils.js) instead of a per-page function.
 
 function ensureCartDrawerHtml() {
   if (document.getElementById('cart-drawer')) return;
