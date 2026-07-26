@@ -2,7 +2,7 @@
  * Muslim Abaya — Premium Pro client reviews (real Messenger / WhatsApp screenshots).
  */
 (function (global) {
-  var VERSION = "20260726rev6";
+  var VERSION = "20260726rev7";
   var SKIP_PATH =
     /^\/(checkout|signin|signup|thank-you|success|privacy|terms|refund)(\/|$)/i;
 
@@ -50,16 +50,16 @@
   ];
 
   var STAR =
-    '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>';
+    '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>';
 
   var CHECK =
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>';
+    '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>';
 
   var ICON_MESSENGER =
-    '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.906 1.447 5.492 3.708 7.17V22l3.405-1.87c.907.25 1.867.385 2.887.385 5.523 0 10-4.145 10-9.243S17.523 2 12 2zm1.043 12.414-2.564-2.736-5.012 2.736L10.9 8.586l2.628 2.736 4.957-2.736-6.442 6.828z"/></svg>';
+    '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.906 1.447 5.492 3.708 7.17V22l3.405-1.87c.907.25 1.867.385 2.887.385 5.523 0 10-4.145 10-9.243S17.523 2 12 2zm1.043 12.414-2.564-2.736-5.012 2.736L10.9 8.586l2.628 2.736 4.957-2.736-6.442 6.828z"/></svg>';
 
   var ICON_WHATSAPP =
-    '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.004 2a9.99 9.99 0 0 0-8.595 15.07L2.5 21.5l4.55-1.19A9.99 9.99 0 1 0 12.004 2zm5.35 14.01c-.24.67-1.4 1.31-2.02 1.39-.51.07-1.17.12-1.87-.06-.43-.1-.99-.36-1.72-.7-3.02-1.31-4.98-4.46-5.12-4.7-.14-.24-1.19-1.99-1.19-3.68 0-1.69.88-2.52 1.19-2.89.31-.37.68-.46.93-.46.25 0 .5.01.72.03.22.02.57-.04.88.44.31.48 1.05 1.67 1.15 1.8.1.13.17.3.04.48-.13.18-.21.3-.42.48-.21.18-.43.39-.62.56-.21.19-.43.4-.19.78.24.38 1.1 1.72 2.36 2.97 1.54 1.37 2.84 1.8 3.28 2.13.44.33.85.28 1.17.17.32-.11 2.02-.77 2.3-.9.28-.13.47-.2.54-.31.07-.11.07-.64-.17-1.28z"/></svg>';
+    '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M12.004 2a9.99 9.99 0 0 0-8.595 15.07L2.5 21.5l4.55-1.19A9.99 9.99 0 1 0 12.004 2zm5.35 14.01c-.24.67-1.4 1.31-2.02 1.39-.51.07-1.17.12-1.87-.06-.43-.1-.99-.36-1.72-.7-3.02-1.31-4.98-4.46-5.12-4.7-.14-.24-1.19-1.99-1.19-3.68 0-1.69.88-2.52 1.19-2.89.31-.37.68-.46.93-.46.25 0 .5.01.72.03.22.02.57-.04.88.44.31.48 1.05 1.67 1.15 1.8.1.13.17.3.04.48-.13.18-.21.3-.42.48-.21.18-.43.39-.62.56-.21.19-.43.4-.19.78.24.38 1.1 1.72 2.36 2.97 1.54 1.37 2.84 1.8 3.28 2.13.44.33.85.28 1.17.17.32-.11 2.02-.77 2.3-.9.28-.13.47-.2.54-.31.07-.11.07-.64-.17-1.28z"/></svg>';
 
   function esc(s) {
     return String(s == null ? "" : s)
@@ -373,12 +373,36 @@
     startAutoplay();
   }
 
-  function ensureCss() {
-    if (document.getElementById("ma-reviews-css")) return;
+  function ensureCss(onReady) {
+    var existing = document.getElementById("ma-reviews-css");
+    if (existing) {
+      // Stylesheet tag already present; if it has already loaded, run
+      // immediately, otherwise wait for its load event too.
+      if (existing.getAttribute("data-loaded") === "1") {
+        onReady();
+      } else {
+        existing.addEventListener("load", onReady, { once: true });
+        // Safety net in case the load event was missed (e.g. cached
+        // instantly) — never block the section forever.
+        setTimeout(onReady, 800);
+      }
+      return;
+    }
     var link = document.createElement("link");
     link.id = "ma-reviews-css";
     link.rel = "stylesheet";
     link.href = "customer-reviews.css?v=" + VERSION;
+    link.addEventListener(
+      "load",
+      function () {
+        link.setAttribute("data-loaded", "1");
+        onReady();
+      },
+      { once: true }
+    );
+    // Safety net: never keep the section hidden forever if the
+    // stylesheet fails to fire a load event for some reason.
+    setTimeout(onReady, 800);
     document.head.appendChild(link);
   }
 
@@ -396,7 +420,10 @@
       footerMount.parentNode.insertBefore(mountEl, footerMount);
     }
 
-    ensureCss();
+    // Hidden until the stylesheet is confirmed loaded — this is what
+    // prevents the "huge unstyled icon" flash some people saw on a
+    // hard refresh, when the markup could paint before its CSS did.
+    mountEl.style.visibility = "hidden";
 
     var fbUrl =
       (global.SITE_SEO && global.SITE_SEO.social && global.SITE_SEO.social.facebook) ||
@@ -409,6 +436,10 @@
     injectSchema();
     initCarousel(document.getElementById("maReviewsTrack"));
     global.__maCustomerReviewsMounted = true;
+
+    ensureCss(function () {
+      mountEl.style.visibility = "";
+    });
   }
 
   global.MaCustomerReviews = { mount: mount };
