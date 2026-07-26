@@ -374,16 +374,54 @@
     return out;
   }
 
+  /**
+   * hero-banner-config.js এ যদি window.SITE_HERO_CONFIG.slides (নিজস্ব,
+   * হিরো-ব্যানারের রেশিওতে ঠিকমতো ক্রপ করা ছবি) দেওয়া থাকে, সেটাই
+   * ব্যবহার হবে — প্রোডাক্ট ছবি থেকে অটো-টানা বন্ধ হয়ে যাবে। খালি রাখলে
+   * আগের মতোই ক্যাটাগরি প্রোডাক্ট থেকে অটোমেটিক ছবি আসবে।
+   */
+  function manualHeroSlides() {
+    var cfg = window.SITE_HERO_CONFIG || {};
+    var list = Array.isArray(cfg.slides) ? cfg.slides : [];
+    return list.filter(function (s) {
+      return s && s.image;
+    });
+  }
+
   function renderHero() {
     var hero = $("homeHero");
     if (!hero) return;
-    var items = heroProducts();
+
+    var heroCfg = window.SITE_HERO_CONFIG || {};
+    var heroEyebrow = heroCfg.eyebrow || "Eid Collection 2026";
+    var heroHeading = heroCfg.heading || "Experience<br>the Elegance";
+    var heroSubtitle = heroCfg.subtitle || "Premium modest wear crafted with comfort &amp; purity.";
+    var heroBtnText = heroCfg.buttonText || "Shop Now";
+
+    var manual = manualHeroSlides();
+    var items = manual.length ? manual : heroProducts();
     if (!items.length) return;
 
     var slides = items
       .map(function (it, i) {
-        var img = resolveImg(it.p);
-        var link = detailHref(it.sec, it.p);
+        var img, link, alt, eyebrow, heading, subtitle, btnText;
+        if (manual.length) {
+          img = it.image;
+          link = it.link || "/";
+          alt = it.alt || heroEyebrow;
+          eyebrow = it.eyebrow || heroEyebrow;
+          heading = it.heading || heroHeading;
+          subtitle = it.subtitle || heroSubtitle;
+          btnText = it.buttonText || heroBtnText;
+        } else {
+          img = resolveImg(it.p);
+          link = detailHref(it.sec, it.p);
+          alt = it.p.name;
+          eyebrow = heroEyebrow;
+          heading = heroHeading;
+          subtitle = heroSubtitle;
+          btnText = heroBtnText;
+        }
         return (
           "<div class='home-hero-slide" +
           (i === 0 ? " is-active" : "") +
@@ -391,17 +429,17 @@
           "<img src='" +
           escapeHtml(img) +
           "' alt='" +
-          escapeHtml(it.p.name) +
+          escapeHtml(alt) +
           "'" +
           (i === 0 ? " fetchpriority='high'" : " loading='lazy'") +
           " onerror=\"this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg'\">" +
           "<div class='home-hero-cap'>" +
-          "<p class='eyebrow'>Eid Collection 2026</p>" +
-          "<h2 class='head'>Experience<br>the Elegance</h2>" +
-          "<p class='sub'>Premium modest wear crafted with comfort &amp; purity.</p>" +
+          "<p class='eyebrow'>" + eyebrow + "</p>" +
+          "<h2 class='head'>" + heading + "</h2>" +
+          "<p class='sub'>" + subtitle + "</p>" +
           "<a class='hero-btn' href='" +
           escapeHtml(link) +
-          "'>Shop Now</a>" +
+          "'>" + btnText + "</a>" +
           "</div>" +
           "</div>"
         );
