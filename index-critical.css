@@ -335,9 +335,22 @@ body {
   transform: scale(0.98) !important;
 }
 
-.whatsapp-btn-style { background: #25d366 !important; }
-.imo-btn-style { background: #0088cc !important; }
-.call-btn-style { background: #1a1a1a !important; }
+.whatsapp-btn-style {
+  background: #111111 !important;
+  color: #ffffff !important;
+  border: 1.5px solid #111111 !important;
+}
+.imo-btn-style,
+.call-btn-style {
+  background: #ffffff !important;
+  color: #111111 !important;
+  border: 1.5px solid #111111 !important;
+}
+.imo-btn-style:hover,
+.call-btn-style:hover {
+  background: #111111 !important;
+  color: #ffffff !important;
+}
 
 @media (max-width: 480px) {
   .premium-action-btn { font-size: 12.5px; padding: 12px 6px; gap: 5px; }
