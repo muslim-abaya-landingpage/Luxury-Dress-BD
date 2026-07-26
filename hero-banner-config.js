@@ -56,34 +56,43 @@ window.SITE_HERO_CONFIG = {
    */
   slides: [
     {
-      image: "images/hero/abaya-1.jpg",
+      image: "images/hero-banner/premium-black-floral-embroidery-abaya-bangladesh-model-original-dubai-cherry-fabric.webp",
       link: "/abaya",
       alt: "Premium Abaya Collection"
     },
     {
-      image: "images/hero/premium-two-piece-1.jpg",
+      image: "images/hero-banner/muslim-abaya-homepage-hero-banner.webp",
+      link: "/abaya",
+      alt: "Muslim Abaya Collection"
+    },
+    {
+      // TODO: এখনো 3-part abaya set-এর ছবি ব্যবহার হচ্ছে (আসল "two-piece"
+      // ছবি না থাকায়) — real two-piece hero ছবি এলে বদলে দিন
+      image: "images/hero-banner/premium-black-3-part-abaya-set-hero-banner-1920x840.webp",
       link: "/premium-two-piece",
       alt: "Premium Two-Piece Set"
     },
     {
-      image: "images/hero/tops-kurti-1.jpg",
-      link: "/tops-kurti",
-      alt: "Tops & Kurti"
-    },
-    {
-      image: "images/hero/embroidery-1.jpg",
+      image: "images/hero-banner/muslim-abaya-premium-black-floral-embroidery-niqab-abaya-hero-banner-1920x840.webp",
       link: "/embroidery",
       alt: "Embroidery Collection"
     },
     {
-      image: "images/hero/hijab-1.jpg",
+      image: "images/hero-banner/premium-short-khimar-hijab-hero-banner-1920x840.webp",
       link: "/hijab",
       alt: "Premium Khimar Hijab"
     },
     {
-      image: "images/hero/panjabi-1.jpg",
+      image: "images/hero-banner/premium-white-cotton-panjabi-hero-banner-1920x840.webp",
       link: "/panjabi",
       alt: "Panjabi Collection"
     }
+    // TODO: "tops-kurti"-র জন্য এখনো কোনো hero ছবি পাওয়া যায়নি —
+    // ছবি রেডি হলে উপরের প্যাটার্ন অনুসরণ করে নতুন entry যোগ করুন:
+    // {
+    //   image: "images/hero-banner/<tops-kurti-filename>.webp",
+    //   link: "/tops-kurti",
+    //   alt: "Tops & Kurti"
+    // }
   ]
 };
