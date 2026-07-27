@@ -394,43 +394,23 @@
     return out;
   }
 
-  /* Normalizes hero slides to { img, link, alt, eyebrow, heading, subtitle, buttonText }.
-     If window.SITE_HERO_CONFIG.slides has entries, those are used as-is (manual mode) —
-     this is the part that was previously documented in hero-banner-config.js's comments
-     but never actually wired up here, so a "slides" array there had no effect. With an
-     empty/missing slides array it falls back to the old auto-pick-from-catalog behavior. */
-  function heroSlideSource() {
-    var heroCfg = window.SITE_HERO_CONFIG || {};
-    var manual = Array.isArray(heroCfg.slides)
-      ? heroCfg.slides.filter(function (s) { return s && s.image; })
-      : [];
-    if (manual.length) {
-      return manual.slice(0, HERO_SLIDES).map(function (s) {
-        return {
-          img: s.image,
-          link: s.link || "/",
-          alt: s.alt || heroCfg.eyebrow || "Muslim Abaya",
-          eyebrow: s.eyebrow,
-          heading: s.heading,
-          subtitle: s.subtitle,
-          buttonText: s.buttonText
-        };
-      });
-    }
-    return heroProducts().map(function (it) {
-      return {
-        img: resolveImg(it.p),
-        link: detailHref(it.sec, it.p),
-        alt: it.p.name
-      };
+  /**
+   * hero-banner-config.js এ যদি window.SITE_HERO_CONFIG.slides (নিজস্ব,
+   * হিরো-ব্যানারের রেশিওতে ঠিকমতো ক্রপ করা ছবি) দেওয়া থাকে, সেটাই
+   * ব্যবহার হবে — প্রোডাক্ট ছবি থেকে অটো-টানা বন্ধ হয়ে যাবে। খালি রাখলে
+   * আগের মতোই ক্যাটাগরি প্রোডাক্ট থেকে অটোমেটিক ছবি আসবে।
+   */
+  function manualHeroSlides() {
+    var cfg = window.SITE_HERO_CONFIG || {};
+    var list = Array.isArray(cfg.slides) ? cfg.slides : [];
+    return list.filter(function (s) {
+      return s && s.image;
     });
   }
 
   function renderHero() {
     var hero = $("homeHero");
     if (!hero) return;
-    var items = heroSlideSource();
-    if (!items.length) return;
 
     var heroCfg = window.SITE_HERO_CONFIG || {};
     var heroEyebrow = heroCfg.eyebrow || "Eid Collection 2026";
@@ -438,26 +418,58 @@
     var heroSubtitle = heroCfg.subtitle || "Premium modest wear crafted with comfort &amp; purity.";
     var heroBtnText = heroCfg.buttonText || "Shop Now";
 
+    var manual = manualHeroSlides();
+    var items = manual.length ? manual : heroProducts();
+    if (!items.length) return;
+
     var slides = items
       .map(function (it, i) {
+        var img, imgMobile, link, alt, eyebrow, heading, subtitle, btnText;
+        if (manual.length) {
+          img = it.image;
+          imgMobile = it.imageMobile || "";
+          link = it.link || "/";
+          alt = it.alt || heroEyebrow;
+          eyebrow = it.eyebrow || heroEyebrow;
+          heading = it.heading || heroHeading;
+          subtitle = it.subtitle || heroSubtitle;
+          btnText = it.buttonText || heroBtnText;
+        } else {
+          img = resolveImg(it.p);
+          imgMobile = "";
+          link = detailHref(it.sec, it.p);
+          alt = it.p.name;
+          eyebrow = heroEyebrow;
+          heading = heroHeading;
+          subtitle = heroSubtitle;
+          btnText = heroBtnText;
+        }
+        var imgTag =
+          "<img src='" +
+          escapeHtml(img) +
+          "' alt='" +
+          escapeHtml(alt) +
+          "'" +
+          (i === 0 ? " fetchpriority='high'" : " loading='lazy'") +
+          " onerror=\"this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg'\">";
+        var pictureTag = imgMobile
+          ? "<picture>" +
+            "<source media='(max-width:640px)' srcset='" + escapeHtml(imgMobile) + "'>" +
+            imgTag +
+            "</picture>"
+          : imgTag;
         return (
           "<div class='home-hero-slide" +
           (i === 0 ? " is-active" : "") +
           "'>" +
-          "<img src='" +
-          escapeHtml(it.img) +
-          "' alt='" +
-          escapeHtml(it.alt) +
-          "'" +
-          (i === 0 ? " fetchpriority='high'" : " loading='lazy'") +
-          " onerror=\"this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg'\">" +
+          pictureTag +
           "<div class='home-hero-cap'>" +
-          "<p class='eyebrow'>" + (it.eyebrow || heroEyebrow) + "</p>" +
-          "<h2 class='head'>" + (it.heading || heroHeading) + "</h2>" +
-          "<p class='sub'>" + (it.subtitle || heroSubtitle) + "</p>" +
+          "<p class='eyebrow'>" + eyebrow + "</p>" +
+          "<h2 class='head'>" + heading + "</h2>" +
+          "<p class='sub'>" + subtitle + "</p>" +
           "<a class='hero-btn' href='" +
-          escapeHtml(it.link) +
-          "'>" + (it.buttonText || heroBtnText) + "</a>" +
+          escapeHtml(link) +
+          "'>" + btnText + "</a>" +
           "</div>" +
           "</div>"
         );
