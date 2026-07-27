@@ -458,19 +458,24 @@
             imgTag +
             "</picture>"
           : imgTag;
+        var hideCaption = !!(manual.length && it.hideCaption);
+        var capTag = hideCaption
+          ? ""
+          : "<div class='home-hero-cap'>" +
+            "<p class='eyebrow'>" + eyebrow + "</p>" +
+            "<h2 class='head'>" + heading + "</h2>" +
+            "<p class='sub'>" + subtitle + "</p>" +
+            "<a class='hero-btn' href='" + escapeHtml(link) + "'>" + btnText + "</a>" +
+            "</div>";
+        var mediaTag = hideCaption
+          ? "<a href='" + escapeHtml(link) + "' aria-label='" + escapeHtml(alt) + "'>" + pictureTag + "</a>"
+          : pictureTag;
         return (
           "<div class='home-hero-slide" +
           (i === 0 ? " is-active" : "") +
           "'>" +
-          pictureTag +
-          "<div class='home-hero-cap'>" +
-          "<p class='eyebrow'>" + eyebrow + "</p>" +
-          "<h2 class='head'>" + heading + "</h2>" +
-          "<p class='sub'>" + subtitle + "</p>" +
-          "<a class='hero-btn' href='" +
-          escapeHtml(link) +
-          "'>" + btnText + "</a>" +
-          "</div>" +
+          mediaTag +
+          capTag +
           "</div>"
         );
       })

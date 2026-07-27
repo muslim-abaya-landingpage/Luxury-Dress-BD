@@ -456,7 +456,7 @@
   .home-catnav-inner { padding: 11px 14px; gap: 16px; }
   .home-catnav-label { font-size: 12px; padding-right: 14px; }
   .home-catnav-inner a { font-size: 12px; }
-  .home-hero-track { aspect-ratio: 3 / 4; border-radius: 10px; }
+  .home-hero-track { aspect-ratio: 16 / 9; border-radius: 10px; }
   .home-hero-slide img { object-position: center top; }
   .home-hero { margin: 10px auto 4px; padding: 0 10px; }
   .home-row { grid-auto-columns: calc((100% - 16px) / 2); gap: 16px; }
