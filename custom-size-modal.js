@@ -1,19 +1,24 @@
-/* ==========================================
-   Custom Size Modal
-   Self-contained: injects its own markup, computes the price live from
-   Length/Width against the site's size-chart extra-charge table
-   (window.SITE_LINKS.sizeChart — see product-config.js), and adds the
-   result to the real cart via the same functions cart-drawer.js uses.
+/* ==========================================================================
+   Custom Size Modal (reusable, self-contained component)
+   Include on ANY page:
+     <link rel="stylesheet" href="custom-size-modal.css">
+     <script src="custom-size-modal.js"></script>
 
-   Usage from any page (after including this file + custom-size-modal.css):
-     window.openCustomSizeModal({
-       id: "abaya-123",            // product id
-       name: "Maroon Abaya Set",   // product name
-       price: 999,                 // BASE price before custom-size extra
-       image: "images/...jpg",     // thumbnail
-       category: "abaya"           // category key (for size-chart lookup + cart grouping)
-     });
-   ========================================== */
+   Two ways to open it:
+   1) From code (category pages / product.html already do this):
+        window.openCustomSizeModal({
+          id: "abaya-123", name: "Maroon Abaya Set", price: 999,
+          image: "images/...jpg", category: "abaya"
+        });
+   2) From a plain page with a static trigger button:
+        <button id="openCustomSize">Custom Size</button>
+      (price/product info won't be set in this case — prefer option 1)
+
+   Price = base product price + extra charge looked up from
+   window.SITE_LINKS.sizeChart (see product-config.js), matched against
+   the entered Length / Width. Falls back to 0 extra if no chart is found,
+   so the modal never breaks even on a page without product-config.js.
+   ========================================================================== */
 (function () {
 
     var pending = null; // the product passed to openCustomSizeModal()
