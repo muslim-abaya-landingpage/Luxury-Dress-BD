@@ -314,7 +314,7 @@ body {
   flex: 1 1 30% !important;
   min-width: 100px !important;
   padding: 15px 8px !important;
-  border-radius: 10px !important;
+  border-radius: 7px !important;
   font-size: 14px !important;
   font-weight: 700 !important;
   letter-spacing: 0.01em !important;
@@ -363,7 +363,7 @@ body {
 }
 
 @media (max-width: 480px) {
-  .premium-action-btn { font-size: 12.5px; padding: 13px 6px; gap: 5px; border-radius: 9px; }
+  .premium-action-btn { font-size: 12.5px; padding: 13px 6px; gap: 5px; border-radius: 6px; }
   .premium-action-btn i { font-size: 16px; }
   .button-row-wrapper { gap: 9px; padding: 0 10px; margin: 12px auto; }
 }
