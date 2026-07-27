@@ -163,7 +163,6 @@
         '<ul class="anz-link-list">' +
           '<li><a href="' + esc(footerHref("/about")) + '">About Us</a></li>' +
           '<li><a href="' + esc(footerHref("/help")) + '#order-status">Order Help</a></li>' +
-          '<li><a href="size-chart.html">Size Chart</a></li>' +
           '<li><a href="' + esc(footerHref("/privacy")) + '">Privacy Policy</a></li>' +
           '<li><a href="' + esc(footerHref("/refund")) + '">Refund Policy</a></li>' +
           '<li><a href="' + esc(footerHref("/terms")) + '">Terms &amp; Conditions</a></li>' +
