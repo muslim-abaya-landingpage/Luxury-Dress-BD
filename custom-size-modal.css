@@ -166,7 +166,7 @@
 
     display:flex;
 
-    gap:15px;
+    gap:12px;
 
     margin-top:25px;
 
@@ -176,17 +176,37 @@
 
     flex:1;
 
-    height:55px;
+    height:52px;
 
-    border:none;
+    border:1.5px solid transparent;
 
-    border-radius:12px;
+    border-radius:10px;
 
     cursor:pointer;
 
-    font-size:17px;
+    font-size:15px;
 
     font-weight:700;
+
+    letter-spacing:0.02em;
+
+    font-family:inherit;
+
+    transition:background .18s ease, color .18s ease, border-color .18s ease, transform .12s ease, box-shadow .18s ease;
+
+}
+
+.csm-buttons button:active{
+
+    transform:scale(.97);
+
+}
+
+.csm-buttons button:focus-visible{
+
+    outline:2px solid #111;
+
+    outline-offset:2px;
 
 }
 
@@ -196,11 +216,32 @@
 
     color:#fff;
 
+    box-shadow:0 6px 16px rgba(17,17,17,.22);
+
+}
+
+#csmBuyNow:hover{
+
+    background:#2a2a2a;
+
+    box-shadow:0 8px 20px rgba(17,17,17,.28);
 }
 
 #csmAddCart{
 
-    background:#ececec;
+    background:#fff;
+
+    color:#111;
+
+    border-color:#d8d8d8;
+
+}
+
+#csmAddCart:hover{
+
+    background:#fafafa;
+
+    border-color:#111;
 
 }
 
@@ -229,6 +270,14 @@
     .csm-buttons{
 
         flex-direction:column;
+
+        gap:10px;
+
+    }
+
+    .csm-buttons button{
+
+        height:50px;
 
     }
 
