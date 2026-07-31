@@ -589,18 +589,25 @@ window.CATEGORY_PRODUCTS = {
 ],
 /* ═══ ④ টু-পিস সারি · PREMIUM TWO-PIECE · premium-two-piece.html ═══ */
  "premium-two-piece": [
-  {
-    id: "DR-01",
-    name: "White Strawberry Print Women's Two-Piece Set",
-    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/muslimabaya-white-strawberry-print-cotton-kurti-set-for-women.webp",
-    link: "/",
-    price: 650,
-    color: "white",
-    colorLabel: "White / Strawberry Print",
-    fabric: "Premium Cotton Fabric",
-    sizes: ["Body 34–46"],
-    detailNote: "Kurti Length: 40–42 Inches | Pant Length: 38–40 Inches"
-  },
+ {
+  id: "DR-01",
+  name: "White Strawberry Print Women's Two-Piece Set",
+  image: "https://raw.githubusercontent.com/.../muslimabaya-white-strawberry-print-cotton-kurti-set-for-women.webp",
+  link: "/",
+  price: 650,
+  color: "white",
+  colorLabel: "White / Strawberry Print",
+  fabric: "Premium Cotton Fabric",
+  sizes: ["34", "36", "38", "40", "42", "44", "46" ],
+  detailNote: "Kurti Length: 40–42 Inches | Pant Length: 38–40 Inches",
+
+  // 👇 নতুন — শুধু এই প্রোডাক্টেই আলাদা প্রিমিয়াম সাইজ দেখাবে
+  bodySizeLabel: "34–46",
+  sizeSpecs: [
+    { label: "Kurti Length", value: "40–42 Inches" },
+    { label: "Pant Length", value: "38–40 Inches" }
+  ]
+},
 {
   id: "DR-01",
   name: "Baby Pink Floral Print Women's Two-Piece Set",
