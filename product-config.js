@@ -88,6 +88,7 @@ window.SITE_LINKS = {
         fabric: "Dubai Cherry",
         bodySize: "46",
         bodySizeLabel: "46 [Free size]",
+        bodySizes: ["42", "44", "46"],
         lengthSizes: ["50", "52", "54", "56"],
         sizes: ["50", "52", "54", "56"],
         types: ["Full Set", "Abaya Only"],
@@ -100,6 +101,7 @@ window.SITE_LINKS = {
       "premium-two-piece": {
         price: 550,
         bodySizeLabel: "42 (Free size)",
+        bodySizes: ["42", "44", "46"],
         lengthSizeLabel: "37-38 inch",
         lengthSizes: ["37-38 inch"],
         sizes: ["42 (Free size)"]
