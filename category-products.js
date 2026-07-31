@@ -796,8 +796,25 @@ window.CATEGORY_PRODUCTS = {
     { label: "Top Length", value: "38–40 Inches" },
     { label: "Pants Length", value: "38 Inches" }
   ]
+},
+{
+  id: "KURTI-17",
+  name: "Premium Red Cotton Embroidered Women's Two-Piece Set",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-red-embroidered-cotton-two-piece-women-salwar-kameez-set-bangladesh-1080x1350.webp",
+  link: "/",
+  price: 750,
+  color: "red",
+  colorLabel: "Red",
+  fabric: "Premium Cotton Fabric",
+  detailNote: "Elegant embroidered design, soft breathable cotton fabric, comfortable everyday fit. Top Length: 38–40 Inches | Pants Length: 38 Inches",
+  bodySizes: ["34", "36", "38", "40", "42", "44", "46"],
+  sizeSpecs: [
+    { label: "Top Length", value: "38–40 Inches" },
+    { label: "Pants Length", value: "38 Inches" }
+  ]
 }   
 ],
+  
 /* ═══ ⑤ এম্ব্রয়ডারি — খালি ═══ */
 embroidery: [
  {
