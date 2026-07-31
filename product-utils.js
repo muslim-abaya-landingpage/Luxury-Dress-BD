@@ -207,6 +207,28 @@
       normalized.sizes = entry.lengthSizes.slice();
     }
 
+    /** কোনো প্রোডাক্টের মাপ যদি সাধারণ "Body Size + একটা Length Size"
+     *  প্যাটার্নে না বসে (যেমন: Body Size একটা রেঞ্জ, আর আলাদা আলাদা করে
+     *  Kurti Length ও Pant Length আছে) — তাহলে raw.sizeSpecs দিয়ে যত খুশি
+     *  কাস্টম লেবেল/ভ্যালু জোড়া দেওয়া যাবে, প্রতিটা আলাদা লাইনে (প্রিমিয়াম
+     *  স্টাইলে) দেখানো হবে:
+     *  sizeSpecs: [
+     *    { label: "Kurti Length", value: "40–42 Inches" },
+     *    { label: "Pant Length", value: "38–40 Inches" }
+     *  ]
+     *  bodySizeLabel দিয়ে Body Size-এর মান (যেমন "34–46") আলাদাভাবে বলা
+     *  যাবে; এটা থাকলে ক্যাটাগরির ডিফল্ট বডি সাইজ পিল না দেখিয়ে এই মানটাই
+     *  fixed টেক্সট হিসেবে দেখাবে। */
+    if (Array.isArray(entry.sizeSpecs) && entry.sizeSpecs.length) {
+      normalized.sizeSpecs = entry.sizeSpecs
+        .filter(function (row) {
+          return row && (row.label || row.value);
+        })
+        .map(function (row) {
+          return { label: String(row.label || ""), value: String(row.value || "") };
+        });
+    }
+
     normalized.productUrl = resolveProductPageLink(normalized);
     return normalized;
   }
@@ -332,10 +354,11 @@
     return false;
   }
 
-  function formatAbayaCartSize(lengthSize) {
+  function formatAbayaCartSize(lengthSize, bodyLabelOverride) {
     var cfg = getAbayaSizeConfig();
     var len = String(lengthSize || cfg.lengthSizes[0] || "50").trim();
-    return "Body " + cfg.bodySizeLabel + " · Length " + len;
+    var bodyLabel = String(bodyLabelOverride || "").trim() || cfg.bodySizeLabel;
+    return "Body " + bodyLabel + " · Length " + len;
   }
 
   function parseAbayaLengthSize(sizeStr) {
@@ -389,10 +412,11 @@
     return false;
 }
 
-  function formatTwoPieceCartSize(lengthSizeOpt) {
+  function formatTwoPieceCartSize(lengthSizeOpt, bodyLabelOverride) {
     var cfg = getTwoPieceSizeConfig();
     var len = String(lengthSizeOpt || cfg.lengthSizeLabel || "37-38 inch").trim();
-    return "Body " + cfg.bodySizeLabel + " · Length " + len;
+    var bodyLabel = String(bodyLabelOverride || "").trim() || cfg.bodySizeLabel;
+    return "Body " + bodyLabel + " · Length " + len;
   }
 
   function parseTwoPieceLengthSize(sizeStr) {

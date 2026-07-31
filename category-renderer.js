@@ -221,27 +221,27 @@ function syncShopCartBadge() {
   if (typeof refreshCartBadgeUI === "function") refreshCartBadgeUI(lines);
   else if (typeof updateCartBadge === "function") updateCartBadge(lines);
 }
-function buildShopCartLineSizeKey(item, sizeValue, categoryKey) {
+function buildShopCartLineSizeKey(item, sizeValue, categoryKey, bodyValueOpt) {
   var isAbaya = typeof isAbayaProduct === "function" && isAbayaProduct(item, categoryKey);
   var isTwoPiece = typeof isTwoPieceProduct === "function" && isTwoPieceProduct(item, categoryKey);
   if (isTwoPiece && typeof formatTwoPieceCartSize === "function") {
     var tpCfg = typeof getTwoPieceSizeConfig === "function" ? getTwoPieceSizeConfig(item) : null;
     var tpLen = String(sizeValue || "").trim() || (tpCfg ? tpCfg.lengthSizeLabel : "37-38 inch");
-    return formatTwoPieceCartSize(tpLen);
+    return formatTwoPieceCartSize(tpLen, bodyValueOpt);
   }
   var abayaCfg = isAbaya && typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig(item) : null;
   var pickedLength =
     String(sizeValue || "").trim() ||
     (abayaCfg ? abayaCfg.lengthSizes[0] : "50");
   if (isAbaya && typeof formatAbayaCartSize === "function") {
-    return formatAbayaCartSize(pickedLength);
+    return formatAbayaCartSize(pickedLength, bodyValueOpt);
   }
   return pickedLength;
 }
-function shopCartHasMatchingLine(item, sizeValue, categoryKey) {
+function shopCartHasMatchingLine(item, sizeValue, categoryKey, bodyValueOpt) {
   var id = String(item && item.id || "").trim();
   if (!id) return false;
-  var sizeKey = buildShopCartLineSizeKey(item, sizeValue, categoryKey);
+  var sizeKey = buildShopCartLineSizeKey(item, sizeValue, categoryKey, bodyValueOpt);
   var mergeKey = id + "|" + sizeKey;
   var lines = typeof loadStoreCart === "function" ? loadStoreCart({ readOnly: true }) : [];
   for (var i = 0; i < lines.length; i++) {
@@ -252,7 +252,7 @@ function shopCartHasMatchingLine(item, sizeValue, categoryKey) {
   }
   return false;
 }
-function buildShopCartLineItem(item, qtyToAdd, sizeValue, categoryKeyOpt, selectedTypeOpt) {
+function buildShopCartLineItem(item, qtyToAdd, sizeValue, categoryKeyOpt, selectedTypeOpt, bodyValueOpt) {
   var categoryKey =
     categoryKeyOpt ||
     (item && item.category) ||
@@ -272,14 +272,26 @@ function buildShopCartLineItem(item, qtyToAdd, sizeValue, categoryKeyOpt, select
   var cat = typeof findCatalogByName === "function" ? findCatalogByName(item.name) : null;
   var pickedSize = pickedLength;
   var pickedType = selectedTypeOpt || item._cartType || "";
+  /** কাস্টমার body-size pill থেকে যা সিলেক্ট করেছে (bodyValueOpt) — সেটাই
+   *  আসল সোর্স অফ ট্রুথ। কিছু সিলেক্ট না করলে (ফিক্সড বডি সাইজ প্রোডাক্টে
+   *  pill থাকেই না) ক্যাটাগরি/প্রোডাক্টের static bodySizeLabel-এ ফলব্যাক
+   *  করবে — আগের আচরণ অক্ষুণ্ণ থাকলো। */
+  var pickedBodyLabel = String(bodyValueOpt || "").trim();
+  var resolvedBodyLabel =
+    pickedBodyLabel ||
+    (isAbaya && abayaCfg
+      ? abayaCfg.bodySizeLabel
+      : isTwoPiece && twoPieceCfg
+        ? twoPieceCfg.bodySizeLabel
+        : "");
   var unitPrice = resolveProductPrice(item, categoryKey, pickedType);
   var cartName = item.name;
   if (pickedType) cartName += " (" + pickedType + ")";
   var sizeLabel =
     isAbaya && typeof formatAbayaCartSize === "function"
-      ? formatAbayaCartSize(pickedLength)
+      ? formatAbayaCartSize(pickedLength, pickedBodyLabel)
       : isTwoPiece && typeof formatTwoPieceCartSize === "function"
-        ? formatTwoPieceCartSize(pickedLength)
+        ? formatTwoPieceCartSize(pickedLength, pickedBodyLabel)
         : "Size " + pickedSize;
   cartName += " (" + sizeLabel + ")";
   return {
@@ -294,23 +306,18 @@ function buildShopCartLineItem(item, qtyToAdd, sizeValue, categoryKeyOpt, select
     description: item.description || item.fabric || "",
     size:
       isAbaya && typeof formatAbayaCartSize === "function"
-        ? formatAbayaCartSize(pickedLength)
+        ? formatAbayaCartSize(pickedLength, pickedBodyLabel)
         : isTwoPiece && typeof formatTwoPieceCartSize === "function"
-          ? formatTwoPieceCartSize(pickedLength)
+          ? formatTwoPieceCartSize(pickedLength, pickedBodyLabel)
           : pickedSize,
     lengthSize: isAbaya ? pickedLength : isTwoPiece && twoPieceCfg ? twoPieceCfg.lengthSizeLabel : "",
-    bodySize:
-      isAbaya && abayaCfg
-        ? abayaCfg.bodySizeLabel
-        : isTwoPiece && twoPieceCfg
-          ? twoPieceCfg.bodySizeLabel
-          : "",
+    bodySize: resolvedBodyLabel,
     productType: pickedType,
     category: item.category || categoryKey || "",
     categoryLabel: item.categoryLabel || ""
   };
 }
-function shopAddProductToCart(item, qtyToAdd, sizeValue, categoryKeyOpt) {
+function shopAddProductToCart(item, qtyToAdd, sizeValue, categoryKeyOpt, bodyValueOpt) {
   var categoryKey =
     categoryKeyOpt ||
     (item && item.category) ||
@@ -328,12 +335,13 @@ function shopAddProductToCart(item, qtyToAdd, sizeValue, categoryKeyOpt) {
         ? abayaCfg.lengthSizes[0]
         : "50");
   var pickedSizeEarly = isAbaya || isTwoPiece ? pickedLength : pickedLength;
-  var addGuardKey = (item.id || item.name || "") + "|" + pickedSizeEarly;
+  var addGuardKey =
+    (item.id || item.name || "") + "|" + pickedSizeEarly + "|" + String(bodyValueOpt || "");
   var now = Date.now();
   if (addGuardKey === shopCartCtx.lastCartAddKey && now - shopCartCtx.lastCartAddAt < 450) return;
   shopCartCtx.lastCartAddKey = addGuardKey;
   shopCartCtx.lastCartAddAt = now;
-  var line = buildShopCartLineItem(item, qtyToAdd, sizeValue, categoryKeyOpt, item._cartType || "");
+  var line = buildShopCartLineItem(item, qtyToAdd, sizeValue, categoryKeyOpt, item._cartType || "", bodyValueOpt);
   var updated = [];
   if (typeof addOrMergeStoreCartItem === "function") {
     updated = addOrMergeStoreCartItem(
@@ -426,13 +434,15 @@ function resetShopCartContext() {
   shopCartCtx.root = null;
   shopCartCtx.products = [];
 }
-function getSelectedSizeForIdx(scopeRoot, idx) {
-  if (!scopeRoot) return "50";
-  var bodyVal = "";
+function getSelectedBodyValueForIdx(scopeRoot, idx) {
+  if (!scopeRoot) return "";
   var bodyPill = scopeRoot.querySelector(
     ".pqv-body-opt.is-active[data-product-idx='" + idx + "']"
   );
-  if (bodyPill) bodyVal = bodyPill.getAttribute("data-body-value") || "";
+  return bodyPill ? bodyPill.getAttribute("data-body-value") || "" : "";
+}
+function getSelectedSizeForIdx(scopeRoot, idx) {
+  if (!scopeRoot) return "50";
   var lengthVal = "";
   var activePill = scopeRoot.querySelector(
     ".pqv-length-opt.is-active[data-product-idx='" + idx + "']"
@@ -450,7 +460,7 @@ function getSelectedSizeForIdx(scopeRoot, idx) {
       lengthVal = sizeEl ? sizeEl.value : "50";
     }
   }
-  return bodyVal ? "Body " + bodyVal + " · " + lengthVal : lengthVal;
+  return lengthVal;
 }
 const toAsciiDigits = (str) => 
   String(str || "").replace(/[০-৯]/g, d => String.fromCharCode(d.charCodeAt(0) - 2486));
@@ -1481,7 +1491,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
         ? p.sizes
         : ["Free Size"];
   var types = getProductTypes(p, categoryKey);
-  var lengthVal = p.detailNote ? String(p.detailNote).replace(/^লং:\s*/i, "").trim() : "";
+  var lengthVal = p.detailNote ? String(p.detailNote).replace(/^Length:\s*/i, "").trim() : "";
   var colorLabel = p.colorLabel ? escapeHtml(p.colorLabel) : p.color ? escapeHtml(p.color) : "";
   var chartData = getSizeChartData(categoryKey);
   var chartBtn = chartData
@@ -1519,7 +1529,21 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     fabricText +
     "</strong></li>" +
     (colorLabel ? "<li><span>Color</span><strong>" + colorLabel + "</strong></li>" : "") +
-    (lengthVal ? "<li><span>Length</span><strong>" + escapeHtml(lengthVal) + "</strong></li>" : "") +
+    (Array.isArray(p.sizeSpecs) && p.sizeSpecs.length
+      ? p.sizeSpecs
+          .map(function (spec) {
+            return (
+              "<li><span>" +
+              escapeHtml(spec.label) +
+              "</span><strong>" +
+              escapeHtml(spec.value) +
+              "</strong></li>"
+            );
+          })
+          .join("")
+      : lengthVal
+        ? "<li><span>Length</span><strong>" + escapeHtml(lengthVal) + "</strong></li>"
+        : "") +
     (types.length
       ? "<li><span>Type</span><strong id='pqvSpecType'>" +
         escapeHtml(defaultType) +
@@ -1553,14 +1577,32 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
               escapeHtml(twoPieceCfg.bodySizeLabel) +
               "</button>") +
           "</div></div>" +
-          '<div class="pqv-field pqv-field-size"><div class="pqv-field-head"><span class="pqv-field-label">Length Size</span>' +
-          chartBtn +
-          '</div><div class="pqv-opt-group pqv-opt-group-wrap">' +
-          '<button type="button" class="pqv-opt-btn is-active" aria-pressed="true" disabled>' +
-          escapeHtml(twoPieceCfg.lengthSizeLabel) +
-          "</button>" +
-          customSizeBtn +
-          "</div></div>"
+          (Array.isArray(p.sizeSpecs) && p.sizeSpecs.length
+            ? p.sizeSpecs
+                .map(function (spec, specI) {
+                  var isLast = specI === p.sizeSpecs.length - 1;
+                  return (
+                    '<div class="pqv-field pqv-field-size"><div class="pqv-field-head"><span class="pqv-field-label">' +
+                    escapeHtml(spec.label) +
+                    "</span>" +
+                    (isLast ? chartBtn : "") +
+                    '</div><div class="pqv-opt-group pqv-opt-group-wrap">' +
+                    '<button type="button" class="pqv-opt-btn is-active" aria-pressed="true" disabled>' +
+                    escapeHtml(spec.value) +
+                    "</button>" +
+                    (isLast ? customSizeBtn : "") +
+                    "</div></div>"
+                  );
+                })
+                .join("")
+            : '<div class="pqv-field pqv-field-size"><div class="pqv-field-head"><span class="pqv-field-label">Length Size</span>' +
+              chartBtn +
+              '</div><div class="pqv-opt-group pqv-opt-group-wrap">' +
+              '<button type="button" class="pqv-opt-btn is-active" aria-pressed="true" disabled>' +
+              escapeHtml(twoPieceCfg.lengthSizeLabel) +
+              "</button>" +
+              customSizeBtn +
+              "</div></div>")
       : '<div class="pqv-field pqv-field-size"><div class="pqv-field-head"><span class="pqv-field-label">Size</span>' +
         chartBtn +
         '</div><div class="pqv-opt-group pqv-opt-group-wrap">' +
@@ -1798,6 +1840,7 @@ function onGlobalShopCartClick(ev) {
   }
   var scope = inProductView ? pqvScope : root;
   var selectedSize = getSelectedSizeForIdx(scope, idx);
+  var selectedBodyValue = getSelectedBodyValueForIdx(scope, idx);
   var selectedType = inProductView ? getSelectedTypeForIdx(scope, idx) : "";
   var qty = inProductView ? getPqvQuantity(scope) : getShopCardQty(root, idx);
   ev.preventDefault();
@@ -1805,8 +1848,8 @@ function onGlobalShopCartClick(ev) {
   var cartItem = Object.assign({}, products[idx], { _cartType: selectedType });
 
   if (action === "buy-now") {
-    if (!shopCartHasMatchingLine(cartItem, selectedSize, categoryKey)) {
-      shopAddProductToCart(cartItem, qty, selectedSize, categoryKey);
+    if (!shopCartHasMatchingLine(cartItem, selectedSize, categoryKey, selectedBodyValue)) {
+      shopAddProductToCart(cartItem, qty, selectedSize, categoryKey, selectedBodyValue);
     }
     var checkoutHref =
       typeof window.siteHref === "function" ? window.siteHref("/checkout") : "checkout.html";
@@ -1825,7 +1868,7 @@ function onGlobalShopCartClick(ev) {
     window.location.href = checkoutHref;
     return;
   }
-  shopAddProductToCart(cartItem, qty, selectedSize, categoryKey);
+  shopAddProductToCart(cartItem, qty, selectedSize, categoryKey, selectedBodyValue);
 }
 if (!window.__maShopCartClickBound) {
   window.__maShopCartClickBound = true;
@@ -2228,16 +2271,31 @@ function buildTwoPieceSizeFields(p) {
     typeof getTwoPieceSizeConfig === "function"
       ? getTwoPieceSizeConfig(p)
       : { bodySizeLabel: "42 (Free size)", lengthSizeLabel: "37-38 inch" };
+  var hasCustomSpecs = p && Array.isArray(p.sizeSpecs) && p.sizeSpecs.length;
+  var lengthRows = hasCustomSpecs
+    ? p.sizeSpecs
+        .map(function (spec) {
+          return (
+            "<div class='card-size-row'><span class='card-size-heading'>" +
+            escapeHtml(spec.label) +
+            "</span><span class='card-body-size-val'>" +
+            escapeHtml(spec.value) +
+            "</span></div>"
+          );
+        })
+        .join("")
+    : "<div class='card-size-row'><span class='card-size-heading'>Length Size</span>" +
+      "<span class='card-body-size-val'>" +
+      escapeHtml(cfg.lengthSizeLabel) +
+      "</span></div>";
   return (
     "<div class='card-size-block card-size-block--abaya card-size-block--twopiece'>" +
     "<div class='card-size-row'><span class='card-size-heading'>Body Size</span>" +
     "<span class='card-body-size-val'>" +
     escapeHtml(cfg.bodySizeLabel) +
     "</span></div>" +
-    "<div class='card-size-row'><span class='card-size-heading'>Length Size</span>" +
-    "<span class='card-body-size-val'>" +
-    escapeHtml(cfg.lengthSizeLabel) +
-    "</span></div></div>"
+    lengthRows +
+    "</div>"
   );
 }
 function buildAbayaSizeFields(idx, lengthSizes, p) {
