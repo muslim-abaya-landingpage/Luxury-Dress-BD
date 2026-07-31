@@ -829,7 +829,7 @@ window.CATEGORY_PRODUCTS = {
     { label: "Pants Length", value: "38 Inches" }
   ]
 }
-];  
+],  
 /* ═══ ⑤ এম্ব্রয়ডারি — খালি ═══ */
 embroidery: [
  {
