@@ -191,6 +191,22 @@
       normalized.bodySizeLabel = abayaDefs.bodySizeLabel || "46 [Free size]";
     }
 
+    /** প্রোডাক্ট নিজে বডি সাইজ বললে (category-products.js এ raw.bodySize /
+     *  raw.bodySizeLabel / raw.bodySizes থাকলে) সেটাই ক্যাটাগরি ডিফল্টের
+     *  উপর প্রায়োরিটি পাবে — যেমন একই ক্যাটাগরির কোনো একটা প্রোডাক্টের বডি
+     *  সাইজ শুধু ৪২ হলে, ওই প্রোডাক্টে শুধু `bodySizes: ["42"]` (বা
+     *  `bodySize`/`bodySizeLabel`) দিলেই হবে, বাকি প্রোডাক্ট ক্যাটাগরি
+     *  ডিফল্ট মেনে চলবে। */
+    if (entry.bodySize != null) normalized.bodySize = entry.bodySize;
+    if (entry.bodySizeLabel != null) normalized.bodySizeLabel = entry.bodySizeLabel;
+    if (Array.isArray(entry.bodySizes) && entry.bodySizes.length) {
+      normalized.bodySizes = entry.bodySizes.slice();
+    }
+    if (Array.isArray(entry.lengthSizes) && entry.lengthSizes.length) {
+      normalized.lengthSizes = entry.lengthSizes.slice();
+      normalized.sizes = entry.lengthSizes.slice();
+    }
+
     normalized.productUrl = resolveProductPageLink(normalized);
     return normalized;
   }
@@ -288,17 +304,24 @@
     );
   }
 
-  function getAbayaSizeConfig() {
+  function getAbayaSizeConfig(product) {
     var ab =
       g.SITE_LINKS &&
       g.SITE_LINKS.defaults &&
       g.SITE_LINKS.defaults.byCategory &&
       g.SITE_LINKS.defaults.byCategory.abaya;
+    var p = product || {};
     return {
-      bodySize: (ab && ab.bodySize) || "46",
-      bodySizeLabel: (ab && ab.bodySizeLabel) || "46 [Free size]",
-      bodySizes: (ab && ab.bodySizes && ab.bodySizes.slice()) || null,
-      lengthSizes: (ab && ab.lengthSizes && ab.lengthSizes.slice()) || ["50", "52", "54", "56"]
+      bodySize: p.bodySize || (ab && ab.bodySize) || "46",
+      bodySizeLabel: p.bodySizeLabel || (ab && ab.bodySizeLabel) || "46 [Free size]",
+      bodySizes:
+        (Array.isArray(p.bodySizes) && p.bodySizes.length && p.bodySizes.slice()) ||
+        (ab && ab.bodySizes && ab.bodySizes.slice()) ||
+        null,
+      lengthSizes:
+        (Array.isArray(p.lengthSizes) && p.lengthSizes.length && p.lengthSizes.slice()) ||
+        (ab && ab.lengthSizes && ab.lengthSizes.slice()) ||
+        ["50", "52", "54", "56"]
     };
   }
 
@@ -323,17 +346,24 @@
     return getAbayaSizeConfig().lengthSizes[0];
   }
 
-  function getTwoPieceSizeConfig() {
+  function getTwoPieceSizeConfig(product) {
     var tp =
       g.SITE_LINKS &&
       g.SITE_LINKS.defaults &&
       g.SITE_LINKS.defaults.byCategory &&
       g.SITE_LINKS.defaults.byCategory["premium-two-piece"];
+    var p = product || {};
     return {
-      bodySizeLabel: (tp && tp.bodySizeLabel) || "42 (Free size)",
-      bodySizes: (tp && tp.bodySizes && tp.bodySizes.slice()) || null,
-      lengthSizeLabel: (tp && tp.lengthSizeLabel) || "37-38 inch",
-      lengthSizes: (tp && tp.lengthSizes && tp.lengthSizes.slice()) || ["37-38 inch"]
+      bodySizeLabel: p.bodySizeLabel || (tp && tp.bodySizeLabel) || "42 (Free size)",
+      bodySizes:
+        (Array.isArray(p.bodySizes) && p.bodySizes.length && p.bodySizes.slice()) ||
+        (tp && tp.bodySizes && tp.bodySizes.slice()) ||
+        null,
+      lengthSizeLabel: p.lengthSizeLabel || (tp && tp.lengthSizeLabel) || "37-38 inch",
+      lengthSizes:
+        (Array.isArray(p.lengthSizes) && p.lengthSizes.length && p.lengthSizes.slice()) ||
+        (tp && tp.lengthSizes && tp.lengthSizes.slice()) ||
+        ["37-38 inch"]
     };
   }
 

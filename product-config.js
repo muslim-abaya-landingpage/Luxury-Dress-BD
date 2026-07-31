@@ -78,6 +78,26 @@ window.SITE_LINKS = {
       }
     }
   },
+  /** এখানের byCategory.<key>.bodySize / bodySizeLabel / bodySizes /
+   *  lengthSizes হলো ওই ক্যাটাগরির সব প্রোডাক্টের ডিফল্ট। কিন্তু যদি একই
+   *  ক্যাটাগরির মধ্যে কোনো একটা নির্দিষ্ট প্রোডাক্টের বডি সাইজ আলাদা হয়
+   *  (যেমন: বেশিরভাগ Abaya-তে বডি ৪২/৪৪/৪৬ পাওয়া যায়, কিন্তু একটা নির্দিষ্ট
+   *  Abaya-তে শুধু ৪২ পাওয়া যায়) — তাহলে ক্যাটাগরির এই ডিফল্ট বদলানোর দরকার
+   *  নেই। বরং category-products.js-এ ওই নির্দিষ্ট প্রোডাক্টের অবজেক্টে
+   *  সরাসরি এই ফিল্ডগুলো দিন, সেটাই ক্যাটাগরি ডিফল্টের উপর প্রায়োরিটি পাবে:
+   *
+   *  {
+   *    name: "Maroon Abaya Set",
+   *    image: "maroon-abaya.jpeg",
+   *    ... (বাকি স্বাভাবিক ফিল্ড) ...
+   *    bodySizes: ["42"],           // শুধু এই প্রোডাক্টে ৪২ ছাড়া আর কোনো
+   *                                  // বডি সাইজ সিলেক্ট করা যাবে না
+   *    bodySizeLabel: "42 [Free size]"
+   *  }
+   *
+   *  bodySizes না দিলে, বা খালি অ্যারে দিলে, ক্যাটাগরির ডিফল্টই ব্যবহার
+   *  হবে — তাই যেসব প্রোডাক্টে আলাদা করার দরকার নেই, সেগুলোতে কিছু না
+   *  লিখলেই চলবে। */
   defaults: {
     price: 550,
     fabric: "Alex soft Georgette",
@@ -101,7 +121,11 @@ window.SITE_LINKS = {
       "premium-two-piece": {
         price: 550,
         bodySizeLabel: "42 (Free size)",
-        bodySizes: ["42", "44", "46"],
+        /** আগে এখানে bodySizes: ["42","44","46"] ছিল, যেটা bodySizeLabel-এর
+         *  "Free size" কথার সাথে সাংঘর্ষিক ছিল — ফলে সব premium-two-piece
+         *  প্রোডাক্টেই ভুলভাবে ৩টা সিলেক্টেবল বডি-সাইজ বাটন দেখাত। এই
+         *  ক্যাটাগরির ডিফল্ট এখন সত্যিকারের "Free size" (একটাই, non-
+         *  selectable) আচরণ করবে। */
         lengthSizeLabel: "37-38 inch",
         lengthSizes: ["37-38 inch"],
         sizes: ["42 (Free size)"]

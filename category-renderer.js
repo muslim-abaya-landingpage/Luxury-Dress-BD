@@ -225,11 +225,11 @@ function buildShopCartLineSizeKey(item, sizeValue, categoryKey) {
   var isAbaya = typeof isAbayaProduct === "function" && isAbayaProduct(item, categoryKey);
   var isTwoPiece = typeof isTwoPieceProduct === "function" && isTwoPieceProduct(item, categoryKey);
   if (isTwoPiece && typeof formatTwoPieceCartSize === "function") {
-    var tpCfg = typeof getTwoPieceSizeConfig === "function" ? getTwoPieceSizeConfig() : null;
+    var tpCfg = typeof getTwoPieceSizeConfig === "function" ? getTwoPieceSizeConfig(item) : null;
     var tpLen = String(sizeValue || "").trim() || (tpCfg ? tpCfg.lengthSizeLabel : "37-38 inch");
     return formatTwoPieceCartSize(tpLen);
   }
-  var abayaCfg = isAbaya && typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig() : null;
+  var abayaCfg = isAbaya && typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig(item) : null;
   var pickedLength =
     String(sizeValue || "").trim() ||
     (abayaCfg ? abayaCfg.lengthSizes[0] : "50");
@@ -260,8 +260,8 @@ function buildShopCartLineItem(item, qtyToAdd, sizeValue, categoryKeyOpt, select
     "";
   var isAbaya = typeof isAbayaProduct === "function" && isAbayaProduct(item, categoryKey);
   var isTwoPiece = typeof isTwoPieceProduct === "function" && isTwoPieceProduct(item, categoryKey);
-  var abayaCfg = isAbaya && typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig() : null;
-  var twoPieceCfg = isTwoPiece && typeof getTwoPieceSizeConfig === "function" ? getTwoPieceSizeConfig() : null;
+  var abayaCfg = isAbaya && typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig(item) : null;
+  var twoPieceCfg = isTwoPiece && typeof getTwoPieceSizeConfig === "function" ? getTwoPieceSizeConfig(item) : null;
   var pickedLength =
     String(sizeValue || "").trim() ||
     (isTwoPiece && twoPieceCfg
@@ -318,8 +318,8 @@ function shopAddProductToCart(item, qtyToAdd, sizeValue, categoryKeyOpt) {
     "";
   var isAbaya = typeof isAbayaProduct === "function" && isAbayaProduct(item, categoryKey);
   var isTwoPiece = typeof isTwoPieceProduct === "function" && isTwoPieceProduct(item, categoryKey);
-  var abayaCfg = isAbaya && typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig() : null;
-  var twoPieceCfg = isTwoPiece && typeof getTwoPieceSizeConfig === "function" ? getTwoPieceSizeConfig() : null;
+  var abayaCfg = isAbaya && typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig(item) : null;
+  var twoPieceCfg = isTwoPiece && typeof getTwoPieceSizeConfig === "function" ? getTwoPieceSizeConfig(item) : null;
   var pickedLength =
     String(sizeValue || "").trim() ||
     (isTwoPiece && twoPieceCfg
@@ -1470,8 +1470,8 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
   var fabricText = escapeHtml(displayFabricLabel(p.fabric, "Premium Georgette"));
   var isAbaya = typeof isAbayaProduct === "function" && isAbayaProduct(p, categoryKey);
   var isTwoPiece = typeof isTwoPieceProduct === "function" && isTwoPieceProduct(p, categoryKey);
-  var abayaCfg = isAbaya && typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig() : null;
-  var twoPieceCfg = isTwoPiece && typeof getTwoPieceSizeConfig === "function" ? getTwoPieceSizeConfig() : null;
+  var abayaCfg = isAbaya && typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig(p) : null;
+  var twoPieceCfg = isTwoPiece && typeof getTwoPieceSizeConfig === "function" ? getTwoPieceSizeConfig(p) : null;
   var sizes =
     isAbaya && abayaCfg
       ? abayaCfg.lengthSizes.slice()
@@ -2223,10 +2223,10 @@ function buildCardSpecsBlock(p, fabricText, sizeOptions, idx) {
     "</select></div></div>"
   );
 }
-function buildTwoPieceSizeFields() {
+function buildTwoPieceSizeFields(p) {
   var cfg =
     typeof getTwoPieceSizeConfig === "function"
-      ? getTwoPieceSizeConfig()
+      ? getTwoPieceSizeConfig(p)
       : { bodySizeLabel: "42 (Free size)", lengthSizeLabel: "37-38 inch" };
   return (
     "<div class='card-size-block card-size-block--abaya card-size-block--twopiece'>" +
@@ -2240,8 +2240,8 @@ function buildTwoPieceSizeFields() {
     "</span></div></div>"
   );
 }
-function buildAbayaSizeFields(idx, lengthSizes) {
-  var cfg = typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig() : { bodySizeLabel: "46 [Free size]", lengthSizes: ["50", "52", "54", "56"] };
+function buildAbayaSizeFields(idx, lengthSizes, p) {
+  var cfg = typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig(p) : { bodySizeLabel: "46 [Free size]", lengthSizes: ["50", "52", "54", "56"] };
   var lengths = lengthSizes && lengthSizes.length ? lengthSizes : cfg.lengthSizes;
   var sizeOptions = lengths
     .map(function (s, i) {
@@ -2276,9 +2276,9 @@ function buildDetailSpecsBlock(p, fabricText, sizeOptions, idx, categoryKey) {
   var isTwoPiece = typeof isTwoPieceProduct === "function" && isTwoPieceProduct(p, categoryKey);
 
   var sizeBlock = isAbaya
-    ? buildAbayaSizeFields(idx, typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig().lengthSizes : null)
+    ? buildAbayaSizeFields(idx, typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig(p).lengthSizes : null, p)
     : isTwoPiece
-      ? buildTwoPieceSizeFields()
+      ? buildTwoPieceSizeFields(p)
       : "<div class='card-size-block detail-size-block'>" +
         "<span class='card-size-heading'>Size</span>" +
         "<select class='card-size-select' data-size-idx='" +
@@ -2320,8 +2320,8 @@ function buildProductCard(p, idx, waLink, detailMode, categoryKey, allProducts) 
   var fabricText = escapeHtml(displayFabricLabel(p.fabric, detailMode ? "Dubai Cherry" : "Premium Georgette"));
   var isAbaya = typeof isAbayaProduct === "function" && isAbayaProduct(p, categoryKey);
   var isTwoPiece = typeof isTwoPieceProduct === "function" && isTwoPieceProduct(p, categoryKey);
-  var abayaCfg = isAbaya && typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig() : null;
-  var twoPieceCfg = isTwoPiece && typeof getTwoPieceSizeConfig === "function" ? getTwoPieceSizeConfig() : null;
+  var abayaCfg = isAbaya && typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig(p) : null;
+  var twoPieceCfg = isTwoPiece && typeof getTwoPieceSizeConfig === "function" ? getTwoPieceSizeConfig(p) : null;
   var sizes =
     isAbaya && abayaCfg
       ? abayaCfg.lengthSizes.slice()
