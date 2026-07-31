@@ -428,16 +428,29 @@ function resetShopCartContext() {
 }
 function getSelectedSizeForIdx(scopeRoot, idx) {
   if (!scopeRoot) return "50";
+  var bodyVal = "";
+  var bodyPill = scopeRoot.querySelector(
+    ".pqv-body-opt.is-active[data-product-idx='" + idx + "']"
+  );
+  if (bodyPill) bodyVal = bodyPill.getAttribute("data-body-value") || "";
+  var lengthVal = "";
   var activePill = scopeRoot.querySelector(
     ".pqv-length-opt.is-active[data-product-idx='" + idx + "']"
   );
-  if (activePill) return activePill.getAttribute("data-length-value") || "50";
-  activePill = scopeRoot.querySelector(
-    ".pqv-size-opt.is-active[data-product-idx='" + idx + "']"
-  );
-  if (activePill) return activePill.getAttribute("data-size-value") || "50";
-  var sizeEl = scopeRoot.querySelector("[data-size-idx='" + idx + "']");
-  return sizeEl ? sizeEl.value : "50";
+  if (activePill) {
+    lengthVal = activePill.getAttribute("data-length-value") || "50";
+  } else {
+    activePill = scopeRoot.querySelector(
+      ".pqv-size-opt.is-active[data-product-idx='" + idx + "']"
+    );
+    if (activePill) {
+      lengthVal = activePill.getAttribute("data-size-value") || "50";
+    } else {
+      var sizeEl = scopeRoot.querySelector("[data-size-idx='" + idx + "']");
+      lengthVal = sizeEl ? sizeEl.value : "50";
+    }
+  }
+  return bodyVal ? "Body " + bodyVal + " · " + lengthVal : lengthVal;
 }
 const toAsciiDigits = (str) => 
   String(str || "").replace(/[০-৯]/g, d => String.fromCharCode(d.charCodeAt(0) - 2486));
@@ -1052,13 +1065,15 @@ function bindPqvInteractions(p, idx, categoryKey, scopeRoot) {
     });
   });
   bindPqvGalleryArrows(modal);
-  modal.querySelectorAll(".pqv-size-opt, .pqv-length-opt, .pqv-type-opt").forEach(function (btn) {
+  modal.querySelectorAll(".pqv-size-opt, .pqv-length-opt, .pqv-type-opt, .pqv-body-opt").forEach(function (btn) {
     btn.addEventListener("click", function () {
       var groupClass = btn.classList.contains("pqv-type-opt")
         ? ".pqv-type-opt"
         : btn.classList.contains("pqv-length-opt")
           ? ".pqv-length-opt"
-          : ".pqv-size-opt";
+          : btn.classList.contains("pqv-body-opt")
+            ? ".pqv-body-opt"
+            : ".pqv-size-opt";
       modal.querySelectorAll(groupClass).forEach(function (b) {
         if (b.getAttribute("data-product-idx") !== String(idx)) return;
         b.classList.remove("is-active");
@@ -1518,9 +1533,12 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
   var sizeField =
     isAbaya && abayaCfg
       ? '<div class="pqv-field pqv-field-body"><span class="pqv-field-label">Body Size</span><div class="pqv-opt-group">' +
-        '<button type="button" class="pqv-opt-btn is-active" aria-pressed="true" disabled>' +
-        escapeHtml(abayaCfg.bodySizeLabel) +
-        "</button></div></div>" +
+        (Array.isArray(abayaCfg.bodySizes) && abayaCfg.bodySizes.length
+          ? buildPqvOptionPills(abayaCfg.bodySizes, idx, "pqv-body-opt", "data-body-value")
+          : '<button type="button" class="pqv-opt-btn is-active" aria-pressed="true" disabled>' +
+            escapeHtml(abayaCfg.bodySizeLabel) +
+            "</button>") +
+        "</div></div>" +
         '<div class="pqv-field pqv-field-size"><div class="pqv-field-head"><span class="pqv-field-label">Length Size</span>' +
         chartBtn +
         '</div><div class="pqv-opt-group pqv-opt-group-wrap">' +
@@ -1529,9 +1547,12 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
         "</div></div>"
       : isTwoPiece && twoPieceCfg
         ? '<div class="pqv-field pqv-field-body"><span class="pqv-field-label">Body Size</span><div class="pqv-opt-group">' +
-          '<button type="button" class="pqv-opt-btn is-active" aria-pressed="true" disabled>' +
-          escapeHtml(twoPieceCfg.bodySizeLabel) +
-          "</button></div></div>" +
+          (Array.isArray(twoPieceCfg.bodySizes) && twoPieceCfg.bodySizes.length
+            ? buildPqvOptionPills(twoPieceCfg.bodySizes, idx, "pqv-body-opt", "data-body-value")
+            : '<button type="button" class="pqv-opt-btn is-active" aria-pressed="true" disabled>' +
+              escapeHtml(twoPieceCfg.bodySizeLabel) +
+              "</button>") +
+          "</div></div>" +
           '<div class="pqv-field pqv-field-size"><div class="pqv-field-head"><span class="pqv-field-label">Length Size</span>' +
           chartBtn +
           '</div><div class="pqv-opt-group pqv-opt-group-wrap">' +
