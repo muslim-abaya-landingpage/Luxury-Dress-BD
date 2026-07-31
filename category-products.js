@@ -609,7 +609,7 @@ window.CATEGORY_PRODUCTS = {
   ]
 },
 {
-  id: "DR-01",
+  id: "DR-02",
   name: "Baby Pink Floral Print Women's Two-Piece Set",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Baby-Pink-Floral-Print.jpeg",
   link: "/",
@@ -621,7 +621,7 @@ window.CATEGORY_PRODUCTS = {
   detailNote: "Length: 37–38 Inches"
 },
 {
-  id: "DR-08",
+  id: "DR-03",
   name: "Black Rose Floral Print Women's Two-Piece Set",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Black-Base-Rose-Floral.jpeg",
   link: "/",
@@ -633,7 +633,7 @@ window.CATEGORY_PRODUCTS = {
   detailNote: "Length: 37–38 Inches"
 },
 {
-  id: "DR-16",
+  id: "DR-4",
   name: "Black White Polka Dot Women's Two-Piece Set",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Black-White-Polka-Dots.jpeg",
   link: "/",
@@ -645,7 +645,7 @@ window.CATEGORY_PRODUCTS = {
   detailNote: "Length: 37–38 Inches"
 },
 {
-  id: "DR-23",
+  id: "DR-5",
   name: "Royal Blue Golden Floral Print Women's Two-Piece Set",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Royal-Blue-Golden-Floral-Print.jpeg",
   link: "/",
@@ -657,7 +657,7 @@ window.CATEGORY_PRODUCTS = {
   detailNote: "Length: 37–38 Inches"
 },
 {
-  id: "DR-30",
+  id: "DR-6",
   name: "Sage Green Mint Green Women's Two-Piece Set",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Sage%20GreenMint%20Green.jpeg",
   link: "/",
@@ -669,7 +669,7 @@ window.CATEGORY_PRODUCTS = {
   detailNote: "Length: 37–38 Inches"
 },
 {
-  id: "DR-32",
+  id: "DR-7",
   name: "Premium White Pink Floral Print Women's Co-ord Set",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-pink-floral-print-womens-co-ord-set-premium.webp",
   link: "/",
@@ -681,7 +681,7 @@ window.CATEGORY_PRODUCTS = {
   detailNote: "Length: 37–38 Inches"
 },
   {
-  id: "DR-33",
+  id: "DR-8",
   name: "Premium Black Floral Women's Co-ord Set",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-black-floral-womens-co-ord-set-bangladesh.webp",
   link: "/",
@@ -693,7 +693,7 @@ window.CATEGORY_PRODUCTS = {
   detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare"
 },
   {
-  id: "DR-34",
+  id: "DR-9",
   name: "Premium Blue Floral Women's Co-ord Set",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-blue-floral-co-ord-set.webp",
   link: "/",
@@ -705,7 +705,7 @@ window.CATEGORY_PRODUCTS = {
   detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare"
 },
   {
-  id: "DR-35",
+  id: "DR-10",
   name: "Premium Navy Blue Floral Women's Co-ord Set",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-navy-blue-floral-co-ord-set.webp",
   link: "/",
@@ -717,7 +717,7 @@ window.CATEGORY_PRODUCTS = {
   detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare"
 },
   {
-  id: "DR-36",
+  id: "DR-11",
   name: "Premium Pink Floral Women's Co-ord Set",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-pink-floral-co-ord-set.webp",
   link: "/",
@@ -729,7 +729,7 @@ window.CATEGORY_PRODUCTS = {
   detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare"
 },
   {
-  id: "DR-37",
+  id: "DR-12",
   name: "Premium Sky Blue Floral Women's Co-ord Set",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-sky-blue-floral-co-ord-set.webp",
   link: "/",
@@ -741,7 +741,7 @@ window.CATEGORY_PRODUCTS = {
   detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare"
 },
   {
-  id: "DR-38",
+  id: "DR-13",
   name: "Premium Black Floral Women's Co-ord Set",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-black-floral-co-ord-set-gold-accent.webp",
   link: "/",
@@ -753,7 +753,7 @@ window.CATEGORY_PRODUCTS = {
   detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare"
 },
  {
-  id: "DR-31",
+  id: "DR-14",
   name: "Black Floral Georgette Set",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/black-floral-georgette-two-piece-set-bangladesh.jpg",
   link: "/",
@@ -765,17 +765,22 @@ window.CATEGORY_PRODUCTS = {
   detailNote: "Length: 37–38 Inches"
 },
 {
-  id: "KURTI-30",
-  name: "Premium Tribal Print Women's Two-Piece Set",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Tribal-Print-Women's-Two-Piece-Set.webp",
+  id: "KURTI-15",
+  name: "Premium Green Cotton Embroidered Women's Two-Piece Set",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-green-cotton-embroidered-2-piece-women-salwar-kameez-set-bangladesh-1080x1350.webp",
   link: "/",
-  price: 450,
-  color: "multicolor",
-  colorLabel: "Rust Brown / Black / Navy Blue / Cherry Red",
+  price: 750,
+  color: "green",
+  colorLabel: "Green",
   fabric: "Premium Cotton Fabric",
-  sizes: ["34-46"],
-  detailNote: "Premium tribal print cotton two-piece set available in four elegant colors. Soft premium cotton fabric with stylish tribal doll print."
-}
+  detailNote: "Elegant embroidered design, soft breathable cotton fabric, comfortable everyday fit. Top Length: 38–40 Inches | Pants Length: 38 Inches",
+  bodySizes: ["34", "36", "38", "40", "42", "44", "46"],
+  sizeSpecs: [
+    { label: "Top Length", value: "38–40 Inches" },
+    { label: "Pants Length", value: "38 Inches" }
+  ]
+},
+   
 ],
 /* ═══ ⑤ এম্ব্রয়ডারি — খালি ═══ */
 embroidery: [
