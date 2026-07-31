@@ -297,6 +297,7 @@
     return {
       bodySize: (ab && ab.bodySize) || "46",
       bodySizeLabel: (ab && ab.bodySizeLabel) || "46 [Free size]",
+      bodySizes: (ab && ab.bodySizes && ab.bodySizes.slice()) || null,
       lengthSizes: (ab && ab.lengthSizes && ab.lengthSizes.slice()) || ["50", "52", "54", "56"]
     };
   }
@@ -330,6 +331,7 @@
       g.SITE_LINKS.defaults.byCategory["premium-two-piece"];
     return {
       bodySizeLabel: (tp && tp.bodySizeLabel) || "42 (Free size)",
+      bodySizes: (tp && tp.bodySizes && tp.bodySizes.slice()) || null,
       lengthSizeLabel: (tp && tp.lengthSizeLabel) || "37-38 inch",
       lengthSizes: (tp && tp.lengthSizes && tp.lengthSizes.slice()) || ["37-38 inch"]
     };
