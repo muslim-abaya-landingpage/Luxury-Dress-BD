@@ -594,16 +594,17 @@ window.CATEGORY_PRODUCTS = {
   name: "White Strawberry Print Women's Two-Piece Set",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/muslimabaya-white-strawberry-print-cotton-kurti-set-for-women.webp",
   link: "/",
-  price: 750,
+  price: 650,
   color: "white",
   colorLabel: "White / Strawberry Print",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Material: Premium Cotton Fabric | Top Length: 38–40 Inches | Pant Length: 38 Inches",
-  // Premium size section
+  // Premium Body Size
   bodySizeLabel: "34–46",
+
+  // Only additional specifications
   sizeSpecs: [
-    { label: "Body Size", value: "34–46" },
     { label: "Top Length", value: "38–40 Inches" },
     { label: "Pant Length", value: "38 Inches" }
   ]
