@@ -356,9 +356,5 @@ body.shop-page .card-actions-anzaar .ma-qty-stepper__btn:disabled {
 }
 
 /* ================================================================
-   SECTION: সাইজ ফিল্ড — শুধু একটাই "Size" দেখানো হয় (Body Size আলাদা
-   লাইন হিসেবে দেখানো হয় না, Anzaar রেফারেন্সের মতোই)
+   Body Size field — shown alongside Length Size (kept visible).
 ================================================================ */
-body.shop-page .pqv-field-body {
-  display: none;
-}

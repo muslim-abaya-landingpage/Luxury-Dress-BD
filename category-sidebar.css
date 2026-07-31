@@ -1761,6 +1761,22 @@ body.shop-product-open > main {
   margin-bottom: 0;
 }
 
+.pqv-field + .pqv-field {
+  margin-top: 16px;
+}
+
+/* Long option rows (e.g. Body Size 34–46) scroll horizontally instead of
+   wrapping to many lines, keeping each size row compact and premium. */
+.pqv-opt-group--scroll {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+}
+.pqv-opt-group--scroll .pqv-opt-btn {
+  flex: 0 0 auto;
+}
+
 .pqv-field-label {
   display: block;
   margin-bottom: 8px;
