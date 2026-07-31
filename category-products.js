@@ -592,7 +592,7 @@ window.CATEGORY_PRODUCTS = {
  {
   id: "DR-01",
   name: "White Strawberry Print Women's Two-Piece Set",
-  image: "https://raw.githubusercontent.com/.../muslimabaya-white-strawberry-print-cotton-kurti-set-for-women.webp",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/muslimabaya-white-strawberry-print-cotton-kurti-set-for-women.webp",
   link: "/",
   price: 650,
   color: "white",
