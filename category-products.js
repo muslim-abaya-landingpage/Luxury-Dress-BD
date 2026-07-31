@@ -588,19 +588,19 @@ window.CATEGORY_PRODUCTS = {
 }
 ],
 /* ═══ ④ টু-পিস সারি · PREMIUM TWO-PIECE · premium-two-piece.html ═══ */
-  "premium-two-piece": [
+ "premium-two-piece": [
   {
-  id: "DR-29",
-  name: "Baby Pink Light Pink Women's Two-Piece Set",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Baby%20PinkLight%20Pink.jpeg",
-  link: "/",
-  price: 550,
-  color: "pink",
-  colorLabel: "Baby Pink / Light Pink",
-  fabric: "Alex Soft Georgette",
-  sizes: ["Body 42 (Free Size)"],
-  detailNote: "Length: 37–38 Inches"
-},
+    id: "DR-01",
+    name: "White Strawberry Print Women's Two-Piece Set",
+    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/muslimabaya-white-strawberry-print-cotton-kurti-set-for-women.webp",
+    link: "/",
+    price: 650,
+    color: "white",
+    colorLabel: "White / Strawberry Print",
+    fabric: "Premium Cotton Fabric",
+    sizes: ["Body 34–46"],
+    detailNote: "Kurti Length: 40–42 Inches | Pant Length: 38–40 Inches"
+  },
 {
   id: "DR-01",
   name: "Baby Pink Floral Print Women's Two-Piece Set",
