@@ -209,7 +209,20 @@ window.CATEGORY_PRODUCTS = {
   }
 ],
   /* ═══ ② কভার আপ — খালি (প্রোডাক্ট-এডিট.bat থেকে যোগ করুন) ═══ */
-  "cover-up": [],
+  "cover-up": [
+  {
+  id: "ABY-COVERUP-01",
+  name: "Premium Black Butterfly Khimar Abaya with Niqab",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/cover-up/premium-black-butterfly-khimar-abaya-with-niqab-luxury-modest-fashion-bangladesh-1080x1350.webp",
+  link: "/",
+  price: 1800,
+  color: "black",
+  colorLabel: "Classic Black",
+  fabric: "Premium Cherry Fabric",
+  sizes: ["50", "52", "54", "56", "58"],
+  detailNote: "Premium butterfly khimar abaya with matching niqab, crafted from high-quality Cherry Fabric. Soft, breathable, lightweight, and designed for elegant modest wear with a graceful flow and premium finishing."
+}
+  ],
 
   /* ═══ TOPS / KURTI LIST ═══ */
 
