@@ -464,7 +464,7 @@ window.CATEGORY_PRODUCTS = {
   color: "black",
   colorLabel: "Black / White",
   fabric: "Premium Cotton Fabric",
-  sizes: ["34-46"],
+  sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Elegant Black & White floral print puff sleeve maxi dress. Length: 43–44 Inches, Flare: 80 Inches."
 },
 {
@@ -476,7 +476,7 @@ window.CATEGORY_PRODUCTS = {
   color: "white",
   colorLabel: "White / Yellow",
   fabric: "Premium Cotton Fabric",
-  sizes: ["34-46"],
+  sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Elegant White & Yellow floral print puff sleeve cotton maxi dress. Length: 43–44 Inches, Flare: 80 Inches."
 },
 {
@@ -488,7 +488,7 @@ window.CATEGORY_PRODUCTS = {
   color: "navy",
   colorLabel: "Navy Blue / White",
   fabric: "Premium Cotton Fabric",
-  sizes: ["34-46"],
+  sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Elegant Navy Blue & White floral print cotton maxi dress. Length: 43–44 Inches, Flare: 80 Inches."
 },
 {
@@ -500,7 +500,7 @@ window.CATEGORY_PRODUCTS = {
   color: "cream",
   colorLabel: "Cream / Black",
   fabric: "Premium Cotton Fabric",
-  sizes: ["34-46"],
+  sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Elegant Cream & Black floral print cotton maxi dress. Length: 43–44 Inches, Flare: 80 Inches."
 },
 {
@@ -512,7 +512,7 @@ window.CATEGORY_PRODUCTS = {
   color: "green",
   colorLabel: "Sage Green / White",
   fabric: "Premium Cotton Fabric",
-  sizes: ["34-46"],
+  sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Elegant Sage Green & White floral print cotton maxi dress. Length: 43–44 Inches, Flare: 80 Inches."
 },
 {
@@ -524,7 +524,7 @@ window.CATEGORY_PRODUCTS = {
   color: "black",
   colorLabel: "Black / White",
   fabric: "Premium Cotton Fabric",
-  sizes: ["34-46"],
+  sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Elegant black & white geometric print premium cotton one-piece kurti. Length: 43–44 Inches, Flare: 80 Inches."
 },
 {
