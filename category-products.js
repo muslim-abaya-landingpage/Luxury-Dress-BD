@@ -536,7 +536,7 @@ window.CATEGORY_PRODUCTS = {
   color: "black",
   colorLabel: "Black",
   fabric: "Premium Cotton Fabric",
-  sizes: ["34-46"],
+  sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 43–44 inches, flare: 80 inches."
 },
 {
@@ -548,7 +548,7 @@ window.CATEGORY_PRODUCTS = {
   color: "red",
   colorLabel: "Cherry Red",
   fabric: "Premium Cotton Fabric",
-  sizes: ["34-46"],
+  sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 43–44 inches, flare: 80 inches."
 },
 {
@@ -560,7 +560,7 @@ window.CATEGORY_PRODUCTS = {
   color: "blue",
   colorLabel: "Navy Blue",
   fabric: "Premium Cotton Fabric",
-  sizes: ["34-46"],
+  sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 43–44 inches, flare: 80 inches."
 },
 {
@@ -572,7 +572,7 @@ window.CATEGORY_PRODUCTS = {
   color: "brown",
   colorLabel: "Rust Brown",
   fabric: "Premium Cotton Fabric",
-  sizes: ["34-46"],
+  sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 43–44 inches, flare: 80 inches."
 },
 {
@@ -584,7 +584,7 @@ window.CATEGORY_PRODUCTS = {
   color: "pink",
   colorLabel: "Pink Floral",
   fabric: "Premium Cotton Fabric",
-  sizes: ["34-46"],
+  sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Premium cotton midi dress with elegant pink floral print. Soft, breathable fabric with a comfortable A-line fit for everyday wear."
 },
 {
@@ -596,7 +596,7 @@ window.CATEGORY_PRODUCTS = {
   color: "yellow",
   colorLabel: "Yellow Striped",
   fabric: "Premium Cotton Fabric",
-  sizes: ["34-46"],
+  sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Premium cotton midi dress featuring elegant yellow striped design. Soft, breathable fabric with a stylish and comfortable fit for daily wear."
 }
 ],
