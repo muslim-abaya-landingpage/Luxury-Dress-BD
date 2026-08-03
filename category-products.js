@@ -441,7 +441,7 @@ window.CATEGORY_PRODUCTS = {
   colorLabel: "Sky Blue",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Premium sky blue botanical print cotton dress. Length: 43–44 Inches, Flare: 80 Inches"
+  detailNote: "Premium sky blue botanical print cotton dress. Length: 38–40 Inches, Flare: 80 Inches"
 },
 {
   id: "KURTI-19",
@@ -453,7 +453,7 @@ window.CATEGORY_PRODUCTS = {
   colorLabel: "White / Lilac",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Elegant white and lilac botanical print cotton one piece dress. Length: 43–44 Inches, Flare: 80 Inches"
+  detailNote: "Elegant white and lilac botanical print cotton one piece dress. Length: 38–40 Inches, Flare: 80 Inches"
 },
 {
   id: "KURTI-20",
@@ -465,7 +465,7 @@ window.CATEGORY_PRODUCTS = {
   colorLabel: "Black / White",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Elegant Black & White floral print puff sleeve maxi dress. Length: 43–44 Inches, Flare: 80 Inches."
+  detailNote: "Elegant Black & White floral print puff sleeve maxi dress. Length: 38–40 Inches, Flare: 80 Inches."
 },
 {
   id: "KURTI-21",
@@ -477,7 +477,7 @@ window.CATEGORY_PRODUCTS = {
   colorLabel: "White / Yellow",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Elegant White & Yellow floral print puff sleeve cotton maxi dress. Length: 43–44 Inches, Flare: 80 Inches."
+  detailNote: "Elegant White & Yellow floral print puff sleeve cotton maxi dress. Length: 38–40 Inches, Flare: 80 Inches."
 },
 {
   id: "KURTI-22",
@@ -489,7 +489,7 @@ window.CATEGORY_PRODUCTS = {
   colorLabel: "Navy Blue / White",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Elegant Navy Blue & White floral print cotton maxi dress. Length: 43–44 Inches, Flare: 80 Inches."
+  detailNote: "Elegant Navy Blue & White floral print cotton maxi dress. Length: 38–40 Inches, Flare: 80 Inches."
 },
 {
   id: "KURTI-23",
@@ -501,7 +501,7 @@ window.CATEGORY_PRODUCTS = {
   colorLabel: "Cream / Black",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Elegant Cream & Black floral print cotton maxi dress. Length: 43–44 Inches, Flare: 80 Inches."
+  detailNote: "Elegant Cream & Black floral print cotton maxi dress. Length: 38–40 Inches, Flare: 80 Inches."
 },
 {
   id: "KURTI-24",
@@ -513,7 +513,7 @@ window.CATEGORY_PRODUCTS = {
   colorLabel: "Sage Green / White",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Elegant Sage Green & White floral print cotton maxi dress. Length: 43–44 Inches, Flare: 80 Inches."
+  detailNote: "Elegant Sage Green & White floral print cotton maxi dress. Length: 38–40 Inches, Flare: 80 Inches."
 },
 {
   id: "KURTI-25",
@@ -525,7 +525,7 @@ window.CATEGORY_PRODUCTS = {
   colorLabel: "Black / White",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Elegant black & white geometric print premium cotton one-piece kurti. Length: 43–44 Inches, Flare: 80 Inches."
+  detailNote: "Elegant black & white geometric print premium cotton one-piece kurti. Length: 38–40 Inches, Flare: 80 Inches."
 },
 {
   id: "KURTI-26",
@@ -537,7 +537,7 @@ window.CATEGORY_PRODUCTS = {
   colorLabel: "Black",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 43–44 inches, flare: 80 inches."
+  detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 38–40 inches, flare: 80 inches."
 },
 {
   id: "KURTI-27",
@@ -549,7 +549,7 @@ window.CATEGORY_PRODUCTS = {
   colorLabel: "Cherry Red",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 43–44 inches, flare: 80 inches."
+  detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 38–40 inches, flare: 80 inches."
 },
 {
   id: "KURTI-28",
@@ -561,7 +561,7 @@ window.CATEGORY_PRODUCTS = {
   colorLabel: "Navy Blue",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 43–44 inches, flare: 80 inches."
+  detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 38–40 inches, flare: 80 inches."
 },
 {
   id: "KURTI-29",
@@ -573,7 +573,7 @@ window.CATEGORY_PRODUCTS = {
   colorLabel: "Rust Brown",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 43–44 inches, flare: 80 inches."
+  detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 38–40 inches, flare: 80 inches."
 },
 {
   id: "KURTI-32",
