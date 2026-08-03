@@ -2,7 +2,13 @@
    Custom Size Modal (reusable, self-contained component)
    Include on ANY page:
      <link rel="stylesheet" href="custom-size-modal.css">
-     <script src="custom-size-modal.js"></script>
+     <script defer src="custom-size-modal.js"></script>
+
+   RESTORED — a second, simpler version of this same file (static-HTML-only,
+   no window.openCustomSizeModal API) was uploaded later and overwrote this
+   one. That broke every category page: category-renderer.js calls
+   window.openCustomSizeModal({...}) directly (see category-renderer.js
+   ~line 1123), which only this dynamic version provides. Keep THIS version.
 
    Two ways to open it:
    1) From code (category pages / product.html already do this):

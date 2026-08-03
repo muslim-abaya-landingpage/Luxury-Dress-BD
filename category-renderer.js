@@ -25,6 +25,16 @@
    ============================================================================ */
 
 function ensureCategoryStyles() {
+  // ⚠️ SPEED FIX — this used to unconditionally overwrite .href on links
+  // that the page's own <head> already declares, using DIFFERENT
+  // cache-busting query strings ("?v=20260603vc14" here vs
+  // "?v=20260603wholesale" / "?v=20260603cart14" in the HTML). A stylesheet
+  // <link> re-fetches whenever its href string changes, so on every single
+  // category-page load this silently downloaded category-sidebar.css (45KB),
+  // qty-stepper.css, and shop-page.css a SECOND time under a different URL —
+  // pure wasted bandwidth/latency, on top of whatever the HTML already loaded.
+  // Fix: only set href when WE create the link (page didn't already have
+  // one). If the HTML already declared it, leave its href alone.
   var link =
     document.getElementById("category-sidebar-css") ||
     document.querySelector('link[href*="category-sidebar.css"]');
@@ -32,9 +42,9 @@ function ensureCategoryStyles() {
     link = document.createElement("link");
     link.id = "category-sidebar-css";
     link.rel = "stylesheet";
+    link.href = "category-sidebar.css?v=20260603wholesale";
     document.head.appendChild(link);
   }
-  link.href = "category-sidebar.css?v=20260603vc14";
   var qtyLink =
     document.getElementById("qty-stepper-css") ||
     document.querySelector('link[href*="qty-stepper.css"]');
@@ -42,11 +52,19 @@ function ensureCategoryStyles() {
     qtyLink = document.createElement("link");
     qtyLink.id = "qty-stepper-css";
     qtyLink.rel = "stylesheet";
+    qtyLink.href = "qty-stepper.css?v=20260531qty2";
     document.head.appendChild(qtyLink);
   }
-  qtyLink.href = "qty-stepper.css?v=20260531qty2";
+  // shop-page.css: only touch it if this page genuinely never declared it
+  // (it always does on shop/category pages) — otherwise leave the
+  // HTML-declared version alone so it isn't fetched twice.
   var shopLink = document.querySelector('link[href*="shop-page.css"]');
-  if (shopLink) shopLink.href = "shop-page.css?v=20260603vc14";
+  if (!shopLink) {
+    shopLink = document.createElement("link");
+    shopLink.rel = "stylesheet";
+    shopLink.href = "shop-page.css?v=20260603cart14";
+    document.head.appendChild(shopLink);
+  }
 }
 
 /** Category key on <html> (SEO) or <body> (legacy SPA). */

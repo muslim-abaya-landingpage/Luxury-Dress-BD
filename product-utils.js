@@ -35,13 +35,39 @@
     });
   }
 
+  // raw.githubusercontent.com is NOT a CDN — no resizing, no edge caching
+  // tuned for Bangladesh, and GitHub actively rate-limits/throttles raw
+  // content. Most product entries in category-products.js already store
+  // a full "https://raw.githubusercontent.com/.../images/<file>" URL, and
+  // the old code below just returned any "https://" URL unchanged — so
+  // ~87% of product images were served straight from GitHub on every page.
+  //
+  // Fix (opt-in, non-breaking): when SITE_LINKS.images.useLocalImages is
+  // true, any raw.githubusercontent.com product image URL is rewritten to
+  // <localBase><filename> instead — e.g. it becomes "images/dress.webp".
+  // Turn this on ONLY after you've actually copied the real image files
+  // into your own images/ folder (or a proper CDN) — until then, leave it
+  // false (the default) and nothing changes/breaks.
+  var GITHUB_RAW_HOST_RE = /^https?:\/\/raw\.githubusercontent\.com\//i;
+
+  function rewriteGithubRawToLocal(url) {
+    var imgCfg = getLinks().images || {};
+    if (!imgCfg.useLocalImages) return url;
+    if (!GITHUB_RAW_HOST_RE.test(url)) return url;
+    var file = fileNameFromUrl(url);
+    if (!file) return url;
+    var base = imgCfg.localBase || "images/";
+    if (base.charAt(base.length - 1) !== "/") base += "/";
+    return base + file;
+  }
+
   function resolveImageUrl(raw) {
     var url = String(raw || "").trim();
     if (!url) return "";
     url = applyReplaceRules(url);
 
     if (/^https?:\/\//i.test(url) || url.indexOf("data:") === 0) {
-      return url;
+      return rewriteGithubRawToLocal(url);
     }
 
     var imgCfg = getLinks().images || {};

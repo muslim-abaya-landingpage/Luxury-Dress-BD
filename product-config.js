@@ -16,7 +16,21 @@ window.SITE_LINKS = {
     /** পুরনো লিংক একসাথে বদলাতে (উদাহরণ):
      *  { from: "https://old-cdn.com/", to: "https://new-cdn.com/" }
      */
-    replace: []
+    replace: [],
+    /** ⚠️ SPEED FIX — এখন category-products.js-এর প্রায় সব প্রোডাক্টের
+     *  image সরাসরি "https://raw.githubusercontent.com/..." — যা কোনো
+     *  CDN না (স্লো, রিসাইজ নেই, GitHub প্রায়ই rate-limit করে)।
+     *
+     *  ধাপ ১: এই ছবিগুলোর real ফাইল আপনার নিজের সার্ভারে "images/"
+     *          ফোল্ডারে আসল ফাইলনাম দিয়ে কপি করুন (URL-এর শেষ অংশটাই
+     *          ফাইলনাম, যেমন "premium-black-3-part-abaya-set-...webp")
+     *  ধাপ ২: সব ফাইল কপি হয়ে গেলে এটা true করে দিন — এরপর
+     *          resolveImageUrl() (product-utils.js) স্বয়ংক্রিয়ভাবে
+     *          raw.githubusercontent.com লিংককে "images/<file>" দিয়ে
+     *          রিপ্লেস করবে, category-products.js-এর কোনো লাইন হাতে
+     *          বদলাতে হবে না।
+     *  false থাকা অবস্থায় সাইট এখনকার মতোই চলবে — কিছু ভাঙবে না। */
+    useLocalImages: false
   },
   productPage: {
     /** এখনো প্রোডাক্ট ডিটেইল পেজ নেই — false রাখুন */

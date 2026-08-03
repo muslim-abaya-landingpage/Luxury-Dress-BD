@@ -14,7 +14,8 @@
     <link rel="stylesheet" href="site-header.css?v=20260603logo">
     <link rel="stylesheet" href="site-footer.css?v=20260603footen">
     <link rel="stylesheet" href="cart-drawer.css?v=20260528b">
-    <link rel="stylesheet" href="mobile-bottom-nav.css">
+    <link rel="stylesheet" href="mobile-bottom-nav.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="mobile-bottom-nav.css"></noscript>
     <style>
         :root {
             --ink: #111111;
@@ -1616,8 +1617,9 @@
             }
         }
     </style>
-<link rel="stylesheet" href="remove-confirm-modal.css">
-<script src="config.js"></script>
+<link rel="stylesheet" href="remove-confirm-modal.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="remove-confirm-modal.css"></noscript>
+<script defer src="config.js"></script>
 </head>
 <body>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-ML7RL6BR"
