@@ -19,21 +19,23 @@
  * ═══════════════════════════════════════════════════════════════════
  */
 window.SITE_HERO_CONFIG = {
-  eyebrow: "Eid Collection 2026",
+  eyebrow: "Premium Modest Wear",
   heading: "Experience<br>the Elegance",
   subtitle: "Premium modest wear crafted with comfort & purity.",
   buttonText: "Shop Now",
 
   slides: [
     {
-      image: "images/hero-banner/premium-black-floral-embroidery-abaya-bangladesh-model-original-dubai-cherry-fabric.webp",
+      image: "images/hero-banner/premium-black-floral-embroidery-abaya-bangladesh-model-original-dubai-cherry-fabric-(2).webp",
       link: "/abaya",
       alt: "Premium Abaya Collection"
     },
     {
+      // TODO: এটা এখনো abaya-র ছবি — tops-kurti-র hero-সাইজের (1920x840)
+      // আসল ছবি রেডি হলে এখানে বদলে দিন
       image: "images/hero-banner/muslim-abaya-homepage-hero-banner.webp",
-      link: "/abaya",
-      alt: "Muslim Abaya Collection"
+      link: "/tops-kurti",
+      alt: "Tops & Kurti Collection"
     },
     {
       // TODO: এটা এখনো "3-part abaya set" ছবি — আসল two-piece hero ছবি
@@ -48,7 +50,9 @@ window.SITE_HERO_CONFIG = {
       alt: "Embroidery Collection"
     },
     {
-      image: "images/hero-banner/premium-short-khimar-hijab-hero-banner-1920x840.webp",
+      // চ.দ্র.: GitHub-এ ফাইলনেমে টাইপো আছে ("pr" মিসিং) — সঠিক নাম হলে
+      // "premium-short-khimar-hijab-hero-banner-1920x840.webp" ব্যবহার করুন
+      image: "images/hero-banner/emium-short-khimar-hijab-hero-banner-1920x840.webp",
       link: "/hijab",
       alt: "Premium Khimar Hijab"
     },
