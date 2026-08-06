@@ -767,16 +767,16 @@ window.CATEGORY_PRODUCTS = {
   detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare"
 },
  {
-  id: "DR-14",
-  name: "Black Floral Georgette Set",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/black-floral-georgette-two-piece-set-bangladesh.jpg",
+  id: "TP-14",
+  name: "Premium Green Yellow Floral Women's 2-Piece Set",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-green-yellow-floral-cotton-womens-maxi-dress-bangladesh-1080x1350.webp",
   link: "/",
-  price: 650,
-  color: "black",
-  colorLabel: "Black Floral",
-  fabric: "Premium Soft Georgette",
-  sizes: ["Body 42 (Free Size)"],
-  detailNote: "Length: 37–38 Inches"
+  price: 1000,
+  color: "green",
+  colorLabel: "Green Yellow Floral",
+  fabric: "Premium V.I.P Linen",
+  sizes: ["34", "36", "38", "40", "42", "44", "46"],
+  detailNote: "Top: 38\" | Pant: 40\" | Gher: 120\""
 },
 {
   id: "KURTI-15",
