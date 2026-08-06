@@ -775,7 +775,7 @@ window.CATEGORY_PRODUCTS = {
   color: "green",
   colorLabel: "Green Yellow Floral",
   fabric: "Premium V.I.P Linen",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
+  bodySizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Top: 38\" | Pant: 40\" | Gher: 120\""
 },
 {
