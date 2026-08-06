@@ -679,8 +679,9 @@ window.CATEGORY_PRODUCTS = {
   color: "navy-blue",
   colorLabel: "Navy Blue",
   fabric: "Premium V.I.P Linen",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Top: 38 in | Pant: 40 in | Gher: 120 in",
+  bodySizes: ["34", "36", "38", "40", "42", "44", "46"],
+  lengthSizes: ["38 inch"],
+  detailNote: "Pant: 40 in | Gher: 120 in",
   sku: "TP15-NB-BICYCLE-VIP-1000"
 },
 {
