@@ -29,6 +29,12 @@
     if (typeof window.__homeRefreshCatalog === "function") {
       window.__homeRefreshCatalog({ deferHero: true });
     }
+    // index.html listens for this to start index-home-anzaar.js /
+    // related-cart.js as soon as the catalog is actually ready, instead of
+    // always waiting out its 3000ms fallback timer. This was previously
+    // never dispatched, so every homepage load paid the full fallback delay
+    // regardless of how quickly the catalog chain above actually finished.
+    window.dispatchEvent(new CustomEvent("ma:catalog-ready"));
   }
 
   function loadAt(i) {

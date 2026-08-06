@@ -112,7 +112,18 @@
 
   window.addEventListener("storeCartUpdated", refreshBadge);
 
+// IMPORTANT: chain the previous window.updateCartBadge instead of replacing
+// it. cart-drawer.js (loaded earlier on every page) already wraps
+// updateCartBadge to also call window.updateCartDrawerUI(), which is what
+// keeps the open cart drawer's item list/total in sync when qty +/- or
+// remove is used. Overwriting it here (as this used to do) silently broke
+// that refresh on every page, since this file always loads last.
+const previousUpdateCartBadge = window.updateCartBadge;
 window.updateCartBadge = (cartLines) => {
+  if (typeof previousUpdateCartBadge === "function") {
+    previousUpdateCartBadge(cartLines);
+  }
+
   const total = (cartLines || []).reduce(
     (sum, item) => sum + (parseInt(item.quantity, 10) || 0),
     0

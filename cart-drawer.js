@@ -19,7 +19,7 @@ function ensureCartDrawerRelatedStyles() {
       color: #111; letter-spacing: -0.01em; text-transform: uppercase; font-size: 12px;
     }
     .related-grid {
-      display: flex; gap: 12px; overflow-x: auto; overflow-y: hidden;
+      display: flex; gap: 12px; overflow-x: auto; overflow-y: visible;
       padding: 4px 4px 12px; margin: 0 -4px;
       scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
       scrollbar-width: thin; max-width: 100%;
@@ -386,14 +386,29 @@ if (typeof document !== 'undefined' && !window.__cartDrawerOpenBound) {
 }
 
 // Self initialize
+//
+// This file is loaded as a `defer` script near the top of most pages'
+// script lists. By the time any defer script runs, document.readyState is
+// already 'interactive' (never 'loading') -- defer scripts execute during
+// the 'interactive' phase, before DOMContentLoaded fires. Checking for
+// `!== 'loading'` therefore always took the "run immediately" branch below,
+// which ran ensureCartDrawerHtml()/updateCartDrawerUI() before later defer
+// scripts (category-products.js, product-links-data.js, etc.) had a chance
+// to define window.CATEGORY_PRODUCTS / window.getRelatedProducts -- so a
+// returning visitor with items already in their cart would silently get no
+// "Customers also bought" row on first paint. Wait for DOMContentLoaded
+// instead: it only fires after every defer script has finished, so this is
+// guaranteed to run last among them. If this file is ever loaded well after
+// the page is fully done (readyState 'complete'), DOMContentLoaded has
+// already fired and never will again, so run immediately in that case.
 if (typeof document !== 'undefined') {
-  if (document.readyState !== 'loading') {
+  if (document.readyState === 'complete') {
     ensureCartDrawerHtml();
     window.updateCartDrawerUI();
   } else {
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', function () {
       ensureCartDrawerHtml();
       window.updateCartDrawerUI();
-    });
+    }, { once: true });
   }
 }

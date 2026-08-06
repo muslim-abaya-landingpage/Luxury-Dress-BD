@@ -50,9 +50,9 @@ window.SITE_HERO_CONFIG = {
       alt: "Embroidery Collection"
     },
     {
-      // চ.দ্র.: GitHub-এ ফাইলনেমে টাইপো আছে ("pr" মিসিং) — সঠিক নাম হলে
-      // "premium-short-khimar-hijab-hero-banner-1920x840.webp" ব্যবহার করুন
-      image: "images/hero-banner/emium-short-khimar-hijab-hero-banner-1920x840.webp",
+      // পূর্বে ফাইলনেমে টাইপো ছিল ("pr" মিসিং, "emium-..." হয়ে গিয়েছিল) —
+      // ঠিক করা হলো। যদি আসল ফাইলটার নাম আসলে অন্য কিছু হয়, এখানে মিলিয়ে বদলে দিন।
+      image: "images/hero-banner/premium-short-khimar-hijab-hero-banner-1920x840.webp",
       link: "/hijab",
       alt: "Premium Khimar Hijab"
     },

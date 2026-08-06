@@ -84,7 +84,7 @@
   function starsHtml(count) {
     var n = Math.max(0, Math.min(5, count | 0));
     var html = '<span class="ma-review-stars" aria-label="' + n + ' out of 5 stars">';
-    for (var i = 0; i < 5; i++) html += STAR;
+    for (var i = 0; i < n; i++) html += STAR;
     return html + "</span>";
   }
 
