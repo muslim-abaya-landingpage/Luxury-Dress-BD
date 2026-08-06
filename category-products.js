@@ -671,16 +671,17 @@ window.CATEGORY_PRODUCTS = {
   detailNote: "Length: 37–38 Inches"
 },
 {
-  id: "DR-6",
-  name: "Sage Green Mint Green Women's Two-Piece Set",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Sage%20GreenMint%20Green.jpeg",
+  id: "TP-6",
+  name: "Premium Navy Blue Bicycle Print Women's Tiered Maxi Dress",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-navy-blue-bicycle-print-womens-tiered-maxi-dress-bangladesh-1080x1350.webp",
   link: "/",
-  price: 550,
-  color: "green",
-  colorLabel: "Sage Green / Mint Green",
-  fabric: "Alex Soft Georgette",
-  sizes: ["Body 42 (Free Size)"],
-  detailNote: "Length: 37–38 Inches"
+  price: 1000,
+  color: "navy-blue",
+  colorLabel: "Navy Blue",
+  fabric: "Premium V.I.P Linen",
+  sizes: ["34", "36", "38", "40", "42", "44", "46"],
+  detailNote: "Top: 38 in | Pant: 40 in | Gher: 120 in",
+  sku: "TP15-NB-BICYCLE-VIP-1000"
 },
 {
   id: "DR-7",
