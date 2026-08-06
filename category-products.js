@@ -775,8 +775,9 @@ window.CATEGORY_PRODUCTS = {
   color: "green",
   colorLabel: "Green Yellow Floral",
   fabric: "Premium V.I.P Linen",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Top: 38 in | Pant: 40 in | Gher: 120 in"
+  bodySizes: ["34", "36", "38", "40", "42", "44", "46"],
+  lengthSizes: ["Top: 38 in", "Pant: 40 in"],
+  detailNote: "Gher: 120 in"
 },
 {
   id: "KURTI-15",
