@@ -10,7 +10,14 @@
 
   var TK = "\u09F3"; // ৳
   var MAX_CARDS_PER_SECTION = 10;
-  var HERO_SLIDES = 5;
+  // Was 5 -- hero-banner-config.js's manual `slides` array has 6 entries
+  // (abaya, tops-kurti, premium-two-piece, embroidery, hijab, panjabi), so
+  // capping at 5 silently dropped the last configured slide (panjabi) from
+  // ever rendering. Raised to 6 so every manually configured slide shows.
+  // If you add more slides to hero-banner-config.js later, raise this to
+  // match -- it's a hard cap on both the manual-slides path and the
+  // catalog auto-pick fallback.
+  var HERO_SLIDES = 6;
   var HERO_INTERVAL = 5000;
 
   var heroTimer = null;
