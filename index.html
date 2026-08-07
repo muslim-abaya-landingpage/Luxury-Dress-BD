@@ -156,7 +156,10 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
 <script type="module" src="cart-utils.js?v=20260603homeqty"></script>
 <script type="module" src="cart-toast.js?v=20260603cartqty"></script>
 <script type="module" src="cart-drawer.js?v=20260528b"></script>
-<link rel="stylesheet" href="related-cart.css">
+<!-- related-cart.css removed: its .related-item/.related-grid rules never
+     matched cart-drawer.js's actual rendered markup (class .related-card),
+     which already injects its own equivalent styles inline via
+     ensureCartDrawerRelatedStyles(). The stylesheet had zero real effect. -->
 
 <!--  এই নতুন কোডটুকু বসিয়ে দিন (টাইমিং ঠিক করার জন্য) -->
 <script src="hero-banner-config.js?v=20260728fix2"></script>
