@@ -10,14 +10,7 @@
 
   var TK = "\u09F3"; // ৳
   var MAX_CARDS_PER_SECTION = 10;
-  // Was 5 -- hero-banner-config.js's manual `slides` array has 6 entries
-  // (abaya, tops-kurti, premium-two-piece, embroidery, hijab, panjabi), so
-  // capping at 5 silently dropped the last configured slide (panjabi) from
-  // ever rendering. Raised to 6 so every manually configured slide shows.
-  // If you add more slides to hero-banner-config.js later, raise this to
-  // match -- it's a hard cap on both the manual-slides path and the
-  // catalog auto-pick fallback.
-  var HERO_SLIDES = 6;
+  var HERO_SLIDES = 5;
   var HERO_INTERVAL = 5000;
 
   var heroTimer = null;
@@ -65,6 +58,17 @@
       return window.maCatalog.resolveImageUrl(raw);
     }
     return raw;
+  }
+
+  /* Stock check — a product is treated as out of stock only when
+     inStock is explicitly false (or stock is explicitly 0). Any
+     product that doesn't mention stock at all stays "in stock" as
+     before, so nothing breaks for existing products. */
+  function isOutOfStock(p) {
+    if (!p) return false;
+    if (p.inStock === false) return true;
+    if (typeof p.stock === "number" && p.stock <= 0) return true;
+    return false;
   }
 
   function categoryHasProducts(key) {
@@ -200,18 +204,23 @@
   function cardHtml(sec, p) {
     var img = resolveImg(p);
     var dHref = detailHref(sec, p);
+    var outOfStock = isOutOfStock(p);
     var msg =
       waLink() +
       "?text=" +
       encodeURIComponent("I want to order " + p.name);
     return (
-      "<article class='ah-card' data-pid='" +
+      "<article class='ah-card" +
+      (outOfStock ? " ah-card-oos" : "") +
+      "' data-pid='" +
       escapeHtml(p.id) +
       "'>" +
       "<a class='ah-card-media' href='" +
       escapeHtml(dHref) +
       "'>" +
-      "<span class='ah-card-badge'>Sale</span>" +
+      (outOfStock
+        ? "<span class='ah-card-badge ah-card-badge-oos'>Stock Out</span>"
+        : "<span class='ah-card-badge'>Sale</span>") +
       "<img src='" +
       escapeHtml(img) +
       "' alt='" +
@@ -230,12 +239,17 @@
       "</span>" +
       "</div>" +
       "<div class='ah-actions'>" +
-      "<button type='button' class='ah-btn ah-btn-cart' data-action='add'>" +
-      cartIconSvg +
-      "<span>Add to Cart</span></button>" +
-      "<a class='ah-btn ah-btn-msg' href='" +
-      escapeHtml(msg) +
-      "' target='_blank' rel='noopener'>Send Message</a>" +
+      (outOfStock
+        ? "<button type='button' class='ah-btn ah-btn-cart' data-action='add' disabled>" +
+          "<span>Stock Out</span></button>"
+        : "<button type='button' class='ah-btn ah-btn-cart' data-action='add'>" +
+          cartIconSvg +
+          "<span>Add to Cart</span></button>") +
+      (outOfStock
+        ? ""
+        : "<a class='ah-btn ah-btn-msg' href='" +
+          escapeHtml(msg) +
+          "' target='_blank' rel='noopener'>Send Message</a>") +
       "</div>" +
       "</div>" +
       "</article>"
@@ -318,6 +332,7 @@
           return x && String(x.id) === String(pid);
         });
         if (!p) return;
+        if (isOutOfStock(p)) return;
         addToCart(sec, p);
         btn.classList.add("is-active");
         // Clear the "added" state after a moment so it doesn't stay
@@ -401,43 +416,23 @@
     return out;
   }
 
-  /* Normalizes hero slides to { img, link, alt, eyebrow, heading, subtitle, buttonText }.
-     If window.SITE_HERO_CONFIG.slides has entries, those are used as-is (manual mode) —
-     this is the part that was previously documented in hero-banner-config.js's comments
-     but never actually wired up here, so a "slides" array there had no effect. With an
-     empty/missing slides array it falls back to the old auto-pick-from-catalog behavior. */
-  function heroSlideSource() {
-    var heroCfg = window.SITE_HERO_CONFIG || {};
-    var manual = Array.isArray(heroCfg.slides)
-      ? heroCfg.slides.filter(function (s) { return s && s.image; })
-      : [];
-    if (manual.length) {
-      return manual.slice(0, HERO_SLIDES).map(function (s) {
-        return {
-          img: s.image,
-          link: s.link || "/",
-          alt: s.alt || heroCfg.eyebrow || "Muslim Abaya",
-          eyebrow: s.eyebrow,
-          heading: s.heading,
-          subtitle: s.subtitle,
-          buttonText: s.buttonText
-        };
-      });
-    }
-    return heroProducts().map(function (it) {
-      return {
-        img: resolveImg(it.p),
-        link: detailHref(it.sec, it.p),
-        alt: it.p.name
-      };
+  /**
+   * hero-banner-config.js এ যদি window.SITE_HERO_CONFIG.slides (নিজস্ব,
+   * হিরো-ব্যানারের রেশিওতে ঠিকমতো ক্রপ করা ছবি) দেওয়া থাকে, সেটাই
+   * ব্যবহার হবে — প্রোডাক্ট ছবি থেকে অটো-টানা বন্ধ হয়ে যাবে। খালি রাখলে
+   * আগের মতোই ক্যাটাগরি প্রোডাক্ট থেকে অটোমেটিক ছবি আসবে।
+   */
+  function manualHeroSlides() {
+    var cfg = window.SITE_HERO_CONFIG || {};
+    var list = Array.isArray(cfg.slides) ? cfg.slides : [];
+    return list.filter(function (s) {
+      return s && s.image;
     });
   }
 
   function renderHero() {
     var hero = $("homeHero");
     if (!hero) return;
-    var items = heroSlideSource();
-    if (!items.length) return;
 
     var heroCfg = window.SITE_HERO_CONFIG || {};
     var heroEyebrow = heroCfg.eyebrow || "Eid Collection 2026";
@@ -445,26 +440,48 @@
     var heroSubtitle = heroCfg.subtitle || "Premium modest wear crafted with comfort &amp; purity.";
     var heroBtnText = heroCfg.buttonText || "Shop Now";
 
+    var manual = manualHeroSlides();
+    var items = manual.length ? manual : heroProducts();
+    if (!items.length) return;
+
     var slides = items
       .map(function (it, i) {
+        var img, link, alt, eyebrow, heading, subtitle, btnText;
+        if (manual.length) {
+          img = it.image;
+          link = it.link || "/";
+          alt = it.alt || heroEyebrow;
+          eyebrow = it.eyebrow || heroEyebrow;
+          heading = it.heading || heroHeading;
+          subtitle = it.subtitle || heroSubtitle;
+          btnText = it.buttonText || heroBtnText;
+        } else {
+          img = resolveImg(it.p);
+          link = detailHref(it.sec, it.p);
+          alt = it.p.name;
+          eyebrow = heroEyebrow;
+          heading = heroHeading;
+          subtitle = heroSubtitle;
+          btnText = heroBtnText;
+        }
         return (
           "<div class='home-hero-slide" +
           (i === 0 ? " is-active" : "") +
           "'>" +
           "<img src='" +
-          escapeHtml(it.img) +
+          escapeHtml(img) +
           "' alt='" +
-          escapeHtml(it.alt) +
+          escapeHtml(alt) +
           "'" +
           (i === 0 ? " fetchpriority='high'" : " loading='lazy'") +
           " onerror=\"this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg'\">" +
           "<div class='home-hero-cap'>" +
-          "<p class='eyebrow'>" + (it.eyebrow || heroEyebrow) + "</p>" +
-          "<h2 class='head'>" + (it.heading || heroHeading) + "</h2>" +
-          "<p class='sub'>" + (it.subtitle || heroSubtitle) + "</p>" +
+          "<p class='eyebrow'>" + eyebrow + "</p>" +
+          "<h2 class='head'>" + heading + "</h2>" +
+          "<p class='sub'>" + subtitle + "</p>" +
           "<a class='hero-btn' href='" +
-          escapeHtml(it.link) +
-          "'>" + (it.buttonText || heroBtnText) + "</a>" +
+          escapeHtml(link) +
+          "'>" + btnText + "</a>" +
           "</div>" +
           "</div>"
         );

@@ -423,6 +423,31 @@
 }
 .ah-btn-msg:hover { background: #ebebeb; }
 
+/* ---------- Out of stock ---------- */
+.ah-card-oos .ah-card-media img {
+  opacity: 0.55;
+  filter: grayscale(35%);
+}
+.ah-card-badge-oos {
+  background: var(--ah-muted);
+}
+.ah-card-oos .ah-card-name,
+.ah-card-oos .ah-card-price {
+  color: var(--ah-muted);
+}
+.ah-btn-cart[disabled] {
+  background: var(--ah-soft);
+  color: var(--ah-muted);
+  border-color: var(--ah-line);
+  cursor: not-allowed;
+}
+.ah-btn-cart[disabled]:hover {
+  background: var(--ah-soft);
+}
+.ah-card-oos .ah-actions {
+  grid-template-columns: 1fr;
+}
+
 /* ---------- Skeleton / loading ---------- */
 .home-skeleton {
   max-width: var(--ah-max);

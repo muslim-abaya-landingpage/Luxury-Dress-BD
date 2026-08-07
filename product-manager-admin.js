@@ -314,15 +314,30 @@
   function buildProductCard(catKey, p, idx) {
     ensureProductPriceByType(p, catKey);
     var card = document.createElement("article");
-    card.className = "pm-product-card";
+    var outOfStock = p.inStock === false;
+    card.className = "pm-product-card" + (outOfStock ? " pm-product-oos" : "");
+    if (outOfStock) {
+      card.style.opacity = "0.75";
+      card.style.borderLeft = "4px solid #c0392b";
+    }
     var meta = getCategoryTypeMeta(catKey);
     var priceLabel = meta ? "বেস দাম (৳) — সাধারণত Full Set" : "দাম (৳)";
+    var stockBtnStyle = outOfStock
+      ? "padding:4px 10px;font-size:12px;background:#c0392b;color:#fff;border-color:#c0392b"
+      : "padding:4px 10px;font-size:12px;background:#2e8b57;color:#fff;border-color:#2e8b57";
     card.innerHTML =
       '<div class="pm-product-head"><strong>#' +
       (idx + 1) +
       " — " +
       escapeHtml(p.name || "Product") +
-      '</strong><button type="button" class="pl-btn pl-btn-secondary pm-del" style="padding:4px 10px;font-size:12px">মুছুন</button></div>' +
+      '</strong><span style="display:flex;gap:6px">' +
+      '<button type="button" class="pl-btn pm-stock-toggle" style="' +
+      stockBtnStyle +
+      '">' +
+      (outOfStock ? "🔴 স্টক নেই — চালু করতে চাপুন" : "🟢 স্টকে আছে — বন্ধ করতে চাপুন") +
+      "</button>" +
+      '<button type="button" class="pl-btn pl-btn-secondary pm-del" style="padding:4px 10px;font-size:12px">মুছুন</button>' +
+      "</span></div>" +
       '<div class="pm-product-body">' +
       field("name", "নাম", p.name) +
       buildTypePriceFields(catKey, p) +
@@ -349,6 +364,16 @@
         if (strong) strong.textContent = "#" + (idx + 1) + " — " + (p.name || "Product");
         renderCatList();
       });
+    });
+
+    card.querySelector(".pm-stock-toggle").addEventListener("click", function () {
+      p.inStock = p.inStock === false ? true : false;
+      renderMain();
+      toast(
+        p.inStock === false
+          ? (p.name || "প্রোডাক্ট") + " — স্টক নেই করা হয়েছে (Save চাপুন)"
+          : (p.name || "প্রোডাক্ট") + " — স্টকে ফেরত আনা হয়েছে (Save চাপুন)"
+      );
     });
 
     card.querySelector(".pm-del").addEventListener("click", function () {
@@ -500,6 +525,9 @@
         lines.push(ind + "  " + k + ": " + jsStr(p[k]) + ",");
       }
     });
+    if (p.inStock === false) {
+      lines.push(ind + "  inStock: false,");
+    }
     if (p.priceByType && typeof p.priceByType === "object") {
       var keys = Object.keys(p.priceByType);
       if (keys.length) {
