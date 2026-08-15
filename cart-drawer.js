@@ -58,23 +58,44 @@ function ensureCartDrawerRelatedStyles() {
   document.head.appendChild(style);
 }
 
-window.addRelatedProductToCart = function (productId) {
+window.addRelatedProductToCart = function (productId, categoryKey) {
   const cats = window.CATEGORY_PRODUCTS || {};
   let product = null;
-  let categoryKey = '';
-  for (const key in cats) {
-    const list = cats[key] || [];
-    const found = list.find(p => p && String(p.id) === String(productId));
+  let foundCategoryKey = '';
+
+  // Look inside the card's own category first. Product ids are only unique
+  // *within* a category, not across all of them — a category-wide scan that
+  // stops at the first id match (the old behavior) will silently grab a
+  // different product that happens to share the same id in an earlier
+  // category, which is why clicking one related-product card could add a
+  // completely different item to the cart.
+  if (categoryKey && Array.isArray(cats[categoryKey])) {
+    const found = cats[categoryKey].find(p => p && String(p.id) === String(productId));
     if (found) {
       product = found;
-      categoryKey = key;
-      break;
+      foundCategoryKey = categoryKey;
     }
   }
+
+  // Fallback for callers that don't pass a category (e.g. cached/older
+  // markup): scan every category, same as before.
+  if (!product) {
+    for (const key in cats) {
+      const list = cats[key] || [];
+      const found = list.find(p => p && String(p.id) === String(productId));
+      if (found) {
+        product = found;
+        foundCategoryKey = key;
+        break;
+      }
+    }
+  }
+
   if (!product) return;
+  categoryKey = foundCategoryKey;
 
   let existing = typeof window.loadStoreCart === 'function' ? window.loadStoreCart({ readOnly: true }) : [];
-  const already = existing.find(item => item.id === product.id && !item.size);
+  const already = existing.find(item => item.id === product.id && !item.size && (!item.category || item.category === categoryKey));
   if (already) {
     already.quantity = (parseInt(already.quantity, 10) || 0) + 1;
   } else {
@@ -131,12 +152,16 @@ window.renderCartDrawerRelated = function (cartItems) {
     const price = parseInt(p.price, 10) || 0;
     const name = String(p.name || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const idAttr = String(p.id || '').replace(/'/g, "\\'");
+    // Carry the product's own category so addRelatedProductToCart can look
+    // it up in the right list — falls back to the cart's primary category
+    // if the candidate object itself doesn't carry one.
+    const catAttr = String(p.category || p.categoryKey || primaryCategory || '').replace(/'/g, "\\'");
     return `
       <div class="related-card">
         <div class="related-card-thumb"><img src="${img}" alt="${name}" loading="lazy" onerror="this.src='images/Baby-Pink-Floral-Print.jpeg'"></div>
         <p class="related-card-name">${name}</p>
         <p class="related-card-price">৳${price}</p>
-        <button type="button" class="related-card-add" onclick="window.addRelatedProductToCart('${idAttr}')">Add to cart</button>
+        <button type="button" class="related-card-add" onclick="window.addRelatedProductToCart('${idAttr}', '${catAttr}')">Add to cart</button>
       </div>
     `;
   }).join('');
