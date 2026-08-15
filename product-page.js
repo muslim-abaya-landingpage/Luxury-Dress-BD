@@ -495,7 +495,16 @@
 
   function buildCartLine() {
     var price = currentPrice();
-    var img = resolveImg(state.product.image || state.product.img);
+    /** কাস্টমার গ্যালারিতে যেই ছবিটা (thumbnail) সিলেক্ট করে দেখছিল, ঠিক
+     *  সেই ছবিটাই cart/checkout-এ preview হিসেবে যাবে — আগে সবসময় শুধু
+     *  ডিফল্ট প্রথম ছবি (state.product.image) যেত, ব্যবহারকারী গ্যালারিতে
+     *  যা-ই দেখুক না কেন। এতে id/name/price/quantity লজিকের কোনো
+     *  পরিবর্তন হয় না, শুধু cart-এর preview ছবিটা এখন সঠিকভাবে মেলে। */
+    var activeGalleryImg =
+      state.galleryImages && state.galleryImages.length
+        ? state.galleryImages[state.activeImage]
+        : "";
+    var img = activeGalleryImg || resolveImg(state.product.image || state.product.img);
     var line = {
       id: state.product.id,
       name: state.product.name,
