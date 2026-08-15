@@ -89,22 +89,34 @@
     return null;
   }
 
-  /* Gather this product + its "- Back" / "- Side" siblings as gallery images */
+  /* Build this product's gallery images.
+     Priority: product.images[] -> product.image + "- Back"/"- Side" siblings -> fallback image.
+     Duplicate URLs are only kept once (whichever occurrence comes first). */
   function buildGallery(product, list) {
-    var base = baseName(product.name).toLowerCase();
     var seen = {};
     var out = [];
-    function pushImg(p) {
-      var img = resolveImg(p.image || p.img);
+    function pushRaw(raw) {
+      var img = resolveImg(raw);
       if (!img || seen[img]) return;
       seen[img] = true;
       out.push(img);
     }
-    pushImg(product);
-    list.forEach(function (p) {
-      if (!p || p === product) return;
-      if (baseName(p.name).toLowerCase() === base && isVariantSuffix(p.name)) pushImg(p);
-    });
+
+    if (Array.isArray(product.images) && product.images.length) {
+      // New multi-image gallery: take every image straight from images[].
+      product.images.forEach(function (raw) { pushRaw(raw); });
+    } else {
+      // Legacy behavior: single main image + any "- Back" / "- Side" variant siblings.
+      pushRaw(product.image || product.img);
+      var base = baseName(product.name).toLowerCase();
+      list.forEach(function (p) {
+        if (!p || p === product) return;
+        if (baseName(p.name).toLowerCase() === base && isVariantSuffix(p.name)) {
+          pushRaw(p.image || p.img);
+        }
+      });
+    }
+
     if (!out.length) out.push("images/Baby-Pink-Floral-Print.jpeg");
     return out;
   }
