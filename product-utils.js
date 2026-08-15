@@ -201,6 +201,23 @@
       _catalogNormalized: true
     };
 
+    /** একাধিক গ্যালারি ছবি (category-products.js এর raw.images[]) — আগে এই
+     *  ফিল্ডটা normalize করার সময় বাদ পড়ে যেত, তাই product.images সবসময়
+     *  undefined হয়ে product-page.js এ পৌঁছাত এবং গ্যালারিতে শুধু একটাই
+     *  ছবি (product.image) দেখাত। এখন প্রতিটা URL resolveImageUrl() দিয়ে
+     *  resolve করে, duplicate বাদ দিয়ে normalized.images এ রাখা হচ্ছে। */
+    if (Array.isArray(entry.images) && entry.images.length) {
+      var seenGalleryUrl = {};
+      var galleryImages = [];
+      entry.images.forEach(function (rawUrl) {
+        var resolved = resolveImageUrl(String(rawUrl || "").trim());
+        if (!resolved || seenGalleryUrl[resolved]) return;
+        seenGalleryUrl[resolved] = true;
+        galleryImages.push(resolved);
+      });
+      if (galleryImages.length) normalized.images = galleryImages;
+    }
+
     if (entry.priceByType && typeof entry.priceByType === "object") {
       normalized.priceByType = entry.priceByType;
     }
