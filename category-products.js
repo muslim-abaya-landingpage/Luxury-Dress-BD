@@ -746,14 +746,40 @@ window.CATEGORY_PRODUCTS = {
 },
   {
   id: "DR-12",
-  name: "Premium Sky Blue Floral Women's Co-ord Set",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-sky-blue-floral-co-ord-set.webp",
+
+  name: "Premium Floral Women's Co-ord Set",
+
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Gowns/black-cream-floral-womens-two-piece-dress.jpg",
+
+  images: [
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Gowns/black-cream-floral-womens-two-piece-dress.jpg",
+
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Gowns/black-multicolor-floral-womens-two-piece-dress.webp",
+
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Gowns/black-white-print-womens-two-piece-dress.webp",
+
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Gowns/mint-green-black-floral-womens-two-piece-dress.webp",
+
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Gowns/navy-blue-floral-womens-two-piece-dress.jpg",
+
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Gowns/navy-blue-white-floral-womens-two-piece-dress.webp",
+
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Gowns/orange-black-white-polka-dot-womens-two-piece-dress.webp",
+
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Gowns/red-multicolor-polka-dot-womens-two-piece-dress.webp",
+
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Gowns/premium-pink-floral-womens-two-piece-dress.webp",
+
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Gowns/light-pink-floral-womens-two-piece-dress.webp"
+  ],
   link: "/",
   price: 650,
-  color: "sky-blue",
-  colorLabel: "Sky Blue",
+  color: "multi-color",
+  colorLabel: "Multiple Colors",
   fabric: "Alex Soft Georgette",
-  sizes: ["Body 42 (Free Size)"],
+  sizes: [
+    "Body 42 (Free Size)"
+  ],
   detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare"
 },
   {
