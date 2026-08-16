@@ -161,7 +161,7 @@
 
   function cartLineMergeKey(line) {
     if (!line) return "";
-    if (line.id) return String(line.id) + "|" + String(line.size || "");
+    if (line.id) return String(line.id) + "|" + String(line.size || "") + "|" + String(line.category || "");
     return String(line.name || "");
   }
 
