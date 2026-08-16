@@ -630,7 +630,11 @@
     }
 
     var email = out.user_email || out.email;
-    if (email) out.user_email = String(email).trim().toLowerCase();
+    if (email) out.user_email = (() => {
+    const emailStr = String(email).trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(emailStr) ? emailStr : undefined;
+  })();
 
     var eventName = String(out.event || out.event_name || "").trim();
     var eventId = out.event_id || out.transaction_id || "";
@@ -732,7 +736,7 @@
       user_data: userData
     };
 
-    out.currency = out.currency || "BDT";
+    out.currency = out.currency || (typeof window !== "undefined" && window.STORE_CURRENCY) || "BDT";
     return out;
   }
 
