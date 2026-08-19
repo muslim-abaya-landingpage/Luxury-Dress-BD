@@ -487,13 +487,13 @@ function buildNavMenuItems() {
         }
         loadScript("product-catalog-sync.js?v=20260531nav2")
           .then(function () {
-            return loadScript("product-config.js?v=20260531price");
+            return loadScript("product-config.js?v=20260819audit");
           })
           .then(function () {
-            return loadScript("product-utils.js?v=20260535");
+            return loadScript("product-utils.js?v=20260819audit");
           })
           .then(function () {
-            return loadScript("category-products.js?v=20260535");
+            return loadScript("category-products.js?v=20260819audit");
           })
           .then(function () {
             return loadScript("product-links-data.js?v=20260535");

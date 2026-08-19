@@ -91,20 +91,16 @@
     .btn-light { background: #fff; color: #111; border-color: #d1d5db; }
 </style>
 
-    <script src="cart-utils.js?v=20260603cartqty"></script>
+    <script src="cart-utils.js?v=20260819audit"></script>
     <script>
       (function () {
         var saved = typeof readOrderTracking === 'function' ? readOrderTracking() : null;
-        var extra = {};
-        if (!saved || !saved.transaction_id) {
-          extra.transaction_id = 'order_' + Date.now();
-          extra.event_id = extra.transaction_id;
-        }
+        if (!saved) return;
         if (typeof pushPurchaseCompleteEvent === 'function') {
-          pushPurchaseCompleteEvent(extra);
-        } else if (saved) {
+          pushPurchaseCompleteEvent({});
+        } else {
           window.dataLayer = window.dataLayer || [];
-          var payload = Object.assign({ event: 'purchase_complete' }, saved, extra);
+          var payload = Object.assign({ event: 'purchase_complete', content_type: 'product', currency: 'BDT' }, saved);
           if (typeof applyMetaTrackingFields === 'function') {
             payload = applyMetaTrackingFields(payload);
           }

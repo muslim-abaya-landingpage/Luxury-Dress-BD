@@ -49,16 +49,32 @@
   // into your own images/ folder (or a proper CDN) — until then, leave it
   // false (the default) and nothing changes/breaks.
   var GITHUB_RAW_HOST_RE = /^https?:\/\/raw\.githubusercontent\.com\//i;
+  var GITHUB_BLOB_HOST_RE = /^https?:\/\/(?:www\.)?github\.com\/.+\/blob\//i;
+
+  function githubImagesRelativePath(url) {
+    var clean = String(url || "").split("?")[0].split("#")[0];
+    var lower = clean.toLowerCase();
+    var marker = "/images/";
+    var idx = lower.lastIndexOf(marker);
+    if (idx !== -1) {
+      try {
+        return decodeURIComponent(clean.slice(idx + marker.length));
+      } catch (e) {
+        return clean.slice(idx + marker.length);
+      }
+    }
+    return fileNameFromUrl(url);
+  }
 
   function rewriteGithubRawToLocal(url) {
     var imgCfg = getLinks().images || {};
     if (!imgCfg.useLocalImages) return url;
-    if (!GITHUB_RAW_HOST_RE.test(url)) return url;
-    var file = fileNameFromUrl(url);
-    if (!file) return url;
+    if (!GITHUB_RAW_HOST_RE.test(url) && !GITHUB_BLOB_HOST_RE.test(url)) return url;
+    var rel = githubImagesRelativePath(url);
+    if (!rel) return url;
     var base = imgCfg.localBase || "images/";
     if (base.charAt(base.length - 1) !== "/") base += "/";
-    return base + file;
+    return base + rel;
   }
 
   function resolveImageUrl(raw) {

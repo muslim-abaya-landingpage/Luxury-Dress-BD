@@ -30,7 +30,7 @@ window.SITE_LINKS = {
      *          রিপ্লেস করবে, category-products.js-এর কোনো লাইন হাতে
      *          বদলাতে হবে না।
      *  false থাকা অবস্থায় সাইট এখনকার মতোই চলবে — কিছু ভাঙবে না। */
-    useLocalImages: false
+    useLocalImages: true
   },
   productPage: {
     /** এখনো প্রোডাক্ট ডিটেইল পেজ নেই — false রাখুন */

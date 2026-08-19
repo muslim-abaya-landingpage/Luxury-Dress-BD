@@ -187,6 +187,7 @@
       window.pushTrackingEvent("AddToCart", {
         content_ids: [p.id],
         content_name: p.name,
+        content_type: "product",
         value: price,
         currency: "BDT"
       });

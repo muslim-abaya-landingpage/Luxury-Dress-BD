@@ -1949,7 +1949,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="product-catalog-loader.js?v=20260603crosssell"></script>
 <script defer src="site-header-config.js?v=20260601en"></script>
 <script defer src="site-header.js?v=20260601en"></script>
-<script src="cart-utils.js?v=20260603img"></script>
+<script src="cart-utils.js?v=20260819audit"></script>
 <script src="cart-toast.js?v=20260603cartqty"></script>
 <script src="cart-drawer.js?v=20260603cartqty"></script>
 <script src="checkout-location-labels.js?v=20260603loc"></script>
@@ -2112,6 +2112,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 user_email: emailValue,
                 order_value: parseFloat(gTotal) || 0,
                 value: parseFloat(gTotal) || 0,
+                content_type: 'product',
                 order_items: productsLabel(),
                 transaction_id: eventId,
                 event_id: eventId,
@@ -2200,7 +2201,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 else reject(new Error('IFRAME_FAIL'));
             }
             iframe.onload = function () { finish(true); };
-            var timer = window.setTimeout(function () { finish(true); }, 6000);
+            var timer = window.setTimeout(function () { finish(false); }, 6000);
             document.body.appendChild(form);
             form.submit();
         });
@@ -2677,11 +2678,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function formatOrderSlotLine(index, item) {
         var qty = parseInt(item.quantity, 10) || 1;
-        var unit = parseInt(item.price, 10) || 0;
         var base = checkoutLineBaseName(item);
         var size = checkoutLineSizeLabel(item);
-        var sizeText = size ? ' · ' + size : '';
-        return index + '. ' + base + sizeText + ' × ' + qty + ' pcs = ' + formatBdtCheckout(unit * qty);
+        var parts = [index + '. ' + base];
+        if (size) parts.push('Size: ' + size);
+        parts.push('Qty: ' + qty);
+        return parts.join(' | ');
     }
 
     function buildProductSlots() {
@@ -3350,6 +3352,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 formData.append('Image_' + (imgIdx + 1), imageSlots[imgIdx] || '');
             }
             if (typeof applyMetaTrackingFields === 'function') {
+                var cartSnapMeta = typeof buildCartTrackingSnapshot === 'function'
+                    ? buildCartTrackingSnapshot(cart)
+                    : { content_ids: [], contents: [] };
                 var metaPayload = applyMetaTrackingFields({
                     phone: phoneValue,
                     email: emailValue,
@@ -3357,7 +3362,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     event_id: eventId,
                     transaction_id: eventId,
                     value: parseFloat(gTotal) || 0,
-                    currency: 'BDT'
+                    currency: 'BDT',
+                    content_type: 'product',
+                    content_ids: cartSnapMeta.content_ids,
+                    contents: cartSnapMeta.contents
                 }) || {};
                 if (metaPayload.fbc) formData.append('FBC', metaPayload.fbc);
                 if (metaPayload.fbp) formData.append('FBP', metaPayload.fbp);
@@ -3495,7 +3503,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div id="site-footer-mount"></div>
 <script src="remove-confirm-modal.js"></script>
 <script src="site-footer-config.js?v=20260603footen"></script>
-<script src="site-footer.js?v=20260603footen"></script>
+<script src="site-footer.js?v=20260819audit"></script>
 <script defer src="mobile-bottom-nav.js"></script>    
 </body>
 </html>
