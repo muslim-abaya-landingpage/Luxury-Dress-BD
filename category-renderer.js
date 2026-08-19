@@ -239,13 +239,36 @@ function syncShopCartBadge() {
   if (typeof refreshCartBadgeUI === "function") refreshCartBadgeUI(lines);
   else if (typeof updateCartBadge === "function") updateCartBadge(lines);
 }
+function resolveTwoPieceCartLength(item, sizeValue) {
+  var picked = String(sizeValue || "").trim();
+  if (picked) return picked;
+  if (item && Array.isArray(item.sizeSpecs) && item.sizeSpecs.length) {
+    return item.sizeSpecs
+      .map(function (row) {
+        var label = String((row && row.label) || "").trim();
+        var value = String((row && row.value) || "").trim();
+        return (label + " " + value).trim();
+      })
+      .filter(Boolean)
+      .join(" | ");
+  }
+  var tpCfg = typeof getTwoPieceSizeConfig === "function" ? getTwoPieceSizeConfig(item) : null;
+  return (tpCfg && tpCfg.lengthSizeLabel) || "37-38 inch";
+}
+function resolveTwoPieceCartBody(item, bodyValueOpt) {
+  var picked = String(bodyValueOpt || "").trim();
+  if (picked) return picked;
+  var tpCfg = typeof getTwoPieceSizeConfig === "function" ? getTwoPieceSizeConfig(item) : null;
+  return (tpCfg && tpCfg.bodySizeLabel) || "42 (Free size)";
+}
 function buildShopCartLineSizeKey(item, sizeValue, categoryKey, bodyValueOpt) {
   var isAbaya = typeof isAbayaProduct === "function" && isAbayaProduct(item, categoryKey);
   var isTwoPiece = typeof isTwoPieceProduct === "function" && isTwoPieceProduct(item, categoryKey);
   if (isTwoPiece && typeof formatTwoPieceCartSize === "function") {
-    var tpCfg = typeof getTwoPieceSizeConfig === "function" ? getTwoPieceSizeConfig(item) : null;
-    var tpLen = String(sizeValue || "").trim() || (tpCfg ? tpCfg.lengthSizeLabel : "37-38 inch");
-    return formatTwoPieceCartSize(tpLen, bodyValueOpt);
+    return formatTwoPieceCartSize(
+      resolveTwoPieceCartLength(item, sizeValue),
+      resolveTwoPieceCartBody(item, bodyValueOpt)
+    );
   }
   var abayaCfg = isAbaya && typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig(item) : null;
   var pickedLength =
@@ -279,14 +302,10 @@ function buildShopCartLineItem(item, qtyToAdd, sizeValue, categoryKeyOpt, select
   var isAbaya = typeof isAbayaProduct === "function" && isAbayaProduct(item, categoryKey);
   var isTwoPiece = typeof isTwoPieceProduct === "function" && isTwoPieceProduct(item, categoryKey);
   var abayaCfg = isAbaya && typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig(item) : null;
-  var twoPieceCfg = isTwoPiece && typeof getTwoPieceSizeConfig === "function" ? getTwoPieceSizeConfig(item) : null;
-  var pickedLength =
-    String(sizeValue || "").trim() ||
-    (isTwoPiece && twoPieceCfg
-      ? twoPieceCfg.lengthSizeLabel
-      : abayaCfg
-        ? abayaCfg.lengthSizes[0]
-        : "50");
+  var pickedLength = isTwoPiece
+    ? resolveTwoPieceCartLength(item, sizeValue)
+    : String(sizeValue || "").trim() ||
+      (abayaCfg ? abayaCfg.lengthSizes[0] : "50");
   var cat = typeof findCatalogByName === "function" ? findCatalogByName(item.name) : null;
   var pickedSize = pickedLength;
   var pickedType = selectedTypeOpt || item._cartType || "";
@@ -295,21 +314,17 @@ function buildShopCartLineItem(item, qtyToAdd, sizeValue, categoryKeyOpt, select
    *  pill থাকেই না) ক্যাটাগরি/প্রোডাক্টের static bodySizeLabel-এ ফলব্যাক
    *  করবে — আগের আচরণ অক্ষুণ্ণ থাকলো। */
   var pickedBodyLabel = String(bodyValueOpt || "").trim();
-  var resolvedBodyLabel =
-    pickedBodyLabel ||
-    (isAbaya && abayaCfg
-      ? abayaCfg.bodySizeLabel
-      : isTwoPiece && twoPieceCfg
-        ? twoPieceCfg.bodySizeLabel
-        : "");
+  var resolvedBodyLabel = isTwoPiece
+    ? resolveTwoPieceCartBody(item, bodyValueOpt)
+    : pickedBodyLabel || (isAbaya && abayaCfg ? abayaCfg.bodySizeLabel : "");
   var unitPrice = resolveProductPrice(item, categoryKey, pickedType);
   var cartName = item.name;
   if (pickedType) cartName += " (" + pickedType + ")";
   var sizeLabel =
     isAbaya && typeof formatAbayaCartSize === "function"
-      ? formatAbayaCartSize(pickedLength, pickedBodyLabel)
+      ? formatAbayaCartSize(pickedLength, resolvedBodyLabel)
       : isTwoPiece && typeof formatTwoPieceCartSize === "function"
-        ? formatTwoPieceCartSize(pickedLength, pickedBodyLabel)
+        ? formatTwoPieceCartSize(pickedLength, resolvedBodyLabel)
         : "Size " + pickedSize;
   cartName += " (" + sizeLabel + ")";
   return {
@@ -324,11 +339,11 @@ function buildShopCartLineItem(item, qtyToAdd, sizeValue, categoryKeyOpt, select
     description: item.description || item.fabric || "",
     size:
       isAbaya && typeof formatAbayaCartSize === "function"
-        ? formatAbayaCartSize(pickedLength, pickedBodyLabel)
+        ? formatAbayaCartSize(pickedLength, resolvedBodyLabel)
         : isTwoPiece && typeof formatTwoPieceCartSize === "function"
-          ? formatTwoPieceCartSize(pickedLength, pickedBodyLabel)
+          ? formatTwoPieceCartSize(pickedLength, resolvedBodyLabel)
           : pickedSize,
-    lengthSize: isAbaya ? pickedLength : isTwoPiece && twoPieceCfg ? twoPieceCfg.lengthSizeLabel : "",
+    lengthSize: isAbaya || isTwoPiece ? pickedLength : "",
     bodySize: resolvedBodyLabel,
     productType: pickedType,
     category: item.category || categoryKey || "",
@@ -344,14 +359,9 @@ function shopAddProductToCart(item, qtyToAdd, sizeValue, categoryKeyOpt, bodyVal
   var isAbaya = typeof isAbayaProduct === "function" && isAbayaProduct(item, categoryKey);
   var isTwoPiece = typeof isTwoPieceProduct === "function" && isTwoPieceProduct(item, categoryKey);
   var abayaCfg = isAbaya && typeof getAbayaSizeConfig === "function" ? getAbayaSizeConfig(item) : null;
-  var twoPieceCfg = isTwoPiece && typeof getTwoPieceSizeConfig === "function" ? getTwoPieceSizeConfig(item) : null;
-  var pickedLength =
-    String(sizeValue || "").trim() ||
-    (isTwoPiece && twoPieceCfg
-      ? twoPieceCfg.lengthSizeLabel
-      : abayaCfg
-        ? abayaCfg.lengthSizes[0]
-        : "50");
+  var pickedLength = isTwoPiece
+    ? resolveTwoPieceCartLength(item, sizeValue)
+    : String(sizeValue || "").trim() || (abayaCfg ? abayaCfg.lengthSizes[0] : "50");
   var pickedSizeEarly = isAbaya || isTwoPiece ? pickedLength : pickedLength;
   var addGuardKey =
     (item.id || item.name || "") + "|" + pickedSizeEarly + "|" + String(bodyValueOpt || "");
@@ -749,10 +759,21 @@ function buildSizeChartTableHtml(data) {
   if (!data) return "";
   var html = "";
   if (Array.isArray(data.regularFit) && data.regularFit.length) {
+    var headers = data.headers || {};
     html +=
       '<div class="pqv-sc-card">' +
-      '<div class="pqv-sc-card-title">Regular Fit (Inch)</div>' +
-      "<table><thead><tr><th>Size</th><th>Length</th><th>Width</th><th>Sleeve</th></tr></thead><tbody>" +
+      '<div class="pqv-sc-card-title">' +
+      escapeHtmlText(data.tableTitle || "Regular Fit (Inch)") +
+      "</div>" +
+      "<table><thead><tr><th>" +
+      escapeHtmlText(headers.size || "Size") +
+      "</th><th>" +
+      escapeHtmlText(headers.length || "Length") +
+      "</th><th>" +
+      escapeHtmlText(headers.width || "Width") +
+      "</th><th>" +
+      escapeHtmlText(headers.sleeve || "Sleeve") +
+      "</th></tr></thead><tbody>" +
       data.regularFit
         .map(function (row) {
           return (
