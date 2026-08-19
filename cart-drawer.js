@@ -189,17 +189,31 @@ function findProductByImage(imgUrl) {
 // entry point again, wire it to window.addOrMergeStoreCartItem (from
 // cart-utils.js) instead of a per-page function.
 
+function ensureCartDrawerHideStyle() {
+  if (document.getElementById('cart-drawer-hide-init')) return;
+  const style = document.createElement('style');
+  style.id = 'cart-drawer-hide-init';
+  style.textContent =
+    '.cart-drawer:not(.is-open){visibility:hidden!important;pointer-events:none!important;transform:translate3d(calc(100% + 40px),0,0)!important}' +
+    '.cart-drawer-overlay:not(.is-open){opacity:0!important;visibility:hidden!important;pointer-events:none!important}';
+  document.head.appendChild(style);
+}
+
 function ensureCartDrawerHtml() {
   if (document.getElementById('cart-drawer')) return;
+
+  ensureCartDrawerHideStyle();
 
   const overlay = document.createElement('div');
   overlay.className = 'cart-drawer-overlay';
   overlay.id = 'cart-drawer-overlay';
+  overlay.setAttribute('aria-hidden', 'true');
   document.body.appendChild(overlay);
 
   const drawer = document.createElement('div');
   drawer.className = 'cart-drawer';
   drawer.id = 'cart-drawer';
+  drawer.setAttribute('aria-hidden', 'true');
   drawer.innerHTML = `
     <div class="cart-drawer-head">
   <h2>Your Shopping Cart</h2>
@@ -242,12 +256,16 @@ window.openCartDrawer = function () {
   window.updateCartDrawerUI();
   drawer.classList.add('is-open');
   overlay.classList.add('is-open');
+  drawer.setAttribute('aria-hidden', 'false');
+  overlay.setAttribute('aria-hidden', 'false');
   document.body.classList.add('cart-drawer-open');
 };
 
 window.closeCartDrawer = function () {
   drawer.classList.remove('is-open');
   overlay.classList.remove('is-open');
+  drawer.setAttribute('aria-hidden', 'true');
+  overlay.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('cart-drawer-open');
 };
 
@@ -503,6 +521,7 @@ if (typeof document !== 'undefined' && !window.__cartDrawerOpenBound) {
 // the page is fully done (readyState 'complete'), DOMContentLoaded has
 // already fired and never will again, so run immediately in that case.
 if (typeof document !== 'undefined') {
+  ensureCartDrawerHideStyle();
   if (document.readyState === 'complete') {
     ensureCartDrawerHtml();
     window.updateCartDrawerUI();

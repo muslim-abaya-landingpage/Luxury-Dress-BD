@@ -860,7 +860,7 @@ function buildNavMenuItems() {
     if (!document.querySelector('link[href*="cart-drawer.css"]')) {
       var link = document.createElement('link');
       link.rel = 'stylesheet';
-      link.href = 'cart-drawer.css?v=20260820cartdrawer';
+      link.href = 'cart-drawer.css?v=20260820fixui';
       document.head.appendChild(link);
     }
     if (document.querySelector('script[src*="cart-drawer.js"]')) return;
@@ -871,7 +871,7 @@ function buildNavMenuItems() {
       document.head.appendChild(qtyCss);
     }
     var s = document.createElement('script');
-    s.src = 'cart-drawer.js?v=20260819pages';
+    s.src = 'cart-drawer.js?v=20260820fixui';
     s.defer = true;
     document.body.appendChild(s);
   }

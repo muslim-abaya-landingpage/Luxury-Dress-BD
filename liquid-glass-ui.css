@@ -115,6 +115,7 @@ opacity .25s ease;
 .navbar a:hover{
 
 color:var(--gold);
+text-decoration:none;
 
 }
 

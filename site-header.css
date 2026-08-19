@@ -289,6 +289,18 @@ html {
   align-items: center;
 }
 
+.abaya-main-header a,
+.abaya-main-header a:hover,
+.abaya-main-header a:focus,
+.abaya-main-header a:active,
+.desktop-menu a,
+.desktop-menu a:hover,
+.desktop-menu a:focus,
+.mobile-nav-panel a,
+.mobile-nav-panel a:hover {
+  text-decoration: none;
+}
+
 .desktop-menu ul li a {
   text-decoration: none;
   color: #111;
@@ -304,8 +316,10 @@ html {
   height: 32px;
 }
 
-.desktop-menu ul li a:hover {
+.desktop-menu ul li a:hover,
+.desktop-menu ul li a:focus {
   color: #000;
+  text-decoration: none;
 }
 
 .desktop-menu ul li .nav-link-soon,

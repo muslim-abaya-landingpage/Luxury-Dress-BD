@@ -214,10 +214,10 @@
   white-space: nowrap;
   transition: color 0.15s ease;
 }
-.home-catnav-inner a:hover {
+.home-catnav-inner a:hover,
+.home-catnav-inner a:focus {
   color: var(--ah-accent);
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  text-decoration: none;
 }
 
 /* ---------- Section ---------- */
