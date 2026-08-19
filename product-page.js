@@ -138,9 +138,16 @@
       .replace(/\.(jpe?g|png|webp|gif|avif)$/i, "")
       .replace(/womens?-two-piece-dress/gi, "")
       .replace(/two-piece-dress/gi, "")
+      .replace(/premium-tc-cotton/gi, "")
+      .replace(/tc-cotton/gi, "")
       .replace(/premium-/gi, "")
       .replace(/-bangladesh.*$/i, "")
+      .replace(/muslim-abaya/gi, "")
+      .replace(/for-women/gi, "")
+      .replace(/\bgowns?\b/gi, "")
       .replace(/[-_]+/g, " ")
+      .replace(/\s+/g, " ")
+      .replace(/\btc cotton\b/gi, "")
       .replace(/\s+/g, " ")
       .trim();
     if (!base) return "Color";

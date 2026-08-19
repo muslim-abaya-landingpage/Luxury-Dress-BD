@@ -490,10 +490,10 @@ function buildNavMenuItems() {
             return loadScript("product-config.js?v=20260819audit");
           })
           .then(function () {
-            return loadScript("product-utils.js?v=20260819audit");
+            return loadScript("product-utils.js?v=20260820grid");
           })
           .then(function () {
-            return loadScript("category-products.js?v=20260819audit");
+            return loadScript("category-products.js?v=20260820grid");
           })
           .then(function () {
             return loadScript("product-links-data.js?v=20260535");

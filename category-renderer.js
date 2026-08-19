@@ -499,6 +499,13 @@ function getSelectedBodyValueForIdx(scopeRoot, idx) {
   );
   return bodyPill ? bodyPill.getAttribute("data-body-value") || "" : "";
 }
+function getSelectedPalazzoForIdx(scopeRoot, idx) {
+  if (!scopeRoot) return "";
+  var pill = scopeRoot.querySelector(
+    ".pqv-palazzo-opt.is-active[data-product-idx='" + idx + "']"
+  );
+  return pill ? pill.getAttribute("data-palazzo-value") || "" : "";
+}
 function getSelectedSizeForIdx(scopeRoot, idx) {
   if (!scopeRoot) return "50";
   var lengthVal = "";
@@ -517,6 +524,10 @@ function getSelectedSizeForIdx(scopeRoot, idx) {
       var sizeEl = scopeRoot.querySelector("[data-size-idx='" + idx + "']");
       lengthVal = sizeEl ? sizeEl.value : "50";
     }
+  }
+  var palazzoVal = getSelectedPalazzoForIdx(scopeRoot, idx);
+  if (palazzoVal) {
+    return String(lengthVal || "").trim() + " · Palazzo " + palazzoVal;
   }
   return lengthVal;
 }
@@ -913,9 +924,16 @@ function colorLabelFromImageUrl(url) {
     .replace(/\.(jpe?g|png|webp|gif|avif)$/i, "")
     .replace(/womens?-two-piece-dress/gi, "")
     .replace(/two-piece-dress/gi, "")
+    .replace(/premium-tc-cotton/gi, "")
+    .replace(/tc-cotton/gi, "")
     .replace(/premium-/gi, "")
     .replace(/-bangladesh.*$/i, "")
+    .replace(/muslim-abaya/gi, "")
+    .replace(/for-women/gi, "")
+    .replace(/\bgowns?\b/gi, "")
     .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .replace(/\btc cotton\b/gi, "")
     .replace(/\s+/g, " ")
     .trim();
   if (!base) return "Color";
@@ -1307,12 +1325,14 @@ function bindPqvInteractions(p, idx, categoryKey, scopeRoot) {
       }
     });
   });
-  modal.querySelectorAll(".pqv-size-opt, .pqv-length-opt, .pqv-type-opt, .pqv-body-opt").forEach(function (btn) {
+  modal.querySelectorAll(".pqv-size-opt, .pqv-length-opt, .pqv-type-opt, .pqv-body-opt, .pqv-palazzo-opt").forEach(function (btn) {
     btn.addEventListener("click", function () {
       var groupClass = btn.classList.contains("pqv-type-opt")
         ? ".pqv-type-opt"
         : btn.classList.contains("pqv-length-opt")
           ? ".pqv-length-opt"
+          : btn.classList.contains("pqv-palazzo-opt")
+            ? ".pqv-palazzo-opt"
           : btn.classList.contains("pqv-body-opt")
             ? ".pqv-body-opt"
             : ".pqv-size-opt";
@@ -1719,6 +1739,67 @@ function bindPqvWholesale(modal) {
   });
   updatePqvWholesaleTotal(modal);
 }
+function buildTwoPiecePqvSizeHtml(p, idx, twoPieceCfg, chartBtn, customSizeBtn) {
+  var bodyHtml =
+    '<div class="pqv-field pqv-field-body"><span class="pqv-field-label">Body Size</span><div class="pqv-opt-group">' +
+    (Array.isArray(twoPieceCfg.bodySizes) && twoPieceCfg.bodySizes.length
+      ? buildPqvOptionPills(twoPieceCfg.bodySizes, idx, "pqv-body-opt", "data-body-value")
+      : '<button type="button" class="pqv-opt-btn is-active" aria-pressed="true" disabled>' +
+        escapeHtml(twoPieceCfg.bodySizeLabel) +
+        "</button>") +
+    "</div></div>";
+  var dressLengths = p && Array.isArray(p.dressLengths) ? p.dressLengths : [];
+  var palazzoLengths = p && Array.isArray(p.palazzoLengths) ? p.palazzoLengths : [];
+  var extraHtml = "";
+  if (dressLengths.length) {
+    extraHtml +=
+      '<div class="pqv-field pqv-field-size"><div class="pqv-field-head"><span class="pqv-field-label">Dress Length</span>' +
+      (palazzoLengths.length ? "" : chartBtn) +
+      '</div><div class="pqv-opt-group pqv-opt-group-wrap">' +
+      buildPqvOptionPills(dressLengths, idx, "pqv-length-opt", "data-length-value") +
+      (palazzoLengths.length ? "" : customSizeBtn) +
+      "</div></div>";
+  }
+  if (palazzoLengths.length) {
+    extraHtml +=
+      '<div class="pqv-field pqv-field-size"><div class="pqv-field-head"><span class="pqv-field-label">Palazzo Length</span>' +
+      chartBtn +
+      '</div><div class="pqv-opt-group pqv-opt-group-wrap">' +
+      buildPqvOptionPills(palazzoLengths, idx, "pqv-palazzo-opt", "data-palazzo-value") +
+      customSizeBtn +
+      "</div></div>";
+  }
+  if (!dressLengths.length && !palazzoLengths.length) {
+    extraHtml =
+      Array.isArray(p.sizeSpecs) && p.sizeSpecs.length
+        ? p.sizeSpecs
+            .map(function (spec, specI) {
+              var isLast = specI === p.sizeSpecs.length - 1;
+              return (
+                '<div class="pqv-field pqv-field-size"><div class="pqv-field-head"><span class="pqv-field-label">' +
+                escapeHtml(spec.label) +
+                "</span>" +
+                (isLast ? chartBtn : "") +
+                '</div><div class="pqv-opt-group pqv-opt-group-wrap">' +
+                '<button type="button" class="pqv-opt-btn is-active" aria-pressed="true" disabled>' +
+                escapeHtml(spec.value) +
+                "</button>" +
+                (isLast ? customSizeBtn : "") +
+                "</div></div>"
+              );
+            })
+            .join("")
+        : '<div class="pqv-field pqv-field-size"><div class="pqv-field-head"><span class="pqv-field-label">Length Size</span>' +
+          chartBtn +
+          '</div><div class="pqv-opt-group pqv-opt-group-wrap">' +
+          '<button type="button" class="pqv-opt-btn is-active" aria-pressed="true" disabled>' +
+          escapeHtml(twoPieceCfg.lengthSizeLabel) +
+          "</button>" +
+          customSizeBtn +
+          "</div></div>";
+  }
+  return bodyHtml + extraHtml;
+}
 /* ----------------------------------------------------------------------
    SECTION 7: কুইক-ভিউ প্যানেলের সম্পূর্ণ HTML
    প্রোডাক্ট পপআপের পুরো কাঠামো (ছবি, দাম, সাইজ, বাটন) এখানে জোড়া লাগানো
@@ -1857,39 +1938,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
         customSizeBtn +
         "</div></div>"
       : isTwoPiece && twoPieceCfg
-        ? '<div class="pqv-field pqv-field-body"><span class="pqv-field-label">Body Size</span><div class="pqv-opt-group">' +
-          (Array.isArray(twoPieceCfg.bodySizes) && twoPieceCfg.bodySizes.length
-            ? buildPqvOptionPills(twoPieceCfg.bodySizes, idx, "pqv-body-opt", "data-body-value")
-            : '<button type="button" class="pqv-opt-btn is-active" aria-pressed="true" disabled>' +
-              escapeHtml(twoPieceCfg.bodySizeLabel) +
-              "</button>") +
-          "</div></div>" +
-          (Array.isArray(p.sizeSpecs) && p.sizeSpecs.length
-            ? p.sizeSpecs
-                .map(function (spec, specI) {
-                  var isLast = specI === p.sizeSpecs.length - 1;
-                  return (
-                    '<div class="pqv-field pqv-field-size"><div class="pqv-field-head"><span class="pqv-field-label">' +
-                    escapeHtml(spec.label) +
-                    "</span>" +
-                    (isLast ? chartBtn : "") +
-                    '</div><div class="pqv-opt-group pqv-opt-group-wrap">' +
-                    '<button type="button" class="pqv-opt-btn is-active" aria-pressed="true" disabled>' +
-                    escapeHtml(spec.value) +
-                    "</button>" +
-                    (isLast ? customSizeBtn : "") +
-                    "</div></div>"
-                  );
-                })
-                .join("")
-            : '<div class="pqv-field pqv-field-size"><div class="pqv-field-head"><span class="pqv-field-label">Length Size</span>' +
-              chartBtn +
-              '</div><div class="pqv-opt-group pqv-opt-group-wrap">' +
-              '<button type="button" class="pqv-opt-btn is-active" aria-pressed="true" disabled>' +
-              escapeHtml(twoPieceCfg.lengthSizeLabel) +
-              "</button>" +
-              customSizeBtn +
-              "</div></div>")
+        ? buildTwoPiecePqvSizeHtml(p, idx, twoPieceCfg, chartBtn, customSizeBtn)
       : '<div class="pqv-field pqv-field-size"><div class="pqv-field-head"><span class="pqv-field-label">Size</span>' +
         chartBtn +
         '</div><div class="pqv-opt-group pqv-opt-group-wrap">' +
@@ -2564,23 +2613,44 @@ function buildTwoPieceSizeFields(p) {
     typeof getTwoPieceSizeConfig === "function"
       ? getTwoPieceSizeConfig(p)
       : { bodySizeLabel: "42 (Free size)", lengthSizeLabel: "37-38 inch" };
+  var dressLengths = p && Array.isArray(p.dressLengths) ? p.dressLengths : [];
+  var palazzoLengths = p && Array.isArray(p.palazzoLengths) ? p.palazzoLengths : [];
   var hasCustomSpecs = p && Array.isArray(p.sizeSpecs) && p.sizeSpecs.length;
-  var lengthRows = hasCustomSpecs
-    ? p.sizeSpecs
-        .map(function (spec) {
-          return (
-            "<div class='card-size-row'><span class='card-size-heading'>" +
-            escapeHtml(spec.label) +
-            "</span><span class='card-body-size-val'>" +
-            escapeHtml(spec.value) +
-            "</span></div>"
-          );
-        })
-        .join("")
-    : "<div class='card-size-row'><span class='card-size-heading'>Length Size</span>" +
+  var lengthRows = "";
+  if (dressLengths.length || palazzoLengths.length) {
+    if (dressLengths.length) {
+      lengthRows +=
+        "<div class='card-size-row'><span class='card-size-heading'>Dress Length</span>" +
+        "<span class='card-body-size-val'>" +
+        escapeHtml(dressLengths.join(", ") + " inches") +
+        "</span></div>";
+    }
+    if (palazzoLengths.length) {
+      lengthRows +=
+        "<div class='card-size-row'><span class='card-size-heading'>Palazzo Length</span>" +
+        "<span class='card-body-size-val'>" +
+        escapeHtml(palazzoLengths.join(", ") + " inches") +
+        "</span></div>";
+    }
+  } else if (hasCustomSpecs) {
+    lengthRows = p.sizeSpecs
+      .map(function (spec) {
+        return (
+          "<div class='card-size-row'><span class='card-size-heading'>" +
+          escapeHtml(spec.label) +
+          "</span><span class='card-body-size-val'>" +
+          escapeHtml(spec.value) +
+          "</span></div>"
+        );
+      })
+      .join("");
+  } else {
+    lengthRows =
+      "<div class='card-size-row'><span class='card-size-heading'>Length Size</span>" +
       "<span class='card-body-size-val'>" +
       escapeHtml(cfg.lengthSizeLabel) +
       "</span></div>";
+  }
   return (
     "<div class='card-size-block card-size-block--abaya card-size-block--twopiece'>" +
     "<div class='card-size-row'><span class='card-size-heading'>Body Size</span>" +

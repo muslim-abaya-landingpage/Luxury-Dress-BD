@@ -291,6 +291,15 @@
           return { label: String(row.label || ""), value: String(row.value || "") };
         });
     }
+    if (Array.isArray(entry.dressLengths) && entry.dressLengths.length) {
+      normalized.dressLengths = entry.dressLengths.slice();
+    }
+    if (Array.isArray(entry.palazzoLengths) && entry.palazzoLengths.length) {
+      normalized.palazzoLengths = entry.palazzoLengths.slice();
+    }
+    if (entry.lengthSizeLabel != null) {
+      normalized.lengthSizeLabel = entry.lengthSizeLabel;
+    }
 
     normalized.productUrl = resolveProductPageLink(normalized);
     return normalized;
@@ -462,11 +471,20 @@
     if (!bodySizeLabel) {
       bodySizeLabel = (tp && tp.bodySizeLabel) || "42 (Free size)";
     }
+    var dressLengths =
+      Array.isArray(p.dressLengths) && p.dressLengths.length ? p.dressLengths.slice() : null;
+    var palazzoLengths =
+      Array.isArray(p.palazzoLengths) && p.palazzoLengths.length ? p.palazzoLengths.slice() : null;
     return {
       bodySizeLabel: bodySizeLabel,
       bodySizes: bodySizes,
-      lengthSizeLabel: p.lengthSizeLabel || (tp && tp.lengthSizeLabel) || "37-38 inch",
+      dressLengths: dressLengths,
+      palazzoLengths: palazzoLengths,
+      lengthSizeLabel:
+        p.lengthSizeLabel ||
+        (dressLengths ? "Dress Length" : (tp && tp.lengthSizeLabel) || "37-38 inch"),
       lengthSizes:
+        dressLengths ||
         (Array.isArray(p.lengthSizes) && p.lengthSizes.length && p.lengthSizes.slice()) ||
         (tp && tp.lengthSizes && tp.lengthSizes.slice()) ||
         ["37-38 inch"]

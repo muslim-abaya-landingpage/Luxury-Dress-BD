@@ -33,6 +33,15 @@ html.category-ready #list {
   gap: 24px;
   align-items: start;
   min-width: 0;
+  max-width: 100%;
+}
+
+.shop-main {
+  min-width: 0;
+  max-width: 100%;
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
 }
 
 .shop-sidebar {
@@ -301,13 +310,6 @@ html.category-ready #list {
   color: #888;
 }
 
-.shop-main {
-  min-width: 0;
-  position: relative;
-  z-index: 1;
-  isolation: isolate;
-}
-
 .shop-top {
   display: flex;
   justify-content: space-between;
@@ -376,6 +378,7 @@ html.category-ready #list {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px 16px;
+  align-items: start;
 }
 
 .premium-card {
@@ -388,6 +391,7 @@ html.category-ready #list {
   background: #fff;
   transition: none;
   min-width: 0;
+  height: auto;
 }
 
 @media (hover: hover) {
@@ -511,7 +515,7 @@ button.img-wrap {
 .premium-card .card-foot {
   position: relative;
   z-index: 2;
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   padding: 10px 8px 16px;
@@ -1280,6 +1284,13 @@ button.img-wrap {
   }
 }
 
+@media (max-width: 768px) {
+  .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 10px;
+  }
+}
+
 @media (max-width: 480px) {
   .product-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1294,6 +1305,17 @@ button.img-wrap {
 
   .card-actions-muslim-abaya {
     gap: 8px;
+  }
+}
+
+@media (max-width: 390px) {
+  .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 8px;
+  }
+
+  .premium-card .card-foot {
+    padding: 8px 4px 12px;
   }
 }
 

@@ -874,8 +874,58 @@ window.CATEGORY_PRODUCTS = {
     { label: "Top Length", value: "38–40 Inches" },
     { label: "Pants Length", value: "38 Inches" }
   ]
+},
+{
+  id: "DR-19",
+  name: "Premium Luxury Two-Piece Dress",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/black-purple-floral-printed-long-kurti-womens-dress.webp",
+  images: [
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/black-purple-floral-printed-long-kurti-womens-dress.webp",
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/burgundy-golden-dotted-printed-long-kurti-womens-dress.webp",
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/lavender-floral-printed-kurti-for-women-premium-tc-cotton-bangladesh.webp",
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/maroon-floral-printed-kurti-for-women-premium-tc-cotton-bangladesh.webp",
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/mustard-yellow-floral-printed-long-kurti-womens-dress.webp",
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/navy-blue-floral-printed-kurti-for-women-premium-tc-cotton-bangladesh.webp",
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-blue-floral-kurti-women-fashion-webp.webp",
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-pink-floral-kurti-for-women-tc-cotton-bangladesh.webp",
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-purple-floral-dress-muslim-abaya-bangladesh.webp",
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-rust-floral-kurta-dress-muslim-abaya-bangladesh.webp",
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-rust-orange-floral-kurti-muslim-abaya-bangladesh.webp",
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-white-floral-kurti-dress-muslim-abaya-bangladesh.webp",
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/teal-floral-printed-womens-long-kurti-dress.webp"
+  ],
+  colorVariants: [
+    { color: "black-purple", colorLabel: "Black Purple Floral", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/black-purple-floral-printed-long-kurti-womens-dress.webp" },
+    { color: "burgundy-gold", colorLabel: "Burgundy Golden Dotted", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/burgundy-golden-dotted-printed-long-kurti-womens-dress.webp" },
+    { color: "lavender", colorLabel: "Lavender Floral", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/lavender-floral-printed-kurti-for-women-premium-tc-cotton-bangladesh.webp" },
+    { color: "maroon", colorLabel: "Maroon Floral", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/maroon-floral-printed-kurti-for-women-premium-tc-cotton-bangladesh.webp" },
+    { color: "mustard", colorLabel: "Mustard Yellow Floral", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/mustard-yellow-floral-printed-long-kurti-womens-dress.webp" },
+    { color: "navy", colorLabel: "Navy Blue Floral", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/navy-blue-floral-printed-kurti-for-women-premium-tc-cotton-bangladesh.webp" },
+    { color: "blue", colorLabel: "Blue Floral", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-blue-floral-kurti-women-fashion-webp.webp" },
+    { color: "pink", colorLabel: "Pink Floral", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-pink-floral-kurti-for-women-tc-cotton-bangladesh.webp" },
+    { color: "purple", colorLabel: "Purple Floral", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-purple-floral-dress-muslim-abaya-bangladesh.webp" },
+    { color: "rust", colorLabel: "Rust Floral", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-rust-floral-kurta-dress-muslim-abaya-bangladesh.webp" },
+    { color: "rust-orange", colorLabel: "Rust Orange Floral", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-rust-orange-floral-kurti-muslim-abaya-bangladesh.webp" },
+    { color: "white", colorLabel: "White Floral", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-white-floral-kurti-dress-muslim-abaya-bangladesh.webp" },
+    { color: "teal", colorLabel: "Teal Floral", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/teal-floral-printed-womens-long-kurti-dress.webp" }
+  ],
+  link: "/",
+  price: 650,
+  color: "multi-color",
+  colorLabel: "14 Colors",
+  fabric: "Alex Soft Georgette",
+  sizes: ["34", "36", "38", "40", "42", "44"],
+  bodySizes: ["34", "36", "38", "40", "42", "44"],
+  dressLengths: ["38", "39", "40"],
+  palazzoLengths: ["37", "38"],
+  lengthSizeLabel: "Dress Length",
+  sizeSpecs: [
+    { label: "Dress Length", value: "38, 39, 40 inches" },
+    { label: "Palazzo Length", value: "37, 38 inches" }
+  ],
+  detailNote: "Two-Piece Dress | Dress Length: 38, 39 & 40 Inches | Palazzo Length: 37 & 38 Inches | Alex Soft Georgette | 14 Colors | 100% Color Quality Assurance"
 }
-],  
+],
 /* ═══ ⑤ এম্ব্রয়ডারি — খালি ═══ */
 embroidery: [
  {
