@@ -141,13 +141,7 @@
   }
 
   function detailHref(sec, p) {
-    var id = p.id || "";
-    var links = window.SITE_LINKS && window.SITE_LINKS.productPage;
-    if (links && links.enabled && links.pattern) {
-      return href(links.pattern.replace("{id}", encodeURIComponent(id)));
-    }
-    var base = href(sec.path || "/" + sec.key);
-    return base + "#p=" + encodeURIComponent(id);
+    return "product.html?id=" + encodeURIComponent(p.id || "");
   }
 
   var cartIconSvg =
@@ -217,7 +211,7 @@
       "'>" +
       "<a class='ah-card-media' href='" +
       escapeHtml(dHref) +
-      "'>" +
+      "' data-home-qv='1'>" +
       (outOfStock
         ? "<span class='ah-card-badge ah-card-badge-oos'>Stock Out</span>"
         : "<span class='ah-card-badge'>Sale</span>") +
@@ -231,7 +225,7 @@
       "<div class='ah-card-row'>" +
       "<a class='ah-card-name' href='" +
       escapeHtml(dHref) +
-      "'>" +
+      "' data-home-qv='1'>" +
       escapeHtml(p.name) +
       "</a>" +
       "<span class='ah-card-price'>" +
@@ -317,6 +311,21 @@
     if (!root.__ahClickBound) {
       root.__ahClickBound = true;
       root.addEventListener("click", function (e) {
+        var qvLink = e.target.closest("[data-home-qv]");
+        if (qvLink) {
+          e.preventDefault();
+          var qvCard = qvLink.closest(".ah-card");
+          var qvSection = qvLink.closest(".home-section");
+          if (!qvCard || !qvSection) return;
+          var qvPid = qvCard.getAttribute("data-pid");
+          var qvKey = qvSection.getAttribute("data-cat");
+          if (typeof window.openProductQuickViewById === "function") {
+            window.openProductQuickViewById(qvKey, qvPid);
+          } else {
+            window.location.href = qvLink.getAttribute("href") || "product.html";
+          }
+          return;
+        }
         var btn = e.target.closest("button[data-action='add']");
         if (!btn) return;
         e.preventDefault();

@@ -74,6 +74,7 @@ function getShopCategoryKey() {
   return (
     (root && root.getAttribute("data-shop-category")) ||
     (body && body.getAttribute("data-shop-category")) ||
+    shopCartCtx.categoryKey ||
     ""
   );
 }
@@ -218,17 +219,21 @@ function fixShopPageLinks(root) {
 var shopCartCtx = {
   root: null,
   products: [],
+  categoryKey: "",
   gridHtml: null,
   gridClassName: "",
   lastCartAddKey: "",
   lastCartAddAt: 0
 };
 function getActivePqvScope() {
-  var root = shopCartCtx.root;
-  if (root && root.querySelector(".pqv-muslim-abaya")) return root;
   var modal = document.getElementById("productQuickView");
   if (modal && !modal.hidden) return modal;
   return null;
+}
+function productFullPageHref(product) {
+  var id = product && product.id ? String(product.id) : "";
+  if (!id) return "product.html";
+  return "product.html?id=" + encodeURIComponent(id);
 }
 function syncShopCartBadge() {
   if (typeof syncCartBadgeFromStore === "function") {
@@ -483,6 +488,7 @@ function shopAddBulkProductsToCart(item, entries, categoryKey, selectedType) {
 function resetShopCartContext() {
   shopCartCtx.root = null;
   shopCartCtx.products = [];
+  shopCartCtx.categoryKey = "";
 }
 function getSelectedBodyValueForIdx(scopeRoot, idx) {
   if (!scopeRoot) return "";
@@ -1443,30 +1449,23 @@ function getQuickViewModalShellHtml() {
 function ensureQuickViewModal() {
   var existing = document.getElementById("productQuickView");
   if (existing) {
-    if (!existing.classList.contains("pqv-page")) {
-      existing.className = "pqv pqv-page";
+    existing.className = "pqv pqv-overlay";
+    if (!existing.querySelector(".pqv-dialog")) {
       existing.innerHTML = getQuickViewModalShellHtml();
-    } else {
-      var oldBar = existing.querySelector(".pqv-toolbar");
-      if (oldBar) oldBar.remove();
-      if (!existing.querySelector(".pqv-float-close")) {
-        existing.insertAdjacentHTML(
-          "afterbegin",
-          '<button type="button" class="pqv-float-close" data-pqv-close="1" aria-label="Close">&times;</button>'
-        );
-      }
     }
-    return;
+    return existing;
   }
   var modal = document.createElement("div");
   modal.id = "productQuickView";
-  modal.className = "pqv pqv-page";
+  modal.className = "pqv pqv-overlay";
   modal.hidden = true;
   modal.setAttribute("aria-hidden", "true");
   modal.innerHTML = getQuickViewModalShellHtml();
   document.body.appendChild(modal);
   modal.addEventListener("click", function (ev) {
-    if (ev.target.closest("[data-pqv-close]")) closeProductQuickView();
+    if (ev.target === modal || ev.target.closest("[data-pqv-close]")) {
+      closeProductQuickView();
+    }
   });
   document.addEventListener("keydown", function (ev) {
     if (ev.key === "Escape") closeProductQuickView();
@@ -1482,6 +1481,7 @@ function ensureQuickViewModal() {
       setPqvGallerySlide(m, ev.key === "ArrowLeft" ? i - 1 : i + 1);
     });
   }
+  return modal;
 }
 /* ----------------------------------------------------------------------
    SECTION 6: মোবাইল স্টিকি অর্ডার বার
@@ -1502,7 +1502,7 @@ function ensureStickyOrderBarStyles() {
     "background:#fff;color:#111;font-size:13.5px;font-weight:700;padding:12px 0;cursor:pointer;" +
     "font-family:inherit;text-align:center;text-decoration:none;}" +
     "#stickyOrderBar .sob-buy{background:#111;color:#fff;}" +
-    "@media (max-width:768px){body.shop-product-open{padding-bottom:138px;}}";
+    "@media (max-width:768px){body.pqv-open{padding-bottom:138px;}}";
   document.head.appendChild(style);
 }
 
@@ -1522,7 +1522,8 @@ function initStickyOrderBar(root) {
   }
   bar.innerHTML =
     '<button type="button" class="sob-btn sob-cart">Add to Cart</button>' +
-    '<button type="button" class="sob-btn sob-buy">Buy Now</button>';
+    '<button type="button" class="sob-btn sob-buy">Buy Now</button>' +
+    '<a class="sob-btn sob-msg" target="_blank" rel="noopener">Send Message</a>';
 
   bar.querySelector(".sob-cart").addEventListener("click", function () {
     var realBtn = actionsRow.querySelector(".pqv-act-cart");
@@ -1532,6 +1533,9 @@ function initStickyOrderBar(root) {
     var realBtn = actionsRow.querySelector(".pqv-act-buy");
     if (realBtn) realBtn.click();
   });
+  var msgBtn = actionsRow.querySelector(".pqv-act-msg");
+  var stickyMsg = bar.querySelector(".sob-msg");
+  if (msgBtn && stickyMsg) stickyMsg.href = msgBtn.getAttribute("href") || "#";
 
   stickyOrderObserver = new IntersectionObserver(
     function (entries) {
@@ -1555,34 +1559,50 @@ function teardownStickyOrderBar() {
 }
 function closeProductQuickView(skipHistory) {
   teardownStickyOrderBar();
-  var root = shopCartCtx.root;
-  if (root && shopCartCtx.gridHtml) {
-    root.innerHTML = shopCartCtx.gridHtml;
-    root.className = shopCartCtx.gridClassName || "";
-    shopCartCtx.gridHtml = null;
-    shopCartCtx.gridClassName = "";
-    document.body.classList.remove("pqv-open", "shop-product-open");
-    var legacy = document.getElementById("productQuickView");
-    if (legacy) {
-      legacy.hidden = true;
-      legacy.setAttribute("aria-hidden", "true");
-      var legacyBody = document.getElementById("pqvBody");
-      if (legacyBody) legacyBody.innerHTML = "";
-    }
-    if (!skipHistory && history.state && history.state.maProduct != null) {
-      history.back();
-    }
-    window.scrollTo(0, 0);
-    refreshShopCardsAfterCartChange();
-    return;
-  }
   var modal = document.getElementById("productQuickView");
-  if (!modal) return;
-  modal.hidden = true;
-  modal.setAttribute("aria-hidden", "true");
+  if (modal) {
+    modal.hidden = true;
+    modal.setAttribute("aria-hidden", "true");
+    var body = document.getElementById("pqvBody");
+    if (body) body.innerHTML = "";
+  }
   document.body.classList.remove("pqv-open", "shop-product-open");
+  shopCartCtx.gridHtml = null;
+  shopCartCtx.gridClassName = "";
+  if (!skipHistory && history.state && history.state.maProduct != null) {
+    try {
+      history.replaceState({}, "", window.location.pathname + window.location.search);
+    } catch (e) {}
+  }
+  refreshShopCardsAfterCartChange();
+}
+function openProductQuickView(idx) {
+  var products = shopCartCtx.products;
+  if (!products || !products[idx]) return;
+  var p = products[idx];
+  var waLink = (window.SITE_MEDIA && window.SITE_MEDIA.whatsappOrderLink) || "https://wa.me/8801970831783";
+  var categoryKey = getShopCategoryKey();
+  var root = shopCartCtx.root || document.getElementById("list");
+  var cardQty = getShopCardQty(root, idx);
+  var html = buildQuickViewPanelHtml(p, idx, waLink, categoryKey, products);
+  var modal = ensureQuickViewModal();
   var body = document.getElementById("pqvBody");
-  if (body) body.innerHTML = "";
+  if (!body) return;
+  body.innerHTML = html;
+  modal.hidden = false;
+  modal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("pqv-open");
+  document.body.classList.remove("shop-product-open");
+  bindPqvInteractions(p, idx, categoryKey, modal);
+  initStickyOrderBar(modal);
+  var pqvQtyInput = modal.querySelector("#pqvQty");
+  if (pqvQtyInput) setPqvQtyInput(pqvQtyInput, cardQty);
+  modal.scrollTop = 0;
+  if (history.pushState) {
+    history.pushState({ maProduct: idx }, "", "#p=" + encodeURIComponent(p.id || String(idx)));
+  }
+  fireShopViewContent(p, categoryKey);
+  updatePqvGalleryNav(modal);
 }
 function buildPqvWholesaleSectionHtml(sizes, idx, isAbaya) {
   var sizeLabel = isAbaya ? "Length" : "Size";
@@ -1897,6 +1917,9 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     '<div class="pqv-panel-col">' +
     '<div class="pqv-panel">' +
     '<button type="button" class="pqv-panel-back" data-pqv-close="1">&lsaquo; Back to products</button>' +
+    '<a class="pqv-full-link" href="' +
+    escapeHtml(productFullPageHref(p)) +
+    '">View full details</a>' +
     '<h1 id="pqvTitle" class="pqv-title" lang="en">' +
     escapeHtml(p.name) +
     "</h1>" +
@@ -1963,40 +1986,6 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     "</div>"
   );
 }
-function openProductQuickView(idx) {
-  var products = shopCartCtx.products;
-  if (!products || !products[idx]) return;
-  var root = shopCartCtx.root || document.getElementById("list");
-  if (!root) return;
-  var waLink = (window.SITE_MEDIA && window.SITE_MEDIA.whatsappOrderLink) || "https://wa.me/8801970831783";
-  var categoryKey = getShopCategoryKey();
-  if (!shopCartCtx.gridHtml && root.querySelector("#productGrid")) {
-    shopCartCtx.gridHtml = root.innerHTML;
-    shopCartCtx.gridClassName = root.className || "";
-  }
-  var cardQty = getShopCardQty(root, idx);
-  var html = buildQuickViewPanelHtml(products[idx], idx, waLink, categoryKey, products);
-  root.className = (shopCartCtx.gridClassName || "") + " shop-product-detail";
-  root.setAttribute("data-category-key", categoryKey);
-  root.innerHTML = html;
-  bindPqvInteractions(products[idx], idx, categoryKey, root);
-  initStickyOrderBar(root);
-  var pqvQtyInput = root.querySelector("#pqvQty");
-  if (pqvQtyInput) setPqvQtyInput(pqvQtyInput, cardQty);
-  var legacy = document.getElementById("productQuickView");
-  if (legacy) {
-    legacy.hidden = true;
-    legacy.setAttribute("aria-hidden", "true");
-  }
-  document.body.classList.remove("pqv-open");
-  document.body.classList.add("shop-product-open");
-  window.scrollTo(0, 0);
-  if (history.pushState) {
-    history.pushState({ maProduct: idx }, "", "#p-" + idx);
-  }
-  fireShopViewContent(products[idx], categoryKey);
-  updatePqvGalleryNav(root);
-}
 /* ----------------------------------------------------------------------
    SECTION 8: গ্লোবাল ক্লিক হ্যান্ডলার
    পেজের যেকোনো জায়গায় কার্ট বাটন/বাই নাউ ক্লিক হলে সেটা এখানে ধরা হয়ে
@@ -2004,8 +1993,9 @@ function openProductQuickView(idx) {
    ---------------------------------------------------------------------- */
 function onGlobalShopCartClick(ev) {
   if (ev.type === "click" && ev.isTrusted === false) return;
+  if (ev.target.closest(".ah-card") && !ev.target.closest("#productQuickView")) return;
   if (ev.target.closest("[data-pqv-close]")) {
-    if (getActivePqvScope() || shopCartCtx.gridHtml) {
+    if (getActivePqvScope()) {
       ev.preventDefault();
       closeProductQuickView();
       return;
@@ -2026,7 +2016,6 @@ function onGlobalShopCartClick(ev) {
   }
   if (!inProductView) {
     if (!root || !document.body.contains(root)) {
-      resetShopCartContext();
       return;
     }
     if (!products || !products.length || !root.contains(ev.target)) return;
@@ -2143,7 +2132,7 @@ if (!window.__maShopCartClickBound) {
 if (!window.__maProductPopBound) {
   window.__maProductPopBound = true;
   window.addEventListener("popstate", function () {
-    if (shopCartCtx.gridHtml) closeProductQuickView(true);
+    if (getActivePqvScope()) closeProductQuickView(true);
   });
 }
 function findProductIdxById(id) {
@@ -2171,6 +2160,34 @@ function openProductFromLocationHash() {
 }
 window.openProductFromLocationHash = openProductFromLocationHash;
 window.openProductQuickView = openProductQuickView;
+window.openProductQuickViewById = function (categoryKey, productId) {
+  var key = String(categoryKey || "");
+  var id = String(productId || "");
+  if (!id) return false;
+  var list = [];
+  if (key && window.CATEGORY_PRODUCTS && window.CATEGORY_PRODUCTS[key]) {
+    list = window.CATEGORY_PRODUCTS[key];
+  } else {
+    var cats = window.CATEGORY_PRODUCTS || {};
+    Object.keys(cats).some(function (catKey) {
+      var found = (cats[catKey] || []).some(function (row) {
+        return row && String(row.id) === id;
+      });
+      if (!found) return false;
+      key = catKey;
+      list = cats[catKey];
+      return true;
+    });
+  }
+  if (!list || !list.length) return false;
+  shopCartCtx.products = list;
+  shopCartCtx.categoryKey = key;
+  shopCartCtx.root = document.getElementById("list") || document.getElementById("homeSections") || shopCartCtx.root;
+  var idx = findProductIdxById(id);
+  if (idx < 0) return false;
+  openProductQuickView(idx);
+  return true;
+};
 window.closeProductQuickView = closeProductQuickView;
 window.syncShopCartBadge = syncShopCartBadge;
 window.resetShopCartContext = resetShopCartContext;
@@ -2182,7 +2199,10 @@ function getShopBootSpec() {
   var body = document.body;
   if (!body) return null;
   if (body.getAttribute("data-shop-hub") === "1") return { hub: true };
-  var key = getShopCategoryKey();
+  var key =
+    (document.documentElement && document.documentElement.getAttribute("data-shop-category")) ||
+    body.getAttribute("data-shop-category") ||
+    "";
   if (key) return { key: key };
   return null;
 }

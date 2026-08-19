@@ -13,8 +13,10 @@
     
     <link rel="stylesheet" href="qty-stepper.css?v=20260601qty" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="qty-stepper.css?v=20260601qty"></noscript>
-    <link rel="stylesheet" href="cart-drawer.css?v=20260819pages" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="cart-drawer.css?v=20260819pages"></noscript>
+    <link rel="stylesheet" href="category-sidebar.css?v=20260820qv" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="category-sidebar.css?v=20260820qv"></noscript>
+    <link rel="stylesheet" href="custom-size-modal.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="custom-size-modal.css"></noscript>
     <link rel="stylesheet" href="index-critical.css?v=20260728fix2">
     <!-- index-home-cards.css and index-home.css removed: they styled an older
          #premium-collection/.item-card product grid that this page no longer
@@ -162,6 +164,8 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
      ensureCartDrawerRelatedStyles(). The stylesheet had zero real effect. -->
 
 <!--  এই নতুন কোডটুকু বসিয়ে দিন (টাইমিং ঠিক করার জন্য) -->
+<script src="custom-size-modal.js"></script>
+<script src="category-renderer.js?v=20260820qv"></script>
 <script src="hero-banner-config.js?v=20260820hero"></script>
 <script type="module" src="index-catalog-defer.js?v=20260530sale"></script>
 <script type="module">
@@ -171,7 +175,7 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
     return !!(p && Object.keys(p).some(function (k) { return (p[k] || []).length; }));
   }
   function startHomeModules() {
-    import("./index-home-muslim-abaya.js?v=20260820brand");
+    import("./index-home-muslim-abaya.js?v=20260820qv");
     import("./related-cart.js?v=20260708");
   }
   if (catalogIsReady()) {
