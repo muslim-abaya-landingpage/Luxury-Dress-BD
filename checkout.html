@@ -1616,6 +1616,154 @@
                 font-size: 16px;
             }
         }
+
+        /* Premium black + white — compact order, no gold/navy/cream accents */
+        .checkout-grid {
+            grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+            gap: 18px;
+        }
+        .checkout-main,
+        .checkout-aside {
+            gap: 14px;
+        }
+        .gb-panel,
+        .card-block {
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(17, 17, 17, 0.04);
+            background: #fff;
+        }
+        .checkout-step.is-active .checkout-step-num,
+        .checkout-step.is-done .checkout-step-num {
+            background: #111111;
+            color: #fff;
+            border-color: #111111;
+        }
+        .top-cat-bar { background: #111111; color: #fff; }
+        .top-cat-bar a { color: #f5f5f5; }
+        .card-block-premium {
+            border-color: #e8e8e8;
+            background: #fff;
+        }
+        .gb-cat-summary {
+            background: #f7f7f7;
+            border-color: #e8e8e8;
+        }
+        .payment-panel {
+            background: #f7f7f7;
+            border: 1px solid #e8e8e8;
+        }
+        .pay-details-badge {
+            color: #111;
+            background: #f5f5f5;
+            border-color: #e8e8e8;
+            border-radius: 6px;
+        }
+        .pay-detail-card-head { background: #f7f7f7; }
+        .pay-chart tr:not(:last-child) td { border-bottom-color: #ececec; }
+        .pay-details-note {
+            background: #f7f7f7;
+            border-left-color: #111111;
+        }
+        .order-total-box .summary-item.total-final strong { color: #fff; }
+        .checkout-trust span {
+            background: #f5f5f5;
+            color: #555555;
+            border-color: #e8e8e8;
+            border-radius: 6px;
+        }
+        .local-file-banner {
+            background: #f7f7f7;
+            border-color: #e0e0e0;
+            color: #333;
+        }
+        .local-file-banner strong,
+        .local-file-banner a { color: #111; }
+        .checkout-modal-icon--info,
+        .checkout-modal-icon--warn {
+            background: #f0f0f0;
+            color: #111;
+        }
+        .coupon-btn {
+            background: #111111;
+            color: #fff;
+            border-color: #111111;
+            border-radius: 6px;
+        }
+        .coupon-btn:hover {
+            background: #333;
+            color: #fff;
+        }
+        .checkout-clear-cart-btn {
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            background: #fff;
+            color: #111;
+            box-shadow: 0 1px 3px rgba(17, 17, 17, 0.04);
+        }
+        .checkout-clear-cart-btn:hover {
+            border-color: #111;
+            background: #f7f7f7;
+            box-shadow: 0 1px 4px rgba(17, 17, 17, 0.06);
+        }
+        .checkout-clear-cart-btn__icon {
+            background: #111;
+            color: #fff;
+        }
+        .checkout-clear-cart-btn__text,
+        .checkout-clear-cart-btn__label { color: #111; }
+        .gb-order-delete {
+            border-color: #e8e8e8;
+            color: #111;
+            border-radius: 6px;
+        }
+        .gb-order-delete:hover {
+            background: #f5f5f5;
+            border-color: #111;
+        }
+        .gb-panel-plan { background: #fff; }
+        .gb-order-qty { border-radius: 6px; }
+        .gb-order-size-select { border-radius: 6px; }
+        .gb-order-add-size-btn { border-radius: 6px; }
+        .pm-option,
+        .pay-plan-card { border-radius: 8px; }
+        .btn-place-order,
+        .sticky-order-btn { border-radius: 6px; }
+        .gb-panel-order .section-label,
+        .gb-panel-order .gb-panel-title { margin-bottom: 8px; }
+        .gb-order-row {
+            grid-template-columns: 64px 1fr auto 36px;
+            gap: 8px 10px;
+            padding: 10px 0;
+        }
+        .gb-order-thumb {
+            width: 60px;
+            height: 74px;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(17, 17, 17, 0.04);
+        }
+        .gb-order-name {
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+        .gb-order-detail {
+            font-size: 12px;
+            color: #555555;
+            margin-bottom: 6px;
+        }
+        .gb-order-price { font-size: 14px; min-width: 72px; }
+        .gb-panel-summary .gb-panel-title { margin-bottom: 12px; }
+        .gb-panel-crosssell,
+        .gb-panel-chart { display: none !important; }
+        @media (max-width: 640px) {
+            .gb-order-row {
+                grid-template-columns: 56px 1fr auto 36px;
+            }
+            .gb-order-thumb { width: 56px; height: 70px; }
+        }
+        @media (max-width: 900px) {
+            .checkout-grid { grid-template-columns: 1fr; gap: 14px; }
+        }
     </style>
 <link rel="stylesheet" href="remove-confirm-modal.css" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="remove-confirm-modal.css"></noscript>
@@ -1672,16 +1820,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
         <div class="checkout-main">
             <div class="card-block">
-                <h3 class="section-label">
-                    <span class="section-label-inner">
-                        <span>Order review</span>
-                        <span id="orderReviewMeta" class="label-meta"></span>
-                    </span>
-                </h3>
-                <div class="order-review-toolbar" id="clearCartWrap"></div>
-                <div class="order-summary" id="orderSummary"></div>
-            </div>
-            <div class="card-block">
                 <h3 class="section-label"><span>Delivery address</span></h3>
                 <div class="form-group">
                     <label for="userName">Your name</label>
@@ -1698,10 +1836,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <label for="userEmail">Email <span style="font-size:13px;font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0;">(Optional)</span></label>
                     <input type="email" id="userEmail" placeholder="name@gmail.com" autocomplete="email">
                 </div>
-                <div class="form-group">
+                <div class="form-group form-group-last">
                     <label for="userAddr">Delivery address</label>
                     <textarea id="userAddr" rows="3" placeholder="House/Road, Area, Thana, District" required></textarea>
                 </div>
+            </div>
+            <div class="card-block">
+                <h3 class="section-label"><span>Delivery option</span></h3>
                 <div class="form-group">
                     <label for="userArea">Delivery district</label>
                     <select id="userArea" required>
@@ -1716,8 +1857,50 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     </select>
                 </div>
             </div>
+            <div class="gb-panel gb-panel-notes">
+                    <h3 class="gb-panel-title">Special instructions <span style="font-size:13px;font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0;">(Optional)</span></h3>
+                    <textarea id="specialNotes" rows="3" maxlength="90" placeholder="Any special instructions for your order"></textarea>
+                    <div style="font-size:12px; color:#6b7280; text-align:right;"><span id="noteCount">0</span> / 90 characters</div>
+            </div>
         </div>
         <aside class="checkout-aside">
+            <div class="card-block gb-panel gb-panel-order">
+                <h3 class="section-label">
+                    <span class="section-label-inner">
+                        <span>Your Order</span>
+                        <span id="orderReviewMeta" class="label-meta"></span>
+                    </span>
+                </h3>
+                <div class="order-review-toolbar" id="clearCartWrap"></div>
+                <div class="order-summary" id="orderSummary"></div>
+            </div>
+            <div class="gb-panel gb-panel-coupon coupon-panel" id="couponPanel">
+                    <button type="button" class="coupon-toggle" id="couponToggle" aria-expanded="false" aria-controls="couponPanelBody">
+                        <span>Have a coupon or voucher?</span>
+                        <span class="coupon-toggle-icon" aria-hidden="true">
+                            <svg width="12" height="8" viewBox="0 0 12 8" fill="none"><path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                        </span>
+                    </button>
+                    <div class="coupon-panel-body" id="couponPanelBody">
+                        <div class="coupon-row">
+                            <input type="text" id="couponCode" placeholder="Coupon / Voucher Code">
+                            <button type="button" id="applyCouponBtn" class="coupon-btn">Apply</button>
+                        </div>
+                        <div id="couponMsg" style="margin-top:8px; font-size:12px; color:#6b7280;"></div>
+                    </div>
+            </div>
+            <div class="gb-panel gb-panel-summary">
+                    <h3 class="gb-panel-title">Order summary</h3>
+                    <div class="gb-order-summary">
+                        <div class="summary-item"><span>Subtotal</span><strong id="side-subtotal">&#2547;0</strong></div>
+                        <div class="summary-item"><span>Delivery cost</span><strong id="side-delivery">&#2547;0</strong></div>
+                        <div class="summary-item"><span>Discount</span><strong id="side-discount">&#2547;0</strong></div>
+                        <div class="summary-item summary-total-row"><span>Total</span><strong id="side-total">&#2547;0 BDT</strong></div>
+                    </div>
+                    <span id="side-design" class="visually-hidden">0</span>
+                    <span id="side-qty" class="visually-hidden">0</span>
+                    <p class="sidebar-meta">Free delivery on 3 or more items</p>
+            </div>
             <div class="gb-panel gb-panel-payment" id="paymentMethodPanel">
                 <h3 class="gb-panel-title">Payment method</h3>
                 <div class="pm-stack" role="radiogroup" aria-label="Select payment method">
@@ -1840,42 +2023,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 </div>
                 </div>
             </div>
-            <div class="gb-panel gb-panel-coupon coupon-panel" id="couponPanel">
-                    <button type="button" class="coupon-toggle" id="couponToggle" aria-expanded="false" aria-controls="couponPanelBody">
-                        <span>Have a coupon or voucher?</span>
-                        <span class="coupon-toggle-icon" aria-hidden="true">
-                            <svg width="12" height="8" viewBox="0 0 12 8" fill="none"><path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                        </span>
-                    </button>
-                    <div class="coupon-panel-body" id="couponPanelBody">
-                        <div class="coupon-row">
-                            <input type="text" id="couponCode" placeholder="Coupon / Voucher Code">
-                            <button type="button" id="applyCouponBtn" class="coupon-btn">Apply</button>
-                        </div>
-                        <div id="couponMsg" style="margin-top:8px; font-size:12px; color:#6b7280;"></div>
-                    </div>
-            </div>
-            <div class="gb-panel gb-panel-summary">
-                    <div class="gb-order-summary">
-                        <div class="summary-item"><span>Sub total</span><strong id="side-subtotal">&#2547;0</strong></div>
-                        <div class="summary-item"><span>Delivery cost</span><strong id="side-delivery">&#2547;0</strong></div>
-                        <div class="summary-item summary-total-row"><span>Total</span><strong id="side-total">&#2547;0 BDT</strong></div>
-                    </div>
-                    <span id="side-design" class="visually-hidden">0</span>
-                    <span id="side-qty" class="visually-hidden">0</span>
-                    <p class="sidebar-meta">Free delivery on 3 or more items</p>
-            </div>
-            <div class="gb-panel gb-panel-crosssell" id="crossSellPanel" style="display:none;">
-                <h3 class="gb-panel-title">
-                    <span>Customers also bought</span>
-                    <span class="cross-sell-dots" id="crossSellDots"></span>
-                </h3>
-                <div id="crossSellBody"></div>
-            </div>
-            <div class="gb-panel gb-panel-chart">
-                <h3 class="gb-panel-title">Product / fabric details</h3>
-                <div id="checkoutProductChart"></div>
-            </div>
             <div class="gb-panel gb-panel-plan">
                     <h3 class="gb-panel-title">Choose Payment Plan</h3>
                     <div class="pay-plan-list" role="radiogroup" aria-label="Payment plan">
@@ -1901,11 +2048,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                             </span>
                         </label>
                     </div>
-            </div>
-            <div class="gb-panel gb-panel-notes">
-                    <h3 class="gb-panel-title">Special instructions <span style="font-size:13px;font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0;">(Optional)</span></h3>
-                    <textarea id="specialNotes" rows="3" maxlength="90" placeholder="Any special instructions for your order"></textarea>
-                    <div style="font-size:12px; color:#6b7280; text-align:right;"><span id="noteCount">0</span> / 90 characters</div>
             </div>
             <div class="gb-panel gb-panel-submit">
                     <label class="terms-box" style="margin-top:0;">
@@ -2294,11 +2436,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var lines = [];
         var color = item.colorLabel || item.color;
         if (color) lines.push('Color: ' + String(color).trim());
-        var fabric = formatCheckoutFabric(item.fabric || item.material);
-        if (fabric) lines.push('Fabric: ' + fabric);
-        var desc = String(item.description || '').trim();
-        var fabricRaw = String(item.fabric || item.material || '').trim();
-        if (desc && desc !== fabricRaw) lines.push(desc);
         return lines.map(function (line) { return escapeHtml(line); }).join('<br>');
     }
 
@@ -2798,6 +2935,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             var sideTotal = document.getElementById('side-total');
             if (sideSubtotal) sideSubtotal.textContent = formatBdtCheckout(0);
             if (sideDelivery) sideDelivery.textContent = formatBdtCheckout(0);
+            var sideDiscountEmpty = document.getElementById('side-discount');
+            if (sideDiscountEmpty) sideDiscountEmpty.textContent = formatBdtCheckout(0);
             if (sideTotal) sideTotal.textContent = formatBdtCheckout(0) + ' BDT';
             renderProductChart();
             renderClearCartToolbar();
@@ -2818,6 +2957,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             var sideTotalNone = document.getElementById('side-total');
             if (sideSubtotalNone) sideSubtotalNone.textContent = formatBdtCheckout(0);
             if (sideDeliveryNone) sideDeliveryNone.textContent = formatBdtCheckout(0);
+            var sideDiscountNone = document.getElementById('side-discount');
+            if (sideDiscountNone) sideDiscountNone.textContent = formatBdtCheckout(0);
             if (sideTotalNone) sideTotalNone.textContent = formatBdtCheckout(0) + ' BDT';
             renderProductChart();
             renderClearCartToolbar();
@@ -2830,9 +2971,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var designCount = orderLines().length;
         var sideSubtotal = document.getElementById('side-subtotal');
         var sideDelivery = document.getElementById('side-delivery');
+        var sideDiscount = document.getElementById('side-discount');
         var sideTotal = document.getElementById('side-total');
         if (sideSubtotal) sideSubtotal.textContent = formatBdtCheckout(sub);
         if (sideDelivery) sideDelivery.textContent = (q >= 3 ? formatBdtCheckout(0) : formatBdtCheckout(ship));
+        if (sideDiscount) sideDiscount.textContent = formatBdtCheckout(0);
         if (sideTotal) sideTotal.textContent = formatBdtCheckout(grand) + ' BDT';
         var sideQty = document.getElementById('side-qty');
         var sideDesign = document.getElementById('side-design');
