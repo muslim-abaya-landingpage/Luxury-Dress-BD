@@ -300,13 +300,13 @@ function buildNavMenuItems() {
     fixHeaderLinks(document.body);
   }
   var ICON_SEARCH =
-    '<svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.75"/><path d="M20.5 20.5L16.2 16.2"/></svg>';
+    '<svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.75" cy="10.75" r="6.35"/><path d="M15.7 15.7L21 21"/></svg>';
   var ICON_BAG =
-    '<svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 8a4 4 0 0 1 8 0"/><path d="M6.5 10h11l-.7 9.2a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6.5 10z"/></svg>';
+    '<svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.4 8.6c0-2 1.6-3.6 3.6-3.6s3.6 1.6 3.6 3.6"/><path d="M7.2 8.8h9.6l1.35 11.4H5.85L7.2 8.8z"/></svg>';
   var ICON_CHAT =
-    '<svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 5h13A2.5 2.5 0 0 1 21 7.5v8A2.5 2.5 0 0 1 18.5 18H12l-4 3v-3H5.5A2.5 2.5 0 0 1 3 15.5v-8A2.5 2.5 0 0 1 5.5 5z"/></svg>';
+    '<svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.2 4.8h11.6A3.2 3.2 0 0 1 21 8v7.1a3.2 3.2 0 0 1-3.2 3.2h-2.55L12 21.2l-3.25-2.9H6.2A3.2 3.2 0 0 1 3 15.1V8a3.2 3.2 0 0 1 3.2-3.2z"/><circle cx="8.5" cy="11.4" r="0.85" fill="currentColor" stroke="none"/><circle cx="12" cy="11.4" r="0.85" fill="currentColor" stroke="none"/><circle cx="15.5" cy="11.4" r="0.85" fill="currentColor" stroke="none"/></svg>';
   var ICON_USER =
-    '<svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.4"/><path d="M5.2 19.2a6.8 6.8 0 0 1 13.6 0"/></svg>';
+    '<svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="7.4" r="3.15"/><path d="M5.1 19.8c1.15-3.55 3.35-5.15 6.9-5.15s5.75 1.6 6.9 5.15"/></svg>';
   var ICON_MENU =
     '<svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>';
   var ICON_CHEV_LEFT =

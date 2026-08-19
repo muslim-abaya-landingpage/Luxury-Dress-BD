@@ -351,8 +351,10 @@ backdrop-filter:blur(14px);
   font-size:16px;
   font-weight:400;
   letter-spacing:normal;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  text-decoration:none;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif !important;
+  white-space:nowrap;
+  border-radius:0 !important;
+  line-height:1;
   cursor:pointer;
   transition:background .15s ease, color .15s ease;
   background:#E6E7EB;
@@ -373,13 +375,13 @@ backdrop-filter:blur(14px);
 }
 
 .ah-btn-cart{
-  flex:0 0 30%;
-  min-width:0;
+  flex:0 0 auto;
+  white-space:nowrap;
   border:1px solid #e5e7eb;
 }
 .ah-btn-msg{
-  flex:1 1 70%;
-  min-width:0;
+  flex:1 1 auto;
+  white-space:nowrap;
   border:none;
 }
 
