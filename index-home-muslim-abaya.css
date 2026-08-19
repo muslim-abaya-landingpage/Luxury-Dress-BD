@@ -173,6 +173,7 @@
   max-width: var(--ah-max);
   margin: 8px auto 0;
   padding: 0 24px;
+  min-width: 0;
 }
 .home-catnav-inner {
   display: flex;
@@ -266,6 +267,8 @@
 
 .home-section-body {
   position: relative;
+  min-width: 0;
+  max-width: 100%;
 }
 .home-row {
   display: grid;
@@ -277,6 +280,8 @@
   scroll-snap-type: x mandatory;
   padding-bottom: 4px;
   scrollbar-width: none;
+  min-width: 0;
+  max-width: 100%;
 }
 .home-row::-webkit-scrollbar { display: none; }
 .home-row-arrow {
@@ -313,6 +318,8 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 .ah-card-media {
   position: relative;
@@ -496,22 +503,77 @@
   .home-hero-arrow { display: none; }
   .home-row-arrow { width: 40px; height: 40px; font-size: 18px; }
 }
+@media (max-width: 640px) {
+  .home-section-head {
+    margin: 0 0 12px;
+    gap: 8px;
+  }
+  .home-section-viewall {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+  .ah-card-body {
+    padding: 10px 0 0;
+    gap: 6px;
+  }
+  .ah-card-row {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 4px;
+  }
+  .ah-card-name {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    display: block;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    width: 100%;
+    max-width: 100%;
+    font-size: 13px;
+    line-height: 1.35;
+  }
+  .ah-card-price {
+    display: block;
+    width: 100%;
+    font-size: 13px;
+  }
+  .ah-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+  .ah-card .ah-btn,
+  .ah-card .ah-btn-cart,
+  .ah-card .ah-btn-msg {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+    height: 38px;
+    min-height: 38px;
+    font-size: 12.5px;
+    padding: 6px 8px;
+    gap: 6px;
+    box-sizing: border-box;
+  }
+}
 @media (max-width: 560px) {
+  .home-catnav { padding-left: 12px; padding-right: 12px; }
   .home-catnav-inner { padding: 10px 0; gap: 16px; }
   .home-catnav-label { font-size: 12px; padding-right: 14px; }
   .home-catnav-inner a { font-size: 12px; }
   .home-hero-track { aspect-ratio: 16 / 9; border-radius: 0; }
   .home-hero-slide img { object-position: center top; }
   .home-hero { margin: 0 auto 4px; padding: 0; }
-  .home-section { margin: 28px auto 36px; }
-  .home-row { grid-auto-columns: calc((100% - 10px) / 2); gap: 10px; }
+  .home-section { margin: 20px auto 24px; padding-left: 12px; padding-right: 12px; }
+  .home-row { grid-auto-columns: calc((100% - 8px) / 2); gap: 8px; }
   .home-row-arrow { width: 36px; height: 36px; font-size: 16px; box-shadow: none; }
   .home-row-arrow.prev { left: 4px; }
   .home-row-arrow.next { right: 4px; }
   .home-section-title { font-size: 18px; }
-  .ah-card-row { gap: 6px; }
-  .ah-card-name { font-size: 13px; }
-  .ah-card-price { font-size: 13px; }
-  .ah-btn { height: 36px; font-size: 13px; padding: 6px 10px; }
-  .home-skeleton .sk-row { grid-template-columns: repeat(2, 1fr); }
+  .home-skeleton .sk-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

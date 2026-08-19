@@ -94,8 +94,8 @@
     .pd-gallery-arrow.prev { left: 12px; }
     .pd-gallery-arrow.next { right: 12px; }
     @media (max-width: 640px) {
-      .pd-gallery { flex-direction: column-reverse; }
-      .pd-thumbs { flex-direction: row; width: 100%; overflow-x: auto; }
+      .pd-gallery { flex-direction: column-reverse; min-width: 0; max-width: 100%; }
+      .pd-thumbs { flex-direction: row; flex-wrap: nowrap; width: 100%; min-width: 0; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
       .pd-thumb { width: 60px; height: 76px; flex-shrink: 0; }
     }
 

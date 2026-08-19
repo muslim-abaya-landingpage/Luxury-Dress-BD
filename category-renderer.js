@@ -42,7 +42,7 @@ function ensureCategoryStyles() {
     link = document.createElement("link");
     link.id = "category-sidebar-css";
     link.rel = "stylesheet";
-    link.href = "category-sidebar.css?v=20260603wholesale";
+    link.href = "category-sidebar.css?v=20260820mobile";
     document.head.appendChild(link);
   }
   var qtyLink =
@@ -62,7 +62,7 @@ function ensureCategoryStyles() {
   if (!shopLink) {
     shopLink = document.createElement("link");
     shopLink.rel = "stylesheet";
-    shopLink.href = "shop-page.css?v=20260603cart14";
+    shopLink.href = "shop-page.css?v=20260820mobile";
     document.head.appendChild(shopLink);
   }
 }

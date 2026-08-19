@@ -355,6 +355,44 @@ body.shop-page .card-actions-muslim-abaya .ma-qty-stepper__btn:disabled {
   color: #bbb !important;
 }
 
+@media (max-width: 640px) {
+  body.shop-page .card-actions-muslim-abaya {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "cart"
+      "msg";
+    gap: 6px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  body.shop-page .muslim-abaya-btn-cart,
+  body.shop-page .muslim-abaya-btn-msg {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    min-height: 38px;
+  }
+
+  body.shop-page .card-actions-muslim-abaya .muslim-abaya-btn-cart {
+    gap: 6px;
+    padding: 8px 8px;
+  }
+
+  body.shop-page .muslim-abaya-btn-cart::after {
+    content: "Add to Cart";
+    font-weight: 500;
+    font-size: 12.5px;
+    letter-spacing: 0.01em;
+  }
+
+  body.shop-page .muslim-abaya-btn-msg {
+    font-size: 12.5px;
+    padding: 8px 8px;
+  }
+}
+
 /* ================================================================
    Body Size field — shown alongside Length Size (kept visible).
 ================================================================ */

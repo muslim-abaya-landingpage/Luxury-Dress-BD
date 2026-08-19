@@ -379,6 +379,8 @@ html.category-ready #list {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px 16px;
   align-items: start;
+  min-width: 0;
+  width: 100%;
 }
 
 .premium-card {
@@ -391,6 +393,8 @@ html.category-ready #list {
   background: #fff;
   transition: none;
   min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
   height: auto;
 }
 
@@ -1316,6 +1320,34 @@ button.img-wrap {
 
   .premium-card .card-foot {
     padding: 8px 4px 12px;
+  }
+}
+
+@media (max-width: 640px) {
+  .premium-card .card-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 4px;
+  }
+
+  .premium-card .card-title-btn,
+  .premium-card .card-title-text {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .premium-card .card-title-text {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    -webkit-line-clamp: 2;
+  }
+
+  .premium-card .card-price {
+    display: block;
+    width: 100%;
   }
 }
 
@@ -2414,15 +2446,32 @@ body.pqv-sc-open {
   }
 
   .pqv-gallery {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .pqv-main-wrap {
+    max-width: 100%;
+    min-width: 0;
   }
 
   .pqv-thumbs {
     flex-direction: row;
+    flex-wrap: nowrap;
     order: 2;
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-height: none;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
   }
 
   .pqv-thumb {
+    flex: 0 0 52px;
     width: 52px;
     height: 64px;
   }
