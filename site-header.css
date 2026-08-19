@@ -380,10 +380,10 @@ html {
 }
 
 .header-announcement-bar {
-  background: #eef4fa;
+  background: #ffffff;
   padding: 6px 0;
-  border-top: 1px solid #e6edf4;
-  border-bottom: 1px solid #e6edf4;
+  border-top: 1px solid #ececec;
+  border-bottom: 1px solid #ececec;
 }
 
 .announcement-slider {
@@ -410,7 +410,7 @@ html {
   display: none;
   font-size: 13px;
   font-weight: 500;
-  color: #334155;
+  color: #111111;
   letter-spacing: 0.02em;
   position: absolute;
   width: 100%;
@@ -430,12 +430,12 @@ html {
   align-items: center;
   justify-content: center;
   background: #ffffff;
-  border: 1px solid #d7dee8;
+  border: 1px solid #e5e5e5;
   width: 32px;
   height: 32px;
   border-radius: 50%;
   cursor: pointer;
-  color: #475569;
+  color: #444;
   box-shadow: none;
   z-index: 2;
   padding: 0;
@@ -450,10 +450,10 @@ html {
 }
 
 .slider-arrow:hover {
-  background: #f8fafc;
-  border-color: #94a3b8;
-  color: #0f172a;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.14);
+  background: #f5f5f5;
+  border-color: #d0d0d0;
+  color: #111;
+  box-shadow: none;
 }
 
 .slider-arrow:active {
