@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="fonts.css?v=20260726">
-    <link rel="preload" as="image" href="images/Baby-Pink-Floral-Print.jpeg" fetchpriority="high">
+    <link rel="preload" as="image" href="images/hero-banner/premium-black-floral-embroidery-abaya-bangladesh-model-original-dubai-cherry-fabric-(2).webp" fetchpriority="high">
     <link rel="preload" as="image" href="assets/logo-muslim-abaya.svg" type="image/svg+xml">
     <link rel="preload" href="site-header.css?v=20260630sticky" as="style">
     <link rel="stylesheet" href="site-header.css?v=20260630sticky">
@@ -116,7 +116,7 @@
 <script type="module" src="site-header.js?v=20260819audit"></script>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-ML7RL6BR"
 height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- Full-width hero slider (populated from catalog by index-home-anzaar.js?v=20260819pages) -->
+<!-- Full-width hero slider (uploaded images from hero-banner-config.js) -->
 <div id="homeHero" class="home-hero"></div>
 
 <!-- Quick category chips -->
@@ -162,7 +162,7 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
      ensureCartDrawerRelatedStyles(). The stylesheet had zero real effect. -->
 
 <!--  এই নতুন কোডটুকু বসিয়ে দিন (টাইমিং ঠিক করার জন্য) -->
-<script src="hero-banner-config.js?v=20260728fix2"></script>
+<script src="hero-banner-config.js?v=20260820hero"></script>
 <script type="module" src="index-catalog-defer.js?v=20260530sale"></script>
 <script type="module">
   // ক্যাটালগ ডেটা পুরোপুরি লোড হওয়া পর্যন্ত মেইন ফাইলটিকে ১ সেকেন্ড দেরি করানো হলো
@@ -171,7 +171,7 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
     return !!(p && Object.keys(p).some(function (k) { return (p[k] || []).length; }));
   }
   function startHomeModules() {
-    import("./index-home-anzaar.js?v=20260819pages");
+    import("./index-home-anzaar.js?v=20260820hero");
     import("./related-cart.js?v=20260708");
   }
   if (catalogIsReady()) {

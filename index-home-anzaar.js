@@ -1,6 +1,6 @@
 /* ==========================================================================
    Anzaar-style homepage renderer
-   - Full-width hero slider (product images from the catalog)
+   - Full-width hero slider (uploaded images from images/hero-banner/ only)
    - Category sections (heading + View All + horizontal card row)
    - Product cards wired to the existing store cart (cart-utils.js)
    Data source: window.CATEGORY_PRODUCTS + window.CATALOG_SECTIONS
@@ -10,7 +10,6 @@
 
   var TK = "\u09F3"; // ৳
   var MAX_CARDS_PER_SECTION = 10;
-  var HERO_SLIDES = 5;
   var HERO_INTERVAL = 5000;
 
   var heroTimer = null;
@@ -393,41 +392,21 @@
   }
 
   /* ---------------- Hero slider ---------------- */
-  function heroProducts() {
-    var secs = activeSections();
-    var out = [];
-    var seen = {};
-    // round-robin one product per section for variety
-    var maxLen = 0;
-    var lists = secs.map(function (s) {
-      var l = sectionProducts(s.key);
-      if (l.length > maxLen) maxLen = l.length;
-      return { sec: s, list: l };
-    });
-    for (var i = 0; i < maxLen && out.length < HERO_SLIDES; i++) {
-      for (var j = 0; j < lists.length && out.length < HERO_SLIDES; j++) {
-        var p = lists[j].list[i];
-        if (!p) continue;
-        var img = resolveImg(p);
-        if (!img || seen[img]) continue;
-        seen[img] = true;
-        out.push({ sec: lists[j].sec, p: p });
-      }
-    }
-    return out;
+  function isUploadedHeroImage(src) {
+    var s = String(src || "")
+      .trim()
+      .split("#")[0]
+      .split("?")[0]
+      .replace(/^\.\//, "");
+    if (!s) return false;
+    return /(^|\/)images\/hero-banner\//i.test(s);
   }
 
-  /**
-   * hero-banner-config.js এ যদি window.SITE_HERO_CONFIG.slides (নিজস্ব,
-   * হিরো-ব্যানারের রেশিওতে ঠিকমতো ক্রপ করা ছবি) দেওয়া থাকে, সেটাই
-   * ব্যবহার হবে — প্রোডাক্ট ছবি থেকে অটো-টানা বন্ধ হয়ে যাবে। খালি রাখলে
-   * আগের মতোই ক্যাটাগরি প্রোডাক্ট থেকে অটোমেটিক ছবি আসবে।
-   */
   function manualHeroSlides() {
     var cfg = window.SITE_HERO_CONFIG || {};
     var list = Array.isArray(cfg.slides) ? cfg.slides : [];
     return list.filter(function (s) {
-      return s && s.image;
+      return s && isUploadedHeroImage(s.image);
     });
   }
 
@@ -441,30 +420,21 @@
     var heroSubtitle = heroCfg.subtitle || "Premium modest wear crafted with comfort &amp; purity.";
     var heroBtnText = heroCfg.buttonText || "Shop Now";
 
-    var manual = manualHeroSlides();
-    var items = manual.length ? manual : heroProducts();
-    if (!items.length) return;
+    var items = manualHeroSlides();
+    if (!items.length) {
+      hero.innerHTML = "";
+      return;
+    }
 
     var slides = items
       .map(function (it, i) {
-        var img, link, alt, eyebrow, heading, subtitle, btnText;
-        if (manual.length) {
-          img = it.image;
-          link = it.link || "/";
-          alt = it.alt || heroEyebrow;
-          eyebrow = it.eyebrow || heroEyebrow;
-          heading = it.heading || heroHeading;
-          subtitle = it.subtitle || heroSubtitle;
-          btnText = it.buttonText || heroBtnText;
-        } else {
-          img = resolveImg(it.p);
-          link = detailHref(it.sec, it.p);
-          alt = it.p.name;
-          eyebrow = heroEyebrow;
-          heading = heroHeading;
-          subtitle = heroSubtitle;
-          btnText = heroBtnText;
-        }
+        var img = it.image;
+        var link = it.link || "/";
+        var alt = it.alt || heroEyebrow;
+        var eyebrow = it.eyebrow || heroEyebrow;
+        var heading = it.heading || heroHeading;
+        var subtitle = it.subtitle || heroSubtitle;
+        var btnText = it.buttonText || heroBtnText;
         return (
           "<div class='home-hero-slide" +
           (i === 0 ? " is-active" : "") +
@@ -475,7 +445,7 @@
           escapeHtml(alt) +
           "'" +
           (i === 0 ? " fetchpriority='high'" : " loading='lazy'") +
-          " onerror=\"this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg'\">" +
+          ">" +
           "<div class='home-hero-cap'>" +
           "<p class='eyebrow'>" + eyebrow + "</p>" +
           "<h2 class='head'>" + heading + "</h2>" +
@@ -515,6 +485,40 @@
 
     heroIdx = 0;
     bindHero(hero, items.length);
+    hero.querySelectorAll(".home-hero-slide img").forEach(function (img) {
+      img.addEventListener("error", function () {
+        var slide = img.closest(".home-hero-slide");
+        if (slide) slide.remove();
+        var live = hero.querySelectorAll(".home-hero-slide");
+        var dotsWrap = hero.querySelector(".home-hero-dots");
+        if (dotsWrap) {
+          dotsWrap.innerHTML = Array.prototype.map
+            .call(live, function (_, i) {
+              return (
+                "<button type='button' aria-label='Slide " +
+                (i + 1) +
+                "' class='" +
+                (i === 0 ? "is-active" : "") +
+                "' data-slide='" +
+                i +
+                "'></button>"
+              );
+            })
+            .join("");
+          dotsWrap.querySelectorAll("button").forEach(function (dot) {
+            dot.addEventListener("click", function () {
+              var n = hero.querySelectorAll(".home-hero-slide").length;
+              goToSlide(hero, parseInt(dot.getAttribute("data-slide"), 10) || 0, n);
+              startHero(hero, n);
+            });
+          });
+        }
+        var n = live.length;
+        heroTotalRef = n;
+        if (n) goToSlide(hero, 0, n);
+        startHero(hero, n);
+      });
+    });
   }
 
   function goToSlide(hero, idx, total) {
@@ -574,8 +578,8 @@
   /* ---------------- Boot ---------------- */
   var rendered = false;
   function renderAll() {
-    if (!window.CATEGORY_PRODUCTS || !activeSections().length) return false;
     renderHero();
+    if (!window.CATEGORY_PRODUCTS || !activeSections().length) return false;
     renderCatnav();
     renderSections();
     var sk = $("homeSkeleton");
