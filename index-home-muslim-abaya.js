@@ -147,8 +147,6 @@
 
   var cartIconSvg =
     "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='M3 4h1.6l1.1 11.2A2 2 0 0 0 7.7 17h9.7a2 2 0 0 0 2-1.7L21 8H7'/><circle cx='9' cy='20' r='1.35'/><circle cx='18' cy='20' r='1.35'/></svg>";
-  var msgIconSvg =
-    "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='M6.2 4.8h11.6A3.2 3.2 0 0 1 21 8v7.1a3.2 3.2 0 0 1-3.2 3.2h-2.55L12 21.2l-3.25-2.9H6.2A3.2 3.2 0 0 1 3 15.1V8a3.2 3.2 0 0 1 3.2-3.2z'/><circle cx='8.5' cy='11.4' r='0.85' fill='currentColor' stroke='none'/><circle cx='12' cy='11.4' r='0.85' fill='currentColor' stroke='none'/><circle cx='15.5' cy='11.4' r='0.85' fill='currentColor' stroke='none'/></svg>";
 
   /* ---------------- Cart ---------------- */
   function addToCart(sec, p) {
@@ -246,9 +244,7 @@
         ? ""
         : "<a class='ah-btn ah-btn-msg' href='" +
           escapeHtml(msg) +
-          "' target='_blank' rel='noopener'>" +
-          msgIconSvg +
-          "<span>Send Message</span></a>") +
+          "' target='_blank' rel='noopener'><span>Send Message</span></a>") +
       "</div>" +
       "</div>" +
       "</article>"
