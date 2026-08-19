@@ -168,7 +168,7 @@ html {
     padding-left: 8px;
     margin-left: 0;
     box-shadow: none;
-    gap: 16px;
+    gap: 18px;
   }
 
   .nav-icons a,
@@ -324,7 +324,7 @@ html {
 .nav-icons {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 18px;
   flex-shrink: 0;
   min-height: 30px;
   justify-content: flex-end;
@@ -335,7 +335,7 @@ html {
 .nav-icons button,
 .nav-icons .cart-drawer-trigger,
 .nav-icon-btn {
-  color: #333;
+  color: #111;
   display: inline-flex;
   align-items: center;
   justify-content: center;

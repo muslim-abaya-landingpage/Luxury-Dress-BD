@@ -6,8 +6,8 @@
     <link rel="stylesheet" href="fonts.css?v=20260726">
     <link rel="preload" as="image" href="images/hero-banner/premium-black-floral-embroidery-abaya-bangladesh-model-original-dubai-cherry-fabric-(2).webp" fetchpriority="high">
     <link rel="preload" as="image" href="assets/logo-muslim-abaya.svg" type="image/svg+xml">
-    <link rel="preload" href="site-header.css?v=20260820whitebar" as="style">
-    <link rel="stylesheet" href="site-header.css?v=20260820whitebar">
+    <link rel="preload" href="site-header.css?v=20260820flatbtn" as="style">
+    <link rel="stylesheet" href="site-header.css?v=20260820flatbtn">
     <link rel="stylesheet" href="site-footer.css?v=20260603footen" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="site-footer.css?v=20260603footen"></noscript>
     
@@ -23,8 +23,8 @@
          renders (the homepage now uses index-home-muslim-abaya.js?v=20260820page -> .home-hero /
          .ah-card). Keeping them loaded only added dead weight and stale
          .muslim-abaya-btn rules that could collide with the current cards. -->
-    <link rel="stylesheet" href="index-home-muslim-abaya.css?v=20260820fashion">
-    <link rel="stylesheet" href="liquid-glass-ui.css?v=20260820cartdrawer">
+    <link rel="stylesheet" href="index-home-muslim-abaya.css?v=20260820flatbtn">
+    <link rel="stylesheet" href="liquid-glass-ui.css?v=20260820flatbtn">
     <link rel="stylesheet" href="cart-drawer.css?v=20260820cartdrawer">
     <link rel="icon" href="assets/logo-muslim-abaya.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="assets/logo-muslim-abaya.svg">
@@ -116,7 +116,7 @@
 <script>(function(){if(location.protocol==='file:'){var b=document.getElementById('localFileBanner');if(b)b.style.display='block';}})();</script>
 <div id="site-header-mount"></div>
 <script src="site-header-config.js?v=20260603logo"></script>
-<script type="module" src="site-header.js?v=20260820cartdrawer"></script>
+<script type="module" src="site-header.js?v=20260820flatbtn"></script>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-ML7RL6BR"
 height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- Full-width hero slider (uploaded images from hero-banner-config.js) -->
@@ -176,7 +176,7 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
     return !!(p && Object.keys(p).some(function (k) { return (p[k] || []).length; }));
   }
   function startHomeModules() {
-    import("./index-home-muslim-abaya.js?v=20260820page");
+    import("./index-home-muslim-abaya.js?v=20260820flatbtn");
     import("./related-cart.js?v=20260708");
   }
   if (catalogIsReady()) {

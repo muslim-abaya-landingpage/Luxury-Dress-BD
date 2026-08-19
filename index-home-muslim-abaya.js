@@ -146,7 +146,7 @@
   }
 
   var cartIconSvg =
-    "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' aria-hidden='true'><path d='M6 6h15l-1.5 9h-12z'/><circle cx='9' cy='20' r='1'/><circle cx='18' cy='20' r='1'/><path d='M6 6L5 3H2'/></svg>";
+    "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='M8 7a4 4 0 0 1 8 0'/><path d='M6.5 10h11l-.7 9.2a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6.5 10z'/></svg>";
 
   /* ---------------- Cart ---------------- */
   function addToCart(sec, p) {
