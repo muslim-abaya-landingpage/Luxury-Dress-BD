@@ -373,6 +373,7 @@ function shopAddProductToCart(item, qtyToAdd, sizeValue, categoryKeyOpt, bodyVal
     pushTrackingEvent("AddToCart", {
       content_ids: [line.id || item.name],
       content_name: item.name,
+      content_type: "product",
       value: line.price,
       currency: "BDT",
       quantity: line.quantity
@@ -433,6 +434,7 @@ function shopAddBulkProductsToCart(item, entries, categoryKey, selectedType) {
     pushTrackingEvent("AddToCart", {
       content_ids: [firstLine && firstLine.id ? firstLine.id : item.name],
       content_name: item.name,
+      content_type: "product",
       value: firstLine ? firstLine.price * totalQty : 0,
       currency: "BDT",
       quantity: totalQty

@@ -932,7 +932,7 @@ panjabi: [
   {
     id: "PAN-002",
     name: "Premium Off White Islamic Panjabi",
-    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/premium-mens-off-white-cotton-panjabi-modern-1080x1350.webp",
+    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-mens-off-white-cotton-panjabi-modern-1080x1350.webp",
     link: "/",
     price: 1050,
     color: "off-white",
@@ -948,7 +948,7 @@ panjabi: [
   {
     id: "PAN-003",
     name: "Premium White Cotton Panjabi",
-    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/premium-white-cotton-panjabi-mens-islamic-fashion-modern-design-1080x1350%20.webp",
+    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-white-cotton-panjabi-mens-islamic-fashion-modern-design-1080x1350.webp",
     link: "/",
     price: 1050,
     color: "white",

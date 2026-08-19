@@ -237,6 +237,7 @@ function formatOnlineOrderProductCell_(sheet, row, designText) {
   var cell = sheet.getRange(row, 7);
   cell.setValue(text);
   try {
+    cell.clearDataValidations();
     cell.setWrap(true);
     cell.setVerticalAlignment('top');
     var lineCount = text.split('\n').length;
@@ -376,6 +377,20 @@ function openProductPickerSidebar() {
   SpreadsheetApp.getUi().showSidebar(html);
 }
 
+function clearOrderProductColumnValidation_(ss) {
+  ss = ss || SpreadsheetApp.getActiveSpreadsheet();
+  var names = ['Online Order', 'Fake'];
+  var i;
+  for (i = 0; i < names.length; i++) {
+    var sh = ss.getSheetByName(names[i]);
+    if (!sh) continue;
+    var last = Math.max(sh.getLastRow(), 1000);
+    try {
+      sh.getRange(2, 7, last, 1).clearDataValidations();
+    } catch (clearErr) {}
+  }
+}
+
 function syncProductListDropdown_() {
   var items = fetchProductCatalog_();
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -386,18 +401,12 @@ function syncProductListDropdown_() {
     var rows = items.map(function (p) { return [p.name, p.price, p.category]; });
     sh.getRange(2, 1, items.length, 3).setValues(rows);
   }
-  var orderSh = ss.getSheetByName('Online Order');
-  if (orderSh && items.length) {
-    var rule = SpreadsheetApp.newDataValidation()
-      .requireValueInRange(sh.getRange(2, 1, items.length + 1, 1), true)
-      .setAllowInvalid(true)
-      .build();
-    orderSh.getRange('G2:G1000').setDataValidation(rule);
-  }
+  clearOrderProductColumnValidation_(ss);
   SpreadsheetApp.getUi().alert(
-    'Product dropdown ready.\n\n' +
-    '• Column G = dropdown (' + items.length + ' products)\n' +
-    '• ProductList tab updated\n' +
+    'ProductList updated.\n\n' +
+    '• ' + items.length + ' products in ProductList\n' +
+    '• Column G validation cleared on Online Order + Fake\n' +
+    '  (G is order line-items, not a single product dropdown)\n' +
     '• Sidebar: Muslim Abaya → Product picker sidebar'
   );
 }
@@ -549,7 +558,7 @@ function onOpen() {
     SpreadsheetApp.getUi()
       .createMenu('Muslim Abaya')
       .addItem('Product picker sidebar (column G)', 'openProductPickerSidebar')
-      .addItem('Product dropdown — column G sync', 'syncProductListDropdown_')
+      .addItem('ProductList sync (clear G validation)', 'syncProductListDropdown_')
       .addItem('Status dropdown — column J (Pending/Confirmed…)', 'setupOrderStatusDropdownFromMenu')
       .addSeparator()
       .addItem('Steadfast — selected row পাঠান', 'steadfastSendActiveRow')

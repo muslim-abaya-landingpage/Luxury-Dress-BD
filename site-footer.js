@@ -166,6 +166,7 @@
           '<li><a href="' + esc(footerHref("/privacy")) + '">Privacy Policy</a></li>' +
           '<li><a href="' + esc(footerHref("/refund")) + '">Refund Policy</a></li>' +
           '<li><a href="' + esc(footerHref("/terms")) + '">Terms &amp; Conditions</a></li>' +
+          '<li><a href="' + esc(footerHref("/success")) + '">Order Success</a></li>' +
           "</ul>",
         "anz-col-links"
       ) +
