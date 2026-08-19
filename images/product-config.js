@@ -71,7 +71,7 @@ window.SITE_LINKS = {
       kaftan: { price: 1650 }
     }
   },
-  /** প্রোডাক্ট ডিটেইলে দামের নিচে ছোট নোট (Anzaar-style) */
+  /** প্রোডাক্ট ডিটেইলে দামের নিচে ছোট নোট (Muslim Abaya) */
   productShortNotes: {
     default:
       "* Colors may vary slightly in photos. Lighting can make the actual shade look a little different.",

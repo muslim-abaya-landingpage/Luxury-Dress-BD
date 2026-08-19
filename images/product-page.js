@@ -2,7 +2,7 @@
    Muslim Abaya — Product detail page (product.html)
    Reads the product id from ?id=... , finds it inside window.CATEGORY_PRODUCTS
    (same data source as the homepage / category pages), and renders an
-   Anzaar-style product page: gallery, color/type + size pickers, quantity,
+   Muslim Abaya product page: gallery, color/type + size pickers, quantity,
    Add to Cart / Buy Now / Send Message, Description/Specification tabs,
    and a Related Products row.
    ========================================================================== */

@@ -1,6 +1,6 @@
 /* ===========================
    MUSLIM ABAYA — SIZE CHART
-   Restyled to match the site's flat Anzaar-style design tokens
+   Restyled to match the site's flat Muslim Abaya design tokens
    (same colors/borders/radius as product.html, shop-page.css, etc.)
 =========================== */
 
@@ -58,7 +58,7 @@ body {
 }
 
 /* Card heading — flat light bar instead of a solid black block,
-   matching the rest of the site's minimal Anzaar-style look */
+   matching the rest of the site's minimal Muslim Abaya look */
 .card-title {
   background: var(--soft);
   color: var(--ink);

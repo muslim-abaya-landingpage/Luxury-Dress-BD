@@ -42,8 +42,8 @@ html, body {
 .item-card img { width: 100%; aspect-ratio: 1 / 1.5; object-fit: cover; border-radius: 8px; }
 
 /* --- Action Buttons --- */
-.anzaar-btn { display: flex; align-items: center; justify-content: center; min-height: 38px; padding: 9px 6px; font-weight: 600; cursor: pointer; border: 1px solid #e5e5e5; }
-.anzaar-btn-buy { background: #111; color: #fff; }
+.muslim-abaya-btn { display: flex; align-items: center; justify-content: center; min-height: 38px; padding: 9px 6px; font-weight: 600; cursor: pointer; border: 1px solid #e5e5e5; }
+.muslim-abaya-btn-buy { background: #111; color: #fff; }
 .button-row-wrapper { display: flex; gap: 12px; justify-content: center; margin: 10px auto; width: 100%; max-width: 500px; }
 .premium-action-btn { flex: 1; padding: 16px 12px; border-radius: 8px; font-weight: 700; color: #fff; text-decoration: none; display: inline-flex; justify-content: center; align-items: center; }
 .whatsapp-btn-style { background: linear-gradient(180deg, #27d366 0%, #1ea14c 100%); }
@@ -93,8 +93,8 @@ body { font-family: 'Hind Siliguri', sans-serif; background: #fff; color: #49505
 }
 
 /* --- Product Actions --- */
-.product-actions-anzaar,
-.card-actions-anzaar {
+.product-actions-muslim-abaya,
+.card-actions-muslim-abaya {
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -109,7 +109,7 @@ body { font-family: 'Hind Siliguri', sans-serif; background: #fff; color: #49505
 }
 
 /* --- Buttons --- */
-.anzaar-btn {
+.muslim-abaya-btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -128,15 +128,15 @@ body { font-family: 'Hind Siliguri', sans-serif; background: #fff; color: #49505
     white-space: nowrap;
 }
 
-.anzaar-btn-cart { background: #f5f5f5; color: #111; font-size: 14px; }
-.anzaar-btn-cart.is-active,
-.anzaar-btn-cart:hover { background: #ebebeb; }
+.muslim-abaya-btn-cart { background: #f5f5f5; color: #111; font-size: 14px; }
+.muslim-abaya-btn-cart.is-active,
+.muslim-abaya-btn-cart:hover { background: #ebebeb; }
 
-.anzaar-btn-buy { background: #111; color: #fff; border-color: #111; gap: 6px; }
-.anzaar-btn-buy:hover { background: #333; border-color: #333; }
+.muslim-abaya-btn-buy { background: #111; color: #fff; border-color: #111; gap: 6px; }
+.muslim-abaya-btn-buy:hover { background: #333; border-color: #333; }
 
-.anzaar-btn-msg { background: #f5f5f5; color: #111; width: 100%; }
-.anzaar-btn-msg:hover { background: #ebebeb; }
+.muslim-abaya-btn-msg { background: #f5f5f5; color: #111; width: 100%; }
+.muslim-abaya-btn-msg:hover { background: #ebebeb; }
 
 .btn-cart.btn-cart-active {
     background: #111 !important;
@@ -640,8 +640,8 @@ html, body {
         font-size: 13px !important;
         line-height: 1.35 !important;
     }
-    .anzaar-btn { font-size: 12px !important; min-height: 40px !important; height: auto !important; padding: 10px 8px !important; }
-    .anzaar-btn-cart { font-size: 14px !important; }
+    .muslim-abaya-btn { font-size: 12px !important; min-height: 40px !important; height: auto !important; padding: 10px 8px !important; }
+    .muslim-abaya-btn-cart { font-size: 14px !important; }
 }
 
 @media (max-width: 480px) {

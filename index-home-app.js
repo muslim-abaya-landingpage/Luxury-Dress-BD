@@ -502,8 +502,8 @@ function renderSidebar() {
                 <button type="button" class="ma-qty-stepper__btn" aria-label="Increase quantity" onclick="event.stopPropagation();updateQty('${p.id}', 1)">+</button>
             </div>`;
         const actionsRowHtml = `<div class="product-actions-row">
-                <button type="button" class="anzaar-btn anzaar-btn-cart${inCart ? ' is-active' : ''}" data-home-cart-action="add" data-product-id="${p.id}">Add to Cart</button>
-                <button type="button" class="anzaar-btn anzaar-btn-buy" data-home-cart-action="buy" data-product-id="${p.id}"><i class="fas fa-shopping-bag" aria-hidden="true"></i> Buy Now</button>
+                <button type="button" class="muslim-abaya-btn muslim-abaya-btn-cart${inCart ? ' is-active' : ''}" data-home-cart-action="add" data-product-id="${p.id}">Add to Cart</button>
+                <button type="button" class="muslim-abaya-btn muslim-abaya-btn-buy" data-home-cart-action="buy" data-product-id="${p.id}"><i class="fas fa-shopping-bag" aria-hidden="true"></i> Buy Now</button>
             </div>`;
 card.innerHTML = `
     <div style="position: relative; overflow: hidden; border-radius: 8px;">
@@ -541,11 +541,11 @@ card.innerHTML = `
             <span class="product-card-name" lang="en">${p.name}</span>
             <span class="product-card-price">${priceHtml}</span>
         </div>
-        <div class="product-actions-anzaar">
+        <div class="product-actions-muslim-abaya">
             ${qtyStepperHtml}
             ${actionsRowHtml}
             <a href="https://wa.me/8801970831783?text=${encodeURIComponent(p.name + ' অর্ডার করতে চাই')}"
-                target="_blank" rel="noopener" class="anzaar-btn anzaar-btn-msg">Send Message</a>
+                target="_blank" rel="noopener" class="muslim-abaya-btn muslim-abaya-btn-msg">Send Message</a>
         </div>
     </div>
 `;

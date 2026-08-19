@@ -2,7 +2,7 @@
    category-sidebar.css — ফাইলের মূল অংশ:
    - সাইডবার/ফিল্টার স্টাইল          (উপর থেকে শুরু)
    - প্রোডাক্ট গ্রিড ও কার্ড           (".product-grid", ".premium-card")
-   - কার্ট/Send Message বাটন (fallback) (".card-actions-anzaar" —
+   - কার্ট/Send Message বাটন (fallback) (".card-actions-muslim-abaya" —
      আসল লেআউট/সাইজ shop-page.css তে, ওখানেই এডিট করুন)
    - কুইক-ভিউ পপআপ (Quick View)      (".pqv-" দিয়ে শুরু ক্লাসগুলো)
    - রেসপনসিভ/মোবাইল অ্যাডজাস্টমেন্ট  (@media কুয়েরিগুলো, সাধারণত ফাইলের শেষে)
@@ -18,7 +18,7 @@ html.category-ready #list {
   visibility: visible;
 }
 
-/* Anzaar-style category shop sidebar */
+/* Muslim Abaya category shop sidebar */
 .shop-breadcrumb--desktop {
   display: none;
 }
@@ -676,14 +676,14 @@ button.img-wrap {
 
 /* ----------------------------------------------------------------------
    ★ কার্ট বাটন + Send Message বাটন — লেআউট/সাইজ shop-page.css তে!
-   .card-actions-anzaar এর আসল লেআউট (গ্রিড কলাম, বাটনের প্রস্থ, রং) এখানে
-   না, shop-page.css ফাইলে ঠিক হয় ("body.shop-page .card-actions-anzaar")
+   .card-actions-muslim-abaya এর আসল লেআউট (গ্রিড কলাম, বাটনের প্রস্থ, রং) এখানে
+   না, shop-page.css ফাইলে ঠিক হয় ("body.shop-page .card-actions-muslim-abaya")
    কারণ ওই সিলেক্টরটা বেশি specific বলে সবসময় জিতে যায়। এখানে শুধু একটা
    fallback/base রাখা আছে (shop-page.css লোড না হলে)। কার্ট বাটন ছোট/বড়
    করতে বা Send Message-এর প্রস্থ পাল্টাতে চাইলে shop-page.css-এর "ORDER
    ACTIONS" সেকশনে যান, এখানে না।
    ---------------------------------------------------------------------- */
-.card-actions-anzaar {
+.card-actions-muslim-abaya {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -736,7 +736,7 @@ button.img-wrap {
   margin-bottom: 12px;
 }
 
-.anzaar-btn-cart.is-active {
+.muslim-abaya-btn-cart.is-active {
   background: #111;
   color: #fff;
   border-color: #111;
@@ -749,7 +749,7 @@ button.img-wrap {
   width: 100%;
 }
 
-.anzaar-btn {
+.muslim-abaya-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -770,49 +770,49 @@ button.img-wrap {
   -webkit-tap-highlight-color: transparent;
 }
 
-.anzaar-btn-ico {
+.muslim-abaya-btn-ico {
   display: inline-flex;
   width: 20px;
   height: 20px;
   flex-shrink: 0;
 }
 
-.anzaar-btn-ico svg {
+.muslim-abaya-btn-ico svg {
   width: 20px;
   height: 20px;
 }
 
-.anzaar-btn-cart {
+.muslim-abaya-btn-cart {
   background: #f3f3f3;
   color: #333;
   gap: 6px;
   font-size: 14px;
 }
 
-.anzaar-btn-cart:hover {
+.muslim-abaya-btn-cart:hover {
   background: #e9e9e9;
 }
 
-.anzaar-btn-buy {
+.muslim-abaya-btn-buy {
   background: #111;
   color: #fff;
   border-color: #111;
   gap: 6px;
 }
 
-.anzaar-btn-buy:hover {
+.muslim-abaya-btn-buy:hover {
   background: #333;
   border-color: #333;
 }
 
-.anzaar-btn-msg {
+.muslim-abaya-btn-msg {
   background: #f3f3f3;
   color: #333;
   width: 100%;
   font-size: 14px;
 }
 
-.anzaar-btn-msg:hover {
+.muslim-abaya-btn-msg:hover {
   background: #e9e9e9;
 }
 
@@ -1292,12 +1292,12 @@ button.img-wrap {
     padding-right: 24px;
   }
 
-  .card-actions-anzaar {
+  .card-actions-muslim-abaya {
     gap: 8px;
   }
 }
 
-/* ── Product detail (Anzaar-style inline page, not floating modal) ── */
+/* ── Product detail (Muslim Abaya inline page, not floating modal) ── */
 body.pqv-open {
   overflow: hidden;
 }
@@ -1318,7 +1318,7 @@ body.shop-product-open > main {
   box-sizing: border-box;
 }
 
-#list.shop-product-detail .pqv-anzaar {
+#list.shop-product-detail .pqv-muslim-abaya {
   width: 100%;
   max-width: 1240px;
   margin: 0 auto;
@@ -1532,7 +1532,7 @@ body.shop-product-open > main {
   margin-top: 4px;
 }
 
-.pqv-anzaar {
+.pqv-muslim-abaya {
   font-family: "Hind Siliguri", "Inter", system-ui, sans-serif;
   display: flex;
   flex-direction: column;
@@ -1565,7 +1565,7 @@ body.shop-product-open > main {
    These used to live inside a 3rd sidebar column next to gallery/panel — Related Products was a
    tall sticky sidebar spanning the whole height, and Description was squeezed under the buy
    buttons in the middle column. Restructured so both sit in their own row below the gallery/panel,
-   side by side, matching the Anzaar reference. */
+   side by side, matching the Muslim Abaya. */
 .pqv-bottom-row {
   display: grid;
   grid-template-columns: 1fr;

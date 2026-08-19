@@ -72,24 +72,24 @@ body.shop-page .premium-card .card-spec-v,
 body.shop-page .premium-card .card-spec-chip,
 body.shop-page .premium-card-detail .detail-content h3,
 body.shop-page .premium-card-detail .detail-price,
-body.shop-page .anzaar-btn,
-body.shop-page .anzaar-btn-cart,
-body.shop-page .anzaar-btn-msg,
-body.shop-page .anzaar-btn-buy {
+body.shop-page .muslim-abaya-btn,
+body.shop-page .muslim-abaya-btn-cart,
+body.shop-page .muslim-abaya-btn-msg,
+body.shop-page .muslim-abaya-btn-buy {
   font-family: var(--font-product-en);
   font-variant-ligatures: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-body.shop-page .anzaar-btn-buy {
+body.shop-page .muslim-abaya-btn-buy {
   font-size: 18px;
   font-weight: 700;
   letter-spacing: 0.01em;
 }
 
-body.shop-page .anzaar-btn-cart,
-body.shop-page .anzaar-btn-msg,
+body.shop-page .muslim-abaya-btn-cart,
+body.shop-page .muslim-abaya-btn-msg,
 body.shop-page .pqv-act-cart,
 body.shop-page .pqv-act-msg {
   font-size: 14px;
@@ -221,10 +221,10 @@ body.shop-page .shop-breadcrumb--mobile {
 /* ============================================================================
    SECTION ★★: ORDER ACTIONS — কার্ট আইকন বাটন + Send Message বাটন
    ============================================================================
-   এই ব্লকটাই আসল কন্ট্রোলার — .card-actions-anzaar কে একটা 2-column CSS
-   GRID বানায় ("cart" কলাম + "msg" কলাম), আর .anzaar-btn-cart / .anzaar-btn-msg
+   এই ব্লকটাই আসল কন্ট্রোলার — .card-actions-muslim-abaya কে একটা 2-column CSS
+   GRID বানায় ("cart" কলাম + "msg" কলাম), আর .muslim-abaya-btn-cart / .muslim-abaya-btn-msg
    ক্লাসকে সরাসরি সেই দুই কলামে বসায়। body.shop-page prefix থাকায় এই রুলগুলো
-   category-sidebar.css-এর যেকোনো .card-actions-anzaar রুলের চেয়ে বেশি
+   category-sidebar.css-এর যেকোনো .card-actions-muslim-abaya রুলের চেয়ে বেশি
    specific — তাই কার্ট বাটনের লেআউট (সাইজ/প্রস্থ) বদলাতে চাইলে সবসময়
    *এই ফাইলেই* (category-sidebar.css তে না) হাত দিতে হবে।
 
@@ -232,12 +232,12 @@ body.shop-page .shop-breadcrumb--mobile {
    - প্রথম কলাম (cart)  = মাত্র 56px চওড়া (আইকন-অনলি ছোট বাটনের জন্য)
    - দ্বিতীয় কলাম (msg) = বাকি সব জায়গা (Send Message পুরোটা নেয়)
 
-   HTML-এ .anzaar-btn-cart আর .anzaar-btn-msg কে সরাসরি .card-actions-anzaar
+   HTML-এ .muslim-abaya-btn-cart আর .muslim-abaya-btn-msg কে সরাসরি .card-actions-muslim-abaya
    এর সন্তান (direct child) হতে হবে — মাঝে কোনো wrapper <div> দিলে সেই
    wrapper-ই একটামাত্র grid item হয়ে যাবে আর কলাম ভাগ ভেঙে যাবে (এটাই
    আগের বাগের কারণ ছিল)।
    ============================================================================ */
-body.shop-page .card-actions-anzaar {
+body.shop-page .card-actions-muslim-abaya {
   position: relative;
   display: grid;
   grid-template-columns: 56px 1fr;
@@ -250,12 +250,12 @@ body.shop-page .card-actions-anzaar {
 }
 /* কার্ডের সামনের গ্রিডে কোয়ান্টিটি স্টেপার দেখানো হয় না (শুধু quick-view/
    ডিটেইল পেজে দেখা যায়) */
-body.shop-page .card-actions-anzaar .ma-qty-stepper { display: none; }
-body.shop-page .card-actions-anzaar .anzaar-btn-cart { grid-area: cart; }
-body.shop-page .card-actions-anzaar .anzaar-btn-msg { grid-area: msg; }
+body.shop-page .card-actions-muslim-abaya .ma-qty-stepper { display: none; }
+body.shop-page .card-actions-muslim-abaya .muslim-abaya-btn-cart { grid-area: cart; }
+body.shop-page .card-actions-muslim-abaya .muslim-abaya-btn-msg { grid-area: msg; }
 
 /* কার্ট বাটন (আইকন-অনলি, ৫৬px কলামের ভেতরে) */
-body.shop-page .anzaar-btn-cart {
+body.shop-page .muslim-abaya-btn-cart {
   position: relative;
   z-index: 1;
   display: flex;
@@ -274,19 +274,19 @@ body.shop-page .anzaar-btn-cart {
   white-space: nowrap;
   transition: background .15s ease;
 }
-body.shop-page .card-actions-anzaar .anzaar-btn-cart .anzaar-btn-ico {
+body.shop-page .card-actions-muslim-abaya .muslim-abaya-btn-cart .muslim-abaya-btn-ico {
   display: inline-flex;
   margin: 0;
 }
-body.shop-page .anzaar-btn-cart .anzaar-btn-ico svg {
+body.shop-page .muslim-abaya-btn-cart .muslim-abaya-btn-ico svg {
   stroke: #545454;
 }
-body.shop-page .anzaar-btn-cart:hover {
+body.shop-page .muslim-abaya-btn-cart:hover {
   background: #dcdde2;
 }
 
 /* Send Message বাটন (বাকি সব জায়গা নেয়) */
-body.shop-page .anzaar-btn-msg {
+body.shop-page .muslim-abaya-btn-msg {
   position: relative;
   z-index: 1;
   display: flex;
@@ -303,21 +303,21 @@ body.shop-page .anzaar-btn-msg {
   letter-spacing: .01em;
   transition: background .15s ease, color .15s ease;
 }
-body.shop-page .anzaar-btn-msg:hover {
+body.shop-page .muslim-abaya-btn-msg:hover {
   background: #dcdde2;
   color: #333;
 }
 
-body.shop-page .anzaar-btn-cart:active,
-body.shop-page .anzaar-btn-msg:active,
-body.shop-page .anzaar-btn-buy:active {
+body.shop-page .muslim-abaya-btn-cart:active,
+body.shop-page .muslim-abaya-btn-msg:active,
+body.shop-page .muslim-abaya-btn-buy:active {
   transform: scale(.98);
   transition-duration: .08s;
 }
 
 /* সিঙ্গেল-প্রোডাক্ট ডিটেইল পেজের তৃতীয় বাটন (Buy Now) — একমাত্র কালো/সলিড
    বাটন হিসেবে থাকে যাতে সেটাই প্রাইমারি অ্যাকশন মনে হয় */
-body.shop-page .anzaar-btn-buy {
+body.shop-page .muslim-abaya-btn-buy {
   position: relative;
   z-index: 1;
   border-radius: 0;
@@ -328,12 +328,12 @@ body.shop-page .anzaar-btn-buy {
   font-weight: 700;
   transition: background .15s ease;
 }
-body.shop-page .anzaar-btn-buy:hover {
+body.shop-page .muslim-abaya-btn-buy:hover {
   background: #333;
 }
 
 /* কোয়ান্টিটি স্টেপার (quick-view-এ) — সাদা পিল স্টাইল */
-body.shop-page .card-actions-anzaar .ma-qty-stepper {
+body.shop-page .card-actions-muslim-abaya .ma-qty-stepper {
   position: relative;
   z-index: 1;
   background: #fff !important;
@@ -341,17 +341,17 @@ body.shop-page .card-actions-anzaar .ma-qty-stepper {
   border-radius: 0 !important;
   overflow: hidden;
 }
-body.shop-page .card-actions-anzaar .ma-qty-stepper__value,
-body.shop-page .card-actions-anzaar .ma-qty-stepper__input,
-body.shop-page .card-actions-anzaar .ma-qty-stepper__btn {
+body.shop-page .card-actions-muslim-abaya .ma-qty-stepper__value,
+body.shop-page .card-actions-muslim-abaya .ma-qty-stepper__input,
+body.shop-page .card-actions-muslim-abaya .ma-qty-stepper__btn {
   background: transparent !important;
   color: #111 !important;
   border: none !important;
 }
-body.shop-page .card-actions-anzaar .ma-qty-stepper__btn:hover {
+body.shop-page .card-actions-muslim-abaya .ma-qty-stepper__btn:hover {
   background: #f0f0f0 !important;
 }
-body.shop-page .card-actions-anzaar .ma-qty-stepper__btn:disabled {
+body.shop-page .card-actions-muslim-abaya .ma-qty-stepper__btn:disabled {
   color: #bbb !important;
 }
 

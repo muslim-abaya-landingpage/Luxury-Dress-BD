@@ -96,7 +96,7 @@ function maShopBagIcon(size) {
   // size না থাকলে বা ভুল থাকলে ডিফল্ট ১৮ হবে
   var s = parseInt(size, 10) || 18; 
   return (
-    '<span class="ma-shop-bag-ico anzaar-btn-ico" aria-hidden="true">' +
+    '<span class="ma-shop-bag-ico muslim-abaya-btn-ico" aria-hidden="true">' +
     '<svg width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
     '<path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/>' +
     '<path d="M6 6L5 3H2"/></svg></span>'
@@ -225,7 +225,7 @@ var shopCartCtx = {
 };
 function getActivePqvScope() {
   var root = shopCartCtx.root;
-  if (root && root.querySelector(".pqv-anzaar")) return root;
+  if (root && root.querySelector(".pqv-muslim-abaya")) return root;
   var modal = document.getElementById("productQuickView");
   if (modal && !modal.hidden) return modal;
   return null;
@@ -610,7 +610,7 @@ function refreshShopCardsAfterCartChange() {
     var stepper = card.querySelector(".shop-card-qty");
     if (stepper) stepper.classList.toggle("in-cart", cartQty > 0);
     setShopCardQty(root, idx, displayQty);
-    var addBtn = card.querySelector(".anzaar-btn-cart[data-product-idx='" + idx + "']");
+    var addBtn = card.querySelector(".muslim-abaya-btn-cart[data-product-idx='" + idx + "']");
     if (addBtn) addBtn.classList.toggle("is-active", cartQty > 0);
   });
   syncShopCartBadge();
@@ -1874,7 +1874,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
      (!isTwoPiece && !isPanjabi && sizes.length > 1));
   var wholesaleHtml = showWholesale ? buildPqvWholesaleSectionHtml(sizes, idx, isAbaya) : "";
   return (
-    '<div class="pqv-anzaar">' +
+    '<div class="pqv-muslim-abaya">' +
     '<div class="pqv-top">' +
     '<div class="pqv-gallery">' +
     '<div class="pqv-thumbs">' +
@@ -2750,7 +2750,7 @@ encodeURIComponent("I want to order " + p.name) +
     sizeOptions +
     "</select>" +
     // 👉 কার্ট বাটন + Send Message এখানে (গ্রিড কার্ড / non-detail মোড)
-    // ⚠️ .anzaar-btn-cart ও .anzaar-btn-msg কে .card-actions-anzaar এর
+    // ⚠️ .muslim-abaya-btn-cart ও .muslim-abaya-btn-msg কে .card-actions-muslim-abaya এর
     // *সরাসরি সন্তান* (direct child) হতেই হবে — shop-page.css এই দুটো
     // ক্লাসকে সরাসরি CSS grid-area ("cart"/"msg") তে বসায়। মাঝে কোনো
     // wrapper <div> দিলে গ্রিড লেআউট ভেঙে যাবে (আগে একবার এই বাগ হয়েছিল)।
@@ -2760,17 +2760,17 @@ encodeURIComponent("I want to order " + p.name) +
     // বসানো হতো, যার ফলে পেজ রিফ্রেশ করলে CSS লোড হওয়ার আগের এক ঝলকের
     // জন্য stepper দেখা যেত, তারপর CSS লোড হলে হঠাৎ অদৃশ্য হয়ে যেত (এটাই
     // "রিফ্রেশ দিলে পরিমাণ দেখা যায় আবার নাই হয়ে যায়" সমস্যার কারণ ছিল)।
-    '<div class="card-actions-anzaar">' +
-    '<button type="button" class="anzaar-btn anzaar-btn-cart' +
+    '<div class="card-actions-muslim-abaya">' +
+    '<button type="button" class="muslim-abaya-btn muslim-abaya-btn-cart' +
     (inCart ? " is-active" : "") +
     '" data-product-idx="' +
     idx +
-    '" data-action="add" aria-label="Add to Cart"><span class="anzaar-btn-ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M6 6L5 3H2"/></svg></span></button>' +
+    '" data-action="add" aria-label="Add to Cart"><span class="muslim-abaya-btn-ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M6 6L5 3H2"/></svg></span></button>' +
     "<a href='" +
     waLink +
     "?text=" +
    encodeURIComponent("I want to order " + p.name) +
-"' target='_blank' rel='noopener' class='anzaar-btn anzaar-btn-msg' onclick='event.stopPropagation()'><span lang='en'>Send Message</span></a>" +
+"' target='_blank' rel='noopener' class='muslim-abaya-btn muslim-abaya-btn-msg' onclick='event.stopPropagation()'><span lang='en'>Send Message</span></a>" +
 "</div></div></article>"
 );
 

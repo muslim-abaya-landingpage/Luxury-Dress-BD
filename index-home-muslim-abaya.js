@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Anzaar-style homepage renderer
+   Muslim Abaya homepage renderer
    - Full-width hero slider (uploaded images from images/hero-banner/ only)
    - Category sections (heading + View All + horizontal card row)
    - Product cards wired to the existing store cart (cart-utils.js)

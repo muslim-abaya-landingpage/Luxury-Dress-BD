@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Anzaar-style homepage (hero slider + category sections + product cards)
+   Muslim Abaya homepage (hero slider + category sections + product cards)
    Built on the site's own static HTML/CSS. Keeps existing cart/checkout.
    ========================================================================== */
 
@@ -55,7 +55,7 @@
   object-position: center 22%;
   display: block;
 }
-/* Caption overlay rendered by index-home-anzaar.js inside every slide.
+/* Caption overlay rendered by index-home-muslim-abaya.js inside every slide.
    These rules did not exist before, so the eyebrow/heading/CTA sat on the
    page completely unstyled (default browser type, no positioning) — that
    is what produced the "broken" stacked-text look under the hero image. */

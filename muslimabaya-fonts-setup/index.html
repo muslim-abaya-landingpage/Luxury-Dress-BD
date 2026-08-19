@@ -18,10 +18,10 @@
     <link rel="stylesheet" href="index-critical.css?v=20260530sale">
     <!-- index-home-cards.css and index-home.css removed: they styled an older
          #premium-collection/.item-card product grid that this page no longer
-         renders (the homepage now uses index-home-anzaar.js -> .home-hero /
+         renders (the homepage now uses index-home-muslim-abaya.js -> .home-hero /
          .ah-card). Keeping them loaded only added dead weight and stale
-         .anzaar-btn rules that could collide with the current cards. -->
-    <link rel="stylesheet" href="index-home-anzaar.css?v=20260724fix">
+         .muslim-abaya-btn rules that could collide with the current cards. -->
+    <link rel="stylesheet" href="index-home-muslim-abaya.css?v=20260724fix">
     <link rel="stylesheet" href="liquid-glass-ui.css?v=20260721">
     <link rel="icon" href="assets/logo-muslim-abaya.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="assets/logo-muslim-abaya.svg">
@@ -116,7 +116,7 @@
 <script type="module" src="site-header.js?v=20260603logo"></script>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-ML7RL6BR"
 height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- Full-width hero slider (populated from catalog by index-home-anzaar.js) -->
+<!-- Full-width hero slider (populated from catalog by index-home-muslim-abaya.js) -->
 <div id="homeHero" class="home-hero"></div>
 
 <!-- Quick category chips -->
@@ -168,7 +168,7 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
     return !!(p && Object.keys(p).some(function (k) { return (p[k] || []).length; }));
   }
   function startHomeModules() {
-    import("./index-home-anzaar.js?v=20260709anz");
+    import("./index-home-muslim-abaya.js?v=20260820brand");
     import("./related-cart.js?v=20260708");
   }
   if (catalogIsReady()) {

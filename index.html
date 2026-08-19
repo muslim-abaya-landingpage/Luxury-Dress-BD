@@ -18,11 +18,11 @@
     <link rel="stylesheet" href="index-critical.css?v=20260728fix2">
     <!-- index-home-cards.css and index-home.css removed: they styled an older
          #premium-collection/.item-card product grid that this page no longer
-         renders (the homepage now uses index-home-anzaar.js?v=20260819pages -> .home-hero /
+         renders (the homepage now uses index-home-muslim-abaya.js?v=20260820brand -> .home-hero /
          .ah-card). Keeping them loaded only added dead weight and stale
-         .anzaar-btn rules that could collide with the current cards. -->
-    <link rel="stylesheet" href="index-home-anzaar.css?v=20260728fix2">
-    <link rel="stylesheet" href="liquid-glass-ui.css?v=20260721">
+         .muslim-abaya-btn rules that could collide with the current cards. -->
+    <link rel="stylesheet" href="index-home-muslim-abaya.css?v=20260820brand">
+    <link rel="stylesheet" href="liquid-glass-ui.css?v=20260820brand">
     <link rel="icon" href="assets/logo-muslim-abaya.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="assets/logo-muslim-abaya.svg">
     <link rel="stylesheet" href="mobile-bottom-nav.css">
@@ -171,7 +171,7 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
     return !!(p && Object.keys(p).some(function (k) { return (p[k] || []).length; }));
   }
   function startHomeModules() {
-    import("./index-home-anzaar.js?v=20260820hero");
+    import("./index-home-muslim-abaya.js?v=20260820brand");
     import("./related-cart.js?v=20260708");
   }
   if (catalogIsReady()) {

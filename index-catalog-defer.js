@@ -29,7 +29,7 @@
     if (typeof window.__homeRefreshCatalog === "function") {
       window.__homeRefreshCatalog({ deferHero: true });
     }
-    // index.html listens for this to start index-home-anzaar.js /
+    // index.html listens for this to start index-home-muslim-abaya.js /
     // related-cart.js as soon as the catalog is actually ready, instead of
     // always waiting out its 3000ms fallback timer. This was previously
     // never dispatched, so every homepage load paid the full fallback delay

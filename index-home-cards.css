@@ -47,7 +47,7 @@
   padding: 5px !important;
 }
 
-#premium-collection .anzaar-btn {
+#premium-collection .muslim-abaya-btn {
   flex: 1 !important;
   height: 35px !important;
   font-size: 11px !important;
@@ -69,7 +69,7 @@
     grid-template-columns: repeat(2, 1fr) !important; /* মোবাইলেও ২ কলাম */
     gap: 8px !important;
   }
-  #premium-collection .anzaar-btn {
+  #premium-collection .muslim-abaya-btn {
     font-size: 10px !important; /* মোবাইলে ফন্ট ছোট */
   }
 }
@@ -209,7 +209,7 @@
   width: 100% !important;
 }
 
-#premium-collection .anzaar-btn {
+#premium-collection .muslim-abaya-btn {
   flex: 1 !important;
   height: 34px !important;
   padding: 0 4px !important;
@@ -223,11 +223,11 @@
   overflow: hidden !important;
 }
 
-#premium-collection .anzaar-btn-cart {
+#premium-collection .muslim-abaya-btn-cart {
   font-size: 11px !important; /* আগের 14px অনেক বড় ছিল */
 }
 
-#premium-collection .anzaar-btn-msg {
+#premium-collection .muslim-abaya-btn-msg {
   flex: 1 !important;
   height: 34px !important;
   padding: 0 4px !important;

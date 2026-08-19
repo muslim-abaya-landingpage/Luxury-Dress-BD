@@ -19,7 +19,7 @@
   --glass-blur:14px;
 
   --brand:#111111;
-  --gold:#6b6b6b; /* neutral grey accent -- gold removed per Anzaar-style flat minimal direction */
+  --gold:#6b6b6b; /* neutral grey accent -- gold removed per Muslim Abaya flat minimal direction */
   --success:#25D366;
 
   --radius:18px;
@@ -306,13 +306,13 @@ backdrop-filter:blur(14px);
 
 }
 /* ==================================================
-   AH CARD + BUTTONS -- flat Anzaar-style (no glass, no gold)
+   AH CARD + BUTTONS -- flat Muslim Abaya (no glass, no gold)
    The frosted/blurred card + gold cart button + green WhatsApp button
-   that used to live here were fighting index-home-anzaar.css (which
+   that used to live here were fighting index-home-muslim-abaya.css (which
    loads first) and, since this file loads after it, always won --
    that's why cart cards looked glassy/green instead of the plain flat
    white-card + grey-button look the site is going for now. Replaced
-   with flat rules matching the Anzaar reference (light grey pill
+   with flat rules matching the Muslim Abaya (light grey pill
    buttons, identical style for both actions, plain white card).
 ================================================== */
 
