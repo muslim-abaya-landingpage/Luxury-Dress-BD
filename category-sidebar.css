@@ -1328,41 +1328,12 @@ body.shop-product-open > main {
   display: none !important;
 }
 
-.pqv.pqv-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 100060;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 20px 12px 32px;
-  background: rgba(17, 17, 17, 0.48);
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.pqv.pqv-overlay[hidden] {
+.pqv.pqv-overlay,
+.pqv.pqv-page {
   display: none !important;
 }
 
-.pqv-overlay .pqv-dialog {
-  width: min(1100px, 100%);
-  margin: 52px auto 24px;
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
-}
-
 .pqv-full-link {
-  display: inline-block;
-  margin: 0 0 14px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #111;
-  text-decoration: underline;
-}
-
-.pqv.pqv-page {
   display: none !important;
 }
 
@@ -1374,20 +1345,7 @@ body.shop-product-open > main {
 }
 
 .pqv-float-close {
-  position: fixed;
-  top: calc(var(--pqv-top-offset, 0px) + 10px);
-  right: 14px;
-  z-index: 100070;
-  width: 40px;
-  height: 40px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
-  font-size: 24px;
-  line-height: 1;
-  color: #333;
-  cursor: pointer;
+  display: none !important;
 }
 
 .pqv-float-close:hover {
@@ -2270,9 +2228,9 @@ body.pqv-sc-open {
   font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   text-align: center;
   text-decoration: none;
-  border: 1px solid #111;
-  border-radius: 4px;
-  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 2px;
+  background: #f5f5f5;
   color: #111;
   cursor: pointer;
   box-sizing: border-box;
@@ -2282,7 +2240,7 @@ body.pqv-sc-open {
 }
 
 .pqv-act-cart:hover {
-  background: #f5f5f5;
+  background: #ebebeb;
 }
 
 .pqv-act-buy {
@@ -2312,9 +2270,9 @@ body.pqv-sc-open {
   font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   text-align: center;
   text-decoration: none;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background: #f3f3f3;
+  border: 1px solid #e5e5e5;
+  border-radius: 2px;
+  background: #f5f5f5;
   color: #111;
   cursor: pointer;
   box-sizing: border-box;
@@ -2446,12 +2404,13 @@ body.pqv-sc-open {
   }
 
   .pqv-actions-row--three {
-    grid-template-columns: 1fr;
-    gap: 8px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
   }
 
-  .pqv-actions-row--three .pqv-act-buy {
-    order: -1;
+  .pqv-actions-row--three .pqv-act {
+    font-size: 12px;
+    padding: 10px 6px;
   }
 }
 
@@ -2516,11 +2475,7 @@ body.pqv-sc-open {
   }
 
   .pqv-actions-row--three {
-    grid-template-columns: 1fr;
-  }
-
-  .pqv-actions-row--three .pqv-act-buy {
-    order: -1;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .pqv-actions-row {
