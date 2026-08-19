@@ -90,19 +90,22 @@ window.CATEGORY_PRODUCTS = {
     sizes: ["44", "46", "48", "50", "52", "54", "56"],
     priceByType: { "Abaya Only": 1550, "Full Set": 1750 }
   },
-
   {
-    id: "ABY-VERSACE-8",
-    name: "Versace Border Premium Abaya Set - Back",
-    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Versace%20Border%20Premium%20Abaya%20Set..jpg",
-    link: "/",
-    price: 1750,
-    color: "black",
-    colorLabel: "Classic Black",
-    fabric: "Dubai Cherry",
-    sizes: ["44", "46", "48", "50", "52", "54", "56"],
-    priceByType: { "Abaya Only": 1550, "Full Set": 1750 }
+  id: "ABY-VERSACE-8",
+  name: "Premium Black Hafeza Set",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Abaya/premium-black-layered-khimar-niqab-abaya-for-women-muslimabaya.webp",
+  link: "/",
+  price: 2600,
+  color: "black",
+  colorLabel: "Classic Black",
+  fabric: "Original Dubai Cherry Fabric",
+  sizes: ["50", "52", "54", "56", "58"],
+  priceByType: {
+    "Hijab + Niqab": 1600,
+    "Full Hafeza Set": 2600
   },
+  detailNote: "Premium Hafeza Set made from Original Dubai Cherry Fabric. Abaya length: 50, 52, 54, 56 and 58 inches. Flare: 180+ inches. Hijab and Niqab are made from Original China Soft Georgette Fabric. Hoodie Hijab features 3 parts at the back and 2 parts at the front, with a 56-inch back and 45-inch front. 2-part nose niqab with a 25-inch front."
+},
 
   {
     id: "ABY-VERSACE-9",
