@@ -18,7 +18,7 @@ body.has-sticky-header #site-header-mount {
 @media (min-width: 1024px) {
   #site-header-mount,
   body.has-sticky-header #site-header-mount {
-    min-height: 118px;
+    min-height: 140px;
   }
 }
 
@@ -27,15 +27,15 @@ body.has-sticky-header #site-header-mount {
 }
 
 body {
-  font-family: "Hind Siliguri", sans-serif;
+  font-family: "Poppins", "Hind Siliguri", sans-serif;
   background: #fff;
-  color: #495057;
+  color: #111;
   padding-bottom: 0;
 }
 
 .container {
   width: 100%;
-  max-width: 1280px;
+  max-width: 1400px;
   margin-left: auto;
   margin-right: auto;
   padding: 16px;

@@ -60,17 +60,23 @@ html {
 }
 
 .custom-container {
-  max-width: 1240px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 12px;
+  padding: 0 24px;
   box-sizing: border-box;
   width: 100%;
 }
 
+@media (max-width: 768px) {
+  .custom-container {
+    padding: 0 12px;
+  }
+}
+
 .header-top-bar {
-  background: #f5f5f5;
+  background: #fff;
   border-bottom: 1px solid #f0f0f0;
-  padding: 6px 0;
+  padding: 5px 0;
 }
 
 .top-bar-content {
@@ -90,9 +96,9 @@ html {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 12px 16px;
+  padding: 16px 24px;
   box-sizing: border-box;
-  gap: 8px;
+  gap: 16px;
 }
 
 /* Logo | centered menu | icons — menu must not bleed under search/cart icons */
@@ -100,23 +106,23 @@ html {
   .header-middle-nav .custom-container.nav-row,
   .header-middle-nav .nav-row.custom-container {
     display: grid;
-    grid-template-columns: minmax(0, 200px) minmax(0, 1fr) minmax(148px, max-content);
+    grid-template-columns: minmax(0, 220px) minmax(0, 1fr) minmax(160px, max-content);
     align-items: center;
-    column-gap: 12px;
+    column-gap: 24px;
     row-gap: 8px;
-    padding: 10px 12px;
+    padding: 14px 24px;
     justify-content: unset;
   }
 
   .brand-text-logo {
     justify-self: start;
     min-width: 0;
-    max-width: 200px;
+    max-width: 220px;
   }
 
   .brand-logo-img {
-    max-width: 200px;
-    height: 40px;
+    max-width: 220px;
+    height: 44px;
   }
 
   .desktop-menu {
@@ -136,7 +142,7 @@ html {
     justify-content: center;
     align-content: center;
     row-gap: 6px;
-    column-gap: 6px;
+    column-gap: 14px;
     max-width: 100%;
     margin: 0;
     padding: 0 8px;
@@ -144,11 +150,13 @@ html {
   }
 
   .desktop-menu ul li a {
-    font-size: 11px;
-    letter-spacing: 0.3px;
-    padding: 2px 4px;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    padding: 4px 2px;
     height: auto;
     line-height: 1.25;
+    font-weight: 600;
+    color: #111;
   }
 
   .nav-icons {
@@ -157,45 +165,63 @@ html {
     position: relative;
     z-index: 4;
     background: #fff;
-    padding-left: 10px;
-    margin-left: 2px;
-    box-shadow: -10px 0 10px 0 #fff;
+    padding-left: 8px;
+    margin-left: 0;
+    box-shadow: none;
+    gap: 16px;
+  }
+
+  .nav-icons a,
+  .nav-icons button,
+  .nav-icons .cart-drawer-trigger,
+  .nav-icon-btn {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+  }
+
+  .nav-icon-svg {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    min-height: 24px;
   }
 }
 
 @media (min-width: 1024px) and (max-width: 1319px) {
   .desktop-menu ul li a {
-    font-size: 10px;
-    letter-spacing: 0.2px;
-    padding: 2px 3px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    padding: 4px 2px;
   }
 
   .desktop-menu ul {
-    column-gap: 5px;
+    column-gap: 10px;
     row-gap: 4px;
   }
 }
 
 @media (min-width: 1200px) {
   .desktop-menu ul {
-    column-gap: 12px;
+    column-gap: 16px;
     row-gap: 4px;
   }
 
   .desktop-menu ul li a {
     font-size: 12px;
-    letter-spacing: 0.4px;
+    letter-spacing: 0.08em;
   }
 }
 
 @media (min-width: 1360px) {
   .desktop-menu ul li a {
     font-size: 13px;
-    letter-spacing: 0.45px;
+    letter-spacing: 0.1em;
   }
 
   .desktop-menu ul {
-    column-gap: 14px;
+    column-gap: 20px;
     flex-wrap: nowrap;
   }
 }
@@ -264,16 +290,16 @@ html {
 
 .desktop-menu ul li a {
   text-decoration: none;
-  color: #333;
+  color: #111;
   font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.45px;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   white-space: nowrap;
   line-height: 1;
   display: inline-flex;
   align-items: center;
-  height: 30px;
+  height: 32px;
 }
 
 .desktop-menu ul li a:hover {
@@ -354,10 +380,10 @@ html {
 }
 
 .header-announcement-bar {
-  background: linear-gradient(180deg, #ffffff 0%, #f8f9fb 100%);
-  padding: 8px 0;
-  border-top: 1px solid #eceff3;
-  border-bottom: 1px solid #eceff3;
+  background: #eef4fa;
+  padding: 6px 0;
+  border-top: 1px solid #e6edf4;
+  border-bottom: 1px solid #e6edf4;
 }
 
 .announcement-slider {
@@ -365,10 +391,10 @@ html {
   align-items: center;
   justify-content: center;
   position: relative;
-  height: 42px;
+  height: 36px;
   max-width: 1100px;
   margin: 0 auto;
-  padding: 0 58px;
+  padding: 0 52px;
   box-sizing: border-box;
 }
 
@@ -382,10 +408,10 @@ html {
 
 .ann-slide {
   display: none;
-  font-size: 15px;
-  font-weight: 700;
-  color: #0f172a;
-  letter-spacing: 0.01em;
+  font-size: 13px;
+  font-weight: 500;
+  color: #334155;
+  letter-spacing: 0.02em;
   position: absolute;
   width: 100%;
   left: 0;
@@ -404,16 +430,16 @@ html {
   align-items: center;
   justify-content: center;
   background: #ffffff;
-  border: 1px solid #cbd5e1;
-  width: 44px;
-  height: 44px;
+  border: 1px solid #d7dee8;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   cursor: pointer;
-  color: #1e293b;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.1);
+  color: #475569;
+  box-shadow: none;
   z-index: 2;
   padding: 0;
-  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .slider-arrow-svg {
@@ -591,8 +617,8 @@ body.global-layout {
   }
 
   .slider-arrow {
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
   }
 
   .slider-arrow-svg {

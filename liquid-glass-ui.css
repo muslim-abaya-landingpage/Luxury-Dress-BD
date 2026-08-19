@@ -346,14 +346,17 @@ backdrop-filter:blur(14px);
   font-size:11px;
   font-weight:600;
 }
+.ah-card-badge:not(.ah-card-badge-oos){
+  display:none;
+}
 
-.ah-card-name{ font-weight:500; line-height:1.4; text-decoration:none; color:#111; }
-.ah-card-price{ font-size:16px; font-weight:700; color:#111; }
+.ah-card-name{ font-weight:400; font-size:15px; line-height:1.4; text-decoration:none; color:#111; }
+.ah-card-price{ font-size:15px; font-weight:500; color:#111; }
 
 .ah-actions{
   display:flex;
   gap:8px;
-  margin-top:4px;
+  margin-top:2px;
   flex-shrink:0;
 }
 
@@ -362,21 +365,23 @@ backdrop-filter:blur(14px);
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:8px;
-  height:39px;
-  padding:6px 16px;
-  border-radius:0;
-  border:1px solid #e5e7eb;
-  font-size:16px;
-  font-weight:400;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  gap:6px;
+  height:40px;
+  padding:8px 10px;
+  border-radius:4px;
+  border:none;
+  font-size:13px;
+  font-weight:500;
+  font-family:"Poppins","Hind Siliguri","Inter",system-ui,sans-serif;
   text-decoration:none;
   cursor:pointer;
   transition:background .15s ease, color .15s ease;
-  background:#E6E7EB;
+  background:#e6e7eb;
   color:#545454;
   box-sizing:border-box;
   line-height:1.2;
+  flex:1 1 50%;
+  min-width:0;
 }
 
 @media(hover:hover){
@@ -389,18 +394,13 @@ backdrop-filter:blur(14px);
   outline-offset:2px;
 }
 
-.ah-btn-cart{
-  flex:0 0 30%;
-  min-width:0;
-}
+.ah-btn-cart,
 .ah-btn-msg{
-  flex:1 1 70%;
   min-width:0;
-  border:none;
 }
 
 @media(max-width:768px){
-  .ah-btn{ height:36px; font-size:12px; padding:6px 8px; }
+  .ah-btn{ height:36px; font-size:11px; padding:6px 8px; }
 }
 
 /* =====================================================
@@ -662,43 +662,7 @@ box-shadow:
 
 }
 
-/* Card Shine */
-
-.ah-card::before{
-
-     content:"";
-
-     position:absolute;
-
-     top:0;
-     left:-120%;
-
-     width:70%;
-     height:100%;
-
-     background:
-     linear-gradient(
-         120deg,
-         transparent,
-         rgba(255,255,255,.35),
-         transparent
-     );
-
-     transition:left .8s ease;
-
-     pointer-events:none;
-
-}
-
-@media (hover:hover){
-
-.ah-card:hover::before{
-
-left:140%;
-
-}
-
-}
+.ah-card::before{ display:none; }
 
 /* Card + button hover states now live in the flat AH CARD block above --
    these leftover glow rules referenced the old glass/green styling and
