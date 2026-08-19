@@ -93,24 +93,24 @@ window.addRelatedProductToCart = function (productId, categoryKey) {
 
   if (!product) return;
   categoryKey = foundCategoryKey;
+  const meta = (window.CATEGORY_META && window.CATEGORY_META[categoryKey]) || {};
 
   let existing = typeof window.loadStoreCart === 'function' ? window.loadStoreCart({ readOnly: true }) : [];
-  const already = existing.find(item => item.id === product.id && !item.size && (!item.category || item.category === categoryKey));
-  if (already) {
-    already.quantity = (parseInt(already.quantity, 10) || 0) + 1;
-  } else {
-    const meta = (window.CATEGORY_META && window.CATEGORY_META[categoryKey]) || {};
-    existing.push({
-      id: product.id,
-      name: product.name,
-      price: parseInt(product.price, 10) || 0,
-      quantity: 1,
-      image: product.image,
-      category: categoryKey,
-      categoryLabel: meta.title || categoryKey
-    });
-  }
-  const updated = typeof window.persistStoreCart === 'function' ? window.persistStoreCart(existing) : existing;
+  const line = {
+    id: product.id,
+    name: product.name,
+    price: parseInt(product.price, 10) || 0,
+    quantity: 1,
+    image: product.image,
+    color: product.color || '',
+    colorLabel: product.colorLabel || '',
+    category: categoryKey,
+    categoryLabel: meta.title || categoryKey,
+    selected: true
+  };
+  const updated = typeof window.addOrMergeStoreCartItem === 'function'
+    ? window.addOrMergeStoreCartItem(existing, line)
+    : (existing.push(line), existing);
   if (typeof window.afterCartMutation === 'function') {
     window.afterCartMutation(updated);
   } else {
@@ -212,6 +212,11 @@ function ensureCartDrawerHtml() {
   </button>
 </div>
     <div class="cart-drawer-body">
+      <div class="cart-select-bar" id="cart-select-bar" hidden>
+        <button type="button" class="cart-select-all-btn" id="cart-select-all">Select all</button>
+        <button type="button" class="cart-select-all-btn" id="cart-deselect-all">Deselect all</button>
+        <span class="cart-select-count" id="cart-select-count"></span>
+      </div>
       <div id="cart-items-list"></div>
       <div id="related-products-section" class="related-wrapper" style="display: none;">
         <h3 class="related-title">Customers also bought</h3>
@@ -220,9 +225,10 @@ function ensureCartDrawerHtml() {
     </div>
     <div class="cart-drawer-foot">
       <div class="cart-drawer-total-row">
-       <span>Total:</span>
+       <span>Checkout total:</span>
         <strong id="cart-drawer-total-price">৳0</strong>
       </div>
+      <p class="cart-drawer-select-hint" id="cart-drawer-select-hint"></p>
       <button type="button" class="cart-drawer-checkout">Proceed to Checkout</button>
     </div>
   `;
@@ -265,14 +271,38 @@ document.addEventListener('keydown', function (e) {
   const checkoutBtn = drawer.querySelector('.cart-drawer-checkout');
   if (checkoutBtn) {
     checkoutBtn.addEventListener('click', () => {
+      const lines = typeof window.loadStoreCart === 'function' ? window.loadStoreCart({ readOnly: true }) : [];
+      const selected = typeof window.getSelectedStoreCartLines === 'function'
+        ? window.getSelectedStoreCartLines(lines)
+        : lines;
+      if (!selected.length) {
+        if (typeof window.showCartAddedToast === 'function') {
+          window.showCartAddedToast({ name: 'Select at least one item for checkout', image: '', price: 0 });
+        }
+        return;
+      }
       window.location.href = typeof window.siteHref === 'function' ? window.siteHref('/checkout') : 'checkout.html';
     });
+  }
+  const selectAllBtn = drawer.querySelector('#cart-select-all');
+  const deselectAllBtn = drawer.querySelector('#cart-deselect-all');
+  if (selectAllBtn) {
+    selectAllBtn.addEventListener('click', function () { window.setAllDrawerLinesSelected(true); });
+  }
+  if (deselectAllBtn) {
+    deselectAllBtn.addEventListener('click', function () { window.setAllDrawerLinesSelected(false); });
   }
 }
 
 window.renderCartList = function (cartItems) {
   const listContainer = document.getElementById('cart-items-list');
   if (!listContainer) return;
+  const selectBar = document.getElementById('cart-select-bar');
+  const selectCount = document.getElementById('cart-select-count');
+  const hintEl = document.getElementById('cart-drawer-select-hint');
+  const isSelected = typeof window.isStoreCartLineSelected === 'function'
+    ? window.isStoreCartLineSelected
+    : function () { return true; };
 
   if (!cartItems || cartItems.length === 0) {
     listContainer.innerHTML = `
@@ -282,19 +312,31 @@ window.renderCartList = function (cartItems) {
     `;
     const totalEl = document.getElementById('cart-drawer-total-price');
     if (totalEl) totalEl.innerText = '৳0';
+    if (selectBar) selectBar.hidden = true;
+    if (hintEl) hintEl.textContent = '';
     return;
   }
 
-  let total = 0;
+  if (selectBar) selectBar.hidden = false;
+
+  let checkoutTotal = 0;
   let html = '';
+  let selectedCount = 0;
+  let selectedPcs = 0;
 
   cartItems.forEach((item, index) => {
     const price = parseInt(item.price, 10) || 550;
     const qty = parseInt(item.quantity, 10) || 1;
     const itemTotal = price * qty;
-    total += itemTotal;
+    const checked = isSelected(item);
+    if (checked) {
+      checkoutTotal += itemTotal;
+      selectedCount += 1;
+      selectedPcs += qty;
+    }
 
     const imgUrl = item.image || 'images/Baby-Pink-Floral-Print.jpeg';
+    const safeName = String(item.name || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
     let sizeDetails = '';
     if (item.size) sizeDetails += `Size: ${item.size}`;
@@ -308,13 +350,16 @@ window.renderCartList = function (cartItems) {
     }
 
     html += `
-      <div class="cart-drawer-item" data-index="${index}" data-id="${item.id}" data-size="${item.size || ''}">
+      <div class="cart-drawer-item${checked ? '' : ' is-deselected'}" data-index="${index}" data-id="${item.id}" data-size="${item.size || ''}">
+        <label class="cart-line-check">
+          <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleDrawerLineSelected(${index}, this.checked)" aria-label="Select for checkout">
+        </label>
         <div class="cart-drawer-thumb">
-          <img src="${imgUrl}" alt="${item.name}" onerror="this.src='images/Baby-Pink-Floral-Print.jpeg'">
+          <img src="${imgUrl}" alt="${safeName}" onerror="this.src='images/Baby-Pink-Floral-Print.jpeg'">
         </div>
         <div class="cart-drawer-item-main">
           <div class="cart-drawer-item-top">
-            <h3 class="cart-drawer-name">${item.name}</h3>
+            <h3 class="cart-drawer-name">${safeName}</h3>
             <button type="button" class="cart-drawer-remove" onclick="removeDrawerItem(${index})">×</button>
           </div>
           ${sizeDetails ? `<div style="font-size: 11px; color: #666; margin-bottom: 6px;">${sizeDetails}</div>` : ''}
@@ -333,7 +378,38 @@ window.renderCartList = function (cartItems) {
 
   listContainer.innerHTML = html;
   const totalEl = document.getElementById('cart-drawer-total-price');
-  if (totalEl) totalEl.innerText = '৳' + total;
+  if (totalEl) totalEl.innerText = '৳' + checkoutTotal;
+  if (selectCount) {
+    selectCount.textContent = selectedCount + ' of ' + cartItems.length + ' selected';
+  }
+  if (hintEl) {
+    const bagPcs = typeof window.cartTotalQty === 'function' ? window.cartTotalQty(cartItems) : cartItems.length;
+    hintEl.textContent = 'Bag: ' + bagPcs + ' pcs · Checkout: ' + selectedPcs + ' pcs';
+  }
+};
+
+window.toggleDrawerLineSelected = function (index, selected) {
+  let existing = typeof window.loadStoreCart === 'function' ? window.loadStoreCart({ readOnly: true }) : [];
+  const updated = typeof window.setStoreCartLineSelected === 'function'
+    ? window.setStoreCartLineSelected(existing, index, selected)
+    : existing;
+  if (typeof window.afterCartMutation === 'function') {
+    window.afterCartMutation(updated);
+  } else {
+    window.updateCartDrawerUI(updated);
+  }
+};
+
+window.setAllDrawerLinesSelected = function (selected) {
+  let existing = typeof window.loadStoreCart === 'function' ? window.loadStoreCart({ readOnly: true }) : [];
+  const updated = typeof window.setAllStoreCartLinesSelected === 'function'
+    ? window.setAllStoreCartLinesSelected(existing, selected)
+    : existing;
+  if (typeof window.afterCartMutation === 'function') {
+    window.afterCartMutation(updated);
+  } else {
+    window.updateCartDrawerUI(updated);
+  }
 };
 
 window.updateDrawerQty = function (index, change) {

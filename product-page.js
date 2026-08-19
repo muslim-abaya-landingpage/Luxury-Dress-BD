@@ -17,6 +17,8 @@
     activeImage: 0,
     selectedType: "",
     selectedSize: "",
+    selectedColor: "",
+    selectedColorLabel: "",
     qty: 1
   };
 
@@ -121,6 +123,93 @@
     return out;
   }
 
+  function fileNameFromProductUrl(url) {
+    var clean = String(url || "").split("?")[0].split("#")[0];
+    var parts = clean.split("/");
+    var file = parts[parts.length - 1] || "";
+    try {
+      file = decodeURIComponent(file);
+    } catch (e) {}
+    return file;
+  }
+
+  function colorLabelFromImageUrl(url) {
+    var base = fileNameFromProductUrl(url)
+      .replace(/\.(jpe?g|png|webp|gif|avif)$/i, "")
+      .replace(/womens?-two-piece-dress/gi, "")
+      .replace(/two-piece-dress/gi, "")
+      .replace(/premium-/gi, "")
+      .replace(/-bangladesh.*$/i, "")
+      .replace(/[-_]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!base) return "Color";
+    return base.replace(/\b\w/g, function (ch) {
+      return ch.toUpperCase();
+    });
+  }
+
+  function colorKeyFromLabel(label) {
+    return String(label || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
+  }
+
+  function getProductColorVariants(p) {
+    if (!p) return [];
+    if (Array.isArray(p.colorVariants) && p.colorVariants.length) {
+      return p.colorVariants
+        .map(function (row) {
+          if (!row) return null;
+          var image = resolveImg(row.image || row.src || "");
+          var colorLabel = String(row.colorLabel || row.label || row.color || "").trim();
+          if (!colorLabel && image) colorLabel = colorLabelFromImageUrl(image);
+          if (!image && !colorLabel) return null;
+          return {
+            color: String(row.color || colorKeyFromLabel(colorLabel)),
+            colorLabel: colorLabel,
+            image: image
+          };
+        })
+        .filter(Boolean);
+    }
+    var gallery = Array.isArray(p.images) && p.images.length ? p.images : [];
+    var looksLikeColors = String(p.colorLabel || p.color || "").toLowerCase().indexOf("multiple") !== -1;
+    if (!looksLikeColors && gallery.length > 1) {
+      looksLikeColors = true;
+      gallery.forEach(function (raw) {
+        if (/(^|[-_\s])(back|side)(\.|[-_\s]|$)/i.test(String(raw || ""))) looksLikeColors = false;
+      });
+    }
+    if (looksLikeColors && gallery.length > 1) {
+      var seen = {};
+      var out = [];
+      gallery.forEach(function (raw) {
+        var image = resolveImg(raw);
+        if (!image || seen[image]) return;
+        seen[image] = true;
+        var colorLabel = colorLabelFromImageUrl(image);
+        out.push({
+          color: colorKeyFromLabel(colorLabel),
+          colorLabel: colorLabel,
+          image: image
+        });
+      });
+      if (out.length > 1) return out;
+    }
+    if (p.color || p.colorLabel) {
+      return [
+        {
+          color: String(p.color || colorKeyFromLabel(p.colorLabel)),
+          colorLabel: String(p.colorLabel || p.color || ""),
+          image: resolveImg(p.image || p.img)
+        }
+      ];
+    }
+    return [];
+  }
+
   function typePriceFrom(p) {
     var map = p && p.priceByType;
     if (!map) return null;
@@ -170,7 +259,81 @@
     thumbsEl.querySelectorAll(".pd-thumb").forEach(function (btn) {
       btn.addEventListener("click", function () {
         state.activeImage = parseInt(btn.getAttribute("data-idx"), 10) || 0;
+        syncColorFromGallery();
         renderGallery();
+        renderColorOptions();
+        renderDescription();
+      });
+    });
+  }
+
+  function syncColorFromGallery() {
+    var variants = getProductColorVariants(state.product);
+    if (variants.length < 2) return;
+    var img = state.galleryImages[state.activeImage] || "";
+    for (var i = 0; i < variants.length; i++) {
+      if (variants[i].image === img) {
+        state.selectedColor = variants[i].color;
+        state.selectedColorLabel = variants[i].colorLabel;
+        return;
+      }
+    }
+  }
+
+  function renderColorOptions() {
+    var el = $("pdColorPickGroup");
+    if (!el) return;
+    var variants = getProductColorVariants(state.product);
+    if (variants.length < 2) {
+      if (state.product.colorLabel || state.product.color) {
+        var one = state.product.colorLabel || state.product.color;
+        el.innerHTML =
+          "<div class='pd-option-label'>Color</div>" +
+          "<div class='pd-option-row'><button type='button' class='pd-option-btn is-active'>" +
+          escapeHtml(one) +
+          "</button></div>";
+        state.selectedColor = state.product.color || colorKeyFromLabel(one);
+        state.selectedColorLabel = one;
+        return;
+      }
+      el.innerHTML = "";
+      return;
+    }
+    if (!state.selectedColor) {
+      state.selectedColor = variants[0].color;
+      state.selectedColorLabel = variants[0].colorLabel;
+    }
+    el.innerHTML =
+      "<div class='pd-option-label'>Color</div>" +
+      "<div class='pd-option-row'>" +
+      variants
+        .map(function (row) {
+          return (
+            "<button type='button' class='pd-option-btn" +
+            (row.color === state.selectedColor ? " is-active" : "") +
+            "' data-color='" +
+            escapeHtml(row.color) +
+            "' data-label='" +
+            escapeHtml(row.colorLabel) +
+            "' data-image='" +
+            escapeHtml(row.image || "") +
+            "'>" +
+            escapeHtml(row.colorLabel) +
+            "</button>"
+          );
+        })
+        .join("") +
+      "</div>";
+    el.querySelectorAll(".pd-option-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        state.selectedColor = btn.getAttribute("data-color") || "";
+        state.selectedColorLabel = btn.getAttribute("data-label") || "";
+        var img = btn.getAttribute("data-image") || "";
+        var gi = state.galleryImages.indexOf(img);
+        if (gi >= 0) state.activeImage = gi;
+        renderGallery();
+        renderColorOptions();
+        renderDescription();
       });
     });
   }
@@ -179,7 +342,10 @@
     var n = state.galleryImages.length;
     if (!n) return;
     state.activeImage = (state.activeImage + dir + n) % n;
+    syncColorFromGallery();
     renderGallery();
+    renderColorOptions();
+    renderDescription();
   }
 
   function renderOptionGroup(containerId, label, options, selectedKey, onPick) {
@@ -370,7 +536,9 @@
     if (state.product.fabric) rows.push(["Fabric", state.product.fabric]);
     var sizes = state.product.sizes || [];
     if (sizes.length) rows.push(["Available Sizes", sizes.join(", ")]);
-    if (state.product.colorLabel) rows.push(["Color", state.product.colorLabel]);
+    if (state.selectedColorLabel || state.product.colorLabel) {
+      rows.push(["Color", state.selectedColorLabel || state.product.colorLabel]);
+    }
     rows.push(["SKU", state.product.id]);
     $("pdSpecPanel").innerHTML =
       "<table class='pd-spec-table'>" +
@@ -512,8 +680,8 @@
       quantity: state.qty,
       image: img,
       category: state.category,
-      color: state.product.color || "",
-      colorLabel: state.product.colorLabel || "",
+      color: state.selectedColor || state.product.color || "",
+      colorLabel: state.selectedColorLabel || state.product.colorLabel || "",
       fabric: state.product.fabric || "",
       size: state.selectedSize || "",
       productType: state.selectedType || ""
@@ -597,6 +765,7 @@
       "<h1 class='pd-name' id='pdName'></h1>" +
       "<div class='pd-price' id='pdPrice'></div>" +
       "<p class='pd-shortnote' id='pdShortNote'></p>" +
+      "<div class='pd-option-group' id='pdColorPickGroup'></div>" +
       "<div class='pd-option-group' id='pdColorGroup'></div>" +
       "<div class='pd-option-group' id='pdSizeGroup'></div>" +
       "<div class='pd-qty-row'>" +
@@ -734,6 +903,7 @@
     var shortNotes = (window.SITE_LINKS && window.SITE_LINKS.productShortNotes) || {};
     $("pdShortNote").textContent = shortNotes[state.category] || shortNotes.default || "";
 
+    renderColorOptions();
     renderTypeOptions();
     renderSizeOptions();
     renderPrice();

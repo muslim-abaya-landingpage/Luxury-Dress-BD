@@ -41,7 +41,9 @@
     var nname = String(name || "").trim().toLowerCase();
     var i;
     for (i = 0; i < CATALOG.length; i++) {
-      if (nid && CATALOG[i].id === nid) return CATALOG[i];
+      if (nid && CATALOG[i].id === nid) {
+        if (!nname || namesLikelySameProduct(nname, CATALOG[i].name)) return CATALOG[i];
+      }
       if (nname && String(CATALOG[i].name || "").trim().toLowerCase() === nname) return CATALOG[i];
     }
     var cats = (typeof window !== "undefined" && window.CATEGORY_PRODUCTS) || {};
@@ -122,17 +124,59 @@
     return "";
   }
 
+  function namesLikelySameProduct(a, b) {
+    var left = String(a || "")
+      .replace(/\s*\([^)]*\)\s*$/, "")
+      .trim()
+      .toLowerCase();
+    var right = String(b || "")
+      .replace(/\s*\([^)]*\)\s*$/, "")
+      .trim()
+      .toLowerCase();
+    if (!left || !right) return false;
+    return left === right || left.indexOf(right) !== -1 || right.indexOf(left) !== -1;
+  }
+
+  function catalogEntryForLine(item, lineId) {
+    var cat = null;
+    if (lineId) {
+      cat = CATALOG.find(function (p) {
+        return p.id === lineId;
+      });
+      if (cat && item && item.name && !namesLikelySameProduct(item.name, cat.name)) {
+        cat = null;
+      }
+    }
+    if (!cat && item && item.name) cat = findByName(item.name);
+    return cat || null;
+  }
+
+  function isStoreCartLineSelected(line) {
+    if (!line) return false;
+    if (line.selected === false || line.selected === 0 || line.selected === "0" || line.selected === "false") {
+      return false;
+    }
+    return true;
+  }
+
+  function getSelectedStoreCartLines(arr) {
+    return (Array.isArray(arr) ? arr : []).filter(isStoreCartLineSelected);
+  }
+
+  function cartSelectedQty(arr) {
+    var q = 0;
+    getSelectedStoreCartLines(arr).forEach(function (item) {
+      q += parseInt(item.quantity, 10) || 0;
+    });
+    return q;
+  }
+
   function normalizeLine(item) {
     if (!item || !item.name) return null;
     var qty = parseInt(item.quantity, 10);
     if (isNaN(qty) || qty < 1) return null;
     var lineId = String(item.id || "").trim();
-    var cat = lineId
-      ? CATALOG.find(function (p) {
-          return p.id === lineId;
-        })
-      : findByName(item.name);
-    if (!cat && item.name) cat = findByName(item.name);
+    var cat = catalogEntryForLine(item, lineId);
     var line = {
       id: lineId || (cat && cat.id) || "",
       name: item.name,
@@ -145,7 +189,8 @@
       description: item.description || (cat && cat.description) || "",
       size: item.size || item.selectedSize || "",
       category: item.category || item.categoryKey || (cat && cat.category) || categoryFromCatalog(lineId, item.name) || "",
-      categoryLabel: item.categoryLabel || (cat && cat.categoryLabel) || ""
+      categoryLabel: item.categoryLabel || (cat && cat.categoryLabel) || "",
+      selected: isStoreCartLineSelected(item)
     };
     if (item.lengthSize) line.lengthSize = String(item.lengthSize);
     if (item.bodySize) line.bodySize = String(item.bodySize);
@@ -161,8 +206,14 @@
 
   function cartLineMergeKey(line) {
     if (!line) return "";
-    if (line.id) return String(line.id) + "|" + String(line.size || "") + "|" + String(line.category || "");
-    return String(line.name || "");
+    return [
+      String(line.id || "").trim(),
+      String(line.size || line.selectedSize || "").trim(),
+      String(line.color || line.colorLabel || "").trim().toLowerCase(),
+      String(line.productType || "").trim(),
+      String(line.category || "").trim(),
+      line.id ? "" : String(line.name || "").trim()
+    ].join("|");
   }
 
   function normalizeArray(arr) {
@@ -353,10 +404,38 @@
     });
     if (found) {
       found.quantity = (parseInt(found.quantity, 10) || 0) + line.quantity;
+      if (line.image) found.image = line.image;
+      if (line.color) found.color = line.color;
+      if (line.colorLabel) found.colorLabel = line.colorLabel;
     } else {
+      line.selected = true;
       list.push(line);
     }
     return persistStoreCart(list);
+  }
+
+  function setStoreCartLineSelected(arr, index, selected) {
+    var list = normalizeArray(arr || []);
+    if (!list[index]) return list;
+    list[index].selected = !!selected;
+    return persistStoreCart(list);
+  }
+
+  function setAllStoreCartLinesSelected(arr, selected) {
+    var list = normalizeArray(arr || []);
+    var on = !!selected;
+    list.forEach(function (line) {
+      line.selected = on;
+    });
+    return persistStoreCart(list);
+  }
+
+  function removeSelectedStoreCartLines(arr) {
+    var list = Array.isArray(arr) ? arr.slice() : loadStoreCart({ readOnly: true });
+    var kept = list.filter(function (line) {
+      return !isStoreCartLineSelected(line);
+    });
+    return persistStoreCart(kept);
   }
 
   /** Homepage / simple lines → full checkout line (size + image) */
@@ -365,8 +444,33 @@
     var out = Object.assign({}, line);
     var catKey = (homeProduct && homeProduct.category) || out.category || "";
     var full = findCatalogProductFull(out.id, out.name);
-    if (full && full.image) out.image = full.image;
+    if (full && full.image && !out.image) out.image = full.image;
     if (!out.category && full && full.category) out.category = full.category;
+    var colorSource = homeProduct || full;
+    if (colorSource && !out.color && !out.colorLabel) {
+      var label = String(colorSource.colorLabel || colorSource.color || "").trim();
+      var gallery = Array.isArray(colorSource.images) ? colorSource.images : [];
+      var multiple = label.toLowerCase().indexOf("multiple") !== -1;
+      if (multiple && gallery.length) {
+        var firstImg = gallery[0];
+        var file = String(firstImg || "").split("/").pop().split("?")[0];
+        try { file = decodeURIComponent(file); } catch (e1) {}
+        var fromFile = file
+          .replace(/\.(jpe?g|png|webp|gif|avif)$/i, "")
+          .replace(/womens?-two-piece-dress/gi, "")
+          .replace(/[-_]+/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+        if (fromFile) {
+          out.colorLabel = fromFile.replace(/\b\w/g, function (ch) { return ch.toUpperCase(); });
+          out.color = out.colorLabel.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+          out.image = firstImg;
+        }
+      } else if (label) {
+        out.colorLabel = label;
+        out.color = colorSource.color || label;
+      }
+    }
 
     if (typeof global.isAbayaProduct === "function" && global.isAbayaProduct(out, catKey)) {
       var abCfg = typeof global.getAbayaSizeConfig === "function" ? global.getAbayaSizeConfig() : null;
@@ -428,6 +532,13 @@
   global.normalizeStoreCart = normalizeArray;
   global.homeCartObjectToArray = objectToArray;
   global.cartTotalQty = cartTotalQty;
+  global.cartSelectedQty = cartSelectedQty;
+  global.cartLineMergeKey = cartLineMergeKey;
+  global.isStoreCartLineSelected = isStoreCartLineSelected;
+  global.getSelectedStoreCartLines = getSelectedStoreCartLines;
+  global.setStoreCartLineSelected = setStoreCartLineSelected;
+  global.setAllStoreCartLinesSelected = setAllStoreCartLinesSelected;
+  global.removeSelectedStoreCartLines = removeSelectedStoreCartLines;
   global.addOrMergeStoreCartItem = addOrMergeItem;
   global.buildLinesFromHomeCart = buildLinesFromHomeCart;
   global.enrichHomeCartLine = enrichHomeCartLine;

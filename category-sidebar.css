@@ -1983,6 +1983,13 @@ body.pqv-sc-open {
   padding: 8px 14px;
 }
 
+.pqv-color-opt {
+  font-size: 12px;
+  line-height: 1.25;
+  max-width: 100%;
+  text-align: left;
+}
+
 .pqv-opt-static {
   display: inline-flex;
   align-items: center;

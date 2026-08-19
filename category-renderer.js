@@ -283,12 +283,26 @@ function shopCartHasMatchingLine(item, sizeValue, categoryKey, bodyValueOpt) {
   var id = String(item && item.id || "").trim();
   if (!id) return false;
   var sizeKey = buildShopCartLineSizeKey(item, sizeValue, categoryKey, bodyValueOpt);
-  var mergeKey = id + "|" + sizeKey;
+  var probe = {
+    id: id,
+    size: sizeKey,
+    color: (item && (item.color || item.colorLabel)) || "",
+    colorLabel: (item && (item.colorLabel || item.color)) || "",
+    productType: (item && (item._cartType || item.productType)) || "",
+    category: categoryKey || (item && item.category) || ""
+  };
+  var mergeKey =
+    typeof cartLineMergeKey === "function"
+      ? cartLineMergeKey(probe)
+      : id + "|" + sizeKey;
   var lines = typeof loadStoreCart === "function" ? loadStoreCart({ readOnly: true }) : [];
   for (var i = 0; i < lines.length; i++) {
     var line = lines[i];
     if (!line) continue;
-    var lineKey = String(line.id || "") + "|" + String(line.size || line.selectedSize || "");
+    var lineKey =
+      typeof cartLineMergeKey === "function"
+        ? cartLineMergeKey(line)
+        : String(line.id || "") + "|" + String(line.size || line.selectedSize || "");
     if (lineKey === mergeKey) return true;
   }
   return false;
@@ -364,7 +378,13 @@ function shopAddProductToCart(item, qtyToAdd, sizeValue, categoryKeyOpt, bodyVal
     : String(sizeValue || "").trim() || (abayaCfg ? abayaCfg.lengthSizes[0] : "50");
   var pickedSizeEarly = isAbaya || isTwoPiece ? pickedLength : pickedLength;
   var addGuardKey =
-    (item.id || item.name || "") + "|" + pickedSizeEarly + "|" + String(bodyValueOpt || "");
+    (item.id || item.name || "") +
+    "|" +
+    pickedSizeEarly +
+    "|" +
+    String(bodyValueOpt || "") +
+    "|" +
+    String((item && (item.color || item.colorLabel)) || "");
   var now = Date.now();
   if (addGuardKey === shopCartCtx.lastCartAddKey && now - shopCartCtx.lastCartAddAt < 450) return;
   shopCartCtx.lastCartAddKey = addGuardKey;
@@ -608,6 +628,15 @@ function changeShopCartProductQty(p, delta, categoryKey) {
   }
   if (lineIdx === -1) {
     if (delta > 0) {
+      if (shopProductHasColorChoice(p) || shopProductHasTypeChoice(p, categoryKey)) {
+        var openIdx = -1;
+        (shopCartCtx.products || []).forEach(function (row, i) {
+          if (row === p) openIdx = i;
+        });
+        if (openIdx < 0 && p.id) openIdx = findProductIdxById(p.id);
+        if (openIdx >= 0) openProductQuickView(openIdx);
+        return;
+      }
       var defaultSize = Array.isArray(p.sizes) && p.sizes.length ? p.sizes[0] : "50";
       var defaultType = getDefaultProductType(p, categoryKey);
       shopAddProductToCart(Object.assign({}, p, { _cartType: defaultType }), delta, defaultSize, categoryKey);
@@ -862,6 +891,124 @@ function collectGalleryImages(product, allProducts) {
   if (main && urls.indexOf(main) === -1) urls.unshift(main);
   return urls;
 }
+function fileNameFromProductUrl(url) {
+  var clean = String(url || "").split("?")[0].split("#")[0];
+  var parts = clean.split("/");
+  var file = parts[parts.length - 1] || "";
+  try {
+    file = decodeURIComponent(file);
+  } catch (e) {}
+  return file;
+}
+function colorLabelFromImageUrl(url) {
+  var base = fileNameFromProductUrl(url)
+    .replace(/\.(jpe?g|png|webp|gif|avif)$/i, "")
+    .replace(/womens?-two-piece-dress/gi, "")
+    .replace(/two-piece-dress/gi, "")
+    .replace(/premium-/gi, "")
+    .replace(/-bangladesh.*$/i, "")
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!base) return "Color";
+  return base.replace(/\b\w/g, function (ch) {
+    return ch.toUpperCase();
+  });
+}
+function colorKeyFromLabel(label) {
+  return String(label || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+function galleryLooksLikeColorways(p) {
+  if (!p) return false;
+  var label = String(p.colorLabel || p.color || "").toLowerCase();
+  if (label.indexOf("multiple") !== -1) return true;
+  if (Array.isArray(p.colorVariants) && p.colorVariants.length > 1) return true;
+  var gallery = Array.isArray(p.images) ? p.images : [];
+  if (gallery.length < 2) return false;
+  for (var i = 0; i < gallery.length; i++) {
+    if (/(^|[-_\s])(back|side)(\.|[-_\s]|$)/i.test(String(gallery[i] || ""))) return false;
+  }
+  return true;
+}
+function getProductColorVariants(p) {
+  if (!p) return [];
+  if (Array.isArray(p.colorVariants) && p.colorVariants.length) {
+    return p.colorVariants
+      .map(function (row) {
+        if (!row) return null;
+        var image = resolveCardImageSrc({ image: row.image || row.src || "" });
+        var colorLabel = String(row.colorLabel || row.label || row.color || "").trim();
+        if (!colorLabel && image) colorLabel = colorLabelFromImageUrl(image);
+        if (!image && !colorLabel) return null;
+        return {
+          color: String(row.color || colorKeyFromLabel(colorLabel)),
+          colorLabel: colorLabel,
+          image: image
+        };
+      })
+      .filter(Boolean);
+  }
+  var gallery = Array.isArray(p.images) && p.images.length ? p.images : [];
+  if (galleryLooksLikeColorways(p) && gallery.length > 1) {
+    var seen = {};
+    var out = [];
+    gallery.forEach(function (raw) {
+      var image = resolveCardImageSrc({ image: raw });
+      if (!image || seen[image]) return;
+      seen[image] = true;
+      var colorLabel = colorLabelFromImageUrl(image);
+      out.push({
+        color: colorKeyFromLabel(colorLabel),
+        colorLabel: colorLabel,
+        image: image
+      });
+    });
+    if (out.length > 1) return out;
+  }
+  if (p.color || p.colorLabel) {
+    return [
+      {
+        color: String(p.color || colorKeyFromLabel(p.colorLabel)),
+        colorLabel: String(p.colorLabel || p.color || ""),
+        image: resolveCardImageSrc(p)
+      }
+    ];
+  }
+  return [];
+}
+function shopProductHasColorChoice(p) {
+  return getProductColorVariants(p).length > 1;
+}
+function getSelectedColorVariantForIdx(scopeRoot, idx, product) {
+  var variants = getProductColorVariants(product);
+  if (scopeRoot) {
+    var pill = scopeRoot.querySelector(".pqv-color-opt.is-active[data-product-idx='" + idx + "']");
+    if (pill) {
+      return {
+        color: pill.getAttribute("data-color-value") || "",
+        colorLabel: pill.getAttribute("data-color-label") || "",
+        image: pill.getAttribute("data-color-image") || ""
+      };
+    }
+  }
+  return variants[0] || {
+    color: (product && product.color) || "",
+    colorLabel: (product && product.colorLabel) || "",
+    image: product ? resolveCardImageSrc(product) : ""
+  };
+}
+function applySelectedColorToProduct(product, colorVariant) {
+  if (!product) return product;
+  if (!colorVariant) return product;
+  var next = Object.assign({}, product);
+  if (colorVariant.color) next.color = colorVariant.color;
+  if (colorVariant.colorLabel) next.colorLabel = colorVariant.colorLabel;
+  if (colorVariant.image) next.image = colorVariant.image;
+  return next;
+}
 function buildPqvThumbsHtml(images, altText) {
   return images
     .map(function (src, i) {
@@ -1066,10 +1213,25 @@ function setPqvGallerySlide(modal, slideIndex) {
     t.classList.toggle("is-active", j === i);
   });
   modal.setAttribute("data-pqv-slide", String(i));
-  mainImg.style.transform = "";
+      mainImg.style.transform = "";
   mainImg.style.transformOrigin = "center center";
   var stage = modal.querySelector(".pqv-zoom-stage");
   if (stage) stage.classList.remove("is-zooming");
+  var colorPills = modal.querySelectorAll(".pqv-color-opt");
+  var colorMatched = false;
+  colorPills.forEach(function (pill) {
+    var match = (pill.getAttribute("data-color-image") || "") === src;
+    if (match) colorMatched = true;
+    pill.classList.toggle("is-active", match);
+    pill.setAttribute("aria-pressed", match ? "true" : "false");
+  });
+  if (colorMatched) {
+    var specColor = modal.querySelector("#pqvSpecColor");
+    var activeColor = modal.querySelector(".pqv-color-opt.is-active");
+    if (specColor && activeColor) {
+      specColor.textContent = activeColor.getAttribute("data-color-label") || "";
+    }
+  }
   updatePqvGalleryNav(modal);
 }
 function updatePqvGalleryNav(modal) {
@@ -1116,6 +1278,27 @@ function bindPqvInteractions(p, idx, categoryKey, scopeRoot) {
     });
   });
   bindPqvGalleryArrows(modal);
+  modal.querySelectorAll(".pqv-color-opt").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      modal.querySelectorAll(".pqv-color-opt").forEach(function (b) {
+        if (b.getAttribute("data-product-idx") !== String(idx)) return;
+        b.classList.remove("is-active");
+        b.setAttribute("aria-pressed", "false");
+      });
+      btn.classList.add("is-active");
+      btn.setAttribute("aria-pressed", "true");
+      var specColor = modal.querySelector("#pqvSpecColor");
+      if (specColor) specColor.textContent = btn.getAttribute("data-color-label") || "";
+      var img = btn.getAttribute("data-color-image") || "";
+      var thumbs = modal.querySelectorAll(".pqv-thumb");
+      for (var t = 0; t < thumbs.length; t++) {
+        if (thumbs[t].getAttribute("data-src") === img) {
+          setPqvGallerySlide(modal, t);
+          break;
+        }
+      }
+    });
+  });
   modal.querySelectorAll(".pqv-size-opt, .pqv-length-opt, .pqv-type-opt, .pqv-body-opt").forEach(function (btn) {
     btn.addEventListener("click", function () {
       var groupClass = btn.classList.contains("pqv-type-opt")
@@ -1553,13 +1736,40 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
         buildPqvTypePills(types, idx, p, categoryKey) +
         "</div></div>"
       : "";
-  var colorField =
-    colorLabel && colorLabelDiffersFromName(p, colorLabel)
-      ? '<div class="pqv-field"><span class="pqv-field-label">Color</span><div class="pqv-opt-group">' +
-        '<button type="button" class="pqv-opt-btn is-active" aria-pressed="true">' +
-        colorLabel +
-        "</button></div></div>"
-      : "";
+  var colorVariants = getProductColorVariants(p);
+  var colorField = "";
+  if (colorVariants.length > 1) {
+    colorField =
+      '<div class="pqv-field"><span class="pqv-field-label">Color</span><div class="pqv-opt-group pqv-opt-group-wrap">' +
+      colorVariants
+        .map(function (row, i) {
+          return (
+            '<button type="button" class="pqv-opt-btn pqv-color-opt' +
+            (i === 0 ? " is-active" : "") +
+            '" data-product-idx="' +
+            idx +
+            '" data-color-value="' +
+            escapeHtml(row.color) +
+            '" data-color-label="' +
+            escapeHtml(row.colorLabel) +
+            '" data-color-image="' +
+            escapeHtml(row.image || "") +
+            '" aria-pressed="' +
+            (i === 0 ? "true" : "false") +
+            '">' +
+            escapeHtml(row.colorLabel) +
+            "</button>"
+          );
+        })
+        .join("") +
+      "</div></div>";
+  } else if (colorLabel && colorLabelDiffersFromName(p, colorLabel)) {
+    colorField =
+      '<div class="pqv-field"><span class="pqv-field-label">Color</span><div class="pqv-opt-group">' +
+      '<button type="button" class="pqv-opt-btn is-active" aria-pressed="true">' +
+      colorLabel +
+      "</button></div></div>";
+  }
   var shortNoteRaw = String(getProductShortNote(p, categoryKey) || "").trim();
   var stockText = "In Stock";
   var descHtml = getProductDescriptionHtml(p, categoryKey);
@@ -1569,7 +1779,13 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     "<li><span>Fabric</span><strong>" +
     fabricText +
     "</strong></li>" +
-    (colorLabel ? "<li><span>Color</span><strong>" + colorLabel + "</strong></li>" : "") +
+    (colorVariants.length
+      ? "<li><span>Color</span><strong id='pqvSpecColor'>" +
+        escapeHtml(colorVariants[0].colorLabel || "") +
+        "</strong></li>"
+      : colorLabel
+        ? "<li><span>Color</span><strong id='pqvSpecColor'>" + colorLabel + "</strong></li>"
+        : "") +
     (Array.isArray(p.sizeSpecs) && p.sizeSpecs.length
       ? p.sizeSpecs
           .map(function (spec) {
@@ -1869,12 +2085,18 @@ function onGlobalShopCartClick(ev) {
       alert("Enter quantity for at least one size.");
       return;
     }
-    var cartItemBulk = Object.assign({}, products[idx], { _cartType: selectedTypeBulk });
+    var cartItemBulk = applySelectedColorToProduct(
+      Object.assign({}, products[idx], { _cartType: selectedTypeBulk }),
+      getSelectedColorVariantForIdx(scopeBulk, idx, products[idx])
+    );
     var addedQty = shopAddBulkProductsToCart(cartItemBulk, entries, categoryKey, selectedTypeBulk);
     if (addedQty > 0 && scopeBulk) resetPqvWholesaleInputs(scopeBulk);
     return;
   }
-  if (action === "add" && !inProductView && shopProductHasTypeChoice(products[idx], categoryKey)) {
+  if (
+    !inProductView &&
+    (shopProductHasTypeChoice(products[idx], categoryKey) || shopProductHasColorChoice(products[idx]))
+  ) {
     ev.preventDefault();
     openProductQuickView(idx);
     return;
@@ -1886,7 +2108,10 @@ function onGlobalShopCartClick(ev) {
   var qty = inProductView ? getPqvQuantity(scope) : getShopCardQty(root, idx);
   ev.preventDefault();
   ev.stopPropagation();
-  var cartItem = Object.assign({}, products[idx], { _cartType: selectedType });
+  var cartItem = applySelectedColorToProduct(
+    Object.assign({}, products[idx], { _cartType: selectedType }),
+    getSelectedColorVariantForIdx(scope, idx, products[idx])
+  );
 
   if (action === "buy-now") {
     if (!shopCartHasMatchingLine(cartItem, selectedSize, categoryKey, selectedBodyValue)) {

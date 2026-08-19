@@ -13,7 +13,7 @@
     <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
     <link rel="stylesheet" href="site-header.css?v=20260603logo">
     <link rel="stylesheet" href="site-footer.css?v=20260603footen">
-    <link rel="stylesheet" href="cart-drawer.css?v=20260528b">
+    <link rel="stylesheet" href="cart-drawer.css?v=20260819pages">
     <link rel="stylesheet" href="mobile-bottom-nav.css" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="mobile-bottom-nav.css"></noscript>
     <style>
@@ -1941,17 +1941,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="auth-config.js"></script>
 <script src="auth-api.js"></script>
 <script src="product-config.js?v=20260603ennotes"></script>
-<script src="product-utils.js?v=20260603sizelabel"></script>
+<script src="product-utils.js?v=20260819pages"></script>
 <!-- Needed so "Customers also bought" has access to the real product catalog on this page -->
-<script src="category-products.js?v=20260603crosssell"></script>
+<script src="category-products.js?v=20260819pages"></script>
 <script src="product-catalog-sync.js?v=20260603crosssell"></script>
 <script src="product-links-data.js?v=20260603crosssell"></script>
 <script src="product-catalog-loader.js?v=20260603crosssell"></script>
 <script defer src="site-header-config.js?v=20260601en"></script>
 <script defer src="site-header.js?v=20260601en"></script>
-<script src="cart-utils.js?v=20260819audit"></script>
+<script src="cart-utils.js?v=20260819pages"></script>
 <script src="cart-toast.js?v=20260603cartqty"></script>
-<script src="cart-drawer.js?v=20260603cartqty"></script>
+<script src="cart-drawer.js?v=20260819pages"></script>
 <script src="checkout-location-labels.js?v=20260603loc"></script>
 <script src="checkout-locations.js?v=20260603loc"></script>
 <script>
@@ -2099,7 +2099,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     function finishCheckoutSuccess(nameValue, phoneValue, emailValue, gTotal, orderId, stableEventId) {
         var eventId = stableEventId || (orderId ? ('order_' + orderId) : ('order_' + Date.now()));
         var cartSnap = typeof buildCartTrackingSnapshot === 'function'
-            ? buildCartTrackingSnapshot(cart)
+            ? buildCartTrackingSnapshot(orderLines())
             : { value: parseFloat(gTotal) || 0, currency: 'BDT' };
         if (typeof syncTikTokUserFromFormFields === 'function') {
             syncTikTokUserFromFormFields();
@@ -2125,7 +2125,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 event_id: eventId
             });
         }
-        if (typeof clearStoreCart === 'function') clearStoreCart();
+        if (typeof removeSelectedStoreCartLines === 'function') {
+            removeSelectedStoreCartLines(cart);
+        } else if (typeof clearStoreCart === 'function') {
+            clearStoreCart();
+        }
         try { sessionStorage.removeItem('muslim_abaya_home_cart_active'); } catch (e) {}
         if (orderId) {
             try { sessionStorage.setItem('ma_last_order_id', orderId); } catch (e) {}
@@ -2512,13 +2516,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         return [];
     }
 
+    function isCheckoutLineSelected(item) {
+        if (typeof isStoreCartLineSelected === 'function') return isStoreCartLineSelected(item);
+        return item && item.selected !== false;
+    }
+
+    function orderLines() {
+        if (typeof getSelectedStoreCartLines === 'function') return getSelectedStoreCartLines(cart);
+        return (cart || []).filter(isCheckoutLineSelected);
+    }
+
     var cart = loadCart();
     var summaryDiv = document.getElementById('orderSummary');
     var areaSelect = document.getElementById('userArea');
 
     function cartQty() {
         var totalQty = 0;
-        cart.forEach(function(item) { totalQty += (parseInt(item.quantity, 10) || 1); });
+        orderLines().forEach(function(item) { totalQty += (parseInt(item.quantity, 10) || 1); });
         return totalQty;
     }
 
@@ -2535,7 +2549,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function cartSubtotal() {
         var t = 0;
-        cart.forEach(function(item) { t += (parseInt(item.price, 10) || 0) * (parseInt(item.quantity, 10) || 1); });
+        orderLines().forEach(function(item) { t += (parseInt(item.price, 10) || 0) * (parseInt(item.quantity, 10) || 1); });
         return t;
     }
 
@@ -2623,6 +2637,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var groups = {};
         var order = [];
         cart.forEach(function (item) {
+            if (!isCheckoutLineSelected(item)) return;
             var cat = inferProductCategory(item);
             var qty = parseInt(item.quantity, 10) || 1;
             var unit = parseInt(item.price, 10) || 0;
@@ -2650,12 +2665,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     function renderProductChart() {
         var el = document.getElementById('checkoutProductChart');
         if (!el) return;
-        if (!cart.length) {
+        if (!orderLines().length) {
             el.innerHTML = '<p class="gb-product-chart-empty">Product details will appear here when items are in your cart.</p>';
             return;
         }
         var rows = '';
         cart.forEach(function (item) {
+            if (!isCheckoutLineSelected(item)) return;
             var qty = parseInt(item.quantity, 10) || 1;
             var unit = parseInt(item.price, 10) || 0;
             var size = checkoutLineSizeLabel(item) || '?';
@@ -2680,15 +2696,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var qty = parseInt(item.quantity, 10) || 1;
         var base = checkoutLineBaseName(item);
         var size = checkoutLineSizeLabel(item);
+        var color = String(item.colorLabel || item.color || '').trim();
         var parts = [index + '. ' + base];
         if (size) parts.push('Size: ' + size);
+        if (color) parts.push('Color: ' + color);
         parts.push('Qty: ' + qty);
         return parts.join(' | ');
     }
 
     function buildProductSlots() {
         var slots = [];
-        cart.forEach(function(item, idx) {
+        orderLines().forEach(function(item, idx) {
             slots.push(formatOrderSlotLine(idx + 1, item));
         });
         while (slots.length < MAX_PRODUCT_SLOTS) {
@@ -2698,14 +2716,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
 
     function productsLabelMultiline() {
-        return cart.map(function (item, idx) {
+        return orderLines().map(function (item, idx) {
             return formatOrderSlotLine(idx + 1, item);
         }).join('\n');
     }
 
     function buildProductImageSlots() {
         var slots = [];
-        cart.forEach(function(item) {
+        orderLines().forEach(function(item) {
             if (slots.length >= MAX_ORDER_IMAGES) return;
             var url = typeof resolveAbsoluteStoreImageUrl === 'function'
                 ? resolveAbsoluteStoreImageUrl(item)
@@ -2785,11 +2803,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             renderClearCartToolbar();
             return;
         }
+        if (!orderLines().length) {
+            summaryDiv.innerHTML =
+                '<div class="empty-cart-msg">' +
+                '<p class="empty-cart-title">No items selected for checkout</p>' +
+                '<p class="empty-cart-desc">Your bag still has items. Open the cart and tick the products you want to order.</p>' +
+                '</div>';
+            var metaElNone = document.getElementById('orderReviewMeta');
+            if (metaElNone) metaElNone.textContent = '';
+            var subBtnNone = document.getElementById('submitBtn');
+            if (subBtnNone) subBtnNone.disabled = true;
+            var sideSubtotalNone = document.getElementById('side-subtotal');
+            var sideDeliveryNone = document.getElementById('side-delivery');
+            var sideTotalNone = document.getElementById('side-total');
+            if (sideSubtotalNone) sideSubtotalNone.textContent = formatBdtCheckout(0);
+            if (sideDeliveryNone) sideDeliveryNone.textContent = formatBdtCheckout(0);
+            if (sideTotalNone) sideTotalNone.textContent = formatBdtCheckout(0) + ' BDT';
+            renderProductChart();
+            renderClearCartToolbar();
+            return;
+        }
         var q = cartQty();
         var sub = cartSubtotal();
         var ship = shippingCharge();
         var grand = grandTotal();
-        var designCount = cart.length;
+        var designCount = orderLines().length;
         var sideSubtotal = document.getElementById('side-subtotal');
         var sideDelivery = document.getElementById('side-delivery');
         var sideTotal = document.getElementById('side-total');
@@ -2803,6 +2841,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         var itemsHtml = '';
         cart.forEach(function(item, idx) {
+            if (!isCheckoutLineSelected(item)) return;
             var qty = parseInt(item.quantity, 10) || 1;
             var unitPrice = parseInt(item.price, 10) || 0;
             var lineTotal = unitPrice * qty;
@@ -3229,6 +3268,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 checkoutAlert('Your cart is empty. Add products first.');
                 return;
             }
+            if (!orderLines().length) {
+                checkoutAlert('Select at least one item in the cart for checkout.');
+                return;
+            }
 
             var nameInput = document.getElementById('userName');
             var phoneInput = document.getElementById('userPhone');
@@ -3353,7 +3396,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             }
             if (typeof applyMetaTrackingFields === 'function') {
                 var cartSnapMeta = typeof buildCartTrackingSnapshot === 'function'
-                    ? buildCartTrackingSnapshot(cart)
+                    ? buildCartTrackingSnapshot(orderLines())
                     : { content_ids: [], contents: [] };
                 var metaPayload = applyMetaTrackingFields({
                     phone: phoneValue,
@@ -3494,7 +3537,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         initCheckoutSteps();
         if (typeof pushTrackingEvent === 'function') {
             var checkoutSnap = typeof buildCartTrackingSnapshot === 'function'
-                ? buildCartTrackingSnapshot(cart)
+                ? buildCartTrackingSnapshot(orderLines())
                 : { currency: 'BDT', value: cartSubtotal() };
             pushTrackingEvent('InitiateCheckout', checkoutSnap);
         }

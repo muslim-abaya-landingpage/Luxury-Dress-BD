@@ -234,6 +234,10 @@
       if (galleryImages.length) normalized.images = galleryImages;
     }
 
+    if (Array.isArray(entry.colorVariants) && entry.colorVariants.length) {
+      normalized.colorVariants = entry.colorVariants.slice();
+    }
+
     if (entry.priceByType && typeof entry.priceByType === "object") {
       normalized.priceByType = entry.priceByType;
     }

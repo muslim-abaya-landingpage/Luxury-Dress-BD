@@ -187,9 +187,9 @@
   </div>
 </main>
   <div id="site-footer-mount"></div>
-  <script defer src="cart-utils.js?v=20260603cartqty"></script>
+  <script defer src="cart-utils.js?v=20260819pages"></script>
   <script defer src="site-header.js?v=20260531nav"></script>
-  <script defer src="category-products.js"></script>
+  <script defer src="category-products.js?v=20260819pages"></script>
   <script defer src="site-api-config.js?v=20260529"></script>
   <script defer src="site-footer.js?v=20260531wa"></script>
   <script>
@@ -329,7 +329,7 @@ if (isLocalFile && localNote) {
 
       if (!videos.length) {
         gridEl.innerHTML =
-        '<p class="video-empty">No videos found. Please check <code>category-products.js</code> and verify that <code>SITE_MEDIA.featuredVideo.videos</code> contains valid YouTube links.</p>';
+        '<p class="video-empty">No videos found. Please check <code>category-products.js?v=20260819pages</code> and verify that <code>SITE_MEDIA.featuredVideo.videos</code> contains valid YouTube links.</p>';
         return;
       }
 
