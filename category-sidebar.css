@@ -1569,8 +1569,8 @@ body.shop-product-open > main {
 
 @media (min-width: 1024px) {
   .pqv-top {
-    grid-template-columns: minmax(0, 1.1fr) minmax(300px, 460px);
-    column-gap: 32px;
+    grid-template-columns: minmax(0, 520px) minmax(280px, 1fr);
+    column-gap: 28px;
     row-gap: 0;
   }
 }
@@ -1608,6 +1608,9 @@ body.shop-product-open > main {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  max-height: min(72vh, 640px);
+  overflow-y: auto;
+  padding-right: 2px;
 }
 
 .pqv-thumb {
@@ -1636,13 +1639,14 @@ body.shop-product-open > main {
   position: relative;
   width: 100%;
   min-width: 0;
+  max-width: 520px;
 }
 
 .pqv-main {
   position: relative;
   width: 100%;
   aspect-ratio: 4 / 5;
-  max-height: min(68vh, 620px);
+  max-height: min(72vh, 640px);
   background: #f4f4f4;
   overflow: hidden;
   isolation: isolate;
@@ -1714,7 +1718,8 @@ body.shop-product-open > main {
 .pqv-main img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
+  object-position: center top;
   display: block;
 }
 
@@ -1998,10 +2003,20 @@ body.pqv-sc-open {
 }
 
 .pqv-color-opt {
-  font-size: 12px;
-  line-height: 1.25;
+  flex: 0 0 auto;
+  width: auto;
   max-width: 100%;
-  text-align: left;
+  white-space: nowrap;
+  font-size: 12px;
+  line-height: 1.2;
+  text-align: center;
+  padding: 7px 12px;
+}
+
+.pqv-color-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .pqv-opt-static {

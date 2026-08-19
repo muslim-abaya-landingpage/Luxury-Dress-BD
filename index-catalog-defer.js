@@ -20,7 +20,7 @@
     "product-config.js?v=20260819audit",
     "product-utils.js?v=20260820grid",
     "product-catalog-sync.js?v=20260604",
-    "category-products.js?v=20260820grid",
+    "category-products.js?v=20260820clean",
     "product-links-data.js?v=20260604",
     "product-catalog-loader.js?v=20260604",
   ];

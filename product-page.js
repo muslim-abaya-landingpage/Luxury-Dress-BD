@@ -148,10 +148,19 @@
       .replace(/[-_]+/g, " ")
       .replace(/\s+/g, " ")
       .replace(/\btc cotton\b/gi, "")
+      .replace(/\bprinted\b/gi, "")
+      .replace(/\blong kurti\b/gi, "")
+      .replace(/\bkurti\b/gi, "")
+      .replace(/\bkurta\b/gi, "")
+      .replace(/\bdress\b/gi, "")
+      .replace(/\bfashion\b/gi, "")
+      .replace(/\bwebp\b/gi, "")
       .replace(/\s+/g, " ")
       .trim();
     if (!base) return "Color";
-    return base.replace(/\b\w/g, function (ch) {
+    var words = base.split(" ").filter(Boolean);
+    if (words.length > 3) words = words.slice(0, 3);
+    return words.join(" ").replace(/\b\w/g, function (ch) {
       return ch.toUpperCase();
     });
   }

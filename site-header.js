@@ -493,7 +493,7 @@ function buildNavMenuItems() {
             return loadScript("product-utils.js?v=20260820grid");
           })
           .then(function () {
-            return loadScript("category-products.js?v=20260820grid");
+            return loadScript("category-products.js?v=20260820clean");
           })
           .then(function () {
             return loadScript("product-links-data.js?v=20260535");
