@@ -428,6 +428,15 @@
     return getAbayaSizeConfig().lengthSizes[0];
   }
 
+  function looksLikeNumericBodySizes(arr) {
+    if (!Array.isArray(arr) || !arr.length) return false;
+    var i;
+    for (i = 0; i < arr.length; i++) {
+      if (!/^\d{2}$/.test(String(arr[i] || "").trim())) return false;
+    }
+    return true;
+  }
+
   function getTwoPieceSizeConfig(product) {
     var tp =
       g.SITE_LINKS &&
@@ -435,12 +444,23 @@
       g.SITE_LINKS.defaults.byCategory &&
       g.SITE_LINKS.defaults.byCategory["premium-two-piece"];
     var p = product || {};
+    var bodySizes =
+      (Array.isArray(p.bodySizes) && p.bodySizes.length && p.bodySizes.slice()) ||
+      (looksLikeNumericBodySizes(p.sizes) && p.sizes.slice()) ||
+      null;
+    var bodySizeLabel = p.bodySizeLabel || "";
+    if (!bodySizeLabel && bodySizes && bodySizes.length) {
+      bodySizeLabel =
+        bodySizes.length === 1
+          ? String(bodySizes[0])
+          : String(bodySizes[0]) + "–" + String(bodySizes[bodySizes.length - 1]);
+    }
+    if (!bodySizeLabel) {
+      bodySizeLabel = (tp && tp.bodySizeLabel) || "42 (Free size)";
+    }
     return {
-      bodySizeLabel: p.bodySizeLabel || (tp && tp.bodySizeLabel) || "42 (Free size)",
-      bodySizes:
-        (Array.isArray(p.bodySizes) && p.bodySizes.length && p.bodySizes.slice()) ||
-        (tp && tp.bodySizes && tp.bodySizes.slice()) ||
-        null,
+      bodySizeLabel: bodySizeLabel,
+      bodySizes: bodySizes,
       lengthSizeLabel: p.lengthSizeLabel || (tp && tp.lengthSizeLabel) || "37-38 inch",
       lengthSizes:
         (Array.isArray(p.lengthSizes) && p.lengthSizes.length && p.lengthSizes.slice()) ||
@@ -454,22 +474,20 @@
     if (ck === "premium-two-piece") return true;
 
     var id = String((p && p.id) || "").trim();
-    if (/^DR-\d+/i.test(id)) return true;
+    if (/^DR-\d+/i.test(id) || /^TP-\d+/i.test(id)) return true;
 
-  // সঠিক কোড:
-  var name = String((p && p.name) || "").toLowerCase();
-
+    var name = String((p && p.name) || "").toLowerCase();
     if (
-      name.includes("two piece") ||
-      name.includes("two-piece") ||
-      name.includes("co-ord") ||
-      name.includes("coord")
+      name.indexOf("two piece") !== -1 ||
+      name.indexOf("two-piece") !== -1 ||
+      name.indexOf("co-ord") !== -1 ||
+      name.indexOf("coord") !== -1
     ) {
       return true;
     }
 
     return false;
-}
+  }
 
   function formatTwoPieceCartSize(lengthSizeOpt, bodyLabelOverride) {
     var cfg = getTwoPieceSizeConfig();

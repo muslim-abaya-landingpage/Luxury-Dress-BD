@@ -70,6 +70,28 @@ window.SITE_LINKS = {
       ]
     },
     byCategory: {
+      "premium-two-piece": {
+        tableTitle: "Two-Piece (Inch)",
+        headers: { size: "Body", length: "Top", width: "Pant", sleeve: "—" },
+        regularFit: [
+          { size: "34", length: "38–40", width: "38", sleeve: "—" },
+          { size: "36", length: "38–40", width: "38", sleeve: "—" },
+          { size: "38", length: "38–40", width: "38", sleeve: "—" },
+          { size: "40", length: "38–40", width: "38", sleeve: "—" },
+          { size: "42", length: "37–38", width: "37–38", sleeve: "—" },
+          { size: "44", length: "37–38", width: "37–38", sleeve: "—" },
+          { size: "46", length: "37–38", width: "37–38", sleeve: "—" }
+        ],
+        customSize: [
+          { length: 40, lengthExtra: 0, width: 34, widthExtra: 0 },
+          { length: 41, lengthExtra: 0, width: 36, widthExtra: 0 },
+          { length: 42, lengthExtra: 250, width: 38, widthExtra: 250 },
+          { length: 43, lengthExtra: 250, width: 40, widthExtra: 250 },
+          { length: 44, lengthExtra: 250, width: 42, widthExtra: 250 },
+          { length: 45, lengthExtra: 450, width: 44, widthExtra: 250 },
+          { length: 46, lengthExtra: 450, width: 46, widthExtra: 250 }
+        ]
+      },
       abaya: {
         regularFit: [
           { size: "Small", length: 50, width: 42, sleeve: 21 },
@@ -158,7 +180,8 @@ window.SITE_LINKS = {
       "* Hijab is not included (unless specified). Colors may vary slightly in photos.",
     "cover-up":
       "* Inner abaya/hijab is not included unless specified.",
-    "premium-two-piece": ""
+    "premium-two-piece":
+      "* Colors may vary slightly in photos. Lighting can make the actual shade look a little different."
   },
  productNotes: {
   default:

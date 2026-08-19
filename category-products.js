@@ -612,6 +612,7 @@ window.CATEGORY_PRODUCTS = {
   colorLabel: "White / Strawberry Print",
   fabric: "Premium Cotton Fabric",
   sizes: ["34", "36", "38", "40", "42", "44", "46"],
+  bodySizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Material: Premium Cotton Fabric | Top Length: 38–40 Inches | Pant Length: 38 Inches",
   // Premium Body Size
   bodySizeLabel: "34–46",
@@ -784,7 +785,7 @@ window.CATEGORY_PRODUCTS = {
 },
   {
   id: "DR-13",
-  name: "Premium Black Floral Women's Co-ord Set",
+  name: "Premium Black Floral Women's Co-ord Set (Gold Accent)",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-black-floral-co-ord-set-gold-accent.webp",
   link: "/",
   price: 650,
@@ -808,7 +809,7 @@ window.CATEGORY_PRODUCTS = {
   detailNote: "Gher: 120 in"
 },
 {
-  id: "KURTI-15",
+  id: "TP-15",
   name: "Premium Green Cotton Embroidered Women's Two-Piece Set",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-green-cotton-embroidered-2-piece-women-salwar-kameez-set-bangladesh-1080x1350.webp",
   link: "/",
@@ -824,7 +825,7 @@ window.CATEGORY_PRODUCTS = {
   ]
 },
 {
-  id: "KURTI-16",
+  id: "TP-16",
   name: "Premium Navy Blue Cotton Embroidered Women's Two-Piece Set",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-navy-blue-embroidered-cotton-two-piece-women-salwar-kameez-set-bangladesh-1080x1350.webp",
   link: "/",
@@ -840,7 +841,7 @@ window.CATEGORY_PRODUCTS = {
   ]
 },
 {
-  id: "KURTI-17",
+  id: "TP-17",
   name: "Premium Red Cotton Embroidered Women's Two-Piece Set",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-red-embroidered-cotton-two-piece-women-salwar-kameez-set-bangladesh-1080x1350.webp",
   link: "/",
@@ -856,7 +857,7 @@ window.CATEGORY_PRODUCTS = {
   ]
 },
 {
-  id: "KURTI-18",
+  id: "TP-18",
   name: "Premium Mustard Yellow Cotton Embroidered Women's Two-Piece Set",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-mustard-yellow-embroidered-cotton-two-piece-women-salwar-kameez-set-bangladesh-1080x1350.webp",
   link: "/",
@@ -1023,9 +1024,12 @@ window.FILTER_COLOR_MAP = {
   pink: { label: "Rose Pink", hex: "#f4b4c4" },
   blue: { label: "Royal Blue", hex: "#4a6fa5" },
   navy: { label: "Navy Blue", hex: "#1E3A8A" },
+  "navy-blue": { label: "Navy Blue", hex: "#1E3A8A" },
   "sky-blue": { label: "Sky Blue", hex: "#87CEEB" },
   green: { label: "Olive Green", hex: "#6b8f71" },
   yellow: { label: "Yellow", hex: "#FFD54F" },
+  "mustard-yellow": { label: "Mustard Yellow", hex: "#D4A017" },
+  "multi-color": { label: "Multiple Colors", hex: "#888888" },
   red: { label: "Red", hex: "#E53935" },
   lavender: { label: "Lavender", hex: "#B39DDB" },
   beige: { label: "Copper Beige", hex: "#d4c4a8" }
