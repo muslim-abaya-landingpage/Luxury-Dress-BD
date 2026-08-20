@@ -705,7 +705,41 @@
     return line;
   }
 
+  function stockStatus() {
+    var p = state.product;
+    if (window.maCatalog && typeof window.maCatalog.getStockStatus === "function") {
+      return window.maCatalog.getStockStatus(p);
+    }
+    if (typeof window.getStockStatus === "function") return window.getStockStatus(p);
+    return { inStock: true, label: "In Stock", buttonLabel: "Add to Cart", qty: null };
+  }
+
+  function applyStockUi() {
+    var st = stockStatus();
+    var stockEl = $("pdStock");
+    var addBtn = $("pdAddCart");
+    var buyBtn = $("pdBuyNow");
+    var stickyCart = document.querySelector("#stickyOrderBar .sob-cart");
+    var stickyBuy = document.querySelector("#stickyOrderBar .sob-buy");
+    if (stockEl) {
+      stockEl.textContent = st.label;
+      stockEl.classList.toggle("is-oos", !st.inStock);
+    }
+    if (addBtn) {
+      addBtn.disabled = !st.inStock;
+      addBtn.textContent = st.buttonLabel;
+    }
+    if (buyBtn) buyBtn.disabled = !st.inStock;
+    if (stickyCart) {
+      stickyCart.disabled = !st.inStock;
+      stickyCart.textContent = st.inStock ? "Add to Cart" : st.buttonLabel;
+    }
+    if (stickyBuy) stickyBuy.disabled = !st.inStock;
+    document.body.classList.toggle("pd-oos", !st.inStock);
+  }
+
   function addToCart(silent) {
+    if (!stockStatus().inStock) return;
     var line = buildCartLine();
     var existing = typeof window.loadStoreCart === "function" ? window.loadStoreCart({ readOnly: true }) : [];
     var merged = typeof window.addOrMergeStoreCartItem === "function"
@@ -743,7 +777,13 @@
       renderQty();
     });
     $("pdQtyPlus").addEventListener("click", function () {
-      state.qty = state.qty + 1;
+      var st = stockStatus();
+      if (!st.inStock) return;
+      if (typeof st.qty === "number") {
+        state.qty = Math.min(st.qty, state.qty + 1);
+      } else {
+        state.qty = state.qty + 1;
+      }
       renderQty();
     });
     $("pdAddCart").addEventListener("click", function (e) {
@@ -787,6 +827,7 @@
       "<div class='pd-qty-row'>" +
       "<span>Quantity:</span>" +
       "<div class='pd-qty-stepper'><button type='button' id='pdQtyMinus'>−</button><span id='pdQtyVal'>1</span><button type='button' id='pdQtyPlus'>+</button></div>" +
+      "<span class='pd-stock' id='pdStock'></span>" +
       "</div>" +
       "<div class='pd-actions'>" +
       "<button type='button' class='pd-btn pd-btn-outline' id='pdAddCart'>Add to Cart</button>" +
@@ -933,6 +974,7 @@
     renderReviews();
     startReviewsAutoplay();
     initStickyOrderBar();
+    applyStockUi();
   }
 
   function boot() {

@@ -59,15 +59,21 @@
     return raw;
   }
 
-  /* Stock check — a product is treated as out of stock only when
-     inStock is explicitly false (or stock is explicitly 0). Any
-     product that doesn't mention stock at all stays "in stock" as
-     before, so nothing breaks for existing products. */
+  /* Stock — reuse product-utils helpers when catalog is loaded. */
+  function stockStatus(p) {
+    if (window.maCatalog && typeof window.maCatalog.getStockStatus === "function") {
+      return window.maCatalog.getStockStatus(p);
+    }
+    if (p && p.inStock === false) {
+      return { inStock: false, label: "Out of Stock", badge: "Sold Out", buttonLabel: "Out of Stock" };
+    }
+    if (p && typeof p.stock === "number" && p.stock <= 0) {
+      return { inStock: false, label: "Out of Stock", badge: "Sold Out", buttonLabel: "Out of Stock" };
+    }
+    return { inStock: true, label: "In Stock", badge: "In Stock", buttonLabel: "Add to Cart" };
+  }
   function isOutOfStock(p) {
-    if (!p) return false;
-    if (p.inStock === false) return true;
-    if (typeof p.stock === "number" && p.stock <= 0) return true;
-    return false;
+    return !stockStatus(p).inStock;
   }
 
   function categoryHasProducts(key) {
@@ -200,6 +206,7 @@
     var img = resolveImg(p);
     var dHref = detailHref(sec, p);
     var outOfStock = isOutOfStock(p);
+    var st = stockStatus(p);
     var msg =
       waLink() +
       "?text=" +
@@ -214,7 +221,7 @@
       escapeHtml(dHref) +
       "'>" +
       (outOfStock
-        ? "<span class='ah-card-badge ah-card-badge-oos'>Stock Out</span>"
+        ? "<span class='ah-card-badge ah-card-badge-oos'>Sold Out</span>"
         : "<span class='ah-card-badge'>Sale</span>") +
       "<img src='" +
       escapeHtml(img) +
@@ -233,10 +240,15 @@
       priceHtml(p) +
       "</span>" +
       "</div>" +
+      "<span class='ah-card-stock" +
+      (outOfStock ? " is-oos" : "") +
+      "'>" +
+      escapeHtml(st.label) +
+      "</span>" +
       "<div class='ah-actions'>" +
       (outOfStock
         ? "<button type='button' class='ah-btn ah-btn-cart' data-action='add' disabled>" +
-          "<span>Stock Out</span></button>"
+          "<span>Out of Stock</span></button>"
         : "<button type='button' class='ah-btn ah-btn-cart' data-action='add'>" +
           cartIconSvg +
           "<span>Add to Cart</span></button>") +

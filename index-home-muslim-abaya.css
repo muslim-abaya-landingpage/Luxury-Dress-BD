@@ -472,6 +472,17 @@
 .ah-btn-cart[disabled]:hover {
   background: var(--ah-soft);
 }
+.ah-card-stock {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7d8578;
+  line-height: 1.2;
+}
+.ah-card-stock.is-oos {
+  color: #8a7d72;
+}
 .ah-card-oos .ah-actions {
   display: flex;
 }

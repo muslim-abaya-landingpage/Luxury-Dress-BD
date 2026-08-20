@@ -286,6 +286,16 @@ body.shop-page .muslim-abaya-btn-cart .muslim-abaya-btn-ico svg {
 body.shop-page .muslim-abaya-btn-cart:hover {
   background: #dcdde2;
 }
+body.shop-page .muslim-abaya-btn-cart:disabled,
+body.shop-page .muslim-abaya-btn-cart.is-oos {
+  background: #f0f0f0;
+  color: #8a8a8a;
+  cursor: not-allowed;
+}
+body.shop-page .muslim-abaya-btn-cart:disabled:hover,
+body.shop-page .muslim-abaya-btn-cart.is-oos:hover {
+  background: #f0f0f0;
+}
 
 /* Send Message বাটন (বাকি সব জায়গা নেয়) */
 body.shop-page .muslim-abaya-btn-msg {
@@ -387,6 +397,18 @@ body.shop-page .card-actions-muslim-abaya .ma-qty-stepper__btn:disabled {
     font-weight: 500;
     font-size: 12.5px;
     letter-spacing: 0.01em;
+  }
+
+  body.shop-page .muslim-abaya-btn-cart.is-oos::after,
+  body.shop-page .muslim-abaya-btn-cart:disabled::after {
+    content: "Out of Stock";
+  }
+
+  body.shop-page .muslim-abaya-btn-cart.is-oos,
+  body.shop-page .muslim-abaya-btn-cart:disabled {
+    background: #f4f4f4;
+    color: #8a8a8a;
+    border-color: #e6e6e6;
   }
 
   body.shop-page .muslim-abaya-btn-msg {

@@ -490,7 +490,7 @@ function buildNavMenuItems() {
             return loadScript("product-config.js?v=20260819audit");
           })
           .then(function () {
-            return loadScript("product-utils.js?v=20260820grid");
+            return loadScript("product-utils.js?v=20260820stock");
           })
           .then(function () {
             return loadScript("category-products.js?v=20260820clean");

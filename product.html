@@ -147,7 +147,9 @@
     .pd-qty-stepper button { width: 36px; height: 36px; border: none; background: #fff; font-size: 16px; cursor: pointer; }
     .pd-qty-stepper button:hover { background: var(--gold-soft); }
     .pd-qty-stepper span { width: 40px; text-align: center; font-weight: 700; }
-    .pd-stock { font-size: 12.5px; color: var(--muted); }
+    .pd-stock { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #2e7d32; }
+    .pd-stock.is-oos { color: #6f675f; }
+    .pd-btn:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
 
     .pd-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
     .pd-btn {
@@ -259,14 +261,14 @@
 
   <div id="site-footer-mount"></div>
 
-  <script defer src="cart-utils.js?v=20260819pages"></script>
+  <script defer src="cart-utils.js?v=20260820stock"></script>
   <script defer src="cart-toast.js?v=20260603cartqty"></script>
   <script defer src="cart-drawer.js?v=20260820fixui"></script>
   <script defer src="site-header-config.js?v=20260603logo"></script>
-  <script defer src="site-header.js?v=20260820fixui"></script>
+  <script defer src="site-header.js?v=20260820stock"></script>
   <script defer src="product-catalog-sync.js?v=20260530d"></script>
   <script defer src="product-config.js?v=20260603ennotes"></script>
-  <script defer src="product-utils.js?v=20260820grid"></script>
+  <script defer src="product-utils.js?v=20260820stock"></script>
   <script defer src="category-products.js?v=20260820clean"></script>
   <script defer src="product-links-data.js?v=20260535"></script>
   <script defer src="product-catalog-loader.js?v=20260535"></script>
@@ -276,7 +278,7 @@
   <script defer src="remove-confirm-modal.js"></script>
   <script defer src="custom-size-modal.js"></script>
   <script defer src="product-reviews.js?v=20260724a"></script>
-  <script defer src="product-page.js?v=20260820clean"></script>
+  <script defer src="product-page.js?v=20260820stock"></script>
   <script defer src="mobile-bottom-nav.js"></script>
 </body>
 </html>

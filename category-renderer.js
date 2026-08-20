@@ -24,6 +24,35 @@
    কার্ড লেআউট)। বাকিগুলো মূলত ভেতরের লজিক — হাত না দেওয়াই ভালো।
    ============================================================================ */
 
+function productStockStatus(p) {
+  if (window.maCatalog && typeof window.maCatalog.getStockStatus === "function") {
+    return window.maCatalog.getStockStatus(p);
+  }
+  if (typeof window.getStockStatus === "function") {
+    return window.getStockStatus(p);
+  }
+  return {
+    inStock: true,
+    qty: null,
+    label: "In Stock",
+    badge: "In Stock",
+    buttonLabel: "Add to Cart"
+  };
+}
+function productIsInStock(p) {
+  return productStockStatus(p).inStock !== false;
+}
+function stockImageBadgeHtml(p) {
+  var st = productStockStatus(p);
+  if (!st.inStock) {
+    return '<span class="product-sale-badge product-soldout-badge">Sold Out</span>';
+  }
+  return (
+    '<span class="product-sale-badge">Sale</span>' +
+    '<span class="product-instock-badge">In Stock</span>'
+  );
+}
+
 function ensureCategoryStyles() {
   // ⚠️ SPEED FIX — this used to unconditionally overwrite .href on links
   // that the page's own <head> already declares, using DIFFERENT
@@ -42,7 +71,7 @@ function ensureCategoryStyles() {
     link = document.createElement("link");
     link.id = "category-sidebar-css";
     link.rel = "stylesheet";
-    link.href = "category-sidebar.css?v=20260820align";
+    link.href = "category-sidebar.css?v=20260820stock";
     document.head.appendChild(link);
   }
   var qtyLink =
@@ -62,7 +91,7 @@ function ensureCategoryStyles() {
   if (!shopLink) {
     shopLink = document.createElement("link");
     shopLink.rel = "stylesheet";
-    shopLink.href = "shop-page.css?v=20260820align";
+    shopLink.href = "shop-page.css?v=20260820stock";
     document.head.appendChild(shopLink);
   }
 }
@@ -372,6 +401,7 @@ function buildShopCartLineItem(item, qtyToAdd, sizeValue, categoryKeyOpt, select
   };
 }
 function shopAddProductToCart(item, qtyToAdd, sizeValue, categoryKeyOpt, bodyValueOpt) {
+  if (!productIsInStock(item)) return;
   var categoryKey =
     categoryKeyOpt ||
     (item && item.category) ||
@@ -447,6 +477,7 @@ function getPqvWholesaleEntries(scopeRoot) {
 }
 function shopAddBulkProductsToCart(item, entries, categoryKey, selectedType) {
   if (!item || !entries || !entries.length) return 0;
+  if (!productIsInStock(item)) return 0;
   var cart = typeof loadStoreCart === "function" ? loadStoreCart({ readOnly: true }) : [];
   var addedLines = 0;
   var totalQty = 0;
@@ -1560,12 +1591,23 @@ function initStickyOrderBar(root) {
 
   bar.querySelector(".sob-cart").addEventListener("click", function () {
     var realBtn = actionsRow.querySelector(".pqv-act-cart");
-    if (realBtn) realBtn.click();
+    if (realBtn && !realBtn.disabled) realBtn.click();
   });
   bar.querySelector(".sob-buy").addEventListener("click", function () {
     var realBtn = actionsRow.querySelector(".pqv-act-buy");
-    if (realBtn) realBtn.click();
+    if (realBtn && !realBtn.disabled) realBtn.click();
   });
+  var cartBtn = actionsRow.querySelector(".pqv-act-cart");
+  var buyBtn = actionsRow.querySelector(".pqv-act-buy");
+  var stickyCart = bar.querySelector(".sob-cart");
+  var stickyBuy = bar.querySelector(".sob-buy");
+  if (cartBtn && cartBtn.disabled && stickyCart) {
+    stickyCart.disabled = true;
+    stickyCart.textContent = cartBtn.textContent || "Out of Stock";
+  }
+  if (buyBtn && buyBtn.disabled && stickyBuy) {
+    stickyBuy.disabled = true;
+  }
   var msgBtn = actionsRow.querySelector(".pqv-act-msg");
   var stickyMsg = bar.querySelector(".sob-msg");
   if (msgBtn && stickyMsg) stickyMsg.href = msgBtn.getAttribute("href") || "#";
@@ -1893,7 +1935,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
       "</button></div></div>";
   }
   var shortNoteRaw = String(getProductShortNote(p, categoryKey) || "").trim();
-  var stockText = "In Stock";
+  var stock = productStockStatus(p);
   var descHtml = getProductDescriptionHtml(p, categoryKey);
   var relatedHtml = buildPqvRelatedHtml(p, idx, allProducts, categoryKey);
   var specRows =
@@ -2011,18 +2053,26 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     '<input type="text" id="pqvQty" class="ma-qty-stepper__input pqv-qty-input" value="1" inputmode="numeric" pattern="[0-9]*" lang="en" autocomplete="off" aria-label="Quantity">' +
     '<button type="button" class="ma-qty-stepper__btn pqv-qty-btn" data-pqv-qty="plus" aria-label="Increase quantity">+</button>' +
     "</div>" +
-    '<span class="pqv-stock">' +
-    escapeHtml(stockText) +
+    '<span class="pqv-stock' +
+    (stock.inStock ? "" : " is-oos") +
+    '">' +
+    escapeHtml(stock.label) +
     "</span>" +
     '<button type="button" class="pqv-jump-desc" data-pqv-jump-desc="1">Jump to Description <span aria-hidden="true">↓</span></button>' +
     "</div>" +
     '<div class="pqv-actions-row pqv-actions-row--three">' +
     '<button type="button" class="pqv-act pqv-act-cart" data-product-idx="' +
     idx +
-    '" data-action="add">Add to Cart</button>' +
+    '" data-action="add"' +
+    (stock.inStock ? "" : " disabled") +
+    ">" +
+    escapeHtml(stock.buttonLabel) +
+    "</button>" +
     '<button type="button" class="pqv-act pqv-act-buy" data-product-idx="' +
     idx +
-    '" data-action="buy-now">' +
+    '" data-action="buy-now"' +
+    (stock.inStock ? "" : " disabled") +
+    ">" +
     maShopBagIcon(16) +
     '<span lang="en">Buy Now</span></button>' +
     '<a class="pqv-act pqv-act-msg" href="' +
@@ -2129,6 +2179,10 @@ function onGlobalShopCartClick(ev) {
     return;
   }
   if (action !== "add" && action !== "buy-now" && action !== "add-bulk") return;
+  if (!productIsInStock(products[idx])) {
+    ev.preventDefault();
+    return;
+  }
   var categoryKey =
     getShopCategoryKey() || "";
   if (action === "add-bulk") {
@@ -2519,7 +2573,7 @@ function buildCardImageBlock(p, idx, categoryKey, allProducts) {
     '" aria-label="' +
     escapeHtml("View " + p.name) +
     '">' +
-    '<span class="product-sale-badge">Sale</span>' +
+    stockImageBadgeHtml(p) +
     '<span class="card-img-stack">' +
     '<img class="card-img-primary" src="' +
     escapeHtml(main) +
@@ -2777,10 +2831,13 @@ function buildProductCard(p, idx, waLink, detailMode, categoryKey, allProducts) 
     .join("");
 
   var colorAttr = p.color ? " data-color='" + escapeHtml(p.color) + "'" : "";
+  var stock = productStockStatus(p);
 
   if (detailMode) {
     return (
-      '<article class="premium-card premium-card-detail" data-product-idx="' +
+      '<article class="premium-card premium-card-detail' +
+      (stock.inStock ? "" : " is-oos") +
+      '" data-product-idx="' +
       idx +
       '" data-price="' +
       productPrice +
@@ -2788,7 +2845,7 @@ function buildProductCard(p, idx, waLink, detailMode, categoryKey, allProducts) 
       colorAttr +
       ">" +
       '<div class="detail-media">' +
-      '<span class="product-sale-badge">Sale</span>' +
+      stockImageBadgeHtml(p) +
       wrapProductImageLink(
         '<img src="' +
           escapeHtml(resolveCardImageSrc(p)) +
@@ -2812,10 +2869,16 @@ function buildProductCard(p, idx, waLink, detailMode, categoryKey, allProducts) 
       '<div class="detail-actions">' +
       '<button type="button" class="msg-btn btn-add-cart" data-product-idx="' +
       idx +
-      '" data-action="add">Add to Cart</button>' +
+      '" data-action="add"' +
+      (stock.inStock ? "" : " disabled") +
+      ">" +
+      escapeHtml(stock.buttonLabel) +
+      "</button>" +
 '<button type="button" class="msg-btn btn-buy-now" data-product-idx="' +
 idx +
-'" data-action="buy-now">' +
+'" data-action="buy-now"' +
+(stock.inStock ? "" : " disabled") +
+">" +
 maShopBagIcon(16) +
 '<span lang="en">Order Now</span></button>' +
 "<a href='" +
@@ -2833,6 +2896,7 @@ encodeURIComponent("I want to order " + p.name) +
   return (
     '<article class="card premium-card' +
     (inCart ? " in-cart" : "") +
+    (stock.inStock ? "" : " is-oos") +
     '" data-product-idx="' +
     idx +
     '" data-price="' +
@@ -2871,9 +2935,12 @@ encodeURIComponent("I want to order " + p.name) +
     '<div class="card-actions-muslim-abaya">' +
     '<button type="button" class="muslim-abaya-btn muslim-abaya-btn-cart' +
     (inCart ? " is-active" : "") +
+    (stock.inStock ? "" : " is-oos") +
     '" data-product-idx="' +
     idx +
-    '" data-action="add" aria-label="Add to Cart"><span class="muslim-abaya-btn-ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M6 6L5 3H2"/></svg></span></button>' +
+    '" data-action="add"' +
+    (stock.inStock ? ' aria-label="Add to Cart"' : ' disabled aria-label="Out of Stock"') +
+    '><span class="muslim-abaya-btn-ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M6 6L5 3H2"/></svg></span></button>' +
     "<a href='" +
     waLink +
     "?text=" +

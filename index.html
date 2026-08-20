@@ -13,8 +13,8 @@
     
     <link rel="stylesheet" href="qty-stepper.css?v=20260601qty" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="qty-stepper.css?v=20260601qty"></noscript>
-    <link rel="stylesheet" href="category-sidebar.css?v=20260820align" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="category-sidebar.css?v=20260820align"></noscript>
+    <link rel="stylesheet" href="category-sidebar.css?v=20260820stock" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="category-sidebar.css?v=20260820stock"></noscript>
     <link rel="stylesheet" href="custom-size-modal.css" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="custom-size-modal.css"></noscript>
     <link rel="stylesheet" href="index-critical.css?v=20260820fashion">
@@ -24,7 +24,7 @@
          .ah-card). Keeping them loaded only added dead weight and stale
          .muslim-abaya-btn rules that could collide with the current cards. -->
     <link rel="stylesheet" href="liquid-glass-ui.css?v=20260820fixui">
-    <link rel="stylesheet" href="index-home-muslim-abaya.css?v=20260820align">
+    <link rel="stylesheet" href="index-home-muslim-abaya.css?v=20260820stock">
     <link rel="stylesheet" href="cart-drawer.css?v=20260820fixui">
     <link rel="icon" href="assets/logo-muslim-abaya.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="assets/logo-muslim-abaya.svg">
@@ -116,7 +116,7 @@
 <script>(function(){if(location.protocol==='file:'){var b=document.getElementById('localFileBanner');if(b)b.style.display='block';}})();</script>
 <div id="site-header-mount"></div>
 <script src="site-header-config.js?v=20260603logo"></script>
-<script type="module" src="site-header.js?v=20260820fixui"></script>
+<script type="module" src="site-header.js?v=20260820stock"></script>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-ML7RL6BR"
 height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- Full-width hero slider (uploaded images from hero-banner-config.js) -->
@@ -156,7 +156,7 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
     </a>
 </div>   
 </section>
-<script type="module" src="cart-utils.js?v=20260819pages"></script>
+<script type="module" src="cart-utils.js?v=20260820stock"></script>
 <script type="module" src="cart-toast.js?v=20260603cartqty"></script>
 <script type="module" src="cart-drawer.js?v=20260820fixui"></script>
 <!-- related-cart.css removed: its .related-item/.related-grid rules never
@@ -166,9 +166,9 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!--  এই নতুন কোডটুকু বসিয়ে দিন (টাইমিং ঠিক করার জন্য) -->
 <script src="custom-size-modal.js"></script>
-<script src="category-renderer.js?v=20260820clean"></script>
+<script src="category-renderer.js?v=20260820stock"></script>
 <script src="hero-banner-config.js?v=20260820hero"></script>
-<script type="module" src="index-catalog-defer.js?v=20260530sale"></script>
+<script type="module" src="index-catalog-defer.js?v=20260820stock"></script>
 <script type="module">
   // ক্যাটালগ ডেটা পুরোপুরি লোড হওয়া পর্যন্ত মেইন ফাইলটিকে ১ সেকেন্ড দেরি করানো হলো
   function catalogIsReady() {
@@ -176,7 +176,7 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
     return !!(p && Object.keys(p).some(function (k) { return (p[k] || []).length; }));
   }
   function startHomeModules() {
-    import("./index-home-muslim-abaya.js?v=20260820anzaar4");
+    import("./index-home-muslim-abaya.js?v=20260820stock");
     import("./related-cart.js?v=20260708");
   }
   if (catalogIsReady()) {

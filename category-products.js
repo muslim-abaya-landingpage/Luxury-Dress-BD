@@ -2,7 +2,10 @@
  * ═══════════════════════════════════════════════════════════════════
  *  প্রোডাক্ট যোগ/বাদ — শুধু এই ফাইল এডিট করুন (PRODUCT-GUIDE.md দেখুন)
  *  • বাল্ক ছবি লিংক: product-links.html → product-links-data.js
- *  • পুরো তথ্য: নিচের অ্যারেতে { id, name, image, price, ... }
+ *  • পুরো তথ্য: নিচের অ্যারেতে { id, name, image, price, stock, ... }
+ *  • স্টক: stock: 5 = ৫টা আছে | stock: 0 বা inStock: false = Sold Out
+ *    খালি রাখলে আগের মতোই In Stock (আনলিমিটেড)। সব ভিজিটরের জন্য
+ *    এখানেই এডিট করতে হয় — অর্ডার অটো কমাতে পারে না (স্ট্যাটিক সাইট)।
  *  • লিংক সার্ভার বদল: product-config.js → SITE_LINKS.images
  *  • Abaya → abaya:[] | Two-piece → "premium-two-piece":[] | খালি ক্যাটাগরি → []
  *  • product-links-data শুধু ছবি আপডেট করে; নতুন প্রোডাক্ট শুধু এখানে + ম্যানেজার থেকে
