@@ -264,33 +264,41 @@ body.shop-page .muslim-abaya-btn-cart {
   align-items: center;
   justify-content: center;
   gap: 0;
-  border-radius: 0;
+  border-radius: 12px;
   padding: 10px 0;
-  border: none;
-  background: #e6e7eb;
-  color: #545454;
+  min-height: 48px;
+  height: 48px;
+  border: 1px solid #111;
+  background: #111;
+  color: #fff;
   font-family: "Inter", "Hind Siliguri", system-ui, sans-serif;
-  font-weight: 700;
-  font-size: 12.5px;
+  font-weight: 600;
+  font-size: 13px;
   letter-spacing: .01em;
   white-space: nowrap;
-  transition: background .15s ease;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 body.shop-page .card-actions-muslim-abaya .muslim-abaya-btn-cart .muslim-abaya-btn-ico {
   display: inline-flex;
   margin: 0;
 }
 body.shop-page .muslim-abaya-btn-cart .muslim-abaya-btn-ico svg {
-  stroke: #545454;
+  stroke: #fff;
 }
 body.shop-page .muslim-abaya-btn-cart:hover {
-  background: #dcdde2;
+  background: #000;
+  border-color: #000;
 }
 body.shop-page .muslim-abaya-btn-cart:disabled,
 body.shop-page .muslim-abaya-btn-cart.is-oos {
   background: #f0f0f0;
+  border-color: #ececec;
   color: #8a8a8a;
   cursor: not-allowed;
+}
+body.shop-page .muslim-abaya-btn-cart:disabled .muslim-abaya-btn-ico svg,
+body.shop-page .muslim-abaya-btn-cart.is-oos .muslim-abaya-btn-ico svg {
+  stroke: #8a8a8a;
 }
 body.shop-page .muslim-abaya-btn-cart:disabled:hover,
 body.shop-page .muslim-abaya-btn-cart.is-oos:hover {
@@ -304,20 +312,22 @@ body.shop-page .muslim-abaya-btn-msg {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 0;
+  border-radius: 12px;
   padding: 10px 0;
-  border: none;
-  background: #e6e7eb;
-  color: #545454;
+  min-height: 48px;
+  height: 48px;
+  border: 1px solid #111;
+  background: #fff;
+  color: #111;
   font-family: "Inter", "Hind Siliguri", system-ui, sans-serif;
-  font-weight: 500;
-  font-size: 12.5px;
+  font-weight: 600;
+  font-size: 13px;
   letter-spacing: .01em;
-  transition: background .15s ease, color .15s ease;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 body.shop-page .muslim-abaya-btn-msg:hover {
-  background: #dcdde2;
-  color: #333;
+  background: #111;
+  color: #fff;
 }
 
 body.shop-page .muslim-abaya-btn-cart:active,
@@ -332,16 +342,18 @@ body.shop-page .muslim-abaya-btn-buy:active {
 body.shop-page .muslim-abaya-btn-buy {
   position: relative;
   z-index: 1;
-  border-radius: 0;
+  border-radius: 12px;
   padding: 13px 0;
+  min-height: 48px;
+  height: 48px;
   border: none;
   background: #111;
   color: #fff;
   font-weight: 700;
-  transition: background .15s ease;
+  transition: background 0.2s ease;
 }
 body.shop-page .muslim-abaya-btn-buy:hover {
-  background: #333;
+  background: #000;
 }
 
 /* কোয়ান্টিটি স্টেপার (quick-view-এ) — সাদা পিল স্টাইল */
@@ -384,7 +396,9 @@ body.shop-page .card-actions-muslim-abaya .ma-qty-stepper__btn:disabled {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
-    min-height: 38px;
+    min-height: 48px;
+    height: 48px;
+    border-radius: 12px;
   }
 
   body.shop-page .card-actions-muslim-abaya .muslim-abaya-btn-cart {
