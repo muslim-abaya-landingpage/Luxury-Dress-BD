@@ -387,7 +387,7 @@ html.category-ready #list {
   display: flex;
   flex-direction: column;
   border: 1px solid #ececec;
-  border-radius: 14px;
+  border-radius: 0;
   box-shadow: 0 4px 16px rgba(17, 17, 17, 0.04);
   overflow: hidden;
   background: #fff;
