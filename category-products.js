@@ -781,9 +781,7 @@ window.CATEGORY_PRODUCTS = {
   color: "multi-color",
   colorLabel: "Multiple Colors",
   fabric: "Alex Soft Georgette",
-  sizes: [
-    "Body 42 (Free Size)"
-  ],
+  sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare"
 },
   {
@@ -795,7 +793,7 @@ window.CATEGORY_PRODUCTS = {
   color: "black",
   colorLabel: "Black",
   fabric: "Alex Soft Georgette",
-  sizes: ["Body 42 (Free Size)"],
+  sizes: ["34", "36", "38", "40", "42", "44", "46"],
   detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare"
 },
  {
