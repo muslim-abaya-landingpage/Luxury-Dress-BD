@@ -247,6 +247,8 @@ body.shop-page .card-actions-muslim-abaya {
   border-radius: 0;
   background: transparent;
   border: none;
+  margin-top: auto;
+  width: 100%;
 }
 /* কার্ডের সামনের গ্রিডে কোয়ান্টিটি স্টেপার দেখানো হয় না (শুধু quick-view/
    ডিটেইল পেজে দেখা যায়) */

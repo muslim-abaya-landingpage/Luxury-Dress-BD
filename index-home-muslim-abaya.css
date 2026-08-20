@@ -319,6 +319,7 @@
   flex-direction: column;
   min-width: 0;
   width: 100%;
+  height: 100%;
   box-sizing: border-box;
 }
 .ah-card-media {
@@ -359,6 +360,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  flex: 1 1 auto;
 }
 .ah-card-row {
   display: flex;
@@ -397,7 +399,8 @@
 .ah-actions {
   display: flex;
   gap: 8px;
-  margin-top: 4px;
+  margin-top: auto;
+  padding-top: 4px;
   flex-shrink: 0;
 }
 .ah-btn {
@@ -533,6 +536,7 @@
     max-width: 100%;
     font-size: 13px;
     line-height: 1.35;
+    min-height: calc(1.35em * 2);
   }
   .ah-card-price {
     display: block;

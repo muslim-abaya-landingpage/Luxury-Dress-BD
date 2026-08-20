@@ -378,7 +378,7 @@ html.category-ready #list {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px 16px;
-  align-items: start;
+  align-items: stretch;
   min-width: 0;
   width: 100%;
 }
@@ -395,7 +395,7 @@ html.category-ready #list {
   min-width: 0;
   width: 100%;
   box-sizing: border-box;
-  height: auto;
+  height: 100%;
 }
 
 @media (hover: hover) {
@@ -519,7 +519,7 @@ button.img-wrap {
 .premium-card .card-foot {
   position: relative;
   z-index: 2;
-  flex: 0 0 auto;
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   padding: 10px 8px 16px;
@@ -696,7 +696,7 @@ button.img-wrap {
   flex-direction: column;
   gap: 6px;
   width: 100%;
-  margin-top: 2px;
+  margin-top: auto;
 }
 
 .shop-card-qty.ma-qty-stepper {
@@ -1343,6 +1343,7 @@ button.img-wrap {
     overflow-wrap: anywhere;
     word-break: normal;
     -webkit-line-clamp: 2;
+    min-height: calc(1.35em * 2);
   }
 
   .premium-card .card-price {
