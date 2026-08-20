@@ -301,6 +301,14 @@
       normalized.lengthSizeLabel = entry.lengthSizeLabel;
     }
 
+    if (entry.inStock === false) {
+      normalized.inStock = false;
+    }
+    if (entry.stock != null && entry.stock !== "") {
+      var stockN = parseInt(entry.stock, 10);
+      if (!isNaN(stockN)) normalized.stock = Math.max(0, stockN);
+    }
+
     normalized.productUrl = resolveProductPageLink(normalized);
     return normalized;
   }
@@ -386,6 +394,39 @@
     });
 
     return result;
+  }
+
+  /**
+   * Catalog stock: omit `stock` (or leave it empty) = sellable / untracked.
+   * `stock: 0` or `inStock: false` = sold out. Numeric `stock` caps cart qty.
+   * Permanent stock for all visitors is edited in category-products.js
+   * (or Product Manager). Checkout cannot rewrite that JS file.
+   */
+  function getStockQty(product) {
+    if (!product) return null;
+    if (product.inStock === false) return 0;
+    if (product.stock == null || product.stock === "") return null;
+    var n = parseInt(product.stock, 10);
+    if (isNaN(n)) return null;
+    return Math.max(0, n);
+  }
+
+  function isInStock(product) {
+    var qty = getStockQty(product);
+    if (qty === null) return true;
+    return qty > 0;
+  }
+
+  function getStockStatus(product) {
+    var inStock = isInStock(product);
+    var qty = getStockQty(product);
+    return {
+      inStock: inStock,
+      qty: qty,
+      label: inStock ? "In Stock" : "Out of Stock",
+      badge: inStock ? "In Stock" : "Sold Out",
+      buttonLabel: inStock ? "Add to Cart" : "Out of Stock"
+    };
   }
 
   function categoryHasProducts(key) {
@@ -651,6 +692,9 @@ g.getCartLineBaseName = getCartLineBaseName;
   return f;
 }
   g.formatFabricLabelEn = formatFabricLabelEn;
+  g.getStockQty = getStockQty;
+  g.isInStock = isInStock;
+  g.getStockStatus = getStockStatus;
   g.maCatalog = {
     resolveImageUrl: resolveImageUrl,
     resolveProductPageLink: resolveProductPageLink,
@@ -658,6 +702,9 @@ g.getCartLineBaseName = getCartLineBaseName;
     normalizeProductEntry: normalizeProductEntry,
     normalizeAll: normalizeAll,
     categoryHasProducts: categoryHasProducts,
-    titleFromFileName: titleFromFileName
+    titleFromFileName: titleFromFileName,
+    getStockQty: getStockQty,
+    isInStock: isInStock,
+    getStockStatus: getStockStatus
   };
 })(window);

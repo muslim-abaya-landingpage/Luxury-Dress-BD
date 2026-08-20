@@ -503,6 +503,46 @@ html.category-ready #list {
   bottom: auto;
 }
 
+.product-instock-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  font-size: 9px;
+  font-weight: 600;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #5e6a58;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 3px 7px;
+  line-height: 1.2;
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.product-soldout-badge {
+  background: rgba(255, 255, 255, 0.94) !important;
+  color: #3a3a3a !important;
+  letter-spacing: 0.16em;
+}
+
+.premium-card.is-oos .card-img-primary,
+.premium-card.is-oos .detail-media img {
+  opacity: 0.58;
+  filter: grayscale(28%);
+}
+
+.premium-card.is-oos .muslim-abaya-btn-cart,
+.premium-card.is-oos .btn-add-cart,
+.premium-card.is-oos .btn-buy-now {
+  cursor: not-allowed;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
 .premium-card .img-wrap,
 button.img-wrap {
   display: block;
@@ -2112,7 +2152,19 @@ body.pqv-sc-open {
   font-size: 12px;
   font-weight: 600;
   color: #2e7d32;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pqv-stock.is-oos {
+  color: #6f675f;
+}
+
+.pqv-act:disabled,
+.sob-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 .pqv-wholesale {

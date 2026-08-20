@@ -314,7 +314,10 @@
   function buildProductCard(catKey, p, idx) {
     ensureProductPriceByType(p, catKey);
     var card = document.createElement("article");
-    var outOfStock = p.inStock === false;
+    var outOfStock = p.inStock === false || (typeof p.stock === "number" && p.stock <= 0);
+    if (typeof window.isInStock === "function") {
+      outOfStock = !window.isInStock(p);
+    }
     card.className = "pm-product-card" + (outOfStock ? " pm-product-oos" : "");
     if (outOfStock) {
       card.style.opacity = "0.75";
@@ -347,6 +350,7 @@
       field("color", "রঙ কোড (black/maroon)", p.color) +
       field("sizes", "সাইজ (কমা দিয়ে)", sizesToInput(p.sizes)) +
       field("id", "SKU / ID", p.id) +
+      field("stock", "স্টক (খালি = আনলিমিটেড, 0 = Out of Stock)", p.stock == null ? "" : p.stock, "number") +
       fieldWide("image", "ছবির URL", p.image) +
       "</div>";
 
@@ -354,6 +358,16 @@
       inp.addEventListener("input", function () {
         var f = inp.getAttribute("data-f");
         if (f === "price") p.price = parseInt(inp.value, 10) || 0;
+        else if (f === "stock") {
+          if (inp.value === "") {
+            delete p.stock;
+            delete p.inStock;
+          } else {
+            p.stock = Math.max(0, parseInt(inp.value, 10) || 0);
+            if (p.stock === 0) p.inStock = false;
+            else delete p.inStock;
+          }
+        }
         else if (f && f.indexOf("typePrice:") === 0) {
           var typeName = f.slice("typePrice:".length);
           if (!p.priceByType) p.priceByType = {};
@@ -367,10 +381,16 @@
     });
 
     card.querySelector(".pm-stock-toggle").addEventListener("click", function () {
-      p.inStock = p.inStock === false ? true : false;
+      if (p.inStock === false || (typeof p.stock === "number" && p.stock <= 0)) {
+        delete p.inStock;
+        if (typeof p.stock === "number" && p.stock <= 0) delete p.stock;
+      } else {
+        p.stock = 0;
+        p.inStock = false;
+      }
       renderMain();
       toast(
-        p.inStock === false
+        p.inStock === false || p.stock === 0
           ? (p.name || "প্রোডাক্ট") + " — স্টক নেই করা হয়েছে (Save চাপুন)"
           : (p.name || "প্রোডাক্ট") + " — স্টকে ফেরত আনা হয়েছে (Save চাপুন)"
       );
@@ -508,7 +528,7 @@
   function productToJsLines(p, indent) {
     var ind = indent || "    ";
     var lines = [ind + "{"];
-    var order = ["id", "name", "image", "price", "color", "colorLabel", "fabric", "sizes", "detailNote", "types"];
+    var order = ["id", "name", "image", "price", "stock", "color", "colorLabel", "fabric", "sizes", "detailNote", "types"];
     order.forEach(function (k) {
       if (p[k] == null || p[k] === "") return;
       if (k === "sizes" && Array.isArray(p.sizes)) {
@@ -521,6 +541,8 @@
         }).join(", ") + "],");
       } else if (k === "price") {
         lines.push(ind + "  price: " + (parseInt(p.price, 10) || 0) + ",");
+      } else if (k === "stock") {
+        lines.push(ind + "  stock: " + (parseInt(p.stock, 10) || 0) + ",");
       } else {
         lines.push(ind + "  " + k + ": " + jsStr(p[k]) + ",");
       }

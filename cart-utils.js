@@ -398,6 +398,24 @@
     var list = normalizeArray(arr);
     var line = normalizeLine(item);
     if (!line) return list;
+    var catalogItem = findCatalogProductFull(line.id, line.name);
+    var inStockFn = global.isInStock || (global.maCatalog && global.maCatalog.isInStock);
+    var stockQtyFn = global.getStockQty || (global.maCatalog && global.maCatalog.getStockQty);
+    if (catalogItem && typeof inStockFn === "function" && !inStockFn(catalogItem)) {
+      return list;
+    }
+    var cap = catalogItem && typeof stockQtyFn === "function" ? stockQtyFn(catalogItem) : null;
+    if (typeof cap === "number") {
+      var already = 0;
+      list.forEach(function (x) {
+        if (String(x.id) === String(line.id)) {
+          already += parseInt(x.quantity, 10) || 0;
+        }
+      });
+      var room = cap - already;
+      if (room <= 0) return list;
+      if (line.quantity > room) line.quantity = room;
+    }
     var key = cartLineMergeKey(line);
     var found = list.find(function (x) {
       return cartLineMergeKey(x) === key;
