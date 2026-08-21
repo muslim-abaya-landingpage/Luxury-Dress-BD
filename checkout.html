@@ -3521,6 +3521,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             formData.append('Total', String(gTotal));
             var eventId = 'order_' + Date.now();
             formData.append('EventID', eventId);
+            formData.append('EventTime', String(Math.floor(Date.now() / 1000)));
             formData.append('ProductSlotCount', String(MAX_PRODUCT_SLOTS));
             var selectedPayment = document.querySelector('input[name="paymentMethod"]:checked');
             formData.append('PaymentMethod', selectedPayment ? selectedPayment.value : 'Cash On Delivery');
@@ -3560,6 +3561,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 if (metaPayload.external_id) formData.append('ExternalID', String(metaPayload.external_id));
                 if (metaPayload.event_source_url) formData.append('EventSourceUrl', String(metaPayload.event_source_url));
                 if (metaPayload.client_user_agent) formData.append('ClientUserAgent', String(metaPayload.client_user_agent));
+                if (metaPayload.content_ids && metaPayload.content_ids.length) {
+                    formData.append('ContentIDs', metaPayload.content_ids.join(','));
+                }
             }
 
             if (!ORDER_SCRIPT_URL) {
