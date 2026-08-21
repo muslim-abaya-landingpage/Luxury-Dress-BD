@@ -2085,7 +2085,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="auth-config.js"></script>
 <script src="auth-api.js"></script>
 <script src="product-config.js?v=20260603ennotes"></script>
-<script src="product-utils.js?v=20260820stock"></script>
+<script src="product-utils.js?v=20260821ordername"></script>
 <!-- Needed so "Customers also bought" has access to the real product catalog on this page -->
 <script src="category-products.js?v=20260820clean"></script>
 <script src="product-catalog-sync.js?v=20260603crosssell"></script>
@@ -2223,7 +2223,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     })();
 
     function buildWhatsAppProductsList() {
-        return productsLabelMultiline();
+        return orderLines().map(function (item, idx) {
+            return formatOrderSlotLineDetailed(idx + 1, item);
+        }).join('\n');
     }
 
     function getWhatsAppOrderLink(order) {
@@ -2832,6 +2834,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
 
     function formatOrderSlotLine(index, item) {
+        var base = checkoutLineBaseName(item);
+        return index + '. ' + base;
+    }
+
+    function formatOrderSlotLineDetailed(index, item) {
         var qty = parseInt(item.quantity, 10) || 1;
         var base = checkoutLineBaseName(item);
         var size = checkoutLineSizeLabel(item);

@@ -618,8 +618,8 @@ function parsePanjabiSize(sizeStr) {
 }
   function stripSizeFromCartName(name) {
     return String(name || "")
-      .replace(/\s*\(Body\s+[^)]+\)\s*$/i, "")
-      .replace(/\s*\(Size\s+[^)]+\)\s*$/i, "")
+      .replace(/\s*\(Body\s+.*\)\s*$/i, "")
+      .replace(/\s*\(Size\s+.*\)\s*$/i, "")
       .trim();
   }
 

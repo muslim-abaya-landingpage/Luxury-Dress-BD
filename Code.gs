@@ -210,22 +210,32 @@ function validateOrderInput_(e) {
     total: total,
     district: param_(e, 'District'),
     slotItems: slotItems,
-    design: slotItems.length ? formatOrderDesignLines_(slotItems) : design
+    design: slotItems.length
+      ? formatOrderDesignLines_(slotItems)
+      : formatOrderDesignLines_(String(design).split(/\n/))
   };
 }
 
-/** প্রতিটি প্রোডাক্ট আলাদা লাইনে — Sheet column G পড়তে সহজ */
+/** প্রতিটি প্রোডাক্ট আলাদা লাইনে — Sheet column G-তে শুধু নাম */
+function stripOrderLineToProductName_(raw) {
+  var s = String(raw || '').trim();
+  if (!s) return '';
+  s = s.replace(/^\d+\.\s*/, '');
+  s = s.split(/\s*\|\s*/)[0].trim();
+  s = s.replace(/\s*\(Body\s+.*\)\s*$/i, '');
+  s = s.replace(/\s*\(Size\s+.*\)\s*$/i, '');
+  return s.trim();
+}
+
 function formatOrderDesignLines_(slotItems) {
   var lines = [];
   var i;
   for (i = 0; i < slotItems.length; i++) {
     var raw = String(slotItems[i] || '').trim();
     if (!raw) continue;
-    if (/^\d+\.\s/.test(raw)) {
-      lines.push(raw);
-    } else {
-      lines.push((lines.length + 1) + '. ' + raw);
-    }
+    var nameOnly = stripOrderLineToProductName_(raw);
+    if (!nameOnly) continue;
+    lines.push((lines.length + 1) + '. ' + nameOnly);
   }
   return lines.join('\n');
 }
@@ -900,9 +910,13 @@ function getAutoCourierMode_() {
 function appendAutoCourierNote_(sheet, row, note) {
   if (!sheet || !row || !note) return;
   try {
+    var clean = String(note).replace(/\s+/g, ' ').trim().slice(0, 80);
+    if (!clean) return;
     var prev = String(sheet.getRange(row, 17).getValue() || '');
-    if (prev.indexOf(note) !== -1) return;
-    sheet.getRange(row, 17).setValue(prev ? (prev + ' | ' + note) : note);
+    if (prev.indexOf(clean) !== -1) return;
+    var next = prev ? (prev + ' | ' + clean) : clean;
+    if (next.length > 220) next = next.slice(0, 220);
+    sheet.getRange(row, 17).setValue(next);
   } catch (err) {}
 }
 
