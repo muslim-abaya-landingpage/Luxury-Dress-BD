@@ -73,19 +73,11 @@
     loadAt(0);
   }
 
-  function schedule() {
-    if (typeof window.requestIdleCallback === "function") {
-      window.requestIdleCallback(start, { timeout: 2000 });
-    } else {
-      window.setTimeout(start, 600);
-    }
-  }
-
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", schedule, { once: true });
+    document.addEventListener("DOMContentLoaded", start, { once: true });
     document.addEventListener("DOMContentLoaded", scheduleFa, { once: true });
   } else {
-    schedule();
+    start();
     scheduleFa();
   }
 })();

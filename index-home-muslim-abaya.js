@@ -227,7 +227,7 @@
       escapeHtml(img) +
       "' alt='" +
       escapeHtml(p.name) +
-      "' loading='lazy' decoding='async' onerror=\"this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg'\">" +
+      "' width='480' height='600' loading='lazy' decoding='async' onerror=\"this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg'\">" +
       "</a>" +
       "<div class='ah-card-body'>" +
       "<div class='ah-card-row'>" +
@@ -399,6 +399,15 @@
   }
 
   /* ---------------- Hero slider ---------------- */
+  var HERO_LCP_FULL =
+    "images/hero-banner/premium-black-floral-embroidery-abaya-bangladesh-model-original-dubai-cherry-fabric-(2).webp";
+  var HERO_LCP_SRCSET =
+    "images/hero-banner/hero-lcp-640.webp 640w, " +
+    "images/hero-banner/hero-lcp-960.webp 960w, " +
+    "images/hero-banner/hero-lcp-1280.webp 1280w, " +
+    HERO_LCP_FULL +
+    " 1920w";
+
   function isUploadedHeroImage(src) {
     var s = String(src || "")
       .trim()
@@ -407,6 +416,102 @@
       .replace(/^\.\//, "");
     if (!s) return false;
     return /(^|\/)images\/hero-banner\//i.test(s);
+  }
+
+  function isLcpHeroSrc(src) {
+    var s = String(src || "");
+    return /premium-black-floral-embroidery-abaya-bangladesh-model-original-dubai-cherry-fabric|\bhero-lcp-\d+\.webp/i.test(
+      s
+    );
+  }
+
+  function heroImgTag(it, i, heroEyebrow) {
+    var img = it.image;
+    var alt = it.alt || heroEyebrow;
+    var isFirst = i === 0;
+    var attrs =
+      " src='" +
+      escapeHtml(isFirst && isLcpHeroSrc(img) ? "images/hero-banner/hero-lcp-960.webp" : img) +
+      "' alt='" +
+      escapeHtml(alt) +
+      "' width='1920' height='840' decoding='" +
+      (isFirst ? "sync" : "async") +
+      "'";
+    if (isFirst) attrs += " fetchpriority='high'";
+    else attrs += " loading='lazy'";
+    if (isFirst && isLcpHeroSrc(img)) {
+      attrs += " srcset='" + HERO_LCP_SRCSET + "' sizes='100vw'";
+    }
+    return "<img" + attrs + ">";
+  }
+
+  function slideHtml(it, i, copy) {
+    return (
+      "<div class='home-hero-slide" +
+      (i === 0 ? " is-active" : "") +
+      "'>" +
+      heroImgTag(it, i, copy.eyebrow) +
+      "<div class='home-hero-cap'>" +
+      "<p class='eyebrow'>" +
+      (it.eyebrow || copy.eyebrow) +
+      "</p>" +
+      "<h2 class='head'>" +
+      (it.heading || copy.heading) +
+      "</h2>" +
+      "<p class='sub'>" +
+      (it.subtitle || copy.subtitle) +
+      "</p>" +
+      "<a class='hero-btn' href='" +
+      escapeHtml(it.link || "/") +
+      "'>" +
+      (it.buttonText || copy.buttonText) +
+      "</a>" +
+      "</div>" +
+      "</div>"
+    );
+  }
+
+  function heroDotsHtml(count) {
+    var html = "";
+    var i;
+    for (i = 0; i < count; i++) {
+      html +=
+        "<button type='button' aria-label='Slide " +
+        (i + 1) +
+        "' class='" +
+        (i === 0 ? "is-active" : "") +
+        "' data-slide='" +
+        i +
+        "'></button>";
+    }
+    return html;
+  }
+
+  function bindHeroErrors(hero) {
+    hero.querySelectorAll(".home-hero-slide img").forEach(function (img) {
+      if (img.getAttribute("data-ma-hero-err")) return;
+      img.setAttribute("data-ma-hero-err", "1");
+      img.addEventListener("error", function () {
+        var slide = img.closest(".home-hero-slide");
+        if (slide) slide.remove();
+        var live = hero.querySelectorAll(".home-hero-slide");
+        var dotsWrap = hero.querySelector(".home-hero-dots");
+        if (dotsWrap) {
+          dotsWrap.innerHTML = heroDotsHtml(live.length);
+          dotsWrap.querySelectorAll("button").forEach(function (dot) {
+            dot.addEventListener("click", function () {
+              var n = hero.querySelectorAll(".home-hero-slide").length;
+              goToSlide(hero, parseInt(dot.getAttribute("data-slide"), 10) || 0, n);
+              startHero(hero, n);
+            });
+          });
+        }
+        var n = live.length;
+        heroTotalRef = n;
+        if (n) goToSlide(hero, 0, n);
+        startHero(hero, n);
+      });
+    });
   }
 
   function manualHeroSlides() {
@@ -422,61 +527,58 @@
     if (!hero) return;
 
     var heroCfg = window.SITE_HERO_CONFIG || {};
-    var heroEyebrow = heroCfg.eyebrow || "Eid Collection 2026";
-    var heroHeading = heroCfg.heading || "Experience<br>the Elegance";
-    var heroSubtitle = heroCfg.subtitle || "Premium modest wear crafted with comfort &amp; purity.";
-    var heroBtnText = heroCfg.buttonText || "Shop Now";
+    var copy = {
+      eyebrow: heroCfg.eyebrow || "Eid Collection 2026",
+      heading: heroCfg.heading || "Experience<br>the Elegance",
+      subtitle: heroCfg.subtitle || "Premium modest wear crafted with comfort &amp; purity.",
+      buttonText: heroCfg.buttonText || "Shop Now"
+    };
 
     var items = manualHeroSlides();
-    if (!items.length) {
-      hero.innerHTML = "";
+    if (!items.length) return;
+
+    var track = hero.querySelector(".home-hero-track");
+    var firstImg = hero.querySelector(".home-hero-slide img");
+    var firstMatches =
+      track &&
+      firstImg &&
+      items[0] &&
+      isLcpHeroSrc(firstImg.getAttribute("src") || "") &&
+      isLcpHeroSrc(items[0].image || "");
+
+    if (hero.querySelector(".home-hero-arrow") && firstMatches) {
+      return;
+    }
+
+    if (firstMatches && !hero.querySelector(".home-hero-arrow")) {
+      var extra = "";
+      var i;
+      for (i = 1; i < items.length; i++) {
+        extra += slideHtml(items[i], i, copy);
+      }
+      var firstSlide = hero.querySelector(".home-hero-slide");
+      if (extra && firstSlide) firstSlide.insertAdjacentHTML("afterend", extra);
+      if (!firstImg.getAttribute("srcset")) {
+        firstImg.setAttribute("srcset", HERO_LCP_SRCSET);
+        firstImg.setAttribute("sizes", "100vw");
+      }
+      track.insertAdjacentHTML(
+        "beforeend",
+        "<button type='button' class='home-hero-arrow prev' aria-label='Previous'>&#8249;</button>" +
+          "<button type='button' class='home-hero-arrow next' aria-label='Next'>&#8250;</button>" +
+          "<div class='home-hero-dots'>" +
+          heroDotsHtml(items.length) +
+          "</div>"
+      );
+      heroIdx = 0;
+      bindHero(hero, items.length);
+      bindHeroErrors(hero);
       return;
     }
 
     var slides = items
-      .map(function (it, i) {
-        var img = it.image;
-        var link = it.link || "/";
-        var alt = it.alt || heroEyebrow;
-        var eyebrow = it.eyebrow || heroEyebrow;
-        var heading = it.heading || heroHeading;
-        var subtitle = it.subtitle || heroSubtitle;
-        var btnText = it.buttonText || heroBtnText;
-        return (
-          "<div class='home-hero-slide" +
-          (i === 0 ? " is-active" : "") +
-          "'>" +
-          "<img src='" +
-          escapeHtml(img) +
-          "' alt='" +
-          escapeHtml(alt) +
-          "'" +
-          (i === 0 ? " fetchpriority='high'" : " loading='lazy'") +
-          ">" +
-          "<div class='home-hero-cap'>" +
-          "<p class='eyebrow'>" + eyebrow + "</p>" +
-          "<h2 class='head'>" + heading + "</h2>" +
-          "<p class='sub'>" + subtitle + "</p>" +
-          "<a class='hero-btn' href='" +
-          escapeHtml(link) +
-          "'>" + btnText + "</a>" +
-          "</div>" +
-          "</div>"
-        );
-      })
-      .join("");
-
-    var dots = items
-      .map(function (it, i) {
-        return (
-          "<button type='button' aria-label='Slide " +
-          (i + 1) +
-          "' class='" +
-          (i === 0 ? "is-active" : "") +
-          "' data-slide='" +
-          i +
-          "'></button>"
-        );
+      .map(function (it, idx) {
+        return slideHtml(it, idx, copy);
       })
       .join("");
 
@@ -486,46 +588,13 @@
       "<button type='button' class='home-hero-arrow prev' aria-label='Previous'>&#8249;</button>" +
       "<button type='button' class='home-hero-arrow next' aria-label='Next'>&#8250;</button>" +
       "<div class='home-hero-dots'>" +
-      dots +
+      heroDotsHtml(items.length) +
       "</div>" +
       "</div>";
 
     heroIdx = 0;
     bindHero(hero, items.length);
-    hero.querySelectorAll(".home-hero-slide img").forEach(function (img) {
-      img.addEventListener("error", function () {
-        var slide = img.closest(".home-hero-slide");
-        if (slide) slide.remove();
-        var live = hero.querySelectorAll(".home-hero-slide");
-        var dotsWrap = hero.querySelector(".home-hero-dots");
-        if (dotsWrap) {
-          dotsWrap.innerHTML = Array.prototype.map
-            .call(live, function (_, i) {
-              return (
-                "<button type='button' aria-label='Slide " +
-                (i + 1) +
-                "' class='" +
-                (i === 0 ? "is-active" : "") +
-                "' data-slide='" +
-                i +
-                "'></button>"
-              );
-            })
-            .join("");
-          dotsWrap.querySelectorAll("button").forEach(function (dot) {
-            dot.addEventListener("click", function () {
-              var n = hero.querySelectorAll(".home-hero-slide").length;
-              goToSlide(hero, parseInt(dot.getAttribute("data-slide"), 10) || 0, n);
-              startHero(hero, n);
-            });
-          });
-        }
-        var n = live.length;
-        heroTotalRef = n;
-        if (n) goToSlide(hero, 0, n);
-        startHero(hero, n);
-      });
-    });
+    bindHeroErrors(hero);
   }
 
   function goToSlide(hero, idx, total) {

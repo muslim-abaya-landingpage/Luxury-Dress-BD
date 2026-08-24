@@ -1120,7 +1120,16 @@
   }
 
   if (typeof window !== "undefined") {
-    ensureTikTokPixelLoaded();
+    function scheduleTikTok() {
+      function run() {
+        ensureTikTokPixelLoaded();
+      }
+      ["pointerdown", "keydown", "touchstart", "scroll"].forEach(function (ev) {
+        window.addEventListener(ev, run, { once: true, passive: true });
+      });
+      window.addEventListener("pagehide", run, { once: true });
+    }
+    scheduleTikTok();
   }
 
   global.refreshCartBadgeUI = refreshCartBadgeUI;

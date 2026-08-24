@@ -9,3 +9,9 @@ muslimabaya.com এর সোর্স কোড।
 - `category-products.js` — সব প্রোডাক্টের ডেটা
 - `category-renderer.js` — ক্যাটাগরি পেজে প্রোডাক্ট রেন্ডার করে
 - `images/` — প্রোডাক্ট ছবি
+
+## পারফরম্যান্স
+
+লোকাল প্রিভিউ: `python3 scripts/serve-gzip.py` → http://127.0.0.1:43147/
+
+বিস্তারিত: [PERFORMANCE-REPORT.md](PERFORMANCE-REPORT.md)
