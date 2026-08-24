@@ -54,6 +54,16 @@ function stockImageBadgeHtml(p) {
 }
 
 function ensureCategoryStyles() {
+  if (!document.getElementById("ma-card-btn-row")) {
+    var btnCss = document.createElement("style");
+    btnCss.id = "ma-card-btn-row";
+    btnCss.textContent =
+      ".card-actions-muslim-abaya{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:stretch;gap:8px;width:100%}" +
+      ".card-actions-muslim-abaya>.muslim-abaya-btn-cart,.card-actions-muslim-abaya>.muslim-abaya-btn-msg{flex:1 1 0!important;width:0!important;min-width:0!important;border:none!important}" +
+      ".card-actions-muslim-abaya>.muslim-abaya-btn-msg{background:#4a4a4a!important;color:#fff!important}" +
+      ".card-actions-muslim-abaya>.muslim-abaya-btn-msg:hover{background:#3a3a3a!important;color:#fff!important}";
+    document.head.appendChild(btnCss);
+  }
   // ⚠️ SPEED FIX — this used to unconditionally overwrite .href on links
   // that the page's own <head> already declares, using DIFFERENT
   // cache-busting query strings ("?v=20260603vc14" here vs
@@ -71,7 +81,7 @@ function ensureCategoryStyles() {
     link = document.createElement("link");
     link.id = "category-sidebar-css";
     link.rel = "stylesheet";
-    link.href = "category-sidebar.css?v=20260824flat";
+    link.href = "category-sidebar.css?v=20260824row";
     document.head.appendChild(link);
   }
   var qtyLink =
@@ -91,7 +101,7 @@ function ensureCategoryStyles() {
   if (!shopLink) {
     shopLink = document.createElement("link");
     shopLink.rel = "stylesheet";
-    shopLink.href = "shop-page.css?v=20260824flat";
+    shopLink.href = "shop-page.css?v=20260824row";
     document.head.appendChild(shopLink);
   }
 }
@@ -2926,9 +2936,7 @@ encodeURIComponent("I want to order " + p.name) +
     "</select>" +
     // 👉 কার্ট বাটন + Send Message এখানে (গ্রিড কার্ড / non-detail মোড)
     // ⚠️ .muslim-abaya-btn-cart ও .muslim-abaya-btn-msg কে .card-actions-muslim-abaya এর
-    // *সরাসরি সন্তান* (direct child) হতেই হবে — shop-page.css এই দুটো
-    // ক্লাসকে সরাসরি CSS grid-area ("cart"/"msg") তে বসায়। মাঝে কোনো
-    // wrapper <div> দিলে গ্রিড লেআউট ভেঙে যাবে (আগে একবার এই বাগ হয়েছিল)।
+    // *সরাসরি সন্তান* (direct child) হতেই হবে — বামে Add to Cart, ডানে Send Message.
     // 📝 এখানে কোয়ান্টিটি স্টেপার (+/-) বসানো হয় না ইচ্ছাকৃতভাবে — গ্রিড
     // কার্ডে সেটা shop-page.css দিয়ে সবসময় display:none করা থাকে (শুধু
     // quick-view/ডিটেইল পেজে দেখানো হয়)। আগে এখানেও stepper-এর HTML

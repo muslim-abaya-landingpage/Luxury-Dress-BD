@@ -333,8 +333,10 @@ backdrop-filter:blur(14px);
 .ah-card-price{ font-size:15px; font-weight:500; color:#111; }
 
 .ah-actions{
-  display:flex;
-  gap:10px;
+  display:flex !important;
+  flex-direction:row !important;
+  flex-wrap:nowrap !important;
+  gap:8px;
   margin-top:16px;
   margin-bottom:24px;
   flex-shrink:0;
@@ -352,7 +354,7 @@ backdrop-filter:blur(14px);
   min-height:48px;
   padding:0 10px;
   border-radius:0 !important;
-  border:1px solid transparent;
+  border:none !important;
   font-size:15px;
   font-weight:600;
   letter-spacing:0.01em;
@@ -364,7 +366,7 @@ backdrop-filter:blur(14px);
   box-sizing:border-box;
   min-width:0;
   flex:1 1 0;
-  width:50%;
+  width:0;
 }
 
 @media(hover:hover){
@@ -385,27 +387,24 @@ backdrop-filter:blur(14px);
 .ah-btn-cart{
   background:#111111;
   color:#fff;
-  border-color:#111111;
   white-space:nowrap;
 }
 .ah-btn-msg{
-  background:#fff;
-  color:#333;
-  border:1px solid #ddd;
+  background:#4a4a4a;
+  color:#fff;
   font-weight:500;
   white-space:nowrap;
 }
 @media(hover:hover){
   .ah-btn-msg:hover{
-    background:#f7f7f7;
-    border-color:#111;
-    color:#111;
+    background:#3a3a3a;
+    color:#fff;
   }
 }
 
-@media(max-width:359px){
-  .ah-actions{ flex-direction:column; gap:8px; }
-  .ah-card .ah-btn, .ah-btn{ width:100%; max-width:100%; }
+@media(max-width:640px){
+  .ah-actions{ flex-direction:row !important; flex-wrap:nowrap !important; gap:8px; }
+  .ah-card .ah-btn, .ah-btn{ width:0; max-width:none; flex:1 1 0; }
 }
 
 /* Cart drawer layout lives in cart-drawer.css. Do not restyle

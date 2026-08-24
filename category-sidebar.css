@@ -734,9 +734,11 @@ button.img-wrap {
    ACTIONS" সেকশনে যান, এখানে না।
    ---------------------------------------------------------------------- */
 .card-actions-muslim-abaya {
-  display: flex;
-  flex-direction: row;
-  gap: 10px;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch;
+  gap: 8px;
   width: 100%;
   margin-top: 16px;
   margin-bottom: 24px;
@@ -790,7 +792,7 @@ button.img-wrap {
 .muslim-abaya-btn-cart.is-active {
   background: #111;
   color: #fff;
-  border-color: #111;
+  border: none;
 }
 
 .card-actions-row {
@@ -805,7 +807,7 @@ button.img-wrap {
   align-items: center;
   justify-content: center;
   min-height: 48px;
-  padding: 0 10px;
+  padding: 0 8px;
   font-family: Inter, "Segoe UI", system-ui, sans-serif;
   font-size: 15px;
   font-weight: 600;
@@ -813,10 +815,10 @@ button.img-wrap {
   text-align: center;
   text-decoration: none;
   border-radius: 0;
-  border: 1px solid #e6e6e6;
+  border: none;
   cursor: pointer;
   box-sizing: border-box;
-  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+  transition: background 0.25s ease, color 0.25s ease;
   white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
 }
@@ -836,9 +838,17 @@ button.img-wrap {
 .muslim-abaya-btn-cart {
   background: #111111;
   color: #fff;
-  border-color: #111111;
+  border: none;
   gap: 8px;
   font-size: 15px;
+}
+
+.card-actions-muslim-abaya .muslim-abaya-btn-cart,
+.card-actions-muslim-abaya .muslim-abaya-btn-msg {
+  flex: 1 1 0 !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  border: none !important;
 }
 
 .muslim-abaya-btn-cart:hover {
@@ -858,18 +868,16 @@ button.img-wrap {
 }
 
 .muslim-abaya-btn-msg {
-  background: #ffffff;
-  color: #333333;
-  width: 100%;
+  background: #4a4a4a;
+  color: #fff;
   font-size: 15px;
   font-weight: 500;
-  border: 1px solid #dddddd;
+  border: none;
 }
 
 .muslim-abaya-btn-msg:hover {
-  background: #f7f7f7;
-  border-color: #111111;
-  color: #111111;
+  background: #3a3a3a;
+  color: #fff;
 }
 
 .card-size-mobile {
@@ -1358,6 +1366,9 @@ button.img-wrap {
   }
 
   .card-actions-muslim-abaya {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
     gap: 8px;
   }
 }

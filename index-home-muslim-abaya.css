@@ -418,10 +418,11 @@
   margin-left: 4px;
 }
 .ah-card .ah-actions {
-  display: flex;
-  flex-direction: row;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
   align-items: stretch;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
   margin-top: 16px;
   margin-bottom: 24px;
@@ -438,8 +439,8 @@
   height: 48px;
   min-height: 48px;
   flex: 1 1 0;
-  width: 50%;
-  max-width: 50%;
+  width: 0;
+  max-width: none;
   border-radius: 0 !important;
   cursor: pointer;
   text-align: center;
@@ -448,8 +449,8 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: background 250ms ease, color 250ms ease, border-color 250ms ease, box-shadow 250ms ease, transform 250ms ease;
-  border: 1px solid transparent;
+  transition: background 250ms ease, color 250ms ease, box-shadow 250ms ease, transform 250ms ease;
+  border: none !important;
   line-height: 1;
   box-sizing: border-box;
   min-width: 0;
@@ -461,13 +462,11 @@
 .ah-card .ah-btn-cart {
   background: #111111;
   color: #fff;
-  border-color: #111111;
   font-weight: 600;
 }
 @media (hover: hover) {
   .ah-card .ah-btn-cart:hover:not(:disabled) {
     background: #000000;
-    border-color: #000000;
     color: #fff;
     transform: translateY(-2px);
     box-shadow: 0 8px 18px rgba(17, 17, 17, 0.18);
@@ -485,16 +484,14 @@
 .ah-card .ah-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
 .ah-card .ah-btn-cart svg { stroke: #fff; }
 .ah-card .ah-btn-msg {
-  background: #ffffff;
-  color: #333333;
-  border: 1px solid #dddddd;
+  background: #4a4a4a;
+  color: #fff;
   font-weight: 500;
 }
 @media (hover: hover) {
   .ah-card .ah-btn-msg:hover {
-    background: #f7f7f7;
-    border-color: #111111;
-    color: #111111;
+    background: #3a3a3a;
+    color: #fff;
   }
 }
 .ah-card .ah-btn:focus-visible {
@@ -572,8 +569,9 @@
   display: flex;
 }
 .ah-card-oos .ah-btn-cart {
-  width: 100%;
-  max-width: 100%;
+  flex: 1 1 0;
+  width: 0;
+  max-width: none;
 }
 
 /* ---------- Skeleton / loading ---------- */
@@ -653,9 +651,11 @@
     line-height: 1.2;
   }
   .ah-card .ah-actions {
-    flex-direction: row;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
     align-items: stretch;
-    gap: 10px;
+    gap: 8px;
     width: 100%;
     margin-top: 16px;
     margin-bottom: 24px;
@@ -664,26 +664,14 @@
   .ah-card .ah-btn-cart,
   .ah-card .ah-btn-msg {
     flex: 1 1 0;
-    width: 50%;
-    max-width: 50%;
+    width: 0;
+    max-width: none;
     height: 48px;
     min-height: 48px;
-    font-size: 13px;
-    padding: 0 8px;
+    font-size: 12px;
+    padding: 0 6px;
     gap: 6px;
     box-sizing: border-box;
-  }
-}
-@media (max-width: 359px) {
-  .ah-card .ah-actions {
-    flex-direction: column;
-    gap: 8px;
-  }
-  .ah-card .ah-btn,
-  .ah-card .ah-btn-cart,
-  .ah-card .ah-btn-msg {
-    width: 100%;
-    max-width: 100%;
   }
 }
 @media (max-width: 560px) {

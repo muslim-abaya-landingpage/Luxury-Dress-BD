@@ -8,6 +8,16 @@
 (function () {
   "use strict";
 
+  if (!document.getElementById("ma-home-btn-row")) {
+    var homeBtnCss = document.createElement("style");
+    homeBtnCss.id = "ma-home-btn-row";
+    homeBtnCss.textContent =
+      ".ah-card .ah-actions{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:stretch;gap:8px;width:100%}" +
+      ".ah-card .ah-btn{flex:1 1 0!important;width:0!important;min-width:0!important;border:none!important}" +
+      ".ah-card .ah-btn-msg{background:#4a4a4a!important;color:#fff!important}";
+    document.head.appendChild(homeBtnCss);
+  }
+
   var TK = "\u09F3"; // ৳
   var MAX_CARDS_PER_SECTION = 10;
   var HERO_INTERVAL = 5000;
