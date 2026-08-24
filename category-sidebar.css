@@ -812,7 +812,7 @@ button.img-wrap {
   line-height: 1.2;
   text-align: center;
   text-decoration: none;
-  border-radius: 6px;
+  border-radius: 0;
   border: 1px solid #e6e6e6;
   cursor: pointer;
   box-sizing: border-box;

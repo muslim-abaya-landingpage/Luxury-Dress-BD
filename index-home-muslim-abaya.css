@@ -440,7 +440,7 @@
   flex: 1 1 0;
   width: 50%;
   max-width: 50%;
-  border-radius: 6px !important;
+  border-radius: 0 !important;
   cursor: pointer;
   text-align: center;
   text-decoration: none;

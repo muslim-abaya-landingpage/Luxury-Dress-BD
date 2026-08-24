@@ -351,7 +351,7 @@ backdrop-filter:blur(14px);
   height:48px;
   min-height:48px;
   padding:0 10px;
-  border-radius:6px !important;
+  border-radius:0 !important;
   border:1px solid transparent;
   font-size:15px;
   font-weight:600;
