@@ -240,14 +240,15 @@ body.shop-page .shop-breadcrumb--mobile {
 body.shop-page .card-actions-muslim-abaya {
   position: relative;
   display: grid;
-  grid-template-columns: 56px 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   grid-template-areas: "cart msg";
-  gap: 8px;
+  gap: 10px;
   padding: 0;
   border-radius: 0;
   background: transparent;
   border: none;
-  margin-top: auto;
+  margin-top: 16px;
+  margin-bottom: 24px;
   width: 100%;
 }
 /* কার্ডের সামনের গ্রিডে কোয়ান্টিটি স্টেপার দেখানো হয় না (শুধু quick-view/
@@ -256,27 +257,28 @@ body.shop-page .card-actions-muslim-abaya .ma-qty-stepper { display: none; }
 body.shop-page .card-actions-muslim-abaya .muslim-abaya-btn-cart { grid-area: cart; }
 body.shop-page .card-actions-muslim-abaya .muslim-abaya-btn-msg { grid-area: msg; }
 
-/* কার্ট বাটন (আইকন-অনলি, ৫৬px কলামের ভেতরে) */
 body.shop-page .muslim-abaya-btn-cart {
   position: relative;
   z-index: 1;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0;
-  border-radius: 0;
-  padding: 10px 0;
+  gap: 8px;
+  border-radius: 6px;
+  padding: 0 10px;
   min-height: 48px;
   height: 48px;
-  border: 1px solid #111;
-  background: #111;
+  width: 100%;
+  border: 1px solid #111111;
+  background: #111111;
   color: #fff;
   font-family: "Inter", "Hind Siliguri", system-ui, sans-serif;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: .01em;
   white-space: nowrap;
-  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  cursor: pointer;
+  transition: background 250ms ease, color 250ms ease, border-color 250ms ease, box-shadow 250ms ease, transform 250ms ease;
 }
 body.shop-page .card-actions-muslim-abaya .muslim-abaya-btn-cart .muslim-abaya-btn-ico {
   display: inline-flex;
@@ -285,9 +287,13 @@ body.shop-page .card-actions-muslim-abaya .muslim-abaya-btn-cart .muslim-abaya-b
 body.shop-page .muslim-abaya-btn-cart .muslim-abaya-btn-ico svg {
   stroke: #fff;
 }
-body.shop-page .muslim-abaya-btn-cart:hover {
-  background: #000;
-  border-color: #000;
+@media (hover: hover) {
+  body.shop-page .muslim-abaya-btn-cart:hover:not(:disabled):not(.is-oos) {
+    background: #000000;
+    border-color: #000000;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(17, 17, 17, 0.18);
+  }
 }
 body.shop-page .muslim-abaya-btn-cart:disabled,
 body.shop-page .muslim-abaya-btn-cart.is-oos {
@@ -309,25 +315,52 @@ body.shop-page .muslim-abaya-btn-cart.is-oos:hover {
 body.shop-page .muslim-abaya-btn-msg {
   position: relative;
   z-index: 1;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 0;
-  padding: 10px 0;
+  border-radius: 6px;
+  padding: 0 10px;
   min-height: 48px;
   height: 48px;
-  border: 1px solid #111;
-  background: #fff;
-  color: #111;
+  width: 100%;
+  border: 1px solid #dddddd;
+  background: #ffffff;
+  color: #333333;
   font-family: "Inter", "Hind Siliguri", system-ui, sans-serif;
-  font-weight: 600;
-  font-size: 13px;
+  font-weight: 500;
+  font-size: 15px;
   letter-spacing: .01em;
-  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  cursor: pointer;
+  transition: background 250ms ease, color 250ms ease, border-color 250ms ease, box-shadow 250ms ease, transform 250ms ease;
 }
-body.shop-page .muslim-abaya-btn-msg:hover {
-  background: #111;
-  color: #fff;
+@media (hover: hover) {
+  body.shop-page .muslim-abaya-btn-msg:hover {
+    background: #f7f7f7;
+    border-color: #111111;
+    color: #111111;
+  }
+}
+body.shop-page .muslim-abaya-btn-cart:focus-visible,
+body.shop-page .muslim-abaya-btn-msg:focus-visible {
+  outline: 2px solid #111111;
+  outline-offset: 3px;
+}
+body.shop-page .muslim-abaya-btn-cart .ah-btn-spin {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.28);
+  border-top-color: #fff;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  animation: ah-spin 0.55s linear infinite;
+}
+body.shop-page .muslim-abaya-btn-cart.is-adding .ah-btn-spin { opacity: 1; }
+body.shop-page .muslim-abaya-btn-cart.is-adding .muslim-abaya-btn-ico,
+body.shop-page .muslim-abaya-btn-cart.is-adding [data-cart-label] { opacity: 0; }
+@keyframes ah-spin {
+  to { transform: rotate(360deg); }
 }
 
 body.shop-page .muslim-abaya-btn-cart:active,
@@ -381,11 +414,9 @@ body.shop-page .card-actions-muslim-abaya .ma-qty-stepper__btn:disabled {
 
 @media (max-width: 640px) {
   body.shop-page .card-actions-muslim-abaya {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas:
-      "cart"
-      "msg";
-    gap: 6px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas: "cart msg";
+    gap: 10px;
     width: 100%;
     max-width: 100%;
     min-width: 0;
@@ -398,24 +429,7 @@ body.shop-page .card-actions-muslim-abaya .ma-qty-stepper__btn:disabled {
     box-sizing: border-box;
     min-height: 48px;
     height: 48px;
-    border-radius: 0;
-  }
-
-  body.shop-page .card-actions-muslim-abaya .muslim-abaya-btn-cart {
-    gap: 6px;
-    padding: 8px 8px;
-  }
-
-  body.shop-page .muslim-abaya-btn-cart::after {
-    content: "Add to Cart";
-    font-weight: 500;
-    font-size: 12.5px;
-    letter-spacing: 0.01em;
-  }
-
-  body.shop-page .muslim-abaya-btn-cart.is-oos::after,
-  body.shop-page .muslim-abaya-btn-cart:disabled::after {
-    content: "Out of Stock";
+    font-size: 13px;
   }
 
   body.shop-page .muslim-abaya-btn-cart.is-oos,
@@ -426,8 +440,18 @@ body.shop-page .card-actions-muslim-abaya .ma-qty-stepper__btn:disabled {
   }
 
   body.shop-page .muslim-abaya-btn-msg {
-    font-size: 12.5px;
+    font-size: 13px;
     padding: 8px 8px;
+  }
+}
+
+@media (max-width: 359px) {
+  body.shop-page .card-actions-muslim-abaya {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "cart"
+      "msg";
+    gap: 8px;
   }
 }
 

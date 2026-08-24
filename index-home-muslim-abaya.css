@@ -417,67 +417,114 @@
   color: var(--ah-muted);
   margin-left: 4px;
 }
-.ah-actions {
+.ah-card .ah-actions {
   display: flex;
-  gap: 8px;
-  margin-top: auto;
-  padding-top: 8px;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 10px;
+  width: 100%;
+  margin-top: 16px;
+  margin-bottom: 24px;
+  padding-top: 0;
   flex-shrink: 0;
 }
-.ah-btn {
+.ah-card .ah-btn {
+  position: relative;
   font-family: var(--ah-sans) !important;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
-  letter-spacing: 0.02em;
-  padding: 0 14px;
+  letter-spacing: 0.01em;
+  padding: 0 10px;
   height: 48px;
   min-height: 48px;
-  border-radius: 0 !important;
+  flex: 1 1 0;
+  width: 50%;
+  max-width: 50%;
+  border-radius: 6px !important;
   cursor: pointer;
   text-align: center;
   text-decoration: none;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  transition: background 250ms ease, color 250ms ease, border-color 250ms ease, box-shadow 250ms ease, transform 250ms ease;
   border: 1px solid transparent;
   line-height: 1;
-  background: #111;
-  color: #fff;
   box-sizing: border-box;
   min-width: 0;
   white-space: nowrap;
 }
-.ah-btn span {
+.ah-card .ah-btn span {
   white-space: nowrap;
 }
-.ah-btn-cart {
-  flex: 1 1 auto;
-  background: #111;
+.ah-card .ah-btn-cart {
+  background: #111111;
   color: #fff;
-  border-color: #111;
+  border-color: #111111;
+  font-weight: 600;
 }
-.ah-btn-cart:hover {
-  background: #000;
-  border-color: #000;
+@media (hover: hover) {
+  .ah-card .ah-btn-cart:hover:not(:disabled) {
+    background: #000000;
+    border-color: #000000;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(17, 17, 17, 0.18);
+  }
+}
+.ah-card .ah-btn-cart:active:not(:disabled) {
+  transform: scale(0.98);
+  box-shadow: none;
+}
+.ah-card .ah-btn-cart.is-active,
+.ah-card .ah-btn-cart.is-added {
+  background: #111111;
   color: #fff;
 }
-.ah-btn-cart.is-active {
-  background: #111;
-  color: #fff;
+.ah-card .ah-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+.ah-card .ah-btn-cart svg { stroke: #fff; }
+.ah-card .ah-btn-msg {
+  background: #ffffff;
+  color: #333333;
+  border: 1px solid #dddddd;
+  font-weight: 500;
 }
-.ah-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
-.ah-btn-cart svg { stroke: #fff; }
-.ah-btn-msg {
-  flex: 1 1 auto;
-  background: #fff;
-  color: #111;
-  border: 1px solid #111;
+@media (hover: hover) {
+  .ah-card .ah-btn-msg:hover {
+    background: #f7f7f7;
+    border-color: #111111;
+    color: #111111;
+  }
 }
-.ah-btn-msg:hover {
-  background: #111;
-  color: #fff;
+.ah-card .ah-btn:focus-visible {
+  outline: 2px solid #111111;
+  outline-offset: 3px;
+}
+.ah-card .ah-btn-spin {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.28);
+  border-top-color: #fff;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  animation: ah-spin 0.55s linear infinite;
+}
+.ah-card .ah-btn-cart.is-adding .ah-btn-spin { opacity: 1; }
+.ah-card .ah-btn-cart.is-adding > svg,
+.ah-card .ah-btn-cart.is-adding [data-cart-label] { opacity: 0; }
+@keyframes ah-spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ah-card .ah-btn,
+  .ah-card .ah-btn-spin {
+    transition: none;
+    animation: none;
+    transform: none;
+  }
 }
 
 /* ---------- Out of stock ---------- */
@@ -523,6 +570,10 @@
 }
 .ah-card-oos .ah-actions {
   display: flex;
+}
+.ah-card-oos .ah-btn-cart {
+  width: 100%;
+  max-width: 100%;
 }
 
 /* ---------- Skeleton / loading ---------- */
@@ -601,28 +652,38 @@
     padding: 0 0 0 8px;
     line-height: 1.2;
   }
-  .ah-actions {
-    flex-direction: column;
+  .ah-card .ah-actions {
+    flex-direction: row;
     align-items: stretch;
-    gap: 8px;
+    gap: 10px;
     width: 100%;
-    max-width: 100%;
-    min-width: 0;
-    margin-top: auto;
-    padding-top: 8px;
+    margin-top: 16px;
+    margin-bottom: 24px;
   }
   .ah-card .ah-btn,
   .ah-card .ah-btn-cart,
   .ah-card .ah-btn-msg {
-    flex: 0 0 auto;
-    width: 100%;
-    max-width: 100%;
+    flex: 1 1 0;
+    width: 50%;
+    max-width: 50%;
     height: 48px;
     min-height: 48px;
     font-size: 13px;
     padding: 0 8px;
     gap: 6px;
     box-sizing: border-box;
+  }
+}
+@media (max-width: 359px) {
+  .ah-card .ah-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .ah-card .ah-btn,
+  .ah-card .ah-btn-cart,
+  .ah-card .ah-btn-msg {
+    width: 100%;
+    max-width: 100%;
   }
 }
 @media (max-width: 560px) {

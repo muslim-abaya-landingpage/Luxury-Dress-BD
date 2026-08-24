@@ -194,6 +194,7 @@
     }
     if (typeof window.showCartAddedToast === "function") {
       window.showCartAddedToast({
+        label: "Product added to cart",
         name: p.name,
         image: resolveImg(p),
         price: price
@@ -251,7 +252,8 @@
           "<span>Out of Stock</span></button>"
         : "<button type='button' class='ah-btn ah-btn-cart' data-action='add'>" +
           cartIconSvg +
-          "<span>Add to Cart</span></button>") +
+          "<span class='ah-btn-spin' aria-hidden='true'></span>" +
+          "<span data-cart-label>Add to Cart</span></button>") +
       (outOfStock
         ? ""
         : "<a class='ah-btn ah-btn-msg' href='" +
@@ -341,13 +343,9 @@
         if (!p) return;
         if (isOutOfStock(p)) return;
         addToCart(sec, p);
-        btn.classList.add("is-active");
-        // Clear the "added" state after a moment so it doesn't stay
-        // visually stuck on this button forever after a single click.
-        clearTimeout(btn.__ahActiveTimer);
-        btn.__ahActiveTimer = setTimeout(function () {
-          btn.classList.remove("is-active");
-        }, 1500);
+        if (typeof window.playCartButtonAddedUi === "function") {
+          window.playCartButtonAddedUi(btn);
+        }
       });
     }
 

@@ -71,7 +71,7 @@ function ensureCategoryStyles() {
     link = document.createElement("link");
     link.id = "category-sidebar-css";
     link.rel = "stylesheet";
-    link.href = "category-sidebar.css?v=20260821sq";
+    link.href = "category-sidebar.css?v=20260824btn";
     document.head.appendChild(link);
   }
   var qtyLink =
@@ -91,7 +91,7 @@ function ensureCategoryStyles() {
   if (!shopLink) {
     shopLink = document.createElement("link");
     shopLink.rel = "stylesheet";
-    shopLink.href = "shop-page.css?v=20260821sq";
+    shopLink.href = "shop-page.css?v=20260824btn";
     document.head.appendChild(shopLink);
   }
 }
@@ -2245,6 +2245,9 @@ function onGlobalShopCartClick(ev) {
     return;
   }
   shopAddProductToCart(cartItem, qty, selectedSize, categoryKey, selectedBodyValue);
+  if (action === "add" && typeof window.playCartButtonAddedUi === "function") {
+    window.playCartButtonAddedUi(actionEl);
+  }
 }
 if (!window.__maShopCartClickBound) {
   window.__maShopCartClickBound = true;
@@ -2940,7 +2943,9 @@ encodeURIComponent("I want to order " + p.name) +
     idx +
     '" data-action="add"' +
     (stock.inStock ? ' aria-label="Add to Cart"' : ' disabled aria-label="Out of Stock"') +
-    '><span class="muslim-abaya-btn-ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M6 6L5 3H2"/></svg></span></button>' +
+    '><span class="muslim-abaya-btn-ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M6 6L5 3H2"/></svg></span><span class="ah-btn-spin" aria-hidden="true"></span><span data-cart-label>' +
+    (stock.inStock ? "Add to Cart" : "Out of Stock") +
+    "</span></button>" +
     "<a href='" +
     waLink +
     "?text=" +

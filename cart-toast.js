@@ -149,12 +149,35 @@
 
   function showCartAddedToast(opts) {
     showToast({
-      label: "Added to bag",
+      label: (opts && opts.label) || "Product added to cart",
       name: opts && (opts.name || opts.productName),
       image: opts && opts.image,
       price: opts && opts.price,
       duration: opts && opts.duration
     });
+  }
+
+  function playCartButtonAddedUi(btn) {
+    if (!btn || btn.disabled || btn.classList.contains("is-oos")) return;
+    var label = btn.querySelector("[data-cart-label]");
+    if (label && !label.getAttribute("data-idle-text")) {
+      label.setAttribute("data-idle-text", label.textContent || "Add to Cart");
+    }
+    clearTimeout(btn.__ahAddUiTimer);
+    clearTimeout(btn.__ahAddUiReset);
+    btn.classList.remove("is-added");
+    btn.classList.add("is-adding");
+    btn.setAttribute("aria-busy", "true");
+    btn.__ahAddUiTimer = setTimeout(function () {
+      btn.classList.remove("is-adding");
+      btn.classList.add("is-added");
+      if (label) label.textContent = "\u2714 Added";
+      btn.setAttribute("aria-busy", "false");
+      btn.__ahAddUiReset = setTimeout(function () {
+        btn.classList.remove("is-added");
+        if (label) label.textContent = label.getAttribute("data-idle-text") || "Add to Cart";
+      }, 1600);
+    }, 280);
   }
 
   function showCartRemovedToast(opts) {
@@ -169,4 +192,5 @@
 
   global.showCartAddedToast = showCartAddedToast;
   global.showCartRemovedToast = showCartRemovedToast;
+  global.playCartButtonAddedUi = playCartButtonAddedUi;
 })(typeof window !== "undefined" ? window : this);
