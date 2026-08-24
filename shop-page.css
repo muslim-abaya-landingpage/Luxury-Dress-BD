@@ -44,6 +44,7 @@ body.shop-page {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden;
 }
 
 /* প্রোডাক্টের ইংরেজি নাম/লেবেল — স্পষ্ট ল্যাটিন ফন্ট */
@@ -420,8 +421,8 @@ body.shop-page .card-actions-muslim-abaya .ma-qty-stepper__btn:disabled {
     box-sizing: border-box;
     min-height: 48px;
     height: 48px;
-    font-size: 12px;
-    padding: 0 6px;
+    font-size: 14px;
+    padding: 0 8px;
   }
 
   body.shop-page .muslim-abaya-btn-cart.is-oos,

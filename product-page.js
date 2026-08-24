@@ -663,7 +663,7 @@
     $("pdRelatedRow").innerHTML = items
       .map(function (p) {
         var img = resolveImg(p.image || p.img);
-        var price = (p.priceByType && Math.min.apply(null, Object.values(p.priceByType).map(function (v) { return parseInt(v, 10) || 0; }).filter(Boolean))) || parseInt(p.price, 10) || 550;
+        var price = parseInt(p.price, 10) || 550;
         return (
           "<a class='pd-rel-card' href='product.html?id=" + encodeURIComponent(p.id) + "'>" +
           "<img src='" + escapeHtml(img) + "' alt='" + escapeHtml(p.name) + "' loading='lazy' onerror=\"this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg'\">" +

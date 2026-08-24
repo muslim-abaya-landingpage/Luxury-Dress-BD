@@ -121,31 +121,16 @@
     return out;
   }
 
-  function typePriceFrom(p) {
-    var map = p && p.priceByType;
-    if (!map) return 0;
-    var vals = Object.keys(map)
-      .map(function (kk) {
-        return parseInt(map[kk], 10) || 0;
-      })
-      .filter(function (v) {
-        return v > 0;
-      });
-    return vals.length ? Math.min.apply(null, vals) : 0;
-  }
-
-  function basePrice(p) {
-    var from = typePriceFrom(p);
-    if (from) return from;
+  function listingPrice(p) {
     return parseInt(p && p.price, 10) || 550;
   }
 
+  function basePrice(p) {
+    return listingPrice(p);
+  }
+
   function priceHtml(p) {
-    var from = typePriceFrom(p);
-    if (from) {
-      return TK + from;
-    }
-    return TK + (parseInt(p && p.price, 10) || 550);
+    return TK + listingPrice(p);
   }
 
   function sectionMeta(key) {

@@ -1346,17 +1346,63 @@ button.img-wrap {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 720px) {
   .product-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 14px;
+  }
+
+  .premium-card,
+  .premium-card .card-foot,
+  .card-actions-muslim-abaya {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .premium-card .card-foot {
+    padding: 14px 14px 16px;
+  }
+
+  .premium-card .card-meta {
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .premium-card .card-title-text {
+    white-space: normal !important;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 15px;
+    line-height: 1.35;
+  }
+
+  .premium-card .card-price {
+    font-size: 20px;
+  }
+
+  .card-actions-muslim-abaya {
     gap: 8px;
+    margin-top: 12px;
+    margin-bottom: 8px;
+  }
+
+  .muslim-abaya-btn,
+  .muslim-abaya-btn-cart,
+  .muslim-abaya-btn-msg {
+    font-size: 14px;
+    min-height: 46px;
+    height: 46px;
+    padding: 0 8px;
   }
 }
 
 @media (max-width: 480px) {
   .product-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
   }
 
   .shop-sort-select {
@@ -1375,8 +1421,8 @@ button.img-wrap {
 
 @media (max-width: 390px) {
   .product-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
   }
 
   .premium-card .card-foot {
@@ -1410,14 +1456,15 @@ button.img-wrap {
   }
 
   .premium-card .card-title-text {
-    display: block;
-    -webkit-line-clamp: unset;
-    -webkit-box-orient: unset;
-    white-space: nowrap;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    white-space: normal;
     overflow: hidden;
     text-overflow: ellipsis;
     min-height: 0;
-    line-height: 1.3;
+    line-height: 1.35;
+    font-size: 15px;
   }
 
   .premium-card .card-price {

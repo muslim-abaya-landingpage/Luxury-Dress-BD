@@ -81,7 +81,7 @@ function ensureCategoryStyles() {
     link = document.createElement("link");
     link.id = "category-sidebar-css";
     link.rel = "stylesheet";
-    link.href = "category-sidebar.css?v=20260824row";
+    link.href = "category-sidebar.css?v=20260824list";
     document.head.appendChild(link);
   }
   var qtyLink =
@@ -101,7 +101,7 @@ function ensureCategoryStyles() {
   if (!shopLink) {
     shopLink = document.createElement("link");
     shopLink.rel = "stylesheet";
-    shopLink.href = "shop-page.css?v=20260824row";
+    shopLink.href = "shop-page.css?v=20260824list";
     document.head.appendChild(shopLink);
   }
 }
@@ -814,16 +814,11 @@ function getProductShortNote(p, categoryKey) {
   if (notes && notes.default) return notes.default;
   return "* \"Note: Product color may slightly vary due to photographic lighting sources.\"";
 }
-function formatCardPriceText(p, categoryKey) {
-  var types = getProductTypes(p, categoryKey);
-  if (types.length <= 1) {
-    return "\u09F3" + resolveProductPrice(p, categoryKey, "");
-  }
-  var prices = types.map(function (t) {
-    return resolveProductPrice(p, categoryKey, t);
-  });
-  var min = Math.min.apply(null, prices);
-  return "\u09F3" + min;
+function listingCardPrice(p) {
+  return parseInt(p && p.price, 10) || 550;
+}
+function formatCardPriceText(p) {
+  return "\u09F3" + listingCardPrice(p);
 }
 function updatePqvPriceDisplay(modal, p, categoryKey, typeLabel) {
   if (!modal || !p) return;
@@ -1870,7 +1865,7 @@ function buildTwoPiecePqvSizeHtml(p, idx, twoPieceCfg, chartBtn, customSizeBtn) 
    ---------------------------------------------------------------------- */
 function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
   var defaultType = getDefaultProductType(p, categoryKey);
-  var productPrice = resolveProductPrice(p, categoryKey, defaultType);
+  var productPrice = listingCardPrice(p);
   var imgFallback = getCategoryFallbackImage(categoryKey || "");
   var gallery = collectGalleryImages(p, allProducts || []);
   var imgSrc = escapeHtml(gallery[0] || resolveCardImageSrc(p));
@@ -2813,9 +2808,12 @@ function buildDetailSpecsBlock(p, fabricText, sizeOptions, idx, categoryKey) {
    ============================================================================ */
 function buildProductCard(p, idx, waLink, detailMode, categoryKey, allProducts) {
   var defaultType = getDefaultProductType(p, categoryKey);
-  var productPrice = resolveProductPrice(p, categoryKey, defaultType);
+  var listingAmount = listingCardPrice(p);
+  var productPrice = detailMode
+    ? resolveProductPrice(p, categoryKey, defaultType)
+    : listingAmount;
   var imgFallback = getCategoryFallbackImage(categoryKey || "");
-  var priceText = formatCardPriceText(p, categoryKey);
+  var priceText = detailMode ? formatBdtPrice(productPrice) : formatCardPriceText(p);
   var fabricText = escapeHtml(displayFabricLabel(p.fabric, detailMode ? "Dubai Cherry" : "Premium Georgette"));
   var isAbaya = typeof isAbayaProduct === "function" && isAbayaProduct(p, categoryKey);
   var isTwoPiece = typeof isTwoPieceProduct === "function" && isTwoPieceProduct(p, categoryKey);
