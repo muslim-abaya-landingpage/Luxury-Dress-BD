@@ -756,4 +756,22 @@
   window.addEventListener("storeCartUpdated", function () {
     if (!rendered) return;
   });
+
+  function restartRowSliders() {
+    var root = $("homeSections");
+    if (!root) return;
+    stopAllRowSliders();
+    root.querySelectorAll(".home-section-body").forEach(function (body) {
+      var rowEl = body.querySelector(".home-row");
+      if (!rowEl) return;
+      window.requestAnimationFrame(function () {
+        startRowAuto(body, rowEl);
+      });
+    });
+  }
+
+  window.addEventListener("pageshow", function () {
+    if (!rendered) return;
+    restartRowSliders();
+  });
 })();
