@@ -1,7 +1,7 @@
 /* ==========================================================================
    Muslim Abaya homepage renderer
    - Full-width hero slider (uploaded images from images/hero-banner/ only)
-   - Category sections (heading + View All + horizontal card row)
+   - Category sections (heading + View All + auto-sliding product row)
    - Product cards wired to the existing store cart (cart-utils.js)
    Data source: window.CATEGORY_PRODUCTS + window.CATALOG_SECTIONS
    ========================================================================== */
@@ -19,8 +19,9 @@
   }
 
   var TK = "\u09F3"; // ৳
-  var MAX_CARDS_PER_SECTION = 10;
   var HERO_INTERVAL = 5000;
+  var ROW_INTERVAL = 4500;
+  var rowTimers = [];
 
   var heroTimer = null;
   var heroIdx = 0;
@@ -116,7 +117,6 @@
       if (seen[k]) continue;
       seen[k] = true;
       out.push(p);
-      if (out.length >= MAX_CARDS_PER_SECTION) break;
     }
     return out;
   }
@@ -279,6 +279,7 @@
   function renderSections() {
     var root = $("homeSections");
     if (!root) return;
+    stopAllRowSliders();
     var secs = activeSections();
     if (!secs.length) return;
 
@@ -359,23 +360,96 @@
       });
     }
 
+    stopAllRowSliders();
     var bodies = root.querySelectorAll(".home-section-body");
     bodies.forEach(function (body) {
-      var rowEl = body.querySelector(".home-row");
-      var prevArrow = body.querySelector(".home-row-arrow.prev");
-      var nextArrow = body.querySelector(".home-row-arrow.next");
-      if (!rowEl) return;
+      bindRowSlider(body);
+    });
+  }
 
-      if (prevArrow) {
-        prevArrow.addEventListener("click", function () {
-          rowEl.scrollBy({ left: -rowEl.clientWidth * 0.8, behavior: "smooth" });
-        });
+  function prefersReducedMotion() {
+    return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
+
+  function rowCanSlide(rowEl) {
+    return rowEl && rowEl.scrollWidth > rowEl.clientWidth + 8;
+  }
+
+  function scrollRowBy(rowEl, dir) {
+    if (!rowCanSlide(rowEl)) return;
+    var page = Math.max(rowEl.clientWidth * 0.8, 1);
+    var max = rowEl.scrollWidth - rowEl.clientWidth;
+    if (dir > 0) {
+      if (rowEl.scrollLeft >= max - 8) {
+        rowEl.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        rowEl.scrollBy({ left: page, behavior: "smooth" });
       }
-      if (nextArrow) {
-        nextArrow.addEventListener("click", function () {
-          rowEl.scrollBy({ left: rowEl.clientWidth * 0.8, behavior: "smooth" });
-        });
-      }
+      return;
+    }
+    if (rowEl.scrollLeft <= 8) {
+      rowEl.scrollTo({ left: max, behavior: "smooth" });
+    } else {
+      rowEl.scrollBy({ left: -page, behavior: "smooth" });
+    }
+  }
+
+  function stopAllRowSliders() {
+    rowTimers.forEach(function (id) {
+      clearInterval(id);
+    });
+    rowTimers = [];
+  }
+
+  function startRowAuto(body, rowEl) {
+    if (body.__ahRowTimer) {
+      clearInterval(body.__ahRowTimer);
+      var idx = rowTimers.indexOf(body.__ahRowTimer);
+      if (idx >= 0) rowTimers.splice(idx, 1);
+      body.__ahRowTimer = 0;
+    }
+    if (prefersReducedMotion() || !rowCanSlide(rowEl)) return;
+    body.__ahRowTimer = setInterval(function () {
+      if (body.__ahRowPaused || document.hidden) return;
+      scrollRowBy(rowEl, 1);
+    }, ROW_INTERVAL);
+    rowTimers.push(body.__ahRowTimer);
+  }
+
+  function bindRowSlider(body) {
+    var rowEl = body.querySelector(".home-row");
+    var prevArrow = body.querySelector(".home-row-arrow.prev");
+    var nextArrow = body.querySelector(".home-row-arrow.next");
+    if (!rowEl) return;
+
+    if (prevArrow) {
+      prevArrow.addEventListener("click", function () {
+        scrollRowBy(rowEl, -1);
+        startRowAuto(body, rowEl);
+      });
+    }
+    if (nextArrow) {
+      nextArrow.addEventListener("click", function () {
+        scrollRowBy(rowEl, 1);
+        startRowAuto(body, rowEl);
+      });
+    }
+
+    body.addEventListener("mouseenter", function () {
+      body.__ahRowPaused = true;
+    });
+    body.addEventListener("mouseleave", function () {
+      body.__ahRowPaused = false;
+    });
+    body.addEventListener("touchstart", function () {
+      body.__ahRowPaused = true;
+    }, { passive: true });
+    body.addEventListener("touchend", function () {
+      body.__ahRowPaused = false;
+    }, { passive: true });
+
+    window.requestAnimationFrame(function () {
+      startRowAuto(body, rowEl);
     });
   }
 
