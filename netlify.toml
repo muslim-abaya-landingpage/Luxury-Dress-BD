@@ -1,0 +1,11 @@
+# Muslim Abaya is a static multi-page site (HTML/CSS/JS at repo root).
+# Do NOT run the leftover Vite/React "react-example" build — that only
+# publishes dist/ and makes every page except the homepage 404.
+
+[build]
+  command = "echo Static site — publishing repo root"
+  publish = "."
+
+[build.environment]
+  # Skip framework auto-detection side effects when possible
+  NODE_VERSION = "20"

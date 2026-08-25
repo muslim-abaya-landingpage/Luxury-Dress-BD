@@ -10,6 +10,7 @@
 /karchupi           /karchupi.html           200
 /kaftan             /kaftan.html             200
 /hijab              /hijab.html              200
+/panjabi            /panjabi.html            200
 /video              /video.html              200
 /category           /category.html           200
 /product-links      /product-links.html      200
@@ -34,6 +35,7 @@
 /karchupi.html           /karchupi           301!
 /kaftan.html             /kaftan             301!
 /hijab.html              /hijab              301!
+/panjabi.html            /panjabi            301!
 /video.html              /video              301!
 /category.html           /category           301!
 /product-links.html      /product-links      301!
