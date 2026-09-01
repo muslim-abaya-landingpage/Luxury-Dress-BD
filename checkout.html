@@ -47,23 +47,27 @@
         }
         .checkout-page-head {
             text-align: center;
-            margin: 0 0 16px;
-            padding-bottom: 12px;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
             border-bottom: 1px solid var(--line);
         }
         .checkout-page-head h1 {
-            margin: 0 0 8px;
+            margin: 0 0 4px;
             font-family: inherit;
-            font-size: clamp(28px, 4.5vw, 36px);
+            font-size: clamp(26px, 4vw, 34px);
             font-weight: 800;
             color: #111111;
             letter-spacing: -0.02em;
         }
         .checkout-subtitle {
-            margin: 0 0 6px;
+            margin: 0;
             font-size: 14px;
             color: var(--muted);
             font-weight: 500;
+        }
+        .field-invalid {
+            border-color: #c0392b !important;
+            box-shadow: 0 0 0 1px #c0392b;
         }
         .checkout-breadcrumb {
             font-size: 13px;
@@ -1367,23 +1371,6 @@
             font-size: 22px;
             color: var(--gold);
         }
-        .checkout-trust {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 8px;
-        }
-        .checkout-trust span {
-            font-size: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            padding: 4px 8px;
-            border-radius: 999px;
-            background: #f3f1ed;
-            color: var(--muted);
-            border: 1px solid var(--line);
-        }
         .terms-box {
             margin-top: 6px;
             font-size: 14px;
@@ -1730,12 +1717,6 @@
             border-left-color: #111111;
         }
         .order-total-box .summary-item.total-final strong { color: #fff; }
-        .checkout-trust span {
-            background: #f5f5f5;
-            color: #555555;
-            border-color: #e8e8e8;
-            border-radius: 6px;
-        }
         .local-file-banner {
             background: #f7f7f7;
             border-color: #e0e0e0;
@@ -1850,11 +1831,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </nav>
         <h1>Checkout</h1>
         <p class="checkout-subtitle">Safe &amp; fast ordering ? Cash on delivery available</p>
-        <div class="checkout-trust" style="justify-content:center;">
-            <span>Secure order</span>
-            <span>COD available</span>
-            <span>Fast support</span>
-        </div>
     </div>
     <div class="checkout-login-bar">
         <span>Have any account? please login or register</span>
@@ -1915,10 +1891,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <p class="delivery-fee-hint">Dhaka ৳80 &middot; Other districts ৳150 &middot; Free delivery on 3+ items</p>
                 </div>
                 <div class="form-group form-group-last">
-                    <label for="userThana">Thana / Upazila <span style="font-size:13px;font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0;">(Optional)</span></label>
-                    <select id="userThana">
+                    <label for="userThana">Thana / Upazila</label>
+                    <select id="userThana" required>
                         <option value="">Select upazila / thana</option>
                     </select>
+                    <p class="field-error" id="userThanaError" style="display:none;color:#c0392b;font-size:12.5px;margin:6px 0 0;">Please select your Thana/Upazila.</p>
                 </div>
             </div>
         </div>
@@ -3393,9 +3370,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 setDeliveryZone(districtZone);
                 applyDeliveryZoneUI(districtZone);
             }
+            // A district change means whatever Thana was previously picked
+            // (if any) no longer necessarily belongs to it, so surface the
+            // requirement again until the customer re-picks one.
+            var thanaSelectOnChange = document.getElementById('userThana');
+            var thanaErrorOnChange = document.getElementById('userThanaError');
+            if (thanaSelectOnChange) thanaSelectOnChange.classList.remove('field-invalid');
+            if (thanaErrorOnChange) thanaErrorOnChange.style.display = 'none';
             displayOrder();
         });
     }
+    (function initThanaValidationClear() {
+        var thanaSelectEl = document.getElementById('userThana');
+        var thanaErrorEl = document.getElementById('userThanaError');
+        if (!thanaSelectEl) return;
+        thanaSelectEl.addEventListener('change', function () {
+            if (thanaSelectEl.value) {
+                thanaSelectEl.classList.remove('field-invalid');
+                if (thanaErrorEl) thanaErrorEl.style.display = 'none';
+            }
+        });
+    })();
     (function initDeliveryZoneSelect() {
         var wrap = document.getElementById('deliveryZoneSelect');
         if (!wrap) return;
@@ -3610,6 +3605,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 checkoutAlert('Please select a delivery district.', areaSelect);
                 return;
             }
+            // Thana/Upazila is required once a district is selected. This is
+            // the last check before the order payload is built and sent to
+            // postOrderToSheet below, so nothing after this point can add a
+            // Thana value on its own — it's the final client-side gate.
+            var thanaSelect = document.getElementById('userThana');
+            var thanaErrorEl = document.getElementById('userThanaError');
+            var thanaValue = (thanaSelect && thanaSelect.value || '').trim();
+            if (!thanaValue) {
+                if (thanaSelect) thanaSelect.classList.add('field-invalid');
+                if (thanaErrorEl) thanaErrorEl.style.display = '';
+                checkoutAlert('Please select your Thana/Upazila.', thanaSelect);
+                return;
+            }
+            if (thanaSelect) thanaSelect.classList.remove('field-invalid');
+            if (thanaErrorEl) thanaErrorEl.style.display = 'none';
             var agreeTerms = document.getElementById('agreeTerms');
             var termsError = document.getElementById('termsError');
             if (agreeTerms && !agreeTerms.checked) {

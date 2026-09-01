@@ -216,10 +216,48 @@ window.addRelatedProductToCart = function (productId, categoryKey) {
   // inside it), so updateCartDrawerUI() above is all the feedback needed.
 };
 
+// Collects candidates across every category in window.CATEGORY_PRODUCTS
+// (not just the cart's primary category), lightly interleaved so the strip
+// isn't dominated by whichever category happens to come first. Falls back
+// to window.getRelatedProducts(primaryCategory) — the previous single-
+// category source — if CATEGORY_PRODUCTS isn't available for some reason.
+function collectRelatedCandidatesAllCategories(primaryCategory, inCart) {
+  const cats = window.CATEGORY_PRODUCTS;
+  if (!cats || typeof cats !== 'object') {
+    return typeof window.getRelatedProducts === 'function'
+      ? (window.getRelatedProducts(primaryCategory, 20) || [])
+      : [];
+  }
+  const perCategoryLists = Object.keys(cats).map(key => {
+    const list = Array.isArray(cats[key]) ? cats[key] : [];
+    return list
+      .filter(p => p && p.id && !inCart[String(p.id)])
+      .map(p => Object.assign({}, p, { category: p.category || p.categoryKey || key }));
+  });
+  // Round-robin interleave across categories instead of concatenating, so
+  // "all categories" doesn't just mean "the first category with enough
+  // stock" in practice.
+  const merged = [];
+  let addedSomething = true;
+  while (addedSomething) {
+    addedSomething = false;
+    for (const list of perCategoryLists) {
+      const next = list.shift();
+      if (next) {
+        merged.push(next);
+        addedSomething = true;
+      }
+    }
+  }
+  return merged;
+}
+
 window.renderCartDrawerRelated = function (cartItems) {
   const section = document.getElementById('related-products-section');
   const container = document.getElementById('related-products-container');
   if (!section || !container) return;
+
+  stopRelatedAutoSlide();
 
   if (!cartItems || !cartItems.length) {
     section.style.display = 'none';
@@ -231,10 +269,7 @@ window.renderCartDrawerRelated = function (cartItems) {
   cartItems.forEach(item => { inCart[String(item.id)] = true; });
 
   const primaryCategory = cartItems[0].category || cartItems[0].categoryKey || '';
-  let candidates = typeof window.getRelatedProducts === 'function'
-    ? window.getRelatedProducts(primaryCategory, 20) || []
-    : [];
-  candidates = candidates.filter(p => p && p.id && !inCart[String(p.id)]);
+  const candidates = collectRelatedCandidatesAllCategories(primaryCategory, inCart).slice(0, 20);
 
   if (!candidates.length) {
     section.style.display = 'none';
@@ -261,7 +296,71 @@ window.renderCartDrawerRelated = function (cartItems) {
     `;
   }).join('');
   section.style.display = '';
+  startRelatedAutoSlide(container);
 };
+
+// --- Auto-sliding "Customers also bought" carousel ---------------------
+// Plain scrollLeft animation, no library. One interval per open drawer,
+// always torn down (stopRelatedAutoSlide) before a re-render so re-renders
+// on cart changes never stack up duplicate timers.
+let relatedAutoSlideTimer = null;
+let relatedAutoSlideResumeTimer = null;
+
+function stopRelatedAutoSlide() {
+  if (relatedAutoSlideTimer) {
+    clearInterval(relatedAutoSlideTimer);
+    relatedAutoSlideTimer = null;
+  }
+  if (relatedAutoSlideResumeTimer) {
+    clearTimeout(relatedAutoSlideResumeTimer);
+    relatedAutoSlideResumeTimer = null;
+  }
+}
+
+function startRelatedAutoSlide(container) {
+  stopRelatedAutoSlide();
+  if (!container || container.scrollWidth <= container.clientWidth + 4) return;
+
+  const STEP_INTERVAL_MS = 2600;
+  const RESUME_DELAY_MS = 3500;
+
+  function step() {
+    const card = container.querySelector('.related-card');
+    const cardStep = card ? card.getBoundingClientRect().width + 12 : 140;
+    const atEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth - 2;
+    container.scrollTo({
+      left: atEnd ? 0 : container.scrollLeft + cardStep,
+      behavior: 'smooth'
+    });
+  }
+
+  function pause() {
+    if (relatedAutoSlideTimer) {
+      clearInterval(relatedAutoSlideTimer);
+      relatedAutoSlideTimer = null;
+    }
+    if (relatedAutoSlideResumeTimer) clearTimeout(relatedAutoSlideResumeTimer);
+    relatedAutoSlideResumeTimer = setTimeout(() => {
+      if (document.body.contains(container)) resume();
+    }, RESUME_DELAY_MS);
+  }
+
+  function resume() {
+    if (relatedAutoSlideTimer) return;
+    relatedAutoSlideTimer = setInterval(step, STEP_INTERVAL_MS);
+  }
+
+  // Manual interaction (touch swipe, mouse drag/wheel) pauses, then
+  // auto-slide resumes on its own after a short delay. Hover pauses too
+  // and resumes on mouse-leave.
+  container.addEventListener('pointerdown', pause);
+  container.addEventListener('touchstart', pause, { passive: true });
+  container.addEventListener('wheel', pause, { passive: true });
+  container.addEventListener('mouseenter', pause);
+  container.addEventListener('mouseleave', resume);
+
+  resume();
+}
 
 function findProductByImage(imgUrl) {
     const cats = window.CATEGORY_PRODUCTS || {};
@@ -353,6 +452,7 @@ window.openCartDrawer = function () {
 };
 
 window.closeCartDrawer = function () {
+  stopRelatedAutoSlide();
   drawer.classList.remove('is-open');
   overlay.classList.remove('is-open');
   drawer.setAttribute('aria-hidden', 'true');
