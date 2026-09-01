@@ -1236,6 +1236,13 @@
             box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.06);
             background: #fff;
         }
+        .pay-detail-card:not(.is-highlight) { display: none; }
+        .pay-chart-badge {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            font-size: 11px;
+        }
         .pay-detail-card-head {
             display: flex;
             align-items: center;
@@ -1256,6 +1263,7 @@
             flex-shrink: 0;
         }
         .dot-mfs { background: #e2136e; }
+        .dot-nagad { background: #f7941d; }
         .dot-bank { background: #1e3a5f; }
         .pay-chart {
             width: 100%;
@@ -2034,12 +2042,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         <span class="pay-details-badge">Official account</span>
                     </div>
                     <div class="pay-details-grid">
-                        <div class="pay-detail-card pay-detail-mfs" data-pm-highlight="bkash,nagad">
-                            <div class="pay-detail-card-head"><span class="dot dot-mfs"></span> Mobile banking (Personal)</div>
+                        <div class="pay-detail-card pay-detail-mfs" data-pm-highlight="bkash">
+                            <div class="pay-detail-card-head"><span class="dot dot-mfs"></span> bKash (Personal)</div>
                             <table class="pay-chart" role="presentation">
                                 <tbody>
                                     <tr>
-                                        <td class="pay-chart-brand"><img src="assets/payment/bkash.svg" alt="bKash" class="pay-chart-logo" loading="lazy"></td>
+                                        <td class="pay-chart-brand"><span class="pm-badge pm-badge-bkash pay-chart-badge" aria-hidden="true">b</span></td>
                                         <td>
                                             <div class="pay-copy-row">
                                                 <span>01970831783</span>
@@ -2047,8 +2055,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                             </div>
                                         </td>
                                     </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pay-detail-card pay-detail-mfs" data-pm-highlight="nagad">
+                            <div class="pay-detail-card-head"><span class="dot dot-nagad"></span> Nagad (Personal)</div>
+                            <table class="pay-chart" role="presentation">
+                                <tbody>
                                     <tr>
-                                        <td class="pay-chart-brand"><img src="assets/payment/nagad.svg" alt="Nagad" class="pay-chart-logo" loading="lazy"></td>
+                                        <td class="pay-chart-brand"><span class="pm-badge pm-badge-nagad pay-chart-badge" aria-hidden="true">N</span></td>
                                         <td>
                                             <div class="pay-copy-row">
                                                 <span>01971642683</span>
@@ -2772,6 +2787,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         return DELIVERY_ZONE_RATES[getDeliveryZone()] || DELIVERY_ZONE_RATES.inside;
     }
 
+    function districtZoneFromValue(val) {
+        if (!val) return null;
+        return (parseInt(val, 10) === 80) ? 'inside' : 'outside';
+    }
+
+    function applyDeliveryZoneUI(zone) {
+        var wrap = document.getElementById('deliveryZoneSelect');
+        if (!wrap) return;
+        wrap.setAttribute('data-active', zone);
+        Array.prototype.slice.call(wrap.querySelectorAll('.delivery-zone-option')).forEach(function (opt) {
+            var input = opt.querySelector('input[type="radio"]');
+            var isActive = !!input && input.value === zone;
+            if (input) input.checked = isActive;
+            opt.classList.toggle('is-active', isActive);
+        });
+    }
+
     function shippingCharge() {
         var q = cartQty();
         if (q === 0 || q >= 3) return 0; // 3 বা তার বেশি পণ্যে বিনামূল্যে ডেলিভারি
@@ -3355,27 +3387,35 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     /* =============== end Customers also bought =============== */
 
     if (areaSelect) {
-        areaSelect.addEventListener('change', displayOrder);
+        areaSelect.addEventListener('change', function () {
+            var districtZone = districtZoneFromValue(areaSelect.value);
+            if (districtZone) {
+                setDeliveryZone(districtZone);
+                applyDeliveryZoneUI(districtZone);
+            }
+            displayOrder();
+        });
     }
     (function initDeliveryZoneSelect() {
         var wrap = document.getElementById('deliveryZoneSelect');
         if (!wrap) return;
-        var options = Array.prototype.slice.call(wrap.querySelectorAll('.delivery-zone-option'));
-        function applyZone(zone) {
-            wrap.setAttribute('data-active', zone);
-            options.forEach(function (opt) {
-                var input = opt.querySelector('input[type="radio"]');
-                var isActive = !!input && input.value === zone;
-                if (input) input.checked = isActive;
-                opt.classList.toggle('is-active', isActive);
-            });
-        }
-        applyZone(getDeliveryZone());
+        applyDeliveryZoneUI(getDeliveryZone());
         wrap.addEventListener('change', function (e) {
             var input = e.target.closest('input[name="deliveryZone"]');
             if (!input) return;
-            setDeliveryZone(input.value);
-            applyZone(input.value);
+            var newZone = input.value;
+            setDeliveryZone(newZone);
+            applyDeliveryZoneUI(newZone);
+            // Keep the district field honest: if it no longer matches the
+            // chosen zone (e.g. district = Dhaka but customer just picked
+            // "Outside Dhaka"), clear it so they re-pick the right district
+            // instead of submitting a mismatched address + fee.
+            if (areaSelect && areaSelect.value && districtZoneFromValue(areaSelect.value) !== newZone) {
+                areaSelect.value = '';
+                var thanaSelect = document.getElementById('userThana');
+                if (thanaSelect && thanaSelect.options.length) thanaSelect.selectedIndex = 0;
+                areaSelect.dispatchEvent(new Event('change', { bubbles: true }));
+            }
             displayOrder();
         });
     })();
