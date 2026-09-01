@@ -1,4 +1,29 @@
 // cart-drawer.js
+//
+// AUDIT NOTE (see PROMPT step 19/22): searched the whole codebase for every
+// symbol listed — showCartAddedToast, showCartRemovedToast,
+// playCartButtonAddedUi, openCartDrawer, closeCartDrawer, afterCartMutation,
+// addOrMergeStoreCartItem, storeCartUpdated, updateCartBadge,
+// updateCartDrawerUI, cart-toast.js, cart-drawer.js, related-cart.js, and
+// every Add to Cart handler. Within the 5 files provided (this file,
+// cart-utils.js, cart-toast.js, related-cart.js, index.html):
+//   - Every showCartAddedToast/showCartRemovedToast call lived in THIS file
+//     (addRelatedProductToCart, and the checkout empty-selection guard) —
+//     both removed below, no toast calls remain anywhere in these files.
+//   - related-cart.js was already emptied by a prior fix (see its header
+//     comment) and is not touched further.
+//   - The site's per-page product-card "Add to Cart" buttons (home page,
+//     category pages, product page) are NOT among the uploaded files — they
+//     live in other page-specific scripts not provided here. Per the
+//     instruction not to touch unrelated files, they are left alone. Those
+//     handlers already call window.afterCartMutation(...)/
+//     window.addOrMergeStoreCartItem(...) (that's the shared architecture
+//     cart-utils.js documents), so to get the "instant drawer" behavior on
+//     those pages, whoever owns each handler should call
+//     window.openCartDrawer() once, after confirming the add succeeded —
+//     exactly the pattern used below in addRelatedProductToCart, which is
+//     the one add-to-cart flow that *is* in scope here (it lives inside the
+//     drawer itself).
 
 function ensureCartDrawerRelatedStyles() {
   if (document.getElementById('cart-drawer-related-style')) return;
@@ -54,6 +79,77 @@ function ensureCartDrawerRelatedStyles() {
     }
     .related-card-add:hover { background: #111; color: #fff; }
     .related-card-add.is-added { border-color: #16a34a; color: #16a34a; }
+
+    /* Premium drawer chrome — supplements cart-drawer.min.css, doesn't replace it */
+    .cart-drawer { width: 420px; max-width: 100vw; background: #fff; }
+    @media (max-width: 480px) { .cart-drawer { width: 92vw; } }
+
+    .cart-drawer-head {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      padding: 18px 18px 14px; border-bottom: 1px solid rgba(17,17,17,.08);
+    }
+    .cart-drawer-head-text h2 {
+      margin: 0; font-size: 16px; font-weight: 700; letter-spacing: -0.01em; color: #111;
+    }
+    .cart-drawer-count { display: block; margin-top: 2px; font-size: 12px; color: #777; }
+    .cart-drawer-close {
+      border: none; background: transparent; font-size: 20px; line-height: 1;
+      color: #111; cursor: pointer; padding: 4px 6px; border-radius: 6px;
+    }
+    .cart-drawer-close:hover { background: rgba(17,17,17,.06); }
+
+    .cart-drawer-item { display: flex; gap: 12px; padding: 14px 0; border-bottom: 1px solid rgba(17,17,17,.06); }
+    .cart-drawer-thumb { width: 64px; height: 78px; flex: 0 0 64px; border-radius: 8px; overflow: hidden; background: #f5f5f5; }
+    .cart-drawer-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .cart-drawer-item-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    .cart-drawer-name { margin: 0; font-size: 13.5px; font-weight: 600; color: #111; line-height: 1.35; }
+    .cart-drawer-remove {
+      border: none; background: transparent; color: #999; font-size: 15px; line-height: 1;
+      cursor: pointer; padding: 2px 4px; flex: 0 0 auto;
+    }
+    .cart-drawer-remove:hover { color: #c0392b; }
+    .cart-drawer-controls { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+    .cart-drawer-qty {
+      display: inline-flex; align-items: center; border: 1px solid #ddd; border-radius: 999px; overflow: hidden;
+    }
+    .cart-drawer-qty button {
+      border: none; background: #fff; width: 30px; height: 30px; font-size: 15px; cursor: pointer; color: #111;
+    }
+    .cart-drawer-qty button:hover { background: #f5f5f5; }
+    .cart-drawer-qty span { min-width: 26px; text-align: center; font-size: 13px; font-weight: 600; }
+    .cart-drawer-line-price { font-size: 13.5px; font-weight: 700; color: #111; }
+
+    .cart-drawer-empty { text-align: center; padding: 48px 16px; }
+    .cart-drawer-empty p { margin: 0 0 14px; font-size: 14px; color: #444; font-weight: 600; }
+    .cart-drawer-empty-continue {
+      display: inline-block; border: 1.5px solid #111; border-radius: 999px;
+      padding: 9px 20px; font-size: 12.5px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .03em; color: #111; text-decoration: none;
+    }
+    .cart-drawer-empty-continue:hover { background: #111; color: #fff; }
+
+    .cart-drawer-foot {
+      position: sticky; bottom: 0; background: #fff; border-top: 1px solid rgba(17,17,17,.08);
+      padding: 14px 18px 18px;
+    }
+    .cart-drawer-total-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .cart-drawer-total-row span { font-size: 13px; color: #555; }
+    .cart-drawer-total-row strong { font-size: 17px; color: #111; }
+    .cart-drawer-checkout {
+      display: block; width: 100%; border: none; border-radius: 999px; background: #111; color: #fff;
+      font-size: 14px; font-weight: 700; letter-spacing: .01em; padding: 13px 0; cursor: pointer;
+      transition: background .2s ease;
+    }
+    .cart-drawer-checkout:hover { background: #000; }
+    .cart-drawer-checkout:disabled { background: #ccc; cursor: not-allowed; }
+    .cart-drawer-continue {
+      display: block; text-align: center; margin-top: 10px; font-size: 12.5px; color: #555;
+      text-decoration: underline; text-underline-offset: 2px;
+    }
+    @media (max-width: 480px) {
+      .cart-drawer-qty button { width: 34px; height: 34px; font-size: 16px; }
+      .cart-drawer-checkout { padding: 14px 0; font-size: 15px; }
+    }
   `;
   document.head.appendChild(style);
 }
@@ -116,9 +212,8 @@ window.addRelatedProductToCart = function (productId, categoryKey) {
   } else {
     window.updateCartDrawerUI(updated);
   }
-  if (typeof window.showCartAddedToast === 'function') {
-    window.showCartAddedToast({ name: product.name, image: product.image, price: product.price });
-  }
+  // No toast — the drawer is already open (this handler only fires from
+  // inside it), so updateCartDrawerUI() above is all the feedback needed.
 };
 
 window.renderCartDrawerRelated = function (cartItems) {
@@ -216,21 +311,17 @@ function ensureCartDrawerHtml() {
   drawer.setAttribute('aria-hidden', 'true');
   drawer.innerHTML = `
     <div class="cart-drawer-head">
-  <h2>Your Shopping Cart</h2>
-  <button
-    type="button"
-    class="cart-drawer-close"
-    aria-label="Close shopping cart"
-  >
-    Close ×
-  </button>
-</div>
-    <div class="cart-drawer-body">
-      <div class="cart-select-bar" id="cart-select-bar" hidden>
-        <button type="button" class="cart-select-all-btn" id="cart-select-all">Select all</button>
-        <button type="button" class="cart-select-all-btn" id="cart-deselect-all">Deselect all</button>
-        <span class="cart-select-count" id="cart-select-count"></span>
+      <div class="cart-drawer-head-text">
+        <h2>Shopping Bag</h2>
+        <span class="cart-drawer-count" id="cart-drawer-count"></span>
       </div>
+      <button
+        type="button"
+        class="cart-drawer-close"
+        aria-label="Close shopping cart"
+      >×</button>
+    </div>
+    <div class="cart-drawer-body">
       <div id="cart-items-list"></div>
       <div id="related-products-section" class="related-wrapper" style="display: none;">
         <h3 class="related-title">Customers also bought</h3>
@@ -239,20 +330,20 @@ function ensureCartDrawerHtml() {
     </div>
     <div class="cart-drawer-foot">
       <div class="cart-drawer-total-row">
-       <span>Checkout total:</span>
+        <span>Subtotal</span>
         <strong id="cart-drawer-total-price">৳0</strong>
       </div>
-      <p class="cart-drawer-select-hint" id="cart-drawer-select-hint"></p>
-      <button type="button" class="cart-drawer-checkout">Proceed to Checkout</button>
+      <button type="button" class="cart-drawer-checkout">Checkout &rarr;</button>
+      <a href="#" class="cart-drawer-continue" id="cart-drawer-continue">Continue Shopping</a>
     </div>
   `;
   document.body.appendChild(drawer);
   ensureCartDrawerRelatedStyles();
 // Open / Close drawer helpers
 window.openCartDrawer = function () {
-  // Always refresh the list before showing — otherwise callers like the
-  // "View bag" button in cart-toast.js could open a drawer still showing
-  // whatever was rendered last (e.g. empty, from before the item was added).
+  // Always refresh the list before showing — otherwise a caller opening
+  // right after an add/remove could show a drawer still rendering whatever
+  // was last drawn (e.g. empty, from before the item was added).
   window.updateCartDrawerUI();
   drawer.classList.add('is-open');
   overlay.classList.add('is-open');
@@ -285,73 +376,58 @@ document.addEventListener('keydown', function (e) {
   }
 });
 
-  // Setup click handler for checkout
+  // Setup click handler for checkout — the whole bag goes to checkout now,
+  // so this just navigates (the button is disabled/hidden while empty via
+  // renderCartList, so there's nothing to guard here).
   const checkoutBtn = drawer.querySelector('.cart-drawer-checkout');
   if (checkoutBtn) {
     checkoutBtn.addEventListener('click', () => {
-      const lines = typeof window.loadStoreCart === 'function' ? window.loadStoreCart({ readOnly: true }) : [];
-      const selected = typeof window.getSelectedStoreCartLines === 'function'
-        ? window.getSelectedStoreCartLines(lines)
-        : lines;
-      if (!selected.length) {
-        if (typeof window.showCartAddedToast === 'function') {
-          window.showCartAddedToast({ name: 'Select at least one item for checkout', image: '', price: 0 });
-        }
-        return;
-      }
+      if (checkoutBtn.disabled) return;
       window.location.href = typeof window.siteHref === 'function' ? window.siteHref('/checkout') : 'checkout.html';
     });
   }
-  const selectAllBtn = drawer.querySelector('#cart-select-all');
-  const deselectAllBtn = drawer.querySelector('#cart-deselect-all');
-  if (selectAllBtn) {
-    selectAllBtn.addEventListener('click', function () { window.setAllDrawerLinesSelected(true); });
-  }
-  if (deselectAllBtn) {
-    deselectAllBtn.addEventListener('click', function () { window.setAllDrawerLinesSelected(false); });
+  const continueLink = drawer.querySelector('#cart-drawer-continue');
+  if (continueLink) {
+    continueLink.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.closeCartDrawer();
+    });
   }
 }
 
 window.renderCartList = function (cartItems) {
   const listContainer = document.getElementById('cart-items-list');
   if (!listContainer) return;
-  const selectBar = document.getElementById('cart-select-bar');
-  const selectCount = document.getElementById('cart-select-count');
-  const hintEl = document.getElementById('cart-drawer-select-hint');
-  const isSelected = typeof window.isStoreCartLineSelected === 'function'
-    ? window.isStoreCartLineSelected
-    : function () { return true; };
+  const countEl = document.getElementById('cart-drawer-count');
+  const checkoutBtn = document.querySelector('.cart-drawer-checkout');
+  const totalEl = document.getElementById('cart-drawer-total-price');
+
+  const totalPcs = typeof window.cartTotalQty === 'function' ? window.cartTotalQty(cartItems) : (cartItems || []).length;
 
   if (!cartItems || cartItems.length === 0) {
     listContainer.innerHTML = `
       <div class="cart-drawer-empty">
-        <p>Your shopping bag is currently empty.</p>
+        <p>Your shopping bag is empty</p>
+        <a href="${typeof window.siteHref === 'function' ? window.siteHref('/') : 'index.html'}" class="cart-drawer-empty-continue">Continue Shopping</a>
       </div>
     `;
-    const totalEl = document.getElementById('cart-drawer-total-price');
     if (totalEl) totalEl.innerText = '৳0';
-    if (selectBar) selectBar.hidden = true;
-    if (hintEl) hintEl.textContent = '';
+    if (countEl) countEl.textContent = '';
+    if (checkoutBtn) checkoutBtn.disabled = true;
     return;
   }
 
-  if (selectBar) selectBar.hidden = false;
+  if (checkoutBtn) checkoutBtn.disabled = false;
+  if (countEl) countEl.textContent = totalPcs + (totalPcs === 1 ? ' item' : ' items');
 
-  let checkoutTotal = 0;
+  let subtotal = 0;
   let html = '';
-  let selectedCount = 0;
-  let selectedPcs = 0;
 
   cartItems.forEach((item, index) => {
     const price = parseInt(item.price, 10) || 550;
     const qty = parseInt(item.quantity, 10) || 1;
     const itemTotal = price * qty;
-    const checked = isSelected(item);
-    if (checked) {
-      checkoutTotal += itemTotal;
-      selectedCount += 1;
-      selectedPcs += qty;
-    }
+    subtotal += itemTotal;
 
     const imgUrl = item.image || 'images/Baby-Pink-Floral-Print.jpeg';
     const safeName = String(item.name || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -368,24 +444,21 @@ window.renderCartList = function (cartItems) {
     }
 
     html += `
-      <div class="cart-drawer-item${checked ? '' : ' is-deselected'}" data-index="${index}" data-id="${item.id}" data-size="${item.size || ''}">
-        <label class="cart-line-check">
-          <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleDrawerLineSelected(${index}, this.checked)" aria-label="Select for checkout">
-        </label>
+      <div class="cart-drawer-item" data-index="${index}" data-id="${item.id}" data-size="${item.size || ''}">
         <div class="cart-drawer-thumb">
           <img src="${imgUrl}" alt="${safeName}" onerror="this.src='images/Baby-Pink-Floral-Print.jpeg'">
         </div>
         <div class="cart-drawer-item-main">
           <div class="cart-drawer-item-top">
             <h3 class="cart-drawer-name">${safeName}</h3>
-            <button type="button" class="cart-drawer-remove" onclick="removeDrawerItem(${index})">×</button>
+            <button type="button" class="cart-drawer-remove" onclick="removeDrawerItem(${index})" aria-label="Remove ${safeName}">🗑</button>
           </div>
           ${sizeDetails ? `<div style="font-size: 11px; color: #666; margin-bottom: 6px;">${sizeDetails}</div>` : ''}
           <div class="cart-drawer-controls">
             <div class="cart-drawer-qty">
-              <button type="button" onclick="updateDrawerQty(${index}, -1)">-</button>
+              <button type="button" onclick="updateDrawerQty(${index}, -1)" aria-label="Decrease quantity">-</button>
               <span>${qty}</span>
-              <button type="button" onclick="updateDrawerQty(${index}, 1)">+</button>
+              <button type="button" onclick="updateDrawerQty(${index}, 1)" aria-label="Increase quantity">+</button>
             </div>
             <span class="cart-drawer-line-price">৳${itemTotal}</span>
           </div>
@@ -395,40 +468,15 @@ window.renderCartList = function (cartItems) {
   });
 
   listContainer.innerHTML = html;
-  const totalEl = document.getElementById('cart-drawer-total-price');
-  if (totalEl) totalEl.innerText = '৳' + checkoutTotal;
-  if (selectCount) {
-    selectCount.textContent = selectedCount + ' of ' + cartItems.length + ' selected';
-  }
-  if (hintEl) {
-    const bagPcs = typeof window.cartTotalQty === 'function' ? window.cartTotalQty(cartItems) : cartItems.length;
-    hintEl.textContent = 'Bag: ' + bagPcs + ' pcs · Checkout: ' + selectedPcs + ' pcs';
-  }
+  if (totalEl) totalEl.innerText = '৳' + subtotal;
 };
 
-window.toggleDrawerLineSelected = function (index, selected) {
-  let existing = typeof window.loadStoreCart === 'function' ? window.loadStoreCart({ readOnly: true }) : [];
-  const updated = typeof window.setStoreCartLineSelected === 'function'
-    ? window.setStoreCartLineSelected(existing, index, selected)
-    : existing;
-  if (typeof window.afterCartMutation === 'function') {
-    window.afterCartMutation(updated);
-  } else {
-    window.updateCartDrawerUI(updated);
-  }
-};
-
-window.setAllDrawerLinesSelected = function (selected) {
-  let existing = typeof window.loadStoreCart === 'function' ? window.loadStoreCart({ readOnly: true }) : [];
-  const updated = typeof window.setAllStoreCartLinesSelected === 'function'
-    ? window.setAllStoreCartLinesSelected(existing, selected)
-    : existing;
-  if (typeof window.afterCartMutation === 'function') {
-    window.afterCartMutation(updated);
-  } else {
-    window.updateCartDrawerUI(updated);
-  }
-};
+// Note: the drawer UI no longer has a select/deselect system (the whole bag
+// now goes to checkout), so window.toggleDrawerLineSelected and
+// window.setAllDrawerLinesSelected — which only ever existed to back that
+// UI — were removed. cart-utils.js still exports setStoreCartLineSelected /
+// setAllStoreCartLinesSelected / getSelectedStoreCartLines untouched, in
+// case something else depends on them.
 
 window.updateDrawerQty = function (index, change) {
   let existing = typeof window.loadStoreCart === 'function' ? window.loadStoreCart({ readOnly: true }) : [];
