@@ -108,6 +108,13 @@ function ensureCartDrawerRelatedStyles() {
       cursor: pointer; padding: 2px 4px; flex: 0 0 auto;
     }
     .cart-drawer-remove:hover { color: #c0392b; }
+    /* Desktop-only visibility bump for the remove icon — mobile size/color
+       was already fine per user feedback, this only sharpens it on wider
+       screens where it looked faint. No other change. */
+    @media (min-width: 481px) {
+      .cart-drawer-remove { color: #555; font-size: 18px; }
+      .cart-drawer-remove:hover { color: #c0392b; }
+    }
     .cart-drawer-controls { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
     .cart-drawer-qty {
       display: inline-flex; align-items: center; border: 1px solid #ddd; border-radius: 999px; overflow: hidden;
