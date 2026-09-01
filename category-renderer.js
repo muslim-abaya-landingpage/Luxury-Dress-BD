@@ -700,6 +700,7 @@ function changeShopCartProductQty(p, delta, categoryKey) {
       var defaultSize = Array.isArray(p.sizes) && p.sizes.length ? p.sizes[0] : "50";
       var defaultType = getDefaultProductType(p, categoryKey);
       shopAddProductToCart(Object.assign({}, p, { _cartType: defaultType }), delta, defaultSize, categoryKey);
+      if (typeof window.openCartDrawer === "function") window.openCartDrawer();
     }
     return;
   }
@@ -2206,6 +2207,7 @@ function onGlobalShopCartClick(ev) {
     );
     var addedQty = shopAddBulkProductsToCart(cartItemBulk, entries, categoryKey, selectedTypeBulk);
     if (addedQty > 0 && scopeBulk) resetPqvWholesaleInputs(scopeBulk);
+    if (addedQty > 0 && typeof window.openCartDrawer === "function") window.openCartDrawer();
     return;
   }
   if (
@@ -2250,8 +2252,11 @@ function onGlobalShopCartClick(ev) {
     return;
   }
   shopAddProductToCart(cartItem, qty, selectedSize, categoryKey, selectedBodyValue);
-  if (action === "add" && typeof window.playCartButtonAddedUi === "function") {
-    window.playCartButtonAddedUi(actionEl);
+  if (action === "add") {
+    if (typeof window.playCartButtonAddedUi === "function") {
+      window.playCartButtonAddedUi(actionEl);
+    }
+    if (typeof window.openCartDrawer === "function") window.openCartDrawer();
   }
 }
 if (!window.__maShopCartClickBound) {

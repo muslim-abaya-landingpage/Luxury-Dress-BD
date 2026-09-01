@@ -178,6 +178,14 @@
     if (typeof window.afterCartMutation === "function") {
       window.afterCartMutation(merged);
     }
+    // Successful add (line was built and merged into the cart) -> open the
+    // drawer instantly, same as the rest of the site. Toasts are already
+    // no-ops (see cart-toast.js), so this is now the only "added" feedback
+    // on the homepage. Guarded by typeof so this file still runs fine on
+    // any page where cart-drawer.js hasn't loaded.
+    if (typeof window.openCartDrawer === "function") {
+      window.openCartDrawer();
+    }
     if (typeof window.pushTrackingEvent === "function") {
       window.pushTrackingEvent("AddToCart", {
         content_ids: [p.id],
