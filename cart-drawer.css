@@ -458,3 +458,15 @@
   }
 
 }
+
+/* ==============================
+   HIDE MOBILE BOTTOM NAV WHILE
+   CART DRAWER IS OPEN
+   (body.cart-drawer-open is toggled
+   by cart-drawer.js's openCartDrawer/
+   closeCartDrawer)
+============================== */
+
+body.cart-drawer-open #mobile-bottom-nav {
+  display: none !important;
+}
