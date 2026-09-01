@@ -400,6 +400,7 @@ function ensureCartDrawerHideStyle() {
   document.head.appendChild(style);
 }
 
+window.ensureCartDrawerHtml = ensureCartDrawerHtml;
 function ensureCartDrawerHtml() {
   if (document.getElementById('cart-drawer')) return;
 

@@ -183,6 +183,9 @@
     // no-ops (see cart-toast.js), so this is now the only "added" feedback
     // on the homepage. Guarded by typeof so this file still runs fine on
     // any page where cart-drawer.js hasn't loaded.
+    if (typeof window.ensureCartDrawerHtml === "function") {
+      window.ensureCartDrawerHtml();
+    }
     if (typeof window.openCartDrawer === "function") {
       window.openCartDrawer();
     }
