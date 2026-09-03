@@ -440,7 +440,7 @@ function ensureCartDrawerHtml() {
         <span>Subtotal</span>
         <strong id="cart-drawer-total-price">৳0</strong>
       </div>
-      <button type="button" class="cart-drawer-checkout">Checkout &rarr;</button>
+      <button type="button" class="cart-drawer-checkout">Order Now &rarr;</button>
       <a href="#" class="cart-drawer-continue" id="cart-drawer-continue">Continue Shopping</a>
     </div>
   `;
