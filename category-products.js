@@ -927,24 +927,8 @@ window.CATEGORY_PRODUCTS = {
     { label: "Palazzo Length", value: "37, 38 inches" }
   ],
   detailNote: "Two-Piece Dress | Dress Length: 38, 39 & 40 Inches | Palazzo Length: 37 & 38 Inches | Alex Soft Georgette | 14 Colors | 100% Color Quality Assurance"
-}
-],
-/* ═══ ⑤ এম্ব্রয়ডারি — খালি ═══ */
-embroidery: [
- {
-  id: "ABY-BLACK-1",
-  name: "Dil Bahar Abaya Full Set",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/dil-bahar-black-stone-work-abaya-original-dubai-cherry-fabric-bangladesh.webp",
-  link: "/",
-  price: 1899,
-  color: "black",
-  colorLabel: "Classic Black",
-  fabric: "Original Dubai Cherry",
-  sizes: ["50", "52", "54", "56", "58"],
-  priceByType: { "Full Set": 1899 },
-  description: "Premium Original Dubai Cherry Fabric. Inner + Open Abaya + Matching Hijab. Beautiful All-Over Embroidery with a 200-Inch Flare."
 },
-  {
+{
   id: "DR-20",
   name: "Premium Stylish Ladies Two-Piece Dress",
 
@@ -1056,7 +1040,23 @@ embroidery: [
     "Premium Poppon Clothing Fabric | Free Size | Body: Up to 42 | Dress Length: 37 Inches | Matching Bottom | Home Delivery Across Bangladesh | Price: 750 BDT",
 
   phone: "01971642683"
-}
+}     
+],
+/* ═══ ⑤ এম্ব্রয়ডারি — খালি ═══ */
+embroidery: [
+ {
+  id: "ABY-BLACK-1",
+  name: "Dil Bahar Abaya Full Set",
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/dil-bahar-black-stone-work-abaya-original-dubai-cherry-fabric-bangladesh.webp",
+  link: "/",
+  price: 1899,
+  color: "black",
+  colorLabel: "Classic Black",
+  fabric: "Original Dubai Cherry",
+  sizes: ["50", "52", "54", "56", "58"],
+  priceByType: { "Full Set": 1899 },
+  description: "Premium Original Dubai Cherry Fabric. Inner + Open Abaya + Matching Hijab. Beautiful All-Over Embroidery with a 200-Inch Flare."
+}  
 ],
 
 /* ═══ ⑥ কারচুপি — খালি ═══ */
