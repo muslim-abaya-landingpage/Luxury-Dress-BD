@@ -943,6 +943,119 @@ embroidery: [
   sizes: ["50", "52", "54", "56", "58"],
   priceByType: { "Full Set": 1899 },
   description: "Premium Original Dubai Cherry Fabric. Inner + Open Abaya + Matching Hijab. Beautiful All-Over Embroidery with a 200-Inch Flare."
+},
+  {
+  id: "DR-20",
+  name: "Premium Stylish Ladies Two-Piece Dress",
+
+  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/yellow-womens-kurti-3-piece-dress-green-flower-design.webp",
+
+  images: [
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/yellow-womens-kurti-3-piece-dress-green-flower-design.webp",
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/taupe-womens-kurti-pink-tassel.webp",
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/purple-womens-kurti-pink-tassel.webp",
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/mint-green-womens-3-piece-kurti-set.webp",
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/mint-green-womens-2-piece-kurti-set.webp",
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/mauve-pink-womens-3-piece-kurti-set.webp",
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/lime-green-womens-3-piece-kurti-set.webp",
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/light-beige-womens-3-piece-kurti-set.webp",
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/lavender-pink-womens-3-piece-kurti-set.webp",
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/dark-purple-womens-3-piece-kurti-set.webp",
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/brown-embroidered-womens-3-piece-kurti-set.webp",
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/beige-embroidered-womens-3-piece-kurti-set.webp"
+  ],
+
+  colorVariants: [
+    {
+      color: "yellow",
+      colorLabel: "Yellow",
+      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/yellow-womens-kurti-3-piece-dress-green-flower-design.webp"
+    },
+    {
+      color: "taupe",
+      colorLabel: "Taupe",
+      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/taupe-womens-kurti-pink-tassel.webp"
+    },
+    {
+      color: "purple",
+      colorLabel: "Purple",
+      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/purple-womens-kurti-pink-tassel.webp"
+    },
+    {
+      color: "mint-green",
+      colorLabel: "Mint Green",
+      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/mint-green-womens-3-piece-kurti-set.webp"
+    },
+    {
+      color: "mint-green-2",
+      colorLabel: "Mint Green 2",
+      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/mint-green-womens-2-piece-kurti-set.webp"
+    },
+    {
+      color: "mauve-pink",
+      colorLabel: "Mauve Pink",
+      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/mauve-pink-womens-3-piece-kurti-set.webp"
+    },
+    {
+      color: "lime-green",
+      colorLabel: "Lime Green",
+      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/lime-green-womens-3-piece-kurti-set.webp"
+    },
+    {
+      color: "light-beige",
+      colorLabel: "Light Beige",
+      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/light-beige-womens-3-piece-kurti-set.webp"
+    },
+    {
+      color: "lavender-pink",
+      colorLabel: "Lavender Pink",
+      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/lavender-pink-womens-3-piece-kurti-set.webp"
+    },
+    {
+      color: "dark-purple",
+      colorLabel: "Dark Purple",
+      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/dark-purple-womens-3-piece-kurti-set.webp"
+    },
+    {
+      color: "brown",
+      colorLabel: "Brown",
+      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/brown-embroidered-womens-3-piece-kurti-set.webp"
+    },
+    {
+      color: "beige",
+      colorLabel: "Beige",
+      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/beige-embroidered-womens-3-piece-kurti-set.webp"
+    }
+  ],
+
+  link: "/",
+
+  price: 750,
+
+  color: "multiple-colors",
+  colorLabel: "12 Colors",
+
+  fabric: "Premium Poppon Clothing Fabric",
+
+  sizes: ["Free Size"],
+  bodySizes: ["42"],
+  dressLengths: ["37"],
+
+  lengthSizeLabel: "Dress Length",
+
+  sizeSpecs: [
+    { label: "Size", value: "Free Size" },
+    { label: "Body", value: "Up to 42" },
+    { label: "Dress Length", value: "37 inches" }
+  ],
+
+  description:
+    "🌸 নতুন ডিজাইনের স্টাইলিশ লেডিস ড্রেস 🌸 | সিম্পল কিন্তু এলিগ্যান্ট লুক—ডেইলি ইউজ, অফিস, ইউনিভার্সিটি কিংবা আউটিংয়ের জন্য দারুণ মানানসই। Premium Poppon Clothing Fabric. সুন্দর টেক্সচার্ড ফেব্রিক, আকর্ষণীয় ফ্রন্ট ডিজাইন, আরামদায়ক ও স্টাইলিশ। সাথে ম্যাচিং বটম।",
+
+  detailNote:
+    "Premium Poppon Clothing Fabric | Free Size | Body: Up to 42 | Dress Length: 37 Inches | Matching Bottom | Home Delivery Across Bangladesh | Price: 750 BDT",
+
+  phone: "01971642683"
 }
 ],
 
