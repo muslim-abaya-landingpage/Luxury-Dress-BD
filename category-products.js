@@ -98,14 +98,14 @@ window.CATEGORY_PRODUCTS = {
   name: "Premium Black Hafeza Set",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Abaya/premium-black-layered-khimar-niqab-abaya-for-women-muslimabaya.webp",
   link: "/",
-  price: 2800,
+  price: 2385,
   color: "black",
   colorLabel: "Classic Black",
   fabric: "Original Dubai Cherry Fabric",
   sizes: ["50", "52", "54", "56", "58"],
   priceByType: {
-    "Hijab + Niqab": 1600,
-    "Full Hafeza Set": 2800
+    "Hijab + Niqab": 1200,
+    "Full Hafeza Set": 2385
   },
   detailNote: "Premium Hafeza Set made from Original Dubai Cherry Fabric. Abaya length: 50, 52, 54, 56 and 58 inches. Flare: 180+ inches. Hijab and Niqab are made from Original China Soft Georgette Fabric. Hoodie Hijab features 3 parts at the back and 2 parts at the front, with a 56-inch back and 45-inch front. 2-part nose niqab with a 25-inch front."
 },
@@ -1040,7 +1040,98 @@ window.CATEGORY_PRODUCTS = {
     "Premium Poppon Clothing Fabric | Free Size | Body: Up to 42 | Dress Length: 37 Inches | Matching Bottom | Home Delivery Across Bangladesh | Price: 750 BDT",
 
   phone: "01971642683"
-}     
+},
+   {
+    id: "KURTI-EMB-01",
+    name: "Charcoal Black Embroidered Kurti",
+    image: "https://muslimabaya.netlify.app/catalog/images/charcoal-black-embroidered-kurti.webp",
+    link: "/",
+    price: 750,
+    color: "charcoal-black",
+    colorLabel: "Charcoal Black",
+    fabric: "Premium Cotton (Hand Embroidery)",
+    sizes: ["Free Size"],
+    bodySizes: ["42"],
+    detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear."
+   },
+   {
+    id: "KURTI-EMB-02",
+    name: "Mustard Yellow Embroidered Kurti",
+    image: "https://muslimabaya.netlify.app/catalog/images/mustard-yellow-embroidered-kurti.webp",
+    link: "/",
+    price: 750,
+    color: "mustard-yellow",
+    colorLabel: "Mustard Yellow",
+    fabric: "Premium Cotton (Hand Embroidery)",
+    sizes: ["Free Size"],
+    bodySizes: ["42"],
+    detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear."
+   },
+   {
+    id: "KURTI-EMB-03",
+    name: "Pastel Pink Embroidered Kurti",
+    image: "https://muslimabaya.netlify.app/catalog/images/pastel-pink-embroidered-kurti.webp",
+    link: "/",
+    price: 750,
+    color: "pastel-pink",
+    colorLabel: "Pastel Pink",
+    fabric: "Premium Cotton (Hand Embroidery)",
+    sizes: ["Free Size"],
+    bodySizes: ["42"],
+    detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear."
+   },
+   {
+    id: "KURTI-EMB-04",
+    name: "Maroon Embroidered Kurti",
+    image: "https://muslimabaya.netlify.app/catalog/images/maroon-embroidered-kurti-for-women.webp",
+    link: "/",
+    price: 750,
+    color: "maroon",
+    colorLabel: "Maroon",
+    fabric: "Premium Cotton (Hand Embroidery)",
+    sizes: ["Free Size"],
+    bodySizes: ["42"],
+    detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear."
+   },
+   {
+    id: "KURTI-EMB-05",
+    name: "Dusty Rose Embroidered Kurti",
+    image: "https://muslimabaya.netlify.app/catalog/images/dusty-rose-embroidered-kurti-for-women-bangladesh.webp",
+    link: "/",
+    price: 750,
+    color: "dusty-rose",
+    colorLabel: "Dusty Rose",
+    fabric: "Premium Cotton (Hand Embroidery)",
+    sizes: ["Free Size"],
+    bodySizes: ["42"],
+    detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear."
+   },
+   {
+    id: "KURTI-EMB-06",
+    name: "Mauve Lavender Embroidered Kurta",
+    image: "https://muslimabaya.netlify.app/catalog/images/mauve-lavender-embroidered-kurta-for-women.webp",
+    link: "/",
+    price: 750,
+    color: "mauve-lavender",
+    colorLabel: "Mauve Lavender",
+    fabric: "Premium Cotton (Hand Embroidery)",
+    sizes: ["Free Size"],
+    bodySizes: ["42"],
+    detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear."
+   },
+   {
+    id: "KURTI-EMB-07",
+    name: "Cream Beige Floral Embroidered Kurti",
+    image: "https://muslimabaya.netlify.app/catalog/images/cream-beige-womens-embroidered-kurti-floral-design.webp",
+    link: "/",
+    price: 750,
+    color: "cream-beige",
+    colorLabel: "Cream Beige",
+    fabric: "Premium Cotton (Hand Embroidery)",
+    sizes: ["Free Size"],
+    bodySizes: ["42"],
+    detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear."
+   }
 ],
 /* ═══ ⑤ এম্ব্রয়ডারি — খালি ═══ */
 embroidery: [
