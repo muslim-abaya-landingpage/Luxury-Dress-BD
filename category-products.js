@@ -956,7 +956,10 @@ window.CATEGORY_PRODUCTS = {
     "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/lavender-pink-womens-3-piece-kurti-set.webp",
     "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/dark-purple-womens-3-piece-kurti-set.webp",
     "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/brown-embroidered-womens-3-piece-kurti-set.webp",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/beige-embroidered-womens-3-piece-kurti-set.webp"
+    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/beige-embroidered-womens-3-piece-kurti-set.webp",
+    "https://muslimabaya.netlify.app/catalog/images/brown-grey-womens-3-piece-kurti-set-floral-design.webp",
+    "https://muslimabaya.netlify.app/catalog/images/light-gray-womens-3-piece-kurti-set-floral-detail.webp",
+    "https://muslimabaya.netlify.app/catalog/images/premium-plum-kurta-set-women.webp"
   ],
 
   colorVariants: [
