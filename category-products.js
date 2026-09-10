@@ -97,10 +97,20 @@ window.CATEGORY_PRODUCTS = {
   id: "ABY-VERSACE-8",
   name: "Premium Black Hafeza Set",
   image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Abaya/premium-black-layered-khimar-niqab-abaya-for-women-muslimabaya.webp",
+    images: [
+      "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Abaya/premium-black-layered-khimar-niqab-abaya-for-women-muslimabaya.webp",
+      "https://muslimabaya.netlify.app/catalog/images/abaya-teal.webp",
+      "https://muslimabaya.netlify.app/catalog/images/abaya-white.webp"
+    ],
+    colorVariants: [
+      { color: "black", colorLabel: "Classic Black", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Abaya/premium-black-layered-khimar-niqab-abaya-for-women-muslimabaya.webp" },
+      { color: "teal", colorLabel: "Teal", image: "https://muslimabaya.netlify.app/catalog/images/abaya-teal.webp" },
+      { color: "white", colorLabel: "White", image: "https://muslimabaya.netlify.app/catalog/images/abaya-white.webp" }
+    ],
   link: "/",
   price: 2385,
   color: "black",
-  colorLabel: "Classic Black",
+    colorLabel: "3 Colors",
   fabric: "Original Dubai Cherry Fabric",
   sizes: ["50", "52", "54", "56", "58"],
   priceByType: {
@@ -1009,6 +1019,21 @@ window.CATEGORY_PRODUCTS = {
       color: "beige",
       colorLabel: "Beige",
       image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/beige-embroidered-womens-3-piece-kurti-set.webp"
+    },
+    {
+      color: "brown-grey",
+      colorLabel: "Brown Grey",
+      image: "https://muslimabaya.netlify.app/catalog/images/brown-grey-womens-3-piece-kurti-set-floral-design.webp"
+    },
+    {
+      color: "light-gray",
+      colorLabel: "Light Gray",
+      image: "https://muslimabaya.netlify.app/catalog/images/light-gray-womens-3-piece-kurti-set-floral-detail.webp"
+    },
+    {
+      color: "plum",
+      colorLabel: "Plum",
+      image: "https://muslimabaya.netlify.app/catalog/images/premium-plum-kurta-set-women.webp"
     }
   ],
 
@@ -1017,7 +1042,7 @@ window.CATEGORY_PRODUCTS = {
   price: 750,
 
   color: "multiple-colors",
-  colorLabel: "12 Colors",
+    colorLabel: "15 Colors",
 
   fabric: "Premium Poppon Clothing Fabric",
 
