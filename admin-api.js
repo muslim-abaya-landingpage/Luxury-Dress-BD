@@ -147,12 +147,50 @@
     });
   }
 
+  // নতুন: Admin Panel থেকে সরাসরি GitHub-এ ফাইল পাবলিশ (Netlify অটো-ডিপ্লয় ট্রিগার করে)
+  // path: category-products.js / product-links-data.js / product-catalog-sections.js / product-config.js
+  function publishFile(path, content, message) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return timeoutPromise(
+      30000,
+      fetch(API_URL, {
+        method: "POST",
+        mode: "cors",
+        credentials: "omit",
+        body: (function () {
+          var body = new URLSearchParams();
+          body.append("RecordType", "AdminPublishFile");
+          body.append("Token", s.token);
+          body.append("Path", path);
+          body.append("Content", content);
+          body.append("Message", message || ("Update " + path + " — Admin Panel থেকে"));
+          return body;
+        })()
+      })
+    )
+      .then(function (res) {
+        return res.text();
+      })
+      .then(function (text) {
+        try {
+          return JSON.parse(String(text || "").trim());
+        } catch (e) {
+          return { ok: false, error: "PARSE_FAILED", message: text };
+        }
+      })
+      .catch(function (err) {
+        return { ok: false, error: "NETWORK_FAILURE", message: err.message };
+      });
+  }
+
   g.MaAdmin = {
     login: login,
     logout: logout,
     getSession: getSession,
     verifySession: verifySession,
     fetchOrders: fetchOrders,
+    publishFile: publishFile,
     isLoggedIn: function () {
       return !!getSession();
     }

@@ -730,18 +730,45 @@
     });
   }
 
+  // নতুন: GitHub-এ অটো-পাবলিশ (লগইন করা থাকলে) — ব্যর্থ হলেও নিচের local download
+  // ব্যাকআপ হিসেবে সবসময় থেকে যাবে, তাই ডেটা হারানোর ঝুঁকি নেই।
+  function publishFilesToGitHub(files) {
+    if (!window.MaAdmin || !window.MaAdmin.isLoggedIn || !window.MaAdmin.isLoggedIn()) {
+      return Promise.resolve({ attempted: false });
+    }
+    var results = [];
+    return files
+      .reduce(function (chain, f) {
+        return chain.then(function () {
+          return window.MaAdmin.publishFile(f.path, f.content, f.message).then(function (res) {
+            results.push({ path: f.path, res: res });
+          });
+        });
+      }, Promise.resolve())
+      .then(function () {
+        return { attempted: true, results: results };
+      });
+  }
+
   function saveAll() {
     stripHomeLinksFromProducts();
-    download(generateSectionsFile(), "product-catalog-sections.js");
+
+    var sectionsContent = generateSectionsFile();
+    var productsContent = generateProductsFile();
+    var linksContent = generateProductLinksFile();
+    var configContent = Object.keys(categoryTypePrices).length ? generateProductConfigFile() : null;
+
+    // ১) সবসময় লোকাল ডাউনলোড (ব্যাকআপ / GitHub লগইন ছাড়া চালানোর জন্য)
+    download(sectionsContent, "product-catalog-sections.js");
     setTimeout(function () {
-      download(generateProductsFile(), "category-products.js");
+      download(productsContent, "category-products.js");
     }, 400);
     setTimeout(function () {
-      download(generateProductLinksFile(), "product-links-data.js");
+      download(linksContent, "product-links-data.js");
     }, 800);
-    if (Object.keys(categoryTypePrices).length) {
+    if (configContent) {
       setTimeout(function () {
-        download(generateProductConfigFile(), "product-config.js");
+        download(configContent, "product-config.js");
       }, 1200);
     }
 
@@ -764,10 +791,41 @@
       }, 800 + newSections.length * 400);
     }
 
-    toast(
-      "৩টি ফাইল ডাউনলোড — category-products.js, product-links-data.js, sections (+ config) প্রজেক্টে রিপ্লেস → Netlify আপলোড" +
-        (newSections.length ? " (+ নতুন HTML)" : "")
-    );
+    // ২) GitHub-এ অটো-পাবলিশ চেষ্টা (Admin লগইন থাকলেই কাজ করবে; নতুন ক্যাটাগরি HTML
+    //    অটো-পাবলিশ হয় না — সেগুলো এখনও ম্যানুয়াল আপলোড লাগবে)
+    if (newSections.length) {
+      toast("৩টি+ ফাইল ডাউনলোড হয়েছে (+ নতুন ক্যাটাগরি HTML — এগুলো ম্যানুয়ালি আপলোড করুন)");
+      return;
+    }
+
+    toast("ফাইল ডাউনলোড হয়েছে — GitHub-এ পাবলিশ হচ্ছে...");
+
+    var files = [
+      { path: "category-products.js", content: productsContent, message: "Update products — Admin Panel থেকে" },
+      { path: "product-links-data.js", content: linksContent, message: "Update product links — Admin Panel থেকে" },
+      { path: "product-catalog-sections.js", content: sectionsContent, message: "Update catalog sections — Admin Panel থেকে" }
+    ];
+    if (configContent) {
+      files.push({ path: "product-config.js", content: configContent, message: "Update product config — Admin Panel থেকে" });
+    }
+
+    publishFilesToGitHub(files).then(function (out) {
+      if (!out.attempted) {
+        toast("লোকাল ফাইল রেডি — GitHub অটো-পাবলিশের জন্য Admin লগইন করুন (admin-login.html)");
+        return;
+      }
+      var failed = out.results.filter(function (r) {
+        return !r.res || !r.res.ok;
+      });
+      if (!failed.length) {
+        toast("✅ পাবলিশ সফল! Netlify ১-২ মিনিটে সাইট আপডেট করবে।");
+      } else {
+        var firstErr = failed[0].res ? failed[0].res.message || failed[0].res.error : "অজানা সমস্যা";
+        toast(
+          "⚠️ " + failed.length + "টি ফাইল পাবলিশ ব্যর্থ (" + firstErr + ") — ডাউনলোড হওয়া ফাইল ম্যানুয়ালি আপলোড করুন"
+        );
+      }
+    });
   }
 
   document.getElementById("pmSave").addEventListener("click", saveAll);
