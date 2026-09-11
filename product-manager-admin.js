@@ -10,6 +10,9 @@
   var products = {};
   var activeKey = "";
   var categoryTypePrices = {};
+  var searchTerm = "";
+  var IMG_MAX_W = 1600;
+  var IMG_QUALITY = 0.82;
 
   function slugify(text) {
     return String(text || "")
@@ -221,19 +224,46 @@
       '<div><button type="button" class="pl-btn pl-btn-secondary" id="pmAddProduct">+ প্রোডাক্ট যোগ</button> ' +
       '<button type="button" class="pl-btn pl-btn-secondary" id="pmEditCat">ক্যাটাগরি এডিট</button></div></div>' +
       buildCategoryTypePricePanel(sec.key) +
+      '<div class="pm-search-row"><input type="search" id="pmSearch" placeholder="নাম দিয়ে প্রোডাক্ট খুঁজুন..." value="' +
+      escapeAttr(searchTerm) +
+      '"><span class="pm-search-count" id="pmSearchCount"></span></div>' +
       '<div class="pm-product-list" id="pmProductList"></div>';
 
     bindCategoryTypePricePanel(sec.key);
 
-    var listEl = document.getElementById("pmProductList");
-    if (!list.length) {
-      listEl.innerHTML =
-        '<p class="pm-empty">এখনো প্রোডাক্ট নেই — 「+ প্রোডাক্ট যোগ」 চাপুন</p>';
-    } else {
-      list.forEach(function (p, idx) {
-        listEl.appendChild(buildProductCard(sec.key, p, idx));
+    function applyFilter() {
+      var t = searchTerm.trim().toLowerCase();
+      if (!t) return list;
+      return list.filter(function (p) {
+        return String(p.name || "").toLowerCase().indexOf(t) !== -1 ||
+          String(p.id || "").toLowerCase().indexOf(t) !== -1;
       });
     }
+
+    function renderList() {
+      var filtered = applyFilter();
+      var listEl = document.getElementById("pmProductList");
+      var countEl = document.getElementById("pmSearchCount");
+      var t = searchTerm.trim();
+      listEl.innerHTML = "";
+      if (!list.length) {
+        listEl.innerHTML = '<p class="pm-empty">এখনো প্রোডাক্ট নেই — 「+ প্রোডাক্ট যোগ」 চাপুন</p>';
+      } else if (!filtered.length) {
+        listEl.innerHTML = '<p class="pm-empty">এই নামে কোনো প্রোডাক্ট পাওয়া যায়নি</p>';
+      } else {
+        filtered.forEach(function (p) {
+          listEl.appendChild(buildProductCard(sec.key, p, list.indexOf(p)));
+        });
+      }
+      if (countEl) countEl.textContent = t ? filtered.length + " / " + list.length + " প্রোডাক্ট" : "";
+    }
+
+    renderList();
+
+    document.getElementById("pmSearch").addEventListener("input", function (e) {
+      searchTerm = e.target.value;
+      renderList();
+    });
 
     document.getElementById("pmAddProduct").addEventListener("click", function () {
       list.push(defaultProduct(sec));
@@ -339,9 +369,11 @@
       '">' +
       (outOfStock ? "🔴 স্টক নেই — চালু করতে চাপুন" : "🟢 স্টকে আছে — বন্ধ করতে চাপুন") +
       "</button>" +
+      '<button type="button" class="pl-btn pl-btn-secondary pm-dup" style="padding:4px 10px;font-size:12px">কপি করুন</button>' +
       '<button type="button" class="pl-btn pl-btn-secondary pm-del" style="padding:4px 10px;font-size:12px">মুছুন</button>' +
       "</span></div>" +
       '<div class="pm-product-body">' +
+      buildImageUploader(p) +
       field("name", "নাম", p.name) +
       buildTypePriceFields(catKey, p) +
       field("price", priceLabel, p.price, "number") +
@@ -351,7 +383,7 @@
       field("sizes", "সাইজ (কমা দিয়ে)", sizesToInput(p.sizes)) +
       field("id", "SKU / ID", p.id) +
       field("stock", "স্টক (খালি = আনলিমিটেড, 0 = Out of Stock)", p.stock == null ? "" : p.stock, "number") +
-      fieldWide("image", "ছবির URL", p.image) +
+      fieldWide("image", "ছবির URL (অটো-পূরণ হয় আপলোড করলে, বা নিজে বসান)", p.image) +
       "</div>";
 
     card.querySelectorAll("[data-f]").forEach(function (inp) {
@@ -403,7 +435,187 @@
       renderMain();
     });
 
+    card.querySelector(".pm-dup").addEventListener("click", function () {
+      var copy = cloneJson(p);
+      copy.name = (p.name || "Product") + " (কপি)";
+      copy.id = (p.id || "SKU") + "-COPY-" + Date.now().toString().slice(-5);
+      products[catKey].splice(idx + 1, 0, copy);
+      renderCatList();
+      renderMain();
+      toast("প্রোডাক্ট কপি হয়েছে — উপরে এডিট করে Save করুন");
+    });
+
+    wireImageUploader(card, p);
+
     return card;
+  }
+
+  // ── ছবি আপলোড: ড্র্যাগ-ড্রপ + লাইভ প্রিভিউ + অটো-অপ্টিমাইজ (WebP, max 1600px) ──
+  function buildImageUploader(p) {
+    var hasImg = !!(p.image && String(p.image).trim());
+    return (
+      '<div class="pm-field pm-field-wide pm-uploader">' +
+      "<label>প্রোডাক্ট ছবি</label>" +
+      '<div class="pm-dropzone">' +
+      '<div class="pm-dropzone-preview"' +
+      (hasImg ? ' style="background-image:url(\'' + escapeAttr(resolveImgForPreview(p.image)) + '\')"' : "") +
+      '>' +
+      (hasImg ? "" : '<span class="pm-dropzone-empty">ছবি নেই</span>') +
+      "</div>" +
+      '<div class="pm-dropzone-drop">' +
+      '<div class="pm-dropzone-txt">ছবি টেনে আনুন বা ক্লিক করে বাছাই করুন</div>' +
+      '<div class="pm-dropzone-sub">JPG/PNG • অটো WebP-তে কনভার্ট + resize হবে</div>' +
+      '<div class="pm-dropzone-status" hidden></div>' +
+      '<input type="file" accept="image/*" class="pm-file-input" hidden>' +
+      "</div>" +
+      "</div>" +
+      "</div>"
+    );
+  }
+
+  function resolveImgForPreview(src) {
+    var s = String(src || "").trim();
+    if (!s) return "";
+    if (/^https?:\/\//i.test(s) || /^data:/i.test(s)) return s;
+    // GitHub রিপোতে থাকা রিলেটিভ পাথ — সাইট রুট থেকে রেজলভ করার চেষ্টা
+    return s.indexOf("/") === 0 ? s : "/" + s;
+  }
+
+  function slugifyFileBase(p) {
+    var base = String(p.id || p.name || "product")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+    return (base || "product") + "-" + Date.now();
+  }
+
+  function resizeToWebp(file, maxW, quality) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image();
+      var url = URL.createObjectURL(file);
+      img.onload = function () {
+        URL.revokeObjectURL(url);
+        var w = img.naturalWidth || img.width;
+        var h = img.naturalHeight || img.height;
+        var scale = w > maxW ? maxW / w : 1;
+        var cw = Math.round(w * scale);
+        var ch = Math.round(h * scale);
+        var canvas = document.createElement("canvas");
+        canvas.width = cw;
+        canvas.height = ch;
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, cw, ch);
+        canvas.toBlob(
+          function (blob) {
+            if (!blob) return reject(new Error("ENCODE_FAILED"));
+            resolve(blob);
+          },
+          "image/webp",
+          quality
+        );
+      };
+      img.onerror = function () {
+        URL.revokeObjectURL(url);
+        reject(new Error("IMAGE_LOAD_FAILED"));
+      };
+      img.src = url;
+    });
+  }
+
+  function blobToBase64(blob) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () {
+        var result = String(reader.result || "");
+        resolve(result.slice(result.indexOf(",") + 1));
+      };
+      reader.onerror = function () {
+        reject(new Error("READ_FAILED"));
+      };
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  function wireImageUploader(card, p) {
+    var dz = card.querySelector(".pm-dropzone-drop");
+    var preview = card.querySelector(".pm-dropzone-preview");
+    var input = card.querySelector(".pm-file-input");
+    var statusEl = card.querySelector(".pm-dropzone-status");
+    var urlInput = card.querySelector('[data-f="image"]');
+    if (!dz || !input) return;
+
+    function setStatus(msg, isErr) {
+      if (!statusEl) return;
+      if (!msg) {
+        statusEl.hidden = true;
+        return;
+      }
+      statusEl.hidden = false;
+      statusEl.textContent = msg;
+      statusEl.style.color = isErr ? "#b32d2e" : "#646970";
+    }
+
+    function setPreview(url) {
+      preview.style.backgroundImage = "url('" + url + "')";
+      preview.innerHTML = "";
+    }
+
+    function handleFile(file) {
+      if (!file || file.type.indexOf("image/") !== 0) {
+        setStatus("শুধু ছবি ফাইল দিন (JPG/PNG/WebP)", true);
+        return;
+      }
+      if (!window.MaAdmin || !window.MaAdmin.isLoggedIn || !window.MaAdmin.isLoggedIn()) {
+        setStatus("আপলোডের জন্য Admin লগইন প্রয়োজন", true);
+        return;
+      }
+      setStatus("অপটিমাইজ করা হচ্ছে...");
+      resizeToWebp(file, IMG_MAX_W, IMG_QUALITY)
+        .then(function (blob) {
+          setPreview(URL.createObjectURL(blob));
+          setStatus("আপলোড হচ্ছে...");
+          return blobToBase64(blob);
+        })
+        .then(function (base64) {
+          var fileName = "images/" + slugifyFileBase(p) + ".webp";
+          return window.MaAdmin.uploadImage(fileName, base64, "image/webp");
+        })
+        .then(function (res) {
+          if (!res || !res.ok) {
+            setStatus((res && (res.message || res.error)) || "আপলোড ব্যর্থ হয়েছে", true);
+            return;
+          }
+          p.image = res.path || res.url || p.image;
+          if (urlInput) {
+            urlInput.value = p.image;
+            urlInput.dispatchEvent(new Event("input", { bubbles: true }));
+          }
+          setStatus("✅ আপলোড সম্পন্ন — Save চাপতে ভুলবেন না");
+        })
+        .catch(function (err) {
+          setStatus("সমস্যা: " + (err && err.message ? err.message : err), true);
+        });
+    }
+
+    dz.addEventListener("click", function () {
+      input.click();
+    });
+    input.addEventListener("change", function () {
+      if (input.files && input.files[0]) handleFile(input.files[0]);
+    });
+    dz.addEventListener("dragover", function (e) {
+      e.preventDefault();
+      dz.classList.add("is-drag");
+    });
+    dz.addEventListener("dragleave", function () {
+      dz.classList.remove("is-drag");
+    });
+    dz.addEventListener("drop", function (e) {
+      e.preventDefault();
+      dz.classList.remove("is-drag");
+      var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (f) handleFile(f);
+    });
   }
 
   function field(name, label, value, type) {

@@ -242,3 +242,114 @@
     max-height: none;
   }
 }
+
+/* ── প্রোডাক্ট সার্চ ── */
+.pm-search-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.pm-search-row input[type="search"] {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 12px;
+  border: 1px solid var(--adm-border-strong, #ddd);
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  background: var(--adm-card, #fff);
+  color: var(--adm-text, #222);
+}
+
+.pm-search-row input[type="search"]:focus {
+  outline: none;
+  border-color: var(--adm-accent, #c9a227);
+  box-shadow: 0 0 0 3px var(--adm-accent-wash, #faf3dd);
+}
+
+.pm-search-count {
+  font-size: 12px;
+  color: var(--adm-muted, #726d63);
+  white-space: nowrap;
+}
+
+/* ── ছবি আপলোড ড্রপজোন ── */
+.pm-uploader {
+  grid-column: 1 / -1;
+}
+
+.pm-dropzone {
+  display: flex;
+  gap: 14px;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+
+.pm-dropzone-preview {
+  width: 96px;
+  height: 96px;
+  flex: 0 0 96px;
+  border-radius: 8px;
+  border: 1px solid var(--adm-border, #e6e0d3);
+  background-color: var(--adm-bg-alt, #efeae0);
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pm-dropzone-empty {
+  font-size: 11px;
+  color: var(--adm-muted-2, #948e80);
+  text-align: center;
+  padding: 0 8px;
+}
+
+.pm-dropzone-drop {
+  flex: 1;
+  min-width: 180px;
+  border: 1.5px dashed var(--adm-border-strong, #d8d0bd);
+  border-radius: 8px;
+  padding: 12px 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  background: var(--adm-card-2, #fbf9f4);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.pm-dropzone-drop:hover {
+  border-color: var(--adm-accent, #c9a227);
+}
+
+.pm-dropzone-drop.is-drag {
+  border-color: var(--adm-accent, #c9a227);
+  background: var(--adm-accent-wash, #faf3dd);
+}
+
+.pm-dropzone-txt {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--adm-text, #221f2e);
+}
+
+.pm-dropzone-sub {
+  font-size: 11px;
+  color: var(--adm-muted, #726d63);
+}
+
+.pm-dropzone-status {
+  font-size: 11.5px;
+  margin-top: 4px;
+}
+
+/* ── কপি বাটন ── */
+.pm-dup {
+  border-color: var(--adm-accent, #c9a227) !important;
+  color: var(--adm-accent-ink, #5c4a13) !important;
+}

@@ -184,6 +184,42 @@
       });
   }
 
+  // নতুন: প্রোডাক্ট ছবি সরাসরি আপলোড (Base64) — GitHub-এর images/ ফোল্ডারে কমিট হয়
+  function uploadImage(fileName, base64Content, mimeType) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return timeoutPromise(
+      45000,
+      fetch(API_URL, {
+        method: "POST",
+        mode: "cors",
+        credentials: "omit",
+        body: (function () {
+          var body = new URLSearchParams();
+          body.append("RecordType", "AdminUploadImage");
+          body.append("Token", s.token);
+          body.append("FileName", fileName);
+          body.append("ContentBase64", base64Content);
+          body.append("MimeType", mimeType || "image/webp");
+          return body;
+        })()
+      })
+    )
+      .then(function (res) {
+        return res.text();
+      })
+      .then(function (text) {
+        try {
+          return JSON.parse(String(text || "").trim());
+        } catch (e) {
+          return { ok: false, error: "PARSE_FAILED", message: text };
+        }
+      })
+      .catch(function (err) {
+        return { ok: false, error: "NETWORK_FAILURE", message: err.message };
+      });
+  }
+
   g.MaAdmin = {
     login: login,
     logout: logout,
@@ -191,6 +227,7 @@
     verifySession: verifySession,
     fetchOrders: fetchOrders,
     publishFile: publishFile,
+    uploadImage: uploadImage,
     isLoggedIn: function () {
       return !!getSession();
     }

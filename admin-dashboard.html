@@ -10,49 +10,102 @@
 <script src="config.js"></script>
 </head>
 <body class="adm-body">
-  <header class="adm-topbar">
-    <div>
-      <h1>Admin Dashboard</h1>
-      <div class="adm-topbar-user" id="admUserLabel">—</div>
-    </div>
-    <div class="adm-topbar-actions">
-      <a class="adm-btn adm-btn-secondary" href="admin-links.html">Links</a>
-      <a class="adm-btn adm-btn-secondary" href="product-manager.html">Products</a>
-      <button type="button" class="adm-btn adm-btn-secondary" id="admRefresh">Refresh</button>
-      <button type="button" class="adm-btn adm-btn-secondary" id="admLogout">Logout</button>
-    </div>
-  </header>
+  <div class="adm-shell">
+    <div class="adm-sidebar-backdrop" id="admSbBackdrop"></div>
+    <aside class="adm-sidebar" id="admSidebar">
+      <div class="adm-sidebar-brand">
+        <div class="adm-sidebar-crest"></div>
+        <div class="adm-sidebar-brand-text"><div class="t1">Muslim Abaya</div><div class="t2">Admin Panel</div></div>
+        <button type="button" class="adm-sidebar-close" id="admSbClose" aria-label="মেনু বন্ধ করুন"><svg viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+      </div>
+      <nav class="adm-sidebar-nav">
+        <a class="adm-sidebar-item is-current" href="admin-dashboard.html"><svg viewBox="0 0 24 24" fill="none"><path d="M4 13h6V4H4v9Zm10 7h6v-9h-6v9ZM4 20h6v-5H4v5ZM14 4v6h6V4h-6Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span>ড্যাশবোর্ড</span></a>
+        <a class="adm-sidebar-item" href="product-manager.html"><svg viewBox="0 0 24 24" fill="none"><path d="M21 8 12 3 3 8l9 5 9-5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 8v8l9 5 9-5V8M12 13v8" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span>প্রোডাক্ট ম্যানেজার</span></a>
+        <a class="adm-sidebar-item" href="product-links.html"><svg viewBox="0 0 24 24" fill="none"><path d="M9.5 14.5 14.5 9.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M11 7.5 12.6 6a3.6 3.6 0 1 1 5.1 5.1L16 12.7M13 16.5 11.4 18a3.6 3.6 0 1 1-5.1-5.1L8 11.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>প্রোডাক্ট লিংক</span></a>
+        <a class="adm-sidebar-item" href="admin-links.html"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="4" y="13" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="13" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/></svg><span>পরিচালনা লিংক</span></a>
+      </nav>
+      <div class="adm-sidebar-foot">
+        <button type="button" class="adm-btn adm-btn-secondary" id="admLogout">লগআউট</button>
+      </div>
+    </aside>
 
-  <main class="adm-main">
-    <section class="adm-panel">
-      <h2>Online Orders</h2>
-      <div class="adm-toolbar">
-        <a class="adm-btn adm-btn-primary" id="admOpenSheet" href="#" target="_blank" rel="noopener">Open Google Sheet</a>
-        <a class="adm-btn adm-btn-secondary" id="admOpenScript" href="#" target="_blank" rel="noopener">Apps Script</a>
-        <span id="admOrderCount" style="font-size:0.85rem;color:#646970;align-self:center"></span>
-      </div>
-      <div class="adm-table-wrap">
-        <table class="adm-table" id="admOrdersTable">
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>Order ID</th>
-              <th>Customer</th>
-              <th>Phone</th>
-              <th>Total</th>
-              <th>Status</th>
-              <th>Payment</th>
-              <th>District</th>
-              <th>Design</th>
-            </tr>
-          </thead>
-          <tbody id="admOrdersBody">
-            <tr><td colspan="9" class="adm-empty">Loading orders…</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-  </main>
+    <div class="adm-content">
+      <header class="adm-topbar">
+        <div>
+          <button type="button" class="adm-menu-btn" id="admMenuBtn" aria-label="মেনু খুলুন"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+          <div>
+            <h1>Admin Dashboard</h1>
+            <div class="adm-topbar-user" id="admUserLabel">—</div>
+          </div>
+        </div>
+        <div class="adm-topbar-actions">
+          <button type="button" class="adm-btn adm-btn-secondary" id="admRefresh">Refresh</button>
+        </div>
+      </header>
+
+      <main class="adm-main">
+        <div class="adm-stats" id="admStats" hidden>
+          <div class="adm-stat-card">
+            <div class="adm-stat-top">
+              <div class="adm-stat-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M21 8 12 3 3 8l9 5 9-5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 8v8l9 5 9-5V8" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+            </div>
+            <div class="adm-stat-value" id="admStatCount">—</div>
+            <div class="adm-stat-label">মোট অর্ডার (তালিকায়)</div>
+          </div>
+          <div class="adm-stat-card">
+            <div class="adm-stat-top">
+              <div class="adm-stat-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 13h6V4H4v9Zm10 7h6v-9h-6v9ZM4 20h6v-5H4v5ZM14 4v6h6V4h-6Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+            </div>
+            <div class="adm-stat-value" id="admStatRevenue">—</div>
+            <div class="adm-stat-label">মোট মূল্য (তালিকায়)</div>
+          </div>
+          <div class="adm-stat-card">
+            <div class="adm-stat-top">
+              <div class="adm-stat-icon"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v5l3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+            </div>
+            <div class="adm-stat-value" id="admStatPending">—</div>
+            <div class="adm-stat-label">Pending অর্ডার</div>
+          </div>
+          <div class="adm-stat-card">
+            <div class="adm-stat-top">
+              <div class="adm-stat-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            </div>
+            <div class="adm-stat-value" id="admStatShipped">—</div>
+            <div class="adm-stat-label">Shipped / Delivered</div>
+          </div>
+        </div>
+
+        <section class="adm-panel">
+          <h2>Online Orders</h2>
+          <div class="adm-toolbar">
+            <a class="adm-btn adm-btn-primary" id="admOpenSheet" href="#" target="_blank" rel="noopener">Open Google Sheet</a>
+            <a class="adm-btn adm-btn-secondary" id="admOpenScript" href="#" target="_blank" rel="noopener">Apps Script</a>
+            <span id="admOrderCount" style="font-size:0.85rem;color:var(--adm-muted);align-self:center"></span>
+          </div>
+          <div class="adm-table-wrap">
+            <table class="adm-table" id="admOrdersTable">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Phone</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Payment</th>
+                  <th>District</th>
+                  <th>Design</th>
+                </tr>
+              </thead>
+              <tbody id="admOrdersBody">
+                <tr><td colspan="9" class="adm-empty">Loading orders…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
 
   <script src="site-api-config.js?v=20260529"></script>
   <script src="admin-config.js"></script>
@@ -94,6 +147,23 @@
           .join("");
       }
 
+      function renderStats(orders) {
+        var statsEl = document.getElementById("admStats");
+        if (!orders || !orders.length) { statsEl.hidden = true; return; }
+        var revenue = 0, pending = 0, shipped = 0;
+        orders.forEach(function (o) {
+          revenue += parseFloat(String(o.total || "0").replace(/[^\d.]/g, "")) || 0;
+          var s = String(o.status || "").toLowerCase();
+          if (!s || s.indexOf("pending") !== -1) pending++;
+          if (s.indexOf("ship") !== -1 || s.indexOf("deliver") !== -1) shipped++;
+        });
+        document.getElementById("admStatCount").textContent = orders.length;
+        document.getElementById("admStatRevenue").textContent = "৳" + revenue.toLocaleString("en-US");
+        document.getElementById("admStatPending").textContent = pending;
+        document.getElementById("admStatShipped").textContent = shipped;
+        statsEl.hidden = false;
+      }
+
       function escapeHtml(s) {
         return String(s || "")
           .replace(/&/g, "&amp;")
@@ -110,6 +180,7 @@
             document.getElementById("admOrderCount").textContent =
               res.count + " total orders found";
             renderOrders(res.orders);
+            renderStats(res.orders);
             if (res.sheetUrl) document.getElementById("admOpenSheet").href = res.sheetUrl;
             if (res.scriptUrl) document.getElementById("admOpenScript").href = res.scriptUrl;
           })
@@ -136,6 +207,17 @@
         MaAdmin.logout();
         location.href = "admin-login.html";
       });
+
+      // Mobile sidebar drawer
+      var sidebar = document.getElementById("admSidebar");
+      var backdrop = document.getElementById("admSbBackdrop");
+      var menuBtn = document.getElementById("admMenuBtn");
+      var closeBtn = document.getElementById("admSbClose");
+      function openDrawer() { sidebar.classList.add("is-open"); backdrop.classList.add("is-open"); }
+      function closeDrawer() { sidebar.classList.remove("is-open"); backdrop.classList.remove("is-open"); }
+      if (menuBtn) menuBtn.addEventListener("click", openDrawer);
+      if (closeBtn) closeBtn.addEventListener("click", closeDrawer);
+      if (backdrop) backdrop.addEventListener("click", closeDrawer);
     })();
   </script>
 </body>
