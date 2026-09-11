@@ -1,68 +1,104 @@
-// product-links-data.js
-//
-// NOTE: window.PRODUCT_LINKS_DATA is also the name product-utils.js's
-// normalizeAll()/applyLinkOverlay() expects for the *image-link overlay*
-// table (edited via product-links.html / product-manager.html) — there,
-// each category key must map to a plain array of image-URL strings,
-// positionally matched against category-products.js. This file previously
-// reused that exact same global name for an unrelated internal cache
-// (a plain copy of CATEGORY_PRODUCTS used only to look up related
-// products), which silently pre-empted the real overlay data and, even if
-// timing hadn't already made it a no-op, would have fed product *objects*
-// into code that expects URL *strings*. Renamed to a private cache key so
-// the two systems can no longer collide.
-if (typeof window !== 'undefined') {
-    window.RELATED_PRODUCTS = window.RELATED_PRODUCTS || {
-        'abaya': ['premium-two-piece', 'tops-kurti'],
-        'premium-two-piece': ['abaya', 'tops-kurti'],
-        'tops-kurti': ['premium-two-piece', 'abaya'],
-        'cover-up': ['abaya', 'premium-two-piece'],
-        'kaftan': ['abaya', 'premium-two-piece'],
-        'hijab': ['abaya', 'premium-two-piece'],
-        'panjabi': ['abaya', 'premium-two-piece']
-    };
-}
-
-function getRelatedProducts(currentCategory, limit = 4) {
-    const targetCategories = (window.RELATED_PRODUCTS && window.RELATED_PRODUCTS[currentCategory]) || [];
-    let recommendations = [];
-
-    if (typeof window !== 'undefined' && !window.__relatedProductsCache && window.CATEGORY_PRODUCTS) {
-        window.__relatedProductsCache = {};
-        for (const catKey in window.CATEGORY_PRODUCTS) {
-            window.__relatedProductsCache[catKey] = window.CATEGORY_PRODUCTS[catKey];
-        }
-    }
-
-    const linksData = window.__relatedProductsCache || window.CATEGORY_PRODUCTS || {};
-
-    targetCategories.forEach(cat => {
-        const productsInCat = linksData[cat] || [];
-        const items = productsInCat.slice(0, 2);
-        recommendations = [...recommendations, ...items];
-    });
-
-    if (recommendations.length === 0 && typeof window !== 'undefined' && window.CATEGORY_PRODUCTS) {
-        for (const cat in window.CATEGORY_PRODUCTS) {
-            if (cat !== currentCategory) {
-                const list = window.CATEGORY_PRODUCTS[cat];
-                recommendations = [...recommendations, ...list.slice(0, 2)];
-            }
-        }
-    }
-
-    // Dedupe by product id (fast + correct) instead of JSON.stringify-ing
-    // whole objects (slow, and fragile if key order ever differs).
-    const seenIds = new Set();
-    const uniqueRecommendations = recommendations.filter(p => {
-        if (!p || p.id == null || seenIds.has(p.id)) return false;
-        seenIds.add(p.id);
-        return true;
-    });
-
-    return uniqueRecommendations.slice(0, limit);
-}
-
-if (typeof window !== 'undefined') {
-    window.getRelatedProducts = getRelatedProducts;
-}
+/**
+ * ═══ সব ক্যাটাগরির প্রোডাক্ট ছবির লিংক — এক জায়গা ═══
+ * এডিট: product-manager.html (প্রতি প্রোডাক্টে ছবির URL) → সেভ
+ * আপডেট: 2026-09-11
+ */
+window.PRODUCT_LINKS_DATA = {
+  abaya: [
+    "images/Maroon Abaya Set...jpeg",
+    "images/premium-black-3-part-abaya-set-muslim-abaya-bd.webp",
+    "images/premium-black-gold-stone-work-abaya-1080x1350.webp",
+    "images/premium-black-silver-stone-work-abaya-1080x1350.webp",
+    "images/Black.jpeg",
+    "images/Versace Border Premium Abaya Set...jpg",
+    "images/Abaya/premium-black-layered-khimar-niqab-abaya-for-women-muslimabaya.webp",
+    "images/Versace Border Premium Abaya Set.jpg",
+    "images/Premium-Floral-Motif-Abaya-Set...jpeg",
+    "images/Premium-Floral-Motif-Abaya-Set..jpeg",
+    "images/Premium-Floral-Motif-Abaya-Set.jpeg",
+    "images/Butterfly-Ababa....jpg",
+    "images/Butterfly-Ababa...jpg",
+    "images/Butterfly-Ababa..jpg",
+    "images/Butterfly-Ababa.jpg",
+  ],
+  "cover-up": [
+    "images/cover-up/premium-black-butterfly-khimar-abaya-with-niqab-luxury-modest-fashion-bangladesh-1080x1350.webp",
+  ],
+  "premium-two-piece": [
+    "images/two-piece-dress/muslimabaya-white-strawberry-print-cotton-kurti-set-for-women.webp",
+    "images/Baby-Pink-Floral-Print.jpeg",
+    "images/Black-Base-Rose-Floral.jpeg",
+    "images/Black-White-Polka-Dots.jpeg",
+    "images/Royal-Blue-Golden-Floral-Print.jpeg",
+    "images/two-piece-dress/premium-navy-blue-bicycle-print-womens-tiered-maxi-dress-bangladesh-1080x1350.webp",
+    "images/white-pink-floral-print-womens-co-ord-set-premium.webp",
+    "images/premium-black-floral-womens-co-ord-set-bangladesh.webp",
+    "images/premium-blue-floral-co-ord-set.webp",
+    "images/premium-navy-blue-floral-co-ord-set.webp",
+    "images/premium-pink-floral-co-ord-set.webp",
+    "images/Gowns/black-cream-floral-womens-two-piece-dress.jpg",
+    "images/premium-black-floral-co-ord-set-gold-accent.webp",
+    "images/two-piece-dress/premium-green-yellow-floral-cotton-womens-maxi-dress-bangladesh-1080x1350.webp",
+    "images/two-piece-dress/premium-green-cotton-embroidered-2-piece-women-salwar-kameez-set-bangladesh-1080x1350.webp",
+    "images/two-piece-dress/premium-navy-blue-embroidered-cotton-two-piece-women-salwar-kameez-set-bangladesh-1080x1350.webp",
+    "images/two-piece-dress/premium-red-embroidered-cotton-two-piece-women-salwar-kameez-set-bangladesh-1080x1350.webp",
+    "images/two-piece-dress/premium-mustard-yellow-embroidered-cotton-two-piece-women-salwar-kameez-set-bangladesh-1080x1350.webp",
+    "images/two-piece-dress/black-purple-floral-printed-long-kurti-womens-dress.webp",
+    "images/two-piece-dress/yellow-womens-kurti-3-piece-dress-green-flower-design.webp",
+    "https://muslimabaya.netlify.app/catalog/images/charcoal-black-embroidered-kurti.webp",
+    "https://muslimabaya.netlify.app/catalog/images/mustard-yellow-embroidered-kurti.webp",
+    "https://muslimabaya.netlify.app/catalog/images/pastel-pink-embroidered-kurti.webp",
+    "https://muslimabaya.netlify.app/catalog/images/maroon-embroidered-kurti-for-women.webp",
+    "https://muslimabaya.netlify.app/catalog/images/dusty-rose-embroidered-kurti-for-women-bangladesh.webp",
+    "https://muslimabaya.netlify.app/catalog/images/mauve-lavender-embroidered-kurta-for-women.webp",
+    "https://muslimabaya.netlify.app/catalog/images/cream-beige-womens-embroidered-kurti-floral-design.webp",
+  ],
+  "tops-kurti": [
+    "images/Classic Purple Lace-Work Kurti  MUSLIM ABAYA.WebP",
+    "images/Elegant Grey Leaf Print Kurti  MUSLIM ABAYA.WebP",
+    "images/Elegant Purple Floral Kurti  MUSLIM ABAYA.WebP",
+    "images/Elegant White Leaf Print Kurti  MUSLIM ABAYA.WebP",
+    "images/Light Pink Soft Floral Kurti  MUSLIM ABAYA.WebP",
+    "images/Magenta Leaf Print Kurti  MUSLIM ABAYA.WebP",
+    "images/Magenta Tassel Detail Kurti  MUSLIM ABAYA.WebP",
+    "images/Premium Pink Floral Lace-Work Kurti  MUSLIM ABAYA.WebP",
+    "images/Vibrant Magenta Floral Kurti  MUSLIM ABAYA.WebP",
+    "images/premium-yellow-tie-dye-cotton-maxi-dress-for-women.webp",
+    "images/stylish-green-floral-cotton-midi-dress-womens-fashion.webp",
+    "images/white-cherry-print-cotton-one-piece-dress-for-women.webp",
+    "images/white-lavender-floral-cotton-one-piece-dress-for-women-muslimabaya.webp",
+    "images/white-maroon-block-print-cotton-one-piece-dress-for-women.webp",
+    "images/white-red-heart-print-cotton-one-piece-dress-for-women.webp",
+    "images/yellow-cotton-flared-one-piece-dress-for-women.webp",
+    "images/yellow-striped-cotton-one-piece-dress-for-women.webp",
+    "images/premium-sky-blue-botanical-print-cotton-one-piece-dress-for-women.webp",
+    "images/white-lilac-botanical-print-cotton-one-piece-dress-for-women.webp",
+    "images/black-white-floral-puff-sleeve-maxi-dress-modern-lifestyle.webp",
+    "images/white-yellow-floral-puff-sleeve-cotton-maxi-dress-premium-lifestyle.webp",
+    "images/navy-blue-white-floral-cotton-maxi-dress-premium-lifestyle.webp",
+    "images/cream-black-floral-cotton-maxi-dress-premium-lifestyle.webp",
+    "images/sage-green-white-floral-cotton-maxi-dress-premium-lifestyle.webp",
+    "images/black-white-geometric-print-cotton-one-piece-kurti-for-women-bangladesh.webp",
+    "images/Premium-Tribal-Print-One-Piece-Black.webp",
+    "images/Premium-Tribal-Print-One-Piece-Cherry-Red.webp",
+    "images/Premium-Tribal-Print-One-Piece-Navy-Blue.webp",
+    "images/Premium-Tribal-Print-One-Piece-Rust-Brown.webp",
+    "images/premium-pink-floral-midi-dress-for-women-bangladesh.webp",
+    "images/brown-embroidered-womens-3-piece-kurti-set.webp",
+  ],
+  embroidery: [
+    "images/dil-bahar-black-stone-work-abaya-original-dubai-cherry-fabric-bangladesh.webp",
+  ],
+  karchupi: [
+  ],
+  kaftan: [
+  ],
+  hijab: [
+    "images/premium-short-khimar-hijab-dusty-pink-soft-jersey.webp",
+  ],
+  panjabi: [
+    "images/premium-white-islamic-mens-kurta-full-sleeve-outdoor-portrait-bangladesh.webp",
+    "images/premium-mens-off-white-cotton-panjabi-modern-1080x1350.webp",
+    "images/premium-white-cotton-panjabi-mens-islamic-fashion-modern-design-1080x1350.webp",
+  ]
+};
