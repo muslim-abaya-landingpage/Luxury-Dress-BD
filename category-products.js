@@ -1,1417 +1,947 @@
 /**
- * ═══════════════════════════════════════════════════════════════════
- *  প্রোডাক্ট যোগ/বাদ — শুধু এই ফাইল এডিট করুন (PRODUCT-GUIDE.md দেখুন)
- *  • বাল্ক ছবি লিংক: product-links.html → product-links-data.js
- *  • পুরো তথ্য: নিচের অ্যারেতে { id, name, image, price, stock, ... }
- *  • স্টক: stock: 5 = ৫টা আছে | stock: 0 বা inStock: false = Sold Out
- *    খালি রাখলে আগের মতোই In Stock (আনলিমিটেড)। সব ভিজিটরের জন্য
- *    এখানেই এডিট করতে হয় — অর্ডার অটো কমাতে পারে না (স্ট্যাটিক সাইট)।
- *  • লিংক সার্ভার বদল: product-config.js → SITE_LINKS.images
- *  • Abaya → abaya:[] | Two-piece → "premium-two-piece":[] | খালি ক্যাটাগরি → []
- *  • product-links-data শুধু ছবি আপডেট করে; নতুন প্রোডাক্ট শুধু এখানে + ম্যানেজার থেকে
- * ═══════════════════════════════════════════════════════════════════
+ * প্রোডাক্ট ডেটা — product-manager.html থেকে এডিট করুন
+ * আপডেট: 2026-09-11
  */
 window.CATEGORY_PRODUCTS = {
-
-  /* ═══ ① আবায়া সারি · ABAYA · abaya.html · /abaya ═══ */
- abaya: [
-  {
-    id: "ABY-MAROON-1",
-    name: "Maroon Abaya Set",
-    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Maroon%20Abaya%20Set...jpeg",
-    link: "/",
-    price: 999,
-    color: "maroon",
-    colorLabel: "Maroon",
-    fabric: "Dubai Cherry",
-    sizes: ["44", "46", "48", "50", "52", "54", "56"],
-    priceByType: { "Abaya Only": 799, "Full Set": 999 }
-  },
-
-  {
-    id: "ABY-BLK-3P-02",
-    name: "Premium Black 3 Part Abaya Set",
-    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-black-3-part-abaya-set-muslim-abaya-bd.webp",
-    link: "/",
-    price: 1450,
-    color: "black",
-    colorLabel: "Classic Black",
-    fabric: "Premium Chiffon Georgette + Dubai Cherry",
-    sizes: ["44", "46", "48", "50", "52", "54", "56"],
-    priceByType: { "Abaya Only": 1150, "Full Set": 1450 },
-    detailNote: "3 Part Premium Abaya Set including Koti, Inner & Hijab. Premium Chiffon Georgette Koti and Hijab with Soft Dubai Cherry Inner."
-  },
-
-  {
-    id: "ABY-BLACK-3",
-    name: "Premium Black Gold Stone Work Abaya Set",
-    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-black-gold-stone-work-abaya-1080x1350.webp",
-    link: "/",
-    price: 1650,
-    color: "black",
-    colorLabel: "Classic Black",
-    fabric: "Original Cherry Clothing",
-    sizes: ["44", "46", "48", "50", "52", "54", "56"],
-    priceByType: { "Abaya Only": 1250, "Full Set": 1650 }
-  },
-
-  {
-    id: "ABY-BLACK-4",
-    name: "Premium Black Silver Stone Work Abaya Set",
-    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-black-silver-stone-work-abaya-1080x1350.webp",
-    link: "/",
-    price: 1650,
-    color: "black",
-    colorLabel: "Classic Black",
-    fabric: "Original Cherry Clothing",
-    sizes: ["44", "46", "48", "50", "52", "54", "56"],
-    priceByType: { "Abaya Only": 1250, "Full Set": 1650 }
-  },
-
-   {
-    id: "ABY-BLACK-6",
-    name: "Black Abaya Set - Side",
-    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Black.jpeg",
-    link: "/",
-    price: 999,
-    color: "black",
-    colorLabel: "Classic Black",
-    fabric: "Dubai Cherry",
-    sizes: ["44", "46", "48", "50", "52", "54", "56"],
-    priceByType: { "Abaya Only": 799, "Full Set": 999 }
-  },
-
-  {
-    id: "ABY-VERSACE-7",
-    name: "Versace Border Premium Abaya Set",
-    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Versace%20Border%20Premium%20Abaya%20Set...jpg",
-    link: "/",
-    price: 1750,
-    color: "black",
-    colorLabel: "Classic Black",
-    fabric: "Dubai Cherry",
-    sizes: ["44", "46", "48", "50", "52", "54", "56"],
-    priceByType: { "Abaya Only": 1550, "Full Set": 1750 }
-  },
-  {
-  id: "ABY-VERSACE-8",
-  name: "Premium Black Hafeza Set",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Abaya/premium-black-layered-khimar-niqab-abaya-for-women-muslimabaya.webp",
-    images: [
-      "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Abaya/premium-black-layered-khimar-niqab-abaya-for-women-muslimabaya.webp",
-      "https://muslimabaya.netlify.app/catalog/images/abaya-teal.webp",
-      "https://muslimabaya.netlify.app/catalog/images/abaya-white.webp"
-    ],
-    colorVariants: [
-      { color: "black", colorLabel: "Classic Black", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Abaya/premium-black-layered-khimar-niqab-abaya-for-women-muslimabaya.webp" },
-      { color: "teal", colorLabel: "Teal", image: "https://muslimabaya.netlify.app/catalog/images/abaya-teal.webp" },
-      { color: "white", colorLabel: "White", image: "https://muslimabaya.netlify.app/catalog/images/abaya-white.webp" }
-    ],
-  link: "/",
-  price: 2385,
-  color: "black",
-    colorLabel: "3 Colors",
-  fabric: "Original Dubai Cherry Fabric",
-  sizes: ["50", "52", "54", "56", "58"],
-  priceByType: {
-    "Hijab + Niqab": 1200,
-    "Full Hafeza Set": 2385
-  },
-  detailNote: "Premium Hafeza Set made from Original Dubai Cherry Fabric. Abaya length: 50, 52, 54, 56 and 58 inches. Flare: 180+ inches. Hijab and Niqab are made from Original China Soft Georgette Fabric. Hoodie Hijab features 3 parts at the back and 2 parts at the front, with a 56-inch back and 45-inch front. 2-part nose niqab with a 25-inch front."
-},
-
-  {
-    id: "ABY-VERSACE-9",
-    name: "Versace Border Premium Abaya Set - Side",
-    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Versace%20Border%20Premium%20Abaya%20Set.jpg",
-    link: "/",
-    price: 1750,
-    color: "black",
-    colorLabel: "Classic Black",
-    fabric: "Dubai Cherry",
-    sizes: ["44", "46", "48", "50", "52", "54", "56"],
-    priceByType: { "Abaya Only": 1550, "Full Set": 1750 }
-  },
-
-  {
-    id: "ABY-FLORAL-10",
-    name: "Premium Floral Motif Abaya Set",
-    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Floral-Motif-Abaya-Set...jpeg",
-    link: "/",
-    price: 1850,
-    color: "black",
-    colorLabel: "Classic Black",
-    fabric: "Dubai Cherry",
-    sizes: ["44", "46", "48", "50", "52", "54", "56"],
-    priceByType: { "Abaya Only": 1650, "Full Set": 1850 }
-  },
-
-  {
-    id: "ABY-FLORAL-11",
-    name: "Premium Floral Motif Abaya Set - Back",
-    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Floral-Motif-Abaya-Set..jpeg",
-    link: "/",
-    price: 1850,
-    color: "black",
-    colorLabel: "Classic Black",
-    fabric: "Dubai Cherry",
-    sizes: ["44", "46", "48", "50", "52", "54", "56"],
-    priceByType: { "Abaya Only": 1650, "Full Set": 1850 }
-  },
-
-  {
-    id: "ABY-FLORAL-12",
-    name: "Premium Floral Motif Abaya Set - Side",
-    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Floral-Motif-Abaya-Set.jpeg",
-    link: "/",
-    price: 1850,
-    color: "black",
-    colorLabel: "Classic Black",
-    fabric: "Dubai Cherry",
-    sizes: ["44", "46", "48", "50", "52", "54", "56"],
-    priceByType: { "Abaya Only": 1650, "Full Set": 1850 }
-  },
-
-  {
-    id: "ABY-BUTTERFLY-13",
-    name: "Butterfly Abaya Set",
-    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Butterfly-Ababa....jpg",
-    link: "/",
-    price: 1350,
-    color: "black",
-    colorLabel: "Classic Black",
-    fabric: "Dubai Cherry",
-    sizes: ["44", "46", "48", "50", "52", "54", "56"],
-    priceByType: { "Abaya Only": 799, "Full Set": 1350 }
-  },
-
-  {
-    id: "ABY-BUTTERFLY-14",
-    name: "Butterfly Abaya Set - Back",
-    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Butterfly-Ababa...jpg",
-    link: "/",
-    price: 1350,
-    color: "black",
-    colorLabel: "Classic Black",
-    fabric: "Dubai Cherry",
-    sizes: ["44", "46", "48", "50", "52", "54", "56"],
-    priceByType: { "Abaya Only": 799, "Full Set": 1350 }
-  },
-
-  {
-    id: "ABY-BUTTERFLY-15",
-    name: "Butterfly Abaya Set - Side",
-    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Butterfly-Ababa..jpg",
-    link: "/",
-    price: 1350,
-    color: "black",
-    colorLabel: "Classic Black",
-    fabric: "Dubai Cherry",
-    sizes: ["44", "46", "48", "50", "52", "54", "56"],
-    priceByType: { "Abaya Only": 799, "Full Set": 1350 }
-  },
-
-  {
-    id: "ABY-BUTTERFLY-16",
-    name: "Butterfly Abaya Set - Detail",
-    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Butterfly-Ababa.jpg",
-    link: "/",
-    price: 1350,
-    color: "black",
-    colorLabel: "Classic Black",
-    fabric: "Dubai Cherry",
-    sizes: ["44", "46", "48", "50", "52", "54", "56"],
-    priceByType: { "Abaya Only": 799, "Full Set": 1350 }
-  }
-],
-  /* ═══ ② কভার আপ — খালি (প্রোডাক্ট-এডিট.bat থেকে যোগ করুন) ═══ */
-  "cover-up": [
-  {
-  id: "ABY-COVERUP-01",
-  name: "Premium Black Butterfly Khimar Abaya with Niqab",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/cover-up/premium-black-butterfly-khimar-abaya-with-niqab-luxury-modest-fashion-bangladesh-1080x1350.webp",
-  link: "/",
-  price: 1800,
-  color: "black",
-  colorLabel: "Classic Black",
-  fabric: "Premium Cherry Fabric",
-  sizes: ["50", "52", "54", "56", "58"],
-  detailNote: "Premium butterfly khimar abaya with matching niqab, crafted from high-quality Cherry Fabric. Soft, breathable, lightweight, and designed for elegant modest wear with a graceful flow and premium finishing."
-}
-  ],
-
-  /* ═══ TOPS / KURTI LIST ═══ */
-
-"tops-kurti": [
-{
-  id: "KURTI-01",
-  name: "Classic Purple Lace-Work Kurti",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/a6e3af9c7beb66737b0d58b8ee90fdf8e62ebee6/images/Classic%20Purple%20Lace-Work%20Kurti%20%20MUSLIM%20ABAYA.WebP",
-  link: "/",
-  price: 250,
-  color: "purple",
-  colorLabel: "Purple",
-  fabric: "TC Cotton",
-  sizes: ["38", "40"],
-  detailNote: "Comfortable lace-work kurti made with premium cotton fabric. Length: 34 inches."
-},
-{
-  id: "KURTI-02",
-  name: "Elegant Grey Leaf Print Kurti",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/a6e3af9c7beb66737b0d58b8ee90fdf8e62ebee6/images/Elegant%20Grey%20Leaf%20Print%20Kurti%20%20MUSLIM%20ABAYA.WebP",
-  link: "/",
-  price: 250,
-  color: "grey",
-  colorLabel: "Grey",
-  fabric: "TC Cotton",
-  sizes: ["38", "40"],
-  detailNote: "Stylish leaf print design for daily wear."
-},
-{
-  id: "KURTI-03",
-  name: "Elegant Purple Floral Kurti",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/a6e3af9c7beb66737b0d58b8ee90fdf8e62ebee6/images/Elegant%20Purple%20Floral%20Kurti%20%20MUSLIM%20ABAYA.WebP",
-  link: "/",
-  price: 250,
-  color: "purple",
-  colorLabel: "Purple",
-  fabric: "TC Cotton",
-  sizes: ["38", "40"],
-  detailNote: "Floral printed kurti suitable for office and casual wear."
-},
-{
-  id: "KURTI-04",
-  name: "Elegant White Leaf Print Kurti",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/a6e3af9c7beb66737b0d58b8ee90fdf8e62ebee6/images/Elegant%20White%20Leaf%20Print%20Kurti%20%20MUSLIM%20ABAYA.WebP",
-  link: "/",
-  price: 250,
-  color: "white",
-  colorLabel: "White",
-  fabric: "TC Cotton",
-  sizes: ["38", "40"],
-  detailNote: "Light and breathable cotton fabric perfect for summer."
-},
-{
-  id: "KURTI-05",
-  name: "Light Pink Floral Kurti",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/a6e3af9c7beb66737b0d58b8ee90fdf8e62ebee6/images/Light%20Pink%20Soft%20Floral%20Kurti%20%20MUSLIM%20ABAYA.WebP",
-  link: "/",
-  price: 250,
-  color: "pink",
-  colorLabel: "Light Pink",
-  fabric: "TC Cotton",
-  sizes: ["38", "40"],
-  detailNote: "Soft pink floral design for everyday comfort."
-},
-{
-  id: "KURTI-06",
-  name: "Magenta Leaf Print Kurti",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/a6e3af9c7beb66737b0d58b8ee90fdf8e62ebee6/images/Magenta%20Leaf%20Print%20Kurti%20%20MUSLIM%20ABAYA.WebP",
-  link: "/",
-  price: 250,
-  color: "magenta",
-  colorLabel: "Magenta",
-  fabric: "TC Cotton",
-  sizes: ["38", "40"],
-  detailNote: "Soft cotton kurti with vibrant magenta color."
-},
-{
-  id: "KURTI-07",
-  name: "Magenta Tassel Detail Kurti",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/a6e3af9c7beb66737b0d58b8ee90fdf8e62ebee6/images/Magenta%20Tassel%20Detail%20Kurti%20%20MUSLIM%20ABAYA.WebP",
-  link: "/",
-  price: 250,
-  color: "magenta",
-  colorLabel: "Magenta",
-  fabric: "TC Cotton",
-  sizes: ["38", "40"],
-  detailNote: "Stylish tassel design kurti for modern look."
-},
-{
-  id: "KURTI-08",
-  name: "Pink Floral Lace Work Kurti",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/a6e3af9c7beb66737b0d58b8ee90fdf8e62ebee6/images/Premium%20Pink%20Floral%20Lace-Work%20Kurti%20%20MUSLIM%20ABAYA.WebP",
-  link: "/",
-  price: 250,
-  color: "pink",
-  colorLabel: "Pink",
-  fabric: "TC Cotton",
-  sizes: ["38", "40"],
-  detailNote: "Elegant lace work floral kurti design."
-},
-{
-  id: "KURTI-09",
-  name: "Vibrant Magenta Floral Kurti",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/a6e3af9c7beb66737b0d58b8ee90fdf8e62ebee6/images/Vibrant%20Magenta%20Floral%20Kurti%20%20MUSLIM%20ABAYA.WebP",
-  link: "/",
-  price: 250,
-  color: "magenta",
-  colorLabel: "Magenta",
-  fabric: "TC Cotton",
-  sizes: ["38", "40"],
-  detailNote: "Bright floral kurti for stylish daily wear."
-},
-{
-  id: "KURTI-10",
-  name: "Premium Yellow Tie-Dye Cotton Maxi Dress",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-yellow-tie-dye-cotton-maxi-dress-for-women.webp",
-  link: "/",
-  price: 350,
-  color: "yellow",
-  colorLabel: "Yellow",
-  fabric: "Premium Cotton Fabric",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Attractive tie-dye design maxi dress. Length: 43–44 inches, Flare: 80 inches."
-},
-{
-  id: "KURTI-11",
-  name: "Stylish Green Floral Cotton Midi Dress",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/stylish-green-floral-cotton-midi-dress-womens-fashion.webp",
-  link: "/",
-  price: 350,
-  color: "green",
-  colorLabel: "Green",
-  fabric: "Premium Cotton Fabric",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Floral printed midi dress in soft cotton fabric."
-},
-{
-  id: "KURTI-12",
-  name: "White Cherry Print Cotton One Piece",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-cherry-print-cotton-one-piece-dress-for-women.webp",
-  link: "/",
-  price: 350,
-  color: "white",
-  colorLabel: "White",
-  fabric: "Premium Cotton Fabric",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Beautiful cherry print one-piece dress."
-},
-{
-  id: "KURTI-13",
-  name: "White Lavender Floral Cotton Dress",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-lavender-floral-cotton-one-piece-dress-for-women-muslimabaya.webp",
-  link: "/",
-  price: 350,
-  color: "white",
-  colorLabel: "White / Lavender",
-  fabric: "Premium Cotton Fabric",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Soft lavender floral cotton dress."
-},
-{
-  id: "KURTI-14",
-  name: "White Maroon Block Print Cotton Dress",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-maroon-block-print-cotton-one-piece-dress-for-women.webp",
-  link: "/",
-  price: 350,
-  color: "white",
-  colorLabel: "White / Maroon",
-  fabric: "Premium Cotton Fabric",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Traditional block print cotton dress."
-},
-{
-  id: "KURTI-15",
-  name: "White Red Heart Print Cotton Dress",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-red-heart-print-cotton-one-piece-dress-for-women.webp",
-  link: "/",
-  price: 350,
-  color: "white",
-  colorLabel: "White / Red",
-  fabric: "Premium Cotton Fabric",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Cute heart print cotton dress."
-},
-{
-  id: "KURTI-16",
-  name: "Yellow Cotton Flared One Piece",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/yellow-cotton-flared-one-piece-dress-for-women.webp",
-  link: "/",
-  price: 350,
-  color: "yellow",
-  colorLabel: "Yellow",
-  fabric: "Premium Cotton Fabric",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Comfortable flared cotton dress."
-},
-{
-  id: "KURTI-17",
-  name: "Yellow Striped Cotton One Piece",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/yellow-striped-cotton-one-piece-dress-for-women.webp",
-  link: "/",
-  price: 350,
-  color: "yellow",
-  colorLabel: "Yellow",
-  fabric: "Premium Cotton Fabric",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Casual striped cotton dress."
-},
-{
-  id: "KURTI-18",
-  name: "Premium Sky Blue Botanical Print Cotton One Piece Dress",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-sky-blue-botanical-print-cotton-one-piece-dress-for-women.webp",
-  link: "/",
-  price: 350,
-  color: "blue",
-  colorLabel: "Sky Blue",
-  fabric: "Premium Cotton Fabric",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Premium sky blue botanical print cotton dress. Length: 38–40 Inches, Flare: 80 Inches"
-},
-{
-  id: "KURTI-19",
-  name: "White Lilac Botanical Print Cotton One Piece Dress",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-lilac-botanical-print-cotton-one-piece-dress-for-women.webp",
-  link: "/",
-  price: 350,
-  color: "white",
-  colorLabel: "White / Lilac",
-  fabric: "Premium Cotton Fabric",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Elegant white and lilac botanical print cotton one piece dress. Length: 38–40 Inches, Flare: 80 Inches"
-},
-{
-  id: "KURTI-20",
-  name: "Black White Floral Puff Sleeve Maxi Dress",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/black-white-floral-puff-sleeve-maxi-dress-modern-lifestyle.webp",
-  link: "/",
-  price: 350,
-  color: "black",
-  colorLabel: "Black / White",
-  fabric: "Premium Cotton Fabric",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Elegant Black & White floral print puff sleeve maxi dress. Length: 38–40 Inches, Flare: 80 Inches."
-},
-{
-  id: "KURTI-21",
-  name: "White Yellow Floral Puff Sleeve Cotton Maxi Dress",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-yellow-floral-puff-sleeve-cotton-maxi-dress-premium-lifestyle.webp",
-  link: "/",
-  price: 350,
-  color: "white",
-  colorLabel: "White / Yellow",
-  fabric: "Premium Cotton Fabric",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Elegant White & Yellow floral print puff sleeve cotton maxi dress. Length: 38–40 Inches, Flare: 80 Inches."
-},
-{
-  id: "KURTI-22",
-  name: "Navy Blue White Floral Cotton Maxi Dress",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/navy-blue-white-floral-cotton-maxi-dress-premium-lifestyle.webp",
-  link: "/",
-  price: 350,
-  color: "navy",
-  colorLabel: "Navy Blue / White",
-  fabric: "Premium Cotton Fabric",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Elegant Navy Blue & White floral print cotton maxi dress. Length: 38–40 Inches, Flare: 80 Inches."
-},
-{
-  id: "KURTI-23",
-  name: "Cream Black Floral Cotton Maxi Dress",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/cream-black-floral-cotton-maxi-dress-premium-lifestyle.webp",
-  link: "/",
-  price: 350,
-  color: "cream",
-  colorLabel: "Cream / Black",
-  fabric: "Premium Cotton Fabric",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Elegant Cream & Black floral print cotton maxi dress. Length: 38–40 Inches, Flare: 80 Inches."
-},
-{
-  id: "KURTI-24",
-  name: "Sage Green White Floral Cotton Maxi Dress",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/sage-green-white-floral-cotton-maxi-dress-premium-lifestyle.webp",
-  link: "/",
-  price: 350,
-  color: "green",
-  colorLabel: "Sage Green / White",
-  fabric: "Premium Cotton Fabric",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Elegant Sage Green & White floral print cotton maxi dress. Length: 38–40 Inches, Flare: 80 Inches."
-},
-{
-  id: "KURTI-25",
-  name: "Black White Geometric Print Cotton One Piece Kurti",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/black-white-geometric-print-cotton-one-piece-kurti-for-women-bangladesh.webp",
-  link: "/",
-  price: 350,
-  color: "black",
-  colorLabel: "Black / White",
-  fabric: "Premium Cotton Fabric",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Elegant black & white geometric print premium cotton one-piece kurti. Length: 38–40 Inches, Flare: 80 Inches."
-},
-{
-  id: "KURTI-26",
-  name: "Premium Tribal Print Cotton One-Piece Maxi Dress - Black",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Tribal-Print-One-Piece-Black.webp",
-  link: "/",
-  price: 450,
-  color: "black",
-  colorLabel: "Black",
-  fabric: "Premium Cotton Fabric",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 38–40 inches, flare: 80 inches."
-},
-{
-  id: "KURTI-27",
-  name: "Premium Tribal Print Cotton One-Piece Maxi Dress - Cherry Red",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Tribal-Print-One-Piece-Cherry-Red.webp",
-  link: "/",
-  price: 450,
-  color: "red",
-  colorLabel: "Cherry Red",
-  fabric: "Premium Cotton Fabric",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 38–40 inches, flare: 80 inches."
-},
-{
-  id: "KURTI-28",
-  name: "Premium Tribal Print Cotton One-Piece Maxi Dress - Navy Blue",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Tribal-Print-One-Piece-Navy-Blue.webp",
-  link: "/",
-  price: 450,
-  color: "blue",
-  colorLabel: "Navy Blue",
-  fabric: "Premium Cotton Fabric",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 38–40 inches, flare: 80 inches."
-},
-{
-  id: "KURTI-29",
-  name: "Premium Tribal Print Cotton One-Piece Maxi Dress - Rust Brown",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Premium-Tribal-Print-One-Piece-Rust-Brown.webp",
-  link: "/",
-  price: 450,
-  color: "brown",
-  colorLabel: "Rust Brown",
-  fabric: "Premium Cotton Fabric",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 38–40 inches, flare: 80 inches."
-},
-{
-  id: "KURTI-32",
-  name: "Premium Pink Floral Midi Dress",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-pink-floral-midi-dress-for-women-bangladesh.webp",
-  link: "/",
-  price: 350,
-  color: "pink",
-  colorLabel: "Pink Floral",
-  fabric: "Premium Cotton Fabric",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Premium cotton midi dress with elegant pink floral print. Soft, breathable fabric with a comfortable A-line fit for everyday wear."
-},
-{
-  id: "KURTI-33",
-  name: "Premium Yellow Striped Midi Dress",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-yellow-striped-midi-dress-women-bangladesh.webp",
-  link: "/",
-  price: 350,
-  color: "yellow",
-  colorLabel: "Yellow Striped",
-  fabric: "Premium Cotton Fabric",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Premium cotton midi dress featuring elegant yellow striped design. Soft, breathable fabric with a stylish and comfortable fit for daily wear."
-}
-],
-/* ═══ ④ টু-পিস সারি · PREMIUM TWO-PIECE · premium-two-piece.html ═══ */
- "premium-two-piece": [
- {
-  id: "DR-01",
-  name: "White Strawberry Print Women's Two-Piece Set",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/muslimabaya-white-strawberry-print-cotton-kurti-set-for-women.webp",
-  link: "/",
-  price: 650,
-  color: "white",
-  colorLabel: "White / Strawberry Print",
-  fabric: "Premium Cotton Fabric",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  bodySizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Material: Premium Cotton Fabric | Top Length: 38–40 Inches | Pant Length: 38 Inches",
-  // Premium Body Size
-  bodySizeLabel: "34–46",
-
-  // Only additional specifications
-  sizeSpecs: [
-    { label: "Top Length", value: "38–40 Inches" },
-    { label: "Pant Length", value: "38 Inches" }
-  ]
-},
-{
-  id: "DR-02",
-  name: "Baby Pink Floral Print Women's Two-Piece Set",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Baby-Pink-Floral-Print.jpeg",
-  link: "/",
-  price: 550,
-  color: "pink",
-  colorLabel: "Baby Pink Floral",
-  fabric: "Alex Soft Georgette",
-  sizes: ["Body 42 (Free Size)"],
-  detailNote: "Length: 37–38 Inches"
-},
-{
-  id: "DR-03",
-  name: "Black Rose Floral Print Women's Two-Piece Set",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Black-Base-Rose-Floral.jpeg",
-  link: "/",
-  price: 550,
-  color: "black",
-  colorLabel: "Black / Rose Floral",
-  fabric: "Alex Soft Georgette",
-  sizes: ["Body 42 (Free Size)"],
-  detailNote: "Length: 37–38 Inches"
-},
-{
-  id: "DR-4",
-  name: "Black White Polka Dot Women's Two-Piece Set",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Black-White-Polka-Dots.jpeg",
-  link: "/",
-  price: 550,
-  color: "black",
-  colorLabel: "Black / White Polka Dot",
-  fabric: "Alex Soft Georgette",
-  sizes: ["Body 42 (Free Size)"],
-  detailNote: "Length: 37–38 Inches"
-},
-{
-  id: "DR-5",
-  name: "Royal Blue Golden Floral Print Women's Two-Piece Set",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Royal-Blue-Golden-Floral-Print.jpeg",
-  link: "/",
-  price: 550,
-  color: "blue",
-  colorLabel: "Royal Blue / Golden Floral",
-  fabric: "Alex Soft Georgette",
-  sizes: ["Body 42 (Free Size)"],
-  detailNote: "Length: 37–38 Inches"
-},
-{
-  id: "TP-6",
-  name: "Premium Navy Blue Bicycle Print Women's Tiered Maxi Dress",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-navy-blue-bicycle-print-womens-tiered-maxi-dress-bangladesh-1080x1350.webp",
-  link: "/",
-  price: 1000,
-  color: "navy-blue",
-  colorLabel: "Navy Blue",
-  fabric: "Premium V.I.P Linen",
-  bodySizes: ["34", "36", "38", "40", "42", "44", "46"],
-  lengthSizes: ["38 inch"],
-  detailNote: "Pant: 40 in | Gher: 120 in",
-  sku: "TP15-NB-BICYCLE-VIP-1000"
-},
-{
-  id: "DR-7",
-  name: "Premium White Pink Floral Print Women's Co-ord Set",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/white-pink-floral-print-womens-co-ord-set-premium.webp",
-  link: "/",
-  price: 650,
-  color: "pink",
-  colorLabel: "White & Pink",
-  fabric: "Alex Soft Georgette",
-  sizes: ["Body 42 (Free Size)"],
-  detailNote: "Length: 37–38 Inches"
-},
-  {
-  id: "DR-8",
-  name: "Premium Black Floral Women's Co-ord Set",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-black-floral-womens-co-ord-set-bangladesh.webp",
-  link: "/",
-  price: 650,
-  color: "black",
-  colorLabel: "Black",
-  fabric: "Alex Soft Georgette",
-  sizes: ["Body 42 (Free Size)"],
-  detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare"
-},
-  {
-  id: "DR-9",
-  name: "Premium Blue Floral Women's Co-ord Set",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-blue-floral-co-ord-set.webp",
-  link: "/",
-  price: 650,
-  color: "blue",
-  colorLabel: "Blue",
-  fabric: "Alex Soft Georgette",
-  sizes: ["Body 42 (Free Size)"],
-  detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare"
-},
-  {
-  id: "DR-10",
-  name: "Premium Navy Blue Floral Women's Co-ord Set",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-navy-blue-floral-co-ord-set.webp",
-  link: "/",
-  price: 650,
-  color: "navy",
-  colorLabel: "Navy Blue",
-  fabric: "Alex Soft Georgette",
-  sizes: ["Body 42 (Free Size)"],
-  detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare"
-},
-  {
-  id: "DR-11",
-  name: "Premium Pink Floral Women's Co-ord Set",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-pink-floral-co-ord-set.webp",
-  link: "/",
-  price: 650,
-  color: "pink",
-  colorLabel: "Pink",
-  fabric: "Alex Soft Georgette",
-  sizes: ["Body 42 (Free Size)"],
-  detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare"
-},
-  {
-  id: "DR-12",
-
-  name: "Premium Floral Women's Co-ord Set",
-
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Gowns/black-cream-floral-womens-two-piece-dress.jpg",
-
-  images: [
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Gowns/black-cream-floral-womens-two-piece-dress.jpg",
-
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Gowns/black-multicolor-floral-womens-two-piece-dress.webp",
-
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Gowns/black-white-print-womens-two-piece-dress.webp",
-
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Gowns/mint-green-black-floral-womens-two-piece-dress.webp",
-
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Gowns/navy-blue-floral-womens-two-piece-dress.jpg",
-
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Gowns/navy-blue-white-floral-womens-two-piece-dress.webp",
-
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Gowns/orange-black-white-polka-dot-womens-two-piece-dress.webp",
-
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Gowns/red-multicolor-polka-dot-womens-two-piece-dress.webp",
-
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Gowns/premium-pink-floral-womens-two-piece-dress.webp",
-
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Gowns/light-pink-floral-womens-two-piece-dress.webp"
-  ],
-  link: "/",
-  price: 650,
-  color: "multi-color",
-  colorLabel: "Multiple Colors",
-  fabric: "Alex Soft Georgette",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare"
-},
-  {
-  id: "DR-13",
-  name: "Premium Black Floral Women's Co-ord Set (Gold Accent)",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-black-floral-co-ord-set-gold-accent.webp",
-  link: "/",
-  price: 650,
-  color: "black",
-  colorLabel: "Black",
-  fabric: "Alex Soft Georgette",
-  sizes: ["34", "36", "38", "40", "42", "44", "46"],
-  detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare"
-},
- {
-  id: "TP-14",
-  name: "Premium Green Yellow Floral Women's 2-Piece Set",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-green-yellow-floral-cotton-womens-maxi-dress-bangladesh-1080x1350.webp",
-  link: "/",
-  price: 1000,
-  color: "green",
-  colorLabel: "Green Yellow Floral",
-  fabric: "Premium V.I.P Linen",
-  bodySizes: ["34", "36", "38", "40", "42", "44", "46"],
-  lengthSizes: ["Top: 38 in", "Pant: 40 in"],
-  detailNote: "Gher: 120 in"
-},
-{
-  id: "TP-15",
-  name: "Premium Green Cotton Embroidered Women's Two-Piece Set",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-green-cotton-embroidered-2-piece-women-salwar-kameez-set-bangladesh-1080x1350.webp",
-  link: "/",
-  price: 750,
-  color: "green",
-  colorLabel: "Green",
-  fabric: "Premium Cotton Fabric",
-  detailNote: "Elegant embroidered design, soft breathable cotton fabric, comfortable everyday fit. Top Length: 38–40 Inches | Pants Length: 38 Inches",
-  bodySizes: ["34", "36", "38", "40", "42", "44", "46"],
-  sizeSpecs: [
-    { label: "Top Length", value: "38–40 Inches" },
-    { label: "Pants Length", value: "38 Inches" }
-  ]
-},
-{
-  id: "TP-16",
-  name: "Premium Navy Blue Cotton Embroidered Women's Two-Piece Set",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-navy-blue-embroidered-cotton-two-piece-women-salwar-kameez-set-bangladesh-1080x1350.webp",
-  link: "/",
-  price: 750,
-  color: "navy-blue",
-  colorLabel: "Navy Blue",
-  fabric: "Premium Cotton Fabric",
-  detailNote: "Elegant embroidered design, soft breathable cotton fabric, comfortable everyday fit. Top Length: 38–40 Inches | Pants Length: 38 Inches",
-  bodySizes: ["34", "36", "38", "40", "42", "44", "46"],
-  sizeSpecs: [
-    { label: "Top Length", value: "38–40 Inches" },
-    { label: "Pants Length", value: "38 Inches" }
-  ]
-},
-{
-  id: "TP-17",
-  name: "Premium Red Cotton Embroidered Women's Two-Piece Set",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-red-embroidered-cotton-two-piece-women-salwar-kameez-set-bangladesh-1080x1350.webp",
-  link: "/",
-  price: 750,
-  color: "red",
-  colorLabel: "Red",
-  fabric: "Premium Cotton Fabric",
-  detailNote: "Elegant embroidered design, soft breathable cotton fabric, comfortable everyday fit. Top Length: 38–40 Inches | Pants Length: 38 Inches",
-  bodySizes: ["34", "36", "38", "40", "42", "44", "46"],
-  sizeSpecs: [
-    { label: "Top Length", value: "38–40 Inches" },
-    { label: "Pants Length", value: "38 Inches" }
-  ]
-},
-{
-  id: "TP-18",
-  name: "Premium Mustard Yellow Cotton Embroidered Women's Two-Piece Set",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-mustard-yellow-embroidered-cotton-two-piece-women-salwar-kameez-set-bangladesh-1080x1350.webp",
-  link: "/",
-  price: 750,
-  color: "mustard-yellow",
-  colorLabel: "Mustard Yellow",
-  fabric: "Premium Cotton Fabric",
-  detailNote: "Elegant embroidered design, soft breathable cotton fabric, comfortable everyday fit. Top Length: 38–40 Inches | Pants Length: 38 Inches",
-  bodySizes: ["34", "36", "38", "40", "42", "44", "46"],
-  sizeSpecs: [
-    { label: "Top Length", value: "38–40 Inches" },
-    { label: "Pants Length", value: "38 Inches" }
-  ]
-},
-{
-  id: "DR-19",
-  name: "Premium Luxury Two-Piece Dress",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/black-purple-floral-printed-long-kurti-womens-dress.webp",
-  images: [
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/black-purple-floral-printed-long-kurti-womens-dress.webp",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/burgundy-golden-dotted-printed-long-kurti-womens-dress.webp",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/lavender-floral-printed-kurti-for-women-premium-tc-cotton-bangladesh.webp",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/maroon-floral-printed-kurti-for-women-premium-tc-cotton-bangladesh.webp",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/mustard-yellow-floral-printed-long-kurti-womens-dress.webp",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/navy-blue-floral-printed-kurti-for-women-premium-tc-cotton-bangladesh.webp",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/pink-floral-printed-kurti-for-women-premium-tc-cotton-bangladesh.webp",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-blue-floral-kurti-women-fashion-webp.webp",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-pink-floral-kurti-for-women-tc-cotton-bangladesh.webp",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-purple-floral-dress-muslim-abaya-bangladesh.webp",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-rust-floral-kurta-dress-muslim-abaya-bangladesh.webp",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-rust-orange-floral-kurti-muslim-abaya-bangladesh.webp",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-white-floral-kurti-dress-muslim-abaya-bangladesh.webp",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/teal-floral-printed-womens-long-kurti-dress.webp"
-  ],
-  colorVariants: [
-    { color: "black-purple", colorLabel: "Black Purple", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/black-purple-floral-printed-long-kurti-womens-dress.webp" },
-    { color: "burgundy-gold", colorLabel: "Burgundy", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/burgundy-golden-dotted-printed-long-kurti-womens-dress.webp" },
-    { color: "lavender", colorLabel: "Lavender", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/lavender-floral-printed-kurti-for-women-premium-tc-cotton-bangladesh.webp" },
-    { color: "maroon", colorLabel: "Maroon", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/maroon-floral-printed-kurti-for-women-premium-tc-cotton-bangladesh.webp" },
-    { color: "mustard", colorLabel: "Mustard", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/mustard-yellow-floral-printed-long-kurti-womens-dress.webp" },
-    { color: "navy", colorLabel: "Navy", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/navy-blue-floral-printed-kurti-for-women-premium-tc-cotton-bangladesh.webp" },
-    { color: "light-pink", colorLabel: "Light Pink", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/pink-floral-printed-kurti-for-women-premium-tc-cotton-bangladesh.webp" },
-    { color: "blue", colorLabel: "Blue", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-blue-floral-kurti-women-fashion-webp.webp" },
-    { color: "pink", colorLabel: "Pink", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-pink-floral-kurti-for-women-tc-cotton-bangladesh.webp" },
-    { color: "purple", colorLabel: "Purple", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-purple-floral-dress-muslim-abaya-bangladesh.webp" },
-    { color: "rust", colorLabel: "Rust", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-rust-floral-kurta-dress-muslim-abaya-bangladesh.webp" },
-    { color: "rust-orange", colorLabel: "Rust Orange", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-rust-orange-floral-kurti-muslim-abaya-bangladesh.webp" },
-    { color: "white", colorLabel: "White", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/premium-white-floral-kurti-dress-muslim-abaya-bangladesh.webp" },
-    { color: "teal", colorLabel: "Teal", image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/teal-floral-printed-womens-long-kurti-dress.webp" }
-  ],
-  link: "/",
-  price: 650,
-  color: "multi-color",
-  colorLabel: "14 Colors",
-  fabric: "Alex Soft Georgette",
-  sizes: ["34", "36", "38", "40", "42", "44"],
-  bodySizes: ["34", "36", "38", "40", "42", "44"],
-  dressLengths: ["38", "39", "40"],
-  palazzoLengths: ["37", "38"],
-  lengthSizeLabel: "Dress Length",
-  sizeSpecs: [
-    { label: "Dress Length", value: "38, 39, 40 inches" },
-    { label: "Palazzo Length", value: "37, 38 inches" }
-  ],
-  detailNote: "Two-Piece Dress | Dress Length: 38, 39 & 40 Inches | Palazzo Length: 37 & 38 Inches | Alex Soft Georgette | 14 Colors | 100% Color Quality Assurance"
-},
-{
-  id: "DR-20",
-  name: "Premium Stylish Ladies Two-Piece Dress",
-
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/yellow-womens-kurti-3-piece-dress-green-flower-design.webp",
-
-  images: [
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/yellow-womens-kurti-3-piece-dress-green-flower-design.webp",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/taupe-womens-kurti-pink-tassel.webp",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/purple-womens-kurti-pink-tassel.webp",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/mint-green-womens-3-piece-kurti-set.webp",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/mint-green-womens-2-piece-kurti-set.webp",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/mauve-pink-womens-3-piece-kurti-set.webp",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/lime-green-womens-3-piece-kurti-set.webp",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/light-beige-womens-3-piece-kurti-set.webp",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/lavender-pink-womens-3-piece-kurti-set.webp",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/dark-purple-womens-3-piece-kurti-set.webp",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/brown-embroidered-womens-3-piece-kurti-set.webp",
-    "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/beige-embroidered-womens-3-piece-kurti-set.webp"
-  ],
-
-  colorVariants: [
+  abaya: [
     {
-      color: "yellow",
-      colorLabel: "Yellow",
-      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/yellow-womens-kurti-3-piece-dress-green-flower-design.webp"
+      id: "ABY-MAROON-1",
+      name: "Maroon Abaya Set",
+      image: "images/Maroon Abaya Set...jpeg",
+      price: 999,
+      color: "maroon",
+      colorLabel: "Maroon",
+      fabric: "Dubai Cherry",
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
+      priceByType: {
+        "Abaya Only": 799,
+        "Full Set": 999
+      }
     },
     {
-      color: "taupe",
-      colorLabel: "Taupe",
-      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/taupe-womens-kurti-pink-tassel.webp"
+      id: "ABY-BLK-3P-02",
+      name: "Premium Black 3 Part Abaya Set",
+      image: "images/premium-black-3-part-abaya-set-muslim-abaya-bd.webp",
+      price: 1450,
+      color: "black",
+      colorLabel: "Classic Black",
+      fabric: "Premium Chiffon Georgette + Dubai Cherry",
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
+      detailNote: "3 Part Premium Abaya Set including Koti, Inner & Hijab. Premium Chiffon Georgette Koti and Hijab with Soft Dubai Cherry Inner.",
+      priceByType: {
+        "Abaya Only": 1150,
+        "Full Set": 1450
+      }
     },
     {
+      id: "ABY-BLACK-3",
+      name: "Premium Black Gold Stone Work Abaya Set",
+      image: "images/premium-black-gold-stone-work-abaya-1080x1350.webp",
+      price: 1650,
+      color: "black",
+      colorLabel: "Classic Black",
+      fabric: "Original Cherry Clothing",
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
+      priceByType: {
+        "Abaya Only": 1250,
+        "Full Set": 1650
+      }
+    },
+    {
+      id: "ABY-BLACK-4",
+      name: "Premium Black Silver Stone Work Abaya Set",
+      image: "images/premium-black-silver-stone-work-abaya-1080x1350.webp",
+      price: 1650,
+      color: "black",
+      colorLabel: "Classic Black",
+      fabric: "Original Cherry Clothing",
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
+      priceByType: {
+        "Abaya Only": 1250,
+        "Full Set": 1650
+      }
+    },
+    {
+      id: "ABY-BLACK-6",
+      name: "Black Abaya Set - Side",
+      image: "images/Black.jpeg",
+      price: 999,
+      color: "black",
+      colorLabel: "Classic Black",
+      fabric: "Dubai Cherry",
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
+      priceByType: {
+        "Abaya Only": 799,
+        "Full Set": 999
+      }
+    },
+    {
+      id: "ABY-VERSACE-7",
+      name: "Versace Border Premium Abaya Set",
+      image: "images/Versace Border Premium Abaya Set...jpg",
+      price: 1750,
+      color: "black",
+      colorLabel: "Classic Black",
+      fabric: "Dubai Cherry",
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
+      priceByType: {
+        "Abaya Only": 1550,
+        "Full Set": 1750
+      }
+    },
+    {
+      id: "ABY-VERSACE-8",
+      name: "Premium Black Hafeza Set",
+      image: "images/Abaya/premium-black-layered-khimar-niqab-abaya-for-women-muslimabaya.webp",
+      price: 2385,
+      color: "black",
+      colorLabel: "3 Colors",
+      fabric: "Original Dubai Cherry Fabric",
+      sizes: ["50", "52", "54", "56", "58"],
+      detailNote: "Premium Hafeza Set made from Original Dubai Cherry Fabric. Abaya length: 50, 52, 54, 56 and 58 inches. Flare: 180+ inches. Hijab and Niqab are made from Original China Soft Georgette Fabric. Hoodie Hijab features 3 parts at the back and 2 parts at the front, with a 56-inch back and 45-inch front. 2-part nose niqab with a 25-inch front.",
+      priceByType: {
+        "Hijab + Niqab": 1200,
+        "Full Hafeza Set": 2385
+      }
+    },
+    {
+      id: "ABY-VERSACE-9",
+      name: "Versace Border Premium Abaya Set - Side",
+      image: "images/Versace Border Premium Abaya Set.jpg",
+      price: 1750,
+      color: "black",
+      colorLabel: "Classic Black",
+      fabric: "Dubai Cherry",
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
+      priceByType: {
+        "Abaya Only": 1550,
+        "Full Set": 1750
+      }
+    },
+    {
+      id: "ABY-FLORAL-10",
+      name: "Premium Floral Motif Abaya Set",
+      image: "images/Premium-Floral-Motif-Abaya-Set...jpeg",
+      price: 1850,
+      color: "black",
+      colorLabel: "Classic Black",
+      fabric: "Dubai Cherry",
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
+      priceByType: {
+        "Abaya Only": 1650,
+        "Full Set": 1850
+      }
+    },
+    {
+      id: "ABY-FLORAL-11",
+      name: "Premium Floral Motif Abaya Set - Back",
+      image: "images/Premium-Floral-Motif-Abaya-Set..jpeg",
+      price: 1850,
+      color: "black",
+      colorLabel: "Classic Black",
+      fabric: "Dubai Cherry",
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
+      priceByType: {
+        "Abaya Only": 1650,
+        "Full Set": 1850
+      }
+    },
+    {
+      id: "ABY-FLORAL-12",
+      name: "Premium Floral Motif Abaya Set - Side",
+      image: "images/Premium-Floral-Motif-Abaya-Set.jpeg",
+      price: 1850,
+      color: "black",
+      colorLabel: "Classic Black",
+      fabric: "Dubai Cherry",
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
+      priceByType: {
+        "Abaya Only": 1650,
+        "Full Set": 1850
+      }
+    },
+    {
+      id: "ABY-BUTTERFLY-13",
+      name: "Butterfly Abaya Set",
+      image: "images/Butterfly-Ababa....jpg",
+      price: 1350,
+      color: "black",
+      colorLabel: "Classic Black",
+      fabric: "Dubai Cherry",
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
+      priceByType: {
+        "Abaya Only": 799,
+        "Full Set": 1350
+      }
+    },
+    {
+      id: "ABY-BUTTERFLY-14",
+      name: "Butterfly Abaya Set - Back",
+      image: "images/Butterfly-Ababa...jpg",
+      price: 1350,
+      color: "black",
+      colorLabel: "Classic Black",
+      fabric: "Dubai Cherry",
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
+      priceByType: {
+        "Abaya Only": 799,
+        "Full Set": 1350
+      }
+    },
+    {
+      id: "ABY-BUTTERFLY-15",
+      name: "Butterfly Abaya Set - Side",
+      image: "images/Butterfly-Ababa..jpg",
+      price: 1350,
+      color: "black",
+      colorLabel: "Classic Black",
+      fabric: "Dubai Cherry",
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
+      priceByType: {
+        "Abaya Only": 799,
+        "Full Set": 1350
+      }
+    },
+    {
+      id: "ABY-BUTTERFLY-16",
+      name: "Butterfly Abaya Set - Detail",
+      image: "images/Butterfly-Ababa.jpg",
+      price: 1350,
+      color: "black",
+      colorLabel: "Classic Black",
+      fabric: "Dubai Cherry",
+      sizes: ["44", "46", "48", "50", "52", "54", "56"],
+      priceByType: {
+        "Abaya Only": 799,
+        "Full Set": 1350
+      }
+    }
+  ],
+  cover-up: [
+    {
+      id: "ABY-COVERUP-01",
+      name: "Premium Black Butterfly Khimar Abaya with Niqab",
+      image: "images/cover-up/premium-black-butterfly-khimar-abaya-with-niqab-luxury-modest-fashion-bangladesh-1080x1350.webp",
+      price: 1800,
+      color: "black",
+      colorLabel: "Classic Black",
+      fabric: "Premium Cherry Fabric",
+      sizes: ["50", "52", "54", "56", "58"],
+      detailNote: "Premium butterfly khimar abaya with matching niqab, crafted from high-quality Cherry Fabric. Soft, breathable, lightweight, and designed for elegant modest wear with a graceful flow and premium finishing."
+    }
+  ],
+  premium-two-piece: [
+    {
+      id: "DR-01",
+      name: "White Strawberry Print Women's Two-Piece Set",
+      image: "images/two-piece-dress/muslimabaya-white-strawberry-print-cotton-kurti-set-for-women.webp",
+      price: 650,
+      color: "white",
+      colorLabel: "White / Strawberry Print",
+      fabric: "Premium Cotton Fabric",
+      sizes: ["34", "36", "38", "40", "42", "44", "46"],
+      detailNote: "Material: Premium Cotton Fabric | Top Length: 38–40 Inches | Pant Length: 38 Inches"
+    },
+    {
+      id: "DR-02",
+      name: "Baby Pink Floral Print Women's Two-Piece Set",
+      image: "images/Baby-Pink-Floral-Print.jpeg",
+      price: 550,
+      color: "pink",
+      colorLabel: "Baby Pink Floral",
+      fabric: "Alex Soft Georgette",
+      sizes: ["Body 42 (Free Size)"],
+      detailNote: "Length: 37–38 Inches"
+    },
+    {
+      id: "DR-03",
+      name: "Black Rose Floral Print Women's Two-Piece Set",
+      image: "images/Black-Base-Rose-Floral.jpeg",
+      price: 550,
+      color: "black",
+      colorLabel: "Black / Rose Floral",
+      fabric: "Alex Soft Georgette",
+      sizes: ["Body 42 (Free Size)"],
+      detailNote: "Length: 37–38 Inches"
+    },
+    {
+      id: "DR-4",
+      name: "Black White Polka Dot Women's Two-Piece Set",
+      image: "images/Black-White-Polka-Dots.jpeg",
+      price: 550,
+      color: "black",
+      colorLabel: "Black / White Polka Dot",
+      fabric: "Alex Soft Georgette",
+      sizes: ["Body 42 (Free Size)"],
+      detailNote: "Length: 37–38 Inches"
+    },
+    {
+      id: "DR-5",
+      name: "Royal Blue Golden Floral Print Women's Two-Piece Set",
+      image: "images/Royal-Blue-Golden-Floral-Print.jpeg",
+      price: 550,
+      color: "blue",
+      colorLabel: "Royal Blue / Golden Floral",
+      fabric: "Alex Soft Georgette",
+      sizes: ["Body 42 (Free Size)"],
+      detailNote: "Length: 37–38 Inches"
+    },
+    {
+      id: "TP-6",
+      name: "Premium Navy Blue Bicycle Print Women's Tiered Maxi Dress",
+      image: "images/two-piece-dress/premium-navy-blue-bicycle-print-womens-tiered-maxi-dress-bangladesh-1080x1350.webp",
+      price: 1000,
+      color: "navy-blue",
+      colorLabel: "Navy Blue",
+      fabric: "Premium V.I.P Linen",
+      sizes: ["38 inch"],
+      detailNote: "Pant: 40 in | Gher: 120 in"
+    },
+    {
+      id: "DR-7",
+      name: "Premium White Pink Floral Print Women's Co-ord Set",
+      image: "images/white-pink-floral-print-womens-co-ord-set-premium.webp",
+      price: 650,
+      color: "pink",
+      colorLabel: "White & Pink",
+      fabric: "Alex Soft Georgette",
+      sizes: ["Body 42 (Free Size)"],
+      detailNote: "Length: 37–38 Inches"
+    },
+    {
+      id: "DR-8",
+      name: "Premium Black Floral Women's Co-ord Set",
+      image: "images/premium-black-floral-womens-co-ord-set-bangladesh.webp",
+      price: 650,
+      color: "black",
+      colorLabel: "Black",
+      fabric: "Alex Soft Georgette",
+      sizes: ["Body 42 (Free Size)"],
+      detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare"
+    },
+    {
+      id: "DR-9",
+      name: "Premium Blue Floral Women's Co-ord Set",
+      image: "images/premium-blue-floral-co-ord-set.webp",
+      price: 650,
+      color: "blue",
+      colorLabel: "Blue",
+      fabric: "Alex Soft Georgette",
+      sizes: ["Body 42 (Free Size)"],
+      detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare"
+    },
+    {
+      id: "DR-10",
+      name: "Premium Navy Blue Floral Women's Co-ord Set",
+      image: "images/premium-navy-blue-floral-co-ord-set.webp",
+      price: 650,
+      color: "navy",
+      colorLabel: "Navy Blue",
+      fabric: "Alex Soft Georgette",
+      sizes: ["Body 42 (Free Size)"],
+      detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare"
+    },
+    {
+      id: "DR-11",
+      name: "Premium Pink Floral Women's Co-ord Set",
+      image: "images/premium-pink-floral-co-ord-set.webp",
+      price: 650,
+      color: "pink",
+      colorLabel: "Pink",
+      fabric: "Alex Soft Georgette",
+      sizes: ["Body 42 (Free Size)"],
+      detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare"
+    },
+    {
+      id: "DR-12",
+      name: "Premium Floral Women's Co-ord Set",
+      image: "images/Gowns/black-cream-floral-womens-two-piece-dress.jpg",
+      price: 650,
+      color: "multi-color",
+      colorLabel: "Multiple Colors",
+      fabric: "Alex Soft Georgette",
+      sizes: ["34", "36", "38", "40", "42", "44", "46"],
+      detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare"
+    },
+    {
+      id: "DR-13",
+      name: "Premium Black Floral Women's Co-ord Set (Gold Accent)",
+      image: "images/premium-black-floral-co-ord-set-gold-accent.webp",
+      price: 650,
+      color: "black",
+      colorLabel: "Black",
+      fabric: "Alex Soft Georgette",
+      sizes: ["34", "36", "38", "40", "42", "44", "46"],
+      detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare"
+    },
+    {
+      id: "TP-14",
+      name: "Premium Green Yellow Floral Women's 2-Piece Set",
+      image: "images/two-piece-dress/premium-green-yellow-floral-cotton-womens-maxi-dress-bangladesh-1080x1350.webp",
+      price: 1000,
+      color: "green",
+      colorLabel: "Green Yellow Floral",
+      fabric: "Premium V.I.P Linen",
+      sizes: ["Top: 38 in", "Pant: 40 in"],
+      detailNote: "Gher: 120 in"
+    },
+    {
+      id: "TP-15",
+      name: "Premium Green Cotton Embroidered Women's Two-Piece Set",
+      image: "images/two-piece-dress/premium-green-cotton-embroidered-2-piece-women-salwar-kameez-set-bangladesh-1080x1350.webp",
+      price: 750,
+      color: "green",
+      colorLabel: "Green",
+      fabric: "Premium Cotton Fabric",
+      sizes: ["42 (Free size)"],
+      detailNote: "Elegant embroidered design, soft breathable cotton fabric, comfortable everyday fit. Top Length: 38–40 Inches | Pants Length: 38 Inches"
+    },
+    {
+      id: "TP-16",
+      name: "Premium Navy Blue Cotton Embroidered Women's Two-Piece Set",
+      image: "images/two-piece-dress/premium-navy-blue-embroidered-cotton-two-piece-women-salwar-kameez-set-bangladesh-1080x1350.webp",
+      price: 750,
+      color: "navy-blue",
+      colorLabel: "Navy Blue",
+      fabric: "Premium Cotton Fabric",
+      sizes: ["42 (Free size)"],
+      detailNote: "Elegant embroidered design, soft breathable cotton fabric, comfortable everyday fit. Top Length: 38–40 Inches | Pants Length: 38 Inches"
+    },
+    {
+      id: "TP-17",
+      name: "Premium Red Cotton Embroidered Women's Two-Piece Set",
+      image: "images/two-piece-dress/premium-red-embroidered-cotton-two-piece-women-salwar-kameez-set-bangladesh-1080x1350.webp",
+      price: 750,
+      color: "red",
+      colorLabel: "Red",
+      fabric: "Premium Cotton Fabric",
+      sizes: ["42 (Free size)"],
+      detailNote: "Elegant embroidered design, soft breathable cotton fabric, comfortable everyday fit. Top Length: 38–40 Inches | Pants Length: 38 Inches"
+    },
+    {
+      id: "TP-18",
+      name: "Premium Mustard Yellow Cotton Embroidered Women's Two-Piece Set",
+      image: "images/two-piece-dress/premium-mustard-yellow-embroidered-cotton-two-piece-women-salwar-kameez-set-bangladesh-1080x1350.webp",
+      price: 750,
+      color: "mustard-yellow",
+      colorLabel: "Mustard Yellow",
+      fabric: "Premium Cotton Fabric",
+      sizes: ["42 (Free size)"],
+      detailNote: "Elegant embroidered design, soft breathable cotton fabric, comfortable everyday fit. Top Length: 38–40 Inches | Pants Length: 38 Inches"
+    },
+    {
+      id: "DR-19",
+      name: "Premium Luxury Two-Piece Dress",
+      image: "images/two-piece-dress/black-purple-floral-printed-long-kurti-womens-dress.webp",
+      price: 650,
+      color: "multi-color",
+      colorLabel: "14 Colors",
+      fabric: "Alex Soft Georgette",
+      sizes: ["34", "36", "38", "40", "42", "44"],
+      detailNote: "Two-Piece Dress | Dress Length: 38, 39 & 40 Inches | Palazzo Length: 37 & 38 Inches | Alex Soft Georgette | 14 Colors | 100% Color Quality Assurance"
+    },
+    {
+      id: "DR-20",
+      name: "Premium Stylish Ladies Two-Piece Dress",
+      image: "images/two-piece-dress/yellow-womens-kurti-3-piece-dress-green-flower-design.webp",
+      price: 750,
+      color: "multiple-colors",
+      colorLabel: "12 Colors",
+      fabric: "Premium Poppon Clothing Fabric",
+      sizes: ["Free Size"],
+      detailNote: "Premium Poppon Clothing Fabric | Free Size | Body: Up to 42 | Dress Length: 37 Inches | Matching Bottom | Home Delivery Across Bangladesh | Price: 750 BDT"
+    },
+    {
+      id: "KURTI-EMB-01",
+      name: "Charcoal Black Embroidered Kurti",
+      image: "https://muslimabaya.netlify.app/catalog/images/charcoal-black-embroidered-kurti.webp",
+      price: 750,
+      color: "charcoal-black",
+      colorLabel: "Charcoal Black",
+      fabric: "Premium Cotton (Hand Embroidery)",
+      sizes: ["Free Size"],
+      detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear."
+    },
+    {
+      id: "KURTI-EMB-02",
+      name: "Mustard Yellow Embroidered Kurti",
+      image: "https://muslimabaya.netlify.app/catalog/images/mustard-yellow-embroidered-kurti.webp",
+      price: 750,
+      color: "mustard-yellow",
+      colorLabel: "Mustard Yellow",
+      fabric: "Premium Cotton (Hand Embroidery)",
+      sizes: ["Free Size"],
+      detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear."
+    },
+    {
+      id: "KURTI-EMB-03",
+      name: "Pastel Pink Embroidered Kurti",
+      image: "https://muslimabaya.netlify.app/catalog/images/pastel-pink-embroidered-kurti.webp",
+      price: 750,
+      color: "pastel-pink",
+      colorLabel: "Pastel Pink",
+      fabric: "Premium Cotton (Hand Embroidery)",
+      sizes: ["Free Size"],
+      detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear."
+    },
+    {
+      id: "KURTI-EMB-04",
+      name: "Maroon Embroidered Kurti",
+      image: "https://muslimabaya.netlify.app/catalog/images/maroon-embroidered-kurti-for-women.webp",
+      price: 750,
+      color: "maroon",
+      colorLabel: "Maroon",
+      fabric: "Premium Cotton (Hand Embroidery)",
+      sizes: ["Free Size"],
+      detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear."
+    },
+    {
+      id: "KURTI-EMB-05",
+      name: "Dusty Rose Embroidered Kurti",
+      image: "https://muslimabaya.netlify.app/catalog/images/dusty-rose-embroidered-kurti-for-women-bangladesh.webp",
+      price: 750,
+      color: "dusty-rose",
+      colorLabel: "Dusty Rose",
+      fabric: "Premium Cotton (Hand Embroidery)",
+      sizes: ["Free Size"],
+      detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear."
+    },
+    {
+      id: "KURTI-EMB-06",
+      name: "Mauve Lavender Embroidered Kurta",
+      image: "https://muslimabaya.netlify.app/catalog/images/mauve-lavender-embroidered-kurta-for-women.webp",
+      price: 750,
+      color: "mauve-lavender",
+      colorLabel: "Mauve Lavender",
+      fabric: "Premium Cotton (Hand Embroidery)",
+      sizes: ["Free Size"],
+      detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear."
+    },
+    {
+      id: "KURTI-EMB-07",
+      name: "Cream Beige Floral Embroidered Kurti",
+      image: "https://muslimabaya.netlify.app/catalog/images/cream-beige-womens-embroidered-kurti-floral-design.webp",
+      price: 750,
+      color: "cream-beige",
+      colorLabel: "Cream Beige",
+      fabric: "Premium Cotton (Hand Embroidery)",
+      sizes: ["Free Size"],
+      detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear."
+    }
+  ],
+  tops-kurti: [
+    {
+      id: "KURTI-01",
+      name: "Classic Purple Lace-Work Kurti",
+      image: "images/Classic Purple Lace-Work Kurti  MUSLIM ABAYA.WebP",
+      price: 250,
       color: "purple",
       colorLabel: "Purple",
-      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/purple-womens-kurti-pink-tassel.webp"
+      fabric: "TC Cotton",
+      sizes: ["38", "40"],
+      detailNote: "Comfortable lace-work kurti made with premium cotton fabric. Length: 34 inches."
     },
     {
-      color: "mint-green",
-      colorLabel: "Mint Green",
-      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/mint-green-womens-3-piece-kurti-set.webp"
+      id: "KURTI-02",
+      name: "Elegant Grey Leaf Print Kurti",
+      image: "images/Elegant Grey Leaf Print Kurti  MUSLIM ABAYA.WebP",
+      price: 250,
+      color: "grey",
+      colorLabel: "Grey",
+      fabric: "TC Cotton",
+      sizes: ["38", "40"],
+      detailNote: "Stylish leaf print design for daily wear."
     },
     {
-      color: "mint-green-2",
-      colorLabel: "Mint Green 2",
-      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/mint-green-womens-2-piece-kurti-set.webp"
+      id: "KURTI-03",
+      name: "Elegant Purple Floral Kurti",
+      image: "images/Elegant Purple Floral Kurti  MUSLIM ABAYA.WebP",
+      price: 250,
+      color: "purple",
+      colorLabel: "Purple",
+      fabric: "TC Cotton",
+      sizes: ["38", "40"],
+      detailNote: "Floral printed kurti suitable for office and casual wear."
     },
     {
-      color: "mauve-pink",
-      colorLabel: "Mauve Pink",
-      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/mauve-pink-womens-3-piece-kurti-set.webp"
+      id: "KURTI-04",
+      name: "Elegant White Leaf Print Kurti",
+      image: "images/Elegant White Leaf Print Kurti  MUSLIM ABAYA.WebP",
+      price: 250,
+      color: "white",
+      colorLabel: "White",
+      fabric: "TC Cotton",
+      sizes: ["38", "40"],
+      detailNote: "Light and breathable cotton fabric perfect for summer."
     },
     {
-      color: "lime-green",
-      colorLabel: "Lime Green",
-      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/lime-green-womens-3-piece-kurti-set.webp"
+      id: "KURTI-05",
+      name: "Light Pink Floral Kurti",
+      image: "images/Light Pink Soft Floral Kurti  MUSLIM ABAYA.WebP",
+      price: 250,
+      color: "pink",
+      colorLabel: "Light Pink",
+      fabric: "TC Cotton",
+      sizes: ["38", "40"],
+      detailNote: "Soft pink floral design for everyday comfort."
     },
     {
-      color: "light-beige",
-      colorLabel: "Light Beige",
-      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/light-beige-womens-3-piece-kurti-set.webp"
+      id: "KURTI-06",
+      name: "Magenta Leaf Print Kurti",
+      image: "images/Magenta Leaf Print Kurti  MUSLIM ABAYA.WebP",
+      price: 250,
+      color: "magenta",
+      colorLabel: "Magenta",
+      fabric: "TC Cotton",
+      sizes: ["38", "40"],
+      detailNote: "Soft cotton kurti with vibrant magenta color."
     },
     {
-      color: "lavender-pink",
-      colorLabel: "Lavender Pink",
-      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/lavender-pink-womens-3-piece-kurti-set.webp"
+      id: "KURTI-07",
+      name: "Magenta Tassel Detail Kurti",
+      image: "images/Magenta Tassel Detail Kurti  MUSLIM ABAYA.WebP",
+      price: 250,
+      color: "magenta",
+      colorLabel: "Magenta",
+      fabric: "TC Cotton",
+      sizes: ["38", "40"],
+      detailNote: "Stylish tassel design kurti for modern look."
     },
     {
-      color: "dark-purple",
-      colorLabel: "Dark Purple",
-      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/dark-purple-womens-3-piece-kurti-set.webp"
+      id: "KURTI-08",
+      name: "Pink Floral Lace Work Kurti",
+      image: "images/Premium Pink Floral Lace-Work Kurti  MUSLIM ABAYA.WebP",
+      price: 250,
+      color: "pink",
+      colorLabel: "Pink",
+      fabric: "TC Cotton",
+      sizes: ["38", "40"],
+      detailNote: "Elegant lace work floral kurti design."
     },
     {
+      id: "KURTI-09",
+      name: "Vibrant Magenta Floral Kurti",
+      image: "images/Vibrant Magenta Floral Kurti  MUSLIM ABAYA.WebP",
+      price: 250,
+      color: "magenta",
+      colorLabel: "Magenta",
+      fabric: "TC Cotton",
+      sizes: ["38", "40"],
+      detailNote: "Bright floral kurti for stylish daily wear."
+    },
+    {
+      id: "KURTI-10",
+      name: "Premium Yellow Tie-Dye Cotton Maxi Dress",
+      image: "images/premium-yellow-tie-dye-cotton-maxi-dress-for-women.webp",
+      price: 350,
+      color: "yellow",
+      colorLabel: "Yellow",
+      fabric: "Premium Cotton Fabric",
+      sizes: ["34", "36", "38", "40", "42", "44", "46"],
+      detailNote: "Attractive tie-dye design maxi dress. Length: 43–44 inches, Flare: 80 inches."
+    },
+    {
+      id: "KURTI-11",
+      name: "Stylish Green Floral Cotton Midi Dress",
+      image: "images/stylish-green-floral-cotton-midi-dress-womens-fashion.webp",
+      price: 350,
+      color: "green",
+      colorLabel: "Green",
+      fabric: "Premium Cotton Fabric",
+      sizes: ["34", "36", "38", "40", "42", "44", "46"],
+      detailNote: "Floral printed midi dress in soft cotton fabric."
+    },
+    {
+      id: "KURTI-12",
+      name: "White Cherry Print Cotton One Piece",
+      image: "images/white-cherry-print-cotton-one-piece-dress-for-women.webp",
+      price: 350,
+      color: "white",
+      colorLabel: "White",
+      fabric: "Premium Cotton Fabric",
+      sizes: ["34", "36", "38", "40", "42", "44", "46"],
+      detailNote: "Beautiful cherry print one-piece dress."
+    },
+    {
+      id: "KURTI-13",
+      name: "White Lavender Floral Cotton Dress",
+      image: "images/white-lavender-floral-cotton-one-piece-dress-for-women-muslimabaya.webp",
+      price: 350,
+      color: "white",
+      colorLabel: "White / Lavender",
+      fabric: "Premium Cotton Fabric",
+      sizes: ["34", "36", "38", "40", "42", "44", "46"],
+      detailNote: "Soft lavender floral cotton dress."
+    },
+    {
+      id: "KURTI-14",
+      name: "White Maroon Block Print Cotton Dress",
+      image: "images/white-maroon-block-print-cotton-one-piece-dress-for-women.webp",
+      price: 350,
+      color: "white",
+      colorLabel: "White / Maroon",
+      fabric: "Premium Cotton Fabric",
+      sizes: ["34", "36", "38", "40", "42", "44", "46"],
+      detailNote: "Traditional block print cotton dress."
+    },
+    {
+      id: "KURTI-15",
+      name: "White Red Heart Print Cotton Dress",
+      image: "images/white-red-heart-print-cotton-one-piece-dress-for-women.webp",
+      price: 350,
+      color: "white",
+      colorLabel: "White / Red",
+      fabric: "Premium Cotton Fabric",
+      sizes: ["34", "36", "38", "40", "42", "44", "46"],
+      detailNote: "Cute heart print cotton dress."
+    },
+    {
+      id: "KURTI-16",
+      name: "Yellow Cotton Flared One Piece",
+      image: "images/yellow-cotton-flared-one-piece-dress-for-women.webp",
+      price: 350,
+      color: "yellow",
+      colorLabel: "Yellow",
+      fabric: "Premium Cotton Fabric",
+      sizes: ["34", "36", "38", "40", "42", "44", "46"],
+      detailNote: "Comfortable flared cotton dress."
+    },
+    {
+      id: "KURTI-17",
+      name: "Yellow Striped Cotton One Piece",
+      image: "images/yellow-striped-cotton-one-piece-dress-for-women.webp",
+      price: 350,
+      color: "yellow",
+      colorLabel: "Yellow",
+      fabric: "Premium Cotton Fabric",
+      sizes: ["34", "36", "38", "40", "42", "44", "46"],
+      detailNote: "Casual striped cotton dress."
+    },
+    {
+      id: "KURTI-18",
+      name: "Premium Sky Blue Botanical Print Cotton One Piece Dress",
+      image: "images/premium-sky-blue-botanical-print-cotton-one-piece-dress-for-women.webp",
+      price: 350,
+      color: "blue",
+      colorLabel: "Sky Blue",
+      fabric: "Premium Cotton Fabric",
+      sizes: ["34", "36", "38", "40", "42", "44", "46"],
+      detailNote: "Premium sky blue botanical print cotton dress. Length: 38–40 Inches, Flare: 80 Inches"
+    },
+    {
+      id: "KURTI-19",
+      name: "White Lilac Botanical Print Cotton One Piece Dress",
+      image: "images/white-lilac-botanical-print-cotton-one-piece-dress-for-women.webp",
+      price: 350,
+      color: "white",
+      colorLabel: "White / Lilac",
+      fabric: "Premium Cotton Fabric",
+      sizes: ["34", "36", "38", "40", "42", "44", "46"],
+      detailNote: "Elegant white and lilac botanical print cotton one piece dress. Length: 38–40 Inches, Flare: 80 Inches"
+    },
+    {
+      id: "KURTI-20",
+      name: "Black White Floral Puff Sleeve Maxi Dress",
+      image: "images/black-white-floral-puff-sleeve-maxi-dress-modern-lifestyle.webp",
+      price: 350,
+      color: "black",
+      colorLabel: "Black / White",
+      fabric: "Premium Cotton Fabric",
+      sizes: ["34", "36", "38", "40", "42", "44", "46"],
+      detailNote: "Elegant Black & White floral print puff sleeve maxi dress. Length: 38–40 Inches, Flare: 80 Inches."
+    },
+    {
+      id: "KURTI-21",
+      name: "White Yellow Floral Puff Sleeve Cotton Maxi Dress",
+      image: "images/white-yellow-floral-puff-sleeve-cotton-maxi-dress-premium-lifestyle.webp",
+      price: 350,
+      color: "white",
+      colorLabel: "White / Yellow",
+      fabric: "Premium Cotton Fabric",
+      sizes: ["34", "36", "38", "40", "42", "44", "46"],
+      detailNote: "Elegant White & Yellow floral print puff sleeve cotton maxi dress. Length: 38–40 Inches, Flare: 80 Inches."
+    },
+    {
+      id: "KURTI-22",
+      name: "Navy Blue White Floral Cotton Maxi Dress",
+      image: "images/navy-blue-white-floral-cotton-maxi-dress-premium-lifestyle.webp",
+      price: 350,
+      color: "navy",
+      colorLabel: "Navy Blue / White",
+      fabric: "Premium Cotton Fabric",
+      sizes: ["34", "36", "38", "40", "42", "44", "46"],
+      detailNote: "Elegant Navy Blue & White floral print cotton maxi dress. Length: 38–40 Inches, Flare: 80 Inches."
+    },
+    {
+      id: "KURTI-23",
+      name: "Cream Black Floral Cotton Maxi Dress",
+      image: "images/cream-black-floral-cotton-maxi-dress-premium-lifestyle.webp",
+      price: 350,
+      color: "cream",
+      colorLabel: "Cream / Black",
+      fabric: "Premium Cotton Fabric",
+      sizes: ["34", "36", "38", "40", "42", "44", "46"],
+      detailNote: "Elegant Cream & Black floral print cotton maxi dress. Length: 38–40 Inches, Flare: 80 Inches."
+    },
+    {
+      id: "KURTI-24",
+      name: "Sage Green White Floral Cotton Maxi Dress",
+      image: "images/sage-green-white-floral-cotton-maxi-dress-premium-lifestyle.webp",
+      price: 350,
+      color: "green",
+      colorLabel: "Sage Green / White",
+      fabric: "Premium Cotton Fabric",
+      sizes: ["34", "36", "38", "40", "42", "44", "46"],
+      detailNote: "Elegant Sage Green & White floral print cotton maxi dress. Length: 38–40 Inches, Flare: 80 Inches."
+    },
+    {
+      id: "KURTI-25",
+      name: "Black White Geometric Print Cotton One Piece Kurti",
+      image: "images/black-white-geometric-print-cotton-one-piece-kurti-for-women-bangladesh.webp",
+      price: 350,
+      color: "black",
+      colorLabel: "Black / White",
+      fabric: "Premium Cotton Fabric",
+      sizes: ["34", "36", "38", "40", "42", "44", "46"],
+      detailNote: "Elegant black & white geometric print premium cotton one-piece kurti. Length: 38–40 Inches, Flare: 80 Inches."
+    },
+    {
+      id: "KURTI-26",
+      name: "Premium Tribal Print Cotton One-Piece Maxi Dress - Black",
+      image: "images/Premium-Tribal-Print-One-Piece-Black.webp",
+      price: 450,
+      color: "black",
+      colorLabel: "Black",
+      fabric: "Premium Cotton Fabric",
+      sizes: ["34", "36", "38", "40", "42", "44", "46"],
+      detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 38–40 inches, flare: 80 inches."
+    },
+    {
+      id: "KURTI-27",
+      name: "Premium Tribal Print Cotton One-Piece Maxi Dress - Cherry Red",
+      image: "images/Premium-Tribal-Print-One-Piece-Cherry-Red.webp",
+      price: 450,
+      color: "red",
+      colorLabel: "Cherry Red",
+      fabric: "Premium Cotton Fabric",
+      sizes: ["34", "36", "38", "40", "42", "44", "46"],
+      detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 38–40 inches, flare: 80 inches."
+    },
+    {
+      id: "KURTI-28",
+      name: "Premium Tribal Print Cotton One-Piece Maxi Dress - Navy Blue",
+      image: "images/Premium-Tribal-Print-One-Piece-Navy-Blue.webp",
+      price: 450,
+      color: "blue",
+      colorLabel: "Navy Blue",
+      fabric: "Premium Cotton Fabric",
+      sizes: ["34", "36", "38", "40", "42", "44", "46"],
+      detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 38–40 inches, flare: 80 inches."
+    },
+    {
+      id: "KURTI-29",
+      name: "Premium Tribal Print Cotton One-Piece Maxi Dress - Rust Brown",
+      image: "images/Premium-Tribal-Print-One-Piece-Rust-Brown.webp",
+      price: 450,
       color: "brown",
-      colorLabel: "Brown",
-      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/brown-embroidered-womens-3-piece-kurti-set.webp"
+      colorLabel: "Rust Brown",
+      fabric: "Premium Cotton Fabric",
+      sizes: ["34", "36", "38", "40", "42", "44", "46"],
+      detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 38–40 inches, flare: 80 inches."
     },
     {
-      color: "beige",
-      colorLabel: "Beige",
-      image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/two-piece-dress/beige-embroidered-womens-3-piece-kurti-set.webp"
-    }
-  ],
-
-  link: "/",
-
-  price: 750,
-
-  color: "multiple-colors",
-    colorLabel: "12 Colors",
-
-  fabric: "Premium Poppon Clothing Fabric",
-
-  sizes: ["Free Size"],
-  bodySizes: ["42"],
-  dressLengths: ["37"],
-
-  lengthSizeLabel: "Dress Length",
-
-  sizeSpecs: [
-    { label: "Size", value: "Free Size" },
-    { label: "Body", value: "Up to 42" },
-    { label: "Dress Length", value: "37 inches" }
-  ],
-
-  description:
-    "🌸 নতুন ডিজাইনের স্টাইলিশ লেডিস ড্রেস 🌸 | সিম্পল কিন্তু এলিগ্যান্ট লুক—ডেইলি ইউজ, অফিস, ইউনিভার্সিটি কিংবা আউটিংয়ের জন্য দারুণ মানানসই। Premium Poppon Clothing Fabric. সুন্দর টেক্সচার্ড ফেব্রিক, আকর্ষণীয় ফ্রন্ট ডিজাইন, আরামদায়ক ও স্টাইলিশ। সাথে ম্যাচিং বটম।",
-
-  detailNote:
-    "Premium Poppon Clothing Fabric | Free Size | Body: Up to 42 | Dress Length: 37 Inches | Matching Bottom | Home Delivery Across Bangladesh | Price: 750 BDT",
-
-  phone: "01971642683"
-},
-   {
-    id: "KURTI-EMB-01",
-    name: "Charcoal Black Embroidered Kurti",
-    image: "https://muslimabaya.netlify.app/catalog/images/charcoal-black-embroidered-kurti.webp",
-    link: "/",
-    price: 750,
-    color: "charcoal-black",
-    colorLabel: "Charcoal Black",
-    fabric: "Premium Cotton (Hand Embroidery)",
-    sizes: ["Free Size"],
-    bodySizes: ["42"],
-    detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear."
-   },
-   {
-    id: "KURTI-EMB-02",
-    name: "Mustard Yellow Embroidered Kurti",
-    image: "https://muslimabaya.netlify.app/catalog/images/mustard-yellow-embroidered-kurti.webp",
-    link: "/",
-    price: 750,
-    color: "mustard-yellow",
-    colorLabel: "Mustard Yellow",
-    fabric: "Premium Cotton (Hand Embroidery)",
-    sizes: ["Free Size"],
-    bodySizes: ["42"],
-    detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear."
-   },
-   {
-    id: "KURTI-EMB-03",
-    name: "Pastel Pink Embroidered Kurti",
-    image: "https://muslimabaya.netlify.app/catalog/images/pastel-pink-embroidered-kurti.webp",
-    link: "/",
-    price: 750,
-    color: "pastel-pink",
-    colorLabel: "Pastel Pink",
-    fabric: "Premium Cotton (Hand Embroidery)",
-    sizes: ["Free Size"],
-    bodySizes: ["42"],
-    detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear."
-   },
-   {
-    id: "KURTI-EMB-04",
-    name: "Maroon Embroidered Kurti",
-    image: "https://muslimabaya.netlify.app/catalog/images/maroon-embroidered-kurti-for-women.webp",
-    link: "/",
-    price: 750,
-    color: "maroon",
-    colorLabel: "Maroon",
-    fabric: "Premium Cotton (Hand Embroidery)",
-    sizes: ["Free Size"],
-    bodySizes: ["42"],
-    detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear."
-   },
-   {
-    id: "KURTI-EMB-05",
-    name: "Dusty Rose Embroidered Kurti",
-    image: "https://muslimabaya.netlify.app/catalog/images/dusty-rose-embroidered-kurti-for-women-bangladesh.webp",
-    link: "/",
-    price: 750,
-    color: "dusty-rose",
-    colorLabel: "Dusty Rose",
-    fabric: "Premium Cotton (Hand Embroidery)",
-    sizes: ["Free Size"],
-    bodySizes: ["42"],
-    detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear."
-   },
-   {
-    id: "KURTI-EMB-06",
-    name: "Mauve Lavender Embroidered Kurta",
-    image: "https://muslimabaya.netlify.app/catalog/images/mauve-lavender-embroidered-kurta-for-women.webp",
-    link: "/",
-    price: 750,
-    color: "mauve-lavender",
-    colorLabel: "Mauve Lavender",
-    fabric: "Premium Cotton (Hand Embroidery)",
-    sizes: ["Free Size"],
-    bodySizes: ["42"],
-    detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear."
-   },
-   {
-    id: "KURTI-EMB-07",
-    name: "Cream Beige Floral Embroidered Kurti",
-    image: "https://muslimabaya.netlify.app/catalog/images/cream-beige-womens-embroidered-kurti-floral-design.webp",
-    link: "/",
-    price: 750,
-    color: "cream-beige",
-    colorLabel: "Cream Beige",
-    fabric: "Premium Cotton (Hand Embroidery)",
-    sizes: ["Free Size"],
-    bodySizes: ["42"],
-    detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear."
-   }
-],
-/* ═══ ⑤ এম্ব্রয়ডারি — খালি ═══ */
-embroidery: [
- {
-  id: "ABY-BLACK-1",
-  name: "Dil Bahar Abaya Full Set",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/dil-bahar-black-stone-work-abaya-original-dubai-cherry-fabric-bangladesh.webp",
-  link: "/",
-  price: 1899,
-  color: "black",
-  colorLabel: "Classic Black",
-  fabric: "Original Dubai Cherry",
-  sizes: ["50", "52", "54", "56", "58"],
-  priceByType: { "Full Set": 1899 },
-  description: "Premium Original Dubai Cherry Fabric. Inner + Open Abaya + Matching Hijab. Beautiful All-Over Embroidery with a 200-Inch Flare."
-}  
-],
-
-/* ═══ ⑥ কারচুপি — খালি ═══ */
-karchupi: [],
-
-/* ═══ ⑦ কাফতান — খালি ═══ */
-kaftan: [],
-
-/* ═══ ⑧ হিজাব — খালি ═══ */
-hijab: [
-{
-  id: "HIJAB-01",
-  name: "Premium Short Khimar Hijab – Dusty Pink",
-  image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-short-khimar-hijab-dusty-pink-soft-jersey.webp",
-  link: "/",
-  price: 150,
-  color: "dusty-pink",
-  colorLabel: "Dusty Pink",
-  fabric: "Premium Soft Jersey Fabric",
-  sizes: ["Free Size"],
-  detailNote: "Premium ready-to-wear short khimar hijab crafted from soft jersey fabric. Lightweight, breathable, stretchable, and comfortable for daily wear, prayer, office, university, and travel."
-}  
-],
-
-/* ═══ ⑨ পাঞ্জাবি ═══ */
-panjabi: [
-  {
-    id: "PAN-001",
-    name: "Premium White Islamic Panjabi",
-    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-white-islamic-mens-kurta-full-sleeve-outdoor-portrait-bangladesh.webp",
-    link: "/",
-    price: 1050,
-    color: "white",
-    colorLabel: "White",
-    fabric: "Premium Cotton",
-    sizes: [
-      "M (Long 40 • Body 42)",
-      "L (Long 42 • Body 44)",
-      "XL (Long 44 • Body 46)"
-    ],
-    detailNote: "Premium Full Sleeve Islamic Panjabi"
-  },
-  {
-    id: "PAN-002",
-    name: "Premium Off White Islamic Panjabi",
-    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-mens-off-white-cotton-panjabi-modern-1080x1350.webp",
-    link: "/",
-    price: 1050,
-    color: "off-white",
-    colorLabel: "Off White",
-    fabric: "Premium Cotton",
-    sizes: [
-      "M (Long 40 • Body 42)",
-      "L (Long 42 • Body 44)",
-      "XL (Long 44 • Body 46)"
-    ],
-    detailNote: "Premium Full Sleeve Islamic Panjabi"
-  },
-  {
-    id: "PAN-003",
-    name: "Premium White Cotton Panjabi",
-    image: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-white-cotton-panjabi-mens-islamic-fashion-modern-design-1080x1350.webp",
-    link: "/",
-    price: 1050,
-    color: "white",
-    colorLabel: "White",
-    fabric: "Premium Cotton",
-    sizes: [
-      "M (Long 40 • Body 42)",
-      "L (Long 42 • Body 44)",
-      "XL (Long 44 • Body 46)"
-    ],
-    detailNote: "Premium Full Sleeve Islamic Panjabi"
-  }
-],
-}; // <--- এই ক্লোজিং ব্র্যাকেটটি অত্যন্ত জরুরি, যা window.CATEGORY_PRODUCTS অবজেক্টকে শেষ করলো।
-
-window.SITE_MEDIA = {
-  whatsappOrderLink:
-    (window.SITE_LINKS && window.SITE_LINKS.order && window.SITE_LINKS.order.whatsapp) ||
-    "https://wa.me/8801970831783",
-  /**
-   * VIDEO PAGE — Add a new entry to the videos[] array to display more videos.
-   * Use either:
-   * url = Full YouTube link
-   * or
-   * videoId = YouTube video ID only.
-   * The page automatically displays videos in rows of 3.
-   */
-  featuredVideo: {
-    title: "Video Collection",
-    helpText: "Watch real product videos to check the quality before placing your order.",
-    videos: [
-      { title: "Collection Video 1", url: "https://www.youtube.com/watch?v=Wyrw0gzKMqk" }
-      // { title: "Collection Video 2", url: "https://youtu.be/XXXXXXXXXXX" },
-      // { title: "Collection Video 3", videoId: "XXXXXXXXXXX" },
-    ]
-  }
-};
-
-window.CATEGORY_META = {
-  abaya: { title: "ABAYA" },
-  "cover-up": { title: "COVER UP" },
-  "tops-kurti": { title: "TOPS/KURTI" }, // অথবা "TOPS/ KURTI"
-  "premium-two-piece": { title: "PREMIUM TWO-PIECE" },
-  embroidery: { title: "EMBROIDERY" },
-  karchupi: { title: "KARCHUPI" },
-  kaftan: { title: "KAFTAN" },
-  hijab: { title: "HIJAB" },
-  panjabi: { title: "PANJABI" },
-  video: { title: "VIDEO" } // মেটাতে 'video' যুক্ত করা হয়েছে
-};
-
-/** Shared nav + hub tiles (Muslim Abaya All Categories page) */
-window.CATEGORY_NAV = [
-  { key: "abaya", href: "/abaya", label: "ABAYA", image: "images/Baby-Pink-Floral-Print.jpeg" },
-  { key: "cover-up", href: "/cover-up", label: "COVER UP", image: "images/Royal-Blue-Golden-Floral-Print.jpeg" },
-  { key: "kaftan", href: "/kaftan", label: "KAFTAN", image: "images/Baby-Pink-Floral-Print.jpeg" },
-  { key: "tops-kurti", href: "/tops-kurti", label: "TOPS/KURTI", image: "images/Black-White-Polka-Dots.jpeg" },
-  { key: "hijab", href: "/hijab", label: "HIJAB", image: "images/Black-White-Polka-Dots.jpeg" },
-  { key: "premium-two-piece", href: "/premium-two-piece", label: "PREMIUM TWO-PIECE", image: "images/premium-pink-floral-co-ord-set.webp" },
-  { key: "embroidery", href: "/embroidery", label: "EMBROIDERY", image: "images/Black-Base-Rose-Floral.jpeg" },
-  { key: "karchupi", href: "/karchupi", label: "KARCHUPI", image: "images/Black-Base-Rose-Floral.jpeg" },
-  { key: "panjabi", href: "/panjabi", label: "PANJABI", image: "images/panjabi-placeholder.jpeg" }, // যদি 'panjabi' নেভিগেশনে দেখাতে চান
-  { key: "video", href: "/video", label: "VIDEO", image: "images/Royal-Blue-Golden-Floral-Print.jpeg" }
-];
-
-/** Display names for product `color` keys — new colors auto-appear in filters when added to products. */
-window.FILTER_COLOR_MAP = {
-  all: { label: "All Colors", hex: "transparent" },
-  maroon: { label: "Maroon", hex: "#7a2348" },
-  black: { label: "Classic Black", hex: "#111111" },
-  white: { label: "Soft White", hex: "#f5f5f5" },
-  pink: { label: "Rose Pink", hex: "#f4b4c4" },
-  blue: { label: "Royal Blue", hex: "#4a6fa5" },
-  navy: { label: "Navy Blue", hex: "#1E3A8A" },
-  "navy-blue": { label: "Navy Blue", hex: "#1E3A8A" },
-  "sky-blue": { label: "Sky Blue", hex: "#87CEEB" },
-  green: { label: "Olive Green", hex: "#6b8f71" },
-  yellow: { label: "Yellow", hex: "#FFD54F" },
-  "mustard-yellow": { label: "Mustard Yellow", hex: "#D4A017" },
-  "multi-color": { label: "Multiple Colors", hex: "#888888" },
-  red: { label: "Red", hex: "#E53935" },
-  lavender: { label: "Lavender", hex: "#B39DDB" },
-  beige: { label: "Copper Beige", hex: "#d4c4a8" }
-};
-
-/** Shared product search — used by header search + category pages */
-(function (g) {
-  function normalize(text) {
-    return String(text || "")
-      .toLowerCase()
-      .replace(/-/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
-  }
-
-  function getTerms(q) {
-    return normalize(q).split(" ").filter(Boolean);
-  }
-
-  function matchesAll(haystack, terms) {
-    if (!terms.length) return true;
-    var h = normalize(haystack);
-    return terms.every(function (term) {
-      return h.indexOf(term) !== -1;
-    });
-  }
-
-  function categoryHaystack(key, meta) {
-    var m = (meta && meta[key]) || {};
-    var nav = g.CATEGORY_NAV || [];
-    var navItem = nav.find(function (n) {
-      return n.key === key;
-    });
-    return [key, m.title || "", m.label || "", navItem && navItem.label ? navItem.label : ""].join(" ");
-  }
-
-  function productHaystack(p, key, meta) {
-    return [
-      p.name,
-      p.colorLabel,
-      p.color,
-      p.fabric,
-      p.description,
-      p.id,
-      p.detailNote,
-      categoryHaystack(key, meta)
-    ].join(" ");
-  }
-
-  function collectProducts(allProducts, query, meta) {
-    var terms = getTerms(query);
-    if (!terms.length) return [];
-    var list = [];
-    Object.keys(allProducts || {}).forEach(function (key) {
-      var catProducts = allProducts[key] || [];
-      var categoryHit = matchesAll(categoryHaystack(key, meta), terms);
-      catProducts.forEach(function (p) {
-        if (!p) return;
-        if (categoryHit || matchesAll(productHaystack(p, key, meta), terms)) {
-          list.push(p);
-        }
-      });
-    });
-    return list;
-  }
-
-  /** Search within one category only (abaya page → abaya products only). */
-  function collectProductsInCategory(allProducts, categoryKey, query, meta) {
-    var terms = getTerms(query);
-    var list = (allProducts && allProducts[categoryKey]) ? allProducts[categoryKey].slice() : [];
-    if (!terms.length) return list;
-    if (matchesAll(categoryHaystack(categoryKey, meta), terms)) return list;
-    return list.filter(function (p) {
-      return p && matchesAll(productHaystack(p, categoryKey, meta), terms);
-    });
-  }
-
-  function pickRedirectHref(query, nav, meta, allProducts) {
-    var terms = getTerms(query);
-    if (!terms.length) return "/category";
-    var hrefByKey = {};
-    (nav || []).forEach(function (n) {
-      if (n.key) hrefByKey[n.key] = n.href || "/abaya";
-    });
-    var bestKey = null;
-    var bestScore = -1;
-    Object.keys(allProducts || {}).forEach(function (key) {
-      var score = 0;
-      if (matchesAll(categoryHaystack(key, meta), terms)) score += 100;
-      (allProducts[key] || []).forEach(function (p) {
-        if (matchesAll(productHaystack(p, key, meta), terms)) score += 1;
-      });
-      if (score > bestScore) {
-        bestScore = score;
-        bestKey = key;
-      }
-    });
-    if (bestKey && hrefByKey[bestKey]) return hrefByKey[bestKey];
-    return "/category";
-  }
-
-  g.maSearch = {
-    getTerms: getTerms,
-    matchesAll: matchesAll,
-    collectProducts: collectProducts,
-    collectProductsInCategory: collectProductsInCategory,
-    pickRedirectHref: pickRedirectHref,
-    categoryMatches: function (key, meta, query) {
-      return matchesAll(categoryHaystack(key, meta), getTerms(query));
+      id: "KURTI-32",
+      name: "Premium Pink Floral Midi Dress",
+      image: "images/premium-pink-floral-midi-dress-for-women-bangladesh.webp",
+      price: 350,
+      color: "pink",
+      colorLabel: "Pink Floral",
+      fabric: "Premium Cotton Fabric",
+      sizes: ["34", "36", "38", "40", "42", "44", "46"],
+      detailNote: "Premium cotton midi dress with elegant pink floral print. Soft, breathable fabric with a comfortable A-line fit for everyday wear."
     },
-    productMatches: function (p, key, meta, query) {
-      return matchesAll(productHaystack(p, key, meta), getTerms(query));
+    {
+      id: "KURTI-33",
+      name: "Premium Yellow Striped Midi Dress",
+      image: "images/brown-embroidered-womens-3-piece-kurti-set.webp",
+      price: 750,
+      stock: 25,
+      color: "Brown",
+      colorLabel: "Brown",
+      fabric: "Premium Popcorn Fabric",
+      sizes: ["40", "42"],
+      detailNote: "Premium cotton midi dress featuring elegant yellow striped design. Soft, breathable fabric with a stylish and comfortable fit for daily wear."
     }
-  };
-})(window);
+  ],
+  embroidery: [
+    {
+      id: "ABY-BLACK-1",
+      name: "Dil Bahar Abaya Full Set",
+      image: "images/dil-bahar-black-stone-work-abaya-original-dubai-cherry-fabric-bangladesh.webp",
+      price: 1899,
+      color: "black",
+      colorLabel: "Classic Black",
+      fabric: "Original Dubai Cherry",
+      sizes: ["50", "52", "54", "56", "58"],
+      priceByType: {
+        "Full Set": 1899
+      }
+    }
+  ],
+  karchupi: [
+  ],
+  kaftan: [
+  ],
+  hijab: [
+    {
+      id: "HIJAB-01",
+      name: "Premium Short Khimar Hijab – Dusty Pink",
+      image: "images/premium-short-khimar-hijab-dusty-pink-soft-jersey.webp",
+      price: 150,
+      color: "dusty-pink",
+      colorLabel: "Dusty Pink",
+      fabric: "Premium Soft Jersey Fabric",
+      sizes: ["Free Size"],
+      detailNote: "Premium ready-to-wear short khimar hijab crafted from soft jersey fabric. Lightweight, breathable, stretchable, and comfortable for daily wear, prayer, office, university, and travel."
+    }
+  ],
+  panjabi: [
+    {
+      id: "PAN-001",
+      name: "Premium White Islamic Panjabi",
+      image: "images/premium-white-islamic-mens-kurta-full-sleeve-outdoor-portrait-bangladesh.webp",
+      price: 1050,
+      color: "white",
+      colorLabel: "White",
+      fabric: "Premium Cotton",
+      sizes: ["M (Long 40 • Body 42)", "L (Long 42 • Body 44)", "XL (Long 44 • Body 46)"],
+      detailNote: "Premium Full Sleeve Islamic Panjabi"
+    },
+    {
+      id: "PAN-002",
+      name: "Premium Off White Islamic Panjabi",
+      image: "images/premium-mens-off-white-cotton-panjabi-modern-1080x1350.webp",
+      price: 1050,
+      color: "off-white",
+      colorLabel: "Off White",
+      fabric: "Premium Cotton",
+      sizes: ["M (Long 40 • Body 42)", "L (Long 42 • Body 44)", "XL (Long 44 • Body 46)"],
+      detailNote: "Premium Full Sleeve Islamic Panjabi"
+    },
+    {
+      id: "PAN-003",
+      name: "Premium White Cotton Panjabi",
+      image: "images/premium-white-cotton-panjabi-mens-islamic-fashion-modern-design-1080x1350.webp",
+      price: 1050,
+      color: "white",
+      colorLabel: "White",
+      fabric: "Premium Cotton",
+      sizes: ["M (Long 40 • Body 42)", "L (Long 42 • Body 44)", "XL (Long 44 • Body 46)"],
+      detailNote: "Premium Full Sleeve Islamic Panjabi"
+    }
+  ]
+};
+
+/** @deprecated — product-catalog-sync.js স্বয়ংক্রিয় বানায় */
+window.CATEGORY_META = {};
+window.CATEGORY_NAV = [];
