@@ -12,6 +12,7 @@
   var categoryTypePrices = {};
   var searchTerm = "";
   var IMG_MAX_W = 1600;
+  var IMG_CARD_MAX_W = 800;
   var IMG_QUALITY = 0.82;
 
   function slugify(text) {
@@ -570,22 +571,37 @@
         return;
       }
       setStatus("অপটিমাইজ করা হচ্ছে...");
-      resizeToWebp(file, IMG_MAX_W, IMG_QUALITY)
-        .then(function (blob) {
-          setPreview(URL.createObjectURL(blob));
+      var base = slugifyFileBase(p);
+      Promise.all([
+        resizeToWebp(file, IMG_MAX_W, IMG_QUALITY),
+        resizeToWebp(file, IMG_CARD_MAX_W, IMG_QUALITY)
+      ])
+        .then(function (blobs) {
+          setPreview(URL.createObjectURL(blobs[0]));
           setStatus("আপলোড হচ্ছে...");
-          return blobToBase64(blob);
+          return Promise.all([blobToBase64(blobs[0]), blobToBase64(blobs[1])]);
         })
-        .then(function (base64) {
-          var fileName = "images/" + slugifyFileBase(p) + ".webp";
-          return window.MaAdmin.uploadImage(fileName, base64, "image/webp");
+        .then(function (base64s) {
+          var mainName = "images/" + base + ".webp";
+          var cardName = "images/" + base + "-card.webp";
+          return Promise.all([
+            window.MaAdmin.uploadImage(mainName, base64s[0], "image/webp"),
+            window.MaAdmin.uploadImage(cardName, base64s[1], "image/webp").catch(function () {
+              return { ok: false };
+            })
+          ]);
         })
-        .then(function (res) {
-          if (!res || !res.ok) {
-            setStatus((res && (res.message || res.error)) || "আপলোড ব্যর্থ হয়েছে", true);
+        .then(function (results) {
+          var mainRes = results[0];
+          var cardRes = results[1];
+          if (!mainRes || !mainRes.ok) {
+            setStatus((mainRes && (mainRes.message || mainRes.error)) || "আপলোড ব্যর্থ হয়েছে", true);
             return;
           }
-          p.image = res.path || res.url || p.image;
+          p.image = mainRes.path || mainRes.url || p.image;
+          if (cardRes && cardRes.ok) {
+            p.imageCard = cardRes.path || cardRes.url || "";
+          }
           if (urlInput) {
             urlInput.value = p.image;
             urlInput.dispatchEvent(new Event("input", { bubbles: true }));
@@ -740,7 +756,7 @@
   function productToJsLines(p, indent) {
     var ind = indent || "    ";
     var lines = [ind + "{"];
-    var order = ["id", "name", "image", "price", "stock", "color", "colorLabel", "fabric", "sizes", "detailNote", "types"];
+    var order = ["id", "name", "image", "imageCard", "price", "stock", "color", "colorLabel", "fabric", "sizes", "detailNote", "types"];
     order.forEach(function (k) {
       if (p[k] == null || p[k] === "") return;
       if (k === "sizes" && Array.isArray(p.sizes)) {
