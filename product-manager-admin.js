@@ -14,6 +14,8 @@
   var IMG_MAX_W = 1600;
   var IMG_CARD_MAX_W = 800;
   var IMG_QUALITY = 0.82;
+  var IMG_GALLERY_MAX_W = 1600;
+  var MAX_GALLERY_IMAGES = 6;
 
   function slugify(text) {
     return String(text || "")
@@ -375,6 +377,7 @@
       "</span></div>" +
       '<div class="pm-product-body">' +
       buildImageUploader(p) +
+      buildGalleryUploader(p) +
       field("name", "নাম", p.name) +
       buildTypePriceFields(catKey, p) +
       field("price", priceLabel, p.price, "number") +
@@ -447,6 +450,7 @@
     });
 
     wireImageUploader(card, p);
+    wireGalleryUploader(card, p);
 
     return card;
   }
@@ -634,6 +638,167 @@
     });
   }
 
+  // ── গ্যালারি: একই প্রোডাক্টের অতিরিক্ত ডিজাইন/অ্যাঙ্গল ছবি (কার্ড হোভার + কুইক-ভিউ গ্যালারিতে দেখায়) ──
+  function buildGalleryUploader(p) {
+    var imgs = Array.isArray(p.images) ? p.images : [];
+    var thumbs = imgs
+      .map(function (url, i) {
+        return (
+          '<div class="pm-gallery-thumb" data-gi="' +
+          i +
+          '"><img src="' +
+          escapeAttr(resolveImgForPreview(url)) +
+          '" alt="">' +
+          '<div class="pm-gallery-thumb-actions">' +
+          '<button type="button" class="pm-gallery-move" data-dir="-1" data-gi="' +
+          i +
+          '"' +
+          (i === 0 ? " disabled" : "") +
+          ' aria-label="বামে সরান">\u2190</button>' +
+          '<button type="button" class="pm-gallery-remove" data-gi="' +
+          i +
+          '" aria-label="মুছুন">\u00d7</button>' +
+          '<button type="button" class="pm-gallery-move" data-dir="1" data-gi="' +
+          i +
+          '"' +
+          (i === imgs.length - 1 ? " disabled" : "") +
+          ' aria-label="ডানে সরান">\u2192</button>' +
+          "</div></div>"
+        );
+      })
+      .join("");
+    var canAdd = imgs.length < MAX_GALLERY_IMAGES;
+    var addTile = canAdd
+      ? '<div class="pm-gallery-add">' +
+        '<div class="pm-gallery-add-txt">+ ছবি যোগ</div>' +
+        '<input type="file" accept="image/*" class="pm-gallery-file-input" hidden>' +
+        "</div>"
+      : "";
+    return (
+      '<div class="pm-field pm-field-wide pm-uploader pm-gallery-uploader">' +
+      "<label>অতিরিক্ত ডিজাইন/অ্যাঙ্গল ছবি (গ্যালারি) — কার্ডে হোভার করলে ও কুইক-ভিউতে দেখাবে, সর্বোচ্চ " +
+      MAX_GALLERY_IMAGES +
+      "টি</label>" +
+      '<div class="pm-gallery-grid">' +
+      thumbs +
+      addTile +
+      "</div>" +
+      '<div class="pm-gallery-status" hidden></div>' +
+      "</div>"
+    );
+  }
+
+  function wireGalleryUploader(card, p) {
+    var wrap = card.querySelector(".pm-gallery-uploader");
+    if (!wrap) return;
+    var statusEl = wrap.querySelector(".pm-gallery-status");
+
+    function setStatus(msg, isErr) {
+      if (!statusEl) return;
+      if (!msg) {
+        statusEl.hidden = true;
+        return;
+      }
+      statusEl.hidden = false;
+      statusEl.textContent = msg;
+      statusEl.style.color = isErr ? "#b32d2e" : "#646970";
+    }
+
+    function rerender() {
+      var holder = document.createElement("div");
+      holder.innerHTML = buildGalleryUploader(p);
+      var newWrap = holder.firstChild;
+      wrap.replaceWith(newWrap);
+      wireGalleryUploader(card, p);
+    }
+
+    wrap.querySelectorAll(".pm-gallery-remove").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var i = parseInt(btn.getAttribute("data-gi"), 10);
+        if (!confirm("এই গ্যালারি ছবিটা সরাবেন?")) return;
+        p.images.splice(i, 1);
+        if (!p.images.length) delete p.images;
+        rerender();
+        toast("গ্যালারি ছবি সরানো হয়েছে (Save চাপুন)");
+      });
+    });
+
+    wrap.querySelectorAll(".pm-gallery-move").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var i = parseInt(btn.getAttribute("data-gi"), 10);
+        var dir = parseInt(btn.getAttribute("data-dir"), 10);
+        var j = i + dir;
+        if (j < 0 || j >= p.images.length) return;
+        var tmp = p.images[i];
+        p.images[i] = p.images[j];
+        p.images[j] = tmp;
+        rerender();
+      });
+    });
+
+    var addTile = wrap.querySelector(".pm-gallery-add");
+    if (addTile) {
+      var input = addTile.querySelector(".pm-gallery-file-input");
+
+      function handleGalleryFile(file) {
+        if (!file || file.type.indexOf("image/") !== 0) {
+          setStatus("শুধু ছবি ফাইল দিন (JPG/PNG/WebP)", true);
+          return;
+        }
+        if (!window.MaAdmin || !window.MaAdmin.isLoggedIn || !window.MaAdmin.isLoggedIn()) {
+          setStatus("আপলোডের জন্য Admin লগইন প্রযোজন", true);
+          return;
+        }
+        var n = (Array.isArray(p.images) ? p.images.length : 0) + 1;
+        var base = slugifyFileBase(p) + "-g" + n;
+        setStatus("অপটিমাইজ করা হচ্ছে...");
+        resizeToWebp(file, IMG_GALLERY_MAX_W, IMG_QUALITY)
+          .then(function (blob) {
+            setStatus("আপলোড হচ্ছে...");
+            return blobToBase64(blob);
+          })
+          .then(function (base64) {
+            var name = "images/" + base + ".webp";
+            return window.MaAdmin.uploadImage(name, base64, "image/webp");
+          })
+          .then(function (res) {
+            if (!res || !res.ok) {
+              setStatus((res && (res.message || res.error)) || "আপলোড ব্যর্থ হয়েছে", true);
+              return;
+            }
+            if (!Array.isArray(p.images)) p.images = [];
+            p.images.push(res.path || res.url);
+            setStatus("");
+            rerender();
+            toast("গ্যালারি ছবি যোগ হয়েছে (Save চাপুন)");
+          })
+          .catch(function (err) {
+            setStatus("সমস্যা: " + (err && err.message ? err.message : err), true);
+          });
+      }
+
+      addTile.addEventListener("click", function () {
+        input.click();
+      });
+      input.addEventListener("change", function () {
+        if (input.files && input.files[0]) handleGalleryFile(input.files[0]);
+      });
+      addTile.addEventListener("dragover", function (e) {
+        e.preventDefault();
+        addTile.classList.add("is-drag");
+      });
+      addTile.addEventListener("dragleave", function () {
+        addTile.classList.remove("is-drag");
+      });
+      addTile.addEventListener("drop", function (e) {
+        e.preventDefault();
+        addTile.classList.remove("is-drag");
+        var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+        if (f) handleGalleryFile(f);
+      });
+    }
+  }
+
   function field(name, label, value, type) {
     return (
       '<div class="pm-field"><label>' +
@@ -756,8 +921,16 @@
   function productToJsLines(p, indent) {
     var ind = indent || "    ";
     var lines = [ind + "{"];
-    var order = ["id", "name", "image", "imageCard", "price", "stock", "color", "colorLabel", "fabric", "sizes", "detailNote", "types"];
+    var order = ["id", "name", "image", "imageCard", "images", "price", "stock", "color", "colorLabel", "fabric", "sizes", "detailNote", "types"];
     order.forEach(function (k) {
+      if (k === "images") {
+        if (Array.isArray(p.images) && p.images.length) {
+          lines.push(ind + "  images: [" + p.images.map(function (s) {
+            return jsStr(s);
+          }).join(", ") + "],");
+        }
+        return;
+      }
       if (p[k] == null || p[k] === "") return;
       if (k === "sizes" && Array.isArray(p.sizes)) {
         lines.push(ind + "  sizes: [" + p.sizes.map(function (s) {
