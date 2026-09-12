@@ -1,7 +1,7 @@
 /**
  * ═══ সব ক্যাটাগরির প্রোডাক্ট ছবির লিংক — এক জায়গা ═══
  * এডিট: product-manager.html (প্রতি প্রোডাক্টে ছবির URL) → সেভ
- * আপডেট: 2026-09-11
+ * আপডেট: 2026-09-12
  */
 window.PRODUCT_LINKS_DATA = {
   abaya: [
@@ -10,7 +10,7 @@ window.PRODUCT_LINKS_DATA = {
     "images/premium-black-gold-stone-work-abaya-1080x1350.webp",
     "images/premium-black-silver-stone-work-abaya-1080x1350.webp",
     "images/Black.jpeg",
-    "images/Versace Border Premium Abaya Set...jpg",
+    "images/aby-versace-7-1789238735544.webp",
     "images/Abaya/premium-black-layered-khimar-niqab-abaya-for-women-muslimabaya.webp",
     "images/Versace Border Premium Abaya Set.jpg",
     "images/Premium-Floral-Motif-Abaya-Set...jpeg",
