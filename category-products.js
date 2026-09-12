@@ -220,7 +220,7 @@ window.CATEGORY_PRODUCTS = {
       }
     }
   ],
-  cover-up: [
+  "cover-up": [
     {
       id: "ABY-COVERUP-01",
       name: "Premium Black Butterfly Khimar Abaya with Niqab",
@@ -233,7 +233,7 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Premium butterfly khimar abaya with matching niqab, crafted from high-quality Cherry Fabric. Soft, breathable, lightweight, and designed for elegant modest wear with a graceful flow and premium finishing."
     }
   ],
-  premium-two-piece: [
+  "premium-two-piece": [
     {
       id: "DR-01",
       name: "White Strawberry Print Women's Two-Piece Set",
@@ -532,7 +532,7 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear."
     }
   ],
-  tops-kurti: [
+  "tops-kurti": [
     {
       id: "KURTI-01",
       name: "Classic Purple Lace-Work Kurti",
