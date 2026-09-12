@@ -2571,15 +2571,25 @@ function buildShopSidebar(categoryKey, products) {
    ---------------------------------------------------------------------- */
 function buildCardImageBlock(p, idx, categoryKey, allProducts) {
   var main = resolveCardImageSrc(p);
+  var card = resolveCardImageCardSrc(p);
   var hover = resolveCardHoverImage(p, allProducts);
   var imgFallback = getCategoryFallbackImage(categoryKey || "");
   var fb = imgFallback.replace(/'/g, "\\'");
-  var errOn = "this.onerror=null;this.src='" + fb + "'";
+  var errOn = "this.onerror=null;this.removeAttribute('srcset');this.src='" + fb + "'";
   var hoverHtml = hover
     ? '<img class="card-img-hover" src="' +
       escapeHtml(hover) +
       '" alt="" loading="lazy" decoding="async" aria-hidden="true" onerror="this.removeAttribute(\'src\')">'
     : "";
+  // ছোট (কার্ড সাইজ) ভ্যারিয়েন্ট থাকলে srcset যোগ — না থাকলে আগের মতোই একটাই src (পুরনো প্রোডাক্টে কোনো পরিবর্তন নেই)
+  var srcsetHtml =
+    card && card !== main
+      ? ' srcset="' +
+        escapeHtml(card) +
+        ' 800w, ' +
+        escapeHtml(main) +
+        ' 1600w" sizes="(max-width: 720px) 100vw, (max-width: 960px) 50vw, 380px"'
+      : "";
   return (
     '<button type="button" class="img-wrap js-quickview-trigger" data-product-idx="' +
     idx +
@@ -2590,7 +2600,9 @@ function buildCardImageBlock(p, idx, categoryKey, allProducts) {
     '<span class="card-img-stack">' +
     '<img class="card-img-primary" src="' +
     escapeHtml(main) +
-    '" alt="' +
+    '"' +
+    srcsetHtml +
+    ' alt="' +
     escapeHtml(p.name) +
     '" loading="lazy" decoding="async" onerror="' +
     errOn +
@@ -2606,6 +2618,13 @@ function resolveCardImageSrc(p) {
     return window.maCatalog.resolveImageUrl(p.image || "");
   }
   return p.image || "";
+}
+function resolveCardImageCardSrc(p) {
+  if (!p || !p.imageCard) return "";
+  if (window.maCatalog && typeof window.maCatalog.resolveImageUrl === "function") {
+    return window.maCatalog.resolveImageUrl(p.imageCard);
+  }
+  return p.imageCard || "";
 }
 function wrapProductImageLink(innerHtml, p) {
   var pageCfg = window.SITE_LINKS && window.SITE_LINKS.productPage;
