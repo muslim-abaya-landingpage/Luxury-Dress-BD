@@ -141,7 +141,12 @@
   }
 
   function jsKey(k) {
-    return /^[a-zA-Z_$][\w$-]*$/.test(k) ? k : '"' + k + '"';
+    // NOTE: a hyphen is NOT a valid character in a bare JS object key/identifier
+    // (e.g. "cover-up", "premium-two-piece", "tops-kurti" MUST be quoted, or the
+    // generated file throws "Unexpected token '-'" and the whole category list
+    // silently renders empty on the live site). Do not add "-" back into this
+    // character class.
+    return /^[a-zA-Z_$][\w$]*$/.test(k) ? k : '"' + k + '"';
   }
 
   function sizesToInput(sizes) {
