@@ -9,6 +9,18 @@
 /*.js
   Cache-Control: public, max-age=31536000, immutable
 
+/category-products.js
+  Cache-Control: public, max-age=300, must-revalidate
+
+/product-catalog-sections.js
+  Cache-Control: public, max-age=300, must-revalidate
+
+/product-links-data.js
+  Cache-Control: public, max-age=300, must-revalidate
+
+/product-config.js
+  Cache-Control: public, max-age=300, must-revalidate
+
 /*.css
   Cache-Control: public, max-age=31536000, immutable
 
