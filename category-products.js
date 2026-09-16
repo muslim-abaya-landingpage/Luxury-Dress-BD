@@ -1,6 +1,6 @@
 /**
  * প্রোডাক্ট ডেটা — product-manager.html থেকে এডিট করুন
- * আপডেট: 2026-09-12
+ * আপডেট: 2026-09-16
  */
 window.CATEGORY_PRODUCTS = {
   abaya: [
@@ -79,9 +79,8 @@ window.CATEGORY_PRODUCTS = {
       id: "ABY-White-7",
       name: "Safa Sate",
       image: "images/aby-versace-7-1789238735544.webp",
-      imageCard: "images/aby-versace-7-1789238735544-card.webp",
       images: ["images/aby-white-7-1789241666830-g1.webp"],
-      price: 2350,
+      price: 2500,
       stock: 100,
       color: "White",
       colorLabel: "Classic White",
@@ -89,7 +88,7 @@ window.CATEGORY_PRODUCTS = {
       sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: {
         "Abaya Only": 1200,
-        "Full Set": 2350
+        "Full Set": 2500
       }
     },
     {
@@ -181,14 +180,15 @@ window.CATEGORY_PRODUCTS = {
       id: "ABY-BUTTERFLY-14",
       name: "Butterfly Abaya Set - Back",
       image: "images/Butterfly-Ababa...jpg",
-      price: 1350,
+      images: ["images/aby-butterfly-14-1789587594148-g1.webp", "images/aby-butterfly-14-1789587604127-g1.webp"],
+      price: 2350,
       color: "black",
       colorLabel: "Classic Black",
       fabric: "Dubai Cherry",
       sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: {
         "Abaya Only": 799,
-        "Full Set": 1350
+        "Full Set": 2350
       }
     },
     {
