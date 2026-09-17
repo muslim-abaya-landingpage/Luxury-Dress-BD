@@ -15,7 +15,7 @@
   var IMG_CARD_MAX_W = 800;
   var IMG_QUALITY = 0.82;
   var IMG_GALLERY_MAX_W = 1600;
-  var MAX_GALLERY_IMAGES = 6;
+  var MAX_GALLERY_IMAGES = 4;
 
   function slugify(text) {
     return String(text || "")
@@ -465,7 +465,7 @@
     var hasImg = !!(p.image && String(p.image).trim());
     return (
       '<div class="pm-field pm-field-wide pm-uploader">' +
-      "<label>প্রোডাক্ট ছবি</label>" +
+      '<label>প্রধান ছবি <span class="pm-field-hint">Main image</span></label>' +
       '<div class="pm-dropzone">' +
       '<div class="pm-dropzone-preview"' +
       (hasImg ? ' style="background-image:url(\'' + escapeAttr(resolveImgForPreview(p.image)) + '\')"' : "") +
@@ -474,7 +474,7 @@
       "</div>" +
       '<div class="pm-dropzone-drop">' +
       '<div class="pm-dropzone-txt">ছবি টেনে আনুন বা ক্লিক করে বাছাই করুন</div>' +
-      '<div class="pm-dropzone-sub">JPG/PNG • অটো WebP-তে কনভার্ট + resize হবে</div>' +
+      '<div class="pm-dropzone-sub">JPG/PNG/WebP • অটো WebP • আলাদা main/images folder</div>' +
       '<div class="pm-dropzone-status" hidden></div>' +
       '<input type="file" accept="image/*" class="pm-file-input" hidden>' +
       "</div>" +
@@ -591,8 +591,8 @@
           return Promise.all([blobToBase64(blobs[0]), blobToBase64(blobs[1])]);
         })
         .then(function (base64s) {
-          var mainName = "images/" + base + ".webp";
-          var cardName = "images/" + base + "-card.webp";
+          var mainName = "images/main/" + base + ".webp";
+          var cardName = "images/main/cards/" + base + "-card.webp";
           return Promise.all([
             window.MaAdmin.uploadImage(mainName, base64s[0], "image/webp"),
             window.MaAdmin.uploadImage(cardName, base64s[1], "image/webp").catch(function () {
@@ -675,15 +675,13 @@
     var canAdd = imgs.length < MAX_GALLERY_IMAGES;
     var addTile = canAdd
       ? '<div class="pm-gallery-add">' +
-        '<div class="pm-gallery-add-txt">+ ছবি যোগ</div>' +
+        '<div class="pm-gallery-add-txt">+ ছবি যোগ</div><small class="pm-gallery-add-hint"></small>' +
         '<input type="file" accept="image/*" class="pm-gallery-file-input" hidden>' +
         "</div>"
       : "";
     return (
       '<div class="pm-field pm-field-wide pm-uploader pm-gallery-uploader">' +
-      "<label>অতিরিক্ত ডিজাইন/অ্যাঙ্গল ছবি (গ্যালারি) — কার্ডে হোভার করলে ও কুইক-ভিউতে দেখাবে, সর্বোচ্চ " +
-      MAX_GALLERY_IMAGES +
-      "টি</label>" +
+      '<label>অতিরিক্ত ডিজাইন/অ্যাঙ্গল ছবি <span class="pm-field-hint">সর্বোচ্চ ৪টি</span></label><div class="pm-gallery-caption">কার্ডে হোভার ও কুইক-ভিউতে দেখাবে</div>' +
       '<div class="pm-gallery-grid">' +
       thumbs +
       addTile +
@@ -763,7 +761,7 @@
             return blobToBase64(blob);
           })
           .then(function (base64) {
-            var name = "images/" + base + ".webp";
+            var name = "images/gallery/" + base + ".webp";
             return window.MaAdmin.uploadImage(name, base64, "image/webp");
           })
           .then(function (res) {
