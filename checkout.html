@@ -2143,7 +2143,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="product-catalog-loader.js?v=20260603crosssell"></script>
 <script defer src="site-header-config.js?v=20260601en"></script>
 <script defer src="site-header.js?v=20260820stock"></script>
-<script src="cart-utils.js?v=20260820stock"></script>
+<script src="cart-utils.js?v=20260925meta"></script>
 <script src="cart-toast.js?v=20260603cartqty"></script>
 <script src="cart-drawer.js?v=20260820fixui"></script>
 <script src="checkout-location-labels.js?v=20260603loc"></script>
@@ -3796,6 +3796,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             el.addEventListener('blur', function () {
                 if (typeof syncTikTokUserFromFormFields === 'function') {
                     syncTikTokUserFromFormFields();
+                }
+                if (typeof saveMetaIdentity === 'function') {
+                    var pEl = document.getElementById('userPhone');
+                    var eEl = document.getElementById('userEmail');
+                    var nEl = document.getElementById('userName');
+                    saveMetaIdentity({
+                        phone: pEl ? pEl.value : '',
+                        email: eEl ? eEl.value : '',
+                        name: nEl ? nEl.value : ''
+                    });
                 }
             });
         });
