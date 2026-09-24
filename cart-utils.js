@@ -617,6 +617,7 @@
 
   var META_FBC_STORAGE_KEY = "ma_meta_fbc";
   var META_FBP_STORAGE_KEY = "ma_meta_fbp";
+  var META_IDENTITY_STORAGE_KEY = "ma_meta_identity";
 
   function readCookieValue(name) {
     if (typeof document === "undefined") return "";
@@ -683,7 +684,39 @@
       if (parsed.phone) out.phone = String(parsed.phone);
       if (parsed.name) out.name = String(parsed.name).trim();
     } catch (e) {}
+    // Fallback: identity saved from checkout form (guest buyers, no login)
+    try {
+      var rawMeta = localStorage.getItem(META_IDENTITY_STORAGE_KEY);
+      if (rawMeta) {
+        var metaId = JSON.parse(rawMeta);
+        if (metaId && typeof metaId === "object") {
+          if (!out.email && metaId.email) out.email = String(metaId.email).trim().toLowerCase();
+          if (!out.phone && metaId.phone) out.phone = String(metaId.phone);
+          if (!out.name && metaId.name) out.name = String(metaId.name).trim();
+        }
+      }
+    } catch (e2) {}
     return out;
+  }
+
+  /** Save guest checkout identity so later ViewContent/AddToCart events carry phone (Meta Advanced Matching). */
+  function saveMetaIdentity(data) {
+    if (!data || typeof data !== "object" || typeof localStorage === "undefined") return;
+    try {
+      var prev = {};
+      try { prev = JSON.parse(localStorage.getItem(META_IDENTITY_STORAGE_KEY) || "{}") || {}; } catch (e0) { prev = {}; }
+      var phone = String(data.phone || "").trim();
+      var email = String(data.email || "").trim().toLowerCase();
+      var name = String(data.name || "").trim();
+      if (phone && !normalizePhoneE164(phone)) phone = "";
+      var next = {
+        phone: phone || prev.phone || "",
+        email: email || prev.email || "",
+        name: name || prev.name || ""
+      };
+      if (!next.phone && !next.email) return;
+      localStorage.setItem(META_IDENTITY_STORAGE_KEY, JSON.stringify(next));
+    } catch (e) {}
   }
 
   function ensureMetaBrowserIds() {
@@ -1147,4 +1180,5 @@
   global.normalizePhoneE164 = normalizePhoneE164;
   global.buildCartTrackingSnapshot = buildCartTrackingSnapshot;
   global.applyMetaTrackingFields = applyMetaTrackingFields;
+  global.saveMetaIdentity = saveMetaIdentity;
 })(typeof window !== "undefined" ? window : this);
