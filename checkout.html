@@ -3839,7 +3839,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             var checkoutSnap = typeof buildCartTrackingSnapshot === 'function'
                 ? buildCartTrackingSnapshot(orderLines())
                 : { currency: 'BDT', value: cartSubtotal() };
-            pushTrackingEvent('InitiateCheckout', checkoutSnap);
+            (function(){var fired=false;function fireIC(){if(fired)return;fired=true;pushTrackingEvent('InitiateCheckout', checkoutSnap);}['userName','userPhone','userEmail','userAddress','userDistrict','userThana'].forEach(function(id){var el=document.getElementById(id);if(!el)return;el.addEventListener('input',fireIC,{once:true});el.addEventListener('focus',fireIC,{once:true});});window.addEventListener('scroll',function onScroll(){if((window.scrollY||window.pageYOffset||0)>200){fireIC();window.removeEventListener('scroll',onScroll);}},{passive:true});window.setTimeout(fireIC,8000);})();
         }
     });
 </script>
