@@ -884,7 +884,7 @@ function buildNavMenuItems() {
     window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
     var gtmScript = document.createElement('script');
     gtmScript.async = true;
-    gtmScript.src = 'https://www.googletagmanager.com/gtm.js?id=' + GTM_ID;
+    gtmScript.src = 'https://muslimabaya.com/gtm.js?id=' + GTM_ID;
     document.head.appendChild(gtmScript);
   }
 
