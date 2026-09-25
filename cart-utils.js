@@ -967,7 +967,7 @@
     ViewContent: "ViewContent",
     AddToCart: "AddToCart",
     InitiateCheckout: "InitiateCheckout",
-    purchase_complete: "CompletePayment"
+    purchase_complete: "CompletePayment", generate_lead: "Contact"
   };
 
   function ensureTikTokPixelLoaded() {
@@ -1129,7 +1129,7 @@
       });
       window.addEventListener("pagehide", run, { once: true });
     }
-    scheduleTikTok();
+    scheduleTikTok();(function(){var fired=false;function fireLead(a){if(fired)return;fired=true;var label="";try{label=(a&&a.textContent||"").trim().slice(0,60);}catch(e){}if(typeof pushTrackingEvent==="function")pushTrackingEvent("generate_lead",{content_name:label||"WhatsApp/Messenger contact",content_category:"lead"});}document.addEventListener("click",function(ev){var a=ev.target&&ev.target.closest?ev.target.closest('a[href*="wa.me"],a[href*="m.me"]'):null;if(a)fireLead(a);},true);})();
   }
 
   global.refreshCartBadgeUI = refreshCartBadgeUI;
