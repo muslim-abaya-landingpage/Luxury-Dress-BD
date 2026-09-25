@@ -2315,7 +2315,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 currency: 'BDT'
             }));
         }
-        if (typeof pushPurchaseCompleteEvent === 'function') {
+        if (false && typeof pushPurchaseCompleteEvent === 'function') { // Purchase now fires server-side only (Apps Script, on J=Confirmed) to avoid double-count/fake orders
             pushPurchaseCompleteEvent({
                 transaction_id: eventId,
                 event_id: eventId
