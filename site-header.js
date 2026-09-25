@@ -874,7 +874,7 @@ function buildNavMenuItems() {
 
   function ensureGtmLoaded() {
     if (window.__maGtmLoaded) return;
-    var hasInlineGtm = !!document.querySelector('script[src*="googletagmanager.com/gtm.js?id=' + GTM_ID + '"]');
+    var hasInlineGtm = !!document.querySelector('script[src*="' + GTM_ID + '"]');
     if (hasInlineGtm) {
       window.__maGtmLoaded = true;
       return;
