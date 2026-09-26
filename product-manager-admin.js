@@ -479,6 +479,7 @@
       '<input type="file" accept="image/*" class="pm-file-input" hidden>' +
       "</div>" +
       "</div>" +
+      '<button type="button" class="pl-btn pl-btn-secondary pm-media-lib-btn" style="margin-top:6px;padding:4px 10px;font-size:12px">🖼 মিডিয়া লাইব্রেরি থেকে বাছাই করুন</button>' +
       "</div>"
     );
   }
@@ -604,7 +605,7 @@
           var mainRes = results[0];
           var cardRes = results[1];
           if (!mainRes || !mainRes.ok) {
-            setStatus((mainRes && (mainRes.message || mainRes.error)) || "আপলোড ব্যর্থ হয়েছে", true);
+            setStatus((mainRes && (mainRes.message || mainRes.error)) || "আপলোড ব্যর্থ হয়েছে", true);
             return;
           }
           p.image = mainRes.path || mainRes.url || p.image;
@@ -641,6 +642,21 @@
       var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
       if (f) handleFile(f);
     });
+
+    var libBtn = card.querySelector(".pm-media-lib-btn");
+    if (libBtn) {
+      libBtn.addEventListener("click", function () {
+        window.openMediaLibrary(function (path) {
+          p.image = path;
+          setPreview(resolveImgForPreview(path));
+          if (urlInput) {
+            urlInput.value = p.image;
+            urlInput.dispatchEvent(new Event("input", { bubbles: true }));
+          }
+          setStatus("✅ মিডিয়া লাইব্রেরি থেকে বাছাই করা হয়েছে — Save চাপতে ভুলবেন না");
+        });
+      });
+    }
   }
 
   // ── গ্যালারি: একই প্রোডাক্টের অতিরিক্ত ডিজাইন/অ্যাঙ্গল ছবি (কার্ড হোভার + কুইক-ভিউ গ্যালারিতে দেখায়) ──
@@ -659,15 +675,15 @@
           i +
           '"' +
           (i === 0 ? " disabled" : "") +
-          ' aria-label="বামে সরান">\u2190</button>' +
+          ' aria-label="বামে সরান">←</button>' +
           '<button type="button" class="pm-gallery-remove" data-gi="' +
           i +
-          '" aria-label="মুছুন">\u00d7</button>' +
+          '" aria-label="মুছুন">×</button>' +
           '<button type="button" class="pm-gallery-move" data-dir="1" data-gi="' +
           i +
           '"' +
           (i === imgs.length - 1 ? " disabled" : "") +
-          ' aria-label="ডানে সরান">\u2192</button>' +
+          ' aria-label="ডানে সরান">→</button>' +
           "</div></div>"
         );
       })
@@ -679,12 +695,18 @@
         '<input type="file" accept="image/*" class="pm-gallery-file-input" hidden>' +
         "</div>"
       : "";
+    var libAddTile = canAdd
+      ? '<div class="pm-gallery-add pm-gallery-lib-add">' +
+        '<div class="pm-gallery-add-txt">🖼 লাইব্রেরি থেকে</div>' +
+        "</div>"
+      : "";
     return (
       '<div class="pm-field pm-field-wide pm-uploader pm-gallery-uploader">' +
       '<label>অতিরিক্ত ডিজাইন/অ্যাঙ্গল ছবি <span class="pm-field-hint">সর্বোচ্চ ৪টি</span></label><div class="pm-gallery-caption">কার্ডে হোভার ও কুইক-ভিউতে দেখাবে</div>' +
       '<div class="pm-gallery-grid">' +
       thumbs +
       addTile +
+      libAddTile +
       "</div>" +
       '<div class="pm-gallery-status" hidden></div>' +
       "</div>"
@@ -739,7 +761,7 @@
       });
     });
 
-    var addTile = wrap.querySelector(".pm-gallery-add");
+    var addTile = wrap.querySelector(".pm-gallery-add:not(.pm-gallery-lib-add)");
     if (addTile) {
       var input = addTile.querySelector(".pm-gallery-file-input");
 
@@ -798,6 +820,23 @@
         addTile.classList.remove("is-drag");
         var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
         if (f) handleGalleryFile(f);
+      });
+    }
+
+    var libAddTile = wrap.querySelector(".pm-gallery-lib-add");
+    if (libAddTile) {
+      libAddTile.addEventListener("click", function () {
+        window.openMediaLibrary(function (path) {
+          if (!Array.isArray(p.images)) p.images = [];
+          if (p.images.length >= MAX_GALLERY_IMAGES) {
+            toast("সর্বোচ্চ " + MAX_GALLERY_IMAGES + "টি গ্যালারি ছবি রাখা যাবে");
+            return;
+          }
+          p.images.push(path);
+          setStatus("");
+          rerender();
+          toast("গ্যালারি ছবি যোগ হয়েছে (Save চাপুন)");
+        });
       });
     }
   }
@@ -1079,7 +1118,7 @@
     var data = collectProductLinkUrls();
     var lines = [
       "/**",
-      " * ═══ সব ক্যাটাগরির প্রোডাক্ট ছবির লিংক — এক জায়গা ═══",
+      " * ═══ সব ক্যাটাগরির প্রোডাক্ট ছবির লিংক — এক জায়গা ═══",
       " * এডিট: product-manager.html (প্রতি প্রোডাক্টে ছবির URL) → সেভ",
       " * আপডেট: " + new Date().toISOString().slice(0, 10),
       " */",
@@ -1153,6 +1192,181 @@
         return { attempted: true, results: results };
       });
   }
+
+  // ── মিডিয়া লাইব্রেরি: GitHub রিপোর সব ছবি (images/ ফোল্ডার) এক জায়গায়
+  // ব্রাউজ/সার্চ/ডিলিট/বাছাই — WordPress-স্টাইল কেন্দ্রীয় Media Library ──
+  var mediaLibState = { images: null, loading: false, filter: "", onSelect: null };
+
+  function ensureMediaLibraryDom() {
+    if (document.getElementById("pmMediaLibModal")) return;
+    var style = document.createElement("style");
+    style.textContent =
+      "#pmMediaLibModal{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}" +
+      "#pmMediaLibModal[hidden]{display:none}" +
+      ".pm-ml-box{background:#fff;border-radius:10px;max-width:960px;width:100%;max-height:86vh;display:flex;flex-direction:column;overflow:hidden}" +
+      ".pm-ml-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #e2e2e2}" +
+      ".pm-ml-head h3{margin:0;font-size:16px}" +
+      ".pm-ml-close{border:none;background:none;font-size:20px;cursor:pointer;color:#555;line-height:1}" +
+      ".pm-ml-search{padding:10px 18px;border-bottom:1px solid #eee}" +
+      ".pm-ml-search input{width:100%;padding:8px 10px;border:1px solid #ccc;border-radius:6px;font-size:14px;box-sizing:border-box}" +
+      ".pm-ml-body{flex:1;overflow:auto;padding:14px 18px}" +
+      ".pm-ml-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}" +
+      ".pm-ml-item{position:relative;border:1px solid #e2e2e2;border-radius:8px;overflow:hidden;cursor:pointer;background:#fafafa}" +
+      ".pm-ml-item img{display:block;width:100%;height:100px;object-fit:cover;background:#eee}" +
+      ".pm-ml-item .pm-ml-path{font-size:10px;color:#666;padding:4px 6px;word-break:break-all;line-height:1.3;max-height:34px;overflow:hidden}" +
+      ".pm-ml-item:hover{border-color:#8a6d3b}" +
+      ".pm-ml-del{position:absolute;top:4px;right:4px;background:rgba(211,47,47,.9);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:13px;cursor:pointer;line-height:1}" +
+      ".pm-ml-empty{color:#777;padding:30px;text-align:center;font-size:14px}" +
+      ".pm-ml-foot{padding:10px 18px;border-top:1px solid #eee;font-size:12px;color:#777}";
+    document.head.appendChild(style);
+
+    var modal = document.createElement("div");
+    modal.id = "pmMediaLibModal";
+    modal.hidden = true;
+    modal.innerHTML =
+      '<div class="pm-ml-box">' +
+      '<div class="pm-ml-head"><h3>মিডিয়া লাইব্রেরি</h3><button type="button" class="pm-ml-close" aria-label="বন্ধ করুন">×</button></div>' +
+      '<div class="pm-ml-search"><input type="search" id="pmMlSearch" placeholder="ফাইলের নাম দিয়ে খুঁজুন..."></div>' +
+      '<div class="pm-ml-body"><div class="pm-ml-grid" id="pmMlGrid"><p class="pm-ml-empty">লোড হচ্ছে...</p></div></div>' +
+      '<div class="pm-ml-foot" id="pmMlFoot"></div>' +
+      "</div>";
+    document.body.appendChild(modal);
+
+    modal.querySelector(".pm-ml-close").addEventListener("click", closeMediaLibrary);
+    modal.addEventListener("click", function (e) {
+      if (e.target === modal) closeMediaLibrary();
+    });
+    document.getElementById("pmMlSearch").addEventListener("input", function (e) {
+      mediaLibState.filter = e.target.value || "";
+      renderMediaLibGrid();
+    });
+  }
+
+  function closeMediaLibrary() {
+    var modal = document.getElementById("pmMediaLibModal");
+    if (modal) modal.hidden = true;
+  }
+
+  function renderMediaLibGrid() {
+    var grid = document.getElementById("pmMlGrid");
+    var foot = document.getElementById("pmMlFoot");
+    if (!grid) return;
+    if (mediaLibState.loading) {
+      grid.innerHTML = '<p class="pm-ml-empty">লোড হচ্ছে...</p>';
+      if (foot) foot.textContent = "";
+      return;
+    }
+    var images = mediaLibState.images || [];
+    var t = mediaLibState.filter.trim().toLowerCase();
+    var filtered = t
+      ? images.filter(function (im) {
+          return String(im.path || "").toLowerCase().indexOf(t) !== -1;
+        })
+      : images;
+    if (!filtered.length) {
+      grid.innerHTML =
+        '<p class="pm-ml-empty">' +
+        (images.length ? "এই নামে কোনো ছবি পাওয়া যায়নি" : "কোনো ছবি নেই — আগে প্রোডাক্টে ছবি আপলোড করুন") +
+        "</p>";
+      if (foot) foot.textContent = "";
+      return;
+    }
+    grid.innerHTML = "";
+    filtered.forEach(function (im) {
+      var item = document.createElement("div");
+      item.className = "pm-ml-item";
+      item.innerHTML =
+        '<img src="' +
+        escapeAttr(im.url || resolveImgForPreview(im.path)) +
+        '" alt="" loading="lazy">' +
+        '<div class="pm-ml-path">' +
+        escapeHtml(im.path) +
+        "</div>" +
+        '<button type="button" class="pm-ml-del" title="মুছুন">×</button>';
+      item.addEventListener("click", function (e) {
+        if (e.target.classList.contains("pm-ml-del")) return;
+        if (typeof mediaLibState.onSelect === "function") {
+          mediaLibState.onSelect(im.path);
+        }
+        closeMediaLibrary();
+      });
+      item.querySelector(".pm-ml-del").addEventListener("click", function (e) {
+        e.stopPropagation();
+        if (!confirm("এই ছবিটা স্থায়ীভাবে মুছবেন?\n" + im.path)) return;
+        if (!window.MaAdmin || !window.MaAdmin.deleteImage) return;
+        window.MaAdmin.deleteImage(im.path).then(function (res) {
+          if (!res || !res.ok) {
+            toast((res && (res.message || res.error)) || "ছবি মুছতে ব্যর্থ হয়েছে");
+            return;
+          }
+          mediaLibState.images = (mediaLibState.images || []).filter(function (x) {
+            return x.path !== im.path;
+          });
+          renderMediaLibGrid();
+          toast("ছবি মুছে ফেলা হয়েছে");
+        });
+      });
+      grid.appendChild(item);
+    });
+    if (foot) foot.textContent = filtered.length + " / " + images.length + " ছবি";
+  }
+
+  function loadMediaLibImages(force) {
+    if (mediaLibState.images && !force) {
+      renderMediaLibGrid();
+      return;
+    }
+    if (!window.MaAdmin || !window.MaAdmin.listImages) {
+      var grid = document.getElementById("pmMlGrid");
+      if (grid) grid.innerHTML = '<p class="pm-ml-empty">MaAdmin.listImages পাওয়া যায়নি</p>';
+      return;
+    }
+    mediaLibState.loading = true;
+    renderMediaLibGrid();
+    window.MaAdmin.listImages()
+      .then(function (res) {
+        mediaLibState.loading = false;
+        if (!res || !res.ok) {
+          mediaLibState.images = [];
+          renderMediaLibGrid();
+          var grid = document.getElementById("pmMlGrid");
+          if (grid) {
+            grid.innerHTML =
+              '<p class="pm-ml-empty">' +
+              escapeHtml((res && (res.message || res.error)) || "ছবির তালিকা আনা যায়নি") +
+              "</p>";
+          }
+          return;
+        }
+        mediaLibState.images = res.images || [];
+        renderMediaLibGrid();
+      })
+      .catch(function (err) {
+        mediaLibState.loading = false;
+        mediaLibState.images = [];
+        renderMediaLibGrid();
+        var grid = document.getElementById("pmMlGrid");
+        if (grid) {
+          grid.innerHTML =
+            '<p class="pm-ml-empty">সমস্যা: ' + escapeHtml(err && err.message ? err.message : String(err)) + "</p>";
+        }
+      });
+  }
+
+  function openMediaLibrary(onSelect) {
+    if (!window.MaAdmin || !window.MaAdmin.isLoggedIn || !window.MaAdmin.isLoggedIn()) {
+      toast("মিডিয়া লাইব্রেরি ব্যবহার করতে Admin লগইন প্রয়োজন");
+      return;
+    }
+    ensureMediaLibraryDom();
+    mediaLibState.onSelect = onSelect;
+    mediaLibState.filter = "";
+    var searchInput = document.getElementById("pmMlSearch");
+    if (searchInput) searchInput.value = "";
+    document.getElementById("pmMediaLibModal").hidden = false;
+    loadMediaLibImages(false);
+  }
+  window.openMediaLibrary = openMediaLibrary;
 
   function saveAll() {
     stripHomeLinksFromProducts();
