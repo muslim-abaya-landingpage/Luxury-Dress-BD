@@ -89,7 +89,7 @@
       if (crossOrigin) link.crossOrigin = 'anonymous';
       document.head.appendChild(link);
     }
-    hint('dns-prefetch', 'https://www.googletagmanager.com');
+        hint('dns-prefetch', 'https://muslimabaya.com');
     hint('dns-prefetch', 'https://www.youtube.com');
     hint('dns-prefetch', 'https://www.youtube-nocookie.com');
     hint('preconnect', 'https://i.ytimg.com');
@@ -876,7 +876,7 @@ function buildNavMenuItems() {
 
   function ensureGtmLoaded() {
     if (window.__maGtmLoaded) return;
-    var hasInlineGtm = !!document.querySelector('script[src*="googletagmanager.com/gtm.js?id=' + GTM_ID + '"]');
+        var hasInlineGtm = !!document.querySelector('script[src*="muslimabaya.com/gtm.js?id=' + GTM_ID + '"]');
     if (hasInlineGtm) {
       window.__maGtmLoaded = true;
       return;
@@ -886,7 +886,7 @@ function buildNavMenuItems() {
     window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
     var gtmScript = document.createElement('script');
     gtmScript.async = true;
-    gtmScript.src = 'https://www.googletagmanager.com/gtm.js?id=' + GTM_ID;
+        gtmScript.src = 'https://muslimabaya.com/gtm.js?id=' + GTM_ID;
     document.head.appendChild(gtmScript);
   }
 
