@@ -104,7 +104,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Premium Hafeza Set made from Original Dubai Cherry Fabric. Abaya length: 50, 52, 54, 56 and 58 inches. Flare: 180+ inches. Hijab and Niqab are made from Original China Soft Georgette Fabric. Hoodie Hijab features 3 parts at the back and 2 parts at the front, with a 56-inch back and 45-inch front. 2-part nose niqab with a 25-inch front.",
       priceByType: {
         "Hijab + Niqab": 1200,
-        "Full Hafeza Set": 2385
+        "Full Hafeza Set": 2385,
+        "Full Set": 2385
       }
     },
     {
