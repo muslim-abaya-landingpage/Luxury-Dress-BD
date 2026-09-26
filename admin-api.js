@@ -287,6 +287,40 @@
       });
   }
 
+    // নতুন: Stock ( ইনভেন্টরি) এবং Analytics
+  function getStock() {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return apiPost({ RecordType: "AdminStockGet", Token: s.token }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "STOCK_FETCH_FAILED");
+      return res;
+    });
+  }
+
+  function setStock(productId, productName, qty) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return apiPost({
+      RecordType: "AdminStockSet",
+      Token: s.token,
+      ProductId: productId,
+      ProductName: productName || "",
+      Qty: qty
+    }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "STOCK_SET_FAILED");
+      return res;
+    });
+  }
+
+  function getAnalytics(days) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return apiPost({ RecordType: "AdminAnalytics", Token: s.token, Days: days || 30 }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "ANALYTICS_FAILED");
+      return res;
+    });
+  }
+
   g.MaAdmin = {
     login: login,
     logout: logout,
@@ -297,6 +331,9 @@
     uploadImage: uploadImage,
     listImages: listImages,
     deleteImage: deleteImage,
+    getStock: getStock,
+    setStock: setStock,
+    getAnalytics: getAnalytics,
     isLoggedIn: function () {
       return !!getSession();
     }
