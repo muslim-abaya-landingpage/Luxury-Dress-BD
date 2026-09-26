@@ -1,32 +1,10 @@
-# Homepage (force — index.html ফাইল থাকলেও ঠিক হয়)
+# Homepage (force)
 /index.html   /   301!
 
-# Clean URLs (no .html in address bar)
-/abaya              /abaya.html              200
-/cover-up           /cover-up.html           200
-/tops-kurti         /tops-kurti.html         200
-/premium-two-piece  /premium-two-piece.html  200
-/embroidery         /embroidery.html         200
-/karchupi           /karchupi.html           200
-/kaftan             /kaftan.html             200
-/hijab              /hijab.html              200
-/panjabi            /panjabi.html            200
-/video              /video.html              200
-/category           /category.html           200
-/product-links      /product-links.html      200
-/product-manager    /product-manager.html    200
-/checkout           /checkout.html           200
-/about              /about.html              200
-/help               /help.html               200
-/signin             /signin.html             200
-/signup             /signup.html             200
-/terms              /terms.html              200
-/privacy            /privacy.html            200
-/refund             /refund.html             200
-/thank-you          /thank-you.html          200
-/success            /success.html            200
-
 # Redirect old .html links to clean URLs (force)
+# Note: extensionless URLs (e.g. /abaya) are served automatically by
+# Cloudflare Pages from the matching .html file — no explicit rewrite
+# rule is needed, and adding one causes a redirect loop on Pages.
 /abaya.html              /abaya              301!
 /cover-up.html           /cover-up           301!
 /tops-kurti.html         /tops-kurti         301!
