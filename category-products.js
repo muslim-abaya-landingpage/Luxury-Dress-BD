@@ -1,6 +1,6 @@
 /**
  * প্রোডাক্ট ডেটা — product-manager.html থেকে এডিট করুন
- * আপডেট: 2026-09-16
+ * আপডেট: 2026-09-26
  */
 window.CATEGORY_PRODUCTS = {
   abaya: [
@@ -80,7 +80,7 @@ window.CATEGORY_PRODUCTS = {
       name: "Safa Sate",
       image: "images/aby-versace-7-1789238735544.webp",
       images: ["images/aby-white-7-1789241666830-g1.webp"],
-      price: 2500,
+      price: 2350,
       stock: 100,
       color: "White",
       colorLabel: "Classic White",
@@ -88,13 +88,14 @@ window.CATEGORY_PRODUCTS = {
       sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: {
         "Abaya Only": 1200,
-        "Full Set": 2500
+        "Full Set": 2350
       }
     },
     {
       id: "ABY-VERSACE-8",
       name: "Premium Black Hafeza Set",
       image: "images/Abaya/premium-black-layered-khimar-niqab-abaya-for-women-muslimabaya.webp",
+      images: ["images/aby-versace-8-1790394088155-g1.webp", "images/aby-versace-8-1790394099554-g2.webp", "images/aby-versace-8-1790394108562-g3.webp", "images/aby-versace-8-1790394117882-g4.webp"],
       price: 2385,
       color: "black",
       colorLabel: "3 Colors",
@@ -180,15 +181,14 @@ window.CATEGORY_PRODUCTS = {
       id: "ABY-BUTTERFLY-14",
       name: "Butterfly Abaya Set - Back",
       image: "images/Butterfly-Ababa...jpg",
-      images: ["images/aby-butterfly-14-1789587594148-g1.webp", "images/aby-butterfly-14-1789587604127-g1.webp"],
-      price: 2350,
+      price: 1350,
       color: "black",
       colorLabel: "Classic Black",
       fabric: "Dubai Cherry",
       sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: {
         "Abaya Only": 799,
-        "Full Set": 2350
+        "Full Set": 1350
       }
     },
     {
