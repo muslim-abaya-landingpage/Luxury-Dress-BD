@@ -119,7 +119,17 @@
       RecordType: "AdminVerify",
       Token: s.token
     }).then(function (res) {
-      if (!res.ok || res.role !== "admin") {
+      // সর্বার-সাইডে সেশন সত্যিই বাতিল হলে/বাতিল না থাকলেই শেষ লগআউট করা হবে (INVALID_TOKEN/EXPIRED/NOT_ADMIN/NO_TOKEN)।
+      // রেট-লিমিট/নেটওয়ার্ক এররের মতো সাময়িক ব্যর্থতায় সেশন মুছে লগআউট করা ঠিক নয়।
+      var hardFailures = ["INVALID_TOKEN", "EXPIRED", "NOT_ADMIN", "NO_TOKEN"];
+      if (!res.ok) {
+        if (hardFailures.indexOf(res.error) !== -1) {
+          logout();
+          return null;
+        }
+        return s;
+      }
+      if (res.role !== "admin") {
         logout();
         return null;
       }
