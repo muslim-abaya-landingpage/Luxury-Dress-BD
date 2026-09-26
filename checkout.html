@@ -3686,6 +3686,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             for (var i = 0; i < MAX_PRODUCT_SLOTS; i++) {
                 formData.append('Product_' + (i + 1), slots[i]);
             }
+            try {
+                var cartJsonLines = orderLines().map(function(item){
+                    return {
+                        id: String(item.id || '').trim(),
+                        name: checkoutLineBaseName(item),
+                        qty: parseInt(item.quantity, 10) || 1,
+                        price: Number(item.price) || 0
+                    };
+                });
+                formData.append('CartJSON', JSON.stringify(cartJsonLines));
+            } catch (cartJsonErr) {}
             var imageSlots = buildProductImageSlots();
             for (var imgIdx = 0; imgIdx < MAX_ORDER_IMAGES; imgIdx++) {
                 formData.append('Image_' + (imgIdx + 1), imageSlots[imgIdx] || '');
