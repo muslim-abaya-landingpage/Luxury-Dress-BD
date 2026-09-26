@@ -206,12 +206,7 @@
       loadAnalytics();
     });
 
-    if (window.MaAdminGuard && MaAdminGuard.require) {
-      MaAdminGuard.require().then(function (session) {
-        if (session) loadStock();
-      });
-    } else {
-      loadStock();
-    }
+    // admin-guard.js আগেই পেজে একবার AdminVerify কল করে (data-admin-guard="1") এবং অবैধ সেশন থাকলেই রিডায়রেক্ট করে দেয়; এখানে আলাদা করে আবার AdminVerify কল করলে রেট-লিমিট বাড়ে যায় এবং অহেতুক লগআউটের সম্ভাবনা বাড়ে।
+    loadStock();
   });
 })();
