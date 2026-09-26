@@ -57,10 +57,18 @@
         </div>
 
         <section id="saStockPanel" class="sa-panel">
-          <div class="pl-toolbar" style="margin-bottom:12px">
+          <div class="pl-toolbar" style="margin-bottom:12px;flex-wrap:wrap;gap:8px">
             <button type="button" class="pl-btn pl-btn-primary" id="saStockRefresh">রিফ্রেশ করুন</button>
-            <span id="saStockStatus" style="margin-left:10px;color:#666;font-size:0.9rem"></span>
+            <label style="display:inline-flex;align-items:center;gap:6px;font-size:0.88rem">কম স্টক থ্রেশহোল্ড:
+              <input type="number" id="saLowStockThreshold" value="5" min="0" style="width:60px;padding:4px 6px;border-radius:6px;border:1px solid #ccc">
+            </label>
+            <button type="button" class="pl-btn pl-btn-secondary" id="saCsvExportStock">CSV এক্সপোর্ট</button>
+            <label class="pl-btn pl-btn-secondary" style="cursor:pointer;margin:0">CSV থেকে বাল্ক আপলোড
+              <input type="file" id="saCsvImportInput" accept=".csv" style="display:none">
+            </label>
+            <span id="saStockStatus" style="margin-left:4px;color:#666;font-size:0.9rem"></span>
           </div>
+          <p style="margin:0 0 12px;font-size:0.82rem;color:#888">CSV ফরম্যাট: <code>ProductId,ProductName,Qty</code> (প্রথম লাইনে হেডার থাকলেও চলবে)</p>
           <div style="overflow-x:auto">
             <table id="saStockTable" style="width:100%;border-collapse:collapse;font-size:0.92rem">
               <thead>
@@ -88,6 +96,7 @@
               <option value="365">গত ১ বছর</option>
             </select>
             <button type="button" class="pl-btn pl-btn-primary" id="saAnalyticsRefresh" style="margin-left:10px">রিফ্রেশ করুন</button>
+            <button type="button" class="pl-btn pl-btn-secondary" id="saCsvExportAnalytics" style="margin-left:8px">CSV এক্সপোর্ট</button>
             <span id="saAnalyticsStatus" style="margin-left:10px;color:#666;font-size:0.9rem"></span>
           </div>
 
@@ -121,6 +130,19 @@
             </table>
           </div>
           <p style="margin-top:10px;font-size:0.82rem;color:#888">* যেসব অর্ডারে qty আনুমানিক (approx), সেগুলো পুরনো (CartJSON আপডেটের আগের) অর্ডার — সঠিক সংখ্যা নাও হতে পারে।</p>
+
+          <h3 style="margin:24px 0 10px">কুরিয়ার স্ট্যাটাস বিভাজন</h3>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:0.92rem">
+              <thead>
+                <tr style="text-align:left;border-bottom:2px solid #ddd">
+                  <th style="padding:8px 6px">স্ট্যাটাস</th>
+                  <th style="padding:8px 6px">অর্ডার সংখ্যা</th>
+                </tr>
+              </thead>
+              <tbody id="saCourierBody"></tbody>
+            </table>
+          </div>
         </section>
       </main>
     </div>
