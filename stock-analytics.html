@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Stock &amp; Analytics | Muslim Abaya</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css?v=20260912v2">
+  <link rel="stylesheet" href="product-manager-admin.css?v=20260918gallery4">
+  <script src="site-api-config.js?v=20260529"></script>
+  <script src="admin-config.js"></script>
+  <script src="admin-api.js?v=20260927stock"></script>
+  <script src="admin-guard.js"></script>
+<script defer src="config.js"></script>
+</head>
+<body class="pl-admin adm-body" data-admin-guard="1">
+  <div class="adm-shell">
+    <div class="adm-sidebar-backdrop" id="admSbBackdrop"></div>
+    <aside class="adm-sidebar" id="admSidebar">
+      <div class="adm-sidebar-brand">
+        <div class="adm-sidebar-crest"></div>
+        <div class="adm-sidebar-brand-text"><div class="t1">Muslim Abaya</div><div class="t2">Admin Panel</div></div>
+        <button type="button" class="adm-sidebar-close" id="admSbClose" aria-label="মেনু বন্ধ করুন"><svg viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+      </div>
+      <nav class="adm-sidebar-nav">
+        <a class="adm-sidebar-item" href="admin-dashboard.html"><svg viewBox="0 0 24 24" fill="none"><path d="M4 13h6V4H4v9Zm10 7h6v-9h-6v9ZM4 20h6v-5H4v5ZM14 4v6h6V4h-6Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span>ড্যাশবোর্ড</span></a>
+        <a class="adm-sidebar-item" href="product-manager.html"><svg viewBox="0 0 24 24" fill="none"><path d="M21 8 12 3 3 8l9 5 9-5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 8v8l9 5 9-5V8M12 13v8" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span>প্রোডাক্ট ম্যানেজার</span></a>
+        <a class="adm-sidebar-item" href="product-links.html"><svg viewBox="0 0 24 24" fill="none"><path d="M9.5 14.5 14.5 9.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M11 7.5 12.6 6a3.6 3.6 0 1 1 5.1 5.1L16 12.7M13 16.5 11.4 18a3.6 3.6 0 1 1-5.1-5.1L8 11.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>প্রোডাক্ট লিংক</span></a>
+        <a class="adm-sidebar-item" href="admin-links.html"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="4" y="13" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="13" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/></svg><span>পরিচালনা লিংক</span></a>
+        <a class="adm-sidebar-item is-current" href="stock-analytics.html"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5M4 19h16M8 15v-4M12 15V9M16 15v-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>স্টক ও অ্যানালিটিক্স</span></a>
+      </nav>
+      <div class="adm-sidebar-foot">
+        <button type="button" class="adm-btn adm-btn-secondary" id="admLogout">লগআউট</button>
+      </div>
+    </aside>
+
+    <div class="adm-content">
+      <header class="pl-admin-header">
+        <button type="button" class="adm-menu-btn" id="admMenuBtn" aria-label="মেনু খুলুন"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        <a class="pl-back" href="admin-links.html">← Admin</a>
+        <a class="pl-back" href="/" style="margin-left:8px">Home</a>
+        <h1>Stock &amp; Analytics</h1>
+        <p>প্রোডাক্টের স্টক দেখুন/আপডেট করুন এবং অর্ডার থেকে রেভিনিউ ও বেস্ট-সেলার বিশ্লেষণ দেখুন</p>
+      </header>
+
+      <main class="pl-main">
+        <div class="sa-tabs" style="display:flex;gap:8px;margin-bottom:16px;border-bottom:1px solid #e2e2e2;padding-bottom:0">
+          <button type="button" class="pl-btn pl-btn-secondary sa-tab-btn is-active" id="saTabStockBtn" data-tab="stock">স্টক</button>
+          <button type="button" class="pl-btn pl-btn-secondary sa-tab-btn" id="saTabAnalyticsBtn" data-tab="analytics">অ্যানালিটিক্স</button>
+        </div>
+
+        <section id="saStockPanel" class="sa-panel">
+          <div class="pl-toolbar" style="margin-bottom:12px">
+            <button type="button" class="pl-btn pl-btn-primary" id="saStockRefresh">রিফ্রেশ করুন</button>
+            <span id="saStockStatus" style="margin-left:10px;color:#666;font-size:0.9rem"></span>
+          </div>
+          <div style="overflow-x:auto">
+            <table id="saStockTable" style="width:100%;border-collapse:collapse;font-size:0.92rem">
+              <thead>
+                <tr style="text-align:left;border-bottom:2px solid #ddd">
+                  <th style="padding:8px 6px">Product ID</th>
+                  <th style="padding:8px 6px">নাম</th>
+                  <th style="padding:8px 6px">বর্তমান স্টক</th>
+                  <th style="padding:8px 6px">নতুন Qty</th>
+                  <th style="padding:8px 6px">আপডেট</th>
+                  <th style="padding:8px 6px">সর্বশেষ পরিবর্তন</th>
+                </tr>
+              </thead>
+              <tbody id="saStockBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="saAnalyticsPanel" class="sa-panel" hidden>
+          <div class="pl-toolbar" style="margin-bottom:12px">
+            <label for="saAnalyticsDays" style="margin-right:8px">সময়সীমা:</label>
+            <select id="saAnalyticsDays" style="padding:6px 10px;border-radius:6px;border:1px solid #ccc">
+              <option value="7">গত ৭ দিন</option>
+              <option value="30" selected>গত ৩০ দিন</option>
+              <option value="90">গত ৯০ দিন</option>
+              <option value="365">গত ১ বছর</option>
+            </select>
+            <button type="button" class="pl-btn pl-btn-primary" id="saAnalyticsRefresh" style="margin-left:10px">রিফ্রেশ করুন</button>
+            <span id="saAnalyticsStatus" style="margin-left:10px;color:#666;font-size:0.9rem"></span>
+          </div>
+
+          <div id="saSummaryCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px"></div>
+
+          <h3 style="margin:0 0 10px">দিন-ভিত্তিক রেভিনিউ</h3>
+          <div style="overflow-x:auto;margin-bottom:24px">
+            <table style="width:100%;border-collapse:collapse;font-size:0.92rem">
+              <thead>
+                <tr style="text-align:left;border-bottom:2px solid #ddd">
+                  <th style="padding:8px 6px">তারিখ</th>
+                  <th style="padding:8px 6px">অর্ডার সংখ্যা</th>
+                  <th style="padding:8px 6px">রেভিনিউ (৳)</th>
+                </tr>
+              </thead>
+              <tbody id="saByDayBody"></tbody>
+            </table>
+          </div>
+
+          <h3 style="margin:0 0 10px">সবচেয়ে বেশি বিক্রি হওয়া প্রোডাক্ট</h3>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:0.92rem">
+              <thead>
+                <tr style="text-align:left;border-bottom:2px solid #ddd">
+                  <th style="padding:8px 6px">প্রোডাক্ট</th>
+                  <th style="padding:8px 6px">বিক্রি (পিস)</th>
+                  <th style="padding:8px 6px">রেভিনিউ (৳)</th>
+                </tr>
+              </thead>
+              <tbody id="saTopProductsBody"></tbody>
+            </table>
+          </div>
+          <p style="margin-top:10px;font-size:0.82rem;color:#888">* যেসব অর্ডারে qty আনুমানিক (approx), সেগুলো পুরনো (CartJSON আপডেটের আগের) অর্ডার — সঠিক সংখ্যা নাও হতে পারে।</p>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="pl-toast" id="saToast" role="status"></div>
+
+  <script src="product-catalog-sync.js"></script>
+  <script src="product-config.js"></script>
+  <script src="product-utils.js?v=20260820stock"></script>
+  <script src="category-products.js?v=20260927stock"></script>
+  <script src="product-links-data.js"></script>
+  <script src="product-catalog-loader.js"></script>
+  <script src="stock-analytics.js?v=20260927a"></script>
+  <script>
+    (function () {
+      var sidebar = document.getElementById("admSidebar");
+      var backdrop = document.getElementById("admSbBackdrop");
+      var menuBtn = document.getElementById("admMenuBtn");
+      var closeBtn = document.getElementById("admSbClose");
+      function openDrawer() { sidebar.classList.add("is-open"); backdrop.classList.add("is-open"); }
+      function closeDrawer() { sidebar.classList.remove("is-open"); backdrop.classList.remove("is-open"); }
+      if (menuBtn) menuBtn.addEventListener("click", openDrawer);
+      if (closeBtn) closeBtn.addEventListener("click", closeDrawer);
+      if (backdrop) backdrop.addEventListener("click", closeDrawer);
+      var logoutBtn = document.getElementById("admLogout");
+      if (logoutBtn) {
+        logoutBtn.addEventListener("click", function () {
+          MaAdmin.logout();
+          location.href = "admin-login.html";
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
