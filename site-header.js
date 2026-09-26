@@ -89,7 +89,7 @@
       if (crossOrigin) link.crossOrigin = 'anonymous';
       document.head.appendChild(link);
     }
-    hint('dns-prefetch', 'https://www.googletagmanager.com');
+        hint('dns-prefetch', 'https://muslimabaya.com');
     hint('dns-prefetch', 'https://www.youtube.com');
     hint('dns-prefetch', 'https://cdnjs.cloudflare.com');
   })();
@@ -874,7 +874,7 @@ function buildNavMenuItems() {
 
   function ensureGtmLoaded() {
     if (window.__maGtmLoaded) return;
-    var hasInlineGtm = !!document.querySelector('script[src*="' + GTM_ID + '"]');
+        var hasInlineGtm = !!document.querySelector('script[src*="muslimabaya.com/gtm.js?id=' + GTM_ID + '"]');
     if (hasInlineGtm) {
       window.__maGtmLoaded = true;
       return;
