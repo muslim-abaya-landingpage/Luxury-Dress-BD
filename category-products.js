@@ -95,7 +95,7 @@ window.CATEGORY_PRODUCTS = {
       id: "ABY-VERSACE-8",
       name: "Premium Black Hafeza Set",
       image: "images/Abaya/premium-black-layered-khimar-niqab-abaya-for-women-muslimabaya.webp",
-      images: ["images/aby-versace-8-1790394088155-g1.webp", "images/aby-versace-8-1790394099554-g2.webp", "images/aby-versace-8-1790394108562-g3.webp", "images/aby-versace-8-1790394117882-g4.webp"],
+      images: ["images/gallery/aby-versace-8-1790420622429-g1.webp", "images/gallery/aby-versace-8-1790420630365-g2.webp", "images/gallery/aby-versace-8-1790420642193-g3.webp", "images/gallery/aby-versace-8-1790420651446-g4.webp"],
       price: 2385,
       color: "black",
       colorLabel: "3 Colors",
