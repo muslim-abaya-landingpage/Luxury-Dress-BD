@@ -1376,18 +1376,19 @@
     var linksContent = generateProductLinksFile();
     var configContent = Object.keys(categoryTypePrices).length ? generateProductConfigFile() : null;
 
-    // ১) সবসময় লোকাল ডাউনলোড (ব্যাকআপ / GitHub লগইন ছাড়া চালানোর জন্য)
-    download(sectionsContent, "product-catalog-sections.js");
-    setTimeout(function () {
-      download(productsContent, "category-products.js");
-    }, 400);
-    setTimeout(function () {
-      download(linksContent, "product-links-data.js");
-    }, 800);
-    if (configContent) {
+    function downloadAllLocal() {
+      download(sectionsContent, "product-catalog-sections.js");
       setTimeout(function () {
-        download(configContent, "product-config.js");
-      }, 1200);
+        download(productsContent, "category-products.js");
+      }, 400);
+      setTimeout(function () {
+        download(linksContent, "product-links-data.js");
+      }, 800);
+      if (configContent) {
+        setTimeout(function () {
+          download(configContent, "product-config.js");
+        }, 1200);
+      }
     }
 
     var newSections = sections.filter(function (sec) {
@@ -1396,7 +1397,11 @@
       });
       return !orig;
     });
+
+    // নতুন ক্যাটাগরি HTML ফাইল অটো-পাবলিশ হয় না — ম্যানুয়াল আপলোড লাগবে,
+    // তাই এক্ষেত্রে লোকাল ডাউনলোড দরকারই থাকে।
     if (newSections.length) {
+      downloadAllLocal();
       setTimeout(function () {
         newSections.forEach(function (sec, i) {
           setTimeout(function () {
@@ -1407,16 +1412,14 @@
       setTimeout(function () {
         download(generateRedirectsSnippet(), "_redirects-new-categories.txt");
       }, 800 + newSections.length * 400);
-    }
-
-    // ২) GitHub-এ অটো-পাবলিশ চেষ্টা (Admin লগইন থাকলেই কাজ করবে; নতুন ক্যাটাগরি HTML
-    //    অটো-পাবলিশ হয় না — সেগুলো এখনও ম্যানুয়াল আপলোড লাগবে)
-    if (newSections.length) {
       toast("৩টি+ ফাইল ডাউনলোড হয়েছে (+ নতুন ক্যাটাগরি HTML — এগুলো ম্যানুয়ালি আপলোড করুন)");
       return;
     }
 
-    toast("ফাইল ডাউনলোড হয়েছে — GitHub-এ পাবলিশ হচ্ছে...");
+    // GitHub-এ অটো-পাবলিশ চেষ্টা (Admin লগইন থাকলেই কাজ করবে)। শুধু লগইন করা না
+    // থাকলে বা পাবলিশ ব্যর্থ হলেই লোকাল ফাইল ডাউনলোড হবে (ব্যাকআপ হিসেবে) —
+    // সফল হলে আর অটো-ডাউনলোড হবে না।
+    toast("GitHub-এ পাবলিশ হচ্ছে...");
 
     var files = [
       { path: "category-products.js", content: productsContent, message: "Update products — Admin Panel থেকে" },
@@ -1429,7 +1432,8 @@
 
     publishFilesToGitHub(files).then(function (out) {
       if (!out.attempted) {
-        toast("লোকাল ফাইল রেডি — GitHub অটো-পাবলিশের জন্য Admin লগইন করুন (admin-login.html)");
+        downloadAllLocal();
+        toast("লোকাল ফাইল ডাউনলোড হয়েছে — GitHub অটো-পাবলিশের জন্য Admin লগইন করুন (admin-login.html)");
         return;
       }
       var failed = out.results.filter(function (r) {
@@ -1438,6 +1442,7 @@
       if (!failed.length) {
         toast("✅ পাবলিশ সফল! Netlify ১-২ মিনিটে সাইট আপডেট করবে।");
       } else {
+        downloadAllLocal();
         var firstErr = failed[0].res ? failed[0].res.message || failed[0].res.error : "অজানা সমস্যা";
         toast(
           "⚠️ " + failed.length + "টি ফাইল পাবলিশ ব্যর্থ (" + firstErr + ") — ডাউনলোড হওয়া ফাইল ম্যানুয়ালি আপলোড করুন"
