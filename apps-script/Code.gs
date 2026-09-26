@@ -117,6 +117,12 @@ function doPost(e) {
     if (type === 'AdminUploadImage') {
       return jsonOut_(publishImageToGitHub_(e));
     }
+    if (type === 'AdminListImages') {
+      return jsonOut_(listImagesFromGitHub_(e));
+    }
+    if (type === 'AdminDeleteImage') {
+      return jsonOut_(deleteImageFromGitHub_(e));
+    }
     if (isSubscribe) {
       var contact = String(param_(e, 'contact') || param_(e, 'email') || '').trim();
       var saved = saveSubscribeContact_(contact);
@@ -2212,8 +2218,7 @@ function maybeSendConfirmedPurchaseCapiForRow_(sheet, row) {
     var status = String(vals[9] || '').toLowerCase().trim();
     if (status !== 'confirmed') return { ok: false, code: 'NOT_CONFIRMED' };
     var notes = String(vals[16] || '');
-    if (note
-s.indexOf('META_PURCHASE_SENT') !== -1) {
+    if (notes.indexOf('META_PURCHASE_SENT') !== -1) {
       return { ok: true, code: 'ALREADY_SENT' };
     }
     if (notes.indexOf('Fake') !== -1 || status === 'fake' || status === 'cancelled') {
@@ -3200,7 +3205,7 @@ function publishImageToGitHub_(e) {
   var rest = path.indexOf(GITHUB_IMAGES_PREFIX_) === 0 ? path.slice(GITHUB_IMAGES_PREFIX_.length) : '';
   var extMatch = /\.([a-zA-Z0-9]+)$/.exec(rest);
   var ext = extMatch ? extMatch[1].toLowerCase() : '';
-  var nameOk = /^[a-z0-9-]+\.[a-z0-9]+$/.test(rest) && GITHUB_IMAGE_ALLOWED_EXT_.indexOf(ext) !== -1;
+  var nameOk = /^[a-z0-9-]+(?:\/[a-z0-9-]+)*\.[a-z0-9]+$/.test(rest) && rest.indexOf('..') === -1 && GITHUB_IMAGE_ALLOWED_EXT_.indexOf(ext) !== -1;
   if (!path || path.indexOf(GITHUB_IMAGES_PREFIX_) !== 0 || !nameOk) {
     return {
       ok: false,
@@ -3282,6 +3287,123 @@ function publishImageToGitHub_(e) {
   };
 }
 
+
+function listImagesFromGitHub_(e) {
+  var token = param_(e, 'Token');
+  var v = verifyAdminSession_(token);
+  if (!v.ok) return v;
+
+  var ghToken = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+  if (!ghToken) {
+    return {
+      ok: false,
+      error: 'GITHUB_NOT_CONFIGURED',
+      message: 'Apps Script → Project Settings → Script Properties এ GITHUB_TOKEN সেট করুন।'
+    };
+  }
+
+  var headers = {
+    Authorization: 'token ' + ghToken,
+    Accept: 'application/vnd.github+json',
+    'User-Agent': 'MuslimAbaya-AdminPanel'
+  };
+
+  var treeUrl =
+    'https://api.github.com/repos/' + GITHUB_PUBLISH_OWNER_ + '/' + GITHUB_PUBLISH_REPO_ +
+    '/git/trees/' + GITHUB_PUBLISH_BRANCH_ + '?recursive=1';
+  var res = UrlFetchApp.fetch(treeUrl, { method: 'get', headers: headers, muteHttpExceptions: true });
+  var code = res.getResponseCode();
+  if (code !== 200) {
+    return {
+      ok: false,
+      error: 'GITHUB_LIST_FAILED',
+      message: 'ছবির তালিকা আনা যায়নি (HTTP ' + code + ')',
+      detail: res.getContentText().slice(0, 300)
+    };
+  }
+  var body = {};
+  try { body = JSON.parse(res.getContentText()); } catch (parseErr) {}
+  var tree = (body && body.tree) || [];
+  var images = [];
+  var i;
+  for (i = 0; i < tree.length; i++) {
+    var item = tree[i];
+    if (!item || item.type !== 'blob') continue;
+    var p = String(item.path || '');
+    if (p.indexOf(GITHUB_IMAGES_PREFIX_) !== 0) continue;
+    var extMatch = /\.([a-zA-Z0-9]+)$/.exec(p);
+    var ext = extMatch ? extMatch[1].toLowerCase() : '';
+    if (GITHUB_IMAGE_ALLOWED_EXT_.indexOf(ext) === -1) continue;
+    images.push({
+      path: p,
+      url: 'https://raw.githubusercontent.com/' + GITHUB_PUBLISH_OWNER_ + '/' + GITHUB_PUBLISH_REPO_ + '/' + GITHUB_PUBLISH_BRANCH_ + '/' + p,
+      size: item.size || 0
+    });
+  }
+  images.sort(function (a, b) { return a.path < b.path ? 1 : -1; });
+  return { ok: true, images: images, count: images.length };
+}
+
+function deleteImageFromGitHub_(e) {
+  var token = param_(e, 'Token');
+  var v = verifyAdminSession_(token);
+  if (!v.ok) return v;
+
+  var ghToken = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+  if (!ghToken) {
+    return {
+      ok: false,
+      error: 'GITHUB_NOT_CONFIGURED',
+      message: 'Apps Script → Project Settings → Script Properties এ GITHUB_TOKEN সেট করুন।'
+    };
+  }
+
+  var path = String(param_(e, 'Path') || '').trim();
+  if (!path || path.indexOf(GITHUB_IMAGES_PREFIX_) !== 0 || path.indexOf('..') !== -1) {
+    return { ok: false, error: 'PATH_NOT_ALLOWED', message: 'শুধু images/ ফোল্ডারের ছবি মোছা যাবে।' };
+  }
+
+  var headers = {
+    Authorization: 'token ' + ghToken,
+    Accept: 'application/vnd.github+json',
+    'User-Agent': 'MuslimAbaya-AdminPanel'
+  };
+  var apiBase =
+    'https://api.github.com/repos/' + GITHUB_PUBLISH_OWNER_ + '/' + GITHUB_PUBLISH_REPO_ +
+    '/contents/' + path.split('/').map(encodeURIComponent).join('/');
+
+  var getRes = UrlFetchApp.fetch(apiBase + '?ref=' + GITHUB_PUBLISH_BRANCH_, {
+    method: 'get',
+    headers: headers,
+    muteHttpExceptions: true
+  });
+  if (getRes.getResponseCode() !== 200) {
+    return { ok: false, error: 'GITHUB_GET_FAILED', message: 'ছবি খুঁজে পাওয়া যায়নি (HTTP ' + getRes.getResponseCode() + ')' };
+  }
+  var fileInfo = {};
+  try { fileInfo = JSON.parse(getRes.getContentText()); } catch (parseErr) {}
+  var sha = fileInfo.sha;
+  if (!sha) {
+    return { ok: false, error: 'GITHUB_NO_SHA', message: 'ছবির sha পাওয়া যায়নি।' };
+  }
+
+  var delRes = UrlFetchApp.fetch(apiBase, {
+    method: 'delete',
+    headers: headers,
+    contentType: 'application/json',
+    payload: JSON.stringify({
+      message: 'Delete image ' + path + ' — Admin Panel থেকে',
+      sha: sha,
+      branch: GITHUB_PUBLISH_BRANCH_
+    }),
+    muteHttpExceptions: true
+  });
+  var delCode = delRes.getResponseCode();
+  if (delCode !== 200) {
+    return { ok: false, error: 'GITHUB_DELETE_FAILED', message: 'ছবি মোছা যায়নি (HTTP ' + delCode + ')', detail: delRes.getContentText().slice(0, 300) };
+  }
+  return { ok: true, message: 'ছবি মুছে ফেলা হয়েছে।', path: path };
+}
 
 // ===== Order value parser (Bangla digits, ৳, commas) =====
 function parseOrderValue_(raw) {
