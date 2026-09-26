@@ -32,7 +32,7 @@ function saveSubscribeContact_(contactRaw) {
   } catch (rl) {
     return { ok: false, error: 'RATE_LIMIT', message: 'অনেকবার চেষ্টা। কিছুক্ষণ পর আবার করুন।' };
   }
-  var sub = ensureSheet_('Subscribe', ['যোগাযোগ (ইমেইল/মোবাইল)', 'তারিখ ও সময়']);
+  var sub = ensureSheet_('Subscribe', ['যোগাযোগ (ইমেইল/মোবাইল)', 'তারিখ ও সময়']);
   var data = sub.getDataRange().getValues();
   var key = contact.toLowerCase();
   for (var i = 1; i < data.length; i++) {
@@ -45,6 +45,9 @@ function saveSubscribeContact_(contactRaw) {
 }
 
 function doGet(e) {
+  if (e && e.parameter && e.parameter['hub.mode'] === 'subscribe') {
+    return messengerVerify_(e);
+  }
   try {
     var type = param_(e, 'RecordType');
     if (type === 'Subscribe') {
@@ -70,6 +73,10 @@ function doPost(e) {
   try {
     selfHealSteadfastBaseUrl_();
     selfHealAutoCourierSetup_();
+    if (e && e.postData && e.postData.contents &&
+        e.postData.contents.indexOf('"object":"page"') !== -1) {
+      return messengerWebhook_(e);
+    }
     if (e && e.postData && e.postData.type && String(e.postData.type).indexOf('json') !== -1) {
       return handleSteadfastWebhookPost_(e);
     }
@@ -80,7 +87,7 @@ function doPost(e) {
       (!type && !isOrder && (param_(e, 'contact') || param_(e, 'email')));
 
     if (!isOrder && !isSubscribe) {
-      rateLimit_(param_(e, 'Email') || param_(e, 'Phone') || param_(e, 'Login') || 'global');
+      rateLimit_(param_(e, 'Email') || param_(e, 'Phone') || param_(e, 'Login') || param_(e, 'Token') || 'global');
     }
 
     if (type === 'AuthRegister' || type === 'CustomerRegister') {
@@ -103,6 +110,12 @@ function doPost(e) {
     }
     if (type === 'AdminTodayStats') {
       return jsonOut_(getAdminTodayStats_(e));
+    }
+    if (type === 'AdminPublishFile') {
+      return jsonOut_(publishFileToGitHub_(e));
+    }
+    if (type === 'AdminUploadImage') {
+      return jsonOut_(publishImageToGitHub_(e));
     }
     if (isSubscribe) {
       var contact = String(param_(e, 'contact') || param_(e, 'email') || '').trim();
@@ -460,7 +473,7 @@ function realityGetAuthState() {
 function realityLogin(identifier, password) {
   var login = String(identifier || '').trim();
   var pass = String(password || '');
-  if (!login || !pass) return { ok: false, message: 'লগইন ও পাসওয়ার্ড দিন।' };
+  if (!login || !pass) return { ok: false, message: 'লগইন ও পাসওয়ার্ড দিন।' };
   var res = loginAdmin_({
     parameter: {
       Login: login,
@@ -614,10 +627,10 @@ function realityChangeMyPassword(currentPassword, newPassword) {
   var current = String(currentPassword || '');
   var next = String(newPassword || '');
   if (!current || !next) return { ok: false, message: 'Current/New password দিন।' };
-  if (next.length < 8) return { ok: false, message: 'নতুন পাসওয়ার্ড কমপক্ষে ৮ অক্ষর।' };
+  if (next.length < 8) return { ok: false, message: 'নতুন পাসওয়ার্ড কমপক্ষে ৮ অক্ষর।' };
 
   var admin = v.email ? findAdminByEmail_(v.email) : findAdminByPhone_(v.phone);
-  if (!admin) return { ok: false, message: 'Admin account পাওয়া যায়নি।' };
+  if (!admin) return { ok: false, message: 'Admin account পাওয়া যায়নি।' };
   if (!verifyPassword_(current, admin.salt, admin.hash)) {
     return { ok: false, message: 'Current password ভুল।' };
   }
@@ -642,14 +655,14 @@ function resetAdminPasswordFromMenu() {
   if (passResp.getSelectedButton() !== ui.Button.OK) return;
   var next = String(passResp.getResponseText() || '');
   if (next.length < 8) {
-    ui.alert('পাসওয়ার্ড কমপক্ষে ৮ অক্ষর হতে হবে।');
+    ui.alert('পাসওয়ার্ড কমপক্ষে ৮ অক্ষর হতে হবে।');
     return;
   }
   var target = null;
   if (idRaw.indexOf('@') !== -1) target = findAdminByEmail_(normalizeEmail_(idRaw));
   if (!target) target = findAdminByPhone_(normalizePhone_(idRaw));
   if (!target) {
-    ui.alert('Admin account পাওয়া যায়নি।');
+    ui.alert('Admin account পাওয়া যায়নি।');
     return;
   }
   var hashed = hashPassword_(next);
@@ -933,7 +946,7 @@ function parseWhatsappOrderText_(rawText) {
     if (!parsed.payment && /bkash|nagad|rocket|cash|cod|card|ডেলিভারি/i.test(lowerLine)) {
       assign_('payment', line);
     }
-    if (!parsed.address && /(road|rd|house|flat|thana|area|village|para|bazar|উপজেলা|থানা|রোড|বাড়ি|এলাকা)/i.test(lowerLine)) {
+    if (!parsed.address && /(road|rd|house|flat|thana|area|village|para|bazar|উপজেলা|থানা|রোড|বাড়ি|এলাকা)/i.test(lowerLine)) {
       assign_('address', line);
     }
     if (!parsed.design && /abaya|hijab|dress|burqa|kaftan|item|design|product|পিস|গাউন|বোরকা/i.test(lowerLine)) {
@@ -970,7 +983,7 @@ function parseWhatsappOrderText_(rawText) {
       if (/(মোট|total|amount|qty|quantity|payment|pay|txn|transaction|sender)\s*[:=\-]/i.test(lnRaw)) continue;
       if (/^(name|customer name|নাম)\s*[:=\-]/i.test(lnRaw)) continue;
       if (/^(product|item|design|model|পণ্য|প্রোডাক্ট)\s*[:=\-]/i.test(lnRaw)) continue;
-      if (/[,،]/.test(lnRaw) || /(road|rd|house|flat|thana|area|village|para|bazar|upazila|district|উপজেলা|জেলা|থানা|রোড|বাড়ি|এলাকা|বাসা)/i.test(lnRaw)) {
+      if (/[,،]/.test(lnRaw) || /(road|rd|house|flat|thana|area|village|para|bazar|upazila|district|উপজেলা|জেলা|থানা|রোড|বাড়ি|এলাকা|বাসা)/i.test(lnRaw)) {
         addressCandidates.push(lnRaw.replace(/[.,\s]+$/, ''));
       }
     }
@@ -1242,6 +1255,7 @@ function handleOnlineOrderPost_(e) {
 
   ensureOnlineOrderHeaders_(sheet);
   ensureOnlineOrderImageHeaders_(sheet);
+  ensureOnlineOrderMetaFieldHeaders_(sheet);
 
   appendRow_(sheet, [
     timestamp,
@@ -1264,6 +1278,10 @@ function handleOnlineOrderPost_(e) {
   ]);
 
   var newRow = sheet.getLastRow();
+  var metaEmailVal = (param_(e, 'Email') || '').trim().toLowerCase();
+  var metaFbcVal = (param_(e, 'FBC') || '').trim();
+  var metaFbpVal = (param_(e, 'FBP') || '').trim();
+  sheet.getRange(newRow, 30, 1, 3).setValues([[metaEmailVal, metaFbcVal, metaFbpVal]]);
   formatOnlineOrderProductCell_(sheet, newRow, validated.design);
   setupOrderStatusDropdown_(sheet);
   var imageUrls = collectOrderImageUrls_(e);
@@ -1338,6 +1356,15 @@ function onOpen() {
   try { selfHealAutoCourierSetup_(); } catch (trgErr) {}
   try { selfHealSteadfastStatusSyncTrigger_(); } catch (syncErr) {}
   try { selfHealDailySafetyBackupTrigger_(); } catch (backupErr) {}
+}
+
+function ensureOnlineOrderMetaFieldHeaders_(sheet) {
+  try {
+    var existing = sheet.getRange(1, 30, 1, 3).getValues()[0];
+    if (!existing[0] && !existing[1] && !existing[2]) {
+      sheet.getRange(1, 30, 1, 3).setValues([['Email', 'FBC', 'FBP']]);
+    }
+  } catch (err) {}
 }
 
 function getOnlineOrderExtraHeaders_() {
@@ -2178,10 +2205,15 @@ function maybeSendConfirmedPurchaseCapiForRow_(sheet, row) {
   if (!sheet || row <= 1) return { ok: false, code: 'ROW_INVALID' };
   try {
     var vals = sheet.getRange(row, 1, 1, 17).getValues()[0];
+    var metaVals = sheet.getRange(row, 30, 1, 3).getValues()[0];
+    var emailVal = String(metaVals[0] || '').trim();
+    var fbcVal = String(metaVals[1] || '').trim();
+    var fbpVal = String(metaVals[2] || '').trim();
     var status = String(vals[9] || '').toLowerCase().trim();
     if (status !== 'confirmed') return { ok: false, code: 'NOT_CONFIRMED' };
     var notes = String(vals[16] || '');
-    if (notes.indexOf('META_PURCHASE_SENT') !== -1) {
+    if (note
+s.indexOf('META_PURCHASE_SENT') !== -1) {
       return { ok: true, code: 'ALREADY_SENT' };
     }
     if (notes.indexOf('Fake') !== -1 || status === 'fake' || status === 'cancelled') {
@@ -2192,7 +2224,9 @@ function maybeSendConfirmedPurchaseCapiForRow_(sheet, row) {
     var capiRes = sendToFacebookCAPI({
       Name: String(vals[1] || ''),
       Phone: String(vals[2] || ''),
-      Email: '',
+      Email: emailVal,
+      FBC: fbcVal,
+      FBP: fbpVal,
       Total: String(vals[7] || '0'),
       Design: String(vals[6] || ''),
       ExternalID: normalizePhone_(String(vals[2] || '')),
@@ -2200,6 +2234,26 @@ function maybeSendConfirmedPurchaseCapiForRow_(sheet, row) {
       ClientUserAgent: '',
       TestEventCode: ''
     }, eventID);
+    if (notes.indexOf('TIKTOK_PURCHASE_SENT') === -1) {
+      try {
+        var ttRes = sendToTikTokCAPI({
+          Name: String(vals[1] || ''),
+          Phone: String(vals[2] || ''),
+          Email: emailVal,
+          Total: String(vals[7] || '0'),
+          Design: String(vals[6] || ''),
+          EventSourceUrl: 'https://muslimabaya.com/checkout'
+        }, eventID);
+        if (ttRes && ttRes.ok) {
+          appendAutoCourierNote_(sheet, row, 'TIKTOK_PURCHASE_SENT');
+        } else {
+          appendAutoCourierNote_(sheet, row, 'TIKTOK_FAIL:' + String((ttRes && ttRes.code) || 'UNKNOWN'));
+        }
+      } catch (ttErr) {
+        appendAutoCourierNote_(sheet, row, 'TIKTOK_ERR:' + String(ttErr.message || ttErr).slice(0, 80));
+      }
+    }
+
     if (capiRes && capiRes.ok) {
       appendAutoCourierNote_(sheet, row, 'CAPI_OK');
       appendAutoCourierNote_(sheet, row, 'META_PURCHASE_SENT');
@@ -2260,15 +2314,15 @@ function steadfastSendActiveRow() {
   } catch (apiErr) {
     SpreadsheetApp.getUi().alert(
       'Steadfast সংযোগ ব্যর্থ।\n\n' +
-      'সম্ভাব্য কারণ: DNS/নেটওয়ার্ক সমস্যা বা API সার্ভার ডাউন।\n' +
-      'Muslim Abaya → "Steadfast API URL fix করুন" চালিয়ে আবার চেষ্টা করুন।\n\n' +
+      'সম্ভাব্য কারণ: DNS/নেটওয়ার্ক সমস্যা বা API সার্ভার ডাউন।\n' +
+      'Muslim Abaya → "Steadfast API URL fix করুন" চালিয়ে আবার চেষ্টা করুন।\n\n' +
       'Error: ' + String(apiErr && apiErr.message ? apiErr.message : apiErr)
     );
     return;
   }
   if (!res || !res.consignment) {
     SpreadsheetApp.getUi().alert(
-      'Steadfast পার্সেল তৈরি হয়নি।\n\n' +
+      'Steadfast পার্সেল তৈরি হয়নি।\n\n' +
       'Response: ' + JSON.stringify(res).slice(0, 400) + '\n\n' +
       'Tips:\n' +
       '1) API Key/Secret ঠিক আছে কিনা দেখুন\n' +
@@ -2304,7 +2358,7 @@ function steadfastShowBalance() {
   } catch (err) {
     SpreadsheetApp.getUi().alert(
       'Steadfast Balance এখন দেখা যাচ্ছে না।\n\n' +
-      'সম্ভাব্য কারণ: Steadfast API বন্ধ/নেটওয়ার্ক বা API Key ভুল।\n\n' +
+      'সম্ভাব্য কারণ: Steadfast API বন্ধ/নেটওয়ার্ক বা API Key ভুল।\n\n' +
       'যা করবেন:\n' +
       '1) Muslim Abaya → "Steadfast API URL fix করুন" (একবার)\n' +
       '2) URL = portal.packzy.com/api/v1 (Steadfast mirror)\n' +
@@ -2413,7 +2467,7 @@ function sendToFacebookCAPI(data, eventID) {
     return { ok: false, code: 'CONFIG_MISSING' };
   }
 
-  var url = 'https://graph.facebook.com/v18.0/' + cfg.pixelId + '/events?access_token=' + cfg.accessToken;
+  var url = 'https://graph.facebook.com/v25.0/' + cfg.pixelId + '/events?access_token=' + cfg.accessToken;
   var cleanPhone = String(data.Phone || '').replace(/[^0-9]/g, '');
   if (cleanPhone.indexOf('0') === 0) cleanPhone = '88' + cleanPhone;
   var cleanEmail = String(data.Email || '').trim().toLowerCase();
@@ -2421,6 +2475,8 @@ function sendToFacebookCAPI(data, eventID) {
   var cleanFbp = String(data.FBP || '').trim();
   var cleanExternalId = String(data.ExternalID || '').trim().toLowerCase();
   var sourceUrl = String(data.EventSourceUrl || '').trim();
+  // Meta blocks CAPI website events without event_source_url for this business category.
+  if (!/^https?:\/\//i.test(sourceUrl)) sourceUrl = 'https://muslimabaya.com/checkout';
   var userAgent = String(data.ClientUserAgent || '').trim();
   var testEventCode = String(data.TestEventCode || '').trim();
   var userData = {
@@ -2442,10 +2498,10 @@ function sendToFacebookCAPI(data, eventID) {
       event_id: eventID,
       action_source: 'website',
       user_data: userData,
-      event_source_url: sourceUrl || undefined,
+      event_source_url: sourceUrl,
       custom_data: {
         currency: 'BDT',
-        value: parseFloat(data.Total) || 0,
+        value: parseOrderValue_(data.Total),
         content_name: data.Design || '',
         content_type: 'product'
       }
@@ -2475,6 +2531,66 @@ function sendToFacebookCAPI(data, eventID) {
     code: 'OK',
     eventsReceived: parsed && parsed.events_received != null ? parsed.events_received : ''
   };
+}
+
+function getTikTokCapiConfig_() {
+  var props = PropertiesService.getScriptProperties();
+  var accessToken = props.getProperty('TIKTOK_ACCESS_TOKEN') || '';
+  var pixelCode = props.getProperty('TIKTOK_PIXEL_ID') || props.getProperty('TIKTOK_PIXEL_CODE') || 'D6FK9GBC77UC649NNCP0';
+  return { accessToken: String(accessToken || '').trim(), pixelCode: String(pixelCode || '').trim() };
+}
+
+function sendToTikTokCAPI(data, eventID) {
+  var cfg = getTikTokCapiConfig_();
+  if (!cfg.accessToken || !cfg.pixelCode) {
+    return { ok: false, code: 'CONFIG_MISSING' };
+  }
+  var url = 'https://business-api.tiktok.com/open_api/v1.3/event/track/';
+  var cleanPhone = String(data.Phone || '').replace(/[^0-9]/g, '');
+  if (cleanPhone.indexOf('0') === 0) cleanPhone = '88' + cleanPhone.slice(1);
+  if (cleanPhone && cleanPhone.indexOf('880') !== 0) cleanPhone = '880' + cleanPhone;
+  var e164Phone = cleanPhone ? ('+' + cleanPhone) : '';
+  var cleanEmail = String(data.Email || '').trim().toLowerCase();
+  var sourceUrl = String(data.EventSourceUrl || '').trim();
+  if (!/^https?:\/\//i.test(sourceUrl)) sourceUrl = 'https://muslimabaya.com/checkout';
+
+  var user = {};
+  if (e164Phone) user.phone_number = [SHA256_Hash(e164Phone)];
+  if (cleanEmail && cleanEmail.indexOf('@') !== -1) user.email = [SHA256_Hash(cleanEmail)];
+
+  var payload = {
+    event_source: 'web',
+    event_source_id: cfg.pixelCode,
+    data: [{
+      event: 'CompletePayment',
+      event_time: Math.floor(Date.now() / 1000),
+      event_id: eventID,
+      user: user,
+      page: { url: sourceUrl },
+      properties: {
+        content_type: 'product',
+        currency: 'BDT',
+        value: parseOrderValue_(data.Total),
+        content_name: data.Design || ''
+      }
+    }]
+  };
+
+  var res = UrlFetchApp.fetch(url, {
+    method: 'post',
+    contentType: 'application/json',
+    headers: { 'Access-Token': cfg.accessToken },
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  });
+  var code = res.getResponseCode();
+  var body = String(res.getContentText() || '');
+  var parsed = {};
+  try { parsed = JSON.parse(body); } catch (jsonErr) {}
+  if (code >= 400 || (parsed && typeof parsed.code === 'number' && parsed.code !== 0)) {
+    return { ok: false, code: 'TIKTOK_HTTP_' + String(code), message: body.slice(0, 200) };
+  }
+  return { ok: true, code: 'OK' };
 }
 
 function SHA256_Hash(input) {
@@ -2935,4 +3051,321 @@ function createFirstAdminFromMenu() {
     'ইমেইল: ' + email + '\n\n' +
     'কোড আপলোডের পর Deploy → New version করুন।'
   );
+}
+// ── GitHub Auto-Publish (Admin Panel → সরাসরি লাইভ সাইটে) ──
+//
+// Script properties প্রয়োজন:
+//   GITHUB_TOKEN — Fine-grained Personal Access Token, শুধু এই একটি রিপোর জন্য,
+//                  Contents: Read and write পারমিশন দিয়ে বানানো।
+//
+// এই ফাংশন শুধু নিচের allow-list এ থাকা ফাইলগুলো commit করতে পারবে —
+// অন্য যেকোনো ফাইলের নাম দিলে PATH_NOT_ALLOWED ফিরিয়ে দেবে (সুরক্ষার জন্য)।
+var GITHUB_PUBLISH_OWNER_ = 'muslim-abaya-landingpage';
+var GITHUB_PUBLISH_REPO_ = 'Luxury-Dress-BD';
+var GITHUB_PUBLISH_BRANCH_ = 'main';
+var GITHUB_PUBLISH_ALLOWED_PATHS_ = [
+  'category-products.js',
+  'product-links-data.js',
+  'product-catalog-sections.js',
+  'product-config.js'
+];
+
+function publishFileToGitHub_(e) {
+  var token = param_(e, 'Token');
+  var v = verifyAdminSession_(token);
+  if (!v.ok) return v;
+
+  var ghToken = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+  if (!ghToken) {
+    return {
+      ok: false,
+      error: 'GITHUB_NOT_CONFIGURED',
+      message: 'Apps Script → Project Settings → Script Properties এ GITHUB_TOKEN সেট করুন।'
+    };
+  }
+
+  var path = String(param_(e, 'Path') || '').trim();
+  var content = String(param_(e, 'Content') || '');
+  var message = String(param_(e, 'Message') || '').trim() || ('Update ' + path + ' — Admin Panel থেকে');
+
+  if (!path || !content) {
+    return { ok: false, error: 'MISSING_FIELDS', message: 'Path এবং Content প্রয়োজন।' };
+  }
+  if (GITHUB_PUBLISH_ALLOWED_PATHS_.indexOf(path) === -1) {
+    return { ok: false, error: 'PATH_NOT_ALLOWED', message: 'এই ফাইল পাবলিশ করার অনুমতি নেই: ' + path };
+  }
+
+  var apiBase =
+    'https://api.github.com/repos/' +
+    GITHUB_PUBLISH_OWNER_ +
+    '/' +
+    GITHUB_PUBLISH_REPO_ +
+    '/contents/' +
+    encodeURIComponent(path);
+  var headers = {
+    Authorization: 'token ' + ghToken,
+    Accept: 'application/vnd.github+json',
+    'User-Agent': 'MuslimAbaya-AdminPanel'
+  };
+
+  // ধাপ ১: বর্তমান ফাইলের sha বের করা (আপডেটের জন্য বাধ্যতামূলক)
+  var getRes = UrlFetchApp.fetch(apiBase + '?ref=' + GITHUB_PUBLISH_BRANCH_, {
+    method: 'get',
+    headers: headers,
+    muteHttpExceptions: true
+  });
+  var getCode = getRes.getResponseCode();
+  if (getCode !== 200) {
+    return {
+      ok: false,
+      error: 'GITHUB_GET_FAILED',
+      message: 'GitHub থেকে ফাইল পাওয়া যায়নি (HTTP ' + getCode + ')',
+      detail: getRes.getContentText().slice(0, 300)
+    };
+  }
+  var fileInfo = {};
+  try { fileInfo = JSON.parse(getRes.getContentText()); } catch (parseErr) {}
+  var sha = fileInfo.sha;
+  if (!sha) {
+    return { ok: false, error: 'GITHUB_NO_SHA', message: 'ফাইলের sha পাওয়া যায়নি।' };
+  }
+
+  // ধাপ ২: নতুন কন্টেন্ট commit করা (UTF-8 সেফ base64)
+  var b64 = Utilities.base64Encode(content, Utilities.Charset.UTF_8);
+  var putPayload = {
+    message: message,
+    content: b64,
+    sha: sha,
+    branch: GITHUB_PUBLISH_BRANCH_
+  };
+  var putRes = UrlFetchApp.fetch(apiBase, {
+    method: 'put',
+    headers: headers,
+    contentType: 'application/json',
+    payload: JSON.stringify(putPayload),
+    muteHttpExceptions: true
+  });
+  var putCode = putRes.getResponseCode();
+  var putBody = {};
+  try { putBody = JSON.parse(putRes.getContentText()); } catch (parseErr2) {}
+
+  if (putCode !== 200 && putCode !== 201) {
+    return {
+      ok: false,
+      error: 'GITHUB_PUT_FAILED',
+      message: 'কমিট ব্যর্থ হয়েছে (HTTP ' + putCode + ')',
+      detail: (putBody && putBody.message) || putRes.getContentText().slice(0, 300)
+    };
+  }
+
+  return {
+    ok: true,
+    message: 'পাবলিশ সফল — Netlify ১-২ মিনিটে সাইট আপডেট করবে।',
+    path: path,
+    commitUrl: (putBody && putBody.commit && putBody.commit.html_url) || '',
+    sha: (putBody && putBody.content && putBody.content.sha) || ''
+  };
+}
+
+// ── ছবি আপলোড (Product Manager → drag/drop, Workstream 2) ──
+// শুধু "images/" ফোল্ডারের ভেতরে, নির্দিষ্ট mime + সাইজ সীমার মধ্যে ছবি commit করে।
+// FileName সার্ভার-সাইডে কড়াভাবে validate হয় (শুধু images/ + a-z 0-9 - . অনুমোদিত) —
+// path traversal বা অন্য কোনো ফাইল ওভাররাইট করা সম্ভব না, ক্লায়েন্ট যাই পাঠাক না কেন।
+// এই ফাংশনটি সম্পূর্ণ আলাদা — publishFileToGitHub_ বা তার allow-list এ হাত দেওয়া হয়নি।
+var GITHUB_IMAGES_PREFIX_ = 'images/';
+var GITHUB_IMAGE_ALLOWED_EXT_ = ['webp', 'jpg', 'jpeg', 'png'];
+var GITHUB_IMAGE_ALLOWED_MIME_ = ['image/webp', 'image/jpeg', 'image/png'];
+var GITHUB_IMAGE_MAX_BYTES_ = Math.round(2.5 * 1024 * 1024); // 2.5MB
+
+function publishImageToGitHub_(e) {
+  var token = param_(e, 'Token');
+  var v = verifyAdminSession_(token);
+  if (!v.ok) return v;
+
+  var ghToken = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+  if (!ghToken) {
+    return {
+      ok: false,
+      error: 'GITHUB_NOT_CONFIGURED',
+      message: 'Apps Script → Project Settings → Script Properties এ GITHUB_TOKEN সেট করুন।'
+    };
+  }
+
+  var mime = String(param_(e, 'MimeType') || '').trim().toLowerCase();
+  if (GITHUB_IMAGE_ALLOWED_MIME_.indexOf(mime) === -1) {
+    return { ok: false, error: 'MIME_NOT_ALLOWED', message: 'শুধু WebP/JPEG/PNG ছবি আপলোড করা যায়।' };
+  }
+
+  var path = String(param_(e, 'FileName') || '').trim();
+  var rest = path.indexOf(GITHUB_IMAGES_PREFIX_) === 0 ? path.slice(GITHUB_IMAGES_PREFIX_.length) : '';
+  var extMatch = /\.([a-zA-Z0-9]+)$/.exec(rest);
+  var ext = extMatch ? extMatch[1].toLowerCase() : '';
+  var nameOk = /^[a-z0-9-]+\.[a-z0-9]+$/.test(rest) && GITHUB_IMAGE_ALLOWED_EXT_.indexOf(ext) !== -1;
+  if (!path || path.indexOf(GITHUB_IMAGES_PREFIX_) !== 0 || !nameOk) {
+    return {
+      ok: false,
+      error: 'PATH_NOT_ALLOWED',
+      message: 'এই নামে ছবি আপলোড করা যাবে না — শুধু images/ ফোল্ডারে সাধারণ ফাইলনেম (a-z 0-9 -) অনুমোদিত।'
+    };
+  }
+
+  var b64 = String(param_(e, 'ContentBase64') || '').replace(/\s/g, '');
+  if (!b64) {
+    return { ok: false, error: 'MISSING_FIELDS', message: 'ছবির ডাটা পাওয়া যায়নি।' };
+  }
+  var approxBytes = Math.floor((b64.length * 3) / 4);
+  if (approxBytes > GITHUB_IMAGE_MAX_BYTES_) {
+    return {
+      ok: false,
+      error: 'FILE_TOO_LARGE',
+      message: 'ছবি ২.৫MB এর বেশি — আপলোডের আগে আরও ছোট/কমপ্রেস করে পাঠান।'
+    };
+  }
+
+  var apiBase =
+    'https://api.github.com/repos/' +
+    GITHUB_PUBLISH_OWNER_ +
+    '/' +
+    GITHUB_PUBLISH_REPO_ +
+    '/contents/' +
+    encodeURIComponent(path);
+  var headers = {
+    Authorization: 'token ' + ghToken,
+    Accept: 'application/vnd.github+json',
+    'User-Agent': 'MuslimAbaya-AdminPanel'
+  };
+
+  // ফাইলটা আগে থেকে আছে কিনা দেখা — থাকলে sha পাঠাতে হবে (আপডেট), না থাকলে নতুন কমিট।
+  var putPayload = {
+    message: 'Upload image ' + path + ' — Admin Panel থেকে',
+    content: b64,
+    branch: GITHUB_PUBLISH_BRANCH_
+  };
+  var getRes = UrlFetchApp.fetch(apiBase + '?ref=' + GITHUB_PUBLISH_BRANCH_, {
+    method: 'get',
+    headers: headers,
+    muteHttpExceptions: true
+  });
+  if (getRes.getResponseCode() === 200) {
+    try {
+      var existing = JSON.parse(getRes.getContentText());
+      if (existing && existing.sha) putPayload.sha = existing.sha;
+    } catch (parseErr3) {}
+  }
+
+  var putRes = UrlFetchApp.fetch(apiBase, {
+    method: 'put',
+    headers: headers,
+    contentType: 'application/json',
+    payload: JSON.stringify(putPayload),
+    muteHttpExceptions: true
+  });
+  var putCode = putRes.getResponseCode();
+  var putBody = {};
+  try { putBody = JSON.parse(putRes.getContentText()); } catch (parseErr4) {}
+
+  if (putCode !== 200 && putCode !== 201) {
+    return {
+      ok: false,
+      error: 'GITHUB_PUT_FAILED',
+      message: 'ছবি আপলোড ব্যর্থ হয়েছে (HTTP ' + putCode + ')',
+      detail: (putBody && putBody.message) || putRes.getContentText().slice(0, 300)
+    };
+  }
+
+  return {
+    ok: true,
+    message: 'ছবি আপলোড সফল — Netlify ১-২ মিনিটে সাইটে যুক্ত হবে।',
+    path: path,
+    commitUrl: (putBody && putBody.commit && putBody.commit.html_url) || '',
+    sha: (putBody && putBody.content && putBody.content.sha) || ''
+  };
+}
+
+
+// ===== Order value parser (Bangla digits, ৳, commas) =====
+function parseOrderValue_(raw) {
+  var bn = '০১২৩৪৫৬৭৮৯';
+  var s = String(raw == null ? '' : raw).replace(/[০-৯]/g, function (d) { return String(bn.indexOf(d)); });
+  s = s.replace(/[^0-9.]/g, '');
+  var n = parseFloat(s);
+  return isFinite(n) && n > 0 ? n : 0;
+}
+
+// ===== Messenger → Conversions API for Business Messaging =====
+var MSGR_PAGE_ID = '964928770039259';
+var MSGR_DATASET_ID = '1465090315322833';
+var MSGR_SHEET = 'MessengerContacts';
+
+function messengerVerify_(e) {
+  var want = PropertiesService.getScriptProperties().getProperty('MSGR_VERIFY_TOKEN') || '';
+  if (want && e.parameter['hub.verify_token'] === want) {
+    return ContentService.createTextOutput(String(e.parameter['hub.challenge'] || ''));
+  }
+  return ContentService.createTextOutput('forbidden');
+}
+
+// Saves every person who messages the Page: PSID + name + time.
+function messengerWebhook_(e) {
+  try {
+    var body = JSON.parse(e.postData.contents);
+    var ss = SpreadsheetApp.getActive();
+    var sh = ss.getSheetByName(MSGR_SHEET) || ss.insertSheet(MSGR_SHEET);
+    if (sh.getLastRow() === 0) sh.appendRow(['PSID', 'Name', 'FirstSeen', 'LastSeen', 'FromAd']);
+    (body.entry || []).forEach(function (entry) {
+      (entry.messaging || []).forEach(function (ev) {
+        var psid = ev.sender && ev.sender.id;
+        if (!psid || String(psid) === MSGR_PAGE_ID) return;
+        var fromAd = ev.referral && ev.referral.source === 'ADS' ? 'yes' : '';
+        upsertMessengerContact_(sh, String(psid), fromAd);
+      });
+    });
+  } catch (err) {}
+  return ContentService.createTextOutput('EVENT_RECEIVED');
+}
+
+function upsertMessengerContact_(sh, psid, fromAd) {
+  var now = new Date();
+  var data = sh.getRange(1, 1, Math.max(sh.getLastRow(), 1), 1).getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === psid) {
+      sh.getRange(i + 1, 4).setValue(now);
+      if (fromAd) sh.getRange(i + 1, 5).setValue('yes');
+      return;
+    }
+  }
+  sh.appendRow([psid, getMessengerName_(psid), now, now, fromAd]);
+}
+
+function getMessengerName_(psid) {
+  try {
+    var token = PropertiesService.getScriptProperties().getProperty('MSGR_PAGE_TOKEN');
+    if (!token) return '';
+    var res = UrlFetchApp.fetch('https://graph.facebook.com/v25.0/' + psid +
+      '?fields=name&access_token=' + encodeURIComponent(token), { muteHttpExceptions: true });
+    return (JSON.parse(res.getContentText()) || {}).name || '';
+  } catch (e) { return ''; }
+}
+
+// Call when a Messenger order becomes Confirmed/Delivered.
+function sendMessengerPurchase_(psid, value, orderId) {
+  var token = PropertiesService.getScriptProperties().getProperty('MSGR_PAGE_TOKEN');
+  if (!token || !psid) return { ok: false, code: 'MISSING' };
+  var payload = {
+    data: [{
+      event_name: 'Purchase',
+      event_time: Math.floor(Date.now() / 1000),
+      event_id: 'msgr_' + String(orderId || psid),
+      action_source: 'business_messaging',
+      messaging_channel: 'messenger',
+      user_data: { page_id: MSGR_PAGE_ID, page_scoped_user_id: String(psid) },
+      custom_data: { currency: 'BDT', value: parseOrderValue_(value) }
+    }]
+  };
+  var res = UrlFetchApp.fetch('https://graph.facebook.com/v25.0/' + MSGR_DATASET_ID +
+    '/events?access_token=' + encodeURIComponent(token), {
+      method: 'post', contentType: 'application/json',
+      payload: JSON.stringify(payload), muteHttpExceptions: true
+    });
+  return { ok: res.getResponseCode() === 200, body: res.getContentText() };
 }
