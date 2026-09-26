@@ -7,7 +7,7 @@
   var SESSION_KEY = cfg.sessionKey || "ma_admin_session";
   var SESSION_MS = (cfg.sessionDays || 7) * 24 * 60 * 60 * 1000;
 
-  // নতুন উন্নতি: টাইমআউট ফাংশন (১০ সেকেন্ডের বেশি সময় নিলে রিজেক্ট হবে)
+  // নতুন উন্নতি: টাইমআউট ফাংশন (১০ সেকেন্ডের বেশি সময় নিলে রিজেক্ট হবে)
   function timeoutPromise(ms, promise) {
     return new Promise(function (resolve, reject) {
       setTimeout(function () { reject(new Error("REQUEST_TIMEOUT")); }, ms);
@@ -99,7 +99,7 @@
       Password: password
     };
     
-    // উন্নতি: ফোন নাম্বার ফরম্যাটিং আরও আধুনিক করা হয়েছে
+    // উন্নতি: ফোন নাম্বার ফরম্যাটিং আরও আধুনিক করা হয়েছে
     if (loginId.indexOf("@") !== -1) fields.Email = loginId.toLowerCase();
     else fields.Phone = loginId.replace(/\D/g, "").replace(/^(?:880|88|0)/, "0");
     
@@ -220,6 +220,73 @@
       });
   }
 
+  // নতুন: Media Library — images/ ফোল্ডারের সব ছবির তালিকা (main/gallery/cards সব সাবফোল্ডার সহ)
+  function listImages() {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return timeoutPromise(
+      20000,
+      fetch(API_URL, {
+        method: "POST",
+        mode: "cors",
+        credentials: "omit",
+        body: (function () {
+          var body = new URLSearchParams();
+          body.append("RecordType", "AdminListImages");
+          body.append("Token", s.token);
+          return body;
+        })()
+      })
+    )
+      .then(function (res) {
+        return res.text();
+      })
+      .then(function (text) {
+        try {
+          return JSON.parse(String(text || "").trim());
+        } catch (e) {
+          return { ok: false, error: "PARSE_FAILED", message: text };
+        }
+      })
+      .catch(function (err) {
+        return { ok: false, error: "NETWORK_FAILURE", message: err.message };
+      });
+  }
+
+  // নতুন: Media Library থেকে একটা ছবি স্থায়ীভাবে মুছে ফেলা
+  function deleteImage(path) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return timeoutPromise(
+      20000,
+      fetch(API_URL, {
+        method: "POST",
+        mode: "cors",
+        credentials: "omit",
+        body: (function () {
+          var body = new URLSearchParams();
+          body.append("RecordType", "AdminDeleteImage");
+          body.append("Token", s.token);
+          body.append("Path", path);
+          return body;
+        })()
+      })
+    )
+      .then(function (res) {
+        return res.text();
+      })
+      .then(function (text) {
+        try {
+          return JSON.parse(String(text || "").trim());
+        } catch (e) {
+          return { ok: false, error: "PARSE_FAILED", message: text };
+        }
+      })
+      .catch(function (err) {
+        return { ok: false, error: "NETWORK_FAILURE", message: err.message };
+      });
+  }
+
   g.MaAdmin = {
     login: login,
     logout: logout,
@@ -228,6 +295,8 @@
     fetchOrders: fetchOrders,
     publishFile: publishFile,
     uploadImage: uploadImage,
+    listImages: listImages,
+    deleteImage: deleteImage,
     isLoggedIn: function () {
       return !!getSession();
     }
