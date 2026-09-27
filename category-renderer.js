@@ -1675,6 +1675,8 @@ function openProductQuickView(idx) {
   root.className = (shopCartCtx.gridClassName || "") + " shop-product-detail";
   root.setAttribute("data-category-key", categoryKey);
   root.innerHTML = html;
+  ensureReviewsWidgetLoaded();
+  callMAReviewsMount(root, p);
   bindPqvInteractions(p, idx, categoryKey, root);
   initStickyOrderBar(root);
   var pqvQtyInput = root.querySelector("#pqvQty");
@@ -1864,6 +1866,22 @@ function buildTwoPiecePqvSizeHtml(p, idx, twoPieceCfg, chartBtn, customSizeBtn) 
    প্রোডাক্ট পপআপের পুরো কাঠামো (ছবি, দাম, সাইজ, বাটন) এখানে জোড়া লাগানো
    হয়ে একটা বড় HTML স্ট্রিং তৈরি হয়।
    ---------------------------------------------------------------------- */
+function ensureReviewsWidgetLoaded() {
+  if (window.MAReviews || document.getElementById("ma-reviews-widget-script")) return;
+  var s = document.createElement("script");
+  s.id = "ma-reviews-widget-script";
+  s.src = "reviews-widget.js?v=20260928";
+  document.head.appendChild(s);
+}
+function callMAReviewsMount(root, p, tries) {
+  tries = tries || 0;
+  if (window.MAReviews) {
+    try { window.MAReviews.mount(root, p); } catch (mErr) {}
+    return;
+  }
+  if (tries > 20) return;
+  setTimeout(function () { callMAReviewsMount(root, p, tries + 1); }, 150);
+}
 function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
   var defaultType = getDefaultProductType(p, categoryKey);
   var productPrice = listingCardPrice(p);
@@ -2104,6 +2122,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     '<div class="pqv-tab-panel" data-panel="spec">' +
     specRows +
     "</div></div></div></div>" +
+    '<div class="pqv-reviews-section"><h3 class="pqv-reviews-title">Customer Reviews</h3><div class="pqv-reviews" data-ma-reviews="1"></div></div>' +
     relatedHtml +
     "</div>" +
     "</div>"
