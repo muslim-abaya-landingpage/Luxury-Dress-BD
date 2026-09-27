@@ -86,6 +86,12 @@ function doPost(e) {
       type === 'Subscribe' ||
       (!type && !isOrder && (param_(e, 'contact') || param_(e, 'email')));
 
+    // Messenger inbox: token-gated with its own (higher) limit, since the admin
+    // inbox polls; must run before the generic 12-per-10-min limiter below.
+    if (type && type.indexOf('Inbox') === 0) {
+      return jsonOut_(handleInboxRequest_(type, e));
+    }
+
     if (!isOrder && !isSubscribe) {
       rateLimit_(param_(e, 'Email') || param_(e, 'Phone') || param_(e, 'Login') || param_(e, 'Token') || 'global');
     }
@@ -1346,6 +1352,7 @@ function onOpen() {
       .addSeparator()
       .addItem('Admin password reset', 'resetAdminPasswordFromMenu')
       .addItem('Admin account তৈরি (প্রথমবার)', 'createFirstAdminFromMenu')
+      .addItem('টিম সদস্য যোগ করুন (Messenger ইনবক্স)', 'createTeamAdminFromMenu')
       .addToUi();
   } catch (menuErr) {}
 
@@ -3024,15 +3031,32 @@ function createFirstAdminFromMenu() {
   }
   var admins = getAdminsSheet_();
   if (admins.getLastRow() > 1) {
-    SpreadsheetApp.getUi().alert('Admins শীটে ইতিমধ্যে অ্যাকাউন্ট আছে।\n\nনতুন অ্যাডমিন: Admins শীটে হাতে সারি যোগ করুন (Customers-এর মতো hash/salt)।');
+    SpreadsheetApp.getUi().alert('Admins শীটে ইতিমধ্যে অ্যাকাউন্ট আছে।\n\nনতুন অ্যাডমিন/টিম সদস্য: মেনু → টিম সদস্য যোগ করুন।');
     return;
   }
+  promptAndCreateAdmin_(admins);
+}
+
+// Team members get their own admin login (used by the Messenger inbox for assignment).
+function createTeamAdminFromMenu() {
+  if (!getAuthSecret_()) {
+    SpreadsheetApp.getUi().alert('আগে Project Settings → Script properties → AUTH_SECRET সেট করুন।');
+    return;
+  }
+  promptAndCreateAdmin_(getAdminsSheet_());
+}
+
+function promptAndCreateAdmin_(admins) {
   var ui = SpreadsheetApp.getUi();
   var emailResp = ui.prompt('অ্যাডমিন ইমেইল', 'লগইনে ব্যবহার করবেন (Gmail)', ui.ButtonSet.OK_CANCEL);
   if (emailResp.getSelectedButton() !== ui.Button.OK) return;
   var email = normalizeEmail_(emailResp.getResponseText());
   if (!email || email.indexOf('@') === -1) {
     ui.alert('সঠিক ইমেইল দিন।');
+    return;
+  }
+  if (findAdminByEmail_(email)) {
+    ui.alert('এই ইমেইলে ইতিমধ্যে অ্যাকাউন্ট আছে।');
     return;
   }
   var phoneResp = ui.prompt('মোবাইল (ঐচ্ছিক)', '01XXXXXXXXX', ui.ButtonSet.OK_CANCEL);
@@ -3415,9 +3439,29 @@ function parseOrderValue_(raw) {
 }
 
 // ===== Messenger → Conversions API for Business Messaging =====
+// Legacy single-Page constants (still used as the default Page and for old sheet rows).
 var MSGR_PAGE_ID = '964928770039259';
 var MSGR_DATASET_ID = '1465090315322833';
 var MSGR_SHEET = 'MessengerContacts';
+var MSGR_MSG_SHEET = 'MessengerMessages';
+
+// ===== Multi-Page Messenger Inbox =====
+// প্রতিটি Page-এর Page Access Token রাখুন Script Properties-এ:
+//   MSGR_PAGE_TOKEN_<PageID>   (যেমন MSGR_PAGE_TOKEN_381729145014885)
+// পুরোনো MSGR_PAGE_TOKEN শুধু MSGR_PAGE_ID Page-এর জন্য fallback।
+var MSGR_PAGES = {
+  '964928770039259': 'Luxury Dress BD',
+  '381729145014885': 'Muslim Abaya',
+  '258170054039575': 'Luxury Dress'
+};
+var MSGR_STATUSES = ['নতুন', 'দাম জিজ্ঞেস', 'অর্ডার কনফার্ম', 'ডেলিভারি হয়েছে', 'বাতিল'];
+var MSGR_CONFIRMED_STATUS = 'অর্ডার কনফার্ম';
+var MSGR_DELIVERED_STATUS = 'ডেলিভারি হয়েছে';
+// Contacts sheet columns (1-based)
+var MC = { PSID: 1, NAME: 2, FIRST: 3, LAST: 4, FROM_AD: 5, PAGE: 6, STATUS: 7, ASSIGNED: 8,
+  LAST_MSG: 9, LAST_DIR: 10, UNREAD: 11, ORDER_ID: 12, ORDER_VALUE: 13, PURCHASE_SENT: 14, NOTES: 15 };
+var MC_HEADERS = ['PSID', 'Name', 'FirstSeen', 'LastSeen', 'FromAd', 'PageId', 'Status', 'AssignedTo',
+  'LastMessage', 'LastDirection', 'Unread', 'OrderId', 'OrderValue', 'PurchaseSent', 'Notes'];
 
 function messengerVerify_(e) {
   var want = PropertiesService.getScriptProperties().getProperty('MSGR_VERIFY_TOKEN') || '';
@@ -3427,41 +3471,131 @@ function messengerVerify_(e) {
   return ContentService.createTextOutput('forbidden');
 }
 
-// Saves every person who messages the Page: PSID + name + time.
+function msgrPageToken_(pageId) {
+  var props = PropertiesService.getScriptProperties();
+  var t = props.getProperty('MSGR_PAGE_TOKEN_' + String(pageId || ''));
+  if (!t && String(pageId) === MSGR_PAGE_ID) t = props.getProperty('MSGR_PAGE_TOKEN');
+  return String(t || '').trim();
+}
+
+function msgrPageName_(pageId) {
+  return MSGR_PAGES[String(pageId)] || String(pageId || '');
+}
+
+function msgrContactsSheet_() {
+  var ss = SpreadsheetApp.getActive();
+  var sh = ss.getSheetByName(MSGR_SHEET) || ss.insertSheet(MSGR_SHEET);
+  var lastCol = Math.max(sh.getLastColumn(), 1);
+  var head = sh.getLastRow() ? sh.getRange(1, 1, 1, lastCol).getValues()[0] : [];
+  if (!head[MC.NOTES - 1]) sh.getRange(1, 1, 1, MC_HEADERS.length).setValues([MC_HEADERS]);
+  return sh;
+}
+
+function msgrMessagesSheet_() {
+  return ensureSheet_(MSGR_MSG_SHEET, ['Time', 'PageId', 'PSID', 'Direction', 'Text', 'MID', 'By']);
+}
+
+// Rows written before multi-Page support have no PageId: they belong to MSGR_PAGE_ID.
+function msgrRowPageId_(row) {
+  return String(row[MC.PAGE - 1] || '') || MSGR_PAGE_ID;
+}
+
+function msgrFindContactRow_(values, pageId, psid) {
+  for (var i = 1; i < values.length; i++) {
+    if (String(values[i][MC.PSID - 1]) === String(psid) && msgrRowPageId_(values[i]) === String(pageId)) {
+      return i + 1;
+    }
+  }
+  return -1;
+}
+
+function msgrEventText_(ev) {
+  if (ev.message) {
+    if (ev.message.text) return String(ev.message.text);
+    var atts = ev.message.attachments || [];
+    if (atts.length) return '[' + atts.map(function (a) { return a.type || 'attachment'; }).join(', ') + ']';
+    return '[message]';
+  }
+  if (ev.postback) return '[বাটন] ' + String(ev.postback.title || ev.postback.payload || '');
+  if (ev.referral) return '[বিজ্ঞাপন/লিংক থেকে এসেছে]';
+  return '';
+}
+
+// Webhook: saves every conversation (all connected Pages) + each message.
 function messengerWebhook_(e) {
+  var lock = LockService.getScriptLock();
   try {
+    lock.waitLock(20000);
     var body = JSON.parse(e.postData.contents);
-    var ss = SpreadsheetApp.getActive();
-    var sh = ss.getSheetByName(MSGR_SHEET) || ss.insertSheet(MSGR_SHEET);
-    if (sh.getLastRow() === 0) sh.appendRow(['PSID', 'Name', 'FirstSeen', 'LastSeen', 'FromAd']);
     (body.entry || []).forEach(function (entry) {
+      var pageId = String(entry.id || MSGR_PAGE_ID);
       (entry.messaging || []).forEach(function (ev) {
-        var psid = ev.sender && ev.sender.id;
-        if (!psid || String(psid) === MSGR_PAGE_ID) return;
-        var fromAd = ev.referral && ev.referral.source === 'ADS' ? 'yes' : '';
-        upsertMessengerContact_(sh, String(psid), fromAd);
+        if (!ev.message && !ev.postback && !ev.referral) return; // delivery/read receipts
+        var isEcho = !!(ev.message && ev.message.is_echo);
+        var psid = String(isEcho ? (ev.recipient && ev.recipient.id) : (ev.sender && ev.sender.id) || '');
+        if (!psid || psid === pageId) return;
+        var mid = ev.message && ev.message.mid ? String(ev.message.mid) : '';
+        // Replies sent from this inbox are already logged; skip their echo.
+        if (isEcho && mid && CacheService.getScriptCache().get('msgr_mid_' + mid)) return;
+        var fromAd = (ev.referral && ev.referral.source === 'ADS') ||
+          (ev.postback && ev.postback.referral && ev.postback.referral.source === 'ADS') ||
+          (ev.message && ev.message.referral && ev.message.referral.source === 'ADS');
+        msgrRecordMessage_(pageId, psid, isEcho ? 'out' : 'in', msgrEventText_(ev), mid,
+          isEcho ? 'Page' : '', fromAd ? 'yes' : '');
       });
     });
-  } catch (err) {}
+  } catch (err) {
+    try { console.error('messengerWebhook_ ' + err); } catch (e2) {}
+  } finally {
+    try { lock.releaseLock(); } catch (e3) {}
+  }
   return ContentService.createTextOutput('EVENT_RECEIVED');
 }
 
-function upsertMessengerContact_(sh, psid, fromAd) {
+function msgrRecordMessage_(pageId, psid, direction, text, mid, by, fromAd) {
   var now = new Date();
-  var data = sh.getRange(1, 1, Math.max(sh.getLastRow(), 1), 1).getValues();
-  for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]) === psid) {
-      sh.getRange(i + 1, 4).setValue(now);
-      if (fromAd) sh.getRange(i + 1, 5).setValue('yes');
-      return;
-    }
+  msgrMessagesSheet_().appendRow([now, pageId, psid, direction, String(text || '').slice(0, 2000), mid || '', by || '']);
+  var sh = msgrContactsSheet_();
+  var values = sh.getDataRange().getValues();
+  var rowNum = msgrFindContactRow_(values, pageId, psid);
+  var preview = String(text || '').slice(0, 200);
+  if (rowNum === -1) {
+    var row = new Array(MC_HEADERS.length);
+    for (var i = 0; i < row.length; i++) row[i] = '';
+    row[MC.PSID - 1] = psid;
+    row[MC.NAME - 1] = getMessengerName_(psid, pageId);
+    row[MC.FIRST - 1] = now;
+    row[MC.LAST - 1] = now;
+    row[MC.FROM_AD - 1] = fromAd || '';
+    row[MC.PAGE - 1] = pageId;
+    row[MC.STATUS - 1] = MSGR_STATUSES[0];
+    row[MC.LAST_MSG - 1] = preview;
+    row[MC.LAST_DIR - 1] = direction;
+    row[MC.UNREAD - 1] = direction === 'in' ? 1 : 0;
+    sh.appendRow(row);
+    return;
   }
-  sh.appendRow([psid, getMessengerName_(psid), now, now, fromAd]);
+  var cur = values[rowNum - 1];
+  cur[MC.LAST - 1] = now;
+  cur[MC.PAGE - 1] = pageId;
+  cur[MC.LAST_MSG - 1] = preview;
+  cur[MC.LAST_DIR - 1] = direction;
+  cur[MC.UNREAD - 1] = direction === 'in' ? (parseInt(cur[MC.UNREAD - 1], 10) || 0) + 1 : 0;
+  if (fromAd) cur[MC.FROM_AD - 1] = 'yes';
+  if (!cur[MC.STATUS - 1]) cur[MC.STATUS - 1] = MSGR_STATUSES[0];
+  if (!cur[MC.NAME - 1]) cur[MC.NAME - 1] = getMessengerName_(psid, pageId);
+  while (cur.length < MC_HEADERS.length) cur.push('');
+  sh.getRange(rowNum, 1, 1, MC_HEADERS.length).setValues([cur.slice(0, MC_HEADERS.length)]);
 }
 
-function getMessengerName_(psid) {
+// Kept for compatibility with older callers.
+function upsertMessengerContact_(sh, psid, fromAd) {
+  msgrRecordMessage_(MSGR_PAGE_ID, psid, 'in', '', '', '', fromAd);
+}
+
+function getMessengerName_(psid, pageId) {
   try {
-    var token = PropertiesService.getScriptProperties().getProperty('MSGR_PAGE_TOKEN');
+    var token = msgrPageToken_(pageId || MSGR_PAGE_ID);
     if (!token) return '';
     var res = UrlFetchApp.fetch('https://graph.facebook.com/v25.0/' + psid +
       '?fields=name&access_token=' + encodeURIComponent(token), { muteHttpExceptions: true });
@@ -3470,8 +3604,9 @@ function getMessengerName_(psid) {
 }
 
 // Call when a Messenger order becomes Confirmed/Delivered.
-function sendMessengerPurchase_(psid, value, orderId) {
-  var token = PropertiesService.getScriptProperties().getProperty('MSGR_PAGE_TOKEN');
+function sendMessengerPurchase_(psid, value, orderId, pageId) {
+  var page = String(pageId || MSGR_PAGE_ID);
+  var token = msgrPageToken_(page);
   if (!token || !psid) return { ok: false, code: 'MISSING' };
   var payload = {
     data: [{
@@ -3480,14 +3615,233 @@ function sendMessengerPurchase_(psid, value, orderId) {
       event_id: 'msgr_' + String(orderId || psid),
       action_source: 'business_messaging',
       messaging_channel: 'messenger',
-      user_data: { page_id: MSGR_PAGE_ID, page_scoped_user_id: String(psid) },
+      user_data: { page_id: page, page_scoped_user_id: String(psid) },
       custom_data: { currency: 'BDT', value: parseOrderValue_(value) }
     }]
   };
-  var res = UrlFetchApp.fetch('https://graph.facebook.com/v25.0/' + MSGR_DATASET_ID +
+  var datasetId = PropertiesService.getScriptProperties().getProperty('MSGR_DATASET_ID_' + page) || MSGR_DATASET_ID;
+  var res = UrlFetchApp.fetch('https://graph.facebook.com/v25.0/' + datasetId +
     '/events?access_token=' + encodeURIComponent(token), {
       method: 'post', contentType: 'application/json',
       payload: JSON.stringify(payload), muteHttpExceptions: true
     });
   return { ok: res.getResponseCode() === 200, body: res.getContentText() };
+}
+
+// ── Inbox admin API (RecordType = Inbox*) ──
+
+function inboxRateLimit_(token) {
+  var cache = CacheService.getScriptCache();
+  var k = 'rl_inbox_' + String(token || 'x').slice(0, 48);
+  var n = parseInt(cache.get(k) || '0', 10);
+  if (n >= 600) throw new Error('RATE_LIMIT');
+  cache.put(k, String(n + 1), 600);
+}
+
+// Admin or staff accounts from the Admins sheet can use the inbox.
+function verifyInboxSession_(token) {
+  var v = verifySession_(token);
+  if (!v.ok) return v;
+  if (v.role !== 'admin' && v.role !== 'staff') {
+    return { ok: false, error: 'NOT_ADMIN', message: 'অ্যাডমিন লগইন প্রয়োজন।' };
+  }
+  return v;
+}
+
+function handleInboxRequest_(type, e) {
+  var token = param_(e, 'Token');
+  inboxRateLimit_(token);
+  var v = verifyInboxSession_(token);
+  if (!v.ok) return v;
+  if (type === 'InboxList') return inboxList_(e);
+  if (type === 'InboxThread') return inboxThread_(e);
+  if (type === 'InboxReply') return inboxReply_(e, v);
+  if (type === 'InboxUpdate') return inboxUpdate_(e, v);
+  return { ok: false, error: 'UNKNOWN_TYPE' };
+}
+
+function msgrTeamNames_() {
+  var out = [];
+  try {
+    var data = getAdminsSheet_().getDataRange().getValues();
+    for (var i = 1; i < data.length; i++) {
+      if (String(data[i][5] || '') === 'blocked') continue;
+      var n = String(data[i][2] || data[i][0] || '').trim();
+      if (n && out.indexOf(n) === -1) out.push(n);
+    }
+  } catch (err) {}
+  return out;
+}
+
+function msgrContactFromRow_(r) {
+  var pageId = msgrRowPageId_(r);
+  return {
+    psid: String(r[MC.PSID - 1]),
+    name: String(r[MC.NAME - 1] || ''),
+    firstSeen: formatCell_(r[MC.FIRST - 1]),
+    lastSeen: formatCell_(r[MC.LAST - 1]),
+    lastSeenMs: r[MC.LAST - 1] instanceof Date ? r[MC.LAST - 1].getTime() : (new Date(r[MC.LAST - 1]).getTime() || 0),
+    fromAd: String(r[MC.FROM_AD - 1] || '') === 'yes',
+    pageId: pageId,
+    pageName: msgrPageName_(pageId),
+    status: String(r[MC.STATUS - 1] || MSGR_STATUSES[0]),
+    assignedTo: String(r[MC.ASSIGNED - 1] || ''),
+    lastMessage: String(r[MC.LAST_MSG - 1] || ''),
+    lastDirection: String(r[MC.LAST_DIR - 1] || ''),
+    unread: parseInt(r[MC.UNREAD - 1], 10) || 0,
+    orderId: String(r[MC.ORDER_ID - 1] || ''),
+    orderValue: String(r[MC.ORDER_VALUE - 1] || ''),
+    purchaseSent: !!r[MC.PURCHASE_SENT - 1],
+    notes: String(r[MC.NOTES - 1] || '')
+  };
+}
+
+function inboxList_(e) {
+  var values = msgrContactsSheet_().getDataRange().getValues();
+  var pageFilter = param_(e, 'PageId');
+  var statusFilter = param_(e, 'Status');
+  var assignedFilter = param_(e, 'AssignedTo');
+  var q = String(param_(e, 'Q') || '').toLowerCase();
+  var unreadOnly = param_(e, 'Unread') === '1';
+  var limit = Math.min(Math.max(parseInt(param_(e, 'Limit'), 10) || 150, 1), 300);
+  var all = [];
+  for (var i = 1; i < values.length; i++) {
+    if (!values[i][MC.PSID - 1]) continue;
+    all.push(msgrContactFromRow_(values[i]));
+  }
+  // Conversion stats cover every conversation, per Page and overall.
+  var stats = { total: 0, unread: 0, fromAd: 0, confirmed: 0, delivered: 0, byPage: {} };
+  all.forEach(function (c) {
+    var ps = stats.byPage[c.pageId] || (stats.byPage[c.pageId] = { name: c.pageName, total: 0, confirmed: 0, unread: 0 });
+    var won = c.status === MSGR_CONFIRMED_STATUS || c.status === MSGR_DELIVERED_STATUS;
+    stats.total++; ps.total++;
+    if (c.unread) { stats.unread++; ps.unread++; }
+    if (c.fromAd) stats.fromAd++;
+    if (won) { stats.confirmed++; ps.confirmed++; }
+    if (c.status === MSGR_DELIVERED_STATUS) stats.delivered++;
+  });
+  var list = all.filter(function (c) {
+    if (pageFilter && c.pageId !== pageFilter) return false;
+    if (statusFilter && c.status !== statusFilter) return false;
+    if (assignedFilter === '__none__' && c.assignedTo) return false;
+    if (assignedFilter && assignedFilter !== '__none__' && c.assignedTo !== assignedFilter) return false;
+    if (unreadOnly && !c.unread) return false;
+    if (q && (c.name + ' ' + c.lastMessage + ' ' + c.orderId + ' ' + c.notes).toLowerCase().indexOf(q) === -1) return false;
+    return true;
+  });
+  list.sort(function (a, b) { return b.lastSeenMs - a.lastSeenMs; });
+  var pages = Object.keys(MSGR_PAGES).map(function (id) {
+    return { id: id, name: MSGR_PAGES[id], connected: !!msgrPageToken_(id) };
+  });
+  return {
+    ok: true,
+    contacts: list.slice(0, limit),
+    count: list.length,
+    stats: stats,
+    pages: pages,
+    statuses: MSGR_STATUSES,
+    team: msgrTeamNames_()
+  };
+}
+
+function inboxThread_(e) {
+  var pageId = param_(e, 'PageId');
+  var psid = param_(e, 'PSID');
+  if (!pageId || !psid) return { ok: false, error: 'MISSING_FIELDS' };
+  var values = msgrMessagesSheet_().getDataRange().getValues();
+  var msgs = [];
+  for (var i = values.length - 1; i >= 1 && msgs.length < 150; i--) {
+    var r = values[i];
+    if (String(r[2]) !== psid || String(r[1]) !== pageId) continue;
+    msgs.push({ time: formatCell_(r[0]), direction: String(r[3] || ''), text: String(r[4] || ''), by: String(r[6] || '') });
+  }
+  msgs.reverse();
+  var sh = msgrContactsSheet_();
+  var cValues = sh.getDataRange().getValues();
+  var rowNum = msgrFindContactRow_(cValues, pageId, psid);
+  var contact = null;
+  if (rowNum !== -1) {
+    if (parseInt(cValues[rowNum - 1][MC.UNREAD - 1], 10)) sh.getRange(rowNum, MC.UNREAD).setValue(0);
+    cValues[rowNum - 1][MC.UNREAD - 1] = 0;
+    contact = msgrContactFromRow_(cValues[rowNum - 1]);
+  }
+  return { ok: true, messages: msgs, contact: contact };
+}
+
+function inboxReply_(e, session) {
+  var pageId = param_(e, 'PageId');
+  var psid = param_(e, 'PSID');
+  var text = String(param_(e, 'Text') || '').trim();
+  if (!pageId || !psid || !text) return { ok: false, error: 'MISSING_FIELDS', message: 'মেসেজ লিখুন।' };
+  if (text.length > 2000) return { ok: false, error: 'TOO_LONG', message: 'মেসেজ ২০০০ অক্ষরের বেশি হতে পারবে না।' };
+  var token = msgrPageToken_(pageId);
+  if (!token) {
+    return { ok: false, error: 'NO_PAGE_TOKEN', message: 'এই Page-এর token সেট করা নেই (Script Properties → MSGR_PAGE_TOKEN_' + pageId + ')।' };
+  }
+  var res = UrlFetchApp.fetch('https://graph.facebook.com/v25.0/me/messages?access_token=' + encodeURIComponent(token), {
+    method: 'post',
+    contentType: 'application/json',
+    payload: JSON.stringify({ recipient: { id: psid }, messaging_type: 'RESPONSE', message: { text: text } }),
+    muteHttpExceptions: true
+  });
+  var body = {};
+  try { body = JSON.parse(res.getContentText()) || {}; } catch (err) {}
+  if (res.getResponseCode() !== 200 || !body.message_id) {
+    var fbErr = body.error || {};
+    var msg = fbErr.message || ('HTTP ' + res.getResponseCode());
+    if (fbErr.error_subcode === 2018278 || fbErr.code === 10) {
+      msg = 'শেষ মেসেজের ২৪ ঘণ্টা পার হয়ে গেছে — Meta নিয়মে এখন এখান থেকে উত্তর যাবে না। Business Suite থেকে উত্তর দিন।';
+    }
+    return { ok: false, error: 'SEND_FAILED', message: msg };
+  }
+  CacheService.getScriptCache().put('msgr_mid_' + body.message_id, '1', 21600);
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    msgrRecordMessage_(pageId, psid, 'out', text, body.message_id, session.name || session.email || 'Admin', '');
+  } finally {
+    lock.releaseLock();
+  }
+  return { ok: true, messageId: body.message_id };
+}
+
+function inboxUpdate_(e, session) {
+  var pageId = param_(e, 'PageId');
+  var psid = param_(e, 'PSID');
+  if (!pageId || !psid) return { ok: false, error: 'MISSING_FIELDS' };
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    var sh = msgrContactsSheet_();
+    var values = sh.getDataRange().getValues();
+    var rowNum = msgrFindContactRow_(values, pageId, psid);
+    if (rowNum === -1) return { ok: false, error: 'NOT_FOUND', message: 'কথোপকথন পাওয়া যায়নি।' };
+    var row = values[rowNum - 1];
+    while (row.length < MC_HEADERS.length) row.push('');
+    var params = getParams_(e);
+    if ('Status' in params) {
+      if (MSGR_STATUSES.indexOf(params.Status) === -1) return { ok: false, error: 'BAD_STATUS' };
+      row[MC.STATUS - 1] = params.Status;
+    }
+    if ('AssignedTo' in params) row[MC.ASSIGNED - 1] = String(params.AssignedTo).slice(0, 80);
+    if ('OrderId' in params) row[MC.ORDER_ID - 1] = String(params.OrderId).slice(0, 60);
+    if ('OrderValue' in params) row[MC.ORDER_VALUE - 1] = String(params.OrderValue).slice(0, 20);
+    if ('Notes' in params) row[MC.NOTES - 1] = String(params.Notes).slice(0, 500);
+    var purchase = null;
+    var won = row[MC.STATUS - 1] === MSGR_CONFIRMED_STATUS || row[MC.STATUS - 1] === MSGR_DELIVERED_STATUS;
+    var value = parseOrderValue_(row[MC.ORDER_VALUE - 1]);
+    // Send the Purchase event to Meta once per conversation, when it is won and has a value.
+    if (won && value > 0 && !row[MC.PURCHASE_SENT - 1]) {
+      purchase = sendMessengerPurchase_(psid, value, row[MC.ORDER_ID - 1] || (pageId + '_' + psid), pageId);
+      if (purchase.ok) row[MC.PURCHASE_SENT - 1] = new Date();
+    }
+    sh.getRange(rowNum, 1, 1, MC_HEADERS.length).setValues([row.slice(0, MC_HEADERS.length)]);
+    return {
+      ok: true,
+      contact: msgrContactFromRow_(row),
+      purchase: purchase ? { ok: purchase.ok, message: purchase.ok ? 'Meta-তে Purchase পাঠানো হয়েছে।' : 'Meta-তে Purchase পাঠানো যায়নি: ' + String(purchase.body || purchase.code || '').slice(0, 200) } : null
+    };
+  } finally {
+    lock.releaseLock();
+  }
 }
