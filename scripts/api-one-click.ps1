@@ -1,6 +1,8 @@
 # Muslim Abaya — Apps Script এক-ক্লিক সেটআপ
 $root = Split-Path $PSScriptRoot -Parent
-$codeFile = Join-Path $root "Code.gs"
+# Live code lives in apps-script\Code.gs (clasp rootDir); root Code.gs is an old copy.
+$codeFile = Join-Path $root "apps-script\Code.gs"
+if (-not (Test-Path $codeFile)) { $codeFile = Join-Path $root "Code.gs" }
 if (-not (Test-Path $codeFile)) {
   $codeFile = Join-Path $root "google-apps-script-backend.gs"
 }
