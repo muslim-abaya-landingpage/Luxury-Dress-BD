@@ -1,7 +1,10 @@
 $root = Split-Path $PSScriptRoot -Parent
-$codeFile = Join-Path $root "Code.gs"
+# Live code lives in apps-script\Code.gs (clasp rootDir); root Code.gs is an old copy.
+$codeFile = Join-Path $root "apps-script\Code.gs"
+if (-not (Test-Path $codeFile)) { $codeFile = Join-Path $root "Code.gs" }
 $code = Get-Content $codeFile -Raw -Encoding UTF8
-$safe = $code.Replace("</textarea>", "<" + "/textarea>")
+# Escape so the textarea shows (and copies) the code exactly, incl. "&amp;" literals.
+$safe = $code.Replace("&", "&amp;").Replace("<", "&lt;")
 $out = Join-Path $root "apps-script-copy.html"
 $html = @"
 <!DOCTYPE html>

@@ -37,7 +37,11 @@
 
 ## ৩. Apps Script-এ নতুন কোড deploy করুন
 
-1. `apps-script/Code.gs`-এর পুরো কোড Apps Script এডিটরে পেস্ট করুন (অথবা `clasp push`)।
+1. কম্পিউটারে repo ফোল্ডারে **`API-কোড-পেস্ট-ও-Deploy.bat`** ডাবল-ক্লিক করুন — পুরো কোড কপি হবে ও
+   Apps Script Editor খুলবে। Editor-এ `Code.gs` → **Ctrl+A → Ctrl+V → Ctrl+S**।
+   (বিকল্প: `apps-script-copy.html` খুলে "সম্পূর্ণ কোড কপি", অথবা `clasp push`।)
+
+   ⚠️ repo-র মূল ফোল্ডারের পুরোনো `Code.gs` **ব্যবহার করবেন না** — আসল কোড `apps-script/Code.gs`।
 2. **Deploy → Manage deployments → Edit (✏️) → Version: New version → Deploy**।
    (নতুন deployment নয় — একই deployment-এ New version, যাতে URL না বদলায়।)
 

@@ -2,7 +2,9 @@ param([switch]$Quick, [switch]$Full)
 
 $root = Split-Path $PSScriptRoot -Parent
 $quickFile = Join-Path $root "apps-script\Fix-doGet.gs"
-$fullFile = Join-Path $root "Code.gs"
+# Live code lives in apps-script\Code.gs (clasp rootDir); root Code.gs is an old copy.
+$fullFile = Join-Path $root "apps-script\Code.gs"
+if (-not (Test-Path $fullFile)) { $fullFile = Join-Path $root "Code.gs" }
 $scriptId = "1LFd_vDAiSJMdWrHJf2s_7fEVVxTt6g6q8cEVWfhVJhYJN-xpNcTFExCD"
 $editorUrl = "https://script.google.com/home/projects/$scriptId/edit"
 
