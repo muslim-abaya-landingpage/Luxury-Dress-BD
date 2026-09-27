@@ -2334,6 +2334,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
 
     function resetOrderButton(btn) {
+        if (typeof orderSubmitting !== 'undefined') orderSubmitting = false;
         setPlaceOrderButtonIdle(btn);
     }
 
@@ -2435,6 +2436,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 resetOrderButton(btn);
             })
             .catch(function () {
+                // অফলাইনে iframe-এর onload ব্রাউজারের এরর পেজেও ফায়ার করে — তখন অর্ডার
+                // সেভ না হয়েও "সফল" দেখাত আর কার্ট মুছে যেত। তাই অফলাইনে fallback নয়।
+                if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+                    offerWhatsAppOrder(orderWa, 'You appear to be offline. Check your internet connection and try again.');
+                    resetOrderButton(btn);
+                    return;
+                }
                 postOrderViaIframe(formData)
                     .then(function () {
                         var orderId = String(stableEventId).replace(/^order_/, '');
@@ -2727,6 +2735,39 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         return totalQty;
     }
 
+    // Catalog stock limit for a cart line (null = not tracked). Mirrors the cap
+    // addOrMergeStoreCartItem applies on product pages, so the checkout "+" button
+    // cannot push quantity past available stock.
+    function checkoutStockCap(item) {
+        if (!item || typeof window.getStockQty !== 'function') return null;
+        var id = String(item.id || '').trim();
+        var product = null;
+        if (id) {
+            var cats = window.CATEGORY_PRODUCTS || {};
+            Object.keys(cats).some(function (key) {
+                var list = Array.isArray(cats[key]) ? cats[key] : [];
+                for (var i = 0; i < list.length; i++) {
+                    if (list[i] && String(list[i].id || '').trim() === id) { product = list[i]; return true; }
+                }
+                return false;
+            });
+        }
+        if (!product && typeof window.findCatalogByName === 'function') {
+            product = window.findCatalogByName(stripSizeFromCartName(item.name));
+        }
+        return product ? window.getStockQty(product) : null;
+    }
+
+    function checkoutQtyForSameProduct(item) {
+        var id = String((item && item.id) || '').trim();
+        var total = 0;
+        cart.forEach(function (line) {
+            var same = id ? String(line.id || '').trim() === id : line === item;
+            if (same) total += parseInt(line.quantity, 10) || 1;
+        });
+        return total;
+    }
+
     function persistCart() {
         if (typeof persistStoreCart === 'function') {
             cart = persistStoreCart(cart);
@@ -2793,6 +2834,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     function shippingCharge() {
         var q = cartQty();
         if (q === 0 || q >= 3) return 0; // 3 বা তার বেশি পণ্যে বিনামূল্যে ডেলিভারি
+        // জেলা বাছাই করা থাকলে চার্জ জেলা থেকেই নেওয়া হয় (Apps Script-ও জেলা দেখে চার্জ লেখে),
+        // যাতে টগল/localStorage আর জেলার মধ্যে অমিল হলে ভুল টোটাল না যায়।
+        var districtZone = areaSelect ? districtZoneFromValue(areaSelect.value) : null;
+        if (districtZone) return DELIVERY_ZONE_RATES[districtZone];
         return deliveryZoneCharge();
     }
 
@@ -3189,6 +3234,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 return;
             }
             if (action === 'inc') {
+                var stockCap = checkoutStockCap(cart[idx]);
+                if (stockCap !== null && checkoutQtyForSameProduct(cart[idx]) >= stockCap) {
+                    checkoutAlert(stockCap > 0
+                        ? 'Only ' + stockCap + ' pcs of this product are in stock.'
+                        : 'This product is out of stock.');
+                    return;
+                }
                 cart[idx].quantity = (parseInt(cart[idx].quantity, 10) || 1) + 1;
             }
             if (action === 'dec') {
@@ -3406,7 +3458,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     (function initDeliveryZoneSelect() {
         var wrap = document.getElementById('deliveryZoneSelect');
         if (!wrap) return;
-        applyDeliveryZoneUI(getDeliveryZone());
+        applyDeliveryZoneUI((areaSelect && districtZoneFromValue(areaSelect.value)) || getDeliveryZone());
         wrap.addEventListener('change', function (e) {
             var input = e.target.closest('input[name="deliveryZone"]');
             if (!input) return;
@@ -3522,9 +3574,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     })();
 
     var orderForm = document.getElementById('orderForm');
+    var orderSubmitting = false;
     if (orderForm) {
         orderForm.addEventListener('submit', function(e) {
             e.preventDefault();
+
+            // একটি অর্ডার পাঠানো চলাকালীন (sticky বাটন বা Enter চাপলেও) দ্বিতীয়বার পাঠানো হবে না।
+            if (orderSubmitting) return;
 
             if (isLocalFilePage()) {
                 showLocalFileBlockedModal();
@@ -3643,6 +3699,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 btn.innerText = 'Processing...';
                 btn.disabled = true;
             }
+            orderSubmitting = true;
 
             var qTotal = cartQty();
             var gTotal = String(grandTotal());
@@ -3677,7 +3734,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             formData.append('SenderNumber', (document.getElementById('senderNumber').value || '').trim());
             formData.append('TransactionID', (document.getElementById('paymentTxnId').value || '').trim());
             formData.append('BankReference', (document.getElementById('bankRef').value || '').trim());
-            formData.append('CouponCode', (document.getElementById('couponCode').value || '').trim());
+            // শুধু যাচাই করা (applied) কুপনই পাঠানো হয় — টাইপ করা কিন্তু প্রয়োগ না করা কোড
+            // শিটে গেলে মনে হবে ডিসকাউন্ট দেওয়া হয়েছে, অথচ টোটালে কোনো ছাড় নেই।
+            formData.append('CouponCode', appliedCoupon ? appliedCoupon.code : '');
             var slots = buildProductSlots();
             for (var i = 0; i < MAX_PRODUCT_SLOTS; i++) {
                 formData.append('Product_' + (i + 1), slots[i]);
@@ -3725,6 +3784,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
             if (!ORDER_SCRIPT_URL) {
                 checkoutAlert('Order API is not configured. Add the Apps Script URL in site-api-config.js.');
+                orderSubmitting = false;
                 if (btn) {
                     btn.disabled = false;
                     setPlaceOrderButtonIdle(btn);
@@ -3865,7 +3925,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 if (applyCouponBtnEl) { applyCouponBtnEl.disabled = true; applyCouponBtnEl.textContent = '...'; }
                 setCouponMsg('চেক করা হচ্ছে...', false);
                 var url = ORDER_SCRIPT_URL + '?RecordType=ValidateCoupon&Code=' + encodeURIComponent(code) + '&Subtotal=' + encodeURIComponent(String(cartSubtotal()));
-                fetch(url).then(function (r) { return r.json(); }).then(function (data) {
+                fetch(url).then(function (r) {
+                    return r.text().then(function (text) {
+                        // Apps Script-এ ValidateCoupon না থাকলে JSON নয়, সাধারণ টেক্সট আসে।
+                        try { return JSON.parse(text); } catch (parseErr) {
+                            return { ok: false, message: 'এই মুহূর্তে কুপন যাচাই করা যাচ্ছে না।' };
+                        }
+                    });
+                }).then(function (data) {
                     if (data && data.ok) {
                         appliedCoupon = { code: code, type: data.type, value: Number(data.value) || 0 };
                         setCouponMsg(data.message || 'কুপন প্রযোজ্য হয়েছে!', false);
