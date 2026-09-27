@@ -2738,6 +2738,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         }
     }
 
+    var appliedCoupon = null; // { code, type, value }
+    function currentDiscountAmount() {
+        if (!appliedCoupon) return 0;
+        var sub = cartSubtotal();
+        var amt = appliedCoupon.type === 'percent' ? Math.round(sub * appliedCoupon.value / 100) : appliedCoupon.value;
+        if (amt < 0) amt = 0;
+        if (amt > sub) amt = sub;
+        return amt;
+    }
+
     function cartSubtotal() {
         var t = 0;
         orderLines().forEach(function(item) { t += (parseInt(item.price, 10) || 0) * (parseInt(item.quantity, 10) || 1); });
@@ -2787,7 +2797,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
 
     function grandTotal() {
-        return cartSubtotal() + shippingCharge();
+        return Math.max(0, cartSubtotal() + shippingCharge() - currentDiscountAmount());
     }
 
     function checkoutLineBaseName(item) {
@@ -3070,7 +3080,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var sideTotal = document.getElementById('side-total');
         if (sideSubtotal) sideSubtotal.textContent = formatBdtCheckout(sub);
         if (sideDelivery) sideDelivery.textContent = (q >= 3 ? formatBdtCheckout(0) : formatBdtCheckout(ship));
-        if (sideDiscount) sideDiscount.textContent = formatBdtCheckout(0);
+        if (sideDiscount) {
+            var discAmt = currentDiscountAmount();
+            sideDiscount.textContent = (discAmt > 0 ? '-' : '') + formatBdtCheckout(discAmt);
+        }
         if (sideTotal) sideTotal.textContent = formatBdtCheckout(grand) + ' BDT';
         var sideQty = document.getElementById('side-qty');
         var sideDesign = document.getElementById('side-design');
@@ -3840,6 +3853,57 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 : String(Date.now());
         }
         cart = loadCart();
+        (function () {
+            var couponToggleBtn = document.getElementById('couponToggle');
+            var couponPanelEl = document.getElementById('couponPanel');
+            if (couponToggleBtn && couponPanelEl) {
+                couponToggleBtn.addEventListener('click', function () {
+                    var isOpen = couponPanelEl.classList.toggle('is-open');
+                    couponToggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                });
+            }
+            var applyCouponBtnEl = document.getElementById('applyCouponBtn');
+            var couponCodeInput = document.getElementById('couponCode');
+            var couponMsgEl = document.getElementById('couponMsg');
+            function setCouponMsg(text, isError) {
+                if (!couponMsgEl) return;
+                couponMsgEl.textContent = text;
+                couponMsgEl.style.color = isError ? '#c0392b' : '#1a7f37';
+            }
+            function applyCouponCode() {
+                var code = ((couponCodeInput && couponCodeInput.value) || '').trim();
+                if (!code) {
+                    appliedCoupon = null;
+                    setCouponMsg('', false);
+                    displayOrder();
+                    return;
+                }
+                if (!ORDER_SCRIPT_URL) return;
+                if (applyCouponBtnEl) { applyCouponBtnEl.disabled = true; applyCouponBtnEl.textContent = '...'; }
+                setCouponMsg('চেক করা হচ্ছে...', false);
+                var url = ORDER_SCRIPT_URL + '?RecordType=ValidateCoupon&Code=' + encodeURIComponent(code) + '&Subtotal=' + encodeURIComponent(String(cartSubtotal()));
+                fetch(url).then(function (r) { return r.json(); }).then(function (data) {
+                    if (data && data.ok) {
+                        appliedCoupon = { code: code, type: data.type, value: Number(data.value) || 0 };
+                        setCouponMsg(data.message || 'কুপন প্রযোজ্য হয়েছে!', false);
+                    } else {
+                        appliedCoupon = null;
+                        setCouponMsg((data && data.message) || 'কুপন কোডটি সঠিক নয়।', true);
+                    }
+                    displayOrder();
+                }).catch(function () {
+                    appliedCoupon = null;
+                    setCouponMsg('নেটওয়ার্ক সমস্যা, আবার চেষ্টা করুন।', true);
+                    displayOrder();
+                }).finally(function () {
+                    if (applyCouponBtnEl) { applyCouponBtnEl.disabled = false; applyCouponBtnEl.textContent = 'Apply'; }
+                });
+            }
+            if (applyCouponBtnEl) applyCouponBtnEl.addEventListener('click', applyCouponCode);
+            if (couponCodeInput) couponCodeInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') { e.preventDefault(); applyCouponCode(); }
+            });
+        })();
         displayOrder();
         persistCart();
         renderCrossSell();
