@@ -331,7 +331,32 @@
     });
   }
 
+  // Messenger inbox (RecordType Inbox*). Unlike apiPost, empty values are sent,
+  // so a field can be cleared (e.g. un-assigning a conversation).
+  function inboxCall(type, fields) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    if (!API_URL) return Promise.reject(new Error("API_MISSING"));
+    var body = new URLSearchParams();
+    body.append("RecordType", type);
+    body.append("Token", s.token);
+    Object.keys(fields || {}).forEach(function (k) {
+      if (fields[k] != null) body.append(k, String(fields[k]));
+    });
+    return timeoutPromise(30000, fetch(API_URL, { method: "POST", mode: "cors", credentials: "omit", body: body }))
+      .then(function (res) { return res.text(); })
+      .then(function (text) {
+        var res;
+        try { res = JSON.parse(String(text || "").trim()); } catch (e) {
+          throw new Error("API পুরনো ভার্সন বা ভুল উত্তর। Apps Script → Deploy → New version করুন।");
+        }
+        if (!res.ok) throw new Error(res.message || res.error || "INBOX_FAILED");
+        return res;
+      });
+  }
+
   g.MaAdmin = {
+    inboxCall: inboxCall,
     login: login,
     logout: logout,
     getSession: getSession,

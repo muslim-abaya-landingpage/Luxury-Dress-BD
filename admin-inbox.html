@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="bn" data-admin-guard="1">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Messenger Inbox | Muslim Abaya Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css?v=20260912v2">
+  <style>
+    .ibx-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:16px; }
+    .ibx-filters { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; align-items:center; }
+    .ibx-filters select, .ibx-filters input[type="search"] { padding:8px 10px; border:1px solid var(--adm-border); border-radius:8px; font:inherit; background:var(--adm-card); color:var(--adm-text); min-width:0; }
+    .ibx-filters input[type="search"] { flex:1 1 180px; }
+    .ibx-filters label { display:flex; gap:6px; align-items:center; font-size:.9rem; color:var(--adm-muted); }
+    .ibx-layout { display:grid; grid-template-columns:minmax(260px,360px) 1fr; gap:14px; min-height:60vh; }
+    .ibx-list { background:var(--adm-card); border:1px solid var(--adm-border); border-radius:12px; overflow:auto; max-height:72vh; }
+    .ibx-item { display:block; width:100%; text-align:left; padding:12px 14px; border:0; border-bottom:1px solid var(--adm-border); background:none; cursor:pointer; font:inherit; color:inherit; }
+    .ibx-item:hover { background:var(--adm-card-2); }
+    .ibx-item.is-active { background:var(--adm-accent-wash); }
+    .ibx-item-top { display:flex; justify-content:space-between; gap:8px; align-items:baseline; }
+    .ibx-name { font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .ibx-time { font-size:.75rem; color:var(--adm-muted); white-space:nowrap; }
+    .ibx-preview { font-size:.85rem; color:var(--adm-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:3px; }
+    .ibx-tags { display:flex; flex-wrap:wrap; gap:4px; margin-top:6px; }
+    .ibx-tag { font-size:.7rem; padding:2px 7px; border-radius:99px; background:var(--adm-bg-alt); color:var(--adm-text); }
+    .ibx-tag.page { background:#e8eefc; color:#1f3a7a; }
+    .ibx-tag.ad { background:var(--adm-accent-wash); color:var(--adm-accent-ink); }
+    .ibx-tag.won { background:var(--adm-ok-wash); color:var(--adm-ok); }
+    .ibx-unread { background:var(--adm-danger); color:#fff; border-radius:99px; font-size:.7rem; padding:1px 7px; font-weight:700; }
+    .ibx-thread { background:var(--adm-card); border:1px solid var(--adm-border); border-radius:12px; display:flex; flex-direction:column; min-width:0; align-self:start; }
+    .ibx-thread-head { padding:12px 14px; border-bottom:1px solid var(--adm-border); display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between; }
+    .ibx-back { display:none; }
+    .ibx-msgs { overflow:auto; padding:14px; display:flex; flex-direction:column; gap:8px; background:var(--adm-bg); min-height:200px; max-height:45vh; }
+    .ibx-msg { max-width:78%; padding:8px 12px; border-radius:14px; white-space:pre-wrap; word-break:break-word; font-size:.95rem; }
+    .ibx-msg.in { align-self:flex-start; background:var(--adm-card); border:1px solid var(--adm-border); }
+    .ibx-msg.out { align-self:flex-end; background:var(--adm-primary); color:#fff; }
+    .ibx-msg-meta { font-size:.7rem; opacity:.7; margin-top:4px; }
+    .ibx-manage { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:8px; padding:10px 14px; border-top:1px solid var(--adm-border); }
+    .ibx-manage label { font-size:.75rem; color:var(--adm-muted); display:flex; flex-direction:column; gap:3px; }
+    .ibx-manage select, .ibx-manage input { padding:7px 9px; border:1px solid var(--adm-border); border-radius:8px; font:inherit; background:var(--adm-card); color:var(--adm-text); }
+    .ibx-quick { display:flex; gap:6px; overflow-x:auto; padding:8px 14px 0; }
+    .ibx-quick button { flex:0 0 auto; border:1px solid var(--adm-border-strong); background:var(--adm-card-2); border-radius:99px; padding:5px 11px; font:inherit; font-size:.8rem; cursor:pointer; color:var(--adm-text); }
+    .ibx-compose { display:flex; gap:8px; padding:10px 14px 14px; }
+    .ibx-thread .adm-btn { width:auto; }
+    .ibx-compose .adm-btn { flex:0 0 auto; align-self:flex-end; }
+    .ibx-manage .adm-btn { align-self:end; }
+    .ibx-compose textarea { min-width:0; flex:1; resize:vertical; min-height:44px; max-height:160px; padding:9px 11px; border:1px solid var(--adm-border); border-radius:10px; font:inherit; }
+    .ibx-empty { padding:30px 16px; text-align:center; color:var(--adm-muted); }
+    .ibx-note { font-size:.85rem; padding:8px 14px; }
+    .ibx-note.err { color:var(--adm-danger); }
+    .ibx-note.ok { color:var(--adm-ok); }
+    .ibx-pages { font-size:.8rem; color:var(--adm-muted); margin:-6px 0 12px; }
+    @media (max-width: 820px) {
+      .ibx-layout { grid-template-columns:1fr; }
+      .ibx-layout.show-thread .ibx-list { display:none; }
+      .ibx-layout:not(.show-thread) .ibx-thread { display:none; }
+      .ibx-back { display:inline-flex; }
+      .ibx-msg { max-width:90%; }
+    }
+  </style>
+</head>
+<body class="adm-body">
+  <div class="adm-shell">
+    <div class="adm-sidebar-backdrop" id="admSbBackdrop"></div>
+    <aside class="adm-sidebar" id="admSidebar">
+      <div class="adm-sidebar-brand">
+        <div class="adm-sidebar-crest"></div>
+        <div class="adm-sidebar-brand-text"><div class="t1">Muslim Abaya</div><div class="t2">Admin Panel</div></div>
+        <button type="button" class="adm-sidebar-close" id="admSbClose" aria-label="মেনু বন্ধ করুন"><svg viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+      </div>
+      <nav class="adm-sidebar-nav">
+        <a class="adm-sidebar-item" href="admin-dashboard.html"><svg viewBox="0 0 24 24" fill="none"><path d="M4 13h6V4H4v9Zm10 7h6v-9h-6v9ZM4 20h6v-5H4v5ZM14 4v6h6V4h-6Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span>ড্যাশবোর্ড</span></a>
+        <a class="adm-sidebar-item is-current" href="admin-inbox.html"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5h16v11H8l-4 4V5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span>Messenger ইনবক্স</span></a>
+        <a class="adm-sidebar-item" href="product-manager.html"><svg viewBox="0 0 24 24" fill="none"><path d="M21 8 12 3 3 8l9 5 9-5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 8v8l9 5 9-5V8M12 13v8" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span>প্রোডাক্ট ম্যানেজার</span></a>
+        <a class="adm-sidebar-item" href="product-links.html"><svg viewBox="0 0 24 24" fill="none"><path d="M9.5 14.5 14.5 9.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M11 7.5 12.6 6a3.6 3.6 0 1 1 5.1 5.1L16 12.7M13 16.5 11.4 18a3.6 3.6 0 1 1-5.1-5.1L8 11.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>প্রোডাক্ট লিংক</span></a>
+        <a class="adm-sidebar-item" href="admin-links.html"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="4" y="13" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="13" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/></svg><span>পরিচালনা লিংক</span></a>
+        <a class="adm-sidebar-item" href="stock-analytics.html"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5M4 19h16M8 15v-4M12 15V9M16 15v-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>স্টক ও অ্যানালিটিক্স</span></a>
+      </nav>
+      <div class="adm-sidebar-foot">
+        <button type="button" class="adm-btn adm-btn-secondary" id="admLogout">লগআউট</button>
+      </div>
+    </aside>
+
+    <div class="adm-content">
+      <header class="adm-topbar">
+        <div>
+          <button type="button" class="adm-menu-btn" id="admMenuBtn" aria-label="মেনু খুলুন"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+          <div>
+            <h1>Messenger ইনবক্স</h1>
+            <div class="adm-topbar-user" id="admUserLabel">—</div>
+          </div>
+        </div>
+        <div class="adm-topbar-actions">
+          <button type="button" class="adm-btn adm-btn-secondary" id="ibxRefresh">Refresh</button>
+        </div>
+      </header>
+
+      <main class="adm-main">
+        <div class="ibx-stats">
+          <div class="adm-stat-card"><div class="adm-stat-value" id="stTotal">—</div><div class="adm-stat-label">মোট কথোপকথন</div></div>
+          <div class="adm-stat-card"><div class="adm-stat-value" id="stUnread">—</div><div class="adm-stat-label">উত্তর বাকি (অপঠিত)</div></div>
+          <div class="adm-stat-card"><div class="adm-stat-value" id="stAd">—</div><div class="adm-stat-label">বিজ্ঞাপন থেকে এসেছে</div></div>
+          <div class="adm-stat-card"><div class="adm-stat-value" id="stWon">—</div><div class="adm-stat-label">অর্ডার কনফার্ম / ডেলিভারি</div></div>
+          <div class="adm-stat-card"><div class="adm-stat-value" id="stRate">—</div><div class="adm-stat-label">কনভার্শন রেট</div></div>
+        </div>
+        <div class="ibx-pages" id="ibxPages"></div>
+
+        <div class="ibx-filters">
+          <select id="fPage" aria-label="Page"><option value="">সব Page</option></select>
+          <select id="fStatus" aria-label="স্ট্যাটাস"><option value="">সব স্ট্যাটাস</option></select>
+          <select id="fAssigned" aria-label="দায়িত্ব"><option value="">সবার</option><option value="__me__">শুধু আমার</option><option value="__none__">কাউকে দেওয়া হয়নি</option></select>
+          <label><input type="checkbox" id="fUnread"> অপঠিত</label>
+          <input type="search" id="fQ" placeholder="নাম / মেসেজ / অর্ডার ID খুঁজুন">
+        </div>
+
+        <div class="ibx-layout" id="ibxLayout">
+          <div class="ibx-list" id="ibxList"><div class="ibx-empty">লোড হচ্ছে…</div></div>
+          <section class="ibx-thread" id="ibxThread">
+            <div class="ibx-empty">বাম পাশ থেকে একটি কথোপকথন বাছুন।</div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="site-api-config.js?v=20260529"></script>
+  <script src="admin-config.js"></script>
+  <script src="admin-api.js?v=20260928inbox"></script>
+  <script src="admin-guard.js"></script>
+  <script>
+    (function () {
+      var DEFAULT_QUICK = [
+        'আসসালামু আলাইকুম! Muslim Abaya-তে আপনাকে স্বাগতম। কীভাবে সাহায্য করতে পারি?',
+        'ডেলিভারি চার্জ: ঢাকার ভেতরে ৳৮০, ঢাকার বাইরে ৳১৫০। ৩টি বা তার বেশি পণ্যে ডেলিভারি ফ্রি।',
+        'অর্ডার করতে আপনার নাম, মোবাইল নম্বর ও পূর্ণ ঠিকানা দিন। অথবা সরাসরি অর্ডার করুন: https://muslimabaya.com/checkout',
+        'ক্যাশ অন ডেলিভারি আছে — পণ্য হাতে পেয়ে টাকা দেবেন।',
+        'আপনার অর্ডার কনফার্ম হয়েছে। ধন্যবাদ! ২-৪ দিনের মধ্যে ডেলিভারি পাবেন ইনশাআল্লাহ।'
+      ];
+      var QUICK_KEY = 'ma_inbox_quick_replies';
+      var POLL_MS = 30000;
+      var session = null;
+      var meta = { statuses: [], team: [], pages: [] };
+      var contacts = [];
+      var active = null; // { pageId, psid }
+      var listTimer = null;
+
+      function $(id) { return document.getElementById(id); }
+      function esc(s) {
+        return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+      function quickReplies() {
+        try {
+          var saved = JSON.parse(localStorage.getItem(QUICK_KEY) || 'null');
+          if (Array.isArray(saved) && saved.length) return saved;
+        } catch (e) {}
+        return DEFAULT_QUICK;
+      }
+      function myName() { return (session && (session.name || session.email)) || ''; }
+      function isWon(status) { return status === 'অর্ডার কনফার্ম' || status === 'ডেলিভারি হয়েছে'; }
+
+      function fillSelect(el, items, keepFirst) {
+        var cur = el.value;
+        var first = Array.prototype.slice.call(el.options, 0, keepFirst).map(function (o) { return o.outerHTML; }).join('');
+        el.innerHTML = first + items.map(function (it) {
+          return '<option value="' + esc(it.value) + '">' + esc(it.label) + '</option>';
+        }).join('');
+        el.value = cur;
+      }
+
+      function renderStats(st) {
+        $('stTotal').textContent = st.total;
+        $('stUnread').textContent = st.unread;
+        $('stAd').textContent = st.fromAd;
+        $('stWon').textContent = st.confirmed;
+        $('stRate').textContent = st.total ? (Math.round(st.confirmed * 1000 / st.total) / 10) + '%' : '—';
+        var parts = Object.keys(st.byPage || {}).map(function (id) {
+          var p = st.byPage[id];
+          return esc(p.name) + ': ' + p.total + ' কথোপকথন, ' + p.confirmed + ' অর্ডার';
+        });
+        var notConnected = meta.pages.filter(function (p) { return !p.connected; }).map(function (p) { return esc(p.name); });
+        $('ibxPages').innerHTML = parts.join(' · ') +
+          (notConnected.length ? '<br><span style="color:var(--adm-danger)">Token সেট হয়নি (উত্তর পাঠানো যাবে না): ' + notConnected.join(', ') + '</span>' : '');
+      }
+
+      function renderList() {
+        var el = $('ibxList');
+        if (!contacts.length) { el.innerHTML = '<div class="ibx-empty">কোনো কথোপকথন পাওয়া যায়নি।</div>'; return; }
+        el.innerHTML = contacts.map(function (c) {
+          var isActive = active && active.pageId === c.pageId && active.psid === c.psid;
+          return '<button type="button" class="ibx-item' + (isActive ? ' is-active' : '') + '" data-page="' + esc(c.pageId) + '" data-psid="' + esc(c.psid) + '">' +
+            '<div class="ibx-item-top"><span class="ibx-name">' + esc(c.name || 'অজানা গ্রাহক') + '</span>' +
+            '<span class="ibx-time">' + (c.unread ? '<span class="ibx-unread">' + c.unread + '</span> ' : '') + esc(c.lastSeen) + '</span></div>' +
+            '<div class="ibx-preview">' + (c.lastDirection === 'out' ? 'আপনি: ' : '') + esc(c.lastMessage) + '</div>' +
+            '<div class="ibx-tags"><span class="ibx-tag page">' + esc(c.pageName) + '</span>' +
+            '<span class="ibx-tag' + (isWon(c.status) ? ' won' : '') + '">' + esc(c.status) + '</span>' +
+            (c.fromAd ? '<span class="ibx-tag ad">বিজ্ঞাপন</span>' : '') +
+            (c.assignedTo ? '<span class="ibx-tag">👤 ' + esc(c.assignedTo) + '</span>' : '') +
+            '</div></button>';
+        }).join('');
+      }
+
+      function loadList() {
+        var assigned = $('fAssigned').value;
+        return MaAdmin.inboxCall('InboxList', {
+          PageId: $('fPage').value,
+          Status: $('fStatus').value,
+          AssignedTo: assigned === '__me__' ? myName() : assigned,
+          Unread: $('fUnread').checked ? '1' : '',
+          Q: $('fQ').value.trim()
+        }).then(function (res) {
+          meta.statuses = res.statuses || [];
+          meta.team = res.team || [];
+          meta.pages = res.pages || [];
+          fillSelect($('fPage'), meta.pages.map(function (p) { return { value: p.id, label: p.name }; }), 1);
+          fillSelect($('fStatus'), meta.statuses.map(function (s) { return { value: s, label: s }; }), 1);
+          contacts = res.contacts || [];
+          renderStats(res.stats || {});
+          renderList();
+        }).catch(function (err) {
+          $('ibxList').innerHTML = '<div class="ibx-empty">সমস্যা: ' + esc(err.message || err) + '</div>';
+        });
+      }
+
+      function findContact(pageId, psid) {
+        for (var i = 0; i < contacts.length; i++) {
+          if (contacts[i].pageId === pageId && contacts[i].psid === psid) return contacts[i];
+        }
+        return null;
+      }
+
+      function renderThread(contact, messages, note) {
+        var c = contact || {};
+        var assignees = meta.team.slice();
+        if (c.assignedTo && assignees.indexOf(c.assignedTo) === -1) assignees.push(c.assignedTo);
+        $('ibxThread').innerHTML =
+          '<div class="ibx-thread-head"><div><button type="button" class="adm-btn adm-btn-secondary ibx-back" id="ibxBack">← তালিকা</button> ' +
+          '<strong>' + esc(c.name || 'অজানা গ্রাহক') + '</strong> <span class="ibx-tag page">' + esc(c.pageName || '') + '</span>' +
+          (c.fromAd ? ' <span class="ibx-tag ad">বিজ্ঞাপন</span>' : '') + '</div>' +
+          '<span class="ibx-time">প্রথম মেসেজ: ' + esc(c.firstSeen || '') + '</span></div>' +
+          '<div class="ibx-msgs" id="ibxMsgs">' +
+          (messages.length ? messages.map(function (m) {
+            return '<div class="ibx-msg ' + (m.direction === 'out' ? 'out' : 'in') + '">' + esc(m.text) +
+              '<div class="ibx-msg-meta">' + esc(m.time) + (m.by ? ' · ' + esc(m.by) : '') + '</div></div>';
+          }).join('') : '<div class="ibx-empty">এই সিস্টেম চালুর পর থেকে কোনো মেসেজ সেভ হয়নি।</div>') +
+          '</div>' +
+          '<div class="ibx-manage">' +
+          '<label>স্ট্যাটাস<select id="mStatus">' + meta.statuses.map(function (s) {
+            return '<option' + (s === c.status ? ' selected' : '') + '>' + esc(s) + '</option>';
+          }).join('') + '</select></label>' +
+          '<label>দায়িত্বে<select id="mAssigned"><option value="">— কেউ না —</option>' + assignees.map(function (n) {
+            return '<option' + (n === c.assignedTo ? ' selected' : '') + '>' + esc(n) + '</option>';
+          }).join('') + '</select></label>' +
+          '<label>অর্ডার ID<input id="mOrderId" value="' + esc(c.orderId || '') + '" placeholder="MA-..."></label>' +
+          '<label>অর্ডার মূল্য (৳)<input id="mOrderValue" inputmode="numeric" value="' + esc(c.orderValue || '') + '"></label>' +
+          '<label style="grid-column:1/-1">নোট<input id="mNotes" value="' + esc(c.notes || '') + '" placeholder="সাইজ, রং, ফলো-আপ…"></label>' +
+          '<button type="button" class="adm-btn adm-btn-secondary" id="mSave">সেভ করুন</button>' +
+          '</div>' +
+          '<div class="ibx-note' + (note && note.err ? ' err' : ' ok') + '" id="ibxNote">' + esc(note ? note.text : (c.purchaseSent ? 'এই অর্ডার Meta-তে Purchase হিসেবে পাঠানো হয়েছে।' : '')) + '</div>' +
+          '<div class="ibx-quick" id="ibxQuick">' + quickReplies().map(function (q, i) {
+            return '<button type="button" data-q="' + i + '" title="' + esc(q) + '">' + esc(q.slice(0, 28)) + (q.length > 28 ? '…' : '') + '</button>';
+          }).join('') + '</div>' +
+          '<form class="ibx-compose" id="ibxCompose"><textarea id="ibxText" placeholder="উত্তর লিখুন… (Enter = পাঠান, Shift+Enter = নতুন লাইন)"></textarea>' +
+          '<button type="submit" class="adm-btn adm-btn-primary" id="ibxSend">পাঠান</button></form>';
+        var box = $('ibxMsgs');
+        box.scrollTop = box.scrollHeight;
+      }
+
+      function setNote(text, err) {
+        var n = $('ibxNote');
+        if (!n) return;
+        n.textContent = text;
+        n.className = 'ibx-note ' + (err ? 'err' : 'ok');
+      }
+
+      function openThread(pageId, psid) {
+        active = { pageId: pageId, psid: psid };
+        $('ibxLayout').classList.add('show-thread');
+        renderList();
+        $('ibxThread').innerHTML = '<div class="ibx-empty">লোড হচ্ছে…</div>';
+        return MaAdmin.inboxCall('InboxThread', { PageId: pageId, PSID: psid }).then(function (res) {
+          if (!active || active.psid !== psid || active.pageId !== pageId) return;
+          var c = res.contact || findContact(pageId, psid);
+          var local = findContact(pageId, psid);
+          if (local) local.unread = 0;
+          renderList();
+          renderThread(c, res.messages || []);
+        }).catch(function (err) {
+          $('ibxThread').innerHTML = '<div class="ibx-empty">সমস্যা: ' + esc(err.message || err) + '</div>';
+        });
+      }
+
+      function sendReply() {
+        var ta = $('ibxText');
+        var text = ta.value.trim();
+        if (!text || !active) return;
+        var btn = $('ibxSend');
+        btn.disabled = true;
+        setNote('পাঠানো হচ্ছে…');
+        var target = active;
+        MaAdmin.inboxCall('InboxReply', { PageId: target.pageId, PSID: target.psid, Text: text }).then(function () {
+          ta.value = '';
+          return openThread(target.pageId, target.psid).then(loadList);
+        }).catch(function (err) {
+          setNote(err.message || String(err), true);
+        }).then(function () {
+          var b = $('ibxSend');
+          if (b) b.disabled = false;
+        });
+      }
+
+      function saveManage() {
+        if (!active) return;
+        var btn = $('mSave');
+        btn.disabled = true;
+        var target = active;
+        MaAdmin.inboxCall('InboxUpdate', {
+          PageId: target.pageId,
+          PSID: target.psid,
+          Status: $('mStatus').value,
+          AssignedTo: $('mAssigned').value,
+          OrderId: $('mOrderId').value.trim(),
+          OrderValue: $('mOrderValue').value.trim(),
+          Notes: $('mNotes').value.trim()
+        }).then(function (res) {
+          var msg = 'সেভ হয়েছে।';
+          if (res.purchase) msg += ' ' + res.purchase.message;
+          else if (isWon(res.contact.status) && !res.contact.purchaseSent && !res.contact.orderValue) {
+            msg += ' Meta-তে কনভার্শন পাঠাতে অর্ডার মূল্য দিন।';
+          }
+          setNote(msg, res.purchase && !res.purchase.ok);
+          loadList();
+        }).catch(function (err) {
+          setNote(err.message || String(err), true);
+        }).then(function () {
+          var b = $('mSave');
+          if (b) b.disabled = false;
+        });
+      }
+
+      $('ibxList').addEventListener('click', function (e) {
+        var item = e.target.closest('.ibx-item');
+        if (item) openThread(item.getAttribute('data-page'), item.getAttribute('data-psid'));
+      });
+      $('ibxThread').addEventListener('click', function (e) {
+        if (e.target.closest('#ibxBack')) {
+          active = null;
+          $('ibxLayout').classList.remove('show-thread');
+          renderList();
+          return;
+        }
+        if (e.target.closest('#mSave')) { saveManage(); return; }
+        var q = e.target.closest('[data-q]');
+        if (q) {
+          var ta = $('ibxText');
+          ta.value = quickReplies()[parseInt(q.getAttribute('data-q'), 10)] || '';
+          ta.focus();
+        }
+      });
+      $('ibxThread').addEventListener('submit', function (e) {
+        if (e.target.id === 'ibxCompose') { e.preventDefault(); sendReply(); }
+      });
+      $('ibxThread').addEventListener('keydown', function (e) {
+        if (e.target.id === 'ibxText' && e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+          e.preventDefault();
+          sendReply();
+        }
+      });
+      ['fPage', 'fStatus', 'fAssigned', 'fUnread'].forEach(function (id) { $(id).addEventListener('change', loadList); });
+      var qTimer = null;
+      $('fQ').addEventListener('input', function () { clearTimeout(qTimer); qTimer = setTimeout(loadList, 400); });
+      $('ibxRefresh').addEventListener('click', function () {
+        loadList();
+        if (active) openThread(active.pageId, active.psid);
+      });
+
+      function startPolling() {
+        clearInterval(listTimer);
+        listTimer = setInterval(function () {
+          if (document.visibilityState === 'visible') loadList();
+        }, POLL_MS);
+      }
+
+      MaAdminGuard.require().then(function (s) {
+        if (!s) return;
+        session = s;
+        $('admUserLabel').textContent = (s.name || 'Admin') + (s.email ? ' · ' + s.email : '');
+        loadList();
+        startPolling();
+      });
+
+      $('admLogout').addEventListener('click', function () { MaAdmin.logout(); location.href = 'admin-login.html'; });
+      var sidebar = $('admSidebar'), backdrop = $('admSbBackdrop');
+      function openDrawer() { sidebar.classList.add('is-open'); backdrop.classList.add('is-open'); }
+      function closeDrawer() { sidebar.classList.remove('is-open'); backdrop.classList.remove('is-open'); }
+      $('admMenuBtn').addEventListener('click', openDrawer);
+      $('admSbClose').addEventListener('click', closeDrawer);
+      backdrop.addEventListener('click', closeDrawer);
+    })();
+  </script>
+</body>
+</html>
