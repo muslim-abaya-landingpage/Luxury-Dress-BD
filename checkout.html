@@ -3497,23 +3497,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         });
     })();
     (function initExtras() {
-        var couponToggle = document.getElementById('couponToggle');
-        var couponPanel = document.getElementById('couponPanel');
-        if (couponToggle && couponPanel) {
-            couponToggle.addEventListener('click', function() {
-                var open = couponPanel.classList.toggle('is-open');
-                couponToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-            });
-        }
-        var applyBtn = document.getElementById('applyCouponBtn');
-        var couponInput = document.getElementById('couponCode');
-        var couponMsg = document.getElementById('couponMsg');
-        if (applyBtn && couponInput && couponMsg) {
-            applyBtn.addEventListener('click', function() {
-                var code = (couponInput.value || '').trim();
-                couponMsg.textContent = code ? 'Coupon "' + code + '" noted (manual verification).' : 'Enter a coupon code.';
-            });
-        }
         var stickyBtn = document.getElementById('stickyOrderBtn');
         if (stickyBtn) {
             stickyBtn.addEventListener('click', function() {
