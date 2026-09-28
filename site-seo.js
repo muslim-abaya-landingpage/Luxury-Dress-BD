@@ -257,7 +257,7 @@
       name: BRAND,
       alternateName: ["muslimabaya", "muslimabaya.com"],
       url: SITE + "/",
-      logo: DEFAULT_IMG,
+      logo: CFG.logoImage || SITE + "/assets/brand/muslim-abaya-logo-icon-512.png",
       sameAs: sameAs,
       contactPoint: {
         "@type": "ContactPoint",

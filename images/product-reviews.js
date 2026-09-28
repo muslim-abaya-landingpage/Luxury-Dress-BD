@@ -21,7 +21,7 @@ window.SITE_REVIEWS = [
   {
     name: "সুমাইয়া আক্তার",
     quote: "আমি পার্সেল পেয়ে গেছি, আলহামদুলিল্লাহ ভালো। আমি আরো দুইটা অর্ডার করতে চাই।",
-    photo: "images/reviews/review-photo-2.jpg",
+    photo: "",
     source: "messenger",
     date: ""
   },
@@ -29,7 +29,7 @@ window.SITE_REVIEWS = [
   {
     name: "Shumi",
     quote: "Parsel hate peyesi, Alhamdulillah valo.",
-    photo: "images/reviews/review-photo-1.jpg",
+    photo: "",
     source: "messenger",
     date: ""
   },
@@ -37,7 +37,7 @@ window.SITE_REVIEWS = [
   {
     name: "Angel Akhi",
     quote: "ধন্যবাদ ভাইয়া, এতো দ্রুত বোরকা পাঠানোর জন্য — গতকাল অর্ডার করেছিলাম, আজকেই হাতে হাতে পেলাম।",
-    photo: "images/reviews/review-photo-3.jpg",
+    photo: "",
     source: "messenger",
     date: ""
   },
