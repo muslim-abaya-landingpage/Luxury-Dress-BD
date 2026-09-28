@@ -331,6 +331,30 @@
     });
   }
 
+  // নতুন: গ্রোথ ড্যাশবোর্ড — Abandoned Cart, Back-in-stock Waitlist, Reorder Offers
+  function getGrowthData() {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return apiPost({ RecordType: "AdminGrowthData", Token: s.token }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "GROWTH_FETCH_FAILED");
+      return res;
+    });
+  }
+
+  function dismissGrowthItem(kind, key) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return apiPost({
+      RecordType: "AdminGrowthDismiss",
+      Token: s.token,
+      Kind: kind,
+      Key: key
+    }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "GROWTH_DISMISS_FAILED");
+      return res;
+    });
+  }
+
   // Messenger inbox (RecordType Inbox*). Unlike apiPost, empty values are sent,
   // so a field can be cleared (e.g. un-assigning a conversation).
   function inboxCall(type, fields) {
@@ -369,6 +393,8 @@
     getStock: getStock,
     setStock: setStock,
     getAnalytics: getAnalytics,
+    getGrowthData: getGrowthData,
+    dismissGrowthItem: dismissGrowthItem,
     isLoggedIn: function () {
       return !!getSession();
     }
