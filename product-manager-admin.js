@@ -11,6 +11,7 @@
   var activeKey = "";
   var categoryTypePrices = {};
   var searchTerm = "";
+  var bulkSelected = {};
   var IMG_MAX_W = 1600;
   var IMG_CARD_MAX_W = 800;
   var IMG_QUALITY = 0.82;
@@ -128,6 +129,21 @@
     }, 4000);
   }
 
+  function updateBulkToolbar() {
+    var countEl = document.getElementById("pmBulkCount");
+    var actionsEl = document.getElementById("pmBulkActions");
+    var selectAllEl = document.getElementById("pmSelectAll");
+    if (!countEl) return;
+    var sec = getActiveSection();
+    var prefix = sec ? sec.key + "#" : "___none___#";
+    var n = Object.keys(bulkSelected).filter(function (k) {
+      return k.indexOf(prefix) === 0;
+    }).length;
+    countEl.textContent = n ? n + " টি নির্বাচিত" : "";
+    if (actionsEl) actionsEl.hidden = n === 0;
+    if (selectAllEl && n === 0) selectAllEl.checked = false;
+  }
+
   function jsStr(s) {
     return (
       '"' +
@@ -204,6 +220,7 @@
     }
 
     var list = products[sec.key] || [];
+    bulkSelected = {};
     mainEl.innerHTML =
       '<div class="pm-cat-head">' +
       "<div><h2>" +
@@ -235,6 +252,7 @@
       '<div class="pm-search-row"><input type="search" id="pmSearch" placeholder="নাম দিয়ে প্রোডাক্ট খুঁজুন..." value="' +
       escapeAttr(searchTerm) +
       '"><span class="pm-search-count" id="pmSearchCount"></span></div>' +
+      "<div class=\"pm-bulk-row\" id=\"pmBulkRow\"><label class=\"pm-bulk-selectall\"><input type=\"checkbox\" id=\"pmSelectAll\"> সব নির্বাচন করুন</label><span class=\"pm-bulk-count\" id=\"pmBulkCount\"></span><div class=\"pm-bulk-actions\" id=\"pmBulkActions\" hidden><button type=\"button\" class=\"pl-btn pl-btn-secondary\" id=\"pmBulkStockOn\">🟢 স্টকে আছে করুন</button><button type=\"button\" class=\"pl-btn pl-btn-secondary\" id=\"pmBulkStockOff\">🔴 স্টক নেই করুন</button><button type=\"button\" class=\"pl-btn pl-btn-secondary\" id=\"pmBulkPrice\">মূল্য পরিবর্তন (%)</button><button type=\"button\" class=\"pl-btn pl-btn-secondary\" id=\"pmBulkDelete\" style=\"color:#b32d2e\">মুছুন</button></div></div>" +
       '<div class="pm-product-list" id="pmProductList"></div>';
 
     bindCategoryTypePricePanel(sec.key);
@@ -283,6 +301,113 @@
     document.getElementById("pmEditCat").addEventListener("click", function () {
       openCategoryModal(sec);
     });
+  function getSelectedIdxs() {
+      var prefix = sec.key + "#";
+      var idxs = [];
+      Object.keys(bulkSelected).forEach(function (k) {
+        if (k.indexOf(prefix) === 0) {
+          var idx = parseInt(k.slice(prefix.length), 10);
+          if (!isNaN(idx) && list[idx]) idxs.push(idx);
+        }
+      });
+      return idxs;
+    }
+
+    var selectAllEl = document.getElementById("pmSelectAll");
+    if (selectAllEl) {
+      selectAllEl.addEventListener("change", function (e) {
+        var checked = e.target.checked;
+        var filtered = applyFilter();
+        filtered.forEach(function (p) {
+          var idx = list.indexOf(p);
+          var key = sec.key + "#" + idx;
+          if (checked) bulkSelected[key] = true;
+          else delete bulkSelected[key];
+        });
+        renderList();
+        updateBulkToolbar();
+      });
+    }
+
+    var bulkStockOnBtn = document.getElementById("pmBulkStockOn");
+    if (bulkStockOnBtn) {
+      bulkStockOnBtn.addEventListener("click", function () {
+        var idxs = getSelectedIdxs();
+        if (!idxs.length) return;
+        idxs.forEach(function (i) {
+          delete list[i].inStock;
+          if (typeof list[i].stock === "number" && list[i].stock <= 0) delete list[i].stock;
+        });
+        bulkSelected = {};
+        renderCatList();
+        renderMain();
+        toast(idxs.length + " টি প্রোডাক্ট স্টকে আছে করা হয়েছে (Save চাপুন)");
+      });
+    }
+
+    var bulkStockOffBtn = document.getElementById("pmBulkStockOff");
+    if (bulkStockOffBtn) {
+      bulkStockOffBtn.addEventListener("click", function () {
+        var idxs = getSelectedIdxs();
+        if (!idxs.length) return;
+        idxs.forEach(function (i) {
+          list[i].stock = 0;
+          list[i].inStock = false;
+        });
+        bulkSelected = {};
+        renderCatList();
+        renderMain();
+        toast(idxs.length + " টি প্রোডাক্ট স্টক নেই করা হয়েছে (Save চাপুন)");
+      });
+    }
+
+    var bulkPriceBtn = document.getElementById("pmBulkPrice");
+    if (bulkPriceBtn) {
+      bulkPriceBtn.addEventListener("click", function () {
+        var idxs = getSelectedIdxs();
+        if (!idxs.length) return;
+        var input = prompt("কত শতাংশ দাম পরিবর্তন করবেন? (বাড়াতে যেমন 10, কমাতে -10)", "10");
+        if (input === null) return;
+        var pct = parseFloat(input);
+        if (isNaN(pct)) {
+          toast("সঠিক সংখ্যা দিন");
+          return;
+        }
+        idxs.forEach(function (i) {
+          var pr = list[i];
+          if (typeof pr.price === "number") pr.price = Math.max(0, Math.round(pr.price * (1 + pct / 100)));
+          if (pr.priceByType) {
+            Object.keys(pr.priceByType).forEach(function (tk) {
+              var v = parseInt(pr.priceByType[tk], 10);
+              if (!isNaN(v)) pr.priceByType[tk] = Math.max(0, Math.round(v * (1 + pct / 100)));
+            });
+          }
+        });
+        bulkSelected = {};
+        renderMain();
+        toast(idxs.length + " টি প্রোডাক্টের দাম " + (pct >= 0 ? "+" : "") + pct + "% পরিবর্তন হয়েছে (Save চাপুন)");
+      });
+    }
+
+    var bulkDeleteBtn = document.getElementById("pmBulkDelete");
+    if (bulkDeleteBtn) {
+      bulkDeleteBtn.addEventListener("click", function () {
+        var idxs = getSelectedIdxs();
+        if (!idxs.length) return;
+        if (!confirm(idxs.length + " টি প্রোডাক্ট মুছে ফেলবেন?")) return;
+        idxs
+          .sort(function (a, b) {
+            return b - a;
+          })
+          .forEach(function (i) {
+            list.splice(i, 1);
+          });
+        bulkSelected = {};
+        renderCatList();
+        renderMain();
+        toast("নির্বাচিত প্রোডাক্ট মুছে ফেলা হয়েছে (Save চাপুন)");
+      });
+    }
   }
 
   function buildCategoryTypePricePanel(catKey) {
@@ -366,8 +491,12 @@
     var stockBtnStyle = outOfStock
       ? "padding:4px 10px;font-size:12px;background:#c0392b;color:#fff;border-color:#c0392b"
       : "padding:4px 10px;font-size:12px;background:#2e8b57;color:#fff;border-color:#2e8b57";
+    var bulkKey = catKey + "#" + idx;
+    var isBulkChecked = !!bulkSelected[bulkKey];
     card.innerHTML =
-      '<div class="pm-product-head"><strong>#' +
+      '<div class="pm-product-head"><label class="pm-bulk-check-wrap"><input type="checkbox" class="pm-bulk-check"' +
+      (isBulkChecked ? ' checked' : '') +
+      '></label><strong>#' +
       (idx + 1) +
       " — " +
       escapeHtml(p.name || "Product") +
@@ -456,6 +585,15 @@
 
     wireImageUploader(card, p);
     wireGalleryUploader(card, p);
+
+    var bulkCheckEl = card.querySelector(".pm-bulk-check");
+    if (bulkCheckEl) {
+      bulkCheckEl.addEventListener("change", function () {
+        if (bulkCheckEl.checked) bulkSelected[bulkKey] = true;
+        else delete bulkSelected[bulkKey];
+        updateBulkToolbar();
+      });
+    }
 
     return card;
   }
@@ -665,7 +803,7 @@
     var thumbs = imgs
       .map(function (url, i) {
         return (
-          '<div class="pm-gallery-thumb" data-gi="' +
+          '<div class="pm-gallery-thumb" draggable="true" data-gi="' +
           i +
           '"><img src="' +
           escapeAttr(resolveImgForPreview(url)) +
@@ -758,6 +896,46 @@
         p.images[i] = p.images[j];
         p.images[j] = tmp;
         rerender();
+      });
+    });
+
+    var dragSrcIdx = null;
+    wrap.querySelectorAll(".pm-gallery-thumb").forEach(function (thumb) {
+      thumb.addEventListener("dragstart", function (e) {
+        dragSrcIdx = parseInt(thumb.getAttribute("data-gi"), 10);
+        thumb.classList.add("is-dragging");
+        if (e.dataTransfer) {
+          e.dataTransfer.effectAllowed = "move";
+          try {
+            e.dataTransfer.setData("text/plain", String(dragSrcIdx));
+          } catch (err) {}
+        }
+      });
+      thumb.addEventListener("dragend", function () {
+        thumb.classList.remove("is-dragging");
+        wrap.querySelectorAll(".pm-gallery-thumb").forEach(function (t) {
+          t.classList.remove("is-drag-over");
+        });
+        dragSrcIdx = null;
+      });
+      thumb.addEventListener("dragover", function (e) {
+        e.preventDefault();
+        if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
+        thumb.classList.add("is-drag-over");
+      });
+      thumb.addEventListener("dragleave", function () {
+        thumb.classList.remove("is-drag-over");
+      });
+      thumb.addEventListener("drop", function (e) {
+        e.preventDefault();
+        thumb.classList.remove("is-drag-over");
+        var targetIdx = parseInt(thumb.getAttribute("data-gi"), 10);
+        if (dragSrcIdx === null || isNaN(targetIdx) || dragSrcIdx === targetIdx) return;
+        var moved = p.images.splice(dragSrcIdx, 1)[0];
+        p.images.splice(targetIdx, 0, moved);
+        dragSrcIdx = null;
+        rerender();
+        toast("গ্যালারি ছবির ক্রম পরিবর্তন হয়েছে (Save চাপুন)");
       });
     });
 
