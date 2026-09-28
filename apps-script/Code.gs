@@ -195,7 +195,8 @@ function orderErrorMessage_(code) {
     MIN_ORDER: 'ন্যূনতম অর্ডার ৳১০০।',
     EMPTY_CART: 'কার্টে কোনো পণ্য নেই।',
     ORDER_RATE_LIMIT: 'এই নম্বর থেকে খুব দ্রুত অর্ডার হয়েছে। ৩০ মিনিট পর আবার চেষ্টা করুন।',
-    DUPLICATE_ORDER: 'একই অর্ডার ইতিমধ্যে পাঠানো হয়েছে।'
+    DUPLICATE_ORDER: 'একই অর্ডার ইতিমধ্যে পাঠানো হয়েছে।',
+    TOTAL_MISMATCH: 'অর্ডারের মূল্যে গরমিল পাওয়া গেছে। পেজ রিফ্রেশ করে আবার চেষ্টা করুন, অথবা WhatsApp-এ অর্ডার করুন।'
   };
   return map[code] || 'অর্ডার গ্রহণ করা যায়নি। WhatsApp এ যোগাযোগ করুন।';
 }
@@ -253,6 +254,8 @@ function validateOrderInput_(e) {
     cartItems = [];
   }
 
+  validateCartPricing_(cartItems);
+
   return {
     name: name,
     phone: phone,
@@ -266,6 +269,40 @@ function validateOrderInput_(e) {
       ? formatOrderDesignLines_(slotItems)
       : formatOrderDesignLines_(String(design).split(/\n/))
   };
+}
+
+// Order Total (and each cart line's price) is sent by the browser and is otherwise
+// trusted as-is — a modified request could claim any Total. This is a partial guard,
+// not a full recomputation: it flags a cart line whose claimed unit price is far below
+// the live catalog price for that same product. It deliberately fails open (skips the
+// check) whenever the catalog can't be fetched or a line can't be matched, so a network
+// hiccup or a product the regex parser misses never blocks a real order.
+var CART_PRICE_TOLERANCE_ = 0.6; // claimed price must be at least 60% of the catalog price
+
+function validateCartPricing_(cartItems) {
+  if (!cartItems || !cartItems.length) return;
+  var catalog;
+  try {
+    catalog = fetchProductCatalog_();
+  } catch (catalogErr) {
+    return;
+  }
+  if (!catalog || !catalog.length) return;
+  var byId = {};
+  var byName = {};
+  catalog.forEach(function (p) {
+    if (p.id) byId[String(p.id)] = p;
+    if (p.name) byName[String(p.name).trim().toLowerCase()] = p;
+  });
+  for (var i = 0; i < cartItems.length; i++) {
+    var item = cartItems[i];
+    var match = (item.id && byId[String(item.id)]) || byName[String(item.name || '').trim().toLowerCase()];
+    if (!match || !match.price) continue; // not in the parsed catalog — don't penalize
+    var claimed = Number(item.price) || 0;
+    if (claimed > 0 && claimed < match.price * CART_PRICE_TOLERANCE_) {
+      throw new Error('TOTAL_MISMATCH');
+    }
+  }
 }
 
 /** প্রতিটি প্রোডাক্ট আলাদা লাইনে — Sheet column G-তে শুধু নাম */
@@ -3075,8 +3112,15 @@ function loginAdmin_(e) {
   return createSession_({ email: user.email, phone: user.phone, name: user.name }, role);
 }
 
+// Real tokens are always two concatenated UUIDs (see createSession_). Rejecting anything
+// else here — before even reading the Sessions sheet — closes off hand-crafted/debug
+// tokens (e.g. a fixed string like 'debug-test-token-123' left over from local testing)
+// regardless of whether a matching row still exists in the sheet.
+var SESSION_TOKEN_FORMAT_ = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 function verifySession_(token) {
   if (!token) return { ok: false, error: 'NO_TOKEN' };
+  if (!SESSION_TOKEN_FORMAT_.test(String(token))) return { ok: false, error: 'INVALID_TOKEN' };
   var data = getSessionsSheet_().getDataRange().getValues();
   var now = Date.now();
   for (var i = data.length - 1; i >= 1; i--) {

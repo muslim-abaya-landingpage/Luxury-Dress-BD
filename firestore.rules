@@ -1,16 +1,25 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow anyone to read products, but only authenticated or authorized requests to write.
-    // For simplicity of an app without email authentication, we'll allow public reads, and we use local check or simple validation.
+    // NOTE: this file belongs to an unused React/Vite prototype (see src/) — the live
+    // muslimabaya.com site (checkout, orders, stock) runs entirely on Google Sheets +
+    // Apps Script and never reads or writes this Firestore project. If this Firebase
+    // project is still active, deploy this file (`firebase deploy --only firestore:rules`)
+    // or delete the project if it is no longer needed — a repo change alone does not
+    // update the rules already live on Firebase.
+    //
+    // The previous rules allowed public read AND write on both collections
+    // ("allow write: if true"), so anyone on the internet could create, edit or delete
+    // any product or order document with no authentication. This app has no
+    // authentication implemented, so there is no legitimate client-side writer to allow
+    // for either collection; writes here are denied by default.
     match /products/{document} {
-      allow read: if true;
-      allow write: if true;
+      allow read: if true; // public product listing — harmless to expose
+      allow write: if false;
     }
-    
-    // Allow anyone to create an order, and read/write for order management.
+
     match /orders/{document} {
-      allow read, write: if true;
+      allow read, write: if false; // orders can carry customer PII — never public
     }
   }
 }
