@@ -132,6 +132,21 @@
           </div>
           <p style="margin-top:10px;font-size:0.82rem;color:#888">* যেসব অর্ডারে qty আনুমানিক (approx), সেগুলো পুরনো (CartJSON আপডেটের আগের) অর্ডার — সঠিক সংখ্যা নাও হতে পারে।</p>
 
+          <h3 style="margin:24px 0 10px">সবচেয়ে কম বিক্রি হওয়া প্রোডাক্ট (Slow Mover)</h3>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:0.92rem">
+              <thead>
+                <tr style="text-align:left;border-bottom:2px solid #ddd">
+                  <th style="padding:8px 6px">প্রোডাক্ট</th>
+                  <th style="padding:8px 6px">বিক্রি (পিস)</th>
+                  <th style="padding:8px 6px">রেভিনিউ (৳)</th>
+                </tr>
+              </thead>
+              <tbody id="saSlowProductsBody"></tbody>
+            </table>
+          </div>
+          <p style="margin-top:10px;font-size:0.82rem;color:#888">* এই প্রোডাক্টগুলো নির্বাচিত সময়সীমায় সবচেয়ে কম বিক্রি হয়েছে — প্রাইসিং/প্রমোশন বিবেচনা করুন।</p>
+
           <h3 style="margin:24px 0 10px">কুরিয়ার স্ট্যাটাস বিভাজন</h3>
           <div style="overflow-x:auto">
             <table style="width:100%;border-collapse:collapse;font-size:0.92rem">
