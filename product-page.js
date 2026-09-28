@@ -730,6 +730,8 @@
       addBtn.textContent = st.buttonLabel;
     }
     if (buyBtn) buyBtn.disabled = !st.inStock;
+    var notifyBtn = $("pdNotifyBtn");
+    if (notifyBtn) notifyBtn.style.display = st.inStock ? "none" : "";
     if (stickyCart) {
       stickyCart.disabled = !st.inStock;
       stickyCart.textContent = st.inStock ? "Add to Cart" : st.buttonLabel;
@@ -786,6 +788,34 @@
       }
       renderQty();
     });
+    
+    if ($("pdNotifyBtn")) {
+      $("pdNotifyBtn").addEventListener("click", function () {
+        var contact = window.prompt("স্টকে এলে জানাতে আপনার ফোন নম্বর বা ইমেইল লিখুন:");
+        if (!contact) return;
+        var p = state.product || {};
+        var apiUrl = typeof window.getSiteApiUrl === "function" ? window.getSiteApiUrl() : "";
+        if (!apiUrl) { alert("দুঃখিত, এখন এই সুবিধাটি কাজ করছে না।"); return; }
+        var btn = $("pdNotifyBtn");
+        btn.disabled = true;
+        var prevText = btn.textContent;
+        btn.textContent = "পাঠানো হচ্ছে…";
+        var body = new URLSearchParams();
+        body.append("RecordType", "NotifyBackInStock");
+        body.append("ProductId", String(p.id || ""));
+        body.append("ProductName", String(p.name || ""));
+        body.append("Contact", contact);
+        fetch(apiUrl, { method: "POST", mode: "cors", cache: "no-store", credentials: "omit", body: body })
+          .then(function () {
+            btn.textContent = "অনুরোধ পাঠানো হয়েছে ✓";
+          })
+          .catch(function () {
+            btn.disabled = false;
+            btn.textContent = prevText;
+            alert("দুঃখিত, একটি সমস্যা হয়েছে। আবার চেষ্টা করুন।");
+          });
+      });
+    }
     $("pdAddCart").addEventListener("click", function (e) {
       addToCart(false);
       var btn = e.currentTarget;
@@ -832,6 +862,7 @@
       "<div class='pd-actions'>" +
       "<button type='button' class='pd-btn pd-btn-outline' id='pdAddCart'>Add to Cart</button>" +
       "<button type='button' class='pd-btn pd-btn-dark' id='pdBuyNow'>Buy Now</button>" +
+      "<button type='button' class='pd-btn pd-btn-outline' id='pdNotifyBtn' style='display:none'>স্টকে এলে জানান</button>" +
       "<a class='pd-btn pd-btn-light' id='pdSendMsg' target='_blank' rel='noopener'>Send Message</a>" +
       "</div>" +
       "</div>" +
