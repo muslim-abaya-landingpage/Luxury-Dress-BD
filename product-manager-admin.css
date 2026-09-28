@@ -474,3 +474,72 @@
   .pm-dropzone-drop { min-width: 150px; min-height: 84px; padding: 10px; }
   .pm-dropzone-txt { font-size: 12px; }
 }
+
+
+/* ── বাল্ক অ্যাকশন টুলবার ── */
+.pm-bulk-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 8px 12px;
+  margin: -6px 0 12px;
+  background: var(--adm-card-2, #fafbfc);
+  border: 1px solid var(--adm-border, #e6e8eb);
+  border-radius: 10px;
+}
+
+.pm-bulk-selectall {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--adm-muted, #6b7280);
+  cursor: pointer;
+  user-select: none;
+}
+
+.pm-bulk-count {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--adm-accent-ink, #7a5c08);
+}
+
+.pm-bulk-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.pm-bulk-actions button {
+  padding: 5px 12px;
+  font-size: 12px;
+}
+
+/* ── প্রোডাক্ট কার্ড: বাল্ক সিলেক্ট চেকবক্স ── */
+.pm-bulk-check-wrap {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 8px;
+}
+
+.pm-bulk-check {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* ── গ্যালারি ছবি ড্র্যাগ-ড্রপ রিঅর্ডার ── */
+.pm-gallery-thumb[draggable="true"] {
+  cursor: grab;
+}
+
+.pm-gallery-thumb.is-dragging {
+  opacity: 0.4;
+}
+
+.pm-gallery-thumb.is-drag-over {
+  outline: 2px solid var(--adm-accent, #b8860b);
+  outline-offset: 2px;
+}
