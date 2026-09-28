@@ -81,7 +81,7 @@ function ensureCategoryStyles() {
     link = document.createElement("link");
     link.id = "category-sidebar-css";
     link.rel = "stylesheet";
-    link.href = "category-sidebar.css?v=20260824list";
+    link.href = "category-sidebar.css?v=20260929fixcrop";
     document.head.appendChild(link);
   }
   var qtyLink =
