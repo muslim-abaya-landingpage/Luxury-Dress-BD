@@ -309,17 +309,25 @@ esc(SOCIAL.linkedin) +
     }
   }
 
-  function buildSubscribeParams(contactValue) {
+  function buildSubscribeParams(contactValue, eventId) {
     var params = new URLSearchParams();
     params.append("RecordType", "Subscribe");
     params.append("contact", contactValue);
     params.append("email", contactValue);
+    if (eventId) params.append("EventID", eventId);
     return params;
   }
 
-  function postSubscribeViaIframe(apiUrl, contactValue) {
+  function pushSubscribeLeadEvent(eventId) {
+    try {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({ event: "lead_subscribe", lead_event_id: eventId });
+    } catch (e) {}
+  }
+
+  function postSubscribeViaIframe(apiUrl, contactValue, eventId) {
     return new Promise(function (resolve, reject) {
-      var params = buildSubscribeParams(contactValue);
+      var params = buildSubscribeParams(contactValue, eventId);
       var frameName = "maSubscribeFrame";
       var iframe = document.getElementById(frameName);
       if (!iframe) {
@@ -366,8 +374,8 @@ esc(SOCIAL.linkedin) +
     });
   }
 
-  function sendSubscribe(apiUrl, contactValue) {
-    var params = buildSubscribeParams(contactValue);
+  function sendSubscribe(apiUrl, contactValue, eventId) {
+    var params = buildSubscribeParams(contactValue, eventId);
     var controller = typeof AbortController !== "undefined" ? new AbortController() : null;
     var timer = controller
       ? setTimeout(function () {
@@ -401,7 +409,7 @@ esc(SOCIAL.linkedin) +
         if (err && err.name === "AbortError") {
           return Promise.reject(new Error("TIMEOUT"));
         }
-        return postSubscribeViaIframe(apiUrl, contactValue);
+        return postSubscribeViaIframe(apiUrl, contactValue, eventId);
       });
   }
 
@@ -446,8 +454,9 @@ esc(SOCIAL.linkedin) +
         }
 
         var contactValue = normalizeContactValue(contactInput.value);
+        var nlEventId = "lead_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
 
-        sendSubscribe(apiUrl, contactValue)
+        sendSubscribe(apiUrl, contactValue, nlEventId)
           .then(function (result) {
             if (result.cors && subscribeOk(result.text)) {
               if (msg) {
@@ -456,6 +465,7 @@ esc(SOCIAL.linkedin) +
                   msg.classList.remove("show");
                 }, 6000);
               }
+              pushSubscribeLeadEvent(nlEventId);
               form.reset();
               return;
             }
@@ -466,6 +476,7 @@ esc(SOCIAL.linkedin) +
                   msg.classList.remove("show");
                 }, 6000);
               }
+              pushSubscribeLeadEvent(nlEventId);
               form.reset();
               return;
             }
