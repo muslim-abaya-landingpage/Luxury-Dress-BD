@@ -98,10 +98,11 @@
                   <th>Payment</th>
                   <th>District</th>
                   <th>Design</th>
+                  <th>একশন</th>
                 </tr>
               </thead>
               <tbody id="admOrdersBody">
-                <tr><td colspan="9" class="adm-empty">Loading orders…</td></tr>
+                <tr><td colspan="10" class="adm-empty">Loading orders…</td></tr>
               </tbody>
             </table>
           </div>
@@ -125,25 +126,79 @@
         return "pending";
       }
 
+      function phoneStats(orders) {
+        var stats = {};
+        orders.forEach(function (o) {
+          var p = String(o.phone || "").trim();
+          if (!p) return;
+          if (!stats[p]) stats[p] = { total: 0, badOutcome: 0 };
+          stats[p].total++;
+          var s = String(o.status || "").toLowerCase();
+          if (s.indexOf("cancel") !== -1 || s.indexOf("return") !== -1) stats[p].badOutcome++;
+        });
+        return stats;
+      }
+
+      function waLink(phone, text) {
+        var digits = String(phone || "").replace(/\D/g, "");
+        if (digits.indexOf("880") !== 0) { digits = digits.replace(/^0/, ""); digits = "880" + digits; }
+        return "https://wa.me/" + digits + "?text=" + encodeURIComponent(text || "");
+      }
+
+      function printInvoice(o) {
+        var w = window.open("", "_blank", "width=420,height=600");
+        if (!w) { alert("পপ-আপ ব্লক করা আছে। ব্রাউজারে পপ-আপ অনুমতি দিন।"); return; }
+        var html = "<!DOCTYPE html><html><head><meta charset='utf-8'><title>Invoice " + (o.orderId || "") + "</title>" +
+          "<style>body{font-family:Arial,sans-serif;padding:20px;font-size:13px;color:#111}h2{margin:0 0 4px}p{margin:2px 0}table{width:100%;border-collapse:collapse;margin-top:12px}td,th{border:1px solid #ccc;padding:6px;text-align:left;font-size:12px}.brand{font-weight:700;font-size:16px}.tot{font-weight:700;font-size:14px;margin-top:10px}</style></head><body>" +
+          "<div class='brand'>Muslim Abaya</div>" +
+          "<p>Order Invoice</p><hr>" +
+          "<p><strong>Order ID:</strong> " + (o.orderId || "—") + "</p>" +
+          "<p><strong>তারিখ:</strong> " + (o.time || "") + "</p>" +
+          "<p><strong>কাস্টমার:</strong> " + (o.name || "") + "</p>" +
+          "<p><strong>ফোন:</strong> " + (o.phone || "") + "</p>" +
+          "<p><strong>ঠিকানা/জেলা:</strong> " + (o.district || "") + "</p>" +
+          "<p><strong>পেমেন্ট:</strong> " + (o.payment || "") + "</p>" +
+          "<table><tr><th>প্রোডাক্ট বিবরণ</th></tr><tr><td>" + (o.design || "") + "</td></tr></table>" +
+          "<p class='tot'>মোট: ৳" + (o.total || 0) + "</p>" +
+          "<script>window.print();<" + "/script>" +
+          "</body></html>";
+        w.document.write(html);
+        w.document.close();
+      }
+
       function renderOrders(orders) {
         var body = document.getElementById("admOrdersBody");
         if (!orders || !orders.length) {
-          body.innerHTML = '<tr><td colspan="9" class="adm-empty">No orders found</td></tr>';
+          body.innerHTML = '<tr><td colspan="10" class="adm-empty">No orders found</td></tr>';
           return;
         }
+        var stats = phoneStats(orders);
+        window.__admOrdersById = {};
         body.innerHTML = orders
-          .map(function (o) {
+          .map(function (o, idx) {
+            var rowId = "admOrderRow" + idx;
+            window.__admOrdersById[rowId] = o;
+            var p = String(o.phone || "").trim();
+            var st = stats[p] || { total: 0, badOutcome: 0 };
+            var badges = "";
+            if (st.total >= 2) badges += ' <span class="adm-badge" style="background:#eef;color:#337;font-size:0.7rem">পুনরায় ক্রেতা (' + st.total + ')</span>';
+            if (st.badOutcome >= 2) badges += ' <span class="adm-badge" style="background:#fee;color:#a33;font-size:0.7rem">⚠️ রিস্কি</span>';
+            var confirmMsg = "আসসালামু আলাইকুম " + (o.name || "") + ", আপনার অর্ডার #" + (o.orderId || "") + " (৳" + (o.total || 0) + ") কনফার্ম হয়েছে। শীঘ্রই ডেলিভারি করা হবে, ধন্যবাদ।";
             return (
               "<tr>" +
               "<td>" + escapeHtml(o.time) + "</td>" +
               "<td><strong>" + escapeHtml(o.orderId || "—") + "</strong></td>" +
-              "<td>" + escapeHtml(o.name) + "</td>" +
+              "<td>" + escapeHtml(o.name) + badges + "</td>" +
               "<td>" + escapeHtml(o.phone) + "</td>" +
               "<td>৳" + escapeHtml(o.total) + "</td>" +
               '<td><span class="adm-badge ' + statusClass(o.status) + '">' + escapeHtml(o.status || "Pending") + "</span></td>" +
               "<td>" + escapeHtml(o.payment || "") + "</td>" +
               "<td>" + escapeHtml(o.district || "") + "</td>" +
               "<td>" + escapeHtml((o.design || "").slice(0, 60)) + (o.design && o.design.length > 60 ? "…" : "") + "</td>" +
+              '<td style="white-space:nowrap">' +
+              '<a class="adm-btn adm-btn-secondary" style="padding:3px 8px;font-size:0.75rem" target="_blank" rel="noopener" href="' + waLink(o.phone, confirmMsg) + '">WhatsApp</a> ' +
+              '<button type="button" class="adm-btn adm-btn-secondary" style="padding:3px 8px;font-size:0.75rem" onclick="printInvoice(window.__admOrdersById[\'' + rowId + '\'])">Print</button>' +
+              "</td>" +
               "</tr>"
             );
           })
@@ -189,7 +244,7 @@
           })
           .catch(function (err) {
             document.getElementById("admOrdersBody").innerHTML =
-              '<tr><td colspan="9" class="adm-empty">Error: ' +
+              '<tr><td colspan="10" class="adm-empty">Error: ' +
               escapeHtml(err.message || err) +
               "</td></tr>";
           });
