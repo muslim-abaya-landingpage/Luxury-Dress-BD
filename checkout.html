@@ -3966,6 +3966,43 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             (function(){var fired=false;function fireIC(){if(fired)return;fired=true;pushTrackingEvent('InitiateCheckout', checkoutSnap);}['userName','userPhone','userEmail','userAddress','userDistrict','userThana'].forEach(function(id){var el=document.getElementById(id);if(!el)return;el.addEventListener('input',fireIC,{once:true});el.addEventListener('focus',fireIC,{once:true});});window.addEventListener('scroll',function onScroll(){if((window.scrollY||window.pageYOffset||0)>200){fireIC();window.removeEventListener('scroll',onScroll);}},{passive:true});window.setTimeout(fireIC,8000);})();
         }
     });
+
+    (function () {
+      var phoneEl = document.getElementById('userPhone');
+      var nameEl = document.getElementById('userName');
+      if (!phoneEl) return;
+      var sentTimer = null;
+      var lastSent = '';
+      function buildSummary() {
+        try {
+          var lines = (typeof orderLines === 'function') ? orderLines() : [];
+          return lines.map(function (it) { return (it.name || '') + ' x' + (it.quantity || 1); }).join(', ').slice(0, 200);
+        } catch (e) { return ''; }
+      }
+      function sendCartCheckpoint() {
+        var phone = String(phoneEl.value || '').replace(/\D/g, '');
+        if (!/^01[3-9][0-9]{8}$/.test(phone)) return;
+        if (phone === lastSent) return;
+        var apiUrl = typeof window.getSiteApiUrl === 'function' ? window.getSiteApiUrl() : '';
+        if (!apiUrl) return;
+        var summary = buildSummary();
+        if (!summary) return;
+        lastSent = phone;
+        var body = new URLSearchParams();
+        body.append('RecordType', 'CartCheckpoint');
+        body.append('Phone', phone);
+        body.append('Name', nameEl ? String(nameEl.value || '') : '');
+        body.append('CartSummary', summary);
+        body.append('CartValue', String(typeof cartSubtotal === 'function' ? cartSubtotal() : 0));
+        fetch(apiUrl, { method: 'POST', mode: 'cors', cache: 'no-store', credentials: 'omit', body: body }).catch(function () {});
+      }
+      function scheduleCartCheckpoint() {
+        if (sentTimer) clearTimeout(sentTimer);
+        sentTimer = setTimeout(sendCartCheckpoint, 1200);
+      }
+      phoneEl.addEventListener('input', scheduleCartCheckpoint);
+      phoneEl.addEventListener('blur', sendCartCheckpoint);
+    })();
 </script>
 <div id="site-footer-mount"></div>
 <script src="remove-confirm-modal.js"></script>
