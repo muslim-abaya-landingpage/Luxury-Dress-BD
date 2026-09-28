@@ -332,7 +332,46 @@
   }
 
   // নতুন: গ্রোথ ড্যাশবোর্ড — Abandoned Cart, Back-in-stock Waitlist, Reorder Offers
-  function getGrowthData() {
+  function getStaffList() {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return apiPost({ RecordType: "AdminStaffList", Token: s.token }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "STAFF_LIST_FAILED");
+      return res;
+    });
+  }
+
+  function saveStaff(fields) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return apiPost({
+      RecordType: "AdminStaffSave",
+      Token: s.token,
+      Email: fields.email || "",
+      Phone: fields.phone || "",
+      Name: fields.name || "",
+      Password: fields.password || ""
+    }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "STAFF_SAVE_FAILED");
+      return res;
+    });
+  }
+
+  function deleteStaff(fields) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return apiPost({
+      RecordType: "AdminStaffDelete",
+      Token: s.token,
+      Email: fields.email || "",
+      Phone: fields.phone || ""
+    }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "STAFF_DELETE_FAILED");
+      return res;
+    });
+  }
+
+    function getGrowthData() {
     var s = getSession();
     if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
     return apiPost({ RecordType: "AdminGrowthData", Token: s.token }).then(function (res) {
@@ -395,6 +434,9 @@
     getAnalytics: getAnalytics,
     getGrowthData: getGrowthData,
     dismissGrowthItem: dismissGrowthItem,
+    getStaffList: getStaffList,
+    saveStaff: saveStaff,
+    deleteStaff: deleteStaff,
     isLoggedIn: function () {
       return !!getSession();
     }
