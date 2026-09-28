@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en" data-admin-guard="1">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>গ্রোথ টুলস | Muslim Abaya Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css?v=20260912v2">
+<script src="config.js"></script>
+</head>
+<body class="adm-body">
+  <div class="adm-shell">
+    <div class="adm-sidebar-backdrop" id="admSbBackdrop"></div>
+    <aside class="adm-sidebar" id="admSidebar">
+      <div class="adm-sidebar-brand">
+        <div class="adm-sidebar-crest"></div>
+        <div class="adm-sidebar-brand-text"><div class="t1">Muslim Abaya</div><div class="t2">Admin Panel</div></div>
+        <button type="button" class="adm-sidebar-close" id="admSbClose" aria-label="মেনু বন্ধ করুন"><svg viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+      </div>
+      <nav class="adm-sidebar-nav">
+        <a class="adm-sidebar-item" href="admin-dashboard.html"><svg viewBox="0 0 24 24" fill="none"><path d="M4 13h6V4H4v9Zm10 7h6v-9h-6v9ZM4 20h6v-5H4v5ZM14 4v6h6V4h-6Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span>ড্যাশবোর্ড</span></a>
+        <a class="adm-sidebar-item" href="admin-inbox.html"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5h16v11H8l-4 4V5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span>Messenger ইনবক্স</span></a>
+        <a class="adm-sidebar-item is-current" href="admin-growth.html"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8M21 7v5h-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>গ্রোথ টুলস</span></a>
+        <a class="adm-sidebar-item" href="product-manager.html"><svg viewBox="0 0 24 24" fill="none"><path d="M21 8 12 3 3 8l9 5 9-5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 8v8l9 5 9-5V8M12 13v8" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span>প্রোডাক্ট ম্যানেজার</span></a>
+        <a class="adm-sidebar-item" href="product-links.html"><svg viewBox="0 0 24 24" fill="none"><path d="M9.5 14.5 14.5 9.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M11 7.5 12.6 6a3.6 3.6 0 1 1 5.1 5.1L16 12.7M13 16.5 11.4 18a3.6 3.6 0 1 1-5.1-5.1L8 11.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>প্রোডাক্ট লিংক</span></a>
+        <a class="adm-sidebar-item" href="admin-links.html"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="4" y="13" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="13" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/></svg><span>পরিচালনা লিংক</span></a>
+        <a class="adm-sidebar-item" href="stock-analytics.html"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5M4 19h16M8 15v-4M12 15V9M16 15v-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>স্টক ও অ্যানালিটিক্স</span></a>
+      </nav>
+      <div class="adm-sidebar-foot">
+        <button type="button" class="adm-btn adm-btn-secondary" id="admLogout">লগআউট</button>
+      </div>
+    </aside>
+
+    <div class="adm-content">
+      <header class="adm-topbar">
+        <div>
+          <button type="button" class="adm-menu-btn" id="admMenuBtn" aria-label="মেনু খুলুন"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+          <div>
+            <h1>গ্রোথ টুলস</h1>
+            <div class="adm-topbar-user" id="admUserLabel">—</div>
+          </div>
+        </div>
+        <div class="adm-topbar-actions">
+          <button type="button" class="adm-btn adm-btn-secondary" id="admRefresh">Refresh</button>
+        </div>
+      </header>
+
+      <main class="adm-main">
+        <div class="adm-stats" id="admGrowthStats">
+          <div class="adm-stat-card">
+            <div class="adm-stat-value" id="admStatCarts">—</div>
+            <div class="adm-stat-label">Abandoned Cart (৭ দিন)</div>
+          </div>
+          <div class="adm-stat-card">
+            <div class="adm-stat-value" id="admStatWaitlist">—</div>
+            <div class="adm-stat-label">Back-in-stock অপেক্ষমান</div>
+          </div>
+          <div class="adm-stat-card">
+            <div class="adm-stat-value" id="admStatOffers">—</div>
+            <div class="adm-stat-label">Reorder অফার (পেন্ডিং)</div>
+          </div>
+        </div>
+
+        <section class="adm-panel">
+          <h2>Abandoned Cart Recovery</h2>
+          <p style="font-size:0.85rem;color:var(--adm-muted);margin-top:-8px">যারা চেকআউট পেজে ফোন নম্বর দিয়েছেন কিন্তু অর্ডার সম্পন্ন করেননি (গত ৭ দিনের মধ্যে)। WhatsApp-এ মেসেজ দিয়ে অর্ডার সম্পন্ন করতে বলুন।</p>
+          <div class="adm-table-wrap">
+            <table class="adm-table" id="admCartsTable">
+              <thead><tr><th>সময়</th><th>নাম</th><th>ফোন</th><th>কার্ট</th><th>মূল্য</th><th>একশন</th></tr></thead>
+              <tbody id="admCartsBody"><tr><td colspan="6" class="adm-empty">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="adm-panel">
+          <h2>Back-in-stock অপেক্ষা তালিকা</h2>
+          <p style="font-size:0.85rem;color:var(--adm-muted);margin-top:-8px">স্টক ফিরে এলে ইমেইলে স্বয়ংক্রিয়ভাবে জানানো হয়েছে। ফোন নম্বর দেওয়াদের WhatsApp-এ ম্যানুয়ালি জানান।</p>
+          <div class="adm-table-wrap">
+            <table class="adm-table" id="admWaitlistTable">
+              <thead><tr><th>প্রোডাক্ট</th><th>যোগাযোগ</th><th>ধরন</th><th>স্ট্যাটাস</th><th>একশন</th></tr></thead>
+              <tbody id="admWaitlistBody"><tr><td colspan="5" class="adm-empty">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="adm-panel">
+          <h2>Reorder ডিসকাউন্ট অফার</h2>
+          <p style="font-size:0.85rem;color:var(--adm-muted);margin-top:-8px">ডেলিভারি সম্পন্ন হওয়া অর্ডারের জন্য স্বয়ংক্রিয় কুপন তৈরি হয়েছে। কাস্টমারকে কুপন কোড ও রিভিউ রিকোয়েস্ট WhatsApp/Messenger-এ পাঠান।</p>
+          <div class="adm-table-wrap">
+            <table class="adm-table" id="admOffersTable">
+              <thead><tr><th>সময়</th><th>নাম</th><th>ফোন</th><th>অর্ডার আইডি</th><th>কুপন কোড</th><th>একশন</th></tr></thead>
+              <tbody id="admOffersBody"><tr><td colspan="6" class="adm-empty">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="site-api-config.js?v=20260529"></script>
+  <script src="admin-config.js"></script>
+  <script src="admin-api.js?v=20260912v3"></script>
+  <script src="admin-guard.js"></script>
+  <script>
+    (function () {
+      function escapeHtml(s) {
+        return String(s || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function waLink(phone, text) {
+        var digits = String(phone || "").replace(/\D/g, "");
+        if (digits.indexOf("880") !== 0) {
+          digits = digits.replace(/^0/, "");
+          digits = "880" + digits;
+        }
+        return "https://wa.me/" + digits + "?text=" + encodeURIComponent(text || "");
+      }
+
+      function fmtTime(iso) {
+        try {
+          var d = new Date(iso);
+          return d.toLocaleString("bn-BD", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+        } catch (e) { return iso || ""; }
+      }
+
+      function dismiss(kind, key, btn) {
+        btn.disabled = true;
+        btn.textContent = "…";
+        MaAdmin.dismissGrowthItem(kind, key).then(function () {
+          load();
+        }).catch(function (err) {
+          btn.disabled = false;
+          btn.textContent = "মুছুন";
+          alert("Error: " + (err.message || err));
+        });
+      }
+
+      function renderCarts(list) {
+        var body = document.getElementById("admCartsBody");
+        document.getElementById("admStatCarts").textContent = list.length;
+        if (!list.length) { body.innerHTML = '<tr><td colspan="6" class="adm-empty">কোনো abandoned cart নেই</td></tr>'; return; }
+        body.innerHTML = list.map(function (c) {
+          var msg = "আসসালামু আলাইকুম " + (c.name || "") + ", আপনার কার্টে থাকা প্রোডাক্টটি এখনো রিজার্ভ আছে। অর্ডার সম্পন্ন করতে সাহায্য লাগলে জানান।";
+          return "<tr>" +
+            "<td>" + escapeHtml(fmtTime(c.updatedAt)) + "</td>" +
+            "<td>" + escapeHtml(c.name || "—") + "</td>" +
+            "<td>" + escapeHtml(c.phone) + "</td>" +
+            "<td>" + escapeHtml((c.summary || "").slice(0, 50)) + "</td>" +
+            "<td>৳" + escapeHtml(c.value || 0) + "</td>" +
+            '<td><a class="adm-btn adm-btn-secondary" style="padding:4px 10px;font-size:0.8rem" target="_blank" rel="noopener" href="' + waLink(c.phone, msg) + '">WhatsApp</a> ' +
+            '<button type="button" class="adm-btn adm-btn-secondary" style="padding:4px 10px;font-size:0.8rem" onclick="window.__dismissCart(this,\'' + escapeHtml(c.phone).replace(/'/g, "") + '\')">মুছুন</button></td>' +
+            "</tr>";
+        }).join("");
+      }
+
+      function renderWaitlist(list) {
+        var body = document.getElementById("admWaitlistBody");
+        document.getElementById("admStatWaitlist").textContent = list.length;
+        if (!list.length) { body.innerHTML = '<tr><td colspan="5" class="adm-empty">কোনো অপেক্ষমান তালিকা নেই</td></tr>'; return; }
+        body.innerHTML = list.map(function (w) {
+          var key = w.productId + "|" + w.contact;
+          var msg = "আসসালামু আলাইকুম, আপনি " + (w.productName || "প্রোডাক্টটি") + " স্টকে ফিরলে জানাতে বলেছিলেন — এটি এখন স্টকে আছে!";
+          var actionBtn = w.isEmail
+            ? '<span style="font-size:0.8rem;color:var(--adm-muted)">ইমেইলে জানানো হয়েছে</span>'
+            : '<a class="adm-btn adm-btn-secondary" style="padding:4px 10px;font-size:0.8rem" target="_blank" rel="noopener" href="' + waLink(w.contact, msg) + '">WhatsApp</a>';
+          return "<tr>" +
+            "<td>" + escapeHtml(w.productName || w.productId) + "</td>" +
+            "<td>" + escapeHtml(w.contact) + "</td>" +
+            "<td>" + (w.isEmail ? "ইমেইল" : "ফোন") + "</td>" +
+            "<td>" + escapeHtml(w.notified || "pending") + "</td>" +
+            "<td>" + actionBtn + ' <button type="button" class="adm-btn adm-btn-secondary" style="padding:4px 10px;font-size:0.8rem" onclick="window.__dismissWaitlist(this,\'' + escapeHtml(key).replace(/'/g, "") + '\')">মুছুন</button></td>' +
+            "</tr>";
+        }).join("");
+      }
+
+      function renderOffers(list) {
+        var body = document.getElementById("admOffersBody");
+        document.getElementById("admStatOffers").textContent = list.length;
+        if (!list.length) { body.innerHTML = '<tr><td colspan="6" class="adm-empty">কোনো pending reorder অফার নেই</td></tr>'; return; }
+        body.innerHTML = list.map(function (o) {
+          var msg = "আসসালামু আলাইকুম " + (o.name || "") + ", আপনার অর্ডারটি ডেলিভারি সম্পন্ন হয়েছে ইনশাআল্লাহ। আপনার জন্য পরবর্তী অর্ডারে বিশেষ ডিসকাউন্ট কুপন: " + (o.coupon || "") + " — সাথে একটি রিভিউ দিলে খুশি হব!";
+          return "<tr>" +
+            "<td>" + escapeHtml(fmtTime(o.createdAt)) + "</td>" +
+            "<td>" + escapeHtml(o.name || "—") + "</td>" +
+            "<td>" + escapeHtml(o.phone) + "</td>" +
+            "<td>" + escapeHtml(o.orderId) + "</td>" +
+            "<td><strong>" + escapeHtml(o.coupon) + "</strong></td>" +
+            '<td><a class="adm-btn adm-btn-secondary" style="padding:4px 10px;font-size:0.8rem" target="_blank" rel="noopener" href="' + waLink(o.phone, msg) + '">WhatsApp</a> ' +
+            '<button type="button" class="adm-btn adm-btn-secondary" style="padding:4px 10px;font-size:0.8rem" onclick="window.__dismissOffer(this,\'' + escapeHtml(o.orderId).replace(/'/g, "") + '\')">পাঠানো হয়েছে</button></td>' +
+            "</tr>";
+        }).join("");
+      }
+
+      window.__dismissCart = function (btn, phone) { dismiss("cart", phone, btn); };
+      window.__dismissWaitlist = function (btn, key) { dismiss("waitlist", key, btn); };
+      window.__dismissOffer = function (btn, orderId) { dismiss("reorder", orderId, btn); };
+
+      function load() {
+        MaAdmin.getGrowthData().then(function (res) {
+          renderCarts(res.abandonedCarts || []);
+          renderWaitlist(res.stockWaitlist || []);
+          renderOffers(res.reorderOffers || []);
+        }).catch(function (err) {
+          document.getElementById("admCartsBody").innerHTML = '<tr><td colspan="6" class="adm-empty">Error: ' + escapeHtml(err.message || err) + '</td></tr>';
+        });
+      }
+
+      MaAdminGuard.require().then(function (s) {
+        if (!s) return;
+        document.getElementById("admUserLabel").textContent = (s.name || "Admin") + (s.email ? " · " + s.email : "");
+        load();
+      });
+
+      document.getElementById("admRefresh").addEventListener("click", load);
+      document.getElementById("admLogout").addEventListener("click", function () {
+        MaAdmin.logout();
+        location.href = "admin-login.html";
+      });
+
+      var sidebar = document.getElementById("admSidebar");
+      var backdrop = document.getElementById("admSbBackdrop");
+      var menuBtn = document.getElementById("admMenuBtn");
+      var closeBtn = document.getElementById("admSbClose");
+      function openDrawer() { sidebar.classList.add("is-open"); backdrop.classList.add("is-open"); }
+      function closeDrawer() { sidebar.classList.remove("is-open"); backdrop.classList.remove("is-open"); }
+      if (menuBtn) menuBtn.addEventListener("click", openDrawer);
+      if (closeBtn) closeBtn.addEventListener("click", closeDrawer);
+      if (backdrop) backdrop.addEventListener("click", closeDrawer);
+    })();
+  </script>
+</body>
+</html>
