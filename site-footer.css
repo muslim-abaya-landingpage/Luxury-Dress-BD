@@ -974,3 +974,167 @@ a.anz-contact-link:hover {
 .footer-dropdown-content {
     display: none;
 }
+
+
+/* =====================================================
+   Footer — Liquid Glass Enhancement (animated glass panels)
+   Added: modern glassmorphism look + subtle motion for the
+   footer section (background drift, floating glow orbs,
+   frosted glass cards for each column, shimmering bottom bar).
+===================================================== */
+
+.anz-footer {
+  position: relative;
+  isolation: isolate;
+  background: linear-gradient(135deg, #0a0a0a 0%, #14100a 35%, #0a0a0a 65%, #120d08 100%);
+  background-size: 240% 240%;
+  animation: anzFooterDrift 22s ease-in-out infinite;
+  overflow: hidden;
+}
+
+.anz-footer::before,
+.anz-footer::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  border-radius: 50%;
+  filter: blur(60px);
+  pointer-events: none;
+  opacity: 0.35;
+}
+
+.anz-footer::before {
+  width: 360px;
+  height: 360px;
+  left: -80px;
+  top: -120px;
+  background: radial-gradient(circle, rgba(201, 169, 98, 0.35), transparent 70%);
+  animation: anzOrbFloatA 16s ease-in-out infinite;
+}
+
+.anz-footer::after {
+  width: 420px;
+  height: 420px;
+  right: -100px;
+  bottom: -140px;
+  background: radial-gradient(circle, rgba(201, 169, 98, 0.22), transparent 70%);
+  animation: anzOrbFloatB 20s ease-in-out infinite;
+}
+
+.anz-footer > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes anzFooterDrift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes anzOrbFloatA {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, 24px) scale(1.12); }
+}
+
+@keyframes anzOrbFloatB {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-24px, -20px) scale(1.08); }
+}
+
+/* Trust strip → frosted glass bar */
+.anz-footer-trust {
+  background: rgba(255, 255, 255, 0.045) !important;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09) !important;
+}
+
+/* Footer columns → frosted glass cards */
+.anz-col-brand,
+.anz-col-shop,
+.anz-col-links,
+.anz-col-contact,
+.anz-col-newsletter {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 16px 16px 14px;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+}
+
+.anz-col-brand:hover,
+.anz-col-shop:hover,
+.anz-col-links:hover,
+.anz-col-contact:hover,
+.anz-col-newsletter:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(201, 169, 98, 0.28);
+  transform: translateY(-2px);
+}
+
+/* WhatsApp CTA — subtle glass glow */
+.anz-wa-cta {
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+/* Newsletter input → glass field */
+.newsletter-form input {
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.newsletter-form input:focus {
+  border-color: rgba(201, 169, 98, 0.55);
+  box-shadow: 0 0 0 3px rgba(201, 169, 98, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Bottom copyright strip → frosted glass with a shimmering gold hairline */
+.anz-footer-strip,
+.anz-bottom.anz-footer-strip,
+#site-footer-mount .anz-bottom.anz-footer-strip {
+  background: rgba(6, 6, 6, 0.72) !important;
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  position: relative;
+  overflow: hidden;
+}
+
+.anz-footer-strip::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -40%;
+  width: 40%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(201, 169, 98, 0.9), transparent);
+  animation: anzStripShimmer 6s linear infinite;
+}
+
+@keyframes anzStripShimmer {
+  0% { left: -40%; }
+  100% { left: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anz-footer,
+  .anz-footer::before,
+  .anz-footer::after,
+  .anz-footer-strip::before {
+    animation: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .anz-col-brand,
+  .anz-col-shop,
+  .anz-col-links,
+  .anz-col-contact,
+  .anz-col-newsletter {
+    padding: 12px 14px 10px;
+    border-radius: 12px;
+  }
+}
