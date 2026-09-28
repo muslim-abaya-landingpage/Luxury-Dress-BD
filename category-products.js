@@ -1,6 +1,6 @@
 /**
  * প্রোডাক্ট ডেটা — product-manager.html থেকে এডিট করুন
- * আপডেট: 2026-09-26
+ * আপডেট: 2026-09-28
  */
 window.CATEGORY_PRODUCTS = {
   abaya: [
@@ -105,7 +105,8 @@ window.CATEGORY_PRODUCTS = {
       priceByType: {
         "Hijab + Niqab": 1200,
         "Full Hafeza Set": 2385,
-        "Full Set": 2385
+        "Full Set": 2385,
+        "Abaya Only": 1200
       }
     },
     {
