@@ -297,6 +297,21 @@
         topBody.appendChild(tr);
       });
 
+      var slowBody = document.getElementById("saSlowProductsBody");
+      if (slowBody) {
+        slowBody.innerHTML = "";
+        (res.slowProducts || []).forEach(function (p) {
+          var tr = document.createElement("tr");
+          tr.style.borderBottom = "1px solid #eee";
+          var name = p.name + (p.approx ? " (approx)" : "");
+          tr.innerHTML = "<td style='padding:6px'>" + name + "</td><td style='padding:6px'>" + p.qty + "</td><td style='padding:6px'>" + (p.revenue ? fmtMoney(p.revenue) : "—") + "</td>";
+          slowBody.appendChild(tr);
+        });
+        if (!(res.slowProducts || []).length) {
+          slowBody.innerHTML = "<tr><td colspan='3' style='padding:6px;color:#888'>পর্যাপ্ত ডেটা নেই</td></tr>";
+        }
+      }
+
       var courierBody = document.getElementById("saCourierBody");
       if (courierBody) {
         courierBody.innerHTML = "";
