@@ -434,6 +434,18 @@
 
   var pendingCsvRows = [];
 
+  // হেডার-নাম দেখে কলাম খুঁজে বের করে — এক্সপোর্ট করা CSV (ProductId, ProductName, Category,
+  // Variant, Tracked, Available, ...) এবং সাধারণ টেমপ্লেট (ProductId, Variant, Qty, Reason) —
+  // দুটোই সঠিকভাবে পড়ার জন্য। আগে কলাম পজিশন ধরে নেওয়া হতো (০,১,২,৩), তাই এক্সপোর্ট করা CSV
+  // আবার আপলোড করলে ProductName-কে Variant, Category-কে Qty হিসেবে ভুল পড়া হতো।
+  function findCsvColumnIndex_(header, names) {
+    for (var i = 0; i < names.length; i++) {
+      var pos = header.indexOf(names[i]);
+      if (pos !== -1) return pos;
+    }
+    return -1;
+  }
+
   function initCsvImport() {
     document.getElementById("saCsvImportInput").addEventListener("change", function (e) {
       var file = e.target.files[0];
@@ -442,13 +454,33 @@
       reader.onload = function () {
         var lines = parseCsv(String(reader.result || ""));
         if (!lines.length) { toast("CSV খালি।"); return; }
-        var header = lines[0].map(function (h) { return h.toLowerCase(); });
-        var startIdx = (header.indexOf("productid") !== -1 || header.indexOf("product id") !== -1) ? 1 : 0;
+        var header = lines[0].map(function (h) { return h.toLowerCase().trim(); });
+        var hasHeader = header.indexOf("productid") !== -1 || header.indexOf("product id") !== -1;
+
+        // ডিফল্ট (হেডার ছাড়া সাধারণ টেমপ্লেট): ProductId, Variant, Qty, Reason
+        var idxProductId = 0, idxVariant = 1, idxQty = 2, idxReason = 3;
+        var startIdx = 0;
+
+        if (hasHeader) {
+          startIdx = 1;
+          idxProductId = findCsvColumnIndex_(header, ["productid", "product id"]);
+          idxVariant = findCsvColumnIndex_(header, ["variant"]);
+          idxQty = findCsvColumnIndex_(header, ["available", "qty", "quantity"]);
+          idxReason = findCsvColumnIndex_(header, ["reason"]);
+          if (idxProductId === -1) idxProductId = 0;
+        }
+
         var rows = [];
         for (var i = startIdx; i < lines.length; i++) {
           var cols = lines[i];
-          if (!cols.length || !cols[0]) continue;
-          rows.push({ productId: cols[0], variant: cols[1] || "", qty: cols[2], reason: cols[3] || "CSV আপলোড" });
+          var pid = cols[idxProductId];
+          if (!cols.length || !pid) continue;
+          rows.push({
+            productId: pid,
+            variant: (idxVariant !== -1 && cols[idxVariant]) || "",
+            qty: idxQty !== -1 ? cols[idxQty] : "",
+            reason: (idxReason !== -1 && cols[idxReason]) || "CSV আপলোড"
+          });
         }
         pendingCsvRows = rows;
         window.MaAdmin.commitStockCsv(rows, true).then(function (res) {
