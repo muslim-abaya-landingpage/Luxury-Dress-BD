@@ -3747,10 +3747,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         id: String(item.id || '').trim(),
                         name: checkoutLineBaseName(item),
                         qty: parseInt(item.quantity, 10) || 1,
-                        price: Number(item.price) || 0
+                        price: Number(item.price) || 0,
+                        size: String(item.size || item.selectedSize || '').trim(),
+                        color: String(item.color || '').trim(),
+                        productType: String(item.productType || '').trim(),
+                        category: String(item.category || '').trim()
                     };
                 });
                 formData.append('CartJSON', JSON.stringify(cartJsonLines));
+                try {
+                    var maSourceVal = (function () {
+                        try {
+                            var qp = new URLSearchParams(window.location.search);
+                            var s = qp.get('utm_source') || qp.get('source') || '';
+                            if (!s) { try { s = localStorage.getItem('ma_source') || ''; } catch (lsErr) {} }
+                            if (!s && document.referrer) {
+                                if (/facebook\.com|fb\.com|instagram\.com/i.test(document.referrer)) s = 'Facebook';
+                                else if (/tiktok\.com/i.test(document.referrer)) s = 'TikTok';
+                            }
+                            return s;
+                        } catch (srcErr) { return ''; }
+                    })();
+                    formData.append('Source', maSourceVal);
+                } catch (sourceAppendErr) {}
             } catch (cartJsonErr) {}
             var imageSlots = buildProductImageSlots();
             for (var imgIdx = 0; imgIdx < MAX_ORDER_IMAGES; imgIdx++) {

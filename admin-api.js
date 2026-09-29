@@ -418,6 +418,95 @@
       });
   }
 
+
+  // ===== নতুন: ভ্যারিয়েন্ট-ভিত্তিক স্টক, লেজার, CSV, Analytics v2 (stock-analytics-v2) =====
+  function getStockVariants(opts) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    opts = opts || {};
+    return apiPost({
+      RecordType: "AdminStockVariantsList",
+      Token: s.token,
+      Search: opts.search || "",
+      StockStatus: opts.stockStatus || "all",
+      Category: opts.category || "",
+      CategoryMap: opts.categoryMap ? JSON.stringify(opts.categoryMap) : ""
+    }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "STOCK_VARIANTS_FETCH_FAILED");
+      return res;
+    });
+  }
+
+  function saveStockVariant(opts) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    opts = opts || {};
+    return apiPost({
+      RecordType: "AdminStockVariantSave",
+      Token: s.token,
+      ProductId: opts.productId,
+      ProductName: opts.productName || "",
+      Category: opts.category || "",
+      Variant: opts.variant || "",
+      Available: (typeof opts.available === "undefined" || opts.available === null) ? "" : opts.available,
+      Threshold: (typeof opts.threshold === "undefined" || opts.threshold === null) ? "" : opts.threshold,
+      Tracked: opts.tracked ? "true" : "",
+      Reason: opts.reason || ""
+    }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "STOCK_VARIANT_SAVE_FAILED");
+      return res;
+    });
+  }
+
+  function getStockLedger(productId, limit) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return apiPost({ RecordType: "AdminStockLedgerList", Token: s.token, ProductId: productId || "", Limit: limit || 200 }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "STOCK_LEDGER_FETCH_FAILED");
+      return res;
+    });
+  }
+
+  function commitStockCsv(rows, previewOnly) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return apiPost({
+      RecordType: "AdminStockCsvCommit",
+      Token: s.token,
+      RowsJSON: JSON.stringify(rows || []),
+      PreviewOnly: previewOnly ? "true" : "false"
+    }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "STOCK_CSV_FAILED");
+      return res;
+    });
+  }
+
+  function getAnalyticsV2(opts) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    opts = opts || {};
+    return apiPost({
+      RecordType: "AdminAnalyticsV2",
+      Token: s.token,
+      Range: opts.range || "today",
+      From: opts.from || "",
+      To: opts.to || "",
+      CategoryMap: opts.categoryMap ? JSON.stringify(opts.categoryMap) : ""
+    }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "ANALYTICS_V2_FAILED");
+      return res;
+    });
+  }
+
+  function migrateStockVariants() {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return apiPost({ RecordType: "AdminStockMigrate", Token: s.token }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "STOCK_MIGRATE_FAILED");
+      return res;
+    });
+  }
+
   g.MaAdmin = {
     inboxCall: inboxCall,
     login: login,
@@ -432,6 +521,12 @@
     getStock: getStock,
     setStock: setStock,
     getAnalytics: getAnalytics,
+    getStockVariants: getStockVariants,
+    saveStockVariant: saveStockVariant,
+    getStockLedger: getStockLedger,
+    commitStockCsv: commitStockCsv,
+    getAnalyticsV2: getAnalyticsV2,
+    migrateStockVariants: migrateStockVariants,
     getGrowthData: getGrowthData,
     dismissGrowthItem: dismissGrowthItem,
     getStaffList: getStaffList,
