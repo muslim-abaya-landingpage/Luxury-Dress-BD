@@ -507,6 +507,25 @@
     });
   }
 
+  function quickAdjustStock(opts) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    opts = opts || {};
+    return apiPost({
+      RecordType: "AdminStockQuickAdjust",
+      Token: s.token,
+      ProductId: opts.productId,
+      ProductName: opts.productName || "",
+      Category: opts.category || "",
+      Variant: opts.variant || "",
+      Delta: opts.delta,
+      Reason: opts.reason || ""
+    }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "STOCK_QUICK_ADJUST_FAILED");
+      return res;
+    });
+  }
+
   g.MaAdmin = {
     inboxCall: inboxCall,
     login: login,
@@ -527,6 +546,7 @@
     commitStockCsv: commitStockCsv,
     getAnalyticsV2: getAnalyticsV2,
     migrateStockVariants: migrateStockVariants,
+    quickAdjustStock: quickAdjustStock,
     getGrowthData: getGrowthData,
     dismissGrowthItem: dismissGrowthItem,
     getStaffList: getStaffList,
