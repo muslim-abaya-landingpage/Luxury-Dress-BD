@@ -312,10 +312,20 @@
       });
   }
 
+  // ===== সব মোডাল বন্ধ করার কমন হেল্পার (একসাথে একাধিক মোডাল যেন কখনো না খোলে) =====
+  function closeAllModals() {
+    var ids = ["saStockEditModal", "saCsvPreviewModal"];
+    ids.forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.hidden = true;
+    });
+  }
+
   // ===== ম্যানুয়াল স্টক এডিট মোডাল =====
   var editCtx = null;
 
   function openStockEditModal(productId, variant, productName, category) {
+    closeAllModals();
     editCtx = { productId: productId, variant: variant || "", productName: productName, category: category };
     document.getElementById("saStockEditTitle").textContent = "স্টক পরিবর্তন — " + productName + (variant ? " (" + variant + ")" : "");
     var existing = lastVariantRows.find(function (v) { return v.productId === productId && (v.variant || "") === (variant || ""); });
@@ -395,6 +405,7 @@
   }
 
   function renderCsvPreview(res) {
+    closeAllModals();
     var body = document.getElementById("saCsvPreviewBody");
     var results = res.results || [];
     body.innerHTML = results.map(function (r) {
