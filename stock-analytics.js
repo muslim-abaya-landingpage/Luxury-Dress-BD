@@ -242,7 +242,7 @@
         '<td style="padding:6px">' + (multi ? '—' : g.variants[0].reserved) + '</td>' +
         '<td style="padding:6px">' + statusBadge(worst) + '</td>' +
         '<td style="padding:6px;font-size:0.8rem;color:#888">' + (multi ? '—' : (g.variants[0].updatedAt || '—')) + '</td>' +
-        '<td style="padding:6px">' + (multi ? '' : '<button type="button" class="pl-btn pl-btn-secondary sa-edit-btn" data-pid="' + g.productId + '" data-variant="" data-name="' + g.productName.replace(/"/g,'&quot;') + '" data-cat="' + (g.category||'') + '" style="padding:4px 10px;font-size:0.82rem">এডিট</button>') + '</td>' +
+        '<td style="padding:6px">' + (multi ? '' : ('<button type="button" class="pl-btn pl-btn-secondary sa-quick-btn" data-pid="' + g.productId + '" data-variant="" data-name="' + g.productName.replace(/"/g,'&quot;') + '" data-cat="' + (g.category||'') + '" style="padding:4px 8px;font-size:0.78rem;margin-right:4px">বিক্রি/রিস্টক</button>' + '<button type="button" class="pl-btn pl-btn-secondary sa-edit-btn" data-pid="' + g.productId + '" data-variant="" data-name="' + g.productName.replace(/"/g,'&quot;') + '" data-cat="' + (g.category||'') + '" style="padding:4px 10px;font-size:0.82rem">এডিট</button>')) + '</td>' +
         '</tr>';
 
       if (multi) {
@@ -255,7 +255,7 @@
               '<td style="padding:4px 8px">Reserved: <strong>' + v.reserved + '</strong></td>' +
               '<td style="padding:4px 8px">' + statusBadge(v.status) + '</td>' +
               '<td style="padding:4px 8px;color:#888">' + (v.updatedAt || '—') + '</td>' +
-              '<td style="padding:4px 8px"><button type="button" class="pl-btn pl-btn-secondary sa-edit-btn" data-pid="' + g.productId + '" data-variant="' + (v.variant||'').replace(/"/g,'&quot;') + '" data-name="' + g.productName.replace(/"/g,'&quot;') + '" data-cat="' + (g.category||'') + '" style="padding:3px 8px;font-size:0.78rem">এডিট</button></td>' +
+              '<td style="padding:4px 8px"><button type="button" class="pl-btn pl-btn-secondary sa-quick-btn" data-pid="' + g.productId + '" data-variant="' + (v.variant||'').replace(/"/g,'&quot;') + '" data-name="' + g.productName.replace(/"/g,'&quot;') + '" data-cat="' + (g.category||'') + '" style="padding:3px 8px;font-size:0.78rem;margin-right:4px">বিক্রি/রিস্টক</button><button type="button" class="pl-btn pl-btn-secondary sa-edit-btn" data-pid="' + g.productId + '" data-variant="' + (v.variant||'').replace(/"/g,'&quot;') + '" data-name="' + g.productName.replace(/"/g,'&quot;') + '" data-cat="' + (g.category||'') + '" style="padding:3px 8px;font-size:0.78rem">এডিট</button></td>' +
               '</tr>';
           }).join("") +
           '</table></td></tr>';
@@ -275,6 +275,11 @@
     Array.prototype.forEach.call(body.querySelectorAll(".sa-edit-btn"), function (btn) {
       btn.addEventListener("click", function () {
         openStockEditModal(btn.getAttribute("data-pid"), btn.getAttribute("data-variant"), btn.getAttribute("data-name"), btn.getAttribute("data-cat"));
+      });
+    });
+    Array.prototype.forEach.call(body.querySelectorAll(".sa-quick-btn"), function (btn) {
+      btn.addEventListener("click", function () {
+        openQuickAdjustModal(btn.getAttribute("data-pid"), btn.getAttribute("data-variant"), btn.getAttribute("data-name"), btn.getAttribute("data-cat"));
       });
     });
   }
@@ -314,7 +319,7 @@
 
   // ===== সব মোডাল বন্ধ করার কমন হেল্পার (একসাথে একাধিক মোডাল যেন কখনো না খোলে) =====
   function closeAllModals() {
-    var ids = ["saStockEditModal", "saCsvPreviewModal"];
+    var ids = ["saStockEditModal", "saCsvPreviewModal", "saQuickAdjustModal"];
     ids.forEach(function (id) {
       var el = document.getElementById(id);
       if (el) el.hidden = true;
@@ -356,6 +361,59 @@
       }).then(function () {
         toast("স্টক আপডেট হয়েছে।");
         closeStockEditModal();
+        loadStock();
+      }).catch(function (err) {
+        toast("সংরক্ষণ ব্যর্থ: " + (err.message || err));
+      });
+    });
+  }
+
+  // ===== দ্রুত স্টক সমন্বয় (Facebook/Messenger/WhatsApp ম্যানুয়াল অর্ডার) =====
+  var quickCtx = null;
+  var quickMode = "sale"; // "sale" | "restock"
+
+  function setQuickMode(mode) {
+    quickMode = mode;
+    var saleBtn = document.getElementById("saQuickModeSale");
+    var restockBtn = document.getElementById("saQuickModeRestock");
+    saleBtn.className = "pl-btn " + (mode === "sale" ? "pl-btn-primary" : "pl-btn-secondary");
+    restockBtn.className = "pl-btn " + (mode === "restock" ? "pl-btn-primary" : "pl-btn-secondary");
+  }
+
+  function openQuickAdjustModal(productId, variant, productName, category) {
+    closeAllModals();
+    quickCtx = { productId: productId, variant: variant || "", productName: productName, category: category };
+    document.getElementById("saQuickAdjustTitle").textContent = "দ্রুত স্টক সমন্বয় — " + productName + (variant ? " (" + variant + ")" : "");
+    document.getElementById("saQuickAdjustQty").value = 1;
+    document.getElementById("saQuickAdjustReasonPreset").value = "Facebook অর্ডার";
+    document.getElementById("saQuickAdjustDetail").value = "";
+    setQuickMode("sale");
+    document.getElementById("saQuickAdjustModal").hidden = false;
+  }
+
+  function closeQuickAdjustModal() {
+    document.getElementById("saQuickAdjustModal").hidden = true;
+    quickCtx = null;
+  }
+
+  function initQuickAdjustModal() {
+    document.getElementById("saQuickModeSale").addEventListener("click", function () { setQuickMode("sale"); });
+    document.getElementById("saQuickModeRestock").addEventListener("click", function () { setQuickMode("restock"); });
+    document.getElementById("saQuickAdjustCancel").addEventListener("click", closeQuickAdjustModal);
+    document.getElementById("saQuickAdjustSave").addEventListener("click", function () {
+      if (!quickCtx) return;
+      var qty = parseInt(document.getElementById("saQuickAdjustQty").value, 10);
+      if (isNaN(qty) || qty <= 0) { toast("সঠিক পরিমাণ দিন।"); return; }
+      var preset = document.getElementById("saQuickAdjustReasonPreset").value;
+      var detail = document.getElementById("saQuickAdjustDetail").value.trim();
+      var reason = [preset, detail].filter(Boolean).join(" — ");
+      var delta = quickMode === "sale" ? -qty : qty;
+      window.MaAdmin.quickAdjustStock({
+        productId: quickCtx.productId, productName: quickCtx.productName, category: quickCtx.category,
+        variant: quickCtx.variant, delta: delta, reason: reason
+      }).then(function () {
+        toast(quickMode === "sale" ? "স্টক থেকে বিক্রি রেকর্ড হয়েছে।" : "নতুন মাল/ফেরত স্টকে যোগ হয়েছে।");
+        closeQuickAdjustModal();
         loadStock();
       }).catch(function (err) {
         toast("সংরক্ষণ ব্যর্থ: " + (err.message || err));
@@ -540,6 +598,7 @@
 
     initTabs();
     initStockEditModal();
+    initQuickAdjustModal();
     initCsvExport();
     initCsvImport();
     initCsvPreviewModal();
