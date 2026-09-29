@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="product-manager-admin.css?v=20260918gallery4">
   <script src="site-api-config.js?v=20260529"></script>
   <script src="admin-config.js"></script>
-  <script src="admin-api.js?v=20260929stockv2"></script>
+  <script src="admin-api.js?v=20260929stockv3"></script>
   <script src="admin-guard.js"></script>
 <style>
   .sa-tab-btn.is-active { background:#111; color:#fff; }
@@ -83,20 +83,26 @@
               <option value="OUT">স্টক শেষ</option>
               <option value="UNTRACKED">ট্র্যাক করা হয়নি</option>
             </select>
-            <label style="display:inline-flex;align-items:center;gap:6px;font-size:0.88rem">
-              <input type="checkbox" id="saSortLowFirst"> কম/শেষ স্টক আগে
-            </label>
-            <label style="display:inline-flex;align-items:center;gap:6px;font-size:0.88rem">ডিফল্ট থ্রেশহোল্ড:
-              <input type="number" id="saLowStockThreshold" value="5" min="0" style="width:60px;padding:4px 6px;border-radius:6px;border:1px solid #ccc">
-            </label>
-            <button type="button" class="pl-btn pl-btn-secondary" id="saCsvExportStock">CSV এক্সপোর্ট</button>
-            <label class="pl-btn pl-btn-secondary" style="cursor:pointer;margin:0">CSV থেকে বাল্ক আপলোড
-              <input type="file" id="saCsvImportInput" accept=".csv" style="display:none">
-            </label>
-            <button type="button" class="pl-btn pl-btn-secondary" id="saMigrateBtn" title="পুরনো Stock শীট থেকে StockVariants-এ মাইগ্রেট করুন">পুরনো স্টক মাইগ্রেট</button>
             <span id="saStockStatus" style="margin-left:4px;color:#666;font-size:0.9rem"></span>
           </div>
-          <p style="margin:0 0 12px;font-size:0.82rem;color:#888">CSV ফরম্যাট: <code>productId,variant,qty,reason</code> (প্রথম লাইনে হেডার থাকলেও চলবে) — আপলোডের আগে প্রিভিউ দেখানো হবে, নিশ্চিত করার পরেই প্রয়োগ হবে।</p>
+
+          <details id="saAdvancedOptions" style="margin-bottom:14px;border:1px solid #eee;border-radius:10px;padding:2px 12px">
+            <summary style="cursor:pointer;padding:8px 0;font-size:0.9rem;color:#555">উন্নত অপশন (CSV, থ্রেশহোল্ড, মাইগ্রেশন)</summary>
+            <div style="padding:6px 0 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+              <label style="display:inline-flex;align-items:center;gap:6px;font-size:0.88rem">
+                <input type="checkbox" id="saSortLowFirst" checked> কম/শেষ স্টক আগে
+              </label>
+              <label style="display:inline-flex;align-items:center;gap:6px;font-size:0.88rem">ডিফল্ট থ্রেশহোল্ড:
+                <input type="number" id="saLowStockThreshold" value="5" min="0" style="width:60px;padding:4px 6px;border-radius:6px;border:1px solid #ccc">
+              </label>
+              <button type="button" class="pl-btn pl-btn-secondary" id="saCsvExportStock">CSV এক্সপোর্ট</button>
+              <label class="pl-btn pl-btn-secondary" style="cursor:pointer;margin:0">CSV থেকে বাল্ক আপলোড
+                <input type="file" id="saCsvImportInput" accept=".csv" style="display:none">
+              </label>
+              <button type="button" class="pl-btn pl-btn-secondary" id="saMigrateBtn" title="পুরনো Stock শীট থেকে StockVariants-এ মাইগ্রেট করুন">পুরনো স্টক মাইগ্রেট</button>
+            </div>
+            <p style="margin:0 0 10px;font-size:0.82rem;color:#888">CSV ফরম্যাট: <code>productId,variant,qty,reason</code> (প্রথম লাইনে হেডার থাকলেও চলবে) — আপলোডের আগে প্রিভিউ দেখানো হবে, নিশ্চিত করার পরেই প্রয়োগ হবে।</p>
+          </details>
           <div id="saCategoryCounts" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px"></div>
           <div style="overflow-x:auto">
             <table id="saStockTable" style="width:100%;border-collapse:collapse;font-size:0.92rem">
@@ -136,6 +142,32 @@
               <div class="sa-modal-actions">
                 <button type="button" class="pl-btn pl-btn-secondary" id="saStockEditCancel">বাতিল</button>
                 <button type="button" class="pl-btn pl-btn-primary" id="saStockEditSave">সংরক্ষণ করুন</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="saQuickAdjustModal" class="sa-modal-backdrop" hidden>
+            <div class="sa-modal">
+              <h3 id="saQuickAdjustTitle">দ্রুত স্টক সমন্বয়</h3>
+              <div style="display:flex;gap:8px;margin-bottom:12px">
+                <button type="button" class="pl-btn pl-btn-secondary" id="saQuickModeSale" style="flex:1">বিক্রি হয়েছে (−)</button>
+                <button type="button" class="pl-btn pl-btn-secondary" id="saQuickModeRestock" style="flex:1">নতুন মাল/ফেরত (+)</button>
+              </div>
+              <label>পরিমাণ (Qty)<input type="number" id="saQuickAdjustQty" min="1" value="1"></label>
+              <label>উৎস / কারণ
+                <select id="saQuickAdjustReasonPreset">
+                  <option value="Facebook অর্ডার">Facebook অর্ডার</option>
+                  <option value="Messenger অর্ডার">Messenger অর্ডার</option>
+                  <option value="WhatsApp অর্ডার">WhatsApp অর্ডার</option>
+                  <option value="নতুন মাল">নতুন মাল</option>
+                  <option value="ফেরত/বাতিল">ফেরত/বাতিল</option>
+                  <option value="অন্যান্য">অন্যান্য</option>
+                </select>
+              </label>
+              <label>বিস্তারিত (ঐচ্ছিক, যেমন কাস্টমারের নাম)<textarea id="saQuickAdjustDetail" rows="2"></textarea></label>
+              <div class="sa-modal-actions">
+                <button type="button" class="pl-btn pl-btn-secondary" id="saQuickAdjustCancel">বাতিল</button>
+                <button type="button" class="pl-btn pl-btn-primary" id="saQuickAdjustSave">সংরক্ষণ করুন</button>
               </div>
             </div>
           </div>
@@ -221,7 +253,7 @@
   <script src="category-products.js?v=20260927stock"></script>
   <script src="product-links-data.js"></script>
   <script src="product-catalog-loader.js"></script>
-  <script src="stock-analytics.js?v=20260929stockv2"></script>
+  <script src="stock-analytics.js?v=20260929stockv3"></script>
   <script>
     (function () {
       var sidebar = document.getElementById("admSidebar");
