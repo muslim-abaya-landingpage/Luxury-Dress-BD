@@ -418,6 +418,34 @@
       });
   }
 
+  // Order panel call: token added automatically; empty values are sent (so notes can be
+  // cleared); ok=false rejects with Error (err.code = server error code).
+  function call(recordType, fields) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    if (!API_URL) return Promise.reject(new Error("API_MISSING"));
+    var body = new URLSearchParams();
+    body.append("RecordType", recordType);
+    body.append("Token", s.token);
+    Object.keys(fields || {}).forEach(function (k) {
+      if (fields[k] != null) body.append(k, String(fields[k]));
+    });
+    return timeoutPromise(30000, fetch(API_URL, { method: "POST", mode: "cors", credentials: "omit", body: body }))
+      .then(function (res) { return res.text(); })
+      .then(function (text) {
+        var res;
+        try { res = JSON.parse(String(text || "").trim()); } catch (e) {
+          throw new Error("API পুরনো ভার্সন বা ভুল উত্তর। Apps Script → Deploy → New version করুন।");
+        }
+        if (!res.ok) {
+          var err = new Error(res.message || res.error || "REQUEST_FAILED");
+          err.code = res.error || "";
+          if (["NOT_ADMIN", "NO_TOKEN", "INVALID_TOKEN", "EXPIRED"].indexOf(res.error) !== -1) logout();
+          throw err;
+        }
+        return res;
+      });
+  }
 
   // ===== নতুন: ভ্যারিয়েন্ট-ভিত্তিক স্টক, লেজার, CSV, Analytics v2 (stock-analytics-v2) =====
   function getStockVariants(opts) {
@@ -527,6 +555,7 @@
   }
 
   g.MaAdmin = {
+    call: call,
     inboxCall: inboxCall,
     login: login,
     logout: logout,

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Orders | Muslim Abaya Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin-panel.css?v=20260930">
+  <script src="config.js"></script>
+</head>
+<body class="pn-body">
+  <div class="pn-app">
+    <aside class="pn-side" id="pnSide"></aside>
+    <main class="pn-main">
+      <div class="pn-head">
+        <button type="button" class="pn-btn pn-menu-btn" id="pnMenuBtn" aria-label="Menu">☰</button>
+        <h1>All <b>Orders</b></h1>
+        <span class="pn-spacer"></span>
+        <span class="pn-note-muted" id="ordCount"></span>
+        <button type="button" class="pn-btn" id="ordRefresh">↻ Refresh</button>
+      </div>
+
+      <div class="pn-tabs" id="ordTabs"></div>
+
+      <div class="pn-toolbar">
+        <input class="pn-in" id="ordSearch" type="search" placeholder="নাম, ফোন বা Order ID দিয়ে খুঁজুন…" autocomplete="off">
+      </div>
+
+      <div class="pn-table-wrap">
+        <table class="pn-table">
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Customer</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Courier</th>
+              <th>Assigned</th>
+            </tr>
+          </thead>
+          <tbody id="ordBody"><tr><td colspan="7" class="pn-empty">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script src="site-api-config.js?v=20260529"></script>
+  <script src="admin-config.js"></script>
+  <script src="admin-api.js?v=20260930"></script>
+  <script src="admin-guard.js"></script>
+  <script src="admin-panel.js?v=20260930"></script>
+  <script>
+    (function () {
+      var esc = MaPanel.esc;
+      var all = [];
+      var counts = {};
+      var statuses = [];
+      var filter = "all";
+      var q = "";
+
+      function matches(o) {
+        if (filter === "today") { if (!isToday(o)) return false; }
+        else if (filter !== "all" && o.status !== filter) return false;
+        if (!q) return true;
+        var hay = (o.name + " " + o.phone + " " + o.orderId).toLowerCase();
+        return hay.indexOf(q) !== -1;
+      }
+
+      function isToday(o) {
+        var m = /^(\d{2})-(\d{2})-(\d{4})/.exec(o.time || "");
+        if (!m) return false;
+        var d = new Date();
+        var pad = function (n) { return (n < 10 ? "0" : "") + n; };
+        return m[1] === pad(d.getDate()) && m[2] === pad(d.getMonth() + 1) && m[3] === String(d.getFullYear());
+      }
+
+      function renderTabs() {
+        var tabs = [["all", "All"], ["today", "Today"]].concat(statuses.map(function (s) { return [s, s]; }));
+        document.getElementById("ordTabs").innerHTML = tabs.map(function (t) {
+          return '<button type="button" class="pn-tab' + (filter === t[0] ? " active" : "") + '" data-f="' + esc(t[0]) + '">' + esc(t[1]) + "<em>" + (counts[t[0]] || 0) + "</em></button>";
+        }).join("");
+      }
+
+      function renderRows() {
+        var list = all.filter(matches);
+        var body = document.getElementById("ordBody");
+        if (!list.length) {
+          body.innerHTML = '<tr><td colspan="7" class="pn-empty">কোনো অর্ডার পাওয়া যায়নি</td></tr>';
+          return;
+        }
+        body.innerHTML = list.map(function (o) {
+          var items = o.items && o.items.length ? esc(o.items[0]) + (o.items.length > 1 ? ' <span class="sub">+' + (o.items.length - 1) + " more</span>" : "") : "—";
+          return (
+            '<tr class="click" data-id="' + esc(o.orderId) + '">' +
+            '<td><div class="oid">' + esc(o.orderId || "—") + '</div><div class="sub">' + esc(o.time) + "</div></td>" +
+            "<td><div>" + esc(o.name) + (o.blocked ? ' <span class="pn-badge blocked">Blocked</span>' : "") + '</div><div class="sub">' + esc(o.phone) + (o.district ? " · " + esc(o.district) : "") + "</div></td>" +
+            "<td>" + items + "</td>" +
+            "<td><b>" + MaPanel.money(o.total) + '</b><div class="sub">' + esc(o.payment || "") + "</div></td>" +
+            '<td><span class="pn-badge ' + MaPanel.statusClass(o.status) + '">' + esc(o.status) + "</span></td>" +
+            "<td>" + (o.tracking ? esc(o.tracking) + '<div class="sub">' + esc(o.courierStatus || o.courier) + "</div>" : '<span class="sub">—</span>') + "</td>" +
+            "<td>" + esc(o.assignedTo || "—") + "</td>" +
+            "</tr>"
+          );
+        }).join("");
+      }
+
+      function load() {
+        document.getElementById("ordBody").innerHTML = '<tr><td colspan="7" class="pn-empty">Loading…</td></tr>';
+        MaAdmin.call("AdminOrderList", { Limit: 500 }).then(function (res) {
+          all = res.orders || [];
+          counts = res.counts || {};
+          statuses = res.statuses || [];
+          document.getElementById("ordCount").textContent = (counts.all || 0) + " orders";
+          renderTabs();
+          renderRows();
+        }).catch(function (err) {
+          var msg = err.code === "NETWORK_FAILURE" ? "নেটওয়ার্ক সমস্যা।" : err.message;
+          document.getElementById("ordBody").innerHTML = '<tr><td colspan="7" class="pn-empty">Error: ' + esc(msg) +
+            (err.code === "" || err.message === "UNKNOWN" ? "<br>Apps Script → Deploy → New version করেছেন কি?" : "") + "</td></tr>";
+        });
+      }
+
+      document.getElementById("ordTabs").addEventListener("click", function (e) {
+        var b = e.target.closest("[data-f]");
+        if (!b) return;
+        filter = b.getAttribute("data-f");
+        renderTabs();
+        renderRows();
+      });
+      document.getElementById("ordSearch").addEventListener("input", function (e) {
+        q = e.target.value.trim().toLowerCase();
+        renderRows();
+      });
+      document.getElementById("ordBody").addEventListener("click", function (e) {
+        var tr = e.target.closest("tr[data-id]");
+        if (tr && tr.getAttribute("data-id")) location.href = "admin-order.html?id=" + encodeURIComponent(tr.getAttribute("data-id"));
+      });
+      document.getElementById("ordRefresh").addEventListener("click", load);
+
+      MaPanel.init("orders").then(function (s) { if (s) load(); });
+    })();
+  </script>
+</body>
+</html>

@@ -9,3 +9,6 @@
 [build.environment]
   # Skip framework auto-detection side effects when possible
   NODE_VERSION = "20"
+  # Firebase web config in leftover React files (public client identifiers, not server secrets).
+  # Netlify's secret scan flags the "AIza" key and fails the build with exit code 2.
+  SECRETS_SCAN_OMIT_PATHS = "firebase-applet-config.json,src/firebase.ts"

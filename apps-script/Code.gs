@@ -104,6 +104,15 @@ function doPost(e) {
       return jsonOut_(handleInboxRequest_(type, e));
     }
 
+    // Order-panel actions (AdminOrder*/AdminFraudCheck/...) are token-gated inside
+    // handleAdminOrderRequest_ and are called several times per page view, so they
+    // skip the shared 12-per-10-min limiter. AdminLogin keeps its own limit.
+    var isAdminOrderPanel = /^(AdminOrder|AdminFraudCheck|AdminBlockCustomer|AdminSendCourier)/.test(type);
+    if (isAdminOrderPanel) {
+      var panelRes = handleAdminOrderRequest_(type, e);
+      if (panelRes) return jsonOut_(panelRes);
+    }
+
     if (!isOrder && !isSubscribe) {
       rateLimit_(param_(e, 'Email') || param_(e, 'Phone') || param_(e, 'Login') || param_(e, 'Token') || 'global');
     }
@@ -196,6 +205,7 @@ function orderErrorMessage_(code) {
     EMPTY_CART: 'কার্টে কোনো পণ্য নেই।',
     ORDER_RATE_LIMIT: 'এই নম্বর থেকে খুব দ্রুত অর্ডার হয়েছে। ৩০ মিনিট পর আবার চেষ্টা করুন।',
     DUPLICATE_ORDER: 'একই অর্ডার ইতিমধ্যে পাঠানো হয়েছে।',
+    ORDER_BLOCKED: 'এই নম্বর থেকে অনলাইনে অর্ডার নেওয়া সম্ভব নয়। WhatsApp এ যোগাযোগ করুন।',
     TOTAL_MISMATCH: 'অর্ডারের মূল্যে গরমিল পাওয়া গেছে। পেজ রিফ্রেশ করে আবার চেষ্টা করুন, অথবা WhatsApp-এ অর্ডার করুন।'
   };
   return map[code] || 'অর্ডার গ্রহণ করা যায়নি। WhatsApp এ যোগাযোগ করুন।';
@@ -1372,6 +1382,7 @@ function generateOrderId_() {
 
 function handleOnlineOrderPost_(e) {
   var validated = validateOrderInput_(e);
+  if (isPhoneBlocked_(validated.phone)) throw new Error('ORDER_BLOCKED');
   rateLimitOrder_(validated.phone);
   checkDuplicateOrder_(validated.phone, validated.total, validated.design);
 

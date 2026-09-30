@@ -10,6 +10,8 @@ Disallow: /signup
 Disallow: /admin/
 Disallow: /admin-login.html
 Disallow: /admin-dashboard.html
+Disallow: /admin-orders.html
+Disallow: /admin-order.html
 Disallow: /admin-links.html
 Disallow: /product-manager.html
 Disallow: /product-links.html

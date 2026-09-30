@@ -7,6 +7,7 @@ window.SITE_SEO = {
   brand: "Muslim Abaya",
   brandBn: "মুসলিম আবায়া",
   defaultImage: "https://muslimabaya.com/images/Baby-Pink-Floral-Print.jpeg",
+  logoImage: "https://muslimabaya.com/assets/brand/muslim-abaya-logo-icon-512.png",
   locale: "bn_BD",
   phone: "+8801970831783",
   social: {
