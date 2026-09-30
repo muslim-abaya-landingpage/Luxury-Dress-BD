@@ -1,10 +1,10 @@
 /**
- * Muslim Abaya — Stock & Analytics পেজ
+ * Muslim Abaya — Stock (variant-level) & Analytics v2 পেজ
  */
 (function () {
   "use strict";
 
-  var LOW_STOCK_THRESHOLD_DEFAULT = 5;
+  var DEFAULT_LOW_THRESHOLD = 5;
 
   function toast(msg) {
     var el = document.getElementById("saToast");
@@ -19,29 +19,8 @@
     return "\u09F3" + num.toLocaleString("en-BD", { maximumFractionDigits: 2 });
   }
 
-  function pctChange(curr, prev) {
-    curr = Number(curr) || 0;
-    prev = Number(prev) || 0;
-    if (prev === 0) return curr > 0 ? "\u2014" : "0%";
-    var pct = ((curr - prev) / prev) * 100;
-    var sign = pct > 0 ? "+" : "";
-    return sign + pct.toFixed(1) + "%";
-  }
-
-  function allProducts() {
-    var cats = window.CATEGORY_PRODUCTS || {};
-    var out = [];
-    var seen = {};
-    Object.keys(cats).forEach(function (key) {
-      var list = cats[key];
-      if (!Array.isArray(list)) return;
-      list.forEach(function (p) {
-        if (!p || !p.id || seen[p.id]) return;
-        seen[p.id] = true;
-        out.push({ id: p.id, name: p.name || p.id, category: key });
-      });
-    });
-    return out;
+  function fmtPct(n) {
+    return (Number(n) * 100 || 0).toFixed(1) + "%";
   }
 
   function downloadCsv(filename, rows) {
@@ -68,9 +47,56 @@
   function parseCsv(text) {
     var lines = String(text || "").split(/\r?\n/).filter(function (l) { return l.trim() !== ""; });
     return lines.map(function (line) {
-      return line.split(",").map(function (c) { return c.trim().replace(/^"|"$/g, ""); });
+      var out = [];
+      var cur = "";
+      var inQ = false;
+      for (var i = 0; i < line.length; i++) {
+        var ch = line[i];
+        if (ch === '"') { inQ = !inQ; continue; }
+        if (ch === ',' && !inQ) { out.push(cur.trim()); cur = ""; continue; }
+        cur += ch;
+      }
+      out.push(cur.trim());
+      return out;
     });
   }
+
+  // ===== ক্যাটাগরি ও প্রোডাক্ট (Product Manager-এর বিদ্যমান তালিকা থেকে — নতুন করে বানানো হয়নি) =====
+  var categoryLabels = {};
+  function initCategoryLabels() {
+    var sections = window.CATALOG_SECTIONS || [];
+    sections.forEach(function (s) {
+      if (!s) return;
+      var key = s.key || s.id || s.slug;
+      var label = s.label || s.name || s.title || key;
+      if (key) categoryLabels[key] = label;
+    });
+  }
+
+  function allProducts() {
+    var cats = window.CATEGORY_PRODUCTS || {};
+    var out = [];
+    var seen = {};
+    Object.keys(cats).forEach(function (key) {
+      var list = cats[key];
+      if (!Array.isArray(list)) return;
+      list.forEach(function (p) {
+        if (!p || !p.id || seen[p.id]) return;
+        seen[p.id] = true;
+        out.push({ id: p.id, name: p.name || p.id, category: key, image: (p.images && p.images[0]) || p.image || "" });
+      });
+    });
+    return out;
+  }
+
+  function buildCategoryMap() {
+    var map = {};
+    allProducts().forEach(function (p) { map[p.id] = p.category; });
+    return map;
+  }
+
+  var productsById = {};
+  var categoryMap = {};
 
   // ===== Tabs =====
   function initTabs() {
@@ -85,307 +111,551 @@
       analyticsPanel.hidden = isStock;
       stockBtn.classList.toggle("is-active", isStock);
       analyticsBtn.classList.toggle("is-active", !isStock);
-      if (!isStock && !analyticsPanel.dataset.loaded) {
-        loadAnalytics();
-      }
+      if (!isStock) loadAnalytics();
     }
 
     stockBtn.addEventListener("click", function () { activate("stock"); });
     analyticsBtn.addEventListener("click", function () { activate("analytics"); });
   }
 
-  // ===== Stock tab =====
-  var lastStockItems = [];
-  var lastStockMap = {};
+  // ===== ক্যাটাগরি ফিল্টার ড্রপডাউন + চিপ =====
+  var activeCategory = "";
 
-  function renderStockTable() {
+  function populateCategoryFilter(items) {
+    var select = document.getElementById("saCategoryFilter");
+    var counts = {};
+    items.forEach(function (it) {
+      var c = it.category || "অজানা";
+      counts[c] = (counts[c] || 0) + 1;
+    });
+    var keys = Object.keys(categoryLabels).length ? Object.keys(categoryLabels) : Object.keys(counts);
+    var html = '<option value="">সব ক্যাটাগরি (' + items.length + ')</option>';
+    keys.forEach(function (key) {
+      var label = categoryLabels[key] || key;
+      var n = counts[key] || 0;
+      html += '<option value="' + key + '">' + label + ' (' + n + ')</option>';
+    });
+    select.innerHTML = html;
+    select.value = activeCategory;
+
+    var chipWrap = document.getElementById("saCategoryCounts");
+    var chipsHtml = '<span class="sa-cat-chip' + (!activeCategory ? ' is-active' : '') + '" data-cat="">সব (' + items.length + ')</span>';
+    keys.forEach(function (key) {
+      var n = counts[key] || 0;
+      if (!n) return;
+      var label = categoryLabels[key] || key;
+      chipsHtml += '<span class="sa-cat-chip' + (activeCategory === key ? ' is-active' : '') + '" data-cat="' + key + '">' + label + ' (' + n + ')</span>';
+    });
+    chipWrap.innerHTML = chipsHtml;
+    Array.prototype.forEach.call(chipWrap.querySelectorAll(".sa-cat-chip"), function (chip) {
+      chip.addEventListener("click", function () {
+        activeCategory = chip.getAttribute("data-cat") || "";
+        select.value = activeCategory;
+        loadStock();
+      });
+    });
+  }
+
+  // ===== স্টক ট্যাব =====
+  var lastVariantRows = []; // ব্যাকএন্ড থেকে যা এসেছে (শুধু StockVariants-এ থাকা সারি)
+
+  function statusBadge(status) {
+    var map = {
+      OK: ['sa-badge-ok', 'ঠিক আছে'],
+      LOW: ['sa-badge-low', 'কম স্টক'],
+      OUT: ['sa-badge-out', 'স্টক শেষ'],
+      UNTRACKED: ['sa-badge-untracked', 'ট্র্যাক করা হয়নি']
+    };
+    var m = map[status] || map.UNTRACKED;
+    return '<span class="sa-badge ' + m[0] + '">' + m[1] + '</span>';
+  }
+
+  function buildProductGroups(variantRows, threshold) {
+    // প্রতিটি প্রোডাক্টের নিচে তার ভ্যারিয়েন্টগুলো — যেসব প্রোডাক্টের কোনো StockVariants সারি নেই, তারা "ট্র্যাক করা হয়নি" হিসেবে দেখানো হবে
+    var byProduct = {};
+    variantRows.forEach(function (v) {
+      if (!byProduct[v.productId]) byProduct[v.productId] = [];
+      byProduct[v.productId].push(v);
+    });
+    var groups = [];
+    var seenIds = {};
+    allProducts().forEach(function (p) {
+      seenIds[p.id] = true;
+      var rows = byProduct[p.id];
+      if (!rows || !rows.length) {
+        groups.push({
+          productId: p.id, productName: p.name, category: p.category, image: p.image,
+          variants: [{ productId: p.id, productName: p.name, category: p.category, variant: "", tracked: false, available: 0, reserved: 0, threshold: null, status: "UNTRACKED", updatedAt: "", updatedBy: "" }]
+        });
+        return;
+      }
+      groups.push({ productId: p.id, productName: p.name, category: p.category, image: p.image, variants: rows });
+    });
+    // ক্যাটালগে নেই এমন প্রোডাক্ট আইডি (পুরনো/মুছে যাওয়া প্রোডাক্ট) — তাও দেখাও যাতে ডেটা হারিয়ে না যায়
+    Object.keys(byProduct).forEach(function (pid) {
+      if (seenIds[pid]) return;
+      var rows = byProduct[pid];
+      groups.push({ productId: pid, productName: rows[0].productName || pid, category: rows[0].category || "", image: "", variants: rows });
+    });
+    return groups;
+  }
+
+  function renderStockTable(variantRows) {
     var body = document.getElementById("saStockBody");
     var threshold = parseInt(document.getElementById("saLowStockThreshold").value, 10);
-    if (isNaN(threshold) || threshold < 0) threshold = LOW_STOCK_THRESHOLD_DEFAULT;
-    body.innerHTML = "";
+    if (isNaN(threshold) || threshold < 0) threshold = DEFAULT_LOW_THRESHOLD;
+    var sortLowFirst = document.getElementById("saSortLowFirst").checked;
 
-    var products = allProducts();
-    products.forEach(function (p) {
-      var stockRow = lastStockMap[p.id];
-      var qtyVal = stockRow ? stockRow.qty : null;
-      var isLow = qtyVal !== null && qtyVal <= threshold;
+    var groups = buildProductGroups(variantRows, threshold);
 
-      var tr = document.createElement("tr");
-      tr.style.borderBottom = "1px solid #eee";
-      if (isLow) tr.style.background = "#fff2f2";
-
-      var tdId = document.createElement("td");
-      tdId.style.padding = "6px";
-      tdId.textContent = p.id;
-      tr.appendChild(tdId);
-
-      var tdName = document.createElement("td");
-      tdName.style.padding = "6px";
-      tdName.textContent = p.name;
-      tr.appendChild(tdName);
-
-      var tdQty = document.createElement("td");
-      tdQty.style.padding = "6px";
-      if (qtyVal !== null) {
-        tdQty.textContent = qtyVal;
-        if (isLow) {
-          tdQty.style.color = "#c0392b";
-          tdQty.style.fontWeight = "700";
-          tdQty.textContent += " \u26a0\ufe0f";
-        }
-      } else {
-        tdQty.textContent = "ট্র্যাক করা হয়নি";
-        tdQty.style.color = "#999";
-      }
-      tr.appendChild(tdQty);
-
-      var tdInput = document.createElement("td");
-      tdInput.style.padding = "6px";
-      var input = document.createElement("input");
-      input.type = "number";
-      input.min = "0";
-      input.style.width = "80px";
-      input.style.padding = "4px 6px";
-      input.placeholder = qtyVal !== null ? String(qtyVal) : "0";
-      tdInput.appendChild(input);
-      tr.appendChild(tdInput);
-
-      var tdBtn = document.createElement("td");
-      tdBtn.style.padding = "6px";
-      var btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "pl-btn pl-btn-secondary";
-      btn.textContent = "সেভ";
-      btn.addEventListener("click", function () {
-        var val = parseInt(input.value, 10);
-        if (isNaN(val) || val < 0) {
-          toast("সঠিক Qty দিন");
-          return;
-        }
-        btn.disabled = true;
-        MaAdmin.setStock(p.id, p.name, val).then(function () {
-          toast("\u2705 " + p.name + " — স্টক আপডেট হয়েছে");
-          loadStock();
-        }).catch(function (err) {
-          toast("\u26a0\ufe0f ব্যর্থ: " + (err && err.message));
-          btn.disabled = false;
-        });
+    if (sortLowFirst) {
+      groups.sort(function (a, b) {
+        var aBad = a.variants.some(function (v) { return v.status === "OUT" || v.status === "LOW"; }) ? 0 : 1;
+        var bBad = b.variants.some(function (v) { return v.status === "OUT" || v.status === "LOW"; }) ? 0 : 1;
+        return aBad - bBad;
       });
-      tdBtn.appendChild(btn);
-      tr.appendChild(tdBtn);
+    }
 
-      var tdUpdated = document.createElement("td");
-      tdUpdated.style.padding = "6px";
-      tdUpdated.style.color = "#888";
-      tdUpdated.style.fontSize = "0.85rem";
-      tdUpdated.textContent = stockRow ? stockRow.updatedAt : "—";
-      tr.appendChild(tdUpdated);
+    if (!groups.length) {
+      body.innerHTML = '<tr><td colspan="10" style="padding:20px;text-align:center;color:#888">কোনো প্রোডাক্ট পাওয়া যায়নি।</td></tr>';
+      return;
+    }
 
-      body.appendChild(tr);
+    var html = "";
+    groups.forEach(function (g, gi) {
+      var multi = g.variants.length > 1;
+      var worst = g.variants.reduce(function (acc, v) {
+        var rank = { OUT: 3, LOW: 2, UNTRACKED: 1, OK: 0 };
+        return (rank[v.status] || 0) > (rank[acc] || 0) ? v.status : acc;
+      }, "OK");
+      var groupId = "saGrp" + gi;
+      var catLabel = categoryLabels[g.category] || g.category || "অজানা";
+      var imgHtml = g.image ? '<img src="' + g.image + '" style="width:36px;height:36px;object-fit:cover;border-radius:6px">' : '<div style="width:36px;height:36px;border-radius:6px;background:#eee"></div>';
+
+      html += '<tr style="border-bottom:1px solid #eee' + (worst === 'OUT' ? ';background:#fff2f2' : worst === 'LOW' ? ';background:#fff9ee' : '') + '">' +
+        '<td style="padding:6px">' + (multi ? '<button type="button" class="sa-expand-btn" data-target="' + groupId + '" style="border:none;background:none;cursor:pointer;font-size:1rem">▸</button>' : '') + '</td>' +
+        '<td style="padding:6px">' + imgHtml + '</td>' +
+        '<td style="padding:6px"><strong>' + g.productName + '</strong><br><span style="color:#888;font-size:0.8rem">' + catLabel + '</span></td>' +
+        '<td style="padding:6px;font-family:monospace;font-size:0.85rem">' + g.productId + '</td>' +
+        '<td style="padding:6px">' + (multi ? (g.variants.length + ' টি') : (g.variants[0].variant || '—')) + '</td>' +
+        '<td style="padding:6px">' + (multi ? '—' : g.variants[0].available) + '</td>' +
+        '<td style="padding:6px">' + (multi ? '—' : g.variants[0].reserved) + '</td>' +
+        '<td style="padding:6px">' + statusBadge(worst) + '</td>' +
+        '<td style="padding:6px;font-size:0.8rem;color:#888">' + (multi ? '—' : (g.variants[0].updatedAt || '—')) + '</td>' +
+        '<td style="padding:6px">' + (multi ? '' : ('<button type="button" class="pl-btn pl-btn-secondary sa-quick-btn" data-pid="' + g.productId + '" data-variant="" data-name="' + g.productName.replace(/"/g,'&quot;') + '" data-cat="' + (g.category||'') + '" style="padding:4px 8px;font-size:0.78rem;margin-right:4px">বিক্রি/রিস্টক</button>' + '<button type="button" class="pl-btn pl-btn-secondary sa-edit-btn" data-pid="' + g.productId + '" data-variant="" data-name="' + g.productName.replace(/"/g,'&quot;') + '" data-cat="' + (g.category||'') + '" style="padding:4px 10px;font-size:0.82rem">এডিট</button>')) + '</td>' +
+        '</tr>';
+
+      if (multi) {
+        html += '<tr id="' + groupId + '" class="sa-variant-row" style="display:none"><td></td><td colspan="9" style="padding:4px 6px 12px">' +
+          '<table style="width:100%;border-collapse:collapse;font-size:0.85rem">' +
+          g.variants.map(function (v) {
+            return '<tr style="border-bottom:1px solid #eee">' +
+              '<td style="padding:4px 8px;width:120px">' + (v.variant || '(কোনো ভ্যারিয়েন্ট নেই)') + '</td>' +
+              '<td style="padding:4px 8px">Available: <strong>' + v.available + '</strong></td>' +
+              '<td style="padding:4px 8px">Reserved: <strong>' + v.reserved + '</strong></td>' +
+              '<td style="padding:4px 8px">' + statusBadge(v.status) + '</td>' +
+              '<td style="padding:4px 8px;color:#888">' + (v.updatedAt || '—') + '</td>' +
+              '<td style="padding:4px 8px"><button type="button" class="pl-btn pl-btn-secondary sa-quick-btn" data-pid="' + g.productId + '" data-variant="' + (v.variant||'').replace(/"/g,'&quot;') + '" data-name="' + g.productName.replace(/"/g,'&quot;') + '" data-cat="' + (g.category||'') + '" style="padding:3px 8px;font-size:0.78rem;margin-right:4px">বিক্রি/রিস্টক</button><button type="button" class="pl-btn pl-btn-secondary sa-edit-btn" data-pid="' + g.productId + '" data-variant="' + (v.variant||'').replace(/"/g,'&quot;') + '" data-name="' + g.productName.replace(/"/g,'&quot;') + '" data-cat="' + (g.category||'') + '" style="padding:3px 8px;font-size:0.78rem">এডিট</button></td>' +
+              '</tr>';
+          }).join("") +
+          '</table></td></tr>';
+      }
     });
 
-    var statusEl = document.getElementById("saStockStatus");
-    var lowCount = products.filter(function (p) {
-      var s = lastStockMap[p.id];
-      return s && s.qty <= threshold;
-    }).length;
-    statusEl.textContent = products.length + "টি প্রোডাক্ট, " + lastStockItems.length + "টি ট্র্যাক করা হচ্ছে" + (lowCount ? " — " + lowCount + "টি কম স্টকে" : "");
+    body.innerHTML = html;
+
+    Array.prototype.forEach.call(body.querySelectorAll(".sa-expand-btn"), function (btn) {
+      btn.addEventListener("click", function () {
+        var target = document.getElementById(btn.getAttribute("data-target"));
+        var isHidden = target.style.display === "none";
+        target.style.display = isHidden ? "" : "none";
+        btn.textContent = isHidden ? "▾" : "▸";
+      });
+    });
+    Array.prototype.forEach.call(body.querySelectorAll(".sa-edit-btn"), function (btn) {
+      btn.addEventListener("click", function () {
+        openStockEditModal(btn.getAttribute("data-pid"), btn.getAttribute("data-variant"), btn.getAttribute("data-name"), btn.getAttribute("data-cat"));
+      });
+    });
+    Array.prototype.forEach.call(body.querySelectorAll(".sa-quick-btn"), function (btn) {
+      btn.addEventListener("click", function () {
+        openQuickAdjustModal(btn.getAttribute("data-pid"), btn.getAttribute("data-variant"), btn.getAttribute("data-name"), btn.getAttribute("data-cat"));
+      });
+    });
   }
 
   function loadStock() {
     var statusEl = document.getElementById("saStockStatus");
     statusEl.textContent = "লোড হচ্ছে...";
+    var search = document.getElementById("saSearchInput").value.trim();
+    var stockStatus = document.getElementById("saStockStatusFilter").value;
+    window.MaAdmin.getStockVariants({ search: search, stockStatus: stockStatus, category: activeCategory, categoryMap: categoryMap })
+      .then(function (res) {
+        lastVariantRows = res.items || [];
+        // ক্যাটাগরি/সার্চ ফিল্টার প্রয়োগের পরেও পুরো প্রোডাক্ট তালিকার সাপেক্ষে গ্রুপ কাউন্ট দেখাতে allProducts ব্যবহার হয়
+        var visibleProducts = allProducts().filter(function (p) {
+          if (activeCategory && p.category !== activeCategory) return false;
+          if (search) {
+            var s = search.toLowerCase();
+            if (p.name.toLowerCase().indexOf(s) === -1 && p.id.toLowerCase().indexOf(s) === -1) return false;
+          }
+          return true;
+        });
+        populateCategoryFilter(allProducts());
+        renderStockTable(lastVariantRows.filter(function (v) {
+          if (activeCategory && (categoryMap[v.productId] || v.category) !== activeCategory) return false;
+          return true;
+        }).concat(
+          // untracked visible products না থাকলে buildProductGroups নিজেই allProducts থেকে untracked যোগ করে, তাই এখানে filteredVariantRows যথেষ্ট
+          []
+        ));
+        statusEl.textContent = "সর্বশেষ আপডেট: " + new Date().toLocaleTimeString("bn-BD");
+      })
+      .catch(function (err) {
+        statusEl.textContent = "";
+        toast("স্টক লোড করা যায়নি: " + (err.message || err));
+      });
+  }
 
-    MaAdmin.getStock().then(function (res) {
-      lastStockItems = res.items || [];
-      lastStockMap = {};
-      lastStockItems.forEach(function (it) { lastStockMap[it.productId] = it; });
-      renderStockTable();
-    }).catch(function (err) {
-      statusEl.textContent = "ব্যর্থ: " + (err && err.message);
+  // ===== সব মোডাল বন্ধ করার কমন হেল্পার (একসাথে একাধিক মোডাল যেন কখনো না খোলে) =====
+  function closeAllModals() {
+    var ids = ["saStockEditModal", "saCsvPreviewModal", "saQuickAdjustModal"];
+    ids.forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.hidden = true;
     });
   }
 
-  function handleCsvImport(file) {
-    var reader = new FileReader();
-    reader.onload = function () {
-      var rows = parseCsv(String(reader.result || ""));
-      if (!rows.length) {
-        toast("CSV ফাইলে কোনো ডেটা নেই");
-        return;
-      }
-      // হেডার লাইন থাকলে বাদ দিন (প্রথম কলামে "ProductId" বা "Product ID" লেখা থাকলে)
-      var firstCell = String(rows[0][0] || "").toLowerCase();
-      if (firstCell.indexOf("product") !== -1 || firstCell.indexOf("id") !== -1) {
-        rows = rows.slice(1);
-      }
-      var valid = rows.filter(function (r) { return r[0] && r.length >= 3 && !isNaN(parseInt(r[2], 10)); });
-      if (!valid.length) {
-        toast("সঠিক ফরম্যাট পাওয়া যায়নি — কলাম হওয়া উচিত: ProductId,ProductName,Qty");
-        return;
-      }
-      toast(valid.length + "টি প্রোডাক্টের স্টক আপডেট হচ্ছে...");
-      var chain = Promise.resolve();
-      var done = 0;
-      valid.forEach(function (r) {
-        chain = chain.then(function () {
-          return MaAdmin.setStock(r[0].trim(), (r[1] || "").trim(), parseInt(r[2], 10)).then(function () {
-            done++;
-          }).catch(function () {});
-        });
-      });
-      chain.then(function () {
-        toast("\u2705 " + done + "/" + valid.length + "টি প্রোডাক্ট আপডেট সম্পন্ন");
+  // ===== ম্যানুয়াল স্টক এডিট মোডাল =====
+  var editCtx = null;
+
+  function openStockEditModal(productId, variant, productName, category) {
+    closeAllModals();
+    editCtx = { productId: productId, variant: variant || "", productName: productName, category: category };
+    document.getElementById("saStockEditTitle").textContent = "স্টক পরিবর্তন — " + productName + (variant ? " (" + variant + ")" : "");
+    var existing = lastVariantRows.find(function (v) { return v.productId === productId && (v.variant || "") === (variant || ""); });
+    document.getElementById("saStockEditQty").value = existing ? existing.available : 0;
+    document.getElementById("saStockEditReasonPreset").value = "";
+    document.getElementById("saStockEditReasonText").value = "";
+    document.getElementById("saStockEditModal").hidden = false;
+  }
+
+  function closeStockEditModal() {
+    document.getElementById("saStockEditModal").hidden = true;
+    editCtx = null;
+  }
+
+  function initStockEditModal() {
+    document.getElementById("saStockEditCancel").addEventListener("click", closeStockEditModal);
+    document.getElementById("saStockEditSave").addEventListener("click", function () {
+      if (!editCtx) return;
+      var qty = parseInt(document.getElementById("saStockEditQty").value, 10);
+      if (isNaN(qty) || qty < 0) { toast("সঠিক Qty দিন।"); return; }
+      var preset = document.getElementById("saStockEditReasonPreset").value;
+      var detail = document.getElementById("saStockEditReasonText").value.trim();
+      var reason = [preset, detail].filter(Boolean).join(" — ");
+      if (!reason) { toast("স্টক পরিবর্তনের কারণ লেখা বাধ্যতামূলক।"); return; }
+      window.MaAdmin.saveStockVariant({
+        productId: editCtx.productId, productName: editCtx.productName, category: editCtx.category,
+        variant: editCtx.variant, available: qty, reason: reason, tracked: true
+      }).then(function () {
+        toast("স্টক আপডেট হয়েছে।");
+        closeStockEditModal();
         loadStock();
+      }).catch(function (err) {
+        toast("সংরক্ষণ ব্যর্থ: " + (err.message || err));
       });
-    };
-    reader.readAsText(file);
-  }
-
-  // ===== Analytics tab =====
-  function loadAnalytics() {
-    var panel = document.getElementById("saAnalyticsPanel");
-    var statusEl = document.getElementById("saAnalyticsStatus");
-    var days = parseInt(document.getElementById("saAnalyticsDays").value, 10) || 30;
-    statusEl.textContent = "লোড হচ্ছে...";
-
-    MaAdmin.getAnalytics(days).then(function (res) {
-      panel.dataset.loaded = "1";
-      panel.dataset.lastResult = JSON.stringify(res);
-
-      var prev = res.previousPeriod || {};
-      var cards = document.getElementById("saSummaryCards");
-      cards.innerHTML = "";
-      var summary = [
-        { label: "মোট অর্ডার", value: res.totalOrders, change: pctChange(res.totalOrders, prev.totalOrders) },
-        { label: "মোট রেভিনিউ", value: fmtMoney(res.totalRevenue), change: pctChange(res.totalRevenue, prev.totalRevenue) },
-        { label: "গড় অর্ডার ভ্যালু", value: fmtMoney(res.avgOrderValue), change: pctChange(res.avgOrderValue, prev.avgOrderValue) },
-        { label: "কুরিয়ারে পাঠানো", value: res.courierOrders, change: null },
-        { label: "নতুন কাস্টমার", value: res.newCustomers, change: null },
-        { label: "ফিরে আসা কাস্টমার", value: res.returningCustomers, change: null }
-      ];
-      summary.forEach(function (s) {
-        var card = document.createElement("div");
-        card.style.cssText = "background:#fff;border:1px solid #e2e2e2;border-radius:10px;padding:14px 16px";
-        var changeHtml = "";
-        if (s.change) {
-          var isUp = s.change.indexOf("+") === 0;
-          var isDown = s.change.indexOf("-") === 0;
-          var color = isUp ? "#1a8a3c" : (isDown ? "#c0392b" : "#888");
-          changeHtml = "<div style='font-size:0.78rem;color:" + color + ";margin-top:4px'>আগের সময়ের তুলনায় " + s.change + "</div>";
-        }
-        card.innerHTML = "<div style='font-size:0.8rem;color:#888;margin-bottom:6px'>" + s.label + "</div><div style='font-size:1.3rem;font-weight:700'>" + s.value + "</div>" + changeHtml;
-        cards.appendChild(card);
-      });
-
-      var byDayBody = document.getElementById("saByDayBody");
-      byDayBody.innerHTML = "";
-      (res.byDay || []).slice().reverse().forEach(function (d) {
-        var tr = document.createElement("tr");
-        tr.style.borderBottom = "1px solid #eee";
-        tr.innerHTML = "<td style='padding:6px'>" + d.date + "</td><td style='padding:6px'>" + d.orders + "</td><td style='padding:6px'>" + fmtMoney(d.revenue) + "</td>";
-        byDayBody.appendChild(tr);
-      });
-
-      var topBody = document.getElementById("saTopProductsBody");
-      topBody.innerHTML = "";
-      (res.topProducts || []).forEach(function (p) {
-        var tr = document.createElement("tr");
-        tr.style.borderBottom = "1px solid #eee";
-        var name = p.name + (p.approx ? " (approx)" : "");
-        tr.innerHTML = "<td style='padding:6px'>" + name + "</td><td style='padding:6px'>" + p.qty + "</td><td style='padding:6px'>" + (p.revenue ? fmtMoney(p.revenue) : "—") + "</td>";
-        topBody.appendChild(tr);
-      });
-
-      var slowBody = document.getElementById("saSlowProductsBody");
-      if (slowBody) {
-        slowBody.innerHTML = "";
-        (res.slowProducts || []).forEach(function (p) {
-          var tr = document.createElement("tr");
-          tr.style.borderBottom = "1px solid #eee";
-          var name = p.name + (p.approx ? " (approx)" : "");
-          tr.innerHTML = "<td style='padding:6px'>" + name + "</td><td style='padding:6px'>" + p.qty + "</td><td style='padding:6px'>" + (p.revenue ? fmtMoney(p.revenue) : "—") + "</td>";
-          slowBody.appendChild(tr);
-        });
-        if (!(res.slowProducts || []).length) {
-          slowBody.innerHTML = "<tr><td colspan='3' style='padding:6px;color:#888'>পর্যাপ্ত ডেটা নেই</td></tr>";
-        }
-      }
-
-      var courierBody = document.getElementById("saCourierBody");
-      if (courierBody) {
-        courierBody.innerHTML = "";
-        var breakdown = res.courierStatusBreakdown || {};
-        Object.keys(breakdown).sort(function (a, b) { return breakdown[b] - breakdown[a]; }).forEach(function (statusName) {
-          var tr = document.createElement("tr");
-          tr.style.borderBottom = "1px solid #eee";
-          tr.innerHTML = "<td style='padding:6px'>" + statusName + "</td><td style='padding:6px'>" + breakdown[statusName] + "</td>";
-          courierBody.appendChild(tr);
-        });
-      }
-
-      statusEl.textContent = "সর্বশেষ " + res.rangeDays + " দিনের তথ্য";
-    }).catch(function (err) {
-      statusEl.textContent = "ব্যর্থ: " + (err && err.message);
     });
   }
 
-  function exportAnalyticsCsv() {
-    var panel = document.getElementById("saAnalyticsPanel");
-    var raw = panel.dataset.lastResult;
-    if (!raw) {
-      toast("আগে অ্যানালিটিক্স লোড করুন");
-      return;
-    }
-    var res = JSON.parse(raw);
-    var rows = [["তারিখ", "অর্ডার", "রেভিনিউ"]];
-    (res.byDay || []).forEach(function (d) { rows.push([d.date, d.orders, d.revenue]); });
-    rows.push([]);
-    rows.push(["প্রোডাক্ট", "বিক্রি (পিস)", "রেভিনিউ"]);
-    (res.topProducts || []).forEach(function (p) { rows.push([p.name, p.qty, p.revenue || ""]); });
-    downloadCsv("analytics-" + res.rangeDays + "days.csv", rows);
+  // ===== দ্রুত স্টক সমন্বয় (Facebook/Messenger/WhatsApp ম্যানুয়াল অর্ডার) =====
+  var quickCtx = null;
+  var quickMode = "sale"; // "sale" | "restock"
+
+  function setQuickMode(mode) {
+    quickMode = mode;
+    var saleBtn = document.getElementById("saQuickModeSale");
+    var restockBtn = document.getElementById("saQuickModeRestock");
+    saleBtn.className = "pl-btn " + (mode === "sale" ? "pl-btn-primary" : "pl-btn-secondary");
+    restockBtn.className = "pl-btn " + (mode === "restock" ? "pl-btn-primary" : "pl-btn-secondary");
   }
 
-  document.addEventListener("DOMContentLoaded", function () {
+  function openQuickAdjustModal(productId, variant, productName, category) {
+    closeAllModals();
+    quickCtx = { productId: productId, variant: variant || "", productName: productName, category: category };
+    document.getElementById("saQuickAdjustTitle").textContent = "দ্রুত স্টক সমন্বয় — " + productName + (variant ? " (" + variant + ")" : "");
+    document.getElementById("saQuickAdjustQty").value = 1;
+    document.getElementById("saQuickAdjustReasonPreset").value = "Facebook অর্ডার";
+    document.getElementById("saQuickAdjustDetail").value = "";
+    setQuickMode("sale");
+    document.getElementById("saQuickAdjustModal").hidden = false;
+  }
+
+  function closeQuickAdjustModal() {
+    document.getElementById("saQuickAdjustModal").hidden = true;
+    quickCtx = null;
+  }
+
+  function initQuickAdjustModal() {
+    document.getElementById("saQuickModeSale").addEventListener("click", function () { setQuickMode("sale"); });
+    document.getElementById("saQuickModeRestock").addEventListener("click", function () { setQuickMode("restock"); });
+    document.getElementById("saQuickAdjustCancel").addEventListener("click", closeQuickAdjustModal);
+    document.getElementById("saQuickAdjustSave").addEventListener("click", function () {
+      if (!quickCtx) return;
+      var qty = parseInt(document.getElementById("saQuickAdjustQty").value, 10);
+      if (isNaN(qty) || qty <= 0) { toast("সঠিক পরিমাণ দিন।"); return; }
+      var preset = document.getElementById("saQuickAdjustReasonPreset").value;
+      var detail = document.getElementById("saQuickAdjustDetail").value.trim();
+      var reason = [preset, detail].filter(Boolean).join(" — ");
+      var delta = quickMode === "sale" ? -qty : qty;
+      window.MaAdmin.quickAdjustStock({
+        productId: quickCtx.productId, productName: quickCtx.productName, category: quickCtx.category,
+        variant: quickCtx.variant, delta: delta, reason: reason
+      }).then(function () {
+        toast(quickMode === "sale" ? "স্টক থেকে বিক্রি রেকর্ড হয়েছে।" : "নতুন মাল/ফেরত স্টকে যোগ হয়েছে।");
+        closeQuickAdjustModal();
+        loadStock();
+      }).catch(function (err) {
+        toast("সংরক্ষণ ব্যর্থ: " + (err.message || err));
+      });
+    });
+  }
+
+  // ===== CSV এক্সপোর্ট/ইমপোর্ট (প্রিভিউ-সহ) =====
+  function initCsvExport() {
+    document.getElementById("saCsvExportStock").addEventListener("click", function () {
+      var rows = [["ProductId", "ProductName", "Category", "Variant", "Tracked", "Available", "Reserved", "Threshold", "UpdatedAt", "UpdatedBy"]];
+      lastVariantRows.forEach(function (v) {
+        rows.push([v.productId, v.productName, v.category, v.variant, v.tracked ? "TRUE" : "FALSE", v.available, v.reserved, v.threshold == null ? "" : v.threshold, v.updatedAt, v.updatedBy]);
+      });
+      downloadCsv("stock-export-" + new Date().toISOString().slice(0, 10) + ".csv", rows);
+    });
+  }
+
+  var pendingCsvRows = [];
+
+  // হেডার-নাম দেখে কলাম খুঁজে বের করে — এক্সপোর্ট করা CSV (ProductId, ProductName, Category,
+  // Variant, Tracked, Available, ...) এবং সাধারণ টেমপ্লেট (ProductId, Variant, Qty, Reason) —
+  // দুটোই সঠিকভাবে পড়ার জন্য। আগে কলাম পজিশন ধরে নেওয়া হতো (০,১,২,৩), তাই এক্সপোর্ট করা CSV
+  // আবার আপলোড করলে ProductName-কে Variant, Category-কে Qty হিসেবে ভুল পড়া হতো।
+  function findCsvColumnIndex_(header, names) {
+    for (var i = 0; i < names.length; i++) {
+      var pos = header.indexOf(names[i]);
+      if (pos !== -1) return pos;
+    }
+    return -1;
+  }
+
+  function initCsvImport() {
+    document.getElementById("saCsvImportInput").addEventListener("change", function (e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        var lines = parseCsv(String(reader.result || ""));
+        if (!lines.length) { toast("CSV খালি।"); return; }
+        var header = lines[0].map(function (h) { return h.toLowerCase().trim(); });
+        var hasHeader = header.indexOf("productid") !== -1 || header.indexOf("product id") !== -1;
+
+        // ডিফল্ট (হেডার ছাড়া সাধারণ টেমপ্লেট): ProductId, Variant, Qty, Reason
+        var idxProductId = 0, idxVariant = 1, idxQty = 2, idxReason = 3;
+        var startIdx = 0;
+
+        if (hasHeader) {
+          startIdx = 1;
+          idxProductId = findCsvColumnIndex_(header, ["productid", "product id"]);
+          idxVariant = findCsvColumnIndex_(header, ["variant"]);
+          idxQty = findCsvColumnIndex_(header, ["available", "qty", "quantity"]);
+          idxReason = findCsvColumnIndex_(header, ["reason"]);
+          if (idxProductId === -1) idxProductId = 0;
+        }
+
+        var rows = [];
+        for (var i = startIdx; i < lines.length; i++) {
+          var cols = lines[i];
+          var pid = cols[idxProductId];
+          if (!cols.length || !pid) continue;
+          rows.push({
+            productId: pid,
+            variant: (idxVariant !== -1 && cols[idxVariant]) || "",
+            qty: idxQty !== -1 ? cols[idxQty] : "",
+            reason: (idxReason !== -1 && cols[idxReason]) || "CSV আপলোড"
+          });
+        }
+        pendingCsvRows = rows;
+        window.MaAdmin.commitStockCsv(rows, true).then(function (res) {
+          renderCsvPreview(res);
+        }).catch(function (err) {
+          toast("CSV প্রিভিউ ব্যর্থ: " + (err.message || err));
+        });
+      };
+      reader.readAsText(file);
+      e.target.value = "";
+    });
+  }
+
+  function renderCsvPreview(res) {
+    closeAllModals();
+    var body = document.getElementById("saCsvPreviewBody");
+    var results = res.results || [];
+    body.innerHTML = results.map(function (r) {
+      return '<tr style="border-bottom:1px solid #eee' + (r.ok ? '' : ';background:#fff2f2') + '">' +
+        '<td style="padding:4px">' + (r.rowIndex + 1) + '</td>' +
+        '<td style="padding:4px">' + r.productId + '</td>' +
+        '<td style="padding:4px">' + (r.variant || '—') + '</td>' +
+        '<td style="padding:4px">' + r.qty + '</td>' +
+        '<td style="padding:4px">' + r.reason + '</td>' +
+        '<td style="padding:4px">' + (r.ok ? '✅ ঠিক আছে' : '⚠️ ' + r.issues.join(', ')) + '</td>' +
+        '</tr>';
+    }).join("");
+    document.getElementById("saCsvPreviewSummary").textContent =
+      res.validCount + " / " + res.totalCount + " সারি সঠিক — শুধু সঠিক সারিগুলো প্রয়োগ হবে।";
+    document.getElementById("saCsvPreviewModal").hidden = false;
+  }
+
+  function initCsvPreviewModal() {
+    document.getElementById("saCsvPreviewCancel").addEventListener("click", function () {
+      document.getElementById("saCsvPreviewModal").hidden = true;
+      pendingCsvRows = [];
+    });
+    document.getElementById("saCsvPreviewConfirm").addEventListener("click", function () {
+      if (!pendingCsvRows.length) { document.getElementById("saCsvPreviewModal").hidden = true; return; }
+      window.MaAdmin.commitStockCsv(pendingCsvRows, false).then(function (res) {
+        toast(res.applied + " টি সারি প্রয়োগ হয়েছে, " + res.skipped + " টি বাদ পড়েছে।");
+        document.getElementById("saCsvPreviewModal").hidden = true;
+        pendingCsvRows = [];
+        loadStock();
+      }).catch(function (err) {
+        toast("CSV প্রয়োগ ব্যর্থ: " + (err.message || err));
+      });
+    });
+  }
+
+  function initMigrateBtn() {
+    document.getElementById("saMigrateBtn").addEventListener("click", function () {
+      if (!confirm("পুরনো Stock শীট থেকে StockVariants-এ মাইগ্রেট করবেন? এটি কোনো ডেটা মুছবে না।")) return;
+      window.MaAdmin.migrateStockVariants().then(function (res) {
+        toast("মাইগ্রেশন সম্পন্ন — " + res.migrated + " টি নতুন, " + res.skipped + " টি আগে থেকেই ছিল।");
+        loadStock();
+      }).catch(function (err) {
+        toast("মাইগ্রেশন ব্যর্থ: " + (err.message || err));
+      });
+    });
+  }
+
+  // ===== Analytics ট্যাব v2 =====
+  function initAnalyticsControls() {
+    var rangeSel = document.getElementById("saRangeSelect");
+    var fromEl = document.getElementById("saRangeFrom");
+    var toEl = document.getElementById("saRangeTo");
+    rangeSel.addEventListener("change", function () {
+      var isCustom = rangeSel.value === "custom";
+      fromEl.hidden = !isCustom;
+      toEl.hidden = !isCustom;
+    });
+    document.getElementById("saAnalyticsRefresh").addEventListener("click", loadAnalytics);
+  }
+
+  function renderSummaryCards(s) {
+    var cards = [
+      { label: "মোট অর্ডার", value: s.totalOrders },
+      { label: "কনফার্ম", value: s.confirmedCount },
+      { label: "ডেলিভারি সম্পন্ন", value: s.deliveredCount },
+      { label: "বাতিল", value: s.cancelledCount },
+      { label: "রিটার্ন", value: s.returnedCount },
+      { label: "মোট অর্ডার মূল্য", value: fmtMoney(s.totalOrderValue) },
+      { label: "ডেলিভারি সম্পন্ন বিক্রয় মূল্য", value: fmtMoney(s.deliveredSalesValue) },
+      { label: "বাতিলের হার", value: fmtPct(s.cancellationRate) },
+      { label: "ডেলিভারি সফলতার হার", value: fmtPct(s.deliverySuccessRate) }
+    ];
+    document.getElementById("saSummaryCards").innerHTML = cards.map(function (c) {
+      return '<div style="background:#fff;border:1px solid #eee;border-radius:10px;padding:14px"><div style="font-size:0.78rem;color:#888;margin-bottom:6px">' + c.label + '</div><div style="font-size:1.3rem;font-weight:700">' + c.value + '</div></div>';
+    }).join("");
+  }
+
+  function loadAnalytics() {
+    var statusEl = document.getElementById("saAnalyticsStatus");
+    statusEl.textContent = "লোড হচ্ছে...";
+    var range = document.getElementById("saRangeSelect").value;
+    var from = document.getElementById("saRangeFrom").value;
+    var to = document.getElementById("saRangeTo").value;
+    window.MaAdmin.getAnalyticsV2({ range: range, from: from, to: to, categoryMap: categoryMap })
+      .then(function (res) {
+        renderSummaryCards(res.summary || {});
+
+        document.getElementById("saTopProductsBody").innerHTML = (res.topProducts || []).map(function (p) {
+          return '<tr style="border-bottom:1px solid #eee"><td style="padding:6px">' + p.name + '</td><td style="padding:6px">' + p.qty + '</td></tr>';
+        }).join("") || '<tr><td colspan="2" style="padding:10px;color:#888">এই সময়সীমায় কোনো বিক্রি নেই।</td></tr>';
+
+        document.getElementById("saTopCategoriesBody").innerHTML = (res.topCategories || []).map(function (c) {
+          return '<tr style="border-bottom:1px solid #eee"><td style="padding:6px">' + (categoryLabels[c.category] || c.category) + '</td><td style="padding:6px">' + c.qty + '</td></tr>';
+        }).join("") || '<tr><td colspan="2" style="padding:10px;color:#888">তথ্য নেই।</td></tr>';
+
+        document.getElementById("saTopSizesBody").innerHTML = (res.topSizes || []).map(function (sz) {
+          return '<tr style="border-bottom:1px solid #eee"><td style="padding:6px">' + sz.size + '</td><td style="padding:6px">' + sz.qty + '</td></tr>';
+        }).join("") || '<tr><td colspan="2" style="padding:10px;color:#888">সাইজ-ভিত্তিক তথ্য নেই।</td></tr>';
+
+        document.getElementById("saLowStockBody").innerHTML = (res.lowStockList || []).map(function (l) {
+          return '<tr style="border-bottom:1px solid #eee"><td style="padding:6px">' + l.productName + '</td><td style="padding:6px">' + (l.variant || '—') + '</td><td style="padding:6px">' + l.available + '</td></tr>';
+        }).join("") || '<tr><td colspan="3" style="padding:10px;color:#888">কম স্টক নেই।</td></tr>';
+
+        document.getElementById("saOutStockBody").innerHTML = (res.outOfStockList || []).map(function (o) {
+          return '<tr style="border-bottom:1px solid #eee"><td style="padding:6px">' + o.productName + '</td><td style="padding:6px">' + (o.variant || '—') + '</td></tr>';
+        }).join("") || '<tr><td colspan="2" style="padding:10px;color:#888">স্টক শেষ কিছু নেই।</td></tr>';
+
+        var sourceMsgEl = document.getElementById("saSourceMessage");
+        if (!res.sourceDataAvailable) {
+          sourceMsgEl.textContent = res.sourceMessage || "উৎসের তথ্য নেই।";
+          document.getElementById("saSourceBody").innerHTML = "";
+        } else {
+          sourceMsgEl.textContent = "";
+          document.getElementById("saSourceBody").innerHTML = (res.sourceBreakdown || []).map(function (s) {
+            return '<tr style="border-bottom:1px solid #eee"><td style="padding:6px">' + s.source + '</td><td style="padding:6px">' + s.orders + '</td><td style="padding:6px">' + s.delivered + '</td></tr>';
+          }).join("");
+        }
+
+        statusEl.textContent = "সর্বশেষ আপডেট: " + new Date().toLocaleTimeString("bn-BD") + " (" + res.from + " – " + res.to + ")";
+      })
+      .catch(function (err) {
+        statusEl.textContent = "";
+        toast("অ্যানালিটিক্স লোড করা যায়নি: " + (err.message || err));
+      });
+  }
+
+  // ===== Init =====
+  function init() {
+    if (!window.MaAdmin || !window.MaAdmin.isLoggedIn()) return; // admin-guard.js redirect করবে
+    initCategoryLabels();
+    categoryMap = buildCategoryMap();
+
     initTabs();
+    initStockEditModal();
+    initQuickAdjustModal();
+    initCsvExport();
+    initCsvImport();
+    initCsvPreviewModal();
+    initMigrateBtn();
+    initAnalyticsControls();
 
     document.getElementById("saStockRefresh").addEventListener("click", loadStock);
-    document.getElementById("saLowStockThreshold").addEventListener("input", renderStockTable);
-
-    var csvInput = document.getElementById("saCsvImportInput");
-    if (csvInput) {
-      csvInput.addEventListener("change", function () {
-        if (csvInput.files && csvInput.files[0]) handleCsvImport(csvInput.files[0]);
-        csvInput.value = "";
-      });
-    }
-    var csvExportStockBtn = document.getElementById("saCsvExportStock");
-    if (csvExportStockBtn) {
-      csvExportStockBtn.addEventListener("click", function () {
-        var rows = [["ProductId", "ProductName", "Qty"]];
-        allProducts().forEach(function (p) {
-          var s = lastStockMap[p.id];
-          rows.push([p.id, p.name, s ? s.qty : ""]);
-        });
-        downloadCsv("stock-export.csv", rows);
-      });
-    }
-
-    document.getElementById("saAnalyticsRefresh").addEventListener("click", function () {
-      document.getElementById("saAnalyticsPanel").dataset.loaded = "";
-      loadAnalytics();
+    document.getElementById("saCategoryFilter").addEventListener("change", function () {
+      activeCategory = this.value;
+      loadStock();
     });
-    document.getElementById("saAnalyticsDays").addEventListener("change", function () {
-      document.getElementById("saAnalyticsPanel").dataset.loaded = "";
-      loadAnalytics();
+    document.getElementById("saStockStatusFilter").addEventListener("change", loadStock);
+    document.getElementById("saSortLowFirst").addEventListener("change", loadStock);
+    var searchDebounce = null;
+    document.getElementById("saSearchInput").addEventListener("input", function () {
+      clearTimeout(searchDebounce);
+      searchDebounce = setTimeout(loadStock, 350);
     });
-    var csvExportAnalyticsBtn = document.getElementById("saCsvExportAnalytics");
-    if (csvExportAnalyticsBtn) {
-      csvExportAnalyticsBtn.addEventListener("click", exportAnalyticsCsv);
-    }
 
-    // admin-guard.js আগেই পেজে একবার AdminVerify কল করে (data-admin-guard="1") এবং অবৈধ সেশন থাকলেই
-    // রিডায়রেক্ট করে দেয়; এখানে আলাদা করে আবার AdminVerify কল করলে রেট-লিমিট বাড়ে এবং অহেতুক লগআউটের সম্ভাবনা বাড়ে।
     loadStock();
-  });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
 })();

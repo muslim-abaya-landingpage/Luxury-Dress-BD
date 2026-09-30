@@ -1,6 +1,6 @@
 /**
  * প্রোডাক্ট ডেটা — product-manager.html থেকে এডিট করুন
- * আপডেট: 2026-09-28
+ * আপডেট: 2026-09-29
  */
 window.CATEGORY_PRODUCTS = {
   abaya: [
@@ -79,7 +79,7 @@ window.CATEGORY_PRODUCTS = {
       id: "ABY-White-7",
       name: "Safa Sate",
       image: "images/aby-versace-7-1789238735544.webp",
-      images: ["images/aby-white-7-1789241666830-g1.webp"],
+      images: ["images/aby-white-7-1789241666830-g1.webp", "images/gallery/aby-white-7-1790646669386-g2.webp"],
       price: 2350,
       stock: 100,
       color: "White",

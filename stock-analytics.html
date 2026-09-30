@@ -11,12 +11,28 @@
   <link rel="stylesheet" href="product-manager-admin.css?v=20260918gallery4">
   <script src="site-api-config.js?v=20260529"></script>
   <script src="admin-config.js"></script>
-  <script src="admin-api.js?v=20260927stock"></script>
+  <script src="admin-api.js?v=20260929stockv3"></script>
   <script src="admin-guard.js"></script>
 <style>
   .sa-tab-btn.is-active { background:#111; color:#fff; }
   #saToast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(20px); background:#111; color:#fff; padding:10px 18px; border-radius:8px; font-size:0.9rem; opacity:0; pointer-events:none; transition: opacity .2s, transform .2s; z-index: 9999; }
   #saToast.is-visible { opacity:1; transform: translateX(-50%) translateY(0); }
+  .sa-modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; z-index:10000; padding:16px; }
+  .sa-modal-backdrop[hidden] { display: none; }
+  .sa-modal { background:#fff; border-radius:12px; padding:20px; width:100%; max-width:420px; max-height:90vh; overflow:auto; }
+  .sa-modal-wide { max-width:720px; }
+  .sa-modal h3 { margin:0 0 14px; }
+  .sa-modal label { display:block; margin-bottom:12px; font-size:0.9rem; }
+  .sa-modal input, .sa-modal select, .sa-modal textarea { width:100%; margin-top:4px; padding:7px 9px; border-radius:6px; border:1px solid #ccc; box-sizing:border-box; font-family:inherit; }
+  .sa-modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:8px; }
+  .sa-variant-row { background:#fafafa; }
+  .sa-badge { display:inline-block; padding:2px 8px; border-radius:20px; font-size:0.75rem; font-weight:600; }
+  .sa-badge-ok { background:#e7f6ec; color:#177245; }
+  .sa-badge-low { background:#fff4e0; color:#a15c00; }
+  .sa-badge-out { background:#fde7e7; color:#b3261e; }
+  .sa-badge-untracked { background:#eee; color:#666; }
+  .sa-cat-chip { padding:4px 10px; border-radius:20px; background:#f1f1f1; font-size:0.8rem; cursor:pointer; border:1px solid transparent; }
+  .sa-cat-chip.is-active { background:#111; color:#fff; }
 </style>
 <script defer src="config.js"></script>
 </head>
@@ -61,103 +77,169 @@
         <section id="saStockPanel" class="sa-panel">
           <div class="pl-toolbar" style="margin-bottom:12px;flex-wrap:wrap;gap:8px">
             <button type="button" class="pl-btn pl-btn-primary" id="saStockRefresh">রিফ্রেশ করুন</button>
-            <label style="display:inline-flex;align-items:center;gap:6px;font-size:0.88rem">কম স্টক থ্রেশহোল্ড:
-              <input type="number" id="saLowStockThreshold" value="5" min="0" style="width:60px;padding:4px 6px;border-radius:6px;border:1px solid #ccc">
-            </label>
-            <button type="button" class="pl-btn pl-btn-secondary" id="saCsvExportStock">CSV এক্সপোর্ট</button>
-            <label class="pl-btn pl-btn-secondary" style="cursor:pointer;margin:0">CSV থেকে বাল্ক আপলোড
-              <input type="file" id="saCsvImportInput" accept=".csv" style="display:none">
-            </label>
+            <select id="saCategoryFilter" style="padding:6px 10px;border-radius:6px;border:1px solid #ccc;min-width:170px"></select>
+            <input type="text" id="saSearchInput" placeholder="নাম, Product ID বা SKU দিয়ে খুঁজুন" style="padding:6px 10px;border-radius:6px;border:1px solid #ccc;min-width:200px;flex:1">
+            <select id="saStockStatusFilter" style="padding:6px 10px;border-radius:6px;border:1px solid #ccc">
+              <option value="all">সব</option>
+              <option value="LOW">কম স্টক</option>
+              <option value="OUT">স্টক শেষ</option>
+              <option value="UNTRACKED">ট্র্যাক করা হয়নি</option>
+            </select>
             <span id="saStockStatus" style="margin-left:4px;color:#666;font-size:0.9rem"></span>
           </div>
-          <p style="margin:0 0 12px;font-size:0.82rem;color:#888">CSV ফরম্যাট: <code>ProductId,ProductName,Qty</code> (প্রথম লাইনে হেডার থাকলেও চলবে)</p>
+
+          <details id="saAdvancedOptions" style="margin-bottom:14px;border:1px solid #eee;border-radius:10px;padding:2px 12px">
+            <summary style="cursor:pointer;padding:8px 0;font-size:0.9rem;color:#555">উন্নত অপশন (CSV, থ্রেশহোল্ড, মাইগ্রেশন)</summary>
+            <div style="padding:6px 0 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+              <label style="display:inline-flex;align-items:center;gap:6px;font-size:0.88rem">
+                <input type="checkbox" id="saSortLowFirst" checked> কম/শেষ স্টক আগে
+              </label>
+              <label style="display:inline-flex;align-items:center;gap:6px;font-size:0.88rem">ডিফল্ট থ্রেশহোল্ড:
+                <input type="number" id="saLowStockThreshold" value="5" min="0" style="width:60px;padding:4px 6px;border-radius:6px;border:1px solid #ccc">
+              </label>
+              <button type="button" class="pl-btn pl-btn-secondary" id="saCsvExportStock">CSV এক্সপোর্ট</button>
+              <label class="pl-btn pl-btn-secondary" style="cursor:pointer;margin:0">CSV থেকে বাল্ক আপলোড
+                <input type="file" id="saCsvImportInput" accept=".csv" style="display:none">
+              </label>
+              <button type="button" class="pl-btn pl-btn-secondary" id="saMigrateBtn" title="পুরনো Stock শীট থেকে StockVariants-এ মাইগ্রেট করুন">পুরনো স্টক মাইগ্রেট</button>
+            </div>
+            <p style="margin:0 0 10px;font-size:0.82rem;color:#888">CSV ফরম্যাট: <code>productId,variant,qty,reason</code> (প্রথম লাইনে হেডার থাকলেও চলবে) — আপলোডের আগে প্রিভিউ দেখানো হবে, নিশ্চিত করার পরেই প্রয়োগ হবে।</p>
+          </details>
+          <div id="saCategoryCounts" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px"></div>
           <div style="overflow-x:auto">
             <table id="saStockTable" style="width:100%;border-collapse:collapse;font-size:0.92rem">
               <thead>
                 <tr style="text-align:left;border-bottom:2px solid #ddd">
+                  <th style="padding:8px 6px"></th>
+                  <th style="padding:8px 6px">ছবি</th>
+                  <th style="padding:8px 6px">নাম / ক্যাটাগরি</th>
                   <th style="padding:8px 6px">Product ID</th>
-                  <th style="padding:8px 6px">নাম</th>
-                  <th style="padding:8px 6px">বর্তমান স্টক</th>
-                  <th style="padding:8px 6px">নতুন Qty</th>
-                  <th style="padding:8px 6px">আপডেট</th>
+                  <th style="padding:8px 6px">ভ্যারিয়েন্ট</th>
+                  <th style="padding:8px 6px">Available</th>
+                  <th style="padding:8px 6px">Reserved</th>
+                  <th style="padding:8px 6px">অবস্থা</th>
                   <th style="padding:8px 6px">সর্বশেষ পরিবর্তন</th>
+                  <th style="padding:8px 6px">অ্যাকশন</th>
                 </tr>
               </thead>
               <tbody id="saStockBody"></tbody>
             </table>
           </div>
+
+          <div id="saStockEditModal" class="sa-modal-backdrop" hidden>
+            <div class="sa-modal">
+              <h3 id="saStockEditTitle">স্টক পরিবর্তন</h3>
+              <label>নতুন Available Qty<input type="number" id="saStockEditQty" min="0"></label>
+              <label>কারণ
+                <select id="saStockEditReasonPreset">
+                  <option value="">-- নির্বাচন করুন --</option>
+                  <option value="নতুন মাল">নতুন মাল</option>
+                  <option value="ক্ষতিগ্রস্ত">ক্ষতিগ্রস্ত</option>
+                  <option value="হারানো">হারানো</option>
+                  <option value="গণনায় সংশোধন">গণনায় সংশোধন</option>
+                  <option value="অন্যান্য">অন্যান্য</option>
+                </select>
+              </label>
+              <label>বিস্তারিত (কারণ ঐচ্ছিকভাবে বিস্তারিত লিখুন)<textarea id="saStockEditReasonText" rows="2"></textarea></label>
+              <div class="sa-modal-actions">
+                <button type="button" class="pl-btn pl-btn-secondary" id="saStockEditCancel">বাতিল</button>
+                <button type="button" class="pl-btn pl-btn-primary" id="saStockEditSave">সংরক্ষণ করুন</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="saQuickAdjustModal" class="sa-modal-backdrop" hidden>
+            <div class="sa-modal">
+              <h3 id="saQuickAdjustTitle">দ্রুত স্টক সমন্বয়</h3>
+              <div style="display:flex;gap:8px;margin-bottom:12px">
+                <button type="button" class="pl-btn pl-btn-secondary" id="saQuickModeSale" style="flex:1">বিক্রি হয়েছে (−)</button>
+                <button type="button" class="pl-btn pl-btn-secondary" id="saQuickModeRestock" style="flex:1">নতুন মাল/ফেরত (+)</button>
+              </div>
+              <label>পরিমাণ (Qty)<input type="number" id="saQuickAdjustQty" min="1" value="1"></label>
+              <label>উৎস / কারণ
+                <select id="saQuickAdjustReasonPreset">
+                  <option value="Facebook অর্ডার">Facebook অর্ডার</option>
+                  <option value="Messenger অর্ডার">Messenger অর্ডার</option>
+                  <option value="WhatsApp অর্ডার">WhatsApp অর্ডার</option>
+                  <option value="নতুন মাল">নতুন মাল</option>
+                  <option value="ফেরত/বাতিল">ফেরত/বাতিল</option>
+                  <option value="অন্যান্য">অন্যান্য</option>
+                </select>
+              </label>
+              <label>বিস্তারিত (ঐচ্ছিক, যেমন কাস্টমারের নাম)<textarea id="saQuickAdjustDetail" rows="2"></textarea></label>
+              <div class="sa-modal-actions">
+                <button type="button" class="pl-btn pl-btn-secondary" id="saQuickAdjustCancel">বাতিল</button>
+                <button type="button" class="pl-btn pl-btn-primary" id="saQuickAdjustSave">সংরক্ষণ করুন</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="saCsvPreviewModal" class="sa-modal-backdrop" hidden>
+            <div class="sa-modal sa-modal-wide">
+              <h3>CSV প্রিভিউ</h3>
+              <div id="saCsvPreviewSummary" style="margin-bottom:10px;font-size:0.9rem"></div>
+              <div style="max-height:320px;overflow:auto">
+                <table style="width:100%;border-collapse:collapse;font-size:0.85rem">
+                  <thead><tr style="text-align:left;border-bottom:1px solid #ddd"><th style="padding:4px">সারি</th><th style="padding:4px">Product ID</th><th style="padding:4px">ভ্যারিয়েন্ট</th><th style="padding:4px">Qty</th><th style="padding:4px">Reason</th><th style="padding:4px">অবস্থা</th></tr></thead>
+                  <tbody id="saCsvPreviewBody"></tbody>
+                </table>
+              </div>
+              <div class="sa-modal-actions">
+                <button type="button" class="pl-btn pl-btn-secondary" id="saCsvPreviewCancel">বাতিল</button>
+                <button type="button" class="pl-btn pl-btn-primary" id="saCsvPreviewConfirm">নিশ্চিত করে প্রয়োগ করুন</button>
+              </div>
+            </div>
+          </div>
         </section>
 
         <section id="saAnalyticsPanel" class="sa-panel" hidden>
-          <div class="pl-toolbar" style="margin-bottom:12px">
-            <label for="saAnalyticsDays" style="margin-right:8px">সময়সীমা:</label>
-            <select id="saAnalyticsDays" style="padding:6px 10px;border-radius:6px;border:1px solid #ccc">
-              <option value="7">গত ৭ দিন</option>
-              <option value="30" selected>গত ৩০ দিন</option>
-              <option value="90">গত ৯০ দিন</option>
-              <option value="365">গত ১ বছর</option>
+          <div class="pl-toolbar" style="margin-bottom:12px;flex-wrap:wrap;gap:8px">
+            <select id="saRangeSelect" style="padding:6px 10px;border-radius:6px;border:1px solid #ccc">
+              <option value="today">আজ</option>
+              <option value="7d" selected>গত ৭ দিন</option>
+              <option value="30d">গত ৩০ দিন</option>
+              <option value="custom">কাস্টম</option>
             </select>
-            <button type="button" class="pl-btn pl-btn-primary" id="saAnalyticsRefresh" style="margin-left:10px">রিফ্রেশ করুন</button>
-            <button type="button" class="pl-btn pl-btn-secondary" id="saCsvExportAnalytics" style="margin-left:8px">CSV এক্সপোর্ট</button>
+            <input type="date" id="saRangeFrom" style="padding:6px 10px;border-radius:6px;border:1px solid #ccc" hidden>
+            <input type="date" id="saRangeTo" style="padding:6px 10px;border-radius:6px;border:1px solid #ccc" hidden>
+            <button type="button" class="pl-btn pl-btn-primary" id="saAnalyticsRefresh">রিফ্রেশ করুন</button>
             <span id="saAnalyticsStatus" style="margin-left:10px;color:#666;font-size:0.9rem"></span>
           </div>
 
           <div id="saSummaryCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px"></div>
 
-          <h3 style="margin:0 0 10px">দিন-ভিত্তিক রেভিনিউ</h3>
-          <div style="overflow-x:auto;margin-bottom:24px">
-            <table style="width:100%;border-collapse:collapse;font-size:0.92rem">
-              <thead>
-                <tr style="text-align:left;border-bottom:2px solid #ddd">
-                  <th style="padding:8px 6px">তারিখ</th>
-                  <th style="padding:8px 6px">অর্ডার সংখ্যা</th>
-                  <th style="padding:8px 6px">রেভিনিউ (৳)</th>
-                </tr>
-              </thead>
-              <tbody id="saByDayBody"></tbody>
-            </table>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-bottom:24px">
+            <div>
+              <h3 style="margin:0 0 10px">সবচেয়ে বেশি বিক্রি হওয়া প্রোডাক্ট</h3>
+              <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:0.9rem"><thead><tr style="text-align:left;border-bottom:2px solid #ddd"><th style="padding:6px">প্রোডাক্ট</th><th style="padding:6px">পিস</th></tr></thead><tbody id="saTopProductsBody"></tbody></table></div>
+            </div>
+            <div>
+              <h3 style="margin:0 0 10px">ক্যাটাগরি অনুযায়ী</h3>
+              <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:0.9rem"><thead><tr style="text-align:left;border-bottom:2px solid #ddd"><th style="padding:6px">ক্যাটাগরি</th><th style="padding:6px">পিস</th></tr></thead><tbody id="saTopCategoriesBody"></tbody></table></div>
+            </div>
+            <div>
+              <h3 style="margin:0 0 10px">সাইজ অনুযায়ী</h3>
+              <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:0.9rem"><thead><tr style="text-align:left;border-bottom:2px solid #ddd"><th style="padding:6px">সাইজ</th><th style="padding:6px">পিস</th></tr></thead><tbody id="saTopSizesBody"></tbody></table></div>
+            </div>
           </div>
 
-          <h3 style="margin:0 0 10px">সবচেয়ে বেশি বিক্রি হওয়া প্রোডাক্ট</h3>
-          <div style="overflow-x:auto">
-            <table style="width:100%;border-collapse:collapse;font-size:0.92rem">
-              <thead>
-                <tr style="text-align:left;border-bottom:2px solid #ddd">
-                  <th style="padding:8px 6px">প্রোডাক্ট</th>
-                  <th style="padding:8px 6px">বিক্রি (পিস)</th>
-                  <th style="padding:8px 6px">রেভিনিউ (৳)</th>
-                </tr>
-              </thead>
-              <tbody id="saTopProductsBody"></tbody>
-            </table>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-bottom:24px">
+            <div>
+              <h3 style="margin:0 0 10px;color:#b45309">কম স্টক</h3>
+              <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:0.9rem"><thead><tr style="text-align:left;border-bottom:2px solid #ddd"><th style="padding:6px">প্রোডাক্ট</th><th style="padding:6px">ভ্যারিয়েন্ট</th><th style="padding:6px">Available</th></tr></thead><tbody id="saLowStockBody"></tbody></table></div>
+            </div>
+            <div>
+              <h3 style="margin:0 0 10px;color:#b91c1c">স্টক শেষ</h3>
+              <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:0.9rem"><thead><tr style="text-align:left;border-bottom:2px solid #ddd"><th style="padding:6px">প্রোডাক্ট</th><th style="padding:6px">ভ্যারিয়েন্ট</th></tr></thead><tbody id="saOutStockBody"></tbody></table></div>
+            </div>
           </div>
-          <p style="margin-top:10px;font-size:0.82rem;color:#888">* যেসব অর্ডারে qty আনুমানিক (approx), সেগুলো পুরনো (CartJSON আপডেটের আগের) অর্ডার — সঠিক সংখ্যা নাও হতে পারে।</p>
 
-          <h3 style="margin:24px 0 10px">সবচেয়ে কম বিক্রি হওয়া প্রোডাক্ট (Slow Mover)</h3>
+          <h3 style="margin:0 0 10px">উৎস (Facebook/TikTok) বিভাজন</h3>
+          <div id="saSourceMessage" style="font-size:0.88rem;color:#888;margin-bottom:8px"></div>
           <div style="overflow-x:auto">
             <table style="width:100%;border-collapse:collapse;font-size:0.92rem">
-              <thead>
-                <tr style="text-align:left;border-bottom:2px solid #ddd">
-                  <th style="padding:8px 6px">প্রোডাক্ট</th>
-                  <th style="padding:8px 6px">বিক্রি (পিস)</th>
-                  <th style="padding:8px 6px">রেভিনিউ (৳)</th>
-                </tr>
-              </thead>
-              <tbody id="saSlowProductsBody"></tbody>
-            </table>
-          </div>
-          <p style="margin-top:10px;font-size:0.82rem;color:#888">* এই প্রোডাক্টগুলো নির্বাচিত সময়সীমায় সবচেয়ে কম বিক্রি হয়েছে — প্রাইসিং/প্রমোশন বিবেচনা করুন।</p>
-
-          <h3 style="margin:24px 0 10px">কুরিয়ার স্ট্যাটাস বিভাজন</h3>
-          <div style="overflow-x:auto">
-            <table style="width:100%;border-collapse:collapse;font-size:0.92rem">
-              <thead>
-                <tr style="text-align:left;border-bottom:2px solid #ddd">
-                  <th style="padding:8px 6px">স্ট্যাটাস</th>
-                  <th style="padding:8px 6px">অর্ডার সংখ্যা</th>
-                </tr>
-              </thead>
-              <tbody id="saCourierBody"></tbody>
+              <thead><tr style="text-align:left;border-bottom:2px solid #ddd"><th style="padding:8px 6px">উৎস</th><th style="padding:8px 6px">অর্ডার</th><th style="padding:8px 6px">ডেলিভারি সম্পন্ন</th></tr></thead>
+              <tbody id="saSourceBody"></tbody>
             </table>
           </div>
         </section>
@@ -173,7 +255,7 @@
   <script src="category-products.js?v=20260927stock"></script>
   <script src="product-links-data.js"></script>
   <script src="product-catalog-loader.js"></script>
-  <script src="stock-analytics.js?v=20260927a"></script>
+  <script src="stock-analytics.js?v=20260929stockv3"></script>
   <script>
     (function () {
       var sidebar = document.getElementById("admSidebar");
