@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Order | Muslim Abaya Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin-panel.css?v=20260930">
+  <script src="config.js"></script>
+</head>
+<body class="pn-body">
+  <div class="pn-app">
+    <aside class="pn-side" id="pnSide"></aside>
+    <main class="pn-main">
+      <div class="pn-head">
+        <button type="button" class="pn-btn pn-menu-btn" id="pnMenuBtn" aria-label="Menu">☰</button>
+        <a class="pn-btn" href="admin-orders.html">☰ All Orders</a>
+        <h1>Order-<b id="oId">…</b></h1>
+        <button type="button" class="pn-btn pn-btn-blue pn-btn-sm" id="btnHistory">⟲ Order History (<span id="histCount">0</span>)</button>
+        <button type="button" class="pn-btn pn-btn-ghost-red pn-btn-sm" id="btnFraud">🛡 Fraud Check</button>
+        <span class="pn-badge pending" id="oStatusBadge">Pending</span>
+        <span class="pn-badge source" id="oSource">Website</span>
+        <span class="pn-note-muted" id="oCreated"></span>
+        <span class="pn-spacer"></span>
+        <a class="pn-btn pn-btn-sm" id="btnPrev" href="#">‹ Previous</a>
+        <a class="pn-btn pn-btn-sm" id="btnNext" href="#">Next ›</a>
+      </div>
+
+      <div id="oError" class="pn-card" style="display:none"></div>
+
+      <div class="pn-grid" id="oGrid" style="display:none">
+        <div>
+          <section class="pn-card">
+            <h2><i>👤</i> Customer Information</h2>
+            <div class="pn-row2">
+              <div class="pn-field"><label for="fName">Name</label><input class="pn-in" id="fName" maxlength="80"></div>
+              <div class="pn-field"><label for="fPhone">Phone</label><input class="pn-in" id="fPhone" inputmode="numeric" maxlength="14"></div>
+            </div>
+            <div class="pn-field">
+              <label for="fAddress">Address</label>
+              <input class="pn-in" id="fAddress" maxlength="400">
+            </div>
+            <div class="pn-actions-row">
+              <button type="button" class="pn-btn pn-btn-sm" id="btnCorrect">✓ Correct Address</button>
+              <a class="pn-btn pn-btn-sm" id="btnMap" target="_blank" rel="noopener" href="#">📍 Show Address</a>
+              <span class="pn-note-muted" style="align-self:center" id="oDistrict"></span>
+            </div>
+            <div class="pn-cust-actions">
+              <div><b>Customer actions</b><small id="blockHint">এই কাস্টমারকে নতুন অর্ডার করা থেকে আটকান</small></div>
+              <button type="button" class="pn-btn pn-btn-ghost-red pn-btn-sm" id="btnBlock">⛔ Block customer</button>
+            </div>
+          </section>
+
+          <section class="pn-card">
+            <h2><i>🛒</i> Order Items <span class="pn-note-muted" id="oQty"></span></h2>
+            <div id="oItems"></div>
+            <div class="pn-note-muted" id="oCustNote"></div>
+          </section>
+
+          <section class="pn-card">
+            <h2><i>📝</i> Notes</h2>
+            <div class="pn-row2">
+              <div class="pn-field"><label for="fAdminNote">Admin Note</label><textarea class="pn-ta" id="fAdminNote" rows="2" placeholder="Internal note for the team"></textarea></div>
+              <div class="pn-field"><label for="fCourierNote">Courier Note</label><textarea class="pn-ta" id="fCourierNote" rows="2" placeholder="Note for the courier"></textarea></div>
+            </div>
+          </section>
+        </div>
+
+        <div>
+          <section class="pn-card">
+            <h2><i>💳</i> Pricing</h2>
+            <div class="pn-field"><label for="fCharge">Shipping Charge (৳)</label><input class="pn-in" id="fCharge" type="number" min="0" step="1"></div>
+            <div class="pn-field"><label for="fAdvance">Advance (৳)</label><input class="pn-in" id="fAdvance" type="number" min="0" step="1"></div>
+            <div class="pn-field"><label for="fDiscount">Discount (৳)</label><input class="pn-in" id="fDiscount" type="number" min="0" step="1"></div>
+            <div class="pn-sum"><span>Subtotal</span><span id="sSub">৳0</span></div>
+            <div class="pn-sum" id="sCouponRow" style="display:none"><span id="sCouponLbl">Coupon</span><span id="sCoupon">৳0</span></div>
+            <div class="pn-sum total"><span>Total</span><b id="sTotal">৳0</b></div>
+            <div class="pn-sum"><span>Due (COD)</span><span id="sDue">৳0</span></div>
+          </section>
+
+          <section class="pn-card">
+            <h2><i>📦</i> Order Details</h2>
+            <div class="pn-field"><label for="fCourier">Courier</label>
+              <select class="pn-sel" id="fCourier"></select></div>
+            <div class="pn-field"><label>Source</label><input class="pn-in" id="fSource" readonly></div>
+            <div class="pn-field"><label for="fStatus">Status</label><select class="pn-sel" id="fStatus"></select></div>
+            <div class="pn-field"><label for="fAssign">Assign To</label><select class="pn-sel" id="fAssign"></select></div>
+            <div class="pn-note-muted" id="oPayment"></div>
+            <div id="oTrack" style="margin-top:8px"></div>
+            <button type="button" class="pn-btn pn-btn-blue pn-btn-block" id="btnCourierSend" style="margin-top:10px">🚚 Send to Steadfast</button>
+          </section>
+
+          <button type="button" class="pn-btn pn-btn-primary pn-btn-block" id="btnSave">✓ Update Order</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="site-api-config.js?v=20260529"></script>
+  <script src="admin-config.js"></script>
+  <script src="admin-api.js?v=20260930"></script>
+  <script src="admin-guard.js"></script>
+  <script src="admin-panel.js?v=20260930"></script>
+  <script>
+    (function () {
+      var esc = MaPanel.esc;
+      var $ = function (id) { return document.getElementById(id); };
+      var orderId = new URLSearchParams(location.search).get("id") || "";
+      var cur = null;      // সর্বশেষ সার্ভার থেকে পাওয়া অর্ডার
+      var history = null;
+      var staff = [];
+
+      function fillSelect(el, options, value, extra) {
+        var list = options.slice();
+        if (value && list.indexOf(value) === -1) list.push(value);
+        el.innerHTML = (extra || "") + list.map(function (o) {
+          return '<option value="' + esc(o) + '"' + (o === value ? " selected" : "") + ">" + esc(o) + "</option>";
+        }).join("");
+      }
+
+      function num(id) { return Math.max(0, parseFloat($(id).value) || 0); }
+
+      function recalc() {
+        if (!cur) return;
+        var charge = num("fCharge"), discount = num("fDiscount"), advance = num("fAdvance");
+        var coupon = cur.couponDiscount || 0;
+        var total = Math.max(0, cur.subtotal + charge - discount - coupon);
+        $("sCouponRow").style.display = coupon ? "" : "none";
+        $("sCouponLbl").textContent = "Coupon" + (cur.couponCode ? " (" + cur.couponCode + ")" : "");
+        $("sCoupon").textContent = "−" + MaPanel.money(coupon);
+        $("sSub").textContent = MaPanel.money(cur.subtotal);
+        $("sTotal").textContent = MaPanel.money(total);
+        $("sDue").textContent = MaPanel.money(Math.max(0, total - advance));
+      }
+
+      function paint(o, meta) {
+        cur = o;
+        orderId = o.orderId;
+        $("oId").textContent = o.orderId;
+        document.title = "Order " + o.orderId + " | Muslim Abaya Admin";
+        var b = $("oStatusBadge");
+        b.textContent = o.status;
+        b.className = "pn-badge " + MaPanel.statusClass(o.status);
+        $("oSource").textContent = o.source;
+        $("oCreated").textContent = "Created : " + o.time;
+        $("fName").value = o.name;
+        $("fPhone").value = o.phone;
+        $("fAddress").value = o.address;
+        $("oDistrict").textContent = o.district ? "জেলা: " + o.district : "";
+        $("btnMap").href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(o.address);
+        $("oQty").textContent = "· মোট " + o.qty + " পিস";
+        $("oItems").innerHTML = (o.items.length ? o.items : ["(পণ্যের তথ্য নেই)"]).map(function (n) {
+          return '<div class="pn-item"><div class="thumb">👗</div><div class="nm">' + esc(n) + "</div></div>";
+        }).join("");
+        $("oCustNote").textContent = o.customerNote ? "কাস্টমার নোট / সিস্টেম: " + o.customerNote : "";
+        $("fAdminNote").value = o.adminNote;
+        $("fCourierNote").value = o.courierNote;
+        $("fCharge").value = o.charge;
+        $("fAdvance").value = o.advance;
+        $("fDiscount").value = o.discount;
+        $("fSource").value = o.source;
+        $("oPayment").textContent = "Payment: " + (o.payment || "—") + (o.txn ? " · Txn: " + o.txn : "");
+        fillSelect($("fStatus"), (meta && meta.statuses) || [], o.status);
+        fillSelect($("fCourier"), (meta && meta.couriers) || ["Steadfast"], o.courier);
+        fillSelect($("fAssign"), staff, o.assignedTo, '<option value="">— Unassigned —</option>');
+        if (o.tracking || o.consignmentId) {
+          $("oTrack").innerHTML = '<div class="pn-note-ok">Tracking: ' + esc(o.tracking || "—") + "</div>" +
+            '<div class="pn-note-muted">Consignment: ' + esc(o.consignmentId || "—") + " · " + esc(o.courierStatus || "") + "</div>";
+          $("btnCourierSend").style.display = "none";
+        } else {
+          $("oTrack").innerHTML = "";
+          $("btnCourierSend").style.display = "";
+        }
+        paintBlock(o.blocked);
+        recalc();
+      }
+
+      function paintBlock(blocked) {
+        if (cur) cur.blocked = !!blocked;
+        $("btnBlock").textContent = blocked ? "✓ Unblock customer" : "⛔ Block customer";
+        $("blockHint").textContent = blocked ? "এই নম্বর থেকে নতুন অর্ডার এখন বন্ধ আছে" : "এই কাস্টমারকে নতুন অর্ডার করা থেকে আটকান";
+      }
+
+      function nav(el, id) {
+        if (id) { el.href = "admin-order.html?id=" + encodeURIComponent(id); el.style.visibility = "visible"; }
+        else { el.style.visibility = "hidden"; }
+      }
+
+      function load() {
+        MaAdmin.call("AdminOrderStaff", {}).then(function (r) { staff = r.staff || []; }).catch(function () {})
+          .then(function () { return MaAdmin.call("AdminOrderGet", { OrderId: orderId }); })
+          .then(function (res) {
+            history = res.history;
+            $("histCount").textContent = history.stats.total;
+            $("oGrid").style.display = "";
+            paint(res.order, res);
+            nav($("btnPrev"), res.prevId);
+            nav($("btnNext"), res.nextId);
+          }).catch(function (err) {
+            var e = $("oError");
+            e.style.display = "";
+            e.innerHTML = "<b>Error:</b> " + esc(err.message) + '<br><a href="admin-orders.html">← সব অর্ডার</a>';
+          });
+      }
+
+      function save() {
+        var btn = $("btnSave");
+        btn.disabled = true;
+        var fields = {
+          OrderId: orderId,
+          Name: $("fName").value,
+          Phone: $("fPhone").value,
+          Address: $("fAddress").value,
+          Charge: num("fCharge"),
+          Advance: num("fAdvance"),
+          Discount: num("fDiscount"),
+          Status: $("fStatus").value,
+          Courier: $("fCourier").value,
+          AssignedTo: $("fAssign").value,
+          AdminNote: $("fAdminNote").value,
+          CourierNote: $("fCourierNote").value
+        };
+        return MaAdmin.call("AdminOrderUpdate", fields).then(function (res) {
+          var keepMeta = { statuses: Array.prototype.map.call($("fStatus").options, function (o) { return o.value; }), couriers: Array.prototype.map.call($("fCourier").options, function (o) { return o.value; }) };
+          var blocked = cur && cur.blocked;
+          res.order.blocked = blocked;
+          paint(res.order, keepMeta);
+          var msg = "অর্ডার আপডেট হয়েছে ✓";
+          if (res.hooks && res.hooks.courier === "SENT") msg += " · Steadfast-এ পাঠানো হয়েছে";
+          MaPanel.toast(msg);
+        }).catch(function (err) {
+          MaPanel.toast(err.message, true);
+        }).then(function () { btn.disabled = false; });
+      }
+
+      $("btnSave").addEventListener("click", save);
+      ["fCharge", "fAdvance", "fDiscount"].forEach(function (id) { $(id).addEventListener("input", recalc); });
+
+      $("btnCorrect").addEventListener("click", function () {
+        var v = $("fAddress").value
+          .replace(/\s+/g, " ")
+          .replace(/\s*,\s*/g, ", ")
+          .replace(/(,\s*){2,}/g, ", ")
+          .replace(/^[,\s]+|[,\s]+$/g, "");
+        $("fAddress").value = v;
+        $("btnMap").href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(v);
+      });
+
+      $("btnBlock").addEventListener("click", function () {
+        if (!cur) return;
+        var unblock = !!cur.blocked;
+        var reason = "";
+        if (!unblock) {
+          if (!confirm(cur.phone + " ব্লক করবেন? এই নম্বর থেকে ওয়েবসাইটে নতুন অর্ডার নেওয়া হবে না।")) return;
+          reason = prompt("ব্লকের কারণ (ঐচ্ছিক)", "") || "";
+        }
+        MaAdmin.call("AdminBlockCustomer", { Phone: cur.phone, Block: unblock ? "0" : "1", Reason: reason })
+          .then(function (r) { paintBlock(r.blocked); MaPanel.toast(r.blocked ? "কাস্টমার ব্লক হয়েছে" : "আনব্লক হয়েছে"); })
+          .catch(function (err) { MaPanel.toast(err.message, true); });
+      });
+
+      $("btnCourierSend").addEventListener("click", function () {
+        if (!cur) return;
+        if (!confirm("এই অর্ডার Steadfast-এ পাঠাবেন? (COD: " + $("sDue").textContent + ")")) return;
+        var btn = $("btnCourierSend");
+        btn.disabled = true;
+        // আগে অসংরক্ষিত পরিবর্তন সেভ, তারপর পাঠানো — যাতে সঠিক COD/ঠিকানা যায়
+        save().then(function () {
+          return MaAdmin.call("AdminSendCourier", { OrderId: orderId });
+        }).then(function (r) {
+          var keep = { statuses: Array.prototype.map.call($("fStatus").options, function (o) { return o.value; }), couriers: Array.prototype.map.call($("fCourier").options, function (o) { return o.value; }) };
+          r.order.blocked = cur && cur.blocked;
+          paint(r.order, keep);
+          MaPanel.toast("Steadfast-এ পাঠানো হয়েছে · " + (r.tracking || ""));
+        }).catch(function (err) {
+          MaPanel.toast(err.message, true);
+        }).then(function () { btn.disabled = false; });
+      });
+
+      function riskLabel(r) {
+        return { low: "ঝুঁকি কম ✓", medium: "সতর্কতা — কিছু ব্যর্থ অর্ডার আছে", high: "ঝুঁকি বেশি ⚠", "new": "নতুন কাস্টমার — আগের অর্ডার নেই", unknown: "ইতিহাস অসম্পূর্ণ (এখনো ডেলিভারি হয়নি)" }[r] || r;
+      }
+
+      function histTable(list) {
+        if (!list || !list.length) return '<div class="pn-note-muted">আগের কোনো অর্ডার নেই।</div>';
+        return '<table class="pn-hist">' + list.map(function (h) {
+          return '<tr><td><a href="admin-order.html?id=' + encodeURIComponent(h.orderId) + '">' + esc(h.orderId) + "</a><br><span class=\"pn-note-muted\">" + esc(h.time) + "</span></td>" +
+            '<td><span class="pn-badge ' + MaPanel.statusClass(h.status) + '">' + esc(h.status) + "</span></td><td style=\"text-align:right\">" + MaPanel.money(h.total) + "</td></tr>";
+        }).join("") + "</table>";
+      }
+
+      $("btnHistory").addEventListener("click", function () {
+        if (!history) return;
+        MaPanel.openModal("Order History (" + history.stats.total + ")", histTable(history.recent));
+      });
+
+      $("btnFraud").addEventListener("click", function () {
+        if (!cur) return;
+        var btn = $("btnFraud");
+        btn.disabled = true;
+        MaAdmin.call("AdminFraudCheck", { Phone: cur.phone, OrderId: cur.orderId }).then(function (r) {
+          var s = r.stats;
+          var html = '<div class="pn-risk ' + esc(r.risk) + '">' + esc(riskLabel(r.risk)) + "</div>" +
+            (r.blocked ? '<div class="pn-risk high">এই নম্বর ব্লক করা আছে' + (r.blockReason ? " — " + esc(r.blockReason) : "") + "</div>" : "") +
+            '<div class="pn-stat-grid">' +
+            '<div class="pn-stat"><b>' + s.total + "</b><span>মোট অর্ডার</span></div>" +
+            '<div class="pn-stat"><b>' + s.delivered + "</b><span>Delivered</span></div>" +
+            '<div class="pn-stat"><b>' + (s.cancelled + s.fake + s.returned) + "</b><span>Cancel/Fake/Return</span></div>" +
+            "</div>" +
+            '<div class="pn-note-muted" style="margin-bottom:10px">Success rate: <b>' + (r.successRate == null ? "—" : r.successRate + "%") + "</b> · শুধু আমাদের নিজের অর্ডার ইতিহাস থেকে হিসাব; অন্য কুরিয়ার/দোকানের ডেটা এতে নেই।</div>" +
+            histTable(r.recent);
+          MaPanel.openModal("Fraud Check · " + r.phone, html);
+        }).catch(function (err) { MaPanel.toast(err.message, true); })
+          .then(function () { btn.disabled = false; });
+      });
+
+      MaPanel.init("orders").then(function (s) {
+        if (!s) return;
+        if (!orderId) { $("oError").style.display = ""; $("oError").innerHTML = 'কোনো Order ID নেই। <a href="admin-orders.html">← সব অর্ডার</a>'; return; }
+        load();
+      });
+    })();
+  </script>
+</body>
+</html>
