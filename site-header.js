@@ -749,33 +749,9 @@ function buildNavMenuItems() {
   function initFastNavigation() {
     if (!canPrefetch()) return;
 
-    var warmRoutes = [
-      '/',
-      '/abaya',
-      '/premium-two-piece',
-      '/embroidery',
-      '/karchupi',
-      '/kaftan',
-      '/hijab',
-      '/panjabi',
-      '/video',
-      '/category',
-      '/checkout'
-    ];
-
-    function warmPopularPages() {
-      warmRoutes.forEach(function (route) {
-        try {
-          prefetchPage(siteHref(route));
-        } catch (e) {}
-      });
-    }
-
-    if ('requestIdleCallback' in window) {
-      requestIdleCallback(warmPopularPages, { timeout: 2000 });
-    } else {
-      setTimeout(warmPopularPages, 800);
-    }
+    /* Only the link the visitor hovers / touches / focuses is prefetched (below).
+       Blanket "warm every popular page" prefetching was removed: it fetched ~11 HTML
+       pages (incl. checkout) on every page load, wasting mobile data and logging 503s. */
 
     function schedulePrefetch(anchor) {
       var url = resolveInternalUrl(anchor);
