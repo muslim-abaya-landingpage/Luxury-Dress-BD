@@ -70,6 +70,16 @@
     return raw;
   }
 
+  /* Small (480px) card variant: images/card/<original path>.webp — falls back to the original on 404. */
+  function cardThumbSrc(src) {
+    if (!src || /^(https?:)?\/\//i.test(src) || /[?#]/.test(src)) return src;
+    var m = String(src).replace(/^\.?\//, "");
+    if (m.indexOf("images/") !== 0 || m.indexOf("images/card/") === 0 || m.indexOf("images/hero-banner/") === 0) {
+      return src;
+    }
+    return "images/card/" + m + ".webp";
+  }
+
   /* Stock — reuse product-utils helpers when catalog is loaded. */
   function stockStatus(p) {
     if (window.maCatalog && typeof window.maCatalog.getStockStatus === "function") {
@@ -209,7 +219,7 @@
   }
 
   /* ---------------- Card ---------------- */
-  function cardHtml(sec, p) {
+  function cardHtml(sec, p, eagerLevel) {
     var img = resolveImg(p);
     var dHref = detailHref(sec, p);
     var outOfStock = isOutOfStock(p);
@@ -231,10 +241,18 @@
         ? "<span class='ah-card-badge ah-card-badge-oos'>Sold Out</span>"
         : "<span class='ah-card-badge'>Sale</span>") +
       "<img src='" +
+      escapeHtml(cardThumbSrc(img)) +
+      "' data-full='" +
       escapeHtml(img) +
       "' alt='" +
       escapeHtml(p.name) +
-      "' width='480' height='600' loading='lazy' decoding='async' onerror=\"this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg'\">" +
+      "' width='480' height='600' " +
+      (eagerLevel === 2
+        ? "fetchpriority='high' decoding='async'"
+        : eagerLevel === 1
+          ? "decoding='async'"
+          : "loading='lazy' decoding='async'") +
+      " onerror=\"var f=this.getAttribute('data-full');if(f&&this.src.indexOf(f)<0&&this.src.indexOf('/images/card/')>-1){this.src=f;return}this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg'\">" +
       "</a>" +
       "<div class='ah-card-body'>" +
       "<div class='ah-card-row'>" +
@@ -280,14 +298,18 @@
     if (!secs.length) return;
 
     var html = "";
+    var firstSectionDone = false;
     secs.forEach(function (sec) {
       var products = sectionProducts(sec.key);
       if (!products.length) return;
+      var isFirstSection = !firstSectionDone;
+      firstSectionDone = true;
       var title = sec.menu || sec.key;
       var viewAll = href(sec.path || "/" + sec.key);
       var cards = products
-        .map(function (p) {
-          return cardHtml(sec, p);
+        .map(function (p, i) {
+          /* first-viewport cards: eager (LCP candidate), first one high priority */
+          return cardHtml(sec, p, isFirstSection && i < 2 ? (i === 0 ? 2 : 1) : 0);
         })
         .join("");
       html +=
@@ -503,20 +525,51 @@
     );
   }
 
+  /* Slides 2+ stay as a 1px placeholder until the page has loaded (or first touch), so ~500 KB of
+     banner images never compete with the first-viewport LCP image. */
+  var HERO_PLACEHOLDER = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+  var heroSlidesArmed = false;
+  function activateHeroSlideImages() {
+    document.querySelectorAll("#homeHero img[data-src]").forEach(function (im) {
+      var real = im.getAttribute("data-src");
+      im.removeAttribute("data-src");
+      if (real) im.src = real;
+    });
+  }
+  function scheduleHeroSlideImages() {
+    if (heroSlidesArmed) return;
+    heroSlidesArmed = true;
+    var done = false;
+    function run() {
+      if (done) return;
+      done = true;
+      activateHeroSlideImages();
+    }
+    ["pointerdown", "touchstart", "keydown", "scroll"].forEach(function (ev) {
+      window.addEventListener(ev, run, { once: true, passive: true });
+    });
+    function afterLoad() {
+      setTimeout(run, 1500);
+    }
+    if (document.readyState === "complete") afterLoad();
+    else window.addEventListener("load", afterLoad, { once: true });
+  }
+
   function heroImgTag(it, i, heroEyebrow) {
     var img = it.image;
     var alt = it.alt || heroEyebrow;
     var isFirst = i === 0;
     var attrs =
       " src='" +
-      escapeHtml(isFirst && isLcpHeroSrc(img) ? "images/hero-banner/hero-lcp-960.webp" : img) +
+      (isFirst
+        ? escapeHtml(isLcpHeroSrc(img) ? "images/hero-banner/hero-lcp-960.webp" : img)
+        : HERO_PLACEHOLDER + "' data-src='" + escapeHtml(img)) +
       "' alt='" +
       escapeHtml(alt) +
       "' width='1920' height='840' decoding='" +
       (isFirst ? "sync" : "async") +
       "'";
     if (isFirst) attrs += " fetchpriority='high'";
-    else attrs += " loading='lazy'";
     if (isFirst && isLcpHeroSrc(img)) {
       attrs += " srcset='" + HERO_LCP_SRCSET + "' sizes='100vw'";
     }
@@ -651,6 +704,7 @@
       heroIdx = 0;
       bindHero(hero, items.length);
       bindHeroErrors(hero);
+      scheduleHeroSlideImages();
       return;
     }
 
@@ -673,9 +727,11 @@
     heroIdx = 0;
     bindHero(hero, items.length);
     bindHeroErrors(hero);
+    scheduleHeroSlideImages();
   }
 
   function goToSlide(hero, idx, total) {
+    if (idx > 0) activateHeroSlideImages();
     var slides = hero.querySelectorAll(".home-hero-slide");
     var dots = hero.querySelectorAll(".home-hero-dots button");
     if (!slides.length) return;
