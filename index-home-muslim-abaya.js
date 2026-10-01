@@ -820,12 +820,36 @@
     return true;
   }
 
+  /* Render only after the (deferred) homepage stylesheet is applied, so unstyled cards never flash
+     and shift the page (CLS). Falls back after 1.5 s. */
+  function afterHomeCss(cb) {
+    var link = document.querySelector('link[rel="stylesheet"][href*="index-home-muslim-abaya"]');
+    if (!link || (link.sheet && link.media !== "print")) {
+      cb();
+      return;
+    }
+    var done = false;
+    function go() {
+      if (done) return;
+      done = true;
+      if (link.media === "print") link.media = "all";
+      cb();
+    }
+    link.addEventListener("load", go, { once: true });
+    link.addEventListener("error", go, { once: true });
+    window.setTimeout(go, 1500);
+  }
+
   // Called by index-catalog-defer.js once catalog scripts finish loading.
   window.__homeRefreshCatalog = function () {
-    renderAll();
+    afterHomeCss(renderAll);
   };
 
   function boot() {
+    afterHomeCss(bootRender);
+  }
+
+  function bootRender() {
     if (renderAll()) return;
     // Catalog may still be loading; retry a few times as a fallback.
     var tries = 0;

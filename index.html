@@ -744,8 +744,15 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
 <script defer src="cart-drawer.js?v=20260820fixui"></script>
 <script defer src="custom-size-modal.js"></script>
 <script defer src="hero-banner-config.js?v=20260820hero"></script>
-<script defer src="index-home-muslim-abaya.js?v=20261002a11y"></script>
-<script defer src="index-catalog-defer.js?v=20260824lcp"></script>
+<!-- Catalog scripts are static + deferred so they download in parallel (not one-by-one after DOMContentLoaded) and run in this order before the homepage renderer. -->
+<script defer src="product-config.js?v=20260819audit"></script>
+<script defer src="product-utils.js?v=20260820stock"></script>
+<script defer src="product-catalog-sync.js?v=20260604"></script>
+<script defer src="category-products.js?v=20260820clean"></script>
+<script defer src="product-links-data.js?v=20260604"></script>
+<script defer src="product-catalog-loader.js?v=20260604"></script>
+<script defer src="index-home-muslim-abaya.js?v=20261002css"></script>
+<script defer src="index-catalog-defer.js?v=20261002par"></script>
     
 <section id="main-video-section" style="background:#fff; padding:25px 15px; scroll-margin-top:100px;">
     <div class="lux-video-wrap">
