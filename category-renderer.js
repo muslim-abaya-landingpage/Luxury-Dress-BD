@@ -2588,13 +2588,26 @@ function buildShopSidebar(categoryKey, products) {
    SECTION 11 ★: প্রোডাক্ট কার্ডের ছবি ব্লক
    কার্ডের উপরের ছবি (হোভার করলে দ্বিতীয় ছবি দেখানো, sale ব্যাজ ইত্যাদি)।
    ---------------------------------------------------------------------- */
+/* 480px card thumbnail: images/card/<original path>.webp (falls back to the original on 404) */
+function deriveCardThumbSrc(src) {
+  if (!src || /^(https?:)?\/\//i.test(src) || /[?#]/.test(src)) return "";
+  var m = String(src).replace(/^\.?\//, "");
+  if (m.indexOf("images/") !== 0 || m.indexOf("images/card/") === 0 || m.indexOf("images/hero-banner/") === 0) {
+    return "";
+  }
+  return "images/card/" + m + ".webp";
+}
 function buildCardImageBlock(p, idx, categoryKey, allProducts) {
   var main = resolveCardImageSrc(p);
   var card = resolveCardImageCardSrc(p);
   var hover = resolveCardHoverImage(p, allProducts);
   var imgFallback = getCategoryFallbackImage(categoryKey || "");
   var fb = imgFallback.replace(/'/g, "\\'");
-  var errOn = "this.onerror=null;this.removeAttribute('srcset');this.src='" + fb + "'";
+  var thumb = !(card && card !== main) ? deriveCardThumbSrc(main) : "";
+  var errOn = thumb
+    ? "var f=this.getAttribute('data-full');if(f&&this.src.indexOf('/images/card/')>-1){this.src=f;return}this.onerror=null;this.removeAttribute('srcset');this.src='" + fb + "'"
+    : "this.onerror=null;this.removeAttribute('srcset');this.src='" + fb + "'";
+  var eager = idx < 2 && document.documentElement.hasAttribute("data-shop-category");
   var hoverHtml = hover
     ? '<img class="card-img-hover" src="' +
       escapeHtml(hover) +
@@ -2618,12 +2631,15 @@ function buildCardImageBlock(p, idx, categoryKey, allProducts) {
     stockImageBadgeHtml(p) +
     '<span class="card-img-stack">' +
     '<img class="card-img-primary" src="' +
-    escapeHtml(main) +
+    escapeHtml(thumb || main) +
     '"' +
+    (thumb ? ' data-full="' + escapeHtml(main) + '"' : "") +
     srcsetHtml +
     ' alt="' +
     escapeHtml(p.name) +
-    '" loading="lazy" decoding="async" onerror="' +
+    '"' +
+    (eager ? (idx === 0 ? ' fetchpriority="high"' : "") : ' loading="lazy"') +
+    ' decoding="async" onerror="' +
     errOn +
     '">' +
     hoverHtml +
