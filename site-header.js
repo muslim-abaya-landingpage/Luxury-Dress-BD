@@ -342,7 +342,7 @@ function buildNavMenuItems() {
     '<a href="/signin" aria-label="Account">' + ICON_USER + '</a>' +
     '<button type="button" class="nav-menu-btn" onclick="window.toggleAbayaMenu()" aria-label="Menu">' + ICON_MENU + '</button>' +
     '</div></div></div>' +
-    '<div class="site-search-drawer" id="siteSearchDrawer" aria-hidden="true">' +
+    '<div class="site-search-drawer" id="siteSearchDrawer" aria-hidden="true" inert>' +
     '<div class="custom-container site-search-inner">' +
     '<div class="site-search-row">' +
     '<form class="site-search-form" id="siteSearchForm" role="search" autocomplete="off">' +
@@ -540,6 +540,8 @@ function buildNavMenuItems() {
     function setSearchOpen(open) {
       document.body.classList.toggle('site-search-open', open);
       drawer.setAttribute('aria-hidden', open ? 'false' : 'true');
+      if (open) drawer.removeAttribute('inert');
+      else drawer.setAttribute('inert', '');
       openBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
       if (open) {
         if (typeof window.closeCartDrawer === 'function') window.closeCartDrawer();

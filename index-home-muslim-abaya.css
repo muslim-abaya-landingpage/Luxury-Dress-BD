@@ -126,22 +126,33 @@
   z-index: 3;
   left: 0;
   right: 0;
-  bottom: 16px;
+  bottom: 8px;
   display: flex;
-  gap: 8px;
+  gap: 0;
   justify-content: center;
 }
 .home-hero-dots button {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+.home-hero-dots button::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  border: none;
   background: rgba(255, 255, 255, 0.55);
-  cursor: pointer;
-  padding: 0;
+  transform: translate(-50%, -50%);
   transition: width 0.2s ease, background 0.2s ease;
 }
-.home-hero-dots button.is-active {
+.home-hero-dots button.is-active::before {
   width: 22px;
   border-radius: 6px;
   background: #fff;
