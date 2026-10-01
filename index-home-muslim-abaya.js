@@ -528,11 +528,28 @@
   /* Slides 2+ stay as a 1px placeholder until the page has loaded (or first touch), so ~500 KB of
      banner images never compete with the first-viewport LCP image. */
   var HERO_PLACEHOLDER = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+  /* Slides with generated 640/960px variants (images/hero-banner/<base>-640.webp / -960.webp). */
+  var HERO_VARIANT_BASES = {
+    "muslim-abaya-homepage-hero-banner": 1,
+    "premium-black-3-part-abaya-set-hero-banner-1920x840": 1,
+    "muslim-abaya-premium-black-floral-embroidery-niqab-abaya-hero-banner-1920x840": 1,
+    "emium-short-khimar-hijab-hero-banner-1920x840": 1,
+    "premium-white-cotton-panjabi-hero-banner-1920x840": 1
+  };
+  function heroSrcsetFor(src) {
+    var m = /^images\/hero-banner\/(.+)\.webp$/.exec(String(src || ""));
+    if (!m || !HERO_VARIANT_BASES[m[1]]) return "";
+    var base = "images/hero-banner/" + m[1];
+    return base + "-640.webp 640w, " + base + "-960.webp 960w, " + src + " 1920w";
+  }
   var heroSlidesArmed = false;
   function activateHeroSlideImages() {
     document.querySelectorAll("#homeHero img[data-src]").forEach(function (im) {
       var real = im.getAttribute("data-src");
+      var set = im.getAttribute("data-srcset");
       im.removeAttribute("data-src");
+      im.removeAttribute("data-srcset");
+      if (set) im.srcset = set;
       if (real) im.src = real;
     });
   }
@@ -563,7 +580,12 @@
       " src='" +
       (isFirst
         ? escapeHtml(isLcpHeroSrc(img) ? "images/hero-banner/hero-lcp-960.webp" : img)
-        : HERO_PLACEHOLDER + "' data-src='" + escapeHtml(img)) +
+        : HERO_PLACEHOLDER +
+          "' data-src='" +
+          escapeHtml(img) +
+          (heroSrcsetFor(img)
+            ? "' data-srcset='" + escapeHtml(heroSrcsetFor(img)) + "' sizes='100vw"
+            : "")) +
       "' alt='" +
       escapeHtml(alt) +
       "' width='1920' height='840' decoding='" +

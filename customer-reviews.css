@@ -391,22 +391,34 @@
 .ma-reviews-dots {
   display: flex;
   justify-content: center;
-  gap: 6px;
-  margin-top: 2px;
+  gap: 0;
+  margin-top: 0;
 }
 
 .ma-reviews-dot {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  border: none;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.ma-reviews-dot::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  border: none;
-  padding: 0;
   background: var(--ma-line);
-  cursor: pointer;
+  transform: translate(-50%, -50%);
   transition: background 0.2s ease, width 0.2s ease;
 }
 
-.ma-reviews-dot.is-active {
+.ma-reviews-dot.is-active::before {
   background: var(--ma-accent);
   width: 14px;
   border-radius: 3px;

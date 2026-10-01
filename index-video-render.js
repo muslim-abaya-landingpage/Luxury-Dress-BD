@@ -30,7 +30,7 @@
           "</button>" +
           "</div>" +
           '<div class="video-content">' +
-          "<h4>" + title + "</h4>" +
+          "<h3>" + title + "</h3>" +
           "<p>" + desc + "</p>" +
           "</div>" +
           "</div>"
