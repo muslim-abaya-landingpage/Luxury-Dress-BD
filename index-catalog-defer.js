@@ -48,7 +48,10 @@
     // fetch and execute it a second time — just move on to the next one.
     var existing = document.querySelector('script[src*="' + base + '"]');
     if (existing) {
-      if (existing.getAttribute("data-loaded") === "1" || existing.hasAttribute("data-ma-loaded")) {
+      // Static <script defer> tags in index.html run (in order) before this file,
+      // so they are already executed here; only wait for scripts injected by other loaders.
+      var isStatic = !existing.hasAttribute("data-ma-loaded") && existing.getAttribute("data-loaded") !== "1" && !existing.async;
+      if (isStatic || existing.getAttribute("data-loaded") === "1" || existing.hasAttribute("data-ma-loaded")) {
         loadAt(i + 1);
       } else {
         existing.addEventListener("load", function () { loadAt(i + 1); }, { once: true });
