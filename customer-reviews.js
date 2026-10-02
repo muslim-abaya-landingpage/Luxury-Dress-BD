@@ -2,7 +2,7 @@
  * Muslim Abaya — Premium Pro client reviews (real Messenger / WhatsApp screenshots).
  */
 (function (global) {
-  var VERSION = "20261003auto";
+  var VERSION = "20261003smooth";
   var SKIP_PATH =
     /^\/(checkout|signin|signup|thank-you|success|privacy|terms|refund)(\/|$)/i;
 
@@ -236,77 +236,150 @@
     var resumeTimer = null;
 
     var reduceMotion = !!(global.matchMedia && global.matchMedia("(prefers-reduced-motion: reduce)").matches);
-    // Continuous, seamless auto-running marquee (slow right-to-left drift). Reduced-motion
-    // visitors keep the old calm "one card every few seconds" behaviour.
-    var marquee = n >= 2 && !reduceMotion;
+    var canAnimate = typeof Element !== "undefined" && typeof Element.prototype.animate === "function";
+    // Continuous, seamless auto-running marquee (slow right-to-left drift) driven by a
+    // compositor-run CSS transform animation (Web Animations API): sub-pixel smooth, no
+    // per-frame JavaScript. Reduced-motion visitors (or very old browsers) keep the calm
+    // "one card every few seconds" scroll behaviour.
+    var marquee = n >= 2 && !reduceMotion && canAnimate;
 
-    var STEP_MS = 3200;      // reduced-motion step autoplay interval
+    var STEP_MS = 3200;      // step autoplay interval (fallback mode)
     var SPEED = 38;          // marquee drift, px per second
     var RESUME_MS = 2200;    // resume this long after the visitor stops interacting
+    var GLIDE_MS = 450;      // arrow / dot glide duration
 
     var autoplayTimer = null;
     var allCards = Array.prototype.slice.call(cards);
+    var rail = null;         // wrapper that gets transformed
+    var anim = null;         // the looping animation
     var setW = 0;            // width of one full set of reviews (cards + gaps)
-    var pos = 0;             // marquee position (float)
-    var lastTs = 0;
-    var rafId = 0;
-    var dotTick = 0;
+    var duration = 0;        // ms for one loop
+    var glideRaf = 0;
+    var dragging = false;
+    var dotTimer = 0;
 
     function isPausedNow() {
-      return isHoverPaused || isOffscreen || isHidden;
+      return isHoverPaused || isOffscreen || isHidden || dragging || !!glideRaf;
     }
 
     function wrap(i) {
       return ((i % n) + n) % n;
     }
 
-    /* ---------- marquee helpers ---------- */
+    /* ---------- marquee ---------- */
 
     function measureSet() {
-      // sub-pixel accurate (offsetLeft is rounded), so the loop seam stays invisible
+      // sub-pixel accurate so the loop seam is invisible
       var first = allCards[0].getBoundingClientRect();
       var last = allCards[n - 1].getBoundingClientRect();
       var gap = n > 1 ? allCards[1].getBoundingClientRect().left - first.right : 0;
       setW = last.right - first.left + gap;
     }
 
-    function buildClones() {
+    function removeClones() {
+      Array.prototype.forEach.call(track.querySelectorAll('[data-ma-clone="1"]'), function (el) {
+        el.parentNode.removeChild(el);
+      });
+    }
+
+    function buildRail() {
+      if (!rail) {
+        var cs = global.getComputedStyle(track);
+        rail = document.createElement("div");
+        rail.className = "ma-reviews-rail";
+        rail.style.cssText =
+          "display:flex;flex:0 0 auto;gap:" + (cs.columnGap && cs.columnGap !== "normal" ? cs.columnGap : "20px") +
+          ";will-change:transform;user-select:none;-webkit-user-select:none";
+        allCards.forEach(function (c) { rail.appendChild(c); });
+        track.appendChild(rail);
+        // the track becomes a clipping window; vertical page scroll still works (touch-action)
+        track.style.overflow = "hidden";
+        track.style.scrollSnapType = "none";
+        track.style.touchAction = "pan-y";
+        track.style.cursor = "grab";
+      }
+      removeClones();
       measureSet();
-      if (setW <= 0) return false;
-      // Need content for [0.5 set .. 1.5 set] + one viewport, so enough sets in total.
-      var sets = Math.ceil(1.5 + track.clientWidth / setW) + 1;
-      for (var s = 1; s < sets; s++) {
+      if (!(setW > 0)) return false;
+      var sets = Math.ceil(track.clientWidth / setW) + 1; // enough copies to fill the window while looping
+      for (var s = 1; s <= sets; s++) {
         for (var c = 0; c < n; c++) {
           var clone = allCards[c].cloneNode(true);
           clone.setAttribute("aria-hidden", "true");
           clone.setAttribute("data-ma-clone", "1");
           clone.setAttribute("inert", "");
-          track.appendChild(clone);
+          rail.appendChild(clone);
         }
       }
-      track.style.scrollSnapType = "none"; // snapping would fight the continuous drift
-      pos = setW; // start in the middle set so there is room on both sides
-      track.scrollLeft = pos;
       return true;
     }
 
-    function normalize() {
-      if (!setW) return;
-      var cur = track.scrollLeft;
-      var fixed = cur;
-      while (fixed >= setW * 1.5) fixed -= setW;
-      while (fixed < setW * 0.5) fixed += setW;
-      if (fixed !== cur) track.scrollLeft = fixed;
-      pos = fixed;
+    function startAnimation(fromFraction) {
+      if (anim) anim.cancel();
+      duration = (setW / SPEED) * 1000;
+      anim = rail.animate(
+        [{ transform: "translate3d(0,0,0)" }, { transform: "translate3d(" + -setW + "px,0,0)" }],
+        { duration: duration, iterations: Infinity, easing: "linear" }
+      );
+      anim.currentTime = (fromFraction || 0) * duration + duration; // keep it positive after any rewind
+      syncPlayState();
+    }
+
+    function fraction() {
+      var t = Number(anim.currentTime) || 0;
+      return (((t % duration) + duration) % duration) / duration;
+    }
+
+    function syncPlayState() {
+      if (!anim) return;
+      if (isPausedNow()) {
+        if (anim.playState === "running") anim.pause();
+      } else if (anim.playState !== "running") {
+        anim.play();
+      }
+    }
+
+    // shift the loop position by dx pixels (positive = content moves left)
+    function shiftBy(dx) {
+      var t = Number(anim.currentTime) || 0;
+      var next = t + (dx / SPEED) * 1000;
+      while (next < duration) next += duration; // stay in a positive iteration
+      anim.currentTime = next;
+    }
+
+    function glide(deltaPx) {
+      cancelAnimationFrame(glideRaf);
+      var start = null;
+      var done = 0;
+      function tick(ts) {
+        if (start === null) start = ts;
+        var p = Math.min(1, (ts - start) / GLIDE_MS);
+        var eased = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+        shiftBy((deltaPx * eased) - done);
+        done = deltaPx * eased;
+        if (p < 1) {
+          glideRaf = requestAnimationFrame(tick);
+        } else {
+          glideRaf = 0;
+          syncPlayState();
+        }
+      }
+      if (anim && anim.playState === "running") anim.pause();
+      glideRaf = requestAnimationFrame(tick);
+    }
+
+    function cardCenterOffset(card) {
+      var r = card.getBoundingClientRect();
+      var t = track.getBoundingClientRect();
+      return r.left + r.width / 2 - (t.left + t.width / 2);
     }
 
     function nearestIndex() {
       var all = track.querySelectorAll(".ma-review-shot-card");
-      var center = track.scrollLeft + track.clientWidth / 2;
       var best = 0;
       var bestDist = Infinity;
       for (var c = 0; c < all.length; c++) {
-        var dist = Math.abs(center - (all[c].offsetLeft + all[c].offsetWidth / 2));
+        var dist = Math.abs(cardCenterOffset(all[c]));
         if (dist < bestDist) {
           bestDist = dist;
           best = c;
@@ -316,75 +389,42 @@
     }
 
     function cardStep() {
-      return allCards[0].offsetWidth + (n > 1 ? allCards[1].offsetLeft - allCards[0].offsetLeft - allCards[0].offsetWidth : 0);
-    }
-
-    function frame(ts) {
-      rafId = global.requestAnimationFrame(frame);
-      if (!lastTs) {
-        lastTs = ts;
-        return;
-      }
-      var dt = Math.min(ts - lastTs, 64);
-      lastTs = ts;
-      if (isPausedNow()) {
-        pos = track.scrollLeft; // stay in sync with wherever the visitor left it
-        return;
-      }
-      pos += (SPEED * dt) / 1000;
-      if (pos >= setW * 1.5) pos -= setW;
-      track.scrollLeft = pos;
-      dotTick += dt;
-      if (dotTick > 300) {
-        dotTick = 0;
-        index = nearestIndex();
-        updateDots();
-      }
-    }
-
-    function startMarquee() {
-      if (rafId) return;
-      lastTs = 0;
-      rafId = global.requestAnimationFrame(frame);
+      var a = allCards[0].getBoundingClientRect();
+      var gap = n > 1 ? allCards[1].getBoundingClientRect().left - a.right : 0;
+      return a.width + gap;
     }
 
     /* ---------- shared UI ---------- */
 
-    // IMPORTANT: only scroll the track horizontally (never the page).
-    // Using scrollIntoView() here previously moved the whole page
-    // vertically whenever the section wasn't fully in view, which
-    // yanked users down to the reviews while they were browsing
-    // products above. track.scrollTo() only affects this element.
+    // IMPORTANT: only moves the carousel itself (never scrolls the page).
     function scrollTo(i) {
       i = wrap(i);
-      var target = allCards[i];
-      if (marquee) {
-        // pick the copy of card i that is closest to what the visitor is looking at now
+      index = i;
+      if (marquee && anim) {
+        // glide to the copy of card i that is closest to the middle of the window
         var all = track.querySelectorAll(".ma-review-shot-card");
-        var center = track.scrollLeft + track.clientWidth / 2;
-        var bestDist = Infinity;
+        var bestDelta = Infinity;
         for (var c = i; c < all.length; c += n) {
-          var d = Math.abs(center - (all[c].offsetLeft + all[c].offsetWidth / 2));
-          if (d < bestDist) {
-            bestDist = d;
-            target = all[c];
-          }
+          var d = cardCenterOffset(all[c]);
+          if (Math.abs(d) < Math.abs(bestDelta)) bestDelta = d;
+        }
+        if (isFinite(bestDelta)) glide(bestDelta);
+      } else {
+        var card = allCards[i];
+        if (card) {
+          var left = card.offsetLeft - (track.clientWidth - card.offsetWidth) / 2;
+          track.scrollTo({ left: left, behavior: "smooth" });
         }
       }
-      index = i;
-      if (!target) return;
-      var left = target.offsetLeft - (track.clientWidth - target.offsetWidth) / 2;
-      track.scrollTo({ left: left, behavior: "smooth" });
       updateDots();
     }
 
     function stepBy(dir) {
-      if (!marquee) {
-        scrollTo(index + dir);
+      if (marquee && anim) {
+        glide(dir * cardStep());
         return;
       }
-      normalize();
-      track.scrollBy({ left: dir * cardStep(), behavior: "smooth" });
+      scrollTo(index + dir);
     }
 
     function updateDots() {
@@ -416,31 +456,45 @@
 
     function pauseThenResume() {
       isHoverPaused = true;
+      syncPlayState();
       clearTimeout(resumeTimer);
       resumeTimer = setTimeout(function () {
         isHoverPaused = false;
+        syncPlayState();
       }, marquee ? RESUME_MS : STEP_MS);
     }
 
-    track.addEventListener("mouseenter", function () { clearTimeout(resumeTimer); isHoverPaused = true; });
-    track.addEventListener("mouseleave", function () { isHoverPaused = false; });
-    track.addEventListener("touchstart", function () { clearTimeout(resumeTimer); isHoverPaused = true; }, { passive: true });
+    function hold() {
+      clearTimeout(resumeTimer);
+      isHoverPaused = true;
+      syncPlayState();
+    }
+    function release() {
+      isHoverPaused = false;
+      syncPlayState();
+    }
+
+    track.addEventListener("mouseenter", hold);
+    track.addEventListener("mouseleave", function () { if (!dragging) release(); });
+    track.addEventListener("focusin", hold);
+    track.addEventListener("focusout", release);
+    track.addEventListener("touchstart", hold, { passive: true });
     track.addEventListener("touchend", pauseThenResume, { passive: true });
     track.addEventListener("touchcancel", pauseThenResume, { passive: true });
-    track.addEventListener("focusin", function () { isHoverPaused = true; });
-    track.addEventListener("focusout", function () { isHoverPaused = false; });
-    document.addEventListener("visibilitychange", function () { isHidden = !!document.hidden; });
+    document.addEventListener("visibilitychange", function () {
+      isHidden = !!document.hidden;
+      syncPlayState();
+    });
 
-    // Only auto-advance while the carousel is actually visible on
-    // screen. This is the main fix for the "forced scroll down"
-    // complaint: previously autoplay kept firing (and yanking the
-    // page) even while the user had scrolled up to look at products.
+    // Only run while the carousel is actually visible on screen (also stops the old
+    // "page jumps down while browsing products" problem).
     if ("IntersectionObserver" in global) {
       var io = new IntersectionObserver(
         function (entries) {
           entries.forEach(function (entry) {
             isOffscreen = !entry.isIntersecting;
           });
+          syncPlayState();
         },
         { threshold: 0.2 }
       );
@@ -477,15 +531,14 @@
       });
     }
 
-    // After the visitor (or a smooth scroll) stops moving the track: wrap into the middle set
-    // (identical content, so the jump is invisible) and refresh the active dot.
+    // fallback mode: after native scrolling stops, refresh the active dot
     var scrollTimer;
     track.addEventListener(
       "scroll",
       function () {
+        if (marquee) return;
         clearTimeout(scrollTimer);
         scrollTimer = setTimeout(function () {
-          if (marquee) normalize();
           index = nearestIndex();
           updateDots();
         }, 120);
@@ -495,6 +548,44 @@
 
     updateDots();
 
+    function enableDrag() {
+      var startX = 0;
+      var startT = 0;
+      track.addEventListener("pointerdown", function (ev) {
+        if (!anim || (ev.pointerType === "mouse" && ev.button !== 0)) return;
+        cancelAnimationFrame(glideRaf);
+        glideRaf = 0;
+        dragging = true;
+        startX = ev.clientX;
+        startT = Number(anim.currentTime) || 0;
+        clearTimeout(resumeTimer);
+        syncPlayState();
+        track.style.cursor = "grabbing";
+        try { track.setPointerCapture(ev.pointerId); } catch (e) {}
+      });
+      track.addEventListener("pointermove", function (ev) {
+        if (!dragging || !anim) return;
+        var next = startT - ((ev.clientX - startX) / SPEED) * 1000;
+        while (next < duration) next += duration;
+        anim.currentTime = next;
+      });
+      function endDrag() {
+        if (!dragging) return;
+        dragging = false;
+        track.style.cursor = "grab";
+        index = nearestIndex();
+        updateDots();
+        pauseThenResume();
+      }
+      track.addEventListener("pointerup", endDrag);
+      track.addEventListener("pointercancel", endDrag);
+      // keyboard: the track is focusable (tabindex=0)
+      track.addEventListener("keydown", function (ev) {
+        if (ev.key === "ArrowRight") { ev.preventDefault(); stepBy(1); pauseThenResume(); }
+        else if (ev.key === "ArrowLeft") { ev.preventDefault(); stepBy(-1); pauseThenResume(); }
+      });
+    }
+
     // Autoplay is switched on by the caller once the stylesheet has loaded: before that the
     // cards are unstyled, so their widths (needed to build the seamless loop) are meaningless.
     var activated = false;
@@ -503,26 +594,31 @@
       tries = tries || 0;
       if (marquee) {
         measureSet();
-        if (setW <= 0 && tries < 8) {
+        if (!(setW > 0) && tries < 8) {
           setTimeout(function () { activate(tries + 1); }, 400);
           return;
         }
       }
       activated = true;
-      if (marquee && buildClones()) {
+      if (marquee && buildRail()) {
+        startAnimation(0);
+        enableDrag();
+        dotTimer = setInterval(function () {
+          if (isPausedNow() && !dragging) return;
+          var i = nearestIndex();
+          if (i !== index) {
+            index = i;
+            updateDots();
+          }
+        }, 300);
         var resizeTimer;
         global.addEventListener("resize", function () {
           clearTimeout(resizeTimer);
           resizeTimer = setTimeout(function () {
-            // rebuild the clone sets for the new width
-            Array.prototype.forEach.call(track.querySelectorAll('[data-ma-clone="1"]'), function (el) {
-              el.parentNode.removeChild(el);
-            });
-            track.scrollLeft = 0;
-            buildClones();
+            var f = anim ? fraction() : 0;
+            if (buildRail()) startAnimation(f);
           }, 200);
         });
-        startMarquee();
       } else {
         marquee = false;
         startStepAutoplay();

@@ -602,7 +602,7 @@ esc(SOCIAL.linkedin) +
       return;
     }
     var s = document.createElement("script");
-    s.src = "customer-reviews.js?v=20261003auto";
+    s.src = "customer-reviews.js?v=20261003smooth";
     s.onload = function () {
       if (window.MaCustomerReviews && typeof window.MaCustomerReviews.mount === "function") {
         window.MaCustomerReviews.mount();
