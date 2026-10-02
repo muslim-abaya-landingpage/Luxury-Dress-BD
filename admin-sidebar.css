@@ -1,0 +1,30 @@
+/* Admin sidebar — "midnight & gold" (applies to .adm-sidebar and .pn-side pages) */
+.adm-sidebar,.pn-side{
+  background:radial-gradient(260px 220px at 0% 0%,rgba(212,167,44,.20),transparent 65%),radial-gradient(240px 260px at 100% 100%,rgba(212,167,44,.10),transparent 60%),linear-gradient(180deg,#17151b 0%,#0d0c10 100%) !important;
+  color:#cfc8b6 !important;border-right:1px solid rgba(212,167,44,.18) !important;
+}
+.adm-sidebar-brand{border-bottom:1px solid rgba(255,255,255,.08) !important;padding:20px 18px 17px !important}
+.adm-sidebar-crest{width:38px !important;height:38px !important;border-radius:11px !important;background:#0e0d10 url("assets/brand/muslim-abaya-logo-icon-dark.svg") center/cover no-repeat !important;box-shadow:0 0 0 1px rgba(212,167,44,.5),0 6px 16px rgba(212,167,44,.25)}
+.adm-sidebar-brand-text .t1{color:#fff !important;font-family:Georgia,"Times New Roman",serif;font-size:16px !important;letter-spacing:.02em}
+.adm-sidebar-brand-text .t2{color:#d4a72c !important;text-transform:uppercase;letter-spacing:.22em !important;font-size:9.5px !important;font-weight:700}
+.adm-sidebar-close{color:#fff !important;border-color:rgba(255,255,255,.25) !important}
+.adm-sidebar-nav{padding:14px 12px !important;gap:3px !important}
+.adm-sidebar-item,.pn-nav a{position:relative;color:#bdb6a4 !important;border-radius:11px !important;padding:10px 12px !important;font-weight:500;transition:background .15s,color .15s,transform .15s}
+.adm-sidebar-item svg{opacity:.8 !important;width:18px !important;height:18px !important}
+.adm-sidebar-item:hover,.pn-nav a:hover{background:rgba(255,255,255,.07) !important;color:#fff !important;transform:translateX(2px)}
+.adm-sidebar-item.is-current,.pn-nav a.active{
+  background:linear-gradient(90deg,rgba(212,167,44,.26),rgba(212,167,44,.06)) !important;color:#f6e3a6 !important;font-weight:700 !important;
+  box-shadow:inset 0 0 0 1px rgba(212,167,44,.28)}
+.adm-sidebar-item.is-current::before,.pn-nav a.active::before{content:"";position:absolute;left:-12px;top:20%;bottom:20%;width:4px;border-radius:0 4px 4px 0;background:#d4a72c;box-shadow:0 0 12px rgba(212,167,44,.8)}
+.adm-sidebar-item.is-current svg{color:#e2b83d;opacity:1 !important}
+.adm-sidebar-foot,.pn-side-foot{border-top:1px solid rgba(255,255,255,.08) !important}
+.adm-sidebar .adm-btn-secondary,.pn-side .pn-btn{background:rgba(255,255,255,.06) !important;border:1px solid rgba(212,167,44,.35) !important;color:#f3ecda !important;border-radius:10px}
+.adm-sidebar .adm-btn-secondary:hover,.pn-side .pn-btn:hover{background:rgba(212,167,44,.2) !important}
+/* order-panel variant */
+.pn-brand{display:flex;align-items:center;gap:10px;font-family:Georgia,"Times New Roman",serif;color:#fff !important;padding:6px 8px 18px !important;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:12px}
+.pn-brand::before{content:"";width:36px;height:36px;border-radius:10px;flex:none;background:#0e0d10 url("assets/brand/muslim-abaya-logo-icon-dark.svg") center/cover;box-shadow:0 0 0 1px rgba(212,167,44,.5)}
+.pn-brand span{color:#d4a72c !important}
+.pn-nav a{margin-bottom:3px !important}
+.pn-side-foot{color:#a79f8b !important;padding-top:14px !important}
+@media (max-width:760px){.adm-sidebar-item.is-current::before,.pn-nav a.active::before{left:-12px}}
+@media (prefers-reduced-motion:reduce){.adm-sidebar-item,.pn-nav a{transition:none}.adm-sidebar-item:hover,.pn-nav a:hover{transform:none}}

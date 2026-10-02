@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="admin.css?v=20260929modern1">
   <link rel="stylesheet" href="admin-dash.css?v=20261003dz">
 <script src="config.js"></script>
+  <link rel="stylesheet" href="admin-sidebar.css?v=20261003sb">
 </head>
 <body class="adm-body">
   <div class="adm-shell">
@@ -105,6 +106,7 @@
   <script src="admin-config.js"></script>
   <script src="admin-api.js?v=20260912v2"></script>
   <script src="admin-guard.js?v=20261003fast"></script>
+  <script src="admin-invoice.js?v=20261003inv"></script>
   <script>
     (function () {
       var session = null;
@@ -135,26 +137,7 @@
         return "https://wa.me/" + digits + "?text=" + encodeURIComponent(text || "");
       }
 
-      function printInvoice(o) {
-        var w = window.open("", "_blank", "width=420,height=600");
-        if (!w) { alert("পপ-আপ ব্লক করা আছে। ব্রাউজারে পপ-আপ অনুমতি দিন।"); return; }
-        var html = "<!DOCTYPE html><html><head><meta charset='utf-8'><title>Invoice " + (o.orderId || "") + "</title>" +
-          "<style>body{font-family:Arial,sans-serif;padding:20px;font-size:13px;color:#111}h2{margin:0 0 4px}p{margin:2px 0}table{width:100%;border-collapse:collapse;margin-top:12px}td,th{border:1px solid #ccc;padding:6px;text-align:left;font-size:12px}.brand{font-weight:700;font-size:16px}.tot{font-weight:700;font-size:14px;margin-top:10px}</style></head><body>" +
-          "<div class='brand'>Muslim Abaya</div>" +
-          "<p>Order Invoice</p><hr>" +
-          "<p><strong>Order ID:</strong> " + (o.orderId || "—") + "</p>" +
-          "<p><strong>তারিখ:</strong> " + (o.time || "") + "</p>" +
-          "<p><strong>কাস্টমার:</strong> " + (o.name || "") + "</p>" +
-          "<p><strong>ফোন:</strong> " + (o.phone || "") + "</p>" +
-          "<p><strong>ঠিকানা/জেলা:</strong> " + (o.district || "") + "</p>" +
-          "<p><strong>পেমেন্ট:</strong> " + (o.payment || "") + "</p>" +
-          "<table><tr><th>প্রোডাক্ট বিবরণ</th></tr><tr><td>" + (o.design || "") + "</td></tr></table>" +
-          "<p class='tot'>মোট: ৳" + (o.total || 0) + "</p>" +
-          "<script>window.print();<" + "/script>" +
-          "</body></html>";
-        w.document.write(html);
-        w.document.close();
-      }
+      window.printInvoice = function (o) { window.MaInvoice.print(o); };
 
       var STATUS_COLORS = { pending: "#c9831a", confirmed: "#2a55a8", shipped: "#5b3aa6", delivered: "#16794a", cancelled: "#c0362c", returned: "#c0362c", other: "#9aa0a9" };
 
