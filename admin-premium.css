@@ -1,0 +1,62 @@
+/* Premium layer for Product Manager / Product Links (loads last, scoped to .pl-admin) */
+.pl-admin{background:linear-gradient(180deg,#f7f4ec 0,#f3f4f6 260px);font-family:"Inter","Hind Siliguri",system-ui,sans-serif}
+.pl-admin .pl-admin-header{position:sticky;top:0;z-index:10;padding:18px 28px 16px;color:#f3ecda;
+  background:radial-gradient(520px 200px at 100% 0%,rgba(212,167,44,.30),transparent 65%),linear-gradient(135deg,#1b1a1f,#0e0d10);
+  border-bottom:1px solid rgba(212,167,44,.35);box-shadow:0 14px 30px -18px rgba(14,13,16,.6)}
+.pl-admin .pl-admin-header h1{font-family:Georgia,"Times New Roman",serif;font-size:1.65rem;letter-spacing:.01em;color:#fff;margin:6px 0 4px}
+.pl-admin .pl-admin-header h1::after{content:"";display:block;width:54px;height:3px;border-radius:3px;margin-top:8px;background:linear-gradient(90deg,#d4a72c,#f0cf6a)}
+.pl-admin .pl-admin-header p{opacity:1;color:#bdb6a4;font-size:.9rem}
+.pl-admin .pl-admin-header p strong{color:#e2b83d}
+.pl-admin .pl-back{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;color:#e8dfc4;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);text-decoration:none}
+.pl-admin .pl-back:hover{background:rgba(212,167,44,.25);color:#fff}
+.pl-admin .pl-toolbar{margin-top:14px;display:flex;flex-wrap:wrap;gap:10px}
+.pl-admin .pl-btn{font:inherit;font-weight:700;font-size:13.5px;padding:10px 18px;border-radius:11px;border:1px solid transparent;cursor:pointer;transition:transform .15s,box-shadow .15s,background .15s}
+.pl-admin .pl-btn:hover{transform:translateY(-1px)}
+.pl-admin .pl-btn-primary{background:linear-gradient(135deg,#e2b83d,#c9971c);color:#1a1405;box-shadow:0 8px 18px -8px rgba(212,167,44,.8)}
+.pl-admin .pl-btn-primary:hover{background:linear-gradient(135deg,#edc64f,#d4a72c)}
+.pl-admin .pl-btn-secondary{background:#14121a;color:#f6e3a6;border-color:#14121a;box-shadow:0 6px 14px -8px rgba(14,13,16,.7)}
+.pl-admin .pl-btn-secondary:hover{background:#2a2630}
+.pl-admin .pl-toolbar .pl-btn-secondary{background:rgba(255,255,255,.08);color:#f3ecda;border-color:rgba(255,255,255,.2);box-shadow:none}
+.pl-admin .pl-toolbar .pl-btn-secondary:hover{background:rgba(255,255,255,.16)}
+.pl-admin .pl-main{padding:22px 28px 60px;max-width:1280px}
+
+/* instructions as collapsible */
+.pl-admin details.pm-help{margin-bottom:18px;background:#fff;border:1px solid #e8e1cf;border-radius:14px;box-shadow:0 1px 2px rgba(20,22,26,.05)}
+.pl-admin details.pm-help summary{cursor:pointer;list-style:none;padding:13px 18px;font-weight:700;display:flex;align-items:center;gap:10px;color:#3a3a3a}
+.pl-admin details.pm-help summary::-webkit-details-marker{display:none}
+.pl-admin details.pm-help summary::before{content:"ℹ";width:24px;height:24px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;background:#fbf3df;color:#8f7428;font-weight:800}
+.pl-admin details.pm-help summary::after{content:"＋";margin-left:auto;color:#8f7428}
+.pl-admin details.pm-help[open] summary::after{content:"－"}
+.pl-admin details.pm-help .pl-steps{border:0;box-shadow:none;margin:0;padding:0 18px 16px;background:transparent}
+
+/* layout + category list */
+.pl-admin .pm-layout{grid-template-columns:minmax(240px,290px) 1fr;gap:22px}
+.pl-admin .pm-sidebar{background:#fff;border:1px solid #ebe5d4;border-radius:18px;padding:16px;box-shadow:0 10px 26px -18px rgba(20,22,26,.35)}
+.pl-admin .pm-sidebar h2{font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:#8f7428;margin-bottom:12px}
+.pl-admin .pm-cat-list{max-height:58vh;padding-right:2px}
+.pl-admin .pm-cat-btn{padding:11px 13px;border-radius:12px;background:#faf8f2;border:1px solid #efe9d8;font-weight:600;color:#2b2b2b;transition:background .15s,transform .15s}
+.pl-admin .pm-cat-btn:hover{background:#f4eed9;transform:translateX(2px)}
+.pl-admin .pm-cat-btn.is-active{background:linear-gradient(135deg,#1b1a1f,#0e0d10);color:#f6e3a6;border-color:#0e0d10;box-shadow:inset 3px 0 0 #d4a72c,0 10px 20px -12px rgba(14,13,16,.7)}
+.pl-admin .pm-cat-btn small{font-weight:500}
+.pl-admin .pm-add-cat{width:100%;margin-top:6px;border-radius:12px;padding:11px;font-weight:800}
+
+/* main column */
+.pl-admin .pm-cat-head h2{font-family:Georgia,"Times New Roman",serif;font-size:1.5rem}
+.pl-admin .pm-how-it-works{background:linear-gradient(135deg,#f3f9f1,#eef7ec);border:1px solid #cfe5c9;border-radius:14px;color:#1d4a2b}
+.pl-admin .pm-type-price-banner{background:linear-gradient(135deg,#fffaf0,#f8efd8);border:1px solid #ecdcae;border-radius:16px;padding:18px 20px}
+.pl-admin .pm-product-card{border:1px solid #ebe5d4;border-radius:16px;background:#fff;box-shadow:0 8px 22px -18px rgba(20,22,26,.4);transition:box-shadow .2s,transform .2s}
+.pl-admin .pm-product-card:hover{box-shadow:0 16px 32px -18px rgba(20,22,26,.45);transform:translateY(-1px)}
+.pl-admin .pm-product-head{background:linear-gradient(90deg,#fbf6e8,#fff);border-bottom:1px solid #f0e9d4;padding:12px 16px}
+.pl-admin .pm-product-head strong{font-size:14.5px;color:#14121a}
+.pl-admin .pm-product-body{padding:16px;gap:12px 16px}
+.pl-admin .pm-field label{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:#7a7360}
+.pl-admin .pm-field input,.pl-admin .pm-field textarea,.pl-admin .pm-field select{border:1.5px solid #e4ddc9;border-radius:10px;padding:10px 12px;background:#fdfcf8;transition:border-color .15s,box-shadow .15s}
+.pl-admin .pm-field input:focus,.pl-admin .pm-field textarea:focus,.pl-admin .pm-field select:focus{outline:0;border-color:#14121a;background:#fff;box-shadow:0 0 0 4px rgba(212,167,44,.22)}
+.pl-admin .pm-search-row input[type="search"]{border:1.5px solid #e4ddc9;border-radius:12px;padding:11px 14px;background:#fff}
+.pl-admin .pm-search-row input[type="search"]:focus{outline:0;border-color:#14121a;box-shadow:0 0 0 4px rgba(212,167,44,.22)}
+.pl-admin .pm-dropzone-drop,.pl-admin .pm-gallery-add{border-color:#d4a72c !important;background:#fffaf0}
+.pl-admin .pm-modal-box{border-radius:20px;border-top:4px solid #d4a72c;box-shadow:0 30px 70px rgba(14,13,16,.35)}
+.pl-admin .pl-toast{border-radius:12px;background:#14121a;color:#f6e3a6;border:1px solid rgba(212,167,44,.5)}
+
+@media (max-width:800px){.pl-admin .pl-admin-header{padding:14px 16px}.pl-admin .pl-main{padding:16px 14px 50px}.pl-admin .pm-layout{grid-template-columns:1fr}.pl-admin .pl-admin-header h1{font-size:1.35rem}}
+@media (prefers-reduced-motion:reduce){.pl-admin .pl-btn,.pl-admin .pm-cat-btn,.pl-admin .pm-product-card{transition:none}.pl-admin .pl-btn:hover,.pl-admin .pm-cat-btn:hover,.pl-admin .pm-product-card:hover{transform:none}}
