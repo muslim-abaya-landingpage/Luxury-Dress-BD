@@ -4949,11 +4949,12 @@ function adminOrderList_(e) {
   for (var i = rows.length - 1; i >= 0; i--) {
     var r = rows[i];
     if (!r[1] &amp;&amp; !r[2]) continue;
-    var o = admRowToOrder_(r, i + 2);
     counts.all++;
-    if (counts.hasOwnProperty(o.status)) counts[o.status]++;
+    var st = String(r[9] || 'Pending') || 'Pending';
+    if (counts.hasOwnProperty(st)) counts[st]++;
     if (dayKeyFromCell_(r[0]) === todayKey) counts.today++;
     if (orders.length &lt; limit) {
+      var o = admRowToOrder_(r, i + 2);
       o.blocked = Object.prototype.hasOwnProperty.call(blockedMap, o.phone);
       orders.push(o);
     }
