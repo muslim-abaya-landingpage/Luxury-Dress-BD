@@ -1124,9 +1124,15 @@
       function run() {
         ensureTikTokPixelLoaded();
       }
-      ["pointerdown", "keydown", "touchstart", "scroll"].forEach(function (ev) {
-        window.addEventListener(ev, run, { once: true, passive: true });
-      });
+      // ~3 s after load, in an idle slot (not at the first scroll/tap, which made it compete with browsing)
+      function afterLoad() {
+        window.setTimeout(function () {
+          if (typeof window.requestIdleCallback === "function") window.requestIdleCallback(run, { timeout: 2000 });
+          else run();
+        }, 3000);
+      }
+      if (document.readyState === "complete") afterLoad();
+      else window.addEventListener("load", afterLoad, { once: true });
       window.addEventListener("pagehide", run, { once: true });
     }
     scheduleTikTok();(function(){var fired=false;function fireLead(a){if(fired)return;fired=true;var label="";try{label=(a&&a.textContent||"").trim().slice(0,60);}catch(e){}if(typeof pushTrackingEvent==="function")pushTrackingEvent("generate_lead",{content_name:label||"WhatsApp/Messenger contact",content_category:"lead"});}document.addEventListener("click",function(ev){var a=ev.target&&ev.target.closest?ev.target.closest('a[href*="wa.me"],a[href*="m.me"]'):null;if(a)fireLead(a);},true);})();

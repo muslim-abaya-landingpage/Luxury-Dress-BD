@@ -876,9 +876,16 @@ function buildNavMenuItems() {
       fired = true;
       ensureGtmLoaded();
     }
-    ['pointerdown', 'keydown', 'touchstart', 'scroll'].forEach(function (ev) {
-      window.addEventListener(ev, run, { once: true, passive: true });
-    });
+    /* Load GTM ~3 s after the page has loaded, in an idle slot. Waiting for the first scroll/tap
+       instead made the heavy tracking scripts start exactly while the visitor began browsing. */
+    function afterLoad() {
+      window.setTimeout(function () {
+        if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(run, { timeout: 2000 });
+        else run();
+      }, 3000);
+    }
+    if (document.readyState === 'complete') afterLoad();
+    else window.addEventListener('load', afterLoad, { once: true });
     window.addEventListener('pagehide', run, { once: true });
     document.addEventListener('visibilitychange', function () {
       if (document.visibilityState === 'hidden') run();
