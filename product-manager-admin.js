@@ -585,6 +585,10 @@
 
     wireImageUploader(card, p);
     wireGalleryUploader(card, p);
+    (function () {
+      var pv = card.querySelector(".pm-dropzone-preview");
+      if (pv && p.image) probeImage(resolveImgForPreview(p.image), function (ok) { if (!ok) pv.classList.add("is-broken"); });
+    })();
 
     var bulkCheckEl = card.querySelector(".pm-bulk-check");
     if (bulkCheckEl) {
@@ -596,6 +600,99 @@
     }
 
     return card;
+  }
+
+  // ── ভাঙা ছবি শনাক্ত: একবার নতুন করে চেষ্টা (সদ্য আপলোড/ডিপ্লয় দেরি), না হলে লাল চিহ্ন ──
+  function watchImg(img, holder) {
+    if (!img || !holder) return;
+    var retried = false;
+    function mark() {
+      holder.classList.add("is-broken");
+      holder.title = "ছবি লোড হয়নি: " + (img.getAttribute("data-orig") || img.getAttribute("src"));
+    }
+    img.setAttribute("data-orig", img.getAttribute("src"));
+    img.addEventListener("error", function () {
+      if (!retried) {
+        retried = true;
+        var o = img.getAttribute("data-orig");
+        setTimeout(function () { img.src = o + (o.indexOf("?") === -1 ? "?" : "&") + "r=" + Date.now(); }, 1200);
+        return;
+      }
+      mark();
+    });
+    img.addEventListener("load", function () { holder.classList.remove("is-broken"); holder.removeAttribute("title"); });
+    if (img.complete && img.naturalWidth === 0 && img.getAttribute("src")) img.dispatchEvent(new Event("error"));
+  }
+
+  function probeImage(url, cb) {
+    var im = new Image();
+    var done = false;
+    function fin(ok) { if (!done) { done = true; cb(ok); } }
+    im.onload = function () { fin(true); };
+    im.onerror = function () { fin(false); };
+    setTimeout(function () { fin(false); }, 15000);
+    im.src = url;
+  }
+
+  // ── সব ছবি যাচাই: ভাঙা/ডুপ্লিকেট খুঁজে এক ক্লিকে ঠিক ──
+  function checkAllImages() {
+    var entries = [];
+    Object.keys(products).forEach(function (cat) {
+      (products[cat] || []).forEach(function (p) {
+        var seen = {};
+        if (p.image) { entries.push({ cat: cat, p: p, kind: "main", url: p.image }); seen[p.image] = true; }
+        (Array.isArray(p.images) ? p.images : []).forEach(function (u) {
+          entries.push({ cat: cat, p: p, kind: seen[u] ? "dup" : "gallery", url: u });
+          seen[u] = true;
+        });
+      });
+    });
+    var bg = document.createElement("div");
+    bg.className = "pm-modal";
+    bg.innerHTML = '<div class="pm-modal-box" style="max-width:720px;max-height:86vh;overflow:auto"><h3>ছবি যাচাই</h3><div id="pmChkBody">যাচাই হচ্ছে… 0/' + entries.length + '</div><div class="pm-modal-actions"><button type="button" class="pl-btn pl-btn-secondary" id="pmChkClose">বন্ধ করুন</button></div></div>';
+    document.body.appendChild(bg);
+    bg.querySelector("#pmChkClose").addEventListener("click", function () { bg.remove(); });
+    var body = bg.querySelector("#pmChkBody");
+    var idx = 0, finished = 0, active = 0, bad = [];
+    function next() {
+      while (active < 6 && idx < entries.length) {
+        (function (e) {
+          active++;
+          if (e.kind === "dup") { e.broken = "dup"; bad.push(e); active--; finished++; return; }
+          probeImage(resolveImgForPreview(e.url), function (ok) {
+            active--; finished++;
+            if (!ok) { e.broken = "missing"; bad.push(e); }
+            body.textContent = "যাচাই হচ্ছে… " + finished + "/" + entries.length;
+            if (finished === entries.length) report(); else next();
+          });
+        })(entries[idx++]);
+      }
+      if (finished === entries.length && !body.getAttribute("data-done")) report();
+    }
+    function report() {
+      body.setAttribute("data-done", "1");
+      if (!bad.length) { body.innerHTML = '<p style="color:#16794a;font-weight:700">✔ ' + entries.length + 'টি ছবির সবগুলো ঠিক আছে।</p>'; return; }
+      body.innerHTML = '<p><b>' + bad.length + 'টি সমস্যা</b> (মোট ' + entries.length + 'টি ছবির মধ্যে)।</p>' +
+        '<button type="button" class="pl-btn pl-btn-primary" id="pmChkFixAll">গ্যালারির সব সমস্যাযুক্ত ছবি সরান</button>' +
+        '<ul style="list-style:none;margin:12px 0 0;padding:0">' + bad.map(function (e, i) {
+          return '<li style="padding:8px 0;border-top:1px solid #eee;font-size:13px"><b>' + escapeAttr(e.p.name || e.p.id) + '</b> · ' + (e.kind === "main" ? "প্রধান ছবি" : "গ্যালারি") + ' — ' +
+            (e.broken === "dup" ? "ডুপ্লিকেট" : "লোড হয়নি") + '<br><code style="font-size:11px;word-break:break-all">' + escapeAttr(e.url) + '</code></li>';
+        }).join("") + "</ul>";
+      var fix = body.querySelector("#pmChkFixAll");
+      fix.addEventListener("click", function () {
+        var n = 0;
+        bad.forEach(function (e) {
+          if (e.kind === "main" || !Array.isArray(e.p.images)) return;
+          var i = e.p.images.lastIndexOf(e.url);
+          if (i !== -1) { e.p.images.splice(i, 1); n++; }
+          if (!e.p.images.length) delete e.p.images;
+        });
+        renderCatList(); renderMain();
+        bg.remove();
+        toast(n + "টি গ্যালারি ছবি সরানো হয়েছে (Save চাপুন)" + (bad.some(function (e) { return e.kind === "main"; }) ? " — প্রধান ছবির সমস্যা নিজে ঠিক করুন" : ""));
+      });
+    }
+    if (!entries.length) report(); else next();
   }
 
   // ── ছবি আপলোড: ড্র্যাগ-ড্রপ + লাইভ প্রিভিউ + অটো-অপ্টিমাইজ (WebP, max 1600px) ──
@@ -807,7 +904,7 @@
           i +
           '"><img src="' +
           escapeAttr(resolveImgForPreview(url)) +
-          '" alt="">' +
+          '" alt="" loading="lazy">' +
           '<div class="pm-gallery-thumb-actions">' +
           '<button type="button" class="pm-gallery-move" data-dir="-1" data-gi="' +
           i +
@@ -829,8 +926,8 @@
     var canAdd = imgs.length < MAX_GALLERY_IMAGES;
     var addTile = canAdd
       ? '<div class="pm-gallery-add">' +
-        '<div class="pm-gallery-add-txt">+ ছবি যোগ</div><small class="pm-gallery-add-hint"></small>' +
-        '<input type="file" accept="image/*" class="pm-gallery-file-input" hidden>' +
+        '<div class="pm-gallery-add-txt">+ ছবি যোগ</div><small class="pm-gallery-add-hint">একসাথে একাধিক</small>' +
+        '<input type="file" accept="image/*" multiple class="pm-gallery-file-input" hidden>' +
         "</div>"
       : "";
     var libAddTile = canAdd
@@ -866,6 +963,8 @@
       statusEl.textContent = msg;
       statusEl.style.color = isErr ? "#b32d2e" : "#646970";
     }
+
+    wrap.querySelectorAll(".pm-gallery-thumb img").forEach(function (im) { watchImg(im, im.closest(".pm-gallery-thumb")); });
 
     function rerender() {
       var holder = document.createElement("div");
@@ -943,8 +1042,23 @@
     if (addTile) {
       var input = addTile.querySelector(".pm-gallery-file-input");
 
-      function handleGalleryFile(file) {
-        if (!file || file.type.indexOf("image/") !== 0) {
+      function uploadGalleryFile(file, n) {
+        var base = slugifyFileBase(p) + "-g" + n;
+        return resizeToWebp(file, IMG_GALLERY_MAX_W, IMG_QUALITY)
+          .then(function (blob) { return blobToBase64(blob); })
+          .then(function (base64) {
+            return window.MaAdmin.uploadImage("images/gallery/" + base + ".webp", base64, "image/webp");
+          })
+          .then(function (res) {
+            if (!res || !res.ok) throw new Error((res && (res.message || res.error)) || "আপলোড ব্যর্থ হয়েছে");
+            if (!Array.isArray(p.images)) p.images = [];
+            p.images.push(res.path || res.url);
+          });
+      }
+
+      function handleGalleryFiles(fileList) {
+        var files = Array.prototype.slice.call(fileList || []).filter(function (f) { return f && f.type.indexOf("image/") === 0; });
+        if (!files.length) {
           setStatus("শুধু ছবি ফাইল দিন (JPG/PNG/WebP)", true);
           return;
         }
@@ -952,39 +1066,40 @@
           setStatus("আপলোডের জন্য Admin লগইন প্রযোজন", true);
           return;
         }
-        var n = (Array.isArray(p.images) ? p.images.length : 0) + 1;
-        var base = slugifyFileBase(p) + "-g" + n;
-        setStatus("অপটিমাইজ করা হচ্ছে...");
-        resizeToWebp(file, IMG_GALLERY_MAX_W, IMG_QUALITY)
-          .then(function (blob) {
-            setStatus("আপলোড হচ্ছে...");
-            return blobToBase64(blob);
-          })
-          .then(function (base64) {
-            var name = "images/gallery/" + base + ".webp";
-            return window.MaAdmin.uploadImage(name, base64, "image/webp");
-          })
-          .then(function (res) {
-            if (!res || !res.ok) {
-              setStatus((res && (res.message || res.error)) || "আপলোড ব্যর্থ হয়েছে", true);
-              return;
-            }
-            if (!Array.isArray(p.images)) p.images = [];
-            p.images.push(res.path || res.url);
-            setStatus("");
-            rerender();
-            toast("গ্যালারি ছবি যোগ হয়েছে (Save চাপুন)");
-          })
-          .catch(function (err) {
-            setStatus("সমস্যা: " + (err && err.message ? err.message : err), true);
+        var have = Array.isArray(p.images) ? p.images.length : 0;
+        var room = MAX_GALLERY_IMAGES - have;
+        var skipped = files.length - room;
+        if (room <= 0) {
+          setStatus("সর্বোচ্চ " + MAX_GALLERY_IMAGES + "টি গ্যালারি ছবি রাখা যায়", true);
+          return;
+        }
+        files = files.slice(0, room);
+        var done = 0, failed = 0, lastErr = "";
+        var chain = Promise.resolve();
+        files.forEach(function (f, i) {
+          chain = chain.then(function () {
+            setStatus("আপলোড হচ্ছে " + (i + 1) + "/" + files.length + " …");
+            return uploadGalleryFile(f, have + i + 1).then(function () { done++; }, function (err) {
+              failed++;
+              lastErr = err && err.message ? err.message : String(err);
+            });
           });
+        });
+        chain.then(function () {
+          rerender();
+          var msg = done + "টি গ্যালারি ছবি যোগ হয়েছে";
+          if (skipped > 0) msg += " (" + skipped + "টি বাদ — সর্বোচ্চ " + MAX_GALLERY_IMAGES + "টি)";
+          if (failed) msg += " · " + failed + "টি ব্যর্থ: " + lastErr;
+          toast(done ? msg + " (Save চাপুন)" : msg);
+        });
       }
 
       addTile.addEventListener("click", function () {
         input.click();
       });
       input.addEventListener("change", function () {
-        if (input.files && input.files[0]) handleGalleryFile(input.files[0]);
+        if (input.files && input.files.length) handleGalleryFiles(input.files);
+        input.value = "";
       });
       addTile.addEventListener("dragover", function (e) {
         e.preventDefault();
@@ -996,8 +1111,7 @@
       addTile.addEventListener("drop", function (e) {
         e.preventDefault();
         addTile.classList.remove("is-drag");
-        var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
-        if (f) handleGalleryFile(f);
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) handleGalleryFiles(e.dataTransfer.files);
       });
     }
 
@@ -1630,6 +1744,8 @@
   }
 
   document.getElementById("pmSave").addEventListener("click", saveAll);
+  var chkBtn = document.getElementById("pmCheckImages");
+  if (chkBtn) chkBtn.addEventListener("click", checkAllImages);
 
   document.getElementById("pmReload").addEventListener("click", function () {
     loadState();
