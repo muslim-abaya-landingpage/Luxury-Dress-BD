@@ -2,7 +2,7 @@
  * Muslim Abaya — Premium Pro client reviews (real Messenger / WhatsApp screenshots).
  */
 (function (global) {
-  var VERSION = "20261002a11y";
+  var VERSION = "20261003auto";
   var SKIP_PATH =
     /^\/(checkout|signin|signup|thank-you|success|privacy|terms|refund)(\/|$)/i;
 
@@ -222,27 +222,133 @@
 
   function initCarousel(track) {
     if (!track) return;
-
     var cards = track.querySelectorAll(".ma-review-shot-card");
     if (!cards.length) return;
 
     var dotsWrap = document.getElementById("maReviewsDots");
     var prevBtn = document.getElementById("maReviewsPrev");
     var nextBtn = document.getElementById("maReviewsNext");
+    var n = cards.length;
     var index = 0;
-    var AUTOPLAY_MS = 3200;
-    var autoplayTimer = null;
     var isHoverPaused = false;
     var isOffscreen = false;
+    var isHidden = !!document.hidden;
     var resumeTimer = null;
 
+    var reduceMotion = !!(global.matchMedia && global.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    // Continuous, seamless auto-running marquee (slow right-to-left drift). Reduced-motion
+    // visitors keep the old calm "one card every few seconds" behaviour.
+    var marquee = n >= 2 && !reduceMotion;
+
+    var STEP_MS = 3200;      // reduced-motion step autoplay interval
+    var SPEED = 38;          // marquee drift, px per second
+    var RESUME_MS = 2200;    // resume this long after the visitor stops interacting
+
+    var autoplayTimer = null;
+    var allCards = Array.prototype.slice.call(cards);
+    var setW = 0;            // width of one full set of reviews (cards + gaps)
+    var pos = 0;             // marquee position (float)
+    var lastTs = 0;
+    var rafId = 0;
+    var dotTick = 0;
+
     function isPausedNow() {
-      return isHoverPaused || isOffscreen;
+      return isHoverPaused || isOffscreen || isHidden;
     }
 
     function wrap(i) {
-      return ((i % cards.length) + cards.length) % cards.length;
+      return ((i % n) + n) % n;
     }
+
+    /* ---------- marquee helpers ---------- */
+
+    function measureSet() {
+      // sub-pixel accurate (offsetLeft is rounded), so the loop seam stays invisible
+      var first = allCards[0].getBoundingClientRect();
+      var last = allCards[n - 1].getBoundingClientRect();
+      var gap = n > 1 ? allCards[1].getBoundingClientRect().left - first.right : 0;
+      setW = last.right - first.left + gap;
+    }
+
+    function buildClones() {
+      measureSet();
+      if (setW <= 0) return false;
+      // Need content for [0.5 set .. 1.5 set] + one viewport, so enough sets in total.
+      var sets = Math.ceil(1.5 + track.clientWidth / setW) + 1;
+      for (var s = 1; s < sets; s++) {
+        for (var c = 0; c < n; c++) {
+          var clone = allCards[c].cloneNode(true);
+          clone.setAttribute("aria-hidden", "true");
+          clone.setAttribute("data-ma-clone", "1");
+          clone.setAttribute("inert", "");
+          track.appendChild(clone);
+        }
+      }
+      track.style.scrollSnapType = "none"; // snapping would fight the continuous drift
+      pos = setW; // start in the middle set so there is room on both sides
+      track.scrollLeft = pos;
+      return true;
+    }
+
+    function normalize() {
+      if (!setW) return;
+      var cur = track.scrollLeft;
+      var fixed = cur;
+      while (fixed >= setW * 1.5) fixed -= setW;
+      while (fixed < setW * 0.5) fixed += setW;
+      if (fixed !== cur) track.scrollLeft = fixed;
+      pos = fixed;
+    }
+
+    function nearestIndex() {
+      var all = track.querySelectorAll(".ma-review-shot-card");
+      var center = track.scrollLeft + track.clientWidth / 2;
+      var best = 0;
+      var bestDist = Infinity;
+      for (var c = 0; c < all.length; c++) {
+        var dist = Math.abs(center - (all[c].offsetLeft + all[c].offsetWidth / 2));
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = c;
+        }
+      }
+      return wrap(best);
+    }
+
+    function cardStep() {
+      return allCards[0].offsetWidth + (n > 1 ? allCards[1].offsetLeft - allCards[0].offsetLeft - allCards[0].offsetWidth : 0);
+    }
+
+    function frame(ts) {
+      rafId = global.requestAnimationFrame(frame);
+      if (!lastTs) {
+        lastTs = ts;
+        return;
+      }
+      var dt = Math.min(ts - lastTs, 64);
+      lastTs = ts;
+      if (isPausedNow()) {
+        pos = track.scrollLeft; // stay in sync with wherever the visitor left it
+        return;
+      }
+      pos += (SPEED * dt) / 1000;
+      if (pos >= setW * 1.5) pos -= setW;
+      track.scrollLeft = pos;
+      dotTick += dt;
+      if (dotTick > 300) {
+        dotTick = 0;
+        index = nearestIndex();
+        updateDots();
+      }
+    }
+
+    function startMarquee() {
+      if (rafId) return;
+      lastTs = 0;
+      rafId = global.requestAnimationFrame(frame);
+    }
+
+    /* ---------- shared UI ---------- */
 
     // IMPORTANT: only scroll the track horizontally (never the page).
     // Using scrollIntoView() here previously moved the whole page
@@ -250,12 +356,35 @@
     // yanked users down to the reviews while they were browsing
     // products above. track.scrollTo() only affects this element.
     function scrollTo(i) {
-      index = wrap(i);
-      var card = cards[index];
-      if (!card) return;
-      var left = card.offsetLeft - (track.clientWidth - card.offsetWidth) / 2;
+      i = wrap(i);
+      var target = allCards[i];
+      if (marquee) {
+        // pick the copy of card i that is closest to what the visitor is looking at now
+        var all = track.querySelectorAll(".ma-review-shot-card");
+        var center = track.scrollLeft + track.clientWidth / 2;
+        var bestDist = Infinity;
+        for (var c = i; c < all.length; c += n) {
+          var d = Math.abs(center - (all[c].offsetLeft + all[c].offsetWidth / 2));
+          if (d < bestDist) {
+            bestDist = d;
+            target = all[c];
+          }
+        }
+      }
+      index = i;
+      if (!target) return;
+      var left = target.offsetLeft - (track.clientWidth - target.offsetWidth) / 2;
       track.scrollTo({ left: left, behavior: "smooth" });
       updateDots();
+    }
+
+    function stepBy(dir) {
+      if (!marquee) {
+        scrollTo(index + dir);
+        return;
+      }
+      normalize();
+      track.scrollBy({ left: dir * cardStep(), behavior: "smooth" });
     }
 
     function updateDots() {
@@ -269,16 +398,16 @@
       if (nextBtn) nextBtn.disabled = false;
     }
 
-    function startAutoplay() {
-      stopAutoplay();
-      if (cards.length < 2) return;
+    function startStepAutoplay() {
+      stopStepAutoplay();
+      if (n < 2) return;
       autoplayTimer = setInterval(function () {
         if (isPausedNow()) return;
         scrollTo(index + 1); // right-to-left: next card slides in from the right
-      }, AUTOPLAY_MS);
+      }, STEP_MS);
     }
 
-    function stopAutoplay() {
+    function stopStepAutoplay() {
       if (autoplayTimer) {
         clearInterval(autoplayTimer);
         autoplayTimer = null;
@@ -290,15 +419,17 @@
       clearTimeout(resumeTimer);
       resumeTimer = setTimeout(function () {
         isHoverPaused = false;
-      }, AUTOPLAY_MS);
+      }, marquee ? RESUME_MS : STEP_MS);
     }
 
-    track.addEventListener("mouseenter", function () { isHoverPaused = true; });
+    track.addEventListener("mouseenter", function () { clearTimeout(resumeTimer); isHoverPaused = true; });
     track.addEventListener("mouseleave", function () { isHoverPaused = false; });
-    track.addEventListener("touchstart", function () { isHoverPaused = true; }, { passive: true });
+    track.addEventListener("touchstart", function () { clearTimeout(resumeTimer); isHoverPaused = true; }, { passive: true });
     track.addEventListener("touchend", pauseThenResume, { passive: true });
+    track.addEventListener("touchcancel", pauseThenResume, { passive: true });
     track.addEventListener("focusin", function () { isHoverPaused = true; });
     track.addEventListener("focusout", function () { isHoverPaused = false; });
+    document.addEventListener("visibilitychange", function () { isHidden = !!document.hidden; });
 
     // Only auto-advance while the carousel is actually visible on
     // screen. This is the main fix for the "forced scroll down"
@@ -318,7 +449,7 @@
 
     if (dotsWrap) {
       dotsWrap.innerHTML = "";
-      for (var d = 0; d < cards.length; d++) {
+      for (var d = 0; d < n; d++) {
         (function (di) {
           var dot = document.createElement("button");
           dot.type = "button";
@@ -326,6 +457,7 @@
           dot.setAttribute("aria-label", "Review " + (di + 1));
           dot.addEventListener("click", function () {
             scrollTo(di);
+            pauseThenResume();
           });
           dotsWrap.appendChild(dot);
         })(d);
@@ -334,43 +466,69 @@
 
     if (prevBtn) {
       prevBtn.addEventListener("click", function () {
-        scrollTo(index - 1);
+        stepBy(-1);
         pauseThenResume();
       });
     }
     if (nextBtn) {
       nextBtn.addEventListener("click", function () {
-        scrollTo(index + 1);
+        stepBy(1);
         pauseThenResume();
       });
     }
 
+    // After the visitor (or a smooth scroll) stops moving the track: wrap into the middle set
+    // (identical content, so the jump is invisible) and refresh the active dot.
     var scrollTimer;
     track.addEventListener(
       "scroll",
       function () {
         clearTimeout(scrollTimer);
         scrollTimer = setTimeout(function () {
-          var center = track.scrollLeft + track.clientWidth / 2;
-          var best = 0;
-          var bestDist = Infinity;
-          for (var c = 0; c < cards.length; c++) {
-            var cardCenter = cards[c].offsetLeft + cards[c].offsetWidth / 2;
-            var dist = Math.abs(center - cardCenter);
-            if (dist < bestDist) {
-              bestDist = dist;
-              best = c;
-            }
-          }
-          index = best;
+          if (marquee) normalize();
+          index = nearestIndex();
           updateDots();
-        }, 80);
+        }, 120);
       },
       { passive: true }
     );
 
     updateDots();
-    startAutoplay();
+
+    // Autoplay is switched on by the caller once the stylesheet has loaded: before that the
+    // cards are unstyled, so their widths (needed to build the seamless loop) are meaningless.
+    var activated = false;
+    function activate(tries) {
+      if (activated) return;
+      tries = tries || 0;
+      if (marquee) {
+        measureSet();
+        if (setW <= 0 && tries < 8) {
+          setTimeout(function () { activate(tries + 1); }, 400);
+          return;
+        }
+      }
+      activated = true;
+      if (marquee && buildClones()) {
+        var resizeTimer;
+        global.addEventListener("resize", function () {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(function () {
+            // rebuild the clone sets for the new width
+            Array.prototype.forEach.call(track.querySelectorAll('[data-ma-clone="1"]'), function (el) {
+              el.parentNode.removeChild(el);
+            });
+            track.scrollLeft = 0;
+            buildClones();
+          }, 200);
+        });
+        startMarquee();
+      } else {
+        marquee = false;
+        startStepAutoplay();
+      }
+    }
+    return activate;
   }
 
   function ensureCss(onReady) {
@@ -434,11 +592,12 @@
 
     mountEl.innerHTML = buildHtml(fbUrl, waUrl);
     injectSchema();
-    initCarousel(document.getElementById("maReviewsTrack"));
+    var activateCarousel = initCarousel(document.getElementById("maReviewsTrack"));
     global.__maCustomerReviewsMounted = true;
 
     ensureCss(function () {
       mountEl.style.visibility = "";
+      if (typeof activateCarousel === "function") activateCarousel();
     });
   }
 

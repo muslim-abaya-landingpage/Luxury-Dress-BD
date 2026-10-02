@@ -575,7 +575,7 @@ esc(SOCIAL.linkedin) +
       return;
     }
     var s = document.createElement("script");
-    s.src = "customer-reviews.js?v=20261002a11y";
+    s.src = "customer-reviews.js?v=20261003auto";
     s.onload = function () {
       if (window.MaCustomerReviews && typeof window.MaCustomerReviews.mount === "function") {
         window.MaCustomerReviews.mount();
