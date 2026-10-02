@@ -10,7 +10,7 @@ const fallbackProducts = [
     { id: 'DR-08', name: 'Black Base Rose', img: 'images/Black-Base-Rose-Floral.jpeg', price: 550 },
     { id: 'DR-16', name: 'Black White Polka', img: 'images/Black-White-Polka-Dots.jpeg', price: 550 },
     { id: 'DR-23', name: 'Royal Blue Golden', img: 'images/Royal-Blue-Golden-Floral-Print.jpeg', price: 550 },
-    { id: 'DR-28', name: 'Pink Floral Printed Co-ord Set', img: 'images/pink-floral-printed-co-ord-set.jpeg', price: 550 }
+    { id: 'DR-28', name: 'Pink Floral Printed Co-ord Set', img: 'images/premium-pink-floral-co-ord-set.webp', price: 550 }
 ];
 let products = fallbackProducts.slice();
 

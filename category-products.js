@@ -868,7 +868,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "KURTI-33",
       name: "Premium Yellow Striped Midi Dress",
-      image: "images/brown-embroidered-womens-3-piece-kurti-set.webp",
+      image: "images/premium-yellow-striped-midi-dress-women-bangladesh.webp",
       price: 750,
       stock: 25,
       color: "Brown",

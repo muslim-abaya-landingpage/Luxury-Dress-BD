@@ -2683,7 +2683,7 @@ function wrapProductImageLink(innerHtml, p) {
 function getCategoryFallbackImage(categoryKey) {
   var fallbacks = {
     abaya: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Maroon%20Abaya%20Set.jpeg",
-    "premium-two-piece": "images/pink-floral-printed-co-ord-set.jpeg",
+    "premium-two-piece": "images/premium-pink-floral-co-ord-set.webp",
     "cover-up": "images/Royal-Blue-Golden-Floral-Print.jpeg",
     "tops-kurti": "images/Black-White-Polka-Dots.jpeg",
     embroidery: "images/Black-Base-Rose-Floral.jpeg",

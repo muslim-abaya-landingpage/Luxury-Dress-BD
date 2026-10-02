@@ -84,7 +84,7 @@ window.PRODUCT_LINKS_DATA = {
     "images/Premium-Tribal-Print-One-Piece-Navy-Blue.webp",
     "images/Premium-Tribal-Print-One-Piece-Rust-Brown.webp",
     "images/premium-pink-floral-midi-dress-for-women-bangladesh.webp",
-    "images/brown-embroidered-womens-3-piece-kurti-set.webp",
+    "images/premium-yellow-striped-midi-dress-women-bangladesh.webp",
   ],
   embroidery: [
     "images/dil-bahar-black-stone-work-abaya-original-dubai-cherry-fabric-bangladesh.webp",
