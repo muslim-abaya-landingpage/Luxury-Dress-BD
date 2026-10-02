@@ -17,7 +17,7 @@
     { id: "DR-08", name: "Black Base Rose", price: 550, image: "images/Black-Base-Rose-Floral.jpeg", category: "premium-two-piece" },
     { id: "DR-16", name: "Black White Polka", price: 550, image: "images/Black-White-Polka-Dots.jpeg", category: "premium-two-piece" },
     { id: "DR-23", name: "Royal Blue Golden", price: 550, image: "images/Royal-Blue-Golden-Floral-Print.jpeg", category: "premium-two-piece" },
-    { id: "DR-28", name: "Pink Floral Printed Co-ord Set", price: 550, image: "images/pink-floral-printed-co-ord-set.jpeg", category: "premium-two-piece" },
+    { id: "DR-28", name: "Pink Floral Printed Co-ord Set", price: 550, image: "images/premium-pink-floral-co-ord-set.webp", category: "premium-two-piece" },
     {
       id: "DR-29",
       name: "Baby Pink / Light Pink",

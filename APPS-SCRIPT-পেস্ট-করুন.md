@@ -8,8 +8,8 @@
 
 1. [script.google.com](https://script.google.com) → প্রজেক্ট **অর্ডার শিট**
 2. **Editor** → পুরনো `Code.gs` এর ভিতর **সব মুছুন**
-3. ব্রাউজারে **`apps-script-copy.html`** খুলুন → **সম্পূর্ণ কোড কপি** (অথবা ফাইল **`Code.gs`**)
-4. **Ctrl+A** → **Ctrl+C** → Apps Script Editor এ **Ctrl+V**
+3. ব্রাউজারে **`apps-script-copy.html`** খুলুন → **১ নম্বর (Code.gs)** কপি করে Editor-এর `Code.gs`-এ পেস্ট (অথবা প্রজেক্টের **`apps-script/Code.gs`** ফাইল)
+4. বাম পাশে **＋ → Script** → নাম `AdminOrders` → **২ নম্বর (AdminOrders.gs)** কপি করে পেস্ট (অথবা **`apps-script/AdminOrders.gs`**) — এটা ছাড়া অর্ডার প্যানেলে `Error: TOO_FAST` আসে
 5. **Save** (ডিস্ক আইকন)
 
 ---

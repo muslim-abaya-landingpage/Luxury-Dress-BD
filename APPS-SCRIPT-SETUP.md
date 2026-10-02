@@ -13,7 +13,7 @@
 ## ২. কোড পেস্ট
 
 1. **Editor** → `Code.gs` (বা নতুন ফাইল)
-2. `google-apps-script-backend.gs` ফাইলের **সম্পূর্ণ** কোড কপি করে পেস্ট করুন
+2. `apps-script-copy.html` পেজ থেকে **Code.gs** কপি করে পেস্ট করুন; তারপর নতুন ফাইল `AdminOrders` খুলে সেখানে **AdminOrders.gs** পেস্ট করুন (দুটো ফাইলই লাগবে)
 3. **Save**
 
 ## ৩. Deploy (Web app)
