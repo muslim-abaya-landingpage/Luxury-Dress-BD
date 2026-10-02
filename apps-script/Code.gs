@@ -114,7 +114,7 @@ function doPost(e) {
     }
 
     if (!isOrder && !isSubscribe) {
-      rateLimit_(param_(e, 'Email') || param_(e, 'Phone') || param_(e, 'Login') || param_(e, 'Token') || 'global');
+      rateLimit_(param_(e, 'Email') || param_(e, 'Phone') || param_(e, 'Login') || param_(e, 'Token') || (type === 'AuthGoogle' ? 'g_' + String(param_(e, 'IdToken')).slice(-24) : '') || 'global');
     }
 
     if (type === 'AuthRegister' || type === 'CustomerRegister') {
@@ -122,6 +122,9 @@ function doPost(e) {
     }
     if (type === 'AuthLogin' || type === 'CustomerLogin') {
       return jsonOut_(loginUser_(e));
+    }
+    if (type === 'AuthGoogle') {
+      return jsonOut_(googleLogin_(e));
     }
     if (type === 'AuthVerify') {
       return jsonOut_(verifySession_(param_(e, 'Token')));
@@ -3050,6 +3053,69 @@ function loginUser_(e) {
   if (user.status === 'blocked') return { ok: false, error: 'BLOCKED', message: 'অ্যাকাউন্ট বন্ধ।' };
   if (!verifyPassword_(password, user.salt, user.hash)) return { ok: false, error: 'INVALID_PASSWORD', message: 'পাসওয়ার্ড ভুল।' };
   return createSession_({ email: user.email, phone: user.phone, name: user.name }, 'customer');
+}
+
+// ── Sign in with Google ──
+// Script property GOOGLE_CLIENT_ID (OAuth "Web application" client ID, ends with
+// .apps.googleusercontent.com) switches this on. The browser sends the Google ID token;
+// we ask Google to validate it (tokeninfo) and then check audience, issuer, expiry and
+// email_verified ourselves before creating / finding the customer and issuing a normal
+// site session. Google-created customers have no password (PasswordHash/Salt empty), so
+// password login can never match them.
+function sanitizeCellText_(value, maxLen) {
+  var t = String(value == null ? '' : value).replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim();
+  if (maxLen) t = t.slice(0, maxLen);
+  // a leading = + - @ would be run as a formula by Google Sheets
+  if (/^[=+\-@]/.test(t)) t = "'" + t;
+  return t;
+}
+
+function googleLogin_(e) {
+  if (!getAuthSecret_()) {
+    return { ok: false, error: 'AUTH_NOT_CONFIGURED', message: 'Apps Script এ AUTH_SECRET সেট করুন।' };
+  }
+  var clientId = PropertiesService.getScriptProperties().getProperty('GOOGLE_CLIENT_ID') || '';
+  if (!clientId) {
+    return { ok: false, error: 'GOOGLE_NOT_CONFIGURED', message: 'Google লগইন চালু করা হয়নি।' };
+  }
+  var idToken = String(param_(e, 'IdToken') || '');
+  if (!idToken || idToken.length > 4096 || idToken.split('.').length !== 3) {
+    return { ok: false, error: 'INVALID_GOOGLE_TOKEN', message: 'Google লগইন ব্যর্থ। আবার চেষ্টা করুন।' };
+  }
+  var info;
+  try {
+    var resp = UrlFetchApp.fetch(
+      'https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(idToken),
+      { muteHttpExceptions: true }
+    );
+    if (resp.getResponseCode() !== 200) {
+      return { ok: false, error: 'INVALID_GOOGLE_TOKEN', message: 'Google লগইন ব্যর্থ। আবার চেষ্টা করুন।' };
+    }
+    info = JSON.parse(resp.getContentText());
+  } catch (err) {
+    return { ok: false, error: 'GOOGLE_VERIFY_FAILED', message: 'Google যাচাই করা যায়নি। আবার চেষ্টা করুন।' };
+  }
+  var iss = String(info.iss || '');
+  var expMs = parseInt(info.exp, 10) * 1000;
+  if (String(info.aud || '') !== clientId ||
+      (iss !== 'accounts.google.com' && iss !== 'https://accounts.google.com') ||
+      !expMs || expMs < Date.now()) {
+    return { ok: false, error: 'INVALID_GOOGLE_TOKEN', message: 'Google লগইন ব্যর্থ। আবার চেষ্টা করুন।' };
+  }
+  if (String(info.email_verified) !== 'true' || !info.email) {
+    return { ok: false, error: 'GOOGLE_EMAIL_UNVERIFIED', message: 'আপনার Google ইমেইল যাচাই করা নয়।' };
+  }
+  var email = normalizeEmail_(info.email);
+  var user = findCustomerByEmail_(email);
+  if (user && user.status === 'blocked') {
+    return { ok: false, error: 'BLOCKED', message: 'অ্যাকাউন্ট বন্ধ।' };
+  }
+  if (!user) {
+    var name = sanitizeCellText_(info.name, 80) || sanitizeCellText_(email.split('@')[0], 80);
+    appendRow_(getCustomersSheet_(), [email, '', name, '', '', 'active', new Date(), new Date()]);
+    user = { email: email, phone: '', name: name };
+  }
+  return createSession_({ email: user.email, phone: user.phone || '', name: user.name || '' }, 'customer');
 }
 
 function findAdminByEmail_(email) {

@@ -14,3 +14,12 @@ window.MA_SITE_API = {
 window.getSiteApiUrl = function () {
   return (window.MA_SITE_API && window.MA_SITE_API.url) || "";
 };
+
+/**
+ * Sign in with Google (optional). Leave "" to keep it switched off — no button, no Google script.
+ * To enable: Google Cloud Console -> APIs & Services -> Credentials -> OAuth client ID
+ * (Web application), add https://muslimabaya.com as an Authorized JavaScript origin, paste the
+ * client ID here, and set the same value as script property GOOGLE_CLIENT_ID in Apps Script
+ * (then Deploy -> New version).
+ */
+window.MA_GOOGLE_CLIENT_ID = window.MA_GOOGLE_CLIENT_ID || "";
