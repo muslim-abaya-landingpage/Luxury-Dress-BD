@@ -3,294 +3,88 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Sign Up | Muslim Abaya</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="site-header.css?v=20260820fixui">
 <link rel="stylesheet" href="site-footer.css?v=20260929glassft" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="site-footer.css?v=20260929glassft"></noscript>
 <link rel="stylesheet" href="mobile-bottom-nav.css">
 <link rel="stylesheet" href="auth-page.css">
+<link rel="stylesheet" href="auth-modern.css?v=20261003am">
 <script src="config.js"></script>
-
-<style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Inter',sans-serif;    
-}
-body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    min-height: 100vh;
-    background: #f6f1e8;
-}
-
-.container {
-    width: 900px;
-    height: 560px;
-    background: #f8f4ec;
-    border-radius: 22px;
-    overflow: hidden;
-    display: flex;
-    box-shadow:
-        18px 18px 35px rgba(0,0,0,.08),
-        -10px -10px 25px rgba(255,255,255,.9);
-    margin: 40px auto 50px; 
-}
-.left{
-    width:50%;
-    position:relative;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    text-align:center;
-    background:#f7f2ea;
-    overflow:hidden;
-}
-
-.left::before{
-    content:"";
-    position:absolute;
-    width:220px;
-    height:220px;
-    background:#f2eee5;
-    border-radius:50%;
-    top:-100px;
-    left:-70px;
-    box-shadow:
-    inset 8px 8px 12px rgba(0,0,0,.04),
-    inset -8px -8px 12px rgba(255,255,255,.8);
-}
-
-.left::after{
-    content:"";
-    position:absolute;
-    width:250px;
-    height:250px;
-    background:#f2eee5;
-    border-radius:50%;
-    bottom:-140px;
-    left:-90px;
-    box-shadow:
-    inset 8px 8px 12px rgba(0,0,0,.04),
-    inset -8px -8px 12px rgba(255,255,255,.8);
-}
-
-.content{
-    z-index:5;
-    width:75%;
-}
-
-.content h2{
-    font-size:38px;
-    color:#1d1d1d;
-    margin-bottom:18px;
-}
-
-.content p{
-    color:#666;
-    line-height:1.8;
-    margin-bottom:35px;
-}
-
-.switch-btn{
-    border:none;
-    cursor:pointer;
-    background:#ece8e0;
-    color:#222;
-    padding:14px 45px;
-    border-radius:30px;
-    font-weight:600;
-    letter-spacing:1px;
-    box-shadow:
-    8px 8px 18px rgba(0,0,0,.08),
-    -8px -8px 18px rgba(255,255,255,.9);
-}
-
-.right{
-    width:50%;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background:#f8f4ec;
-}
-
-.form-box{
-    width:78%;
-    text-align:center;
-}
-
-.form-box h2{
-    font-size:38px;
-    margin-bottom:20px;
-    color:#222;
-}
-
-.social{
-    display:flex;
-    justify-content:center;
-    gap:16px;
-    margin-bottom:25px;
-}
-
-.social a{
-    width:42px;
-    height:42px;
-    background:#f5f1ea;
-    border-radius:50%;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    text-decoration:none;
-    color:#333;
-    font-weight:600;
-    box-shadow:
-    6px 6px 12px rgba(0,0,0,.08),
-    -6px -6px 12px rgba(255,255,255,.9);
-}
-
-.small{
-    color:#999;
-    font-size:12px;
-    letter-spacing:1px;
-    margin-bottom:20px;
-}
-
-.input-box{
-    width:100%;
-    margin-bottom:18px;
-}
-
-.input-box input{
-    width:100%;
-    padding:15px;
-    border:none;
-    outline:none;
-    background:#f5f1ea;
-    border-radius:10px;
-    box-shadow:
-    inset 3px 3px 6px rgba(0,0,0,.05),
-    inset -3px -3px 6px rgba(255,255,255,.9);
-}
-
-.signup-btn{
-    margin-top:12px;
-    border:none;
-    cursor:pointer;
-    padding:15px 60px;
-    border-radius:30px;
-    background:#1d2d45;
-    color:#fff;
-    font-weight:600;
-    letter-spacing:1px;
-    box-shadow:0 10px 20px rgba(29,45,69,.25);
-}
-
-.signup-btn:hover{
-    transform:translateY(-2px);
-}
-
-.switch-btn:hover{
-    transform:translateY(-2px);
-}
-
-@media(max-width:900px){
-
-.container{
-    width:95%;
-    height:auto;
-    flex-direction:column;
-    margin: 30px auto; 
-}
-
-.left,
-.right{
-    width:100%;
-    padding:60px 20px;
-}
-
-}
-</style>
-
 </head>
-<body>
+<body class="am-body">
 <div id="site-header-mount"></div>
 
-<div class="container">
+<main class="am-main">
+  <div class="am-shell">
+    <aside class="am-brand">
+      <a class="am-logo" href="/" aria-label="Muslim Abaya home">
+        <img src="assets/brand/muslim-abaya-logo-icon-dark.svg" alt="" width="52" height="52">
+        <span class="am-logo-text"><small>Muslim</small><strong>Abaya</strong></span>
+      </a>
+      <h1>Join <em>Muslim Abaya</em></h1>
+      <p class="am-brand-lead">Create your free account in under a minute.</p>
+      <ul class="am-perks">
+        <li><span class="am-perk-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg></span>Cash on delivery, nationwide</li>
+        <li><span class="am-perk-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3.5 8.5"/><path d="M3.5 3.5v5h5"/></svg></span>Easy return policy</li>
+        <li><span class="am-perk-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8 20 7v10l-8 4.2L4 17V7z"/><path d="M4 7l8 4.2L20 7M12 11.2v10"/></svg></span>Track your order anytime</li>
+      </ul>
+      <p class="am-brand-foot">Need help? <a href="https://wa.me/8801970831783" target="_blank" rel="noopener">Chat with us on WhatsApp</a></p>
+    </aside>
 
-<div class="left">
-  <div class="content">
-    <h2>Welcome Back !</h2>
-    <p>
-      To keep connected with us please login
-      with your personal info
-    </p>
+    <section class="am-form-wrap" aria-label="Sign Up">
+      <div class="am-form form-box">
+        <span class="am-eyebrow">Join us</span>
+        <h2>Create your account</h2>
+        <p class="am-sub">It takes less than a minute.</p>
 
-    <button class="switch-btn" id="signinLink" type="button"
-      onclick="window.location.href='signin.html'">
-      SIGN IN
-    </button>
+        <form id="signupForm" novalidate>
+          <div class="am-field">
+            <label for="su-name">Full name</label>
+            <div class="am-input"><svg class="am-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c.8-3.6 3.9-5.4 7.5-5.4s6.7 1.8 7.5 5.4"/></svg><input type="text" id="su-name" name="name" autocomplete="name" placeholder="Your full name"></div>
+          </div>
+          <div class="am-field">
+            <label for="su-mobile">Mobile number</label>
+            <div class="am-input"><svg class="am-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg><input type="tel" id="su-mobile" name="tel" inputmode="numeric" autocomplete="tel" placeholder="01XXXXXXXXX"></div>
+          </div>
+          <div class="am-field">
+            <label for="su-email">Email</label>
+            <div class="am-input"><svg class="am-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.5 7.5 8.5 6 8.5-6"/></svg><input type="email" id="su-email" name="email" autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="you@example.com"></div>
+          </div>
+          <div class="am-field">
+            <label for="su-pass">Password</label>
+            <div class="am-input has-toggle"><svg class="am-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg><input type="password" id="su-pass" name="new-password" autocomplete="new-password" placeholder="Create a password"><button type="button" class="am-eye" data-am-eye="su-pass" aria-label="Show password" aria-pressed="false"><svg class="am-eye-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="am-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.6 10.6 0 0 1 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.1M6.5 6.6A17.7 17.7 0 0 0 2 12s3.6 7 10 7c1.8 0 3.4-.5 4.8-1.2"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div>
+            <div class="am-meter" data-am-meter="su-pass" data-am-meter-label="suPassHint" data-level="0" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+            <p class="am-hint" id="suPassHint">At least 8 characters.</p>
+          </div>
+          <div class="am-field">
+            <label for="su-confirm">Confirm password</label>
+            <div class="am-input has-toggle"><svg class="am-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg><input type="password" id="su-confirm" name="confirm-password" autocomplete="new-password" placeholder="Repeat your password"><button type="button" class="am-eye" data-am-eye="su-confirm" aria-label="Show password" aria-pressed="false"><svg class="am-eye-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="am-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.6 10.6 0 0 1 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.1M6.5 6.6A17.7 17.7 0 0 0 2 12s3.6 7 10 7c1.8 0 3.4-.5 4.8-1.2"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div>
+          </div>
+
+          <p class="am-msg" id="signupMsg" role="alert" aria-live="polite"></p>
+
+          <button class="am-btn" id="signupBtn" type="submit">Create account</button>
+        </form>
+
+        <p class="am-switch">Already have an account? <a id="signinLink" href="signin.html">Sign in</a></p>
+      </div>
+    </section>
   </div>
-</div>
+</main>
 
-<div class="right">
-  <div class="form-box">
-    <h2>Create Account</h2>
-
-    <div class="social">
-      <a href="https://www.facebook.com/muslimabayaofficial" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-        <i class="fab fa-facebook-f"></i>
-      </a>
-      <a href="https://www.linkedin.com/in/muslimabayabd/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-        <i class="fab fa-linkedin-in"></i>
-      </a>
-      <a href="https://x.com/muslimabayashop" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
-        <i class="fab fa-x-twitter"></i>
-      </a>
-    </div>
-
-    <div class="small">OR USE EMAIL FOR REGISTRATION</div>
-
-    <form id="signupForm">
-      <div class="input-box">
-        <input type="text" id="su-name" placeholder="Name">
-      </div>
-
-      <div class="input-box">
-        <input type="text" id="su-mobile" placeholder="Mobile">
-      </div>
-
-      <div class="input-box">
-        <input type="email" id="su-email" placeholder="Email">
-      </div>
-
-      <div class="input-box">
-        <input type="password" id="su-pass" placeholder="Password">
-      </div>
-
-      <div class="input-box">
-        <input type="password" id="su-confirm" placeholder="Confirm Password">
-      </div>
-
-     <button class="signup-btn" id="signupBtn" type="submit">
-        SIGN UP
-      </button>
-    </form>
-  </div>
-</div>
-
-</div> <div id="site-footer-mount"></div>
+<div id="site-footer-mount"></div>
 <script src="cart-utils.js?v=20261002fix"></script>
   <script src="site-security.js"></script>
   <script src="site-api-config.js?v=20261003g"></script>
   <script src="site-api-health.js"></script>
   <script src="auth-config.js"></script>
   <script src="auth-api.js?v=20261003g"></script>
-  <script defer src="google-signin.js?v=20261003g"></script>
+  <script defer src="auth-ui.js?v=20261003am"></script>
+  <script defer src="google-signin.js?v=20261003am2"></script>
   <script defer src="site-header.js?v=20261002gtm"></script>
   <script src="site-footer.js?v=20261003smooth"></script>
   <script>
@@ -304,36 +98,37 @@ body {
       var nextUrl = params.get('next') || 'checkout.html';
       var signinLink = document.getElementById('signinLink');
       if (signinLink && params.get('next')) {
-        signinLink.onclick = function () {
-          window.location.href = 'signin.html?next=' + encodeURIComponent(params.get('next'));
-        };
+        signinLink.href = 'signin.html?next=' + encodeURIComponent(params.get('next'));
+      }
+      var msg = document.getElementById('signupMsg');
+      function fail(text, fieldId) {
+        msg.className = 'am-msg is-error';
+        msg.textContent = text;
+        var f = fieldId && document.getElementById(fieldId);
+        if (f) f.focus();
       }
       form.addEventListener('submit', function (e) {
-         e.preventDefault();
-         var name = document.getElementById('su-name').value.trim();
-         var phone = document
-        .getElementById('su-mobile')
-        .value
-        .replace(/\D/g, '');
-        var email = document
-        .getElementById('su-email')
-        .value
-        .trim()
-        .toLowerCase();
+        e.preventDefault();
+        msg.className = 'am-msg';
+        msg.textContent = '';
+        var name = document.getElementById('su-name').value.trim();
+        var phone = document.getElementById('su-mobile').value.replace(/\D/g, '');
+        var email = document.getElementById('su-email').value.trim().toLowerCase();
         var pass = document.getElementById('su-pass').value;
         var confirm = document.getElementById('su-confirm').value;
-        if (name.length < 2) { alert('Please enter your full name.'); return; }
-        if (!/^01\d{9}$/.test(phone.replace(/\s+/g, ''))) { alert('Enter a valid 11-digit mobile number.'); return; }
-        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alert('Enter a valid email address.'); return; }
+        if (name.length < 2) { fail('Please enter your full name.', 'su-name'); return; }
+        if (!/^01\d{9}$/.test(phone.replace(/\s+/g, ''))) { fail('Enter a valid 11-digit mobile number.', 'su-mobile'); return; }
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { fail('Enter a valid email address.', 'su-email'); return; }
         var strength = MaSecurity.checkPasswordStrength(pass);
-        if (!strength.ok) { alert(strength.message); return; }
-        if (pass !== confirm) { alert('Passwords do not match.'); return; }
+        if (!strength.ok) { fail(strength.message, 'su-pass'); return; }
+        if (pass !== confirm) { fail('Passwords do not match.', 'su-confirm'); return; }
         var btn = document.getElementById('signupBtn');
         btn.disabled = true;
-        btn.innerHTML =
-        '<span class="spinner"></span> Creating Account...';
+        btn.innerHTML = '<span class="spinner"></span> Creating account...';
         MaAuth.register({ name: name, phone: phone, email: email, password: pass })
           .then(function () {
+            msg.className = 'am-msg is-ok';
+            msg.textContent = 'Account created — redirecting...';
             window.location.href = nextUrl;
           })
           .catch(function (err) {
@@ -341,11 +136,11 @@ body {
               alert(typeof getLocalFileAuthHint === 'function' ? getLocalFileAuthHint() : 'Run the local server and open http://127.0.0.1/signup.html to test sign up.');
               return;
             }
-            alert((err && err.message) || 'Registration failed. Please try again.');
+            fail((err && err.message) || 'Registration failed. Please try again.');
           })
           .finally(function () {
             btn.disabled = false;
-            btn.innerHTML='Create Account';
+            btn.innerHTML = 'Create account';
           });
       });
     })();

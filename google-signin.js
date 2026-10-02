@@ -17,15 +17,15 @@
 
   var box = doc.createElement("div");
   box.id = "maGoogleBox";
-  box.style.cssText = "margin:0 0 14px;text-align:center";
+  box.style.cssText = "text-align:center";
   var btnHost = doc.createElement("div");
   btnHost.style.cssText = "display:flex;justify-content:center;min-height:44px";
   var msg = doc.createElement("p");
   msg.className = "form-msg";
   msg.setAttribute("role", "status");
   var or = doc.createElement("div");
-  or.textContent = "or";
-  or.style.cssText = "margin:12px 0 0;color:#777;font-size:13px";
+  or.className = "am-or";
+  or.textContent = "or continue with email";
   box.appendChild(btnHost);
   box.appendChild(msg);
   box.appendChild(or);
