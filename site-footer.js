@@ -569,7 +569,34 @@ esc(SOCIAL.linkedin) +
     return /^\/(checkout|signin|signup|thank-you|success|privacy|terms|refund)(\/|$)/i.test(p);
   }
 
+  // Floating "Customer Support" chat bubble (support-chat.js) — loaded after the page has
+  // loaded, never on checkout / account / thank-you pages.
+  function shouldSkipChat() {
+    var p = String((window.location && window.location.pathname) || "/")
+      .replace(/\/index\.html$/i, "/")
+      .replace(/\.html$/i, "");
+    return /^\/(checkout|signin|signup|thank-you|success|admin|api-setup|product-manager|product-links|stock-analytics)/i.test(p);
+  }
+
+  function loadSupportChat() {
+    if (window.__maSupportChat || shouldSkipChat()) return;
+    var s = document.createElement("script");
+    s.src = "support-chat.js?v=20261003chat3";
+    s.async = true;
+    (document.head || document.documentElement).appendChild(s);
+  }
+
+  function scheduleSupportChat() {
+    function go() {
+      if (typeof window.requestIdleCallback === "function") window.requestIdleCallback(loadSupportChat, { timeout: 4000 });
+      else window.setTimeout(loadSupportChat, 1500);
+    }
+    if (document.readyState === "complete") go();
+    else window.addEventListener("load", go, { once: true });
+  }
+
   function bootFooter() {
+    scheduleSupportChat();
     if (shouldSkipReviews()) {
       mountFooter();
       return;
