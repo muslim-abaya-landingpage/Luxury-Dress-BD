@@ -133,6 +133,19 @@
     });
   }
 
+  function loginWithGoogle(idToken) {
+    if (!idToken) return Promise.reject(new Error("MISSING_FIELDS"));
+    return apiPost({
+      RecordType: "AuthGoogle",
+      IdToken: idToken,
+      Source: "google"
+    }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "GOOGLE_LOGIN_FAILED");
+      saveSession(res);
+      return res;
+    });
+  }
+
   function verifySession() {
     var s = getSession();
     if (!s || !s.token) return Promise.resolve(null);
@@ -156,6 +169,7 @@
   g.MaAuth = {
     register: register,
     login: login,
+    loginWithGoogle: loginWithGoogle,
     logout: logout,
     getSession: getSession,
     verifySession: verifySession,
