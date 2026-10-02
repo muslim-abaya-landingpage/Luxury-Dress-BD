@@ -7,6 +7,7 @@
   <title>Admin Dashboard | Muslim Abaya</title>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="admin.css?v=20260929modern1">
+  <link rel="stylesheet" href="admin-dash.css?v=20261003dz">
 <script src="config.js"></script>
 </head>
 <body class="adm-body">
@@ -49,65 +50,52 @@
       </header>
 
       <main class="adm-main">
-        <div class="adm-stats" id="admStats" hidden>
-          <div class="adm-stat-card">
-            <div class="adm-stat-top">
-              <div class="adm-stat-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M21 8 12 3 3 8l9 5 9-5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 8v8l9 5 9-5V8" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+        <section class="dz-hero">
+          <div class="dz-hero-top">
+            <div>
+              <div class="dz-hello" id="dzHello">আসসালামু আলাইকুম</div>
+              <h2 id="dzName">Admin</h2>
+              <div class="dz-date" id="dzDate"></div>
             </div>
-            <div class="adm-stat-value" id="admStatCount">—</div>
-            <div class="adm-stat-label">মোট অর্ডার (তালিকায়)</div>
-          </div>
-          <div class="adm-stat-card">
-            <div class="adm-stat-top">
-              <div class="adm-stat-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 13h6V4H4v9Zm10 7h6v-9h-6v9ZM4 20h6v-5H4v5ZM14 4v6h6V4h-6Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+            <div class="dz-actions">
+              <a class="dz-gold" href="admin-orders.html">অর্ডার প্যানেল →</a>
+              <a id="admOpenSheet" href="#" target="_blank" rel="noopener">Google Sheet</a>
+              <a id="admOpenScript" href="#" target="_blank" rel="noopener">Apps Script</a>
             </div>
-            <div class="adm-stat-value" id="admStatRevenue">—</div>
-            <div class="adm-stat-label">মোট মূল্য (তালিকায়)</div>
           </div>
-          <div class="adm-stat-card">
-            <div class="adm-stat-top">
-              <div class="adm-stat-icon"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v5l3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
-            </div>
-            <div class="adm-stat-value" id="admStatPending">—</div>
-            <div class="adm-stat-label">Pending অর্ডার</div>
+          <div class="dz-today">
+            <div><b id="dzTodayCount">—</b><span>আজকের অর্ডার</span></div>
+            <div><b id="dzTodayRev">—</b><span>আজকের বিক্রয়</span></div>
+            <div><b id="dzRepeat">—</b><span>পুনরায় ক্রেতা</span></div>
           </div>
-          <div class="adm-stat-card">
-            <div class="adm-stat-top">
-              <div class="adm-stat-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            </div>
-            <div class="adm-stat-value" id="admStatShipped">—</div>
-            <div class="adm-stat-label">Shipped / Delivered</div>
-          </div>
+        </section>
+
+        <div class="dz-kpis" id="admStats" hidden>
+          <div class="dz-kpi" style="--c:#d4a72c"><b id="admStatCount">—</b><span>মোট অর্ডার (তালিকায়)</span></div>
+          <div class="dz-kpi" style="--c:#14161a"><b id="admStatRevenue">—</b><span>মোট মূল্য (তালিকায়)</span></div>
+          <div class="dz-kpi" style="--c:#c9831a"><b id="admStatPending">—</b><span>Pending অর্ডার</span></div>
+          <div class="dz-kpi" style="--c:#16794a"><b id="admStatShipped">—</b><span>Shipped / Delivered</span></div>
         </div>
 
-        <section class="adm-panel">
-          <h2>Online Orders</h2>
-          <div class="adm-toolbar">
-            <a class="adm-btn adm-btn-primary" id="admOpenSheet" href="#" target="_blank" rel="noopener">Open Google Sheet</a>
-            <a class="adm-btn adm-btn-secondary" id="admOpenScript" href="#" target="_blank" rel="noopener">Apps Script</a>
-            <span id="admOrderCount" style="font-size:0.85rem;color:var(--adm-muted);align-self:center"></span>
+        <div class="dz-grid">
+          <section class="dz-card">
+            <h3>গত ৭ দিনের অর্ডার <small id="dzWeekTotal"></small></h3>
+            <div class="dz-bars" id="dzBars"><div class="dz-skel" style="width:100%;height:100px"></div></div>
+          </section>
+          <section class="dz-card">
+            <h3>স্ট্যাটাস বিভাজন <small id="admOrderCount"></small></h3>
+            <div class="dz-split" id="dzSplit"></div>
+            <div class="dz-legend" id="dzLegend"></div>
+            <div class="dz-dist" id="dzDist"></div>
+          </section>
+        </div>
+
+        <section class="dz-card">
+          <div class="dz-orders-head">
+            <h3>সাম্প্রতিক অর্ডার</h3>
+            <a href="admin-orders.html">সব অর্ডার দেখুন →</a>
           </div>
-          <div class="adm-table-wrap">
-            <table class="adm-table" id="admOrdersTable">
-              <thead>
-                <tr>
-                  <th>Time</th>
-                  <th>Order ID</th>
-                  <th>Customer</th>
-                  <th>Phone</th>
-                  <th>Total</th>
-                  <th>Status</th>
-                  <th>Payment</th>
-                  <th>District</th>
-                  <th>Design</th>
-                  <th>একশন</th>
-                </tr>
-              </thead>
-              <tbody id="admOrdersBody">
-                <tr><td colspan="10" class="adm-empty">Loading orders…</td></tr>
-              </tbody>
-            </table>
-          </div>
+          <div id="admOrdersBody"><div class="dz-empty">Loading orders…</div></div>
         </section>
       </main>
     </div>
@@ -168,59 +156,104 @@
         w.document.close();
       }
 
+      var STATUS_COLORS = { pending: "#c9831a", confirmed: "#2a55a8", shipped: "#5b3aa6", delivered: "#16794a", cancelled: "#c0362c", returned: "#c0362c", other: "#9aa0a9" };
+
+      function statusKey(s) {
+        var x = String(s || "").toLowerCase();
+        if (!x || x.indexOf("pend") !== -1) return "pending";
+        if (x.indexOf("deliver") !== -1) return "delivered";
+        if (x.indexOf("ship") !== -1) return "shipped";
+        if (x.indexOf("confirm") !== -1) return "confirmed";
+        if (x.indexOf("cancel") !== -1) return "cancelled";
+        if (x.indexOf("return") !== -1) return "returned";
+        return "other";
+      }
+
+      function parseDate(t) {
+        var m = /^(\d{2})-(\d{2})-(\d{4})/.exec(String(t || ""));
+        return m ? new Date(+m[3], +m[2] - 1, +m[1]) : null;
+      }
+      function num(v) { return parseFloat(String(v || "0").replace(/[^\d.]/g, "")) || 0; }
+      function dayKey(d) { return d.getFullYear() + "-" + d.getMonth() + "-" + d.getDate(); }
+
       function renderOrders(orders) {
         var body = document.getElementById("admOrdersBody");
-        if (!orders || !orders.length) {
-          body.innerHTML = '<tr><td colspan="10" class="adm-empty">No orders found</td></tr>';
-          return;
-        }
+        if (!orders || !orders.length) { body.innerHTML = '<div class="dz-empty">No orders found</div>'; return; }
         var stats = phoneStats(orders);
         window.__admOrdersById = {};
-        body.innerHTML = orders
-          .map(function (o, idx) {
-            var rowId = "admOrderRow" + idx;
-            window.__admOrdersById[rowId] = o;
-            var p = String(o.phone || "").trim();
-            var st = stats[p] || { total: 0, badOutcome: 0 };
-            var badges = "";
-            if (st.total >= 2) badges += ' <span class="adm-badge" style="background:#eef;color:#337;font-size:0.7rem">পুনরায় ক্রেতা (' + st.total + ')</span>';
-            if (st.badOutcome >= 2) badges += ' <span class="adm-badge" style="background:#fee;color:#a33;font-size:0.7rem">⚠️ রিস্কি</span>';
-            var confirmMsg = "আসসালামু আলাইকুম " + (o.name || "") + ", আপনার অর্ডার #" + (o.orderId || "") + " (৳" + (o.total || 0) + ") কনফার্ম হয়েছে। শীঘ্রই ডেলিভারি করা হবে, ধন্যবাদ।";
-            return (
-              "<tr>" +
-              "<td>" + escapeHtml(o.time) + "</td>" +
-              "<td><strong>" + escapeHtml(o.orderId || "—") + "</strong></td>" +
-              "<td>" + escapeHtml(o.name) + badges + "</td>" +
-              "<td>" + escapeHtml(o.phone) + "</td>" +
-              "<td>৳" + escapeHtml(o.total) + "</td>" +
-              '<td><span class="adm-badge ' + statusClass(o.status) + '">' + escapeHtml(o.status || "Pending") + "</span></td>" +
-              "<td>" + escapeHtml(o.payment || "") + "</td>" +
-              "<td>" + escapeHtml(o.district || "") + "</td>" +
-              "<td>" + escapeHtml((o.design || "").slice(0, 60)) + (o.design && o.design.length > 60 ? "…" : "") + "</td>" +
-              '<td style="white-space:nowrap">' +
-              '<a class="adm-btn adm-btn-secondary" style="padding:3px 8px;font-size:0.75rem" target="_blank" rel="noopener" href="' + waLink(o.phone, confirmMsg) + '">WhatsApp</a> ' +
-              '<button type="button" class="adm-btn adm-btn-secondary" style="padding:3px 8px;font-size:0.75rem" onclick="printInvoice(window.__admOrdersById[\'' + rowId + '\'])">Print</button>' +
-              "</td>" +
-              "</tr>"
-            );
-          })
-          .join("");
+        body.innerHTML = orders.slice(0, 12).map(function (o, idx) {
+          var rowId = "admOrderRow" + idx;
+          window.__admOrdersById[rowId] = o;
+          var st = stats[String(o.phone || "").trim()] || { total: 0, badOutcome: 0 };
+          var tags = "";
+          if (st.total >= 2) tags += "<em>পুনরায় ক্রেতা (" + st.total + ")</em>";
+          if (st.badOutcome >= 2) tags += '<em class="bad">⚠️ রিস্কি</em>';
+          var key = statusKey(o.status);
+          var confirmMsg = "আসসালামু আলাইকুম " + (o.name || "") + ", আপনার অর্ডার #" + (o.orderId || "") + " (৳" + (o.total || 0) + ") কনফার্ম হয়েছে। শীঘ্রই ডেলিভারি করা হবে, ধন্যবাদ।";
+          var ini = String(o.name || "?").trim().charAt(0).toUpperCase() || "?";
+          return '<div class="dz-order">' +
+            '<div class="dz-av">' + escapeHtml(ini) + "</div>" +
+            '<div class="dz-who"><b>' + escapeHtml(o.name) + "</b><span>" + escapeHtml(o.orderId || "—") + " · " + escapeHtml(o.time) + "</span>" +
+            (tags ? '<div class="dz-tags">' + tags + "</div>" : "") + "</div>" +
+            '<div class="dz-items">' + escapeHtml((o.design || "").replace(/\s*\n\s*/g, " ").slice(0, 90)) + "</div>" +
+            '<div class="dz-amt">৳' + escapeHtml(o.total) + "<small>" + escapeHtml(o.payment || "") + (o.district ? " · " + escapeHtml(o.district) : "") + "</small></div>" +
+            '<div class="dz-st"><span class="dz-chip ' + key + '">' + escapeHtml(o.status || "Pending") + "</span></div>" +
+            '<div class="dz-row-actions"><a target="_blank" rel="noopener" href="' + waLink(o.phone, confirmMsg) + '">WhatsApp</a>' +
+            '<button type="button" onclick="printInvoice(window.__admOrdersById[\'' + rowId + '\'])">Print</button></div>' +
+            "</div>";
+        }).join("");
       }
 
       function renderStats(orders) {
         var statsEl = document.getElementById("admStats");
         if (!orders || !orders.length) { statsEl.hidden = true; return; }
-        var revenue = 0, pending = 0, shipped = 0;
+        var revenue = 0, pending = 0, shipped = 0, counts = {}, districts = {};
+        var today = new Date(), todayKey = dayKey(today), todayCount = 0, todayRev = 0;
+        var days = [];
+        for (var d = 6; d >= 0; d--) { var dt = new Date(today.getFullYear(), today.getMonth(), today.getDate() - d); days.push({ key: dayKey(dt), date: dt, n: 0 }); }
         orders.forEach(function (o) {
-          revenue += parseFloat(String(o.total || "0").replace(/[^\d.]/g, "")) || 0;
-          var s = String(o.status || "").toLowerCase();
-          if (!s || s.indexOf("pending") !== -1) pending++;
-          if (s.indexOf("ship") !== -1 || s.indexOf("deliver") !== -1) shipped++;
+          var amt = num(o.total);
+          revenue += amt;
+          var k = statusKey(o.status);
+          counts[k] = (counts[k] || 0) + 1;
+          if (k === "pending") pending++;
+          if (k === "shipped" || k === "delivered") shipped++;
+          if (o.district) districts[o.district] = (districts[o.district] || 0) + 1;
+          var od = parseDate(o.time);
+          if (od) {
+            var ok = dayKey(od);
+            if (ok === todayKey) { todayCount++; todayRev += amt; }
+            days.forEach(function (x) { if (x.key === ok) x.n++; });
+          }
         });
         document.getElementById("admStatCount").textContent = orders.length;
         document.getElementById("admStatRevenue").textContent = "৳" + revenue.toLocaleString("en-US");
         document.getElementById("admStatPending").textContent = pending;
         document.getElementById("admStatShipped").textContent = shipped;
+        document.getElementById("dzTodayCount").textContent = todayCount;
+        document.getElementById("dzTodayRev").textContent = "৳" + todayRev.toLocaleString("en-US");
+        var ps = phoneStats(orders), rep = 0;
+        Object.keys(ps).forEach(function (p) { if (ps[p].total >= 2) rep++; });
+        document.getElementById("dzRepeat").textContent = rep;
+
+        var max = Math.max.apply(null, days.map(function (x) { return x.n; }).concat([1]));
+        var names = ["রবি", "সোম", "মঙ্গল", "বুধ", "বৃহ", "শুক্র", "শনি"];
+        document.getElementById("dzWeekTotal").textContent = "মোট " + days.reduce(function (a, x) { return a + x.n; }, 0);
+        document.getElementById("dzBars").innerHTML = days.map(function (x) {
+          return '<div class="dz-bar' + (x.key === todayKey ? " is-today" : "") + '"><em>' + x.n + '</em><div style="height:' + Math.max(3, Math.round(x.n / max * 100)) + '%"></div><span>' + names[x.date.getDay()] + "</span></div>";
+        }).join("");
+
+        var order = ["pending", "confirmed", "shipped", "delivered", "cancelled", "returned", "other"];
+        var labels = { pending: "Pending", confirmed: "Confirmed", shipped: "Shipped", delivered: "Delivered", cancelled: "Cancelled", returned: "Returned", other: "অন্যান্য" };
+        var present = order.filter(function (k) { return counts[k]; });
+        document.getElementById("dzSplit").innerHTML = present.map(function (k) {
+          return '<i style="width:' + (counts[k] / orders.length * 100) + "%;background:" + STATUS_COLORS[k] + '"></i>';
+        }).join("");
+        document.getElementById("dzLegend").innerHTML = present.map(function (k) {
+          return '<div><s style="--c:' + STATUS_COLORS[k] + '"></s>' + labels[k] + "<b>" + counts[k] + "</b></div>";
+        }).join("");
+        var top = Object.keys(districts).sort(function (a, b) { return districts[b] - districts[a]; }).slice(0, 5);
+        document.getElementById("dzDist").innerHTML = top.map(function (d) { return "<span>" + escapeHtml(d) + " · " + districts[d] + "</span>"; }).join("");
         statsEl.hidden = false;
       }
 
@@ -233,12 +266,10 @@
       }
 
       function loadOrders() {
-        document.getElementById("admOrdersBody").innerHTML =
-          '<tr><td colspan="9" class="adm-empty">Loading orders…</td></tr>';
+        document.getElementById("admOrdersBody").innerHTML = '<div class="dz-empty">Loading orders…</div>';
         MaAdmin.fetchOrders(100)
           .then(function (res) {
-            document.getElementById("admOrderCount").textContent =
-              res.count + " total orders found";
+            document.getElementById("admOrderCount").textContent = (res.count || (res.orders || []).length) + " অর্ডার";
             renderOrders(res.orders);
             renderStats(res.orders);
             if (res.sheetUrl) document.getElementById("admOpenSheet").href = res.sheetUrl;
@@ -246,9 +277,7 @@
           })
           .catch(function (err) {
             document.getElementById("admOrdersBody").innerHTML =
-              '<tr><td colspan="10" class="adm-empty">Error: ' +
-              escapeHtml(err.message || err) +
-              "</td></tr>";
+              '<div class="dz-empty">Error: ' + escapeHtml(err.message || err) + "</div>";
           });
       }
 
@@ -257,6 +286,8 @@
         session = s;
         document.getElementById("admUserLabel").textContent =
           (s.name || "Admin") + (s.email ? " · " + s.email : "");
+        document.getElementById("dzName").textContent = s.name || "Admin";
+        document.getElementById("dzDate").textContent = new Date().toLocaleDateString("bn-BD", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
         if (s.sheetUrl) document.getElementById("admOpenSheet").href = s.sheetUrl;
         if (s.scriptUrl) document.getElementById("admOpenScript").href = s.scriptUrl;
         loadOrders();
