@@ -240,6 +240,11 @@
   padding: 0 24px;
   position: relative;
 }
+/* below-the-fold rows: skip style/layout/paint until near the viewport (smaller main-thread cost) */
+.home-section ~ .home-section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 700px;
+}
 .home-section-head {
   display: flex;
   align-items: center;
