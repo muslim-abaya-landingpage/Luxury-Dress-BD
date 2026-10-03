@@ -81,7 +81,7 @@ function ensureCategoryStyles() {
     link = document.createElement("link");
     link.id = "category-sidebar-css";
     link.rel = "stylesheet";
-    link.href = "category-sidebar.css?v=20260929fixcrop";
+    link.href = "/category-sidebar.css?v=20260929fixcrop";
     document.head.appendChild(link);
   }
   var qtyLink =
@@ -91,7 +91,7 @@ function ensureCategoryStyles() {
     qtyLink = document.createElement("link");
     qtyLink.id = "qty-stepper-css";
     qtyLink.rel = "stylesheet";
-    qtyLink.href = "qty-stepper.css?v=20260531qty2";
+    qtyLink.href = "/qty-stepper.css?v=20260531qty2";
     document.head.appendChild(qtyLink);
   }
   // shop-page.css: only touch it if this page genuinely never declared it
@@ -101,7 +101,7 @@ function ensureCategoryStyles() {
   if (!shopLink) {
     shopLink = document.createElement("link");
     shopLink.rel = "stylesheet";
-    shopLink.href = "shop-page.css?v=20260824list";
+    shopLink.href = "/shop-page.css?v=20260824list";
     document.head.appendChild(shopLink);
   }
 }
@@ -1870,7 +1870,7 @@ function ensureReviewsWidgetLoaded() {
   if (window.MAReviews || document.getElementById("ma-reviews-widget-script")) return;
   var s = document.createElement("script");
   s.id = "ma-reviews-widget-script";
-  s.src = "reviews-widget.js?v=20260928";
+  s.src = "/reviews-widget.js?v=20260928";
   document.head.appendChild(s);
 }
 function callMAReviewsMount(root, p, tries) {

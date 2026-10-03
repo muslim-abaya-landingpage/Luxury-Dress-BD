@@ -270,7 +270,7 @@
     mainImg.alt = escapeHtml(state.product.name);
     mainImg.onerror = function () {
       mainImg.onerror = null;
-      mainImg.src = "images/Baby-Pink-Floral-Print.jpeg";
+      mainImg.src = "/images/Baby-Pink-Floral-Print.jpeg";
     };
     thumbsEl.querySelectorAll(".pd-thumb").forEach(function (btn) {
       btn.addEventListener("click", function () {
