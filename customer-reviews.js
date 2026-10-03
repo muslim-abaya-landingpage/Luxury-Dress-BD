@@ -645,7 +645,7 @@
     var link = document.createElement("link");
     link.id = "ma-reviews-css";
     link.rel = "stylesheet";
-    link.href = "customer-reviews.css?v=" + VERSION;
+    link.href = "/customer-reviews.css?v=" + VERSION;
     link.addEventListener(
       "load",
       function () {

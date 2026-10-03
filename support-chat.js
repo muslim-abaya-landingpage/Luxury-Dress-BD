@@ -34,7 +34,7 @@
   var phoneTel = pick(userCfg.phoneTel, footerCfg.phoneTel, seo.phone, "+8801970831783");
   var brand = pick(userCfg.brand, seo.brand, "Muslim Abaya");
   var replyTime = userCfg.replyTime || "";
-  var logo = pick(userCfg.logo, "assets/brand/muslim-abaya-logo-icon-512.png");
+  var logo = pick(userCfg.logo, "/assets/brand/muslim-abaya-logo-icon-512.png");
 
   // Messenger: https://m.me/<page username> derived from the Facebook page URL
   var messenger = userCfg.messenger || "";

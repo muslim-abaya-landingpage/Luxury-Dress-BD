@@ -594,7 +594,7 @@ esc(SOCIAL.linkedin) +
   function loadSupportChat() {
     if (window.__maSupportChat || shouldSkipChat()) return;
     var s = document.createElement("script");
-    s.src = footerAssetAbs("support-chat.js?v=20261003chat3");
+    s.src = footerAssetAbs("support-chat.js?v=20261004fix");
     s.async = true;
     (document.head || document.documentElement).appendChild(s);
   }
@@ -615,7 +615,7 @@ esc(SOCIAL.linkedin) +
       return;
     }
     var s = document.createElement("script");
-    s.src = footerAssetAbs("customer-reviews.js?v=20261003tt");
+    s.src = footerAssetAbs("customer-reviews.js?v=20261004fix");
     s.onload = function () {
       if (window.MaCustomerReviews && typeof window.MaCustomerReviews.mount === "function") {
         window.MaCustomerReviews.mount();
