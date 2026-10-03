@@ -429,15 +429,19 @@
 .ma-reviews-cta {
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
   margin-top: 32px;
+  margin-bottom: 12px;
   flex-wrap: wrap;
 }
 
 .ma-reviews-cta-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
+  min-height: 48px;
+  min-width: 48px;
   padding: 13px 24px;
   border-radius: 8px;
   font-size: 12.5px;
