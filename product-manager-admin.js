@@ -719,9 +719,14 @@
     );
   }
 
+  // সদ্য আপলোড হওয়া ছবি ডিপ্লয় হতে সময় নেয়; তখন লাইভ URL চাইলে 404 আসে (এবং ব্রাউজার/CDN তা মনে রাখতে পারে)।
+  // তাই আপলোডের পর লোকাল প্রিভিউ (blob) দেখাই — লাইভ URL-এ অনুরোধই যায় না।
+  var localPreviews = {};
+
   function resolveImgForPreview(src) {
     var s = String(src || "").trim();
     if (!s) return "";
+    if (localPreviews[s]) return localPreviews[s];
     if (/^https?:\/\//i.test(s) || /^data:/i.test(s)) return s;
     // GitHub রিপোতে থাকা রিলেটিভ পাথ — সাইট রুট থেকে রেজলভ করার চেষ্টা
     return s.indexOf("/") === 0 ? s : "/" + s;
@@ -1044,15 +1049,21 @@
 
       function uploadGalleryFile(file, n) {
         var base = slugifyFileBase(p) + "-g" + n;
+        var localBlob = null;
         return resizeToWebp(file, IMG_GALLERY_MAX_W, IMG_QUALITY)
-          .then(function (blob) { return blobToBase64(blob); })
+          .then(function (blob) {
+            localBlob = blob;
+            return blobToBase64(blob);
+          })
           .then(function (base64) {
             return window.MaAdmin.uploadImage("images/gallery/" + base + ".webp", base64, "image/webp");
           })
           .then(function (res) {
             if (!res || !res.ok) throw new Error((res && (res.message || res.error)) || "আপলোড ব্যর্থ হয়েছে");
             if (!Array.isArray(p.images)) p.images = [];
-            p.images.push(res.path || res.url);
+            var savedPath = res.path || res.url;
+            if (localBlob && savedPath) localPreviews[savedPath] = URL.createObjectURL(localBlob);
+            p.images.push(savedPath);
           });
       }
 
