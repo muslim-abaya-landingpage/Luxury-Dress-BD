@@ -3619,3 +3619,24 @@ window.addEventListener("load", function () {
     scheduleShopCategoryBoot(true);
   }
 });
+
+/* ছবি রিকভারি: সদ্য আপলোড/ডিপ্লয়ের আগে ব্যর্থ হওয়া লোকাল ছবি একবার ক্যাশ-বাস্ট করে আবার চেষ্টা; তবুও না হলে গ্যালারি থাম্বনেইল লুকায় */
+(function () {
+  if (window.__maImgRecover) return;
+  window.__maImgRecover = true;
+  document.addEventListener("error", function (e) {
+    var img = e.target;
+    if (!img || img.tagName !== "IMG") return;
+    var src = img.getAttribute("src") || "";
+    if (!src || /^(data:|blob:|https?:)/i.test(src) && src.indexOf(location.origin) !== 0) return;
+    if (src.indexOf("images/") === -1) return;
+    if (!img.__maRetry) {
+      img.__maRetry = 1;
+      var sep = src.indexOf("?") === -1 ? "?" : "&";
+      setTimeout(function () { img.src = src + sep + "rcb=" + Date.now(); }, 800);
+      return;
+    }
+    var thumb = img.closest && img.closest(".pqv-thumb, .pd-thumb");
+    if (thumb) thumb.style.display = "none";
+  }, true);
+})();
