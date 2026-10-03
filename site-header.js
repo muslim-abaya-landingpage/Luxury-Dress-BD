@@ -30,9 +30,9 @@
     Array.isArray(HEADER_CFG.announcements) && HEADER_CFG.announcements.length
       ? HEADER_CFG.announcements
       : [
-          '💎 PREMIUM MODEST WEAR | TIMELESS ELEGANCE & EVERYDAY COMFORT',
-          '💎 Premium Modest Fashion | Elegant Abayas & Two-Piece Collections',
-          '🚚 Buy 3 Dresses & Enjoy FREE Nationwide Delivery'
+          'ð PREMIUM MODEST WEAR | TIMELESS ELEGANCE & EVERYDAY COMFORT',
+          'ð Premium Modest Fashion | Elegant Abayas & Two-Piece Collections',
+          'ð Buy 3 Dresses & Enjoy FREE Nationwide Delivery'
         ];
 
   (  function bootSiteSeo() {
@@ -89,9 +89,22 @@
       if (crossOrigin) link.crossOrigin = 'anonymous';
       document.head.appendChild(link);
     }
-        hint('dns-prefetch', 'https://muslimabaya.com');
+    hint('dns-prefetch', 'https://muslimabaya.com');
     hint('dns-prefetch', 'https://www.youtube.com');
     hint('dns-prefetch', 'https://cdnjs.cloudflare.com');
+    // GTM/pixel scripts are the heaviest things the page fetches (GTM container +
+    // fbevents.js + the TikTok pixel + Clarity together run well past 300 KB) and they
+    // all load from different third-party origins. A plain dns-prefetch only resolves
+    // DNS; preconnect also opens the TCP + TLS handshake ahead of time, so by the time
+    // each script tag actually requests its file the connection is already warm. These
+    // domains are exactly the ones gtm.js / fbevents.js / the TikTok pixel loader /
+    // Clarity use, so warming them here shaves real time off when those scripts
+    // (deferred as they already are) do fire.
+    hint('preconnect', 'https://www.googletagmanager.com');
+    hint('preconnect', 'https://connect.facebook.net', true);
+    hint('preconnect', 'https://analytics.tiktok.com', true);
+    hint('preconnect', 'https://www.clarity.ms', true);
+    hint('preconnect', 'https://scripts.clarity.ms', true);
   })();
 
   function getSiteRoot() {
@@ -101,7 +114,7 @@
     return path.slice(0, slash + 1);
   }
 
-  /** Always relative paths — works on file:// and https:// */
+  /** Always relative paths â works on file:// and https:// */
   function siteAsset(file) {
     return String(file || '').replace(/^\//, '');
   }
@@ -193,7 +206,7 @@
     );
   }
 
-  /** মেনু সক্রিয়: enabled:true অথবা ওই ক্যাটাগরিতে অন্তত ১টি প্রোডাক্ট */
+  /** à¦®à§à¦¨à§ à¦¸à¦à§à¦°à¦¿à¦¯à¦¼: enabled:true à¦à¦¥à¦¬à¦¾ à¦à¦ à¦à§à¦¯à¦¾à¦à¦¾à¦à¦°à¦¿à¦¤à§ à¦à¦¨à§à¦¤à¦¤ à§§à¦à¦¿ à¦ªà§à¦°à§à¦¡à¦¾à¦à§à¦ */
   function navItemEnabledForSection(sec) {
     if (sec && sec.key && categoryHasProducts(sec.key)) return true;
     return sec.enabled !== false;
@@ -202,11 +215,11 @@ function buildNavMenuItems() {
     var sections = window.CATALOG_SECTIONS || [];
     var extras = window.SITE_NAV_EXTRAS || [];
 
-    // মূল ক্যাটাগরিগুলোর জন্য আসল পেজ পাথ (sec.path, যেমন "/tops-kurti") ব্যবহার করা হচ্ছে —
-    // আগে এখানে "#" + key দিয়ে হ্যাশ-লিংক বানানো হতো, যেটা siteHref() দিয়ে গেলে
-    // "#tops-kurti.html"-এর মতো একটা অকেজো স্ট্রিং তৈরি করত। ব্রাউজার "#" দিয়ে শুরু হওয়া
-    // যেকোনো href-কে শুধু বর্তমান পেজের ভেতরের একটা fragment হিসেবে ধরে — তাই ক্লিক করলে
-    // পেজই বদলাতো না। এখন সঠিক পাথ ব্যবহার করা হচ্ছে, যাতে মেনু ক্লিক করলে আসল ক্যাটাগরি পেজে যায়।
+    // à¦®à§à¦² à¦à§à¦¯à¦¾à¦à¦¾à¦à¦°à¦¿à¦à§à¦²à§à¦° à¦à¦¨à§à¦¯ à¦à¦¸à¦² à¦ªà§à¦ à¦ªà¦¾à¦¥ (sec.path, à¦¯à§à¦®à¦¨ "/tops-kurti") à¦¬à§à¦¯à¦¬à¦¹à¦¾à¦° à¦à¦°à¦¾ à¦¹à¦à§à¦à§ â
+    // à¦à¦à§ à¦à¦à¦¾à¦¨à§ "#" + key à¦¦à¦¿à¦¯à¦¼à§ à¦¹à§à¦¯à¦¾à¦¶-à¦²à¦¿à¦à¦ à¦¬à¦¾à¦¨à¦¾à¦¨à§ à¦¹à¦¤à§, à¦¯à§à¦à¦¾ siteHref() à¦¦à¦¿à¦¯à¦¼à§ à¦à§à¦²à§
+    // "#tops-kurti.html"-à¦à¦° à¦®à¦¤à§ à¦à¦à¦à¦¾ à¦à¦à§à¦à§ à¦¸à§à¦à§à¦°à¦¿à¦ à¦¤à§à¦°à¦¿ à¦à¦°à¦¤à¥¤ à¦¬à§à¦°à¦¾à¦à¦à¦¾à¦° "#" à¦¦à¦¿à¦¯à¦¼à§ à¦¶à§à¦°à§ à¦¹à¦à¦¯à¦¼à¦¾
+    // à¦¯à§à¦à§à¦¨à§ href-à¦à§ à¦¶à§à¦§à§ à¦¬à¦°à§à¦¤à¦®à¦¾à¦¨ à¦ªà§à¦à§à¦° à¦­à§à¦¤à¦°à§à¦° à¦à¦à¦à¦¾ fragment à¦¹à¦¿à¦¸à§à¦¬à§ à¦§à¦°à§ â à¦¤à¦¾à¦ à¦à§à¦²à¦¿à¦ à¦à¦°à¦²à§
+    // à¦ªà§à¦à¦ à¦¬à¦¦à¦²à¦¾à¦¤à§ à¦¨à¦¾à¥¤ à¦à¦à¦¨ à¦¸à¦ à¦¿à¦ à¦ªà¦¾à¦¥ à¦¬à§à¦¯à¦¬à¦¹à¦¾à¦° à¦à¦°à¦¾ à¦¹à¦à§à¦à§, à¦¯à¦¾à¦¤à§ à¦®à§à¦¨à§ à¦à§à¦²à¦¿à¦ à¦à¦°à¦²à§ à¦à¦¸à¦² à¦à§à¦¯à¦¾à¦à¦¾à¦à¦°à¦¿ à¦ªà§à¦à§ à¦¯à¦¾à¦¯à¦¼à¥¤
     var items = sections.map(function (sec) {
       var href = sec.path || ("/" + String(sec.key || "").replace(/\.html$/i, "").trim());
       return {
@@ -291,7 +304,7 @@ function buildNavMenuItems() {
     });
   }
 
-  /** Breadcrumb / body links — href="/" works on Netlify; file:// needs real .html paths */
+  /** Breadcrumb / body links â href="/" works on Netlify; file:// needs real .html paths */
   function fixAllPageLinks() {
     fixHeaderLinks(document.body);
   }
@@ -691,7 +704,7 @@ function buildNavMenuItems() {
     var mount = document.getElementById('site-header-mount');
     if (!mount) return;
     // The header itself is position:fixed (see .abaya-main-header in
-    // site-header.css), so it's removed from normal document flow —
+    // site-header.css), so it's removed from normal document flow â
     // measuring mount.offsetHeight here only reports the mount's own
     // static placeholder height (min-height:148px), completely
     // disconnected from the real header's rendered height. That mismatch
@@ -866,7 +879,7 @@ function buildNavMenuItems() {
     document.head.appendChild(gtmScript);
   }
 
-  /** GTM — first user gesture or tab hide (keeps Ads pixels, stays off the LCP path) */
+  /** GTM â first user gesture or tab hide (keeps Ads pixels, stays off the LCP path) */
   function scheduleDeferredGtm() {
     if (window.__maGtmScheduled) return;
     window.__maGtmScheduled = true;
