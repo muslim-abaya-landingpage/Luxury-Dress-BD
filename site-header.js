@@ -51,8 +51,8 @@
       s.onerror = function () { if (next) next(); };
       (document.head || document.documentElement).appendChild(s);
     }
-    loadScript('site-seo-config.js?v=' + SEO_VER, function () {
-      loadScript('site-seo.js?v=' + SEO_VER, function () {
+    loadScript(siteAssetAbs('site-seo-config.js?v=' + SEO_VER), function () {
+      loadScript(siteAssetAbs('site-seo.js?v=' + SEO_VER), function () {
         if (window.MaSiteSeo && typeof window.MaSiteSeo.apply === 'function') {
           window.MaSiteSeo.apply();
         }
@@ -121,6 +121,15 @@
 
   function prefersCleanUrls() {
     return window.location.protocol === 'https:' || window.location.protocol === 'http:';
+  }
+
+  /** Like siteAsset(), but returns an ABSOLUTE path ("/file.js") on http(s) pages so
+      dynamically injected scripts/styles resolve correctly from subdirectory pages
+      (e.g. /product/{id}) instead of relative to that subdirectory. Falls back to the
+      old relative behavior on file:// so local double-click testing still works. */
+  function siteAssetAbs(file) {
+    var f = siteAsset(file);
+    return prefersCleanUrls() ? '/' + f : f;
   }
 
   function routeToHtmlFile(route) {
@@ -345,7 +354,7 @@ function buildNavMenuItems() {
     '</div></div></div>' +
     '<div class="header-middle-nav"><div class="custom-container nav-row">' +
     '<div class="brand-text-logo"><a href="/" class="brand-logo-link" aria-label="' + HEADER_BRAND.name + ' Home">' +
-    '<img class="brand-logo-img" src="' + HEADER_BRAND.logoSrc + '" alt="' + HEADER_BRAND.logoAlt + '" width="220" height="46" decoding="async" fetchpriority="high">' +
+    '<img class="brand-logo-img" src="' + siteAssetAbs(HEADER_BRAND.logoSrc) + '" alt="' + HEADER_BRAND.logoAlt + '" width="220" height="46" decoding="async" fetchpriority="high">' +
   '<span class="brand-logo-fallback" aria-hidden="true">' + HEADER_BRAND.fallbackText + '</span></a></div>' +
     '<nav class="desktop-menu" aria-label="Main"><ul></ul></nav>' +
     '<div class="nav-icons">' +
@@ -482,7 +491,7 @@ function buildNavMenuItems() {
               return;
             }
             var s = document.createElement("script");
-            s.src = siteAsset(file);
+            s.src = siteAssetAbs(file);
             s.async = true;
             s.onload = function () {
               s.setAttribute("data-loaded", "1");
@@ -840,6 +849,7 @@ function buildNavMenuItems() {
   window.syncSiteHeaderOffset = syncSiteHeaderOffset;
   window.siteHref = siteHref;
   window.siteAsset = siteAsset;
+  window.siteAssetAbs = siteAssetAbs;
   window.fixAllPageLinks = fixAllPageLinks;
   window.applyDynamicNavMenu = applyDynamicNavMenu;
 
@@ -847,18 +857,18 @@ function buildNavMenuItems() {
     if (!document.querySelector('link[href*="cart-drawer.css"]')) {
       var link = document.createElement('link');
       link.rel = 'stylesheet';
-      link.href = 'cart-drawer.css?v=20260820fixui';
+      link.href = siteAssetAbs('cart-drawer.css?v=20260820fixui');
       document.head.appendChild(link);
     }
     if (document.querySelector('script[src*="cart-drawer.js"]')) return;
     if (!document.querySelector('link[href*="qty-stepper.css"]')) {
       var qtyCss = document.createElement('link');
       qtyCss.rel = 'stylesheet';
-      qtyCss.href = 'qty-stepper.css?v=20260531qty';
+      qtyCss.href = siteAssetAbs('qty-stepper.css?v=20260531qty');
       document.head.appendChild(qtyCss);
     }
     var s = document.createElement('script');
-    s.src = 'cart-drawer.js?v=20260820fixui';
+    s.src = siteAssetAbs('cart-drawer.js?v=20260820fixui');
     s.defer = true;
     document.body.appendChild(s);
   }
