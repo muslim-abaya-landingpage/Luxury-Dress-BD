@@ -65,6 +65,19 @@
     return routeOrFile;
   }
 
+  /** Same fix as site-header.js's siteAssetAbs(): dynamically injected scripts here
+      (support-chat.js, customer-reviews.js, site-api-config.js) were requested with a
+      bare relative filename, which resolves against the CURRENT page's directory. That
+      is fine for root pages but breaks on subdirectory pages like /product/{id}. Prefer
+      the shared window.siteAssetAbs from site-header.js; fall back to an inline version
+      so this file still works standalone / before site-header.js has run. */
+  function footerAssetAbs(file) {
+    if (typeof window.siteAssetAbs === "function") return window.siteAssetAbs(file);
+    var f = String(file || "").replace(/^\//, "");
+    var isHttp = window.location.protocol === "https:" || window.location.protocol === "http:";
+    return isHttp ? "/" + f : f;
+  }
+
   function categoryHasProducts(key) {
     if (window.maCatalog && typeof window.maCatalog.categoryHasProducts === "function") {
       return window.maCatalog.categoryHasProducts(key);
@@ -288,7 +301,7 @@ esc(SOCIAL.linkedin) +
       return;
     }
     var s = document.createElement("script");
-    s.src = "site-api-config.js?v=20260529";
+    s.src = footerAssetAbs("site-api-config.js?v=20260529");
     s.onload = function () {
       cb(getScriptUrl());
     };
@@ -581,7 +594,7 @@ esc(SOCIAL.linkedin) +
   function loadSupportChat() {
     if (window.__maSupportChat || shouldSkipChat()) return;
     var s = document.createElement("script");
-    s.src = "support-chat.js?v=20261003chat3";
+    s.src = footerAssetAbs("support-chat.js?v=20261003chat3");
     s.async = true;
     (document.head || document.documentElement).appendChild(s);
   }
@@ -602,7 +615,7 @@ esc(SOCIAL.linkedin) +
       return;
     }
     var s = document.createElement("script");
-    s.src = "customer-reviews.js?v=20261003tt";
+    s.src = footerAssetAbs("customer-reviews.js?v=20261003tt");
     s.onload = function () {
       if (window.MaCustomerReviews && typeof window.MaCustomerReviews.mount === "function") {
         window.MaCustomerReviews.mount();
