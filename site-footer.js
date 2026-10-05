@@ -552,11 +552,16 @@ esc(SOCIAL.linkedin) +
     }, 25);
   }
 
-  function syncFooterPanels() {
+  var footerWideMedia = window.matchMedia ? window.matchMedia("(min-width: 769px)") : null;
+  var footerExpandedMode = null;
+
+  function syncFooterPanels(force) {
+    var expand = footerWideMedia ? footerWideMedia.matches : window.innerWidth > 768;
+    if (!force && expand === footerExpandedMode) return;
+    footerExpandedMode = expand;
     var panels = document.querySelectorAll(".anz-foot-details");
-    var expand = window.innerWidth > 768;
     panels.forEach(function (panel) {
-      panel.open = expand;
+      if (panel.open !== expand) panel.open = expand;
     });
   }
 
@@ -565,10 +570,17 @@ esc(SOCIAL.linkedin) +
     if (!mount) return;
     mount.innerHTML = buildFooterHtml();
     initNewsletter();
-    syncFooterPanels();
+    syncFooterPanels(true);
     if (!window.__maFooterPanelBound) {
       window.__maFooterPanelBound = true;
-      window.addEventListener("resize", syncFooterPanels);
+      var syncMode = function () { syncFooterPanels(); };
+      if (footerWideMedia && typeof footerWideMedia.addEventListener === "function") {
+        footerWideMedia.addEventListener("change", syncMode);
+      } else if (footerWideMedia && typeof footerWideMedia.addListener === "function") {
+        footerWideMedia.addListener(syncMode);
+      } else {
+        window.addEventListener("resize", syncMode, { passive: true });
+      }
     }
     waitForCatalogAndRefresh(0);
   }
@@ -615,7 +627,7 @@ esc(SOCIAL.linkedin) +
       return;
     }
     var s = document.createElement("script");
-    s.src = footerAssetAbs("customer-reviews.js?v=20261004fix");
+    s.src = footerAssetAbs("customer-reviews.js?v=20261006scroll2");
     s.onload = function () {
       if (window.MaCustomerReviews && typeof window.MaCustomerReviews.mount === "function") {
         window.MaCustomerReviews.mount();

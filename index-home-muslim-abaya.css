@@ -240,10 +240,12 @@
   padding: 0 24px;
   position: relative;
 }
-/* below-the-fold rows: skip style/layout/paint until near the viewport (smaller main-thread cost) */
-.home-section ~ .home-section {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 700px;
+/* Keep mobile section heights stable while the visitor is swiping. */
+@media (min-width: 901px) and (pointer: fine) {
+  .home-section ~ .home-section {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 700px;
+  }
 }
 .home-section-head {
   display: flex;
@@ -525,9 +527,12 @@
   border-radius: 50%;
   opacity: 0;
   pointer-events: none;
+  animation: none;
+}
+.ah-card .ah-btn-cart.is-adding .ah-btn-spin {
+  opacity: 1;
   animation: ah-spin 0.55s linear infinite;
 }
-.ah-card .ah-btn-cart.is-adding .ah-btn-spin { opacity: 1; }
 .ah-card .ah-btn-cart.is-adding > svg,
 .ah-card .ah-btn-cart.is-adding [data-cart-label] { opacity: 0; }
 @keyframes ah-spin {
@@ -535,9 +540,21 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .ah-card .ah-btn,
-  .ah-card .ah-btn-spin {
+  .ah-card .ah-btn-spin,
+  .ah-card .ah-btn-cart.is-adding .ah-btn-spin {
     transition: none;
     animation: none;
+    transform: none;
+  }
+}
+
+@media (max-width: 900px), (pointer: coarse) {
+  .home-row {
+    touch-action: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+  }
+  .ah-card:hover .ah-card-media img {
     transform: none;
   }
 }

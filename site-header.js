@@ -709,6 +709,10 @@ function buildNavMenuItems() {
     }
   }
 
+  var headerOffsetFrame = 0;
+  var lastHeaderHeight = 0;
+  var headerSizeObserver = null;
+
   function syncSiteHeaderOffset() {
     var mount = document.getElementById('site-header-mount');
     if (!mount) return;
@@ -723,9 +727,38 @@ function buildNavMenuItems() {
     // push that real height back onto the placeholder so they always match.
     var header = mount.querySelector('.abaya-main-header') || mount.firstElementChild;
     var realHeight = header ? header.offsetHeight : mount.offsetHeight;
-    if (realHeight) {
+    if (realHeight && realHeight !== lastHeaderHeight) {
+      lastHeaderHeight = realHeight;
       mount.style.minHeight = realHeight + 'px';
       document.documentElement.style.setProperty('--site-header-h', realHeight + 'px');
+    }
+  }
+
+  function scheduleSiteHeaderOffset() {
+    if (headerOffsetFrame) return;
+    headerOffsetFrame = window.requestAnimationFrame(function () {
+      headerOffsetFrame = 0;
+      syncSiteHeaderOffset();
+    });
+  }
+
+  function observeSiteHeaderSize(mount) {
+    var header = mount.querySelector('.abaya-main-header') || mount.firstElementChild;
+    if (header && typeof window.ResizeObserver === 'function') {
+      if (headerSizeObserver) headerSizeObserver.disconnect();
+      headerSizeObserver = new window.ResizeObserver(scheduleSiteHeaderOffset);
+      headerSizeObserver.observe(header);
+    } else {
+      // Mobile browser chrome can resize the viewport height during a swipe.
+      // Only a width change needs a new header measurement in this fallback.
+      var width = document.documentElement.clientWidth || window.innerWidth;
+      window.addEventListener('resize', function () {
+        var nextWidth = document.documentElement.clientWidth || window.innerWidth;
+        if (nextWidth === width) return;
+        width = nextWidth;
+        scheduleSiteHeaderOffset();
+      }, { passive: true });
+      if (header) header.addEventListener('transitionend', scheduleSiteHeaderOffset);
     }
   }
 
@@ -770,6 +803,7 @@ function buildNavMenuItems() {
 
   function initFastNavigation() {
     if (!canPrefetch()) return;
+    if (window.matchMedia && !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
 
     /* Only the link the visitor hovers / touches / focuses is prefetched (below).
        Blanket "warm every popular page" prefetching was removed: it fetched ~11 HTML
@@ -788,11 +822,6 @@ function buildNavMenuItems() {
       var anchor = ev.target && ev.target.closest ? ev.target.closest('a[href]') : null;
       if (anchor) schedulePrefetch(anchor);
     }, true);
-
-    document.addEventListener('touchstart', function (ev) {
-      var anchor = ev.target && ev.target.closest ? ev.target.closest('a[href]') : null;
-      if (anchor) schedulePrefetch(anchor);
-    }, { passive: true, capture: true });
 
     document.addEventListener('focusin', function (ev) {
       var anchor = ev.target && ev.target.closest ? ev.target.closest('a[href]') : null;
@@ -833,9 +862,9 @@ function buildNavMenuItems() {
       }
     });
     syncSiteHeaderOffset();
-    window.addEventListener('resize', syncSiteHeaderOffset);
+    observeSiteHeaderSize(mount);
     if (document.fonts && typeof document.fonts.ready === 'object' && document.fonts.ready.then) {
-      document.fonts.ready.then(syncSiteHeaderOffset);
+      document.fonts.ready.then(scheduleSiteHeaderOffset);
     }
     if (annTimer) clearInterval(annTimer);
     annTimer = setInterval(function () { window.moveAnnouncement(1); }, 4000);
@@ -854,7 +883,7 @@ function buildNavMenuItems() {
   window.applyDynamicNavMenu = applyDynamicNavMenu;
 
   function ensureCartDrawerAssets() {
-    if (!document.querySelector('link[href*="cart-drawer.css"]')) {
+    if (!document.querySelector('link[href*="cart-drawer.css"], link[href*="cart-drawer.min.css"]')) {
       var link = document.createElement('link');
       link.rel = 'stylesheet';
       link.href = siteAssetAbs('cart-drawer.css?v=20260820fixui');

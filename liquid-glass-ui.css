@@ -561,6 +561,39 @@ scroll-behavior:smooth;
 
 /* Selection */
 
+/* Mobile scroll: avoid repainting blurred fixed layers and promoting every
+   product card/button into a separate GPU surface. Press states still work. */
+@media (max-width: 900px), (pointer: coarse) {
+  .site-header,
+  .header,
+  header,
+  .search-box,
+  .search-input,
+  .header-search input,
+  .ah-search,
+  .search-wrap,
+  .item-card,
+  .product-card,
+  .sale-badge,
+  .discount-badge,
+  .category-chip,
+  .category-pill,
+  .ah-category,
+  .cart-drawer,
+  .cart-panel {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .ah-card,
+  .ah-btn,
+  .item-card,
+  .product-card {
+    transform: none;
+    will-change: auto;
+    backface-visibility: visible;
+  }
+}
+
 ::selection{
 
 background:rgba(120,120,120,.22);
