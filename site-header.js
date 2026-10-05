@@ -897,7 +897,7 @@ function buildNavMenuItems() {
       document.head.appendChild(qtyCss);
     }
     var s = document.createElement('script');
-    s.src = siteAssetAbs('cart-drawer.js?v=20260820fixui');
+    s.src = siteAssetAbs('cart-drawer.js?v=20261006cart1');
     s.defer = true;
     document.body.appendChild(s);
   }
