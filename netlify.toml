@@ -3,7 +3,7 @@
 # publishes dist/ and makes every page except the homepage 404.
 
 [build]
-  command = "echo Static site — publishing repo root"
+  command = "node scripts/prepare-netlify-headers.mjs"
   publish = "."
 
 [build.environment]
