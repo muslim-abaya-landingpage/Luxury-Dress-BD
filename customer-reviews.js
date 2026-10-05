@@ -612,13 +612,25 @@
           }
         }, 300);
         var resizeTimer;
-        global.addEventListener("resize", function () {
+        var carouselWidth = track.clientWidth;
+        function scheduleRailResize() {
+          var nextWidth = track.clientWidth;
+          if (!nextWidth || nextWidth === carouselWidth) return;
+          carouselWidth = nextWidth;
           clearTimeout(resizeTimer);
           resizeTimer = setTimeout(function () {
             var f = anim ? fraction() : 0;
             if (buildRail()) startAnimation(f);
           }, 200);
-        });
+        }
+        // Rebuild cloned cards only when the carousel's width changes, not
+        // whenever the mobile address bar changes the viewport height.
+        if (typeof global.ResizeObserver === "function") {
+          var railObserver = new global.ResizeObserver(scheduleRailResize);
+          railObserver.observe(track);
+        } else {
+          global.addEventListener("resize", scheduleRailResize, { passive: true });
+        }
       } else {
         marquee = false;
         startStepAutoplay();

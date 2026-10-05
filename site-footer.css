@@ -1138,3 +1138,40 @@ a.anz-contact-link:hover {
     border-radius: 12px;
   }
 }
+
+/* The static dark/gold footer remains, without continuously repainting
+   large blurred gradients while a phone scrolls past it. */
+@media (max-width: 900px), (pointer: coarse) {
+  .anz-footer,
+  .anz-footer::before,
+  .anz-footer::after,
+  .anz-footer-strip::before {
+    animation: none !important;
+  }
+  .anz-footer::before,
+  .anz-footer::after {
+    filter: none;
+    display: none;
+  }
+  .anz-footer-trust,
+  .anz-col-brand,
+  .anz-col-shop,
+  .anz-col-links,
+  .anz-col-contact,
+  .anz-col-newsletter,
+  .anz-wa-cta,
+  .newsletter-form input,
+  .anz-footer-strip,
+  .anz-bottom.anz-footer-strip,
+  #site-footer-mount .anz-bottom.anz-footer-strip {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .anz-col-brand:hover,
+  .anz-col-shop:hover,
+  .anz-col-links:hover,
+  .anz-col-contact:hover,
+  .anz-col-newsletter:hover {
+    transform: none;
+  }
+}
