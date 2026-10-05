@@ -586,6 +586,8 @@ window.renderCartList = function (cartItems) {
 // setAllStoreCartLinesSelected / getSelectedStoreCartLines untouched, in
 // case something else depends on them.
 
+// The header may replace the badge callback after this script loads.
+// Drawer mutations must also render directly, including the final empty cart.
 window.updateDrawerQty = function (index, change) {
   let existing = typeof window.loadStoreCart === 'function' ? window.loadStoreCart({ readOnly: true }) : [];
   if (!existing[index]) return;
@@ -596,9 +598,8 @@ window.updateDrawerQty = function (index, change) {
   const updated = typeof window.persistStoreCart === 'function' ? window.persistStoreCart(existing) : existing;
   if (typeof window.afterCartMutation === 'function') {
     window.afterCartMutation(updated);
-  } else {
-    window.updateCartDrawerUI(updated);
   }
+  window.updateCartDrawerUI(updated);
 };
 
 window.removeDrawerItem = function (index) {
@@ -608,9 +609,8 @@ window.removeDrawerItem = function (index) {
   const updated = typeof window.persistStoreCart === 'function' ? window.persistStoreCart(existing) : existing;
   if (typeof window.afterCartMutation === 'function') {
     window.afterCartMutation(updated);
-  } else {
-    window.updateCartDrawerUI(updated);
   }
+  window.updateCartDrawerUI(updated);
 };
 
 window.updateCartDrawerUI = function (cartLines) {
