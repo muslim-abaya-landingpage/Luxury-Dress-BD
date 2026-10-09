@@ -7,44 +7,105 @@
   var SESSION_KEY = cfg.sessionKey || "ma_admin_session";
   var SESSION_MS = (cfg.sessionDays || 7) * 24 * 60 * 60 * 1000;
 
-  function apiPost(fields) {
+  var READ_TYPES = ['AdminOrders', 'AdminOrderList', 'AdminOrderGet', 'AdminOrderStaff',
+    'AdminStockGet', 'AdminAnalytics', 'AdminStockVariantsList', 'AdminStockLedgerList',
+    'AdminAnalyticsV2', 'AdminGrowthData', 'AdminStaffList', 'InboxList', 'InboxThread'];
+  var CACHE_PREFIX = "ma_admin_read_v2:";
+  var SNAPSHOT_MS = 5 * 60 * 1000;
+  var inFlight = Object.create(null);
+  var cacheGeneration = 0;
+  var HARD_FAILURES = ["INVALID_TOKEN", "EXPIRED", "NOT_ADMIN", "NO_TOKEN"];
+
+  function clearReadCache() {
+    cacheGeneration++;
+    inFlight = Object.create(null);
+    try {
+      for (var i = sessionStorage.length - 1; i >= 0; i--) {
+        var key = sessionStorage.key(i);
+        if (key.indexOf(CACHE_PREFIX) === 0 || key === "ma_admin_orders_v1") sessionStorage.removeItem(key);
+      }
+    } catch (e) {}
+  }
+
+  function readKey(fields) {
+    return CACHE_PREFIX + JSON.stringify(Object.keys(fields).filter(function (k) { return k !== "Token"; })
+      .sort().map(function (k) { return [k, String(fields[k] == null ? "" : fields[k])]; }));
+  }
+
+  // Same-tab snapshots are display-only: every load still requests current server data.
+  function cached(recordType, fields) {
+    var s = getSession();
+    if (!s || READ_TYPES.indexOf(recordType) === -1) return null;
+    var params = Object.assign({}, fields || {}, { RecordType: recordType });
+    try {
+      var entry = JSON.parse(sessionStorage.getItem(readKey(params)) || "null");
+      if (entry && entry.token === s.token && Date.now() - entry.at < SNAPSHOT_MS) return entry.result;
+    } catch (e) {}
+    return null;
+  }
+
+  function timeoutPromise(ms, promise) {
+    return new Promise(function (resolve, reject) {
+      var timer = setTimeout(function () { reject(new Error("REQUEST_TIMEOUT")); }, ms);
+      promise.then(function (value) { clearTimeout(timer); resolve(value); },
+        function (err) { clearTimeout(timer); reject(err); });
+    });
+  }
+
+  function request(fields, timeout) {
     if (!API_URL) return Promise.reject(new Error("API_MISSING"));
+    var read = READ_TYPES.indexOf(fields.RecordType) !== -1;
+    var key = read ? readKey(fields) : "";
+    var flightKey = fields.Token + ":" + key;
+    if (read && inFlight[flightKey]) return inFlight[flightKey];
+    if (!read && fields.Token && fields.RecordType !== "AdminVerify") clearReadCache();
+    var generation = cacheGeneration;
     var body = new URLSearchParams();
     Object.keys(fields).forEach(function (k) {
-      if (fields[k] != null && fields[k] !== "") body.append(k, String(fields[k]));
+      if (fields[k] != null) body.append(k, String(fields[k]));
     });
-    return fetch(API_URL, {
-      method: "POST",
-      mode: "cors",
-      credentials: "omit",
-      body: body
-    }).then(function (res) {
-      return res.text();
-    }).then(function (text) {
+    var task = timeoutPromise(timeout || 30000, fetch(API_URL, {
+      method: "POST", mode: "cors", credentials: "omit", body: body
+    }).then(function (res) { return res.text(); })).then(function (text) {
       var raw = String(text || "").trim();
-      try {
-        return JSON.parse(raw);
-      } catch (e) {
-        if (raw === "Success") {
-          return {
-            ok: false,
-            error: "DEPLOY_OLD",
-            message:
-              "API পুরনো ভার্সন। Apps Script → Deploy → New version করুন।"
-          };
-        }
-        return { ok: false, error: raw || "UNKNOWN", message: raw };
+      var res;
+      try { res = JSON.parse(raw); } catch (e) {
+        res = { ok: false, error: raw === "Success" ? "DEPLOY_OLD" : "INVALID_RESPONSE",
+          message: "API পুরনো ভার্সন বা ভুল উত্তর। Apps Script → Deploy → New version করুন।" };
       }
+      if (!res || typeof res !== "object") res = { ok: false, error: "INVALID_RESPONSE" };
+      var current = getSession();
+      var sameSession = current && current.token === fields.Token;
+      if (fields.Token && sameSession && HARD_FAILURES.indexOf(res.error) !== -1) logout();
+      if (read && res.ok && sameSession && generation === cacheGeneration) {
+        try { sessionStorage.setItem(key, JSON.stringify({ token: fields.Token, at: Date.now(), result: res })); } catch (e) {}
+      }
+      if (!read && fields.Token && fields.RecordType !== "AdminVerify") clearReadCache();
+      return res;
+    });
+    if (read) {
+      inFlight[flightKey] = task;
+      var release = function () { if (inFlight[flightKey] === task) delete inFlight[flightKey]; };
+      task.then(release, release);
+    }
+    return task;
+  }
+
+  function apiPost(fields) {
+    return request(fields, 30000).catch(function (err) {
+      return { ok: false, error: "NETWORK_FAILURE", message: err.message };
     });
   }
 
   function saveSession(data) {
+    var previous = getSession();
+    if (!previous || previous.token !== data.token) clearReadCache();
     var session = {
       token: data.token,
       email: data.email || "",
       phone: data.phone || "",
       name: data.name || "",
-      role: "admin",
+      role: data.role || "admin",
       expires: data.expires || Date.now() + SESSION_MS,
       sheetUrl: data.sheetUrl || "",
       scriptUrl: data.scriptUrl || cfg.scriptProjectUrl || ""
@@ -60,7 +121,7 @@
       var raw = localStorage.getItem(SESSION_KEY);
       if (!raw) return null;
       var s = JSON.parse(raw);
-      if (!s || !s.token || s.role !== "admin") return null;
+      if (!s || !s.token || ["admin", "staff"].indexOf(s.role) === -1) return null;
       if (s.expires && Date.now() > s.expires) {
         logout();
         return null;
@@ -72,6 +133,8 @@
   }
 
   function logout() {
+    clearReadCache();
+    try { sessionStorage.removeItem("ma_admin_verified_at"); } catch (e) {}
     try {
       localStorage.removeItem(SESSION_KEY);
     } catch (e) {}
@@ -81,16 +144,22 @@
     var loginId = String(data.login || "").trim();
     var password = String(data.password || "");
     if (!loginId || !password) return Promise.reject(new Error("MISSING_FIELDS"));
+
     var fields = {
       RecordType: "AdminLogin",
       Password: password
     };
+
+    // উন্নতি: ফোন নাম্বার ফরম্যাটিং আরও আধুনিক করা হয়েছে
     if (loginId.indexOf("@") !== -1) fields.Email = loginId.toLowerCase();
-    else fields.Phone = loginId.replace(/[^\d]/g, "").replace(/^880/, "0");
+    else fields.Phone = loginId.replace(/\D/g, "").replace(/^(?:880|88|0)/, "0");
+
     if (!fields.Email && !fields.Phone) return Promise.reject(new Error("INVALID_LOGIN"));
+
     return apiPost(fields).then(function (res) {
       if (!res.ok) throw new Error(res.message || res.error || "LOGIN_FAILED");
       saveSession(res);
+      try { sessionStorage.setItem("ma_admin_verified_at", JSON.stringify({ token: res.token, at: Date.now() })); } catch (e) {}
       return getSession();
     });
   }
@@ -102,7 +171,19 @@
       RecordType: "AdminVerify",
       Token: s.token
     }).then(function (res) {
-      if (!res.ok || res.role !== "admin") {
+      // সর্বার-সাইডে সেশন সত্যিই বাতিল হলে/বাতিল না থাকলেই শেষ লগআউট করা হবে (INVALID_TOKEN/EXPIRED/NOT_ADMIN/NO_TOKEN)।
+      // রেট-লিমিট/নেটওয়ার্ক এররের মতো সাময়িক ব্যর্থতায় সেশন মুছে লগআউট করা ঠিক নয়।
+      var current = getSession();
+      if (!current || current.token !== s.token) return current;
+      var hardFailures = ["INVALID_TOKEN", "EXPIRED", "NOT_ADMIN", "NO_TOKEN"];
+      if (!res.ok) {
+        if (hardFailures.indexOf(res.error) !== -1) {
+          logout();
+          return null;
+        }
+        return s;
+      }
+      if (["admin", "staff"].indexOf(res.role) === -1) {
         logout();
         return null;
       }
@@ -130,12 +211,397 @@
     });
   }
 
+  // নতুন: Admin Panel থেকে সরাসরি GitHub-এ ফাইল পাবলিশ (Netlify অটো-ডিপ্লয় ট্রিগার করে)
+  // path: category-products.js / product-links-data.js / product-catalog-sections.js / product-config.js
+  function publishFile(path, content, message) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return timeoutPromise(
+      30000,
+      fetch(API_URL, {
+        method: "POST",
+        mode: "cors",
+        credentials: "omit",
+        body: (function () {
+          var body = new URLSearchParams();
+          body.append("RecordType", "AdminPublishFile");
+          body.append("Token", s.token);
+          body.append("Path", path);
+          body.append("Content", content);
+          body.append("Message", message || ("Update " + path + " — Admin Panel থেকে"));
+          return body;
+        })()
+      })
+    )
+      .then(function (res) {
+        return res.text();
+      })
+      .then(function (text) {
+        try {
+          return JSON.parse(String(text || "").trim());
+        } catch (e) {
+          return { ok: false, error: "PARSE_FAILED", message: text };
+        }
+      })
+      .catch(function (err) {
+        return { ok: false, error: "NETWORK_FAILURE", message: err.message };
+      });
+  }
+
+  // নতুন: প্রোডাক্ট ছবি সরাসরি আপলোড (Base64) — GitHub-এর images/ ফোল্ডারে কমিট হয়
+  function uploadImage(fileName, base64Content, mimeType) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return timeoutPromise(
+      45000,
+      fetch(API_URL, {
+        method: "POST",
+        mode: "cors",
+        credentials: "omit",
+        body: (function () {
+          var body = new URLSearchParams();
+          body.append("RecordType", "AdminUploadImage");
+          body.append("Token", s.token);
+          body.append("FileName", fileName);
+          body.append("ContentBase64", base64Content);
+          body.append("MimeType", mimeType || "image/webp");
+          return body;
+        })()
+      })
+    )
+      .then(function (res) {
+        return res.text();
+      })
+      .then(function (text) {
+        try {
+          return JSON.parse(String(text || "").trim());
+        } catch (e) {
+          return { ok: false, error: "PARSE_FAILED", message: text };
+        }
+      })
+      .catch(function (err) {
+        return { ok: false, error: "NETWORK_FAILURE", message: err.message };
+      });
+  }
+
+  // নতুন: Media Library — images/ ফোল্ডারের সব ছবির তালিকা (main/gallery/cards সব সাবফোল্ডার সহ)
+  function listImages() {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return timeoutPromise(
+      20000,
+      fetch(API_URL, {
+        method: "POST",
+        mode: "cors",
+        credentials: "omit",
+        body: (function () {
+          var body = new URLSearchParams();
+          body.append("RecordType", "AdminListImages");
+          body.append("Token", s.token);
+          return body;
+        })()
+      })
+    )
+      .then(function (res) {
+        return res.text();
+      })
+      .then(function (text) {
+        try {
+          return JSON.parse(String(text || "").trim());
+        } catch (e) {
+          return { ok: false, error: "PARSE_FAILED", message: text };
+        }
+      })
+      .catch(function (err) {
+        return { ok: false, error: "NETWORK_FAILURE", message: err.message };
+      });
+  }
+
+  // নতুন: Media Library থেকে একটা ছবি স্থায়ীভাবে মুছে ফেলা
+  function deleteImage(path) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return timeoutPromise(
+      20000,
+      fetch(API_URL, {
+        method: "POST",
+        mode: "cors",
+        credentials: "omit",
+        body: (function () {
+          var body = new URLSearchParams();
+          body.append("RecordType", "AdminDeleteImage");
+          body.append("Token", s.token);
+          body.append("Path", path);
+          return body;
+        })()
+      })
+    )
+      .then(function (res) {
+        return res.text();
+      })
+      .then(function (text) {
+        try {
+          return JSON.parse(String(text || "").trim());
+        } catch (e) {
+          return { ok: false, error: "PARSE_FAILED", message: text };
+        }
+      })
+      .catch(function (err) {
+        return { ok: false, error: "NETWORK_FAILURE", message: err.message };
+      });
+  }
+
+    // নতুন: Stock ( ইনভেন্টরি) এবং Analytics
+  function getStock() {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return apiPost({ RecordType: "AdminStockGet", Token: s.token }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "STOCK_FETCH_FAILED");
+      return res;
+    });
+  }
+
+  function setStock(productId, productName, qty) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return apiPost({
+      RecordType: "AdminStockSet",
+      Token: s.token,
+      ProductId: productId,
+      ProductName: productName || "",
+      Qty: qty
+    }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "STOCK_SET_FAILED");
+      return res;
+    });
+  }
+
+  function getAnalytics(days) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return apiPost({ RecordType: "AdminAnalytics", Token: s.token, Days: days || 30 }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "ANALYTICS_FAILED");
+      return res;
+    });
+  }
+
+  // নতুন: গ্রোথ ড্যাশবোর্ড — Abandoned Cart, Back-in-stock Waitlist, Reorder Offers
+  function getStaffList() {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return apiPost({ RecordType: "AdminStaffList", Token: s.token }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "STAFF_LIST_FAILED");
+      return res;
+    });
+  }
+
+  function saveStaff(fields) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return apiPost({
+      RecordType: "AdminStaffSave",
+      Token: s.token,
+      Email: fields.email || "",
+      Phone: fields.phone || "",
+      Name: fields.name || "",
+      Password: fields.password || ""
+    }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "STAFF_SAVE_FAILED");
+      return res;
+    });
+  }
+
+  function deleteStaff(fields) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return apiPost({
+      RecordType: "AdminStaffDelete",
+      Token: s.token,
+      Email: fields.email || "",
+      Phone: fields.phone || ""
+    }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "STAFF_DELETE_FAILED");
+      return res;
+    });
+  }
+
+    function getGrowthData() {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return apiPost({ RecordType: "AdminGrowthData", Token: s.token }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "GROWTH_FETCH_FAILED");
+      return res;
+    });
+  }
+
+  function dismissGrowthItem(kind, key) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return apiPost({
+      RecordType: "AdminGrowthDismiss",
+      Token: s.token,
+      Kind: kind,
+      Key: key
+    }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "GROWTH_DISMISS_FAILED");
+      return res;
+    });
+  }
+
+  // Messenger inbox (RecordType Inbox*). Unlike apiPost, empty values are sent,
+  // so a field can be cleared (e.g. un-assigning a conversation).
+  function inboxCall(type, fields) { return call(type, fields); }
+
+  function call(recordType, fields) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    var params = Object.assign({}, fields || {}, { RecordType: recordType, Token: s.token });
+    return request(params, 30000).then(function (res) {
+      if (!res.ok) {
+        var err = new Error(res.message || res.error || "REQUEST_FAILED");
+        err.code = res.error || "";
+        throw err;
+      }
+      return res;
+    });
+  }
+
+  // ===== নতুন: ভ্যারিয়েন্ট-ভিত্তিক স্টক, লেজার, CSV, Analytics v2 (stock-analytics-v2) =====
+  function getStockVariants(opts) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    opts = opts || {};
+    return apiPost({
+      RecordType: "AdminStockVariantsList",
+      Token: s.token,
+      Search: opts.search || "",
+      StockStatus: opts.stockStatus || "all",
+      Category: opts.category || "",
+      CategoryMap: opts.categoryMap ? JSON.stringify(opts.categoryMap) : ""
+    }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "STOCK_VARIANTS_FETCH_FAILED");
+      return res;
+    });
+  }
+
+  function saveStockVariant(opts) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    opts = opts || {};
+    return apiPost({
+      RecordType: "AdminStockVariantSave",
+      Token: s.token,
+      ProductId: opts.productId,
+      ProductName: opts.productName || "",
+      Category: opts.category || "",
+      Variant: opts.variant || "",
+      Available: (typeof opts.available === "undefined" || opts.available === null) ? "" : opts.available,
+      Threshold: (typeof opts.threshold === "undefined" || opts.threshold === null) ? "" : opts.threshold,
+      Tracked: opts.tracked ? "true" : "",
+      Reason: opts.reason || ""
+    }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "STOCK_VARIANT_SAVE_FAILED");
+      return res;
+    });
+  }
+
+  function getStockLedger(productId, limit) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return apiPost({ RecordType: "AdminStockLedgerList", Token: s.token, ProductId: productId || "", Limit: limit || 200 }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "STOCK_LEDGER_FETCH_FAILED");
+      return res;
+    });
+  }
+
+  function commitStockCsv(rows, previewOnly) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return apiPost({
+      RecordType: "AdminStockCsvCommit",
+      Token: s.token,
+      RowsJSON: JSON.stringify(rows || []),
+      PreviewOnly: previewOnly ? "true" : "false"
+    }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "STOCK_CSV_FAILED");
+      return res;
+    });
+  }
+
+  function getAnalyticsV2(opts) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    opts = opts || {};
+    return apiPost({
+      RecordType: "AdminAnalyticsV2",
+      Token: s.token,
+      Range: opts.range || "today",
+      From: opts.from || "",
+      To: opts.to || "",
+      CategoryMap: opts.categoryMap ? JSON.stringify(opts.categoryMap) : ""
+    }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "ANALYTICS_V2_FAILED");
+      return res;
+    });
+  }
+
+  function migrateStockVariants() {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return apiPost({ RecordType: "AdminStockMigrate", Token: s.token }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "STOCK_MIGRATE_FAILED");
+      return res;
+    });
+  }
+
+  function quickAdjustStock(opts) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    opts = opts || {};
+    return apiPost({
+      RecordType: "AdminStockQuickAdjust",
+      Token: s.token,
+      ProductId: opts.productId,
+      ProductName: opts.productName || "",
+      Category: opts.category || "",
+      Variant: opts.variant || "",
+      Delta: opts.delta,
+      Reason: opts.reason || ""
+    }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "STOCK_QUICK_ADJUST_FAILED");
+      return res;
+    });
+  }
+
   g.MaAdmin = {
+    cached: cached,
+    clearReadCache: clearReadCache,
+    call: call,
+    inboxCall: inboxCall,
     login: login,
     logout: logout,
     getSession: getSession,
     verifySession: verifySession,
     fetchOrders: fetchOrders,
+    publishFile: publishFile,
+    uploadImage: uploadImage,
+    listImages: listImages,
+    deleteImage: deleteImage,
+    getStock: getStock,
+    setStock: setStock,
+    getAnalytics: getAnalytics,
+    getStockVariants: getStockVariants,
+    saveStockVariant: saveStockVariant,
+    getStockLedger: getStockLedger,
+    commitStockCsv: commitStockCsv,
+    getAnalyticsV2: getAnalyticsV2,
+    migrateStockVariants: migrateStockVariants,
+    quickAdjustStock: quickAdjustStock,
+    getGrowthData: getGrowthData,
+    dismissGrowthItem: dismissGrowthItem,
+    getStaffList: getStaffList,
+    saveStaff: saveStaff,
+    deleteStaff: deleteStaff,
     isLoggedIn: function () {
       return !!getSession();
     }
