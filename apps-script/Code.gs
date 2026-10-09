@@ -4268,9 +4268,9 @@ var MSGR_CONFIRMED_STATUS = 'অর্ডার কনফার্ম';
 var MSGR_DELIVERED_STATUS = 'ডেলিভারি হয়েছে';
 // Contacts sheet columns (1-based)
 var MC = { PSID: 1, NAME: 2, FIRST: 3, LAST: 4, FROM_AD: 5, PAGE: 6, STATUS: 7, ASSIGNED: 8,
-  LAST_MSG: 9, LAST_DIR: 10, UNREAD: 11, ORDER_ID: 12, ORDER_VALUE: 13, PURCHASE_SENT: 14, NOTES: 15 };
+  LAST_MSG: 9, LAST_DIR: 10, UNREAD: 11, ORDER_ID: 12, ORDER_VALUE: 13, PURCHASE_SENT: 14, NOTES: 15, PROFILE: 16 };
 var MC_HEADERS = ['PSID', 'Name', 'FirstSeen', 'LastSeen', 'FromAd', 'PageId', 'Status', 'AssignedTo',
-  'LastMessage', 'LastDirection', 'Unread', 'OrderId', 'OrderValue', 'PurchaseSent', 'Notes'];
+  'LastMessage', 'LastDirection', 'Unread', 'OrderId', 'OrderValue', 'PurchaseSent', 'Notes', 'ProfilePic'];
 
 function messengerVerify_(e) {
   var want = PropertiesService.getScriptProperties().getProperty('MSGR_VERIFY_TOKEN') || '';
@@ -4297,11 +4297,14 @@ function msgrContactsSheet_() {
   var lastCol = Math.max(sh.getLastColumn(), 1);
   var head = sh.getLastRow() ? sh.getRange(1, 1, 1, lastCol).getValues()[0] : [];
   if (!head[MC.NOTES - 1]) sh.getRange(1, 1, 1, MC_HEADERS.length).setValues([MC_HEADERS]);
+  if (!head[MC.PROFILE - 1]) sh.getRange(1, MC.PROFILE).setValue('ProfilePic');
   return sh;
 }
 
 function msgrMessagesSheet_() {
-  return ensureSheet_(MSGR_MSG_SHEET, ['Time', 'PageId', 'PSID', 'Direction', 'Text', 'MID', 'By']);
+  var sh = ensureSheet_(MSGR_MSG_SHEET, ['Time', 'PageId', 'PSID', 'Direction', 'Text', 'MID', 'By', 'Attachments']);
+  sh.getRange(1, 8).setValue('Attachments');
+  return sh;
 }
 
 // Rows written before multi-Page support have no PageId: they belong to MSGR_PAGE_ID.
@@ -4350,7 +4353,7 @@ function messengerWebhook_(e) {
           (ev.postback && ev.postback.referral && ev.postback.referral.source === 'ADS') ||
           (ev.message && ev.message.referral && ev.message.referral.source === 'ADS');
         msgrRecordMessage_(pageId, psid, isEcho ? 'out' : 'in', msgrEventText_(ev), mid,
-          isEcho ? 'Page' : '', fromAd ? 'yes' : '');
+          isEcho ? 'Page' : '', fromAd ? 'yes' : '', ev.message && ev.message.attachments);
       });
     });
   } catch (err) {
@@ -4361,9 +4364,9 @@ function messengerWebhook_(e) {
   return ContentService.createTextOutput('EVENT_RECEIVED');
 }
 
-function msgrRecordMessage_(pageId, psid, direction, text, mid, by, fromAd) {
+function msgrRecordMessage_(pageId, psid, direction, text, mid, by, fromAd, attachments) {
   var now = new Date();
-  msgrMessagesSheet_().appendRow([now, pageId, psid, direction, String(text || '').slice(0, 2000), mid || '', by || '']);
+  msgrMessagesSheet_().appendRow([now, pageId, psid, direction, String(text || '').slice(0, 2000), mid || '', by || '', JSON.stringify(msgrAttachments_(attachments))]);
   var sh = msgrContactsSheet_();
   var values = sh.getDataRange().getValues();
   var rowNum = msgrFindContactRow_(values, pageId, psid);
@@ -4372,7 +4375,9 @@ function msgrRecordMessage_(pageId, psid, direction, text, mid, by, fromAd) {
     var row = new Array(MC_HEADERS.length);
     for (var i = 0; i < row.length; i++) row[i] = '';
     row[MC.PSID - 1] = psid;
-    row[MC.NAME - 1] = getMessengerName_(psid, pageId);
+    var profile = getMessengerProfile_(psid, pageId);
+    row[MC.NAME - 1] = profile.name || '';
+    row[MC.PROFILE - 1] = profile.profile_pic || '';
     row[MC.FIRST - 1] = now;
     row[MC.LAST - 1] = now;
     row[MC.FROM_AD - 1] = fromAd || '';
@@ -4402,14 +4407,36 @@ function upsertMessengerContact_(sh, psid, fromAd) {
   msgrRecordMessage_(MSGR_PAGE_ID, psid, 'in', '', '', '', fromAd);
 }
 
-function getMessengerName_(psid, pageId) {
+function msgrAttachments_(items) {
+  if (typeof items === 'string') { try { items = JSON.parse(items); } catch (e) { items = []; } }
+  return (Array.isArray(items) ? items : []).slice(0, 20).map(function (a) {
+    var url = String(a.url || (a.payload && a.payload.url) || '');
+    return { type: String(a.type || 'file'), url: /^https:\/\//i.test(url) ? url : '' };
+  }).filter(function (a) { return a.url; });
+}
+
+function getMessengerProfile_(psid, pageId) {
+  var key = 'msgr_profile_' + pageId + '_' + psid;
+  var cache = CacheService.getScriptCache();
+  var cached = cache.get(key);
+  if (cached) { try { return JSON.parse(cached); } catch (e) {} }
   try {
     var token = msgrPageToken_(pageId || MSGR_PAGE_ID);
-    if (!token) return '';
-    var res = UrlFetchApp.fetch('https://graph.facebook.com/v25.0/' + psid +
-      '?fields=name&access_token=' + encodeURIComponent(token), { muteHttpExceptions: true });
-    return (JSON.parse(res.getContentText()) || {}).name || '';
-  } catch (e) { return ''; }
+    if (!token) return {};
+    var res = UrlFetchApp.fetch('https://graph.facebook.com/v25.0/' + encodeURIComponent(psid) +
+      '?fields=first_name,last_name,profile_pic', {
+        headers: { Authorization: 'Bearer ' + token }, muteHttpExceptions: true
+      });
+    if (res.getResponseCode() !== 200) { cache.put(key, '{}', 300); return {}; }
+    var body = JSON.parse(res.getContentText()) || {};
+    var profile = { name: [body.first_name, body.last_name].filter(Boolean).join(' '), profile_pic: body.profile_pic || '' };
+    cache.put(key, JSON.stringify(profile), 3600);
+    return profile;
+  } catch (e) { return {}; }
+}
+
+function getMessengerName_(psid, pageId) {
+  return getMessengerProfile_(psid, pageId).name || '';
 }
 
 // Call when a Messenger order becomes Confirmed/Delivered.
@@ -4487,6 +4514,7 @@ function msgrContactFromRow_(r) {
   return {
     psid: String(r[MC.PSID - 1]),
     name: String(r[MC.NAME - 1] || ''),
+    profilePic: String(r[MC.PROFILE - 1] || ''),
     firstSeen: formatCell_(r[MC.FIRST - 1]),
     lastSeen: formatCell_(r[MC.LAST - 1]),
     lastSeenMs: r[MC.LAST - 1] instanceof Date ? r[MC.LAST - 1].getTime() : (new Date(r[MC.LAST - 1]).getTime() || 0),
@@ -4562,7 +4590,7 @@ function inboxThread_(e) {
   for (var i = values.length - 1; i >= 1 && msgs.length < 150; i--) {
     var r = values[i];
     if (String(r[2]) !== psid || String(r[1]) !== pageId) continue;
-    msgs.push({ time: formatCell_(r[0]), direction: String(r[3] || ''), text: String(r[4] || ''), by: String(r[6] || '') });
+    msgs.push({ time: formatCell_(r[0]), direction: String(r[3] || ''), text: String(r[4] || ''), by: String(r[6] || ''), attachments: msgrAttachments_(r[7]) });
   }
   msgs.reverse();
   var sh = msgrContactsSheet_();
@@ -4572,6 +4600,9 @@ function inboxThread_(e) {
   if (rowNum !== -1) {
     if (parseInt(cValues[rowNum - 1][MC.UNREAD - 1], 10)) sh.getRange(rowNum, MC.UNREAD).setValue(0);
     cValues[rowNum - 1][MC.UNREAD - 1] = 0;
+    var profile = getMessengerProfile_(psid, pageId);
+    if (profile.name) { cValues[rowNum - 1][MC.NAME - 1] = profile.name; sh.getRange(rowNum, MC.NAME).setValue(profile.name); }
+    if (profile.profile_pic) { cValues[rowNum - 1][MC.PROFILE - 1] = profile.profile_pic; sh.getRange(rowNum, MC.PROFILE).setValue(profile.profile_pic); }
     contact = msgrContactFromRow_(cValues[rowNum - 1]);
   }
   return { ok: true, messages: msgs, contact: contact };
