@@ -22,7 +22,7 @@
     fallbackText: 'MUSLIM ABAYA'
   };
 
-  var HEADER_WHATSAPP = HEADER_CFG.whatsapp || 'https://wa.me/8801970831783';
+  var HEADER_WHATSAPP = HEADER_CFG.whatsapp || 'https://wa.me/8801971642683';
 
   var SEARCH_PLACEHOLDER = (HEADER_CFG.search && HEADER_CFG.search.placeholder) || 'Search';
 
