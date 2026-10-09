@@ -11,36 +11,31 @@
 
   var STAMP_KEY = "ma_admin_verified_at";
   var FRESH_MS = 10 * 60 * 1000;
+  var verifying = null;
 
-  function recentlyVerified() {
-    try { return Date.now() - Number(sessionStorage.getItem(STAMP_KEY) || 0) < FRESH_MS; } catch (e) { return false; }
+  function recentlyVerified(token) {
+    try {
+      var stamp = JSON.parse(sessionStorage.getItem(STAMP_KEY) || "null");
+      return stamp && stamp.token === token && Date.now() - stamp.at < FRESH_MS;
+    } catch (e) { return false; }
   }
-  function markVerified() {
-    try { sessionStorage.setItem(STAMP_KEY, String(Date.now())); } catch (e) {}
-  }
-
   function verifyNow() {
-    if (!g.MaAdmin || !g.MaAdmin.verifySession) {
-      location.href = loginUrl();
-      return Promise.resolve(null);
-    }
-    return g.MaAdmin.verifySession().then(function (s) {
-      if (!s) {
-        try { sessionStorage.removeItem(STAMP_KEY); } catch (e) {}
-        location.href = loginUrl();
-        return null;
-      }
-      markVerified();
+    if (verifying) return verifying;
+    verifying = g.MaAdmin.verifySession().then(function (s) {
+      if (!s) { location.href = loginUrl(); return null; }
+      try { sessionStorage.setItem(STAMP_KEY, JSON.stringify({ token: s.token, at: Date.now() })); } catch (e) {}
       return s;
-    });
+    }).catch(function () { return g.MaAdmin.getSession(); });
+    verifying.then(function () { verifying = null; });
+    return verifying;
   }
 
-  // সেশন সম্প্রতি যাচাই হয়ে থাকলে পেজ সঙ্গে সঙ্গে চালু হয় (সার্ভার প্রতিটি ডেটা কলেই টোকেন যাচাই করে);
-  // যাচাই ব্যাকগ্রাউন্ডে চলে, অবৈধ হলে লগইনে পাঠায়।
+  // The shell can start immediately; every API request still validates authorization.
   function requireAdmin() {
     var cached = g.MaAdmin && g.MaAdmin.getSession && g.MaAdmin.getSession();
-    if (cached && recentlyVerified()) return Promise.resolve(cached);
-    return verifyNow();
+    if (!cached) { location.href = loginUrl(); return Promise.resolve(null); }
+    if (!recentlyVerified(cached.token)) verifyNow();
+    return Promise.resolve(cached);
   }
 
   function requireOwner() {

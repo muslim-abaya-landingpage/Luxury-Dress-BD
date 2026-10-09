@@ -3,9 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <meta name="robots" content="noindex, nofollow">
   <title>Order | Muslim Abaya Admin</title>
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="admin-panel.css?v=20260930">
   <script src="config.js?v=20261009-inbox"></script>
   <link rel="stylesheet" href="admin-sidebar.css?v=20261003sb">
@@ -100,8 +102,8 @@
 
   <script src="site-api-config.js?v=20261009-inbox"></script>
   <script src="admin-config.js?v=20261009-inbox"></script>
-  <script src="admin-api.js?v=20260930"></script>
-  <script src="admin-guard.js?v=20261003fast"></script>
+  <script src="admin-api.js?v=20261010-speed"></script>
+  <script src="admin-guard.js?v=20261010-speed"></script>
   <script src="admin-panel.js?v=20260930"></script>
   <script>
     (function () {
@@ -189,20 +191,25 @@
       }
 
       function load() {
-        MaAdmin.call("AdminOrderStaff", {}).then(function (r) { staff = r.staff || []; }).catch(function () {})
-          .then(function () { return MaAdmin.call("AdminOrderGet", { OrderId: orderId }); })
-          .then(function (res) {
-            history = res.history;
-            $("histCount").textContent = history.stats.total;
-            $("oGrid").style.display = "";
-            paint(res.order, res);
-            nav($("btnPrev"), res.prevId);
-            nav($("btnNext"), res.nextId);
-          }).catch(function (err) {
-            var e = $("oError");
-            e.style.display = "";
-            e.innerHTML = "<b>Error:</b> " + esc(err.message) + '<br><a href="admin-orders.html">← সব অর্ডার</a>';
-          });
+        // Staff and order requests run together; order rendering never waits for staff.
+        var cachedStaff = MaAdmin.cached("AdminOrderStaff", {});
+        if (cachedStaff) staff = cachedStaff.staff || [];
+        MaAdmin.call("AdminOrderStaff", {}).then(function (r) {
+          staff = r.staff || [];
+          if (cur) fillSelect($("fAssign"), staff, $("fAssign").value, '<option value="">— Unassigned —</option>');
+        }).catch(function () {});
+        return MaAdmin.call("AdminOrderGet", { OrderId: orderId }).then(function (res) {
+          history = res.history;
+          $("histCount").textContent = history.stats.total;
+          $("oGrid").style.display = "";
+          paint(res.order, res);
+          nav($("btnPrev"), res.prevId);
+          nav($("btnNext"), res.nextId);
+        }).catch(function (err) {
+          var e = $("oError");
+          e.style.display = "";
+          e.innerHTML = "<b>Error:</b> " + esc(err.message) + '<br><a href="admin-orders.html">← সব অর্ডার</a>';
+        });
       }
 
       function save() {

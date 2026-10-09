@@ -7,56 +7,105 @@
   var SESSION_KEY = cfg.sessionKey || "ma_admin_session";
   var SESSION_MS = (cfg.sessionDays || 7) * 24 * 60 * 60 * 1000;
 
-  // নতুন উন্নতি: টাইমআউট ফাংশন (১০ সেকেন্ডের বেশি সময় নিলে রিজেক্ট হবে)
+  var READ_TYPES = ['AdminOrders', 'AdminOrderList', 'AdminOrderGet', 'AdminOrderStaff',
+    'AdminStockGet', 'AdminAnalytics', 'AdminStockVariantsList', 'AdminStockLedgerList',
+    'AdminAnalyticsV2', 'AdminGrowthData', 'AdminStaffList', 'InboxList', 'InboxThread'];
+  var CACHE_PREFIX = "ma_admin_read_v2:";
+  var SNAPSHOT_MS = 5 * 60 * 1000;
+  var inFlight = Object.create(null);
+  var cacheGeneration = 0;
+  var HARD_FAILURES = ["INVALID_TOKEN", "EXPIRED", "NOT_ADMIN", "NO_TOKEN"];
+
+  function clearReadCache() {
+    cacheGeneration++;
+    inFlight = Object.create(null);
+    try {
+      for (var i = sessionStorage.length - 1; i >= 0; i--) {
+        var key = sessionStorage.key(i);
+        if (key.indexOf(CACHE_PREFIX) === 0 || key === "ma_admin_orders_v1") sessionStorage.removeItem(key);
+      }
+    } catch (e) {}
+  }
+
+  function readKey(fields) {
+    return CACHE_PREFIX + JSON.stringify(Object.keys(fields).filter(function (k) { return k !== "Token"; })
+      .sort().map(function (k) { return [k, String(fields[k] == null ? "" : fields[k])]; }));
+  }
+
+  // Same-tab snapshots are display-only: every load still requests current server data.
+  function cached(recordType, fields) {
+    var s = getSession();
+    if (!s || READ_TYPES.indexOf(recordType) === -1) return null;
+    var params = Object.assign({}, fields || {}, { RecordType: recordType });
+    try {
+      var entry = JSON.parse(sessionStorage.getItem(readKey(params)) || "null");
+      if (entry && entry.token === s.token && Date.now() - entry.at < SNAPSHOT_MS) return entry.result;
+    } catch (e) {}
+    return null;
+  }
+
   function timeoutPromise(ms, promise) {
     return new Promise(function (resolve, reject) {
-      setTimeout(function () { reject(new Error("REQUEST_TIMEOUT")); }, ms);
-      promise.then(resolve, reject);
+      var timer = setTimeout(function () { reject(new Error("REQUEST_TIMEOUT")); }, ms);
+      promise.then(function (value) { clearTimeout(timer); resolve(value); },
+        function (err) { clearTimeout(timer); reject(err); });
     });
   }
 
-  function apiPost(fields) {
+  function request(fields, timeout) {
     if (!API_URL) return Promise.reject(new Error("API_MISSING"));
-    
+    var read = READ_TYPES.indexOf(fields.RecordType) !== -1;
+    var key = read ? readKey(fields) : "";
+    var flightKey = fields.Token + ":" + key;
+    if (read && inFlight[flightKey]) return inFlight[flightKey];
+    if (!read && fields.Token && fields.RecordType !== "AdminVerify") clearReadCache();
+    var generation = cacheGeneration;
     var body = new URLSearchParams();
     Object.keys(fields).forEach(function (k) {
-      if (fields[k] != null && fields[k] !== "") body.append(k, String(fields[k]));
+      if (fields[k] != null) body.append(k, String(fields[k]));
     });
-
-    // timeoutPromise এর মাধ্যমে ফেচ কল করা
-    return timeoutPromise(10000, fetch(API_URL, {
-      method: "POST",
-      mode: "cors",
-      credentials: "omit",
-      body: body
-    })).then(function (res) {
-      return res.text();
-    }).then(function (text) {
+    var task = timeoutPromise(timeout || 30000, fetch(API_URL, {
+      method: "POST", mode: "cors", credentials: "omit", body: body
+    }).then(function (res) { return res.text(); })).then(function (text) {
       var raw = String(text || "").trim();
-      try {
-        return JSON.parse(raw);
-      } catch (e) {
-        if (raw === "Success") {
-          return {
-            ok: false,
-            error: "DEPLOY_OLD",
-            message: "API পুরনো ভার্সন। Apps Script → Deploy → New version করুন।"
-          };
-        }
-        return { ok: false, error: raw || "UNKNOWN", message: raw };
+      var res;
+      try { res = JSON.parse(raw); } catch (e) {
+        res = { ok: false, error: raw === "Success" ? "DEPLOY_OLD" : "INVALID_RESPONSE",
+          message: "API পুরনো ভার্সন বা ভুল উত্তর। Apps Script → Deploy → New version করুন।" };
       }
-    }).catch(function(err) {
+      if (!res || typeof res !== "object") res = { ok: false, error: "INVALID_RESPONSE" };
+      var current = getSession();
+      var sameSession = current && current.token === fields.Token;
+      if (fields.Token && sameSession && HARD_FAILURES.indexOf(res.error) !== -1) logout();
+      if (read && res.ok && sameSession && generation === cacheGeneration) {
+        try { sessionStorage.setItem(key, JSON.stringify({ token: fields.Token, at: Date.now(), result: res })); } catch (e) {}
+      }
+      if (!read && fields.Token && fields.RecordType !== "AdminVerify") clearReadCache();
+      return res;
+    });
+    if (read) {
+      inFlight[flightKey] = task;
+      var release = function () { if (inFlight[flightKey] === task) delete inFlight[flightKey]; };
+      task.then(release, release);
+    }
+    return task;
+  }
+
+  function apiPost(fields) {
+    return request(fields, 30000).catch(function (err) {
       return { ok: false, error: "NETWORK_FAILURE", message: err.message };
     });
   }
 
   function saveSession(data) {
+    var previous = getSession();
+    if (!previous || previous.token !== data.token) clearReadCache();
     var session = {
       token: data.token,
       email: data.email || "",
       phone: data.phone || "",
       name: data.name || "",
-      role: "admin",
+      role: data.role || "admin",
       expires: data.expires || Date.now() + SESSION_MS,
       sheetUrl: data.sheetUrl || "",
       scriptUrl: data.scriptUrl || cfg.scriptProjectUrl || ""
@@ -72,7 +121,7 @@
       var raw = localStorage.getItem(SESSION_KEY);
       if (!raw) return null;
       var s = JSON.parse(raw);
-      if (!s || !s.token || s.role !== "admin") return null;
+      if (!s || !s.token || ["admin", "staff"].indexOf(s.role) === -1) return null;
       if (s.expires && Date.now() > s.expires) {
         logout();
         return null;
@@ -84,6 +133,8 @@
   }
 
   function logout() {
+    clearReadCache();
+    try { sessionStorage.removeItem("ma_admin_verified_at"); } catch (e) {}
     try {
       localStorage.removeItem(SESSION_KEY);
     } catch (e) {}
@@ -93,21 +144,22 @@
     var loginId = String(data.login || "").trim();
     var password = String(data.password || "");
     if (!loginId || !password) return Promise.reject(new Error("MISSING_FIELDS"));
-    
+
     var fields = {
       RecordType: "AdminLogin",
       Password: password
     };
-    
+
     // উন্নতি: ফোন নাম্বার ফরম্যাটিং আরও আধুনিক করা হয়েছে
     if (loginId.indexOf("@") !== -1) fields.Email = loginId.toLowerCase();
     else fields.Phone = loginId.replace(/\D/g, "").replace(/^(?:880|88|0)/, "0");
-    
+
     if (!fields.Email && !fields.Phone) return Promise.reject(new Error("INVALID_LOGIN"));
-    
+
     return apiPost(fields).then(function (res) {
       if (!res.ok) throw new Error(res.message || res.error || "LOGIN_FAILED");
       saveSession(res);
+      try { sessionStorage.setItem("ma_admin_verified_at", JSON.stringify({ token: res.token, at: Date.now() })); } catch (e) {}
       return getSession();
     });
   }
@@ -121,6 +173,8 @@
     }).then(function (res) {
       // সর্বার-সাইডে সেশন সত্যিই বাতিল হলে/বাতিল না থাকলেই শেষ লগআউট করা হবে (INVALID_TOKEN/EXPIRED/NOT_ADMIN/NO_TOKEN)।
       // রেট-লিমিট/নেটওয়ার্ক এররের মতো সাময়িক ব্যর্থতায় সেশন মুছে লগআউট করা ঠিক নয়।
+      var current = getSession();
+      if (!current || current.token !== s.token) return current;
       var hardFailures = ["INVALID_TOKEN", "EXPIRED", "NOT_ADMIN", "NO_TOKEN"];
       if (!res.ok) {
         if (hardFailures.indexOf(res.error) !== -1) {
@@ -129,7 +183,7 @@
         }
         return s;
       }
-      if (res.role !== "admin") {
+      if (["admin", "staff"].indexOf(res.role) === -1) {
         logout();
         return null;
       }
@@ -396,55 +450,20 @@
 
   // Messenger inbox (RecordType Inbox*). Unlike apiPost, empty values are sent,
   // so a field can be cleared (e.g. un-assigning a conversation).
-  function inboxCall(type, fields) {
-    var s = getSession();
-    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
-    if (!API_URL) return Promise.reject(new Error("API_MISSING"));
-    var body = new URLSearchParams();
-    body.append("RecordType", type);
-    body.append("Token", s.token);
-    Object.keys(fields || {}).forEach(function (k) {
-      if (fields[k] != null) body.append(k, String(fields[k]));
-    });
-    return timeoutPromise(30000, fetch(API_URL, { method: "POST", mode: "cors", credentials: "omit", body: body }))
-      .then(function (res) { return res.text(); })
-      .then(function (text) {
-        var res;
-        try { res = JSON.parse(String(text || "").trim()); } catch (e) {
-          throw new Error("API পুরনো ভার্সন বা ভুল উত্তর। Apps Script → Deploy → New version করুন।");
-        }
-        if (!res.ok) throw new Error(res.message || res.error || "INBOX_FAILED");
-        return res;
-      });
-  }
+  function inboxCall(type, fields) { return call(type, fields); }
 
-  // Order panel call: token added automatically; empty values are sent (so notes can be
-  // cleared); ok=false rejects with Error (err.code = server error code).
   function call(recordType, fields) {
     var s = getSession();
     if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
-    if (!API_URL) return Promise.reject(new Error("API_MISSING"));
-    var body = new URLSearchParams();
-    body.append("RecordType", recordType);
-    body.append("Token", s.token);
-    Object.keys(fields || {}).forEach(function (k) {
-      if (fields[k] != null) body.append(k, String(fields[k]));
+    var params = Object.assign({}, fields || {}, { RecordType: recordType, Token: s.token });
+    return request(params, 30000).then(function (res) {
+      if (!res.ok) {
+        var err = new Error(res.message || res.error || "REQUEST_FAILED");
+        err.code = res.error || "";
+        throw err;
+      }
+      return res;
     });
-    return timeoutPromise(30000, fetch(API_URL, { method: "POST", mode: "cors", credentials: "omit", body: body }))
-      .then(function (res) { return res.text(); })
-      .then(function (text) {
-        var res;
-        try { res = JSON.parse(String(text || "").trim()); } catch (e) {
-          throw new Error("API পুরনো ভার্সন বা ভুল উত্তর। Apps Script → Deploy → New version করুন।");
-        }
-        if (!res.ok) {
-          var err = new Error(res.message || res.error || "REQUEST_FAILED");
-          err.code = res.error || "";
-          if (["NOT_ADMIN", "NO_TOKEN", "INVALID_TOKEN", "EXPIRED"].indexOf(res.error) !== -1) logout();
-          throw err;
-        }
-        return res;
-      });
   }
 
   // ===== নতুন: ভ্যারিয়েন্ট-ভিত্তিক স্টক, লেজার, CSV, Analytics v2 (stock-analytics-v2) =====
@@ -555,6 +574,8 @@
   }
 
   g.MaAdmin = {
+    cached: cached,
+    clearReadCache: clearReadCache,
     call: call,
     inboxCall: inboxCall,
     login: login,

@@ -42,7 +42,7 @@ function normalizeSubscribeContact_(raw) {
   if (!v) return '';
   if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return normalizeEmail_(v);
   var phone = normalizePhone_(v);
-  if (phone.length >= 11 &amp;&amp; phone.length &lt;= 14 &amp;&amp; phone.charAt(0) === '0') return phone;
+  if (phone.length &gt;= 11 &amp;&amp; phone.length &lt;= 14 &amp;&amp; phone.charAt(0) === '0') return phone;
   return '';
 }
 
@@ -244,20 +244,20 @@ function validateOrderInput_(e) {
   var siteTs = parseInt(param_(e, 'SiteTs'), 10);
   var ageMs = Date.now() - siteTs;
   if (!siteTs || ageMs &lt; 1200) throw new Error('TOO_FAST');
-  if (ageMs > 30 * 60 * 1000) throw new Error('EXPIRED');
+  if (ageMs &gt; 30 * 60 * 1000) throw new Error('EXPIRED');
 
   var name = String(param_(e, 'Name') || '').replace(/\s+/g, ' ').trim();
-  if (name.length &lt; 2 || name.length > 80) throw new Error('INVALID_NAME');
+  if (name.length &lt; 2 || name.length &gt; 80) throw new Error('INVALID_NAME');
   if (/^(test|asdf|xxx+|fake|spam|demo|null|undefined)$/i.test(name)) throw new Error('INVALID_NAME');
 
   var phone = normalizePhone_(param_(e, 'Phone'));
   if (!/^01\d{9}$/.test(phone)) throw new Error('INVALID_PHONE');
 
   var address = String(param_(e, 'Address') || '').trim();
-  if (address.length &lt; 8 || address.length > 400) throw new Error('INVALID_ADDRESS');
+  if (address.length &lt; 8 || address.length &gt; 400) throw new Error('INVALID_ADDRESS');
 
   var qty = parseInt(param_(e, 'Quantity'), 10) || 0;
-  if (qty &lt; 1 || qty > 500) throw new Error('INVALID_QTY');
+  if (qty &lt; 1 || qty &gt; 500) throw new Error('INVALID_QTY');
 
   var total = parseFloat(String(param_(e, 'Total') || '0').replace(/[^\d.]/g, '')) || 0;
   if (total &lt; 100) throw new Error('MIN_ORDER');
@@ -336,7 +336,7 @@ function validateCartPricing_(cartItems) {
     var match = (item.id &amp;&amp; byId[String(item.id)]) || byName[String(item.name || '').trim().toLowerCase()];
     if (!match || !match.price) continue; // not in the parsed catalog — don't penalize
     var claimed = Number(item.price) || 0;
-    if (claimed > 0 &amp;&amp; claimed &lt; match.price * CART_PRICE_TOLERANCE_) {
+    if (claimed &gt; 0 &amp;&amp; claimed &lt; match.price * CART_PRICE_TOLERANCE_) {
       throw new Error('TOTAL_MISMATCH');
     }
   }
@@ -382,7 +382,7 @@ function formatOnlineOrderProductCell_(sheet, row, designText) {
     var i;
     for (i = 0; i &lt; lines.length; i++) {
       var len = String(lines[i] || '').length;
-      if (len > longest) longest = len;
+      if (len &gt; longest) longest = len;
     }
     // WhatsApp single-line orders should stay compact; multiline catalog orders can grow.
     var visualLines = Math.max(lineCount, Math.ceil(longest / 42));
@@ -441,7 +441,7 @@ function fetchProductCatalog_() {
   }
   var url = getProductCatalogUrl_();
   var res = UrlFetchApp.fetch(url, { muteHttpExceptions: true, followRedirects: true });
-  if (res.getResponseCode() >= 400) {
+  if (res.getResponseCode() &gt;= 400) {
     throw new Error('CATALOG_FETCH_FAIL HTTP ' + res.getResponseCode());
   }
   var items = parseProductsFromCatalogJs_(res.getContentText());
@@ -489,8 +489,8 @@ function fillActiveRowProductLines_(linesText) {
     if (qm) totalQty += parseInt(qm[1], 10) || 0;
     if (pm) totalAmt += parseFloat(String(pm[1]).replace(/,/g, '')) || 0;
   }
-  if (totalQty > 0) sheet.getRange(row, 4).setValue(totalQty);
-  if (totalAmt > 0) sheet.getRange(row, 8).setValue(totalAmt);
+  if (totalQty &gt; 0) sheet.getRange(row, 4).setValue(totalQty);
+  if (totalAmt &gt; 0) sheet.getRange(row, 8).setValue(totalAmt);
   return { ok: true, row: row, qty: totalQty, total: totalAmt };
 }
 
@@ -647,7 +647,7 @@ function getRealityDashboardData() {
   };
   var recent = [];
   var i;
-  for (i = data.length - 1; i >= 1; i--) {
+  for (i = data.length - 1; i &gt;= 1; i--) {
     var r = data[i];
     if (!r || (!r[1] &amp;&amp; !r[2])) continue;
     var rowDay = dayKeyFromCell_(r[0]);
@@ -769,7 +769,7 @@ function realityChangeMyPassword(currentPassword, newPassword) {
   var sheet = getAdminsSheet_();
   sheet.getRange(admin.row, 4).setValue(hashed.hash);
   sheet.getRange(admin.row, 5).setValue(hashed.salt);
-  if (sheet.getLastColumn() >= 9) sheet.getRange(admin.row, 9).setValue(new Date());
+  if (sheet.getLastColumn() &gt;= 9) sheet.getRange(admin.row, 9).setValue(new Date());
   return { ok: true, message: 'Password updated.' };
 }
 
@@ -800,7 +800,7 @@ function resetAdminPasswordFromMenu() {
   var sheet = getAdminsSheet_();
   sheet.getRange(target.row, 4).setValue(hashed.hash);
   sheet.getRange(target.row, 5).setValue(hashed.salt);
-  if (sheet.getLastColumn() >= 9) sheet.getRange(target.row, 9).setValue(new Date());
+  if (sheet.getLastColumn() &gt;= 9) sheet.getRange(target.row, 9).setValue(new Date());
   ui.alert('Password reset complete for: ' + (target.email || target.phone || 'admin'));
 }
 
@@ -913,7 +913,7 @@ function dailySafetyBackupTriggerHandler() {
 
 function getLowStockThreshold_() {
   var v = Number(PropertiesService.getScriptProperties().getProperty('LOW_STOCK_THRESHOLD'));
-  return (v &amp;&amp; v > 0) ? v : 5;
+  return (v &amp;&amp; v &gt; 0) ? v : 5;
 }
 
 function checkLowStockAndEmail_() {
@@ -1031,7 +1031,7 @@ function parseWhatsappOrderText_(rawText) {
 
   function parseQty_(v) {
     var n = parseInt(String(v || '').replace(/[^\d]/g, ''), 10);
-    return n > 0 ? n : 0;
+    return n &gt; 0 ? n : 0;
   }
 
   function normalizePayment_(v) {
@@ -1068,12 +1068,12 @@ function parseWhatsappOrderText_(rawText) {
     }
     if (key === 'qty') {
       var qtyNum = parseQty_(val);
-      if (qtyNum > 0) val = String(qtyNum);
+      if (qtyNum &gt; 0) val = String(qtyNum);
       else return;
     }
     if (key === 'total') {
       var amount = parseMoney_(val);
-      if (amount > 0) val = String(amount);
+      if (amount &gt; 0) val = String(amount);
       else return;
     }
     if (key === 'payment') {
@@ -1140,7 +1140,7 @@ function parseWhatsappOrderText_(rawText) {
   // Pipe format fallback: ORDER|Name|Phone|District|Address|Product|Qty|Total|Payment
   if ((!parsed.phone || !parsed.address) &amp;&amp; text.indexOf('|') !== -1) {
     var parts = text.split('|').map(function (p) { return String(p || '').trim(); });
-    if (parts.length >= 8) {
+    if (parts.length &gt;= 8) {
       assign_('name', parts[1] || '');
       assign_('phone', parts[2] || '');
       assign_('district', parts[3] || '');
@@ -1178,7 +1178,7 @@ function parseWhatsappOrderText_(rawText) {
     var partsFromAddress = String(parsed.address).split(/[,،]/).map(function (p) {
       return String(p || '').trim();
     }).filter(Boolean);
-    if (partsFromAddress.length >= 2) {
+    if (partsFromAddress.length &gt;= 2) {
       assign_('district', partsFromAddress[partsFromAddress.length - 1]);
     }
   }
@@ -1196,8 +1196,8 @@ function parseWhatsappOrderText_(rawText) {
       if (q) qtySum += parseInt(q[1], 10) || 0;
       if (amt) amountSum += parseFloat(String(amt[1]).replace(/,/g, '')) || 0;
     }
-    if ((!parsed.qty || parsed.qty === '1') &amp;&amp; qtySum > 0) parsed.qty = String(qtySum);
-    if (!parsed.total &amp;&amp; amountSum > 0) parsed.total = String(amountSum);
+    if ((!parsed.qty || parsed.qty === '1') &amp;&amp; qtySum &gt; 0) parsed.qty = String(qtySum);
+    if (!parsed.total &amp;&amp; amountSum &gt; 0) parsed.total = String(amountSum);
   }
 
   if (!parsed.payment) parsed.payment = 'Cash On Delivery';
@@ -1218,11 +1218,11 @@ function parseWhatsappOrderText_(rawText) {
 
   if (parsed.total) {
     var rounded = Math.round(parseFloat(parsed.total) || 0);
-    if (rounded > 0) parsed.total = String(rounded);
+    if (rounded &gt; 0) parsed.total = String(rounded);
   }
   if (parsed.qty) {
     var finalQty = parseInt(parsed.qty, 10) || 1;
-    parsed.qty = String(finalQty > 0 ? finalQty : 1);
+    parsed.qty = String(finalQty &gt; 0 ? finalQty : 1);
   }
 
   return parsed;
@@ -1259,7 +1259,7 @@ function submitWhatsappMiniOrder(payload) {
   var timestamp = Utilities.formatDate(now, 'GMT+6', 'dd-MM-yyyy HH:mm:ss');
   var orderId = generateOrderId_();
   var districtChargeMap = getDistrictChargeMap_();
-  var charge = qty > 0 &amp;&amp; qty &lt; 3 ? (districtChargeMap[district] || 150) : 0;
+  var charge = qty &gt; 0 &amp;&amp; qty &lt; 3 ? (districtChargeMap[district] || 150) : 0;
   var finalNotes = notes ? ('WhatsApp manual | ' + notes) : 'WhatsApp manual';
 
   appendRow_(sheet, [
@@ -1389,7 +1389,7 @@ function rateLimitOrder_(phone) {
   var k = 'ord_' + String(normalized || 'x');
   var n = parseInt(cache.get(k) || '0', 10);
   var maxOrders = parseInt(PropertiesService.getScriptProperties().getProperty('ORDER_RATE_LIMIT_MAX') || '6', 10);
-  if (n >= maxOrders) throw new Error('ORDER_RATE_LIMIT');
+  if (n &gt;= maxOrders) throw new Error('ORDER_RATE_LIMIT');
   cache.put(k, String(n + 1), 1800);
 }
 
@@ -1424,7 +1424,7 @@ function handleOnlineOrderPost_(e) {
 
   var districtChargeMap = getDistrictChargeMap_();
   var charge = 0;
-  if (validated.qty > 0 &amp;&amp; validated.qty &lt; 3) {
+  if (validated.qty &gt; 0 &amp;&amp; validated.qty &lt; 3) {
     charge = districtChargeMap[validated.district] || 150;
   }
 
@@ -1966,7 +1966,7 @@ function syncSteadfastCourierStatusesCore_(opts) {
   opts = opts || {};
   var limit = parseInt(opts.limit, 10) || 40;
   if (limit &lt; 1) limit = 1;
-  if (limit > 200) limit = 200;
+  if (limit &gt; 200) limit = 200;
   var includeFinal = !!opts.includeFinal;
 
   var ss = getCourierSyncSpreadsheet_();
@@ -1978,8 +1978,8 @@ function syncSteadfastCourierStatusesCore_(opts) {
   var updated = 0;
   var failed = 0;
   var i;
-  for (i = data.length - 1; i >= 1; i--) {
-    if (scanned >= limit) break;
+  for (i = data.length - 1; i &gt;= 1; i--) {
+    if (scanned &gt;= limit) break;
     var r = data[i];
     var rowNo = i + 1;
     var jStatus = String(r[9] || '').toLowerCase().trim();
@@ -2120,7 +2120,7 @@ function appendAutoCourierNote_(sheet, row, note) {
     var prev = String(sheet.getRange(row, 17).getValue() || '');
     if (prev.indexOf(clean) !== -1) return;
     var next = prev ? (prev + ' | ' + clean) : clean;
-    if (next.length > 220) next = next.slice(0, 220);
+    if (next.length &gt; 220) next = next.slice(0, 220);
     sheet.getRange(row, 17).setValue(next);
   } catch (err) {}
 }
@@ -2492,7 +2492,7 @@ function steadfastSendActiveRow() {
     SpreadsheetApp.getUi().alert('Tracking already exists: ' + tracking);
     return;
   }
-  if (address.length > 250) address = address.slice(0, 250);
+  if (address.length &gt; 250) address = address.slice(0, 250);
 
   var payment = String(vals[14] || 'Cash On Delivery');
   var codAmount = /cash\s*on\s*delivery/i.test(payment) ? total : 0;
@@ -2650,7 +2650,7 @@ function setMetaCapiConfigForOps_(accessToken, pixelId) {
   return {
     ok: true,
     pixelId: pixel,
-    tokenMask: token.length > 8 ? (token.slice(0, 4) + '...' + token.slice(-4)) : '****'
+    tokenMask: token.length &gt; 8 ? (token.slice(0, 4) + '...' + token.slice(-4)) : '****'
   };
 }
 
@@ -2722,7 +2722,7 @@ function sendToFacebookCAPI(data, eventID) {
   var body = String(res.getContentText() || '');
   var parsed = {};
   try { parsed = JSON.parse(body); } catch (jsonErr) {}
-  if (code >= 400 || (parsed &amp;&amp; parsed.error)) {
+  if (code &gt;= 400 || (parsed &amp;&amp; parsed.error)) {
     return {
       ok: false,
       code: 'META_HTTP_' + String(code),
@@ -2790,7 +2790,7 @@ function sendToTikTokCAPI(data, eventID) {
   var body = String(res.getContentText() || '');
   var parsed = {};
   try { parsed = JSON.parse(body); } catch (jsonErr) {}
-  if (code >= 400 || (parsed &amp;&amp; typeof parsed.code === 'number' &amp;&amp; parsed.code !== 0)) {
+  if (code &gt;= 400 || (parsed &amp;&amp; typeof parsed.code === 'number' &amp;&amp; parsed.code !== 0)) {
     return { ok: false, code: 'TIKTOK_HTTP_' + String(code), message: body.slice(0, 200) };
   }
   return { ok: true, code: 'OK' };
@@ -2865,13 +2865,13 @@ function rateLimit_(key) {
   var cache = CacheService.getScriptCache();
   var k = 'rl_' + String(key || 'x').slice(0, 64);
   var n = parseInt(cache.get(k) || '0', 10);
-  if (n >= 12) throw new Error('RATE_LIMIT');
+  if (n &gt;= 12) throw new Error('RATE_LIMIT');
   cache.put(k, String(n + 1), 600);
 }
 
 function normalizePhone_(value) {
   var digits = String(value || '').replace(/[^\d]/g, '');
-  if (digits.indexOf('880') === 0 &amp;&amp; digits.length >= 12) digits = '0' + digits.substring(3);
+  if (digits.indexOf('880') === 0 &amp;&amp; digits.length &gt;= 12) digits = '0' + digits.substring(3);
   if (digits.length === 10 &amp;&amp; digits.charAt(0) === '1') digits = '0' + digits;
   return digits;
 }
@@ -2929,12 +2929,12 @@ function openWhatsAppNotifyDialogActiveRow() {
   var message = buildWhatsAppMessageForRow_(values);
   var waUrl = 'https://wa.me/' + intl + '?text=' + encodeURIComponent(message);
   var html = HtmlService.createHtmlOutput(
-    '&lt;div style="font-family:Arial,sans-serif;padding:16px;text-align:center;">' +
-    '&lt;p style="white-space:pre-wrap;text-align:left;background:#f5f5f5;padding:10px;border-radius:8px;font-size:13px;">' +
+    '&lt;div style="font-family:Arial,sans-serif;padding:16px;text-align:center;"&gt;' +
+    '&lt;p style="white-space:pre-wrap;text-align:left;background:#f5f5f5;padding:10px;border-radius:8px;font-size:13px;"&gt;' +
     message.replace(/&lt;/g,'&amp;lt;') +
-    '&lt;/p>' +
-    '&lt;a href="' + waUrl + '" target="_blank" style="display:inline-block;background:#25D366;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:bold;">WhatsApp-এ পাঠান&lt;/a>' +
-    '&lt;/div>'
+    '&lt;/p&gt;' +
+    '&lt;a href="' + waUrl + '" target="_blank" style="display:inline-block;background:#25D366;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:bold;"&gt;WhatsApp-এ পাঠান&lt;/a&gt;' +
+    '&lt;/div&gt;'
   ).setWidth(380).setHeight(320);
   SpreadsheetApp.getUi().showModalDialog(html, 'WhatsApp মেসেজ পাঠান');
 }
@@ -3103,7 +3103,7 @@ function googleLogin_(e) {
     return { ok: false, error: 'GOOGLE_NOT_CONFIGURED', message: 'Google লগইন চালু করা হয়নি।' };
   }
   var idToken = String(param_(e, 'IdToken') || '');
-  if (!idToken || idToken.length > 4096 || idToken.split('.').length !== 3) {
+  if (!idToken || idToken.length &gt; 4096 || idToken.split('.').length !== 3) {
     return { ok: false, error: 'INVALID_GOOGLE_TOKEN', message: 'Google লগইন ব্যর্থ। আবার চেষ্টা করুন।' };
   }
   var info;
@@ -3224,10 +3224,10 @@ function verifySession_(token) {
   if (!SESSION_TOKEN_FORMAT_.test(String(token))) return { ok: false, error: 'INVALID_TOKEN' };
   var data = getSessionsSheet_().getDataRange().getValues();
   var now = Date.now();
-  for (var i = data.length - 1; i >= 1; i--) {
+  for (var i = data.length - 1; i &gt;= 1; i--) {
     if (String(data[i][0]) !== token) continue;
     var expMs = data[i][5] instanceof Date ? data[i][5].getTime() : new Date(data[i][5]).getTime();
-    if (expMs &amp;&amp; now > expMs) return { ok: false, error: 'EXPIRED' };
+    if (expMs &amp;&amp; now &gt; expMs) return { ok: false, error: 'EXPIRED' };
     var role = data[i][6] ? String(data[i][6]) : 'customer';
     return {
       ok: true,
@@ -3259,13 +3259,13 @@ function listAdminOrders_(e) {
   if (!v.ok) return v;
   var limit = parseInt(param_(e, 'Limit'), 10) || 80;
   if (limit &lt; 1) limit = 1;
-  if (limit > 200) limit = 200;
+  if (limit &gt; 200) limit = 200;
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
   if (!sheet) return { ok: false, error: 'NO_SHEET', message: 'Online Order শীট পাওয়া যায়নি।' };
   var data = sheet.getDataRange().getValues();
   var orders = [];
   var i;
-  for (i = data.length - 1; i >= 1 &amp;&amp; orders.length &lt; limit; i--) {
+  for (i = data.length - 1; i &gt;= 1 &amp;&amp; orders.length &lt; limit; i--) {
     var r = data[i];
     if (!r[1] &amp;&amp; !r[2]) continue;
     orders.push({
@@ -3419,7 +3419,7 @@ function getAdminAnalytics_(e) {
   if (!v.ok) return v;
   var days = parseInt(param_(e, 'Days'), 10) || 30;
   if (days &lt; 1) days = 1;
-  if (days > 365) days = 365;
+  if (days &gt; 365) days = 365;
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
   if (!sheet) return { ok: false, error: 'NO_SHEET', message: 'Online Order শীট পাওয়া যায়নি।' };
   var data = sheet.getDataRange().getValues();
@@ -3458,7 +3458,7 @@ function getAdminAnalytics_(e) {
       var r = data[j];
       if (!r[1] &amp;&amp; !r[2]) continue;
       var dayKey = dayKeyFromCell_(r[0]);
-      if (!dayKey || dayKey &lt; fromKey || (toKeyExclusive &amp;&amp; dayKey >= toKeyExclusive)) continue;
+      if (!dayKey || dayKey &lt; fromKey || (toKeyExclusive &amp;&amp; dayKey &gt;= toKeyExclusive)) continue;
 
       var total = parseFloat(String(r[7] || '0').replace(/[^\d.]/g, '')) || 0;
       totalOrders++;
@@ -3514,7 +3514,7 @@ function getAdminAnalytics_(e) {
   var current = summarize(cutoffKey, null);
   var previous = summarize(prevCutoffKey, cutoffKey);
 
-  var dayList = Object.keys(current.byDay).map(function (k) { return current.byDay[k]; }).sort(function (a, b) { return a.date &lt; b.date ? -1 : (a.date > b.date ? 1 : 0); });
+  var dayList = Object.keys(current.byDay).map(function (k) { return current.byDay[k]; }).sort(function (a, b) { return a.date &lt; b.date ? -1 : (a.date &gt; b.date ? 1 : 0); });
   var productList = Object.keys(current.byProduct).map(function (k) { return current.byProduct[k]; }).sort(function (a, b) { return b.qty - a.qty; }).slice(0, 20);
 
   return {
@@ -3549,7 +3549,7 @@ function getPublicStockStatus_() {
       var id = String(r[0] || '').trim();
       if (!id) continue;
       var qty = Number(r[2]) || 0;
-      items[id] = { qty: qty, inStock: qty > 0 };
+      items[id] = { qty: qty, inStock: qty &gt; 0 };
     }
     return { ok: true, items: items };
   } catch (err) {
@@ -3575,7 +3575,7 @@ function getOrderTrackStatus_(e) {
     if (!sheet) return { ok: true, orders: [] };
     var data = sheet.getDataRange().getValues();
     var orders = [];
-    for (var i = data.length - 1; i >= 1; i--) {
+    for (var i = data.length - 1; i &gt;= 1; i--) {
       var r = data[i];
       var rowPhone = normalizePhone_(r[2]);
       if (rowPhone !== phone) continue;
@@ -3592,7 +3592,7 @@ function getOrderTrackStatus_(e) {
         courierStatus: String(r[12] || ''),
         district: String(r[13] || '')
       });
-      if (orders.length >= 15) break;
+      if (orders.length &gt;= 15) break;
     }
     return { ok: true, orders: orders };
   } catch (err) {
@@ -3641,10 +3641,10 @@ function validateCouponCode_(code, subtotal) {
           return { ok: false, error: 'EXPIRED', message: 'এই কুপনের মেয়াদ শেষ হয়ে গেছে।' };
         }
       }
-      if (usageLimit > 0 &amp;&amp; usedCount >= usageLimit) {
+      if (usageLimit &gt; 0 &amp;&amp; usedCount &gt;= usageLimit) {
         return { ok: false, error: 'LIMIT_REACHED', message: 'এই কুপনের ব্যবহারসীমা শেষ হয়ে গেছে।' };
       }
-      if (minOrder > 0 &amp;&amp; subtotal &lt; minOrder) {
+      if (minOrder &gt; 0 &amp;&amp; subtotal &lt; minOrder) {
         return { ok: false, error: 'MIN_ORDER', message: 'এই কুপনের জন্য সর্বনিম্ন অর্ডার \u09F3' + minOrder + ' হতে হবে।' };
       }
       var discount = 0;
@@ -3653,7 +3653,7 @@ function validateCouponCode_(code, subtotal) {
       } else {
         discount = Math.round(value);
       }
-      if (discount > subtotal) discount = subtotal;
+      if (discount &gt; subtotal) discount = subtotal;
       if (discount &lt; 0) discount = 0;
       return { ok: true, discount: discount, type: type, value: value, rowIndex: i + 1, message: 'কুপন প্রযোজ্য হয়েছে!' };
     }
@@ -3686,9 +3686,9 @@ function submitReview_(e) {
 
     if (!productId) return { ok: false, error: 'NO_PRODUCT', message: 'প্রোডাক্ট শনাক্ত করা যায়নি।' };
     if (!name) return { ok: false, error: 'NO_NAME', message: 'আপনার নাম দিন।' };
-    if (name.length > 60) name = name.slice(0, 60);
-    if (!rating || rating &lt; 1 || rating > 5) return { ok: false, error: 'BAD_RATING', message: 'রেটিং ১ থেকে ৫ এর মধ্যে দিন।' };
-    if (comment.length > 600) comment = comment.slice(0, 600);
+    if (name.length &gt; 60) name = name.slice(0, 60);
+    if (!rating || rating &lt; 1 || rating &gt; 5) return { ok: false, error: 'BAD_RATING', message: 'রেটিং ১ থেকে ৫ এর মধ্যে দিন।' };
+    if (comment.length &gt; 600) comment = comment.slice(0, 600);
 
     try { rateLimit_('review_' + name.slice(0, 40) + '_' + productId.slice(0, 40)); }
     catch (rlErr) { return { ok: false, error: 'RATE_LIMIT', message: 'একটু পর আবার চেষ্টা করুন।' }; }
@@ -3863,7 +3863,7 @@ function createFirstAdminFromMenu() {
     return;
   }
   var admins = getAdminsSheet_();
-  if (admins.getLastRow() > 1) {
+  if (admins.getLastRow() &gt; 1) {
     SpreadsheetApp.getUi().alert('Admins শীটে ইতিমধ্যে অ্যাকাউন্ট আছে।\n\nনতুন অ্যাডমিন/টিম সদস্য: মেনু → টিম সদস্য যোগ করুন।');
     return;
   }
@@ -3929,7 +3929,7 @@ var GITHUB_PUBLISH_ALLOWED_PATHS_ = [
   'category-products.js',
   'product-links-data.js',
   'product-catalog-sections.js',
-  'product-config.js?v=20261009-inbox'
+  'product-config.js'
 ];
 
 function publishFileToGitHub_(e) {
@@ -4076,7 +4076,7 @@ function publishImageToGitHub_(e) {
     return { ok: false, error: 'MISSING_FIELDS', message: 'ছবির ডাটা পাওয়া যায়নি।' };
   }
   var approxBytes = Math.floor((b64.length * 3) / 4);
-  if (approxBytes > GITHUB_IMAGE_MAX_BYTES_) {
+  if (approxBytes &gt; GITHUB_IMAGE_MAX_BYTES_) {
     return {
       ok: false,
       error: 'FILE_TOO_LARGE',
@@ -4268,7 +4268,7 @@ function parseOrderValue_(raw) {
   var s = String(raw == null ? '' : raw).replace(/[০-৯]/g, function (d) { return String(bn.indexOf(d)); });
   s = s.replace(/[^0-9.]/g, '');
   var n = parseFloat(s);
-  return isFinite(n) &amp;&amp; n > 0 ? n : 0;
+  return isFinite(n) &amp;&amp; n &gt; 0 ? n : 0;
 }
 
 // ===== Messenger → Conversions API for Business Messaging =====
@@ -4280,7 +4280,7 @@ var MSGR_MSG_SHEET = 'MessengerMessages';
 
 // ===== Multi-Page Messenger Inbox =====
 // প্রতিটি Page-এর Page Access Token রাখুন Script Properties-এ:
-//   MSGR_PAGE_TOKEN_&lt;PageID>   (যেমন MSGR_PAGE_TOKEN_381729145014885)
+//   MSGR_PAGE_TOKEN_&lt;PageID&gt;   (যেমন MSGR_PAGE_TOKEN_381729145014885)
 // পুরোনো MSGR_PAGE_TOKEN শুধু MSGR_PAGE_ID Page-এর জন্য fallback।
 var MSGR_PAGES = {
   '964928770039259': 'Luxury Dress BD',
@@ -4327,7 +4327,7 @@ function msgrContactsSheet_() {
 
 function msgrMessagesSheet_() {
   var sh = ensureSheet_(MSGR_MSG_SHEET, ['Time', 'PageId', 'PSID', 'Direction', 'Text', 'MID', 'By', 'Attachments']);
-  sh.getRange(1, 8).setValue('Attachments');
+  if (sh.getRange(1, 8).getValue() !== 'Attachments') sh.getRange(1, 8).setValue('Attachments');
   return sh;
 }
 
@@ -4494,7 +4494,7 @@ function inboxRateLimit_(token) {
   var cache = CacheService.getScriptCache();
   var k = 'rl_inbox_' + String(token || 'x').slice(0, 48);
   var n = parseInt(cache.get(k) || '0', 10);
-  if (n >= 600) throw new Error('RATE_LIMIT');
+  if (n &gt;= 600) throw new Error('RATE_LIMIT');
   cache.put(k, String(n + 1), 600);
 }
 
@@ -4611,7 +4611,7 @@ function inboxThread_(e) {
   if (!pageId || !psid) return { ok: false, error: 'MISSING_FIELDS' };
   var values = msgrMessagesSheet_().getDataRange().getValues();
   var msgs = [];
-  for (var i = values.length - 1; i >= 1 &amp;&amp; msgs.length &lt; 150; i--) {
+  for (var i = values.length - 1; i &gt;= 1 &amp;&amp; msgs.length &lt; 150; i--) {
     var r = values[i];
     if (String(r[2]) !== psid || String(r[1]) !== pageId) continue;
     msgs.push({ time: formatCell_(r[0]), direction: String(r[3] || ''), text: String(r[4] || ''), by: String(r[6] || ''), attachments: msgrAttachments_(r[7]) });
@@ -4625,8 +4625,8 @@ function inboxThread_(e) {
     if (parseInt(cValues[rowNum - 1][MC.UNREAD - 1], 10)) sh.getRange(rowNum, MC.UNREAD).setValue(0);
     cValues[rowNum - 1][MC.UNREAD - 1] = 0;
     var profile = getMessengerProfile_(psid, pageId);
-    if (profile.name) { cValues[rowNum - 1][MC.NAME - 1] = profile.name; sh.getRange(rowNum, MC.NAME).setValue(profile.name); }
-    if (profile.profile_pic) { cValues[rowNum - 1][MC.PROFILE - 1] = profile.profile_pic; sh.getRange(rowNum, MC.PROFILE).setValue(profile.profile_pic); }
+    if (profile.name &amp;&amp; cValues[rowNum - 1][MC.NAME - 1] !== profile.name) { cValues[rowNum - 1][MC.NAME - 1] = profile.name; sh.getRange(rowNum, MC.NAME).setValue(profile.name); }
+    if (profile.profile_pic &amp;&amp; cValues[rowNum - 1][MC.PROFILE - 1] !== profile.profile_pic) { cValues[rowNum - 1][MC.PROFILE - 1] = profile.profile_pic; sh.getRange(rowNum, MC.PROFILE).setValue(profile.profile_pic); }
     contact = msgrContactFromRow_(cValues[rowNum - 1]);
   }
   return { ok: true, messages: msgs, contact: contact };
@@ -4637,7 +4637,7 @@ function inboxReply_(e, session) {
   var psid = param_(e, 'PSID');
   var text = String(param_(e, 'Text') || '').trim();
   if (!pageId || !psid || !text) return { ok: false, error: 'MISSING_FIELDS', message: 'মেসেজ লিখুন।' };
-  if (text.length > 2000) return { ok: false, error: 'TOO_LONG', message: 'মেসেজ ২০০০ অক্ষরের বেশি হতে পারবে না।' };
+  if (text.length &gt; 2000) return { ok: false, error: 'TOO_LONG', message: 'মেসেজ ২০০০ অক্ষরের বেশি হতে পারবে না।' };
   var token = msgrPageToken_(pageId);
   if (!token) {
     return { ok: false, error: 'NO_PAGE_TOKEN', message: 'এই Page-এর token সেট করা নেই (Script Properties → MSGR_PAGE_TOKEN_' + pageId + ')।' };
@@ -4695,7 +4695,7 @@ function inboxUpdate_(e, session) {
     var won = row[MC.STATUS - 1] === MSGR_CONFIRMED_STATUS || row[MC.STATUS - 1] === MSGR_DELIVERED_STATUS;
     var value = parseOrderValue_(row[MC.ORDER_VALUE - 1]);
     // Send the Purchase event to Meta once per conversation, when it is won and has a value.
-    if (won &amp;&amp; value > 0 &amp;&amp; !row[MC.PURCHASE_SENT - 1]) {
+    if (won &amp;&amp; value &gt; 0 &amp;&amp; !row[MC.PURCHASE_SENT - 1]) {
       purchase = sendMessengerPurchase_(psid, value, row[MC.ORDER_ID - 1] || (pageId + '_' + psid), pageId);
       if (purchase.ok) row[MC.PURCHASE_SENT - 1] = new Date();
     }

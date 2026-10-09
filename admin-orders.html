@@ -3,9 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <meta name="robots" content="noindex, nofollow">
   <title>Orders | Muslim Abaya Admin</title>
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="admin-panel.css?v=20260930">
   <script src="config.js?v=20261009-inbox"></script>
   <link rel="stylesheet" href="admin-sidebar.css?v=20261003sb">
@@ -49,8 +51,8 @@
 
   <script src="site-api-config.js?v=20261009-inbox"></script>
   <script src="admin-config.js?v=20261009-inbox"></script>
-  <script src="admin-api.js?v=20260930"></script>
-  <script src="admin-guard.js?v=20261003fast"></script>
+  <script src="admin-api.js?v=20261010-speed"></script>
+  <script src="admin-guard.js?v=20261010-speed"></script>
   <script src="admin-panel.js?v=20260930"></script>
   <script>
     (function () {
@@ -107,8 +109,9 @@
         }).join("");
       }
 
-      var CACHE_KEY = "ma_admin_orders_v1";
+      var ordersShown = false;
       function apply(res) {
+        ordersShown = true;
         all = res.orders || [];
         counts = res.counts || {};
         statuses = res.statuses || [];
@@ -118,20 +121,16 @@
       }
 
       function load() {
-        var shown = false;
-        try {
-          var c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || "null");
-          if (c && c.orders) { apply(c); shown = true; }
-        } catch (e) {}
-        if (!shown) document.getElementById("ordBody").innerHTML = '<tr><td colspan="7" class="pn-empty">Loading…</td></tr>';
-        MaAdmin.call("AdminOrderList", { Limit: 300 }).then(function (res) {
-          apply(res);
-          try { sessionStorage.setItem(CACHE_KEY, JSON.stringify(res)); } catch (e) {}
-        }).catch(function (err) {
-          var msg = err.code === "NETWORK_FAILURE" ? "নেটওয়ার্ক সমস্যা।" : err.message;
-          document.getElementById("ordBody").innerHTML = '<tr><td colspan="7" class="pn-empty">Error: ' + esc(msg) +
-            (err.code === "" || err.message === "UNKNOWN" ? "<br>Apps Script → Deploy → New version করেছেন কি?" : "") + "</td></tr>";
-        });
+        var cached = MaAdmin.cached("AdminOrderList", { Limit: 300 });
+        if (cached) apply(cached);
+        var btn = document.getElementById("ordRefresh");
+        btn.disabled = true;
+        document.getElementById("ordCount").textContent = (ordersShown ? (counts.all || 0) + " orders · " : "") + "আপডেট হচ্ছে…";
+        if (!ordersShown) document.getElementById("ordBody").innerHTML = '<tr><td colspan="7" class="pn-empty">অর্ডার আনা হচ্ছে…</td></tr>';
+        return MaAdmin.call("AdminOrderList", { Limit: 300 }).then(apply).catch(function (err) {
+          if (ordersShown) { MaPanel.toast("আপডেট করা যায়নি: " + err.message, true); return; }
+          document.getElementById("ordBody").innerHTML = '<tr><td colspan="7" class="pn-empty">Error: ' + esc(err.message) + "</td></tr>";
+        }).then(function () { btn.disabled = false; });
       }
 
       document.getElementById("ordTabs").addEventListener("click", function (e) {

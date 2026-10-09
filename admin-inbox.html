@@ -3,9 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <meta name="robots" content="noindex, nofollow">
   <title>Messenger Inbox | Muslim Abaya Admin</title>
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="admin.css?v=20260929modern1">
   <style>
     .ibx-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:16px; }
@@ -132,8 +134,8 @@
 
   <script src="site-api-config.js?v=20261009-inbox"></script>
   <script src="admin-config.js?v=20261009-inbox"></script>
-  <script src="admin-api.js?v=20260928inbox"></script>
-  <script src="admin-guard.js?v=20261003fast"></script>
+  <script src="admin-api.js?v=20261010-speed"></script>
+  <script src="admin-guard.js?v=20261010-speed"></script>
   <script>
     (function () {
       var DEFAULT_QUICK = [
@@ -227,15 +229,8 @@
         mediaFallbacks(el);
       }
 
-      function loadList() {
-        var assigned = $('fAssigned').value;
-        return MaAdmin.inboxCall('InboxList', {
-          PageId: $('fPage').value,
-          Status: $('fStatus').value,
-          AssignedTo: assigned === '__me__' ? myName() : assigned,
-          Unread: $('fUnread').checked ? '1' : '',
-          Q: $('fQ').value.trim()
-        }).then(function (res) {
+      var listSequence = 0;
+      function applyList(res) {
           meta.statuses = res.statuses || [];
           meta.team = res.team || [];
           meta.pages = res.pages || [];
@@ -244,7 +239,24 @@
           contacts = res.contacts || [];
           renderStats(res.stats || {});
           renderList();
+      }
+      function loadList() {
+        var sequence = ++listSequence;
+        var assigned = $('fAssigned').value;
+        var fields = {
+          PageId: $('fPage').value,
+          Status: $('fStatus').value,
+          AssignedTo: assigned === '__me__' ? myName() : assigned,
+          Unread: $('fUnread').checked ? '1' : '',
+          Q: $('fQ').value.trim()
+        };
+        var cached = MaAdmin.cached('InboxList', fields);
+        if (cached) { applyList(cached); $('ibxPages').appendChild(document.createTextNode(' · আপডেট হচ্ছে…')); }
+        return MaAdmin.inboxCall('InboxList', fields).then(function (res) {
+          if (sequence === listSequence) applyList(res);
         }).catch(function (err) {
+          if (sequence !== listSequence) return;
+          if (contacts.length) { $('ibxPages').textContent = 'আপডেট করা যায়নি: ' + (err.message || err); return; }
           $('ibxList').innerHTML = '<div class="ibx-empty">সমস্যা: ' + esc(err.message || err) + '</div>';
         });
       }
@@ -305,15 +317,25 @@
         active = { pageId: pageId, psid: psid };
         $('ibxLayout').classList.add('show-thread');
         renderList();
-        $('ibxThread').innerHTML = '<div class="ibx-empty">লোড হচ্ছে…</div>';
+        var cached = MaAdmin.cached('InboxThread', { PageId: pageId, PSID: psid });
+        if (cached) {
+          renderThread(cached.contact || findContact(pageId, psid), cached.messages || []);
+          $('ibxThread').querySelectorAll('.ibx-manage input, .ibx-manage select').forEach(function (el) { el.disabled = true; });
+        } else {
+          $('ibxThread').innerHTML = '<div class="ibx-empty">কথোপকথন আনা হচ্ছে…</div>';
+        }
         return MaAdmin.inboxCall('InboxThread', { PageId: pageId, PSID: psid }).then(function (res) {
           if (!active || active.psid !== psid || active.pageId !== pageId) return;
           var c = res.contact || findContact(pageId, psid);
           var local = findContact(pageId, psid);
           if (local) { local.unread = 0; if (c) { local.name = c.name; local.profilePic = c.profilePic; } }
           renderList();
+          var draft = $('ibxText') ? $('ibxText').value : '';
           renderThread(c, res.messages || []);
+          if (draft) $('ibxText').value = draft;
         }).catch(function (err) {
+          if (!active || active.psid !== psid || active.pageId !== pageId) return;
+          if (cached) { setNote('আপডেট করা যায়নি: ' + (err.message || err), true); return; }
           $('ibxThread').innerHTML = '<div class="ibx-empty">সমস্যা: ' + esc(err.message || err) + '</div>';
         });
       }

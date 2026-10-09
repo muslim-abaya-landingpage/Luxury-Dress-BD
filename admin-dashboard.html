@@ -3,9 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <meta name="robots" content="noindex, nofollow">
   <title>Admin Dashboard | Muslim Abaya</title>
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="admin.css?v=20260929modern1">
   <link rel="stylesheet" href="admin-dash.css?v=20261003dz">
 <script src="config.js?v=20261009-inbox"></script>
@@ -104,8 +106,8 @@
 
   <script src="site-api-config.js?v=20261009-inbox"></script>
   <script src="admin-config.js?v=20261009-inbox"></script>
-  <script src="admin-api.js?v=20260912v2"></script>
-  <script src="admin-guard.js?v=20261003fast"></script>
+  <script src="admin-api.js?v=20261010-speed"></script>
+  <script src="admin-guard.js?v=20261010-speed"></script>
   <script src="admin-invoice.js?v=20261009-inbox"></script>
   <script>
     (function () {
@@ -248,20 +250,25 @@
           .replace(/"/g, "&quot;");
       }
 
+      var ordersShown = false;
+      function applyOrders(res) {
+        ordersShown = true;
+        document.getElementById("admOrderCount").textContent = (res.count || (res.orders || []).length) + " অর্ডার";
+        renderOrders(res.orders);
+        renderStats(res.orders);
+        if (res.sheetUrl) document.getElementById("admOpenSheet").href = res.sheetUrl;
+        if (res.scriptUrl) document.getElementById("admOpenScript").href = res.scriptUrl;
+      }
       function loadOrders() {
-        document.getElementById("admOrdersBody").innerHTML = '<div class="dz-empty">Loading orders…</div>';
-        MaAdmin.fetchOrders(100)
-          .then(function (res) {
-            document.getElementById("admOrderCount").textContent = (res.count || (res.orders || []).length) + " অর্ডার";
-            renderOrders(res.orders);
-            renderStats(res.orders);
-            if (res.sheetUrl) document.getElementById("admOpenSheet").href = res.sheetUrl;
-            if (res.scriptUrl) document.getElementById("admOpenScript").href = res.scriptUrl;
-          })
-          .catch(function (err) {
-            document.getElementById("admOrdersBody").innerHTML =
-              '<div class="dz-empty">Error: ' + escapeHtml(err.message || err) + "</div>";
-          });
+        var cached = MaAdmin.cached("AdminOrders", { Limit: 100 });
+        if (cached) applyOrders(cached);
+        var btn = document.getElementById("admRefresh");
+        btn.disabled = true;
+        document.getElementById("admOrderCount").textContent = (ordersShown ? document.getElementById("admOrderCount").textContent.split(" · ")[0] + " · " : "") + "আপডেট হচ্ছে…";
+        return MaAdmin.fetchOrders(100).then(applyOrders).catch(function (err) {
+          document.getElementById("admOrderCount").textContent = "আপডেট করা যায়নি";
+          if (!ordersShown) document.getElementById("admOrdersBody").innerHTML = '<div class="dz-empty">Error: ' + escapeHtml(err.message || err) + "</div>";
+        }).then(function () { btn.disabled = false; });
       }
 
       MaAdminGuard.require().then(function (s) {
