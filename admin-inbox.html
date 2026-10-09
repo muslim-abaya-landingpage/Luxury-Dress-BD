@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <link rel="preload" as="script" href="site-api-config.js?v=20261009-inbox">
   <link rel="preload" as="script" href="admin-config.js?v=20261009-inbox">
-  <link rel="preload" as="script" href="admin-api.js?v=20261010-speed">
+  <link rel="preload" as="script" href="admin-api.js?v=20261010-thread">
   <link rel="preload" as="script" href="admin-guard.js?v=20261010-speed">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -138,7 +138,7 @@
 
   <script src="site-api-config.js?v=20261009-inbox"></script>
   <script src="admin-config.js?v=20261009-inbox"></script>
-  <script src="admin-api.js?v=20261010-speed"></script>
+  <script src="admin-api.js?v=20261010-thread"></script>
   <script src="admin-guard.js?v=20261010-speed"></script>
   <script>
     (function () {
@@ -156,6 +156,8 @@
       var contacts = [];
       var active = null; // { pageId, psid }
       var listTimer = null;
+      var threadSequence = 0;
+      var profileChecks = Object.create(null);
 
       function $(id) { return document.getElementById(id); }
       function esc(s) {
@@ -278,7 +280,7 @@
         if (c.assignedTo && assignees.indexOf(c.assignedTo) === -1) assignees.push(c.assignedTo);
         $('ibxThread').innerHTML =
           '<div class="ibx-thread-head"><div><button type="button" class="adm-btn adm-btn-secondary ibx-back" id="ibxBack">← তালিকা</button> ' +
-          avatar(c) + '<strong>' + esc(c.name || 'অজানা গ্রাহক') + '</strong> <span class="ibx-tag page">' + esc(c.pageName || '') + '</span>' +
+          '<span id="ibxThreadAvatar">' + avatar(c) + '</span><strong id="ibxThreadName">' + esc(c.name || 'অজানা গ্রাহক') + '</strong> <span class="ibx-tag page">' + esc(c.pageName || '') + '</span>' +
           (c.fromAd ? ' <span class="ibx-tag ad">বিজ্ঞাপন</span>' : '') + '</div>' +
           '<span class="ibx-time">প্রথম মেসেজ: ' + esc(c.firstSeen || '') + '</span></div>' +
           '<div class="ibx-msgs" id="ibxMsgs">' +
@@ -318,18 +320,21 @@
       }
 
       function openThread(pageId, psid) {
+        var sequence = ++threadSequence;
         active = { pageId: pageId, psid: psid };
         $('ibxLayout').classList.add('show-thread');
         renderList();
         var cached = MaAdmin.cached('InboxThread', { PageId: pageId, PSID: psid });
         if (cached) {
           renderThread(cached.contact || findContact(pageId, psid), cached.messages || []);
-          $('ibxThread').querySelectorAll('.ibx-manage input, .ibx-manage select').forEach(function (el) { el.disabled = true; });
+          $('ibxThread').querySelectorAll('.ibx-manage input, .ibx-manage select, #mSave').forEach(function (el) { el.disabled = true; });
         } else {
-          $('ibxThread').innerHTML = '<div class="ibx-empty">কথোপকথন আনা হচ্ছে…</div>';
+          renderThread(findContact(pageId, psid), []);
+          $('ibxMsgs').innerHTML = '<div class="ibx-empty" role="status">মেসেজ আপডেট হচ্ছে…</div>';
+          $('ibxThread').querySelectorAll('.ibx-manage input, .ibx-manage select, #mSave, #ibxSend').forEach(function (el) { el.disabled = true; });
         }
         return MaAdmin.inboxCall('InboxThread', { PageId: pageId, PSID: psid }).then(function (res) {
-          if (!active || active.psid !== psid || active.pageId !== pageId) return;
+          if (sequence !== threadSequence || !active || active.psid !== psid || active.pageId !== pageId) return;
           var c = res.contact || findContact(pageId, psid);
           var local = findContact(pageId, psid);
           if (local) { local.unread = 0; if (c) { local.name = c.name; local.profilePic = c.profilePic; } }
@@ -337,14 +342,34 @@
           var draft = $('ibxText') ? $('ibxText').value : '';
           renderThread(c, res.messages || []);
           if (draft) $('ibxText').value = draft;
+          refreshProfile(pageId, psid, sequence);
         }).catch(function (err) {
-          if (!active || active.psid !== psid || active.pageId !== pageId) return;
+          if (sequence !== threadSequence || !active || active.psid !== psid || active.pageId !== pageId) return;
           if (cached) { setNote('আপডেট করা যায়নি: ' + (err.message || err), true); return; }
           $('ibxThread').innerHTML = '<div class="ibx-empty">সমস্যা: ' + esc(err.message || err) + '</div>';
         });
       }
 
+      // Profile enrichment runs after the conversation is usable, without replacing drafts or form edits.
+      function refreshProfile(pageId, psid, sequence) {
+        var key = pageId + ':' + psid;
+        if (profileChecks[key] && Date.now() - profileChecks[key] < 300000) return;
+        profileChecks[key] = Date.now();
+        MaAdmin.inboxCall('InboxProfile', { PageId: pageId, PSID: psid }).then(function (res) {
+          var c = res.contact;
+          if (!c) return;
+          var local = findContact(pageId, psid);
+          if (local) { local.name = c.name; local.profilePic = c.profilePic; }
+          renderList();
+          if (sequence !== threadSequence || !active || active.pageId !== pageId || active.psid !== psid) return;
+          $('ibxThreadName').textContent = c.name || 'অজানা গ্রাহক';
+          $('ibxThreadAvatar').innerHTML = avatar(c);
+          mediaFallbacks($('ibxThreadAvatar'));
+        }).catch(function () { /* Optional profile lookup cannot block messages or replies. */ });
+      }
+
       function sendReply() {
+        if ($('ibxSend') && $('ibxSend').disabled) return;
         var ta = $('ibxText');
         var text = ta.value.trim();
         if (!text || !active) return;
