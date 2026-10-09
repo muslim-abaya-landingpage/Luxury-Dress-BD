@@ -18,7 +18,7 @@ window.SITE_LINKS = {
     "pattern": "/product/{id}"
   },
   "order": {
-    "whatsapp": "https://wa.me/8801970831783"
+    "whatsapp": "https://wa.me/8801971642683"
   },
   "sizeChart": {
     "default": {

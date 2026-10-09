@@ -1664,7 +1664,7 @@ function openProductQuickView(idx) {
   var p = products[idx];
   var root = shopCartCtx.root || document.getElementById("list");
   if (!root) return;
-  var waLink = (window.SITE_MEDIA && window.SITE_MEDIA.whatsappOrderLink) || "https://wa.me/8801970831783";
+  var waLink = (window.SITE_MEDIA && window.SITE_MEDIA.whatsappOrderLink) || "https://wa.me/8801971642683";
   var categoryKey = getShopCategoryKey();
   if (!shopCartCtx.gridHtml && root.querySelector("#productGrid")) {
     shopCartCtx.gridHtml = root.innerHTML;
@@ -3107,7 +3107,7 @@ function collectCategoryViewData(categoryKey) {
   var title = searchQ
     ? 'Search: "' + searchQ + '"'
     : (categoryMeta[categoryKey] && categoryMeta[categoryKey].title) || categoryKey.toUpperCase();
-  var waLink = (window.SITE_MEDIA && window.SITE_MEDIA.whatsappOrderLink) || "https://wa.me/8801970831783";
+  var waLink = (window.SITE_MEDIA && window.SITE_MEDIA.whatsappOrderLink) || "https://wa.me/8801971642683";
   var breadcrumb = searchQ
     ? "<nav class='shop-breadcrumb' aria-label='Breadcrumb'>" +
       "<a href='" + escapeHtml(shopHref("/")) + "'>Home</a><span>&rsaquo;</span><strong>Search</strong><span>&rsaquo;</span><strong>" +

@@ -9,7 +9,7 @@ window.SITE_SEO = {
   defaultImage: "https://muslimabaya.com/images/Baby-Pink-Floral-Print.jpeg",
   logoImage: "https://muslimabaya.com/assets/brand/muslim-abaya-logo-icon-512.png",
   locale: "bn_BD",
-  phone: "+8801970831783",
+  phone: "+8801971642683",
   social: {
     facebook: "https://www.facebook.com/muslimabayaofficial/", // মেইন ফেসবুক পেজ
     instagram: "https://www.instagram.com/muslimabaya.shop/",

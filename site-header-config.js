@@ -24,7 +24,7 @@ window.SITE_HEADER_CONFIG = {
   },
 
   /** হেডারের চ্যাট আইকন */
-  whatsapp: "https://wa.me/8801970831783",
+  whatsapp: "https://wa.me/8801971642683",
 
   search: {
     placeholder: "Search"

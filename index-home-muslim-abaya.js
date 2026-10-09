@@ -35,7 +35,7 @@
   function waLink() {
     return (
       (window.SITE_MEDIA && window.SITE_MEDIA.whatsappOrderLink) ||
-      "https://wa.me/8801970831783"
+      "https://wa.me/8801971642683"
     );
   }
 

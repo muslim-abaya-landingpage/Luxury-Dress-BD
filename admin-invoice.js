@@ -67,7 +67,7 @@
       "<table><thead><tr><th>#</th><th>Product</th></tr></thead><tbody>" + rows + "</tbody></table>" +
       "<div class='sum'>" + sum + "</div>" +
       "<span class='pay'>" + esc(o.payment || "Cash on Delivery") + "</span></div>" +
-      "<div class='foot'><b>ধন্যবাদ — Thank you for shopping with us</b>muslimabaya.com · WhatsApp 01970831783</div></div></body></html>";
+      "<div class='foot'><b>ধন্যবাদ — Thank you for shopping with us</b>muslimabaya.com · WhatsApp 01971642683</div></div></body></html>";
   }
 
   function print(o) {

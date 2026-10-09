@@ -544,7 +544,7 @@ card.innerHTML = `
         <div class="product-actions-muslim-abaya">
             ${qtyStepperHtml}
             ${actionsRowHtml}
-            <a href="https://wa.me/8801970831783?text=${encodeURIComponent(p.name + ' অর্ডার করতে চাই')}"
+            <a href="https://wa.me/8801971642683?text=${encodeURIComponent(p.name + ' অর্ডার করতে চাই')}"
                 target="_blank" rel="noopener" class="muslim-abaya-btn muslim-abaya-btn-msg">Send Message</a>
         </div>
     </div>

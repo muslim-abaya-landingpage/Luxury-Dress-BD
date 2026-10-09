@@ -58,6 +58,10 @@
       .ibx-back { display:inline-flex; }
       .ibx-msg { max-width:90%; }
     }
+    .ibx-avatar { width:36px;height:36px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:8px;background:#e8eefc;display:inline-flex;align-items:center;justify-content:center;color:#1f3a7a; }
+    .ibx-attachment { display:block;margin-top:8px; }
+    .ibx-attachment img { max-width:100%;max-height:320px;border-radius:10px;object-fit:contain;display:block; }
+    .ibx-attachment video,.ibx-attachment audio { max-width:100%; }
   </style>
   <link rel="stylesheet" href="admin-sidebar.css?v=20261003sb">
 </head>
@@ -126,8 +130,8 @@
     </div>
   </div>
 
-  <script src="site-api-config.js?v=20261003g"></script>
-  <script src="admin-config.js"></script>
+  <script src="site-api-config.js?v=20261009-inbox"></script>
+  <script src="admin-config.js?v=20261009-inbox"></script>
   <script src="admin-api.js?v=20260928inbox"></script>
   <script src="admin-guard.js?v=20261003fast"></script>
   <script>
@@ -185,13 +189,33 @@
           (notConnected.length ? '<br><span style="color:var(--adm-danger)">Token সেট হয়নি (উত্তর পাঠানো যাবে না): ' + notConnected.join(', ') + '</span>' : '');
       }
 
+      function mediaUrl(url) {
+        try { var u = new URL(String(url || '')); return u.protocol === 'https:' ? u.href : ''; } catch (e) { return ''; }
+      }
+      function avatar(c) {
+        var url = mediaUrl(c.profilePic);
+        return url ? '<img class="ibx-avatar" src="' + esc(url) + '" alt="প্রোফাইল ছবি" loading="lazy" referrerpolicy="no-referrer">' : '<span class="ibx-avatar" aria-label="প্রোফাইল ছবি নেই">👤</span>';
+      }
+      function attachments(m) {
+        return (Array.isArray(m.attachments) ? m.attachments : []).map(function (a) {
+          var url = mediaUrl(a.url); if (!url) return '';
+          var safe = esc(url);
+          if (a.type === 'image') return '<a class="ibx-attachment" href="' + safe + '" target="_blank" rel="noopener noreferrer"><img src="' + safe + '" alt="গ্রাহকের পাঠানো ছবি" loading="lazy" referrerpolicy="no-referrer"></a>';
+          if (a.type === 'video' || a.type === 'audio') return '<div class="ibx-attachment"><' + a.type + ' controls preload="none" src="' + safe + '"></' + a.type + '></div>';
+          return '<a class="ibx-attachment" href="' + safe + '" target="_blank" rel="noopener noreferrer">সংযুক্ত ফাইল খুলুন</a>';
+        }).join('');
+      }
+      function mediaFallbacks(root) {
+        root.querySelectorAll('.ibx-avatar').forEach(function (img) { if (img.tagName === 'IMG') img.addEventListener('error', function () { var span = document.createElement('span'); span.className = 'ibx-avatar'; span.textContent = '👤'; img.replaceWith(span); }); });
+        root.querySelectorAll('.ibx-attachment img').forEach(function (img) { img.addEventListener('error', function () { img.replaceWith(document.createTextNode('ছবিটি লোড হয়নি—খুলে দেখুন')); }); });
+      }
       function renderList() {
         var el = $('ibxList');
         if (!contacts.length) { el.innerHTML = '<div class="ibx-empty">কোনো কথোপকথন পাওয়া যায়নি।</div>'; return; }
         el.innerHTML = contacts.map(function (c) {
           var isActive = active && active.pageId === c.pageId && active.psid === c.psid;
           return '<button type="button" class="ibx-item' + (isActive ? ' is-active' : '') + '" data-page="' + esc(c.pageId) + '" data-psid="' + esc(c.psid) + '">' +
-            '<div class="ibx-item-top"><span class="ibx-name">' + esc(c.name || 'অজানা গ্রাহক') + '</span>' +
+            '<div class="ibx-item-top"><span class="ibx-name">' + avatar(c) + esc(c.name || 'অজানা গ্রাহক') + '</span>' +
             '<span class="ibx-time">' + (c.unread ? '<span class="ibx-unread">' + c.unread + '</span> ' : '') + esc(c.lastSeen) + '</span></div>' +
             '<div class="ibx-preview">' + (c.lastDirection === 'out' ? 'আপনি: ' : '') + esc(c.lastMessage) + '</div>' +
             '<div class="ibx-tags"><span class="ibx-tag page">' + esc(c.pageName) + '</span>' +
@@ -200,6 +224,7 @@
             (c.assignedTo ? '<span class="ibx-tag">👤 ' + esc(c.assignedTo) + '</span>' : '') +
             '</div></button>';
         }).join('');
+        mediaFallbacks(el);
       }
 
       function loadList() {
@@ -237,12 +262,12 @@
         if (c.assignedTo && assignees.indexOf(c.assignedTo) === -1) assignees.push(c.assignedTo);
         $('ibxThread').innerHTML =
           '<div class="ibx-thread-head"><div><button type="button" class="adm-btn adm-btn-secondary ibx-back" id="ibxBack">← তালিকা</button> ' +
-          '<strong>' + esc(c.name || 'অজানা গ্রাহক') + '</strong> <span class="ibx-tag page">' + esc(c.pageName || '') + '</span>' +
+          avatar(c) + '<strong>' + esc(c.name || 'অজানা গ্রাহক') + '</strong> <span class="ibx-tag page">' + esc(c.pageName || '') + '</span>' +
           (c.fromAd ? ' <span class="ibx-tag ad">বিজ্ঞাপন</span>' : '') + '</div>' +
           '<span class="ibx-time">প্রথম মেসেজ: ' + esc(c.firstSeen || '') + '</span></div>' +
           '<div class="ibx-msgs" id="ibxMsgs">' +
           (messages.length ? messages.map(function (m) {
-            return '<div class="ibx-msg ' + (m.direction === 'out' ? 'out' : 'in') + '">' + esc(m.text) +
+            return '<div class="ibx-msg ' + (m.direction === 'out' ? 'out' : 'in') + '">' + esc(m.text) + attachments(m) +
               '<div class="ibx-msg-meta">' + esc(m.time) + (m.by ? ' · ' + esc(m.by) : '') + '</div></div>';
           }).join('') : '<div class="ibx-empty">এই সিস্টেম চালুর পর থেকে কোনো মেসেজ সেভ হয়নি।</div>') +
           '</div>' +
@@ -264,6 +289,7 @@
           }).join('') + '</div>' +
           '<form class="ibx-compose" id="ibxCompose"><textarea id="ibxText" placeholder="উত্তর লিখুন… (Enter = পাঠান, Shift+Enter = নতুন লাইন)"></textarea>' +
           '<button type="submit" class="adm-btn adm-btn-primary" id="ibxSend">পাঠান</button></form>';
+        mediaFallbacks($('ibxThread'));
         var box = $('ibxMsgs');
         box.scrollTop = box.scrollHeight;
       }
@@ -284,7 +310,7 @@
           if (!active || active.psid !== psid || active.pageId !== pageId) return;
           var c = res.contact || findContact(pageId, psid);
           var local = findContact(pageId, psid);
-          if (local) local.unread = 0;
+          if (local) { local.unread = 0; if (c) { local.name = c.name; local.profilePic = c.profilePic; } }
           renderList();
           renderThread(c, res.messages || []);
         }).catch(function (err) {

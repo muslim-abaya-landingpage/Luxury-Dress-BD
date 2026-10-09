@@ -1,7 +1,7 @@
 (() => {
   const CONFIG = {
     homeHref: "/",
-    callNumber: "+8801970831783",
+    callNumber: "+8801971642683",
     loginHref: "signin.html"
   };
 
