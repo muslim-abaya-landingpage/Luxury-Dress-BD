@@ -337,7 +337,7 @@ export default function App() {
   };
 
   // WhatsApp WhatsApp Order Link
-  const waBaseLink = "https://wa.me/8801970831783";
+  const waBaseLink = "https://wa.me/8801971642683";
 
   // Compute color options dynamically based on products
   const colorOptions = useMemo(() => {
@@ -676,7 +676,7 @@ export default function App() {
       <div className="bg-[#1c1917] text-[#c5a880] text-center py-2 px-4 text-xs tracking-wider uppercase font-medium flex items-center justify-center gap-2">
         <span>✨ Cash on Delivery Available Nationwide ✨</span>
         <span className="hidden sm:inline">|</span>
-        <span className="hidden sm:inline">Call or WhatsApp to Order: +8801970831783</span>
+        <span className="hidden sm:inline">Call or WhatsApp to Order: +8801971642683</span>
       </div>
 
       {/* Header */}
@@ -2060,7 +2060,7 @@ export default function App() {
             <ul className="space-y-2">
               <li className="flex items-center gap-2">
                 <Phone className="w-3.5 h-3.5 text-[#c5a880]" />
-                <span>Helpline: +8801970831783 (10 AM - 10 PM)</span>
+                <span>Helpline: +8801971642683 (10 AM - 10 PM)</span>
               </li>
               <li>• 24/7 WhatsApp Support is active</li>
               <li>• 3 Days Easy Exchange & Return Policy</li>
