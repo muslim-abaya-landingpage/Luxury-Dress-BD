@@ -4515,6 +4515,7 @@ function handleInboxRequest_(type, e) {
   if (!v.ok) return v;
   if (type === 'InboxList') return inboxList_(e);
   if (type === 'InboxThread') return inboxThread_(e);
+  if (type === 'InboxProfile') return inboxProfile_(e);
   if (type === 'InboxReply') return inboxReply_(e, v);
   if (type === 'InboxUpdate') return inboxUpdate_(e, v);
   return { ok: false, error: 'UNKNOWN_TYPE' };
@@ -4624,12 +4625,25 @@ function inboxThread_(e) {
   if (rowNum !== -1) {
     if (parseInt(cValues[rowNum - 1][MC.UNREAD - 1], 10)) sh.getRange(rowNum, MC.UNREAD).setValue(0);
     cValues[rowNum - 1][MC.UNREAD - 1] = 0;
-    var profile = getMessengerProfile_(psid, pageId);
-    if (profile.name &amp;&amp; cValues[rowNum - 1][MC.NAME - 1] !== profile.name) { cValues[rowNum - 1][MC.NAME - 1] = profile.name; sh.getRange(rowNum, MC.NAME).setValue(profile.name); }
-    if (profile.profile_pic &amp;&amp; cValues[rowNum - 1][MC.PROFILE - 1] !== profile.profile_pic) { cValues[rowNum - 1][MC.PROFILE - 1] = profile.profile_pic; sh.getRange(rowNum, MC.PROFILE).setValue(profile.profile_pic); }
+    // Message reads must never wait for the external profile API.
     contact = msgrContactFromRow_(cValues[rowNum - 1]);
   }
   return { ok: true, messages: msgs, contact: contact };
+}
+
+function inboxProfile_(e) {
+  var pageId = param_(e, 'PageId');
+  var psid = param_(e, 'PSID');
+  if (!pageId || !psid) return { ok: false, error: 'MISSING_FIELDS' };
+  var sh = msgrContactsSheet_();
+  var values = sh.getDataRange().getValues();
+  var rowNum = msgrFindContactRow_(values, pageId, psid);
+  if (rowNum === -1) return { ok: false, error: 'NOT_FOUND' };
+  var profile = getMessengerProfile_(psid, pageId);
+  var row = values[rowNum - 1];
+  if (profile.name &amp;&amp; row[MC.NAME - 1] !== profile.name) { row[MC.NAME - 1] = profile.name; sh.getRange(rowNum, MC.NAME).setValue(profile.name); }
+  if (profile.profile_pic &amp;&amp; row[MC.PROFILE - 1] !== profile.profile_pic) { row[MC.PROFILE - 1] = profile.profile_pic; sh.getRange(rowNum, MC.PROFILE).setValue(profile.profile_pic); }
+  return { ok: true, contact: msgrContactFromRow_(row) };
 }
 
 function inboxReply_(e, session) {
