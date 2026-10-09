@@ -65,12 +65,12 @@ export default function Header({
           <div className="flex items-center gap-3 sm:gap-5">
             {/* Direct Phone Tab */}
             <a
-              href="tel:01970831783"
+              href="tel:01971642683"
               className="hidden sm:flex items-center gap-1.5 text-xs text-gray-300 hover:text-[#D4AF37] transition-colors"
               id="header-phone-link"
             >
               <Phone className="h-3.5 w-3.5" />
-              <span className="font-mono">01970831783</span>
+              <span className="font-mono">01971642683</span>
             </a>
 
             {/* Language Toggle Button */}

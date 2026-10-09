@@ -9,8 +9,8 @@ interface ActionButtonsProps {
 
 export default function ActionButtons({ currentProduct, language }: ActionButtonsProps) {
   // Pre-fill texts with chosen details
-  const phoneNumber = "8801970831783";
-  const rawNumber = "01970831783";
+  const phoneNumber = "8801971642683";
+  const rawNumber = "01971642683";
   
   const getEncodedText = () => {
   const text = `Assalamu Alaikum.

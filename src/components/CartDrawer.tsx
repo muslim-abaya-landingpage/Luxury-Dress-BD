@@ -430,7 +430,7 @@ export default function CartDrawer({
 
                   <div className="mt-8 space-y-3 w-full">
                     <a
-                      href={`https://wa.me/8801970831783?text=${encodeURIComponent(
+                      href={`https://wa.me/8801971642683?text=${encodeURIComponent(
                         `Salam. My order ID is ${orderId}. Please confirm it.`
                       )}`}
                       target="_blank"
