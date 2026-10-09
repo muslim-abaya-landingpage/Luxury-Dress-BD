@@ -4303,7 +4303,7 @@ function msgrContactsSheet_() {
 
 function msgrMessagesSheet_() {
   var sh = ensureSheet_(MSGR_MSG_SHEET, ['Time', 'PageId', 'PSID', 'Direction', 'Text', 'MID', 'By', 'Attachments']);
-  sh.getRange(1, 8).setValue('Attachments');
+  if (sh.getRange(1, 8).getValue() !== 'Attachments') sh.getRange(1, 8).setValue('Attachments');
   return sh;
 }
 
@@ -4601,8 +4601,8 @@ function inboxThread_(e) {
     if (parseInt(cValues[rowNum - 1][MC.UNREAD - 1], 10)) sh.getRange(rowNum, MC.UNREAD).setValue(0);
     cValues[rowNum - 1][MC.UNREAD - 1] = 0;
     var profile = getMessengerProfile_(psid, pageId);
-    if (profile.name) { cValues[rowNum - 1][MC.NAME - 1] = profile.name; sh.getRange(rowNum, MC.NAME).setValue(profile.name); }
-    if (profile.profile_pic) { cValues[rowNum - 1][MC.PROFILE - 1] = profile.profile_pic; sh.getRange(rowNum, MC.PROFILE).setValue(profile.profile_pic); }
+    if (profile.name && cValues[rowNum - 1][MC.NAME - 1] !== profile.name) { cValues[rowNum - 1][MC.NAME - 1] = profile.name; sh.getRange(rowNum, MC.NAME).setValue(profile.name); }
+    if (profile.profile_pic && cValues[rowNum - 1][MC.PROFILE - 1] !== profile.profile_pic) { cValues[rowNum - 1][MC.PROFILE - 1] = profile.profile_pic; sh.getRange(rowNum, MC.PROFILE).setValue(profile.profile_pic); }
     contact = msgrContactFromRow_(cValues[rowNum - 1]);
   }
   return { ok: true, messages: msgs, contact: contact };
