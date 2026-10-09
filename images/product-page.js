@@ -46,7 +46,7 @@
   function waLink() {
     return (
       (window.SITE_LINKS && window.SITE_LINKS.order && window.SITE_LINKS.order.whatsapp) ||
-      "https://wa.me/8801970831783"
+      "https://wa.me/8801971642683"
     );
   }
 
