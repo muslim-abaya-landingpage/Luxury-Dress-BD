@@ -9,7 +9,7 @@
 
   var READ_TYPES = ['AdminOrders', 'AdminOrderList', 'AdminOrderGet', 'AdminOrderStaff',
     'AdminStockGet', 'AdminAnalytics', 'AdminStockVariantsList', 'AdminStockLedgerList',
-    'AdminAnalyticsV2', 'AdminGrowthData', 'AdminStaffList', 'InboxList', 'InboxThread'];
+    'AdminAnalyticsV2', 'AdminGrowthData', 'AdminStaffList', 'InboxList', 'InboxThread', 'InboxProfile'];
   var CACHE_PREFIX = "ma_admin_read_v2:";
   var SNAPSHOT_MS = 5 * 60 * 1000;
   var inFlight = Object.create(null);
