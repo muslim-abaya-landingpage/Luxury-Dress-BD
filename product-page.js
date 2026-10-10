@@ -865,6 +865,11 @@
       "<button type='button' class='pd-btn pd-btn-outline' id='pdNotifyBtn' style='display:none'>স্টকে এলে জানান</button>" +
       "<a class='pd-btn pd-btn-light' id='pdSendMsg' target='_blank' rel='noopener'>Send Message</a>" +
       "</div>" +
+      "<div class='pdp-purchase-assurance' role='note' aria-label='Delivery and payment information'>" +
+      "<p><strong>ডেলিভারি:</strong> ঢাকার ভিতরে ৳80 · ঢাকার বাইরে ৳150 · ৩ বা তার বেশি আইটেমে ফ্রি</p>" +
+      "<p><strong>পেমেন্ট:</strong> Cash on Delivery, bKash, Nagad ও Bank Transfer</p>" +
+      "<a href='/refund.html'>রিটার্ন ও এক্সচেঞ্জ নীতি দেখুন</a>" +
+      "</div>" +
       "</div>" +
       "</div>" +
       "<div class='pd-bottom-grid'>" +
