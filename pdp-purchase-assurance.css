@@ -1,0 +1,35 @@
+/* Local delivery, payment and policy details near the product purchase actions. */
+.pdp-purchase-assurance {
+  display: grid;
+  gap: 7px;
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border: 1px solid #e9e9ee;
+  border-radius: 8px;
+  color: #30303a;
+  background: #fafafd;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.pdp-purchase-assurance p {
+  margin: 0;
+}
+
+.pdp-purchase-assurance strong {
+  color: #17171d;
+  font-weight: 700;
+}
+
+.pdp-purchase-assurance a {
+  width: fit-content;
+  color: #3f36a8;
+  font-weight: 600;
+  text-underline-offset: 2px;
+}
+
+.pdp-purchase-assurance a:focus-visible {
+  outline: 2px solid #5b47c7;
+  outline-offset: 3px;
+  border-radius: 2px;
+}
