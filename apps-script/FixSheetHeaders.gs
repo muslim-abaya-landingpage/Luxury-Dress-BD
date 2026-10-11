@@ -1,5 +1,5 @@
 /**
- * একবার চালান: Online Order শীটে I–Q হেডার সেট করবে।
+ * একবার চালান: Online Order শীটে অর্ডারের হেডার সেট করবে।
  * Apps Script Editor → FixSheetHeaders → Run → setupOnlineOrderHeadersNow
  */
 function setupOnlineOrderHeadersNow() {
@@ -9,7 +9,7 @@ function setupOnlineOrderHeadersNow() {
     return;
   }
   var headers = getOnlineOrderExtraHeaders_();
-  var headerRange = sheet.getRange(1, 9, 1, headers.length);
+  var headerRange = sheet.getRange(1, onlineOrderColumn_(sheet, 9), 1, headers.length);
   headerRange.setValues([headers]);
   try {
     headerRange
@@ -19,5 +19,5 @@ function setupOnlineOrderHeadersNow() {
       .setHorizontalAlignment('center')
       .setWrap(true);
   } catch (e) {}
-  SpreadsheetApp.getUi().alert('কলাম I–Q হেডার সেট সম্পন্ন।');
+  SpreadsheetApp.getUi().alert('অর্ডারের হেডার সেট সম্পন্ন।');
 }

@@ -13,10 +13,14 @@
 ## ২. কোড পেস্ট
 
 1. **Editor** → `Code.gs` (বা নতুন ফাইল)
-2. `apps-script-copy.html` পেজ থেকে **Code.gs** কপি করে পেস্ট করুন; তারপর নতুন ফাইল `AdminOrders` খুলে সেখানে **AdminOrders.gs** পেস্ট করুন (দুটো ফাইলই লাগবে)
+2. `apps-script-copy.html` পেজ থেকে **Code.gs**, **AdminOrders.gs** ও **FixSheetHeaders.gs** কপি করে একই নামের ফাইলে পেস্ট করুন। না থাকলে **＋ → Script** দিয়ে তৈরি করুন। H-তে সাইজ বসানোর পরিবর্তনে তিনটি ফাইল আপডেট করতে হবে।
 3. **Save**
 
 ## ৩. Deploy (Web app)
+
+আগের ডিপ্লয়মেন্ট আপডেট করতে **Deploy → Manage deployments → Edit → Version: New version → Deploy** ব্যবহার করুন। আগের URL-ই থাকবে; সাইটের API URL বদলাতে হবে না। H কলামে সাইজের বিন্যাস ও যাচাইয়ের জন্য `ORDER-SIZE-SETUP.md` দেখুন।
+
+প্রথমবার ডিপ্লয় করলে:
 
 1. **Deploy** → **New deployment**
 2. Type: **Web app**
@@ -48,7 +52,7 @@ window.MA_SITE_API = {
 
 ## Sheet ট্যাব
 
-- **`Online Order`** — চেকআউট অর্ডার (A–H মূল তথ্য; I–Q: Order ID, Status, Tracking, Payment ইত্যাদি — বিস্তারিত `APPS-SCRIPT-দৈনিক-কাজ.md`)
+- **`Online Order`** — A–G মূল তথ্য, H পণ্যের সাইজ, I মোট টাকা, J অর্ডার আইডি, K স্ট্যাটাস, L–N কুরিয়ার, R নোট এবং S–AD ছবি। কোড আগের H=টাকা বিন্যাসও চেনে। বিস্তারিত `ORDER-SIZE-SETUP.md`।
 - `Customers` — Sign Up (হ্যাশ পাসওয়ার্ড)
 - `Sessions` — লগইন টোকেন
 - `Logins` — লগইন অডিট

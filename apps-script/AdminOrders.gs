@@ -13,7 +13,7 @@
  *   AdminSendCourier — Steadfast-এ পার্সেল পাঠানো
  *   AdminOrderStaff  — অ্যাসাইনের জন্য স্টাফ তালিকা (Admins শীট)
  *
- * Online Order শীটের নতুন কলাম (AN থেকে) স্বয়ংক্রিয়ভাবে তৈরি হয়:
+ * Online Order শীটের admin কলাম (logical AN; H size থাকলে physical AO থেকে) স্বয়ংক্রিয়ভাবে তৈরি হয়:
  *   AN Admin Note · AO Courier Note · AP Advance · AQ Discount · AR Assigned To · AS Source · AT Courier
  */
 
@@ -44,7 +44,7 @@ function admGetSheet_() {
 
 function admEnsureHeaders_(sheet) {
   var headers = admExtraHeaders_();
-  var range = sheet.getRange(1, ADM_COL_ADMIN_NOTE, 1, headers.length);
+  var range = sheet.getRange(1, onlineOrderColumn_(sheet, ADM_COL_ADMIN_NOTE), 1, headers.length);
   var cur = range.getValues()[0];
   var missing = false;
   for (var i = 0; i < headers.length; i++) {
@@ -81,6 +81,7 @@ function admRowToOrder_(r, rowNumber) {
     charge: charge,
     address: String(r[5] || ''),
     design: design,
+    size: String(r.orderSizeText_ || ''),
     items: items,
     total: total,
     subtotal: Math.max(0, total - charge + discount + coupon),
@@ -109,7 +110,7 @@ function admRowToOrder_(r, rowNumber) {
 function admReadAll_(sheet) {
   var lastRow = sheet.getLastRow();
   if (lastRow < 2) return [];
-  return sheet.getRange(2, 1, lastRow - 1, ADM_LAST_COL).getValues();
+  return readOnlineOrderRows_(sheet, 2, lastRow - 1, ADM_LAST_COL);
 }
 
 function admFindRow_(sheet, orderId) {
@@ -117,7 +118,7 @@ function admFindRow_(sheet, orderId) {
   if (!id) return 0;
   var lastRow = sheet.getLastRow();
   if (lastRow < 2) return 0;
-  var ids = sheet.getRange(2, 9, lastRow - 1, 1).getValues();
+  var ids = sheet.getRange(2, onlineOrderColumn_(sheet, 9), lastRow - 1, 1).getValues();
   for (var i = ids.length - 1; i >= 0; i--) {
     if (String(ids[i][0] || '').trim() === id) return i + 2;
   }
@@ -285,14 +286,14 @@ function adminOrderGet_(e) {
   var orderId = String(param_(e, 'OrderId') || '').trim();
   var row = admFindRow_(sheet, orderId);
   if (!row) return { ok: false, error: 'NOT_FOUND', message: 'অর্ডার পাওয়া যায়নি।' };
-  var vals = sheet.getRange(row, 1, 1, ADM_LAST_COL).getValues()[0];
+  var vals = readOnlineOrderRows_(sheet, row, 1, ADM_LAST_COL)[0];
   var order = admRowToOrder_(vals, row);
 
   var prevId = '';
   var nextId = '';
   var lastRow = sheet.getLastRow();
-  if (row > 2) prevId = String(sheet.getRange(row - 1, 9).getValue() || '');
-  if (row < lastRow) nextId = String(sheet.getRange(row + 1, 9).getValue() || '');
+  if (row > 2) prevId = String(sheet.getRange(row - 1, onlineOrderColumn_(sheet, 9)).getValue() || '');
+  if (row < lastRow) nextId = String(sheet.getRange(row + 1, onlineOrderColumn_(sheet, 9)).getValue() || '');
 
   var rows = admReadAll_(sheet);
   var history = admHistoryForPhone_(rows, order.phone, order.orderId);
@@ -330,7 +331,7 @@ function adminOrderUpdate_(e) {
     sheet = admGetSheet_();
     row = admFindRow_(sheet, param_(e, 'OrderId'));
     if (!row) return { ok: false, error: 'NOT_FOUND', message: 'অর্ডার পাওয়া যায়নি।' };
-    var vals = sheet.getRange(row, 1, 1, ADM_LAST_COL).getValues()[0];
+    var vals = readOnlineOrderRows_(sheet, row, 1, ADM_LAST_COL)[0];
     prevStatus = String(vals[9] || 'Pending');
 
     if (admHasParam_(e, 'Name')) {
@@ -378,9 +379,9 @@ function adminOrderUpdate_(e) {
 
     // ফোন কলামে শূন্য হারানো ঠেকাতে টেক্সট ফরম্যাট
     sheet.getRange(row, 3).setNumberFormat('@');
-    // কলাম B–Q এবং AD–AJ আলাদা লিখি; ছবির কলাম (R–AC) অক্ষত থাকে
-    sheet.getRange(row, 2, 1, 16).setValues([vals.slice(1, 17)]);
-    sheet.getRange(row, ADM_COL_ADMIN_NOTE, 1, ADM_LAST_COL - ADM_COL_ADMIN_NOTE + 1)
+    // Logical B–Q আপডেট করি; H-এর সাইজ এবং ছবির সব কলাম অক্ষত থাকে
+    writeOnlineOrderFields_(sheet, row, 2, vals.slice(1, 17));
+    sheet.getRange(row, onlineOrderColumn_(sheet, ADM_COL_ADMIN_NOTE), 1, ADM_LAST_COL - ADM_COL_ADMIN_NOTE + 1)
       .setValues([vals.slice(ADM_COL_ADMIN_NOTE - 1, ADM_LAST_COL)]);
     newStatus = String(vals[9]);
   } finally {
@@ -393,7 +394,7 @@ function adminOrderUpdate_(e) {
     hooks = admRunConfirmedHooks_(sheet, row);
   }
 
-  var fresh = admRowToOrder_(sheet.getRange(row, 1, 1, ADM_LAST_COL).getValues()[0], row);
+  var fresh = admRowToOrder_(readOnlineOrderRows_(sheet, row, 1, ADM_LAST_COL)[0], row);
   return { ok: true, order: fresh, hooks: hooks };
 }
 
@@ -405,7 +406,7 @@ function admRunConfirmedHooks_(sheet, row) {
   } catch (err) { out.capi = 'ERR'; }
   try {
     if (isAutoCourierEnabled_() && shouldAutoCourierOnConfirmed_()) {
-      var vals = sheet.getRange(row, 1, 1, 17).getValues()[0];
+      var vals = readOnlineOrderRows_(sheet, row, 1, 17)[0];
       if (!String(vals[10] || '').trim() && !String(vals[11] || '').trim()) {
         var res = tryAutoCourierForOrder_({
           sheet: sheet,
@@ -417,7 +418,7 @@ function admRunConfirmedHooks_(sheet, row) {
           design: String(vals[6] || ''),
           slotItems: designTextToSlotItems_(String(vals[6] || '')),
           qty: parseInt(String(vals[3] || '0'), 10) || 0,
-          total: admNum_(vals[7]) - admNum_(sheet.getRange(row, ADM_COL_ADVANCE).getValue()),
+          total: admNum_(vals[7]) - admNum_(sheet.getRange(row, onlineOrderColumn_(sheet, ADM_COL_ADVANCE)).getValue()),
           payment: String(vals[14] || 'Cash On Delivery')
         });
         out.courier = res && res.ok ? 'SENT' : ((res && res.reason) || 'FAIL');
@@ -440,7 +441,7 @@ function adminSendCourier_(e) {
     var sheet = admGetSheet_();
     var row = admFindRow_(sheet, param_(e, 'OrderId'));
     if (!row) return { ok: false, error: 'NOT_FOUND', message: 'অর্ডার পাওয়া যায়নি।' };
-    var vals = sheet.getRange(row, 1, 1, ADM_LAST_COL).getValues()[0];
+    var vals = readOnlineOrderRows_(sheet, row, 1, ADM_LAST_COL)[0];
     var o = admRowToOrder_(vals, row);
     if (o.tracking || o.consignmentId) {
       return { ok: false, error: 'ALREADY_SENT', message: 'ইতিমধ্যে কুরিয়ারে পাঠানো হয়েছে: ' + (o.tracking || o.consignmentId) };
@@ -461,6 +462,7 @@ function adminSendCourier_(e) {
       note: (o.courierNote || ('Order ' + o.orderId + ' · Qty ' + o.qty)).slice(0, 200),
       item_description: buildCourierItemDescription_({
         design: o.design,
+        sizeText: o.size,
         slotItems: designTextToSlotItems_(o.design),
         qty: o.qty
       })
@@ -477,13 +479,13 @@ function adminSendCourier_(e) {
       try { msg = JSON.stringify(res).slice(0, 200); } catch (jerr) {}
       return { ok: false, error: 'COURIER_FAIL', message: 'Steadfast পার্সেল তৈরি হয়নি। ' + msg };
     }
-    sheet.getRange(row, 10, 1, 4).setValues([['Shipped', c.tracking_code || '', c.consignment_id || '', c.status || 'in_review']]);
-    sheet.getRange(row, ADM_COL_COURIER).setValue('Steadfast');
+    sheet.getRange(row, onlineOrderColumn_(sheet, 10), 1, 4).setValues([['Shipped', c.tracking_code || '', c.consignment_id || '', c.status || 'in_review']]);
+    sheet.getRange(row, onlineOrderColumn_(sheet, ADM_COL_COURIER)).setValue('Steadfast');
     return {
       ok: true,
       tracking: c.tracking_code || '',
       consignmentId: c.consignment_id || '',
-      order: admRowToOrder_(sheet.getRange(row, 1, 1, ADM_LAST_COL).getValues()[0], row)
+      order: admRowToOrder_(readOnlineOrderRows_(sheet, row, 1, ADM_LAST_COL)[0], row)
     };
   } finally {
     lock.releaseLock();

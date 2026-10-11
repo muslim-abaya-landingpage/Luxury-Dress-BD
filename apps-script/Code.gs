@@ -50,6 +50,7 @@ function doGet(e) {
   }
   try {
     var type = param_(e, 'RecordType');
+    if (type === 'OrderSchema') return jsonOut_(getOnlineOrderSchemaStatus_());
     if (type === 'Subscribe') {
       var contact = String(param_(e, 'contact') || param_(e, 'email') || '').trim();
       var saved = saveSubscribeContact_(contact);
@@ -193,7 +194,171 @@ function doPost(e) {
   }
 }
 
-// ── Online Order (A–H + Order ID কলাম I) ──
+// ── Online Order: H = size, I = total, J = order ID, K = status ──
+// Existing integrations use the original logical A–AT field order. Resolve the
+// inserted H column at the sheet boundary, so legacy sheets and other tabs keep
+// their existing field positions. The cache lives only for this execution.
+var ONLINE_ORDER_LAYOUT_CACHE_ = {};
+
+function onlineOrderHasSizeColumn_(sheet) {
+  if (!sheet || sheet.getName() !== 'Online Order') return false;
+  var key = sheet.getParent().getId() + ':' + sheet.getSheetId();
+  if (Object.prototype.hasOwnProperty.call(ONLINE_ORDER_LAYOUT_CACHE_, key)) {
+    return ONLINE_ORDER_LAYOUT_CACHE_[key];
+  }
+  var headers = sheet.getRange(1, 8, 1, 3).getValues()[0];
+  var sizeHeader = String(headers[0] || '').trim();
+  var inserted = /সাইজ|\bsize\b/i.test(sizeHeader) ||
+    (!sizeHeader && String(headers[1] || '').trim() === 'মোট টাকা' &&
+      String(headers[2] || '').trim() === 'অর্ডার আইডি');
+  ONLINE_ORDER_LAYOUT_CACHE_[key] = inserted;
+  return inserted;
+}
+
+function onlineOrderColumn_(sheet, originalColumn) {
+  return originalColumn + (originalColumn >= 8 && onlineOrderHasSizeColumn_(sheet) ? 1 : 0);
+}
+
+// Deployment verification exposes only column numbers, never customer/order data.
+function getOnlineOrderSchemaStatus_() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
+  if (!sheet) return { ok: false, error: 'NO_SHEET' };
+  return {
+    ok: true,
+    version: 'order-size-h-20261012',
+    columns: {
+      size: onlineOrderHasSizeColumn_(sheet) ? 8 : null,
+      total: onlineOrderColumn_(sheet, 8), orderId: onlineOrderColumn_(sheet, 9),
+      status: onlineOrderColumn_(sheet, 10), tracking: onlineOrderColumn_(sheet, 11),
+      notes: onlineOrderColumn_(sheet, 17), images: onlineOrderColumn_(sheet, 18),
+      cartJSON: onlineOrderColumn_(sheet, 33)
+    }
+  };
+}
+
+function normalizeOnlineOrderRows_(sheet, rows) {
+  if (!onlineOrderHasSizeColumn_(sheet)) return rows;
+  return rows.map(function (row) {
+    var logical = row.slice(0, 7).concat(row.slice(8));
+    logical.orderSizeText_ = String(row[7] || '');
+    return logical;
+  });
+}
+
+function readOnlineOrderRows_(sheet, row, rowCount, originalLastColumn) {
+  if (row === undefined) return normalizeOnlineOrderRows_(sheet, sheet.getDataRange().getValues());
+  if (!rowCount) return [];
+  return normalizeOnlineOrderRows_(sheet,
+    sheet.getRange(row, 1, rowCount, onlineOrderColumn_(sheet, originalLastColumn)).getValues());
+}
+
+// Preserve the independently populated H cell when an admin edits B–Q.
+function writeOnlineOrderFields_(sheet, row, originalFirstColumn, values) {
+  var split = 8 - originalFirstColumn;
+  if (onlineOrderHasSizeColumn_(sheet) && split > 0 && split < values.length) {
+    sheet.getRange(row, originalFirstColumn, 1, split).setValues([values.slice(0, split)]);
+    sheet.getRange(row, 9, 1, values.length - split).setValues([values.slice(split)]);
+    return;
+  }
+  sheet.getRange(row, onlineOrderColumn_(sheet, originalFirstColumn), 1, values.length).setValues([values]);
+}
+
+// Long courier logs and tracking JSON must stay inside their own cells.
+// Formatting empty rows does not add content or change getLastRow().
+function formatOnlineOrderDisplay_(sheet, row) {
+  if (!sheet || sheet.getName() !== 'Online Order') return;
+  var firstRow = row || 2;
+  var rowCount = row ? 1 : Math.max(0, sheet.getMaxRows() - 1);
+  if (rowCount) {
+    sheet.getRange(firstRow, onlineOrderColumn_(sheet, 17), rowCount, 1)
+      .setWrapStrategy(SpreadsheetApp.WrapStrategy.CLIP).setVerticalAlignment('top');
+    var metaStart = onlineOrderColumn_(sheet, 30);
+    var metaWidth = Math.min(10, sheet.getMaxColumns() - metaStart + 1);
+    if (metaWidth > 0) sheet.getRange(firstRow, metaStart, rowCount, metaWidth)
+      .setWrapStrategy(SpreadsheetApp.WrapStrategy.CLIP).setVerticalAlignment('top');
+  }
+  if (!row) {
+    sheet.setColumnWidth(onlineOrderColumn_(sheet, 17), 300);
+    sheet.setFrozenRows(Math.max(1, sheet.getFrozenRows()));
+  }
+}
+
+// Hide internal fields only on an explicit setup. Opening the sheet does not
+// re-hide columns that an operator has chosen to inspect.
+function setupOnlineOrderDisplayNow() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
+  if (!sheet) throw new Error('Online Order শীট পাওয়া যায়নি।');
+  formatOnlineOrderDisplay_(sheet);
+  var maxColumns = sheet.getMaxColumns();
+  var trackingStart = onlineOrderColumn_(sheet, 30);
+  var flagsStart = onlineOrderColumn_(sheet, 36);
+  if (trackingStart + 3 <= maxColumns) sheet.hideColumns(trackingStart, 4);
+  if (flagsStart + 3 <= maxColumns) sheet.hideColumns(flagsStart, 4);
+  var helperColumn = sheet.getLastColumn();
+  if (helperColumn && /পণ্যের সাইজ.*স্বয়ংক্রিয়/.test(String(sheet.getRange(1, helperColumn).getValue() || ''))) {
+    sheet.hideColumns(helperColumn);
+  }
+  return { ok: true };
+}
+
+function formatOnlineOrderSizes_(items, design) {
+  if (Array.isArray(items) && items.length) {
+    return items.map(function (item, index) {
+      var size = String((item && (item.size || item.selectedSize)) || '').trim().slice(0, 160);
+      return (index + 1) + '. ' + (size || 'সাইজ নির্বাচন করা হয়নি');
+    }).join('\n');
+  }
+  // Older manual orders store their actual sizes in the product description.
+  // Leave unknown sizes blank rather than inferring a default from the product.
+  var found = false;
+  var sizes = String(design || '').split(/\n/).filter(function (line) {
+    return String(line).trim();
+  }).map(function (line, index) {
+    var match = line.match(/Body\s+\d+(?:\s*\([^)]*\))?\s*·\s*Length\s+\d+(?:\s*-\s*\d+)?(?:\s*inch)?/i);
+    if (match) found = true;
+    return (index + 1) + '. ' + (match ? match[0] : 'সাইজ সংরক্ষিত নেই');
+  });
+  return found ? sizes.join('\n') : '';
+}
+
+function appendOnlineOrderRow_(sheet, values, sizeText) {
+  var physical = values.slice();
+  if (onlineOrderHasSizeColumn_(sheet)) {
+    physical.splice(7, 0, String(sizeText || formatOnlineOrderSizes_([], values[6])));
+  }
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    var row = sheet.getLastRow() + 1;
+    appendRow_(sheet, physical);
+    if (onlineOrderHasSizeColumn_(sheet)) {
+      sheet.getRange(row, 8).clearDataValidations().setWrap(true).setVerticalAlignment('top');
+    }
+    try { formatOnlineOrderDisplay_(sheet, row); } catch (displayErr) {}
+    return row;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function syncOnlineOrderSizesNow() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
+  if (!sheet || !onlineOrderHasSizeColumn_(sheet)) {
+    throw new Error('Online Order-এর H কলামে পণ্যের সাইজ হেডার প্রয়োজন।');
+  }
+  var rows = readOnlineOrderRows_(sheet);
+  var sizes = [];
+  for (var i = 1; i < rows.length; i++) {
+    var items = [];
+    try { items = JSON.parse(String(rows[i][32] || '[]')); } catch (err) {}
+    sizes.push([formatOnlineOrderSizes_(items, rows[i][6]) || rows[i].orderSizeText_ || '']);
+  }
+  sheet.getRange(1, 8).setValue('পণ্যের সাইজ');
+  if (sizes.length) sheet.getRange(2, 8, sizes.length, 1).setValues(sizes)
+    .clearDataValidations().setWrap(true).setVerticalAlignment('top');
+  sheet.setColumnWidth(8, 235);
+  return { ok: true, orders: sizes.length };
+}
 
 function orderErrorMessage_(code) {
   var map = {
@@ -258,7 +423,11 @@ function validateOrderInput_(e) {
             id: String((it && it.id) || '').trim(),
             name: String((it && it.name) || '').trim(),
             qty: parseInt((it && it.qty), 10) || 1,
-            price: parseFloat(it && it.price) || 0
+            price: parseFloat(it && it.price) || 0,
+            size: String((it && (it.size || it.selectedSize)) || '').trim().slice(0, 160),
+            color: String((it && it.color) || '').trim().slice(0, 80),
+            productType: String((it && it.productType) || '').trim().slice(0, 80),
+            category: String((it && it.category) || '').trim().slice(0, 80)
           };
         }).filter(function (it) { return it.id; });
       }
@@ -379,6 +548,15 @@ function buildCourierItemDescription_(ctx) {
     }
   }
   if (!lines.length) return String((ctx && ctx.design) || 'Muslim Abaya order').slice(0, 500);
+  var sizeText = String((ctx && ctx.sizeText) || '');
+  if (!sizeText && ctx && ctx.sheet && ctx.row && onlineOrderHasSizeColumn_(ctx.sheet)) {
+    sizeText = String(ctx.sheet.getRange(ctx.row, 8).getValue() || '');
+  }
+  var sizes = sizeText.split(/\n/);
+  lines = lines.map(function (line, index) {
+    var size = String(sizes[index] || '').replace(/^\d+\.\s*/, '').trim();
+    return size && line.indexOf(size) === -1 ? line + ' · ' + size : line;
+  });
   return lines.slice(0, 10).join('\n').slice(0, 500);
 }
 
@@ -466,7 +644,7 @@ function fillActiveRowProductLines_(linesText) {
     if (pm) totalAmt += parseFloat(String(pm[1]).replace(/,/g, '')) || 0;
   }
   if (totalQty > 0) sheet.getRange(row, 4).setValue(totalQty);
-  if (totalAmt > 0) sheet.getRange(row, 8).setValue(totalAmt);
+  if (totalAmt > 0) sheet.getRange(row, onlineOrderColumn_(sheet, 8)).setValue(totalAmt);
   return { ok: true, row: row, qty: totalQty, total: totalAmt };
 }
 
@@ -610,7 +788,7 @@ function getRealityDashboardData() {
   if (!sheet) {
     return { ok: false, error: 'NO_SHEET', message: 'Online Order শিট পাওয়া যায়নি।' };
   }
-  var data = sheet.getDataRange().getValues();
+  var data = readOnlineOrderRows_(sheet);
   var todayKey = Utilities.formatDate(new Date(), 'GMT+6', 'yyyy-MM-dd');
   var stats = {
     totalToday: 0,
@@ -1238,7 +1416,7 @@ function submitWhatsappMiniOrder(payload) {
   var charge = qty > 0 && qty < 3 ? (districtChargeMap[district] || 150) : 0;
   var finalNotes = notes ? ('WhatsApp manual | ' + notes) : 'WhatsApp manual';
 
-  appendRow_(sheet, [
+  var row = appendOnlineOrderRow_(sheet, [
     timestamp,
     name,
     phone,
@@ -1258,7 +1436,6 @@ function submitWhatsappMiniOrder(payload) {
     finalNotes
   ]);
 
-  var row = sheet.getLastRow();
   formatOnlineOrderProductCell_(sheet, row, design);
 
   var autoResult = { ok: false, reason: 'SKIPPED' };
@@ -1337,7 +1514,7 @@ function setupOrderStatusDropdown_(sheet) {
     // Soft validation to avoid disruptive popup while operators are editing quickly.
     .setAllowInvalid(true)
     .build();
-  sheet.getRange('J2:J2000').setDataValidation(rule);
+  sheet.getRange(2, onlineOrderColumn_(sheet, 10), sheet.getMaxRows() - 1, 1).setDataValidation(rule);
   return true;
 }
 
@@ -1347,7 +1524,7 @@ function setupOrderStatusDropdownFromMenu() {
     return;
   }
   SpreadsheetApp.getUi().alert(
-    'Column J (Status) dropdown ready:\n\n' +
+    'Status dropdown ready:\n\n' +
     getOrderStatusOptions_().join(' · ') +
     '\n\nConfirmed = Steadfast auto (Confirmed mode)\nShipped = courier পাঠানো হয়েছে'
   );
@@ -1415,7 +1592,7 @@ function handleOnlineOrderPost_(e) {
   ensureOnlineOrderMetaFieldHeaders_(sheet);
   ensureCouponMetaHeaders_(sheet);
 
-  appendRow_(sheet, [
+  var newRow = appendOnlineOrderRow_(sheet, [
     timestamp,
     validated.name,
     validated.phone,
@@ -1433,13 +1610,12 @@ function handleOnlineOrderPost_(e) {
     payment,
     txn,
     notes
-  ]);
+  ], formatOnlineOrderSizes_(validated.cartItems, validated.design));
 
-  var newRow = sheet.getLastRow();
   var metaEmailVal = (param_(e, 'Email') || '').trim().toLowerCase();
   var metaFbcVal = (param_(e, 'FBC') || '').trim();
   var metaFbpVal = (param_(e, 'FBP') || '').trim();
-  sheet.getRange(newRow, 30, 1, 3).setValues([[metaEmailVal, metaFbcVal, metaFbpVal]]);
+  sheet.getRange(newRow, onlineOrderColumn_(sheet, 30), 1, 3).setValues([[metaEmailVal, metaFbcVal, metaFbpVal]]);
   var couponCodeVal = String(param_(e, 'CouponCode') || '').trim().toUpperCase();
   var couponDiscountVal = 0;
   if (couponCodeVal) {
@@ -1452,9 +1628,9 @@ function handleOnlineOrderPost_(e) {
       }
     } catch (couponErr) {}
   }
-  sheet.getRange(newRow, 34, 1, 2).setValues([[couponCodeVal, couponDiscountVal]]);
+  sheet.getRange(newRow, onlineOrderColumn_(sheet, 34), 1, 2).setValues([[couponCodeVal, couponDiscountVal]]);
   try {
-    sheet.getRange(newRow, 33).setValue(JSON.stringify(validated.cartItems || []));
+    sheet.getRange(newRow, onlineOrderColumn_(sheet, 33)).setValue(JSON.stringify(validated.cartItems || []));
   } catch (cartJsonWriteErr) {}
   decrementStockForOrder_(validated.cartItems);
   formatOnlineOrderProductCell_(sheet, newRow, validated.design);
@@ -1474,9 +1650,9 @@ function handleOnlineOrderPost_(e) {
     payment: payment
   });
 
-  // Purchase event should fire only after manual confirmation (J=Confirmed),
+  // Purchase event should fire only after manual confirmation (Status=Confirmed),
   // so fake/test submissions do not pollute ads optimization.
-  appendAutoCourierNote_(sheet, newRow, 'META_PURCHASE_WAIT: set J=Confirmed');
+  appendAutoCourierNote_(sheet, newRow, 'META_PURCHASE_WAIT: set Status=Confirmed');
 
   return ContentService.createTextOutput('Success|' + orderId).setMimeType(ContentService.MimeType.TEXT);
 }
@@ -1496,7 +1672,8 @@ function onOpen() {
       .addItem('WhatsApp order mini form', 'openWhatsappOrderMiniFormSidebar')
       .addItem('WhatsApp — অর্ডার আপডেট পাঠান (সিলেক্টেড রো)', 'openWhatsAppNotifyDialogActiveRow')
       .addItem('ProductList sync (clear G validation)', 'syncProductListDropdown_')
-      .addItem('Status dropdown — column J (Pending/Confirmed…)', 'setupOrderStatusDropdownFromMenu')
+      .addItem('পণ্যের সাইজ H-তে আপডেট করুন', 'syncOnlineOrderSizesNow')
+      .addItem('Status dropdown (Pending/Confirmed…)', 'setupOrderStatusDropdownFromMenu')
       .addItem('Reviews — Status ড্রপডাউন সেটআপ (Pending/Approved/Rejected)', 'setupReviewStatusDropdownFromMenu')
       .addSeparator()
       .addItem('Steadfast — selected row পাঠান', 'steadfastSendActiveRow')
@@ -1510,7 +1687,8 @@ function onOpen() {
       .addItem('Low Stock — এখনই চেক করুন (ইমেইল)', 'checkLowStockNowFromMenu_')
       .addItem('Coupons শিট খুলুন', 'openCouponsSheetFromMenu_')
       .addItem('Steadfast API URL fix করুন', 'setSteadfastBaseUrlToApi_')
-      .addItem('Sheet headers (J–Q + ছবি R–AC) সেট করুন', 'setupOnlineOrderExtraHeaders')
+      .addItem('অর্ডার ও ছবি হেডার ঠিক করুন', 'setupOnlineOrderExtraHeaders')
+      .addItem('অর্ডার শিটের প্রদর্শন পরিষ্কার করুন', 'setupOnlineOrderDisplayNow')
       .addItem('Selected row — ছবি thumbnail ঠিক করুন', 'repairOnlineOrderImagesActiveRow')
       .addItem('Auto courier — Confirmed হলে পাঠান', 'setupAutoCourierConfirmedMode')
       .addItem('Auto courier — Order হলেই instant', 'setupAutoCourierInstantMode')
@@ -1529,6 +1707,7 @@ function onOpen() {
       ensureOnlineOrderHeaders_(orderSheet);
       ensureOnlineOrderImageHeaders_(orderSheet);
       setupOrderStatusDropdown_(orderSheet);
+      formatOnlineOrderDisplay_(orderSheet);
     }
   } catch (sheetErr) {}
 
@@ -1540,10 +1719,14 @@ function onOpen() {
 
 function ensureOnlineOrderMetaFieldHeaders_(sheet) {
   try {
-    var existing = sheet.getRange(1, 30, 1, 3).getValues()[0];
+    var existing = sheet.getRange(1, onlineOrderColumn_(sheet, 30), 1, 3).getValues()[0];
     if (!existing[0] && !existing[1] && !existing[2]) {
-      sheet.getRange(1, 30, 1, 3).setValues([['Email', 'FBC', 'FBP']]);
+      sheet.getRange(1, onlineOrderColumn_(sheet, 30), 1, 3).setValues([['Email', 'FBC', 'FBP']]);
     }
+    var cartHeader = sheet.getRange(1, onlineOrderColumn_(sheet, 33));
+    if (!cartHeader.getValue()) cartHeader.setValue('CartJSON');
+    var stockHeader = sheet.getRange(1, onlineOrderColumn_(sheet, 36));
+    if (!stockHeader.getValue()) stockHeader.setValue('StockStage');
   } catch (err) {}
 }
 
@@ -1633,7 +1816,7 @@ function setOrderProductImages_(sheet, row, urls) {
   for (var i = 0; i < urls.length && i < ONLINE_ORDER_IMAGE_COUNT; i++) {
     var url = String(urls[i] || '').trim();
     if (!url || url.indexOf('http') !== 0) continue;
-    var col = ONLINE_ORDER_IMAGE_COL + i;
+    var col = onlineOrderColumn_(sheet, ONLINE_ORDER_IMAGE_COL) + i;
     var cell = sheet.getRange(row, col);
     try {
       cell.clearContent();
@@ -1665,7 +1848,7 @@ function setOrderProductImages_(sheet, row, urls) {
     try {
       sheet.setRowHeight(row, 88);
       for (var c = 0; c < ONLINE_ORDER_IMAGE_COUNT; c++) {
-        sheet.setColumnWidth(ONLINE_ORDER_IMAGE_COL + c, 96);
+        sheet.setColumnWidth(onlineOrderColumn_(sheet, ONLINE_ORDER_IMAGE_COL) + c, 96);
       }
     } catch (heightErr) {}
   }
@@ -1683,7 +1866,7 @@ function repairOnlineOrderImagesActiveRow() {
   var urls = [];
   var i;
   for (i = 0; i < ONLINE_ORDER_IMAGE_COUNT; i++) {
-    var cell = sheet.getRange(row, ONLINE_ORDER_IMAGE_COL + i);
+    var cell = sheet.getRange(row, onlineOrderColumn_(sheet, ONLINE_ORDER_IMAGE_COL) + i);
     var note = String(cell.getNote() || '').trim();
     var val = String(cell.getDisplayValue() || cell.getValue() || '').trim();
     if (note.indexOf('http') === 0) urls.push(note);
@@ -1691,7 +1874,7 @@ function repairOnlineOrderImagesActiveRow() {
     else if (val && val !== 'Photo') urls.push(val);
   }
   if (!urls.length) {
-    SpreadsheetApp.getUi().alert('এই row-এ R–W তে কোনো ছবি URL পাওয়া যায়নি।');
+    SpreadsheetApp.getUi().alert('এই অর্ডারের ছবির কলামে কোনো ছবি URL পাওয়া যায়নি।');
     return;
   }
   setOrderProductImages_(sheet, row, urls);
@@ -1702,16 +1885,16 @@ function repairOnlineOrderImagesActiveRow() {
 function ensureOnlineOrderHeaders_(sheet) {
   if (!sheet) return;
   var headers = getOnlineOrderExtraHeaders_();
-  var current = sheet.getRange(1, 9, 1, headers.length).getValues()[0];
+  var current = sheet.getRange(1, onlineOrderColumn_(sheet, 9), 1, headers.length).getValues()[0];
   var needsUpdate = false;
   for (var i = 0; i < headers.length; i++) {
-    if (!String(current[i] || '').trim()) {
+    if (String(current[i] || '').trim() !== headers[i]) {
       needsUpdate = true;
       break;
     }
   }
   if (!needsUpdate) return;
-  var headerRange = sheet.getRange(1, 9, 1, headers.length);
+  var headerRange = sheet.getRange(1, onlineOrderColumn_(sheet, 9), 1, headers.length);
   headerRange.setValues([headers]);
   try {
     headerRange
@@ -1726,7 +1909,7 @@ function ensureOnlineOrderHeaders_(sheet) {
 function ensureOnlineOrderImageHeaders_(sheet) {
   if (!sheet) return;
   var headers = getOnlineOrderImageHeaders_();
-  var startCol = ONLINE_ORDER_IMAGE_COL;
+  var startCol = onlineOrderColumn_(sheet, ONLINE_ORDER_IMAGE_COL);
   var current = sheet.getRange(1, startCol, 1, headers.length).getValues()[0];
   var needsUpdate = false;
   for (var i = 0; i < headers.length; i++) {
@@ -1756,8 +1939,10 @@ function setupOnlineOrderExtraHeaders() {
     SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   ensureOnlineOrderHeaders_(sheet);
   ensureOnlineOrderImageHeaders_(sheet);
+  ensureOnlineOrderMetaFieldHeaders_(sheet);
   setupOrderStatusDropdown_(sheet);
-  SpreadsheetApp.getUi().alert('কলাম I–Q ও R–W (ছবি) হেডার সেট হয়েছে। A–H আগে থেকে থাকলে সেগুলো অপরিবর্তিত।\n\nColumn J status dropdown applied.');
+  setupOnlineOrderDisplayNow();
+  SpreadsheetApp.getUi().alert('অর্ডার ও ছবির হেডার সেট হয়েছে। নোট নিজের কলামে থাকবে; অভ্যন্তরীণ ট্র্যাকিং কলাম লুকানো হয়েছে।\n\nStatus dropdown applied.');
 }
 
 function getSteadfastKeys_() {
@@ -1898,13 +2083,13 @@ function steadfastGetStatusByInvoice_(invoice) {
 
 function applySteadfastStatusToRow_(sheet, row, payload) {
   if (!sheet || !row || row < 2 || !payload) return false;
-  var current = sheet.getRange(row, 1, 1, 17).getValues()[0];
+  var current = readOnlineOrderRows_(sheet, row, 1, 17)[0];
   var tracking = String(payload.tracking_code || current[10] || '').trim();
   var cid = String(payload.consignment_id || current[11] || '').trim();
   var courierStatus = normalizeSteadfastDeliveryStatus_(payload.status || payload.delivery_status || '');
   if (!courierStatus) return false;
   var orderStatus = sheetOrderStatusFromCourier_(courierStatus, current[9]);
-  sheet.getRange(row, 10, 1, 4).setValues([[
+  sheet.getRange(row, onlineOrderColumn_(sheet, 10), 1, 4).setValues([[
     orderStatus,
     tracking,
     cid,
@@ -1949,7 +2134,7 @@ function syncSteadfastCourierStatusesCore_(opts) {
   if (!ss) return { ok: false, error: 'NO_SPREADSHEET' };
   var sheet = ss.getSheetByName('Online Order');
   if (!sheet) return { ok: false, error: 'NO_SHEET' };
-  var data = sheet.getDataRange().getValues();
+  var data = readOnlineOrderRows_(sheet);
   var scanned = 0;
   var updated = 0;
   var failed = 0;
@@ -2093,11 +2278,11 @@ function appendAutoCourierNote_(sheet, row, note) {
   try {
     var clean = String(note).replace(/\s+/g, ' ').trim().slice(0, 80);
     if (!clean) return;
-    var prev = String(sheet.getRange(row, 17).getValue() || '');
+    var prev = String(sheet.getRange(row, onlineOrderColumn_(sheet, 17)).getValue() || '');
     if (prev.indexOf(clean) !== -1) return;
     var next = prev ? (prev + ' | ' + clean) : clean;
     if (next.length > 220) next = next.slice(0, 220);
-    sheet.getRange(row, 17).setValue(next);
+    sheet.getRange(row, onlineOrderColumn_(sheet, 17)).setValue(next);
   } catch (err) {}
 }
 
@@ -2109,8 +2294,8 @@ function tryAutoCourierForOrder_(ctx) {
     var keys = getSteadfastKeys_();
     if (!keys.apiKey || !keys.secretKey) {
       var missNote = 'AUTO_COURIER: API Key/Secret missing — Apps Script → Script properties';
-      var prevMiss = String(ctx.sheet.getRange(ctx.row, 17).getValue() || '');
-      ctx.sheet.getRange(ctx.row, 17).setValue(prevMiss ? (prevMiss + ' | ' + missNote) : missNote);
+      var prevMiss = String(ctx.sheet.getRange(ctx.row, onlineOrderColumn_(ctx.sheet, 17)).getValue() || '');
+      ctx.sheet.getRange(ctx.row, onlineOrderColumn_(ctx.sheet, 17)).setValue(prevMiss ? (prevMiss + ' | ' + missNote) : missNote);
       return { ok: false, reason: 'KEYS_MISSING' };
     }
 
@@ -2146,13 +2331,13 @@ function tryAutoCourierForOrder_(ctx) {
           failMsg = JSON.stringify(res).slice(0, 160);
         } catch (jsonErr) {}
       }
-      var prevNotes = String(ctx.sheet.getRange(ctx.row, 17).getValue() || '');
+      var prevNotes = String(ctx.sheet.getRange(ctx.row, onlineOrderColumn_(ctx.sheet, 17)).getValue() || '');
       var nextNotes = prevNotes ? (prevNotes + ' | ') : '';
-      ctx.sheet.getRange(ctx.row, 17).setValue(nextNotes + 'AUTO_COURIER_FAIL:' + failMsg.slice(0, 120));
+      ctx.sheet.getRange(ctx.row, onlineOrderColumn_(ctx.sheet, 17)).setValue(nextNotes + 'AUTO_COURIER_FAIL:' + failMsg.slice(0, 120));
       return { ok: false, reason: 'API_FAIL', raw: res };
     }
 
-    ctx.sheet.getRange(ctx.row, 10, 1, 4).setValues([[
+    ctx.sheet.getRange(ctx.row, onlineOrderColumn_(ctx.sheet, 10), 1, 4).setValues([[
       'Shipped',
       c.tracking_code || '',
       c.consignment_id || '',
@@ -2166,8 +2351,8 @@ function tryAutoCourierForOrder_(ctx) {
   } catch (err) {
     try {
       var msg = String(err && err.message ? err.message : err);
-      var prev = String(ctx.sheet.getRange(ctx.row, 17).getValue() || '');
-      ctx.sheet.getRange(ctx.row, 17).setValue((prev ? prev + ' | ' : '') + 'AUTO_COURIER_ERR:' + msg.slice(0, 120));
+      var prev = String(ctx.sheet.getRange(ctx.row, onlineOrderColumn_(ctx.sheet, 17)).getValue() || '');
+      ctx.sheet.getRange(ctx.row, onlineOrderColumn_(ctx.sheet, 17)).setValue((prev ? prev + ' | ' : '') + 'AUTO_COURIER_ERR:' + msg.slice(0, 120));
     } catch (innerErr) {}
     return { ok: false, reason: 'EXCEPTION' };
   }
@@ -2188,7 +2373,7 @@ function maybeAutoCourierAfterWebOrder_(sheet, row, ctx) {
     return;
   }
   if (!shouldAutoCourierOnNewOrder_()) {
-    appendAutoCourierNote_(sheet, row, 'AUTO_COURIER: Confirmed mode — J=Confirmed করলে Steadfast');
+    appendAutoCourierNote_(sheet, row, 'AUTO_COURIER: Confirmed mode — Status=Confirmed করলে Steadfast');
     return;
   }
   tryAutoCourierForOrder_(Object.assign({ sheet: sheet, row: row }, ctx || {}));
@@ -2207,7 +2392,7 @@ function getAutoCourierStatusNote_() {
       : 'Instant mode ON কিন্তু STEADFAST_API_KEY/SECRET_KEY Script properties-এ নেই।';
   }
   return keyOk
-    ? 'Confirmed mode: Status (J) = Confirmed করলে Steadfast auto।'
+    ? 'Confirmed mode: Status = Confirmed করলে Steadfast auto।'
     : 'Confirmed mode ON কিন্তু Steadfast API key missing।';
 }
 
@@ -2235,7 +2420,7 @@ function steadfastRetryAutoActiveRow() {
     SpreadsheetApp.getUi().alert('Data row সিলেক্ট করুন (row 2+)');
     return;
   }
-  var vals = sheet.getRange(row, 1, 1, 17).getValues()[0];
+  var vals = readOnlineOrderRows_(sheet, row, 1, 17)[0];
   var tracking = String(vals[10] || '').trim();
   if (tracking) {
     SpreadsheetApp.getUi().alert('Tracking already exists: ' + tracking);
@@ -2258,11 +2443,11 @@ function steadfastRetryAutoActiveRow() {
     SpreadsheetApp.getUi().alert('Steadfast OK!\nTracking: ' + (res.tracking || '—'));
     return;
   }
-  var note = String(sheet.getRange(row, 17).getValue() || '');
+  var note = String(sheet.getRange(row, onlineOrderColumn_(sheet, 17)).getValue() || '');
   SpreadsheetApp.getUi().alert(
     'Auto courier failed.\n\n' +
     'Reason: ' + String((res && res.reason) || 'UNKNOWN') + '\n' +
-    (note ? ('Notes (Q): ' + note.slice(0, 200)) : '') + '\n\n' +
+    (note ? ('Notes: ' + note.slice(0, 200)) : '') + '\n\n' +
     'Muslim Abaya → Steadfast balance / API URL fix চেক করুন।'
   );
 }
@@ -2290,8 +2475,8 @@ function setupAutoCourierConfirmedMode() {
   SpreadsheetApp.getUi().alert(
     'Confirmed mode চালু।\n\n' +
     '① Website order → Status Pending\n' +
-    '② ফোনে verify → Status (J) = Confirmed\n' +
-    '③ Steadfast-এ auto পাঠাবে (Tracking K-তে)'
+    '② ফোনে verify → Status = Confirmed\n' +
+    '③ Steadfast-এ auto পাঠাবে (ট্র্যাকিং কলামে নম্বর আসবে)'
   );
 }
 
@@ -2339,7 +2524,7 @@ function autoCourierOnEditTrigger(e) {
     var range = e.range;
     var sheet = range.getSheet();
     if (!sheet || sheet.getName() !== 'Online Order') return;
-    if (range.getColumn() !== 10) return; // J = Status
+    if (range.getColumn() !== onlineOrderColumn_(sheet, 10)) return; // Resolve the actual Status column (K with size in H).
     if (range.getNumRows() !== 1 || range.getNumColumns() !== 1) return;
     var newStatus = String(range.getValue() || '').toLowerCase().trim();
     if (newStatus !== 'confirmed') return;
@@ -2352,7 +2537,7 @@ function autoCourierOnEditTrigger(e) {
 
     if (!isAutoCourierEnabled_() || !shouldAutoCourierOnConfirmed_()) return;
 
-    var vals = sheet.getRange(row, 1, 1, 17).getValues()[0];
+    var vals = readOnlineOrderRows_(sheet, row, 1, 17)[0];
     var tracking = String(vals[10] || '').trim();
     var consignment = String(vals[11] || '').trim();
     if (tracking || consignment) return; // already sent
@@ -2372,9 +2557,9 @@ function autoCourierOnEditTrigger(e) {
     });
 
     if (!autoRes || !autoRes.ok) {
-      var prev = String(sheet.getRange(row, 17).getValue() || '');
+      var prev = String(sheet.getRange(row, onlineOrderColumn_(sheet, 17)).getValue() || '');
       var note = 'AUTO_CONFIRM_FAIL';
-      sheet.getRange(row, 17).setValue(prev ? (prev + ' | ' + note) : note);
+      sheet.getRange(row, onlineOrderColumn_(sheet, 17)).setValue(prev ? (prev + ' | ' + note) : note);
     }
   } catch (err) {
     // Avoid breaking onEdit trigger execution.
@@ -2384,8 +2569,8 @@ function autoCourierOnEditTrigger(e) {
 function maybeSendConfirmedPurchaseCapiForRow_(sheet, row) {
   if (!sheet || row <= 1) return { ok: false, code: 'ROW_INVALID' };
   try {
-    var vals = sheet.getRange(row, 1, 1, 17).getValues()[0];
-    var metaVals = sheet.getRange(row, 30, 1, 3).getValues()[0];
+    var vals = readOnlineOrderRows_(sheet, row, 1, 17)[0];
+    var metaVals = sheet.getRange(row, onlineOrderColumn_(sheet, 30), 1, 3).getValues()[0];
     var emailVal = String(metaVals[0] || '').trim();
     var fbcVal = String(metaVals[1] || '').trim();
     var fbpVal = String(metaVals[2] || '').trim();
@@ -2451,7 +2636,7 @@ function steadfastSendActiveRow() {
     SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   var row = sheet.getActiveCell().getRow();
   if (row < 1) return;
-  var vals = sheet.getRange(row, 1, 1, 17).getValues()[0];
+  var vals = readOnlineOrderRows_(sheet, row, 1, 17)[0];
   var name = String(vals[1] || '').trim();
   var phone = normalizePhone_(vals[2]);
   var address = String(vals[5] || '').trim();
@@ -2482,6 +2667,7 @@ function steadfastSendActiveRow() {
     note: 'Muslim Abaya',
     item_description: buildCourierItemDescription_({
       design: design,
+      sizeText: vals.orderSizeText_ || '',
       slotItems: slotItems,
       qty: parseInt(String(vals[3] || '0'), 10) || 0
     })
@@ -2511,7 +2697,7 @@ function steadfastSendActiveRow() {
     return;
   }
   var c = res.consignment;
-  sheet.getRange(row, 10, 1, 4).setValues([[
+  sheet.getRange(row, onlineOrderColumn_(sheet, 10), 1, 4).setValues([[
     'Shipped',
     c.tracking_code || '',
     c.consignment_id || '',
@@ -2571,7 +2757,7 @@ function updateOrderFromSteadfastWebhook_(payload) {
   if (!invoice && !tracking && !cid) return;
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
   if (!sheet) return;
-  var data = sheet.getDataRange().getValues();
+  var data = readOnlineOrderRows_(sheet);
   var i;
   for (i = 1; i < data.length; i++) {
     var rowInvoice = String(data[i][8] || '').trim();
@@ -2895,7 +3081,7 @@ function openWhatsAppNotifyDialogActiveRow() {
     SpreadsheetApp.getUi().alert('একটা অর্ডার রো সিলেক্ট করুন (হেডার রো নয়)।');
     return;
   }
-  var values = sheet.getRange(row, 1, 1, 17).getValues()[0];
+  var values = readOnlineOrderRows_(sheet, row, 1, 17)[0];
   var phoneLocal = normalizePhone_(values[2]);
   if (!phoneLocal || phoneLocal.length < 10) {
     SpreadsheetApp.getUi().alert('এই রো-তে সঃকল ফোন নম্বর পাওয়া যায়নি।');
@@ -3238,7 +3424,7 @@ function listAdminOrders_(e) {
   if (limit > 200) limit = 200;
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
   if (!sheet) return { ok: false, error: 'NO_SHEET', message: 'Online Order শীট পাওয়া যায়নি।' };
-  var data = sheet.getDataRange().getValues();
+  var data = readOnlineOrderRows_(sheet);
   var orders = [];
   var i;
   for (i = data.length - 1; i >= 1 && orders.length < limit; i--) {
@@ -3252,6 +3438,7 @@ function listAdminOrders_(e) {
       charge: r[4],
       address: String(r[5] || ''),
       design: String(r[6] || ''),
+      size: String(r.orderSizeText_ || ''),
       total: String(r[7] || ''),
       orderId: String(r[8] || ''),
       status: String(r[9] || 'Pending'),
@@ -3280,7 +3467,7 @@ function getAdminTodayStats_(e) {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
   if (!sheet) return { ok: false, error: 'NO_SHEET', message: 'Online Order শীট পাওয়া যায়নি।' };
 
-  var data = sheet.getDataRange().getValues();
+  var data = readOnlineOrderRows_(sheet);
   var todayKey = Utilities.formatDate(new Date(), 'GMT+6', 'yyyy-MM-dd');
   var todayCount = 0;
   var courierCount = 0;
@@ -3398,7 +3585,7 @@ function getAdminAnalytics_(e) {
   if (days > 365) days = 365;
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
   if (!sheet) return { ok: false, error: 'NO_SHEET', message: 'Online Order শীট পাওয়া যায়নি।' };
-  var data = sheet.getDataRange().getValues();
+  var data = readOnlineOrderRows_(sheet);
 
   var cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - days);
@@ -3549,7 +3736,7 @@ function getOrderTrackStatus_(e) {
     }
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
     if (!sheet) return { ok: true, orders: [] };
-    var data = sheet.getDataRange().getValues();
+    var data = readOnlineOrderRows_(sheet);
     var orders = [];
     for (var i = data.length - 1; i >= 1; i--) {
       var r = data[i];
@@ -3561,6 +3748,7 @@ function getOrderTrackStatus_(e) {
         orderId: rowOrderId,
         date: r[0] ? new Date(r[0]).toISOString() : '',
         product: String(r[6] || ''),
+        size: String(r.orderSizeText_ || ''),
         qty: r[3] || '',
         total: r[7] || '',
         status: String(r[9] || 'Pending'),
@@ -3582,9 +3770,9 @@ function getCouponsSheet_() {
 
 function ensureCouponMetaHeaders_(sheet) {
   try {
-    var existing = sheet.getRange(1, 34, 1, 2).getValues()[0];
+    var existing = sheet.getRange(1, onlineOrderColumn_(sheet, 34), 1, 2).getValues()[0];
     if (!existing[0] && !existing[1]) {
-      sheet.getRange(1, 34, 1, 2).setValues([['CouponCode', 'CouponDiscount']]);
+      sheet.getRange(1, onlineOrderColumn_(sheet, 34), 1, 2).setValues([['CouponCode', 'CouponDiscount']]);
     }
   } catch (err) {}
 }
@@ -3785,23 +3973,23 @@ function restoreStockForOrder_(cartItems) {
 
 /**
  * Google Sheet এ কেউ সরাসরি একটা সেল এডিট করলেই এটা অটোম্যাটিক চলে (simple trigger) —
- * Online Order শীটের স্ট্যাটাস কলাম (J, col 10) এ 'Cancelled'/'বাতিল'/'Return' জাতীয় কিছু লেখা হলে
- * সেই অর্ডারের CartJSON (col 33) থেকে পরিমাণ পড়ে Stock শীটে ফিরিয়ে যোগ করা হয়।
+ * Online Order-এর Status (H size থাকলে K) এ 'Cancelled'/'বাতিল'/'Return' লেখা হলে
+ * সেই অর্ডারের CartJSON (H size থাকলে AH) থেকে Stock শীটে পরিমাণ ফিরিয়ে যোগ করা হয়।
  */
 function onEdit(e) {
   try {
     if (!e || !e.range) return;
     var sheet = e.range.getSheet();
     if (sheet.getName() !== 'Online Order') return;
-    if (e.range.getColumn() !== 10) return;
+    if (e.range.getColumn() !== onlineOrderColumn_(sheet, 10)) return;
     var row = e.range.getRow();
     if (row < 2) return;
     var newStatus = String(e.value || '').trim();
     if (!isCancelledStatus_(newStatus)) return;
-    var alreadyRestoredCol = 34;
+    var alreadyRestoredCol = onlineOrderColumn_(sheet, 36); // StockStage, never CouponCode
     var restoredFlag = sheet.getRange(row, alreadyRestoredCol).getValue();
-    if (restoredFlag) return;
-    var cartJsonCell = String(sheet.getRange(row, 33).getValue() || '').trim();
+    if (/^RESTORED(?:\s|$)/i.test(String(restoredFlag || ''))) return;
+    var cartJsonCell = String(sheet.getRange(row, onlineOrderColumn_(sheet, 33)).getValue() || '').trim();
     if (!cartJsonCell) return;
     var items = [];
     try { items = JSON.parse(cartJsonCell); } catch (pe) { return; }
