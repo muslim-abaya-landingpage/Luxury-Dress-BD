@@ -3587,7 +3587,7 @@ function sendDailySummaryEmail_() {
     if (!emails.length) return;
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
     if (!sheet) return;
-    var data = sheet.getDataRange().getValues();
+    var data = readOnlineOrderRows_(sheet);
     var yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
     var yKey = Utilities.formatDate(yesterday, 'GMT+6', 'yyyy-MM-dd');
     var orders = 0, revenue = 0, pending = 0, delivered = 0;
@@ -4718,7 +4718,7 @@ function messengerGreetingText_() {
 function lookupOrderStatusForMessenger_(query) {
   var sheet = SpreadsheetApp.getActive().getSheetByName('Online Order');
   if (!sheet) return [];
-  var data = sheet.getDataRange().getValues();
+  var data = readOnlineOrderRows_(sheet);
   var phoneDigits = String(query || '').replace(/\D/g, '');
   var isPhone = /^01\d{9}$/.test(phoneDigits);
   var qOrderId = String(query || '').trim().toLowerCase();

@@ -250,3 +250,15 @@ test('deployment diagnostics expose only the installed schema, without any custo
   assert.deepEqual(schema, { ok: true, version: 'order-size-h-20261012', columns: { size: 8, total: 9, orderId: 10, status: 11, tracking: 12, notes: 18, images: 19, cartJSON: 34 } });
   assert.equal(f.sheet.writes.length, 0);
 });
+
+for (const withSize of [true, false]) {
+  test(`Messenger tracking preserves order ID, total and status (H size=${withSize})`, () => {
+    const f = fixture(withSize);
+    f.ctx.SpreadsheetApp.getActive = f.ctx.SpreadsheetApp.getActiveSpreadsheet;
+    const rows = f.ctx.lookupOrderStatusForMessenger_("MA-20261011-4777");
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0][7], 2885);
+    assert.equal(rows[0][8], "MA-20261011-4777");
+    assert.equal(rows[0][9], "Pending");
+  });
+}
