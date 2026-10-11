@@ -130,7 +130,7 @@ for (const withSize of [true, false]) {
     assert.deepEqual(row.slice(29 + offset, 32 + offset), ['new@example.invalid', 'new-fbc', 'new-fbp']);
     assert.equal(JSON.parse(row[32 + offset])[1].size, 'Body 42 · Length 52');
     assert.equal(JSON.parse(row[32 + offset])[1].productType, 'Full Set');
-    assert.equal(f.sent.length, 0); assert.equal(f.events.length, 0); assert.equal(f.decremented.length, 1);
+    assert.equal(f.sent.length, 0); assert.equal(f.events.length, 0); assert.equal(f.decremented.length, 0); assert.equal(row[35 + offset], "NEW");
     assert.deepEqual(f.locks, ['acquire', 'release']);
   });
   test(`${layout}: admin read/update uses correct total, ID and advances and preserves the size formula/images`, () => {
@@ -165,16 +165,19 @@ for (const withSize of [true, false]) {
     const event = f.events.find(e => e.type === 'facebook');
     assert.equal(event.payload.Total, '2885'); assert.equal(event.payload.Email, 'customer@example.invalid');
     assert.equal(event.payload.FBC, 'test-fbc'); assert.equal(event.payload.FBP, 'test-fbp');
-    assert.equal(event.id, 'purchase_MA-20261011-4777');
+    assert.equal(event.id, 'order-event');
     f.ctx.autoCourierOnEditTrigger({ range: f.sheet.getRange(2, 10 + offset) });
     assert.equal(f.sent.length, 1); assert.equal(f.events.length, 2);
   });
   test(`${layout}: cancelled order restores AH/AG stock once and never overwrites its coupon`, () => {
     const f = fixture(withSize);
+    f.sheet.rows[1][35 + offset] = 'RESERVED';
+    const released = [];
+    f.ctx.releaseStockForOrderItems_ = (items, id) => { released.push(id); items.forEach(item => { f.stock.rows.find(row => row[0] === item.id)[2] += item.qty; }); };
     f.ctx.onEdit({ range: f.sheet.getRange(2, 10 + offset), value: 'Cancelled' });
     assert.deepEqual(f.stock.rows.slice(1).map(r => r[2]), [11, 11, 11]);
     assert.equal(f.sheet.rows[1][33 + offset], 'KEEP-COUPON');
-    assert.match(f.sheet.rows[1][35 + offset], /^RESTORED /);
+    assert.equal(f.sheet.rows[1][35 + offset], 'RELEASED'); assert.deepEqual(released, ['MA-20261011-4777']);
     f.ctx.onEdit({ range: f.sheet.getRange(2, 10 + offset), value: 'Cancelled' });
     assert.deepEqual(f.stock.rows.slice(1).map(r => r[2]), [11, 11, 11]);
   });

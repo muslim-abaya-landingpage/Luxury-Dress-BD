@@ -44,11 +44,16 @@ function admGetSheet_() {
 
 function admEnsureHeaders_(sheet) {
   var headers = admExtraHeaders_();
+  var maxCols = sheet.getMaxColumns();
+  var lastCol = onlineOrderColumn_(sheet, ADM_LAST_COL);
+  if (maxCols < lastCol) sheet.insertColumnsAfter(maxCols, lastCol - maxCols);
   var range = sheet.getRange(1, onlineOrderColumn_(sheet, ADM_COL_ADMIN_NOTE), 1, headers.length);
   var cur = range.getValues()[0];
   var missing = false;
   for (var i = 0; i < headers.length; i++) {
-    if (String(cur[i] || '').trim() !== headers[i]) { missing = true; break; }
+    var existing = String(cur[i] || '').trim();
+    if (existing && existing !== headers[i]) throw new Error('HEADER_CONFLICT');
+    if (!existing) missing = true;
   }
   if (!missing) return;
   range.setValues([headers]);
@@ -60,6 +65,19 @@ function admEnsureHeaders_(sheet) {
 function admNum_(v) {
   var n = parseFloat(String(v == null ? '' : v).replace(/[^\d.\-]/g, ''));
   return isNaN(n) ? 0 : n;
+}
+
+function admCellText_(value, maxLen) {
+  var text = String(value == null ? '' : value).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '').slice(0, maxLen || 500);
+  return /^\s*[=+\-@]/.test(text) ? "'" + text : text;
+}
+
+function admMoneyParam_(e, key, fallback) {
+  if (!admHasParam_(e, key)) return fallback;
+  var text = String(param_(e, key) || '').trim();
+  var value = text === '' ? 0 : Number(text);
+  if (!isFinite(value) || value < 0) throw new Error('INVALID_AMOUNT');
+  return Math.round(value * 100) / 100;
 }
 
 function admRowToOrder_(r, rowNumber) {
@@ -102,7 +120,7 @@ function admRowToOrder_(r, rowNumber) {
     adminNote: String(r[ADM_COL_ADMIN_NOTE - 1] || ''),
     courierNote: String(r[ADM_COL_COURIER_NOTE - 1] || ''),
     assignedTo: String(r[ADM_COL_ASSIGNED - 1] || ''),
-    source: String(r[ADM_COL_SOURCE - 1] || '') || 'Website',
+    source: String(r[ADM_COL_SOURCE - 1] || r[36] || '') || 'Website',
     courier: String(r[ADM_COL_COURIER - 1] || '') || 'Steadfast'
   };
 }
@@ -176,7 +194,7 @@ function adminBlockCustomer_(e) {
     if (unblock) {
       if (found) sheet.deleteRow(found);
     } else if (!found) {
-      appendRow_(sheet, [phone, String(param_(e, 'Reason') || '').slice(0, 200), new Date(), v.email || v.name || 'admin']);
+      appendRow_(sheet, [phone, admCellText_(param_(e, 'Reason'), 200), new Date(), admCellText_(v.email || v.name || 'admin', 100)]);
     }
   } finally {
     lock.releaseLock();
@@ -266,12 +284,11 @@ function adminOrderList_(e) {
   for (var i = rows.length - 1; i >= 0; i--) {
     var r = rows[i];
     if (!r[1] && !r[2]) continue;
+    var o = admRowToOrder_(r, i + 2);
     counts.all++;
-    var st = String(r[9] || 'Pending') || 'Pending';
-    if (counts.hasOwnProperty(st)) counts[st]++;
+    if (counts.hasOwnProperty(o.status)) counts[o.status]++;
     if (dayKeyFromCell_(r[0]) === todayKey) counts.today++;
     if (orders.length < limit) {
-      var o = admRowToOrder_(r, i + 2);
       o.blocked = Object.prototype.hasOwnProperty.call(blockedMap, o.phone);
       orders.push(o);
     }
@@ -337,7 +354,7 @@ function adminOrderUpdate_(e) {
     if (admHasParam_(e, 'Name')) {
       var name = String(param_(e, 'Name') || '').replace(/\s+/g, ' ').trim();
       if (name.length < 2 || name.length > 80) return { ok: false, error: 'INVALID_NAME', message: 'সঠিক নাম দিন।' };
-      vals[1] = name;
+      vals[1] = admCellText_(name, 80);
     }
     if (admHasParam_(e, 'Phone')) {
       var phone = normalizePhone_(param_(e, 'Phone'));
@@ -347,7 +364,7 @@ function adminOrderUpdate_(e) {
     if (admHasParam_(e, 'Address')) {
       var address = String(param_(e, 'Address') || '').trim();
       if (address.length < 5 || address.length > 400) return { ok: false, error: 'INVALID_ADDRESS', message: 'সঠিক ঠিকানা দিন।' };
-      vals[5] = address;
+      vals[5] = admCellText_(address, 400);
     }
 
     // প্রাইসিং: subtotal = total - charge + discount + coupon (পুরনো মান দিয়ে), তারপর নতুন মান বসিয়ে total আবার হিসাব
@@ -356,9 +373,9 @@ function adminOrderUpdate_(e) {
     var oldDiscount = admNum_(vals[ADM_COL_DISCOUNT - 1]);
     var coupon = admNum_(vals[ADM_COL_COUPON_DISC - 1]);
     var subtotal = Math.max(0, oldTotal - oldCharge + oldDiscount + coupon);
-    var charge = admHasParam_(e, 'Charge') ? Math.max(0, admNum_(param_(e, 'Charge'))) : oldCharge;
-    var discount = admHasParam_(e, 'Discount') ? Math.max(0, admNum_(param_(e, 'Discount'))) : oldDiscount;
-    var advance = admHasParam_(e, 'Advance') ? Math.max(0, admNum_(param_(e, 'Advance'))) : admNum_(vals[ADM_COL_ADVANCE - 1]);
+    var charge = admMoneyParam_(e, 'Charge', oldCharge);
+    var discount = admMoneyParam_(e, 'Discount', oldDiscount);
+    var advance = admMoneyParam_(e, 'Advance', admNum_(vals[ADM_COL_ADVANCE - 1]));
     var total = Math.max(0, subtotal + charge - discount - coupon);
     if (advance > total) return { ok: false, error: 'INVALID_ADVANCE', message: 'অ্যাডভান্স মোট টাকার বেশি হতে পারে না।' };
     vals[4] = charge;
@@ -371,16 +388,16 @@ function adminOrderUpdate_(e) {
       if (ADM_STATUSES.indexOf(st) === -1) return { ok: false, error: 'INVALID_STATUS', message: 'অবৈধ স্ট্যাটাস।' };
       vals[9] = st;
     }
-    if (admHasParam_(e, 'AdminNote')) vals[ADM_COL_ADMIN_NOTE - 1] = String(param_(e, 'AdminNote') || '').slice(0, 500);
-    if (admHasParam_(e, 'CourierNote')) vals[ADM_COL_COURIER_NOTE - 1] = String(param_(e, 'CourierNote') || '').slice(0, 300);
-    if (admHasParam_(e, 'AssignedTo')) vals[ADM_COL_ASSIGNED - 1] = String(param_(e, 'AssignedTo') || '').slice(0, 80);
-    if (admHasParam_(e, 'Courier')) vals[ADM_COL_COURIER - 1] = String(param_(e, 'Courier') || '').slice(0, 40);
+    if (admHasParam_(e, 'AdminNote')) vals[ADM_COL_ADMIN_NOTE - 1] = admCellText_(param_(e, 'AdminNote'), 500);
+    if (admHasParam_(e, 'CourierNote')) vals[ADM_COL_COURIER_NOTE - 1] = admCellText_(param_(e, 'CourierNote'), 300);
+    if (admHasParam_(e, 'AssignedTo')) vals[ADM_COL_ASSIGNED - 1] = admCellText_(param_(e, 'AssignedTo'), 80);
+    if (admHasParam_(e, 'Courier')) vals[ADM_COL_COURIER - 1] = admCellText_(param_(e, 'Courier'), 40);
     if (!vals[ADM_COL_SOURCE - 1]) vals[ADM_COL_SOURCE - 1] = 'Website';
 
     // ফোন কলামে শূন্য হারানো ঠেকাতে টেক্সট ফরম্যাট
     sheet.getRange(row, 3).setNumberFormat('@');
-    // Logical B–Q আপডেট করি; H-এর সাইজ এবং ছবির সব কলাম অক্ষত থাকে
-    writeOnlineOrderFields_(sheet, row, 2, vals.slice(1, 17));
+    // Only write editable cells; preserve product formulas, images, cart metadata and system notes.
+    [2, 3, 5, 6, 8, 10].forEach(function (col) { sheet.getRange(row, onlineOrderColumn_(sheet, col)).setValue(vals[col - 1]); });
     sheet.getRange(row, onlineOrderColumn_(sheet, ADM_COL_ADMIN_NOTE), 1, ADM_LAST_COL - ADM_COL_ADMIN_NOTE + 1)
       .setValues([vals.slice(ADM_COL_ADMIN_NOTE - 1, ADM_LAST_COL)]);
     newStatus = String(vals[9]);
@@ -389,9 +406,15 @@ function adminOrderUpdate_(e) {
   }
 
   // শীটে Status হাতে বদলালে যে onEdit ট্রিগার চলে, API লিখলে তা চলে না — তাই এখানে একই কাজ করি
-  var hooks = null;
-  if (newStatus.toLowerCase() === 'confirmed' && prevStatus.toLowerCase() !== 'confirmed') {
-    hooks = admRunConfirmedHooks_(sheet, row);
+  var hooks = {};
+  if (typeof applyStockLifecycleForStatusChange_ === 'function' && newStatus !== prevStatus) {
+    try { applyStockLifecycleForStatusChange_(sheet, row, newStatus); hooks.stock = 'OK'; }
+    catch (stockErr) { hooks.stock = 'ERR'; }
+  }
+  if (newStatus.toLowerCase() === 'confirmed') {
+    var confirmedHooks = admRunConfirmedHooks_(sheet, row);
+    hooks.capi = confirmedHooks.capi;
+    hooks.courier = confirmedHooks.courier;
   }
 
   var fresh = admRowToOrder_(readOnlineOrderRows_(sheet, row, 1, ADM_LAST_COL)[0], row);
@@ -527,7 +550,51 @@ function handleAdminOrderRequest_(type, e) {
   } catch (err) {
     var code = String(err && err.message ? err.message : err);
     if (code === 'NO_SHEET') return { ok: false, error: 'NO_SHEET', message: 'Online Order শীট পাওয়া যায়নি।' };
+    if (code === 'HEADER_CONFLICT') return { ok: false, error: code, message: 'অর্ডার শীটের AN–AT কলামে অন্য তথ্য আছে। কলামগুলো যাচাই করতে হবে।' };
+    if (code === 'INVALID_AMOUNT') return { ok: false, error: code, message: 'চার্জ, ডিসকাউন্ট ও অ্যাডভান্সে সঠিক শূন্য বা ধনাত্মক সংখ্যা দিন।' };
     return { ok: false, error: 'SERVER_ERROR', message: code.slice(0, 200) };
   }
   return null;
+}
+
+// Editor-only setup check: initialize empty panel headers and log aggregates, never order details.
+// This function is deliberately absent from the public doPost router.
+function adminOrderPanelSetupAudit() {
+  var sheet = admGetSheet_();
+  var rows = admReadAll_(sheet);
+  var seen = {};
+  var result = { panelHeadersReady: true, orders: 0, missingOrderIds: 0, duplicateOrderIds: 0 };
+  rows.forEach(function (row) {
+    if (!row[1] && !row[2]) return;
+    result.orders++;
+    var id = String(row[8] || '').trim();
+    if (!id) result.missingOrderIds++;
+    else if (seen[id]) result.duplicateOrderIds++;
+    else seen[id] = true;
+  });
+  console.log('ADMIN_ORDER_PANEL_AUDIT ' + JSON.stringify(result));
+  return result;
+}
+
+// Owner runs once from the Apps Script editor. Fills only blank IDs on existing order rows.
+function repairMissingAdminOrderIds() {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    var sheet = admGetSheet_();
+    var rows = admReadAll_(sheet);
+    var used = {};
+    rows.forEach(function (row) { var id = String(row[8] || '').trim(); if (id) used[id] = true; });
+    var repaired = 0;
+    for (var i = 0; i < rows.length; i++) {
+      if ((!rows[i][1] && !rows[i][2]) || String(rows[i][8] || '').trim()) continue;
+      var id;
+      do { id = 'MA-LEGACY-' + Utilities.getUuid().replace(/-/g, '').slice(0, 12).toUpperCase(); } while (used[id]);
+      sheet.getRange(i + 2, onlineOrderColumn_(sheet, 9)).setValue(id);
+      used[id] = true;
+      repaired++;
+    }
+    console.log('ADMIN_ORDER_ID_REPAIR ' + JSON.stringify({ repaired: repaired }));
+    return { ok: true, repaired: repaired };
+  } finally { lock.releaseLock(); }
 }

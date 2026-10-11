@@ -99,22 +99,30 @@ function doPost(e) {
       type === 'Subscribe' ||
       (!type && !isOrder && (param_(e, 'contact') || param_(e, 'email')));
 
+    if (type === 'CartCheckpoint') {
+      return jsonOut_(saveCartCheckpoint_(e));
+    }
+    if (type === 'NotifyBackInStock') {
+      return jsonOut_(saveBackInStockRequest_(e));
+    }
     // Messenger inbox: token-gated with its own (higher) limit, since the admin
     // inbox polls; must run before the generic 12-per-10-min limiter below.
     if (type && type.indexOf('Inbox') === 0) {
       return jsonOut_(handleInboxRequest_(type, e));
     }
 
-    // Order-panel actions (AdminOrder*/AdminFraudCheck/...) are token-gated inside
-    // handleAdminOrderRequest_ and are called several times per page view, so they
-    // skip the shared 12-per-10-min limiter. AdminLogin keeps its own limit.
-    var isAdminOrderPanel = /^(AdminOrder|AdminFraudCheck|AdminBlockCustomer|AdminSendCourier)/.test(type);
-    if (isAdminOrderPanel) {
-      var panelRes = handleAdminOrderRequest_(type, e);
-      if (panelRes) return jsonOut_(panelRes);
+    // Every order-panel action verifies the admin/staff token inside its handler.
+    var orderPanelTypes = ['AdminOrderList', 'AdminOrderGet', 'AdminOrderUpdate', 'AdminFraudCheck', 'AdminBlockCustomer', 'AdminSendCourier', 'AdminOrderStaff'];
+    if (orderPanelTypes.indexOf(type) !== -1) {
+      var panelResult = handleAdminOrderRequest_(type, e);
+      return jsonOut_(panelResult || { ok: false, error: 'UNKNOWN_TYPE' });
     }
 
-    if (!isOrder && !isSubscribe) {
+    // Admin panel calls: token-gated with a higher shared limit (dashboard/stock/growth
+    // pages can fire many calls quickly); must run before the generic 12-per-10-min limiter.
+    if (type && type.indexOf('Admin') === 0) {
+      adminRateLimit_(param_(e, 'Token') || 'admin_global');
+    } else if (!isOrder && !isSubscribe) {
       rateLimit_(param_(e, 'Email') || param_(e, 'Phone') || param_(e, 'Login') || param_(e, 'Token') || (type === 'AuthGoogle' ? 'g_' + String(param_(e, 'IdToken')).slice(-24) : '') || 'global');
     }
 
@@ -157,8 +165,44 @@ function doPost(e) {
     if (type === 'AdminStockGet') {
       return jsonOut_(getAdminStock_(e));
     }
+    if (type === 'AdminGrowthData') {
+      return jsonOut_(getAdminGrowthData_(e));
+    }
+    if (type === 'AdminGrowthDismiss') {
+      return jsonOut_(markGrowthItemDone_(e));
+    }
+    if (type === 'AdminStaffList') {
+      return jsonOut_(listAdminStaff_(e));
+    }
+    if (type === 'AdminStaffSave') {
+      return jsonOut_(saveAdminStaff_(e));
+    }
+    if (type === 'AdminStaffDelete') {
+      return jsonOut_(deleteAdminStaff_(e));
+    }
     if (type === 'AdminStockSet') {
       return jsonOut_(setAdminStock_(e));
+    }
+    if (type === 'AdminStockVariantsList') {
+      return jsonOut_(getAdminStockVariants_(e));
+    }
+    if (type === 'AdminStockVariantSave') {
+      return jsonOut_(saveAdminStockVariant_(e));
+    }
+    if (type === 'AdminStockLedgerList') {
+      return jsonOut_(getAdminStockLedger_(e));
+    }
+    if (type === 'AdminStockCsvCommit') {
+      return jsonOut_(commitAdminStockCsvBatch_(e));
+    }
+    if (type === 'AdminAnalyticsV2') {
+      return jsonOut_(getAdminAnalyticsV2_(e));
+    }
+    if (type === 'AdminStockMigrate') {
+      return jsonOut_(migrateStockToVariants_(e));
+    }
+    if (type === 'AdminStockQuickAdjust') {
+      return jsonOut_(quickAdjustAdminStock_(e));
     }
     if (type === 'AdminAnalytics') {
       return jsonOut_(getAdminAnalytics_(e));
@@ -170,9 +214,27 @@ function doPost(e) {
       var contact = String(param_(e, 'contact') || param_(e, 'email') || '').trim();
       var saved = saveSubscribeContact_(contact);
       if (!saved.ok) return jsonOut_(saved);
+      if (!saved.duplicate) {
+        try {
+          var leadEventId = String(param_(e, 'EventID') || '').trim();
+          var normalizedContact = normalizeSubscribeContact_(contact);
+          var isEmailContact = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedContact);
+          var leadData = {
+            Name: '',
+            Phone: isEmailContact ? '' : normalizedContact,
+            Email: isEmailContact ? normalizedContact : '',
+            EventSourceUrl: 'https://muslimabaya.com/'
+          };
+          sendToFacebookCAPI(leadData, leadEventId, 'Lead');
+          sendToTikTokCAPI(leadData, leadEventId, 'SubmitForm');
+        } catch (capiErr) {
+          try { console.error('Subscribe CAPI error: ' + (capiErr.message || capiErr)); } catch (logErr2) {}
+        }
+      }
       return jsonOut_({ ok: true, message: 'Subscribed', sheet: 'Subscribe' });
     }
 
+    if (!isOrder) return jsonOut_({ ok: false, error: 'UNKNOWN_TYPE', message: 'অজানা API অনুরোধ।' });
     return handleOnlineOrderPost_(e);
   } catch (err) {
     var errCode = String(err.message || err);
@@ -181,7 +243,8 @@ function doPost(e) {
     var isOrderReq = orderType === 'Order' || (!orderType && param_(e, 'Name') && param_(e, 'Phone'));
     if (isOrderReq) {
       var friendly = orderErrorMessage_(errCode);
-      if (friendly.indexOf('WhatsApp') === -1 && errCode && errCode.length < 120) {
+      var isOutOfStockMsg = errCode && errCode.indexOf('OUT_OF_STOCK:') === 0;
+      if (!isOutOfStockMsg && friendly.indexOf('WhatsApp') === -1 && errCode && errCode.length < 120) {
         friendly = friendly + ' (' + errCode + ')';
       }
       return ContentService.createTextOutput('Error|' + friendly)
@@ -369,14 +432,19 @@ function orderErrorMessage_(code) {
     INVALID_PHONE: 'সঠিক ১১ ডিজিট মোবাইল নম্বর দিন (01XXXXXXXXX)।',
     INVALID_ADDRESS: 'সম্পূর্ণ ডেলিভারি ঠিকানা লিখুন।',
     INVALID_QTY: 'অর্ডার পরিমাণ সঠিক নয়।',
+    ORDER_BLOCKED: 'এই নম্বর থেকে অনলাইনে অর্ডার নেওয়া সম্ভব নয়। WhatsApp এ যোগাযোগ করুন।',
     MIN_ORDER: 'ন্যূনতম অর্ডার ৳১০০।',
     EMPTY_CART: 'কার্টে কোনো পণ্য নেই।',
     ORDER_RATE_LIMIT: 'এই নম্বর থেকে খুব দ্রুত অর্ডার হয়েছে। ৩০ মিনিট পর আবার চেষ্টা করুন।',
-    DUPLICATE_ORDER: 'একই অর্ডার ইতিমধ্যে পাঠানো হয়েছে।',
-    ORDER_BLOCKED: 'এই নম্বর থেকে অনলাইনে অর্ডার নেওয়া সম্ভব নয়। WhatsApp এ যোগাযোগ করুন।',
-    TOTAL_MISMATCH: 'অর্ডারের মূল্যে গরমিল পাওয়া গেছে। পেজ রিফ্রেশ করে আবার চেষ্টা করুন, অথবা WhatsApp-এ অর্ডার করুন।'
+    DUPLICATE_ORDER: 'একই অর্ডার ইতিমধ্যে পাঠানো হয়েছে।'
   };
-  return map[code] || 'অর্ডার গ্রহণ করা যায়নি। WhatsApp এ যোগাযোগ করুন।';
+  if (map[code]) return map[code];
+  var codeStr = String(code || '');
+  if (codeStr.indexOf('OUT_OF_STOCK:') === 0) {
+    var label = codeStr.slice('OUT_OF_STOCK:'.length);
+    return 'দুঃখিত, ' + label + ' এই মুহূর্তে স্টকে নেই। অন্য একটি পণ্য বেছে নিন অথবা কিছুক্ষণ পর আবার চেষ্টা করুন।';
+  }
+  return 'অর্ডার গ্রহণ করা যায়নি। WhatsApp এ যোগাযোগ করুন।';
 }
 
 function validateOrderInput_(e) {
@@ -436,8 +504,6 @@ function validateOrderInput_(e) {
     cartItems = [];
   }
 
-  validateCartPricing_(cartItems);
-
   return {
     name: name,
     phone: phone,
@@ -451,40 +517,6 @@ function validateOrderInput_(e) {
       ? formatOrderDesignLines_(slotItems)
       : formatOrderDesignLines_(String(design).split(/\n/))
   };
-}
-
-// Order Total (and each cart line's price) is sent by the browser and is otherwise
-// trusted as-is — a modified request could claim any Total. This is a partial guard,
-// not a full recomputation: it flags a cart line whose claimed unit price is far below
-// the live catalog price for that same product. It deliberately fails open (skips the
-// check) whenever the catalog can't be fetched or a line can't be matched, so a network
-// hiccup or a product the regex parser misses never blocks a real order.
-var CART_PRICE_TOLERANCE_ = 0.6; // claimed price must be at least 60% of the catalog price
-
-function validateCartPricing_(cartItems) {
-  if (!cartItems || !cartItems.length) return;
-  var catalog;
-  try {
-    catalog = fetchProductCatalog_();
-  } catch (catalogErr) {
-    return;
-  }
-  if (!catalog || !catalog.length) return;
-  var byId = {};
-  var byName = {};
-  catalog.forEach(function (p) {
-    if (p.id) byId[String(p.id)] = p;
-    if (p.name) byName[String(p.name).trim().toLowerCase()] = p;
-  });
-  for (var i = 0; i < cartItems.length; i++) {
-    var item = cartItems[i];
-    var match = (item.id && byId[String(item.id)]) || byName[String(item.name || '').trim().toLowerCase()];
-    if (!match || !match.price) continue; // not in the parsed catalog — don't penalize
-    var claimed = Number(item.price) || 0;
-    if (claimed > 0 && claimed < match.price * CART_PRICE_TOLERANCE_) {
-      throw new Error('TOTAL_MISMATCH');
-    }
-  }
 }
 
 /** প্রতিটি প্রোডাক্ট আলাদা লাইনে — Sheet column G-তে শুধু নাম */
@@ -1508,6 +1540,7 @@ function getOrderStatusOptions_() {
 function setupOrderStatusDropdown_(sheet) {
   sheet = sheet || SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
   if (!sheet) return false;
+  if (onlineOrderHasSizeColumn_(sheet)) sheet.getRange(2, onlineOrderColumn_(sheet, 9), sheet.getMaxRows() - 1, 1).clearDataValidations();
   var options = getOrderStatusOptions_();
   var rule = SpreadsheetApp.newDataValidation()
     .requireValueInList(options, true)
@@ -1560,6 +1593,55 @@ function generateOrderId_() {
   return 'MA-' + datePart + '-' + rand;
 }
 
+function computeCatalogPriceMap_() {
+  var map = {};
+  try {
+    var items = fetchProductCatalog_();
+    for (var i = 0; i < items.length; i++) {
+      if (items[i] && items[i].id) map[items[i].id] = Number(items[i].price) || 0;
+    }
+  } catch (catalogErr) {}
+  return map;
+}
+
+function computeVerifiedOrderPricing_(cartItems, charge, couponCodeVal) {
+  var priceMap = computeCatalogPriceMap_();
+  var catalogOk = Object.keys(priceMap).length > 0;
+  var subtotal = 0;
+  var unverifiedIds = [];
+  var items = cartItems || [];
+  var i;
+  for (i = 0; i < items.length; i++) {
+    var it = items[i] || {};
+    var qty = Math.max(1, parseInt(it.qty, 10) || 1);
+    if (catalogOk && Object.prototype.hasOwnProperty.call(priceMap, it.id)) {
+      subtotal += priceMap[it.id] * qty;
+    } else {
+      subtotal += (Number(it.price) || 0) * qty;
+      if (it.id) unverifiedIds.push(it.id);
+    }
+  }
+  var couponDiscountVal = 0;
+  var couponRowIndex = null;
+  if (couponCodeVal) {
+    try {
+      var couponCheck = validateCouponCode_(couponCodeVal, subtotal);
+      if (couponCheck.ok) {
+        couponDiscountVal = couponCheck.discount;
+        couponRowIndex = couponCheck.rowIndex;
+      }
+    } catch (couponErr) {}
+  }
+  return {
+    catalogOk: catalogOk,
+    subtotal: subtotal,
+    unverifiedIds: unverifiedIds,
+    couponDiscountVal: couponDiscountVal,
+    couponRowIndex: couponRowIndex,
+    hasItems: items.length > 0
+  };
+}
+
 function handleOnlineOrderPost_(e) {
   var validated = validateOrderInput_(e);
   if (isPhoneBlocked_(validated.phone)) throw new Error('ORDER_BLOCKED');
@@ -1581,16 +1663,44 @@ function handleOnlineOrderPost_(e) {
     charge = districtChargeMap[validated.district] || 150;
   }
 
-  var totalStr = String(validated.total);
+  // ── নিরাপত্তা: সার্ভার নিজে দাম হিসাব করে — ক্লায়েন্টের পাঠানো Total সরাসরি বিশ্বাস করা হয় না ──
+  var couponCodeVal = String(param_(e, 'CouponCode') || '').trim().toUpperCase();
+  var pricing = computeVerifiedOrderPricing_(validated.cartItems, charge, couponCodeVal);
+  var couponDiscountVal = pricing.couponDiscountVal;
+  if (pricing.couponRowIndex != null) {
+    try { incrementCouponUsage_(pricing.couponRowIndex); } catch (incErr) {}
+  }
+
+  var verifiedTotal = validated.total;
+  var priceAdjustNote = '';
+  if (pricing.catalogOk && pricing.hasItems) {
+    var expectedTotal = Math.max(0, pricing.subtotal + charge - couponDiscountVal);
+    if (Math.abs(expectedTotal - validated.total) > 2) {
+      priceAdjustNote = '⚠️ Total যাচাই করে বদলানো হয়েছে (গ্রাহক ৳' + validated.total + ' → যাচাইকৃত ৳' + expectedTotal + ')';
+    }
+    verifiedTotal = expectedTotal;
+    if (pricing.unverifiedIds.length) {
+      priceAdjustNote = (priceAdjustNote ? priceAdjustNote + ' | ' : '') + '⚠️ দাম যাচাই করা যায়নি: ' + pricing.unverifiedIds.join(', ');
+    }
+  }
+
+  var totalStr = String(verifiedTotal);
   var payment = param_(e, 'PaymentMethod') || 'Cash On Delivery';
   var txn = (param_(e, 'TransactionID') || param_(e, 'SenderNumber') || '').trim();
   var notes = (param_(e, 'SpecialNotes') || '').trim();
+  if (priceAdjustNote) notes = notes ? (notes + ' | ' + priceAdjustNote) : priceAdjustNote;
   var district = param_(e, 'District') || validated.district || '';
+  var sourceVal = String(param_(e, 'Source') || param_(e, 'UtmSource') || '').trim();
 
   ensureOnlineOrderHeaders_(sheet);
   ensureOnlineOrderImageHeaders_(sheet);
   ensureOnlineOrderMetaFieldHeaders_(sheet);
   ensureCouponMetaHeaders_(sheet);
+  ensureOnlineOrderStockStageHeader_(sheet);
+  ensureOnlineOrderSourceHeader_(sheet);
+  ensureOnlineOrderTrackingEventIdHeader_(sheet);
+
+  assertStockAvailableForOrder_(validated.cartItems);
 
   var newRow = appendOnlineOrderRow_(sheet, [
     timestamp,
@@ -1612,27 +1722,21 @@ function handleOnlineOrderPost_(e) {
     notes
   ], formatOnlineOrderSizes_(validated.cartItems, validated.design));
 
+  var trackingId = String(eventID || '').trim();
+  if (!/^[A-Za-z0-9_.:-]{1,100}$/.test(trackingId)) trackingId = 'order_' + orderId;
+  sheet.getRange(newRow, onlineOrderColumn_(sheet, 38)).setValue(trackingId);
   var metaEmailVal = (param_(e, 'Email') || '').trim().toLowerCase();
   var metaFbcVal = (param_(e, 'FBC') || '').trim();
   var metaFbpVal = (param_(e, 'FBP') || '').trim();
   sheet.getRange(newRow, onlineOrderColumn_(sheet, 30), 1, 3).setValues([[metaEmailVal, metaFbcVal, metaFbpVal]]);
-  var couponCodeVal = String(param_(e, 'CouponCode') || '').trim().toUpperCase();
-  var couponDiscountVal = 0;
-  if (couponCodeVal) {
-    try {
-      var subtotalForCoupon = Math.max(0, (parseFloat(totalStr) || 0) - charge);
-      var couponCheck = validateCouponCode_(couponCodeVal, subtotalForCoupon);
-      if (couponCheck.ok) {
-        couponDiscountVal = couponCheck.discount;
-        incrementCouponUsage_(couponCheck.rowIndex);
-      }
-    } catch (couponErr) {}
-  }
   sheet.getRange(newRow, onlineOrderColumn_(sheet, 34), 1, 2).setValues([[couponCodeVal, couponDiscountVal]]);
   try {
     sheet.getRange(newRow, onlineOrderColumn_(sheet, 33)).setValue(JSON.stringify(validated.cartItems || []));
   } catch (cartJsonWriteErr) {}
-  decrementStockForOrder_(validated.cartItems);
+  try {
+    sheet.getRange(newRow, onlineOrderColumn_(sheet, 36)).setValue('NEW');
+    sheet.getRange(newRow, onlineOrderColumn_(sheet, 37)).setValue(sourceVal);
+  } catch (stageWriteErr) {}
   formatOnlineOrderProductCell_(sheet, newRow, validated.design);
   setupOrderStatusDropdown_(sheet);
   var imageUrls = collectOrderImageUrls_(e);
@@ -1653,6 +1757,8 @@ function handleOnlineOrderPost_(e) {
   // Purchase event should fire only after manual confirmation (Status=Confirmed),
   // so fake/test submissions do not pollute ads optimization.
   appendAutoCourierNote_(sheet, newRow, 'META_PURCHASE_WAIT: set Status=Confirmed');
+
+  try { markCartConverted_(validated.phone); } catch (mccErr) {}
 
   return ContentService.createTextOutput('Success|' + orderId).setMimeType(ContentService.MimeType.TEXT);
 }
@@ -1675,6 +1781,7 @@ function onOpen() {
       .addItem('পণ্যের সাইজ H-তে আপডেট করুন', 'syncOnlineOrderSizesNow')
       .addItem('Status dropdown (Pending/Confirmed…)', 'setupOrderStatusDropdownFromMenu')
       .addItem('Reviews — Status ড্রপডাউন সেটআপ (Pending/Approved/Rejected)', 'setupReviewStatusDropdownFromMenu')
+      .addItem('Messenger — Get Started বাটন + Greeting সেটআপ (৩ পেজ)', 'setupMessengerProfileForAllPagesFromMenu')
       .addSeparator()
       .addItem('Steadfast — selected row পাঠান', 'steadfastSendActiveRow')
       .addItem('Steadfast — balance দেখুন', 'steadfastShowBalance')
@@ -1697,7 +1804,6 @@ function onOpen() {
       .addSeparator()
       .addItem('Admin password reset', 'resetAdminPasswordFromMenu')
       .addItem('Admin account তৈরি (প্রথমবার)', 'createFirstAdminFromMenu')
-      .addItem('টিম সদস্য যোগ করুন (Messenger ইনবক্স)', 'createTeamAdminFromMenu')
       .addToUi();
   } catch (menuErr) {}
 
@@ -1942,7 +2048,7 @@ function setupOnlineOrderExtraHeaders() {
   ensureOnlineOrderMetaFieldHeaders_(sheet);
   setupOrderStatusDropdown_(sheet);
   setupOnlineOrderDisplayNow();
-  SpreadsheetApp.getUi().alert('অর্ডার ও ছবির হেডার সেট হয়েছে। নোট নিজের কলামে থাকবে; অভ্যন্তরীণ ট্র্যাকিং কলাম লুকানো হয়েছে।\n\nStatus dropdown applied.');
+  try { SpreadsheetApp.getUi().alert('অর্ডার ও ছবির হেডার সেট হয়েছে। নোট নিজের কলামে থাকবে; অভ্যন্তরীণ ট্র্যাকিং কলাম লুকানো হয়েছে।\n\nStatus dropdown applied.'); } catch (uiErr) { console.log("ORDER_HEADERS_READY"); }
 }
 
 function getSteadfastKeys_() {
@@ -2088,6 +2194,7 @@ function applySteadfastStatusToRow_(sheet, row, payload) {
   var cid = String(payload.consignment_id || current[11] || '').trim();
   var courierStatus = normalizeSteadfastDeliveryStatus_(payload.status || payload.delivery_status || '');
   if (!courierStatus) return false;
+  var prevOrderStatus = String(current[9] || '');
   var orderStatus = sheetOrderStatusFromCourier_(courierStatus, current[9]);
   sheet.getRange(row, onlineOrderColumn_(sheet, 10), 1, 4).setValues([[
     orderStatus,
@@ -2095,6 +2202,9 @@ function applySteadfastStatusToRow_(sheet, row, payload) {
     cid,
     courierStatus
   ]]);
+  if (orderStatus === 'Delivered' && prevOrderStatus !== 'Delivered') {
+    try { createReorderOffer_(String(current[8] || ''), String(current[2] || ''), String(current[1] || '')); } catch (roErr) {}
+  }
   return true;
 }
 
@@ -2566,69 +2676,62 @@ function autoCourierOnEditTrigger(e) {
   }
 }
 
+function ensureOnlineOrderTrackingEventIdHeader_(sheet) {
+  var maxCols = sheet.getMaxColumns();
+  var lastCol = onlineOrderColumn_(sheet, 38);
+  if (maxCols < lastCol) sheet.insertColumnsAfter(maxCols, lastCol - maxCols);
+  var cell = sheet.getRange(1, onlineOrderColumn_(sheet, 38));
+  var header = String(cell.getValue() || '').trim();
+  if (header && header !== 'Tracking Event ID') throw new Error('TRACKING_HEADER_CONFLICT');
+  if (!header) cell.setValue('Tracking Event ID');
+}
+
 function maybeSendConfirmedPurchaseCapiForRow_(sheet, row) {
   if (!sheet || row <= 1) return { ok: false, code: 'ROW_INVALID' };
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
   try {
     var vals = readOnlineOrderRows_(sheet, row, 1, 17)[0];
-    var metaVals = sheet.getRange(row, onlineOrderColumn_(sheet, 30), 1, 3).getValues()[0];
-    var emailVal = String(metaVals[0] || '').trim();
-    var fbcVal = String(metaVals[1] || '').trim();
-    var fbpVal = String(metaVals[2] || '').trim();
-    var status = String(vals[9] || '').toLowerCase().trim();
-    if (status !== 'confirmed') return { ok: false, code: 'NOT_CONFIRMED' };
+    if (String(vals[9] || '').toLowerCase().trim() !== 'confirmed') return { ok: false, code: 'NOT_CONFIRMED' };
     var notes = String(vals[16] || '');
-    if (notes.indexOf('META_PURCHASE_SENT') !== -1) {
-      return { ok: true, code: 'ALREADY_SENT' };
-    }
-    if (notes.indexOf('Fake') !== -1 || status === 'fake' || status === 'cancelled') {
-      return { ok: false, code: 'SKIP_FAKE_OR_CANCEL' };
-    }
+    if (notes.indexOf('Fake') !== -1) return { ok: false, code: 'SKIP_FAKE_OR_CANCEL' };
+    var metaSent = notes.indexOf('META_PURCHASE_SENT') !== -1;
+    var tiktokSent = notes.indexOf('TIKTOK_PURCHASE_SENT') !== -1;
+    if (metaSent && tiktokSent) return { ok: true, code: 'ALREADY_SENT' };
+    var metaVals = sheet.getRange(row, onlineOrderColumn_(sheet, 30), 1, 3).getValues()[0];
     var orderId = String(vals[8] || ('MA-ROW-' + row)).trim();
     var eventID = 'purchase_' + orderId;
-    var capiRes = sendToFacebookCAPI({
-      Name: String(vals[1] || ''),
-      Phone: String(vals[2] || ''),
-      Email: emailVal,
-      FBC: fbcVal,
-      FBP: fbpVal,
-      Total: String(vals[7] || '0'),
-      Design: String(vals[6] || ''),
-      ExternalID: normalizePhone_(String(vals[2] || '')),
-      EventSourceUrl: 'https://muslimabaya.com/checkout',
-      ClientUserAgent: '',
-      TestEventCode: ''
-    }, eventID);
-    if (notes.indexOf('TIKTOK_PURCHASE_SENT') === -1) {
+    if (sheet.getMaxColumns() >= onlineOrderColumn_(sheet, 38) && String(sheet.getRange(1, onlineOrderColumn_(sheet, 38)).getValue() || '') === 'Tracking Event ID') {
+      var storedId = String(sheet.getRange(row, onlineOrderColumn_(sheet, 38)).getValue() || '').trim();
+      if (/^[A-Za-z0-9_.:-]{1,100}$/.test(storedId)) eventID = storedId;
+    }
+    var data = {
+      Name: String(vals[1] || ''), Phone: String(vals[2] || ''), Email: String(metaVals[0] || '').trim(),
+      FBC: String(metaVals[1] || '').trim(), FBP: String(metaVals[2] || '').trim(),
+      Total: String(vals[7] || '0'), Design: String(vals[6] || ''),
+      ExternalID: normalizePhone_(String(vals[2] || '')), EventSourceUrl: 'https://muslimabaya.com/checkout'
+    };
+    var metaCode = metaSent ? 'ALREADY_SENT' : 'UNKNOWN';
+    var tiktokCode = tiktokSent ? 'ALREADY_SENT' : 'UNKNOWN';
+    if (!metaSent) {
       try {
-        var ttRes = sendToTikTokCAPI({
-          Name: String(vals[1] || ''),
-          Phone: String(vals[2] || ''),
-          Email: emailVal,
-          Total: String(vals[7] || '0'),
-          Design: String(vals[6] || ''),
-          EventSourceUrl: 'https://muslimabaya.com/checkout'
-        }, eventID);
-        if (ttRes && ttRes.ok) {
-          appendAutoCourierNote_(sheet, row, 'TIKTOK_PURCHASE_SENT');
-        } else {
-          appendAutoCourierNote_(sheet, row, 'TIKTOK_FAIL:' + String((ttRes && ttRes.code) || 'UNKNOWN'));
-        }
-      } catch (ttErr) {
-        appendAutoCourierNote_(sheet, row, 'TIKTOK_ERR:' + String(ttErr.message || ttErr).slice(0, 80));
-      }
+        var meta = sendToFacebookCAPI(data, eventID);
+        metaSent = !!(meta && meta.ok);
+        metaCode = (meta && meta.code) || 'UNKNOWN';
+        if (metaSent) { appendAutoCourierNote_(sheet, row, 'CAPI_OK'); appendAutoCourierNote_(sheet, row, 'META_PURCHASE_SENT'); }
+        else appendAutoCourierNote_(sheet, row, 'CAPI_FAIL:' + metaCode);
+      } catch (metaErr) { metaCode = 'EXCEPTION'; appendAutoCourierNote_(sheet, row, 'CAPI_ERR:EXCEPTION'); }
     }
-
-    if (capiRes && capiRes.ok) {
-      appendAutoCourierNote_(sheet, row, 'CAPI_OK');
-      appendAutoCourierNote_(sheet, row, 'META_PURCHASE_SENT');
-      return { ok: true, code: 'SENT' };
+    if (!tiktokSent) {
+      try {
+        var tt = sendToTikTokCAPI(data, eventID);
+        tiktokSent = !!(tt && tt.ok);
+        tiktokCode = (tt && tt.code) || 'UNKNOWN';
+        appendAutoCourierNote_(sheet, row, tiktokSent ? 'TIKTOK_PURCHASE_SENT' : 'TIKTOK_FAIL:' + tiktokCode);
+      } catch (ttErr) { tiktokCode = 'EXCEPTION'; appendAutoCourierNote_(sheet, row, 'TIKTOK_ERR:EXCEPTION'); }
     }
-    appendAutoCourierNote_(sheet, row, 'CAPI_FAIL:' + String((capiRes && capiRes.code) || 'UNKNOWN'));
-    return { ok: false, code: (capiRes && capiRes.code) || 'UNKNOWN' };
-  } catch (err) {
-    appendAutoCourierNote_(sheet, row, 'CAPI_ERR:' + String(err.message || err).slice(0, 80));
-    return { ok: false, code: 'EXCEPTION' };
-  }
+    return { ok: metaSent && tiktokSent, code: metaSent && tiktokSent ? 'SENT' : 'PARTIAL_FAILURE', metaCode: metaCode, tiktokCode: tiktokCode };
+  } finally { lock.releaseLock(); }
 }
 
 function steadfastSendActiveRow() {
@@ -2826,7 +2929,7 @@ function getMetaCapiConfigForOps_() {
   };
 }
 
-function sendToFacebookCAPI(data, eventID) {
+function sendToFacebookCAPI(data, eventID, eventName) {
   var cfg = getFacebookCapiConfig_();
   if (!cfg.accessToken || !cfg.pixelId) {
     return { ok: false, code: 'CONFIG_MISSING' };
@@ -2858,7 +2961,7 @@ function sendToFacebookCAPI(data, eventID) {
 
   var payload = {
     data: [{
-      event_name: 'Purchase',
+      event_name: eventName || 'Purchase',
       event_time: Math.floor(Date.now() / 1000),
       event_id: eventID,
       action_source: 'website',
@@ -2884,7 +2987,7 @@ function sendToFacebookCAPI(data, eventID) {
   var body = String(res.getContentText() || '');
   var parsed = {};
   try { parsed = JSON.parse(body); } catch (jsonErr) {}
-  if (code >= 400 || (parsed && parsed.error)) {
+  if (code < 200 || code >= 300 || parsed.error || !(Number(parsed.events_received) > 0)) {
     return {
       ok: false,
       code: 'META_HTTP_' + String(code),
@@ -2905,16 +3008,15 @@ function getTikTokCapiConfig_() {
   return { accessToken: String(accessToken || '').trim(), pixelCode: String(pixelCode || '').trim() };
 }
 
-function sendToTikTokCAPI(data, eventID) {
+function sendToTikTokCAPI(data, eventID, eventName) {
   var cfg = getTikTokCapiConfig_();
   if (!cfg.accessToken || !cfg.pixelCode) {
     return { ok: false, code: 'CONFIG_MISSING' };
   }
   var url = 'https://business-api.tiktok.com/open_api/v1.3/event/track/';
   var cleanPhone = String(data.Phone || '').replace(/[^0-9]/g, '');
-  if (cleanPhone.indexOf('0') === 0) cleanPhone = '88' + cleanPhone.slice(1);
-  if (cleanPhone && cleanPhone.indexOf('880') !== 0) cleanPhone = '880' + cleanPhone;
-  var e164Phone = cleanPhone ? ('+' + cleanPhone) : '';
+  cleanPhone = normalizePhone_(cleanPhone);
+  var e164Phone = /^01\d{9}$/.test(cleanPhone) ? ('+88' + cleanPhone) : '';
   var cleanEmail = String(data.Email || '').trim().toLowerCase();
   var sourceUrl = String(data.EventSourceUrl || '').trim();
   if (!/^https?:\/\//i.test(sourceUrl)) sourceUrl = 'https://muslimabaya.com/checkout';
@@ -2927,7 +3029,7 @@ function sendToTikTokCAPI(data, eventID) {
     event_source: 'web',
     event_source_id: cfg.pixelCode,
     data: [{
-      event: 'CompletePayment',
+      event: eventName || 'CompletePayment',
       event_time: Math.floor(Date.now() / 1000),
       event_id: eventID,
       user: user,
@@ -2952,7 +3054,7 @@ function sendToTikTokCAPI(data, eventID) {
   var body = String(res.getContentText() || '');
   var parsed = {};
   try { parsed = JSON.parse(body); } catch (jsonErr) {}
-  if (code >= 400 || (parsed && typeof parsed.code === 'number' && parsed.code !== 0)) {
+  if (code < 200 || code >= 300 || !Object.prototype.hasOwnProperty.call(parsed, 'code') || Number(parsed.code) !== 0) {
     return { ok: false, code: 'TIKTOK_HTTP_' + String(code), message: body.slice(0, 200) };
   }
   return { ok: true, code: 'OK' };
@@ -3160,6 +3262,26 @@ function getAdminsSheet_() {
   return sheet;
 }
 
+function getAdminNotifyEmails_() {
+  try {
+    var data = getAdminsSheet_().getDataRange().getValues();
+    var emails = [];
+    for (var i = 1; i < data.length; i++) {
+      var role = String(data[i][7] || 'admin').toLowerCase();
+      var status = String(data[i][5] || '').toLowerCase();
+      var email = String(data[i][0] || '').trim();
+      if (role === 'admin' && status !== 'blocked' && email) emails.push(email);
+    }
+    if (!emails.length) {
+      var fallback = Session.getEffectiveUser().getEmail();
+      if (fallback) emails.push(fallback);
+    }
+    return emails;
+  } catch (err) {
+    return [];
+  }
+}
+
 function findCustomerByEmail_(email) {
   var data = getCustomersSheet_().getDataRange().getValues();
   var target = normalizeEmail_(email);
@@ -3241,69 +3363,6 @@ function loginUser_(e) {
   return createSession_({ email: user.email, phone: user.phone, name: user.name }, 'customer');
 }
 
-// ── Sign in with Google ──
-// Script property GOOGLE_CLIENT_ID (OAuth "Web application" client ID, ends with
-// .apps.googleusercontent.com) switches this on. The browser sends the Google ID token;
-// we ask Google to validate it (tokeninfo) and then check audience, issuer, expiry and
-// email_verified ourselves before creating / finding the customer and issuing a normal
-// site session. Google-created customers have no password (PasswordHash/Salt empty), so
-// password login can never match them.
-function sanitizeCellText_(value, maxLen) {
-  var t = String(value == null ? '' : value).replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim();
-  if (maxLen) t = t.slice(0, maxLen);
-  // a leading = + - @ would be run as a formula by Google Sheets
-  if (/^[=+\-@]/.test(t)) t = "'" + t;
-  return t;
-}
-
-function googleLogin_(e) {
-  if (!getAuthSecret_()) {
-    return { ok: false, error: 'AUTH_NOT_CONFIGURED', message: 'Apps Script এ AUTH_SECRET সেট করুন।' };
-  }
-  var clientId = PropertiesService.getScriptProperties().getProperty('GOOGLE_CLIENT_ID') || '';
-  if (!clientId) {
-    return { ok: false, error: 'GOOGLE_NOT_CONFIGURED', message: 'Google লগইন চালু করা হয়নি।' };
-  }
-  var idToken = String(param_(e, 'IdToken') || '');
-  if (!idToken || idToken.length > 4096 || idToken.split('.').length !== 3) {
-    return { ok: false, error: 'INVALID_GOOGLE_TOKEN', message: 'Google লগইন ব্যর্থ। আবার চেষ্টা করুন।' };
-  }
-  var info;
-  try {
-    var resp = UrlFetchApp.fetch(
-      'https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(idToken),
-      { muteHttpExceptions: true }
-    );
-    if (resp.getResponseCode() !== 200) {
-      return { ok: false, error: 'INVALID_GOOGLE_TOKEN', message: 'Google লগইন ব্যর্থ। আবার চেষ্টা করুন।' };
-    }
-    info = JSON.parse(resp.getContentText());
-  } catch (err) {
-    return { ok: false, error: 'GOOGLE_VERIFY_FAILED', message: 'Google যাচাই করা যায়নি। আবার চেষ্টা করুন।' };
-  }
-  var iss = String(info.iss || '');
-  var expMs = parseInt(info.exp, 10) * 1000;
-  if (String(info.aud || '') !== clientId ||
-      (iss !== 'accounts.google.com' && iss !== 'https://accounts.google.com') ||
-      !expMs || expMs < Date.now()) {
-    return { ok: false, error: 'INVALID_GOOGLE_TOKEN', message: 'Google লগইন ব্যর্থ। আবার চেষ্টা করুন।' };
-  }
-  if (String(info.email_verified) !== 'true' || !info.email) {
-    return { ok: false, error: 'GOOGLE_EMAIL_UNVERIFIED', message: 'আপনার Google ইমেইল যাচাই করা নয়।' };
-  }
-  var email = normalizeEmail_(info.email);
-  var user = findCustomerByEmail_(email);
-  if (user && user.status === 'blocked') {
-    return { ok: false, error: 'BLOCKED', message: 'অ্যাকাউন্ট বন্ধ।' };
-  }
-  if (!user) {
-    var name = sanitizeCellText_(info.name, 80) || sanitizeCellText_(email.split('@')[0], 80);
-    appendRow_(getCustomersSheet_(), [email, '', name, '', '', 'active', new Date(), new Date()]);
-    user = { email: email, phone: '', name: name };
-  }
-  return createSession_({ email: user.email, phone: user.phone || '', name: user.name || '' }, 'customer');
-}
-
 function findAdminByEmail_(email) {
   var data = getAdminsSheet_().getDataRange().getValues();
   var target = normalizeEmail_(email);
@@ -3375,15 +3434,8 @@ function loginAdmin_(e) {
   return createSession_({ email: user.email, phone: user.phone, name: user.name }, role);
 }
 
-// Real tokens are always two concatenated UUIDs (see createSession_). Rejecting anything
-// else here — before even reading the Sessions sheet — closes off hand-crafted/debug
-// tokens (e.g. a fixed string like 'debug-test-token-123' left over from local testing)
-// regardless of whether a matching row still exists in the sheet.
-var SESSION_TOKEN_FORMAT_ = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
 function verifySession_(token) {
   if (!token) return { ok: false, error: 'NO_TOKEN' };
-  if (!SESSION_TOKEN_FORMAT_.test(String(token))) return { ok: false, error: 'INVALID_TOKEN' };
   var data = getSessionsSheet_().getDataRange().getValues();
   var now = Date.now();
   for (var i = data.length - 1; i >= 1; i--) {
@@ -3407,12 +3459,20 @@ function verifySession_(token) {
 function verifyAdminSession_(token) {
   var v = verifySession_(token);
   if (!v.ok) return v;
-  if (v.role !== 'admin') return { ok: false, error: 'NOT_ADMIN', message: 'অ্যাডমিন লগইন প্রয়োজন।' };
+  if (v.role !== 'admin' && v.role !== 'staff') return { ok: false, error: 'NOT_ADMIN', message: 'অ্যাডমিন লগইন প্রয়োজন।' };
+  v.isOwner = (v.role === 'admin');
   try {
-    v.sheetUrl = SpreadsheetApp.getActiveSpreadsheet().getUrl();
-    v.scriptUrl = 'https://script.google.com/home/projects/' + ScriptApp.getScriptId() + '/edit';
+    if (v.isOwner) {
+      v.sheetUrl = SpreadsheetApp.getActiveSpreadsheet().getUrl();
+      v.scriptUrl = 'https://script.google.com/home/projects/' + ScriptApp.getScriptId() + '/edit';
+    }
   } catch (err) {}
   return v;
+}
+
+function requireOwnerAdmin_(v) {
+  if (!v.isOwner) return { ok: false, error: 'OWNER_ONLY', message: 'শুধুমাত্র মূল অ্যাডমিন এই কাজটি করতে পারবেন।' };
+  return null;
 }
 
 function listAdminOrders_(e) {
@@ -3495,6 +3555,103 @@ function ensureStockSheet_() {
   return ensureSheet_('Stock', ['Product ID', 'Product Name', 'Qty', 'Updated At']);
 }
 
+function sendDailySummaryEmail_() {
+  try {
+    var emails = getAdminNotifyEmails_();
+    if (!emails.length) return;
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
+    if (!sheet) return;
+    var data = sheet.getDataRange().getValues();
+    var yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    var yKey = Utilities.formatDate(yesterday, 'GMT+6', 'yyyy-MM-dd');
+    var orders = 0, revenue = 0, pending = 0, delivered = 0;
+    for (var i = 1; i < data.length; i++) {
+      var r = data[i];
+      var dk = dayKeyFromCell_(r[0]);
+      if (dk !== yKey) continue;
+      orders++;
+      revenue += parseFloat(String(r[7] || '0').replace(/[^\d.]/g, '')) || 0;
+      var status = String(r[9] || '').toLowerCase();
+      if (!status || status.indexOf('pending') !== -1) pending++;
+      if (status.indexOf('deliver') !== -1) delivered++;
+    }
+    var body = 'গতকালের (' + yKey + ') সেলস সামারি:\n\n' +
+      '📦 মোট অর্ডার: ' + orders + '\n' +
+      '💰 মোট বিক্রি: ৳' + revenue.toLocaleString('en-US') + '\n' +
+      '⏳ Pending অর্ডার: ' + pending + '\n' +
+      '✅ Delivered অর্ডার: ' + delivered + '\n\n' +
+      'বিস্তারিত দেখতে Admin Dashboard এ যান।';
+    MailApp.sendEmail({ to: emails.join(','), subject: '📊 গতকালের সেলস সামারি — ' + yKey, body: body });
+  } catch (err) {}
+}
+
+function installDailySummaryTrigger_() {
+  var triggers = ScriptApp.getProjectTriggers();
+  for (var i = 0; i < triggers.length; i++) {
+    if (triggers[i].getHandlerFunction() === 'sendDailySummaryEmail_') ScriptApp.deleteTrigger(triggers[i]);
+  }
+  ScriptApp.newTrigger('sendDailySummaryEmail_').timeBased().atHour(8).everyDays(1).inTimezone('Asia/Dhaka').create();
+}
+
+function listAdminStaff_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var owner = requireOwnerAdmin_(v);
+  if (owner) return owner;
+  var data = getAdminsSheet_().getDataRange().getValues();
+  var items = [];
+  for (var i = 1; i < data.length; i++) {
+    var r = data[i];
+    if (!r[0] && !r[1]) continue;
+    var role = String(r[7] || 'admin').toLowerCase();
+    if (role !== 'staff') continue;
+    items.push({ email: String(r[0] || ''), phone: String(r[1] || ''), name: String(r[2] || ''), status: String(r[5] || 'active') });
+  }
+  return { ok: true, items: items };
+}
+
+function saveAdminStaff_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var owner = requireOwnerAdmin_(v);
+  if (owner) return owner;
+  var email = normalizeEmail_(param_(e, 'Email'));
+  var phone = normalizePhone_(param_(e, 'Phone'));
+  var name = String(param_(e, 'Name') || '').trim();
+  var password = String(param_(e, 'Password') || '');
+  if (!email && !phone) return { ok: false, error: 'MISSING_LOGIN', message: 'ইমেইল বা ফোন দিন।' };
+  if (!password || password.length < 6) return { ok: false, error: 'WEAK_PASSWORD', message: 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।' };
+  var existing = email ? findAdminByEmail_(email) : findAdminByPhone_(phone);
+  var hp = hashPassword_(password);
+  var sheet = getAdminsSheet_();
+  var now = new Date();
+  if (existing) {
+    sheet.getRange(existing.row, 3).setValue(name || existing.name);
+    sheet.getRange(existing.row, 4).setValue(hp.hash);
+    sheet.getRange(existing.row, 5).setValue(hp.salt);
+    sheet.getRange(existing.row, 6).setValue('active');
+    sheet.getRange(existing.row, 8).setValue('staff');
+    sheet.getRange(existing.row, 9).setValue(now);
+  } else {
+    appendRow_(sheet, [email || '', phone || '', name, hp.hash, hp.salt, 'active', now, 'staff', now]);
+  }
+  return { ok: true };
+}
+
+function deleteAdminStaff_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var owner = requireOwnerAdmin_(v);
+  if (owner) return owner;
+  var email = normalizeEmail_(param_(e, 'Email'));
+  var phone = normalizePhone_(param_(e, 'Phone'));
+  var existing = email ? findAdminByEmail_(email) : findAdminByPhone_(phone);
+  if (!existing) return { ok: false, error: 'NOT_FOUND' };
+  if (String(existing.role || '').toLowerCase() !== 'staff') return { ok: false, error: 'NOT_STAFF', message: 'শুধু স্টাফ অ্যাকাউন্ট মোছা যাবে।' };
+  getAdminsSheet_().getRange(existing.row, 6).setValue('blocked');
+  return { ok: true };
+}
+
 function getAdminStock_(e) {
   var token = param_(e, 'Token');
   var v = verifyAdminSession_(token);
@@ -3537,12 +3694,29 @@ function setAdminStock_(e) {
   var sheet = ensureStockSheet_();
   var row = findStockRow_(sheet, productId);
   var now = new Date();
+  var oldQty = 0;
   if (row === -1) {
     appendRow_(sheet, [productId, productName, qty, now]);
   } else {
+    oldQty = Number(sheet.getRange(row, 3).getValue()) || 0;
     sheet.getRange(row, 3).setValue(qty);
     sheet.getRange(row, 4).setValue(now);
     if (productName) sheet.getRange(row, 2).setValue(productName);
+  }
+  if (oldQty <= 0 && qty > 0) {
+    try { notifyBackInStockWaitlist_(productId); } catch (nErr) {}
+  }
+  if (qty > 0 && qty <= 5 && oldQty > 5) {
+    try {
+      var lowStockEmails = getAdminNotifyEmails_();
+      if (lowStockEmails.length) {
+        MailApp.sendEmail({
+          to: lowStockEmails.join(','),
+          subject: '⚠️ কম স্টক সতর্কতা: ' + (productName || productId),
+          body: (productName || productId) + ' (' + productId + ') এর স্টক মাত্র ' + qty + ' পিস বাকি আছে। এখনই পুনরায় স্টক করার কথা ভাবুন।\n\nAdmin Panel: স্টক ও অ্যানালিটিক্স পেজ থেকে আপডেট করুন।'
+        });
+      }
+    } catch (mErr) {}
   }
   return { ok: true, productId: productId, qty: qty };
 }
@@ -3678,7 +3852,9 @@ function getAdminAnalytics_(e) {
   var previous = summarize(prevCutoffKey, cutoffKey);
 
   var dayList = Object.keys(current.byDay).map(function (k) { return current.byDay[k]; }).sort(function (a, b) { return a.date < b.date ? -1 : (a.date > b.date ? 1 : 0); });
-  var productList = Object.keys(current.byProduct).map(function (k) { return current.byProduct[k]; }).sort(function (a, b) { return b.qty - a.qty; }).slice(0, 20);
+  var allProductsSorted = Object.keys(current.byProduct).map(function (k) { return current.byProduct[k]; }).sort(function (a, b) { return b.qty - a.qty; });
+  var productList = allProductsSorted.slice(0, 20);
+  var bottomProductList = allProductsSorted.filter(function (p) { return p.qty > 0; }).slice(-10).reverse();
 
   return {
     ok: true,
@@ -3696,24 +3872,60 @@ function getAdminAnalytics_(e) {
       avgOrderValue: previous.totalOrders ? Math.round((previous.totalRevenue / previous.totalOrders) * 100) / 100 : 0
     },
     byDay: dayList,
-    topProducts: productList
+    topProducts: productList,
+    slowProducts: bottomProductList
   };
 }
 
 // ===== পাবলিক Stock Status (কাস্টমারদের সাইটে এর জন্য, Token লাগে না) =====
 function getPublicStockStatus_() {
   try {
-    var sheet = ensureStockSheet_();
-    var data = sheet.getDataRange().getValues();
     var items = {};
-    var i;
-    for (i = 1; i < data.length; i++) {
-      var r = data[i];
-      var id = String(r[0] || '').trim();
-      if (!id) continue;
-      var qty = Number(r[2]) || 0;
-      items[id] = { qty: qty, inStock: qty > 0 };
-    }
+    try {
+      var legacySheet = ensureStockSheet_();
+      var legacyData = legacySheet.getDataRange().getValues();
+      var li;
+      for (li = 1; li < legacyData.length; li++) {
+        var lr = legacyData[li];
+        var lid = String(lr[0] || '').trim();
+        if (!lid) continue;
+        var lqty = Number(lr[2]) || 0;
+        items[lid] = { qty: lqty, inStock: lqty > 0 };
+      }
+    } catch (legacyErr) {}
+    try {
+      var vSheet = ensureStockVariantsSheet_();
+      var vData = vSheet.getDataRange().getValues();
+      var byProduct = {};
+      var i;
+      for (i = 1; i < vData.length; i++) {
+        var r = vData[i];
+        var pid = String(r[0] || '').trim();
+        if (!pid) continue;
+        var tracked = (String(r[4]).toUpperCase() === 'TRUE') || (r[4] === true);
+        var variant = String(r[3] || '').trim();
+        var available = Number(r[5]) || 0;
+        var reserved = Number(r[6]) || 0;
+        var threshold = (r[7] === '' || r[7] === null || typeof r[7] === 'undefined') ? null : Number(r[7]);
+        if (!byProduct[pid]) byProduct[pid] = { totalAvailable: 0, anyTracked: false, variants: {} };
+        if (tracked) {
+          byProduct[pid].totalAvailable += Math.max(0, available);
+          byProduct[pid].anyTracked = true;
+        }
+        byProduct[pid].variants[variant || '_default'] = {
+          tracked: tracked, available: available, reserved: reserved, threshold: threshold
+        };
+      }
+      Object.keys(byProduct).forEach(function (pid) {
+        var p = byProduct[pid];
+        if (!items[pid]) items[pid] = { qty: 0, inStock: true };
+        if (p.anyTracked) {
+          items[pid].qty = p.totalAvailable;
+          items[pid].inStock = p.totalAvailable > 0;
+        }
+        items[pid].variants = p.variants;
+      });
+    } catch (vErr) {}
     return { ok: true, items: items };
   } catch (err) {
     return { ok: false, error: 'STOCK_STATUS_FAILED', message: String(err.message || err) };
@@ -3977,6 +4189,7 @@ function restoreStockForOrder_(cartItems) {
  * সেই অর্ডারের CartJSON (H size থাকলে AH) থেকে Stock শীটে পরিমাণ ফিরিয়ে যোগ করা হয়।
  */
 function onEdit(e) {
+  if (typeof boostAutoDateOnEdit === "function") boostAutoDateOnEdit(e);
   try {
     if (!e || !e.range) return;
     var sheet = e.range.getSheet();
@@ -3985,16 +4198,7 @@ function onEdit(e) {
     var row = e.range.getRow();
     if (row < 2) return;
     var newStatus = String(e.value || '').trim();
-    if (!isCancelledStatus_(newStatus)) return;
-    var alreadyRestoredCol = onlineOrderColumn_(sheet, 36); // StockStage, never CouponCode
-    var restoredFlag = sheet.getRange(row, alreadyRestoredCol).getValue();
-    if (/^RESTORED(?:\s|$)/i.test(String(restoredFlag || ''))) return;
-    var cartJsonCell = String(sheet.getRange(row, onlineOrderColumn_(sheet, 33)).getValue() || '').trim();
-    if (!cartJsonCell) return;
-    var items = [];
-    try { items = JSON.parse(cartJsonCell); } catch (pe) { return; }
-    restoreStockForOrder_(items);
-    sheet.getRange(row, alreadyRestoredCol).setValue('RESTORED ' + new Date());
+    applyStockLifecycleForStatusChange_(sheet, row, newStatus);
   } catch (onEditErr) {
     // স্প্রেডশিট সুরক্ষিত রাখতে এখানে কিছু ভাঙানো যাবে না
   }
@@ -4028,32 +4232,15 @@ function createFirstAdminFromMenu() {
   }
   var admins = getAdminsSheet_();
   if (admins.getLastRow() > 1) {
-    SpreadsheetApp.getUi().alert('Admins শীটে ইতিমধ্যে অ্যাকাউন্ট আছে।\n\nনতুন অ্যাডমিন/টিম সদস্য: মেনু → টিম সদস্য যোগ করুন।');
+    SpreadsheetApp.getUi().alert('Admins শীটে ইতিমধ্যে অ্যাকাউন্ট আছে।\n\nনতুন অ্যাডমিন: Admins শীটে হাতে সারি যোগ করুন (Customers-এর মতো hash/salt)।');
     return;
   }
-  promptAndCreateAdmin_(admins);
-}
-
-// Team members get their own admin login (used by the Messenger inbox for assignment).
-function createTeamAdminFromMenu() {
-  if (!getAuthSecret_()) {
-    SpreadsheetApp.getUi().alert('আগে Project Settings → Script properties → AUTH_SECRET সেট করুন।');
-    return;
-  }
-  promptAndCreateAdmin_(getAdminsSheet_());
-}
-
-function promptAndCreateAdmin_(admins) {
   var ui = SpreadsheetApp.getUi();
   var emailResp = ui.prompt('অ্যাডমিন ইমেইল', 'লগইনে ব্যবহার করবেন (Gmail)', ui.ButtonSet.OK_CANCEL);
   if (emailResp.getSelectedButton() !== ui.Button.OK) return;
   var email = normalizeEmail_(emailResp.getResponseText());
   if (!email || email.indexOf('@') === -1) {
     ui.alert('সঠিক ইমেইল দিন।');
-    return;
-  }
-  if (findAdminByEmail_(email)) {
-    ui.alert('এই ইমেইলে ইতিমধ্যে অ্যাকাউন্ট আছে।');
     return;
   }
   var phoneResp = ui.prompt('মোবাইল (ঐচ্ছিক)', '01XXXXXXXXX', ui.ButtonSet.OK_CANCEL);
@@ -4100,6 +4287,8 @@ function publishFileToGitHub_(e) {
   var token = param_(e, 'Token');
   var v = verifyAdminSession_(token);
   if (!v.ok) return v;
+  var ownerErr = requireOwnerAdmin_(v);
+  if (ownerErr) return ownerErr;
 
   var ghToken = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
   if (!ghToken) {
@@ -4207,6 +4396,8 @@ function publishImageToGitHub_(e) {
   var token = param_(e, 'Token');
   var v = verifyAdminSession_(token);
   if (!v.ok) return v;
+  var ownerErr = requireOwnerAdmin_(v);
+  if (ownerErr) return ownerErr;
 
   var ghToken = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
   if (!ghToken) {
@@ -4369,6 +4560,8 @@ function deleteImageFromGitHub_(e) {
   var token = param_(e, 'Token');
   var v = verifyAdminSession_(token);
   if (!v.ok) return v;
+  var ownerErr = requireOwnerAdmin_(v);
+  if (ownerErr) return ownerErr;
 
   var ghToken = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
   if (!ghToken) {
@@ -4436,7 +4629,248 @@ function parseOrderValue_(raw) {
 }
 
 // ===== Messenger → Conversions API for Business Messaging =====
-// Legacy single-Page constants (still used as the default Page and for old sheet rows).
+var MSGR_PAGE_ID = '964928770039259';
+var MSGR_DATASET_ID = '1465090315322833';
+var MSGR_SHEET = 'MessengerContacts';
+
+function messengerVerify_(e) {
+  var want = PropertiesService.getScriptProperties().getProperty('MSGR_VERIFY_TOKEN') || '';
+  if (want && e.parameter['hub.verify_token'] === want) {
+    return ContentService.createTextOutput(String(e.parameter['hub.challenge'] || ''));
+  }
+  return ContentService.createTextOutput('forbidden');
+}
+
+// Saves every person who messages the Page: PSID + name + time.
+function messengerContactExists_(sh, psid) {
+  var data = sh.getRange(1, 1, Math.max(sh.getLastRow(), 1), 1).getValues();
+  var i;
+  for (i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === psid) return true;
+  }
+  return false;
+}
+
+function getPageAccessToken_(pageId) {
+  var props = PropertiesService.getScriptProperties();
+  return props.getProperty('MSGR_PAGE_TOKEN_' + pageId) || props.getProperty('MSGR_PAGE_TOKEN') || '';
+}
+
+function sendMessengerText_(pageId, psid, text) {
+  var token = getPageAccessToken_(pageId);
+  if (!token || !psid) return { ok: false, code: 'MISSING_TOKEN' };
+  var payload = {
+    recipient: { id: String(psid) },
+    messaging_type: 'RESPONSE',
+    message: { text: String(text || '').slice(0, 2000) }
+  };
+  try {
+    var res = UrlFetchApp.fetch('https://graph.facebook.com/v21.0/me/messages?access_token=' + encodeURIComponent(token), {
+      method: 'post',
+      contentType: 'application/json',
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    });
+    return { ok: res.getResponseCode() === 200, body: res.getContentText() };
+  } catch (sendErr) {
+    return { ok: false, error: String(sendErr.message || sendErr) };
+  }
+}
+
+function normalizeMsgrText_(s) {
+  return String(s || '').toLowerCase().trim();
+}
+
+function messengerGreetingText_() {
+  return 'আসসালামু আলাইকুম! Muslim Abaya / Luxury Dress BD-তে স্বাগতম। 🌸\n\n' +
+    'ওয়েবসাইট: https://muslimabaya.com\n' +
+    'WhatsApp: 01971642683\n\n' +
+    'অর্ডার স্ট্যাটাস জানতে আপনার ফোন নাম্বার বা অর্ডার আইডি পাঠান।\n' +
+    'দাম, ডেলিভারি, পেমেন্ট বা রিটার্ন নিয়ে প্রশ্ন থাকলে লিখুন, সাথে সাথে জানাবো।';
+}
+
+function lookupOrderStatusForMessenger_(query) {
+  var sheet = SpreadsheetApp.getActive().getSheetByName('Online Order');
+  if (!sheet) return [];
+  var data = sheet.getDataRange().getValues();
+  var phoneDigits = String(query || '').replace(/\D/g, '');
+  var isPhone = /^01\d{9}$/.test(phoneDigits);
+  var qOrderId = String(query || '').trim().toLowerCase();
+  var matches = [];
+  var i;
+  for (i = data.length - 1; i >= 1; i--) {
+    var row = data[i];
+    var rowPhone = String(row[2] || '').replace(/\D/g, '');
+    var rowOrderId = String(row[8] || '').trim().toLowerCase();
+    if (isPhone && rowPhone === phoneDigits) {
+      matches.push(row);
+      if (matches.length >= 3) break;
+    } else if (!isPhone && rowOrderId && rowOrderId === qOrderId) {
+      matches.push(row);
+      break;
+    }
+  }
+  return matches;
+}
+
+function buildMessengerAutoReply_(rawText) {
+  var text = normalizeMsgrText_(rawText);
+  var phoneDigits = text.replace(/\D/g, '');
+  var looksLikeOrderId = /^[a-z]{1,4}[-_]?[0-9a-z]{4,}$/i.test(String(rawText || '').trim());
+
+  if (/^01\d{9}$/.test(phoneDigits) || looksLikeOrderId) {
+    var found = lookupOrderStatusForMessenger_(phoneDigits.length === 11 ? phoneDigits : String(rawText || '').trim());
+    if (found && found.length) {
+      return found.map(function (row) {
+        return '📦 অর্ডার আইডি: ' + row[8] + '\nস্ট্যাটাস: ' + (row[9] || 'Pending') +
+          '\nমোট: ৳' + row[7] + '\nতারিখ: ' + row[0];
+      }).join('\n\n');
+    }
+    if (/^01\d{9}$/.test(phoneDigits)) {
+      return 'এই নাম্বারে কোনো অর্ডার খুঁজে পাইনি। সঠিক ফোন নাম্বার (01XXXXXXXXX) দিয়ে আবার চেষ্টা করুন, অথবা WhatsApp করুন: 01971642683';
+    }
+  }
+
+  if (/(^|\s)(hi|hello|hey|salam|সালাম|আসসালামু|শুরু|start)(\s|$)/i.test(text)) {
+    return messengerGreetingText_();
+  }
+  if (/(দাম|price|rate|কত)/i.test(text)) {
+    return '💰 প্রতিটি প্রোডাক্টের দাম আমাদের ওয়েবসাইটে দেখা যাবে:\nhttps://muslimabaya.com\n\nনির্দিষ্ট কোনো প্রোডাক্টের নাম বা ছবি পাঠালে দাম জানিয়ে দিচ্ছি।';
+  }
+  if (/(delivery|ডেলিভারি|shipping|কতদিন)/i.test(text)) {
+    return '🚚 ডেলিভারি সময়: ঢাকার ভিতরে ১-২ কার্যদিবস, ঢাকার বাইরে ৩-৫ কার্যদিবস।\nডেলিভারি চার্জ সাধারণত ৳১৫০ (৩+ পিস অর্ডারে ফ্রি ডেলিভারি)।';
+  }
+  if (/(payment|পেমেন্ট|bkash|বিকাশ|nagad|নগদ|cod|ক্যাশ)/i.test(text)) {
+    return '💳 পেমেন্ট মাধ্যম: ক্যাশ অন ডেলিভারি (COD), বিকাশ ও নগদ।\nঅর্ডার করার সময় আপনি পছন্দমতো মাধ্যম বেছে নিতে পারবেন।';
+  }
+  if (/(return|রিটার্ন|exchange|এক্সচেঞ্জ|ফেরত)/i.test(text)) {
+    return '↩️ প্রোডাক্টে সমস্যা থাকলে ডেলিভারির ২৪ ঘণ্টার মধ্যে জানালে রিটার্ন/এক্সচেঞ্জ করা যাবে। বিস্তারিত জানতে WhatsApp করুন: 01971642683';
+  }
+  if (/(size|সাইজ|মাপ)/i.test(text)) {
+    return '📏 সাইজ গাইড:\nAbaya/Kaftan — Free Size (Body 46), Length: 50/52/54/56\nPremium Two-Piece — Free Size (Body 42), Length: 37-38 inch\nকাস্টম সাইজ দরকার হলে অর্ডারের সময় জানাতে পারবেন।';
+  }
+
+  return 'ধন্যবাদ আপনার মেসেজের জন্য! 🙏\n\n' +
+    'অর্ডার স্ট্যাটাস জানতে ফোন নাম্বার বা অর্ডার আইডি পাঠান।\n' +
+    'দাম/ডেলিভারি/পেমেন্ট/রিটার্ন/সাইজ নিয়ে প্রশ্ন থাকলে লিখুন।\n' +
+    'সরাসরি কথা বলতে WhatsApp করুন: 01971642683\nওয়েবসাইট: https://muslimabaya.com';
+}
+
+function messengerWebhook_(e) {
+  try {
+    var body = JSON.parse(e.postData.contents);
+    (body.entry || []).forEach(function (entry) {
+      var pageId = String(entry.id || MSGR_PAGE_ID);
+      (entry.messaging || []).forEach(function (ev) {
+        var psid = ev.sender && ev.sender.id;
+        if (!psid || String(psid) === pageId) return;
+        if (ev.message && ev.message.is_echo) return;
+
+        var fromAd = ev.referral && ev.referral.source === 'ADS' ? 'yes' : '';
+        var isNew = true;
+        try {
+          var contactsSh = msgrContactsSheet_();
+          var values = contactsSh.getDataRange().getValues();
+          isNew = msgrFindContactRow_(values, pageId, String(psid)) === -1;
+        } catch (lookupErr) {}
+
+        try {
+          msgrRecordMessage_(pageId, String(psid), 'in', msgrEventText_(ev), (ev.message && ev.message.mid) ? String(ev.message.mid) : '', '', fromAd, ev.message && ev.message.attachments);
+        } catch (recErr) {}
+
+        try {
+          var replySent = '';
+          if (ev.postback && ev.postback.payload === 'GET_STARTED') {
+            replySent = messengerGreetingText_();
+            sendMessengerText_(pageId, psid, replySent);
+          } else if (ev.message && ev.message.text) {
+            var replyText = buildMessengerAutoReply_(ev.message.text);
+            if (isNew) replyText = messengerGreetingText_() + '\n\n' + replyText;
+            replySent = replyText;
+            sendMessengerText_(pageId, psid, replyText);
+          }
+          if (replySent) {
+            try { msgrRecordMessage_(pageId, String(psid), 'out', replySent, '', 'Bot', ''); } catch (recErr2) {}
+          }
+        } catch (replyErr) {}
+      });
+    });
+  } catch (err) {}
+  return ContentService.createTextOutput('EVENT_RECEIVED');
+}
+
+function setupMessengerProfileForAllPages_() {
+  var pageIds = ['964928770039259', '381729145014885', '258170054039575'];
+  var results = {};
+  pageIds.forEach(function (pid) {
+    var token = getPageAccessToken_(pid);
+    if (!token) { results[pid] = { ok: false, error: 'NO_TOKEN' }; return; }
+    var payload = {
+      get_started: { payload: 'GET_STARTED' },
+      greeting: [{ locale: 'default', text: 'আসসালামু আলাইকুম {{user_first_name}}! Muslim Abaya-তে স্বাগতম। অর্ডার স্ট্যাটাস, দাম বা ডেলিভারি নিয়ে জানতে মেসেজ করুন।' }]
+    };
+    var res = UrlFetchApp.fetch('https://graph.facebook.com/v21.0/me/messenger_profile?access_token=' + encodeURIComponent(token), {
+      method: 'post',
+      contentType: 'application/json',
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    });
+    results[pid] = { ok: res.getResponseCode() === 200, body: res.getContentText() };
+  });
+  return results;
+}
+
+function setupMessengerProfileForAllPagesFromMenu() {
+  var r = setupMessengerProfileForAllPages_();
+  SpreadsheetApp.getUi().alert('Messenger profile setup ফলাফল:\n' + JSON.stringify(r, null, 2).slice(0, 900));
+}
+
+function upsertMessengerContact_(sh, psid, fromAd) {
+  var now = new Date();
+  var data = sh.getRange(1, 1, Math.max(sh.getLastRow(), 1), 1).getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === psid) {
+      sh.getRange(i + 1, 4).setValue(now);
+      if (fromAd) sh.getRange(i + 1, 5).setValue('yes');
+      return;
+    }
+  }
+  sh.appendRow([psid, getMessengerName_(psid), now, now, fromAd]);
+}
+
+function getMessengerName_(psid) {
+  try {
+    var token = PropertiesService.getScriptProperties().getProperty('MSGR_PAGE_TOKEN');
+    if (!token) return '';
+    var res = UrlFetchApp.fetch('https://graph.facebook.com/v25.0/' + psid +
+      '?fields=name&access_token=' + encodeURIComponent(token), { muteHttpExceptions: true });
+    return (JSON.parse(res.getContentText()) || {}).name || '';
+  } catch (e) { return ''; }
+}
+
+// Call when a Messenger order becomes Confirmed/Delivered.
+function sendMessengerPurchase_(psid, value, orderId) {
+  var token = PropertiesService.getScriptProperties().getProperty('MSGR_PAGE_TOKEN');
+  if (!token || !psid) return { ok: false, code: 'MISSING' };
+  var payload = {
+    data: [{
+      event_name: 'Purchase',
+      event_time: Math.floor(Date.now() / 1000),
+      event_id: 'msgr_' + String(orderId || psid),
+      action_source: 'business_messaging',
+      messaging_channel: 'messenger',
+      user_data: { page_id: MSGR_PAGE_ID, page_scoped_user_id: String(psid) },
+      custom_data: { currency: 'BDT', value: parseOrderValue_(value) }
+    }]
+  };
+  var res = UrlFetchApp.fetch('https://graph.facebook.com/v25.0/' + MSGR_DATASET_ID +
+    '/events?access_token=' + encodeURIComponent(token), {
+      method: 'post', contentType: 'application/json',
+      payload: JSON.stringify(payload), muteHttpExceptions: true
+    });
+  return { ok: res.getResponseCode() === 200, body: res.getContentText() };
+}
+
 var MSGR_PAGE_ID = '964928770039259';
 var MSGR_DATASET_ID = '1465090315322833';
 var MSGR_SHEET = 'MessengerContacts';
@@ -4459,14 +4893,6 @@ var MC = { PSID: 1, NAME: 2, FIRST: 3, LAST: 4, FROM_AD: 5, PAGE: 6, STATUS: 7, 
   LAST_MSG: 9, LAST_DIR: 10, UNREAD: 11, ORDER_ID: 12, ORDER_VALUE: 13, PURCHASE_SENT: 14, NOTES: 15, PROFILE: 16 };
 var MC_HEADERS = ['PSID', 'Name', 'FirstSeen', 'LastSeen', 'FromAd', 'PageId', 'Status', 'AssignedTo',
   'LastMessage', 'LastDirection', 'Unread', 'OrderId', 'OrderValue', 'PurchaseSent', 'Notes', 'ProfilePic'];
-
-function messengerVerify_(e) {
-  var want = PropertiesService.getScriptProperties().getProperty('MSGR_VERIFY_TOKEN') || '';
-  if (want && e.parameter['hub.verify_token'] === want) {
-    return ContentService.createTextOutput(String(e.parameter['hub.challenge'] || ''));
-  }
-  return ContentService.createTextOutput('forbidden');
-}
 
 function msgrPageToken_(pageId) {
   var props = PropertiesService.getScriptProperties();
@@ -4522,35 +4948,6 @@ function msgrEventText_(ev) {
 }
 
 // Webhook: saves every conversation (all connected Pages) + each message.
-function messengerWebhook_(e) {
-  var lock = LockService.getScriptLock();
-  try {
-    lock.waitLock(20000);
-    var body = JSON.parse(e.postData.contents);
-    (body.entry || []).forEach(function (entry) {
-      var pageId = String(entry.id || MSGR_PAGE_ID);
-      (entry.messaging || []).forEach(function (ev) {
-        if (!ev.message && !ev.postback && !ev.referral) return; // delivery/read receipts
-        var isEcho = !!(ev.message && ev.message.is_echo);
-        var psid = String(isEcho ? (ev.recipient && ev.recipient.id) : (ev.sender && ev.sender.id) || '');
-        if (!psid || psid === pageId) return;
-        var mid = ev.message && ev.message.mid ? String(ev.message.mid) : '';
-        // Replies sent from this inbox are already logged; skip their echo.
-        if (isEcho && mid && CacheService.getScriptCache().get('msgr_mid_' + mid)) return;
-        var fromAd = (ev.referral && ev.referral.source === 'ADS') ||
-          (ev.postback && ev.postback.referral && ev.postback.referral.source === 'ADS') ||
-          (ev.message && ev.message.referral && ev.message.referral.source === 'ADS');
-        msgrRecordMessage_(pageId, psid, isEcho ? 'out' : 'in', msgrEventText_(ev), mid,
-          isEcho ? 'Page' : '', fromAd ? 'yes' : '', ev.message && ev.message.attachments);
-      });
-    });
-  } catch (err) {
-    try { console.error('messengerWebhook_ ' + err); } catch (e2) {}
-  } finally {
-    try { lock.releaseLock(); } catch (e3) {}
-  }
-  return ContentService.createTextOutput('EVENT_RECEIVED');
-}
 
 function msgrRecordMessage_(pageId, psid, direction, text, mid, by, fromAd, attachments) {
   var now = new Date();
@@ -4659,6 +5056,14 @@ function inboxRateLimit_(token) {
   var k = 'rl_inbox_' + String(token || 'x').slice(0, 48);
   var n = parseInt(cache.get(k) || '0', 10);
   if (n >= 600) throw new Error('RATE_LIMIT');
+  cache.put(k, String(n + 1), 600);
+}
+
+function adminRateLimit_(token) {
+  var cache = CacheService.getScriptCache();
+  var k = 'rl_admin_' + String(token || 'x').slice(0, 48);
+  var n = parseInt(cache.get(k) || '0', 10);
+  if (n >= 300) throw new Error('RATE_LIMIT');
   cache.put(k, String(n + 1), 600);
 }
 
@@ -4886,4 +5291,1160 @@ function inboxUpdate_(e, session) {
   } finally {
     lock.releaseLock();
   }
+}
+
+// ================= Abandoned Cart Recovery =================
+function ensureAbandonedCartsSheet_() {
+  return ensureSheet_('AbandonedCarts', ['Phone', 'Name', 'CartSummary', 'CartValue', 'CreatedAt', 'UpdatedAt', 'Status']);
+}
+
+function findAbandonedCartRow_(sheet, phone) {
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0] || '').trim() === String(phone).trim()) return i + 1;
+  }
+  return -1;
+}
+
+function saveCartCheckpoint_(e) {
+  var phone = normalizePhone_(param_(e, 'Phone'));
+  if (!phone || phone.length < 10) return { ok: false, error: 'INVALID_PHONE' };
+  try { rateLimit_('cart_' + phone); } catch (rl) { return { ok: false, error: 'RATE_LIMIT' }; }
+  var name = String(param_(e, 'Name') || '').trim();
+  var summary = String(param_(e, 'CartSummary') || '').trim().slice(0, 500);
+  var value = Number(param_(e, 'CartValue')) || 0;
+  if (!summary || value <= 0) return { ok: false, error: 'EMPTY_CART' };
+  var sheet = ensureAbandonedCartsSheet_();
+  var now = new Date();
+  var row = findAbandonedCartRow_(sheet, phone);
+  if (row === -1) {
+    appendRow_(sheet, [phone, name, summary, value, now, now, 'open']);
+  } else {
+    var createdAt = sheet.getRange(row, 5).getValue();
+    sheet.getRange(row, 2, 1, 6).setValues([[name, summary, value, createdAt, now, 'open']]);
+  }
+  return { ok: true };
+}
+
+function markCartConverted_(phone) {
+  try {
+    var p = normalizePhone_(phone);
+    if (!p) return;
+    var sheet = ensureAbandonedCartsSheet_();
+    var row = findAbandonedCartRow_(sheet, p);
+    if (row !== -1) sheet.getRange(row, 7).setValue('converted');
+  } catch (err) {}
+}
+
+// ================= Back-in-stock waitlist =================
+function ensureStockWaitlistSheet_() {
+  return ensureSheet_('StockWaitlist', ['ProductId', 'ProductName', 'Contact', 'IsEmail', 'CreatedAt', 'Notified']);
+}
+
+function saveBackInStockRequest_(e) {
+  var productId = String(param_(e, 'ProductId') || '').trim();
+  var productName = String(param_(e, 'ProductName') || '').trim();
+  var contactRaw = String(param_(e, 'Contact') || '').trim();
+  var contact = normalizeSubscribeContact_(contactRaw);
+  if (!productId) return { ok: false, error: 'MISSING_PRODUCT' };
+  if (!contact) return { ok: false, error: 'INVALID_CONTACT', message: 'সঠিক ইমেইল বা মোবাইল (01XXXXXXXXX) দিন।' };
+  try { rateLimit_('waitlist_' + contact.slice(0, 40)); } catch (rl) { return { ok: false, error: 'RATE_LIMIT' }; }
+  var isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact);
+  var sheet = ensureStockWaitlistSheet_();
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0] || '').trim() === productId && String(data[i][2] || '').trim().toLowerCase() === contact.toLowerCase()) {
+      return { ok: true, message: 'Already on waitlist', duplicate: true };
+    }
+  }
+  appendRow_(sheet, [productId, productName, contact, isEmail ? 'yes' : '', new Date(), '']);
+  return { ok: true, message: 'জানানো হবে' };
+}
+
+function notifyBackInStockWaitlist_(productId) {
+  try {
+    var sheet = ensureStockWaitlistSheet_();
+    var data = sheet.getDataRange().getValues();
+    for (var i = 1; i < data.length; i++) {
+      var r = data[i];
+      if (String(r[0] || '').trim() !== String(productId).trim()) continue;
+      if (String(r[5] || '').trim()) continue;
+      var isEmail = String(r[3] || '') === 'yes';
+      if (isEmail) {
+        try {
+          MailApp.sendEmail({
+            to: String(r[2]),
+            subject: 'সুখবর! ' + (r[1] || 'পণ্যটি') + ' আবার স্টকে এসেছে — Muslim Abaya',
+            body: 'আসসালামু আলাইকুম,\n\nআপনি যে পণ্যটির জন্য অপেক্ষা করছিলেন (' + (r[1] || productId) + ') সেটি আবার স্টকে এসেছে।\n\nএখনই অর্ডার করতে ভিজিট করুন: https://muslimabaya.com/\n\nধন্যবাদ,\nMuslim Abaya'
+          });
+          sheet.getRange(i + 1, 6).setValue('emailed:' + new Date());
+        } catch (mailErr) {
+          sheet.getRange(i + 1, 6).setValue('email_failed');
+        }
+      } else {
+        sheet.getRange(i + 1, 6).setValue('pending-whatsapp');
+      }
+    }
+  } catch (err) {}
+}
+
+// ================= Reorder discount on delivery =================
+function ensureReorderOffersSheet_() {
+  return ensureSheet_('ReorderOffers', ['OrderId', 'Phone', 'Name', 'CouponCode', 'CreatedAt', 'Contacted']);
+}
+
+function generateReorderCouponCode_(phone) {
+  var suffix = String(phone || '').slice(-4) || String(Math.floor(1000 + Math.random() * 9000));
+  return 'REORDER' + suffix + Math.floor(Math.random() * 90 + 10);
+}
+
+function createReorderOffer_(orderId, phone, name) {
+  if (!phone) return;
+  try {
+    var couponSheet = getCouponsSheet_();
+    var code = generateReorderCouponCode_(phone);
+    var expiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    appendRow_(couponSheet, [code, 'percent', 10, 0, expiry, 1, 0, true]);
+    var offersSheet = ensureReorderOffersSheet_();
+    appendRow_(offersSheet, [orderId || '', phone, name || '', code, new Date(), '']);
+  } catch (err) {}
+}
+
+// ================= Admin: Growth dashboard data =================
+function getAdminGrowthData_(e) {
+  var token = param_(e, 'Token');
+  var v = verifyAdminSession_(token);
+  if (!v.ok) return v;
+  var out = { ok: true, abandonedCarts: [], stockWaitlist: [], reorderOffers: [] };
+  try {
+    var cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    var cSheet = ensureAbandonedCartsSheet_();
+    var cData = cSheet.getDataRange().getValues();
+    for (var i = 1; i < cData.length; i++) {
+      var r = cData[i];
+      if (String(r[6] || '') !== 'open') continue;
+      var updated = r[5] instanceof Date ? r[5] : new Date(r[5]);
+      if (updated < cutoff) continue;
+      out.abandonedCarts.push({ phone: String(r[0] || ''), name: String(r[1] || ''), summary: String(r[2] || ''), value: Number(r[3]) || 0, updatedAt: updated.toISOString() });
+    }
+  } catch (err1) {}
+  try {
+    var wSheet = ensureStockWaitlistSheet_();
+    var wData = wSheet.getDataRange().getValues();
+    for (var j = 1; j < wData.length; j++) {
+      var wr = wData[j];
+      var notified = String(wr[5] || '');
+      if (notified.indexOf('emailed') === 0 || notified === 'dismissed') continue;
+      out.stockWaitlist.push({ productId: String(wr[0] || ''), productName: String(wr[1] || ''), contact: String(wr[2] || ''), isEmail: String(wr[3] || '') === 'yes', notified: notified });
+    }
+  } catch (err2) {}
+  try {
+    var rSheet = ensureReorderOffersSheet_();
+    var rData = rSheet.getDataRange().getValues();
+    for (var k = rData.length - 1; k >= 1 && out.reorderOffers.length < 50; k--) {
+      var rr = rData[k];
+      if (String(rr[5] || '') === 'done') continue;
+      out.reorderOffers.push({ orderId: String(rr[0] || ''), phone: String(rr[1] || ''), name: String(rr[2] || ''), coupon: String(rr[3] || ''), createdAt: rr[4] instanceof Date ? rr[4].toISOString() : String(rr[4] || '') });
+    }
+  } catch (err3) {}
+  return out;
+}
+
+function markGrowthItemDone_(e) {
+  var token = param_(e, 'Token');
+  var v = verifyAdminSession_(token);
+  if (!v.ok) return v;
+  var kind = String(param_(e, 'Kind') || '');
+  var key = String(param_(e, 'Key') || '');
+  try {
+    if (kind === 'cart') {
+      var cSheet = ensureAbandonedCartsSheet_();
+      var row = findAbandonedCartRow_(cSheet, key);
+      if (row !== -1) cSheet.getRange(row, 7).setValue('dismissed');
+    } else if (kind === 'waitlist') {
+      var wSheet = ensureStockWaitlistSheet_();
+      var wData = wSheet.getDataRange().getValues();
+      for (var i = 1; i < wData.length; i++) {
+        if ((String(wData[i][0] || '') + '|' + String(wData[i][2] || '')) === key) { wSheet.getRange(i + 1, 6).setValue('dismissed'); break; }
+      }
+    } else if (kind === 'reorder') {
+      var rSheet = ensureReorderOffersSheet_();
+      var rData = rSheet.getDataRange().getValues();
+      for (var j = 1; j < rData.length; j++) {
+        if (String(rData[j][0] || '') === key) { rSheet.getRange(j + 1, 6).setValue('done'); break; }
+      }
+    }
+  } catch (err) {}
+  return { ok: true };
+}
+
+/* ============================================================
+ * STOCK ANALYTICS v2 — ভ্যারিয়েন্ট-ভিত্তিক স্টক, অডিট ও অ্যানালিটিক্স
+ * (নতুন কোড — পুরনো Stock শীট বা কোনো অর্ডার ডেটা মোছা হয়নি)
+ * ============================================================ */
+
+var STOCK_LOW_DEFAULT_THRESHOLD_ = 5;
+
+function ensureStockVariantsSheet_() {
+  return ensureSheet_('StockVariants', ['Product ID', 'Product Name', 'Category', 'Variant', 'Tracked', 'Available', 'Reserved', 'LowStockThreshold', 'UpdatedAt', 'UpdatedBy']);
+}
+
+function ensureStockLedgerSheet_() {
+  return ensureSheet_('StockLedger', ['Timestamp', 'Product ID', 'Variant', 'ChangeType', 'QtyBefore', 'QtyAfter', 'ReservedBefore', 'ReservedAfter', 'Reason', 'OrderId', 'Admin']);
+}
+
+function ensureOnlineOrderStockStageHeader_(sheet) {
+  try {
+    var existing = sheet.getRange(1, onlineOrderColumn_(sheet, 36)).getValue();
+    if (!existing) sheet.getRange(1, onlineOrderColumn_(sheet, 36)).setValue('StockStage');
+  } catch (err) {}
+}
+
+function ensureOnlineOrderSourceHeader_(sheet) {
+  try {
+    var existing = sheet.getRange(1, onlineOrderColumn_(sheet, 37)).getValue();
+    if (!existing) sheet.getRange(1, onlineOrderColumn_(sheet, 37)).setValue('Source');
+  } catch (err) {}
+}
+
+function normStockVariant_(v) {
+  return String(v || '').trim();
+}
+
+function findStockVariantRowIndex_(data, productId, variant) {
+  var pid = String(productId || '').trim();
+  var vv = normStockVariant_(variant);
+  var i;
+  for (i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === pid && normStockVariant_(data[i][3]) === vv) return i + 1;
+  }
+  return -1;
+}
+
+function getOrCreateStockVariantRow_(sheet, productId, productName, variant, category) {
+  var data = sheet.getDataRange().getValues();
+  var row = findStockVariantRowIndex_(data, productId, variant);
+  if (row !== -1) return row;
+  var now = new Date();
+  appendRow_(sheet, [String(productId).trim(), String(productName || ''), String(category || ''), normStockVariant_(variant), false, 0, 0, '', now, 'system']);
+  return sheet.getLastRow();
+}
+
+function readStockVariantRow_(sheet, row) {
+  var r = sheet.getRange(row, 1, 1, 10).getValues()[0];
+  return {
+    row: row,
+    productId: String(r[0] || ''),
+    productName: String(r[1] || ''),
+    category: String(r[2] || ''),
+    variant: String(r[3] || ''),
+    tracked: (String(r[4]).toUpperCase() === 'TRUE') || (r[4] === true),
+    available: Number(r[5]) || 0,
+    reserved: Number(r[6]) || 0,
+    threshold: (r[7] === '' || r[7] === null || typeof r[7] === 'undefined') ? null : Number(r[7]),
+    updatedAt: r[8],
+    updatedBy: String(r[9] || '')
+  };
+}
+
+function writeStockVariantRow_(sheet, row, fields) {
+  if (typeof fields.tracked !== 'undefined') sheet.getRange(row, 5).setValue(!!fields.tracked);
+  if (typeof fields.available !== 'undefined') sheet.getRange(row, 6).setValue(Math.max(0, Number(fields.available) || 0));
+  if (typeof fields.reserved !== 'undefined') sheet.getRange(row, 7).setValue(Math.max(0, Number(fields.reserved) || 0));
+  if (typeof fields.threshold !== 'undefined') sheet.getRange(row, 8).setValue(fields.threshold === null ? '' : Number(fields.threshold));
+  if (typeof fields.productName !== 'undefined' && fields.productName) sheet.getRange(row, 2).setValue(fields.productName);
+  if (typeof fields.category !== 'undefined' && fields.category) sheet.getRange(row, 3).setValue(fields.category);
+  sheet.getRange(row, 9).setValue(new Date());
+  if (typeof fields.updatedBy !== 'undefined') sheet.getRange(row, 10).setValue(fields.updatedBy);
+}
+
+function appendStockLedger_(entry) {
+  try {
+    var sheet = ensureStockLedgerSheet_();
+    appendRow_(sheet, [
+      new Date(),
+      entry.productId || '',
+      entry.variant || '',
+      entry.changeType || '',
+      entry.qtyBefore != null ? entry.qtyBefore : '',
+      entry.qtyAfter != null ? entry.qtyAfter : '',
+      entry.reservedBefore != null ? entry.reservedBefore : '',
+      entry.reservedAfter != null ? entry.reservedAfter : '',
+      entry.reason || '',
+      entry.orderId || '',
+      entry.admin || 'system'
+    ]);
+  } catch (ledgerErr) {}
+}
+
+/**
+ * একটি ভ্যারিয়েন্টের Available/Reserved পরিবর্তন করে এবং লেজারে হিস্ট্রি রাখে।
+ * deltaAvailable/deltaReserved পজিটিভ বা নেগেটিভ হতে পারে। কখনো ০-এর নিচে নামবে না।
+ */
+/**
+ * এই ফাংশন নিজে কোনো লক নেয় না — যেসব জায়গা থেকে এটা কল হয় (reserve/release/finalize
+ * হেল্পারগুলোর মাধ্যমে, applyStockLifecycleForStatusChange_-এর ভেতর থেকে) সেখানে লক আগে
+ * থেকেই ধরা থাকে। একই এক্সিকিউশনে দ্বিতীয়বার LockService লক নেওয়া (nested lock) Apps
+ * Script-এ ডেডলক/টাইমআউট ঘটাতে পারে, তাই ইচ্ছাকৃতভাবে এখানে লক নেওয়া বাদ দেওয়া হয়েছে।
+ * সরাসরি বাইরে থেকে কল করলে আগে LockService.getScriptLock().waitLock() করে নিন।
+ */
+function mutateStockVariant_(opts) {
+  var sheet = ensureStockVariantsSheet_();
+  var row = getOrCreateStockVariantRow_(sheet, opts.productId, opts.productName, opts.variant, opts.category);
+  var before = readStockVariantRow_(sheet, row);
+  var nextAvailable = Math.max(0, before.available + (opts.deltaAvailable || 0));
+  var nextReserved = Math.max(0, before.reserved + (opts.deltaReserved || 0));
+  var fields = { available: nextAvailable, reserved: nextReserved, updatedBy: opts.admin || 'system' };
+  if (opts.setTracked) fields.tracked = true;
+  if (opts.productName) fields.productName = opts.productName;
+  if (opts.category) fields.category = opts.category;
+  if (typeof opts.threshold !== 'undefined') fields.threshold = opts.threshold;
+  writeStockVariantRow_(sheet, row, fields);
+  appendStockLedger_({
+    productId: before.productId || opts.productId,
+    variant: before.variant || opts.variant,
+    changeType: opts.changeType,
+    qtyBefore: before.available,
+    qtyAfter: nextAvailable,
+    reservedBefore: before.reserved,
+    reservedAfter: nextReserved,
+    reason: opts.reason || '',
+    orderId: opts.orderId || '',
+    admin: opts.admin || 'system'
+  });
+  return { before: before, after: { available: nextAvailable, reserved: nextReserved } };
+}
+
+/** কার্ট-আইটেম থেকে variant key বের করা (size অগ্রাধিকার পায়, না থাকলে color) */
+function cartItemVariantKey_(item) {
+  var size = String((item && item.size) || '').trim();
+  if (size) return size;
+  var color = String((item && item.color) || '').trim();
+  if (color) return color;
+  return '';
+}
+
+/**
+ * নতুন অর্ডার তৈরির সময় — যেসব ভ্যারিয়েন্ট ট্র্যাক করা হয় ও স্টক শেষ, তাতে অর্ডার আটকায়।
+ * ট্র্যাক না করা ভ্যারিয়েন্টে কোনো বাধা নেই।
+ */
+function assertStockAvailableForOrder_(cartItems) {
+  if (!cartItems || !cartItems.length) return;
+  try {
+    var sheet = ensureStockVariantsSheet_();
+    var data = sheet.getDataRange().getValues();
+    var i;
+    for (i = 0; i < cartItems.length; i++) {
+      var item = cartItems[i];
+      var pid = String((item && item.id) || '').trim();
+      if (!pid) continue;
+      var variant = cartItemVariantKey_(item);
+      var qty = parseInt(item.qty, 10) || 1;
+      var rowIdx = findStockVariantRowIndex_(data, pid, variant);
+      if (rowIdx === -1) continue; // ট্র্যাক করা হয়নি — বাধা নেই
+      var r = data[rowIdx - 1];
+      var tracked = (String(r[4]).toUpperCase() === 'TRUE') || (r[4] === true);
+      if (!tracked) continue;
+      var available = Number(r[5]) || 0;
+      if (available < qty) {
+        var label = String((item && item.name) || pid) + (variant ? (' (' + variant + ')') : '');
+        var err = new Error('OUT_OF_STOCK:' + label);
+        err.isStockError = true;
+        throw err;
+      }
+    }
+  } catch (stockCheckErr) {
+    if (stockCheckErr && stockCheckErr.isStockError) throw stockCheckErr;
+    // অপ্রত্যাশিত এরর অর্ডার নেওয়া বন্ধ করবে না — শুধু স্টক-শেষ হলেই বন্ধ করা হয়
+  }
+}
+
+/** Confirmed → রিজার্ভ করা */
+function reserveStockForOrderItems_(cartItems, orderId, admin) {
+  (cartItems || []).forEach(function (item) {
+    var pid = String((item && item.id) || '').trim();
+    if (!pid) return;
+    var qty = parseInt(item.qty, 10) || 0;
+    if (qty <= 0) return;
+    var variant = cartItemVariantKey_(item);
+    mutateStockVariant_({
+      productId: pid,
+      productName: item.name,
+      category: item.category,
+      variant: variant,
+      deltaAvailable: -qty,
+      deltaReserved: qty,
+      changeType: 'RESERVE',
+      reason: 'অর্ডার কনফার্ম — Order ' + orderId,
+      orderId: orderId,
+      admin: admin || 'system'
+    });
+  });
+}
+
+/** Cancelled → রিজার্ভ ছাড়া (যদি আগে রিজার্ভ করা থাকে) */
+function releaseStockForOrderItems_(cartItems, orderId, admin) {
+  (cartItems || []).forEach(function (item) {
+    var pid = String((item && item.id) || '').trim();
+    if (!pid) return;
+    var qty = parseInt(item.qty, 10) || 0;
+    if (qty <= 0) return;
+    var variant = cartItemVariantKey_(item);
+    mutateStockVariant_({
+      productId: pid,
+      productName: item.name,
+      category: item.category,
+      variant: variant,
+      deltaAvailable: qty,
+      deltaReserved: -qty,
+      changeType: 'RELEASE',
+      reason: 'অর্ডার বাতিল/ফেরত — Order ' + orderId,
+      orderId: orderId,
+      admin: admin || 'system'
+    });
+  });
+}
+
+/** Delivered → বিক্রি চূড়ান্ত (রিজার্ভ থেকে সরানো, Available আগেই বাদ গেছে) */
+function finalizeSoldStockForOrderItems_(cartItems, orderId, admin) {
+  (cartItems || []).forEach(function (item) {
+    var pid = String((item && item.id) || '').trim();
+    if (!pid) return;
+    var qty = parseInt(item.qty, 10) || 0;
+    if (qty <= 0) return;
+    var variant = cartItemVariantKey_(item);
+    mutateStockVariant_({
+      productId: pid,
+      productName: item.name,
+      category: item.category,
+      variant: variant,
+      deltaAvailable: 0,
+      deltaReserved: -qty,
+      changeType: 'SELL',
+      reason: 'ডেলিভারি সম্পন্ন — Order ' + orderId,
+      orderId: orderId,
+      admin: admin || 'system'
+    });
+  });
+}
+
+/** Confirmed ধাপ ছাড়াই সরাসরি Delivered হলে — সরাসরি Available থেকে বাদ */
+function finalizeSoldDirectStockForOrderItems_(cartItems, orderId, admin) {
+  (cartItems || []).forEach(function (item) {
+    var pid = String((item && item.id) || '').trim();
+    if (!pid) return;
+    var qty = parseInt(item.qty, 10) || 0;
+    if (qty <= 0) return;
+    var variant = cartItemVariantKey_(item);
+    mutateStockVariant_({
+      productId: pid,
+      productName: item.name,
+      category: item.category,
+      variant: variant,
+      deltaAvailable: -qty,
+      deltaReserved: 0,
+      changeType: 'SELL_DIRECT',
+      reason: 'ডেলিভারি সম্পন্ন (রিজার্ভ ছাড়াই সরাসরি) — Order ' + orderId,
+      orderId: orderId,
+      admin: admin || 'system'
+    });
+  });
+}
+
+/**
+ * অর্ডারের স্ট্যাটাস পরিবর্তন হলে স্টক লাইফসাইকেল প্রয়োগ — idempotent, oversell-safe।
+ * StockStage কলাম (৩৬): '' / 'NEW' → 'RESERVED' → 'SOLD', অথবা যেকোনো ধাপ থেকে 'RELEASED'।
+ * একই টার্গেট স্টেজে দ্বিতীয়বার এলে কিছুই করে না (দ্বিতীয়বার প্রয়োগ ঠেকায়)।
+ */
+function applyStockLifecycleForStatusChange_(sheet, row, newStatus) {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    ensureOnlineOrderStockStageHeader_(sheet);
+    var rawStage = String(sheet.getRange(row, onlineOrderColumn_(sheet, 36)).getValue() || '').trim().toUpperCase();
+    var isLegacyOrder = !rawStage || rawStage === 'LEGACY_SKIPPED'; // কখনো StockStage লেখা হয়নি, বা আগে একবার লিগ্যাসি হিসেবে স্কিপ হয়েছে — উভয় অবস্থাতেই স্থায়ীভাবে auto-lifecycle থেকে বাদ থাকবে
+    var currentStage = isLegacyOrder ? 'LEGACY_UNKNOWN' : rawStage;
+
+    var target = null;
+    if (isReturnKeywordStatus_(newStatus) || isPlainCancelStatus_(newStatus)) {
+      target = 'RELEASED';
+    } else if (String(newStatus).trim() === 'Confirmed') {
+      target = 'RESERVED';
+    } else if (String(newStatus).trim() === 'Delivered') {
+      target = 'SOLD';
+    } else {
+      return; // Pending/Shipped/Fake — স্টকে কোনো প্রভাব নেই
+    }
+
+    if (isLegacyOrder) {
+      // পুরনো (এই ফিচার ডিপ্লয়ের আগের) অর্ডার — অনুমান করে স্টক পরিবর্তন করা হবে না।
+      // শুধু একবার মার্ক করে রাখা হয় যাতে অ্যাডমিন চাইলে ম্যানুয়ালি স্টক সমন্বয় করতে পারেন,
+      // আর বারবার একই সারিতে এডিট হলে লেজারে বারবার নোট না জমে।
+      var orderIdCellLegacy = sheet.getRange(row, onlineOrderColumn_(sheet, 9)).getValue();
+      var orderIdLegacy = String(orderIdCellLegacy || ('row' + row));
+      sheet.getRange(row, onlineOrderColumn_(sheet, 36)).setValue('LEGACY_SKIPPED');
+      appendStockLedger_({
+        productId: '', variant: '', changeType: 'LEGACY_SKIPPED',
+        reason: 'পুরনো (মাইগ্রেশনের আগের) অর্ডার — স্ট্যাটাস \'' + newStatus + '\'-এ পরিবর্তিত হয়েছে, কিন্তু স্টক অটো-আপডেট করা হয়নি। প্রয়োজনে ম্যানুয়ালি স্টক সমন্বয় করুন।',
+        orderId: orderIdLegacy, admin: 'system'
+      });
+      return;
+    }
+
+    if (currentStage === target) return; // আগেই এই ধাপে আছে — দ্বিতীয়বার প্রয়োগ করা হবে না
+
+    var orderIdCell = sheet.getRange(row, onlineOrderColumn_(sheet, 9)).getValue();
+    var orderId = String(orderIdCell || ('row' + row));
+    var cartJsonCell = String(sheet.getRange(row, onlineOrderColumn_(sheet, 33)).getValue() || '').trim();
+    var items = [];
+    if (cartJsonCell) {
+      try { items = JSON.parse(cartJsonCell); } catch (pe) { items = []; }
+    }
+    if (!items.length) {
+      sheet.getRange(row, onlineOrderColumn_(sheet, 36)).setValue(target);
+      return;
+    }
+
+    if (target === 'RESERVED') {
+      // NEW বা RELEASED থেকে RESERVED — রিজার্ভ করো। SOLD থেকে হলে (অস্বাভাবিক) — কিছু করবে না, শুধু নোট রাখো।
+      if (currentStage === 'SOLD') {
+        appendStockLedger_({ productId: '', variant: '', changeType: 'REVIEW_NEEDED', reason: 'SOLD থেকে আবার Confirmed — ম্যানুয়াল যাচাই দরকার', orderId: orderId, admin: 'system' });
+      } else {
+        reserveStockForOrderItems_(items, orderId, 'system');
+      }
+    } else if (target === 'RELEASED') {
+      if (currentStage === 'RESERVED') {
+        releaseStockForOrderItems_(items, orderId, 'system');
+      } else if (currentStage === 'SOLD') {
+        // ডেলিভারির পরে বাতিল/রিটার্ন — স্টক অটো-রিস্টোর হবে না, শুধু লেজারে নোট থাকবে; অ্যাডমিন নিজে সিদ্ধান্ত নেবেন
+        appendStockLedger_({ productId: '', variant: '', changeType: 'RETURN_REVIEW_NEEDED', reason: 'ডেলিভারির পর বাতিল/রিটার্ন — স্টক ফেরত দিতে চাইলে অ্যাডমিন প্যানেল থেকে ম্যানুয়ালি যোগ করুন', orderId: orderId, admin: 'system' });
+      }
+      // NEW থেকে RELEASED — কখনো রিজার্ভ হয়নি, তাই ছাড়ারও কিছু নেই
+    } else if (target === 'SOLD') {
+      if (currentStage === 'RESERVED') {
+        finalizeSoldStockForOrderItems_(items, orderId, 'system');
+      } else if (currentStage === 'NEW') {
+        finalizeSoldDirectStockForOrderItems_(items, orderId, 'system');
+      } else if (currentStage === 'RELEASED') {
+        appendStockLedger_({ productId: '', variant: '', changeType: 'REVIEW_NEEDED', reason: 'বাতিল থেকে আবার Delivered — ম্যানুয়াল যাচাই দরকার', orderId: orderId, admin: 'system' });
+        finalizeSoldDirectStockForOrderItems_(items, orderId, 'system');
+      }
+    }
+
+    sheet.getRange(row, onlineOrderColumn_(sheet, 36)).setValue(target);
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function isReturnKeywordStatus_(statusText) {
+  var s = String(statusText || '').trim().toLowerCase();
+  return s.indexOf('return') !== -1 || s.indexOf('ফেরত') !== -1 || s.indexOf('refund') !== -1;
+}
+function isPlainCancelStatus_(statusText) {
+  var s = String(statusText || '').trim().toLowerCase();
+  return s.indexOf('cancel') !== -1 || s.indexOf('বাতিল') !== -1;
+}
+
+/* ---------------- Admin endpoints (stock variants + ledger + csv + analytics v2) ---------------- */
+
+function computeVariantStatus_(v, defaultThreshold) {
+  if (!v.tracked) return 'UNTRACKED';
+  if (v.available <= 0) return 'OUT';
+  var threshold = (v.threshold === null || typeof v.threshold === 'undefined') ? defaultThreshold : v.threshold;
+  if (v.available <= threshold) return 'LOW';
+  return 'OK';
+}
+
+function getAdminStockVariants_(e) {
+  var token = param_(e, 'Token');
+  var v = verifyAdminSession_(token);
+  if (!v.ok) return v;
+  var search = String(param_(e, 'Search') || '').trim().toLowerCase();
+  var stockStatus = String(param_(e, 'StockStatus') || 'all').trim().toLowerCase();
+  var categoryFilter = String(param_(e, 'Category') || '').trim().toLowerCase();
+  var categoryMap = {};
+  try {
+    var cmRaw = param_(e, 'CategoryMap');
+    if (cmRaw) categoryMap = JSON.parse(cmRaw) || {};
+  } catch (cmErr) { categoryMap = {}; }
+
+  var sheet = ensureStockVariantsSheet_();
+  var data = sheet.getDataRange().getValues();
+  var defaultThreshold = STOCK_LOW_DEFAULT_THRESHOLD_;
+  var rows = [];
+  var i;
+  for (i = 1; i < data.length; i++) {
+    var r = data[i];
+    var pid = String(r[0] || '').trim();
+    if (!pid) continue;
+    var item = {
+      productId: pid,
+      productName: String(r[1] || ''),
+      category: String(r[2] || '') || categoryMap[pid] || '',
+      variant: String(r[3] || ''),
+      tracked: (String(r[4]).toUpperCase() === 'TRUE') || (r[4] === true),
+      available: Number(r[5]) || 0,
+      reserved: Number(r[6]) || 0,
+      threshold: (r[7] === '' || r[7] === null || typeof r[7] === 'undefined') ? null : Number(r[7]),
+      updatedAt: formatCell_(r[8]),
+      updatedBy: String(r[9] || '')
+    };
+    item.status = computeVariantStatus_(item, defaultThreshold);
+    rows.push(item);
+  }
+
+  if (search) {
+    rows = rows.filter(function (it) {
+      return it.productId.toLowerCase().indexOf(search) !== -1 ||
+        it.productName.toLowerCase().indexOf(search) !== -1;
+    });
+  }
+  if (categoryFilter) {
+    rows = rows.filter(function (it) { return String(it.category || '').toLowerCase() === categoryFilter; });
+  }
+  if (stockStatus && stockStatus !== 'all') {
+    var want = stockStatus.toUpperCase();
+    rows = rows.filter(function (it) { return it.status === want; });
+  }
+
+  var categoryCounts = {};
+  rows.forEach(function (it) {
+    var c = it.category || 'অজানা';
+    categoryCounts[c] = (categoryCounts[c] || 0) + 1;
+  });
+
+  return { ok: true, items: rows, count: rows.length, categoryCounts: categoryCounts, defaultThreshold: defaultThreshold };
+}
+
+function saveAdminStockVariant_(e) {
+  var token = param_(e, 'Token');
+  var v = verifyAdminSession_(token);
+  if (!v.ok) return v;
+
+  var productId = String(param_(e, 'ProductId') || '').trim();
+  if (!productId) return { ok: false, error: 'MISSING_ID', message: 'Product ID প্রয়োজন।' };
+  var productName = String(param_(e, 'ProductName') || '').trim();
+  var category = String(param_(e, 'Category') || '').trim();
+  var variant = normStockVariant_(param_(e, 'Variant'));
+  var reason = String(param_(e, 'Reason') || '').trim();
+  if (!reason) return { ok: false, error: 'REASON_REQUIRED', message: 'স্টক পরিবর্তনের কারণ লেখা বাধ্যতামূলক।' };
+
+  var qtyRaw = param_(e, 'Available');
+  var hasQty = qtyRaw !== '' && typeof qtyRaw !== 'undefined';
+  var qty = parseInt(qtyRaw, 10);
+  if (hasQty && (isNaN(qty) || qty < 0)) return { ok: false, error: 'INVALID_QTY', message: 'সঠিক Available সংখ্যা দিন।' };
+
+  var thresholdRaw = param_(e, 'Threshold');
+  var threshold;
+  if (thresholdRaw === '' || typeof thresholdRaw === 'undefined') {
+    threshold = undefined;
+  } else {
+    var t = parseInt(thresholdRaw, 10);
+    threshold = isNaN(t) ? undefined : t;
+  }
+
+  var trackedRaw = String(param_(e, 'Tracked') || '').trim().toLowerCase();
+  var setTracked = hasQty || trackedRaw === 'true' || trackedRaw === '1';
+
+  var lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    var sheet = ensureStockVariantsSheet_();
+    var row = getOrCreateStockVariantRow_(sheet, productId, productName, variant, category);
+    var before = readStockVariantRow_(sheet, row);
+    var nextAvailable = hasQty ? qty : before.available;
+    var deltaAvailable = nextAvailable - before.available;
+    var fields = { available: nextAvailable, updatedBy: v.email || 'admin' };
+    if (setTracked) fields.tracked = true;
+    if (productName) fields.productName = productName;
+    if (category) fields.category = category;
+    if (typeof threshold !== 'undefined') fields.threshold = threshold;
+    writeStockVariantRow_(sheet, row, fields);
+    appendStockLedger_({
+      productId: before.productId || productId,
+      variant: before.variant || variant,
+      changeType: 'MANUAL',
+      qtyBefore: before.available,
+      qtyAfter: nextAvailable,
+      reservedBefore: before.reserved,
+      reservedAfter: before.reserved,
+      reason: reason,
+      orderId: '',
+      admin: v.email || 'admin'
+    });
+    return { ok: true, productId: productId, variant: variant, available: nextAvailable, reserved: before.reserved, delta: deltaAvailable };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function getAdminStockLedger_(e) {
+  var token = param_(e, 'Token');
+  var v = verifyAdminSession_(token);
+  if (!v.ok) return v;
+  var productId = String(param_(e, 'ProductId') || '').trim();
+  var limit = parseInt(param_(e, 'Limit'), 10) || 200;
+  if (limit < 1) limit = 1;
+  if (limit > 1000) limit = 1000;
+
+  var sheet = ensureStockLedgerSheet_();
+  var data = sheet.getDataRange().getValues();
+  var rows = [];
+  var i;
+  for (i = data.length - 1; i >= 1; i--) {
+    var r = data[i];
+    var pid = String(r[1] || '');
+    if (productId && pid !== productId) continue;
+    rows.push({
+      timestamp: formatCell_(r[0]),
+      productId: pid,
+      variant: String(r[2] || ''),
+      changeType: String(r[3] || ''),
+      qtyBefore: r[4],
+      qtyAfter: r[5],
+      reservedBefore: r[6],
+      reservedAfter: r[7],
+      reason: String(r[8] || ''),
+      orderId: String(r[9] || ''),
+      admin: String(r[10] || '')
+    });
+    if (rows.length >= limit) break;
+  }
+  return { ok: true, items: rows, count: rows.length };
+}
+
+/**
+ * CSV ব্যাচ — PreviewOnly=true হলে শুধু যাচাই করে ফলাফল দেখায়, কিছু লেখে না।
+ * PreviewOnly না থাকলে যাচাই-সফল সারিগুলো প্রয়োগ করে।
+ */
+function commitAdminStockCsvBatch_(e) {
+  var token = param_(e, 'Token');
+  var v = verifyAdminSession_(token);
+  if (!v.ok) return v;
+
+  var rowsRaw = param_(e, 'RowsJSON');
+  var previewOnly = String(param_(e, 'PreviewOnly') || '').trim().toLowerCase() === 'true';
+  var rows;
+  try {
+    rows = JSON.parse(rowsRaw || '[]');
+  } catch (pe) {
+    return { ok: false, error: 'INVALID_JSON', message: 'CSV ডেটা পড়া যায়নি।' };
+  }
+  if (!Array.isArray(rows) || !rows.length) {
+    return { ok: false, error: 'EMPTY', message: 'CSV-তে কোনো সারি পাওয়া যায়নি।' };
+  }
+
+  var sheet = ensureStockVariantsSheet_();
+  var data = sheet.getDataRange().getValues();
+  var knownIds = {};
+  var di;
+  for (di = 1; di < data.length; di++) {
+    var kid = String(data[di][0] || '').trim();
+    if (kid) knownIds[kid] = true;
+  }
+
+  var seen = {};
+  var results = [];
+  var validCount = 0;
+  rows.forEach(function (row, idx) {
+    var productId = String(row.productId || row.ProductId || '').trim();
+    var variant = normStockVariant_(row.variant || row.Variant);
+    var qtyRaw = row.qty != null ? row.qty : row.Qty;
+    var reason = String(row.reason || row.Reason || '').trim();
+    var issues = [];
+    if (!productId) issues.push('Product ID খালি');
+    var qty = parseInt(qtyRaw, 10);
+    if (qtyRaw === '' || typeof qtyRaw === 'undefined' || isNaN(qty) || qty < 0) issues.push('Qty সঠিক নয়');
+    if (!reason) issues.push('Reason খালি');
+    var key = productId + '||' + variant;
+    if (seen[key]) issues.push('ডুপ্লিকেট সারি (আগেই এই ব্যাচে আছে)');
+    seen[key] = true;
+    if (productId && !knownIds[productId]) issues.push('অজানা Product ID (StockVariants-এ নেই — নতুন হিসেবে যোগ হবে)');
+    var ok = !issues.some(function (m) { return m !== ('অজানা Product ID (StockVariants-এ নেই — নতুন হিসেবে যোগ হবে)'); }) && productId && !isNaN(qty) && qty >= 0 && reason;
+    if (ok) validCount++;
+    results.push({ rowIndex: idx, productId: productId, variant: variant, qty: qtyRaw, reason: reason, ok: !!ok, issues: issues });
+  });
+
+  if (previewOnly) {
+    return { ok: true, preview: true, results: results, validCount: validCount, totalCount: rows.length };
+  }
+
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  var applied = 0;
+  var skipped = 0;
+  try {
+    results.forEach(function (res) {
+      if (!res.ok) { skipped++; return; }
+      var row = getOrCreateStockVariantRow_(sheet, res.productId, '', res.variant, '');
+      var before = readStockVariantRow_(sheet, row);
+      var nextAvailable = parseInt(res.qty, 10);
+      writeStockVariantRow_(sheet, row, { available: nextAvailable, tracked: true, updatedBy: v.email || 'admin' });
+      appendStockLedger_({
+        productId: res.productId,
+        variant: res.variant,
+        changeType: 'CSV_IMPORT',
+        qtyBefore: before.available,
+        qtyAfter: nextAvailable,
+        reservedBefore: before.reserved,
+        reservedAfter: before.reserved,
+        reason: res.reason,
+        orderId: '',
+        admin: v.email || 'admin'
+      });
+      applied++;
+    });
+  } finally {
+    lock.releaseLock();
+  }
+  return { ok: true, preview: false, applied: applied, skipped: skipped, totalCount: rows.length };
+}
+
+function bdRangeBounds_(range, fromStr, toStr) {
+  var now = new Date();
+  var todayKey = Utilities.formatDate(now, 'GMT+6', 'yyyy-MM-dd');
+  var fromKey, toKey;
+  if (range === 'today') {
+    fromKey = todayKey; toKey = todayKey;
+  } else if (range === '7d') {
+    var d7 = new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000);
+    fromKey = Utilities.formatDate(d7, 'GMT+6', 'yyyy-MM-dd'); toKey = todayKey;
+  } else if (range === '30d') {
+    var d30 = new Date(now.getTime() - 29 * 24 * 60 * 60 * 1000);
+    fromKey = Utilities.formatDate(d30, 'GMT+6', 'yyyy-MM-dd'); toKey = todayKey;
+  } else if (range === 'custom') {
+    fromKey = fromStr || todayKey; toKey = toStr || todayKey;
+  } else {
+    fromKey = todayKey; toKey = todayKey;
+  }
+  return { fromKey: fromKey, toKey: toKey };
+}
+
+/**
+ * BD টাইমজোন-অ্যাওয়্যার অ্যানালিটিক্স v2 — আসল অর্ডার ডেটা থেকে হিসাব করা হয়।
+ * সোর্স/সাইজ/ক্যাটাগরির তথ্য না থাকলে বানানো সংখ্যা দেখানো হয় না।
+ */
+function getAdminAnalyticsV2_(e) {
+  var token = param_(e, 'Token');
+  var v = verifyAdminSession_(token);
+  if (!v.ok) return v;
+
+  var range = String(param_(e, 'Range') || 'today').trim().toLowerCase();
+  var fromStr = String(param_(e, 'From') || '').trim();
+  var toStr = String(param_(e, 'To') || '').trim();
+  var bounds = bdRangeBounds_(range, fromStr, toStr);
+
+  var categoryMap = {};
+  try {
+    var cmRaw = param_(e, 'CategoryMap');
+    if (cmRaw) categoryMap = JSON.parse(cmRaw) || {};
+  } catch (cmErr) { categoryMap = {}; }
+
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
+  var summary = {
+    totalOrders: 0, confirmedCount: 0, cancelledCount: 0, deliveredCount: 0, returnedCount: 0,
+    totalOrderValue: 0, deliveredSalesValue: 0
+  };
+  var productSales = {}; // id -> { name, qty }
+  var categorySales = {}; // category -> qty
+  var sizeSales = {}; // size -> qty
+  var sourceStats = {}; // source -> { orders, delivered }
+  var anySourceData = false;
+
+  if (sheet) {
+    var data = readOnlineOrderRows_(sheet);
+    var i;
+    for (i = 1; i < data.length; i++) {
+      var r = data[i];
+      var dk = dayKeyFromCell_(r[0]);
+      if (!dk || dk < bounds.fromKey || dk > bounds.toKey) continue;
+      summary.totalOrders++;
+      var status = String(r[9] || '').trim();
+      var total = parseFloat(String(r[7] || '0').replace(/[^\d.]/g, '')) || 0;
+      summary.totalOrderValue += total;
+
+      var isReturn = isReturnKeywordStatus_(status);
+      var isPlainCancel = isPlainCancelStatus_(status);
+      if (isReturn) summary.returnedCount++;
+      else if (isPlainCancel) summary.cancelledCount++;
+
+      if (status === 'Confirmed') summary.confirmedCount++;
+      if (status === 'Delivered') {
+        summary.deliveredCount++;
+        summary.deliveredSalesValue += total;
+      }
+
+      var sourceVal = String(r[36] || '').trim(); // কলাম ৩৭ (0-ইনডেক্স ৩৬)
+      if (sourceVal) {
+        anySourceData = true;
+        if (!sourceStats[sourceVal]) sourceStats[sourceVal] = { orders: 0, delivered: 0 };
+        sourceStats[sourceVal].orders++;
+        if (status === 'Delivered') sourceStats[sourceVal].delivered++;
+      }
+
+      // best-seller হিসাব Confirmed/Shipped/Delivered অর্ডার থেকে (বাতিল/পেন্ডিং বাদ) —
+      // Shipped মানে কুরিয়ারে পাঠানো হয়ে গেছে (Steadfast auto), তাই এটাও একটা প্রতিশ্রুত বিক্রি —
+      // আগে শুধু Confirmed/Delivered গোনা হতো, ফলে ট্রানজিটে থাকা অর্ডারগুলোর পণ্য বেস্ট-সেলার/
+      // ক্যাটাগরি/সাইজ পরিসংখ্যানে বাদ পড়ে যেত।
+      if (status === 'Confirmed' || status === 'Shipped' || status === 'Delivered') {
+        var cartJsonCell = String(r[32] || '').trim(); // কলাম ৩৩
+        if (cartJsonCell) {
+          try {
+            var items = JSON.parse(cartJsonCell);
+            if (Array.isArray(items)) {
+              items.forEach(function (it) {
+                var pid = String((it && it.id) || '').trim();
+                if (!pid) return;
+                var qty = parseInt(it.qty, 10) || 0;
+                if (qty <= 0) return;
+                var name = String((it && it.name) || pid);
+                if (!productSales[pid]) productSales[pid] = { name: name, qty: 0 };
+                productSales[pid].qty += qty;
+
+                var cat = String((it && it.category) || '').trim() || categoryMap[pid] || 'অজানা ক্যাটাগরি';
+                categorySales[cat] = (categorySales[cat] || 0) + qty;
+
+                var size = String((it && it.size) || '').trim();
+                if (size) sizeSales[size] = (sizeSales[size] || 0) + qty;
+              });
+            }
+          } catch (cartErr) {}
+        }
+      }
+    }
+  }
+
+  summary.cancellationRate = summary.totalOrders ? ((summary.cancelledCount + summary.returnedCount) / summary.totalOrders) : 0;
+  summary.deliverySuccessRate = summary.totalOrders ? (summary.deliveredCount / summary.totalOrders) : 0;
+
+  var topProducts = Object.keys(productSales).map(function (pid) {
+    return { productId: pid, name: productSales[pid].name, qty: productSales[pid].qty };
+  }).sort(function (a, b) { return b.qty - a.qty; }).slice(0, 20);
+
+  var topCategories = Object.keys(categorySales).map(function (c) {
+    return { category: c, qty: categorySales[c] };
+  }).sort(function (a, b) { return b.qty - a.qty; });
+
+  var topSizes = Object.keys(sizeSales).map(function (s) {
+    return { size: s, qty: sizeSales[s] };
+  }).sort(function (a, b) { return b.qty - a.qty; });
+
+  var sourceBreakdown = Object.keys(sourceStats).map(function (s) {
+    return { source: s, orders: sourceStats[s].orders, delivered: sourceStats[s].delivered };
+  }).sort(function (a, b) { return b.orders - a.orders; });
+
+  // কম স্টক / স্টক শেষ — বর্তমান স্ন্যাপশট (তারিখ-নির্ভর নয়)
+  var lowStockList = [];
+  var outOfStockList = [];
+  try {
+    var vSheet = ensureStockVariantsSheet_();
+    var vData = vSheet.getDataRange().getValues();
+    var vi;
+    for (vi = 1; vi < vData.length; vi++) {
+      var vr = vData[vi];
+      var tracked = (String(vr[4]).toUpperCase() === 'TRUE') || (vr[4] === true);
+      if (!tracked) continue;
+      var available = Number(vr[5]) || 0;
+      var threshold = (vr[7] === '' || vr[7] === null || typeof vr[7] === 'undefined') ? STOCK_LOW_DEFAULT_THRESHOLD_ : Number(vr[7]);
+      var entry = { productId: String(vr[0] || ''), productName: String(vr[1] || ''), variant: String(vr[3] || ''), available: available, threshold: threshold };
+      if (available <= 0) outOfStockList.push(entry);
+      else if (available <= threshold) lowStockList.push(entry);
+    }
+  } catch (stockListErr) {}
+
+  return {
+    ok: true,
+    range: range,
+    from: bounds.fromKey,
+    to: bounds.toKey,
+    summary: summary,
+    topProducts: topProducts,
+    topCategories: topCategories,
+    topSizes: topSizes,
+    lowStockList: lowStockList,
+    outOfStockList: outOfStockList,
+    sourceBreakdown: sourceBreakdown,
+    sourceDataAvailable: anySourceData,
+    sourceMessage: anySourceData ? '' : 'এই সময়সীমার অর্ডারে উৎস (Facebook/TikTok) তথ্য নেই। নতুন অর্ডার থেকে এই তথ্য সংরক্ষণ শুরু হয়েছে।'
+  };
+}
+
+/**
+ * পুরনো Stock শীট থেকে StockVariants-এ নিরাপদে মাইগ্রেট করা — idempotent, কোনো ডেটা মোছে না।
+ * শুধু owner অ্যাডমিন চালাতে পারবে।
+ */
+function migrateStockToVariants_(e) {
+  var token = param_(e, 'Token');
+  var v = verifyAdminSession_(token);
+  if (!v.ok) return v;
+  var ownerErr = requireOwnerAdmin_(v);
+  if (ownerErr) return ownerErr;
+
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  var migrated = 0, skipped = 0, total = 0;
+  try {
+    var legacySheet = ensureStockSheet_();
+    var legacyData = legacySheet.getDataRange().getValues();
+    var vSheet = ensureStockVariantsSheet_();
+    var vData = vSheet.getDataRange().getValues();
+    var i;
+    for (i = 1; i < legacyData.length; i++) {
+      var r = legacyData[i];
+      var pid = String(r[0] || '').trim();
+      if (!pid) continue;
+      total++;
+      var existingRow = findStockVariantRowIndex_(vData, pid, '');
+      if (existingRow !== -1) { skipped++; continue; }
+      var qty = Number(r[2]) || 0;
+      var name = String(r[1] || '');
+      appendRow_(vSheet, [pid, name, '', '', true, qty, 0, '', new Date(), 'migration']);
+      appendStockLedger_({
+        productId: pid, variant: '', changeType: 'MIGRATE',
+        qtyBefore: 0, qtyAfter: qty, reservedBefore: 0, reservedAfter: 0,
+        reason: 'পুরনো Stock শীট থেকে মাইগ্রেশন', orderId: '', admin: v.email || 'admin'
+      });
+      // vData তে নতুন সারি যোগ হলো তা পরবর্তী লুপের জন্য মেমরিতেও যোগ করা দরকার যাতে ডুপ্লিকেট না হয়
+      vData.push([pid, name, '', '', true, qty, 0, '', new Date(), 'migration']);
+      migrated++;
+    }
+  } finally {
+    lock.releaseLock();
+  }
+  return { ok: true, migrated: migrated, skipped: skipped, total: total, message: 'মাইগ্রেশন সম্পন্ন — পুরনো Stock শীট অপরিবর্তিত রাখা হয়েছে।' };
+}
+
+function quickAdjustAdminStock_(e) {
+  var token = param_(e, 'Token');
+  var v = verifyAdminSession_(token);
+  if (!v.ok) return v;
+  var productId = String(param_(e, 'ProductId') || '').trim();
+  if (!productId) return { ok: false, error: 'MISSING_ID', message: 'Product ID প্রয়োজন।' };
+  var productName = String(param_(e, 'ProductName') || '').trim();
+  var category = String(param_(e, 'Category') || '').trim();
+  var variant = normStockVariant_(param_(e, 'Variant'));
+  var delta = parseInt(param_(e, 'Delta'), 10);
+  if (isNaN(delta) || delta === 0) return { ok: false, error: 'INVALID_DELTA', message: 'সঠিক পরিমাণ দিন।' };
+  var reason = String(param_(e, 'Reason') || '').trim();
+  if (!reason) return { ok: false, error: 'REASON_REQUIRED', message: 'কারণ লেখা বাধ্যতামূলক।' };
+
+  var lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    var sheet = ensureStockVariantsSheet_();
+    var row = getOrCreateStockVariantRow_(sheet, productId, productName, variant, category);
+    var before = readStockVariantRow_(sheet, row);
+    if (delta < 0 && (before.available + delta) < 0) {
+      return { ok: false, error: 'INSUFFICIENT_STOCK', message: 'এত স্টক নেই। বর্তমান Available: ' + before.available };
+    }
+    var nextAvailable = Math.max(0, before.available + delta);
+    writeStockVariantRow_(sheet, row, { available: nextAvailable, tracked: true, updatedBy: v.email || 'admin' });
+    appendStockLedger_({
+      productId: before.productId || productId,
+      variant: before.variant || variant,
+      changeType: delta < 0 ? 'MANUAL_SALE' : 'MANUAL_RESTOCK',
+      qtyBefore: before.available,
+      qtyAfter: nextAvailable,
+      reservedBefore: before.reserved,
+      reservedAfter: before.reserved,
+      reason: reason,
+      orderId: '',
+      admin: v.email || 'admin'
+    });
+    return { ok: true, productId: productId, variant: variant, available: nextAvailable, delta: delta };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+
+// ── Sign in with Google ──
+// Script property GOOGLE_CLIENT_ID (OAuth "Web application" client ID, ends with
+// .apps.googleusercontent.com) switches this on. The browser sends the Google ID token;
+// we ask Google to validate it (tokeninfo) and then check audience, issuer, expiry and
+// email_verified ourselves before creating / finding the customer and issuing a normal
+// site session. Google-created customers have no password (PasswordHash/Salt empty), so
+// password login can never match them.
+function sanitizeCellText_(value, maxLen) {
+  var t = String(value == null ? '' : value).replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim();
+  if (maxLen) t = t.slice(0, maxLen);
+  // a leading = + - @ would be run as a formula by Google Sheets
+  if (/^[=+\-@]/.test(t)) t = "'" + t;
+  return t;
+}
+
+function googleLogin_(e) {
+  if (!getAuthSecret_()) {
+    return { ok: false, error: 'AUTH_NOT_CONFIGURED', message: 'Apps Script এ AUTH_SECRET সেট করুন।' };
+  }
+  var clientId = PropertiesService.getScriptProperties().getProperty('GOOGLE_CLIENT_ID') || '';
+  if (!clientId) {
+    return { ok: false, error: 'GOOGLE_NOT_CONFIGURED', message: 'Google লগইন চালু করা হয়নি।' };
+  }
+  var idToken = String(param_(e, 'IdToken') || '');
+  if (!idToken || idToken.length > 4096 || idToken.split('.').length !== 3) {
+    return { ok: false, error: 'INVALID_GOOGLE_TOKEN', message: 'Google লগইন ব্যর্থ। আবার চেষ্টা করুন।' };
+  }
+  var info;
+  try {
+    var resp = UrlFetchApp.fetch(
+      'https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(idToken),
+      { muteHttpExceptions: true }
+    );
+    if (resp.getResponseCode() !== 200) {
+      return { ok: false, error: 'INVALID_GOOGLE_TOKEN', message: 'Google লগইন ব্যর্থ। আবার চেষ্টা করুন।' };
+    }
+    info = JSON.parse(resp.getContentText());
+  } catch (err) {
+    return { ok: false, error: 'GOOGLE_VERIFY_FAILED', message: 'Google যাচাই করা যায়নি। আবার চেষ্টা করুন।' };
+  }
+  var iss = String(info.iss || '');
+  var expMs = parseInt(info.exp, 10) * 1000;
+  if (String(info.aud || '') !== clientId ||
+      (iss !== 'accounts.google.com' && iss !== 'https://accounts.google.com') ||
+      !expMs || expMs < Date.now()) {
+    return { ok: false, error: 'INVALID_GOOGLE_TOKEN', message: 'Google লগইন ব্যর্থ। আবার চেষ্টা করুন।' };
+  }
+  if (String(info.email_verified) !== 'true' || !info.email) {
+    return { ok: false, error: 'GOOGLE_EMAIL_UNVERIFIED', message: 'আপনার Google ইমেইল যাচাই করা নয়।' };
+  }
+  var email = normalizeEmail_(info.email);
+  var user = findCustomerByEmail_(email);
+  if (user && user.status === 'blocked') {
+    return { ok: false, error: 'BLOCKED', message: 'অ্যাকাউন্ট বন্ধ।' };
+  }
+  if (!user) {
+    var name = sanitizeCellText_(info.name, 80) || sanitizeCellText_(email.split('@')[0], 80);
+    appendRow_(getCustomersSheet_(), [email, '', name, '', '', 'active', new Date(), new Date()]);
+    user = { email: email, phone: '', name: name };
+  }
+  return createSession_({ email: user.email, phone: user.phone || '', name: user.name || '' }, 'customer');
+}
+
+
+
+// Run from the project editor: aggregate setup evidence only, with no tokens or customer data in logs.
+function trackingSetupAudit() {
+  var meta = getFacebookCapiConfig_();
+  var tt = getTikTokCapiConfig_();
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
+  var result = { metaConfigured: !!(meta.accessToken && meta.pixelId), tiktokConfigured: !!(tt.accessToken && tt.pixelCode), orders: 0, confirmed: 0, metaSent: 0, tiktokSent: 0, metaFailures: 0, tiktokFailures: 0, sharedEventIds: 0 };
+  if (sheet && sheet.getLastRow() >= 2) {
+    var rows = readOnlineOrderRows_(sheet);
+    for (var i = 1; i < rows.length; i++) {
+      var row = rows[i];
+      if (!row[1] && !row[2]) continue;
+      result.orders++;
+      if (String(row[9] || '').toLowerCase() === 'confirmed') result.confirmed++;
+      var note = String(row[16] || '');
+      if (note.indexOf('META_PURCHASE_SENT') !== -1) result.metaSent++;
+      if (note.indexOf('TIKTOK_PURCHASE_SENT') !== -1) result.tiktokSent++;
+      if (/CAPI_(FAIL|ERR):/.test(note)) result.metaFailures++;
+      if (/TIKTOK_(FAIL|ERR):/.test(note)) result.tiktokFailures++;
+      if (String(rows[0][37] || '') === 'Tracking Event ID' && row[37]) result.sharedEventIds++;
+    }
+  }
+  console.log('TRACKING_SETUP_AUDIT ' + JSON.stringify(result));
+  return result;
 }
