@@ -485,8 +485,8 @@
         var p = row.product, s = row.section;
         var out = p.inStock === false || (typeof p.stock === "number" && p.stock <= 0);
         var selectionKey = JSON.stringify([s.key, row.index]);
-        return '<tr><td><input type="checkbox" class="pm-overview-check" data-select-cat="' + escapeAttr(s.key) + '" data-select-index="' + row.index + '" aria-label="' + escapeAttr((p.name || 'Product') + ' নির্বাচন') + '"' + (overviewSelected[selectionKey] ? ' checked' : '') + '></td><td><strong>'  + escapeHtml(p.name || "Product") + '</strong><small>' + escapeHtml(p.id || "SKU নেই") +
-          '</small></td><td>' + escapeHtml(s.menuBn || s.menu || s.key) + '</td><td>৳' + (parseInt(p.price, 10) || 0) +
+        return '<tr><td><input type="checkbox" class="pm-overview-check" data-select-cat="' + escapeAttr(s.key) + '" data-select-index="' + row.index + '" aria-label="' + escapeAttr((p.name || 'Product') + ' নির্বাচন') + '"' + (overviewSelected[selectionKey] ? ' checked' : '') + '></td><td><div class="pm-overview-product"><span class="pm-overview-photo">' + (p.image ? '<img loading="lazy" decoding="async" src="' + escapeAttr(p.image) + '" alt="' + escapeAttr(p.name || 'Product') + '">' : '<span>ছবি নেই</span>') + '</span><div><strong>' + escapeHtml(p.name || "Product") + '</strong><small>' + escapeHtml(p.id || "SKU নেই") +
+          '</small></div></div></td><td>' + escapeHtml(s.menuBn || s.menu || s.key) + '</td><td>৳' + (parseInt(p.price, 10) || 0) +
           '</td><td><button type="button" class="pl-btn pm-overview-stock" data-stock-cat="' + escapeAttr(s.key) + '" data-stock-index="' + row.index + '" aria-pressed="' + out + '">' + (out ? '🔴 স্টক নেই' : '🟢 স্টকে আছে') + '</button>' +
           '</td><td><button type="button" class="pl-btn pl-btn-secondary" data-pm-cat="' + escapeAttr(s.key) +
           '" data-pm-index="' + row.index + '">এডিট</button></td></tr>';
@@ -495,6 +495,11 @@
       document.getElementById("pmOverviewSelected").textContent = selectedKeys.length + "টি নির্বাচিত";
       document.getElementById("pmOverviewOff").disabled = !selectedKeys.length;
       document.getElementById("pmOverviewOn").disabled = !selectedKeys.length;
+      document.querySelectorAll(".pm-overview-photo img").forEach(function (img) {
+        img.addEventListener("error", function () {
+          img.parentNode.textContent = "ছবি লোড হয়নি";
+        });
+      });
       document.querySelectorAll(".pm-overview-check").forEach(function (input) {
         input.addEventListener("change", function () {
           var key = JSON.stringify([input.getAttribute("data-select-cat"), parseInt(input.getAttribute("data-select-index"), 10)]);

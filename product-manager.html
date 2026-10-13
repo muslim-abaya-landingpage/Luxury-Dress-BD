@@ -15,7 +15,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="admin.css?v=20260929modern1">
-  <link rel="stylesheet" href="product-manager-admin.css?v=20261014-auto-stock">
+  <link rel="stylesheet" href="product-manager-admin.css?v=20261014-stock-photos">
   <script src="site-api-config.js?v=20261009-inbox"></script>
   <script src="admin-config.js?v=20261009-inbox"></script>
   <script src="admin-api.js?v=20261013-speed2"></script>
@@ -23,6 +23,7 @@
 <script defer src="config.js?v=20261009-inbox"></script>
   <link rel="stylesheet" href="admin-sidebar.css?v=20261003sb">
   <link rel="stylesheet" href="admin-premium.css?v=20261003pm2">
+<style>.pm-overview-product{display:flex;align-items:center;gap:12px}.pm-overview-photo{display:flex;align-items:center;justify-content:center;width:64px;height:80px;flex-shrink:0;background:#f3f3f3;border-radius:8px;overflow:hidden;font-size:11px;text-align:center;color:#666}.pm-overview-photo img{width:100%;height:100%;object-fit:contain}</style>
 </head>
 <body class="pl-admin adm-body" data-admin-guard="1">
   <div class="adm-shell">
@@ -617,8 +618,8 @@
         var p = row.product, s = row.section;
         var out = p.inStock === false || (typeof p.stock === "number" && p.stock <= 0);
         var selectionKey = JSON.stringify([s.key, row.index]);
-        return '<tr><td><input type="checkbox" class="pm-overview-check" data-select-cat="' + escapeAttr(s.key) + '" data-select-index="' + row.index + '" aria-label="' + escapeAttr((p.name || 'Product') + ' নির্বাচন') + '"' + (overviewSelected[selectionKey] ? ' checked' : '') + '></td><td><strong>'  + escapeHtml(p.name || "Product") + '</strong><small>' + escapeHtml(p.id || "SKU নেই") +
-          '</small></td><td>' + escapeHtml(s.menuBn || s.menu || s.key) + '</td><td>৳' + (parseInt(p.price, 10) || 0) +
+        return '<tr><td><input type="checkbox" class="pm-overview-check" data-select-cat="' + escapeAttr(s.key) + '" data-select-index="' + row.index + '" aria-label="' + escapeAttr((p.name || 'Product') + ' নির্বাচন') + '"' + (overviewSelected[selectionKey] ? ' checked' : '') + '></td><td><div class="pm-overview-product"><span class="pm-overview-photo">' + (p.image ? '<img loading="lazy" decoding="async" src="' + escapeAttr(p.image) + '" alt="' + escapeAttr(p.name || 'Product') + '">' : '<span>ছবি নেই</span>') + '</span><div><strong>' + escapeHtml(p.name || "Product") + '</strong><small>' + escapeHtml(p.id || "SKU নেই") +
+          '</small></div></div></td><td>' + escapeHtml(s.menuBn || s.menu || s.key) + '</td><td>৳' + (parseInt(p.price, 10) || 0) +
           '</td><td><button type="button" class="pl-btn pm-overview-stock" data-stock-cat="' + escapeAttr(s.key) + '" data-stock-index="' + row.index + '" aria-pressed="' + out + '">' + (out ? '🔴 স্টক নেই' : '🟢 স্টকে আছে') + '</button>' +
           '</td><td><button type="button" class="pl-btn pl-btn-secondary" data-pm-cat="' + escapeAttr(s.key) +
           '" data-pm-index="' + row.index + '">এডিট</button></td></tr>';
@@ -627,6 +628,11 @@
       document.getElementById("pmOverviewSelected").textContent = selectedKeys.length + "টি নির্বাচিত";
       document.getElementById("pmOverviewOff").disabled = !selectedKeys.length;
       document.getElementById("pmOverviewOn").disabled = !selectedKeys.length;
+      document.querySelectorAll(".pm-overview-photo img").forEach(function (img) {
+        img.addEventListener("error", function () {
+          img.parentNode.textContent = "ছবি লোড হয়নি";
+        });
+      });
       document.querySelectorAll(".pm-overview-check").forEach(function (input) {
         input.addEventListener("change", function () {
           var key = JSON.stringify([input.getAttribute("data-select-cat"), parseInt(input.getAttribute("data-select-index"), 10)]);
