@@ -235,3 +235,15 @@ test('late catalog-ready notification preserves rendered cards; explicit refresh
   env.ctx.__homeRefreshCatalog();
   assert.equal(paints, 1);
 });
+test('header waits for the static homepage catalog instead of loading duplicate scripts', () => {
+  const env = environment(), bundle = new env.El();
+  env.ctx.document.querySelector = selector => selector.includes('home-render.min.js') ? bundle : null;
+  const api = env.expose('site-header.js', '{ ensureProductCatalog }');
+  let finished = 0; api.ensureProductCatalog(() => finished++);
+  assert.equal(finished, 0);
+  assert.equal(bundle.listeners.get('load').length, 1);
+  env.ctx.CATALOG_SECTIONS = [{ key: 'abaya' }]; env.ctx.CATEGORY_PRODUCTS = {};
+  bundle.emit('load');
+  assert.equal(finished, 1);
+  assert.equal(bundle.getAttribute('data-loaded'), '1');
+});

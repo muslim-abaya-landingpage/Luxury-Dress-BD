@@ -480,6 +480,18 @@ function buildNavMenuItems() {
       finish();
       return;
     }
+    // The homepage downloads an ordered static bundle. Wait for it rather than
+    // injecting a second copy of its constituent scripts while defer runs.
+    var homeBundle = document.querySelector('script[src*="home-render.min.js"]');
+    if (homeBundle && homeBundle.getAttribute("data-loaded") !== "1") {
+      function bundleFinished() {
+        homeBundle.setAttribute("data-loaded", "1");
+        ensureProductCatalog(cb);
+      }
+      homeBundle.addEventListener("load", bundleFinished, { once: true });
+      homeBundle.addEventListener("error", bundleFinished, { once: true });
+      return;
+    }
     if (!catalogLoadPromise) {
       catalogLoadPromise = new Promise(function (resolve) {
         function loadScript(file) {
