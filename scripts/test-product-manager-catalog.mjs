@@ -14,7 +14,7 @@ function fixture(extra) {
   vm.runInContext(source('product-manager.html').match(/<script id="pmRawCatalog">([\s\S]*?)<\/script>/)[1], ctx);
   vm.runInContext(source('product-catalog-loader.js'), ctx);
   const app = source('product-manager-admin.js').replace(
-    '  loadState();\n  renderCatList();\n  renderMain();\n})();',
+    source('product-manager-admin.js').slice(source('product-manager-admin.js').lastIndexOf('  loadState();\n  renderCatList();\n  renderMain();')), 
     '  window.testManager = { loadState, generateProductsFile, toggleStock, escapeAttr, state() { return { sections, products }; } };\n})();'
   );
   vm.runInContext(app, ctx);

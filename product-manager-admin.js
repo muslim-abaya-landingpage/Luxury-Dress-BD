@@ -11,6 +11,11 @@
   var ALL_PRODUCTS_KEY = "__all_products__";
   var activeKey = ALL_PRODUCTS_KEY;
   var allSearchTerm = "";
+  var overviewCategory = "";
+  var overviewStock = "";
+  var overviewSelected = {};
+  var savedSnapshot = "";
+  function catalogSnapshot() { return JSON.stringify([sections, products, categoryTypePrices]); }
   var categoryTypePrices = {};
   var searchTerm = "";
   var bulkSelected = {};
@@ -449,6 +454,7 @@
   }
 
   function renderAllProducts() {
+    overviewSelected = {};
     var rows = [];
     sections.forEach(function (sec) {
       (products[sec.key] || []).forEach(function (p, index) {
@@ -459,23 +465,43 @@
       '<p class="pl-section-meta">নাম, SKU বা ক্যাটাগরি দিয়ে খুঁজুন। সম্পাদনা করতে সংশ্লিষ্ট ক্যাটাগরি খুলুন।</p></div>' +
       '<div class="pm-search-row"><input type="search" id="pmAllSearch" placeholder="সব ক্যাটাগরিতে খুঁজুন…" value="' + escapeAttr(allSearchTerm) +
       '"><span id="pmAllCount" class="pm-search-count"></span></div>' +
-      '<div class="pm-overview-wrap"><table class="pm-overview"><thead><tr><th>প্রোডাক্ট / SKU</th><th>ক্যাটাগরি</th><th>বেস দাম</th><th>স্টক</th><th>সম্পাদনা</th></tr></thead><tbody id="pmAllRows"></tbody></table></div>';
+      '<div class="pm-overview-tools"><label>ক্যাটাগরি <select id="pmOverviewCategory"><option value="">সব ক্যাটাগরি</option>' + sections.map(function (sec) { return '<option value="' + escapeAttr(sec.key) + '"' + (overviewCategory === sec.key ? ' selected' : '') + '>' + escapeHtml(sec.menuBn || sec.menu || sec.key) + '</option>'; }).join('') + '</select></label>' +
+      '<label>স্টক <select id="pmOverviewStock"><option value="">সব স্টক</option><option value="in"' + (overviewStock === 'in' ? ' selected' : '') + '>স্টকে আছে</option><option value="out"' + (overviewStock === 'out' ? ' selected' : '') + '>স্টক নেই</option></select></label>' +
+      '<button type="button" class="pl-btn" id="pmSelectVisible">দেখানো পণ্য নির্বাচন</button><button type="button" class="pl-btn" id="pmClearSelection">নির্বাচন বাতিল</button>' +
+      '<span id="pmOverviewSelected" role="status"></span><button type="button" class="pl-btn" id="pmOverviewOff">নির্বাচিত স্টক নেই করুন</button><button type="button" class="pl-btn" id="pmOverviewOn">নির্বাচিত স্টকে আনুন</button></div>' +
+      '<div class="pm-overview-wrap"><table class="pm-overview"><thead><tr><th>বাছাই</th><th>প্রোডাক্ট / SKU</th><th>ক্যাটাগরি</th><th>বেস দাম</th><th>স্টক</th><th>সম্পাদনা</th></tr></thead><tbody id="pmAllRows"></tbody></table></div>';
     function draw() {
       var term = allSearchTerm.trim().toLowerCase();
       var visible = rows.filter(function (row) {
         var p = row.product, s = row.section;
+        var out = p.inStock === false || (typeof p.stock === "number" && p.stock <= 0);
+        if (overviewCategory && s.key !== overviewCategory) return false;
+        if (overviewStock === "out" && !out || overviewStock === "in" && out) return false;
         return [p.name, p.id, s.key, s.menu, s.menuBn].join(" ").toLowerCase().indexOf(term) !== -1;
       });
       document.getElementById("pmAllCount").textContent = visible.length + " / " + rows.length + " এন্ট্রি";
       document.getElementById("pmAllRows").innerHTML = visible.map(function (row) {
         var p = row.product, s = row.section;
         var out = p.inStock === false || (typeof p.stock === "number" && p.stock <= 0);
-        return '<tr><td><strong>' + escapeHtml(p.name || "Product") + '</strong><small>' + escapeHtml(p.id || "SKU নেই") +
+        var selectionKey = JSON.stringify([s.key, row.index]);
+        return '<tr><td><input type="checkbox" class="pm-overview-check" data-select-cat="' + escapeAttr(s.key) + '" data-select-index="' + row.index + '" aria-label="' + escapeAttr((p.name || 'Product') + ' নির্বাচন') + '"' + (overviewSelected[selectionKey] ? ' checked' : '') + '></td><td><strong>'  + escapeHtml(p.name || "Product") + '</strong><small>' + escapeHtml(p.id || "SKU নেই") +
           '</small></td><td>' + escapeHtml(s.menuBn || s.menu || s.key) + '</td><td>৳' + (parseInt(p.price, 10) || 0) +
           '</td><td><button type="button" class="pl-btn pm-overview-stock" data-stock-cat="' + escapeAttr(s.key) + '" data-stock-index="' + row.index + '" aria-pressed="' + out + '">' + (out ? '🔴 স্টক নেই' : '🟢 স্টকে আছে') + '</button>' +
           '</td><td><button type="button" class="pl-btn pl-btn-secondary" data-pm-cat="' + escapeAttr(s.key) +
           '" data-pm-index="' + row.index + '">এডিট</button></td></tr>';
-      }).join("") || '<tr><td colspan="5" class="pm-empty">কোনো প্রোডাক্ট পাওয়া যায়নি</td></tr>';
+      }).join("") || '<tr><td colspan="6" class="pm-empty">কোনো প্রোডাক্ট পাওয়া যায়নি</td></tr>';
+      var selectedKeys = Object.keys(overviewSelected);
+      document.getElementById("pmOverviewSelected").textContent = selectedKeys.length + "টি নির্বাচিত";
+      document.getElementById("pmOverviewOff").disabled = !selectedKeys.length;
+      document.getElementById("pmOverviewOn").disabled = !selectedKeys.length;
+      document.querySelectorAll(".pm-overview-check").forEach(function (input) {
+        input.addEventListener("change", function () {
+          var key = JSON.stringify([input.getAttribute("data-select-cat"), parseInt(input.getAttribute("data-select-index"), 10)]);
+          if (input.checked) overviewSelected[key] = true; else delete overviewSelected[key];
+          draw();
+        });
+      });
+      document.getElementById("pmSelectVisible").onclick = function () { visible.forEach(function (row) { overviewSelected[JSON.stringify([row.section.key, row.index])] = true; }); draw(); };
       document.querySelectorAll("[data-stock-cat]").forEach(function (button) {
         button.addEventListener("click", function () {
           var p = products[button.getAttribute("data-stock-cat")][parseInt(button.getAttribute("data-stock-index"), 10)];
@@ -487,6 +513,7 @@
       });
       document.querySelectorAll("[data-pm-cat]").forEach(function (button) {
         button.addEventListener("click", function () {
+          overviewSelected = {};
           activeKey = button.getAttribute("data-pm-cat");
           var index = parseInt(button.getAttribute("data-pm-index"), 10);
           searchTerm = "";
@@ -497,7 +524,22 @@
         });
       });
     }
-    document.getElementById("pmAllSearch").addEventListener("input", function (e) { allSearchTerm = e.target.value; draw(); });
+    document.getElementById("pmAllSearch").addEventListener("input", function (e) { allSearchTerm = e.target.value; overviewSelected = {}; draw(); });
+    document.getElementById("pmOverviewCategory").addEventListener("change", function (e) { overviewCategory = e.target.value; overviewSelected = {}; draw(); });
+    document.getElementById("pmOverviewStock").addEventListener("change", function (e) { overviewStock = e.target.value; overviewSelected = {}; draw(); });
+    document.getElementById("pmClearSelection").addEventListener("click", function () { overviewSelected = {}; draw(); });
+    function bulkStock(out) {
+      Object.keys(overviewSelected).forEach(function (key) {
+        var ref = JSON.parse(key), p = (products[ref[0]] || [])[ref[1]];
+        if (!p) return;
+        if (out) { p.stock = 0; p.inStock = false; }
+        else { delete p.inStock; if (typeof p.stock === "number" && p.stock <= 0) delete p.stock; }
+      });
+      overviewSelected = {}; draw();
+      setSaveStatus("নির্বাচিত পণ্যের স্টক বদলেছে — Save Data চাপুন।");
+    }
+    document.getElementById("pmOverviewOff").addEventListener("click", function () { bulkStock(true); });
+    document.getElementById("pmOverviewOn").addEventListener("click", function () { bulkStock(false); });
     draw();
   }
 
@@ -1832,6 +1874,7 @@
     // GitHub-এ অটো-পাবলিশ চেষ্টা (Admin লগইন থাকলেই কাজ করবে)। শুধু লগইন করা না
     // থাকলে বা পাবলিশ ব্যর্থ হলেই লোকাল ফাইল ডাউনলোড হবে (ব্যাকআপ হিসেবে) —
     // সফল হলে আর অটো-ডাউনলোড হবে না।
+    var publishingSnapshot = catalogSnapshot();
     saveButton.disabled = true;
     setSaveStatus("GitHub-এ সেভ হচ্ছে… অপেক্ষা করুন।");
     toast("GitHub-এ পাবলিশ হচ্ছে...");
@@ -1857,6 +1900,7 @@
         return !r.res || !r.res.ok;
       });
       if (!failed.length) {
+        savedSnapshot = publishingSnapshot;
         setSaveStatus("✅ GitHub-এ সেভ হয়েছে। সাইটের Deploy শেষ হলে পরিবর্তন দেখা যাবে।");
         toast("✅ GitHub-এ সেভ সফল! সাইটের Deploy সম্পন্ন হওয়া পর্যন্ত অপেক্ষা করুন।");
       } else {
@@ -1879,9 +1923,13 @@
   if (chkBtn) chkBtn.addEventListener("click", checkAllImages);
 
   document.getElementById("pmReload").addEventListener("click", function () {
+    if (savedSnapshot !== catalogSnapshot() && !confirm("সেভ না করা পরিবর্তন বাদ দিয়ে আবার লোড করবেন?")) return;
     loadState();
+    savedSnapshot = catalogSnapshot();
+    overviewSelected = {};
     renderCatList();
     renderMain();
+    setSaveStatus("সাইটের বর্তমান ডেটা লোড হয়েছে।");
     toast("সাইট থেকে আবার লোড হয়েছে");
   });
 
@@ -1896,4 +1944,8 @@
   loadState();
   renderCatList();
   renderMain();
+  savedSnapshot = catalogSnapshot();
+  window.addEventListener("beforeunload", function (event) {
+    if (savedSnapshot !== catalogSnapshot()) { event.preventDefault(); event.returnValue = ""; }
+  });
 })();
