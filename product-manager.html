@@ -15,7 +15,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="admin.css?v=20260929modern1">
-  <link rel="stylesheet" href="product-manager-admin.css?v=20261003gal5">
+  <link rel="stylesheet" href="product-manager-admin.css?v=20261013-all-products">
   <script src="site-api-config.js?v=20261009-inbox"></script>
   <script src="admin-config.js?v=20261009-inbox"></script>
   <script src="admin-api.js?v=20261013-speed2"></script>
@@ -121,12 +121,14 @@
   <div class="pl-toast" id="pmToast" role="status"></div>
 
   <script src="product-catalog-sync.js"></script>
+  <script src="product-catalog-sections.js?v=20261013-manager"></script>
   <script src="product-config.js?v=20261009-inbox"></script>
   <script src="product-utils.js?v=20260820stock"></script>
   <script src="category-products.js?v=20260820clean"></script>
   <script src="product-links-data.js"></script>
-  <script src="product-catalog-loader.js"></script>
-  <script src="product-manager-admin.js?v=20261003gal5"></script>
+  <script id="pmRawCatalog">window.MA_RAW_CATEGORY_PRODUCTS = JSON.parse(JSON.stringify(window.CATEGORY_PRODUCTS || {}));</script>
+  <script src="product-catalog-loader.js?v=20261013-manager"></script>
+  <script src="product-manager-admin.js?v=20261013-all-products"></script>
   <script>
     (function () {
       var sidebar = document.getElementById("admSidebar");

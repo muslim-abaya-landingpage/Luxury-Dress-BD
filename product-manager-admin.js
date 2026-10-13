@@ -8,7 +8,9 @@
 
   var sections = [];
   var products = {};
-  var activeKey = "";
+  var ALL_PRODUCTS_KEY = "__all_products__";
+  var activeKey = ALL_PRODUCTS_KEY;
+  var allSearchTerm = "";
   var categoryTypePrices = {};
   var searchTerm = "";
   var bulkSelected = {};
@@ -42,6 +44,24 @@
       window.applyProductLinks();
       products = cloneJson(window.CATEGORY_PRODUCTS || {});
     }
+    var rawCatalog = window.MA_RAW_CATEGORY_PRODUCTS || {};
+    Object.keys(products).forEach(function (key) {
+      if (!Array.isArray(products[key])) return;
+      products[key].forEach(function (product) {
+        var raw = (rawCatalog[key] || []).find(function (row) { return row && row.id === product.id && row.name === product.name; });
+        if (!raw) return;
+        Object.keys(raw).forEach(function (fieldName) {
+          if (fieldName === "__proto__" || fieldName === "constructor" || fieldName === "prototype") return;
+          if (!Object.prototype.hasOwnProperty.call(product, fieldName)) product[fieldName] = cloneJson(raw[fieldName]);
+        });
+      });
+    });
+    // Keep data-only categories visible and included when exporting the catalog.
+    Object.keys(products).forEach(function (key) {
+      if (!Array.isArray(products[key]) || sections.some(function (s) { return s.key === key; })) return;
+      sections.push({ key: key, menu: key.toUpperCase(), menuBn: key,
+        page: key + ".html", path: "/" + key });
+    });
     if (!activeKey && sections[0]) activeKey = sections[0].key;
     loadCategoryTypePrices();
   }
@@ -181,6 +201,19 @@
 
   function renderCatList() {
     catListEl.innerHTML = "";
+    var allItem = document.createElement("li");
+    var allButton = document.createElement("button");
+    allButton.type = "button";
+    allButton.className = "pm-cat-btn" + (activeKey === ALL_PRODUCTS_KEY ? " is-active" : "");
+    var total = sections.reduce(function (n, s) { return n + (products[s.key] || []).length; }, 0);
+    allButton.innerHTML = "সব প্রোডাক্ট<small>" + total + " এন্ট্রি · " + sections.length + " ক্যাটাগরি</small>";
+    allButton.addEventListener("click", function () {
+      activeKey = ALL_PRODUCTS_KEY;
+      renderCatList();
+      renderMain();
+    });
+    allItem.appendChild(allButton);
+    catListEl.appendChild(allItem);
     sections.forEach(function (sec, idx) {
       var li = document.createElement("li");
       var btn = document.createElement("button");
@@ -198,6 +231,7 @@
         "</small>";
       btn.addEventListener("click", function () {
         activeKey = sec.key;
+        searchTerm = "";
         renderCatList();
         renderMain();
       });
@@ -213,6 +247,10 @@
   }
 
   function renderMain() {
+    if (activeKey === ALL_PRODUCTS_KEY) {
+      renderAllProducts();
+      return;
+    }
     var sec = getActiveSection();
     if (!sec) {
       mainEl.innerHTML = '<p class="pm-empty">বাম থেকে ক্যাটাগরি বেছে নিন</p>';
@@ -408,6 +446,50 @@
         toast("নির্বাচিত প্রোডাক্ট মুছে ফেলা হয়েছে (Save চাপুন)");
       });
     }
+  }
+
+  function renderAllProducts() {
+    var rows = [];
+    sections.forEach(function (sec) {
+      (products[sec.key] || []).forEach(function (p, index) {
+        rows.push({ section: sec, product: p, index: index });
+      });
+    });
+    mainEl.innerHTML = '<div class="pm-cat-head"><h2>সব ক্যাটাগরির প্রোডাক্ট</h2>' +
+      '<p class="pl-section-meta">নাম, SKU বা ক্যাটাগরি দিয়ে খুঁজুন। সম্পাদনা করতে সংশ্লিষ্ট ক্যাটাগরি খুলুন।</p></div>' +
+      '<div class="pm-search-row"><input type="search" id="pmAllSearch" placeholder="সব ক্যাটাগরিতে খুঁজুন…" value="' + escapeAttr(allSearchTerm) +
+      '"><span id="pmAllCount" class="pm-search-count"></span></div>' +
+      '<div class="pm-overview-wrap"><table class="pm-overview"><thead><tr><th>প্রোডাক্ট / SKU</th><th>ক্যাটাগরি</th><th>বেস দাম</th><th>স্টক</th><th>সম্পাদনা</th></tr></thead><tbody id="pmAllRows"></tbody></table></div>';
+    function draw() {
+      var term = allSearchTerm.trim().toLowerCase();
+      var visible = rows.filter(function (row) {
+        var p = row.product, s = row.section;
+        return [p.name, p.id, s.key, s.menu, s.menuBn].join(" ").toLowerCase().indexOf(term) !== -1;
+      });
+      document.getElementById("pmAllCount").textContent = visible.length + " / " + rows.length + " এন্ট্রি";
+      document.getElementById("pmAllRows").innerHTML = visible.map(function (row) {
+        var p = row.product, s = row.section;
+        var out = p.inStock === false || (typeof p.stock === "number" && p.stock <= 0);
+        return '<tr><td><strong>' + escapeHtml(p.name || "Product") + '</strong><small>' + escapeHtml(p.id || "SKU নেই") +
+          '</small></td><td>' + escapeHtml(s.menuBn || s.menu || s.key) + '</td><td>৳' + (parseInt(p.price, 10) || 0) +
+          '</td><td>' + (out ? "স্টক নেই" : p.stock == null ? "স্টকে আছে" : escapeHtml(p.stock) + "টি") +
+          '</td><td><button type="button" class="pl-btn pl-btn-secondary" data-pm-cat="' + escapeAttr(s.key) +
+          '" data-pm-index="' + row.index + '">এডিট</button></td></tr>';
+      }).join("") || '<tr><td colspan="5" class="pm-empty">কোনো প্রোডাক্ট পাওয়া যায়নি</td></tr>';
+      document.querySelectorAll("[data-pm-cat]").forEach(function (button) {
+        button.addEventListener("click", function () {
+          activeKey = button.getAttribute("data-pm-cat");
+          var index = parseInt(button.getAttribute("data-pm-index"), 10);
+          searchTerm = "";
+          renderCatList();
+          renderMain();
+          var cards = document.querySelectorAll(".pm-product-card");
+          if (cards[index]) cards[index].scrollIntoView({ block: "start" });
+        });
+      });
+    }
+    document.getElementById("pmAllSearch").addEventListener("input", function (e) { allSearchTerm = e.target.value; draw(); });
+    draw();
   }
 
   function buildCategoryTypePricePanel(catKey) {
@@ -1313,6 +1395,13 @@
         lines.push(ind + "  },");
       }
     }
+    // Preserve variant data and future product fields even when this editor has
+    // no dedicated control for them. Saving must not silently strip catalog data.
+    Object.keys(p).forEach(function (key) {
+      if (order.indexOf(key) !== -1 || key === "inStock" || key === "priceByType" || key === "_catalogNormalized") return;
+      var value = JSON.stringify(p[key]);
+      if (value !== undefined) lines.push(ind + "  " + jsKey(key) + ": " + value + ",");
+    });
     if (lines[lines.length - 1].slice(-1) === ",") {
       lines[lines.length - 1] = lines[lines.length - 1].slice(0, -1);
     }

@@ -1,6 +1,14 @@
 /* Product manager — shared with product-links look */
 @import url("product-links-admin.css");
 
+.pm-overview-wrap { overflow-x: auto; border: 1px solid #e8e8e8; border-radius: 8px; background: #fff; }
+.pm-overview { width: 100%; min-width: 580px; border-collapse: collapse; font-size: 14px; }
+.pm-overview th, .pm-overview td { padding: 13px 14px; border-bottom: 1px solid #eee; text-align: left; vertical-align: middle; }
+.pm-overview th { background: #f8f8f8; color: #555; font-weight: 600; white-space: nowrap; }
+.pm-overview td small { display: block; margin-top: 4px; color: #777; font-size: 12px; }
+.pm-overview tbody tr:last-child td { border-bottom: 0; }
+.pm-overview tbody tr:hover { background: #fafafa; }
+
 .pm-layout {
   display: grid;
   grid-template-columns: minmax(220px, 280px) 1fr;
