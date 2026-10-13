@@ -472,10 +472,19 @@
         var out = p.inStock === false || (typeof p.stock === "number" && p.stock <= 0);
         return '<tr><td><strong>' + escapeHtml(p.name || "Product") + '</strong><small>' + escapeHtml(p.id || "SKU নেই") +
           '</small></td><td>' + escapeHtml(s.menuBn || s.menu || s.key) + '</td><td>৳' + (parseInt(p.price, 10) || 0) +
-          '</td><td>' + (out ? "স্টক নেই" : p.stock == null ? "স্টকে আছে" : escapeHtml(p.stock) + "টি") +
+          '</td><td><button type="button" class="pl-btn pm-overview-stock" data-stock-cat="' + escapeAttr(s.key) + '" data-stock-index="' + row.index + '" aria-pressed="' + out + '">' + (out ? '🔴 স্টক নেই' : '🟢 স্টকে আছে') + '</button>' +
           '</td><td><button type="button" class="pl-btn pl-btn-secondary" data-pm-cat="' + escapeAttr(s.key) +
           '" data-pm-index="' + row.index + '">এডিট</button></td></tr>';
       }).join("") || '<tr><td colspan="5" class="pm-empty">কোনো প্রোডাক্ট পাওয়া যায়নি</td></tr>';
+      document.querySelectorAll("[data-stock-cat]").forEach(function (button) {
+        button.addEventListener("click", function () {
+          var p = products[button.getAttribute("data-stock-cat")][parseInt(button.getAttribute("data-stock-index"), 10)];
+          toggleStock(p);
+          draw();
+          toast((p.name || "প্রোডাক্ট") + " — স্টক পরিবর্তন হয়েছে। Save Data চাপুন।");
+          setSaveStatus("পরিবর্তন এখনও সেভ হয়নি — Save Data চাপুন।");
+        });
+      });
       document.querySelectorAll("[data-pm-cat]").forEach(function (button) {
         button.addEventListener("click", function () {
           activeKey = button.getAttribute("data-pm-cat");
@@ -556,6 +565,21 @@
       .join("");
   }
 
+  function toggleStock(p) {
+    if (p.inStock === false || (typeof p.stock === "number" && p.stock <= 0)) {
+      delete p.inStock;
+      if (typeof p.stock === "number" && p.stock <= 0) delete p.stock;
+    } else {
+      p.stock = 0;
+      p.inStock = false;
+    }
+  }
+
+  function setSaveStatus(message) {
+    var el = document.getElementById("pmSaveStatus");
+    if (el) el.textContent = message;
+  }
+
   function buildProductCard(catKey, p, idx) {
     ensureProductPriceByType(p, catKey);
     var card = document.createElement("article");
@@ -633,13 +657,8 @@
     });
 
     card.querySelector(".pm-stock-toggle").addEventListener("click", function () {
-      if (p.inStock === false || (typeof p.stock === "number" && p.stock <= 0)) {
-        delete p.inStock;
-        if (typeof p.stock === "number" && p.stock <= 0) delete p.stock;
-      } else {
-        p.stock = 0;
-        p.inStock = false;
-      }
+      toggleStock(p);
+      setSaveStatus("পরিবর্তন এখনও সেভ হয়নি — Save Data চাপুন।");
       renderMain();
       toast(
         p.inStock === false || p.stock === 0
@@ -1253,7 +1272,7 @@
   }
 
   function escapeHtml(s) {
-    return String(s || "")
+    return String(s == null ? "" : s)
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;");
@@ -1761,6 +1780,8 @@
   window.openMediaLibrary = openMediaLibrary;
 
   function saveAll() {
+    var saveButton = document.getElementById("pmSave");
+    if (saveButton.disabled) return;
     stripHomeLinksFromProducts();
 
     var sectionsContent = generateSectionsFile();
@@ -1811,6 +1832,8 @@
     // GitHub-এ অটো-পাবলিশ চেষ্টা (Admin লগইন থাকলেই কাজ করবে)। শুধু লগইন করা না
     // থাকলে বা পাবলিশ ব্যর্থ হলেই লোকাল ফাইল ডাউনলোড হবে (ব্যাকআপ হিসেবে) —
     // সফল হলে আর অটো-ডাউনলোড হবে না।
+    saveButton.disabled = true;
+    setSaveStatus("GitHub-এ সেভ হচ্ছে… অপেক্ষা করুন।");
     toast("GitHub-এ পাবলিশ হচ্ছে...");
 
     var files = [
@@ -1823,7 +1846,9 @@
     }
 
     publishFilesToGitHub(files).then(function (out) {
+      saveButton.disabled = false;
       if (!out.attempted) {
+        setSaveStatus("সাইটে সেভ হয়নি। Admin লগইন প্রয়োজন; ব্যাকআপ ফাইল ডাউনলোড হয়েছে।");
         downloadAllLocal();
         toast("লোকাল ফাইল ডাউনলোড হয়েছে — GitHub অটো-পাবলিশের জন্য Admin লগইন করুন (admin-login.html)");
         return;
@@ -1832,14 +1857,20 @@
         return !r.res || !r.res.ok;
       });
       if (!failed.length) {
-        toast("✅ পাবলিশ সফল! Netlify ১-২ মিনিটে সাইট আপডেট করবে।");
+        setSaveStatus("✅ GitHub-এ সেভ হয়েছে। সাইটের Deploy শেষ হলে পরিবর্তন দেখা যাবে।");
+        toast("✅ GitHub-এ সেভ সফল! সাইটের Deploy সম্পন্ন হওয়া পর্যন্ত অপেক্ষা করুন।");
       } else {
+        setSaveStatus("⚠️ কিছু ফাইল সেভ হয়নি। আবার Save চাপুন; ব্যাকআপ ডাউনলোড হয়েছে।");
         downloadAllLocal();
         var firstErr = failed[0].res ? failed[0].res.message || failed[0].res.error : "অজানা সমস্যা";
         toast(
           "⚠️ " + failed.length + "টি ফাইল পাবলিশ ব্যর্থ (" + firstErr + ") — ডাউনলোড হওয়া ফাইল ম্যানুয়ালি আপলোড করুন"
         );
       }
+    }).catch(function () {
+      saveButton.disabled = false;
+      setSaveStatus("⚠️ সংযোগ সমস্যায় সেভ নিশ্চিত হয়নি। আবার Save চাপুন।");
+      toast("সেভ ব্যর্থ — আবার চেষ্টা করুন।");
     });
   }
 

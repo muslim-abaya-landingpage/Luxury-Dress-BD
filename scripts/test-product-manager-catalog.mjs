@@ -15,13 +15,13 @@ function fixture(extra) {
   vm.runInContext(source('product-catalog-loader.js'), ctx);
   const app = source('product-manager-admin.js').replace(
     '  loadState();\n  renderCatList();\n  renderMain();\n})();',
-    '  window.testManager = { loadState, generateProductsFile, state() { return { sections, products }; } };\n})();'
+    '  window.testManager = { loadState, generateProductsFile, toggleStock, escapeAttr, state() { return { sections, products }; } };\n})();'
   );
   vm.runInContext(app, ctx);
   window.testManager.loadState();
   const result = vm.createContext({ window: {} });
   vm.runInContext(window.testManager.generateProductsFile(), result);
-  return { original, state: window.testManager.state(), exported: result.window.CATEGORY_PRODUCTS };
+  return { manager: window.testManager, original, state: window.testManager.state(), exported: result.window.CATEGORY_PRODUCTS };
 }
 test('all registered categories and every catalog entry survive editor loading and export', () => {
   const f = fixture();
@@ -38,4 +38,20 @@ test('an unlisted category remains visible and source variant/custom fields surv
   const product = f.exported['unlisted-category'][0];
   assert.equal(product.customData.preserve, true);
   assert.equal(product.colorVariants[0].color, 'Blue');
+});
+
+test('stock toggle exports zero and numeric zero remains visible', () => {
+  const f = fixture();
+  const p = f.state.products.abaya[0];
+  f.manager.toggleStock(p);
+  assert.equal(p.stock, 0);
+  assert.equal(p.inStock, false);
+  assert.equal(f.manager.escapeAttr(0), '0');
+  const out = vm.createContext({ window: {} });
+  vm.runInContext(f.manager.generateProductsFile(), out);
+  assert.equal(out.window.CATEGORY_PRODUCTS.abaya[0].stock, 0);
+  assert.equal(out.window.CATEGORY_PRODUCTS.abaya[0].inStock, false);
+  f.manager.toggleStock(p);
+  assert.equal(p.stock, undefined);
+  assert.equal(p.inStock, undefined);
 });

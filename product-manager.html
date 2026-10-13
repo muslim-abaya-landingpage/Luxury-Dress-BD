@@ -15,7 +15,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="admin.css?v=20260929modern1">
-  <link rel="stylesheet" href="product-manager-admin.css?v=20261013-all-products">
+  <link rel="stylesheet" href="product-manager-admin.css?v=20261013-stock-controls">
   <script src="site-api-config.js?v=20261009-inbox"></script>
   <script src="admin-config.js?v=20261009-inbox"></script>
   <script src="admin-api.js?v=20261013-speed2"></script>
@@ -60,6 +60,7 @@
           <button type="button" class="pl-btn pl-btn-secondary" id="pmReload">Reload Current Data</button>
           <a class="pl-btn pl-btn-secondary" href="product-links.html" style="text-decoration:none;display:inline-flex;align-items:center" title="Categories — Product Link URL">Product Links</a>
         </div>
+        <p id="pmSaveStatus" role="status" aria-live="polite">স্টক পরিবর্তনের পর Save Data চাপুন।</p>
       </header>
 
       <main class="pl-main">
@@ -128,7 +129,7 @@
   <script src="product-links-data.js"></script>
   <script id="pmRawCatalog">window.MA_RAW_CATEGORY_PRODUCTS = JSON.parse(JSON.stringify(window.CATEGORY_PRODUCTS || {}));</script>
   <script src="product-catalog-loader.js?v=20261013-manager"></script>
-  <script src="product-manager-admin.js?v=20261013-all-products"></script>
+  <script src="product-manager-admin.js?v=20261013-stock-controls"></script>
   <script>
     (function () {
       var sidebar = document.getElementById("admSidebar");
