@@ -902,8 +902,11 @@
   }
 
   // Called by index-catalog-defer.js once catalog scripts finish loading.
-  window.__homeRefreshCatalog = function () {
-    afterHomeCss(renderAll);
+  window.__homeRefreshCatalog = function (options) {
+    if (options && options.initial && rendered) return;
+    afterHomeCss(function () {
+      if (!options || !options.initial || !rendered) renderAll();
+    });
   };
 
   function boot() {

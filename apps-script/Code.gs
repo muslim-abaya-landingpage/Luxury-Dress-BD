@@ -84,8 +84,6 @@ function doGet(e) {
 
 function doPost(e) {
   try {
-    selfHealSteadfastBaseUrl_();
-    selfHealAutoCourierSetup_();
     if (e && e.postData && e.postData.contents &&
         e.postData.contents.indexOf('"object":"page"') !== -1) {
       return messengerWebhook_(e);
@@ -98,6 +96,12 @@ function doPost(e) {
     var isSubscribe =
       type === 'Subscribe' ||
       (!type && !isOrder && (param_(e, 'contact') || param_(e, 'email')));
+
+    // Courier repair belongs to order creation, never dashboard/inbox reads.
+    if (isOrder) {
+      selfHealSteadfastBaseUrl_();
+      selfHealAutoCourierSetup_();
+    }
 
     if (type === 'CartCheckpoint') {
       return jsonOut_(saveCartCheckpoint_(e));

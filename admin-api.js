@@ -32,14 +32,14 @@
       .sort().map(function (k) { return [k, String(fields[k] == null ? "" : fields[k])]; }));
   }
 
-  // Same-tab snapshots are display-only: every load still requests current server data.
-  function cached(recordType, fields) {
+  // Session-scoped snapshots: navigation may reuse a result for 15 seconds; Refresh is always live.
+  function cached(recordType, fields, maxAgeMs) {
     var s = getSession();
     if (!s || READ_TYPES.indexOf(recordType) === -1) return null;
     var params = Object.assign({}, fields || {}, { RecordType: recordType });
     try {
       var entry = JSON.parse(sessionStorage.getItem(readKey(params)) || "null");
-      if (entry && entry.token === s.token && Date.now() - entry.at < SNAPSHOT_MS) return entry.result;
+      if (entry && entry.token === s.token && Date.now() - entry.at < (maxAgeMs || SNAPSHOT_MS)) return entry.result;
     } catch (e) {}
     return null;
   }
@@ -52,9 +52,13 @@
     });
   }
 
-  function request(fields, timeout) {
+  function request(fields, timeout, options) {
     if (!API_URL) return Promise.reject(new Error("API_MISSING"));
     var read = READ_TYPES.indexOf(fields.RecordType) !== -1;
+    // Only page navigation opts in; Refresh and every write still reach the server.
+    var maxAge = Math.min(15000, Math.max(0, Number(options && options.maxAgeMs) || 0));
+    var recent = read && maxAge ? cached(fields.RecordType, fields, maxAge) : null;
+    if (recent) return Promise.resolve(recent);
     var key = read ? readKey(fields) : "";
     var flightKey = fields.Token + ":" + key;
     if (read && inFlight[flightKey]) return inFlight[flightKey];
@@ -91,8 +95,8 @@
     return task;
   }
 
-  function apiPost(fields) {
-    return request(fields, 30000).catch(function (err) {
+  function apiPost(fields, options) {
+    return request(fields, 30000, options).catch(function (err) {
       return { ok: false, error: "NETWORK_FAILURE", message: err.message };
     });
   }
@@ -192,14 +196,14 @@
     });
   }
 
-  function fetchOrders(limit) {
+  function fetchOrders(limit, options) {
     var s = getSession();
     if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
     return apiPost({
       RecordType: "AdminOrders",
       Token: s.token,
       Limit: limit || 80
-    }).then(function (res) {
+    }, options).then(function (res) {
       if (!res.ok) throw new Error(res.message || res.error || "ORDERS_FAILED");
       if (res.sheetUrl) {
         s.sheetUrl = res.sheetUrl;
@@ -452,11 +456,11 @@
   // so a field can be cleared (e.g. un-assigning a conversation).
   function inboxCall(type, fields) { return call(type, fields); }
 
-  function call(recordType, fields) {
+  function call(recordType, fields, options) {
     var s = getSession();
     if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
     var params = Object.assign({}, fields || {}, { RecordType: recordType, Token: s.token });
-    return request(params, 30000).then(function (res) {
+    return request(params, 30000, options).then(function (res) {
       if (!res.ok) {
         var err = new Error(res.message || res.error || "REQUEST_FAILED");
         err.code = res.error || "";

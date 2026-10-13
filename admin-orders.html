@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <link rel="preload" as="script" href="site-api-config.js?v=20261009-inbox">
   <link rel="preload" as="script" href="admin-config.js?v=20261009-inbox">
-  <link rel="preload" as="script" href="admin-api.js?v=20261010-speed">
+  <link rel="preload" as="script" href="admin-api.js?v=20261013-speed2">
   <link rel="preload" as="script" href="admin-guard.js?v=20261010-speed">
   <link rel="preload" as="script" href="admin-panel.js?v=20260930">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -56,7 +56,7 @@
 
   <script src="site-api-config.js?v=20261009-inbox"></script>
   <script src="admin-config.js?v=20261009-inbox"></script>
-  <script src="admin-api.js?v=20261010-speed"></script>
+  <script src="admin-api.js?v=20261013-speed2"></script>
   <script src="admin-guard.js?v=20261010-speed"></script>
   <script src="admin-panel.js?v=20260930"></script>
   <script>
@@ -125,14 +125,14 @@
         renderRows();
       }
 
-      function load() {
+      function load(options) {
         var cached = MaAdmin.cached("AdminOrderList", { Limit: 300 });
         if (cached) apply(cached);
         var btn = document.getElementById("ordRefresh");
         btn.disabled = true;
         document.getElementById("ordCount").textContent = (ordersShown ? (counts.all || 0) + " orders · " : "") + "আপডেট হচ্ছে…";
         if (!ordersShown) document.getElementById("ordBody").innerHTML = '<tr><td colspan="7" class="pn-empty">অর্ডার আনা হচ্ছে…</td></tr>';
-        return MaAdmin.call("AdminOrderList", { Limit: 300 }).then(apply).catch(function (err) {
+        return MaAdmin.call("AdminOrderList", { Limit: 300 }, options).then(apply).catch(function (err) {
           if (ordersShown) { MaPanel.toast("আপডেট করা যায়নি: " + err.message, true); return; }
           document.getElementById("ordBody").innerHTML = '<tr><td colspan="7" class="pn-empty">Error: ' + esc(err.message) + "</td></tr>";
         }).then(function () { btn.disabled = false; });
@@ -155,7 +155,7 @@
       });
       document.getElementById("ordRefresh").addEventListener("click", load);
 
-      MaPanel.init("orders").then(function (s) { if (s) load(); });
+      MaPanel.init("orders").then(function (s) { if (s) load({ maxAgeMs: 15000 }); });
     })();
   </script>
 </body>

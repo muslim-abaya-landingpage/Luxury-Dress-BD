@@ -62,3 +62,20 @@ test('successful login marks verification to avoid an extra login-to-dashboard r
  f.calls[0].reply({ok:true,token:'new-session',role:'admin',expires:Date.now()+60000});await p;
  await f.window.MaAdminGuard.require();assert.equal(f.calls.length,1);
 });
+test('page navigation reuses a recent read; Refresh still requests server data',async()=>{
+ const f=fixture(),api=f.window.MaAdmin;
+ let p=api.call('AdminOrderList',{Limit:300});f.calls[0].reply({ok:true,orders:[{orderId:'one'}]});await p;
+ assert.equal((await api.call('AdminOrderList',{Limit:300},{maxAgeMs:15000})).orders[0].orderId,'one');assert.equal(f.calls.length,1);
+ p=api.call('AdminOrderList',{Limit:300});assert.equal(f.calls.length,2);f.calls[1].reply({ok:true,orders:[]});await p;
+});
+test('navigation reuse expires and never survives mutation or another session',async()=>{
+ const f=fixture(),api=f.window.MaAdmin;
+ let p=api.call('AdminOrders',{Limit:100});f.calls[0].reply({ok:true,orders:[]});await p;
+ const key=[...Array(f.sessionStorage.length)].map((_,i)=>f.sessionStorage.key(i)).find(k=>k.startsWith('ma_admin_read_v2:'));
+ const entry=JSON.parse(f.sessionStorage.getItem(key));entry.at=Date.now()-16000;f.sessionStorage.setItem(key,JSON.stringify(entry));
+ p=api.call('AdminOrders',{Limit:100},{maxAgeMs:15000});assert.equal(f.calls.length,2);f.calls[1].reply({ok:true,orders:[]});await p;
+ const mutation=api.call('AdminOrderUpdate',{OrderId:'one'});f.calls[2].reply({ok:true});await mutation;
+ p=api.call('AdminOrders',{Limit:100},{maxAgeMs:15000});assert.equal(f.calls.length,4);f.calls[3].reply({ok:true,orders:[]});await p;
+ f.localStorage.setItem('ma_admin_session',JSON.stringify({token:'other-session',role:'admin',expires:Date.now()+60000}));
+ p=api.call('AdminOrders',{Limit:100},{maxAgeMs:15000});assert.equal(f.calls.length,5);f.calls[4].reply({ok:true,orders:[]});await p;
+});

@@ -262,3 +262,11 @@ for (const withSize of [true, false]) {
     assert.equal(rows[0][9], "Pending");
   });
 }
+test('admin reads bypass courier repair while order creation still repairs its setup',()=>{
+ const f=fixture(), calls=[];
+ Object.assign(f.ctx,{selfHealSteadfastBaseUrl_:()=>calls.push('base'),selfHealAutoCourierSetup_:()=>calls.push('trigger'),handleAdminOrderRequest_:()=>({ok:true}),handleOnlineOrderPost_:()=>({ok:true}),jsonOut_:x=>x});
+ assert.equal(f.ctx.doPost({parameter:{RecordType:'AdminOrderList',Token:'test'}}).ok,true);
+ assert.deepEqual(calls,[]);
+ assert.equal(f.ctx.doPost({parameter:{RecordType:'Order'}}).ok,true);
+ assert.deepEqual(calls,['base','trigger']);
+});

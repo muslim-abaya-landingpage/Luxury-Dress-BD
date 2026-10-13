@@ -27,7 +27,7 @@
 
   function afterCatalog() {
     if (typeof window.__homeRefreshCatalog === "function") {
-      window.__homeRefreshCatalog({ deferHero: true });
+      window.__homeRefreshCatalog({ initial: true });
     }
     // index.html listens for this to start index-home-muslim-abaya.js /
     // related-cart.js as soon as the catalog is actually ready, instead of
@@ -73,6 +73,10 @@
   }
 
   function start() {
+    if (window.maCatalog && window.CATEGORY_PRODUCTS && window.CATALOG_SECTIONS) {
+      afterCatalog();
+      return;
+    }
     loadAt(0);
   }
 

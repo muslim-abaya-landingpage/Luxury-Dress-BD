@@ -226,3 +226,12 @@ for (const resizeObserver of [true, false]) test(`review carousel ignores height
 test('all changed JavaScript still parses', () => {
   for (const file of ['site-header.js', 'site-footer.js', 'customer-reviews.js', 'index-home-muslim-abaya.js']) new vm.Script(source(file), { filename: file });
 });
+test('late catalog-ready notification preserves rendered cards; explicit refresh still renders', () => {
+  const env = environment();
+  const api = env.expose('index-home-muslim-abaya.js', '{ prepare(fn) { renderAll = fn; rendered = true; } }');
+  let paints = 0; api.prepare(() => { paints++; return true; });
+  env.ctx.__homeRefreshCatalog({ initial: true });
+  assert.equal(paints, 0);
+  env.ctx.__homeRefreshCatalog();
+  assert.equal(paints, 1);
+});
