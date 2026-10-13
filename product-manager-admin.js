@@ -15,6 +15,7 @@
   var overviewStock = "";
   var overviewSelected = {};
   var savedSnapshot = "";
+  var stockPublishing = false;
   function catalogSnapshot() { return JSON.stringify([sections, products, categoryTypePrices]); }
   var categoryTypePrices = {};
   var searchTerm = "";
@@ -505,10 +506,7 @@
       document.querySelectorAll("[data-stock-cat]").forEach(function (button) {
         button.addEventListener("click", function () {
           var p = products[button.getAttribute("data-stock-cat")][parseInt(button.getAttribute("data-stock-index"), 10)];
-          toggleStock(p);
-          draw();
-          toast((p.name || "প্রোডাক্ট") + " — স্টক পরিবর্তন হয়েছে। Save Data চাপুন।");
-          setSaveStatus("পরিবর্তন এখনও সেভ হয়নি — Save Data চাপুন।");
+          publishStockToggle(p, draw);
         });
       });
       document.querySelectorAll("[data-pm-cat]").forEach(function (button) {
@@ -607,6 +605,54 @@
       .join("");
   }
 
+  function publishStockToggle(p, redraw) {
+    if (stockPublishing || document.getElementById("pmSave").disabled) return Promise.resolve(false);
+    if (!window.MaAdmin || !window.MaAdmin.isLoggedIn || !window.MaAdmin.isLoggedIn()) {
+      setSaveStatus("স্টক বদলাতে Admin লগইন করুন। কোনো পরিবর্তন হয়নি।");
+      toast("Admin লগইন প্রয়োজন।");
+      return Promise.resolve(false);
+    }
+    if (savedSnapshot !== catalogSnapshot()) {
+      setSaveStatus("অন্য সম্পাদনা সেভ করা বাকি। আগে Save Data চাপুন, তারপর এক ক্লিকে স্টক বদলান।");
+      return Promise.resolve(false);
+    }
+    var old = { stock: p.stock, inStock: p.inStock };
+    toggleStock(p);
+    var content = generateProductsFile();
+    stockPublishing = true;
+    document.getElementById("pmSave").disabled = true;
+    redraw();
+    setSaveStatus("স্টক স্বয়ংক্রিয়ভাবে সেভ হচ্ছে…");
+    return Promise.resolve().then(function () {
+      return window.MaAdmin.publishFile("category-products.js", content, "Update product stock — " + (p.id || p.name || "Product"));
+    }).then(function (result) {
+      if (!result || !result.ok) throw new Error(result && (result.message || result.error) || "সেভ ব্যর্থ");
+      // Mark only this stock change saved; preserve warnings for edits made during the request.
+      var baseline = JSON.parse(savedSnapshot);
+      Object.keys(products).forEach(function (key) {
+        var index = products[key].indexOf(p);
+        if (index >= 0 && baseline[1][key] && baseline[1][key][index]) {
+          var row = baseline[1][key][index];
+          if (p.stock === undefined) delete row.stock; else row.stock = p.stock;
+          if (p.inStock === undefined) delete row.inStock; else row.inStock = p.inStock;
+        }
+      });
+      savedSnapshot = JSON.stringify(baseline);
+      setSaveStatus("✅ স্টক সেভ হয়েছে। ওয়েবসাইটের Deploy শেষ হলে আপডেট দেখা যাবে।");
+      return true;
+    }).catch(function (error) {
+      if (old.stock === undefined) delete p.stock; else p.stock = old.stock;
+      if (old.inStock === undefined) delete p.inStock; else p.inStock = old.inStock;
+      setSaveStatus("⚠️ স্টক সেভ হয়নি: " + error.message + " — আগের স্টক ফিরিয়ে দেওয়া হয়েছে।");
+      return false;
+    }).then(function (ok) {
+      stockPublishing = false;
+      document.getElementById("pmSave").disabled = false;
+      renderMain();
+      return ok;
+    });
+  }
+
   function toggleStock(p) {
     if (p.inStock === false || (typeof p.stock === "number" && p.stock <= 0)) {
       delete p.inStock;
@@ -699,14 +745,7 @@
     });
 
     card.querySelector(".pm-stock-toggle").addEventListener("click", function () {
-      toggleStock(p);
-      setSaveStatus("পরিবর্তন এখনও সেভ হয়নি — Save Data চাপুন।");
-      renderMain();
-      toast(
-        p.inStock === false || p.stock === 0
-          ? (p.name || "প্রোডাক্ট") + " — স্টক নেই করা হয়েছে (Save চাপুন)"
-          : (p.name || "প্রোডাক্ট") + " — স্টকে ফেরত আনা হয়েছে (Save চাপুন)"
-      );
+      publishStockToggle(p, renderMain);
     });
 
     card.querySelector(".pm-del").addEventListener("click", function () {
