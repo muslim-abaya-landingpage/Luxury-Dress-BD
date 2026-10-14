@@ -1,0 +1,48 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+import vm from 'node:vm';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const read = f => fs.readFileSync(path.join(root,f),'utf8');
+const sitemap=read('sitemap.xml');
+const ctx={window:{},console};vm.createContext(ctx);
+for(const f of ['product-config.js','product-utils.js','category-products.js','product-links-data.js','product-catalog-sync.js'])vm.runInContext(read(f),ctx);
+const w=ctx.window;
+const cats=w.maCatalog.normalizeAll(w.CATEGORY_PRODUCTS,w.PRODUCT_LINKS_DATA||w.PRODUCT_IMAGE_LISTS||{});
+let count=0;
+for(const [cat,rows] of Object.entries(cats))for(const p of rows){
+  const html=read('product/'+p.id+'.html');const url='https://muslimabaya.com/product/'+encodeURIComponent(p.id);
+  assert(html.includes('<link rel="canonical" href="'+url+'">'));
+  assert(sitemap.includes('<loc>'+url+'</loc>'));
+  assert(html.includes('data-product-id="'+p.id+'"'));
+  assert(html.includes('data-shop-category="'+cat+'"'));
+  assert(html.includes('<h1>'));
+  assert(!/\b(?:src|href)="(?:site-|product-|category-|images\/)/.test(html));
+  const data=[...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(m=>JSON.parse(m[1]));
+  const product=data.find(d=>d['@type']==='Product');
+  assert.equal(product.sku,p.id);assert.equal(product.offers.price,p.price);assert.equal(product.offers.url,url);
+  assert.equal(product.offers.availability,'https://schema.org/'+(w.maCatalog.getStockStatus(p).inStock?'InStock':'OutOfStock'));
+  count++;
+}
+// The same renderer boot must resolve path-based pages and old hash URLs.
+const renderer=read('category-renderer.js');
+const getFn=name=>renderer.slice(renderer.indexOf('function '+name+'('),renderer.indexOf('\n}',renderer.indexOf('function '+name+'('))+2);
+const test={window:{location:{hash:''}},document:{documentElement:{getAttribute:()=> 'ABY-BLK-3P-02'}},shopCartCtx:{products:[{id:'ABY-BLK-3P-02'}]},decodeURIComponent,opened:null};
+test.openProductQuickView=i=>test.opened=i;vm.createContext(test);
+vm.runInContext(getFn('findProductIdxById')+'\n'+getFn('openProductFromLocationHash'),test);
+test.openProductFromLocationHash();assert.equal(test.opened,0);
+test.document.documentElement.getAttribute=()=>null;test.window.location.hash='#p=ABY-BLK-3P-02';test.opened=null;test.openProductFromLocationHash();assert.equal(test.opened,0);
+test.window.location.hash='#p-0';test.opened=null;test.openProductFromLocationHash();assert.equal(test.opened,0);
+const header=read('site-header.js');const hrefFn=header.slice(header.indexOf('  function siteHref('),header.indexOf('\n  }',header.indexOf('  function siteHref('))+4);
+const links={prefersCleanUrls:()=>true};vm.createContext(links);vm.runInContext(hrefFn,links);
+for(const [input,expected] of [['/privacy','/privacy'],['privacy.html','/privacy'],['/order-track','/order-track'],['/help#order-status','/help#order-status'],['/product/ABY-BLK-3P-02','/product/ABY-BLK-3P-02'],['https://example.com','https://example.com']])assert.equal(links.siteHref(input),expected);
+w.location={protocol:'https:'};assert.equal(w.maCatalog.resolveImageUrl('images/test.webp'),'/images/test.webp');
+assert(read('home-render.min.js').includes('return x("/product/"+encodeURIComponent(t.id||""))'));
+assert(renderer.includes('href="/product/'));
+// Back navigation may only select a fixed, safe collection route.
+let backKey='abaya';
+const back={document:{documentElement:{hasAttribute:()=>true}},window:{location:{href:''}},getShopCategoryKey:()=>backKey};
+vm.createContext(back);vm.runInContext(getFn('closeProductQuickView'),back);
+for(const [key,expected] of [['abaya','/abaya'],['premium-two-piece','/premium-two-piece'],['javascript:alert(1)','/category'],['__proto__','/category'],['//example.com','/category']]){backKey=key;back.closeProductQuickView(false);assert.equal(back.window.location.href,expected);}
+console.log(`PASS: ${count} product pages, schema, sitemap, legacy hash boot, nested-page links, images and home links.`);

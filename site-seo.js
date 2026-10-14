@@ -323,8 +323,8 @@
             "@type": "Offer",
             price: price,
             priceCurrency: "BDT",
-            availability: "https://schema.org/InStock",
-            url: pathToCanonical(path)
+            availability: "https://schema.org/" + (p.inStock === false || (p.stock != null && Number(p.stock) <= 0) ? "OutOfStock" : "InStock"),
+            url: SITE + "/product/" + encodeURIComponent(p.id)
           }
         }
       };
@@ -383,6 +383,8 @@
   }
 
   function apply() {
+    // Generated product pages already have stable, product-specific HTML meta.
+    if (document.documentElement.hasAttribute('data-product-id')) return;
     var info = resolvePageMeta();
     var path = normalizePath(global.location && global.location.pathname);
 
@@ -447,3 +449,4 @@
     scheduleCategorySchemaRefresh();
   }
 })(typeof window !== "undefined" ? window : this);
+
