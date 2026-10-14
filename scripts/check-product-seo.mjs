@@ -40,4 +40,9 @@ for(const [input,expected] of [['/privacy','/privacy'],['privacy.html','/privacy
 w.location={protocol:'https:'};assert.equal(w.maCatalog.resolveImageUrl('images/test.webp'),'/images/test.webp');
 assert(read('home-render.min.js').includes('return x("/product/"+encodeURIComponent(t.id||""))'));
 assert(renderer.includes('href="/product/'));
+// Back navigation may only select a fixed, safe collection route.
+let backKey='abaya';
+const back={document:{documentElement:{hasAttribute:()=>true}},window:{location:{href:''}},getShopCategoryKey:()=>backKey};
+vm.createContext(back);vm.runInContext(getFn('closeProductQuickView'),back);
+for(const [key,expected] of [['abaya','/abaya'],['premium-two-piece','/premium-two-piece'],['javascript:alert(1)','/category'],['__proto__','/category'],['//example.com','/category']]){backKey=key;back.closeProductQuickView(false);assert.equal(back.window.location.href,expected);}
 console.log(`PASS: ${count} product pages, schema, sitemap, legacy hash boot, nested-page links, images and home links.`);
