@@ -110,12 +110,15 @@ function ensureCategoryStyles() {
 function getShopCategoryKey() {
   var root = document.documentElement;
   var body = document.body;
-  return (
+  var raw =
     (root && root.getAttribute("data-shop-category")) ||
     (body && body.getAttribute("data-shop-category")) ||
     shopCartCtx.categoryKey ||
-    ""
-  );
+    "";
+  var key = String(raw).trim();
+  key = key.replace(/^\/+|\/+$/g, "");
+  key = key.replace(/[^A-Za-z0-9_/-]/g, "");
+  return key;
 }
 
 function setShopCategoryKey(key) {
