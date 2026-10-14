@@ -1643,7 +1643,16 @@ function teardownStickyOrderBar() {
 }
 function closeProductQuickView(skipHistory) {
   if (!skipHistory && document.documentElement.hasAttribute('data-product-id')) {
-    window.location.href = shopHref('/' + getShopCategoryKey());
+    // DOM category attributes select a fixed route; they never become a URL.
+    var categoryRoutes = {
+      abaya: '/abaya', 'cover-up': '/cover-up',
+      'premium-two-piece': '/premium-two-piece', 'tops-kurti': '/tops-kurti',
+      embroidery: '/embroidery', karchupi: '/karchupi', kaftan: '/kaftan',
+      hijab: '/hijab', panjabi: '/panjabi'
+    };
+    var categoryKey = getShopCategoryKey();
+    window.location.href = Object.prototype.hasOwnProperty.call(categoryRoutes, categoryKey)
+      ? categoryRoutes[categoryKey] : '/category';
     return;
   }
   teardownStickyOrderBar();
