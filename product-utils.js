@@ -78,6 +78,14 @@
   }
 
   function resolveImageUrl(raw) {
+    var url = resolveImageUrlRaw(raw);
+    if (g.location && /^https?:$/.test(g.location.protocol) && url && !/^(?:[a-z][a-z0-9+.-]*:|\/)/i.test(url)) {
+      return '/' + url.replace(/^\.\//, '');
+    }
+    return url;
+  }
+
+  function resolveImageUrlRaw(raw) {
     var url = String(raw || "").trim();
     if (!url) return "";
     url = applyReplaceRules(url);
@@ -708,3 +716,4 @@ g.getCartLineBaseName = getCartLineBaseName;
     getStockStatus: getStockStatus
   };
 })(window);
+

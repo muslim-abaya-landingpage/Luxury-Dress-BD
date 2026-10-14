@@ -153,8 +153,7 @@
   }
 
   function detailHref(sec, p) {
-    var base = href(sec.path || "/" + sec.key);
-    return base + "#p=" + encodeURIComponent(p.id || "");
+    return href('/product/' + encodeURIComponent(p.id || ''));
   }
 
   var cartIconSvg =
@@ -980,3 +979,4 @@
     });
   }
 })();
+

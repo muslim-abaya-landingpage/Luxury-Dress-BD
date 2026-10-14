@@ -1639,6 +1639,10 @@ function teardownStickyOrderBar() {
   if (bar) bar.classList.remove("is-visible");
 }
 function closeProductQuickView(skipHistory) {
+  if (!skipHistory && document.documentElement.hasAttribute('data-product-id')) {
+    window.location.href = shopHref('/' + getShopCategoryKey());
+    return;
+  }
   teardownStickyOrderBar();
   var root = shopCartCtx.root;
   if (root && shopCartCtx.gridHtml) {
@@ -1662,6 +1666,11 @@ function openProductQuickView(idx) {
   var products = shopCartCtx.products;
   if (!products || !products[idx]) return;
   var p = products[idx];
+  var productId = document.documentElement.getAttribute('data-product-id');
+  if (window.location.protocol !== 'file:' && String(productId || '') !== String(p.id)) {
+    window.location.href = '/product/' + encodeURIComponent(p.id);
+    return;
+  }
   var root = shopCartCtx.root || document.getElementById("list");
   if (!root) return;
   var waLink = (window.SITE_MEDIA && window.SITE_MEDIA.whatsappOrderLink) || "https://wa.me/8801971642683";
@@ -1689,7 +1698,7 @@ function openProductQuickView(idx) {
   document.body.classList.remove("pqv-open");
   document.body.classList.add("shop-product-open");
   window.scrollTo(0, 0);
-  if (history.pushState) {
+  if (!productId && history.pushState) {
     history.pushState({ maProduct: idx }, "", "#p=" + encodeURIComponent(p.id || String(idx)));
   }
   fireShopViewContent(p, categoryKey);
@@ -1960,7 +1969,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
   }
   var shortNoteRaw = String(getProductShortNote(p, categoryKey) || "").trim();
   var stock = productStockStatus(p);
-  var descHtml = getProductDescriptionHtml(p, categoryKey);
+  var descHtml = (p.detailNote ? '<p>' + escapeHtml(p.detailNote) + '</p>' : '') + getProductDescriptionHtml(p, categoryKey);
   var relatedHtml = buildPqvRelatedHtml(p, idx, allProducts, categoryKey);
   var specRows =
     "<ul class='pqv-spec-table'>" +
@@ -2300,6 +2309,8 @@ function findProductIdxById(id) {
 function openProductFromLocationHash() {
   var hash = window.location.hash || "";
   var idx = -1;
+  var productId = document.documentElement.getAttribute('data-product-id');
+  if (productId) idx = findProductIdxById(productId);
   var byId = hash.match(/^#p=(.+)$/);
   if (byId) {
     idx = findProductIdxById(decodeURIComponent(byId[1]));
@@ -2623,7 +2634,7 @@ function buildCardImageBlock(p, idx, categoryKey, allProducts) {
         ' 1600w" sizes="(max-width: 720px) 100vw, (max-width: 960px) 50vw, 380px"'
       : "";
   return (
-    '<button type="button" class="img-wrap js-quickview-trigger" data-product-idx="' +
+    '<a href="/product/' + encodeURIComponent(p.id) + '" class="img-wrap" data-product-idx="' +
     idx +
     '" aria-label="' +
     escapeHtml("View " + p.name) +
@@ -2644,7 +2655,7 @@ function buildCardImageBlock(p, idx, categoryKey, allProducts) {
     '">' +
     hoverHtml +
     "</span>" +
-    "</button>"
+    "</a>"
   );
 }
 function resolveCardImageSrc(p) {
@@ -2977,11 +2988,11 @@ encodeURIComponent("I want to order " + p.name) +
     buildCardImageBlock(p, idx, categoryKey, allProducts) +
     '<div class="card-foot">' +
     '<div class="card-meta">' +
-    '<button type="button" class="card-title-btn js-quickview-trigger" data-product-idx="' +
+    '<a href="/product/' + encodeURIComponent(p.id) + '" class="card-title-btn" data-product-idx="' +
     idx +
     '"><span class="card-title-text" lang="en">' +
     escapeHtml(p.name) +
-    "</span></button>" +
+    "</span></a>" +
     '<span class="card-price">' +
     priceText +
     "</span>" +
@@ -3086,6 +3097,7 @@ function getCategoryPageUrl(key) {
   return shopHref("/" + key);
 }
 function updateCategoryDocumentTitle(key) {
+  if (document.documentElement.hasAttribute('data-product-id')) return;
   var meta = (window.CATEGORY_META || {})[key];
   document.title = meta && meta.title ? meta.title + " Collection | Muslim Abaya" : "Muslim Abaya";
 }
@@ -3399,6 +3411,8 @@ function navigateShopCategory(categoryKey, href, replaceState) {
   return true;
 }
 function initShopCategorySpaNav() {
+  // Product pages must navigate to collection pages with their own HTML SEO.
+  if (document.documentElement.hasAttribute('data-product-id')) return;
   if (window.__shopCategorySpaInit) return;
   window.__shopCategorySpaInit = true;
   document.addEventListener("click", function (e) {
@@ -3640,3 +3654,4 @@ window.addEventListener("load", function () {
     if (thumb) thumb.style.display = "none";
   }, true);
 })();
+

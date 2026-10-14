@@ -4,9 +4,9 @@
 
   var SOCIAL = SEO.social || FOOTER_CFG.social || {
   facebook: "https://www.facebook.com/muslimabayaofficial/",
-  instagram: "https://www.instagram.com/luxurydressbd/",
-  youtube: "https://www.youtube.com/@luxurydressbd",
-  tiktok: "https://www.tiktok.com/@muslimabayabd",
+  instagram: "https://www.instagram.com/muslimabaya.shop/",
+  youtube: "https://www.youtube.com/@luxurydress_shop",
+  tiktok: "https://www.tiktok.com/@muslimabaya.shop",
   linkedin: "https://www.linkedin.com/in/muslimabayabd"
 };
   var CONTACT = FOOTER_CFG.contact || {
@@ -647,3 +647,4 @@ esc(SOCIAL.linkedin) +
     bootFooter();
   }
 })();
+

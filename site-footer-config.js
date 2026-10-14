@@ -14,9 +14,9 @@ window.SITE_FOOTER_CONFIG = {
 
   social: {
     facebook: "https://www.facebook.com/muslimabayaofficial/",
-    instagram: "https://www.instagram.com/luxurydressbd/",
-    youtube: "https://www.youtube.com/@luxurydressbd",
-    tiktok: "https://www.tiktok.com/@muslimabayabd",
+    instagram: "https://www.instagram.com/muslimabaya.shop/",
+    youtube: "https://www.youtube.com/@luxurydress_shop",
+    tiktok: "https://www.tiktok.com/@muslimabaya.shop",
     linkedin: "https://www.linkedin.com/in/muslimabayabd"
   },
 
@@ -39,3 +39,4 @@ window.SITE_FOOTER_CONFIG = {
 
   copyrightHtml: "Copyright &copy; 2026 Muslim Abaya. All Rights Reserved."
 };
+

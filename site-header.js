@@ -193,6 +193,15 @@
   })();
 
   function siteHref(route) {
+    // Keep fragments intact and resolve internal URLs from the site root,
+    // including links emitted on /product/{id} pages.
+    if (prefersCleanUrls()) {
+      var value = String(route || '/');
+      if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(value)) return value;
+      if (value.charAt(0) !== '/') value = '/' + value;
+      var parts = value.match(/^([^?#]*)([\s\S]*)$/);
+      return parts[1].replace(/\/index\.html$/i, '/').replace(/\.html$/i, '') + parts[2];
+    }
     var file = routeToHtmlFile(route);
     if (!prefersCleanUrls()) return file;
     var q = file.indexOf('?') >= 0 ? file.slice(file.indexOf('?')) : '';
@@ -967,3 +976,4 @@ function buildNavMenuItems() {
     runHeaderBoot();
   }
 })();
+
