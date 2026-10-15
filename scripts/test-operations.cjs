@@ -26,6 +26,7 @@ assert.throws(()=>c.opsLinePrice_({qty:1,size:'Body 99 · Length 52',productType
 assert.throws(()=>c.opsLinePrice_({qty:1.5,size:'Body 42 · Length 52',productType:'Full Set'},ab),/INVALID_QTY/);
 const custom={qty:1,size:'Custom (L59.5/W49.5)',productType:'Full Set'};
 assert.equal(c.opsLinePrice_(custom,ab),ab.prices['Full Set']+500);
+for(const size of ['Custom (L1..2/W45)','Custom (L0/W45)','Custom (Lbad/W45)']) assert.throws(()=>c.opsLinePrice_({qty:1,size,productType:'Full Set'},ab),/INVALID_CUSTOM_SIZE/);
 assert.throws(()=>c.opsVerifiedPricing_([{id:'NO-SUCH-ID',qty:1,size:'38'}],0,''),/UNKNOWN_PRODUCT/);
 assert.throws(()=>c.opsVerifiedPricing_([],0,''),/STRUCTURED/);
 assert.throws(()=>c.opsVerifiedPricing_([{id:catalog.products[0].id,qty:1,size:'Body '+catalog.products[0].bodySizes[0]+' · Length '+catalog.products[0].lengths[0],productType:Object.keys(catalog.products[0].prices)[0]}],0,'INVALID'),/INVALID_COUPON/);
