@@ -136,7 +136,7 @@
           <div id="saStockEditModal" class="sa-modal-backdrop" hidden>
             <div class="sa-modal">
               <h3 id="saStockEditTitle">স্টক পরিবর্তন</h3>
-              <label>নতুন Available Qty<input type="number" id="saStockEditQty" min="0"></label>
+              <label>নতুন Available Qty<input type="number" id="saStockEditQty" min="0" step="1" placeholder="গণনা করা বিক্রিযোগ্য মজুত লিখুন"></label><p style="font-size:0.85rem">এখানে নতুন মোট বিক্রিযোগ্য সংখ্যা দিন। Reserved অপরিবর্তিত থাকবে। ট্র্যাক করা হয়নি মানে মজুত অজানা।</p>
               <label>কারণ
                 <select id="saStockEditReasonPreset">
                   <option value="">-- নির্বাচন করুন --</option>
@@ -262,7 +262,7 @@
   <script src="category-products.js?v=20260927stock"></script>
   <script src="product-links-data.js"></script>
   <script src="product-catalog-loader.js"></script>
-  <script src="stock-analytics.js?v=20260929stockv3"></script>
+  <script src="stock-analytics.js?v=20261016-variantfix"></script>
   <script>
     (function () {
       var sidebar = document.getElementById("admSidebar");
@@ -285,3 +285,4 @@
   </script>
 </body>
 </html>
+
