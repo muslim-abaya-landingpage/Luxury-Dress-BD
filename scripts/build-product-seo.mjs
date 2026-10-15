@@ -32,6 +32,7 @@ for (const [category, rows] of Object.entries(catalog)) {
     const image = /^https?:\/\//.test(p.image) ? p.image : site + '/' + p.image.replace(/^\//, '');
     const stock = w.maCatalog.getStockStatus(p);
     const schema = {'@context':'https://schema.org','@type':'Product',name:p.name,image:[image],description:desc,sku:p.id,brand:{'@type':'Brand',name:'Muslim Abaya'},offers:{'@type':'Offer',url,priceCurrency:'BDT',price:p.price,availability:'https://schema.org/' + (stock.inStock ? 'InStock' : 'OutOfStock')}};
+    if (stock.qty == null) delete schema.offers.availability;
     const crumbs = {'@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:[{ '@type':'ListItem',position:1,name:'Home',item:site+'/'},{'@type':'ListItem',position:2,name:category,item:site+'/'+category},{'@type':'ListItem',position:3,name:p.name,item:url}]};
     let html = template.replace(/data-shop-category="abaya"/g, `data-shop-category="${esc(category)}"`)
       .replace('<html lang="en"', `<html lang="en" data-seo-managed="full" data-product-id="${esc(p.id)}"`)
@@ -40,10 +41,10 @@ for (const [category, rows] of Object.entries(catalog)) {
       .replace(/<meta name="description"[^>]*>/, `<meta name="description" content="${esc(desc)}">`)
       .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, `<script type="application/ld+json">${json(schema)}</script>\n<script type="application/ld+json">${json(crumbs)}</script>`)
       .replace('</head>', `<meta property="og:title" content="${esc(title)}">\n<meta property="og:description" content="${esc(desc)}">\n<meta property="og:type" content="product">\n<meta property="og:url" content="${url}">\n<meta property="og:image" content="${esc(image)}">\n<meta name="twitter:card" content="summary_large_image">\n</head>`)
-      .replace('<div id="list"></div>', `<div id="list"><article><h1>${esc(p.name)}</h1><img src="${esc(image)}" alt="${esc(p.name)}" width="480" height="600" style="max-width:100%;height:auto"><p>৳${p.price}</p><p>${esc(p.fabric)}</p><p>${esc(p.detailNote)}</p><p>${esc(stock.label)}</p><a href="https://wa.me/8801971642683?text=${encodeURIComponent('I want to order '+p.name)}">Order on WhatsApp</a><p><a href="/${category}">View collection</a> · <a href="/refund">Return policy</a></p></article></div>`)
+      .replace('<div id="list"></div>', `<div id="list"><article><h1>${esc(p.name)}</h1><img src="${esc(image)}" alt="${esc(p.name)}" width="480" height="600" style="max-width:100%;height:auto"><p>৳${p.price}</p><p>${esc(p.fabric)}</p><p>${esc(p.detailNote)}</p><p>${esc(stock.label)}</p><a href="https://wa.me/8801971642683?text=${encodeURIComponent('I want to order '+p.name)}">Order on WhatsApp</a><p><a href="/${category}">View collection</a> · <a href="/shopping-guide">সাইজ ও কেনাকাটার গাইড</a> · <a href="/refund">Return policy</a></p></article></div>`)
       .replace(/\b(src|href)="(?!https?:|\/|#|data:)([^"\s]+)"/g, '$1="/$2"');
     // New version prevents stale immutable JS caches on the generated pages.
-    for (const file of ['site-header.js','site-footer.js','category-renderer.js','site-seo.js','product-utils.js','site-footer-config.js']) html = html.replace(new RegExp(file.replace('.', '\\.')+'\\?v=[^"\\s]+', 'g'), file+'?v=20261015-organic1');
+    for (const file of ['site-header.js','site-footer.js','category-renderer.js','site-seo.js','product-utils.js','site-footer-config.js']) html = html.replace(new RegExp(file.replace('.', '\\.')+'\\?v=[^"\\s]+', 'g'), file+'?v=20261016-ops');
     fs.writeFileSync(path.join(root, 'product', p.id+'.html'), html);
     products.push({id:p.id,category,url});
   }
@@ -53,3 +54,4 @@ if (!sitemap.includes('<loc>'+site+'/panjabi</loc>')) sitemap = sitemap.replace(
 sitemap = sitemap.replace('</urlset>', products.map(p => `  <url><loc>${p.url}</loc></url>`).join('\n')+'\n</urlset>');
 fs.writeFileSync(path.join(root, 'sitemap.xml'), sitemap);
 console.log(`Generated ${products.length} product pages and sitemap URLs.`);
+

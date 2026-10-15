@@ -182,6 +182,7 @@
             quantity: 1,
             image: pending.image,
             category: pending.category,
+            productType: pending.productType || "",
             categoryLabel: (window.CATEGORY_META && window.CATEGORY_META[pending.category] && window.CATEGORY_META[pending.category].title) || pending.category,
             size: sizeLabel,
             note: note || undefined
@@ -224,3 +225,4 @@
     }
 
 })();
+

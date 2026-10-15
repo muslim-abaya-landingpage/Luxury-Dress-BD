@@ -17,6 +17,9 @@
     activeImage: 0,
     selectedType: "",
     selectedSize: "",
+    selectedBody: "",
+    selectedDressLength: "",
+    selectedPalazzoLength: "",
     selectedColor: "",
     selectedColorLabel: "",
     qty: 1
@@ -415,6 +418,20 @@
       updateSendMessageLink();
       applyStockUi();
     });
+    var ab = window.isAbayaProduct && window.isAbayaProduct(state.product, state.category);
+    var tp = window.isTwoPieceProduct && window.isTwoPieceProduct(state.product, state.category);
+    var cfg = ab ? window.getAbayaSizeConfig(state.product) : tp ? window.getTwoPieceSizeConfig(state.product) : null;
+    function extraOptions(id, label, options, key) {
+      if (!options || !options.length) return;
+      if (!state[key]) state[key] = String(options[0]);
+      var box = document.createElement("div"); box.id = id; el.appendChild(box);
+      renderOptionGroup(id, label, options.map(String), state[key], function (value) { state[key] = value; renderSizeOptions(); updateSendMessageLink(); applyStockUi(); });
+    }
+    if (ab) extraOptions("pdBodyOptions", "Body", cfg.bodySizes && cfg.bodySizes.length ? cfg.bodySizes : [cfg.bodySizeLabel], "selectedBody");
+    if (tp && cfg.dressLengths) {
+      extraOptions("pdDressOptions", "Dress Length", cfg.dressLengths, "selectedDressLength");
+      extraOptions("pdPalazzoOptions", "Palazzo Length", cfg.palazzoLengths, "selectedPalazzoLength");
+    }
     var chartData =
       (window.SITE_LINKS &&
         window.SITE_LINKS.sizeChart &&
@@ -436,6 +453,7 @@
               price: currentPrice(),
               image: (state.galleryImages && state.galleryImages[0]) || state.product.image,
               category: state.category
+              ,productType: state.selectedType || ""
             });
           });
         }
@@ -679,6 +697,21 @@
       .join("");
   }
 
+  function selectedVariant() {
+    var p = state.product, s = String(state.selectedSize || "");
+    if (!s || /^Custom/i.test(s) || /Body\s/i.test(s)) return s;
+    if (window.isAbayaProduct && window.isAbayaProduct(p, state.category)) {
+      var ab = window.getAbayaSizeConfig(p);
+      return "Body " + (state.selectedBody || ab.bodySizeLabel) + " · Length " + s;
+    }
+    if (window.isTwoPieceProduct && window.isTwoPieceProduct(p, state.category)) {
+      var tp = window.getTwoPieceSizeConfig(p);
+      var body = /^\d+$/.test(s) ? s : tp.bodySizeLabel;
+      return "Body " + body + " · Length " + (state.selectedDressLength || tp.lengthSizeLabel) + (state.selectedPalazzoLength ? " · Palazzo " + state.selectedPalazzoLength : "");
+    }
+    return s;
+  }
+
   function buildCartLine() {
     var price = currentPrice();
     /** কাস্টমার গ্যালারিতে যেই ছবিটা (thumbnail) সিলেক্ট করে দেখছিল, ঠিক
@@ -701,7 +734,7 @@
       color: state.selectedColor || state.product.color || "",
       colorLabel: state.selectedColorLabel || state.product.colorLabel || "",
       fabric: state.product.fabric || "",
-      size: state.selectedSize || "",
+      size: selectedVariant(),
       productType: state.selectedType || ""
     };
     return line;
@@ -709,7 +742,7 @@
 
   function stockStatus() {
     var p = state.product;
-    var variant = state.selectedSize || state.selectedColor || "";
+    var variant = selectedVariant() || state.selectedColor || "";
     if (window.maCatalog && typeof window.maCatalog.getStockStatus === "function") {
       return window.maCatalog.getStockStatus(p, variant);
     }
@@ -771,7 +804,7 @@
     if (!msgLink || !state.product) return;
     var msgText =
       "I want to order " + state.product.name +
-      (state.selectedSize ? " (Size: " + state.selectedSize + ")" : "") +
+      (state.selectedSize ? " (Size: " + selectedVariant() + ")" : "") +
       (state.selectedType ? " (" + state.selectedType + ")" : "");
     msgLink.href = waLink() + "?text=" + encodeURIComponent(msgText);
   }
@@ -794,6 +827,7 @@
     
     if ($("pdNotifyBtn")) {
       $("pdNotifyBtn").addEventListener("click", function () {
+        if (!state.selectedSize) { alert("আগে প্রয়োজনীয় সাইজটি বেছে নিন।"); return; }
         var contact = window.prompt("স্টকে এলে জানাতে আপনার ফোন নম্বর বা ইমেইল লিখুন:");
         if (!contact) return;
         var p = state.product || {};
@@ -804,18 +838,22 @@
         var prevText = btn.textContent;
         btn.textContent = "পাঠানো হচ্ছে…";
         var body = new URLSearchParams();
-        body.append("RecordType", "NotifyBackInStock");
+        body.append("RecordType", "NotifyBackInStockV2");
         body.append("ProductId", String(p.id || ""));
         body.append("ProductName", String(p.name || ""));
         body.append("Contact", contact);
+        body.append("Variant", selectedVariant());
+        body.append("ProductType", state.selectedType || "");
         fetch(apiUrl, { method: "POST", mode: "cors", cache: "no-store", credentials: "omit", body: body })
-          .then(function () {
+          .then(function (response) { return response.json(); })
+          .then(function (result) {
+            if (!result.ok) throw new Error(result.message || "অনুরোধ সংরক্ষণ হয়নি");
             btn.textContent = "অনুরোধ পাঠানো হয়েছে ✓";
           })
-          .catch(function () {
+          .catch(function (err) {
             btn.disabled = false;
             btn.textContent = prevText;
-            alert("দুঃখিত, একটি সমস্যা হয়েছে। আবার চেষ্টা করুন।");
+            alert(err.message || "দুঃখিত, একটি সমস্যা হয়েছে। আবার চেষ্টা করুন।");
           });
       });
     }
@@ -1130,3 +1168,4 @@
     if (thumb) thumb.style.display = "none";
   }, true);
 })();
+

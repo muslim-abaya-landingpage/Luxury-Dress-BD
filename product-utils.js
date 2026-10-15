@@ -472,8 +472,8 @@
     return {
       inStock: inStock,
       qty: qty,
-      label: inStock ? "In Stock" : "Out of Stock",
-      badge: inStock ? "In Stock" : "Sold Out",
+      label: qty === null ? "স্টক নিশ্চিত করুন" : (inStock ? "In Stock" : "Out of Stock"),
+      badge: qty === null ? "স্টক যাচাই বাকি" : (inStock ? "In Stock" : "Sold Out"),
       buttonLabel: inStock ? "Add to Cart" : "Out of Stock"
     };
   }
@@ -759,4 +759,5 @@ g.getCartLineBaseName = getCartLineBaseName;
     getStockStatus: getStockStatus
   };
 })(window);
+
 
