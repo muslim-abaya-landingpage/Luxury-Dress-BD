@@ -32,7 +32,7 @@ assert.deepEqual(model.analyze([], {today:'2026-10-16'}).groups.delivered,{count
 const original = JSON.stringify(fixture); model.analyze(fixture); assert.equal(JSON.stringify(fixture),original);
 // Execute the real order page controller with its existing authenticated API contract.
 const html = fs.readFileSync(path.join(__dirname,'../admin-orders.html'),'utf8');
-const inline = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].at(-1)[1];
+const inline = [...html.matchAll(/<script>([\s\S]*?)<\/script>/gi)].at(-1)[1];
 class Element {
   constructor(){ this.listeners={}; this.textContent=''; this.innerHTML=''; this.hidden=true; this.children=[]; }
   addEventListener(k,fn){this.listeners[k]=fn;}
