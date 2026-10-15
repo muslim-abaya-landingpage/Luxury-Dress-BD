@@ -6,6 +6,8 @@ import fs from 'node:fs';
 const code = fs.readFileSync(new URL('../apps-script/Code.gs', import.meta.url), 'utf8');
 const admin = fs.readFileSync(new URL('../apps-script/AdminOrders.gs', import.meta.url), 'utf8');
 const headersFix = fs.readFileSync(new URL('../apps-script/FixSheetHeaders.gs', import.meta.url), 'utf8');
+const doGetFix = fs.readFileSync(new URL('../apps-script/Fix-doGet.gs', import.meta.url), 'utf8');
+assert.equal((code + '\n' + admin + '\n' + headersFix + '\n' + doGetFix).match(/\bfunction\s+doGet\s*\(/g)?.length || 0, 1, 'the Apps Script project must define exactly one canonical doGet router');
 const cart = [
   { id: 'KURTI-03', name: 'Purple Kurti', qty: 1, price: 250, size: '38', color: 'purple', category: 'tops-kurti' },
   { id: 'ABY-HAFEZA-1', name: 'Black Hafeza Set', qty: 1, price: 2385, size: 'Body 42 · Length 52', productType: 'Full Set' },
@@ -130,7 +132,8 @@ for (const withSize of [true, false]) {
     assert.deepEqual(row.slice(29 + offset, 32 + offset), ['new@example.invalid', 'new-fbc', 'new-fbp']);
     assert.equal(JSON.parse(row[32 + offset])[1].size, 'Body 42 · Length 52');
     assert.equal(JSON.parse(row[32 + offset])[1].productType, 'Full Set');
-    assert.equal(f.sent.length, 0); assert.equal(f.events.length, 0); assert.equal(f.decremented.length, 0); assert.equal(row[35 + offset], "NEW");
+    assert.equal(f.sent.length, 0); assert.equal(f.events.length, 0); assert.equal(f.decremented.length, 0); assert.equal(row[35 + offset], "RESERVED");
+    assert.deepEqual(f.stock.rows.slice(1).map(stockRow => stockRow[2]), [9, 9, 9]);
     assert.deepEqual(f.locks, ['acquire', 'release']);
   });
   test(`${layout}: admin read/update uses correct total, ID and advances and preserves the size formula/images`, () => {

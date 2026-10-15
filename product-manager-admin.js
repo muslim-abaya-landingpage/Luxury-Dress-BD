@@ -719,7 +719,7 @@
       field("color", "রঙ কোড (black/maroon)", p.color) +
       field("sizes", "সাইজ (কমা দিয়ে)", sizesToInput(p.sizes)) +
       field("id", "SKU / ID", p.id) +
-      field("stock", "স্টক (খালি = আনলিমিটেড, 0 = Out of Stock)", p.stock == null ? "" : p.stock, "number") +
+      field("stock", "ক্যাটালগের পণ্য-স্তরের স্টক (সার্ভার স্টক-শিট/সাইজ-স্টক থাকলে তা অগ্রাধিকার পাবে)", p.stock == null ? "" : p.stock, "number") +
       fieldWide("image", "ছবির URL (অটো-পূরণ হয় আপলোড করলে, বা নিজে বসান)", p.image) +
       "</div>";
 

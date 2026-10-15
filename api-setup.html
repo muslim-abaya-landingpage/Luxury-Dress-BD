@@ -36,14 +36,13 @@
       <div id="status" class="status"></div>
     </div>
     <div class="card" style="border-color:#111">
-      <h2 style="font-size:16px;margin:0 0 10px">? doGet not found? — ?? ???????? ???</h2>
-      <p style="font-size:14px;margin:0 0 12px">????? Code.gs ???? <strong>???? ????</strong> ??? ????:</p>
+      <h2 style="font-size:16px;margin:0 0 10px">Apps Script API যাচাই</h2>
+      <p style="font-size:14px;margin:0 0 12px">এই পেজ <code>OrderSchema</code> endpoint পরীক্ষা করে। আলাদা <code>Fix-doGet</code> ফাইল তৈরি করবেন না—এতে মূল <code>Code.gs</code> router ছায়া পড়ে StockStatus, login ও অন্যান্য API বন্ধ হতে পারে।</p>
       <ol>
-        <li>Windows-? <strong>API-?????-???.bat</strong> ????-????? ? <strong>Yes</strong></li>
-        <li>Editor-? <strong>+ ? Script</strong> ? ??? <code>Fix-doGet</code> ? Ctrl+V ? Save</li>
-        <li>Deploy ? Manage ? Edit ? <strong>New version</strong> ? Deploy</li>
+        <li>Apps Script-এর বর্তমান deployment-এ <strong>Manage deployments → Edit → New version → Deploy</strong> করুন।</li>
+        <li>শুধু মূল <code>Code.gs</code>-এর canonical <code>doGet</code> route ব্যবহার করুন।</li>
+        <li>নিচের API পরীক্ষা সফল হলে schema version ও কলাম বিন্যাস দেখা যাবে।</li>
       </ol>
-      <button type="button" class="btn" id="openBat" style="background:#2e7d32">API-?????-???.bat ?????</button>
     </div>
     <div class="card">
       <h2 style="font-size:16px;margin:0 0 10px">???????? ????? (Sign Up ??)</h2>
@@ -75,20 +74,18 @@
           return;
         }
         show("wait", "??? ?????…");
-        fetch(url, { method: "GET", mode: "cors" })
+        var separator = url.indexOf("?") === -1 ? "?" : "&";
+        fetch(url + separator + "RecordType=OrderSchema", { method: "GET", mode: "cors", cache: "no-store" })
           .then(function (r) {
-            return r.text();
+            if (!r.ok) throw new Error("HTTP " + r.status);
+            return r.json();
           })
-          .then(function (text) {
-            if (text.indexOf("Muslim Abaya API OK") !== -1) {
-              show("ok", "????? ??? ???? checkout / signup ??? ??? ?????");
-            } else if (text.indexOf("doGet") !== -1) {
-              show(
-                "err",
-                "???? ??? ????? ?????? apps-script-copy.html ???? ???????? ??? ??? ???? ? Code.gs ? Save ? Deploy New version?"
-              );
+          .then(function (data) {
+            var c = data && data.columns;
+            if (data && data.ok && data.version && c && c.size === 8 && c.total === 9 && c.orderId === 10 && c.status === 11) {
+              show("ok", "API সচল — schema " + data.version + " (H=সাইজ, I=মোট, J=অর্ডার ID, K=স্ট্যাটাস)।");
             } else {
-              show("err", "??????????? ?????: " + text.slice(0, 120));
+              show("err", "API schema অমিল বা Deploy অসম্পূর্ণ: " + JSON.stringify(data).slice(0, 180));
             }
           })
           .catch(function () {
@@ -119,13 +116,6 @@
         }
       });
       document.getElementById("testBtn").after(saveBtn);
-
-      var openBat = document.getElementById("openBat");
-      if (openBat) {
-        openBat.addEventListener("click", function () {
-          alert("???????? API-?????-???.bat ????-????? ?????");
-        });
-      }
 
       if (saved) {
         setTimeout(function () {

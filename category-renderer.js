@@ -440,6 +440,30 @@ function shopAddProductToCart(item, qtyToAdd, sizeValue, categoryKeyOpt, bodyVal
   shopCartCtx.lastCartAddKey = addGuardKey;
   shopCartCtx.lastCartAddAt = now;
   var line = buildShopCartLineItem(item, qtyToAdd, sizeValue, categoryKeyOpt, item._cartType || "", bodyValueOpt);
+  var stockQtyFn = window.getStockQty || (window.maCatalog && window.maCatalog.getStockQty);
+  var variantTrackedFn = window.hasTrackedStockVariants || (window.maCatalog && window.maCatalog.hasTrackedStockVariants);
+  if (typeof stockQtyFn === "function") {
+    var variantKey = String(line.size || line.selectedSize || line.color || "").replace(/\s+/g, " ").trim().toLowerCase();
+    var cap = stockQtyFn(item, line.size || line.selectedSize || line.color || "");
+    if (cap === 0) {
+      alert("দুঃখিত, এই সাইজটি বর্তমানে স্টকে নেই। অন্য সাইজ বেছে নিন।");
+      return;
+    }
+    if (typeof cap === "number") {
+      var perVariant = typeof variantTrackedFn === "function" ? variantTrackedFn(item) : false;
+      var currentCart = typeof loadStoreCart === "function" ? loadStoreCart({ readOnly: true }) : [];
+      var already = currentCart.reduce(function (sum, existing) {
+        var existingKey = String(existing.size || existing.selectedSize || existing.color || "").replace(/\s+/g, " ").trim().toLowerCase();
+        return sum + (String(existing.id) === String(line.id) && (!perVariant || existingKey === variantKey) ? parseInt(existing.quantity, 10) || 0 : 0);
+      }, 0);
+      var room = cap - already;
+      if (room <= 0) {
+        alert("এই সাইজের আর স্টক নেই।");
+        return;
+      }
+      line.quantity = Math.min(parseInt(line.quantity, 10) || 1, room);
+    }
+  }
   var updated = [];
   if (typeof addOrMergeStoreCartItem === "function") {
     updated = addOrMergeStoreCartItem(
@@ -499,6 +523,23 @@ function shopAddBulkProductsToCart(item, entries, categoryKey, selectedType) {
     var qty = parseInt(entry.qty, 10) || 0;
     if (qty <= 0 || !entry.size) return;
     var line = buildShopCartLineItem(item, qty, entry.size, categoryKey, selectedType || "");
+    var stockQtyFn = window.getStockQty || (window.maCatalog && window.maCatalog.getStockQty);
+    var variantTrackedFn = window.hasTrackedStockVariants || (window.maCatalog && window.maCatalog.hasTrackedStockVariants);
+    if (typeof stockQtyFn === "function") {
+      var variantKey = String(line.size || line.selectedSize || line.color || "").replace(/\s+/g, " ").trim().toLowerCase();
+      var cap = stockQtyFn(item, line.size || line.selectedSize || line.color || "");
+      if (cap === 0) return;
+      if (typeof cap === "number") {
+        var perVariant = typeof variantTrackedFn === "function" ? variantTrackedFn(item) : false;
+        var already = cart.reduce(function (sum, existing) {
+          var existingKey = String(existing.size || existing.selectedSize || existing.color || "").replace(/\s+/g, " ").trim().toLowerCase();
+          return sum + (String(existing.id) === String(line.id) && (!perVariant || existingKey === variantKey) ? parseInt(existing.quantity, 10) || 0 : 0);
+        }, 0);
+        var room = cap - already;
+        if (room <= 0) return;
+        line.quantity = Math.min(parseInt(line.quantity, 10) || 1, room);
+      }
+    }
     if (typeof addOrMergeStoreCartItem === "function") {
       cart = addOrMergeStoreCartItem(cart, line);
     } else {
@@ -506,7 +547,7 @@ function shopAddBulkProductsToCart(item, entries, categoryKey, selectedType) {
     }
     if (!firstLine) firstLine = line;
     addedLines += 1;
-    totalQty += qty;
+    totalQty += parseInt(line.quantity, 10) || 0;
   });
   if (!addedLines) return 0;
   if (typeof persistStoreCart === "function") persistStoreCart(cart);

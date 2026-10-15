@@ -350,6 +350,7 @@
         renderGallery();
         renderColorOptions();
         renderDescription();
+        applyStockUi();
       });
     });
   }
@@ -412,6 +413,7 @@
       state.selectedSize = val;
       renderSizeOptions();
       updateSendMessageLink();
+      applyStockUi();
     });
     var chartData =
       (window.SITE_LINKS &&
@@ -707,10 +709,11 @@
 
   function stockStatus() {
     var p = state.product;
+    var variant = state.selectedSize || state.selectedColor || "";
     if (window.maCatalog && typeof window.maCatalog.getStockStatus === "function") {
-      return window.maCatalog.getStockStatus(p);
+      return window.maCatalog.getStockStatus(p, variant);
     }
-    if (typeof window.getStockStatus === "function") return window.getStockStatus(p);
+    if (typeof window.getStockStatus === "function") return window.getStockStatus(p, variant);
     return { inStock: true, label: "In Stock", buttonLabel: "Add to Cart", qty: null };
   }
 

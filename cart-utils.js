@@ -394,6 +394,11 @@
     };
   }
 
+  function stockVariantForLine(line) {
+    return String((line && (line.size || line.selectedSize || line.color)) || "")
+      .replace(/\s+/g, " ").trim().toLowerCase();
+  }
+
   function addOrMergeItem(arr, item) {
     var list = normalizeArray(arr);
     var line = normalizeLine(item);
@@ -401,14 +406,17 @@
     var catalogItem = findCatalogProductFull(line.id, line.name);
     var inStockFn = global.isInStock || (global.maCatalog && global.maCatalog.isInStock);
     var stockQtyFn = global.getStockQty || (global.maCatalog && global.maCatalog.getStockQty);
-    if (catalogItem && typeof inStockFn === "function" && !inStockFn(catalogItem)) {
+    var variantTrackedFn = global.hasTrackedStockVariants || (global.maCatalog && global.maCatalog.hasTrackedStockVariants);
+    var variant = line.size || line.selectedSize || line.color || "";
+    if (catalogItem && typeof inStockFn === "function" && !inStockFn(catalogItem, variant)) {
       return list;
     }
-    var cap = catalogItem && typeof stockQtyFn === "function" ? stockQtyFn(catalogItem) : null;
+    var cap = catalogItem && typeof stockQtyFn === "function" ? stockQtyFn(catalogItem, variant) : null;
     if (typeof cap === "number") {
+      var perVariant = typeof variantTrackedFn === "function" ? variantTrackedFn(catalogItem) : false;
       var already = 0;
       list.forEach(function (x) {
-        if (String(x.id) === String(line.id)) {
+        if (String(x.id) === String(line.id) && (!perVariant || stockVariantForLine(x) === stockVariantForLine(line))) {
           already += parseInt(x.quantity, 10) || 0;
         }
       });

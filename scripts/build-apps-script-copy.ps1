@@ -24,7 +24,7 @@ $html = @"
 <body>
   <h1>Apps Script কোড (৩টি ফাইল)</h1>
   <div class="step">
-    <p><strong>H কলামে পণ্যের সাইজ:</strong> এই কোড নতুন বিন্যাসে I-তে টাকা, J-তে অর্ডার আইডি ও K-তে স্ট্যাটাস ব্যবহার করে। নিচের তিনটি ফাইল সেভ করে বর্তমান ডিপ্লয়মেন্টের নতুন ভার্সন Deploy করুন:</p>
+    <p><strong>H কলামে পণ্যের সাইজ:</strong> এই কোড নতুন বিন্যাসে I-তে টাকা, J-তে অর্ডার আইডি ও K-তে স্ট্যাটাস ব্যবহার করে। নিচের তিনটি ফাইল সেভ করে বর্তমান ডিপ্লয়মেন্টের নতুন ভার্সন Deploy করুন। আলাদা <code>Fix-doGet.gs</code>-এ <code>doGet</code> function রাখবেন না—এটি মূল router override করে API বন্ধ করতে পারে:</p>
     <ol>
       <li>script.google.com → আপনার প্রজেক্ট → <strong>Code.gs</strong> এ Ctrl+A → নিচের <strong>১ নম্বর</strong> কোড পেস্ট</li>
       <li>বাম পাশে <strong>＋ → Script</strong> চাপুন, নাম দিন <strong>AdminOrders</strong> (AdminOrders.gs তৈরি হবে) → Ctrl+A → নিচের <strong>২ নম্বর</strong> কোড পেস্ট</li>

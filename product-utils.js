@@ -410,24 +410,65 @@
    * Permanent stock for all visitors is edited in category-products.js
    * (or Product Manager). Checkout cannot rewrite that JS file.
    */
-  function getStockQty(product) {
+  function stockVariantKey(value) {
+    return String(value || "").replace(/\s+/g, " ").trim().toLowerCase();
+  }
+
+  function hasTrackedStockVariants(product) {
+    var variants = product && product.stockVariants && typeof product.stockVariants === "object"
+      ? product.stockVariants
+      : null;
+    return !!variants && Object.keys(variants).some(function (key) {
+      return variants[key] && variants[key].tracked === true;
+    });
+  }
+
+  function getStockQty(product, variant) {
     if (!product) return null;
-    if (product.inStock === false) return 0;
+    if (product.inStock === false) return 0; // Product Manager-এর explicit stock-off override
+    var variants = product.stockVariants && typeof product.stockVariants === "object"
+      ? product.stockVariants
+      : null;
+    var variantKeys = variants ? Object.keys(variants) : [];
+    var hasTrackedVariants = hasTrackedStockVariants(product);
+
+    if (variants && String(variant || "").trim()) {
+      var requestedKey = stockVariantKey(variant);
+      var matched = null;
+      variantKeys.some(function (key) {
+        if (stockVariantKey(key) === requestedKey) {
+          matched = variants[key];
+          return true;
+        }
+        return false;
+      });
+      if (matched && matched.tracked === true) {
+        return Math.max(0, parseInt(matched.available, 10) || 0);
+      }
+      if (hasTrackedVariants) return 0; // tracked product-এর অজানা/untracked size বিক্রিযোগ্য নয়
+    }
+
+    if (hasTrackedVariants) {
+      return variantKeys.reduce(function (sum, key) {
+        var row = variants[key];
+        return sum + (row && row.tracked === true ? Math.max(0, parseInt(row.available, 10) || 0) : 0);
+      }, 0);
+    }
     if (product.stock == null || product.stock === "") return null;
     var n = parseInt(product.stock, 10);
     if (isNaN(n)) return null;
     return Math.max(0, n);
   }
 
-  function isInStock(product) {
-    var qty = getStockQty(product);
+  function isInStock(product, variant) {
+    var qty = getStockQty(product, variant);
     if (qty === null) return true;
     return qty > 0;
   }
 
-  function getStockStatus(product) {
-    var inStock = isInStock(product);
-    var qty = getStockQty(product);
+  function getStockStatus(product, variant) {
+    var inStock = isInStock(product, variant);
+    var qty = getStockQty(product, variant);
     return {
       inStock: inStock,
       qty: qty,
@@ -700,6 +741,7 @@ g.getCartLineBaseName = getCartLineBaseName;
   return f;
 }
   g.formatFabricLabelEn = formatFabricLabelEn;
+  g.hasTrackedStockVariants = hasTrackedStockVariants;
   g.getStockQty = getStockQty;
   g.isInStock = isInStock;
   g.getStockStatus = getStockStatus;
@@ -711,6 +753,7 @@ g.getCartLineBaseName = getCartLineBaseName;
     normalizeAll: normalizeAll,
     categoryHasProducts: categoryHasProducts,
     titleFromFileName: titleFromFileName,
+    hasTrackedStockVariants: hasTrackedStockVariants,
     getStockQty: getStockQty,
     isInStock: isInStock,
     getStockStatus: getStockStatus

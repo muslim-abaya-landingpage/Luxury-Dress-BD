@@ -1934,19 +1934,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 
 <script src="site-security.js?v=20260603ord"></script>
-<script src="site-api-config.js?v=20261009-inbox"></script>
+
 <script src="site-api-health.js?v=20260610"></script>
 <script src="auth-config.js?v=20261009-inbox"></script>
 <script src="auth-api.js"></script>
 <script src="product-config.js?v=20261009-inbox"></script>
-<script src="product-utils.js?v=20260603sizelabel"></script>
+<script src="product-utils.js?v=20261015-stockv2"></script>
 <!-- Needed so "Customers also bought" has access to the real product catalog on this page -->
 <script src="category-products.js?v=20260603crosssell"></script>
 <script src="product-catalog-sync.js?v=20260603crosssell"></script>
 <script src="product-links-data.js?v=20260603crosssell"></script>
+<script defer src="site-api-config.js?v=20261009-inbox"></script>
+<script defer src="stock-sync.js?v=20261015-stockv2"></script>
 <script src="product-catalog-loader.js?v=20260603crosssell"></script>
 <script defer src="site-header.js?v=20261009-inbox"></script>
-<script src="cart-utils.js?v=20260603img"></script>
+<script src="cart-utils.js?v=20261015-stockv2"></script>
 <script src="cart-toast.js?v=20260603cartqty"></script>
 <script src="cart-drawer.js?v=20260603cartqty"></script>
 <script src="checkout-location-labels.js?v=20260603loc"></script>
@@ -2763,7 +2765,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function displayOrder() {
         if (!summaryDiv) return;
-        
+
         if (cart.length === 0) {
             summaryDiv.innerHTML = buildEmptyCartHtml();
             var metaElEmpty = document.getElementById('orderReviewMeta');
@@ -2831,7 +2833,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         summaryDiv.innerHTML = '<div class="gb-order-list">' + itemsHtml + '</div>';
         renderProductChart();
-        
+
         var subBtn = document.getElementById('submitBtn');
         if (subBtn) subBtn.disabled = false;
         renderClearCartToolbar();

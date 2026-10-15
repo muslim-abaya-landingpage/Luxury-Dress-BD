@@ -343,7 +343,7 @@ function adminOrderUpdate_(e) {
   if (!v.ok) return v;
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
-  var sheet, row, prevStatus, newStatus;
+  var sheet, row, prevStatus, newStatus, stockHook = null;
   try {
     sheet = admGetSheet_();
     row = admFindRow_(sheet, param_(e, 'OrderId'));
@@ -394,23 +394,38 @@ function adminOrderUpdate_(e) {
     if (admHasParam_(e, 'Courier')) vals[ADM_COL_COURIER - 1] = admCellText_(param_(e, 'Courier'), 40);
     if (!vals[ADM_COL_SOURCE - 1]) vals[ADM_COL_SOURCE - 1] = 'Website';
 
+    newStatus = String(vals[9] || 'Pending');
+    if (newStatus !== prevStatus && typeof applyStockLifecycleForStatusChangeLocked_ === 'function') {
+      try {
+        applyStockLifecycleForStatusChangeLocked_(sheet, row, newStatus);
+        stockHook = 'OK';
+      } catch (stockErr) {
+        var stockMessage = String(stockErr && stockErr.message || stockErr);
+        if (stockMessage.indexOf('OUT_OF_STOCK:') === 0) {
+          return { ok: false, error: 'OUT_OF_STOCK', message: 'পর্যাপ্ত available stock নেই। ' + stockMessage.slice('OUT_OF_STOCK:'.length) };
+        }
+        if (stockMessage.indexOf('VARIANT_NOT_TRACKED:') === 0) {
+          return { ok: false, error: 'VARIANT_NOT_TRACKED', message: 'এই অর্ডারের নির্বাচিত সাইজের stock setup করা নেই। আগে Stock Analytics-এ সাইজটি track করুন।' };
+        }
+        if (stockMessage.indexOf('STOCK_LEDGER_MISMATCH:') === 0) {
+          return { ok: false, error: 'STOCK_LEDGER_MISMATCH', message: 'Reserved stock-এর হিসাব অর্ডারের সাথে মিলছে না। স্ট্যাটাস বদলানো হয়নি; Stock Ledger মিলিয়ে নিন।' };
+        }
+        return { ok: false, error: 'STOCK_UPDATE_FAILED', message: 'স্টক যাচাই/আপডেট করা যায়নি; অর্ডারের স্ট্যাটাস বদলানো হয়নি। আবার চেষ্টা করুন।' };
+      }
+    }
+
     // ফোন কলামে শূন্য হারানো ঠেকাতে টেক্সট ফরম্যাট
     sheet.getRange(row, 3).setNumberFormat('@');
     // Only write editable cells; preserve product formulas, images, cart metadata and system notes.
     [2, 3, 5, 6, 8, 10].forEach(function (col) { sheet.getRange(row, onlineOrderColumn_(sheet, col)).setValue(vals[col - 1]); });
     sheet.getRange(row, onlineOrderColumn_(sheet, ADM_COL_ADMIN_NOTE), 1, ADM_LAST_COL - ADM_COL_ADMIN_NOTE + 1)
       .setValues([vals.slice(ADM_COL_ADMIN_NOTE - 1, ADM_LAST_COL)]);
-    newStatus = String(vals[9]);
   } finally {
     lock.releaseLock();
   }
 
-  // শীটে Status হাতে বদলালে যে onEdit ট্রিগার চলে, API লিখলে তা চলে না — তাই এখানে একই কাজ করি
   var hooks = {};
-  if (typeof applyStockLifecycleForStatusChange_ === 'function' && newStatus !== prevStatus) {
-    try { applyStockLifecycleForStatusChange_(sheet, row, newStatus); hooks.stock = 'OK'; }
-    catch (stockErr) { hooks.stock = 'ERR'; }
-  }
+  if (stockHook) hooks.stock = stockHook;
   if (newStatus.toLowerCase() === 'confirmed') {
     var confirmedHooks = admRunConfirmedHooks_(sheet, row);
     hooks.capi = confirmedHooks.capi;

@@ -2129,20 +2129,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 
 <script src="site-security.js?v=20260603ord"></script>
-<script src="site-api-config.js?v=20261009-inbox"></script>
+
 <script src="site-api-health.js?v=20260610"></script>
 <script src="auth-config.js?v=20261009-inbox"></script>
 <script src="auth-api.js"></script>
 <script src="product-config.js?v=20261009-inbox"></script>
-<script src="product-utils.js?v=20260821ordername"></script>
+<script src="product-utils.js?v=20261015-stockv2"></script>
 <!-- Needed so "Customers also bought" has access to the real product catalog on this page -->
 <script src="category-products.js?v=20260820clean"></script>
 <script src="product-catalog-sync.js?v=20260603crosssell"></script>
 <script src="product-links-data.js?v=20260603crosssell"></script>
+<script defer src="site-api-config.js?v=20261009-inbox"></script>
+<script defer src="stock-sync.js?v=20261015-stockv2"></script>
+
 <script src="product-catalog-loader.js?v=20260603crosssell"></script>
 <script defer src="site-header-config.js?v=20261009-inbox"></script>
 <script defer src="site-header.js?v=20261009-inbox"></script>
-<script src="cart-utils.js?v=20261002fix"></script>
+<script src="cart-utils.js?v=20261015-stockv2"></script>
 <script src="cart-toast.js?v=20260603cartqty"></script>
 <script src="cart-drawer.js?v=20261006cart1"></script>
 <script src="checkout-location-labels.js?v=20260603loc"></script>
@@ -2738,8 +2741,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     // Catalog stock limit for a cart line (null = not tracked). Mirrors the cap
     // addOrMergeStoreCartItem applies on product pages, so the checkout "+" button
     // cannot push quantity past available stock.
-    function checkoutStockCap(item) {
-        if (!item || typeof window.getStockQty !== 'function') return null;
+    function checkoutStockVariantKey(item) {
+        return String((item && (item.size || item.selectedSize || item.color)) || '')
+            .replace(/\s+/g, ' ').trim().toLowerCase();
+    }
+
+    function checkoutStockProduct(item) {
+        if (!item) return null;
         var id = String(item.id || '').trim();
         var product = null;
         if (id) {
@@ -2755,14 +2763,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (!product && typeof window.findCatalogByName === 'function') {
             product = window.findCatalogByName(stripSizeFromCartName(item.name));
         }
-        return product ? window.getStockQty(product) : null;
+        return product;
+    }
+
+    function checkoutStockCap(item) {
+        if (!item || typeof window.getStockQty !== 'function') return null;
+        var product = checkoutStockProduct(item);
+        return product ? window.getStockQty(product, item.size || item.selectedSize || item.color || '') : null;
     }
 
     function checkoutQtyForSameProduct(item) {
         var id = String((item && item.id) || '').trim();
+        var variantKey = checkoutStockVariantKey(item);
+        var product = checkoutStockProduct(item);
+        var variantTrackedFn = window.hasTrackedStockVariants || (window.maCatalog && window.maCatalog.hasTrackedStockVariants);
+        var perVariant = product && typeof variantTrackedFn === 'function' ? variantTrackedFn(product) : false;
         var total = 0;
         cart.forEach(function (line) {
-            var same = id ? String(line.id || '').trim() === id : line === item;
+            var same = id
+                ? String(line.id || '').trim() === id && (!perVariant || checkoutStockVariantKey(line) === variantKey)
+                : line === item;
             if (same) total += parseInt(line.quantity, 10) || 1;
         });
         return total;
@@ -3073,7 +3093,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function displayOrder() {
         if (!summaryDiv) return;
-        
+
         if (cart.length === 0) {
             summaryDiv.innerHTML = buildEmptyCartHtml();
             var metaElEmpty = document.getElementById('orderReviewMeta');
@@ -3171,7 +3191,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         summaryDiv.innerHTML = '<div class="gb-order-list">' + itemsHtml + '</div>';
         renderProductChart();
-        
+
         var subBtn = document.getElementById('submitBtn');
         if (subBtn) subBtn.disabled = false;
         renderClearCartToolbar();
@@ -3215,8 +3235,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 return;
             } else {
                 var nextSize = String(sel.value || '').trim();
+                var previousSize = String(cart[idx].size || cart[idx].selectedSize || '').trim();
                 cart[idx].size = nextSize;
                 cart[idx].selectedSize = nextSize;
+                var nextCap = checkoutStockCap(cart[idx]);
+                if (nextCap === 0 || (typeof nextCap === 'number' && checkoutQtyForSameProduct(cart[idx]) > nextCap)) {
+                    cart[idx].size = previousSize;
+                    cart[idx].selectedSize = previousSize;
+                    checkoutAlert(nextCap === 0
+                        ? 'এই সাইজটি বর্তমানে স্টকে নেই।'
+                        : 'এই সাইজে available stock-এর চেয়ে বেশি পণ্য কার্টে আছে।');
+                    displayOrder();
+                    return;
+                }
             }
             persistCart();
             updateCheckoutLineSizeDisplay(idx);

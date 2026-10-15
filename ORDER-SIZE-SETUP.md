@@ -25,7 +25,7 @@
 
 ## বর্তমান Apps Script ডিপ্লয়মেন্ট আপডেট
 
-1. `apps-script-copy.html` থেকে তিনটি কোড কপি করে Apps Script-এর **Code.gs**, **AdminOrders.gs** এবং **FixSheetHeaders.gs**-এ পেস্ট করুন। এই পরিবর্তন মূল GitHub কোডের ভিত্তিতে তৈরি; Apps Script-এ আলাদা স্থানীয় পরিবর্তন থাকলে আগে সেগুলোর সঙ্গে diff মিলিয়ে নিন। Script Properties-এর বিদ্যমান Google Client ID, courier keys ও tracking settings পুনরায় দেওয়ার প্রয়োজন নেই।
+1. `apps-script-copy.html` থেকে তিনটি কোড কপি করে Apps Script-এর **Code.gs**, **AdminOrders.gs** এবং **FixSheetHeaders.gs**-এ পেস্ট করুন। এই পরিবর্তন মূল GitHub কোডের ভিত্তিতে তৈরি; Apps Script-এ আলাদা স্থানীয় পরিবর্তন থাকলে আগে সেগুলোর সঙ্গে diff মিলিয়ে নিন। Script Properties-এর বিদ্যমান Google Client ID, courier keys ও tracking settings পুনরায় দেওয়ার প্রয়োজন নেই। **অতিরিক্ত কোনো `Fix-doGet.gs` ফাইলে `doGet` function রাখবেন না**—এটি মূল router-কে override করে stock, login ও schema API বন্ধ করে দিতে পারে; পুরনো ফাইল থাকলে তার `doGet` মুছে দিন।
 2. **Save → Deploy → Manage deployments → Edit → Version: New version → Deploy**। নতুন আলাদা ডিপ্লয়মেন্ট তৈরি করবেন না; বর্তমান `/exec` URL রাখুন।
 3. Editor-এ একবার **setupOnlineOrderExtraHeaders** Run করুন। মূল শিটের R-তে নোট, S–AD-তে ছবি এবং K-তে স্ট্যাটাস ড্রপডাউন ঠিক হবে। বর্তমান H-তে সাইজ আগে থেকে আছে। পুনরায় প্রয়োজন হলে **syncOnlineOrderSizesNow** Run করুন; এটি CartJSON এবং পুরনো বর্ণনা থেকে সংরক্ষিত সাইজ দেখাবে, অজানা সাইজ অনুমান করবে না।
 

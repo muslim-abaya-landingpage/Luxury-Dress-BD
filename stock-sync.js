@@ -17,7 +17,6 @@
 
     var xhr = new XMLHttpRequest();
     xhr.open("GET", apiUrl + "?RecordType=StockStatus", false);
-    xhr.timeout = 4000;
     xhr.send(null);
     if (xhr.status !== 200) return;
 
@@ -33,8 +32,24 @@
         if (!p || !p.id) return;
         var entry = map[p.id];
         if (entry) {
-          p.stock = entry.qty;
-          p.inStock = entry.inStock;
+          p.stockVariants = entry.variants && typeof entry.variants === "object"
+            ? entry.variants
+            : null;
+          var variants = p.stockVariants || {};
+          var hasTrackedVariants = Object.keys(variants).some(function (variantKey) {
+            return variants[variantKey] && variants[variantKey].tracked === true;
+          });
+          if (hasTrackedVariants) {
+            // Size ledger is authoritative, except an explicit Product Manager Out-of-Stock override.
+            if (p.inStock !== false) {
+              p.stock = entry.qty;
+              p.inStock = entry.inStock;
+            }
+          } else if (entry.legacyTracked === true && p.inStock !== false) {
+            // Existing server-side product stock row remains authoritative over catalog fallback.
+            p.stock = entry.qty;
+            p.inStock = entry.inStock;
+          }
         }
       });
     });

@@ -248,7 +248,8 @@ function doPost(e) {
     if (isOrderReq) {
       var friendly = orderErrorMessage_(errCode);
       var isOutOfStockMsg = errCode && errCode.indexOf('OUT_OF_STOCK:') === 0;
-      if (!isOutOfStockMsg && friendly.indexOf('WhatsApp') === -1 && errCode && errCode.length < 120) {
+      var isKnownStockMsg = isOutOfStockMsg || errCode.indexOf('VARIANT_NOT_TRACKED:') === 0 || errCode === 'STOCK_CHECK_UNAVAILABLE';
+      if (!isKnownStockMsg && friendly.indexOf('WhatsApp') === -1 && errCode && errCode.length < 120) {
         friendly = friendly + ' (' + errCode + ')';
       }
       return ContentService.createTextOutput('Error|' + friendly)
@@ -389,23 +390,29 @@ function formatOnlineOrderSizes_(items, design) {
 }
 
 function appendOnlineOrderRow_(sheet, values, sizeText) {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    return appendOnlineOrderRowLocked_(sheet, values, sizeText);
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// Caller must already hold the script lock. Used by order submission so stock
+// reserve + order append happen in one critical section without a nested lock.
+function appendOnlineOrderRowLocked_(sheet, values, sizeText) {
   var physical = values.slice();
   if (onlineOrderHasSizeColumn_(sheet)) {
     physical.splice(7, 0, String(sizeText || formatOnlineOrderSizes_([], values[6])));
   }
-  var lock = LockService.getScriptLock();
-  lock.waitLock(20000);
-  try {
-    var row = sheet.getLastRow() + 1;
-    appendRow_(sheet, physical);
-    if (onlineOrderHasSizeColumn_(sheet)) {
-      sheet.getRange(row, 8).clearDataValidations().setWrap(true).setVerticalAlignment('top');
-    }
-    try { formatOnlineOrderDisplay_(sheet, row); } catch (displayErr) {}
-    return row;
-  } finally {
-    lock.releaseLock();
+  var row = sheet.getLastRow() + 1;
+  appendRow_(sheet, physical);
+  if (onlineOrderHasSizeColumn_(sheet)) {
+    sheet.getRange(row, 8).clearDataValidations().setWrap(true).setVerticalAlignment('top');
   }
+  try { formatOnlineOrderDisplay_(sheet, row); } catch (displayErr) {}
+  return row;
 }
 
 function syncOnlineOrderSizesNow() {
@@ -444,6 +451,12 @@ function orderErrorMessage_(code) {
   };
   if (map[code]) return map[code];
   var codeStr = String(code || '');
+  if (codeStr.indexOf('VARIANT_NOT_TRACKED:') === 0) {
+    return 'দুঃখিত, এই পণ্যের নির্বাচিত সাইজের স্টক যাচাই করা যাচ্ছে না। অন্য সাইজ বেছে নিন অথবা WhatsApp এ যোগাযোগ করুন।';
+  }
+  if (codeStr === 'STOCK_CHECK_UNAVAILABLE') {
+    return 'এই মুহূর্তে স্টক যাচাই করা যাচ্ছে না। অর্ডারটি নেওয়া হয়নি—কিছুক্ষণ পর আবার চেষ্টা করুন।';
+  }
   if (codeStr.indexOf('OUT_OF_STOCK:') === 0) {
     var label = codeStr.slice('OUT_OF_STOCK:'.length);
     return 'দুঃখিত, ' + label + ' এই মুহূর্তে স্টকে নেই। অন্য একটি পণ্য বেছে নিন অথবা কিছুক্ষণ পর আবার চেষ্টা করুন।';
@@ -1671,9 +1684,6 @@ function handleOnlineOrderPost_(e) {
   var couponCodeVal = String(param_(e, 'CouponCode') || '').trim().toUpperCase();
   var pricing = computeVerifiedOrderPricing_(validated.cartItems, charge, couponCodeVal);
   var couponDiscountVal = pricing.couponDiscountVal;
-  if (pricing.couponRowIndex != null) {
-    try { incrementCouponUsage_(pricing.couponRowIndex); } catch (incErr) {}
-  }
 
   var verifiedTotal = validated.total;
   var priceAdjustNote = '';
@@ -1704,43 +1714,64 @@ function handleOnlineOrderPost_(e) {
   ensureOnlineOrderSourceHeader_(sheet);
   ensureOnlineOrderTrackingEventIdHeader_(sheet);
 
-  assertStockAvailableForOrder_(validated.cartItems);
-
-  var newRow = appendOnlineOrderRow_(sheet, [
-    timestamp,
-    validated.name,
-    validated.phone,
-    validated.qty,
-    charge,
-    validated.address,
-    validated.design,
-    totalStr,
-    orderId,
-    'Pending',
-    '',
-    '',
-    '',
-    district,
-    payment,
-    txn,
-    notes
-  ], formatOnlineOrderSizes_(validated.cartItems, validated.design));
-
   var trackingId = String(eventID || '').trim();
   if (!/^[A-Za-z0-9_.:-]{1,100}$/.test(trackingId)) trackingId = 'order_' + orderId;
-  sheet.getRange(newRow, onlineOrderColumn_(sheet, 38)).setValue(trackingId);
   var metaEmailVal = (param_(e, 'Email') || '').trim().toLowerCase();
   var metaFbcVal = (param_(e, 'FBC') || '').trim();
   var metaFbpVal = (param_(e, 'FBP') || '').trim();
-  sheet.getRange(newRow, onlineOrderColumn_(sheet, 30), 1, 3).setValues([[metaEmailVal, metaFbcVal, metaFbpVal]]);
-  sheet.getRange(newRow, onlineOrderColumn_(sheet, 34), 1, 2).setValues([[couponCodeVal, couponDiscountVal]]);
+
+  // Hold tracked units before another order can pass the same availability check.
+  // Persist the cart and RESERVED stage together so later cancel/delivery can release it.
+  var orderLock = LockService.getScriptLock();
+  orderLock.waitLock(20000);
+  var newRow = 0;
+  var reservedVariantCount = 0;
   try {
-    sheet.getRange(newRow, onlineOrderColumn_(sheet, 33)).setValue(JSON.stringify(validated.cartItems || []));
-  } catch (cartJsonWriteErr) {}
-  try {
-    sheet.getRange(newRow, onlineOrderColumn_(sheet, 36)).setValue('NEW');
-    sheet.getRange(newRow, onlineOrderColumn_(sheet, 37)).setValue(sourceVal);
-  } catch (stageWriteErr) {}
+    reservedVariantCount = reserveStockForOrderItems_(validated.cartItems, orderId, 'order-intake');
+    newRow = appendOnlineOrderRowLocked_(sheet, [
+      timestamp,
+      validated.name,
+      validated.phone,
+      validated.qty,
+      charge,
+      validated.address,
+      validated.design,
+      totalStr,
+      orderId,
+      'Pending',
+      '',
+      '',
+      '',
+      district,
+      payment,
+      txn,
+      notes
+    ], formatOnlineOrderSizes_(validated.cartItems, validated.design));
+
+    sheet.getRange(newRow, onlineOrderColumn_(sheet, 30), 1, 3).setValues([[metaEmailVal, metaFbcVal, metaFbpVal]]);
+    sheet.getRange(newRow, onlineOrderColumn_(sheet, 33), 1, 6).setValues([[
+      JSON.stringify(validated.cartItems || []),
+      couponCodeVal,
+      couponDiscountVal,
+      reservedVariantCount > 0 ? 'RESERVED' : 'NEW',
+      sourceVal,
+      trackingId
+    ]]);
+  } catch (orderCreateErr) {
+    if (newRow) {
+      try { sheet.getRange(newRow, 1, 1, sheet.getLastColumn()).clearContent(); } catch (clearErr) {}
+    }
+    if (reservedVariantCount > 0) {
+      try { releaseStockForOrderItems_(validated.cartItems, orderId, 'order-intake-rollback'); } catch (rollbackErr) {}
+    }
+    throw orderCreateErr;
+  } finally {
+    orderLock.releaseLock();
+  }
+
+  if (pricing.couponRowIndex != null) {
+    try { incrementCouponUsage_(pricing.couponRowIndex); } catch (incErr) {}
+  }
   formatOnlineOrderProductCell_(sheet, newRow, validated.design);
   setupOrderStatusDropdown_(sheet);
   var imageUrls = collectOrderImageUrls_(e);
@@ -3894,7 +3925,7 @@ function getPublicStockStatus_() {
         var lid = String(lr[0] || '').trim();
         if (!lid) continue;
         var lqty = Number(lr[2]) || 0;
-        items[lid] = { qty: lqty, inStock: lqty > 0 };
+        items[lid] = { qty: lqty, inStock: lqty > 0, legacyTracked: true };
       }
     } catch (legacyErr) {}
     try {
@@ -4202,9 +4233,17 @@ function onEdit(e) {
     var row = e.range.getRow();
     if (row < 2) return;
     var newStatus = String(e.value || '').trim();
-    applyStockLifecycleForStatusChange_(sheet, row, newStatus);
+    var statusCell = sheet.getRange(row, onlineOrderColumn_(sheet, 10));
+    try {
+      applyStockLifecycleForStatusChange_(sheet, row, newStatus);
+      statusCell.clearNote();
+    } catch (stockErr) {
+      var previousStatus = (typeof e.oldValue === 'undefined' || e.oldValue === '') ? 'Pending' : e.oldValue;
+      statusCell.setValue(previousStatus);
+      statusCell.setNote('স্টক যাচাই/আপডেট ব্যর্থ হয়েছে; স্ট্যাটাস আগের অবস্থায় ফেরানো হয়েছে। ' + String(stockErr.message || stockErr));
+    }
   } catch (onEditErr) {
-    // স্প্রেডশিট সুরক্ষিত রাখতে এখানে কিছু ভাঙানো যাবে না
+    // অপ্রত্যাশিত trigger error শীট এডিট ব্লক করবে না
   }
 }
 
@@ -5512,15 +5551,19 @@ function ensureOnlineOrderSourceHeader_(sheet) {
 }
 
 function normStockVariant_(v) {
-  return String(v || '').trim();
+  return String(v || '').replace(/\s+/g, ' ').trim();
+}
+
+function stockVariantCompareKey_(v) {
+  return normStockVariant_(v).toLowerCase();
 }
 
 function findStockVariantRowIndex_(data, productId, variant) {
   var pid = String(productId || '').trim();
-  var vv = normStockVariant_(variant);
+  var vv = stockVariantCompareKey_(variant);
   var i;
   for (i = 1; i < data.length; i++) {
-    if (String(data[i][0]).trim() === pid && normStockVariant_(data[i][3]) === vv) return i + 1;
+    if (String(data[i][0]).trim() === pid && stockVariantCompareKey_(data[i][3]) === vv) return i + 1;
   }
   return -1;
 }
@@ -5628,81 +5671,316 @@ function cartItemVariantKey_(item) {
   return '';
 }
 
+function stockRowIsTracked_(row) {
+  return !!row && ((String(row[4]).toUpperCase() === 'TRUE') || row[4] === true);
+}
+
+function stockRequirementsForCart_(cartItems) {
+  var byKey = Object.create(null);
+  var out = [];
+  (cartItems || []).forEach(function (item) {
+    var productId = String((item && item.id) || '').trim();
+    var qty = parseInt(item && item.qty, 10) || 0;
+    if (!productId || qty <= 0) return;
+    var variant = normStockVariant_(cartItemVariantKey_(item));
+    var key = productId + '\u001f' + stockVariantCompareKey_(variant);
+    var req = byKey[key];
+    if (!req) {
+      req = byKey[key] = {
+        productId: productId,
+        productName: String((item && item.name) || productId),
+        category: String((item && item.category) || ''),
+        variant: variant,
+        qty: 0
+      };
+      out.push(req);
+    }
+    req.qty += qty;
+  });
+  return out;
+}
+
+function legacyProductStockRequirements_(cartItems, variantData, legacyData) {
+  variantData = variantData || [];
+  legacyData = legacyData || [];
+  var hasTrackedVariants = Object.create(null);
+  for (var i = 1; i < variantData.length; i++) {
+    var variantRow = variantData[i];
+    var variantProductId = String(variantRow[0] || '').trim();
+    if (variantProductId && stockRowIsTracked_(variantRow)) hasTrackedVariants[variantProductId] = true;
+  }
+  var legacyRows = Object.create(null);
+  for (var j = 1; j < legacyData.length; j++) {
+    var legacyProductId = String(legacyData[j][0] || '').trim();
+    if (legacyProductId) legacyRows[legacyProductId] = { rowIndex: j + 1, row: legacyData[j] };
+  }
+  var byProduct = Object.create(null);
+  stockRequirementsForCart_(cartItems).forEach(function (line) {
+    if (hasTrackedVariants[line.productId] || !legacyRows[line.productId]) return;
+    var req = byProduct[line.productId];
+    if (!req) {
+      var legacy = legacyRows[line.productId];
+      req = byProduct[line.productId] = {
+        productId: line.productId,
+        productName: String(legacy.row[1] || line.productName || line.productId),
+        rowIndex: legacy.rowIndex,
+        available: Number(legacy.row[2]) || 0,
+        qty: 0
+      };
+    }
+    req.qty += line.qty;
+  });
+  return Object.keys(byProduct).map(function (id) { return byProduct[id]; });
+}
+
+function trackedStockRequirements_(cartItems, data, strictMissingVariant) {
+  data = data || [];
+  var trackedProducts = Object.create(null);
+  for (var i = 1; i < data.length; i++) {
+    var row = data[i];
+    var pid = String(row[0] || '').trim();
+    if (pid && stockRowIsTracked_(row)) trackedProducts[pid] = true;
+  }
+  var requirements = [];
+  stockRequirementsForCart_(cartItems).forEach(function (req) {
+    var rowIndex = findStockVariantRowIndex_(data, req.productId, req.variant);
+    if (rowIndex === -1) {
+      if (strictMissingVariant && trackedProducts[req.productId]) {
+        var missing = new Error('VARIANT_NOT_TRACKED:' + req.productName + (req.variant ? ' (' + req.variant + ')' : ''));
+        missing.isStockError = true;
+        throw missing;
+      }
+      return; // এ পণ্যে কোনো tracked variant নেই — legacy/untracked catalog item
+    }
+    var stockRow = data[rowIndex - 1];
+    if (!stockRowIsTracked_(stockRow)) {
+      if (strictMissingVariant && trackedProducts[req.productId]) {
+        var untracked = new Error('VARIANT_NOT_TRACKED:' + req.productName + (req.variant ? ' (' + req.variant + ')' : ''));
+        untracked.isStockError = true;
+        throw untracked;
+      }
+      return;
+    }
+    req.rowIndex = rowIndex;
+    req.available = Number(stockRow[5]) || 0;
+    req.reserved = Number(stockRow[6]) || 0;
+    requirements.push(req);
+  });
+  return requirements;
+}
+
+function assertStockRequirementsAvailable_(requirements) {
+  (requirements || []).forEach(function (req) {
+    if (req.available < req.qty) {
+      var label = req.productName + (req.variant ? ' (' + req.variant + ')' : '') +
+        ' — Available ' + req.available + ', চাওয়া হয়েছে ' + req.qty;
+      var err = new Error('OUT_OF_STOCK:' + label);
+      err.isStockError = true;
+      throw err;
+    }
+  });
+}
+
+function reservedStockRequirements_(cartItems, data) {
+  data = data || [];
+  var requirements = [];
+  stockRequirementsForCart_(cartItems).forEach(function (req) {
+    var rowIndex = findStockVariantRowIndex_(data, req.productId, req.variant);
+    if (rowIndex === -1) return;
+    var row = data[rowIndex - 1];
+    var tracked = stockRowIsTracked_(row);
+    var reserved = Number(row[6]) || 0;
+    if (!tracked && reserved <= 0) return;
+    req.rowIndex = rowIndex;
+    req.tracked = tracked;
+    req.available = Number(row[5]) || 0;
+    req.reserved = reserved;
+    requirements.push(req);
+  });
+  return requirements;
+}
+
+function assertStockRequirementsReserved_(requirements) {
+  (requirements || []).forEach(function (req) {
+    if (req.reserved < req.qty) {
+      var label = req.productName + (req.variant ? ' (' + req.variant + ')' : '');
+      var err = new Error('STOCK_LEDGER_MISMATCH:' + label);
+      err.isStockError = true;
+      throw err;
+    }
+  });
+}
+
 /**
  * নতুন অর্ডার তৈরির সময় — যেসব ভ্যারিয়েন্ট ট্র্যাক করা হয় ও স্টক শেষ, তাতে অর্ডার আটকায়।
  * ট্র্যাক না করা ভ্যারিয়েন্টে কোনো বাধা নেই।
  */
 function assertStockAvailableForOrder_(cartItems) {
   if (!cartItems || !cartItems.length) return;
+  var lock = LockService.getScriptLock();
+  var locked = false;
   try {
+    lock.waitLock(15000);
+    locked = true;
     var sheet = ensureStockVariantsSheet_();
     var data = sheet.getDataRange().getValues();
-    var i;
-    for (i = 0; i < cartItems.length; i++) {
-      var item = cartItems[i];
-      var pid = String((item && item.id) || '').trim();
-      if (!pid) continue;
-      var variant = cartItemVariantKey_(item);
-      var qty = parseInt(item.qty, 10) || 1;
-      var rowIdx = findStockVariantRowIndex_(data, pid, variant);
-      if (rowIdx === -1) continue; // ট্র্যাক করা হয়নি — বাধা নেই
-      var r = data[rowIdx - 1];
-      var tracked = (String(r[4]).toUpperCase() === 'TRUE') || (r[4] === true);
-      if (!tracked) continue;
-      var available = Number(r[5]) || 0;
-      if (available < qty) {
-        var label = String((item && item.name) || pid) + (variant ? (' (' + variant + ')') : '');
-        var err = new Error('OUT_OF_STOCK:' + label);
-        err.isStockError = true;
-        throw err;
+    assertStockRequirementsAvailable_(trackedStockRequirements_(cartItems, data, true));
+    var legacySheet = ensureStockSheet_();
+    legacyProductStockRequirements_(cartItems, data, legacySheet.getDataRange().getValues()).forEach(function (req) {
+      if (req.available < req.qty) {
+        var out = new Error('OUT_OF_STOCK:' + req.productName + ' — Available ' + req.available + ', চাওয়া হয়েছে ' + req.qty);
+        out.isStockError = true;
+        throw out;
       }
-    }
+    });
   } catch (stockCheckErr) {
     if (stockCheckErr && stockCheckErr.isStockError) throw stockCheckErr;
-    // অপ্রত্যাশিত এরর অর্ডার নেওয়া বন্ধ করবে না — শুধু স্টক-শেষ হলেই বন্ধ করা হয়
+    var unavailable = new Error('STOCK_CHECK_UNAVAILABLE');
+    unavailable.isStockError = true;
+    throw unavailable;
+  } finally {
+    if (locked) lock.releaseLock();
   }
 }
 
 /** Confirmed → রিজার্ভ করা */
 function reserveStockForOrderItems_(cartItems, orderId, admin) {
-  (cartItems || []).forEach(function (item) {
-    var pid = String((item && item.id) || '').trim();
-    if (!pid) return;
-    var qty = parseInt(item.qty, 10) || 0;
-    if (qty <= 0) return;
-    var variant = cartItemVariantKey_(item);
-    mutateStockVariant_({
-      productId: pid,
-      productName: item.name,
-      category: item.category,
-      variant: variant,
-      deltaAvailable: -qty,
-      deltaReserved: qty,
-      changeType: 'RESERVE',
-      reason: 'অর্ডার কনফার্ম — Order ' + orderId,
-      orderId: orderId,
-      admin: admin || 'system'
-    });
+  var sheet = ensureStockVariantsSheet_();
+  var data = sheet.getDataRange().getValues();
+  var requirements = trackedStockRequirements_(cartItems, data, true);
+  assertStockRequirementsAvailable_(requirements);
+  var legacySheet = ensureStockSheet_();
+  var legacyData = legacySheet.getDataRange().getValues();
+  var legacyRequirements = legacyProductStockRequirements_(cartItems, data, legacyData);
+  legacyRequirements.forEach(function (req) {
+    if (req.available < req.qty) {
+      var err = new Error('OUT_OF_STOCK:' + req.productName + ' — Available ' + req.available + ', চাওয়া হয়েছে ' + req.qty);
+      err.isStockError = true;
+      throw err;
+    }
   });
+  var applied = [];
+  var appliedLegacy = [];
+  try {
+    requirements.forEach(function (req) {
+      mutateStockVariant_({
+        productId: req.productId,
+        productName: req.productName,
+        category: req.category,
+        variant: req.variant,
+        deltaAvailable: -req.qty,
+        deltaReserved: req.qty,
+        changeType: 'RESERVE',
+        reason: (admin === 'order-intake' ? 'নতুন অর্ডার — Order ' : 'অর্ডার কনফার্ম — Order ') + orderId,
+        orderId: orderId,
+        admin: admin || 'system'
+      });
+      applied.push(req);
+    });
+    legacyRequirements.forEach(function (req) {
+      var row = req.rowIndex;
+      var before = Number(legacySheet.getRange(row, 3).getValue()) || 0;
+      var after = before - req.qty;
+      if (after < 0) {
+        var out = new Error('OUT_OF_STOCK:' + req.productName + ' — Available ' + before + ', চাওয়া হয়েছে ' + req.qty);
+        out.isStockError = true;
+        throw out;
+      }
+      legacySheet.getRange(row, 3).setValue(after);
+      legacySheet.getRange(row, 4).setValue(new Date());
+      appliedLegacy.push({ req: req, before: before, after: after });
+      appendStockLedger_({
+        productId: req.productId,
+        variant: '',
+        changeType: 'RESERVE_PRODUCT_TOTAL',
+        qtyBefore: before,
+        qtyAfter: after,
+        reservedBefore: 0,
+        reservedAfter: 0,
+        reason: 'নতুন/কনফার্ম অর্ডার — product-total stock, Order ' + orderId,
+        orderId: orderId,
+        admin: admin || 'system'
+      });
+    });
+  } catch (reserveErr) {
+    for (var j = appliedLegacy.length - 1; j >= 0; j--) {
+      var legacyApplied = appliedLegacy[j];
+      try {
+        legacySheet.getRange(legacyApplied.req.rowIndex, 3).setValue(legacyApplied.before);
+        legacySheet.getRange(legacyApplied.req.rowIndex, 4).setValue(new Date());
+        appendStockLedger_({
+          productId: legacyApplied.req.productId,
+          variant: '',
+          changeType: 'RESERVE_ROLLBACK_PRODUCT_TOTAL',
+          qtyBefore: legacyApplied.after,
+          qtyAfter: legacyApplied.before,
+          reservedBefore: 0,
+          reservedAfter: 0,
+          reason: 'অর্ডার তৈরি ব্যর্থ — Order ' + orderId,
+          orderId: orderId,
+          admin: 'system'
+        });
+      } catch (legacyRollbackErr) {}
+    }
+    for (var i = applied.length - 1; i >= 0; i--) {
+      var req = applied[i];
+      try {
+        mutateStockVariant_({
+          productId: req.productId,
+          productName: req.productName,
+          category: req.category,
+          variant: req.variant,
+          deltaAvailable: req.qty,
+          deltaReserved: -req.qty,
+          changeType: 'RESERVE_ROLLBACK',
+          reason: 'অর্ডার তৈরি ব্যর্থ — Order ' + orderId,
+          orderId: orderId,
+          admin: 'system'
+        });
+      } catch (rollbackErr) {}
+    }
+    throw reserveErr;
+  }
+  return requirements.length + legacyRequirements.length;
 }
 
 /** Cancelled → রিজার্ভ ছাড়া (যদি আগে রিজার্ভ করা থাকে) */
 function releaseStockForOrderItems_(cartItems, orderId, admin) {
-  (cartItems || []).forEach(function (item) {
-    var pid = String((item && item.id) || '').trim();
-    if (!pid) return;
-    var qty = parseInt(item.qty, 10) || 0;
-    if (qty <= 0) return;
-    var variant = cartItemVariantKey_(item);
+  var sheet = ensureStockVariantsSheet_();
+  var variantData = sheet.getDataRange().getValues();
+  var requirements = reservedStockRequirements_(cartItems, variantData);
+  assertStockRequirementsReserved_(requirements);
+  requirements.forEach(function (req) {
     mutateStockVariant_({
-      productId: pid,
-      productName: item.name,
-      category: item.category,
-      variant: variant,
-      deltaAvailable: qty,
-      deltaReserved: -qty,
-      changeType: 'RELEASE',
+      productId: req.productId,
+      productName: req.productName,
+      category: req.category,
+      variant: req.variant,
+      deltaAvailable: req.tracked ? req.qty : 0,
+      deltaReserved: -req.qty,
+      changeType: req.tracked ? 'RELEASE' : 'RELEASE_UNTRACKED_RESERVATION',
       reason: 'অর্ডার বাতিল/ফেরত — Order ' + orderId,
+      orderId: orderId,
+      admin: admin || 'system'
+    });
+  });
+
+  var legacySheet = ensureStockSheet_();
+  var legacyRequirements = legacyProductStockRequirements_(cartItems, variantData, legacySheet.getDataRange().getValues());
+  legacyRequirements.forEach(function (req) {
+    var current = Number(legacySheet.getRange(req.rowIndex, 3).getValue()) || 0;
+    var next = current + req.qty;
+    legacySheet.getRange(req.rowIndex, 3).setValue(next);
+    legacySheet.getRange(req.rowIndex, 4).setValue(new Date());
+    appendStockLedger_({
+      productId: req.productId,
+      variant: '',
+      changeType: 'RELEASE_PRODUCT_TOTAL',
+      qtyBefore: current,
+      qtyAfter: next,
+      reservedBefore: 0,
+      reservedAfter: 0,
+      reason: 'অর্ডার বাতিল/ফেরত — product-total stock, Order ' + orderId,
       orderId: orderId,
       admin: admin || 'system'
     });
@@ -5711,20 +5989,18 @@ function releaseStockForOrderItems_(cartItems, orderId, admin) {
 
 /** Delivered → বিক্রি চূড়ান্ত (রিজার্ভ থেকে সরানো, Available আগেই বাদ গেছে) */
 function finalizeSoldStockForOrderItems_(cartItems, orderId, admin) {
-  (cartItems || []).forEach(function (item) {
-    var pid = String((item && item.id) || '').trim();
-    if (!pid) return;
-    var qty = parseInt(item.qty, 10) || 0;
-    if (qty <= 0) return;
-    var variant = cartItemVariantKey_(item);
+  var sheet = ensureStockVariantsSheet_();
+  var requirements = reservedStockRequirements_(cartItems, sheet.getDataRange().getValues());
+  assertStockRequirementsReserved_(requirements);
+  requirements.forEach(function (req) {
     mutateStockVariant_({
-      productId: pid,
-      productName: item.name,
-      category: item.category,
-      variant: variant,
+      productId: req.productId,
+      productName: req.productName,
+      category: req.category,
+      variant: req.variant,
       deltaAvailable: 0,
-      deltaReserved: -qty,
-      changeType: 'SELL',
+      deltaReserved: -req.qty,
+      changeType: req.tracked ? 'SELL' : 'SELL_UNTRACKED_RESERVATION',
       reason: 'ডেলিভারি সম্পন্ন — Order ' + orderId,
       orderId: orderId,
       admin: admin || 'system'
@@ -5734,21 +6010,53 @@ function finalizeSoldStockForOrderItems_(cartItems, orderId, admin) {
 
 /** Confirmed ধাপ ছাড়াই সরাসরি Delivered হলে — সরাসরি Available থেকে বাদ */
 function finalizeSoldDirectStockForOrderItems_(cartItems, orderId, admin) {
-  (cartItems || []).forEach(function (item) {
-    var pid = String((item && item.id) || '').trim();
-    if (!pid) return;
-    var qty = parseInt(item.qty, 10) || 0;
-    if (qty <= 0) return;
-    var variant = cartItemVariantKey_(item);
+  var sheet = ensureStockVariantsSheet_();
+  var data = sheet.getDataRange().getValues();
+  var requirements = trackedStockRequirements_(cartItems, data, true);
+  assertStockRequirementsAvailable_(requirements);
+  var legacySheet = ensureStockSheet_();
+  var legacyRequirements = legacyProductStockRequirements_(cartItems, data, legacySheet.getDataRange().getValues());
+  legacyRequirements.forEach(function (req) {
+    if (req.available < req.qty) {
+      var err = new Error('OUT_OF_STOCK:' + req.productName + ' — Available ' + req.available + ', চাওয়া হয়েছে ' + req.qty);
+      err.isStockError = true;
+      throw err;
+    }
+  });
+  requirements.forEach(function (req) {
     mutateStockVariant_({
-      productId: pid,
-      productName: item.name,
-      category: item.category,
-      variant: variant,
-      deltaAvailable: -qty,
+      productId: req.productId,
+      productName: req.productName,
+      category: req.category,
+      variant: req.variant,
+      deltaAvailable: -req.qty,
       deltaReserved: 0,
       changeType: 'SELL_DIRECT',
       reason: 'ডেলিভারি সম্পন্ন (রিজার্ভ ছাড়াই সরাসরি) — Order ' + orderId,
+      orderId: orderId,
+      admin: admin || 'system'
+    });
+  });
+
+  legacyRequirements.forEach(function (req) {
+    var before = Number(legacySheet.getRange(req.rowIndex, 3).getValue()) || 0;
+    if (before < req.qty) {
+      var err = new Error('OUT_OF_STOCK:' + req.productName + ' — Available ' + before + ', চাওয়া হয়েছে ' + req.qty);
+      err.isStockError = true;
+      throw err;
+    }
+    var after = before - req.qty;
+    legacySheet.getRange(req.rowIndex, 3).setValue(after);
+    legacySheet.getRange(req.rowIndex, 4).setValue(new Date());
+    appendStockLedger_({
+      productId: req.productId,
+      variant: '',
+      changeType: 'SELL_DIRECT_PRODUCT_TOTAL',
+      qtyBefore: before,
+      qtyAfter: after,
+      reservedBefore: 0,
+      reservedAfter: 0,
+      reason: 'ডেলিভারি সম্পন্ন — product-total stock, Order ' + orderId,
       orderId: orderId,
       admin: admin || 'system'
     });
@@ -5764,81 +6072,82 @@ function applyStockLifecycleForStatusChange_(sheet, row, newStatus) {
   var lock = LockService.getScriptLock();
   lock.waitLock(15000);
   try {
-    ensureOnlineOrderStockStageHeader_(sheet);
-    var rawStage = String(sheet.getRange(row, onlineOrderColumn_(sheet, 36)).getValue() || '').trim().toUpperCase();
-    var isLegacyOrder = !rawStage || rawStage === 'LEGACY_SKIPPED'; // কখনো StockStage লেখা হয়নি, বা আগে একবার লিগ্যাসি হিসেবে স্কিপ হয়েছে — উভয় অবস্থাতেই স্থায়ীভাবে auto-lifecycle থেকে বাদ থাকবে
-    var currentStage = isLegacyOrder ? 'LEGACY_UNKNOWN' : rawStage;
-
-    var target = null;
-    if (isReturnKeywordStatus_(newStatus) || isPlainCancelStatus_(newStatus)) {
-      target = 'RELEASED';
-    } else if (String(newStatus).trim() === 'Confirmed') {
-      target = 'RESERVED';
-    } else if (String(newStatus).trim() === 'Delivered') {
-      target = 'SOLD';
-    } else {
-      return; // Pending/Shipped/Fake — স্টকে কোনো প্রভাব নেই
-    }
-
-    if (isLegacyOrder) {
-      // পুরনো (এই ফিচার ডিপ্লয়ের আগের) অর্ডার — অনুমান করে স্টক পরিবর্তন করা হবে না।
-      // শুধু একবার মার্ক করে রাখা হয় যাতে অ্যাডমিন চাইলে ম্যানুয়ালি স্টক সমন্বয় করতে পারেন,
-      // আর বারবার একই সারিতে এডিট হলে লেজারে বারবার নোট না জমে।
-      var orderIdCellLegacy = sheet.getRange(row, onlineOrderColumn_(sheet, 9)).getValue();
-      var orderIdLegacy = String(orderIdCellLegacy || ('row' + row));
-      sheet.getRange(row, onlineOrderColumn_(sheet, 36)).setValue('LEGACY_SKIPPED');
-      appendStockLedger_({
-        productId: '', variant: '', changeType: 'LEGACY_SKIPPED',
-        reason: 'পুরনো (মাইগ্রেশনের আগের) অর্ডার — স্ট্যাটাস \'' + newStatus + '\'-এ পরিবর্তিত হয়েছে, কিন্তু স্টক অটো-আপডেট করা হয়নি। প্রয়োজনে ম্যানুয়ালি স্টক সমন্বয় করুন।',
-        orderId: orderIdLegacy, admin: 'system'
-      });
-      return;
-    }
-
-    if (currentStage === target) return; // আগেই এই ধাপে আছে — দ্বিতীয়বার প্রয়োগ করা হবে না
-
-    var orderIdCell = sheet.getRange(row, onlineOrderColumn_(sheet, 9)).getValue();
-    var orderId = String(orderIdCell || ('row' + row));
-    var cartJsonCell = String(sheet.getRange(row, onlineOrderColumn_(sheet, 33)).getValue() || '').trim();
-    var items = [];
-    if (cartJsonCell) {
-      try { items = JSON.parse(cartJsonCell); } catch (pe) { items = []; }
-    }
-    if (!items.length) {
-      sheet.getRange(row, onlineOrderColumn_(sheet, 36)).setValue(target);
-      return;
-    }
-
-    if (target === 'RESERVED') {
-      // NEW বা RELEASED থেকে RESERVED — রিজার্ভ করো। SOLD থেকে হলে (অস্বাভাবিক) — কিছু করবে না, শুধু নোট রাখো।
-      if (currentStage === 'SOLD') {
-        appendStockLedger_({ productId: '', variant: '', changeType: 'REVIEW_NEEDED', reason: 'SOLD থেকে আবার Confirmed — ম্যানুয়াল যাচাই দরকার', orderId: orderId, admin: 'system' });
-      } else {
-        reserveStockForOrderItems_(items, orderId, 'system');
-      }
-    } else if (target === 'RELEASED') {
-      if (currentStage === 'RESERVED') {
-        releaseStockForOrderItems_(items, orderId, 'system');
-      } else if (currentStage === 'SOLD') {
-        // ডেলিভারির পরে বাতিল/রিটার্ন — স্টক অটো-রিস্টোর হবে না, শুধু লেজারে নোট থাকবে; অ্যাডমিন নিজে সিদ্ধান্ত নেবেন
-        appendStockLedger_({ productId: '', variant: '', changeType: 'RETURN_REVIEW_NEEDED', reason: 'ডেলিভারির পর বাতিল/রিটার্ন — স্টক ফেরত দিতে চাইলে অ্যাডমিন প্যানেল থেকে ম্যানুয়ালি যোগ করুন', orderId: orderId, admin: 'system' });
-      }
-      // NEW থেকে RELEASED — কখনো রিজার্ভ হয়নি, তাই ছাড়ারও কিছু নেই
-    } else if (target === 'SOLD') {
-      if (currentStage === 'RESERVED') {
-        finalizeSoldStockForOrderItems_(items, orderId, 'system');
-      } else if (currentStage === 'NEW') {
-        finalizeSoldDirectStockForOrderItems_(items, orderId, 'system');
-      } else if (currentStage === 'RELEASED') {
-        appendStockLedger_({ productId: '', variant: '', changeType: 'REVIEW_NEEDED', reason: 'বাতিল থেকে আবার Delivered — ম্যানুয়াল যাচাই দরকার', orderId: orderId, admin: 'system' });
-        finalizeSoldDirectStockForOrderItems_(items, orderId, 'system');
-      }
-    }
-
-    sheet.getRange(row, onlineOrderColumn_(sheet, 36)).setValue(target);
+    return applyStockLifecycleForStatusChangeLocked_(sheet, row, newStatus);
   } finally {
     lock.releaseLock();
   }
+}
+
+function applyStockLifecycleForStatusChangeLocked_(sheet, row, newStatus) {
+  ensureOnlineOrderStockStageHeader_(sheet);
+  var rawStage = String(sheet.getRange(row, onlineOrderColumn_(sheet, 36)).getValue() || '').trim().toUpperCase();
+  var isLegacyOrder = !rawStage || rawStage === 'LEGACY_SKIPPED';
+  var currentStage = isLegacyOrder ? 'LEGACY_UNKNOWN' : rawStage;
+  var status = String(newStatus || '').trim();
+  var statusLower = status.toLowerCase();
+  var target = null;
+
+  if (isReturnKeywordStatus_(status) || isPlainCancelStatus_(status) || statusLower === 'fake') {
+    target = 'RELEASED';
+  } else if (status === 'Confirmed') {
+    target = 'RESERVED';
+  } else if (status === 'Delivered') {
+    target = 'SOLD';
+  } else if (status === 'Pending' && currentStage === 'RESERVED') {
+    target = 'RELEASED';
+  } else {
+    return; // Pending/Shipped-এ নতুন reserve নয়; Confirmed→Shipped হলে reserve বহাল থাকে
+  }
+
+  if (isLegacyOrder) {
+    var orderIdCellLegacy = sheet.getRange(row, onlineOrderColumn_(sheet, 9)).getValue();
+    var orderIdLegacy = String(orderIdCellLegacy || ('row' + row));
+    sheet.getRange(row, onlineOrderColumn_(sheet, 36)).setValue('LEGACY_SKIPPED');
+    appendStockLedger_({
+      productId: '', variant: '', changeType: 'LEGACY_SKIPPED',
+      reason: 'পুরনো (মাইগ্রেশনের আগের) অর্ডার — স্ট্যাটাস \'' + status + '\'-এ পরিবর্তিত হয়েছে, কিন্তু স্টক অটো-আপডেট করা হয়নি। প্রয়োজনে ম্যানুয়ালি স্টক সমন্বয় করুন।',
+      orderId: orderIdLegacy, admin: 'system'
+    });
+    return;
+  }
+
+  if (currentStage === target) return;
+  var orderIdCell = sheet.getRange(row, onlineOrderColumn_(sheet, 9)).getValue();
+  var orderId = String(orderIdCell || ('row' + row));
+  var cartJsonCell = String(sheet.getRange(row, onlineOrderColumn_(sheet, 33)).getValue() || '').trim();
+  var items = [];
+  if (cartJsonCell) {
+    try { items = JSON.parse(cartJsonCell); } catch (pe) { items = []; }
+  }
+  if (!items.length) {
+    sheet.getRange(row, onlineOrderColumn_(sheet, 36)).setValue(target);
+    return;
+  }
+
+  if (target === 'RESERVED') {
+    if (currentStage === 'SOLD') {
+      appendStockLedger_({ productId: '', variant: '', changeType: 'REVIEW_NEEDED', reason: 'SOLD থেকে আবার Confirmed — ম্যানুয়াল যাচাই দরকার', orderId: orderId, admin: 'system' });
+    } else {
+      reserveStockForOrderItems_(items, orderId, 'system');
+    }
+  } else if (target === 'RELEASED') {
+    if (currentStage === 'RESERVED') {
+      releaseStockForOrderItems_(items, orderId, 'system');
+    } else if (currentStage === 'SOLD') {
+      appendStockLedger_({ productId: '', variant: '', changeType: 'RETURN_REVIEW_NEEDED', reason: 'ডেলিভারির পর বাতিল/রিটার্ন — স্টক ফেরত দিতে চাইলে অ্যাডমিন প্যানেল থেকে ম্যানুয়ালি যোগ করুন', orderId: orderId, admin: 'system' });
+    }
+  } else if (target === 'SOLD') {
+    if (currentStage === 'RESERVED') {
+      finalizeSoldStockForOrderItems_(items, orderId, 'system');
+    } else if (currentStage === 'NEW') {
+      finalizeSoldDirectStockForOrderItems_(items, orderId, 'system');
+    } else if (currentStage === 'RELEASED') {
+      appendStockLedger_({ productId: '', variant: '', changeType: 'REVIEW_NEEDED', reason: 'বাতিল থেকে আবার Delivered — ম্যানুয়াল যাচাই দরকার', orderId: orderId, admin: 'system' });
+      finalizeSoldDirectStockForOrderItems_(items, orderId, 'system');
+    }
+  }
+
+  sheet.getRange(row, onlineOrderColumn_(sheet, 36)).setValue(target);
 }
 
 function isReturnKeywordStatus_(statusText) {
