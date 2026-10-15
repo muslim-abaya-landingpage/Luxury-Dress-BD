@@ -1,0 +1,30 @@
+import fs from 'node:fs';
+import vm from 'node:vm';
+import assert from 'node:assert/strict';
+const elements = {};
+function el(id) { return elements[id] ||= {value:'',checked:false,hidden:true,textContent:'',innerHTML:'',classList:{add(){},remove(){}},handlers:{},addEventListener(n,f){this.handlers[n]=f},querySelectorAll(){return []}}; }
+const document={readyState:'loading',addEventListener(){},getElementById:el};
+const w={CATEGORY_PRODUCTS:{'tops-kurti':[{id:'KURTI-03',name:'Purple Kurti'}],abaya:[{id:'ABY-HAFEZA-1',name:'Hafeza Set'}]}};
+let payload;
+w.MaAdmin={saveStockVariant(p){payload=p;return Promise.resolve()},getStockVariants(){return Promise.resolve({items:[]})}};
+const ctx={window:w,document,console,setTimeout(){},clearTimeout(){}};
+vm.createContext(ctx);
+let code=fs.readFileSync(new URL('../stock-analytics.js',import.meta.url),'utf8');
+code=code.replace('  // ===== Init =====',`  window.stockTests={renderStockTable,openStockEditModal,initStockEditModal,initQuickAdjustModal,openQuickAdjustModal,buildProductGroups,setRows(v){lastVariantRows=v},setCategory(v){activeCategory=v}};\n  // ===== Init =====`);
+vm.runInContext(code,ctx);
+const t=w.stockTests;
+el('saStockStatusFilter').value='all';el('saLowStockThreshold').value='5';
+const rows=[{productId:'KURTI-03',productName:'Purple Kurti',category:'tops-kurti',variant:'38',tracked:true,available:7,reserved:1,status:'OK'}];
+t.setRows(rows);t.renderStockTable(rows);
+assert.equal((el('saStockBody').innerHTML.match(/data-variant="38"/g)||[]).length,2);
+t.openStockEditModal('KURTI-03','38','Purple Kurti','tops-kurti');
+assert.equal(el('saStockEditQty').value,7);
+assert(el('saStockEditTitle').textContent.includes('(38)'));
+t.initStockEditModal();el('saStockEditQty').value='9';el('saStockEditReasonPreset').value='Physical count';
+el('saStockEditSave').handlers.click();assert.equal(payload.variant,'38');assert.equal(payload.available,9);assert.equal(payload.tracked,true);
+for(const bad of ['','1.5','-1','3abc','9007199254740992']){payload=null;el('saStockEditQty').value=bad;el('saStockEditSave').handlers.click();assert.equal(payload,null);}
+rows[0].tracked=false;rows[0].available=0;t.openStockEditModal('KURTI-03','38','Purple Kurti','tops-kurti');assert.equal(el('saStockEditQty').value,'');
+el('saSearchInput').value='KURTI-03';assert.equal(t.buildProductGroups(rows,5).length,1);
+el('saSearchInput').value='';t.setCategory('abaya');assert.equal(t.buildProductGroups([],5)[0].productId,'ABY-HAFEZA-1');
+t.setCategory('');el('saStockStatusFilter').value='OUT';assert.equal(t.buildProductGroups([],5).length,0);
+console.log('PASS: exact single-variant keys, edit payload, unknown quantities, whole-unit validation, search/category/status filtering.');

@@ -23,6 +23,10 @@
     return (Number(n) * 100 || 0).toFixed(1) + "%";
   }
 
+  function stockAttr(value) {
+    return String(value == null ? "" : value).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
   function downloadCsv(filename, rows) {
     var csv = rows.map(function (row) {
       return row.map(function (cell) {
@@ -179,10 +183,15 @@
     });
     var groups = [];
     var seenIds = {};
+    var search = document.getElementById("saSearchInput").value.trim().toLowerCase();
+    var statusFilter = document.getElementById("saStockStatusFilter").value.toLowerCase();
     allProducts().forEach(function (p) {
       seenIds[p.id] = true;
+      if (activeCategory && p.category !== activeCategory) return;
+      if (search && (p.id + " " + p.name).toLowerCase().indexOf(search) === -1) return;
       var rows = byProduct[p.id];
       if (!rows || !rows.length) {
+        if (statusFilter !== "all" && statusFilter !== "untracked") return;
         groups.push({
           productId: p.id, productName: p.name, category: p.category, image: p.image,
           variants: [{ productId: p.id, productName: p.name, category: p.category, variant: "", tracked: false, available: 0, reserved: 0, threshold: null, status: "UNTRACKED", updatedAt: "", updatedBy: "" }]
@@ -238,11 +247,11 @@
         '<td style="padding:6px"><strong>' + g.productName + '</strong><br><span style="color:#888;font-size:0.8rem">' + catLabel + '</span></td>' +
         '<td style="padding:6px;font-family:monospace;font-size:0.85rem">' + g.productId + '</td>' +
         '<td style="padding:6px">' + (multi ? (g.variants.length + ' টি') : (g.variants[0].variant || '—')) + '</td>' +
-        '<td style="padding:6px">' + (multi ? '—' : g.variants[0].available) + '</td>' +
+        '<td style="padding:6px">' + (multi || !g.variants[0].tracked ? '—' : g.variants[0].available) + '</td>' +
         '<td style="padding:6px">' + (multi ? '—' : g.variants[0].reserved) + '</td>' +
         '<td style="padding:6px">' + statusBadge(worst) + '</td>' +
         '<td style="padding:6px;font-size:0.8rem;color:#888">' + (multi ? '—' : (g.variants[0].updatedAt || '—')) + '</td>' +
-        '<td style="padding:6px">' + (multi ? '' : ('<button type="button" class="pl-btn pl-btn-secondary sa-quick-btn" data-pid="' + g.productId + '" data-variant="" data-name="' + g.productName.replace(/"/g,'&quot;') + '" data-cat="' + (g.category||'') + '" style="padding:4px 8px;font-size:0.78rem;margin-right:4px">বিক্রি/রিস্টক</button>' + '<button type="button" class="pl-btn pl-btn-secondary sa-edit-btn" data-pid="' + g.productId + '" data-variant="" data-name="' + g.productName.replace(/"/g,'&quot;') + '" data-cat="' + (g.category||'') + '" style="padding:4px 10px;font-size:0.82rem">এডিট</button>')) + '</td>' +
+        '<td style="padding:6px">' + (multi ? '' : ('<button type="button" class="pl-btn pl-btn-secondary sa-quick-btn" data-pid="' + g.productId + '" data-variant="' + stockAttr(g.variants[0].variant) + '" data-name="' + g.productName.replace(/"/g,'&quot;') + '" data-cat="' + (g.category||'') + '" style="padding:4px 8px;font-size:0.78rem;margin-right:4px">বিক্রি/রিস্টক</button>' + '<button type="button" class="pl-btn pl-btn-secondary sa-edit-btn" data-pid="' + g.productId + '" data-variant="' + stockAttr(g.variants[0].variant) + '" data-name="' + g.productName.replace(/"/g,'&quot;') + '" data-cat="' + (g.category||'') + '" style="padding:4px 10px;font-size:0.82rem">এডিট</button>')) + '</td>' +
         '</tr>';
 
       if (multi) {
@@ -334,7 +343,7 @@
     editCtx = { productId: productId, variant: variant || "", productName: productName, category: category };
     document.getElementById("saStockEditTitle").textContent = "স্টক পরিবর্তন — " + productName + (variant ? " (" + variant + ")" : "");
     var existing = lastVariantRows.find(function (v) { return v.productId === productId && (v.variant || "") === (variant || ""); });
-    document.getElementById("saStockEditQty").value = existing ? existing.available : 0;
+    document.getElementById("saStockEditQty").value = existing && existing.tracked ? existing.available : "";
     document.getElementById("saStockEditReasonPreset").value = "";
     document.getElementById("saStockEditReasonText").value = "";
     document.getElementById("saStockEditModal").hidden = false;
@@ -349,8 +358,9 @@
     document.getElementById("saStockEditCancel").addEventListener("click", closeStockEditModal);
     document.getElementById("saStockEditSave").addEventListener("click", function () {
       if (!editCtx) return;
-      var qty = parseInt(document.getElementById("saStockEditQty").value, 10);
-      if (isNaN(qty) || qty < 0) { toast("সঠিক Qty দিন।"); return; }
+      var qtyText = document.getElementById("saStockEditQty").value.trim();
+      var qty = Number(qtyText);
+      if (!/^\d+$/.test(qtyText) || !Number.isSafeInteger(qty)) { toast("গণনা করা পূর্ণসংখ্যার Available Qty দিন।"); return; }
       var preset = document.getElementById("saStockEditReasonPreset").value;
       var detail = document.getElementById("saStockEditReasonText").value.trim();
       var reason = [preset, detail].filter(Boolean).join(" — ");
@@ -659,3 +669,4 @@
     init();
   }
 })();
+
