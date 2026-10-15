@@ -14,6 +14,7 @@
   <title>Orders | Muslim Abaya Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="admin-panel.css?v=20260930">
+  <link rel="stylesheet" href="admin-order-insights.css?v=20261016-1">
   <script src="config.js?v=20261009-inbox"></script>
   <link rel="stylesheet" href="admin-sidebar.css?v=20261003sb">
 </head>
@@ -29,6 +30,18 @@
         <button type="button" class="pn-btn" id="ordRefresh">↻ Refresh</button>
       </div>
 
+      <section class="oi-panel" id="ordInsights" aria-labelledby="ordInsightsTitle" hidden>
+        <h2 id="ordInsightsTitle">অর্ডার যাচাই ও বিক্রয় সারাংশ</h2>
+        <p class="oi-note" id="ordScope"></p>
+        <div class="oi-cards" id="ordFinance"></div>
+        <p class="oi-note">Delivered মূল্যতে ডেলিভারি চার্জ থাকতে পারে। এটি কুরিয়ার থেকে পাওয়া টাকা বা লাভ নয়। খরচ ও কুরিয়ার জমার তথ্য ছাড়া লাভ গণনা করা হচ্ছে না।</p>
+        <div class="oi-controls">
+          <label for="ordIssueFilter">যাচাইয়ের তালিকা</label>
+          <select id="ordIssueFilter"><option value="all">সব অর্ডার</option><option value="flagged">যাচাই প্রয়োজন</option></select>
+          <span class="oi-note" id="ordIssueCount" role="status" aria-live="polite"></span>
+        </div>
+        <p class="oi-note">সাইজ খালি থাকলে পুরোনো অর্ডার বা ফ্রি সাইজও হতে পারে। সতর্কতা দেখে অর্ডার খুলে যাচাই করুন। ID নেই বা একই ID হলে Google Sheet-এ সারি নম্বর ধরে যাচাই করুন। এই তালিকা কোনো তথ্য নিজে থেকে বদলায় না। Pending-এর মধ্যে শিটে স্ট্যাটাস খালি থাকা অর্ডারও থাকতে পারে। ক্যাটালগের দাম ও CartJSON-এর পূর্ণ মিল এখানে যাচাই হয় না।</p>
+      </section>
       <div class="pn-tabs" id="ordTabs"></div>
 
       <div class="pn-toolbar">
@@ -46,9 +59,10 @@
               <th>Status</th>
               <th>Courier</th>
               <th>Assigned</th>
+              <th>যাচাই</th>
             </tr>
           </thead>
-          <tbody id="ordBody"><tr><td colspan="7" class="pn-empty">Loading…</td></tr></tbody>
+          <tbody id="ordBody"><tr><td colspan="8" class="pn-empty">Loading…</td></tr></tbody>
         </table>
       </div>
     </main>
@@ -59,6 +73,7 @@
   <script src="admin-api.js?v=20261013-speed2"></script>
   <script src="admin-guard.js?v=20261010-speed"></script>
   <script src="admin-panel.js?v=20260930"></script>
+  <script src="admin-order-insights.js?v=20261016-1"></script>
   <script>
     (function () {
       var esc = MaPanel.esc;
@@ -67,8 +82,21 @@
       var statuses = [];
       var filter = "all";
       var q = "";
+      var issueFilter = "all";
+      var insights = null;
+      var issueRows = new Map();
+      var issueSelect = document.getElementById("ordIssueFilter");
+      Object.keys(MaOrderInsights.labels).forEach(function (key) {
+        var option = document.createElement("option");
+        option.value = key;
+        option.textContent = MaOrderInsights.labels[key];
+        issueSelect.appendChild(option);
+      });
 
       function matches(o) {
+        var issues = issueRows.get(o) || [];
+        if (issueFilter === "flagged" && !issues.length) return false;
+        if (issueFilter !== "all" && issueFilter !== "flagged" && issues.indexOf(issueFilter) === -1) return false;
         if (filter === "today") { if (!isToday(o)) return false; }
         else if (filter !== "all" && o.status !== filter) return false;
         if (!q) return true;
@@ -77,11 +105,7 @@
       }
 
       function isToday(o) {
-        var m = /^(\d{2})-(\d{2})-(\d{4})/.exec(o.time || "");
-        if (!m) return false;
-        var d = new Date();
-        var pad = function (n) { return (n < 10 ? "0" : "") + n; };
-        return m[1] === pad(d.getDate()) && m[2] === pad(d.getMonth() + 1) && m[3] === String(d.getFullYear());
+        return MaOrderInsights.dateKey(o.time) === MaOrderInsights.dhakaToday();
       }
 
       function renderTabs() {
@@ -93,34 +117,64 @@
 
       function renderRows() {
         var list = all.filter(matches);
+        document.getElementById("ordIssueCount").textContent = "দেখানো হচ্ছে " + list.length + " / " + all.length + " অর্ডার";
         var body = document.getElementById("ordBody");
         if (!list.length) {
-          body.innerHTML = '<tr><td colspan="7" class="pn-empty">কোনো অর্ডার পাওয়া যায়নি</td></tr>';
+          body.innerHTML = '<tr><td colspan="8" class="pn-empty">কোনো অর্ডার পাওয়া যায়নি</td></tr>';
           return;
         }
         body.innerHTML = list.map(function (o) {
           var items = o.items && o.items.length ? esc(o.items[0]) + (o.items.length > 1 ? ' <span class="sub">+' + (o.items.length - 1) + " more</span>" : "") : "—";
+          var canOpen = o.orderId && (issueRows.get(o) || []).indexOf("duplicate_id") === -1;
           return (
-            '<tr class="click" data-id="' + esc(o.orderId) + '">' +
-            '<td><div class="oid">' + esc(o.orderId || "—") + '</div><div class="sub">' + esc(o.time) + "</div></td>" +
+            '<tr class="' + (canOpen ? 'click' : '') + '" data-id="' + (canOpen ? esc(o.orderId) : '') + '">' +
+            '<td><div class="oid">' + (canOpen ? '<a class="oi-link" href="admin-order.html?id=' + encodeURIComponent(o.orderId) + '">' + esc(o.orderId) + '</a>' : esc(o.orderId || "ID নেই")) + '</div><div class="sub">' + esc(o.time) + (o.row ? " · সারি " + esc(o.row) : "") + "</div></td>" +
             "<td><div>" + esc(o.name) + (o.blocked ? ' <span class="pn-badge blocked">Blocked</span>' : "") + '</div><div class="sub">' + esc(o.phone) + (o.district ? " · " + esc(o.district) : "") + "</div></td>" +
-            "<td>" + items + "</td>" +
-            "<td><b>" + MaPanel.money(o.total) + '</b><div class="sub">' + esc(o.payment || "") + "</div></td>" +
+            "<td>" + items + '<div class="sub">সাইজ: ' + esc(o.size || "তথ্য নেই") + '</div></td>' +
+            "<td><b>" + (MaOrderInsights.amount(o.total) === null ? 'অবৈধ মান' : MaPanel.money(o.total)) + '</b><div class="sub">' + esc(o.payment || "") + "</div></td>" +
             '<td><span class="pn-badge ' + MaPanel.statusClass(o.status) + '">' + esc(o.status) + "</span></td>" +
             "<td>" + (o.tracking ? esc(o.tracking) + '<div class="sub">' + esc(o.courierStatus || o.courier) + "</div>" : '<span class="sub">—</span>') + "</td>" +
             "<td>" + esc(o.assignedTo || "—") + "</td>" +
+            '<td><div class="oi-issues">' + (issueRows.get(o) || []).map(function (key) { return '<span class="oi-issue">' + esc(MaOrderInsights.labels[key]) + '</span>'; }).join("") + ((issueRows.get(o) || []).length ? '' : '<span class="oi-good">পরীক্ষিত ক্ষেত্রে সতর্কতা নেই</span>') + '</div></td>' +
             "</tr>"
           );
         }).join("");
       }
 
       var ordersShown = false;
+      function renderInsights(res) {
+        insights = MaOrderInsights.analyze(all);
+        issueRows = new Map();
+        insights.rows.forEach(function (r) { issueRows.set(r.order, r.issues); });
+        var g = insights.groups;
+        var cards = [
+          ["লোড হওয়া অর্ডারের মোট মূল্য", insights.totalValue, false, ""],
+          ["Delivered (" + g.delivered.count + ")", g.delivered.value, false, "delivered"],
+          ["Pending / Confirmed / Shipped (" + g.active.count + ")", g.active.value, false, ""],
+          ["Cancelled (" + g.cancelled.count + ")", g.cancelled.value, false, ""],
+          ["Fake (" + g.fake.count + ")", g.fake.value, false, ""],
+          ["Returned (" + g.returned.count + ")", g.returned.value, false, ""],
+          ["অন্য / অজানা স্ট্যাটাস (" + g.unknown.count + ")", g.unknown.value, false, ""],
+          ["যাচাই প্রয়োজন", insights.flagged, true, "review"]
+        ];
+        document.getElementById("ordFinance").innerHTML = cards.map(function (c) {
+          return '<div class="oi-card ' + c[3] + '"><span>' + esc(c[0]) + '</span><strong>' + (c[2] ? c[1] : MaPanel.money(c[1])) + '</strong></div>';
+        }).join("");
+        var total = Number(res.counts && res.counts.all);
+        var scope = "এই সারাংশ লোড হওয়া " + all.length + "টি অর্ডারের; নিচের সার্চ ও ফিল্টার সারাংশের হিসাব বদলায় না। ";
+        if (Number.isFinite(total) && total > all.length) scope += "শিটে মোট " + total + "টি আছে—বাকি " + (total - all.length) + "টি এই হিসাবে নেই। ";
+        if (insights.invalidAmounts) scope += insights.invalidAmounts + "টি অর্ডারের অবৈধ টাকার মান যোগ করা হয়নি। ";
+        scope += "বাংলাদেশ সময় অনুযায়ী যাচাই: " + insights.today + "।";
+        document.getElementById("ordScope").textContent = scope;
+        document.getElementById("ordInsights").hidden = false;
+      }
       function apply(res) {
         ordersShown = true;
         all = res.orders || [];
         counts = res.counts || {};
         statuses = res.statuses || [];
         document.getElementById("ordCount").textContent = (counts.all || 0) + " orders";
+        renderInsights(res);
         renderTabs();
         renderRows();
       }
@@ -131,10 +185,10 @@
         var btn = document.getElementById("ordRefresh");
         btn.disabled = true;
         document.getElementById("ordCount").textContent = (ordersShown ? (counts.all || 0) + " orders · " : "") + "আপডেট হচ্ছে…";
-        if (!ordersShown) document.getElementById("ordBody").innerHTML = '<tr><td colspan="7" class="pn-empty">অর্ডার আনা হচ্ছে…</td></tr>';
+        if (!ordersShown) document.getElementById("ordBody").innerHTML = '<tr><td colspan="8" class="pn-empty">অর্ডার আনা হচ্ছে…</td></tr>';
         return MaAdmin.call("AdminOrderList", { Limit: 300 }, options).then(apply).catch(function (err) {
           if (ordersShown) { MaPanel.toast("আপডেট করা যায়নি: " + err.message, true); return; }
-          document.getElementById("ordBody").innerHTML = '<tr><td colspan="7" class="pn-empty">Error: ' + esc(err.message) + "</td></tr>";
+          document.getElementById("ordBody").innerHTML = '<tr><td colspan="8" class="pn-empty">Error: ' + esc(err.message) + "</td></tr>";
         }).then(function () { btn.disabled = false; });
       }
 
@@ -149,7 +203,12 @@
         q = e.target.value.trim().toLowerCase();
         renderRows();
       });
+      issueSelect.addEventListener("change", function () {
+        issueFilter = issueSelect.value;
+        renderRows();
+      });
       document.getElementById("ordBody").addEventListener("click", function (e) {
+        if (e.target.closest("a")) return;
         var tr = e.target.closest("tr[data-id]");
         if (tr && tr.getAttribute("data-id")) location.href = "admin-order.html?id=" + encodeURIComponent(tr.getAttribute("data-id"));
       });
@@ -160,3 +219,4 @@
   </script>
 </body>
 </html>
+

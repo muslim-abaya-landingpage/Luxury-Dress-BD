@@ -66,14 +66,14 @@
               <div class="dz-date" id="dzDate"></div>
             </div>
             <div class="dz-actions">
-              <a class="dz-gold" href="admin-orders.html">অর্ডার প্যানেল →</a>
+              <a class="dz-gold" href="admin-orders.html">অর্ডার যাচাই ও বিক্রয় সারাংশ →</a>
               <a id="admOpenSheet" href="#" target="_blank" rel="noopener">Google Sheet</a>
               <a id="admOpenScript" href="#" target="_blank" rel="noopener">Apps Script</a>
             </div>
           </div>
           <div class="dz-today">
             <div><b id="dzTodayCount">—</b><span>আজকের অর্ডার</span></div>
-            <div><b id="dzTodayRev">—</b><span>আজকের বিক্রয়</span></div>
+            <div><b id="dzTodayRev">—</b><span>আজকের অর্ডার মূল্য (তালিকায়)</span></div>
             <div><b id="dzRepeat">—</b><span>পুনরায় ক্রেতা</span></div>
           </div>
         </section>
@@ -81,6 +81,7 @@
         <div class="dz-kpis" id="admStats" hidden>
           <div class="dz-kpi" style="--c:#d4a72c"><b id="admStatCount">—</b><span>মোট অর্ডার (তালিকায়)</span></div>
           <div class="dz-kpi" style="--c:#14161a"><b id="admStatRevenue">—</b><span>মোট মূল্য (তালিকায়)</span></div>
+          <div class="dz-kpi" style="--c:#16794a"><b id="admStatDeliveredValue">—</b><span>Delivered মূল্য (তালিকায়, চার্জসহ; লাভ নয়)</span></div>
           <div class="dz-kpi" style="--c:#c9831a"><b id="admStatPending">—</b><span>Pending অর্ডার</span></div>
           <div class="dz-kpi" style="--c:#16794a"><b id="admStatShipped">—</b><span>Shipped / Delivered</span></div>
         </div>
@@ -114,6 +115,7 @@
   <script src="admin-api.js?v=20261013-speed2"></script>
   <script src="admin-guard.js?v=20261010-speed"></script>
   <script src="admin-invoice.js?v=20261009-inbox"></script>
+  <script src="admin-order-insights.js?v=20261016-1"></script>
   <script>
     (function () {
       var session = null;
@@ -218,6 +220,7 @@
         });
         document.getElementById("admStatCount").textContent = orders.length;
         document.getElementById("admStatRevenue").textContent = "৳" + revenue.toLocaleString("en-US");
+        document.getElementById("admStatDeliveredValue").textContent = "৳" + MaOrderInsights.analyze(orders).groups.delivered.value.toLocaleString("en-US");
         document.getElementById("admStatPending").textContent = pending;
         document.getElementById("admStatShipped").textContent = shipped;
         document.getElementById("dzTodayCount").textContent = todayCount;
@@ -308,3 +311,4 @@
   </script>
 </body>
 </html>
+
