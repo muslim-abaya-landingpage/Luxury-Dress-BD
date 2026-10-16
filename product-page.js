@@ -776,6 +776,8 @@
     document.body.classList.toggle("pd-oos", !st.inStock);
   }
 
+  window.addEventListener("ma:stock-updated", applyStockUi);
+
   function addToCart(silent) {
     if (!stockStatus().inStock) return;
     var line = buildCartLine();
@@ -1168,4 +1170,3 @@
     if (thumb) thumb.style.display = "none";
   }, true);
 })();
-

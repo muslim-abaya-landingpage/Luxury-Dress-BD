@@ -1,30 +1,30 @@
-# Homepage (force)
-/index.html   /   301!
+# Homepage (permanent)
+/index.html   /   301
 
-# Redirect old .html links to clean URLs (force)
+# Redirect old .html links to clean URLs
 # Note: extensionless URLs (e.g. /abaya) are served automatically by
 # Cloudflare Pages from the matching .html file — no explicit rewrite
 # rule is needed, and adding one causes a redirect loop on Pages.
-/abaya.html              /abaya              301!
-/cover-up.html           /cover-up           301!
-/tops-kurti.html         /tops-kurti         301!
-/premium-two-piece.html  /premium-two-piece  301!
-/embroidery.html         /embroidery         301!
-/karchupi.html           /karchupi           301!
-/kaftan.html             /kaftan             301!
-/hijab.html              /hijab              301!
-/panjabi.html            /panjabi            301!
-/video.html              /video              301!
-/category.html           /category           301!
-/product-links.html      /product-links      301!
-/product-manager.html    /product-manager    301!
-/checkout.html           /checkout           301!
-/about.html              /about              301!
-/help.html               /help              301!
-/signin.html             /signin             301!
-/signup.html             /signup             301!
-/terms.html              /terms              301!
-/privacy.html            /privacy            301!
-/refund.html             /refund             301!
-/thank-you.html          /thank-you          301!
-/success.html            /success            301!
+/abaya.html              /abaya              301
+/cover-up.html           /cover-up           301
+/tops-kurti.html         /tops-kurti         301
+/premium-two-piece.html  /premium-two-piece  301
+/embroidery.html         /embroidery         301
+/karchupi.html           /karchupi           301
+/kaftan.html             /kaftan             301
+/hijab.html              /hijab              301
+/panjabi.html            /panjabi            301
+/video.html              /video              301
+/category.html           /category           301
+/product-links.html      /product-links      301
+/product-manager.html    /product-manager    301
+/checkout.html           /checkout           301
+/about.html              /about              301
+/help.html               /help               301
+/signin.html             /signin             301
+/signup.html             /signup             301
+/terms.html              /terms              301
+/privacy.html            /privacy            301
+/refund.html             /refund             301
+/thank-you.html          /thank-you          301
+/success.html            /success            301
