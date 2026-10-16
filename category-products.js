@@ -134,6 +134,7 @@ window.CATEGORY_PRODUCTS = {
       id: "ABY-VERSACE-9",
       name: "Versace Border Premium Abaya Set - Side",
       image: "/images/Versace Border Premium Abaya Set.jpg",
+      images: ["images/gallery/aby-versace-9-1792180650386-g1.webp", "images/gallery/aby-versace-9-1792180660161-g2.webp", "images/gallery/aby-versace-9-1792180671387-g3.webp", "images/gallery/aby-versace-9-1792180680076-g4.webp"],
       price: 1750,
       color: "black",
       colorLabel: "Classic Black",
