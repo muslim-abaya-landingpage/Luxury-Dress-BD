@@ -163,7 +163,7 @@
         var sleeve = document.getElementById("csmSleeve").value;
         var note = document.getElementById("csmNote").value;
 
-        if (!length || !width) {
+        if (!Number.isFinite(Number(length)) || !Number.isFinite(Number(width)) || Number(length) <= 0 || Number(width) <= 0) {
             var lengthInput = document.getElementById("csmLength");
             if (lengthInput) lengthInput.focus();
             return;
@@ -182,6 +182,7 @@
             quantity: 1,
             image: pending.image,
             category: pending.category,
+            productType: pending.productType || "",
             categoryLabel: (window.CATEGORY_META && window.CATEGORY_META[pending.category] && window.CATEGORY_META[pending.category].title) || pending.category,
             size: sizeLabel,
             note: note || undefined
@@ -224,3 +225,4 @@
     }
 
 })();
+

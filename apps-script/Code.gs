@@ -92,6 +92,11 @@ function doPost(e) {
       return handleSteadfastWebhookPost_(e);
     }
     var type = param_(e, 'RecordType');
+    if (type === 'NotifyBackInStockV2') return jsonOut_(opsSaveWaitlist_(e));
+    if (type && type.indexOf('AdminOperations') === 0) {
+      adminRateLimit_(param_(e, 'Token') || 'admin_global');
+      return jsonOut_(opsHandle_(type, e));
+    }
     var isOrder = type === 'Order' || (!type && param_(e, 'Name') && param_(e, 'Phone'));
     var isSubscribe =
       type === 'Subscribe' ||
@@ -450,6 +455,7 @@ function orderErrorMessage_(code) {
     DUPLICATE_ORDER: 'একই অর্ডার ইতিমধ্যে পাঠানো হয়েছে।'
   };
   if (map[code]) return map[code];
+  if (/^(UNKNOWN_PRODUCT|INVALID_SIZE|SIZE_REQUIRED|PRODUCT_TYPE_REQUIRED|STRUCTURED_CART_REQUIRED|CATALOG_|PRICE_CHANGED|INVALID_CUSTOM_SIZE|INVALID_COUPON)/.test(String(code))) return 'পণ্য, সাইজ বা দাম নতুন করে যাচাই প্রয়োজন। পেজ রিফ্রেশ করে পণ্য/সাইজ আবার বেছে নিন অথবা WhatsApp-এ যোগাযোগ করুন।';
   var codeStr = String(code || '');
   if (codeStr.indexOf('VARIANT_NOT_TRACKED:') === 0) {
     return 'দুঃখিত, এই পণ্যের নির্বাচিত সাইজের স্টক যাচাই করা যাচ্ছে না। অন্য সাইজ বেছে নিন অথবা WhatsApp এ যোগাযোগ করুন।';
@@ -507,7 +513,7 @@ function validateOrderInput_(e) {
           return {
             id: String((it && it.id) || '').trim(),
             name: String((it && it.name) || '').trim(),
-            qty: parseInt((it && it.qty), 10) || 1,
+            qty: Number(it && it.qty),
             price: parseFloat(it && it.price) || 0,
             size: String((it && (it.size || it.selectedSize)) || '').trim().slice(0, 160),
             color: String((it && it.color) || '').trim().slice(0, 80),
@@ -1057,7 +1063,7 @@ function runSafetyBackupNow() {
     return { ok: false, error: 'BACKUP_SHEET_SAME_AS_SOURCE' };
   }
 
-  var tabs = ['Online Order', 'Subscribe', 'Admins', 'Real Customer', 'Fake', 'Stock'];
+  var tabs = ['Online Order', 'Subscribe', 'Admins', 'Real Customer', 'Fake', 'Stock', 'StockVariants', 'StockLedger', 'Reviews', 'Coupons', 'AbandonedCarts', 'StockWaitlist', 'ReorderOffers', 'OperationsRecords'];
   var copied = [];
   var totalRows = 0;
   var i;
@@ -1082,6 +1088,7 @@ function runSafetyBackupNow() {
     Session.getActiveUser().getEmail() || 'unknown',
     'manual/auto backup'
   ]);
+  PropertiesService.getScriptProperties().setProperty('OPS_LAST_BACKUP_AT', new Date().toISOString());
 
   return {
     ok: true,
@@ -1682,7 +1689,9 @@ function handleOnlineOrderPost_(e) {
 
   // ── নিরাপত্তা: সার্ভার নিজে দাম হিসাব করে — ক্লায়েন্টের পাঠানো Total সরাসরি বিশ্বাস করা হয় না ──
   var couponCodeVal = String(param_(e, 'CouponCode') || '').trim().toUpperCase();
-  var pricing = computeVerifiedOrderPricing_(validated.cartItems, charge, couponCodeVal);
+  if (validated.cartItems.reduce(function(sum,it){return sum+it.qty;},0) !== validated.qty) throw new Error('INVALID_QTY');
+  var pricing = opsVerifiedPricing_(validated.cartItems, charge, couponCodeVal);
+  if (Math.abs(pricing.subtotal + charge - pricing.couponDiscountVal - validated.total) > 2) throw new Error('PRICE_CHANGED');
   var couponDiscountVal = pricing.couponDiscountVal;
 
   var verifiedTotal = validated.total;
@@ -4104,9 +4113,15 @@ function submitReview_(e) {
     try { rateLimit_('review_' + name.slice(0, 40) + '_' + productId.slice(0, 40)); }
     catch (rlErr) { return { ok: false, error: 'RATE_LIMIT', message: 'একটু পর আবার চেষ্টা করুন।' }; }
 
-    var sheet = getReviewsSheet_();
-    var reviewId = Utilities.getUuid();
-    appendRow_(sheet, [reviewId, productId, productName, name, rating, comment, new Date(), 'Pending']);
+    var reviewLock = LockService.getScriptLock();
+    reviewLock.waitLock(15000);
+    try {
+      var verified = opsReviewVerification_(e, productId);
+      var sheet = getReviewsSheet_();
+      opsReviewHeaders_(sheet);
+      var reviewId = Utilities.getUuid();
+      appendRow_(sheet, [reviewId, productId, productName, admCellText_(name,60), rating, admCellText_(comment,600), new Date(), 'Pending', verified.verified, verified.orderId]);
+    } finally { reviewLock.releaseLock(); }
     return { ok: true, message: 'ধন্যবাদ! আপনার রিভিউ পর্যালোচনার পর প্রকাশিত হবে।' };
   } catch (err) {
     return { ok: false, error: 'REVIEW_SUBMIT_FAILED', message: String(err.message || err) };
@@ -4132,6 +4147,7 @@ function getProductReviews_(e) {
         name: String(r[3] || ''),
         rating: rating,
         comment: String(r[5] || ''),
+        verifiedPurchase: r[8] === true,
         date: r[6] instanceof Date ? Utilities.formatDate(r[6], 'GMT+6', 'dd MMM yyyy') : String(r[6] || '')
       });
     }
@@ -5412,6 +5428,8 @@ function notifyBackInStockWaitlist_(productId) {
       var r = data[i];
       if (String(r[0] || '').trim() !== String(productId).trim()) continue;
       if (String(r[5] || '').trim()) continue;
+      // Size requests need variant availability; product-level restock is insufficient.
+      if (String(r[6] || '').trim()) continue;
       var isEmail = String(r[3] || '') === 'yes';
       if (isEmail) {
         try {
@@ -5478,7 +5496,7 @@ function getAdminGrowthData_(e) {
       var wr = wData[j];
       var notified = String(wr[5] || '');
       if (notified.indexOf('emailed') === 0 || notified === 'dismissed') continue;
-      out.stockWaitlist.push({ productId: String(wr[0] || ''), productName: String(wr[1] || ''), contact: String(wr[2] || ''), isEmail: String(wr[3] || '') === 'yes', notified: notified });
+      out.stockWaitlist.push({ productId: String(wr[0] || ''), productName: String(wr[1] || ''), variant: String(wr[6] || ''), contact: String(wr[2] || ''), isEmail: String(wr[3] || '') === 'yes', notified: notified });
     }
   } catch (err2) {}
   try {
@@ -5508,7 +5526,7 @@ function markGrowthItemDone_(e) {
       var wSheet = ensureStockWaitlistSheet_();
       var wData = wSheet.getDataRange().getValues();
       for (var i = 1; i < wData.length; i++) {
-        if ((String(wData[i][0] || '') + '|' + String(wData[i][2] || '')) === key) { wSheet.getRange(i + 1, 6).setValue('dismissed'); break; }
+        if ((String(wData[i][0] || '') + '|' + String(wData[i][2] || '') + '|' + String(wData[i][6] || '')) === key) { wSheet.getRange(i + 1, 6).setValue('dismissed'); break; }
       }
     } else if (kind === 'reorder') {
       var rSheet = ensureReorderOffersSheet_();
@@ -6286,6 +6304,7 @@ function saveAdminStockVariant_(e) {
       orderId: '',
       admin: v.email || 'admin'
     });
+    if (setTracked && nextAvailable > 0 && (deltaAvailable > 0 || !before.tracked)) { try { opsNotifyVariant_(productId, variant, nextAvailable); } catch (notifyErr) {} }
     return { ok: true, productId: productId, variant: variant, available: nextAvailable, reserved: before.reserved, delta: deltaAvailable };
   } finally {
     lock.releaseLock();
@@ -6665,6 +6684,7 @@ function quickAdjustAdminStock_(e) {
       orderId: '',
       admin: v.email || 'admin'
     });
+    if (delta > 0) { try { opsNotifyVariant_(productId, variant, nextAvailable); } catch (notifyErr) {} }
     return { ok: true, productId: productId, variant: variant, available: nextAvailable, delta: delta };
   } finally {
     lock.releaseLock();
@@ -6761,3 +6781,4 @@ function trackingSetupAudit() {
   console.log('TRACKING_SETUP_AUDIT ' + JSON.stringify(result));
   return result;
 }
+

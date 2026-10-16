@@ -171,13 +171,13 @@
         document.getElementById("admStatWaitlist").textContent = list.length;
         if (!list.length) { body.innerHTML = '<tr><td colspan="5" class="adm-empty">কোনো অপেক্ষমান তালিকা নেই</td></tr>'; return; }
         body.innerHTML = list.map(function (w) {
-          var key = w.productId + "|" + w.contact;
-          var msg = "আসসালামু আলাইকুম, আপনি " + (w.productName || "প্রোডাক্টটি") + " স্টকে ফিরলে জানাতে বলেছিলেন — এটি এখন স্টকে আছে!";
+          var key = w.productId + "|" + w.contact + "|" + (w.variant || "");
+          var msg = "আসসালামু আলাইকুম, আপনি " + (w.productName || "প্রোডাক্টটি") + " (" + (w.variant || "সাইজ যাচাই প্রয়োজন") + ") সম্পর্কে আপনার অনুরোধ পেয়েছি। সঠিক স্টক ও ডেলিভারি নিশ্চিত করে জানাচ্ছি।";
           var actionBtn = w.isEmail
-            ? '<span style="font-size:0.8rem;color:var(--adm-muted)">ইমেইলে জানানো হয়েছে</span>'
+            ? '<span style="font-size:0.8rem;color:var(--adm-muted)">ইমেইল নোটিফিকেশন অপেক্ষমাণ</span>'
             : '<a class="adm-btn adm-btn-secondary" style="padding:4px 10px;font-size:0.8rem" target="_blank" rel="noopener" href="' + waLink(w.contact, msg) + '">WhatsApp</a>';
           return "<tr>" +
-            "<td>" + escapeHtml(w.productName || w.productId) + "</td>" +
+            "<td>" + escapeHtml(w.productName || w.productId) + "<div>সাইজ: " + escapeHtml(w.variant || "অজানা") + "</div></td>" +
             "<td>" + escapeHtml(w.contact) + "</td>" +
             "<td>" + (w.isEmail ? "ইমেইল" : "ফোন") + "</td>" +
             "<td>" + escapeHtml(w.notified || "pending") + "</td>" +
@@ -243,3 +243,4 @@
   </script>
 </body>
 </html>
+

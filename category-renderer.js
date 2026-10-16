@@ -1469,7 +1469,8 @@ function bindPqvInteractions(p, idx, categoryKey, scopeRoot) {
       window.openCustomSizeModal({
         id: customSizeBtnEl.getAttribute("data-product-id"),
         name: customSizeBtnEl.getAttribute("data-product-name"),
-        price: Number(customSizeBtnEl.getAttribute("data-product-price")) || 0,
+        price: resolveProductPrice(p, categoryKey, getSelectedTypeForIdx(modal, idx) || getDefaultProductType(p, categoryKey)),
+        productType: getSelectedTypeForIdx(modal, idx) || getDefaultProductType(p, categoryKey),
         image: customSizeBtnEl.getAttribute("data-product-image"),
         category: customSizeBtnEl.getAttribute("data-category")
       });
@@ -1932,7 +1933,7 @@ function ensureReviewsWidgetLoaded() {
   if (window.MAReviews || document.getElementById("ma-reviews-widget-script")) return;
   var s = document.createElement("script");
   s.id = "ma-reviews-widget-script";
-  s.src = "/reviews-widget.js?v=20260928";
+  s.src = "/reviews-widget.js?v=20261016-ops";
   document.head.appendChild(s);
 }
 function callMAReviewsMount(root, p, tries) {
@@ -3707,4 +3708,5 @@ window.addEventListener("load", function () {
     if (thumb) thumb.style.display = "none";
   }, true);
 })();
+
 

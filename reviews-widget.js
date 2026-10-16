@@ -66,6 +66,7 @@
       Name: payload.name || "",
       Rating: String(payload.rating || ""),
       Comment: payload.comment || ""
+      ,OrderID: payload.orderId || "", Phone: payload.phone || ""
     });
     fetch(url, {
       method: "POST",
@@ -95,6 +96,7 @@
           "</span>" +
           '<span class="pqv-review-name">' +
           esc(r.name) +
+          (r.verifiedPurchase === true ? ' <span class="pqv-review-verified">✓ কেনাকাটা যাচাই করা</span>' : '') +
           "</span>" +
           '<span class="pqv-review-date">' +
           esc(r.date) +
@@ -174,6 +176,9 @@
         "</div>" +
         '<input type="hidden" name="rating" value="0">' +
         '<input type="text" class="pqv-review-input" name="name" maxlength="60" placeholder="আপনার নাম" required>' +
+        '<label>কেনাকাটা যাচাইয়ের Order ID (ঐচ্ছিক)<input type="text" class="pqv-review-input" name="orderId" maxlength="100" autocomplete="off"></label>' +
+        '<label>অর্ডারের মোবাইল নম্বর (যাচাইয়ের জন্য)<input type="tel" class="pqv-review-input" name="phone" maxlength="16" autocomplete="tel"></label>' +
+        '<p class="pqv-review-form-msg">অর্ডার ও মোবাইল শুধু কেনাকাটা যাচাইয়ে ব্যবহৃত হবে; প্রকাশ করা হবে না। পুরোনো অর্ডারে Product ID না থাকলে যাচাই সম্ভব নাও হতে পারে।</p>' +
         '<textarea class="pqv-review-input" name="comment" maxlength="600" rows="3" placeholder="আপনার অভিজ্ঞতা লিখুন (ঐচ্ছিক)"></textarea>' +
         '<button type="submit" class="pqv-review-submit-btn">জমা দিন</button>' +
         '<p class="pqv-review-form-msg" data-ma-review-msg="1"></p>' +
@@ -230,7 +235,7 @@
             submitBtn.textContent = "জমা হচ্ছে…";
           }
           submitReview(
-            { productId: productId, productName: productName, name: name, rating: rating, comment: comment },
+            { productId: productId, productName: productName, name: name, rating: rating, comment: comment, orderId: String(fd.get("orderId") || "").trim(), phone: String(fd.get("phone") || "").trim() },
             function (res2) {
               if (submitBtn) {
                 submitBtn.disabled = false;
@@ -258,3 +263,4 @@
 
   window.MAReviews = { mount: mount };
 })();
+

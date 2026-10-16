@@ -1,0 +1,104 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),path=require('node:path');
+const root=path.resolve(__dirname,'..');
+const catalog=JSON.parse(fs.readFileSync(path.join(root,'catalog-validation.json'),'utf8'));
+const source=fs.readFileSync(path.join(root,'apps-script/Operations.gs'),'utf8');
+const c={console,Date,JSON,Number,String,Math,Array,Object,Error,isFinite};vm.createContext(c);vm.runInContext(source,c);
+c.opsCatalog_=()=>JSON.parse(JSON.stringify(catalog));c.validateCouponCode_=()=>({ok:false});
+assert.equal(c.opsAmount_(''),null);assert.equal(c.opsAmount_(0),0);assert.equal(c.opsAmount_('12.50'),12.5);
+for(const n of [-1,'garbage',1.001,Infinity])assert.throws(()=>c.opsAmount_(n));
+assert.equal(c.opsResult_(c.opsFinance_({})).profit,null);
+assert.throws(()=>c.opsFinance_({finalized:true}),/INCOMPLETE/);
+const money={goodsCost:600,packagingCost:50,courierCost:100,otherCost:0,customerPaid:100,courierCollected:900,courierRemitted:700,refundPaid:0,finalized:true};
+assert.equal(c.opsResult_(c.opsFinance_(money)).profit,250);assert.equal(c.opsResult_(c.opsFinance_(money)).courierDue,100);
+assert.equal(c.opsResult_(c.opsFinance_({...money,courierRemitted:900})).courierDue,-100);
+// Every catalog product must have at least one accepted variant and authoritative price.
+for(const p of catalog.products){let size;
+ if(p.kind==='abaya')size='Body '+(p.bodySizes[0]||(p.bodyLabel.match(/\d+/)||[])[0])+' · Length '+p.lengths[0];
+ else if(p.kind==='two-piece')size=p.sizes[0];else size=p.sizes[0];
+ const it={id:p.id,qty:1,price:1,size,productType:p.prices?Object.keys(p.prices)[0]:''};
+ const expected=p.prices?p.prices[it.productType]:p.price;
+ assert.equal(c.opsLinePrice_(it,p),expected,p.id);assert.equal(it.price,expected,p.id+' overwrites client price');
+}
+const ab={id:'TEST-ABAYA',name:'Test Abaya',category:'abaya',kind:'abaya',price:1750,prices:{'Full Set':1750,'Abaya Only':1550},bodySizes:['42'],lengths:['52'],custom:[{length:59,lengthExtra:250,width:49,widthExtra:250},{length:60,lengthExtra:250,width:50,widthExtra:250}]};
+assert.equal(c.opsLinePrice_({qty:1,size:'Body 42 · Length 52',productType:'FullSet'},ab),ab.prices['Full Set']);
+assert.throws(()=>c.opsLinePrice_({qty:1,size:'52',productType:'Full Set'},ab),/INVALID_SIZE/);
+assert.throws(()=>c.opsLinePrice_({qty:1,size:'Body 99 · Length 52',productType:'Full Set'},ab),/INVALID_SIZE/);
+assert.throws(()=>c.opsLinePrice_({qty:1.5,size:'Body 42 · Length 52',productType:'Full Set'},ab),/INVALID_QTY/);
+const custom={qty:1,size:'Custom (L59.5/W49.5)',productType:'Full Set'};
+assert.equal(c.opsLinePrice_(custom,ab),ab.prices['Full Set']+500);
+for(const size of ['Custom (L1..2/W45)','Custom (L0/W45)','Custom (Lbad/W45)']) assert.throws(()=>c.opsLinePrice_({qty:1,size,productType:'Full Set'},ab),/INVALID_CUSTOM_SIZE/);
+assert.throws(()=>c.opsVerifiedPricing_([{id:'NO-SUCH-ID',qty:1,size:'38'}],0,''),/UNKNOWN_PRODUCT/);
+assert.throws(()=>c.opsVerifiedPricing_([],0,''),/STRUCTURED/);
+assert.throws(()=>c.opsVerifiedPricing_([{id:catalog.products[0].id,qty:1,size:'Body '+catalog.products[0].bodySizes[0]+' · Length '+catalog.products[0].lengths[0],productType:Object.keys(catalog.products[0].prices)[0]}],0,'INVALID'),/INVALID_COUPON/);
+let ret={kind:'return',stage:'requested',condition:'unknown',productId:'OLD-PRODUCT',originalSize:'52',qty:1,note:'পণ্য ও অর্ডার মিলিয়ে দেখা হয়েছে'};
+assert.equal(c.opsReturn_(ret,null).stage,'requested');
+assert.throws(()=>c.opsReturn_({...ret,stage:'closed'},null),/TRANSITION/);
+assert.throws(()=>c.opsReturn_({...ret,stage:'inspected'}, {...ret,stage:'received'}),/INSPECTION/);
+assert.throws(()=>c.opsReturn_({...ret,kind:'exchange',stage:'approved'},ret),/REPLACEMENT/);
+let rows=[],locked=0,creates=0;
+c.param_=(e,k)=>e.parameter[k]??'';c.verifyAdminSession_=t=>t?{ok:true,isOwner:t==='owner',email:'owner@example.invalid'}:{ok:false,error:'NO_TOKEN'};
+c.requireOwnerAdmin_=v=>v.isOwner?null:{ok:false,error:'OWNER_ONLY'};
+c.LockService={getScriptLock:()=>({waitLock(){locked++;},releaseLock(){locked--;}})};
+c.opsGetOrder_=()=>({status:'Delivered',qty:2});
+c.opsLatest_=()=>{const m={};rows.forEach(r=>m[r.id]=JSON.parse(JSON.stringify(r)));return m;};
+c.opsAppend_=r=>{assert.equal(locked,1);rows.push(JSON.parse(JSON.stringify(r)));creates++;};
+function req(type,payload,token='owner'){return c.opsHandle_(type,{parameter:{Token:token,Payload:JSON.stringify(payload)}});}
+assert.equal(req('AdminOperationsList',{},'').error,'NO_TOKEN');
+assert.equal(req('AdminOperationsSave',{},'staff').error,'OWNER_ONLY');
+let p={kind:'finance',orderId:'EXAMPLE-1',revision:0,data:money};
+assert(req('AdminOperationsSave',p).ok);assert.equal(rows.length,1);
+assert.equal(req('AdminOperationsSave',p).error,'REVISION_CONFLICT');assert.equal(rows.length,1);
+assert(req('AdminOperationsSave',{...p,revision:1,data:{...money,packagingCost:60}}).ok);assert.equal(rows.length,2);assert.equal(rows[0].data.packagingCost,50);
+p={kind:'return',id:'return:12345678-abcd',orderId:'EXAMPLE-1',revision:0,data:ret};
+assert(req('AdminOperationsSave',p).ok);
+assert.equal(req('AdminOperationsSave',p).error,'REVISION_CONFLICT');
+assert.equal(req('AdminOperationsSave',{...p,id:'return:87654321-abcd',data:{...ret,qty:2}}).error,'RETURN_QTY_EXCEEDS_ORDER');
+assert.equal(locked,0);assert.equal(creates,3);
+// The generated validation JSON must match the live site's exact catalog sources.
+const crypto=require('node:crypto');let stale=false,cached=null;
+const live={CacheService:{getScriptCache:()=>({get:()=>null,put:(key,value,ttl)=>{cached={key,value,ttl};}})},UrlFetchApp:{fetch:()=>({getResponseCode:()=>200,getContentText:()=>JSON.stringify(catalog)}),fetchAll:requests=>requests.map((r,i)=>({getResponseCode:()=>200,getContentText:()=>fs.readFileSync(path.join(root,catalog.sources[i]),'utf8')+(stale&&i===0?' ':'')}))},Utilities:{DigestAlgorithm:{SHA_256:'sha256'},Charset:{UTF_8:'utf8'},computeDigest:(algorithm,text)=>Array.from(crypto.createHash(algorithm).update(text).digest())}};
+vm.createContext(live);vm.runInContext(source,live);
+assert.equal(live.opsCatalog_().products.length,catalog.products.length);assert.equal(cached.ttl,60);
+stale=true;assert.throws(()=>live.opsCatalog_(),/CATALOG_OUTDATED/);
+// A later return invalidates an older finalized financial calculation.
+const orderRow=Array(46).fill('');orderRow[8]='EXAMPLE-1';orderRow[9]='Delivered';
+c.admGetSheet_=()=>({});c.admReadAll_=()=>[orderRow];
+rows.forEach((r,i)=>r.sequence=i);
+assert.equal(req('AdminOperationsList',{}).records.find(r=>r.kind==='finance').result.profit,null);
+assert(req('AdminOperationsSave',{kind:'finance',orderId:'EXAMPLE-1',revision:2,data:money}).ok);
+rows.forEach((r,i)=>r.sequence=i);
+assert.equal(req('AdminOperationsList',{}).records.find(r=>r.kind==='finance').result.profit,250);
+orderRow[9]='Returned';assert.equal(req('AdminOperationsList',{}).records.find(r=>r.kind==='finance').result.profit,null);
+// Reviews expose a boolean badge only after delivered order + phone + Product ID match.
+c.normalizePhone_=s=>String(s||'').replace(/\D/g,'');
+const reviewRow=Array(46).fill('');reviewRow[2]='01000000000';reviewRow[8]='TEST-ORDER';reviewRow[9]='Delivered';reviewRow[32]=JSON.stringify([{id:'TEST-PRODUCT'}]);
+c.admReadAll_=()=>[reviewRow];let reviewRows=[];c.getReviewsSheet_=()=>({getDataRange:()=>({getValues:()=>reviewRows})});
+const reviewEvent={parameter:{OrderID:'TEST-ORDER',Phone:'01000000000'}};
+assert.equal(c.opsReviewVerification_(reviewEvent,'TEST-PRODUCT').verified,true);
+assert.throws(()=>c.opsReviewVerification_({parameter:{OrderID:'TEST-ORDER',Phone:'01000000001'}},'TEST-PRODUCT'),/VERIFICATION_FAILED/);
+assert.throws(()=>c.opsReviewVerification_(reviewEvent,'OTHER-PRODUCT'),/VERIFICATION_FAILED/);
+reviewRow[9]='Shipped';assert.throws(()=>c.opsReviewVerification_(reviewEvent,'TEST-PRODUCT'),/VERIFICATION_FAILED/);reviewRow[9]='Delivered';
+const existingReview=Array(10).fill('');existingReview[1]='TEST-PRODUCT';existingReview[9]='TEST-ORDER';reviewRows=[existingReview];
+assert.throws(()=>c.opsReviewVerification_(reviewEvent,'TEST-PRODUCT'),/ALREADY_EXISTS/);
+assert.equal(c.opsReviewVerification_({parameter:{}},'TEST-PRODUCT').verified,false);
+// Restock messages must match both product and exact normalized size, never an unrelated size.
+const waiting=[['TEST-PRODUCT','Test','mail@example.invalid','yes',null,'','38'],['TEST-PRODUCT','Test','other@example.invalid','yes',null,'','40'],['TEST-PRODUCT','Test','01000000000','',null,'','38']];
+let emails=[];c.MailApp={sendEmail:msg=>emails.push(msg)};
+c.SpreadsheetApp={getActiveSpreadsheet:()=>({getSheetByName:()=>({getLastRow:()=>4,getRange:(row,col,count)=>({getValues:()=>waiting,setValue:value=>{waiting[row-2][col-1]=value;}})})})};
+c.opsNotifyVariant_('TEST-PRODUCT','38',1);assert.equal(emails.length,1);assert.equal(waiting[1][5],'');assert.equal(waiting[2][5],'pending-whatsapp');
+c.opsNotifyVariant_('TEST-PRODUCT','38',1);assert.equal(emails.length,1,'restock retries do not resend successful emails');
+// Product-page cart and stock keys must use the same complete size as the server.
+const browser={window:{},document:{readyState:'loading',addEventListener(){}},console};
+vm.createContext(browser);
+for(const file of catalog.sources)vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),browser);
+const pageSource=fs.readFileSync(path.join(root,'product-page.js'),'utf8').replace('if (document.readyState === "loading") {','window.__opsTest={state:state,selectedVariant:selectedVariant}; if (document.readyState === "loading") {');
+vm.runInContext(pageSource,browser);
+const pd=browser.window.__opsTest;
+pd.state.category='abaya';pd.state.product={id:'TEST-ABAYA',category:'abaya',bodySizes:['42','44'],lengthSizes:['52']};pd.state.selectedBody='44';pd.state.selectedSize='52';
+assert.equal(pd.selectedVariant(),'Body 44 · Length 52');
+pd.state.category='premium-two-piece';pd.state.product={id:'TEST-TWO',category:'premium-two-piece',bodySizes:['38'],dressLengths:['40'],palazzoLengths:['38']};pd.state.selectedSize='38';pd.state.selectedDressLength='40';pd.state.selectedPalazzoLength='38';
+assert.equal(pd.selectedVariant(),'Body 38 · Length 40 · Palazzo 38');
+pd.state.category='tops-kurti';pd.state.product={id:'TEST-KURTI'};pd.state.selectedSize='38';assert.equal(pd.selectedVariant(),'38');
+for(const file of ['apps-script/Code.gs','apps-script/AdminOrders.gs','apps-script/Operations.gs','admin-operations.js','product-page.js','custom-size-modal.js','category-renderer.js','reviews-widget.js'])new vm.Script(fs.readFileSync(path.join(root,file),'utf8'),{filename:file});
+for(const file of ['admin-operations.html','help.html','product.html','shopping-guide.html'])for(const m of fs.readFileSync(path.join(root,file),'utf8').matchAll(/<script(?:\s([^>]*))?>([\s\S]*?)<\/script\b[^>]*>/gi)){if(/application\/ld\+json/.test(m[1]||'')){JSON.parse(m[2]);}else new vm.Script(m[2]);}
+console.log('PASS: '+catalog.products.length+' catalog products, price/type/size/custom validation, incomplete money, profit and settlement, owner auth, append-only revisions, duplicate retries, return lifecycle, quantity limits, syntax and JSON-LD.');
