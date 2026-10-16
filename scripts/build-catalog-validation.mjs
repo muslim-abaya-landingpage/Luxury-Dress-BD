@@ -20,5 +20,6 @@ for(const [category,rows] of Object.entries(catalog)) for(const p of rows){
     custom,kind:ab?'abaya':tp?'two-piece':'simple'});
 }
 if(new Set(products.map(p=>p.id)).size!==products.length)throw Error('Duplicate product IDs');
-fs.writeFileSync(path.join(root,'catalog-validation.json'),JSON.stringify({version:1,sources,sourceSha256:createHash('sha256').update(sourceText).digest('hex'),products}));
+fs.writeFileSync(path.join(root,'catalog-validation.json'),JSON.stringify({version:1,releaseSha:process.env.CF_PAGES_COMMIT_SHA||'',sources,sourceSha256:createHash('sha256').update(sourceText).digest('hex'),products}));
 console.log('Validation catalog: '+products.length+' products');
+

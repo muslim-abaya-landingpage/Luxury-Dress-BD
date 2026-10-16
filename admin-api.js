@@ -7,7 +7,7 @@
   var SESSION_KEY = cfg.sessionKey || "ma_admin_session";
   var SESSION_MS = (cfg.sessionDays || 7) * 24 * 60 * 60 * 1000;
 
-  var READ_TYPES = ['AdminOrders', 'AdminOrderList', 'AdminOrderGet', 'AdminOrderStaff',
+  var READ_TYPES = ['AdminCatalogState', 'AdminCatalogStatus', 'AdminOrders', 'AdminOrderList', 'AdminOrderGet', 'AdminOrderStaff',
     'AdminStockGet', 'AdminAnalytics', 'AdminStockVariantsList', 'AdminStockLedgerList',
     'AdminAnalyticsV2', 'AdminGrowthData', 'AdminStaffList', 'InboxList', 'InboxThread', 'InboxProfile'];
   var CACHE_PREFIX = "ma_admin_read_v2:";
@@ -460,7 +460,7 @@
     var s = getSession();
     if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
     var params = Object.assign({}, fields || {}, { RecordType: recordType, Token: s.token });
-    return request(params, 30000, options).then(function (res) {
+    return request(params, recordType === "AdminCatalogPublish" ? 120000 : 30000, options).then(function (res) {
       if (!res.ok) {
         var err = new Error(res.message || res.error || "REQUEST_FAILED");
         err.code = res.error || "";
@@ -611,3 +611,4 @@
     }
   };
 })(window);
+
