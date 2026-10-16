@@ -102,3 +102,14 @@ pd.state.category='tops-kurti';pd.state.product={id:'TEST-KURTI'};pd.state.selec
 for(const file of ['apps-script/Code.gs','apps-script/AdminOrders.gs','apps-script/Operations.gs','admin-operations.js','product-page.js','custom-size-modal.js','category-renderer.js','reviews-widget.js'])new vm.Script(fs.readFileSync(path.join(root,file),'utf8'),{filename:file});
 for(const file of ['admin-operations.html','help.html','product.html','shopping-guide.html'])for(const m of fs.readFileSync(path.join(root,file),'utf8').matchAll(/<script(?:\s([^>]*))?>([\s\S]*?)<\/script\b[^>]*>/gi)){if(/application\/ld\+json/.test(m[1]||'')){JSON.parse(m[2]);}else new vm.Script(m[2]);}
 console.log('PASS: '+catalog.products.length+' catalog products, price/type/size/custom validation, incomplete money, profit and settlement, owner auth, append-only revisions, duplicate retries, return lifecycle, quantity limits, syntax and JSON-LD.');
+
+const backend=fs.readFileSync(path.join(root,'apps-script/Code.gs'),'utf8');
+const backupFunction=backend.slice(backend.indexOf('function runSafetyBackupNow() {'),backend.indexOf('function runSafetyBackupNowFromMenu()'));
+let published=null,released=0,copies=0,badCopy=false;
+const sourceTabs=[{getName:()=> 'Online Order',getLastRow:()=>53,getLastColumn:()=>40},{getName:()=> 'StockVariants',getLastRow:()=>4,getLastColumn:()=>10}];
+const backupCopy={getId:()=> 'new-backup',getUrl:()=> 'https://docs.google.com/spreadsheets/d/new-backup',getSheetByName:name=>badCopy?null:sourceTabs.find(s=>s.getName()===name)};
+const bc={console:{log:()=>{}},Date,JSON,Math,Error,LockService:{getUserLock:()=>({tryLock:()=>true,releaseLock:()=>released++})},SpreadsheetApp:{getActiveSpreadsheet:()=>({getId:()=> 'source',getSheets:()=>sourceTabs,copy:()=>{copies++;return backupCopy;}})},Utilities:{formatDate:()=> '2026-10-16 07-20-00'},PropertiesService:{getScriptProperties:()=>({setProperties:p=>{published=p;}})}};
+vm.createContext(bc);vm.runInContext(backupFunction,bc);
+assert.equal(bc.runSafetyBackupNow().totalRows,55);assert.equal(copies,1);assert.equal(published.SAFETY_BACKUP_SPREADSHEET_ID,'new-backup');assert.ok(published.OPS_LAST_BACKUP_AT);assert.equal(released,1);
+published=null;badCopy=true;assert.throws(()=>bc.runSafetyBackupNow(),/BACKUP_VERIFICATION_FAILED/);assert.equal(published,null);assert.equal(released,2);
+console.log('PASS: native backup copy, all-tab verification, last-good pointer preservation and lock release.');
