@@ -1,0 +1,30 @@
+const fs = require('node:fs');
+const vm = require('node:vm');
+const assert = require('node:assert/strict');
+const renderer = fs.readFileSync('category-renderer.js', 'utf8');
+const galleryFn = renderer.slice(renderer.indexOf('function collectGalleryImages('), renderer.indexOf('function buildPqvThumbsHtml('));
+const colorFn = renderer.slice(renderer.indexOf('function galleryLooksLikeColorways('), renderer.indexOf('function getProductColorVariants('));
+const context = {resolveCardImageSrc:p => p.image || ''};
+vm.createContext(context);
+vm.runInContext(galleryFn + '\n' + colorFn, context);
+const product = {image:'/images/main.webp', images:['/images/gallery/a.webp','/images/gallery/b.webp','/images/main.webp'],color:'black'};
+assert.deepEqual(Array.from(context.collectGalleryImages(product, [])), ['/images/main.webp','/images/gallery/a.webp','/images/gallery/b.webp']);
+assert.equal(context.galleryLooksLikeColorways(product), false);
+assert.equal(context.galleryLooksLikeColorways({...product, images:['images/uploads/a.webp','images/uploads/b.webp']}), false);
+assert.equal(context.galleryLooksLikeColorways({...product, colorVariants:[{},{}]}), true);
+assert.equal(context.galleryLooksLikeColorways({...product, images:['red.webp','blue.webp']}), true);
+assert.deepEqual(Array.from(context.collectGalleryImages({image:'main.webp'}, [])), ['main.webp']);
+
+const quick = fs.readFileSync('product-quick-upload.js','utf8');
+const openFn = quick.slice(quick.indexOf('function open(){'),quick.indexOf('async function submit('));
+const elements = Object.fromEntries(['pqPhotos','pqSubmit','pqView','pq_name'].map(k=>[k,{}]));
+let resets=0, restored=0;
+elements.pqForm = {reset(){resets++;}};
+elements.pq_name.focus=()=>{};
+const heading={};
+const ui={editing:{id:'EXISTING'},completed:false,currentId:'EXISTING',cachedAssets:{},staged:true,
+  $:id=>elements[id],dialog:{querySelector:()=>heading,showModal(){}},preview(){},kind(){},message(){},restoreDraft(){restored++;}};
+vm.createContext(ui);vm.runInContext(openFn,ui);ui.open();
+assert.equal(ui.editing,null);assert.equal(ui.currentId,null);assert.equal(elements.pqPhotos.required,true);
+assert.equal(resets,1);assert.equal(restored,1);assert.equal(heading.textContent,'নতুন পণ্য আপলোড');
+console.log('PASS: gallery preserves main photo, deduplicates views, keeps explicit color variants, and new upload clears edit identity.');

@@ -951,11 +951,10 @@ function buildSizeChartTableHtml(data) {
    ---------------------------------------------------------------------- */
 function collectGalleryImages(product, allProducts) {
   if (Array.isArray(product.images) && product.images.length) {
-    return product.images
-      .map(function (u) {
-        return resolveCardImageSrc({ image: u });
-      })
-      .filter(Boolean);
+    var gallery = [resolveCardImageSrc(product)].concat(product.images.map(function (u) {
+      return resolveCardImageSrc({ image: u });
+    }));
+    return gallery.filter(function (src, index) { return src && gallery.indexOf(src) === index; });
   }
   var main = resolveCardImageSrc(product);
   if (!allProducts || !allProducts.length) return main ? [main] : [];
@@ -1046,6 +1045,8 @@ function galleryLooksLikeColorways(p) {
   if (Array.isArray(p.colorVariants) && p.colorVariants.length > 1) return true;
   var gallery = Array.isArray(p.images) ? p.images : [];
   if (gallery.length < 2) return false;
+  // Owner uploads are additional views, not automatically separate color variants.
+  if (gallery.some(function (url) { return /(?:^|\/)images\/(?:gallery|uploads)\//i.test(String(url || "")); })) return false;
   for (var i = 0; i < gallery.length; i++) {
     if (/(^|[-_\s])(back|side)(\.|[-_\s]|$)/i.test(String(gallery[i] || ""))) return false;
   }
