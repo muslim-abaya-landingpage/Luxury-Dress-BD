@@ -88,7 +88,7 @@ c.SpreadsheetApp={getActiveSpreadsheet:()=>({getSheetByName:()=>({getLastRow:()=
 c.opsNotifyVariant_('TEST-PRODUCT','38',1);assert.equal(emails.length,1);assert.equal(waiting[1][5],'');assert.equal(waiting[2][5],'pending-whatsapp');
 c.opsNotifyVariant_('TEST-PRODUCT','38',1);assert.equal(emails.length,1,'restock retries do not resend successful emails');
 // Product-page cart and stock keys must use the same complete size as the server.
-const browser={window:{},document:{readyState:'loading',addEventListener(){}},console};
+const browser={window:{addEventListener(){}},document:{readyState:'loading',addEventListener(){}},console};
 vm.createContext(browser);
 for(const file of catalog.sources)vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),browser);
 const pageSource=fs.readFileSync(path.join(root,'product-page.js'),'utf8').replace('if (document.readyState === "loading") {','window.__opsTest={state:state,selectedVariant:selectedVariant}; if (document.readyState === "loading") {');

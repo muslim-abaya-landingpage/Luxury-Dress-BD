@@ -58,6 +58,99 @@
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
 
+# Public storefront HTML: short shared-cache TTL, browsers must revalidate.
+/
+  ! Cache-Control
+  Cache-Control: public, max-age=0, s-maxage=60, must-revalidate
+
+/index.html
+  ! Cache-Control
+  Cache-Control: public, max-age=0, s-maxage=60, must-revalidate
+
+/abaya
+  ! Cache-Control
+  Cache-Control: public, max-age=0, s-maxage=60, must-revalidate
+
+/abaya.html
+  ! Cache-Control
+  Cache-Control: public, max-age=0, s-maxage=60, must-revalidate
+
+/category
+  ! Cache-Control
+  Cache-Control: public, max-age=0, s-maxage=60, must-revalidate
+
+/category.html
+  ! Cache-Control
+  Cache-Control: public, max-age=0, s-maxage=60, must-revalidate
+
+/cover-up
+  ! Cache-Control
+  Cache-Control: public, max-age=0, s-maxage=60, must-revalidate
+
+/cover-up.html
+  ! Cache-Control
+  Cache-Control: public, max-age=0, s-maxage=60, must-revalidate
+
+/tops-kurti
+  ! Cache-Control
+  Cache-Control: public, max-age=0, s-maxage=60, must-revalidate
+
+/tops-kurti.html
+  ! Cache-Control
+  Cache-Control: public, max-age=0, s-maxage=60, must-revalidate
+
+/premium-two-piece
+  ! Cache-Control
+  Cache-Control: public, max-age=0, s-maxage=60, must-revalidate
+
+/premium-two-piece.html
+  ! Cache-Control
+  Cache-Control: public, max-age=0, s-maxage=60, must-revalidate
+
+/embroidery
+  ! Cache-Control
+  Cache-Control: public, max-age=0, s-maxage=60, must-revalidate
+
+/embroidery.html
+  ! Cache-Control
+  Cache-Control: public, max-age=0, s-maxage=60, must-revalidate
+
+/karchupi
+  ! Cache-Control
+  Cache-Control: public, max-age=0, s-maxage=60, must-revalidate
+
+/karchupi.html
+  ! Cache-Control
+  Cache-Control: public, max-age=0, s-maxage=60, must-revalidate
+
+/kaftan
+  ! Cache-Control
+  Cache-Control: public, max-age=0, s-maxage=60, must-revalidate
+
+/kaftan.html
+  ! Cache-Control
+  Cache-Control: public, max-age=0, s-maxage=60, must-revalidate
+
+/hijab
+  ! Cache-Control
+  Cache-Control: public, max-age=0, s-maxage=60, must-revalidate
+
+/hijab.html
+  ! Cache-Control
+  Cache-Control: public, max-age=0, s-maxage=60, must-revalidate
+
+/panjabi
+  ! Cache-Control
+  Cache-Control: public, max-age=0, s-maxage=60, must-revalidate
+
+/panjabi.html
+  ! Cache-Control
+  Cache-Control: public, max-age=0, s-maxage=60, must-revalidate
+
+/product/*
+  ! Cache-Control
+  Cache-Control: public, max-age=0, s-maxage=60, must-revalidate
+
 /checkout
   Content-Type: text/html; charset=UTF-8
   ! Cache-Control

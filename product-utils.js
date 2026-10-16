@@ -312,6 +312,9 @@
     if (entry.inStock === false) {
       normalized.inStock = false;
     }
+    if (entry.stockVariants && typeof entry.stockVariants === "object") {
+      normalized.stockVariants = entry.stockVariants;
+    }
     if (entry.stock != null && entry.stock !== "") {
       var stockN = parseInt(entry.stock, 10);
       if (!isNaN(stockN)) normalized.stock = Math.max(0, stockN);
@@ -759,5 +762,4 @@ g.getCartLineBaseName = getCartLineBaseName;
     getStockStatus: getStockStatus
   };
 })(window);
-
 

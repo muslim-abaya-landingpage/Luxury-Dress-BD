@@ -3681,8 +3681,51 @@ window.bootAllCategories = function () {
     renderAllCategories();
   });
 };
-scheduleShopCategoryBoot();
+function refreshVisibleShopStockCards() {
+  var grid = document.getElementById("productGrid");
+  var products = shopCartCtx && shopCartCtx.products;
+  if (!grid || !Array.isArray(products)) return;
 
+  Array.prototype.forEach.call(grid.querySelectorAll(".premium-card[data-product-idx]"), function (card) {
+    var index = parseInt(card.getAttribute("data-product-idx"), 10);
+    var product = products[index];
+    if (!product) return;
+
+    var status = productStockStatus(product);
+    card.classList.toggle("is-oos", !status.inStock);
+
+    var saleBadge = card.querySelector(".product-sale-badge");
+    var inStockBadge = card.querySelector(".product-instock-badge");
+    if (saleBadge) {
+      saleBadge.classList.toggle("product-soldout-badge", !status.inStock);
+      saleBadge.textContent = status.inStock ? "Sale" : "Sold Out";
+    }
+    if (!status.inStock && inStockBadge) {
+      inStockBadge.remove();
+    } else if (status.inStock && saleBadge && !inStockBadge) {
+      inStockBadge = document.createElement("span");
+      inStockBadge.className = "product-instock-badge";
+      inStockBadge.textContent = "In Stock";
+      saleBadge.insertAdjacentElement("afterend", inStockBadge);
+    }
+
+    var addButton = card.querySelector(".muslim-abaya-btn-cart, .detail-actions .btn-add-cart");
+    if (addButton) {
+      addButton.disabled = !status.inStock;
+      addButton.classList.toggle("is-oos", !status.inStock);
+      addButton.setAttribute("aria-label", status.inStock ? "Add to Cart" : "Out of Stock");
+      var label = addButton.querySelector("[data-cart-label]");
+      if (label) label.textContent = status.inStock ? "Add to Cart" : "Out of Stock";
+      else addButton.textContent = status.buttonLabel;
+    }
+
+    var buyButton = card.querySelector(".detail-actions .btn-buy-now");
+    if (buyButton) buyButton.disabled = !status.inStock;
+  });
+}
+window.addEventListener("ma:stock-updated", refreshVisibleShopStockCards);
+
+scheduleShopCategoryBoot();
 window.addEventListener("load", function () {
   if (getShopBootSpec() && !isShopCategoryRendered()) {
     scheduleShopCategoryBoot(true);
@@ -3709,5 +3752,4 @@ window.addEventListener("load", function () {
     if (thumb) thumb.style.display = "none";
   }, true);
 })();
-
 
