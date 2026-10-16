@@ -1055,48 +1055,33 @@ function copySheetToBackup_(sourceSheet, backupSpreadsheet, targetName) {
 }
 
 function runSafetyBackupNow() {
-  var src = SpreadsheetApp.getActiveSpreadsheet();
-  if (!src) return { ok: false, error: 'NO_SOURCE_SHEET' };
-  var backup = getSafetyBackupSpreadsheet_();
-  if (!backup) return { ok: false, error: 'NO_BACKUP_SHEET' };
-  if (src.getId() === backup.getId()) {
-    return { ok: false, error: 'BACKUP_SHEET_SAME_AS_SOURCE' };
+  var lock = LockService.getUserLock();
+  if (!lock.tryLock(1000)) return { ok: false, error: 'BACKUP_IN_PROGRESS' };
+  try {
+    var src = SpreadsheetApp.getActiveSpreadsheet();
+    if (!src) return { ok: false, error: 'NO_SOURCE_SHEET' };
+    var stamp = Utilities.formatDate(new Date(), 'Asia/Dhaka', 'yyyy-MM-dd HH-mm-ss');
+    // Native workbook copy preserves images, formulas and formatting. Never clear an older backup.
+    var backup = src.copy('Luxury Dress Safety Backup ' + stamp);
+    if (!backup || src.getId() === backup.getId()) throw new Error('BACKUP_COPY_FAILED');
+    var copied = [], totalRows = 0;
+    src.getSheets().forEach(function(source) {
+      var target = backup.getSheetByName(source.getName());
+      if (!target || source.getLastRow() !== target.getLastRow() || source.getLastColumn() !== target.getLastColumn()) {
+        throw new Error('BACKUP_VERIFICATION_FAILED');
+      }
+      var rows = Math.max(0, source.getLastRow() - 1);
+      copied.push({ name: source.getName(), rows: rows });
+      totalRows += rows;
+    });
+    // Publish the new backup pointer only after every source tab has been verified.
+    var props = PropertiesService.getScriptProperties();
+    props.setProperties({ SAFETY_BACKUP_SPREADSHEET_ID: backup.getId(), OPS_LAST_BACKUP_AT: new Date().toISOString() });
+    console.log('SAFETY_BACKUP_OK ' + JSON.stringify({ tabs: copied.length, rows: totalRows }));
+    return { ok: true, backupSpreadsheetId: backup.getId(), backupSpreadsheetUrl: backup.getUrl(), copiedTabs: copied, totalRows: totalRows };
+  } finally {
+    lock.releaseLock();
   }
-
-  var tabs = ['Online Order', 'Subscribe', 'Admins', 'Real Customer', 'Fake', 'Stock', 'StockVariants', 'StockLedger', 'Reviews', 'Coupons', 'AbandonedCarts', 'StockWaitlist', 'ReorderOffers', 'OperationsRecords'];
-  var copied = [];
-  var totalRows = 0;
-  var i;
-  for (i = 0; i < tabs.length; i++) {
-    var s = src.getSheetByName(tabs[i]);
-    if (!s) continue;
-    var rows = copySheetToBackup_(s, backup, 'BKP_' + tabs[i]);
-    copied.push({ name: tabs[i], rows: rows });
-    totalRows += Math.max(0, rows);
-  }
-
-  var log = backup.getSheetByName('Backup Log');
-  if (!log) {
-    log = backup.insertSheet('Backup Log');
-    log.getRange(1, 1, 1, 6).setValues([['Time', 'Source Sheet ID', 'Copied Tabs', 'Rows', 'By', 'Note']]);
-  }
-  log.appendRow([
-    new Date(),
-    src.getId(),
-    copied.map(function (x) { return x.name; }).join(', '),
-    totalRows,
-    Session.getActiveUser().getEmail() || 'unknown',
-    'manual/auto backup'
-  ]);
-  PropertiesService.getScriptProperties().setProperty('OPS_LAST_BACKUP_AT', new Date().toISOString());
-
-  return {
-    ok: true,
-    backupSpreadsheetId: backup.getId(),
-    backupSpreadsheetUrl: backup.getUrl(),
-    copiedTabs: copied,
-    totalRows: totalRows
-  };
 }
 
 function runSafetyBackupNowFromMenu() {
