@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
   <meta charset="UTF-8">
   <link rel="preload" as="script" href="site-api-config.js?v=20261009-inbox">
   <link rel="preload" as="script" href="admin-config.js?v=20261009-inbox">
-  <link rel="preload" as="script" href="admin-api.js?v=20261013-speed2">
+  <link rel="preload" as="script" href="admin-api.js?v=20261016-publish">
   <link rel="preload" as="script" href="admin-guard.js?v=20261010-speed">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,12 +18,13 @@
   <link rel="stylesheet" href="product-manager-admin.css?v=20261014-stock-photos">
   <script src="site-api-config.js?v=20261009-inbox"></script>
   <script src="admin-config.js?v=20261009-inbox"></script>
-  <script src="admin-api.js?v=20261013-speed2"></script>
+  <script src="admin-api.js?v=20261016-publish"></script>
   <script src="admin-guard.js?v=20261010-speed"></script>
 <script defer src="config.js?v=20261009-inbox"></script>
   <link rel="stylesheet" href="admin-sidebar.css?v=20261003sb">
   <link rel="stylesheet" href="admin-premium.css?v=20261003pm2">
 <style>.pm-overview-product{display:flex;align-items:center;gap:12px}.pm-overview-photo{display:flex;align-items:center;justify-content:center;width:64px;height:80px;flex-shrink:0;background:#f3f3f3;border-radius:8px;overflow:hidden;font-size:11px;text-align:center;color:#666}.pm-overview-photo img{width:100%;height:100%;object-fit:contain}</style>
+<link rel="stylesheet" href="product-quick-upload.css?v=20261016-publish">
 </head>
 <body class="pl-admin adm-body" data-admin-guard="1">
   <div class="adm-shell">
@@ -53,30 +54,19 @@
         <button type="button" class="adm-menu-btn" id="admMenuBtn" aria-label="মেনু খুলুন"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
         <a class="pl-back" href="admin-links.html">← Admin</a>
         <a class="pl-back" href="/" style="margin-left:8px">Home</a>
-        <h1>Product Manager</h1>
-        <p>Manage <strong>Luxury Dress BD</strong> product data — Add/Edit + <strong>Sync</strong> to your website, store, menu, or database</p>
+        <h1>প্রোডাক্ট ম্যানেজার</h1>
+        <p>ছবি ও তথ্য দিয়ে পণ্য ওয়েবসাইটে প্রকাশ করুন। আলাদা ফাইল আপলোড বা deploy করার প্রয়োজন নেই।</p>
         <div class="pl-toolbar">
-          <button type="button" class="pl-btn pl-btn-primary" id="pmSave">Save Data (Push Changes)</button>
+          <button type="button" class="pl-btn pl-btn-primary" id="pmSave">পরিবর্তন প্রকাশ করুন</button>
           <button type="button" class="pl-btn pl-btn-secondary" id="pmCheckImages" title="সব প্রোডাক্টের ছবি যাচাই করে ভাঙা/ডুপ্লিকেট খুঁজুন">🔍 ছবি যাচাই</button>
-          <button type="button" class="pl-btn pl-btn-secondary" id="pmReload">Reload Current Data</button>
+          <button type="button" class="pl-btn pl-btn-secondary" id="pmReload">বর্তমান ডেটা আবার লোড করুন</button>
           <a class="pl-btn pl-btn-secondary" href="product-links.html" style="text-decoration:none;display:inline-flex;align-items:center" title="Categories — Product Link URL">Product Links</a>
         </div>
         <p id="pmSaveStatus" role="status" aria-live="polite">স্টক বাটনে ক্লিক করলেই স্বয়ংক্রিয়ভাবে সেভ হবে।</p>
       </header>
 
-      <main class="pl-main">
-        <details class="pm-help"><summary>নির্দেশনা — ক্যাটাগরি ফোল্ডার কীভাবে বাছবেন</summary><div class="pl-steps">
-          <strong>Instructions = Category Types (Pick the right folder):</strong>
-          <ol>
-            <li><strong>For Abaya:</strong> Go to folder <code>abaya</code> + JSON</li>
-            <li><strong>For Two-Piece:</strong> Go to folder <code>premium-two-piece</code> + JSON</li>
-            <li><strong>For Embroidery:</strong> Go to folder <code>embroidery</code> + JSON (Set property <code>enabled: true</code>)</li>
-            <li>Automatic Updates: <strong>Add, Edit, Delete, Or</strong> <strong>Sync</strong> to your Netlify deployment</li>
-          </ol>
-          <p style="margin:10px 0 0;font-size:0.85rem;color:#666">
-            <code>product-catalog.bat</code> · Data: <code>product-catalog-data.md</code>
-          </p>
-        </div></details>
+      <main class="pl-main"><section class="pm-quick-intro"><div><h2>একবারেই ছবি ও পণ্য প্রকাশ</h2><p>ক্যাটাগরি বাছুন → ছবি ও তথ্য দিন → প্রকাশ করুন</p></div><div><button class="pl-btn pl-btn-primary" id="pmQuickUpload" type="button">+ নতুন পণ্য আপলোড</button> <button class="pl-btn pl-btn-secondary" id="pmPublishCheck" type="button">প্রকাশের অবস্থা দেখুন</button> <a id="pmLiveLink" target="_blank" rel="noopener" hidden>লাইভ পণ্য দেখুন →</a></div></section>
+        <details class="pm-help"><summary>কীভাবে পণ্য প্রকাশ করবেন</summary><div class="pl-steps"><ol><li>“নতুন পণ্য আপলোড” চাপুন এবং ক্যাটাগরি বাছুন।</li><li>নাম, দাম, সাইজ ও নিজের পণ্যের ছবি দিন। প্রথম ছবিটি প্রধান ছবি হবে।</li><li>“ছবিসহ ওয়েবসাইটে প্রকাশ করুন” চাপুন। লাইভ হওয়ার নিশ্চয়তা ও লিংক এখানে দেখাবে।</li></ol><p>আগের পণ্য সম্পাদনা করতে নিচের তালিকা ব্যবহার করুন।</p></div></details>
 
         <div class="pm-layout" id="pmLayout">
           <aside class="pm-sidebar">
@@ -130,7 +120,8 @@
   <script src="product-links-data.js"></script>
   <script id="pmRawCatalog">window.MA_RAW_CATEGORY_PRODUCTS = JSON.parse(JSON.stringify(window.CATEGORY_PRODUCTS || {}));</script>
   <script src="product-catalog-loader.js?v=20261013-manager"></script>
-  <script id="pmStockAdmin">
+  <script src="product-publish-utils.js?v=20261016-publish"></script><script src="product-publisher.js?v=20261016-publish"></script><script src="product-quick-upload.js?v=20261016-publish"></script>
+<script id="pmStockAdmin">
 (function () {
   var ROW_CIRCLES = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "⑪", "⑫"];
 
@@ -744,51 +735,10 @@
   }
 
   function publishStockToggle(p, redraw) {
-    if (stockPublishing || document.getElementById("pmSave").disabled) return Promise.resolve(false);
-    if (!window.MaAdmin || !window.MaAdmin.isLoggedIn || !window.MaAdmin.isLoggedIn()) {
-      setSaveStatus("স্টক বদলাতে Admin লগইন করুন। কোনো পরিবর্তন হয়নি।");
-      toast("Admin লগইন প্রয়োজন।");
-      return Promise.resolve(false);
-    }
-    if (savedSnapshot !== catalogSnapshot()) {
-      setSaveStatus("অন্য সম্পাদনা সেভ করা বাকি। আগে Save Data চাপুন, তারপর এক ক্লিকে স্টক বদলান।");
-      return Promise.resolve(false);
-    }
-    var old = { stock: p.stock, inStock: p.inStock };
-    toggleStock(p);
-    var content = generateProductsFile();
-    stockPublishing = true;
-    document.getElementById("pmSave").disabled = true;
-    redraw();
-    setSaveStatus("স্টক স্বয়ংক্রিয়ভাবে সেভ হচ্ছে…");
-    return Promise.resolve().then(function () {
-      return window.MaAdmin.publishFile("category-products.js", content, "Update product stock — " + (p.id || p.name || "Product"));
-    }).then(function (result) {
-      if (!result || !result.ok) throw new Error(result && (result.message || result.error) || "সেভ ব্যর্থ");
-      // Mark only this stock change saved; preserve warnings for edits made during the request.
-      var baseline = JSON.parse(savedSnapshot);
-      Object.keys(products).forEach(function (key) {
-        var index = products[key].indexOf(p);
-        if (index >= 0 && baseline[1][key] && baseline[1][key][index]) {
-          var row = baseline[1][key][index];
-          if (p.stock === undefined) delete row.stock; else row.stock = p.stock;
-          if (p.inStock === undefined) delete row.inStock; else row.inStock = p.inStock;
-        }
-      });
-      savedSnapshot = JSON.stringify(baseline);
-      setSaveStatus("✅ স্টক সেভ হয়েছে। ওয়েবসাইটের Deploy শেষ হলে আপডেট দেখা যাবে।");
-      return true;
-    }).catch(function (error) {
-      if (old.stock === undefined) delete p.stock; else p.stock = old.stock;
-      if (old.inStock === undefined) delete p.inStock; else p.inStock = old.inStock;
-      setSaveStatus("⚠️ স্টক সেভ হয়নি: " + error.message + " — আগের স্টক ফিরিয়ে দেওয়া হয়েছে।");
-      return false;
-    }).then(function (ok) {
-      stockPublishing = false;
-      document.getElementById("pmSave").disabled = false;
-      renderMain();
-      return ok;
-    });
+    if(stockPublishing||document.getElementById("pmSave").disabled)return Promise.resolve(false);
+    if(savedSnapshot!==catalogSnapshot()){setSaveStatus("অন্য সম্পাদনা প্রকাশ করা বাকি। আগে পরিবর্তন প্রকাশ করুন।");return Promise.resolve(false);}
+    var old={stock:p.stock,inStock:p.inStock};toggleStock(p);redraw();stockPublishing=true;
+    return saveAll().then(function(){return true;}).catch(function(err){if(old.stock===undefined)delete p.stock;else p.stock=old.stock;if(old.inStock===undefined)delete p.inStock;else p.inStock=old.inStock;return false;}).finally(function(){stockPublishing=false;renderMain();});
   }
 
   function toggleStock(p) {
@@ -919,6 +869,7 @@
       });
     }
 
+    var easyEdit=document.createElement('button');easyEdit.type='button';easyEdit.className='pl-btn pl-btn-secondary';easyEdit.textContent='ছবি ও তথ্য সহজে এডিট';easyEdit.addEventListener('click',function(){window.MaProductQuickUpload.edit(p,catKey);});card.appendChild(easyEdit);
     return card;
   }
 
@@ -1998,117 +1949,30 @@
   }
   window.openMediaLibrary = openMediaLibrary;
 
-  function saveAll() {
-    var saveButton = document.getElementById("pmSave");
-    if (saveButton.disabled) return;
-    stripHomeLinksFromProducts();
-
-    var sectionsContent = generateSectionsFile();
-    var productsContent = generateProductsFile();
-    var linksContent = generateProductLinksFile();
-    var configContent = Object.keys(categoryTypePrices).length ? generateProductConfigFile() : null;
-
-    function downloadAllLocal() {
-      download(sectionsContent, "product-catalog-sections.js");
-      setTimeout(function () {
-        download(productsContent, "category-products.js");
-      }, 400);
-      setTimeout(function () {
-        download(linksContent, "product-links-data.js");
-      }, 800);
-      if (configContent) {
-        setTimeout(function () {
-          download(configContent, "product-config.js");
-        }, 1200);
-      }
-    }
-
-    var newSections = sections.filter(function (sec) {
-      var orig = (window.CATALOG_SECTIONS || []).find(function (s) {
-        return s.key === sec.key;
-      });
-      return !orig;
-    });
-
-    // নতুন ক্যাটাগরি HTML ফাইল অটো-পাবলিশ হয় না — ম্যানুয়াল আপলোড লাগবে,
-    // তাই এক্ষেত্রে লোকাল ডাউনলোড দরকারই থাকে।
-    if (newSections.length) {
-      downloadAllLocal();
-      setTimeout(function () {
-        newSections.forEach(function (sec, i) {
-          setTimeout(function () {
-            download(generateCategoryHtml(sec), sec.page);
-          }, i * 350);
-        });
-      }, 800);
-      setTimeout(function () {
-        download(generateRedirectsSnippet(), "_redirects-new-categories.txt");
-      }, 800 + newSections.length * 400);
-      toast("৩টি+ ফাইল ডাউনলোড হয়েছে (+ নতুন ক্যাটাগরি HTML — এগুলো ম্যানুয়ালি আপলোড করুন)");
-      return;
-    }
-
-    // GitHub-এ অটো-পাবলিশ চেষ্টা (Admin লগইন থাকলেই কাজ করবে)। শুধু লগইন করা না
-    // থাকলে বা পাবলিশ ব্যর্থ হলেই লোকাল ফাইল ডাউনলোড হবে (ব্যাকআপ হিসেবে) —
-    // সফল হলে আর অটো-ডাউনলোড হবে না।
-    var publishingSnapshot = catalogSnapshot();
-    saveButton.disabled = true;
-    setSaveStatus("GitHub-এ সেভ হচ্ছে… অপেক্ষা করুন।");
-    toast("GitHub-এ পাবলিশ হচ্ছে...");
-
-    var files = [
-      { path: "category-products.js", content: productsContent, message: "Update products — Admin Panel থেকে" },
-      { path: "product-links-data.js", content: linksContent, message: "Update product links — Admin Panel থেকে" },
-      { path: "product-catalog-sections.js", content: sectionsContent, message: "Update catalog sections — Admin Panel থেকে" }
-    ];
-    if (configContent) {
-      files.push({ path: "product-config.js", content: configContent, message: "Update product config — Admin Panel থেকে" });
-    }
-
-    publishFilesToGitHub(files).then(function (out) {
-      saveButton.disabled = false;
-      if (!out.attempted) {
-        setSaveStatus("সাইটে সেভ হয়নি। Admin লগইন প্রয়োজন; ব্যাকআপ ফাইল ডাউনলোড হয়েছে।");
-        downloadAllLocal();
-        toast("লোকাল ফাইল ডাউনলোড হয়েছে — GitHub অটো-পাবলিশের জন্য Admin লগইন করুন (admin-login.html)");
-        return;
-      }
-      var failed = out.results.filter(function (r) {
-        return !r.res || !r.res.ok;
-      });
-      if (!failed.length) {
-        savedSnapshot = publishingSnapshot;
-        setSaveStatus("✅ GitHub-এ সেভ হয়েছে। সাইটের Deploy শেষ হলে পরিবর্তন দেখা যাবে।");
-        toast("✅ GitHub-এ সেভ সফল! সাইটের Deploy সম্পন্ন হওয়া পর্যন্ত অপেক্ষা করুন।");
-      } else {
-        setSaveStatus("⚠️ কিছু ফাইল সেভ হয়নি। আবার Save চাপুন; ব্যাকআপ ডাউনলোড হয়েছে।");
-        downloadAllLocal();
-        var firstErr = failed[0].res ? failed[0].res.message || failed[0].res.error : "অজানা সমস্যা";
-        toast(
-          "⚠️ " + failed.length + "টি ফাইল পাবলিশ ব্যর্থ (" + firstErr + ") — ডাউনলোড হওয়া ফাইল ম্যানুয়ালি আপলোড করুন"
-        );
-      }
-    }).catch(function () {
-      saveButton.disabled = false;
-      setSaveStatus("⚠️ সংযোগ সমস্যায় সেভ নিশ্চিত হয়নি। আবার Save চাপুন।");
-      toast("সেভ ব্যর্থ — আবার চেষ্টা করুন।");
-    });
+  function saveAll(target) {
+    var button=document.getElementById("pmSave");
+    if(button.disabled)return Promise.reject(new Error("প্রকাশ চলছে। একটু অপেক্ষা করুন।"));
+    var snapshot;
+    try {
+      if(!window.MaCatalogPublisher.isReady())throw new Error("প্রকাশের সংযোগ প্রস্তুত নয়। বর্তমান ডেটা আবার লোড করুন।");
+      window.MaProductPublishUtils.validateCatalog(products);
+      if(sections.some(function(sec){return !(window.CATALOG_SECTIONS||[]).some(function(old){return old.key===sec.key;});}))throw new Error("নতুন ক্যাটাগরি চালু করার আগে সেটি সেটআপ করতে হবে। বর্তমান ক্যাটাগরিতে পণ্য যোগ করুন।");
+      stripHomeLinksFromProducts();snapshot=catalogSnapshot();
+      var files=[{path:"category-products.js",content:generateProductsFile()},{path:"product-links-data.js",content:generateProductLinksFile()},{path:"product-catalog-sections.js",content:generateSectionsFile()},{path:"product-config.js",content:generateProductConfigFile()}];
+    } catch(err){setSaveStatus(err.message);return Promise.reject(err);}
+    button.disabled=true;
+    return window.MaCatalogPublisher.publish(files,target).then(function(result){savedSnapshot=snapshot;return result;}).catch(function(err){setSaveStatus("প্রকাশ হয়নি: "+err.message+" — আপনার পরিবর্তন অক্ষত আছে।");throw err;}).finally(function(){button.disabled=false;});
   }
 
-  document.getElementById("pmSave").addEventListener("click", saveAll);
+  document.getElementById("pmSave").addEventListener("click", function(){saveAll().catch(function(){});});
   var chkBtn = document.getElementById("pmCheckImages");
   if (chkBtn) chkBtn.addEventListener("click", checkAllImages);
 
-  document.getElementById("pmReload").addEventListener("click", function () {
-    if (savedSnapshot !== catalogSnapshot() && !confirm("সেভ না করা পরিবর্তন বাদ দিয়ে আবার লোড করবেন?")) return;
-    loadState();
-    savedSnapshot = catalogSnapshot();
-    overviewSelected = {};
-    renderCatList();
-    renderMain();
-    setSaveStatus("সাইটের বর্তমান ডেটা লোড হয়েছে।");
-    toast("সাইট থেকে আবার লোড হয়েছে");
-  });
+  function reloadPublishingData() {
+    mainEl.inert=true;catListEl.inert=true;
+    return window.MaCatalogPublisher.init(function(text,error){setSaveStatus(text);document.getElementById("pmSaveStatus").classList.toggle("pm-quick-error",!!error);},function(){window.MA_RAW_CATEGORY_PRODUCTS=JSON.parse(JSON.stringify(window.CATEGORY_PRODUCTS||{}));loadState();overviewSelected={};renderCatList();renderMain();savedSnapshot=catalogSnapshot();}).then(function(){mainEl.inert=false;catListEl.inert=false;}).catch(function(err){mainEl.inert=false;catListEl.inert=false;setSaveStatus("প্রকাশের সংযোগ পাওয়া যায়নি: "+err.message);});
+  }
+  document.getElementById("pmReload").addEventListener("click",function(){if(savedSnapshot!==catalogSnapshot()&&!confirm("সেভ না করা পরিবর্তন বাদ দিয়ে বর্তমান ডেটা লোড করবেন?"))return;reloadPublishingData();});
 
   document.getElementById("pmAddCategory").addEventListener("click", function () {
     openCategoryModal(null);
@@ -2122,6 +1986,8 @@
   renderCatList();
   renderMain();
   savedSnapshot = catalogSnapshot();
+  window.MaProductQuickUpload.mount({sections:function(){return sections;},status:setSaveStatus,isSaved:function(){return savedSnapshot===catalogSnapshot();},stage:function(category,product){if(!sections.some(function(sec){return sec.key===category;}))throw new Error("ক্যাটাগরি বাছুন।");Object.keys(products).forEach(function(k){products[k]=products[k].filter(function(p){return p.id!==product.id;});});products[category].unshift(product);renderCatList();renderMain();},publish:saveAll});
+  reloadPublishingData();
   window.addEventListener("beforeunload", function (event) {
     if (savedSnapshot !== catalogSnapshot()) { event.preventDefault(); event.returnValue = ""; }
   });

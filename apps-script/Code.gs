@@ -159,6 +159,8 @@ function doPost(e) {
     if (type === 'AdminTodayStats') {
       return jsonOut_(getAdminTodayStats_(e));
     }
+    if (type && type.indexOf('AdminCatalog') === 0) return jsonOut_(catalogPublishHandle_(type, e));
+
     if (type === 'AdminPublishFile') {
       return jsonOut_(publishFileToGitHub_(e));
     }
