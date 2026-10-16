@@ -10,9 +10,9 @@ import {
   Truck,
   ShieldCheck,
   HeartHandshake,
+  MessageCircle,
 } from "lucide-react";
-import { FaWhatsapp } from "react-icons/fa";
-import { motion, AnimatePresence } from "framer-motion"; // যদি motion/react এ সমস্যা করে তবে framer-motion ব্যবহার করুন
+import { motion, AnimatePresence } from "motion/react";
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -437,7 +437,7 @@ export default function CartDrawer({
                       rel="noopener noreferrer"
                       className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20ba56] text-white font-extrabold py-3 rounded-xl text-center text-sm tracking-wider transition-all"
                     >
-                      <FaWhatsapp className="h-5 w-5" />
+                      <MessageCircle className="h-5 w-5" />
                       <span>Speed Up Order on WhatsApp</span>
                     </a>
 

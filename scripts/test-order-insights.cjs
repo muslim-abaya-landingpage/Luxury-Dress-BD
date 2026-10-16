@@ -2,7 +2,8 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
-const model = require('../admin-order-insights.js');
+const loadedModel = require('../admin-order-insights.js');
+const model = globalThis.MaOrderInsights || loadedModel.default || loadedModel;
 const good = {orderId:'MA-20261015-001', time:'15-10-2026 10:00', status:'Delivered', total:1000, charge:100, advance:0, qty:1, size:'Body 42 · Length 52', name:'Example', phone:'', items:['Example']};
 const fixture = [good,
   {...good,orderId:'MA-20261015-002',status:'Pending',total:500},

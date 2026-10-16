@@ -23,6 +23,7 @@ export default function ProductViewer({
   const currentIndex = products.findIndex((p) => p.id === currentProduct.id);
   const [selectedSize, setSelectedSize] = useState<string>(currentProduct.sizes[0]);
   const [selectedColor, setSelectedColor] = useState<string>(currentProduct.colors[0].name);
+  const [adding, setAdding] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomPos, setZoomPos] = useState({ x: 0, y: 0 });
 
@@ -283,21 +284,25 @@ export default function ProductViewer({
     ⚡ Order Now (Cash on Delivery)
   </button>
 
-           <button
+  <button
   onClick={async () => {
-    if (!selectedSize || !selectedColor) return;
-    // optionally: setAdding(true);
-    await onAddToCart(currentProduct, selectedSize, selectedColor);
-    // optionally: setAdding(false);
+    if (!selectedSize || !selectedColor || adding) return;
+    setAdding(true);
+    try {
+      await onAddToCart(currentProduct, selectedSize, selectedColor);
+    } finally {
+      setAdding(false);
+    }
   }}
   className="w-full inline-flex justify-center items-center bg-white hover:bg-neutral-50 text-gray-900 border border-gray-300 font-bold py-3 px-6 rounded-xl active:scale-[0.99] transition-all text-xs uppercase tracking-wider"
   id={`add-to-cart-btn-${currentProduct.id}`}
   disabled={adding}
->
+  >
   {adding
     ? "Adding..."
     : "🛒 Add to Shopping Bag"}
 </button>
+        </div>
             
       {/* Bullet features section */}
       <div className="bg-neutral-50 px-6 py-4 border-t border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-gray-500">
@@ -308,6 +313,8 @@ export default function ProductViewer({
           </div>
         ))}
       </div>
+    </div>
+    </div>
     </div>
   );
 }
