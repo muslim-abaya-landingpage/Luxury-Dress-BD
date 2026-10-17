@@ -225,6 +225,10 @@
 }
 .am-period { color: var(--am-gold); }
 .am-sub { max-width: 33ch; margin: 0 0 36px; color: var(--am-muted); font-size: 14px; line-height: 1.7; }
+.am-forgot { margin: -5px 0 0; text-align: right; font-size: 12px; }
+.am-forgot a, .am-support-note a { color: var(--am-ink); font-weight: 700; text-decoration: none; border-bottom: 1px solid var(--am-gold); }
+.am-forgot a:hover, .am-support-note a:hover { color: var(--am-gold); }
+.am-support-note { margin: 22px 0 0; color: var(--am-muted); font-size: 12px; line-height: 1.65; text-align: center; }
 
 .am-field { margin-bottom: 22px; }
 .am-field label {
@@ -373,6 +377,15 @@
   .am-form h2 { font-size: 38px; }
   .am-sub { margin-bottom: 32px; }
 }
+
+/* Auth pages are focused tasks on mobile; keep the fixed shopping nav from
+   covering the form and remove one extra navigation decision. */
+html body.am-body { padding-bottom: 0 !important; }
+body.am-body .mbn-bar { display: none !important; }
+body.am-body .am-input input { min-height: 54px; font-size: 16px; }
+body.am-body .am-eye { width: 42px; height: 42px; }
+body.am-body .am-btn { min-height: 56px; }
+body.am-body .am-field { scroll-margin-top: 24px; }
 
 @media (prefers-reduced-motion: reduce) {
   .am-btn, .am-input input, .am-meter i, .am-brand-foot a span { transition: none; }
