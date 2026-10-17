@@ -103,6 +103,43 @@
           </section>
         </div>
 
+        <section class="dz-card adm-feature-card" aria-labelledby="admAlertHeading">
+          <div class="adm-feature-head">
+            <div><h3 id="admAlertHeading">নোটিফিকেশন সেন্টার</h3><small id="admAlertState" role="status" aria-live="polite">অ্যালার্ট লোড হচ্ছে…</small></div>
+            <div class="adm-feature-actions"><button type="button" class="adm-btn adm-btn-secondary" id="admDesktopAlerts" hidden>ডেস্কটপ অ্যালার্ট চালু করুন</button><button type="button" class="adm-btn adm-btn-secondary" id="admAlertsRefresh">রিফ্রেশ</button></div>
+          </div>
+          <div class="adm-desktop-status" id="admDesktopStatus" role="status" aria-live="polite"></div>
+          <div class="adm-alert-columns">
+            <section class="adm-alert-panel" aria-labelledby="admStockHeading"><h4 id="admStockHeading">কম/শেষ স্টক <span class="adm-count-badge" id="admStockAlertCount">—</span></h4><div class="adm-alert-list" id="admStockAlerts" aria-live="polite"><div class="adm-feature-empty">স্টক যাচাই হচ্ছে…</div></div></section>
+            <section class="adm-alert-panel" aria-labelledby="admInboxHeading"><h4 id="admInboxHeading">অপঠিত কাস্টমার ইনবক্স <span class="adm-count-badge" id="admInboxAlertCount">—</span></h4><div class="adm-alert-list" id="admInboxAlerts" aria-live="polite"><div class="adm-feature-empty">ইনবক্স যাচাই হচ্ছে…</div></div></section>
+          </div>
+        </section>
+
+        <section class="dz-card adm-feature-card" aria-labelledby="admTasksHeading">
+          <div class="adm-feature-head">
+            <div><h3 id="admTasksHeading">প্রায়োরিটি অর্ডার টাস্ক</h3><small id="admTaskState" role="status" aria-live="polite">অর্ডার যাচাই হচ্ছে…</small></div>
+            <button type="button" class="adm-btn adm-btn-secondary" id="admTasksRefresh">রিফ্রেশ</button>
+          </div>
+          <div class="adm-task-summary"><span>Pending <b id="admTaskPendingCount">—</b></span><span>Overdue <b id="admTaskOverdueCount">—</b></span><small id="admTaskScope"></small></div>
+          <div id="admPriorityTasks" aria-live="polite"><div class="adm-feature-empty">প্রায়োরিটি টাস্ক লোড হচ্ছে…</div></div>
+        </section>
+
+        <section class="dz-card adm-feature-card" aria-labelledby="admReportHeading">
+          <div class="adm-feature-head adm-report-head">
+            <div><h3 id="admReportHeading">পূর্ণ-সময়ের অ্যানালিটিক্স ও সেলস রিপোর্ট</h3><small id="admReportState" role="status" aria-live="polite">রিপোর্ট লোড হচ্ছে…</small></div>
+            <div class="adm-report-controls"><label for="admReportRange">সময়সীমা</label><select id="admReportRange"><option value="all">সমস্ত সময়</option><option value="today">আজ</option><option value="7d">শেষ ৭ দিন</option><option value="30d">শেষ ৩০ দিন</option><option value="custom">নিজস্ব তারিখ</option></select><span id="admReportCustomDates" hidden><label for="admReportFrom">থেকে</label><input type="date" id="admReportFrom"><label for="admReportTo">পর্যন্ত</label><input type="date" id="admReportTo"></span><button type="button" class="adm-btn adm-btn-secondary" id="admReportLoad">রিপোর্ট দেখুন</button><button type="button" class="adm-btn adm-btn-secondary" id="admReportExport" disabled>CSV ডাউনলোড</button></div>
+          </div>
+          <div class="adm-feature-error" id="admReportError" role="alert" hidden></div>
+          <div id="admReportBody" hidden>
+            <p class="adm-report-range">রিপোর্টের সময়সীমা: <b id="admReportRangeLabel">—</b></p>
+            <p class="adm-undated-note" id="admUndatedNote" hidden></p>
+            <div class="adm-report-kpis">
+              <div><b id="admReportOrders">—</b><span>মোট অর্ডার</span></div><div><b id="admReportOrderValue">—</b><span>মোট অর্ডার মূল্য</span></div><div><b id="admReportDeliveredValue">—</b><span>Delivered অর্ডার মূল্য</span></div><div><b id="admReportDelivered">—</b><span>Delivered অর্ডার</span></div><div><b id="admReportCancelRate">—</b><span>বাতিল/রিটার্ন হার</span></div><div><b id="admReportDeliveryRate">—</b><span>ডেলিভারি সফলতার হার</span></div>
+            </div>
+            <div class="adm-report-grid"><section><h4>মাসভিত্তিক অর্ডার মূল্য <small>সর্বশেষ ১২ মাস</small></h4><div id="admSalesMonths" class="adm-sales-months"></div></section><section><h4>শীর্ষ পণ্য <small>প্রতিশ্রুত বিক্রিত পরিমাণ</small></h4><div id="admReportProducts" class="adm-report-list"></div></section><section><h4>অর্ডারের উৎস</h4><div id="admReportSources" class="adm-report-list"></div></section></div>
+          </div>
+        </section>
+
         <section class="dz-card">
           <div class="dz-orders-head">
             <h3>সাম্প্রতিক অর্ডার</h3>
@@ -121,6 +158,8 @@
   <script src="admin-guard.js?v=20261010-speed"></script>
   <script src="admin-invoice.js?v=20261009-inbox"></script>
   <script src="admin-order-insights.js?v=20261016-1"></script>
+  <script src="admin-dashboard-logic.js?v=20261018-1"></script>
+  <script src="admin-dashboard-features.js?v=20261018-1"></script>
   <script>
     (function () {
       var session = null;
