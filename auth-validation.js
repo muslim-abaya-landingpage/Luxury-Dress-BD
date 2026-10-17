@@ -3,13 +3,14 @@
   "use strict";
 
   var doc = g.document;
-  var form = doc.getElementById("signinForm") || doc.getElementById("signupForm");
+  var form = doc.getElementById("signinForm") || doc.getElementById("signupForm") || doc.getElementById("forgotForm");
   if (!form) return;
   var isSignup = form.id === "signupForm";
+  var isForgot = form.id === "forgotForm";
   var security = g.MaSecurity || {};
   var fields = isSignup
     ? ["su-name", "su-mobile", "su-email", "su-pass", "su-confirm"]
-    : ["si-login", "si-pass"];
+    : isForgot ? ["fp-login"] : ["si-login", "si-pass"];
 
   function valueOf(id) {
     var input = doc.getElementById(id);
@@ -31,6 +32,11 @@
   function errorFor(id) {
     var value = valueOf(id).trim();
     if (id === "si-login") {
+      if (!value) return "Enter your email or mobile number.";
+      if (value.indexOf("@") >= 0) return isEmail(value) ? "" : "Enter a valid email address.";
+      return isPhone(value) ? "" : "Enter a valid Bangladesh mobile number.";
+    }
+    if (id === "fp-login") {
       if (!value) return "Enter your email or mobile number.";
       if (value.indexOf("@") >= 0) return isEmail(value) ? "" : "Enter a valid email address.";
       return isPhone(value) ? "" : "Enter a valid Bangladesh mobile number.";
