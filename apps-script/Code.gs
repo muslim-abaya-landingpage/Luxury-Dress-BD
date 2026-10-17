@@ -126,7 +126,7 @@ function doPost(e) {
     }
 
     // Every order-panel action verifies the admin/staff token inside its handler.
-    var orderPanelTypes = ['AdminOrderList', 'AdminOrderGet', 'AdminOrderUpdate', 'AdminFraudCheck', 'AdminBlockCustomer', 'AdminSendCourier', 'AdminOrderStaff'];
+    var orderPanelTypes = ['AdminOrderList', 'AdminOrderGet', 'AdminOrderUpdate', 'AdminFraudCheck', 'AdminBlockCustomer', 'AdminSendCourier', 'AdminOrderStaff', 'AdminCourierTracking'];
     if (orderPanelTypes.indexOf(type) !== -1) {
       var panelResult = handleAdminOrderRequest_(type, e);
       return jsonOut_(panelResult || { ok: false, error: 'UNKNOWN_TYPE' });
@@ -2185,8 +2185,6 @@ function steadfastPlaceOrder_(orderData) {
 function normalizeSteadfastDeliveryStatus_(status) {
   var s = String(status || '').toLowerCase().trim();
   if (!s) return '';
-  if (s === 'in_review') return 'pending';
-  if (s === 'unknown_approval_pending') return 'approval_pending';
   return s;
 }
 
@@ -2892,30 +2890,18 @@ function handleSteadfastWebhookPost_(e) {
 }
 
 function updateOrderFromSteadfastWebhook_(payload) {
-  var invoice = String(payload.invoice || '').trim();
-  var tracking = String(payload.tracking_code || '').trim();
-  var cid = String(payload.consignment_id || '').trim();
-  if (!invoice && !tracking && !cid) return;
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
   if (!sheet) return;
-  var data = readOnlineOrderRows_(sheet);
-  var i;
-  for (i = 1; i < data.length; i++) {
-    var rowInvoice = String(data[i][8] || '').trim();
-    var rowTracking = String(data[i][10] || '').trim();
-    var rowCid = String(data[i][11] || '').trim();
-    var hit = false;
-    if (invoice && rowInvoice === invoice) hit = true;
-    if (!hit && tracking && rowTracking === tracking) hit = true;
-    if (!hit && cid && rowCid === cid) hit = true;
-    if (!hit) continue;
-    applySteadfastStatusToRow_(sheet, i + 1, {
-      tracking_code: tracking || rowTracking || '',
-      consignment_id: cid || rowCid || '',
-      delivery_status: payload.status || payload.delivery_status || ''
-    });
-    return;
-  }
+  var match = findCourierTrackingOrder_(sheet, payload);
+  if (!match) return;
+  appendCourierTrackingEvent_(match.values, payload, 'webhook');
+  var status = payload.status || payload.delivery_status || '';
+  if (typeof status !== 'string' || !status) return;
+  applySteadfastStatusToRow_(sheet, match.row, {
+    tracking_code: payload.tracking_code || match.values[10] || '',
+    consignment_id: payload.consignment_id || match.values[11] || '',
+    delivery_status: status
+  });
 }
 
 function getDistrictChargeMap_() {
@@ -6815,4 +6801,97 @@ function trackingSetupAudit() {
   }
   console.log('TRACKING_SETUP_AUDIT ' + JSON.stringify(result));
   return result;
+}
+
+// Exact courier events: store provider text separately from shop workflow statuses.
+function courierTrackingCell_(value, max) {
+  var text = String(value == null ? '' : value).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '').slice(0, max || 1000);
+  return /^\s*[=+\-@]/.test(text) ? "'" + text : text;
+}
+
+function findCourierTrackingOrder_(sheet, identifiers) {
+  var rows = readOnlineOrderRows_(sheet);
+  var matches = [];
+  for (var i = 1; i < rows.length; i++) {
+    var row = rows[i], hit = false, conflict = false;
+    [['invoice', 8], ['tracking_code', 10], ['consignment_id', 11]].forEach(function (pair) {
+      var supplied = String(identifiers[pair[0]] || '').trim();
+      var stored = String(row[pair[1]] || '').trim();
+      if (supplied && stored) { if (supplied === stored) hit = true; else conflict = true; }
+    });
+    if (hit && !conflict) matches.push({ row: i + 1, values: row });
+  }
+  return matches.length === 1 ? matches[0] : null;
+}
+
+function getCourierTrackingSheet_(create) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('Courier Tracking');
+  if (!sheet && create) {
+    sheet = ss.insertSheet('Courier Tracking');
+    sheet.appendRow(['Received At', 'Order ID', 'Consignment ID', 'Tracking Code', 'Event Type', 'Courier Status', 'Tracking Message', 'Provider Time', 'Event Key', 'Source']);
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+function readCourierTrackingEvents_(orderId) {
+  var sheet = getCourierTrackingSheet_(false);
+  if (!sheet || sheet.getLastRow() < 2) return [];
+  var last = sheet.getLastRow(), start = 2;
+  var rows = sheet.getRange(start, 1, last - start + 1, 10).getValues();
+  return rows.filter(function (r) { return String(r[1]) === String(orderId); }).map(function (r) {
+    return { receivedAt: r[0] instanceof Date ? r[0].toISOString() : String(r[0] || ''),
+      status: String(r[5] || ''), message: String(r[6] || ''), providerTime: String(r[7] || ''),
+      type: String(r[4] || ''), source: String(r[9] || '') };
+  }).slice(-100).reverse();
+}
+
+function appendCourierTrackingEvent_(order, payload, source) {
+  var status = typeof payload.delivery_status === 'string' ? payload.delivery_status : (typeof payload.status === 'string' ? payload.status : '');
+  var message = String(payload.tracking_message || '').trim();
+  if (!status && !message) return false;
+  var event = [String(order[8] || ''), String(payload.consignment_id || order[11] || ''), String(payload.tracking_code || order[10] || ''),
+    String(payload.notification_type || (message ? 'tracking_update' : 'delivery_status')), status, message, String(payload.updated_at || '')];
+  var key = Utilities.base64EncodeWebSafe(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, JSON.stringify(event)));
+  var lock = LockService.getScriptLock(); lock.waitLock(5000);
+  try {
+    var sheet = getCourierTrackingSheet_(true), last = sheet.getLastRow();
+    if (last >= 2) {
+      var start = 2, keys = sheet.getRange(start, 9, last - start + 1, 1).getValues();
+      if (keys.some(function (row) { return String(row[0]) === key; })) return false;
+    }
+    sheet.appendRow([new Date().toISOString()].concat(event.map(function (value) { return courierTrackingCell_(value, 2000); }), [key, source]));
+    return true;
+  } finally { lock.releaseLock(); }
+}
+
+function adminCourierTracking_(e) {
+  var verified = verifyAdminSession_(param_(e, 'Token'));
+  if (!verified.ok) return verified;
+  var id = String(param_(e, 'OrderId') || '').trim();
+  if (!id) return { ok: false, error: 'MISSING_ORDER_ID' };
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
+  if (!sheet) return { ok: false, error: 'NO_SHEET' };
+  var match = findCourierTrackingOrder_(sheet, { invoice: id });
+  if (!match) return { ok: false, error: 'ORDER_NOT_UNIQUE', message: 'একটি নির্দিষ্ট অর্ডার শনাক্ত করা যায়নি।' };
+  var row = match.values, raw = String(row[12] || ''), fetchedAt = '', warning = '';
+  var refresh = String(param_(e, 'Refresh') || '') === '1';
+  if (refresh && (row[10] || row[11])) {
+    try {
+      var response = row[11] ? steadfastGetStatusByConsignmentId_(row[11]) : steadfastGetStatusByTrackingCode_(row[10]);
+      var status = extractSteadfastDeliveryStatus_(response);
+      if (!status) warning = 'কুরিয়ার থেকে নতুন স্ট্যাটাস পাওয়া যায়নি।';
+      else {
+        raw = String(status); fetchedAt = new Date().toISOString();
+        // Preserve the workflow column: fetching tracking never marks an order delivered.
+        sheet.getRange(match.row, onlineOrderColumn_(sheet, 13)).setValue(courierTrackingCell_(raw, 100));
+        appendCourierTrackingEvent_(row, { delivery_status: raw, notification_type: 'status_check',
+          tracking_message: response.tracking_message || '', updated_at: response.updated_at || '' }, 'api');
+      }
+    } catch (err) { warning = 'কুরিয়ারের সংযোগে নতুন স্ট্যাটাস আনা যায়নি। সংরক্ষিত তথ্য দেখানো হচ্ছে।'; }
+  }
+  return { ok: true, version: 1, orderId: id, courierStatus: raw, tracking: String(row[10] || ''),
+    consignmentId: String(row[11] || ''), fetchedAt: fetchedAt, warning: warning,
+    events: readCourierTrackingEvents_(id), historyScope: 'এই সংযোগ চালুর পর পাওয়া সর্বশেষ ১০০টি ঘটনা; পুরোনো সম্পূর্ণ ইতিহাস নয়।' };
 }

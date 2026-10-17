@@ -554,6 +554,7 @@ function adminStaffList_(e) {
 function handleAdminOrderRequest_(type, e) {
   try {
     switch (type) {
+      case 'AdminCourierTracking': return adminCourierTracking_(e);
       case 'AdminOrderList': return adminOrderList_(e);
       case 'AdminOrderGet': return adminOrderGet_(e);
       case 'AdminOrderUpdate': return adminOrderUpdate_(e);
