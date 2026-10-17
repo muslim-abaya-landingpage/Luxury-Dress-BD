@@ -2543,6 +2543,43 @@ function getPriceBounds(products) {
   }
   return { min: min, max: max };
 }
+function isGalleryVariantProduct(p) {
+  var name = String((p && p.name) || "").toLowerCase();
+  return /\s[-–]\s?(back|side|detail)$/.test(name) || /\s(back|side|detail)$/.test(name);
+}
+function getAllCategoryProducts() {
+  var all = window.CATEGORY_PRODUCTS || {};
+  var seen = {};
+  var products = [];
+  Object.keys(all).forEach(function (key) {
+    (Array.isArray(all[key]) ? all[key] : []).forEach(function (p) {
+      if (!p || !p.name || isGalleryVariantProduct(p)) return;
+      var id = String(p.id || p.name).trim().toLowerCase();
+      if (seen[id]) return;
+      seen[id] = true;
+      products.push(p);
+    });
+  });
+  return products;
+}
+function getFilterOptions(products, field) {
+  var seen = {};
+  var values = [];
+  products.forEach(function (p) {
+    var list = field === "sizes" ? (Array.isArray(p.sizes) ? p.sizes : []) : [p[field]];
+    list.forEach(function (value) {
+      var key = String(value || "").trim();
+      if (!key || seen[key]) return;
+      seen[key] = true;
+      values.push(key);
+    });
+  });
+  return values.sort(function (a, b) {
+    var an = parseFloat(a), bn = parseFloat(b);
+    if (!isNaN(an) && !isNaN(bn)) return an - bn;
+    return a.localeCompare(b);
+  });
+}
 function buildProductListHtml(products) {
   function isPrimaryName(name) {
     var s = String(name || "").toLowerCase();
@@ -2580,6 +2617,10 @@ function buildProductListHtml(products) {
 function buildShopSidebar(categoryKey, products) {
   var bounds = getPriceBounds(products);
   var colorOptions = getProductColorOptions(products);
+  var sizeOptions = getFilterOptions(products, "sizes");
+  var categoryOptions = categoryKey ? [] : (window.CATEGORY_NAV || []).filter(function (c) {
+    return c && c.key && (window.CATEGORY_PRODUCTS || {})[c.key];
+  });
   var colorChecks = colorOptions.length
     ? colorOptions
         .map(function (opt) {
@@ -2594,8 +2635,18 @@ function buildShopSidebar(categoryKey, products) {
             "</label>"
           );
         })
-        .join("")
+    .join("")
     : "<p class='color-filter-empty'>No colors listed for this category.</p>";
+  var sizeChecks = sizeOptions.length
+    ? sizeOptions.map(function (size) {
+        return "<label class='filter-check-option'><input type='checkbox' class='size-filter-check' value='" + escapeHtml(size) + "'><span>" + escapeHtml(size) + "</span></label>";
+      }).join("")
+    : "<p class='color-filter-empty'>No sizes listed.</p>";
+  var categoryChecks = categoryOptions.length
+    ? categoryOptions.map(function (c) {
+        return "<label class='filter-check-option'><input type='checkbox' class='category-filter-check' value='" + escapeHtml(c.key) + "'><span>" + escapeHtml(c.label || c.key) + "</span></label>";
+      }).join("")
+    : "";
   return (
     "<aside class='shop-sidebar'>" +
     "<div class='shop-filter-head'>" +
@@ -2603,7 +2654,8 @@ function buildShopSidebar(categoryKey, products) {
     "<button type='button' class='shop-filter-close' id='shopFilterClose' aria-label='Close filters'>&times;</button>" +
     "</div>" +
     "<a class='sidebar-home' href='" + escapeHtml(shopHref("/")) + "'>&lsaquo; Home</a>" +
-    "<a class='sidebar-all-category' href='" + escapeHtml(shopHref("/")) + "'>All Category</a>" +
+    "<a class='sidebar-all-category' href='" + escapeHtml(shopHref("/category")) + "'>All Categories</a>" +
+    (categoryChecks ? "<div class='sidebar-filter sidebar-filter-categories'><h4>Category</h4><div class='filter-check-list' id='categoryFilters'>" + categoryChecks + "</div></div>" : "") +
     buildProductListHtml(products) +
     "<div class='sidebar-filter sidebar-filter-price'>" +
     "<h4>Price Range</h4>" +
@@ -2639,6 +2691,11 @@ function buildShopSidebar(categoryKey, products) {
     colorChecks +
     "</div>" +
     "</div>" +
+    "<div class='sidebar-filter sidebar-filter-sizes'><h4>Size</h4><div class='filter-check-list' id='sizeFilters'>" + sizeChecks + "</div></div>" +
+    "<div class='sidebar-filter sidebar-filter-availability'><h4>Availability</h4><div class='filter-check-list' id='availabilityFilters'>" +
+    "<label class='filter-check-option'><input type='checkbox' class='availability-filter-check' value='in-stock'><span>In stock</span></label>" +
+    "<label class='filter-check-option'><input type='checkbox' class='availability-filter-check' value='out-of-stock'><span>Out of stock</span></label></div></div>" +
+    "<button type='button' class='shop-filter-reset' id='shopFilterReset'>Clear all filters</button>" +
     "</aside>"
   );
 }
@@ -3169,11 +3226,11 @@ function collectCategoryViewData(categoryKey) {
       products = window.maSearch.collectProducts(allProducts, searchQ, categoryMeta);
     }
   } else {
-    products = (allProducts[categoryKey] || []).slice();
+    products = categoryKey ? (allProducts[categoryKey] || []).slice() : getAllCategoryProducts();
   }
   var title = searchQ
     ? 'Search: "' + searchQ + '"'
-    : (categoryMeta[categoryKey] && categoryMeta[categoryKey].title) || categoryKey.toUpperCase();
+    : (categoryKey ? ((categoryMeta[categoryKey] && categoryMeta[categoryKey].title) || categoryKey.toUpperCase()) : "All Categories");
   var waLink = (window.SITE_MEDIA && window.SITE_MEDIA.whatsappOrderLink) || "https://wa.me/8801971642683";
   var breadcrumb = searchQ
     ? "<nav class='shop-breadcrumb' aria-label='Breadcrumb'>" +
@@ -3205,7 +3262,7 @@ function bindShopCategoryControls(root, products) {
     syncShopCartBadge();
     return;
   }
-  var filterState = { colors: [], priceMin: null, priceMax: null };
+  var filterState = { colors: [], sizes: [], categories: [], availability: [], priceMin: null, priceMax: null };
   function applyFilters() {
     var grid = root.querySelector("#productGrid");
     var countEl = root.querySelector("#shopCount");
@@ -3221,6 +3278,15 @@ function bindShopCategoryControls(root, products) {
       if (filterState.colors.length) {
         var productColorKey = getProductColorFilterKey(p);
         if (!productColorKey || filterState.colors.indexOf(productColorKey) === -1) show = false;
+      }
+      if (filterState.sizes.length) {
+        var productSizes = Array.isArray(p.sizes) ? p.sizes.map(String) : [];
+        if (!filterState.sizes.some(function (size) { return productSizes.indexOf(size) !== -1; })) show = false;
+      }
+      if (filterState.categories.length && filterState.categories.indexOf(String(p.category || "")) === -1) show = false;
+      if (filterState.availability.length) {
+        var inStock = productIsInStock(p);
+        if (filterState.availability.length === 1 && ((filterState.availability[0] === "in-stock") !== inStock)) show = false;
       }
       if (filterState.priceMin !== null && price < filterState.priceMin) show = false;
       if (filterState.priceMax !== null && price > filterState.priceMax) show = false;
@@ -3280,6 +3346,31 @@ function bindShopCategoryControls(root, products) {
         filterState.colors.push(cb.value);
       });
       applyFilters();
+    });
+  }
+  function bindCheckboxFilter(id, className, stateKey) {
+    var wrap = root.querySelector(id);
+    if (!wrap) return;
+    wrap.addEventListener("change", function (ev) {
+      if (!ev.target.classList.contains(className)) return;
+      filterState[stateKey] = Array.prototype.slice.call(wrap.querySelectorAll("." + className + ":checked")).map(function (cb) { return cb.value; });
+      applyFilters();
+    });
+  }
+  bindCheckboxFilter("#sizeFilters", "size-filter-check", "sizes");
+  bindCheckboxFilter("#categoryFilters", "category-filter-check", "categories");
+  bindCheckboxFilter("#availabilityFilters", "availability-filter-check", "availability");
+  var resetButton = root.querySelector("#shopFilterReset");
+  if (resetButton) {
+    resetButton.addEventListener("click", function () {
+      root.querySelectorAll(".color-filter-check, .size-filter-check, .category-filter-check, .availability-filter-check").forEach(function (cb) { cb.checked = false; });
+      if (priceMin) priceMin.value = priceMin.min;
+      if (priceMax) priceMax.value = priceMax.max;
+      filterState.colors = [];
+      filterState.sizes = [];
+      filterState.categories = [];
+      filterState.availability = [];
+      updatePriceTrack();
     });
   }
   syncShopCartBadge();
@@ -3513,6 +3604,9 @@ function renderAllCategories() {
     renderCategory("");
     return;
   }
+  renderCategory("");
+  return;
+  /* Legacy category tile hub retained below for rollback/reference. */
   root.className = "cat-hub-page";
   if (typeof window.syncCatalogFromSections === "function") {
     window.syncCatalogFromSections();
@@ -3752,4 +3846,3 @@ window.addEventListener("load", function () {
     if (thumb) thumb.style.display = "none";
   }, true);
 })();
-

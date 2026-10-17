@@ -2767,3 +2767,15 @@ body.pqv-sc-open {
     gap: 10px;
   }
 }
+
+/* Faceted filter refresh */
+.filter-check-list { display:flex; flex-direction:column; gap:0; }
+.filter-check-option { display:flex; align-items:center; gap:9px; padding:8px 0; border-bottom:1px solid #f3f3f3; font-size:13px; color:#333; cursor:pointer; }
+.filter-check-option:last-child { border-bottom:none; }
+.filter-check-option input { width:16px; height:16px; accent-color:#111; cursor:pointer; }
+.shop-filter-reset { width:100%; border:1px solid #111; background:#fff; color:#111; border-radius:4px; padding:9px 12px; font:inherit; font-size:13px; cursor:pointer; }
+.shop-filter-reset:hover { background:#111; color:#fff; }
+.shop-mobile-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:0 0 14px; padding:0 2px; }
+.shop-filter-open { display:inline-flex; align-items:center; gap:8px; border:1px solid #ddd; background:#fff; border-radius:4px; font-size:14px; font-weight:600; color:#111; padding:8px 12px; cursor:pointer; font-family:inherit; }
+.shop-sort-wrap { display:inline-flex; align-items:center; gap:8px; font-size:14px; font-weight:600; color:#111; }
+.shop-sort-select { border:1px solid #ddd; border-radius:4px; padding:8px 28px 8px 10px; font-size:13px; font-weight:500; color:#333; background:#fff; font-family:inherit; min-width:170px; }
