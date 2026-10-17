@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import fs from 'node:fs';
+import crypto from 'node:crypto';
 
 const code = fs.readFileSync(new URL('../apps-script/Code.gs', import.meta.url), 'utf8');
 const admin = fs.readFileSync(new URL('../apps-script/AdminOrders.gs', import.meta.url), 'utf8');
@@ -23,6 +24,7 @@ class Sheet {
     this.writes = []; this.validations = []; this.notes = new Map(); this.widths = new Map();
     this.images = []; this.formulas = new Map();
   }
+  appendRow(row) { this.rows.push([...row]); return this; }
   getName() { return this.name; }
   getSheetId() { return this.id; }
   getParent() { return { getId: () => this.parent }; }
@@ -100,7 +102,7 @@ function fixture(withSize = true) {
     newDataValidation: () => ({ requireValueInList() { return this; }, setAllowInvalid() { return this; }, build() { return {}; } })
   }, PropertiesService: { getScriptProperties: () => ({ getProperty: key => props.get(key) ?? null, setProperty: (key, value) => props.set(key, value) }) },
     LockService: { getScriptLock: () => ({ waitLock() { locks.push('acquire'); }, releaseLock() { locks.push('release'); } }) },
-    Utilities: { formatDate: (_date, _zone, pattern) => pattern === 'yyyy-MM-dd' ? '2026-10-11' : '11-10-2026 12:29:31', sleep() {} },
+    Utilities: { DigestAlgorithm: { SHA_256: 'sha256' }, computeDigest: (algorithm, text) => [...crypto.createHash(algorithm).update(text).digest()], base64EncodeWebSafe: bytes => Buffer.from(bytes).toString('base64url'), formatDate: (_date, _zone, pattern) => pattern === 'yyyy-MM-dd' ? '2026-10-11' : '11-10-2026 12:29:31', sleep() {} },
     ContentService: { MimeType: { TEXT: 'text' }, createTextOutput: text => ({ text, setMimeType() { return this; } }) }
   });
   vm.runInContext(code + '\n' + admin + '\n' + headersFix, context);
@@ -108,6 +110,7 @@ function fixture(withSize = true) {
     verifyAdminSession_: () => ({ ok: true, sheetUrl: 'verified-test-url' }),
     param_: (e, key) => (e?.parameter || e || {})[key] || '',
     isPhoneBlocked_: () => false, rateLimit_: () => {}, rateLimitOrder_: () => {}, checkDuplicateOrder_: () => {}, validateCartPricing_: () => {},
+    opsVerifiedPricing_: items => ({ subtotal: (items || []).reduce((sum, item) => sum + (Number(item.price) || 0) * (Number(item.qty) || 0), 0), couponDiscountVal: 0 }),
     getDistrictChargeMap_: () => ({ 'ঢাকা': 0 }), generateOrderId_: () => 'MA-NEW-0001',
     decrementStockForOrder_: items => decremented.push(items), getSteadfastKeys_: () => ({ apiKey: 'mock', secretKey: 'mock' }),
     steadfastPlaceOrder_: payload => { sent.push(payload); return { consignment: { tracking_code: 'SFR-MOCK', consignment_id: 'CID-MOCK', status: 'in_review' } }; },
@@ -215,6 +218,62 @@ for (const withSize of [true, false]) {
     assert.equal(f.sheet.rows[2][9 + offset], 'Pending'); assert.equal(f.sheet.rows[2][16 + offset], 'WhatsApp manual');
   });
 }
+
+for (const withSize of [true, false]) {
+  test(`${withSize ? 'H size' : 'legacy H total'}: admin order list paginates newest-first and omits detail-only fields`, () => {
+    const f = fixture(withSize);
+    const offset = withSize ? 1 : 0;
+    const template = [...f.sheet.rows[1]];
+    function addOrder(id, name, phone, status, day) {
+      const row = [...template];
+      row[0] = `${day}T12:00:00+06:00`;
+      row[1] = name;
+      row[2] = phone;
+      row[7 + offset] = 1800;
+      row[8 + offset] = id;
+      row[9 + offset] = status;
+      f.sheet.rows.push(row);
+    }
+    addOrder('MA-20261012-1001', 'Second Customer', '01812345678', 'Confirmed', '2026-10-12');
+    addOrder('MA-20261013-1002', 'Newest Customer', '01912345678', 'Delivered', '2026-10-13');
+
+    const first = f.ctx.adminOrderList_({ parameter: { Token: 'mock', Limit: '1' } });
+    assert.equal(first.ok, true);
+    assert.equal(first.orders.length, 1);
+    assert.equal(first.orders[0].orderId, 'MA-20261013-1002');
+    assert.equal(first.nextCursor, 3);
+    assert.equal(first.counts.all, 3);
+    assert.equal(first.counts.Delivered, 1);
+    for (const key of ['address', 'txn', 'customerNote', 'courierNote', 'design']) {
+      assert.equal(Object.hasOwn(first.orders[0], key), false, `${key} must not be sent in the list response`);
+    }
+
+    const second = f.ctx.adminOrderList_({ parameter: { Token: 'mock', Limit: '1', Cursor: String(first.nextCursor) } });
+    assert.equal(second.orders[0].orderId, 'MA-20261012-1001');
+    assert.equal(second.nextCursor, 2);
+    const third = f.ctx.adminOrderList_({ parameter: { Token: 'mock', Limit: '1', Cursor: String(second.nextCursor) } });
+    assert.equal(third.orders[0].orderId, 'MA-20261011-4777');
+    assert.equal(third.nextCursor, 0);
+  });
+}
+
+test('legacy admin order-list requests without paging parameters still receive every row', () => {
+  const f = fixture(true);
+  const template = [...f.sheet.rows[1]];
+  for (let i = 0; i < 85; i++) {
+    const row = [...template];
+    row[0] = `2026-10-14T12:${String(i % 60).padStart(2, '0')}:00+06:00`;
+    row[1] = `Legacy Customer ${i}`;
+    row[2] = '01812345678';
+    row[8] = `MA-20261014-${String(i).padStart(4, '0')}`;
+    row[9] = 'Pending';
+    f.sheet.rows.push(row);
+  }
+  const response = f.ctx.adminOrderList_({ parameter: { Token: 'mock' } });
+  assert.equal(response.ok, true);
+  assert.equal(response.orders.length, 86);
+  assert.equal(response.nextCursor, 0);
+});
 
 test('an order-ID edit in J never triggers confirmation/cancellation hooks on a sheet with H sizes', () => {
   const f = fixture();

@@ -131,6 +131,13 @@ function admReadAll_(sheet) {
   return readOnlineOrderRows_(sheet, 2, lastRow - 1, ADM_LAST_COL);
 }
 
+function admReadHistory_(sheet) {
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return [];
+  // Fraud history needs only date, phone, total, order ID, status and courier status.
+  return readOnlineOrderRows_(sheet, 2, lastRow - 1, 13);
+}
+
 function admFindRow_(sheet, orderId) {
   var id = String(orderId || '').trim();
   if (!id) return 0;
@@ -250,7 +257,7 @@ function adminFraudCheck_(e) {
   if (!v.ok) return v;
   var phone = normalizePhone_(param_(e, 'Phone'));
   if (!/^01\d{9}$/.test(phone)) return { ok: false, error: 'INVALID_PHONE', message: 'সঠিক ফোন নম্বর নয়।' };
-  var rows = admReadAll_(admGetSheet_());
+  var rows = admReadHistory_(admGetSheet_());
   var h = admHistoryForPhone_(rows, phone, param_(e, 'OrderId'));
   var blockedMap = admBlockedMap_();
   return {
@@ -271,29 +278,81 @@ function adminFraudCheck_(e) {
 function adminOrderList_(e) {
   var v = verifyAdminSession_(param_(e, 'Token'));
   if (!v.ok) return v;
-  var limit = parseInt(param_(e, 'Limit'), 10) || 300;
+  var limitValue = String(param_(e, 'Limit') || '').trim();
+  var cursorValue = String(param_(e, 'Cursor') || '').trim();
+  var limit = parseInt(limitValue, 10) || 80;
   if (limit < 1) limit = 1;
-  if (limit > 1000) limit = 1000;
   var sheet = admGetSheet_();
-  var rows = admReadAll_(sheet);
+  var lastRow = sheet.getLastRow();
+  var rowCount = Math.max(0, lastRow - 1);
+  // Keep older admin clients working: only clients that send paging params are capped.
+  if (!limitValue && !cursorValue) limit = Math.max(1, rowCount);
+  else if (limit > 300) limit = 300;
+  var cursor = parseInt(cursorValue, 10);
+  if (!isFinite(cursor) || cursor < 0) cursor = 0;
+  var endRow = cursor > 0 ? Math.min(cursor, lastRow) : lastRow;
+  var startRow = endRow >= 2 ? Math.max(2, endRow - limit + 1) : 2;
+  var pageRows = endRow >= startRow
+    ? readOnlineOrderRows_(sheet, startRow, endRow - startRow + 1, ADM_LAST_COL)
+    : [];
+  // Counts need only the first ten logical fields; avoid reading notes, addresses, cart JSON and images.
+  var countRows = rowCount ? readOnlineOrderRows_(sheet, 2, rowCount, 10) : [];
   var blockedMap = admBlockedMap_();
   var todayKey = Utilities.formatDate(new Date(), 'GMT+6', 'yyyy-MM-dd');
   var counts = { all: 0, today: 0 };
   ADM_STATUSES.forEach(function (s) { counts[s] = 0; });
   var orders = [];
-  for (var i = rows.length - 1; i >= 0; i--) {
-    var r = rows[i];
+  for (var i = 0; i < countRows.length; i++) {
+    var r = countRows[i];
     if (!r[1] && !r[2]) continue;
-    var o = admRowToOrder_(r, i + 2);
+    var status = String(r[9] || 'Pending') || 'Pending';
     counts.all++;
-    if (counts.hasOwnProperty(o.status)) counts[o.status]++;
+    if (counts.hasOwnProperty(status)) counts[status]++;
     if (dayKeyFromCell_(r[0]) === todayKey) counts.today++;
-    if (orders.length < limit) {
-      o.blocked = Object.prototype.hasOwnProperty.call(blockedMap, o.phone);
-      orders.push(o);
-    }
   }
-  return { ok: true, orders: orders, counts: counts, statuses: ADM_STATUSES, sheetUrl: v.sheetUrl };
+  for (var j = pageRows.length - 1; j >= 0; j--) {
+    var rowNumber = startRow + j;
+    var pageRow = pageRows[j];
+    if (!pageRow[1] && !pageRow[2]) continue;
+    var order = admRowToOrder_(pageRow, rowNumber);
+    order.blocked = Object.prototype.hasOwnProperty.call(blockedMap, order.phone);
+    orders.push(admOrderListSummary_(order));
+  }
+  return {
+    ok: true,
+    orders: orders,
+    counts: counts,
+    statuses: ADM_STATUSES,
+    sheetUrl: v.sheetUrl,
+    nextCursor: startRow > 2 ? startRow - 1 : 0,
+    limit: limit
+  };
+}
+
+function admOrderListSummary_(order) {
+  return {
+    row: order.row,
+    time: order.time,
+    name: order.name,
+    phone: order.phone,
+    qty: order.qty,
+    charge: order.charge,
+    size: order.size,
+    items: order.items,
+    total: order.total,
+    advance: order.advance,
+    orderId: order.orderId,
+    status: order.status,
+    tracking: order.tracking,
+    consignmentId: order.consignmentId,
+    courierStatus: order.courierStatus,
+    district: order.district,
+    payment: order.payment,
+    adminNote: order.adminNote,
+    assignedTo: order.assignedTo,
+    courier: order.courier,
+    blocked: order.blocked
+  };
 }
 
 function adminOrderGet_(e) {
@@ -312,7 +371,7 @@ function adminOrderGet_(e) {
   if (row > 2) prevId = String(sheet.getRange(row - 1, onlineOrderColumn_(sheet, 9)).getValue() || '');
   if (row < lastRow) nextId = String(sheet.getRange(row + 1, onlineOrderColumn_(sheet, 9)).getValue() || '');
 
-  var rows = admReadAll_(sheet);
+  var rows = admReadHistory_(sheet);
   var history = admHistoryForPhone_(rows, order.phone, order.orderId);
   var blockedMap = admBlockedMap_();
   order.blocked = Object.prototype.hasOwnProperty.call(blockedMap, order.phone);
