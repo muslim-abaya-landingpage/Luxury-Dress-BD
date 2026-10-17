@@ -20,7 +20,8 @@
 <link rel="stylesheet" href="admin.css?v=20261018-shared">
 <link rel="stylesheet" href="admin-dashboard-design.css?v=20261018-3">
 <script src="admin-dashboard-design.js?v=20261018-3"></script>
-<link rel="stylesheet" href="admin-premium-layout.css?v=20261018-1">
+<link rel="stylesheet" href="admin-premium-layout.css?v=20261018-2">
+<script src="admin-order-status.js?v=20261018-1"></script>
 </head>
 <body class="pn-body">
   <div class="pn-app adm-shell">
@@ -82,6 +83,7 @@
         <input class="pn-in" id="ordSearch" type="search" placeholder="নাম, ফোন বা Order ID দিয়ে খুঁজুন…" autocomplete="off">
       </div>
 
+      <p class="adm-courier-note">কুরিয়ারে নথিভুক্ত মানে API-তে পার্সেল তৈরি হয়েছে; রাইডারের কাছে পৌঁছেছে এমন নিশ্চয়তা নয়। কুরিয়ার কলামে সর্বশেষ সংরক্ষিত স্ট্যাটাস দেখানো হচ্ছে।</p>
       <div class="pn-table-wrap">
         <table class="pn-table">
           <thead>
@@ -90,8 +92,8 @@
               <th>Customer</th>
               <th>Items</th>
               <th>Total</th>
-              <th>Status</th>
-              <th>Courier</th>
+              <th>অর্ডারের অবস্থা</th>
+              <th>কুরিয়ার (সংরক্ষিত তথ্য)</th>
               <th>Assigned</th>
               <th>যাচাই</th>
             </tr>
@@ -159,6 +161,7 @@
         }
         body.innerHTML = list.map(function (o) {
           var items = o.items && o.items.length ? esc(o.items[0]) + (o.items.length > 1 ? ' <span class="sub">+' + (o.items.length - 1) + " more</span>" : "") : "—";
+          var displayStatus = MaOrderStatus.describe(o);
           var canOpen = o.orderId && (issueRows.get(o) || []).indexOf("duplicate_id") === -1;
           return (
             '<tr class="' + (canOpen ? 'click' : '') + '" data-id="' + (canOpen ? esc(o.orderId) : '') + '">' +
@@ -166,8 +169,8 @@
             "<td><div>" + esc(o.name) + (o.blocked ? ' <span class="pn-badge blocked">Blocked</span>' : "") + '</div><div class="sub">' + esc(o.phone) + (o.district ? " · " + esc(o.district) : "") + "</div></td>" +
             "<td>" + items + '<div class="sub">সাইজ: ' + esc(o.size || "তথ্য নেই") + '</div></td>' +
             "<td><b>" + (MaOrderInsights.amount(o.total) === null ? 'অবৈধ মান' : MaPanel.money(o.total)) + '</b><div class="sub">' + esc(o.payment || "") + "</div></td>" +
-            '<td><span class="pn-badge ' + MaPanel.statusClass(o.status) + '">' + esc(o.status) + "</span></td>" +
-            "<td>" + (o.tracking ? esc(o.tracking) + '<div class="sub">' + esc(o.courierStatus || o.courier) + "</div>" : '<span class="sub">—</span>') + "</td>" +
+            '<td><span class="pn-badge ' + MaPanel.statusClass(o.status) + '">' + esc(displayStatus.orderLabel) + "</span></td>" +
+            "<td>" + (displayStatus.hasCourier ? esc(o.tracking || o.consignmentId || "—") + '<div class="sub">' + esc(displayStatus.courierLabel) + "</div>" : '<span class="sub">—</span>') + "</td>" +
             "<td>" + esc(o.assignedTo || "—") + "</td>" +
             '<td><div class="oi-issues">' + (issueRows.get(o) || []).map(function (key) { return '<span class="oi-issue">' + esc(MaOrderInsights.labels[key]) + '</span>'; }).join("") + ((issueRows.get(o) || []).length ? '' : '<span class="oi-good">পরীক্ষিত ক্ষেত্রে সতর্কতা নেই</span>') + '</div></td>' +
             "</tr>"
