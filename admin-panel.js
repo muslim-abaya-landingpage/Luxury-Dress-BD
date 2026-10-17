@@ -50,6 +50,14 @@
   function renderSide(active, session) {
     var side = document.getElementById("pnSide");
     if (!side) return;
+    if (side.dataset.sharedDesign === '1') {
+      var logout = side.querySelector('#admLogout');
+      if (logout && !logout.dataset.bound) {
+        logout.dataset.bound = '1';
+        logout.addEventListener('click', function () { MaAdmin.logout(); location.href = 'admin-login.html'; });
+      }
+      return;
+    }
     var html = '<div class="pn-brand">Muslim <span>Abaya</span></div><nav class="pn-nav">';
     NAV.forEach(function (n) {
       html += '<a href="' + n.href + '" class="' + (n.key === active ? "active" : "") + '"><span class="ico">' + n.ico + "</span>" + n.label + "</a>";

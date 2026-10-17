@@ -31,3 +31,27 @@
 .dz-bar.is-today div{background:linear-gradient(180deg,var(--adm-accent-light),var(--adm-accent))}
 :root[data-admin-theme="dark"] .dz-skel{background:linear-gradient(90deg,#302a40,#413751,#302a40);background-size:200% 100%}
 @media(prefers-reduced-motion:reduce){.adm-sidebar,.adm-sidebar-backdrop{transition:none}.dz-skel{animation:none}}
+/* Shared shell for orders, operations, products, links, stock and inbox. */
+:root{--pn-bg:var(--adm-bg);--pn-card:var(--adm-card);--pn-text:var(--adm-text);--pn-muted:var(--adm-muted);--pn-border:var(--adm-border)}
+.adm-sidebar-crest{display:grid;place-items:center;background:#7952d9!important;color:#fff}.adm-sidebar-crest svg{display:block;width:22px;height:22px}
+.adm-sidebar-item svg{display:block;flex:0 0 20px;width:20px!important;height:20px!important;opacity:1!important}
+.adm-sidebar-close svg,.adm-collapse-btn svg{display:block;width:18px;height:18px;flex:none}
+.adm-sidebar-nav{min-height:0}.adm-sidebar-brand,.adm-sidebar-profile,.adm-sidebar-foot{flex-shrink:0}
+.pn-app.adm-shell{gap:22px}.pn-app>.adm-sidebar{flex:0 0 266px}.pn-main{padding:0;min-width:0}
+.pn-head{background:var(--adm-card);border:1px solid var(--adm-border);border-radius:20px;padding:16px 20px;min-height:74px}.pn-head h1 b{color:var(--adm-accent-ink)}
+.pn-btn.pn-menu-btn{display:none}.pn-menu-btn svg{display:block}
+.pn-btn,.pn-in,.pn-sel,.pn-ta,.pn-table-wrap,.pn-table th,.pn-table tr.click:hover td,.pn-modal{background:var(--adm-card);color:var(--adm-text);border-color:var(--adm-border)}
+.pn-table td{border-color:var(--adm-border)}.pn-table th,.pn-tab{background:var(--adm-card-2)}.pn-tab{color:var(--adm-muted);border-color:var(--adm-border)}.pn-tab.active{background:var(--adm-accent-wash);color:var(--adm-accent-ink);border-color:var(--adm-accent)}
+.oi-panel,.oi-card,.oi-panel input:not([type=checkbox]),.oi-panel textarea,.oi-panel select{background:var(--adm-card);color:var(--adm-text);border-color:var(--adm-border)}.oi-card{background:var(--adm-card-2)}.oi-note,.pn-field label{color:var(--adm-muted)}
+.pl-admin.adm-body{background:var(--adm-bg)}
+.pl-admin .pm-sidebar,.pl-admin .pm-product-card,.pl-admin details.pm-help,.pl-admin .pl-steps,.pl-admin .pl-card,.pm-overview-wrap{background:var(--adm-card);border-color:var(--adm-border);color:var(--adm-text)}
+.pl-admin .pm-product-head,.pl-admin .pm-cat-btn,.pm-overview th{background:var(--adm-card-2);color:var(--adm-text);border-color:var(--adm-border)}
+.pl-admin .pm-product-head strong,.pl-admin details.pm-help summary,.pl-admin .pm-sidebar h2{color:var(--adm-text)}
+.pl-admin .pm-cat-btn.is-active{background:var(--adm-accent-wash);color:var(--adm-accent-ink);border-color:var(--adm-accent);box-shadow:inset 3px 0 var(--adm-accent)}
+.pl-admin .pl-btn-primary{background:var(--adm-accent);color:#fff;box-shadow:none}.pl-admin .pl-btn-secondary{background:var(--adm-card-2);color:var(--adm-text);border-color:var(--adm-border)}
+:root[data-admin-theme="dark"] .ibx-msg.out{background:#6846b2;color:#fff}
+:root[data-admin-theme="dark"] :is(.ibx-compose textarea,.pl-admin input,.pl-admin select,.pl-admin textarea){background:var(--adm-card-2);color:var(--adm-text);border-color:var(--adm-border-strong)}
+@media(min-width:981px){.pn-app>.adm-sidebar.is-collapsed{flex-basis:82px}}
+@media(max-width:980px){.pn-app.adm-shell{gap:0}.pn-btn.pn-menu-btn{display:inline-flex}.pn-main{width:100%}.adm-sidebar-profile{padding-top:12px;padding-bottom:4px}.adm-sidebar-item{min-height:42px;padding-top:10px!important;padding-bottom:10px!important}}
+.pl-admin .pl-section{background:var(--adm-card);border-color:var(--adm-border);color:var(--adm-text)}.pl-admin .pl-section-head{background:var(--adm-accent-wash);color:var(--adm-accent-ink)}.pl-admin .pl-section-body label,.pl-admin .pl-note,.pl-admin .pm-overview td small{color:var(--adm-muted)}.pl-admin .pl-section-head a{color:var(--adm-accent-ink)}
+.pn-btn-primary{background:var(--adm-accent);border-color:var(--adm-accent);color:#fff}.pn-btn-primary:hover{background:#6846b2}.pn-btn:not(.pn-btn-primary):hover{background:var(--adm-bg-alt)}
