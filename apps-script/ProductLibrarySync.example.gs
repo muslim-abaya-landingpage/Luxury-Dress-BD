@@ -2,7 +2,7 @@
  * ProductLibrary two-way sync example.
  * This file is NOT wired into the live Apps Script deployment yet.
  * Existing helpers required in the same Apps Script project:
- *   param_(), verifyAdminSession_(), cpHead_()
+ *   param_(), verifyAdminSession_(), requireOwnerAdmin_(), cpHead_()
  * Route both RecordTypes inside doPost() after the existing Admin rate limit:
  *   if (type === 'AdminProductSheetRead' || type === 'AdminProductSheetWrite')
  *     return jsonOut_(productLibrarySheetHandle_(type, e));
@@ -11,7 +11,7 @@
 var PRODUCT_LIBRARY_HEADERS_ = [
   'SKU', 'Name', 'Category', 'Price', 'Image', 'Sizes JSON', 'Color',
   'Color Label', 'Fabric', 'Stock', 'Detail Note', 'Images JSON',
-  'Variant Matrix JSON'
+  'Variant Matrix JSON', 'Price By Type JSON', 'Color Variants JSON'
 ];
 var PRODUCT_LIBRARY_MAX_ROWS_ = 1000;
 
@@ -21,10 +21,29 @@ function productLibrarySafeText_(value) {
   return /^[=+\-@\t\r]/.test(text) ? "'" + text : text;
 }
 
+function productLibrarySpreadsheet_() {
+  var id = PropertiesService.getScriptProperties().getProperty('PRODUCT_LIBRARY_SPREADSHEET_ID');
+  var ss = id ? SpreadsheetApp.openById(id) : SpreadsheetApp.getActiveSpreadsheet();
+  if (!ss) throw new Error('PRODUCT_LIBRARY_SPREADSHEET_ID_REQUIRED');
+  return ss;
+}
+
 function productLibrarySheet_() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var ss = productLibrarySpreadsheet_();
   var sheet = ss.getSheetByName('ProductLibrary') || ss.insertSheet('ProductLibrary');
-  if (sheet.getLastRow() === 0) sheet.getRange(1, 1, 1, PRODUCT_LIBRARY_HEADERS_.length).setValues([PRODUCT_LIBRARY_HEADERS_]);
+  if (sheet.getMaxColumns() < PRODUCT_LIBRARY_HEADERS_.length) {
+    sheet.insertColumnsAfter(sheet.getMaxColumns(), PRODUCT_LIBRARY_HEADERS_.length - sheet.getMaxColumns());
+  }
+  var headerRange = sheet.getRange(1, 1, 1, PRODUCT_LIBRARY_HEADERS_.length);
+  var current = headerRange.getDisplayValues()[0];
+  var needsWrite = false;
+  for (var i = 0; i < PRODUCT_LIBRARY_HEADERS_.length; i++) {
+    if (String(current[i] || '').trim() && String(current[i]).trim() !== PRODUCT_LIBRARY_HEADERS_[i]) {
+      throw new Error('PRODUCT_LIBRARY_HEADER_CONFLICT');
+    }
+    if (!String(current[i] || '').trim()) needsWrite = true;
+  }
+  if (needsWrite) headerRange.setValues([PRODUCT_LIBRARY_HEADERS_]);
   return sheet;
 }
 
@@ -36,7 +55,8 @@ function productLibraryJsonCell_(value) {
 function productLibrarySheetHandle_(type, e) {
   var who = verifyAdminSession_(param_(e, 'Token'));
   if (!who || !who.ok) return who || { ok: false, error: 'NOT_ADMIN' };
-  if (who.role !== 'admin') return { ok: false, error: 'OWNER_ONLY', message: 'শুধু মূল Admin এই শিট সিঙ্ক করতে পারবেন।' };
+  var ownerError = requireOwnerAdmin_(who);
+  if (ownerError) return ownerError;
 
   var sheet = productLibrarySheet_();
   var properties = PropertiesService.getScriptProperties();
@@ -54,7 +74,8 @@ function productLibrarySheetHandle_(type, e) {
         sizes: String(r[5] || ''), color: String(r[6] || '').trim(),
         colorLabel: String(r[7] || '').trim(), fabric: String(r[8] || '').trim(),
         stock: r[9], detailNote: String(r[10] || ''), images: String(r[11] || ''),
-        variantMatrix: String(r[12] || '')
+        variantMatrix: String(r[12] || ''), priceByType: String(r[13] || ''),
+        colorVariants: String(r[14] || '')
       });
     }
     var baseHead = properties.getProperty('PRODUCT_LIBRARY_BASE_HEAD') || '';
@@ -98,13 +119,19 @@ function productLibrarySheetHandle_(type, e) {
       productLibrarySafeText_(p.color || ''), productLibrarySafeText_(p.colorLabel || ''),
       productLibrarySafeText_(p.fabric || ''), stock, productLibrarySafeText_(p.detailNote || ''),
       productLibrarySafeText_(productLibraryJsonCell_(p.images)),
-      productLibrarySafeText_(productLibraryJsonCell_(p.variantMatrix))
+      productLibrarySafeText_(productLibraryJsonCell_(p.variantMatrix)),
+      productLibrarySafeText_(productLibraryJsonCell_(p.priceByType)),
+      productLibrarySafeText_(productLibraryJsonCell_(p.colorVariants))
     ]);
   }
 
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
+    var lockedCurrent = cpHead_();
+    if (lockedCurrent.head !== expectedHead) {
+      return { ok: false, error: 'CATALOG_CONFLICT', message: 'Export চলাকালে সাইটের catalog বদলেছে। Product Manager থেকে reload করে আবার export করুন।' };
+    }
     // Replace only the dedicated mirror tab after the full batch has validated.
     sheet.clearContents();
     sheet.getRange(1, 1, table.length, PRODUCT_LIBRARY_HEADERS_.length).setValues(table);

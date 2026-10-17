@@ -108,6 +108,7 @@ function fixture(withSize = true) {
     verifyAdminSession_: () => ({ ok: true, sheetUrl: 'verified-test-url' }),
     param_: (e, key) => (e?.parameter || e || {})[key] || '',
     isPhoneBlocked_: () => false, rateLimit_: () => {}, rateLimitOrder_: () => {}, checkDuplicateOrder_: () => {}, validateCartPricing_: () => {},
+    opsVerifiedPricing_: items => ({ catalogOk: true, subtotal: items.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.qty || 1), 0), unverifiedIds: [], couponDiscountVal: 0, couponRowIndex: null, hasItems: true }),
     getDistrictChargeMap_: () => ({ 'ঢাকা': 0 }), generateOrderId_: () => 'MA-NEW-0001',
     decrementStockForOrder_: items => decremented.push(items), getSteadfastKeys_: () => ({ apiKey: 'mock', secretKey: 'mock' }),
     steadfastPlaceOrder_: payload => { sent.push(payload); return { consignment: { tracking_code: 'SFR-MOCK', consignment_id: 'CID-MOCK', status: 'in_review' } }; },

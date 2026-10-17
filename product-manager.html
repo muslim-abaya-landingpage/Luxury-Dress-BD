@@ -2042,6 +2042,9 @@
       if (Array.isArray(row.sizes)) product.sizes = row.sizes.slice();
       if (Array.isArray(row.images) && row.images.length) product.images = row.images.slice();
       if (row.detailNote) product.detailNote = String(row.detailNote).trim();
+      if (row.priceByType && typeof row.priceByType === "object" && !Array.isArray(row.priceByType)) product.priceByType = cloneJson(row.priceByType);
+      if (Array.isArray(row.colorVariants)) product.colorVariants = cloneJson(row.colorVariants);
+      if (Array.isArray(row.variantMatrix)) product.variantMatrix = cloneJson(row.variantMatrix);
       if (typeof row.stock === "number") {
         product.stock = row.stock;
         if (row.stock === 0) product.inStock = false;
@@ -2086,6 +2089,7 @@
 
 </script>
   <script src="product-bulk-import.js?v=20261017-1"></script>
+  <script src="product-sheet-sync.example.js?v=20261017-1"></script>
   <script>
     (function () {
       var sidebar = document.getElementById("admSidebar");
