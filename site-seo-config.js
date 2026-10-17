@@ -30,9 +30,9 @@ window.SITE_SEO = {
         "অর্ডার, ডেলিভারি, পেমেন্ট ও রিটার্ন সহায়তা — Muslim Abaya (muslimabaya.com)।"
     },
     "/video": {
-      title: "Product Videos | Muslim Abaya",
+      title: "Product Video Gallery | Muslim Abaya",
       description:
-        "আসল প্রোডাক্ট ভিডিও — Muslim Abaya কালেকশন দেখুন আগে অর্ডার করুন।"
+        "Watch product videos to preview fabric, finishing and style before ordering from Muslim Abaya's modest fashion collection."
     },
     "/privacy": {
       title: "Privacy Policy | Muslim Abaya",
@@ -47,9 +47,9 @@ window.SITE_SEO = {
       description: "Muslim Abaya রিফান্ড ও রিটার্ন নীতি — muslimabaya.com।"
     },
     "/category": {
-      title: "All Categories | Muslim Abaya",
+      title: "All Products | Muslim Abaya — Shop Modest Fashion",
       description:
-        "সব ক্যাটাগরি — আবায়া, টু-পিস, এম্ব্রয়ডারি ও আরও। Muslim Abaya বাংলাদেশ।"
+        "Browse all Muslim Abaya products with category, price, color, size and availability filters. Premium modest fashion with COD in Bangladesh."
     }
   },
   categories: {

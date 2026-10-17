@@ -72,6 +72,19 @@
         margin: 12px 0 0;
         font-weight: 700;
     }
+    .tracking-pin-panel {
+        margin: 18px auto 0;
+        padding: 16px;
+        max-width: 420px;
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 14px;
+        text-align: left;
+    }
+    .tracking-pin-panel h2 { margin: 0 0 6px; font-size: 15px; color: #166534; }
+    .tracking-pin-value { margin: 0; font: 800 24px/1.3 Inter, sans-serif; letter-spacing: .18em; color: #111; }
+    .tracking-pin-note { margin: 8px 0 0; font-size: 13px; line-height: 1.55; color: #475569; }
+    .tracking-pin-missing { display: none; margin: 14px 0 0; color: #92400e; font-size: 13px; line-height: 1.5; }
     .actions {
         margin-top: 24px;
         display: flex;
@@ -118,11 +131,17 @@
         <div class="icon"><i class="fas fa-check"></i></div>
         <p class="thank-message">Thank you! Your order has been received. We will contact you shortly to confirm delivery.</p>
         <p id="orderIdLine" class="order-id-line"></p>
-        <p class="thank-sub">Save your order ID for reference, or track your order on our help page.</p>
+        <p class="thank-sub">Save your order ID and tracking PIN. You will need both, along with the phone number used for the order, to check its status.</p>
+        <section id="trackingPinPanel" class="tracking-pin-panel" hidden aria-live="polite">
+            <h2>Your one-time tracking PIN</h2>
+            <p id="trackingPinValue" class="tracking-pin-value"></p>
+            <p class="tracking-pin-note">Keep this PIN private. Use it with your phone number and order ID on the Order Tracking page.</p>
+        </section>
+        <p id="trackingPinMissing" class="tracking-pin-missing">Your order was received, but a tracking PIN is not available on this page. Please contact support before placing another order.</p>
         <div class="actions">
             <a href="/" class="btn btn-dark"><i class="fas fa-shopping-bag"></i> Continue Shopping</a>
             <a href="https://wa.me/8801971642683" class="btn btn-light" target="_blank" rel="noopener">WhatsApp Us</a>
-            <a href="help.html#order-status" class="btn btn-light">Track Order</a>
+            <a href="order-track.html" class="btn btn-light">Track Order</a>
         </div>
     </div>
     <script>
@@ -135,13 +154,28 @@
         try { sessionStorage.removeItem('cart'); } catch (e) {}
         (function () {
             var oid = '';
-            try { oid = sessionStorage.getItem('ma_last_order_id') || ''; } catch (e) {}
+            var pin = '';
+            try {
+                oid = sessionStorage.getItem('ma_last_order_id') || '';
+                pin = sessionStorage.getItem('ma_last_order_tracking_pin') || '';
+            } catch (e) {}
             if (oid) {
                 var el = document.getElementById('orderIdLine');
                 if (el) {
                     el.style.display = 'block';
                     el.textContent = 'Order ID: ' + oid;
                 }
+            }
+            if (/^\d{8}$/.test(pin)) {
+                var panel = document.getElementById('trackingPinPanel');
+                var value = document.getElementById('trackingPinValue');
+                if (panel && value) {
+                    panel.hidden = false;
+                    value.textContent = pin;
+                }
+            } else if (oid) {
+                var missing = document.getElementById('trackingPinMissing');
+                if (missing) missing.style.display = 'block';
             }
         })();
     </script>

@@ -71,7 +71,11 @@ function doGet(e) {
       return jsonOut_(getPublicStockStatus_());
     }
     if (type === 'OrderTrack') {
-      return jsonOut_(getOrderTrackStatus_(e));
+      return jsonOut_({
+        ok: false,
+        error: 'METHOD_NOT_ALLOWED',
+        message: 'অর্ডার যাচাইয়ের অনুরোধ POST দিয়ে পাঠান।'
+      });
     }
     if (type === 'ValidateCoupon') {
       return jsonOut_(validateCouponCode_(param_(e, 'Code'), parseFloat(param_(e, 'Subtotal')) || 0));
@@ -97,6 +101,7 @@ function doPost(e) {
       return handleSteadfastWebhookPost_(e);
     }
     var type = param_(e, 'RecordType');
+    if (type === 'OrderTrack') return jsonOut_(getOrderTrackStatus_(e));
     if (type === 'NotifyBackInStockV2') return jsonOut_(opsSaveWaitlist_(e));
     if (type && type.indexOf('AdminOperations') === 0) {
       adminRateLimit_(param_(e, 'Token') || 'admin_global');
@@ -303,15 +308,18 @@ function onlineOrderColumn_(sheet, originalColumn) {
 function getOnlineOrderSchemaStatus_() {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
   if (!sheet) return { ok: false, error: 'NO_SHEET' };
+  var pinColumns = findOnlineOrderTrackingPinColumns_(sheet);
   return {
     ok: true,
-    version: 'order-size-h-20261012',
+    version: 'order-tracking-pin-20261018',
     columns: {
       size: onlineOrderHasSizeColumn_(sheet) ? 8 : null,
       total: onlineOrderColumn_(sheet, 8), orderId: onlineOrderColumn_(sheet, 9),
       status: onlineOrderColumn_(sheet, 10), tracking: onlineOrderColumn_(sheet, 11),
       notes: onlineOrderColumn_(sheet, 17), images: onlineOrderColumn_(sheet, 18),
-      cartJSON: onlineOrderColumn_(sheet, 33)
+      cartJSON: onlineOrderColumn_(sheet, 33),
+      trackingPinHash: pinColumns ? pinColumns.hashColumn : null,
+      trackingPinSalt: pinColumns ? pinColumns.saltColumn : null
     }
   };
 }
@@ -353,7 +361,7 @@ function formatOnlineOrderDisplay_(sheet, row) {
     sheet.getRange(firstRow, onlineOrderColumn_(sheet, 17), rowCount, 1)
       .setWrapStrategy(SpreadsheetApp.WrapStrategy.CLIP).setVerticalAlignment('top');
     var metaStart = onlineOrderColumn_(sheet, 30);
-    var metaWidth = Math.min(10, sheet.getMaxColumns() - metaStart + 1);
+    var metaWidth = Math.min(11, sheet.getMaxColumns() - metaStart + 1);
     if (metaWidth > 0) sheet.getRange(firstRow, metaStart, rowCount, metaWidth)
       .setWrapStrategy(SpreadsheetApp.WrapStrategy.CLIP).setVerticalAlignment('top');
   }
@@ -373,7 +381,14 @@ function setupOnlineOrderDisplayNow() {
   var trackingStart = onlineOrderColumn_(sheet, 30);
   var flagsStart = onlineOrderColumn_(sheet, 36);
   if (trackingStart + 3 <= maxColumns) sheet.hideColumns(trackingStart, 4);
-  if (flagsStart + 3 <= maxColumns) sheet.hideColumns(flagsStart, 4);
+  if (flagsStart + 4 <= maxColumns) sheet.hideColumns(flagsStart, 5);
+  var pinColumns = findOnlineOrderTrackingPinColumns_(sheet);
+  if (pinColumns) {
+    try { sheet.hideColumns(pinColumns.hashColumn); } catch (hideHashErr) {}
+    if (pinColumns.saltColumn !== pinColumns.hashColumn) {
+      try { sheet.hideColumns(pinColumns.saltColumn); } catch (hideSaltErr) {}
+    }
+  }
   var helperColumn = sheet.getLastColumn();
   if (helperColumn && /পণ্যের সাইজ.*স্বয়ংক্রিয়/.test(String(sheet.getRange(1, helperColumn).getValue() || ''))) {
     sheet.hideColumns(helperColumn);
@@ -1716,6 +1731,10 @@ function handleOnlineOrderPost_(e) {
   ensureOnlineOrderStockStageHeader_(sheet);
   ensureOnlineOrderSourceHeader_(sheet);
   ensureOnlineOrderTrackingEventIdHeader_(sheet);
+  var trackingPin = generateOrderTrackingPin_();
+  var trackingPinSalt = Utilities.getUuid();
+  var trackingPinHash = hashOrderTrackingPin_(trackingPin, trackingPinSalt);
+  var trackingPinColumns = ensureOnlineOrderTrackingPinColumns_(sheet);
 
   var trackingId = String(eventID || '').trim();
   if (!/^[A-Za-z0-9_.:-]{1,100}$/.test(trackingId)) trackingId = 'order_' + orderId;
@@ -1760,6 +1779,8 @@ function handleOnlineOrderPost_(e) {
       sourceVal,
       trackingId
     ]]);
+    sheet.getRange(newRow, trackingPinColumns.hashColumn).setValue(trackingPinHash);
+    sheet.getRange(newRow, trackingPinColumns.saltColumn).setValue(trackingPinSalt);
   } catch (orderCreateErr) {
     if (newRow) {
       try { sheet.getRange(newRow, 1, 1, sheet.getLastColumn()).clearContent(); } catch (clearErr) {}
@@ -1798,7 +1819,7 @@ function handleOnlineOrderPost_(e) {
 
   try { markCartConverted_(validated.phone); } catch (mccErr) {}
 
-  return ContentService.createTextOutput('Success|' + orderId).setMimeType(ContentService.MimeType.TEXT);
+  return ContentService.createTextOutput('Success|' + orderId + '|' + trackingPin).setMimeType(ContentService.MimeType.TEXT);
 }
 
 // ── Steadfast Courier (Sheet menu + webhook) ──
@@ -2722,6 +2743,83 @@ function ensureOnlineOrderTrackingEventIdHeader_(sheet) {
   var header = String(cell.getValue() || '').trim();
   if (header && header !== 'Tracking Event ID') throw new Error('TRACKING_HEADER_CONFLICT');
   if (!header) cell.setValue('Tracking Event ID');
+}
+
+function findOnlineOrderTrackingPinColumns_(sheet) {
+  if (!sheet) return null;
+  var lastColumn = Math.max(1, sheet.getLastColumn());
+  var headers = sheet.getRange(1, 1, 1, lastColumn).getValues()[0];
+  var hashColumn = 0;
+  var saltColumn = 0;
+  for (var i = 0; i < headers.length; i++) {
+    var header = String(headers[i] || '').trim();
+    if (header === 'TrackingPinHash') hashColumn = i + 1;
+    if (header === 'TrackingPinSalt') saltColumn = i + 1;
+  }
+  if (!hashColumn || !saltColumn) return null;
+  var insertedSizeOffset = onlineOrderHasSizeColumn_(sheet) ? 1 : 0;
+  return {
+    hashColumn: hashColumn,
+    saltColumn: saltColumn,
+    hashIndex: hashColumn - 1 - (insertedSizeOffset && hashColumn > 8 ? 1 : 0),
+    saltIndex: saltColumn - 1 - (insertedSizeOffset && saltColumn > 8 ? 1 : 0)
+  };
+}
+
+function ensureOnlineOrderTrackingPinColumns_(sheet) {
+  var existing = findOnlineOrderTrackingPinColumns_(sheet);
+  if (existing) return existing;
+  var lastColumn = Math.max(1, sheet.getLastColumn());
+  var headers = sheet.getRange(1, 1, 1, lastColumn).getValues()[0];
+  var hashColumn = 0;
+  var saltColumn = 0;
+  for (var i = 0; i < headers.length; i++) {
+    var header = String(headers[i] || '').trim();
+    if (header === 'TrackingPinHash') hashColumn = i + 1;
+    if (header === 'TrackingPinSalt') saltColumn = i + 1;
+  }
+  var nextColumn = lastColumn + 1;
+  if (!hashColumn) hashColumn = nextColumn++;
+  if (!saltColumn) saltColumn = nextColumn++;
+  var requiredLastColumn = Math.max(hashColumn, saltColumn);
+  var maxColumns = sheet.getMaxColumns();
+  if (requiredLastColumn > maxColumns) {
+    sheet.insertColumnsAfter(maxColumns, requiredLastColumn - maxColumns);
+  }
+  if (String(sheet.getRange(1, hashColumn).getValue() || '').trim() !== 'TrackingPinHash') {
+    sheet.getRange(1, hashColumn).setValue('TrackingPinHash');
+  }
+  if (String(sheet.getRange(1, saltColumn).getValue() || '').trim() !== 'TrackingPinSalt') {
+    sheet.getRange(1, saltColumn).setValue('TrackingPinSalt');
+  }
+  return findOnlineOrderTrackingPinColumns_(sheet);
+}
+
+function generateOrderTrackingPin_() {
+  var uuidHex = String(Utilities.getUuid() || '').replace(/[^a-f0-9]/gi, '').slice(0, 8);
+  if (uuidHex.length !== 8) throw new Error('TRACKING_PIN_GENERATION_FAILED');
+  var pinNumber = parseInt(uuidHex, 16) % 100000000;
+  return ('00000000' + String(pinNumber)).slice(-8);
+}
+
+function hashOrderTrackingPin_(pin, salt) {
+  var digest = Utilities.computeDigest(
+    Utilities.DigestAlgorithm.SHA_256,
+    String(salt || '') + ':' + String(pin || ''),
+    Utilities.Charset.UTF_8
+  );
+  return Utilities.base64Encode(digest);
+}
+
+function constantTimeTextEqual_(left, right) {
+  var a = String(left || '');
+  var b = String(right || '');
+  if (a.length !== b.length) return false;
+  var difference = 0;
+  for (var i = 0; i < a.length; i++) {
+    difference |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return difference === 0;
 }
 
 function maybeSendConfirmedPurchaseCapiForRow_(sheet, row) {
@@ -3973,44 +4071,54 @@ function getPublicStockStatus_() {
 
 function getOrderTrackStatus_(e) {
   try {
-    var phoneRaw = param_(e, 'Phone');
-    var orderId = String(param_(e, 'OrderId') || '').trim();
-    var phone = normalizePhone_(phoneRaw);
-    if (!phone || phone.length < 10) {
-      return { ok: false, error: 'INVALID_PHONE', message: 'সঠিক মোবাইল নম্বর দিন (01XXXXXXXXXX)।' };
+    var phone = normalizePhone_(param_(e, 'Phone'));
+    var orderId = String(param_(e, 'OrderId') || '').trim().toUpperCase();
+    var pin = String(param_(e, 'TrackingPin') || '').trim();
+    if (!phone || phone.length < 10 || phone.length > 14 ||
+        !/^[A-Za-z0-9_.:-]{1,40}$/.test(orderId) || !/^\d{8}$/.test(pin)) {
+      return { ok: true, orders: [] };
     }
     try {
-      rateLimit_('track_' + phone);
+      rateLimit_('track_phone_' + phone);
+      rateLimit_('track_order_' + orderId);
     } catch (rl) {
       return { ok: false, error: 'RATE_LIMIT', message: 'অনেকবার চেষ্টা করা হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।' };
     }
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
     if (!sheet) return { ok: true, orders: [] };
+    var pinColumns = findOnlineOrderTrackingPinColumns_(sheet);
+    if (!pinColumns) return { ok: true, orders: [] };
     var data = readOnlineOrderRows_(sheet);
-    var orders = [];
     for (var i = data.length - 1; i >= 1; i--) {
       var r = data[i];
-      var rowPhone = normalizePhone_(r[2]);
-      if (rowPhone !== phone) continue;
-      var rowOrderId = String(r[8] || '').trim();
-      if (orderId && rowOrderId.toLowerCase() !== orderId.toLowerCase()) continue;
-      orders.push({
-        orderId: rowOrderId,
-        date: r[0] ? new Date(r[0]).toISOString() : '',
-        product: String(r[6] || ''),
-        size: String(r.orderSizeText_ || ''),
-        qty: r[3] || '',
-        total: r[7] || '',
-        status: String(r[9] || 'Pending'),
-        tracking: String(r[10] || ''),
-        courierStatus: String(r[12] || ''),
-        district: String(r[13] || '')
-      });
-      if (orders.length >= 15) break;
+      if (normalizePhone_(r[2]) !== phone) continue;
+      if (String(r[8] || '').trim().toUpperCase() !== orderId) continue;
+      var storedHash = String(r[pinColumns.hashIndex] || '').trim();
+      var storedSalt = String(r[pinColumns.saltIndex] || '').trim();
+      if (!storedHash || !storedSalt ||
+          !constantTimeTextEqual_(storedHash, hashOrderTrackingPin_(pin, storedSalt))) {
+        return { ok: true, orders: [] };
+      }
+      return {
+        ok: true,
+        orders: [{
+          orderId: String(r[8] || '').trim(),
+          date: r[0] ? new Date(r[0]).toISOString() : '',
+          product: String(r[6] || ''),
+          size: String(r.orderSizeText_ || ''),
+          qty: r[3] || '',
+          total: r[7] || '',
+          status: String(r[9] || 'Pending'),
+          tracking: String(r[10] || ''),
+          courierStatus: String(r[12] || ''),
+          district: String(r[13] || '')
+        }]
+      };
     }
-    return { ok: true, orders: orders };
+    return { ok: true, orders: [] };
   } catch (err) {
-    return { ok: false, error: 'ORDER_TRACK_FAILED', message: String(err.message || err) };
+    try { console.error('OrderTrack error: ' + String(err.message || err)); } catch (logErr) {}
+    return { ok: false, error: 'ORDER_TRACK_FAILED', message: 'তথ্য যাচাই করা যায়নি। আবার চেষ্টা করুন।' };
   }
 }
 

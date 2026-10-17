@@ -122,6 +122,22 @@ test.describe('Luxury Dress BD — integration / E2E', () => {
     }
   });
 
+  test('category listing exposes one descriptive H1 and intro after hydration', async ({ page }) => {
+    await mockAppsScript(page, async () => 'Success|E2E-NOT-USED|12345678');
+    await page.goto('/abaya.html');
+    await expect(page.locator('#list .shop-title')).toHaveText('Abaya Collection');
+    await expect(page.locator('#list h1')).toHaveCount(1);
+    await expect(page.locator('#shopCategoryDescription')).not.toBeEmpty();
+  });
+
+  test('product video gallery renders configured real videos instead of an empty management page', async ({ page }) => {
+    await mockAppsScript(page, async () => 'Success|E2E-NOT-USED|12345678');
+    await page.goto('/video.html');
+    await expect(page.locator('#videoTitle')).toHaveText('Product Video Gallery');
+    await expect(page.locator('.video-cell')).toHaveCount(1);
+    await expect(page.locator('.video-cell-title')).toHaveText('Premium Two Piece');
+  });
+
   test('checkout reads cart and calculates district delivery and free shipping at 3 items', async ({ page }) => {
     await mockAppsScript(page, async () => 'Success|E2E-NOT-USED');
     await openCheckoutWithCart(page, [
@@ -141,7 +157,7 @@ test.describe('Luxury Dress BD — integration / E2E', () => {
   });
 
   test('valid COD order posts expected fields to a mocked API, shows order ID, and clears cart', async ({ page }) => {
-    const orders = await mockAppsScript(page, async () => 'Success|E2E-ORDER-0001');
+    const orders = await mockAppsScript(page, async () => 'Success|E2E-ORDER-0001|12345678');
     await openCheckoutWithCart(page);
     await fillValidDeliveryDetails(page);
     await page.locator('#agreeTerms').check({ force: true });
@@ -149,6 +165,8 @@ test.describe('Luxury Dress BD — integration / E2E', () => {
 
     await expect(page).toHaveURL(/thank-you/);
     await expect(page.locator('#orderIdLine')).toContainText('E2E-ORDER-0001');
+    await expect(page.locator('#trackingPinPanel')).toBeVisible();
+    await expect(page.locator('#trackingPinValue')).toHaveText('12345678');
     expect(orders).toHaveLength(1);
     expect(orders[0].RecordType).toBe('Order');
     expect(orders[0].Name).toBe('E2E Test Customer');
@@ -162,6 +180,23 @@ test.describe('Luxury Dress BD — integration / E2E', () => {
       expect.objectContaining({ id: 'DR-01', qty: 1, price: 550 }),
     ]);
     expect(await page.evaluate(() => localStorage.getItem('secured_checkout_cart'))).toBeNull();
+  });
+
+  test('legacy success response without a PIN is not treated as confirmed and does not clear cart', async ({ page }) => {
+    const orders = await mockAppsScript(page, async () => 'Success|E2E-LEGACY-ORDER');
+    await openCheckoutWithCart(page);
+    await fillValidDeliveryDetails(page);
+    await page.locator('#agreeTerms').check({ force: true });
+    await page.locator('#submitBtn').click();
+
+    await expect(page.locator('#checkoutModal')).toHaveAttribute('aria-hidden', 'false');
+    await expect(page.locator('#checkoutModalTitle')).toHaveText('Order status not confirmed');
+    await expect(page.locator('#checkoutModalMessage')).toContainText('do not submit again');
+    await expect(page.getByRole('button', { name: 'Check on WhatsApp' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Try again' })).toHaveCount(0);
+    expect(orders).toHaveLength(1);
+    expect(await page.evaluate(() => JSON.parse(localStorage.getItem('secured_checkout_cart')).length)).toBe(1);
+    expect(await page.evaluate(() => sessionStorage.getItem('ma_last_order_tracking_pin'))).toBeNull();
   });
 
   test('backend rejection leaves the order/cart recoverable and offers retry', async ({ page }) => {
@@ -183,7 +218,7 @@ test.describe('Luxury Dress BD — integration / E2E', () => {
   });
 
   test('required checkout details, Terms acceptance, and payment reference block submission', async ({ page }) => {
-    const orders = await mockAppsScript(page, async () => 'Success|E2E-SHOULD-NOT-SEND');
+    const orders = await mockAppsScript(page, async () => 'Success|E2E-SHOULD-NOT-SEND|87654321');
     await openCheckoutWithCart(page);
     await page.locator('#submitBtn').click();
     await expect(page.locator('#checkoutModal')).toHaveAttribute('aria-hidden', 'false');
@@ -210,6 +245,35 @@ test.describe('Luxury Dress BD — integration / E2E', () => {
     expect(orders).toHaveLength(1);
     expect(orders[0].PaymentMethod).toBe('bKash');
     expect(orders[0].TransactionID).toBe('TXN-E2E-1234');
+  });
+
+  test('order tracking sends phone, order ID and PIN only in a POST body', async ({ page }) => {
+    let captured = null;
+    await page.route(API_GLOB, async (route) => {
+      const request = route.request();
+      if (request.method() !== 'POST') return route.fulfill({ status: 204, headers: { 'access-control-allow-origin': '*' } });
+      captured = { url: request.url(), method: request.method(), fields: parseRequestFields(request) };
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json; charset=utf-8',
+        headers: { 'access-control-allow-origin': '*' },
+        body: JSON.stringify({ ok: true, orders: [{ orderId: 'MA-E2E-123', date: '2026-10-17T12:00:00.000Z', product: 'Premium Abaya', qty: 1, total: 630, status: 'Confirmed', tracking: 'TRK-E2E' }] })
+      });
+    });
+    await page.goto('/order-track.html');
+    await expect.poll(() => page.evaluate(() => window.MA_SITE_API?.url || '')).not.toBe('');
+    await page.locator('#trackPhone').fill('01712345678');
+    await page.locator('#trackOrderId').fill('MA-E2E-123');
+    await page.locator('#trackPin').fill('12345678');
+    await page.locator('#trackSubmitBtn').click();
+    await expect(page.locator('.order-card')).toContainText('MA-E2E-123');
+
+    expect(captured.method).toBe('POST');
+    const requestUrl = new URL(captured.url);
+    expect(requestUrl.searchParams.has('Phone')).toBe(false);
+    expect(requestUrl.searchParams.has('OrderId')).toBe(false);
+    expect(requestUrl.searchParams.has('TrackingPin')).toBe(false);
+    expect(captured.fields).toMatchObject({ RecordType: 'OrderTrack', Phone: '01712345678', OrderId: 'MA-E2E-123', TrackingPin: '12345678' });
   });
 
   test('admin order data is not exposed to an unauthenticated visitor', async ({ page }) => {
