@@ -171,3 +171,12 @@
 /images/gallery/*
   ! Cache-Control
   Cache-Control: public, max-age=86400, must-revalidate
+
+# Product administration must always load the current stock publication controls.
+/product-manager
+  ! Cache-Control
+  Cache-Control: no-store, max-age=0
+
+/product-manager.html
+  ! Cache-Control
+  Cache-Control: no-store, max-age=0
