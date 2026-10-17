@@ -43,6 +43,9 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
+      - name: Run Apps Script security contract tests
+        run: npm run test:backend
+
       - name: Install Playwright Chromium and Linux dependencies
         run: npx playwright install --with-deps chromium
 
