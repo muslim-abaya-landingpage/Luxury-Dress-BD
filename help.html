@@ -200,6 +200,104 @@
       .faq-question { padding: 18px 20px; font-size: 15px; }
       .faq-content-inner { padding: 0 20px 20px; font-size: 14px; }
     }
+
+    .delivery-info-panel {
+      margin: 0 0 34px;
+      padding: clamp(20px, 4vw, 32px);
+      border: 1px solid #e7e0d4;
+      border-radius: 18px;
+      background: linear-gradient(145deg, #fff 0%, #faf8f3 100%);
+      box-shadow: 0 8px 28px rgba(17, 17, 17, 0.045);
+    }
+    .delivery-info-kicker {
+      margin: 0 0 8px;
+      color: #8a6d39;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .delivery-info-title {
+      margin: 0;
+      color: #171717;
+      font-size: clamp(22px, 4vw, 30px);
+      font-weight: 800;
+      line-height: 1.3;
+    }
+    .delivery-info-intro {
+      margin: 9px 0 20px;
+      color: #5f5b55;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    .delivery-info-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .delivery-info-card {
+      min-width: 0;
+      padding: 18px 16px;
+      border: 1px solid #eee9e1;
+      border-radius: 13px;
+      background: #fff;
+    }
+    .delivery-info-card span,
+    .delivery-info-card strong { display: block; }
+    .delivery-info-card span {
+      color: #65615a;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .delivery-info-card strong {
+      margin-top: 5px;
+      color: #171717;
+      font-size: 22px;
+      line-height: 1.25;
+    }
+    .delivery-info-card--free strong { color: #176b4d; font-size: 18px; }
+    .delivery-info-note {
+      margin: 16px 0 0;
+      color: #5f5b55;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+    .delivery-info-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .delivery-info-actions a {
+      display: inline-flex;
+      min-height: 44px;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 16px;
+      border: 1px solid #171717;
+      border-radius: 9px;
+      color: #171717;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: background-color .18s ease, color .18s ease, transform .18s ease;
+    }
+    .delivery-info-actions a:hover { transform: translateY(-1px); }
+    .delivery-info-actions a:focus-visible { outline: 3px solid #c9a96e; outline-offset: 3px; }
+    .delivery-info-actions .delivery-info-primary { background: #171717; color: #fff; }
+    .delivery-info-actions .delivery-info-primary:hover { background: #333; }
+    @media (max-width: 640px) {
+      .delivery-info-grid { grid-template-columns: 1fr; gap: 9px; }
+      .delivery-info-card { padding: 15px 16px; }
+      .delivery-info-card strong { font-size: 20px; }
+      .delivery-info-actions { display: grid; grid-template-columns: 1fr; }
+      .delivery-info-actions a { width: 100%; }
+    }
+    @media (max-width: 640px) {
+      /* The Help page now has direct WhatsApp and Call actions; keep the floating chat button
+         from covering the delivery cards while preserving the site's sticky bottom navigation. */
+      .help-page #maChatFab { display: none !important; }
+    }
   </style>
 
   <!-- Google SEO FAQ Schema Markup -->
@@ -231,6 +329,14 @@
           "@type": "Answer",
           "text": "You can pay using bKash, Nagad, or cards at checkout. Please enter your mobile wallet account number and Transaction ID exactly as shown on your payment receipt."
         }
+      },
+      {
+        "@type": "Question",
+        "name": "What are the delivery areas and charges?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "We deliver across Bangladesh. Delivery is ৳80 inside Dhaka and ৳150 outside Dhaka. Orders of 3 or more items receive free nationwide delivery. The final charge is shown at checkout after selecting the district."
+        }
       }
     ]
   }
@@ -249,6 +355,32 @@
       <p><a href="/shopping-guide">বাংলায় সাইজ, Full Set ও কাপড় বাছাইয়ের গাইড →</a></p><h1>Order Help &amp; FAQ</h1>
       <p>Everything you need to shop, pay, and track your Muslim Abaya order easily in plain English.</p>
     </header>
+
+    <section class="delivery-info-panel" aria-labelledby="delivery-info-title">
+      <p class="delivery-info-kicker">Delivery at a glance · সারা বাংলাদেশে ডেলিভারি</p>
+      <h2 class="delivery-info-title" id="delivery-info-title">Delivery areas &amp; charges <span lang="bn">ডেলিভারি এলাকা ও চার্জ</span></h2>
+      <p class="delivery-info-intro" lang="bn">আপনার জেলা নির্বাচন করলে checkout-এ ডেলিভারি চার্জ দেখানো হবে। অর্ডার নিশ্চিত করার আগে মোট খরচ দেখে নিন।</p>
+      <div class="delivery-info-grid" aria-label="Delivery charges">
+        <article class="delivery-info-card">
+          <span lang="bn">ঢাকা শহরের ভেতরে</span>
+          <strong>৳80</strong>
+        </article>
+        <article class="delivery-info-card">
+          <span lang="bn">ঢাকার বাইরে অন্যান্য জেলা</span>
+          <strong>৳150</strong>
+        </article>
+        <article class="delivery-info-card delivery-info-card--free">
+          <span lang="bn">৩ বা তার বেশি আইটেমে</span>
+          <strong lang="bn">দেশজুড়ে ফ্রি ডেলিভারি</strong>
+        </article>
+      </div>
+      <p class="delivery-info-note" lang="bn">ডেলিভারি চার্জ অর্ডারের আইটেম সংখ্যা ও নির্বাচিত জেলার ভিত্তিতে গণনা হয়; চূড়ান্ত চার্জ checkout-এর order summary-তে দেখুন।</p>
+      <div class="delivery-info-actions" aria-label="Contact and shopping actions">
+        <a class="delivery-info-primary" href="https://wa.me/8801971642683?text=Hello%2C%20I%20have%20a%20question%20about%20delivery." target="_blank" rel="noopener noreferrer">WhatsApp-এ ডেলিভারি জিজ্ঞাসা করুন</a>
+        <a href="tel:+8801971642683">কল করুন: +880 1971-642683</a>
+        <a href="/order-track">অর্ডার ট্র্যাক করুন</a>
+      </div>
+    </section>
 
     <!-- Section 1 -->
     <div class="faq-section">
@@ -411,5 +543,3 @@
 <script defer src="mobile-bottom-nav.js?v=20261011-active-state"></script>
 </body>
   </html>
-
-
