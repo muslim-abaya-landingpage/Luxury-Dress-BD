@@ -60,6 +60,10 @@
         var entry = items[product.id];
         if (!entry || typeof entry !== "object") return;
 
+        // Capture the catalog switch once, separately from live zero-quantity results.
+        if (typeof product._catalogStockDisabled !== "boolean") {
+          product._catalogStockDisabled = product.inStock === false || (typeof product.stock === "number" && product.stock <= 0);
+        }
         var oldStock = product.stock;
         var oldInStock = product.inStock;
         var oldVariants = product.stockVariants;
@@ -74,11 +78,11 @@
 
         if (hasTrackedVariants) {
           // Product Manager-এর explicit Out-of-Stock override-কে অগ্রাধিকার দিই।
-          if (product.inStock !== false) {
+          if (!product._catalogStockDisabled) {
             product.stock = entry.qty;
             product.inStock = entry.inStock;
           }
-        } else if (entry.legacyTracked === true && product.inStock !== false) {
+        } else if (entry.legacyTracked === true && !product._catalogStockDisabled) {
           product.stock = entry.qty;
           product.inStock = entry.inStock;
         }

@@ -4,7 +4,7 @@ import crypto from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const assets = ['category-products.js', 'product-links-data.js', 'product-config.js', 'product-catalog-sections.js', 'product-utils.js', 'category-renderer.js', 'product-quick-upload.js', 'product-publisher.js', 'product-publish-utils.js', 'admin-api.js'];
+const assets = ['category-products.js', 'product-links-data.js', 'product-config.js', 'product-catalog-sections.js', 'product-utils.js', 'category-renderer.js', 'product-quick-upload.js', 'product-publisher.js', 'product-publish-utils.js', 'admin-api.js', 'stock-sync.js'];
 const versions = new Map(assets.map(file => [file, crypto.createHash('sha256').update(fs.readFileSync(path.join(root, file))).digest('hex').slice(0, 16)]));
 let updated = 0;
 function walk(dir) {

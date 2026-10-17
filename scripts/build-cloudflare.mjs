@@ -1,6 +1,6 @@
 // Cloudflare Pages build command: node scripts/build-cloudflare.mjs
 // Build output directory: . (the repository is a static multi-page site).
 import {execFileSync} from 'node:child_process';
-for (const script of ['scripts/build-catalog-validation.mjs','scripts/build-product-seo.mjs','scripts/build-catalog-asset-versions.mjs','scripts/test-operations.cjs','scripts/test-product-publish.cjs','scripts/test-product-gallery.cjs']) {
+for (const script of ['scripts/build-catalog-validation.mjs','scripts/build-product-seo.mjs','scripts/build-catalog-asset-versions.mjs','scripts/test-operations.cjs','scripts/test-product-publish.cjs','scripts/test-product-gallery.cjs','scripts/test-stock-publication.cjs']) {
   execFileSync(process.execPath,[script],{stdio:'inherit'});
 }
