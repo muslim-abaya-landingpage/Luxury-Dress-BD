@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-admin-guard="1">
+<html lang="bn-BD" data-admin-guard="1">
 <head>
   <meta charset="UTF-8">
   <link rel="preload" as="script" href="site-api-config.js?v=20261009-inbox">
@@ -14,7 +14,7 @@
   <title>Admin Dashboard | Muslim Abaya</title>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="admin.css?v=20260929modern1">
-  <link rel="stylesheet" href="admin-dash.css?v=20261003dz">
+  <link rel="stylesheet" href="admin-dash.css?v=20261018dashboard">
 <script src="config.js?v=20261009-inbox"></script>
   <link rel="stylesheet" href="admin-sidebar.css?v=20261003sb">
 </head>
@@ -53,7 +53,8 @@
           </div>
         </div>
         <div class="adm-topbar-actions">
-          <button type="button" class="adm-btn adm-btn-secondary" id="admRefresh">Refresh</button>
+          <div class="adm-sync" id="admSyncStatus" role="status" aria-live="polite" aria-atomic="true"><span class="adm-sync-dot" id="admSyncDot"></span><span id="admSyncText">ডেটা যাচাই হচ্ছে…</span></div>
+          <button type="button" class="adm-btn adm-btn-secondary" id="admRefresh" aria-busy="false">রিফ্রেশ</button>
         </div>
       </header>
 
@@ -68,23 +69,25 @@
             <div class="dz-actions">
               <a class="dz-gold" href="admin-orders.html">অর্ডার যাচাই ও বিক্রয় সারাংশ →</a>
               <a class="dz-gold" href="admin-operations.html">হিসাব ও রিটার্ন →</a>
-              <a id="admOpenSheet" href="#" target="_blank" rel="noopener">Google Sheet</a>
-              <a id="admOpenScript" href="#" target="_blank" rel="noopener">Apps Script</a>
+              <a id="admOpenSheet" href="#" target="_blank" rel="noopener" hidden>Google Sheet</a>
+              <a id="admOpenScript" href="#" target="_blank" rel="noopener" hidden>Apps Script</a>
             </div>
           </div>
           <div class="dz-today">
-            <div><b id="dzTodayCount">—</b><span>আজকের অর্ডার</span></div>
-            <div><b id="dzTodayRev">—</b><span>আজকের অর্ডার মূল্য (তালিকায়)</span></div>
-            <div><b id="dzRepeat">—</b><span>পুনরায় ক্রেতা</span></div>
+            <div><b id="dzTodayCount">—</b><span>আজকের অর্ডার (সর্বশেষ ১০০-এর মধ্যে)</span></div>
+            <div><b id="dzTodayRev">—</b><span>আজকের অর্ডার মূল্য (সর্বশেষ ১০০-এর মধ্যে)</span></div>
+            <div><b id="dzRepeat">—</b><span>পুনরায় ক্রেতা (সর্বশেষ ১০০-এর মধ্যে)</span></div>
           </div>
         </section>
 
+        <p class="dz-scope-note" id="dzScopeNote">এই সারাংশ সর্বশেষ ১০০টি লোড করা অর্ডার থেকে হিসাব করা। পুরো তালিকা দেখতে অর্ডার প্যানেল খুলুন।</p>
+
         <div class="dz-kpis" id="admStats" hidden>
-          <div class="dz-kpi" style="--c:#d4a72c"><b id="admStatCount">—</b><span>মোট অর্ডার (তালিকায়)</span></div>
-          <div class="dz-kpi" style="--c:#14161a"><b id="admStatRevenue">—</b><span>মোট মূল্য (তালিকায়)</span></div>
-          <div class="dz-kpi" style="--c:#16794a"><b id="admStatDeliveredValue">—</b><span>Delivered মূল্য (তালিকায়, চার্জসহ; লাভ নয়)</span></div>
-          <div class="dz-kpi" style="--c:#c9831a"><b id="admStatPending">—</b><span>Pending অর্ডার</span></div>
-          <div class="dz-kpi" style="--c:#16794a"><b id="admStatShipped">—</b><span>Shipped / Delivered</span></div>
+          <div class="dz-kpi" style="--c:#d4a72c"><b id="admStatCount">—</b><span>অর্ডার সংখ্যা (সর্বশেষ ১০০)</span></div>
+          <div class="dz-kpi" style="--c:#14161a"><b id="admStatRevenue">—</b><span>অর্ডার মূল্য (সর্বশেষ ১০০)</span></div>
+          <div class="dz-kpi" style="--c:#16794a"><b id="admStatDeliveredValue">—</b><span>Delivered মূল্য (সর্বশেষ ১০০; চার্জসহ, লাভ নয়)</span></div>
+          <div class="dz-kpi" style="--c:#c9831a"><b id="admStatPending">—</b><span>Pending (সর্বশেষ ১০০)</span></div>
+          <div class="dz-kpi" style="--c:#16794a"><b id="admStatShipped">—</b><span>Shipped / Delivered (সর্বশেষ ১০০)</span></div>
         </div>
 
         <div class="dz-grid">
@@ -105,7 +108,8 @@
             <h3>সাম্প্রতিক অর্ডার</h3>
             <a href="admin-orders.html">সব অর্ডার দেখুন →</a>
           </div>
-          <div id="admOrdersBody"><div class="dz-empty">Loading orders…</div></div>
+          <div class="dz-load-notice" id="admLoadNotice" role="alert" aria-live="assertive" hidden></div>
+          <div id="admOrdersBody" aria-live="polite" aria-busy="true"><div class="dz-empty">অর্ডার লোড হচ্ছে…</div></div>
         </section>
       </main>
     </div>
@@ -163,15 +167,14 @@
       }
 
       function parseDate(t) {
-        var m = /^(\d{2})-(\d{2})-(\d{4})/.exec(String(t || ""));
-        return m ? new Date(+m[3], +m[2] - 1, +m[1]) : null;
+        return MaOrderInsights.dateKey(t);
       }
       function num(v) { return parseFloat(String(v || "0").replace(/[^\d.]/g, "")) || 0; }
-      function dayKey(d) { return d.getFullYear() + "-" + d.getMonth() + "-" + d.getDate(); }
+      function dayKey(d) { return d.toISOString().slice(0, 10); }
 
       function renderOrders(orders) {
         var body = document.getElementById("admOrdersBody");
-        if (!orders || !orders.length) { body.innerHTML = '<div class="dz-empty">No orders found</div>'; return; }
+        if (!orders || !orders.length) { body.innerHTML = '<div class="dz-empty">এখনো কোনো অর্ডার নেই। নতুন অর্ডার এলে এখানে দেখা যাবে।</div>'; return; }
         var stats = phoneStats(orders);
         window.__admOrdersById = {};
         body.innerHTML = orders.slice(0, 12).map(function (o, idx) {
@@ -199,11 +202,20 @@
 
       function renderStats(orders) {
         var statsEl = document.getElementById("admStats");
-        if (!orders || !orders.length) { statsEl.hidden = true; return; }
+        if (!orders || !orders.length) {
+          statsEl.hidden = true;
+          document.getElementById("dzWeekTotal").textContent = "";
+          document.getElementById("dzBars").innerHTML = '<div class="dz-empty">অর্ডার এলে সাপ্তাহিক চার্ট দেখা যাবে।</div>';
+          document.getElementById("dzSplit").innerHTML = "";
+          document.getElementById("dzLegend").innerHTML = '<div class="dz-empty">এখনো স্ট্যাটাস ডেটা নেই।</div>';
+          document.getElementById("dzDist").innerHTML = "";
+          return;
+        }
         var revenue = 0, pending = 0, shipped = 0, counts = {}, districts = {};
-        var today = new Date(), todayKey = dayKey(today), todayCount = 0, todayRev = 0;
+        var todayKey = MaOrderInsights.dhakaToday(), todayCount = 0, todayRev = 0;
         var days = [];
-        for (var d = 6; d >= 0; d--) { var dt = new Date(today.getFullYear(), today.getMonth(), today.getDate() - d); days.push({ key: dayKey(dt), date: dt, n: 0 }); }
+        var todayParts = todayKey.split("-").map(Number);
+        for (var d = 6; d >= 0; d--) { var dt = new Date(Date.UTC(todayParts[0], todayParts[1] - 1, todayParts[2] - d)); days.push({ key: dayKey(dt), date: dt, n: 0 }); }
         orders.forEach(function (o) {
           var amt = num(o.total);
           revenue += amt;
@@ -214,7 +226,7 @@
           if (o.district) districts[o.district] = (districts[o.district] || 0) + 1;
           var od = parseDate(o.time);
           if (od) {
-            var ok = dayKey(od);
+            var ok = od;
             if (ok === todayKey) { todayCount++; todayRev += amt; }
             days.forEach(function (x) { if (x.key === ok) x.n++; });
           }
@@ -234,7 +246,7 @@
         var names = ["রবি", "সোম", "মঙ্গল", "বুধ", "বৃহ", "শুক্র", "শনি"];
         document.getElementById("dzWeekTotal").textContent = "মোট " + days.reduce(function (a, x) { return a + x.n; }, 0);
         document.getElementById("dzBars").innerHTML = days.map(function (x) {
-          return '<div class="dz-bar' + (x.key === todayKey ? " is-today" : "") + '"><em>' + x.n + '</em><div style="height:' + Math.max(3, Math.round(x.n / max * 100)) + '%"></div><span>' + names[x.date.getDay()] + "</span></div>";
+          return '<div class="dz-bar' + (x.key === todayKey ? " is-today" : "") + '"><em>' + x.n + '</em><div style="height:' + Math.max(3, Math.round(x.n / max * 100)) + '%"></div><span>' + names[x.date.getUTCDay()] + "</span></div>";
         }).join("");
 
         var order = ["pending", "confirmed", "shipped", "delivered", "cancelled", "returned", "other"];
@@ -259,25 +271,81 @@
           .replace(/"/g, "&quot;");
       }
 
+      function setSyncState(state, text) {
+        var status = document.getElementById("admSyncStatus");
+        status.className = "adm-sync " + state;
+        document.getElementById("admSyncText").textContent = text;
+      }
+
+      function friendlyError(err) {
+        var code = String(err && (err.code || err.message) || "").toUpperCase();
+        if (/INVALID_TOKEN|EXPIRED|NOT_ADMIN|NO_TOKEN|NOT_LOGGED_IN/.test(code)) return "আপনার অ্যাডমিন সেশন শেষ হয়েছে। আবার লগ ইন করে চেষ্টা করুন।";
+        if (code.indexOf("API_MISSING") !== -1) return "অ্যাডমিন API কনফিগার করা নেই। সাইট কনফিগারেশন যাচাই করুন।";
+        if (code.indexOf("TIMEOUT") !== -1) return "সার্ভার সাড়া দিতে সময় নিচ্ছে। কিছুক্ষণ পরে আবার চেষ্টা করুন।";
+        if (code.indexOf("DEPLOY_OLD") !== -1 || code.indexOf("INVALID_RESPONSE") !== -1) return "সার্ভার থেকে অপ্রত্যাশিত উত্তর এসেছে। Apps Script-এর বর্তমান deployment যাচাই করুন।";
+        if (code.indexOf("NO_SHEET") !== -1) return "অর্ডার শিট পাওয়া যায়নি। Google Sheet সংযোগ যাচাই করুন।";
+        return "সার্ভারের সঙ্গে সংযোগ করা যায়নি। ইন্টারনেট পরীক্ষা করে আবার চেষ্টা করুন।";
+      }
+
+      function setAdminLink(id, rawUrl, host) {
+        var link = document.getElementById(id);
+        link.hidden = true;
+        try {
+          var url = new URL(String(rawUrl || ""));
+          if (url.protocol !== "https:" || url.hostname !== host) return;
+          link.href = url.href;
+          link.hidden = false;
+        } catch (e) {}
+      }
+
       var ordersShown = false;
       function applyOrders(res) {
+        var orders = Array.isArray(res.orders) ? res.orders : [];
         ordersShown = true;
-        document.getElementById("admOrderCount").textContent = (res.count || (res.orders || []).length) + " অর্ডার";
-        renderOrders(res.orders);
-        renderStats(res.orders);
-        if (res.sheetUrl) document.getElementById("admOpenSheet").href = res.sheetUrl;
-        if (res.scriptUrl) document.getElementById("admOpenScript").href = res.scriptUrl;
+        document.getElementById("admOrderCount").textContent = orders.length + "টি লোড করা অর্ডার";
+        renderOrders(orders);
+        renderStats(orders);
+        document.getElementById("admOrdersBody").setAttribute("aria-busy", "false");
+        if (res.sheetUrl) setAdminLink("admOpenSheet", res.sheetUrl, "docs.google.com");
+        if (res.scriptUrl) setAdminLink("admOpenScript", res.scriptUrl, "script.google.com");
       }
       function loadOrders(options) {
         var cached = MaAdmin.cached("AdminOrders", { Limit: 100 });
-        if (cached) applyOrders(cached);
+        if (cached) {
+          applyOrders(cached);
+          setSyncState("checking", "সংরক্ষিত ডেটা দেখানো হচ্ছে · লাইভ আপডেট যাচাই হচ্ছে…");
+        } else {
+          setSyncState("checking", "অর্ডার ডেটা আপডেট হচ্ছে…");
+        }
         var btn = document.getElementById("admRefresh");
         btn.disabled = true;
-        document.getElementById("admOrderCount").textContent = (ordersShown ? document.getElementById("admOrderCount").textContent.split(" · ")[0] + " · " : "") + "আপডেট হচ্ছে…";
-        return MaAdmin.fetchOrders(100, options).then(applyOrders).catch(function (err) {
-          document.getElementById("admOrderCount").textContent = "আপডেট করা যায়নি";
-          if (!ordersShown) document.getElementById("admOrdersBody").innerHTML = '<div class="dz-empty">Error: ' + escapeHtml(err.message || err) + "</div>";
-        }).then(function () { btn.disabled = false; });
+        btn.setAttribute("aria-busy", "true");
+        btn.textContent = "আপডেট হচ্ছে…";
+        document.getElementById("admOrdersBody").setAttribute("aria-busy", "true");
+        return MaAdmin.fetchOrders(100, options).then(function (res) {
+          applyOrders(res);
+          document.getElementById("admLoadNotice").hidden = true;
+          var time = new Intl.DateTimeFormat("bn-BD", { hour: "2-digit", minute: "2-digit", second: "2-digit", timeZone: "Asia/Dhaka" }).format(new Date());
+          setSyncState("ok", "সর্বশেষ সফল আপডেট " + time + " (বাংলাদেশ সময়)");
+        }).catch(function (err) {
+          var message = friendlyError(err);
+          setSyncState("error", ordersShown ? "আপডেট ব্যর্থ · আগের ডেটা দেখানো হচ্ছে" : "অর্ডার ডেটা লোড করা যায়নি");
+          if (ordersShown) {
+            var notice = document.getElementById("admLoadNotice");
+            notice.textContent = message + " আগের লোড করা তথ্য অপরিবর্তিত রাখা হয়েছে।";
+            notice.hidden = false;
+          } else {
+            var body = document.getElementById("admOrdersBody");
+            body.innerHTML = '<div class="dz-error" role="alert"><b>অর্ডার ডেটা পাওয়া যায়নি</b><span>' + escapeHtml(message) + '</span><button type="button" id="admRetry">আবার চেষ্টা করুন</button></div>';
+            var retry = document.getElementById("admRetry");
+            if (retry) retry.addEventListener("click", function () { loadOrders(); });
+          }
+        }).then(function () {
+          btn.disabled = false;
+          btn.setAttribute("aria-busy", "false");
+          btn.textContent = "রিফ্রেশ";
+          document.getElementById("admOrdersBody").setAttribute("aria-busy", "false");
+        });
       }
 
       MaAdminGuard.require().then(function (s) {
@@ -286,9 +354,9 @@
         document.getElementById("admUserLabel").textContent =
           (s.name || "Admin") + (s.email ? " · " + s.email : "");
         document.getElementById("dzName").textContent = s.name || "Admin";
-        document.getElementById("dzDate").textContent = new Date().toLocaleDateString("bn-BD", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-        if (s.sheetUrl) document.getElementById("admOpenSheet").href = s.sheetUrl;
-        if (s.scriptUrl) document.getElementById("admOpenScript").href = s.scriptUrl;
+        document.getElementById("dzDate").textContent = new Intl.DateTimeFormat("bn-BD", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "Asia/Dhaka" }).format(new Date());
+        if (s.sheetUrl) setAdminLink("admOpenSheet", s.sheetUrl, "docs.google.com");
+        if (s.scriptUrl) setAdminLink("admOpenScript", s.scriptUrl, "script.google.com");
         loadOrders({ maxAgeMs: 15000 });
       });
 
@@ -312,5 +380,3 @@
   </script>
 </body>
 </html>
-
-

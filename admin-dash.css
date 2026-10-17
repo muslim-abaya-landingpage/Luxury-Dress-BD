@@ -1,7 +1,5 @@
-/* Admin dashboard — "command center" layout (loads after admin.css) */
-.dz-hero{position:relative;overflow:hidden;border-radius:20px;padding:26px 28px;color:#f3ecda;margin-bottom:18px;
-  background:radial-gradient(520px 260px at 100% 0%,rgba(212,167,44,.32),transparent 62%),radial-gradient(380px 240px at 0% 120%,rgba(212,167,44,.14),transparent 60%),linear-gradient(150deg,#1b1a1f,#0e0d10);
-  box-shadow:0 20px 44px -18px rgba(20,22,26,.45)}
+/* Admin dashboard — command center layout */
+.dz-hero{position:relative;overflow:hidden;border-radius:20px;padding:26px 28px;color:#f3ecda;margin-bottom:18px;background:radial-gradient(520px 260px at 100% 0%,rgba(212,167,44,.32),transparent 62%),radial-gradient(380px 240px at 0% 120%,rgba(212,167,44,.14),transparent 60%),linear-gradient(150deg,#1b1a1f,#0e0d10);box-shadow:0 20px 44px -18px rgba(20,22,26,.45)}
 .dz-hero::after{content:"";position:absolute;right:-70px;bottom:-90px;width:240px;height:240px;border-radius:50%;border:1px solid rgba(212,167,44,.3);box-shadow:0 0 0 30px rgba(212,167,44,.05),0 0 0 60px rgba(212,167,44,.03);pointer-events:none}
 .dz-hero-top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;position:relative;z-index:1}
 .dz-hello{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#d4a72c;font-weight:700}
@@ -9,20 +7,26 @@
 .dz-date{color:#bdb6a4;font-size:13.5px}
 .dz-actions{display:flex;gap:8px;flex-wrap:wrap;align-self:flex-start}
 .dz-actions a{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;color:#f3ecda;border:1px solid rgba(243,236,218,.22);background:rgba(255,255,255,.06);transition:background .15s}
+.dz-actions a[hidden]{display:none}
 .dz-actions a:hover{background:rgba(255,255,255,.14)}
 .dz-actions a.dz-gold{background:#d4a72c;border-color:#d4a72c;color:#1a1405}
 .dz-actions a.dz-gold:hover{background:#e2b83d}
 .dz-today{display:flex;gap:28px;flex-wrap:wrap;margin-top:22px;position:relative;z-index:1}
 .dz-today div b{display:block;font-size:30px;line-height:1.1;color:#fff;font-weight:800}
 .dz-today div span{font-size:12.5px;color:#bdb6a4}
-
-.dz-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
-.dz-kpi{position:relative;background:var(--adm-card);border:1px solid var(--adm-border);border-radius:16px;padding:16px 18px 16px;box-shadow:var(--adm-shadow-sm);overflow:hidden}
+.dz-scope-note{margin:-5px 0 14px;padding:9px 12px;border-left:3px solid #d4a72c;border-radius:0 8px 8px 0;background:var(--adm-accent-wash);color:var(--adm-muted);font-size:12.5px;line-height:1.5}
+.adm-topbar-actions{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap}
+.adm-sync{display:flex;align-items:center;gap:7px;color:var(--adm-muted);font-size:12px;line-height:1.4}
+.adm-sync-dot{width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#a0a5ae}
+.adm-sync.checking .adm-sync-dot{background:#c9831a;box-shadow:0 0 0 3px rgba(201,131,26,.15)}
+.adm-sync.ok .adm-sync-dot{background:#16794a;box-shadow:0 0 0 3px rgba(22,121,74,.14)}
+.adm-sync.error .adm-sync-dot{background:#c0362c;box-shadow:0 0 0 3px rgba(192,54,44,.14)}
+.dz-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.dz-kpi{position:relative;min-width:0;background:var(--adm-card);border:1px solid var(--adm-border);border-radius:16px;padding:15px 13px 15px 16px;box-shadow:var(--adm-shadow-sm);overflow:hidden}
 .dz-kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c,#d4a72c)}
-.dz-kpi b{display:block;font-size:28px;font-weight:800;line-height:1.15}
-.dz-kpi span{font-size:13px;color:var(--adm-muted)}
+.dz-kpi b{display:block;font-size:25px;font-weight:800;line-height:1.15;overflow-wrap:anywhere}
+.dz-kpi span{font-size:12.5px;color:var(--adm-muted);line-height:1.4}
 .dz-kpi i{font-style:normal;font-size:11.5px;font-weight:700;color:var(--c,#b8860b)}
-
 .dz-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-bottom:18px}
 .dz-card{background:var(--adm-card);border:1px solid var(--adm-border);border-radius:16px;padding:18px 20px;box-shadow:var(--adm-shadow-sm)}
 .dz-card h3{margin:0 0 14px;font-size:15px;font-weight:700;display:flex;justify-content:space-between;align-items:baseline}
@@ -41,7 +45,6 @@
 .dz-legend b{margin-left:auto}
 .dz-dist{margin-top:16px;padding-top:14px;border-top:1px dashed var(--adm-border);display:flex;flex-wrap:wrap;gap:6px}
 .dz-dist span{font-size:12.5px;padding:4px 10px;border-radius:99px;background:var(--adm-accent-wash);color:var(--adm-accent-ink);font-weight:600}
-
 .dz-orders-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:10px;flex-wrap:wrap}
 .dz-orders-head h3{margin:0}
 .dz-orders-head a{font-size:13px;font-weight:700;color:var(--adm-accent-ink);text-decoration:none}
@@ -64,9 +67,15 @@
 .dz-row-actions a,.dz-row-actions button{font:inherit;font-size:12px;font-weight:600;padding:6px 10px;border-radius:9px;border:1px solid var(--adm-border-strong);background:#fff;color:var(--adm-text);text-decoration:none;cursor:pointer}
 .dz-row-actions a:hover,.dz-row-actions button:hover{background:var(--adm-bg-alt)}
 .dz-empty{padding:26px;text-align:center;color:var(--adm-muted)}
+.dz-error{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:18px 4px;color:var(--adm-danger)}
+.dz-error span{flex:1 1 260px;font-size:13px;color:var(--adm-muted)}
+.dz-error button{font:inherit;padding:8px 12px;border:1px solid var(--adm-border-strong);border-radius:9px;background:var(--adm-card);color:var(--adm-text);cursor:pointer}
+.dz-load-notice{margin:12px 0;padding:10px 12px;border-radius:10px;background:var(--adm-danger-wash);color:var(--adm-danger);font-size:13px;line-height:1.5}
 .dz-skel{height:14px;border-radius:6px;background:linear-gradient(90deg,#eceef1,#f6f7f9,#eceef1);background-size:200% 100%;animation:dzs 1.2s linear infinite}
 @keyframes dzs{to{background-position:-200% 0}}
-
-@media (max-width:980px){.dz-kpis{grid-template-columns:repeat(2,1fr)}.dz-grid{grid-template-columns:1fr}}
-@media (max-width:720px){.dz-order{grid-template-columns:42px 1fr auto;gap:10px}.dz-items{display:none}.dz-order .dz-st,.dz-order .dz-row-actions{grid-column:2 / -1}.dz-hero{padding:20px}.dz-hero h2{font-size:21px}}
-@media (prefers-reduced-motion:reduce){.dz-skel{animation:none}}
+.adm-topbar-actions :focus-visible,.dz-actions a:focus-visible,.dz-orders-head a:focus-visible,.dz-row-actions a:focus-visible,.dz-row-actions button:focus-visible,.dz-error button:focus-visible{outline:3px solid #d4a72c;outline-offset:3px}
+@media (max-width:1200px){.dz-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:980px){.dz-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.dz-grid{grid-template-columns:1fr}}
+@media (max-width:720px){.dz-order{grid-template-columns:42px 1fr auto;gap:10px}.dz-items{display:none}.dz-order .dz-st,.dz-order .dz-row-actions{grid-column:2 / -1}.dz-hero{padding:20px}.dz-hero h2{font-size:21px}.adm-topbar-actions{gap:8px}.adm-sync{max-width:210px}.dz-card{padding:16px}}
+@media (max-width:400px){.dz-kpis{grid-template-columns:1fr}.dz-today{gap:16px}.adm-sync{font-size:11px}}
+@media (prefers-reduced-motion:reduce){.dz-skel{animation:none}.dz-actions a{transition:none}}
