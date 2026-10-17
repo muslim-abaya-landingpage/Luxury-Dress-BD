@@ -46,6 +46,9 @@ jobs:
       - name: Run Apps Script security contract tests
         run: npm run test:backend
 
+      - name: Verify order, catalog, stock and finance workflow
+        run: npm run test:order-flow
+
       - name: Install Playwright Chromium and Linux dependencies
         run: npx playwright install --with-deps chromium
 
