@@ -55,3 +55,27 @@
 @media(max-width:980px){.pn-app.adm-shell{gap:0}.pn-btn.pn-menu-btn{display:inline-flex}.pn-main{width:100%}.adm-sidebar-profile{padding-top:12px;padding-bottom:4px}.adm-sidebar-item{min-height:42px;padding-top:10px!important;padding-bottom:10px!important}}
 .pl-admin .pl-section{background:var(--adm-card);border-color:var(--adm-border);color:var(--adm-text)}.pl-admin .pl-section-head{background:var(--adm-accent-wash);color:var(--adm-accent-ink)}.pl-admin .pl-section-body label,.pl-admin .pl-note,.pl-admin .pm-overview td small{color:var(--adm-muted)}.pl-admin .pl-section-head a{color:var(--adm-accent-ink)}
 .pn-btn-primary{background:var(--adm-accent);border-color:var(--adm-accent);color:#fff}.pn-btn-primary:hover{background:#6846b2}.pn-btn:not(.pn-btn-primary):hover{background:var(--adm-bg-alt)}
+/* Five task-based sections keep secondary tools out of the main menu. */
+.adm-nav-group>summary{list-style:none;cursor:pointer;user-select:none}
+.adm-nav-group>summary::-webkit-details-marker{display:none}
+.adm-nav-group>summary::marker{content:""}
+.adm-nav-group>summary .adm-nav-chevron{margin-left:auto;flex:0 0 14px;width:14px!important;height:14px!important;color:var(--adm-muted)}
+.adm-nav-group[open]>summary .adm-nav-chevron{transform:rotate(90deg)}
+.adm-nav-group.has-current>summary{color:var(--adm-accent-ink)!important;background:var(--adm-accent-wash)!important;font-weight:700}
+.adm-nav-children{margin:4px 8px 8px 22px;padding-left:12px;border-left:1px solid var(--adm-border-strong)}
+.adm-nav-children .adm-nav-child{min-height:38px;padding:9px 12px!important;font-size:13px;line-height:1.5}
+.adm-nav-child.is-current::before{display:none}
+.adm-nav-child.is-current{box-shadow:inset 3px 0 var(--adm-accent)!important}
+.adm-daily{margin:4px 0 22px}.adm-daily h2{font-size:18px;margin:0 0 12px}
+.adm-daily-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.adm-daily-action{display:flex;flex-direction:column;gap:8px;padding:20px;border:1px solid var(--adm-border);border-radius:16px;background:var(--adm-card);color:var(--adm-text);text-decoration:none;line-height:1.6}
+.adm-daily-action strong{display:flex;justify-content:space-between;gap:8px;color:var(--adm-accent-ink);font-size:17px}
+.adm-daily-action>span{font-size:13px;color:var(--adm-muted)}
+.adm-daily-action:hover{border-color:var(--adm-accent);background:var(--adm-accent-wash)}
+.adm-daily-action:focus-visible,.adm-disclosure>summary:focus-visible{outline:2px solid var(--adm-accent);outline-offset:3px}
+.adm-disclosure{margin:18px 0;border:1px solid var(--adm-border);border-radius:14px;background:var(--adm-card);color:var(--adm-text)}
+.adm-disclosure>summary{cursor:pointer;padding:16px 18px;font-weight:600;line-height:1.6}
+.adm-disclosure-body{padding:0 18px 18px}.adm-dashboard-reports .dz-card{margin-top:14px}
+.adm-product-tools{margin:12px 0}.adm-product-tools .pl-toolbar{padding:0 16px 16px;margin:0}
+@media(min-width:981px){.is-collapsed .adm-nav-children,.is-collapsed .adm-nav-chevron{display:none}.is-collapsed .adm-nav-group>summary{justify-content:center}}
+@media(max-width:1100px){.adm-daily-grid{grid-template-columns:1fr}.adm-daily-action{padding:16px}}
