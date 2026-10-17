@@ -4,6 +4,32 @@ html:not(.category-ready) #list {
   min-height: 55vh;
 }
 
+/* Keep a small, crawler- and visitor-visible page heading while products hydrate. */
+html:not(.category-ready) #list > .category-seo-fallback {
+  visibility: visible;
+}
+.category-seo-fallback {
+  max-width: 920px;
+  margin: 0 auto 16px;
+  padding: 12px 0 6px;
+}
+.category-seo-fallback .shop-title,
+.shop-page-heading .shop-title {
+  margin: 0;
+  color: #171717;
+  font-size: clamp(23px, 3vw, 31px);
+  font-weight: 700;
+  line-height: 1.25;
+}
+.shop-page-heading { margin: 0 0 16px; }
+.shop-category-description {
+  max-width: 78ch;
+  margin: 8px 0 0;
+  color: #5b5b5b;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
 html.category-ready #list {
   visibility: visible;
 }

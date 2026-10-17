@@ -2294,8 +2294,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         return 'https://wa.me/' + wa + '?text=' + encodeURIComponent(lines.join('\n'));
     }
 
-    function finishCheckoutSuccess(nameValue, phoneValue, emailValue, gTotal, orderId, stableEventId) {
-        var eventId = stableEventId || (orderId ? ('order_' + orderId) : ('order_' + Date.now()));
+    function finishCheckoutSuccess(nameValue, phoneValue, emailValue, gTotal, orderId, trackingPin, stableEventId) {
+      var eventId = stableEventId || (orderId ? ('order_' + orderId) : ('order_' + Date.now()));
         var cartSnap = typeof buildCartTrackingSnapshot === 'function'
             ? buildCartTrackingSnapshot(orderLines())
             : { value: parseFloat(gTotal) || 0, currency: 'BDT' };
@@ -2333,6 +2333,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (orderId) {
             try { sessionStorage.setItem('ma_last_order_id', orderId); } catch (e) {}
         }
+        if (/^\d{8}$/.test(String(trackingPin || ''))) {
+            try { sessionStorage.setItem('ma_last_order_tracking_pin', String(trackingPin)); } catch (e) {}
+        }
         window.location.href = pageLink('/thank-you');
     }
 
@@ -2365,49 +2368,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         });
     }
 
-    function postOrderViaIframe(formData) {
-        return new Promise(function (resolve, reject) {
-            if (!ORDER_SCRIPT_URL) {
-                reject(new Error('NO_URL'));
-                return;
-            }
-            var frameName = 'maOrderSubmitFrame';
-            var iframe = document.getElementById('maOrderSubmitFrame');
-            if (!iframe) {
-                iframe = document.createElement('iframe');
-                iframe.name = frameName;
-                iframe.id = frameName;
-                iframe.title = 'Order submit';
-                iframe.style.cssText = 'position:absolute;width:1px;height:1px;opacity:0;border:0';
-                iframe.setAttribute('aria-hidden', 'true');
-                document.body.appendChild(iframe);
-            }
-            var form = document.createElement('form');
-            form.method = 'POST';
-            form.action = ORDER_SCRIPT_URL;
-            form.target = frameName;
-            form.acceptCharset = 'UTF-8';
-            form.style.display = 'none';
-            formData.forEach(function (value, key) {
-                var input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = key;
-                input.value = value;
-                form.appendChild(input);
-            });
-            var settled = false;
-            function finish(ok) {
-                if (settled) return;
-                settled = true;
-                window.clearTimeout(timer);
-                try { form.remove(); } catch (e) {}
-                if (ok) resolve();
-                else reject(new Error('IFRAME_FAIL'));
-            }
-            iframe.onload = function () { finish(true); };
-            var timer = window.setTimeout(function () { finish(false); }, 6000);
-            document.body.appendChild(form);
-            form.submit();
+    function offerOrderConfirmationUnknown(orderWa, reference) {
+        var supportLines = [
+            'Order status check — Muslim Abaya',
+            'Reference: ' + String(reference || ''),
+            'Name: ' + String((orderWa && orderWa.name) || ''),
+            'Mobile: ' + String((orderWa && orderWa.phone) || '')
+        ];
+        var supportUrl = 'https://wa.me/8801971642683?text=' + encodeURIComponent(supportLines.join('\n'));
+        openCheckoutModal({
+            title: 'Order status not confirmed',
+            message: 'The request may have reached us, but the secure tracking PIN could not be verified on this device. To avoid duplicate orders, do not submit again until support checks the reference. Contact us with the reference below.',
+            variant: 'error',
+            actions: [
+                {
+                    label: 'Check on WhatsApp',
+                    wa: true,
+                    primary: true,
+                    onClick: function () {
+                        window.open(supportUrl, '_blank', 'noopener');
+                        closeCheckoutModal();
+                    }
+                },
+                { label: 'Close', onClick: closeCheckoutModal }
+            ]
         });
     }
 
@@ -2428,36 +2412,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             .then(function (result) {
                 var text = String(result.text || '').trim();
                 if (text.indexOf('Success') === 0) {
-                    var orderId = text.indexOf('|') !== -1 ? text.split('|')[1].trim() : '';
-                    finishCheckoutSuccess(nameValue, phoneValue, emailValue, gTotal, orderId, stableEventId);
+                    var parts = text.split('|');
+                    var orderId = parts[1] ? parts[1].trim() : '';
+                    var trackingPin = parts[2] ? parts[2].trim() : '';
+                    if (!orderId || !/^\d{8}$/.test(trackingPin)) {
+                        offerOrderConfirmationUnknown(orderWa, stableEventId);
+                        resetOrderButton(btn);
+                        return;
+                    }
+                    finishCheckoutSuccess(nameValue, phoneValue, emailValue, gTotal, orderId, trackingPin, stableEventId);
                     return;
                 }
                 var msg = text.indexOf('Error|') === 0
                     ? text.slice(6).trim()
                     : (text ? text.slice(0, 160) : 'Order was not saved to the sheet.');
+                if (!result.ok || !text) {
+                    offerOrderConfirmationUnknown(orderWa, stableEventId);
+                    resetOrderButton(btn);
+                    return;
+                }
                 offerWhatsAppOrder(orderWa, msg);
                 resetOrderButton(btn);
             })
             .catch(function () {
-                // অফলাইনে iframe-এর onload ব্রাউজারের এরর পেজেও ফায়ার করে — তখন অর্ডার
-                // সেভ না হয়েও "সফল" দেখাত আর কার্ট মুছে যেত। তাই অফলাইনে fallback নয়।
-                if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-                    offerWhatsAppOrder(orderWa, 'You appear to be offline. Check your internet connection and try again.');
-                    resetOrderButton(btn);
-                    return;
-                }
-                postOrderViaIframe(formData)
-                    .then(function () {
-                        var orderId = String(stableEventId).replace(/^order_/, '');
-                        finishCheckoutSuccess(nameValue, phoneValue, emailValue, gTotal, orderId, stableEventId);
-                    })
-                    .catch(function () {
-                        offerWhatsAppOrder(
-                            orderWa,
-                            'API connection failed. Check your internet or send the order via WhatsApp.'
-                        );
-                        resetOrderButton(btn);
-                    });
+                // A timeout may occur after the server saved the order. Never retry or
+                // show success without the PIN; support can check this stable reference.
+                offerOrderConfirmationUnknown(orderWa, stableEventId);
+                resetOrderButton(btn);
             });
     }
     const MAX_PRODUCT_SLOTS = 50;
@@ -4051,6 +4032,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="remove-confirm-modal.js"></script>
 <script src="site-footer-config.js?v=20261009-inbox"></script>
 <script src="site-footer.js?v=20261009-inbox"></script>
-<script defer src="mobile-bottom-nav.js?v=20261011-active-state"></script>
+<script defer src="mobile-bottom-nav.js?v=20261018-mobile-nav"></script>
 </body>
 </html>

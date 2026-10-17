@@ -6,7 +6,7 @@
   <title>অর্ডার ট্র্যাক করুন | Muslim Abaya</title>
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="description" content="আপনার মোবাইল নম্বর ও অর্ডার আইডি দিভ়ে Muslim Abaya অর্ডারের সর্বশেষ স্ট্যাটাস ও কুরিয়ার তথ্য দেখুন।">
+  <meta name="description" content="মোবাইল নম্বর, অর্ডার আইডি ও confirmation screen-এ পাওয়া ৮-অঙ্কের PIN দিয়ে Muslim Abaya অর্ডারের স্ট্যাটাস যাচাই করুন।">
   <link rel="canonical" href="https://muslimabaya.com/order-track">
   <link rel="stylesheet" href="mobile-bottom-nav.css?v=20261011-active-state" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="mobile-bottom-nav.css?v=20261011-active-state"></noscript>
@@ -85,6 +85,8 @@
     }
     .track-field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(17,17,17,0.06); }
     .track-field .hint { font-size: 12px; color: var(--muted); margin-top: 5px; }
+    .track-support { margin: 14px 4px 0; color: var(--muted); font-size: 13px; line-height: 1.6; text-align: center; }
+    .track-support a { color: var(--ink); font-weight: 700; text-underline-offset: 3px; }
 
     .track-submit {
       width: 100%;
@@ -166,7 +168,7 @@
     }
   </style>
 
-  <script defer src="site-seo-config.js?v=20261009-inbox"></script>
+  <script defer src="site-seo-config.js?v=20261018-seo"></script>
   <script defer src="site-seo.js?v=20261004fix"></script>
   <script defer src="config.js?v=20261009-inbox"></script>
 </head>
@@ -177,7 +179,7 @@
   <main class="track-wrap">
     <header class="track-hero">
       <h1>অর্ডার ট্র্যাক করুন</h1>
-      <p>আপনার মোবাইল নম্বর দিয়ে সহজেই দেখুন আপনার অর্ডারের সর্বশেষ অবস্থা — লগইন ছাড়াই।</p>
+      <p>মোবাইল নম্বর, অর্ডার আইডি এবং অর্ডার নিশ্চিতকরণ স্ক্রিনে পাওয়া PIN দিয়ে নিরাপদে স্ট্যাটাস দেখুন।</p>
     </header>
 
     <form class="track-form" id="trackForm">
@@ -186,13 +188,18 @@
         <input type="tel" id="trackPhone" name="phone" placeholder="01XXXXXXXXX" required inputmode="numeric" autocomplete="tel">
       </div>
       <div class="track-field">
-        <label for="trackOrderId">অর্ডার আইডি (ঐচ্ছিক)</label>
-        <input type="text" id="trackOrderId" name="orderId" placeholder="যেমন: MA-10234">
-        <div class="hint">অর্ডার আইডি না জানলে খালি রাখুন — সব অর্ডার দেখাবে।</div>
+        <label for="trackOrderId">অর্ডার আইডি *</label>
+        <input type="text" id="trackOrderId" name="orderId" placeholder="যেমন: MA-10234" required maxlength="40" autocomplete="off">
+      </div>
+      <div class="track-field">
+        <label for="trackPin">৮-অঙ্কের ট্র্যাকিং PIN *</label>
+        <input type="password" id="trackPin" name="trackingPin" placeholder="অর্ডার নিশ্চিতকরণে দেখানো PIN" required inputmode="numeric" pattern="[0-9]{8}" maxlength="8" autocomplete="off">
+        <div class="hint">PINটি অর্ডার সফল হওয়ার পর confirmation screen-এ দেখানো হয়।</div>
       </div>
       <button type="submit" class="track-submit" id="trackSubmitBtn">ট্র্যাক করুন</button>
       <div class="track-msg" id="trackMsg"></div>
     </form>
+    <p class="track-support">পুরোনো অর্ডার বা PIN হারিয়ে গেলে <a href="https://wa.me/8801971642683" target="_blank" rel="noopener">WhatsApp-এ সহায়তা নিন</a>।</p>
 
     <div class="track-loading" id="trackLoading">খোঁজা হচ্ছে…</div>
     <div class="order-list" id="orderList"></div>
@@ -277,9 +284,18 @@
 
         var phone = document.getElementById('trackPhone').value.trim();
         var orderId = document.getElementById('trackOrderId').value.trim();
+        var trackingPin = document.getElementById('trackPin').value.trim();
         var digits = phone.replace(/[^\d]/g, '');
         if (digits.length < 10) {
           showMsg('error', 'সঠিক মোবাইল নম্বর দিন (যেমন: 01712345678)।');
+          return;
+        }
+        if (!orderId || orderId.length > 40 || !/^[A-Za-z0-9_.:-]+$/.test(orderId)) {
+          showMsg('error', 'সঠিক অর্ডার আইডি লিখুন।');
+          return;
+        }
+        if (!/^\d{8}$/.test(trackingPin)) {
+          showMsg('error', '৮ অঙ্কের ট্র্যাকিং PIN লিখুন।');
           return;
         }
 
@@ -294,10 +310,19 @@
         btn.disabled = true;
         loadingEl.classList.add('show');
 
-        var qs = 'RecordType=OrderTrack&Phone=' + encodeURIComponent(phone);
-        if (orderId) qs += '&OrderId=' + encodeURIComponent(orderId);
+        var body = new URLSearchParams();
+        body.append('RecordType', 'OrderTrack');
+        body.append('Phone', phone);
+        body.append('OrderId', orderId);
+        body.append('TrackingPin', trackingPin);
 
-        fetch(apiUrl + '?' + qs)
+        fetch(apiUrl, {
+          method: 'POST',
+          body: body,
+          mode: 'cors',
+          credentials: 'omit',
+          cache: 'no-store'
+        })
           .then(function (r) { return r.json(); })
           .then(function (data) {
             btn.disabled = false;
@@ -307,7 +332,7 @@
               return;
             }
             if (!data.orders || !data.orders.length) {
-              showMsg('empty', 'এই নম্বরে কোনো অর্ডার পাওয়া যায়নি। নম্বর ও অর্ডার আইডি ঠিক আছে কিনা যাচাই করুন।');
+              showMsg('empty', 'তথ্য যাচাই করা যায়নি। মোবাইল নম্বর, অর্ডার আইডি ও PIN মিলিয়ে দেখুন। পুরোনো অর্ডার বা PIN হারালে WhatsApp-এ সহায়তা নিন।');
               return;
             }
             renderOrders(data.orders);
@@ -341,6 +366,6 @@
 <script defer src="site-api-config.js?v=20261009-inbox"></script>
 <script defer src="site-footer-config.js?v=20261009-inbox"></script>
 <script defer src="site-footer.js?v=20261009-inbox"></script>
-<script defer src="mobile-bottom-nav.js?v=20261011-active-state"></script>
+<script defer src="mobile-bottom-nav.js?v=20261018-mobile-nav"></script>
 </body>
 </html>

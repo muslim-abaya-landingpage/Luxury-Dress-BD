@@ -3208,10 +3208,37 @@ function getCategoryPageUrl(key) {
   }
   return shopHref("/" + key);
 }
+function getShopSeoMeta(categoryKey) {
+  var cfg = window.SITE_SEO || {};
+  if (categoryKey) return (cfg.categories || {})[categoryKey] || {};
+  return (cfg.pages || {})["/category"] || {};
+}
+function getShopCategoryHeading(categoryKey, fallback, searchQ) {
+  if (searchQ) return fallback;
+  var meta = getShopSeoMeta(categoryKey);
+  var title = String(meta.title || "").split("|")[0].split("—")[0].trim();
+  if (title) return title;
+  if (!categoryKey && document.body.getAttribute("data-shop-hub") === "1") return "All Products";
+  return fallback;
+}
+function getShopCategoryDescription(categoryKey, searchQ) {
+  if (searchQ) return "";
+  return String(getShopSeoMeta(categoryKey).description || "").trim();
+}
 function updateCategoryDocumentTitle(key) {
   if (document.documentElement.hasAttribute('data-product-id')) return;
-  var meta = (window.CATEGORY_META || {})[key];
-  document.title = meta && meta.title ? meta.title + " Collection | Muslim Abaya" : "Muslim Abaya";
+  var searchQ = getPageSearchQuery();
+  if (searchQ) {
+    document.title = 'Search: "' + searchQ + '" | Muslim Abaya';
+    return;
+  }
+  var meta = getShopSeoMeta(key);
+  if (meta.title) {
+    document.title = meta.title;
+    return;
+  }
+  var categoryMeta = (window.CATEGORY_META || {})[key];
+  document.title = categoryMeta && categoryMeta.title ? categoryMeta.title + " Collection | Muslim Abaya" : "Muslim Abaya";
 }
 function collectCategoryViewData(categoryKey) {
   var allProducts = window.CATEGORY_PRODUCTS || {};
@@ -3228,9 +3255,12 @@ function collectCategoryViewData(categoryKey) {
   } else {
     products = categoryKey ? (allProducts[categoryKey] || []).slice() : getAllCategoryProducts();
   }
+  var fallbackTitle = categoryKey
+    ? ((categoryMeta[categoryKey] && categoryMeta[categoryKey].title) || categoryKey.toUpperCase())
+    : "All Products";
   var title = searchQ
     ? 'Search: "' + searchQ + '"'
-    : (categoryKey ? ((categoryMeta[categoryKey] && categoryMeta[categoryKey].title) || categoryKey.toUpperCase()) : "All Categories");
+    : getShopCategoryHeading(categoryKey, fallbackTitle, searchQ);
   var waLink = (window.SITE_MEDIA && window.SITE_MEDIA.whatsappOrderLink) || "https://wa.me/8801971642683";
   var breadcrumb = searchQ
     ? "<nav class='shop-breadcrumb' aria-label='Breadcrumb'>" +
@@ -3497,9 +3527,15 @@ function softSwitchShopCategory(categoryKey) {
     fixShopPageLinks(root);
   }
   var titleEl = root.querySelector(".shop-title");
+  var descriptionEl = root.querySelector("#shopCategoryDescription");
   var countEl = root.querySelector("#shopCount");
   var grid = root.querySelector("#productGrid");
   if (titleEl) titleEl.textContent = view.title;
+  if (descriptionEl) {
+    var description = getShopCategoryDescription(categoryKey, view.searchQ);
+    descriptionEl.textContent = description;
+    descriptionEl.hidden = !description;
+  }
   if (countEl) countEl.textContent = view.products.length + " items";
   if (grid) {
     var cards = view.products
@@ -3653,6 +3689,7 @@ function renderCategory(categoryKey) {
   var waLink = view.waLink;
   var breadcrumb = view.breadcrumb;
   var detailMode = view.detailMode;
+  var categoryDescription = getShopCategoryDescription(categoryKey, searchQ);
   if (categoryKey && !searchQ && !products.length) {
     var soonTitle = title;
     var soonCrumb =
@@ -3709,11 +3746,12 @@ return;
     "<div class='shop-layout'>" +
     "<div class='shop-sidebar-col'>" + crumbs.desktop + sidebarHtml + "</div>" +
     "<section class='shop-main'>" +
-    "<div class='shop-top'><h2 class='shop-title'>" +
+    "<header class='shop-page-heading'><div class='shop-top'><h1 class='shop-title'>" +
     escapeHtml(title) +
-    "</h2><span class='shop-count' id='shopCount' hidden>" +
+    "</h1><span class='shop-count' id='shopCount' hidden>" +
     products.length +
-   " items</span></div>" +
+   " items</span></div><p class='shop-category-description' id='shopCategoryDescription'" +
+   (categoryDescription ? "" : " hidden") + ">" + escapeHtml(categoryDescription) + "</p></header>" +
 "<div class='product-grid" + (detailMode ? " product-grid-detail" : "") + "' id='productGrid'>" +
 (cards ||
   "<p class='filter-empty'>" +

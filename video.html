@@ -13,7 +13,7 @@
   <link rel="canonical" href="https://muslimabaya.com/video">
   <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
 
-  <script src="site-seo-config.js?v=20261009-inbox"></script>
+  <script src="site-seo-config.js?v=20261018-seo"></script>
   <script src="site-seo.js?v=20261015-organic1"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,7 +26,6 @@
   <link rel="stylesheet" href="site-header.css?v=20260820fixui">
   <link rel="stylesheet" href="site-footer.css?v=20261006scroll2">
 <script src="config.js?v=20261009-inbox"></script>
-</head>
   <style>
     .wrap { max-width: 1180px; margin: 0 auto; padding: 16px 12px 24px; }
     .breadcrumb { font-size: 13px; color: #666; margin: 0 0 14px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
@@ -158,6 +157,17 @@
       .owner-stats .n { font-size: 18px; }
     }
   </style>
+  <meta property="og:title" content="Product Videos | Muslim Abaya">
+  <meta property="og:description" content="Watch real product videos before you order — Muslim Abaya premium collection.">
+  <meta property="og:url" content="https://muslimabaya.com/video">
+  <meta property="og:image" content="https://muslimabaya.com/images/Baby-Pink-Floral-Print.jpeg">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Muslim Abaya">
+  <meta property="og:locale" content="bn_BD">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Product Videos | Muslim Abaya">
+  <meta name="twitter:description" content="Watch real product videos before you order — Muslim Abaya premium collection.">
+  <meta name="twitter:image" content="https://muslimabaya.com/images/Baby-Pink-Floral-Print.jpeg">
 </head>
 <body>
   <div id="site-header-mount"></div>
@@ -169,10 +179,9 @@
       <span> / </span>
       <strong>Video</strong>
     </nav>
-    </main>
-</body>
-  <div class="card">
-    <h1 id="videoTitle" class="page-title">Video Management</h1>
+    <div class="card">
+    <h1 id="videoTitle" class="page-title">Product Video Gallery</h1>
+    <p class="help video-intro">Watch real product videos to preview fabric, finishing and style before ordering from Muslim Abaya.</p>
     <p id="localFileNote" class="local-note"></p>
       <div id="ownerStats" class="owner-stats" hidden>
       <h3>Owner Dashboard (Analytics)</h3>
@@ -183,7 +192,7 @@
       <div id="ownerCourierNote" class="sub"></div>
     </div>
     <div id="videoGrid" class="video-grid" aria-live="polite"></div>
-    <p id="videoHelp" class="help"></p>
+    <p id="videoHelp" class="help">Browse the videos below, then visit the product page for sizes, colors and current availability.</p>
   </div>
 </main>
   <div id="site-footer-mount"></div>
@@ -192,6 +201,7 @@
   <script defer src="category-products.js?v=20260820clean"></script>
   <script defer src="site-api-config.js?v=20261009-inbox"></script>
   <script defer src="site-footer.js?v=20261015-organic1"></script>
+  <script src="video-config.js?v=20261018-video"></script>
   <script>
     (function initVideoPage() {
       function parseYouTubeId(input) {
@@ -212,10 +222,11 @@
 
       function normalizeVideoList(cfg) {
         var list = [];
-        if (cfg && Array.isArray(cfg.videos) && cfg.videos.length) {
-          cfg.videos.forEach(function (item, i) {
+        var configuredVideos = Array.isArray(cfg) ? cfg : (cfg && Array.isArray(cfg.videos) ? cfg.videos : []);
+        if (configuredVideos.length) {
+          configuredVideos.forEach(function (item, i) {
             if (!item) return;
-            var id = item.videoId || parseYouTubeId(item.url || item.link || item.watchUrl);
+            var id = parseYouTubeId(item.videoId || item.url || item.link || item.watchUrl);
             if (!id) return;
             list.push({
               id: id,
@@ -263,7 +274,8 @@
       }
 
       var cfg = (window.SITE_MEDIA && window.SITE_MEDIA.featuredVideo) || {};
-      var videos = normalizeVideoList(cfg);
+      var videoSource = Array.isArray(window.SITE_VIDEOS) ? window.SITE_VIDEOS : cfg;
+      var videos = normalizeVideoList(videoSource);
       var isLocalFile = location.protocol === "file:";
       var ownerStatsEl = document.getElementById("ownerStats");
       var ownerTodayEl = document.getElementById("ownerTodayCount");
@@ -274,11 +286,11 @@
       var gridEl = document.getElementById("videoGrid");
       var helpEl = document.getElementById("videoHelp");
       var localNote = document.getElementById("localFileNote");
-if (titleEl) titleEl.textContent = cfg.title || "Video Gallery";
+if (titleEl) titleEl.textContent = "Product Video Gallery";
 
 if (helpEl) {
   helpEl.textContent =
-    cfg.helpText || "Please wait while the content is loading, thank you for your patience.";
+    cfg.helpText || "Browse the videos below, then visit the product page for sizes, colors and current availability.";
 }
 
 if (isLocalFile && localNote) {
@@ -325,11 +337,17 @@ if (isLocalFile && localNote) {
           .catch(function () {});
       }
 
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", fetchOwnerStats);
+      } else {
+        fetchOwnerStats();
+      }
+
       if (!gridEl) return;
 
       if (!videos.length) {
         gridEl.innerHTML =
-        '<p class="video-empty">No videos found. Please check <code>category-products.js?v=20260820clean</code> and verify that <code>SITE_MEDIA.featuredVideo.videos</code> contains valid YouTube links.</p>';
+        '<p class="video-empty">Product video previews are being updated. Browse the current collection from the <a href="category.html">All Products</a> page.</p>';
         return;
       }
 
@@ -376,9 +394,7 @@ if (isLocalFile && localNote) {
       } else {
         syncBadge();
       }
-      fetchOwnerStats();
     })();
   </script>
 </body>
 </html>
-
