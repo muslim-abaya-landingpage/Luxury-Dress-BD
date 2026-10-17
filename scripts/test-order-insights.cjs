@@ -44,13 +44,15 @@ const document = {getElementById(id){if(!els.has(id))els.set(id,new Element());r
 const escape = s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const hostile = {...good,orderId:'unsafe<id>',name:'<img src=x onerror=alert(1)>',size:''};
 const calls=[];
-const context = {document,Map,MaOrderInsights:model,MaPanel:{esc:escape,money:n=>'৳'+n,statusClass:()=>'',toast(){},init:()=>Promise.resolve({})},MaAdmin:{cached:()=>null,call:(type,args)=>{calls.push({type,args});return Promise.resolve({orders:[...fixture,hostile],counts:{all:400},statuses:['Pending','Delivered']});}},location:{href:''}};
+const statusScope={module:{exports:{}}};
+vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../admin-order-status.js'),'utf8'),statusScope);
+const context = {document,Map,MaOrderStatus:statusScope.module.exports,MaOrderInsights:model,MaPanel:{esc:escape,money:n=>'৳'+n,statusClass:()=>'',toast(){},init:()=>Promise.resolve({})},MaAdmin:{cached:()=>null,call:(type,args)=>{calls.push({type,args});return Promise.resolve({orders:[...fixture,hostile],counts:{all:400},statuses:['Pending','Delivered']});}},location:{href:''}};
 vm.runInNewContext(inline,context);
 setImmediate(()=>{
   try {
     assert.equal(calls.length,1); assert.equal(calls[0].type,'AdminOrderList');
     assert.equal(document.getElementById('ordInsights').hidden,false);
-    assert(document.getElementById('ordScope').textContent.includes('বাকি 392'));
+    assert(document.getElementById('ordScope').textContent.includes('8 / 400'));
     assert(document.getElementById('ordBody').innerHTML.includes('&lt;img'));
     assert(!document.getElementById('ordBody').innerHTML.includes('<img'));
     assert(document.getElementById('ordBody').innerHTML.includes('unsafe%3Cid%3E'));
