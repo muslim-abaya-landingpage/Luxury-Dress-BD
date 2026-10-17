@@ -2796,3 +2796,24 @@ body.pqv-sc-open {
   .shop-filter-reset { position: sticky; bottom: max(8px, env(safe-area-inset-bottom)); background: #2a2a2a; color: #faf6f0; border-color: #2a2a2a; min-height: 44px; }
   @media (prefers-reduced-motion: reduce) { .shop-sidebar, .shop-filter-backdrop, .shop-filter-close { transition: none; } }
 }
+
+/* Size + availability filter polish */
+.size-filter-list, #sizeFilters { display:grid !important; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:8px; }
+.size-filter-option { position:relative; display:flex; align-items:center; justify-content:center; min-height:38px; padding:7px 5px; border:1px solid #dcd5c9; border-radius:8px; background:#fff; color:#3b3536; font-size:13px; line-height:1.15; text-align:center; cursor:pointer; transition:background .18s ease, border-color .18s ease, color .18s ease, transform .18s ease; }
+.size-filter-option:hover { border-color:#6b4c5a; color:#6b4c5a; transform:translateY(-1px); }
+.size-filter-option input, .availability-filter-option input { position:absolute; opacity:0; pointer-events:none; }
+.size-filter-option:has(input:checked) { background:#6b4c5a; border-color:#6b4c5a; color:#faf6f0; font-weight:700; }
+.availability-filter-list { display:grid; grid-template-columns:1fr; gap:8px; }
+.availability-filter-option { position:relative; display:flex; align-items:center; gap:9px; min-height:42px; padding:9px 11px; border:1px solid #dcd5c9; border-radius:8px; background:#fff; color:#3b3536; font-size:13px; cursor:pointer; transition:background .18s ease, border-color .18s ease, color .18s ease; }
+.availability-filter-option:has(input:checked) { background:#f0eae1; border-color:#6b4c5a; color:#6b4c5a; font-weight:700; }
+.availability-dot { width:9px; height:9px; border-radius:50%; flex:0 0 9px; }
+.availability-dot-in { background:#4f8a68; box-shadow:0 0 0 3px rgba(79,138,104,.12); }
+.availability-dot-out { background:#a77b7b; box-shadow:0 0 0 3px rgba(167,123,123,.12); }
+.sidebar-filter-sizes h4, .sidebar-filter-availability h4 { display:flex; align-items:center; justify-content:space-between; }
+.sidebar-filter-sizes h4::after, .sidebar-filter-availability h4::after { content:'Select'; font-size:11px; font-weight:400; letter-spacing:.03em; color:#9a8e87; text-transform:uppercase; }
+@media (max-width:960px) {
+  #sizeFilters { grid-template-columns:repeat(3, minmax(0,1fr)) !important; gap:8px; }
+  .size-filter-option { min-height:42px; font-size:14px; }
+  .availability-filter-list { grid-template-columns:1fr 1fr; gap:8px; }
+  .availability-filter-option { min-height:44px; padding:9px; }
+}

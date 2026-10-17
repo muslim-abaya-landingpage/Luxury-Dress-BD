@@ -81,7 +81,7 @@ function ensureCategoryStyles() {
     link = document.createElement("link");
     link.id = "category-sidebar-css";
     link.rel = "stylesheet";
-    link.href = "/category-sidebar.css?v=20260929fixcrop";
+    link.href = "/category-sidebar.css?v=20261017filterpolish";
     document.head.appendChild(link);
   }
   var qtyLink =
@@ -2639,7 +2639,7 @@ function buildShopSidebar(categoryKey, products) {
     : "<p class='color-filter-empty'>No colors listed for this category.</p>";
   var sizeChecks = sizeOptions.length
     ? sizeOptions.map(function (size) {
-        return "<label class='filter-check-option'><input type='checkbox' class='size-filter-check' value='" + escapeHtml(size) + "'><span>" + escapeHtml(size) + "</span></label>";
+        return "<label class='size-filter-option'><input type='checkbox' class='size-filter-check' value='" + escapeHtml(size) + "'><span>" + escapeHtml(size) + "</span></label>";
       }).join("")
     : "<p class='color-filter-empty'>No sizes listed.</p>";
   var categoryChecks = categoryOptions.length
@@ -2692,9 +2692,9 @@ function buildShopSidebar(categoryKey, products) {
     "</div>" +
     "</div>" +
     "<div class='sidebar-filter sidebar-filter-sizes'><h4>Size</h4><div class='filter-check-list' id='sizeFilters'>" + sizeChecks + "</div></div>" +
-    "<div class='sidebar-filter sidebar-filter-availability'><h4>Availability</h4><div class='filter-check-list' id='availabilityFilters'>" +
-    "<label class='filter-check-option'><input type='checkbox' class='availability-filter-check' value='in-stock'><span>In stock</span></label>" +
-    "<label class='filter-check-option'><input type='checkbox' class='availability-filter-check' value='out-of-stock'><span>Out of stock</span></label></div></div>" +
+    "<div class='sidebar-filter sidebar-filter-availability'><h4>Availability</h4><div class='availability-filter-list' id='availabilityFilters'>" +
+    "<label class='availability-filter-option'><input type='checkbox' class='availability-filter-check' value='in-stock'><span class='availability-dot availability-dot-in'></span><span>In stock</span></label>" +
+    "<label class='availability-filter-option'><input type='checkbox' class='availability-filter-check' value='out-of-stock'><span class='availability-dot availability-dot-out'></span><span>Out of stock</span></label></div></div>" +
     "<button type='button' class='shop-filter-reset' id='shopFilterReset'>Clear all filters</button>" +
     "</aside>"
   );
