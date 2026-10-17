@@ -22,7 +22,8 @@ for(const [cat,rows] of Object.entries(cats))for(const p of rows){
   const data=[...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(m=>JSON.parse(m[1]));
   const product=data.find(d=>d['@type']==='Product');
   assert.equal(product.sku,p.id);assert.equal(product.offers.price,p.price);assert.equal(product.offers.url,url);
-  assert.equal(product.offers.availability,'https://schema.org/'+(w.maCatalog.getStockStatus(p).inStock?'InStock':'OutOfStock'));
+  const stock = w.maCatalog.getStockStatus(p);
+  assert.equal(product.offers.availability, stock.qty == null ? undefined : 'https://schema.org/'+(stock.inStock?'InStock':'OutOfStock')); 
   count++;
 }
 // The same renderer boot must resolve path-based pages and old hash URLs.
