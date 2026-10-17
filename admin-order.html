@@ -19,7 +19,8 @@
 <link rel="stylesheet" href="admin.css?v=20261018-shared">
 <link rel="stylesheet" href="admin-dashboard-design.css?v=20261018-3">
 <script src="admin-dashboard-design.js?v=20261018-3"></script>
-<link rel="stylesheet" href="admin-premium-layout.css?v=20261018-1">
+<link rel="stylesheet" href="admin-premium-layout.css?v=20261018-2">
+<script src="admin-order-status.js?v=20261018-1"></script>
 </head>
 <body class="pn-body">
   <div class="pn-app adm-shell">
@@ -126,7 +127,7 @@
             <div class="pn-field"><label for="fCourier">Courier</label>
               <select class="pn-sel" id="fCourier"></select></div>
             <div class="pn-field"><label>Source</label><input class="pn-in" id="fSource" readonly></div>
-            <div class="pn-field"><label for="fStatus">Status</label><select class="pn-sel" id="fStatus"></select></div>
+            <div class="pn-field"><label for="fStatus">অর্ডারের অবস্থা (কুরিয়ারের লাইভ স্ট্যাটাস নয়)</label><select class="pn-sel" id="fStatus"></select></div>
             <div class="pn-field"><label for="fAssign">Assign To</label><select class="pn-sel" id="fAssign"></select></div>
             <div class="pn-note-muted" id="oPayment"></div>
             <div id="oTrack" style="margin-top:8px"></div>
@@ -182,7 +183,9 @@
         $("oId").textContent = o.orderId;
         document.title = "Order " + o.orderId + " | Muslim Abaya Admin";
         var b = $("oStatusBadge");
-        b.textContent = o.status;
+        var displayStatus = MaOrderStatus.describe(o);
+        b.textContent = displayStatus.orderLabel;
+        b.title = displayStatus.note;
         b.className = "pn-badge " + MaPanel.statusClass(o.status);
         $("oSource").textContent = o.source;
         $("oCreated").textContent = "Created : " + o.time;
@@ -208,7 +211,7 @@
         fillSelect($("fAssign"), staff, o.assignedTo, '<option value="">— Unassigned —</option>');
         if (o.tracking || o.consignmentId) {
           $("oTrack").innerHTML = '<div class="pn-note-ok">Tracking: ' + esc(o.tracking || "—") + "</div>" +
-            '<div class="pn-note-muted">Consignment: ' + esc(o.consignmentId || "—") + " · " + esc(o.courierStatus || "") + "</div>";
+            '<div class="pn-note-muted">Consignment: ' + esc(o.consignmentId || "—") + " · কুরিয়ার (সংরক্ষিত): " + esc(displayStatus.courierLabel) + "</div>";
           $("btnCourierSend").style.display = "none";
         } else {
           $("oTrack").innerHTML = "";
