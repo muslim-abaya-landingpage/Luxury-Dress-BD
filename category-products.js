@@ -1129,13 +1129,11 @@ window.CATEGORY_PRODUCTS = {
       name: "Premium Short Khimar Hijab – Dusty Pink",
       image: "/images/premium-short-khimar-hijab-dusty-pink-soft-jersey.webp",
       price: 150,
-      stock: 0,
       color: "dusty-pink",
       colorLabel: "Dusty Pink",
       fabric: "Premium Soft Jersey Fabric",
       sizes: ["Free Size"],
       detailNote: "Premium ready-to-wear short khimar hijab crafted from soft jersey fabric. Lightweight, breathable, stretchable, and comfortable for daily wear, prayer, office, university, and travel.",
-      inStock: false,
       category: "hijab",
       categoryLabel: "হিজাব",
       productUrl: "/"
