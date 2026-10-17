@@ -30,6 +30,8 @@
  *
  * Script properties:
  *   AUTH_SECRET — Sign Up
+ *   ORDER_RATE_LIMIT_MAX — optional order limit per 30-minute window (default 6)
+ *   ORDER_RATE_LIMIT_BYPASS — optional explicit comma/space-separated allowlist; unset = no bypass
  *   STEADFAST_API_KEY, STEADFAST_SECRET_KEY — Steadfast Courier
  *   STEADFAST_WEBHOOK_TOKEN — webhook URL ?token=... (Apps Script header পড়ে না)
  * ঐচ্ছিক: FB_ACCESS_TOKEN, FB_PIXEL_ID
@@ -78,10 +80,13 @@ function doGet(e) {
     var type = param_(e, 'RecordType');
     if (type === 'OrderSchema') return jsonOut_(getOnlineOrderSchemaStatus_());
     if (type === 'Subscribe') {
-      var contact = String(param_(e, 'contact') || param_(e, 'email') || '').trim();
-      var saved = saveSubscribeContact_(contact);
-      if (!saved.ok) return jsonOut_(saved);
-      return jsonOut_({ ok: true, message: 'Subscribed', sheet: 'Subscribe' });
+      // GET may be triggered by link scanners, previews, or browser prefetch.
+      // Never mutate the Subscribe sheet from a GET request; use doPost instead.
+      return jsonOut_({
+        ok: false,
+        error: 'METHOD_NOT_ALLOWED',
+        message: 'Subscription requests must use POST.'
+      });
     }
     if (type === 'AuthVerify' || type === 'AdminVerify') {
       var tok = param_(e, 'Token');
@@ -118,6 +123,11 @@ function doPost(e) {
       return handleSteadfastWebhookPost_(e);
     }
     var type = param_(e, 'RecordType');
+    if (type === 'NotifyBackInStockV2') return jsonOut_(opsSaveWaitlist_(e));
+    if (type &amp;&amp; type.indexOf('AdminOperations') === 0) {
+      adminRateLimit_(param_(e, 'Token') || 'admin_global');
+      return jsonOut_(opsHandle_(type, e));
+    }
     var isOrder = type === 'Order' || (!type &amp;&amp; param_(e, 'Name') &amp;&amp; param_(e, 'Phone'));
     var isSubscribe =
       type === 'Subscribe' ||
@@ -180,6 +190,8 @@ function doPost(e) {
     if (type === 'AdminTodayStats') {
       return jsonOut_(getAdminTodayStats_(e));
     }
+    if (type &amp;&amp; type.indexOf('AdminCatalog') === 0) return jsonOut_(catalogPublishHandle_(type, e));
+
     if (type === 'AdminPublishFile') {
       return jsonOut_(publishFileToGitHub_(e));
     }
@@ -476,6 +488,7 @@ function orderErrorMessage_(code) {
     DUPLICATE_ORDER: 'একই অর্ডার ইতিমধ্যে পাঠানো হয়েছে।'
   };
   if (map[code]) return map[code];
+  if (/^(UNKNOWN_PRODUCT|INVALID_SIZE|SIZE_REQUIRED|PRODUCT_TYPE_REQUIRED|STRUCTURED_CART_REQUIRED|CATALOG_|PRICE_CHANGED|INVALID_CUSTOM_SIZE|INVALID_COUPON)/.test(String(code))) return 'পণ্য, সাইজ বা দাম নতুন করে যাচাই প্রয়োজন। পেজ রিফ্রেশ করে পণ্য/সাইজ আবার বেছে নিন অথবা WhatsApp-এ যোগাযোগ করুন।';
   var codeStr = String(code || '');
   if (codeStr.indexOf('VARIANT_NOT_TRACKED:') === 0) {
     return 'দুঃখিত, এই পণ্যের নির্বাচিত সাইজের স্টক যাচাই করা যাচ্ছে না। অন্য সাইজ বেছে নিন অথবা WhatsApp এ যোগাযোগ করুন।';
@@ -533,7 +546,7 @@ function validateOrderInput_(e) {
           return {
             id: String((it &amp;&amp; it.id) || '').trim(),
             name: String((it &amp;&amp; it.name) || '').trim(),
-            qty: parseInt((it &amp;&amp; it.qty), 10) || 1,
+            qty: Number(it &amp;&amp; it.qty),
             price: parseFloat(it &amp;&amp; it.price) || 0,
             size: String((it &amp;&amp; (it.size || it.selectedSize)) || '').trim().slice(0, 160),
             color: String((it &amp;&amp; it.color) || '').trim().slice(0, 80),
@@ -1075,47 +1088,33 @@ function copySheetToBackup_(sourceSheet, backupSpreadsheet, targetName) {
 }
 
 function runSafetyBackupNow() {
-  var src = SpreadsheetApp.getActiveSpreadsheet();
-  if (!src) return { ok: false, error: 'NO_SOURCE_SHEET' };
-  var backup = getSafetyBackupSpreadsheet_();
-  if (!backup) return { ok: false, error: 'NO_BACKUP_SHEET' };
-  if (src.getId() === backup.getId()) {
-    return { ok: false, error: 'BACKUP_SHEET_SAME_AS_SOURCE' };
+  var lock = LockService.getUserLock();
+  if (!lock.tryLock(1000)) return { ok: false, error: 'BACKUP_IN_PROGRESS' };
+  try {
+    var src = SpreadsheetApp.getActiveSpreadsheet();
+    if (!src) return { ok: false, error: 'NO_SOURCE_SHEET' };
+    var stamp = Utilities.formatDate(new Date(), 'Asia/Dhaka', 'yyyy-MM-dd HH-mm-ss');
+    // Native workbook copy preserves images, formulas and formatting. Never clear an older backup.
+    var backup = src.copy('Luxury Dress Safety Backup ' + stamp);
+    if (!backup || src.getId() === backup.getId()) throw new Error('BACKUP_COPY_FAILED');
+    var copied = [], totalRows = 0;
+    src.getSheets().forEach(function(source) {
+      var target = backup.getSheetByName(source.getName());
+      if (!target || source.getLastRow() !== target.getLastRow() || source.getLastColumn() !== target.getLastColumn()) {
+        throw new Error('BACKUP_VERIFICATION_FAILED');
+      }
+      var rows = Math.max(0, source.getLastRow() - 1);
+      copied.push({ name: source.getName(), rows: rows });
+      totalRows += rows;
+    });
+    // Publish the new backup pointer only after every source tab has been verified.
+    var props = PropertiesService.getScriptProperties();
+    props.setProperties({ SAFETY_BACKUP_SPREADSHEET_ID: backup.getId(), OPS_LAST_BACKUP_AT: new Date().toISOString() });
+    console.log('SAFETY_BACKUP_OK ' + JSON.stringify({ tabs: copied.length, rows: totalRows }));
+    return { ok: true, backupSpreadsheetId: backup.getId(), backupSpreadsheetUrl: backup.getUrl(), copiedTabs: copied, totalRows: totalRows };
+  } finally {
+    lock.releaseLock();
   }
-
-  var tabs = ['Online Order', 'Subscribe', 'Admins', 'Real Customer', 'Fake', 'Stock'];
-  var copied = [];
-  var totalRows = 0;
-  var i;
-  for (i = 0; i &lt; tabs.length; i++) {
-    var s = src.getSheetByName(tabs[i]);
-    if (!s) continue;
-    var rows = copySheetToBackup_(s, backup, 'BKP_' + tabs[i]);
-    copied.push({ name: tabs[i], rows: rows });
-    totalRows += Math.max(0, rows);
-  }
-
-  var log = backup.getSheetByName('Backup Log');
-  if (!log) {
-    log = backup.insertSheet('Backup Log');
-    log.getRange(1, 1, 1, 6).setValues([['Time', 'Source Sheet ID', 'Copied Tabs', 'Rows', 'By', 'Note']]);
-  }
-  log.appendRow([
-    new Date(),
-    src.getId(),
-    copied.map(function (x) { return x.name; }).join(', '),
-    totalRows,
-    Session.getActiveUser().getEmail() || 'unknown',
-    'manual/auto backup'
-  ]);
-
-  return {
-    ok: true,
-    backupSpreadsheetId: backup.getId(),
-    backupSpreadsheetUrl: backup.getUrl(),
-    copiedTabs: copied,
-    totalRows: totalRows
-  };
 }
 
 function runSafetyBackupNowFromMenu() {
@@ -1608,11 +1607,13 @@ function setupOrderStatusDropdownFromMenu() {
 
 function rateLimitOrder_(phone) {
   var normalized = normalizePhone_(phone);
-  var bypassRaw = PropertiesService.getScriptProperties().getProperty('ORDER_RATE_LIMIT_BYPASS') || '01971642683';
-  var bypassParts = String(bypassRaw).split(/[,;\s]+/);
-  var b;
-  for (b = 0; b &lt; bypassParts.length; b++) {
-    if (normalizePhone_(bypassParts[b]) === normalized) return;
+  var bypassRaw = String(PropertiesService.getScriptProperties().getProperty('ORDER_RATE_LIMIT_BYPASS') || '').trim();
+  if (bypassRaw) {
+    var bypassParts = bypassRaw.split(/[,;\s]+/);
+    var b;
+    for (b = 0; b &lt; bypassParts.length; b++) {
+      if (normalized &amp;&amp; normalizePhone_(bypassParts[b]) === normalized) return;
+    }
   }
   var cache = CacheService.getScriptCache();
   var k = 'ord_' + String(normalized || 'x');
@@ -1708,7 +1709,9 @@ function handleOnlineOrderPost_(e) {
 
   // ── নিরাপত্তা: সার্ভার নিজে দাম হিসাব করে — ক্লায়েন্টের পাঠানো Total সরাসরি বিশ্বাস করা হয় না ──
   var couponCodeVal = String(param_(e, 'CouponCode') || '').trim().toUpperCase();
-  var pricing = computeVerifiedOrderPricing_(validated.cartItems, charge, couponCodeVal);
+  if (validated.cartItems.reduce(function(sum,it){return sum+it.qty;},0) !== validated.qty) throw new Error('INVALID_QTY');
+  var pricing = opsVerifiedPricing_(validated.cartItems, charge, couponCodeVal);
+  if (Math.abs(pricing.subtotal + charge - pricing.couponDiscountVal - validated.total) > 2) throw new Error('PRICE_CHANGED');
   var couponDiscountVal = pricing.couponDiscountVal;
 
   var verifiedTotal = validated.total;
@@ -4130,9 +4133,15 @@ function submitReview_(e) {
     try { rateLimit_('review_' + name.slice(0, 40) + '_' + productId.slice(0, 40)); }
     catch (rlErr) { return { ok: false, error: 'RATE_LIMIT', message: 'একটু পর আবার চেষ্টা করুন।' }; }
 
-    var sheet = getReviewsSheet_();
-    var reviewId = Utilities.getUuid();
-    appendRow_(sheet, [reviewId, productId, productName, name, rating, comment, new Date(), 'Pending']);
+    var reviewLock = LockService.getScriptLock();
+    reviewLock.waitLock(15000);
+    try {
+      var verified = opsReviewVerification_(e, productId);
+      var sheet = getReviewsSheet_();
+      opsReviewHeaders_(sheet);
+      var reviewId = Utilities.getUuid();
+      appendRow_(sheet, [reviewId, productId, productName, admCellText_(name,60), rating, admCellText_(comment,600), new Date(), 'Pending', verified.verified, verified.orderId]);
+    } finally { reviewLock.releaseLock(); }
     return { ok: true, message: 'ধন্যবাদ! আপনার রিভিউ পর্যালোচনার পর প্রকাশিত হবে।' };
   } catch (err) {
     return { ok: false, error: 'REVIEW_SUBMIT_FAILED', message: String(err.message || err) };
@@ -4158,6 +4167,7 @@ function getProductReviews_(e) {
         name: String(r[3] || ''),
         rating: rating,
         comment: String(r[5] || ''),
+        verifiedPurchase: r[8] === true,
         date: r[6] instanceof Date ? Utilities.formatDate(r[6], 'GMT+6', 'dd MMM yyyy') : String(r[6] || '')
       });
     }
@@ -5438,6 +5448,8 @@ function notifyBackInStockWaitlist_(productId) {
       var r = data[i];
       if (String(r[0] || '').trim() !== String(productId).trim()) continue;
       if (String(r[5] || '').trim()) continue;
+      // Size requests need variant availability; product-level restock is insufficient.
+      if (String(r[6] || '').trim()) continue;
       var isEmail = String(r[3] || '') === 'yes';
       if (isEmail) {
         try {
@@ -5504,7 +5516,7 @@ function getAdminGrowthData_(e) {
       var wr = wData[j];
       var notified = String(wr[5] || '');
       if (notified.indexOf('emailed') === 0 || notified === 'dismissed') continue;
-      out.stockWaitlist.push({ productId: String(wr[0] || ''), productName: String(wr[1] || ''), contact: String(wr[2] || ''), isEmail: String(wr[3] || '') === 'yes', notified: notified });
+      out.stockWaitlist.push({ productId: String(wr[0] || ''), productName: String(wr[1] || ''), variant: String(wr[6] || ''), contact: String(wr[2] || ''), isEmail: String(wr[3] || '') === 'yes', notified: notified });
     }
   } catch (err2) {}
   try {
@@ -5534,7 +5546,7 @@ function markGrowthItemDone_(e) {
       var wSheet = ensureStockWaitlistSheet_();
       var wData = wSheet.getDataRange().getValues();
       for (var i = 1; i &lt; wData.length; i++) {
-        if ((String(wData[i][0] || '') + '|' + String(wData[i][2] || '')) === key) { wSheet.getRange(i + 1, 6).setValue('dismissed'); break; }
+        if ((String(wData[i][0] || '') + '|' + String(wData[i][2] || '') + '|' + String(wData[i][6] || '')) === key) { wSheet.getRange(i + 1, 6).setValue('dismissed'); break; }
       }
     } else if (kind === 'reorder') {
       var rSheet = ensureReorderOffersSheet_();
@@ -5726,6 +5738,39 @@ function stockRequirementsForCart_(cartItems) {
   return out;
 }
 
+function legacyProductStockRequirements_(cartItems, variantData, legacyData) {
+  variantData = variantData || [];
+  legacyData = legacyData || [];
+  var hasTrackedVariants = Object.create(null);
+  for (var i = 1; i &lt; variantData.length; i++) {
+    var variantRow = variantData[i];
+    var variantProductId = String(variantRow[0] || '').trim();
+    if (variantProductId &amp;&amp; stockRowIsTracked_(variantRow)) hasTrackedVariants[variantProductId] = true;
+  }
+  var legacyRows = Object.create(null);
+  for (var j = 1; j &lt; legacyData.length; j++) {
+    var legacyProductId = String(legacyData[j][0] || '').trim();
+    if (legacyProductId) legacyRows[legacyProductId] = { rowIndex: j + 1, row: legacyData[j] };
+  }
+  var byProduct = Object.create(null);
+  stockRequirementsForCart_(cartItems).forEach(function (line) {
+    if (hasTrackedVariants[line.productId] || !legacyRows[line.productId]) return;
+    var req = byProduct[line.productId];
+    if (!req) {
+      var legacy = legacyRows[line.productId];
+      req = byProduct[line.productId] = {
+        productId: line.productId,
+        productName: String(legacy.row[1] || line.productName || line.productId),
+        rowIndex: legacy.rowIndex,
+        available: Number(legacy.row[2]) || 0,
+        qty: 0
+      };
+    }
+    req.qty += line.qty;
+  });
+  return Object.keys(byProduct).map(function (id) { return byProduct[id]; });
+}
+
 function trackedStockRequirements_(cartItems, data, strictMissingVariant) {
   data = data || [];
   var trackedProducts = Object.create(null);
@@ -5818,6 +5863,14 @@ function assertStockAvailableForOrder_(cartItems) {
     var sheet = ensureStockVariantsSheet_();
     var data = sheet.getDataRange().getValues();
     assertStockRequirementsAvailable_(trackedStockRequirements_(cartItems, data, true));
+    var legacySheet = ensureStockSheet_();
+    legacyProductStockRequirements_(cartItems, data, legacySheet.getDataRange().getValues()).forEach(function (req) {
+      if (req.available &lt; req.qty) {
+        var out = new Error('OUT_OF_STOCK:' + req.productName + ' — Available ' + req.available + ', চাওয়া হয়েছে ' + req.qty);
+        out.isStockError = true;
+        throw out;
+      }
+    });
   } catch (stockCheckErr) {
     if (stockCheckErr &amp;&amp; stockCheckErr.isStockError) throw stockCheckErr;
     var unavailable = new Error('STOCK_CHECK_UNAVAILABLE');
@@ -5834,7 +5887,18 @@ function reserveStockForOrderItems_(cartItems, orderId, admin) {
   var data = sheet.getDataRange().getValues();
   var requirements = trackedStockRequirements_(cartItems, data, true);
   assertStockRequirementsAvailable_(requirements);
+  var legacySheet = ensureStockSheet_();
+  var legacyData = legacySheet.getDataRange().getValues();
+  var legacyRequirements = legacyProductStockRequirements_(cartItems, data, legacyData);
+  legacyRequirements.forEach(function (req) {
+    if (req.available &lt; req.qty) {
+      var err = new Error('OUT_OF_STOCK:' + req.productName + ' — Available ' + req.available + ', চাওয়া হয়েছে ' + req.qty);
+      err.isStockError = true;
+      throw err;
+    }
+  });
   var applied = [];
+  var appliedLegacy = [];
   try {
     requirements.forEach(function (req) {
       mutateStockVariant_({
@@ -5851,7 +5915,51 @@ function reserveStockForOrderItems_(cartItems, orderId, admin) {
       });
       applied.push(req);
     });
+    legacyRequirements.forEach(function (req) {
+      var row = req.rowIndex;
+      var before = Number(legacySheet.getRange(row, 3).getValue()) || 0;
+      var after = before - req.qty;
+      if (after &lt; 0) {
+        var out = new Error('OUT_OF_STOCK:' + req.productName + ' — Available ' + before + ', চাওয়া হয়েছে ' + req.qty);
+        out.isStockError = true;
+        throw out;
+      }
+      legacySheet.getRange(row, 3).setValue(after);
+      legacySheet.getRange(row, 4).setValue(new Date());
+      appliedLegacy.push({ req: req, before: before, after: after });
+      appendStockLedger_({
+        productId: req.productId,
+        variant: '',
+        changeType: 'RESERVE_PRODUCT_TOTAL',
+        qtyBefore: before,
+        qtyAfter: after,
+        reservedBefore: 0,
+        reservedAfter: 0,
+        reason: 'নতুন/কনফার্ম অর্ডার — product-total stock, Order ' + orderId,
+        orderId: orderId,
+        admin: admin || 'system'
+      });
+    });
   } catch (reserveErr) {
+    for (var j = appliedLegacy.length - 1; j >= 0; j--) {
+      var legacyApplied = appliedLegacy[j];
+      try {
+        legacySheet.getRange(legacyApplied.req.rowIndex, 3).setValue(legacyApplied.before);
+        legacySheet.getRange(legacyApplied.req.rowIndex, 4).setValue(new Date());
+        appendStockLedger_({
+          productId: legacyApplied.req.productId,
+          variant: '',
+          changeType: 'RESERVE_ROLLBACK_PRODUCT_TOTAL',
+          qtyBefore: legacyApplied.after,
+          qtyAfter: legacyApplied.before,
+          reservedBefore: 0,
+          reservedAfter: 0,
+          reason: 'অর্ডার তৈরি ব্যর্থ — Order ' + orderId,
+          orderId: orderId,
+          admin: 'system'
+        });
+      } catch (legacyRollbackErr) {}
+    }
     for (var i = applied.length - 1; i >= 0; i--) {
       var req = applied[i];
       try {
@@ -5871,13 +5979,14 @@ function reserveStockForOrderItems_(cartItems, orderId, admin) {
     }
     throw reserveErr;
   }
-  return requirements.length;
+  return requirements.length + legacyRequirements.length;
 }
 
 /** Cancelled → রিজার্ভ ছাড়া (যদি আগে রিজার্ভ করা থাকে) */
 function releaseStockForOrderItems_(cartItems, orderId, admin) {
   var sheet = ensureStockVariantsSheet_();
-  var requirements = reservedStockRequirements_(cartItems, sheet.getDataRange().getValues());
+  var variantData = sheet.getDataRange().getValues();
+  var requirements = reservedStockRequirements_(cartItems, variantData);
   assertStockRequirementsReserved_(requirements);
   requirements.forEach(function (req) {
     mutateStockVariant_({
@@ -5889,6 +5998,27 @@ function releaseStockForOrderItems_(cartItems, orderId, admin) {
       deltaReserved: -req.qty,
       changeType: req.tracked ? 'RELEASE' : 'RELEASE_UNTRACKED_RESERVATION',
       reason: 'অর্ডার বাতিল/ফেরত — Order ' + orderId,
+      orderId: orderId,
+      admin: admin || 'system'
+    });
+  });
+
+  var legacySheet = ensureStockSheet_();
+  var legacyRequirements = legacyProductStockRequirements_(cartItems, variantData, legacySheet.getDataRange().getValues());
+  legacyRequirements.forEach(function (req) {
+    var current = Number(legacySheet.getRange(req.rowIndex, 3).getValue()) || 0;
+    var next = current + req.qty;
+    legacySheet.getRange(req.rowIndex, 3).setValue(next);
+    legacySheet.getRange(req.rowIndex, 4).setValue(new Date());
+    appendStockLedger_({
+      productId: req.productId,
+      variant: '',
+      changeType: 'RELEASE_PRODUCT_TOTAL',
+      qtyBefore: current,
+      qtyAfter: next,
+      reservedBefore: 0,
+      reservedAfter: 0,
+      reason: 'অর্ডার বাতিল/ফেরত — product-total stock, Order ' + orderId,
       orderId: orderId,
       admin: admin || 'system'
     });
@@ -5922,6 +6052,15 @@ function finalizeSoldDirectStockForOrderItems_(cartItems, orderId, admin) {
   var data = sheet.getDataRange().getValues();
   var requirements = trackedStockRequirements_(cartItems, data, true);
   assertStockRequirementsAvailable_(requirements);
+  var legacySheet = ensureStockSheet_();
+  var legacyRequirements = legacyProductStockRequirements_(cartItems, data, legacySheet.getDataRange().getValues());
+  legacyRequirements.forEach(function (req) {
+    if (req.available &lt; req.qty) {
+      var err = new Error('OUT_OF_STOCK:' + req.productName + ' — Available ' + req.available + ', চাওয়া হয়েছে ' + req.qty);
+      err.isStockError = true;
+      throw err;
+    }
+  });
   requirements.forEach(function (req) {
     mutateStockVariant_({
       productId: req.productId,
@@ -5932,6 +6071,30 @@ function finalizeSoldDirectStockForOrderItems_(cartItems, orderId, admin) {
       deltaReserved: 0,
       changeType: 'SELL_DIRECT',
       reason: 'ডেলিভারি সম্পন্ন (রিজার্ভ ছাড়াই সরাসরি) — Order ' + orderId,
+      orderId: orderId,
+      admin: admin || 'system'
+    });
+  });
+
+  legacyRequirements.forEach(function (req) {
+    var before = Number(legacySheet.getRange(req.rowIndex, 3).getValue()) || 0;
+    if (before &lt; req.qty) {
+      var err = new Error('OUT_OF_STOCK:' + req.productName + ' — Available ' + before + ', চাওয়া হয়েছে ' + req.qty);
+      err.isStockError = true;
+      throw err;
+    }
+    var after = before - req.qty;
+    legacySheet.getRange(req.rowIndex, 3).setValue(after);
+    legacySheet.getRange(req.rowIndex, 4).setValue(new Date());
+    appendStockLedger_({
+      productId: req.productId,
+      variant: '',
+      changeType: 'SELL_DIRECT_PRODUCT_TOTAL',
+      qtyBefore: before,
+      qtyAfter: after,
+      reservedBefore: 0,
+      reservedAfter: 0,
+      reason: 'ডেলিভারি সম্পন্ন — product-total stock, Order ' + orderId,
       orderId: orderId,
       admin: admin || 'system'
     });
@@ -6161,6 +6324,7 @@ function saveAdminStockVariant_(e) {
       orderId: '',
       admin: v.email || 'admin'
     });
+    if (setTracked &amp;&amp; nextAvailable > 0 &amp;&amp; (deltaAvailable > 0 || !before.tracked)) { try { opsNotifyVariant_(productId, variant, nextAvailable); } catch (notifyErr) {} }
     return { ok: true, productId: productId, variant: variant, available: nextAvailable, reserved: before.reserved, delta: deltaAvailable };
   } finally {
     lock.releaseLock();
@@ -6540,6 +6704,7 @@ function quickAdjustAdminStock_(e) {
       orderId: '',
       admin: v.email || 'admin'
     });
+    if (delta > 0) { try { opsNotifyVariant_(productId, variant, nextAvailable); } catch (notifyErr) {} }
     return { ok: true, productId: productId, variant: variant, available: nextAvailable, delta: delta };
   } finally {
     lock.releaseLock();

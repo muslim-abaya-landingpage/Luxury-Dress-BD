@@ -4,6 +4,8 @@
  *
  * Script properties:
  *   AUTH_SECRET — Sign Up
+ *   ORDER_RATE_LIMIT_MAX — optional order limit per 30-minute window (default 6)
+ *   ORDER_RATE_LIMIT_BYPASS — optional explicit comma/space-separated allowlist; unset = no bypass
  *   STEADFAST_API_KEY, STEADFAST_SECRET_KEY — Steadfast Courier
  *   STEADFAST_WEBHOOK_TOKEN — webhook URL ?token=... (Apps Script header পড়ে না)
  * ঐচ্ছিক: FB_ACCESS_TOKEN, FB_PIXEL_ID
@@ -52,10 +54,13 @@ function doGet(e) {
     var type = param_(e, 'RecordType');
     if (type === 'OrderSchema') return jsonOut_(getOnlineOrderSchemaStatus_());
     if (type === 'Subscribe') {
-      var contact = String(param_(e, 'contact') || param_(e, 'email') || '').trim();
-      var saved = saveSubscribeContact_(contact);
-      if (!saved.ok) return jsonOut_(saved);
-      return jsonOut_({ ok: true, message: 'Subscribed', sheet: 'Subscribe' });
+      // GET may be triggered by link scanners, previews, or browser prefetch.
+      // Never mutate the Subscribe sheet from a GET request; use doPost instead.
+      return jsonOut_({
+        ok: false,
+        error: 'METHOD_NOT_ALLOWED',
+        message: 'Subscription requests must use POST.'
+      });
     }
     if (type === 'AuthVerify' || type === 'AdminVerify') {
       var tok = param_(e, 'Token');
@@ -1576,11 +1581,13 @@ function setupOrderStatusDropdownFromMenu() {
 
 function rateLimitOrder_(phone) {
   var normalized = normalizePhone_(phone);
-  var bypassRaw = PropertiesService.getScriptProperties().getProperty('ORDER_RATE_LIMIT_BYPASS') || '01971642683';
-  var bypassParts = String(bypassRaw).split(/[,;\s]+/);
-  var b;
-  for (b = 0; b < bypassParts.length; b++) {
-    if (normalizePhone_(bypassParts[b]) === normalized) return;
+  var bypassRaw = String(PropertiesService.getScriptProperties().getProperty('ORDER_RATE_LIMIT_BYPASS') || '').trim();
+  if (bypassRaw) {
+    var bypassParts = bypassRaw.split(/[,;\s]+/);
+    var b;
+    for (b = 0; b < bypassParts.length; b++) {
+      if (normalized && normalizePhone_(bypassParts[b]) === normalized) return;
+    }
   }
   var cache = CacheService.getScriptCache();
   var k = 'ord_' + String(normalized || 'x');
@@ -6768,4 +6775,3 @@ function trackingSetupAudit() {
   console.log('TRACKING_SETUP_AUDIT ' + JSON.stringify(result));
   return result;
 }
-

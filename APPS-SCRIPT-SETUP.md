@@ -16,6 +16,16 @@
 2. `apps-script-copy.html` পেজ থেকে **Code.gs**, **AdminOrders.gs** ও **FixSheetHeaders.gs** কপি করে একই নামের ফাইলে পেস্ট করুন। না থাকলে **＋ → Script** দিয়ে তৈরি করুন। H-তে সাইজ বসানোর পরিবর্তনে তিনটি ফাইল আপডেট করতে হবে।
 3. **Save**
 
+### Security patch (2026-10-17)
+
+- `GET ?RecordType=Subscribe` এখন `METHOD_NOT_ALLOWED` JSON দেয় এবং Subscribe Sheet-এ কিছু লেখে না। Google Apps Script `ContentService` response-এ HTTP status code বেছে নেওয়া যায় না—তাই GET-এর HTTP status `200` হলেও JSON-এ `ok:false` থাকবে।
+- Newsletter/footer-এর স্বাভাবিক পথ `POST`; `site-footer.js` আগেই form-urlencoded POST পাঠায়, তাই POST subscription flow চালু থাকে।
+- Order limiter-এর bypass এখন default-এ **খালি**। `ORDER_RATE_LIMIT_BYPASS` Script Property স্পষ্টভাবে সেট থাকলেই allowlist প্রযোজ্য হবে। আগে থেকে Script Properties-এ property থাকলে তা এখনও কার্যকর—Project Settings-এ review করুন; অনুমোদিত প্রয়োজন না থাকলে মুছে দিন। `ORDER_RATE_LIMIT_MAX` না থাকলে limit প্রতি ফোনে ৩০ মিনিটে ৬টি order।
+- Source `apps-script/Code.gs`; `apps-script-copy.html` থেকে কপি করার আগে generated Code.gs parity test চালান: `npm run test:backend`।
+- এই security patch-এর জন্য কোনো Sheet migration বা `setupOnlineOrderExtraHeaders` চালানোর দরকার নেই। `main`-এ Git merge হওয়া **Apps Script deployment নয়**; Code.gs Save করার পর নিচের ধাপ অনুযায়ী নতুন Web App version প্রকাশ করতে হবে।
+
+প্রকাশের পর test deployment/আলাদা Sheet-এ POST subscription যাচাই করুন। Production-এ POST probe দেবেন না—তা বাস্তব Subscribe row লিখতে পারে। GET-only নিরাপদ probe হিসেবে `?RecordType=Subscribe&contact=security-probe@example.invalid` ব্যবহার করলে JSON `METHOD_NOT_ALLOWED` পাওয়া উচিত এবং Sheet row বাড়বে না।
+
 ## ৩. Deploy (Web app)
 
 আগের ডিপ্লয়মেন্ট আপডেট করতে **Deploy → Manage deployments → Edit → Version: New version → Deploy** ব্যবহার করুন। আগের URL-ই থাকবে; সাইটের API URL বদলাতে হবে না। H কলামে সাইজের বিন্যাস ও যাচাইয়ের জন্য `ORDER-SIZE-SETUP.md` দেখুন।
