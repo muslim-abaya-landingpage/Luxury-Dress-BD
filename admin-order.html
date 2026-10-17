@@ -19,8 +19,9 @@
 <link rel="stylesheet" href="admin.css?v=20261018-shared">
 <link rel="stylesheet" href="admin-dashboard-design.css?v=20261018-3">
 <script src="admin-dashboard-design.js?v=20261018-3"></script>
-<link rel="stylesheet" href="admin-premium-layout.css?v=20261018-2">
-<script src="admin-order-status.js?v=20261018-1"></script>
+<link rel="stylesheet" href="admin-premium-layout.css?v=20261018-3">
+<script src="admin-order-status.js?v=20261018-2"></script>
+<script src="admin-courier-tracking.js?v=20261018-1"></script>
 </head>
 <body class="pn-body">
   <div class="pn-app adm-shell">
@@ -122,6 +123,16 @@
             <div class="pn-sum"><span>Due (COD)</span><span id="sDue">৳0</span></div>
           </section>
 
+          <section class="pn-card" id="courierTrackingPanel" hidden aria-labelledby="ctHeading">
+            <h2 id="ctHeading">Steadfast ট্র্যাকিং</h2>
+            <strong id="ctStatus"></strong><p class="pn-note-muted" id="ctChecked"></p>
+            <button type="button" class="pn-btn" id="ctRefresh">Steadfast থেকে আপডেট আনুন</button>
+            <a class="pn-btn" id="ctPortal" target="_blank" rel="noopener" hidden>Steadfast-এ খুলুন</a>
+            <p id="ctWarning" role="status" aria-live="polite"></p>
+            <ol class="adm-courier-timeline" id="ctEvents"></ol>
+            <p class="pn-note-muted" id="ctEmpty">এখনো কোনো ট্র্যাকিং বার্তা পাওয়া যায়নি। অবস্থান অনুমান করা হচ্ছে না।</p>
+            <small class="pn-note-muted" id="ctScope"></small>
+          </section>
           <section class="pn-card">
             <h2><i>📦</i> Order Details</h2>
             <div class="pn-field"><label for="fCourier">Courier</label>
@@ -186,7 +197,8 @@
         var displayStatus = MaOrderStatus.describe(o);
         b.textContent = displayStatus.orderLabel;
         b.title = displayStatus.note;
-        b.className = "pn-badge " + MaPanel.statusClass(o.status);
+        b.className = "pn-badge " + displayStatus.badgeKey;
+        document.dispatchEvent(new CustomEvent("ma-order-rendered", { detail: o }));
         $("oSource").textContent = o.source;
         $("oCreated").textContent = "Created : " + o.time;
         $("fName").value = o.name;

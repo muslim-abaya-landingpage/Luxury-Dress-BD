@@ -20,8 +20,8 @@
 
 <link rel="stylesheet" href="admin-dashboard-design.css?v=20261018-3">
 <script src="admin-dashboard-design.js?v=20261018-3"></script>
-<link rel="stylesheet" href="admin-premium-layout.css?v=20261018-2">
-<script src="admin-order-status.js?v=20261018-1"></script>
+<link rel="stylesheet" href="admin-premium-layout.css?v=20261018-3">
+<script src="admin-order-status.js?v=20261018-2"></script>
 </head>
 <body class="adm-body">
   <div class="adm-shell">
@@ -131,7 +131,7 @@
             <a href="admin-orders.html">সব অর্ডার দেখুন →</a>
           </div>
           <div class="dz-load-notice" id="admLoadNotice" role="alert" aria-live="assertive" hidden></div>
-          <p class="adm-courier-note">অর্ডারের অবস্থা ও কুরিয়ারের অবস্থা আলাদা। কুরিয়ারে নথিভুক্ত মানেই রাইডারের কাছে নয়; কুরিয়ার তথ্য সর্বশেষ সংরক্ষিত আপডেট।</p>
+          <p class="adm-courier-note">ব্যাজে কুরিয়ারের মূল স্ট্যাটাস দেখানো হচ্ছে। ট্র্যাকিংয়ের ঘটনা ও নতুন আপডেট দেখতে অর্ডার খুলুন।</p>
           <div id="admOrdersBody" aria-live="polite" aria-busy="true"><div class="dz-empty">অর্ডার লোড হচ্ছে…</div></div>
         </section>
         <details class="adm-disclosure adm-dashboard-reports"><summary>বিস্তারিত রিপোর্ট ও বিশ্লেষণ</summary><div class="adm-disclosure-body">
@@ -250,15 +250,16 @@
           if (st.badOutcome >= 2) tags += '<em class="bad">⚠️ রিস্কি</em>';
           var key = statusKey(o.status);
           var displayStatus = MaOrderStatus.describe(o);
+          key = displayStatus.badgeKey;
           var confirmMsg = "আসসালামু আলাইকুম " + (o.name || "") + ", আপনার অর্ডার #" + (o.orderId || "") + " (৳" + (o.total || 0) + ") কনফার্ম হয়েছে। শীঘ্রই ডেলিভারি করা হবে, ধন্যবাদ।";
           var ini = String(o.name || "?").trim().charAt(0).toUpperCase() || "?";
           return '<div class="dz-order">' +
             '<div class="dz-av">' + escapeHtml(ini) + "</div>" +
-            '<div class="dz-who"><b>' + escapeHtml(o.name) + "</b><span>" + escapeHtml(o.orderId || "—") + " · " + escapeHtml(o.time) + "</span>" +
+            '<div class="dz-who"><b><a class="adm-order-open" href="admin-order.html?id=' + encodeURIComponent(o.orderId || '') + '">' + escapeHtml(o.name) + "</a></b><span>" + escapeHtml(o.orderId || "—") + " · " + escapeHtml(o.time) + "</span>" +
             (tags ? '<div class="dz-tags">' + tags + "</div>" : "") + "</div>" +
             '<div class="dz-items">' + escapeHtml((o.design || "").replace(/\s*\n\s*/g, " ").slice(0, 90)) + "</div>" +
             '<div class="dz-amt">৳' + escapeHtml(o.total) + "<small>" + escapeHtml(o.payment || "") + (o.district ? " · " + escapeHtml(o.district) : "") + "</small></div>" +
-            '<div class="dz-st" title="' + escapeHtml(displayStatus.note) + '"><span class="dz-chip ' + key + '">' + escapeHtml(displayStatus.orderLabel) + '</span>' + (displayStatus.hasCourier ? '<small class="adm-courier-state">কুরিয়ার: ' + escapeHtml(displayStatus.courierLabel) + '</small>' : '') + "</div>" +
+            '<div class="dz-st" title="' + escapeHtml(displayStatus.note) + '"><span class="dz-chip ' + key + '">' + escapeHtml(displayStatus.orderLabel) + '</span>' + (displayStatus.hasCourier ? '<small class="adm-courier-state">অর্ডার: ' + escapeHtml(displayStatus.orderRaw) + '</small>' : '') + "</div>" +
             '<div class="dz-row-actions"><a target="_blank" rel="noopener" href="' + waLink(o.phone, confirmMsg) + '">WhatsApp</a>' +
             '<button type="button" onclick="printInvoice(window.__admOrdersById[\'' + rowId + '\'])">Print</button></div>' +
             "</div>";
