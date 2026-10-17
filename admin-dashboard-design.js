@@ -39,6 +39,21 @@
       if (event.key === 'ma-admin-sidebar-collapsed') setCollapsed(event.newValue === 'true');
     });
     sidebar.querySelectorAll('.adm-sidebar-item').forEach(function (link) { link.title = link.textContent.trim(); });
+    sidebar.querySelectorAll('.adm-nav-group').forEach(function (group) {
+      group.querySelector('summary').addEventListener('click', function (event) {
+        if (!mobile.matches && sidebar.classList.contains('is-collapsed')) {
+          event.preventDefault();
+          setCollapsed(false); save('ma-admin-sidebar-collapsed', 'false');
+          group.open = true;
+        }
+      });
+    });
+    // A dashboard shortcut brings the new-product button into view without submitting data.
+    if (window.location && window.location.hash === '#pmQuickUpload') {
+      var upload = document.getElementById('pmQuickUpload');
+      if (upload) { upload.scrollIntoView({ block: 'center' }); upload.focus({ preventScroll: true }); }
+    }
+
     if (!menu || !close || !backdrop) return;
     menu.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>';
     menu.setAttribute('aria-controls', sidebar.id);
@@ -65,7 +80,7 @@
       if (!mobile.matches || !sidebar.classList.contains('is-open')) return;
       if (event.key === 'Escape') drawer(false, true);
       if (event.key === 'Tab') {
-        var items = Array.from(sidebar.querySelectorAll('a[href], button')).filter(function (item) { return item.getClientRects().length; });
+        var items = Array.from(sidebar.querySelectorAll('a[href], button, summary')).filter(function (item) { return item.getClientRects().length; });
         var first = items[0], last = items[items.length - 1];
         if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
         else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
