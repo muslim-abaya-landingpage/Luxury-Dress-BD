@@ -80,7 +80,7 @@
       <p><a class="pn-btn" href="admin-operations.html">হিসাব ও রিটার্ন →</a></p><div class="pn-tabs" id="ordTabs"></div>
 
       <div class="pn-toolbar">
-        <input class="pn-in" id="ordSearch" type="search" placeholder="নাম, ফোন বা Order ID দিয়ে খুঁজুন…" autocomplete="off">
+        <input class="pn-in" id="ordSearch" type="search" placeholder="লোড হওয়া অর্ডারের নাম, ফোন বা Order ID…" autocomplete="off">
       </div>
 
       <div class="pn-table-wrap">
@@ -100,6 +100,10 @@
           <tbody id="ordBody" aria-live="polite"><tr class="pn-skeleton-row"><td colspan="8"><div class="pn-skeleton-stack"><i></i><i></i><i></i><i></i></div></td></tr></tbody>
         </table>
       </div>
+      <div class="pn-toolbar" id="ordPaging" aria-live="polite">
+        <button type="button" class="pn-btn" id="ordLoadMore" hidden style="display:none">আরও অর্ডার দেখুন</button>
+        <span class="pn-note-muted" id="ordPageStatus"></span>
+      </div>
     </main>
   </div>
 
@@ -115,6 +119,10 @@
       var all = [];
       var counts = {};
       var statuses = [];
+      var nextCursor = 0;
+      var cursorSupported = false;
+      var pageLimit = 80;
+      var loadingMore = false;
       var filter = "all";
       var q = "";
       var issueFilter = "all";
@@ -152,7 +160,7 @@
 
       function renderRows() {
         var list = all.filter(matches);
-        document.getElementById("ordIssueCount").textContent = "দেখানো হচ্ছে " + list.length + " / " + all.length + " অর্ডার";
+        document.getElementById("ordIssueCount").textContent = "লোড করা " + all.length + "টির মধ্যে দেখানো হচ্ছে " + list.length;
         var body = document.getElementById("ordBody");
         if (!list.length) {
           body.innerHTML = '<tr><td colspan="8" class="pn-empty">কোনো অর্ডার পাওয়া যায়নি</td></tr>';
@@ -175,6 +183,20 @@
             "</tr>"
           );
         }).join("");
+      }
+
+      function renderPagination() {
+        var total = Number(counts.all) || 0;
+        var moreBtn = document.getElementById("ordLoadMore");
+        var hasMore = cursorSupported && !!nextCursor;
+        moreBtn.hidden = !hasMore;
+        moreBtn.style.display = hasMore ? "" : "none";
+        if (!cursorSupported && total > all.length) {
+          document.getElementById("ordPageStatus").textContent = "পুরোনো order API: সব অর্ডার দেখতে Apps Script pagination deploy প্রয়োজন।";
+          return;
+        }
+        document.getElementById("ordPageStatus").textContent =
+          "লোড হয়েছে " + all.length + " / " + total + " অর্ডার" + (hasMore ? " · আরও আছে" : " · শেষ পৃষ্ঠা");
       }
 
       var ordersShown = false;
@@ -202,28 +224,55 @@
         document.getElementById("ordScope").textContent = scope;
         document.getElementById("ordInsights").hidden = false;
       }
-      function apply(res) {
+      function apply(res, append) {
         ordersShown = true;
-        all = res.orders || [];
+        var incoming = res.orders || [];
+        all = append ? all.concat(incoming) : incoming;
+        cursorSupported = typeof res.nextCursor === "number";
+        nextCursor = Math.max(0, parseInt(res.nextCursor, 10) || 0);
         counts = res.counts || {};
         statuses = res.statuses || [];
         document.getElementById("ordCount").textContent = (counts.all || 0) + "টি অর্ডার";
         renderInsights(res);
         renderTabs();
         renderRows();
+        renderPagination();
       }
 
-      function load(options) {
-        var cached = MaAdmin.cached("AdminOrderList", { Limit: 300 }, 5 * 60 * 1000);
-        if (cached) apply(cached);
+      function load(options, append) {
+        append = append === true;
+        if (append && (!nextCursor || loadingMore)) return Promise.resolve();
+        var params = { Limit: pageLimit };
+        if (append) params.Cursor = nextCursor;
+        var cached = append ? null : MaAdmin.cached("AdminOrderList", params, 5 * 60 * 1000);
+        if (cached) apply(cached, false);
         var btn = document.getElementById("ordRefresh");
-        btn.disabled = true;
-        document.getElementById("ordCount").textContent = (ordersShown ? (counts.all || 0) + "টি অর্ডার · " : "") + "আপডেট হচ্ছে…";
-        if (!ordersShown) document.getElementById("ordBody").innerHTML = '<tr><td colspan="8" class="pn-empty">অর্ডার আনা হচ্ছে…</td></tr>';
-        return MaAdmin.call("AdminOrderList", { Limit: 300 }, options).then(apply).catch(function (err) {
+        var moreBtn = document.getElementById("ordLoadMore");
+        if (append) {
+          loadingMore = true;
+          moreBtn.disabled = true;
+          moreBtn.textContent = "লোড হচ্ছে…";
+        } else {
+          btn.disabled = true;
+        }
+        document.getElementById("ordCount").textContent = (ordersShown ? (counts.all || 0) + " orders · " : "") + "আপডেট হচ্ছে…";
+        if (!append && !ordersShown) document.getElementById("ordBody").innerHTML = '<tr><td colspan="8" class="pn-empty">অর্ডার আনা হচ্ছে…</td></tr>';
+        return MaAdmin.call("AdminOrderList", params, options).then(function (res) {
+          if (append && typeof res.nextCursor !== "number") throw new Error("ORDER_PAGINATION_API_OLD");
+          apply(res, append);
+        }).catch(function (err) {
+          if (err && err.message === "ORDER_PAGINATION_API_OLD") {
+            MaPanel.toast("Apps Script order API আপডেট হয়নি; Load More চালু করতে backend deploy প্রয়োজন।", true);
+            return;
+          }
           if (ordersShown) { MaPanel.toast("আপডেট করা যায়নি: " + err.message, true); return; }
           document.getElementById("ordBody").innerHTML = '<tr><td colspan="8" class="pn-empty">Error: ' + esc(err.message) + "</td></tr>";
-        }).then(function () { btn.disabled = false; });
+        }).then(function () {
+          btn.disabled = false;
+          loadingMore = false;
+          moreBtn.disabled = false;
+          moreBtn.textContent = "আরও অর্ডার দেখুন";
+        });
       }
 
       document.getElementById("ordTabs").addEventListener("click", function (e) {
@@ -247,6 +296,7 @@
         if (tr && tr.getAttribute("data-id")) location.href = "admin-order.html?id=" + encodeURIComponent(tr.getAttribute("data-id"));
       });
       document.getElementById("ordRefresh").addEventListener("click", load);
+      document.getElementById("ordLoadMore").addEventListener("click", function () { load(null, true); });
 
       MaPanel.init("orders").then(function (s) { if (s) load({ maxAgeMs: 5 * 60 * 1000 }); });
     })();
