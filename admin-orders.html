@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <link rel="preload" as="script" href="site-api-config.js?v=20261009-inbox">
   <link rel="preload" as="script" href="admin-config.js?v=20261009-inbox">
-  <link rel="preload" as="script" href="admin-api.js?v=20261013-speed2">
+  <link rel="preload" as="script" href="admin-api.js?v=20261017-instant">
   <link rel="preload" as="script" href="admin-guard.js?v=20261010-speed">
   <link rel="preload" as="script" href="admin-panel.js?v=20261016-ops">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,7 +13,7 @@
   <meta name="robots" content="noindex, nofollow">
   <title>Orders | Muslim Abaya Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="admin-panel.css?v=20260930">
+  <link rel="stylesheet" href="admin-panel.css?v=20261017-instant">
   <link rel="stylesheet" href="admin-order-insights.css?v=20261016-1">
   <script src="config.js?v=20261009-inbox"></script>
   <link rel="stylesheet" href="admin-sidebar.css?v=20261003sb">
@@ -62,7 +62,7 @@
               <th>যাচাই</th>
             </tr>
           </thead>
-          <tbody id="ordBody"><tr><td colspan="8" class="pn-empty">Loading…</td></tr></tbody>
+          <tbody id="ordBody" aria-live="polite"><tr class="pn-skeleton-row"><td colspan="8"><div class="pn-skeleton-stack"><i></i><i></i><i></i><i></i></div></td></tr></tbody>
         </table>
       </div>
     </main>
@@ -70,7 +70,7 @@
 
   <script src="site-api-config.js?v=20261009-inbox"></script>
   <script src="admin-config.js?v=20261009-inbox"></script>
-  <script src="admin-api.js?v=20261013-speed2"></script>
+  <script src="admin-api.js?v=20261017-instant"></script>
   <script src="admin-guard.js?v=20261010-speed"></script>
   <script src="admin-panel.js?v=20261016-ops"></script>
   <script src="admin-order-insights.js?v=20261016-1"></script>
@@ -180,7 +180,7 @@
       }
 
       function load(options) {
-        var cached = MaAdmin.cached("AdminOrderList", { Limit: 300 });
+        var cached = MaAdmin.cached("AdminOrderList", { Limit: 300 }, 5 * 60 * 1000);
         if (cached) apply(cached);
         var btn = document.getElementById("ordRefresh");
         btn.disabled = true;
@@ -214,10 +214,8 @@
       });
       document.getElementById("ordRefresh").addEventListener("click", load);
 
-      MaPanel.init("orders").then(function (s) { if (s) load({ maxAgeMs: 15000 }); });
+      MaPanel.init("orders").then(function (s) { if (s) load({ maxAgeMs: 5 * 60 * 1000 }); });
     })();
   </script>
 </body>
 </html>
-
-

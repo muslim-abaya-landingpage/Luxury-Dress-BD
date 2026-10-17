@@ -134,6 +134,14 @@ body.pn-body {
 .pn-table .oid { font-weight: 700; color: var(--pn-red); }
 .pn-table .sub { color: var(--pn-muted); font-size: 12.5px; }
 .pn-empty { text-align: center; color: var(--pn-muted); padding: 30px 10px !important; }
+.pn-skeleton-row td { padding: 18px 12px !important; }
+.pn-skeleton-stack { display: grid; gap: 10px; }
+.pn-skeleton-stack i { display: block; height: 12px; width: 72%; border-radius: 999px; background: linear-gradient(90deg, #eef0f6 25%, #f8f9fc 50%, #eef0f6 75%); background-size: 200% 100%; animation: pn-shimmer 1.2s linear infinite; }
+.pn-skeleton-stack i:nth-child(2) { width: 48%; }
+.pn-skeleton-stack i:nth-child(3) { width: 60%; }
+.pn-skeleton-stack i:nth-child(4) { width: 38%; }
+@keyframes pn-shimmer { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .pn-skeleton-stack i { animation: none; } }
 
 /* Modal */
 .pn-modal-bg { position: fixed; inset: 0; background: rgba(15, 20, 40, .5); display: none; align-items: center; justify-content: center; padding: 16px; z-index: 50; }

@@ -56,7 +56,9 @@
     if (!API_URL) return Promise.reject(new Error("API_MISSING"));
     var read = READ_TYPES.indexOf(fields.RecordType) !== -1;
     // Only page navigation opts in; Refresh and every write still reach the server.
-    var maxAge = Math.min(15000, Math.max(0, Number(options && options.maxAgeMs) || 0));
+    // Orders page-এ আগের snapshot আগে দেখানো হবে; Refresh button live request বাধ্য করবে।
+    // এতে navigation-এর সময় blank/loading state থাকে না, কিন্তু data শেষ পর্যন্ত revalidate হয়।
+    var maxAge = Math.min(5 * 60 * 1000, Math.max(0, Number(options && options.maxAgeMs) || 0));
     var recent = read && maxAge ? cached(fields.RecordType, fields, maxAge) : null;
     if (recent) return Promise.resolve(recent);
     var key = read ? readKey(fields) : "";
@@ -611,4 +613,3 @@
     }
   };
 })(window);
-
