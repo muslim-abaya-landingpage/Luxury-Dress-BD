@@ -242,9 +242,11 @@
           var msg = "অর্ডার আপডেট হয়েছে ✓";
           if (res.hooks && res.hooks.courier === "SENT") msg += " · Steadfast-এ পাঠানো হয়েছে";
           MaPanel.toast(msg);
+          return true;
         }).catch(function (err) {
           MaPanel.toast(err.message, true);
-        }).then(function () { btn.disabled = false; });
+          return false;
+        }).then(function (saved) { btn.disabled = false; return saved; });
       }
 
       $("btnSave").addEventListener("click", save);
@@ -279,9 +281,11 @@
         var btn = $("btnCourierSend");
         btn.disabled = true;
         // আগে অসংরক্ষিত পরিবর্তন সেভ, তারপর পাঠানো — যাতে সঠিক COD/ঠিকানা যায়
-        save().then(function () {
+        save().then(function (saved) {
+          if (!saved) return null;
           return MaAdmin.call("AdminSendCourier", { OrderId: orderId });
         }).then(function (r) {
+          if (!r) return;
           var keep = { statuses: Array.prototype.map.call($("fStatus").options, function (o) { return o.value; }), couriers: Array.prototype.map.call($("fCourier").options, function (o) { return o.value; }) };
           r.order.blocked = cur && cur.blocked;
           paint(r.order, keep);
@@ -337,4 +341,3 @@
   </script>
 </body>
 </html>
-

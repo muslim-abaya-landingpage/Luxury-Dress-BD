@@ -126,7 +126,7 @@ function doPost(e) {
     }
 
     // Every order-panel action verifies the admin/staff token inside its handler.
-    var orderPanelTypes = ['AdminOrderList', 'AdminOrderGet', 'AdminOrderUpdate', 'AdminFraudCheck', 'AdminBlockCustomer', 'AdminSendCourier', 'AdminOrderStaff'];
+    var orderPanelTypes = ['AdminOrderList', 'AdminOrderListV2', 'AdminOrderGet', 'AdminOrderUpdate', 'AdminFraudCheck', 'AdminBlockCustomer', 'AdminSendCourier', 'AdminOrderStaff'];
     if (orderPanelTypes.indexOf(type) !== -1) {
       var panelResult = handleAdminOrderRequest_(type, e);
       return jsonOut_(panelResult || { ok: false, error: 'UNKNOWN_TYPE' });
@@ -138,6 +138,10 @@ function doPost(e) {
       adminRateLimit_(param_(e, 'Token') || 'admin_global');
     } else if (!isOrder && !isSubscribe) {
       rateLimit_(param_(e, 'Email') || param_(e, 'Phone') || param_(e, 'Login') || param_(e, 'Token') || (type === 'AuthGoogle' ? 'g_' + String(param_(e, 'IdToken')).slice(-24) : '') || 'global');
+    }
+
+    if (type === 'AdminProductSheetRead' || type === 'AdminProductSheetWrite') {
+      return jsonOut_(productLibrarySheetHandle_(type, e));
     }
 
     if (type === 'AuthRegister' || type === 'CustomerRegister') {

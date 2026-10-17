@@ -25,6 +25,7 @@
   <link rel="stylesheet" href="admin-premium.css?v=20261003pm2">
 <style>.pm-overview-product{display:flex;align-items:center;gap:12px}.pm-overview-photo{display:flex;align-items:center;justify-content:center;width:64px;height:80px;flex-shrink:0;background:#f3f3f3;border-radius:8px;overflow:hidden;font-size:11px;text-align:center;color:#666}.pm-overview-photo img{width:100%;height:100%;object-fit:contain}</style>
 <link rel="stylesheet" href="product-quick-upload.css?v=20261016-publish">
+<link rel="stylesheet" href="product-bulk-import.css?v=20261017-1">
 </head>
 <body class="pl-admin adm-body" data-admin-guard="1">
   <div class="adm-shell">
@@ -65,7 +66,7 @@
         <p id="pmSaveStatus" role="status" aria-live="polite">স্টক বাটনে ক্লিক করলেই স্বয়ংক্রিয়ভাবে সেভ হবে।</p>
       </header>
 
-      <main class="pl-main"><section class="pm-quick-intro"><div><h2>একবারেই ছবি ও পণ্য প্রকাশ</h2><p>ক্যাটাগরি বাছুন → ছবি ও তথ্য দিন → প্রকাশ করুন</p></div><div><button class="pl-btn pl-btn-primary" id="pmQuickUpload" type="button">+ নতুন পণ্য আপলোড</button> <button class="pl-btn pl-btn-secondary" id="pmPublishCheck" type="button">প্রকাশের অবস্থা দেখুন</button> <a id="pmLiveLink" target="_blank" rel="noopener" hidden>লাইভ পণ্য দেখুন →</a></div></section>
+      <main class="pl-main"><section class="pm-quick-intro"><div><h2>একবারেই ছবি ও পণ্য প্রকাশ</h2><p>ক্যাটাগরি বাছুন → ছবি ও তথ্য দিন → প্রকাশ করুন</p></div><div><button class="pl-btn pl-btn-primary" id="pmQuickUpload" type="button">+ নতুন পণ্য আপলোড</button> <button class="pl-btn pl-btn-secondary" id="pmBulkImport" type="button">CSV / Sheet CSV আমদানি</button> <button class="pl-btn pl-btn-secondary" id="pmPublishCheck" type="button">প্রকাশের অবস্থা দেখুন</button> <a id="pmLiveLink" target="_blank" rel="noopener" hidden>লাইভ পণ্য দেখুন →</a></div></section>
         <details class="pm-help"><summary>কীভাবে পণ্য প্রকাশ করবেন</summary><div class="pl-steps"><ol><li>“নতুন পণ্য আপলোড” চাপুন এবং ক্যাটাগরি বাছুন।</li><li>নাম, দাম, সাইজ ও নিজের পণ্যের ছবি দিন। প্রথম ছবিটি প্রধান ছবি হবে।</li><li>“ছবিসহ ওয়েবসাইটে প্রকাশ করুন” চাপুন। লাইভ হওয়ার নিশ্চয়তা ও লিংক এখানে দেখাবে।</li></ol><p>আগের পণ্য সম্পাদনা করতে নিচের তালিকা ব্যবহার করুন।</p></div></details>
 
         <div class="pm-layout" id="pmLayout">
@@ -1986,6 +1987,99 @@
   renderCatList();
   renderMain();
   savedSnapshot = catalogSnapshot();
+  function findProductById(id) {
+    var target = String(id || "").trim().toLowerCase();
+    var found = null;
+    sections.some(function (sec) {
+      var list = products[sec.key] || [];
+      var idx = list.findIndex(function (p) { return String(p.id || "").trim().toLowerCase() === target; });
+      if (idx >= 0) { found = { section: sec, index: idx, product: list[idx] }; return true; }
+      return false;
+    });
+    return found;
+  }
+  function previewBulkImport(rows) {
+    var seen = Object.create(null);
+    return (rows || []).map(function (row, index) {
+      var errors = [];
+      var id = String(row.id || "").trim();
+      var name = String(row.name || "").trim();
+      var categoryText = String(row.category || "").trim().toLowerCase();
+      var section = sections.find(function (sec) {
+        return [sec.key, sec.menu, sec.menuBn, sec.page, sec.path].some(function (value) {
+          return String(value || "").trim().toLowerCase() === categoryText;
+        });
+      });
+      var price = Number(row.price);
+      var existing = id ? findProductById(id) : null;
+      if (!id) errors.push("SKU / ID খালি");
+      if (id && seen[id.toLowerCase()]) errors.push("এই CSV-তে একই SKU একাধিকবার আছে");
+      if (id) seen[id.toLowerCase()] = true;
+      if (!name) errors.push("পণ্যের নাম খালি");
+      if (!Number.isFinite(price) || price < 0) errors.push("দাম সঠিক সংখ্যা নয়");
+      if (!section) errors.push("ক্যাটাগরি পাওয়া যায়নি: " + (row.category || "খালি"));
+      if (!existing && !String(row.image || "").trim()) errors.push("নতুন পণ্যের জন্য Image URL আবশ্যক");
+      return { row: index + 2, id: id, name: name, category: section ? section.menuBn || section.menu || section.key : String(row.category || ""), categoryKey: section && section.key, price: price, status: existing ? "update" : "new", errors: errors };
+    });
+  }
+  function applyBulkImport(rows) {
+    var preview = previewBulkImport(rows);
+    var invalid = preview.filter(function (item) { return item.errors.length; });
+    if (invalid.length) throw new Error("CSV-তে " + invalid.length + "টি ভুল সারি আছে। কোনো পণ্য যোগ হয়নি; Preview-তে ভুল ঠিক করে আবার import করুন।");
+    var added = 0, updated = 0;
+    (rows || []).forEach(function (row, index) {
+      var sec = sections.find(function (item) { return item.key === preview[index].categoryKey; });
+      var found = findProductById(row.id);
+      var product = found ? cloneJson(found.product) : {};
+      product.id = String(row.id).trim();
+      product.name = String(row.name).trim();
+      product.price = Number(row.price);
+      if (row.image) product.image = String(row.image).trim();
+      if (!product.image && Array.isArray(row.images) && row.images.length) product.image = row.images[0];
+      if (row.fabric) product.fabric = String(row.fabric).trim();
+      if (row.color) product.color = String(row.color).trim();
+      if (row.colorLabel) product.colorLabel = String(row.colorLabel).trim();
+      if (Array.isArray(row.sizes)) product.sizes = row.sizes.slice();
+      if (Array.isArray(row.images) && row.images.length) product.images = row.images.slice();
+      if (row.detailNote) product.detailNote = String(row.detailNote).trim();
+      if (row.priceByType && typeof row.priceByType === "object" && !Array.isArray(row.priceByType)) product.priceByType = cloneJson(row.priceByType);
+      if (Array.isArray(row.colorVariants)) product.colorVariants = cloneJson(row.colorVariants);
+      if (Array.isArray(row.variantMatrix)) product.variantMatrix = cloneJson(row.variantMatrix);
+      if (typeof row.stock === "number") {
+        product.stock = row.stock;
+        if (row.stock === 0) product.inStock = false;
+        else delete product.inStock;
+      }
+      if (!found || found.section.key !== sec.key) product.link = sec.path || "/" + sec.key;
+      else product.link = product.link || sec.path || "/" + sec.key;
+      if (found) {
+        products[found.section.key].splice(found.index, 1);
+        updated++;
+      } else added++;
+      products[sec.key].push(product);
+    });
+    activeKey = ALL_PRODUCTS_KEY;
+    overviewSelected = {};
+    renderCatList();
+    renderMain();
+    setSaveStatus("CSV আমদানি staging সম্পন্ন: " + added + "টি নতুন, " + updated + "টি আপডেট। ওয়েবসাইটে প্রকাশ করতে ‘পরিবর্তন প্রকাশ করুন’ চাপুন।");
+    return { added: added, updated: updated };
+  }
+  window.MaProductManagerBulk = {
+    preview: previewBulkImport,
+    apply: applyBulkImport,
+    isReady: function () { return !!(window.MaCatalogPublisher && window.MaCatalogPublisher.isReady()); },
+    exportRows: function () {
+      return sections.reduce(function (all, sec) {
+        (products[sec.key] || []).forEach(function (product) {
+          var row = cloneJson(product);
+          row.category = sec.key;
+          all.push(row);
+        });
+        return all;
+      }, []);
+    }
+  };
   window.MaProductQuickUpload.mount({sections:function(){return sections;},status:setSaveStatus,isSaved:function(){return savedSnapshot===catalogSnapshot();},stage:function(category,product){if(!sections.some(function(sec){return sec.key===category;}))throw new Error("ক্যাটাগরি বাছুন।");Object.keys(products).forEach(function(k){products[k]=products[k].filter(function(p){return p.id!==product.id;});});products[category].unshift(product);renderCatList();renderMain();},publish:saveAll});
   reloadPublishingData();
   window.addEventListener("beforeunload", function (event) {
@@ -1994,6 +2088,8 @@
 })();
 
 </script>
+  <script src="product-bulk-import.js?v=20261017-1"></script>
+  <script src="product-sheet-sync.example.js?v=20261017-1"></script>
   <script>
     (function () {
       var sidebar = document.getElementById("admSidebar");

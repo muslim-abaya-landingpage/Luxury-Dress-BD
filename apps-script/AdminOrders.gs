@@ -555,6 +555,7 @@ function handleAdminOrderRequest_(type, e) {
   try {
     switch (type) {
       case 'AdminOrderList': return adminOrderList_(e);
+      case 'AdminOrderListV2': return adminOrderListV2_(e);
       case 'AdminOrderGet': return adminOrderGet_(e);
       case 'AdminOrderUpdate': return adminOrderUpdate_(e);
       case 'AdminFraudCheck': return adminFraudCheck_(e);

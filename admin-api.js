@@ -7,7 +7,7 @@
   var SESSION_KEY = cfg.sessionKey || "ma_admin_session";
   var SESSION_MS = (cfg.sessionDays || 7) * 24 * 60 * 60 * 1000;
 
-  var READ_TYPES = ['AdminCatalogState', 'AdminCatalogStatus', 'AdminOrders', 'AdminOrderList', 'AdminOrderGet', 'AdminOrderStaff',
+  var READ_TYPES = ['AdminCatalogState', 'AdminCatalogStatus', 'AdminOrders', 'AdminOrderList', 'AdminOrderListV2', 'AdminProductSheetRead', 'AdminOrderGet', 'AdminOrderStaff',
     'AdminStockGet', 'AdminAnalytics', 'AdminStockVariantsList', 'AdminStockLedgerList',
     'AdminAnalyticsV2', 'AdminGrowthData', 'AdminStaffList', 'InboxList', 'InboxThread', 'InboxProfile'];
   var CACHE_PREFIX = "ma_admin_read_v2:";
