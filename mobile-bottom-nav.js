@@ -1,6 +1,7 @@
 (() => {
   const CONFIG = {
     homeHref: "/",
+    categoryHref: "/category",
     callNumber: "+8801971642683",
     loginHref: "signin.html"
   };
@@ -29,7 +30,7 @@
         <span class="mbn-label">Home</span>
       </a>
 
-      <button type="button" class="mbn-item" id="mbn-category" aria-label="Category" aria-controls="mobileMenuPanel" aria-expanded="false">
+      <button type="button" class="mbn-item" id="mbn-category" aria-label="Browse product categories" aria-controls="mobileMenuPanel" aria-expanded="false">
         ${ICONS.category}
         <span class="mbn-label">Category</span>
       </button>
@@ -59,7 +60,7 @@
       if (typeof window.toggleAbayaMenu === "function") {
         window.toggleAbayaMenu();
       } else {
-        window.location.href = siteHrefSafe(CONFIG.homeHref);
+        window.location.href = siteHrefSafe(CONFIG.categoryHref);
       }
       syncCategoryState();
     });

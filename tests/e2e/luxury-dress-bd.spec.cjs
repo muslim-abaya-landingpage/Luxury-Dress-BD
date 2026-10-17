@@ -283,6 +283,19 @@ test.describe('Luxury Dress BD — integration / E2E', () => {
     await expect(page.locator('body')).not.toContainText('Customer phone');
   });
 
+  test('mobile category navigation falls back to the category hub if the header menu is unavailable', async ({ page }) => {
+    await mockAppsScript(page, async () => 'Success|E2E-NOT-USED');
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/checkout.html');
+    await page.evaluate(() => { window.toggleAbayaMenu = undefined; });
+
+    const categoryButton = page.getByRole('button', { name: 'Browse product categories' });
+    await expect(categoryButton).toBeVisible();
+    await categoryButton.click();
+    await expect(page).toHaveURL(/\/category(?:\.html)?$/);
+    await expect(page.locator('#list h1')).toBeVisible();
+  });
+
   test('checkout layout does not create horizontal overflow on a mobile viewport', async ({ page }) => {
     await mockAppsScript(page, async () => 'Success|E2E-NOT-USED');
     await page.setViewportSize({ width: 390, height: 844 });
