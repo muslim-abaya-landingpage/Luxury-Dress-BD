@@ -4,6 +4,8 @@
  *
  * Script properties:
  *   AUTH_SECRET — Sign Up
+ *   GOOGLE_CLIENT_ID — optional Google sign-in
+ *   FACEBOOK_LOGIN_APP_ID, FACEBOOK_LOGIN_APP_SECRET — optional Facebook sign-in
  *   ORDER_RATE_LIMIT_MAX — optional order limit per 30-minute window (default 6)
  *   ORDER_RATE_LIMIT_BYPASS — optional explicit comma/space-separated allowlist; unset = no bypass
  *   STEADFAST_API_KEY, STEADFAST_SECRET_KEY — Steadfast Courier
@@ -137,7 +139,7 @@ function doPost(e) {
     if (type && type.indexOf('Admin') === 0) {
       adminRateLimit_(param_(e, 'Token') || 'admin_global');
     } else if (!isOrder && !isSubscribe) {
-      rateLimit_(param_(e, 'Email') || param_(e, 'Phone') || param_(e, 'Login') || param_(e, 'Token') || (type === 'AuthGoogle' ? 'g_' + String(param_(e, 'IdToken')).slice(-24) : '') || 'global');
+      rateLimit_(param_(e, 'Email') || param_(e, 'Phone') || param_(e, 'Login') || param_(e, 'Token') || (type === 'AuthGoogle' ? 'g_' + String(param_(e, 'IdToken')).slice(-24) : type === 'AuthFacebook' ? 'f_' + String(param_(e, 'AccessToken')).slice(-24) : '') || 'global');
     }
 
     if (type === 'AuthRegister' || type === 'CustomerRegister') {
@@ -148,6 +150,9 @@ function doPost(e) {
     }
     if (type === 'AuthGoogle') {
       return jsonOut_(googleLogin_(e));
+    }
+    if (type === 'AuthFacebook') {
+      return jsonOut_(facebookLogin_(e));
     }
     if (type === 'AuthVerify') {
       return jsonOut_(verifySession_(param_(e, 'Token')));
@@ -6770,6 +6775,73 @@ function googleLogin_(e) {
   }
   if (!user) {
     var name = sanitizeCellText_(info.name, 80) || sanitizeCellText_(email.split('@')[0], 80);
+    appendRow_(getCustomersSheet_(), [email, '', name, '', '', 'active', new Date(), new Date()]);
+    user = { email: email, phone: '', name: name };
+  }
+  return createSession_({ email: user.email, phone: user.phone || '', name: user.name || '' }, 'customer');
+}
+
+// ── Sign in with Facebook ──
+// FACEBOOK_LOGIN_APP_ID is public configuration; FACEBOOK_LOGIN_APP_SECRET must stay in
+// Script Properties. The app token is used only to verify the browser access token with Meta.
+function facebookLogin_(e) {
+  if (!getAuthSecret_()) {
+    return { ok: false, error: 'AUTH_NOT_CONFIGURED', message: 'Customer sign-in is not configured.' };
+  }
+  var props = PropertiesService.getScriptProperties();
+  var appId = props.getProperty('FACEBOOK_LOGIN_APP_ID') || '';
+  var appSecret = props.getProperty('FACEBOOK_LOGIN_APP_SECRET') || '';
+  if (!appId || !appSecret) {
+    return { ok: false, error: 'FACEBOOK_NOT_CONFIGURED', message: 'Facebook sign-in is not configured yet.' };
+  }
+  var accessToken = String(param_(e, 'AccessToken') || '');
+  if (!accessToken || accessToken.length > 4096 || /[\r\n]/.test(accessToken)) {
+    return { ok: false, error: 'INVALID_FACEBOOK_TOKEN', message: 'Facebook sign-in failed. Please try again.' };
+  }
+
+  var debug;
+  try {
+    var debugUrl = 'https://graph.facebook.com/v25.0/debug_token?input_token=' +
+      encodeURIComponent(accessToken) + '&access_token=' + encodeURIComponent(appId + '|' + appSecret);
+    var debugRes = UrlFetchApp.fetch(debugUrl, { muteHttpExceptions: true });
+    if (debugRes.getResponseCode() !== 200) {
+      return { ok: false, error: 'INVALID_FACEBOOK_TOKEN', message: 'Facebook sign-in failed. Please try again.' };
+    }
+    debug = JSON.parse(debugRes.getContentText()).data || {};
+  } catch (err) {
+    return { ok: false, error: 'FACEBOOK_VERIFY_FAILED', message: 'Facebook could not verify this sign-in. Please try again.' };
+  }
+  var expiresAt = parseInt(debug.expires_at, 10) * 1000;
+  var dataExpiresAt = parseInt(debug.data_access_expires_at, 10) * 1000;
+  if (debug.is_valid !== true || String(debug.app_id || '') !== String(appId) || !debug.user_id ||
+      (expiresAt && expiresAt < Date.now()) || (dataExpiresAt && dataExpiresAt < Date.now())) {
+    return { ok: false, error: 'INVALID_FACEBOOK_TOKEN', message: 'Facebook sign-in failed. Please try again.' };
+  }
+
+  var profile;
+  try {
+    var profileUrl = 'https://graph.facebook.com/v25.0/me?fields=id,name,email&access_token=' + encodeURIComponent(accessToken);
+    var profileRes = UrlFetchApp.fetch(profileUrl, { muteHttpExceptions: true });
+    if (profileRes.getResponseCode() !== 200) {
+      return { ok: false, error: 'FACEBOOK_PROFILE_FAILED', message: 'Facebook profile details could not be verified.' };
+    }
+    profile = JSON.parse(profileRes.getContentText());
+  } catch (err) {
+    return { ok: false, error: 'FACEBOOK_PROFILE_FAILED', message: 'Facebook profile details could not be verified.' };
+  }
+  if (String(profile.id || '') !== String(debug.user_id)) {
+    return { ok: false, error: 'INVALID_FACEBOOK_TOKEN', message: 'Facebook sign-in failed. Please try again.' };
+  }
+  var email = normalizeEmail_(profile.email || '');
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { ok: false, error: 'FACEBOOK_EMAIL_REQUIRED', message: 'Facebook did not share an email address. Allow email access or use email sign-in.' };
+  }
+  var user = findCustomerByEmail_(email);
+  if (user && user.status === 'blocked') {
+    return { ok: false, error: 'BLOCKED', message: 'This account is unavailable.' };
+  }
+  if (!user) {
+    var name = sanitizeCellText_(profile.name, 80) || sanitizeCellText_(email.split('@')[0], 80);
     appendRow_(getCustomersSheet_(), [email, '', name, '', '', 'active', new Date(), new Date()]);
     user = { email: email, phone: '', name: name };
   }

@@ -146,6 +146,19 @@
     });
   }
 
+  function loginWithFacebook(accessToken) {
+    if (!accessToken) return Promise.reject(new Error("MISSING_FIELDS"));
+    return apiPost({
+      RecordType: "AuthFacebook",
+      AccessToken: accessToken,
+      Source: "facebook"
+    }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "FACEBOOK_LOGIN_FAILED");
+      saveSession(res);
+      return res;
+    });
+  }
+
   function verifySession() {
     var s = getSession();
     if (!s || !s.token) return Promise.resolve(null);
@@ -170,6 +183,7 @@
     register: register,
     login: login,
     loginWithGoogle: loginWithGoogle,
+    loginWithFacebook: loginWithFacebook,
     logout: logout,
     getSession: getSession,
     verifySession: verifySession,

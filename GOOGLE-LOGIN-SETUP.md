@@ -1,6 +1,6 @@
 # Google দিয়ে লগইন ("Continue with Google") চালু করা
 
-কোড সাইটে তৈরি আছে, কিন্তু **আপনি Client ID বসানোর আগে পুরোপুরি বন্ধ** (কোনো বাটন দেখায় না, Google থেকে কিছু নামে না)।
+কোড সাইটে তৈরি আছে, কিন্তু **আপনি Client ID বসানোর আগে Google sign-in বন্ধ** থাকে (বাটনটি disabled থাকে এবং Google script লোড হয় না)।
 
 ## ১. Google Cloud-এ Client ID বানান (আপনাকে করতে হবে)
 > Google-এর মেনুর নাম বদলাতে পারে — না মিললে "OAuth client ID" লিখে সার্চ করুন।
@@ -13,7 +13,7 @@
 4. Create চাপুন → **Client ID** কপি করুন (`xxxx.apps.googleusercontent.com` দিয়ে শেষ হয়)
 
 ## ২. Apps Script-এ বসান
-1. `apps-script-copy.html` থেকে **নতুন Code.gs** পেস্ট করুন (এতে `googleLogin_` যোগ হয়েছে)
+1. `apps-script/Code.gs` থেকে **নতুন Code.gs** পেস্ট করুন (এতে `googleLogin_` যোগ হয়েছে)
 2. Project Settings → **Script properties** → `GOOGLE_CLIENT_ID` = আপনার Client ID → Save
 3. **Deploy → Manage deployments → ✏️ Edit → New version → Deploy**
 

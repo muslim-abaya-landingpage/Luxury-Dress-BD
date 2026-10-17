@@ -10,7 +10,7 @@
 <noscript><link rel="stylesheet" href="site-footer.css?v=20261006scroll2"></noscript>
 <link rel="stylesheet" href="mobile-bottom-nav.css?v=20261011-active-state">
 <link rel="stylesheet" href="auth-page.css">
-<link rel="stylesheet" href="auth-modern.css?v=20261018-neumorph-motion">
+<link rel="stylesheet" href="auth-modern.css?v=20261018-social-validation">
 <script src="config.js?v=20261009-inbox"></script>
 </head>
 <body class="am-body">
@@ -44,6 +44,22 @@
         <span class="am-eyebrow">Join the edit</span>
         <h2>Create your account<span class="am-period">.</span></h2>
         <p class="am-sub">A few details, then you’re ready to shop.</p>
+
+        <section class="am-social-login" aria-label="Social sign-in options">
+          <div class="am-social-divider"><span>or continue with</span></div>
+          <div class="am-social-grid">
+            <div class="am-social-google">
+              <div id="maGoogleButtonHost" hidden></div>
+              <button class="am-social-btn" id="maGoogleFallback" type="button" disabled aria-label="Google sign-in unavailable until configured">
+                <span class="am-social-mark is-google" aria-hidden="true">G</span><span>Google</span>
+              </button>
+            </div>
+            <button class="am-social-btn" id="maFacebookButton" type="button" disabled aria-label="Facebook sign-in unavailable until configured">
+              <span class="am-social-mark is-facebook" aria-hidden="true">f</span><span>Facebook</span>
+            </button>
+          </div>
+          <p class="am-social-status" id="maSocialStatus" role="status" aria-live="polite">Social sign-in is not configured yet. You can continue with email.</p>
+        </section>
 
         <form id="signupForm" novalidate>
           <div class="am-field">
@@ -81,12 +97,15 @@
 <div id="site-footer-mount"></div>
 <script src="cart-utils.js?v=20261015-stockv2"></script>
 <script src="site-security.js"></script>
-<script src="site-api-config.js?v=20261009-inbox"></script>
+<script src="site-api-config.js?v=20261018-social"></script>
 <script src="site-api-health.js"></script>
 <script src="auth-config.js?v=20261009-inbox"></script>
-<script src="auth-api.js?v=20261003g"></script>
+<script src="auth-api.js?v=20261018-social"></script>
 <script defer src="auth-ui.js?v=20261003am"></script>
-<script defer src="google-signin.js?v=20261003am2"></script>
+<script defer src="auth-social-ui.js?v=20261018-social"></script>
+<script defer src="auth-validation.js?v=20261018-fields"></script>
+<script defer src="google-signin.js?v=20261018-social"></script>
+<script defer src="facebook-signin.js?v=20261018-social"></script>
 <script defer src="site-header.js?v=20261009-inbox"></script>
 <script src="site-footer.js?v=20261009-inbox"></script>
 <script>

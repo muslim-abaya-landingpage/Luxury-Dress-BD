@@ -606,3 +606,77 @@ body.am-body .am-field { scroll-margin-top: 24px; }
     transform: none;
   }
 }
+
+/* Social sign-in uses raised controls, with provider identity kept recognizable. */
+.am-social-login { margin: 0 0 23px; }
+.am-social-divider { display: flex; align-items: center; gap: 12px; margin: 0 0 14px; color: #878579; font-size: 10px; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; }
+.am-social-divider::before, .am-social-divider::after { content: ""; flex: 1; height: 1px; background: #d9d5cb; }
+.am-social-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; }
+.am-social-google { min-width: 0; }
+.am-social-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 13px;
+  color: #34362d;
+  background: linear-gradient(145deg, #f6f3ec, #ece9e1);
+  box-shadow: 4px 4px 10px rgba(137, 132, 119, 0.17), -4px -4px 10px rgba(255, 255, 255, 0.78);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  transition: background-color 200ms ease, transform 200ms cubic-bezier(0.2, 0.75, 0.3, 1), box-shadow 220ms ease, opacity 180ms ease;
+}
+.am-social-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 6px 7px 13px rgba(137, 132, 119, 0.2), -4px -4px 10px rgba(255, 255, 255, 0.82); }
+.am-social-btn:active:not(:disabled) { transform: translateY(0) scale(0.985); box-shadow: var(--am-inset); }
+.am-social-btn:focus-visible { outline: 2px solid #987342; outline-offset: 3px; }
+.am-social-btn:disabled { opacity: 0.58; cursor: not-allowed; box-shadow: var(--am-inset); }
+.am-social-mark { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: rgba(255, 255, 255, 0.78); font-family: Arial, sans-serif; font-size: 15px; font-weight: 700; }
+.am-social-mark.is-google { color: #4285f4; }
+.am-social-mark.is-facebook { color: #1877f2; font-size: 18px; }
+.am-social-google #maGoogleButtonHost[hidden] { display: none !important; }
+.am-social-google #maGoogleButtonHost { display: flex; min-height: 48px; align-items: center; justify-content: center; padding: 2px; border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 13px; background: linear-gradient(145deg, #f6f3ec, #ece9e1); box-shadow: 4px 4px 10px rgba(137, 132, 119, 0.17), -4px -4px 10px rgba(255, 255, 255, 0.78); transition: transform 200ms ease, box-shadow 220ms ease; }
+.am-social-google #maGoogleButtonHost:hover { transform: translateY(-2px); box-shadow: 6px 7px 13px rgba(137, 132, 119, 0.2), -4px -4px 10px rgba(255, 255, 255, 0.82); }
+.am-social-status { min-height: 17px; margin: 10px 1px 0; color: #77776e; font-size: 11px; line-height: 1.45; text-align: center; }
+.am-social-status:empty { display: none; }
+.am-social-status.is-error { color: #a53932; animation: am-error-in 220ms ease both; }
+.am-social-status.is-pending { color: #8f7045; }
+
+/* Field errors are injected by auth-validation.js and linked with aria-describedby. */
+.am-field-error { display: none; margin: 7px 2px 0; color: #a53932; font-size: 12px; font-weight: 500; line-height: 1.45; }
+.am-field.is-invalid .am-field-error { display: block; animation: am-error-in 220ms ease both; }
+.am-field.is-invalid .am-input input { border-color: rgba(165, 57, 50, 0.68); background-color: #f5ece8; box-shadow: var(--am-inset), 0 0 0 2px rgba(165, 57, 50, 0.12); }
+.am-field.is-invalid .am-input > svg.am-ic { color: #a53932; }
+.am-field.has-error-pulse .am-input { animation: am-field-shake 360ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+
+@keyframes am-error-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes am-field-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+
+@media (max-width: 520px) {
+  .am-social-grid { grid-template-columns: 1fr; gap: 9px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .am-social-btn,
+  .am-social-google #maGoogleButtonHost,
+  .am-social-status,
+  .am-field-error,
+  .am-field.has-error-pulse .am-input {
+    animation: none !important;
+    transition: none !important;
+    transform: none;
+  }
+}
