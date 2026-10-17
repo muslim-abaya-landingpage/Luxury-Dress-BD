@@ -1,0 +1,41 @@
+modules:
+  http_2xx:
+    prober: http
+    timeout: 10s
+    http:
+      method: GET
+      preferred_ip_protocol: ip4
+      follow_redirects: true
+      valid_status_codes: [200, 204]
+      tls_config:
+        insecure_skip_verify: false
+
+  apps_script_root:
+    prober: http
+    timeout: 10s
+    http:
+      method: GET
+      preferred_ip_protocol: ip4
+      follow_redirects: true
+      valid_status_codes: [200]
+      fail_if_body_not_matches_regexp:
+        - 'Muslim Abaya API OK'
+      tls_config:
+        insecure_skip_verify: false
+
+  apps_script_schema:
+    prober: http
+    timeout: 10s
+    http:
+      method: GET
+      preferred_ip_protocol: ip4
+      follow_redirects: true
+      valid_status_codes: [200]
+      fail_if_body_not_matches_regexp:
+        - '"ok"\s*:\s*true'
+        - '"size"\s*:\s*8'
+        - '"total"\s*:\s*9'
+        - '"orderId"\s*:\s*10'
+        - '"status"\s*:\s*11'
+      tls_config:
+        insecure_skip_verify: false

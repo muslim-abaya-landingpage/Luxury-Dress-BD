@@ -2130,6 +2130,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <script src="site-security.js?v=20260603ord"></script>
 
+<script src="site-api-config.js?v=20261009-inbox"></script>
 <script src="site-api-health.js?v=20260610"></script>
 <script src="auth-config.js?v=20261009-inbox"></script>
 <script src="auth-api.js"></script>
@@ -2139,7 +2140,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="category-products.js?v=20260820clean"></script>
 <script src="product-catalog-sync.js?v=20260603crosssell"></script>
 <script src="product-links-data.js?v=20260603crosssell"></script>
-<script defer src="site-api-config.js?v=20261009-inbox"></script>
 <script defer src="stock-sync.js?v=20261017-async-stockv1"></script>
 
 <script src="product-catalog-loader.js?v=20260603crosssell"></script>
@@ -3618,14 +3618,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 return;
             }
 
-            if (window.MaSecurity) {
-                if (!MaSecurity.guardSubmit('checkout-order', 3000)) {
-                    checkoutAlert('Please wait a moment and try again.');
-                    return;
-                }
-                if (document.getElementById('orderHp') && document.getElementById('orderHp').value) {
-                    return;
-                }
+            if (window.MaSecurity && document.getElementById('orderHp') && document.getElementById('orderHp').value) {
+                return;
             }
 
             if (cart.length === 0) {
@@ -3723,6 +3717,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     );
                     return;
                 }
+            }
+
+            if (!ORDER_SCRIPT_URL) {
+                checkoutAlert('Order API is not configured. Add the Apps Script URL in site-api-config.js.');
+                return;
+            }
+            if (window.MaSecurity && !MaSecurity.guardSubmit('checkout-order', 3000)) {
+                checkoutAlert('Please wait a moment and try again.');
+                return;
             }
 
             var btn = document.getElementById('submitBtn');
@@ -3830,16 +3833,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 if (metaPayload.content_ids && metaPayload.content_ids.length) {
                     formData.append('ContentIDs', metaPayload.content_ids.join(','));
                 }
-            }
-
-            if (!ORDER_SCRIPT_URL) {
-                checkoutAlert('Order API is not configured. Add the Apps Script URL in site-api-config.js.');
-                orderSubmitting = false;
-                if (btn) {
-                    btn.disabled = false;
-                    setPlaceOrderButtonIdle(btn);
-                }
-                return;
             }
 
             var orderWa = {
@@ -4061,4 +4054,3 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script defer src="mobile-bottom-nav.js?v=20261011-active-state"></script>
 </body>
 </html>
-

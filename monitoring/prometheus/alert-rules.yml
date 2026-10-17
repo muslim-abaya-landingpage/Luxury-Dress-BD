@@ -1,0 +1,68 @@
+groups:
+  - name: luxury-dress-bd-availability
+    interval: 30s
+    rules:
+      - alert: CheckoutUnavailable
+        expr: probe_success{job="storefront-probes", probe_class="storefront", instance=~".*/checkout/?$"} == 0
+        for: 90s
+        labels:
+          severity: critical
+          service: storefront
+        annotations:
+          summary: "Checkout endpoint probe failed"
+          description: "GET probe to {{ $labels.instance }} has failed for at least 90 seconds. Check hosting, DNS/TLS, release status, and checkout assets."
+          runbook_url: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/docs/PRODUCTION-MONITORING-BN.md"
+
+      - alert: StorefrontRouteUnavailable
+        expr: probe_success{job="storefront-probes", probe_class="storefront", instance!~".*/checkout/?$"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: storefront
+        annotations:
+          summary: "A public storefront route probe failed"
+          description: "GET probe to {{ $labels.instance }} has failed for at least 2 minutes. Check host status, DNS/TLS, and recent asset releases."
+          runbook_url: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/docs/PRODUCTION-MONITORING-BN.md"
+
+      - alert: AppsScriptHealthProbeFailed
+        expr: probe_success{job="storefront-probes", probe_class=~"api_root|api_schema"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: apps-script
+        annotations:
+          summary: "Apps Script root or OrderSchema GET check failed"
+          description: "{{ $labels.probe_class }} probe to {{ $labels.instance }} failed. Inspect Apps Script deployment, execution errors, and schema/version. This alert is based on GET-only probes."
+          runbook_url: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/docs/PRODUCTION-MONITORING-BN.md"
+
+      - alert: StorefrontProbeLatencyHigh
+        expr: avg_over_time(probe_duration_seconds{job="storefront-probes", probe_class="storefront"}[5m]) > 2
+        for: 5m
+        labels:
+          severity: warning
+          service: storefront
+        annotations:
+          summary: "Storefront synthetic probe latency is elevated"
+          description: "Average probe duration for {{ $labels.instance }} has exceeded 2 seconds over repeated 5-minute windows. Compare with the post-deploy baseline."
+          runbook_url: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/docs/PRODUCTION-MONITORING-BN.md"
+
+      - alert: StorefrontTlsCertificateExpiringSoon
+        expr: (probe_ssl_earliest_cert_expiry{job="storefront-probes", probe_class="storefront"} - time()) < 14 * 24 * 3600
+        for: 10m
+        labels:
+          severity: warning
+          service: storefront
+        annotations:
+          summary: "Storefront TLS certificate expires within 14 days"
+          description: "TLS certificate for {{ $labels.instance }} has less than 14 days remaining. Check the hosting provider's certificate renewal."
+          runbook_url: "https://github.com/muslim-abaya-landingpage/Luxury-Dress-BD/blob/main/docs/PRODUCTION-MONITORING-BN.md"
+
+      - alert: BlackboxExporterScrapeFailed
+        expr: up{job="blackbox-exporter"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: monitoring
+        annotations:
+          summary: "Prometheus cannot scrape Blackbox Exporter"
+          description: "The blackbox-exporter target is down or unreachable; synthetic probe metrics may be stale."

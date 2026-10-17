@@ -1,0 +1,58 @@
+global:
+  scrape_interval: 60s
+  scrape_timeout: 12s
+  evaluation_interval: 30s
+
+rule_files:
+  - /etc/prometheus/alert-rules.yml
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"]
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: blackbox-exporter
+    static_configs:
+      - targets: ["blackbox-exporter:9115"]
+
+  - job_name: storefront-probes
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+          - https://muslimabaya.com/
+          - https://muslimabaya.com/checkout
+          - https://muslimabaya.com/site-api-config.js
+        labels:
+          service: storefront
+          probe_class: storefront
+          probe_module: http_2xx
+      # Replace the deployment ID with the current public Web App URL from site-api-config.js.
+      # These probes are GET-only; never add production Order/signup/subscribe POST requests.
+      - targets:
+          - https://script.google.com/macros/s/REPLACE_WITH_DEPLOYMENT_ID/exec
+        labels:
+          service: apps-script
+          probe_class: api_root
+          probe_module: apps_script_root
+      - targets:
+          - https://script.google.com/macros/s/REPLACE_WITH_DEPLOYMENT_ID/exec?RecordType=OrderSchema
+        labels:
+          service: apps-script
+          probe_class: api_schema
+          probe_module: apps_script_schema
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [probe_module]
+        target_label: __param_module
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
