@@ -79,3 +79,79 @@
 @media (max-width:720px){.dz-order{grid-template-columns:42px 1fr auto;gap:10px}.dz-items{display:none}.dz-order .dz-st,.dz-order .dz-row-actions{grid-column:2 / -1}.dz-hero{padding:20px}.dz-hero h2{font-size:21px}.adm-topbar-actions{gap:8px}.adm-sync{max-width:210px}.dz-card{padding:16px}}
 @media (max-width:400px){.dz-kpis{grid-template-columns:1fr}.dz-today{gap:16px}.adm-sync{font-size:11px}}
 @media (prefers-reduced-motion:reduce){.dz-skel{animation:none}.dz-actions a{transition:none}}
+
+/* Dashboard command-center additions: alerts, priority queue and lifetime sales report. */
+.adm-feature-card{margin-bottom:16px}
+.adm-feature-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:12px}
+.adm-feature-head h3{margin:0 0 4px}
+.adm-feature-head small,.adm-feature-head [role=status]{color:var(--adm-muted);font-size:12px;line-height:1.5}
+.adm-feature-head [role=status].is-error,.adm-desktop-status.is-error,.adm-feature-error{color:var(--adm-danger)}
+.adm-feature-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.adm-feature-actions button[hidden]{display:none}
+.adm-desktop-status{font-size:12px;color:var(--adm-muted);margin:-4px 0 12px}
+.adm-alert-columns{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.adm-alert-panel{min-width:0;border:1px solid var(--adm-border);border-radius:12px;padding:13px;background:var(--adm-bg-alt)}
+.adm-alert-panel h4,.adm-report-grid h4{display:flex;align-items:center;gap:8px;margin:0 0 9px;font-size:13.5px}
+.adm-count-badge{display:inline-flex;align-items:center;justify-content:center;min-width:23px;height:23px;padding:0 7px;border-radius:99px;background:var(--adm-accent-wash);color:var(--adm-accent-ink);font-size:12px}
+.adm-count-badge.is-danger{background:var(--adm-danger-wash);color:var(--adm-danger)}
+.adm-alert-list{display:grid;gap:6px}
+.adm-alert-item{display:flex;align-items:center;gap:9px;min-width:0;padding:8px 9px;border-radius:9px;background:var(--adm-card);border:1px solid var(--adm-border);text-decoration:none;color:var(--adm-text)}
+.adm-alert-item:hover{border-color:var(--adm-border-strong);background:var(--adm-accent-wash)}
+.adm-alert-mark{display:flex;align-items:center;justify-content:center;flex:0 0 25px;width:25px;height:25px;border-radius:50%;font-weight:800;background:var(--adm-warn-wash);color:var(--adm-warn)}
+.adm-alert-item.is-danger .adm-alert-mark{background:var(--adm-danger-wash);color:var(--adm-danger)}
+.adm-alert-copy{display:block;min-width:0}
+.adm-alert-copy b,.adm-alert-copy small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.adm-alert-copy b{font-size:12.5px}
+.adm-alert-copy small{margin-top:2px;color:var(--adm-muted);font-size:11.5px}
+.adm-feature-empty{padding:13px 8px;color:var(--adm-muted);font-size:12.5px;text-align:center}
+.adm-feature-more{display:inline-block;padding:7px 2px;color:var(--adm-accent-ink);font-size:12.5px;font-weight:700;text-decoration:none}
+.adm-feature-more:hover{text-decoration:underline}
+.adm-task-summary{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:4px 0 8px}
+.adm-task-summary>span{display:inline-flex;gap:6px;align-items:center;padding:5px 9px;border-radius:99px;background:var(--adm-accent-wash);font-size:12px;color:var(--adm-text)}
+.adm-task-summary>span:nth-child(2){background:var(--adm-danger-wash);color:var(--adm-danger)}
+.adm-task-summary small{margin-left:auto;color:var(--adm-muted);font-size:11.5px}
+.adm-task-row{display:grid;grid-template-columns:8px minmax(0,1fr) auto auto;align-items:center;gap:12px;padding:11px 4px;border-top:1px solid var(--adm-border)}
+.adm-task-priority{width:7px;height:32px;border-radius:99px;background:var(--adm-warn)}
+.adm-task-row.is-overdue .adm-task-priority{background:var(--adm-danger)}
+.adm-task-row.is-unknown .adm-task-priority{background:#7a6bb3}
+.adm-task-main{min-width:0}
+.adm-task-main b,.adm-task-main span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.adm-task-main b{font-size:13px}
+.adm-task-main span{margin-top:3px;color:var(--adm-muted);font-size:11.5px}
+.adm-task-value{font-size:13px;font-weight:800;white-space:nowrap}
+.adm-task-open{font-size:12px;font-weight:700;color:var(--adm-accent-ink);text-decoration:none;white-space:nowrap}
+.adm-task-open:hover{text-decoration:underline}
+.adm-report-controls{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.adm-report-controls label{font-size:12px;color:var(--adm-muted)}
+.adm-report-controls select,.adm-report-controls input{min-height:36px;padding:6px 8px;border:1px solid var(--adm-border-strong);border-radius:8px;background:var(--adm-card);color:var(--adm-text);font:inherit;font-size:12px}
+.adm-report-controls span{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.adm-report-controls span[hidden]{display:none}
+.adm-report-range{margin:6px 0 10px;color:var(--adm-muted);font-size:12px}
+.adm-undated-note{padding:8px 10px;border-left:3px solid var(--adm-warn);background:var(--adm-warn-wash);color:var(--adm-warn);font-size:12px}
+.adm-report-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:12px 0 16px}
+.adm-report-kpis>div{min-width:0;padding:12px;border:1px solid var(--adm-border);border-radius:11px;background:var(--adm-bg-alt)}
+.adm-report-kpis b,.adm-report-kpis span{display:block}
+.adm-report-kpis b{font-size:18px;line-height:1.25;overflow-wrap:anywhere}
+.adm-report-kpis span{margin-top:4px;color:var(--adm-muted);font-size:11.5px}
+.adm-report-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:12px}
+.adm-report-grid>section{min-width:0;padding:13px;border:1px solid var(--adm-border);border-radius:12px}
+.adm-report-grid h4{justify-content:space-between;flex-wrap:wrap}
+.adm-report-grid h4 small{color:var(--adm-muted);font-size:10.5px;font-weight:500}
+.adm-sales-months,.adm-report-list{display:grid;gap:7px}
+.adm-month-row{display:grid;grid-template-columns:58px minmax(40px,1fr) auto;gap:7px;align-items:center;font-size:11.5px}
+.adm-month-label{color:var(--adm-muted)}
+.adm-month-bar{height:8px;border-radius:99px;background:var(--adm-bg-alt);overflow:hidden}
+.adm-month-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#b8860b,#d4a72c)}
+.adm-month-row>b{font-size:11.5px;white-space:nowrap}
+.adm-month-row>small{grid-column:2/-1;margin-top:-6px;color:var(--adm-muted);font-size:10.5px}
+.adm-report-row{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid var(--adm-border);font-size:11.5px}
+.adm-report-row:last-child{border-bottom:0}
+.adm-report-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.adm-report-row b{white-space:nowrap}
+.adm-feature-error{padding:12px;border-radius:9px;background:var(--adm-danger-wash);font-size:12.5px;line-height:1.5}
+.adm-feature-error button{margin-left:8px;padding:5px 8px;border:1px solid currentColor;border-radius:7px;background:var(--adm-card);color:inherit;cursor:pointer}
+.adm-feature-error[hidden],.adm-report-body[hidden]{display:none}
+.adm-report-controls button:focus-visible,.adm-feature-actions button:focus-visible,.adm-task-open:focus-visible,.adm-alert-item:focus-visible,.adm-feature-more:focus-visible{outline:3px solid #d4a72c;outline-offset:2px}
+@media(max-width:980px){.adm-report-grid{grid-template-columns:1fr 1fr}.adm-report-grid>section:first-child{grid-column:1/-1}}
+@media(max-width:720px){.adm-alert-columns{grid-template-columns:1fr}.adm-report-head{display:block}.adm-report-controls{margin-top:10px}.adm-report-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.adm-task-row{grid-template-columns:7px minmax(0,1fr) auto;gap:8px}.adm-task-value{grid-column:2;grid-row:2}.adm-task-open{grid-column:3;grid-row:1/3}.adm-task-summary small{width:100%;margin-left:0}}
+@media(max-width:480px){.adm-report-grid{grid-template-columns:1fr}.adm-report-grid>section:first-child{grid-column:auto}.adm-report-kpis{grid-template-columns:1fr 1fr}.adm-report-controls{align-items:flex-start}.adm-report-controls span{width:100%}.adm-report-controls input{flex:1;min-width:120px}}

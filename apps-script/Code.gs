@@ -6427,6 +6427,15 @@ function commitAdminStockCsvBatch_(e) {
   return { ok: true, preview: false, applied: applied, skipped: skipped, totalCount: rows.length };
 }
 
+function bdIsValidDateKey_(value) {
+  var match = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return false;
+  var year = Number(match[1]), month = Number(match[2]), day = Number(match[3]);
+  if (year < 1900 || year > 9999 || month < 1 || month > 12 || day < 1 || day > 31) return false;
+  var date = new Date(Date.UTC(year, month - 1, day));
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
+}
+
 function bdRangeBounds_(range, fromStr, toStr) {
   var now = new Date();
   var todayKey = Utilities.formatDate(now, 'GMT+6', 'yyyy-MM-dd');
@@ -6439,12 +6448,17 @@ function bdRangeBounds_(range, fromStr, toStr) {
   } else if (range === '30d') {
     var d30 = new Date(now.getTime() - 29 * 24 * 60 * 60 * 1000);
     fromKey = Utilities.formatDate(d30, 'GMT+6', 'yyyy-MM-dd'); toKey = todayKey;
+  } else if (range === 'all') {
+    fromKey = ''; toKey = todayKey;
   } else if (range === 'custom') {
     fromKey = fromStr || todayKey; toKey = toStr || todayKey;
+    if (!bdIsValidDateKey_(fromKey) || !bdIsValidDateKey_(toKey) || fromKey > toKey) {
+      return { ok: false, error: 'INVALID_DATE_RANGE', message: 'সঠিক তারিখের সীমা দিন।' };
+    }
   } else {
     fromKey = todayKey; toKey = todayKey;
   }
-  return { fromKey: fromKey, toKey: toKey };
+  return { fromKey: fromKey, toKey: toKey, all: range === 'all' };
 }
 
 /**
@@ -6460,6 +6474,7 @@ function getAdminAnalyticsV2_(e) {
   var fromStr = String(param_(e, 'From') || '').trim();
   var toStr = String(param_(e, 'To') || '').trim();
   var bounds = bdRangeBounds_(range, fromStr, toStr);
+  if (bounds.ok === false) return bounds;
 
   var categoryMap = {};
   try {
@@ -6476,6 +6491,10 @@ function getAdminAnalyticsV2_(e) {
   var categorySales = {}; // category -> qty
   var sizeSales = {}; // size -> qty
   var sourceStats = {}; // source -> { orders, delivered }
+  var monthStats = {}; // yyyy-MM -> order and sales totals
+  var undatedOrderCount = 0;
+  var firstOrderDay = '';
+  var lastOrderDay = '';
   var anySourceData = false;
 
   if (sheet) {
@@ -6484,11 +6503,26 @@ function getAdminAnalyticsV2_(e) {
     for (i = 1; i < data.length; i++) {
       var r = data[i];
       var dk = dayKeyFromCell_(r[0]);
-      if (!dk || dk < bounds.fromKey || dk > bounds.toKey) continue;
+      if (dk && !bdIsValidDateKey_(dk)) dk = '';
+      if (range === 'all') {
+        if (dk && dk > bounds.toKey) continue;
+      } else if (!dk || dk < bounds.fromKey || dk > bounds.toKey) continue;
+      if (!r[1] && !r[2]) continue;
+      if (!dk) undatedOrderCount++;
+      else {
+        if (!firstOrderDay || dk < firstOrderDay) firstOrderDay = dk;
+        if (!lastOrderDay || dk > lastOrderDay) lastOrderDay = dk;
+      }
       summary.totalOrders++;
       var status = String(r[9] || '').trim();
       var total = parseFloat(String(r[7] || '0').replace(/[^\d.]/g, '')) || 0;
       summary.totalOrderValue += total;
+      if (dk) {
+        var monthKey = dk.slice(0, 7);
+        if (!monthStats[monthKey]) monthStats[monthKey] = { month: monthKey, orders: 0, revenue: 0, deliveredOrders: 0, deliveredSales: 0 };
+        monthStats[monthKey].orders++;
+        monthStats[monthKey].revenue += total;
+      }
 
       var isReturn = isReturnKeywordStatus_(status);
       var isPlainCancel = isPlainCancelStatus_(status);
@@ -6499,6 +6533,10 @@ function getAdminAnalyticsV2_(e) {
       if (status === 'Delivered') {
         summary.deliveredCount++;
         summary.deliveredSalesValue += total;
+        if (dk && monthStats[dk.slice(0, 7)]) {
+          monthStats[dk.slice(0, 7)].deliveredOrders++;
+          monthStats[dk.slice(0, 7)].deliveredSales += total;
+        }
       }
 
       var sourceVal = String(r[36] || '').trim(); // কলাম ৩৭ (0-ইনডেক্স ৩৬)
@@ -6559,6 +6597,7 @@ function getAdminAnalyticsV2_(e) {
   var sourceBreakdown = Object.keys(sourceStats).map(function (s) {
     return { source: s, orders: sourceStats[s].orders, delivered: sourceStats[s].delivered };
   }).sort(function (a, b) { return b.orders - a.orders; });
+  var salesByMonth = Object.keys(monthStats).sort().map(function (month) { return monthStats[month]; });
 
   // কম স্টক / স্টক শেষ — বর্তমান স্ন্যাপশট (তারিখ-নির্ভর নয়)
   var lowStockList = [];
@@ -6582,12 +6621,14 @@ function getAdminAnalyticsV2_(e) {
   return {
     ok: true,
     range: range,
-    from: bounds.fromKey,
-    to: bounds.toKey,
+    from: range === 'all' ? firstOrderDay : bounds.fromKey,
+    to: range === 'all' ? lastOrderDay : bounds.toKey,
     summary: summary,
     topProducts: topProducts,
     topCategories: topCategories,
     topSizes: topSizes,
+    salesByMonth: salesByMonth,
+    undatedOrderCount: undatedOrderCount,
     lowStockList: lowStockList,
     outOfStockList: outOfStockList,
     sourceBreakdown: sourceBreakdown,
