@@ -1,6 +1,6 @@
 /**
  * প্রোডাক্ট ডেটা — product-manager.html থেকে এডিট করুন
- * আপডেট: 2026-10-16
+ * আপডেট: 2026-10-17
  */
 window.CATEGORY_PRODUCTS = {
   abaya: [
@@ -134,7 +134,7 @@ window.CATEGORY_PRODUCTS = {
       id: "ABY-VERSACE-9",
       name: "Versace Border Premium Abaya Set - Side",
       image: "/images/Versace Border Premium Abaya Set.jpg",
-      images: ["images/gallery/aby-versace-9-1792180650386-g1.webp", "images/gallery/aby-versace-9-1792180660161-g2.webp", "images/gallery/aby-versace-9-1792180671387-g3.webp", "images/gallery/aby-versace-9-1792180680076-g4.webp"],
+      images: ["/images/gallery/aby-versace-9-1792180650386-g1.webp", "/images/gallery/aby-versace-9-1792180660161-g2.webp", "/images/gallery/aby-versace-9-1792180671387-g3.webp", "/images/gallery/aby-versace-9-1792180680076-g4.webp"],
       price: 1750,
       color: "black",
       colorLabel: "Classic Black",
@@ -1129,11 +1129,13 @@ window.CATEGORY_PRODUCTS = {
       name: "Premium Short Khimar Hijab – Dusty Pink",
       image: "/images/premium-short-khimar-hijab-dusty-pink-soft-jersey.webp",
       price: 150,
+      stock: 0,
       color: "dusty-pink",
       colorLabel: "Dusty Pink",
       fabric: "Premium Soft Jersey Fabric",
       sizes: ["Free Size"],
       detailNote: "Premium ready-to-wear short khimar hijab crafted from soft jersey fabric. Lightweight, breathable, stretchable, and comfortable for daily wear, prayer, office, university, and travel.",
+      inStock: false,
       category: "hijab",
       categoryLabel: "হিজাব",
       productUrl: "/"
