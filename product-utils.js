@@ -309,8 +309,11 @@
       normalized.lengthSizeLabel = entry.lengthSizeLabel;
     }
 
-    if (entry.inStock === false) {
-      normalized.inStock = false;
+    if (typeof entry.inStock === "boolean") {
+      normalized.inStock = entry.inStock;
+    }
+    if (typeof entry._catalogStockDisabled === "boolean") {
+      normalized._catalogStockDisabled = entry._catalogStockDisabled;
     }
     if (entry.stockVariants && typeof entry.stockVariants === "object") {
       normalized.stockVariants = entry.stockVariants;
@@ -472,11 +475,12 @@
   function getStockStatus(product, variant) {
     var inStock = isInStock(product, variant);
     var qty = getStockQty(product, variant);
+    var confirmedAvailable = product && product.inStock === true;
     return {
       inStock: inStock,
       qty: qty,
-      label: qty === null ? "স্টক নিশ্চিত করুন" : (inStock ? "In Stock" : "Out of Stock"),
-      badge: qty === null ? "স্টক যাচাই বাকি" : (inStock ? "In Stock" : "Sold Out"),
+      label: qty === null ? (confirmedAvailable ? "In Stock" : "স্টক নিশ্চিত করুন") : (inStock ? "In Stock" : "Out of Stock"),
+      badge: qty === null ? (confirmedAvailable ? "In Stock" : "স্টক যাচাই বাকি") : (inStock ? "In Stock" : "Sold Out"),
       buttonLabel: inStock ? "Add to Cart" : "Out of Stock"
     };
   }

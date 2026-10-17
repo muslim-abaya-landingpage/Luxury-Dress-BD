@@ -157,7 +157,12 @@
   var overviewSelected = {};
   var savedSnapshot = "";
   var stockPublishing = false;
-  function catalogSnapshot() { return JSON.stringify([sections, products, categoryTypePrices]); }
+  function catalogSnapshot() {
+    return JSON.stringify([sections, products, categoryTypePrices], function(key, value) {
+      if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+      var sorted = {}; Object.keys(value).sort().forEach(function(k) { sorted[k] = value[k]; }); return sorted;
+    });
+  }
   var categoryTypePrices = {};
   var searchTerm = "";
   var bulkSelected = {};
@@ -211,6 +216,9 @@
     });
     if (!activeKey && sections[0]) activeKey = sections[0].key;
     loadCategoryTypePrices();
+    Object.keys(products).forEach(function (key) {
+      (products[key] || []).forEach(function (product) { ensureProductPriceByType(product, key); });
+    });
   }
 
   function getCategoryTypeMeta(catKey) {
@@ -519,14 +527,7 @@
       bulkStockOnBtn.addEventListener("click", function () {
         var idxs = getSelectedIdxs();
         if (!idxs.length) return;
-        idxs.forEach(function (i) {
-          delete list[i].inStock;
-          if (typeof list[i].stock === "number" && list[i].stock <= 0) delete list[i].stock;
-        });
-        bulkSelected = {};
-        renderCatList();
-        renderMain();
-        toast(idxs.length + " টি প্রোডাক্ট স্টকে আছে করা হয়েছে (Save চাপুন)");
+        publishStockChanges(idxs.map(function(i) { return list[i]; }), true, function() { bulkSelected = {}; renderCatList(); renderMain(); });
       });
     }
 
@@ -535,14 +536,7 @@
       bulkStockOffBtn.addEventListener("click", function () {
         var idxs = getSelectedIdxs();
         if (!idxs.length) return;
-        idxs.forEach(function (i) {
-          list[i].stock = 0;
-          list[i].inStock = false;
-        });
-        bulkSelected = {};
-        renderCatList();
-        renderMain();
-        toast(idxs.length + " টি প্রোডাক্ট স্টক নেই করা হয়েছে (Save চাপুন)");
+        publishStockChanges(idxs.map(function(i) { return list[i]; }), false, function() { bulkSelected = {}; renderCatList(); renderMain(); });
       });
     }
 
@@ -673,14 +667,10 @@
     document.getElementById("pmOverviewStock").addEventListener("change", function (e) { overviewStock = e.target.value; overviewSelected = {}; draw(); });
     document.getElementById("pmClearSelection").addEventListener("click", function () { overviewSelected = {}; draw(); });
     function bulkStock(out) {
-      Object.keys(overviewSelected).forEach(function (key) {
-        var ref = JSON.parse(key), p = (products[ref[0]] || [])[ref[1]];
-        if (!p) return;
-        if (out) { p.stock = 0; p.inStock = false; }
-        else { delete p.inStock; if (typeof p.stock === "number" && p.stock <= 0) delete p.stock; }
-      });
-      overviewSelected = {}; draw();
-      setSaveStatus("নির্বাচিত পণ্যের স্টক বদলেছে — Save Data চাপুন।");
+      var items = Object.keys(overviewSelected).map(function(key) {
+        var ref = JSON.parse(key); return (products[ref[0]] || [])[ref[1]];
+      }).filter(Boolean);
+      publishStockChanges(items, !out, function() { overviewSelected = {}; draw(); });
     }
     document.getElementById("pmOverviewOff").addEventListener("click", function () { bulkStock(true); });
     document.getElementById("pmOverviewOn").addEventListener("click", function () { bulkStock(false); });
@@ -751,21 +741,43 @@
       .join("");
   }
 
+  function setProductAvailability(p, available) {
+    p.inStock = !!available;
+    if (!available) p.stock = 0;
+    else if (typeof p.stock === "number" && p.stock <= 0) delete p.stock;
+  }
+
+  function publishStockChanges(items, available, redraw) {
+    if (stockPublishing || document.getElementById("pmSave").disabled) {
+      setSaveStatus("স্টক সেভ হচ্ছে। একটু অপেক্ষা করুন।");
+      return Promise.resolve(false);
+    }
+    if (savedSnapshot !== catalogSnapshot()) {
+      setSaveStatus("অন্য সম্পাদনা সেভ করা বাকি। আগে ‘পরিবর্তন প্রকাশ করুন’ চাপুন, তারপর স্টক বদলান।");
+      return Promise.resolve(false);
+    }
+    if (!items.length) return Promise.resolve(false);
+    var previous = items.map(function(p) { return {p:p,stock:p.stock,inStock:p.inStock}; });
+    stockPublishing = true;
+    items.forEach(function(p) { setProductAvailability(p, available); });
+    redraw();
+    return saveAll(items.length === 1 ? {id:items[0].id} : null).then(function() {
+      return true;
+    }).catch(function() {
+      previous.forEach(function(row) {
+        if (row.stock === undefined) delete row.p.stock; else row.p.stock = row.stock;
+        if (row.inStock === undefined) delete row.p.inStock; else row.p.inStock = row.inStock;
+      });
+      return false;
+    }).finally(function() { stockPublishing = false; renderCatList(); renderMain(); });
+  }
+
   function publishStockToggle(p, redraw) {
-    if(stockPublishing||document.getElementById("pmSave").disabled)return Promise.resolve(false);
-    if(savedSnapshot!==catalogSnapshot()){setSaveStatus("অন্য সম্পাদনা প্রকাশ করা বাকি। আগে পরিবর্তন প্রকাশ করুন।");return Promise.resolve(false);}
-    var old={stock:p.stock,inStock:p.inStock};toggleStock(p);redraw();stockPublishing=true;
-    return saveAll().then(function(){return true;}).catch(function(err){if(old.stock===undefined)delete p.stock;else p.stock=old.stock;if(old.inStock===undefined)delete p.inStock;else p.inStock=old.inStock;return false;}).finally(function(){stockPublishing=false;renderMain();});
+    return publishStockChanges([p], p.inStock === false || (typeof p.stock === "number" && p.stock <= 0), redraw);
   }
 
   function toggleStock(p) {
-    if (p.inStock === false || (typeof p.stock === "number" && p.stock <= 0)) {
-      delete p.inStock;
-      if (typeof p.stock === "number" && p.stock <= 0) delete p.stock;
-    } else {
-      p.stock = 0;
-      p.inStock = false;
-    }
+    setProductAvailability(p, p.inStock === false || (typeof p.stock === "number" && p.stock <= 0));
   }
 
   function setSaveStatus(message) {
@@ -1581,8 +1593,8 @@
         lines.push(ind + "  " + k + ": " + jsStr(p[k]) + ",");
       }
     });
-    if (p.inStock === false) {
-      lines.push(ind + "  inStock: false,");
+    if (typeof p.inStock === "boolean") {
+      lines.push(ind + "  inStock: " + (p.inStock ? "true" : "false") + ",");
     }
     if (p.priceByType && typeof p.priceByType === "object") {
       var keys = Object.keys(p.priceByType);
@@ -1604,7 +1616,7 @@
     // Preserve variant data and future product fields even when this editor has
     // no dedicated control for them. Saving must not silently strip catalog data.
     Object.keys(p).forEach(function (key) {
-      if (order.indexOf(key) !== -1 || key === "inStock" || key === "priceByType" || key === "_catalogNormalized") return;
+      if (order.indexOf(key) !== -1 || key === "inStock" || key === "priceByType" || key === "_catalogNormalized" || key === "_catalogStockDisabled") return;
       var value = JSON.stringify(p[key]);
       if (value !== undefined) lines.push(ind + "  " + jsKey(key) + ": " + value + ",");
     });
