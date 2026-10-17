@@ -35,6 +35,9 @@ class Handler(SimpleHTTPRequestHandler):
 
     def send_head(self):
         path = self.translate_path(self.path)
+        # Cloudflare Pages serves /page from a matching /page.html file.
+        if not os.path.isfile(path) and not os.path.splitext(path)[1] and os.path.isfile(path + ".html"):
+            path += ".html"
         if os.path.isdir(path):
             index = os.path.join(path, "index.html")
             if os.path.isfile(index):

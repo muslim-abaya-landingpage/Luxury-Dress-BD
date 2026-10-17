@@ -1,0 +1,75 @@
+name: E2E
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: "Optional deployed site URL for a post-deploy smoke run (HTTPS; all Apps Script calls are mocked)"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: Playwright E2E
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      CI: "true"
+      E2E_BASE_URL: ${{ github.event_name == 'workflow_dispatch' && inputs.target_url || '' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium and Linux dependencies
+        run: npx playwright install --with-deps chromium
+
+      - name: Validate optional deployed URL
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.target_url != '' }}
+        env:
+          TARGET_URL: ${{ inputs.target_url }}
+        run: |
+          node <<'NODE'
+          const url = new URL(process.env.TARGET_URL);
+          if (url.protocol !== 'https:' || url.username || url.password) {
+            throw new Error('target_url must be an HTTPS URL without embedded credentials.');
+          }
+          console.log(`Remote E2E target: ${url.origin}`);
+          console.log('The Playwright suite intercepts all Google Apps Script calls; it does not write production orders.');
+          NODE
+
+      - name: Run Playwright E2E suite
+        run: npm run test:e2e
+
+      - name: Upload test report and failure evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-e2e-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 14
