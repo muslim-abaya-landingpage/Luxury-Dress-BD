@@ -282,6 +282,7 @@
         renderGallery();
         renderColorOptions();
         renderDescription();
+    updateSendMessageLink();
       });
     });
   }
@@ -353,6 +354,7 @@
         renderGallery();
         renderColorOptions();
         renderDescription();
+    updateSendMessageLink();
         applyStockUi();
       });
     });
@@ -366,6 +368,7 @@
     renderGallery();
     renderColorOptions();
     renderDescription();
+    updateSendMessageLink();
   }
 
   function renderOptionGroup(containerId, label, options, selectedKey, onPick) {
@@ -542,6 +545,7 @@
 
   function renderQty() {
     $("pdQtyVal").textContent = state.qty;
+    updateSendMessageLink();
   }
 
   function renderBreadcrumb() {
@@ -804,10 +808,20 @@
   function updateSendMessageLink() {
     var msgLink = $("pdSendMsg");
     if (!msgLink || !state.product) return;
-    var msgText =
-      "I want to order " + state.product.name +
-      (state.selectedSize ? " (Size: " + selectedVariant() + ")" : "") +
-      (state.selectedType ? " (" + state.selectedType + ")" : "");
+    var line = buildCartLine();
+    var msgText = [
+      "আসসালামু আলাইকুম, আমি এই পণ্যটি WhatsApp-এ অর্ডার করতে চাই:",
+      "পণ্য: " + line.name,
+      "পণ্য আইডি: " + line.id,
+      "একক দাম: ৳" + line.price,
+      "পরিমাণ: " + line.quantity,
+      line.size ? "সাইজ: " + line.size : "",
+      (line.colorLabel || line.color) ? "রং: " + (line.colorLabel || line.color) : "",
+      line.productType ? "ধরন: " + line.productType : "",
+      "পণ্যের লিংক: " + window.location.href
+    ].filter(Boolean).join("\n");
+    msgLink.textContent = "WhatsApp-এ অর্ডার";
+    msgLink.setAttribute("aria-label", "WhatsApp-এ " + line.name + " অর্ডার করুন");
     msgLink.href = waLink() + "?text=" + encodeURIComponent(msgText);
   }
 
@@ -906,7 +920,7 @@
       "<button type='button' class='pd-btn pd-btn-outline' id='pdAddCart'>Add to Cart</button>" +
       "<button type='button' class='pd-btn pd-btn-dark' id='pdBuyNow'>Buy Now</button>" +
       "<button type='button' class='pd-btn pd-btn-outline' id='pdNotifyBtn' style='display:none'>স্টকে এলে জানান</button>" +
-      "<a class='pd-btn pd-btn-light' id='pdSendMsg' target='_blank' rel='noopener'>Send Message</a>" +
+      "<a class='pd-btn pd-btn-whatsapp' id='pdSendMsg' target='_blank' rel='noopener noreferrer'>WhatsApp-এ অর্ডার</a>" +
       "</div>" +
       "<div class='pdp-purchase-assurance' role='note' aria-label='Delivery and payment information'>" +
       "<p><strong>ডেলিভারি:</strong> ঢাকার ভিতরে ৳80 · ঢাকার বাইরে ৳150 · ৩ বা তার বেশি আইটেমে ফ্রি</p>" +
@@ -1107,6 +1121,7 @@
     renderQty();
     renderGallery();
     renderDescription();
+    updateSendMessageLink();
     wireActions();
 
     var listForRelated = (window.CATEGORY_PRODUCTS || {})[state.category] || [];
