@@ -19,6 +19,7 @@
 <link rel="stylesheet" href="admin.css?v=20261018-shared">
 <link rel="stylesheet" href="admin-dashboard-design.css?v=20261018-3">
 <script src="admin-dashboard-design.js?v=20261018-3"></script>
+<link rel="stylesheet" href="admin-premium-layout.css?v=20261018-1">
 </head>
 <body class="pn-body">
   <div class="pn-app adm-shell">
@@ -29,7 +30,7 @@
         <button type="button" class="adm-collapse-btn" id="admCollapse" aria-controls="admSidebar" aria-expanded="true" aria-label="সাইডবার ছোট করুন"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="3" stroke="currentColor" stroke-width="1.6"/><path d="M9 4v16" stroke="currentColor" stroke-width="1.6"/></svg></button>
         <button type="button" class="adm-sidebar-close" id="admSbClose" aria-label="মেনু বন্ধ করুন"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
       </div>
-      <div class="adm-sidebar-profile"><div class="adm-profile-avatar" aria-hidden="true">MA</div><div class="adm-profile-copy"><strong>Muslim Abaya</strong><small>স্টোর ম্যানেজমেন্ট</small></div></div>
+      <div class="adm-sidebar-profile"><div class="adm-profile-avatar" aria-hidden="true">MA</div><div class="adm-profile-copy"><strong>আপনার কর্মক্ষেত্র</strong><small>স্টোর পরিচালনা</small></div></div>
       <nav class="adm-sidebar-nav" aria-label="অ্যাডমিন মেনু">
 <a class="adm-sidebar-item" href="admin-dashboard.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>ড্যাশবোর্ড</span></a>
 <details class="adm-nav-group has-current" name="adm-navigation" open><summary class="adm-sidebar-item" title="অর্ডার ও হিসাব"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z M9 7h6M9 11h6M9 15h4"/></svg><span>অর্ডার ও হিসাব</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
@@ -57,7 +58,7 @@
       <div class="pn-head">
         <button type="button" class="pn-btn pn-menu-btn" id="pnMenuBtn" aria-label="Menu">☰</button>
         <a class="pn-btn" href="admin-orders.html">☰ All Orders</a>
-        <h1>Order-<b id="oId">…</b></h1>
+        <div class="adm-heading"><span class="adm-page-kicker">মুসলিম আবায়া / অর্ডার ও হিসাব</span><h1>Order-<b id="oId">…</b></h1></div>
         <button type="button" class="pn-btn pn-btn-blue pn-btn-sm" id="btnHistory">⟲ Order History (<span id="histCount">0</span>)</button>
         <button type="button" class="pn-btn pn-btn-ghost-red pn-btn-sm" id="btnFraud">🛡 Fraud Check</button>
         <span class="pn-badge pending" id="oStatusBadge">Pending</span>
