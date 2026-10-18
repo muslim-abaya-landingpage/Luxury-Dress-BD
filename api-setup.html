@@ -3,56 +3,66 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>API ????? ??? | Muslim Abaya</title>
+  <meta name="robots" content="noindex, nofollow">
+  <title>API সেটআপ ও যাচাই | Muslim Abaya</title>
   <link rel="stylesheet" href="site-header.css?v=20260603logo">
   <style>
-    body { font-family: Inter, "Hind Siliguri", sans-serif; margin: 0; background: #f7f7f7; }
-    .wrap { max-width: 640px; margin: 24px auto; padding: 0 16px 48px; }
+    body { font-family: Inter, "Hind Siliguri", sans-serif; margin: 0; background: #f7f7f7; color: #171717; }
+    .wrap { max-width: 680px; margin: 24px auto; padding: 0 16px 48px; }
     .card { background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
     h1 { font-size: 22px; margin: 0 0 8px; }
-    .lead { color: #555; font-size: 14px; margin: 0 0 16px; }
+    h2 { font-size: 16px; margin: 0 0 10px; }
+    .lead { color: #555; font-size: 14px; margin: 0 0 16px; line-height: 1.65; }
     label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 6px; }
     input[type="url"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
     .btn { margin-top: 12px; padding: 10px 18px; border: none; border-radius: 4px; background: #111; color: #fff; font-weight: 600; cursor: pointer; }
     .btn:hover { background: #333; }
-    .status { margin-top: 14px; padding: 12px; border-radius: 4px; font-size: 14px; display: none; }
+    .btn:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid #8a6a2f; outline-offset: 2px; }
+    .status { margin-top: 14px; padding: 12px; border-radius: 4px; font-size: 14px; line-height: 1.6; display: none; overflow-wrap: anywhere; }
     .status.ok { display: block; background: #e8f5e9; color: #1b5e20; }
     .status.err { display: block; background: #ffebee; color: #b71c1c; }
     .status.wait { display: block; background: #fff8e1; color: #6d4c00; }
-    ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
+    ol { margin: 0; padding-left: 22px; line-height: 1.75; font-size: 14px; }
     code { font-size: 12px; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; word-break: break-all; }
+    .note { margin: 12px 0 0; color: #555; font-size: 13px; line-height: 1.65; }
+    a { color: #4b3621; }
   </style>
-<script src="config.js?v=20261009-inbox"></script>
+  <script src="config.js?v=20261009-inbox"></script>
 </head>
 <body>
   <div id="site-header-mount"></div>
-  <div class="wrap">
-    <div class="card">
-      <h1>API ????? ???</h1>
-      <p class="lead">??????, Sign Up, Newsletter — ?? ?? Apps Script URL ??????? ????</p>
-      <label for="apiUrl">Web App URL (Deploy ????)</label>
-      <input type="url" id="apiUrl" placeholder="https://script.google.com/macros/s/.../exec">
-      <button type="button" class="btn" id="testBtn">????? ????? ????</button>
-      <div id="status" class="status"></div>
-    </div>
-    <div class="card" style="border-color:#111">
-      <h2 style="font-size:16px;margin:0 0 10px">Apps Script API যাচাই</h2>
-      <p style="font-size:14px;margin:0 0 12px">এই পেজ <code>OrderSchema</code> endpoint পরীক্ষা করে। আলাদা <code>Fix-doGet</code> ফাইল তৈরি করবেন না—এতে মূল <code>Code.gs</code> router ছায়া পড়ে StockStatus, login ও অন্যান্য API বন্ধ হতে পারে।</p>
+  <main class="wrap">
+    <section class="card" aria-labelledby="page-title">
+      <h1 id="page-title">API সেটআপ ও যাচাই</h1>
+      <p class="lead">Checkout, sign up এবং newsletter-এর Apps Script Web App সংযোগ যাচাই করুন। এই পরীক্ষা শুধু read-only <code>OrderSchema</code> GET request পাঠায়; কোনো order, customer বা subscriber row তৈরি বা পরিবর্তন করে না।</p>
+      <label for="apiUrl">Apps Script Web App URL</label>
+      <input type="url" id="apiUrl" inputmode="url" autocomplete="url" placeholder="https://script.google.com/macros/s/.../exec" aria-describedby="apiNote">
+      <button type="button" class="btn" id="testBtn">Read-only API পরীক্ষা</button>
+      <button type="button" class="btn" id="copyBtn" style="margin-left:8px;background:#444">URL কপি করুন</button>
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+      <p id="apiNote" class="note">এই পেজ কোনো secret বা password সংরক্ষণ করে না। Subscribe GET probe এখানে চালানো হয় না।</p>
+    </section>
+
+    <section class="card" aria-labelledby="schema-title">
+      <h2 id="schema-title">OrderSchema ফল কীভাবে বুঝবেন</h2>
       <ol>
-        <li>Apps Script-এর বর্তমান deployment-এ <strong>Manage deployments → Edit → New version → Deploy</strong> করুন।</li>
-        <li>শুধু মূল <code>Code.gs</code>-এর canonical <code>doGet</code> route ব্যবহার করুন।</li>
-        <li>নিচের API পরীক্ষা সফল হলে schema version ও কলাম বিন্যাস দেখা যাবে।</li>
+        <li>সফল হলে <code>ok: true</code>, schema version এবং কলাম mapping দেখা যাবে।</li>
+        <li>সাইজ, মোট টাকা, Order ID ও status-এর কলাম যথাক্রমে H, I, J ও K হওয়া উচিত।</li>
+        <li>API পুরোনো version-এর response দিলে Apps Script-এ source Save করে বিদ্যমান deployment-এ <strong>New version</strong> প্রকাশ করুন।</li>
       </ol>
-    </div>
-    <div class="card">
-      <h2 style="font-size:16px;margin:0 0 10px">???????? ????? (Sign Up ??)</h2>
+    </section>
+
+    <section class="card" aria-labelledby="deploy-title">
+      <h2 id="deploy-title">নিরাপদ update নির্দেশনা</h2>
       <ol>
-        <li><a href="apps-script-copy.html">apps-script-copy.html</a> ? ???? ??? ? <code>Code.gs</code> Replace</li>
-        <li>Project Settings ? <code>AUTH_SECRET</code> ???</li>
-        <li>Deploy ? <strong>New version</strong></li>
+        <li><a href="apps-script-copy.html">Apps Script source copy page</a>-এ canonical project-এর সব source file দেখুন।</li>
+        <li>শুধু মূল <code>Code.gs</code>-এর <code>doGet</code> router ব্যবহার করুন; আলাদা <code>Fix-doGet</code> file যোগ করবেন না।</li>
+        <li>Apps Script-এ code Save করার পর <strong>Deploy → Manage deployments → Edit → Version: New version → Deploy</strong> নির্বাচন করুন।</li>
+        <li>বিদ্যমান deployment edit করলে `/exec` URL একই থাকে; নতুন deployment বানালে সাইটের URL-ও আলাদাভাবে update করতে হবে।</li>
       </ol>
-    </div>
-  </div>
+    </section>
+  </main>
+
   <script src="site-api-config.js?v=20261009-inbox"></script>
   <script defer src="site-header.js?v=20261009-inbox"></script>
   <script>
@@ -67,60 +77,60 @@
         status.textContent = text;
       }
 
+      function validatedUrl(value) {
+        var url;
+        try { url = new URL(value); } catch (e) { return null; }
+        if (url.protocol !== "https:") return null;
+        if (["script.google.com", "script.googleusercontent.com"].indexOf(url.hostname) === -1) return null;
+        return url;
+      }
+
       document.getElementById("testBtn").addEventListener("click", function () {
-        var url = (input.value || "").trim();
+        var raw = (input.value || "").trim();
+        var url = validatedUrl(raw);
         if (!url) {
-          show("err", "URL ????");
+          show("err", "HTTPS-সহ সঠিক Google Apps Script Web App URL দিন।");
           return;
         }
-        show("wait", "??? ?????…");
-        var separator = url.indexOf("?") === -1 ? "?" : "&";
-        fetch(url + separator + "RecordType=OrderSchema", { method: "GET", mode: "cors", cache: "no-store" })
-          .then(function (r) {
-            if (!r.ok) throw new Error("HTTP " + r.status);
-            return r.json();
+        show("wait", "Read-only schema পরীক্ষা চলছে…");
+        url.searchParams.set("RecordType", "OrderSchema");
+        fetch(url.toString(), { method: "GET", mode: "cors", cache: "no-store", credentials: "omit" })
+          .then(function (response) {
+            if (!response.ok) throw new Error("HTTP " + response.status);
+            return response.json();
           })
           .then(function (data) {
-            var c = data && data.columns;
-            if (data && data.ok && data.version && c && c.size === 8 && c.total === 9 && c.orderId === 10 && c.status === 11) {
-              show("ok", "API সচল — schema " + data.version + " (H=সাইজ, I=মোট, J=অর্ডার ID, K=স্ট্যাটাস)।");
+            var columns = data && data.columns;
+            if (data && data.ok && data.version && columns && columns.size === 8 && columns.total === 9 && columns.orderId === 10 && columns.status === 11) {
+              show("ok", "API সচল — schema " + data.version + "; H=সাইজ, I=মোট টাকা, J=Order ID, K=স্ট্যাটাস। এটি read-only পরীক্ষা।");
             } else {
-              show("err", "API schema অমিল বা Deploy অসম্পূর্ণ: " + JSON.stringify(data).slice(0, 180));
+              show("err", "API response পাওয়া গেছে, কিন্তু schema মেলেনি। Apps Script deployment version ও কলাম mapping যাচাই করুন।");
             }
           })
           .catch(function () {
-            show(
-              "err",
-              "????? ??????? Deploy ??? ??? ????, URL ???? ????, ??? Who has access = Anyone ???? ??????"
-            );
+            show("err", "API-তে পৌঁছানো যায়নি। URL সঠিক কি না এবং deployment-এ Who has access = Anyone আছে কি না যাচাই করুন।");
           });
       });
 
-      var saveBtn = document.createElement("button");
-      saveBtn.type = "button";
-      saveBtn.className = "btn";
-      saveBtn.style.marginLeft = "8px";
-      saveBtn.style.background = "#444";
-      saveBtn.textContent = "URL ??? (?????????? ???)";
-      saveBtn.addEventListener("click", function () {
+      document.getElementById("copyBtn").addEventListener("click", function () {
         var url = (input.value || "").trim();
-        if (!url) return;
+        if (!validatedUrl(url)) {
+          show("err", "কপি করার আগে সঠিক HTTPS Apps Script URL দিন।");
+          return;
+        }
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(url).then(function () {
-            alert(
-              "URL ??? ???????\n\nsite-api-config.js ???? url: ? ????? ???? ??? ??? ?????"
-            );
+            show("ok", "Web App URL clipboard-এ কপি হয়েছে। site-api-config.js-এ এটি প্রয়োজন হলে আপডেট করুন।");
+          }).catch(function () {
+            window.prompt("Web App URL কপি করুন:", url);
           });
         } else {
-          prompt("?? URL site-api-config.js ? ???:", url);
+          window.prompt("Web App URL কপি করুন:", url);
         }
       });
-      document.getElementById("testBtn").after(saveBtn);
 
       if (saved) {
-        setTimeout(function () {
-          document.getElementById("testBtn").click();
-        }, 400);
+        window.setTimeout(function () { document.getElementById("testBtn").click(); }, 400);
       }
     })();
   </script>
