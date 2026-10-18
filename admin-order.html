@@ -153,7 +153,7 @@
 
   <script src="site-api-config.js?v=20261009-inbox"></script>
   <script src="admin-config.js?v=20261009-inbox"></script>
-  <script src="admin-api.js?v=20261013-speed2"></script>
+  <script src="admin-api.js?v=80dbd3e930707465"></script>
   <script src="admin-guard.js?v=20261010-speed"></script>
   <script src="admin-panel.js?v=20261018-shared"></script>
   <script>
@@ -173,11 +173,22 @@
         }).join("");
       }
 
-      function num(id) { return Math.max(0, parseFloat($(id).value) || 0); }
+      function num(id) {
+        var input = $(id);
+        if (!String(input.value || '').trim()) return 0;
+        if (typeof input.checkValidity === 'function' && !input.checkValidity()) return NaN;
+        var value = Number(input.value);
+        return Number.isFinite(value) && value >= 0 ? value : NaN;
+      }
 
       function recalc() {
         if (!cur) return;
         var charge = num("fCharge"), discount = num("fDiscount"), advance = num("fAdvance");
+        if (![charge, discount, advance].every(Number.isFinite)) {
+          $("sTotal").textContent = "—";
+          $("sDue").textContent = "—";
+          return;
+        }
         var coupon = cur.couponDiscount || 0;
         var total = Math.max(0, cur.subtotal + charge - discount - coupon);
         $("sCouponRow").style.display = coupon ? "" : "none";
@@ -267,6 +278,10 @@
       }
 
       function save() {
+        var charge = num("fCharge"), advance = num("fAdvance"), discount = num("fDiscount");
+        if (![charge, advance, discount].every(Number.isFinite)) {
+          return Promise.reject(new Error("চার্জ, অগ্রিম ও ছাড়ে শূন্য বা ধনাত্মক পূর্ণসংখ্যা দিন।"));
+        }
         var btn = $("btnSave");
         btn.disabled = true;
         var fields = {
@@ -274,9 +289,9 @@
           Name: $("fName").value,
           Phone: $("fPhone").value,
           Address: $("fAddress").value,
-          Charge: num("fCharge"),
-          Advance: num("fAdvance"),
-          Discount: num("fDiscount"),
+          Charge: charge,
+          Advance: advance,
+          Discount: discount,
           Status: $("fStatus").value,
           Courier: $("fCourier").value,
           AssignedTo: $("fAssign").value,
@@ -291,12 +306,18 @@
           var msg = "অর্ডার আপডেট হয়েছে ✓";
           if (res.hooks && res.hooks.courier === "SENT") msg += " · Steadfast-এ পাঠানো হয়েছে";
           MaPanel.toast(msg);
-        }).catch(function (err) {
-          MaPanel.toast(err.message, true);
-        }).then(function () { btn.disabled = false; });
+        }).then(function (value) {
+          btn.disabled = false;
+          return value;
+        }, function (err) {
+          btn.disabled = false;
+          throw err;
+        });
       }
 
-      $("btnSave").addEventListener("click", save);
+      $("btnSave").addEventListener("click", function () {
+        save().catch(function (err) { MaPanel.toast(err.message, true); });
+      });
       ["fCharge", "fAdvance", "fDiscount"].forEach(function (id) { $(id).addEventListener("input", recalc); });
 
       $("btnCorrect").addEventListener("click", function () {
@@ -386,4 +407,3 @@
   </script>
 </body>
 </html>
-

@@ -3455,11 +3455,11 @@ function loginAdmin_(e) {
   rateLimit_('admin_' + (email || phone));
   var user = email ? findAdminByEmail_(email) : findAdminByPhone_(phone);
   if (!user) return { ok: false, error: 'NOT_FOUND', message: 'অ্যাডমিন অ্যাকাউন্ট পাওয়া যায়নি।' };
-  if (user.status === 'blocked') return { ok: false, error: 'BLOCKED', message: 'অ্যাকাউন্ট বন্ধ।' };
+  if (String(user.status || '').trim().toLowerCase() === 'blocked') return { ok: false, error: 'BLOCKED', message: 'অ্যাকাউন্ট বন্ধ।' };
   if (!verifyPassword_(password, user.salt, user.hash)) {
     return { ok: false, error: 'INVALID_PASSWORD', message: 'পাসওয়ার্ড ভুল।' };
   }
-  var role = (user.role === 'staff') ? 'staff' : 'admin';
+  var role = String(user.role || 'admin').trim().toLowerCase() === 'staff' ? 'staff' : 'admin';
   return createSession_({ email: user.email, phone: user.phone, name: user.name }, role);
 }
 
@@ -3489,6 +3489,17 @@ function verifyAdminSession_(token) {
   var v = verifySession_(token);
   if (!v.ok) return v;
   if (v.role !== 'admin' && v.role !== 'staff') return { ok: false, error: 'NOT_ADMIN', message: 'অ্যাডমিন লগইন প্রয়োজন।' };
+  var current = v.email ? findAdminByEmail_(v.email) : null;
+  if (!current && v.phone) current = findAdminByPhone_(v.phone);
+  if (!current) return { ok: false, error: 'NOT_ADMIN', message: 'অ্যাডমিন অ্যাকাউন্ট আর সক্রিয় নেই।' };
+  if (String(current.status || '').trim().toLowerCase() === 'blocked') {
+    return { ok: false, error: 'BLOCKED', message: 'অ্যাডমিন অ্যাকাউন্ট বন্ধ।' };
+  }
+  var currentRole = String(current.role || 'admin').trim().toLowerCase() === 'staff' ? 'staff' : 'admin';
+  if (currentRole !== v.role) return { ok: false, error: 'NOT_ADMIN', message: 'অ্যাডমিন ভূমিকা পরিবর্তিত হয়েছে—আবার লগ ইন করুন।' };
+  v.email = current.email;
+  v.phone = current.phone;
+  v.name = current.name;
   v.isOwner = (v.role === 'admin');
   try {
     if (v.isOwner) {
@@ -3599,7 +3610,7 @@ function sendDailySummaryEmail_() {
       var dk = dayKeyFromCell_(r[0]);
       if (dk !== yKey) continue;
       orders++;
-      revenue += parseFloat(String(r[7] || '0').replace(/[^\d.]/g, '')) || 0;
+      revenue += parseSignedOrderAmount_(r[7]);
       var status = String(r[9] || '').toLowerCase();
       if (!status || status.indexOf('pending') !== -1) pending++;
       if (status.indexOf('deliver') !== -1) delivered++;
@@ -3649,22 +3660,48 @@ function saveAdminStaff_(e) {
   var name = String(param_(e, 'Name') || '').trim();
   var password = String(param_(e, 'Password') || '');
   if (!email && !phone) return { ok: false, error: 'MISSING_LOGIN', message: 'ইমেইল বা ফোন দিন।' };
+  if (!name) return { ok: false, error: 'MISSING_NAME', message: 'স্টাফের নাম দিন।' };
   if (!password || password.length < 6) return { ok: false, error: 'WEAK_PASSWORD', message: 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।' };
-  var existing = email ? findAdminByEmail_(email) : findAdminByPhone_(phone);
-  var hp = hashPassword_(password);
   var sheet = getAdminsSheet_();
-  var now = new Date();
-  if (existing) {
-    sheet.getRange(existing.row, 3).setValue(name || existing.name);
-    sheet.getRange(existing.row, 4).setValue(hp.hash);
-    sheet.getRange(existing.row, 5).setValue(hp.salt);
-    sheet.getRange(existing.row, 6).setValue('active');
-    sheet.getRange(existing.row, 8).setValue('staff');
-    sheet.getRange(existing.row, 9).setValue(now);
-  } else {
-    appendRow_(sheet, [email || '', phone || '', name, hp.hash, hp.salt, 'active', now, 'staff', now]);
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(5000)) return { ok: false, error: 'BUSY', message: 'স্টাফ তালিকা ব্যস্ত—আবার চেষ্টা করুন।' };
+  try {
+    var data = sheet.getDataRange().getValues();
+    var emailRow = 0, phoneRow = 0;
+    for (var i = 1; i < data.length; i++) {
+      var rowEmail = normalizeEmail_(data[i][0]);
+      var rowPhone = normalizePhone_(data[i][1]);
+      if (email && rowEmail === email) emailRow = i + 1;
+      if (phone && rowPhone === phone) phoneRow = i + 1;
+    }
+    if (emailRow && phoneRow && emailRow !== phoneRow) {
+      return { ok: false, error: 'IDENTIFIER_CONFLICT', message: 'ইমেইল ও ফোন আলাদা অ্যাকাউন্টে ব্যবহৃত—তথ্য যাচাই করুন।' };
+    }
+    var existingRow = emailRow || phoneRow;
+    if (existingRow) {
+      var role = String(data[existingRow - 1][7] || 'admin').trim().toLowerCase();
+      if (role !== 'staff') {
+        return { ok: false, error: 'ACCOUNT_CONFLICT', message: 'এই ইমেইল/ফোন ইতিমধ্যে অ্যাডমিন অ্যাকাউন্টে ব্যবহৃত।' };
+      }
+    }
+    var hp = hashPassword_(password);
+    var now = new Date();
+    if (existingRow) {
+      if (email) sheet.getRange(existingRow, 1).setValue(email);
+      if (phone) sheet.getRange(existingRow, 2).setValue(phone);
+      sheet.getRange(existingRow, 3).setValue(name);
+      sheet.getRange(existingRow, 4).setValue(hp.hash);
+      sheet.getRange(existingRow, 5).setValue(hp.salt);
+      sheet.getRange(existingRow, 6).setValue('active');
+      sheet.getRange(existingRow, 8).setValue('staff');
+      sheet.getRange(existingRow, 9).setValue(now);
+    } else {
+      appendRow_(sheet, [email || '', phone || '', name, hp.hash, hp.salt, 'active', now, 'staff', now]);
+    }
+    return { ok: true };
+  } finally {
+    lock.releaseLock();
   }
-  return { ok: true };
 }
 
 function deleteAdminStaff_(e) {
@@ -3826,7 +3863,7 @@ function getAdminAnalytics_(e) {
       var dayKey = dayKeyFromCell_(r[0]);
       if (!dayKey || dayKey < fromKey || (toKeyExclusive && dayKey >= toKeyExclusive)) continue;
 
-      var total = parseFloat(String(r[7] || '0').replace(/[^\d.]/g, '')) || 0;
+      var total = parseSignedOrderAmount_(r[7]);
       totalOrders++;
       totalRevenue += total;
       if (String(r[10] || '').trim() || String(r[11] || '').trim()) courierOrders++;
@@ -4436,6 +4473,52 @@ var GITHUB_IMAGE_ALLOWED_EXT_ = ['webp', 'jpg', 'jpeg', 'png'];
 var GITHUB_IMAGE_ALLOWED_MIME_ = ['image/webp', 'image/jpeg', 'image/png'];
 var GITHUB_IMAGE_MAX_BYTES_ = Math.round(2.5 * 1024 * 1024); // 2.5MB
 
+function isAllowedGithubImagePath_(path) {
+  var value = String(path || '').trim();
+  if (value.indexOf(GITHUB_IMAGES_PREFIX_) !== 0) return false;
+  var rest = value.slice(GITHUB_IMAGES_PREFIX_.length);
+  var extMatch = /\.([a-zA-Z0-9]+)$/.exec(rest);
+  var ext = extMatch ? extMatch[1].toLowerCase() : '';
+  return /^[a-z0-9-]+(?:\/[a-z0-9-]+)*\.[a-z0-9]+$/.test(rest) &&
+    rest.indexOf('..') === -1 && GITHUB_IMAGE_ALLOWED_EXT_.indexOf(ext) !== -1;
+}
+
+function validateGithubImagePayload_(b64, mime, path) {
+  var value = String(b64 || '').replace(/\s/g, '');
+  if (!value || value.length % 4 !== 0 || !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value)) {
+    return { ok: false, error: 'INVALID_IMAGE_DATA', message: 'ছবির ডাটা সঠিক Base64 ফরম্যাটে নেই।' };
+  }
+  var pathMatch = /\.([a-zA-Z0-9]+)$/.exec(String(path || ''));
+  var ext = pathMatch ? pathMatch[1].toLowerCase() : '';
+  var expectedMime = ext === 'webp' ? 'image/webp' : (ext === 'png' ? 'image/png' : 'image/jpeg');
+  if (GITHUB_IMAGE_ALLOWED_MIME_.indexOf(mime) === -1 || mime !== expectedMime) {
+    return { ok: false, error: 'MIME_NOT_ALLOWED', message: 'ফাইলের এক্সটেনশন ও ছবির ধরন মিলতে হবে (WebP/JPEG/PNG)।' };
+  }
+  if (value.length > Math.ceil(GITHUB_IMAGE_MAX_BYTES_ / 3) * 4) {
+    return { ok: false, error: 'FILE_TOO_LARGE', message: 'ছবি ২.৫MB এর বেশি।' };
+  }
+  var bytes;
+  try { bytes = Utilities.base64Decode(value); } catch (err) {
+    return { ok: false, error: 'INVALID_IMAGE_DATA', message: 'ছবির ডাটা পড়া যায়নি।' };
+  }
+  if (!bytes || bytes.length > GITHUB_IMAGE_MAX_BYTES_) {
+    return { ok: false, error: 'FILE_TOO_LARGE', message: 'ছবি ২.৫MB এর বেশি।' };
+  }
+  function byteAt(index) { return (bytes[index] + 256) % 256; }
+  var valid = false;
+  if (mime === 'image/png') {
+    var png = [137, 80, 78, 71, 13, 10, 26, 10];
+    valid = bytes.length >= png.length && png.every(function (b, i) { return byteAt(i) === b; });
+  } else if (mime === 'image/jpeg') {
+    valid = bytes.length >= 3 && byteAt(0) === 255 && byteAt(1) === 216 && byteAt(2) === 255;
+  } else if (mime === 'image/webp') {
+    valid = bytes.length >= 12 && byteAt(0) === 82 && byteAt(1) === 73 && byteAt(2) === 70 && byteAt(3) === 70 &&
+      byteAt(8) === 87 && byteAt(9) === 69 && byteAt(10) === 66 && byteAt(11) === 80;
+  }
+  if (!valid) return { ok: false, error: 'INVALID_IMAGE_DATA', message: 'ফাইলের ভেতরের ডাটা ঘোষিত ছবির ধরনের সঙ্গে মেলে না।' };
+  return { ok: true };
+}
+
 function publishImageToGitHub_(e) {
   var token = param_(e, 'Token');
   var v = verifyAdminSession_(token);
@@ -4453,16 +4536,8 @@ function publishImageToGitHub_(e) {
   }
 
   var mime = String(param_(e, 'MimeType') || '').trim().toLowerCase();
-  if (GITHUB_IMAGE_ALLOWED_MIME_.indexOf(mime) === -1) {
-    return { ok: false, error: 'MIME_NOT_ALLOWED', message: 'শুধু WebP/JPEG/PNG ছবি আপলোড করা যায়।' };
-  }
-
   var path = String(param_(e, 'FileName') || '').trim();
-  var rest = path.indexOf(GITHUB_IMAGES_PREFIX_) === 0 ? path.slice(GITHUB_IMAGES_PREFIX_.length) : '';
-  var extMatch = /\.([a-zA-Z0-9]+)$/.exec(rest);
-  var ext = extMatch ? extMatch[1].toLowerCase() : '';
-  var nameOk = /^[a-z0-9-]+(?:\/[a-z0-9-]+)*\.[a-z0-9]+$/.test(rest) && rest.indexOf('..') === -1 && GITHUB_IMAGE_ALLOWED_EXT_.indexOf(ext) !== -1;
-  if (!path || path.indexOf(GITHUB_IMAGES_PREFIX_) !== 0 || !nameOk) {
+  if (!isAllowedGithubImagePath_(path)) {
     return {
       ok: false,
       error: 'PATH_NOT_ALLOWED',
@@ -4471,17 +4546,8 @@ function publishImageToGitHub_(e) {
   }
 
   var b64 = String(param_(e, 'ContentBase64') || '').replace(/\s/g, '');
-  if (!b64) {
-    return { ok: false, error: 'MISSING_FIELDS', message: 'ছবির ডাটা পাওয়া যায়নি।' };
-  }
-  var approxBytes = Math.floor((b64.length * 3) / 4);
-  if (approxBytes > GITHUB_IMAGE_MAX_BYTES_) {
-    return {
-      ok: false,
-      error: 'FILE_TOO_LARGE',
-      message: 'ছবি ২.৫MB এর বেশি — আপলোডের আগে আরও ছোট/কমপ্রেস করে পাঠান।'
-    };
-  }
+  var imageValidation = validateGithubImagePayload_(b64, mime, path);
+  if (!imageValidation.ok) return imageValidation;
 
   var apiBase =
     'https://api.github.com/repos/' +
@@ -4617,7 +4683,7 @@ function deleteImageFromGitHub_(e) {
   }
 
   var path = String(param_(e, 'Path') || '').trim();
-  if (!path || path.indexOf(GITHUB_IMAGES_PREFIX_) !== 0 || path.indexOf('..') !== -1) {
+  if (!isAllowedGithubImagePath_(path)) {
     return { ok: false, error: 'PATH_NOT_ALLOWED', message: 'শুধু images/ ফোল্ডারের ছবি মোছা যাবে।' };
   }
 
@@ -4670,6 +4736,16 @@ function parseOrderValue_(raw) {
   s = s.replace(/[^0-9.]/g, '');
   var n = parseFloat(s);
   return isFinite(n) && n > 0 ? n : 0;
+}
+
+function parseSignedOrderAmount_(raw) {
+  var bn = '০১২৩৪৫৬৭৮৯';
+  var text = String(raw == null ? '' : raw)
+    .replace(/[০-৯]/g, function (d) { return String(bn.indexOf(d)); })
+    .replace(/,/g, '');
+  var match = text.match(/-?(?:\d+(?:\.\d*)?|\.\d+)/);
+  var amount = match ? Number(match[0]) : 0;
+  return isFinite(amount) ? amount : 0;
 }
 
 // ===== Messenger → Conversions API for Business Messaging =====
@@ -5113,12 +5189,7 @@ function adminRateLimit_(token) {
 
 // Admin or staff accounts from the Admins sheet can use the inbox.
 function verifyInboxSession_(token) {
-  var v = verifySession_(token);
-  if (!v.ok) return v;
-  if (v.role !== 'admin' && v.role !== 'staff') {
-    return { ok: false, error: 'NOT_ADMIN', message: 'অ্যাডমিন লগইন প্রয়োজন।' };
-  }
-  return v;
+  return verifyAdminSession_(token);
 }
 
 function handleInboxRequest_(type, e) {
@@ -6505,8 +6576,8 @@ function getAdminAnalyticsV2_(e) {
         if (!lastOrderDay || dk > lastOrderDay) lastOrderDay = dk;
       }
       summary.totalOrders++;
-      var status = String(r[9] || '').trim();
-      var total = parseFloat(String(r[7] || '0').replace(/[^\d.]/g, '')) || 0;
+      var status = String(r[9] || '').trim().toLowerCase();
+      var total = parseSignedOrderAmount_(r[7]);
       summary.totalOrderValue += total;
       if (dk) {
         var monthKey = dk.slice(0, 7);
@@ -6520,8 +6591,8 @@ function getAdminAnalyticsV2_(e) {
       if (isReturn) summary.returnedCount++;
       else if (isPlainCancel) summary.cancelledCount++;
 
-      if (status === 'Confirmed') summary.confirmedCount++;
-      if (status === 'Delivered') {
+      if (status === 'confirmed') summary.confirmedCount++;
+      if (status === 'delivered') {
         summary.deliveredCount++;
         summary.deliveredSalesValue += total;
         if (dk && monthStats[dk.slice(0, 7)]) {
@@ -6535,14 +6606,14 @@ function getAdminAnalyticsV2_(e) {
         anySourceData = true;
         if (!sourceStats[sourceVal]) sourceStats[sourceVal] = { orders: 0, delivered: 0 };
         sourceStats[sourceVal].orders++;
-        if (status === 'Delivered') sourceStats[sourceVal].delivered++;
+        if (status === 'delivered') sourceStats[sourceVal].delivered++;
       }
 
       // best-seller হিসাব Confirmed/Shipped/Delivered অর্ডার থেকে (বাতিল/পেন্ডিং বাদ) —
       // Shipped মানে কুরিয়ারে পাঠানো হয়ে গেছে (Steadfast auto), তাই এটাও একটা প্রতিশ্রুত বিক্রি —
       // আগে শুধু Confirmed/Delivered গোনা হতো, ফলে ট্রানজিটে থাকা অর্ডারগুলোর পণ্য বেস্ট-সেলার/
       // ক্যাটাগরি/সাইজ পরিসংখ্যানে বাদ পড়ে যেত।
-      if (status === 'Confirmed' || status === 'Shipped' || status === 'Delivered') {
+      if (status === 'confirmed' || status === 'shipped' || status === 'delivered') {
         var cartJsonCell = String(r[32] || '').trim(); // কলাম ৩৩
         if (cartJsonCell) {
           try {

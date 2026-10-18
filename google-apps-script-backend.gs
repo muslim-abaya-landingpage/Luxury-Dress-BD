@@ -53,7 +53,8 @@ function doPost(e) {
       appendRow_(sub, [param_(e, 'contact') || param_(e, 'email'), new Date()]);
       return ContentService.createTextOutput('Success').setMimeType(ContentService.MimeType.TEXT);
     }
-    return ContentService.createTextOutput(handleOrder_(e)).setMimeType(ContentService.MimeType.TEXT);
+    if (isOrder) return ContentService.createTextOutput(handleOrder_(e)).setMimeType(ContentService.MimeType.TEXT);
+    return jsonOut_({ ok: false, error: type ? 'UNKNOWN_RECORD_TYPE' : 'INVALID_REQUEST' });
   } catch (err) {
     if (String(err.message || err) === 'RATE_LIMIT') {
       return jsonOut_({ ok: false, error: 'RATE_LIMIT', message: 'অনেকবার চেষ্টা। কিছুক্ষণ পর আবার করুন।' });

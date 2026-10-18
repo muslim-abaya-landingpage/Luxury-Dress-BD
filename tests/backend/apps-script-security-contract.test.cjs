@@ -179,3 +179,134 @@ test('the copy/paste HTML embeds the canonical Apps Script Code.gs source', () =
   const embedded = match[1].replace(/&(amp|lt|gt);/g, (_, key) => ({ amp: '&', lt: '<', gt: '>' })[key]);
   assert.equal(embedded.replace(/\r\n/g, '\n').trimEnd(), source.replace(/\r\n/g, '\n').trimEnd());
 });
+
+
+test('admin login treats blocked status case-insensitively', () => {
+  let passwordChecks = 0;
+  const sandbox = {
+    getAuthSecret_: () => 'configured',
+    getAdminsSheet_: () => ({ getLastRow: () => 2 }),
+    param_: (_event, key) => ({ Email: 'OWNER@example.com', Password: 'correct horse' })[key] || '',
+    normalizeEmail_: value => String(value || '').trim().toLowerCase(),
+    normalizePhone_: value => String(value || '').replace(/\D/g, ''),
+    rateLimit_: () => {},
+    findAdminByEmail_: () => ({ status: 'Blocked', salt: 's', hash: 'h' }),
+    findAdminByPhone_: () => null,
+    verifyPassword_: () => { passwordChecks += 1; return true; }
+  };
+  const loginAdmin = runFunction('loginAdmin_', sandbox);
+  const result = loginAdmin({});
+  assert.equal(result.error, 'BLOCKED');
+  assert.equal(passwordChecks, 0);
+});
+
+test('admin session verification rejects blocked accounts and stale roles', () => {
+  function verify(currentAdmin, sessionRole) {
+    const sandbox = {
+      verifySession_: () => ({ ok: true, token: 't', email: 'staff@example.com', phone: '01900000000', name: 'Staff', role: sessionRole }),
+      findAdminByEmail_: () => currentAdmin,
+      findAdminByPhone_: () => currentAdmin
+    };
+    return runFunction('verifyAdminSession_', sandbox)('t');
+  }
+  assert.equal(verify({ email: 'staff@example.com', phone: '01900000000', role: 'staff', status: 'BLOCKED' }, 'staff').error, 'BLOCKED');
+  assert.equal(verify({ email: 'staff@example.com', phone: '01900000000', role: 'admin', status: 'active' }, 'staff').error, 'NOT_ADMIN');
+});
+
+test('staff save cannot overwrite admin rows or bind identifiers from different accounts', () => {
+  function callSave(initialRows, fields) {
+    const rows = initialRows.map(row => row.slice());
+    const sheet = {
+      getDataRange: () => ({ getValues: () => rows }),
+      getRange: (row, column) => ({ setValue: value => { rows[row - 1][column - 1] = value; } })
+    };
+    const sandbox = {
+      LockService: { getScriptLock: () => ({ tryLock: () => true, releaseLock: () => {} }) },
+      verifyAdminSession_: () => ({ ok: true, isOwner: true }),
+      requireOwnerAdmin_: () => null,
+      getAdminsSheet_: () => sheet,
+      normalizeEmail_: value => String(value || '').trim().toLowerCase(),
+      normalizePhone_: value => String(value || '').replace(/\D/g, ''),
+      hashPassword_: () => ({ hash: 'new-hash', salt: 'new-salt' }),
+      appendRow_: (_target, row) => rows.push(row),
+      param_: (_event, key) => fields[key] || ''
+    };
+    const save = runFunction('saveAdminStaff_', sandbox);
+    return { result: save({}), rows };
+  }
+
+  const admin = ['owner@example.com', '01900000000', 'Owner', 'old-hash', 'old-salt', 'active', new Date(), 'admin', new Date()];
+  const ownerAttempt = callSave([['Email', 'Phone'], admin], {
+    Email: 'owner@example.com', Phone: '01800000000', Name: 'Injected', Password: 'secret1'
+  });
+  assert.equal(ownerAttempt.result.error, 'ACCOUNT_CONFLICT');
+  assert.equal(ownerAttempt.rows[1][7], 'admin');
+  assert.equal(ownerAttempt.rows[1][3], 'old-hash');
+
+  const staffA = ['a@example.com', '01911111111', 'A', 'h', 's', 'active', new Date(), 'staff', new Date()];
+  const staffB = ['b@example.com', '01922222222', 'B', 'h', 's', 'active', new Date(), 'staff', new Date()];
+  const splitIdentity = callSave([['Email', 'Phone'], staffA, staffB], {
+    Email: 'a@example.com', Phone: '01922222222', Name: 'A', Password: 'secret1'
+  });
+  assert.equal(splitIdentity.result.error, 'IDENTIFIER_CONFLICT');
+  assert.equal(splitIdentity.rows[1][1], '01911111111');
+  assert.equal(splitIdentity.rows[2][1], '01922222222');
+});
+
+test('media path validation allows only image types and image bytes must match MIME', () => {
+  const start = source.indexOf("var GITHUB_IMAGES_PREFIX_ =");
+  const end = source.indexOf('function publishImageToGitHub_', start);
+  assert.ok(start >= 0 && end > start, 'Missing image validation helpers');
+  const sandbox = {
+    Utilities: { base64Decode: value => Array.from(Buffer.from(value, 'base64')) },
+    String, Number, Math, isFinite
+  };
+  vm.runInNewContext(source.slice(start, end) + '\nthis.pathAllowed = isAllowedGithubImagePath_; this.validateImage = validateGithubImagePayload_;', sandbox);
+  assert.equal(sandbox.pathAllowed('images/main/new-photo.webp'), true);
+  assert.equal(sandbox.pathAllowed('images/checkout.html'), false);
+  assert.equal(sandbox.pathAllowed('images/../admin.png'), false);
+  const pngBytes = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 0]);
+  assert.equal(sandbox.validateImage(pngBytes.toString('base64'), 'image/png', 'images/main/photo.png').ok, true);
+  assert.equal(sandbox.validateImage(Buffer.from('abc').toString('base64'), 'image/png', 'images/main/photo.png').error, 'INVALID_IMAGE_DATA');
+  assert.equal(sandbox.validateImage(pngBytes.toString('base64'), 'image/jpeg', 'images/main/photo.jpg').error, 'INVALID_IMAGE_DATA');
+});
+
+test('legacy Apps Script backend fails closed for unknown RecordType instead of treating it as an order', () => {
+  const legacy = fs.readFileSync(path.join(root, 'google-apps-script-backend.gs'), 'utf8');
+  assert.match(legacy, /if \(isOrder\) return ContentService\.createTextOutput\(handleOrder_\(e\)\)/);
+  assert.match(legacy, /UNKNOWN_RECORD_TYPE/);
+  assert.doesNotMatch(legacy, /return ContentService\.createTextOutput\(handleOrder_\(e\)\)\.setMimeType\(ContentService\.MimeType\.TEXT\);\s*\n\s*\} catch/);
+});
+
+
+test('manual Apps Script copy page contains every canonical server-side and HTML source file', () => {
+  const appDir = path.join(root, 'apps-script');
+  const names = fs.readdirSync(appDir).filter(name => /\.(gs|html)$/.test(name));
+  const copyPage = fs.readFileSync(path.join(root, 'apps-script-copy.html'), 'utf8');
+  for (const name of names) {
+    const canonical = fs.readFileSync(path.join(appDir, name), 'utf8');
+    const escaped = canonical.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+    assert.ok(copyPage.includes(escaped), `Copy page is missing or stale: ${name}`);
+  }
+  assert.match(copyPage, /সম্পূর্ণ project/);
+  assert.match(copyPage, /Operations\.gs/);
+  assert.match(copyPage, /CatalogPublish\.gs/);
+});
+
+
+test('admin login normalizes stored role casing before creating a session', () => {
+  const user = { email: 'staff@example.com', phone: '01900000000', name: 'Staff', status: 'active', role: 'STAFF', salt: 's', hash: 'h' };
+  const sandbox = {
+    getAuthSecret_: () => 'configured',
+    getAdminsSheet_: () => ({ getLastRow: () => 2 }),
+    param_: (_event, key) => ({ Email: user.email, Password: 'secret1' })[key] || '',
+    normalizeEmail_: value => String(value || '').trim().toLowerCase(),
+    normalizePhone_: value => String(value || '').replace(/\D/g, ''),
+    rateLimit_: () => {},
+    findAdminByEmail_: () => user,
+    verifyPassword_: () => true,
+    createSession_: (_identity, role) => ({ ok: true, role })
+  };
+  const result = runFunction('loginAdmin_', sandbox)({});
+  assert.equal(result.role, 'staff');
+});

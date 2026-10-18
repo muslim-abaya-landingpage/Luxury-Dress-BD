@@ -46,3 +46,19 @@ test('uses inclusive one-hour pending overdue threshold', () => {
   assert.equal(task.overdue, true);
   assert.equal(task.overdueMs, 0);
 });
+
+
+const dashboardHtml = fs.readFileSync(path.join(__dirname, '../../admin-dashboard.html'), 'utf8');
+test('dashboard money parser preserves negative totals and Bengali digits', () => {
+  const match = dashboardHtml.match(/function num\(v\) \{[\s\S]*?\n      \}/);
+  assert.ok(match, 'Could not locate dashboard amount parser');
+  const parseContext = {};
+  vm.runInNewContext(match[0] + '\nthis.parseAmount = num;', parseContext);
+  assert.equal(parseContext.parseAmount('৳ -1,250'), -1250);
+  assert.equal(parseContext.parseAmount('৳ ১,২৫০'), 1250);
+});
+test('orders without IDs are not given a broken admin-order link', () => {
+  assert.match(dashboardHtml, /var orderLink = o\.orderId\s*\?[\s\S]*?:\s*'<span>'/);
+  assert.ok(dashboardHtml.includes(": '<span>' + escapeHtml(o.name) + '</span>'"));
+  assert.match(dashboardHtml, /'<div class="dz-who"><b>' \+ orderLink/);
+});

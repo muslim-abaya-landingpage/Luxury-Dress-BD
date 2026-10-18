@@ -7,6 +7,8 @@ const vm = require('node:vm');
 const source = fs.readFileSync(path.join(__dirname, '../../apps-script/Code.gs'), 'utf8');
 const helpers = source.match(/function bdIsValidDateKey_[\s\S]*?function bdRangeBounds_\([\s\S]*?\n\}/m);
 assert.ok(helpers, 'Could not locate analytics date-bound helpers in Code.gs');
+const signedAmount = source.match(/function parseSignedOrderAmount_\([\s\S]*?\n\}/m);
+assert.ok(signedAmount, 'Could not locate signed amount parser in Code.gs');
 const fixedNow = Date.UTC(2026, 9, 18, 0, 30, 0);
 class FixedDate extends Date {
   constructor(...args) { super(...(args.length ? args : [fixedNow])); }
@@ -24,7 +26,7 @@ const sandbox = {
   Math,
   Utilities: { formatDate: formatDhaka }
 };
-vm.runInNewContext(helpers[0] + '\nthis.bdRangeBounds_ = bdRangeBounds_; this.bdIsValidDateKey_ = bdIsValidDateKey_;', sandbox);
+vm.runInNewContext(helpers[0] + '\n' + signedAmount[0] + '\nthis.bdRangeBounds_ = bdRangeBounds_; this.bdIsValidDateKey_ = bdIsValidDateKey_; this.parseSignedOrderAmount_ = parseSignedOrderAmount_;', sandbox);
 const today = formatDhaka(new FixedDate());
 
 test('all range covers the full dated history through Bangladesh today', () => {
@@ -50,6 +52,12 @@ test('unknown range keeps the legacy today fallback', () => {
   assert.equal(result.all, false);
 });
 
+test('signed amount parser preserves refunds and Bangla numerals', () => {
+  assert.equal(sandbox.parseSignedOrderAmount_('৳ -1,250'), -1250);
+  assert.equal(sandbox.parseSignedOrderAmount_('৳ ১,২৫০.৫০'), 1250.5);
+  assert.equal(sandbox.parseSignedOrderAmount_('invalid'), 0);
+});
+
 test('analytics response includes monthly sales and undated-order disclosure fields', () => {
   assert.match(source, /salesByMonth:\s*salesByMonth/);
   assert.match(source, /undatedOrderCount:\s*undatedOrderCount/);
@@ -66,10 +74,11 @@ test('lifetime analytics includes all dated and undated orders and groups valid 
   };
   const rows = [Array(37).fill('header'),
     makeRow({ time: '15-12-2025 10:00:00', name: 'A', phone: '01000000001', total: 1000, status: 'Confirmed', cart: [{ id: 'p1', name: 'Abaya', qty: 1 }] }),
-    makeRow({ time: '17-10-2026 11:00:00', name: 'B', phone: '01000000002', total: 1200, status: 'Delivered', cart: [{ id: 'p1', name: 'Abaya', qty: 2 }], sourceName: 'Facebook' }),
+    makeRow({ time: '17-10-2026 11:00:00', name: 'B', phone: '01000000002', total: 1200, status: 'delivered', cart: [{ id: 'p1', name: 'Abaya', qty: 2 }], sourceName: 'Facebook' }),
     makeRow({ time: '', name: 'C', phone: '01000000003', total: 500, status: 'Pending' }),
     makeRow({ time: '19-10-2026 11:00:00', name: 'Future', phone: '01000000004', total: 900, status: 'Pending' }),
-    makeRow({ time: '17-10-2026 11:00:00', name: '', phone: '', total: 400, status: 'Pending' })
+    makeRow({ time: '17-10-2026 11:00:00', name: '', phone: '', total: 400, status: 'Pending' }),
+    makeRow({ time: '17-10-2026 12:00:00', name: 'Refund', phone: '01000000005', total: -100, status: 'Cancelled' })
   ];
   const testSandbox = {
     Date: FixedDate,
@@ -90,11 +99,12 @@ test('lifetime analytics includes all dated and undated orders and groups valid 
     ensureStockVariantsSheet_: () => ({ getDataRange: () => ({ getValues: () => [['Product ID']] }) }),
     STOCK_LOW_DEFAULT_THRESHOLD_: 5
   };
-  vm.runInNewContext(helpers[0] + '\n' + analytics[0] + '\nthis.runAnalytics = getAdminAnalyticsV2_;', testSandbox);
+  vm.runInNewContext(helpers[0] + '\n' + signedAmount[0] + '\n' + analytics[0] + '\nthis.runAnalytics = getAdminAnalyticsV2_;', testSandbox);
   const result = testSandbox.runAnalytics({ Token: 'valid', Range: 'all' });
   assert.equal(result.ok, true);
-  assert.equal(result.summary.totalOrders, 3);
-  assert.equal(result.summary.totalOrderValue, 2700);
+  assert.equal(result.summary.totalOrders, 4);
+  assert.equal(result.summary.totalOrderValue, 2600);
+  assert.equal(result.summary.deliveredCount, 1);
   assert.equal(result.summary.deliveredSalesValue, 1200);
   assert.equal(result.undatedOrderCount, 1);
   assert.deepEqual(Array.from(result.salesByMonth, row => row.month), ['2025-12', '2026-10']);

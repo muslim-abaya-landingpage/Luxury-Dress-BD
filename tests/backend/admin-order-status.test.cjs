@@ -31,3 +31,22 @@ test('partial delivery, unknown statuses and shop status are preserved',()=>{
  assert.equal(describe({courierStatus:'future_state'}).courierLabel,'future_state');
  assert.equal(JSON.stringify(order),snapshot);
 });
+
+
+const orderPage = fs.readFileSync(require('node:path').join(__dirname, '../../admin-order.html'), 'utf8');
+test('order editor rejects invalid money and keeps save failures rejected', () => {
+  const start = orderPage.indexOf('function save() {');
+  const end = orderPage.indexOf('$("btnSave").addEventListener', start);
+  assert.ok(start >= 0 && end > start, 'Could not locate order save flow');
+  const saveFlow = orderPage.slice(start, end);
+  assert.match(saveFlow, /!\[charge, advance, discount\]\.every\(Number\.isFinite\)/);
+  assert.match(saveFlow, /MaAdmin\.call\("AdminOrderUpdate"/);
+  assert.match(saveFlow, /function \(err\) \{\s*btn\.disabled = false;\s*throw err;/);
+});
+test('courier send is chained after successful order update', () => {
+  const start = orderPage.indexOf('$("btnCourierSend").addEventListener');
+  const end = orderPage.indexOf('});', start);
+  assert.ok(start >= 0 && end > start, 'Could not locate courier send handler');
+  const courierFlow = orderPage.slice(start, orderPage.indexOf('function load()', start));
+  assert.match(courierFlow, /save\(\)\.then\(function \(\) \{\s*return MaAdmin\.call\("AdminSendCourier"/);
+});

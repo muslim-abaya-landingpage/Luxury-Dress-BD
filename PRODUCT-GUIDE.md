@@ -10,7 +10,7 @@
 1. `প্রোডাক্ট-এডিট.bat` চালান (বা `http://localhost:5500/product-manager.html`)  
 2. বামে ক্যাটাগরি বেছে নিন → প্রোডাক্ট এডিট করুন  
 3. **সেভ করুন** → `category-products.js` + `product-links-data.js` + `product-catalog-sections.js` ডাউনলোড  
-4. প্রজেক্টে রিপ্লেস → Netlify আপলোড → `Ctrl+F5`  
+4. প্রজেক্টে রিপ্লেস → `main` branch-এ push (Cloudflare Pages auto-deploy) → deployment সফল হলে `Ctrl+F5`
 5. নতুন ক্যাটাগরি হলে: HTML + `_redirects-new-categories.txt` ও ডাউনলোড হবে — সেগুলো যোগ করুন
 
 ---
@@ -144,8 +144,8 @@
 ## Sign In / Sign Up — Google Sheet
 
 - ফর্ম সাবমিট → `auth-sheets.js` → আপনার Apps Script URL।
-- Sheet-এ লগ দেখতে `google-apps-script-backend.gs` কোড **Apps Script-এ পেস্ট** করে **নতুন deployment** করুন (একই URL থাকলে আপডেট deployment)।
-- ট্যাব: `Customers` (রেজিস্টার), `Logins` (সাইন ইন), `Orders` (চেকআউট)।
+- Sign In/Sign Up, অর্ডার ও Admin API একই canonical Apps Script project-এ চালাতে `APPS-SCRIPT-SETUP.md` অনুসরণ করুন। `google-apps-script-backend.gs` পুরোনো/অসম্পূর্ণ; এটি Admin API-এর জন্য deploy করবেন না।
+- ট্যাব: `Customers` (রেজিস্টার), `Logins` (সাইন ইন), `Online Order` (চেকআউট)।
 
 **পাসওয়ার্ড লগইন ও অর্ডার:** `APPS-SCRIPT-SETUP.md` দেখুন — Apps Script এ `AUTH_SECRET` + `site-api-config.js` এ Deploy URL। Sign Up, Checkout, Newsletter একই API।
 

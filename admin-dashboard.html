@@ -179,7 +179,7 @@
 
   <script src="site-api-config.js?v=20261009-inbox"></script>
   <script src="admin-config.js?v=20261009-inbox"></script>
-  <script src="admin-api.js?v=20261013-speed2"></script>
+  <script src="admin-api.js?v=80dbd3e930707465"></script>
   <script src="admin-guard.js?v=20261010-speed"></script>
   <script src="admin-invoice.js?v=20261009-inbox"></script>
   <script src="admin-order-insights.js?v=20261016-1"></script>
@@ -233,7 +233,13 @@
       function parseDate(t) {
         return MaOrderInsights.dateKey(t);
       }
-      function num(v) { return parseFloat(String(v || "0").replace(/[^\d.]/g, "")) || 0; }
+      function num(v) {
+        var bn = "০১২৩৪৫৬৭৮৯";
+        var text = String(v || "0").replace(/[০-৯]/g, function (d) { return String(bn.indexOf(d)); }).replace(/,/g, "");
+        var match = text.match(/-?(?:\d+(?:\.\d*)?|\.\d+)/);
+        var amount = match ? Number(match[0]) : 0;
+        return Number.isFinite(amount) ? amount : 0;
+      }
       function dayKey(d) { return d.toISOString().slice(0, 10); }
 
       function renderOrders(orders) {
@@ -253,9 +259,12 @@
           key = displayStatus.badgeKey;
           var confirmMsg = "আসসালামু আলাইকুম " + (o.name || "") + ", আপনার অর্ডার #" + (o.orderId || "") + " (৳" + (o.total || 0) + ") কনফার্ম হয়েছে। শীঘ্রই ডেলিভারি করা হবে, ধন্যবাদ।";
           var ini = String(o.name || "?").trim().charAt(0).toUpperCase() || "?";
+          var orderLink = o.orderId
+            ? '<a class="adm-order-open" href="admin-order.html?id=' + encodeURIComponent(o.orderId) + '">' + escapeHtml(o.name) + '</a>'
+            : '<span>' + escapeHtml(o.name) + '</span>';
           return '<div class="dz-order">' +
             '<div class="dz-av">' + escapeHtml(ini) + "</div>" +
-            '<div class="dz-who"><b><a class="adm-order-open" href="admin-order.html?id=' + encodeURIComponent(o.orderId || '') + '">' + escapeHtml(o.name) + "</a></b><span>" + escapeHtml(o.orderId || "—") + " · " + escapeHtml(o.time) + "</span>" +
+            '<div class="dz-who"><b>' + orderLink + "</b><span>" + escapeHtml(o.orderId || "—") + " · " + escapeHtml(o.time) + "</span>" +
             (tags ? '<div class="dz-tags">' + tags + "</div>" : "") + "</div>" +
             '<div class="dz-items">' + escapeHtml((o.design || "").replace(/\s*\n\s*/g, " ").slice(0, 90)) + "</div>" +
             '<div class="dz-amt">৳' + escapeHtml(o.total) + "<small>" + escapeHtml(o.payment || "") + (o.district ? " · " + escapeHtml(o.district) : "") + "</small></div>" +

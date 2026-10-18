@@ -1,12 +1,38 @@
 $root = Split-Path $PSScriptRoot -Parent
-# Live code lives in apps-script\ (clasp rootDir).
-$code = Get-Content (Join-Path $root "apps-script\Code.gs") -Raw -Encoding UTF8
-$adm = Get-Content (Join-Path $root "apps-script\AdminOrders.gs") -Raw -Encoding UTF8
-$fix = Get-Content (Join-Path $root "apps-script\FixSheetHeaders.gs") -Raw -Encoding UTF8
-# Escape so the textareas show (and copy) the code exactly, incl. "&amp;" literals.
-$safe = $code.Replace("&", "&amp;").Replace("<", "&lt;")
-$safeAdm = $adm.Replace("&", "&amp;").Replace("<", "&lt;")
-$safeFix = $fix.Replace("&", "&amp;").Replace("<", "&lt;")
+$sourceDir = Join-Path $root "apps-script"
+$preferred = @("Code.gs", "AdminOrders.gs", "FixSheetHeaders.gs")
+$files = @()
+foreach ($name in $preferred) {
+  $candidate = Join-Path $sourceDir $name
+  if (Test-Path $candidate) { $files += Get-Item $candidate }
+}
+$extras = Get-ChildItem $sourceDir -File | Where-Object { $_.Extension -eq ".gs" -or $_.Extension -eq ".html" } | Sort-Object Name
+foreach ($file in $extras) {
+  if ($preferred -notcontains $file.Name) { $files += $file }
+}
+
+$sections = New-Object System.Text.StringBuilder
+$bindings = @()
+$index = 0
+foreach ($file in $files) {
+  $index++
+  $name = $file.Name
+  $content = Get-Content $file.FullName -Raw -Encoding UTF8
+  $safe = $content.Replace("&", "&amp;").Replace("<", "&lt;")
+  switch ($name) {
+    "Code.gs" { $box = "codeBox"; $button = "copyBtn" }
+    "AdminOrders.gs" { $box = "admBox"; $button = "copyAdm" }
+    "FixSheetHeaders.gs" { $box = "fixBox"; $button = "copyFix" }
+    default { $box = "fileBox$index"; $button = "copyFile$index" }
+  }
+  $safeName = $name.Replace("&", "&amp;").Replace("<", "&lt;")
+  [void]$sections.AppendLine("<h2>$index. $safeName</h2>")
+  [void]$sections.AppendLine("<textarea id=`"$box`" readonly>$safe</textarea><br>")
+  [void]$sections.AppendLine("<button type=`"button`" id=`"$button`">$safeName কপি</button>")
+  $bindings += "bind('$button', '$box');"
+}
+
+$fileNames = ($files | ForEach-Object { $_.Name }) -join ", "
 $out = Join-Path $root "apps-script-copy.html"
 $html = @"
 <!DOCTYPE html>
@@ -22,30 +48,17 @@ $html = @"
   </style>
 </head>
 <body>
-  <h1>Apps Script কোড (৩টি ফাইল)</h1>
+  <h1>Apps Script কোড (সম্পূর্ণ project)</h1>
+  <p>এই page-এ canonical project-এর সব source file আছে: $fileNames</p>
   <div class="step">
-    <p><strong>H কলামে পণ্যের সাইজ:</strong> এই কোড নতুন বিন্যাসে I-তে টাকা, J-তে অর্ডার আইডি ও K-তে স্ট্যাটাস ব্যবহার করে। নিচের তিনটি ফাইল সেভ করে বর্তমান ডিপ্লয়মেন্টের নতুন ভার্সন Deploy করুন। আলাদা <code>Fix-doGet.gs</code>-এ <code>doGet</code> function রাখবেন না—এটি মূল router override করে API বন্ধ করতে পারে:</p>
+    <p><strong>গুরুত্বপূর্ণ:</strong> Admin dashboard-এর সব API চালাতে নিচের সব ফাইল একই Apps Script project-এ রাখতে হবে। <code>.gs</code> ফাইলের জন্য <strong>＋ → Script</strong>, আর <code>.html</code> ফাইলের জন্য <strong>＋ → HTML</strong> ব্যবহার করুন; একই নাম রেখে প্রতিটি কোড সংশ্লিষ্ট ফাইলে কপি করুন। একাধিক <code>doGet</code> function রাখবেন না—canonical router শুধু <code>Code.gs</code>-এ।</p>
     <ol>
-      <li>script.google.com → আপনার প্রজেক্ট → <strong>Code.gs</strong> এ Ctrl+A → নিচের <strong>১ নম্বর</strong> কোড পেস্ট</li>
-      <li>বাম পাশে <strong>＋ → Script</strong> চাপুন, নাম দিন <strong>AdminOrders</strong> (AdminOrders.gs তৈরি হবে) → Ctrl+A → নিচের <strong>২ নম্বর</strong> কোড পেস্ট</li>
-      <li><strong>FixSheetHeaders.gs</strong> ফাইল থাকলে নিচের <strong>৩ নম্বর</strong> কোড দিয়ে আপডেট করুন। না থাকলে <strong>＋ → Script → FixSheetHeaders</strong> তৈরি করুন।</li>
-      <li><strong>Save</strong> (ডিস্ক আইকন)</li>
-      <li><strong>Deploy → Manage deployments → ✏️ Edit → Version: New version → Deploy</strong> (URL একই থাকবে)</li>
-      <li>একবার <strong>setupOnlineOrderExtraHeaders</strong> Run করুন; এটি সঠিক কলামে হেডার ও স্ট্যাটাস ড্রপডাউন ঠিক করবে। নোট ও JSON নিজের কলামে থাকবে, হেডার স্থির থাকবে এবং অভ্যন্তরীণ ট্র্যাকিং কলাম লুকানো হবে। বর্তমান H-তে সাইজ থাকলে আবার সাইজ সিঙ্ক করার প্রয়োজন নেই।</li>
+      <li>প্রতিটি source file-এর নাম অনুযায়ী Apps Script file তৈরি বা update করুন।</li>
+      <li><strong>Save</strong> চাপুন এবং <code>npm run test:backend</code> parity test পাস হয়েছে কি নিশ্চিত করুন।</li>
+      <li><strong>Deploy → Manage deployments → Edit → Version: New version → Deploy</strong> করে বিদ্যমান Web App URL রাখুন।</li>
     </ol>
   </div>
-  <h2>১. Code.gs</h2>
-  <textarea id="codeBox" readonly>$safe</textarea>
-  <br>
-  <button type="button" id="copyBtn">Code.gs কপি</button>
-  <h2>২. AdminOrders.gs</h2>
-  <textarea id="admBox" readonly>$safeAdm</textarea>
-  <br>
-  <button type="button" id="copyAdm">AdminOrders.gs কপি</button>
-  <h2>৩. FixSheetHeaders.gs</h2>
-  <textarea id="fixBox" readonly>$safeFix</textarea>
-  <br>
-  <button type="button" id="copyFix">FixSheetHeaders.gs কপি</button>
+  $($sections.ToString())
   <script>
     function bind(btn, box) {
       document.getElementById(btn).onclick = function () {
@@ -53,9 +66,7 @@ $html = @"
         navigator.clipboard.writeText(t).then(function () { alert("কপি হয়েছে!"); });
       };
     }
-    bind("copyBtn", "codeBox");
-    bind("copyAdm", "admBox");
-    bind("copyFix", "fixBox");
+    $($bindings -join "`n    ")
   </script>
 </body>
 </html>

@@ -13,7 +13,7 @@
 ## ২. কোড পেস্ট
 
 1. **Editor** → `Code.gs` (বা নতুন ফাইল)
-2. `apps-script-copy.html` পেজ থেকে **Code.gs**, **AdminOrders.gs** ও **FixSheetHeaders.gs** কপি করে একই নামের ফাইলে পেস্ট করুন। না থাকলে **＋ → Script** দিয়ে তৈরি করুন। H-তে সাইজ বসানোর পরিবর্তনে তিনটি ফাইল আপডেট করতে হবে।
+2. `apps-script-copy.html` পেজে থাকা **সব** `.gs` ও `.html` source একই প্রকল্পে রাখুন—`.gs`-এর জন্য **＋ → Script**, `ProductPicker.html`-এর মতো HTML file-এর জন্য **＋ → HTML**। এতে `Operations.gs` ও `CatalogPublish.gs`-এর মতো Admin API modules-ও অন্তর্ভুক্ত; শুধু তিনটি ফাইল কপি করলে কিছু dashboard route চলবে না। আলাদা `doGet` তৈরি করবেন না।
 3. **Save**
 
 ### Security patch (2026-10-17)
@@ -81,9 +81,9 @@ Script properties এ যোগ করলে Purchase ইভেন্ট যা�
 |--------|--------|
 | `AUTH_NOT_CONFIGURED` | Script properties এ `AUTH_SECRET` সেভ করুন |
 | Sign up কাজ করে না | Deploy URL `site-api-config.js` এ ঠিক আছে কিনা দেখুন |
-| অর্ডার Sheet এ যায় না | একই URL + `google-apps-script-backend.gs` deploy করা আছে কিনা |
+| অর্ডার Sheet এ যায় না | `apps-script-copy.html` থেকে canonical `apps-script/Code.gs` ও companion files কপি করে একই Apps Script project-এ deploy করা আছে কিনা দেখুন; `google-apps-script-backend.gs` পুরোনো/অসম্পূর্ণ এবং Admin API-এর জন্য ব্যবহার করবেন না। |
 | পুরনো URL | `site-footer.js` আর আলাদা URL ব্যবহার করে না — শুধু `site-api-config.js` |
-| Subscribe সবুজ কিন্তু Sheet খালি | লাইভে পুরনো `site-footer.js` — `site-footer.js` + `site-api-config.js` Netlify এ deploy করুন; Deploy **Anyone** + New version |
+| Subscribe সবুজ কিন্তু Sheet খালি | লাইভে পুরনো `site-footer.js` — `site-footer.js` + `site-api-config.js` `main`-এ push করে Cloudflare Pages deploy সফল করুন; Apps Script Deploy **Anyone** + New version |
 | API URL লগইন পেজ দেখায় | Deploy → Who has access: **Anyone** (Google অ্যাকাউন্ট লাগবে না) |
 
 বিস্তারিত: `SECURITY-GUIDE.md`
