@@ -310,3 +310,60 @@ test('admin login normalizes stored role casing before creating a session', () =
   const result = runFunction('loginAdmin_', sandbox)({});
   assert.equal(result.role, 'staff');
 });
+
+
+test('admin permission matrix is explicit and staff cannot inherit protected Ops access', () => {
+  const sandbox = {
+    ADMIN_PERMISSION_MATRIX_: {
+      admin: ['admin.owner_actions', 'ops.protected.manage'],
+      staff: []
+    }
+  };
+  const hasPermission = runFunction('adminHasPermission_', sandbox);
+  sandbox.adminHasPermission_ = hasPermission;
+  const requirePermission = runFunction('requireAdminPermission_', sandbox);
+  sandbox.requireAdminPermission_ = requirePermission;
+  const canManageProtectedOps = runFunction('canManageProtectedOps_', sandbox);
+  const ownerGate = runFunction('requireOwnerAdmin_', sandbox);
+
+  assert.equal(hasPermission({ role: 'admin' }, 'admin.owner_actions'), true);
+  assert.equal(hasPermission({ role: 'admin' }, 'ops.protected.manage'), true);
+  assert.equal(hasPermission({ role: 'admin' }, 'unknown.permission'), false);
+  assert.equal(hasPermission({ role: 'staff' }, 'ops.protected.manage'), false);
+  assert.equal(hasPermission({ role: 'staff', isOwner: true }, 'admin.owner_actions'), false);
+  assert.equal(hasPermission({ role: 'unknown' }, 'ops.protected.manage'), false);
+  assert.equal(hasPermission(null, 'admin.owner_actions'), false);
+  assert.equal(canManageProtectedOps({ role: 'admin' }), true);
+  assert.equal(canManageProtectedOps({ role: 'staff' }), false);
+  assert.equal(ownerGate({ role: 'admin' }), null);
+  assert.equal(ownerGate({ role: 'staff', isOwner: true }).error, 'OWNER_ONLY');
+  assert.equal(requirePermission({ role: 'staff' }, 'ops.protected.manage').error, 'FORBIDDEN');
+  assert.doesNotMatch(source, /getProperty\(['"]SINGLE_OWNER_MODE['"]\)/);
+});
+
+test('Reality protected-ops guard admits the explicit admin permission and rejects staff', () => {
+  function invoke(role) {
+    const sandbox = {
+      requireRealityAdminSession_: () => ({ role: role }),
+      requireAdminPermission_: session => session.role === 'admin' ? null : { ok: false, error: 'FORBIDDEN' }
+    };
+    return runFunction('requireRealityManager_', sandbox)();
+  }
+  assert.equal(invoke('admin').role, 'admin');
+  assert.throws(() => invoke('staff'), /ADMIN_ONLY/);
+});
+
+
+test('canonical Apps Script matrix grants only declared owner permissions', () => {
+  const context = {};
+  vm.runInNewContext(source, context, { timeout: 5000 });
+  assert.equal(JSON.stringify(context.ADMIN_PERMISSION_MATRIX_), JSON.stringify({
+    admin: ['admin.owner_actions', 'ops.protected.manage'],
+    staff: []
+  }));
+  assert.equal(context.adminHasPermission_({ role: 'admin' }, 'ops.protected.manage'), true);
+  assert.equal(context.adminHasPermission_({ role: 'staff' }, 'ops.protected.manage'), false);
+  assert.equal(context.adminHasPermission_({ role: 'admin' }, 'unknown.permission'), false);
+  assert.equal(context.requireOwnerAdmin_({ role: 'admin' }), null);
+  assert.equal(context.requireOwnerAdmin_({ role: 'staff', isOwner: true }).error, 'OWNER_ONLY');
+});

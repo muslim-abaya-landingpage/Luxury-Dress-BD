@@ -777,18 +777,31 @@ function requireRealityAdminSession_() {
   return v;
 }
 
-function isSingleOwnerMode_() {
-  var raw = PropertiesService.getScriptProperties().getProperty('SINGLE_OWNER_MODE');
-  if (raw === null || raw === undefined || String(raw).trim() === '') return true; // default ON for your use-case
-  var v = String(raw).toLowerCase().trim();
-  return v === '1' || v === 'true' || v === 'yes' || v === 'on';
+/**
+ * Initial deny-by-default permission slice. Add a permission to this matrix
+ * deliberately before wiring its API route; unknown permissions/roles deny.
+ */
+var ADMIN_PERMISSION_MATRIX_ = Object.freeze({
+  admin: Object.freeze(['admin.owner_actions', 'ops.protected.manage']),
+  staff: Object.freeze([])
+});
+
+function adminHasPermission_(session, permission) {
+  if (!session || session.ok === false) return false;
+  var requested = String(permission || '').trim();
+  if (!requested) return false;
+  var role = String(session.role || '').trim().toLowerCase();
+  var allowed = ADMIN_PERMISSION_MATRIX_[role];
+  return Array.isArray(allowed) && allowed.indexOf(requested) !== -1;
+}
+
+function requireAdminPermission_(session, permission) {
+  if (adminHasPermission_(session, permission)) return null;
+  return { ok: false, error: 'FORBIDDEN', message: 'এই কাজের অনুমতি নেই।' };
 }
 
 function canManageProtectedOps_(session) {
-  var role = String((session && session.role) || '').toLowerCase();
-  if (role === 'admin') return true;
-  if (role === 'staff' && isSingleOwnerMode_()) return true;
-  return false;
+  return adminHasPermission_(session, 'ops.protected.manage');
 }
 
 function effectiveOpsRole_(session) {
@@ -799,7 +812,7 @@ function effectiveOpsRole_(session) {
 
 function requireRealityManager_() {
   var v = requireRealityAdminSession_();
-  if (!canManageProtectedOps_(v)) {
+  if (requireAdminPermission_(v, 'ops.protected.manage')) {
     throw new Error('ADMIN_ONLY');
   }
   return v;
@@ -3511,7 +3524,9 @@ function verifyAdminSession_(token) {
 }
 
 function requireOwnerAdmin_(v) {
-  if (!v.isOwner) return { ok: false, error: 'OWNER_ONLY', message: 'শুধুমাত্র মূল অ্যাডমিন এই কাজটি করতে পারবেন।' };
+  if (requireAdminPermission_(v, 'admin.owner_actions')) {
+    return { ok: false, error: 'OWNER_ONLY', message: 'শুধুমাত্র মূল অ্যাডমিন এই কাজটি করতে পারবেন।' };
+  }
   return null;
 }
 
