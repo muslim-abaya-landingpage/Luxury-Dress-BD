@@ -109,6 +109,94 @@ function sendNewOrderAlertOnce_(orderId, message) {
   }
 }
 
+function configureWhatsAppProperties(accessToken, phoneNumberId, recipient) {
+  var props = PropertiesService.getScriptProperties();
+  if (accessToken) props.setProperty('WHATSAPP_ACCESS_TOKEN', String(accessToken).trim());
+  if (phoneNumberId) props.setProperty('WHATSAPP_PHONE_NUMBER_ID', String(phoneNumberId).trim());
+  if (recipient) props.setProperty('WHATSAPP_TEST_RECIPIENT', String(recipient).replace(/\D/g, ''));
+  return { ok: true, configured: ['WHATSAPP_ACCESS_TOKEN', 'WHATSAPP_PHONE_NUMBER_ID', 'WHATSAPP_TEST_RECIPIENT'] };
+}
+
+function sendWhatsAppUtilityTemplate_(order) {
+  var props = PropertiesService.getScriptProperties();
+  var token = props.getProperty('WHATSAPP_ACCESS_TOKEN');
+  var phoneNumberId = props.getProperty('WHATSAPP_PHONE_NUMBER_ID');
+  var recipient = String(order.recipient || props.getProperty('WHATSAPP_TEST_RECIPIENT') || '').replace(/\D/g, '');
+  var templateName = props.getProperty('WHATSAPP_TEMPLATE_NAME') || 'order_alert';
+  var language = props.getProperty('WHATSAPP_TEMPLATE_LANGUAGE') || 'en_US';
+  if (!token || !phoneNumberId || !recipient) throw new Error('WhatsApp credentials/recipient are not configured.');
+
+  var payload = {
+    messaging_product: 'whatsapp',
+    recipient_type: 'individual',
+    to: recipient,
+    type: 'template',
+    template: {
+      name: templateName,
+      language: { code: language },
+      components: [{ type: 'body', parameters: [
+        { type: 'text', text: String(order.orderId || '') },
+        { type: 'text', text: String(order.name || '') },
+        { type: 'text', text: String(order.total || '') },
+        { type: 'text', text: String(order.status || 'Pending') }
+      ] }]
+    }
+  };
+  var response = UrlFetchApp.fetch(
+    'https://graph.facebook.com/v23.0/' + encodeURIComponent(phoneNumberId) + '/messages',
+    { method: 'post', contentType: 'application/json', headers: { Authorization: 'Bearer ' + token },
+      payload: JSON.stringify(payload), muteHttpExceptions: true }
+  );
+  var code = response.getResponseCode();
+  var body = response.getContentText();
+  var ok = code >= 200 && code < 300;
+  recordAutomationLog_('WHATSAPP_SEND', ok, 0, 0, 'HTTP ' + code + ' ' + body.slice(0, 500));
+  if (!ok) throw new Error('WhatsApp API error ' + code + ': ' + body);
+  return JSON.parse(body);
+}
+
+function logWhatsAppDeliveryStatus_(messageId, status, recipient) {
+  recordAutomationLog_('WHATSAPP_DELIVERY', true, 0, 0,
+    JSON.stringify({ messageId: messageId, status: status, recipient: recipient }));
+}
+
+function monitorWhatsAppQuotaDaily() {
+  var mirror = getOrderSyncMirror_();
+  var log = getOrCreateAutomationLogSheet_(mirror);
+  var rows = log.getDataRange().getValues();
+  var now = new Date();
+  var monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  var sent = 0, delivered = 0, failed = 0;
+  for (var i = 1; i < rows.length; i++) {
+    var when = parseAutomationLogDate_(rows[i][0]);
+    if (!when || when.getTime() < monthStart) continue;
+    var type = String(rows[i][1] || '');
+    var status = String(rows[i][2] || '');
+    if (type === 'WHATSAPP_SEND' && status === 'OK') sent++;
+    if (type === 'WHATSAPP_SEND' && status !== 'OK') failed++;
+    if (type === 'WHATSAPP_DELIVERY' && status === 'OK') delivered++;
+  }
+  var result = { ok: failed === 0, monthSent: sent, delivered: delivered, failed: failed, freeTierReference: 1000 };
+  recordAutomationLog_('WHATSAPP_QUOTA', result.ok, 0, 0, JSON.stringify(result));
+  if (sent >= 800) {
+    var emails = typeof getAdminNotifyEmails_ === 'function' ? getAdminNotifyEmails_() : [];
+    if (emails.length) MailApp.sendEmail({ to: emails.join(','), subject: 'WhatsApp quota warning: ' + sent, body: JSON.stringify(result, null, 2) });
+  }
+  return result;
+}
+
+function whatsappQuotaMonitorTriggerHandler() {
+  try { monitorWhatsAppQuotaDaily(); }
+  catch (err) { recordAutomationLog_('WHATSAPP_QUOTA', false, 0, 0, String(err.message || err)); }
+}
+
+function setupWhatsAppQuotaMonitorTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function (trigger) {
+    if (trigger.getHandlerFunction() === 'whatsappQuotaMonitorTriggerHandler') ScriptApp.deleteTrigger(trigger);
+  });
+  ScriptApp.newTrigger('whatsappQuotaMonitorTriggerHandler').timeBased().atHour(4).everyDays(1).create();
+}
+
 function findOrderIdColumn_(headers) {
   var aliases = [
     'অর্ডার আইডি',
@@ -516,6 +604,11 @@ function selfHealOrderSyncTriggers_() {
     return trigger.getHandlerFunction() === 'automationSummaryTriggerHandler';
   });
   if (!hasSummary) setupAutomationSummaryTrigger();
+
+  var hasWhatsAppQuota = ScriptApp.getProjectTriggers().some(function (trigger) {
+    return trigger.getHandlerFunction() === 'whatsappQuotaMonitorTriggerHandler';
+  });
+  if (!hasWhatsAppQuota) setupWhatsAppQuotaMonitorTrigger();
 }
 
 /**
@@ -540,6 +633,7 @@ function setupOperationsTriggersFromMenu() {
 
   setupAutomationLogVerificationTrigger();
   setupAutomationSummaryTrigger();
+  setupWhatsAppQuotaMonitorTrigger();
 
   SpreadsheetApp.getUi().alert(
     'Operations automation চালু হয়েছে।\n\n' +
