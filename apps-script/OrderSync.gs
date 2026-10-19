@@ -450,12 +450,53 @@ function hasOrderSyncTrigger_() {
 }
 
 function orderSyncTriggerHandler() {
+  PropertiesService.getScriptProperties().setProperty(
+    'ORDERSYNC_LAST_TRIGGER_AT',
+    new Date().toISOString()
+  );
   try {
-    runOrderSyncNow();
+    var result = runOrderSyncNow();
+    PropertiesService.getScriptProperties().setProperty(
+      'ORDERSYNC_LAST_TRIGGER_RESULT',
+      JSON.stringify(result)
+    );
   } catch (err) {
     recordAutomationLog_('SYNC', false, 0, 0, String(err.message || err));
+    PropertiesService.getScriptProperties().setProperty(
+      'ORDERSYNC_LAST_TRIGGER_RESULT',
+      JSON.stringify({ ok: false, error: String(err.message || err) })
+    );
     console.error('ORDERSYNC_FAILED ' + String(err.stack || err));
   }
+}
+
+function verifyOrderSyncPollingHealth() {
+  var props = PropertiesService.getScriptProperties();
+  var triggers = ScriptApp.getProjectTriggers();
+  var matching = triggers.filter(function (trigger) {
+    return trigger.getHandlerFunction() === 'orderSyncTriggerHandler' &&
+      trigger.getEventType() === ScriptApp.EventType.CLOCK;
+  });
+  var lastTriggerAt = props.getProperty('ORDERSYNC_LAST_TRIGGER_AT') || '';
+  var lastResultText = props.getProperty('ORDERSYNC_LAST_TRIGGER_RESULT') || '{}';
+  var lastTrigger = lastTriggerAt ? new Date(lastTriggerAt) : null;
+  var ageMinutes = lastTrigger ? (Date.now() - lastTrigger.getTime()) / 60000 : null;
+  var lastResult = {};
+  try { lastResult = JSON.parse(lastResultText); } catch (err) {}
+  var result = {
+    ok: matching.length === 1 && ageMinutes !== null && ageMinutes <= 20 && lastResult.ok !== false,
+    triggerCount: matching.length,
+    lastTriggerAt: lastTriggerAt,
+    ageMinutes: ageMinutes,
+    lastResult: lastResult,
+    recommendation: matching.length !== 1
+      ? 'Run setupOrderSyncNewOrderAutomation() once.'
+      : (ageMinutes === null || ageMinutes > 20
+        ? 'Wait for the next run or run orderSyncTriggerHandler() manually.'
+        : 'Polling trigger appears healthy.')
+  };
+  recordAutomationLog_('SYNC_HEALTH', result.ok, 0, 0, JSON.stringify(result));
+  return result;
 }
 
 function setupOrderSyncTrigger() {
