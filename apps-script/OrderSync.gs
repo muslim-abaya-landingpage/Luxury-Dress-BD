@@ -12,6 +12,7 @@ var ORDERSYNC_MIRROR_PROPERTY_ = 'ORDERSYNC_MIRROR_SPREADSHEET_ID';
 var ORDERSYNC_DEFAULT_MIRROR_ID_ = '15zmNokNrI7-0Tb5pWPLUvH_s4d84o8g13Ozo9i5yHyc';
 var ORDERSYNC_SHEET_NAME_ = 'OrderSync';
 var ORDERSYNC_LOG_SHEET_NAME_ = 'AutomationLogs';
+var ORDERSYNC_REPORT_SHEET_NAME_ = 'AutomationReports';
 
 function getOrderSyncMirrorId_() {
   return String(
@@ -60,6 +61,51 @@ function recordAutomationLog_(type, ok, added, updated, message) {
     log.getRange(log.getLastRow(), 1).setNumberFormat('dd-MM-yyyy HH:mm:ss');
   } catch (logErr) {
     console.error('AUTOMATION_LOG_FAILED ' + String(logErr.stack || logErr));
+  }
+}
+
+function sendNewOrderAlertOnce_(orderId, message) {
+  var id = String(orderId || '').trim();
+  if (!id) return;
+
+  var props = PropertiesService.getScriptProperties();
+  var sent = {};
+  try { sent = JSON.parse(props.getProperty('ORDERSYNC_ALERTED_ORDER_IDS') || '{}') || {}; } catch (err) {}
+  if (sent[id]) return;
+
+  var delivered = false;
+  try {
+    var emails = typeof getAdminNotifyEmails_ === 'function' ? getAdminNotifyEmails_() : [];
+    if (emails.length) {
+      MailApp.sendEmail({ to: emails.join(','), subject: 'নতুন অর্ডার — ' + id, body: String(message || '') });
+      delivered = true;
+    }
+  } catch (emailErr) {
+    console.error('ORDERSYNC_EMAIL_ALERT_FAILED ' + String(emailErr));
+  }
+
+  var token = props.getProperty('TELEGRAM_BOT_TOKEN') || '';
+  var chatId = props.getProperty('TELEGRAM_CHAT_ID') || '';
+  if (token && chatId) {
+    try {
+      var response = UrlFetchApp.fetch(
+        'https://api.telegram.org/bot' + encodeURIComponent(token) + '/sendMessage',
+        { method: 'post', contentType: 'application/json',
+          payload: JSON.stringify({ chat_id: chatId, text: String(message || '') }),
+          muteHttpExceptions: true }
+      );
+      if (response.getResponseCode() >= 200 && response.getResponseCode() < 300) delivered = true;
+    } catch (telegramErr) {
+      console.error('ORDERSYNC_TELEGRAM_ALERT_FAILED ' + String(telegramErr));
+    }
+  }
+
+  if (delivered) {
+    sent[id] = new Date().toISOString();
+    var keys = Object.keys(sent);
+    if (keys.length > 500) delete sent[keys[0]];
+    props.setProperty('ORDERSYNC_ALERTED_ORDER_IDS', JSON.stringify(sent));
+    recordAutomationLog_('ALERT', true, 0, 0, 'New order alert sent: ' + id);
   }
 }
 
@@ -151,6 +197,15 @@ function runOrderSyncNow() {
         target.getRange(nextRow, 1, 1, width).setValues([row]);
         mirrorRowsById[orderId] = nextRow;
         added++;
+        sendNewOrderAlertOnce_(
+          orderId,
+          'নতুন অর্ডার এসেছে\n' +
+          'Order ID: ' + orderId + '\n' +
+          'Customer: ' + String(row[1] || '') + '\n' +
+          'Phone: ' + String(row[2] || '') + '\n' +
+          'Total: ৳' + String(row[8] || '') + '\n' +
+          'Status: ' + String(row[10] || 'Pending')
+        );
       }
     }
 
@@ -331,6 +386,69 @@ function verifyAutomationLogs() {
   return result;
 }
 
+function parseAutomationLogDate_(value) {
+  if (value instanceof Date) return value;
+  var text = String(value || '').trim();
+  var match = text.match(/^(\d{2})-(\d{2})-(\d{4})[ T](\d{2}):(\d{2}):(\d{2})$/);
+  if (match) return new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1]), Number(match[4]), Number(match[5]), Number(match[6]));
+  var parsed = new Date(text);
+  return isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function generateSevenDayAutomationSummary() {
+  var mirror = getOrderSyncMirror_();
+  var log = getOrCreateAutomationLogSheet_(mirror);
+  var report = mirror.getSheetByName(ORDERSYNC_REPORT_SHEET_NAME_) || mirror.insertSheet(ORDERSYNC_REPORT_SHEET_NAME_);
+  var rows = log.getDataRange().getValues();
+  var now = new Date();
+  var cutoff = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  var daily = {};
+
+  for (var i = 1; i < rows.length; i++) {
+    var when = parseAutomationLogDate_(rows[i][0]);
+    if (!when || when < cutoff) continue;
+    var day = Utilities.formatDate(when, 'Asia/Dhaka', 'yyyy-MM-dd');
+    if (!daily[day]) daily[day] = { syncOk: 0, syncError: 0, backupOk: 0, backupError: 0, alerts: 0, verifyError: 0 };
+    var type = String(rows[i][1] || '');
+    var status = String(rows[i][2] || '');
+    if (type === 'SYNC') status === 'OK' ? daily[day].syncOk++ : daily[day].syncError++;
+    if (type === 'BACKUP') status === 'OK' ? daily[day].backupOk++ : daily[day].backupError++;
+    if (type === 'ALERT' && status === 'OK') daily[day].alerts++;
+    if (type === 'VERIFY' && status !== 'OK') daily[day].verifyError++;
+  }
+
+  var output = [['Generated At', 'Period Start', 'Period End', 'Sync OK', 'Sync Errors', 'Backup OK', 'Backup Errors', 'Alerts', 'Verification Errors']];
+  var totals = { syncOk: 0, syncError: 0, backupOk: 0, backupError: 0, alerts: 0, verifyError: 0 };
+  for (var d = 6; d >= 0; d--) {
+    var date = new Date(now.getTime() - d * 24 * 60 * 60 * 1000);
+    var key = Utilities.formatDate(date, 'Asia/Dhaka', 'yyyy-MM-dd');
+    var item = daily[key] || { syncOk: 0, syncError: 0, backupOk: 0, backupError: 0, alerts: 0, verifyError: 0 };
+    output.push([new Date(), key, key, item.syncOk, item.syncError, item.backupOk, item.backupError, item.alerts, item.verifyError]);
+    Object.keys(totals).forEach(function (k) { totals[k] += item[k]; });
+  }
+  output.push(['7-day total', Utilities.formatDate(cutoff, 'Asia/Dhaka', 'yyyy-MM-dd'), Utilities.formatDate(now, 'Asia/Dhaka', 'yyyy-MM-dd'), totals.syncOk, totals.syncError, totals.backupOk, totals.backupError, totals.alerts, totals.verifyError]);
+  report.clearContents();
+  report.getRange(1, 1, output.length, output[0].length).setValues(output);
+  report.setFrozenRows(1);
+  report.getRange(1, 1, 1, output[0].length).setFontWeight('bold');
+  report.getRange(2, 1, 7, 1).setNumberFormat('dd-MM-yyyy HH:mm:ss');
+  report.autoResizeColumns(1, output[0].length);
+  recordAutomationLog_('REPORT', true, 0, 0, 'Seven-day summary generated');
+  return { ok: true, rows: output.length - 1, totals: totals };
+}
+
+function automationSummaryTriggerHandler() {
+  try { generateSevenDayAutomationSummary(); }
+  catch (err) { recordAutomationLog_('REPORT', false, 0, 0, String(err.message || err)); }
+}
+
+function setupAutomationSummaryTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function (trigger) {
+    if (trigger.getHandlerFunction() === 'automationSummaryTriggerHandler') ScriptApp.deleteTrigger(trigger);
+  });
+  ScriptApp.newTrigger('automationSummaryTriggerHandler').timeBased().atHour(3).nearMinute(15).everyDays(1).create();
+}
+
 function automationLogVerificationTriggerHandler() {
   try {
     verifyAutomationLogs();
@@ -372,6 +490,11 @@ function selfHealOrderSyncTriggers_() {
     return trigger.getHandlerFunction() === 'automationLogVerificationTriggerHandler';
   });
   if (!hasVerification) setupAutomationLogVerificationTrigger();
+
+  var hasSummary = ScriptApp.getProjectTriggers().some(function (trigger) {
+    return trigger.getHandlerFunction() === 'automationSummaryTriggerHandler';
+  });
+  if (!hasSummary) setupAutomationSummaryTrigger();
 }
 
 /**
@@ -395,6 +518,7 @@ function setupOperationsTriggersFromMenu() {
     .create();
 
   setupAutomationLogVerificationTrigger();
+  setupAutomationSummaryTrigger();
 
   SpreadsheetApp.getUi().alert(
     'Operations automation চালু হয়েছে।\n\n' +

@@ -1805,6 +1805,20 @@ function handleOnlineOrderPost_(e) {
     orderLock.releaseLock();
   }
 
+  try {
+    if (typeof sendNewOrderAlertOnce_ === 'function') {
+      sendNewOrderAlertOnce_(
+        orderId,
+        'নতুন online order এসেছে\n' +
+        'Order ID: ' + orderId + '\n' +
+        'Customer: ' + validated.name + '\n' +
+        'Phone: ' + validated.phone + '\n' +
+        'Total: ৳' + totalStr + '\n' +
+        'Status: Pending'
+      );
+    }
+  } catch (alertErr) {}
+
   if (pricing.couponRowIndex != null) {
     try { incrementCouponUsage_(pricing.couponRowIndex); } catch (incErr) {}
   }
@@ -1868,6 +1882,7 @@ function onOpen() {
       .addItem('OrderSync — auto sync ON (15m)', 'setupOrderSyncTrigger')
       .addItem('OrderSync — auto sync OFF', 'disableOrderSyncTrigger')
       .addItem('Operations — daily backup + OrderSync ON', 'setupOperationsTriggersFromMenu')
+      .addItem('Automation — 7-day summary এখনই তৈরি করুন', 'generateSevenDayAutomationSummary')
       .addItem('Low Stock — এখনই চেক করুন (ইমেইল)', 'checkLowStockNowFromMenu_')
       .addItem('Coupons শিট খুলুন', 'openCouponsSheetFromMenu_')
       .addItem('Steadfast API URL fix করুন', 'setSteadfastBaseUrlToApi_')
