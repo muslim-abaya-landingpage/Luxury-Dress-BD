@@ -391,6 +391,33 @@ function runOrderSyncNowFromMenu() {
   }
 }
 
+function runOrderSyncLiveTestFromMenu() {
+  var ui = SpreadsheetApp.getUi();
+  var confirmation = ui.alert(
+    'OrderSync live test',
+    'এটি source order data পড়ে mirror sheet sync করবে এবং নতুন Order ID পাওয়া গেলে notification পাঠাতে পারে। চালাবেন?',
+    ui.ButtonSet.YES_NO
+  );
+  if (confirmation !== ui.Button.YES) return { ok: false, cancelled: true };
+
+  try {
+    var result = runOrderSyncNow();
+    var health = verifyOrderSyncPollingHealth();
+    ui.alert(
+      'OrderSync live test complete\n\n' +
+      'Added: ' + result.added + '\n' +
+      'Updated: ' + result.updated + '\n' +
+      'Total synced: ' + result.synced + '\n' +
+      'Polling health: ' + (health.ok ? 'OK' : 'CHECK REQUIRED')
+    );
+    return { sync: result, health: health };
+  } catch (err) {
+    recordAutomationLog_('SYNC_LIVE_TEST', false, 0, 0, String(err.message || err));
+    ui.alert('OrderSync live test failed:\n\n' + String(err.message || err));
+    return { ok: false, error: String(err.message || err) };
+  }
+}
+
 function setOrderSyncMirrorIdFromMenu() {
   var ui = SpreadsheetApp.getUi();
   var current = getOrderSyncMirrorId_();
@@ -578,6 +605,42 @@ function verifyAutomationLogs() {
   return result;
 }
 
+function scanAndAlertAutomationErrors() {
+  var mirror = getOrderSyncMirror_();
+  var log = getOrCreateAutomationLogSheet_(mirror);
+  var rows = log.getDataRange().getValues();
+  var cutoff = Date.now() - 24 * 60 * 60 * 1000;
+  var errors = [];
+
+  for (var i = 1; i < rows.length; i++) {
+    var when = parseAutomationLogDate_(rows[i][0]);
+    var type = String(rows[i][1] || '');
+    var status = String(rows[i][2] || '');
+    if (!when || when.getTime() < cutoff || status !== 'ERROR') continue;
+    errors.push({
+      timestamp: Utilities.formatDate(when, 'Asia/Dhaka', 'dd-MM-yyyy HH:mm:ss'),
+      type: type,
+      message: String(rows[i][5] || '').slice(0, 300)
+    });
+  }
+
+  if (!errors.length) {
+    recordAutomationLog_('ERROR_SCAN', true, 0, 0, 'No errors in the last 24 hours');
+    return { ok: true, errorCount: 0, alerted: false };
+  }
+
+  var lines = errors.slice(-20).map(function(item) {
+    return item.timestamp + ' | ' + item.type + ' | ' + item.message;
+  });
+  var message =
+    'Automation error alert — গত ২৪ ঘণ্টায় ' + errors.length + 'টি ERROR পাওয়া গেছে।\n\n' +
+    lines.join('\n') +
+    '\n\nবিস্তারিত: AutomationLogs tab';
+  var notify = sendAdminAndTelegramNotification_('AutomationLogs error alert', message);
+  recordAutomationLog_('ERROR_ALERT', notify.email || notify.telegram, 0, 0, JSON.stringify({ count: errors.length, notify: notify }));
+  return { ok: false, errorCount: errors.length, alerted: true, notify: notify };
+}
+
 function parseAutomationLogDate_(value) {
   if (value instanceof Date) return value;
   var text = String(value || '').trim();
@@ -693,6 +756,7 @@ function setupAutomationSummaryTrigger() {
 function automationLogVerificationTriggerHandler() {
   try {
     verifyAutomationLogs();
+    scanAndAlertAutomationErrors();
   } catch (err) {
     recordAutomationLog_('VERIFY', false, 0, 0, String(err.message || err));
   }
