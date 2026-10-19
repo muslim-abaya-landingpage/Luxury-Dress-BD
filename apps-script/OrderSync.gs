@@ -352,6 +352,28 @@ function setupAutomationLogVerificationTrigger() {
     .create();
 }
 
+function selfHealOrderSyncTriggers_() {
+  // The default mirror ID is validated before creating installable triggers.
+  // If the destination is unavailable, the next sheet open can retry safely.
+  try {
+    getOrderSyncMirror_().getName();
+  } catch (mirrorErr) {
+    return;
+  }
+
+  if (!hasOrderSyncTrigger_()) {
+    ScriptApp.newTrigger('orderSyncTriggerHandler')
+      .timeBased()
+      .everyMinutes(15)
+      .create();
+  }
+
+  var hasVerification = ScriptApp.getProjectTriggers().some(function (trigger) {
+    return trigger.getHandlerFunction() === 'automationLogVerificationTriggerHandler';
+  });
+  if (!hasVerification) setupAutomationLogVerificationTrigger();
+}
+
 /**
  * One-click setup for both operational automations.
  * The existing daily safety backup function creates one backup per day;

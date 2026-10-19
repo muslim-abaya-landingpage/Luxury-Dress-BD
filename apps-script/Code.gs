@@ -1898,6 +1898,7 @@ function onOpen() {
   try { selfHealAutoCourierSetup_(); } catch (trgErr) {}
   try { selfHealSteadfastStatusSyncTrigger_(); } catch (syncErr) {}
   try { selfHealDailySafetyBackupTrigger_(); } catch (backupErr) {}
+  try { selfHealOrderSyncTriggers_(); } catch (orderSyncErr) {}
 }
 
 function ensureOnlineOrderMetaFieldHeaders_(sheet) {
