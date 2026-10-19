@@ -1,0 +1,135 @@
+name: Apps Script Deploy
+
+# Pushes apps-script/ to the Google Apps Script project and updates the
+# EXISTING web-app deployment in place, so the /exec URL never changes.
+#
+# One-time setup (see APPS-SCRIPT-AUTO-DEPLOY.md):
+#   1. Turn on "Google Apps Script API" at https://script.google.com/home/usersettings
+#   2. Add the contents of your .clasprc.json as the repository secret CLASPRC_JSON
+#
+# Safety: before overwriting, the workflow pulls the live project, saves it as a
+# downloadable backup artifact, and refuses to deploy if the live project has a
+# file that is not in apps-script/ (clasp push would otherwise delete it).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps-script/**"
+      - ".github/workflows/apps-script-deploy.yml"
+  workflow_dispatch:
+    inputs:
+      allow_extra_remote_files:
+        description: "Deploy even if the live project has files missing from apps-script/ (they will be DELETED)"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: apps-script-deploy
+  cancel-in-progress: false
+
+env:
+  SCRIPT_ID: 1LFd_vDAiSJMdWrHJf2s_7fEVVxTt6g6q8cEVWfhVJhYJN-xpNcTFExCD
+  DEPLOYMENT_ID: AKfycbxZv7KU0JMY90576HoRF8wtHmEgW2ggkTxAoQKjO6on1cactlDgJDhoRLndCh3kK_hz
+
+jobs:
+  deploy:
+    name: Push and redeploy Apps Script
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check credentials secret
+        id: creds
+        env:
+          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
+        run: |
+          if [ -z "$CLASPRC_JSON" ]; then
+            echo "::warning::CLASPRC_JSON secret is not set; skipping Apps Script deploy. See APPS-SCRIPT-AUTO-DEPLOY.md."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          printf '%s' "$CLASPRC_JSON" > "$HOME/.clasprc.json"
+          chmod 600 "$HOME/.clasprc.json"
+          # clasp 2.x stores a top-level "token"; clasp 3.x stores "tokens".
+          if node -e 'const j=require(process.env.HOME+"/.clasprc.json");process.exit(j.tokens?0:1)'; then
+            echo "major=3" >> "$GITHUB_OUTPUT"
+          else
+            echo "major=2" >> "$GITHUB_OUTPUT"
+          fi
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout
+        if: steps.creds.outputs.ready == 'true'
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        if: steps.creds.outputs.ready == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install clasp
+        if: steps.creds.outputs.ready == 'true'
+        run: |
+          if [ "${{ steps.creds.outputs.major }}" = "3" ]; then
+            npm install -g @google/clasp@3
+          else
+            npm install -g @google/clasp@2.4.2
+          fi
+          clasp --version
+
+      - name: Back up the live project and compare file lists
+        if: steps.creds.outputs.ready == 'true'
+        run: |
+          mkdir -p live-backup
+          cd live-backup
+          printf '{"scriptId":"%s","rootDir":"."}' "$SCRIPT_ID" > .clasp.json
+          clasp pull
+          cd ..
+          # Compare base names (clasp may pull .gs as .js).
+          ls live-backup | grep -v '^\.clasp\.json$' | sed -E 's/\.(gs|js)$//; s/\.html$//; s/\.json$//' | sort -u > remote.txt
+          ls apps-script | sed -E 's/\.(gs|js)$//; s/\.html$//; s/\.json$//' | sort -u > local.txt
+          comm -23 remote.txt local.txt > extra.txt
+          echo "Live project files:"; cat remote.txt
+          if [ -s extra.txt ]; then
+            echo "::error::The live project has files that are not in apps-script/: $(tr '\n' ' ' < extra.txt). Add them to the repo first, or re-run manually with allow_extra_remote_files."
+            if [ "${{ inputs.allow_extra_remote_files }}" != "true" ]; then exit 1; fi
+          fi
+
+      - name: Upload live-project backup
+        if: steps.creds.outputs.ready == 'true' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apps-script-live-backup-${{ github.run_number }}
+          path: live-backup/
+          retention-days: 90
+          if-no-files-found: ignore
+
+      - name: Push code
+        if: steps.creds.outputs.ready == 'true'
+        run: clasp push --force
+
+      - name: Update the existing web-app deployment
+        if: steps.creds.outputs.ready == 'true'
+        run: |
+          DESC="GitHub ${GITHUB_SHA::7} $(date -u +%Y-%m-%dT%H:%MZ)"
+          if [ "${{ steps.creds.outputs.major }}" = "3" ]; then
+            clasp update-deployment "$DEPLOYMENT_ID" --description "$DESC"
+          else
+            clasp deploy --deploymentId "$DEPLOYMENT_ID" --description "$DESC"
+          fi
+
+      - name: Smoke-test the web app
+        if: steps.creds.outputs.ready == 'true'
+        run: |
+          code=$(curl -sS -L -o body.txt -w '%{http_code}' "https://script.google.com/macros/s/$DEPLOYMENT_ID/exec")
+          echo "HTTP $code"; head -c 300 body.txt; echo
+          [ "$code" = "200" ]
+
+      - name: Remove credentials
+        if: always()
+        run: rm -f "$HOME/.clasprc.json"
