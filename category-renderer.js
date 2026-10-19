@@ -2718,7 +2718,10 @@ function deriveCardThumbSrc(src) {
   if (m.indexOf("images/") !== 0 || m.indexOf("images/card/") === 0 || m.indexOf("images/hero-banner/") === 0) {
     return "";
   }
-  return "images/card/" + m + ".webp";
+  // Keep a root-absolute source root-absolute so nested pages such as
+  // /product/<id> do not request /product/images/card/... (404).
+  var prefix = String(src).charAt(0) === "/" ? "/" : "";
+  return prefix + "images/card/" + m + ".webp";
 }
 function buildCardImageBlock(p, idx, categoryKey, allProducts) {
   var main = resolveCardImageSrc(p);

@@ -4,6 +4,9 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '../..');
 
 test('admin dashboard renders alerts, priority orders, lifetime report and consented desktop notices', async ({ page }) => {
+  // The fixtures below use fixed order dates; pin "now" so the overdue
+  // assertions don't start failing once the calendar moves past them.
+  await page.clock.setFixedTime(new Date('2026-10-18T12:00:00+06:00'));
   await page.setContent(`<!doctype html><html><body>
     <button id="admDesktopAlerts" hidden></button><span id="admDesktopStatus"></span>
     <button id="admAlertsRefresh"></button><span id="admAlertState"></span><span id="admStockAlertCount"></span><span id="admInboxAlertCount"></span>
