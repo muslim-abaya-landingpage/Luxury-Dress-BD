@@ -433,8 +433,29 @@ function generateSevenDayAutomationSummary() {
   report.getRange(1, 1, 1, output[0].length).setFontWeight('bold');
   report.getRange(2, 1, 7, 1).setNumberFormat('dd-MM-yyyy HH:mm:ss');
   report.autoResizeColumns(1, output[0].length);
+  refreshAutomationReportChart_(report);
   recordAutomationLog_('REPORT', true, 0, 0, 'Seven-day summary generated');
   return { ok: true, rows: output.length - 1, totals: totals };
+}
+
+function refreshAutomationReportChart_(report) {
+  // AutomationReports is a dedicated report tab, so replace only its charts.
+  report.getCharts().forEach(function (chart) {
+    report.removeChart(chart);
+  });
+
+  var chart = report.newChart()
+    .setChartType(Charts.ChartType.COLUMN)
+    .addRange(report.getRange('B1:B8'))
+    .addRange(report.getRange('D1:G8'))
+    .setPosition(12, 1, 0, 0)
+    .setOption('title', 'গত ৭ দিনের Sync ও Backup Performance')
+    .setOption('legend', { position: 'bottom' })
+    .setOption('height', 360)
+    .setOption('width', 760)
+    .build();
+
+  report.insertChart(chart);
 }
 
 function automationSummaryTriggerHandler() {
