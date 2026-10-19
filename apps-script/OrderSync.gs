@@ -64,6 +64,59 @@ function recordAutomationLog_(type, ok, added, updated, message) {
   }
 }
 
+function configureNotificationProperties(telegramToken, telegramChatId, alertEmail) {
+  var props = PropertiesService.getScriptProperties();
+  if (telegramToken) props.setProperty('TELEGRAM_BOT_TOKEN', String(telegramToken).trim());
+  if (telegramChatId) props.setProperty('TELEGRAM_CHAT_ID', String(telegramChatId).trim());
+  if (alertEmail) props.setProperty('NOTIFICATION_ALERT_EMAIL', String(alertEmail).trim());
+  return { ok: true, configured: ['TELEGRAM_BOT_TOKEN', 'TELEGRAM_CHAT_ID', 'NOTIFICATION_ALERT_EMAIL'] };
+}
+
+function sendAdminAndTelegramNotification_(subject, message) {
+  var result = { email: false, telegram: false };
+  var props = PropertiesService.getScriptProperties();
+  try {
+    var emails = [];
+    var configuredEmail = props.getProperty('NOTIFICATION_ALERT_EMAIL') || '';
+    if (configuredEmail) emails.push(configuredEmail);
+    if (typeof getAdminNotifyEmails_ === 'function') emails = emails.concat(getAdminNotifyEmails_());
+    emails = emails.filter(function (email, index, list) { return email && list.indexOf(email) === index; });
+    if (emails.length) {
+      MailApp.sendEmail({ to: emails.join(','), subject: subject, body: message });
+      result.email = true;
+    }
+  } catch (emailErr) { result.emailError = String(emailErr.message || emailErr); }
+
+  try {
+    var token = props.getProperty('TELEGRAM_BOT_TOKEN') || '';
+    var chatId = props.getProperty('TELEGRAM_CHAT_ID') || '';
+    if (token && chatId) {
+      var response = UrlFetchApp.fetch('https://api.telegram.org/bot' + encodeURIComponent(token) + '/sendMessage', {
+        method: 'post', contentType: 'application/json',
+        payload: JSON.stringify({ chat_id: chatId, text: message }), muteHttpExceptions: true
+      });
+      result.telegram = response.getResponseCode() >= 200 && response.getResponseCode() < 300;
+      if (!result.telegram) result.telegramError = response.getContentText().slice(0, 500);
+    } else {
+      result.telegramError = 'TELEGRAM_BOT_TOKEN বা TELEGRAM_CHAT_ID সেট করা হয়নি।';
+    }
+  } catch (telegramErr) { result.telegramError = String(telegramErr.message || telegramErr); }
+
+  recordAutomationLog_('ALERT', result.email || result.telegram, 0, 0, JSON.stringify(result));
+  return result;
+}
+
+function testNewOrderNotifications() {
+  var testOrderId = 'TEST-NOTIFICATION-' + Utilities.formatDate(new Date(), 'Asia/Dhaka', 'yyyyMMdd-HHmmss');
+  var message = 'Muslim Abaya notification test\n\n' +
+    'Order ID: ' + testOrderId + '\n' +
+    'Customer: QA Notification Test\n' +
+    'Phone: 01971642683\n' +
+    'Total: ৳1079\n' +
+    'Status: TEST ONLY — DO NOT SHIP';
+  return sendAdminAndTelegramNotification_('Order notification test — ' + testOrderId, message);
+}
+
 function sendNewOrderAlertOnce_(orderId, message) {
   var id = String(orderId || '').trim();
   if (!id) return;
