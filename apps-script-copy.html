@@ -4961,52 +4961,6 @@ function setupMessengerProfileForAllPagesFromMenu() {
   SpreadsheetApp.getUi().alert('Messenger profile setup ফলাফল:\n' + JSON.stringify(r, null, 2).slice(0, 900));
 }
 
-function upsertMessengerContact_(sh, psid, fromAd) {
-  var now = new Date();
-  var data = sh.getRange(1, 1, Math.max(sh.getLastRow(), 1), 1).getValues();
-  for (var i = 1; i &lt; data.length; i++) {
-    if (String(data[i][0]) === psid) {
-      sh.getRange(i + 1, 4).setValue(now);
-      if (fromAd) sh.getRange(i + 1, 5).setValue('yes');
-      return;
-    }
-  }
-  sh.appendRow([psid, getMessengerName_(psid), now, now, fromAd]);
-}
-
-function getMessengerName_(psid) {
-  try {
-    var token = PropertiesService.getScriptProperties().getProperty('MSGR_PAGE_TOKEN');
-    if (!token) return '';
-    var res = UrlFetchApp.fetch('https://graph.facebook.com/v25.0/' + psid +
-      '?fields=name&amp;access_token=' + encodeURIComponent(token), { muteHttpExceptions: true });
-    return (JSON.parse(res.getContentText()) || {}).name || '';
-  } catch (e) { return ''; }
-}
-
-// Call when a Messenger order becomes Confirmed/Delivered.
-function sendMessengerPurchase_(psid, value, orderId) {
-  var token = PropertiesService.getScriptProperties().getProperty('MSGR_PAGE_TOKEN');
-  if (!token || !psid) return { ok: false, code: 'MISSING' };
-  var payload = {
-    data: [{
-      event_name: 'Purchase',
-      event_time: Math.floor(Date.now() / 1000),
-      event_id: 'msgr_' + String(orderId || psid),
-      action_source: 'business_messaging',
-      messaging_channel: 'messenger',
-      user_data: { page_id: MSGR_PAGE_ID, page_scoped_user_id: String(psid) },
-      custom_data: { currency: 'BDT', value: parseOrderValue_(value) }
-    }]
-  };
-  var res = UrlFetchApp.fetch('https://graph.facebook.com/v25.0/' + MSGR_DATASET_ID +
-    '/events?access_token=' + encodeURIComponent(token), {
-      method: 'post', contentType: 'application/json',
-      payload: JSON.stringify(payload), muteHttpExceptions: true
-    });
-  return { ok: res.getResponseCode() === 200, body: res.getContentText() };
-}
-
 var MSGR_PAGE_ID = '964928770039259';
 var MSGR_DATASET_ID = '1465090315322833';
 var MSGR_SHEET = 'MessengerContacts';
