@@ -15,22 +15,21 @@ if errorlevel 1 (
   exit /b 1
 )
 
-where clasp >nul 2>nul
-if errorlevel 1 (
-  echo clasp ইনস্টল হচ্ছে...
-  call npm install -g @google/clasp
-)
+echo clasp-এর সর্বশেষ ভার্সন ইনস্টল/আপডেট হচ্ছে...
+call npm install -g @google/clasp@latest
+call clasp --version
 
 echo.
 echo ধাপ ১: Google Apps Script API চালু করুন (ব্রাউজারে খুলছে) - সুইচটা ON করুন।
 start "" "https://script.google.com/home/usersettings"
 pause
 
-if not exist "%USERPROFILE%\.clasprc.json" (
-  echo.
-  echo ধাপ ২: Google লগইন - luxurydressbd@gmail.com দিয়ে লগইন করে Allow দিন।
-  call clasp login
-)
+echo.
+echo ধাপ ২: Google লগইন।
+echo   যে লিংক আসবে সেটা সাধারণ Chrome-এ খুলুন, এবং যে Google অ্যাকাউন্টে
+echo   Apps Script প্রজেক্টটা আছে সেই অ্যাকাউন্ট বেছে নিয়ে Allow দিন।
+if exist "%USERPROFILE%\.clasprc.json" del "%USERPROFILE%\.clasprc.json"
+call clasp login
 
 if not exist "%USERPROFILE%\.clasprc.json" (
   echo [ব্যর্থ] লগইন ফাইল তৈরি হয়নি। আবার চালান।
