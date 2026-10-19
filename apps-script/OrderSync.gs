@@ -9,12 +9,15 @@
  */
 
 var ORDERSYNC_MIRROR_PROPERTY_ = 'ORDERSYNC_MIRROR_SPREADSHEET_ID';
+var ORDERSYNC_DEFAULT_MIRROR_ID_ = '15zmNokNrI7-0Tb5pWPLUvH_s4d84o8g13Ozo9i5yHyc';
 var ORDERSYNC_SHEET_NAME_ = 'OrderSync';
+var ORDERSYNC_LOG_SHEET_NAME_ = 'AutomationLogs';
 
 function getOrderSyncMirrorId_() {
   return String(
     PropertiesService.getScriptProperties()
-      .getProperty(ORDERSYNC_MIRROR_PROPERTY_) || ''
+      .getProperty(ORDERSYNC_MIRROR_PROPERTY_) ||
+      ORDERSYNC_DEFAULT_MIRROR_ID_ || ''
   ).trim();
 }
 
@@ -32,6 +35,32 @@ function getOrderSyncMirror_() {
 function getOrCreateOrderSyncSheet_(spreadsheet) {
   return spreadsheet.getSheetByName(ORDERSYNC_SHEET_NAME_) ||
     spreadsheet.insertSheet(ORDERSYNC_SHEET_NAME_);
+}
+
+function getOrCreateAutomationLogSheet_(spreadsheet) {
+  var sheet = spreadsheet.getSheetByName(ORDERSYNC_LOG_SHEET_NAME_) ||
+    spreadsheet.insertSheet(ORDERSYNC_LOG_SHEET_NAME_);
+  if (sheet.getLastRow() === 0) {
+    sheet.getRange(1, 1, 1, 6).setValues([[
+      'Timestamp', 'Type', 'Status', 'Added', 'Updated', 'Message'
+    ]]);
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+function recordAutomationLog_(type, ok, added, updated, message) {
+  try {
+    var mirror = getOrderSyncMirror_();
+    var log = getOrCreateAutomationLogSheet_(mirror);
+    log.appendRow([
+      new Date(), String(type || ''), ok ? 'OK' : 'ERROR',
+      Number(added || 0), Number(updated || 0), String(message || '')
+    ]);
+    log.getRange(log.getLastRow(), 1).setNumberFormat('dd-MM-yyyy HH:mm:ss');
+  } catch (logErr) {
+    console.error('AUTOMATION_LOG_FAILED ' + String(logErr.stack || logErr));
+  }
 }
 
 function findOrderIdColumn_(headers) {
@@ -142,6 +171,7 @@ function runOrderSyncNow() {
       mirrorSpreadsheetId: targetSpreadsheet.getId(),
       mirrorSheet: ORDERSYNC_SHEET_NAME_
     };
+    recordAutomationLog_('SYNC', true, added, updated, 'OrderSync completed');
     console.log('ORDERSYNC_OK ' + JSON.stringify(result));
     return result;
   } finally {
@@ -227,6 +257,7 @@ function orderSyncTriggerHandler() {
   try {
     runOrderSyncNow();
   } catch (err) {
+    recordAutomationLog_('SYNC', false, 0, 0, String(err.message || err));
     console.error('ORDERSYNC_FAILED ' + String(err.stack || err));
   }
 }
@@ -271,6 +302,56 @@ function getOrderSyncStatus_() {
   };
 }
 
+function verifyAutomationLogs() {
+  var mirror = getOrderSyncMirror_();
+  var log = getOrCreateAutomationLogSheet_(mirror);
+  var rows = log.getDataRange().getValues();
+  var cutoff = Date.now() - 24 * 60 * 60 * 1000;
+  var syncOk = 0, syncError = 0, backupOk = 0, backupError = 0;
+
+  for (var i = 1; i < rows.length; i++) {
+    var when = rows[i][0] instanceof Date ? rows[i][0].getTime() : 0;
+    if (when < cutoff) continue;
+    var type = String(rows[i][1] || '');
+    var status = String(rows[i][2] || '');
+    if (type === 'SYNC' && status === 'OK') syncOk++;
+    if (type === 'SYNC' && status !== 'OK') syncError++;
+    if (type === 'BACKUP' && status === 'OK') backupOk++;
+    if (type === 'BACKUP' && status !== 'OK') backupError++;
+  }
+
+  var result = {
+    ok: syncError === 0 && backupError === 0,
+    syncOk: syncOk,
+    syncError: syncError,
+    backupOk: backupOk,
+    backupError: backupError
+  };
+  recordAutomationLog_('VERIFY', result.ok, 0, 0, JSON.stringify(result));
+  return result;
+}
+
+function automationLogVerificationTriggerHandler() {
+  try {
+    verifyAutomationLogs();
+  } catch (err) {
+    recordAutomationLog_('VERIFY', false, 0, 0, String(err.message || err));
+  }
+}
+
+function setupAutomationLogVerificationTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function (trigger) {
+    if (trigger.getHandlerFunction() === 'automationLogVerificationTriggerHandler') {
+      ScriptApp.deleteTrigger(trigger);
+    }
+  });
+  ScriptApp.newTrigger('automationLogVerificationTriggerHandler')
+    .timeBased()
+    .atHour(3)
+    .everyDays(1)
+    .create();
+}
+
 /**
  * One-click setup for both operational automations.
  * The existing daily safety backup function creates one backup per day;
@@ -290,6 +371,8 @@ function setupOperationsTriggersFromMenu() {
     .timeBased()
     .everyMinutes(15)
     .create();
+
+  setupAutomationLogVerificationTrigger();
 
   SpreadsheetApp.getUi().alert(
     'Operations automation চালু হয়েছে।\n\n' +

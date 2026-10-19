@@ -1124,8 +1124,23 @@ function runSafetyBackupNowFromMenu() {
 
 function dailySafetyBackupTriggerHandler() {
   try {
-    runSafetyBackupNow();
-  } catch (err) {}
+    var backupResult = runSafetyBackupNow();
+    if (typeof recordAutomationLog_ === 'function') {
+      recordAutomationLog_(
+        'BACKUP',
+        !!(backupResult && backupResult.ok),
+        0,
+        0,
+        backupResult && backupResult.ok
+          ? 'Safety backup created: ' + backupResult.backupSpreadsheetId
+          : String((backupResult && backupResult.error) || 'BACKUP_FAILED')
+      );
+    }
+  } catch (err) {
+    if (typeof recordAutomationLog_ === 'function') {
+      recordAutomationLog_('BACKUP', false, 0, 0, String(err.message || err));
+    }
+  }
   try {
     checkLowStockAndEmail_();
   } catch (err2) {}
