@@ -474,6 +474,16 @@ function setupOrderSyncTrigger() {
   SpreadsheetApp.getUi().alert('OrderSync ON — প্রতি ১৫ মিনিটে sync হবে।');
 }
 
+function setupOrderSyncNewOrderAutomation() {
+  setupOrderSyncTrigger();
+  return {
+    ok: true,
+    trigger: 'orderSyncTriggerHandler',
+    interval: 'every 15 minutes',
+    note: 'Website/API writes are detected by polling; manual edits are covered when the sheet is opened and the trigger is authorized.'
+  };
+}
+
 function disableOrderSyncTrigger() {
   var removed = false;
   ScriptApp.getProjectTriggers().forEach(function (trigger) {
@@ -600,8 +610,36 @@ function refreshAutomationReportChart_(report) {
 }
 
 function automationSummaryTriggerHandler() {
-  try { generateSevenDayAutomationSummary(); }
+  try {
+    var summary = generateSevenDayAutomationSummary();
+    sendSevenDayAutomationSummary_(summary);
+  }
   catch (err) { recordAutomationLog_('REPORT', false, 0, 0, String(err.message || err)); }
+}
+
+function sendSevenDayAutomationSummary_(summary) {
+  var totals = summary.totals || {};
+  var message =
+    'গত ৭ দিনের Automation Summary\n\n' +
+    'Sync OK: ' + Number(totals.syncOk || 0) + '\n' +
+    'Sync Errors: ' + Number(totals.syncError || 0) + '\n' +
+    'Backup OK: ' + Number(totals.backupOk || 0) + '\n' +
+    'Backup Errors: ' + Number(totals.backupError || 0) + '\n' +
+    'Alerts: ' + Number(totals.alerts || 0) + '\n' +
+    'Verification Errors: ' + Number(totals.verifyError || 0) + '\n\n' +
+    'AutomationReports tab-এ বিস্তারিত report ও chart আপডেট হয়েছে।';
+
+  var result = sendAdminAndTelegramNotification_(
+    '7-day OrderSync automation summary',
+    message
+  );
+  recordAutomationLog_('REPORT_NOTIFY', result.email || result.telegram, 0, 0, JSON.stringify(result));
+  return result;
+}
+
+function sendSevenDayAutomationSummaryNow() {
+  var summary = generateSevenDayAutomationSummary();
+  return sendSevenDayAutomationSummary_(summary);
 }
 
 function setupAutomationSummaryTrigger() {
