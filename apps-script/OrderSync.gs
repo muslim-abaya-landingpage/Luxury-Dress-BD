@@ -192,6 +192,31 @@ function setOrderSyncMirrorIdFromMenu() {
   ui.alert('OrderSync mirror spreadsheet ID সংরক্ষণ করা হয়েছে।');
 }
 
+// API/automation setup helper. Safe to call again; it only replaces the
+// configured destination after validating that the spreadsheet is accessible.
+function configureOrderSyncMirror(spreadsheetId) {
+  var id = String(spreadsheetId || '').trim();
+  if (!/^[A-Za-z0-9_-]{20,}$/.test(id)) {
+    throw new Error('Invalid mirror spreadsheet ID.');
+  }
+
+  var mirror = SpreadsheetApp.openById(id);
+  var source = SpreadsheetApp.getActiveSpreadsheet();
+  if (source && source.getId() === mirror.getId()) {
+    throw new Error('Mirror spreadsheet source spreadsheet-এর মতো একই হতে পারবে না।');
+  }
+
+  PropertiesService.getScriptProperties().setProperty(
+    ORDERSYNC_MIRROR_PROPERTY_,
+    id
+  );
+  return {
+    ok: true,
+    mirrorSpreadsheetId: id,
+    mirrorSpreadsheetName: mirror.getName()
+  };
+}
+
 function hasOrderSyncTrigger_() {
   return ScriptApp.getProjectTriggers().some(function (trigger) {
     return trigger.getHandlerFunction() === 'orderSyncTriggerHandler';
