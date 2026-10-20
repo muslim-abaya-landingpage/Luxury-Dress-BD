@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8"><title>Apps Script কোড</title><style>body { font-family: system-ui, sans-serif; margin: 16px; max-width: 960px; } textarea { width: 100%; height: 52vh; font: 11px Consolas, monospace; } button { margin-top: 10px; padding: 12px 20px; font-size: 15px; cursor: pointer; } .step { background: #fff8e1; border: 1px solid #f0d58a; padding: 10px 14px; border-radius: 6px; }</style></head><body><h1>Apps Script কোড (সম্পূর্ণ project)</h1><p>এই page-এ canonical project-এর সব source file আছে: Code.gs, AdminOrders.gs, FixSheetHeaders.gs, BoostAutoDate.gs, CatalogPublish.gs, CourierIntegrationAudit.gs, Fix-doGet.gs, InstallDateTrigger.gs, Monitor.gs, Operations.gs, OrderSync.gs, ProductPicker.html</p><div class="step"><p><strong>গুরুত্বপূর্ণ:</strong> Admin dashboard-এর সব API চালাতে নিচের সব ফাইল একই Apps Script project-এ রাখতে হবে। <code>.gs</code> ফাইলের জন্য <strong>＋ → Script</strong>, আর <code>.html</code> ফাইলের জন্য <strong>＋ → HTML</strong> ব্যবহার করুন; একই নাম রেখে প্রতিটি কোড সংশ্লিষ্ট ফাইলে কপি করুন। একাধিক <code>doGet</code> function রাখবেন না—canonical router শুধু <code>Code.gs</code>-এ।</p><ol><li>প্রতিটি source file-এর নাম অনুযায়ী Apps Script file তৈরি বা update করুন।</li><li><strong>Save</strong> চাপুন এবং <code>npm run test:backend</code> parity test পাস হয়েছে কি নিশ্চিত করুন।</li><li><strong>Deploy → Manage deployments → Edit → Version: New version → Deploy</strong> করে বিদ্যমান Web App URL রাখুন।</li></ol></div><h2>1. Code.gs</h2>
+<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8"><title>Apps Script কোড</title><style>body { font-family: system-ui, sans-serif; margin: 16px; max-width: 960px; } textarea { width: 100%; height: 52vh; font: 11px Consolas, monospace; } button { margin-top: 10px; padding: 12px 20px; font-size: 15px; cursor: pointer; } .step { background: #fff8e1; border: 1px solid #f0d58a; padding: 10px 14px; border-radius: 6px; }</style></head><body><h1>Apps Script কোড (সম্পূর্ণ project)</h1><p>এই page-এ canonical project-এর সব source file আছে: Code.gs, AdminOrders.gs, FixSheetHeaders.gs, BoostAutoDate.gs, CatalogPublish.gs, CourierIntegrationAudit.gs, DataFixes.gs, Fix-doGet.gs, InstallDateTrigger.gs, Monitor.gs, Operations.gs, OrderSync.gs, ProductPicker.html</p><div class="step"><p><strong>গুরুত্বপূর্ণ:</strong> Admin dashboard-এর সব API চালাতে নিচের সব ফাইল একই Apps Script project-এ রাখতে হবে। <code>.gs</code> ফাইলের জন্য <strong>＋ → Script</strong>, আর <code>.html</code> ফাইলের জন্য <strong>＋ → HTML</strong> ব্যবহার করুন; একই নাম রেখে প্রতিটি কোড সংশ্লিষ্ট ফাইলে কপি করুন। একাধিক <code>doGet</code> function রাখবেন না—canonical router শুধু <code>Code.gs</code>-এ।</p><ol><li>প্রতিটি source file-এর নাম অনুযায়ী Apps Script file তৈরি বা update করুন।</li><li><strong>Save</strong> চাপুন এবং <code>npm run test:backend</code> parity test পাস হয়েছে কি নিশ্চিত করুন।</li><li><strong>Deploy → Manage deployments → Edit → Version: New version → Deploy</strong> করে বিদ্যমান Web App URL রাখুন।</li></ol></div><h2>1. Code.gs</h2>
 <textarea id="codeBox" readonly>/**
  * Muslim Abaya — সম্পূর্ণ Web App (এক ফাইলে পেস্ট করুন)
  * Code.gs → Ctrl+A → Ctrl+V → Save → Deploy → New version
@@ -8115,26 +8115,128 @@ function courierIntegrationAudit() {
 }
 </textarea><br>
 <button type="button" id="copyFile6">CourierIntegrationAudit.gs কপি</button>
-<h2>7. Fix-doGet.gs</h2>
+<h2>7. DataFixes.gs</h2>
 <textarea id="fileBox7" readonly>/**
+ * One-off data corrections approved by the owner on 2026-10-21. Editor-only.
+ * Run dataFix20261021DryRun() first (read-only; logs no names/phones), then dataFix20261021Apply().
+ * Apply re-checks every cell before writing and records before/after in AutomationLogs.
+ *  A) MA-LEGACY-D12B4EEB7677: date 10-12-2026 → 12-10-2026 (day/month were swapped)
+ *  B) Order by "Nahid Nahar" with no Order ID → give it an ID from its own order date
+ *  C) MA-20261011-4777: quantity/total from the checkout record (3 pcs, ৳2885)
+ */
+var DF_ = { swapId: 'MA-LEGACY-D12B4EEB7677', noIdName: 'Nahid Nahar', qtyId: 'MA-20261011-4777', qty: 3, total: 2885 };
+
+function dfRows_() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
+  var last = lastOnlineOrderDataRow_(sheet);
+  var rows = last >= 2 ? readOnlineOrderRows_(sheet, 2, last - 1, 17) : [];
+  return { sheet: sheet, rows: rows };
+}
+
+function dfFind_(rows) {
+  var out = { swap: [], noId: [], qty: [] };
+  rows.forEach(function (r, i) {
+    var id = String(r[8] || '').trim(), rowNo = i + 2;
+    if (id === DF_.swapId) out.swap.push(rowNo);
+    if (!id &amp;&amp; String(r[1] || '').trim().toLowerCase() === DF_.noIdName.toLowerCase()) out.noId.push(rowNo);
+    if (id === DF_.qtyId) out.qty.push(rowNo);
+  });
+  return out;
+}
+
+function dfDateParts_(v) {
+  if (v instanceof Date) return { y: +Utilities.formatDate(v, 'Asia/Dhaka', 'yyyy'), m: +Utilities.formatDate(v, 'Asia/Dhaka', 'M'), d: +Utilities.formatDate(v, 'Asia/Dhaka', 'd'), isDate: true };
+  var m = /^(\d{1,2})-(\d{1,2})-(\d{4})/.exec(String(v || '').trim());
+  return m ? { d: +m[1], m: +m[2], y: +m[3], isDate: false } : null;
+}
+
+function dfCartsFor_(phone) {
+  var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('AbandonedCarts');
+  if (!sh || sh.getLastRow() &lt; 2) return [];
+  return sh.getRange(2, 1, sh.getLastRow() - 1, 7).getValues().filter(function (r) { return normalizePhone_(r[0]) === phone; })
+    .map(function (r) { return { summary: String(r[2] || '').slice(0, 300), value: Number(r[3]) || 0, status: String(r[6] || '') }; });
+}
+
+function dataFix20261021DryRun() {
+  var d = dfRows_(), f = dfFind_(d.rows), report = {};
+  report.A = f.swap.map(function (row) { var r = d.rows[row - 2]; return { row: row, date: String(r[0]), parts: dfDateParts_(r[0]), status: String(r[9] || '') }; });
+  report.B = f.noId.map(function (row) { var r = d.rows[row - 2]; return { row: row, date: String(r[0]), status: String(r[9] || ''), total: r[7] }; });
+  report.C = f.qty.map(function (row) {
+    var r = d.rows[row - 2];
+    return { row: row, qty: r[3], charge: r[4], total: r[7], status: String(r[9] || ''), courier: String(r[12] || ''), design: String(r[6] || '').slice(0, 300), carts: dfCartsFor_(normalizePhone_(r[2])) };
+  });
+  console.log('DATAFIX DRY ' + JSON.stringify(report));
+  return report;
+}
+
+function dataFix20261021Apply() {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  var done = [];
+  try {
+    var d = dfRows_(), f = dfFind_(d.rows), sheet = d.sheet;
+    // A) swap day/month
+    if (f.swap.length === 1) {
+      var rowA = f.swap[0], cell = sheet.getRange(rowA, 1), v = cell.getValue(), p = dfDateParts_(v);
+      if (p &amp;&amp; p.y === 2026 &amp;&amp; p.d === 10 &amp;&amp; p.m === 12) {
+        if (p.isDate) {
+          var fixed = new Date(v.getTime()); fixed.setMonth(9); fixed.setDate(12);
+          cell.setValue(fixed);
+        } else {
+          cell.setValue(String(v).replace(/^10-12-2026/, '12-10-2026'));
+        }
+        done.push('A row ' + rowA + ': 10-12-2026 → 12-10-2026');
+      } else done.push('A skipped: date is not 10-12-2026 any more');
+    } else done.push('A skipped: found ' + f.swap.length + ' rows');
+    // B) missing Order ID
+    if (f.noId.length === 1) {
+      var rowB = f.noId[0], pb = dfDateParts_(d.rows[rowB - 2][0]);
+      if (pb) {
+        var used = {}; d.rows.forEach(function (r) { used[String(r[8] || '').trim()] = true; });
+        var base = 'MA-' + pb.y + ('0' + pb.m).slice(-2) + ('0' + pb.d).slice(-2) + '-', id = '';
+        for (var t = 0; t &lt; 50 &amp;&amp; (!id || used[id]); t++) id = base + (Math.floor(Math.random() * 9000) + 1000);
+        var idCell = sheet.getRange(rowB, onlineOrderColumn_(sheet, 9));
+        if (!String(idCell.getValue() || '').trim() &amp;&amp; !used[id]) { idCell.setValue(id); done.push('B row ' + rowB + ': Order ID ' + id); }
+        else done.push('B skipped: cell no longer empty');
+      } else done.push('B skipped: unreadable date');
+    } else done.push('B skipped: found ' + f.noId.length + ' rows');
+    // C) quantity and total from checkout
+    if (f.qty.length === 1) {
+      var rowC = f.qty[0], r = d.rows[rowC - 2];
+      var qCell = sheet.getRange(rowC, 4), tCell = sheet.getRange(rowC, onlineOrderColumn_(sheet, 8));
+      var before = { qty: qCell.getValue(), total: tCell.getValue() };
+      if (Number(before.qty) !== DF_.qty || Number(String(before.total).replace(/[^\d.]/g, '')) !== DF_.total) {
+        qCell.setValue(DF_.qty); tCell.setValue(DF_.total);
+        done.push('C row ' + rowC + ': qty ' + before.qty + ' → ' + DF_.qty + ', total ' + before.total + ' → ' + DF_.total);
+      } else done.push('C already correct');
+    } else done.push('C skipped: found ' + f.qty.length + ' rows');
+  } finally { lock.releaseLock(); }
+  if (typeof recordAutomationLog_ === 'function') recordAutomationLog_('DATAFIX', true, done.length, 0, done.join(' | '));
+  console.log('DATAFIX APPLIED ' + JSON.stringify(done));
+  return done;
+}
+</textarea><br>
+<button type="button" id="copyFile7">DataFixes.gs কপি</button>
+<h2>8. Fix-doGet.gs</h2>
+<textarea id="fileBox8" readonly>/**
  * Compatibility note: this file intentionally defines no doGet().
  * A former fallback implementation here shadowed Code.gs and returned the
  * generic health text for StockStatus, OrderSchema, auth and other GET APIs.
  * The canonical GET router is the single doGet() in Code.gs.
  */
 </textarea><br>
-<button type="button" id="copyFile7">Fix-doGet.gs কপি</button>
-<h2>8. InstallDateTrigger.gs</h2>
-<textarea id="fileBox8" readonly>function installBoostAutoDateTriggerNow() {
+<button type="button" id="copyFile8">Fix-doGet.gs কপি</button>
+<h2>9. InstallDateTrigger.gs</h2>
+<textarea id="fileBox9" readonly>function installBoostAutoDateTriggerNow() {
   const triggers = ScriptApp.getProjectTriggers();
   const exists = triggers.some(t => t.getHandlerFunction() === 'boostAutoDateOnEdit' &amp;&amp; t.getEventType() === ScriptApp.EventType.ON_EDIT);
   if (!exists) {
     ScriptApp.newTrigger('boostAutoDateOnEdit').forSpreadsheet(SpreadsheetApp.getActive()).onEdit().create();
   }
 }</textarea><br>
-<button type="button" id="copyFile8">InstallDateTrigger.gs কপি</button>
-<h2>9. Monitor.gs</h2>
-<textarea id="fileBox9" readonly>/**
+<button type="button" id="copyFile9">InstallDateTrigger.gs কপি</button>
+<h2>10. Monitor.gs</h2>
+<textarea id="fileBox10" readonly>/**
  * Free uptime monitor: checks the storefront every hour and e-mails the admin
  * (and Telegram, if configured) after 2 failed checks in a row, then once more
  * when the site is reachable again. One-time setup: run setupUptimeMonitorTrigger().
@@ -8232,9 +8334,9 @@ function ensureRecentBackup_(nowMs) {
   return 'RETRY_FAILED';
 }
 </textarea><br>
-<button type="button" id="copyFile9">Monitor.gs কপি</button>
-<h2>10. Operations.gs</h2>
-<textarea id="fileBox10" readonly>function opsNotifyVariant_(id,variant,available){
+<button type="button" id="copyFile10">Monitor.gs কপি</button>
+<h2>11. Operations.gs</h2>
+<textarea id="fileBox11" readonly>function opsNotifyVariant_(id,variant,available){
  if(available&lt;=0)return;
  var sh=SpreadsheetApp.getActiveSpreadsheet().getSheetByName('StockWaitlist');if(!sh||sh.getLastRow()&lt;2)return;
  var rows=sh.getRange(2,1,sh.getLastRow()-1,7).getValues(),sent=0;
@@ -8299,9 +8401,9 @@ function opsReviewVerification_(e,productId){var id=String(param_(e,'OrderID')||
 function opsSaveWaitlist_(e){try{var id=String(param_(e,'ProductId')||'').trim(),variant=String(param_(e,'Variant')||'').trim().slice(0,160),contact=normalizeSubscribeContact_(param_(e,'Contact'));if(!contact)throw Error('INVALID_CONTACT');var p=opsCatalog_().products.filter(function(x){return x.id===id;})[0];if(!p)throw Error('UNKNOWN_PRODUCT');opsLinePrice_({qty:1,size:variant,productType:param_(e,'ProductType')},p);rateLimit_('size_wait_'+contact.slice(0,40));var lock=LockService.getScriptLock();lock.waitLock(15000);try{var sh=ensureStockWaitlistSheet_(),h=sh.getRange(1,7).getValue();if(h&amp;&amp;h!=='Variant')throw Error('WAITLIST_HEADER_CONFLICT');sh.getRange(1,7).setValue('Variant');var rows=sh.getDataRange().getValues();for(var i=1;i&lt;rows.length;i++)if(String(rows[i][0])===id&amp;&amp;String(rows[i][2]).toLowerCase()===contact.toLowerCase()&amp;&amp;opsNorm_(rows[i][6])===opsNorm_(variant))return {ok:true,message:'এই সাইজের তালিকায় আছেন।'};sh.appendRow([admCellText_(id,100),admCellText_(p.name,200),admCellText_(contact,150),/@/.test(contact)?'yes':'',new Date(),'',admCellText_(variant,160)]);return {ok:true,message:'নির্বাচিত সাইজের অনুরোধ সংরক্ষিত হয়েছে।'};}finally{lock.releaseLock();}}catch(err){return {ok:false,error:String(err.message||err),message:'পণ্য, সাইজ ও যোগাযোগের তথ্য যাচাই করুন।'};}}
 function opsDhakaTime_(iso){if(!iso)return null;var d=new Date(iso);return isNaN(d.getTime())?String(iso):Utilities.formatDate(d,'Asia/Dhaka','yyyy-MM-dd HH:mm');}
 </textarea><br>
-<button type="button" id="copyFile10">Operations.gs কপি</button>
-<h2>11. OrderSync.gs</h2>
-<textarea id="fileBox11" readonly>/**
+<button type="button" id="copyFile11">Operations.gs কপি</button>
+<h2>12. OrderSync.gs</h2>
+<textarea id="fileBox12" readonly>/**
  * OrderSync — Online Order sheet mirror
  *
  * Setup:
@@ -9263,9 +9365,9 @@ function setupOperationsTriggersFromMenu() {
   );
 }
 </textarea><br>
-<button type="button" id="copyFile11">OrderSync.gs কপি</button>
-<h2>12. ProductPicker.html</h2>
-<textarea id="fileBox12" readonly>&lt;!DOCTYPE html>
+<button type="button" id="copyFile12">OrderSync.gs কপি</button>
+<h2>13. ProductPicker.html</h2>
+<textarea id="fileBox13" readonly>&lt;!DOCTYPE html>
 &lt;html>
 &lt;head>
   &lt;base target="_top">
@@ -9476,7 +9578,7 @@ function setupOperationsTriggersFromMenu() {
 &lt;/body>
 &lt;/html>
 </textarea><br>
-<button type="button" id="copyFile12">ProductPicker.html কপি</button><script>function bind(btn, box) { document.getElementById(btn).onclick = function () { var t = document.getElementById(box).value; navigator.clipboard.writeText(t).then(function () { alert("কপি হয়েছে!"); }); }; }bind('copyBtn', 'codeBox');
+<button type="button" id="copyFile13">ProductPicker.html কপি</button><script>function bind(btn, box) { document.getElementById(btn).onclick = function () { var t = document.getElementById(box).value; navigator.clipboard.writeText(t).then(function () { alert("কপি হয়েছে!"); }); }; }bind('copyBtn', 'codeBox');
 bind('copyAdm', 'admBox');
 bind('copyFix', 'fixBox');
 bind('copyFile4', 'fileBox4');
@@ -9487,4 +9589,5 @@ bind('copyFile8', 'fileBox8');
 bind('copyFile9', 'fileBox9');
 bind('copyFile10', 'fileBox10');
 bind('copyFile11', 'fileBox11');
-bind('copyFile12', 'fileBox12');</script></body></html>
+bind('copyFile12', 'fileBox12');
+bind('copyFile13', 'fileBox13');</script></body></html>
