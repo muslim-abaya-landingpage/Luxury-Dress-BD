@@ -45,7 +45,7 @@ test('order list: WhatsApp confirm link, bulk select, courier send skips sent or
 test('order page: WhatsApp button and reason picker on cancel', async ({ page }) => {
   await page.setContent(`<!doctype html><html><body>
     <div class="pn-head"><button id="btnFraud">fraud</button></div>
-    <input id="fName" value="Rahima"><input id="fAddress" value="Mirpur 10">
+    <div class="pn-actions-row"><a id="btnMap" href="#">map</a></div><input id="fName" value="Rahima"><input id="fAddress" value="Mirpur 10">
     <select id="fStatus"><option>Pending</option><option>Cancelled</option></select>
     <textarea id="fAdminNote">call after 5pm</textarea>
   </body></html>`);
@@ -61,6 +61,7 @@ test('order page: WhatsApp button and reason picker on cancel', async ({ page })
   await page.evaluate((o) => document.dispatchEvent(new CustomEvent('ma-order-rendered', { detail: o })), orders[0]);
   await expect(page.locator('#otWaConfirm')).toBeVisible();
   await expect(page.locator('#otPrint')).toBeVisible();
+  await expect(page.locator('.pn-actions-row #otWaConfirm')).toHaveCount(1);
   await page.selectOption('#fStatus', 'Cancelled');
   await page.locator('[data-reason="ফোন ধরেনি"]').click();
   await expect(page.locator('#fAdminNote')).toHaveValue('[কারণ: ফোন ধরেনি] call after 5pm');

@@ -181,9 +181,9 @@
     wa.textContent = "💬 WhatsApp-এ কনফার্ম"; wa.style.display = "none";
     var pr = document.createElement("button");
     pr.type = "button"; pr.className = "pn-btn pn-btn-sm"; pr.id = "otPrint"; pr.textContent = "🖨 ইনভয়েস"; pr.style.display = "none";
-    var anchor = $("btnFraud");
-    head.insertBefore(pr, anchor ? anchor.nextSibling : null);
-    head.insertBefore(wa, pr);
+    var mapBtn = $("btnMap"), row = mapBtn && mapBtn.parentNode;
+    if (row) { row.insertBefore(wa, mapBtn.nextSibling); row.insertBefore(pr, wa.nextSibling); }
+    else { head.appendChild(wa); head.appendChild(pr); }
     function liveOrder() {
       if (!current) return null;
       var o = {}; Object.keys(current).forEach(function (k) { o[k] = current[k]; });
