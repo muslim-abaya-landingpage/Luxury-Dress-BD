@@ -8135,11 +8135,31 @@ function sendNewOrderAlertOnce_(orderId, message) {
 
   if (delivered) {
     sent[id] = new Date().toISOString();
-    var keys = Object.keys(sent);
-    if (keys.length > 500) delete sent[keys[0]];
-    props.setProperty('ORDERSYNC_ALERTED_ORDER_IDS', JSON.stringify(sent));
+    try {
+      props.setProperty('ORDERSYNC_ALERTED_ORDER_IDS', serializeAlertedOrderIds_(sent));
+    } catch (propErr) {
+      console.error('ORDERSYNC_ALERT_LOG_SAVE_FAILED ' + String(propErr));
+    }
     recordAutomationLog_('ALERT', true, 0, 0, 'New order alert sent: ' + id);
   }
+}
+
+// Script properties allow at most 9 KB per value. Keep only the newest
+// entries that fit (well under the limit) so setProperty never throws.
+var ORDERSYNC_ALERTED_MAX_CHARS_ = 7000;
+function serializeAlertedOrderIds_(sent) {
+  var keys = Object.keys(sent || {}).sort(function (a, b) {
+    return String(sent[a]).localeCompare(String(sent[b]));
+  });
+  var kept = {};
+  var json = '{}';
+  for (var i = keys.length - 1; i >= 0; i--) {
+    kept[keys[i]] = sent[keys[i]];
+    var next = JSON.stringify(kept);
+    if (next.length > ORDERSYNC_ALERTED_MAX_CHARS_) { delete kept[keys[i]]; break; }
+    json = next;
+  }
+  return json;
 }
 
 function configureWhatsAppProperties(accessToken, phoneNumberId, recipient) {
@@ -8294,14 +8314,28 @@ function runOrderSyncNow() {
       targetValues[0] = sourceHeaders;
     }
 
+    // Build the whole mirror in memory and write it with ONE setValues call.
+    // (Writing row-by-row made every 15-minute run take ~1 call per order and
+    // could exhaust the 90 min/day trigger-runtime quota shared with backups
+    // and courier sync.)
+    var body = [];
     var mirrorRowsById = {};
     for (var r = 1; r &lt; targetValues.length; r++) {
-      var existingId = String(targetValues[r][orderIdColumn] || '').trim();
-      if (existingId) mirrorRowsById[existingId] = r + 1;
+      var existing = targetValues[r].slice(0, width);
+      while (existing.length &lt; width) existing.push('');
+      body.push(existing);
+      var existingId = String(existing[orderIdColumn] || '').trim();
+      if (existingId) mirrorRowsById[existingId] = body.length - 1;
     }
 
+    // First fill of an empty mirror: copy everything but send NO alerts,
+    // otherwise every historical order would be e-mailed as "new" (gmail.com
+    // accounts may send to only 100 recipients/day).
+    var isInitialFill = Object.keys(mirrorRowsById).length === 0;
+    var ORDERSYNC_MAX_ALERTS_PER_RUN = 10;
     var added = 0;
     var updated = 0;
+    var newOrders = [];
 
     for (var s = 1; s &lt; sourceValues.length; s++) {
       var row = sourceValues[s].slice(0, width);
@@ -8310,24 +8344,39 @@ function runOrderSyncNow() {
       var orderId = String(row[orderIdColumn] || '').trim();
       if (!orderId) continue;
 
-      if (mirrorRowsById[orderId]) {
-        target.getRange(mirrorRowsById[orderId], 1, 1, width).setValues([row]);
+      if (mirrorRowsById[orderId] != null) {
+        body[mirrorRowsById[orderId]] = row;
         updated++;
       } else {
-        var nextRow = Math.max(2, target.getLastRow() + 1);
-        target.getRange(nextRow, 1, 1, width).setValues([row]);
-        mirrorRowsById[orderId] = nextRow;
+        body.push(row);
+        mirrorRowsById[orderId] = body.length - 1;
         added++;
-        sendNewOrderAlertOnce_(
-          orderId,
-          'নতুন অর্ডার এসেছে\n' +
-          'Order ID: ' + orderId + '\n' +
-          'Customer: ' + String(row[1] || '') + '\n' +
-          'Phone: ' + String(row[2] || '') + '\n' +
-          'Total: ৳' + String(row[8] || '') + '\n' +
-          'Status: ' + String(row[10] || 'Pending')
-        );
+        if (!isInitialFill) newOrders.push(row);
       }
+    }
+
+    if (body.length) {
+      if (target.getMaxRows() &lt; body.length + 1) {
+        target.insertRowsAfter(target.getMaxRows(), body.length + 1 - target.getMaxRows());
+      }
+      target.getRange(2, 1, body.length, width).setValues(body);
+    }
+
+    newOrders.slice(-ORDERSYNC_MAX_ALERTS_PER_RUN).forEach(function (newRow) {
+      var newId = String(newRow[orderIdColumn] || '').trim();
+      sendNewOrderAlertOnce_(
+        newId,
+        'নতুন অর্ডার এসেছে\n' +
+        'Order ID: ' + newId + '\n' +
+        'Customer: ' + String(newRow[1] || '') + '\n' +
+        'Phone: ' + String(newRow[2] || '') + '\n' +
+        'Total: ৳' + String(newRow[8] || '') + '\n' +
+        'Status: ' + String(newRow[10] || 'Pending')
+      );
+    });
+    if (newOrders.length > ORDERSYNC_MAX_ALERTS_PER_RUN) {
+      recordAutomationLog_('ALERT', true, 0, 0,
+        'Alert cap reached: ' + newOrders.length + ' new orders, alerted newest ' + ORDERSYNC_MAX_ALERTS_PER_RUN);
     }
 
     target.setFrozenRows(1);
@@ -8344,6 +8393,8 @@ function runOrderSyncNow() {
       synced: added + updated,
       added: added,
       updated: updated,
+      initialFill: isInitialFill,
+      alerted: Math.min(newOrders.length, ORDERSYNC_MAX_ALERTS_PER_RUN),
       mirrorSpreadsheetId: targetSpreadsheet.getId(),
       mirrorSheet: ORDERSYNC_SHEET_NAME_
     };
