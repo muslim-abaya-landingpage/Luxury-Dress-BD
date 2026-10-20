@@ -22,10 +22,10 @@ window.getSiteApiUrl = function () {
  * client ID here, and set the same value as script property GOOGLE_CLIENT_ID in Apps Script
  * (then Deploy -> New version).
  */
-window.MA_GOOGLE_CLIENT_ID = window.MA_GOOGLE_CLIENT_ID || "";
+window.MA_GOOGLE_CLIENT_ID = window.MA_GOOGLE_CLIENT_ID || "839440319456-inanmbciqnj4h22o24fsleduv92rqpt6.apps.googleusercontent.com";
 
 /**
  * Sign in with Facebook (optional). The App ID is public; keep the App Secret only in
  * Google Apps Script Script Properties as FACEBOOK_LOGIN_APP_SECRET.
  */
-window.MA_FACEBOOK_APP_ID = window.MA_FACEBOOK_APP_ID || "";
+window.MA_FACEBOOK_APP_ID = window.MA_FACEBOOK_APP_ID || "3992256867596731";
