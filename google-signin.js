@@ -9,7 +9,7 @@
   var fallback = doc.getElementById("maGoogleFallback");
   var host = doc.getElementById("maGoogleButtonHost");
   var params = new URLSearchParams(g.location.search);
-  var next = params.get("next") || "checkout.html";
+  var next = params.get("next") || "/";
   var social = g.MaSocialUI;
 
   if (!clientId || !g.MaAuth || typeof g.MaAuth.loginWithGoogle !== "function" || !host) {

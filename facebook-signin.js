@@ -9,7 +9,7 @@
   var appId = String(g.MA_FACEBOOK_APP_ID || "").trim();
   var social = g.MaSocialUI;
   var params = new URLSearchParams(g.location.search);
-  var next = params.get("next") || "checkout.html";
+  var next = params.get("next") || "/";
   var busy = false;
 
   if (!appId || !g.MaAuth || typeof g.MaAuth.loginWithFacebook !== "function") {
