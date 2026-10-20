@@ -8310,6 +8310,12 @@ function telegramSetupChatId() {
     var m = u.message || u.channel_post || u.my_chat_member || {};
     if (m.chat &amp;&amp; m.chat.id) chatId = String(m.chat.id);
   });
+  var botName = '';
+  try {
+    var me = JSON.parse(UrlFetchApp.fetch('https://api.telegram.org/bot' + encodeURIComponent(token) + '/getMe', { muteHttpExceptions: true }).getContentText());
+    botName = me &amp;&amp; me.result ? '@' + me.result.username : '';
+  } catch (meErr) {}
+  console.log('TELEGRAM: token belongs to ' + (botName || 'unknown bot') + ', updates=' + (data.result || []).length);
   if (!chatId) { console.log('TELEGRAM: বটকে Telegram-এ যেকোনো একটা মেসেজ (যেমন "hi") পাঠিয়ে আবার চালান।'); return { ok: false, error: 'NO_MESSAGE_YET' }; }
   props.setProperty('TELEGRAM_CHAT_ID', chatId);
   var tg = sendTelegramText_('✅ Muslim Abaya: Telegram নোটিফিকেশন চালু হয়েছে। নতুন অর্ডার, সাইট ডাউন আর দৈনিক সেলস সামারি এখানে আসবে।');
