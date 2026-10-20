@@ -5810,6 +5810,7 @@ function mutateStockVariant_(opts) {
   if (opts.category) fields.category = opts.category;
   if (typeof opts.threshold !== 'undefined') fields.threshold = opts.threshold;
   writeStockVariantRow_(sheet, row, fields);
+  try { queueLowStockAlert_(before, nextAvailable, !!(before.tracked || opts.setTracked)); } catch (lowErr) {}
   appendStockLedger_({
     productId: before.productId || opts.productId,
     variant: before.variant || opts.variant,
@@ -5823,6 +5824,42 @@ function mutateStockVariant_(opts) {
     admin: opts.admin || 'system'
   });
   return { before: before, after: { available: nextAvailable, reserved: nextReserved } };
+}
+
+var LOW_STOCK_DEFAULT_THRESHOLD_ = 2;
+var LOW_STOCK_QUEUE_KEY_ = 'LOW_STOCK_ALERT_QUEUE';
+
+/** Queues an alert when a tracked size crosses from above its threshold to at/below it. Cheap; no network. */
+function queueLowStockAlert_(before, nextAvailable, tracked) {
+  if (!tracked || !before) return false;
+  var threshold = before.threshold == null || isNaN(before.threshold) ? LOW_STOCK_DEFAULT_THRESHOLD_ : before.threshold;
+  if (!(before.available > threshold && nextAvailable <= threshold)) return false;
+  var props = PropertiesService.getScriptProperties();
+  var queue = [];
+  try { queue = JSON.parse(props.getProperty(LOW_STOCK_QUEUE_KEY_) || '[]') || []; } catch (e) { queue = []; }
+  var key = before.productId + '|' + before.variant;
+  queue = queue.filter(function (q) { return q.key !== key; });
+  queue.push({ key: key, name: before.productName || before.productId, variant: before.variant || 'সব সাইজ', left: nextAvailable, threshold: threshold });
+  props.setProperty(LOW_STOCK_QUEUE_KEY_, JSON.stringify(queue.slice(-30)));
+  return true;
+}
+
+/** Sends queued low-stock alerts (Telegram + email). Called from the 15-minute trigger. */
+function flushLowStockAlerts_() {
+  var props = PropertiesService.getScriptProperties();
+  var raw = props.getProperty(LOW_STOCK_QUEUE_KEY_);
+  if (!raw) return 0;
+  var queue = [];
+  try { queue = JSON.parse(raw) || []; } catch (e) {}
+  props.deleteProperty(LOW_STOCK_QUEUE_KEY_);
+  if (!queue.length) return 0;
+  var lines = queue.map(function (q) {
+    return '• ' + q.name + ' — ' + q.variant + ': ' + (q.left > 0 ? q.left + ' পিস বাকি' : 'স্টক শেষ');
+  });
+  var msg = '📦 স্টক কমে গেছে (' + queue.length + 'টি সাইজ)\n\n' + lines.join('\n') +
+    '\n\nস্টক বাড়াতে: muslimabaya.com/stock-analytics';
+  if (typeof sendAdminAndTelegramNotification_ === 'function') sendAdminAndTelegramNotification_('Muslim Abaya — স্টক কমে গেছে', msg);
+  return queue.length;
 }
 
 /** কার্ট-আইটেম থেকে variant key বের করা (size অগ্রাধিকার পায়, না থাকলে color) */

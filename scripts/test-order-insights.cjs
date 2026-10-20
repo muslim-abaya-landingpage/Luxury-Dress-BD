@@ -64,7 +64,7 @@ setImmediate(()=>{
     assert.equal(document.getElementById('ordFinance').innerHTML,finance);
     assert.equal(calls.length,1,'filters do not write or refetch orders');
     document.getElementById('ordSearch').listeners.input({target:{value:'does-not-exist'}});
-    assert(document.getElementById('ordBody').innerHTML.includes('colspan="8"'));
+    assert(document.getElementById('ordBody').innerHTML.includes('colspan="9"'));
     console.log('PASS: finance separation, strict dates, Dhaka boundary, audit flags, no mutation, page/API integration, escaping, scope and combined filters.');
   } catch(error) { console.error(error); process.exitCode=1; }
 });

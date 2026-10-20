@@ -474,6 +474,19 @@
         });
       }
     }
+    if (window.MaSizeFinder && window.MaSizeFinder.attach) {
+      var main = "#pdSizeGroup > .pd-option-row .pd-option-btn";
+      var finderGroups = ab
+        ? [{ selector: main, mode: "length", label: "দৈর্ঘ্য" }, { selector: "#pdBodyOptions .pd-option-btn", mode: "body", label: "বডি" }]
+        : tp
+          ? [{ selector: main, mode: "body", label: "বডি" }, { selector: "#pdDressOptions .pd-option-btn", mode: "length", label: "ড্রেসের দৈর্ঘ্য" }]
+          : [{ selector: main, mode: "body", label: "সাইজ" }];
+      try {
+        var row0 = el.querySelector(".pd-option-row");
+        window.MaSizeFinder.attach({ scope: document, labelHost: el.querySelector(".pd-option-label"), boxAfter: row0,
+          groups: finderGroups, hasCustom: !!document.getElementById("pdCustomSizeBtn") });
+      } catch (sfErr) {}
+    }
   }
 
   function buildPdSizeChartTableHtml(data) {

@@ -602,6 +602,7 @@ function orderSyncTriggerHandler() {
     'ORDERSYNC_LAST_TRIGGER_AT',
     new Date().toISOString()
   );
+  try { if (typeof flushLowStockAlerts_ === 'function') flushLowStockAlerts_(); } catch (lowErr) {}
   try {
     var result = runOrderSyncNow();
     PropertiesService.getScriptProperties().setProperty(

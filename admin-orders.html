@@ -86,6 +86,7 @@
         <table class="pn-table">
           <thead>
             <tr>
+              <th style="width:34px"><input type="checkbox" class="ot-sel" id="otSelAll" aria-label="দেখানো সব অর্ডার বাছুন"></th>
               <th>অর্ডার</th>
               <th>কাস্টমার</th>
               <th>পণ্য</th>
@@ -96,7 +97,7 @@
               <th>যাচাই</th>
             </tr>
           </thead>
-          <tbody id="ordBody" aria-live="polite"><tr class="pn-skeleton-row"><td colspan="8"><div class="pn-skeleton-stack"><i></i><i></i><i></i><i></i></div></td></tr></tbody>
+          <tbody id="ordBody" aria-live="polite"><tr class="pn-skeleton-row"><td colspan="9"><div class="pn-skeleton-stack"><i></i><i></i><i></i><i></i></div></td></tr></tbody>
         </table>
       </div>
       <div class="pn-toolbar" id="ordPaging" aria-live="polite">
@@ -113,6 +114,8 @@
   <script src="admin-panel.js?v=20261018-shared"></script>
   <script src="admin-order-insights.js?v=20261016-1"></script>
   <script src="admin-manual-order.js?v=20261020-1" defer></script>
+  <script src="admin-invoice.js?v=20261021-1" defer></script>
+  <script src="admin-order-tools.js?v=20261021-1" defer></script>
   <script>
     (function () {
       var esc = MaPanel.esc;
@@ -163,7 +166,7 @@
         document.getElementById("ordIssueCount").textContent = "লোড করা " + all.length + "টির মধ্যে দেখানো হচ্ছে " + list.length;
         var body = document.getElementById("ordBody");
         if (!list.length) {
-          body.innerHTML = '<tr><td colspan="8" class="pn-empty">কোনো অর্ডার পাওয়া যায়নি</td></tr>';
+          body.innerHTML = '<tr><td colspan="9" class="pn-empty">কোনো অর্ডার পাওয়া যায়নি</td></tr>';
           return;
         }
         body.innerHTML = list.map(function (o) {
@@ -171,9 +174,10 @@
           var displayStatus = MaOrderStatus.describe(o);
           var canOpen = o.orderId && (issueRows.get(o) || []).indexOf("duplicate_id") === -1;
           return (
-            '<tr class="' + (canOpen ? 'click' : '') + '" data-id="' + (canOpen ? esc(o.orderId) : '') + '">' +
+            '<tr class="' + (canOpen ? 'click' : '') + '" data-id="' + (canOpen ? esc(o.orderId) : '') + '"' + (canOpen ? ' data-oid="' + esc(o.orderId) + '"' : '') + '>' +
+            '<td>' + (canOpen ? '<input type="checkbox" class="ot-sel" data-oid="' + esc(o.orderId) + '" aria-label="' + esc(o.orderId) + ' বাছুন">' : '') + '</td>' +
             '<td><div class="oid">' + (canOpen ? '<a class="oi-link" href="admin-order.html?id=' + encodeURIComponent(o.orderId) + '">' + esc(o.orderId) + '</a>' : esc(o.orderId || "ID নেই")) + '</div><div class="sub">' + esc(o.time) + (o.row && !canOpen ? " · সারি " + esc(o.row) : "") + "</div></td>" +
-            "<td><div>" + esc(o.name) + (o.blocked ? ' <span class="pn-badge blocked">Blocked</span>' : "") + '</div><div class="sub">' + esc(o.phone) + (o.district ? " · " + esc(o.district) : "") + "</div></td>" +
+            "<td><div>" + esc(o.name) + (o.blocked ? ' <span class="pn-badge blocked">Blocked</span>' : "") + '</div><div class="sub">' + esc(o.phone) + (o.district ? " · " + esc(o.district) : "") + '</div><div class="ot-wa-slot"></div></td>' +
             "<td>" + items + '<div class="sub">সাইজ: ' + esc(o.size || "তথ্য নেই") + '</div></td>' +
             "<td><b>" + (MaOrderInsights.amount(o.total) === null ? 'অবৈধ মান' : MaPanel.money(o.total)) + '</b><div class="sub">' + esc(o.payment || "") + "</div></td>" +
             '<td><span class="pn-badge ' + displayStatus.badgeKey + '">' + esc(displayStatus.orderLabel) + '</span><div class="sub">অর্ডার: ' + esc(displayStatus.orderRaw) + "</div></td>" +
@@ -183,6 +187,10 @@
             "</tr>"
           );
         }).join("");
+        try {
+          window.MaOrdersState = { all: all, total: Number(counts.all) || all.length };
+          document.dispatchEvent(new CustomEvent("ma-orders-rendered"));
+        } catch (stateErr) {}
       }
 
       function renderPagination() {
@@ -256,7 +264,7 @@
           btn.disabled = true;
         }
         document.getElementById("ordCount").textContent = (ordersShown ? (counts.all || 0) + " orders · " : "") + "আপডেট হচ্ছে…";
-        if (!append && !ordersShown) document.getElementById("ordBody").innerHTML = '<tr><td colspan="8" class="pn-empty">অর্ডার আনা হচ্ছে…</td></tr>';
+        if (!append && !ordersShown) document.getElementById("ordBody").innerHTML = '<tr><td colspan="9" class="pn-empty">অর্ডার আনা হচ্ছে…</td></tr>';
         return MaAdmin.call("AdminOrderList", params, options).then(function (res) {
           if (append && typeof res.nextCursor !== "number") throw new Error("ORDER_PAGINATION_API_OLD");
           apply(res, append);
@@ -266,7 +274,7 @@
             return;
           }
           if (ordersShown) { MaPanel.toast("আপডেট করা যায়নি: " + err.message, true); return; }
-          document.getElementById("ordBody").innerHTML = '<tr><td colspan="8" class="pn-empty">Error: ' + esc(err.message) + "</td></tr>";
+          document.getElementById("ordBody").innerHTML = '<tr><td colspan="9" class="pn-empty">Error: ' + esc(err.message) + "</td></tr>";
         }).then(function () {
           btn.disabled = false;
           loadingMore = false;
@@ -291,7 +299,7 @@
         renderRows();
       });
       document.getElementById("ordBody").addEventListener("click", function (e) {
-        if (e.target.closest("a")) return;
+        if (e.target.closest("a, input, label")) return;
         var tr = e.target.closest("tr[data-id]");
         if (tr && tr.getAttribute("data-id")) location.href = "admin-order.html?id=" + encodeURIComponent(tr.getAttribute("data-id"));
       });
