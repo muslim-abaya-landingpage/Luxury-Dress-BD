@@ -1,0 +1,230 @@
+/* Muslim Abaya Orders — WooCommerce-inspired presentation layer.
+   Keeps the existing order API, IDs, controls and event handlers intact. */
+
+.wo-orders-page,
+.wo-edit-page {
+  --wo-bg: #f3f4f6;
+  --wo-card: #ffffff;
+  --wo-border: #d9dce2;
+  --wo-text: #20242a;
+  --wo-muted: #68707d;
+  --wo-accent: #7057b8;
+  --wo-accent-soft: #f0ebfa;
+  --wo-green: #237a4b;
+  --wo-yellow: #8a5d00;
+  background: var(--wo-bg);
+}
+
+.wo-orders-page .adm-shell,
+.wo-edit-page .adm-shell { gap: 22px; }
+.wo-orders-page .pn-main,
+.wo-edit-page .pn-main { max-width: 1500px; }
+
+.wo-orders-page .pn-head,
+.wo-edit-page .pn-head {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 4px 0 18px;
+  min-height: 0;
+  box-shadow: none;
+  align-items: center;
+}
+.wo-orders-page .pn-head h1,
+.wo-edit-page .pn-head h1 { font-size: 28px; letter-spacing: -.035em; }
+.wo-orders-page .adm-page-kicker,
+.wo-edit-page .adm-page-kicker { display: none; }
+.wo-orders-page .pn-head .pn-btn,
+.wo-edit-page .pn-head .pn-btn { background: #fff; border-color: var(--wo-border); color: var(--wo-text); }
+.wo-orders-page .pn-head .pn-btn:hover,
+.wo-edit-page .pn-head .pn-btn:hover { background: #f9fafb; }
+
+/* Orders list: tabs become the familiar WooCommerce status navigation. */
+.wo-orders-page .pn-tabs {
+  gap: 0;
+  margin: 0 0 18px;
+  border-bottom: 1px solid var(--wo-border);
+  align-items: flex-end;
+}
+.wo-orders-page .pn-tab {
+  position: relative;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #515963;
+  padding: 12px 15px 13px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.wo-orders-page .pn-tab + .pn-tab { border-left: 1px solid #e5e7eb; }
+.wo-orders-page .pn-tab:hover { color: var(--wo-accent); background: #fafafa; }
+.wo-orders-page .pn-tab.active {
+  color: var(--wo-accent);
+  background: transparent;
+  font-weight: 700;
+}
+.wo-orders-page .pn-tab.active::after {
+  content: "";
+  position: absolute;
+  height: 3px;
+  left: 12px;
+  right: 12px;
+  bottom: -1px;
+  background: var(--wo-accent);
+  border-radius: 3px 3px 0 0;
+}
+.wo-orders-page .pn-tab em {
+  display: inline-block;
+  min-width: 22px;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: #eceef1;
+  color: #5f6670;
+  font-size: 11px;
+  font-style: normal;
+  text-align: center;
+}
+.wo-orders-page .pn-tab.active em { background: var(--wo-accent-soft); color: var(--wo-accent); }
+
+.wo-orders-page .pn-toolbar {
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+.wo-orders-page .pn-toolbar:first-of-type { justify-content: flex-end; }
+.wo-orders-page #ordSearch {
+  max-width: 360px;
+  min-height: 42px;
+  border-radius: 4px;
+  background: #fff;
+  border-color: #c6cbd3;
+  box-shadow: inset 0 1px 1px rgba(0,0,0,.04);
+}
+.wo-orders-page #ordRefresh,
+.wo-orders-page #ordLoadMore {
+  min-height: 42px;
+  border-radius: 4px;
+  background: #fff;
+}
+.wo-orders-page #ordInsights {
+  border-radius: 5px;
+  background: #fff;
+  border-color: var(--wo-border);
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.wo-orders-page .oi-cards { gap: 10px; }
+.wo-orders-page .oi-card { border-radius: 4px; background: #fafafa; border-color: #e1e4e8; }
+
+.wo-orders-page .pn-table-wrap {
+  border-radius: 4px;
+  background: #fff;
+  border-color: var(--wo-border);
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.wo-orders-page .pn-table { min-width: 1120px; }
+.wo-orders-page .pn-table th {
+  background: #f8f9fa;
+  color: #505760;
+  text-transform: none;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+  padding: 12px 14px;
+  white-space: nowrap;
+}
+.wo-orders-page .pn-table td {
+  padding: 13px 14px;
+  border-bottom-color: #e7e9ed;
+  background: #fff;
+  font-size: 13px;
+}
+.wo-orders-page .pn-table tr.click:hover td { background: #f8f7fc; }
+.wo-orders-page .pn-table .oid { color: #3c4652; font-weight: 700; }
+.wo-orders-page .pn-table .oi-link { color: var(--wo-accent); text-decoration: none; }
+.wo-orders-page .pn-table .oi-link:hover { text-decoration: underline; }
+.wo-orders-page .pn-table .sub { color: #737b86; font-size: 11.5px; }
+.wo-orders-page .pn-badge { border-radius: 3px; padding: 4px 9px; font-size: 11px; }
+.wo-orders-page .pn-badge.pending { background: #fff2cc; border-color: #f0d78b; color: var(--wo-yellow); }
+.wo-orders-page .pn-badge.confirmed { background: #e6f1ff; color: #205a9c; }
+.wo-orders-page .pn-badge.shipped { background: #eee8ff; color: #6243a5; }
+.wo-orders-page .pn-badge.delivered { background: #e1f4e9; color: var(--wo-green); }
+.wo-orders-page .pn-badge.cancelled,
+.wo-orders-page .pn-badge.fake { background: #fbe5e6; color: #a12d38; }
+.wo-orders-page #ordPageStatus { font-size: 12px; }
+
+/* Edit order: WooCommerce-like two-column editor and compact panels. */
+.wo-edit-page .pn-grid { grid-template-columns: minmax(0, 1fr) 320px; gap: 18px; }
+.wo-edit-page .pn-card {
+  border-radius: 5px;
+  border-color: var(--wo-border);
+  background: var(--wo-card);
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+  padding: 20px;
+}
+.wo-edit-page .pn-card h2 {
+  margin: -20px -20px 18px;
+  padding: 14px 18px;
+  border-bottom: 1px solid #e3e5e8;
+  color: var(--wo-text);
+  font-size: 14px;
+  font-weight: 700;
+}
+.wo-edit-page .pn-card h2 i { color: var(--wo-accent); }
+.wo-edit-page .pn-field label { color: #4e5661; font-size: 12px; }
+.wo-edit-page .pn-in,
+.wo-edit-page .pn-sel,
+.wo-edit-page .pn-ta {
+  border-radius: 3px;
+  border-color: #bfc5cd;
+  background: #fff;
+  min-height: 40px;
+  padding: 8px 10px;
+}
+.wo-edit-page .pn-in:focus,
+.wo-edit-page .pn-sel:focus,
+.wo-edit-page .pn-ta:focus { outline: 2px solid #d9cff1; border-color: var(--wo-accent); }
+.wo-edit-page .pn-item { border-radius: 3px; background: #fafafa; }
+.wo-edit-page .pn-item .thumb { border-radius: 3px; background: #eceef1; }
+.wo-edit-page .pn-sum { padding: 8px 0; }
+.wo-edit-page .pn-sum.total { border-top-color: #dfe2e6; font-size: 16px; }
+.wo-edit-page .pn-sum.total b { color: var(--wo-text); }
+.wo-edit-page #btnSave {
+  border-radius: 4px;
+  background: #2f3338;
+  border-color: #2f3338;
+  min-height: 46px;
+  font-weight: 700;
+}
+.wo-edit-page #btnSave:hover { background: #1e2226; }
+.wo-edit-page #btnCourierSend { border-radius: 4px; }
+.wo-edit-page .pn-cust-actions { border-top-color: #e3e5e8; }
+.wo-edit-page .pn-head .pn-badge { border-radius: 3px; }
+.wo-edit-page .pn-head .pn-btn-blue { color: var(--wo-accent); background: var(--wo-accent-soft); border-color: #ddd2f3; }
+.wo-edit-page .pn-head .pn-btn-ghost-red { background: #fff; }
+.wo-edit-page #oError { border-radius: 5px; }
+
+@media (max-width: 980px) {
+  .wo-edit-page .pn-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 700px) {
+  .wo-orders-page .pn-head,
+  .wo-edit-page .pn-head { padding: 2px 0 14px; }
+  .wo-orders-page .pn-head h1,
+  .wo-edit-page .pn-head h1 { font-size: 22px; }
+  .wo-orders-page .pn-tabs { overflow-x: auto; flex-wrap: nowrap; scrollbar-width: thin; }
+  .wo-orders-page .pn-tab { white-space: nowrap; padding: 10px 11px 11px; font-size: 12px; }
+  .wo-orders-page .pn-toolbar:first-of-type { justify-content: stretch; }
+  .wo-orders-page #ordSearch { max-width: none; width: 100%; }
+  .wo-orders-page .pn-table-wrap { margin-inline: -1px; }
+  .wo-edit-page .pn-card { padding: 16px; }
+  .wo-edit-page .pn-card h2 { margin: -16px -16px 16px; }
+  .wo-edit-page .pn-head .pn-spacer { display: none; }
+  .wo-edit-page .pn-head > * { max-width: 100%; }
+  .wo-edit-page .pn-head .adm-heading { order: 2; flex-basis: calc(100% - 52px); }
+  .wo-edit-page .pn-head #btnHistory,
+  .wo-edit-page .pn-head #btnFraud { order: 3; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wo-orders-page *, .wo-edit-page * { scroll-behavior: auto !important; transition: none !important; }
+}
