@@ -177,14 +177,19 @@
     var node = byId("admPriorityTasks");
     if (!node) return;
     var orders = Array.isArray(result && result.orders) ? result.orders : [];
-    var tasks = AdminDashboardLogic.buildPriorityTasks(orders, Date.now());
+    var allTasks = AdminDashboardLogic.buildPriorityTasks(orders, Date.now());
+    // Orders older than 90 days are kept on purpose (owner's decision) and would otherwise bury today's work.
+    var OLD_MS = 90 * 24 * 3600 * 1000;
+    var tasks = allTasks.filter(function (task) { return task.dateUnknown || task.ageMs == null || task.ageMs <= OLD_MS; });
+    var oldCount = allTasks.length - tasks.length;
+    var oldNote = oldCount ? '<a class="adm-feature-more adm-old-note" href="admin-orders.html">৯০ দিনের বেশি পুরোনো ' + oldCount.toLocaleString("en-US") + 'টি অর্ডার এই তালিকায় দেখানো হচ্ছে না — অর্ডার প্যানেলে দেখুন →</a>' : "";
     var overdue = tasks.filter(function (task) { return task.overdue; }).length;
     var pending = tasks.filter(function (task) { return task.status === "pending"; }).length;
     byId("admTaskPendingCount").textContent = pending.toLocaleString("en-US");
     byId("admTaskOverdueCount").textContent = overdue.toLocaleString("en-US");
     byId("admTaskScope").textContent = "সাম্প্রতিক " + orders.length.toLocaleString("en-US") + " / " + Number(result && result.counts && result.counts.all || orders.length).toLocaleString("en-US") + " অর্ডার যাচাই করা হয়েছে";
     if (!tasks.length) {
-      node.innerHTML = '<div class="adm-feature-empty">কোনো pending বা overdue কাজ নেই।</div>';
+      node.innerHTML = '<div class="adm-feature-empty">এই মুহূর্তে কোনো জরুরি কাজ নেই ✓</div>' + oldNote;
       return;
     }
     node.innerHTML = tasks.slice(0, 10).map(function (task) {
@@ -197,7 +202,7 @@
         '<span>' + escapeHtml(task.statusLabel) + ' · ' + escapeHtml(order.time || "তারিখ নেই") + ' · ' + escapeHtml(stateText || ageLabel(task)) + '</span></div>' +
         '<div class="adm-task-value">' + money(order.total) + '</div>' +
         '<a class="adm-task-open" href="' + escapeHtml(taskHref) + '" aria-label="অর্ডার ' + escapeHtml(task.orderId || "বিস্তারিত") + ' খুলুন">দেখুন →</a></div>';
-    }).join("") + (tasks.length > 10 ? '<a class="adm-feature-more" href="admin-orders.html">আরও ' + (tasks.length - 10) + 'টি কাজ অর্ডার প্যানেলে দেখুন →</a>' : "");
+    }).join("") + (tasks.length > 10 ? '<a class="adm-feature-more" href="admin-orders.html">আরও ' + (tasks.length - 10) + 'টি কাজ অর্ডার প্যানেলে দেখুন →</a>' : "") + oldNote;
   }
   function refreshTasks(force) {
     if (state.taskBusy || document.hidden || !window.MaAdmin || !MaAdmin.getSession || !MaAdmin.getSession()) return Promise.resolve();

@@ -20,7 +20,8 @@
 
 <link rel="stylesheet" href="admin-dashboard-design.css?v=20261018-3">
 <script src="admin-dashboard-design.js?v=20261018-3"></script>
-<link rel="stylesheet" href="admin-premium-layout.css?v=20261018-3">
+<link rel="stylesheet" href="admin-premium-layout.css?v=20261021-1">
+  <link rel="stylesheet" href="admin-dashboard-clean.css?v=20261021-1">
 <script src="admin-order-status.js?v=20261018-2"></script>
 </head>
 <body class="adm-body">
@@ -74,26 +75,19 @@
       </header>
 
       <main class="adm-main">
-        <section class="dz-hero">
-          <div class="dz-hero-top">
-            <div>
-              <div class="dz-hello" id="dzHello">আসসালামু আলাইকুম</div>
-              <h2 id="dzName">Admin</h2>
-              <div class="dz-date" id="dzDate"></div>
-            </div>
-            <div class="dz-actions">
-              <a id="admOpenSheet" href="#" target="_blank" rel="noopener" hidden>Google Sheet</a>
-              <a id="admOpenScript" href="#" target="_blank" rel="noopener" hidden>Apps Script</a>
-            </div>
+        <section class="dzc-overview" aria-labelledby="dzName">
+          <div class="dzc-greet">
+            <div><span class="dzc-hello" id="dzHello">আসসালামু আলাইকুম</span> <h2 id="dzName">Admin</h2></div>
+            <span class="dzc-date" id="dzDate"></span>
           </div>
-          <div class="dz-today">
-            <div><b id="dzTodayCount">—</b><span>আজকের অর্ডার (সর্বশেষ ১০০-এর মধ্যে)</span></div>
-            <div><b id="dzTodayRev">—</b><span>আজকের অর্ডার মূল্য (সর্বশেষ ১০০-এর মধ্যে)</span></div>
-            <div><b id="dzRepeat">—</b><span>পুনরায় ক্রেতা (সর্বশেষ ১০০-এর মধ্যে)</span></div>
+          <div class="dzc-kpis">
+            <div class="dzc-kpi"><span>আজকের অর্ডার</span><b id="dzTodayCount">—</b></div>
+            <div class="dzc-kpi"><span>আজকের অর্ডার মূল্য</span><b id="dzTodayRev">—</b></div>
+            <div class="dzc-kpi"><span>গত ৭ দিনে অর্ডার</span><b id="dzWeekCount">—</b></div>
+            <div class="dzc-kpi"><span>পুনরায় ক্রেতা</span><b id="dzRepeat">—</b></div>
           </div>
+          <p class="dzc-note" id="dzScopeNote">সর্বশেষ ১০০টি অর্ডার থেকে হিসাব। পুরো হিসাব দেখতে অর্ডার প্যানেল খুলুন।</p>
         </section>
-
-        <p class="dz-scope-note" id="dzScopeNote">এই সারাংশ সর্বশেষ ১০০টি লোড করা অর্ডার থেকে হিসাব করা। পুরো তালিকা দেখতে অর্ডার প্যানেল খুলুন।</p>
 
         <section class="adm-daily" aria-labelledby="admDailyHeading">
           <h2 id="admDailyHeading">দ্রুত কাজ শুরু করুন</h2>
@@ -135,6 +129,7 @@
           <div id="admOrdersBody" aria-live="polite" aria-busy="true"><div class="dz-empty">অর্ডার লোড হচ্ছে…</div></div>
         </section>
         <details class="adm-disclosure adm-dashboard-reports"><summary>বিস্তারিত রিপোর্ট ও বিশ্লেষণ</summary><div class="adm-disclosure-body">
+        <p class="dzc-tools">অন্যান্য লিংক: <a id="admOpenSheet" href="#" target="_blank" rel="noopener" hidden>Google Sheet</a> <a id="admOpenScript" href="#" target="_blank" rel="noopener" hidden>Apps Script</a></p>
         <div class="dz-kpis" id="admStats" hidden>
           <div class="dz-kpi" style="--c:#d4a72c"><b id="admStatCount">—</b><span>অর্ডার সংখ্যা (সর্বশেষ ১০০)</span></div>
           <div class="dz-kpi" style="--c:#14161a"><b id="admStatRevenue">—</b><span>অর্ডার মূল্য (সর্বশেষ ১০০)</span></div>
@@ -184,7 +179,7 @@
   <script src="admin-invoice.js?v=20261009-inbox"></script>
   <script src="admin-order-insights.js?v=20261021-2"></script>
   <script src="admin-dashboard-logic.js?v=20261018-1"></script>
-  <script src="admin-dashboard-features.js?v=20261018-1"></script>
+  <script src="admin-dashboard-features.js?v=20261021-1"></script>
   <script>
     (function () {
       var session = null;
@@ -247,7 +242,7 @@
         if (!orders || !orders.length) { body.innerHTML = '<div class="dz-empty">এখনো কোনো অর্ডার নেই। নতুন অর্ডার এলে এখানে দেখা যাবে।</div>'; return; }
         var stats = phoneStats(orders);
         window.__admOrdersById = {};
-        body.innerHTML = orders.slice(0, 12).map(function (o, idx) {
+        body.innerHTML = orders.slice(0, 8).map(function (o, idx) {
           var rowId = "admOrderRow" + idx;
           window.__admOrdersById[rowId] = o;
           var st = stats[String(o.phone || "").trim()] || { total: 0, badOutcome: 0 };
@@ -320,6 +315,7 @@
         var max = Math.max.apply(null, days.map(function (x) { return x.n; }).concat([1]));
         var names = ["রবি", "সোম", "মঙ্গল", "বুধ", "বৃহ", "শুক্র", "শনি"];
         document.getElementById("dzWeekTotal").textContent = "মোট " + days.reduce(function (a, x) { return a + x.n; }, 0);
+        var weekEl = document.getElementById("dzWeekCount"); if (weekEl) weekEl.textContent = days.reduce(function (a, x) { return a + x.n; }, 0);
         document.getElementById("dzBars").innerHTML = days.map(function (x) {
           return '<div class="dz-bar' + (x.key === todayKey ? " is-today" : "") + '"><em>' + x.n + '</em><div style="height:' + Math.max(3, Math.round(x.n / max * 100)) + '%"></div><span>' + names[x.date.getUTCDay()] + "</span></div>";
         }).join("");

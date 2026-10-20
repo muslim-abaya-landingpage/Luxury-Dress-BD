@@ -1,0 +1,38 @@
+/* Admin dashboard — clean overview (loaded last on admin-dashboard.html). Uses the theme variables, so dark mode follows. */
+
+/* Header scrolls with the page instead of floating over the content */
+.adm-topbar{position:relative!important;top:auto!important}
+
+/* Overview: greeting + four numbers on one light card */
+.dzc-overview{background:var(--adm-card);border:1px solid var(--adm-border);border-radius:18px;padding:20px 22px;margin:0 0 18px}
+.dzc-greet{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.dzc-greet h2{display:inline;margin:0;font-size:20px;font-weight:700;color:var(--adm-text);letter-spacing:-.01em}
+.dzc-hello{color:var(--adm-muted);font-size:14px;margin-right:4px}
+.dzc-date{color:var(--adm-muted);font-size:13px}
+.dzc-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0;padding:0;border:0}
+.dzc-kpi{background:var(--adm-bg-alt);border:1px solid var(--adm-border);border-radius:14px;padding:14px 16px;min-width:0}
+.dzc-kpi span{display:block;font-size:12.5px;color:var(--adm-muted);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dzc-kpi b{display:block;font-size:26px;line-height:1.15;font-weight:700;color:var(--adm-text);font-variant-numeric:tabular-nums}
+.dzc-note{margin:12px 0 0;font-size:12px;color:var(--adm-muted)}
+
+/* Quick actions: compact buttons instead of tall cards */
+.adm-daily{margin:0 0 18px}
+.adm-daily h2{font-size:14px;font-weight:600;color:var(--adm-muted);margin:0 0 10px}
+.adm-daily-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.adm-daily .adm-daily-action{min-height:0!important;padding:12px 14px!important;display:grid!important;grid-template-columns:36px 1fr auto;align-items:center;column-gap:12px;row-gap:0;border-radius:14px}
+.adm-daily .adm-daily-icon{position:static!important;width:36px!important;height:36px!important;margin:0!important;grid-row:1 / span 2}
+.adm-daily .adm-daily-action strong{font-size:14.5px;line-height:1.3}
+.adm-daily .adm-daily-action>span:not(.adm-daily-icon){font-size:12px;line-height:1.4;grid-column:2}
+
+/* Cards: calmer spacing */
+.adm-main .dz-card{border-radius:18px;margin-bottom:18px}
+.adm-old-note{display:block;margin-top:10px;font-size:13px;color:var(--adm-muted)!important}
+.dzc-tools{font-size:13px;color:var(--adm-muted);margin:0 0 12px}
+.dzc-tools a{margin-right:12px}
+
+@media (max-width:980px){.dzc-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){
+  .dzc-overview{padding:16px}
+  .dzc-kpi b{font-size:22px}
+  .adm-daily-grid{grid-template-columns:1fr}
+}

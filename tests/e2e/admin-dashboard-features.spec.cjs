@@ -43,9 +43,10 @@ test('admin dashboard renders alerts, priority orders, lifetime report and conse
       getStockVariants: async () => ({ defaultThreshold: 5, items: window.__stockItems }),
       inboxCall: async () => window.__inboxResult,
       call: async () => ({
-        counts: { all: 2 },
+        counts: { all: 3 },
         orders: [
-          { orderId: 'P-OLD', name: 'Pending Customer', status: 'Pending', time: '01-01-2026 10:00:00', total: '1800' },
+          { orderId: 'P-OLD', name: 'Pending Customer', status: 'Pending', time: '01-09-2026 10:00:00', total: '1800' },
+          { orderId: 'P-ANCIENT', name: 'Very Old', status: 'Pending', time: '01-01-2026 10:00:00', total: '900' },
           { orderId: 'C-NEW', name: 'Confirmed Customer', status: 'Confirmed', time: '18-10-2026 10:00:00', total: '2100' }
         ]
       }),
@@ -70,6 +71,8 @@ test('admin dashboard renders alerts, priority orders, lifetime report and conse
   await expect(page.locator('#admTaskOverdueCount')).toHaveText('1');
   await expect(page.locator('#admPriorityTasks')).toContainText('P-OLD');
   await expect(page.locator('#admPriorityTasks a.adm-task-open')).toHaveAttribute('href', 'admin-order.html?id=P-OLD');
+  await expect(page.locator('#admPriorityTasks')).not.toContainText('P-ANCIENT');
+  await expect(page.locator('#admPriorityTasks .adm-old-note')).toContainText('1টি');
   await expect(page.locator('#admReportOrders')).toHaveText('7');
   await expect(page.locator('#admReportDeliveredValue')).toHaveText('৳4,200');
   await expect(page.locator('#admSalesMonths')).toContainText('2026-10');
