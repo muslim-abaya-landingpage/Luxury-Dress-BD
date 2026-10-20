@@ -7,7 +7,8 @@ const source = await readFile(new URL('../_headers', import.meta.url), 'utf8');
 const cases = {
   '/': 'public, max-age=0, s-maxage=60, must-revalidate',
   '/checkout': 'public, max-age=0, must-revalidate',
-  '/admin-orders': 'public, max-age=0, must-revalidate',
+  '/admin-orders': 'public, max-age=0, s-maxage=0, must-revalidate',
+  '/admin-orders.html': 'public, max-age=0, s-maxage=0, must-revalidate',
   '/index.html': 'public, max-age=0, s-maxage=60, must-revalidate',
   '/abaya': 'public, max-age=0, s-maxage=60, must-revalidate',
   '/product/ABY-BLACK-1.html': 'public, max-age=0, s-maxage=60, must-revalidate',

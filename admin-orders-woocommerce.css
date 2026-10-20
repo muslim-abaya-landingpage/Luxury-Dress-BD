@@ -293,3 +293,7 @@
 @media (max-width: 700px) {
   .wo-orders-page .pn-toolbar .wo-filter { min-width: calc(50% - 4px); flex: 1 1 calc(50% - 4px); }
 }
+
+.wo-orders-page .wo-export-btn { min-height: 42px; white-space: nowrap; border-color: #c6cbd3; background: #fff; color: var(--wo-text); }
+.wo-orders-page .wo-export-btn:hover { background: #f7f8fa; border-color: var(--wo-accent); color: var(--wo-accent); }
+@media (max-width: 700px) { .wo-orders-page .wo-export-btn { width: 100%; } }

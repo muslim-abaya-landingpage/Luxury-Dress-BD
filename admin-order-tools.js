@@ -255,7 +255,50 @@
   /* --- order list page --- */
   var selected = {};
   function ordersNow() { return (root.MaOrdersState && root.MaOrdersState.all) || []; }
+  function filteredOrders() { return (root.MaOrdersState && root.MaOrdersState.filtered) || ordersNow(); }
   function selectedOrders() { return ordersNow().filter(function (o) { return o.orderId && selected[o.orderId]; }); }
+
+  function csvCell(value) {
+    var s = String(value == null ? "" : value).replace(/\r?\n/g, " ");
+    return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+  function exportCsv(list) {
+    list = list || [];
+    if (!list.length) { toast("Export করার মতো কোনো filtered order নেই", true); return; }
+    var headers = ["Order ID", "Date", "Customer", "Phone", "Address", "Items", "Qty", "Total", "Advance", "Due", "Payment", "Order status", "Courier", "Courier status", "Tracking", "Assigned staff", "Source"];
+    var rows = list.map(function (o) {
+      return [o.orderId, o.time, o.name, o.phone, o.address, itemsOf(o).join(" | "), o.qty, o.total, o.advance, o.due, o.payment, o.status, o.courier, o.courierStatus || "Not sent", o.tracking || o.consignmentId, o.assignedTo, o.source].map(csvCell).join(",");
+    });
+    var csv = "\ufeff" + headers.map(csvCell).join(",") + "\r\n" + rows.join("\r\n") + "\r\n";
+    var blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    var url = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = url; a.download = "muslim-abaya-orders-filtered-" + new Date().toISOString().slice(0, 10) + ".csv";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    toast(list.length + "টি filtered order CSV export হয়েছে");
+  }
+
+  function refreshBulkTracking(btn) {
+    var list = selectedOrders(), eligible = list.filter(function (o) { return text(o.tracking) || text(o.consignmentId); });
+    var skipped = list.length - eligible.length;
+    if (!eligible.length) { toast("Tracking/consignment ID থাকা কোনো selected order নেই", true); return; }
+    if (!confirm(eligible.length + "টি order-এর courier status Steadfast থেকে refresh করবেন?" + (skipped ? "\n" + skipped + "টি order skip হবে — tracking নেই।" : ""))) return;
+    btn.disabled = true;
+    var ok = 0, failed = [];
+    eligible.reduce(function (p, o, i) {
+      return p.then(function () {
+        btn.textContent = "Sync হচ্ছে " + (i + 1) + "/" + eligible.length + "…";
+        return root.MaAdmin.call("AdminCourierTracking", { OrderId: o.orderId, Refresh: "1" }, { maxAgeMs: 0 }).then(function (r) {
+          if (!r || r.ok === false) throw new Error((r && r.message) || "status sync ব্যর্থ");
+          ok++;
+        }).catch(function (err) { failed.push(o.orderId + ": " + (err && err.message || "ব্যর্থ")); });
+      });
+    }, Promise.resolve()).then(function () {
+      btn.disabled = false; btn.textContent = "↻ Courier status sync";
+      toast(ok + "টি courier status sync হয়েছে" + (failed.length ? " · ব্যর্থ: " + failed.join("; ") : ""), failed.length > 0);
+      var r = $("ordRefresh"); if (r) r.click();
+    });
+  }
 
   function slipsHtml(list) {
     var first = root.MaInvoice.html(list[0]);
@@ -358,6 +401,7 @@
     bar.className = "ot-bulk"; bar.id = "otBulk"; bar.hidden = true;
     bar.innerHTML = '<b id="otBulkCount"></b>' +
       '<button type="button" class="pn-btn pn-btn-sm" id="otPrintSel">🖨 প্যাকিং স্লিপ প্রিন্ট</button>' +
+      '<button type="button" class="pn-btn pn-btn-sm" id="otSyncSel">↻ Courier status sync</button>' +
       '<button type="button" class="pn-btn pn-btn-sm pn-btn-blue" id="otSendSel">🚚 Steadfast-এ পাঠান</button>' +
       '<button type="button" class="pn-btn pn-btn-sm" id="otClearSel">বাছাই মুছুন</button>';
     tableWrap.parentNode.insertBefore(bar, tableWrap);
@@ -383,7 +427,9 @@
     });
     $("otClearSel").addEventListener("click", function () { selected = {}; if (all) all.checked = false; decorateRows(); });
     $("otPrintSel").addEventListener("click", function () { printSlips(selectedOrders()); });
+    $("otSyncSel").addEventListener("click", function () { refreshBulkTracking(this); });
     $("otSendSel").addEventListener("click", function () { sendBulk(this); });
+    $("ordExportFiltered").addEventListener("click", function () { exportCsv(filteredOrders()); });
     document.addEventListener("ma-orders-rendered", function () { if (all) all.checked = false; decorateRows(); paintReport(); });
     decorateRows();
   }

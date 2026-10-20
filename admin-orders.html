@@ -20,7 +20,7 @@
 <link rel="stylesheet" href="admin-dashboard-design.css?v=20261018-3">
   <script src="admin-dashboard-design.js?v=20261018-3"></script>
   <link rel="stylesheet" href="admin-premium-layout.css?v=20261018-3">
-  <link rel="stylesheet" href="admin-orders-woocommerce.css?v=20261021-wo2">
+  <link rel="stylesheet" href="admin-orders-woocommerce.css?v=20261021-wo3">
   <script src="admin-order-status.js?v=20261018-2"></script>
 </head>
 <body class="pn-body wo-orders-page">
@@ -110,6 +110,7 @@
           <option value="assigned">Assigned</option>
           <option value="unassigned">Unassigned</option>
         </select>
+        <button type="button" class="pn-btn pn-btn-sm wo-export-btn" id="ordExportFiltered">Export filtered CSV</button>
       </div>
 
       <div class="pn-table-wrap">
@@ -145,7 +146,7 @@
   <script src="admin-order-insights.js?v=20261021-2"></script>
   <script src="admin-manual-order.js?v=20261020-1" defer></script>
   <script src="admin-invoice.js?v=20261021-1" defer></script>
-  <script src="admin-order-tools.js?v=20261021-4" defer></script>
+  <script src="admin-order-tools.js?v=20261021-5" defer></script>
   <script>
     (function () {
       var esc = MaPanel.esc;
@@ -258,6 +259,7 @@
       function renderRows() {
         var list = all.filter(matches);
         document.getElementById("ordIssueCount").textContent = "লোড করা " + all.length + "টির মধ্যে দেখানো হচ্ছে " + list.length;
+        window.MaOrdersState = { all: all, filtered: list, total: Number(counts.all) || all.length };
         var body = document.getElementById("ordBody");
         if (!list.length) {
           body.innerHTML = '<tr><td colspan="9" class="pn-empty">কোনো অর্ডার পাওয়া যায়নি</td></tr>';
@@ -282,7 +284,6 @@
           );
         }).join("");
         try {
-          window.MaOrdersState = { all: all, total: Number(counts.all) || all.length };
           document.dispatchEvent(new CustomEvent("ma-orders-rendered"));
         } catch (stateErr) {}
       }

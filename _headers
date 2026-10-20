@@ -58,6 +58,23 @@
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
 
+# Admin pages must revalidate immediately after a deployment.
+/admin-orders.html
+  ! Cache-Control
+  Cache-Control: public, max-age=0, s-maxage=0, must-revalidate
+
+/admin-orders
+  ! Cache-Control
+  Cache-Control: public, max-age=0, s-maxage=0, must-revalidate
+
+/admin-order.html
+  ! Cache-Control
+  Cache-Control: public, max-age=0, s-maxage=0, must-revalidate
+
+/admin-order
+  ! Cache-Control
+  Cache-Control: public, max-age=0, s-maxage=0, must-revalidate
+
 # Public storefront HTML: short shared-cache TTL, browsers must revalidate.
 /
   ! Cache-Control
