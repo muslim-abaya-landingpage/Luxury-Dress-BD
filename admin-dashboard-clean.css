@@ -36,3 +36,7 @@
   .dzc-kpi b{font-size:22px}
   .adm-daily-grid{grid-template-columns:1fr}
 }
+
+/* Dark mode: secondary buttons had a white background with light text */
+html[data-admin-theme="dark"] .adm-btn-secondary{background:var(--adm-bg-alt);color:var(--adm-text);border-color:var(--adm-border-strong)}
+html[data-admin-theme="dark"] .adm-btn-secondary:hover{background:var(--adm-primary)}
