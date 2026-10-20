@@ -3720,9 +3720,9 @@ function ensureStockSheet_() {
 }
 
 function sendDailySummaryEmail_() {
+  var result = { email: false, telegram: false };
   try {
     var emails = getAdminNotifyEmails_();
-    if (!emails.length) return;
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
     if (!sheet) return;
     var data = readOnlineOrderRows_(sheet);
@@ -3745,8 +3745,19 @@ function sendDailySummaryEmail_() {
       '⏳ Pending অর্ডার: ' + pending + '\n' +
       '✅ Delivered অর্ডার: ' + delivered + '\n\n' +
       'বিস্তারিত দেখতে Admin Dashboard এ যান।';
-    MailApp.sendEmail({ to: emails.join(','), subject: '📊 গতকালের সেলস সামারি — ' + yKey, body: body });
-  } catch (err) {}
+    var subject = '📊 গতকালের সেলস সামারি — ' + yKey;
+    if (emails.length) {
+      try { MailApp.sendEmail({ to: emails.join(','), subject: subject, body: body }); result.email = true; }
+      catch (mailErr) { result.emailError = String(mailErr && mailErr.message || mailErr); }
+    }
+    if (typeof sendTelegramText_ === 'function') {
+      var tg = sendTelegramText_(subject + '\n\n' + body);
+      result.telegram = tg.ok;
+      if (tg.error) result.telegramError = tg.error;
+    }
+  } catch (err) { result.error = String(err && err.message || err); }
+  console.log('DAILY_SUMMARY ' + JSON.stringify(result));
+  return result;
 }
 
 function installDailySummaryTrigger_() {

@@ -72,6 +72,22 @@ function configureNotificationProperties(telegramToken, telegramChatId, alertEma
   return { ok: true, configured: ['TELEGRAM_BOT_TOKEN', 'TELEGRAM_CHAT_ID', 'NOTIFICATION_ALERT_EMAIL'] };
 }
 
+/** Telegram-only message. Returns { ok, error }. Never throws. */
+function sendTelegramText_(message) {
+  try {
+    var props = PropertiesService.getScriptProperties();
+    var token = props.getProperty('TELEGRAM_BOT_TOKEN') || '';
+    var chatId = props.getProperty('TELEGRAM_CHAT_ID') || '';
+    if (!token || !chatId) return { ok: false, error: 'TELEGRAM_BOT_TOKEN বা TELEGRAM_CHAT_ID সেট করা হয়নি।' };
+    var response = UrlFetchApp.fetch('https://api.telegram.org/bot' + encodeURIComponent(token) + '/sendMessage', {
+      method: 'post', contentType: 'application/json',
+      payload: JSON.stringify({ chat_id: chatId, text: message }), muteHttpExceptions: true
+    });
+    var ok = response.getResponseCode() >= 200 && response.getResponseCode() < 300;
+    return ok ? { ok: true } : { ok: false, error: response.getContentText().slice(0, 500) };
+  } catch (err) { return { ok: false, error: String(err && err.message || err) }; }
+}
+
 function sendAdminAndTelegramNotification_(subject, message) {
   var result = { email: false, telegram: false };
   var props = PropertiesService.getScriptProperties();
@@ -87,20 +103,9 @@ function sendAdminAndTelegramNotification_(subject, message) {
     }
   } catch (emailErr) { result.emailError = String(emailErr.message || emailErr); }
 
-  try {
-    var token = props.getProperty('TELEGRAM_BOT_TOKEN') || '';
-    var chatId = props.getProperty('TELEGRAM_CHAT_ID') || '';
-    if (token && chatId) {
-      var response = UrlFetchApp.fetch('https://api.telegram.org/bot' + encodeURIComponent(token) + '/sendMessage', {
-        method: 'post', contentType: 'application/json',
-        payload: JSON.stringify({ chat_id: chatId, text: message }), muteHttpExceptions: true
-      });
-      result.telegram = response.getResponseCode() >= 200 && response.getResponseCode() < 300;
-      if (!result.telegram) result.telegramError = response.getContentText().slice(0, 500);
-    } else {
-      result.telegramError = 'TELEGRAM_BOT_TOKEN বা TELEGRAM_CHAT_ID সেট করা হয়নি।';
-    }
-  } catch (telegramErr) { result.telegramError = String(telegramErr.message || telegramErr); }
+  var tg = sendTelegramText_(message);
+  result.telegram = tg.ok;
+  if (tg.error) result.telegramError = tg.error;
 
   recordAutomationLog_('ALERT', result.email || result.telegram, 0, 0, JSON.stringify(result));
   return result;

@@ -147,3 +147,29 @@ test('uptime monitor alerts once after 2 failures and once on recovery', () => {
   assert.match(sent[1], /আবার চালু/);
   box.siteUptimeCheck(); assert.equal(sent.length, 2);
 });
+
+test('daily summary goes to Telegram as well as email', () => {
+  const OS = read('OrderSync.gs');
+  const mails = [], posts = [];
+  const props = { TELEGRAM_BOT_TOKEN: 't', TELEGRAM_CHAT_ID: 'c' };
+  const yKey = '2026-10-20';
+  const box = { console: { log() {} },
+    getAdminNotifyEmails_: () => ['owner@x.com'],
+    SpreadsheetApp: { getActiveSpreadsheet: () => ({ getSheetByName: () => ({}) }) },
+    readOnlineOrderRows_: () => [['h'], ['d', 'A', '017', '', '', '', '', '1000', 'X', 'Pending'], ['d', 'B', '018', '', '', '', '', '500', 'Y', 'Delivered']],
+    dayKeyFromCell_: () => yKey, parseSignedOrderAmount_: v => Number(v),
+    Utilities: { formatDate: () => yKey },
+    MailApp: { sendEmail: m => mails.push(m.subject) },
+    PropertiesService: { getScriptProperties: () => ({ getProperty: k => props[k] || null }) },
+    UrlFetchApp: { fetch: (u, o) => { posts.push(JSON.parse(o.payload).text); return { getResponseCode: () => 200 }; } } };
+  vm.createContext(box);
+  vm.runInContext(extractFrom(OS, 'sendTelegramText_') + '\n' + extractFrom(CODE, 'sendDailySummaryEmail_'), box);
+  const r = box.sendDailySummaryEmail_();
+  assert.equal(r.email, true); assert.equal(r.telegram, true);
+  assert.equal(mails.length, 1); assert.equal(posts.length, 1);
+  assert.match(posts[0], /মোট অর্ডার: 2/);
+  assert.match(posts[0], /৳1,500/);
+  delete props.TELEGRAM_BOT_TOKEN;
+  const r2 = box.sendDailySummaryEmail_();
+  assert.equal(r2.email, true); assert.equal(r2.telegram, false, 'email still goes when Telegram is not set up');
+});
