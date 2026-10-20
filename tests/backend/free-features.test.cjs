@@ -193,3 +193,15 @@ test('backup catch-up reruns a stale backup and alerts only when it keeps failin
   ok = true;
   assert.equal(box.ensureRecentBackup_(now + 11 * H), 'CAUGHT_UP');
 });
+
+test('courier sync keeps checking hand-delivered orders until Steadfast reports a final status', () => {
+  const box = {}; vm.createContext(box);
+  vm.runInContext(extractFrom(CODE, 'steadfastSyncShouldSkip_'), box);
+  const sent = ['', '', '', '', '', '', '', '', '', '', 'TRACK1', 'CID1'], notSent = ['', '', '', '', '', '', '', '', 'MA-1', '', '', ''];
+  assert.equal(box.steadfastSyncShouldSkip_('Delivered', 'pending', sent), false, 'stale pending gets refreshed');
+  assert.equal(box.steadfastSyncShouldSkip_('Delivered', 'delivered', sent), true);
+  assert.equal(box.steadfastSyncShouldSkip_('Shipped', 'cancelled_approval_pending', sent), false, 'approval pending is not final yet');
+  assert.equal(box.steadfastSyncShouldSkip_('Shipped', 'in_review', sent), false);
+  assert.equal(box.steadfastSyncShouldSkip_('Fake', '', notSent), true, 'never sent to courier → no API call');
+  assert.equal(box.steadfastSyncShouldSkip_('Pending', '', notSent), false);
+});

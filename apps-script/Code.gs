@@ -2379,6 +2379,20 @@ function syncSteadfastStatusForRow_(sheet, row, vals) {
   return { ok: applied, status: normalizeSteadfastDeliveryStatus_(status) };
 }
 
+/**
+ * The courier's own final status ends syncing. A hand-set final order status alone does not:
+ * those rows keep syncing (if they were sent to the courier) so a stale "pending" gets corrected.
+ * Finished orders that never went to the courier are skipped so they don't use API calls.
+ */
+function steadfastSyncShouldSkip_(orderStatus, courierStatus, r) {
+  var c = String(courierStatus || '').toLowerCase().trim();
+  if (c === 'delivered' || c === 'cancelled' || c === 'partial_delivered') return true;
+  var o = String(orderStatus || '').toLowerCase().trim();
+  var orderFinal = o === 'delivered' || o === 'cancelled' || o === 'canceled' || o === 'fake' || o === 'returned';
+  var sentToCourier = !!(String(r[10] || '').trim() || String(r[11] || '').trim());
+  return orderFinal && !sentToCourier;
+}
+
 function syncSteadfastCourierStatusesCore_(opts) {
   opts = opts || {};
   var limit = parseInt(opts.limit, 10) || 40;
@@ -2401,7 +2415,7 @@ function syncSteadfastCourierStatusesCore_(opts) {
     var rowNo = i + 1;
     var jStatus = String(r[9] || '').toLowerCase().trim();
     var courierStatus = String(r[12] || '').toLowerCase().trim();
-    if (!includeFinal && (jStatus === 'delivered' || jStatus === 'cancelled' || courierStatus === 'delivered' || courierStatus === 'cancelled')) {
+    if (!includeFinal && steadfastSyncShouldSkip_(jStatus, courierStatus, r)) {
       continue;
     }
     if (!String(r[10] || '').trim() && !String(r[11] || '').trim() && !String(r[8] || '').trim()) {
