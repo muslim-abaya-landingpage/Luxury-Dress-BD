@@ -70,22 +70,22 @@
         <section class="adm-panel">
           <h2>নতুন স্টাফ যোগ করুন</h2>
           <p style="font-size:0.85rem;color:var(--adm-muted);margin-top:-8px">স্টাফ অ্যাকাউন্ট দিয়ে অর্ডার দেখা/স্ট্যাটাস আপডেট করা যাবে, কিন্তু প্রোডাক্ট পাবলিশ/ইমেজ আপলোড/স্টাফ ম্যানেজমেন্টের মতো স্পর্শকাতর কাজ শুধু আপনি (মূল অ্যাডমিন) করতে পারবেন।</p>
-          <form id="admStaffForm" style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-top:10px">
+          <form id="admStaffForm" autocomplete="off" style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-top:10px">
             <div>
               <label style="display:block;font-size:0.8rem;margin-bottom:4px">নাম</label>
-              <input type="text" id="stfName" required style="padding:8px 10px;border-radius:8px;border:1px solid #ccc;min-width:150px">
+              <input type="text" id="stfName" autocomplete="off" required style="padding:8px 10px;border-radius:8px;border:1px solid #ccc;min-width:150px">
             </div>
             <div>
               <label style="display:block;font-size:0.8rem;margin-bottom:4px">ইমেইল</label>
-              <input type="email" id="stfEmail" style="padding:8px 10px;border-radius:8px;border:1px solid #ccc;min-width:180px">
+              <input type="email" id="stfEmail" autocomplete="off" style="padding:8px 10px;border-radius:8px;border:1px solid #ccc;min-width:180px">
             </div>
             <div>
               <label style="display:block;font-size:0.8rem;margin-bottom:4px">ফোন (ইমেইল না দিলে)</label>
-              <input type="tel" id="stfPhone" style="padding:8px 10px;border-radius:8px;border:1px solid #ccc;min-width:150px">
+              <input type="tel" id="stfPhone" autocomplete="off" style="padding:8px 10px;border-radius:8px;border:1px solid #ccc;min-width:150px">
             </div>
             <div>
               <label style="display:block;font-size:0.8rem;margin-bottom:4px">পাসওয়ার্ড</label>
-              <input type="password" id="stfPassword" required minlength="6" style="padding:8px 10px;border-radius:8px;border:1px solid #ccc;min-width:150px">
+              <input type="password" id="stfPassword" autocomplete="new-password" required minlength="6" style="padding:8px 10px;border-radius:8px;border:1px solid #ccc;min-width:150px">
             </div>
             <button type="submit" class="adm-btn adm-btn-primary">যোগ করুন</button>
             <span id="admStaffFormStatus" style="font-size:0.85rem;color:var(--adm-muted)"></span>

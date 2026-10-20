@@ -8,6 +8,10 @@ Disallow: /success
 Disallow: /signin
 Disallow: /signup
 Disallow: /admin/
+Disallow: /admin-
+Disallow: /stock-analytics
+Disallow: /product-manager
+Disallow: /product-links
 Disallow: /admin-login.html
 Disallow: /admin-dashboard.html
 Disallow: /admin-orders.html
