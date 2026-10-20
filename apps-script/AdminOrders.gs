@@ -283,7 +283,9 @@ function adminOrderList_(e) {
   var limit = parseInt(limitValue, 10) || 80;
   if (limit < 1) limit = 1;
   var sheet = admGetSheet_();
-  var lastRow = sheet.getLastRow();
+  // Page from the last real order, not getLastRow(): trailing formula/format
+  // rows made the first page (newest 300 rows) entirely empty.
+  var lastRow = lastOnlineOrderDataRow_(sheet);
   var rowCount = Math.max(0, lastRow - 1);
   // Keep older admin clients working: only clients that send paging params are capped.
   if (!limitValue && !cursorValue) limit = Math.max(1, rowCount);

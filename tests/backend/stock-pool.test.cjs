@@ -164,3 +164,15 @@ test('expired login sessions are removed, valid and undated ones are kept', () =
   assert.equal(res.removed, 2);
   assert.deepEqual(rows.slice(1).map(r => r[0]), ['live', 'undated']);
 });
+
+test('new orders go right after the last real order, not after trailing formula rows', () => {
+  // 3 orders, then empty-but-formatted/formula rows down to 965.
+  const values = Array.from({ length: 964 }, (_, i) => (i < 3 ? ['C' + i, '017'] : ['', '']));
+  const sheet = { getLastRow: () => 965, getRange: (r, c, n, w) => ({ getValues: () => values.slice(r - 2, r - 2 + n) }) };
+  const box = {};
+  vm.createContext(box);
+  vm.runInContext(extractFunction('lastOnlineOrderDataRow_'), box);
+  assert.equal(box.lastOnlineOrderDataRow_(sheet), 4);
+  const empty = { getLastRow: () => 1 };
+  assert.equal(box.lastOnlineOrderDataRow_(empty), 1);
+});

@@ -423,8 +423,11 @@ function appendOnlineOrderRowLocked_(sheet, values, sizeText) {
   if (onlineOrderHasSizeColumn_(sheet)) {
     physical.splice(7, 0, String(sizeText || formatOnlineOrderSizes_([], values[6])));
   }
-  var row = sheet.getLastRow() + 1;
-  appendRow_(sheet, physical);
+  // Append right after the last real order (name/phone), not after
+  // getLastRow(): formulas or formatting further down (e.g. a QA/helper
+  // column) would otherwise push new orders hundreds of rows below the rest.
+  var row = lastOnlineOrderDataRow_(sheet) + 1;
+  writeRowAt_(sheet, row, physical);
   if (onlineOrderHasSizeColumn_(sheet)) {
     sheet.getRange(row, 8).clearDataValidations().setWrap(true).setVerticalAlignment('top');
   }
@@ -3344,8 +3347,25 @@ function ensureSheet_(name, headers) {
   return sheet;
 }
 
+/**
+ * Last row of the Online Order sheet that holds an actual order, judged by the
+ * customer name (B) or phone (C) cells. Returns 1 when there are no orders.
+ */
+function lastOnlineOrderDataRow_(sheet) {
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return 1;
+  var cells = sheet.getRange(2, 2, lastRow - 1, 2).getValues();
+  for (var i = cells.length - 1; i >= 0; i--) {
+    if (String(cells[i][0] || '').trim() || String(cells[i][1] || '').trim()) return i + 2;
+  }
+  return 1;
+}
+
 function appendRow_(sheet, values) {
-  var row = sheet.getLastRow() + 1;
+  writeRowAt_(sheet, sheet.getLastRow() + 1, values);
+}
+
+function writeRowAt_(sheet, row, values) {
   for (var c = 0; c < values.length; c++) {
     var cell = sheet.getRange(row, c + 1);
     if (typeof values[c] === 'string' && /^0\d{10,}$/.test(values[c])) cell.setNumberFormat('@');
