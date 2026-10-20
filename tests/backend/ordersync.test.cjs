@@ -96,3 +96,15 @@ test('alerted-order log stays under the 9 KB script-property limit', () => {
   env.sandbox.sendNewOrderAlertOnce_('MA-20261020-999', 'x');
   assert.equal(env.alerts.length, 1000, 'recent order must not be alerted twice');
 });
+
+test('in-cell images are mirrored as their URL instead of crashing setValues', () => {
+  const img = { toBuilder() {}, getUrl: () => 'https://example.com/a.jpg', getContentUrl: () => 'x' };
+  const noUrl = { toBuilder() {}, getUrl: () => null, getContentUrl: () => null };
+  const row = order(1); row[8] = img; row[9] = 'MA-1'; row[7] = noUrl;
+  const env = setup([row], null);
+  env.sandbox.runOrderSyncNow();
+  assert.equal(env.mirror.values[1][8], 'https://example.com/a.jpg');
+  assert.equal(env.mirror.values[1][7], '[image]');
+  const d = new Date(2026, 0, 1);
+  assert.equal(env.sandbox.mirrorSafeValue_(d), d);
+});

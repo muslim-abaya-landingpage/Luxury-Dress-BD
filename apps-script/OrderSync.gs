@@ -289,6 +289,19 @@ function findOrderIdColumn_(headers) {
   return 9;
 }
 
+// In-cell images (CellImage) cannot be written to another spreadsheet with
+// setValues ("Service error: Spreadsheets"). Mirror them as their URL instead.
+function mirrorSafeValue_(value) {
+  if (value && typeof value === 'object' && !(value instanceof Date) &&
+      typeof value.toBuilder === 'function') {
+    var url = '';
+    try { url = (typeof value.getUrl === 'function' && value.getUrl()) || ''; } catch (e) {}
+    if (!url) { try { url = (typeof value.getContentUrl === 'function' && value.getContentUrl()) || ''; } catch (e2) {} }
+    return url || '[image]';
+  }
+  return value;
+}
+
 function runOrderSyncNow() {
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
@@ -341,7 +354,7 @@ function runOrderSyncNow() {
     var body = [];
     var mirrorRowsById = {};
     for (var r = 1; r < targetValues.length; r++) {
-      var existing = targetValues[r].slice(0, width);
+      var existing = targetValues[r].slice(0, width).map(mirrorSafeValue_);
       while (existing.length < width) existing.push('');
       body.push(existing);
       var existingId = String(existing[orderIdColumn] || '').trim();
@@ -358,7 +371,7 @@ function runOrderSyncNow() {
     var newOrders = [];
 
     for (var s = 1; s < sourceValues.length; s++) {
-      var row = sourceValues[s].slice(0, width);
+      var row = sourceValues[s].slice(0, width).map(mirrorSafeValue_);
       while (row.length < width) row.push('');
 
       var orderId = String(row[orderIdColumn] || '').trim();
