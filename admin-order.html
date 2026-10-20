@@ -146,6 +146,14 @@
             <div id="oTrack" style="margin-top:8px"></div>
             <button type="button" class="pn-btn pn-btn-blue pn-btn-block" id="btnCourierSend" style="margin-top:10px">🚚 Send to Steadfast</button>
           </section>
+          <section class="pn-card wo-customer-history" id="customerHistoryPanel" aria-labelledby="customerHistoryTitle">
+            <h2 id="customerHistoryTitle"><i>◷</i> Customer history</h2>
+            <div class="wo-history-kpis" id="customerHistoryStats" aria-live="polite"></div>
+            <div class="wo-history-list" id="customerHistoryRows">
+              <p class="pn-note-muted">Customer history loading…</p>
+            </div>
+            <button type="button" class="pn-btn pn-btn-sm wo-history-more" id="customerHistoryMore">View full history</button>
+          </section>
 
           <button type="button" class="pn-btn pn-btn-primary pn-btn-block" id="btnSave">✓ Update Order</button>
         </div>
@@ -168,6 +176,8 @@
       var cur = null;      // সর্বশেষ সার্ভার থেকে পাওয়া অর্ডার
       var history = null;
       var staff = [];
+      var dirty = false;
+      var saving = false;
 
       function fillSelect(el, options, value, extra) {
         var list = options.slice();
@@ -183,6 +193,38 @@
         if (typeof input.checkValidity === 'function' && !input.checkValidity()) return NaN;
         var value = Number(input.value);
         return Number.isFinite(value) && value >= 0 ? value : NaN;
+      }
+
+      function setSaveState(isSaving) {
+        saving = !!isSaving;
+        var btn = $("btnSave");
+        if (!btn) return;
+        btn.disabled = saving;
+        btn.setAttribute("aria-busy", saving ? "true" : "false");
+        btn.innerHTML = saving ? '<span class="wo-save-spinner" aria-hidden="true"></span><span>Saving…</span>' : '<span>✓ Update Order</span>';
+      }
+
+      function renderItems(o) {
+        var items = Array.isArray(o.items) && o.items.length ? o.items : ["(পণ্যের তথ্য নেই)"];
+        var size = o.size || "—";
+        var rows = items.map(function (name, index) {
+          return '<tr><td><strong>' + esc(name) + '</strong><small>' + (index === 0 ? 'Size: ' + esc(size) : 'Product item') + '</small></td><td class="wo-item-qty">—</td><td class="wo-item-price">—</td></tr>';
+        }).join("");
+        return '<div class="wo-items-table-wrap"><table class="wo-items-table"><thead><tr><th>Product</th><th>Qty</th><th>Price</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+          '<div class="wo-items-summary"><span>' + esc(String(o.qty || items.length)) + ' total item(s)</span><strong>' + MaPanel.money(o.subtotal) + '</strong></div>';
+      }
+
+      function renderCustomerHistory() {
+        var stats = history && history.stats ? history.stats : {};
+        var recent = history && Array.isArray(history.recent) ? history.recent : [];
+        var total = Number(stats.total) || recent.length || 0;
+        var revenue = stats.revenue != null ? stats.revenue : (stats.totalValue != null ? stats.totalValue : null);
+        $("customerHistoryStats").innerHTML = '<div><strong>' + esc(String(total)) + '</strong><span>Total orders</span></div>' +
+          '<div><strong>' + (revenue == null ? '—' : MaPanel.money(revenue)) + '</strong><span>Total revenue</span></div>';
+        $("customerHistoryRows").innerHTML = recent.length ? recent.slice(0, 5).map(function (h) {
+          return '<a class="wo-history-row" href="admin-order.html?id=' + encodeURIComponent(h.orderId || "") + '"><span><b>' + esc(h.orderId || "Order") + '</b><small>' + esc(h.time || "") + '</small></span><span><em class="pn-badge ' + MaPanel.statusClass(h.status) + '">' + esc(h.status || "—") + '</em><strong>' + MaPanel.money(h.total) + '</strong></span></a>';
+        }).join("") : '<p class="pn-note-muted">No previous orders found.</p>';
+        $("customerHistoryMore").disabled = !recent.length;
       }
 
       function recalc() {
@@ -206,6 +248,7 @@
       function paint(o, meta) {
         cur = o;
         orderId = o.orderId;
+        dirty = false;
         $("oId").textContent = o.orderId;
         document.title = "Order " + o.orderId + " | Muslim Abaya Admin";
         var b = $("oStatusBadge");
@@ -222,9 +265,7 @@
         $("oDistrict").textContent = o.district ? "জেলা: " + o.district : "";
         $("btnMap").href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(o.address);
         $("oQty").textContent = "· মোট " + o.qty + " পিস";
-        $("oItems").innerHTML = (o.items.length ? o.items : ["(পণ্যের তথ্য নেই)"]).map(function (n) {
-          return '<div class="pn-item"><div class="thumb">👗</div><div class="nm">' + esc(n) + "</div></div>";
-        }).join("");
+        $("oItems").innerHTML = renderItems(o);
         $("oCustNote").textContent = o.customerNote ? "কাস্টমার নোট / সিস্টেম: " + o.customerNote : "";
         $("fAdminNote").value = o.adminNote;
         $("fCourierNote").value = o.courierNote;
@@ -270,6 +311,7 @@
         return MaAdmin.call("AdminOrderGet", { OrderId: orderId }).then(function (res) {
           history = res.history;
           $("histCount").textContent = history.stats.total;
+          renderCustomerHistory();
           $("oGrid").style.display = "";
           paint(res.order, res);
           nav($("btnPrev"), res.prevId);
@@ -286,8 +328,7 @@
         if (![charge, advance, discount].every(Number.isFinite)) {
           return Promise.reject(new Error("চার্জ, অগ্রিম ও ছাড়ে শূন্য বা ধনাত্মক পূর্ণসংখ্যা দিন।"));
         }
-        var btn = $("btnSave");
-        btn.disabled = true;
+        setSaveState(true);
         var fields = {
           OrderId: orderId,
           Name: $("fName").value,
@@ -311,10 +352,10 @@
           if (res.hooks && res.hooks.courier === "SENT") msg += " · Steadfast-এ পাঠানো হয়েছে";
           MaPanel.toast(msg);
         }).then(function (value) {
-          btn.disabled = false;
+          setSaveState(false);
           return value;
         }, function (err) {
-          btn.disabled = false;
+          setSaveState(false);
           throw err;
         });
       }
@@ -322,7 +363,17 @@
       $("btnSave").addEventListener("click", function () {
         save().catch(function (err) { MaPanel.toast(err.message, true); });
       });
-      ["fCharge", "fAdvance", "fDiscount"].forEach(function (id) { $(id).addEventListener("input", recalc); });
+      ["fName", "fPhone", "fAddress", "fAdminNote", "fCourierNote", "fCharge", "fAdvance", "fDiscount"].forEach(function (id) {
+        $(id).addEventListener("input", function () { dirty = true; if (id === "fCharge" || id === "fAdvance" || id === "fDiscount") recalc(); });
+      });
+      ["fCourier", "fStatus", "fAssign"].forEach(function (id) {
+        $(id).addEventListener("change", function () { dirty = true; });
+      });
+      window.addEventListener("beforeunload", function (event) {
+        if (!dirty || saving) return;
+        event.preventDefault();
+        event.returnValue = "";
+      });
 
       $("btnCorrect").addEventListener("click", function () {
         var v = $("fAddress").value
@@ -331,6 +382,7 @@
           .replace(/(,\s*){2,}/g, ", ")
           .replace(/^[,\s]+|[,\s]+$/g, "");
         $("fAddress").value = v;
+        dirty = true;
         $("btnMap").href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(v);
       });
 
@@ -380,6 +432,9 @@
       $("btnHistory").addEventListener("click", function () {
         if (!history) return;
         MaPanel.openModal("Order History (" + history.stats.total + ")", histTable(history.recent));
+      });
+      $("customerHistoryMore").addEventListener("click", function () {
+        if (history) MaPanel.openModal("Order History (" + history.stats.total + ")", histTable(history.recent));
       });
 
       $("btnFraud").addEventListener("click", function () {
