@@ -128,7 +128,7 @@ function doPost(e) {
     }
 
     // Every order-panel action verifies the admin/staff token inside its handler.
-    var orderPanelTypes = ['AdminOrderList', 'AdminOrderGet', 'AdminOrderUpdate', 'AdminFraudCheck', 'AdminBlockCustomer', 'AdminSendCourier', 'AdminOrderStaff', 'AdminCourierTracking'];
+    var orderPanelTypes = ['AdminOrderList', 'AdminOrderGet', 'AdminOrderUpdate', 'AdminFraudCheck', 'AdminBlockCustomer', 'AdminSendCourier', 'AdminOrderStaff', 'AdminCourierTracking', 'AdminManualOrderCreate'];
     if (orderPanelTypes.indexOf(type) !== -1) {
       var panelResult = handleAdminOrderRequest_(type, e);
       return jsonOut_(panelResult || { ok: false, error: 'UNKNOWN_TYPE' });
@@ -1665,6 +1665,24 @@ function checkDuplicateOrder_(phone, total, design) {
   cache.put('dup_' + sig, '1', 600);
 }
 
+/**
+ * Returns a one-line risk warning (and writes it to the order's Admin Note)
+ * when this phone has earlier Fake/cancelled/returned orders; '' otherwise.
+ */
+function flagNewOrderRisk_(sheet, row, phone, orderId) {
+  if (typeof admHistoryForPhone_ !== 'function' || !row) return '';
+  var h = admHistoryForPhone_(admReadHistory_(sheet), normalizePhone_(phone), orderId);
+  if (h.risk !== 'high' && h.risk !== 'medium') return '';
+  var s = h.stats;
+  var line = '⚠ ঝুঁকি ' + (h.risk === 'high' ? 'বেশি' : 'মাঝারি') + ': আগের অর্ডার ' + s.total +
+    'টি — ডেলিভারি ' + s.delivered + ', Fake ' + s.fake + ', বাতিল ' + s.cancelled + ', রিটার্ন ' + s.returned +
+    (h.successRate === null ? '' : ' (সফলতা ' + h.successRate + '%)');
+  var cell = sheet.getRange(row, onlineOrderColumn_(sheet, ADM_COL_ADMIN_NOTE));
+  var existing = String(cell.getValue() || '');
+  cell.setValue(existing ? line + ' | ' + existing : line);
+  return line;
+}
+
 function generateOrderId_() {
   var now = new Date();
   var datePart = Utilities.formatDate(now, 'GMT+6', 'yyyyMMdd');
@@ -1833,6 +1851,10 @@ function handleOnlineOrderPost_(e) {
     orderLock.releaseLock();
   }
 
+  // নতুন অর্ডারের ঝুঁকি-যাচাই: আগের Fake/বাতিল/রিটার্ন থাকলে Admin Note-এ সতর্কতা।
+  var riskLine = '';
+  try { riskLine = flagNewOrderRisk_(sheet, newRow, validated.phone, orderId); } catch (riskErr) {}
+
   try {
     if (typeof sendNewOrderAlertOnce_ === 'function') {
       sendNewOrderAlertOnce_(
@@ -1842,7 +1864,8 @@ function handleOnlineOrderPost_(e) {
         'Customer: ' + validated.name + '\n' +
         'Phone: ' + validated.phone + '\n' +
         'Total: ৳' + totalStr + '\n' +
-        'Status: Pending'
+        'Status: Pending' +
+        (riskLine ? '\n' + riskLine : '')
       );
     }
   } catch (alertErr) {}

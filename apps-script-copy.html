@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8"><title>Apps Script কোড</title><style>body { font-family: system-ui, sans-serif; margin: 16px; max-width: 960px; } textarea { width: 100%; height: 52vh; font: 11px Consolas, monospace; } button { margin-top: 10px; padding: 12px 20px; font-size: 15px; cursor: pointer; } .step { background: #fff8e1; border: 1px solid #f0d58a; padding: 10px 14px; border-radius: 6px; }</style></head><body><h1>Apps Script কোড (সম্পূর্ণ project)</h1><p>এই page-এ canonical project-এর সব source file আছে: Code.gs, AdminOrders.gs, FixSheetHeaders.gs, BoostAutoDate.gs, CatalogPublish.gs, CourierIntegrationAudit.gs, Fix-doGet.gs, InstallDateTrigger.gs, Operations.gs, OrderSync.gs, ProductPicker.html</p><div class="step"><p><strong>গুরুত্বপূর্ণ:</strong> Admin dashboard-এর সব API চালাতে নিচের সব ফাইল একই Apps Script project-এ রাখতে হবে। <code>.gs</code> ফাইলের জন্য <strong>＋ → Script</strong>, আর <code>.html</code> ফাইলের জন্য <strong>＋ → HTML</strong> ব্যবহার করুন; একই নাম রেখে প্রতিটি কোড সংশ্লিষ্ট ফাইলে কপি করুন। একাধিক <code>doGet</code> function রাখবেন না—canonical router শুধু <code>Code.gs</code>-এ।</p><ol><li>প্রতিটি source file-এর নাম অনুযায়ী Apps Script file তৈরি বা update করুন।</li><li><strong>Save</strong> চাপুন এবং <code>npm run test:backend</code> parity test পাস হয়েছে কি নিশ্চিত করুন।</li><li><strong>Deploy → Manage deployments → Edit → Version: New version → Deploy</strong> করে বিদ্যমান Web App URL রাখুন।</li></ol></div><h2>1. Code.gs</h2>
+<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8"><title>Apps Script কোড</title><style>body { font-family: system-ui, sans-serif; margin: 16px; max-width: 960px; } textarea { width: 100%; height: 52vh; font: 11px Consolas, monospace; } button { margin-top: 10px; padding: 12px 20px; font-size: 15px; cursor: pointer; } .step { background: #fff8e1; border: 1px solid #f0d58a; padding: 10px 14px; border-radius: 6px; }</style></head><body><h1>Apps Script কোড (সম্পূর্ণ project)</h1><p>এই page-এ canonical project-এর সব source file আছে: Code.gs, AdminOrders.gs, FixSheetHeaders.gs, BoostAutoDate.gs, CatalogPublish.gs, CourierIntegrationAudit.gs, Fix-doGet.gs, InstallDateTrigger.gs, Monitor.gs, Operations.gs, OrderSync.gs, ProductPicker.html</p><div class="step"><p><strong>গুরুত্বপূর্ণ:</strong> Admin dashboard-এর সব API চালাতে নিচের সব ফাইল একই Apps Script project-এ রাখতে হবে। <code>.gs</code> ফাইলের জন্য <strong>＋ → Script</strong>, আর <code>.html</code> ফাইলের জন্য <strong>＋ → HTML</strong> ব্যবহার করুন; একই নাম রেখে প্রতিটি কোড সংশ্লিষ্ট ফাইলে কপি করুন। একাধিক <code>doGet</code> function রাখবেন না—canonical router শুধু <code>Code.gs</code>-এ।</p><ol><li>প্রতিটি source file-এর নাম অনুযায়ী Apps Script file তৈরি বা update করুন।</li><li><strong>Save</strong> চাপুন এবং <code>npm run test:backend</code> parity test পাস হয়েছে কি নিশ্চিত করুন।</li><li><strong>Deploy → Manage deployments → Edit → Version: New version → Deploy</strong> করে বিদ্যমান Web App URL রাখুন।</li></ol></div><h2>1. Code.gs</h2>
 <textarea id="codeBox" readonly>/**
  * Muslim Abaya — সম্পূর্ণ Web App (এক ফাইলে পেস্ট করুন)
  * Code.gs → Ctrl+A → Ctrl+V → Save → Deploy → New version
@@ -129,7 +129,7 @@ function doPost(e) {
     }
 
     // Every order-panel action verifies the admin/staff token inside its handler.
-    var orderPanelTypes = ['AdminOrderList', 'AdminOrderGet', 'AdminOrderUpdate', 'AdminFraudCheck', 'AdminBlockCustomer', 'AdminSendCourier', 'AdminOrderStaff', 'AdminCourierTracking'];
+    var orderPanelTypes = ['AdminOrderList', 'AdminOrderGet', 'AdminOrderUpdate', 'AdminFraudCheck', 'AdminBlockCustomer', 'AdminSendCourier', 'AdminOrderStaff', 'AdminCourierTracking', 'AdminManualOrderCreate'];
     if (orderPanelTypes.indexOf(type) !== -1) {
       var panelResult = handleAdminOrderRequest_(type, e);
       return jsonOut_(panelResult || { ok: false, error: 'UNKNOWN_TYPE' });
@@ -1666,6 +1666,24 @@ function checkDuplicateOrder_(phone, total, design) {
   cache.put('dup_' + sig, '1', 600);
 }
 
+/**
+ * Returns a one-line risk warning (and writes it to the order's Admin Note)
+ * when this phone has earlier Fake/cancelled/returned orders; '' otherwise.
+ */
+function flagNewOrderRisk_(sheet, row, phone, orderId) {
+  if (typeof admHistoryForPhone_ !== 'function' || !row) return '';
+  var h = admHistoryForPhone_(admReadHistory_(sheet), normalizePhone_(phone), orderId);
+  if (h.risk !== 'high' &amp;&amp; h.risk !== 'medium') return '';
+  var s = h.stats;
+  var line = '⚠ ঝুঁকি ' + (h.risk === 'high' ? 'বেশি' : 'মাঝারি') + ': আগের অর্ডার ' + s.total +
+    'টি — ডেলিভারি ' + s.delivered + ', Fake ' + s.fake + ', বাতিল ' + s.cancelled + ', রিটার্ন ' + s.returned +
+    (h.successRate === null ? '' : ' (সফলতা ' + h.successRate + '%)');
+  var cell = sheet.getRange(row, onlineOrderColumn_(sheet, ADM_COL_ADMIN_NOTE));
+  var existing = String(cell.getValue() || '');
+  cell.setValue(existing ? line + ' | ' + existing : line);
+  return line;
+}
+
 function generateOrderId_() {
   var now = new Date();
   var datePart = Utilities.formatDate(now, 'GMT+6', 'yyyyMMdd');
@@ -1834,6 +1852,10 @@ function handleOnlineOrderPost_(e) {
     orderLock.releaseLock();
   }
 
+  // নতুন অর্ডারের ঝুঁকি-যাচাই: আগের Fake/বাতিল/রিটার্ন থাকলে Admin Note-এ সতর্কতা।
+  var riskLine = '';
+  try { riskLine = flagNewOrderRisk_(sheet, newRow, validated.phone, orderId); } catch (riskErr) {}
+
   try {
     if (typeof sendNewOrderAlertOnce_ === 'function') {
       sendNewOrderAlertOnce_(
@@ -1843,7 +1865,8 @@ function handleOnlineOrderPost_(e) {
         'Customer: ' + validated.name + '\n' +
         'Phone: ' + validated.phone + '\n' +
         'Total: ৳' + totalStr + '\n' +
-        'Status: Pending'
+        'Status: Pending' +
+        (riskLine ? '\n' + riskLine : '')
       );
     }
   } catch (alertErr) {}
@@ -7635,6 +7658,9 @@ function adminOrderUpdate_(e) {
 
   var hooks = {};
   if (stockHook) hooks.stock = stockHook;
+  if (newStatus === 'Fake' &amp;&amp; prevStatus !== 'Fake') {
+    try { hooks.autoBlock = admAutoBlockRepeatFake_(sheet, vals[2]); } catch (blockErr) { hooks.autoBlock = 'FAILED'; }
+  }
   if (newStatus.toLowerCase() === 'confirmed') {
     var confirmedHooks = admRunConfirmedHooks_(sheet, row);
     hooks.capi = confirmedHooks.capi;
@@ -7771,6 +7797,7 @@ function handleAdminOrderRequest_(type, e) {
       case 'AdminBlockCustomer': return adminBlockCustomer_(e);
       case 'AdminSendCourier': return adminSendCourier_(e);
       case 'AdminOrderStaff': return adminStaffList_(e);
+      case 'AdminManualOrderCreate': return adminManualOrderCreate_(e);
     }
   } catch (err) {
     var code = String(err &amp;&amp; err.message ? err.message : err);
@@ -7822,6 +7849,52 @@ function repairMissingAdminOrderIds() {
     console.log('ADMIN_ORDER_ID_REPAIR ' + JSON.stringify({ repaired: repaired }));
     return { ok: true, repaired: repaired };
   } finally { lock.releaseLock(); }
+}
+
+// ── Auto-block &amp; manual orders ──
+
+/** একই নম্বরে এতগুলো Fake অর্ডার হলে নম্বরটি স্বয়ংক্রিয়ভাবে Blocked শিটে যায়। */
+var ADM_AUTO_BLOCK_FAKE_COUNT = 2;
+
+function admAutoBlockRepeatFake_(sheet, phoneRaw) {
+  var phone = normalizePhone_(phoneRaw);
+  if (!/^01\d{9}$/.test(phone)) return 'SKIPPED';
+  var h = admHistoryForPhone_(admReadHistory_(sheet), phone, '');
+  if (h.stats.fake &lt; ADM_AUTO_BLOCK_FAKE_COUNT) return 'BELOW_THRESHOLD';
+  if (Object.prototype.hasOwnProperty.call(admBlockedMap_(), phone)) return 'ALREADY_BLOCKED';
+  appendRow_(admBlockedSheet_(), [phone, 'স্বয়ংক্রিয়: ' + h.stats.fake + 'টি Fake অর্ডার', new Date(), 'auto']);
+  return 'BLOCKED';
+}
+
+/**
+ * WhatsApp/ফোনে পাওয়া অর্ডার অ্যাডমিন প্যানেল থেকে যোগ করা। বিদ্যমান
+ * submitWhatsappMiniOrder ব্যবহার করে: Order ID, তারিখ ও ডেলিভারি চার্জ নিজে বসে।
+ */
+function adminManualOrderCreate_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var phone = normalizePhone_(param_(e, 'Phone'));
+  if (/^01\d{9}$/.test(phone) &amp;&amp; Object.prototype.hasOwnProperty.call(admBlockedMap_(), phone) &amp;&amp;
+      String(param_(e, 'AllowBlocked') || '') !== '1') {
+    return { ok: false, error: 'PHONE_BLOCKED', message: 'এই নম্বরটি Blocked তালিকায় আছে। নিশ্চিত হলে আবার চেষ্টা করুন।' };
+  }
+  var notes = admCellText_(param_(e, 'Notes'), 300);
+  var by = String(v.email || v.phone || v.name || 'admin');
+  var res = submitWhatsappMiniOrder({
+    name: admCellText_(param_(e, 'Name'), 80),
+    phone: phone,
+    district: admCellText_(param_(e, 'District'), 60),
+    address: admCellText_(param_(e, 'Address'), 400),
+    design: admCellText_(param_(e, 'Design'), 1000),
+    qty: param_(e, 'Qty'),
+    total: param_(e, 'Total'),
+    payment: admCellText_(param_(e, 'Payment'), 40) || 'Cash On Delivery',
+    txn: admCellText_(param_(e, 'Txn'), 80),
+    notes: (notes ? notes + ' | ' : '') + 'যোগ করেছেন: ' + by,
+    sendCourierNow: false
+  });
+  if (!res || !res.ok) return { ok: false, error: 'INVALID_ORDER', message: (res &amp;&amp; res.message) || 'অর্ডার যোগ করা যায়নি।' };
+  return { ok: true, orderId: res.orderId, row: res.row };
 }
 </textarea><br>
 <button type="button" id="copyAdm">AdminOrders.gs কপি</button>
@@ -8007,8 +8080,67 @@ function courierIntegrationAudit() {
   }
 }</textarea><br>
 <button type="button" id="copyFile8">InstallDateTrigger.gs কপি</button>
-<h2>9. Operations.gs</h2>
-<textarea id="fileBox9" readonly>function opsNotifyVariant_(id,variant,available){
+<h2>9. Monitor.gs</h2>
+<textarea id="fileBox9" readonly>/**
+ * Free uptime monitor: checks the storefront every hour and e-mails the admin
+ * (and Telegram, if configured) after 2 failed checks in a row, then once more
+ * when the site is reachable again. One-time setup: run setupUptimeMonitorTrigger().
+ */
+var MONITOR_URLS_ = ['https://muslimabaya.com/', 'https://muslimabaya.com/checkout'];
+
+function siteUptimeCheck() {
+  var props = PropertiesService.getScriptProperties();
+  var failures = [];
+  MONITOR_URLS_.forEach(function (url) {
+    try {
+      var res = UrlFetchApp.fetch(url, { muteHttpExceptions: true, followRedirects: true });
+      var code = res.getResponseCode();
+      if (code >= 400) failures.push(url + ' → HTTP ' + code);
+    } catch (err) {
+      failures.push(url + ' → ' + String(err &amp;&amp; err.message || err).slice(0, 150));
+    }
+  });
+  var wasDown = props.getProperty('MONITOR_DOWN') === '1';
+  var streak = failures.length ? (parseInt(props.getProperty('MONITOR_FAIL_STREAK') || '0', 10) || 0) + 1 : 0;
+  props.setProperty('MONITOR_FAIL_STREAK', String(streak));
+  props.setProperty('MONITOR_LAST_CHECK', new Date().toISOString());
+  var notified = '';
+  if (streak >= 2 &amp;&amp; !wasDown) {
+    props.setProperty('MONITOR_DOWN', '1');
+    notified = 'DOWN';
+    monitorNotify_('⚠ muslimabaya.com খোলা যাচ্ছে না',
+      'পরপর ' + streak + ' বার যাচাইয়ে সমস্যা পাওয়া গেছে:\n' + failures.join('\n') +
+      '\n\nCloudflare ড্যাশবোর্ড ও ডোমেইন যাচাই করুন। ঠিক হলে আবার জানানো হবে।');
+  } else if (!failures.length &amp;&amp; wasDown) {
+    props.setProperty('MONITOR_DOWN', '0');
+    notified = 'RECOVERED';
+    monitorNotify_('✅ muslimabaya.com আবার চালু', 'সাইট আবার স্বাভাবিকভাবে খুলছে।');
+  }
+  var result = { ok: true, failures: failures, streak: streak, notified: notified };
+  console.log('UPTIME ' + JSON.stringify(result));
+  return result;
+}
+
+function monitorNotify_(subject, body) {
+  if (typeof sendAdminAndTelegramNotification_ === 'function') {
+    sendAdminAndTelegramNotification_(subject, subject + '\n\n' + body);
+    return;
+  }
+  var emails = typeof getAdminNotifyEmails_ === 'function' ? getAdminNotifyEmails_() : [];
+  if (emails.length) MailApp.sendEmail({ to: emails.join(','), subject: subject, body: body });
+}
+
+function setupUptimeMonitorTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === 'siteUptimeCheck') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('siteUptimeCheck').timeBased().everyHours(1).create();
+  return { ok: true, interval: 'every hour' };
+}
+</textarea><br>
+<button type="button" id="copyFile9">Monitor.gs কপি</button>
+<h2>10. Operations.gs</h2>
+<textarea id="fileBox10" readonly>function opsNotifyVariant_(id,variant,available){
  if(available&lt;=0)return;
  var sh=SpreadsheetApp.getActiveSpreadsheet().getSheetByName('StockWaitlist');if(!sh||sh.getLastRow()&lt;2)return;
  var rows=sh.getRange(2,1,sh.getLastRow()-1,7).getValues(),sent=0;
@@ -8073,9 +8205,9 @@ function opsReviewVerification_(e,productId){var id=String(param_(e,'OrderID')||
 function opsSaveWaitlist_(e){try{var id=String(param_(e,'ProductId')||'').trim(),variant=String(param_(e,'Variant')||'').trim().slice(0,160),contact=normalizeSubscribeContact_(param_(e,'Contact'));if(!contact)throw Error('INVALID_CONTACT');var p=opsCatalog_().products.filter(function(x){return x.id===id;})[0];if(!p)throw Error('UNKNOWN_PRODUCT');opsLinePrice_({qty:1,size:variant,productType:param_(e,'ProductType')},p);rateLimit_('size_wait_'+contact.slice(0,40));var lock=LockService.getScriptLock();lock.waitLock(15000);try{var sh=ensureStockWaitlistSheet_(),h=sh.getRange(1,7).getValue();if(h&amp;&amp;h!=='Variant')throw Error('WAITLIST_HEADER_CONFLICT');sh.getRange(1,7).setValue('Variant');var rows=sh.getDataRange().getValues();for(var i=1;i&lt;rows.length;i++)if(String(rows[i][0])===id&amp;&amp;String(rows[i][2]).toLowerCase()===contact.toLowerCase()&amp;&amp;opsNorm_(rows[i][6])===opsNorm_(variant))return {ok:true,message:'এই সাইজের তালিকায় আছেন।'};sh.appendRow([admCellText_(id,100),admCellText_(p.name,200),admCellText_(contact,150),/@/.test(contact)?'yes':'',new Date(),'',admCellText_(variant,160)]);return {ok:true,message:'নির্বাচিত সাইজের অনুরোধ সংরক্ষিত হয়েছে।'};}finally{lock.releaseLock();}}catch(err){return {ok:false,error:String(err.message||err),message:'পণ্য, সাইজ ও যোগাযোগের তথ্য যাচাই করুন।'};}}
 function opsDhakaTime_(iso){if(!iso)return null;var d=new Date(iso);return isNaN(d.getTime())?String(iso):Utilities.formatDate(d,'Asia/Dhaka','yyyy-MM-dd HH:mm');}
 </textarea><br>
-<button type="button" id="copyFile9">Operations.gs কপি</button>
-<h2>10. OrderSync.gs</h2>
-<textarea id="fileBox10" readonly>/**
+<button type="button" id="copyFile10">Operations.gs কপি</button>
+<h2>11. OrderSync.gs</h2>
+<textarea id="fileBox11" readonly>/**
  * OrderSync — Online Order sheet mirror
  *
  * Setup:
@@ -9000,9 +9132,9 @@ function setupOperationsTriggersFromMenu() {
   );
 }
 </textarea><br>
-<button type="button" id="copyFile10">OrderSync.gs কপি</button>
-<h2>11. ProductPicker.html</h2>
-<textarea id="fileBox11" readonly>&lt;!DOCTYPE html>
+<button type="button" id="copyFile11">OrderSync.gs কপি</button>
+<h2>12. ProductPicker.html</h2>
+<textarea id="fileBox12" readonly>&lt;!DOCTYPE html>
 &lt;html>
 &lt;head>
   &lt;base target="_top">
@@ -9213,7 +9345,7 @@ function setupOperationsTriggersFromMenu() {
 &lt;/body>
 &lt;/html>
 </textarea><br>
-<button type="button" id="copyFile11">ProductPicker.html কপি</button><script>function bind(btn, box) { document.getElementById(btn).onclick = function () { var t = document.getElementById(box).value; navigator.clipboard.writeText(t).then(function () { alert("কপি হয়েছে!"); }); }; }bind('copyBtn', 'codeBox');
+<button type="button" id="copyFile12">ProductPicker.html কপি</button><script>function bind(btn, box) { document.getElementById(btn).onclick = function () { var t = document.getElementById(box).value; navigator.clipboard.writeText(t).then(function () { alert("কপি হয়েছে!"); }); }; }bind('copyBtn', 'codeBox');
 bind('copyAdm', 'admBox');
 bind('copyFix', 'fixBox');
 bind('copyFile4', 'fileBox4');
@@ -9223,4 +9355,5 @@ bind('copyFile7', 'fileBox7');
 bind('copyFile8', 'fileBox8');
 bind('copyFile9', 'fileBox9');
 bind('copyFile10', 'fileBox10');
-bind('copyFile11', 'fileBox11');</script></body></html>
+bind('copyFile11', 'fileBox11');
+bind('copyFile12', 'fileBox12');</script></body></html>

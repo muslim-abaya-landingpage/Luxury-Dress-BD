@@ -487,6 +487,9 @@ function adminOrderUpdate_(e) {
 
   var hooks = {};
   if (stockHook) hooks.stock = stockHook;
+  if (newStatus === 'Fake' && prevStatus !== 'Fake') {
+    try { hooks.autoBlock = admAutoBlockRepeatFake_(sheet, vals[2]); } catch (blockErr) { hooks.autoBlock = 'FAILED'; }
+  }
   if (newStatus.toLowerCase() === 'confirmed') {
     var confirmedHooks = admRunConfirmedHooks_(sheet, row);
     hooks.capi = confirmedHooks.capi;
@@ -623,6 +626,7 @@ function handleAdminOrderRequest_(type, e) {
       case 'AdminBlockCustomer': return adminBlockCustomer_(e);
       case 'AdminSendCourier': return adminSendCourier_(e);
       case 'AdminOrderStaff': return adminStaffList_(e);
+      case 'AdminManualOrderCreate': return adminManualOrderCreate_(e);
     }
   } catch (err) {
     var code = String(err && err.message ? err.message : err);
@@ -674,4 +678,50 @@ function repairMissingAdminOrderIds() {
     console.log('ADMIN_ORDER_ID_REPAIR ' + JSON.stringify({ repaired: repaired }));
     return { ok: true, repaired: repaired };
   } finally { lock.releaseLock(); }
+}
+
+// ── Auto-block & manual orders ──
+
+/** একই নম্বরে এতগুলো Fake অর্ডার হলে নম্বরটি স্বয়ংক্রিয়ভাবে Blocked শিটে যায়। */
+var ADM_AUTO_BLOCK_FAKE_COUNT = 2;
+
+function admAutoBlockRepeatFake_(sheet, phoneRaw) {
+  var phone = normalizePhone_(phoneRaw);
+  if (!/^01\d{9}$/.test(phone)) return 'SKIPPED';
+  var h = admHistoryForPhone_(admReadHistory_(sheet), phone, '');
+  if (h.stats.fake < ADM_AUTO_BLOCK_FAKE_COUNT) return 'BELOW_THRESHOLD';
+  if (Object.prototype.hasOwnProperty.call(admBlockedMap_(), phone)) return 'ALREADY_BLOCKED';
+  appendRow_(admBlockedSheet_(), [phone, 'স্বয়ংক্রিয়: ' + h.stats.fake + 'টি Fake অর্ডার', new Date(), 'auto']);
+  return 'BLOCKED';
+}
+
+/**
+ * WhatsApp/ফোনে পাওয়া অর্ডার অ্যাডমিন প্যানেল থেকে যোগ করা। বিদ্যমান
+ * submitWhatsappMiniOrder ব্যবহার করে: Order ID, তারিখ ও ডেলিভারি চার্জ নিজে বসে।
+ */
+function adminManualOrderCreate_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var phone = normalizePhone_(param_(e, 'Phone'));
+  if (/^01\d{9}$/.test(phone) && Object.prototype.hasOwnProperty.call(admBlockedMap_(), phone) &&
+      String(param_(e, 'AllowBlocked') || '') !== '1') {
+    return { ok: false, error: 'PHONE_BLOCKED', message: 'এই নম্বরটি Blocked তালিকায় আছে। নিশ্চিত হলে আবার চেষ্টা করুন।' };
+  }
+  var notes = admCellText_(param_(e, 'Notes'), 300);
+  var by = String(v.email || v.phone || v.name || 'admin');
+  var res = submitWhatsappMiniOrder({
+    name: admCellText_(param_(e, 'Name'), 80),
+    phone: phone,
+    district: admCellText_(param_(e, 'District'), 60),
+    address: admCellText_(param_(e, 'Address'), 400),
+    design: admCellText_(param_(e, 'Design'), 1000),
+    qty: param_(e, 'Qty'),
+    total: param_(e, 'Total'),
+    payment: admCellText_(param_(e, 'Payment'), 40) || 'Cash On Delivery',
+    txn: admCellText_(param_(e, 'Txn'), 80),
+    notes: (notes ? notes + ' | ' : '') + 'যোগ করেছেন: ' + by,
+    sendCourierNow: false
+  });
+  if (!res || !res.ok) return { ok: false, error: 'INVALID_ORDER', message: (res && res.message) || 'অর্ডার যোগ করা যায়নি।' };
+  return { ok: true, orderId: res.orderId, row: res.row };
 }
