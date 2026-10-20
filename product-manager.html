@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="product-manager-admin.css?v=20261014-stock-photos">
   <script src="site-api-config.js?v=20261009-inbox"></script>
   <script src="admin-config.js?v=20261009-inbox"></script>
-  <script src="admin-api.js?v=20261016-publish"></script>
+  <script src="admin-api.js?v=80dbd3e930707465"></script>
   <script src="admin-guard.js?v=20261010-speed"></script>
 <script defer src="config.js?v=20261009-inbox"></script>
   <link rel="stylesheet" href="admin-sidebar.css?v=20261003sb">
@@ -130,14 +130,14 @@
   <div class="pl-toast" id="pmToast" role="status"></div>
 
   <script src="product-catalog-sync.js"></script>
-  <script src="product-catalog-sections.js?v=20261013-manager"></script>
-  <script src="product-config.js?v=20261009-inbox"></script>
-  <script src="product-utils.js?v=20260820stock"></script>
-  <script src="category-products.js?v=20260820clean"></script>
-  <script src="product-links-data.js"></script>
+  <script src="product-catalog-sections.js?v=215cfaaa25953550"></script>
+  <script src="product-config.js?v=688f61c91ffaf2a7"></script>
+  <script src="product-utils.js?v=460604041e5f8ec0"></script>
+  <script src="category-products.js?v=fa55a907c2bf0fe7"></script>
+  <script src="product-links-data.js?v=16d3b6ba47d02931"></script>
   <script id="pmRawCatalog">window.MA_RAW_CATEGORY_PRODUCTS = JSON.parse(JSON.stringify(window.CATEGORY_PRODUCTS || {}));</script>
   <script src="product-catalog-loader.js?v=20261013-manager"></script>
-  <script src="product-publish-utils.js?v=20261016-publish"></script><script src="product-publisher.js?v=20261016-publish"></script><script src="product-quick-upload.js?v=20261016-publish"></script>
+  <script src="product-publish-utils.js?v=4d87960bbc2baa44"></script><script src="product-publisher.js?v=d20f0246c52b4da3"></script><script src="product-quick-upload.js?v=4175c7bced24b73d"></script>
 <script id="pmStockAdmin">
 (function () {
   var ROW_CIRCLES = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "⑪", "⑫"];
@@ -624,7 +624,7 @@
           '</small></div></div></td><td>' + escapeHtml(s.menuBn || s.menu || s.key) + '</td><td>৳' + (parseInt(p.price, 10) || 0) +
           '</td><td><button type="button" class="pl-btn pm-overview-stock" data-stock-cat="' + escapeAttr(s.key) + '" data-stock-index="' + row.index + '" aria-pressed="' + out + '">' + (out ? '🔴 স্টক নেই' : '🟢 স্টকে আছে') + '</button>' +
           '</td><td><button type="button" class="pl-btn pl-btn-secondary" data-pm-cat="' + escapeAttr(s.key) +
-          '" data-pm-index="' + row.index + '">এডিট</button></td></tr>';
+          '" data-pm-index="' + row.index + '">এডিট</button> <button type="button" class="pl-btn pl-btn-secondary" title="এই পণ্যের দাম, সাইজ ও বিবরণ নিয়ে নতুন পণ্য" data-pm-copy-cat="' + escapeAttr(s.key) + '" data-pm-copy-index="' + row.index + '">কপি</button></td></tr>';
       }).join("") || '<tr><td colspan="6" class="pm-empty">কোনো প্রোডাক্ট পাওয়া যায়নি</td></tr>';
       var selectedKeys = Object.keys(overviewSelected);
       document.getElementById("pmOverviewSelected").textContent = selectedKeys.length + "টি নির্বাচিত";
@@ -647,6 +647,13 @@
         button.addEventListener("click", function () {
           var p = products[button.getAttribute("data-stock-cat")][parseInt(button.getAttribute("data-stock-index"), 10)];
           publishStockToggle(p, draw);
+        });
+      });
+      document.querySelectorAll("[data-pm-copy-cat]").forEach(function (button) {
+        button.addEventListener("click", function () {
+          var cat = button.getAttribute("data-pm-copy-cat");
+          var p = (products[cat] || [])[parseInt(button.getAttribute("data-pm-copy-index"), 10)];
+          if (p && window.MaProductQuickUpload && window.MaProductQuickUpload.copyFrom) window.MaProductQuickUpload.copyFrom(p, cat);
         });
       });
       document.querySelectorAll("[data-pm-cat]").forEach(function (button) {
@@ -1684,7 +1691,7 @@
       title +
       '</title>\n  <link rel="preconnect" href="https://fonts.googleapis.com">\n  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">\n  <link rel="stylesheet" href="site-header.css">\n  <link rel="stylesheet" href="site-footer.css">\n  <link rel="stylesheet" href="shop-page.css?v=1">\n  <link rel="stylesheet" href="category-sidebar.css?v=1" id="category-sidebar-css">\n</head>\n<body data-shop-category="' +
       sec.key +
-      '">\n  <div id="site-header-mount"></div>\n  <main class="wrap"><div id="list"></div></main>\n  <div id="site-footer-mount"></div>\n  <script defer src="cart-utils.js"><\/script>\n  <script defer src="site-header.js"><\/script>\n  <script defer src="product-catalog-sections.js"><\/script>\n  <script defer src="product-catalog-sync.js"><\/script>\n  <script defer src="product-config.js"><\/script>\n  <script defer src="product-utils.js"><\/script>\n  <script defer src="category-products.js"><\/script>\n  <script defer src="product-links-data.js"><\/script>\n  <script defer src="product-catalog-loader.js"><\/script>\n  <script defer src="category-renderer.js"><\/script>\n  <script defer src="site-footer.js"><\/script>\n  <script defer src="shop-category-boot.js"><\/script>\n</body>\n</html>\n'
+      '">\n  <div id="site-header-mount"></div>\n  <main class="wrap"><div id="list"></div></main>\n  <div id="site-footer-mount"></div>\n  <script defer src="cart-utils.js"><\/script>\n  <script defer src="site-header.js"><\/script>\n  <script defer src="product-catalog-sections.js?v=215cfaaa25953550"><\/script>\n  <script defer src="product-catalog-sync.js"><\/script>\n  <script defer src="product-config.js?v=688f61c91ffaf2a7"><\/script>\n  <script defer src="product-utils.js?v=460604041e5f8ec0"><\/script>\n  <script defer src="category-products.js?v=fa55a907c2bf0fe7"><\/script>\n  <script defer src="product-links-data.js?v=16d3b6ba47d02931"><\/script>\n  <script defer src="product-catalog-loader.js"><\/script>\n  <script defer src="category-renderer.js?v=00bd7a2ddbd5f59b"><\/script>\n  <script defer src="site-footer.js"><\/script>\n  <script defer src="shop-category-boot.js"><\/script>\n</body>\n</html>\n'
     );
   }
 
@@ -2015,7 +2022,7 @@
   renderCatList();
   renderMain();
   savedSnapshot = catalogSnapshot();
-  window.MaProductQuickUpload.mount({sections:function(){return sections;},status:setSaveStatus,isSaved:function(){return savedSnapshot===catalogSnapshot();},stage:function(category,product){if(!sections.some(function(sec){return sec.key===category;}))throw new Error("ক্যাটাগরি বাছুন।");Object.keys(products).forEach(function(k){products[k]=products[k].filter(function(p){return p.id!==product.id;});});products[category].unshift(product);renderCatList();renderMain();},publish:saveAll});
+  window.MaProductQuickUpload.mount({sections:function(){return sections;},products:function(){return products;},status:setSaveStatus,isSaved:function(){return savedSnapshot===catalogSnapshot();},stage:function(category,product){if(!sections.some(function(sec){return sec.key===category;}))throw new Error("ক্যাটাগরি বাছুন।");Object.keys(products).forEach(function(k){products[k]=products[k].filter(function(p){return p.id!==product.id;});});products[category].unshift(product);renderCatList();renderMain();},publish:saveAll});
   reloadPublishingData();
   window.addEventListener("beforeunload", function (event) {
     if (savedSnapshot !== catalogSnapshot()) { event.preventDefault(); event.returnValue = ""; }
