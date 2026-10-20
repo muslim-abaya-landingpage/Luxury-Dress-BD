@@ -1145,6 +1145,31 @@ function dailySafetyBackupTriggerHandler() {
   try {
     checkLowStockAndEmail_();
   } catch (err2) {}
+  try {
+    cleanupExpiredSessions_();
+  } catch (err3) {}
+}
+
+/**
+ * Deletes Sessions rows whose ExpiresAt is in the past. Such tokens are
+ * already rejected by verifySession_ (EXPIRED), so removing them changes no
+ * login behaviour; it only stops old tokens piling up in the sheet.
+ * Rows with a missing/unreadable expiry are kept. Runs with the daily backup.
+ */
+function cleanupExpiredSessions_(nowMs) {
+  var now = Number(nowMs) || Date.now();
+  var sheet = getSessionsSheet_();
+  var data = sheet.getDataRange().getValues();
+  var removed = 0;
+  for (var i = data.length - 1; i >= 1; i--) {
+    var raw = data[i][5];
+    var expMs = raw instanceof Date ? raw.getTime() : (raw === '' || raw === null ? NaN : new Date(raw).getTime());
+    if (isFinite(expMs) &amp;&amp; expMs > 0 &amp;&amp; now > expMs) {
+      sheet.deleteRow(i + 1);
+      removed++;
+    }
+  }
+  return { ok: true, removed: removed };
 }
 
 function getLowStockThreshold_() {
@@ -6755,6 +6780,21 @@ function migrateStockToVariants_(e) {
   var ownerErr = requireOwnerAdmin_(v);
   if (ownerErr) return ownerErr;
 
+  return migrateLegacyStockCore_(v.email || 'admin');
+}
+
+/**
+ * Editor-run entry point (only the project owner can run editor functions).
+ * Same idempotent migration as the admin API: old "Stock" sheet products get
+ * an "all sizes" pool row in StockVariants; nothing is deleted.
+ */
+function migrateLegacyStockToVariantsFromEditor() {
+  var result = migrateLegacyStockCore_('owner-editor');
+  console.log('MIGRATE_LEGACY_STOCK ' + JSON.stringify(result));
+  return result;
+}
+
+function migrateLegacyStockCore_(adminLabel) {
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
   var migrated = 0, skipped = 0, total = 0;
@@ -6777,7 +6817,7 @@ function migrateStockToVariants_(e) {
       appendStockLedger_({
         productId: pid, variant: '', changeType: 'MIGRATE',
         qtyBefore: 0, qtyAfter: qty, reservedBefore: 0, reservedAfter: 0,
-        reason: 'পুরনো Stock শীট থেকে মাইগ্রেশন', orderId: '', admin: v.email || 'admin'
+        reason: 'পুরনো Stock শীট থেকে মাইগ্রেশন', orderId: '', admin: adminLabel || 'admin'
       });
       // vData তে নতুন সারি যোগ হলো তা পরবর্তী লুপের জন্য মেমরিতেও যোগ করা দরকার যাতে ডুপ্লিকেট না হয়
       vData.push([pid, name, '', '', true, qty, 0, '', new Date(), 'migration']);
@@ -8316,6 +8356,21 @@ function mirrorSafeValue_(value) {
   return value;
 }
 
+function phoneColumnIndexes_(headers) {
+  var out = [];
+  (headers || []).forEach(function (h, i) {
+    if (/মোবাইল|ফোন|phone/i.test(String(h || ''))) out.push(i);
+  });
+  return out;
+}
+
+function mirrorPhoneText_(value) {
+  if (value === '' || value === null || typeof value === 'undefined') return '';
+  var text = String(value).trim();
+  if (/^1[3-9]\d{8}$/.test(text)) text = '0' + text; // BD mobile that lost its leading 0
+  return text;
+}
+
 function runOrderSyncNow() {
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
@@ -8406,6 +8461,12 @@ function runOrderSyncNow() {
       if (target.getMaxRows() &lt; body.length + 1) {
         target.insertRowsAfter(target.getMaxRows(), body.length + 1 - target.getMaxRows());
       }
+      // Phone columns: keep the leading 0 (01XXXXXXXXX). Format as plain text
+      // and restore a 0 that an earlier numeric write may have dropped.
+      phoneColumnIndexes_(sourceHeaders).forEach(function (c) {
+        target.getRange(2, c + 1, body.length, 1).setNumberFormat('@');
+        body.forEach(function (r) { r[c] = mirrorPhoneText_(r[c]); });
+      });
       target.getRange(2, 1, body.length, width).setValues(body);
     }
 

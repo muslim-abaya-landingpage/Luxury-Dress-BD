@@ -302,6 +302,21 @@ function mirrorSafeValue_(value) {
   return value;
 }
 
+function phoneColumnIndexes_(headers) {
+  var out = [];
+  (headers || []).forEach(function (h, i) {
+    if (/মোবাইল|ফোন|phone/i.test(String(h || ''))) out.push(i);
+  });
+  return out;
+}
+
+function mirrorPhoneText_(value) {
+  if (value === '' || value === null || typeof value === 'undefined') return '';
+  var text = String(value).trim();
+  if (/^1[3-9]\d{8}$/.test(text)) text = '0' + text; // BD mobile that lost its leading 0
+  return text;
+}
+
 function runOrderSyncNow() {
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
@@ -392,6 +407,12 @@ function runOrderSyncNow() {
       if (target.getMaxRows() < body.length + 1) {
         target.insertRowsAfter(target.getMaxRows(), body.length + 1 - target.getMaxRows());
       }
+      // Phone columns: keep the leading 0 (01XXXXXXXXX). Format as plain text
+      // and restore a 0 that an earlier numeric write may have dropped.
+      phoneColumnIndexes_(sourceHeaders).forEach(function (c) {
+        target.getRange(2, c + 1, body.length, 1).setNumberFormat('@');
+        body.forEach(function (r) { r[c] = mirrorPhoneText_(r[c]); });
+      });
       target.getRange(2, 1, body.length, width).setValues(body);
     }
 

@@ -32,7 +32,7 @@ function fakeSheet(values) {
 }
 
 function setup(sourceRows, mirrorRows) {
-  const header = ['Time', 'Name', 'Phone', 'Qty', 'Ship', 'Addr', 'Product', 'Size', 'Total', 'অর্ডার আইডি', 'Status'];
+  const header = ['Time', 'Name', 'মোবাইল নম্বর', 'Qty', 'Ship', 'Addr', 'Product', 'Size', 'Total', 'অর্ডার আইডি', 'Status'];
   const src = fakeSheet([header, ...sourceRows]);
   const mirror = fakeSheet(mirrorRows ? [header, ...mirrorRows] : []);
   const props = {};
@@ -107,4 +107,14 @@ test('in-cell images are mirrored as their URL instead of crashing setValues', (
   assert.equal(env.mirror.values[1][7], '[image]');
   const d = new Date(2026, 0, 1);
   assert.equal(env.sandbox.mirrorSafeValue_(d), d);
+});
+
+test('phone columns keep the leading 0 in the mirror', () => {
+  const row = order(1); row[2] = '01971642683';
+  const lost = order(2); lost[2] = 1722397670;
+  const env = setup([row, lost], null);
+  env.sandbox.runOrderSyncNow();
+  assert.equal(env.mirror.values[1][2], '01971642683');
+  assert.equal(env.mirror.values[2][2], '01722397670');
+  assert.equal(env.sandbox.mirrorPhoneText_('12345'), '12345', 'non-mobile values are left as they are');
 });

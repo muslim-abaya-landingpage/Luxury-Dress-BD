@@ -146,3 +146,21 @@ test('storefront uses the same pool rule for size availability', () => {
   const strict = { id: 'K', stockVariants: { '38': { tracked: true, available: 2 } } };
   assert.equal(qty(strict, '40'), 0);
 });
+
+test('expired login sessions are removed, valid and undated ones are kept', () => {
+  const now = Date.UTC(2026, 9, 20);
+  const rows = [
+    ['Token', 'Email', 'Phone', 'Name', 'CreatedAt', 'ExpiresAt', 'Role'],
+    ['old', 'a', '', '', '', new Date(Date.UTC(2026, 8, 3)), 'customer'],
+    ['live', 'b', '', '', '', new Date(Date.UTC(2026, 9, 27)), 'admin'],
+    ['undated', 'c', '', '', '', '', 'customer'],
+    ['old2', 'd', '', '', '', '2026-10-10T00:00:00Z', 'admin'],
+  ];
+  const sheet = { getDataRange: () => ({ getValues: () => rows.map(r => r.slice()) }), deleteRow: n => { rows.splice(n - 1, 1); } };
+  const box = { getSessionsSheet_: () => sheet };
+  vm.createContext(box);
+  vm.runInContext(extractFunction('cleanupExpiredSessions_'), box);
+  const res = box.cleanupExpiredSessions_(now);
+  assert.equal(res.removed, 2);
+  assert.deepEqual(rows.slice(1).map(r => r[0]), ['live', 'undated']);
+});
