@@ -8292,6 +8292,31 @@ function configureNotificationProperties(telegramToken, telegramChatId, alertEma
   return { ok: true, configured: ['TELEGRAM_BOT_TOKEN', 'TELEGRAM_CHAT_ID', 'NOTIFICATION_ALERT_EMAIL'] };
 }
 
+/**
+ * Editor-only, one time: after TELEGRAM_BOT_TOKEN is set and you have sent any
+ * message to the bot, run this. It finds your chat ID, saves TELEGRAM_CHAT_ID,
+ * and sends a test message. Never logs the token.
+ */
+function telegramSetupChatId() {
+  var props = PropertiesService.getScriptProperties();
+  var token = props.getProperty('TELEGRAM_BOT_TOKEN') || '';
+  if (!token) { console.log('TELEGRAM: আগে Script Properties-এ TELEGRAM_BOT_TOKEN বসান।'); return { ok: false, error: 'NO_TOKEN' }; }
+  var res = UrlFetchApp.fetch('https://api.telegram.org/bot' + encodeURIComponent(token) + '/getUpdates', { muteHttpExceptions: true });
+  var data = {};
+  try { data = JSON.parse(res.getContentText()); } catch (e) {}
+  if (!data.ok) { console.log('TELEGRAM: টোকেন ঠিক নেই বা Telegram সাড়া দেয়নি (HTTP ' + res.getResponseCode() + ')।'); return { ok: false, error: 'BAD_TOKEN' }; }
+  var chatId = '';
+  (data.result || []).forEach(function (u) {
+    var m = u.message || u.channel_post || u.my_chat_member || {};
+    if (m.chat &amp;&amp; m.chat.id) chatId = String(m.chat.id);
+  });
+  if (!chatId) { console.log('TELEGRAM: বটকে Telegram-এ যেকোনো একটা মেসেজ (যেমন "hi") পাঠিয়ে আবার চালান।'); return { ok: false, error: 'NO_MESSAGE_YET' }; }
+  props.setProperty('TELEGRAM_CHAT_ID', chatId);
+  var tg = sendTelegramText_('✅ Muslim Abaya: Telegram নোটিফিকেশন চালু হয়েছে। নতুন অর্ডার, সাইট ডাউন আর দৈনিক সেলস সামারি এখানে আসবে।');
+  console.log('TELEGRAM: chat saved, test message ' + (tg.ok ? 'sent' : 'failed: ' + tg.error));
+  return { ok: tg.ok };
+}
+
 /** Telegram-only message. Returns { ok, error }. Never throws. */
 function sendTelegramText_(message) {
   try {
