@@ -81,6 +81,35 @@
 
       <div class="pn-toolbar">
         <input class="pn-in" id="ordSearch" type="search" placeholder="লোড হওয়া অর্ডারের নাম, ফোন বা Order ID…" autocomplete="off">
+        <select class="pn-sel wo-filter" id="ordDateFilter" aria-label="তারিখের ফিল্টার">
+          <option value="all">All dates</option>
+          <option value="today">Today</option>
+          <option value="yesterday">Yesterday</option>
+          <option value="7d">Last 7 days</option>
+          <option value="month">This month</option>
+        </select>
+        <select class="pn-sel wo-filter" id="ordCourierFilter" aria-label="কুরিয়ার ফিল্টার">
+          <option value="all">All couriers</option>
+          <option value="sent">Sent to courier</option>
+          <option value="not-sent">Not sent</option>
+          <option value="Steadfast">Steadfast</option>
+          <option value="Pathao">Pathao</option>
+          <option value="RedX">RedX</option>
+          <option value="Paperfly">Paperfly</option>
+          <option value="Manual">Manual</option>
+        </select>
+        <select class="pn-sel wo-filter" id="ordPaymentFilter" aria-label="পেমেন্ট ফিল্টার">
+          <option value="all">All payments</option>
+          <option value="cod">COD</option>
+          <option value="advance">Advance paid</option>
+          <option value="paid">Fully paid</option>
+          <option value="due">Due amount</option>
+        </select>
+        <select class="pn-sel wo-filter" id="ordAssignedFilter" aria-label="দায়িত্বপ্রাপ্ত স্টাফ ফিল্টার">
+          <option value="all">All staff</option>
+          <option value="assigned">Assigned</option>
+          <option value="unassigned">Unassigned</option>
+        </select>
       </div>
 
       <div class="pn-table-wrap">
@@ -130,6 +159,10 @@
       var filter = "all";
       var q = "";
       var issueFilter = "all";
+      var dateFilter = "all";
+      var courierFilter = "all";
+      var paymentFilter = "all";
+      var assignedFilter = "all";
       var insights = null;
       var issueRows = new Map();
       var issueSelect = document.getElementById("ordIssueFilter");
@@ -146,6 +179,10 @@
         if (issueFilter !== "all" && issueFilter !== "flagged" && issues.indexOf(issueFilter) === -1) return false;
         if (filter === "today") { if (!isToday(o)) return false; }
         else if (filter !== "all" && o.status !== filter) return false;
+        if (!matchesDate(o)) return false;
+        if (!matchesCourier(o)) return false;
+        if (!matchesPayment(o)) return false;
+        if (!matchesAssigned(o)) return false;
         if (!q) return true;
         var hay = (o.name + " " + o.phone + " " + o.orderId).toLowerCase();
         return hay.indexOf(q) !== -1;
@@ -153,6 +190,62 @@
 
       function isToday(o) {
         return MaOrderInsights.dateKey(o.time) === MaOrderInsights.dhakaToday();
+      }
+
+      function dateKey(o) { return MaOrderInsights.dateKey(o.time); }
+      function matchesDate(o) {
+        if (dateFilter === "all") return true;
+        var key = dateKey(o), today = MaOrderInsights.dhakaToday();
+        if (!key) return false;
+        if (dateFilter === "today") return key === today;
+        if (dateFilter === "month") return key.slice(0, 7) === today.slice(0, 7);
+        var orderDay = new Date(key + "T00:00:00+06:00").getTime();
+        var todayDay = new Date(today + "T00:00:00+06:00").getTime();
+        if (!Number.isFinite(orderDay) || !Number.isFinite(todayDay)) return false;
+        var diff = Math.round((todayDay - orderDay) / 86400000);
+        return dateFilter === "yesterday" ? diff === 1 : dateFilter === "7d" ? diff >= 0 && diff < 7 : true;
+      }
+      function matchesCourier(o) {
+        var courier = String(o.courier || "").trim().toLowerCase();
+        var sent = Boolean(o.tracking || o.consignmentId || o.courierStatus);
+        if (courierFilter === "all") return true;
+        if (courierFilter === "sent") return sent;
+        if (courierFilter === "not-sent") return !sent;
+        return courier === courierFilter.toLowerCase();
+      }
+      function matchesPayment(o) {
+        if (paymentFilter === "all") return true;
+        var payment = String(o.payment || "").toLowerCase();
+        var advance = Number(o.advance) || 0;
+        var due = Number(o.due);
+        if (!Number.isFinite(due)) due = Math.max(0, (Number(o.total) || 0) - advance);
+        if (paymentFilter === "cod") return payment.indexOf("cod") !== -1 || payment.indexOf("cash") !== -1;
+        if (paymentFilter === "advance") return advance > 0;
+        if (paymentFilter === "paid") return due <= 0;
+        if (paymentFilter === "due") return due > 0;
+        return true;
+      }
+      function matchesAssigned(o) {
+        var assigned = String(o.assignedTo || "").trim();
+        if (assignedFilter === "all") return true;
+        if (assignedFilter === "assigned") return !!assigned;
+        if (assignedFilter === "unassigned") return !assigned;
+        return assigned === assignedFilter;
+      }
+
+      function updateAssignedOptions() {
+        var select = document.getElementById("ordAssignedFilter");
+        var current = select.value;
+        var names = [];
+        all.forEach(function (o) {
+          var name = String(o.assignedTo || "").trim();
+          if (name && names.indexOf(name) === -1) names.push(name);
+        });
+        select.innerHTML = '<option value="all">All staff</option><option value="assigned">Assigned</option><option value="unassigned">Unassigned</option>' + names.sort().map(function (name) {
+          return '<option value="' + esc(name) + '">' + esc(name) + '</option>';
+        }).join("");
+        select.value = names.indexOf(current) !== -1 || ["all", "assigned", "unassigned"].indexOf(current) !== -1 ? current : "all";
+        assignedFilter = select.value;
       }
 
       function renderTabs() {
@@ -181,7 +274,7 @@
             "<td><div>" + esc(o.name) + (o.blocked ? ' <span class="pn-badge blocked">Blocked</span>' : "") + '</div><div class="sub">' + esc(o.phone) + (o.district ? " · " + esc(o.district) : "") + '</div><div class="ot-wa-slot"></div></td>' +
             "<td>" + items + '<div class="sub">সাইজ: ' + esc(o.size || "তথ্য নেই") + '</div></td>' +
             "<td><b>" + (MaOrderInsights.amount(o.total) === null ? 'অবৈধ মান' : MaPanel.money(o.total)) + '</b><div class="sub">' + esc(o.payment || "") + "</div></td>" +
-            '<td><span class="pn-badge ' + displayStatus.badgeKey + '">' + esc(displayStatus.orderLabel) + '</span><div class="sub">অর্ডার: ' + esc(displayStatus.orderRaw) + "</div></td>" +
+            '<td><span class="pn-badge ' + MaPanel.statusClass(o.status) + '">Order: ' + esc(displayStatus.orderRaw) + '</span><div class="wo-courier-status ' + (displayStatus.hasCourier ? 'is-live' : 'is-empty') + '">Courier: ' + esc(displayStatus.hasCourier ? displayStatus.courierLabel : 'Not sent') + "</div></td>" +
             "<td>" + (displayStatus.hasCourier ? esc(o.tracking || o.consignmentId || "—") + '<div class="sub">' + esc(o.courier || 'Steadfast') + "</div>" : '<span class="sub">—</span>') + "</td>" +
             "<td>" + esc(o.assignedTo || "—") + "</td>" +
             '<td><div class="oi-issues">' + (issueRows.get(o) || []).map(function (key) { return '<span class="oi-issue">' + esc(MaOrderInsights.labels[key]) + '</span>'; }).join("") + ((issueRows.get(o) || []).length ? '' : '<span class="sub">—</span>') + '</div></td>' +
@@ -242,6 +335,7 @@
         counts = res.counts || {};
         statuses = res.statuses || [];
         document.getElementById("ordCount").textContent = (counts.all || 0) + "টি অর্ডার";
+        updateAssignedOptions();
         renderInsights(res);
         renderTabs();
         renderRows();
@@ -297,6 +391,22 @@
       });
       issueSelect.addEventListener("change", function () {
         issueFilter = issueSelect.value;
+        renderRows();
+      });
+      document.getElementById("ordDateFilter").addEventListener("change", function (e) {
+        dateFilter = e.target.value;
+        renderRows();
+      });
+      document.getElementById("ordCourierFilter").addEventListener("change", function (e) {
+        courierFilter = e.target.value;
+        renderRows();
+      });
+      document.getElementById("ordPaymentFilter").addEventListener("change", function (e) {
+        paymentFilter = e.target.value;
+        renderRows();
+      });
+      document.getElementById("ordAssignedFilter").addEventListener("change", function (e) {
+        assignedFilter = e.target.value;
         renderRows();
       });
       document.getElementById("ordBody").addEventListener("click", function (e) {

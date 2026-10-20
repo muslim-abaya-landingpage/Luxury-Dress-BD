@@ -264,3 +264,32 @@
   .wo-edit-page .wo-history-kpis { grid-template-columns: 1fr 1fr; }
 }
 @media (prefers-reduced-motion: reduce) { .wo-edit-page .wo-save-spinner { animation: none; } }
+
+/* Orders filters and split order/courier status presentation. */
+.wo-orders-page .pn-toolbar .wo-filter {
+  width: auto;
+  min-width: 132px;
+  min-height: 42px;
+  padding: 8px 30px 8px 10px;
+  border-radius: 4px;
+  background: #fff;
+  border-color: #c6cbd3;
+  color: var(--wo-text);
+  font-size: 12px;
+}
+.wo-orders-page .pn-toolbar .wo-filter:focus { outline: 2px solid #d9cff1; border-color: var(--wo-accent); }
+.wo-orders-page .wo-courier-status {
+  display: block;
+  margin-top: 5px;
+  color: #68707d;
+  font-size: 11px;
+  line-height: 1.35;
+}
+.wo-orders-page .wo-courier-status.is-live { color: #237a4b; }
+.wo-orders-page .wo-courier-status.is-empty { color: #8a9099; }
+@media (max-width: 900px) {
+  .wo-orders-page .pn-toolbar .wo-filter { flex: 1 1 150px; }
+}
+@media (max-width: 700px) {
+  .wo-orders-page .pn-toolbar .wo-filter { min-width: calc(50% - 4px); flex: 1 1 calc(50% - 4px); }
+}
