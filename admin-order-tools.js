@@ -75,13 +75,27 @@
     return "unknown";
   }
 
-  /** "Black Abaya (Body 42 · Length 52) × 2" → name "Black Abaya", qty 2 */
-  function parseItem(line) {
-    var s = text(line), qty = 1, m = /[×x]\s*(\d+)\s*$/i.exec(s);
-    if (m) { qty = parseInt(m[1], 10) || 1; s = s.slice(0, m.index).trim(); }
-    s = s.replace(/\s*\([^)]*\)\s*$/, "").replace(/\s*[-–—|]\s*(size|সাইজ)\b.*$/i, "").trim();
-    return { name: s || "(নাম নেই)", qty: qty };
+  /**
+   * Item text comes in several shapes (old and new checkout, hand-typed):
+   *  "Black Abaya (Body 42 · Length 52) · Body 42 · Length 52 × 2 pcs = ৳1,100"
+   *  "Royal Blue Golden (1টি)"  ·  "Black Base Rose (1), Royal Blue Golden (1)"  ·  "Royal-Blue-Golden-Floral-Print"
+   * Returns [{ name, key, qty }]; key is a loose match key so the same product groups together.
+   */
+  function parseItems(line) {
+    var src = text(line);
+    if (!src) return [];
+    var parts = /\(\s*\d+\s*(টি|pcs?)?\s*\)\s*,/i.test(src) ? src.split(/,\s*(?![^()]*\))/) : [src];
+    return parts.map(function (part) {
+      var s = text(part), qty = 1, m;
+      if ((m = /[×x]\s*(\d+)\s*(pcs?|টি|পিস)?\b/i.exec(s))) qty = parseInt(m[1], 10) || 1;
+      else if ((m = /\(\s*(\d+)\s*(টি|pcs?|পিস)?\s*\)\s*$/i.exec(s))) qty = parseInt(m[1], 10) || 1;
+      var name = s.split(/\s+[·×=]\s*|\s*\(/)[0].replace(/\s*[×x]\s*\d+.*$/i, "").trim();
+      if (name.indexOf(" ") === -1 && /-/.test(name)) name = name.replace(/-+/g, " ");
+      name = name.replace(/\s+/g, " ").trim() || "(নাম নেই)";
+      return { name: name, key: name.toLowerCase().replace(/[^a-z0-9\u0980-\u09ff]+/g, " ").trim(), qty: qty };
+    }).filter(function (it) { return it.key; });
   }
+  function parseItem(line) { return parseItems(line)[0] || { name: "(নাম নেই)", key: "", qty: 1 }; }
 
   function emptyRow() { return { orders: 0, delivered: 0, failed: 0, active: 0, value: 0 }; }
   function tally(row, kind, value) {
@@ -99,12 +113,12 @@
       var d = text(o.district) || "জেলা লেখা নেই";
       tally(byDistrict[d] = byDistrict[d] || emptyRow(), kind, value);
       tally(totals, kind, value);
-      itemsOf(o).forEach(function (line) {
-        var it = parseItem(line), p = byProduct[it.name] = byProduct[it.name] || { units: 0, deliveredUnits: 0, failedUnits: 0, orders: 0 };
+      itemsOf(o).forEach(function (line) { parseItems(line).forEach(function (it) {
+        var p = byProduct[it.key] = byProduct[it.key] || { label: it.name, units: 0, deliveredUnits: 0, failedUnits: 0, orders: 0 };
         p.orders++; p.units += it.qty;
         if (kind === "delivered") p.deliveredUnits += it.qty;
         else if (kind === "returned" || kind === "cancelled" || kind === "fake") p.failedUnits += it.qty;
-      });
+      }); });
       if (kind === "returned" || kind === "cancelled" || kind === "fake") {
         var r = reasonOf(o.adminNote) || "কারণ লেখা হয়নি";
         reasons[r] = (reasons[r] || 0) + 1;
@@ -133,7 +147,7 @@
   }
 
   var api = { REASONS: REASONS, waPhone: waPhone, confirmMessage: confirmMessage, waUrl: waUrl, needsReason: needsReason,
-    reasonOf: reasonOf, withReason: withReason, outcome: outcome, parseItem: parseItem, report: report,
+    reasonOf: reasonOf, withReason: withReason, outcome: outcome, parseItem: parseItem, parseItems: parseItems, report: report,
     courierPlan: courierPlan, failRate: failRate };
   root.MaOrderTools = api;
   if (typeof module !== "undefined" && module.exports) { module.exports = api; return; }
@@ -149,7 +163,7 @@
     ".ot-bulk{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0;padding:8px 10px;border-radius:10px;background:rgba(99,91,255,.07)}" +
     ".ot-bulk[hidden]{display:none}.ot-bulk b{margin-right:4px}.ot-sel{width:18px;height:18px;cursor:pointer}" +
     ".ot-report{margin:12px 0}.ot-report summary{cursor:pointer;font-weight:700;padding:6px 0}" +
-    ".ot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:8px}" +
+    ".ot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:8px}.ot-grid>.ot-wide{grid-column:1/-1}.ot-tbl td:first-child{min-width:140px}" +
     ".ot-grid h3{font-size:.95rem;margin:0 0 6px}.ot-tbl{width:100%;border-collapse:collapse;font-size:.85rem}" +
     ".ot-tbl th,.ot-tbl td{padding:5px 6px;border-bottom:1px solid rgba(127,127,127,.18);text-align:right}.ot-tbl th:first-child,.ot-tbl td:first-child{text-align:left}" +
     ".ot-bad{color:#c62828;font-weight:700}.ot-note{font-size:.8rem;opacity:.75;margin:4px 0 0}" +
@@ -289,11 +303,11 @@
       '<div class="ot-grid"><div><h3>জেলা অনুযায়ী</h3>' +
       table(["জেলা", "অর্ডার", "ডেলিভারড", "ব্যর্থ", "ব্যর্থতার হার", "ডেলিভারড মূল্য"], rep.districts.map(function (r) {
         return "<tr><td>" + esc(r.key) + "</td><td>" + r.orders + "</td><td>" + r.delivered + "</td><td>" + r.failed + "</td><td>" + rateCell(failRate(r)) + "</td><td>" + money(r.value) + "</td></tr>";
-      })) + "</div><div><h3>পণ্য অনুযায়ী (পিস)</h3>" +
+      })) + "</div><div class=\"ot-wide\"><h3>পণ্য অনুযায়ী (পিস)</h3>" +
       table(["পণ্য", "অর্ডার হয়েছে", "ডেলিভারড", "ব্যর্থ", "ব্যর্থতার হার"], rep.products.map(function (p) {
         var done = p.deliveredUnits + p.failedUnits;
-        return "<tr><td>" + esc(p.key) + "</td><td>" + p.units + "</td><td>" + p.deliveredUnits + "</td><td>" + p.failedUnits + "</td><td>" + rateCell(done ? Math.round(p.failedUnits / done * 100) : null) + "</td></tr>";
-      })) + "</div><div><h3>বাতিল / ফেরতের কারণ</h3>" +
+        return "<tr><td>" + esc(p.label || p.key) + "</td><td>" + p.units + "</td><td>" + p.deliveredUnits + "</td><td>" + p.failedUnits + "</td><td>" + rateCell(done ? Math.round(p.failedUnits / done * 100) : null) + "</td></tr>";
+      })) + '<p class="ot-note">পুরোনো অর্ডারে পণ্যের নাম একেক রকম লেখা থাকায় একই পণ্য আলাদা লাইনে আসতে পারে।</p></div><div><h3>বাতিল / ফেরতের কারণ</h3>' +
       table(["কারণ", "অর্ডার"], rep.reasons.map(function (r) { return "<tr><td>" + esc(r.reason) + "</td><td>" + r.count + "</td></tr>"; })) +
       '<p class="ot-note">অর্ডার Cancelled, Fake বা Returned করার সময় কারণ বেছে নিলে এখানে যোগ হবে।</p></div></div>';
   }

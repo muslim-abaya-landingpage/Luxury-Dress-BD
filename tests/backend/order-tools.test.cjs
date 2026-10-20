@@ -51,7 +51,7 @@ test('report groups by district, product units and reason', () => {
   assert.equal(JSON.stringify([ctg.orders, ctg.delivered, ctg.failed]), JSON.stringify([2, 0, 2]));
   assert.equal(T.failRate(ctg), 100);
   assert.ok(rep.districts.find(d => d.key === 'জেলা লেখা নেই'));
-  const abaya = rep.products.find(p => p.key === 'Black Abaya');
+  const abaya = rep.products.find(p => p.label === 'Black Abaya');
   assert.equal(JSON.stringify([abaya.units, abaya.deliveredUnits, abaya.failedUnits]), JSON.stringify([5, 2, 1]));
   assert.equal(JSON.stringify(rep.reasons.map(r => r.reason).sort()), JSON.stringify(['কারণ লেখা হয়নি', 'সাইজ মেলেনি']));
   assert.equal(rep.totals.orders, 4);
@@ -64,4 +64,17 @@ test('bulk courier skips orders already sent, finished or blocked', () => {
   ]);
   assert.equal(JSON.stringify(plan.send.map(o => o.orderId)), JSON.stringify(['MA-1', 'MA-6']));
   assert.equal(plan.skip.length, 4);
+});
+
+test('item parser handles every checkout format seen in the sheet', () => {
+  const one = (s) => { const r = T.parseItems(s); return r.map(i => i.name + '|' + i.qty).join(','); };
+  assert.equal(one('Black White Polka (Body 42 (Free size) · Length 50) · Body 42 (Free size) · Length 50 × 2 pcs = ৳1,100'), 'Black White Polka|2');
+  assert.equal(one('Pink Floral Printed Co-ord Set · Body 42 (Free size) · Length 37-38 inch × 1 pcs = ৳550'), 'Pink Floral Printed Co-ord Set|1');
+  assert.equal(one('Royal Blue Golden (1টি)'), 'Royal Blue Golden|1');
+  assert.equal(one('Black Base Rose (1), Royal Blue Golden (2)'), 'Black Base Rose|1,Royal Blue Golden|2');
+  assert.equal(one('Royal-Blue-Golden-Floral-Print'), 'Royal Blue Golden Floral Print|1');
+  assert.equal(one('Premium Black Hafeza Set (Full Set)'), 'Premium Black Hafeza Set|1');
+  assert.equal(one('kurti'), 'kurti|1');
+  const a = T.parseItems('Black White Polka (1টি)')[0], b = T.parseItems('black white polka × 1 pcs = ৳550')[0];
+  assert.equal(a.key, b.key, 'same product groups together regardless of case');
 });
