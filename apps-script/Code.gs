@@ -3759,6 +3759,15 @@ function sendDailySummaryEmail_() {
       '⏳ Pending অর্ডার: ' + pending + '\n' +
       '✅ Delivered অর্ডার: ' + delivered + '\n\n' +
       'বিস্তারিত দেখতে Admin Dashboard এ যান।';
+    var stuck = [];
+    try { stuck = findStuckOrders_(data, Date.now()); } catch (stuckErr) {}
+    if (stuck.length) {
+      body += '\n\n⚠ নজর দেওয়া দরকার (' + stuck.length + 'টি):\n' + stuck.slice(0, 15).map(function (s) {
+        return '• ' + s.orderId + ' (৳' + s.total + ') — ' + s.why;
+      }).join('\n') + (stuck.length > 15 ? '\n…আরও ' + (stuck.length - 15) + 'টি' : '') +
+      '\n\nঅর্ডার প্যানেলে Order ID দিয়ে খুঁজুন।';
+    }
+    result.stuck = stuck.length;
     var subject = '📊 গতকালের সেলস সামারি — ' + yKey;
     if (emails.length) {
       try { MailApp.sendEmail({ to: emails.join(','), subject: subject, body: body }); result.email = true; }
@@ -3772,6 +3781,35 @@ function sendDailySummaryEmail_() {
   } catch (err) { result.error = String(err && err.message || err); }
   console.log('DAILY_SUMMARY ' + JSON.stringify(result));
   return result;
+}
+
+/**
+ * Orders that look forgotten (last 90 days only, so very old legacy rows don't repeat every day):
+ *  - Pending/Confirmed for 3+ days and never sent to the courier
+ *  - sent to the courier 10+ days ago and the courier still has no final status
+ */
+var STUCK_WINDOW_DAYS_ = 90, STUCK_UNSENT_DAYS_ = 3, STUCK_COURIER_DAYS_ = 10;
+function findStuckOrders_(data, nowMs) {
+  var today = Utilities.formatDate(new Date(nowMs), 'GMT+6', 'yyyy-MM-dd');
+  function daysSince(key) { return Math.round((Date.parse(today + 'T00:00:00Z') - Date.parse(key + 'T00:00:00Z')) / 86400000); }
+  var out = [];
+  for (var i = 1; i < data.length; i++) {
+    var r = data[i], id = String(r[8] || '').trim();
+    var key = dayKeyFromCell_(r[0]);
+    if (!id || !key || !/^\d{4}-\d{2}-\d{2}$/.test(key)) continue;
+    var age = daysSince(key);
+    if (age < 0 || age > STUCK_WINDOW_DAYS_) continue;
+    var st = String(r[9] || 'Pending').toLowerCase().trim();
+    var courier = String(r[12] || '').toLowerCase().trim();
+    var sent = !!(String(r[10] || '').trim() || String(r[11] || '').trim());
+    var total = parseSignedOrderAmount_(r[7]);
+    if ((st === 'pending' || st === 'confirmed') && !sent && age >= STUCK_UNSENT_DAYS_) {
+      out.push({ orderId: id, total: total, age: age, why: age + ' দিন ধরে ' + (st === 'pending' ? 'Pending' : 'Confirmed') + ', কুরিয়ারে পাঠানো হয়নি' });
+    } else if (sent && age >= STUCK_COURIER_DAYS_ && !/^(delivered|partial_delivered|cancelled)$/.test(courier) && st !== 'cancelled' && st !== 'fake') {
+      out.push({ orderId: id, total: total, age: age, why: age + ' দিন আগে কুরিয়ারে গেছে, Steadfast স্ট্যাটাস এখনো "' + (courier || 'নেই') + '"' });
+    }
+  }
+  return out.sort(function (a, b) { return b.age - a.age; });
 }
 
 function installDailySummaryTrigger_() {

@@ -7,7 +7,8 @@
     invalid_date: 'তারিখ নেই বা বোঝা যাচ্ছে না', date_mismatch: 'Order ID ও তারিখ মেলেনি',
     invalid_total: 'মোট টাকার মান সঠিক নয়', invalid_qty: 'পণ্যের পরিমাণ যাচাই করুন',
     advance_over_total: 'অগ্রিম মোট টাকার চেয়ে বেশি', review_note: 'অ্যাডমিন নোটে যাচাই বাকি',
-    unknown_status: 'অর্ডার স্ট্যাটাস যাচাই করুন'
+    unknown_status: 'অর্ডার স্ট্যাটাস যাচাই করুন',
+    stuck_unsent: '৩+ দিন ধরে কুরিয়ারে পাঠানো হয়নি', stuck_courier: '১০+ দিনেও কুরিয়ারে শেষ হয়নি'
   };
   function text(v) { return String(v == null ? '' : v).trim(); }
   function amount(v) {
@@ -67,6 +68,13 @@
       if (total !== null && amount(o.advance) !== null && amount(o.advance) > total) issues.push('advance_over_total');
       if (/⚠|REVIEW|যাচাই|অমিল|পার্থক্য/i.test(text(o.adminNote))) issues.push('review_note');
       if (group === 'unknown') issues.push('unknown_status');
+      if (date && date <= today) {
+        var age = Math.round((Date.parse(today + 'T00:00:00Z') - Date.parse(date + 'T00:00:00Z')) / 86400000);
+        var sent = !!(text(o.tracking) || text(o.consignmentId));
+        var courier = text(o.courierStatus).toLowerCase();
+        if (age <= 90 && group === 'active' && !sent && age >= 3) issues.push('stuck_unsent');
+        else if (age <= 90 && sent && age >= 10 && group !== 'cancelled' && group !== 'fake' && !/^(delivered|partial_delivered|cancelled)$/.test(courier)) issues.push('stuck_courier');
+      }
       if (group === 'delivered' && total !== null) {
         var shipping = amount(o.charge);
         if (shipping === null || shipping > total) unknownShipping++;

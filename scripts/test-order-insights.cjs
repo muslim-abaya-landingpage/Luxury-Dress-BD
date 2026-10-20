@@ -29,6 +29,17 @@ for (const code of ['duplicate_id','missing_size','future_date','date_mismatch',
 for (const code of ['missing_id','unknown_status','invalid_date','invalid_total']) assert(a.rows[2].issues.includes(code),code);
 assert.equal(a.invalidAmounts,1);
 assert(!model.analyze([{...good,status:'Delivered',size:''}],{today:'2026-10-16'}).rows[0].issues.includes('missing_size'),'finished orders are not flagged for size');
+{ const st = model.analyze([
+    {...good,orderId:'MA-20261010-1',time:'10-10-2026',status:'Confirmed'},
+    {...good,orderId:'MA-20261015-2',time:'15-10-2026',status:'Pending'},
+    {...good,orderId:'MA-20261001-3',time:'01-10-2026',status:'Shipped',tracking:'T',courierStatus:'in_review'},
+    {...good,orderId:'MA-20261001-4',time:'01-10-2026',status:'Delivered',tracking:'T',courierStatus:'delivered'},
+    {...good,orderId:'MA-20260501-5',time:'01-05-2026',status:'Pending'}],{today:'2026-10-16'});
+  assert(st.rows[0].issues.includes('stuck_unsent'),'6 days unsent');
+  assert(!st.rows[1].issues.includes('stuck_unsent'),'1 day is fine');
+  assert(st.rows[2].issues.includes('stuck_courier'),'courier not final after 15 days');
+  assert(!st.rows[3].issues.some(k=>k.startsWith('stuck')),'delivered is done');
+  assert(!st.rows[4].issues.some(k=>k.startsWith('stuck')),'older than 90 days not repeated'); }
 assert.equal(a.totalValue,1100);
 assert.deepEqual(model.analyze([], {today:'2026-10-16'}).groups.delivered,{count:0,value:0});
 const original = JSON.stringify(fixture); model.analyze(fixture); assert.equal(JSON.stringify(fixture),original);

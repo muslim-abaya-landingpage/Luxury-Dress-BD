@@ -205,3 +205,22 @@ test('courier sync keeps checking hand-delivered orders until Steadfast reports 
   assert.equal(box.steadfastSyncShouldSkip_('Fake', '', notSent), true, 'never sent to courier → no API call');
   assert.equal(box.steadfastSyncShouldSkip_('Pending', '', notSent), false);
 });
+
+test('daily summary lists forgotten orders: unsent for 3+ days, or courier not final after 10 days', () => {
+  const box = { Utilities: { formatDate: (d) => new Date(d.getTime() + 6 * 3600000).toISOString().slice(0, 10) },
+    parseSignedOrderAmount_: v => Number(v) || 0 };
+  vm.createContext(box);
+  vm.runInContext([extractFrom(CODE, 'dayKeyFromCell_'), 'var STUCK_WINDOW_DAYS_ = 90, STUCK_UNSENT_DAYS_ = 3, STUCK_COURIER_DAYS_ = 10;', extractFrom(CODE, 'findStuckOrders_')].join('\n'), box);
+  const row = (date, id, st, track, courier) => [date, 'n', '017', 1, 0, 'a', 'x', 1000, id, st, track, '', courier];
+  const now = Date.parse('2026-10-21T04:00:00Z');
+  const res = box.findStuckOrders_([['h'],
+    row('15-10-2026', 'A', 'Confirmed', '', ''),        // 6 days, unsent → stuck
+    row('20-10-2026', 'B', 'Pending', '', ''),          // 1 day → fine
+    row('05-10-2026', 'C', 'Shipped', 'T1', 'in_review'),// 16 days, courier not final → stuck
+    row('05-10-2026', 'D', 'Delivered', 'T2', 'delivered'), // done
+    row('21-05-2026', 'E', 'Pending', '', ''),          // older than 90 days → ignored
+    row('01-10-2026', 'F', 'Fake', '', ''),             // finished
+  ], now);
+  assert.equal(JSON.stringify(res.map(r => r.orderId)), JSON.stringify(['C', 'A']));
+  assert.match(res[0].why, /in_review/);
+});
