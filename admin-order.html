@@ -6,7 +6,7 @@
   <link rel="preload" as="script" href="admin-config.js?v=20261009-inbox">
   <link rel="preload" as="script" href="admin-api.js?v=20261013-speed2">
   <link rel="preload" as="script" href="admin-guard.js?v=20261010-speed">
-  <link rel="preload" as="script" href="admin-panel.js?v=20261018-shared">
+  <link rel="preload" as="script" href="admin-panel.js?v=20261021-notify1">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,9 +20,9 @@
 <link rel="stylesheet" href="admin-dashboard-design.css?v=20261018-3">
   <script src="admin-dashboard-design.js?v=20261018-3"></script>
   <link rel="stylesheet" href="admin-premium-layout.css?v=20261018-3">
-  <link rel="stylesheet" href="admin-orders-woocommerce.css?v=20261021-wo4">
+  <link rel="stylesheet" href="admin-orders-woocommerce.css?v=20261021-wo5">
   <script src="admin-order-status.js?v=20261018-2"></script>
-<script src="admin-courier-tracking.js?v=20261018-1"></script>
+<script src="admin-courier-tracking.js?v=20261021-notify1"></script>
   <style>.pn-head .adm-heading{flex:1 1 260px;min-width:220px}.pn-head .adm-heading h1{overflow-wrap:anywhere}</style>
 </head>
 <body class="pn-body wo-edit-page">
@@ -165,7 +165,7 @@
   <script src="admin-config.js?v=20261009-inbox"></script>
   <script src="admin-api.js?v=80dbd3e930707465"></script>
   <script src="admin-guard.js?v=20261010-speed"></script>
-  <script src="admin-panel.js?v=20261018-shared"></script>
+  <script src="admin-panel.js?v=20261021-notify1"></script>
   <script src="admin-invoice.js?v=20261021-1"></script>
   <script src="admin-order-tools.js?v=20261021-5"></script>
   <script>
@@ -178,6 +178,36 @@
       var staff = [];
       var dirty = false;
       var saving = false;
+      var formSnapshot = "";
+
+      function notify(message, isError) {
+        if (window.MaPanel && MaPanel.toast) MaPanel.toast(message, !!isError);
+        var errorBox = $("oError");
+        if (isError && errorBox) {
+          errorBox.style.display = "";
+          errorBox.setAttribute("role", "alert");
+          errorBox.innerHTML = "<b>সমস্যা:</b> " + esc(message);
+        }
+      }
+
+      function readFormState() {
+        return ["fName", "fPhone", "fAddress", "fAdminNote", "fCourierNote", "fCharge", "fAdvance", "fDiscount", "fCourier", "fStatus", "fAssign"]
+          .map(function (id) { var field = $(id); return field ? String(field.value || "") : ""; });
+      }
+
+      function syncDirty() {
+        dirty = JSON.stringify(readFormState()) !== formSnapshot;
+        var btn = $("btnSave");
+        if (btn && !saving) btn.classList.toggle("wo-save-dirty", dirty);
+        return dirty;
+      }
+
+      function captureFormSnapshot() {
+        formSnapshot = JSON.stringify(readFormState());
+        dirty = false;
+        var btn = $("btnSave");
+        if (btn) btn.classList.remove("wo-save-dirty");
+      }
 
       function fillSelect(el, options, value, extra) {
         var list = options.slice();
@@ -202,6 +232,7 @@
         btn.disabled = saving;
         btn.setAttribute("aria-busy", saving ? "true" : "false");
         btn.innerHTML = saving ? '<span class="wo-save-spinner" aria-hidden="true"></span><span>Saving…</span>' : '<span>✓ Update Order</span>';
+        if (!saving) syncDirty();
       }
 
       function renderItems(o) {
@@ -248,7 +279,6 @@
       function paint(o, meta) {
         cur = o;
         orderId = o.orderId;
-        dirty = false;
         $("oId").textContent = o.orderId;
         document.title = "Order " + o.orderId + " | Muslim Abaya Admin";
         var b = $("oStatusBadge");
@@ -287,6 +317,7 @@
         }
         paintBlock(o.blocked);
         recalc();
+        captureFormSnapshot();
       }
 
       function paintBlock(blocked) {
@@ -319,11 +350,14 @@
         }).catch(function (err) {
           var e = $("oError");
           e.style.display = "";
+          e.setAttribute("role", "alert");
           e.innerHTML = "<b>Error:</b> " + esc(err.message) + '<br><a href="admin-orders.html">← সব অর্ডার</a>';
+          notify(err.message || "অর্ডার লোড করা যায়নি", true);
         });
       }
 
       function save() {
+        if (saving) return Promise.resolve();
         var charge = num("fCharge"), advance = num("fAdvance"), discount = num("fDiscount");
         if (![charge, advance, discount].every(Number.isFinite)) {
           return Promise.reject(new Error("চার্জ, অগ্রিম ও ছাড়ে শূন্য বা ধনাত্মক পূর্ণসংখ্যা দিন।"));
@@ -350,7 +384,7 @@
           paint(res.order, keepMeta);
           var msg = "অর্ডার আপডেট হয়েছে ✓";
           if (res.hooks && res.hooks.courier === "SENT") msg += " · Steadfast-এ পাঠানো হয়েছে";
-          MaPanel.toast(msg);
+          notify(msg);
         }).then(function (value) {
           setSaveState(false);
           return value;
@@ -361,18 +395,23 @@
       }
 
       $("btnSave").addEventListener("click", function () {
-        save().catch(function (err) { MaPanel.toast(err.message, true); });
+        save().catch(function (err) { notify(err.message, true); });
       });
       ["fName", "fPhone", "fAddress", "fAdminNote", "fCourierNote", "fCharge", "fAdvance", "fDiscount"].forEach(function (id) {
-        $(id).addEventListener("input", function () { dirty = true; if (id === "fCharge" || id === "fAdvance" || id === "fDiscount") recalc(); });
+        $(id).addEventListener("input", function () { syncDirty(); if (id === "fCharge" || id === "fAdvance" || id === "fDiscount") recalc(); });
       });
       ["fCourier", "fStatus", "fAssign"].forEach(function (id) {
-        $(id).addEventListener("change", function () { dirty = true; });
+        $(id).addEventListener("change", syncDirty);
       });
       window.addEventListener("beforeunload", function (event) {
         if (!dirty || saving) return;
         event.preventDefault();
         event.returnValue = "";
+      });
+      document.addEventListener("click", function (event) {
+        var link = event.target.closest && event.target.closest("a[href]");
+        if (!link || !dirty || saving || link.target === "_blank" || link.href.indexOf("#") !== -1) return;
+        if (!window.confirm("আপনার কিছু পরিবর্তন এখনো সংরক্ষণ করা হয়নি। পেজ ছাড়লে এগুলো হারিয়ে যাবে। এগিয়ে যাবেন?")) event.preventDefault();
       });
 
       $("btnCorrect").addEventListener("click", function () {
@@ -382,7 +421,7 @@
           .replace(/(,\s*){2,}/g, ", ")
           .replace(/^[,\s]+|[,\s]+$/g, "");
         $("fAddress").value = v;
-        dirty = true;
+        syncDirty();
         $("btnMap").href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(v);
       });
 
@@ -395,8 +434,8 @@
           reason = prompt("ব্লকের কারণ (ঐচ্ছিক)", "") || "";
         }
         MaAdmin.call("AdminBlockCustomer", { Phone: cur.phone, Block: unblock ? "0" : "1", Reason: reason })
-          .then(function (r) { paintBlock(r.blocked); MaPanel.toast(r.blocked ? "কাস্টমার ব্লক হয়েছে" : "আনব্লক হয়েছে"); })
-          .catch(function (err) { MaPanel.toast(err.message, true); });
+          .then(function (r) { paintBlock(r.blocked); notify(r.blocked ? "কাস্টমার ব্লক হয়েছে" : "আনব্লক হয়েছে"); })
+          .catch(function (err) { notify(err.message, true); });
       });
 
       $("btnCourierSend").addEventListener("click", function () {
@@ -411,9 +450,9 @@
           var keep = { statuses: Array.prototype.map.call($("fStatus").options, function (o) { return o.value; }), couriers: Array.prototype.map.call($("fCourier").options, function (o) { return o.value; }) };
           r.order.blocked = cur && cur.blocked;
           paint(r.order, keep);
-          MaPanel.toast("Steadfast-এ পাঠানো হয়েছে · " + (r.tracking || ""));
+          notify("Steadfast-এ পাঠানো হয়েছে · " + (r.tracking || ""));
         }).catch(function (err) {
-          MaPanel.toast(err.message, true);
+          notify(err.message, true);
         }).then(function () { btn.disabled = false; });
       });
 
@@ -453,7 +492,7 @@
             '<div class="pn-note-muted" style="margin-bottom:10px">Success rate: <b>' + (r.successRate == null ? "—" : r.successRate + "%") + "</b> · শুধু আমাদের নিজের অর্ডার ইতিহাস থেকে হিসাব; অন্য কুরিয়ার/দোকানের ডেটা এতে নেই।</div>" +
             histTable(r.recent);
           MaPanel.openModal("Fraud Check · " + r.phone, html);
-        }).catch(function (err) { MaPanel.toast(err.message, true); })
+        }).catch(function (err) { notify(err.message, true); })
           .then(function () { btn.disabled = false; });
       });
 

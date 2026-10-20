@@ -39,10 +39,15 @@
       el = document.createElement("div");
       el.id = "pnToast";
       el.className = "pn-toast";
+      el.setAttribute("role", "status");
+      el.setAttribute("aria-live", "polite");
+      el.setAttribute("aria-atomic", "true");
       document.body.appendChild(el);
     }
     el.textContent = msg;
-    el.className = "pn-toast show" + (isErr ? " err" : "");
+    el.className = "pn-toast show" + (isErr ? " err" : " ok");
+    el.setAttribute("role", isErr ? "alert" : "status");
+    el.setAttribute("aria-live", isErr ? "assertive" : "polite");
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function () { el.className = "pn-toast"; }, isErr ? 6000 : 3000);
   }
@@ -109,4 +114,3 @@
     openModal: openModal
   };
 })(window);
-

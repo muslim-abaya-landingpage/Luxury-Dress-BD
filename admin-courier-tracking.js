@@ -33,8 +33,14 @@
       if (serial !== generation) return;
       if (result.version !== 1) throw new Error('TRACKING_NOT_READY');
       paint(result);
+      if (refresh && window.MaPanel && MaPanel.toast) {
+        MaPanel.toast('Steadfast courier status updated ✓');
+      }
     }).catch(function () {
-      if (serial === generation) text('ctWarning', 'বিস্তারিত কুরিয়ার সংযোগ সক্রিয় নেই বা সাড়া পাওয়া যাচ্ছে না। মূল স্ট্যাটাস উপরে দেখুন; সম্পূর্ণ তথ্য Steadfast-এ খুলুন।');
+      if (serial === generation) {
+        text('ctWarning', 'বিস্তারিত কুরিয়ার সংযোগ সক্রিয় নেই বা সাড়া পাওয়া যাচ্ছে না। মূল স্ট্যাটাস উপরে দেখুন; সম্পূর্ণ তথ্য Steadfast-এ খুলুন।');
+        if (refresh && window.MaPanel && MaPanel.toast) MaPanel.toast('Steadfast status sync failed', true);
+      }
     }).finally(function () { if (serial === generation) el('ctRefresh').disabled = false; });
   }
   document.addEventListener('ma-order-rendered', function (event) {

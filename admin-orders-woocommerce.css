@@ -385,6 +385,10 @@ body.pn-body.wo-edit-page {
 .wo-edit-page #btnSave { background: #2271b1; border-color: #135e96; color: #fff; text-shadow: 0 -1px 1px rgba(0,0,0,.15); }
 .wo-edit-page #btnSave { min-height: 38px; margin-bottom: 16px; border-radius: 3px; font-size: 13px; }
 .wo-edit-page #btnSave:hover { background: #135e96; }
+.wo-edit-page #btnSave.wo-save-dirty { box-shadow: 0 0 0 2px rgba(34,113,177,.18); }
+.wo-edit-page #btnSave.wo-save-dirty::after { content: " • unsaved"; font-size: 11px; font-weight: 400; opacity: .9; }
+.wo-edit-page .pn-toast.ok { border-left: 3px solid #00a32a; }
+.wo-edit-page .pn-toast.err { border-left: 3px solid #d63638; }
 .wo-edit-page .pn-cust-actions { margin-top: 15px; padding-top: 12px; border-top: 1px solid #dcdcde; }
 .wo-edit-page .pn-cust-actions b { color: #1d2327; font-size: 12px; }
 .wo-edit-page .pn-cust-actions small { color: #646970; font-size: 11px; }
