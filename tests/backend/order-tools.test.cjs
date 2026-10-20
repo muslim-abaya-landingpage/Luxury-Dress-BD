@@ -78,3 +78,16 @@ test('item parser handles every checkout format seen in the sheet', () => {
   const a = T.parseItems('Black White Polka (1টি)')[0], b = T.parseItems('black white polka × 1 pcs = ৳550')[0];
   assert.equal(a.key, b.key, 'same product groups together regardless of case');
 });
+
+test('district guess: only an unambiguous match, Bengali spelling variants and Dhaka areas', () => {
+  const D = [{ bn: 'ঢাকা', en: 'Dhaka' }, { bn: 'টাঙ্গাইল', en: 'Tangail' }, { bn: 'নারায়ণগঞ্জ', en: 'Narayanganj' }, { bn: 'চট্টগ্রাম', en: 'Chittagong' }, { bn: 'মুন্সীগঞ্জ', en: 'Munshiganj' }];
+  assert.equal(T.guessDistrict('গ্রাম:চরজানা, থানা ও জেলা টাংগাইল', D), 'টাঙ্গাইল');
+  assert.equal(T.guessDistrict('সোনার গা, নারায়ণগন্জ', D), 'নারায়ণগঞ্জ');
+  assert.equal(T.guessDistrict('House 5, Agrabad, Chattogram', D), 'চট্টগ্রাম');
+  assert.equal(T.guessDistrict('Uttara sector 18, Aparajita', D), 'ঢাকা');
+  assert.equal(T.guessDistrict('উত্তরা সেক্টর 18', D), 'ঢাকা');
+  assert.equal(T.guessDistrict('Dhaka to Tangail bus stand', D), '', 'two districts → no guess');
+  assert.equal(T.guessDistrict('Jury', D), '');
+  const rep = T.report([{ orderId: 'A', address: 'Mirpur 10', status: 'Delivered', total: 100, items: ['x'] }], D);
+  assert.equal(rep.districts[0].key, 'ঢাকা'); assert.equal(rep.guessedDistricts, 1);
+});

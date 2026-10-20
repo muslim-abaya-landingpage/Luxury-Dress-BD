@@ -173,3 +173,23 @@ test('daily summary goes to Telegram as well as email', () => {
   const r2 = box.sendDailySummaryEmail_();
   assert.equal(r2.email, true); assert.equal(r2.telegram, false, 'email still goes when Telegram is not set up');
 });
+
+test('backup catch-up reruns a stale backup and alerts only when it keeps failing', () => {
+  const props = {}, sent = []; let ok = false, runs = 0;
+  const H = 3600 * 1000, now = Date.parse('2026-10-21T10:00:00Z');
+  const box = { console: { log() {} },
+    PropertiesService: { getScriptProperties: () => ({ getProperty: k => (k in props ? props[k] : null), setProperty: (k, v) => { props[k] = String(v); } }) },
+    hasDailySafetyBackupTrigger_: () => true,
+    runSafetyBackupNow: () => { runs++; if (ok) { props.OPS_LAST_BACKUP_AT = new Date(now).toISOString(); return { ok: true }; } return { ok: false, error: 'server error' }; },
+    recordAutomationLog_: () => {}, sendAdminAndTelegramNotification_: (s) => sent.push(s) };
+  vm.createContext(box); vm.runInContext(MON, box);
+  props.OPS_LAST_BACKUP_AT = new Date(now - 20 * H).toISOString();
+  assert.equal(box.ensureRecentBackup_(now), 'FRESH'); assert.equal(runs, 0);
+  props.OPS_LAST_BACKUP_AT = new Date(now - 27 * H).toISOString();
+  assert.equal(box.ensureRecentBackup_(now), 'RETRY_FAILED'); assert.equal(runs, 1); assert.equal(sent.length, 0, 'no alert before 30h');
+  assert.equal(box.ensureRecentBackup_(now + 1 * H), 'WAITING', 'waits 3h between retries');
+  assert.equal(box.ensureRecentBackup_(now + 4 * H), 'ALERTED'); assert.equal(sent.length, 1);
+  assert.equal(box.ensureRecentBackup_(now + 7 * H), 'RETRY_FAILED', 'one alert per day'); assert.equal(sent.length, 1);
+  ok = true;
+  assert.equal(box.ensureRecentBackup_(now + 11 * H), 'CAUGHT_UP');
+});

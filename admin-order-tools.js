@@ -97,6 +97,31 @@
   }
   function parseItem(line) { return parseItems(line)[0] || { name: "(নাম নেই)", key: "", qty: 1 }; }
 
+  /* ---- district guess from address (report only; the sheet is never changed) ---- */
+  var DISTRICT_ALIAS = { Chittagong: ["chattogram", "ctg"], Barisal: ["barishal"], Bogura: ["bogra"], Jessore: ["jashore"], Comilla: ["cumilla"], "Cox's Bazar": ["coxs bazar", "cox bazar"] };
+  var DHAKA_AREAS = ["mirpur", "uttara", "khilkhet", "dhanmondi", "mohammadpur", "badda", "gulshan", "banani", "motijheel", "jatrabari", "rampura", "malibagh", "mohakhali", "tejgaon", "keraniganj", "savar", "ashulia", "demra", "khilgaon", "basundhara", "bashundhara",
+    "মিরপুর", "উত্তরা", "খিলক্ষেত", "ধানমন্ডি", "মোহাম্মদপুর", "বাড্ডা", "গুলশান", "বনানী", "মতিঝিল", "যাত্রাবাড়ী", "রামপুরা", "মালিবাগ", "মহাখালী", "তেজগাঁও", "কেরানীগঞ্জ", "সাভার", "আশুলিয়া", "ডেমরা", "খিলগাঁও", "বসুন্ধরা"];
+  function normBn(s) {
+    return String(s || "").toLowerCase()
+      .replace(/ন্জ/g, "ঞ্জ").replace(/ংগ/g, "ঙ্গ").replace(/ড়/g, "ড়").replace(/ঢ়/g, "ঢ়").replace(/য়/g, "য়")
+      .replace(/[^a-z\u0980-\u09ff]+/g, " ").replace(/\s+/g, " ").trim();
+  }
+  /** districts: [{bn,en}] (CHECKOUT_DISTRICTS). Returns the Bengali name only when exactly one district matches. */
+  function guessDistrict(address, districts) {
+    var a = " " + normBn(address) + " ";
+    if (a.trim() === "" || !districts || !districts.length) return "";
+    var hits = districts.filter(function (d) {
+      var names = [d.bn, d.en].concat(DISTRICT_ALIAS[d.en] || []);
+      return names.some(function (n) { var k = normBn(n); return k && a.indexOf(" " + k + " ") !== -1; });
+    });
+    if (hits.length === 1) return hits[0].bn;
+    if (!hits.length && DHAKA_AREAS.some(function (k) { return a.indexOf(" " + normBn(k)) !== -1; })) {
+      var dhaka = districts.filter(function (d) { return d.en === "Dhaka"; })[0];
+      return dhaka ? dhaka.bn : "";
+    }
+    return "";
+  }
+
   function emptyRow() { return { orders: 0, delivered: 0, failed: 0, active: 0, value: 0 }; }
   function tally(row, kind, value) {
     row.orders++;
@@ -106,11 +131,13 @@
   }
   function failRate(r) { var done = r.delivered + r.failed; return done ? Math.round((r.failed / done) * 100) : null; }
 
-  function report(orders) {
-    var byDistrict = {}, byProduct = {}, reasons = {}, totals = emptyRow();
+  function report(orders, districts) {
+    var byDistrict = {}, byProduct = {}, reasons = {}, totals = emptyRow(), guessed = 0;
     (orders || []).forEach(function (o) {
       var kind = outcome(o), value = num(o.total);
-      var d = text(o.district) || "জেলা লেখা নেই";
+      var d = text(o.district);
+      if (!d && districts) { d = guessDistrict(o.address, districts); if (d) guessed++; }
+      d = d || "জেলা লেখা নেই";
       tally(byDistrict[d] = byDistrict[d] || emptyRow(), kind, value);
       tally(totals, kind, value);
       itemsOf(o).forEach(function (line) { parseItems(line).forEach(function (it) {
@@ -128,7 +155,7 @@
       return Object.keys(map).map(function (k) { var r = map[k]; r.key = k; return r; })
         .sort(function (a, b) { return (b[sortKey] - a[sortKey]) || a.key.localeCompare(b.key); });
     }
-    return { totals: totals, districts: rows(byDistrict, "orders"), products: rows(byProduct, "units"),
+    return { totals: totals, guessedDistricts: guessed, districts: rows(byDistrict, "orders"), products: rows(byProduct, "units"),
       reasons: Object.keys(reasons).map(function (k) { return { reason: k, count: reasons[k] }; }).sort(function (a, b) { return b.count - a.count; }) };
   }
 
@@ -148,7 +175,7 @@
 
   var api = { REASONS: REASONS, waPhone: waPhone, confirmMessage: confirmMessage, waUrl: waUrl, needsReason: needsReason,
     reasonOf: reasonOf, withReason: withReason, outcome: outcome, parseItem: parseItem, parseItems: parseItems, report: report,
-    courierPlan: courierPlan, failRate: failRate };
+    courierPlan: courierPlan, failRate: failRate, guessDistrict: guessDistrict };
   root.MaOrderTools = api;
   if (typeof module !== "undefined" && module.exports) { module.exports = api; return; }
   if (typeof document === "undefined") return;
@@ -295,11 +322,22 @@
   }
   function rateCell(r) { return r == null ? "—" : '<span class="' + (r >= 30 ? "ot-bad" : "") + '">' + r + "%</span>"; }
 
+  var districtList = null, districtLoading = false;
+  function loadDistricts() {
+    if (districtList || districtLoading) return;
+    districtLoading = true;
+    fetch("/checkout-location-labels.js").then(function (r) { return r.ok ? r.text() : ""; }).then(function (t) {
+      var m = /CHECKOUT_DISTRICTS\s*=\s*(\[[\s\S]*?\]);/.exec(t || "");
+      districtList = m ? JSON.parse(m[1]) : [];
+    }).catch(function () { districtList = []; }).then(function () { districtLoading = false; paintReport(); });
+  }
   function paintReport() {
     var box = $("otReportBody"); if (!box || !$("otReport").open) return;
-    var list = ordersNow(), rep = report(list), total = root.MaOrdersState && root.MaOrdersState.total;
+    loadDistricts();
+    var list = ordersNow(), rep = report(list, districtList && districtList.length ? districtList : null), total = root.MaOrdersState && root.MaOrdersState.total;
     box.innerHTML =
-      '<p class="ot-note">লোড হওয়া ' + list.length + (total && total > list.length ? " / " + total : "") + 'টি অর্ডারের হিসাব। "ব্যর্থ" মানে বাতিল, Fake বা রিটার্ন। ব্যর্থতার হার = ব্যর্থ ÷ (ডেলিভারড + ব্যর্থ); চলমান অর্ডার এতে ধরা হয়নি।</p>' +
+      '<p class="ot-note">লোড হওয়া ' + list.length + (total && total > list.length ? " / " + total : "") + 'টি অর্ডারের হিসাব। "ব্যর্থ" মানে বাতিল, Fake বা রিটার্ন। ব্যর্থতার হার = ব্যর্থ ÷ (ডেলিভারড + ব্যর্থ); চলমান অর্ডার এতে ধরা হয়নি।' +
+      (rep.guessedDistricts ? " জেলা লেখা না থাকা " + rep.guessedDistricts + "টি অর্ডারের জেলা ঠিকানা থেকে অনুমান করা হয়েছে (শিটে কিছু বদলানো হয়নি)।" : "") + '</p>' +
       '<div class="ot-grid"><div><h3>জেলা অনুযায়ী</h3>' +
       table(["জেলা", "অর্ডার", "ডেলিভারড", "ব্যর্থ", "ব্যর্থতার হার", "ডেলিভারড মূল্য"], rep.districts.map(function (r) {
         return "<tr><td>" + esc(r.key) + "</td><td>" + r.orders + "</td><td>" + r.delivered + "</td><td>" + r.failed + "</td><td>" + rateCell(failRate(r)) + "</td><td>" + money(r.value) + "</td></tr>";

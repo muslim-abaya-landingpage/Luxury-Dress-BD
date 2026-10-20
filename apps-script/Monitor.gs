@@ -33,7 +33,9 @@ function siteUptimeCheck() {
     notified = 'RECOVERED';
     monitorNotify_('✅ muslimabaya.com আবার চালু', 'সাইট আবার স্বাভাবিকভাবে খুলছে।');
   }
-  var result = { ok: true, failures: failures, streak: streak, notified: notified };
+  var backup = '';
+  try { backup = ensureRecentBackup_(); } catch (backupErr) { backup = 'ERROR'; }
+  var result = { ok: true, failures: failures, streak: streak, notified: notified, backup: backup };
   console.log('UPTIME ' + JSON.stringify(result));
   return result;
 }
@@ -53,4 +55,43 @@ function setupUptimeMonitorTrigger() {
   });
   ScriptApp.newTrigger('siteUptimeCheck').timeBased().everyHours(1).create();
   return { ok: true, interval: 'every hour' };
+}
+
+/**
+ * Backup catch-up. The daily backup trigger occasionally dies with a Google
+ * "server error" before our code can catch it. If the last successful backup
+ * is older than 26 hours, run it again (at most every 3 hours); if it is still
+ * missing after 30 hours, alert once per day.
+ */
+var BACKUP_STALE_MS_ = 26 * 3600 * 1000;
+var BACKUP_ALERT_MS_ = 30 * 3600 * 1000;
+var BACKUP_RETRY_GAP_MS_ = 3 * 3600 * 1000;
+
+function ensureRecentBackup_(nowMs) {
+  var now = Number(nowMs) || Date.now();
+  var props = PropertiesService.getScriptProperties();
+  if (typeof runSafetyBackupNow !== 'function' || typeof hasDailySafetyBackupTrigger_ !== 'function') return 'NO_BACKUP';
+  if (!hasDailySafetyBackupTrigger_()) return 'NO_TRIGGER';
+  var last = Date.parse(props.getProperty('OPS_LAST_BACKUP_AT') || '');
+  var age = isFinite(last) ? now - last : Infinity;
+  if (age < BACKUP_STALE_MS_) return 'FRESH';
+  var lastTry = Date.parse(props.getProperty('BACKUP_CATCHUP_AT') || '');
+  if (isFinite(lastTry) && now - lastTry < BACKUP_RETRY_GAP_MS_) return 'WAITING';
+  props.setProperty('BACKUP_CATCHUP_AT', new Date(now).toISOString());
+  var res = null;
+  try { res = runSafetyBackupNow(); } catch (err) { res = { ok: false, error: String(err && err.message || err) }; }
+  if (typeof recordAutomationLog_ === 'function') {
+    recordAutomationLog_('BACKUP', !!(res && res.ok), 0, 0, 'catch-up: ' + (res && res.ok ? 'ok' : String(res && res.error || 'failed')));
+  }
+  if (res && res.ok) return 'CAUGHT_UP';
+  var today = new Date(now + 6 * 3600 * 1000).toISOString().slice(0, 10);
+  if (age >= BACKUP_ALERT_MS_ && props.getProperty('BACKUP_ALERT_DAY') !== today) {
+    props.setProperty('BACKUP_ALERT_DAY', today);
+    monitorNotify_('⚠ অর্ডার শিটের ব্যাকআপ হচ্ছে না',
+      'শেষ সফল ব্যাকআপ ' + (isFinite(last) ? Math.round(age / 3600000) + ' ঘণ্টা আগে' : 'পাওয়া যায়নি') +
+      '। আবার চেষ্টা করেও হয়নি: ' + String(res && res.error || 'অজানা কারণ') +
+      '\n\nApps Script → Executions দেখুন, বা এডিটর থেকে runSafetyBackupNow চালান।');
+    return 'ALERTED';
+  }
+  return 'RETRY_FAILED';
 }

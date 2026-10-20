@@ -50,7 +50,8 @@
       if (!id) issues.push('missing_id');
       else if (seen[id] > 1) issues.push('duplicate_id');
       var size = text(o.size);
-      if (!size || /^(?:—|-|null|undefined)$/i.test(size)) issues.push('missing_size');
+      // Size only matters while the order still has to be packed; finished orders are not flagged.
+      if ((group === 'active' || group === 'unknown') && (!size || /^(?:—|-|null|undefined)$/i.test(size))) issues.push('missing_size');
       var date = dateKey(o.time);
       if (!date) issues.push('invalid_date');
       else {
