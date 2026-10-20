@@ -246,7 +246,7 @@
         '<td style="padding:6px">' + imgHtml + '</td>' +
         '<td style="padding:6px"><strong>' + g.productName + '</strong><br><span style="color:#888;font-size:0.8rem">' + catLabel + '</span></td>' +
         '<td style="padding:6px;font-family:monospace;font-size:0.85rem">' + g.productId + '</td>' +
-        '<td style="padding:6px">' + (multi ? (g.variants.length + ' টি') : (g.variants[0].variant || '—')) + '</td>' +
+        '<td style="padding:6px">' + (multi ? (g.variants.length + ' টি') : (g.variants[0].variant || 'সব সাইজ (মোট)')) + '</td>' +
         '<td style="padding:6px">' + (multi || !g.variants[0].tracked ? '—' : g.variants[0].available) + '</td>' +
         '<td style="padding:6px">' + (multi ? '—' : g.variants[0].reserved) + '</td>' +
         '<td style="padding:6px">' + statusBadge(worst) + '</td>' +
@@ -259,7 +259,7 @@
           '<table style="width:100%;border-collapse:collapse;font-size:0.85rem">' +
           g.variants.map(function (v) {
             return '<tr style="border-bottom:1px solid #eee">' +
-              '<td style="padding:4px 8px;width:120px">' + (v.variant || '(কোনো ভ্যারিয়েন্ট নেই)') + '</td>' +
+              '<td style="padding:4px 8px;width:120px">' + (v.variant || 'সব সাইজ (মোট)') + '</td>' +
               '<td style="padding:4px 8px">Available: <strong>' + v.available + '</strong></td>' +
               '<td style="padding:4px 8px">Reserved: <strong>' + v.reserved + '</strong></td>' +
               '<td style="padding:4px 8px">' + statusBadge(v.status) + '</td>' +

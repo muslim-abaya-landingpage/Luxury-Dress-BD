@@ -451,6 +451,11 @@
       if (matched && matched.tracked === true) {
         return Math.max(0, parseInt(matched.available, 10) || 0);
       }
+      // সাইজের আলাদা সারি না থাকলে পণ্যের "সব সাইজ" পুল (খালি Variant) ব্যবহার হয় — Apps Script-এর একই নিয়ম।
+      var pool = !matched ? variants._default : null;
+      if (pool && pool.tracked === true) {
+        return Math.max(0, parseInt(pool.available, 10) || 0);
+      }
       if (hasTrackedVariants) return 0; // tracked product-এর অজানা/untracked size বিক্রিযোগ্য নয়
     }
 

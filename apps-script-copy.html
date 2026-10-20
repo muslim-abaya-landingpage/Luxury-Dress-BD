@@ -5785,6 +5785,40 @@ function stockRequirementsForCart_(cartItems) {
   return out;
 }
 
+/**
+ * Flexible stock: a StockVariants row with an empty Variant is the product's
+ * "all sizes" pool. A cart line whose exact size has no row uses that pool,
+ * so the owner can keep one total per product, per-size counts, or a mix,
+ * and change between them at any time. Lines that resolve to the same row are
+ * merged so availability is checked against the combined quantity.
+ */
+function resolveStockRequirementsForCart_(cartItems, data) {
+  data = data || [];
+  var merged = Object.create(null);
+  var out = [];
+  stockRequirementsForCart_(cartItems).forEach(function (req) {
+    var variant = req.variant;
+    if (variant &amp;&amp; findStockVariantRowIndex_(data, req.productId, variant) === -1 &amp;&amp;
+        findStockVariantRowIndex_(data, req.productId, '') !== -1) {
+      variant = '';
+    }
+    var key = req.productId + '\u001f' + stockVariantCompareKey_(variant);
+    var target = merged[key];
+    if (!target) {
+      target = merged[key] = {
+        productId: req.productId,
+        productName: req.productName,
+        category: req.category,
+        variant: variant,
+        qty: 0
+      };
+      out.push(target);
+    }
+    target.qty += req.qty;
+  });
+  return out;
+}
+
 function legacyProductStockRequirements_(cartItems, variantData, legacyData) {
   variantData = variantData || [];
   legacyData = legacyData || [];
@@ -5827,7 +5861,7 @@ function trackedStockRequirements_(cartItems, data, strictMissingVariant) {
     if (pid &amp;&amp; stockRowIsTracked_(row)) trackedProducts[pid] = true;
   }
   var requirements = [];
-  stockRequirementsForCart_(cartItems).forEach(function (req) {
+  resolveStockRequirementsForCart_(cartItems, data).forEach(function (req) {
     var rowIndex = findStockVariantRowIndex_(data, req.productId, req.variant);
     if (rowIndex === -1) {
       if (strictMissingVariant &amp;&amp; trackedProducts[req.productId]) {
@@ -5869,7 +5903,7 @@ function assertStockRequirementsAvailable_(requirements) {
 function reservedStockRequirements_(cartItems, data) {
   data = data || [];
   var requirements = [];
-  stockRequirementsForCart_(cartItems).forEach(function (req) {
+  resolveStockRequirementsForCart_(cartItems, data).forEach(function (req) {
     var rowIndex = findStockVariantRowIndex_(data, req.productId, req.variant);
     if (rowIndex === -1) return;
     var row = data[rowIndex - 1];
