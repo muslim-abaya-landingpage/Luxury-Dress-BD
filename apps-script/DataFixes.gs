@@ -4,9 +4,11 @@
  * Apply re-checks every cell before writing and records before/after in AutomationLogs.
  *  A) MA-LEGACY-D12B4EEB7677: date 10-12-2026 → 12-10-2026 (day/month were swapped)
  *  B) Order by "Nahid Nahar" with no Order ID → give it an ID from its own order date
- *  C) MA-20261011-4777: quantity/total from the checkout record (3 pcs, ৳2885)
+ *  C) MA-20261011-4777: quantity/total/items from the checkout record (3 pcs, ৳2885)
  */
-var DF_ = { swapId: 'MA-LEGACY-D12B4EEB7677', noIdName: 'Nahid Nahar', qtyId: 'MA-20261011-4777', qty: 3, total: 2885 };
+var DF_ = { swapId: 'MA-LEGACY-D12B4EEB7677', noIdName: 'Nahid Nahar', qtyId: 'MA-20261011-4777', qty: 3, total: 2885,
+  oldDesign: '1. Premium Black Hafeza Set (Full Set)',
+  design: '1. Elegant Purple Floral Kurti (Size 38) × 1\n2. Premium Black Hafeza Set (Full Set) (Body 42 · Length 52) × 1\n3. Elegant Grey Leaf Print Kurti (Size 38) × 1' };
 
 function dfRows_() {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
@@ -90,7 +92,10 @@ function dataFix20261021Apply() {
       if (Number(before.qty) !== DF_.qty || Number(String(before.total).replace(/[^\d.]/g, '')) !== DF_.total) {
         qCell.setValue(DF_.qty); tCell.setValue(DF_.total);
         done.push('C row ' + rowC + ': qty ' + before.qty + ' → ' + DF_.qty + ', total ' + before.total + ' → ' + DF_.total);
-      } else done.push('C already correct');
+      } else done.push('C qty/total already correct');
+      var gCell = sheet.getRange(rowC, 7);
+      if (String(gCell.getValue() || '').trim() === DF_.oldDesign) { gCell.setValue(DF_.design); done.push('C row ' + rowC + ': items → 3 checkout items'); }
+      else done.push('C items unchanged (not the single-item text)');
     } else done.push('C skipped: found ' + f.qty.length + ' rows');
   } finally { lock.releaseLock(); }
   if (typeof recordAutomationLog_ === 'function') recordAutomationLog_('DATAFIX', true, done.length, 0, done.join(' | '));
