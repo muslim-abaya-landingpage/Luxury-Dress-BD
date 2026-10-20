@@ -8583,7 +8583,7 @@ function setupOrderSyncTrigger() {
     .everyMinutes(15)
     .create();
 
-  SpreadsheetApp.getUi().alert('OrderSync ON — প্রতি ১৫ মিনিটে sync হবে।');
+  try { SpreadsheetApp.getUi().alert('OrderSync ON — প্রতি ১৫ মিনিটে sync হবে।'); } catch (uiErr) {}
 }
 
 function setupOrderSyncNewOrderAutomation() {
