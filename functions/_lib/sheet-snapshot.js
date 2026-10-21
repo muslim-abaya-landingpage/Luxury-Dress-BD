@@ -2,7 +2,7 @@
 import { toAppsScriptValues } from './sheets-shim.js';
 
 const API = 'https://sheets.googleapis.com/v4/spreadsheets/';
-export const READ_SHEETS = ['Online Order', 'Sessions', 'Admins', 'Blocked'];
+export const READ_SHEETS = ['Online Order', 'Sessions', 'Admins', 'Blocked', 'StockVariants'];
 const META_TTL_MS = 10 * 60 * 1000;
 let metaCache = { id: '', at: 0, meta: null };
 

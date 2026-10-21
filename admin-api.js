@@ -55,7 +55,7 @@
   // Fast read path: the site's own Cloudflare function answers order list/detail reads from the
   // sheet directly (read-only). Anything other than ok:true falls back to Apps Script, which stays
   // the source of truth and the only writer. If the edge is not set up, it is skipped for 10 minutes.
-  var EDGE_TYPES = ["AdminVerify", "AdminOrderList", "AdminOrderGet", "AdminOrders", "AdminFraudCheck", "AdminOrderStaff", "AdminCustomerLookup"];
+  var EDGE_TYPES = ["AdminVerify", "AdminOrderList", "AdminOrderGet", "AdminOrders", "AdminFraudCheck", "AdminOrderStaff", "AdminCustomerLookup", "AdminStockVariantsList", "AdminAnalyticsV2"];
   var EDGE_URL = cfg.edgeReadUrl === undefined ? "/api/admin-read" : cfg.edgeReadUrl;
   var EDGE_OFF_KEY = "ma_admin_edge_off";
   function edgeRead(fields, body) {

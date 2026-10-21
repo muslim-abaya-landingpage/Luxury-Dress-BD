@@ -42,7 +42,14 @@ function fixture() {
   const admins = [['Email', 'Phone', 'Name', 'PasswordHash', 'Salt', 'Status', 'CreatedAt', 'Role', 'UpdatedAt'],
     ['owner@example.com', '01700000000', 'Owner', 'h', 's', 'active', new Date(NOW - 9e9), 'admin']];
   const blocked = [['Phone', 'Reason', 'BlockedAt', 'BlockedBy'], ['01722222222', 'fake', new Date(NOW - 86400000), 'Owner']];
-  return { 'Online Order': orders, Sessions: sessions, Admins: admins, Blocked: blocked };
+  const stock = [['Product ID', 'Product Name', 'Category', 'Variant', 'Tracked', 'Available', 'Reserved', 'LowStockThreshold', 'UpdatedAt', 'UpdatedBy'],
+    ['ABY-1', 'Abaya Black', 'abaya', 'M', true, 0, 0, '', new Date(NOW - 86400000), 'Owner'],
+    ['ABY-1', 'Abaya Black', 'abaya', 'L', true, 1, 0, 3, new Date(NOW - 86400000), 'Owner'],
+    ['HJB-2', 'Hijab', '', 'Free', false, 9, 0, '', 'text date', '']];
+  orders[3][32] = JSON.stringify([{ id: 'ABY-1', name: 'Abaya Black', qty: 1, size: 'M', category: 'abaya' }]);
+  orders[2][32] = JSON.stringify([{ id: 'HJB-2', name: 'Hijab', qty: 2 }]);
+  orders[2][36] = 'Facebook';
+  return { 'Online Order': orders, Sessions: sessions, Admins: admins, Blocked: blocked, StockVariants: stock };
 }
 
 // What the Sheets API would return for those values (serials + formatted copy; trailing blanks trimmed).
@@ -120,6 +127,11 @@ test('dashboard, verify, fraud, staff and customer reads match Apps Script exact
     (c) => c.adminStaffList_({ parameter: { Token: 'tok-admin' } }),
     (c) => c.adminCustomerLookup_({ parameter: { Token: 'tok-admin', Phone: '01711111111' } }),
     (c) => c.adminCustomerLookup_({ parameter: { Token: 'tok-admin', Phone: '01799999999' } }),
+    (c) => c.getAdminStockVariants_({ parameter: { Token: 'tok-admin', StockStatus: 'all' } }),
+    (c) => c.getAdminStockVariants_({ parameter: { Token: 'tok-admin', Search: 'aby', CategoryMap: '{"HJB-2":"hijab"}' } }),
+    (c) => c.getAdminAnalyticsV2_({ parameter: { Token: 'tok-admin', Range: 'today' } }),
+    (c) => c.getAdminAnalyticsV2_({ parameter: { Token: 'tok-admin', Range: '30d' } }),
+    (c) => c.getAdminAnalyticsV2_({ parameter: { Token: 'tok-admin', Range: 'all' } }),
   ];
   for (const run of cases) {
     const a = withNow(() => run(truth));

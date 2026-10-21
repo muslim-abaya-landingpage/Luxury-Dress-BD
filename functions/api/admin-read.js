@@ -23,8 +23,10 @@ const ALLOWED = {
   AdminFraudCheck: 'adminFraudCheck_',
   AdminOrderStaff: 'adminStaffList_',
   AdminCustomerLookup: 'adminCustomerLookup_',
+  AdminStockVariantsList: 'getAdminStockVariants_',
+  AdminAnalyticsV2: 'getAdminAnalyticsV2_',
 };
-const FIELDS = ['RecordType', 'Token', 'Limit', 'Cursor', 'OrderId', 'Phone'];
+const FIELDS = ['RecordType', 'Token', 'Limit', 'Cursor', 'OrderId', 'Phone', 'Search', 'StockStatus', 'Category', 'CategoryMap', 'Range', 'From', 'To'];
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -45,7 +47,7 @@ export async function handleAdminRead(request, env, deps = {}) {
   let params;
   try {
     const text = await request.text();
-    if (text.length > 4096) return json({ ok: false, error: 'TOO_LARGE' }, 413);
+    if (text.length > 65536) return json({ ok: false, error: 'TOO_LARGE' }, 413);
     const form = new URLSearchParams(text);
     params = {};
     FIELDS.forEach((k) => { if (form.has(k)) params[k] = String(form.get(k) || '').trim(); });

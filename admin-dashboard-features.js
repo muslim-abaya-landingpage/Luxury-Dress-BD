@@ -138,14 +138,22 @@
     setStatus("admAlertState", "অ্যালার্ট আপডেট হচ্ছে…", false);
     var stockPromise = MaAdmin.getStockVariants({ stockStatus: "all" }).then(function (res) { return { ok: true, data: res }; }, function (error) { return { ok: false, error: error }; });
     var inboxPromise = MaAdmin.inboxCall("InboxList", { Unread: "1", Limit: 300 }).then(function (res) { return { ok: true, data: res }; }, function (error) { return { ok: false, error: error }; });
-    return Promise.all([stockPromise, inboxPromise]).then(function (results) {
-      var stockResult = results[0], inboxResult = results[1];
-      var currentStock = [], currentInbox = [];
-      var stockNode = byId("admStockAlerts"), inboxNode = byId("admInboxAlerts");
+    // Each card renders as soon as its own data arrives (the inbox is slower and must not hold up stock).
+    var currentStock = [], currentInbox = [];
+    stockPromise = stockPromise.then(function (stockResult) {
+      var stockNode = byId("admStockAlerts");
       if (stockResult.ok) currentStock = renderStockAlerts(stockResult.data.items, stockResult.data.defaultThreshold) || [];
       else if (stockNode) stockNode.innerHTML = '<div class="adm-feature-error" role="alert">' + escapeHtml(errorText(stockResult.error)) + '</div>';
+      return stockResult;
+    });
+    inboxPromise = inboxPromise.then(function (inboxResult) {
+      var inboxNode = byId("admInboxAlerts");
       if (inboxResult.ok) currentInbox = renderInboxAlerts(inboxResult.data) || [];
       else if (inboxNode) inboxNode.innerHTML = '<div class="adm-feature-error" role="alert">' + escapeHtml(errorText(inboxResult.error)) + '</div>';
+      return inboxResult;
+    });
+    return Promise.all([stockPromise, inboxPromise]).then(function (results) {
+      var stockResult = results[0], inboxResult = results[1];
 
       var stockSignature = currentStock.map(stockKey).sort();
       var inboxMap = {};
