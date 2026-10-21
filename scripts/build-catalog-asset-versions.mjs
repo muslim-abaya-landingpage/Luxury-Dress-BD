@@ -14,14 +14,19 @@ function walk(dir) {
     if (entry.isDirectory()) { walk(full); continue; }
     if (!entry.name.endsWith('.html')) continue;
     const before = fs.readFileSync(full, 'utf8');
-    const after = before.replace(/(<script\b[^>]*\bsrc=)(["'])([^"']+)\2/gi, (match, prefix, quote, url) => {
+    const stamp = (match, prefix, quote, url) => {
       if (/^(?:[a-z]+:)?\/\//i.test(url)) return match;
       const file = url.split(/[?#]/)[0].split('/').pop();
       if (!versions.has(file)) return match;
       const parsed = new URL(url, 'https://local.invalid/');
       parsed.searchParams.set('v', versions.get(file));
       return prefix + quote + url.split(/[?#]/)[0] + parsed.search + parsed.hash + quote;
-    });
+    };
+    // <script src> and the matching <link rel=preload href> must carry the same version,
+    // otherwise the browser downloads the file twice (preloaded copy is never used).
+    const after = before
+      .replace(/(<script\b[^>]*\bsrc=)(["'])([^"']+)\2/gi, stamp)
+      .replace(/(<link\b(?=[^>]*\brel=["']?preload)[^>]*\bhref=)(["'])([^"']+)\2/gi, stamp);
     if (after !== before) {fs.writeFileSync(full, after); updated++;}
   }
 }

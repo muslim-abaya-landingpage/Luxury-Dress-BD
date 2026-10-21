@@ -207,7 +207,7 @@ test('admin session verification rejects blocked accounts and stale roles', () =
       findAdminByEmail_: () => currentAdmin,
       findAdminByPhone_: () => currentAdmin
     };
-    return runFunction('verifyAdminSession_', sandbox)('t');
+    return runFunction('verifyAdminSessionUncached_', sandbox)('t');
   }
   assert.equal(verify({ email: 'staff@example.com', phone: '01900000000', role: 'staff', status: 'BLOCKED' }, 'staff').error, 'BLOCKED');
   assert.equal(verify({ email: 'staff@example.com', phone: '01900000000', role: 'admin', status: 'active' }, 'staff').error, 'NOT_ADMIN');

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <link rel="preload" as="script" href="site-api-config.js?v=20261009-inbox">
   <link rel="preload" as="script" href="admin-config.js?v=20261009-inbox">
-  <link rel="preload" as="script" href="admin-api.js?v=20261013-speed2">
+  <link rel="preload" as="script" href="admin-api.js?v=80dbd3e930707465">
   <link rel="preload" as="script" href="admin-guard.js?v=20261010-speed">
   <link rel="preload" as="script" href="admin-panel.js?v=20261021-notify1">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,10 +20,10 @@
 <link rel="stylesheet" href="admin-dashboard-design.css?v=20261018-3">
   <script src="admin-dashboard-design.js?v=20261018-3"></script>
   <link rel="stylesheet" href="admin-premium-layout.css?v=20261018-3">
-  <link rel="stylesheet" href="admin-orders-woocommerce.css?v=20261021-wo5">
+  <link rel="stylesheet" href="admin-orders-woocommerce.css?v=20261021-wo7">
   <script src="admin-order-status.js?v=20261018-2"></script>
 <script src="admin-courier-tracking.js?v=20261021-notify1"></script>
-  <style>.pn-head .adm-heading{flex:1 1 260px;min-width:220px}.pn-head .adm-heading h1{overflow-wrap:anywhere}</style>
+  <style>.wo-stale-note{margin:0 0 12px;padding:8px 12px;border-radius:10px;background:var(--adm-accent-wash,#f2edfc);color:var(--adm-accent-ink,#6240b2);font-size:13px}.wo-stale-note[hidden]{display:none}#oGrid.wo-stale{opacity:.92}.pn-head .adm-heading{flex:1 1 260px;min-width:220px}.pn-head .adm-heading h1{overflow-wrap:anywhere}</style>
 </head>
 <body class="pn-body wo-edit-page">
   <div class="pn-app adm-shell">
@@ -235,11 +235,28 @@
         if (!saving) syncDirty();
       }
 
+      /** "Name (Size 38) × 2 pcs = ৳1,100" → { name, qty, price }; unknown parts stay blank instead of guessed. */
+      function splitItem(text) {
+        var t = String(text || "").trim(), qty = "", price = "", m;
+        if ((m = /=\s*৳\s*([\d,]+(?:\.\d+)?)\s*$/.exec(t))) { price = m[1].replace(/,/g, ""); t = t.slice(0, m.index).trim(); }
+        if ((m = /[×x]\s*(\d+)\s*(?:pcs?|টি|পিস)?\s*$/i.exec(t))) { qty = m[1]; t = t.slice(0, m.index).trim(); }
+        else if ((m = /\(\s*(\d+)\s*(?:টি|pcs?|পিস)?\s*\)\s*$/i.exec(t))) { qty = m[1]; t = t.slice(0, m.index).trim(); }
+        return { name: t || String(text || ""), qty: qty, price: price };
+      }
+      /** Size cell holds "1. 38\n2. Body 42 · Length 52" — one line per item. */
+      function sizeFor(o, index, count) {
+        var lines = String(o.size || "").split(/\n/).map(function (x) { return x.trim(); }).filter(Boolean);
+        if (count <= 1) return lines.length ? lines.join(" · ").replace(/^1\.\s*/, "") : "";
+        var hit = lines.filter(function (l) { return l.indexOf((index + 1) + ".") === 0; })[0];
+        return hit ? hit.replace(/^\d+\.\s*/, "") : "";
+      }
       function renderItems(o) {
         var items = Array.isArray(o.items) && o.items.length ? o.items : ["(পণ্যের তথ্য নেই)"];
-        var size = o.size || "—";
-        var rows = items.map(function (name, index) {
-          return '<tr><td><strong>' + esc(name) + '</strong><small>' + (index === 0 ? 'Size: ' + esc(size) : 'Product item') + '</small></td><td class="wo-item-qty">—</td><td class="wo-item-price">—</td></tr>';
+        var rows = items.map(function (raw, index) {
+          var it = splitItem(raw), size = sizeFor(o, index, items.length);
+          return '<tr><td><strong>' + esc(it.name) + '</strong>' + (size ? '<small>Size: ' + esc(size) + '</small>' : '') + '</td>' +
+            '<td class="wo-item-qty">' + (it.qty ? '× ' + esc(it.qty) : '—') + '</td>' +
+            '<td class="wo-item-price">' + (it.price ? MaPanel.money(Number(it.price)) : '—') + '</td></tr>';
         }).join("");
         return '<div class="wo-items-table-wrap"><table class="wo-items-table"><thead><tr><th>Product</th><th>Qty</th><th>Price</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
           '<div class="wo-items-summary"><span>' + esc(String(o.qty || items.length)) + ' total item(s)</span><strong>' + MaPanel.money(o.subtotal) + '</strong></div>';
@@ -331,6 +348,53 @@
         else { el.style.visibility = "hidden"; }
       }
 
+      var SEED_MAX_AGE = 30 * 60 * 1000;
+      /** Order-list rows carry most fields; the rest get safe blanks until the live copy arrives. */
+      function orderFromListRow(o) {
+        var charge = Number(o.charge) || 0, discount = Number(o.discount) || 0, coupon = Number(o.couponDiscount) || 0, total = Number(o.total) || 0;
+        return Object.assign({ design: "", customerNote: "", courierNote: "", txn: "", couponCode: "", source: "", tracking: "", consignmentId: "", courierStatus: "", assignedTo: "", adminNote: "" }, o, {
+          items: Array.isArray(o.items) ? o.items : [],
+          subtotal: o.subtotal != null ? Number(o.subtotal) : Math.max(0, total - charge + discount + coupon),
+          due: o.due != null ? Number(o.due) : Math.max(0, total - (Number(o.advance) || 0)),
+          courier: o.courier || "Steadfast"
+        });
+      }
+      function seedFromCache() {
+        try {
+          var full = MaAdmin.cached("AdminOrderGet", { OrderId: orderId }, SEED_MAX_AGE);
+          if (full && full.order) return { order: full.order, meta: full, history: full.history, prevId: full.prevId, nextId: full.nextId };
+          var list = MaAdmin.cached("AdminOrderList", { Limit: 80 }, SEED_MAX_AGE);
+          var rows = (list && list.orders) || [];
+          for (var i = 0; i < rows.length; i++) {
+            if (rows[i] && rows[i].orderId === orderId) {
+              return { order: orderFromListRow(rows[i]), meta: { statuses: list.statuses || [], couriers: ["Steadfast", "Pathao", "RedX", "Paperfly", "Manual"] }, history: null,
+                prevId: rows[i + 1] ? rows[i + 1].orderId : "", nextId: rows[i - 1] ? rows[i - 1].orderId : "" };
+            }
+          }
+        } catch (seedErr) {}
+        return null;
+      }
+      /** While showing a cached copy: inputs and actions are locked and a small note says it is updating. */
+      function setStale(isStale, failed) {
+        var grid = $("oGrid");
+        if (!grid) return;
+        grid.classList.toggle("wo-stale", !!isStale);
+        Array.prototype.forEach.call(grid.querySelectorAll("input, select, textarea, button"), function (el) {
+          if (isStale) { if (!el.disabled) { el.disabled = true; el.setAttribute("data-stale-lock", "1"); } }
+          else if (el.getAttribute("data-stale-lock") === "1") { el.disabled = false; el.removeAttribute("data-stale-lock"); }
+        });
+        var note = $("oStaleNote");
+        if (!note) {
+          note = document.createElement("div");
+          note.id = "oStaleNote"; note.className = "wo-stale-note"; note.setAttribute("role", "status");
+          grid.parentNode.insertBefore(note, grid);
+        }
+        note.hidden = !isStale && !failed;
+        note.textContent = failed ? "সর্বশেষ তথ্য আনা যায়নি — আগের তথ্য দেখানো হচ্ছে, তাই এডিট বন্ধ। পেজ রিফ্রেশ করুন।" : "সর্বশেষ তথ্য আনা হচ্ছে… (ততক্ষণ এডিট বন্ধ)";
+        if (failed) Array.prototype.forEach.call(grid.querySelectorAll("input, select, textarea, button"), function (el) { el.disabled = true; });
+        if (!isStale && !failed) captureFormSnapshot();
+      }
+
       function load() {
         // Staff and order requests run together; order rendering never waits for staff.
         var cachedStaff = MaAdmin.cached("AdminOrderStaff", {});
@@ -339,6 +403,18 @@
           staff = r.staff || [];
           if (cur) fillSelect($("fAssign"), staff, $("fAssign").value, '<option value="">— Unassigned —</option>');
         }).catch(function () {});
+        // Instant first view: this order's earlier copy, else its row from the order-list snapshot.
+        // The form stays locked until the live copy arrives, so nothing stale can be saved.
+        var seed = seedFromCache();
+        if (seed) {
+          if (seed.history) { history = seed.history; $("histCount").textContent = history.stats.total; }
+          renderCustomerHistory();
+          $("oGrid").style.display = "";
+          paint(seed.order, seed.meta);
+          nav($("btnPrev"), seed.prevId);
+          nav($("btnNext"), seed.nextId);
+          setStale(true);
+        }
         return MaAdmin.call("AdminOrderGet", { OrderId: orderId }).then(function (res) {
           history = res.history;
           $("histCount").textContent = history.stats.total;
@@ -347,7 +423,9 @@
           paint(res.order, res);
           nav($("btnPrev"), res.prevId);
           nav($("btnNext"), res.nextId);
+          setStale(false);
         }).catch(function (err) {
+          if (seed) setStale(false, true);
           var e = $("oError");
           e.style.display = "";
           e.setAttribute("role", "alert");

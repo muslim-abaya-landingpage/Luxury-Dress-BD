@@ -3621,7 +3621,43 @@ function verifySession_(token) {
   return { ok: false, error: 'INVALID_TOKEN' };
 }
 
+/**
+ * Admin check with a 60-second cache. Every panel request used to read the whole Sessions and
+ * Admins sheets; a successful result is now reused briefly. The key is a hash of the token plus a
+ * generation number that staff changes bump, so blocking/removing staff applies immediately.
+ * Expiry is re-checked on every hit. Failures are never cached.
+ */
+var ADMIN_AUTH_CACHE_SECONDS_ = 60;
+function adminAuthCacheKey_(token) {
+  var gen = PropertiesService.getScriptProperties().getProperty('ADMIN_AUTH_GEN') || '0';
+  var digest = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, String(token));
+  var hex = digest.map(function (b) { return ('0' + (b & 0xff).toString(16)).slice(-2); }).join('').slice(0, 32);
+  return 'adm_auth_' + gen + '_' + hex;
+}
+function bumpAdminAuthGeneration_() {
+  try { PropertiesService.getScriptProperties().setProperty('ADMIN_AUTH_GEN', String(Date.now())); } catch (err) {}
+}
 function verifyAdminSession_(token) {
+  if (!token) return verifyAdminSessionUncached_(token);
+  var cache = null, key = '';
+  try { cache = CacheService.getScriptCache(); key = adminAuthCacheKey_(token); } catch (cacheErr) { cache = null; }
+  if (cache) {
+    try {
+      var hit = cache.get(key);
+      if (hit) {
+        var cachedV = JSON.parse(hit);
+        if (cachedV && cachedV.ok && (!cachedV.expires || Date.now() < cachedV.expires)) return cachedV;
+      }
+    } catch (readErr) {}
+  }
+  var v = verifyAdminSessionUncached_(token);
+  if (cache && v && v.ok) {
+    try { cache.put(key, JSON.stringify(v), ADMIN_AUTH_CACHE_SECONDS_); } catch (putErr) {}
+  }
+  return v;
+}
+
+function verifyAdminSessionUncached_(token) {
   var v = verifySession_(token);
   if (!v.ok) return v;
   if (v.role !== 'admin' && v.role !== 'staff') return { ok: false, error: 'NOT_ADMIN', message: 'অ্যাডমিন লগইন প্রয়োজন।' };
@@ -3838,6 +3874,7 @@ function listAdminStaff_(e) {
 }
 
 function saveAdminStaff_(e) {
+  if (typeof bumpAdminAuthGeneration_ === 'function') bumpAdminAuthGeneration_();
   var v = verifyAdminSession_(param_(e, 'Token'));
   if (!v.ok) return v;
   var owner = requireOwnerAdmin_(v);
@@ -3892,6 +3929,7 @@ function saveAdminStaff_(e) {
 }
 
 function deleteAdminStaff_(e) {
+  if (typeof bumpAdminAuthGeneration_ === 'function') bumpAdminAuthGeneration_();
   var v = verifyAdminSession_(param_(e, 'Token'));
   if (!v.ok) return v;
   var owner = requireOwnerAdmin_(v);

@@ -424,3 +424,23 @@ body.pn-body.wo-edit-page {
   .wo-edit-page .pn-card { margin-bottom: 12px; }
   .wo-edit-page .wo-sidebar-column { display: flex; }
 }
+
+/* ── Phones: no iOS zoom on focus, most-used panels first, save always reachable ── */
+@media (max-width: 760px) {
+  .wo-edit-page #oGrid input, .wo-edit-page #oGrid select, .wo-edit-page #oGrid textarea { font-size: 16px; }
+  .wo-edit-page #oGrid.pn-grid { display: flex; flex-direction: column; gap: 14px; }
+  .wo-edit-page #oGrid .wo-primary-column, .wo-edit-page #oGrid .wo-sidebar-column { display: contents; }
+  .wo-edit-page #oGrid .pn-card { margin: 0; width: auto; max-width: none; align-self: stretch; box-sizing: border-box; }
+  .wo-edit-page .wo-general-card { order: 1; }
+  .wo-edit-page .wo-details-card { order: 2; }
+  .wo-edit-page .wo-pricing-card { order: 3; }
+  .wo-edit-page .wo-items-card { order: 4; }
+  .wo-edit-page .wo-notes-card { order: 5; }
+  .wo-edit-page .wo-tracking-card { order: 6; }
+  .wo-edit-page .wo-customer-history { order: 7; }
+  .wo-edit-page #btnSave {
+    order: 99; position: sticky; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); z-index: 20;
+    min-height: 48px; font-size: 16px; margin: 4px 0 0; border-radius: 10px; box-shadow: 0 6px 20px rgba(15, 30, 50, .22);
+  }
+  .wo-edit-page .wo-items-table th:nth-child(3), .wo-edit-page .wo-items-table td:nth-child(3) { white-space: nowrap; }
+}

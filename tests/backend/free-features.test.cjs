@@ -244,3 +244,30 @@ test('full order page: items, design text and backdated timestamps are validated
   assert.throws(() => box.admCreateTimestamp_('2026-02-30', '10:00', now), /INVALID_DATE/);
   assert.throws(() => box.admCreateTimestamp_('2024-01-01', '10:00', now), /TOO_OLD_DATE/);
 });
+
+test('admin login check is cached briefly, never caches failures, and staff changes invalidate it', () => {
+  const store = {}, props = {}; let reads = 0, sessionOk = true, expires = Date.now() + 3600e3;
+  const box = {
+    CacheService: { getScriptCache: () => ({ get: k => store[k] || null, put: (k, v) => { store[k] = v; } }) },
+    PropertiesService: { getScriptProperties: () => ({ getProperty: k => props[k] || null, setProperty: (k, v) => { props[k] = String(v); } }) },
+    Utilities: { DigestAlgorithm: { SHA_256: 1 }, computeDigest: (a, s) => Array.from(require('node:crypto').createHash('sha256').update(s).digest()).map(b => b > 127 ? b - 256 : b) },
+    verifyAdminSessionUncached_: () => { reads++; return sessionOk ? { ok: true, role: 'admin', email: 'o@x.com', expires } : { ok: false, error: 'INVALID_TOKEN' }; },
+  };
+  box.require = require; vm.createContext(box);
+  vm.runInContext(['var ADMIN_AUTH_CACHE_SECONDS_ = 60;', extractFrom(CODE, 'adminAuthCacheKey_'), extractFrom(CODE, 'bumpAdminAuthGeneration_'), extractFrom(CODE, 'verifyAdminSession_')].join('\n'), box);
+  assert.equal(box.verifyAdminSession_('tok').ok, true); assert.equal(reads, 1);
+  assert.equal(box.verifyAdminSession_('tok').ok, true); assert.equal(reads, 1, 'second call served from cache');
+  assert.ok(Object.keys(store).every(k => !k.includes('tok')), 'raw token never used as a cache key');
+  box.bumpAdminAuthGeneration_(); sessionOk = false;
+  assert.equal(box.verifyAdminSession_('tok').ok, false, 'staff change forces a fresh check'); assert.equal(reads, 2);
+  assert.equal(box.verifyAdminSession_('tok').ok, false); assert.equal(reads, 3, 'failures are not cached');
+});
+
+test('order lookup finds the row and neighbour IDs from one read', () => {
+  const box = {}; vm.createContext(box);
+  vm.runInContext(extractFrom(ADM, 'admLocateOrder_'), box);
+  const rows = [['', '', '', '', '', '', '', '', 'A'], ['', '', '', '', '', '', '', '', 'B'], ['', '', '', '', '', '', '', '', 'C']];
+  assert.equal(JSON.stringify(box.admLocateOrder_(rows, 'B')), JSON.stringify({ index: 1, prevId: 'A', nextId: 'C' }));
+  assert.equal(JSON.stringify(box.admLocateOrder_(rows, 'A')), JSON.stringify({ index: 0, prevId: '', nextId: 'B' }));
+  assert.equal(box.admLocateOrder_(rows, 'Z').index, -1);
+});

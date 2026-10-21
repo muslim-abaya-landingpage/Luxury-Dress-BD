@@ -43,6 +43,15 @@ function admGetSheet_() {
 }
 
 function admEnsureHeaders_(sheet) {
+  // Headers rarely change; once verified, skip the read for 6 hours (the check still runs if the cache is empty).
+  var cacheKey = 'adm_headers_ok_' + sheet.getSheetId();
+  var cache = null;
+  try { cache = CacheService.getScriptCache(); if (cache.get(cacheKey)) return; } catch (cacheErr) { cache = null; }
+  admEnsureHeadersUncached_(sheet);
+  if (cache) { try { cache.put(cacheKey, '1', 21600); } catch (putErr) {} }
+}
+
+function admEnsureHeadersUncached_(sheet) {
   var headers = admExtraHeaders_();
   var maxCols = sheet.getMaxColumns();
   var lastCol = onlineOrderColumn_(sheet, ADM_LAST_COL);
@@ -362,23 +371,32 @@ function admOrderListSummary_(order) {
   };
 }
 
+/** Finds an Order ID in already-read rows (last match wins, like admFindRow_) plus the IDs of the rows around it. */
+function admLocateOrder_(rows, orderId) {
+  var id = String(orderId || '').trim();
+  for (var i = rows.length - 1; i >= 0; i--) {
+    if (String(rows[i][8] || '').trim() === id) {
+      return { index: i, prevId: i > 0 ? String(rows[i - 1][8] || '') : '', nextId: i < rows.length - 1 ? String(rows[i + 1][8] || '') : '' };
+    }
+  }
+  return { index: -1, prevId: '', nextId: '' };
+}
+
 function adminOrderGet_(e) {
   var v = verifyAdminSession_(param_(e, 'Token'));
   if (!v.ok) return v;
   var sheet = admGetSheet_();
   var orderId = String(param_(e, 'OrderId') || '').trim();
-  var row = admFindRow_(sheet, orderId);
-  if (!row) return { ok: false, error: 'NOT_FOUND', message: 'অর্ডার পাওয়া যায়নি।' };
+  if (!orderId) return { ok: false, error: 'NOT_FOUND', message: 'অর্ডার পাওয়া যায়নি।' };
+  // One read gives the row, its neighbours' IDs and the customer history (was 4 separate reads).
+  var rows = admReadHistory_(sheet);
+  var at = admLocateOrder_(rows, orderId);
+  if (at.index < 0) return { ok: false, error: 'NOT_FOUND', message: 'অর্ডার পাওয়া যায়নি।' };
+  var row = at.index + 2;
   var vals = readOnlineOrderRows_(sheet, row, 1, ADM_LAST_COL)[0];
   var order = admRowToOrder_(vals, row);
-
-  var prevId = '';
-  var nextId = '';
-  var lastRow = sheet.getLastRow();
-  if (row > 2) prevId = String(sheet.getRange(row - 1, onlineOrderColumn_(sheet, 9)).getValue() || '');
-  if (row < lastRow) nextId = String(sheet.getRange(row + 1, onlineOrderColumn_(sheet, 9)).getValue() || '');
-
-  var rows = admReadHistory_(sheet);
+  var prevId = at.prevId;
+  var nextId = at.nextId;
   var history = admHistoryForPhone_(rows, order.phone, order.orderId);
   var blockedMap = admBlockedMap_();
   order.blocked = Object.prototype.hasOwnProperty.call(blockedMap, order.phone);
