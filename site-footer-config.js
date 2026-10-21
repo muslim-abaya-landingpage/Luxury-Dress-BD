@@ -14,7 +14,8 @@ window.SITE_FOOTER_CONFIG = {
 
   supportChat: {
     supabaseUrl: "https://aajeqlgwlracqnfycdnb.supabase.co",
-    supabaseKey: "sb_publishable_U0lwxeyIQnccV8kMWUResw_drNDxbfM"
+    supabaseKey: "sb_publishable_U0lwxeyIQnccV8kMWUResw_drNDxbfM",
+    turnstileSiteKey: "0x4AAAAAAFfxnZO3GtKn9kh3"
   },
 
   social: {

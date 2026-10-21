@@ -40,3 +40,16 @@ Customer replies are stored when sent, but there is no email/SMS notification ye
 ## Free-plan note
 
 Supabase Free includes Realtime and Edge Function quotas, but the project can pause after a week of low activity and has no uptime SLA. If it pauses, an owner must restore it from Supabase Dashboard. Monitor database size, Realtime messages and connections against the Free plan quotas.
+
+
+## Admin inbox access and testing
+
+After the feature branch is merged and the site is deployed, open `https://muslimabaya.com/admin-support-inbox.html`. Locally, serve the repository root with `python3 -m http.server 8000` and open `http://localhost:8000/admin-support-inbox.html`; the live Supabase backend still needs to be reachable. Sign in with an approved Supabase Auth email/password account. To test a new agent, create the account in the inbox, complete email verification if enabled, then have the project owner add that email to `public.support_agents` with `active = true`. Never store or share the inbox password in documentation or chat.
+
+For chat testing after deployment, open the storefront in a private/incognito session, open Customer Support, complete the Turnstile prompt if shown, and send a harmless test message. In a second browser session, sign in to the admin inbox and verify that the conversation appears and replies arrive in real time. Test the Order status action with a known test order ID and the exact phone number used for that order. Confirm that a wrong ID/phone pair reveals no order details. The widget asks for both values and does not store them in the chat message/event log.
+
+## Order lookup and Turnstile rollout
+
+`supabase/functions/order-status/index.ts` is the Edge Function that proxies order lookup to the existing Apps Script `OrderTrack` route. It requires a verified visitor JWT and a server-side Turnstile token with action `order_status`; it returns only the order ID, date, status, courier status, and tracking value. Before it works, add `TURNSTILE_SECRET_KEY`, `ORDER_TRACK_API_URL`, and `ALLOWED_ORIGINS` as Supabase Edge Function secrets and deploy `order-status` with JWT verification enabled. Configure Supabase Auth CAPTCHA to use Cloudflare Turnstile as well. Only the public Site key belongs in `site-footer-config.js`; never place the Secret key there.
+
+The public storefront remains on its previous deployed version until the follow-up GitHub change is merged and built. Turnstile will not validate until the rotated Secret key is saved in Supabase and Auth CAPTCHA is configured.
