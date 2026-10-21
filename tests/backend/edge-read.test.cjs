@@ -111,6 +111,25 @@ test('AdminOrderList and AdminOrderGet match the Apps Script answer exactly', as
   assert.equal(got.nextId, 'MA-4');
 });
 
+test('dashboard, verify, fraud, staff and customer reads match Apps Script exactly', async () => {
+  const { truth, edge } = await makeCores();
+  const cases = [
+    (c) => c.verifyAdminSession_('tok-admin'),
+    (c) => c.listAdminOrders_({ parameter: { Token: 'tok-admin', Limit: '80' } }),
+    (c) => c.adminFraudCheck_({ parameter: { Token: 'tok-admin', Phone: '01711111111', OrderId: 'MA-3' } }),
+    (c) => c.adminStaffList_({ parameter: { Token: 'tok-admin' } }),
+    (c) => c.adminCustomerLookup_({ parameter: { Token: 'tok-admin', Phone: '01711111111' } }),
+    (c) => c.adminCustomerLookup_({ parameter: { Token: 'tok-admin', Phone: '01799999999' } }),
+  ];
+  for (const run of cases) {
+    const a = withNow(() => run(truth));
+    const b = withNow(() => run(edge));
+    assert.equal(a.ok, true, JSON.stringify(a));
+    assert.equal(JSON.stringify(b), JSON.stringify(a));
+  }
+  assert.equal(withNow(() => edge.listAdminOrders_({ parameter: { Token: 'tok-admin' } })).orders[0].time.length > 0, true);
+});
+
 test('expired, unknown and missing tokens are refused', async () => {
   const { edge } = await makeCores();
   assert.equal(withNow(() => edge.adminOrderList_({ parameter: { Token: 'tok-old' } })).error, 'EXPIRED');

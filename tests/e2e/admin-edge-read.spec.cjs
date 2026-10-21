@@ -30,9 +30,9 @@ test('order reads come from the fast edge copy when it answers ok', async ({ pag
   expect(calls.apps).toEqual([]);
   // Writes and other reads never use the edge.
   await page.evaluate(() => window.MaAdmin.call('AdminOrderUpdate', { OrderId: 'MA-1' }));
-  await page.evaluate(() => window.MaAdmin.call('AdminOrderStaff', {}));
+  await page.evaluate(() => window.MaAdmin.call('AdminStockVariantsList', {}));
   expect(calls.edge).toBe(1);
-  expect(calls.apps).toEqual(['AdminOrderUpdate', 'AdminOrderStaff']);
+  expect(calls.apps).toEqual(['AdminOrderUpdate', 'AdminStockVariantsList']);
 });
 
 test('anything but ok from the edge falls back to Apps Script', async ({ page }) => {
