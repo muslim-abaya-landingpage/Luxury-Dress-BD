@@ -1,0 +1,9 @@
+/* Simplified operations workspace; existing forms and APIs remain unchanged. */
+.ops-workspace-nav{display:flex;flex-wrap:wrap;gap:9px;margin:18px 0}
+.ops-workspace-nav button{border:1px solid #ddd8ed;background:#fff;color:#34294c;border-radius:12px;padding:12px 17px;font:600 14px inherit;cursor:pointer}
+.ops-workspace-nav button[aria-selected="true"]{background:#7050bd;color:white;border-color:#7050bd}
+.ops-workspace-nav button:focus-visible{outline:3px solid #b9a5ec;outline-offset:2px}
+.ops-workspace-intro{background:#f7f4ff;border:1px solid #e6ddfa;border-radius:14px;padding:16px;margin:12px 0;color:#473c5f;line-height:1.65}
+.ops-workspace-panel[hidden]{display:none!important}
+.ops-grid{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+@media(max-width:640px){.ops-workspace-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.ops-workspace-nav button{padding:12px 8px}.ops-workspace-intro{font-size:14px}}
