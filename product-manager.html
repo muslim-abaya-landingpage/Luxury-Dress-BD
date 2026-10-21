@@ -1203,7 +1203,9 @@
     stockPublishing = true;
     items.forEach(function(p) { setProductAvailability(p, available); });
     redraw();
+    var published = false;
     return saveAll(items.length === 1 ? {id:items[0].id} : null).then(function() {
+      published = true;
       return true;
     }).catch(function() {
       previous.forEach(function(row) {
@@ -1211,7 +1213,14 @@
         if (row.inStock === undefined) delete row.p.inStock; else row.p.inStock = row.inStock;
       });
       return false;
-    }).finally(function() { stockPublishing = false; renderCatList(); renderMain(); });
+    }).finally(function() {
+      stockPublishing = false;
+      renderCatList();
+      renderMain();
+      // Rendering may normalize product fields. Keep the successful publish
+      // baseline in sync so the next stock click is not mistaken for unsaved edits.
+      if (published) savedSnapshot = catalogSnapshot();
+    });
   }
 
   function publishStockToggle(p, redraw) {
