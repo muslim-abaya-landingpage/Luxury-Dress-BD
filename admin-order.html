@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <link rel="preload" as="script" href="site-api-config.js?v=20261009-inbox">
   <link rel="preload" as="script" href="admin-config.js?v=20261009-inbox">
-  <link rel="preload" as="script" href="admin-api.js?v=06c75e163ac5be5a">
+  <link rel="preload" as="script" href="admin-api.js?v=2823eb7bcff4e142">
   <link rel="preload" as="script" href="admin-guard.js?v=20261010-speed">
   <link rel="preload" as="script" href="admin-panel.js?v=20261021-notify1">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -163,7 +163,7 @@
 
   <script src="site-api-config.js?v=20261009-inbox"></script>
   <script src="admin-config.js?v=20261009-inbox"></script>
-  <script src="admin-api.js?v=06c75e163ac5be5a"></script>
+  <script src="admin-api.js?v=2823eb7bcff4e142"></script>
   <script src="admin-guard.js?v=20261010-speed"></script>
   <script src="admin-panel.js?v=20261021-notify1"></script>
   <script src="admin-invoice.js?v=20261021-1"></script>
@@ -231,7 +231,7 @@
         if (!btn) return;
         btn.disabled = saving;
         btn.setAttribute("aria-busy", saving ? "true" : "false");
-        btn.innerHTML = saving ? '<span class="wo-save-spinner" aria-hidden="true"></span><span>Saving…</span>' : '<span>✓ Update Order</span>';
+        btn.innerHTML = saving ? '<span class="wo-save-spinner" aria-hidden="true"></span><span>সেভ হচ্ছে… অন্য পাতায় যেতে পারেন</span>' : '<span>✓ Update Order</span>';
         if (!saving) syncDirty();
       }
 
@@ -440,6 +440,10 @@
         if (![charge, advance, discount].every(Number.isFinite)) {
           return Promise.reject(new Error("চার্জ, অগ্রিম ও ছাড়ে শূন্য বা ধনাত্মক পূর্ণসংখ্যা দিন।"));
         }
+        // Feels instant: the form counts as saved at once and the admin may move on (the request uses
+        // keepalive). If the server refuses, the edits stay on screen and are marked unsaved again.
+        var previousSnapshot = formSnapshot;
+        captureFormSnapshot();
         setSaveState(true);
         var fields = {
           OrderId: orderId,
@@ -455,7 +459,16 @@
           AdminNote: $("fAdminNote").value,
           CourierNote: $("fCourierNote").value
         };
+        var savedSnapshot = formSnapshot;
+        if (MaAdmin.markPendingSave) MaAdmin.markPendingSave(orderId, { Status: fields.Status, Charge: charge, Advance: advance, Discount: discount, AdminNote: fields.AdminNote });
         return MaAdmin.call("AdminOrderUpdate", fields).then(function (res) {
+          if (MaAdmin.clearPendingSave) MaAdmin.clearPendingSave(orderId);
+          if (JSON.stringify(readFormState()) !== savedSnapshot) {
+            // The admin kept editing while this save ran: keep their new edits on screen.
+            cur = res.order;
+            notify("অর্ডার আপডেট হয়েছে ✓ (নতুন পরিবর্তনগুলো এখনো সেভ করা বাকি)");
+            return;
+          }
           var keepMeta = { statuses: Array.prototype.map.call($("fStatus").options, function (o) { return o.value; }), couriers: Array.prototype.map.call($("fCourier").options, function (o) { return o.value; }) };
           var blocked = cur && cur.blocked;
           res.order.blocked = blocked;
@@ -467,8 +480,10 @@
           setSaveState(false);
           return value;
         }, function (err) {
+          if (MaAdmin.clearPendingSave) MaAdmin.clearPendingSave(orderId);
+          formSnapshot = previousSnapshot; // edits are still on screen, now marked unsaved again
           setSaveState(false);
-          throw err;
+          throw new Error("সেভ হয়নি — আপনার পরিবর্তনগুলো রাখা আছে, আবার চেষ্টা করুন। (" + (err && err.message || "ত্রুটি") + ")");
         });
       }
 

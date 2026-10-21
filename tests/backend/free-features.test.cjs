@@ -135,7 +135,7 @@ test('uptime monitor alerts once after 2 failures and once on recovery', () => {
   let code = 500;
   const box = { console: { log() {} },
     PropertiesService: { getScriptProperties: () => ({ getProperty: k => (k in props ? props[k] : null), setProperty: (k, v) => { props[k] = String(v); } }) },
-    UrlFetchApp: { fetch: () => ({ getResponseCode: () => code }) },
+    UrlFetchApp: { fetch: (url) => /health=1/.test(url) ? { getResponseCode: () => 200, getContentText: () => '{"ok":true}' } : { getResponseCode: () => code } },
     sendAdminAndTelegramNotification_: (s) => sent.push(s) };
   vm.createContext(box);
   vm.runInContext(MON, box);
@@ -146,6 +146,24 @@ test('uptime monitor alerts once after 2 failures and once on recovery', () => {
   box.siteUptimeCheck(); assert.equal(sent.length, 2);
   assert.match(sent[1], /আবার চালু/);
   box.siteUptimeCheck(); assert.equal(sent.length, 2);
+});
+
+test('fast admin path: alert once after 2 failed hourly checks, once on recovery, never with data', () => {
+  const props = {}, sent = [];
+  let edge = { code: 503, body: '{"ok":false,"error":"EDGE_ERROR","reason":"SA_TOKEN_FAILED"}' };
+  const box = { console: { log() {} },
+    PropertiesService: { getScriptProperties: () => ({ getProperty: k => (k in props ? props[k] : null), setProperty: (k, v) => { props[k] = String(v); } }) },
+    UrlFetchApp: { fetch: (url) => /health=1/.test(url) ? { getResponseCode: () => edge.code, getContentText: () => edge.body } : { getResponseCode: () => 200 } },
+    sendAdminAndTelegramNotification_: (s, b) => sent.push(b) };
+  vm.createContext(box);
+  vm.runInContext(MON, box);
+  assert.equal(box.siteUptimeCheck().edge, 'FAIL 1'); assert.equal(sent.length, 0);
+  assert.equal(box.siteUptimeCheck().edge, 'DOWN'); assert.equal(sent.length, 1);
+  assert.match(sent[0], /দ্রুত পথ বন্ধ/); assert.match(sent[0], /SA_TOKEN_FAILED/);
+  box.siteUptimeCheck(); assert.equal(sent.length, 1, 'no repeat while still down');
+  edge = { code: 200, body: '{"ok":true,"ms":700}' };
+  assert.equal(box.siteUptimeCheck().edge, 'RECOVERED'); assert.equal(sent.length, 2);
+  assert.equal(box.siteUptimeCheck().edge, 'OK'); assert.equal(sent.length, 2);
 });
 
 test('daily summary goes to Telegram as well as email', () => {

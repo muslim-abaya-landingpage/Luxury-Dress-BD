@@ -52,7 +52,20 @@ function fixture() {
   const msgr = [['PSID', 'Name', 'FirstSeen', 'LastSeen', 'FromAd', 'PageId', 'Status', 'AssignedTo', 'LastMessage', 'LastDirection', 'Unread', 'OrderId', 'OrderValue', 'PurchaseSent', 'Notes', 'ProfilePic'],
     ['111', 'Ayesha', new Date(NOW - 9e7), new Date(NOW - 600000), 'yes', '', 'New', '', 'দাম কত?', 'in', 2, '', '', '', '', ''],
     ['222', 'Karim', new Date(NOW - 9e7), new Date(NOW - 9e6), '', '', 'New', '', 'ok', 'out', 0, '', '', '', '', '']];
-  return { 'Online Order': orders, Sessions: sessions, Admins: admins, Blocked: blocked, StockVariants: stock, MessengerContacts: msgr };
+  const msgs = [['Time', 'PageId', 'PSID', 'Direction', 'Text', 'MID', 'By', 'Attachments'],
+    [new Date(NOW - 700000), '964928770039259', '222', 'in', 'hi', 'm1', '', ''],
+    [new Date(NOW - 600000), '964928770039259', '222', 'out', 'hello', '', 'Owner', ''],
+    [new Date(NOW - 500000), '964928770039259', '111', 'in', 'দাম কত?', 'm2', '', '']];
+  const ledger = [['Timestamp', 'Product ID', 'Variant', 'ChangeType', 'QtyBefore', 'QtyAfter', 'ReservedBefore', 'ReservedAfter', 'Reason', 'OrderId', 'Admin'],
+    [new Date(NOW - 86400000), 'ABY-1', 'M', 'ORDER_RESERVE', 1, 0, 0, 1, 'order', 'MA-3', 'system'],
+    [new Date(NOW - 3600000), 'HJB-2', 'Free', 'MANUAL', 5, 9, 0, 0, 'restock', '', 'Owner']];
+  const carts = [['Phone', 'Name', 'CartSummary', 'CartValue', 'CreatedAt', 'UpdatedAt', 'Status'],
+    ['01755555555', 'Mita', 'Abaya Black × 1', 1450, new Date(NOW - 2 * 86400000), new Date(NOW - 86400000), 'open'],
+    ['01755555556', 'Old', 'x', 10, new Date(NOW - 30 * 86400000), new Date(NOW - 20 * 86400000), 'open']];
+  const waitlist = [['ProductId', 'ProductName', 'Contact', 'IsEmail', 'CreatedAt', 'Notified', 'Variant'], ['ABY-1', 'Abaya Black', '01766666666', 'no', new Date(NOW - 86400000), '', 'M']];
+  const reorder = [['OrderId', 'Phone', 'Name', 'CouponCode', 'CreatedAt', 'Contacted'], ['MA-1', '01711111111', 'Rina', 'BACK10', new Date(NOW - 86400000), '']];
+  return { 'Online Order': orders, Sessions: sessions, Admins: admins, Blocked: blocked, StockVariants: stock, MessengerContacts: msgr,
+    MessengerMessages: msgs, StockLedger: ledger, AbandonedCarts: carts, StockWaitlist: waitlist, ReorderOffers: reorder };
 }
 
 // What the Sheets API would return for those values (serials + formatted copy; trailing blanks trimmed).
@@ -136,6 +149,10 @@ test('dashboard, verify, fraud, staff and customer reads match Apps Script exact
     (c) => c.getAdminAnalyticsV2_({ parameter: { Token: 'tok-admin', Range: '30d' } }),
     (c) => c.getAdminAnalyticsV2_({ parameter: { Token: 'tok-admin', Range: 'all' } }),
     (c) => c.inboxList_({ parameter: { Token: 'tok-admin', Unread: '1', Limit: '300' } }),
+    (c) => c.inboxThread_({ parameter: { Token: 'tok-admin', PageId: '964928770039259', PSID: '222' } }),
+    (c) => c.getAdminStockLedger_({ parameter: { Token: 'tok-admin', Limit: '50' } }),
+    (c) => c.getAdminStockLedger_({ parameter: { Token: 'tok-admin', ProductId: 'ABY-1' } }),
+    (c) => c.getAdminGrowthData_({ parameter: { Token: 'tok-admin' } }),
   ];
   for (const run of cases) {
     const a = withNow(() => run(truth));
@@ -144,6 +161,10 @@ test('dashboard, verify, fraud, staff and customer reads match Apps Script exact
     assert.equal(JSON.stringify(b), JSON.stringify(a));
   }
   assert.equal(withNow(() => edge.listAdminOrders_({ parameter: { Token: 'tok-admin' } })).orders[0].time.length > 0, true);
+  assert.throws(() => withNow(() => edge.inboxThread_({ parameter: { PageId: '964928770039259', PSID: '111' } })), /READ_ONLY/, 'unread chat needs a write');
+  const growth = withNow(() => edge.getAdminGrowthData_({ parameter: { Token: 'tok-admin' } }));
+  assert.equal(growth.abandonedCarts.length, 1);
+  assert.equal(growth.stockWaitlist.length, 1);
 });
 
 test('expired, unknown and missing tokens are refused', async () => {
@@ -181,7 +202,9 @@ test('endpoint: full request through mocked Google APIs', async () => {
     assert.equal(init.headers.Authorization, 'Bearer AT');
     if (/values:batchGet/.test(url)) {
       const formatted = /FORMATTED_VALUE/.test(url) && !/UNFORMATTED/.test(url);
-      return ok({ valueRanges: names.map((n) => ({ values: apiCopies(data[n])[formatted ? 'formatted' : 'raw'] })) });
+      const asked = new URL(url).searchParams.getAll('ranges').map((r) => r.replace(/^'|'$/g, '').replace(/''/g, "'"));
+      asked.forEach((n) => assert.ok(names.includes(n), 'unknown tab ' + n));
+      return ok({ valueRanges: asked.map((n) => ({ values: apiCopies(data[n])[formatted ? 'formatted' : 'raw'] })) });
     }
     return ok({ spreadsheetUrl: 'https://docs.google.com/spreadsheets/d/SHEET/edit', properties: { timeZone: 'Asia/Dhaka' },
       sheets: names.map((n, i) => ({ properties: { title: n, sheetId: i + 1, gridProperties: { rowCount: 1000, columnCount: 50 } } })).concat([{ properties: { title: 'Products', sheetId: 99 } }]) });
@@ -203,4 +226,26 @@ test('endpoint: full request through mocked Google APIs', async () => {
   assert.equal((await handleAdminRead(req({ RecordType: 'AdminOrderList', Token: 'x' }), {}, { fetch: fakeFetch })).status, 503);
   assert.equal((await handleAdminRead(req({ RecordType: 'AdminOrderList', Token: 'x' }, { Origin: 'https://evil.example' }), env, { fetch: fakeFetch })).status, 403);
   assert.equal(calls.filter((u) => u.startsWith('https://oauth2')).length, 1, 'access token is reused');
+
+  calls.length = 0;
+  const verify = await handleAdminRead(req({ RecordType: 'AdminVerify', Token: 'tok-admin' }), env, { fetch: fakeFetch, now: () => NOW + 1000 });
+  assert.equal(verify.status, 200);
+  const tabs = calls.filter((u) => /batchGet/.test(u)).flatMap((u) => new URL(u).searchParams.getAll('ranges'));
+  assert.deepEqual([...new Set(tabs)].sort(), ["'Admins'", "'Sessions'"], 'login check reads only the login tabs');
+  const unreadChat = await handleAdminRead(req({ RecordType: 'InboxThread', Token: 'tok-admin', PageId: '964928770039259', PSID: '111' }), env, { fetch: fakeFetch, now: () => NOW + 2000 });
+  assert.equal(unreadChat.status, 409, 'marking a chat read is left to Apps Script');
+  assert.equal((await unreadChat.json()).reason, 'NEEDS_WRITE');
+
+  const { handleHealth, _resetHealthCache } = await lib('api/admin-read.js');
+  _resetHealthCache();
+  const health = await handleHealth(env, { fetch: fakeFetch, now: () => NOW });
+  const hb = await health.json();
+  assert.equal(health.status, 200);
+  assert.equal(hb.ok, true);
+  assert.deepEqual(Object.keys(hb).sort(), ['ms', 'ok'], 'health answer carries no sheet data');
+  const before = calls.length;
+  assert.equal((await handleHealth(env, { fetch: fakeFetch, now: () => NOW + 30000 })).status, 200);
+  assert.equal(calls.length, before, 'a repeat check within a minute does not read the sheet again');
+  _resetHealthCache();
+  assert.equal((await handleHealth({}, { fetch: fakeFetch })).status, 503);
 });

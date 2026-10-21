@@ -2,7 +2,9 @@
 import { toAppsScriptValues } from './sheets-shim.js';
 
 const API = 'https://sheets.googleapis.com/v4/spreadsheets/';
-export const READ_SHEETS = ['Online Order', 'Sessions', 'Admins', 'Blocked', 'StockVariants', 'MessengerContacts'];
+// Default tabs (order reads). Each request asks only for the tabs its code reads: login checks need just
+// Sessions + Admins, so they stay small and fast.
+export const READ_SHEETS = ['Online Order', 'Sessions', 'Admins', 'Blocked'];
 const META_TTL_MS = 10 * 60 * 1000;
 let metaCache = { id: '', at: 0, meta: null };
 
@@ -18,18 +20,22 @@ function quote(title) { return "'" + String(title).replace(/'/g, "''") + "'"; }
 // Requests that arrive together (a page fires several reads at once) share one sheet read. Only a read
 // that started moments ago is shared, so a read issued after a save never gets pre-save data.
 const SHARE_MS = 400;
-let inflight = { id: '', at: 0, promise: null };
+let inflight = new Map();
 
 export function loadSnapshot(opts) {
   const nowMs = opts.nowMs || Date.now();
-  if (inflight.promise && inflight.id === opts.spreadsheetId && nowMs - inflight.at < SHARE_MS) return inflight.promise;
-  const promise = loadSnapshotFresh(opts);
-  inflight = { id: opts.spreadsheetId, at: nowMs, promise };
-  promise.catch(() => { if (inflight.promise === promise) inflight = { id: '', at: 0, promise: null }; });
+  const wanted = (opts.sheets || READ_SHEETS).slice().sort();
+  const key = opts.spreadsheetId + '|' + wanted.join('|');
+  const hit = inflight.get(key);
+  if (hit && nowMs - hit.at < SHARE_MS) return hit.promise;
+  const promise = loadSnapshotFresh(Object.assign({}, opts, { sheets: wanted }));
+  inflight.set(key, { at: nowMs, promise });
+  if (inflight.size > 20) inflight = new Map([[key, { at: nowMs, promise }]]);
+  promise.catch(() => { const cur = inflight.get(key); if (cur && cur.promise === promise) inflight.delete(key); });
   return promise;
 }
 
-async function loadSnapshotFresh({ spreadsheetId, token, fetchImpl = fetch, nowMs = Date.now() }) {
+async function loadSnapshotFresh({ spreadsheetId, token, sheets: wanted = READ_SHEETS, fetchImpl = fetch, nowMs = Date.now() }) {
   if (metaCache.id !== spreadsheetId || !metaCache.meta || nowMs - metaCache.at > META_TTL_MS) {
     const fields = 'spreadsheetUrl,properties.timeZone,sheets.properties(title,sheetId,gridProperties(rowCount,columnCount))';
     const meta = await getJson(fetchImpl, API + encodeURIComponent(spreadsheetId) + '?fields=' + encodeURIComponent(fields), token);
@@ -37,8 +43,9 @@ async function loadSnapshotFresh({ spreadsheetId, token, fetchImpl = fetch, nowM
   }
   const meta = metaCache.meta;
   const timeZone = (meta.properties && meta.properties.timeZone) || 'Asia/Dhaka';
-  const present = (meta.sheets || []).map((s) => s.properties).filter((p) => READ_SHEETS.includes(p.title));
-  if (!present.some((p) => p.title === 'Online Order')) throw new Error('NO_SHEET');
+  const present = (meta.sheets || []).map((s) => s.properties).filter((p) => wanted.includes(p.title));
+  if (wanted.includes('Online Order') && !present.some((p) => p.title === 'Online Order')) throw new Error('NO_SHEET');
+  if (!present.length) throw new Error('NO_SHEET');
   const ranges = present.map((p) => 'ranges=' + encodeURIComponent(quote(p.title))).join('&');
   const base = API + encodeURIComponent(spreadsheetId) + '/values:batchGet?majorDimension=ROWS&' + ranges;
   const [raw, formatted] = await Promise.all([
@@ -55,4 +62,4 @@ async function loadSnapshotFresh({ spreadsheetId, token, fetchImpl = fetch, nowM
   return { spreadsheetId, url: meta.spreadsheetUrl || '', timeZone, sheets };
 }
 
-export function _resetMetaCache() { metaCache = { id: '', at: 0, meta: null }; inflight = { id: '', at: 0, promise: null }; }
+export function _resetMetaCache() { metaCache = { id: '', at: 0, meta: null }; inflight = new Map(); }

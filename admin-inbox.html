@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <link rel="preload" as="script" href="site-api-config.js?v=20261009-inbox">
   <link rel="preload" as="script" href="admin-config.js?v=20261009-inbox">
-  <link rel="preload" as="script" href="admin-api.js?v=06c75e163ac5be5a">
+  <link rel="preload" as="script" href="admin-api.js?v=2823eb7bcff4e142">
   <link rel="preload" as="script" href="admin-guard.js?v=20261010-speed">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -154,7 +154,7 @@
 
   <script src="site-api-config.js?v=20261009-inbox"></script>
   <script src="admin-config.js?v=20261009-inbox"></script>
-  <script src="admin-api.js?v=06c75e163ac5be5a"></script>
+  <script src="admin-api.js?v=2823eb7bcff4e142"></script>
   <script src="admin-guard.js?v=20261010-speed"></script>
   <script>
     (function () {
@@ -255,7 +255,8 @@
       function applyList(res) {
           meta.statuses = res.statuses || [];
           meta.team = res.team || [];
-          meta.pages = res.pages || [];
+          // The fast copy leaves out which Pages are connected; keep what the first full load said.
+          if (!(res.pagesOmitted && meta.pages && meta.pages.length)) meta.pages = res.pages || [];
           fillSelect($('fPage'), meta.pages.map(function (p) { return { value: p.id, label: p.name }; }), 1);
           fillSelect($('fStatus'), meta.statuses.map(function (s) { return { value: s, label: s }; }), 1);
           contacts = res.contacts || [];
@@ -274,7 +275,8 @@
         };
         var cached = MaAdmin.cached('InboxList', fields);
         if (cached) { applyList(cached); $('ibxPages').appendChild(document.createTextNode(' · আপডেট হচ্ছে…')); }
-        return MaAdmin.inboxCall('InboxList', fields).then(function (res) {
+        // After the first full load (which tells us the Pages), refreshes may use the fast read-only copy.
+        return MaAdmin.inboxCall('InboxList', fields, { edgeSummary: !!(meta.pages && meta.pages.length) }).then(function (res) {
           if (sequence === listSequence) applyList(res);
         }).catch(function (err) {
           if (sequence !== listSequence) return;

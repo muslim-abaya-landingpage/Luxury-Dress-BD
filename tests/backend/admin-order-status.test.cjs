@@ -41,7 +41,8 @@ test('order editor rejects invalid money and keeps save failures rejected', () =
   const saveFlow = orderPage.slice(start, end);
   assert.match(saveFlow, /!\[charge, advance, discount\]\.every\(Number\.isFinite\)/);
   assert.match(saveFlow, /MaAdmin\.call\("AdminOrderUpdate"/);
-  assert.match(saveFlow, /function \(err\) \{\s*(?:btn\.disabled = false|setSaveState\(false\));\s*throw err;/, 'a failed save re-enables the button and stays rejected');
+  assert.match(saveFlow, /function \(err\) \{[^}]*?(?:btn\.disabled = false|setSaveState\(false\));\s*throw (?:err|new Error\()/, 'a failed save re-enables the button and stays rejected');
+  assert.match(saveFlow, /formSnapshot = previousSnapshot/, 'a failed save marks the edits unsaved again');
 });
 test('courier send is chained after successful order update', () => {
   const start = orderPage.indexOf('$("btnCourierSend").addEventListener');

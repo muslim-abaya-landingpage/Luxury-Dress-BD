@@ -8603,9 +8603,46 @@ function siteUptimeCheck() {
   }
   var backup = '';
   try { backup = ensureRecentBackup_(); } catch (backupErr) { backup = 'ERROR'; }
-  var result = { ok: true, failures: failures, streak: streak, notified: notified, backup: backup };
+  var edge = '';
+  try { edge = edgeHealthCheck_(props); } catch (edgeErr) { edge = 'ERROR'; }
+  var result = { ok: true, failures: failures, streak: streak, notified: notified, backup: backup, edge: edge };
   console.log('UPTIME ' + JSON.stringify(result));
   return result;
+}
+
+/**
+ * The admin panel reads orders through a fast Cloudflare copy (/api/admin-read). If it breaks (key deleted,
+ * sheet unshared, Google error) the panel quietly falls back to Apps Script and just becomes slow, so nobody
+ * would notice. Two failed hourly checks in a row → one alert; recovery → one alert.
+ */
+var EDGE_HEALTH_URL_ = 'https://muslimabaya.com/api/admin-read?health=1';
+function edgeHealthCheck_(props) {
+  var problem = '';
+  try {
+    var res = UrlFetchApp.fetch(EDGE_HEALTH_URL_, { muteHttpExceptions: true, followRedirects: true });
+    var data = {};
+    try { data = JSON.parse(res.getContentText()); } catch (parseErr) {}
+    if (res.getResponseCode() !== 200 || !data.ok) problem = 'HTTP ' + res.getResponseCode() + ' ' + (data.error || '') + (data.reason ? ' (' + data.reason + ')' : '');
+  } catch (err) {
+    problem = String(err &amp;&amp; err.message || err).slice(0, 150);
+  }
+  var wasDown = props.getProperty('EDGE_DOWN') === '1';
+  var streak = problem ? (parseInt(props.getProperty('EDGE_FAIL_STREAK') || '0', 10) || 0) + 1 : 0;
+  props.setProperty('EDGE_FAIL_STREAK', String(streak));
+  if (streak >= 2 &amp;&amp; !wasDown) {
+    props.setProperty('EDGE_DOWN', '1');
+    monitorNotify_('⚠ অ্যাডমিন প্যানেলের দ্রুত পথ বন্ধ',
+      'অর্ডার প্যানেল এখনো কাজ করছে, তবে আবার ধীর (৩–৫ সেকেন্ড) হয়ে গেছে।\nকারণ: ' + problem +
+      '\n\nযাচাই করুন: Cloudflare → Settings → Variables and Secrets-এ GOOGLE_SA_JSON আছে কিনা, ' +
+      'Google Cloud-এ muslimabaya-reader-এর key মুছে ফেলা হয়েছে কিনা, আর অর্ডার শিট muslimabaya-reader-এর সঙ্গে শেয়ার করা আছে কিনা।');
+    return 'DOWN';
+  }
+  if (!problem &amp;&amp; wasDown) {
+    props.setProperty('EDGE_DOWN', '0');
+    monitorNotify_('✅ অ্যাডমিন প্যানেলের দ্রুত পথ আবার চালু', 'অর্ডার প্যানেল আবার দ্রুত লোড হচ্ছে।');
+    return 'RECOVERED';
+  }
+  return problem ? 'FAIL ' + streak : 'OK';
 }
 
 function monitorNotify_(subject, body) {

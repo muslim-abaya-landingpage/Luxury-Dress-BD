@@ -55,7 +55,7 @@
   // Fast read path: the site's own Cloudflare function answers order list/detail reads from the
   // sheet directly (read-only). Anything other than ok:true falls back to Apps Script, which stays
   // the source of truth and the only writer. If the edge is not set up, it is skipped for 10 minutes.
-  var EDGE_TYPES = ["AdminVerify", "AdminOrderList", "AdminOrderGet", "AdminOrders", "AdminFraudCheck", "AdminOrderStaff", "AdminCustomerLookup", "AdminStockVariantsList", "AdminAnalyticsV2"];
+  var EDGE_TYPES = ["AdminVerify", "AdminOrderList", "AdminOrderGet", "AdminOrders", "AdminFraudCheck", "AdminOrderStaff", "AdminCustomerLookup", "AdminStockVariantsList", "AdminAnalyticsV2", "AdminStockLedgerList", "AdminGrowthData", "InboxThread"];
   var EDGE_URL = cfg.edgeReadUrl === undefined ? "/api/admin-read" : cfg.edgeReadUrl;
   var EDGE_OFF_KEY = "ma_admin_edge_off";
   function edgeRead(fields, body, options) {
@@ -102,9 +102,10 @@
     });
     var task = edgeRead(fields, body, options).then(function (edgeText) {
       if (edgeText != null) return edgeText;
-      return timeoutPromise(timeout || 30000, fetch(API_URL, {
-        method: "POST", mode: "cors", credentials: "omit", body: body
-      }).then(function (res) { return res.text(); }));
+      // Writes use keepalive so a save still reaches the server if the admin moves to another page.
+      var init = { method: "POST", mode: "cors", credentials: "omit", body: body };
+      if (!read && body.toString().length < 60000) init.keepalive = true;
+      return timeoutPromise(timeout || 30000, fetch(API_URL, init).then(function (res) { return res.text(); }));
     }).then(function (text) {
       var raw = String(text || "").trim();
       var res;
@@ -612,7 +613,51 @@
     });
   }
 
+  // ===== Saves that finish after the admin has left the page =====
+  // The order page lets the admin move on while a save is still running. The intended values are kept
+  // here until the server answers; if that answer never reached a page, the next admin page re-reads the
+  // order (fast read path) and warns when the save did not land.
+  var PENDING_KEY = "ma_admin_pending_saves";
+  function readPending() { try { return JSON.parse(localStorage.getItem(PENDING_KEY) || "{}") || {}; } catch (e) { return {}; } }
+  function writePending(map) { try { if (Object.keys(map).length) localStorage.setItem(PENDING_KEY, JSON.stringify(map)); else localStorage.removeItem(PENDING_KEY); } catch (e) {} }
+  function markPendingSave(orderId, expect) { var map = readPending(); map[orderId] = { expect: expect, at: Date.now() }; writePending(map); }
+  function clearPendingSave(orderId) { var map = readPending(); delete map[orderId]; writePending(map); }
+  function savedValue(key, order) {
+    var v = order[key.charAt(0).toLowerCase() + key.slice(1)];
+    if (key === "AdminNote") return String(v == null ? "" : v).replace(/^'/, "").trim();
+    if (key === "Charge" || key === "Advance" || key === "Discount") return Number(v) || 0;
+    return String(v == null ? "" : v).trim();
+  }
+  function saveLanded(expect, order) {
+    return Object.keys(expect).every(function (k) {
+      var want = expect[k];
+      return typeof want === "number" ? savedValue(k, order) === want : savedValue(k, order) === String(want).trim();
+    });
+  }
+  function warn(message) {
+    if (g.MaPanel && g.MaPanel.toast) g.MaPanel.toast(message, true);
+    else try { console.warn(message); } catch (e) {}
+  }
+  function checkPendingSaves() {
+    var map = readPending();
+    Object.keys(map).forEach(function (orderId) {
+      var item = map[orderId];
+      if (!item || Date.now() - item.at > 24 * 3600 * 1000) { clearPendingSave(orderId); return; }
+      if (Date.now() - item.at < 5000) return; // the page that started it may still be waiting for the answer
+      call("AdminOrderGet", { OrderId: orderId }).then(function (res) {
+        var current = readPending()[orderId];
+        if (!current || current.at !== item.at) return;
+        clearPendingSave(orderId);
+        if (!saveLanded(item.expect, res.order || {})) warn("অর্ডার #" + orderId + "-এর শেষ পরিবর্তন সেভ হয়নি। অর্ডারটি খুলে আবার সেভ করুন।");
+      }).catch(function () {});
+    });
+  }
+  setTimeout(function () { if (getSession()) checkPendingSaves(); }, 2500);
+
   g.MaAdmin = {
+    markPendingSave: markPendingSave,
+    clearPendingSave: clearPendingSave,
+    checkPendingSaves: checkPendingSaves,
     cached: cached,
     clearReadCache: clearReadCache,
     call: call,
