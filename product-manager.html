@@ -29,7 +29,7 @@
 <link rel="stylesheet" href="admin-dashboard-design.css?v=20261018-3">
 <script src="admin-dashboard-design.js?v=20261018-3"></script>
 <link rel="stylesheet" href="admin-premium-layout.css?v=20261021-1">
-<link rel="stylesheet" href="product-manager-wp.css?v=20261022-4">
+<link rel="stylesheet" href="product-manager-wp.css?v=20261022-8">
 </head>
 <body class="pl-admin adm-body pm-wp-admin" data-admin-guard="1">
   <div class="adm-shell">
@@ -137,11 +137,11 @@
   <script src="product-catalog-sections.js?v=215cfaaa25953550"></script>
   <script src="product-config.js?v=688f61c91ffaf2a7"></script>
   <script src="product-utils.js?v=460604041e5f8ec0"></script>
-  <script src="category-products.js?v=fa55a907c2bf0fe7"></script>
+  <script src="category-products.js?v=126fab2bb4752683"></script>
   <script src="product-links-data.js?v=16d3b6ba47d02931"></script>
   <script id="pmRawCatalog">window.MA_RAW_CATEGORY_PRODUCTS = JSON.parse(JSON.stringify(window.CATEGORY_PRODUCTS || {}));</script>
   <script src="product-catalog-loader.js?v=20261013-manager"></script>
-  <script src="product-publish-utils.js?v=4d87960bbc2baa44"></script><script src="product-publisher.js?v=a57243c992cd40a5"></script><script src="product-quick-upload.js?v=9ec1c27c8929cbfd"></script>
+  <script src="product-publish-utils.js?v=4d87960bbc2baa44"></script><script src="product-publisher.js?v=a57243c992cd40a5"></script><script src="product-quick-upload.js?v=4215657447c68aba"></script>
 <script id="pmStockAdmin">
 (function () {
   var ROW_CIRCLES = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "⑪", "⑫"];
@@ -413,7 +413,11 @@
   function renderMain() {
     // The full product list looks like WordPress → Products (no category column); a category opens its editor beside the list.
     var layoutEl = document.getElementById("pmLayout");
-    if (layoutEl) layoutEl.classList.toggle("pm-all-view", activeKey === ALL_PRODUCTS_KEY);
+    if (layoutEl) layoutEl.classList.toggle("pm-all-view", activeKey === ALL_PRODUCTS_KEY || activeKey === EDIT_KEY);
+    if (activeKey === EDIT_KEY) {
+      renderProductEditor();
+      return;
+    }
     if (activeKey === ALL_PRODUCTS_KEY) {
       renderAllProducts();
       return;
@@ -606,6 +610,180 @@
     }
   }
 
+  // ===== WooCommerce-style "Edit product" screen =====
+  // Left: name, description, Product data (General / Inventory / Attributes). Right: Publish, Categories,
+  // Tags, Brand, Product image, Product gallery. Edits change the in-memory catalog; "Update" publishes it.
+  var EDIT_KEY = "__edit_product__";
+  var editTarget = null; // { cat, index }
+  var editTab = "general";
+  function todayKey() { return new Date(Date.now() + 216e5).toISOString().slice(0, 10); }
+  function formatDay(day) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(day || ""));
+    if (!m) return "";
+    return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][parseInt(m[2], 10) - 1] + " " + parseInt(m[3], 10) + ", " + m[1];
+  }
+  function productTags(p) { return Array.isArray(p.tags) ? p.tags.filter(Boolean) : []; }
+  function allBrands() {
+    var seen = {};
+    Object.keys(products).forEach(function (k) { (products[k] || []).forEach(function (q) { if (q.brand) seen[q.brand] = true; }); });
+    return Object.keys(seen).sort();
+  }
+  function openProductEditor(cat, index) {
+    editTarget = { cat: cat, index: index };
+    editTab = "general";
+    activeKey = EDIT_KEY;
+    renderCatList();
+    renderMain();
+    window.scrollTo(0, 0);
+  }
+
+  function renderProductEditor() {
+    var list = editTarget && products[editTarget.cat];
+    var p = list && list[editTarget.index];
+    if (!p) { activeKey = ALL_PRODUCTS_KEY; renderMain(); return; }
+    var catKey = editTarget.cat;
+    ensureProductPriceByType(p, catKey);
+    var meta = getCategoryTypeMeta(catKey);
+    var out = p.inStock === false || (typeof p.stock === "number" && p.stock <= 0);
+    if (typeof window.isInStock === "function") out = !window.isInStock(p);
+    var tabs = [["general", "General"], ["inventory", "Inventory"], ["attributes", "Attributes"]];
+    var tags = productTags(p);
+    mainEl.innerHTML =
+      '<div class="pm-wp-edit">' +
+      '<button type="button" class="pm-wp-back" id="pmEditBack">← All products</button>' +
+      '<div class="pm-wp-heading"><h2 class="pm-wp-title">Edit product</h2><button type="button" class="pm-wp-title-action" id="pmEditAddNew">Add new product</button></div>' +
+      '<div class="pm-wp-columns">' +
+      '<div class="pm-wp-col-main">' +
+        '<input type="text" class="pm-wp-name" data-ef="name" value="' + escapeAttr(p.name || "") + '" placeholder="Product name" aria-label="Product name">' +
+        '<p class="pm-wp-permalink">Permalink: ' + (p.id ? '<a href="/product/' + encodeURIComponent(p.id) + '" target="_blank" rel="noopener">https://muslimabaya.com/product/' + escapeHtml(p.id) + '</a>' : "—") + '</p>' +
+        '<section class="pm-wp-box"><h3 class="pm-wp-box-title">Product description</h3><div class="pm-wp-box-body">' +
+          '<textarea data-ef="detailNote" rows="8" placeholder="What is in the set, fabric, care notes…">' + escapeHtml(p.detailNote || "") + '</textarea></div></section>' +
+        '<section class="pm-wp-box pm-wp-data"><h3 class="pm-wp-box-title">Product data <span>— ' + (meta ? "Variable product (types)" : "Simple product") + '</span></h3>' +
+          '<div class="pm-wp-data-wrap"><ul class="pm-wp-data-tabs">' + tabs.map(function (t) { return '<li><button type="button" data-etab="' + t[0] + '" class="' + (editTab === t[0] ? "is-active" : "") + '">' + t[1] + '</button></li>'; }).join("") + '</ul>' +
+          '<div class="pm-wp-data-panels">' +
+            '<div class="pm-wp-panel" data-epanel="general"' + (editTab === "general" ? "" : " hidden") + '>' +
+              efield("price", meta ? "Base price (৳)" : "Regular price (৳)", p.price, "number", meta ? "Usually the Full Set price; shown as the starting price." : "") +
+              (meta ? meta.types.map(function (t) { return efield("typePrice:" + t, t + " price (৳)", (p.priceByType || {})[t] != null ? p.priceByType[t] : "", "number"); }).join("") : "") +
+            '</div>' +
+            '<div class="pm-wp-panel" data-epanel="inventory"' + (editTab === "inventory" ? "" : " hidden") + '>' +
+              efield("id", "SKU", p.id, "text", "Also the product link. Changing it changes the URL.") +
+              efield("stock", "Stock quantity", p.stock == null ? "" : p.stock, "number", "Leave blank for unlimited. 0 = out of stock.") +
+              '<p class="pm-wp-form-row"><label>Stock status</label><span><mark class="' + (out ? "outofstock" : "instock") + '">' + (out ? "Out of stock" : "In stock") + '</mark> ' +
+              '<button type="button" class="pm-wp-button" id="pmEditStock">' + (out ? "Mark in stock" : "Mark out of stock") + '</button></span></p>' +
+            '</div>' +
+            '<div class="pm-wp-panel" data-epanel="attributes"' + (editTab === "attributes" ? "" : " hidden") + '>' +
+              efield("colorLabel", "Color (shown)", p.colorLabel) +
+              efield("color", "Color code", p.color, "text", "e.g. black, maroon — used for color filters.") +
+              efield("fabric", "Fabric", p.fabric) +
+              efield("sizes", "Sizes", sizesToInput(p.sizes), "text", "Separate with commas.") +
+            '</div>' +
+          '</div></div></section>' +
+      '</div>' +
+      '<div class="pm-wp-col-side">' +
+        '<section class="pm-wp-box"><h3 class="pm-wp-box-title">Publish</h3><div class="pm-wp-box-body pm-wp-publish">' +
+          '<p>Status: <b>Published</b></p>' +
+          '<p>Catalog: <b>' + escapeHtml(enName(sections.find(function (x) { return x.key === catKey; }) || { menu: catKey })) + '</b></p>' +
+          '<p>Added: <b>' + (formatDay(p.dateAdded) || "—") + '</b></p>' +
+          '<p><label class="pm-wp-check"><input type="checkbox" data-ef="featured"' + (p.featured ? " checked" : "") + '> ★ Featured product</label></p>' +
+          '<div class="pm-wp-publish-actions"><button type="button" class="pm-wp-trash" id="pmEditTrash">Move to Trash</button>' +
+          '<button type="button" class="pm-wp-primary" id="pmEditUpdate">Update</button></div>' +
+          '<p class="pm-wp-publish-note" id="pmEditNote">Changes go live after Update.</p>' +
+        '</div></section>' +
+        '<section class="pm-wp-box"><h3 class="pm-wp-box-title">Product categories</h3><div class="pm-wp-box-body"><ul class="pm-wp-cats">' +
+          sections.map(function (sec) { return '<li><label><input type="radio" name="pmEditCat" value="' + escapeAttr(sec.key) + '"' + (sec.key === catKey ? " checked" : "") + '> ' + escapeHtml(enName(sec)) + '</label></li>'; }).join("") +
+        '</ul></div></section>' +
+        '<section class="pm-wp-box"><h3 class="pm-wp-box-title">Product tags</h3><div class="pm-wp-box-body">' +
+          '<div class="pm-wp-tag-add"><input type="text" id="pmEditTagInput" placeholder="Add tag" aria-label="Add tag"><button type="button" class="pm-wp-button" id="pmEditTagAdd">Add</button></div>' +
+          '<p class="pm-wp-hint">Separate tags with commas</p><ul class="pm-wp-tags">' +
+          tags.map(function (t, i) { return '<li><button type="button" class="pm-wp-tag-x" data-tag-i="' + i + '" aria-label="Remove tag ' + escapeAttr(t) + '">×</button> ' + escapeHtml(t) + '</li>'; }).join("") +
+        '</ul></div></section>' +
+        '<section class="pm-wp-box"><h3 class="pm-wp-box-title">Product brand</h3><div class="pm-wp-box-body">' +
+          '<input type="text" data-ef="brand" list="pmBrandList" value="' + escapeAttr(p.brand || "") + '" placeholder="e.g. Muslim Abaya" aria-label="Product brand">' +
+          '<datalist id="pmBrandList">' + allBrands().map(function (b) { return '<option value="' + escapeAttr(b) + '">'; }).join("") + '</datalist>' +
+        '</div></section>' +
+        '<section class="pm-wp-box pm-wp-media"><h3 class="pm-wp-box-title">Product image</h3><div class="pm-wp-box-body">' + buildImageUploader(p) +
+          fieldWide("image", "Image URL", p.image) + '</div></section>' +
+        '<section class="pm-wp-box pm-wp-media"><h3 class="pm-wp-box-title">Product gallery</h3><div class="pm-wp-box-body">' + buildGalleryUploader(p) + '</div></section>' +
+      '</div></div></div>';
+
+    var root = mainEl.querySelector(".pm-wp-edit");
+    function changed(msg) {
+      var note = document.getElementById("pmEditNote");
+      if (note) { note.textContent = msg || "Unsaved changes — click Update to publish."; note.classList.add("is-dirty"); }
+    }
+    root.querySelectorAll("[data-ef]").forEach(function (inp) {
+      inp.addEventListener(inp.type === "checkbox" ? "change" : "input", function () {
+        var f = inp.getAttribute("data-ef");
+        if (f === "featured") { if (inp.checked) p.featured = true; else delete p.featured; }
+        else if (f === "price") p.price = parseInt(inp.value, 10) || 0;
+        else if (f === "stock") {
+          if (inp.value === "") { delete p.stock; delete p.inStock; }
+          else { p.stock = Math.max(0, parseInt(inp.value, 10) || 0); if (p.stock === 0) p.inStock = false; else delete p.inStock; }
+        } else if (f.indexOf("typePrice:") === 0) {
+          if (!p.priceByType) p.priceByType = {};
+          p.priceByType[f.slice(10)] = parseInt(inp.value, 10) || 0;
+        } else if (f === "sizes") p.sizes = inputToSizes(inp.value);
+        else if (f === "brand") { var b = inp.value.trim(); if (b) p.brand = b; else delete p.brand; }
+        else p[f] = inp.value;
+        changed();
+      });
+    });
+    // The shared image helpers bind to [data-f="image"]; keep the URL box in sync with uploads.
+    var urlBox = root.querySelector('[data-f="image"]');
+    if (urlBox) urlBox.addEventListener("input", function () { p.image = urlBox.value; changed(); });
+    root.querySelectorAll("[data-etab]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        editTab = b.getAttribute("data-etab");
+        root.querySelectorAll("[data-etab]").forEach(function (x) { x.classList.toggle("is-active", x === b); });
+        root.querySelectorAll("[data-epanel]").forEach(function (panel) { panel.hidden = panel.getAttribute("data-epanel") !== editTab; });
+      });
+    });
+    function addTags() {
+      var input = document.getElementById("pmEditTagInput");
+      var next = productTags(p);
+      String(input.value || "").split(",").map(function (t) { return t.trim(); }).filter(Boolean).forEach(function (t) {
+        if (next.map(function (x) { return x.toLowerCase(); }).indexOf(t.toLowerCase()) === -1) next.push(t);
+      });
+      if (next.length) p.tags = next; else delete p.tags;
+      renderProductEditor(); changed();
+    }
+    document.getElementById("pmEditTagAdd").addEventListener("click", addTags);
+    document.getElementById("pmEditTagInput").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); addTags(); } });
+    root.querySelectorAll("[data-tag-i]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var next = productTags(p); next.splice(parseInt(b.getAttribute("data-tag-i"), 10), 1);
+        if (next.length) p.tags = next; else delete p.tags;
+        renderProductEditor(); changed();
+      });
+    });
+    root.querySelectorAll('input[name="pmEditCat"]').forEach(function (r) {
+      r.addEventListener("change", function () {
+        if (!r.checked || r.value === catKey) return;
+        list.splice(editTarget.index, 1);
+        if (!products[r.value]) products[r.value] = [];
+        products[r.value].push(p);
+        editTarget = { cat: r.value, index: products[r.value].length - 1 };
+        renderProductEditor(); changed("Moved to " + enName(sections.find(function (x) { return x.key === r.value; })) + " — click Update to publish.");
+      });
+    });
+    document.getElementById("pmEditStock").addEventListener("click", function () { publishStockToggle(p, renderProductEditor); });
+    document.getElementById("pmEditTrash").addEventListener("click", function () {
+      if (!confirm("Move this product to Trash? It is removed from the website after Update.")) return;
+      list.splice(editTarget.index, 1);
+      activeKey = ALL_PRODUCTS_KEY; renderCatList(); renderMain();
+      toast("Product removed — click “Publish edited products” to update the website");
+    });
+    document.getElementById("pmEditUpdate").addEventListener("click", function () { document.getElementById("pmSave").click(); });
+    document.getElementById("pmEditBack").addEventListener("click", function () { activeKey = ALL_PRODUCTS_KEY; renderCatList(); renderMain(); });
+    document.getElementById("pmEditAddNew").addEventListener("click", function () { var q = document.getElementById("pmQuickUpload"); if (q) q.click(); });
+    wireImageUploader(root, p);
+    wireGalleryUploader(root, p);
+  }
+  function efield(name, label, value, type, hint) {
+    return '<p class="pm-wp-form-row"><label for="pmEf_' + escapeAttr(name) + '">' + label + '</label><span><input id="pmEf_' + escapeAttr(name) + '" type="' + (type || "text") + '" data-ef="' + escapeAttr(name) + '" value="' + escapeAttr(value == null ? "" : value) + '">' +
+      (hint ? '<small>' + hint + '</small>' : '') + '</span></p>';
+  }
+
   function renderAllProducts() {
     overviewSelected = {};
     var rows = [];
@@ -623,7 +801,9 @@
     var headRow = '<tr><td class="check-column"><input type="checkbox" class="pm-check-all" aria-label="Select all products on this page"></td>' +
       '<th class="column-thumb" scope="col"><span class="pm-thumb-icon" aria-label="Image" title="Image"></span></th>' +
       '<th class="column-name" scope="col">Name</th><th class="column-sku" scope="col">SKU</th><th class="column-stock" scope="col">Stock</th>' +
-      '<th class="column-price" scope="col">Price</th><th class="column-cats" scope="col">Categories</th></tr>';
+      '<th class="column-price" scope="col">Price</th><th class="column-cats" scope="col">Categories</th>' +
+      '<th class="column-tags" scope="col">Tags</th><th class="column-brand" scope="col">Brands</th>' +
+      '<th class="column-featured" scope="col"><span title="Featured" aria-label="Featured">★</span></th><th class="column-date" scope="col">Date</th></tr>';
     // Same layout as WordPress → Products: title + "Add new", status links, search, bulk actions / filters / pages, list table.
     mainEl.innerHTML = '<div class="pm-wp-list">' +
       '<div class="pm-wp-heading"><h2 class="pm-wp-title">Products</h2>' +
@@ -684,7 +864,7 @@
         var out = p.inStock === false || (typeof p.stock === "number" && p.stock <= 0);
         if (overviewCategory && s.key !== overviewCategory) return false;
         if (overviewStock === "out" && !out || overviewStock === "in" && out) return false;
-        return [p.name, p.id, s.key, s.menu, s.menuBn].join(" ").toLowerCase().indexOf(term) !== -1;
+        return [p.name, p.id, s.key, s.menu, s.menuBn, p.brand || ""].concat(productTags(p)).join(" ").toLowerCase().indexOf(term) !== -1;
       });
       document.getElementById("pmAllCount").textContent = visible.length + " / " + rows.length + " items";
       var pageCount = Math.max(1, Math.ceil(visible.length / overviewPageSize));
@@ -733,8 +913,29 @@
           '<td class="column-sku">' + (p.id ? escapeHtml(p.id) : '<span class="na">–</span>') + '</td>' +
           '<td class="column-stock"><mark class="' + (out ? 'outofstock' : 'instock') + '">' + (out ? 'Out of stock' : 'In stock') + '</mark></td>' +
           '<td class="column-price">' + priceText(p) + '</td>' +
-          '<td class="column-cats"><button type="button" class="pm-row-link" data-filter-cat="' + escapeAttr(s.key) + '">' + escapeHtml(catName(s)) + '</button></td></tr>';
-      }).join("") || '<tr><td colspan="7" class="pm-empty">No products found</td></tr>';
+          '<td class="column-cats"><button type="button" class="pm-row-link" data-filter-cat="' + escapeAttr(s.key) + '">' + escapeHtml(catName(s)) + '</button></td>' +
+          '<td class="column-tags">' + (productTags(p).length ? productTags(p).map(function (t) { return '<button type="button" class="pm-row-link" data-filter-term="' + escapeAttr(t) + '">' + escapeHtml(t) + '</button>'; }).join(', ') : '<span class="na">–</span>') + '</td>' +
+          '<td class="column-brand">' + (p.brand ? '<button type="button" class="pm-row-link" data-filter-term="' + escapeAttr(p.brand) + '">' + escapeHtml(p.brand) + '</button>' : '<span class="na">–</span>') + '</td>' +
+          '<td class="column-featured"><button type="button" class="pm-star' + (p.featured ? ' is-on' : '') + '" data-feature-cat="' + escapeAttr(s.key) + '" data-feature-index="' + row.index + '" aria-pressed="' + (p.featured ? 'true' : 'false') + '" title="' + (p.featured ? 'Featured — click to unfeature' : 'Click to feature') + '">' + (p.featured ? '★' : '☆') + '</button></td>' +
+          '<td class="column-date">' + (p.dateAdded ? 'Published<br><span>' + escapeHtml(formatDay(p.dateAdded)) + '</span>' : '<span class="na">–</span>') + '</td></tr>';
+      }).join("") || '<tr><td colspan="11" class="pm-empty">No products found</td></tr>';
+      document.querySelectorAll("[data-filter-term]").forEach(function (button) {
+        button.addEventListener("click", function () {
+          allSearchTerm = button.getAttribute("data-filter-term");
+          document.getElementById("pmAllSearch").value = allSearchTerm;
+          overviewPage = 1; overviewSelected = {};
+          draw();
+        });
+      });
+      document.querySelectorAll("[data-feature-cat]").forEach(function (button) {
+        button.addEventListener("click", function () {
+          var fp = (products[button.getAttribute("data-feature-cat")] || [])[parseInt(button.getAttribute("data-feature-index"), 10)];
+          if (!fp) return;
+          if (fp.featured) delete fp.featured; else fp.featured = true;
+          draw();
+          toast("Featured changed — click “Publish edited products” to save");
+        });
+      });
       document.querySelectorAll("[data-filter-cat]").forEach(function (button) {
         button.addEventListener("click", function () {
           overviewCategory = button.getAttribute("data-filter-cat");
@@ -787,13 +988,7 @@
       document.querySelectorAll("[data-pm-cat]").forEach(function (button) {
         button.addEventListener("click", function () {
           overviewSelected = {};
-          activeKey = button.getAttribute("data-pm-cat");
-          var index = parseInt(button.getAttribute("data-pm-index"), 10);
-          searchTerm = "";
-          renderCatList();
-          renderMain();
-          var cards = document.querySelectorAll(".pm-product-card");
-          if (cards[index]) cards[index].scrollIntoView({ block: "start" });
+          openProductEditor(button.getAttribute("data-pm-cat"), parseInt(button.getAttribute("data-pm-index"), 10));
         });
       });
     }
@@ -1819,7 +2014,7 @@
       title +
       '</title>\n  <link rel="preconnect" href="https://fonts.googleapis.com">\n  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">\n  <link rel="stylesheet" href="site-header.css">\n  <link rel="stylesheet" href="site-footer.css">\n  <link rel="stylesheet" href="shop-page.css?v=1">\n  <link rel="stylesheet" href="category-sidebar.css?v=1" id="category-sidebar-css">\n</head>\n<body data-shop-category="' +
       sec.key +
-      '">\n  <div id="site-header-mount"></div>\n  <main class="wrap"><div id="list"></div></main>\n  <div id="site-footer-mount"></div>\n  <script defer src="cart-utils.js"><\/script>\n  <script defer src="site-header.js"><\/script>\n  <script defer src="product-catalog-sections.js?v=215cfaaa25953550"><\/script>\n  <script defer src="product-catalog-sync.js"><\/script>\n  <script defer src="product-config.js?v=688f61c91ffaf2a7"><\/script>\n  <script defer src="product-utils.js?v=460604041e5f8ec0"><\/script>\n  <script defer src="category-products.js?v=fa55a907c2bf0fe7"><\/script>\n  <script defer src="product-links-data.js?v=16d3b6ba47d02931"><\/script>\n  <script defer src="product-catalog-loader.js"><\/script>\n  <script defer src="category-renderer.js?v=00bd7a2ddbd5f59b"><\/script>\n  <script defer src="site-footer.js"><\/script>\n  <script defer src="shop-category-boot.js"><\/script>\n</body>\n</html>\n'
+      '">\n  <div id="site-header-mount"></div>\n  <main class="wrap"><div id="list"></div></main>\n  <div id="site-footer-mount"></div>\n  <script defer src="cart-utils.js"><\/script>\n  <script defer src="site-header.js"><\/script>\n  <script defer src="product-catalog-sections.js?v=215cfaaa25953550"><\/script>\n  <script defer src="product-catalog-sync.js"><\/script>\n  <script defer src="product-config.js?v=688f61c91ffaf2a7"><\/script>\n  <script defer src="product-utils.js?v=460604041e5f8ec0"><\/script>\n  <script defer src="category-products.js?v=126fab2bb4752683"><\/script>\n  <script defer src="product-links-data.js?v=16d3b6ba47d02931"><\/script>\n  <script defer src="product-catalog-loader.js"><\/script>\n  <script defer src="category-renderer.js?v=00bd7a2ddbd5f59b"><\/script>\n  <script defer src="site-footer.js"><\/script>\n  <script defer src="shop-category-boot.js"><\/script>\n</body>\n</html>\n'
     );
   }
 

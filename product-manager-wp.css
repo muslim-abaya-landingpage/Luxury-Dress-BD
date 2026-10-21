@@ -573,3 +573,93 @@ html[data-admin-theme="dark"] .pm-wp-list, html[data-admin-theme="dark"] .pm-wp-
   .pm-wp-admin .pm-wp-table .column-name { width: auto; }
   .pm-wp-admin .pm-row-actions .pm-row-link { padding: 4px 0; }
 }
+
+/* ===== New list columns ===== */
+.pm-wp-admin .pm-wp-table .column-tags { width: 11%; }
+.pm-wp-admin .pm-wp-table .column-brand { width: 9%; }
+.pm-wp-admin .pm-wp-table .column-featured { width: 3em; text-align: center; }
+.pm-wp-admin .pm-wp-table .column-date { width: 10%; color: #50575e; font-size: 13px !important; }
+.pm-wp-admin .pm-wp-table .column-name { width: 30%; }
+.pm-wp-admin .pm-wp-table .column-sku { width: 10%; }
+.pm-wp-admin .pm-wp-table .column-price, .pm-wp-admin .pm-wp-table .column-stock { width: 9%; }
+.pm-star { padding: 0; border: 0; background: none; color: #a7aaad; font-size: 18px; line-height: 1; cursor: pointer; }
+.pm-star.is-on { color: #dba617; }
+.pm-star:hover { color: #dba617; }
+@media (max-width: 1000px) { .pm-wp-admin .pm-wp-table .column-tags { display: none; } }
+@media (max-width: 782px) { .pm-wp-admin .pm-wp-table .column-featured, .pm-wp-admin .pm-wp-table .column-date { display: none; } }
+
+/* ===== Edit product screen ===== */
+.pm-wp-edit { font-size: 14px; color: #1d2327; }
+.pm-wp-columns { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 20px; align-items: start; }
+.pm-wp-name { width: 100%; box-sizing: border-box; height: 44px; padding: 3px 10px; border: 1px solid #8c8f94; border-radius: 4px; background: #fff; font-size: 20px !important; line-height: 1.3; }
+.pm-wp-name:focus { border-color: #2271b1; box-shadow: 0 0 0 1px #2271b1; outline: 0; }
+.pm-wp-permalink { margin: 6px 0 16px; color: #50575e; font-size: 13px; word-break: break-all; }
+.pm-wp-permalink a { color: #2271b1; }
+.pm-wp-box { margin: 0 0 20px; border: 1px solid #c3c4c7; background: #fff; box-shadow: 0 1px 1px rgba(0,0,0,.04); }
+.pm-wp-box-title { margin: 0 !important; padding: 8px 12px !important; border-bottom: 1px solid #c3c4c7; font-size: 14px !important; font-weight: 600 !important; line-height: 1.4; }
+.pm-wp-box-title span { font-weight: 400; color: #50575e; }
+.pm-wp-box-body { padding: 12px; }
+.pm-wp-box textarea { width: 100%; box-sizing: border-box; min-height: 160px; padding: 8px 10px; border: 1px solid #8c8f94; border-radius: 4px; font: inherit; font-size: 14px !important; line-height: 1.6; }
+.pm-wp-box input[type="text"], .pm-wp-box input[type="number"] { width: 100%; box-sizing: border-box; min-height: 32px; padding: 0 8px; border: 1px solid #8c8f94; border-radius: 4px; background: #fff; font-size: 14px; }
+.pm-wp-box input:focus, .pm-wp-box textarea:focus { border-color: #2271b1; box-shadow: 0 0 0 1px #2271b1; outline: 0; }
+
+.pm-wp-data-wrap { display: flex; min-height: 220px; }
+.pm-wp-data-tabs { flex: 0 0 160px; margin: 0; padding: 0; list-style: none; background: #fafafa; border-right: 1px solid #eee; }
+.pm-wp-data-tabs li { margin: 0; border-bottom: 1px solid #eee; }
+.pm-wp-data-tabs button { display: block; width: 100%; padding: 10px 12px; border: 0; background: none; color: #2271b1; font-size: 13px !important; text-align: left; cursor: pointer; }
+.pm-wp-data-tabs button.is-active { background: #eee; color: #50575e; font-weight: 600; }
+.pm-wp-data-panels { flex: 1 1 auto; min-width: 0; padding: 6px 0; }
+.pm-wp-form-row { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 4px 16px; align-items: start; margin: 0; padding: 8px 16px; }
+.pm-wp-form-row > label { padding-top: 6px; font-size: 13px !important; color: #1d2327; }
+.pm-wp-form-row > span { display: flex; flex-direction: column; gap: 4px; }
+.pm-wp-form-row small { color: #646970; font-size: 13px; }
+.pm-wp-form-row mark { background: none; font-weight: 700; }
+.pm-wp-form-row mark.instock { color: #00a32a; } .pm-wp-form-row mark.outofstock { color: #b32d2e; }
+.pm-wp-form-row > span:has(> mark) { flex-direction: row; align-items: center; gap: 10px; }
+
+.pm-wp-publish p { margin: 0 0 8px; font-size: 13px; color: #50575e; }
+.pm-wp-publish b { color: #1d2327; }
+.pm-wp-check { display: inline-flex; align-items: center; gap: 6px; color: #1d2327; }
+.pm-wp-publish-actions { display: flex; align-items: center; justify-content: space-between; margin: 12px -12px -12px; padding: 10px 12px; border-top: 1px solid #dcdcde; background: #f6f7f7; }
+.pm-wp-trash { padding: 0; border: 0; background: none; color: #b32d2e; font-size: 13px; text-decoration: underline; cursor: pointer; }
+.pm-wp-primary { min-height: 32px; padding: 0 14px; border: 1px solid #2271b1; border-radius: 3px; background: #2271b1; color: #fff; font-size: 13px; cursor: pointer; }
+.pm-wp-primary:hover { background: #135e96; }
+.pm-wp-publish-note { margin: 22px 0 0 !important; }
+.pm-wp-publish-note.is-dirty { color: #b26200 !important; font-weight: 600; }
+.pm-wp-cats { max-height: 220px; overflow: auto; margin: 0; padding: 4px 8px; list-style: none; border: 1px solid #dcdcde; }
+.pm-wp-cats li { margin: 6px 0; font-size: 13px; }
+.pm-wp-tag-add { display: flex; gap: 4px; }
+.pm-wp-hint { margin: 4px 0 8px; color: #646970; font-size: 13px; font-style: italic; }
+.pm-wp-tags { display: flex; flex-wrap: wrap; gap: 6px 12px; margin: 0; padding: 0; list-style: none; font-size: 13px; }
+.pm-wp-tag-x { width: 18px; height: 18px; padding: 0; border: 0; border-radius: 50%; background: #dcdcde; color: #50575e; font-size: 12px; line-height: 18px; cursor: pointer; }
+.pm-wp-tag-x:hover { background: #b32d2e; color: #fff; }
+.pm-wp-media .pm-uploader > label { display: none; }
+.pm-wp-media .pm-dropzone { display: block; }
+.pm-wp-media .pm-dropzone-preview { width: 100%; height: 220px; background-size: cover; background-position: center; margin-bottom: 8px; }
+.pm-wp-media .pm-field { margin: 0 0 8px; }
+.pm-wp-media .pm-field label { font-size: 13px !important; }
+.pm-wp-media .pm-gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+@media (max-width: 960px) {
+  .pm-wp-columns { grid-template-columns: 1fr; }
+  .pm-wp-data-wrap { flex-direction: column; }
+  .pm-wp-data-tabs { display: flex; flex: none; border-right: 0; border-bottom: 1px solid #eee; }
+  .pm-wp-data-tabs li { flex: 1; border-bottom: 0; border-right: 1px solid #eee; }
+  .pm-wp-data-tabs button { text-align: center; }
+  .pm-wp-form-row { grid-template-columns: 1fr; }
+  .pm-wp-form-row > label { padding-top: 0; }
+}
+/* Shorter rows: SKU has its own column, so the row actions skip it on wide screens */
+@media (min-width: 783px) { .pm-wp-admin .pm-row-actions .pm-row-id { display: none; } }
+.pm-wp-admin .pm-wp-table .column-stock mark, .pm-wp-admin .pm-wp-table .column-price { white-space: nowrap; }
+.pm-wp-admin .pm-wp-table .column-tags .pm-row-link { white-space: nowrap; }
+.pm-wp-admin .pm-wp-table .column-date span { white-space: nowrap; }
+.pm-wp-admin .pm-wp-table .column-name { width: 28%; }
+/* Let the table size columns from content (WordPress list tables do), name gets the rest */
+.pm-wp-admin .pm-wp-table .column-sku, .pm-wp-admin .pm-wp-table .column-stock, .pm-wp-admin .pm-wp-table .column-price,
+.pm-wp-admin .pm-wp-table .column-cats, .pm-wp-admin .pm-wp-table .column-tags, .pm-wp-admin .pm-wp-table .column-brand,
+.pm-wp-admin .pm-wp-table .column-date { width: auto; }
+.pm-wp-admin .pm-wp-table .column-name { width: auto; min-width: 210px; }
+.pm-wp-admin .pm-wp-table .column-sku, .pm-wp-admin .pm-wp-table .column-date { white-space: nowrap; }
+.pm-wp-admin .pm-wp-table tbody td, .pm-wp-admin .pm-wp-table tbody th { padding: 9px 8px; }
+.pm-wp-admin .pm-row-actions { margin-top: 2px; }
+@media (max-width: 1180px) { .pm-wp-admin .pm-wp-table .column-brand { display: none; } }
