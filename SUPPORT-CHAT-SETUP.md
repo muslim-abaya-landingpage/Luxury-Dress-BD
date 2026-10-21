@@ -53,3 +53,8 @@ For chat testing after deployment, open the storefront in a private/incognito se
 `supabase/functions/order-status/index.ts` is the Edge Function that proxies order lookup to the existing Apps Script `OrderTrack` route. It requires a verified visitor JWT and a server-side Turnstile token with action `order_status`; it returns only the order ID, date, status, courier status, and tracking value. Before it works, add `TURNSTILE_SECRET_KEY`, `ORDER_TRACK_API_URL`, and `ALLOWED_ORIGINS` as Supabase Edge Function secrets and deploy `order-status` with JWT verification enabled. Configure Supabase Auth CAPTCHA to use Cloudflare Turnstile as well. Only the public Site key belongs in `site-footer-config.js`; never place the Secret key there.
 
 The public storefront remains on its previous deployed version until the follow-up GitHub change is merged and built. Turnstile will not validate until the rotated Secret key is saved in Supabase and Auth CAPTCHA is configured.
+
+
+## Admin inbox alerts
+
+In the admin inbox, select **Enable alerts** to grant this browser permission for desktop notifications; browsers require this user gesture. Select **Sound: Off** to enable/disable the short sound. Alerts are generated only for new customer messages while the inbox page is open and subscribed; this is not a background push service and does not alert if the tab/browser is closed or Realtime is disconnected. Browser notification permissions may also be blocked by OS/browser settings.
