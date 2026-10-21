@@ -19,14 +19,14 @@ body.global-layout #homeCatnav {
 }
 
 .home-hero {
-  margin: clamp(10px, 2vw, 24px) auto 18px;
-  padding: 0 clamp(10px, 2.5vw, 32px);
+  margin: 0 auto 8px;
+  padding: 0;
 }
 .home-hero-track {
   overflow: hidden;
-  border: 1px solid var(--home-glass-border);
+  border: 0;
   border-radius: 0;
-  box-shadow: 0 20px 54px rgba(70,70,70,.14), inset 0 1px rgba(255,255,255,.85);
+  box-shadow: none;
 }
 .home-hero-slide img { transition: transform 1.2s cubic-bezier(.2,.7,.2,1), filter .8s ease; }
 .home-hero-slide.is-active img { transform: scale(1.015); }
@@ -136,7 +136,7 @@ body.global-layout #homeCatnav {
 }
 
 @media (max-width: 700px) {
-  .home-hero { margin: 8px auto 12px; padding: 0 8px; }
+  .home-hero { margin: 0 auto 4px; padding: 0; }
   .home-hero-track { border-radius: 0; }
   .home-hero-cap { right: 12px; left: 12px; bottom: 12px; max-width: none; padding: 17px 17px 15px; border-radius: 0; }
   .home-hero-cap .eyebrow { margin-bottom: 6px; font-size: 9px; }
@@ -159,3 +159,6 @@ body.global-layout #homeCatnav {
   .home-hero-cap, .home-catnav-inner, .home-section { animation: none; }
   .home-hero-slide img, .home-hero-cap .hero-btn, .home-hero-arrow, .ah-card, .ah-card-media img, .home-row-arrow { transition: none; }
 }
+
+/* No rounded corners on the home page: video block and order buttons too. */
+#main-video-section, #main-video-section *, .home-order-strip, .home-order-strip * { border-radius: 0 !important; }

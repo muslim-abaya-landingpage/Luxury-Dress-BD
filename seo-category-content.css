@@ -57,3 +57,10 @@
     line-height: 1.65;
   }
 }
+
+/* Home page: quiet text block near the footer, not a boxed headline above the products. */
+.home-seo-intro { max-width: 1100px; margin: 8px auto 28px; padding: 0 16px; background: none; border: 0; color: #6b6b6b; }
+.home-seo-intro h1 { font-size: 15px; font-weight: 600; color: #555; margin: 0 0 4px; }
+.home-seo-intro p { font-size: 13px; line-height: 1.65; margin: 4px 0; }
+.home-seo-intro a { color: #555; font-weight: 600; }
+@media (max-width: 600px) { .home-seo-intro { margin: 6px auto 22px; padding: 0 14px; } .home-seo-intro p { font-size: 12.5px; } }
