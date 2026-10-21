@@ -21,7 +21,7 @@
 <link rel="stylesheet" href="admin-dashboard-design.css?v=20261018-3">
 <script src="admin-dashboard-design.js?v=20261018-3"></script>
 <link rel="stylesheet" href="admin-premium-layout.css?v=20261021-1">
-  <link rel="stylesheet" href="admin-dashboard-clean.css?v=20261021-2">
+  <link rel="stylesheet" href="admin-dashboard-clean.css?v=20261022-smart1">
 <script src="admin-order-status.js?v=20261018-2"></script>
 </head>
 <body class="adm-body">
@@ -89,8 +89,8 @@
           <p class="dzc-note" id="dzScopeNote">সর্বশেষ ১০০টি অর্ডার থেকে হিসাব। পুরো হিসাব দেখতে অর্ডার প্যানেল খুলুন।</p>
         </section>
 
-        <section class="adm-daily" aria-labelledby="admDailyHeading">
-          <h2 id="admDailyHeading">দ্রুত কাজ শুরু করুন</h2>
+        <nav class="adm-smart-jump" aria-label="ড্যাশবোর্ড শর্টকাট"><a href="#admDailyHeading">দ্রুত কাজ</a><a href="#admAlertHeading">জরুরি বিষয়</a><a href="#admTasksHeading">অগ্রাধিকার অর্ডার</a><a href="admin-inbox.html">ইনবক্স ↗</a><a href="admin-operations.html">হিসাব ও রিটার্ন ↗</a></nav><section class="adm-daily" aria-labelledby="admDailyHeading">
+          <div class="adm-smart-section-title"><h2 id="admDailyHeading">দ্রুত কাজ শুরু করুন</h2><span>সবচেয়ে বেশি ব্যবহৃত ৩টি কাজ</span></div>
           <div class="adm-daily-grid">
             <a class="adm-daily-action" href="admin-orders.html"><span class="adm-daily-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></span><strong>নতুন অর্ডার দেখুন <span aria-hidden="true">→</span></strong><span>অর্ডার যাচাই ও স্ট্যাটাস পরিবর্তন</span></a>
             <a class="adm-daily-action" href="product-manager.html#pmQuickUpload"><span class="adm-daily-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="7" width="16" height="14" rx="3"/><path d="M9 7V5a3 3 0 0 1 6 0v2M9 12h6M12 9v6"/></svg></span><strong>পণ্য যোগ করুন <span aria-hidden="true">→</span></strong><span>ছবি, দাম ও তথ্য দিয়ে নতুন পণ্য প্রকাশ</span></a>
@@ -100,7 +100,7 @@
 
         <section class="dz-card adm-feature-card" aria-labelledby="admAlertHeading">
           <div class="adm-feature-head">
-            <div><h3 id="admAlertHeading">যে বিষয়গুলোতে নজর দরকার</h3><small id="admAlertState" role="status" aria-live="polite">অ্যালার্ট লোড হচ্ছে…</small></div>
+            <div><h3 id="admAlertHeading">জরুরি নজর</h3><small id="admAlertState" role="status" aria-live="polite">অ্যালার্ট লোড হচ্ছে…</small></div>
             <div class="adm-feature-actions"><button type="button" class="adm-btn adm-btn-secondary" id="admDesktopAlerts" hidden>ডেস্কটপ অ্যালার্ট চালু করুন</button><button type="button" class="adm-btn adm-btn-secondary" id="admAlertsRefresh">রিফ্রেশ</button></div>
           </div>
           <div class="adm-desktop-status" id="admDesktopStatus" role="status" aria-live="polite"></div>
