@@ -32,7 +32,7 @@
     function update() {
       var lvl = score(input.value);
       meter.setAttribute("data-level", String(lvl));
-      if (label) label.textContent = lvl ? "Password strength: " + words[lvl] : "At least 8 characters.";
+      if (label) label.textContent = lvl ? "Password strength: " + words[lvl] : "At least 8 characters, with a letter and a number.";
     }
     input.addEventListener("input", update);
     update();

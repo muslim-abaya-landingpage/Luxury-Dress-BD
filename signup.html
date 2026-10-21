@@ -2,150 +2,105 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Create Account | Muslim Abaya</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Create an account | Muslim Abaya</title>
+<meta name="description" content="Create a Muslim Abaya account for faster checkout and order updates. Cash on delivery across Bangladesh.">
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="https://muslimabaya.com/signup">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="/assets/logo-muslim-abaya.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/brand/muslim-abaya-logo-icon-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://accounts.google.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="site-header.css?v=20261022-ann">
 <link rel="stylesheet" href="site-footer.css?v=20261006scroll2" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="site-footer.css?v=20261006scroll2"></noscript>
 <link rel="stylesheet" href="mobile-bottom-nav.css?v=20261011-active-state">
-<link rel="stylesheet" href="auth-page.css">
-<link rel="stylesheet" href="auth-modern.css?v=20261022-social2">
+<link rel="stylesheet" href="signin.css?v=20261022-2">
 <script src="config.js?v=20261009-inbox"></script>
 </head>
-<body class="am-body">
+<body class="am-body si-body">
 <div id="site-header-mount"></div>
 
-<main class="am-main">
-  <div class="am-shell">
-    <aside class="am-brand">
-      <div class="am-brand-inner">
-        <a class="am-logo" href="/" aria-label="Muslim Abaya home">
-          <img src="assets/brand/muslim-abaya-logo-icon-dark.svg" alt="" width="52" height="52">
-          <span class="am-logo-text"><small>Muslim</small><strong>Abaya</strong></span>
-        </a>
-        <div class="am-brand-copy">
-          <span class="am-collection-label">A considered beginning</span>
-          <h1>Make it <em>yours.</em></h1>
-          <p class="am-brand-lead">Save your details once and enjoy a more effortless way to shop modest fashion.</p>
+<main class="si-main">
+  <section class="si-card" aria-labelledby="su-title">
+    <a class="si-logo" href="/" aria-label="Muslim Abaya home">
+      <img src="assets/brand/muslim-abaya-logo-icon-dark.svg" alt="" width="40" height="40">
+      <span>Muslim Abaya</span>
+    </a>
+    <h1 id="su-title">Create an account</h1>
+    <p class="si-sub">Check out faster and follow your orders.</p>
+
+    <section class="am-social-login" aria-label="Sign up with Google or Facebook">
+      <div class="am-social-grid">
+        <div class="am-social-google">
+          <div id="maGoogleButtonHost" hidden></div>
+          <button class="am-social-btn" id="maGoogleFallback" type="button" disabled>
+            <span class="am-social-mark is-google" aria-hidden="true">G</span><span>Sign in with Google</span>
+          </button>
         </div>
-        <div class="am-brand-meta"><span class="am-meta-line"></span><span>Dhaka · Bangladesh</span></div>
+        <button class="am-social-btn" id="maFacebookButton" type="button" hidden disabled>
+          <span class="am-social-mark is-facebook" aria-hidden="true">f</span><span>Sign in with Facebook</span>
+        </button>
       </div>
-      <ul class="am-perks" aria-label="Member benefits">
-        <li><span class="am-perk-number">01</span><span>Faster checkout, every time</span></li>
-        <li><span class="am-perk-number">02</span><span>Order updates in one place</span></li>
-        <li><span class="am-perk-number">03</span><span>Cash on delivery, nationwide</span></li>
-      </ul>
-      <p class="am-brand-foot">Already a member? <a href="signin.html">Sign in <span aria-hidden="true">↗</span></a></p>
-    </aside>
-
-    <section class="am-form-wrap" aria-label="Create account">
-      <div class="am-form form-box">
-        <span class="am-eyebrow">Join the edit</span>
-        <h2>Create your account<span class="am-period">.</span></h2>
-        <p class="am-sub">A few details, then you’re ready to shop.</p>
-
-        <section class="am-social-login" aria-label="Sign in with Google or Facebook">
-          <div class="am-social-grid">
-            <div class="am-social-google">
-              <div id="maGoogleButtonHost" hidden></div>
-              <button class="am-social-btn" id="maGoogleFallback" type="button" disabled aria-label="Sign in with Google">
-                <span class="am-social-mark is-google" aria-hidden="true">G</span><span>Sign in with Google</span>
-              </button>
-            </div>
-            <button class="am-social-btn" id="maFacebookButton" type="button" hidden disabled aria-label="Sign in with Facebook">
-              <span class="am-social-mark is-facebook" aria-hidden="true">f</span><span>Sign in with Facebook</span>
-            </button>
-          </div>
-          <p class="am-social-status" id="maSocialStatus" role="status" aria-live="polite"></p>
-          <div class="am-social-divider"><span>or use email</span></div>
-        </section>
-
-        <form id="signupForm" novalidate>
-          <div class="am-field">
-            <label for="su-name">Full name</label>
-            <div class="am-input"><svg class="am-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c.8-3.6 3.9-5.4 7.5-5.4s6.7 1.8 7.5 5.4"/></svg><input type="text" id="su-name" name="name" autocomplete="name" placeholder="Your full name"></div>
-          </div>
-          <div class="am-field">
-            <label for="su-mobile">Mobile number</label>
-            <div class="am-input"><svg class="am-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg><input type="tel" id="su-mobile" name="tel" inputmode="numeric" autocomplete="tel" placeholder="01XXXXXXXXX"></div>
-          </div>
-          <div class="am-field">
-            <label for="su-email">Email</label>
-            <div class="am-input"><svg class="am-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.5 7.5 8.5 6 8.5-6"/></svg><input type="email" id="su-email" name="email" autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="you@example.com"></div>
-          </div>
-          <div class="am-field">
-            <label for="su-pass">Password</label>
-            <div class="am-input has-toggle"><svg class="am-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg><input type="password" id="su-pass" name="new-password" autocomplete="new-password" placeholder="Create a password"><button type="button" class="am-eye" data-am-eye="su-pass" aria-label="Show password" aria-pressed="false"><svg class="am-eye-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="am-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.6 10.6 0 0 1 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.1M6.5 6.6A17.7 17.7 0 0 0 2 12s3.6 7 10 7c1.8 0 3.4-.5 4.8-1.2"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div>
-            <div class="am-meter" data-am-meter="su-pass" data-am-meter-label="suPassHint" data-level="0" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-            <p class="am-hint" id="suPassHint">At least 8 characters.</p>
-          </div>
-          <div class="am-field">
-            <label for="su-confirm">Confirm password</label>
-            <div class="am-input has-toggle"><svg class="am-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg><input type="password" id="su-confirm" name="confirm-password" autocomplete="new-password" placeholder="Repeat your password"><button type="button" class="am-eye" data-am-eye="su-confirm" aria-label="Show password" aria-pressed="false"><svg class="am-eye-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="am-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.6 10.6 0 0 1 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.1M6.5 6.6A17.7 17.7 0 0 0 2 12s3.6 7 10 7c1.8 0 3.4-.5 4.8-1.2"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div>
-          </div>
-          <p class="am-msg" id="signupMsg" role="alert" aria-live="polite"></p>
-          <button class="am-btn" id="signupBtn" type="submit"><span>Create account</span><span class="am-btn-arrow" aria-hidden="true">→</span></button>
-        </form>
-        <p class="am-switch">Already have an account? <a id="signinLink" href="signin.html">Sign in</a></p>
-        <p class="am-secure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Private, secure account creation</p>
-      </div>
+      <p class="am-social-status" id="maSocialStatus" role="status"></p>
+      <div class="am-social-divider"><span>or sign up with email</span></div>
     </section>
-  </div>
+
+    <form id="signupForm" novalidate>
+      <div class="am-field">
+        <label for="su-name">Full name</label>
+        <div class="am-input"><svg class="am-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c.8-3.6 3.9-5.4 7.5-5.4s6.7 1.8 7.5 5.4"/></svg><input type="text" id="su-name" name="name" autocomplete="name" placeholder="Your full name" required></div>
+      </div>
+      <div class="am-field">
+        <label for="su-mobile">Mobile number</label>
+        <div class="am-input"><svg class="am-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg><input type="tel" id="su-mobile" name="tel" inputmode="tel" autocomplete="tel" placeholder="01XXXXXXXXX" required></div>
+      </div>
+      <div class="am-field">
+        <label for="su-email">Email</label>
+        <div class="am-input"><svg class="am-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.5 7.5 8.5 6 8.5-6"/></svg><input type="email" id="su-email" name="email" autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="you@example.com" required></div>
+      </div>
+      <div class="am-field">
+        <label for="su-pass">Password</label>
+        <div class="am-input has-toggle"><svg class="am-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg><input type="password" id="su-pass" name="new-password" autocomplete="new-password" placeholder="Create a password" aria-describedby="suPassHint" required><button type="button" class="am-eye" data-am-eye="su-pass" aria-label="Show password" aria-pressed="false"><svg class="am-eye-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="am-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.6 10.6 0 0 1 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.1M6.5 6.6A17.7 17.7 0 0 0 2 12s3.6 7 10 7c1.8 0 3.4-.5 4.8-1.2"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div>
+        <div class="am-meter" data-am-meter="su-pass" data-am-meter-label="suPassHint" data-level="0" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <p class="am-hint" id="suPassHint">At least 8 characters, with a letter and a number.</p>
+      </div>
+      <div class="am-field">
+        <label for="su-confirm">Confirm password</label>
+        <div class="am-input has-toggle"><svg class="am-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg><input type="password" id="su-confirm" name="confirm-password" autocomplete="new-password" placeholder="Repeat your password" required><button type="button" class="am-eye" data-am-eye="su-confirm" aria-label="Show password" aria-pressed="false"><svg class="am-eye-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="am-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.6 10.6 0 0 1 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.1M6.5 6.6A17.7 17.7 0 0 0 2 12s3.6 7 10 7c1.8 0 3.4-.5 4.8-1.2"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div>
+      </div>
+      <p class="form-msg" id="signupMsg" role="alert"></p>
+
+      <button class="am-btn" id="signupBtn" type="submit">Create account</button>
+    </form>
+
+    <p class="si-switch">Already have an account? <a id="signinLink" href="/signin">Sign in</a></p>
+  </section>
+
+  <ul class="si-perks" aria-label="Why create an account">
+    <li>Faster checkout</li>
+    <li>Order updates in one place</li>
+    <li>Cash on delivery, nationwide</li>
+  </ul>
 </main>
 
 <div id="site-footer-mount"></div>
-<script src="cart-utils.js?v=20261015-stockv2"></script>
-<script src="site-security.js"></script>
-<script src="site-api-config.js?v=20261022-social2"></script>
-<script src="site-api-health.js"></script>
-<script src="auth-config.js?v=20261009-inbox"></script>
-<script src="auth-api.js?v=20261022-1"></script>
-<script defer src="auth-ui.js?v=20261003am"></script>
+<script defer src="cart-utils.js?v=20261015-stockv2"></script>
+<script defer src="site-security.js?v=20261022-1"></script>
+<script defer src="site-api-config.js?v=20261022-social2"></script>
+<script defer src="auth-config.js?v=20261009-inbox"></script>
+<script defer src="auth-api.js?v=20261022-2"></script>
+<script defer src="auth-ui.js?v=20261022-2"></script>
 <script defer src="auth-social-ui.js?v=20261022-social2"></script>
-<script defer src="auth-validation.js?v=20261018-fields"></script>
+<script defer src="auth-validation.js?v=20261022-2"></script>
+<script defer src="signup-page.js?v=20261022-1"></script>
 <script defer src="google-signin.js?v=20261022-1"></script>
 <script defer src="facebook-signin.js?v=20261022-1"></script>
 <script defer src="site-header.js?v=20261022-seo2"></script>
-<script src="site-footer.js?v=20261009-inbox"></script>
-<script>
-  (function () {
-    if (typeof showAuthApiNotice === 'function') showAuthApiNotice('.form-box');
-    var form = document.getElementById('signupForm');
-    if (!form) return;
-    var params = new URLSearchParams(window.location.search);
-    var nextUrl = params.get('next') || 'checkout.html';
-    var signinLink = document.getElementById('signinLink');
-    if (signinLink && params.get('next')) signinLink.href = 'signin.html?next=' + encodeURIComponent(params.get('next'));
-    var msg = document.getElementById('signupMsg');
-    function fail(text, fieldId) {
-      msg.className = 'am-msg is-error'; msg.textContent = text;
-      var f = fieldId && document.getElementById(fieldId); if (f) f.focus();
-    }
-    form.addEventListener('submit', function (e) {
-      e.preventDefault(); msg.className = 'am-msg'; msg.textContent = '';
-      var name = document.getElementById('su-name').value.trim();
-      var phone = document.getElementById('su-mobile').value.replace(/\D/g, '');
-      var email = document.getElementById('su-email').value.trim().toLowerCase();
-      var pass = document.getElementById('su-pass').value;
-      var confirm = document.getElementById('su-confirm').value;
-      if (name.length < 2) { fail('Please enter your full name.', 'su-name'); return; }
-      if (!/^01\d{9}$/.test(phone.replace(/\s+/g, ''))) { fail('Enter a valid 11-digit mobile number.', 'su-mobile'); return; }
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { fail('Enter a valid email address.', 'su-email'); return; }
-      var strength = MaSecurity.checkPasswordStrength(pass);
-      if (!strength.ok) { fail(strength.message, 'su-pass'); return; }
-      if (pass !== confirm) { fail('Passwords do not match.', 'su-confirm'); return; }
-      var btn = document.getElementById('signupBtn'); btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Creating account...';
-      MaAuth.register({ name: name, phone: phone, email: email, password: pass })
-        .then(function () { msg.className = 'am-msg is-ok'; msg.textContent = 'Account created — redirecting...'; window.location.href = nextUrl; })
-        .catch(function (err) {
-          if (typeof isLocalPreview === 'function' && isLocalPreview()) { alert(typeof getLocalFileAuthHint === 'function' ? getLocalFileAuthHint() : 'Run the local server and open http://127.0.0.1/signup.html to test sign up.'); return; }
-          fail(window.MaAuth && MaAuth.errorText ? MaAuth.errorText(err, (err && err.message) || 'Registration failed. Please try again.') : ((err && err.message) || 'Registration failed. Please try again.'));
-        })
-        .finally(function () { btn.disabled = false; btn.innerHTML = '<span>Create account</span><span class="am-btn-arrow" aria-hidden="true">→</span>'; });
-    });
-  })();
-</script>
+<script defer src="site-footer.js?v=20261009-inbox"></script>
 <script defer src="mobile-bottom-nav.js?v=20261011-active-state"></script>
 </body>
 </html>

@@ -79,3 +79,13 @@ body.si-body { margin: 0; background: #f6f6f4; color: var(--si-ink); font-family
   .si-logo { margin-bottom: 14px; }
 }
 @media (prefers-reduced-motion: reduce) { .am-btn .spinner { animation: none; } }
+
+/* Sign-up extras: password strength bar and hint. */
+.am-meter { display: flex; gap: 4px; margin-top: 8px; }
+.am-meter i { flex: 1; height: 3px; background: #e2e2e2; }
+.am-meter[data-level="1"] i:nth-child(-n+1) { background: #c2493a; }
+.am-meter[data-level="2"] i:nth-child(-n+2) { background: #d39445; }
+.am-meter[data-level="3"] i:nth-child(-n+3) { background: #8a9a3c; }
+.am-meter[data-level="4"] i { background: var(--si-ok); }
+.am-hint { margin: 6px 0 0; color: var(--si-muted); font-size: 13px; }
+.am-field.is-invalid .am-hint { display: none; }

@@ -43,7 +43,7 @@
     }
     if (id === "si-pass") return valueOf(id) ? "" : "Enter your password.";
     if (id === "su-name") return value.length >= 2 ? "" : "Please enter your full name.";
-    if (id === "su-mobile") return /^01\d{9}$/.test(value.replace(/\D/g, "")) ? "" : "Enter a valid 11-digit mobile number (01XXXXXXXXX).";
+    if (id === "su-mobile") return isPhone(value) ? "" : "Enter a valid 11-digit mobile number (01XXXXXXXXX).";
     if (id === "su-email") {
       var email = typeof security.validateEmail === "function" ? security.validateEmail(value) : (isEmail(value) ? value : "");
       return email ? "" : "Enter a valid email address.";

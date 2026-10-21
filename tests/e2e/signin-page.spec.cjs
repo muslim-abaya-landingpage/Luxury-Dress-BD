@@ -48,3 +48,46 @@ test('empty fields are flagged next to the field', async ({ page }) => {
   await expect(page.locator('.am-field.is-invalid')).toHaveCount(2);
   await expect(page.locator('.am-field-error').first()).toContainText('Enter your email or mobile number');
 });
+
+test('sign-up: duplicate email gets a clear message on the email field; +880 mobile is accepted', async ({ page }) => {
+  let sent = null;
+  await stubServer(page, (body) => { sent = Object.fromEntries(body); return { ok: false, error: 'EMAIL_EXISTS', message: 'এই ইমেইলে ইতিমধ্যে অ্যাকাউন্ট আছে।' }; });
+  await page.goto('/signup.html?next=https://evil.example/');
+  await expect(page).toHaveTitle('Create an account | Muslim Abaya');
+  await expect(page.locator('h1')).toHaveText('Create an account');
+  await expect(page.locator('#signinLink')).toHaveAttribute('href', /\/signin/);
+  await page.fill('#su-name', 'Ayesha Rahman');
+  await page.fill('#su-mobile', '+8801712345678');
+  await page.fill('#su-email', 'Ayesha@Example.com');
+  await page.fill('#su-pass', 'abc12345');
+  await page.fill('#su-confirm', 'abc12345');
+  await page.click('#signupBtn');
+  await expect(page.locator('#signupMsg')).toContainText('already uses this email');
+  await expect(page.locator('#su-email')).toBeFocused();
+  expect(sent.Phone).toBe('01712345678');
+  expect(sent.Email).toBe('ayesha@example.com');
+});
+
+test('sign-up: password hint states the full rule and mismatched passwords are flagged', async ({ page }) => {
+  await stubServer(page, () => ({ ok: true }));
+  await page.goto('/signup.html');
+  await expect(page.locator('#suPassHint')).toContainText('a letter and a number');
+  await page.fill('#su-pass', 'abc12345');
+  await page.fill('#su-confirm', 'abc12399');
+  await page.click('#signupBtn');
+  await expect(page.locator('.am-field.is-invalid')).toHaveCount(4);
+  await expect(page.locator('#su-confirm').locator('xpath=ancestor::div[contains(@class,"am-field")]')).toContainText('Passwords do not match');
+});
+
+test('sign-up: success goes to a same-site page only', async ({ page }) => {
+  await stubServer(page, () => ({ ok: true, token: 't', email: 'a@b.co', name: 'A', expires: Date.now() + 3600000 }));
+  await page.goto('/signup.html?next=//evil.example/x');
+  await page.fill('#su-name', 'Ayesha Rahman');
+  await page.fill('#su-mobile', '01712345678');
+  await page.fill('#su-email', 'a@b.co');
+  await page.fill('#su-pass', 'abc12345');
+  await page.fill('#su-confirm', 'abc12345');
+  await page.click('#signupBtn');
+  await page.waitForURL((u) => u.pathname === '/' || u.pathname === '/index.html', { waitUntil: 'commit' });
+  expect(new URL(page.url()).hostname).toBe('127.0.0.1');
+});
