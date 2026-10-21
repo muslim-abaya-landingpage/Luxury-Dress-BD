@@ -34,10 +34,14 @@ window.SITE_SEO = {
       description:
         "Muslim Abaya সম্পর্কে জানুন — বাংলাদেশে প্রিমিয়াম আবায়া ও মডেস্ট ফ্যাশন। ক্যাশ অন ডেলিভারি, সারাদেশে শিপিং।"
     },
+    "/shopping-guide": {
+      title: "বোরকা ও আবায়ার সাইজ গাইড — Body, Length, Full Set | Muslim Abaya",
+      description: "বোরকা/আবায়ার সঠিক সাইজ বাছুন: বুক (Body 42/44/46) ও লম্বা (Length 50–56) কীভাবে মাপবেন, Full Set ও Only Abaya-র পার্থক্য, কাপড়ের যত্ন ও সাইজ না মিললে কী করবেন।"
+    },
     "/help": {
-      title: "Order Help & FAQ | Muslim Abaya",
+      title: "Help & FAQ — অর্ডার, ডেলিভারি, পেমেন্ট | Muslim Abaya",
       description:
-        "অর্ডার, ডেলিভারি, পেমেন্ট ও রিটার্ন সহায়তা — Muslim Abaya (muslimabaya.com)।"
+        "Muslim Abaya অর্ডার সহায়তা: কীভাবে অর্ডার করবেন, ক্যাশ অন ডেলিভারি, bKash/Nagad পেমেন্ট, ঢাকায় ৳80 ও ঢাকার বাইরে ৳150 ডেলিভারি, ৩টি পণ্যে ফ্রি ডেলিভারি, রিটার্ন ও অর্ডার ট্র্যাকিং।"
     },
     "/video": {
       title: "Product Videos | Muslim Abaya",
