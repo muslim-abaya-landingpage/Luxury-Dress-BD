@@ -518,3 +518,58 @@ html[data-admin-theme="dark"] .pm-wp-list, html[data-admin-theme="dark"] .pm-wp-
 .pm-wp-admin .pl-main { padding-top: 4px; }
 .pm-wp-table .column-sku { white-space: nowrap; }
 .pm-wp-admin .pm-wp-table tbody th.check-column { background: transparent !important; border: 0 !important; }
+
+/* ===== Standard type scale (English UI), 2026-10-22 =====
+   One font and a fixed set of sizes like WordPress admin: 14px body, 13px secondary, 23px page title.
+   Nothing on this page goes below 13px. */
+.pm-wp-admin, .pm-wp-admin button, .pm-wp-admin input, .pm-wp-admin select, .pm-wp-admin textarea, .pm-wp-admin .pm-quick-dialog {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Hind Siliguri", sans-serif !important;
+}
+.pm-wp-admin { font-size: 14px !important; line-height: 1.5; }
+.pm-wp-admin .pl-main, .pm-wp-admin .pm-wp-list, .pm-wp-admin .pm-wp-table, .pm-wp-admin .pm-wp-table td, .pm-wp-admin .pm-wp-table th,
+.pm-wp-admin .pm-main, .pm-wp-admin .pm-field input, .pm-wp-admin .pm-field select, .pm-wp-admin .pm-field textarea,
+.pm-wp-admin .pm-wp-search input[type="search"], .pm-wp-admin .pm-wp-tablenav select, .pm-wp-admin .pm-search-row input { font-size: 14px !important; }
+.pm-wp-admin .pm-wp-table thead th, .pm-wp-admin .pm-wp-table tfoot th, .pm-wp-admin .pm-row-actions, .pm-wp-admin .pm-row-link,
+.pm-wp-admin .pm-wp-subsubsub button, .pm-wp-admin .pm-wp-button, .pm-wp-admin .pm-wp-title-action, .pm-wp-admin .pm-wp-pages,
+.pm-wp-admin .pm-wp-selected, .pm-wp-admin .pm-row-meta, .pm-wp-admin #pmSaveStatus, .pm-wp-admin .adm-product-tools > summary,
+.pm-wp-admin .pm-cat-btn small, .pm-wp-admin .pm-field label, .pm-wp-admin .pl-section-meta, .pm-wp-admin .pm-how-it-works,
+.pm-wp-admin .pl-btn, .pm-wp-admin #pmSave, .pm-wp-admin .pm-wp-back, .pm-wp-admin .pm-type-hint { font-size: 13px !important; }
+.pm-wp-admin .pm-wp-title { font-size: 23px !important; font-weight: 400 !important; }
+.pm-wp-admin .pm-cat-head h2 { font-size: 20px !important; font-weight: 400 !important; }
+.pm-wp-admin .pm-wp-table .pm-row-title { font-size: 14px !important; font-weight: 600 !important; }
+.pm-wp-admin .pm-field label { letter-spacing: 0 !important; text-transform: none !important; font-weight: 600 !important; color: #1d2327 !important; }
+
+/* Sidebar (this page): readable 14px items, 13px sub-items and profile text */
+.pm-wp-admin .adm-sidebar-item { font-size: 14px !important; }
+.pm-wp-admin .adm-nav-children .adm-nav-child { font-size: 13px !important; }
+.pm-wp-admin .adm-profile-copy strong, .pm-wp-admin .adm-sidebar-brand-text .t1 { font-size: 14px !important; }
+.pm-wp-admin .adm-profile-copy small, .pm-wp-admin .adm-sidebar-brand-text .t2, .pm-wp-admin .adm-theme-toggle, .pm-wp-admin .adm-sidebar .adm-btn-secondary { font-size: 13px !important; }
+.pm-wp-admin .adm-sidebar-brand-text .t2 { letter-spacing: .06em !important; }
+
+/* Category list beside the editor */
+.pm-wp-admin .pm-sidebar h2 { font-size: 14px !important; font-weight: 600 !important; }
+.pm-wp-admin .pm-cat-btn { font-size: 14px !important; line-height: 1.4; }
+.pm-wp-admin .pm-cat-btn small { display: block; }
+
+/* Upload dialog */
+.pm-wp-admin .pm-quick-dialog h2 { font-size: 20px !important; font-weight: 600; }
+.pm-wp-admin .pm-quick-dialog p, .pm-wp-admin .pm-quick-grid label { font-size: 14px !important; }
+.pm-wp-admin .pm-quick-grid small, .pm-wp-admin .pm-quick-tip { font-size: 13px !important; }
+.pm-wp-admin .pm-quick-grid input, .pm-wp-admin .pm-quick-grid select, .pm-wp-admin .pm-quick-grid textarea { font-size: 14px !important; padding: 8px 10px !important; border-radius: 4px !important; border-color: #8c8f94 !important; }
+
+@media (max-width: 782px) {
+  /* WordPress uses larger touch text on phones */
+  .pm-wp-admin .pm-wp-table .pm-row-title { font-size: 15px !important; }
+  .pm-wp-admin input, .pm-wp-admin select, .pm-wp-admin textarea { font-size: 16px !important; }
+}
+.pm-wp-admin .pm-wp-table .column-name { width: 42%; }
+.pm-wp-admin .pm-wp-table .column-sku { width: 14%; }
+.pm-wp-admin .pm-row-actions { line-height: 1.6; }
+.pm-wp-admin .pm-gallery-add small, .pm-wp-admin .pm-gallery-tile small { font-size: 12px !important; }
+@media (max-width: 782px) {
+  .pm-wp-admin .pm-wp-table { table-layout: fixed; }
+  .pm-wp-admin .pm-wp-table .check-column { width: 34px; }
+  .pm-wp-admin .pm-wp-table .column-thumb { width: 52px; padding-left: 0; padding-right: 6px; }
+  .pm-wp-admin .pm-wp-table .column-name { width: auto; }
+  .pm-wp-admin .pm-row-actions .pm-row-link { padding: 4px 0; }
+}

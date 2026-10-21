@@ -33,7 +33,7 @@ test('copy an existing product into the upload form: details copied, name/colour
   await expect(page.locator('#pq_category')).toHaveValue('abaya');
   await expect(page.locator('#pq_color')).toHaveValue('');
   await expect(page.locator('#pqPhotos')).toHaveJSProperty('required', true);
-  await expect(page.locator('.pm-quick-dialog h2')).toHaveText('আগের পণ্য থেকে নতুন পণ্য');
+  await expect(page.locator('.pm-quick-dialog h2')).toHaveText('New product from an existing one');
 
   // submitting without photos is refused, and the source product is untouched
   await page.fill('#pq_name', 'Butterfly Abaya Set - Maroon');

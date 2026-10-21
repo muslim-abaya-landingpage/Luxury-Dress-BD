@@ -26,5 +26,5 @@ const ui={editing:{id:'EXISTING'},completed:false,currentId:'EXISTING',cachedAss
   $:id=>elements[id],dialog:{querySelector:()=>heading,showModal(){}},preview(){},kind(){},message(){},restoreDraft(){restored++;}};
 vm.createContext(ui);vm.runInContext(openFn,ui);ui.open();
 assert.equal(ui.editing,null);assert.equal(ui.currentId,null);assert.equal(elements.pqPhotos.required,true);
-assert.equal(resets,1);assert.equal(restored,1);assert.equal(heading.textContent,'নতুন পণ্য আপলোড');
+assert.equal(resets,1);assert.equal(restored,1);assert.equal(heading.textContent,'Upload new product');
 console.log('PASS: gallery preserves main photo, deduplicates views, keeps explicit color variants, and new upload clears edit identity.');
