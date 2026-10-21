@@ -54,3 +54,19 @@ html[data-admin-theme="dark"] .adm-btn-secondary:hover{background:var(--adm-prim
 .adm-main .adm-feature-head h3{letter-spacing:-.015em}
 .adm-main .adm-disclosure>summary{cursor:pointer}
 @media(max-width:640px){.adm-smart-jump{gap:6px}.adm-smart-jump a{min-height:34px;padding:7px 10px;font-size:12px}.adm-smart-section-title>span{display:none}}
+
+/* Clarity pass: remove unnecessary visual noise while retaining every data control. */
+.adm-main{max-width:1320px}
+.adm-main .dzc-overview{padding:22px 24px;margin-bottom:24px;box-shadow:none}
+.adm-main .dzc-kpi{background:var(--adm-card);box-shadow:none;padding:16px}
+.adm-main .dzc-kpi b{font-size:clamp(22px,2vw,29px)}
+.adm-main .adm-daily{margin-bottom:24px}
+.adm-main .adm-daily h2{font-size:17px;font-weight:700;color:var(--adm-text);margin-bottom:12px}
+.adm-main .adm-daily .adm-daily-action{background:var(--adm-card);border:1px solid var(--adm-border);box-shadow:none;transition:background .16s,border-color .16s}
+.adm-main .adm-daily .adm-daily-action:hover{background:var(--adm-accent-wash);border-color:var(--adm-accent)}
+.adm-main .dz-card{border:1px solid var(--adm-border);box-shadow:none;border-radius:16px;margin-bottom:20px}
+.adm-main .adm-feature-head{gap:12px}
+.adm-main .adm-feature-head h3,.adm-main .dz-orders-head h3{font-size:17px}
+.adm-main .adm-courier-note{font-size:12px;color:var(--adm-muted)}
+.adm-main .adm-disclosure{border-radius:14px}
+@media(max-width:640px){.adm-main .dzc-overview{padding:16px}.adm-main .dzc-kpi{padding:12px}.adm-main .dzc-kpi span{white-space:normal}.adm-main .adm-daily .adm-daily-action{padding:12px!important}}
