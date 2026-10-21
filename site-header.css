@@ -845,3 +845,10 @@ body.site-search-open .site-search-drawer {
   background-color: #ffffff !important;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
+
+/* Phones: announcement text fits on one or two lines without being cut off. */
+@media (max-width: 1023px) {
+  .announcement-content { height: auto; min-height: 34px; display: flex; align-items: center; }
+  .ann-slide { position: static; padding: 0 4px; font-size: 12px; line-height: 1.35; }
+  .ann-slide:not(.active) { display: none; }
+}

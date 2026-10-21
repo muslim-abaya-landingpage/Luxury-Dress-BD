@@ -241,7 +241,7 @@
       document.head.appendChild(css);
     }
     if (/\/signin$|\/signup$/.test(info.path)) {
-      upsertMeta('meta[name="robots"]', "name", "robots", "noindex, nofollow");
+      upsertMeta('meta[name="robots"]', "name", "robots", "noindex, follow");
     }
   }
 

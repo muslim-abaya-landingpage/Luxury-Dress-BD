@@ -19,6 +19,16 @@ window.SITE_SEO = {
     threads: "https://www.threads.com/@muslimabaya.shop"
   },
   pages: {
+    "/signin": {
+      title: "Sign in | Muslim Abaya",
+      description: "Sign in to your Muslim Abaya account to track orders and check out faster. Cash on delivery across Bangladesh.",
+      robots: "noindex, follow"
+    },
+    "/signup": {
+      title: "Create an account | Muslim Abaya",
+      description: "Create a Muslim Abaya account for faster checkout and order updates. Cash on delivery across Bangladesh.",
+      robots: "noindex, follow"
+    },
     "/about": {
       title: "About Us | Muslim Abaya — muslimabaya.com",
       description:

@@ -9,7 +9,7 @@
   var fallback = doc.getElementById("maGoogleFallback");
   var host = doc.getElementById("maGoogleButtonHost");
   var params = new URLSearchParams(g.location.search);
-  var next = params.get("next") || "/";
+  var next = g.MaAuth && g.MaAuth.safeNext ? g.MaAuth.safeNext(params.get("next"), "/") : "/";
   var social = g.MaSocialUI;
 
   if (!clientId || !g.MaAuth || typeof g.MaAuth.loginWithGoogle !== "function" || !host) {
@@ -28,11 +28,11 @@
     g.MaAuth.loginWithGoogle(response.credential)
       .then(function () {
         if (social) social.message("Signed in — redirecting…", "pending");
-        g.location.href = next;
+        g.location.replace(next);
       })
       .catch(function (err) {
         busy = false;
-        if (social) social.message((err && err.message) || "Google sign-in failed. Please try again.", "error");
+        if (social) social.message(g.MaAuth.errorText ? g.MaAuth.errorText(err, "Google sign-in did not finish. Please try again.") : "Google sign-in failed. Please try again.", "error");
       });
   }
 

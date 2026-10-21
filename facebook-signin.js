@@ -9,7 +9,7 @@
   var appId = String(g.MA_FACEBOOK_APP_ID || "").trim();
   var social = g.MaSocialUI;
   var params = new URLSearchParams(g.location.search);
-  var next = params.get("next") || "/";
+  var next = g.MaAuth && g.MaAuth.safeNext ? g.MaAuth.safeNext(params.get("next"), "/") : "/";
   var busy = false;
 
   if (!appId || g.MA_FACEBOOK_LOGIN_ENABLED !== true || !g.MaAuth || typeof g.MaAuth.loginWithFacebook !== "function") {
@@ -48,12 +48,12 @@
       g.MaAuth.loginWithFacebook(accessToken)
         .then(function () {
           if (social) social.message("Signed in — redirecting…", "pending");
-          g.location.href = next;
+          g.location.replace(next);
         })
         .catch(function (err) {
           busy = false;
           button.disabled = false;
-          if (social) social.message((err && err.message) || "Facebook sign-in failed. Please try again.", "error");
+          if (social) social.message(g.MaAuth.errorText ? g.MaAuth.errorText(err, "Facebook sign-in did not finish. Please try again.") : "Facebook sign-in failed. Please try again.", "error");
         });
     }, { scope: "email,public_profile", return_scopes: true });
   });

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Create Account | Muslim Abaya</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site-header.css?v=20260820fixui">
+<link rel="stylesheet" href="site-header.css?v=20261022-ann">
 <link rel="stylesheet" href="site-footer.css?v=20261006scroll2" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="site-footer.css?v=20261006scroll2"></noscript>
 <link rel="stylesheet" href="mobile-bottom-nav.css?v=20261011-active-state">
@@ -100,13 +100,13 @@
 <script src="site-api-config.js?v=20261022-social2"></script>
 <script src="site-api-health.js"></script>
 <script src="auth-config.js?v=20261009-inbox"></script>
-<script src="auth-api.js?v=20261018-social"></script>
+<script src="auth-api.js?v=20261022-1"></script>
 <script defer src="auth-ui.js?v=20261003am"></script>
 <script defer src="auth-social-ui.js?v=20261022-social2"></script>
 <script defer src="auth-validation.js?v=20261018-fields"></script>
-<script defer src="google-signin.js?v=20261022-social2"></script>
-<script defer src="facebook-signin.js?v=20261022-social2"></script>
-<script defer src="site-header.js?v=20261022-utf8"></script>
+<script defer src="google-signin.js?v=20261022-1"></script>
+<script defer src="facebook-signin.js?v=20261022-1"></script>
+<script defer src="site-header.js?v=20261022-seo2"></script>
 <script src="site-footer.js?v=20261009-inbox"></script>
 <script>
   (function () {
@@ -140,7 +140,7 @@
         .then(function () { msg.className = 'am-msg is-ok'; msg.textContent = 'Account created — redirecting...'; window.location.href = nextUrl; })
         .catch(function (err) {
           if (typeof isLocalPreview === 'function' && isLocalPreview()) { alert(typeof getLocalFileAuthHint === 'function' ? getLocalFileAuthHint() : 'Run the local server and open http://127.0.0.1/signup.html to test sign up.'); return; }
-          fail((err && err.message) || 'Registration failed. Please try again.');
+          fail(window.MaAuth && MaAuth.errorText ? MaAuth.errorText(err, (err && err.message) || 'Registration failed. Please try again.') : ((err && err.message) || 'Registration failed. Please try again.'));
         })
         .finally(function () { btn.disabled = false; btn.innerHTML = '<span>Create account</span><span class="am-btn-arrow" aria-hidden="true">→</span>'; });
     });
