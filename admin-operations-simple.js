@@ -21,3 +21,36 @@ function setup(){
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);else setup();
 })();
+
+(function(){
+'use strict';
+function ready(){
+ var list=document.getElementById('opsOrderIds'),finance=document.getElementById('opsFinanceOrder'),ret=document.getElementById('retOrder');
+ if(!list||!finance||!ret)return;
+ function picker(input,loadButton){
+  var label=document.createElement('label');label.className='ops-order-picker-label';label.textContent='অর্ডার তালিকা থেকে নির্বাচন';
+  var select=document.createElement('select');select.className='ops-order-picker';select.setAttribute('aria-label','অর্ডার নির্বাচন করুন');
+  label.appendChild(select);input.parentNode.insertBefore(label,input);
+  function populate(){
+   var old=select.value,ids=Array.from(list.querySelectorAll('option')).map(function(o){return o.value;}).filter(Boolean);
+   select.replaceChildren();var first=document.createElement('option');first.value='';first.textContent=ids.length?'অর্ডার বেছে নিন':'অর্ডার লোড হচ্ছে…';select.appendChild(first);
+   ids.forEach(function(id){var option=document.createElement('option');option.value=id;option.textContent=id;select.appendChild(option);});
+   if(ids.includes(old))select.value=old;else if(ids.includes(input.value))select.value=input.value;
+  }
+  select.addEventListener('change',function(){input.value=select.value;input.dispatchEvent(new Event('input',{bubbles:true}));if(loadButton&&select.value)loadButton.click();});
+  input.addEventListener('input',function(){select.value=Array.from(select.options).some(function(o){return o.value===input.value;})?input.value:'';});
+  var observer=new MutationObserver(populate);observer.observe(list,{childList:true,subtree:true,attributes:true});populate();
+ }
+ picker(finance,document.getElementById('opsFinanceLoad'));picker(ret,null);
+ var form=document.getElementById('opsFinanceForm'),check=document.getElementById('opsFinalized');
+ var hint=document.createElement('p');hint.className='ops-workspace-hint';hint.setAttribute('role','status');check.closest('label').insertAdjacentElement('afterend',hint);
+ function validate(){
+  var missing=Array.from(document.querySelectorAll('#opsMoneyFields input')).filter(function(x){return x.value.trim()==='';});
+  if(check.checked&&missing.length){hint.textContent='চূড়ান্ত হিসাবের আগে '+missing.length+'টি টাকার ঘর পূরণ করুন। অজানা হলে খসড়া রাখুন।';}
+  else hint.textContent=check.checked?'সব তথ্য ও প্রমাণ যাচাই করে সংরক্ষণ করুন।':'খসড়া হিসাব সংরক্ষণ করা যাবে; লাভ চূড়ান্ত দেখাবে না।';
+ }
+ form.addEventListener('input',validate);form.addEventListener('change',validate);validate();
+ form.addEventListener('submit',function(e){if(!check.checked)return;var missing=Array.from(document.querySelectorAll('#opsMoneyFields input')).some(function(x){return x.value.trim()==='';});if(missing){e.preventDefault();e.stopImmediatePropagation();validate();hint.scrollIntoView({block:'center'});}},true);
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ready);else ready();
+})();
