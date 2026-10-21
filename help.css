@@ -82,33 +82,7 @@ body.help-page { margin: 0; background: #fff; color: var(--hp-ink); font-family:
 @media (prefers-reduced-motion: reduce) { .hp-faq summary::after, .hp-tile { transition: none; } }
 
 /* ---------- Shopping guide ---------- */
-.sg-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin: 0 0 24px; padding: 0; list-style: none; border: 1px solid var(--hp-line); background: var(--hp-line); }
-.sg-steps li { display: grid; grid-template-columns: 34px 1fr; column-gap: 10px; align-items: center; padding: 14px 14px; background: #fff; }
-.sg-steps span { grid-row: span 2; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: var(--hp-ink); color: #fff; font-weight: 700; }
-.sg-steps strong { font-size: 16px; line-height: 1.3; }
-.sg-steps small { color: var(--hp-muted); font-size: 13px; }
 
-.sg-helper { padding: 22px 20px; background: var(--hp-soft); }
-.sg-helper h2 { margin: 0 0 14px; font-size: 21px; }
-#sgForm { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; }
-#sgForm label { display: flex; flex-direction: column; gap: 4px; font-size: 15px; font-weight: 600; }
-#sgForm small { color: var(--hp-muted); font-size: 12.5px; font-weight: 400; }
-#sgForm input { box-sizing: border-box; width: 100%; height: 48px; padding: 0 12px; border: 1px solid #cfcfcf; background: #fff; font: 500 17px/1 "Inter", sans-serif; }
-#sgForm input:focus { outline: none; border-color: var(--hp-ink); box-shadow: 0 0 0 1px var(--hp-ink); }
-.hp-btn--ink { min-height: 48px; border: 0; background: var(--hp-ink); color: #fff !important; font-family: inherit; cursor: pointer; }
-.sg-result { margin-top: 14px; padding: 14px 16px; background: #fff; border-left: 4px solid var(--hp-green); }
-.sg-result.is-warn { border-left-color: #c2493a; color: #8a2f24; }
-.sg-result p { margin: 0 0 8px; color: var(--hp-muted); font-size: 14px; }
-.sg-result ul { display: flex; flex-wrap: wrap; gap: 10px 28px; margin: 0; padding: 0; list-style: none; }
-.sg-result li { display: flex; flex-direction: column; }
-.sg-result li span { color: var(--hp-muted); font-size: 13px; }
-.sg-result li strong { font: 700 22px/1.2 "Inter", "Hind Siliguri", sans-serif; }
-.sg-result li small { max-width: 260px; color: var(--hp-muted); font-size: 13px; line-height: 1.4; }
-.sg-sizes { display: grid; grid-template-columns: auto 1fr; gap: 1px; margin-top: 16px; background: var(--hp-line); border: 1px solid var(--hp-line); }
-.sg-sizes div { display: contents; }
-.sg-sizes span, .sg-sizes strong { padding: 10px 12px; background: #fff; font-size: 14px; }
-.sg-sizes span { color: var(--hp-muted); font-weight: 600; }
-.sg-sizes strong { font-family: "Inter", sans-serif; font-weight: 600; }
 
 .sg-faq { padding-top: 6px; }
 .sg-faq details { scroll-margin-top: calc(var(--site-header-h, 0px) + 60px); }
@@ -122,13 +96,6 @@ body.help-page { margin: 0; background: #fff; color: var(--hp-ink); font-family:
 .sg-compare strong { display: block; margin-bottom: 4px; font-size: 16px; }
 .sg-compare p { margin: 0; color: var(--hp-muted); font-size: 15px; line-height: 1.5; }
 
-@media (max-width: 760px) {
-  .sg-steps { grid-template-columns: 1fr; }
-  #sgForm { grid-template-columns: 1fr 1fr; }
-  #sgForm .hp-btn--ink { grid-column: 1 / -1; }
-}
 @media (max-width: 420px) {
-  .sg-helper { padding: 18px 14px; }
-  #sgForm { grid-template-columns: 1fr; }
   .sg-compare { grid-template-columns: 1fr; }
 }
