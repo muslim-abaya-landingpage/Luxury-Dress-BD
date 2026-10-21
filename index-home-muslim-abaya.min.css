@@ -7,3 +7,5 @@
 .ah-card-stock.is-oos{color:#b91c1c;background:#fdecec;border-color:#f5c2c2;font-weight:700}
 .ah-card-oos .ah-card-price{text-decoration:line-through}
 @media (max-width:600px){.ah-card-oos .ah-card-media::after{font-size:12px;padding:8px 0;letter-spacing:.16em}}
+
+.ah-card-stock{border-radius:0}

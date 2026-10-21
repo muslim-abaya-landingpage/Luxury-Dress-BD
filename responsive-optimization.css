@@ -79,7 +79,7 @@ body.global-layout {
   }
 
   .home-hero-track {
-    border-radius: 14px;
+    border-radius: 0;
   }
 
   .home-hero-cap {
@@ -88,7 +88,7 @@ body.global-layout {
     bottom: 10px;
     max-width: none;
     padding: 14px 15px 13px;
-    border-radius: 13px;
+    border-radius: 0;
   }
 
   .home-hero-cap .head {
@@ -134,12 +134,12 @@ body.global-layout {
   }
 
   .ah-card {
-    border-radius: 14px;
+    border-radius: 0;
   }
 
   .ah-card-media {
     margin: 5px 5px 0;
-    border-radius: 11px;
+    border-radius: 0;
   }
 
   .ah-card-body {
