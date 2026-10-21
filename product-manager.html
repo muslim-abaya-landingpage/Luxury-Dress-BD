@@ -29,7 +29,7 @@
 <link rel="stylesheet" href="admin-dashboard-design.css?v=20261018-3">
 <script src="admin-dashboard-design.js?v=20261018-3"></script>
 <link rel="stylesheet" href="admin-premium-layout.css?v=20261021-1">
-<link rel="stylesheet" href="product-manager-wp.css?v=20261021-1">
+<link rel="stylesheet" href="product-manager-wp.css?v=20261022-1">
 </head>
 <body class="pl-admin adm-body pm-wp-admin" data-admin-guard="1">
   <div class="adm-shell">
@@ -74,17 +74,20 @@
         <div class="adm-heading"><span class="adm-page-kicker">মুসলিম আবায়া / পণ্য ও স্টক</span><h1>পণ্য পরিচালনা</h1></div>
         <p>ছবি ও তথ্য দিয়ে পণ্য ওয়েবসাইটে প্রকাশ করুন। আলাদা ফাইল আপলোড বা deploy করার প্রয়োজন নেই।</p>
         <div class="pl-toolbar"><button type="button" class="pl-btn pl-btn-secondary" id="pmSave">এডিট করা পণ্যের পরিবর্তন প্রকাশ করুন</button></div>
-        <details class="adm-disclosure adm-product-tools"><summary>আগের পণ্যের পরিবর্তন ও অন্যান্য টুল</summary>        <div class="pl-toolbar">
+        <details class="adm-disclosure adm-product-tools"><summary>অন্যান্য টুল</summary>        <div class="pl-toolbar">
           <button type="button" class="pl-btn pl-btn-secondary" id="pmCheckImages" title="সব প্রোডাক্টের ছবি যাচাই করে ভাঙা/ডুপ্লিকেট খুঁজুন">🔍 ছবি যাচাই</button>
           <button type="button" class="pl-btn pl-btn-secondary" id="pmReload">বর্তমান ডেটা আবার লোড করুন</button>
+          <button class="pl-btn pl-btn-secondary" id="pmPublishCheck" type="button">প্রকাশের অবস্থা দেখুন</button>
           <a class="pl-btn pl-btn-secondary" href="product-links.html" style="text-decoration:none;display:inline-flex;align-items:center" title="Categories — Product Link URL">Product Links</a>
         </div>
 </details>
         <p id="pmSaveStatus" role="status" aria-live="polite">স্টক বাটনে ক্লিক করলেই স্বয়ংক্রিয়ভাবে সেভ হবে।</p>
       </header>
 
-      <main class="pl-main"><section class="pm-quick-intro"><div><h2>একবারেই ছবি ও পণ্য প্রকাশ</h2><p>ক্যাটাগরি বাছুন → ছবি ও তথ্য দিন → প্রকাশ করুন</p></div><div><button class="pl-btn pl-btn-primary" id="pmQuickUpload" type="button">+ নতুন পণ্য আপলোড</button> <button class="pl-btn pl-btn-secondary" id="pmPublishCheck" type="button">প্রকাশের অবস্থা দেখুন</button> <a id="pmLiveLink" target="_blank" rel="noopener" hidden>লাইভ পণ্য দেখুন →</a></div></section>
-        <details class="pm-help"><summary>কীভাবে পণ্য প্রকাশ করবেন</summary><div class="pl-steps"><ol><li>“নতুন পণ্য আপলোড” চাপুন এবং ক্যাটাগরি বাছুন।</li><li>নাম, দাম, সাইজ ও নিজের পণ্যের ছবি দিন। প্রথম ছবিটি প্রধান ছবি হবে।</li><li>“ছবিসহ ওয়েবসাইটে প্রকাশ করুন” চাপুন। লাইভ হওয়ার নিশ্চয়তা ও লিংক এখানে দেখাবে।</li></ol><p>আগের পণ্য সম্পাদনা করতে নিচের তালিকা ব্যবহার করুন।</p></div></details>
+      <main class="pl-main">
+        <!-- WordPress-style screen: the "Add new product" button in the list header opens this uploader. -->
+        <button class="pl-btn pl-btn-primary" id="pmQuickUpload" type="button" hidden>+ নতুন পণ্য আপলোড</button>
+        <div class="pm-wp-notice" id="pmLiveNotice"><a id="pmLiveLink" target="_blank" rel="noopener" hidden>✅ নতুন পণ্য লাইভ হয়েছে — দেখুন →</a></div>
 
         <div class="pm-layout" id="pmLayout">
           <aside class="pm-sidebar">
@@ -405,6 +408,9 @@
   }
 
   function renderMain() {
+    // The full product list looks like WordPress → Products (no category column); a category opens its editor beside the list.
+    var layoutEl = document.getElementById("pmLayout");
+    if (layoutEl) layoutEl.classList.toggle("pm-all-view", activeKey === ALL_PRODUCTS_KEY);
     if (activeKey === ALL_PRODUCTS_KEY) {
       renderAllProducts();
       return;
@@ -418,6 +424,7 @@
     var list = products[sec.key] || [];
     bulkSelected = {};
     mainEl.innerHTML =
+      '<button type="button" class="pm-wp-back" id="pmBackToAll">← সব পণ্য</button>' +
       '<div class="pm-cat-head">' +
       "<div><h2>" +
       (sec.row || "") +
@@ -452,6 +459,12 @@
       '<div class="pm-product-list" id="pmProductList"></div>';
 
     bindCategoryTypePricePanel(sec.key);
+    document.getElementById("pmBackToAll").addEventListener("click", function () {
+      activeKey = ALL_PRODUCTS_KEY;
+      searchTerm = "";
+      renderCatList();
+      renderMain();
+    });
 
     function applyFilter() {
       var t = searchTerm.trim().toLowerCase();
@@ -604,25 +617,54 @@
       return row.product.inStock === false || (typeof row.product.stock === "number" && row.product.stock <= 0);
     }).length;
     var inStockCount = rows.length - outOfStockCount;
-    mainEl.innerHTML = '<div class="pm-cat-head"><div><h2>সব ক্যাটাগরির প্রোডাক্ট</h2>' +
-      '<p class="pl-section-meta">নাম, SKU বা ক্যাটাগরি দিয়ে খুঁজুন। সম্পাদনা করতে সংশ্লিষ্ট ক্যাটাগরি খুলুন।</p></div>' +
-      '<button type="button" class="pl-btn pl-btn-primary" id="pmAllQuickUpload">+ নতুন পণ্য যোগ</button></div>' +
-      '<nav class="pm-status-tabs" aria-label="স্টক অনুযায়ী পণ্য ফিল্টার">' +
-      '<button type="button" data-overview-stock="" class="' + (overviewStock === "" ? "is-active" : "") + '">সব পণ্য <span>(' + rows.length + ')</span></button>' +
-      '<button type="button" data-overview-stock="in" class="' + (overviewStock === "in" ? "is-active" : "") + '">স্টকে আছে <span>(' + inStockCount + ')</span></button>' +
-      '<button type="button" data-overview-stock="out" class="' + (overviewStock === "out" ? "is-active" : "") + '">স্টক নেই <span>(' + outOfStockCount + ')</span></button></nav>' +
-      '<div class="pm-search-row"><input type="search" id="pmAllSearch" placeholder="সব ক্যাটাগরিতে খুঁজুন…" value="' + escapeAttr(allSearchTerm) +
-      '"><span id="pmAllCount" class="pm-search-count"></span></div>' +
-      '<div class="pm-overview-tools"><label>ক্যাটাগরি <select id="pmOverviewCategory"><option value="">সব ক্যাটাগরি</option>' + sections.map(function (sec) { return '<option value="' + escapeAttr(sec.key) + '"' + (overviewCategory === sec.key ? ' selected' : '') + '>' + escapeHtml(sec.menuBn || sec.menu || sec.key) + '</option>'; }).join('') + '</select></label>' +
-      '<label>স্টক <select id="pmOverviewStock"><option value="">সব স্টক</option><option value="in"' + (overviewStock === 'in' ? ' selected' : '') + '>স্টকে আছে</option><option value="out"' + (overviewStock === 'out' ? ' selected' : '') + '>স্টক নেই</option></select></label>' +
-      '<button type="button" class="pl-btn" id="pmSelectVisible">এই পৃষ্ঠার পণ্য নির্বাচন</button><button type="button" class="pl-btn" id="pmClearSelection">নির্বাচন বাতিল</button>' +
-      '<span id="pmOverviewSelected" role="status"></span><button type="button" class="pl-btn" id="pmOverviewOff">নির্বাচিত স্টক নেই করুন</button><button type="button" class="pl-btn" id="pmOverviewOn">নির্বাচিত স্টকে আনুন</button></div>' +
-      '<div class="pm-pager pm-pager-top" id="pmPagerTop"></div>' +
-      '<div class="pm-overview-wrap"><table class="pm-overview"><thead><tr><th>বাছাই</th><th>প্রোডাক্ট / SKU</th><th>ক্যাটাগরি</th><th>বেস দাম</th><th>স্টক</th><th>সম্পাদনা</th></tr></thead><tbody id="pmAllRows"></tbody></table></div>' +
-      '<div class="pm-pager pm-pager-bottom" id="pmPagerBottom"></div>';
+    function catName(sec) { return sec.menuBn || sec.menu || sec.key; }
+    var catOptions = sections.map(function (sec) { return '<option value="' + escapeAttr(sec.key) + '"' + (overviewCategory === sec.key ? ' selected' : '') + '>' + escapeHtml(catName(sec)) + ' (' + (products[sec.key] || []).length + ')</option>'; }).join('');
+    var headRow = '<tr><td class="check-column"><input type="checkbox" class="pm-check-all" aria-label="এই পৃষ্ঠার সব পণ্য নির্বাচন"></td>' +
+      '<th class="column-thumb" scope="col"><span class="pm-thumb-icon" aria-label="ছবি" title="ছবি"></span></th>' +
+      '<th class="column-name" scope="col">নাম</th><th class="column-sku" scope="col">SKU</th><th class="column-stock" scope="col">স্টক</th>' +
+      '<th class="column-price" scope="col">দাম</th><th class="column-cats" scope="col">ক্যাটাগরি</th></tr>';
+    // Same layout as WordPress → Products: title + "Add new", status links, search, bulk actions / filters / pages, list table.
+    mainEl.innerHTML = '<div class="pm-wp-list">' +
+      '<div class="pm-wp-heading"><h2 class="pm-wp-title">পণ্য</h2>' +
+      '<button type="button" class="pm-wp-title-action" id="pmAllQuickUpload">নতুন পণ্য যোগ করুন</button>' +
+      '<button type="button" class="pm-wp-title-action" id="pmManageCats">ক্যাটাগরি</button></div>' +
+      '<ul class="pm-wp-subsubsub pm-status-tabs">' +
+      '<li><button type="button" data-overview-stock="" class="' + (overviewStock === "" ? "is-active" : "") + '">সব <span class="count">(' + rows.length + ')</span></button> |</li>' +
+      '<li><button type="button" data-overview-stock="in" class="' + (overviewStock === "in" ? "is-active" : "") + '">স্টকে আছে <span class="count">(' + inStockCount + ')</span></button> |</li>' +
+      '<li><button type="button" data-overview-stock="out" class="' + (overviewStock === "out" ? "is-active" : "") + '">স্টক নেই <span class="count">(' + outOfStockCount + ')</span></button></li></ul>' +
+      '<p class="pm-wp-search"><label class="pm-sr-only" for="pmAllSearch">পণ্য খুঁজুন</label><input type="search" id="pmAllSearch" value="' + escapeAttr(allSearchTerm) + '">' +
+      '<button type="button" class="pm-wp-button" id="pmAllSearchBtn">পণ্য খুঁজুন</button><span id="pmAllCount" class="pm-sr-only"></span></p>' +
+      '<div class="pm-wp-tablenav top">' +
+      '<div class="pm-wp-actions"><label class="pm-sr-only" for="pmBulkAction">একসাথে কাজ</label><select id="pmBulkAction"><option value="">একসাথে কাজ</option><option value="in">স্টকে আনুন</option><option value="out">স্টক নেই করুন</option></select>' +
+      '<button type="button" class="pm-wp-button" id="pmBulkApply">প্রয়োগ</button></div>' +
+      '<div class="pm-wp-actions"><select id="pmOverviewCategory" aria-label="ক্যাটাগরি দিয়ে ফিল্টার"><option value="">ক্যাটাগরি বাছুন</option>' + catOptions + '</select>' +
+      '<select id="pmOverviewStock" aria-label="স্টক অবস্থা দিয়ে ফিল্টার"><option value="">স্টক অবস্থা অনুযায়ী</option><option value="in"' + (overviewStock === 'in' ? ' selected' : '') + '>স্টকে আছে</option><option value="out"' + (overviewStock === 'out' ? ' selected' : '') + '>স্টক নেই</option></select>' +
+      '<button type="button" class="pm-wp-button" id="pmFilterBtn">ফিল্টার</button></div>' +
+      '<div class="pm-wp-pages" id="pmPagerTop"></div></div>' +
+      // Kept for the bulk stock logic and its tests; the bulk-action select above drives them.
+      '<div class="pm-overview-tools" hidden><button type="button" id="pmSelectVisible">এই পৃষ্ঠার পণ্য নির্বাচন</button><button type="button" id="pmClearSelection">নির্বাচন বাতিল</button>' +
+      '<button type="button" id="pmOverviewOff">নির্বাচিত স্টক নেই করুন</button><button type="button" id="pmOverviewOn">নির্বাচিত স্টকে আনুন</button></div>' +
+      '<span id="pmOverviewSelected" class="pm-wp-selected" role="status"></span>' +
+      '<div class="pm-overview-wrap"><table class="pm-overview pm-wp-table"><thead>' + headRow + '</thead><tbody id="pmAllRows"></tbody><tfoot>' + headRow + '</tfoot></table></div>' +
+      '<div class="pm-wp-tablenav bottom"><div class="pm-wp-pages" id="pmPagerBottom"></div></div></div>';
     document.getElementById("pmAllQuickUpload").addEventListener("click", function () {
       var quickUpload = document.getElementById("pmQuickUpload");
       if (quickUpload) quickUpload.click();
+    });
+    document.getElementById("pmManageCats").addEventListener("click", function () {
+      if (!sections.length) return;
+      activeKey = overviewCategory || sections[0].key;
+      searchTerm = "";
+      renderCatList();
+      renderMain();
+    });
+    document.getElementById("pmAllSearchBtn").addEventListener("click", function () { overviewPage = 1; draw(); });
+    document.getElementById("pmFilterBtn").addEventListener("click", function () { overviewPage = 1; draw(); });
+    document.getElementById("pmBulkApply").addEventListener("click", function () {
+      var action = document.getElementById("pmBulkAction").value;
+      if (!action) return;
+      if (!Object.keys(overviewSelected).length) { toast("আগে পণ্য নির্বাচন করুন"); return; }
+      document.getElementById(action === "out" ? "pmOverviewOff" : "pmOverviewOn").click();
     });
     document.querySelectorAll("[data-overview-stock]").forEach(function (button) {
       button.addEventListener("click", function () {
@@ -630,6 +672,7 @@
         overviewPage = 1;
         overviewSelected = {};
         document.getElementById("pmOverviewStock").value = overviewStock;
+        document.querySelectorAll("[data-overview-stock]").forEach(function (b) { b.classList.toggle("is-active", b === button); });
         draw();
       });
     });
@@ -649,11 +692,14 @@
       var pageRows = visible.slice(pageStart, pageStart + overviewPageSize);
       var pageFirstItem = visible.length ? pageStart + 1 : 0;
       var pageLastItem = Math.min(pageStart + overviewPageSize, visible.length);
-      var pagerMarkup = '<span>' + pageFirstItem + '–' + pageLastItem + ' / ' + visible.length + '</span>' +
-        '<label>প্রতি পৃষ্ঠায় <select class="pm-page-size" aria-label="প্রতি পৃষ্ঠায় পণ্যের সংখ্যা">' +
-        [20, 50, 100].map(function (size) { return '<option value="' + size + '"' + (overviewPageSize === size ? ' selected' : '') + '>' + size + '</option>'; }).join('') +
-        '</select></label><div class="pm-pager-actions"><button type="button" data-pm-page="' + (overviewPage - 1) + '"' + (overviewPage <= 1 ? ' disabled' : '') + '>← আগে</button>' +
-        '<span>পৃষ্ঠা ' + overviewPage + ' / ' + pageCount + '</span><button type="button" data-pm-page="' + (overviewPage + 1) + '"' + (overviewPage >= pageCount ? ' disabled' : '') + '>পরের →</button></div>';
+      var itemsLabel = visible.length + 'টি পণ্য';
+      var pagerMarkup = '<span class="displaying-num">' + itemsLabel + '</span>' + (pageCount > 1 ?
+        '<span class="pagination-links">' +
+        '<button type="button" data-pm-page="1" aria-label="প্রথম পৃষ্ঠা"' + (overviewPage <= 1 ? ' disabled' : '') + '>«</button>' +
+        '<button type="button" data-pm-page="' + (overviewPage - 1) + '" aria-label="আগের পৃষ্ঠা"' + (overviewPage <= 1 ? ' disabled' : '') + '>‹</button>' +
+        '<span class="paging-input">' + overviewPage + ' / ' + pageCount + '</span>' +
+        '<button type="button" data-pm-page="' + (overviewPage + 1) + '" aria-label="পরের পৃষ্ঠা"' + (overviewPage >= pageCount ? ' disabled' : '') + '>›</button>' +
+        '<button type="button" data-pm-page="' + pageCount + '" aria-label="শেষ পৃষ্ঠা"' + (overviewPage >= pageCount ? ' disabled' : '') + '>»</button></span>' : '');
       document.getElementById("pmPagerTop").innerHTML = pagerMarkup;
       document.getElementById("pmPagerBottom").innerHTML = pagerMarkup;
       document.querySelectorAll("[data-pm-page]").forEach(function (button) {
@@ -662,25 +708,53 @@
           draw();
         });
       });
-      document.querySelectorAll(".pm-page-size").forEach(function (select) {
-        select.addEventListener("change", function () {
-          overviewPageSize = parseInt(select.value, 10) || 20;
-          overviewPage = 1;
-          draw();
-        });
-      });
+      function priceText(p) {
+        var values = p.priceByType ? Object.keys(p.priceByType).map(function (k) { return parseInt(p.priceByType[k], 10); }).filter(function (n) { return !isNaN(n); }) : [];
+        if (values.length > 1 && Math.min.apply(null, values) !== Math.max.apply(null, values)) return '৳' + Math.min.apply(null, values) + ' – ৳' + Math.max.apply(null, values);
+        return '৳' + (parseInt(p.price, 10) || 0);
+      }
       document.getElementById("pmAllRows").innerHTML = pageRows.map(function (row) {
         var p = row.product, s = row.section;
         var out = p.inStock === false || (typeof p.stock === "number" && p.stock <= 0);
         var selectionKey = JSON.stringify([s.key, row.index]);
-        return '<tr><td><input type="checkbox" class="pm-overview-check" data-select-cat="' + escapeAttr(s.key) + '" data-select-index="' + row.index + '" aria-label="' + escapeAttr((p.name || 'Product') + ' নির্বাচন') + '"' + (overviewSelected[selectionKey] ? ' checked' : '') + '></td><td><div class="pm-overview-product"><span class="pm-overview-photo">' + (p.image ? '<img loading="lazy" decoding="async" src="' + escapeAttr(p.image) + '" alt="' + escapeAttr(p.name || 'Product') + '">' : '<span>ছবি নেই</span>') + '</span><div><strong>' + escapeHtml(p.name || "Product") + '</strong><small>' + escapeHtml(p.id || "SKU নেই") +
-          '</small></div></div></td><td>' + escapeHtml(s.menuBn || s.menu || s.key) + '</td><td>৳' + (parseInt(p.price, 10) || 0) +
-          '</td><td><button type="button" class="pl-btn pm-overview-stock" data-stock-cat="' + escapeAttr(s.key) + '" data-stock-index="' + row.index + '" aria-pressed="' + out + '">' + (out ? '🔴 স্টক নেই' : '🟢 স্টকে আছে') + '</button>' +
-          '</td><td><button type="button" class="pl-btn pl-btn-secondary" data-pm-cat="' + escapeAttr(s.key) +
-          '" data-pm-index="' + row.index + '">এডিট</button> <button type="button" class="pl-btn pl-btn-secondary" title="এই পণ্যের দাম, সাইজ ও বিবরণ নিয়ে নতুন পণ্য" data-pm-copy-cat="' + escapeAttr(s.key) + '" data-pm-copy-index="' + row.index + '">কপি</button></td></tr>';
-      }).join("") || '<tr><td colspan="6" class="pm-empty">কোনো প্রোডাক্ট পাওয়া যায়নি</td></tr>';
+        var name = escapeHtml(p.name || "Product");
+        var cat = ' data-pm-cat="' + escapeAttr(s.key) + '" data-pm-index="' + row.index + '"';
+        return '<tr class="' + (out ? 'is-outofstock' : '') + '">' +
+          '<th class="check-column" scope="row"><input type="checkbox" class="pm-overview-check" data-select-cat="' + escapeAttr(s.key) + '" data-select-index="' + row.index + '" aria-label="' + escapeAttr((p.name || 'Product') + ' নির্বাচন') + '"' + (overviewSelected[selectionKey] ? ' checked' : '') + '></th>' +
+          '<td class="column-thumb"><span class="pm-overview-photo">' + (p.image ? '<img loading="lazy" decoding="async" src="' + escapeAttr(p.image) + '" alt="">' : '<span class="pm-no-photo" aria-label="ছবি নেই"></span>') + '</span></td>' +
+          '<td class="column-name"><strong><button type="button" class="pm-row-title"' + cat + '>' + name + '</button></strong>' +
+          '<div class="pm-row-meta"><mark class="' + (out ? 'outofstock' : 'instock') + '">' + (out ? 'স্টক নেই' : 'স্টকে আছে') + '</mark> · ' + priceText(p) + '</div>' +
+          '<div class="pm-row-actions"><span class="pm-row-id">ID: ' + escapeHtml(p.id || "—") + ' | </span>' +
+          '<button type="button" class="pm-row-link"' + cat + '>এডিট</button> | ' +
+          '<button type="button" class="pm-row-link" title="এই পণ্যের দাম, সাইজ ও বিবরণ নিয়ে নতুন পণ্য" data-pm-copy-cat="' + escapeAttr(s.key) + '" data-pm-copy-index="' + row.index + '">কপি</button> | ' +
+          '<button type="button" class="pm-row-link pm-overview-stock" data-stock-cat="' + escapeAttr(s.key) + '" data-stock-index="' + row.index + '" aria-pressed="' + out + '">' + (out ? 'স্টকে আনুন' : 'স্টক নেই করুন') + '</button>' +
+          (p.id ? ' | <a class="pm-row-link" href="/product/' + encodeURIComponent(p.id) + '" target="_blank" rel="noopener">দেখুন</a>' : '') + '</div></td>' +
+          '<td class="column-sku">' + (p.id ? escapeHtml(p.id) : '<span class="na">–</span>') + '</td>' +
+          '<td class="column-stock"><mark class="' + (out ? 'outofstock' : 'instock') + '">' + (out ? 'স্টক নেই' : 'স্টকে আছে') + '</mark></td>' +
+          '<td class="column-price">' + priceText(p) + '</td>' +
+          '<td class="column-cats"><button type="button" class="pm-row-link" data-filter-cat="' + escapeAttr(s.key) + '">' + escapeHtml(catName(s)) + '</button></td></tr>';
+      }).join("") || '<tr><td colspan="7" class="pm-empty">কোনো পণ্য পাওয়া যায়নি</td></tr>';
+      document.querySelectorAll("[data-filter-cat]").forEach(function (button) {
+        button.addEventListener("click", function () {
+          overviewCategory = button.getAttribute("data-filter-cat");
+          document.getElementById("pmOverviewCategory").value = overviewCategory;
+          overviewPage = 1; overviewSelected = {};
+          draw();
+        });
+      });
+      var allOnPage = pageRows.length && pageRows.every(function (row) { return overviewSelected[JSON.stringify([row.section.key, row.index])]; });
+      document.querySelectorAll(".pm-check-all").forEach(function (box) {
+        box.checked = !!allOnPage;
+        box.onchange = function () {
+          pageRows.forEach(function (row) {
+            var key = JSON.stringify([row.section.key, row.index]);
+            if (box.checked) overviewSelected[key] = true; else delete overviewSelected[key];
+          });
+          draw();
+        };
+      });
       var selectedKeys = Object.keys(overviewSelected);
-      document.getElementById("pmOverviewSelected").textContent = selectedKeys.length + "টি নির্বাচিত";
+      document.getElementById("pmOverviewSelected").textContent = selectedKeys.length ? selectedKeys.length + "টি পণ্য নির্বাচিত" : "";
       document.getElementById("pmOverviewOff").disabled = !selectedKeys.length;
       document.getElementById("pmOverviewOn").disabled = !selectedKeys.length;
       document.querySelectorAll(".pm-overview-photo img").forEach(function (img) {
