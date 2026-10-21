@@ -29,7 +29,7 @@
 <link rel="stylesheet" href="admin-dashboard-design.css?v=20261018-3">
 <script src="admin-dashboard-design.js?v=20261018-3"></script>
 <link rel="stylesheet" href="admin-premium-layout.css?v=20261021-1">
-<link rel="stylesheet" href="product-manager-wp.css?v=20261022-8">
+<link rel="stylesheet" href="product-manager-wp.css?v=20261022-9">
 </head>
 <body class="pl-admin adm-body pm-wp-admin" data-admin-guard="1">
   <div class="adm-shell">
@@ -701,9 +701,13 @@
           '<input type="text" data-ef="brand" list="pmBrandList" value="' + escapeAttr(p.brand || "") + '" placeholder="e.g. Muslim Abaya" aria-label="Product brand">' +
           '<datalist id="pmBrandList">' + allBrands().map(function (b) { return '<option value="' + escapeAttr(b) + '">'; }).join("") + '</datalist>' +
         '</div></section>' +
-        '<section class="pm-wp-box pm-wp-media"><h3 class="pm-wp-box-title">Product image</h3><div class="pm-wp-box-body">' + buildImageUploader(p) +
-          fieldWide("image", "Image URL", p.image) + '</div></section>' +
-        '<section class="pm-wp-box pm-wp-media"><h3 class="pm-wp-box-title">Product gallery</h3><div class="pm-wp-box-body">' + buildGalleryUploader(p) + '</div></section>' +
+        '<section class="pm-wp-box pm-wp-media" id="pmImgBox"><h3 class="pm-wp-box-title">Product image</h3><div class="pm-wp-box-body">' +
+          '<div id="pmImgView"></div><p class="pm-wp-upload-status" id="pmImgStatus" hidden></p>' +
+          // The real uploader (upload, WebP, media library) stays in the page, hidden; the links above drive it.
+          '<div class="pm-wp-hidden-uploader" hidden>' + buildImageUploader(p) + fieldWide("image", "Image URL", p.image) + '</div></div></section>' +
+        '<section class="pm-wp-box pm-wp-media" id="pmGalBox"><h3 class="pm-wp-box-title">Product gallery</h3><div class="pm-wp-box-body">' +
+          '<div id="pmGalView"></div><p class="pm-wp-upload-status" id="pmGalStatus" hidden></p>' +
+          '<div class="pm-wp-hidden-uploader" id="pmGalHidden" hidden>' + buildGalleryUploader(p) + '</div></div></section>' +
       '</div></div></div>';
 
     var root = mainEl.querySelector(".pm-wp-edit");
@@ -778,6 +782,114 @@
     document.getElementById("pmEditAddNew").addEventListener("click", function () { var q = document.getElementById("pmQuickUpload"); if (q) q.click(); });
     wireImageUploader(root, p);
     wireGalleryUploader(root, p);
+    wireWpMediaBoxes(root, p, changed);
+    wireWpBoxControls(root);
+  }
+
+  // WordPress-style "Product image" / "Product gallery" boxes: a link when empty, thumbnails when set.
+  var HELP_IMG = "This image is the main product photo on the shop and product pages.";
+  var HELP_GAL = "These extra photos show on card hover and in the product page gallery (max " + MAX_GALLERY_IMAGES + ").";
+  function wireWpMediaBoxes(root, p, changed) {
+    var imgView = root.querySelector("#pmImgView"), galView = root.querySelector("#pmGalView");
+    var urlBox = root.querySelector('[data-f="image"]');
+    function mirror(fromSel, toId) {
+      var from = root.querySelector(fromSel), to = root.querySelector("#" + toId);
+      if (!from || !to) return;
+      var copy = function () { to.hidden = from.hidden || !from.textContent; to.textContent = from.textContent; to.style.color = from.style.color || ""; };
+      new MutationObserver(copy).observe(from, { childList: true, characterData: true, subtree: true, attributes: true });
+    }
+    function chooser(anchor, onUpload, onLibrary) {
+      var old = root.querySelector(".pm-wp-chooser"); if (old) old.remove();
+      var menu = document.createElement("div");
+      menu.className = "pm-wp-chooser";
+      menu.innerHTML = '<button type="button" data-ch="up">Upload from computer</button><button type="button" data-ch="lib">Media library</button>';
+      anchor.insertAdjacentElement("afterend", menu);
+      menu.querySelector('[data-ch="up"]').addEventListener("click", function () { menu.remove(); onUpload(); });
+      menu.querySelector('[data-ch="lib"]').addEventListener("click", function () { menu.remove(); onLibrary(); });
+      setTimeout(function () {
+        document.addEventListener("click", function off(e) { if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener("click", off); } });
+      }, 0);
+    }
+    function drawImage() {
+      if (p.image) {
+        imgView.innerHTML = '<button type="button" class="pm-wp-thumb-btn" id="pmImgEdit" title="Click the image to edit or update"><img src="' + escapeAttr(resolveImgForPreview(p.image)) + '" alt=""></button>' +
+          '<p class="pm-wp-howto">Click the image to edit or update</p><p><a href="#" class="pm-wp-link-danger" id="pmImgRemove">Remove product image</a></p>';
+        root.querySelector("#pmImgRemove").addEventListener("click", function (e) {
+          e.preventDefault();
+          p.image = ""; delete p.imageCard;
+          if (urlBox) urlBox.value = "";
+          drawImage(); changed();
+        });
+      } else {
+        imgView.innerHTML = '<a href="#" id="pmImgEdit">Set product image</a> <span class="pm-wp-help" tabindex="0" title="' + escapeAttr(HELP_IMG) + '" aria-label="' + escapeAttr(HELP_IMG) + '">?</span>';
+      }
+      root.querySelector("#pmImgEdit").addEventListener("click", function (e) {
+        e.preventDefault();
+        chooser(e.currentTarget.tagName === "A" ? e.currentTarget.nextElementSibling || e.currentTarget : e.currentTarget,
+          function () { var inp = root.querySelector(".pm-wp-hidden-uploader .pm-file-input"); if (inp) inp.click(); },
+          function () { var lib = root.querySelector(".pm-wp-hidden-uploader .pm-media-lib-btn"); if (lib) lib.click(); });
+      });
+    }
+    function drawGallery() {
+      var imgs = Array.isArray(p.images) ? p.images : [];
+      galView.innerHTML = (imgs.length ? '<ul class="pm-wp-gallery">' + imgs.map(function (u, i) {
+        return '<li><img src="' + escapeAttr(resolveImgForPreview(u)) + '" alt=""><button type="button" class="pm-wp-gal-del" data-gal-del="' + i + '" aria-label="Delete image" title="Delete image">×</button></li>';
+      }).join("") + '</ul>' : '') +
+        (imgs.length < MAX_GALLERY_IMAGES ? '<p class="pm-wp-gal-add"><a href="#" id="pmGalAdd">Add product gallery images</a> <span class="pm-wp-help" tabindex="0" title="' + escapeAttr(HELP_GAL) + '" aria-label="' + escapeAttr(HELP_GAL) + '">?</span></p>' : '');
+      galView.querySelectorAll("[data-gal-del]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var next = (p.images || []).slice(); next.splice(parseInt(b.getAttribute("data-gal-del"), 10), 1);
+          if (next.length) p.images = next; else delete p.images;
+          refreshHiddenGallery(); drawGallery(); changed();
+        });
+      });
+      var add = galView.querySelector("#pmGalAdd");
+      if (add) add.addEventListener("click", function (e) {
+        e.preventDefault();
+        chooser(add.nextElementSibling || add,
+          function () { var inp = root.querySelector("#pmGalHidden .pm-gallery-file-input"); if (inp) inp.click(); },
+          function () { var lib = root.querySelector("#pmGalHidden .pm-gallery-lib-add"); if (lib) lib.click(); });
+      });
+    }
+    function refreshHiddenGallery() {
+      var holder = root.querySelector("#pmGalHidden");
+      holder.innerHTML = buildGalleryUploader(p);
+      wireGalleryUploader(holder, p);
+      mirror("#pmGalHidden .pm-gallery-status", "pmGalStatus");
+    }
+    if (urlBox) urlBox.addEventListener("input", function () { drawImage(); });
+    // The hidden gallery uploader re-renders itself after every upload / reorder / library pick.
+    new MutationObserver(function () { drawGallery(); changed(); }).observe(root.querySelector("#pmGalHidden"), { childList: true });
+    mirror(".pm-wp-hidden-uploader .pm-dropzone-status", "pmImgStatus");
+    mirror("#pmGalHidden .pm-gallery-status", "pmGalStatus");
+    drawImage(); drawGallery();
+  }
+
+  // Box header buttons like WordPress: move up, move down, collapse.
+  function wireWpBoxControls(root) {
+    root.querySelectorAll(".pm-wp-box").forEach(function (box) {
+      var title = box.querySelector(".pm-wp-box-title");
+      if (!title || title.querySelector(".pm-wp-box-tools")) return;
+      var name = title.childNodes[0] ? title.childNodes[0].textContent.trim() : "box";
+      var tools = document.createElement("span");
+      tools.className = "pm-wp-box-tools";
+      tools.innerHTML = '<button type="button" data-box="up" aria-label="Move ' + escapeAttr(name) + ' box up">⌃</button>' +
+        '<button type="button" data-box="down" aria-label="Move ' + escapeAttr(name) + ' box down">⌄</button>' +
+        '<button type="button" data-box="toggle" aria-expanded="true" aria-label="Toggle panel: ' + escapeAttr(name) + '">▴</button>';
+      title.appendChild(tools);
+      tools.addEventListener("click", function (e) {
+        var b = e.target.closest("button"); if (!b) return;
+        var act = b.getAttribute("data-box");
+        if (act === "toggle") {
+          var closed = box.classList.toggle("is-closed");
+          b.setAttribute("aria-expanded", closed ? "false" : "true"); b.textContent = closed ? "▾" : "▴";
+        } else if (act === "up" && box.previousElementSibling && box.previousElementSibling.classList.contains("pm-wp-box")) {
+          box.parentNode.insertBefore(box, box.previousElementSibling);
+        } else if (act === "down" && box.nextElementSibling && box.nextElementSibling.classList.contains("pm-wp-box")) {
+          box.parentNode.insertBefore(box.nextElementSibling, box);
+        }
+      });
+    });
   }
   function efield(name, label, value, type, hint) {
     return '<p class="pm-wp-form-row"><label for="pmEf_' + escapeAttr(name) + '">' + label + '</label><span><input id="pmEf_' + escapeAttr(name) + '" type="' + (type || "text") + '" data-ef="' + escapeAttr(name) + '" value="' + escapeAttr(value == null ? "" : value) + '">' +

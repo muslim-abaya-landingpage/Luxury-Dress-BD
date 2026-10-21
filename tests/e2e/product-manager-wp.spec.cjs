@@ -23,6 +23,15 @@ test('edit screen: name, description, product data tabs, tags, brand, featured, 
   await expect(page.locator('.pm-wp-edit .pm-wp-title')).toHaveText('Edit product');
   await expect(page.locator('.pm-wp-name')).toHaveValue('Maroon Abaya Set');
   for (const box of ['Publish', 'Product categories', 'Product tags', 'Product brand', 'Product image', 'Product gallery', 'Product description']) await expect(page.locator('.pm-wp-box-title', { hasText: box }).first()).toBeVisible();
+  // Product image / gallery boxes behave like WordPress: thumbnail + "Remove product image", or a "Set product image" link.
+  await expect(page.locator('#pmImgView img')).toBeVisible();
+  await page.click('#pmImgRemove');
+  await expect(page.locator('#pmImgView')).toContainText('Set product image');
+  await page.click('#pmImgEdit');
+  await expect(page.locator('.pm-wp-chooser')).toContainText('Upload from computer');
+  await expect(page.locator('#pmGalView')).toContainText('Add product gallery images');
+  await page.click('#pmGalBox [data-box="toggle"]');
+  await expect(page.locator('#pmGalBox')).toHaveClass(/is-closed/);
   await page.click('[data-etab="inventory"]');
   await expect(page.locator('[data-epanel="inventory"]')).toBeVisible();
   await expect(page.locator('[data-epanel="general"]')).toBeHidden();
