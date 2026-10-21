@@ -20,7 +20,7 @@
 <link rel="stylesheet" href="admin-dashboard-design.css?v=20261018-3">
   <script src="admin-dashboard-design.js?v=20261018-3"></script>
   <link rel="stylesheet" href="admin-premium-layout.css?v=20261018-3">
-  <link rel="stylesheet" href="admin-orders-woocommerce.css?v=20261021-wo7">
+  <link rel="stylesheet" href="admin-orders-woocommerce.css?v=20261022-wo8">
   <script src="admin-order-status.js?v=20261018-2"></script>
 <script src="admin-courier-tracking.js?v=20261021-notify1"></script>
   <style>.wo-stale-note{margin:0 0 12px;padding:8px 12px;border-radius:10px;background:var(--adm-accent-wash,#f2edfc);color:var(--adm-accent-ink,#6240b2);font-size:13px}.wo-stale-note[hidden]{display:none}#oGrid.wo-stale{opacity:.92}.pn-head .adm-heading{flex:1 1 260px;min-width:220px}.pn-head .adm-heading h1{overflow-wrap:anywhere}</style>
@@ -78,7 +78,7 @@
       <div class="pn-grid" id="oGrid" style="display:none">
         <div class="wo-primary-column">
           <section class="pn-card wo-general-card">
-            <h2><i>⚙</i> General</h2>
+            <h2><i>⚙</i> Billing &amp; shipping details</h2><p class="wo-section-help">গ্রাহকের নাম, ফোন ও ডেলিভারি ঠিকানা এখানে সম্পাদনা করুন।</p>
             <div class="pn-row2">
               <div class="pn-field"><label for="fName">Name</label><input class="pn-in" id="fName" maxlength="80"></div>
               <div class="pn-field"><label for="fPhone">Phone</label><input class="pn-in" id="fPhone" inputmode="numeric" maxlength="14"></div>
@@ -115,7 +115,7 @@
 
         <div class="wo-sidebar-column">
           <section class="pn-card wo-pricing-card">
-            <h2><i>💳</i> Pricing</h2>
+            <h2><i>💳</i> Order totals</h2>
             <div class="pn-field"><label for="fCharge">Shipping Charge (৳)</label><input class="pn-in" id="fCharge" type="number" min="0" step="1"></div>
             <div class="pn-field"><label for="fAdvance">Advance (৳)</label><input class="pn-in" id="fAdvance" type="number" min="0" step="1"></div>
             <div class="pn-field"><label for="fDiscount">Discount (৳)</label><input class="pn-in" id="fDiscount" type="number" min="0" step="1"></div>
@@ -136,7 +136,7 @@
             <small class="pn-note-muted" id="ctScope"></small>
           </section>
           <section class="pn-card wo-details-card">
-            <h2><i>⚡</i> Order actions</h2>
+            <h2><i>⚡</i> Order actions</h2><p class="wo-section-help">এখানে অর্ডার স্ট্যাটাস পরিবর্তন করুন। Steadfast-এর লাইভ স্ট্যাটাস আলাদা দেখানো হয়।</p>
             <div class="pn-field"><label for="fCourier">Courier</label>
               <select class="pn-sel" id="fCourier"></select></div>
             <div class="pn-field"><label>Source</label><input class="pn-in" id="fSource" readonly></div>
