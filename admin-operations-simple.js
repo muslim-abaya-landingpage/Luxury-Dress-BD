@@ -54,3 +54,37 @@ function ready(){
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ready);else ready();
 })();
+
+
+(function(){
+'use strict';
+function init(){
+ var get=function(id){return document.getElementById(id);};
+ var ids=['opsStatementCollected','opsStatementDelivery','opsStatementCod'];
+ if(!get('opsStatementApply'))return;
+ function amount(id){var s=get(id).value.trim();if(!s)return null;var n=Number(s);return Number.isFinite(n)&&n>=0&&Math.round(n*100)===n*100?n:null;}
+ function calc(){
+  var values=ids.map(amount),out=get('opsStatementResult');
+  if(values.some(function(v){return v===null;})){out.textContent='Collected, Delivery bill এবং COD charge—তিনটি সঠিক অঙ্ক প্রয়োজন।';return null;}
+  var net=Math.round((values[0]-values[1]-values[2])*100)/100;
+  if(net<0){out.textContent='চার্জ সংগ্রহের চেয়ে বেশি; স্টেটমেন্ট যাচাই করুন।';return null;}
+  out.textContent='স্টেটমেন্ট অনুযায়ী প্রাপ্য: ৳'+net.toFixed(2)+' (ব্যাংকে জমা নিশ্চিত নয়)';
+  return {collected:values[0],charge:Math.round((values[1]+values[2])*100)/100,net:net};
+ }
+ ids.forEach(function(id){get(id).addEventListener('input',calc);});
+ get('opsStatementApply').addEventListener('click',function(){
+  var data=calc(),statement=get('opsStatementId').value.trim(),order=get('opsFinanceOrder').value.trim();
+  if(!data||!order){get('opsStatementResult').textContent='প্রথমে একটি অর্ডার নির্বাচন করুন এবং সঠিক অঙ্ক দিন।';return;}
+  if(!/^SFC-[0-9]{4,20}$/i.test(statement)){get('opsStatementResult').textContent='বৈধ Steadfast Statement ID দিন।';return;}
+  if(!window.confirm('স্টেটমেন্টটি এই অর্ডারের সঙ্গে মিলেছে এবং চার্জ যাচাই করেছেন?'))return;
+  get('money_courierCollected').value=data.collected;
+  get('money_courierCost').value=data.charge;
+  var note=get('opsFinanceNote'),tag='Steadfast statement '+statement+'; expected payout ৳'+data.net.toFixed(2)+'; bank receipt NOT verified.';
+  if(!note.value.includes('Steadfast statement '+statement))note.value=(note.value?note.value+'\n':'')+tag;
+  get('opsFinalized').checked=false;
+  get('opsStatementResult').textContent='Collected ও courier cost বসানো হয়েছে; ব্যাংকে জমা এবং অন্য খরচ যাচাই করে হিসাব সংরক্ষণ করুন।';
+  get('opsFinanceForm').dispatchEvent(new Event('input',{bubbles:true}));
+ });
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
