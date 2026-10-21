@@ -94,8 +94,8 @@
     ".ma-chat-chip:hover{border-color:#b69655;background:#fffdf8;transform:translateY(-1px)}" +
     ".ma-chat-chip:focus-visible{outline:2px solid #b69655;outline-offset:2px}" +
     ".ma-chat-transcript{display:none;flex-direction:column;gap:9px;padding:4px 0 10px}" +
-    ".ma-chat-body.has-conversation .ma-chat-transcript{display:flex}" +
-    ".ma-chat-body.has-conversation .ma-chat-welcome,.ma-chat-body.has-conversation .ma-chat-section-title,.ma-chat-body.has-conversation .ma-chat-chips{display:none}" +
+    ".ma-chat-body.has-messages .ma-chat-transcript{display:flex}" +
+    ".ma-chat-body.has-messages .ma-chat-welcome,.ma-chat-body.has-messages .ma-chat-section-title,.ma-chat-body.has-messages .ma-chat-chips{display:none}" +
     ".ma-chat-message{max-width:88%;padding:10px 12px;border-radius:14px;background:#fff;border:1px solid #e9e7e2;box-shadow:0 1px 2px rgba(0,0,0,.03);overflow-wrap:anywhere}" +
     ".ma-chat-message.is-customer{align-self:flex-end;background:#171717;color:#fff;border-color:#171717;border-radius:14px 14px 4px 14px}" +
     ".ma-chat-message.is-agent{align-self:flex-start;border-radius:14px 14px 14px 4px}" +
@@ -115,8 +115,18 @@
     ".ma-chat-note{margin:8px 2px 0;font-size:11px;color:#666}" +
     "body:has(#stickyOrderBar) .ma-chat-fab{bottom:calc(144px + env(safe-area-inset-bottom,0px))}" +
     "body:has(#stickyOrderBar) .ma-chat-panel{bottom:calc(208px + env(safe-area-inset-bottom,0px))}" +
+    ".ma-chat-panel.is-expanded{width:min(460px,calc(100vw - 28px));max-height:min(760px,calc(100vh - 100px))}" +
+    ".ma-chat-order-form{display:grid;gap:8px;margin:10px 0 12px;padding:12px;border:1px solid #eee8db;border-radius:14px;background:#fff}" +
+    ".ma-chat-order-form[hidden],.ma-chat-turnstile[hidden]{display:none!important}" +
+    ".ma-chat-order-form input{box-sizing:border-box;width:100%;min-height:42px;border:1px solid #dedbd4;border-radius:10px;padding:9px 11px;font:inherit;font-size:14px}" +
+    ".ma-chat-order-form input:focus{outline:2px solid #b69655;outline-offset:1px}" +
+    ".ma-chat-order-form button{min-height:42px;border:0;border-radius:10px;padding:0 14px;background:#0a7d3b;color:#fff;font:600 14px system-ui;cursor:pointer}" +
+    ".ma-chat-order-form button:disabled{opacity:.6;cursor:wait}" +
+    ".ma-chat-order-result{margin:0;color:#4d4638;font-size:12px;line-height:1.55;overflow-wrap:anywhere}" +
+    ".ma-chat-turnstile{display:flex;justify-content:center;max-width:100%;overflow:hidden;margin:8px 0}" +
     "@media (min-width:769px){.ma-chat-fab{right:22px;bottom:22px;padding:0 20px 0 16px}.ma-chat-fab .ma-chat-fab-label{display:inline}.ma-chat-panel{right:22px;bottom:90px}body:has(#stickyOrderBar) .ma-chat-fab{bottom:22px}body:has(#stickyOrderBar) .ma-chat-panel{bottom:90px}}" +
-    "@media (prefers-reduced-motion:reduce){.ma-chat-fab{transition:none}}";
+    "@media (max-width:560px){.ma-chat-fab{right:12px;bottom:calc(16px + env(safe-area-inset-bottom,0px));min-height:50px;min-width:50px}.ma-chat-panel{inset:auto 8px calc(76px + env(safe-area-inset-bottom,0px)) 8px;width:auto;max-height:min(72dvh,620px);border-radius:18px}.ma-chat-head{padding:10px 12px}.ma-chat-body{padding:14px 12px}.ma-chat-welcome{padding:14px 10px 16px}.ma-chat-chip{min-height:40px;padding:8px 10px}.ma-chat-foot{padding:9px 10px calc(10px + env(safe-area-inset-bottom,0px))}.ma-chat-send{padding:0 11px}.ma-chat-panel.is-expanded{inset:0;width:auto;max-height:none;height:100dvh;border-radius:0}.ma-chat-panel.is-expanded .ma-chat-body{max-height:none}.ma-chat-fab:has(+ .ma-chat-panel.is-expanded){display:none}body:has(#stickyOrderBar) .ma-chat-fab{bottom:calc(82px + env(safe-area-inset-bottom,0px))}body:has(#stickyOrderBar) .ma-chat-panel{bottom:calc(140px + env(safe-area-inset-bottom,0px))}}" +
+    "@media (prefers-reduced-motion:reduce){.ma-chat-fab,.ma-chat-chip{transition:none}}";
 
   var ICON_CHAT =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.5L3 21l1.6-5.2A8.5 8.5 0 1 1 21 12z"/></svg>';
@@ -234,12 +244,42 @@
     welcome.appendChild(el("span", "ma-chat-online", '<i class="ma-chat-status-dot" aria-hidden="true"></i> Chat with our team here or continue on WhatsApp/Messenger'));
     var sectionTitle = el("p", "ma-chat-section-title", "Quick help · দ্রুত সহায়তা");
     var chips = el("div", "ma-chat-chips");
+    var orderForm = el("form", "ma-chat-order-form");
+    orderForm.hidden = true;
+    var orderIdInput = doc.createElement("input");
+    orderIdInput.type = "text";
+    orderIdInput.maxLength = 80;
+    orderIdInput.required = true;
+    orderIdInput.autocomplete = "off";
+    orderIdInput.placeholder = "Order ID";
+    orderIdInput.setAttribute("aria-label", "Order ID");
+    var orderPhoneInput = doc.createElement("input");
+    orderPhoneInput.type = "tel";
+    orderPhoneInput.maxLength = 24;
+    orderPhoneInput.required = true;
+    orderPhoneInput.autocomplete = "tel";
+    orderPhoneInput.placeholder = "অর্ডারে ব্যবহৃত ফোন নম্বর";
+    orderPhoneInput.setAttribute("aria-label", "অর্ডারে ব্যবহৃত ফোন নম্বর");
+    var lookupButton = doc.createElement("button");
+    lookupButton.type = "submit";
+    lookupButton.textContent = "অর্ডার খুঁজুন · Check status";
+    var orderResult = el("p", "ma-chat-order-result");
+    orderResult.setAttribute("aria-live", "polite");
+    orderForm.appendChild(orderIdInput);
+    orderForm.appendChild(orderPhoneInput);
+    orderForm.appendChild(lookupButton);
+    orderForm.appendChild(orderResult);
+    var captchaBox = el("div", "ma-chat-turnstile");
+    captchaBox.id = "ma-support-chat-turnstile";
+    captchaBox.hidden = true;
     var transcript = el("div", "ma-chat-transcript");
     transcript.setAttribute("aria-live", "polite");
     transcript.setAttribute("aria-relevant", "additions");
     body.appendChild(welcome);
     body.appendChild(sectionTitle);
     body.appendChild(chips);
+    body.appendChild(orderForm);
+    body.appendChild(captchaBox);
     body.appendChild(transcript);
     var foot = el("div", "ma-chat-foot");
     var row = el("div", "ma-chat-row");
@@ -278,6 +318,41 @@
     doc.body.appendChild(fab);
     doc.body.appendChild(panel);
 
+    var turnstileScriptPromise = null;
+    var turnstileWidgetId = null;
+    function loadTurnstileScript() {
+      if (global.turnstile) return Promise.resolve();
+      if (turnstileScriptPromise) return turnstileScriptPromise;
+      turnstileScriptPromise = new Promise(function (resolve, reject) {
+        var script = doc.createElement("script");
+        script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+        script.async = true;
+        script.defer = true;
+        script.onload = resolve;
+        script.onerror = function () { reject(new Error("CAPTCHA could not load.")); };
+        doc.head.appendChild(script);
+      });
+      return turnstileScriptPromise;
+    }
+    async function getTurnstileToken(action) {
+      var config = (global.SITE_FOOTER_CONFIG || {}).supportChat || {};
+      if (!config.turnstileSiteKey) throw new Error("CAPTCHA is not configured.");
+      await loadTurnstileScript();
+      captchaBox.hidden = false;
+      if (turnstileWidgetId !== null) {
+        global.turnstile.remove(turnstileWidgetId);
+        turnstileWidgetId = null;
+      }
+      return new Promise(function (resolve, reject) {
+        turnstileWidgetId = global.turnstile.render(captchaBox, {
+          sitekey: config.turnstileSiteKey,
+          action: action,
+          callback: function (token) { captchaBox.hidden = true; resolve(token); },
+          "error-callback": function () { reject(new Error("CAPTCHA failed. Please try again.")); },
+          "expired-callback": function () { reject(new Error("CAPTCHA expired. Please try again.")); }
+        });
+      });
+    }
     function updateLinks() {
       var text = String(input.value || "").trim();
       var full = (text || "Hello! I have a question.") + pageContext();
@@ -297,7 +372,7 @@
       time.textContent = row.created_at ? new Date(row.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "";
       bubble.appendChild(time);
       transcript.appendChild(bubble);
-      body.classList.add("has-conversation");
+      body.classList.add("has-conversation", "has-messages");
       body.scrollTop = body.scrollHeight;
     }
     async function ensureLiveConversationImpl() {
@@ -307,7 +382,8 @@
         var session = sessionResult && sessionResult.data && sessionResult.data.session;
         if (session && session.user) currentUser = session.user;
         else {
-          var signed = await client.auth.signInAnonymously();
+          var captchaToken = await getTurnstileToken("support_chat_auth");
+          var signed = await client.auth.signInAnonymously({ options: { captchaToken: captchaToken } });
           if (signed.error) throw signed.error;
           currentUser = signed.data.user;
         }
@@ -369,6 +445,7 @@
       seenMessageIds = Object.create(null);
       (result.data || []).forEach(appendMessage);
       body.classList.add("has-conversation");
+      body.classList.toggle("has-messages", Boolean((result.data || []).length));
       await client.from("support_messages").update({ read_at: new Date().toISOString() })
         .eq("conversation_id", conversationId).eq("sender_role", "agent").is("read_at", null);
     }
@@ -434,11 +511,52 @@
       event.preventDefault();
       sendLiveMessage();
     });
+    orderForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      if (!liveEnabled) {
+        orderResult.textContent = "অর্ডার যাচাই সাময়িকভাবে অনুপলব্ধ। WhatsApp-এ যোগাযোগ করুন।";
+        return;
+      }
+      var phone = orderPhoneInput.value.trim();
+      var orderId = orderIdInput.value.trim();
+      if (!phone || !orderId) return;
+      lookupButton.disabled = true;
+      orderResult.textContent = "অর্ডার যাচাই করা হচ্ছে…";
+      try {
+        var state = await ensureLiveConversation();
+        var turnstileToken = await getTurnstileToken("order_status");
+        var result = await state.client.functions.invoke("order-status", {
+          body: { phone: phone, orderId: orderId, turnstileToken: turnstileToken }
+        });
+        if (result.error || !result.data || result.data.ok !== true) throw new Error("Lookup failed");
+        var order = result.data.order;
+        if (!order) {
+          orderResult.textContent = "এই Order ID ও ফোন নম্বরে অর্ডার পাওয়া যায়নি। দুটোই মিলিয়ে আবার চেষ্টা করুন।";
+        } else {
+          var parts = ["অর্ডার " + order.orderId + ": " + order.status];
+          if (order.courierStatus) parts.push("কুরিয়ার: " + order.courierStatus);
+          if (order.tracking) parts.push("Tracking: " + order.tracking);
+          orderResult.textContent = parts.join(" · ");
+        }
+      } catch (_) {
+        orderResult.textContent = "এখন অর্ডার যাচাই করা যাচ্ছে না। CAPTCHA সম্পন্ন করে আবার চেষ্টা করুন, অথবা WhatsApp-এ যোগাযোগ করুন।";
+      } finally {
+        lookupButton.disabled = false;
+      }
+    });
     QUICK.forEach(function (q) {
       var b = el("button", "ma-chat-chip");
       b.type = "button";
       b.textContent = q.label + (q.labelBn ? " · " + q.labelBn : "");
       b.addEventListener("click", function () {
+        if (q.key === "order_status") {
+          orderForm.hidden = false;
+          orderResult.textContent = "";
+          if (q.key) recordQuickAction(q.key);
+          orderIdInput.focus();
+          return;
+        }
+        orderForm.hidden = true;
         input.value = q.text;
         updateLinks();
         if (q.key) recordQuickAction(q.key);
@@ -477,8 +595,6 @@
     expand.addEventListener("click", function () {
       var expanded = panel.classList.toggle("is-expanded");
       expand.setAttribute("aria-label", expanded ? "Restore chat size" : "Expand chat");
-      panel.style.width = expanded ? "min(460px,calc(100vw - 28px))" : "";
-      panel.style.maxHeight = expanded ? "min(760px,calc(100vh - 100px))" : "";
     });
     doc.addEventListener("keydown", function (ev) {
       if (ev.key === "Escape" && panel.classList.contains("is-open")) setOpen(false);
