@@ -9,3 +9,5 @@
 @media(max-width:640px){.ops-workspace-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.ops-workspace-nav button{padding:12px 8px}.ops-workspace-intro{font-size:14px}}
 
 .ops-workspace-hint{border-left:3px solid #7050bd;padding:10px 14px;background:#f8f6fc;border-radius:6px;color:#514665;line-height:1.65;margin:0 0 16px}
+
+.ops-order-picker-label{display:block;margin:12px 0;font-weight:600}.ops-order-picker{display:block;width:100%;padding:12px;border:1px solid #c7bed9;border-radius:10px;background:#fff;color:#241d34;font:inherit;margin-top:7px}
