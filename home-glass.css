@@ -170,3 +170,16 @@ body.global-layout #homeCatnav {
 .ah-card-stock.is-oos { background: none; }
 .ah-card-body { padding-bottom: 14px; }
 .ah-card .ah-actions { margin-bottom: 0; }
+
+/* Phones: the glass caption covered most of the banner. Keep the banner image clear and
+   show only a small Shop Now button in the corner (the banner artwork already has its text). */
+@media (max-width: 700px) {
+  .home-hero-cap {
+    left: 12px; right: auto; bottom: 26px; top: auto;
+    max-width: none; padding: 0; border: 0;
+    background: none !important; box-shadow: none;
+    -webkit-backdrop-filter: none; backdrop-filter: none;
+  }
+  .home-hero-cap .eyebrow, .home-hero-cap .head, .home-hero-cap .sub { display: none; }
+  .home-hero-cap .hero-btn { min-height: 36px; padding: 8px 16px; font-size: 11px; box-shadow: 0 4px 12px rgba(0,0,0,.18); }
+}
