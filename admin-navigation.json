@@ -38,8 +38,17 @@
   },
   {
     "label": "কাস্টমার ইনবক্স",
-    "href": "admin-inbox.html",
-    "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M3 4h18v13H8l-5 4V4ZM7 9h10M7 13h7\"/></svg>"
+    "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M3 4h18v13H8l-5 4V4ZM7 9h10M7 13h7\"/></svg>",
+    "links": [
+      {
+        "href": "admin-inbox.html",
+        "label": "বর্তমান কাস্টমার ইনবক্স"
+      },
+      {
+        "href": "admin-support-inbox.html",
+        "label": "রিয়েল-টাইম লাইভ সাপোর্ট"
+      }
+    ]
   },
   {
     "label": "সেটিংস ও অন্যান্য",

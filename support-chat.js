@@ -42,13 +42,24 @@
     var m = /facebook\.com\/(?:pg\/)?([^/?#]+)/i.exec(String(social.facebook));
     if (m && !/^(profile\.php|pages|people)$/i.test(m[1])) messenger = "https://m.me/" + m[1];
   }
+  var backendCfg = (global.SITE_FOOTER_CONFIG && global.SITE_FOOTER_CONFIG.supportChat) || {};
+  var supabaseUrl = pick(userCfg.supabaseUrl, backendCfg.supabaseUrl);
+  var supabaseKey = pick(userCfg.supabaseKey, backendCfg.supabaseKey);
+  var liveEnabled = Boolean(supabaseUrl && supabaseKey);
+  var supabaseClient = null;
+  var supabaseLoadPromise = null;
+  var currentUser = null;
+  var conversationId = "";
+  var conversationChannel = null;
+  var conversationPromise = null;
+  var seenMessageIds = Object.create(null);
 
   var QUICK = userCfg.quickQuestions || [
-    { label: "Order status", labelBn: "অর্ডার স্ট্যাটাস", text: "Hello! I would like to check my order status. My order ID is: " },
-    { label: "Size help", labelBn: "সাইজ পরামর্শ", text: "Hello! I need help choosing the right size." },
-    { label: "Delivery & COD", labelBn: "ডেলিভারি ও COD", text: "Hello! Could you tell me about delivery time and cash on delivery?" },
-    { label: "Product question", labelBn: "পণ্যের তথ্য", text: "Hello! I have a question about this product." },
-    { label: "Return / exchange", labelBn: "রিটার্ন / এক্সচেঞ্জ", text: "Hello! I need help with a return or exchange." }
+    { key: "order_status", label: "Order status", labelBn: "অর্ডার স্ট্যাটাস", text: "Hello! I would like to check my order status. My order ID is: " },
+    { key: "size_help", label: "Size help", labelBn: "সাইজ পরামর্শ", text: "Hello! I need help choosing the right size." },
+    { key: "delivery_cod", label: "Delivery & COD", labelBn: "ডেলিভারি ও COD", text: "Hello! Could you tell me about delivery time and cash on delivery?" },
+    { key: "product_question", label: "Product question", labelBn: "পণ্যের তথ্য", text: "Hello! I have a question about this product." },
+    { key: "return_exchange", label: "Return / exchange", labelBn: "রিটার্ন / এক্সচেঞ্জ", text: "Hello! I need help with a return or exchange." }
   ];
 
   var CSS =
@@ -82,6 +93,14 @@
     ".ma-chat-chip{border:1px solid #e3e1dc;background:#fff;border-radius:999px;padding:9px 12px;font:inherit;font-size:13px;cursor:pointer;color:#222;box-shadow:0 1px 2px rgba(0,0,0,.025);transition:border-color .15s ease,background .15s ease,transform .15s ease}" +
     ".ma-chat-chip:hover{border-color:#b69655;background:#fffdf8;transform:translateY(-1px)}" +
     ".ma-chat-chip:focus-visible{outline:2px solid #b69655;outline-offset:2px}" +
+    ".ma-chat-transcript{display:none;flex-direction:column;gap:9px;padding:4px 0 10px}" +
+    ".ma-chat-body.has-conversation .ma-chat-transcript{display:flex}" +
+    ".ma-chat-body.has-conversation .ma-chat-welcome,.ma-chat-body.has-conversation .ma-chat-section-title,.ma-chat-body.has-conversation .ma-chat-chips{display:none}" +
+    ".ma-chat-message{max-width:88%;padding:10px 12px;border-radius:14px;background:#fff;border:1px solid #e9e7e2;box-shadow:0 1px 2px rgba(0,0,0,.03);overflow-wrap:anywhere}" +
+    ".ma-chat-message.is-customer{align-self:flex-end;background:#171717;color:#fff;border-color:#171717;border-radius:14px 14px 4px 14px}" +
+    ".ma-chat-message.is-agent{align-self:flex-start;border-radius:14px 14px 14px 4px}" +
+    ".ma-chat-message-body{white-space:pre-wrap}" +
+    ".ma-chat-message time{display:block;margin-top:5px;font-size:10px;opacity:.68}" +
     ".ma-chat-foot{padding:10px 12px 12px;border-top:1px solid #eee;background:#fff}" +
     ".ma-chat-row{display:flex;gap:8px;align-items:flex-end}" +
     ".ma-chat-input{flex:1;min-width:0;resize:none;border:1px solid #d9d9d9;border-radius:12px;padding:10px 12px;font:inherit;font-size:14px;max-height:96px;min-height:42px}" +
@@ -128,6 +147,30 @@
     return "";
   }
 
+  function loadSupabase() {
+    if (supabaseClient) return Promise.resolve(supabaseClient);
+    if (supabaseLoadPromise) return supabaseLoadPromise;
+    supabaseLoadPromise = new Promise(function (resolve, reject) {
+      function create() {
+        if (!global.supabase || typeof global.supabase.createClient !== "function") {
+          reject(new Error("Supabase client did not load."));
+          return;
+        }
+        supabaseClient = global.supabase.createClient(supabaseUrl, supabaseKey, {
+          auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
+        });
+        resolve(supabaseClient);
+      }
+      if (global.supabase && typeof global.supabase.createClient === "function") { create(); return; }
+      var script = doc.createElement("script");
+      script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js";
+      script.async = true;
+      script.onload = create;
+      script.onerror = function () { reject(new Error("Unable to load chat client.")); };
+      (doc.head || doc.documentElement).appendChild(script);
+    });
+    return supabaseLoadPromise;
+  }
   function build() {
     var style = doc.createElement("style");
     style.id = "ma-support-chat-css";
@@ -188,12 +231,16 @@
     welcome.appendChild(el("b", "", "Customer Support"));
     welcome.appendChild(el("small", "", "How can we help you today?"));
     welcome.appendChild(el("small", "", "আমরা কীভাবে সাহায্য করতে পারি?"));
-    welcome.appendChild(el("span", "ma-chat-online", '<i class="ma-chat-status-dot" aria-hidden="true"></i> Choose a topic and continue on WhatsApp or Messenger'));
+    welcome.appendChild(el("span", "ma-chat-online", '<i class="ma-chat-status-dot" aria-hidden="true"></i> Chat with our team here or continue on WhatsApp/Messenger'));
     var sectionTitle = el("p", "ma-chat-section-title", "Quick help · দ্রুত সহায়তা");
     var chips = el("div", "ma-chat-chips");
+    var transcript = el("div", "ma-chat-transcript");
+    transcript.setAttribute("aria-live", "polite");
+    transcript.setAttribute("aria-relevant", "additions");
     body.appendChild(welcome);
     body.appendChild(sectionTitle);
     body.appendChild(chips);
+    body.appendChild(transcript);
     var foot = el("div", "ma-chat-foot");
     var row = el("div", "ma-chat-row");
     var input = el("textarea", "ma-chat-input");
@@ -222,7 +269,8 @@
       alt.appendChild(ms);
     }
     foot.appendChild(alt);
-    foot.appendChild(el("p", "ma-chat-note", "Sending opens WhatsApp with your message ready."));
+    var note = el("p", "ma-chat-note", liveEnabled ? "Messages are saved in our support inbox. Please do not send card or password details." : "Your message opens WhatsApp. Do not send card or password details.");
+    foot.appendChild(note);
 
     panel.appendChild(head);
     panel.appendChild(body);
@@ -237,7 +285,155 @@
       send.href = url;
       wa.href = waBase + "?text=" + encodeURIComponent("Hello! I have a question." + pageContext());
     }
-
+    function appendMessage(row) {
+      if (!row || !row.id || seenMessageIds[row.id]) return;
+      seenMessageIds[row.id] = true;
+      var bubble = el("div", "ma-chat-message " + (row.sender_role === "customer" ? "is-customer" : "is-agent"));
+      var messageBody = el("div", "ma-chat-message-body");
+      messageBody.textContent = String(row.body || "");
+      bubble.appendChild(messageBody);
+      var time = el("time");
+      time.dateTime = row.created_at || "";
+      time.textContent = row.created_at ? new Date(row.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "";
+      bubble.appendChild(time);
+      transcript.appendChild(bubble);
+      body.classList.add("has-conversation");
+      body.scrollTop = body.scrollHeight;
+    }
+    async function ensureLiveConversationImpl() {
+      var client = await loadSupabase();
+      if (!currentUser) {
+        var sessionResult = await client.auth.getSession();
+        var session = sessionResult && sessionResult.data && sessionResult.data.session;
+        if (session && session.user) currentUser = session.user;
+        else {
+          var signed = await client.auth.signInAnonymously();
+          if (signed.error) throw signed.error;
+          currentUser = signed.data.user;
+        }
+      }
+      if (conversationId) {
+        var active = await client.from("support_conversations").select("id,status").eq("id", conversationId).maybeSingle();
+        if (active.error) throw active.error;
+        if (active.data && active.data.status !== "closed") return { client: client, id: conversationId };
+        conversationId = "";
+        if (conversationChannel) {
+          await client.removeChannel(conversationChannel);
+          conversationChannel = null;
+        }
+      }
+      var storedId = "";
+      try { storedId = global.localStorage.getItem("maSupportConversation:" + currentUser.id) || ""; } catch (_) {}
+      if (storedId) {
+        var cached = await client.from("support_conversations").select("id,status").eq("id", storedId).maybeSingle();
+        if (!cached.error && cached.data && cached.data.status !== "closed") conversationId = cached.data.id;
+      }
+      if (!conversationId) {
+        var recent = await client.from("support_conversations").select("id,status")
+          .eq("visitor_id", currentUser.id).neq("status", "closed")
+          .order("updated_at", { ascending: false }).limit(1).maybeSingle();
+        if (recent.error) throw recent.error;
+        if (recent.data) conversationId = recent.data.id;
+      }
+      if (!conversationId) {
+        var created = await client.from("support_conversations").insert({
+          visitor_id: currentUser.id,
+          status: "open",
+          page_path: String(global.location && global.location.pathname || "/").slice(0, 512)
+        }).select("id").single();
+        if (created.error) throw created.error;
+        conversationId = created.data.id;
+        await client.from("support_events").insert({
+          conversation_id: conversationId,
+          visitor_id: currentUser.id,
+          event_type: "conversation_started",
+          action_key: "website_chat",
+          page_path: String(global.location && global.location.pathname || "/").slice(0, 512)
+        });
+        try { global.localStorage.setItem("maSupportConversation:" + currentUser.id, conversationId); } catch (_) {}
+      }
+      await loadThread(client);
+      subscribeThread(client);
+      return { client: client, id: conversationId };
+    }
+    function ensureLiveConversation() {
+      if (conversationPromise) return conversationPromise;
+      conversationPromise = ensureLiveConversationImpl().finally(function () { conversationPromise = null; });
+      return conversationPromise;
+    }
+    async function loadThread(client) {
+      var result = await client.from("support_messages").select("id,conversation_id,sender_id,sender_role,body,created_at,read_at")
+        .eq("conversation_id", conversationId).order("created_at", { ascending: true }).limit(150);
+      if (result.error) throw result.error;
+      transcript.textContent = "";
+      seenMessageIds = Object.create(null);
+      (result.data || []).forEach(appendMessage);
+      body.classList.add("has-conversation");
+      await client.from("support_messages").update({ read_at: new Date().toISOString() })
+        .eq("conversation_id", conversationId).eq("sender_role", "agent").is("read_at", null);
+    }
+    function subscribeThread(client) {
+      if (conversationChannel || !conversationId) return;
+      conversationChannel = client.channel("support-chat-" + conversationId)
+        .on("postgres_changes", {
+          event: "INSERT", schema: "public", table: "support_messages",
+          filter: "conversation_id=eq." + conversationId
+        }, function (payload) { appendMessage(payload.new); })
+        .subscribe(function (status) {
+          if (status === "SUBSCRIBED") note.textContent = "Live chat connected — messages are saved securely.";
+          else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") note.textContent = "Live connection interrupted. Please use WhatsApp if this continues.";
+        });
+    }
+    async function recordQuickAction(actionKey) {
+      if (!liveEnabled) return;
+      try {
+        var state = await ensureLiveConversation();
+        var eventType = actionKey === "order_status" ? "order_status_request" : "quick_action";
+        var result = await state.client.from("support_events").insert({
+          conversation_id: state.id,
+          visitor_id: currentUser.id,
+          event_type: eventType,
+          action_key: actionKey,
+          page_path: String(global.location && global.location.pathname || "/").slice(0, 512)
+        });
+        if (result.error) throw result.error;
+      } catch (error) {
+        note.textContent = "Could not connect to live support. You can still use WhatsApp or Messenger.";
+      }
+    }
+    async function sendLiveMessage() {
+      var messageText = String(input.value || "").trim();
+      if (!messageText) { input.focus(); return; }
+      if (isSendingMessage) return;
+      isSendingMessage = true;
+      send.setAttribute("aria-disabled", "true");
+      send.style.opacity = ".65";
+      try {
+        var state = await ensureLiveConversation();
+        var inserted = await state.client.from("support_messages").insert({
+          conversation_id: state.id,
+          sender_id: currentUser.id,
+          sender_role: "customer",
+          body: messageText
+        }).select("id,conversation_id,sender_id,sender_role,body,created_at,read_at").single();
+        if (inserted.error) throw inserted.error;
+        appendMessage(inserted.data);
+        input.value = "";
+        updateLinks();
+        note.textContent = "Message sent to the support inbox.";
+      } catch (error) {
+        note.textContent = "Message was not sent. Please try again or contact us on WhatsApp.";
+      } finally {
+        isSendingMessage = false;
+        send.removeAttribute("aria-disabled");
+        send.style.opacity = "";
+      }
+    }
+    send.addEventListener("click", function (event) {
+      if (!liveEnabled) return;
+      event.preventDefault();
+      sendLiveMessage();
+    });
     QUICK.forEach(function (q) {
       var b = el("button", "ma-chat-chip");
       b.type = "button";
@@ -245,11 +441,11 @@
       b.addEventListener("click", function () {
         input.value = q.text;
         updateLinks();
+        if (q.key) recordQuickAction(q.key);
         input.focus();
       });
       chips.appendChild(b);
     });
-
     input.addEventListener("input", updateLinks);
     input.addEventListener("keydown", function (ev) {
       if (ev.key === "Enter" && !ev.shiftKey) {
@@ -259,7 +455,6 @@
       }
     });
     updateLinks();
-
     function setOpen(open) {
       panel.classList.toggle("is-open", open);
       fab.setAttribute("aria-expanded", open ? "true" : "false");
@@ -268,6 +463,9 @@
       if (dot) dot.style.display = open ? "none" : "";
       if (open) {
         updateLinks();
+        if (liveEnabled) ensureLiveConversation().catch(function () {
+          note.textContent = "Live support is temporarily unavailable. Use WhatsApp or Messenger instead.";
+        });
         global.setTimeout(function () { input.focus(); }, 60);
       } else {
         fab.focus();
