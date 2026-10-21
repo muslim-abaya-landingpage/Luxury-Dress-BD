@@ -12,13 +12,13 @@
   var next = params.get("next") || "/";
   var busy = false;
 
-  if (!appId || !g.MaAuth || typeof g.MaAuth.loginWithFacebook !== "function") {
-    button.disabled = true;
-    button.title = "Facebook sign-in needs provider configuration.";
+  if (!appId || g.MA_FACEBOOK_LOGIN_ENABLED !== true || !g.MaAuth || typeof g.MaAuth.loginWithFacebook !== "function") {
+    button.hidden = true;
     if (social) social.setProviderState("facebook", "disabled");
     return;
   }
 
+  button.hidden = false;
   if (social) social.setProviderState("facebook", "loading");
   button.disabled = true;
   g.fbAsyncInit = function () {

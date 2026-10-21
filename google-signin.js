@@ -13,10 +13,7 @@
   var social = g.MaSocialUI;
 
   if (!clientId || !g.MaAuth || typeof g.MaAuth.loginWithGoogle !== "function" || !host) {
-    if (fallback) {
-      fallback.disabled = true;
-      fallback.title = "Google sign-in needs provider configuration.";
-    }
+    if (fallback) fallback.hidden = true;
     if (social) social.setProviderState("google", "disabled");
     return;
   }
@@ -57,7 +54,7 @@
         type: "standard",
         theme: "outline",
         size: "large",
-        text: "continue_with",
+        text: "signin_with",
         shape: "rectangular",
         width: Math.max(120, Math.floor(host.getBoundingClientRect().width || 180))
       });

@@ -29,3 +29,6 @@ window.MA_GOOGLE_CLIENT_ID = window.MA_GOOGLE_CLIENT_ID || "839440319456-inanmbc
  * Google Apps Script Script Properties as FACEBOOK_LOGIN_APP_SECRET.
  */
 window.MA_FACEBOOK_APP_ID = window.MA_FACEBOOK_APP_ID || "3992256867596731";
+/* Turn on only after FACEBOOK_LOGIN_APP_ID and FACEBOOK_LOGIN_APP_SECRET are saved in Apps Script
+ * Script Properties; until then the Facebook button stays hidden instead of failing. */
+window.MA_FACEBOOK_LOGIN_ENABLED = window.MA_FACEBOOK_LOGIN_ENABLED === true;

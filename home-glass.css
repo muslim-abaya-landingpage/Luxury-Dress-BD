@@ -162,3 +162,11 @@ body.global-layout #homeCatnav {
 
 /* No rounded corners on the home page: video block and order buttons too. */
 #main-video-section, #main-video-section *, .home-order-strip, .home-order-strip * { border-radius: 0 !important; }
+
+/* Product cards: photo fills the card edge to edge, no extra white frame, no underlines. */
+.ah-card-media { margin: 0 !important; }
+.ah-card a, .ah-card a:hover, .ah-card-name, .ah-card-name:hover { text-decoration: none !important; }
+.ah-card-stock { border: 0; background: none; padding: 0; }
+.ah-card-stock.is-oos { background: none; }
+.ah-card-body { padding-bottom: 14px; }
+.ah-card .ah-actions { margin-bottom: 0; }

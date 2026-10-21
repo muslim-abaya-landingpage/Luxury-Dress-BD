@@ -30,9 +30,9 @@
     Array.isArray(HEADER_CFG.announcements) && HEADER_CFG.announcements.length
       ? HEADER_CFG.announcements
       : [
-          'ð PREMIUM MODEST WEAR | TIMELESS ELEGANCE & EVERYDAY COMFORT',
-          'ð Premium Modest Fashion | Elegant Abayas & Two-Piece Collections',
-          'ð Buy 3 Dresses & Enjoy FREE Nationwide Delivery'
+          '💎 PREMIUM MODEST WEAR | TIMELESS ELEGANCE & EVERYDAY COMFORT',
+          '💎 Premium Modest Fashion | Elegant Abayas & Two-Piece Collections',
+          '🚚 Buy 3 Dresses & Enjoy FREE Nationwide Delivery'
         ];
 
   (  function bootSiteSeo() {
@@ -114,7 +114,7 @@
     return path.slice(0, slash + 1);
   }
 
-  /** Always relative paths â works on file:// and https:// */
+  /** Always relative paths — works on file:// and https:// */
   function siteAsset(file) {
     return String(file || '').replace(/^\//, '');
   }
@@ -224,7 +224,7 @@
     );
   }
 
-  /** à¦®à§à¦¨à§ à¦¸à¦à§à¦°à¦¿à¦¯à¦¼: enabled:true à¦à¦¥à¦¬à¦¾ à¦à¦ à¦à§à¦¯à¦¾à¦à¦¾à¦à¦°à¦¿à¦¤à§ à¦à¦¨à§à¦¤à¦¤ à§§à¦à¦¿ à¦ªà§à¦°à§à¦¡à¦¾à¦à§à¦ */
+  /** মেনু সক্রিয়: enabled:true অথবা ওই ক্যাটাগরিতে অন্তত ১টি প্রোডাক্ট */
   function navItemEnabledForSection(sec) {
     if (sec && sec.key && categoryHasProducts(sec.key)) return true;
     return sec.enabled !== false;
@@ -233,11 +233,11 @@ function buildNavMenuItems() {
     var sections = window.CATALOG_SECTIONS || [];
     var extras = window.SITE_NAV_EXTRAS || [];
 
-    // à¦®à§à¦² à¦à§à¦¯à¦¾à¦à¦¾à¦à¦°à¦¿à¦à§à¦²à§à¦° à¦à¦¨à§à¦¯ à¦à¦¸à¦² à¦ªà§à¦ à¦ªà¦¾à¦¥ (sec.path, à¦¯à§à¦®à¦¨ "/tops-kurti") à¦¬à§à¦¯à¦¬à¦¹à¦¾à¦° à¦à¦°à¦¾ à¦¹à¦à§à¦à§ â
-    // à¦à¦à§ à¦à¦à¦¾à¦¨à§ "#" + key à¦¦à¦¿à¦¯à¦¼à§ à¦¹à§à¦¯à¦¾à¦¶-à¦²à¦¿à¦à¦ à¦¬à¦¾à¦¨à¦¾à¦¨à§ à¦¹à¦¤à§, à¦¯à§à¦à¦¾ siteHref() à¦¦à¦¿à¦¯à¦¼à§ à¦à§à¦²à§
-    // "#tops-kurti.html"-à¦à¦° à¦®à¦¤à§ à¦à¦à¦à¦¾ à¦à¦à§à¦à§ à¦¸à§à¦à§à¦°à¦¿à¦ à¦¤à§à¦°à¦¿ à¦à¦°à¦¤à¥¤ à¦¬à§à¦°à¦¾à¦à¦à¦¾à¦° "#" à¦¦à¦¿à¦¯à¦¼à§ à¦¶à§à¦°à§ à¦¹à¦à¦¯à¦¼à¦¾
-    // à¦¯à§à¦à§à¦¨à§ href-à¦à§ à¦¶à§à¦§à§ à¦¬à¦°à§à¦¤à¦®à¦¾à¦¨ à¦ªà§à¦à§à¦° à¦­à§à¦¤à¦°à§à¦° à¦à¦à¦à¦¾ fragment à¦¹à¦¿à¦¸à§à¦¬à§ à¦§à¦°à§ â à¦¤à¦¾à¦ à¦à§à¦²à¦¿à¦ à¦à¦°à¦²à§
-    // à¦ªà§à¦à¦ à¦¬à¦¦à¦²à¦¾à¦¤à§ à¦¨à¦¾à¥¤ à¦à¦à¦¨ à¦¸à¦ à¦¿à¦ à¦ªà¦¾à¦¥ à¦¬à§à¦¯à¦¬à¦¹à¦¾à¦° à¦à¦°à¦¾ à¦¹à¦à§à¦à§, à¦¯à¦¾à¦¤à§ à¦®à§à¦¨à§ à¦à§à¦²à¦¿à¦ à¦à¦°à¦²à§ à¦à¦¸à¦² à¦à§à¦¯à¦¾à¦à¦¾à¦à¦°à¦¿ à¦ªà§à¦à§ à¦¯à¦¾à¦¯à¦¼à¥¤
+    // মূল ক্যাটাগরিগুলোর জন্য আসল পেজ পাথ (sec.path, যেমন "/tops-kurti") ব্যবহার করা হচ্ছে —
+    // আগে এখানে "#" + key দিয়ে হ্যাশ-লিংক বানানো হতো, যেটা siteHref() দিয়ে গেলে
+    // "#tops-kurti.html"-এর মতো একটা অকেজো স্ট্রিং তৈরি করত। ব্রাউজার "#" দিয়ে শুরু হওয়া
+    // যেকোনো href-কে শুধু বর্তমান পেজের ভেতরের একটা fragment হিসেবে ধরে — তাই ক্লিক করলে
+    // পেজই বদলাতো না। এখন সঠিক পাথ ব্যবহার করা হচ্ছে, যাতে মেনু ক্লিক করলে আসল ক্যাটাগরি পেজে যায়।
     var items = sections.map(function (sec) {
       var href = sec.path || ("/" + String(sec.key || "").replace(/\.html$/i, "").trim());
       return {
@@ -322,7 +322,7 @@ function buildNavMenuItems() {
     });
   }
 
-  /** Breadcrumb / body links â href="/" works on Netlify; file:// needs real .html paths */
+  /** Breadcrumb / body links — href="/" works on Netlify; file:// needs real .html paths */
   function fixAllPageLinks() {
     fixHeaderLinks(document.body);
   }
@@ -738,7 +738,7 @@ function buildNavMenuItems() {
     var mount = document.getElementById('site-header-mount');
     if (!mount) return;
     // The header itself is position:fixed (see .abaya-main-header in
-    // site-header.css), so it's removed from normal document flow â
+    // site-header.css), so it's removed from normal document flow —
     // measuring mount.offsetHeight here only reports the mount's own
     // static placeholder height (min-height:148px), completely
     // disconnected from the real header's rendered height. That mismatch
@@ -939,7 +939,7 @@ function buildNavMenuItems() {
     document.head.appendChild(gtmScript);
   }
 
-  /** GTM â first user gesture or tab hide (keeps Ads pixels, stays off the LCP path) */
+  /** GTM — first user gesture or tab hide (keeps Ads pixels, stays off the LCP path) */
   function scheduleDeferredGtm() {
     if (window.__maGtmScheduled) return;
     window.__maGtmScheduled = true;

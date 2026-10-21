@@ -17,8 +17,9 @@
       node.textContent = "";
       return;
     }
-    var names = unavailable.map(function (p) { return p === "google" ? "Google" : "Facebook"; });
-    node.textContent = names.join(" and ") + " sign-in " + (names.length === 1 ? "is" : "are") + " not configured. Email sign-in is available.";
+    node.textContent = "";
+    var section = node.closest(".am-social-login");
+    if (section) section.hidden = unavailable.length === Object.keys(states).length;
   }
   g.MaSocialUI = {
     setProviderState: function (provider, state) {

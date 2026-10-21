@@ -167,3 +167,10 @@ body.am-body {
   .am-form-wrap { background: rgba(245,245,243,.94); }
   .am-form, .am-input input, .am-social-btn { background: rgba(255,255,255,.9); }
 }
+
+/* Social sign-in: one full-width button per row, then "or use email". */
+.am-social-grid { grid-template-columns: 1fr; gap: 10px; }
+.am-social-btn[hidden], .am-social-login[hidden] { display: none !important; }
+.am-social-login .am-social-divider { margin: 16px 0 0; }
+.am-social-btn { font-size: 14px; }
+.am-brand-meta { display: none; }
