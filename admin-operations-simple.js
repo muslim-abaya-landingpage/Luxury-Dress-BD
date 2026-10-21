@@ -9,9 +9,15 @@ function setup(){
  var names=['ওভারভিউ','অর্ডার হিসাব','রিটার্ন ও এক্সচেঞ্জ','সিস্টেমের অবস্থা'];
  var intro=document.createElement('div');intro.className='ops-workspace-intro';intro.textContent='প্রথমে সারসংক্ষেপ দেখুন। অর্ডারের হিসাব বা রিটার্ন করতে উপরের বিভাগ নির্বাচন করুন। অসম্পূর্ণ তথ্য দিয়ে চূড়ান্ত লাভ দেখানো হবে না।';
  var nav=document.createElement('div');nav.id='opsWorkspaceNav';nav.className='ops-workspace-nav';nav.setAttribute('role','tablist');nav.setAttribute('aria-label','হিসাব ব্যবস্থাপনা');
- panels.forEach(function(p,i){p.classList.add('ops-workspace-panel');p.id='opsWorkspacePanel'+i;p.setAttribute('role','tabpanel');var b=document.createElement('button');b.type='button';b.id='opsWorkspaceTab'+i;b.setAttribute('role','tab');b.setAttribute('aria-controls',p.id);b.textContent=names[i];b.addEventListener('click',function(){activate(i);});nav.appendChild(b);});
+ panels.forEach(function(p,i){p.classList.add('ops-workspace-panel');p.id='opsWorkspacePanel'+i;p.setAttribute('role','tabpanel');var b=document.createElement('button');b.type='button';b.id='opsWorkspaceTab'+i;b.setAttribute('role','tab');b.setAttribute('aria-controls',p.id);b.textContent=names[i];b.addEventListener('click',function(){activate(i);});b.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();var next=(i+(e.key==='ArrowRight'?1:panels.length-1))%panels.length;activate(next);nav.children[next].focus();}});nav.appendChild(b);});
  function activate(index){panels.forEach(function(p,i){p.hidden=i!==index;var b=nav.children[i];b.setAttribute('aria-selected',String(i===index));b.tabIndex=i===index?0:-1;});}
+ function showFor(target){var node=target.closest('[data-finance],[data-case]');if(!node)return;activate(node.hasAttribute('data-finance')?1:2);}
+ document.getElementById('opsFinanceRows').addEventListener('click',showFor,true);document.getElementById('opsReturns').addEventListener('click',showFor,true);
  var first=panels[0];first.parentNode.insertBefore(nav,first);first.parentNode.insertBefore(intro,first);activate(0);
+ var financeForm=document.getElementById('opsFinanceForm'),returnForm=document.getElementById('opsReturnForm');
+ var notice=document.createElement('p');notice.className='ops-workspace-hint';notice.textContent='খরচ বা জমার অঙ্ক অজানা হলে ঘর ফাঁকা রাখুন; ০ লিখবেন শুধু নিশ্চিত হলে।';financeForm.insertBefore(notice,financeForm.firstChild);
+ var retNotice=document.createElement('p');retNotice.className='ops-workspace-hint';retNotice.textContent='রিটার্ন আবেদন সংরক্ষণ করলেই টাকা ফেরত বা স্টক পরিবর্তন হয় না। পণ্য যাচাই ও প্রকৃত লেনদেন আলাদাভাবে নিশ্চিত করুন।';returnForm.insertBefore(retNotice,returnForm.firstChild);
+ function financeCheck(){var id=document.getElementById('opsFinanceOrder').value.trim();var btn=document.getElementById('opsFinanceSave');if(!id)btn.disabled=true;}financeForm.addEventListener('input',financeCheck);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);else setup();
 })();
