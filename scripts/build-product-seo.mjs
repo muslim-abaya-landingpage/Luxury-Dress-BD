@@ -35,7 +35,9 @@ for (const [category, rows] of Object.entries(catalog)) {
     if (stock.qty == null) delete schema.offers.availability;
     const crumbs = {'@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:[{ '@type':'ListItem',position:1,name:'Home',item:site+'/'},{'@type':'ListItem',position:2,name:category,item:site+'/'+category},{'@type':'ListItem',position:3,name:p.name,item:url}]};
     let html = template.replace(/data-shop-category="abaya"/g, `data-shop-category="${esc(category)}"`)
-      .replace('<html lang="en"', `<html lang="en" data-seo-managed="full" data-product-id="${esc(p.id)}"`)
+      .replace(/<html\b([^>]*)>/, (m, attrs) => `<html${attrs.replace(/\s+data-(seo-managed|product-id)="[^"]*"/g, '')} data-seo-managed="full" data-product-id="${esc(p.id)}">`)
+      // The category's own intro (its heading and copy) does not belong on a single product's page.
+      .replace(/\s*<section class="seo-category-intro"[\s\S]*?<\/section>/, '')
       .replace(/<title>[\s\S]*?<\/title>/, `<title>${esc(title)}</title>`)
       .replace(/<link rel="canonical"[^>]*>/, `<link rel="canonical" href="${url}">`)
       .replace(/<meta name="description"[^>]*>/, `<meta name="description" content="${esc(desc)}">`)
@@ -45,6 +47,8 @@ for (const [category, rows] of Object.entries(catalog)) {
       .replace(/\b(src|href)="(?!https?:|\/|#|data:)([^"\s]+)"/g, '$1="/$2"');
     // New version prevents stale immutable JS caches on the generated pages.
     for (const file of ['site-header.js','site-footer.js','category-renderer.js','site-seo.js','product-utils.js','site-footer-config.js']) html = html.replace(new RegExp(file.replace('.', '\\.')+'\\?v=[^"\\s]+', 'g'), file+'?v=20261016-ops');
+    // A product page without its id silently renders as the category list, so refuse to write one.
+    if (!html.includes(`data-product-id="${esc(p.id)}"`) || !html.includes(`<title>${esc(title)}</title>`)) throw new Error(`Product page for ${p.id} is missing its product id or title; check the category template`);
     fs.writeFileSync(path.join(root, 'product', p.id+'.html'), html);
     products.push({id:p.id,category,url});
   }
