@@ -1,0 +1,211 @@
+/* Muslim Abaya — responsive polish layer
+   Loaded after the homepage theme so responsive rules remain easy to audit. */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body.global-layout {
+  min-width: 320px;
+}
+
+/* Keep the desktop canvas focused instead of leaving oversized side gutters. */
+@media (min-width: 1200px) {
+  :root { --ah-max: 1360px; }
+
+  .home-hero,
+  .home-section,
+  .home-catnav,
+  .home-skeleton {
+    max-width: 1360px;
+  }
+
+  .home-row {
+    grid-auto-columns: calc((100% - 3 * 18px) / 4);
+    gap: 18px;
+  }
+
+  .home-section {
+    margin-top: 34px;
+    margin-bottom: 42px;
+  }
+
+  .ah-card-body {
+    padding: 15px 14px 16px;
+  }
+}
+
+/* Mid-size screens get a comfortable three-up catalog without cramped cards. */
+@media (min-width: 901px) and (max-width: 1199px) {
+  .home-row {
+    grid-auto-columns: calc((100% - 2 * 16px) / 3);
+    gap: 16px;
+  }
+
+  .home-hero,
+  .home-section,
+  .home-catnav,
+  .home-skeleton {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+/* Touch devices: avoid expensive blur layers and keep the first screen compact. */
+@media (max-width: 900px), (pointer: coarse) {
+  .home-hero-cap,
+  .home-catnav-inner,
+  .ah-card,
+  .home-row-arrow {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .home-hero-cap {
+    background: linear-gradient(0deg, rgba(0, 0, 0, .62), rgba(0, 0, 0, .12));
+  }
+
+  .ah-card {
+    box-shadow: 0 8px 24px rgba(70, 70, 70, .08), inset 0 1px rgba(255,255,255,.92);
+  }
+}
+
+@media (max-width: 700px) {
+  .home-hero {
+    margin-top: 6px;
+    margin-bottom: 10px;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .home-hero-track {
+    border-radius: 14px;
+  }
+
+  .home-hero-cap {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    max-width: none;
+    padding: 14px 15px 13px;
+    border-radius: 13px;
+  }
+
+  .home-hero-cap .head {
+    font-size: clamp(23px, 7.2vw, 31px);
+  }
+
+  .home-hero-cap .hero-btn {
+    min-height: 44px;
+    padding: 11px 19px;
+  }
+
+  .home-catnav {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .home-section {
+    margin-top: 20px;
+    margin-bottom: 28px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .home-section-head {
+    margin-bottom: 12px;
+  }
+
+  .home-section-title {
+    font-size: 16px;
+    letter-spacing: .1em;
+  }
+
+  .home-section-viewall {
+    min-height: 40px;
+    padding: 9px 13px;
+    font-size: 11px;
+  }
+
+  .home-row {
+    grid-auto-columns: calc((100% - 12px) / 2);
+    gap: 12px;
+    scroll-snap-type: x proximity;
+  }
+
+  .ah-card {
+    border-radius: 14px;
+  }
+
+  .ah-card-media {
+    margin: 5px 5px 0;
+    border-radius: 11px;
+  }
+
+  .ah-card-body {
+    padding: 11px 10px 12px;
+    gap: 5px;
+  }
+
+  .ah-card-name {
+    font-size: 13px;
+    line-height: 1.3;
+  }
+
+  .ah-card-price {
+    font-size: 15px;
+  }
+
+  .ah-card .ah-actions {
+    gap: 5px;
+    margin-top: 9px;
+  }
+
+  .ah-card .ah-btn {
+    min-height: 44px;
+    height: auto;
+    padding: 10px 6px;
+    font-size: 11px;
+  }
+
+  #main-video-section {
+    padding: 22px 10px !important;
+  }
+
+  .lux-video-wrap {
+    padding: 18px 10px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .home-section {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .home-row {
+    grid-auto-columns: calc((100% - 10px) / 2);
+    gap: 10px;
+  }
+
+  .ah-card-body {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .ah-card .ah-btn {
+    font-size: 10px;
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .home-hero-slide img,
+  .home-hero-cap,
+  .home-catnav-inner,
+  .home-section,
+  .ah-card,
+  .ah-card-media img { animation: none !important; transition: none !important; }
+}
