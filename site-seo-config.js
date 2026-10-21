@@ -54,41 +54,41 @@ window.SITE_SEO = {
   },
   categories: {
     abaya: {
-      title: "বোরখা ও আবায়া কালেকশন বাংলাদেশ | Muslim Abaya",
+      title: "Muslim Abaya | বোরখা ও আবায়া কালেকশন বাংলাদেশ",
       description:
         "বাংলাদেশে premium বোরখা ও আবায়া কিনুন। Soft fabric, modest design, বিভিন্ন size এবং সারা দেশে Cash on Delivery।"
     },
     "premium-two-piece": {
-      title: "টু-পিস ড্রেস বাংলাদেশ | Premium Two-Piece Collection",
+      title: "Muslim Abaya | টু-পিস ড্রেস বাংলাদেশ",
       description:
         "বাংলাদেশে premium টু-পিস ড্রেস কিনুন। Floral print, georgette fabric, বিভিন্ন design ও সারা দেশে Cash on Delivery।"
     },
     "cover-up": {
-      title: "মডেস্ট কভার-আপ কালেকশন বাংলাদেশ | Muslim Abaya",
+      title: "Muslim Abaya | মডেস্ট কভার-আপ কালেকশন বাংলাদেশ",
       description: "বাংলাদেশে modest cover-up collection দেখুন। আরামদায়ক design, quality fabric এবং সারা দেশে Cash on Delivery।"
     },
     "tops-kurti": {
-      title: "মেয়েদের কুর্তি ও টপস বাংলাদেশ | Muslim Abaya",
+      title: "Muslim Abaya | মেয়েদের কুর্তি ও টপস বাংলাদেশ",
       description: "বাংলাদেশে modest মেয়েদের কুর্তি ও টপস collection দেখুন। সুন্দর design, আরামদায়ক fabric এবং সারা দেশে Cash on Delivery।"
     },
     embroidery: {
-      title: "Embroidered বোরখা ও আবায়া বাংলাদেশ | Muslim Abaya",
+      title: "Muslim Abaya | Embroidered বোরখা ও আবায়া",
       description: "বাংলাদেশে embroidered বোরখা, আবায়া ও modest dress collection দেখুন। premium finishing এবং Cash on Delivery।"
     },
     karchupi: {
-      title: "কারচুপি বোরখা ও আবায়া কালেকশন | Muslim Abaya",
+      title: "Muslim Abaya | কারচুপি বোরখা ও আবায়া কালেকশন",
       description: "কারচুপি বোরখা, আবায়া ও modest fashion collection দেখুন। premium design এবং সারা বাংলাদেশে Cash on Delivery।"
     },
     kaftan: {
-      title: "Kaftan Collection বাংলাদেশ | Muslim Abaya",
+      title: "Muslim Abaya | Kaftan Collection বাংলাদেশ",
       description: "বাংলাদেশে modest kaftan collection দেখুন। আরামদায়ক design, quality fabric এবং সারা দেশে Cash on Delivery।"
     },
     hijab: {
-      title: "হিজাব কালেকশন বাংলাদেশ | Muslim Abaya",
+      title: "Muslim Abaya | হিজাব কালেকশন বাংলাদেশ",
       description: "বাংলাদেশে হিজাব ও modest fashion collection দেখুন। বিভিন্ন color, comfortable fabric এবং সারা দেশে Cash on Delivery।"
     },
     panjabi: {
-      title: "পুরুষদের পাঞ্জাবী বাংলাদেশ | Premium Panjabi",
+      title: "Muslim Abaya | পুরুষদের পাঞ্জাবী বাংলাদেশ",
       description:
         "বাংলাদেশে premium পুরুষদের পাঞ্জাবী কিনুন। Cotton fabric, full sleeve, size guide, nationwide delivery ও Cash on Delivery।"
     }
