@@ -29,3 +29,21 @@ test('shopping guide: site header/footer, no size section, three dropdown topics
   await expect(page.locator('#exchange')).not.toHaveAttribute('open', '');
   await expect(page.locator('#set')).toHaveAttribute('open', '');
 });
+
+test('dropdowns open and close smoothly (height animates) and one stays open per group', async ({ page }) => {
+  await page.route(/facebook|gtag|doubleclick|cloudflareinsights|googletagmanager|clarity|tiktok|script\.google/, (r) => r.abort());
+  await page.goto('/help.html');
+  const first = page.locator('#payment details').first();
+  const second = page.locator('#payment details').nth(1);
+  await first.locator('summary').click();
+  const mid = await first.locator('.hp-answer').evaluate((el) => el.getAnimations().length);
+  expect(mid).toBeGreaterThan(0);
+  await expect(first).toHaveAttribute('open', '');
+  await second.locator('summary').click();
+  await expect(second).toHaveAttribute('open', '');
+  await expect(first).not.toHaveAttribute('open', '', { timeout: 2000 });
+  await second.locator('summary').click();
+  await expect(second).not.toHaveAttribute('open', '', { timeout: 2000 });
+  await page.goto('/help.html#delivery');
+  await expect(page.locator('#delivery details').first()).toHaveAttribute('open', '');
+});

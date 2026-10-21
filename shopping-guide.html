@@ -22,7 +22,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="site-header.css?v=20261022-ann">
-  <link rel="stylesheet" href="help.css?v=20261022-3">
+  <link rel="stylesheet" href="help.css?v=20261022-4">
   <link rel="stylesheet" href="site-footer.css?v=20261006scroll2" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="cart-drawer.css?v=20260820fixui" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="mobile-bottom-nav.css?v=20261011-active-state" media="print" onload="this.media='all'">
@@ -101,7 +101,7 @@
       <a href="#set">Full Set / Only Abaya</a><a href="#fabric">কাপড় ও যত্ন</a><a href="#exchange">এক্সচেঞ্জ</a>
     </nav>
 
-    <div class="hp-faq sg-faq">
+    <div class="hp-faq sg-faq" data-accordion>
       <details id="set">
         <summary>Full Set ও Only Abaya-এর পার্থক্য কী?</summary>
         <div class="hp-answer">
@@ -158,11 +158,6 @@
 
   <script>
   (function () {
-    // Opening one topic closes the others; a link to #topic opens it.
-    var all = document.querySelectorAll('.sg-faq details');
-    all.forEach(function (d) { d.addEventListener('toggle', function () { if (d.open) all.forEach(function (o) { if (o !== d) o.open = false; }); }); });
-    function openFromHash() { var t = location.hash && document.getElementById(location.hash.slice(1)); if (t && t.tagName === 'DETAILS') t.open = true; }
-    window.addEventListener('hashchange', openFromHash); openFromHash();
     // Analytics: which guide links lead people onward.
     document.addEventListener('click', function (e) {
       var a = e.target.closest && e.target.closest('main a[href]'); if (!a) return;
@@ -172,6 +167,7 @@
     });
   })();
   </script>
+  <script defer src="details-smooth.js?v=20261022-1"></script>
   <script defer src="category-products.js?v=126fab2bb4752683"></script>
   <script defer src="product-links-data.js?v=16d3b6ba47d02931"></script>
   <script defer src="cart-utils.js?v=20261015-stockv2"></script>

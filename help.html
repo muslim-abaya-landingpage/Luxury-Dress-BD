@@ -22,7 +22,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="site-header.css?v=20261022-ann">
-  <link rel="stylesheet" href="help.css?v=20261022-3">
+  <link rel="stylesheet" href="help.css?v=20261022-4">
   <link rel="stylesheet" href="site-footer.css?v=20261006scroll2" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="cart-drawer.css?v=20260820fixui" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="mobile-bottom-nav.css?v=20261011-active-state" media="print" onload="this.media='all'">
@@ -105,7 +105,7 @@
       <a href="#order">অর্ডার</a><a href="#payment">পেমেন্ট</a><a href="#delivery">ডেলিভারি</a><a href="#returns">রিটার্ন ও সাইজ</a><a href="#account">অ্যাকাউন্ট</a>
     </nav>
 
-    <section class="hp-faq" id="order" aria-labelledby="faq-order">
+    <section class="hp-faq" data-accordion id="order" aria-labelledby="faq-order">
       <h2 id="faq-order">অর্ডার</h2>
       <details>
         <summary>কীভাবে অর্ডার করব?</summary>
@@ -117,7 +117,7 @@
       </details>
     </section>
 
-    <section class="hp-faq" id="payment" aria-labelledby="faq-payment">
+    <section class="hp-faq" data-accordion id="payment" aria-labelledby="faq-payment">
       <h2 id="faq-payment">পেমেন্ট</h2>
       <details>
         <summary>ক্যাশ অন ডেলিভারি আছে?</summary>
@@ -129,7 +129,7 @@
       </details>
     </section>
 
-    <section class="hp-faq" id="delivery" aria-labelledby="faq-delivery">
+    <section class="hp-faq" data-accordion id="delivery" aria-labelledby="faq-delivery">
       <h2 id="faq-delivery">ডেলিভারি</h2>
       <details>
         <summary>ডেলিভারি চার্জ কত?</summary>
@@ -141,7 +141,7 @@
       </details>
     </section>
 
-    <section class="hp-faq" id="returns" aria-labelledby="faq-returns">
+    <section class="hp-faq" data-accordion id="returns" aria-labelledby="faq-returns">
       <h2 id="faq-returns">রিটার্ন ও সাইজ</h2>
       <details>
         <summary>পণ্যে সমস্যা থাকলে কী করব?</summary>
@@ -153,7 +153,7 @@
       </details>
     </section>
 
-    <section class="hp-faq" id="account" aria-labelledby="faq-account">
+    <section class="hp-faq" data-accordion id="account" aria-labelledby="faq-account">
       <h2 id="faq-account">অ্যাকাউন্ট</h2>
       <details>
         <summary>অ্যাকাউন্ট খোলা কি জরুরি?</summary>
@@ -179,23 +179,7 @@
 
   <div id="site-footer-mount"></div>
 
-  <script>
-    // Opening one answer closes the others in the same topic, so the page stays short on phones.
-    document.querySelectorAll('.hp-faq details').forEach(function (d) {
-      d.addEventListener('toggle', function () {
-        if (!d.open) return;
-        d.parentNode.querySelectorAll('details[open]').forEach(function (o) { if (o !== d) o.open = false; });
-      });
-    });
-    // A link to #topic opens that topic's first question.
-    function openFromHash() {
-      var s = location.hash && document.querySelector('.hp-faq' + location.hash.replace(/[^#\w-]/g, ''));
-      var first = s && s.querySelector('details');
-      if (first) first.open = true;
-    }
-    window.addEventListener('hashchange', openFromHash);
-    openFromHash();
-  </script>
+  <script defer src="details-smooth.js?v=20261022-1"></script>
   <script defer src="category-products.js?v=126fab2bb4752683"></script>
   <script defer src="product-links-data.js?v=16d3b6ba47d02931"></script>
   <script defer src="cart-utils.js?v=20261015-stockv2"></script>
