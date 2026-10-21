@@ -9,12 +9,11 @@ window.CATEGORY_PRODUCTS = {
       name: "Maroon Abaya Set",
       image: "/images/Maroon Abaya Set...jpeg",
       price: 999,
-      stock: 0,
       color: "maroon",
       colorLabel: "Maroon",
       fabric: "Dubai Cherry",
       sizes: ["44", "46", "48", "50", "52", "54", "56"],
-      inStock: false,
+      inStock: true,
       priceByType: {
         "Abaya Only": 799,
         "Full Set": 999
