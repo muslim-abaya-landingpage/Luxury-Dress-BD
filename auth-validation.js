@@ -3,14 +3,15 @@
   "use strict";
 
   var doc = g.document;
-  var form = doc.getElementById("signinForm") || doc.getElementById("signupForm") || doc.getElementById("forgotForm");
-  if (!form) return;
-  var isSignup = form.id === "signupForm";
-  var isForgot = form.id === "forgotForm";
+  var FORMS = {
+    signinForm: ["si-login", "si-pass"],
+    signupForm: ["su-name", "su-mobile", "su-email", "su-pass", "su-confirm"],
+    forgotForm: ["fp-login"]
+  };
+  // The account page can hold both the sign-in and the sign-up form.
+  var forms = Object.keys(FORMS).map(function (id) { return doc.getElementById(id); }).filter(Boolean);
+  if (!forms.length) return;
   var security = g.MaSecurity || {};
-  var fields = isSignup
-    ? ["su-name", "su-mobile", "su-email", "su-pass", "su-confirm"]
-    : isForgot ? ["fp-login"] : ["si-login", "si-pass"];
 
   function valueOf(id) {
     var input = doc.getElementById(id);
@@ -118,36 +119,42 @@
     return !message;
   }
 
-  fields.forEach(function (id) {
-    var input = doc.getElementById(id);
-    if (!input) return;
-    input.addEventListener("blur", function () { validate(id, false); });
-    input.addEventListener("input", function () {
-      var field = input.closest(".am-field");
-      if (field && field.classList.contains("is-invalid")) validate(id, false);
-      if (id === "su-pass") {
-        var confirmField = doc.getElementById("su-confirm");
-        if (confirmField && confirmField.closest(".am-field").classList.contains("is-invalid")) validate("su-confirm", false);
-      }
-    });
-  });
-
-  form.addEventListener("submit", function (event) {
-    var invalid = [];
+  function bind(form) {
+    var fields = FORMS[form.id];
     fields.forEach(function (id) {
-      if (!validate(id, false)) invalid.push(id);
+      var input = doc.getElementById(id);
+      if (!input) return;
+      // Leaving an empty field (e.g. switching tabs) is not an error yet; submitting is.
+      input.addEventListener("blur", function () { if (valueOf(id).trim()) validate(id, false); });
+      input.addEventListener("input", function () {
+        var field = input.closest(".am-field");
+        if (field && field.classList.contains("is-invalid")) validate(id, false);
+        if (id === "su-pass") {
+          var confirmField = doc.getElementById("su-confirm");
+          if (confirmField && confirmField.closest(".am-field").classList.contains("is-invalid")) validate("su-confirm", false);
+        }
+      });
     });
-    if (!invalid.length) return;
 
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    invalid.forEach(function (id, index) { validate(id, index === 0); });
-    var first = doc.getElementById(invalid[0]);
-    if (first) {
-      first.focus();
-      if (typeof first.scrollIntoView === "function") {
-        first.scrollIntoView({ block: "center", behavior: g.matchMedia && g.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    form.addEventListener("submit", function (event) {
+      var invalid = [];
+      fields.forEach(function (id) {
+        if (!validate(id, false)) invalid.push(id);
+      });
+      if (!invalid.length) return;
+
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      invalid.forEach(function (id, index) { validate(id, index === 0); });
+      var first = doc.getElementById(invalid[0]);
+      if (first) {
+        first.focus();
+        if (typeof first.scrollIntoView === "function") {
+          first.scrollIntoView({ block: "center", behavior: g.matchMedia && g.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+        }
       }
-    }
-  }, true);
+    }, true);
+  }
+
+  forms.forEach(bind);
 })(window);

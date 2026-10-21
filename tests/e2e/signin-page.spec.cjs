@@ -13,7 +13,7 @@ test('wrong password shows a plain message, not a code, and keeps the user on th
   await page.goto('/signin.html');
   await expect(page).toHaveTitle('Sign in | Muslim Abaya');
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex, follow/);
-  await expect(page.locator('h1')).toHaveText('Sign in');
+  await expect(page.locator('#tab-signin')).toHaveAttribute('aria-selected', 'true');
   await page.fill('#si-login', '01712345678');
   await page.fill('#si-pass', 'wrong-pass');
   await page.click('#signinBtn');
@@ -54,8 +54,8 @@ test('sign-up: duplicate email gets a clear message on the email field; +880 mob
   await stubServer(page, (body) => { sent = Object.fromEntries(body); return { ok: false, error: 'EMAIL_EXISTS', message: 'এই ইমেইলে ইতিমধ্যে অ্যাকাউন্ট আছে।' }; });
   await page.goto('/signup.html?next=https://evil.example/');
   await expect(page).toHaveTitle('Create an account | Muslim Abaya');
-  await expect(page.locator('h1')).toHaveText('Create an account');
-  await expect(page.locator('#signinLink')).toHaveAttribute('href', /\/signin/);
+  await expect(page.locator('#tab-signup')).toHaveAttribute('aria-selected', 'true');
+  await expect(page.locator('#panel-signin')).toHaveAttribute('inert', '');
   await page.fill('#su-name', 'Ayesha Rahman');
   await page.fill('#su-mobile', '+8801712345678');
   await page.fill('#su-email', 'Ayesha@Example.com');
@@ -90,4 +90,21 @@ test('sign-up: success goes to a same-site page only', async ({ page }) => {
   await page.click('#signupBtn');
   await page.waitForURL((u) => u.pathname === '/' || u.pathname === '/index.html', { waitUntil: 'commit' });
   expect(new URL(page.url()).hostname).toBe('127.0.0.1');
+});
+
+test('sign in / sign up slide side by side without reloading, and the address follows', async ({ page }) => {
+  await stubServer(page, () => ({ ok: true }));
+  await page.goto('/signin.html?next=/checkout.html');
+  await page.evaluate(() => { window.__sameDoc = true; });
+  await expect(page.locator('.si-perks')).toHaveCount(0);
+  await page.click('#tab-signup');
+  await expect(page.locator('#authTrack')).toHaveAttribute('data-active', 'signup');
+  await expect(page).toHaveURL(/\/signup\?next=%2Fcheckout\.html$|\/signup\?next=\/checkout\.html$/);
+  await expect(page).toHaveTitle('Create an account | Muslim Abaya');
+  await expect(page.locator('#su-name')).toBeVisible();
+  await expect.poll(() => page.evaluate(() => { const r = document.getElementById('panel-signup').getBoundingClientRect(); const v = document.querySelector('.si-viewport').getBoundingClientRect(); return Math.round(r.left - v.left); })).toBeLessThan(4);
+  await page.click('#panel-signup [data-auth-tab="signin"]');
+  await expect(page.locator('#authTrack')).toHaveAttribute('data-active', 'signin');
+  await expect(page.locator('#si-login')).toBeFocused();
+  expect(await page.evaluate(() => window.__sameDoc)).toBe(true);
 });
