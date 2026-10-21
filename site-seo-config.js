@@ -54,43 +54,43 @@ window.SITE_SEO = {
   },
   categories: {
     abaya: {
-      title: "Abaya Collection | Muslim Abaya — Buy Online Bangladesh",
+      title: "বোরখা ও আবায়া কালেকশন বাংলাদেশ | Muslim Abaya",
       description:
-        "Premium abaya collection Bangladesh — soft georgette, modest styles, cash on delivery nationwide. Shop Muslim Abaya at muslimabaya.com."
+        "বাংলাদেশে premium বোরখা ও আবায়া কিনুন। Soft fabric, modest design, বিভিন্ন size এবং সারা দেশে Cash on Delivery।"
     },
     "premium-two-piece": {
-      title: "Premium Two-Piece Dress | Muslim Abaya — COD Bangladesh",
+      title: "টু-পিস ড্রেস বাংলাদেশ | Premium Two-Piece Collection",
       description:
-        "Premium two-piece modest dress collection — floral prints, georgette fabric, cash on delivery all over Bangladesh. muslimabaya.com."
+        "বাংলাদেশে premium টু-পিস ড্রেস কিনুন। Floral print, georgette fabric, বিভিন্ন design ও সারা দেশে Cash on Delivery।"
     },
     "cover-up": {
-      title: "Cover Up Collection | Muslim Abaya Bangladesh",
-      description: "Modest cover up collection — Muslim Abaya Bangladesh. Order online with cash on delivery."
+      title: "মডেস্ট কভার-আপ কালেকশন বাংলাদেশ | Muslim Abaya",
+      description: "বাংলাদেশে modest cover-up collection দেখুন। আরামদায়ক design, quality fabric এবং সারা দেশে Cash on Delivery।"
     },
     "tops-kurti": {
-      title: "Tops & Kurti | Muslim Abaya — Modest Fashion",
-      description: "Tops and kurti collection — modest fashion, COD Bangladesh. Muslim Abaya muslimabaya.com."
+      title: "মেয়েদের কুর্তি ও টপস বাংলাদেশ | Muslim Abaya",
+      description: "বাংলাদেশে modest মেয়েদের কুর্তি ও টপস collection দেখুন। সুন্দর design, আরামদায়ক fabric এবং সারা দেশে Cash on Delivery।"
     },
     embroidery: {
-      title: "Embroidery Abaya & Dress | Muslim Abaya",
-      description: "Embroidery abaya and dress collection — premium modest wear, cash on delivery Bangladesh."
+      title: "Embroidered বোরখা ও আবায়া বাংলাদেশ | Muslim Abaya",
+      description: "বাংলাদেশে embroidered বোরখা, আবায়া ও modest dress collection দেখুন। premium finishing এবং Cash on Delivery।"
     },
     karchupi: {
-      title: "Karchupi Collection | Muslim Abaya Bangladesh",
-      description: "Karchupi modest fashion collection — Muslim Abaya. Cash on delivery nationwide."
+      title: "কারচুপি বোরখা ও আবায়া কালেকশন | Muslim Abaya",
+      description: "কারচুপি বোরখা, আবায়া ও modest fashion collection দেখুন। premium design এবং সারা বাংলাদেশে Cash on Delivery।"
     },
     kaftan: {
-      title: "Kaftan Collection | Muslim Abaya Bangladesh",
-      description: "Kaftan collection — modest fashion Bangladesh. Order with COD at muslimabaya.com."
+      title: "Kaftan Collection বাংলাদেশ | Muslim Abaya",
+      description: "বাংলাদেশে modest kaftan collection দেখুন। আরামদায়ক design, quality fabric এবং সারা দেশে Cash on Delivery।"
     },
     hijab: {
-      title: "Hijab Collection | Muslim Abaya Bangladesh",
-      description: "Hijab collection — Muslim Abaya Bangladesh. Cash on delivery."
+      title: "হিজাব কালেকশন বাংলাদেশ | Muslim Abaya",
+      description: "বাংলাদেশে হিজাব ও modest fashion collection দেখুন। বিভিন্ন color, comfortable fabric এবং সারা দেশে Cash on Delivery।"
     },
     panjabi: {
-      title: "Premium White Cotton Panjabi for Men | Muslim Abaya Bangladesh",
+      title: "পুরুষদের পাঞ্জাবী বাংলাদেশ | Premium Panjabi",
       description:
-        "Buy Premium White Cotton Panjabi for Men in Bangladesh. Made from premium cotton garments fabric with full sleeves and Chinese snap buttons. Fast nationwide delivery and Cash on Delivery available."
+        "বাংলাদেশে premium পুরুষদের পাঞ্জাবী কিনুন। Cotton fabric, full sleeve, size guide, nationwide delivery ও Cash on Delivery।"
     }
   }
 };
