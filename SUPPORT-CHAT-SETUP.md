@@ -25,7 +25,7 @@ All four migrations have been applied to the existing Free Supabase project. Cus
      set display_name = excluded.display_name, active = true;
    ```
 
-4. Publish the feature branch only after reviewing the storefront widget and admin route. The live website does not change until the branch is merged/deployed. The inbox route will be `/admin-support-inbox.html` after deployment.
+4. The admin inbox is at `https://muslimabaya.com/admin-support-inbox.html`. Its password reset page is `/admin-support-reset.html`; a single exact production redirect URL has been added to Supabase Auth so recovery links return to that page.
 
 Anonymous Supabase users are persistent Auth records and Supabase does not automatically clean them up. Supabase recommends CAPTCHA/Cloudflare Turnstile for abuse prevention. This project has database-side chat/event rate limits, but Turnstile is not configured yet. Decide the support-chat retention period and configure CAPTCHA before broad public launch; do not expose an Auth secret/service-role key in the website.
 
@@ -33,7 +33,7 @@ Never put the Supabase service-role key in a browser file. The publishable key i
 
 ## Order status behaviour
 
-The **Order status** Quick Action is logged in `support_events` as `order_status_request` and opens a live conversation for an agent to answer. It does not yet search or disclose an order record automatically. The current Supabase `orders` table was present but empty when inspected; the website's order system needs a verified, privacy-safe lookup connection before automatic status responses can be added. Do not ask customers to post payment-card details or passwords in chat.
+The **Order status** action now calls the `order-status` Supabase Edge Function. It requires a signed-in anonymous visitor session, Turnstile verification, and the configured Apps Script `OrderTrack` endpoint. It returns only order ID/date/status/tracking fields and does not store submitted phone/order IDs in the chat log. If required Edge Function secrets or Supabase Auth CAPTCHA configuration are missing, lookup is not fully operational. Never ask customers to post payment-card details or passwords in chat.
 
 Customer replies are stored when sent, but there is no email/SMS notification yet. Realtime delivery is for currently connected storefront and inbox sessions; visitors who clear browser storage or switch devices may not be able to recover their anonymous thread.
 
@@ -50,11 +50,20 @@ For chat testing after deployment, open the storefront in a private/incognito se
 
 ## Order lookup and Turnstile rollout
 
-`supabase/functions/order-status/index.ts` is the Edge Function that proxies order lookup to the existing Apps Script `OrderTrack` route. It requires a verified visitor JWT and a server-side Turnstile token with action `order_status`; it returns only the order ID, date, status, courier status, and tracking value. Before it works, add `TURNSTILE_SECRET_KEY`, `ORDER_TRACK_API_URL`, and `ALLOWED_ORIGINS` as Supabase Edge Function secrets and deploy `order-status` with JWT verification enabled. Configure Supabase Auth CAPTCHA to use Cloudflare Turnstile as well. Only the public Site key belongs in `site-footer-config.js`; never place the Secret key there.
+`supabase/functions/order-status/index.ts` is deployed as `order-status` with JWT verification enabled. It proxies lookup to the existing Apps Script `OrderTrack` route, checks a server-side Turnstile token with action `order_status`, and returns only the order ID, date, status, courier status, and tracking value. For actual lookup, ensure these Edge Function secrets exist: `TURNSTILE_SECRET_KEY`, `ORDER_TRACK_API_URL`, and `ALLOWED_ORIGINS=https://muslimabaya.com`. Configure Supabase Auth CAPTCHA to use Cloudflare Turnstile if CAPTCHA is required on anonymous sign-ins. Only the public Site key belongs in `site-footer-config.js`; never place the Secret key there.
 
-The public storefront remains on its previous deployed version until the follow-up GitHub change is merged and built. Turnstile will not validate until the rotated Secret key is saved in Supabase and Auth CAPTCHA is configured.
+The order lookup UI and Edge Function source are deployed. Lookup will return `FUNCTION_NOT_CONFIGURED` until its required server-side secrets are saved in Supabase; do not publish or paste secret keys in source or chat.
 
 
 ## Admin inbox alerts
 
 In the admin inbox, select **Enable alerts** to grant this browser permission for desktop notifications; browsers require this user gesture. Select **Sound: Off** to enable/disable the short sound. Alerts are generated only for new customer messages while the inbox page is open and subscribed; this is not a background push service and does not alert if the tab/browser is closed or Realtime is disconnected. Browser notification permissions may also be blocked by OS/browser settings.
+
+
+## Admin password recovery
+
+`admin-support-reset.html` implements Supabase Auth recovery. It requests a recovery email with the exact production redirect `https://muslimabaya.com/admin-support-reset.html`, displays a generic response that does not reveal whether an email exists, and only exposes the new-password form after a valid recovery session. The new password is sent through `supabase.auth.updateUser`; no service-role key or custom password storage is used. Supabase Auth URL Configuration must continue to allow this exact redirect. The existing general `forgot-password.html` page is not used by Admin Inbox.
+
+## Admin inbox alerts code
+
+The full, copyable browser notification and sound integration is documented in [`ADMIN-INBOX-ALERTS-CODE-BN.md`](ADMIN-INBOX-ALERTS-CODE-BN.md) and runs in `admin-support-inbox.html`. It is opt-in and requires the agent's inbox tab to remain open and Realtime-connected; it is not a push-notification service.

@@ -59,6 +59,14 @@
   X-Content-Type-Options: nosniff
 
 # Admin pages must revalidate immediately after a deployment.
+/admin-support-inbox.html
+  ! Cache-Control
+  Cache-Control: no-store
+
+/admin-support-reset.html
+  ! Cache-Control
+  Cache-Control: no-store
+
 /admin-orders.html
   ! Cache-Control
   Cache-Control: public, max-age=0, s-maxage=0, must-revalidate
