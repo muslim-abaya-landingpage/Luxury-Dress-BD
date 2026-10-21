@@ -25,6 +25,7 @@ $adminTools = @(
   "product-manager.html",
   "product-links.html",
   "product-manager-admin.css",
+  "product-manager-wp.css",
   "product-links-admin.css",
   "product-manager-admin.js",
   "product-links-admin.js"
