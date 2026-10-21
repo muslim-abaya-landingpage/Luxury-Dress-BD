@@ -1,545 +1,211 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Order Help & FAQ | Muslim Abaya</title>
-  
-  <!-- SEO Meta Tags -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Help &amp; FAQ — অর্ডার, ডেলিভারি, পেমেন্ট | Muslim Abaya</title>
+  <meta name="description" content="Muslim Abaya অর্ডার সহায়তা: কীভাবে অর্ডার করবেন, ক্যাশ অন ডেলিভারি, bKash/Nagad পেমেন্ট, ঢাকায় ৳80 ও ঢাকার বাইরে ৳150 ডেলিভারি, ৩টি পণ্যে ফ্রি ডেলিভারি, রিটার্ন ও অর্ডার ট্র্যাকিং।">
   <meta name="robots" content="index, follow">
-  <meta name="description" content="Find answers to your questions about ordering, secure payment methods, delivery timelines, and returns at Muslim Abaya.">
   <link rel="canonical" href="https://muslimabaya.com/help">
-  <link rel="stylesheet" href="mobile-bottom-nav.css?v=20261011-active-state" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="mobile-bottom-nav.css?v=20261011-active-state"></noscript>
-  
-  <!-- Open Graph (Facebook/WhatsApp Sharing) -->
+  <meta name="theme-color" content="#ffffff">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Order Help & FAQ | Muslim Abaya">
-  <meta property="og:description" content="Everything you need to shop, pay, and track your Muslim Abaya order easily.">
+  <meta property="og:site_name" content="Muslim Abaya">
+  <meta property="og:locale" content="bn_BD">
+  <meta property="og:title" content="Help & FAQ | Muslim Abaya">
+  <meta property="og:description" content="অর্ডার, ডেলিভারি চার্জ, পেমেন্ট, রিটার্ন ও ট্র্যাকিং — সব প্রশ্নের উত্তর এক জায়গায়।">
   <meta property="og:url" content="https://muslimabaya.com/help">
-  <meta property="og:image" content="https://muslimabaya.com/assets/og-faq-banner.jpg">
-  
-  <!-- Icons & Favicon -->
-  <link rel="icon" href="assets/logo-muslim-abaya.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="assets/logo-muslim-abaya.svg">
-  <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
-  
-  <!-- Fonts & Stylesheets -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <meta property="og:image" content="https://muslimabaya.com/assets/brand/muslim-abaya-logo-icon-512.png">
+  <meta name="twitter:card" content="summary">
+  <link rel="icon" href="/assets/logo-muslim-abaya.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/assets/brand/muslim-abaya-logo-icon-512.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="site-header.css?v=20261022-ann">
+  <link rel="stylesheet" href="help.css?v=20261022-1">
   <link rel="stylesheet" href="site-footer.css?v=20261006scroll2" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="site-footer.css?v=20261006scroll2"></noscript>
-  <link rel="stylesheet" href="cart-drawer.css?v=20260820fixui">
-<style>
-    :root {
-      --primary-color: #111111;
-      --text-main: #111111;
-      --text-muted: #6b6b6b;
-      --border-color: #ececec;
-      --bg-card: #ffffff;
-    }
-
-    body {
-      background-color: #f9fafb;
-      margin: 0;
-      padding: 0;
-    }
-    #site-header-mount + * {
-  margin-top: 0 !important;
-}
-#site-header-mount {
-  margin-bottom: 0 !important;
-  padding-bottom: 0 !important;
-}
-
-  .help-wrap {
-  max-width: 840px;
-  margin: 0 auto; 
-  padding: 0px 20px 60px;
-  font-family: 'Inter', system-ui, sans-serif;
-}
-
-    .help-hero {
-      text-align: center;
-      margin-bottom: 40px;
-    }
-
-    .help-hero h1 {
-      margin: 0 0 12px;
-      font-size: clamp(28px, 5vw, 38px);
-      font-weight: 800;
-      color: var(--primary-color);
-      letter-spacing: -0.03em;
-    }
-
-    .help-hero p {
-      margin: 0 auto;
-      font-size: 16px;
-      line-height: 1.6;
-      color: var(--text-muted);
-      max-width: 580px;
-    }
-
-    /* Premium Section Styling */
-    .faq-section {
-      margin-bottom: 32px;
-    }
-
-    .faq-section-title {
-      font-size: 19px;
-      font-weight: 700;
-      color: var(--text-main);
-      margin: 0 0 16px 4px;
-      letter-spacing: -0.01em;
-    }
-
-    /* Premium Accordion Card */
-    .help-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 14px;
-      margin-bottom: 14px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.015);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      overflow: hidden;
-    }
-
-    .help-card:hover {
-      border-color: #cbd5e1;
-      box-shadow: 0 4px 20px rgba(17, 17, 17, 0.06);
-    }
-
-    /* Accordion Trigger Button */
-    .faq-question {
-      width: 100%;
-      text-align: left;
-      background: none;
-      border: none;
-      padding: 22px 24px;
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--text-main);
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-    }
-
-    /* CSS Pure Premium Chevron/Arrow Icon */
-    .icon-chevron {
-      width: 10px;
-      height: 10px;
-      border-bottom: 2px solid #9a9a9a;
-      border-right: 2px solid #9a9a9a;
-      transform: rotate(-45deg); /* Points Right by default */
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s;
-      flex-shrink: 0;
-      margin-right: 4px;
-    }
-
-    .help-card:hover .icon-chevron {
-      border-color: var(--primary-color);
-    }
-
-    /* Active State (When card is open) */
-    .help-card.active {
-      border-color: var(--primary-color);
-      box-shadow: 0 4px 20px rgba(17, 17, 17, 0.04);
-    }
-
-    .help-card.active .icon-chevron {
-      transform: rotate(45deg); /* Turns smoothly to point Down */
-      border-color: var(--primary-color);
-    }
-
-    /* Content Area Animation */
-    .faq-answer {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .faq-content-inner {
-      padding: 0 24px 24px;
-      color: #3d3d3d;
-      line-height: 1.75;
-      font-size: 14.5px;
-      border-top: 1px solid transparent;
-    }
-
-    /* Smooth border fade-in inside active card */
-    .help-card.active .faq-content-inner {
-      border-top-color: #f5f5f5;
-    }
-
-    .faq-content-inner p {
-      margin: 0;
-    }
-
-    .faq-content-inner ul {
-      margin: 0;
-      padding-left: 20px;
-    }
-
-    .faq-content-inner li { 
-      margin-bottom: 12px; 
-    }
-    
-    .faq-content-inner li:last-child { 
-      margin-bottom: 0; 
-    }
-
-    .faq-content-inner strong { 
-      color: var(--text-main); 
-      font-weight: 600; 
-    }
-
-    @media (max-width: 640px) {
-      .help-wrap { padding: 24px 16px 40px; }
-      .faq-question { padding: 18px 20px; font-size: 15px; }
-      .faq-content-inner { padding: 0 20px 20px; font-size: 14px; }
-    }
-
-    .delivery-info-panel {
-      margin: 0 0 34px;
-      padding: clamp(20px, 4vw, 32px);
-      border: 1px solid #e7e0d4;
-      border-radius: 18px;
-      background: linear-gradient(145deg, #fff 0%, #faf8f3 100%);
-      box-shadow: 0 8px 28px rgba(17, 17, 17, 0.045);
-    }
-    .delivery-info-kicker {
-      margin: 0 0 8px;
-      color: #8a6d39;
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-    }
-    .delivery-info-title {
-      margin: 0;
-      color: #171717;
-      font-size: clamp(22px, 4vw, 30px);
-      font-weight: 800;
-      line-height: 1.3;
-    }
-    .delivery-info-intro {
-      margin: 9px 0 20px;
-      color: #5f5b55;
-      font-size: 14px;
-      line-height: 1.7;
-    }
-    .delivery-info-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 12px;
-    }
-    .delivery-info-card {
-      min-width: 0;
-      padding: 18px 16px;
-      border: 1px solid #eee9e1;
-      border-radius: 13px;
-      background: #fff;
-    }
-    .delivery-info-card span,
-    .delivery-info-card strong { display: block; }
-    .delivery-info-card span {
-      color: #65615a;
-      font-size: 13px;
-      line-height: 1.5;
-    }
-    .delivery-info-card strong {
-      margin-top: 5px;
-      color: #171717;
-      font-size: 22px;
-      line-height: 1.25;
-    }
-    .delivery-info-card--free strong { color: #176b4d; font-size: 18px; }
-    .delivery-info-note {
-      margin: 16px 0 0;
-      color: #5f5b55;
-      font-size: 13px;
-      line-height: 1.65;
-    }
-    .delivery-info-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 20px;
-    }
-    .delivery-info-actions a {
-      display: inline-flex;
-      min-height: 44px;
-      align-items: center;
-      justify-content: center;
-      padding: 10px 16px;
-      border: 1px solid #171717;
-      border-radius: 9px;
-      color: #171717;
-      font-size: 13px;
-      font-weight: 700;
-      text-decoration: none;
-      transition: background-color .18s ease, color .18s ease, transform .18s ease;
-    }
-    .delivery-info-actions a:hover { transform: translateY(-1px); }
-    .delivery-info-actions a:focus-visible { outline: 3px solid #c9a96e; outline-offset: 3px; }
-    .delivery-info-actions .delivery-info-primary { background: #171717; color: #fff; }
-    .delivery-info-actions .delivery-info-primary:hover { background: #333; }
-    @media (max-width: 640px) {
-      .delivery-info-grid { grid-template-columns: 1fr; gap: 9px; }
-      .delivery-info-card { padding: 15px 16px; }
-      .delivery-info-card strong { font-size: 20px; }
-      .delivery-info-actions { display: grid; grid-template-columns: 1fr; }
-      .delivery-info-actions a { width: 100%; }
-    }
-    @media (max-width: 640px) {
-      /* The Help page now has direct WhatsApp and Call actions; keep the floating chat button
-         from covering the delivery cards while preserving the site's sticky bottom navigation. */
-      .help-page #maChatFab { display: none !important; }
-    }
-  </style>
-
-  <!-- Google SEO FAQ Schema Markup -->
+  <link rel="stylesheet" href="cart-drawer.css?v=20260820fixui" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="mobile-bottom-nav.css?v=20261011-active-state" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="site-footer.css?v=20261006scroll2"><link rel="stylesheet" href="cart-drawer.css?v=20260820fixui"><link rel="stylesheet" href="mobile-bottom-nav.css?v=20261011-active-state"></noscript>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
+    "@graph": [
       {
-        "@type": "Question",
-        "name": "How to place an order on Muslim Abaya?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Add items to your cart, open Checkout, fill in your name, mobile, district, thana, and full address, then tap Place Order."
-        }
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://muslimabaya.com/" },
+          { "@type": "ListItem", "position": 2, "name": "Help & FAQ", "item": "https://muslimabaya.com/help" }
+        ]
       },
       {
-        "@type": "Question",
-        "name": "Do you offer Cash on Delivery (COD)?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes, we offer Cash on Delivery across Bangladesh. You pay only when the parcel arrives at your doorstep, with no advance payment required."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What online payment options are available?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "You can pay using bKash, Nagad, or cards at checkout. Please enter your mobile wallet account number and Transaction ID exactly as shown on your payment receipt."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What are the delivery areas and charges?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "We deliver across Bangladesh. Delivery is ৳80 inside Dhaka and ৳150 outside Dhaka. Orders of 3 or more items receive free nationwide delivery. The final charge is shown at checkout after selecting the district."
-        }
+        "@type": "FAQPage",
+        "mainEntity": [
+          { "@type": "Question", "name": "কীভাবে অর্ডার করব?", "acceptedAnswer": { "@type": "Answer", "text": "পছন্দের পণ্য বেছে সাইজ ঠিক করে Add to Cart চাপুন, তারপর Checkout-এ নাম, মোবাইল নম্বর, জেলা, থানা ও পূর্ণ ঠিকানা দিয়ে Place Order চাপুন। চাইলে WhatsApp বা ফোনেও অর্ডার করতে পারেন।" } },
+          { "@type": "Question", "name": "অর্ডার কনফার্ম হয়েছে কীভাবে বুঝব?", "acceptedAnswer": { "@type": "Answer", "text": "অর্ডার দেওয়ার পর Thank You পেজ দেখাবে। আমাদের টিম যাচাই করে অর্ডার কনফার্ম করে, তারপর কুরিয়ারে পাঠায়। Track Order পেজে মোবাইল নম্বর দিয়ে অবস্থা দেখতে পারবেন।" } },
+          { "@type": "Question", "name": "ক্যাশ অন ডেলিভারি আছে?", "acceptedAnswer": { "@type": "Answer", "text": "হ্যাঁ, সারা বাংলাদেশে ক্যাশ অন ডেলিভারি আছে। পার্সেল হাতে পেয়ে টাকা দেবেন।" } },
+          { "@type": "Question", "name": "অনলাইনে কীভাবে পেমেন্ট করব?", "acceptedAnswer": { "@type": "Answer", "text": "Checkout-এ bKash, Nagad বা Card বেছে নিন। যে নম্বর থেকে টাকা পাঠিয়েছেন সেটি এবং Transaction ID রসিদে যেমন আছে ঠিক তেমন লিখুন।" } },
+          { "@type": "Question", "name": "ডেলিভারি চার্জ কত?", "acceptedAnswer": { "@type": "Answer", "text": "ঢাকার ভেতরে ৳80, ঢাকার বাইরে ৳150। একসাথে ৩টি বা তার বেশি পণ্য অর্ডার করলে সারা দেশে ডেলিভারি ফ্রি। চূড়ান্ত চার্জ Checkout-এ জেলা বাছাই করলে দেখা যায়।" } },
+          { "@type": "Question", "name": "অর্ডার কোথায় আছে কীভাবে দেখব?", "acceptedAnswer": { "@type": "Answer", "text": "Track Order পেজে অর্ডারের মোবাইল নম্বর দিন (অর্ডার আইডি থাকলে সেটিও দিতে পারেন)। জরুরি হলে WhatsApp-এ নাম ও মোবাইল নম্বরসহ মেসেজ দিন।" } },
+          { "@type": "Question", "name": "পণ্যে সমস্যা থাকলে কী করব?", "acceptedAnswer": { "@type": "Answer", "text": "পার্সেল পাওয়ার ৩ দিনের মধ্যে পরিষ্কার ছবিসহ আমাদের জানান। রিটার্ন ও রিফান্ড পলিসি অনুযায়ী দেখা হবে।" } },
+          { "@type": "Question", "name": "সঠিক সাইজ কীভাবে বাছব?", "acceptedAnswer": { "@type": "Answer", "text": "শপিং গাইডে Body ও Length সাইজের মাপ দেওয়া আছে। পণ্যের পেজে 'আমার সাইজ কোনটা?' চাপলেও সাইজ বের করতে সাহায্য পাবেন।" } },
+          { "@type": "Question", "name": "অ্যাকাউন্ট খোলা কি জরুরি?", "acceptedAnswer": { "@type": "Answer", "text": "না, অ্যাকাউন্ট ছাড়াই অর্ডার করা যায়। অ্যাকাউন্ট থাকলে পরের বার Checkout দ্রুত হয় এবং অর্ডার এক জায়গায় দেখা যায়। Sign in with Google দিয়েও এক চাপে অ্যাকাউন্ট খোলা যায়।" } },
+          { "@type": "Question", "name": "পাসওয়ার্ড ভুলে গেলে কী করব?", "acceptedAnswer": { "@type": "Answer", "text": "Sign in পেজে Forgot password চাপুন, অথবা Sign in with Google ব্যবহার করুন।" } }
+        ]
       }
     ]
   }
   </script>
-  
-  <script defer src="site-seo-config.js?v=20261022-seo2"></script>
+  <script defer src="site-seo-config.js?v=20261022-seo3"></script>
   <script defer src="site-seo.js?v=20261022-seo2"></script>
   <script defer src="config.js?v=20261009-inbox"></script>
 </head>
 <body class="help-page">
-
   <div id="site-header-mount"></div>
 
-  <main class="help-wrap">
-    <header class="help-hero">
-      <p><a href="/shopping-guide">বাংলায় সাইজ, Full Set ও কাপড় বাছাইয়ের গাইড →</a></p><h1>Order Help &amp; FAQ</h1>
-      <p>Everything you need to shop, pay, and track your Muslim Abaya order easily in plain English.</p>
+  <main class="hp">
+    <nav class="hp-crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span aria-current="page">Help &amp; FAQ</span></nav>
+
+    <header class="hp-hero">
+      <p class="hp-kicker">Help &amp; FAQ</p>
+      <h1>কীভাবে সাহায্য করতে পারি?</h1>
+      <p class="hp-lead">অর্ডার, ডেলিভারি, পেমেন্ট ও রিটার্ন — সব প্রশ্নের উত্তর এখানে। উত্তর না পেলে সরাসরি আমাদের জানান।</p>
     </header>
 
-    <section class="delivery-info-panel" aria-labelledby="delivery-info-title">
-      <p class="delivery-info-kicker">Delivery at a glance · সারা বাংলাদেশে ডেলিভারি</p>
-      <h2 class="delivery-info-title" id="delivery-info-title">Delivery areas &amp; charges <span lang="bn">ডেলিভারি এলাকা ও চার্জ</span></h2>
-      <p class="delivery-info-intro" lang="bn">আপনার জেলা নির্বাচন করলে checkout-এ ডেলিভারি চার্জ দেখানো হবে। অর্ডার নিশ্চিত করার আগে মোট খরচ দেখে নিন।</p>
-      <div class="delivery-info-grid" aria-label="Delivery charges">
-        <article class="delivery-info-card">
-          <span lang="bn">ঢাকা শহরের ভেতরে</span>
-          <strong>৳80</strong>
-        </article>
-        <article class="delivery-info-card">
-          <span lang="bn">ঢাকার বাইরে অন্যান্য জেলা</span>
-          <strong>৳150</strong>
-        </article>
-        <article class="delivery-info-card delivery-info-card--free">
-          <span lang="bn">৩ বা তার বেশি আইটেমে</span>
-          <strong lang="bn">দেশজুড়ে ফ্রি ডেলিভারি</strong>
-        </article>
-      </div>
-      <p class="delivery-info-note" lang="bn">ডেলিভারি চার্জ অর্ডারের আইটেম সংখ্যা ও নির্বাচিত জেলার ভিত্তিতে গণনা হয়; চূড়ান্ত চার্জ checkout-এর order summary-তে দেখুন।</p>
-      <div class="delivery-info-actions" aria-label="Contact and shopping actions">
-        <a class="delivery-info-primary" href="https://wa.me/8801971642683?text=Hello%2C%20I%20have%20a%20question%20about%20delivery." target="_blank" rel="noopener noreferrer">WhatsApp-এ ডেলিভারি জিজ্ঞাসা করুন</a>
-        <a href="tel:+8801971642683">কল করুন: +880 1971-642683</a>
-        <a href="/order-track">অর্ডার ট্র্যাক করুন</a>
-      </div>
+    <section class="hp-quick" aria-label="Quick help">
+      <a class="hp-tile hp-tile--wa" href="https://wa.me/8801971642683?text=%E0%A6%86%E0%A6%B8%E0%A6%B8%E0%A6%BE%E0%A6%B2%E0%A6%BE%E0%A6%AE%E0%A7%81%20%E0%A6%86%E0%A6%B2%E0%A6%BE%E0%A6%87%E0%A6%95%E0%A7%81%E0%A6%AE%2C%20%E0%A6%86%E0%A6%AE%E0%A6%BE%E0%A6%B0%20%E0%A6%8F%E0%A6%95%E0%A6%9F%E0%A6%BF%20%E0%A6%AA%E0%A7%8D%E0%A6%B0%E0%A6%B6%E0%A7%8D%E0%A6%A8%20%E0%A6%86%E0%A6%9B%E0%A7%87%E0%A5%A4" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 8.5c.2-.5.5-.5.8-.5h.5c.2 0 .4 0 .5.4l.7 1.6c.1.2 0 .4-.1.6l-.5.6c-.1.1-.2.3 0 .5.5.9 1.3 1.7 2.3 2.2.2.1.4.1.5-.1l.6-.7c.2-.2.4-.2.6-.1l1.5.7c.3.1.4.3.4.5 0 .6-.3 1.4-1 1.7-.7.3-1.6.4-3.4-.4-2-.9-3.5-2.9-3.9-3.8-.4-.9-.4-1.8-.1-2.4z" fill="currentColor"/></svg>
+        <span><strong>WhatsApp</strong><small>সবচেয়ে দ্রুত উত্তর</small></span>
+      </a>
+      <a class="hp-tile" href="tel:+8801971642683">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 6 6L15 14l5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <span><strong>কল করুন</strong><small>01971-642683</small></span>
+      </a>
+      <a class="hp-tile" href="/order-track">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="7" cy="17.5" r="1.7" fill="#fff" stroke="currentColor" stroke-width="1.6"/><circle cx="17" cy="17.5" r="1.7" fill="#fff" stroke="currentColor" stroke-width="1.6"/></svg>
+        <span><strong>অর্ডার ট্র্যাক</strong><small>মোবাইল নম্বর দিয়ে</small></span>
+      </a>
+      <a class="hp-tile" href="/shopping-guide">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17 17 4l3 3L7 20H4z M13 8l3 3 M10 11l2 2 M7 14l2 2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <span><strong>সাইজ গাইড</strong><small>সঠিক মাপ বাছুন</small></span>
+      </a>
     </section>
 
-    <!-- Section 1 -->
-    <div class="faq-section">
-      <h2 class="faq-section-title">Account &amp; Checkout</h2>
-      
-      <div class="help-card">
-        <button class="faq-question" aria-expanded="false">
-          Account Registration &amp; Sign In
-          <span class="icon-chevron"></span>
-        </button>
-        <div class="faq-answer">
-          <div class="faq-content-inner">
-            <p>Create a free account with <strong>Sign Up</strong> to save your details for faster checkout. Returning customers can use <strong>Sign In</strong> with email or mobile and password. Your name, phone, and address are stored securely for repeat orders.</p>
-          </div>
-        </div>
+    <section class="hp-delivery" aria-labelledby="hp-delivery-title">
+      <h2 id="hp-delivery-title">ডেলিভারি চার্জ</h2>
+      <div class="hp-rates">
+        <div class="hp-rate"><span>ঢাকার ভেতরে</span><strong>৳80</strong></div>
+        <div class="hp-rate"><span>ঢাকার বাইরে</span><strong>৳150</strong></div>
+        <div class="hp-rate hp-rate--free"><span>৩টি বা তার বেশি পণ্যে</span><strong>ফ্রি ডেলিভারি</strong></div>
       </div>
-    </div>
+      <p class="hp-note">সারা বাংলাদেশে ক্যাশ অন ডেলিভারি। চূড়ান্ত চার্জ Checkout-এ জেলা বাছাই করলে দেখা যাবে।</p>
+    </section>
 
-    <!-- Section 2 -->
-    <div class="faq-section">
-      <h2 class="faq-section-title">Ordering &amp; Payment</h2>
-      
-      <div class="help-card">
-        <button class="faq-question" aria-expanded="false">
-          How to Order &amp; Delivery Process
-          <span class="icon-chevron"></span>
-        </button>
-        <div class="faq-answer">
-          <div class="faq-content-inner">
-            <ul>
-              <li><strong>How to order:</strong> Add items to cart, open Checkout, fill in your name, mobile, district, thana, and full address, then tap <strong>Place Order</strong>.</li>
-              <li><strong>Order confirmation:</strong> Pending until verified; confirmed once our team checks payment or COD details.</li>
-              <li><strong>Delivery updates:</strong> After confirmation you will see a Thank You page. For urgent questions, message us on WhatsApp with your order name and mobile number.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+    <nav class="hp-topics" aria-label="FAQ topics">
+      <a href="#order">অর্ডার</a><a href="#payment">পেমেন্ট</a><a href="#delivery">ডেলিভারি</a><a href="#returns">রিটার্ন ও সাইজ</a><a href="#account">অ্যাকাউন্ট</a>
+    </nav>
 
-      <div class="help-card">
-        <button class="faq-question" aria-expanded="false">
-          Payment Methods (COD &amp; Online)
-          <span class="icon-chevron"></span>
-        </button>
-        <div class="faq-answer">
-          <div class="faq-content-inner">
-            <ul>
-              <li><strong>Cash on Delivery (COD):</strong> Pay when the parcel arrives. No advance payment required for COD orders.</li>
-              <li><strong>Online payment:</strong> Select bKash, Nagad, or card at checkout. Enter your <strong>Sender Number</strong> and <strong>Transaction ID</strong> exactly as shown on your receipt.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+    <section class="hp-faq" id="order" aria-labelledby="faq-order">
+      <h2 id="faq-order">অর্ডার</h2>
+      <details>
+        <summary>কীভাবে অর্ডার করব?</summary>
+        <div class="hp-answer"><p>পছন্দের পণ্য বেছে সাইজ ঠিক করে <strong>Add to Cart</strong> চাপুন, তারপর <strong>Checkout</strong>-এ নাম, মোবাইল নম্বর, জেলা, থানা ও পূর্ণ ঠিকানা দিয়ে <strong>Place Order</strong> চাপুন। চাইলে <a href="https://wa.me/8801971642683" target="_blank" rel="noopener">WhatsApp</a> বা ফোনেও অর্ডার করতে পারেন।</p></div>
+      </details>
+      <details>
+        <summary>অর্ডার কনফার্ম হয়েছে কীভাবে বুঝব?</summary>
+        <div class="hp-answer"><p>অর্ডার দেওয়ার পর Thank You পেজ দেখাবে। আমাদের টিম যাচাই করে অর্ডার কনফার্ম করে, তারপর কুরিয়ারে পাঠায়। <a href="/order-track">Track Order</a> পেজে মোবাইল নম্বর দিয়ে অবস্থা দেখতে পারবেন।</p></div>
+      </details>
+    </section>
 
-      <div class="help-card">
-        <button class="faq-question" aria-expanded="false">
-          Returns &amp; Defective Items
-          <span class="icon-chevron"></span>
-        </button>
-        <div class="faq-answer">
-          <div class="faq-content-inner">
-            <p>Report any faulty item within 3 days of delivery with clear photos. Requests are reviewed under our <a href="refund.html">Refund &amp; Return Policy</a>.</p>
-          </div>
-        </div>
-      </div>
-    </div>
+    <section class="hp-faq" id="payment" aria-labelledby="faq-payment">
+      <h2 id="faq-payment">পেমেন্ট</h2>
+      <details>
+        <summary>ক্যাশ অন ডেলিভারি আছে?</summary>
+        <div class="hp-answer"><p>হ্যাঁ, সারা বাংলাদেশে ক্যাশ অন ডেলিভারি আছে। পার্সেল হাতে পেয়ে টাকা দেবেন।</p></div>
+      </details>
+      <details>
+        <summary>অনলাইনে কীভাবে পেমেন্ট করব?</summary>
+        <div class="hp-answer"><p>Checkout-এ <strong>bKash</strong>, <strong>Nagad</strong> বা <strong>Card</strong> বেছে নিন। যে নম্বর থেকে টাকা পাঠিয়েছেন সেটি এবং <strong>Transaction ID</strong> রসিদে যেমন আছে ঠিক তেমন লিখুন।</p></div>
+      </details>
+    </section>
 
-    <!-- Section 3 -->
-    <div class="faq-section">
-      <h2 class="faq-section-title">Form Guides</h2>
-      
-      <div class="help-card">
-        <button class="faq-question" aria-expanded="false">
-          Sign Up — Field Guide
-          <span class="icon-chevron"></span>
-        </button>
-        <div class="faq-answer">
-          <div class="faq-content-inner">
-            <ul>
-              <li><strong>Full Name:</strong> Your real name for delivery (e.g. Nusrat Jahan).</li>
-              <li><strong>Mobile Number:</strong> 11-digit Bangladesh number (e.g. 01712345678).</li>
-              <li><strong>Email:</strong> Active email for order updates (e.g. name@gmail.com).</li>
-              <li><strong>Password:</strong> At least 8 characters with letters and numbers.</li>
-              <li><strong>Confirm Password:</strong> Must match your password exactly.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+    <section class="hp-faq" id="delivery" aria-labelledby="faq-delivery">
+      <h2 id="faq-delivery">ডেলিভারি</h2>
+      <details>
+        <summary>ডেলিভারি চার্জ কত?</summary>
+        <div class="hp-answer"><p>ঢাকার ভেতরে ৳80, ঢাকার বাইরে ৳150। একসাথে ৩টি বা তার বেশি পণ্য অর্ডার করলে সারা দেশে ডেলিভারি ফ্রি। চূড়ান্ত চার্জ Checkout-এ জেলা বাছাই করলে দেখা যায়।</p></div>
+      </details>
+      <details>
+        <summary>অর্ডার কোথায় আছে কীভাবে দেখব?</summary>
+        <div class="hp-answer"><p><a href="/order-track">Track Order</a> পেজে অর্ডারের মোবাইল নম্বর দিন (অর্ডার আইডি থাকলে সেটিও দিতে পারেন)। জরুরি হলে WhatsApp-এ নাম ও মোবাইল নম্বরসহ মেসেজ দিন।</p></div>
+      </details>
+    </section>
 
-      <div class="help-card">
-        <button class="faq-question" aria-expanded="false">
-          Sign In — Quick Guide
-          <span class="icon-chevron"></span>
-        </button>
-        <div class="faq-answer">
-          <div class="faq-content-inner">
-            <ul>
-              <li><strong>Email or Mobile:</strong> Use whichever you registered with.</li>
-              <li><strong>Password:</strong> Enter your account password and tap Sign In.</li>
-            </ul>
-          </div>
-        </div>
+    <section class="hp-faq" id="returns" aria-labelledby="faq-returns">
+      <h2 id="faq-returns">রিটার্ন ও সাইজ</h2>
+      <details>
+        <summary>পণ্যে সমস্যা থাকলে কী করব?</summary>
+        <div class="hp-answer"><p>পার্সেল পাওয়ার <strong>৩ দিনের মধ্যে</strong> পরিষ্কার ছবিসহ আমাদের জানান। <a href="/refund">রিটার্ন ও রিফান্ড পলিসি</a> অনুযায়ী দেখা হবে।</p></div>
+      </details>
+      <details>
+        <summary>সঠিক সাইজ কীভাবে বাছব?</summary>
+        <div class="hp-answer"><p><a href="/shopping-guide">শপিং গাইডে</a> Body ও Length সাইজের মাপ দেওয়া আছে। পণ্যের পেজে <strong>আমার সাইজ কোনটা?</strong> চাপলেও সাইজ বের করতে সাহায্য পাবেন।</p></div>
+      </details>
+    </section>
+
+    <section class="hp-faq" id="account" aria-labelledby="faq-account">
+      <h2 id="faq-account">অ্যাকাউন্ট</h2>
+      <details>
+        <summary>অ্যাকাউন্ট খোলা কি জরুরি?</summary>
+        <div class="hp-answer"><p>না, অ্যাকাউন্ট ছাড়াই অর্ডার করা যায়। অ্যাকাউন্ট থাকলে পরের বার Checkout দ্রুত হয় এবং অর্ডার এক জায়গায় দেখা যায়। <a href="/signup">Sign up</a> পেজে <strong>Sign in with Google</strong> দিয়েও এক চাপে অ্যাকাউন্ট খোলা যায়।</p></div>
+      </details>
+      <details>
+        <summary>পাসওয়ার্ড ভুলে গেলে কী করব?</summary>
+        <div class="hp-answer"><p><a href="/signin">Sign in</a> পেজে <strong>Forgot password</strong> চাপুন, অথবা Sign in with Google ব্যবহার করুন।</p></div>
+      </details>
+    </section>
+
+    <section class="hp-contact" aria-labelledby="hp-contact-title">
+      <div>
+        <h2 id="hp-contact-title">আর কোনো প্রশ্ন?</h2>
+        <p>WhatsApp বা ফোনে আমাদের জানান, আমরা সাহায্য করব।</p>
       </div>
-    </div>
+      <div class="hp-contact-actions">
+        <a class="hp-btn hp-btn--dark" href="https://wa.me/8801971642683" target="_blank" rel="noopener">WhatsApp-এ মেসেজ দিন</a>
+        <a class="hp-btn" href="tel:+8801971642683">কল করুন</a>
+      </div>
+    </section>
   </main>
 
   <div id="site-footer-mount"></div>
 
-  <!-- JavaScript for Smooth Accordion & Chevron Rotation -->
   <script>
-    document.querySelectorAll('.faq-question').forEach(button => {
-      button.addEventListener('click', () => {
-        const card = button.parentElement;
-        const answer = button.nextElementSibling;
-        const isExpanded = button.getAttribute('aria-expanded') === 'true';
-
-        // Close other open items
-        document.querySelectorAll('.help-card').forEach(otherCard => {
-          if (otherCard !== card) {
-            otherCard.classList.remove('active');
-            otherCard.querySelector('.faq-answer').style.maxHeight = null;
-            otherCard.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
-          }
-        });
-
-        // Toggle current item
-        if (isExpanded) {
-          button.setAttribute('aria-expanded', 'false');
-          card.classList.remove('active');
-          answer.style.maxHeight = null;
-        } else {
-          button.setAttribute('aria-expanded', 'true');
-          card.classList.add('active');
-          answer.style.maxHeight = answer.scrollHeight + "px";
-        }
+    // Opening one answer closes the others in the same topic, so the page stays short on phones.
+    document.querySelectorAll('.hp-faq details').forEach(function (d) {
+      d.addEventListener('toggle', function () {
+        if (!d.open) return;
+        d.parentNode.querySelectorAll('details[open]').forEach(function (o) { if (o !== d) o.open = false; });
       });
     });
- </script>
-
-<script>
-  // ফাঁকা জায়গা চিরতরে দূর করার ম্যাজিক ট্রিক
-  window.addEventListener('DOMContentLoaded', () => {
-    const headerMount = document.getElementById('site-header-mount');
-    if (headerMount) {
-      headerMount.style.marginBottom = '0px';
-      headerMount.style.paddingBottom = '0px';
+    // A link to #topic opens that topic's first question.
+    function openFromHash() {
+      var s = location.hash && document.querySelector('.hp-faq' + location.hash.replace(/[^#\w-]/g, ''));
+      var first = s && s.querySelector('details');
+      if (first) first.open = true;
     }
-  });
-</script>
-
-<script defer src="category-products.js?v=126fab2bb4752683"></script>
-<script defer src="product-links-data.js?v=16d3b6ba47d02931"></script>
-<script defer src="cart-utils.js?v=20261015-stockv2"></script>
-<script defer src="cart-toast.js?v=20260603cartqty"></script>
-<script defer src="cart-drawer.js?v=20261006cart1"></script>
-<script defer src="site-header-config.js?v=20261016-ops"></script>
-<script defer src="site-header.js?v=20261022-seo2"></script>
-<script defer src="site-api-config.js?v=20261009-inbox"></script>
-<script defer src="site-footer-config.js?v=20261015-organic1"></script>
-<script defer src="site-footer.js?v=20261015-organic1"></script>
-<script defer src="mobile-bottom-nav.js?v=20261011-active-state"></script>
+    window.addEventListener('hashchange', openFromHash);
+    openFromHash();
+  </script>
+  <script defer src="category-products.js?v=126fab2bb4752683"></script>
+  <script defer src="product-links-data.js?v=16d3b6ba47d02931"></script>
+  <script defer src="cart-utils.js?v=20261015-stockv2"></script>
+  <script defer src="cart-toast.js?v=20260603cartqty"></script>
+  <script defer src="cart-drawer.js?v=20261006cart1"></script>
+  <script defer src="site-header-config.js?v=20261016-ops"></script>
+  <script defer src="site-header.js?v=20261022-seo3"></script>
+  <script defer src="site-api-config.js?v=20261022-social2"></script>
+  <script defer src="site-footer-config.js?v=20261015-organic1"></script>
+  <script defer src="site-footer.js?v=20261015-organic1"></script>
+  <script defer src="mobile-bottom-nav.js?v=20261011-active-state"></script>
 </body>
-  </html>
+</html>

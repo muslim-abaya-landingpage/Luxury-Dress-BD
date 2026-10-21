@@ -1,6 +1,6 @@
 (function () {
   var GTM_ID = 'GTM-ML7RL6BR';
-  var SEO_VER = '20261022-seo2';
+  var SEO_VER = '20261022-seo3';
   var HEADER_CFG = window.SITE_HEADER_CONFIG || {};
 
   var TOP_BAR_FACEBOOK_FALLBACK =

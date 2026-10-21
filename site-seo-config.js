@@ -35,9 +35,9 @@ window.SITE_SEO = {
         "Muslim Abaya সম্পর্কে জানুন — বাংলাদেশে প্রিমিয়াম আবায়া ও মডেস্ট ফ্যাশন। ক্যাশ অন ডেলিভারি, সারাদেশে শিপিং।"
     },
     "/help": {
-      title: "Order Help & FAQ | Muslim Abaya",
+      title: "Help & FAQ — অর্ডার, ডেলিভারি, পেমেন্ট | Muslim Abaya",
       description:
-        "অর্ডার, ডেলিভারি, পেমেন্ট ও রিটার্ন সহায়তা — Muslim Abaya (muslimabaya.com)।"
+        "Muslim Abaya অর্ডার সহায়তা: কীভাবে অর্ডার করবেন, ক্যাশ অন ডেলিভারি, bKash/Nagad পেমেন্ট, ঢাকায় ৳80 ও ঢাকার বাইরে ৳150 ডেলিভারি, ৩টি পণ্যে ফ্রি ডেলিভারি, রিটার্ন ও অর্ডার ট্র্যাকিং।"
     },
     "/video": {
       title: "Product Videos | Muslim Abaya",
