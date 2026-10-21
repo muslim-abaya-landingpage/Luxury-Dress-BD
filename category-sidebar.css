@@ -2855,3 +2855,7 @@ body.pqv-sc-open {
   .pqv-is-oos .pqv-soldout-ribbon { font-size: 18px; padding: 11px 6px; }
   .premium-card.is-oos .img-wrap::after { font-size: 12px; padding: 7px 4px; letter-spacing: .14em; }
 }
+
+/* Product names on cards: no underline (owner preference), only a colour change on hover. */
+.premium-card .card-title-btn, .premium-card .card-title-btn:hover, .premium-card .card-title-btn:focus { text-decoration: none !important; }
+.premium-card .card-title-btn:hover { color: #000; }

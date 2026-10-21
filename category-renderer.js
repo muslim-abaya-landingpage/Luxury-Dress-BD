@@ -3735,6 +3735,7 @@ return;
     "class='shop-sidebar'",
     "class='shop-sidebar' id='shopFilterPanel'"
   );
+  var shopTitleTag = document.documentElement.hasAttribute('data-product-id') ? 'h2' : 'h1';
   var crumbs = shopBreadcrumbVariants(breadcrumb);
   root.innerHTML =
   crumbs.mobile +
@@ -3753,9 +3754,10 @@ return;
     "<div class='shop-layout'>" +
     "<div class='shop-sidebar-col'>" + crumbs.desktop + sidebarHtml + "</div>" +
     "<section class='shop-main'>" +
-    "<div class='shop-top'><h2 class='shop-title'>" +
+    // The category name is the page's main heading; on a product page the product name is.
+    "<div class='shop-top'><" + shopTitleTag + " class='shop-title'>" +
     escapeHtml(title) +
-    "</h2><span class='shop-count' id='shopCount' hidden>" +
+    "</" + shopTitleTag + "><span class='shop-count' id='shopCount' hidden>" +
     products.length +
    " items</span></div>" +
 "<div class='product-grid" + (detailMode ? " product-grid-detail" : "") + "' id='productGrid'>" +
