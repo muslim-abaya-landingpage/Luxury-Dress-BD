@@ -14,7 +14,7 @@
   <title>Admin Dashboard | Muslim Abaya</title>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="admin.css?v=20260929modern1">
-  <link rel="stylesheet" href="admin-dash.css?v=20261018dashboard">
+  <link rel="stylesheet" href="admin-dash.css?v=20261021-1">
 <script src="config.js?v=20261009-inbox"></script>
   <link rel="stylesheet" href="admin-sidebar.css?v=20261003sb">
 
@@ -115,7 +115,7 @@
             <div><h3 id="admTasksHeading">আগে যে অর্ডারগুলো দেখবেন</h3><small id="admTaskState" role="status" aria-live="polite">অর্ডার যাচাই হচ্ছে…</small></div>
             <button type="button" class="adm-btn adm-btn-secondary" id="admTasksRefresh">রিফ্রেশ</button>
           </div>
-          <div class="adm-task-summary"><span>Pending <b id="admTaskPendingCount">—</b></span><span>Overdue <b id="admTaskOverdueCount">—</b></span><small id="admTaskScope"></small></div>
+          <div class="adm-task-summary"><span>Pending <b id="admTaskPendingCount">—</b></span><span>দেরি হয়েছে <b id="admTaskOverdueCount">—</b></span><small id="admTaskScope"></small></div>
           <div id="admPriorityTasks" aria-live="polite"><div class="adm-feature-empty">প্রায়োরিটি টাস্ক লোড হচ্ছে…</div></div>
         </section>
 
@@ -178,8 +178,8 @@
   <script src="admin-guard.js?v=20261010-speed"></script>
   <script src="admin-invoice.js?v=20261009-inbox"></script>
   <script src="admin-order-insights.js?v=20261021-2"></script>
-  <script src="admin-dashboard-logic.js?v=20261018-1"></script>
-  <script src="admin-dashboard-features.js?v=20261021-3"></script>
+  <script src="admin-dashboard-logic.js?v=20261021-1"></script>
+  <script src="admin-dashboard-features.js?v=20261021-4"></script>
   <script>
     (function () {
       var session = null;

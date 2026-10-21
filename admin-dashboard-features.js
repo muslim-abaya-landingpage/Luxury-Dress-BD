@@ -96,7 +96,7 @@
     byId("admStockAlertCount").textContent = tracked.length.toLocaleString("en-US");
     byId("admStockAlertCount").classList.toggle("is-danger", out.length > 0);
     if (!tracked.length) {
-      node.innerHTML = '<div class="adm-feature-empty">স্টক threshold-এর নিচে নেই। (ডিফল্ট threshold ' + escapeHtml(defaultThreshold || 5) + ')</div>';
+      node.innerHTML = '<div class="adm-feature-empty">কোনো পণ্যের স্টক সতর্কসীমার নিচে নেই। (সাধারণ সতর্কসীমা: ' + escapeHtml(defaultThreshold || 5) + 'টি)</div>';
       return tracked;
     }
     node.innerHTML = tracked.slice(0, 6).map(function (item) {
@@ -104,7 +104,7 @@
       return '<a class="adm-alert-item ' + (isOut ? "is-danger" : "is-warning") + '" href="stock-analytics.html">' +
         '<span class="adm-alert-mark" aria-hidden="true">' + (isOut ? "!" : "↓") + '</span>' +
         '<span class="adm-alert-copy"><b>' + escapeHtml(item.productName || item.productId || "প্রোডাক্ট") + (item.variant ? " · " + escapeHtml(item.variant) : "") + '</b>' +
-        '<small>' + (isOut ? "স্টক শেষ" : "কম স্টক") + " · আছে " + escapeHtml(item.available) + " · threshold " + escapeHtml(item.threshold == null ? defaultThreshold || 5 : item.threshold) + '</small></span></a>';
+        '<small>' + (isOut ? "স্টক শেষ" : "কম স্টক") + " · আছে " + escapeHtml(item.available) + " · সতর্কসীমা " + escapeHtml(item.threshold == null ? defaultThreshold || 5 : item.threshold) + '</small></span></a>';
     }).join("") + (tracked.length > 6 ? '<a class="adm-feature-more" href="stock-analytics.html">আরও ' + (tracked.length - 6) + 'টি দেখুন →</a>' : "");
     return tracked;
   }
@@ -119,11 +119,11 @@
     byId("admInboxAlertCount").textContent = count.toLocaleString("en-US");
     byId("admInboxAlertCount").classList.toggle("is-danger", count > 0);
     if (!count) {
-      node.innerHTML = '<div class="adm-feature-empty">এখন কোনো অপঠিত conversation নেই।</div>';
+      node.innerHTML = '<div class="adm-feature-empty">এখন কোনো অপঠিত মেসেজ নেই।</div>';
       return unread;
     }
     if (!unread.length) {
-      node.innerHTML = '<a class="adm-alert-item is-warning" href="admin-inbox.html"><span class="adm-alert-mark" aria-hidden="true">✉</span><span class="adm-alert-copy"><b>' + count + 'টি অপঠিত conversation</b><small>সরাসরি ইনবক্সে দেখুন</small></span></a>';
+      node.innerHTML = '<a class="adm-alert-item is-warning" href="admin-inbox.html"><span class="adm-alert-mark" aria-hidden="true">✉</span><span class="adm-alert-copy"><b>' + count + 'টি কথোপকথনে অপঠিত মেসেজ</b><small>সরাসরি ইনবক্সে দেখুন</small></span></a>';
       return unread;
     }
     node.innerHTML = unread.slice(0, 5).map(function (contact) {
@@ -203,7 +203,7 @@
     node.innerHTML = tasks.slice(0, 10).map(function (task) {
       var order = task.order;
       var className = task.overdue ? "is-overdue" : (task.dateUnknown ? "is-unknown" : "is-open");
-      var stateText = task.overdue ? AdminDashboardLogic.formatOverdue(task.overdueMs) : (task.dateUnknown ? "তারিখ যাচাই দরকার" : (task.status === "pending" ? "Pending · " + ageLabel(task) : ""));
+      var stateText = task.overdue ? AdminDashboardLogic.formatOverdue(task.overdueMs) : (task.dateUnknown ? "তারিখ যাচাই দরকার" : (task.status === "pending" ? "অপেক্ষমাণ · " + ageLabel(task) : ""));
       var taskHref = task.orderId ? "admin-order.html?id=" + encodeURIComponent(task.orderId) : "admin-orders.html";
       return '<div class="adm-task-row ' + className + '"><span class="adm-task-priority" aria-hidden="true"></span>' +
         '<div class="adm-task-main"><b>' + escapeHtml(order.name || "গ্রাহক") + ' · #' + escapeHtml(task.orderId || "—") + '</b>' +
@@ -220,7 +220,7 @@
     return MaAdmin.call("AdminOrderList", { Limit: TASK_LIMIT }).then(function (result) {
       renderTasks(result);
       state.lastTaskRefresh = Date.now();
-      setStatus("admTaskState", "সর্বশেষ যাচাই " + dateTimeDhaka() + " · Pending ≥ ১ ঘণ্টা, Confirmed ≥ ২৪ ঘণ্টা, Shipped ≥ ৪৮ ঘণ্টা overdue", false);
+      setStatus("admTaskState", "সর্বশেষ যাচাই " + dateTimeDhaka() + " · দেরি ধরা হয়: Pending ১ ঘণ্টা, Confirmed ২৪ ঘণ্টা, Shipped ৪৮ ঘণ্টা পার হলে", false);
     }).catch(function (error) {
       setStatus("admTaskState", errorText(error), true);
       byId("admPriorityTasks").innerHTML = '<div class="adm-feature-error" role="alert">' + escapeHtml(errorText(error)) + ' <button type="button" id="admRetryTasks">আবার চেষ্টা করুন</button></div>';

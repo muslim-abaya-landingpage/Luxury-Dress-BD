@@ -90,11 +90,11 @@
 
   function formatOverdue(ms) {
     var minutes = Math.max(0, Math.floor(Number(ms || 0) / 60000));
-    if (minutes === 0) return "এখনই overdue";
-    if (minutes < 60) return minutes + " মিনিট overdue";
+    if (minutes === 0) return "এইমাত্র সময় পার হয়েছে";
+    if (minutes < 60) return minutes + " মিনিট দেরি";
     var hours = Math.floor(minutes / 60);
-    if (hours < 24) return hours + " ঘণ্টা overdue";
-    return Math.floor(hours / 24) + " দিন overdue";
+    if (hours < 24) return hours + " ঘণ্টা দেরি";
+    return Math.floor(hours / 24) + " দিন দেরি";
   }
 
   return {

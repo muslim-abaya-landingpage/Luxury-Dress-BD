@@ -76,7 +76,7 @@
 .adm-topbar-actions :focus-visible,.dz-actions a:focus-visible,.dz-orders-head a:focus-visible,.dz-row-actions a:focus-visible,.dz-row-actions button:focus-visible,.dz-error button:focus-visible{outline:3px solid #d4a72c;outline-offset:3px}
 @media (max-width:1200px){.dz-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:980px){.dz-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.dz-grid{grid-template-columns:1fr}}
-@media (max-width:720px){.dz-order{grid-template-columns:42px 1fr auto;gap:10px}.dz-items{display:none}.dz-order .dz-st,.dz-order .dz-row-actions{grid-column:2 / -1}.dz-hero{padding:20px}.dz-hero h2{font-size:21px}.adm-topbar-actions{gap:8px}.adm-sync{max-width:210px}.dz-card{padding:16px}}
+@media (max-width:720px){.dz-order{grid-template-columns:42px 1fr auto;gap:10px}.dz-items{display:none}.dz-order .dz-st,.dz-order .dz-row-actions{grid-column:2 / -1}.dz-order .dz-who{grid-column:2 / -1;min-width:0}.dz-order .dz-amt{grid-column:2 / -1;text-align:left}.dz-order .dz-st{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.dz-hero{padding:20px}.dz-hero h2{font-size:21px}.adm-topbar-actions{gap:8px}.adm-sync{max-width:210px}.dz-card{padding:16px}}
 @media (max-width:400px){.dz-kpis{grid-template-columns:1fr}.dz-today{gap:16px}.adm-sync{font-size:11px}}
 @media (prefers-reduced-motion:reduce){.dz-skel{animation:none}.dz-actions a{transition:none}}
 
