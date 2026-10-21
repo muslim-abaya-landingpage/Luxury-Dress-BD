@@ -766,3 +766,11 @@
   .home-section-title { font-size: 13px; }
   .home-skeleton .sk-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* Out of stock: obvious at a glance on home cards */
+.ah-card-oos .ah-card-media::after{content:"STOCK OUT";position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);background:rgba(185,28,28,.92);color:#fff;text-align:center;font:700 15px/1 var(--ah-sans,system-ui,sans-serif);letter-spacing:.22em;padding:11px 0;z-index:3;pointer-events:none}
+.ah-card-oos .ah-card-media img{filter:grayscale(70%) brightness(.9)}
+.ah-card-badge.ah-card-badge-oos{background:#b91c1c;color:#fff}
+.ah-card-stock.is-oos{color:#b91c1c;background:#fdecec;border-color:#f5c2c2;font-weight:700}
+.ah-card-oos .ah-card-price{text-decoration:line-through}
+@media (max-width:600px){.ah-card-oos .ah-card-media::after{font-size:12px;padding:8px 0;letter-spacing:.16em}}

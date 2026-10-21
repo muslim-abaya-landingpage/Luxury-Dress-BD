@@ -2817,3 +2817,41 @@ body.pqv-sc-open {
   .availability-filter-list { grid-template-columns:1fr 1fr; gap:8px; }
   .availability-filter-option { min-height:44px; padding:9px; }
 }
+
+/* ===== Out of stock: impossible to miss (2026-10-22) ===== */
+/* Product cards: dark "STOCK OUT" band across the photo, red badge */
+.premium-card.is-oos .img-wrap { position: relative; }
+.premium-card.is-oos .img-wrap::after {
+  content: "STOCK OUT";
+  position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%);
+  padding: 10px 6px; background: rgba(20, 20, 20, .82); color: #fff;
+  font: 700 15px/1.2 "Inter", system-ui, sans-serif; letter-spacing: .18em; text-align: center; pointer-events: none;
+}
+.premium-card.is-oos .product-soldout-badge { background: #c0392b !important; color: #fff !important; }
+.premium-card.is-oos .card-price { color: #8a8a8a; text-decoration: line-through; }
+
+/* Product page / quick view */
+.pqv-oos-banner { display: none; }
+.pqv-is-oos .pqv-oos-banner {
+  display: flex; flex-direction: column; gap: 4px; margin: 10px 0 14px; padding: 12px 14px;
+  border: 1px solid #f1c4bf; border-left: 4px solid #c0392b; border-radius: 6px; background: #fdf2f1; color: #7a1d14;
+}
+.pqv-is-oos .pqv-oos-banner strong { font-size: 16px; letter-spacing: .01em; }
+.pqv-is-oos .pqv-oos-banner span { font-size: 14px; line-height: 1.55; color: #5c2a24; }
+.pqv-soldout-ribbon { display: none; }
+.pqv-is-oos .pqv-main { position: relative; }
+.pqv-is-oos .pqv-soldout-ribbon {
+  display: block; position: absolute; z-index: 3; left: 0; right: 0; top: 50%; transform: translateY(-50%);
+  padding: 14px 8px; background: rgba(20, 20, 20, .82); color: #fff; text-align: center;
+  font: 700 22px/1.2 "Inter", system-ui, sans-serif; letter-spacing: .22em; pointer-events: none;
+}
+.pqv-is-oos .pqv-zoom-img { filter: grayscale(35%); opacity: .7; }
+.pqv-is-oos .pqv-price { color: #8a8a8a; text-decoration: line-through; }
+.pqv-is-oos .pqv-options, .pqv-is-oos .pqv-qty { opacity: .45; pointer-events: none; }
+.pqv-is-oos .pqv-stock.is-oos { background: #c0392b !important; color: #fff !important; border-color: #c0392b !important; font-weight: 700; }
+.pqv-is-oos .pqv-act-cart[disabled] { background: #f3f3f3 !important; color: #c0392b !important; border-color: #e3b5b0 !important; font-weight: 700; opacity: 1 !important; cursor: not-allowed; }
+.pqv-is-oos .pqv-act-buy[disabled] { display: none !important; }
+@media (max-width: 640px) {
+  .pqv-is-oos .pqv-soldout-ribbon { font-size: 18px; padding: 11px 6px; }
+  .premium-card.is-oos .img-wrap::after { font-size: 12px; padding: 7px 4px; letter-spacing: .14em; }
+}

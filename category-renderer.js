@@ -2129,7 +2129,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
      (!isTwoPiece && !isPanjabi && sizes.length > 1));
   var wholesaleHtml = showWholesale ? buildPqvWholesaleSectionHtml(sizes, idx, isAbaya) : "";
   return (
-    '<div class="pqv-muslim-abaya">' +
+    '<div class="pqv-muslim-abaya' + (stock.inStock ? "" : " pqv-is-oos") + '">' +
     '<div class="pqv-top">' +
     '<div class="pqv-gallery">' +
     '<div class="pqv-thumbs">' +
@@ -2139,6 +2139,8 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     '<div class="pqv-main pqv-zoom-stage">' +
     '<button type="button" class="pqv-nav pqv-nav-prev" data-pqv-nav="prev" aria-label="Previous image" hidden>' +
     '<span aria-hidden="true">&#10094;</span></button>' +
+    // Shown only when the product is out of stock (CSS: .pqv-is-oos).
+    '<span class="pqv-soldout-ribbon" aria-hidden="true">STOCK OUT</span>' +
     '<img id="pqvMainImg" class="pqv-zoom-img" src="' +
     imgSrc +
     '" alt="' +
@@ -2160,6 +2162,10 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     '">' +
     priceText +
     "</p>" +
+    '<div class="pqv-oos-banner" role="status">' +
+    '<strong>Out of Stock · এই পণ্যটি এখন স্টকে নেই</strong>' +
+    '<span>এই মুহূর্তে অর্ডার নেওয়া যাচ্ছে না। নতুন স্টক কবে আসবে জানতে নিচের <b>Send Message</b> বাটনে আমাদের জানান।</span>' +
+    "</div>" +
     (shortNoteRaw
       ? '<p class="pqv-note">' + escapeHtml(shortNoteRaw) + "</p>"
       : "") +
@@ -3855,7 +3861,26 @@ function refreshVisibleShopStockCards() {
     if (buyButton) buyButton.disabled = !status.inStock;
   });
 }
+// The open product page / quick view follows live stock changes too (stock-sync runs after first paint).
+function refreshOpenProductPanels() {
+  var products = shopCartCtx && shopCartCtx.products;
+  if (!Array.isArray(products)) return;
+  Array.prototype.forEach.call(document.querySelectorAll(".pqv-muslim-abaya"), function (root) {
+    var btn = root.querySelector(".pqv-act-cart[data-product-idx]:not(.pqv-wholesale-add)");
+    var product = btn && products[parseInt(btn.getAttribute("data-product-idx"), 10)];
+    if (!product) return;
+    var status = productStockStatus(product);
+    root.classList.toggle("pqv-is-oos", !status.inStock);
+    var stockEl = root.querySelector(".pqv-stock");
+    if (stockEl) { stockEl.classList.toggle("is-oos", !status.inStock); stockEl.textContent = status.label; }
+    btn.disabled = !status.inStock;
+    btn.textContent = status.buttonLabel;
+    var buy = root.querySelector(".pqv-act-buy");
+    if (buy) buy.disabled = !status.inStock;
+  });
+}
 window.addEventListener("ma:stock-updated", refreshVisibleShopStockCards);
+window.addEventListener("ma:stock-updated", refreshOpenProductPanels);
 
 scheduleShopCategoryBoot();
 window.addEventListener("load", function () {
