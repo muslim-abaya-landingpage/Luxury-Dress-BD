@@ -34,6 +34,10 @@ window.SITE_SEO = {
       description:
         "Muslim Abaya সম্পর্কে জানুন — বাংলাদেশে প্রিমিয়াম আবায়া ও মডেস্ট ফ্যাশন। ক্যাশ অন ডেলিভারি, সারাদেশে শিপিং।"
     },
+    "/shopping-guide": {
+      title: "বোরকা ও আবায়ার সাইজ গাইড — Body, Length, Full Set | Muslim Abaya",
+      description: "বোরকা/আবায়ার সঠিক সাইজ বাছুন: বুক (Body 42/44/46) ও লম্বা (Length 50–56) কীভাবে মাপবেন, Full Set ও Only Abaya-র পার্থক্য, কাপড়ের যত্ন ও সাইজ না মিললে কী করবেন।"
+    },
     "/help": {
       title: "Help & FAQ — অর্ডার, ডেলিভারি, পেমেন্ট | Muslim Abaya",
       description:
