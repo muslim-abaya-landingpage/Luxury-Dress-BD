@@ -1,30 +1,31 @@
 /**
  * প্রোডাক্ট ডেটা — product-manager.html থেকে এডিট করুন
- * আপডেট: 2026-10-17
+ * আপডেট: 2026-10-21
  */
 window.CATEGORY_PRODUCTS = {
   abaya: [
     {
       id: "ABY-MAROON-1",
-      dateAdded: "2026-05-28",
       name: "Maroon Abaya Set",
       image: "/images/Maroon Abaya Set...jpeg",
       price: 999,
+      stock: 0,
       color: "maroon",
       colorLabel: "Maroon",
       fabric: "Dubai Cherry",
       sizes: ["44", "46", "48", "50", "52", "54", "56"],
+      inStock: false,
       priceByType: {
         "Abaya Only": 799,
         "Full Set": 999
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-05-28"
     },
     {
       id: "ABY-BLK-3P-02",
-      dateAdded: "2026-07-06",
       name: "Premium Black 3 Part Abaya Set",
       image: "/images/premium-black-3-part-abaya-set-muslim-abaya-bd.webp",
       price: 1450,
@@ -39,11 +40,11 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-06"
     },
     {
       id: "ABY-BLACK-3",
-      dateAdded: "2026-05-28",
       name: "Premium Black Gold Stone Work Abaya Set",
       image: "/images/premium-black-gold-stone-work-abaya-1080x1350.webp",
       price: 1650,
@@ -57,11 +58,11 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-05-28"
     },
     {
       id: "ABY-BLACK-4",
-      dateAdded: "2026-07-17",
       name: "Premium Black Silver Stone Work Abaya Set",
       image: "/images/premium-black-silver-stone-work-abaya-1080x1350.webp",
       price: 1650,
@@ -75,11 +76,11 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-17"
     },
     {
       id: "ABY-BLACK-6",
-      dateAdded: "2026-07-17",
       name: "Black Abaya Set - Side",
       image: "/images/Black.jpeg",
       price: 999,
@@ -93,11 +94,11 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-17"
     },
     {
       id: "ABY-White-7",
-      dateAdded: "2026-09-13",
       name: "Safa Sate",
       image: "/images/aby-versace-7-1789238735544.webp",
       images: ["/images/aby-white-7-1789241666830-g1.webp", "/images/gallery/aby-white-7-1790646669386-g2.webp"],
@@ -113,11 +114,11 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-09-13"
     },
     {
       id: "ABY-HAFEZA-1",
-      dateAdded: "2026-09-29",
       name: "Premium Black Hafeza Set",
       image: "/images/Abaya/premium-black-layered-khimar-niqab-abaya-for-women-muslimabaya.webp",
       images: ["/images/gallery/aby-versace-8-1790420622429-g1.webp", "/images/gallery/aby-versace-8-1790420630365-g2.webp", "/images/gallery/aby-versace-8-1790420642193-g3.webp", "/images/gallery/aby-versace-8-1790420651446-g4.webp"],
@@ -135,11 +136,11 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-09-29"
     },
     {
       id: "ABY-VERSACE-9",
-      dateAdded: "2026-07-17",
       name: "Versace Border Premium Abaya Set - Side",
       image: "/images/Versace Border Premium Abaya Set.jpg",
       images: ["/images/gallery/aby-versace-9-1792180650386-g1.webp", "/images/gallery/aby-versace-9-1792180660161-g2.webp", "/images/gallery/aby-versace-9-1792180671387-g3.webp", "/images/gallery/aby-versace-9-1792180680076-g4.webp"],
@@ -154,11 +155,11 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-17"
     },
     {
       id: "ABY-FLORAL-10",
-      dateAdded: "2026-07-17",
       name: "Premium Floral Motif Abaya Set",
       image: "/images/Premium-Floral-Motif-Abaya-Set...jpeg",
       price: 1850,
@@ -172,11 +173,11 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-17"
     },
     {
       id: "ABY-FLORAL-11",
-      dateAdded: "2026-07-17",
       name: "Premium Floral Motif Abaya Set - Back",
       image: "/images/Premium-Floral-Motif-Abaya-Set..jpeg",
       price: 1850,
@@ -190,11 +191,11 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-17"
     },
     {
       id: "ABY-FLORAL-12",
-      dateAdded: "2026-07-17",
       name: "Premium Floral Motif Abaya Set - Side",
       image: "/images/Premium-Floral-Motif-Abaya-Set.jpeg",
       price: 1850,
@@ -208,11 +209,11 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-17"
     },
     {
       id: "ABY-BUTTERFLY-13",
-      dateAdded: "2026-07-17",
       name: "Butterfly Abaya Set",
       image: "/images/Butterfly-Ababa....jpg",
       price: 1350,
@@ -226,11 +227,11 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-17"
     },
     {
       id: "ABY-BUTTERFLY-14",
-      dateAdded: "2026-07-17",
       name: "Butterfly Abaya Set - Back",
       image: "/images/Butterfly-Ababa...jpg",
       price: 1350,
@@ -244,11 +245,11 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-17"
     },
     {
       id: "ABY-BUTTERFLY-15",
-      dateAdded: "2026-07-17",
       name: "Butterfly Abaya Set - Side",
       image: "/images/Butterfly-Ababa..jpg",
       price: 1350,
@@ -262,11 +263,11 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-17"
     },
     {
       id: "ABY-BUTTERFLY-16",
-      dateAdded: "2026-07-17",
       name: "Butterfly Abaya Set - Detail",
       image: "/images/Butterfly-Ababa.jpg",
       price: 1350,
@@ -280,13 +281,13 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-17"
     }
   ],
   "cover-up": [
     {
       id: "ABY-COVERUP-01",
-      dateAdded: "2026-08-02",
       name: "Premium Black Butterfly Khimar Abaya with Niqab",
       image: "/images/cover-up/premium-black-butterfly-khimar-abaya-with-niqab-luxury-modest-fashion-bangladesh-1080x1350.webp",
       price: 1800,
@@ -297,13 +298,13 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Premium butterfly khimar abaya with matching niqab, crafted from high-quality Cherry Fabric. Soft, breathable, lightweight, and designed for elegant modest wear with a graceful flow and premium finishing.",
       category: "cover-up",
       categoryLabel: "কভার আপ",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-08-02"
     }
   ],
   "premium-two-piece": [
     {
       id: "DR-01",
-      dateAdded: "2026-05-28",
       name: "White Strawberry Print Women's Two-Piece Set",
       image: "/images/two-piece-dress/muslimabaya-white-strawberry-print-cotton-kurti-set-for-women.webp",
       price: 650,
@@ -314,11 +315,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Material: Premium Cotton Fabric | Top Length: 38–40 Inches | Pant Length: 38 Inches",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-05-28"
     },
     {
       id: "DR-02",
-      dateAdded: "2026-08-01",
       name: "Baby Pink Floral Print Women's Two-Piece Set",
       image: "/images/Baby-Pink-Floral-Print.jpeg",
       price: 550,
@@ -329,11 +330,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Length: 37–38 Inches",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-08-01"
     },
     {
       id: "DR-03",
-      dateAdded: "2026-08-01",
       name: "Black Rose Floral Print Women's Two-Piece Set",
       image: "/images/Black-Base-Rose-Floral.jpeg",
       price: 550,
@@ -344,11 +345,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Length: 37–38 Inches",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-08-01"
     },
     {
       id: "DR-4",
-      dateAdded: "2026-08-01",
       name: "Black White Polka Dot Women's Two-Piece Set",
       image: "/images/Black-White-Polka-Dots.jpeg",
       price: 550,
@@ -359,11 +360,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Length: 37–38 Inches",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-08-01"
     },
     {
       id: "DR-5",
-      dateAdded: "2026-08-01",
       name: "Royal Blue Golden Floral Print Women's Two-Piece Set",
       image: "/images/Royal-Blue-Golden-Floral-Print.jpeg",
       price: 550,
@@ -374,11 +375,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Length: 37–38 Inches",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-08-01"
     },
     {
       id: "TP-6",
-      dateAdded: "2026-08-07",
       name: "Premium Navy Blue Bicycle Print Women's Tiered Maxi Dress",
       image: "/images/two-piece-dress/premium-navy-blue-bicycle-print-womens-tiered-maxi-dress-bangladesh-1080x1350.webp",
       price: 1000,
@@ -389,11 +390,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Pant: 40 in | Gher: 120 in",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-08-07"
     },
     {
       id: "DR-7",
-      dateAdded: "2026-08-01",
       name: "Premium White Pink Floral Print Women's Co-ord Set",
       image: "/images/white-pink-floral-print-womens-co-ord-set-premium.webp",
       price: 650,
@@ -404,11 +405,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Length: 37–38 Inches",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-08-01"
     },
     {
       id: "DR-8",
-      dateAdded: "2026-08-01",
       name: "Premium Black Floral Women's Co-ord Set",
       image: "/images/premium-black-floral-womens-co-ord-set-bangladesh.webp",
       price: 650,
@@ -419,11 +420,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-08-01"
     },
     {
       id: "DR-9",
-      dateAdded: "2026-08-01",
       name: "Premium Blue Floral Women's Co-ord Set",
       image: "/images/premium-blue-floral-co-ord-set.webp",
       price: 650,
@@ -434,11 +435,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-08-01"
     },
     {
       id: "DR-10",
-      dateAdded: "2026-08-01",
       name: "Premium Navy Blue Floral Women's Co-ord Set",
       image: "/images/premium-navy-blue-floral-co-ord-set.webp",
       price: 650,
@@ -449,11 +450,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-08-01"
     },
     {
       id: "DR-11",
-      dateAdded: "2026-08-01",
       name: "Premium Pink Floral Women's Co-ord Set",
       image: "/images/premium-pink-floral-co-ord-set.webp",
       price: 650,
@@ -464,11 +465,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-08-01"
     },
     {
       id: "DR-12",
-      dateAdded: "2026-08-01",
       name: "Premium Floral Women's Co-ord Set",
       image: "/images/Gowns/black-cream-floral-womens-two-piece-dress.jpg",
       price: 650,
@@ -479,11 +480,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-08-01"
     },
     {
       id: "DR-13",
-      dateAdded: "2026-08-01",
       name: "Premium Black Floral Women's Co-ord Set (Gold Accent)",
       image: "/images/premium-black-floral-co-ord-set-gold-accent.webp",
       price: 650,
@@ -494,11 +495,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-08-01"
     },
     {
       id: "TP-14",
-      dateAdded: "2026-08-07",
       name: "Premium Green Yellow Floral Women's 2-Piece Set",
       image: "/images/two-piece-dress/premium-green-yellow-floral-cotton-womens-maxi-dress-bangladesh-1080x1350.webp",
       price: 1000,
@@ -509,11 +510,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Gher: 120 in",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-08-07"
     },
     {
       id: "TP-15",
-      dateAdded: "2026-08-19",
       name: "Premium Green Cotton Embroidered Women's Two-Piece Set",
       image: "/images/two-piece-dress/premium-green-cotton-embroidered-2-piece-women-salwar-kameez-set-bangladesh-1080x1350.webp",
       price: 750,
@@ -524,11 +525,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Elegant embroidered design, soft breathable cotton fabric, comfortable everyday fit. Top Length: 38–40 Inches | Pants Length: 38 Inches",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-08-19"
     },
     {
       id: "TP-16",
-      dateAdded: "2026-08-19",
       name: "Premium Navy Blue Cotton Embroidered Women's Two-Piece Set",
       image: "/images/two-piece-dress/premium-navy-blue-embroidered-cotton-two-piece-women-salwar-kameez-set-bangladesh-1080x1350.webp",
       price: 750,
@@ -539,11 +540,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Elegant embroidered design, soft breathable cotton fabric, comfortable everyday fit. Top Length: 38–40 Inches | Pants Length: 38 Inches",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-08-19"
     },
     {
       id: "TP-17",
-      dateAdded: "2026-08-19",
       name: "Premium Red Cotton Embroidered Women's Two-Piece Set",
       image: "/images/two-piece-dress/premium-red-embroidered-cotton-two-piece-women-salwar-kameez-set-bangladesh-1080x1350.webp",
       price: 750,
@@ -554,11 +555,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Elegant embroidered design, soft breathable cotton fabric, comfortable everyday fit. Top Length: 38–40 Inches | Pants Length: 38 Inches",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-08-19"
     },
     {
       id: "TP-18",
-      dateAdded: "2026-08-19",
       name: "Premium Mustard Yellow Cotton Embroidered Women's Two-Piece Set",
       image: "/images/two-piece-dress/premium-mustard-yellow-embroidered-cotton-two-piece-women-salwar-kameez-set-bangladesh-1080x1350.webp",
       price: 750,
@@ -569,11 +570,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Elegant embroidered design, soft breathable cotton fabric, comfortable everyday fit. Top Length: 38–40 Inches | Pants Length: 38 Inches",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-08-19"
     },
     {
       id: "DR-19",
-      dateAdded: "2026-08-20",
       name: "Premium Luxury Two-Piece Dress",
       image: "/images/two-piece-dress/black-purple-floral-printed-long-kurti-womens-dress.webp",
       price: 650,
@@ -584,11 +585,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Two-Piece Dress | Dress Length: 38, 39 & 40 Inches | Palazzo Length: 37 & 38 Inches | Alex Soft Georgette | 14 Colors | 100% Color Quality Assurance",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-08-20"
     },
     {
       id: "DR-20",
-      dateAdded: "2026-09-06",
       name: "Premium Stylish Ladies Two-Piece Dress",
       image: "/images/two-piece-dress/yellow-womens-kurti-3-piece-dress-green-flower-design.webp",
       price: 750,
@@ -599,11 +600,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Premium Poppon Clothing Fabric | Free Size | Body: Up to 42 | Dress Length: 37 Inches | Matching Bottom | Home Delivery Across Bangladesh | Price: 750 BDT",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-09-06"
     },
     {
       id: "KURTI-EMB-01",
-      dateAdded: "2026-09-10",
       name: "Charcoal Black Embroidered Kurti",
       image: "https://muslimabaya.netlify.app/catalog/images/charcoal-black-embroidered-kurti.webp",
       price: 750,
@@ -614,11 +615,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear.",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-09-10"
     },
     {
       id: "KURTI-EMB-02",
-      dateAdded: "2026-09-10",
       name: "Mustard Yellow Embroidered Kurti",
       image: "https://muslimabaya.netlify.app/catalog/images/mustard-yellow-embroidered-kurti.webp",
       price: 750,
@@ -629,11 +630,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear.",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-09-10"
     },
     {
       id: "KURTI-EMB-03",
-      dateAdded: "2026-09-10",
       name: "Pastel Pink Embroidered Kurti",
       image: "https://muslimabaya.netlify.app/catalog/images/pastel-pink-embroidered-kurti.webp",
       price: 750,
@@ -644,11 +645,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear.",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-09-10"
     },
     {
       id: "KURTI-EMB-04",
-      dateAdded: "2026-09-10",
       name: "Maroon Embroidered Kurti",
       image: "https://muslimabaya.netlify.app/catalog/images/maroon-embroidered-kurti-for-women.webp",
       price: 750,
@@ -659,11 +660,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear.",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-09-10"
     },
     {
       id: "KURTI-EMB-05",
-      dateAdded: "2026-09-10",
       name: "Dusty Rose Embroidered Kurti",
       image: "https://muslimabaya.netlify.app/catalog/images/dusty-rose-embroidered-kurti-for-women-bangladesh.webp",
       price: 750,
@@ -674,11 +675,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear.",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-09-10"
     },
     {
       id: "KURTI-EMB-06",
-      dateAdded: "2026-09-10",
       name: "Mauve Lavender Embroidered Kurta",
       image: "https://muslimabaya.netlify.app/catalog/images/mauve-lavender-embroidered-kurta-for-women.webp",
       price: 750,
@@ -689,11 +690,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear.",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-09-10"
     },
     {
       id: "KURTI-EMB-07",
-      dateAdded: "2026-09-10",
       name: "Cream Beige Floral Embroidered Kurti",
       image: "https://muslimabaya.netlify.app/catalog/images/cream-beige-womens-embroidered-kurti-floral-design.webp",
       price: 750,
@@ -704,13 +705,13 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear.",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-09-10"
     }
   ],
   "tops-kurti": [
     {
       id: "KURTI-01",
-      dateAdded: "2026-06-21",
       name: "Classic Purple Lace-Work Kurti",
       image: "/images/Classic Purple Lace-Work Kurti  MUSLIM ABAYA.WebP",
       price: 250,
@@ -721,11 +722,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Comfortable lace-work kurti made with premium cotton fabric. Length: 34 inches.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-06-21"
     },
     {
       id: "KURTI-02",
-      dateAdded: "2026-06-21",
       name: "Elegant Grey Leaf Print Kurti",
       image: "/images/Elegant Grey Leaf Print Kurti  MUSLIM ABAYA.WebP",
       price: 250,
@@ -736,11 +737,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Stylish leaf print design for daily wear.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-06-21"
     },
     {
       id: "KURTI-03",
-      dateAdded: "2026-06-21",
       name: "Elegant Purple Floral Kurti",
       image: "/images/Elegant Purple Floral Kurti  MUSLIM ABAYA.WebP",
       price: 250,
@@ -751,11 +752,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Floral printed kurti suitable for office and casual wear.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-06-21"
     },
     {
       id: "KURTI-04",
-      dateAdded: "2026-06-21",
       name: "Elegant White Leaf Print Kurti",
       image: "/images/Elegant White Leaf Print Kurti  MUSLIM ABAYA.WebP",
       price: 250,
@@ -766,11 +767,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Light and breathable cotton fabric perfect for summer.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-06-21"
     },
     {
       id: "KURTI-05",
-      dateAdded: "2026-06-21",
       name: "Light Pink Floral Kurti",
       image: "/images/Light Pink Soft Floral Kurti  MUSLIM ABAYA.WebP",
       price: 250,
@@ -781,11 +782,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Soft pink floral design for everyday comfort.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-06-21"
     },
     {
       id: "KURTI-06",
-      dateAdded: "2026-06-21",
       name: "Magenta Leaf Print Kurti",
       image: "/images/Magenta Leaf Print Kurti  MUSLIM ABAYA.WebP",
       price: 250,
@@ -796,11 +797,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Soft cotton kurti with vibrant magenta color.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-06-21"
     },
     {
       id: "KURTI-07",
-      dateAdded: "2026-06-21",
       name: "Magenta Tassel Detail Kurti",
       image: "/images/Magenta Tassel Detail Kurti  MUSLIM ABAYA.WebP",
       price: 250,
@@ -811,11 +812,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Stylish tassel design kurti for modern look.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-06-21"
     },
     {
       id: "KURTI-08",
-      dateAdded: "2026-06-21",
       name: "Pink Floral Lace Work Kurti",
       image: "/images/Premium Pink Floral Lace-Work Kurti  MUSLIM ABAYA.WebP",
       price: 250,
@@ -826,11 +827,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Elegant lace work floral kurti design.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-06-21"
     },
     {
       id: "KURTI-09",
-      dateAdded: "2026-06-21",
       name: "Vibrant Magenta Floral Kurti",
       image: "/images/Vibrant Magenta Floral Kurti  MUSLIM ABAYA.WebP",
       price: 250,
@@ -841,11 +842,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Bright floral kurti for stylish daily wear.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-06-21"
     },
     {
       id: "KURTI-10",
-      dateAdded: "2026-07-03",
       name: "Premium Yellow Tie-Dye Cotton Maxi Dress",
       image: "/images/premium-yellow-tie-dye-cotton-maxi-dress-for-women.webp",
       price: 350,
@@ -856,11 +857,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Attractive tie-dye design maxi dress. Length: 43–44 inches, Flare: 80 inches.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-03"
     },
     {
       id: "KURTI-11",
-      dateAdded: "2026-07-03",
       name: "Stylish Green Floral Cotton Midi Dress",
       image: "/images/stylish-green-floral-cotton-midi-dress-womens-fashion.webp",
       price: 350,
@@ -871,11 +872,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Floral printed midi dress in soft cotton fabric.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-03"
     },
     {
       id: "KURTI-12",
-      dateAdded: "2026-07-03",
       name: "White Cherry Print Cotton One Piece",
       image: "/images/white-cherry-print-cotton-one-piece-dress-for-women.webp",
       price: 350,
@@ -886,11 +887,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Beautiful cherry print one-piece dress.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-03"
     },
     {
       id: "KURTI-13",
-      dateAdded: "2026-07-03",
       name: "White Lavender Floral Cotton Dress",
       image: "/images/white-lavender-floral-cotton-one-piece-dress-for-women-muslimabaya.webp",
       price: 350,
@@ -901,11 +902,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Soft lavender floral cotton dress.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-03"
     },
     {
       id: "KURTI-14",
-      dateAdded: "2026-07-03",
       name: "White Maroon Block Print Cotton Dress",
       image: "/images/white-maroon-block-print-cotton-one-piece-dress-for-women.webp",
       price: 350,
@@ -916,11 +917,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Traditional block print cotton dress.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-03"
     },
     {
       id: "KURTI-15",
-      dateAdded: "2026-07-03",
       name: "White Red Heart Print Cotton Dress",
       image: "/images/white-red-heart-print-cotton-one-piece-dress-for-women.webp",
       price: 350,
@@ -931,11 +932,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Cute heart print cotton dress.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-03"
     },
     {
       id: "KURTI-16",
-      dateAdded: "2026-07-03",
       name: "Yellow Cotton Flared One Piece",
       image: "/images/yellow-cotton-flared-one-piece-dress-for-women.webp",
       price: 350,
@@ -946,11 +947,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Comfortable flared cotton dress.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-03"
     },
     {
       id: "KURTI-17",
-      dateAdded: "2026-07-03",
       name: "Yellow Striped Cotton One Piece",
       image: "/images/yellow-striped-cotton-one-piece-dress-for-women.webp",
       price: 350,
@@ -961,11 +962,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Casual striped cotton dress.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-03"
     },
     {
       id: "KURTI-18",
-      dateAdded: "2026-07-03",
       name: "Premium Sky Blue Botanical Print Cotton One Piece Dress",
       image: "/images/premium-sky-blue-botanical-print-cotton-one-piece-dress-for-women.webp",
       price: 350,
@@ -976,11 +977,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Premium sky blue botanical print cotton dress. Length: 38–40 Inches, Flare: 80 Inches",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-03"
     },
     {
       id: "KURTI-19",
-      dateAdded: "2026-07-03",
       name: "White Lilac Botanical Print Cotton One Piece Dress",
       image: "/images/white-lilac-botanical-print-cotton-one-piece-dress-for-women.webp",
       price: 350,
@@ -991,11 +992,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Elegant white and lilac botanical print cotton one piece dress. Length: 38–40 Inches, Flare: 80 Inches",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-03"
     },
     {
       id: "KURTI-20",
-      dateAdded: "2026-07-04",
       name: "Black White Floral Puff Sleeve Maxi Dress",
       image: "/images/black-white-floral-puff-sleeve-maxi-dress-modern-lifestyle.webp",
       price: 350,
@@ -1006,11 +1007,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Elegant Black & White floral print puff sleeve maxi dress. Length: 38–40 Inches, Flare: 80 Inches.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-04"
     },
     {
       id: "KURTI-21",
-      dateAdded: "2026-07-04",
       name: "White Yellow Floral Puff Sleeve Cotton Maxi Dress",
       image: "/images/white-yellow-floral-puff-sleeve-cotton-maxi-dress-premium-lifestyle.webp",
       price: 350,
@@ -1021,11 +1022,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Elegant White & Yellow floral print puff sleeve cotton maxi dress. Length: 38–40 Inches, Flare: 80 Inches.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-04"
     },
     {
       id: "KURTI-22",
-      dateAdded: "2026-07-04",
       name: "Navy Blue White Floral Cotton Maxi Dress",
       image: "/images/navy-blue-white-floral-cotton-maxi-dress-premium-lifestyle.webp",
       price: 350,
@@ -1036,11 +1037,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Elegant Navy Blue & White floral print cotton maxi dress. Length: 38–40 Inches, Flare: 80 Inches.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-04"
     },
     {
       id: "KURTI-23",
-      dateAdded: "2026-07-04",
       name: "Cream Black Floral Cotton Maxi Dress",
       image: "/images/cream-black-floral-cotton-maxi-dress-premium-lifestyle.webp",
       price: 350,
@@ -1051,11 +1052,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Elegant Cream & Black floral print cotton maxi dress. Length: 38–40 Inches, Flare: 80 Inches.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-04"
     },
     {
       id: "KURTI-24",
-      dateAdded: "2026-07-04",
       name: "Sage Green White Floral Cotton Maxi Dress",
       image: "/images/sage-green-white-floral-cotton-maxi-dress-premium-lifestyle.webp",
       price: 350,
@@ -1066,11 +1067,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Elegant Sage Green & White floral print cotton maxi dress. Length: 38–40 Inches, Flare: 80 Inches.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-04"
     },
     {
       id: "KURTI-25",
-      dateAdded: "2026-07-05",
       name: "Black White Geometric Print Cotton One Piece Kurti",
       image: "/images/black-white-geometric-print-cotton-one-piece-kurti-for-women-bangladesh.webp",
       price: 350,
@@ -1081,11 +1082,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Elegant black & white geometric print premium cotton one-piece kurti. Length: 38–40 Inches, Flare: 80 Inches.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-05"
     },
     {
       id: "KURTI-26",
-      dateAdded: "2026-07-06",
       name: "Premium Tribal Print Cotton One-Piece Maxi Dress - Black",
       image: "/images/Premium-Tribal-Print-One-Piece-Black.webp",
       price: 450,
@@ -1096,11 +1097,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 38–40 inches, flare: 80 inches.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-06"
     },
     {
       id: "KURTI-27",
-      dateAdded: "2026-07-06",
       name: "Premium Tribal Print Cotton One-Piece Maxi Dress - Cherry Red",
       image: "/images/Premium-Tribal-Print-One-Piece-Cherry-Red.webp",
       price: 450,
@@ -1111,11 +1112,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 38–40 inches, flare: 80 inches.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-06"
     },
     {
       id: "KURTI-28",
-      dateAdded: "2026-07-06",
       name: "Premium Tribal Print Cotton One-Piece Maxi Dress - Navy Blue",
       image: "/images/Premium-Tribal-Print-One-Piece-Navy-Blue.webp",
       price: 450,
@@ -1126,11 +1127,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 38–40 inches, flare: 80 inches.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-06"
     },
     {
       id: "KURTI-29",
-      dateAdded: "2026-07-06",
       name: "Premium Tribal Print Cotton One-Piece Maxi Dress - Rust Brown",
       image: "/images/Premium-Tribal-Print-One-Piece-Rust-Brown.webp",
       price: 450,
@@ -1141,11 +1142,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Premium tribal print cotton one-piece maxi dress. Square neck, puff half sleeves, length: 38–40 inches, flare: 80 inches.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-06"
     },
     {
       id: "KURTI-32",
-      dateAdded: "2026-07-06",
       name: "Premium Pink Floral Midi Dress",
       image: "/images/premium-pink-floral-midi-dress-for-women-bangladesh.webp",
       price: 350,
@@ -1156,11 +1157,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Premium cotton midi dress with elegant pink floral print. Soft, breathable fabric with a comfortable A-line fit for everyday wear.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-06"
     },
     {
       id: "KURTI-33",
-      dateAdded: "2026-07-06",
       name: "Premium Yellow Striped Midi Dress",
       image: "/images/premium-yellow-striped-midi-dress-women-bangladesh.webp",
       price: 750,
@@ -1172,13 +1173,13 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Premium cotton midi dress featuring elegant yellow striped design. Soft, breathable fabric with a stylish and comfortable fit for daily wear.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-06"
     }
   ],
   embroidery: [
     {
       id: "ABY-BLACK-1",
-      dateAdded: "2026-05-28",
       name: "Dil Bahar Abaya Full Set",
       image: "/images/dil-bahar-black-stone-work-abaya-original-dubai-cherry-fabric-bangladesh.webp",
       price: 1899,
@@ -1191,7 +1192,8 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "embroidery",
       categoryLabel: "এম্ব্রয়ডারি",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-05-28"
     }
   ],
   karchupi: [
@@ -1201,7 +1203,6 @@ window.CATEGORY_PRODUCTS = {
   hijab: [
     {
       id: "HIJAB-01",
-      dateAdded: "2026-07-21",
       name: "Premium Short Khimar Hijab – Dusty Pink",
       image: "/images/premium-short-khimar-hijab-dusty-pink-soft-jersey.webp",
       price: 150,
@@ -1213,13 +1214,13 @@ window.CATEGORY_PRODUCTS = {
       inStock: true,
       category: "hijab",
       categoryLabel: "হিজাব",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-21"
     }
   ],
   panjabi: [
     {
       id: "PAN-001",
-      dateAdded: "2026-07-10",
       name: "Premium White Islamic Panjabi",
       image: "/images/premium-white-islamic-mens-kurta-full-sleeve-outdoor-portrait-bangladesh.webp",
       price: 1050,
@@ -1230,11 +1231,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Premium Full Sleeve Islamic Panjabi",
       category: "panjabi",
       categoryLabel: "পাঞ্জাবী",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-10"
     },
     {
       id: "PAN-002",
-      dateAdded: "2026-07-12",
       name: "Premium Off White Islamic Panjabi",
       image: "/images/premium-mens-off-white-cotton-panjabi-modern-1080x1350.webp",
       price: 1050,
@@ -1245,11 +1246,11 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Premium Full Sleeve Islamic Panjabi",
       category: "panjabi",
       categoryLabel: "পাঞ্জাবী",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-12"
     },
     {
       id: "PAN-003",
-      dateAdded: "2026-07-12",
       name: "Premium White Cotton Panjabi",
       image: "/images/premium-white-cotton-panjabi-mens-islamic-fashion-modern-design-1080x1350.webp",
       price: 1050,
@@ -1260,7 +1261,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Premium Full Sleeve Islamic Panjabi",
       category: "panjabi",
       categoryLabel: "পাঞ্জাবী",
-      productUrl: "/"
+      productUrl: "/",
+      dateAdded: "2026-07-12"
     }
   ]
 };

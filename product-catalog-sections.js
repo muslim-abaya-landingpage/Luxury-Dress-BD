@@ -1,6 +1,6 @@
 /**
  * ক্যাটাগরি সারি — মেনু ও HTML পেজ (product-manager.html থেকে আপডেট)
- * আপডেট: 2026-10-17
+ * আপডেট: 2026-10-21
  */
 window.CATALOG_SECTIONS = [
   {
