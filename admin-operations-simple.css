@@ -11,3 +11,5 @@
 .ops-workspace-hint{border-left:3px solid #7050bd;padding:10px 14px;background:#f8f6fc;border-radius:6px;color:#514665;line-height:1.65;margin:0 0 16px}
 
 .ops-order-picker-label{display:block;margin:12px 0;font-weight:600}.ops-order-picker{display:block;width:100%;padding:12px;border:1px solid #c7bed9;border-radius:10px;background:#fff;color:#241d34;font:inherit;margin-top:7px}
+
+.ops-statement{margin:16px 0;padding:18px;border:1px solid #dcd5ec;border-radius:14px;background:#faf9fe}.ops-statement h3{margin:0 0 8px;font-size:17px}.ops-statement #opsStatementResult{font-weight:700;margin:12px 0}
