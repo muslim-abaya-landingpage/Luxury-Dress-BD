@@ -49,7 +49,10 @@ function fixture() {
   orders[3][32] = JSON.stringify([{ id: 'ABY-1', name: 'Abaya Black', qty: 1, size: 'M', category: 'abaya' }]);
   orders[2][32] = JSON.stringify([{ id: 'HJB-2', name: 'Hijab', qty: 2 }]);
   orders[2][36] = 'Facebook';
-  return { 'Online Order': orders, Sessions: sessions, Admins: admins, Blocked: blocked, StockVariants: stock };
+  const msgr = [['PSID', 'Name', 'FirstSeen', 'LastSeen', 'FromAd', 'PageId', 'Status', 'AssignedTo', 'LastMessage', 'LastDirection', 'Unread', 'OrderId', 'OrderValue', 'PurchaseSent', 'Notes', 'ProfilePic'],
+    ['111', 'Ayesha', new Date(NOW - 9e7), new Date(NOW - 600000), 'yes', '', 'New', '', 'দাম কত?', 'in', 2, '', '', '', '', ''],
+    ['222', 'Karim', new Date(NOW - 9e7), new Date(NOW - 9e6), '', '', 'New', '', 'ok', 'out', 0, '', '', '', '', '']];
+  return { 'Online Order': orders, Sessions: sessions, Admins: admins, Blocked: blocked, StockVariants: stock, MessengerContacts: msgr };
 }
 
 // What the Sheets API would return for those values (serials + formatted copy; trailing blanks trimmed).
@@ -132,6 +135,7 @@ test('dashboard, verify, fraud, staff and customer reads match Apps Script exact
     (c) => c.getAdminAnalyticsV2_({ parameter: { Token: 'tok-admin', Range: 'today' } }),
     (c) => c.getAdminAnalyticsV2_({ parameter: { Token: 'tok-admin', Range: '30d' } }),
     (c) => c.getAdminAnalyticsV2_({ parameter: { Token: 'tok-admin', Range: 'all' } }),
+    (c) => c.inboxList_({ parameter: { Token: 'tok-admin', Unread: '1', Limit: '300' } }),
   ];
   for (const run of cases) {
     const a = withNow(() => run(truth));

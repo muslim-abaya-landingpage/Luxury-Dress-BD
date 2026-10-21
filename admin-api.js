@@ -58,9 +58,10 @@
   var EDGE_TYPES = ["AdminVerify", "AdminOrderList", "AdminOrderGet", "AdminOrders", "AdminFraudCheck", "AdminOrderStaff", "AdminCustomerLookup", "AdminStockVariantsList", "AdminAnalyticsV2"];
   var EDGE_URL = cfg.edgeReadUrl === undefined ? "/api/admin-read" : cfg.edgeReadUrl;
   var EDGE_OFF_KEY = "ma_admin_edge_off";
-  function edgeRead(fields, body) {
+  function edgeRead(fields, body, options) {
     try {
-      if (!EDGE_URL || EDGE_TYPES.indexOf(fields.RecordType) === -1 || !fields.Token) return Promise.resolve(null);
+      var edgeOk = EDGE_TYPES.indexOf(fields.RecordType) !== -1 || (fields.RecordType === "InboxList" && options && options.edgeSummary);
+      if (!EDGE_URL || !edgeOk || !fields.Token) return Promise.resolve(null);
       if (!/^https?:$/.test(g.location && g.location.protocol)) return Promise.resolve(null);
       var off = Number(sessionStorage.getItem(EDGE_OFF_KEY) || 0);
       if (off && Date.now() < off) return Promise.resolve(null);
@@ -99,7 +100,7 @@
     Object.keys(fields).forEach(function (k) {
       if (fields[k] != null) body.append(k, String(fields[k]));
     });
-    var task = edgeRead(fields, body).then(function (edgeText) {
+    var task = edgeRead(fields, body, options).then(function (edgeText) {
       if (edgeText != null) return edgeText;
       return timeoutPromise(timeout || 30000, fetch(API_URL, {
         method: "POST", mode: "cors", credentials: "omit", body: body
@@ -488,7 +489,7 @@
 
   // Messenger inbox (RecordType Inbox*). Unlike apiPost, empty values are sent,
   // so a field can be cleared (e.g. un-assigning a conversation).
-  function inboxCall(type, fields) { return call(type, fields); }
+  function inboxCall(type, fields, options) { return call(type, fields, options); }
 
   function call(recordType, fields, options) {
     var s = getSession();

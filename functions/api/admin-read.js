@@ -25,8 +25,18 @@ const ALLOWED = {
   AdminCustomerLookup: 'adminCustomerLookup_',
   AdminStockVariantsList: 'getAdminStockVariants_',
   AdminAnalyticsV2: 'getAdminAnalyticsV2_',
+  // Dashboard unread count only. Which Pages are connected lives in Script Properties (secret tokens), which
+  // the edge cannot read, so `pages` is left out and the inbox page itself keeps using Apps Script.
+  InboxList: (core, e) => {
+    const v = core.verifyAdminSession_(core.param_(e, 'Token'));
+    if (!v.ok) return v;
+    const r = core.inboxList_(e);
+    delete r.pages;
+    r.pagesOmitted = true;
+    return r;
+  },
 };
-const FIELDS = ['RecordType', 'Token', 'Limit', 'Cursor', 'OrderId', 'Phone', 'Search', 'StockStatus', 'Category', 'CategoryMap', 'Range', 'From', 'To'];
+const FIELDS = ['RecordType', 'Token', 'Limit', 'Cursor', 'OrderId', 'Phone', 'Search', 'StockStatus', 'Category', 'CategoryMap', 'Range', 'From', 'To', 'Unread', 'PageId', 'Status', 'AssignedTo', 'Q'];
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {

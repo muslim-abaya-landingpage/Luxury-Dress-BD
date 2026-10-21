@@ -137,7 +137,7 @@
     state.alertBusy = true;
     setStatus("admAlertState", "অ্যালার্ট আপডেট হচ্ছে…", false);
     var stockPromise = MaAdmin.getStockVariants({ stockStatus: "all" }).then(function (res) { return { ok: true, data: res }; }, function (error) { return { ok: false, error: error }; });
-    var inboxPromise = MaAdmin.inboxCall("InboxList", { Unread: "1", Limit: 300 }).then(function (res) { return { ok: true, data: res }; }, function (error) { return { ok: false, error: error }; });
+    var inboxPromise = MaAdmin.inboxCall("InboxList", { Unread: "1", Limit: 300 }, { edgeSummary: true }).then(function (res) { return { ok: true, data: res }; }, function (error) { return { ok: false, error: error }; });
     // Each card renders as soon as its own data arrives (the inbox is slower and must not hold up stock).
     var currentStock = [], currentInbox = [];
     stockPromise = stockPromise.then(function (stockResult) {

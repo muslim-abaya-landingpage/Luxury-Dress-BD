@@ -2,7 +2,7 @@
 import { toAppsScriptValues } from './sheets-shim.js';
 
 const API = 'https://sheets.googleapis.com/v4/spreadsheets/';
-export const READ_SHEETS = ['Online Order', 'Sessions', 'Admins', 'Blocked', 'StockVariants'];
+export const READ_SHEETS = ['Online Order', 'Sessions', 'Admins', 'Blocked', 'StockVariants', 'MessengerContacts'];
 const META_TTL_MS = 10 * 60 * 1000;
 let metaCache = { id: '', at: 0, meta: null };
 
@@ -15,7 +15,21 @@ async function getJson(fetchImpl, url, token) {
 
 function quote(title) { return "'" + String(title).replace(/'/g, "''") + "'"; }
 
-export async function loadSnapshot({ spreadsheetId, token, fetchImpl = fetch, nowMs = Date.now() }) {
+// Requests that arrive together (a page fires several reads at once) share one sheet read. Only a read
+// that started moments ago is shared, so a read issued after a save never gets pre-save data.
+const SHARE_MS = 400;
+let inflight = { id: '', at: 0, promise: null };
+
+export function loadSnapshot(opts) {
+  const nowMs = opts.nowMs || Date.now();
+  if (inflight.promise && inflight.id === opts.spreadsheetId && nowMs - inflight.at < SHARE_MS) return inflight.promise;
+  const promise = loadSnapshotFresh(opts);
+  inflight = { id: opts.spreadsheetId, at: nowMs, promise };
+  promise.catch(() => { if (inflight.promise === promise) inflight = { id: '', at: 0, promise: null }; });
+  return promise;
+}
+
+async function loadSnapshotFresh({ spreadsheetId, token, fetchImpl = fetch, nowMs = Date.now() }) {
   if (metaCache.id !== spreadsheetId || !metaCache.meta || nowMs - metaCache.at > META_TTL_MS) {
     const fields = 'spreadsheetUrl,properties.timeZone,sheets.properties(title,sheetId,gridProperties(rowCount,columnCount))';
     const meta = await getJson(fetchImpl, API + encodeURIComponent(spreadsheetId) + '?fields=' + encodeURIComponent(fields), token);
@@ -41,4 +55,4 @@ export async function loadSnapshot({ spreadsheetId, token, fetchImpl = fetch, no
   return { spreadsheetId, url: meta.spreadsheetUrl || '', timeZone, sheets };
 }
 
-export function _resetMetaCache() { metaCache = { id: '', at: 0, meta: null }; }
+export function _resetMetaCache() { metaCache = { id: '', at: 0, meta: null }; inflight = { id: '', at: 0, promise: null }; }

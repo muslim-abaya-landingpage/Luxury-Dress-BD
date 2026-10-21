@@ -94,7 +94,7 @@ export function buildEnv(snapshot) {
   ss.getActiveSheet = () => sheets['Online Order'] || Object.values(sheets)[0];
   const props = snapshot.properties || {};
   return {
-    SpreadsheetApp: { getActiveSpreadsheet: () => ss, openById: (id) => (id === snapshot.spreadsheetId ? ss : readOnly()) },
+    SpreadsheetApp: { getActiveSpreadsheet: () => ss, getActive: () => ss, openById: (id) => (id === snapshot.spreadsheetId ? ss : readOnly()) },
     PropertiesService: { getScriptProperties: () => ({ getProperty: (k) => (k in props ? props[k] : null), setProperty: readOnly, deleteProperty: readOnly }) },
     // No cache on the edge: Apps Script helpers treat a throwing cache as "not cached" and do the real check.
     CacheService: { getScriptCache: () => { throw new Error('NO_CACHE'); } },
