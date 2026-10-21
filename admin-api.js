@@ -52,6 +52,35 @@
     });
   }
 
+  // Fast read path: the site's own Cloudflare function answers order list/detail reads from the
+  // sheet directly (read-only). Anything other than ok:true falls back to Apps Script, which stays
+  // the source of truth and the only writer. If the edge is not set up, it is skipped for 10 minutes.
+  var EDGE_TYPES = ["AdminOrderList", "AdminOrderGet"];
+  var EDGE_URL = cfg.edgeReadUrl === undefined ? "/api/admin-read" : cfg.edgeReadUrl;
+  var EDGE_OFF_KEY = "ma_admin_edge_off";
+  function edgeRead(fields, body) {
+    try {
+      if (!EDGE_URL || EDGE_TYPES.indexOf(fields.RecordType) === -1 || !fields.Token) return Promise.resolve(null);
+      if (!/^https?:$/.test(g.location && g.location.protocol)) return Promise.resolve(null);
+      var off = Number(sessionStorage.getItem(EDGE_OFF_KEY) || 0);
+      if (off && Date.now() < off) return Promise.resolve(null);
+    } catch (e) { return Promise.resolve(null); }
+    return timeoutPromise(6000, fetch(EDGE_URL, { method: "POST", credentials: "same-origin", body: body }))
+      .then(function (res) {
+        var edge = res.headers.get("X-MA-Source") === "edge";
+        return res.text().then(function (text) {
+          var data = null;
+          try { data = JSON.parse(text); } catch (e) {}
+          if (edge && res.ok && data && data.ok === true) return text;
+          // Not deployed / not configured: skip for 10 min. A passing Google error: skip for 1 min.
+          var pause = !edge || (data && data.error === "NOT_CONFIGURED") ? 10 : (res.status === 503 ? 1 : 0);
+          if (pause) { try { sessionStorage.setItem(EDGE_OFF_KEY, String(Date.now() + pause * 60 * 1000)); } catch (e) {} }
+          return null;
+        });
+      })
+      .catch(function () { return null; });
+  }
+
   function request(fields, timeout, options) {
     if (!API_URL) return Promise.reject(new Error("API_MISSING"));
     var read = READ_TYPES.indexOf(fields.RecordType) !== -1;
@@ -70,9 +99,12 @@
     Object.keys(fields).forEach(function (k) {
       if (fields[k] != null) body.append(k, String(fields[k]));
     });
-    var task = timeoutPromise(timeout || 30000, fetch(API_URL, {
-      method: "POST", mode: "cors", credentials: "omit", body: body
-    }).then(function (res) { return res.text(); })).then(function (text) {
+    var task = edgeRead(fields, body).then(function (edgeText) {
+      if (edgeText != null) return edgeText;
+      return timeoutPromise(timeout || 30000, fetch(API_URL, {
+        method: "POST", mode: "cors", credentials: "omit", body: body
+      }).then(function (res) { return res.text(); }));
+    }).then(function (text) {
       var raw = String(text || "").trim();
       var res;
       try { res = JSON.parse(raw); } catch (e) {
