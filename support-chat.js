@@ -44,10 +44,11 @@
   }
 
   var QUICK = userCfg.quickQuestions || [
-    { label: "Order status", labelBn: "অর্ডার স্ট্যাটাস", text: "Hello! I would like to know the status of my order." },
-    { label: "Size help", labelBn: "সাইজ", text: "Hello! I need help choosing the right size." },
-    { label: "Delivery & COD", labelBn: "ডেলিভারি", text: "Hello! Could you tell me about delivery time and cash on delivery?" },
-    { label: "Product price", labelBn: "দাম", text: "Hello! I would like to know the price of a product." }
+    { label: "Order status", labelBn: "অর্ডার স্ট্যাটাস", text: "Hello! I would like to check my order status. My order ID is: " },
+    { label: "Size help", labelBn: "সাইজ পরামর্শ", text: "Hello! I need help choosing the right size." },
+    { label: "Delivery & COD", labelBn: "ডেলিভারি ও COD", text: "Hello! Could you tell me about delivery time and cash on delivery?" },
+    { label: "Product question", labelBn: "পণ্যের তথ্য", text: "Hello! I have a question about this product." },
+    { label: "Return / exchange", labelBn: "রিটার্ন / এক্সচেঞ্জ", text: "Hello! I need help with a return or exchange." }
   ];
 
   var CSS =
@@ -57,23 +58,30 @@
     ".ma-chat-fab svg{width:24px;height:24px;flex:none}" +
     ".ma-chat-fab .ma-chat-fab-label{display:none}" +
     ".ma-chat-dot{position:absolute;top:6px;right:6px;width:11px;height:11px;border-radius:50%;background:#25d366;border:2px solid #111}" +
-    ".ma-chat-panel{position:fixed;right:16px;bottom:calc(144px + env(safe-area-inset-bottom,0px));z-index:511;width:min(360px,calc(100vw - 32px));max-height:min(540px,calc(100vh - 170px));display:none;flex-direction:column;background:#fff;color:#111;border-radius:16px;box-shadow:0 18px 50px rgba(0,0,0,.28);overflow:hidden;font:14px/1.45 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}" +
+    ".ma-chat-panel{position:fixed;right:16px;bottom:calc(144px + env(safe-area-inset-bottom,0px));z-index:511;width:min(390px,calc(100vw - 28px));max-height:min(620px,calc(100vh - 130px));display:none;flex-direction:column;background:#fff;color:#111;border-radius:16px;box-shadow:0 18px 50px rgba(0,0,0,.28);overflow:hidden;font:14px/1.45 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}" +
     ".ma-chat-panel.is-open{display:flex}" +
     ".ma-chat-head{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #eee;background:#fff}" +
     ".ma-chat-avatar{width:40px;height:40px;border-radius:50%;object-fit:contain;background:#f3f3f3;border:1px solid #eee;flex:none}" +
     ".ma-chat-title{flex:1;min-width:0}" +
     ".ma-chat-title strong{display:block;font-size:14px;letter-spacing:.06em;text-transform:uppercase}" +
-    ".ma-chat-title span{display:block;font-size:12px;color:#5b5b5b}" +
+    ".ma-chat-title span{display:flex;align-items:center;gap:6px;font-size:12px;color:#5b5b5b}" +
+    ".ma-chat-status-dot{width:8px;height:8px;border-radius:50%;background:#b69655;display:inline-block;flex:none}" +
+    ".ma-chat-expand{font-size:18px;line-height:1}" +
     ".ma-chat-icon-btn{width:36px;height:36px;border:0;border-radius:10px;background:#f4f4f4;color:#111;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;text-decoration:none}" +
     ".ma-chat-icon-btn:hover{background:#e9e9e9}" +
     ".ma-chat-icon-btn svg{width:18px;height:18px}" +
-    ".ma-chat-body{padding:16px 14px;overflow:auto;background:#fafafa;flex:1}" +
-    ".ma-chat-hello{background:#fff;border:1px solid #eee;border-radius:14px 14px 14px 4px;padding:12px 14px;margin:0 0 12px;max-width:92%}" +
-    ".ma-chat-hello b{display:block;margin-bottom:2px}" +
-    ".ma-chat-hello small{color:#595959}" +
+    ".ma-chat-body{padding:18px 16px;overflow:auto;background:linear-gradient(180deg,#fff 0%,#fbfaf7 100%);flex:1}" +
+    ".ma-chat-welcome{text-align:center;padding:18px 12px 20px;margin:0 0 16px;background:#fff;border:1px solid #eee;border-radius:16px}" +
+    ".ma-chat-welcome img{width:50px;height:50px;object-fit:contain;border-radius:50%;margin:0 auto 8px;background:#f7f4ed;border:1px solid #eee}" +
+    ".ma-chat-welcome strong{display:block;font-family:Georgia,'Times New Roman',serif;font-size:23px;letter-spacing:.02em;color:#171717}" +
+    ".ma-chat-welcome b{display:block;margin:3px 0 4px;font-size:15px}" +
+    ".ma-chat-welcome small{display:block;color:#666;font-size:13px}" +
+    ".ma-chat-welcome .ma-chat-online{display:inline-flex;align-items:center;gap:7px;margin-top:13px;padding:7px 11px;border:1px solid #e7e7e7;border-radius:999px;background:#fbfbfb;font-size:11px;color:#555}" +
+    ".ma-chat-section-title{margin:0 0 9px;font-size:12px;font-weight:700;letter-spacing:.08em;color:#777;text-transform:uppercase}" +
     ".ma-chat-chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 6px}" +
-    ".ma-chat-chip{border:1px solid #d9d9d9;background:#fff;border-radius:999px;padding:8px 12px;font:inherit;font-size:13px;cursor:pointer;color:#111}" +
-    ".ma-chat-chip:hover{border-color:#111}" +
+    ".ma-chat-chip{border:1px solid #e3e1dc;background:#fff;border-radius:999px;padding:9px 12px;font:inherit;font-size:13px;cursor:pointer;color:#222;box-shadow:0 1px 2px rgba(0,0,0,.025);transition:border-color .15s ease,background .15s ease,transform .15s ease}" +
+    ".ma-chat-chip:hover{border-color:#b69655;background:#fffdf8;transform:translateY(-1px)}" +
+    ".ma-chat-chip:focus-visible{outline:2px solid #b69655;outline-offset:2px}" +
     ".ma-chat-foot{padding:10px 12px 12px;border-top:1px solid #eee;background:#fff}" +
     ".ma-chat-row{display:flex;gap:8px;align-items:flex-end}" +
     ".ma-chat-input{flex:1;min-width:0;resize:none;border:1px solid #d9d9d9;border-radius:12px;padding:10px 12px;font:inherit;font-size:14px;max-height:96px;min-height:42px}" +
@@ -95,6 +103,8 @@
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.5L3 21l1.6-5.2A8.5 8.5 0 1 1 21 12z"/></svg>';
   var ICON_CLOSE =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+  var ICON_EXPAND =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5"/><path d="m3 3 6 6m12-6-6 6M3 21l6-6m12 6-6-6"/></svg>';
   var ICON_PHONE =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2.1z"/></svg>';
   var ICON_SEND =
@@ -148,26 +158,42 @@
     avatar.onerror = function () { avatar.style.visibility = "hidden"; };
     var title = el("div", "ma-chat-title");
     title.innerHTML =
-      '<strong id="maChatTitle"></strong><span id="maChatSub"></span>';
+      '<strong id="maChatTitle"></strong><span id="maChatSub"><i class="ma-chat-status-dot" aria-hidden="true"></i></span>';
     title.querySelector("strong").textContent = brand;
-    title.querySelector("#maChatSub").textContent = replyTime || "Chat with us on WhatsApp or Messenger";
+    title.querySelector("#maChatSub").appendChild(doc.createTextNode(replyTime || "WhatsApp & Messenger support"));
     var call = el("a", "ma-chat-icon-btn", ICON_PHONE);
     call.href = "tel:" + String(phoneTel).replace(/[^\d+]/g, "");
     call.setAttribute("aria-label", "Call us");
+    var expand = el("button", "ma-chat-icon-btn ma-chat-expand", ICON_EXPAND);
+    expand.type = "button";
+    expand.setAttribute("aria-label", "Expand chat");
     var close = el("button", "ma-chat-icon-btn", ICON_CLOSE);
     close.type = "button";
     close.setAttribute("aria-label", "Close chat");
     head.appendChild(avatar);
     head.appendChild(title);
     head.appendChild(call);
+    head.appendChild(expand);
     head.appendChild(close);
-
     var body = el("div", "ma-chat-body");
-    var hello = el("div", "ma-chat-hello", "<b>Customer Support</b>How can we help you today?<br><small>আমরা কীভাবে সাহায্য করতে পারি?</small>");
+    var welcome = el("div", "ma-chat-welcome");
+    var welcomeLogo = el("img");
+    welcomeLogo.src = logo;
+    welcomeLogo.alt = "";
+    welcomeLogo.onerror = function () { welcomeLogo.style.display = "none"; };
+    welcome.appendChild(welcomeLogo);
+    var brandMark = el("strong");
+    brandMark.textContent = brand;
+    welcome.appendChild(brandMark);
+    welcome.appendChild(el("b", "", "Customer Support"));
+    welcome.appendChild(el("small", "", "How can we help you today?"));
+    welcome.appendChild(el("small", "", "আমরা কীভাবে সাহায্য করতে পারি?"));
+    welcome.appendChild(el("span", "ma-chat-online", '<i class="ma-chat-status-dot" aria-hidden="true"></i> Choose a topic and continue on WhatsApp or Messenger'));
+    var sectionTitle = el("p", "ma-chat-section-title", "Quick help · দ্রুত সহায়তা");
     var chips = el("div", "ma-chat-chips");
-    body.appendChild(hello);
+    body.appendChild(welcome);
+    body.appendChild(sectionTitle);
     body.appendChild(chips);
-
     var foot = el("div", "ma-chat-foot");
     var row = el("div", "ma-chat-row");
     var input = el("textarea", "ma-chat-input");
@@ -250,6 +276,12 @@
 
     fab.addEventListener("click", function () { setOpen(!panel.classList.contains("is-open")); });
     close.addEventListener("click", function () { setOpen(false); });
+    expand.addEventListener("click", function () {
+      var expanded = panel.classList.toggle("is-expanded");
+      expand.setAttribute("aria-label", expanded ? "Restore chat size" : "Expand chat");
+      panel.style.width = expanded ? "min(460px,calc(100vw - 28px))" : "";
+      panel.style.maxHeight = expanded ? "min(760px,calc(100vh - 100px))" : "";
+    });
     doc.addEventListener("keydown", function (ev) {
       if (ev.key === "Escape" && panel.classList.contains("is-open")) setOpen(false);
     });
