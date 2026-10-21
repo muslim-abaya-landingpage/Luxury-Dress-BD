@@ -169,6 +169,7 @@
       var POLL_MS = 30000;
       var session = null;
       var meta = { statuses: [], team: [], pages: [] };
+      var pageMetadataLoaded = false;
       var contacts = [];
       var active = null; // { pageId, psid }
       var listTimer = null;
@@ -257,6 +258,7 @@
           meta.team = res.team || [];
           // The fast copy leaves out which Pages are connected; keep what the first full load said.
           if (!(res.pagesOmitted && meta.pages && meta.pages.length)) meta.pages = res.pages || [];
+          if (!res.pagesOmitted) pageMetadataLoaded = true;
           fillSelect($('fPage'), meta.pages.map(function (p) { return { value: p.id, label: p.name }; }), 1);
           fillSelect($('fStatus'), meta.statuses.map(function (s) { return { value: s, label: s }; }), 1);
           contacts = res.contacts || [];
@@ -275,9 +277,16 @@
         };
         var cached = MaAdmin.cached('InboxList', fields);
         if (cached) { applyList(cached); $('ibxPages').appendChild(document.createTextNode(' · আপডেট হচ্ছে…')); }
-        // After the first full load (which tells us the Pages), refreshes may use the fast read-only copy.
-        return MaAdmin.inboxCall('InboxList', fields, { edgeSummary: !!(meta.pages && meta.pages.length) }).then(function (res) {
-          if (sequence === listSequence) applyList(res);
+        // Show the read-only edge summary immediately, even on a fresh visit. If page metadata
+        // is not cached yet, fetch the full response in the background to hydrate the selectors.
+        return MaAdmin.inboxCall('InboxList', fields, { edgeSummary: true }).then(function (res) {
+          if (sequence !== listSequence) return;
+          applyList(res);
+          if (res.pagesOmitted && !pageMetadataLoaded) {
+            MaAdmin.inboxCall('InboxList', fields, { edgeSummary: false }).then(function (full) {
+              if (sequence === listSequence && !full.pagesOmitted) applyList(full);
+            }).catch(function () {});
+          }
         }).catch(function (err) {
           if (sequence !== listSequence) return;
           if (contacts.length) { $('ibxPages').textContent = 'আপডেট করা যায়নি: ' + (err.message || err); return; }
