@@ -12,6 +12,11 @@ window.SITE_FOOTER_CONFIG = {
     address: "832, West Rasulpur, Dhaka-1211, Bangladesh"
   },
 
+  supportChat: {
+    supabaseUrl: "https://aajeqlgwlracqnfycdnb.supabase.co",
+    supabaseKey: "sb_publishable_U0lwxeyIQnccV8kMWUResw_drNDxbfM"
+  },
+
   social: {
     facebook: "https://www.facebook.com/muslimabayaofficial/",
     instagram: "https://www.instagram.com/muslimabaya.shop/",
@@ -39,4 +44,3 @@ window.SITE_FOOTER_CONFIG = {
 
   copyrightHtml: "Copyright &copy; 2026 Muslim Abaya. All Rights Reserved."
 };
-
