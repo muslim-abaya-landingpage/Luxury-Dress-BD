@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>Reset Admin Inbox Password · Muslim Abaya</title>
+  <style>
+    :root{--ink:#181715;--muted:#77736b;--line:#e9e5dc;--paper:#fff;--wash:#f7f5f1;--gold:#b59657;--green:#14824b;--red:#a4322d;--shadow:0 18px 60px rgba(30,24,14,.11)}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:linear-gradient(135deg,#f3f1ed,#fbfaf8);color:var(--ink);font:15px/1.55 "DM Sans",system-ui,-apple-system,Segoe UI,sans-serif;display:grid;place-items:center;padding:22px}
+    .card{width:min(480px,100%);background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:clamp(24px,6vw,42px);box-shadow:var(--shadow)}.brand{display:flex;align-items:center;gap:12px;margin-bottom:28px}.mark{width:42px;height:42px;border:1px solid var(--gold);border-radius:50%;display:grid;place-items:center;color:var(--gold);font:700 22px Georgia,serif}.brand strong{display:block;font:700 18px Georgia,serif}.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:.16em;text-transform:uppercase}.eyebrow{color:var(--gold);font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}h1{font:700 clamp(27px,6vw,34px)/1.15 Georgia,serif;margin:8px 0 10px}.intro{color:var(--muted);margin:0 0 24px}.field{display:block;font-size:12px;font-weight:700;margin:16px 0 6px}input{width:100%;height:46px;border:1px solid var(--line);border-radius:10px;padding:0 13px;font:inherit;outline:none}input:focus{border-color:var(--gold);box-shadow:0 0 0 3px #b5965720}button{width:100%;height:46px;margin-top:16px;border:0;border-radius:10px;background:#1b1a18;color:#fff;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer}button:hover{background:#37332d}button:disabled{opacity:.6;cursor:wait}.notice{min-height:22px;margin:14px 0 0;font-size:13px;color:var(--red)}.notice.success{color:var(--green)}.hidden{display:none!important}.back{display:inline-block;margin-top:20px;color:#6f592e;text-decoration:none;font-size:13px}.back:hover{text-decoration:underline}.note{background:var(--wash);border-radius:10px;padding:12px;color:var(--muted);font-size:12px;margin-top:18px}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="brand"><span class="mark" aria-hidden="true">M</span><span><strong>Muslim Abaya</strong><small>Private support workspace</small></span></div>
+    <section id="requestPanel">
+      <div class="eyebrow">Account recovery</div>
+      <h1>Reset your password</h1>
+      <p class="intro">Enter the email on your support-agent account. If it is registered, Supabase will send a secure recovery link.</p>
+      <form id="requestForm" novalidate>
+        <label class="field" for="email">Work email</label>
+        <input id="email" type="email" autocomplete="username" inputmode="email" required maxlength="254" placeholder="you@example.com">
+        <button id="requestButton" type="submit">Send recovery link</button>
+      </form>
+      <div id="requestNotice" class="notice" role="status" aria-live="polite"></div>
+      <div class="note">For your privacy, this page does not reveal whether an email address has an account. A recovery link is valid only according to your Supabase Auth email settings.</div>
+    </section>
+    <section id="changePanel" class="hidden">
+      <div class="eyebrow">Secure recovery session</div>
+      <h1>Choose a new password</h1>
+      <p class="intro">Set a new password for your Supabase Auth account. Your password is sent only to Supabase Auth over HTTPS.</p>
+      <form id="changeForm" novalidate>
+        <label class="field" for="newPassword">New password</label>
+        <input id="newPassword" type="password" autocomplete="new-password" minlength="8" required>
+        <label class="field" for="confirmPassword">Confirm new password</label>
+        <input id="confirmPassword" type="password" autocomplete="new-password" minlength="8" required>
+        <button id="changeButton" type="submit">Save new password</button>
+      </form>
+      <div id="changeNotice" class="notice" role="status" aria-live="polite"></div>
+      <a id="inboxLink" class="back hidden" href="/admin-support-inbox.html">Continue to Admin Inbox</a>
+    </section>
+    <a id="loginLink" class="back" href="/admin-support-inbox.html">← Back to Admin Inbox sign in</a>
+  </main>
+
+  <script src="/site-footer-config.js?v=20261022-support-chat"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+  (function(){
+    "use strict";
+    var config=(window.SITE_FOOTER_CONFIG||{}).supportChat||{};
+    var requestPanel=document.getElementById("requestPanel");
+    var changePanel=document.getElementById("changePanel");
+    var requestNotice=document.getElementById("requestNotice");
+    var changeNotice=document.getElementById("changeNotice");
+    var loginLink=document.getElementById("loginLink");
+    var changeSessionReady=false;
+    var urlParams=new URLSearchParams(window.location.search);
+    var hashParams=new URLSearchParams(window.location.hash.replace(/^#/,""));
+    var recoveryLink=urlParams.get("type")==="recovery"||hashParams.get("type")==="recovery"||urlParams.has("code");
+
+    function showNotice(node,message,success){node.textContent=message||"";node.className="notice"+(success?" success":"");}
+    function showChangeForm(){requestPanel.classList.add("hidden");changePanel.classList.remove("hidden");loginLink.classList.add("hidden");document.getElementById("newPassword").focus();}
+    function showRequestForm(){requestPanel.classList.remove("hidden");changePanel.classList.add("hidden");loginLink.classList.remove("hidden");}
+    function getClient(){
+      if(!config.supabaseUrl||!config.supabaseKey)throw new Error("Support sign-in configuration is missing.");
+      if(!window.supabase||!window.supabase.createClient)throw new Error("Supabase Auth did not load. Refresh and try again.");
+      if(!window.__maSupportResetClient)window.__maSupportResetClient=window.supabase.createClient(config.supabaseUrl,config.supabaseKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:"implicit"}});
+      return window.__maSupportResetClient;
+    }
+
+    document.getElementById("requestForm").addEventListener("submit",async function(event){
+      event.preventDefault();
+      var button=document.getElementById("requestButton");
+      var email=document.getElementById("email").value.trim().toLowerCase();
+      if(!email){showNotice(requestNotice,"Enter your work email.");return;}
+      button.disabled=true;showNotice(requestNotice,"Requesting a secure link…");
+      try{
+        var redirectTo=new URL("/admin-support-reset.html",window.location.origin).toString();
+        var result=await getClient().auth.resetPasswordForEmail(email,{redirectTo:redirectTo});
+        if(result.error)throw result.error;
+        showNotice(requestNotice,"If this email is registered, a password recovery email will arrive shortly. Check your inbox and spam folder.",true);
+      }catch(error){
+        showNotice(requestNotice,"Could not request a recovery link. Refresh and try again; if this continues, contact the project owner.");
+      }finally{button.disabled=false;}
+    });
+
+    document.getElementById("changeForm").addEventListener("submit",async function(event){
+      event.preventDefault();
+      var button=document.getElementById("changeButton");
+      var password=document.getElementById("newPassword").value;
+      var confirm=document.getElementById("confirmPassword").value;
+      if(!changeSessionReady){showNotice(changeNotice,"Open the recovery link from your email again. This page needs its valid recovery session before changing a password.");return;}
+      if(password.length<8){showNotice(changeNotice,"Use at least 8 characters, or meet any stronger password rule shown by Supabase.");return;}
+      if(password!==confirm){showNotice(changeNotice,"The two passwords do not match.");return;}
+      button.disabled=true;showNotice(changeNotice,"Updating your password…");
+      try{
+        var result=await getClient().auth.updateUser({password:password});
+        if(result.error)throw result.error;
+        document.getElementById("newPassword").value="";document.getElementById("confirmPassword").value="";
+        showNotice(changeNotice,"Password updated. Continue to the Admin Inbox and sign in with your new password.",true);
+        document.getElementById("inboxLink").classList.remove("hidden");
+      }catch(error){
+        showNotice(changeNotice,"Password could not be updated. The recovery link may have expired; request a new one and follow it promptly.");
+      }finally{button.disabled=false;}
+    });
+
+    try{
+      var client=getClient();
+      client.auth.onAuthStateChange(function(event,session){
+        if(event==="PASSWORD_RECOVERY"&&session){changeSessionReady=true;showChangeForm();}
+      });
+      client.auth.getSession().then(function(result){
+        if(result.error)throw result.error;
+        if(recoveryLink&&result.data&&result.data.session){changeSessionReady=true;showChangeForm();}
+        else if(recoveryLink){showRequestForm();showNotice(requestNotice,"This recovery link is invalid or expired. Request a fresh link.");}
+      }).catch(function(){if(recoveryLink){showRequestForm();showNotice(requestNotice,"This recovery link could not be verified. Request a fresh link.");}});
+    }catch(error){showNotice(requestNotice,error.message||"Could not connect to Supabase Auth.");}
+  })();
+  </script>
+</body>
+</html>
