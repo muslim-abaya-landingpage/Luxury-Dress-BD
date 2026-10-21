@@ -224,3 +224,23 @@ test('daily summary lists forgotten orders: unsent for 3+ days, or courier not f
   assert.equal(JSON.stringify(res.map(r => r.orderId)), JSON.stringify(['C', 'A']));
   assert.match(res[0].why, /in_review/);
 });
+
+test('full order page: items, design text and backdated timestamps are validated', () => {
+  const box = {}; vm.createContext(box);
+  vm.runInContext([extractFrom(ADM, 'admParseCreateItems_'), extractFrom(ADM, 'admCreateDesignText_'), extractFrom(ADM, 'admCreateTimestamp_')].join('\n'), box);
+  const items = box.admParseCreateItems_(JSON.stringify([
+    { id: 'ABY-1', name: 'Black Abaya', type: 'Full Set', size: 'Body 46 · Length 52', price: 1450, qty: 2 },
+    { name: 'Hand-typed Kurti', price: 350, qty: 1 }]));
+  assert.equal(items.length, 2);
+  assert.match(items[1].id, /^CUSTOM-HAND-TYPED-KURTI/);
+  assert.equal(box.admCreateDesignText_(items), '1. Black Abaya (Full Set · Body 46 · Length 52) × 2 = ৳2,900\n2. Hand-typed Kurti × 1 = ৳350');
+  assert.throws(() => box.admParseCreateItems_('[]'), /NO_ITEMS/);
+  assert.throws(() => box.admParseCreateItems_(JSON.stringify([{ name: 'x', price: 10, qty: 1.5 }])), /ITEM_QTY/);
+  assert.throws(() => box.admParseCreateItems_(JSON.stringify([{ name: 'x', price: -1, qty: 1 }])), /ITEM_PRICE/);
+  const now = Date.parse('2026-10-21T08:30:00Z'); // 14:30 Dhaka
+  assert.equal(JSON.stringify(box.admCreateTimestamp_('2026-10-20', '09:05', now)), JSON.stringify({ stamp: '20-10-2026 09:05:00', ymd: '20261020' }));
+  assert.equal(box.admCreateTimestamp_('', '', now).stamp, '21-10-2026 14:30:00', 'defaults to now in Dhaka');
+  assert.throws(() => box.admCreateTimestamp_('2026-10-25', '10:00', now), /FUTURE_DATE/);
+  assert.throws(() => box.admCreateTimestamp_('2026-02-30', '10:00', now), /INVALID_DATE/);
+  assert.throws(() => box.admCreateTimestamp_('2024-01-01', '10:00', now), /TOO_OLD_DATE/);
+});

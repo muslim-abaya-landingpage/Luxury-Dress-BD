@@ -429,7 +429,8 @@
     $("otPrintSel").addEventListener("click", function () { printSlips(selectedOrders()); });
     $("otSyncSel").addEventListener("click", function () { refreshBulkTracking(this); });
     $("otSendSel").addEventListener("click", function () { sendBulk(this); });
-    $("ordExportFiltered").addEventListener("click", function () { exportCsv(filteredOrders()); });
+    var exportBtn = $("ordExportFiltered");
+    if (exportBtn) exportBtn.addEventListener("click", function () { exportCsv(filteredOrders()); });
     document.addEventListener("ma-orders-rendered", function () { if (all) all.checked = false; decorateRows(); paintReport(); });
     decorateRows();
   }

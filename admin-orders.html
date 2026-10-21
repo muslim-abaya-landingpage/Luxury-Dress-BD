@@ -62,6 +62,7 @@
         <div class="adm-heading"><span class="adm-page-kicker">মুসলিম আবায়া / অর্ডার ও হিসাব</span><h1>অর্ডার পরিচালনা</h1></div>
         <span class="pn-spacer"></span>
         <span class="pn-note-muted" id="ordCount"></span>
+        <a class="pn-btn pn-btn-primary" href="admin-order-new.html" id="ordNewOrder">+ নতুন অর্ডার</a>
         <button type="button" class="pn-btn" id="ordRefresh">রিফ্রেশ</button>
       </div>
 
@@ -146,7 +147,7 @@
   <script src="admin-order-insights.js?v=20261021-2"></script>
   <script src="admin-manual-order.js?v=20261020-1" defer></script>
   <script src="admin-invoice.js?v=20261021-1" defer></script>
-  <script src="admin-order-tools.js?v=20261021-5" defer></script>
+  <script src="admin-order-tools.js?v=20261021-6" defer></script>
   <script>
     (function () {
       var esc = MaPanel.esc;
@@ -259,7 +260,7 @@
       function renderRows() {
         var list = all.filter(matches);
         document.getElementById("ordIssueCount").textContent = "লোড করা " + all.length + "টির মধ্যে দেখানো হচ্ছে " + list.length;
-        window.MaOrdersState = { all: all, filtered: list, total: Number(counts.all) || all.length };
+        try { window.MaOrdersState = { all: all, filtered: list, total: Number(counts.all) || all.length }; } catch (stateErr) {}
         var body = document.getElementById("ordBody");
         if (!list.length) {
           body.innerHTML = '<tr><td colspan="9" class="pn-empty">কোনো অর্ডার পাওয়া যায়নি</td></tr>';

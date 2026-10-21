@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <link rel="preload" as="script" href="site-api-config.js?v=20261009-inbox">
+  <link rel="preload" as="script" href="admin-config.js?v=20261009-inbox">
+  <link rel="preload" as="script" href="admin-api.js?v=20261013-speed2">
+  <link rel="preload" as="script" href="admin-guard.js?v=20261010-speed">
+  <link rel="preload" as="script" href="admin-panel.js?v=20261018-shared">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <meta name="robots" content="noindex, nofollow">
+  <title>নতুন অর্ডার | Muslim Abaya Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="admin-panel.css?v=20260930">
+  <script src="config.js?v=20261009-inbox"></script>
+  <link rel="stylesheet" href="admin-sidebar.css?v=20261003sb">
+<link rel="stylesheet" href="admin.css?v=20261018-shared">
+<link rel="stylesheet" href="admin-dashboard-design.css?v=20261018-3">
+<script src="admin-dashboard-design.js?v=20261018-3"></script>
+<link rel="stylesheet" href="admin-premium-layout.css?v=20261018-3">
+<script src="admin-order-status.js?v=20261018-2"></script>
+  <link rel="stylesheet" href="admin-order-new.css?v=20261021-1">
+</head>
+<body class="pn-body">
+  <div class="pn-app adm-shell">
+    <div class="adm-sidebar-backdrop" id="admSbBackdrop"></div><aside class="adm-sidebar" id="pnSide" data-shared-design="1">
+      <div class="adm-sidebar-brand">
+        <div class="adm-sidebar-crest"></div>
+        <div class="adm-sidebar-brand-text"><div class="t1">Muslim Abaya</div><div class="t2">Admin Panel</div></div>
+        <button type="button" class="adm-collapse-btn" id="admCollapse" aria-controls="admSidebar" aria-expanded="true" aria-label="সাইডবার ছোট করুন"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="3" stroke="currentColor" stroke-width="1.6"/><path d="M9 4v16" stroke="currentColor" stroke-width="1.6"/></svg></button>
+        <button type="button" class="adm-sidebar-close" id="admSbClose" aria-label="মেনু বন্ধ করুন"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+      </div>
+      <div class="adm-sidebar-profile"><div class="adm-profile-avatar" aria-hidden="true">MA</div><div class="adm-profile-copy"><strong>আপনার কর্মক্ষেত্র</strong><small>স্টোর পরিচালনা</small></div></div>
+      <nav class="adm-sidebar-nav" aria-label="অ্যাডমিন মেনু">
+<a class="adm-sidebar-item" href="admin-dashboard.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>ড্যাশবোর্ড</span></a>
+<details class="adm-nav-group has-current" name="adm-navigation" open><summary class="adm-sidebar-item" title="অর্ডার ও হিসাব"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z M9 7h6M9 11h6M9 15h4"/></svg><span>অর্ডার ও হিসাব</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
+<a class="adm-sidebar-item adm-nav-child" href="admin-orders.html"><span>অর্ডার প্যানেল</span></a>
+<a class="adm-sidebar-item adm-nav-child is-current" href="admin-order-new.html" aria-current="page"><span>নতুন অর্ডার</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-operations.html"><span>হিসাব ও রিটার্ন</span></a>
+</div></details>
+<details class="adm-nav-group" name="adm-navigation"><summary class="adm-sidebar-item" title="পণ্য ও স্টক"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="6" width="16" height="15" rx="2"/><path d="M9 6V5a3 3 0 0 1 6 0v1M9 10a3 3 0 0 0 6 0"/></svg><span>পণ্য ও স্টক</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
+<a class="adm-sidebar-item adm-nav-child" href="product-manager.html"><span>প্রোডাক্ট ম্যানেজার</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="stock-analytics.html"><span>স্টক ও অ্যানালিটিক্স</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="product-links.html"><span>প্রোডাক্ট লিংক</span></a>
+</div></details>
+<a class="adm-sidebar-item" href="admin-inbox.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h18v13H8l-5 4V4ZM7 9h10M7 13h7"/></svg><span>কাস্টমার ইনবক্স</span></a>
+<details class="adm-nav-group" name="adm-navigation"><summary class="adm-sidebar-item" title="সেটিংস ও অন্যান্য"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 9v12"/></svg><span>সেটিংস ও অন্যান্য</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
+<a class="adm-sidebar-item adm-nav-child" href="admin-staff.html"><span>স্টাফ ম্যানেজমেন্ট</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-growth.html"><span>গ্রোথ টুলস</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-links.html"><span>পরিচালনা লিংক</span></a>
+</div></details>
+</nav>
+      <div class="adm-sidebar-foot">
+        <button type="button" id="admThemeToggle" class="adm-theme-toggle" role="switch" aria-checked="false" aria-label="ডার্ক মোড"><svg viewBox="0 0 24 24" fill="none"><path d="M20 14A8.5 8.5 0 0 1 10 4a8.5 8.5 0 1 0 10 10Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="adm-theme-label">ডার্ক মোড</span><span class="adm-theme-track" aria-hidden="true"></span></button>
+        <button type="button" class="adm-btn adm-btn-secondary" id="admLogout">লগআউট</button>
+      </div>
+    </aside>
+    <main class="pn-main">
+      <div class="pn-head">
+        <button type="button" class="pn-btn pn-menu-btn" id="pnMenuBtn" aria-label="Menu">☰</button>
+        <div class="adm-heading"><span class="adm-page-kicker">মুসলিম আবায়া / অর্ডার ও হিসাব</span><h1>Add new order</h1></div>
+        <a class="pn-btn pn-btn-sm" href="admin-orders.html">← সব অর্ডার</a>
+      </div>
+      <form id="noForm" class="no-layout" novalidate autocomplete="off">
+        <div class="no-main">
+          <section class="no-card">
+            <h2 class="no-order-title">Order #<span id="noNextId">নতুন</span> <small id="noTitleTotal"></small></h2>
+            <div class="no-cols">
+              <div class="no-col">
+                <h3>General</h3>
+                <label class="no-label" for="noDate">Date created</label>
+                <div class="no-date"><input class="no-in" type="date" id="noDate"><input class="no-in" type="number" id="noHour" min="0" max="23" aria-label="ঘণ্টা"><span>:</span><input class="no-in" type="number" id="noMin" min="0" max="59" aria-label="মিনিট"></div>
+                <label class="no-label" for="noStatus">Status</label>
+                <select class="no-in" id="noStatus"></select>
+                <label class="no-label" for="noCustomer">Customer</label>
+                <input class="no-in" id="noCustomer" list="noCustList" placeholder="Guest — নাম বা ফোন লিখে আগের ক্রেতা খুঁজুন">
+                <datalist id="noCustList"></datalist>
+                <small class="no-hint" id="noCustHint"></small>
+              </div>
+              <div class="no-col">
+                <h3>Billing <button type="button" class="no-pencil" id="noBillToggle" aria-expanded="false" aria-label="Billing এডিট করুন">✎</button></h3>
+                <div class="no-view" id="noBillView"></div>
+                <div id="noBillEdit" hidden>
+                  <label class="no-label" for="noName">নাম *</label><input class="no-in" id="noName" maxlength="80">
+                  <label class="no-label" for="noPhone">মোবাইল *</label><input class="no-in" id="noPhone" inputmode="numeric" maxlength="14" placeholder="01XXXXXXXXX">
+                  <label class="no-label" for="noEmail">Email address</label><input class="no-in" id="noEmail" type="email" maxlength="120">
+                </div>
+              </div>
+              <div class="no-col">
+                <h3>Shipping <button type="button" class="no-pencil" id="noShipToggle" aria-expanded="false" aria-label="Shipping এডিট করুন">✎</button></h3>
+                <div class="no-view" id="noShipView"></div>
+                <div id="noShipEdit" hidden>
+                  <label class="no-label" for="noAddress">পূর্ণ ঠিকানা *</label><textarea class="no-in" id="noAddress" rows="2" maxlength="400"></textarea>
+                  <label class="no-label" for="noDistrict">জেলা</label><select class="no-in" id="noDistrict"><option value="">— জেলা বাছুন —</option></select>
+                  <label class="no-label" for="noCourierNote">Courier note</label><input class="no-in" id="noCourierNote" maxlength="300" placeholder="কুরিয়ারের জন্য নির্দেশনা">
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="no-card no-items-card">
+            <table class="no-table">
+              <thead><tr><th>Item</th><th>Price</th><th>Qty</th><th>Total</th><th></th></tr></thead>
+              <tbody id="noItems"></tbody>
+            </table>
+            <div class="no-totals">
+              <div><span>Items Subtotal:</span><b id="noSub">৳0</b></div>
+              <div><label for="noShipping">Shipping:</label><span class="no-num"><input class="no-in no-mini" type="number" id="noShipping" min="0" step="1" value="150"><b id="noShipLine">৳150</b></span></div>
+              <div><label for="noDiscount">Discount:</label><span class="no-num"><input class="no-in no-mini" type="number" id="noDiscount" min="0" step="1" value="0"><b id="noDiscLine">−৳0</b></span></div>
+              <div id="noCouponRow" hidden><span id="noCouponLbl">Coupon:</span><span class="no-num"><button type="button" class="no-link" id="noCouponRemove">সরান</button><b id="noCouponLine"></b></span></div>
+              <div class="no-grand"><span>Order Total:</span><b id="noTotal">৳0</b></div>
+              <div><label for="noAdvance">Paid (অগ্রিম):</label><span class="no-num"><input class="no-in no-mini" type="number" id="noAdvance" min="0" step="1" value="0"></span></div>
+              <div class="no-due"><span>Due on delivery (COD):</span><b id="noDue">৳0</b></div>
+            </div>
+            <div class="no-item-actions">
+              <button type="button" class="no-btn" id="noAddBtn">Add item(s)</button>
+              <button type="button" class="no-btn" id="noCouponBtn">Apply coupon</button>
+              <span class="no-spacer"></span>
+              <button type="button" class="no-btn no-btn-dark" id="noRecalc">Recalculate</button>
+            </div>
+          </section>
+        </div>
+
+        <aside class="no-side">
+          <section class="no-box">
+            <div class="no-box-head"><h3>Order actions</h3><button type="button" class="no-box-toggle" aria-expanded="true" aria-label="ছোট/বড় করুন">▴</button></div>
+            <div class="no-box-body">
+              <div class="no-action-row"><select class="no-in" id="noAction" aria-label="তৈরির পর কী হবে"><option value="">Choose an action...</option><option value="print">তৈরির পর ইনভয়েস প্রিন্ট</option><option value="courier">তৈরির পর Steadfast-এ পাঠান</option></select></div>
+              <div class="no-box-foot"><button type="button" class="no-trash" id="noTrash">Move to trash</button><button type="submit" class="no-btn no-btn-dark" id="noCreate">Create</button></div>
+              <p class="no-msg" id="noStatusMsg" role="status" aria-live="polite"></p>
+            </div>
+          </section>
+          <section class="no-box">
+            <div class="no-box-head"><h3>Payment</h3><button type="button" class="no-box-toggle" aria-expanded="true" aria-label="ছোট/বড় করুন">▴</button></div>
+            <div class="no-box-body">
+              <label class="no-label" for="noPayment">Payment method</label>
+              <select class="no-in" id="noPayment"><option>Cash On Delivery</option><option>bKash</option><option>Nagad</option><option>Rocket</option><option>Bank</option></select>
+              <label class="no-label" for="noTxn">Transaction ID / Sender</label><input class="no-in" id="noTxn" maxlength="80">
+            </div>
+          </section>
+          <section class="no-box">
+            <div class="no-box-head"><h3>Order attribution</h3><button type="button" class="no-box-toggle" aria-expanded="true" aria-label="ছোট/বড় করুন">▴</button></div>
+            <div class="no-box-body">
+              <label class="no-label" for="noSource">Origin</label>
+              <select class="no-in" id="noSource"><option value="Other">Unknown</option><option>Facebook</option><option>WhatsApp</option><option value="Phone">Phone call</option><option>Instagram</option><option>TikTok</option><option value="Walk-in">Shop / Walk-in</option><option>Other</option></select>
+            </div>
+          </section>
+          <section class="no-box">
+            <div class="no-box-head"><h3>Order notes</h3><button type="button" class="no-box-toggle" aria-expanded="true" aria-label="ছোট/বড় করুন">▴</button></div>
+            <div class="no-box-body">
+              <label class="no-label" for="noNote">Add note</label>
+              <textarea class="no-in" id="noNote" rows="3" maxlength="300"></textarea>
+              <small class="no-hint">Private note — শুধু অ্যাডমিনরা দেখবেন (Admin Note)।</small>
+            </div>
+          </section>
+        </aside>
+      </form>
+
+      <dialog id="noAddDialog" class="no-dialog">
+        <div class="no-dialog-head"><h3>Add products</h3><button type="button" id="noAddClose" aria-label="বন্ধ করুন">×</button></div>
+        <label class="no-label" for="noProdSearch">পণ্য খুঁজুন</label>
+        <input class="no-in" id="noProdSearch" list="noProdList" placeholder="নাম বা SKU লিখে বাছুন…"><datalist id="noProdList"></datalist>
+        <div id="noProdPick" class="no-pick" hidden>
+          <b id="noProdName"></b>
+          <div class="no-pick-grid">
+            <label id="noTypeWrap">Type<select class="no-in" id="noType"></select></label>
+            <label>Size<select class="no-in" id="noSize"></select></label>
+            <label>Price (৳)<input class="no-in" type="number" id="noItemPrice" min="1"></label>
+            <label>Qty<input class="no-in" type="number" id="noItemQty" min="1" value="1"></label>
+          </div>
+          <button type="button" class="no-btn no-btn-dark" id="noAddPicked">Add</button>
+        </div>
+        <details class="no-custom"><summary>তালিকায় নেই এমন পণ্য যোগ করুন</summary>
+          <div class="no-pick-grid">
+            <label class="no-wide">পণ্যের নাম<input class="no-in" id="noCustName" maxlength="150"></label>
+            <label>Size<input class="no-in" id="noCustSize" maxlength="40"></label>
+            <label>Price (৳)<input class="no-in" type="number" id="noCustPrice" min="1"></label>
+            <label>Qty<input class="no-in" type="number" id="noCustQty" min="1" value="1"></label>
+          </div>
+          <button type="button" class="no-btn" id="noAddCustom">Add</button>
+        </details>
+      </dialog>
+    </main>
+  </div>
+
+  <script src="site-api-config.js?v=20261009-inbox"></script>
+  <script src="admin-config.js?v=20261009-inbox"></script>
+  <script src="admin-api.js?v=80dbd3e930707465"></script>
+  <script src="admin-guard.js?v=20261010-speed"></script>
+  <script src="admin-panel.js?v=20261018-shared"></script>
+  <script src="category-products.js?v=fa55a907c2bf0fe7"></script>
+  <script src="admin-invoice.js?v=20261021-1"></script>
+  <script src="admin-order-new.js?v=20261021-2"></script>
+
+</body>
+</html>

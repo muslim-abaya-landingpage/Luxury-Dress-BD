@@ -129,7 +129,7 @@ function doPost(e) {
     }
 
     // Every order-panel action verifies the admin/staff token inside its handler.
-    var orderPanelTypes = ['AdminOrderList', 'AdminOrderGet', 'AdminOrderUpdate', 'AdminFraudCheck', 'AdminBlockCustomer', 'AdminSendCourier', 'AdminOrderStaff', 'AdminCourierTracking', 'AdminManualOrderCreate'];
+    var orderPanelTypes = ['AdminOrderList', 'AdminOrderGet', 'AdminOrderUpdate', 'AdminFraudCheck', 'AdminBlockCustomer', 'AdminSendCourier', 'AdminOrderStaff', 'AdminCourierTracking', 'AdminManualOrderCreate', 'AdminOrderCreate', 'AdminCustomerLookup', 'AdminCouponCheck'];
     if (orderPanelTypes.indexOf(type) !== -1) {
       var panelResult = handleAdminOrderRequest_(type, e);
       return jsonOut_(panelResult || { ok: false, error: 'UNKNOWN_TYPE' });
@@ -7903,6 +7903,9 @@ function handleAdminOrderRequest_(type, e) {
       case 'AdminSendCourier': return adminSendCourier_(e);
       case 'AdminOrderStaff': return adminStaffList_(e);
       case 'AdminManualOrderCreate': return adminManualOrderCreate_(e);
+      case 'AdminOrderCreate': return adminOrderCreateFull_(e);
+      case 'AdminCustomerLookup': return adminCustomerLookup_(e);
+      case 'AdminCouponCheck': return adminCouponCheck_(e);
     }
   } catch (err) {
     var code = String(err &amp;&amp; err.message ? err.message : err);
@@ -8000,6 +8003,220 @@ function adminManualOrderCreate_(e) {
   });
   if (!res || !res.ok) return { ok: false, error: 'INVALID_ORDER', message: (res &amp;&amp; res.message) || 'অর্ডার যোগ করা যায়নি।' };
   return { ok: true, orderId: res.orderId, row: res.row };
+}
+
+/* ───────────── Full "Add new order" page (admin-order-new.html), WooCommerce-style ───────────── */
+
+var ADM_CREATE_STATUSES = ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'];
+var ADM_SOURCES = ['Website', 'Facebook', 'WhatsApp', 'Phone', 'Instagram', 'TikTok', 'Walk-in', 'Other'];
+
+/** Items from the page: [{id,name,size,type,price,qty,category}] → validated cart items (same shape as the website cart). */
+function admParseCreateItems_(raw) {
+  var list;
+  try { list = JSON.parse(String(raw || '[]')); } catch (err) { list = null; }
+  if (!Array.isArray(list) || !list.length) throw new Error('NO_ITEMS');
+  if (list.length > 30) throw new Error('TOO_MANY_ITEMS');
+  return list.map(function (it) {
+    var name = String(it &amp;&amp; it.name || '').replace(/\s+/g, ' ').trim().slice(0, 150);
+    var qty = Number(it &amp;&amp; it.qty);
+    var price = Number(it &amp;&amp; it.price);
+    if (!name) throw new Error('ITEM_NAME');
+    if (!isFinite(qty) || qty &lt; 1 || qty > 100 || Math.floor(qty) !== qty) throw new Error('ITEM_QTY');
+    if (!isFinite(price) || price &lt; 0 || price > 1000000) throw new Error('ITEM_PRICE');
+    return {
+      id: String(it &amp;&amp; it.id || '').trim().slice(0, 80) || ('CUSTOM-' + name.toUpperCase().replace(/[^A-Z0-9]+/g, '-').slice(0, 30)),
+      name: name,
+      qty: qty,
+      price: Math.round(price * 100) / 100,
+      size: String(it &amp;&amp; it.size || '').trim().slice(0, 160),
+      color: '',
+      productType: String(it &amp;&amp; it.type || '').trim().slice(0, 80),
+      category: String(it &amp;&amp; it.category || '').trim().slice(0, 80)
+    };
+  });
+}
+
+/** One line per item, in the same style as website orders. */
+function admCreateDesignText_(items) {
+  return items.map(function (it, i) {
+    var extra = [it.productType, it.size].filter(Boolean).join(' · ');
+    return (i + 1) + '. ' + it.name + (extra ? ' (' + extra + ')' : '') + ' × ' + it.qty + ' = ৳' + Math.round(it.price * it.qty).toLocaleString('en-US');
+  }).join('\n');
+}
+
+/** 'yyyy-mm-dd' + 'HH:mm' (Dhaka) → { stamp: 'dd-MM-yyyy HH:mm:ss', ymd: 'yyyyMMdd' }; defaults to now. */
+function admCreateTimestamp_(dateStr, timeStr, nowMs) {
+  var now = Number(nowMs) || Date.now();
+  var d = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(dateStr || '').trim());
+  var t = /^(\d{1,2}):(\d{2})$/.exec(String(timeStr || '').trim());
+  if (!d) {
+    var dh = new Date(now + 6 * 3600000).toISOString();
+    d = [null, dh.slice(0, 4), dh.slice(5, 7), dh.slice(8, 10)];
+    if (!t) t = [null, dh.slice(11, 13), dh.slice(14, 16)];
+  }
+  if (!t) t = [null, '00', '00'];
+  var y = +d[1], mo = +d[2], da = +d[3], h = +t[1], mi = +t[2];
+  var check = new Date(Date.UTC(y, mo - 1, da));
+  if (check.getUTCFullYear() !== y || check.getUTCMonth() !== mo - 1 || check.getUTCDate() !== da || h > 23 || mi > 59) throw new Error('INVALID_DATE');
+  var whenMs = Date.UTC(y, mo - 1, da, h, mi) - 6 * 3600000;
+  if (whenMs > now + 24 * 3600000) throw new Error('FUTURE_DATE');
+  if (whenMs &lt; now - 400 * 24 * 3600000) throw new Error('TOO_OLD_DATE');
+  function p2(n) { return ('0' + n).slice(-2); }
+  return { stamp: p2(da) + '-' + p2(mo) + '-' + y + ' ' + p2(h) + ':' + p2(mi) + ':00', ymd: '' + y + p2(mo) + p2(da) };
+}
+
+function admCreateError_(code) {
+  var m = {
+    NO_ITEMS: 'অন্তত একটি পণ্য যোগ করুন।', TOO_MANY_ITEMS: 'একটি অর্ডারে সর্বোচ্চ ৩০টি পণ্য।', ITEM_NAME: 'প্রতিটি পণ্যের নাম দিন।',
+    ITEM_QTY: 'পরিমাণ ১–১০০-এর মধ্যে পূর্ণ সংখ্যা দিন।', ITEM_PRICE: 'পণ্যের দাম সঠিক দিন।', INVALID_DATE: 'তারিখ বা সময় সঠিক নয়।',
+    FUTURE_DATE: 'ভবিষ্যতের তারিখ দেওয়া যাবে না।', TOO_OLD_DATE: 'এক বছরের বেশি পুরোনো তারিখ দেওয়া যাবে না।', INVALID_AMOUNT: 'চার্জ, ডিসকাউন্ট ও অ্যাডভান্সে শূন্য বা ধনাত্মক সংখ্যা দিন।'
+  };
+  return { ok: false, error: code, message: m[code] || code };
+}
+
+function adminOrderCreateFull_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var by = String(v.name || v.email || v.phone || 'admin');
+
+  var name = String(param_(e, 'Name') || '').replace(/\s+/g, ' ').trim();
+  if (name.length &lt; 2 || name.length > 80) return { ok: false, error: 'INVALID_NAME', message: 'ক্রেতার সঠিক নাম দিন।' };
+  var phone = normalizePhone_(param_(e, 'Phone'));
+  if (!/^01\d{9}$/.test(phone)) return { ok: false, error: 'INVALID_PHONE', message: 'সঠিক ১১ ডিজিট মোবাইল নম্বর দিন।' };
+  var address = String(param_(e, 'Address') || '').replace(/\s+/g, ' ').trim();
+  if (address.length &lt; 8 || address.length > 400) return { ok: false, error: 'INVALID_ADDRESS', message: 'সম্পূর্ণ ঠিকানা দিন (কমপক্ষে ৮ অক্ষর)।' };
+  var district = admCellText_(String(param_(e, 'District') || '').trim(), 60);
+  var status = String(param_(e, 'Status') || 'Pending').trim();
+  if (ADM_CREATE_STATUSES.indexOf(status) === -1) return { ok: false, error: 'INVALID_STATUS', message: 'অবৈধ স্ট্যাটাস।' };
+  var source = String(param_(e, 'Source') || 'Phone').trim();
+  if (ADM_SOURCES.indexOf(source) === -1) source = 'Other';
+
+  if (String(param_(e, 'AllowBlocked') || '') !== '1') {
+    var blocked = admBlockedMap_();
+    if (blocked[phone] !== undefined) return { ok: false, error: 'PHONE_BLOCKED', message: 'এই নম্বরটি Blocked তালিকায় আছে।' };
+  }
+
+  var items, when, charge, discount, advance;
+  try {
+    items = admParseCreateItems_(param_(e, 'ItemsJSON'));
+    when = admCreateTimestamp_(param_(e, 'Date'), param_(e, 'Time'));
+    charge = admMoneyParam_(e, 'Charge', 0);
+    discount = admMoneyParam_(e, 'Discount', 0);
+    advance = admMoneyParam_(e, 'Advance', 0);
+  } catch (inputErr) {
+    return admCreateError_(String(inputErr &amp;&amp; inputErr.message || inputErr));
+  }
+  var qty = items.reduce(function (s, it) { return s + it.qty; }, 0);
+  var subtotal = items.reduce(function (s, it) { return s + it.price * it.qty; }, 0);
+  var couponCode = String(param_(e, 'CouponCode') || '').trim().toUpperCase();
+  var coupon = { discount: 0, rowIndex: null };
+  if (couponCode) {
+    var c = validateCouponCode_(couponCode, subtotal);
+    if (!c.ok) return { ok: false, error: 'COUPON_' + (c.error || 'INVALID'), message: c.message || 'কুপন প্রযোজ্য নয়।' };
+    coupon = { discount: Number(c.discount) || 0, rowIndex: c.rowIndex };
+  }
+  var total = Math.max(0, Math.round((subtotal + charge - discount - coupon.discount) * 100) / 100);
+  if (total &lt; 1) return { ok: false, error: 'INVALID_TOTAL', message: 'মোট টাকা শূন্যের বেশি হতে হবে।' };
+  if (advance > total) return { ok: false, error: 'INVALID_ADVANCE', message: 'অ্যাডভান্স মোট টাকার বেশি হতে পারে না।' };
+
+  var payment = admCellText_(String(param_(e, 'Payment') || 'Cash On Delivery').trim() || 'Cash On Delivery', 60);
+  var txn = admCellText_(param_(e, 'Txn'), 80);
+  var customerNote = admCellText_(param_(e, 'CustomerNote'), 300);
+  var adminNote = admCellText_([String(param_(e, 'AdminNote') || '').trim(), 'যোগ করেছেন: ' + by].filter(Boolean).join(' | '), 500);
+  var courierNote = admCellText_(param_(e, 'CourierNote'), 300);
+  var email = String(param_(e, 'Email') || '').trim().toLowerCase().slice(0, 120);
+  if (email &amp;&amp; !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) email = '';
+  var design = admCreateDesignText_(items);
+
+  var sheet = admGetSheet_();
+  ensureOnlineOrderHeaders_(sheet);
+  ensureOnlineOrderImageHeaders_(sheet);
+  ensureOnlineOrderMetaFieldHeaders_(sheet);
+  ensureCouponMetaHeaders_(sheet);
+  ensureOnlineOrderStockStageHeader_(sheet);
+  ensureOnlineOrderSourceHeader_(sheet);
+  ensureOnlineOrderTrackingEventIdHeader_(sheet);
+
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  var row = 0, reserved = 0, orderId = '', stockNote = '';
+  try {
+    for (var t = 0; t &lt; 20 &amp;&amp; (!orderId || admFindRow_(sheet, orderId)); t++) orderId = 'MA-' + when.ymd + '-' + (Math.floor(Math.random() * 9000) + 1000);
+    try {
+      reserved = reserveStockForOrderItems_(items, orderId, 'admin:' + by);
+    } catch (stockErr) {
+      var sm = String(stockErr &amp;&amp; stockErr.message || stockErr);
+      if (sm.indexOf('OUT_OF_STOCK:') === 0) return { ok: false, error: 'OUT_OF_STOCK', message: 'পর্যাপ্ত স্টক নেই: ' + sm.slice(13) };
+      if (sm.indexOf('VARIANT_NOT_TRACKED:') === 0) return { ok: false, error: 'VARIANT_NOT_TRACKED', message: 'এই পণ্যের নির্বাচিত সাইজের স্টক সেটআপ করা নেই। সাইজ ঠিক করুন বা স্টক প্যানেলে সাইজটি যোগ করুন।' };
+      throw stockErr;
+    }
+    row = appendOnlineOrderRowLocked_(sheet, [
+      when.stamp, admCellText_(name, 80), phone, qty, charge, admCellText_(address, 400), design, String(total), orderId,
+      'Pending', '', '', '', district, payment, txn, customerNote
+    ], formatOnlineOrderSizes_(items, design));
+    sheet.getRange(row, 3).setNumberFormat('@');
+    sheet.getRange(row, onlineOrderColumn_(sheet, 30), 1, 3).setValues([[email, '', '']]);
+    sheet.getRange(row, onlineOrderColumn_(sheet, 33), 1, 6).setValues([[
+      JSON.stringify(items), couponCode, coupon.discount, reserved > 0 ? 'RESERVED' : 'NEW', source, 'admin_' + orderId
+    ]]);
+    sheet.getRange(row, onlineOrderColumn_(sheet, ADM_COL_ADMIN_NOTE), 1, ADM_LAST_COL - ADM_COL_ADMIN_NOTE + 1).setValues([[
+      adminNote, courierNote, advance, discount, '', source, 'Steadfast'
+    ]]);
+    if (status !== 'Pending') {
+      try {
+        if (typeof applyStockLifecycleForStatusChangeLocked_ === 'function') applyStockLifecycleForStatusChangeLocked_(sheet, row, status);
+        sheet.getRange(row, onlineOrderColumn_(sheet, 10)).setValue(status);
+      } catch (lifeErr) {
+        stockNote = 'স্ট্যাটাস Pending রাখা হয়েছে: স্টক আপডেট করা যায়নি (' + String(lifeErr &amp;&amp; lifeErr.message || lifeErr).slice(0, 80) + ')';
+        status = 'Pending';
+      }
+    }
+  } catch (err) {
+    if (row) { try { sheet.getRange(row, 1, 1, sheet.getLastColumn()).clearContent(); } catch (clearErr) {} }
+    if (reserved > 0) { try { releaseStockForOrderItems_(items, orderId, 'admin-create-rollback'); } catch (relErr) {} }
+    throw err;
+  } finally {
+    lock.releaseLock();
+  }
+
+  try { flagNewOrderRisk_(sheet, row, phone, orderId); } catch (riskErr) {}
+  try { formatOnlineOrderProductCell_(sheet, row, design); } catch (fmtErr) {}
+  try { setupOrderStatusDropdown_(sheet); } catch (ddErr) {}
+  if (coupon.rowIndex != null) { try { incrementCouponUsage_(coupon.rowIndex); } catch (incErr) {} }
+  var hooks = {};
+  if (status === 'Confirmed') { try { hooks = admRunConfirmedHooks_(sheet, row) || {}; } catch (hookErr) {} }
+  return { ok: true, orderId: orderId, row: row, total: total, status: status, stockNote: stockNote, hooks: hooks };
+}
+
+/** Customer search by phone: last name/address/district/email from earlier orders, plus history and block status. */
+function adminCustomerLookup_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var phone = normalizePhone_(param_(e, 'Phone'));
+  if (!/^01\d{9}$/.test(phone)) return { ok: false, error: 'INVALID_PHONE', message: 'সঠিক মোবাইল নম্বর দিন।' };
+  var sheet = admGetSheet_();
+  var rows = admReadAll_(sheet);
+  var last = null;
+  for (var i = rows.length - 1; i >= 0; i--) {
+    if (normalizePhone_(rows[i][2]) === phone &amp;&amp; String(rows[i][1] || '').trim()) { last = rows[i]; break; }
+  }
+  var hist = admHistoryForPhone_(rows, phone, '');
+  var blocked = admBlockedMap_();
+  return {
+    ok: true, found: !!last, phone: phone,
+    name: last ? String(last[1] || '') : '', address: last ? String(last[5] || '') : '', district: last ? String(last[13] || '') : '',
+    email: last ? String(last[29] || '') : '',
+    stats: hist.stats, risk: hist.risk, successRate: hist.successRate, recent: (hist.recent || []).slice(0, 5),
+    blocked: blocked[phone] !== undefined
+  };
+}
+
+/** Coupon preview for the page (does not count a use). */
+function adminCouponCheck_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var res = validateCouponCode_(param_(e, 'Code'), parseFloat(param_(e, 'Subtotal')) || 0);
+  return res.ok ? { ok: true, discount: res.discount, message: res.message } : { ok: false, error: res.error, message: res.message };
 }
 </textarea><br>
 <button type="button" id="copyAdm">AdminOrders.gs কপি</button>
