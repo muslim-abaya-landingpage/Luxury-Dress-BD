@@ -10,7 +10,7 @@
 - `supabase/migrations/202610220004_agent_policy_tighten.sql` stops non-agent users from probing the support-agent allow-list.
 - `site-footer-config.js` contains only the Supabase project URL and publishable key. It does not contain a service-role or secret key.
 
-The two migrations have been applied to the existing Free Supabase project. Customer/agent access is enforced by RLS; visitors must use Supabase anonymous Auth and can only read/write their own conversation. The admin inbox checks the signed-in email against `support_agents` before loading any conversations.
+All four migrations have been applied to the existing Free Supabase project. Customer/agent access is enforced by RLS; visitors must use Supabase anonymous Auth and can only read/write their own conversation. The admin inbox checks the signed-in email against `support_agents` before loading any conversations.
 
 ## Required one-time configuration
 
