@@ -98,7 +98,7 @@ window.CATEGORY_PRODUCTS = {
     },
     {
       id: "ABY-White-7",
-      name: "Safa Sate",
+      name: "Safa Sate Borka ",
       image: "/images/aby-versace-7-1789238735544.webp",
       images: ["/images/aby-white-7-1789241666830-g1.webp", "/images/gallery/aby-white-7-1790646669386-g2.webp"],
       price: 2385,
@@ -108,8 +108,8 @@ window.CATEGORY_PRODUCTS = {
       fabric: "Dubai Cherry ",
       sizes: ["44", "46", "48", "50", "52", "54", "56"],
       priceByType: {
-        "Abaya Only": 1200,
-        "Full Set": 2350
+        "Abaya Only": 1250,
+        "Full Set": 2385
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
