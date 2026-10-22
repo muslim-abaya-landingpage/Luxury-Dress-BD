@@ -4227,8 +4227,10 @@ function getPublicStockStatus_() {
     Object.keys(liveOverrides).forEach(function(id) {
       if (!items[id]) items[id] = {};
       items[id].manualOverride = true;
-      items[id].inStock = liveOverrides[id];
-      items[id].qty = liveOverrides[id] ? Math.max(1, Number(items[id].qty) || 0) : 0;
+      var tracked = items[id].legacyTracked === true || Object.keys(items[id].variants || {}).some(function(key) { return items[id].variants[key] && items[id].variants[key].tracked === true; });
+      var actualQty = Number(items[id].qty) || 0;
+      items[id].inStock = liveOverrides[id] === true && (!tracked || actualQty > 0);
+      if (!liveOverrides[id]) items[id].qty = 0;
     });
     return { ok: true, items: items };
   } catch (err) {
