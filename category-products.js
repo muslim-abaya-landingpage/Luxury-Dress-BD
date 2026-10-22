@@ -64,15 +64,14 @@ window.CATEGORY_PRODUCTS = {
       id: "ABY-BLACK-4",
       name: "Premium Black Silver Stone Work Abaya Set",
       image: "/images/premium-black-silver-stone-work-abaya-1080x1350.webp",
-      price: 1850,
+      price: 1650,
       color: "black",
       colorLabel: "Classic Black",
       fabric: "Original Cherry Clothing",
       sizes: ["44", "46", "48", "50", "52", "54", "56"],
-      types: ["Full Set Borka+Hijab+Niqab", "Abaya Only"],
       priceByType: {
-        "Full Set Borka+Hijab+Niqab": 1850,
-        "Abaya Only": 1450
+        "Abaya Only": 1250,
+        "Full Set": 1650
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
@@ -101,7 +100,7 @@ window.CATEGORY_PRODUCTS = {
       id: "ABY-White-7",
       name: "Safa Sate Borka",
       image: "/images/aby-versace-7-1789238735544.webp",
-      images: ["/images/aby-white-7-1789241666830-g1.webp", "/images/gallery/aby-white-7-1790646669386-g2.webp", "/images/gallery/aby-white-7-1792705242665-g3.webp", "/images/gallery/aby-white-7-1792705249566-g4.webp"],
+      images: ["/images/aby-white-7-1789241666830-g1.webp", "/images/gallery/aby-white-7-1790646669386-g2.webp", "/images/gallery/aby-white-7-1792705249566-g4.webp", "/images/gallery/aby-white-7-1792705394113-g4.webp"],
       price: 2385,
       stock: 100,
       color: "White",
@@ -146,14 +145,15 @@ window.CATEGORY_PRODUCTS = {
       name: "Versace Border Premium Abaya Set - Side",
       image: "/images/Versace Border Premium Abaya Set.jpg",
       images: ["/images/gallery/aby-versace-9-1792180650386-g1.webp", "/images/gallery/aby-versace-9-1792180660161-g2.webp", "/images/gallery/aby-versace-9-1792180671387-g3.webp", "/images/gallery/aby-versace-9-1792180680076-g4.webp"],
-      price: 1750,
+      price: 2050,
       color: "black",
       colorLabel: "Classic Black",
       fabric: "Dubai Cherry",
       sizes: ["44", "46", "48", "50", "52", "54", "56"],
+      types: ["Full Set Borka+Hijab+Niqab", "Abaya Only"],
       priceByType: {
-        "Abaya Only": 1550,
-        "Full Set": 1750
+        "Full Set Borka+Hijab+Niqab": 2050,
+        "Abaya Only": 1700
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
