@@ -23,8 +23,14 @@ jobs:
           cache: npm
       - name: Install pinned dependencies
         run: npm ci
-      - name: Install browser
-        run: npx playwright install --with-deps chromium
+      - name: Use preinstalled Chrome or install Playwright Chromium
+        run: |
+          if command -v google-chrome >/dev/null 2>&1; then
+            echo "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=$(command -v google-chrome)" >> "$GITHUB_ENV"
+            google-chrome --version
+          else
+            npx playwright install --with-deps chromium
+          fi
       - name: Run responsive viewport checks only
         run: npx playwright test tests/e2e/responsive-audit.spec.cjs --workers=2 --retries=0
       - name: Upload screenshots and test report
