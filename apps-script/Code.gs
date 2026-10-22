@@ -6284,7 +6284,8 @@ function assertStockAvailableForOrder_(cartItems) {
 
 /** Confirmed → রিজার্ভ করা */
 function reserveStockForOrderItems_(cartItems, orderId, admin) {
-  assertLiveStockAvailable_(cartItems);
+  // No live-stock switch check here: an order placed before a product was switched off must still be
+  // confirmable. New orders are stopped at intake (handleOnlineOrderPost_).
   var sheet = ensureStockVariantsSheet_();
   var data = sheet.getDataRange().getValues();
   var requirements = trackedStockRequirements_(cartItems, data, true);
