@@ -48,9 +48,8 @@ jobs:
           CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
         run: |
           if [ -z "$CLASPRC_JSON" ]; then
-            echo "::warning::CLASPRC_JSON secret is not set; skipping Apps Script deploy. See APPS-SCRIPT-AUTO-DEPLOY.md."
-            echo "ready=false" >> "$GITHUB_OUTPUT"
-            exit 0
+            echo "::error::Apps Script was NOT deployed: CLASPRC_JSON secret is missing. Set it under GitHub Actions secrets. See APPS-SCRIPT-AUTO-DEPLOY.md."
+            exit 1
           fi
           printf '%s' "$CLASPRC_JSON" > "$HOME/.clasprc.json"
           chmod 600 "$HOME/.clasprc.json"
