@@ -733,3 +733,19 @@ html[data-admin-theme="dark"] .pm-wp-list, html[data-admin-theme="dark"] .pm-wp-
 }
 :root[data-admin-theme="dark"] .pm-wp-savebar { background: #1d2327; border-color: #3c434a; }
 :root[data-admin-theme="dark"] .pm-wp-savebar-msg { color: #c3c4c7; }
+
+/* Option rows: name + price + order + remove */
+.pm-opt-row > span .pm-opt-name { flex: 1 1 150px; min-width: 120px; }
+.pm-opt-row > span .pm-opt-price { flex: 0 1 90px; width: 90px; min-width: 70px; }
+.pm-opt-tools { display: inline-flex; align-items: center; gap: 4px; flex: none; }
+.pm-opt-move { min-width: 30px; padding: 0 6px !important; line-height: 28px; }
+.pm-opt-move:disabled { opacity: .35; cursor: default; }
+.pm-opt-row label em { font-style: normal; color: #646970; font-size: 12px; }
+#pmOptEditMsg.is-err { color: #b32d2e; font-weight: 600; }
+@media (max-width: 760px) {
+  .pm-opt-row > span { flex-wrap: wrap; }
+  .pm-opt-row > span .pm-opt-name { flex: 1 1 100%; }
+  .pm-opt-row > span .pm-opt-price { flex: 1 1 100px; width: auto; }
+}
+@media (max-width: 760px) { .pm-opt-row > span .pm-opt-name { min-width: 0; } }
+.pm-opt-row > span { gap: 6px; }

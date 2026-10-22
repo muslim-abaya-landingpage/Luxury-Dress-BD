@@ -29,7 +29,7 @@
 <link rel="stylesheet" href="admin-dashboard-design.css?v=20261018-3">
 <script src="admin-dashboard-design.js?v=20261018-3"></script>
 <link rel="stylesheet" href="admin-premium-layout.css?v=20261021-1">
-<link rel="stylesheet" href="product-manager-wp.css?v=20261023-save">
+<link rel="stylesheet" href="product-manager-wp.css?v=20261023-opt">
 </head>
 <body class="pl-admin adm-body pm-wp-admin" data-admin-guard="1">
   <div class="adm-shell">
@@ -675,9 +675,17 @@
       rows = '<p class="pm-wp-form-row"><label>Price on product cards</label><span><b id="pmCardPrice">৳' + (parseInt(p.price, 10) || 0) + '</b><small>Always the same as the first option (' + escapeHtml(types[0]) + ').</small></span></p>' +
         types.map(function (t) {
           var v = p.priceByType && p.priceByType[t] != null ? p.priceByType[t] : "";
-          return '<p class="pm-wp-form-row pm-opt-row"><label for="pmEf_typePrice:' + escapeAttr(t) + '">' + escapeHtml(t) + ' price (৳)</label><span><input id="pmEf_typePrice:' + escapeAttr(t) + '" type="number" min="0" data-ef="typePrice:' + escapeAttr(t) + '" value="' + escapeAttr(v) + '">' +
-            (types.length > 1 ? ' <button type="button" class="pm-wp-link-danger" data-opt-del="' + escapeAttr(t) + '">Remove</button>' : '') + '</span></p>';
-        }).join("");
+          var i = types.indexOf(t);
+          return '<div class="pm-wp-form-row pm-opt-row"><label for="pmEf_typePrice:' + escapeAttr(t) + '">Option ' + (i + 1) + (i === 0 ? ' <em>(card price)</em>' : '') + '</label><span>' +
+            '<input type="text" class="pm-opt-name" maxlength="40" data-opt-name="' + escapeAttr(t) + '" value="' + escapeAttr(t) + '" aria-label="Option name (' + escapeAttr(t) + ')" title="Option name — edit to rename">' +
+            '<input id="pmEf_typePrice:' + escapeAttr(t) + '" class="pm-opt-price" type="number" min="0" data-ef="typePrice:' + escapeAttr(t) + '" value="' + escapeAttr(v) + '" aria-label="' + escapeAttr(t) + ' price">' +
+            '<span class="pm-opt-tools">' +
+            (types.length > 1 ? '<button type="button" class="pm-wp-button pm-opt-move" data-opt-up="' + i + '"' + (i === 0 ? ' disabled' : '') + ' aria-label="Move ' + escapeAttr(t) + ' up" title="Move up">↑</button>' +
+              '<button type="button" class="pm-wp-button pm-opt-move" data-opt-down="' + i + '"' + (i === types.length - 1 ? ' disabled' : '') + ' aria-label="Move ' + escapeAttr(t) + ' down" title="Move down">↓</button>' +
+              '<button type="button" class="pm-wp-link-danger" data-opt-del="' + escapeAttr(t) + '">Remove</button>' : '') +
+            '</span></span></div>';
+        }).join("") +
+        '<p class="pm-wp-form-row pm-opt-help"><label></label><span><small id="pmOptEditMsg" role="status">Edit an option name to rename it (e.g. Hijab → Hijab + Niqab). ↑ ↓ change the order; the first option is the card price.</small></span></p>';
     }
     return rows +
       '<div class="pm-wp-form-row pm-opt-add"><label for="pmOptName">Add option</label><span>' +
@@ -824,6 +832,51 @@
       optAdd.addEventListener("click", addOption);
       [optName, optPrice].forEach(function (el) { el.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); addOption(); } }); });
     }
+    // Rename and reorder options.
+    function setOptionTypes(types) {
+      if (meta && types.join("|") === meta.types.join("|")) delete p.types; else p.types = types;
+    }
+    root.querySelectorAll("[data-opt-name]").forEach(function (inp) {
+      var oldName = inp.getAttribute("data-opt-name");
+      function rename() {
+        var name = String(inp.value || "").replace(/\s+/g, " ").trim();
+        var msg = document.getElementById("pmOptEditMsg");
+        if (name === oldName) { inp.value = oldName; return; }
+        var types = productOptionTypes(p, meta);
+        var bad = !name || name.length > 40 || /["<>]/.test(name) ? "Write an option name (up to 40 letters)." :
+          types.some(function (t) { return t !== oldName && t.toLowerCase() === name.toLowerCase(); }) ? "“" + name + "” already exists." : "";
+        if (bad) { if (msg) { msg.textContent = bad; msg.classList.add("is-err"); } inp.value = oldName; inp.focus(); return; }
+        if (!p.priceByType || typeof p.priceByType !== "object") p.priceByType = {};
+        var price = p.priceByType[oldName];
+        var map = {};
+        types = types.map(function (t) { return t === oldName ? name : t; });
+        types.forEach(function (t) { map[t] = t === name ? price : p.priceByType[t]; });
+        Object.keys(p.priceByType).forEach(function (k) { if (k !== oldName && !(k in map)) map[k] = p.priceByType[k]; });
+        p.priceByType = map;
+        setOptionTypes(types);
+        syncCardPrice(p, meta);
+        renderProductEditor();
+        changed("Option “" + oldName + "” renamed to “" + name + "” — click Save changes.");
+      }
+      inp.addEventListener("change", rename);
+      inp.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") { e.preventDefault(); rename(); }
+        else if (e.key === "Escape") { inp.value = oldName; inp.blur(); }
+      });
+    });
+    root.querySelectorAll("[data-opt-up],[data-opt-down]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var up = b.hasAttribute("data-opt-up");
+        var i = parseInt(b.getAttribute(up ? "data-opt-up" : "data-opt-down"), 10), j = up ? i - 1 : i + 1;
+        var types = productOptionTypes(p, meta);
+        if (j < 0 || j >= types.length) return;
+        var t = types[i]; types[i] = types[j]; types[j] = t;
+        setOptionTypes(types);
+        syncCardPrice(p, meta);
+        renderProductEditor();
+        changed("Order changed — “" + types[0] + "” is now first (card price). Click Save changes.");
+      });
+    });
     root.querySelectorAll("[data-opt-del]").forEach(function (b) {
       b.addEventListener("click", function () {
         var name = b.getAttribute("data-opt-del");

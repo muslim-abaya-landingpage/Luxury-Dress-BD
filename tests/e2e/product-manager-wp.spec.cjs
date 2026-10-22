@@ -59,13 +59,13 @@ test('edit screen: option prices keep the card price in step, and a new option (
   await page.waitForTimeout(500);
   await page.evaluate(() => { window.MaCatalogPublisher = Object.assign({}, window.MaCatalogPublisher, { isReady: () => true, publish: (files) => { window.__published = files; return Promise.resolve({ ok: true }); } }); });
   await page.locator('#pmAllRows tr').first().locator('.pm-row-title').click();
-  const first = page.locator('.pm-opt-row input').first();
+  const first = page.locator('.pm-opt-row .pm-opt-price').first();
   await first.fill('1999');
   await expect(page.locator('#pmCardPrice')).toHaveText('৳1999');
   await page.fill('#pmOptName', 'Hijab');
   await page.fill('#pmOptPrice', '450');
   await page.click('#pmOptAdd');
-  await expect(page.locator('.pm-opt-row label', { hasText: 'Hijab price' })).toBeVisible();
+  await expect(page.locator('[data-opt-name="Hijab"]')).toBeVisible();
   await page.fill('#pmOptName', 'HIJAB'); await page.fill('#pmOptPrice', '1'); await page.click('#pmOptAdd');
   await expect(page.locator('#pmOptMsg')).toContainText('already exists');
   await page.click('text=Update');
@@ -77,7 +77,7 @@ test('edit screen: option prices keep the card price in step, and a new option (
   expect(block).toContain('"Hijab": 450');
   // Removing it again restores the category's default options.
   await page.click('[data-opt-del="Hijab"]');
-  await expect(page.locator('.pm-opt-row label', { hasText: 'Hijab price' })).toHaveCount(0);
+  await expect(page.locator('[data-opt-name="Hijab"]')).toHaveCount(0);
 });
 
 async function withPublisher(page, fail) {
@@ -142,7 +142,7 @@ test('edit screen: the save bar is always visible, shows unsaved / saved / faile
   await withPublisher(page, true);
   await page.locator('#pmAllRows tr').first().locator('.pm-row-title').click();
   const bar = page.locator('#pmEditBar');
-  await page.locator('.pm-opt-row input').first().fill('1777');
+  await page.locator('.pm-opt-row .pm-opt-price').first().fill('1777');
   await expect(bar).toHaveAttribute('data-state', 'dirty');
   await expect(bar).toBeInViewport();
   await page.click('#pmEditBarSave');
@@ -153,4 +153,34 @@ test('edit screen: the save bar is always visible, shows unsaved / saved / faile
   await expect(bar).toHaveAttribute('data-state', 'ok');
   await expect(page.locator('#pmEditNote')).toContainText('Saved');
   expect(await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content.includes('1777'))).toBe(true);
+});
+
+test('edit screen: an option can be renamed (Hijab → Hijab + Niqab) and reordered, keeping its price', async ({ page }) => {
+  await stub(page);
+  page.on('dialog', (d) => d.accept());
+  await page.goto('/product-manager.html');
+  await page.waitForTimeout(500);
+  await withPublisher(page, false);
+  await page.locator('#pmAllRows tr').first().locator('.pm-row-title').click();
+  await page.fill('#pmOptName', 'Hijab'); await page.fill('#pmOptPrice', '450'); await page.click('#pmOptAdd');
+  const hijab = page.locator('[data-opt-name="Hijab"]');
+  await hijab.fill('Hijab + Niqab'); await hijab.press('Enter');
+  const renamed = page.locator('[data-opt-name="Hijab + Niqab"]');
+  await expect(renamed).toBeVisible();
+  await expect(page.locator('[data-ef="typePrice:Hijab + Niqab"]')).toHaveValue('450');
+  await expect(page.locator('#pmEditBar')).toHaveAttribute('data-state', 'dirty');
+  // Duplicate name is refused and the old name stays.
+  await renamed.fill('full set'); await renamed.press('Enter');
+  await expect(page.locator('#pmOptEditMsg')).toContainText('already exists');
+  await expect(page.locator('[data-opt-name="Hijab + Niqab"]')).toBeVisible();
+  // Move it to the top: it becomes the card price.
+  await page.locator('[data-opt-up="2"]').click();
+  await page.locator('[data-opt-up="1"]').click();
+  await expect(page.locator('.pm-opt-name').first()).toHaveValue('Hijab + Niqab');
+  await expect(page.locator('#pmCardPrice')).toHaveText('৳450');
+  await page.click('#pmEditBarSave');
+  await expect(page.locator('#pmEditBar')).toHaveAttribute('data-state', 'ok');
+  const file = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
+  expect(file).toContain('"Hijab + Niqab": 450');
+  expect(file).not.toMatch(/"Hijab": 450/);
 });
