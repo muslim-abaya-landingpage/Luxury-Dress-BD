@@ -74,9 +74,14 @@ Deno.serve(async (request: Request) => {
     return jsonResponse(origin, { ok: false, error: "CAPTCHA_REQUIRED" }, 400);
   }
 
-  const turnstileSecret = Deno.env.get("TURNSTILE_SECRET_KEY");
-  const orderTrackApiUrl = Deno.env.get("ORDER_TRACK_API_URL");
-  if (!turnstileSecret || !orderTrackApiUrl) {
+  const turnstileSecret = (Deno.env.get("TURNSTILE_SECRET_KEY") || "").trim();
+  const orderTrackApiUrl = (Deno.env.get("ORDER_TRACK_API_URL") || "").trim();
+  const missingConfig: string[] = [];
+  if (!turnstileSecret) missingConfig.push("TURNSTILE_SECRET_KEY");
+  if (!orderTrackApiUrl) missingConfig.push("ORDER_TRACK_API_URL");
+  if (missingConfig.length) {
+    // Log missing variable names only. Secret values must never enter logs.
+    console.error("order-status missing required function secrets:", missingConfig.join(", "));
     return jsonResponse(origin, { ok: false, error: "FUNCTION_NOT_CONFIGURED" }, 500);
   }
 
