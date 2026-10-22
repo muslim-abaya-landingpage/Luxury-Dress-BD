@@ -449,6 +449,9 @@
         MaAdmin.call("AdminOrderDelete", { OrderIds: JSON.stringify(ids), Confirm: "PERMANENT_DELETE" }).then(function (res) {
           MaPanel.toast((res.deleted || ids.length) + "টি অর্ডার স্থায়ীভাবে মুছে দেওয়া হয়েছে।");
           // Reload from server; never reuse a stale cached list after deletion.
+          if (typeof MaAdmin.clearReadCache === "function") MaAdmin.clearReadCache();
+          var clear = document.getElementById("otClearSel");
+          if (clear) clear.click();
           all = [];
           ordersShown = false;
           nextCursor = 0;
@@ -460,7 +463,11 @@
       document.getElementById("ordRefresh").addEventListener("click", load);
       document.getElementById("ordLoadMore").addEventListener("click", function () { load(null, true); });
 
-      MaPanel.init("orders").then(function (s) { if (s) load({ maxAgeMs: 5 * 60 * 1000 }); });
+      MaPanel.init("orders").then(function (s) {
+        if (!s) return;
+        if (s.role !== "admin" && s.isOwner !== true) deleteBtn.hidden = true;
+        load({ maxAgeMs: 5 * 60 * 1000 });
+      });
     })();
   </script>
 </body>
