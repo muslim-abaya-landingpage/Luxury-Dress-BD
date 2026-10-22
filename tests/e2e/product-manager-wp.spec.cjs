@@ -133,3 +133,24 @@ test('Bulk "Change price (%)" raises every option price of the selected products
   const b = block(await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content), 'ABY-MAROON-1');
   for (const [t, v] of Object.entries(before.types)) expect(b).toContain('"' + t + '": ' + Math.round(v * 1.1));
 });
+
+test('edit screen: the save bar is always visible, shows unsaved / saved / failed, and Ctrl+S saves', async ({ page }) => {
+  await stub(page);
+  page.on('dialog', (d) => d.accept());
+  await page.goto('/product-manager.html');
+  await page.waitForTimeout(500);
+  await withPublisher(page, true);
+  await page.locator('#pmAllRows tr').first().locator('.pm-row-title').click();
+  const bar = page.locator('#pmEditBar');
+  await page.locator('.pm-opt-row input').first().fill('1777');
+  await expect(bar).toHaveAttribute('data-state', 'dirty');
+  await expect(bar).toBeInViewport();
+  await page.click('#pmEditBarSave');
+  await expect(bar).toHaveAttribute('data-state', 'err');
+  await expect(page.locator('#pmEditNote')).toContainText('Not saved');
+  await withPublisher(page, false);
+  await page.keyboard.press('Control+s');
+  await expect(bar).toHaveAttribute('data-state', 'ok');
+  await expect(page.locator('#pmEditNote')).toContainText('Saved');
+  expect(await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content.includes('1777'))).toBe(true);
+});

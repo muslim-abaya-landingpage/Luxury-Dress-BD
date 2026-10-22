@@ -29,7 +29,7 @@
 <link rel="stylesheet" href="admin-dashboard-design.css?v=20261018-3">
 <script src="admin-dashboard-design.js?v=20261018-3"></script>
 <link rel="stylesheet" href="admin-premium-layout.css?v=20261021-1">
-<link rel="stylesheet" href="product-manager-wp.css?v=20261023-qe">
+<link rel="stylesheet" href="product-manager-wp.css?v=20261023-save">
 </head>
 <body class="pl-admin adm-body pm-wp-admin" data-admin-guard="1">
   <div class="adm-shell">
@@ -137,7 +137,7 @@
   <script src="product-catalog-sections.js?v=ac54db358f8d927e"></script>
   <script src="product-config.js?v=e7e6eb97e3ce454e"></script>
   <script src="product-utils.js?v=460604041e5f8ec0"></script>
-  <script src="category-products.js?v=ba30ecb1e52ea32d"></script>
+  <script src="category-products.js?v=ecd32aaff8e38b6c"></script>
   <script src="product-links-data.js?v=49a0ee4ca9e20d0b"></script>
   <script id="pmRawCatalog">window.MA_RAW_CATEGORY_PRODUCTS = JSON.parse(JSON.stringify(window.CATEGORY_PRODUCTS || {}));</script>
   <script src="product-catalog-loader.js?v=20261013-manager"></script>
@@ -735,7 +735,7 @@
           '<p>Added: <b>' + (formatDay(p.dateAdded) || "—") + '</b></p>' +
           '<p><label class="pm-wp-check"><input type="checkbox" data-ef="featured"' + (p.featured ? " checked" : "") + '> ★ Featured product</label></p>' +
           '<div class="pm-wp-publish-actions"><button type="button" class="pm-wp-trash" id="pmEditTrash">Move to Trash</button>' +
-          '<button type="button" class="pm-wp-primary" id="pmEditUpdate">Update</button></div>' +
+          '<button type="button" class="pm-wp-primary" id="pmEditUpdate">Update (Save)</button></div>' +
           '<p class="pm-wp-publish-note" id="pmEditNote">Changes go live after Update.</p>' +
         '</div></section>' +
         '<section class="pm-wp-box"><h3 class="pm-wp-box-title">Product categories</h3><div class="pm-wp-box-body"><ul class="pm-wp-cats">' +
@@ -757,13 +757,32 @@
         '<section class="pm-wp-box pm-wp-media" id="pmGalBox"><h3 class="pm-wp-box-title">Product gallery</h3><div class="pm-wp-box-body">' +
           '<div id="pmGalView"></div><p class="pm-wp-upload-status" id="pmGalStatus" hidden></p>' +
           '<div class="pm-wp-hidden-uploader" id="pmGalHidden" hidden>' + buildGalleryUploader(p) + '</div></div></section>' +
-      '</div></div></div>';
+      '</div></div>' +
+      // Always-visible save bar (stays at the bottom of the screen while editing).
+      '<div class="pm-wp-savebar" id="pmEditBar"><span class="pm-wp-savebar-msg" id="pmEditBarMsg">No unsaved changes.</span>' +
+      '<button type="button" class="pm-wp-primary" id="pmEditBarSave">Save changes</button></div>' +
+      '</div>';
 
     var root = mainEl.querySelector(".pm-wp-edit");
-    function changed(msg) {
-      var note = document.getElementById("pmEditNote");
-      if (note) { note.textContent = msg || "Unsaved changes — click Update to publish."; note.classList.add("is-dirty"); }
+    function editMsg(text, state) {
+      var note = document.getElementById("pmEditNote"), bar = document.getElementById("pmEditBar"), barMsg = document.getElementById("pmEditBarMsg");
+      [note, barMsg].forEach(function (el) { if (el) el.textContent = text; });
+      if (note) { note.classList.toggle("is-dirty", state === "dirty"); note.classList.toggle("is-ok", state === "ok"); note.classList.toggle("is-err", state === "err"); }
+      if (bar) bar.setAttribute("data-state", state || "");
     }
+    function changed(msg) { editMsg(msg || "Unsaved changes — click Save changes.", "dirty"); }
+    function saveEdit() {
+      var b1 = document.getElementById("pmEditUpdate"), b2 = document.getElementById("pmEditBarSave");
+      if (b2 && b2.disabled) return;
+      [b1, b2].forEach(function (b) { if (b) b.disabled = true; });
+      editMsg("Saving…", "busy");
+      saveAll().then(function () {
+        editMsg("Saved ✓ — the website shows it in about 2 minutes.", "ok");
+      }).catch(function (err) {
+        editMsg("Not saved: " + ((err && err.message) || "try again") + " — your changes are kept.", "err");
+      }).finally(function () { [b1, b2].forEach(function (b) { if (b) b.disabled = false; }); });
+    }
+    if (savedSnapshot && savedSnapshot !== catalogSnapshot()) changed();
     root.querySelectorAll("[data-ef]").forEach(function (inp) {
       inp.addEventListener(inp.type === "checkbox" ? "change" : "input", function () {
         var f = inp.getAttribute("data-ef");
@@ -863,7 +882,8 @@
       activeKey = ALL_PRODUCTS_KEY; renderCatList(); renderMain();
       toast("Product removed — click “Publish edited products” to update the website");
     });
-    document.getElementById("pmEditUpdate").addEventListener("click", function () { document.getElementById("pmSave").click(); });
+    document.getElementById("pmEditUpdate").addEventListener("click", saveEdit);
+    document.getElementById("pmEditBarSave").addEventListener("click", saveEdit);
     document.getElementById("pmEditBack").addEventListener("click", function () { activeKey = ALL_PRODUCTS_KEY; renderCatList(); renderMain(); });
     document.getElementById("pmEditAddNew").addEventListener("click", function () { var q = document.getElementById("pmQuickUpload"); if (q) q.click(); });
     wireImageUploader(root, p);
@@ -2325,7 +2345,7 @@
       title +
       '</title>\n  <link rel="preconnect" href="https://fonts.googleapis.com">\n  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">\n  <link rel="stylesheet" href="site-header.css?v=20261022-ann">\n  <link rel="stylesheet" href="site-footer.css">\n  <link rel="stylesheet" href="shop-page.css?v=1">\n  <link rel="stylesheet" href="category-sidebar.css?v=20261022-nound" id="category-sidebar-css">\n</head>\n<body data-shop-category="' +
       sec.key +
-      '">\n  <div id="site-header-mount"></div>\n  <main class="wrap"><div id="list"></div></main>\n  <div id="site-footer-mount"></div>\n  <script defer src="cart-utils.js"><\/script>\n  <script defer src="site-header.js"><\/script>\n  <script defer src="product-catalog-sections.js?v=ac54db358f8d927e"><\/script>\n  <script defer src="product-catalog-sync.js"><\/script>\n  <script defer src="product-config.js?v=e7e6eb97e3ce454e"><\/script>\n  <script defer src="product-utils.js?v=460604041e5f8ec0"><\/script>\n  <script defer src="category-products.js?v=ba30ecb1e52ea32d"><\/script>\n  <script defer src="product-links-data.js?v=49a0ee4ca9e20d0b"><\/script>\n  <script defer src="product-catalog-loader.js"><\/script>\n  <script defer src="category-renderer.js?v=da909518e293b0c3"><\/script>\n  <script defer src="site-footer.js"><\/script>\n  <script defer src="shop-category-boot.js"><\/script>\n</body>\n</html>\n'
+      '">\n  <div id="site-header-mount"></div>\n  <main class="wrap"><div id="list"></div></main>\n  <div id="site-footer-mount"></div>\n  <script defer src="cart-utils.js"><\/script>\n  <script defer src="site-header.js"><\/script>\n  <script defer src="product-catalog-sections.js?v=ac54db358f8d927e"><\/script>\n  <script defer src="product-catalog-sync.js"><\/script>\n  <script defer src="product-config.js?v=e7e6eb97e3ce454e"><\/script>\n  <script defer src="product-utils.js?v=460604041e5f8ec0"><\/script>\n  <script defer src="category-products.js?v=ecd32aaff8e38b6c"><\/script>\n  <script defer src="product-links-data.js?v=49a0ee4ca9e20d0b"><\/script>\n  <script defer src="product-catalog-loader.js"><\/script>\n  <script defer src="category-renderer.js?v=da909518e293b0c3"><\/script>\n  <script defer src="site-footer.js"><\/script>\n  <script defer src="shop-category-boot.js"><\/script>\n</body>\n</html>\n'
     );
   }
 
@@ -2658,6 +2678,12 @@
   savedSnapshot = catalogSnapshot();
   window.MaProductQuickUpload.mount({sections:function(){return sections;},products:function(){return products;},status:setSaveStatus,isSaved:function(){return savedSnapshot===catalogSnapshot();},stage:function(category,product){if(!sections.some(function(sec){return sec.key===category;}))throw new Error("Choose a category.");Object.keys(products).forEach(function(k){products[k]=products[k].filter(function(p){return p.id!==product.id;});});products[category].unshift(product);renderCatList();renderMain();},publish:saveAll});
   reloadPublishingData().then(refreshLiveStockOverrides);
+  document.addEventListener("keydown", function (e) {
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && String(e.key).toLowerCase() === "s") {
+      var b = document.getElementById("pmEditBarSave");
+      if (b) { e.preventDefault(); b.click(); }
+    }
+  });
   window.addEventListener("beforeunload", function (event) {
     if (savedSnapshot !== catalogSnapshot()) { event.preventDefault(); event.returnValue = ""; }
   });

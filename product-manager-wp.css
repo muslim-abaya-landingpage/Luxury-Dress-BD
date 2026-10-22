@@ -713,3 +713,23 @@ html[data-admin-theme="dark"] .pm-wp-list, html[data-admin-theme="dark"] .pm-wp-
 .pm-qe-grid input { min-height: 34px; padding: 4px 8px; border: 1px solid #8c8f94; font-size: 14px; }
 .pm-qe-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .pm-qe-msg { color: #b32d2e; font-size: 13px; }
+
+/* Edit product: always-visible save bar + clear save result */
+.pm-wp-savebar { position: sticky; bottom: 0; z-index: 20; display: flex; align-items: center; justify-content: flex-end; gap: 14px; margin: 20px -2px 0; padding: 12px 16px; background: #fff; border: 1px solid #c3c4c7; box-shadow: 0 -4px 14px rgba(0,0,0,.08); }
+.pm-wp-savebar-msg { flex: 1; min-width: 0; font-size: 14px; color: #50575e; }
+.pm-wp-savebar .pm-wp-primary { min-height: 40px; padding: 0 22px; font-size: 15px; }
+.pm-wp-savebar[data-state="dirty"] { border-color: #dba617; background: #fcf9e8; }
+.pm-wp-savebar[data-state="dirty"] .pm-wp-savebar-msg { color: #8a6100; font-weight: 600; }
+.pm-wp-savebar[data-state="ok"] { border-color: #00a32a; background: #edfaef; }
+.pm-wp-savebar[data-state="ok"] .pm-wp-savebar-msg { color: #007017; font-weight: 600; }
+.pm-wp-savebar[data-state="err"] { border-color: #d63638; background: #fcf0f1; }
+.pm-wp-savebar[data-state="err"] .pm-wp-savebar-msg { color: #b32d2e; font-weight: 600; }
+.pm-wp-publish-note.is-ok { color: #007017 !important; font-weight: 600; }
+.pm-wp-publish-note.is-err { color: #b32d2e !important; font-weight: 600; }
+.pm-wp-primary:disabled { opacity: .6; cursor: wait; }
+@media (max-width: 760px) {
+  .pm-wp-savebar { bottom: env(safe-area-inset-bottom, 0); flex-wrap: wrap; padding: 10px 12px; }
+  .pm-wp-savebar .pm-wp-primary { flex: 1 0 100%; min-height: 46px; }
+}
+:root[data-admin-theme="dark"] .pm-wp-savebar { background: #1d2327; border-color: #3c434a; }
+:root[data-admin-theme="dark"] .pm-wp-savebar-msg { color: #c3c4c7; }
