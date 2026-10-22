@@ -3,32 +3,39 @@ const html=fs.readFileSync('product-manager.html','utf8');
 function between(start,end){return html.slice(html.indexOf(start),html.indexOf(end,html.indexOf(start)));}
 const ui={stockPublishing:false,queuedStockToggle:null,savedSnapshot:'saved',catalogSnapshot:()=> 'saved',document:{getElementById:()=>({disabled:false})},requestAnimationFrame(callback){callback()},mainEl:{addEventListener(){},contains(){return true}},setSaveStatus(){},renderCatList(){},renderMain(){},saveAll:()=>Promise.resolve({sha:'test'})};
 vm.createContext(ui);
+vm.runInContext(between('  var liveStockOverrides = ', '  function refreshLiveStockOverrides('),ui);
 vm.runInContext(between('  function setProductAvailability(', '  function setSaveStatus('),ui);
 vm.runInContext(between('  function productToJsLines(', '  function generateProductsFile('),ui);
 ui.jsStr=s=>JSON.stringify(s);
 const helpers={window:{}};vm.createContext(helpers);vm.runInContext(fs.readFileSync('product-utils.js','utf8'),helpers);
 const U=helpers.window.maCatalog;
 (async()=>{
+  // Stock on/off is a live switch (AdminLiveStockSet) and no longer rewrites the catalog file.
+  const calls=[];let reply=()=>Promise.resolve({ok:true});
+  ui.window={MaAdmin:{call:(type,fields)=>{calls.push({type,fields});return reply(type,fields);}}};
   for(const category of ['abaya','cover-up','premium-two-piece','tops-kurti','embroidery','karchupi','kaftan','hijab','panjabi']){
-    const p={id:category,name:category,price:100,image:'photo.webp'};
+    const p={id:'P-'+category,name:category,price:100,image:'photo.webp'};
+    calls.length=0;
     assert.equal(await ui.publishStockToggle(p,()=>{}),true);
-    assert.equal(p.inStock,false);assert.equal(U.getStockStatus(p).label,'Out of Stock');
-    assert.match(ui.productToJsLines(p).join('\n'),/inStock: false/);
+    assert.equal(calls.length,1);assert.equal(calls[0].type,'AdminLiveStockSet');
+    assert.deepEqual(JSON.parse(calls[0].fields.ProductIds),[p.id]);assert.equal(calls[0].fields.InStock,'false');
+    assert.equal(ui.managerOutOfStock(p),true);
+    assert.equal(p.inStock,undefined);assert.equal(p.stock,undefined); // catalog entry untouched
     assert.equal(await ui.publishStockToggle(p,()=>{}),true);
-    assert.equal(p.inStock,true);assert.equal(p.stock,undefined);
-    const serialized=ui.productToJsLines(p).join('\n');assert.match(serialized,/inStock: true/);
-    const restored=vm.runInNewContext('('+serialized+')');
-    const normalized=U.normalizeProductEntry(restored,category,0);
-    assert.equal(normalized.inStock,true);assert.equal(U.getStockStatus(normalized).label,'In Stock');
-    assert.equal(U.getStockStatus(normalized).qty,null); // no invented quantities
+    assert.equal(calls[1].fields.InStock,'true');assert.equal(ui.managerOutOfStock(p),false);
   }
-  const rows=[{id:'a',stock:4},{id:'b',inStock:true}];let writes=0;
-  ui.saveAll=()=>{writes++;return Promise.resolve({});};
-  await ui.publishStockChanges(rows,false,()=>{});assert.equal(writes,1);assert.ok(rows.every(p=>p.inStock===false));
-  const prior=JSON.stringify(rows);ui.saveAll=()=>Promise.reject(Error('network'));
-  assert.equal(await ui.publishStockChanges(rows,true,()=>{}),false);assert.deepEqual(JSON.parse(JSON.stringify(rows)),JSON.parse(prior));
-  ui.catalogSnapshot=()=> 'unsaved';writes=0;ui.saveAll=()=>{writes++;return Promise.resolve({});};
-  assert.equal(await ui.publishStockToggle(rows[0],()=>{}),false);assert.equal(writes,0);
+  // Bulk: one request for many products; a refused save rolls the switches back.
+  const rows=[{id:'a',stock:4},{id:'b',inStock:true}];calls.length=0;
+  assert.equal(await ui.publishStockChanges(rows,false,()=>{}),true);
+  assert.equal(calls.length,1);assert.deepEqual(JSON.parse(calls[0].fields.ProductIds),['a','b']);
+  assert.ok(rows.every(p=>ui.managerOutOfStock(p)));
+  reply=()=>Promise.resolve({ok:false,error:'UNAUTHORIZED'});
+  assert.equal(await ui.publishStockChanges(rows,true,()=>{}),false);
+  assert.ok(rows.every(p=>ui.managerOutOfStock(p)),'failed save keeps the previous switch');
+  reply=()=>Promise.reject(Error('network'));
+  const fresh={id:'c'};assert.equal(await ui.publishStockToggle(fresh,()=>{}),false);
+  assert.equal(ui.managerOutOfStock(fresh),false,'network failure leaves no switch behind');
+  reply=()=>Promise.resolve({ok:true});
   const tracked={inStock:true,stockVariants:{M:{tracked:true,available:0},L:{tracked:true,available:3}}};
   assert.equal(U.getStockQty(tracked,'M'),0);assert.equal(U.getStockQty(tracked,'L'),3);
   tracked.inStock=false;assert.equal(U.getStockQty(tracked,'L'),0);
@@ -44,9 +51,12 @@ const U=helpers.window.maCatalog;
   catalog={test:[{id:'MANUAL',inStock:false,stock:0}]};
   sync.applyStockMap({MANUAL:{qty:7,inStock:true,legacyTracked:true}});
   assert.equal(catalog.test[0].inStock,false);assert.equal(U.getStockQty(catalog.test[0]),0);
+  catalog={test:[{id:'OVR',inStock:false,stock:0},{id:'OVR2'}]};
+  sync.applyStockMap({OVR:{manualOverride:true,inStock:true,qty:1},OVR2:{manualOverride:true,inStock:false,qty:0}});
+  assert.equal(catalog.test[0].inStock,true);assert.equal(catalog.test[1].inStock,false);
   const snapshot={sections:[],products:{x:[{stock:0,inStock:false}]},categoryTypePrices:{}};
   vm.createContext(snapshot);vm.runInContext(between('  function catalogSnapshot()', '  var categoryTypePrices'),snapshot);
   const before=snapshot.catalogSnapshot();delete snapshot.products.x[0].stock;snapshot.products.x[0].stock=0;
   assert.equal(snapshot.catalogSnapshot(),before);
-  console.log('PASS: all nine categories persist stock on/off, bulk autosaves once, failed saves rollback, dirty edits stay protected, live zero stock can restock after normalization, and manual off overrides remain authoritative.');
+  console.log('PASS: stock on/off uses the live switch for all nine categories (catalog untouched), bulk sends one request, refused or failed saves roll back, live zero stock can restock after normalization, and live switches override the catalog both ways.');
 })().catch(e=>{console.error(e);process.exitCode=1;});

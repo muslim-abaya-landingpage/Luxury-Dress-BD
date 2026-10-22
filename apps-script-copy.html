@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8"><title>Apps Script কোড</title><style>body { font-family: system-ui, sans-serif; margin: 16px; max-width: 960px; } textarea { width: 100%; height: 52vh; font: 11px Consolas, monospace; } button { margin-top: 10px; padding: 12px 20px; font-size: 15px; cursor: pointer; } .step { background: #fff8e1; border: 1px solid #f0d58a; padding: 10px 14px; border-radius: 6px; }</style></head><body><h1>Apps Script কোড (সম্পূর্ণ project)</h1><p>এই page-এ canonical project-এর সব source file আছে: Code.gs, AdminOrders.gs, FixSheetHeaders.gs, BoostAutoDate.gs, CatalogPublish.gs, CourierIntegrationAudit.gs, DataFixes.gs, Fix-doGet.gs, InstallDateTrigger.gs, Monitor.gs, Operations.gs, OrderSync.gs, LiveStock.gs, ProductPicker.html</p><div class="step"><p><strong>গুরুত্বপূর্ণ:</strong> Admin dashboard-এর সব API চালাতে নিচের সব ফাইল একই Apps Script project-এ রাখতে হবে। <code>.gs</code> ফাইলের জন্য <strong>＋ → Script</strong>, আর <code>.html</code> ফাইলের জন্য <strong>＋ → HTML</strong> ব্যবহার করুন; একই নাম রেখে প্রতিটি কোড সংশ্লিষ্ট ফাইলে কপি করুন। একাধিক <code>doGet</code> function রাখবেন না—canonical router শুধু <code>Code.gs</code>-এ।</p><ol><li>প্রতিটি source file-এর নাম অনুযায়ী Apps Script file তৈরি বা update করুন।</li><li><strong>Save</strong> চাপুন এবং <code>npm run test:backend</code> parity test পাস হয়েছে কি নিশ্চিত করুন।</li><li><strong>Deploy → Manage deployments → Edit → Version: New version → Deploy</strong> করে বিদ্যমান Web App URL রাখুন।</li></ol></div><h2>1. Code.gs</h2>
+<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8"><title>Apps Script কোড</title><style>body { font-family: system-ui, sans-serif; margin: 16px; max-width: 960px; } textarea { width: 100%; height: 52vh; font: 11px Consolas, monospace; } button { margin-top: 10px; padding: 12px 20px; font-size: 15px; cursor: pointer; } .step { background: #fff8e1; border: 1px solid #f0d58a; padding: 10px 14px; border-radius: 6px; }</style></head><body><h1>Apps Script কোড (সম্পূর্ণ project)</h1><p>এই page-এ canonical project-এর সব source file আছে: Code.gs, AdminOrders.gs, FixSheetHeaders.gs, BoostAutoDate.gs, CatalogPublish.gs, CourierIntegrationAudit.gs, DataFixes.gs, Fix-doGet.gs, InstallDateTrigger.gs, LiveStock.gs, Monitor.gs, Operations.gs, OrderSync.gs, ProductPicker.html</p><div class="step"><p><strong>গুরুত্বপূর্ণ:</strong> Admin dashboard-এর সব API চালাতে নিচের সব ফাইল একই Apps Script project-এ রাখতে হবে। <code>.gs</code> ফাইলের জন্য <strong>＋ → Script</strong>, আর <code>.html</code> ফাইলের জন্য <strong>＋ → HTML</strong> ব্যবহার করুন; একই নাম রেখে প্রতিটি কোড সংশ্লিষ্ট ফাইলে কপি করুন। একাধিক <code>doGet</code> function রাখবেন না—canonical router শুধু <code>Code.gs</code>-এ।</p><ol><li>প্রতিটি source file-এর নাম অনুযায়ী Apps Script file তৈরি বা update করুন।</li><li><strong>Save</strong> চাপুন এবং <code>npm run test:backend</code> parity test পাস হয়েছে কি নিশ্চিত করুন।</li><li><strong>Deploy → Manage deployments → Edit → Version: New version → Deploy</strong> করে বিদ্যমান Web App URL রাখুন।</li></ol></div><h2>1. Code.gs</h2>
 <textarea id="codeBox" readonly>/**
  * Muslim Abaya — সম্পূর্ণ Web App (এক ফাইলে পেস্ট করুন)
  * Code.gs → Ctrl+A → Ctrl+V → Save → Deploy → New version
@@ -6183,7 +6183,8 @@ function assertStockAvailableForOrder_(cartItems) {
 
 /** Confirmed → রিজার্ভ করা */
 function reserveStockForOrderItems_(cartItems, orderId, admin) {
-  assertLiveStockAvailable_(cartItems);
+  // No live-stock switch check here: an order placed before a product was switched off must still be
+  // confirmable. New orders are stopped at intake (handleOnlineOrderPost_).
   var sheet = ensureStockVariantsSheet_();
   var data = sheet.getDataRange().getValues();
   var requirements = trackedStockRequirements_(cartItems, data, true);
@@ -8579,8 +8580,67 @@ function dataFix20261021Apply() {
   }
 }</textarea><br>
 <button type="button" id="copyFile9">InstallDateTrigger.gs কপি</button>
-<h2>10. Monitor.gs</h2>
+<h2>10. LiveStock.gs</h2>
 <textarea id="fileBox10" readonly>/**
+ * Live Stock overrides: a fast, authenticated stock switch separate from GitHub catalog publishing.
+ * Deploy this file alongside Code.gs in the SAME Apps Script project.
+ * Stock quantities/variant reservations remain managed by the existing inventory workflow.
+ */
+function liveStockSheet_() {
+  return ensureSheet_('LiveStockOverrides', ['Product ID', 'In Stock', 'Updated At', 'Updated By']);
+}
+function liveStockOverrides_() {
+  var sh = liveStockSheet_(), values = sh.getDataRange().getValues(), map = {};
+  for (var i = 1; i &lt; values.length; i++) {
+    var id = String(values[i][0] || '').trim();
+    if (!id) continue;
+    map[id] = String(values[i][1]).toLowerCase() === 'true' || values[i][1] === true;
+  }
+  return map;
+}
+function adminLiveStockHandle_(type, e) {
+  var auth = verifyAdminSession_(param_(e, 'Token'));
+  if (!auth.ok) return auth;
+  if (type === 'AdminLiveStockList') return {ok:true, items:liveStockOverrides_()};
+  if (type !== 'AdminLiveStockSet') return {ok:false, error:'UNKNOWN_TYPE'};
+  var ids, available = String(param_(e, 'InStock')).toLowerCase();
+  try { ids = JSON.parse(param_(e, 'ProductIds') || '[]'); }
+  catch (err) { return {ok:false, error:'INVALID_PRODUCTS'}; }
+  if (!Array.isArray(ids) || !ids.length || ids.length > 100 ||
+      ids.some(function(id){ return typeof id !== 'string' || !/^[a-zA-Z0-9_-]{1,90}$/.test(id); }) ||
+      (available !== 'true' &amp;&amp; available !== 'false')) return {ok:false,error:'INVALID_STOCK_CHANGE'};
+  var lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    var sh = liveStockSheet_(), values = sh.getDataRange().getValues(), rowById = {};
+    for (var i = 1; i &lt; values.length; i++) {
+      var key = String(values[i][0] || '').trim();
+      if (key) rowById[key] = i + 1;
+    }
+    var flag = available === 'true', now = new Date();
+    ids.forEach(function(id) {
+      if (rowById[id]) sh.getRange(rowById[id], 2, 1, 3).setValues([[flag,now,auth.email || 'admin']]);
+      else { sh.appendRow([id,flag,now,auth.email || 'admin']); rowById[id] = sh.getLastRow(); }
+    });
+    return {ok:true, productIds:ids, inStock:flag};
+  } finally { lock.releaseLock(); }
+}
+
+function assertLiveStockAvailable_(cartItems) {
+  var map = liveStockOverrides_();
+  (cartItems || []).forEach(function(item) {
+    var id = String((item &amp;&amp; (item.id || item.productId)) || '').trim();
+    if (id &amp;&amp; Object.prototype.hasOwnProperty.call(map, id) &amp;&amp; map[id] === false) {
+      var err = new Error('OUT_OF_STOCK:' + id);
+      err.isStockError = true;
+      throw err;
+    }
+  });
+}
+</textarea><br>
+<button type="button" id="copyFile10">LiveStock.gs কপি</button>
+<h2>11. Monitor.gs</h2>
+<textarea id="fileBox11" readonly>/**
  * Free uptime monitor: checks the storefront every hour and e-mails the admin
  * (and Telegram, if configured) after 2 failed checks in a row, then once more
  * when the site is reachable again. One-time setup: run setupUptimeMonitorTrigger().
@@ -8715,9 +8775,9 @@ function ensureRecentBackup_(nowMs) {
   return 'RETRY_FAILED';
 }
 </textarea><br>
-<button type="button" id="copyFile10">Monitor.gs কপি</button>
-<h2>11. Operations.gs</h2>
-<textarea id="fileBox11" readonly>function opsNotifyVariant_(id,variant,available){
+<button type="button" id="copyFile11">Monitor.gs কপি</button>
+<h2>12. Operations.gs</h2>
+<textarea id="fileBox12" readonly>function opsNotifyVariant_(id,variant,available){
  if(available&lt;=0)return;
  var sh=SpreadsheetApp.getActiveSpreadsheet().getSheetByName('StockWaitlist');if(!sh||sh.getLastRow()&lt;2)return;
  var rows=sh.getRange(2,1,sh.getLastRow()-1,7).getValues(),sent=0;
@@ -8782,9 +8842,9 @@ function opsReviewVerification_(e,productId){var id=String(param_(e,'OrderID')||
 function opsSaveWaitlist_(e){try{var id=String(param_(e,'ProductId')||'').trim(),variant=String(param_(e,'Variant')||'').trim().slice(0,160),contact=normalizeSubscribeContact_(param_(e,'Contact'));if(!contact)throw Error('INVALID_CONTACT');var p=opsCatalog_().products.filter(function(x){return x.id===id;})[0];if(!p)throw Error('UNKNOWN_PRODUCT');opsLinePrice_({qty:1,size:variant,productType:param_(e,'ProductType')},p);rateLimit_('size_wait_'+contact.slice(0,40));var lock=LockService.getScriptLock();lock.waitLock(15000);try{var sh=ensureStockWaitlistSheet_(),h=sh.getRange(1,7).getValue();if(h&amp;&amp;h!=='Variant')throw Error('WAITLIST_HEADER_CONFLICT');sh.getRange(1,7).setValue('Variant');var rows=sh.getDataRange().getValues();for(var i=1;i&lt;rows.length;i++)if(String(rows[i][0])===id&amp;&amp;String(rows[i][2]).toLowerCase()===contact.toLowerCase()&amp;&amp;opsNorm_(rows[i][6])===opsNorm_(variant))return {ok:true,message:'এই সাইজের তালিকায় আছেন।'};sh.appendRow([admCellText_(id,100),admCellText_(p.name,200),admCellText_(contact,150),/@/.test(contact)?'yes':'',new Date(),'',admCellText_(variant,160)]);return {ok:true,message:'নির্বাচিত সাইজের অনুরোধ সংরক্ষিত হয়েছে।'};}finally{lock.releaseLock();}}catch(err){return {ok:false,error:String(err.message||err),message:'পণ্য, সাইজ ও যোগাযোগের তথ্য যাচাই করুন।'};}}
 function opsDhakaTime_(iso){if(!iso)return null;var d=new Date(iso);return isNaN(d.getTime())?String(iso):Utilities.formatDate(d,'Asia/Dhaka','yyyy-MM-dd HH:mm');}
 </textarea><br>
-<button type="button" id="copyFile11">Operations.gs কপি</button>
-<h2>12. OrderSync.gs</h2>
-<textarea id="fileBox12" readonly>/**
+<button type="button" id="copyFile12">Operations.gs কপি</button>
+<h2>13. OrderSync.gs</h2>
+<textarea id="fileBox13" readonly>/**
  * OrderSync — Online Order sheet mirror
  *
  * Setup:
@@ -9746,66 +9806,7 @@ function setupOperationsTriggersFromMenu() {
   );
 }
 </textarea><br>
-<button type="button" id="copyFile12">OrderSync.gs কপি</button>
-<h2>13. LiveStock.gs</h2>
-<textarea id="fileBox13" readonly>/**
- * Live Stock overrides: a fast, authenticated stock switch separate from GitHub catalog publishing.
- * Deploy this file alongside Code.gs in the SAME Apps Script project.
- * Stock quantities/variant reservations remain managed by the existing inventory workflow.
- */
-function liveStockSheet_() {
-  return ensureSheet_('LiveStockOverrides', ['Product ID', 'In Stock', 'Updated At', 'Updated By']);
-}
-function liveStockOverrides_() {
-  var sh = liveStockSheet_(), values = sh.getDataRange().getValues(), map = {};
-  for (var i = 1; i &lt; values.length; i++) {
-    var id = String(values[i][0] || '').trim();
-    if (!id) continue;
-    map[id] = String(values[i][1]).toLowerCase() === 'true' || values[i][1] === true;
-  }
-  return map;
-}
-function adminLiveStockHandle_(type, e) {
-  var auth = verifyAdminSession_(param_(e, 'Token'));
-  if (!auth.ok) return auth;
-  if (type === 'AdminLiveStockList') return {ok:true, items:liveStockOverrides_()};
-  if (type !== 'AdminLiveStockSet') return {ok:false, error:'UNKNOWN_TYPE'};
-  var ids, available = String(param_(e, 'InStock')).toLowerCase();
-  try { ids = JSON.parse(param_(e, 'ProductIds') || '[]'); }
-  catch (err) { return {ok:false, error:'INVALID_PRODUCTS'}; }
-  if (!Array.isArray(ids) || !ids.length || ids.length > 100 ||
-      ids.some(function(id){ return typeof id !== 'string' || !/^[a-zA-Z0-9_-]{1,90}$/.test(id); }) ||
-      (available !== 'true' &amp;&amp; available !== 'false')) return {ok:false,error:'INVALID_STOCK_CHANGE'};
-  var lock = LockService.getScriptLock();
-  lock.waitLock(15000);
-  try {
-    var sh = liveStockSheet_(), values = sh.getDataRange().getValues(), rowById = {};
-    for (var i = 1; i &lt; values.length; i++) {
-      var key = String(values[i][0] || '').trim();
-      if (key) rowById[key] = i + 1;
-    }
-    var flag = available === 'true', now = new Date();
-    ids.forEach(function(id) {
-      if (rowById[id]) sh.getRange(rowById[id], 2, 1, 3).setValues([[flag,now,auth.email || 'admin']]);
-      else { sh.appendRow([id,flag,now,auth.email || 'admin']); rowById[id] = sh.getLastRow(); }
-    });
-    return {ok:true, productIds:ids, inStock:flag};
-  } finally { lock.releaseLock(); }
-}
-
-function assertLiveStockAvailable_(cartItems) {
-  var map = liveStockOverrides_();
-  (cartItems || []).forEach(function(item) {
-    var id = String((item &amp;&amp; (item.id || item.productId)) || '').trim();
-    if (id &amp;&amp; Object.prototype.hasOwnProperty.call(map, id) &amp;&amp; map[id] === false) {
-      var err = new Error('OUT_OF_STOCK:' + id);
-      err.isStockError = true;
-      throw err;
-    }
-  });
-}
-</textarea><br>
-<button type="button" id="copyFile13">LiveStock.gs কপি</button>
+<button type="button" id="copyFile13">OrderSync.gs কপি</button>
 <h2>14. ProductPicker.html</h2>
 <textarea id="fileBox14" readonly>&lt;!DOCTYPE html>
 &lt;html>
@@ -10018,20 +10019,7 @@ function assertLiveStockAvailable_(cartItems) {
 &lt;/body>
 &lt;/html>
 </textarea><br>
-<button type="button" id="copyFile14">ProductPicker.html কপি</button>
-<script>function bind(btn, box) { document.getElementById(btn).onclick = function () { var t = document.getElementById(box).value; navigator.clipboard.writeText(t).then(function () { alert("কপি হয়েছে!"); }); }; }
-
-
-
-
-
-
-
-
-
-
-
-bind('copyBtn', 'codeBox');
+<button type="button" id="copyFile14">ProductPicker.html কপি</button><script>function bind(btn, box) { document.getElementById(btn).onclick = function () { var t = document.getElementById(box).value; navigator.clipboard.writeText(t).then(function () { alert("কপি হয়েছে!"); }); }; }bind('copyBtn', 'codeBox');
 bind('copyAdm', 'admBox');
 bind('copyFix', 'fixBox');
 bind('copyFile4', 'fileBox4');
