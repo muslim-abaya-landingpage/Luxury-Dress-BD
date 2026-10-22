@@ -100,7 +100,7 @@ window.CATEGORY_PRODUCTS = {
       id: "ABY-White-7",
       name: "Safa Sate Borka",
       image: "/images/aby-versace-7-1789238735544.webp",
-      images: ["/images/aby-white-7-1789241666830-g1.webp", "/images/gallery/aby-white-7-1790646669386-g2.webp", "images/gallery/aby-white-7-1792705242665-g3.webp", "images/gallery/aby-white-7-1792705249566-g4.webp"],
+      images: ["/images/aby-white-7-1789241666830-g1.webp", "/images/gallery/aby-white-7-1790646669386-g2.webp", "images/gallery/aby-white-7-1792705249566-g4.webp", "images/gallery/aby-white-7-1792705394113-g4.webp"],
       price: 2385,
       stock: 100,
       color: "White",
