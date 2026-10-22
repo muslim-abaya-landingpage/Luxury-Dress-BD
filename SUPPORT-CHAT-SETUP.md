@@ -50,9 +50,30 @@ For chat testing after deployment, open the storefront in a private/incognito se
 
 ## Order lookup and Turnstile rollout
 
-`supabase/functions/order-status/index.ts` is deployed as `order-status` with JWT verification enabled. It proxies lookup to the existing Apps Script `OrderTrack` route, checks a server-side Turnstile token with action `order_status`, and returns only the order ID, date, status, courier status, and tracking value. For actual lookup, ensure these Edge Function secrets exist: `TURNSTILE_SECRET_KEY`, `ORDER_TRACK_API_URL`, and `ALLOWED_ORIGINS=https://muslimabaya.com`. Configure Supabase Auth CAPTCHA to use Cloudflare Turnstile if CAPTCHA is required on anonymous sign-ins. Only the public Site key belongs in `site-footer-config.js`; never place the Secret key there.
+`supabase/functions/order-status/index.ts` is deployed as `order-status` with JWT verification enabled. It reads `TURNSTILE_SECRET_KEY` and `ORDER_TRACK_API_URL` from the Edge Function runtime using `Deno.env.get(...)`; it never reads a secret from browser code. Each lookup is verified by Cloudflare Turnstile for action `order_status` and hostname `muslimabaya.com`, then proxied to the Apps Script `OrderTrack` route. The response is limited to order ID, date, status, courier status, and tracking value.
 
-The order lookup UI and Edge Function source are deployed. Lookup will return `FUNCTION_NOT_CONFIGURED` until its required server-side secrets are saved in Supabase; do not publish or paste secret keys in source or chat.
+### Add the Edge Function secret
+
+1. In Cloudflare Turnstile, open the widget for `muslimabaya.com` and copy its **Secret key**. Do not use the **Site key** in this step.
+2. Open the Supabase project → **Edge Functions** → **Secrets**.
+3. Add a secret with the exact name `TURNSTILE_SECRET_KEY` and paste the Cloudflare **Secret key** only into the Supabase **Value** field. Save it.
+4. Verify the name appears in the Custom secrets list. The dashboard intentionally does not show the saved value. Never paste this key into `support-chat.js`, `site-footer-config.js`, GitHub, logs, or chat.
+5. Keep the other required settings present: `ORDER_TRACK_API_URL` (the Apps Script `OrderTrack` web app URL) and `ALLOWED_ORIGINS=https://muslimabaya.com`.
+
+The function code checks for missing configuration. It now logs missing variable **names only**; it never logs values. If `TURNSTILE_SECRET_KEY` or `ORDER_TRACK_API_URL` is absent or blank, the request returns `FUNCTION_NOT_CONFIGURED` (HTTP 500). Adding a Supabase Function secret does not require placing or committing the key in source code.
+
+### Configure Supabase Auth CAPTCHA separately
+
+The Edge Function secret and Supabase Auth's CAPTCHA setting are separate configuration surfaces. In Supabase **Authentication → Attack Protection**, enable **CAPTCHA protection**, select Cloudflare Turnstile, enter the widget's Site key and Secret key in the Auth settings, and save. Keep Anonymous Sign-Ins enabled for storefront chat. Only the public Site key may be in `site-footer-config.js`; the Secret key must stay server-side.
+
+### Verify the setup
+
+- Confirm `TURNSTILE_SECRET_KEY`, `ORDER_TRACK_API_URL`, and `ALLOWED_ORIGINS` are listed under Supabase Edge Function Custom secrets; check names only, never reveal values.
+- Confirm Supabase Auth Attack Protection shows CAPTCHA protection enabled and Cloudflare Turnstile selected.
+- Submit a Turnstile-backed lookup using a designated test order ID and its matching test phone. A missing server secret returns `FUNCTION_NOT_CONFIGURED`; a missing token returns `CAPTCHA_REQUIRED`; an invalid, wrong-action, or wrong-host token returns `CAPTCHA_FAILED`.
+- The deployed `order-status` source enforces `verify_jwt=true`. Do not disable JWT verification or store the Turnstile Secret key in the frontend.
+
+Until the server-side secret and Auth CAPTCHA are configured, lookup is not fully operational. Do not publish or paste secret keys in source or chat.
 
 
 ## Admin inbox alerts
