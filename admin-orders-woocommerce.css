@@ -459,6 +459,7 @@ body.pn-body.wo-edit-page {
 @media (max-width: 760px) {
   .wo-orders-page .pn-toolbar input:not([type="checkbox"]):not([type="radio"]),
   .wo-orders-page .pn-toolbar select,
+  .wo-orders-page .pn-toolbar .wo-filter,
   .wo-orders-page #ordIssueFilter {
     font-size: 16px;
     min-height: 44px;
