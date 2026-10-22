@@ -106,6 +106,10 @@ function doPost(e) {
       return handleSteadfastWebhookPost_(e);
     }
     var type = param_(e, 'RecordType');
+    if (type === 'AdminLiveStockList' || type === 'AdminLiveStockSet') {
+      adminRateLimit_(param_(e, 'Token') || 'admin_global');
+      return jsonOut_(adminLiveStockHandle_(type, e));
+    }
     if (type === 'NotifyBackInStockV2') return jsonOut_(opsSaveWaitlist_(e));
     if (type && type.indexOf('AdminOperations') === 0) {
       adminRateLimit_(param_(e, 'Token') || 'admin_global');
@@ -1748,6 +1752,7 @@ function computeVerifiedOrderPricing_(cartItems, charge, couponCodeVal) {
 
 function handleOnlineOrderPost_(e) {
   var validated = validateOrderInput_(e);
+  assertLiveStockAvailable_(validated.cartItems);
   if (isPhoneBlocked_(validated.phone)) throw new Error('ORDER_BLOCKED');
   rateLimitOrder_(validated.phone);
   checkDuplicateOrder_(validated.phone, validated.total, validated.design);
@@ -4224,6 +4229,14 @@ function getPublicStockStatus_() {
         items[pid].variants = p.variants;
       });
     } catch (vErr) {}
+    // Explicit admin stock switches take precedence over static catalog flags.
+    var liveOverrides = liveStockOverrides_();
+    Object.keys(liveOverrides).forEach(function(id) {
+      if (!items[id]) items[id] = {};
+      items[id].manualOverride = true;
+      items[id].inStock = liveOverrides[id];
+      items[id].qty = liveOverrides[id] ? Math.max(1, Number(items[id].qty) || 0) : 0;
+    });
     return { ok: true, items: items };
   } catch (err) {
     return { ok: false, error: 'STOCK_STATUS_FAILED', message: String(err.message || err) };
@@ -6176,6 +6189,7 @@ function assertStockAvailableForOrder_(cartItems) {
 
 /** Confirmed → রিজার্ভ করা */
 function reserveStockForOrderItems_(cartItems, orderId, admin) {
+  assertLiveStockAvailable_(cartItems);
   var sheet = ensureStockVariantsSheet_();
   var data = sheet.getDataRange().getValues();
   var requirements = trackedStockRequirements_(cartItems, data, true);
