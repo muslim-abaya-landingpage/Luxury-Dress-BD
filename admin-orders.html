@@ -112,6 +112,7 @@
           <option value="unassigned">Unassigned</option>
         </select>
         <button type="button" class="pn-btn pn-btn-sm wo-export-btn" id="ordExportFiltered">Export filtered CSV</button>
+        <button type="button" class="pn-btn pn-btn-sm" id="ordDeleteSelected" disabled style="border-color:#c53030;color:#b91c1c">স্থায়ীভাবে মুছুন (0)</button>
       </div>
 
       <div class="pn-table-wrap">
@@ -416,10 +417,57 @@
         var tr = e.target.closest("tr[data-id]");
         if (tr && tr.getAttribute("data-id")) location.href = "admin-order.html?id=" + encodeURIComponent(tr.getAttribute("data-id"));
       });
+      // The backend independently enforces owner-only access and unique IDs.
+      var deleteBtn = document.getElementById("ordDeleteSelected");
+      function selectedOrderIds() {
+        return Array.prototype.map.call(document.querySelectorAll('#ordBody .ot-sel[data-oid]:checked'), function (box) {
+          return box.getAttribute('data-oid');
+        }).filter(Boolean);
+      }
+      function updateDeleteButton() {
+        var ids = selectedOrderIds();
+        deleteBtn.textContent = "স্থায়ীভাবে মুছুন (" + ids.length + ")";
+        deleteBtn.disabled = !ids.length;
+      }
+      document.getElementById("ordBody").addEventListener("change", updateDeleteButton);
+      document.getElementById("otSelAll").addEventListener("change", function () {
+        // Other bulk-action code may handle this event too.
+        setTimeout(updateDeleteButton, 0);
+      });
+      document.addEventListener("ma-orders-rendered", function () {
+        document.getElementById("otSelAll").checked = false;
+        updateDeleteButton();
+      });
+      deleteBtn.addEventListener("click", function () {
+        var ids = selectedOrderIds();
+        if (!ids.length) return;
+        if (ids.length > 20) { MaPanel.toast("একবারে সর্বোচ্চ ২০টি অর্ডার মুছতে পারবেন।", true); return; }
+        if (!window.confirm(ids.length + "টি অর্ডার Google Sheets থেকে স্থায়ীভাবে মুছে যাবে। কুরিয়ার বা পেমেন্ট রেকর্ড স্বয়ংক্রিয়ভাবে বাতিল হবে না। চালিয়ে যাবেন?")) return;
+        var typed = window.prompt("নিশ্চিত করতে DELETE লিখুন। এই কাজ ফেরানো যাবে না।");
+        if (typed !== "DELETE") return;
+        deleteBtn.disabled = true;
+        MaAdmin.call("AdminOrderDelete", { OrderIds: JSON.stringify(ids), Confirm: "PERMANENT_DELETE" }).then(function (res) {
+          MaPanel.toast((res.deleted || ids.length) + "টি অর্ডার স্থায়ীভাবে মুছে দেওয়া হয়েছে।");
+          // Reload from server; never reuse a stale cached list after deletion.
+          if (typeof MaAdmin.clearReadCache === "function") MaAdmin.clearReadCache();
+          var clear = document.getElementById("otClearSel");
+          if (clear) clear.click();
+          all = [];
+          ordersShown = false;
+          nextCursor = 0;
+          return load({ maxAgeMs: 0 });
+        }).catch(function (err) {
+          MaPanel.toast("মুছতে ব্যর্থ: " + (err && err.message || "অজানা সমস্যা"), true);
+        }).then(updateDeleteButton);
+      });
       document.getElementById("ordRefresh").addEventListener("click", load);
       document.getElementById("ordLoadMore").addEventListener("click", function () { load(null, true); });
 
-      MaPanel.init("orders").then(function (s) { if (s) load({ maxAgeMs: 5 * 60 * 1000 }); });
+      MaPanel.init("orders").then(function (s) {
+        if (!s) return;
+        if (s.role !== "admin" && s.isOwner !== true) deleteBtn.hidden = true;
+        load({ maxAgeMs: 5 * 60 * 1000 });
+      });
     })();
   </script>
 </body>
