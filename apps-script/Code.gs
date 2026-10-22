@@ -99,6 +99,10 @@ function doPost(e) {
       return handleSteadfastWebhookPost_(e);
     }
     var type = param_(e, 'RecordType');
+    // Public, email-token-protected recovery endpoints. No active admin session required.
+    if (type === 'AdminPasswordResetRequest' || type === 'AdminPasswordResetConfirm') {
+      return jsonOut_(adminPasswordRecoveryHandle_(type, e));
+    }
     if (type === 'AdminLiveStockList' || type === 'AdminLiveStockSet') {
       adminRateLimit_(param_(e, 'Token') || 'admin_global');
       return jsonOut_(adminLiveStockHandle_(type, e));

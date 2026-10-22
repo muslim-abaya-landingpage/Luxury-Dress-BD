@@ -180,6 +180,30 @@
     } catch (e) {}
   }
 
+  // Public password recovery calls; these intentionally do not require a session.
+  function requestPasswordReset(email) {
+    return apiPost({
+      RecordType: "AdminPasswordResetRequest",
+      Email: String(email || "").trim().toLowerCase()
+    }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "RECOVERY_UNAVAILABLE");
+      return res;
+    });
+  }
+  function confirmPasswordReset(data) {
+    return apiPost({
+      RecordType: "AdminPasswordResetConfirm",
+      Email: String(data.email || "").trim().toLowerCase(),
+      Token: String(data.token || ""),
+      NewPassword: String(data.newPassword || "")
+    }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "INVALID_RECOVERY_LINK");
+      // A successfully reset password invalidates old admin/staff sessions.
+      logout();
+      return res;
+    });
+  }
+
   function login(data) {
     var loginId = String(data.login || "").trim();
     var password = String(data.password || "");
@@ -663,6 +687,8 @@
     call: call,
     inboxCall: inboxCall,
     login: login,
+    requestPasswordReset: requestPasswordReset,
+    confirmPasswordReset: confirmPasswordReset,
     logout: logout,
     getSession: getSession,
     verifySession: verifySession,

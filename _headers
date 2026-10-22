@@ -58,6 +58,27 @@
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
 
+# Never cache pages that can carry password-recovery state.
+/admin-forgot-password.html
+  ! Cache-Control
+  Cache-Control: no-store
+  Referrer-Policy: no-referrer
+
+/admin-reset-password.html
+  ! Cache-Control
+  Cache-Control: no-store
+  Referrer-Policy: no-referrer
+
+/admin-forgot-password
+  ! Cache-Control
+  Cache-Control: no-store
+  Referrer-Policy: no-referrer
+
+/admin-reset-password
+  ! Cache-Control
+  Cache-Control: no-store
+  Referrer-Policy: no-referrer
+
 # Admin pages must revalidate immediately after a deployment.
 /admin-support-inbox.html
   ! Cache-Control
