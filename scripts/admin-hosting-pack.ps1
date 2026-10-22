@@ -8,6 +8,7 @@ New-Item -ItemType Directory -Path $out | Out-Null
 
 $adminCore = @(
   "admin-login.html",
+  "admin-password-reset.html",
   "admin-dashboard.html",
   "admin-orders.html",
   "admin-order.html",

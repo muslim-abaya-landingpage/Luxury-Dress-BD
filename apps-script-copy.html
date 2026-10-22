@@ -3618,26 +3618,57 @@ function adminResetDigest_(value) {
   return bytes.map(function (b) { return ('0' + ((b + 256) % 256).toString(16)).slice(-2); }).join('');
 }
 
+function adminResetAccountKey_(email) {
+  return 'ADMIN_PWRESET_CURRENT_' + adminResetDigest_(normalizeEmail_(email));
+}
+
+function adminResetTokenKey_(tokenDigest) {
+  return 'ADMIN_PWRESET_TOKEN_' + tokenDigest;
+}
+
+function adminResetThrottleKey_(email) {
+  return 'ADMIN_PWRESET_THROTTLE_' + adminResetDigest_(normalizeEmail_(email));
+}
+
 function requestAdminPasswordReset_(e) {
   var email = normalizeEmail_(param_(e, 'Email'));
   var generic = { ok: true, message: ADMIN_RESET_GENERIC_MESSAGE_ };
   if (!email || email.length > 254 || email.indexOf('@') &lt; 1 || !getAuthSecret_()) return generic;
 
-  var digest = adminResetDigest_(email);
-  try { rateLimit_('admin_pwreset_' + digest.slice(0, 48)); } catch (rateErr) { return generic; }
-  var cache = CacheService.getScriptCache();
-  var requestKey = 'admin_pwreset_req_' + digest.slice(0, 40);
-  if (cache.get(requestKey)) return generic;
-  cache.put(requestKey, '1', 60);
+  var lock = LockService.getScriptLock();
+  var token = '';
+  var tokenDigest = '';
+  var accountKey = adminResetAccountKey_(email);
+  var tokenKey = '';
+  var acquired = false;
+  try {
+    lock.waitLock(15000);
+    acquired = true;
+    var properties = PropertiesService.getScriptProperties();
+    var now = Date.now();
+    var throttleKey = adminResetThrottleKey_(email);
+    var lastRequest = Number(properties.getProperty(throttleKey) || 0);
+    if (lastRequest &amp;&amp; now - lastRequest &lt; 60000) return generic;
 
-  var admin = findAdminByEmail_(email);
-  if (!admin || !admin.email || String(admin.status || '').trim().toLowerCase() === 'blocked') return generic;
-  var role = String(admin.role || 'admin').trim().toLowerCase();
-  if (role !== 'admin') return generic;
+    var admin = findAdminByEmail_(email);
+    if (!admin || !admin.email || String(admin.status || '').trim().toLowerCase() === 'blocked' ||
+        String(admin.role || 'admin').trim().toLowerCase() !== 'admin') return generic;
 
-  var token = Utilities.getUuid().replace(/-/g, '') + Utilities.getUuid().replace(/-/g, '');
-  var tokenKey = 'admin_pwreset_tok_' + adminResetDigest_(token);
-  cache.put(tokenKey, JSON.stringify({ email: email, createdAt: Date.now() }), ADMIN_RESET_TTL_SECONDS_);
+    // The script lock makes throttle check/write and current-token replacement atomic.
+    token = Utilities.getUuid().replace(/-/g, '') + Utilities.getUuid().replace(/-/g, '');
+    tokenDigest = adminResetDigest_(token);
+    tokenKey = adminResetTokenKey_(tokenDigest);
+    var previousDigest = properties.getProperty(accountKey);
+    if (previousDigest) properties.deleteProperty(adminResetTokenKey_(previousDigest));
+    properties.setProperty(tokenKey, JSON.stringify({ email: email, createdAt: now }));
+    properties.setProperty(accountKey, tokenDigest);
+    properties.setProperty(throttleKey, String(now));
+  } catch (lockOrStoreErr) {
+    return generic;
+  } finally {
+    if (acquired) lock.releaseLock();
+  }
+
   var link = 'https://muslimabaya.com/admin-password-reset.html?token=' + encodeURIComponent(token);
   try {
     MailApp.sendEmail({
@@ -3646,7 +3677,21 @@ function requestAdminPasswordReset_(e) {
       body: 'আপনার Admin Panel password reset অনুরোধ এসেছে। ১০ মিনিটের মধ্যে এই link খুলে নতুন password দিন:\n\n' + link + '\n\nআপনি অনুরোধ না করলে এই email উপেক্ষা করুন। নিরাপত্তার জন্য link একবারই ব্যবহার করা যাবে।'
     });
   } catch (mailErr) {
-    cache.remove(tokenKey);
+    var cleanupLock = LockService.getScriptLock();
+    var cleanupAcquired = false;
+    try {
+      cleanupLock.waitLock(15000);
+      cleanupAcquired = true;
+      var cleanupProperties = PropertiesService.getScriptProperties();
+      if (cleanupProperties.getProperty(accountKey) === tokenDigest) {
+        cleanupProperties.deleteProperty(tokenKey);
+        cleanupProperties.deleteProperty(accountKey);
+      }
+    } catch (cleanupErr) {
+      console.error('Admin password reset cleanup failed.');
+    } finally {
+      if (cleanupAcquired) cleanupLock.releaseLock();
+    }
     console.error('Admin password reset email could not be sent.');
   }
   return generic;
@@ -3663,28 +3708,38 @@ function completeAdminPasswordReset_(e) {
   try { rateLimit_('admin_pwreset_complete_' + adminResetDigest_(token).slice(0, 48)); }
   catch (rateErr) { return { ok: false, error: 'RESET_TRY_LATER' }; }
 
-  var cache = CacheService.getScriptCache();
-  var tokenKey = 'admin_pwreset_tok_' + adminResetDigest_(token);
-  var saved = cache.get(tokenKey);
-  if (!saved) return { ok: false, error: 'RESET_LINK_INVALID_OR_EXPIRED' };
-  var record;
-  try { record = JSON.parse(saved); } catch (parseErr) { cache.remove(tokenKey); return { ok: false, error: 'RESET_LINK_INVALID_OR_EXPIRED' }; }
-  var email = normalizeEmail_(record.email);
-  if (!email || !record.createdAt || Date.now() - Number(record.createdAt) > ADMIN_RESET_TTL_SECONDS_ * 1000) {
-    cache.remove(tokenKey);
-    return { ok: false, error: 'RESET_LINK_INVALID_OR_EXPIRED' };
-  }
-
   var lock = LockService.getScriptLock();
   lock.waitLock(15000);
   try {
-    if (cache.get(tokenKey) !== saved) return { ok: false, error: 'RESET_LINK_INVALID_OR_EXPIRED' };
+    var properties = PropertiesService.getScriptProperties();
+    var tokenDigest = adminResetDigest_(token);
+    var tokenKey = adminResetTokenKey_(tokenDigest);
+    var saved = properties.getProperty(tokenKey);
+    if (!saved) return { ok: false, error: 'RESET_LINK_INVALID_OR_EXPIRED' };
+    var record;
+    try { record = JSON.parse(saved); } catch (parseErr) {
+      properties.deleteProperty(tokenKey);
+      return { ok: false, error: 'RESET_LINK_INVALID_OR_EXPIRED' };
+    }
+    var email = normalizeEmail_(record.email);
+    var accountKey = adminResetAccountKey_(email);
+    if (!email || properties.getProperty(accountKey) !== tokenDigest || !record.createdAt ||
+        Date.now() - Number(record.createdAt) > ADMIN_RESET_TTL_SECONDS_ * 1000) {
+      properties.deleteProperty(tokenKey);
+      if (email &amp;&amp; properties.getProperty(accountKey) === tokenDigest) properties.deleteProperty(accountKey);
+      return { ok: false, error: 'RESET_LINK_INVALID_OR_EXPIRED' };
+    }
     var admin = findAdminByEmail_(email);
     if (!admin || String(admin.status || '').trim().toLowerCase() === 'blocked' ||
         String(admin.role || 'admin').trim().toLowerCase() !== 'admin') {
-      cache.remove(tokenKey);
+      properties.deleteProperty(tokenKey);
+      properties.deleteProperty(accountKey);
       return { ok: false, error: 'RESET_LINK_INVALID_OR_EXPIRED' };
     }
+    // Consume while holding the lock, before credential writes: partial write failures must not
+    // leave a valid link that could be replayed to overwrite the password again.
+    properties.deleteProperty(tokenKey);
+    properties.deleteProperty(accountKey);
     var hashed = hashPassword_(password);
     var sheet = getAdminsSheet_();
     sheet.getRange(admin.row, 4).setValue(hashed.hash);
@@ -3699,7 +3754,6 @@ function completeAdminPasswordReset_(e) {
       var rowRole = String(data[i][6] || 'customer').trim().toLowerCase();
       if (rowEmail === email &amp;&amp; (rowRole === 'admin' || rowRole === 'staff')) sessions.deleteRow(i + 1);
     }
-    cache.remove(tokenKey);
     bumpAdminAuthGeneration_();
     return { ok: true, message: 'পাসওয়ার্ড বদলানো হয়েছে। এখন নতুন password দিয়ে Admin Panel-এ লগইন করুন।' };
   } finally {
