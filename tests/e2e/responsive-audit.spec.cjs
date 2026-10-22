@@ -109,7 +109,7 @@ for (const spec of paths) {
           }).slice(0, 6).map(el => ({ name: el.tagName.toLowerCase() + (el.id ? '#' + el.id : ''), height: Math.round(el.getBoundingClientRect().height), width: Math.round(el.getBoundingClientRect().width) }))
         };
       });
-      console.log('RESPONSIVE_AUDIT ' + JSON.stringify({ page: spec.name, width, ...findings, pageErrors: errors }));
+      console.log('RESPONSIVE_AUDIT ' + JSON.stringify({ source: process.env.E2E_BASE_URL ? 'production' : 'local', page: spec.name, width, ...findings, pageErrors: errors }));
       if (findings.htmlScrollWidth > findings.viewport + 2) {
         await page.screenshot({ path: 'test-results/overflow-' + spec.name + '-' + width + '.png', fullPage: true }).catch(() => {});
       }
