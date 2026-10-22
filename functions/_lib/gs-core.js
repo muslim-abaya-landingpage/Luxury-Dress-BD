@@ -138,6 +138,11 @@ function doPost(e) {
       return jsonOut_(handleInboxRequest_(type, e));
     }
 
+    // Public password recovery is separately rate-limited and only emails the
+    // registered admin address; never require an existing admin session here.
+    if (type === 'AdminPasswordResetRequest') return jsonOut_(requestAdminPasswordReset_(e));
+    if (type === 'AdminPasswordResetComplete') return jsonOut_(completeAdminPasswordReset_(e));
+
     // Every order-panel action verifies the admin/staff token inside its handler.
     var orderPanelTypes = ['AdminOrderList', 'AdminOrderGet', 'AdminOrderUpdate', 'AdminFraudCheck', 'AdminBlockCustomer', 'AdminSendCourier', 'AdminOrderStaff', 'AdminCourierTracking', 'AdminManualOrderCreate', 'AdminOrderCreate', 'AdminCustomerLookup', 'AdminCouponCheck'];
     if (orderPanelTypes.indexOf(type) !== -1) {
@@ -3609,6 +3614,103 @@ function loginAdmin_(e) {
   }
   var role = String(user.role || 'admin').trim().toLowerCase() === 'staff' ? 'staff' : 'admin';
   return createSession_({ email: user.email, phone: user.phone, name: user.name }, role);
+}
+
+var ADMIN_RESET_TTL_SECONDS_ = 600;
+var ADMIN_RESET_GENERIC_MESSAGE_ = 'যদি এই ইমেইলটি সক্রিয় Admin account-এর সঙ্গে মেলে, তাহলে password reset link পাঠানো হবে। Inbox ও Spam folder দেখুন।';
+
+function adminResetDigest_(value) {
+  var bytes = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, String(value || ''), Utilities.Charset.UTF_8);
+  return bytes.map(function (b) { return ('0' + ((b + 256) % 256).toString(16)).slice(-2); }).join('');
+}
+
+function requestAdminPasswordReset_(e) {
+  var email = normalizeEmail_(param_(e, 'Email'));
+  var generic = { ok: true, message: ADMIN_RESET_GENERIC_MESSAGE_ };
+  if (!email || email.length > 254 || email.indexOf('@') < 1 || !getAuthSecret_()) return generic;
+
+  var digest = adminResetDigest_(email);
+  try { rateLimit_('admin_pwreset_' + digest.slice(0, 48)); } catch (rateErr) { return generic; }
+  var cache = CacheService.getScriptCache();
+  var requestKey = 'admin_pwreset_req_' + digest.slice(0, 40);
+  if (cache.get(requestKey)) return generic;
+  cache.put(requestKey, '1', 60);
+
+  var admin = findAdminByEmail_(email);
+  if (!admin || !admin.email || String(admin.status || '').trim().toLowerCase() === 'blocked') return generic;
+  var role = String(admin.role || 'admin').trim().toLowerCase();
+  if (role !== 'admin') return generic;
+
+  var token = Utilities.getUuid().replace(/-/g, '') + Utilities.getUuid().replace(/-/g, '');
+  var tokenKey = 'admin_pwreset_tok_' + adminResetDigest_(token);
+  cache.put(tokenKey, JSON.stringify({ email: email, createdAt: Date.now() }), ADMIN_RESET_TTL_SECONDS_);
+  var link = 'https://muslimabaya.com/admin-password-reset.html?token=' + encodeURIComponent(token);
+  try {
+    MailApp.sendEmail({
+      to: String(admin.email),
+      subject: 'Muslim Abaya Admin — Password reset',
+      body: 'আপনার Admin Panel password reset অনুরোধ এসেছে। ১০ মিনিটের মধ্যে এই link খুলে নতুন password দিন:\n\n' + link + '\n\nআপনি অনুরোধ না করলে এই email উপেক্ষা করুন। নিরাপত্তার জন্য link একবারই ব্যবহার করা যাবে।'
+    });
+  } catch (mailErr) {
+    cache.remove(tokenKey);
+    console.error('Admin password reset email could not be sent.');
+  }
+  return generic;
+}
+
+function completeAdminPasswordReset_(e) {
+  var token = String(param_(e, 'Token') || '').trim();
+  var password = String(param_(e, 'Password') || '');
+  if (!/^[a-f0-9]{64}$/i.test(token)) return { ok: false, error: 'RESET_LINK_INVALID_OR_EXPIRED' };
+  if (password.length < 12 || password.length > 256) {
+    return { ok: false, error: 'WEAK_PASSWORD', message: 'নতুন password কমপক্ষে ১২ অক্ষরের হতে হবে।' };
+  }
+  if (!getAuthSecret_()) return { ok: false, error: 'RESET_UNAVAILABLE' };
+  try { rateLimit_('admin_pwreset_complete_' + adminResetDigest_(token).slice(0, 48)); }
+  catch (rateErr) { return { ok: false, error: 'RESET_TRY_LATER' }; }
+
+  var cache = CacheService.getScriptCache();
+  var tokenKey = 'admin_pwreset_tok_' + adminResetDigest_(token);
+  var saved = cache.get(tokenKey);
+  if (!saved) return { ok: false, error: 'RESET_LINK_INVALID_OR_EXPIRED' };
+  var record;
+  try { record = JSON.parse(saved); } catch (parseErr) { cache.remove(tokenKey); return { ok: false, error: 'RESET_LINK_INVALID_OR_EXPIRED' }; }
+  var email = normalizeEmail_(record.email);
+  if (!email || !record.createdAt || Date.now() - Number(record.createdAt) > ADMIN_RESET_TTL_SECONDS_ * 1000) {
+    cache.remove(tokenKey);
+    return { ok: false, error: 'RESET_LINK_INVALID_OR_EXPIRED' };
+  }
+
+  var lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    if (cache.get(tokenKey) !== saved) return { ok: false, error: 'RESET_LINK_INVALID_OR_EXPIRED' };
+    var admin = findAdminByEmail_(email);
+    if (!admin || String(admin.status || '').trim().toLowerCase() === 'blocked' ||
+        String(admin.role || 'admin').trim().toLowerCase() !== 'admin') {
+      cache.remove(tokenKey);
+      return { ok: false, error: 'RESET_LINK_INVALID_OR_EXPIRED' };
+    }
+    var hashed = hashPassword_(password);
+    var sheet = getAdminsSheet_();
+    sheet.getRange(admin.row, 4).setValue(hashed.hash);
+    sheet.getRange(admin.row, 5).setValue(hashed.salt);
+    if (sheet.getLastColumn() >= 9) sheet.getRange(admin.row, 9).setValue(new Date());
+
+    // Revoke existing admin/staff sessions so the password change takes effect immediately.
+    var sessions = getSessionsSheet_();
+    var data = sessions.getDataRange().getValues();
+    for (var i = data.length - 1; i >= 1; i--) {
+      var rowEmail = normalizeEmail_(data[i][1]);
+      var rowRole = String(data[i][6] || 'customer').trim().toLowerCase();
+      if (rowEmail === email && (rowRole === 'admin' || rowRole === 'staff')) sessions.deleteRow(i + 1);
+    }
+    cache.remove(tokenKey);
+    bumpAdminAuthGeneration_();
+    return { ok: true, message: 'পাসওয়ার্ড বদলানো হয়েছে। এখন নতুন password দিয়ে Admin Panel-এ লগইন করুন।' };
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 function verifySession_(token) {
