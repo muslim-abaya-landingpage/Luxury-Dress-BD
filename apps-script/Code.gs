@@ -132,7 +132,12 @@ function doPost(e) {
     }
 
     // Every order-panel action verifies the admin/staff token inside its handler.
-    var orderPanelTypes = ['AdminOrderList', 'AdminOrderGet', 'AdminOrderUpdate', 'AdminOrderDelete', 'AdminFraudCheck', 'AdminBlockCustomer', 'AdminSendCourier', 'AdminOrderStaff', 'AdminCourierTracking', 'AdminManualOrderCreate', 'AdminOrderCreate', 'AdminCustomerLookup', 'AdminCouponCheck'];
+    // Destructive order removal: isolated handler with its own owner authorization.
+    if (type === 'AdminOrderDelete') {
+      adminRateLimit_(param_(e, 'Token') || 'admin_global');
+      return jsonOut_(adminOrderDelete_(e));
+    }
+    var orderPanelTypes = ['AdminOrderList', 'AdminOrderGet', 'AdminOrderUpdate', 'AdminFraudCheck', 'AdminBlockCustomer', 'AdminSendCourier', 'AdminOrderStaff', 'AdminCourierTracking', 'AdminManualOrderCreate', 'AdminOrderCreate', 'AdminCustomerLookup', 'AdminCouponCheck'];
     if (orderPanelTypes.indexOf(type) !== -1) {
       var panelResult = handleAdminOrderRequest_(type, e);
       return jsonOut_(panelResult || { ok: false, error: 'UNKNOWN_TYPE' });
