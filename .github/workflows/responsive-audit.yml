@@ -3,6 +3,8 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - "**/*.html"
+      - "**/*.css"
       - "tests/e2e/responsive-audit.spec.cjs"
       - ".github/workflows/responsive-audit.yml"
   workflow_dispatch:
