@@ -1210,10 +1210,12 @@ window.CATEGORY_PRODUCTS = {
       name: "Dil Bahar Abaya Full Set",
       image: "/images/dil-bahar-black-stone-work-abaya-original-dubai-cherry-fabric-bangladesh.webp",
       price: 1899,
+      stock: 0,
       color: "black",
       colorLabel: "Classic Black",
       fabric: "Original Dubai Cherry",
       sizes: ["50", "52", "54", "56", "58"],
+      inStock: false,
       priceByType: {
         "Full Set": 1899
       },
