@@ -164,6 +164,21 @@
   var savedSnapshot = "";
   var stockPublishing = false;
   var queuedStockToggle = null;
+  var liveStockOverrides = Object.create(null);
+  function managerOutOfStock(p) {
+    if (p && Object.prototype.hasOwnProperty.call(liveStockOverrides, String(p.id))) {
+      return liveStockOverrides[String(p.id)] === false;
+    }
+    return !!p && (p.inStock === false || (typeof p.stock === "number" && p.stock <= 0));
+  }
+  function refreshLiveStockOverrides() {
+    return window.MaAdmin.call("AdminLiveStockList", {}, {maxAgeMs:0}).then(function(result) {
+      liveStockOverrides = Object.assign(Object.create(null), result.items || {});
+      renderMain();
+    }).catch(function(err) {
+      setSaveStatus("Live stock unavailable: " + err.message);
+    });
+  }
   function catalogSnapshot() {
     return JSON.stringify([sections, products, categoryTypePrices], function(key, value) {
       if (!value || typeof value !== "object" || Array.isArray(value)) return value;
@@ -645,8 +660,8 @@
     var catKey = editTarget.cat;
     ensureProductPriceByType(p, catKey);
     var meta = getCategoryTypeMeta(catKey);
-    var out = p.inStock === false || (typeof p.stock === "number" && p.stock <= 0);
-    if (typeof window.isInStock === "function") out = !window.isInStock(p);
+    var out = managerOutOfStock(p);
+    if (!Object.prototype.hasOwnProperty.call(liveStockOverrides, String(p.id)) && typeof window.isInStock === "function") out = !window.isInStock(p);
     var tabs = [["general", "General"], ["inventory", "Inventory"], ["attributes", "Attributes"]];
     var tags = productTags(p);
     mainEl.innerHTML =
@@ -906,7 +921,7 @@
       });
     });
     var outOfStockCount = rows.filter(function (row) {
-      return row.product.inStock === false || (typeof row.product.stock === "number" && row.product.stock <= 0);
+      return managerOutOfStock(row.product);
     }).length;
     var inStockCount = rows.length - outOfStockCount;
     function catName(sec) { return enName(sec); }
@@ -974,7 +989,7 @@
       var term = allSearchTerm.trim().toLowerCase();
       var visible = rows.filter(function (row) {
         var p = row.product, s = row.section;
-        var out = p.inStock === false || (typeof p.stock === "number" && p.stock <= 0);
+        var out = managerOutOfStock(p);
         if (overviewCategory && s.key !== overviewCategory) return false;
         if (overviewStock === "out" && !out || overviewStock === "in" && out) return false;
         return [p.name, p.id, s.key, s.menu, s.menuBn, p.brand || ""].concat(productTags(p)).join(" ").toLowerCase().indexOf(term) !== -1;
@@ -1009,7 +1024,7 @@
       }
       document.getElementById("pmAllRows").innerHTML = pageRows.map(function (row) {
         var p = row.product, s = row.section;
-        var out = p.inStock === false || (typeof p.stock === "number" && p.stock <= 0);
+        var out = managerOutOfStock(p);
         var selectionKey = JSON.stringify([s.key, row.index]);
         var name = escapeHtml(p.name || "Product");
         var cat = ' data-pm-cat="' + escapeAttr(s.key) + '" data-pm-index="' + row.index + '"';
@@ -1187,66 +1202,40 @@
   }
 
   function publishStockChanges(items, available, redraw) {
-    if (stockPublishing) {
-      // Keep a second click made while the first save is in flight.
-      // Two rapid clicks on the same item cancel each other out.
-      if (items.length === 1) {
-        if (queuedStockToggle && queuedStockToggle.product === items[0]) queuedStockToggle = null;
-        else queuedStockToggle = {product:items[0]};
-        setSaveStatus(queuedStockToggle ? "Next stock change queued. Saving first change…" : "Next stock change cancelled. Saving first change…");
-      } else {
-        setSaveStatus("Saving stock. Please wait.");
-      }
-      return Promise.resolve(false);
-    }
-    if (document.getElementById("pmSave").disabled) {
-      setSaveStatus("Saving changes. Please wait until saving finishes.");
-      return Promise.resolve(false);
-    }
-    if (savedSnapshot !== catalogSnapshot()) {
-      setSaveStatus("Other edits are not saved yet. Click “Publish edited products” first, then change stock.");
-      return Promise.resolve(false);
-    }
     if (!items.length) return Promise.resolve(false);
-    var previous = items.map(function(p) { return {p:p,stock:p.stock,inStock:p.inStock}; });
+    if (stockPublishing) {
+      setSaveStatus("Stock is saving. Please wait a moment.");
+      return Promise.resolve(false);
+    }
+    var ids = items.map(function(p) { return String(p.id || ""); });
+    if (ids.some(function(id) { return !id; })) {
+      setSaveStatus("Product ID missing. Stock was not changed.");
+      return Promise.resolve(false);
+    }
+    var before = ids.map(function(id) {
+      return {id:id, exists:Object.prototype.hasOwnProperty.call(liveStockOverrides,id), value:liveStockOverrides[id]};
+    });
     stockPublishing = true;
-    items.forEach(function(p) { setProductAvailability(p, available); });
-    setSaveStatus("Stock change received. Saving to website…");
-    var published = false;
-    // Let the browser paint the new stock label before the expensive
-    // catalog generation and network publish begins.
-    return new Promise(function(resolve) {
-      requestAnimationFrame(function() {
-        redraw();
-        requestAnimationFrame(resolve);
-      });
-    }).then(function() {
-      return saveAll(items.length === 1 ? {id:items[0].id} : null);
-    }).then(function() {
-      published = true;
+    ids.forEach(function(id) { liveStockOverrides[id] = !!available; });
+    setSaveStatus("Saving stock…");
+    try { redraw(); } catch (renderError) {}
+    return window.MaAdmin.call("AdminLiveStockSet", {
+      ProductIds: JSON.stringify(ids), InStock: available ? "true" : "false"
+    }).then(function(result) {
+      if (!result || result.ok !== true) throw new Error("Stock save was not confirmed.");
+      setSaveStatus("Stock saved. Customers will see the update after stock refresh.");
       return true;
-    }).catch(function() {
-      previous.forEach(function(row) {
-        if (row.stock === undefined) delete row.p.stock; else row.p.stock = row.stock;
-        if (row.inStock === undefined) delete row.p.inStock; else row.p.inStock = row.inStock;
+    }).catch(function(err) {
+      before.forEach(function(row) {
+        if (row.exists) liveStockOverrides[row.id] = row.value;
+        else delete liveStockOverrides[row.id];
       });
+      setSaveStatus("Stock not saved: " + err.message);
       return false;
     }).finally(function() {
       stockPublishing = false;
       renderCatList();
       renderMain();
-      // Rendering may normalize product fields. Keep the successful publish
-      // baseline in sync so the next stock click is not mistaken for unsaved edits.
-      if (published) savedSnapshot = catalogSnapshot();
-      else setSaveStatus("Stock change was not saved. Check the publishing error and retry.");
-      var next = queuedStockToggle;
-      queuedStockToggle = null;
-      if (published && next && next.product) {
-        // The first publish has finished; apply the saved second click now.
-        publishStockToggle(next.product, renderMain);
-      } else if (!published && next) {
-        setSaveStatus("Stock was not saved. Retry after checking the error above.");
-      }
     });
   }
 
@@ -1255,7 +1244,7 @@
       setSaveStatus("Product not found. Reload current data and retry.");
       return Promise.resolve(false);
     }
-    return publishStockChanges([p], p.inStock === false || (typeof p.stock === "number" && p.stock <= 0), redraw);
+    return publishStockChanges([p], managerOutOfStock(p), redraw);
   }
 
   // One listener survives pagination, filters, table redraws and stock updates.
@@ -1271,7 +1260,7 @@
   });
 
   function toggleStock(p) {
-    setProductAvailability(p, p.inStock === false || (typeof p.stock === "number" && p.stock <= 0));
+    setProductAvailability(p, managerOutOfStock(p));
   }
 
   function setSaveStatus(message) {
@@ -1282,8 +1271,8 @@
   function buildProductCard(catKey, p, idx) {
     ensureProductPriceByType(p, catKey);
     var card = document.createElement("article");
-    var outOfStock = p.inStock === false || (typeof p.stock === "number" && p.stock <= 0);
-    if (typeof window.isInStock === "function") {
+    var outOfStock = managerOutOfStock(p);
+    if (!Object.prototype.hasOwnProperty.call(liveStockOverrides, String(p.id)) && typeof window.isInStock === "function") {
       outOfStock = !window.isInStock(p);
     }
     card.className = "pm-product-card" + (outOfStock ? " pm-product-oos" : "");
@@ -2510,7 +2499,7 @@
   renderMain();
   savedSnapshot = catalogSnapshot();
   window.MaProductQuickUpload.mount({sections:function(){return sections;},products:function(){return products;},status:setSaveStatus,isSaved:function(){return savedSnapshot===catalogSnapshot();},stage:function(category,product){if(!sections.some(function(sec){return sec.key===category;}))throw new Error("Choose a category.");Object.keys(products).forEach(function(k){products[k]=products[k].filter(function(p){return p.id!==product.id;});});products[category].unshift(product);renderCatList();renderMain();},publish:saveAll});
-  reloadPublishingData();
+  reloadPublishingData().then(refreshLiveStockOverrides);
   window.addEventListener("beforeunload", function (event) {
     if (savedSnapshot !== catalogSnapshot()) { event.preventDefault(); event.returnValue = ""; }
   });
