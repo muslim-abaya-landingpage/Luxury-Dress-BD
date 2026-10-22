@@ -124,16 +124,18 @@ window.CATEGORY_PRODUCTS = {
       image: "/images/Abaya/premium-black-layered-khimar-niqab-abaya-for-women-muslimabaya.webp",
       images: ["/images/gallery/aby-versace-8-1790420622429-g1.webp", "/images/gallery/aby-versace-8-1790420630365-g2.webp", "/images/gallery/aby-versace-8-1790420642193-g3.webp", "/images/gallery/aby-versace-8-1790420651446-g4.webp"],
       price: 2385,
+      stock: 100,
       color: "black",
       colorLabel: "3 Colors",
       fabric: "Original Dubai Cherry Fabric",
       sizes: ["50", "52", "54", "56", "58"],
       detailNote: "Premium Hafeza Set made from Original Dubai Cherry Fabric. Abaya length: 50, 52, 54, 56 and 58 inches. Flare: 180+ inches. Hijab and Niqab are made from Original China Soft Georgette Fabric. Hoodie Hijab features 3 parts at the back and 2 parts at the front, with a 56-inch back and 45-inch front. 2-part nose niqab with a 25-inch front.",
+      types: ["Full Set Borka+Hijab+Niqab", "Abaya Only"],
       priceByType: {
+        "Full Set Borka+Hijab+Niqab": 2385,
+        "Abaya Only": 1350,
         "Hijab + Niqab": 1200,
-        "Full Hafeza Set": 2385,
-        "Full Set": 2385,
-        "Abaya Only": 1200
+        "Full Hafeza Set": 2385
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
