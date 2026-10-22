@@ -435,3 +435,8 @@ body.shop-page .card-actions-muslim-abaya .ma-qty-stepper__btn:disabled {
 /* ================================================================
    Body Size field — shown alongside Length Size (kept visible).
 ================================================================ */
+
+/* A 16px native select prevents iOS Safari focus zoom on category sorting. */
+@media (max-width: 768px) {
+  body.shop-page #shopSort { font-size: 16px; min-height: 44px; }
+}
