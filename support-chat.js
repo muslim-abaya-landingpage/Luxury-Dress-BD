@@ -53,6 +53,7 @@
   var conversationChannel = null;
   var conversationPromise = null;
   var seenMessageIds = Object.create(null);
+  var isSendingMessage = false;
 
   var QUICK = userCfg.quickQuestions || [
     { key: "order_status", label: "Order status", labelBn: "অর্ডার স্ট্যাটাস", text: "Hello! I would like to check my order status. My order ID is: " },
@@ -123,6 +124,17 @@
     ".ma-chat-order-form button{min-height:42px;border:0;border-radius:10px;padding:0 14px;background:#0a7d3b;color:#fff;font:600 14px system-ui;cursor:pointer}" +
     ".ma-chat-order-form button:disabled{opacity:.6;cursor:wait}" +
     ".ma-chat-order-result{margin:0;color:#4d4638;font-size:12px;line-height:1.55;overflow-wrap:anywhere}" +
+    ".ma-order-card{display:grid;gap:10px;padding:13px;border:1px solid #e8e2d4;border-radius:14px;background:linear-gradient(145deg,#fffdf8,#fff);box-shadow:0 5px 16px rgba(31,25,13,.06)}" +
+    ".ma-order-card-head{display:flex;align-items:center;gap:9px;min-width:0}" +
+    ".ma-order-card-mark{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;flex:none;border-radius:50%;background:#edf7ef;color:#16733d;font-size:17px;font-weight:800}" +
+    ".ma-order-card-title{flex:1;min-width:0;color:#25231e;font-size:13px;font-weight:750}" +
+    ".ma-order-card-status{max-width:55%;padding:5px 9px;border:1px solid #dcebdc;border-radius:999px;background:#f1f8f1;color:#23633c;font-size:11px;font-weight:700;text-align:center;overflow-wrap:anywhere}" +
+    ".ma-order-card-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}" +
+    ".ma-order-card-item{min-width:0;padding:8px 9px;border-radius:10px;background:#f7f6f2}" +
+    ".ma-order-card-item small{display:block;margin-bottom:3px;color:#777;font-size:10px}" +
+    ".ma-order-card-item strong{display:block;color:#2d2a24;font-size:12px;font-weight:650;overflow-wrap:anywhere}" +
+    ".ma-order-card-note{margin:0;color:#777;font-size:10px}" +
+    ".ma-order-error{padding:10px 11px;border:1px solid #f0dfc7;border-radius:11px;background:#fffaf1;color:#704c18;font-size:12px;line-height:1.5}" +
     ".ma-chat-turnstile{display:flex;justify-content:center;max-width:100%;overflow:hidden;margin:8px 0}" +
     "@media (min-width:769px){.ma-chat-fab{right:22px;bottom:22px;padding:0 20px 0 16px}.ma-chat-fab .ma-chat-fab-label{display:inline}.ma-chat-panel{right:22px;bottom:90px}body:has(#stickyOrderBar) .ma-chat-fab{bottom:22px}body:has(#stickyOrderBar) .ma-chat-panel{bottom:90px}}" +
     "@media (max-width:560px){.ma-chat-fab{right:12px;bottom:calc(16px + env(safe-area-inset-bottom,0px));min-height:50px;min-width:50px}.ma-chat-panel{inset:auto 8px calc(76px + env(safe-area-inset-bottom,0px)) 8px;width:auto;max-height:min(72dvh,620px);border-radius:18px}.ma-chat-head{padding:10px 12px}.ma-chat-body{padding:14px 12px}.ma-chat-welcome{padding:14px 10px 16px}.ma-chat-chip{min-height:40px;padding:8px 10px}.ma-chat-foot{padding:9px 10px calc(10px + env(safe-area-inset-bottom,0px))}.ma-chat-send{padding:0 11px}.ma-chat-panel.is-expanded{inset:0;width:auto;max-height:none;height:100dvh;border-radius:0}.ma-chat-panel.is-expanded .ma-chat-body{max-height:none}.ma-chat-fab:has(+ .ma-chat-panel.is-expanded){display:none}body:has(#stickyOrderBar) .ma-chat-fab{bottom:calc(82px + env(safe-area-inset-bottom,0px))}body:has(#stickyOrderBar) .ma-chat-panel{bottom:calc(140px + env(safe-area-inset-bottom,0px))}}" +
@@ -263,12 +275,49 @@
     var lookupButton = doc.createElement("button");
     lookupButton.type = "submit";
     lookupButton.textContent = "অর্ডার খুঁজুন · Check status";
-    var orderResult = el("p", "ma-chat-order-result");
+    var orderResult = el("div", "ma-chat-order-result");
     orderResult.setAttribute("aria-live", "polite");
     orderForm.appendChild(orderIdInput);
     orderForm.appendChild(orderPhoneInput);
     orderForm.appendChild(lookupButton);
     orderForm.appendChild(orderResult);
+    function showOrderError(message) {
+      orderResult.replaceChildren();
+      var errorCard = el("div", "ma-order-error");
+      errorCard.setAttribute("role", "status");
+      errorCard.textContent = message;
+      orderResult.appendChild(errorCard);
+    }
+    function renderOrderCard(order) {
+      orderResult.replaceChildren();
+      var card = el("section", "ma-order-card");
+      card.setAttribute("aria-label", "অর্ডার স্ট্যাটাস");
+      var heading = el("div", "ma-order-card-head");
+      heading.appendChild(el("span", "ma-order-card-mark", "✓"));
+      heading.appendChild(el("strong", "ma-order-card-title", "অর্ডারের আপডেট"));
+      var status = el("span", "ma-order-card-status");
+      status.textContent = String(order.status || "স্ট্যাটাস পাওয়া যায়নি");
+      heading.appendChild(status);
+      card.appendChild(heading);
+      var grid = el("div", "ma-order-card-grid");
+      function addItem(label, value) {
+        if (!value) return;
+        var item = el("div", "ma-order-card-item");
+        item.appendChild(el("small", "", label));
+        item.appendChild(el("strong", "", String(value)));
+        grid.appendChild(item);
+      }
+      addItem("অর্ডার আইডি", order.orderId);
+      if (order.date) {
+        var parsedDate = new Date(order.date);
+        addItem("অর্ডারের তারিখ", Number.isNaN(parsedDate.getTime()) ? order.date : parsedDate.toLocaleDateString("bn-BD", { year: "numeric", month: "short", day: "numeric" }));
+      }
+      addItem("কুরিয়ার আপডেট", order.courierStatus);
+      addItem("ট্র্যাকিং নম্বর", order.tracking);
+      card.appendChild(grid);
+      card.appendChild(el("p", "ma-order-card-note", "অর্ডারের তথ্য মিলছে না? অর্ডারে ব্যবহৃত ফোন নম্বর ও Order ID আবার যাচাই করুন।"));
+      orderResult.appendChild(card);
+    }
     var captchaBox = el("div", "ma-chat-turnstile");
     captchaBox.id = "ma-support-chat-turnstile";
     captchaBox.hidden = true;
@@ -514,14 +563,19 @@
     orderForm.addEventListener("submit", async function (event) {
       event.preventDefault();
       if (!liveEnabled) {
-        orderResult.textContent = "অর্ডার যাচাই সাময়িকভাবে অনুপলব্ধ। WhatsApp-এ যোগাযোগ করুন।";
+        showOrderError("অর্ডার যাচাই সাময়িকভাবে অনুপলব্ধ। WhatsApp-এ যোগাযোগ করুন।");
         return;
       }
       var phone = orderPhoneInput.value.trim();
       var orderId = orderIdInput.value.trim();
       if (!phone || !orderId) return;
       lookupButton.disabled = true;
-      orderResult.textContent = "অর্ডার যাচাই করা হচ্ছে…";
+      lookupButton.textContent = "খোঁজা হচ্ছে…";
+      orderResult.replaceChildren();
+      var loading = el("div", "ma-order-error");
+      loading.setAttribute("role", "status");
+      loading.textContent = "আপনার অর্ডারের তথ্য খোঁজা হচ্ছে…";
+      orderResult.appendChild(loading);
       try {
         var state = await ensureLiveConversation();
         var turnstileToken = await getTurnstileToken("order_status");
@@ -531,17 +585,15 @@
         if (result.error || !result.data || result.data.ok !== true) throw new Error("Lookup failed");
         var order = result.data.order;
         if (!order) {
-          orderResult.textContent = "এই Order ID ও ফোন নম্বরে অর্ডার পাওয়া যায়নি। দুটোই মিলিয়ে আবার চেষ্টা করুন।";
+          showOrderError("এই Order ID ও ফোন নম্বরে অর্ডার পাওয়া যায়নি। অর্ডারে ব্যবহৃত নম্বর ও Order ID মিলিয়ে আবার চেষ্টা করুন।");
         } else {
-          var parts = ["অর্ডার " + order.orderId + ": " + order.status];
-          if (order.courierStatus) parts.push("কুরিয়ার: " + order.courierStatus);
-          if (order.tracking) parts.push("Tracking: " + order.tracking);
-          orderResult.textContent = parts.join(" · ");
+          renderOrderCard(order);
         }
       } catch (_) {
-        orderResult.textContent = "এখন অর্ডার যাচাই করা যাচ্ছে না। CAPTCHA সম্পন্ন করে আবার চেষ্টা করুন, অথবা WhatsApp-এ যোগাযোগ করুন।";
+        showOrderError("এখন অর্ডার যাচাই করা যাচ্ছে না। CAPTCHA সম্পন্ন করে আবার চেষ্টা করুন, অথবা WhatsApp-এ যোগাযোগ করুন।");
       } finally {
         lookupButton.disabled = false;
+        lookupButton.textContent = "অর্ডার খুঁজুন · Check status";
       }
     });
     QUICK.forEach(function (q) {
@@ -551,7 +603,7 @@
       b.addEventListener("click", function () {
         if (q.key === "order_status") {
           orderForm.hidden = false;
-          orderResult.textContent = "";
+          orderResult.replaceChildren();
           if (q.key) recordQuickAction(q.key);
           orderIdInput.focus();
           return;
