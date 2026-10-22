@@ -1236,37 +1236,274 @@ function buildPqvRelatedHtml(p, idx, allProducts, categoryKey) {
     });
   }
   if (!picked.length) return "";
-  var items = picked
+  // Related Products use the homepage product card (same markup, styles and
+  // add-to-cart/message logic as index-home-muslim-abaya.js) in the homepage's
+  // 3-per-row slider. Which products are picked is unchanged.
+  ensurePqvHomeRelatedCss();
+  var sec = pqvHomeSectionMeta(categoryKey);
+  var registry = {};
+  var cards = picked
     .slice(0, 4)
     .map(function (row) {
-      var rp = row.product;
-      var price = formatCardPriceText(rp, categoryKey);
-      return (
-        '<button type="button" class="pqv-related-item js-quickview-trigger" data-product-idx="' +
-        row.index +
-        '">' +
-        '<img src="' +
-        escapeHtml(resolveCardImageSrc(rp)) +
-        '" alt="" loading="lazy">' +
-        '<div class="pqv-related-meta"><span class="pqv-related-name" lang="en">' +
-        escapeHtml(rp.name) +
-        '</span><span class="pqv-related-price">' +
-        price +
-        "</span></div></button>"
-      );
+      registry[String(row.product.id)] = row.product;
+      return pqvHomeCardHtml(row.product);
     })
     .join("");
+  window.__pqvHomeRelated = { sec: sec, products: registry };
   var seeAllHref = shopHref("/category");
   return (
-    '<aside class="pqv-related">' +
-    '<div class="pqv-related-head"><h3>Related Products</h3>' +
-    '<a class="pqv-related-all" href="' +
+    '<section class="pqv-related pqv-home-related" data-cat="' +
+    escapeHtml(sec.key) +
+    '">' +
+    '<div class="home-section-head">' +
+    '<h2 class="home-section-title">Related Products</h2>' +
+    '<a class="home-section-viewall" href="' +
     escapeHtml(seeAllHref) +
     '">See All</a></div>' +
-    '<div class="pqv-related-list">' +
-    items +
-    "</div></aside>"
+    '<div class="home-section-body">' +
+    "<button type='button' class='home-row-arrow prev' aria-label='Previous'>&#8249;</button>" +
+    '<div class="home-row">' +
+    cards +
+    "</div>" +
+    "<button type='button' class='home-row-arrow next' aria-label='Next'>&#8250;</button>" +
+    "</div></section>"
   );
+}
+/* ----------------------------------------------------------------------
+   Related Products = homepage product cards.
+   Card HTML, add-to-cart and slider behaviour are copied from
+   index-home-muslim-abaya.js; styles come from related-home-cards.css
+   (generated from the homepage CSS by scripts/build-related-home-cards.mjs).
+   ---------------------------------------------------------------------- */
+var PQV_HOME_RELATED_CSS = "/related-home-cards.css?v=20261023-rel1";
+var PQV_HOME_ROW_INTERVAL = 4500;
+var PQV_HOME_CART_ICON =
+  "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='M3 4h1.6l1.1 11.2A2 2 0 0 0 7.7 17h9.7a2 2 0 0 0 2-1.7L21 8H7'/><circle cx='9' cy='20' r='1.35'/><circle cx='18' cy='20' r='1.35'/></svg>";
+function ensurePqvHomeRelatedCss() {
+  if (document.getElementById("pqv-home-related-css")) return;
+  var link = document.createElement("link");
+  link.id = "pqv-home-related-css";
+  link.rel = "stylesheet";
+  link.href = PQV_HOME_RELATED_CSS;
+  document.head.appendChild(link);
+}
+function pqvHomeSectionMeta(key) {
+  var secs = window.CATALOG_SECTIONS || [];
+  for (var i = 0; i < secs.length; i++) {
+    if (secs[i] && secs[i].key === key) return secs[i];
+  }
+  return { key: key || "", menu: key || "", path: "/" + (key || "") };
+}
+function pqvHomeHref(path) {
+  if (typeof window.siteHref === "function") return window.siteHref(path);
+  return path;
+}
+function pqvHomeWaLink() {
+  return (window.SITE_MEDIA && window.SITE_MEDIA.whatsappOrderLink) || "https://wa.me/8801971642683";
+}
+function pqvHomeCardHtml(p) {
+  var img = resolveCardImageSrc(p);
+  var thumb = deriveCardThumbSrc(img) || img;
+  var dHref = pqvHomeHref("/product/" + encodeURIComponent(p.id || ""));
+  var st = productStockStatus(p);
+  var outOfStock = st.inStock === false;
+  var msg = pqvHomeWaLink() + "?text=" + encodeURIComponent("I want to order " + p.name);
+  return (
+    "<article class='ah-card" +
+    (outOfStock ? " ah-card-oos" : "") +
+    "' data-pid='" +
+    escapeHtml(p.id) +
+    "'>" +
+    "<a class='ah-card-media' href='" +
+    escapeHtml(dHref) +
+    "'>" +
+    (outOfStock
+      ? "<span class='ah-card-badge ah-card-badge-oos'>Sold Out</span>"
+      : "<span class='ah-card-badge'>Sale</span>") +
+    "<img src='" +
+    escapeHtml(thumb) +
+    "' data-full='" +
+    escapeHtml(img) +
+    "' alt='" +
+    escapeHtml(p.name) +
+    "' width='480' height='600' loading='lazy' decoding='async'" +
+    " onerror=\"var f=this.getAttribute('data-full');if(f&&this.src.indexOf(f)<0&&this.src.indexOf('/images/card/')>-1){this.src=f;return}this.onerror=null;this.src='/images/Baby-Pink-Floral-Print.jpeg'\">" +
+    "</a>" +
+    "<div class='ah-card-body'>" +
+    "<div class='ah-card-row'>" +
+    "<a class='ah-card-name' href='" +
+    escapeHtml(dHref) +
+    "'>" +
+    escapeHtml(p.name) +
+    "</a>" +
+    "<span class='ah-card-price'>" +
+    formatCardPriceText(p) +
+    "</span>" +
+    "</div>" +
+    "<span class='ah-card-stock" +
+    (outOfStock ? " is-oos" : "") +
+    "'>" +
+    // Homepage cards only ever show "In Stock" / "Out of Stock".
+    (outOfStock ? "Out of Stock" : "In Stock") +
+    "</span>" +
+    "<div class='ah-actions'>" +
+    (outOfStock
+      ? "<button type='button' class='ah-btn ah-btn-cart' data-action='add' disabled>" +
+        "<span>Out of Stock</span></button>"
+      : "<button type='button' class='ah-btn ah-btn-cart' data-action='add'>" +
+        PQV_HOME_CART_ICON +
+        "<span class='ah-btn-spin' aria-hidden='true'></span>" +
+        "<span data-cart-label>Add to Cart</span></button>") +
+    (outOfStock
+      ? ""
+      : "<a class='ah-btn ah-btn-msg' href='" +
+        escapeHtml(msg) +
+        "' target='_blank' rel='noopener'><span>Send Message</span></a>") +
+    "</div>" +
+    "</div>" +
+    "</article>"
+  );
+}
+/* Same as addToCart() in index-home-muslim-abaya.js */
+function pqvHomeAddToCart(sec, p) {
+  var price = listingCardPrice(p);
+  var line = {
+    id: p.id,
+    name: p.name,
+    price: price,
+    quantity: 1,
+    image: resolveCardImageSrc(p),
+    category: sec.key,
+    categoryLabel: sec.menu
+  };
+  if (typeof window.enrichHomeCartLine === "function") {
+    line = window.enrichHomeCartLine(p, line);
+  }
+  var existing =
+    typeof window.loadStoreCart === "function" ? window.loadStoreCart({ readOnly: true }) : [];
+  var merged =
+    typeof window.addOrMergeStoreCartItem === "function"
+      ? window.addOrMergeStoreCartItem(existing, line)
+      : existing.concat([line]);
+  if (typeof window.markStoreCartSession === "function") {
+    window.markStoreCartSession();
+  }
+  if (typeof window.afterCartMutation === "function") {
+    window.afterCartMutation(merged);
+  }
+  if (typeof window.ensureCartDrawerHtml === "function") {
+    window.ensureCartDrawerHtml();
+  }
+  if (typeof window.openCartDrawer === "function") {
+    window.openCartDrawer();
+  }
+  if (typeof window.pushTrackingEvent === "function") {
+    window.pushTrackingEvent("AddToCart", {
+      content_ids: [p.id],
+      content_name: p.name,
+      content_type: "product",
+      value: price,
+      currency: "BDT"
+    });
+  }
+  if (typeof window.showCartAddedToast === "function") {
+    window.showCartAddedToast({
+      label: "Product added to cart",
+      name: p.name,
+      image: resolveCardImageSrc(p),
+      price: price
+    });
+  }
+}
+function pqvHomeRowAutoplayAllowed() {
+  var mm = window.matchMedia;
+  return !(mm && mm("(prefers-reduced-motion: reduce)").matches) &&
+    !(mm && mm("(max-width: 900px), (pointer: coarse)").matches);
+}
+function pqvHomeRowCanSlide(rowEl) {
+  return rowEl && rowEl.scrollWidth > rowEl.clientWidth + 8;
+}
+function pqvHomeScrollRowBy(rowEl, dir) {
+  if (!pqvHomeRowCanSlide(rowEl)) return;
+  var page = Math.max(rowEl.clientWidth * 0.8, 1);
+  var max = rowEl.scrollWidth - rowEl.clientWidth;
+  if (dir > 0) {
+    if (rowEl.scrollLeft >= max - 8) rowEl.scrollTo({ left: 0, behavior: "smooth" });
+    else rowEl.scrollBy({ left: page, behavior: "smooth" });
+    return;
+  }
+  if (rowEl.scrollLeft <= 8) rowEl.scrollTo({ left: max, behavior: "smooth" });
+  else rowEl.scrollBy({ left: -page, behavior: "smooth" });
+}
+function pqvHomeStartRowAuto(body, rowEl) {
+  if (body.__ahRowTimer) {
+    clearInterval(body.__ahRowTimer);
+    body.__ahRowTimer = 0;
+  }
+  if (!pqvHomeRowAutoplayAllowed() || document.hidden || !body.isConnected ||
+      body.__ahRowVisible === false || !pqvHomeRowCanSlide(rowEl)) return;
+  body.__ahRowTimer = setInterval(function () {
+    if (!body.isConnected) {
+      clearInterval(body.__ahRowTimer);
+      body.__ahRowTimer = 0;
+      return;
+    }
+    if (body.__ahRowPaused || document.hidden) return;
+    pqvHomeScrollRowBy(rowEl, 1);
+  }, PQV_HOME_ROW_INTERVAL);
+}
+function bindPqvHomeRelated(root) {
+  var section = root && root.querySelector(".pqv-home-related");
+  if (!section || section.__ahBound) return;
+  section.__ahBound = true;
+  section.addEventListener("click", function (e) {
+    var btn = e.target.closest("button[data-action='add']");
+    if (!btn) return;
+    e.preventDefault();
+    var card = btn.closest(".ah-card");
+    var state = window.__pqvHomeRelated;
+    if (!card || !state) return;
+    var p = state.products[String(card.getAttribute("data-pid"))];
+    if (!p || productStockStatus(p).inStock === false) return;
+    pqvHomeAddToCart(state.sec, p);
+    if (typeof window.playCartButtonAddedUi === "function") {
+      window.playCartButtonAddedUi(btn);
+    }
+  });
+  var body = section.querySelector(".home-section-body");
+  var rowEl = section.querySelector(".home-row");
+  if (!body || !rowEl) return;
+  var prevArrow = body.querySelector(".home-row-arrow.prev");
+  var nextArrow = body.querySelector(".home-row-arrow.next");
+  if (prevArrow) {
+    prevArrow.addEventListener("click", function () {
+      pqvHomeScrollRowBy(rowEl, -1);
+      pqvHomeStartRowAuto(body, rowEl);
+    });
+  }
+  if (nextArrow) {
+    nextArrow.addEventListener("click", function () {
+      pqvHomeScrollRowBy(rowEl, 1);
+      pqvHomeStartRowAuto(body, rowEl);
+    });
+  }
+  body.addEventListener("mouseenter", function () { body.__ahRowPaused = true; });
+  body.addEventListener("mouseleave", function () { body.__ahRowPaused = false; });
+  body.addEventListener("touchstart", function () { body.__ahRowPaused = true; }, { passive: true });
+  body.addEventListener("touchend", function () { body.__ahRowPaused = false; }, { passive: true });
+  body.addEventListener("touchcancel", function () { body.__ahRowPaused = false; }, { passive: true });
+  if (typeof window.IntersectionObserver === "function") {
+    body.__ahRowVisible = false;
+    new window.IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        body.__ahRowVisible = entry.isIntersecting;
+        pqvHomeStartRowAuto(body, rowEl);
+      });
+    }, { threshold: 0.05 }).observe(body);
+  }
+  window.requestAnimationFrame(function () {
+    pqvHomeStartRowAuto(body, rowEl);
+  });
 }
 function syncPqvTopOffset() {
   var header = document.getElementById("site-header-mount");
@@ -1777,6 +2014,7 @@ function openProductQuickView(idx) {
   ensureReviewsWidgetLoaded();
   callMAReviewsMount(root, p);
   bindPqvInteractions(p, idx, categoryKey, root);
+  bindPqvHomeRelated(root);
   initStickyOrderBar(root);
   var pqvQtyInput = root.querySelector("#pqvQty");
   if (pqvQtyInput) setPqvQtyInput(pqvQtyInput, cardQty);
