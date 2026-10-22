@@ -76,7 +76,11 @@
           return variants[variantKey] && variants[variantKey].tracked === true;
         });
 
-        if (hasTrackedVariants) {
+        if (entry.manualOverride === true) {
+          product.stock = entry.qty;
+          product.inStock = entry.inStock === true;
+          product._liveStockOverride = true;
+        } else if (hasTrackedVariants) {
           // Product Manager-এর explicit Out-of-Stock override-কে অগ্রাধিকার দিই।
           if (!product._catalogStockDisabled) {
             product.stock = entry.qty;
