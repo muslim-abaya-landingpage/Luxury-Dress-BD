@@ -163,6 +163,7 @@
   var overviewPageSize = 20;
   var savedSnapshot = "";
   var stockPublishing = false;
+  var queuedStockToggle = null;
   function catalogSnapshot() {
     return JSON.stringify([sections, products, categoryTypePrices], function(key, value) {
       if (!value || typeof value !== "object" || Array.isArray(value)) return value;
@@ -1190,8 +1191,20 @@
   }
 
   function publishStockChanges(items, available, redraw) {
-    if (stockPublishing || document.getElementById("pmSave").disabled) {
-      setSaveStatus("Saving stock. Please wait.");
+    if (stockPublishing) {
+      // Keep a second click made while the first save is in flight.
+      // Two rapid clicks on the same item cancel each other out.
+      if (items.length === 1) {
+        if (queuedStockToggle && queuedStockToggle.product === items[0]) queuedStockToggle = null;
+        else queuedStockToggle = {product:items[0]};
+        setSaveStatus(queuedStockToggle ? "Next stock change queued. Saving first change…" : "Next stock change cancelled. Saving first change…");
+      } else {
+        setSaveStatus("Saving stock. Please wait.");
+      }
+      return Promise.resolve(false);
+    }
+    if (document.getElementById("pmSave").disabled) {
+      setSaveStatus("Saving changes. Please wait until saving finishes.");
       return Promise.resolve(false);
     }
     if (savedSnapshot !== catalogSnapshot()) {
@@ -1220,6 +1233,14 @@
       // Rendering may normalize product fields. Keep the successful publish
       // baseline in sync so the next stock click is not mistaken for unsaved edits.
       if (published) savedSnapshot = catalogSnapshot();
+      var next = queuedStockToggle;
+      queuedStockToggle = null;
+      if (published && next && next.product) {
+        // The first publish has finished; apply the saved second click now.
+        publishStockToggle(next.product, renderMain);
+      } else if (!published && next) {
+        setSaveStatus("Stock was not saved. Retry after checking the error above.");
+      }
     });
   }
 
