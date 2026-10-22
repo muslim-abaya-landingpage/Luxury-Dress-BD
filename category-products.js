@@ -1,6 +1,6 @@
 /**
  * প্রোডাক্ট ডেটা — product-manager.html থেকে এডিট করুন
- * আপডেট: 2026-10-21
+ * আপডেট: 2026-10-22
  */
 window.CATEGORY_PRODUCTS = {
   abaya: [
@@ -567,11 +567,13 @@ window.CATEGORY_PRODUCTS = {
       name: "Premium Red Cotton Embroidered Women's Two-Piece Set",
       image: "/images/two-piece-dress/premium-red-embroidered-cotton-two-piece-women-salwar-kameez-set-bangladesh-1080x1350.webp",
       price: 750,
+      stock: 0,
       color: "red",
       colorLabel: "Red",
       fabric: "Premium Cotton Fabric",
       sizes: ["42 (Free size)"],
       detailNote: "Elegant embroidered design, soft breathable cotton fabric, comfortable everyday fit. Top Length: 38–40 Inches | Pants Length: 38 Inches",
+      inStock: false,
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
       productUrl: "/",
