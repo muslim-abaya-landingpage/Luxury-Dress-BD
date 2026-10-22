@@ -187,3 +187,37 @@ test('edit screen: an option can be renamed (Hijab → Hijab + Niqab) and reorde
   expect(file).toContain('"Hijab + Niqab": 450');
   expect(file).not.toMatch(/"Hijab": 450/);
 });
+
+test('edit screen: new main and gallery photos are not committed one by one; they go up with Save in one publish', async ({ page }) => {
+  await stub(page);
+  page.on('dialog', (d) => d.accept());
+  await page.goto('/product-manager.html');
+  await page.waitForTimeout(500);
+  await page.evaluate(() => {
+    window.__uploads = []; window.__queued = {};
+    window.MaAdmin.uploadImage = (path) => { window.__uploads.push(path); return Promise.resolve({ ok: true, path }); };
+    window.MaCatalogPublisher = Object.assign({}, window.MaCatalogPublisher, {
+      isReady: () => true,
+      enqueue: (rows) => rows.forEach((r) => { window.__queued[r.path] = r; }),
+      publish: (files) => { window.__published = files; return Promise.resolve({ ok: true }); }
+    });
+  });
+  await page.locator('#pmAllRows tr').first().locator('.pm-row-title').click();
+  // 64x80 PNG made in the page so the real resize/WebP step runs.
+  const png = await page.evaluate(() => { const c = document.createElement('canvas'); c.width = 64; c.height = 80; c.getContext('2d').fillRect(0, 0, 64, 80); return c.toDataURL('image/png').split(',')[1]; });
+  const file = { name: 'photo.png', mimeType: 'image/png', buffer: Buffer.from(png, 'base64') };
+  await page.locator('.pm-file-input').first().setInputFiles(file);
+  await page.locator('.pm-gallery-file-input').first().setInputFiles([file, { ...file, name: 'photo2.png' }]);
+  await expect.poll(() => page.evaluate(() => Object.keys(window.__queued).length)).toBe(4);
+  const queued = await page.evaluate(() => Object.keys(window.__queued));
+  for (const p of queued) expect(p).toMatch(/^images\/uploads\/[a-z0-9-]+\.webp$/);
+  expect(await page.evaluate(() => window.__uploads)).toEqual([]);
+  // Before saving, the editor shows the photos from the browser (they are not on the website yet).
+  const srcs = await page.evaluate(() => Array.from(document.querySelectorAll('#pmImgView img, #pmGalView img')).map((i) => i.getAttribute('src')));
+  expect(srcs.length).toBeGreaterThanOrEqual(3);
+  expect(srcs.filter((s) => /^blob:/.test(s)).length).toBeGreaterThanOrEqual(3);
+  await page.click('#pmSave');
+  await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
+  const catalog = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
+  for (const p of queued) expect(catalog).toContain(p);
+});
