@@ -70,3 +70,12 @@ html[data-admin-theme="dark"] .adm-btn-secondary:hover{background:var(--adm-prim
 .adm-main .adm-courier-note{font-size:12px;color:var(--adm-muted)}
 .adm-main .adm-disclosure{border-radius:14px}
 @media(max-width:640px){.adm-main .dzc-overview{padding:16px}.adm-main .dzc-kpi{padding:12px}.adm-main .dzc-kpi span{white-space:normal}.adm-main .adm-daily .adm-daily-action{padding:12px!important}}
+
+/* The analytics time range is an editable native control on iPhones. */
+@media (max-width: 760px) {
+  .adm-main .adm-report-controls select,
+  .adm-main .adm-report-controls input[type="date"] {
+    font-size: 16px;
+    min-height: 44px;
+  }
+}

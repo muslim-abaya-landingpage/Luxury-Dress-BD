@@ -1,0 +1,51 @@
+name: Responsive UI Audit
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "**/*.html"
+      - "**/*.css"
+      - "tests/e2e/responsive-audit.spec.cjs"
+      - ".github/workflows/responsive-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: Browser responsive audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install pinned dependencies
+        run: npm ci
+      - name: Use preinstalled Chrome or install Playwright Chromium
+        run: |
+          if command -v google-chrome >/dev/null 2>&1; then
+            echo "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=$(command -v google-chrome)" >> "$GITHUB_ENV"
+            google-chrome --version
+          else
+            npx playwright install --with-deps chromium
+          fi
+      - name: Run responsive viewport checks only
+        run: npx playwright test tests/e2e/responsive-audit.spec.cjs --workers=2 --retries=0
+      - name: Audit production site without production API writes
+        env:
+          E2E_BASE_URL: https://muslimabaya.com
+        run: npx playwright test tests/e2e/responsive-audit.spec.cjs --workers=2 --retries=0
+      - name: Upload screenshots and test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: responsive-audit-${{ github.run_id }}
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 14
+          if-no-files-found: ignore

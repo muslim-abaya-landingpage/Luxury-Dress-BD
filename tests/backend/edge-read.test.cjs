@@ -37,7 +37,7 @@ function fixture() {
     row('12-10-2026', 'Text Date', 1733333333, 'MA-4', 'Cancelled'),
   ];
   const sessions = [['Token', 'Email', 'Phone', 'Name', 'CreatedAt', 'ExpiresAt', 'Role'],
-    ['tok-admin', 'owner@example.com', '01700000000', 'Owner', new Date(NOW - 3600000), new Date(NOW + 86400000), 'admin'],
+    ['tok-admin', 'owner@example.com', '01700000000', 'Owner', new Date(NOW - 3600000), new Date(Date.UTC(2100, 0, 1)), 'admin'],
     ['tok-old', 'owner@example.com', '01700000000', 'Owner', new Date(NOW - 9e8), new Date(NOW - 1000), 'admin']];
   const admins = [['Email', 'Phone', 'Name', 'PasswordHash', 'Salt', 'Status', 'CreatedAt', 'Role', 'UpdatedAt'],
     ['owner@example.com', '01700000000', 'Owner', 'h', 's', 'active', new Date(NOW - 9e9), 'admin']];
@@ -80,7 +80,16 @@ function withNow(fn) {
   const RealDate = Date;
   class FakeDate extends RealDate { constructor(...a) { super(...(a.length ? a : [NOW])); } static now() { return NOW; } static [Symbol.hasInstance](x) { return x instanceof RealDate; } }
   global.Date = FakeDate;
-  try { return fn(); } finally { global.Date = RealDate; }
+  // Keep the fixture clock active while promises settle. Otherwise
+  // date-dependent session checks race with the real wall clock.
+  var result;
+  try { result = fn(); }
+  catch (err) { global.Date = RealDate; throw err; }
+  if (result && typeof result.then === 'function') {
+    return Promise.resolve(result).finally(() => { global.Date = RealDate; });
+  }
+  global.Date = RealDate;
+  return result;
 }
 
 async function makeCores() {

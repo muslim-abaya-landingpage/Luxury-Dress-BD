@@ -453,3 +453,49 @@ body.pn-body.wo-edit-page {
 .wo-edit-page .pn-field label{font-weight:600}
 .wo-edit-page .pn-in:focus-visible,.wo-edit-page .pn-sel:focus-visible,.wo-edit-page .pn-ta:focus-visible{outline:2px solid var(--wo-accent);outline-offset:1px}
 /* Phones keep the earlier fixed save bar (rules above); do not reset it to static here. */
+
+/* Small-screen order management: focusable horizontal table with pinned IDs.
+   Never collapse data columns: every order field remains available by scrolling. */
+@media (max-width: 760px) {
+  .wo-orders-page .pn-toolbar input:not([type="checkbox"]):not([type="radio"]),
+  .wo-orders-page .pn-toolbar select,
+  .wo-orders-page .pn-toolbar .wo-filter,
+  .wo-orders-page #ordIssueFilter {
+    font-size: 16px;
+    min-height: 44px;
+  }
+  .wo-orders-page .pn-table th:first-child,
+  .wo-orders-page .pn-table td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    width: 48px;
+    min-width: 48px;
+    max-width: 48px;
+    padding: 10px;
+    background: #fff;
+  }
+  .wo-orders-page .pn-table th:nth-child(2),
+  .wo-orders-page .pn-table td:nth-child(2) {
+    position: sticky;
+    left: 48px;
+    z-index: 2;
+    background: #fff;
+    box-shadow: 2px 0 0 #e7e9ed;
+  }
+  .wo-orders-page .pn-table th:first-child,
+  .wo-orders-page .pn-table th:nth-child(2) {
+    z-index: 3;
+    background: #f8f9fa;
+  }
+  .wo-orders-page .pn-table tr.click:hover td:first-child,
+  .wo-orders-page .pn-table tr.click:hover td:nth-child(2) { background: #f8f7fc; }
+  .wo-orders-page .pn-table-wrap:focus-visible { outline: 3px solid #7057b8; outline-offset: 3px; }
+  .wo-orders-page .wo-table-hint {
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 6px 0 10px;
+    color: var(--wo-muted);
+  }
+}
+@media (min-width: 761px) { .wo-orders-page .wo-table-hint { display: none; } }

@@ -852,3 +852,20 @@ body.site-search-open .site-search-drawer {
   .ann-slide { position: static; padding: 0 4px; font-size: 12px; line-height: 1.35; }
   .ann-slide:not(.active) { display: none; }
 }
+
+/* Responsive QA: a full-size search tap target, without enlarging every
+   header icon and crowding the logo on 320px phones. */
+@media (max-width: 1023px) {
+  .nav-icons #navSearchOpen {
+    box-sizing: border-box;
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 10px;
+  }
+}
+@media (max-width: 380px) {
+  .brand-logo-img { max-width: 100%; }
+}

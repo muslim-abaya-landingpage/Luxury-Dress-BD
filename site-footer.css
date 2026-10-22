@@ -1175,3 +1175,12 @@ a.anz-contact-link:hover {
     transform: none;
   }
 }
+
+/* Newsletter contact field must not trigger iOS Safari focus zoom. */
+@media (max-width: 768px) {
+  .newsletter-form input:not([type="checkbox"]):not([type="radio"]) {
+    font-size: 16px;
+    min-height: 44px;
+  }
+  .newsletter-form button { min-height: 44px; }
+}
