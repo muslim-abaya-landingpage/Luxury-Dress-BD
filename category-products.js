@@ -98,14 +98,14 @@ window.CATEGORY_PRODUCTS = {
     },
     {
       id: "ABY-White-7",
-      name: "Safa Sate Borka ",
+      name: "Safa Sate Borka",
       image: "/images/aby-versace-7-1789238735544.webp",
       images: ["/images/aby-white-7-1789241666830-g1.webp", "/images/gallery/aby-white-7-1790646669386-g2.webp"],
       price: 2385,
       stock: 100,
       color: "White",
       colorLabel: "Classic White",
-      fabric: "Dubai Cherry ",
+      fabric: "Dubai Cherry",
       sizes: ["44", "46", "48", "50", "52", "54", "56", "58"],
       types: ["Full Set", "Abaya Only", "Hijab"],
       priceByType: {
