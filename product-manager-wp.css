@@ -749,3 +749,5 @@ html[data-admin-theme="dark"] .pm-wp-list, html[data-admin-theme="dark"] .pm-wp-
 }
 @media (max-width: 760px) { .pm-opt-row > span .pm-opt-name { min-width: 0; } }
 .pm-opt-row > span { gap: 6px; }
+.pm-wp-savebar[data-state="pub"], .pm-wp-savebar[data-state="busy"] { border-color: #2271b1; background: #f0f6fc; }
+.pm-wp-savebar[data-state="pub"] .pm-wp-savebar-msg, .pm-wp-savebar[data-state="busy"] .pm-wp-savebar-msg { color: #135e96; font-weight: 600; }

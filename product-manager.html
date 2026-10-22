@@ -29,7 +29,7 @@
 <link rel="stylesheet" href="admin-dashboard-design.css?v=20261018-3">
 <script src="admin-dashboard-design.js?v=20261018-3"></script>
 <link rel="stylesheet" href="admin-premium-layout.css?v=20261021-1">
-<link rel="stylesheet" href="product-manager-wp.css?v=20261023-opt">
+<link rel="stylesheet" href="product-manager-wp.css?v=20261023-live">
 </head>
 <body class="pl-admin adm-body pm-wp-admin" data-admin-guard="1">
   <div class="adm-shell">
@@ -137,7 +137,7 @@
   <script src="product-catalog-sections.js?v=ac54db358f8d927e"></script>
   <script src="product-config.js?v=e7e6eb97e3ce454e"></script>
   <script src="product-utils.js?v=460604041e5f8ec0"></script>
-  <script src="category-products.js?v=ecd32aaff8e38b6c"></script>
+  <script src="category-products.js?v=bcbc048d8007ee11"></script>
   <script src="product-links-data.js?v=49a0ee4ca9e20d0b"></script>
   <script id="pmRawCatalog">window.MA_RAW_CATEGORY_PRODUCTS = JSON.parse(JSON.stringify(window.CATEGORY_PRODUCTS || {}));</script>
   <script src="product-catalog-loader.js?v=20261013-manager"></script>
@@ -785,7 +785,7 @@
       [b1, b2].forEach(function (b) { if (b) b.disabled = true; });
       editMsg("Saving…", "busy");
       saveAll().then(function () {
-        editMsg("Saved ✓ — the website shows it in about 2 minutes.", "ok");
+        editMsg("Saved ✓ — now updating the website (about 1–2 minutes). This message turns green when it is live.", "pub");
       }).catch(function (err) {
         editMsg("Not saved: " + ((err && err.message) || "try again") + " — your changes are kept.", "err");
       }).finally(function () { [b1, b2].forEach(function (b) { if (b) b.disabled = false; }); });
@@ -1309,7 +1309,7 @@
         msg.textContent = "Saving…";
         row.querySelectorAll("button").forEach(function (b) { b.disabled = true; });
         saveAll({ id: p.id }).then(function () {
-          toast("Saved — the website shows it in about 2 minutes");
+          toast("Saved — the website updates in about 1–2 minutes (the status at the top shows ✅ when live)");
           renderMain();
         }).catch(function (err) {
           var restored = JSON.parse(before);
@@ -2731,6 +2731,16 @@
   savedSnapshot = catalogSnapshot();
   window.MaProductQuickUpload.mount({sections:function(){return sections;},products:function(){return products;},status:setSaveStatus,isSaved:function(){return savedSnapshot===catalogSnapshot();},stage:function(category,product){if(!sections.some(function(sec){return sec.key===category;}))throw new Error("Choose a category.");Object.keys(products).forEach(function(k){products[k]=products[k].filter(function(p){return p.id!==product.id;});});products[category].unshift(product);renderCatList();renderMain();},publish:saveAll});
   reloadPublishingData().then(refreshLiveStockOverrides);
+  // The publisher fires this once the new catalog is actually served by the website.
+  document.addEventListener("ma-product-live", function () {
+    var bar = document.getElementById("pmEditBar");
+    if (!bar || bar.getAttribute("data-state") !== "pub") return;
+    var text = "✅ Live on the website now. If an open product page still shows the old details, refresh it.";
+    var msg = document.getElementById("pmEditBarMsg"), note = document.getElementById("pmEditNote");
+    if (msg) msg.textContent = text;
+    if (note) { note.textContent = text; note.classList.add("is-ok"); }
+    bar.setAttribute("data-state", "ok");
+  });
   document.addEventListener("keydown", function (e) {
     if ((e.ctrlKey || e.metaKey) && !e.altKey && String(e.key).toLowerCase() === "s") {
       var b = document.getElementById("pmEditBarSave");

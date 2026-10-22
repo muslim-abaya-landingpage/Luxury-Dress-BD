@@ -150,8 +150,11 @@ test('edit screen: the save bar is always visible, shows unsaved / saved / faile
   await expect(page.locator('#pmEditNote')).toContainText('Not saved');
   await withPublisher(page, false);
   await page.keyboard.press('Control+s');
-  await expect(bar).toHaveAttribute('data-state', 'ok');
+  await expect(bar).toHaveAttribute('data-state', 'pub');
   await expect(page.locator('#pmEditNote')).toContainText('Saved');
+  await page.evaluate(() => document.dispatchEvent(new CustomEvent('ma-product-live')));
+  await expect(bar).toHaveAttribute('data-state', 'ok');
+  await expect(page.locator('#pmEditBarMsg')).toContainText('Live on the website');
   expect(await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content.includes('1777'))).toBe(true);
 });
 
@@ -179,7 +182,7 @@ test('edit screen: an option can be renamed (Hijab → Hijab + Niqab) and reorde
   await expect(page.locator('.pm-opt-name').first()).toHaveValue('Hijab + Niqab');
   await expect(page.locator('#pmCardPrice')).toHaveText('৳450');
   await page.click('#pmEditBarSave');
-  await expect(page.locator('#pmEditBar')).toHaveAttribute('data-state', 'ok');
+  await expect(page.locator('#pmEditBar')).toHaveAttribute('data-state', 'pub');
   const file = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
   expect(file).toContain('"Hijab + Niqab": 450');
   expect(file).not.toMatch(/"Hijab": 450/);
