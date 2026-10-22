@@ -107,11 +107,11 @@ window.CATEGORY_PRODUCTS = {
       colorLabel: "Classic White",
       fabric: "Dubai Cherry",
       sizes: ["44", "46", "48", "50", "52", "54", "56", "58"],
-      types: ["Full Set", "Abaya Only", "Hijab"],
+      types: ["Full Set", "Abaya Only", "Hijab+Niqab"],
       priceByType: {
-        "Abaya Only": 1350,
         "Full Set": 2385,
-        "Hijab": 1200
+        "Abaya Only": 1350,
+        "Hijab+Niqab": 1200
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
