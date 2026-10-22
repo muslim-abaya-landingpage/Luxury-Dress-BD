@@ -702,3 +702,14 @@ html[data-admin-theme="dark"] .pm-wp-list, html[data-admin-theme="dark"] .pm-wp-
 .pm-opt-add #pmOptPrice { flex: 0 0 110px; width: 110px; height: auto; }
 .pm-opt-add #pmOptAdd { flex: none; }
 .pm-opt-add small { flex: 1 1 100%; }
+
+/* Quick Edit in the product list */
+.pm-qe-row > td { padding: 0 !important; background: #f6f7f7; }
+.pm-qe { margin: 0; padding: 14px 16px; border: 0; border-left: 4px solid #2271b1; }
+.pm-qe legend { padding: 0; font-weight: 600; font-size: 14px; }
+.pm-qe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px 14px; margin: 10px 0; }
+.pm-qe-grid label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #1d2327; }
+.pm-qe-grid .pm-qe-wide { grid-column: 1 / -1; }
+.pm-qe-grid input { min-height: 34px; padding: 4px 8px; border: 1px solid #8c8f94; font-size: 14px; }
+.pm-qe-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pm-qe-msg { color: #b32d2e; font-size: 13px; }

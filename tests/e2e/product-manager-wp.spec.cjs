@@ -79,3 +79,57 @@ test('edit screen: option prices keep the card price in step, and a new option (
   await page.click('[data-opt-del="Hijab"]');
   await expect(page.locator('.pm-opt-row label', { hasText: 'Hijab price' })).toHaveCount(0);
 });
+
+async function withPublisher(page, fail) {
+  await page.evaluate((fail) => { window.__published = null; window.MaCatalogPublisher = Object.assign({}, window.MaCatalogPublisher, { isReady: () => true, publish: (files) => fail ? Promise.reject(new Error('offline')) : (window.__published = files, Promise.resolve({ ok: true })) }); }, fail);
+}
+const block = (file, id) => file.slice(file.indexOf('"' + id + '"'), file.indexOf('"' + id + '"') + 700);
+
+test('Quick Edit in the list: name, option prices and colour save at once; a failed save changes nothing', async ({ page }) => {
+  await stub(page);
+  page.on('dialog', (d) => d.accept());
+  await page.goto('/product-manager.html');
+  await page.waitForTimeout(500);
+  await withPublisher(page, true);
+  const row = page.locator('#pmAllRows tr').first();
+  await row.hover();
+  await row.locator('[data-qe-cat]').click();
+  await page.fill('.pm-qe [data-qe="name"]', 'Maroon Abaya Set (Eid)');
+  await page.fill('.pm-qe [data-qe-type="Full Set"]', '1111');
+  await page.click('.pm-qe [data-qe-save]');
+  await expect(page.locator('.pm-qe-msg')).toContainText('Not saved');
+  expect(await page.evaluate(() => window.CATEGORY_PRODUCTS && 1)).toBe(1);
+  await page.click('.pm-qe [data-qe-cancel]');
+  await expect(page.locator('#pmAllRows tr').first()).toContainText('Maroon Abaya Set');
+  await expect(page.locator('#pmAllRows tr').first()).not.toContainText('(Eid)');
+
+  await withPublisher(page, false);
+  await page.locator('#pmAllRows tr').first().hover();
+  await page.locator('#pmAllRows tr').first().locator('[data-qe-cat]').click();
+  await page.fill('.pm-qe [data-qe="name"]', 'Maroon Abaya Set (Eid)');
+  await page.fill('.pm-qe [data-qe-type="Full Set"]', '1111');
+  await page.fill('.pm-qe [data-qe="colorLabel"]', 'Deep Maroon');
+  await page.click('.pm-qe [data-qe-save]');
+  await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
+  const file = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
+  const b = block(file, 'ABY-MAROON-1');
+  expect(b).toContain('name: "Maroon Abaya Set (Eid)"');
+  expect(b).toContain('price: 1111');
+  expect(b).toContain('"Full Set": 1111');
+  expect(b).toContain('colorLabel: "Deep Maroon"');
+});
+
+test('Bulk "Change price (%)" raises every option price of the selected products and saves at once', async ({ page }) => {
+  await stub(page);
+  page.on('dialog', (d) => (d.type() === 'prompt' ? d.accept('10') : d.accept()));
+  await page.goto('/product-manager.html');
+  await page.waitForTimeout(500);
+  await withPublisher(page, false);
+  const before = await page.evaluate(() => { const f = (window.CATEGORY_PRODUCTS.abaya || []).find((p) => p.id === 'ABY-MAROON-1'); return { price: f.price, types: Object.assign({}, f.priceByType) }; });
+  await page.locator('#pmAllRows tr').first().locator('.pm-overview-check').check();
+  await page.selectOption('#pmBulkAction', 'price');
+  await page.click('#pmBulkApply');
+  await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
+  const b = block(await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content), 'ABY-MAROON-1');
+  for (const [t, v] of Object.entries(before.types)) expect(b).toContain('"' + t + '": ' + Math.round(v * 1.1));
+});

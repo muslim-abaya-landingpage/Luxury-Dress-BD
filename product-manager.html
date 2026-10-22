@@ -29,7 +29,7 @@
 <link rel="stylesheet" href="admin-dashboard-design.css?v=20261018-3">
 <script src="admin-dashboard-design.js?v=20261018-3"></script>
 <link rel="stylesheet" href="admin-premium-layout.css?v=20261021-1">
-<link rel="stylesheet" href="product-manager-wp.css?v=20261023-opt2">
+<link rel="stylesheet" href="product-manager-wp.css?v=20261023-qe">
 </head>
 <body class="pl-admin adm-body pm-wp-admin" data-admin-guard="1">
   <div class="adm-shell">
@@ -137,7 +137,7 @@
   <script src="product-catalog-sections.js?v=ac54db358f8d927e"></script>
   <script src="product-config.js?v=e7e6eb97e3ce454e"></script>
   <script src="product-utils.js?v=460604041e5f8ec0"></script>
-  <script src="category-products.js?v=e0118848cf4782c2"></script>
+  <script src="category-products.js?v=ba30ecb1e52ea32d"></script>
   <script src="product-links-data.js?v=49a0ee4ca9e20d0b"></script>
   <script id="pmRawCatalog">window.MA_RAW_CATEGORY_PRODUCTS = JSON.parse(JSON.stringify(window.CATEGORY_PRODUCTS || {}));</script>
   <script src="product-catalog-loader.js?v=20261013-manager"></script>
@@ -1014,7 +1014,7 @@
       '<p class="pm-wp-search"><label class="pm-sr-only" for="pmAllSearch">Search products</label><input type="search" id="pmAllSearch" value="' + escapeAttr(allSearchTerm) + '">' +
       '<button type="button" class="pm-wp-button" id="pmAllSearchBtn">Search products</button><span id="pmAllCount" class="pm-sr-only"></span></p>' +
       '<div class="pm-wp-tablenav top">' +
-      '<div class="pm-wp-actions"><label class="pm-sr-only" for="pmBulkAction">Bulk actions</label><select id="pmBulkAction"><option value="">Bulk actions</option><option value="in">Mark in stock</option><option value="out">Mark out of stock</option></select>' +
+      '<div class="pm-wp-actions"><label class="pm-sr-only" for="pmBulkAction">Bulk actions</label><select id="pmBulkAction"><option value="">Bulk actions</option><option value="in">Mark in stock</option><option value="out">Mark out of stock</option><option value="price">Change price (%)</option></select>' +
       '<button type="button" class="pm-wp-button" id="pmBulkApply">Apply</button></div>' +
       '<div class="pm-wp-actions"><select id="pmOverviewCategory" aria-label="Filter by category"><option value="">Select a category</option>' + catOptions + '</select>' +
       '<select id="pmOverviewStock" aria-label="Filter by stock status"><option value="">Filter by stock status</option><option value="in"' + (overviewStock === 'in' ? ' selected' : '') + '>In stock</option><option value="out"' + (overviewStock === 'out' ? ' selected' : '') + '>Out of stock</option></select>' +
@@ -1043,6 +1043,7 @@
       var action = document.getElementById("pmBulkAction").value;
       if (!action) return;
       if (!Object.keys(overviewSelected).length) { toast("Select products first"); return; }
+      if (action === "price") { bulkReprice(); return; }
       document.getElementById(action === "out" ? "pmOverviewOff" : "pmOverviewOn").click();
     });
     document.querySelectorAll("[data-overview-stock]").forEach(function (button) {
@@ -1105,6 +1106,7 @@
           '<div class="pm-row-meta"><mark class="' + (out ? 'outofstock' : 'instock') + '">' + (out ? 'Out of stock' : 'In stock') + '</mark> · ' + priceText(p) + '</div>' +
           '<div class="pm-row-actions"><span class="pm-row-id">ID: ' + escapeHtml(p.id || "—") + ' | </span>' +
           '<button type="button" class="pm-row-link"' + cat + '>Edit</button> | ' +
+          '<button type="button" class="pm-row-link" data-qe-cat="' + escapeAttr(s.key) + '" data-qe-index="' + row.index + '">Quick Edit</button> | ' +
           '<button type="button" class="pm-row-link" title="New product with this one’s price, sizes and description" data-pm-copy-cat="' + escapeAttr(s.key) + '" data-pm-copy-index="' + row.index + '">Copy</button> | ' +
           '<button type="button" class="pm-row-link pm-overview-stock" data-stock-cat="' + escapeAttr(s.key) + '" data-stock-index="' + row.index + '" aria-pressed="' + out + '">' + (out ? 'Mark in stock' : 'Mark out of stock') + '</button>' +
           (p.id ? ' | <a class="pm-row-link" href="/product/' + encodeURIComponent(p.id) + '" target="_blank" rel="noopener">View</a>' : '') + '</div></td>' +
@@ -1184,6 +1186,92 @@
           overviewSelected = {};
           openProductEditor(button.getAttribute("data-pm-cat"), parseInt(button.getAttribute("data-pm-index"), 10));
         });
+      });
+      document.querySelectorAll("[data-qe-cat]").forEach(function (button) {
+        button.addEventListener("click", function () {
+          openQuickEdit(button.closest("tr"), button.getAttribute("data-qe-cat"), parseInt(button.getAttribute("data-qe-index"), 10));
+        });
+      });
+    }
+    // WooCommerce-style Quick Edit: change name, prices, colour and fabric in the list, then Update saves at once.
+    function openQuickEdit(tr, catKey, index) {
+      var p = (products[catKey] || [])[index];
+      if (!p || !tr) return;
+      var open = document.querySelector(".pm-qe-row");
+      if (open) { var prev = open.previousElementSibling; open.remove(); if (prev) prev.hidden = false; }
+      var meta = getCategoryTypeMeta(catKey);
+      var types = productOptionTypes(p, meta);
+      var priceInputs = types.length
+        ? types.map(function (t) { var v = p.priceByType && p.priceByType[t] != null ? p.priceByType[t] : ""; return '<label>' + escapeHtml(t) + ' price (৳)<input type="number" min="0" data-qe-type="' + escapeAttr(t) + '" value="' + escapeAttr(v) + '"></label>'; }).join("")
+        : '<label>Price (৳)<input type="number" min="0" data-qe="price" value="' + escapeAttr(p.price == null ? "" : p.price) + '"></label>';
+      var row = document.createElement("tr");
+      row.className = "pm-qe-row";
+      row.innerHTML = '<td colspan="11"><fieldset class="pm-qe"><legend>Quick Edit — ' + escapeHtml(p.name || "") + '</legend>' +
+        '<div class="pm-qe-grid">' +
+        '<label class="pm-qe-wide">Name<input type="text" data-qe="name" value="' + escapeAttr(p.name || "") + '"></label>' +
+        priceInputs +
+        '<label>Colour (shown)<input type="text" data-qe="colorLabel" value="' + escapeAttr(p.colorLabel || "") + '"></label>' +
+        '<label>Colour code<input type="text" data-qe="color" value="' + escapeAttr(p.color || "") + '" placeholder="e.g. black"></label>' +
+        '<label>Fabric<input type="text" data-qe="fabric" value="' + escapeAttr(p.fabric || "") + '"></label>' +
+        '</div><div class="pm-qe-actions"><button type="button" class="pm-wp-button button-primary" data-qe-save>Update</button> <button type="button" class="pm-wp-button" data-qe-cancel>Cancel</button> <span class="pm-qe-msg" role="status"></span></div></fieldset></td>';
+      tr.hidden = true;
+      tr.parentNode.insertBefore(row, tr.nextSibling);
+      var first = row.querySelector('[data-qe="name"]'); if (first) first.focus();
+      row.querySelector("[data-qe-cancel]").addEventListener("click", function () { row.remove(); tr.hidden = false; });
+      row.querySelector("[data-qe-save]").addEventListener("click", function () {
+        var msg = row.querySelector(".pm-qe-msg");
+        var name = row.querySelector('[data-qe="name"]').value.trim();
+        if (!name) { msg.textContent = "Name cannot be empty."; return; }
+        var prices = {}, bad = false;
+        row.querySelectorAll("[data-qe-type]").forEach(function (inp) { var v = parseInt(inp.value, 10); if (!(v > 0)) bad = true; prices[inp.getAttribute("data-qe-type")] = v; });
+        var plain = row.querySelector('[data-qe="price"]');
+        if (plain && !(parseInt(plain.value, 10) > 0)) bad = true;
+        if (bad) { msg.textContent = "Every price must be more than 0."; return; }
+        var before = JSON.stringify(p);
+        p.name = name;
+        ["colorLabel", "color", "fabric"].forEach(function (k) { var v = row.querySelector('[data-qe="' + k + '"]').value.trim(); if (v) p[k] = v; else delete p[k]; });
+        if (plain) p.price = parseInt(plain.value, 10);
+        if (Object.keys(prices).length) { if (!p.priceByType) p.priceByType = {}; Object.keys(prices).forEach(function (t) { p.priceByType[t] = prices[t]; }); syncCardPrice(p, meta); }
+        if (JSON.stringify(p) === before) { row.remove(); tr.hidden = false; return; }
+        msg.textContent = "Saving…";
+        row.querySelectorAll("button").forEach(function (b) { b.disabled = true; });
+        saveAll({ id: p.id }).then(function () {
+          toast("Saved — the website shows it in about 2 minutes");
+          renderMain();
+        }).catch(function (err) {
+          var restored = JSON.parse(before);
+          Object.keys(p).forEach(function (k) { delete p[k]; });
+          Object.assign(p, restored);
+          msg.textContent = "Not saved: " + (err && err.message || "try again") + " — nothing was changed.";
+          row.querySelectorAll("button").forEach(function (b) { b.disabled = false; });
+        });
+      });
+    }
+    // Bulk "Change price (%)": raises or lowers every price of the selected products, then saves at once.
+    function bulkReprice() {
+      var refs = Object.keys(overviewSelected).map(function (key) { return JSON.parse(key); });
+      var items = refs.map(function (ref) { return { p: (products[ref[0]] || [])[ref[1]], cat: ref[0] }; }).filter(function (x) { return x.p; });
+      if (!items.length) return;
+      var input = prompt("Change the price of " + items.length + " product(s) by what percent?\n10 = 10% higher, -10 = 10% lower", "10");
+      if (input === null) return;
+      var pct = parseFloat(input);
+      if (isNaN(pct) || pct <= -100 || pct > 500) { toast("Enter a percent between -99 and 500"); return; }
+      var backup = items.map(function (x) { return JSON.stringify(x.p); });
+      var round = function (v) { return Math.max(1, Math.round(v * (1 + pct / 100))); };
+      items.forEach(function (x) {
+        if (typeof x.p.price === "number") x.p.price = round(x.p.price);
+        if (x.p.priceByType) Object.keys(x.p.priceByType).forEach(function (t) { var v = parseInt(x.p.priceByType[t], 10); if (!isNaN(v)) x.p.priceByType[t] = round(v); });
+        syncCardPrice(x.p, getCategoryTypeMeta(x.cat));
+      });
+      setSaveStatus("Saving new prices for " + items.length + " product(s)…");
+      saveAll(null).then(function () {
+        overviewSelected = {};
+        toast(items.length + " product(s) " + (pct >= 0 ? "+" : "") + pct + "% — saved, live in about 2 minutes");
+        renderMain();
+      }).catch(function (err) {
+        items.forEach(function (x, i) { var r = JSON.parse(backup[i]); Object.keys(x.p).forEach(function (k) { delete x.p[k]; }); Object.assign(x.p, r); });
+        renderMain();
+        setSaveStatus("Prices not saved: " + (err && err.message || "try again") + " — nothing was changed.");
       });
     }
     document.getElementById("pmAllSearch").addEventListener("input", function (e) { allSearchTerm = e.target.value; overviewPage = 1; overviewSelected = {}; draw(); });
@@ -2237,7 +2325,7 @@
       title +
       '</title>\n  <link rel="preconnect" href="https://fonts.googleapis.com">\n  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">\n  <link rel="stylesheet" href="site-header.css?v=20261022-ann">\n  <link rel="stylesheet" href="site-footer.css">\n  <link rel="stylesheet" href="shop-page.css?v=1">\n  <link rel="stylesheet" href="category-sidebar.css?v=20261022-nound" id="category-sidebar-css">\n</head>\n<body data-shop-category="' +
       sec.key +
-      '">\n  <div id="site-header-mount"></div>\n  <main class="wrap"><div id="list"></div></main>\n  <div id="site-footer-mount"></div>\n  <script defer src="cart-utils.js"><\/script>\n  <script defer src="site-header.js"><\/script>\n  <script defer src="product-catalog-sections.js?v=ac54db358f8d927e"><\/script>\n  <script defer src="product-catalog-sync.js"><\/script>\n  <script defer src="product-config.js?v=e7e6eb97e3ce454e"><\/script>\n  <script defer src="product-utils.js?v=460604041e5f8ec0"><\/script>\n  <script defer src="category-products.js?v=e0118848cf4782c2"><\/script>\n  <script defer src="product-links-data.js?v=49a0ee4ca9e20d0b"><\/script>\n  <script defer src="product-catalog-loader.js"><\/script>\n  <script defer src="category-renderer.js?v=da909518e293b0c3"><\/script>\n  <script defer src="site-footer.js"><\/script>\n  <script defer src="shop-category-boot.js"><\/script>\n</body>\n</html>\n'
+      '">\n  <div id="site-header-mount"></div>\n  <main class="wrap"><div id="list"></div></main>\n  <div id="site-footer-mount"></div>\n  <script defer src="cart-utils.js"><\/script>\n  <script defer src="site-header.js"><\/script>\n  <script defer src="product-catalog-sections.js?v=ac54db358f8d927e"><\/script>\n  <script defer src="product-catalog-sync.js"><\/script>\n  <script defer src="product-config.js?v=e7e6eb97e3ce454e"><\/script>\n  <script defer src="product-utils.js?v=460604041e5f8ec0"><\/script>\n  <script defer src="category-products.js?v=ba30ecb1e52ea32d"><\/script>\n  <script defer src="product-links-data.js?v=49a0ee4ca9e20d0b"><\/script>\n  <script defer src="product-catalog-loader.js"><\/script>\n  <script defer src="category-renderer.js?v=da909518e293b0c3"><\/script>\n  <script defer src="site-footer.js"><\/script>\n  <script defer src="shop-category-boot.js"><\/script>\n</body>\n</html>\n'
     );
   }
 
