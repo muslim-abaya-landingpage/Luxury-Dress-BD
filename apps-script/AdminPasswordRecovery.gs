@@ -79,8 +79,9 @@ function adminPasswordResetRequest_(e) {
           + encodeURIComponent(email) + '&token=' + encodeURIComponent(token)
       };
     }
-    // Store cooldown for known and unknown addresses to avoid account probing.
-    props.setProperty(key, JSON.stringify(record));
+    // Do not persist arbitrary unknown emails; attackers must not fill Script Properties.
+    // The response stays identical for known and unknown addresses.
+    if (eligible) props.setProperty(key, JSON.stringify(record));
   } finally {
     lock.releaseLock();
   }
