@@ -115,6 +115,58 @@ for (const spec of paths) {
       }
       expect(findings.mediaViewport).toBe(true);
       expect(findings.htmlScrollWidth, 'document horizontal overflow').toBeLessThanOrEqual(findings.viewport + 2);
+      // These are new improvements in this PR: verify in the checked-out
+      // branch only. The production scan is intentionally read-only and
+      // reports the currently deployed state before the PR is merged.
+      if (!process.env.E2E_BASE_URL && width <= 390) {
+        if (!spec.admin) {
+          const search = await page.locator('#navSearchOpen').evaluate(el => {
+            const r = el.getBoundingClientRect();
+            return { width: Math.round(r.width), height: Math.round(r.height) };
+          });
+          expect(search.width, 'header search tap width').toBeGreaterThanOrEqual(44);
+          expect(search.height, 'header search tap height').toBeGreaterThanOrEqual(44);
+        }
+        if (['home', 'product', 'category'].includes(spec.name)) {
+          const footerFont = await page.locator('.newsletter-form input:not([type="checkbox"])').first().evaluate(
+            el => parseFloat(getComputedStyle(el).fontSize));
+          expect(footerFont, 'newsletter contact input font').toBeGreaterThanOrEqual(16);
+        }
+        if (spec.name === 'category') {
+          const selectFont = await page.locator('#shopSort').evaluate(el => parseFloat(getComputedStyle(el).fontSize));
+          expect(selectFont, 'category sort font').toBeGreaterThanOrEqual(16);
+        }
+        if (spec.name === 'admin-dashboard') {
+          const font = await page.locator('#admReportRange').evaluate(el => parseFloat(getComputedStyle(el).fontSize));
+          expect(font, 'admin report filter font').toBeGreaterThanOrEqual(16);
+        }
+        if (spec.name === 'admin-orders') {
+          const sizes = await page.locator('#ordSearch, #ordDateFilter').evaluateAll(elements =>
+            elements.map(el => parseFloat(getComputedStyle(el).fontSize)));
+          expect(sizes).toHaveLength(2);
+          sizes.forEach(font => expect(font, 'orders filter font').toBeGreaterThanOrEqual(16));
+          await expect(page.locator('#ordersTableHint')).toBeVisible();
+          const table = page.locator('.pn-table-wrap');
+          await expect(table).toHaveAttribute('tabindex', '0');
+          const geometry = await table.evaluate(el => {
+            const first = el.querySelector('thead th:first-child');
+            const second = el.querySelector('thead th:nth-child(2)');
+            el.scrollLeft = 160;
+            return {
+              moved: el.scrollLeft,
+              firstSticky: getComputedStyle(first).position === 'sticky',
+              secondSticky: getComputedStyle(second).position === 'sticky',
+              firstLeft: Math.round(first.getBoundingClientRect().left),
+              secondLeft: Math.round(second.getBoundingClientRect().left)
+            };
+          });
+          expect(geometry.moved, 'order list can scroll independently').toBeGreaterThan(0);
+          expect(geometry.firstSticky).toBe(true);
+          expect(geometry.secondSticky).toBe(true);
+          expect(geometry.secondLeft).toBeGreaterThan(geometry.firstLeft);
+        }
+      }
+
     });
   }
 }
