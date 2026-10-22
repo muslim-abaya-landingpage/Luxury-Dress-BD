@@ -42,3 +42,15 @@ function adminLiveStockHandle_(type, e) {
     return {ok:true, productIds:ids, inStock:flag};
   } finally { lock.releaseLock(); }
 }
+
+function assertLiveStockAvailable_(cartItems) {
+  var map = liveStockOverrides_();
+  (cartItems || []).forEach(function(item) {
+    var id = String((item && (item.id || item.productId)) || '').trim();
+    if (id && Object.prototype.hasOwnProperty.call(map, id) && map[id] === false) {
+      var err = new Error('OUT_OF_STOCK:' + id);
+      err.isStockError = true;
+      throw err;
+    }
+  });
+}
