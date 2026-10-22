@@ -140,7 +140,9 @@ window.CATEGORY_PRODUCTS = {
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
       productUrl: "/",
-      dateAdded: "2026-09-29"
+      dateAdded: "2026-09-29",
+      brand: "Muslim Abaya",
+      tags: ["Borka","Abaya","বোরখা","বুরকা","বুরখা","টু-পিস ড্রেস","কাপড়"]
     },
     {
       id: "ABY-VERSACE-9",
