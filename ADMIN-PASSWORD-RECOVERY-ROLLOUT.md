@@ -1,3 +1,15 @@
+## Verified prerequisite (23 October 2026)
+
+The connected Google Sheet **অর্ডার শিট 2026** currently contains the expected `Admins` (A:I) and `Sessions` (A:G) columns. A registered admin record has a valid email, a nonempty hash and salt, an allowed status and a recognized role. **Do not edit these credentials manually.**
+
+**AUTOMATED DEPLOYMENT CURRENTLY BLOCKED:** The `Apps Script Deploy` GitHub Actions workflow exists, but its two recent runs (22 October) did not execute the deployment steps: `CLASPRC_JSON` was missing. The workflow previously exited with success despite doing no deployment; this PR changes that misleading result into an explicit failure.
+
+One-time credential setup **must be done by the account owner on their own computer**. See [APPS-SCRIPT-AUTO-DEPLOY.md](APPS-SCRIPT-AUTO-DEPLOY.md) and the [Windows helper](APPS-SCRIPT-%E0%A6%85%E0%A6%9F%E0%A7%8B-%E0%A6%A1%E0%A6%BF%E0%A6%AA%E0%A7%8D%E0%A6%B2%E0%A6%AF%E0%A6%BC-%E0%A6%B8%E0%A7%87%E0%A6%9F%E0%A6%86%E0%A6%AA.bat) to authorize `clasp` and add the `CLASPRC_JSON` GitHub Actions secret. **Never send `.clasprc.json` contents or a screenshot of them to ChatGPT.** Check the live project backup and differences before allowing a full `clasp push --force`.
+
+The Apps Script Web App execution account must also authorize `MailApp` email-sending permission if requested by Google; a green GitHub workflow alone cannot prove that emails are actually delivered.
+
+---
+
 # Muslim Abaya — Admin password recovery rollout
 
 **Scope:** \`muslimabaya.com/admin-login.html\` and the *existing* **অর্ডার শীট** Google Apps Script Web App. No Cloudflare D1, order, stock, or customer-password change.
