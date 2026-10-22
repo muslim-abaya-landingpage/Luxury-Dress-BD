@@ -1,7 +1,7 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const html=fs.readFileSync('product-manager.html','utf8');
 function between(start,end){return html.slice(html.indexOf(start),html.indexOf(end,html.indexOf(start)));}
-const ui={stockPublishing:false,savedSnapshot:'saved',catalogSnapshot:()=> 'saved',document:{getElementById:()=>({disabled:false})},setSaveStatus(){},renderCatList(){},renderMain(){},saveAll:()=>Promise.resolve({sha:'test'})};
+const ui={stockPublishing:false,queuedStockToggle:null,savedSnapshot:'saved',catalogSnapshot:()=> 'saved',document:{getElementById:()=>({disabled:false})},requestAnimationFrame(callback){callback()},mainEl:{addEventListener(){},contains(){return true}},setSaveStatus(){},renderCatList(){},renderMain(){},saveAll:()=>Promise.resolve({sha:'test'})};
 vm.createContext(ui);
 vm.runInContext(between('  function setProductAvailability(', '  function setSaveStatus('),ui);
 vm.runInContext(between('  function productToJsLines(', '  function generateProductsFile('),ui);
