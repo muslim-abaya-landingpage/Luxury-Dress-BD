@@ -80,7 +80,16 @@ function withNow(fn) {
   const RealDate = Date;
   class FakeDate extends RealDate { constructor(...a) { super(...(a.length ? a : [NOW])); } static now() { return NOW; } static [Symbol.hasInstance](x) { return x instanceof RealDate; } }
   global.Date = FakeDate;
-  try { return fn(); } finally { global.Date = RealDate; }
+  // Keep the fixture clock active until an async operation has finished.
+  // Restoring Date immediately causes the test session to expire mid-request.
+  var result;
+  try { result = fn(); }
+  catch (err) { global.Date = RealDate; throw err; }
+  if (result && typeof result.then === 'function') {
+    return Promise.resolve(result).finally(() => { global.Date = RealDate; });
+  }
+  global.Date = RealDate;
+  return result;
 }
 
 async function makeCores() {
