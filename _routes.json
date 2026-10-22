@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "description": "Only these paths run Pages Functions (API + instant live catalog); everything else is static.",
+  "include": ["/api/*", "/category-products.js", "/product-links-data.js", "/product-catalog-sections.js", "/product-config.js", "/catalog-validation.json", "/product/*"],
+  "exclude": []
+}

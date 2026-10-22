@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const sources = ['apps-script/Code.gs', 'apps-script/AdminOrders.gs'];
-const exportsList = ['verifyAdminSessionUncached_', 'verifyAdminSession_', 'param_', 'adminOrderList_', 'adminOrderGet_',
+const exportsList = ['verifyAdminSessionUncached_', 'verifyAdminSession_', 'requireOwnerAdmin_', 'param_', 'adminOrderList_', 'adminOrderGet_',
   'listAdminOrders_', 'adminFraudCheck_', 'adminStaffList_', 'adminCustomerLookup_', 'getAdminStockVariants_', 'getAdminAnalyticsV2_', 'inboxList_', 'inboxThread_', 'getAdminStockLedger_', 'getAdminGrowthData_'];
 const services = ['SpreadsheetApp', 'PropertiesService', 'CacheService', 'Utilities', 'Session', 'LockService', 'UrlFetchApp',
   'MailApp', 'GmailApp', 'ScriptApp', 'ContentService', 'HtmlService', 'Logger', 'DriveApp', 'CalendarApp', 'XmlService'];

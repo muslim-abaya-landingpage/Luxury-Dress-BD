@@ -8,3 +8,4 @@ coverage/
 !.env.example
 playwright-report/
 test-results/
+live-build.json

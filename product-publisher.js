@@ -7,6 +7,33 @@
  function storeJob(){try{sessionStorage.setItem('ma_product_publish_job',JSON.stringify(job));}catch(e){}}
  function setJob(j){job=j;storeJob();}
  function status(s,error){notify(s,!!error);}
+ function sha256Hex(text){return crypto.subtle.digest('SHA-256',bytes(text)).then(hex);}
+ async function codeText(path){var r=await fetch('/'+path+'?live='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('LIVE_CODE_'+path);return r.text();}
+ // Same order-check data the website build makes (scripts/build-catalog-validation.mjs), computed in a
+ // sandboxed Web Worker from the files just saved, so order prices match what visitors now see.
+ async function buildValidation(map,sha){
+  var core=await codeText('catalog-validation-core.js'),utils=await codeText('product-utils.js'),sync=await codeText('product-catalog-sync.js');
+  var sources=['product-config.js','product-utils.js','category-products.js','product-links-data.js','product-catalog-sync.js'];
+  var texts={'product-config.js':map['product-config.js'],'product-utils.js':utils,'category-products.js':map['category-products.js'],'product-links-data.js':map['product-links-data.js'],'product-catalog-sync.js':sync};
+  if(sources.some(function(f){return typeof texts[f]!=='string';}))throw Error('LIVE_FILES_MISSING');
+  var code='var __post=self.postMessage.bind(self);(function(){var window={},console={log:function(){},info:function(){},warn:function(){},error:function(){}},self,fetch,XMLHttpRequest,importScripts,setTimeout,setInterval,localStorage,sessionStorage,indexedDB,document,location,navigator,postMessage,caches;\n'+sources.map(function(f){return texts[f];}).join('\n;\n')+'\n;\n'+core+'\n;try{__post({ok:true,sources:window.__maValidationSources,products:window.__maBuildValidationProducts(window)});}catch(e){__post({ok:false,error:String(e&&e.message||e)});}})();';
+  var url=URL.createObjectURL(new Blob([code],{type:'text/javascript'})),worker=new Worker(url);
+  var out=await new Promise(function(resolve,reject){var t=setTimeout(function(){reject(Error('LIVE_TIMEOUT'));},15000);worker.onmessage=function(e){clearTimeout(t);resolve(e.data);};worker.onerror=function(e){clearTimeout(t);e.preventDefault&&e.preventDefault();reject(Error('LIVE_WORKER'));};}).finally(function(){worker.terminate();URL.revokeObjectURL(url);});
+  if(!out||!out.ok||JSON.stringify(out.sources)!==JSON.stringify(sources))throw Error('LIVE_VALIDATION');
+  var hash=await sha256Hex(sources.map(function(f){return f+'\u0000'+texts[f]+'\u0000';}).join(''));
+  return {products:out.products,json:JSON.stringify({version:1,releaseSha:sha,sources:sources,sourceSha256:hash,products:out.products})};
+ }
+ async function pushLive(files,sent,sha){
+  try{
+   var session=g.MaAdmin&&g.MaAdmin.getSession&&g.MaAdmin.getSession();if(!session||!session.token)return false;
+   var map={};files.forEach(function(f){map[f.path]=f.content;});
+   var v=await buildValidation(map,sha),index={},names={};
+   v.products.forEach(function(p){index[p.id]=p.category;names[p.id]=p.name;});
+   var res=await fetch('/api/live-publish',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({Token:session.token,sha:sha,files:map,validation:v.json,index:index,names:names,assets:(sent||[]).map(function(a){return {path:a.path,content:a.content};})})});
+   var r=await res.json().catch(function(){return null;});
+   return !!(r&&r.ok);
+  }catch(e){return false;}
+ }
  async function servesFiles(shas){
   try{for(var path of Object.keys(shas)){var r=await fetch('/'+path+'?live='+Date.now(),{cache:'no-store'});if(!r.ok||await gitHash(await r.text())!==shas[path])return false;}return Object.keys(shas).length>0;}catch(e){return false;}
  }
@@ -50,7 +77,10 @@
   var result=await call('AdminCatalogPublish',{Payload:JSON.stringify(data)});
   if(!result.sha)throw Error('Publish info not found.');
   assets={};base={head:result.sha,shas:result.shas};request=null;setJob({sha:result.sha,shas:result.shas,productId:target&&target.id||'',category:target&&target.category||'',started:Date.now()});
+  status('✅ Saved. Updating the website…');
+  // Instant update: the same files go to the site's live copy right away (the deploy follows in ~1 min).
+  if(await pushLive(data.files,queued,result.sha)){var done=job;setJob(null);clearTimeout(timer);status('✅ Saved and live on the website now.');document.dispatchEvent(new CustomEvent('ma-product-live',{detail:done}));result.live=true;return result;}
   status('✅ Photos and product details saved. Publishing to the website…');check();return result;
  }
- g.MaCatalogPublisher={init:init,publish:publish,enqueue:function(rows){rows.forEach(function(a){assets[a.path]=a;});},pendingPhotos:function(){return Object.keys(assets).length;},check:check,isReady:function(){return !!base;},gitHash:gitHash};
+ g.MaCatalogPublisher={init:init,publish:publish,enqueue:function(rows){rows.forEach(function(a){assets[a.path]=a;});},pendingPhotos:function(){return Object.keys(assets).length;},check:check,_buildValidation:buildValidation,isReady:function(){return !!base;},gitHash:gitHash};
 })(window);
