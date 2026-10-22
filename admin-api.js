@@ -204,6 +204,14 @@
     });
   }
 
+  function requestPasswordReset(email) {
+    return apiPost({ RecordType: "AdminPasswordResetRequest", Email: String(email || "").trim() });
+  }
+
+  function completePasswordReset(token, password) {
+    return apiPost({ RecordType: "AdminPasswordResetComplete", Token: String(token || ""), Password: String(password || "") });
+  }
+
   function verifySession() {
     var s = getSession();
     if (!s || !s.token) return Promise.resolve(null);
@@ -663,6 +671,8 @@
     call: call,
     inboxCall: inboxCall,
     login: login,
+    requestPasswordReset: requestPasswordReset,
+    completePasswordReset: completePasswordReset,
     logout: logout,
     getSession: getSession,
     verifySession: verifySession,

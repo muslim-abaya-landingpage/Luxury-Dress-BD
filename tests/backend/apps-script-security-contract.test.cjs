@@ -200,6 +200,77 @@ test('admin login treats blocked status case-insensitively', () => {
   assert.equal(passwordChecks, 0);
 });
 
+test('admin password reset request does not reveal whether an email belongs to an admin', () => {
+  function request(admin) {
+    const cache = new Map();
+    const sent = [];
+    const sandbox = {
+      normalizeEmail_: value => String(value || '').trim().toLowerCase(),
+      param_: (_event, key) => key === 'Email' ? 'OWNER@example.com' : '',
+      getAuthSecret_: () => 'configured',
+      ADMIN_RESET_GENERIC_MESSAGE_: 'generic reset response',
+      ADMIN_RESET_TTL_SECONDS_: 600,
+      adminResetDigest_: value => `digest-${value}`,
+      rateLimit_: () => {},
+      CacheService: { getScriptCache: () => ({
+        get: key => cache.get(key) || null,
+        put: (key, value) => cache.set(key, value),
+        remove: key => cache.delete(key)
+      }) },
+      Utilities: { getUuid: () => '12345678-1234-1234-1234-123456789abc' },
+      findAdminByEmail_: () => admin,
+      MailApp: { sendEmail: message => sent.push(message) },
+      console: { error() {} }
+    };
+    return { result: runFunction('requestAdminPasswordReset_', sandbox)({}), sent };
+  }
+
+  const missing = request(null);
+  const staff = request({ email: 'owner@example.com', status: 'active', role: 'staff' });
+  const owner = request({ email: 'owner@example.com', status: 'active', role: 'admin' });
+  assert.equal(missing.result.message, owner.result.message);
+  assert.equal(staff.result.message, owner.result.message);
+  assert.equal(missing.sent.length, 0);
+  assert.equal(staff.sent.length, 0);
+  assert.equal(owner.sent.length, 1);
+  assert.match(owner.sent[0].body, /admin-password-reset\.html\?token=/);
+  assert.equal(owner.result.token, undefined);
+});
+
+test('admin password recovery rejects weak passwords and malformed or expired links before changing credentials', () => {
+  let cacheReads = 0;
+  let credentialWrites = 0;
+  const sandbox = {
+    param_: (_event, key) => ({ Token: 'a'.repeat(64), Password: 'short' })[key] || '',
+    CacheService: { getScriptCache: () => ({ get: () => { cacheReads += 1; return null; }, remove() {} }) },
+    getAuthSecret_: () => 'configured',
+    rateLimit_: () => {},
+    adminResetDigest_: value => String(value),
+    LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
+    getAdminsSheet_: () => ({ getRange: () => ({ setValue() { credentialWrites += 1; } }) })
+  };
+  const complete = runFunction('completeAdminPasswordReset_', sandbox);
+  const weak = complete({});
+  assert.equal(weak.error, 'WEAK_PASSWORD');
+  assert.equal(cacheReads, 0);
+  assert.equal(credentialWrites, 0);
+
+  sandbox.param_ = (_event, key) => ({ Token: 'not-a-valid-reset-token', Password: 'correct horse battery' })[key] || '';
+  const malformed = complete({});
+  assert.equal(malformed.error, 'RESET_LINK_INVALID_OR_EXPIRED');
+  assert.equal(credentialWrites, 0);
+});
+
+test('password reset routes bypass session-required admin API handling and revoke old sessions on success', () => {
+  const requestAt = source.indexOf("if (type === 'AdminPasswordResetRequest')");
+  const completeAt = source.indexOf("if (type === 'AdminPasswordResetComplete')");
+  const authenticatedAdminLimitAt = source.indexOf("if (type && type.indexOf('Admin') === 0)");
+  assert.ok(requestAt >= 0 && requestAt < authenticatedAdminLimitAt);
+  assert.ok(completeAt >= 0 && completeAt < authenticatedAdminLimitAt);
+  assert.match(extractFunction('completeAdminPasswordReset_'), /sessions\.deleteRow\(i \+ 1\)/);
+  assert.match(extractFunction('completeAdminPasswordReset_'), /bumpAdminAuthGeneration_\(\)/);
+});
+
 test('admin session verification rejects blocked accounts and stale roles', () => {
   function verify(currentAdmin, sessionRole) {
     const sandbox = {
