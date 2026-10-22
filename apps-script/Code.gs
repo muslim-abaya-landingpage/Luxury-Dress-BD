@@ -1745,6 +1745,7 @@ function computeVerifiedOrderPricing_(cartItems, charge, couponCodeVal) {
 
 function handleOnlineOrderPost_(e) {
   var validated = validateOrderInput_(e);
+  assertLiveStockAvailable_(validated.cartItems);
   if (isPhoneBlocked_(validated.phone)) throw new Error('ORDER_BLOCKED');
   rateLimitOrder_(validated.phone);
   checkDuplicateOrder_(validated.phone, validated.total, validated.design);
@@ -6181,6 +6182,7 @@ function assertStockAvailableForOrder_(cartItems) {
 
 /** Confirmed → রিজার্ভ করা */
 function reserveStockForOrderItems_(cartItems, orderId, admin) {
+  assertLiveStockAvailable_(cartItems);
   var sheet = ensureStockVariantsSheet_();
   var data = sheet.getDataRange().getValues();
   var requirements = trackedStockRequirements_(cartItems, data, true);
