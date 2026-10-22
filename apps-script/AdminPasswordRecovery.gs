@@ -75,7 +75,7 @@ function adminPasswordResetRequest_(e) {
       record.passwordFingerprint = adminRecoveryDigest_(String(user.hash) + '|' + String(user.salt));
       pendingMail = {
         to: String(user.email).trim(),
-        link: 'https://muslimabaya.com/admin-reset-password.html?email='
+        link: 'https://muslimabaya.com/admin-reset-password.html#email='
           + encodeURIComponent(email) + '&token=' + encodeURIComponent(token)
       };
     }
