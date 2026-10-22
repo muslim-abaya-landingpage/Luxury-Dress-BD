@@ -1085,12 +1085,8 @@
         });
       });
       document.getElementById("pmSelectVisible").onclick = function () { pageRows.forEach(function (row) { overviewSelected[JSON.stringify([row.section.key, row.index])] = true; }); draw(); };
-      document.querySelectorAll("[data-stock-cat]").forEach(function (button) {
-        button.addEventListener("click", function () {
-          var p = products[button.getAttribute("data-stock-cat")][parseInt(button.getAttribute("data-stock-index"), 10)];
-          publishStockToggle(p, draw);
-        });
-      });
+      // Stock clicks are delegated to the stable product container below.
+      // Do not bind to table rows that are replaced on every redraw.
       document.querySelectorAll("[data-pm-copy-cat]").forEach(function (button) {
         button.addEventListener("click", function () {
           var cat = button.getAttribute("data-pm-copy-cat");
@@ -1215,9 +1211,11 @@
     var previous = items.map(function(p) { return {p:p,stock:p.stock,inStock:p.inStock}; });
     stockPublishing = true;
     items.forEach(function(p) { setProductAvailability(p, available); });
-    redraw();
     var published = false;
-    return saveAll(items.length === 1 ? {id:items[0].id} : null).then(function() {
+    return Promise.resolve().then(function() {
+      redraw();
+      return saveAll(items.length === 1 ? {id:items[0].id} : null);
+    }).then(function() {
       published = true;
       return true;
     }).catch(function() {
@@ -1245,8 +1243,24 @@
   }
 
   function publishStockToggle(p, redraw) {
+    if (!p) {
+      setSaveStatus("Product not found. Reload current data and retry.");
+      return Promise.resolve(false);
+    }
     return publishStockChanges([p], p.inStock === false || (typeof p.stock === "number" && p.stock <= 0), redraw);
   }
+
+  // One listener survives pagination, filters, table redraws and stock updates.
+  // Previously each redraw replaced the clicked button and its listener.
+  mainEl.addEventListener("click", function(event) {
+    var button = event.target.closest("[data-stock-cat]");
+    if (!button || !mainEl.contains(button)) return;
+    event.preventDefault();
+    var cat = button.getAttribute("data-stock-cat");
+    var index = Number(button.getAttribute("data-stock-index"));
+    var product = (products[cat] || [])[index];
+    publishStockToggle(product, renderMain);
+  });
 
   function toggleStock(p) {
     setProductAvailability(p, p.inStock === false || (typeof p.stock === "number" && p.stock <= 0));
