@@ -1211,9 +1211,16 @@
     var previous = items.map(function(p) { return {p:p,stock:p.stock,inStock:p.inStock}; });
     stockPublishing = true;
     items.forEach(function(p) { setProductAvailability(p, available); });
+    setSaveStatus("Stock change received. Saving to website…");
     var published = false;
-    return Promise.resolve().then(function() {
-      redraw();
+    // Let the browser paint the new stock label before the expensive
+    // catalog generation and network publish begins.
+    return new Promise(function(resolve) {
+      requestAnimationFrame(function() {
+        redraw();
+        requestAnimationFrame(resolve);
+      });
+    }).then(function() {
       return saveAll(items.length === 1 ? {id:items[0].id} : null);
     }).then(function() {
       published = true;
@@ -1231,6 +1238,7 @@
       // Rendering may normalize product fields. Keep the successful publish
       // baseline in sync so the next stock click is not mistaken for unsaved edits.
       if (published) savedSnapshot = catalogSnapshot();
+      else setSaveStatus("Stock change was not saved. Check the publishing error and retry.");
       var next = queuedStockToggle;
       queuedStockToggle = null;
       if (published && next && next.product) {
