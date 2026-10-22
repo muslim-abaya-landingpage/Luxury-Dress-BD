@@ -51,3 +51,31 @@ test('edit screen: name, description, product data tabs, tags, brand, featured, 
   await first.locator('.column-tags .pm-row-link', { hasText: 'eid' }).click();
   await expect(page.locator('#pmAllRows tr')).toHaveCount(1);
 });
+
+test('edit screen: option prices keep the card price in step, and a new option (e.g. Hijab) is added in one click', async ({ page }) => {
+  await stub(page);
+  page.on('dialog', (d) => d.accept());
+  await page.goto('/product-manager.html');
+  await page.waitForTimeout(500);
+  await page.evaluate(() => { window.MaCatalogPublisher = Object.assign({}, window.MaCatalogPublisher, { isReady: () => true, publish: (files) => { window.__published = files; return Promise.resolve({ ok: true }); } }); });
+  await page.locator('#pmAllRows tr').first().locator('.pm-row-title').click();
+  const first = page.locator('.pm-opt-row input').first();
+  await first.fill('1999');
+  await expect(page.locator('#pmCardPrice')).toHaveText('৳1999');
+  await page.fill('#pmOptName', 'Hijab');
+  await page.fill('#pmOptPrice', '450');
+  await page.click('#pmOptAdd');
+  await expect(page.locator('.pm-opt-row label', { hasText: 'Hijab price' })).toBeVisible();
+  await page.fill('#pmOptName', 'HIJAB'); await page.fill('#pmOptPrice', '1'); await page.click('#pmOptAdd');
+  await expect(page.locator('#pmOptMsg')).toContainText('already exists');
+  await page.click('text=Update');
+  await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
+  const file = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
+  const block = file.slice(file.indexOf('"ABY-MAROON-1"'), file.indexOf('"ABY-MAROON-1"') + 900);
+  expect(block).toContain('price: 1999');
+  expect(block).toMatch(/types: \[[^\]]*"Hijab"\]/);
+  expect(block).toContain('"Hijab": 450');
+  // Removing it again restores the category's default options.
+  await page.click('[data-opt-del="Hijab"]');
+  await expect(page.locator('.pm-opt-row label', { hasText: 'Hijab price' })).toHaveCount(0);
+});

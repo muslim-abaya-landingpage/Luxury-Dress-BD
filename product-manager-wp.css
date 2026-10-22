@@ -692,3 +692,13 @@ html[data-admin-theme="dark"] .pm-wp-list, html[data-admin-theme="dark"] .pm-wp-
 .pm-wp-chooser button:last-child { border-bottom: 0; }
 .pm-wp-chooser button:hover { background: #f6f7f7; color: #135e96; }
 @media (hover: none) { .pm-wp-gal-del { opacity: 1; } }
+
+/* Product options (Full Set / Abaya Only / added options such as Hijab) */
+.pm-opt-row > span { display: flex !important; flex-direction: row !important; align-items: center; gap: 8px; }
+.pm-opt-row > span input { flex: 1 1 auto; min-width: 0; }
+.pm-opt-row button.pm-wp-link-danger { flex: none; border: 0; background: none; padding: 0 4px; font: inherit; font-size: 13px; text-decoration: underline; cursor: pointer; }
+.pm-opt-add > span { display: flex !important; flex-direction: row !important; flex-wrap: wrap; gap: 8px; align-items: center; }
+.pm-opt-add #pmOptName { flex: 1 1 160px; width: auto; height: auto; min-width: 0; }
+.pm-opt-add #pmOptPrice { flex: 0 0 110px; width: 110px; height: auto; }
+.pm-opt-add #pmOptAdd { flex: none; }
+.pm-opt-add small { flex: 1 1 100%; }

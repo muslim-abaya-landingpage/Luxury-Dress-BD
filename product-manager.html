@@ -29,7 +29,7 @@
 <link rel="stylesheet" href="admin-dashboard-design.css?v=20261018-3">
 <script src="admin-dashboard-design.js?v=20261018-3"></script>
 <link rel="stylesheet" href="admin-premium-layout.css?v=20261021-1">
-<link rel="stylesheet" href="product-manager-wp.css?v=20261022-9">
+<link rel="stylesheet" href="product-manager-wp.css?v=20261023-opt2">
 </head>
 <body class="pl-admin adm-body pm-wp-admin" data-admin-guard="1">
   <div class="adm-shell">
@@ -134,11 +134,11 @@
   <div class="pl-toast" id="pmToast" role="status"></div>
 
   <script src="product-catalog-sync.js"></script>
-  <script src="product-catalog-sections.js?v=215cfaaa25953550"></script>
-  <script src="product-config.js?v=688f61c91ffaf2a7"></script>
+  <script src="product-catalog-sections.js?v=ac54db358f8d927e"></script>
+  <script src="product-config.js?v=e7e6eb97e3ce454e"></script>
   <script src="product-utils.js?v=460604041e5f8ec0"></script>
-  <script src="category-products.js?v=126fab2bb4752683"></script>
-  <script src="product-links-data.js?v=16d3b6ba47d02931"></script>
+  <script src="category-products.js?v=e0118848cf4782c2"></script>
+  <script src="product-links-data.js?v=49a0ee4ca9e20d0b"></script>
   <script id="pmRawCatalog">window.MA_RAW_CATEGORY_PRODUCTS = JSON.parse(JSON.stringify(window.CATEGORY_PRODUCTS || {}));</script>
   <script src="product-catalog-loader.js?v=20261013-manager"></script>
   <script src="product-publish-utils.js?v=4d87960bbc2baa44"></script><script src="product-publisher.js?v=a57243c992cd40a5"></script><script src="product-quick-upload.js?v=4215657447c68aba"></script>
@@ -653,6 +653,40 @@
     window.scrollTo(0, 0);
   }
 
+  // Options a customer chooses on the product page; each has its own price.
+  function productOptionTypes(p, meta) {
+    if (Array.isArray(p.types) && p.types.length) return p.types.slice();
+    return meta ? meta.types.slice() : [];
+  }
+  // Cards and lists show p.price; the product page opens on the first option. Keep them the same.
+  function syncCardPrice(p, meta) {
+    var types = productOptionTypes(p, meta);
+    var first = types.length && p.priceByType ? parseInt(p.priceByType[types[0]], 10) : NaN;
+    if (first > 0) p.price = first;
+    var shown = document.getElementById("pmCardPrice");
+    if (shown) shown.textContent = "৳" + (parseInt(p.price, 10) || 0);
+  }
+  function buildOptionPriceRows(p, meta) {
+    var types = productOptionTypes(p, meta);
+    var rows = "";
+    if (!types.length) {
+      rows = efield("price", "Regular price (৳)", p.price, "number", "");
+    } else {
+      rows = '<p class="pm-wp-form-row"><label>Price on product cards</label><span><b id="pmCardPrice">৳' + (parseInt(p.price, 10) || 0) + '</b><small>Always the same as the first option (' + escapeHtml(types[0]) + ').</small></span></p>' +
+        types.map(function (t) {
+          var v = p.priceByType && p.priceByType[t] != null ? p.priceByType[t] : "";
+          return '<p class="pm-wp-form-row pm-opt-row"><label for="pmEf_typePrice:' + escapeAttr(t) + '">' + escapeHtml(t) + ' price (৳)</label><span><input id="pmEf_typePrice:' + escapeAttr(t) + '" type="number" min="0" data-ef="typePrice:' + escapeAttr(t) + '" value="' + escapeAttr(v) + '">' +
+            (types.length > 1 ? ' <button type="button" class="pm-wp-link-danger" data-opt-del="' + escapeAttr(t) + '">Remove</button>' : '') + '</span></p>';
+        }).join("");
+    }
+    return rows +
+      '<div class="pm-wp-form-row pm-opt-add"><label for="pmOptName">Add option</label><span>' +
+      '<input type="text" id="pmOptName" maxlength="40" placeholder="Option name, e.g. Hijab"> ' +
+      '<input type="number" id="pmOptPrice" min="1" placeholder="Price ৳"> ' +
+      '<button type="button" class="pm-wp-button" id="pmOptAdd">+ Add option</button>' +
+      '<small id="pmOptMsg" role="status">Customers pick it on the product page, with this price.</small></span></div>';
+  }
+
   function renderProductEditor() {
     var list = editTarget && products[editTarget.cat];
     var p = list && list[editTarget.index];
@@ -674,12 +708,11 @@
         '<p class="pm-wp-permalink">Permalink: ' + (p.id ? '<a href="/product/' + encodeURIComponent(p.id) + '" target="_blank" rel="noopener">https://muslimabaya.com/product/' + escapeHtml(p.id) + '</a>' : "—") + '</p>' +
         '<section class="pm-wp-box"><h3 class="pm-wp-box-title">Product description</h3><div class="pm-wp-box-body">' +
           '<textarea data-ef="detailNote" rows="8" placeholder="What is in the set, fabric, care notes…">' + escapeHtml(p.detailNote || "") + '</textarea></div></section>' +
-        '<section class="pm-wp-box pm-wp-data"><h3 class="pm-wp-box-title">Product data <span>— ' + (meta ? "Variable product (types)" : "Simple product") + '</span></h3>' +
+        '<section class="pm-wp-box pm-wp-data"><h3 class="pm-wp-box-title">Product data <span>— ' + (productOptionTypes(p, meta).length ? "Variable product (options)" : "Simple product") + '</span></h3>' +
           '<div class="pm-wp-data-wrap"><ul class="pm-wp-data-tabs">' + tabs.map(function (t) { return '<li><button type="button" data-etab="' + t[0] + '" class="' + (editTab === t[0] ? "is-active" : "") + '">' + t[1] + '</button></li>'; }).join("") + '</ul>' +
           '<div class="pm-wp-data-panels">' +
             '<div class="pm-wp-panel" data-epanel="general"' + (editTab === "general" ? "" : " hidden") + '>' +
-              efield("price", meta ? "Base price (৳)" : "Regular price (৳)", p.price, "number", meta ? "Usually the Full Set price; shown as the starting price." : "") +
-              (meta ? meta.types.map(function (t) { return efield("typePrice:" + t, t + " price (৳)", (p.priceByType || {})[t] != null ? p.priceByType[t] : "", "number"); }).join("") : "") +
+              buildOptionPriceRows(p, meta) +
             '</div>' +
             '<div class="pm-wp-panel" data-epanel="inventory"' + (editTab === "inventory" ? "" : " hidden") + '>' +
               efield("id", "SKU", p.id, "text", "Also the product link. Changing it changes the URL.") +
@@ -742,10 +775,47 @@
         } else if (f.indexOf("typePrice:") === 0) {
           if (!p.priceByType) p.priceByType = {};
           p.priceByType[f.slice(10)] = parseInt(inp.value, 10) || 0;
+          syncCardPrice(p, meta);
         } else if (f === "sizes") p.sizes = inputToSizes(inp.value);
         else if (f === "brand") { var b = inp.value.trim(); if (b) p.brand = b; else delete p.brand; }
         else p[f] = inp.value;
         changed();
+      });
+    });
+    // Options (Full Set / Abaya Only / anything added here, e.g. Hijab), each with its own price.
+    var optAdd = document.getElementById("pmOptAdd");
+    if (optAdd) {
+      var optName = document.getElementById("pmOptName"), optPrice = document.getElementById("pmOptPrice"), optMsg = document.getElementById("pmOptMsg");
+      var addOption = function () {
+        var name = String(optName.value || "").replace(/\s+/g, " ").trim();
+        var price = parseInt(optPrice.value, 10);
+        var types = productOptionTypes(p, meta);
+        if (!name || name.length > 40 || /["<>]/.test(name)) { optMsg.textContent = "Write an option name (up to 40 letters), e.g. Hijab."; optName.focus(); return; }
+        if (!(price > 0)) { optMsg.textContent = "Write the price for " + name + "."; optPrice.focus(); return; }
+        if (types.some(function (t) { return t.toLowerCase() === name.toLowerCase(); })) { optMsg.textContent = "“" + name + "” already exists."; optName.focus(); return; }
+        if (!p.priceByType || typeof p.priceByType !== "object") p.priceByType = {};
+        if (!types.length) { types = ["Regular"]; p.priceByType.Regular = parseInt(p.price, 10) || price; }
+        p.types = types.concat(name);
+        p.priceByType[name] = price;
+        syncCardPrice(p, meta);
+        renderProductEditor();
+        changed("Option “" + name + "” added — click Update to publish.");
+        var again = document.getElementById("pmOptName"); if (again) again.focus();
+      };
+      optAdd.addEventListener("click", addOption);
+      [optName, optPrice].forEach(function (el) { el.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); addOption(); } }); });
+    }
+    root.querySelectorAll("[data-opt-del]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var name = b.getAttribute("data-opt-del");
+        var types = productOptionTypes(p, meta).filter(function (t) { return t !== name; });
+        if (p.priceByType) delete p.priceByType[name];
+        if (meta && types.join("|") === meta.types.join("|")) delete p.types;
+        else if (!meta && types.length === 1 && types[0] === "Regular") { delete p.types; delete p.priceByType; }
+        else p.types = types;
+        syncCardPrice(p, meta);
+        renderProductEditor();
+        changed("Option “" + name + "” removed — click Update to publish.");
       });
     });
     // The shared image helpers bind to [data-f="image"]; keep the URL box in sync with uploads.
@@ -2167,7 +2237,7 @@
       title +
       '</title>\n  <link rel="preconnect" href="https://fonts.googleapis.com">\n  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">\n  <link rel="stylesheet" href="site-header.css?v=20261022-ann">\n  <link rel="stylesheet" href="site-footer.css">\n  <link rel="stylesheet" href="shop-page.css?v=1">\n  <link rel="stylesheet" href="category-sidebar.css?v=20261022-nound" id="category-sidebar-css">\n</head>\n<body data-shop-category="' +
       sec.key +
-      '">\n  <div id="site-header-mount"></div>\n  <main class="wrap"><div id="list"></div></main>\n  <div id="site-footer-mount"></div>\n  <script defer src="cart-utils.js"><\/script>\n  <script defer src="site-header.js"><\/script>\n  <script defer src="product-catalog-sections.js?v=215cfaaa25953550"><\/script>\n  <script defer src="product-catalog-sync.js"><\/script>\n  <script defer src="product-config.js?v=688f61c91ffaf2a7"><\/script>\n  <script defer src="product-utils.js?v=460604041e5f8ec0"><\/script>\n  <script defer src="category-products.js?v=126fab2bb4752683"><\/script>\n  <script defer src="product-links-data.js?v=16d3b6ba47d02931"><\/script>\n  <script defer src="product-catalog-loader.js"><\/script>\n  <script defer src="category-renderer.js?v=00bd7a2ddbd5f59b"><\/script>\n  <script defer src="site-footer.js"><\/script>\n  <script defer src="shop-category-boot.js"><\/script>\n</body>\n</html>\n'
+      '">\n  <div id="site-header-mount"></div>\n  <main class="wrap"><div id="list"></div></main>\n  <div id="site-footer-mount"></div>\n  <script defer src="cart-utils.js"><\/script>\n  <script defer src="site-header.js"><\/script>\n  <script defer src="product-catalog-sections.js?v=ac54db358f8d927e"><\/script>\n  <script defer src="product-catalog-sync.js"><\/script>\n  <script defer src="product-config.js?v=e7e6eb97e3ce454e"><\/script>\n  <script defer src="product-utils.js?v=460604041e5f8ec0"><\/script>\n  <script defer src="category-products.js?v=e0118848cf4782c2"><\/script>\n  <script defer src="product-links-data.js?v=49a0ee4ca9e20d0b"><\/script>\n  <script defer src="product-catalog-loader.js"><\/script>\n  <script defer src="category-renderer.js?v=da909518e293b0c3"><\/script>\n  <script defer src="site-footer.js"><\/script>\n  <script defer src="shop-category-boot.js"><\/script>\n</body>\n</html>\n'
     );
   }
 
