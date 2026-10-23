@@ -1,0 +1,31 @@
+/* Product Manager premium layer — visual-only, preserves publish and stock behavior */
+body.pm-wp-admin{font-family:Inter,"Segoe UI","Hind Siliguri",sans-serif!important;font-size:16px!important;background:#f4f6f9!important;color:#1c2a3c!important}
+.pm-wp-admin .pl-main{padding:24px!important;min-width:0}
+.pm-wp-admin .pm-layout{grid-template-columns:minmax(225px,250px) minmax(0,1fr)!important;gap:20px!important}
+.pm-wp-admin .pm-sidebar{background:#fff!important;border:1px solid #e1e7ee!important;border-radius:16px!important;padding:18px!important;box-shadow:0 8px 28px rgba(24,41,64,.045)!important}
+.pm-wp-admin .pm-sidebar h2,.pm-wp-admin .pm-cat-head h2{font-size:19px!important;font-weight:750!important;color:#1a2b40!important}
+.pm-wp-admin .pm-cat-btn{min-height:43px!important;padding:11px 13px!important;font-size:14px!important;font-weight:600!important;border-radius:10px!important;background:#f4f6f9!important;color:#30425c!important;margin-bottom:3px!important}
+.pm-wp-admin .pm-cat-btn.is-active{background:#203551!important;color:#fff!important;border-color:#203551!important}
+.pm-wp-admin .pm-add-cat{margin-top:12px!important}
+.pm-wp-admin .pm-product-card,.pm-wp-admin .pm-overview-wrap{border:1px solid #e0e6ef!important;border-radius:15px!important;background:#fff!important;box-shadow:0 6px 20px rgba(24,41,64,.035)!important;overflow:hidden}
+.pm-wp-admin .pm-product-head{background:#f9fafc!important;padding:15px 17px!important;border-bottom:1px solid #e7eaf0!important}
+.pm-wp-admin .pm-product-head strong{font-size:16px!important}
+.pm-wp-admin .pm-product-body{padding:18px!important;gap:15px!important}
+.pm-wp-admin .pm-field label{font-size:13px!important;line-height:1.45!important;color:#53627a!important;margin-bottom:6px!important}
+.pm-wp-admin .pm-field input,.pm-wp-admin .pm-field textarea,.pm-wp-admin .pm-field select{font-size:14px!important;min-height:42px!important;padding:10px 12px!important;border:1px solid #d9e1eb!important;border-radius:9px!important;background:#fff!important}
+.pm-wp-admin .pm-field input:focus-visible,.pm-wp-admin .pm-field select:focus-visible,.pm-wp-admin .pm-field textarea:focus-visible{outline:2px solid #b58a48!important;outline-offset:2px!important}
+.pm-wp-admin .pm-overview th{background:#f3f6fa!important;font-size:13px!important;color:#475870!important;padding:14px!important}
+.pm-wp-admin .pm-overview td{font-size:14px!important;padding:14px!important}
+.pm-wp-admin .pm-quick-dialog,.pm-wp-admin .pm-modal-box{border:1px solid #e0e6ee!important;border-radius:18px!important;box-shadow:0 22px 70px rgba(12,29,52,.20)!important}
+.pm-wp-admin .pm-quick-dialog h2{font-size:23px!important;color:#1a2b40!important}
+.pm-wp-admin .pm-quick-grid label{font-size:14px!important}
+.pm-wp-admin .pm-quick-grid input,.pm-wp-admin .pm-quick-grid select,.pm-wp-admin .pm-quick-grid textarea{border-color:#d5deea!important;border-radius:10px!important;min-height:43px!important;font-size:14px!important}
+.pm-wp-admin .pl-btn{font-size:14px!important;min-height:40px!important;border-radius:10px!important;font-weight:700!important}
+.pm-wp-admin .pl-btn-primary{background:#203551!important;border-color:#203551!important;color:#fff!important}
+.pm-wp-admin .pm-wp-notice,.pm-wp-admin .pm-quick-intro{border-radius:14px!important}
+.pm-wp-admin .pm-guide{display:flex;gap:10px;align-items:center;flex-wrap:wrap;border:1px solid #e1e7ef;background:#fff;border-radius:14px;padding:12px 16px;margin:0 0 17px;color:#52627a;font-size:13px}
+.pm-wp-admin .pm-guide strong{color:#1d3049;font-size:14px}
+.pm-wp-admin .pm-guide a{color:#254d79;font-weight:700}
+@media(max-width:900px){.pm-wp-admin .pm-layout{grid-template-columns:1fr!important}.pm-wp-admin .pm-sidebar{position:static!important}.pm-wp-admin .pl-main{padding:16px!important}}
+@media(max-width:600px){.pm-wp-admin .pl-main{padding:11px!important}.pm-wp-admin .pm-product-body{grid-template-columns:1fr!important;padding:13px!important}.pm-wp-admin .pm-quick-dialog{padding:16px!important}}
+@media(prefers-reduced-motion:reduce){.pm-wp-admin *{scroll-behavior:auto!important}}
