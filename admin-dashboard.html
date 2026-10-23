@@ -253,7 +253,7 @@
           var key = statusKey(o.status);
           var displayStatus = MaOrderStatus.describe(o);
           key = displayStatus.badgeKey;
-          var confirmMsg = "Welcome back, " + (o.name || "") + ", আপনার অর্ডার #" + (o.orderId || "") + " (৳" + (o.total || 0) + ") কনফার্ম হয়েছে। শীঘ্রই ডেলিভারি করা হবে, ধন্যবাদ।";
+          var confirmMsg = "আসসালামু আলাইকুম " + (o.name || "") + ", আপনার অর্ডার #" + (o.orderId || "") + " (৳" + (o.total || 0) + ") কনফার্ম হয়েছে। শীঘ্রই ডেলিভারি করা হবে, ধন্যবাদ।";
           var ini = String(o.name || "?").trim().charAt(0).toUpperCase() || "?";
           var orderLink = o.orderId
             ? '<a class="adm-order-open" href="admin-order.html?id=' + encodeURIComponent(o.orderId) + '">' + escapeHtml(o.name) + '</a>'
