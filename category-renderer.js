@@ -2388,7 +2388,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     imgSrc +
     '" alt="' +
     escapeHtml(p.name) +
-    '" fetchpriority="high" decoding="async" onerror="this.onerror=null;this.src=\'' +
+    '" width="1080" height="1350" fetchpriority="high" decoding="async" onerror="this.onerror=null;this.src=\'' +
     imgFallback.replace(/'/g, "\\'") +
     '\'">' +
     '<button type="button" class="pqv-nav pqv-nav-next" data-pqv-nav="next" aria-label="Next image" hidden>' +

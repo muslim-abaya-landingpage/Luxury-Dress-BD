@@ -192,9 +192,11 @@
   <script defer src="site-header.js?v=20261022-seo6"></script>
   <script defer src="category-products.js?v=126fab2bb4752683"></script>
   <script defer src="site-api-config.js?v=20261009-inbox"></script>
-  <script defer src="site-footer.js?v=20261022-support-chat"></script>
+  <script defer src="site-footer.js?v=20261023-speed1"></script>
   <script>
-    (function initVideoPage() {
+    // Runs after the deferred scripts above (category-products.js provides SITE_MEDIA),
+    // so the video list does not depend on script reordering by the CDN.
+    function initVideoPage() {
       function parseYouTubeId(input) {
         var raw = String(input || "").trim();
         if (!raw) return "";
@@ -378,7 +380,12 @@ if (isLocalFile && localNote) {
         syncBadge();
       }
       fetchOwnerStats();
-    })();
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initVideoPage);
+    } else {
+      initVideoPage();
+    }
   </script>
 </body>
 </html>
