@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <link rel="preload" as="script" href="site-api-config.js?v=20261009-inbox">
@@ -21,6 +21,7 @@
   <script src="admin-dashboard-design.js?v=20261018-3"></script>
   <link rel="stylesheet" href="admin-premium-layout.css?v=20261018-3">
   <link rel="stylesheet" href="admin-orders-woocommerce.css?v=20261023-touch1">
+  <link rel="stylesheet" href="admin-orders-premium.css?v=20261024-1">
   <script src="admin-order-status.js?v=20261018-2"></script>
 </head>
 <body class="pn-body wo-orders-page">
@@ -32,64 +33,64 @@
         <button type="button" class="adm-collapse-btn" id="admCollapse" aria-controls="admSidebar" aria-expanded="true" aria-label="সাইডবার ছোট করুন"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="3" stroke="currentColor" stroke-width="1.6"/><path d="M9 4v16" stroke="currentColor" stroke-width="1.6"/></svg></button>
         <button type="button" class="adm-sidebar-close" id="admSbClose" aria-label="মেনু বন্ধ করুন"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
       </div>
-      <div class="adm-sidebar-profile"><div class="adm-profile-avatar" aria-hidden="true">MA</div><div class="adm-profile-copy"><strong>আপনার কর্মক্ষেত্র</strong><small>স্টোর পরিচালনা</small></div></div>
+      <div class="adm-sidebar-profile"><div class="adm-profile-avatar" aria-hidden="true">MA</div><div class="adm-profile-copy"><strong>Workspace</strong><small>Store Operations</small></div></div>
       <nav class="adm-sidebar-nav" aria-label="অ্যাডমিন মেনু">
-<a class="adm-sidebar-item" href="admin-dashboard.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>ড্যাশবোর্ড</span></a>
-<details class="adm-nav-group has-current" name="adm-navigation" open><summary class="adm-sidebar-item" title="অর্ডার ও হিসাব"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z M9 7h6M9 11h6M9 15h4"/></svg><span>অর্ডার ও হিসাব</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
-<a class="adm-sidebar-item adm-nav-child is-current" href="admin-orders.html" aria-current="page"><span>অর্ডার প্যানেল</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="admin-operations.html"><span>হিসাব ও রিটার্ন</span></a>
+<a class="adm-sidebar-item" href="admin-dashboard.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Dashboard</span></a>
+<details class="adm-nav-group has-current" name="adm-navigation" open><summary class="adm-sidebar-item" title="Orders & Finance"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z M9 7h6M9 11h6M9 15h4"/></svg><span>Orders & Finance</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
+<a class="adm-sidebar-item adm-nav-child is-current" href="admin-orders.html" aria-current="page"><span>Order Management</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-operations.html"><span>Finance & Returns</span></a>
 </div></details>
-<details class="adm-nav-group" name="adm-navigation"><summary class="adm-sidebar-item" title="পণ্য ও স্টক"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="6" width="16" height="15" rx="2"/><path d="M9 6V5a3 3 0 0 1 6 0v1M9 10a3 3 0 0 0 6 0"/></svg><span>পণ্য ও স্টক</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
-<a class="adm-sidebar-item adm-nav-child" href="product-manager.html"><span>প্রোডাক্ট ম্যানেজার</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="stock-analytics.html"><span>স্টক ও অ্যানালিটিক্স</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="product-links.html"><span>প্রোডাক্ট লিংক</span></a>
+<details class="adm-nav-group" name="adm-navigation"><summary class="adm-sidebar-item" title="Products & Inventory"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="6" width="16" height="15" rx="2"/><path d="M9 6V5a3 3 0 0 1 6 0v1M9 10a3 3 0 0 0 6 0"/></svg><span>Products & Inventory</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
+<a class="adm-sidebar-item adm-nav-child" href="product-manager.html"><span>Product Manager</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="stock-analytics.html"><span>Stock & Analytics</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="product-links.html"><span>Product Links</span></a>
 </div></details>
-<a class="adm-sidebar-item" href="admin-inbox.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h18v13H8l-5 4V4ZM7 9h10M7 13h7"/></svg><span>কাস্টমার ইনবক্স</span></a>
-<details class="adm-nav-group" name="adm-navigation"><summary class="adm-sidebar-item" title="সেটিংস ও অন্যান্য"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 9v12"/></svg><span>সেটিংস ও অন্যান্য</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
-<a class="adm-sidebar-item adm-nav-child" href="admin-staff.html"><span>স্টাফ ম্যানেজমেন্ট</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="admin-growth.html"><span>গ্রোথ টুলস</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="admin-links.html"><span>পরিচালনা লিংক</span></a>
+<a class="adm-sidebar-item" href="admin-inbox.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h18v13H8l-5 4V4ZM7 9h10M7 13h7"/></svg><span>Customer Inbox</span></a>
+<details class="adm-nav-group" name="adm-navigation"><summary class="adm-sidebar-item" title="Settings & Tools"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 9v12"/></svg><span>Settings & Tools</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
+<a class="adm-sidebar-item adm-nav-child" href="admin-staff.html"><span>Staff Management</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-growth.html"><span>Growth Tools</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-links.html"><span>Admin Links</span></a>
 </div></details>
 </nav>
       <div class="adm-sidebar-foot">
-        <button type="button" id="admThemeToggle" class="adm-theme-toggle" role="switch" aria-checked="false" aria-label="ডার্ক মোড"><svg viewBox="0 0 24 24" fill="none"><path d="M20 14A8.5 8.5 0 0 1 10 4a8.5 8.5 0 1 0 10 10Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="adm-theme-label">ডার্ক মোড</span><span class="adm-theme-track" aria-hidden="true"></span></button>
-        <button type="button" class="adm-btn adm-btn-secondary" id="admLogout">লগআউট</button>
+        <button type="button" id="admThemeToggle" class="adm-theme-toggle" role="switch" aria-checked="false" aria-label="Dark Mode"><svg viewBox="0 0 24 24" fill="none"><path d="M20 14A8.5 8.5 0 0 1 10 4a8.5 8.5 0 1 0 10 10Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="adm-theme-label">Dark Mode</span><span class="adm-theme-track" aria-hidden="true"></span></button>
+        <button type="button" class="adm-btn adm-btn-secondary" id="admLogout">Log Out</button>
       </div>
     </aside>
     <main class="pn-main">
       <div class="pn-head">
         <button type="button" class="pn-btn pn-menu-btn" id="pnMenuBtn" aria-label="Menu">☰</button>
-        <div class="adm-heading"><span class="adm-page-kicker">মুসলিম আবায়া / অর্ডার ও হিসাব</span><h1>অর্ডার পরিচালনা</h1></div>
+        <div class="adm-heading"><span class="adm-page-kicker">Muslim Abaya / Orders</span><h1>Order Management</h1></div>
         <span class="pn-spacer"></span>
         <span class="pn-note-muted" id="ordCount"></span>
-        <a class="pn-btn pn-btn-primary" href="admin-order-new.html" id="ordNewOrder">+ নতুন অর্ডার</a>
-        <button type="button" class="pn-btn" id="ordRefresh">রিফ্রেশ</button>
+        <a class="pn-btn pn-btn-primary" href="admin-order-new.html" id="ordNewOrder">+ New Order</a>
+        <button type="button" class="pn-btn" id="ordRefresh">Refresh</button>
       </div>
 
       <section class="oi-panel" id="ordInsights" aria-labelledby="ordInsightsTitle" hidden>
-        <h2 id="ordInsightsTitle">অর্ডারের সারাংশ</h2>
+        <h2 id="ordInsightsTitle">Order Overview</h2>
         <p class="oi-note" id="ordScope"></p>
         <div class="oi-cards" id="ordFinance"></div>
-        <p class="oi-note">অর্ডারের মূল্য চার্জসহ; এটি লাভ বা কুরিয়ার থেকে পাওয়া টাকা নয়।</p>
+        <p class="oi-note">Order totals include charges; they do not represent profit or courier payouts.</p>
         <div class="oi-controls">
-          <label for="ordIssueFilter">যাচাইয়ের তালিকা</label>
-          <select id="ordIssueFilter"><option value="all">সব অর্ডার</option><option value="flagged">যাচাই প্রয়োজন</option></select>
+          <label for="ordIssueFilter">Review Queue</label>
+          <select id="ordIssueFilter"><option value="all">All Orders</option><option value="flagged">Needs Review</option></select>
           <span class="oi-note" id="ordIssueCount" role="status" aria-live="polite"></span>
         </div>
-        <details><summary>যাচাইয়ের সহায়তা</summary><p class="oi-note">চিহ্নিত অর্ডার খুলে দেখুন। ID না থাকলে বা একই ID হলে শিটের সারি নম্বর ব্যবহার করুন। সাইজ খালি মানেই ভুল নয়।</p></details>
+        <details><summary>Review Guidance</summary><p class="oi-note">Open flagged orders to review. When IDs are missing or duplicated, refer to the source sheet row. An empty size does not always mean an error.</p></details>
       </section>
-      <p><a class="pn-btn" href="admin-operations.html">হিসাব ও রিটার্ন →</a></p><div class="pn-tabs" id="ordTabs"></div>
+      <p><a class="pn-btn" href="admin-operations.html">Finance & Returns →</a></p><div class="pn-tabs" id="ordTabs"></div>
 
       <div class="pn-toolbar">
-        <input class="pn-in" id="ordSearch" type="search" placeholder="লোড হওয়া অর্ডারের নাম, ফোন বা Order ID…" autocomplete="off">
-        <select class="pn-sel wo-filter" id="ordDateFilter" aria-label="তারিখের ফিল্টার">
+        <input class="pn-in" id="ordSearch" type="search" placeholder="Search loaded orders by customer, phone or order ID…" autocomplete="off">
+        <select class="pn-sel wo-filter" id="ordDateFilter" aria-label="Filter by date">
           <option value="all">All dates</option>
           <option value="today">Today</option>
           <option value="yesterday">Yesterday</option>
           <option value="7d">Last 7 days</option>
           <option value="month">This month</option>
         </select>
-        <select class="pn-sel wo-filter" id="ordCourierFilter" aria-label="কুরিয়ার ফিল্টার">
+        <select class="pn-sel wo-filter" id="ordCourierFilter" aria-label="Filter by courier">
           <option value="all">All couriers</option>
           <option value="sent">Sent to courier</option>
           <option value="not-sent">Not sent</option>
@@ -99,42 +100,43 @@
           <option value="Paperfly">Paperfly</option>
           <option value="Manual">Manual</option>
         </select>
-        <select class="pn-sel wo-filter" id="ordPaymentFilter" aria-label="পেমেন্ট ফিল্টার">
+        <select class="pn-sel wo-filter" id="ordPaymentFilter" aria-label="Filter by payment">
           <option value="all">All payments</option>
           <option value="cod">COD</option>
           <option value="advance">Advance paid</option>
           <option value="paid">Fully paid</option>
           <option value="due">Due amount</option>
         </select>
-        <select class="pn-sel wo-filter" id="ordAssignedFilter" aria-label="দায়িত্বপ্রাপ্ত স্টাফ ফিল্টার">
+        <select class="pn-sel wo-filter" id="ordAssignedFilter" aria-label="Filter by assigned staff">
           <option value="all">All staff</option>
           <option value="assigned">Assigned</option>
           <option value="unassigned">Unassigned</option>
         </select>
+        <button type="button" class="pn-btn pn-btn-sm" id="ordResetFilters">Clear Filters</button>
         <button type="button" class="pn-btn pn-btn-sm wo-export-btn" id="ordExportFiltered">Export filtered CSV</button>
       </div>
 
-      <p id="ordersTableHint" class="wo-table-hint">↔ অর্ডার নম্বর স্থির থাকবে। কুরিয়ার, ট্র্যাকিং ও বাকি তথ্য দেখতে টেবিলটি ডানে–বামে স্ক্রল করুন।</p>
-      <div class="pn-table-wrap" role="region" tabindex="0" aria-label="অর্ডারের সম্পূর্ণ তালিকা" aria-describedby="ordersTableHint">
+      <p id="ordersTableHint" class="wo-table-hint">↔ Order IDs remain visible. Scroll horizontally for courier, tracking and other details.</p>
+      <div class="pn-table-wrap" role="region" tabindex="0" aria-label="Full order list" aria-describedby="ordersTableHint">
         <table class="pn-table">
           <thead>
             <tr>
-              <th style="width:34px"><input type="checkbox" class="ot-sel" id="otSelAll" aria-label="দেখানো সব অর্ডার বাছুন"></th>
-              <th>অর্ডার</th>
-              <th>কাস্টমার</th>
-              <th>পণ্য</th>
-              <th>মোট</th>
-              <th>কুরিয়ার স্ট্যাটাস</th>
-              <th>ট্র্যাকিং</th>
-              <th>দায়িত্বপ্রাপ্ত</th>
-              <th>যাচাই</th>
+              <th style="width:34px"><input type="checkbox" class="ot-sel" id="otSelAll" aria-label="দেখানো All Orders বাছুন"></th>
+              <th>Order</th>
+              <th>Customer</th>
+              <th>Products</th>
+              <th>Total</th>
+              <th>Courier Status</th>
+              <th>Tracking</th>
+              <th>Assigned To</th>
+              <th>Review</th>
             </tr>
           </thead>
           <tbody id="ordBody" aria-live="polite"><tr class="pn-skeleton-row"><td colspan="9"><div class="pn-skeleton-stack"><i></i><i></i><i></i><i></i></div></td></tr></tbody>
         </table>
       </div>
       <div class="pn-toolbar" id="ordPaging" aria-live="polite">
-        <button type="button" class="pn-btn" id="ordLoadMore" hidden style="display:none">আরও অর্ডার দেখুন</button>
+        <button type="button" class="pn-btn" id="ordLoadMore" hidden style="display:none">আরও Order দেখুন</button>
         <span class="pn-note-muted" id="ordPageStatus"></span>
       </div>
     </main>
@@ -422,6 +424,21 @@
 
       MaPanel.init("orders").then(function (s) { if (s) load({ maxAgeMs: 5 * 60 * 1000 }); });
     })();
+  </script>
+
+  <script>
+  (function(){
+    var btn=document.getElementById("ordResetFilters");
+    if(!btn)return;
+    btn.addEventListener("click",function(){
+      var search=document.getElementById("ordSearch");
+      if(search){search.value="";search.dispatchEvent(new Event("input",{bubbles:true}));}
+      ["ordDateFilter","ordCourierFilter","ordPaymentFilter","ordAssignedFilter","ordIssueFilter"].forEach(function(id){
+        var el=document.getElementById(id);if(el){el.value="all";el.dispatchEvent(new Event("change",{bubbles:true}));}
+      });
+      var tab=document.querySelector('#ordTabs [data-f="all"]');if(tab)tab.click();
+    });
+  })();
   </script>
 </body>
 </html>
