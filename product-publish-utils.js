@@ -11,6 +11,12 @@
   if(kind==='two-piece'){p.bodySizes=p.sizes.slice();p.dressLengths=sizes(d.dress);p.palazzoLengths=sizes(d.palazzo);if(!p.dressLengths.length||!p.palazzoLengths.length)throw Error('টু-পিসের Dress Length ও Palazzo Length দিন।');}
   return p;
  }
- function validateCatalog(products){var ids={};Object.keys(products).forEach(function(cat){(products[cat]||[]).forEach(function(p){if(!/^[A-Za-z0-9][A-Za-z0-9_-]{1,100}$/.test(String(p.id||''))||ids[p.id])throw Error('পণ্যের ID ফাঁকা বা একই ID একাধিক পণ্যে আছে।');ids[p.id]=true;if(!String(p.name||'').trim()||!Number.isFinite(Number(p.price))||Number(p.price)<=0||!p.image)throw Error('প্রতিটি পণ্যের নাম, দাম ও প্রধান ছবি প্রয়োজন।');});});}
+ function validateCatalog(products){var ids={};Object.keys(products).forEach(function(cat){(products[cat]||[]).forEach(function(p){if(!/^[A-Za-z0-9][A-Za-z0-9_-]{1,100}$/.test(String(p.id||''))||ids[p.id])throw Error('পণ্যের ID ফাঁকা বা একই ID একাধিক পণ্যে আছে।');ids[p.id]=true;if(!String(p.name||'').trim()||!Number.isFinite(Number(p.price))||Number(p.price)<=0||!p.image)throw Error('প্রতিটি পণ্যের নাম, দাম ও প্রধান ছবি প্রয়োজন।');
+  if(p.status!=null&&p.status!=='draft'&&p.status!=='trash')throw Error(p.id+': status must be Published, Draft or Trash.');
+  var whole=function(v){return Number.isSafeInteger(Number(v))&&Number(v)>0&&Number(v)<=1000000;};
+  if(p.regularPrice!=null&&!whole(p.regularPrice))throw Error(p.id+': before-sale price must be whole taka.');
+  if(p.regularPriceByType!=null&&(typeof p.regularPriceByType!=='object'||Object.keys(p.regularPriceByType).some(function(k){return !whole(p.regularPriceByType[k]);})))throw Error(p.id+': option before-sale prices must be whole taka.');
+  if(String(p.seoTitle||'').length>120||String(p.seoDescription||'').length>320)throw Error(p.id+': SEO title max 120 and description max 320 characters.');
+ });});}
  g.MaProductPublishUtils={sizes:sizes,money:money,mode:mode,makeProduct:makeProduct,validateCatalog:validateCatalog};
 })(window);

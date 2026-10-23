@@ -141,6 +141,7 @@
   }
 
   function priceHtml(p) {
+    if (typeof window.maFormatPriceHtml === "function") return window.maFormatPriceHtml(p, null, listingPrice(p));
     return TK + listingPrice(p);
   }
 

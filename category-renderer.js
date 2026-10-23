@@ -862,15 +862,27 @@ function getProductShortNote(p, categoryKey) {
 function listingCardPrice(p) {
   return parseInt(p && p.price, 10) || 550;
 }
+/** Card price: "৳1650", or the regular price struck through when the product is on sale. */
 function formatCardPriceText(p) {
-  return "\u09F3" + listingCardPrice(p);
+  var price = listingCardPrice(p);
+  return typeof window.maFormatPriceHtml === "function" ? window.maFormatPriceHtml(p, null, price) : "\u09F3" + price;
+}
+/** Price of one option on the product page, with its "before sale" price when it has one. Numbers only (safe HTML). */
+function optionPriceHtml(p, typeLabel, price) {
+  var amount = parseInt(price, 10) || 0;
+  if (typeof window.maGetSaleInfo !== "function") return formatBdtPrice(amount);
+  var info = (typeLabel && window.maGetSaleInfo(p, typeLabel, amount)) ||
+    (amount === (parseInt(p && p.price, 10) || 0) ? window.maGetSaleInfo(p, null, amount) : null);
+  if (!info) return formatBdtPrice(amount);
+  return '<del class="ma-price-was" aria-label="Regular price \u09F3' + info.regular + '">\u09F3' + info.regular + '</del> ' +
+    '<span class="ma-price-now">\u09F3' + info.sale + '</span> <span class="ma-price-off">-' + info.percent + '%</span>';
 }
 function updatePqvPriceDisplay(modal, p, categoryKey, typeLabel) {
   if (!modal || !p) return;
   var el = modal.querySelector("#pqvPrice");
   if (!el) return;
   var price = resolveProductPrice(p, categoryKey, typeLabel);
-  el.textContent = formatBdtPrice(price);
+  el.innerHTML = optionPriceHtml(p, typeLabel, price);
   el.setAttribute("data-price", String(price));
 }
 function getSizeChartData(categoryKey) {
@@ -1718,7 +1730,7 @@ function bindPqvInteractions(p, idx, categoryKey, scopeRoot) {
         if (typePrice) {
           var priceEl = modal.querySelector("#pqvPrice");
           if (priceEl) {
-            priceEl.textContent = formatBdtPrice(typePrice);
+            priceEl.innerHTML = optionPriceHtml(p, typeVal, typePrice);
             priceEl.setAttribute("data-price", typePrice);
           }
         } else {
@@ -2340,7 +2352,15 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
       : "") +
     "<li><span>SKU</span><strong>" +
     escapeHtml(p.id || "—") +
-    "</strong></li></ul>";
+    "</strong></li>" +
+    (Array.isArray(p.tags) && p.tags.length
+      ? "<li class='pqv-spec-tags'><span>Tags</span><strong>" +
+        p.tags.map(function (t) {
+          return "<a href='" + escapeHtml(shopHref("/category") + "?tag=" + encodeURIComponent(t)) + "'>" + escapeHtml(t) + "</a>";
+        }).join(", ") +
+        "</strong></li>"
+      : "") +
+    "</ul>";
   var sizeField =
     isAbaya && abayaCfg
       ? '<div class="pqv-field pqv-field-body"><span class="pqv-field-label">Body Size</span><div class="pqv-opt-group">' +
@@ -2403,7 +2423,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     '<p class="pqv-price" id="pqvPrice" data-price="' +
     productPrice +
     '">' +
-    priceText +
+    optionPriceHtml(p, defaultType, productPrice) +
     "</p>" +
     '<div class="pqv-oos-banner" role="status">' +
     '<strong>Out of Stock · এই পণ্যটি এখন স্টকে নেই</strong>' +
@@ -3282,7 +3302,7 @@ function buildProductCard(p, idx, waLink, detailMode, categoryKey, allProducts) 
     ? resolveProductPrice(p, categoryKey, defaultType)
     : listingAmount;
   var imgFallback = getCategoryFallbackImage(categoryKey || "");
-  var priceText = detailMode ? formatBdtPrice(productPrice) : formatCardPriceText(p);
+  var priceText = detailMode ? optionPriceHtml(p, defaultType, productPrice) : formatCardPriceText(p);
   var fabricText = escapeHtml(displayFabricLabel(p.fabric, detailMode ? "Dubai Cherry" : "Premium Georgette"));
   var isAbaya = typeof isAbayaProduct === "function" && isAbayaProduct(p, categoryKey);
   var isTwoPiece = typeof isTwoPieceProduct === "function" && isTwoPieceProduct(p, categoryKey);
@@ -3441,6 +3461,13 @@ function getPageSearchQuery() {
     return "";
   }
 }
+function getPageTagQuery() {
+  try {
+    return (new URLSearchParams(window.location.search).get("tag") || "").trim().slice(0, 60);
+  } catch (e) {
+    return "";
+  }
+}
 function normalizeCategoryHrefPath(href) {
   if (!href) return "";
   try {
@@ -3504,9 +3531,14 @@ function collectCategoryViewData(categoryKey) {
   var allProducts = window.CATEGORY_PRODUCTS || {};
   var categoryMeta = window.CATEGORY_META || {};
   var searchQ = getPageSearchQuery();
+  var tagQ = getPageTagQuery();
   var products;
 
-  if (searchQ && window.maSearch) {
+  if (tagQ && window.maSearch) {
+    products = window.maSearch.collectProductsByTag(allProducts, tagQ);
+    if (categoryKey) products = products.filter(function (p) { return (allProducts[categoryKey] || []).indexOf(p) !== -1; });
+    searchQ = "";
+  } else if (searchQ && window.maSearch) {
     if (categoryKey) {
       products = window.maSearch.collectProductsInCategory(allProducts, categoryKey, searchQ, categoryMeta);
     } else {
@@ -3515,14 +3547,16 @@ function collectCategoryViewData(categoryKey) {
   } else {
     products = categoryKey ? (allProducts[categoryKey] || []).slice() : getAllCategoryProducts();
   }
-  var title = searchQ
+  var title = tagQ
+    ? 'Tag: ' + tagQ
+    : searchQ
     ? 'Search: "' + searchQ + '"'
     : (categoryKey ? ((categoryMeta[categoryKey] && categoryMeta[categoryKey].title) || categoryKey.toUpperCase()) : "All Categories");
   var waLink = (window.SITE_MEDIA && window.SITE_MEDIA.whatsappOrderLink) || "https://wa.me/8801971642683";
-  var breadcrumb = searchQ
+  var breadcrumb = (searchQ || tagQ)
     ? "<nav class='shop-breadcrumb' aria-label='Breadcrumb'>" +
-      "<a href='" + escapeHtml(shopHref("/")) + "'>Home</a><span>&rsaquo;</span><strong>Search</strong><span>&rsaquo;</span><strong>" +
-      escapeHtml(searchQ) +
+      "<a href='" + escapeHtml(shopHref("/")) + "'>Home</a><span>&rsaquo;</span><strong>" + (tagQ ? "Tag" : "Search") + "</strong><span>&rsaquo;</span><strong>" +
+      escapeHtml(tagQ || searchQ) +
       "</strong></nav>"
     : "<nav class='shop-breadcrumb' aria-label='Breadcrumb'>" +
       "<a href='" + escapeHtml(shopHref("/")) + "'>Home</a><span>&rsaquo;</span><a href='" +
@@ -3742,6 +3776,9 @@ function bindShopCategoryControls(root, products) {
         if (mode === "name-asc") {
           return String(pa.name || "").localeCompare(String(pb.name || ""));
         }
+        if (mode === "newest") {
+          return String(pb.dateAdded || "").localeCompare(String(pa.dateAdded || "")) || ia - ib;
+        }
         return ia - ib;
       });
       cards.forEach(function (card) {
@@ -3886,7 +3923,7 @@ function initShopCategorySpaNav() {
 function renderAllCategories() {
   var root = document.getElementById("list");
   if (!root) return;
-  var searchQ = getPageSearchQuery();
+  var searchQ = getPageSearchQuery() || getPageTagQuery();
   if (searchQ && window.maSearch) {
     renderCategory("");
     return;
@@ -3992,6 +4029,7 @@ return;
     "<option value='price-asc'>Price: Low to High</option>" +
     "<option value='price-desc'>Price: High to Low</option>" +
     "<option value='name-asc'>Name: A-Z</option>" +
+    "<option value='newest'>Newest</option>" +
     "</select></label></div>" +
     "<div class='shop-filter-backdrop' id='shopFilterBackdrop' hidden></div>" +
     "<div class='shop-layout'>" +

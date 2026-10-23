@@ -29,7 +29,7 @@
 <link rel="stylesheet" href="admin-dashboard-design.css?v=20261018-3">
 <script src="admin-dashboard-design.js?v=20261018-3"></script>
 <link rel="stylesheet" href="admin-premium-layout.css?v=20261021-1">
-<link rel="stylesheet" href="product-manager-wp.css?v=20261023-live">
+<link rel="stylesheet" href="product-manager-wp.css?v=20261024-wc">
 </head>
 <body class="pl-admin adm-body pm-wp-admin" data-admin-guard="1">
   <div class="adm-shell">
@@ -139,9 +139,9 @@
   <script src="product-utils.js?v=460604041e5f8ec0"></script>
   <script src="category-products.js?v=ecd32aaff8e38b6c"></script>
   <script src="product-links-data.js?v=49a0ee4ca9e20d0b"></script>
-  <script id="pmRawCatalog">window.MA_RAW_CATEGORY_PRODUCTS = JSON.parse(JSON.stringify(window.CATEGORY_PRODUCTS || {}));</script>
+  <script id="pmRawCatalog">window.MA_CATALOG_INCLUDE_UNPUBLISHED = true; window.MA_RAW_CATEGORY_PRODUCTS = JSON.parse(JSON.stringify(window.CATEGORY_PRODUCTS || {}));</script>
   <script src="product-catalog-loader.js?v=20261013-manager"></script>
-  <script src="product-publish-utils.js?v=4d87960bbc2baa44"></script><script src="product-publisher.js?v=0d238a0c81d56678"></script><script src="product-quick-upload.js?v=4215657447c68aba"></script>
+  <script src="product-publish-utils.js?v=4d87960bbc2baa44"></script><script src="product-csv.js?v=1"></script><script src="product-publisher.js?v=0d238a0c81d56678"></script><script src="product-quick-upload.js?v=4215657447c68aba"></script>
 <script id="pmStockAdmin">
 (function () {
   var ROW_CIRCLES = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "⑪", "⑫"];
@@ -158,6 +158,8 @@
   var allSearchTerm = "";
   var overviewCategory = "";
   var overviewStock = "";
+  var overviewStatus = ""; // "" = all except Trash | "publish" | "draft" | "trash"
+  var overviewSort = { key: "", dir: 1 };
   var overviewSelected = {};
   var overviewPage = 1;
   var overviewPageSize = 20;
@@ -639,6 +641,32 @@
     return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][parseInt(m[2], 10) - 1] + " " + parseInt(m[3], 10) + ", " + m[1];
   }
   function productTags(p) { return Array.isArray(p.tags) ? p.tags.filter(Boolean) : []; }
+  // WooCommerce-style status. Published = no field; Draft / Trash stay in the catalog but are hidden from the website.
+  function productStatus(p) { return p && (p.status === "draft" || p.status === "trash") ? p.status : "publish"; }
+  function setProductStatus(p, status) {
+    if (status === "draft" || status === "trash") p.status = status; else delete p.status;
+    if (status === "trash") p.trashedAt = todayKey(); else delete p.trashedAt;
+  }
+  // Sale: price / priceByType = what the customer pays; regularPrice / regularPriceByType = optional "before sale" price.
+  function setRegularPrice(p, typeLabel, value) {
+    var n = parseInt(value, 10);
+    if (typeLabel) {
+      if (!p.regularPriceByType || typeof p.regularPriceByType !== "object") p.regularPriceByType = {};
+      if (n > 0) p.regularPriceByType[typeLabel] = n; else delete p.regularPriceByType[typeLabel];
+      if (!Object.keys(p.regularPriceByType).length) delete p.regularPriceByType;
+    } else if (n > 0) p.regularPrice = n; else delete p.regularPrice;
+  }
+  function productOnSale(p) {
+    if (parseInt(p.regularPrice, 10) > parseInt(p.price, 10)) return true;
+    var r = p.regularPriceByType, s = p.priceByType || {};
+    return !!r && Object.keys(r).some(function (t) { return parseInt(r[t], 10) > parseInt(s[t], 10); });
+  }
+  function seoDefaults(p) {
+    return {
+      title: (p.name || "Product") + " | Muslim Abaya Bangladesh",
+      description: ((p.name || "") + " — " + (p.fabric || "modest fashion") + ". " + (p.detailNote || "") + " Price ৳" + (parseInt(p.price, 10) || 0) + ". Cash on delivery in Bangladesh.").replace(/\s+/g, " ").trim()
+    };
+  }
   function allBrands() {
     var seen = {};
     Object.keys(products).forEach(function (k) { (products[k] || []).forEach(function (q) { if (q.brand) seen[q.brand] = true; }); });
@@ -663,6 +691,10 @@
     var types = productOptionTypes(p, meta);
     var first = types.length && p.priceByType ? parseInt(p.priceByType[types[0]], 10) : NaN;
     if (first > 0) p.price = first;
+    if (types.length) {
+      var firstWas = p.regularPriceByType ? parseInt(p.regularPriceByType[types[0]], 10) : NaN;
+      if (firstWas > 0) p.regularPrice = firstWas; else delete p.regularPrice;
+    }
     var shown = document.getElementById("pmCardPrice");
     if (shown) shown.textContent = "৳" + (parseInt(p.price, 10) || 0);
   }
@@ -670,7 +702,8 @@
     var types = productOptionTypes(p, meta);
     var rows = "";
     if (!types.length) {
-      rows = efield("price", "Regular price (৳)", p.price, "number", "");
+      rows = efield("price", "Price (৳)", p.price, "number", "What the customer pays.") +
+        efield("regularPrice", "Before-sale price (৳)", p.regularPrice == null ? "" : p.regularPrice, "number", "Optional. When higher than the price, the shop shows it crossed out (sale). Leave empty when there is no sale.");
     } else {
       rows = '<p class="pm-wp-form-row"><label>Price on product cards</label><span><b id="pmCardPrice">৳' + (parseInt(p.price, 10) || 0) + '</b><small>Always the same as the first option (' + escapeHtml(types[0]) + ').</small></span></p>' +
         types.map(function (t) {
@@ -679,13 +712,14 @@
           return '<div class="pm-wp-form-row pm-opt-row"><label for="pmEf_typePrice:' + escapeAttr(t) + '">Option ' + (i + 1) + (i === 0 ? ' <em>(card price)</em>' : '') + '</label><span>' +
             '<input type="text" class="pm-opt-name" maxlength="40" data-opt-name="' + escapeAttr(t) + '" value="' + escapeAttr(t) + '" aria-label="Option name (' + escapeAttr(t) + ')" title="Option name — edit to rename">' +
             '<input id="pmEf_typePrice:' + escapeAttr(t) + '" class="pm-opt-price" type="number" min="0" data-ef="typePrice:' + escapeAttr(t) + '" value="' + escapeAttr(v) + '" aria-label="' + escapeAttr(t) + ' price">' +
+            '<input class="pm-opt-was" type="number" min="0" data-ef="typeRegular:' + escapeAttr(t) + '" value="' + escapeAttr(p.regularPriceByType && p.regularPriceByType[t] != null ? p.regularPriceByType[t] : "") + '" placeholder="Was ৳" aria-label="' + escapeAttr(t) + ' before-sale price" title="Optional before-sale price — shown crossed out when higher than the price">' +
             '<span class="pm-opt-tools">' +
             (types.length > 1 ? '<button type="button" class="pm-wp-button pm-opt-move" data-opt-up="' + i + '"' + (i === 0 ? ' disabled' : '') + ' aria-label="Move ' + escapeAttr(t) + ' up" title="Move up">↑</button>' +
               '<button type="button" class="pm-wp-button pm-opt-move" data-opt-down="' + i + '"' + (i === types.length - 1 ? ' disabled' : '') + ' aria-label="Move ' + escapeAttr(t) + ' down" title="Move down">↓</button>' +
               '<button type="button" class="pm-wp-link-danger" data-opt-del="' + escapeAttr(t) + '">Remove</button>' : '') +
             '</span></span></div>';
         }).join("") +
-        '<p class="pm-wp-form-row pm-opt-help"><label></label><span><small id="pmOptEditMsg" role="status">Edit an option name to rename it (e.g. Hijab → Hijab + Niqab). ↑ ↓ change the order; the first option is the card price.</small></span></p>';
+        '<p class="pm-wp-form-row pm-opt-help"><label></label><span><small id="pmOptEditMsg" role="status">Edit an option name to rename it (e.g. Hijab → Hijab + Niqab). ↑ ↓ change the order; the first option is the card price. “Was ৳” (before-sale price) is optional: when higher than the price, the shop shows a sale.</small></span></p>';
     }
     return rows +
       '<div class="pm-wp-form-row pm-opt-add"><label for="pmOptName">Add option</label><span>' +
@@ -735,10 +769,20 @@
               efield("sizes", "Sizes", sizesToInput(p.sizes), "text", "Separate with commas.") +
             '</div>' +
           '</div></div></section>' +
+        '<section class="pm-wp-box" id="pmSeoBox"><h3 class="pm-wp-box-title">Search engine listing (SEO)</h3><div class="pm-wp-box-body">' +
+          '<div class="pm-seo-preview" aria-label="Google preview"><div class="pm-seo-prev-title" id="pmSeoPrevTitle"></div>' +
+          '<div class="pm-seo-prev-url">muslimabaya.com › product › ' + escapeHtml(p.id || "") + '</div><div class="pm-seo-prev-desc" id="pmSeoPrevDesc"></div></div>' +
+          '<p class="pm-wp-form-row"><label for="pmSeoTitle">SEO title</label><span><input id="pmSeoTitle" type="text" maxlength="120" data-ef="seoTitle" value="' + escapeAttr(p.seoTitle || "") + '" placeholder="' + escapeAttr(seoDefaults(p).title) + '"><small id="pmSeoTitleCount"></small></span></p>' +
+          '<p class="pm-wp-form-row"><label for="pmSeoDesc">Meta description</label><span><textarea id="pmSeoDesc" rows="3" maxlength="320" data-ef="seoDescription" placeholder="' + escapeAttr(seoDefaults(p).description) + '">' + escapeHtml(p.seoDescription || "") + '</textarea><small id="pmSeoDescCount"></small></span></p>' +
+          '<p class="pm-wp-hint">Leave empty to use the automatic title and description. Google shows about 60 characters of the title and 160 of the description.</p>' +
+        '</div></section>' +
       '</div>' +
       '<div class="pm-wp-col-side">' +
         '<section class="pm-wp-box"><h3 class="pm-wp-box-title">Publish</h3><div class="pm-wp-box-body pm-wp-publish">' +
-          '<p>Status: <b>Published</b></p>' +
+          '<p class="pm-wp-status-row"><label for="pmEditStatus">Status:</label> ' + (productStatus(p) === "trash"
+            ? '<b>In Trash</b>'
+            : '<select id="pmEditStatus" data-ef="status"><option value="publish"' + (productStatus(p) === "publish" ? " selected" : "") + '>Published</option><option value="draft"' + (productStatus(p) === "draft" ? " selected" : "") + '>Draft (hidden)</option></select>') + '</p>' +
+          '<p class="pm-wp-hint" id="pmStatusNote"></p>' +
           '<p>Catalog: <b>' + escapeHtml(enName(sections.find(function (x) { return x.key === catKey; }) || { menu: catKey })) + '</b></p>' +
           '<p>Added: <b>' + (formatDay(p.dateAdded) || "—") + '</b></p>' +
           '<p><label class="pm-wp-check"><input type="checkbox" data-ef="featured"' + (p.featured ? " checked" : "") + '> ★ Featured product</label></p>' +
@@ -779,6 +823,23 @@
       if (bar) bar.setAttribute("data-state", state || "");
     }
     function changed(msg) { editMsg(msg || "Unsaved changes — click Save changes.", "dirty"); }
+    function paintStatusNote() {
+      var note = document.getElementById("pmStatusNote");
+      if (!note) return;
+      var st = productStatus(p);
+      note.textContent = st === "draft" ? "Hidden from the website, search, sitemap and checkout until you publish it." :
+        st === "trash" ? "In Trash — not on the website. Restore it from Products → Trash." : "";
+    }
+    function updateSeoPreview() {
+      var d = seoDefaults(p);
+      var title = p.seoTitle || d.title, desc = p.seoDescription || d.description;
+      var t = document.getElementById("pmSeoPrevTitle"), ds = document.getElementById("pmSeoPrevDesc");
+      if (t) t.textContent = title.length > 62 ? title.slice(0, 60) + "…" : title;
+      if (ds) ds.textContent = desc.length > 162 ? desc.slice(0, 160) + "…" : desc;
+      var tc = document.getElementById("pmSeoTitleCount"), dc = document.getElementById("pmSeoDescCount");
+      if (tc) { tc.textContent = title.length + " / 60 characters" + (p.seoTitle ? "" : " (automatic)"); tc.classList.toggle("is-err", title.length > 60); }
+      if (dc) { dc.textContent = desc.length + " / 160 characters" + (p.seoDescription ? "" : " (automatic)"); dc.classList.toggle("is-err", desc.length > 160); }
+    }
     function saveEdit() {
       var b1 = document.getElementById("pmEditUpdate"), b2 = document.getElementById("pmEditBarSave");
       if (b2 && b2.disabled) return;
@@ -796,6 +857,10 @@
         var f = inp.getAttribute("data-ef");
         if (f === "featured") { if (inp.checked) p.featured = true; else delete p.featured; }
         else if (f === "price") p.price = parseInt(inp.value, 10) || 0;
+        else if (f === "regularPrice") setRegularPrice(p, null, inp.value);
+        else if (f.indexOf("typeRegular:") === 0) { setRegularPrice(p, f.slice(12), inp.value); syncCardPrice(p, meta); }
+        else if (f === "status") { setProductStatus(p, inp.value); paintStatusNote(); }
+        else if (f === "seoTitle" || f === "seoDescription") { var sv = inp.value.replace(/\s+/g, " ").trim(); if (sv) p[f] = sv; else delete p[f]; updateSeoPreview(); }
         else if (f === "stock") {
           if (inp.value === "") { delete p.stock; delete p.inStock; }
           else { p.stock = Math.max(0, parseInt(inp.value, 10) || 0); if (p.stock === 0) p.inStock = false; else delete p.inStock; }
@@ -853,6 +918,10 @@
         types.forEach(function (t) { map[t] = t === name ? price : p.priceByType[t]; });
         Object.keys(p.priceByType).forEach(function (k) { if (k !== oldName && !(k in map)) map[k] = p.priceByType[k]; });
         p.priceByType = map;
+        if (p.regularPriceByType && p.regularPriceByType[oldName] != null) {
+          p.regularPriceByType[name] = p.regularPriceByType[oldName];
+          delete p.regularPriceByType[oldName];
+        }
         setOptionTypes(types);
         syncCardPrice(p, meta);
         renderProductEditor();
@@ -882,6 +951,7 @@
         var name = b.getAttribute("data-opt-del");
         var types = productOptionTypes(p, meta).filter(function (t) { return t !== name; });
         if (p.priceByType) delete p.priceByType[name];
+        if (p.regularPriceByType) { delete p.regularPriceByType[name]; if (!Object.keys(p.regularPriceByType).length) delete p.regularPriceByType; }
         if (meta && types.join("|") === meta.types.join("|")) delete p.types;
         else if (!meta && types.length === 1 && types[0] === "Regular") { delete p.types; delete p.priceByType; }
         else p.types = types;
@@ -930,11 +1000,22 @@
     });
     document.getElementById("pmEditStock").addEventListener("click", function () { publishStockToggle(p, renderProductEditor); });
     document.getElementById("pmEditTrash").addEventListener("click", function () {
-      if (!confirm("Move this product to Trash? It is removed from the website after Update.")) return;
-      list.splice(editTarget.index, 1);
-      activeKey = ALL_PRODUCTS_KEY; renderCatList(); renderMain();
-      toast("Product removed — click “Publish edited products” to update the website");
+      if (!confirm("Move this product to Trash? It disappears from the website now; you can restore it from Products → Trash.")) return;
+      var before = JSON.stringify(p);
+      setProductStatus(p, "trash");
+      editMsg("Moving to Trash…", "busy");
+      saveAll({ id: p.id }).then(function () {
+        activeKey = ALL_PRODUCTS_KEY; renderCatList(); renderMain();
+        toast("Moved to Trash — restore it any time from Products → Trash");
+      }).catch(function (err) {
+        var restored = JSON.parse(before);
+        Object.keys(p).forEach(function (k) { delete p[k]; });
+        Object.assign(p, restored);
+        editMsg("Not moved to Trash: " + ((err && err.message) || "try again") + " — nothing was changed.", "err");
+      });
     });
+    paintStatusNote();
+    updateSeoPreview();
     document.getElementById("pmEditUpdate").addEventListener("click", saveEdit);
     document.getElementById("pmEditBarSave").addEventListener("click", saveEdit);
     document.getElementById("pmEditBack").addEventListener("click", function () { activeKey = ALL_PRODUCTS_KEY; renderCatList(); renderMain(); });
@@ -1063,31 +1144,54 @@
         rows.push({ section: sec, product: p, index: index });
       });
     });
-    var outOfStockCount = rows.filter(function (row) {
+    var statusCount = { all: 0, publish: 0, draft: 0, trash: 0 };
+    rows.forEach(function (row) { var st = productStatus(row.product); statusCount[st]++; if (st !== "trash") statusCount.all++; });
+    if (overviewStatus && !statusCount[overviewStatus]) overviewStatus = "";
+    var liveRows = rows.filter(function (row) { return productStatus(row.product) !== "trash"; });
+    var outOfStockCount = liveRows.filter(function (row) {
       return managerOutOfStock(row.product);
     }).length;
-    var inStockCount = rows.length - outOfStockCount;
+    var inStockCount = liveRows.length - outOfStockCount;
+    var inTrash = overviewStatus === "trash";
+    function sortHead(key, label) {
+      var on = overviewSort.key === key;
+      return '<button type="button" class="pm-sort' + (on ? ' is-sorted' : '') + '" data-sort="' + key + '" aria-label="Sort by ' + label + '">' + label +
+        '<span class="pm-sort-ind" aria-hidden="true">' + (on ? (overviewSort.dir > 0 ? ' ▲' : ' ▼') : '') + '</span></button>';
+    }
+    function ariaSort(key) { return overviewSort.key === key ? ' aria-sort="' + (overviewSort.dir > 0 ? 'ascending' : 'descending') + '"' : ''; }
     function catName(sec) { return enName(sec); }
     var catOptions = sections.map(function (sec) { return '<option value="' + escapeAttr(sec.key) + '"' + (overviewCategory === sec.key ? ' selected' : '') + '>' + escapeHtml(catName(sec)) + ' (' + (products[sec.key] || []).length + ')</option>'; }).join('');
     var headRow = '<tr><td class="check-column"><input type="checkbox" class="pm-check-all" aria-label="Select all products on this page"></td>' +
       '<th class="column-thumb" scope="col"><span class="pm-thumb-icon" aria-label="Image" title="Image"></span></th>' +
-      '<th class="column-name" scope="col">Name</th><th class="column-sku" scope="col">SKU</th><th class="column-stock" scope="col">Stock</th>' +
-      '<th class="column-price" scope="col">Price</th><th class="column-cats" scope="col">Categories</th>' +
+      '<th class="column-name" scope="col"' + ariaSort("name") + '>' + sortHead("name", "Name") + '</th><th class="column-sku" scope="col"' + ariaSort("sku") + '>' + sortHead("sku", "SKU") + '</th><th class="column-stock" scope="col"' + ariaSort("stock") + '>' + sortHead("stock", "Stock") + '</th>' +
+      '<th class="column-price" scope="col"' + ariaSort("price") + '>' + sortHead("price", "Price") + '</th><th class="column-cats" scope="col">Categories</th>' +
       '<th class="column-tags" scope="col">Tags</th><th class="column-brand" scope="col">Brands</th>' +
-      '<th class="column-featured" scope="col"><span title="Featured" aria-label="Featured">★</span></th><th class="column-date" scope="col">Date</th></tr>';
+      '<th class="column-featured" scope="col"><span title="Featured" aria-label="Featured">★</span></th><th class="column-date" scope="col"' + ariaSort("date") + '>' + sortHead("date", "Date") + '</th></tr>';
     // Same layout as WordPress → Products: title + "Add new", status links, search, bulk actions / filters / pages, list table.
     mainEl.innerHTML = '<div class="pm-wp-list">' +
       '<div class="pm-wp-heading"><h2 class="pm-wp-title">Products</h2>' +
       '<button type="button" class="pm-wp-title-action" id="pmAllQuickUpload">Add new product</button>' +
-      '<button type="button" class="pm-wp-title-action" id="pmManageCats">Categories</button></div>' +
+      '<button type="button" class="pm-wp-title-action" id="pmManageCats">Categories</button>' +
+      '<button type="button" class="pm-wp-title-action" id="pmCsvExport">Export CSV</button>' +
+      '<button type="button" class="pm-wp-title-action" id="pmCsvImport">Import CSV</button>' +
+      '<input type="file" id="pmCsvFile" accept=".csv,text/csv" hidden></div>' +
+      '<ul class="pm-wp-subsubsub pm-post-status">' +
+      [["", "All", statusCount.all], ["publish", "Published", statusCount.publish], ["draft", "Drafts", statusCount.draft], ["trash", "Trash", statusCount.trash]]
+        .filter(function (x) { return x[0] === "" || x[2] > 0; })
+        .map(function (x, i, arr) { return '<li><button type="button" data-overview-status="' + x[0] + '" class="' + (overviewStatus === x[0] ? "is-active" : "") + '">' + x[1] + ' <span class="count">(' + x[2] + ')</span></button>' + (i < arr.length - 1 ? ' |' : '') + '</li>'; }).join("") +
+      (inTrash && statusCount.trash ? '<li> <button type="button" class="pm-wp-button" id="pmEmptyTrash">Empty Trash</button></li>' : '') +
+      '</ul>' +
       '<ul class="pm-wp-subsubsub pm-status-tabs">' +
-      '<li><button type="button" data-overview-stock="" class="' + (overviewStock === "" ? "is-active" : "") + '">All <span class="count">(' + rows.length + ')</span></button> |</li>' +
+      '<li><button type="button" data-overview-stock="" class="' + (overviewStock === "" ? "is-active" : "") + '">All stock <span class="count">(' + liveRows.length + ')</span></button> |</li>' +
       '<li><button type="button" data-overview-stock="in" class="' + (overviewStock === "in" ? "is-active" : "") + '">In stock <span class="count">(' + inStockCount + ')</span></button> |</li>' +
       '<li><button type="button" data-overview-stock="out" class="' + (overviewStock === "out" ? "is-active" : "") + '">Out of stock <span class="count">(' + outOfStockCount + ')</span></button></li></ul>' +
       '<p class="pm-wp-search"><label class="pm-sr-only" for="pmAllSearch">Search products</label><input type="search" id="pmAllSearch" value="' + escapeAttr(allSearchTerm) + '">' +
       '<button type="button" class="pm-wp-button" id="pmAllSearchBtn">Search products</button><span id="pmAllCount" class="pm-sr-only"></span></p>' +
       '<div class="pm-wp-tablenav top">' +
-      '<div class="pm-wp-actions"><label class="pm-sr-only" for="pmBulkAction">Bulk actions</label><select id="pmBulkAction"><option value="">Bulk actions</option><option value="in">Mark in stock</option><option value="out">Mark out of stock</option><option value="price">Change price (%)</option></select>' +
+      '<div class="pm-wp-actions"><label class="pm-sr-only" for="pmBulkAction">Bulk actions</label><select id="pmBulkAction"><option value="">Bulk actions</option>' + (inTrash
+        ? '<option value="restore">Restore</option><option value="delete">Delete permanently</option>'
+        : '<option value="in">Mark in stock</option><option value="out">Mark out of stock</option><option value="price">Change price (%)</option>' +
+          '<option value="publish">Publish</option><option value="draft">Set to Draft</option><option value="trash">Move to Trash</option>') + '</select>' +
       '<button type="button" class="pm-wp-button" id="pmBulkApply">Apply</button></div>' +
       '<div class="pm-wp-actions"><select id="pmOverviewCategory" aria-label="Filter by category"><option value="">Select a category</option>' + catOptions + '</select>' +
       '<select id="pmOverviewStock" aria-label="Filter by stock status"><option value="">Filter by stock status</option><option value="in"' + (overviewStock === 'in' ? ' selected' : '') + '>In stock</option><option value="out"' + (overviewStock === 'out' ? ' selected' : '') + '>Out of stock</option></select>' +
@@ -1117,8 +1221,92 @@
       if (!action) return;
       if (!Object.keys(overviewSelected).length) { toast("Select products first"); return; }
       if (action === "price") { bulkReprice(); return; }
+      if (["publish", "draft", "trash", "restore", "delete"].indexOf(action) !== -1) { bulkStatus(action); return; }
       document.getElementById(action === "out" ? "pmOverviewOff" : "pmOverviewOn").click();
     });
+    document.querySelectorAll("[data-overview-status]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        overviewStatus = button.getAttribute("data-overview-status");
+        overviewPage = 1; overviewSelected = {};
+        renderAllProducts();
+      });
+    });
+    var emptyTrash = document.getElementById("pmEmptyTrash");
+    if (emptyTrash) emptyTrash.addEventListener("click", function () {
+      overviewSelected = {};
+      rows.forEach(function (row) { if (productStatus(row.product) === "trash") overviewSelected[JSON.stringify([row.section.key, row.index])] = true; });
+      bulkStatus("delete");
+    });
+    mainEl.querySelectorAll("thead [data-sort], tfoot [data-sort]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var key = button.getAttribute("data-sort");
+        if (overviewSort.key === key) overviewSort.dir = -overviewSort.dir; else overviewSort = { key: key, dir: key === "date" ? -1 : 1 };
+        overviewPage = 1;
+        renderAllProducts();
+      });
+    });
+    // CSV export / import (product-csv.js). Import shows what will change first, then saves at once.
+    document.getElementById("pmCsvExport").addEventListener("click", function () {
+      if (!window.MaProductCsv) { toast("CSV tool did not load — reload the page"); return; }
+      var blob = new Blob([window.MaProductCsv.exportCsv(products, sections, { metaFor: getCategoryTypeMeta })], { type: "text/csv;charset=utf-8" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "muslimabaya-products-" + todayKey() + ".csv";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+    });
+    document.getElementById("pmCsvImport").addEventListener("click", function () { document.getElementById("pmCsvFile").click(); });
+    document.getElementById("pmCsvFile").addEventListener("change", function (e) {
+      var file = e.target.files && e.target.files[0];
+      e.target.value = "";
+      if (!file) return;
+      if (file.size > 3 * 1024 * 1024) { toast("The CSV file is too large (max 3 MB)"); return; }
+      file.text().then(function (text) { showImportPlan(text); }).catch(function () { toast("Could not read the file"); });
+    });
+    function showImportPlan(text) {
+      var plan = window.MaProductCsv.planImport(text, products, sections, {
+        today: todayKey(),
+        metaFor: getCategoryTypeMeta,
+        newProduct: function (sec) { var base = defaultProduct(sec); delete base.link; return base; }
+      });
+      var old = document.getElementById("pmImportDialog"); if (old) old.remove();
+      var box = document.createElement("div");
+      box.id = "pmImportDialog";
+      box.className = "pm-import-backdrop";
+      var line = function (x) { return '<li><b>' + escapeHtml(x.sku) + '</b> ' + escapeHtml(x.name || "") + (x.fields ? ' — <span>' + escapeHtml(x.fields.join(", ")) + '</span>' : x.category ? ' — new in ' + escapeHtml(x.category) : '') + '</li>'; };
+      var nothing = !plan.updates.length && !plan.created.length;
+      box.innerHTML = '<div class="pm-import-dialog" role="dialog" aria-modal="true" aria-labelledby="pmImportTitle"><h3 id="pmImportTitle">Import products</h3>' +
+        '<p><b>' + plan.updates.length + '</b> product(s) will change, <b>' + plan.created.length + '</b> new, <b>' + plan.errors.length + '</b> row(s) with problems (skipped).</p>' +
+        (plan.updates.length ? '<h4>Changes</h4><ul>' + plan.updates.slice(0, 40).map(line).join("") + (plan.updates.length > 40 ? '<li>… and ' + (plan.updates.length - 40) + ' more</li>' : '') + '</ul>' : '') +
+        (plan.created.length ? '<h4>New products</h4><ul>' + plan.created.slice(0, 40).map(line).join("") + '</ul>' : '') +
+        (plan.errors.length ? '<h4>Problems</h4><ul class="pm-import-errors">' + plan.errors.slice(0, 40).map(function (x) { return '<li>Row ' + x.line + ': ' + escapeHtml(x.message) + '</li>'; }).join("") + '</ul>' : '') +
+        '<p class="pm-wp-hint">An empty cell leaves that field unchanged. Prices are whole taka.</p>' +
+        '<div class="pm-import-actions"><button type="button" class="pm-wp-button" data-import-cancel>Cancel</button> ' +
+        '<button type="button" class="pm-wp-primary" data-import-apply' + (nothing ? ' disabled' : '') + '>Apply and save</button></div></div>';
+      document.body.appendChild(box);
+      box.querySelector("[data-import-cancel]").addEventListener("click", function () { box.remove(); });
+      var apply = box.querySelector("[data-import-apply]");
+      apply.addEventListener("click", function () {
+        apply.disabled = true;
+        var backup = JSON.stringify(products);
+        Object.keys(products).forEach(function (k) { delete products[k]; });
+        Object.assign(products, plan.staged);
+        Object.keys(products).forEach(function (key) { (products[key] || []).forEach(function (q) { ensureProductPriceByType(q, key); }); });
+        apply.textContent = "Saving…";
+        saveAll(null).then(function () {
+          box.remove();
+          toast("Imported " + (plan.updates.length + plan.created.length) + " product(s) — live in about 2 minutes");
+          overviewSelected = {}; renderCatList(); renderMain();
+        }).catch(function (err) {
+          var restored = JSON.parse(backup);
+          Object.keys(products).forEach(function (k) { delete products[k]; });
+          Object.assign(products, restored);
+          apply.disabled = false; apply.textContent = "Apply and save";
+          box.querySelector("p").textContent = "Not saved: " + ((err && err.message) || "try again") + " — nothing was changed.";
+          renderMain();
+        });
+      });
+    }
     document.querySelectorAll("[data-overview-stock]").forEach(function (button) {
       button.addEventListener("click", function () {
         overviewStock = button.getAttribute("data-overview-stock");
@@ -1134,10 +1322,28 @@
       var visible = rows.filter(function (row) {
         var p = row.product, s = row.section;
         var out = managerOutOfStock(p);
+        var st = productStatus(p);
+        if (overviewStatus ? st !== overviewStatus : st === "trash") return false;
         if (overviewCategory && s.key !== overviewCategory) return false;
         if (overviewStock === "out" && !out || overviewStock === "in" && out) return false;
         return [p.name, p.id, s.key, s.menu, s.menuBn, p.brand || ""].concat(productTags(p)).join(" ").toLowerCase().indexOf(term) !== -1;
       });
+      if (overviewSort.key) {
+        var sk = overviewSort.key, dir = overviewSort.dir;
+        var val = function (row) {
+          var p = row.product;
+          if (sk === "name") return String(p.name || "").toLowerCase();
+          if (sk === "sku") return String(p.id || "").toLowerCase();
+          if (sk === "price") return parseInt(p.price, 10) || 0;
+          if (sk === "date") return String(p.dateAdded || "");
+          if (sk === "stock") return managerOutOfStock(p) ? -1 : (p.stock == null || p.stock === "" ? 1e9 : parseInt(p.stock, 10) || 0);
+          return 0;
+        };
+        visible = visible.map(function (row, i) { return { row: row, i: i, v: val(row) }; }).sort(function (a, b) {
+          var c = typeof a.v === "number" ? a.v - b.v : String(a.v).localeCompare(String(b.v));
+          return c ? c * dir : a.i - b.i;
+        }).map(function (x) { return x.row; });
+      }
       document.getElementById("pmAllCount").textContent = visible.length + " / " + rows.length + " items";
       var pageCount = Math.max(1, Math.ceil(visible.length / overviewPageSize));
       overviewPage = Math.min(Math.max(1, overviewPage), pageCount);
@@ -1163,8 +1369,10 @@
       });
       function priceText(p) {
         var values = p.priceByType ? Object.keys(p.priceByType).map(function (k) { return parseInt(p.priceByType[k], 10); }).filter(function (n) { return !isNaN(n); }) : [];
-        if (values.length > 1 && Math.min.apply(null, values) !== Math.max.apply(null, values)) return '৳' + Math.min.apply(null, values) + ' – ৳' + Math.max.apply(null, values);
-        return '৳' + (parseInt(p.price, 10) || 0);
+        var sale = productOnSale(p) ? ' <span class="pm-sale-tag">Sale</span>' : '';
+        if (values.length > 1 && Math.min.apply(null, values) !== Math.max.apply(null, values)) return '৳' + Math.min.apply(null, values) + ' – ৳' + Math.max.apply(null, values) + sale;
+        var was = parseInt(p.regularPrice, 10) > parseInt(p.price, 10) ? '<del>৳' + parseInt(p.regularPrice, 10) + '</del> ' : '';
+        return was + '৳' + (parseInt(p.price, 10) || 0) + sale;
       }
       document.getElementById("pmAllRows").innerHTML = pageRows.map(function (row) {
         var p = row.product, s = row.section;
@@ -1175,8 +1383,18 @@
         return '<tr class="' + (out ? 'is-outofstock' : '') + '">' +
           '<th class="check-column" scope="row"><input type="checkbox" class="pm-overview-check" data-select-cat="' + escapeAttr(s.key) + '" data-select-index="' + row.index + '" aria-label="' + escapeAttr((p.name || 'Product') + ' select') + '"' + (overviewSelected[selectionKey] ? ' checked' : '') + '></th>' +
           '<td class="column-thumb"><span class="pm-overview-photo">' + (p.image ? '<img loading="lazy" decoding="async" src="' + escapeAttr(p.image) + '" alt="">' : '<span class="pm-no-photo" aria-label="No image"></span>') + '</span></td>' +
-          '<td class="column-name"><strong><button type="button" class="pm-row-title"' + cat + '>' + name + '</button></strong>' +
+          '<td class="column-name"><strong><button type="button" class="pm-row-title"' + cat + '>' + name + '</button>' +
+          (productStatus(p) === "draft" ? ' <span class="pm-post-state">— Draft</span>' : '') + '</strong>' +
           '<div class="pm-row-meta"><mark class="' + (out ? 'outofstock' : 'instock') + '">' + (out ? 'Out of stock' : 'In stock') + '</mark> · ' + priceText(p) + '</div>' +
+          (productStatus(p) === "trash"
+            ? '<div class="pm-row-actions"><span class="pm-row-id">ID: ' + escapeHtml(p.id || "—") + ' | </span>' +
+              '<button type="button" class="pm-row-link" data-status-action="restore" data-status-cat="' + escapeAttr(s.key) + '" data-status-index="' + row.index + '">Restore</button> | ' +
+              '<button type="button" class="pm-row-link pm-row-danger" data-status-action="delete" data-status-cat="' + escapeAttr(s.key) + '" data-status-index="' + row.index + '">Delete permanently</button>' +
+              (p.trashedAt ? ' <span class="pm-row-id">· trashed ' + escapeHtml(formatDay(p.trashedAt)) + '</span>' : '') + '</div></td>' +
+              '<td class="column-sku">' + escapeHtml(p.id || "") + '</td><td class="column-stock"></td><td class="column-price">' + priceText(p) + '</td>' +
+              '<td class="column-cats">' + escapeHtml(catName(s)) + '</td><td class="column-tags"></td><td class="column-brand"></td><td class="column-featured"></td>' +
+              '<td class="column-date">Trash</td></tr>'
+            : '') + (productStatus(p) === "trash" ? '' :
           '<div class="pm-row-actions"><span class="pm-row-id">ID: ' + escapeHtml(p.id || "—") + ' | </span>' +
           '<button type="button" class="pm-row-link"' + cat + '>Edit</button> | ' +
           '<button type="button" class="pm-row-link" data-qe-cat="' + escapeAttr(s.key) + '" data-qe-index="' + row.index + '">Quick Edit</button> | ' +
@@ -1190,7 +1408,7 @@
           '<td class="column-tags">' + (productTags(p).length ? productTags(p).map(function (t) { return '<button type="button" class="pm-row-link" data-filter-term="' + escapeAttr(t) + '">' + escapeHtml(t) + '</button>'; }).join(', ') : '<span class="na">–</span>') + '</td>' +
           '<td class="column-brand">' + (p.brand ? '<button type="button" class="pm-row-link" data-filter-term="' + escapeAttr(p.brand) + '">' + escapeHtml(p.brand) + '</button>' : '<span class="na">–</span>') + '</td>' +
           '<td class="column-featured"><button type="button" class="pm-star' + (p.featured ? ' is-on' : '') + '" data-feature-cat="' + escapeAttr(s.key) + '" data-feature-index="' + row.index + '" aria-pressed="' + (p.featured ? 'true' : 'false') + '" title="' + (p.featured ? 'Featured — click to unfeature' : 'Click to feature') + '">' + (p.featured ? '★' : '☆') + '</button></td>' +
-          '<td class="column-date">' + (p.dateAdded ? 'Published<br><span>' + escapeHtml(formatDay(p.dateAdded)) + '</span>' : '<span class="na">–</span>') + '</td></tr>';
+          '<td class="column-date">' + (p.dateAdded ? (productStatus(p) === "draft" ? 'Last modified' : 'Published') + '<br><span>' + escapeHtml(formatDay(p.dateAdded)) + '</span>' : (productStatus(p) === "draft" ? 'Draft' : '<span class="na">–</span>')) + '</td></tr>');
       }).join("") || '<tr><td colspan="11" class="pm-empty">No products found</td></tr>';
       document.querySelectorAll("[data-filter-term]").forEach(function (button) {
         button.addEventListener("click", function () {
@@ -1247,6 +1465,13 @@
       document.getElementById("pmSelectVisible").onclick = function () { pageRows.forEach(function (row) { overviewSelected[JSON.stringify([row.section.key, row.index])] = true; }); draw(); };
       // Stock clicks are delegated to the stable product container below.
       // Do not bind to table rows that are replaced on every redraw.
+      document.querySelectorAll("[data-status-action]").forEach(function (button) {
+        button.addEventListener("click", function () {
+          overviewSelected = {};
+          overviewSelected[JSON.stringify([button.getAttribute("data-status-cat"), parseInt(button.getAttribute("data-status-index"), 10)])] = true;
+          bulkStatus(button.getAttribute("data-status-action"));
+        });
+      });
       document.querySelectorAll("[data-pm-copy-cat]").forEach(function (button) {
         button.addEventListener("click", function () {
           var cat = button.getAttribute("data-pm-copy-cat");
@@ -1320,6 +1545,38 @@
         });
       });
     }
+    // Publish / Draft / Trash / Restore / Delete permanently for the selected products, saved at once (undone if saving fails).
+    function bulkStatus(action) {
+      var refs = Object.keys(overviewSelected).map(function (key) { return JSON.parse(key); })
+        .filter(function (ref) { return (products[ref[0]] || [])[ref[1]]; });
+      if (!refs.length) { toast("Select products first"); return; }
+      var n = refs.length;
+      if (action === "delete" && !confirm("Permanently delete " + n + " product(s)? This cannot be undone.")) return;
+      if (action === "trash" && !confirm("Move " + n + " product(s) to Trash? They disappear from the website; you can restore them from Trash.")) return;
+      var backup = JSON.stringify(products);
+      if (action === "delete") {
+        var byCat = {};
+        refs.forEach(function (ref) { (byCat[ref[0]] = byCat[ref[0]] || []).push(ref[1]); });
+        Object.keys(byCat).forEach(function (cat) {
+          byCat[cat].sort(function (a, b) { return b - a; }).forEach(function (i) { if (productStatus(products[cat][i]) === "trash") products[cat].splice(i, 1); });
+        });
+      } else {
+        refs.forEach(function (ref) { setProductStatus(products[ref[0]][ref[1]], action === "restore" ? "publish" : action); });
+      }
+      var label = { publish: "published", draft: "set to Draft", trash: "moved to Trash", restore: "restored", delete: "deleted permanently" }[action];
+      setSaveStatus("Saving: " + n + " product(s) " + label + "…");
+      saveAll(null).then(function () {
+        overviewSelected = {};
+        toast(n + " product(s) " + label + " — the website updates in about 2 minutes");
+        renderCatList(); renderMain();
+      }).catch(function (err) {
+        var restored = JSON.parse(backup);
+        Object.keys(products).forEach(function (k) { delete products[k]; });
+        Object.assign(products, restored);
+        renderMain();
+        setSaveStatus("Not saved: " + ((err && err.message) || "try again") + " — nothing was changed.");
+      });
+    }
     // Bulk "Change price (%)": raises or lowers every price of the selected products, then saves at once.
     function bulkReprice() {
       var refs = Object.keys(overviewSelected).map(function (key) { return JSON.parse(key); });
@@ -1334,6 +1591,8 @@
       items.forEach(function (x) {
         if (typeof x.p.price === "number") x.p.price = round(x.p.price);
         if (x.p.priceByType) Object.keys(x.p.priceByType).forEach(function (t) { var v = parseInt(x.p.priceByType[t], 10); if (!isNaN(v)) x.p.priceByType[t] = round(v); });
+        if (parseInt(x.p.regularPrice, 10) > 0) x.p.regularPrice = round(parseInt(x.p.regularPrice, 10));
+        if (x.p.regularPriceByType) Object.keys(x.p.regularPriceByType).forEach(function (t) { var v = parseInt(x.p.regularPriceByType[t], 10); if (!isNaN(v)) x.p.regularPriceByType[t] = round(v); });
         syncCardPrice(x.p, getCategoryTypeMeta(x.cat));
       });
       setSaveStatus("Saving new prices for " + items.length + " product(s)…");

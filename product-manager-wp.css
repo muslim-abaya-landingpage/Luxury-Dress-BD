@@ -751,3 +751,31 @@ html[data-admin-theme="dark"] .pm-wp-list, html[data-admin-theme="dark"] .pm-wp-
 .pm-opt-row > span { gap: 6px; }
 .pm-wp-savebar[data-state="pub"], .pm-wp-savebar[data-state="busy"] { border-color: #2271b1; background: #f0f6fc; }
 .pm-wp-savebar[data-state="pub"] .pm-wp-savebar-msg, .pm-wp-savebar[data-state="busy"] .pm-wp-savebar-msg { color: #135e96; font-weight: 600; }
+
+/* ── 2026-10-24: status, sorting, sale, SEO box, CSV import ── */
+.pm-post-status { margin-bottom: 4px; }
+.pm-post-state { color: var(--pm-wp-muted); font-weight: 600; }
+.pm-sort { background: none; border: 0; padding: 0; font: inherit; color: var(--pm-wp-blue); cursor: pointer; text-align: left; }
+.pm-sort:hover, .pm-sort.is-sorted { color: var(--pm-wp-text); }
+.pm-sort-ind { font-size: 10px; }
+.pm-sale-tag { display: inline-block; padding: 0 5px; font-size: 11px; font-weight: 700; color: #fff; background: #b32d2e; vertical-align: middle; }
+.column-price del { color: var(--pm-wp-muted); }
+.pm-row-danger { color: #b32d2e !important; }
+.pm-opt-row > span { flex-wrap: wrap; }
+.pm-opt-row > span .pm-opt-was { flex: 0 1 100px; width: 100px; min-width: 80px; }
+@media (max-width: 782px) { .pm-opt-row > span .pm-opt-was { flex: 1 1 100px; width: auto; } }
+.pm-wp-status-row select { margin-left: 4px; }
+.pm-seo-preview { border: 1px solid var(--pm-wp-border); background: #fff; padding: 10px 12px; margin-bottom: 12px; font-family: Arial, sans-serif; }
+.pm-seo-prev-title { color: #1a0dab; font-size: 18px; line-height: 1.3; }
+.pm-seo-prev-url { color: #006621; font-size: 13px; margin: 2px 0; }
+.pm-seo-prev-desc { color: #4d5156; font-size: 13px; line-height: 1.45; }
+#pmSeoBox input, #pmSeoBox textarea { width: 100%; }
+#pmSeoBox small.is-err { color: #b32d2e; font-weight: 600; }
+.pm-import-backdrop { position: fixed; inset: 0; z-index: 10000; background: rgba(0, 0, 0, .45); display: flex; align-items: flex-start; justify-content: center; padding: 6vh 16px; overflow: auto; }
+.pm-import-dialog { background: #fff; color: var(--pm-wp-text); width: min(720px, 100%); padding: 18px 20px; border: 1px solid var(--pm-wp-border); }
+.pm-import-dialog h3 { margin: 0 0 8px; font-size: 18px; }
+.pm-import-dialog h4 { margin: 12px 0 4px; font-size: 14px; }
+.pm-import-dialog ul { margin: 0; padding-left: 18px; max-height: 220px; overflow: auto; font-size: 13px; }
+.pm-import-dialog li span { color: var(--pm-wp-muted); }
+.pm-import-errors li { color: #b32d2e; }
+.pm-import-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }

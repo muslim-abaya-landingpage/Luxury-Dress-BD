@@ -17,12 +17,12 @@
   }
 
   var chain = [
-    "product-config.js?v=20260819audit",
-    "product-utils.js?v=20260820stock",
+    "product-config.js?v=20261024-wc1",
+    "product-utils.js?v=20261024-wc1",
     "product-catalog-sync.js?v=20260604",
-    "category-products.js?v=20260820clean",
+    "category-products.js?v=20261024-wc1",
     "product-links-data.js?v=20260604",
-    "product-catalog-loader.js?v=20260604",
+    "product-catalog-loader.js?v=20261024-wc1",
   ];
 
   function afterCatalog() {

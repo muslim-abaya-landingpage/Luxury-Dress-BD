@@ -323,8 +323,38 @@
       if (!isNaN(stockN)) normalized.stock = Math.max(0, stockN);
     }
 
+    // WooCommerce-style fields from Product Manager: sale price, status, featured, tags, brand, SEO.
+    var regularPrice = parseInt(entry.regularPrice, 10);
+    if (regularPrice > normalized.price) normalized.regularPrice = regularPrice;
+    if (entry.regularPriceByType && typeof entry.regularPriceByType === "object") {
+      normalized.regularPriceByType = entry.regularPriceByType;
+    }
+    if (entry.status === "draft" || entry.status === "trash") normalized.status = entry.status;
+    if (entry.featured === true) normalized.featured = true;
+    if (Array.isArray(entry.tags) && entry.tags.length) {
+      normalized.tags = entry.tags.map(function (t) { return String(t || "").trim(); }).filter(Boolean);
+    }
+    if (entry.brand) normalized.brand = String(entry.brand);
+    if (entry.dateAdded) normalized.dateAdded = String(entry.dateAdded);
+    if (entry.seoTitle) normalized.seoTitle = String(entry.seoTitle);
+    if (entry.seoDescription) normalized.seoDescription = String(entry.seoDescription);
+
     normalized.productUrl = resolveProductPageLink(normalized);
     return normalized;
+  }
+
+  /** Draft and Trash products are kept in the catalog file but never shown or sold. */
+  function isPublishedProduct(product) {
+    return !!product && product.status !== "draft" && product.status !== "trash";
+  }
+
+  /** Storefront view of one category: published products only, featured ones first (stable order). */
+  function storefrontList(list) {
+    var out = (list || []).filter(isPublishedProduct);
+    if (!out.some(function (p) { return p.featured === true; })) return out;
+    return out.map(function (p, i) { return { p: p, i: i }; })
+      .sort(function (a, b) { return ((b.p.featured === true) - (a.p.featured === true)) || (a.i - b.i); })
+      .map(function (x) { return x.p; });
   }
 
   function normalizeCategoryList(list, categoryKey) {
@@ -362,7 +392,16 @@
     return result;
   }
 
+  /** Product Manager passes { includeUnpublished: true }; every storefront/build caller gets published products only. */
   function normalizeAll(categories, linkLists, options) {
+    var all = normalizeAllEntries(categories, linkLists, options);
+    if (options && options.includeUnpublished) return all;
+    var out = {};
+    Object.keys(all).forEach(function (key) { out[key] = storefrontList(all[key]); });
+    return out;
+  }
+
+  function normalizeAllEntries(categories, linkLists, options) {
     var opts = options || {};
     var mode =
       opts.mode ||
@@ -753,6 +792,124 @@ g.getCartLineBaseName = getCartLineBaseName;
   }
   return f;
 }
+  /**
+   * Sale price: `price` / `priceByType` stay the price the customer pays (cart and order checks use them);
+   * `regularPrice` / `regularPriceByType` are the optional "before sale" prices shown struck through.
+   * Returns { regular, sale, percent } when the product (or option) is on sale, else null.
+   */
+  function getSaleInfo(product, typeLabel, sellingPrice) {
+    if (!product) return null;
+    var sale = parseInt(sellingPrice != null && sellingPrice !== "" ? sellingPrice : product.price, 10) || 0;
+    var regular = NaN;
+    if (typeLabel) {
+      var map = product.regularPriceByType;
+      if (map && typeof map === "object" && map[typeLabel] != null) regular = parseInt(map[typeLabel], 10);
+    } else {
+      regular = parseInt(product.regularPrice, 10);
+    }
+    if (!(sale > 0) || !(regular > sale)) return null;
+    return { regular: regular, sale: sale, percent: Math.round((1 - sale / regular) * 100) };
+  }
+
+  /** "৳1650", or "<del>৳1900</del> <span>৳1650</span>" when on sale (safe HTML: numbers only). */
+  function formatPriceHtml(product, typeLabel, sellingPrice) {
+    var info = getSaleInfo(product, typeLabel, sellingPrice);
+    var sale = parseInt(sellingPrice != null && sellingPrice !== "" ? sellingPrice : product && product.price, 10) || 0;
+    if (!info) return "\u09F3" + sale;
+    return '<del class="ma-price-was" aria-label="Regular price \u09F3' + info.regular + '">\u09F3' + info.regular + '</del> ' +
+      '<span class="ma-price-now">\u09F3' + info.sale + '</span>';
+  }
+
+  /* ---------- Site search (header search box, /category?q=…, /category?tag=…) ---------- */
+  function searchText(v) {
+    return String(v == null ? "" : v).toLowerCase().replace(/[\s\-_/.,()+]+/g, " ").trim();
+  }
+  function searchTerms(q) {
+    return searchText(q).split(" ").filter(function (t) { return t.length > 0; });
+  }
+  function categoryLabelText(key, meta) {
+    var secs = g.CATALOG_SECTIONS || [];
+    var parts = [key, meta && meta[key] && meta[key].title];
+    secs.forEach(function (s) { if (s && s.key === key) parts.push(s.menu, s.menuBn); });
+    return searchText(parts.join(" "));
+  }
+  function productSearchText(p, key, meta) {
+    return searchText([p.name, p.id, p.color, p.colorLabel, p.fabric, p.brand, (p.tags || []).join(" "), categoryLabelText(key, meta)].join(" "));
+  }
+  function productMatches(p, key, meta, q) {
+    var terms = searchTerms(q);
+    if (!terms.length || !p) return false;
+    var hay = " " + productSearchText(p, key, meta) + " ";
+    return terms.every(function (t) { return hay.indexOf(t) !== -1; });
+  }
+  function categoryMatches(key, meta, q) {
+    var t = searchText(q);
+    return !!t && categoryLabelText(key, meta).split(" ").indexOf(t) !== -1;
+  }
+  function productHasTag(p, tag) {
+    var want = searchText(tag);
+    return !!want && Array.isArray(p && p.tags) && p.tags.some(function (t) { return searchText(t) === want; });
+  }
+  function collectProductsInCategory(all, key, q, meta) {
+    var list = (all && all[key]) || [];
+    if (categoryMatches(key, meta, q)) return list.slice();
+    return list.filter(function (p) { return productMatches(p, key, meta, q); });
+  }
+  function collectProducts(all, q, meta) {
+    var out = [], seen = {};
+    Object.keys(all || {}).forEach(function (key) {
+      collectProductsInCategory(all, key, q, meta).forEach(function (p) {
+        var id = p.id || p.name;
+        if (seen[id]) return;
+        seen[id] = true;
+        out.push(p);
+      });
+    });
+    return out;
+  }
+  function collectProductsByTag(all, tag) {
+    var out = [], seen = {};
+    Object.keys(all || {}).forEach(function (key) {
+      ((all && all[key]) || []).forEach(function (p) {
+        var id = p.id || p.name;
+        if (seen[id] || !productHasTag(p, tag)) return;
+        seen[id] = true;
+        out.push(p);
+      });
+    });
+    return out;
+  }
+  /** Where the header search form goes: the only matching category, otherwise all categories. */
+  function pickRedirectHref(q, nav, meta, all) {
+    var keys = Object.keys(all || {}).filter(function (key) { return collectProductsInCategory(all, key, q, meta).length; });
+    if (keys.length === 1) {
+      var hit = (nav || []).find(function (n) { return n && n.key === keys[0]; });
+      return (hit && hit.href) || "/" + keys[0];
+    }
+    return "/category";
+  }
+
+  g.maSearch = {
+    getTerms: searchTerms,
+    productMatches: productMatches,
+    categoryMatches: categoryMatches,
+    productHasTag: productHasTag,
+    collectProducts: collectProducts,
+    collectProductsInCategory: collectProductsInCategory,
+    collectProductsByTag: collectProductsByTag,
+    pickRedirectHref: pickRedirectHref
+  };
+  // One small shared style for sale prices, so every page (home, shop, product, related) shows them the same.
+  if (typeof document !== "undefined" && document.head && !document.getElementById("ma-sale-price-css")) {
+    var saleCss = document.createElement("style");
+    saleCss.id = "ma-sale-price-css";
+    saleCss.textContent = ".ma-price-was{color:#8a8f98;font-weight:400;text-decoration:line-through;margin-right:4px;font-size:.86em}" +
+      ".ma-price-now{color:#b42318}.ma-price-off{display:inline-block;margin-left:6px;padding:1px 6px;font-size:.62em;font-weight:700;" +
+      "line-height:1.5;vertical-align:middle;color:#fff;background:#b42318}.pqv-spec-tags a{color:inherit;text-decoration:underline}";
+    document.head.appendChild(saleCss);
+  }
+  g.maGetSaleInfo = getSaleInfo;
+  g.maFormatPriceHtml = formatPriceHtml;
   g.formatFabricLabelEn = formatFabricLabelEn;
   g.hasTrackedStockVariants = hasTrackedStockVariants;
   g.getStockQty = getStockQty;
@@ -764,6 +921,8 @@ g.getCartLineBaseName = getCartLineBaseName;
     hasExplicitProductLink: hasExplicitProductLink,
     normalizeProductEntry: normalizeProductEntry,
     normalizeAll: normalizeAll,
+    isPublishedProduct: isPublishedProduct,
+    getSaleInfo: getSaleInfo,
     categoryHasProducts: categoryHasProducts,
     titleFromFileName: titleFromFileName,
     hasTrackedStockVariants: hasTrackedStockVariants,

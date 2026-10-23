@@ -27,8 +27,9 @@ for (const [category, rows] of Object.entries(catalog)) {
     if (!/^[A-Za-z0-9_-]+$/.test(p.id)) throw new Error(`Unsafe product id: ${p.id}`);
     seen.add(p.id);
     const url = `${site}/product/${encodeURIComponent(p.id)}`;
-    const title = `${p.name} | Muslim Abaya Bangladesh`;
-    const desc = `${p.name} — ${p.fabric || 'modest fashion'}. ${p.detailNote || ''} Price ৳${p.price}. Cash on delivery in Bangladesh.`.trim();
+    // Product Manager → "Search engine listing" overrides the generated title / description.
+    const title = String(p.seoTitle || '').trim() || `${p.name} | Muslim Abaya Bangladesh`;
+    const desc = String(p.seoDescription || '').trim() || `${p.name} — ${p.fabric || 'modest fashion'}. ${p.detailNote || ''} Price ৳${p.price}. Cash on delivery in Bangladesh.`.trim();
     const image = /^https?:\/\//.test(p.image) ? p.image : site + '/' + p.image.replace(/^\//, '');
     const stock = w.maCatalog.getStockStatus(p);
     const schema = {'@context':'https://schema.org','@type':'Product',name:p.name,image:[image],description:desc,sku:p.id,brand:{'@type':'Brand',name:'Muslim Abaya'},offers:{'@type':'Offer',url,priceCurrency:'BDT',price:p.price,availability:'https://schema.org/' + (stock.inStock ? 'InStock' : 'OutOfStock')}};
@@ -49,6 +50,20 @@ for (const [category, rows] of Object.entries(catalog)) {
     if (!html.includes(`data-product-id="${esc(p.id)}"`) || !html.includes(`<title>${esc(title)}</title>`)) throw new Error(`Product page for ${p.id} is missing its product id or title; check the category template`);
     fs.writeFileSync(path.join(root, 'product', p.id+'.html'), html);
     products.push({id:p.id,category,url});
+  }
+}
+// Pages of products that are no longer published (Draft, Trash or deleted) must not stay online.
+// Only pages this script generated (data-seo-managed="full" + data-product-id) are removed.
+if (seen.size) {
+  for (const file of fs.readdirSync(path.join(root, 'product'))) {
+    const m = /^([A-Za-z0-9_-]+)\.html$/.exec(file);
+    if (!m || seen.has(m[1])) continue;
+    const full = path.join(root, 'product', file);
+    const html = fs.readFileSync(full, 'utf8');
+    if (html.includes('data-seo-managed="full"') && html.includes('data-product-id="' + m[1] + '"')) {
+      fs.unlinkSync(full);
+      console.log('Removed product page of unpublished product: ' + m[1]);
+    }
   }
 }
 let sitemap = read('sitemap.xml').replace(/\s*<url>\s*<loc>https:\/\/muslimabaya\.com\/product\/[^<]+<\/loc>[\s\S]*?<\/url>/g, '');
