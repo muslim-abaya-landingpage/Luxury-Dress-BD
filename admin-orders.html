@@ -113,6 +113,8 @@
           <option value="assigned">Assigned</option>
           <option value="unassigned">Unassigned</option>
         </select>
+        <select class="pn-sel wo-filter" id="ordPriorityFilter" aria-label="Order priority"><option value="all">All priorities</option><option value="attention">Needs attention</option><option value="unassigned">Unassigned orders</option><option value="courier">Courier pending</option></select>
+        <select class="pn-sel wo-filter" id="ordSort" aria-label="Sort orders"><option value="original">Default order</option><option value="value-desc">Highest value</option><option value="value-asc">Lowest value</option><option value="name">Customer A–Z</option></select>
         <button type="button" class="pn-btn pn-btn-sm" id="ordResetFilters">Clear Filters</button>
         <button type="button" class="pn-btn pn-btn-sm wo-export-btn" id="ordExportFiltered">Export filtered CSV</button>
       </div>
@@ -170,6 +172,8 @@
       var courierFilter = "all";
       var paymentFilter = "all";
       var assignedFilter = "all";
+      var priorityFilter = "all";
+      var orderSort = "original";
       var insights = null;
       var issueRows = new Map();
       var issueSelect = document.getElementById("ordIssueFilter");
@@ -190,6 +194,9 @@
         if (!matchesCourier(o)) return false;
         if (!matchesPayment(o)) return false;
         if (!matchesAssigned(o)) return false;
+        if (priorityFilter === "attention" && !(issueRows.get(o) || []).length && !o.blocked) return false;
+        if (priorityFilter === "unassigned" && String(o.assignedTo || "").trim()) return false;
+        if (priorityFilter === "courier" && (o.tracking || o.consignmentId || o.courierStatus) ) return false;
         if (!q) return true;
         var hay = (o.name + " " + o.phone + " " + o.orderId).toLowerCase();
         return hay.indexOf(q) !== -1;
@@ -264,6 +271,14 @@
 
       function renderRows() {
         var list = all.filter(matches);
+        if (orderSort !== "original") {
+          list.sort(function (a,b) {
+            if(orderSort === "name") return String(a.name||"").localeCompare(String(b.name||""));
+            var va=MaOrderInsights.amount(a.total), vb=MaOrderInsights.amount(b.total);
+            va=va == null ? -1 : va; vb=vb == null ? -1 : vb;
+            return orderSort === "value-desc" ? vb-va : va-vb;
+          });
+        }
         document.getElementById("ordIssueCount").textContent = "Showing " + list.length + " of " + all.length + " loaded orders";
         try { window.MaOrdersState = { all: all, filtered: list, total: Number(counts.all) || all.length }; } catch (stateErr) {}
         var body = document.getElementById("ordBody");
@@ -415,6 +430,8 @@
         paymentFilter = e.target.value;
         renderRows();
       });
+      document.getElementById("ordPriorityFilter").addEventListener("change", function(e){ priorityFilter=e.target.value; renderRows(); });
+      document.getElementById("ordSort").addEventListener("change", function(e){ orderSort=e.target.value; renderRows(); });
       document.getElementById("ordAssignedFilter").addEventListener("change", function (e) {
         assignedFilter = e.target.value;
         renderRows();
@@ -455,9 +472,10 @@
     btn.addEventListener("click",function(){
       var search=document.getElementById("ordSearch");
       if(search){search.value="";search.dispatchEvent(new Event("input",{bubbles:true}));}
-      ["ordDateFilter","ordCourierFilter","ordPaymentFilter","ordAssignedFilter","ordIssueFilter"].forEach(function(id){
+      ["ordDateFilter","ordCourierFilter","ordPaymentFilter","ordAssignedFilter","ordIssueFilter","ordPriorityFilter"].forEach(function(id){
         var el=document.getElementById(id);if(el){el.value="all";el.dispatchEvent(new Event("change",{bubbles:true}));}
       });
+      var sort=document.getElementById("ordSort"); if(sort){sort.value="original";sort.dispatchEvent(new Event("change",{bubbles:true}));}
       var tab=document.querySelector('#ordTabs [data-f="all"]');if(tab)tab.click();
     });
   })();
