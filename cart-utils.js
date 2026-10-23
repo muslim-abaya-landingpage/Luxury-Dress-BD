@@ -965,7 +965,10 @@
     var payload = applyMetaTrackingFields(merged);
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push(payload);
-    pushToTikTok("purchase_complete", payload);
+    // TikTok CompletePayment is NOT sent from the browser at order submit.
+    // The order-sheet Apps Script sends CompletePayment (and Meta Purchase) only when
+    // the order's Status is set to "Confirmed", using this same event_id — so fake or
+    // cancelled orders are never reported as purchases.
     markPurchaseFired(txKey);
     return payload;
   }
