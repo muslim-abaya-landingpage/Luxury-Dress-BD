@@ -123,6 +123,7 @@
 
       <p class="wo-workflow-hint">Tip: Start with <strong>Today</strong>, use <strong>Needs attention</strong> when reviewing issues, and open an Order ID to manage that order.</p>
       <p id="ordersTableHint" class="wo-table-hint">↔ Order IDs remain visible. Scroll horizontally for courier, tracking and other details.</p>
+      <dialog id="ordQuickPreview" class="wo-quick-preview" aria-labelledby="ordPreviewTitle"><div class="wo-preview-head"><h2 id="ordPreviewTitle">Order Quick Preview</h2><button type="button" class="pn-btn" id="ordPreviewClose">Close</button></div><div id="ordPreviewContent"></div><div class="wo-preview-foot"><a id="ordPreviewOpen" class="pn-btn pn-btn-primary" href="#">Open Order</a></div></dialog>
       <div class="pn-table-wrap" role="region" tabindex="0" aria-label="Full order list" aria-describedby="ordersTableHint">
         <table class="pn-table">
           <thead>
@@ -135,10 +136,10 @@
               <th>Courier Status</th>
               <th>Tracking</th>
               <th>Assigned To</th>
-              <th>Review</th>
+              <th>Review</th><th>Preview</th>
             </tr>
           </thead>
-          <tbody id="ordBody" aria-live="polite"><tr class="pn-skeleton-row"><td colspan="9"><div class="pn-skeleton-stack"><i></i><i></i><i></i><i></i></div></td></tr></tbody>
+          <tbody id="ordBody" aria-live="polite"><tr class="pn-skeleton-row"><td colspan="10"><div class="pn-skeleton-stack"><i></i><i></i><i></i><i></i></div></td></tr></tbody>
         </table>
       </div>
       <div class="pn-toolbar" id="ordPaging" aria-live="polite">
@@ -286,7 +287,7 @@
         try { window.MaOrdersState = { all: all, filtered: list, total: Number(counts.all) || all.length }; } catch (stateErr) {}
         var body = document.getElementById("ordBody");
         if (!list.length) {
-          body.innerHTML = '<tr><td colspan="9" class="pn-empty">কোনো অর্ডার পাওয়া যায়নি</td></tr>';
+          body.innerHTML = '<tr><td colspan="10" class="pn-empty">কোনো অর্ডার পাওয়া যায়নি</td></tr>';
           return;
         }
         body.innerHTML = list.map(function (o) {
@@ -304,6 +305,7 @@
             "<td>" + (displayStatus.hasCourier ? esc(o.tracking || o.consignmentId || "—") + '<div class="sub">' + esc(o.courier || 'Steadfast') + "</div>" : '<span class="sub">—</span>') + "</td>" +
             "<td>" + esc(o.assignedTo || "—") + "</td>" +
             '<td><div class="oi-issues">' + (issueRows.get(o) || []).map(function (key) { return '<span class="oi-issue">' + esc(MaOrderInsights.labels[key]) + '</span>'; }).join("") + ((issueRows.get(o) || []).length ? '' : '<span class="sub">—</span>') + '</div></td>' +
+            '<td><button type="button" class="pn-btn wo-preview-btn" data-preview-id="' + esc(o.orderId || "") + '" data-preview-row="' + esc(o.row || "") + '">Preview</button></td>' +
             "</tr>"
           );
         }).join("");
@@ -387,7 +389,7 @@
           btn.disabled = true;
         }
         document.getElementById("ordCount").textContent = (ordersShown ? (counts.all || 0) + " orders · " : "") + "আপডেট হচ্ছে…";
-        if (!append && !ordersShown) document.getElementById("ordBody").innerHTML = '<tr><td colspan="9" class="pn-empty">অর্ডার আনা হচ্ছে…</td></tr>';
+        if (!append && !ordersShown) document.getElementById("ordBody").innerHTML = '<tr><td colspan="10" class="pn-empty">অর্ডার আনা হচ্ছে…</td></tr>';
         return MaAdmin.call("AdminOrderList", params, options).then(function (res) {
           if (append && typeof res.nextCursor !== "number") throw new Error("ORDER_PAGINATION_API_OLD");
           apply(res, append);
@@ -397,7 +399,7 @@
             return;
           }
           if (ordersShown) { MaPanel.toast("আপডেট করা যায়নি: " + err.message, true); return; }
-          document.getElementById("ordBody").innerHTML = '<tr><td colspan="9" class="pn-empty">Error: ' + esc(err.message) + "</td></tr>";
+          document.getElementById("ordBody").innerHTML = '<tr><td colspan="10" class="pn-empty">Error: ' + esc(err.message) + "</td></tr>";
         }).then(function () {
           btn.disabled = false;
           loadingMore = false;
@@ -439,7 +441,22 @@
         assignedFilter = e.target.value;
         renderRows();
       });
+
+      function openQuickPreview(o) {
+        if(!o)return;
+        var box=document.getElementById("ordQuickPreview"), status=MaOrderStatus.describe(o);
+        var flags=(issueRows.get(o)||[]).map(function(k){return MaOrderInsights.labels[k]||k;}).join(", ");
+        var rows=[["Order ID",o.orderId],["Customer",o.name],["Phone",o.phone],["Products",Array.isArray(o.items)?o.items.join(", "):o.design],["Total",MaPanel.money(o.total)],["Payment",o.payment],["Order Status",status.orderRaw],["Courier Status",status.hasCourier?status.courierLabel:"Not sent"],["Tracking",o.tracking||o.consignmentId],["Assigned Staff",o.assignedTo],["Review Flags",flags||"None"]];
+        document.getElementById("ordPreviewContent").innerHTML='<dl class="wo-preview-grid">'+rows.map(function(pair){return '<div><dt>'+esc(pair[0])+'</dt><dd>'+esc(pair[1]==null||pair[1]===""?"—":pair[1])+'</dd></div>';}).join("")+'</dl><p class="wo-preview-note">Courier status is the last recorded value, not a live location update.</p>';
+        var link=document.getElementById("ordPreviewOpen");
+        link.hidden=!o.orderId||(issueRows.get(o)||[]).indexOf("duplicate_id")!==-1;
+        if(!link.hidden)link.href="admin-order.html?id="+encodeURIComponent(o.orderId);
+        if(box.showModal)box.showModal();else box.setAttribute("open","");
+      }
+      document.getElementById("ordPreviewClose").addEventListener("click",function(){document.getElementById("ordQuickPreview").close();});
       document.getElementById("ordBody").addEventListener("click", function (e) {
+        var btn=e.target.closest("[data-preview-id]");
+        if(btn){var order=all.find(function(o){return String(o.orderId||"")===btn.getAttribute("data-preview-id") && String(o.row||"")===btn.getAttribute("data-preview-row");});openQuickPreview(order);return;}
         if (e.target.closest("a, input, label")) return;
         var tr = e.target.closest("tr[data-id]");
         if (tr && tr.getAttribute("data-id")) location.href = "admin-order.html?id=" + encodeURIComponent(tr.getAttribute("data-id"));
