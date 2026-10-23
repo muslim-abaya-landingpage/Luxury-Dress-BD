@@ -10,6 +10,6 @@ const commitTime=Number(git(['log','-1','--format=%ct']))||Math.floor(Date.now()
 const history=git(['log','-200','--format=%H']).split('\n').filter(Boolean);
 fs.writeFileSync('live-build.json',JSON.stringify({sha,commitTime,history}));
 console.log('live-build.json: '+sha.slice(0,12)+' with '+history.length+' commits of history');
-for (const script of ['scripts/build-catalog-validation.mjs','scripts/build-product-seo.mjs','scripts/build-catalog-asset-versions.mjs','scripts/test-operations.cjs','scripts/test-product-publish.cjs','scripts/test-product-gallery.cjs','scripts/test-stock-publication.cjs']) {
+for (const script of ['scripts/build-catalog-validation.mjs','scripts/build-product-seo.mjs','scripts/build-catalog-asset-versions.mjs','scripts/test-operations.cjs','scripts/test-product-publish.cjs','scripts/test-product-gallery.cjs','scripts/test-stock-publication.cjs','scripts/prune-deploy.mjs']) {
   execFileSync(process.execPath,[script],{stdio:'inherit'});
 }
