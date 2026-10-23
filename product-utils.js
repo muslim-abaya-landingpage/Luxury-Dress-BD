@@ -480,12 +480,13 @@
   function getStockStatus(product, variant) {
     var inStock = isInStock(product, variant);
     var qty = getStockQty(product, variant);
-    var confirmedAvailable = product && product.inStock === true;
+    // No stock count entered (and not marked out of stock): shown as "In Stock" everywhere, the same
+    // as the homepage always showed (owner's choice, 2026-10-23).
     return {
       inStock: inStock,
       qty: qty,
-      label: qty === null ? (confirmedAvailable ? "In Stock" : "স্টক নিশ্চিত করুন") : (inStock ? "In Stock" : "Out of Stock"),
-      badge: qty === null ? (confirmedAvailable ? "In Stock" : "স্টক যাচাই বাকি") : (inStock ? "In Stock" : "Sold Out"),
+      label: inStock ? "In Stock" : "Out of Stock",
+      badge: inStock ? "In Stock" : "Sold Out",
       buttonLabel: inStock ? "Add to Cart" : "Out of Stock"
     };
   }

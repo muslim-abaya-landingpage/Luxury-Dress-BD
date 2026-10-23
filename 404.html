@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Page not found | Muslim Abaya</title>
+  <link rel="icon" href="/assets/logo-muslim-abaya.svg" type="image/svg+xml">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/site-header.css?v=20261022-ann">
+  <link rel="stylesheet" href="/site-footer.css?v=20261006scroll2" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="/site-footer.css?v=20261006scroll2"></noscript>
+  <link rel="stylesheet" href="/cart-drawer.css?v=20260820fixui">
+  <link rel="stylesheet" href="/mobile-bottom-nav.css?v=20261011-active-state" media="print" onload="this.media='all'">
+  <style>
+    body { margin: 0; background: #fff; color: #111; font-family: "Plus Jakarta Sans", "Hind Siliguri", system-ui, sans-serif; }
+    .nf-wrap { max-width: 720px; margin: 0 auto; padding: 64px 16px 80px; text-align: center; }
+    .nf-code { font-family: "Playfair Display", serif; font-size: 72px; font-weight: 700; line-height: 1; margin: 0 0 12px; letter-spacing: 0.02em; }
+    .nf-title { font-size: 22px; font-weight: 600; margin: 0 0 8px; }
+    .nf-text { color: #545454; font-size: 15px; line-height: 1.6; margin: 0 0 28px; }
+    .nf-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 32px; }
+    .nf-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 22px; font-weight: 600; font-size: 14px; text-decoration: none; border-radius: 0; }
+    .nf-btn-primary { background: #111; color: #fff; }
+    .nf-btn-secondary { background: #fff; color: #111; border: 1px solid #111; }
+    .nf-cats { display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: center; padding-top: 24px; border-top: 1px solid #ececec; }
+    .nf-cats a { color: #333; font-size: 13px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; text-decoration: none; }
+    .nf-cats a:hover { color: #000; text-decoration: underline; }
+    @media (max-width: 480px) { .nf-code { font-size: 56px; } .nf-btn { width: 100%; } }
+  </style>
+</head>
+<body>
+  <div id="site-header-mount"></div>
+  <main class="nf-wrap">
+    <p class="nf-code">404</p>
+    <h1 class="nf-title">পেজটি পাওয়া যায়নি</h1>
+    <p class="nf-text">আপনি যে লিংকটি খুলেছেন সেটি আর নেই বা ঠিকানাটি ভুল। নিচের লিংক থেকে আমাদের কালেকশন দেখুন।<br>The page you are looking for does not exist.</p>
+    <div class="nf-actions">
+      <a class="nf-btn nf-btn-primary" href="/">হোম পেইজে যান</a>
+      <a class="nf-btn nf-btn-secondary" href="/category">সব পণ্য দেখুন</a>
+    </div>
+    <nav class="nf-cats" id="nfCats" aria-label="Categories"></nav>
+  </main>
+  <div id="site-footer-mount"></div>
+
+  <script defer src="/config.js?v=20261009-inbox"></script>
+  <script defer src="/product-catalog-sections.js?v=ac54db358f8d927e"></script>
+  <script defer src="/cart-utils.js?v=20261015-stockv2"></script>
+  <script defer src="/cart-toast.js?v=20260603cartqty"></script>
+  <script defer src="/cart-drawer.js?v=20261006cart1"></script>
+  <script defer src="/site-header-config.js?v=20261016-ops"></script>
+  <script defer src="/site-header.js?v=20261022-seo6"></script>
+  <script defer src="/site-api-config.js?v=20261009-inbox"></script>
+  <script defer src="/site-footer-config.js?v=20261022-support-chat"></script>
+  <script defer src="/site-footer.js?v=20261022-support-chat"></script>
+  <script defer src="/mobile-bottom-nav.js?v=20261011-active-state"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var nav = document.getElementById('nfCats');
+      var secs = (window.CATALOG_SECTIONS || []).filter(function (s) { return s && s.enabled !== false && s.key; });
+      nav.innerHTML = secs.map(function (s) {
+        var a = document.createElement('a');
+        a.href = s.path || '/' + s.key;
+        a.textContent = s.menu || s.key;
+        return a.outerHTML;
+      }).join('');
+    });
+  </script>
+</body>
+</html>

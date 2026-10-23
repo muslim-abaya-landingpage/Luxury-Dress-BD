@@ -2146,6 +2146,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script defer src="site-header-config.js?v=20261016-ops"></script>
 <script defer src="site-header.js?v=20261022-seo6"></script>
 <script src="cart-utils.js?v=20261015-stockv2"></script>
+<script src="cart-reprice.js?v=20261023-1"></script>
 <script src="cart-toast.js?v=20260603cartqty"></script>
 <script src="cart-drawer.js?v=20261006cart1"></script>
 <script src="checkout-location-labels.js?v=20260603loc"></script>
@@ -2191,6 +2192,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var icons = { info: 'i', warn: '!', error: '?', success: '?' };
         titleEl.textContent = (opts && opts.title) || '';
         msgEl.textContent = (opts && opts.message) || '';
+        msgEl.style.whiteSpace = 'pre-line';
         if (iconEl) {
             iconEl.className = 'checkout-modal-icon checkout-modal-icon--' + variant;
             iconEl.textContent = icons[variant] || 'i';
@@ -2428,6 +2430,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             .then(function (result) {
                 var text = String(result.text || '').trim();
                 if (text.indexOf('Success') === 0) {
+                    postOrderToSheet.__retries = 0;
                     var orderId = text.indexOf('|') !== -1 ? text.split('|')[1].trim() : '';
                     finishCheckoutSuccess(nameValue, phoneValue, emailValue, gTotal, orderId, stableEventId);
                     return;
@@ -2435,6 +2438,38 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 var msg = text.indexOf('Error|') === 0
                     ? text.slice(6).trim()
                     : (text ? text.slice(0, 160) : 'Order was not saved to the sheet.');
+                // The server rejects an order whose prices differ from the catalog. Update the cart if a
+                // price changed; right after a product save the server may still use the previous
+                // catalog for up to a minute, so then wait and send the same order again.
+                if (/দাম নতুন করে যাচাই/.test(msg) && typeof window.maCartReprice === 'function') {
+                    var attempt = (postOrderToSheet.__retries = (postOrderToSheet.__retries || 0));
+                    window.maCartReprice(cart).then(function (result) {
+                        if (applyRepricedCart(result)) {
+                            postOrderToSheet.__retries = 0;
+                            resetOrderButton(btn);
+                            openCheckoutModal({
+                                title: 'দাম আপডেট হয়েছে',
+                                message: 'কিছু পণ্যের দাম বদলেছে:\n' + repriceChangesText(result.changes) + '\nনতুন মোট ৳' + grandTotal() + '। ঠিক থাকলে আবার Place Order চাপুন।',
+                                variant: 'warn',
+                                actions: [{ label: 'ঠিক আছে', primary: true, onClick: function () { closeCheckoutModal(); } }]
+                            });
+                            return;
+                        }
+                        var recentLive = window.maCartRepriceLastSource && window.maCartRepriceLastSource().live;
+                        if (recentLive && attempt < 3) {
+                            postOrderToSheet.__retries = attempt + 1;
+                            if (btn) { btn.disabled = true; btn.innerText = 'Confirming price… please wait'; }
+                            setTimeout(function () {
+                                postOrderToSheet(formData, nameValue, phoneValue, emailValue, gTotal, btn, orderWa);
+                            }, 25000);
+                            return;
+                        }
+                        postOrderToSheet.__retries = 0;
+                        offerWhatsAppOrder(orderWa, msg);
+                        resetOrderButton(btn);
+                    });
+                    return;
+                }
                 offerWhatsAppOrder(orderWa, msg);
                 resetOrderButton(btn);
             })
@@ -2730,6 +2765,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     var cart = loadCart();
     var summaryDiv = document.getElementById('orderSummary');
+
+    /* Prices can change after a product was added to the cart. Bring the cart in line with the
+       current catalog (the same data the order server checks) and tell the customer. */
+    function applyRepricedCart(result) {
+        if (!result || !result.changes || !result.changes.length) return false;
+        cart = result.lines;
+        persistCart();
+        if (typeof displayOrder === 'function') displayOrder();
+        return true;
+    }
+    function repriceChangesText(changes) {
+        return changes.map(function (c) { return c.name + ': ৳' + c.from + ' → ৳' + c.to; }).join('\n');
+    }
+    if (typeof window.maCartReprice === 'function') {
+        window.maCartReprice(cart).then(function (result) {
+            if (applyRepricedCart(result)) {
+                openCheckoutModal({
+                    title: 'দাম আপডেট হয়েছে',
+                    message: 'কার্টে রাখার পর কিছু পণ্যের দাম বদলেছে। কার্টে এখন বর্তমান দাম দেখানো হচ্ছে:\n' + repriceChangesText(result.changes),
+                    variant: 'warn',
+                    actions: [{ label: 'ঠিক আছে', primary: true, onClick: function () { closeCheckoutModal(); } }]
+                });
+            }
+        });
+    }
     var areaSelect = document.getElementById('userArea');
 
     function cartQty() {
@@ -3721,6 +3781,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
             if (!ORDER_SCRIPT_URL) {
                 checkoutAlert('Order API is not configured. Add the Apps Script URL in site-api-config.js.');
+                return;
+            }
+            // Last price check right before sending, so the order matches what the server will charge.
+            if (typeof window.maCartReprice === 'function' && !orderForm.__maPriceChecked) {
+                if (orderForm.__maPriceChecking) return;
+                orderForm.__maPriceChecking = true;
+                var checkBtn = document.getElementById('submitBtn');
+                if (checkBtn) { checkBtn.innerText = 'Checking price...'; checkBtn.disabled = true; }
+                window.maCartReprice(cart, { timeoutMs: 4000 }).then(function (result) {
+                    orderForm.__maPriceChecking = false;
+                    if (checkBtn) setPlaceOrderButtonIdle(checkBtn);
+                    if (applyRepricedCart(result)) {
+                        openCheckoutModal({
+                            title: 'দাম আপডেট হয়েছে',
+                            message: 'কিছু পণ্যের দাম বদলেছে:\n' + repriceChangesText(result.changes) + '\nনতুন মোট ৳' + grandTotal() + '। ঠিক থাকলে আবার Place Order চাপুন।',
+                            variant: 'warn',
+                            actions: [{ label: 'ঠিক আছে', primary: true, onClick: function () { closeCheckoutModal(); } }]
+                        });
+                        return;
+                    }
+                    orderForm.__maPriceChecked = true;
+                    try { orderForm.requestSubmit ? orderForm.requestSubmit() : orderForm.dispatchEvent(new Event('submit', { cancelable: true })); }
+                    finally { orderForm.__maPriceChecked = false; }
+                });
                 return;
             }
             if (window.MaSecurity && !MaSecurity.guardSubmit('checkout-order', 3000)) {

@@ -182,6 +182,60 @@ test.describe('Luxury Dress BD — integration / E2E', () => {
     await expect(page.locator('#submitBtn')).toBeEnabled();
   });
 
+  test('a price changed after adding to cart is updated in the cart before the order is sent', async ({ page }) => {
+    const orders = await mockAppsScript(page, async () => 'Success|E2E-ORDER-0002');
+    const stale = [{ id: 'ABY-MAROON-1', name: 'Maroon Abaya Set', price: 850, quantity: 1, size: 'Body 44 / Length 52', productType: 'Full Set', category: 'abaya', selected: true }];
+    // The catalog the order server checks: the price changes once more while the customer is on checkout.
+    let catalogFetches = 0;
+    await page.route('**/catalog-validation.json*', async (route) => {
+      const res = await route.fetch();
+      const data = await res.json();
+      catalogFetches++;
+      if (catalogFetches > 1) data.products.forEach((p) => { if (p.id === 'ABY-MAROON-1') p.prices['Full Set'] = 1099; });
+      await route.fulfill({ response: res, body: JSON.stringify(data) });
+    });
+    await openCheckoutWithCart(page, stale);
+    await expect(page.locator('#checkoutModalTitle')).toHaveText('দাম আপডেট হয়েছে');
+    await expect(page.locator('#checkoutModalMessage')).toContainText('৳850 → ৳999');
+    await page.locator('#checkoutModalActions button').first().click();
+    await fillValidDeliveryDetails(page);
+    await page.locator('#agreeTerms').check({ force: true });
+    await page.locator('#submitBtn').click();
+    // Changed again before sending: nothing is sent, the customer sees the new total first.
+    await expect(page.locator('#checkoutModalMessage')).toContainText('৳999 → ৳1099');
+    expect(orders).toHaveLength(0);
+    await page.locator('#checkoutModalActions button').first().click();
+    await page.locator('#submitBtn').click();
+    await expect(page).toHaveURL(/thank-you/);
+    expect(orders).toHaveLength(1);
+    expect(JSON.parse(orders[0].CartJSON)).toEqual([expect.objectContaining({ id: 'ABY-MAROON-1', price: 1099, productType: 'Full Set' })]);
+    expect(orders[0].Total).toBe('1179'); // ৳1099 + ৳80 Dhaka delivery
+  });
+
+  test('right after a product save the order is re-sent once the order server has the new prices', async ({ page }) => {
+    let calls = 0;
+    const orders = await mockAppsScript(page, async () => (++calls === 1
+      ? 'Error|পণ্য, সাইজ বা দাম নতুন করে যাচাই প্রয়োজন। পেজ রিফ্রেশ করে পণ্য/সাইজ আবার বেছে নিন।'
+      : 'Success|E2E-ORDER-0003'));
+    // The site is already serving the just-saved catalog (instant live update).
+    await page.route('**/catalog-validation.json*', async (route) => {
+      const res = await route.fetch();
+      await route.fulfill({ response: res, headers: Object.assign({}, res.headers(), { 'x-ma-live': '1' }) });
+    });
+    await page.clock.install();
+    const cartLine = [{ id: 'ABY-MAROON-1', name: 'Maroon Abaya Set', price: 999, quantity: 1, size: 'Body 44 / Length 52', productType: 'Full Set', category: 'abaya', selected: true }];
+    await openCheckoutWithCart(page, cartLine);
+    await fillValidDeliveryDetails(page);
+    await page.locator('#agreeTerms').check({ force: true });
+    await page.locator('#submitBtn').click();
+    await expect(page.locator('#submitBtn')).toContainText('Confirming price');
+    expect(orders).toHaveLength(1);
+    await page.clock.runFor(26000);
+    await expect(page).toHaveURL(/thank-you/);
+    expect(orders).toHaveLength(2);
+    expect(orders[1].EventID).toBe(orders[0].EventID);
+  });
+
   test('required checkout details, Terms acceptance, and payment reference block submission', async ({ page }) => {
     const orders = await mockAppsScript(page, async () => 'Success|E2E-SHOULD-NOT-SEND');
     await openCheckoutWithCart(page);

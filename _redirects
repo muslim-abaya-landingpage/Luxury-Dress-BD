@@ -29,3 +29,9 @@
 /refund.html             /refund             301
 /thank-you.html          /thank-you          301
 /success.html            /success            301
+
+# Common addresses people type or old links use (seen in traffic); without these they would hit the 404 page.
+/login      /signin            302
+/register   /signup            302
+/dashboard  /admin-dashboard   302
+/contact    /help              302

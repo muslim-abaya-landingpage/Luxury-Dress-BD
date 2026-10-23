@@ -2500,23 +2500,6 @@
 
   // নতুন: GitHub-এ অটো-পাবলিশ (লগইন করা থাকলে) — ব্যর্থ হলেও নিচের local download
   // ব্যাকআপ হিসেবে সবসময় থেকে যাবে, তাই ডেটা হারানোর ঝুঁকি নেই।
-  function publishFilesToGitHub(files) {
-    if (!window.MaAdmin || !window.MaAdmin.isLoggedIn || !window.MaAdmin.isLoggedIn()) {
-      return Promise.resolve({ attempted: false });
-    }
-    var results = [];
-    return files
-      .reduce(function (chain, f) {
-        return chain.then(function () {
-          return window.MaAdmin.publishFile(f.path, f.content, f.message).then(function (res) {
-            results.push({ path: f.path, res: res });
-          });
-        });
-      }, Promise.resolve())
-      .then(function () {
-        return { attempted: true, results: results };
-      });
-  }
 
   // ── মিডিয়া লাইব্রেরি: GitHub রিপোর সব ছবি (images/ ফোল্ডার) এক জায়গায়
   // ব্রাউজ/সার্চ/ডিলিট/বাছাই — WordPress-স্টাইল কেন্দ্রীয় Media Library ──

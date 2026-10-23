@@ -1217,8 +1217,13 @@ function buildPqvRelatedHtml(p, idx, allProducts, categoryKey) {
   var myBase = getProductBaseName(p.name);
   var picked = [];
   var seen = {};
+  // Like the homepage rows: extra "- Back" / "- Side" photo entries are not separate products.
+  function isPrimaryRelated(rp) {
+    var s = String(rp && rp.name || "").toLowerCase();
+    return s.indexOf("- back") === -1 && s.indexOf("- side") === -1;
+  }
   allProducts.forEach(function (rp, ri) {
-    if (ri === idx || !rp || !rp.name) return;
+    if (ri === idx || !rp || !rp.name || !isPrimaryRelated(rp)) return;
     var base = getProductBaseName(rp.name);
     if (base === myBase) return;
     var key = rp.id || rp.name;
@@ -1228,7 +1233,7 @@ function buildPqvRelatedHtml(p, idx, allProducts, categoryKey) {
   });
   if (picked.length < 2) {
     allProducts.forEach(function (rp, ri) {
-      if (ri === idx || !rp || picked.length >= 4) return;
+      if (ri === idx || !rp || picked.length >= 4 || !isPrimaryRelated(rp)) return;
       var key = rp.id || rp.name;
       if (seen[key]) return;
       seen[key] = true;
