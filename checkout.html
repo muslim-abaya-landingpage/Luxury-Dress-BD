@@ -2413,20 +2413,51 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         });
     }
 
-    function postOrderToSheet(formData, nameValue, phoneValue, emailValue, gTotal, btn, orderWa) {
-        var stableEventId = formData.get('EventID') || ('order_' + Date.now());
-        fetch(ORDER_SCRIPT_URL, {
+    // Order safety net: on the live site the order goes to our Cloudflare Worker first.
+    // It saves the order before forwarding it to the Apps Script and keeps retrying in the
+    // background if Google fails, so an order is never lost. It returns the Apps Script's
+    // own "Success|..." / "Error|..." text. Anything else (Worker unavailable) -> throw,
+    // and the original direct-to-Apps-Script path below runs instead.
+    function postOrderViaEdge(formData) {
+        var host = String(location.hostname || '').toLowerCase();
+        if (host !== 'muslimabaya.com' && host !== 'www.muslimabaya.com') {
+            return Promise.reject(new Error('EDGE_NOT_AVAILABLE'));
+        }
+        var fd = new FormData();
+        formData.forEach(function (value, key) { fd.append(key, value); });
+        fd.append('_ma_target', ORDER_SCRIPT_URL);
+        return fetch('/_ma/order', {
+            method: 'POST',
+            body: fd,
+            credentials: 'same-origin',
+            cache: 'no-store'
+        }).then(function (res) {
+            return res.text().then(function (text) {
+                var t = String(text || '').trim();
+                if (t.indexOf('Success') === 0 || t.indexOf('Error|') === 0) return { ok: res.ok, text: t };
+                throw new Error('EDGE_UNAVAILABLE');
+            });
+        });
+    }
+
+    function postOrderDirect(formData) {
+        return fetch(ORDER_SCRIPT_URL, {
             method: 'POST',
             body: formData,
             mode: 'cors',
             credentials: 'omit',
             cache: 'no-store'
-        })
-            .then(function (res) {
-                return res.text().then(function (text) {
-                    return { ok: res.ok, text: text };
-                });
-            })
+        }).then(function (res) {
+            return res.text().then(function (text) {
+                return { ok: res.ok, text: text };
+            });
+        });
+    }
+
+    function postOrderToSheet(formData, nameValue, phoneValue, emailValue, gTotal, btn, orderWa) {
+        var stableEventId = formData.get('EventID') || ('order_' + Date.now());
+        postOrderViaEdge(formData)
+            .catch(function () { return postOrderDirect(formData); })
             .then(function (result) {
                 var text = String(result.text || '').trim();
                 if (text.indexOf('Success') === 0) {
