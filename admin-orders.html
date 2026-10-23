@@ -137,7 +137,7 @@
       </div>
       <div class="pn-toolbar" id="ordPaging" aria-live="polite">
         <button type="button" class="pn-btn" id="ordLoadMore" hidden style="display:none">আরও Order দেখুন</button>
-        <span class="pn-note-muted" id="ordPageStatus"></span>
+        <button type="button" class="pn-btn" id="ordLoadAll" hidden>Load All for Search</button><span class="pn-note-muted" id="ordPageStatus"></span>
       </div>
     </main>
   </div>
@@ -161,6 +161,7 @@
       var cursorSupported = false;
       var pageLimit = 80;
       var loadingMore = false;
+      var loadingAll = false;
       var filter = "all";
       var q = "";
       var issueFilter = "all";
@@ -262,7 +263,7 @@
 
       function renderRows() {
         var list = all.filter(matches);
-        document.getElementById("ordIssueCount").textContent = "লোড করা " + all.length + "টির মধ্যে দেখানো হচ্ছে " + list.length;
+        document.getElementById("ordIssueCount").textContent = "Showing " + list.length + " of " + all.length + " loaded orders";
         try { window.MaOrdersState = { all: all, filtered: list, total: Number(counts.all) || all.length }; } catch (stateErr) {}
         var body = document.getElementById("ordBody");
         if (!list.length) {
@@ -298,6 +299,9 @@
         var hasMore = cursorSupported && !!nextCursor;
         moreBtn.hidden = !hasMore;
         moreBtn.style.display = hasMore ? "" : "none";
+        var allBtn = document.getElementById("ordLoadAll");
+        allBtn.hidden = !hasMore || loadingAll;
+        allBtn.disabled = loadingAll;
         if (!cursorSupported && total > all.length) {
           document.getElementById("ordPageStatus").textContent = "পুরোনো order API: সব অর্ডার দেখতে Apps Script pagination deploy প্রয়োজন।";
           return;
@@ -421,6 +425,23 @@
       });
       document.getElementById("ordRefresh").addEventListener("click", load);
       document.getElementById("ordLoadMore").addEventListener("click", function () { load(null, true); });
+      document.getElementById("ordLoadAll").addEventListener("click", async function () {
+        if (loadingAll || !cursorSupported || !nextCursor) return;
+        loadingAll = true;
+        var button = document.getElementById("ordLoadAll");
+        button.disabled = true;
+        var pages = 0;
+        try {
+          while (nextCursor && cursorSupported && pages < 20) {
+            var before = nextCursor;
+            await load({ maxAgeMs: 0 }, true);
+            pages++;
+            if (nextCursor === before) break;
+          }
+          MaPanel.toast(nextCursor ? "Loaded 20 more pages. Click again for remaining orders." : "All available orders loaded.");
+        } catch (err) { MaPanel.toast("Could not load all orders: " + err.message, true); }
+        finally { loadingAll = false; renderPagination(); }
+      });
 
       MaPanel.init("orders").then(function (s) { if (s) load({ maxAgeMs: 5 * 60 * 1000 }); });
     })();
