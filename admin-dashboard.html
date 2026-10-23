@@ -216,8 +216,9 @@
 
       function waLink(phone, text) {
         var digits = String(phone || "").replace(/\D/g, "");
-        if (digits.indexOf("880") !== 0) { digits = digits.replace(/^0/, ""); digits = "880" + digits; }
-        return "https://wa.me/" + digits + "?text=" + encodeURIComponent(text || "");
+        if (/^01\d{9}$/.test(digits)) digits = "88" + digits;
+        else if (/^1\d{9}$/.test(digits)) digits = "880" + digits;
+        return /^8801\d{9}$/.test(digits) ? "https://wa.me/" + digits + "?text=" + encodeURIComponent(text || "") : "";
       }
 
       window.printInvoice = function (o) { window.MaInvoice.print(o); };
@@ -255,7 +256,7 @@
         var count = document.getElementById("admRecentCount");
         if(count)count.textContent = "Showing " + Math.min(8,filtered.length) + " of " + recentOrders.length + " loaded orders";
         var body = document.getElementById("admOrdersBody");
-        if (!filtered.length) { body.innerHTML = '<div class="dz-empty">এখনো কোনো অর্ডার নেই। নতুন অর্ডার এলে এখানে দেখা যাবে।</div>'; return; }
+        if (!filtered.length) { body.innerHTML = '<div class="dz-empty">' + (recentQuery ? 'No matching orders among the loaded records.' : 'No recent orders available.') + '</div>'; return; }
         var stats = phoneStats(recentOrders);
         window.__admOrdersById = {};
         body.innerHTML = filtered.slice(0, 8).map(function (o, idx) {
@@ -279,8 +280,8 @@
             (tags ? '<div class="dz-tags">' + tags + "</div>" : "") + "</div>" +
             '<div class="dz-items">' + escapeHtml((o.design || (Array.isArray(o.items)?o.items.join(", "):"") || "No product details").replace(/\s*\n\s*/g, " ").slice(0, 90)) + "</div>" +
             '<div class="dz-amt">৳' + escapeHtml(o.total) + "<small>" + escapeHtml(o.payment || "") + (o.district ? " · " + escapeHtml(o.district) : "") + "</small></div>" +
-            '<div class="dz-st" title="' + escapeHtml(displayStatus.note) + '"><span class="dz-chip ' + key + '">' + escapeHtml(displayStatus.orderLabel) + '</span>' + '<small class="adm-courier-state">Order: ' + escapeHtml(displayStatus.orderRaw) + '</small>' + "</div>" +
-            '<div class="dz-row-actions"><a target="_blank" rel="noopener" href="' + waLink(o.phone, confirmMsg) + '">WhatsApp</a>' +
+            '<div class="dz-st" title="' + escapeHtml(displayStatus.note) + '"><span class="dz-chip ' + statusKey(o.status) + '">Order: ' + escapeHtml(displayStatus.orderRaw) + '</span>' + '<small class="adm-courier-state">Courier: ' + escapeHtml(displayStatus.hasCourier ? displayStatus.courierLabel : 'Not sent') + '</small>' + "</div>" +
+            '<div class="dz-row-actions">' + (waLink(o.phone, confirmMsg) ? '<a target="_blank" rel="noopener" href="' + waLink(o.phone, confirmMsg) + '">WhatsApp</a>' : '') +
             '<button type="button" onclick="printInvoice(window.__admOrdersById[\'' + rowId + '\'])">Print</button></div>' +
             "</div>";
         }).join("");
