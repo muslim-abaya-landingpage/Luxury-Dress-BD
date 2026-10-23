@@ -1,0 +1,62 @@
+/* Muslim Abaya — Premium Commerce Dashboard | 2026-10-24
+   Presentation-only enhancement. Does not modify authentication, API, stock or orders. */
+body.adm-body{
+  --adm-bg:#f5f6f8;--adm-card:#fff;--adm-border:#e6e8ed;
+  --adm-text:#171d29;--adm-muted:#697386;--adm-primary:#17243a;
+  --adm-accent:#bd9250;--adm-accent-light:#ddbd83;
+  --adm-shadow-sm:0 2px 8px rgba(19,32,50,.035);
+  --adm-shadow-md:0 12px 32px rgba(19,32,50,.07);
+  background:var(--adm-bg);color:var(--adm-text);
+}
+.adm-shell{min-height:100vh}
+.adm-sidebar{background:#141d2c!important;color:#e9edf4!important;border-right:1px solid #2b3545!important}
+.adm-sidebar-brand{border-bottom-color:rgba(255,255,255,.10)!important}
+.adm-sidebar-brand-text .t1{color:#fff!important;letter-spacing:.015em}
+.adm-sidebar-brand-text .t2{color:#bba57f!important}
+.adm-sidebar-profile{background:rgba(255,255,255,.04)!important;border-color:rgba(255,255,255,.09)!important}
+.adm-profile-copy strong{color:#f6f7fb!important}
+.adm-profile-copy small{color:#b6bfcc!important}
+.adm-sidebar-nav .adm-sidebar-item{border-radius:11px;transition:background .18s ease,color .18s ease;color:#cbd4e1!important}
+.adm-sidebar-nav .adm-sidebar-item:hover{background:rgba(255,255,255,.09)!important;color:#fff!important}
+.adm-sidebar-nav .adm-sidebar-item.is-current,.adm-sidebar-nav .adm-sidebar-item[aria-current="page"]{background:rgba(197,155,88,.15)!important;color:#f2d4a1!important;box-shadow:inset 3px 0 #c99d59}
+.adm-sidebar-nav svg{flex-shrink:0}
+.adm-sidebar-foot{border-top-color:rgba(255,255,255,.11)!important}
+.adm-sidebar-foot .adm-theme-toggle{color:#e0e5ee!important}
+.adm-content{min-width:0}
+.adm-topbar{background:rgba(255,255,255,.93)!important;border-bottom:1px solid #e7eaf0!important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.adm-page-kicker{text-transform:none;letter-spacing:.02em;color:#8b795c!important}
+.adm-heading h1{letter-spacing:-.025em;color:#162338}
+.adm-main{max-width:1540px;margin-inline:auto}
+.dzc-overview{background:linear-gradient(125deg,#19253a 0%,#263b52 66%,#364b5e 100%)!important;color:#fff!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:20px!important;box-shadow:0 16px 35px rgba(28,42,62,.15)!important}
+.dzc-overview h2,.dzc-overview .dzc-hello,.dzc-overview .dzc-date{color:#fff!important}
+.dzc-overview .dzc-hello,.dzc-overview .dzc-date{opacity:.75}
+.dzc-kpis{gap:12px}
+.dzc-kpi{background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.13)!important;border-radius:14px!important;box-shadow:none!important}
+.dzc-kpi span{color:#d1d9e5!important}
+.dzc-kpi b{color:#fff!important;font-variant-numeric:tabular-nums}
+.dzc-note{color:#d2dbe7!important}
+.adm-daily,.dz-card,.adm-feature-card{border-radius:18px!important}
+.adm-daily-action{border:1px solid #e7e9ef!important;border-radius:15px!important;background:#fff!important;box-shadow:0 5px 18px rgba(19,32,50,.04)!important;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.adm-daily-action:hover{transform:translateY(-2px);box-shadow:0 12px 25px rgba(19,32,50,.09)!important;border-color:#d3b98c!important}
+.adm-daily-icon{background:#f8f1e5!important;color:#94703b!important;border-radius:12px!important}
+.adm-daily-action strong{color:#1b2940!important}
+.dz-card,.adm-feature-card{background:#fff!important;border:1px solid #e6e8ee!important;box-shadow:0 4px 20px rgba(19,32,50,.035)!important}
+.adm-btn{border-radius:10px!important;min-height:40px}
+.adm-btn:focus-visible,.adm-daily-action:focus-visible,.adm-sidebar-item:focus-visible{outline:3px solid #c5a266!important;outline-offset:3px}
+.adm-sync{font-size:.85rem}
+:where(.adm-main) :where(table){border-collapse:separate;border-spacing:0}
+:where(.adm-main) :where(th){background:#f7f8fa;color:#536176;font-weight:700}
+@media(max-width:900px){
+ .adm-main{padding-inline:14px!important}
+ .adm-topbar{padding-inline:14px!important}
+ .dzc-overview{border-radius:16px!important}
+ .dzc-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:480px){
+ .dzc-kpis{gap:9px}
+ .dzc-kpi{padding:13px 11px!important}
+ .dzc-kpi b{font-size:clamp(1.15rem,5vw,1.6rem)!important;overflow-wrap:anywhere}
+ .adm-daily-grid{grid-template-columns:1fr!important}
+ .adm-heading h1{font-size:1.2rem!important}
+}
+@media(prefers-reduced-motion:reduce){.adm-daily-action,.adm-sidebar-nav .adm-sidebar-item{transition:none!important}}
