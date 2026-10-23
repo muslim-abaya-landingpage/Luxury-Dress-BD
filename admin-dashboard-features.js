@@ -357,13 +357,14 @@
     byId("admAlertsRefresh").addEventListener("click", refreshAlerts);
     byId("admTasksRefresh").addEventListener("click", function () { refreshTasks(true); });
     byId("admReportLoad").addEventListener("click", loadAnalytics);
-    byId("admRefresh").addEventListener("click", function () { refreshAlerts(); refreshTasks(true); loadAnalytics(); });
+    byId("admRefresh").addEventListener("click", function () { refreshAlerts(); refreshTasks(true); if (document.querySelector(".adm-dashboard-reports[open]")) loadAnalytics(); });
     byId("admReportRange").addEventListener("change", function () { toggleCustomDates(); if (this.value !== "custom") loadAnalytics(); });
     byId("admReportExport").addEventListener("click", exportCsv);
     toggleCustomDates();
     refreshAlerts();
     refreshTasks(true);
-    loadAnalytics();
+    var reportSection = document.querySelector(".adm-dashboard-reports");
+    if (reportSection) reportSection.addEventListener("toggle", function () { if (reportSection.open && !window.__maDashboardSalesReport) loadAnalytics(); });
     window.setInterval(function () {
       if (document.hidden) return;
       refreshAlerts();
