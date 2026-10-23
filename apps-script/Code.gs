@@ -2651,6 +2651,20 @@ function maybeAutoCourierAfterWebOrder_(sheet, row, ctx) {
     appendAutoCourierNote_(sheet, row, 'AUTO_COURIER: Confirmed mode — Status=Confirmed করলে Steadfast');
     return;
   }
+  // Courier ratio protection: a customer whose earlier orders were often Fake/cancelled/returned is not
+  // sent to Steadfast automatically; the order stays Pending (on hold) until a person checks it.
+  // Script property RISK_HOLD_LEVEL: 'medium' (default: hold medium + high risk), 'high', or 'off'.
+  var holdLevel = String(PropertiesService.getScriptProperties().getProperty('RISK_HOLD_LEVEL') || 'medium').toLowerCase().trim();
+  if (holdLevel !== 'off' && ctx && ctx.phone && typeof admHistoryForPhone_ === 'function') {
+    try {
+      var h = admHistoryForPhone_(admReadHistory_(sheet), normalizePhone_(ctx.phone), ctx.orderId);
+      if (h.risk === 'high' || (h.risk === 'medium' && holdLevel !== 'high')) {
+        appendAutoCourierNote_(sheet, row, 'AUTO_COURIER_HOLD: ঝুঁকি ' + (h.risk === 'high' ? 'বেশি' : 'মাঝারি') +
+          (h.successRate === null ? '' : ' (সফলতা ' + h.successRate + '%)') + ' — যাচাই করে নিজে পাঠান');
+        return;
+      }
+    } catch (holdErr) {}
+  }
   tryAutoCourierForOrder_(Object.assign({ sheet: sheet, row: row }, ctx || {}));
 }
 

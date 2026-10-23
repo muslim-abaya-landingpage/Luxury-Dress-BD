@@ -110,6 +110,51 @@ test('new order from a risky number gets a warning in Admin Note; clean numbers 
   assert.equal(written[56], undefined);
 });
 
+test('instant auto-courier holds a risky customer\'s order and still sends clean ones', () => {
+  const notes = [];
+  const sent = [];
+  let props = {};
+  let rows = historyRows([['01711111111', 'Fake'], ['01711111111', 'Delivered'],
+    ['01822222222', 'Delivered'], ['01822222222', 'Delivered'], ['01822222222', 'Delivered'], ['01822222222', 'Cancelled'],
+    ['01933333333', 'Delivered']]);
+  const box = {
+    normalizePhone_, formatCell_,
+    admReadHistory_: () => rows,
+    isAutoCourierEnabled_: () => true,
+    shouldAutoCourierOnNewOrder_: () => true,
+    appendAutoCourierNote_: (sheet, row, note) => notes.push([row, note]),
+    tryAutoCourierForOrder_: (ctx) => { sent.push(ctx.row); return { ok: true }; },
+    PropertiesService: { getScriptProperties: () => ({ getProperty: (k) => (k in props ? props[k] : null) }) },
+  };
+  vm.createContext(box);
+  vm.runInContext(extractFrom(ADM, 'admNum_') + '\n' + extractFrom(ADM, 'admHistoryForPhone_') + '\n' + extractFrom(CODE, 'maybeAutoCourierAfterWebOrder_'), box);
+  box.maybeAutoCourierAfterWebOrder_({}, 10, { phone: '01711111111', orderId: 'NEW1' }); // high risk (Fake)
+  box.maybeAutoCourierAfterWebOrder_({}, 11, { phone: '01822222222', orderId: 'NEW2' }); // medium (75%)
+  box.maybeAutoCourierAfterWebOrder_({}, 12, { phone: '01933333333', orderId: 'NEW3' }); // low
+  box.maybeAutoCourierAfterWebOrder_({}, 13, { phone: '01644444444', orderId: 'NEW4' }); // new customer
+  assert.deepEqual(sent, [12, 13]);
+  assert.match(notes.find((n) => n[0] === 10)[1], /^AUTO_COURIER_HOLD: ঝুঁকি বেশি/);
+  assert.match(notes.find((n) => n[0] === 11)[1], /ঝুঁকি মাঝারি \(সফলতা 75%\)/);
+
+  props = { RISK_HOLD_LEVEL: 'high' };
+  sent.length = 0;
+  box.maybeAutoCourierAfterWebOrder_({}, 20, { phone: '01711111111', orderId: 'NEW5' });
+  box.maybeAutoCourierAfterWebOrder_({}, 21, { phone: '01822222222', orderId: 'NEW6' });
+  assert.deepEqual(sent, [21]);
+
+  props = { RISK_HOLD_LEVEL: 'off' };
+  sent.length = 0;
+  box.maybeAutoCourierAfterWebOrder_({}, 30, { phone: '01711111111', orderId: 'NEW7' });
+  assert.deepEqual(sent, [30]);
+
+  // If the history cannot be read, the order is sent exactly as before.
+  props = {};
+  sent.length = 0;
+  box.admReadHistory_ = () => { throw new Error('sheet busy'); };
+  box.maybeAutoCourierAfterWebOrder_({}, 40, { phone: '01711111111', orderId: 'NEW8' });
+  assert.deepEqual(sent, [40]);
+});
+
 test('manual order uses the existing mini-order flow and records who added it', () => {
   let captured = null;
   const params = { Token: 't', Name: 'Rahim', Phone: '01711111111', District: 'ঢাকা', Address: 'House 1, Road 2, Dhaka', Design: 'Kurti × 1', Qty: '1', Total: '630', Payment: 'Cash On Delivery', Notes: 'call first' };

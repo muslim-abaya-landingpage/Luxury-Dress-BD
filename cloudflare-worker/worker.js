@@ -80,6 +80,9 @@ export default {
 // the order stays queued and the cron retries it until the sheet accepts it, so a
 // Google outage can no longer silently lose an order.
 // D1 binding: DB. Optional secrets for alerts: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID.
+// IP tracking & blocking (2026-10-24): every order attempt's IP is logged in order_ip_log and an
+// order from a blocked IP (blocked_ips, managed from the admin order page) is refused. Schema:
+// cloudflare-worker/schema-ip.sql. Any D1 error in this part lets the order through unchanged.
 
 const ORDER_HOSTS = ['muslimabaya.com', 'www.muslimabaya.com'];
 const ORDER_TARGET_RE = /^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]{20,}\/exec$/;
@@ -180,6 +183,14 @@ async function handleOrder(request, env, ctx) {
   if (existing && existing.status === 'saved') {
     return textOut(existing.last_response && existing.last_response.indexOf('Success') === 0 ? existing.last_response : 'Success|' + (existing.order_id || ''));
   }
+  const ipInfo = clientIpInfo(request);
+  const ipBlock = await findIpBlock(env, ipInfo.ip, now);
+  if (ipBlock) {
+    const alertNeeded = await logOrderIp(env, eventId, ipInfo, pairs, 'blocked', now);
+    if (alertNeeded) ctx.waitUntil(sendAlert(env, '⛔ ব্লক করা IP থেকে অর্ডারের চেষ্টা আটকানো হয়েছে।\n' + orderSummaryFromPairs(eventId, pairs) + '\nIP: ' + ipInfo.ip + (ipBlock.reason ? '\nব্লকের কারণ: ' + ipBlock.reason : '')));
+    return textOut('Error|' + IP_BLOCKED_MESSAGE);
+  }
+  await logOrderIp(env, eventId, ipInfo, pairs, 'received', now);
   if (existing) {
     await env.DB.prepare("UPDATE order_inbox SET payload = ?, target = ?, status = 'sending', updated_at = ? WHERE event_id = ?")
       .bind(payload, target, now, eventId).run();
@@ -195,6 +206,7 @@ async function handleOrder(request, env, ctx) {
   if (r.kind === 'success') {
     await env.DB.prepare("UPDATE order_inbox SET status = 'saved', attempts = ?, order_id = ?, last_response = ?, updated_at = ? WHERE event_id = ?")
       .bind(attempts, r.orderId || '', r.text, done, eventId).run();
+    ctx.waitUntil(setOrderIpOutcome(env, eventId, 'saved', r.orderId));
     return textOut(r.text);
   }
   if (r.kind === 'duplicate' && priorAttempts > 0) {
@@ -203,16 +215,19 @@ async function handleOrder(request, env, ctx) {
     await env.DB.prepare("UPDATE order_inbox SET status = 'needs_attention', attempts = ?, last_response = ?, updated_at = ? WHERE event_id = ?")
       .bind(attempts, r.text, done, eventId).run();
     ctx.waitUntil(sendAlert(env, '🔎 একটা অর্ডার শিটে আছে কিনা মিলিয়ে দেখুন (আগের চেষ্টার উত্তর আসেনি, এখন "ডুপ্লিকেট" বলছে)।\n' + orderSummaryFromPairs(eventId, pairs)));
+    ctx.waitUntil(setOrderIpOutcome(env, eventId, 'needs_attention', ''));
     return textOut('Success|');
   }
   if (r.kind === 'rejected' || r.kind === 'duplicate') {
     await env.DB.prepare("UPDATE order_inbox SET status = 'rejected', attempts = ?, last_response = ?, updated_at = ? WHERE event_id = ?")
       .bind(attempts, r.text, done, eventId).run();
+    ctx.waitUntil(setOrderIpOutcome(env, eventId, 'rejected', ''));
     return textOut(r.text);
   }
   // Google did not answer properly: keep the order and retry in the background.
   await env.DB.prepare("UPDATE order_inbox SET status = 'retry', attempts = ?, next_at = ?, last_response = ?, updated_at = ? WHERE event_id = ?")
     .bind(attempts, done + backoffMs(1), r.text, done, eventId).run();
+  ctx.waitUntil(setOrderIpOutcome(env, eventId, 'queued', ''));
   return textOut('Success|', 200, { 'X-MA-Queued': '1' });
 }
 
@@ -233,6 +248,7 @@ async function processOrderQueue(env) {
     if (r.kind === 'success') {
       await env.DB.prepare("UPDATE order_inbox SET status = 'saved', attempts = ?, order_id = ?, last_response = ?, updated_at = ? WHERE event_id = ?")
         .bind(attempts, r.orderId || '', r.text, t, row.event_id).run();
+      await setOrderIpOutcome(env, row.event_id, 'saved', r.orderId);
     } else if (r.kind === 'duplicate') {
       await env.DB.prepare("UPDATE order_inbox SET status = 'needs_attention', attempts = ?, last_response = ?, updated_at = ? WHERE event_id = ?")
         .bind(attempts, r.text, t, row.event_id).run();
@@ -253,6 +269,161 @@ async function processOrderQueue(env) {
   }
   // Keep personal data only as long as needed.
   await env.DB.prepare("DELETE FROM order_inbox WHERE status IN ('saved', 'rejected') AND updated_at < ?").bind(now - 30 * 24 * 3600 * 1000).run();
+  await cleanupIpTables(env, now);
+}
+
+// ---------------- IP tracking & blocking (added 2026-10-24) ----------------
+
+const IP_BLOCKED_MESSAGE = 'দুঃখিত, এই ইন্টারনেট সংযোগ থেকে এখন অনলাইনে অর্ডার নেওয়া যাচ্ছে না। WhatsApp-এ অর্ডার করুন।';
+const IP_LOG_KEEP_MS = 180 * 24 * 3600 * 1000;
+const IP_ALERT_GAP_MS = 60 * 60 * 1000;
+
+// ip-guard:begin
+const IPV4_RE = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/;
+
+/** Expands an IPv6 address to 8 lowercase groups without leading zeros, or returns null. */
+function ipv6Groups(ip) {
+  let s = String(ip || '').trim().toLowerCase();
+  if (!s || s.indexOf(':') === -1 || !/^[0-9a-f:.]+$/.test(s)) return null;
+  let tail = [];
+  const v4 = /(\d+\.\d+\.\d+\.\d+)$/.exec(s);
+  if (v4) {
+    if (!IPV4_RE.test(v4[1])) return null;
+    const p = v4[1].split('.').map(Number);
+    tail = [((p[0] << 8) | p[1]).toString(16), ((p[2] << 8) | p[3]).toString(16)];
+    s = s.slice(0, -v4[1].length);
+    if (s.endsWith(':') && !s.endsWith('::')) s = s.slice(0, -1);
+  }
+  const parts = s.split('::');
+  if (parts.length > 2) return null;
+  const head = parts[0] ? parts[0].split(':') : [];
+  const rest = parts.length === 2 && parts[1] ? parts[1].split(':') : [];
+  const known = head.length + rest.length + tail.length;
+  if (parts.length === 1 && known !== 8) return null;
+  if (parts.length === 2 && known > 7) return null;
+  const fill = parts.length === 2 ? new Array(8 - known).fill('0') : [];
+  const groups = head.concat(fill, rest, tail);
+  if (groups.length !== 8) return null;
+  for (let i = 0; i < 8; i++) {
+    if (!/^[0-9a-f]{1,4}$/.test(groups[i])) return null;
+    groups[i] = parseInt(groups[i], 16).toString(16);
+  }
+  return groups;
+}
+
+/** Normalised address ("1.2.3.4", or IPv6 in full 8-group form), or '' when invalid. */
+function normalizeIp(ip) {
+  const s = String(ip || '').trim();
+  if (IPV4_RE.test(s)) return s;
+  const g = ipv6Groups(s);
+  if (!g) return '';
+  // IPv4-mapped IPv6 (::ffff:1.2.3.4) is the IPv4 address.
+  if (g.slice(0, 5).every((x) => x === '0') && g[5] === 'ffff') {
+    const a = parseInt(g[6], 16), b = parseInt(g[7], 16);
+    return [a >> 8, a & 255, b >> 8, b & 255].join('.');
+  }
+  return g.join(':');
+}
+
+/** What a block stores: the IPv4 address itself, or the IPv6 /64 network ("2001:db8:0:1::/64"). */
+function ipBlockKey(ip) {
+  const n = normalizeIp(ip);
+  if (!n) return '';
+  if (n.indexOf(':') === -1) return n;
+  return n.split(':').slice(0, 4).join(':') + '::/64';
+}
+
+/** Every stored block that would cover this address (exact address and, for IPv6, its /64). */
+function ipBlockKeys(ip) {
+  const n = normalizeIp(ip);
+  if (!n) return [];
+  const key = ipBlockKey(n);
+  return key === n ? [n] : [n, key];
+}
+
+/** Bangladesh mobile number as 01XXXXXXXXX ('' when it is not one). */
+function localPhone(v) {
+  let d = String(v || '').replace(/\D/g, '');
+  if (d.length === 13 && d.indexOf('880') === 0) d = d.slice(2);
+  else if (d.length === 10 && d.charAt(0) === '1') d = '0' + d;
+  return /^01\d{9}$/.test(d) ? d : '';
+}
+
+/** Short device text from a User-Agent, e.g. "Android · Chrome". */
+function deviceLabel(ua) {
+  const s = String(ua || '');
+  if (!s) return '';
+  const os = /iPhone|iPad|iPod/.test(s) ? 'iPhone/iPad' : /Android/.test(s) ? 'Android' : /Windows/.test(s) ? 'Windows' : /Mac OS X/.test(s) ? 'Mac' : /Linux/.test(s) ? 'Linux' : 'অন্যান্য';
+  const app = /FBAN|FBAV|FB_IAB/.test(s) ? 'Facebook app' : /Instagram/.test(s) ? 'Instagram app' : /musical_ly|TikTok|BytedanceWebview/.test(s) ? 'TikTok app'
+    : /SamsungBrowser/.test(s) ? 'Samsung Internet' : /OPR\/|Opera/.test(s) ? 'Opera' : /Edg\//.test(s) ? 'Edge' : /CriOS|Chrome\//.test(s) ? 'Chrome'
+    : /Firefox|FxiOS/.test(s) ? 'Firefox' : /Safari/.test(s) ? 'Safari' : 'Browser';
+  return os + ' · ' + app;
+}
+// ip-guard:end
+
+function clientIpInfo(request) {
+  const cf = request.cf || {};
+  return {
+    ip: normalizeIp(request.headers.get('CF-Connecting-IP') || ''),
+    country: String(cf.country || '').slice(0, 4),
+    asn: Number(cf.asn) || null,
+    asOrg: String(cf.asOrganization || '').slice(0, 120),
+    ua: String(request.headers.get('User-Agent') || '').slice(0, 300)
+  };
+}
+
+// The block that covers this IP, or null. A D1 problem must never stop an order, so errors -> null.
+async function findIpBlock(env, ip, now) {
+  const keys = ipBlockKeys(ip);
+  if (!keys.length) return null;
+  try {
+    const marks = keys.map(() => '?').join(', ');
+    return await env.DB.prepare('SELECT ip, reason, expires_at FROM blocked_ips WHERE ip IN (' + marks + ') AND (expires_at IS NULL OR expires_at > ?) LIMIT 1')
+      .bind(...keys, now).first();
+  } catch (e) {
+    console.log('ip_block_check_error', String(e).slice(0, 200));
+    return null;
+  }
+}
+
+// Records the attempt. For a blocked attempt, returns true when no blocked attempt from this IP was
+// logged in the last hour (so a retry loop sends one alert, not hundreds).
+async function logOrderIp(env, eventId, info, pairs, outcome, now) {
+  try {
+    let alert = false;
+    if (outcome === 'blocked') {
+      const recent = await env.DB.prepare("SELECT 1 AS x FROM order_ip_log WHERE ip = ? AND outcome = 'blocked' AND created_at > ? LIMIT 1")
+        .bind(info.ip, now - IP_ALERT_GAP_MS).first();
+      alert = !recent;
+    }
+    await env.DB.prepare('INSERT INTO order_ip_log (event_id, created_at, ip, country, asn, as_org, user_agent, phone, name, total, outcome) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ' +
+      'ON CONFLICT(event_id) DO UPDATE SET ip = excluded.ip, country = excluded.country, asn = excluded.asn, as_org = excluded.as_org, user_agent = excluded.user_agent, outcome = excluded.outcome')
+      .bind(eventId, now, info.ip || null, info.country || null, info.asn, info.asOrg || null, info.ua || null,
+        localPhone(pairValue(pairs, 'Phone')) || pairValue(pairs, 'Phone').slice(0, 40), pairValue(pairs, 'Name').slice(0, 120), pairValue(pairs, 'Total').slice(0, 20), outcome)
+      .run();
+    return alert;
+  } catch (e) {
+    console.log('ip_log_error', String(e).slice(0, 200));
+    return false;
+  }
+}
+
+async function setOrderIpOutcome(env, eventId, outcome, orderId) {
+  try {
+    await env.DB.prepare("UPDATE order_ip_log SET outcome = ?, order_id = COALESCE(NULLIF(?, ''), order_id) WHERE event_id = ?")
+      .bind(outcome, String(orderId || ''), eventId).run();
+  } catch (e) {
+    console.log('ip_outcome_error', String(e).slice(0, 200));
+  }
+}
+
+async function cleanupIpTables(env, now) {
+  try {
+    await env.DB.prepare('DELETE FROM order_ip_log WHERE created_at < ?').bind(now - IP_LOG_KEEP_MS).run();
+    await env.DB.prepare('DELETE FROM blocked_ips WHERE expires_at IS NOT NULL AND expires_at < ?').bind(now).run();
+  } catch (e) {
+    console.log('ip_cleanup_error', String(e).slice(0, 200));
+  }
 }
 
 // ---------------- Meta Conversions API ----------------

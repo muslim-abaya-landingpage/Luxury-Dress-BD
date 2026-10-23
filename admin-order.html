@@ -16,6 +16,20 @@
   <link rel="stylesheet" href="admin-panel.css?v=20260930">
   <script src="config.js?v=20261009-inbox"></script>
   <link rel="stylesheet" href="admin-sidebar.css?v=20261003sb">
+  <style>
+    .wo-hold { border-left: 4px solid #c2410c; background: #fff7ed; }
+    .wo-hold h2 { margin: 0 0 6px; font-size: 16px; color: #9a3412; }
+    .wo-hold ul { margin: 0 0 6px; padding-left: 18px; }
+    .wo-hold li { margin: 2px 0; }
+    .wo-ip-row { border-top: 1px solid #eceef3; padding: 10px 0; }
+    .wo-ip-row:first-child { border-top: 0; padding-top: 0; }
+    .wo-ip-addr { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 700; word-break: break-all; }
+    .wo-ip-meta { font-size: 12px; color: #5b6478; margin: 2px 0 6px; }
+    .wo-ip-phones { font-size: 12px; margin: 4px 0 6px; }
+    .wo-ip-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .wo-ip-actions select { min-height: 32px; border: 1px solid #d5d9e2; border-radius: 6px; padding: 0 6px; background: #fff; }
+    .wo-ip-blocked { color: #a11919; font-weight: 700; font-size: 12px; }
+  </style>
 <link rel="stylesheet" href="admin.css?v=20261018-shared">
 <link rel="stylesheet" href="admin-dashboard-design.css?v=20261018-3">
   <script src="admin-dashboard-design.js?v=20261018-3"></script>
@@ -74,6 +88,7 @@
       </div>
 
       <div id="oError" class="pn-card" style="display:none"></div>
+      <div id="oHold" class="pn-card wo-hold" style="display:none" role="alert" aria-live="polite"></div>
 
       <div class="pn-grid" id="oGrid" style="display:none">
         <div class="wo-primary-column">
@@ -145,6 +160,11 @@
             <div class="pn-note-muted" id="oPayment"></div>
             <div id="oTrack" style="margin-top:8px"></div>
             <button type="button" class="pn-btn pn-btn-blue pn-btn-block" id="btnCourierSend" style="margin-top:10px">🚚 Send to Steadfast</button>
+          </section>
+          <section class="pn-card wo-ip-card" id="ipPanel" aria-labelledby="ipPanelTitle">
+            <h2 id="ipPanelTitle"><i>⌖</i> IP ও ডিভাইস</h2>
+            <div id="ipBody"><p class="pn-note-muted">IP তথ্য লোড হচ্ছে…</p></div>
+            <button type="button" class="pn-btn pn-btn-sm" id="ipBlockedList" style="margin-top:8px">ব্লক করা সব IP</button>
           </section>
           <section class="pn-card wo-customer-history" id="customerHistoryPanel" aria-labelledby="customerHistoryTitle">
             <h2 id="customerHistoryTitle"><i>◷</i> Customer history</h2>
@@ -340,6 +360,7 @@
       function paintBlock(blocked) {
         if (cur) cur.blocked = !!blocked;
         $("btnBlock").textContent = blocked ? "✓ Unblock customer" : "⛔ Block customer";
+        renderHold();
         $("blockHint").textContent = blocked ? "এই নম্বর থেকে নতুন অর্ডার এখন বন্ধ আছে" : "এই কাস্টমারকে নতুন অর্ডার করা থেকে আটকান";
       }
 
@@ -424,6 +445,7 @@
           nav($("btnPrev"), res.prevId);
           nav($("btnNext"), res.nextId);
           setStale(false);
+          loadIpInfo();
         }).catch(function (err) {
           if (seed) setStale(false, true);
           var e = $("oError");
@@ -488,6 +510,9 @@
       }
 
       $("btnSave").addEventListener("click", function () {
+        var reasons = holdReasons();
+        if (reasons.length && $("fStatus").value === "Confirmed" && cur && cur.status !== "Confirmed" &&
+            !confirm("⏸ এই অর্ডারটি হোল্ডে আছে:\n• " + reasons.join("\n• ") + "\n\nকাস্টমারকে ফোনে যাচাই করেছেন? তারপরও Confirmed করবেন?")) return;
         save().catch(function (err) { notify(err.message, true); });
       });
       ["fName", "fPhone", "fAddress", "fAdminNote", "fCourierNote", "fCharge", "fAdvance", "fDiscount"].forEach(function (id) {
@@ -533,7 +558,9 @@
 
       $("btnCourierSend").addEventListener("click", function () {
         if (!cur) return;
-        if (!confirm("এই অর্ডার Steadfast-এ পাঠাবেন? (COD: " + $("sDue").textContent + ")")) return;
+        var holdList = holdReasons();
+        var holdText = holdList.length ? "⏸ এই অর্ডারটি হোল্ডে আছে:\n• " + holdList.join("\n• ") + "\n\n" : "";
+        if (!confirm(holdText + "এই অর্ডার Steadfast-এ পাঠাবেন? (COD: " + $("sDue").textContent + ")")) return;
         var btn = $("btnCourierSend");
         btn.disabled = true;
         // আগে অসংরক্ষিত পরিবর্তন সেভ, তারপর পাঠানো — যাতে সঠিক COD/ঠিকানা যায়
@@ -588,6 +615,141 @@
         }).catch(function (err) { notify(err.message, true); })
           .then(function () { btn.disabled = false; });
       });
+
+      // ── Hold (ঝুঁকিপূর্ণ অর্ডার) + IP tracking & blocking ──
+      // The order Worker logs each website order's IP in Cloudflare D1; /api/admin-ip reads it and manages
+      // IP blocks. A risky order is "on hold": a banner lists why, and Confirm / Send to Steadfast ask first.
+      var ipInfo = null;
+      var IP_DAYS = [["1", "১ দিন"], ["7", "৭ দিন"], ["30", "৩০ দিন"], ["0", "স্থায়ী"]];
+
+      function fmtTime(ms) {
+        if (!ms) return "";
+        try { return new Date(ms).toLocaleString("en-GB", { timeZone: "Asia/Dhaka", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }); }
+        catch (e) { return new Date(ms).toISOString().slice(0, 16).replace("T", " "); }
+      }
+
+      function ipCall(fields) {
+        var s = MaAdmin.getSession && MaAdmin.getSession();
+        if (!s || !s.token) return Promise.reject(new Error("আবার লগ ইন করুন।"));
+        var body = new URLSearchParams();
+        body.set("Token", s.token);
+        Object.keys(fields).forEach(function (k) { body.set(k, String(fields[k] == null ? "" : fields[k])); });
+        return fetch("/api/admin-ip", { method: "POST", body: body, credentials: "same-origin", cache: "no-store" })
+          .then(function (r) { return r.json().catch(function () { return { ok: false, message: "HTTP " + r.status }; }); })
+          .then(function (j) { if (!j || !j.ok) throw new Error((j && (j.message || j.error)) || "IP তথ্য পাওয়া যায়নি"); return j; });
+      }
+
+      function holdReasons() {
+        if (!cur) return [];
+        var st = String(cur.status || "").toLowerCase();
+        if (cur.tracking || cur.consignmentId || ["shipped", "delivered", "cancelled", "fake"].indexOf(st) !== -1) return [];
+        var out = [];
+        if (cur.blocked) out.push("এই ফোন নম্বর ব্লক করা আছে");
+        if (history && (history.risk === "high" || history.risk === "medium")) {
+          var s = history.stats || {};
+          out.push((history.risk === "high" ? "ঝুঁকি বেশি" : "সতর্কতা") + ": আগের অর্ডারে ডেলিভারি " + (s.delivered || 0) +
+            ", বাতিল/Fake/রিটার্ন " + ((s.cancelled || 0) + (s.fake || 0) + (s.returned || 0)) +
+            (history.successRate == null ? "" : " (সফলতা " + history.successRate + "%)"));
+        }
+        if (ipInfo && ipInfo.ips) {
+          ipInfo.ips.forEach(function (x) {
+            if (x.blocked) out.push("অর্ডারের IP ব্লক করা আছে (" + x.ip + ")");
+            if (x.otherPhones && x.otherPhones.length >= 3) out.push("একই IP থেকে ৩০ দিনে আরও " + x.otherPhones.length + "টি ভিন্ন নম্বরে অর্ডার এসেছে");
+          });
+        }
+        return out;
+      }
+
+      function renderHold() {
+        var box = $("oHold");
+        if (!box) return;
+        var reasons = holdReasons();
+        if (!reasons.length) { box.style.display = "none"; box.innerHTML = ""; return; }
+        box.innerHTML = "<h2>⏸ হোল্ড — যাচাই না করে পাঠাবেন না</h2><ul>" + reasons.map(function (r) { return "<li>" + esc(r) + "</li>"; }).join("") + "</ul>" +
+          '<div class="pn-note-muted">কাস্টমারকে ফোন করে নিশ্চিত হোন, প্রয়োজনে ডেলিভারি চার্জ অগ্রিম নিন। Confirmed করা বা Steadfast-এ পাঠানোর সময় আবার জিজ্ঞেস করা হবে।</div>';
+        box.style.display = "";
+      }
+
+      function renderIp() {
+        var body = $("ipBody");
+        if (!ipInfo) return;
+        var o = ipInfo.order;
+        var html = o
+          ? '<div class="wo-ip-meta">এই অর্ডার: <b>' + esc(o.device || "—") + "</b> · " + esc(o.network || "নেটওয়ার্ক অজানা") + (o.country ? " · " + esc(o.country) : "") + " · " + esc(fmtTime(o.time)) + "</div>"
+          : '<p class="pn-note-muted">এই অর্ডারের IP রেকর্ড নেই। IP রেকর্ড ২৪ অক্টোবর ২০২৬ থেকে, শুধু ওয়েবসাইটের অর্ডারে রাখা হয়।</p>';
+        if (ipInfo.ips && ipInfo.ips.length) {
+          html += ipInfo.ips.map(function (x, i) {
+            var phones = x.otherPhones && x.otherPhones.length
+              ? '<div class="wo-ip-phones">একই IP-তে অন্য নম্বর (৩০ দিন): ' + x.otherPhones.map(function (p) { return "<b>" + esc(p.phone) + "</b> (" + p.orders + ")"; }).join(", ") + "</div>"
+              : '<div class="wo-ip-phones pn-note-muted">একই IP-তে অন্য কোনো নম্বর নেই (৩০ দিন)</div>';
+            var state = x.blocked
+              ? '<div class="wo-ip-blocked">⛔ ব্লক করা' + (x.blocked.key !== x.ip ? " (" + esc(x.blocked.key) + ")" : "") + " · " + (x.blocked.expiresAt ? esc(fmtTime(x.blocked.expiresAt)) + " পর্যন্ত" : "স্থায়ী") + (x.blocked.reason ? " · " + esc(x.blocked.reason) : "") + "</div>"
+              : "";
+            var actions = x.blocked
+              ? '<button type="button" class="pn-btn pn-btn-sm" data-ip-unblock="' + esc(x.blocked.key) + '">✓ IP আনব্লক</button>'
+              : '<select id="ipDays' + i + '" aria-label="ব্লকের মেয়াদ">' + IP_DAYS.map(function (d) { return '<option value="' + d[0] + '"' + (d[0] === "7" ? " selected" : "") + ">" + d[1] + "</option>"; }).join("") + "</select>" +
+                '<button type="button" class="pn-btn pn-btn-ghost-red pn-btn-sm" data-ip-block="' + esc(x.ip) + '" data-ip-days="ipDays' + i + '">⛔ IP ব্লক</button>';
+            return '<div class="wo-ip-row"><div class="wo-ip-addr">' + esc(x.ip) + "</div>" +
+              '<div class="wo-ip-meta">এই IP থেকে ৩০ দিনে ' + x.ordersFromIp30d + "টি অর্ডার" + (x.ordersByThisPhone ? " · এই নম্বরের " + x.ordersByThisPhone + "টি" : "") + "</div>" +
+              phones + state + '<div class="wo-ip-actions">' + actions + "</div></div>";
+          }).join("");
+        }
+        body.innerHTML = html;
+      }
+
+      function loadIpInfo() {
+        if (!cur) return;
+        ipCall({ Action: "lookup", OrderId: cur.orderId, Phone: cur.phone }).then(function (r) {
+          ipInfo = r;
+          renderIp();
+          renderHold();
+        }).catch(function (err) {
+          $("ipBody").innerHTML = '<p class="pn-note-muted">IP তথ্য পাওয়া যায়নি: ' + esc(err.message) + "</p>";
+        });
+      }
+
+      document.addEventListener("click", function (event) {
+        var t = event.target;
+        var blockBtn = t.closest && t.closest("[data-ip-block]");
+        var unblockBtn = t.closest && t.closest("[data-ip-unblock]");
+        if (blockBtn) {
+          var ip = blockBtn.getAttribute("data-ip-block");
+          var sel = $(blockBtn.getAttribute("data-ip-days"));
+          var days = sel ? sel.value : "7";
+          var label = (IP_DAYS.filter(function (d) { return d[0] === days; })[0] || [0, days])[1];
+          if (!confirm(ip + " — " + label + " ব্লক করবেন?\n\nএই IP (মোবাইলে IPv6 হলে তার পুরো /64 নেটওয়ার্ক) থেকে ওয়েবসাইটে নতুন অর্ডার নেওয়া হবে না।\nসতর্কতা: মোবাইল ডেটায় অনেক সময় একই IP অনেক মানুষ ব্যবহার করে, তাই দীর্ঘমেয়াদি ব্লক নিরীহ কাস্টমারকেও আটকাতে পারে।")) return;
+          var reason = prompt("ব্লকের কারণ (ঐচ্ছিক)", "") || "";
+          blockBtn.disabled = true;
+          ipCall({ Action: "block", Ip: ip, Days: days, Reason: reason }).then(function () {
+            notify("IP ব্লক হয়েছে");
+            loadIpInfo();
+          }).catch(function (err) { notify(err.message, true); blockBtn.disabled = false; });
+        } else if (unblockBtn) {
+          var key = unblockBtn.getAttribute("data-ip-unblock");
+          if (!confirm(key + " আনব্লক করবেন?")) return;
+          unblockBtn.disabled = true;
+          ipCall({ Action: "unblock", Ip: key }).then(function () {
+            notify("IP আনব্লক হয়েছে");
+            if (unblockBtn.closest("#pnModal")) openBlockedList(); else loadIpInfo();
+          }).catch(function (err) { notify(err.message, true); unblockBtn.disabled = false; });
+        }
+      });
+
+      function openBlockedList() {
+        ipCall({ Action: "list" }).then(function (r) {
+          var list = r.blocked || [];
+          var html = list.length
+            ? '<table class="pn-hist">' + list.map(function (b) {
+                return "<tr><td><span class=\"wo-ip-addr\">" + esc(b.key) + "</span><br><span class=\"pn-note-muted\">" + esc(b.reason || "কারণ লেখা নেই") + " · " + esc(b.by || "") + "</span></td>" +
+                  "<td>" + (b.expiresAt ? esc(fmtTime(b.expiresAt)) + " পর্যন্ত" : "স্থায়ী") + "</td>" +
+                  '<td style="text-align:right"><button type="button" class="pn-btn pn-btn-sm" data-ip-unblock="' + esc(b.key) + '">আনব্লক</button></td></tr>';
+              }).join("") + "</table>"
+            : '<div class="pn-note-muted">কোনো IP ব্লক করা নেই।</div>';
+          MaPanel.openModal("ব্লক করা IP (" + list.length + ")", html);
+          if (ipInfo) loadIpInfo();
+        }).catch(function (err) { notify(err.message, true); });
+      }
+      $("ipBlockedList").addEventListener("click", openBlockedList);
 
       MaPanel.init("orders").then(function (s) {
         if (!s) return;
