@@ -162,6 +162,15 @@
   var overviewPage = 1;
   var overviewPageSize = 20;
   var savedSnapshot = "";
+  var publishedProductIds = Object.create(null);
+  function rememberPublishedProductIds() {
+    publishedProductIds = Object.create(null);
+    Object.keys(products).forEach(function(cat) {
+      (products[cat] || []).forEach(function(p) {
+        if (p && p.id) publishedProductIds[String(p.id)] = true;
+      });
+    });
+  }
   var stockPublishing = false;
   var queuedStockToggle = null;
   var liveStockOverrides = Object.create(null);
@@ -1443,6 +1452,10 @@
       setSaveStatus("Product ID missing. Stock was not changed.");
       return Promise.resolve(false);
     }
+    if (ids.some(function(id) { return !publishedProductIds[id]; })) {
+      setSaveStatus("Publish new products or changed Product IDs before changing live stock.");
+      return Promise.resolve(false);
+    }
     var before = ids.map(function(id) {
       return {id:id, exists:Object.prototype.hasOwnProperty.call(liveStockOverrides,id), value:liveStockOverrides[id]};
     });
@@ -2688,7 +2701,7 @@
       var files=[{path:"category-products.js",content:generateProductsFile()},{path:"product-links-data.js",content:generateProductLinksFile()},{path:"product-catalog-sections.js",content:generateSectionsFile()},{path:"product-config.js",content:generateProductConfigFile()}];
     } catch(err){setSaveStatus(err.message);return Promise.reject(err);}
     button.disabled=true;
-    return window.MaCatalogPublisher.publish(files,target).then(function(result){savedSnapshot=snapshot;return result;}).catch(function(err){setSaveStatus("Not published: "+err.message+" — your changes are kept.");throw err;}).finally(function(){button.disabled=false;});
+    return window.MaCatalogPublisher.publish(files,target).then(function(result){savedSnapshot=snapshot;rememberPublishedProductIds();return result;}).catch(function(err){setSaveStatus("Not published: "+err.message+" — your changes are kept.");throw err;}).finally(function(){button.disabled=false;});
   }
 
   document.getElementById("pmSave").addEventListener("click", function(){saveAll().catch(function(){});});
@@ -2697,7 +2710,7 @@
 
   function reloadPublishingData() {
     mainEl.inert=true;catListEl.inert=true;
-    return window.MaCatalogPublisher.init(function(text,error){setSaveStatus(text);document.getElementById("pmSaveStatus").classList.toggle("pm-quick-error",!!error);},function(){window.MA_RAW_CATEGORY_PRODUCTS=JSON.parse(JSON.stringify(window.CATEGORY_PRODUCTS||{}));loadState();overviewSelected={};renderCatList();renderMain();savedSnapshot=catalogSnapshot();}).then(function(){mainEl.inert=false;catListEl.inert=false;}).catch(function(err){mainEl.inert=false;catListEl.inert=false;setSaveStatus("Could not reach the publisher: "+err.message);});
+    return window.MaCatalogPublisher.init(function(text,error){setSaveStatus(text);document.getElementById("pmSaveStatus").classList.toggle("pm-quick-error",!!error);},function(){window.MA_RAW_CATEGORY_PRODUCTS=JSON.parse(JSON.stringify(window.CATEGORY_PRODUCTS||{}));loadState();overviewSelected={};renderCatList();renderMain();savedSnapshot=catalogSnapshot();rememberPublishedProductIds();}).then(function(){mainEl.inert=false;catListEl.inert=false;}).catch(function(err){mainEl.inert=false;catListEl.inert=false;setSaveStatus("Could not reach the publisher: "+err.message);});
   }
   document.getElementById("pmReload").addEventListener("click",function(){if(savedSnapshot!==catalogSnapshot()&&!confirm("Discard unsaved changes and reload current data?"))return;reloadPublishingData();});
 
@@ -2713,6 +2726,7 @@
   renderCatList();
   renderMain();
   savedSnapshot = catalogSnapshot();
+  rememberPublishedProductIds();
   window.MaProductQuickUpload.mount({sections:function(){return sections;},products:function(){return products;},status:setSaveStatus,isSaved:function(){return savedSnapshot===catalogSnapshot();},stage:function(category,product){if(!sections.some(function(sec){return sec.key===category;}))throw new Error("Choose a category.");Object.keys(products).forEach(function(k){products[k]=products[k].filter(function(p){return p.id!==product.id;});});products[category].unshift(product);renderCatList();renderMain();},publish:saveAll});
   reloadPublishingData().then(refreshLiveStockOverrides);
   // The publisher fires this once the new catalog is actually served by the website.

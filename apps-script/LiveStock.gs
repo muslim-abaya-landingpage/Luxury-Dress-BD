@@ -20,6 +20,8 @@ function adminLiveStockHandle_(type, e) {
   if (!auth.ok) return auth;
   if (type === 'AdminLiveStockList') return {ok:true, items:liveStockOverrides_()};
   if (type !== 'AdminLiveStockSet') return {ok:false, error:'UNKNOWN_TYPE'};
+  var denied = requireOwnerAdmin_(auth);
+  if (denied) return denied;
   var ids, available = String(param_(e, 'InStock')).toLowerCase();
   try { ids = JSON.parse(param_(e, 'ProductIds') || '[]'); }
   catch (err) { return {ok:false, error:'INVALID_PRODUCTS'}; }
