@@ -1,0 +1,32 @@
+/* English-first Premium Order Desk — presentation only */
+body.wo-orders-page{font-family:Inter,"Segoe UI",Arial,sans-serif!important;font-size:16px!important;color:#192639!important;background:#f4f6f9!important;line-height:1.52!important}
+.wo-orders-page .adm-sidebar{background:#141d2c!important}
+.wo-orders-page .adm-sidebar-nav .adm-sidebar-item{font-size:15px!important;min-height:47px!important;font-weight:600!important}
+.wo-orders-page .adm-sidebar-brand-text .t1{font-size:17px!important}
+.wo-orders-page .adm-profile-copy strong{font-size:15px!important}
+.wo-orders-page .pn-main{padding:28px!important;min-width:0}
+.wo-orders-page .pn-head{background:#fff!important;border:1px solid #e7eaf0!important;border-radius:18px!important;padding:23px 25px!important;margin-bottom:22px!important;box-shadow:0 6px 22px rgba(22,35,55,.035)!important;gap:12px!important;flex-wrap:wrap}
+.wo-orders-page .adm-page-kicker{font-size:13px!important;color:#866b43!important}
+.wo-orders-page .adm-heading h1{font-size:clamp(26px,2.5vw,34px)!important;font-weight:800!important;line-height:1.25!important;color:#182638!important}
+.wo-orders-page .pn-note-muted,.wo-orders-page .oi-note,.wo-orders-page #ordPageStatus{font-size:14px!important}
+.wo-orders-page .pn-btn{font-size:14px!important;font-weight:700!important;border-radius:10px!important;min-height:43px!important;padding:10px 15px!important}
+.wo-orders-page .pn-btn-primary{background:#1f314b!important;color:#fff!important;border-color:#1f314b!important}
+.wo-orders-page .pn-btn-primary:hover{background:#304863!important}
+.wo-orders-page .oi-panel{background:#fff!important;border-radius:17px!important;border:1px solid #e6eaf0!important;padding:23px!important;margin-bottom:20px!important}
+.wo-orders-page .oi-panel h2{font-size:22px!important;font-weight:800!important}
+.wo-orders-page .oi-cards b{font-size:clamp(23px,2.5vw,30px)!important}
+.wo-orders-page .pn-tabs{gap:9px!important;margin:16px 0!important}
+.wo-orders-page .pn-tabs button{font-size:14px!important;font-weight:700!important;min-height:41px!important;border-radius:10px!important}
+.wo-orders-page .pn-toolbar{display:flex;gap:10px!important;align-items:center;flex-wrap:wrap;margin-bottom:14px!important}
+.wo-orders-page #ordSearch{flex:1 1 260px!important;min-width:180px!important}
+.wo-orders-page .pn-in,.wo-orders-page .pn-sel{font-size:14px!important;min-height:44px!important;border-radius:10px!important;border-color:#dfe4eb!important;background:#fff!important;padding:9px 12px!important}
+.wo-orders-page .pn-in:focus-visible,.wo-orders-page .pn-sel:focus-visible,.wo-orders-page button:focus-visible{outline:3px solid #bc9557!important;outline-offset:2px}
+.wo-orders-page #ordResetFilters{background:#f7f8fb!important;border-color:#d6dce6!important;color:#263850!important}
+.wo-orders-page .pn-table-wrap{border:1px solid #e2e6ee!important;border-radius:16px!important;background:#fff!important;box-shadow:0 8px 28px rgba(30,44,65,.045)!important}
+.wo-orders-page .pn-table{font-size:14px!important;line-height:1.5!important}
+.wo-orders-page .pn-table th{font-size:13px!important;font-weight:800!important;color:#47566c!important;background:#f4f6f9!important;letter-spacing:.01em!important;padding:16px 14px!important}
+.wo-orders-page .pn-table td{font-size:14px!important;padding:15px 14px!important;vertical-align:middle!important}
+.wo-orders-page .pn-table tbody tr:hover{background:#f8fafc!important}
+.wo-orders-page .wo-table-hint{font-size:13px!important;color:#68778d!important}
+@media(max-width:860px){.wo-orders-page .pn-main{padding:14px!important}.wo-orders-page .pn-head{padding:17px!important}.wo-orders-page .pn-toolbar .pn-sel{flex:1 1 145px!important}}
+@media(max-width:480px){.wo-orders-page .pn-main{padding:10px!important}.wo-orders-page .adm-heading h1{font-size:25px!important}.wo-orders-page .pn-btn{min-height:42px!important}}
