@@ -1,0 +1,38 @@
+/* Muslim Abaya Admin — unified premium visual system v1.
+  Visual-only: preserves page-specific functionality, layout logic, hidden states. */
+:root{
+ --adm-bg:#f4f6f9;--adm-bg-alt:#eef1f5;--adm-card:#fff;--adm-card-2:#fafbfc;
+ --adm-primary:#1b2a41;--adm-primary-2:#293e59;--adm-text:#1c2a3c;
+ --adm-muted:#637184;--adm-border:#e2e7ee;--adm-border-strong:#d1d9e4;
+ --adm-accent:#b58a48;--adm-accent-light:#d8b77b;--adm-accent-ink:#795825;--adm-accent-wash:#fbf5e9;
+ --adm-radius:14px;--adm-shadow-sm:0 2px 9px rgba(22,36,58,.035);--adm-shadow-md:0 12px 34px rgba(22,36,58,.075);
+ --pn-bg:#f4f6f9;--pn-card:#fff;--pn-border:#e2e7ee;--pn-text:#1c2a3c;--pn-muted:#637184;
+}
+body.adm-body,body.pn-body{font-family:Inter,"Segoe UI","Hind Siliguri",system-ui,sans-serif!important;font-size:16px;line-height:1.5;background:#f4f6f9;color:#1c2a3c;-webkit-font-smoothing:antialiased}
+.adm-sidebar,.pn-side{background:#161f2e!important;color:#dbe2ed!important;border-right:1px solid #344054!important}
+.adm-sidebar-brand-text .t1{font-family:Inter,"Segoe UI",sans-serif!important;color:#fff!important;font-size:17px!important;font-weight:750!important;letter-spacing:.01em!important}
+.adm-sidebar-brand-text .t2{color:#d6af70!important;font-size:10px!important;letter-spacing:.12em!important}
+.adm-sidebar-nav .adm-sidebar-item,.pn-nav a{color:#d3dbe7!important;font-size:14px!important;font-weight:600!important;border-radius:10px!important;line-height:1.45!important}
+.adm-sidebar-nav .adm-sidebar-item:hover,.pn-nav a:hover{background:#293648!important;color:#fff!important;transform:none!important}
+.adm-sidebar-nav .adm-sidebar-item.is-current,.adm-sidebar-nav .adm-sidebar-item[aria-current=page],.pn-nav a.active{background:#2c3543!important;color:#f1ce95!important;box-shadow:inset 3px 0 #c9a069!important}
+.adm-sidebar-profile{border:1px solid rgba(255,255,255,.11)!important;border-radius:13px!important;background:rgba(255,255,255,.04)!important}
+.adm-profile-copy strong{color:#fff!important;font-size:14px!important}
+.adm-profile-copy small{color:#b9c3d1!important;font-size:12px!important}
+.adm-main,.pn-main{min-width:0}
+.adm-heading h1,.pn-head h1{color:#1c2a3c;font-size:24px!important;font-weight:750!important;line-height:1.3!important;letter-spacing:-.02em}
+.adm-page-kicker{font-size:12px!important;color:#856735!important;font-weight:600!important}
+.adm-topbar,.pn-head{border:1px solid #e2e7ee;border-radius:16px;background:#fff;box-shadow:0 5px 20px rgba(22,36,58,.04)}
+.adm-btn,.pn-btn{font-size:14px!important;font-weight:650!important;border-radius:10px!important;min-height:40px}
+.adm-btn-primary,.pn-btn-primary{background:#203551!important;color:#fff!important;border-color:#203551!important}
+.adm-btn-primary:hover,.pn-btn-primary:hover{background:#304a69!important}
+.adm-card,.dz-card,.pn-card,.oi-panel{border-color:#e2e7ee!important;border-radius:15px!important;box-shadow:0 5px 20px rgba(22,36,58,.035)}
+.adm-main h2,.pn-main h2{line-height:1.35}
+.pn-table-wrap,.adm-table-wrap{border-color:#e2e7ee!important;border-radius:13px!important}
+.pn-table th,.adm-main table th{font-size:13px!important;font-weight:700!important}
+.pn-table td,.adm-main table td{font-size:14px!important;line-height:1.5}
+input:not([type=checkbox]):not([type=radio]),select,textarea{accent-color:#a77d3e}
+:where(.adm-main,.pn-main) input:not([type=checkbox]):not([type=radio]):not([type=hidden]),:where(.adm-main,.pn-main) select,:where(.adm-main,.pn-main) textarea{font-size:14px;min-height:40px;border-radius:9px}
+:where(.adm-main,.pn-main) a:focus-visible,:where(.adm-main,.pn-main) button:focus-visible,:where(.adm-main,.pn-main) input:focus-visible,:where(.adm-main,.pn-main) select:focus-visible{outline:2px solid #b58a48!important;outline-offset:3px}
+:where(.adm-main,.pn-main) [role=status]{font-size:13px}
+@media(max-width:760px){.adm-heading h1,.pn-head h1{font-size:22px!important}.pn-main{padding-inline:12px}.adm-main{padding-inline:12px}}
+@media(prefers-reduced-motion:reduce){.adm-sidebar-nav .adm-sidebar-item,.pn-nav a{transition:none!important}}
