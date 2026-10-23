@@ -30,3 +30,11 @@ body.wo-orders-page{font-family:Inter,"Segoe UI",Arial,sans-serif!important;font
 .wo-orders-page .wo-table-hint{font-size:13px!important;color:#68778d!important}
 @media(max-width:860px){.wo-orders-page .pn-main{padding:14px!important}.wo-orders-page .pn-head{padding:17px!important}.wo-orders-page .pn-toolbar .pn-sel{flex:1 1 145px!important}}
 @media(max-width:480px){.wo-orders-page .pn-main{padding:10px!important}.wo-orders-page .adm-heading h1{font-size:25px!important}.wo-orders-page .pn-btn{min-height:42px!important}}
+
+/* Standard readable admin typography, 16px body / 14px dense table / 24px title */
+body.wo-orders-page{font-size:16px!important;line-height:1.5!important}
+.wo-orders-page .adm-heading h1{font-size:24px!important}
+.wo-orders-page .oi-panel h2{font-size:20px!important}
+.wo-orders-page .pn-table th,.wo-orders-page .pn-table td{font-size:14px!important}
+.wo-orders-page .pn-btn,.wo-orders-page .pn-in,.wo-orders-page .pn-sel{font-size:14px!important}
+.wo-orders-page #ordLoadAll{background:#eef3f9!important;color:#243a55!important;border:1px solid #cbd6e4!important}
