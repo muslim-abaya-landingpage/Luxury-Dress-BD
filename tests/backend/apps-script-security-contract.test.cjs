@@ -200,6 +200,210 @@ test('admin login treats blocked status case-insensitively', () => {
   assert.equal(passwordChecks, 0);
 });
 
+test('admin password reset request does not reveal whether an email belongs to an admin', () => {
+  function request(admin, properties = new Map(), clock = { now: 100000 }, sequence = { value: 0 }) {
+    const sent = [];
+    let lockCount = 0;
+    const sandbox = {
+      normalizeEmail_: value => String(value || '').trim().toLowerCase(),
+      param_: (_event, key) => key === 'Email' ? 'OWNER@example.com' : '',
+      getAuthSecret_: () => 'configured',
+      ADMIN_RESET_GENERIC_MESSAGE_: 'generic reset response',
+      ADMIN_RESET_TTL_SECONDS_: 600,
+      adminResetDigest_: value => `digest-${String(value)}`,
+      adminResetAccountKey_: email => `current:${email}`,
+      adminResetTokenKey_: digest => `token:${digest}`,
+      adminResetThrottleKey_: email => `throttle:${email}`,
+      rateLimit_: () => {},
+      LockService: { getScriptLock: () => ({ waitLock: () => { lockCount += 1; }, releaseLock() {} }) },
+      PropertiesService: { getScriptProperties: () => ({
+        getProperty: key => properties.has(key) ? properties.get(key) : null,
+        setProperty: (key, value) => { properties.set(key, String(value)); },
+        deleteProperty: key => properties.delete(key)
+      }) },
+      Date: { now: () => clock.now },
+      Utilities: { getUuid: () => `00000000-0000-0000-0000-${String(++sequence.value).padStart(12, '0')}` },
+      findAdminByEmail_: () => admin,
+      MailApp: { sendEmail: message => sent.push(message) },
+      console: { error() {} }
+    };
+    return { result: runFunction('requestAdminPasswordReset_', sandbox)({}), sent, properties, lockCount };
+  }
+
+  const missing = request(null);
+  const staff = request({ email: 'owner@example.com', status: 'active', role: 'staff' });
+  const owner = request({ email: 'owner@example.com', status: 'active', role: 'admin' });
+  assert.equal(missing.result.message, owner.result.message);
+  assert.equal(staff.result.message, owner.result.message);
+  assert.equal(missing.sent.length, 0);
+  assert.equal(staff.sent.length, 0);
+  assert.equal(owner.sent.length, 1);
+  assert.match(owner.sent[0].body, /admin-password-reset\.html\?token=/);
+  assert.equal(owner.result.token, undefined);
+  assert.equal(owner.lockCount, 1);
+  assert.ok(owner.properties.has('throttle:owner@example.com'));
+  assert.ok(owner.properties.has('current:owner@example.com'));
+});
+
+test('admin password reset replaces old durable tokens and serializes the one-minute throttle', () => {
+  const properties = new Map();
+  const clock = { now: 100000 };
+  const sequence = { value: 0 };
+  const admin = { email: 'owner@example.com', status: 'active', role: 'admin' };
+  const first = (() => {
+    const sent = [];
+    const sandbox = {
+      normalizeEmail_: value => String(value || '').trim().toLowerCase(),
+      param_: (_event, key) => key === 'Email' ? 'owner@example.com' : '',
+      getAuthSecret_: () => 'configured', ADMIN_RESET_GENERIC_MESSAGE_: 'generic', ADMIN_RESET_TTL_SECONDS_: 600,
+      adminResetDigest_: value => `digest-${String(value)}`, adminResetAccountKey_: email => `current:${email}`,
+      adminResetTokenKey_: digest => `token:${digest}`, adminResetThrottleKey_: email => `throttle:${email}`,
+      rateLimit_: () => {}, LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
+      PropertiesService: { getScriptProperties: () => ({
+        getProperty: key => properties.has(key) ? properties.get(key) : null,
+        setProperty: (key, value) => properties.set(key, String(value)), deleteProperty: key => properties.delete(key)
+      }) },
+      Date: { now: () => clock.now },
+      Utilities: { getUuid: () => `00000000-0000-0000-0000-${String(++sequence.value).padStart(12, '0')}` },
+      findAdminByEmail_: () => admin, MailApp: { sendEmail: message => sent.push(message) }, console: { error() {} }
+    };
+    return { run: () => runFunction('requestAdminPasswordReset_', sandbox)({}), sent };
+  })();
+  first.run();
+  const firstToken = decodeURIComponent(first.sent[0].body.match(/\?token=([^\s]+)/)[1]);
+  const firstDigest = `digest-${firstToken}`;
+  assert.ok(properties.has(`token:${firstDigest}`));
+
+  // Simulate the next allowed request. The durable account pointer replaces the old token.
+  clock.now += 60001;
+  const second = (() => {
+    const sent = [];
+    const sandbox = {
+      normalizeEmail_: value => String(value || '').trim().toLowerCase(),
+      param_: (_event, key) => key === 'Email' ? 'owner@example.com' : '',
+      getAuthSecret_: () => 'configured', ADMIN_RESET_GENERIC_MESSAGE_: 'generic', ADMIN_RESET_TTL_SECONDS_: 600,
+      adminResetDigest_: value => `digest-${String(value)}`, adminResetAccountKey_: email => `current:${email}`,
+      adminResetTokenKey_: digest => `token:${digest}`, adminResetThrottleKey_: email => `throttle:${email}`,
+      rateLimit_: () => {}, LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
+      PropertiesService: { getScriptProperties: () => ({
+        getProperty: key => properties.has(key) ? properties.get(key) : null,
+        setProperty: (key, value) => properties.set(key, String(value)), deleteProperty: key => properties.delete(key)
+      }) },
+      Date: { now: () => clock.now },
+      Utilities: { getUuid: () => `00000000-0000-0000-0000-${String(++sequence.value).padStart(12, '0')}` },
+      findAdminByEmail_: () => admin, MailApp: { sendEmail: message => sent.push(message) }, console: { error() {} }
+    };
+    return { run: () => runFunction('requestAdminPasswordReset_', sandbox)({}), sent };
+  })();
+  second.run();
+  assert.equal(properties.has(`token:${firstDigest}`), false);
+  assert.match(properties.get('current:owner@example.com'), /^digest-/);
+  assert.equal(second.sent.length, 1);
+
+  // A third request within the throttle window is generic and cannot mint another token.
+  const currentDigest = properties.get('current:owner@example.com');
+  const throttleSandbox = {
+    normalizeEmail_: value => String(value || '').trim().toLowerCase(), param_: (_event, key) => key === 'Email' ? 'owner@example.com' : '',
+    getAuthSecret_: () => 'configured', ADMIN_RESET_GENERIC_MESSAGE_: 'generic', adminResetDigest_: value => `digest-${String(value)}`,
+    adminResetAccountKey_: email => `current:${email}`, adminResetTokenKey_: digest => `token:${digest}`,
+    adminResetThrottleKey_: email => `throttle:${email}`, rateLimit_: () => {},
+    LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
+    PropertiesService: { getScriptProperties: () => ({
+      getProperty: key => properties.has(key) ? properties.get(key) : null,
+      setProperty: (key, value) => properties.set(key, String(value)), deleteProperty: key => properties.delete(key)
+    }) },
+    Date: { now: () => clock.now }, findAdminByEmail_: () => admin, Utilities: { getUuid: () => assert.fail('throttled call must not create token') },
+    MailApp: { sendEmail: () => assert.fail('throttled call must not send email') }, console: { error() {} }
+  };
+  runFunction('requestAdminPasswordReset_', throttleSandbox)({});
+  assert.equal(properties.get('current:owner@example.com'), currentDigest);
+});
+
+test('admin password recovery rejects weak passwords and malformed or expired links before changing credentials', () => {
+  let credentialWrites = 0;
+  const sandbox = {
+    param_: (_event, key) => ({ Token: 'a'.repeat(64), Password: 'short' })[key] || '',
+    getAuthSecret_: () => 'configured',
+    rateLimit_: () => {},
+    adminResetDigest_: value => `digest-${String(value)}`,
+    adminResetAccountKey_: email => `current:${email}`,
+    adminResetTokenKey_: digest => `token:${digest}`,
+    LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
+    PropertiesService: { getScriptProperties: () => ({ getProperty() { assert.fail('weak or malformed token must not read durable storage'); }, deleteProperty() {} }) },
+    getAdminsSheet_: () => ({ getRange: () => ({ setValue() { credentialWrites += 1; } }) })
+  };
+  const complete = runFunction('completeAdminPasswordReset_', sandbox);
+  const weak = complete({});
+  assert.equal(weak.error, 'WEAK_PASSWORD');
+  assert.equal(credentialWrites, 0);
+
+  sandbox.param_ = (_event, key) => ({ Token: 'not-a-valid-reset-token', Password: 'correct horse battery' })[key] || '';
+  const malformed = complete({});
+  assert.equal(malformed.error, 'RESET_LINK_INVALID_OR_EXPIRED');
+  assert.equal(credentialWrites, 0);
+});
+
+test('password reset accepts only the latest durable link and consumes it after changing credentials', () => {
+  const token = 'b'.repeat(64);
+  const digest = `digest-${token}`;
+  const properties = new Map([
+    [`token:${digest}`, JSON.stringify({ email: 'owner@example.com', createdAt: 1000 })],
+    ['current:owner@example.com', digest]
+  ]);
+  const adminRow = ['owner@example.com', '01900000000', 'Owner', 'old-hash', 'old-salt', 'active', new Date(0), 'admin', new Date(0)];
+  const values = [['Email', 'Phone', 'Name', 'PasswordHash', 'Salt', 'Status', 'CreatedAt', 'Role', 'UpdatedAt'], adminRow];
+  const sessionsRows = [['Token', 'Email', 'Phone', 'Name', 'CreatedAt', 'ExpiresAt', 'Role'], ['old-session', 'owner@example.com', '', '', '', '', 'admin']];
+  const writes = [];
+  const sandbox = {
+    param_: (_event, key) => ({ Token: token, Password: 'a-long-new-password-123' })[key] || '',
+    normalizeEmail_: value => String(value || '').trim().toLowerCase(), getAuthSecret_: () => 'configured', rateLimit_: () => {},
+    ADMIN_RESET_TTL_SECONDS_: 600,
+    adminResetDigest_: value => `digest-${String(value)}`, adminResetAccountKey_: email => `current:${email}`,
+    adminResetTokenKey_: value => `token:${value}`,
+    LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
+    PropertiesService: { getScriptProperties: () => ({
+      getProperty: key => properties.has(key) ? properties.get(key) : null, deleteProperty: key => properties.delete(key)
+    }) },
+    Date: class extends global.Date { static now() { return 2000; } },
+    findAdminByEmail_: () => ({ row: 2, email: 'owner@example.com', status: 'active', role: 'admin' }),
+    hashPassword_: () => ({ hash: 'new-hash', salt: 'new-salt' }),
+    getAdminsSheet_: () => ({ getLastColumn: () => 9, getRange: (row, column) => ({ setValue: value => {
+      assert.equal(properties.has(`token:${digest}`), false, 'reset token is consumed before credential mutation');
+      assert.equal(properties.has('current:owner@example.com'), false, 'account token pointer is consumed before credential mutation');
+      writes.push([row, column, value]); values[row - 1][column - 1] = value;
+    } }) }),
+    getSessionsSheet_: () => ({ getDataRange: () => ({ getValues: () => sessionsRows }), deleteRow: row => sessionsRows.splice(row - 1, 1) }),
+    bumpAdminAuthGeneration_: () => { sandbox.generationBumped = true; }
+  };
+  const complete = runFunction('completeAdminPasswordReset_', sandbox);
+  const result = complete({});
+  assert.equal(result.ok, true);
+  assert.deepEqual(writes.map(row => row[1]), [4, 5, 9]);
+  assert.equal(properties.has(`token:${digest}`), false);
+  assert.equal(properties.has('current:owner@example.com'), false);
+  assert.equal(sessionsRows.length, 1, 'existing admin session was revoked');
+  assert.equal(sandbox.generationBumped, true);
+  assert.equal(complete({}).error, 'RESET_LINK_INVALID_OR_EXPIRED', 'completed link is single-use');
+});
+
+test('password reset routes bypass session-required admin API handling and revoke old sessions on success', () => {
+  const requestAt = source.indexOf("if (type === 'AdminPasswordResetRequest')");
+  const completeAt = source.indexOf("if (type === 'AdminPasswordResetComplete')");
+  const authenticatedAdminLimitAt = source.indexOf("if (type && type.indexOf('Admin') === 0)");
+  assert.ok(requestAt >= 0 && requestAt < authenticatedAdminLimitAt);
+  assert.ok(completeAt >= 0 && completeAt < authenticatedAdminLimitAt);
+  assert.match(extractFunction('completeAdminPasswordReset_'), /sessions\.deleteRow\(i \+ 1\)/);
+  assert.match(extractFunction('completeAdminPasswordReset_'), /bumpAdminAuthGeneration_\(\)/);
+  assert.match(extractFunction('requestAdminPasswordReset_'), /lock\.waitLock\(15000\)/);
+  assert.match(extractFunction('requestAdminPasswordReset_'), /PropertiesService\.getScriptProperties\(\)/);
+  assert.match(extractFunction('completeAdminPasswordReset_'), /properties\.getProperty\(accountKey\) !== tokenDigest/);
+});
+
+test('admin hosting pack includes the password-reset page linked from admin login', () => {
+  const pack = fs.readFileSync(path.join(root, 'scripts/admin-hosting-pack.ps1'), 'utf8');
+  assert.match(pack, /"admin-password-reset\.html"/);
+});
+
 test('admin session verification rejects blocked accounts and stale roles', () => {
   function verify(currentAdmin, sessionRole) {
     const sandbox = {

@@ -92,6 +92,13 @@ function withNow(fn) {
   return result;
 }
 
+async function withNowAsync(fn) {
+  const RealDate = Date;
+  class FakeDate extends RealDate { constructor(...a) { super(...(a.length ? a : [NOW])); } static now() { return NOW; } static [Symbol.hasInstance](x) { return x instanceof RealDate; } }
+  global.Date = FakeDate;
+  try { return await fn(); } finally { global.Date = RealDate; }
+}
+
 async function makeCores() {
   const { createCore } = await lib('_lib/gs-core.js');
   const { buildEnv, toAppsScriptValues } = await lib('_lib/sheets-shim.js');
@@ -221,7 +228,7 @@ test('endpoint: full request through mocked Google APIs', async () => {
   const req = (body, headers = {}) => new Request('https://muslimabaya.com/api/admin-read', { method: 'POST', body: new URLSearchParams(body), headers });
   const env = { GOOGLE_SA_JSON: sa, SHEET_ID: 'SHEET' };
 
-  const res = await withNow(() => handleAdminRead(req({ RecordType: 'AdminOrderList', Token: 'tok-admin', Limit: '80' }), env, { fetch: fakeFetch, now: () => NOW }));
+  const res = await withNowAsync(() => handleAdminRead(req({ RecordType: 'AdminOrderList', Token: 'tok-admin', Limit: '80' }), env, { fetch: fakeFetch, now: () => NOW }));
   assert.equal(res.status, 200);
   assert.equal(res.headers.get('X-MA-Source'), 'edge');
   const body = await res.json();
@@ -237,11 +244,11 @@ test('endpoint: full request through mocked Google APIs', async () => {
   assert.equal(calls.filter((u) => u.startsWith('https://oauth2')).length, 1, 'access token is reused');
 
   calls.length = 0;
-  const verify = await handleAdminRead(req({ RecordType: 'AdminVerify', Token: 'tok-admin' }), env, { fetch: fakeFetch, now: () => NOW + 1000 });
+  const verify = await withNowAsync(() => handleAdminRead(req({ RecordType: 'AdminVerify', Token: 'tok-admin' }), env, { fetch: fakeFetch, now: () => NOW + 1000 }));
   assert.equal(verify.status, 200);
   const tabs = calls.filter((u) => /batchGet/.test(u)).flatMap((u) => new URL(u).searchParams.getAll('ranges'));
   assert.deepEqual([...new Set(tabs)].sort(), ["'Admins'", "'Sessions'"], 'login check reads only the login tabs');
-  const unreadChat = await handleAdminRead(req({ RecordType: 'InboxThread', Token: 'tok-admin', PageId: '964928770039259', PSID: '111' }), env, { fetch: fakeFetch, now: () => NOW + 2000 });
+  const unreadChat = await withNowAsync(() => handleAdminRead(req({ RecordType: 'InboxThread', Token: 'tok-admin', PageId: '964928770039259', PSID: '111' }), env, { fetch: fakeFetch, now: () => NOW + 2000 }));
   assert.equal(unreadChat.status, 409, 'marking a chat read is left to Apps Script');
   assert.equal((await unreadChat.json()).reason, 'NEEDS_WRITE');
 
