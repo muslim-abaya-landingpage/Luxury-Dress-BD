@@ -92,7 +92,7 @@
           <option value="month">This month</option>
         </select>
       </div>
-      <details class="wo-advanced-filters" id="ordAdvancedFilters"><summary>More Filters <span aria-hidden="true">⌄</span></summary><div class="pn-toolbar wo-secondary-toolbar">
+      <div class="pn-toolbar" style="align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0"><label for="ordCategoryFilter" style="font-weight:650">পণ্যের ক্যাটাগরি</label><select class="pn-sel wo-filter" id="ordCategoryFilter" aria-label="পণ্যের ক্যাটাগরি"><option value="all">সব ক্যাটাগরি</option><option value="abaya">আবায়া / বোরকা</option><option value="threepiece">থ্রি-পিস / সালোয়ার</option><option value="kurti">কুর্তি</option><option value="dress">ড্রেস / গাউন</option><option value="other">অন্যান্য / শনাক্ত হয়নি</option></select><select class="pn-sel wo-filter" id="ordProductFilter" aria-label="নির্দিষ্ট প্রোডাক্ট"><option value="all">সব প্রোডাক্ট</option></select><span class="sub">প্রোডাক্ট তালিকা বর্তমানে লোড করা অর্ডার থেকে তৈরি</span></div><details class="wo-advanced-filters" id="ordAdvancedFilters"><summary>More Filters <span aria-hidden="true">⌄</span></summary><div class="pn-toolbar wo-secondary-toolbar">
         <select class="pn-sel wo-filter" id="ordCourierFilter" aria-label="Filter by courier">
           <option value="all">All couriers</option>
           <option value="sent">Sent to courier</option>
@@ -178,6 +178,11 @@
       var assignedFilter = "all";
       var priorityFilter = "all";
       var orderSort = "original";
+      var categoryFilter = "all";
+      var productFilter = "all";
+      function orderProducts(o){return (Array.isArray(o.items) && o.items.length ? o.items : [o.design || ""]).map(function(x){return String(x || "").trim();}).filter(Boolean);}
+      function productCategory(name){var n=String(name||"").toLowerCase();if(/abaya|abায়া|আবায়া|borka|burqa|বোরকা|hijab|হিজাব/.test(n))return "abaya";if(/three.?piece|3.?piece|থ্রি.?পিস|সালোয়ার|salwar/.test(n))return "threepiece";if(/kurti|কুর্তি/.test(n))return "kurti";if(/dress|গাউন|gown|ফ্রক|frock/.test(n))return "dress";return "other";}
+      function updateProductOptions(){var names=Array.from(new Set(all.flatMap(orderProducts))).sort(function(a,b){return a.localeCompare(b);});var select=document.getElementById("ordProductFilter");select.innerHTML='<option value="all">সব প্রোডাক্ট</option>'+names.map(function(n){return '<option value="'+esc(n)+'">'+esc(n)+'</option>';}).join("");if(names.indexOf(productFilter)<0)productFilter="all";select.value=productFilter;}
       var insights = null;
       var issueRows = new Map();
       var issueSelect = document.getElementById("ordIssueFilter");
@@ -189,6 +194,9 @@
       });
 
       function matches(o) {
+        var products=orderProducts(o);
+        if(categoryFilter!=="all" && !products.some(function(n){return productCategory(n)===categoryFilter;}))return false;
+        if(productFilter!=="all" && products.indexOf(productFilter)===-1)return false;
         var issues = issueRows.get(o) || [];
         if (issueFilter === "flagged" && !issues.length) return false;
         if (issueFilter !== "all" && issueFilter !== "flagged" && issues.indexOf(issueFilter) === -1) return false;
@@ -291,7 +299,8 @@
           return;
         }
         body.innerHTML = list.map(function (o) {
-          var items = o.items && o.items.length ? esc(o.items[0]) + (o.items.length > 1 ? ' <span class="sub">+' + (o.items.length - 1) + " more</span>" : "") : "—";
+          var productNames=orderProducts(o);
+          var items=productNames.length ? '<details class="ma-order-products"><summary style="cursor:pointer;font-weight:600;line-height:1.5">'+esc(productNames[0])+ (productNames.length>1 ? ' <span class="sub">(+'+(productNames.length-1)+' আরও)</span>' : '') +'</summary><ul style="margin:8px 0 2px;padding-left:18px;line-height:1.7">'+productNames.map(function(n){return '<li>'+esc(n)+'</li>';}).join("")+'</ul></details>' : "—";
           var displayStatus = MaOrderStatus.describe(o);
           var canOpen = o.orderId && (issueRows.get(o) || []).indexOf("duplicate_id") === -1;
           return (
@@ -366,6 +375,7 @@
         statuses = res.statuses || [];
         document.getElementById("ordCount").textContent = (counts.all || 0) + "টি অর্ডার";
         updateAssignedOptions();
+        updateProductOptions();
         renderInsights(res);
         renderTabs();
         renderRows();
@@ -435,6 +445,8 @@
         paymentFilter = e.target.value;
         renderRows();
       });
+      document.getElementById("ordCategoryFilter").addEventListener("change",function(e){categoryFilter=e.target.value;renderRows();});
+      document.getElementById("ordProductFilter").addEventListener("change",function(e){productFilter=e.target.value;renderRows();});
       document.getElementById("ordPriorityFilter").addEventListener("change", function(e){ priorityFilter=e.target.value; renderRows(); });
       document.getElementById("ordSort").addEventListener("change", function(e){ orderSort=e.target.value; renderRows(); });
       document.getElementById("ordAssignedFilter").addEventListener("change", function (e) {
@@ -457,7 +469,7 @@
       document.getElementById("ordBody").addEventListener("click", function (e) {
         var btn=e.target.closest("[data-preview-id]");
         if(btn){var order=all.find(function(o){return String(o.orderId||"")===btn.getAttribute("data-preview-id") && String(o.row||"")===btn.getAttribute("data-preview-row");});openQuickPreview(order);return;}
-        if (e.target.closest("a, input, label")) return;
+        if (e.target.closest("a, input, label, summary, details, button, select")) return;
         var tr = e.target.closest("tr[data-id]");
         if (tr && tr.getAttribute("data-id")) location.href = "admin-order.html?id=" + encodeURIComponent(tr.getAttribute("data-id"));
       });
@@ -495,6 +507,7 @@
       ["ordDateFilter","ordCourierFilter","ordPaymentFilter","ordAssignedFilter","ordIssueFilter","ordPriorityFilter"].forEach(function(id){
         var el=document.getElementById(id);if(el){el.value="all";el.dispatchEvent(new Event("change",{bubbles:true}));}
       });
+      categoryFilter="all";productFilter="all";["ordCategoryFilter","ordProductFilter"].forEach(function(id){var el=document.getElementById(id);if(el){el.value="all";el.dispatchEvent(new Event("change",{bubbles:true}));}});
       var sort=document.getElementById("ordSort"); if(sort){sort.value="original";sort.dispatchEvent(new Event("change",{bubbles:true}));}
       var tab=document.querySelector('#ordTabs [data-f="all"]');if(tab)tab.click();
     });
