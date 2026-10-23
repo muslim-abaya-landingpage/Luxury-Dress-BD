@@ -38,3 +38,13 @@ body.wo-orders-page{font-size:16px!important;line-height:1.5!important}
 .wo-orders-page .pn-table th,.wo-orders-page .pn-table td{font-size:14px!important}
 .wo-orders-page .pn-btn,.wo-orders-page .pn-in,.wo-orders-page .pn-sel{font-size:14px!important}
 .wo-orders-page #ordLoadAll{background:#eef3f9!important;color:#243a55!important;border:1px solid #cbd6e4!important}
+
+/* Focused workflow: primary search/date visible, advanced controls collapsible */
+.wo-orders-page .wo-primary-toolbar{background:#fff;border:1px solid #e3e8f0;border-radius:14px;padding:14px;margin:12px 0!important}
+.wo-orders-page .wo-advanced-filters{border:1px solid #e3e8f0;border-radius:12px;background:#fff;margin:0 0 12px;overflow:hidden}
+.wo-orders-page .wo-advanced-filters summary{cursor:pointer;list-style:none;padding:13px 16px;font-size:14px;font-weight:700;color:#263a55;display:flex;justify-content:space-between;align-items:center}
+.wo-orders-page .wo-advanced-filters summary::-webkit-details-marker{display:none}
+.wo-orders-page .wo-secondary-toolbar{padding:0 14px 14px;margin:0!important}
+.wo-orders-page .wo-toolbar-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.wo-orders-page .wo-workflow-hint{font-size:13px;color:#69768a;margin:10px 0}
+@media(max-width:680px){.wo-orders-page .wo-primary-toolbar>*{flex:1 1 100%}.wo-orders-page .wo-toolbar-actions>*{flex:1 1 150px}}
