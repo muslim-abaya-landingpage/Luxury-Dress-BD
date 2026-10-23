@@ -1,6 +1,6 @@
 /**
  * প্রোডাক্ট ডেটা — product-manager.html থেকে এডিট করুন
- * আপডেট: 2026-10-22
+ * আপডেট: 2026-10-23
  */
 window.CATEGORY_PRODUCTS = {
   abaya: [
@@ -116,7 +116,9 @@ window.CATEGORY_PRODUCTS = {
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
       productUrl: "/",
-      dateAdded: "2026-09-13"
+      dateAdded: "2026-09-13",
+      brand: "Muslim Abaya",
+      tags: ["Abaya","বোরখা","বুরকা","বুরখা","টু-পিস ড্রেস","কাপড়"]
     },
     {
       id: "ABY-HAFEZA-1",
