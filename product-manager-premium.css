@@ -29,3 +29,48 @@ body.pm-wp-admin{font-family:Inter,"Segoe UI","Hind Siliguri",sans-serif!importa
 @media(max-width:900px){.pm-wp-admin .pm-layout{grid-template-columns:1fr!important}.pm-wp-admin .pm-sidebar{position:static!important}.pm-wp-admin .pl-main{padding:16px!important}}
 @media(max-width:600px){.pm-wp-admin .pl-main{padding:11px!important}.pm-wp-admin .pm-product-body{grid-template-columns:1fr!important;padding:13px!important}.pm-wp-admin .pm-quick-dialog{padding:16px!important}}
 @media(prefers-reduced-motion:reduce){.pm-wp-admin *{scroll-behavior:auto!important}}
+
+/* Responsive management pass: usable touch targets, contained layouts, no horizontal page overflow */
+.pm-wp-admin .pl-main,.pm-wp-admin .pm-main,.pm-wp-admin .pm-layout,.pm-wp-admin .adm-content{min-width:0;max-width:100%}
+.pm-wp-admin .pm-layout>*{min-width:0}
+.pm-wp-admin .pm-cat-list{overscroll-behavior:contain;scrollbar-width:thin}
+.pm-wp-admin .pm-sidebar{min-width:0}
+.pm-wp-admin .pm-overview-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.pm-wp-admin .pm-overview{min-width:690px}
+.pm-wp-admin .pm-quick-dialog{width:min(760px,calc(100vw - 20px));max-height:min(90dvh,900px);overflow-y:auto;overscroll-behavior:contain}
+.pm-wp-admin .pm-modal-box{width:min(540px,100%);max-height:90dvh;overflow-y:auto}
+.pm-wp-admin .pm-quick-grid>*,.pm-wp-admin .pm-product-body>*,.pm-wp-admin .pm-field{min-width:0}
+.pm-wp-admin input[type="file"]{max-width:100%;font-size:14px}
+.pm-wp-admin img{max-width:100%}
+.pm-wp-admin .pl-btn,.pm-wp-admin .pm-cat-btn{touch-action:manipulation}
+.pm-wp-admin .pm-product-head{flex-wrap:wrap;gap:10px}
+.pm-wp-admin .pm-guide{gap:8px 12px}
+.pm-wp-admin .pm-guide a{display:inline-flex;align-items:center;min-height:36px}
+.pm-wp-admin .pm-guide span{flex:1 1 280px}
+@media (min-width:901px) and (max-width:1200px){
+  .pm-wp-admin .pm-layout{grid-template-columns:215px minmax(0,1fr)!important;gap:15px!important}
+  .pm-wp-admin .pl-main{padding:17px!important}
+}
+@media(max-width:900px){
+ .pm-wp-admin .pm-layout{display:flex!important;flex-direction:column!important;gap:14px!important}
+ .pm-wp-admin .pm-sidebar,.pm-wp-admin .pm-main{width:100%!important;max-width:100%!important}
+ .pm-wp-admin .pm-sidebar{position:static!important}
+ .pm-wp-admin .pm-cat-list{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;max-height:none;padding:2px 1px 9px;margin-bottom:8px}
+ .pm-wp-admin .pm-cat-list li{flex:0 0 auto;min-width:140px;max-width:230px;margin:0}
+ .pm-wp-admin .pm-cat-btn{text-align:center;min-height:44px}
+ .pm-wp-admin .pm-add-cat{width:auto;min-height:44px}
+}
+@media(max-width:600px){
+ .pm-wp-admin .pm-guide{align-items:flex-start;flex-direction:column;padding:13px}
+ .pm-wp-admin .pm-guide span{flex:auto}
+ .pm-wp-admin .pm-quick-grid{grid-template-columns:minmax(0,1fr)!important;gap:12px!important}
+ .pm-wp-admin .pm-quick-wide{grid-column:auto!important}
+ .pm-wp-admin .pm-quick-actions{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+ .pm-wp-admin .pm-quick-actions button,.pm-wp-admin .pm-quick-actions .pl-btn{width:100%!important;min-height:46px!important}
+ .pm-wp-admin .pm-field input,.pm-wp-admin .pm-field select,.pm-wp-admin .pm-field textarea,
+ .pm-wp-admin .pm-quick-grid input,.pm-wp-admin .pm-quick-grid select,.pm-wp-admin .pm-quick-grid textarea{font-size:16px!important}
+ .pm-wp-admin .pm-modal-box{padding:16px!important}
+ .pm-wp-admin .pm-product-card{border-radius:12px!important}
+ .pm-wp-admin .pm-overview-photo{width:48px;height:60px}
+}
+@media(max-width:390px){.pm-wp-admin .pl-main{padding:8px!important}.pm-wp-admin .pm-sidebar{padding:12px!important}.pm-wp-admin .pm-cat-list li{min-width:125px}}
