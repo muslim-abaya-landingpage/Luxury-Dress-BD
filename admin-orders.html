@@ -181,6 +181,21 @@
       var categoryFilter = "all";
       var productFilter = "all";
       function orderProducts(o){return (Array.isArray(o.items) && o.items.length ? o.items : [o.design || ""]).map(function(x){return String(x || "").trim();}).filter(Boolean);}
+      function detailItems(o) {
+        var src = Array.isArray(o.orderItems)&&o.orderItems.length ? o.orderItems : (Array.isArray(o.items)&&o.items.length?o.items:[o.design||""]);
+        return src.map(function(x){
+          var v=(x&&typeof x==="object")?x:{name:String(x||"")};
+          return {name:v.name||v.productName||v.product||v.title||v.design||"পণ্যের নাম নেই",
+            design:v.design||v.variant||o.design||null,color:v.color||v.colour||v.selectedColor||o.color||null,
+            size:v.size||o.size||null,qty:v.quantity!=null?v.quantity:(v.qty!=null?v.qty:null)};
+        });
+      }
+      function displayField(v){return v==null||String(v).trim()===""?"তথ্য সংরক্ষিত নেই":String(v);}
+      function previewItems(o){return detailItems(o).map(function(v){
+        return '<article class="ma-product-detail"><strong>'+esc(v.name)+'</strong><div class="ma-product-fields">'+
+          '<span>ডিজাইন: '+esc(displayField(v.design))+'</span><span>কালার: '+esc(displayField(v.color))+'</span>'+
+          '<span>সাইজ: '+esc(displayField(v.size))+'</span><span>পরিমাণ: '+esc(displayField(v.qty))+'</span></div></article>';
+      }).join("");}
       function productCategory(name){var n=String(name||"").toLowerCase();if(/abaya|abায়া|আবায়া|borka|burqa|বোরকা|hijab|হিজাব/.test(n))return "abaya";if(/three.?piece|3.?piece|থ্রি.?পিস|সালোয়ার|salwar/.test(n))return "threepiece";if(/kurti|কুর্তি/.test(n))return "kurti";if(/dress|গাউন|gown|ফ্রক|frock/.test(n))return "dress";return "other";}
       function updateProductOptions(){var names=Array.from(new Set(all.flatMap(orderProducts))).sort(function(a,b){return a.localeCompare(b);});var select=document.getElementById("ordProductFilter");select.innerHTML='<option value="all">সব প্রোডাক্ট</option>'+names.map(function(n){return '<option value="'+esc(n)+'">'+esc(n)+'</option>';}).join("");if(names.indexOf(productFilter)<0)productFilter="all";select.value=productFilter;}
       var insights = null;
@@ -458,8 +473,8 @@
         if(!o)return;
         var box=document.getElementById("ordQuickPreview"), status=MaOrderStatus.describe(o);
         var flags=(issueRows.get(o)||[]).map(function(k){return MaOrderInsights.labels[k]||k;}).join(", ");
-        var rows=[["Order ID",o.orderId],["Customer",o.name],["Phone",o.phone],["Products",Array.isArray(o.items)?o.items.join(", "):o.design],["Total",MaPanel.money(o.total)],["Payment",o.payment],["Order Status",status.orderRaw],["Courier Status",status.hasCourier?status.courierLabel:"Not sent"],["Tracking",o.tracking||o.consignmentId],["Assigned Staff",o.assignedTo],["Review Flags",flags||"None"]];
-        document.getElementById("ordPreviewContent").innerHTML='<dl class="wo-preview-grid">'+rows.map(function(pair){return '<div><dt>'+esc(pair[0])+'</dt><dd>'+esc(pair[1]==null||pair[1]===""?"—":pair[1])+'</dd></div>';}).join("")+'</dl><p class="wo-preview-note">Courier status is the last recorded value, not a live location update.</p>';
+        var rows=[["Order ID",o.orderId],["Customer",o.name],["Phone",o.phone],["Total",MaPanel.money(o.total)],["Payment",o.payment],["Order Status",status.orderRaw],["Courier Status",status.hasCourier?status.courierLabel:"Not sent"],["Tracking",o.tracking||o.consignmentId],["Assigned Staff",o.assignedTo],["Review Flags",flags||"None"]];
+        document.getElementById("ordPreviewContent").innerHTML='<section class="ma-product-section"><h3>অর্ডারকৃত পণ্য</h3>'+previewItems(o)+'</section>'+'<dl class="wo-preview-grid">'+rows.map(function(pair){return '<div><dt>'+esc(pair[0])+'</dt><dd>'+esc(pair[1]==null||pair[1]===""?"—":pair[1])+'</dd></div>';}).join("")+'</dl><p class="wo-preview-note">Courier status is the last recorded value, not a live location update.</p>';
         var link=document.getElementById("ordPreviewOpen");
         link.hidden=!o.orderId||(issueRows.get(o)||[]).indexOf("duplicate_id")!==-1;
         if(!link.hidden)link.href="admin-order.html?id="+encodeURIComponent(o.orderId);
@@ -513,5 +528,14 @@
     });
   })();
   </script>
-</body>
+<style>
+.ma-product-section{margin-bottom:16px}.ma-product-section h3{font-size:1rem;margin:0 0 10px}
+.ma-product-detail{border:1px solid #e1e6ef;border-radius:12px;padding:12px;margin:8px 0;background:#f8fafc;overflow-wrap:anywhere}
+.ma-product-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px;font-size:.9rem}
+.wo-quick-preview{width:min(94vw,680px);max-height:90vh;overflow:auto}
+.pn-table-wrap{max-width:100%;overflow-x:auto}
+.pn-table th,.pn-table td{vertical-align:middle;overflow-wrap:anywhere}
+@media(max-width:1150px){.pn-table th:nth-child(7),.pn-table td:nth-child(7),.pn-table th:nth-child(8),.pn-table td:nth-child(8),.pn-table th:nth-child(9),.pn-table td:nth-child(9){display:none}.pn-table{min-width:680px}}
+@media(max-width:600px){.ma-product-fields{grid-template-columns:1fr}}
+</style></body>
 </html>
