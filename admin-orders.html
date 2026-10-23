@@ -82,7 +82,7 @@
       </section>
       <p><a class="pn-btn" href="admin-operations.html">Finance & Returns →</a></p><div class="pn-tabs" id="ordTabs"></div>
 
-      <div class="pn-toolbar">
+      <div class="pn-toolbar wo-primary-toolbar">
         <input class="pn-in" id="ordSearch" type="search" placeholder="Search loaded orders by customer, phone or order ID…" autocomplete="off">
         <select class="pn-sel wo-filter" id="ordDateFilter" aria-label="Filter by date">
           <option value="all">All dates</option>
@@ -91,6 +91,8 @@
           <option value="7d">Last 7 days</option>
           <option value="month">This month</option>
         </select>
+      </div>
+      <details class="wo-advanced-filters" id="ordAdvancedFilters"><summary>More Filters <span aria-hidden="true">⌄</span></summary><div class="pn-toolbar wo-secondary-toolbar">
         <select class="pn-sel wo-filter" id="ordCourierFilter" aria-label="Filter by courier">
           <option value="all">All couriers</option>
           <option value="sent">Sent to courier</option>
@@ -115,10 +117,11 @@
         </select>
         <select class="pn-sel wo-filter" id="ordPriorityFilter" aria-label="Order priority"><option value="all">All priorities</option><option value="attention">Needs attention</option><option value="unassigned">Unassigned orders</option><option value="courier">Courier pending</option></select>
         <select class="pn-sel wo-filter" id="ordSort" aria-label="Sort orders"><option value="original">Default order</option><option value="value-desc">Highest value</option><option value="value-asc">Lowest value</option><option value="name">Customer A–Z</option></select>
-        <button type="button" class="pn-btn pn-btn-sm" id="ordResetFilters">Clear Filters</button>
-        <button type="button" class="pn-btn pn-btn-sm wo-export-btn" id="ordExportFiltered">Export filtered CSV</button>
-      </div>
+      </div></details>
+      <div class="wo-toolbar-actions"><button type="button" class="pn-btn pn-btn-sm" id="ordResetFilters">Clear Filters</button>
+        <button type="button" class="pn-btn pn-btn-sm wo-export-btn" id="ordExportFiltered">Export filtered CSV</button></div>
 
+      <p class="wo-workflow-hint">Tip: Start with <strong>Today</strong>, use <strong>Needs attention</strong> when reviewing issues, and open an Order ID to manage that order.</p>
       <p id="ordersTableHint" class="wo-table-hint">↔ Order IDs remain visible. Scroll horizontally for courier, tracking and other details.</p>
       <div class="pn-table-wrap" role="region" tabindex="0" aria-label="Full order list" aria-describedby="ordersTableHint">
         <table class="pn-table">
