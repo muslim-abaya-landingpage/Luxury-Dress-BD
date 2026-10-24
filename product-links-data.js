@@ -102,6 +102,6 @@ window.PRODUCT_LINKS_DATA = {
     "/images/premium-white-cotton-panjabi-mens-islamic-fashion-modern-design-1080x1350.webp",
   ],
   "three-piece-dress": [
-    "images/uploads/p-197025f0b8ff4107-1.webp",
+    "/images/uploads/p-197025f0b8ff4107-1.webp",
   ]
 };

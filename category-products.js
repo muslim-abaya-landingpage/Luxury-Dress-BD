@@ -1334,16 +1334,20 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "P-197025F0B8FF4107",
       name: "Premium Cotton Three Piece",
-      image: "images/uploads/p-197025f0b8ff4107-1.webp",
+      image: "/images/uploads/p-197025f0b8ff4107-1.webp",
       imageCard: "images/uploads/p-197025f0b8ff4107-card.webp",
-      images: ["images/uploads/p-197025f0b8ff4107-2.webp", "images/uploads/p-197025f0b8ff4107-3.webp"],
+      images: ["/images/uploads/p-197025f0b8ff4107-2.webp", "/images/uploads/p-197025f0b8ff4107-3.webp"],
       price: 1750,
       color: "Navy Blue | Red | Yellow",
       colorLabel: "Navy Blue | Red | Yellow",
       fabric: "100% Selap Cotton",
       sizes: ["38 | 40 | 42 | 44 | 46"],
       detailNote: "🌸 Premium Cotton Three Piece Collection 🌸\n\nরুচিশীল ডিজাইন ও আকর্ষণীয় কালারের সুন্দর সমন্বয়ে তৈরি প্রিমিয়াম থ্রি-পিস কালেকশন।\n\n✅ কাপড়: ১০০% সেলাপ কটন  \n✅ সালোয়ার: প্যান্ট কাট  \n✅ ডিজাইন: আকর্ষণীয় প্রিন্টেড ডিজাইন  \n✅ কালার: নেভি ব্লু, লাল ও হলুদ  \n✅ মূল্য: ১,৭৫০ টাকা\n\n📦 পাইকারি ও খুচরা বিক্রয় করা হয়।\n\n🚚 সারা বাংলাদেশে ডেলিভারি সুবিধা।",
-      dateAdded: "2026-10-24"
+      category: "three-piece-dress",
+      categoryLabel: "থ্রি-পিস ড্রেস",
+      dateAdded: "2026-10-24",
+      productUrl: "/",
+      regularPrice: 1850
     }
   ]
 };
