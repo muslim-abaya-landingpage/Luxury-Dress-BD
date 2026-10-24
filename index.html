@@ -732,6 +732,30 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- Quick category chips -->
 <nav id="homeCatnav" class="home-catnav" aria-label="Shop categories"></nav>
+<script>
+/* Fallback for the separately-rendered homepage rail: keep the active Three Piece link visible. */
+(function(){
+  function ensureThreePieceLink(){
+    var rail=document.querySelector('#homeCatnav .home-catnav-inner');
+    if(!rail)return;
+    if(rail.querySelector('a[href*="three-piece-dress"]'))return;
+    var entry=document.createElement('a');
+    entry.href='/three-piece-dress';
+    entry.textContent='THREE PIECE DRESS';
+    entry.setAttribute('data-catalog-key','three-piece-dress');
+    rail.appendChild(entry);
+  }
+  document.addEventListener('DOMContentLoaded',function(){
+    ensureThreePieceLink();
+    var root=document.getElementById('homeCatnav');
+    if(root&&window.MutationObserver){
+      var updating=false;
+      new MutationObserver(function(){if(updating)return;updating=true;ensureThreePieceLink();updating=false;}).observe(root,{childList:true,subtree:true});
+    }
+  });
+  window.addEventListener('ma:catalog-ready',ensureThreePieceLink);
+})();
+</script>
 
 <!-- Category product sections -->
 <main id="homeSections" class="home-sections"></main>
