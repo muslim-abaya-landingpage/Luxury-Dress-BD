@@ -177,17 +177,10 @@
 
   function getProductColorVariants(p) {
     if (!p) return [];
-    // The editor's displayed color list is authoritative. Old explicit variants
-    // must not override a more recently saved comma-separated color label.
-    var savedLabels = String(p.colorLabel || "").split(/[,，;；|]/).map(function(x){return x.trim();}).filter(Boolean);
-    if (savedLabels.length > 1 && Array.isArray(p.colorVariants) && p.colorVariants.length) {
-      return savedLabels.map(function(label,i){
-        var old = p.colorVariants[i] || {};
-        return { color: colorKeyFromLabel(label), colorLabel: label, image: resolveImg(old.image || old.src || "") };
-      });
-    }
     if (Array.isArray(p.colorVariants) && p.colorVariants.length) {
-      return p.colorVariants
+      // Follow the colors saved in the admin panel, not an older per-photo list (product-utils.js).
+      var rows = typeof window.maReconcileColorVariants === "function" ? window.maReconcileColorVariants(p) || p.colorVariants : p.colorVariants;
+      return rows
         .map(function (row) {
           if (!row) return null;
           var image = resolveImg(row.image || row.src || "");

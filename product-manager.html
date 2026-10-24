@@ -878,13 +878,7 @@
         } else if (f === "colorLabel") {
           p.colorLabel = inp.value;
           p.color = inp.value;
-          var labels = inp.value.split(/[,，;；|]/).map(function(x){return x.trim();}).filter(Boolean);
-          if (Array.isArray(p.colorVariants) && p.colorVariants.length) {
-            p.colorVariants = labels.map(function(label,i){
-              var previous = p.colorVariants[i] || {};
-              return { color: label.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,""), colorLabel: label, image: previous.image || "" };
-            });
-          }
+          // The per-photo color list is brought in line when saving (reconcileAllColorVariants).
         }
         else if (f === "sizes") p.sizes = inputToSizes(inp.value);
         else if (f === "brand") { var b = inp.value.trim(); if (b) p.brand = b; else delete p.brand; }
@@ -2953,6 +2947,18 @@
   }
   window.openMediaLibrary = openMediaLibrary;
 
+  // Saved color text is the truth: rewrite each product's per-photo color list to match it, keeping
+  // each photo with its own color (same rules the website uses, product-utils.js).
+  function reconcileAllColorVariants() {
+    if (typeof window.maReconcileColorVariants !== "function") return;
+    Object.keys(products).forEach(function (key) {
+      (products[key] || []).forEach(function (p) {
+        var rows = window.maReconcileColorVariants(p);
+        if (rows && JSON.stringify(rows) !== JSON.stringify(p.colorVariants)) p.colorVariants = rows;
+      });
+    });
+  }
+
   function saveAll(target) {
     var button=document.getElementById("pmSave");
     if(button.disabled)return Promise.reject(new Error("Publishing. Please wait."));
@@ -2961,7 +2967,7 @@
       if(!window.MaCatalogPublisher.isReady())throw new Error("Publishing is not ready. Reload current data.");
       window.MaProductPublishUtils.validateCatalog(products);
       if(sections.some(function(sec){return !(window.CATALOG_SECTIONS||[]).some(function(old){return old.key===sec.key;});}))throw new Error("A new category must be set up before it goes live. Add products to an existing category.");
-      stripHomeLinksFromProducts();snapshot=catalogSnapshot();
+      reconcileAllColorVariants();stripHomeLinksFromProducts();snapshot=catalogSnapshot();
       var files=[{path:"category-products.js",content:generateProductsFile()},{path:"product-links-data.js",content:generateProductLinksFile()},{path:"product-catalog-sections.js",content:generateSectionsFile()},{path:"product-config.js",content:generateProductConfigFile()}];
     } catch(err){setSaveStatus(err.message);return Promise.reject(err);}
     button.disabled=true;

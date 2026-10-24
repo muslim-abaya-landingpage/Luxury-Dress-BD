@@ -1067,7 +1067,9 @@ function galleryLooksLikeColorways(p) {
 function getProductColorVariants(p) {
   if (!p) return [];
   if (Array.isArray(p.colorVariants) && p.colorVariants.length) {
-    return p.colorVariants
+    // Follow the colors saved in the admin panel, not an older per-photo list (product-utils.js).
+    var rows = typeof window.maReconcileColorVariants === "function" ? window.maReconcileColorVariants(p) || p.colorVariants : p.colorVariants;
+    return rows
       .map(function (row) {
         if (!row) return null;
         var image = resolveCardImageSrc({ image: row.image || row.src || "" });

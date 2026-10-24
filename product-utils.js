@@ -915,6 +915,49 @@ g.getCartLineBaseName = getCartLineBaseName;
   g.getStockQty = getStockQty;
   g.isInStock = isInStock;
   g.getStockStatus = getStockStatus;
+
+  /**
+   * Color options for the product page, matching the "Color (shown)" text saved in the admin panel.
+   * Products can also carry an older per-photo list (colorVariants). When the owner changes the color
+   * text, the old list must not keep showing the previous colors. Rules (photo order is kept, so the
+   * first color still matches the main photo):
+   *  - a color that is still in the saved text keeps its own photo;
+   *  - the other photos take the remaining new colors, in the order they were typed;
+   *  - a photo with no color left is dropped; extra new colors are added without a photo.
+   * Returns null when the product has no per-photo list, or the saved text names one color or none.
+   */
+  function colorKey(label) {
+    return String(label || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  }
+  function reconcileColorVariants(p) {
+    if (!p || !Array.isArray(p.colorVariants) || !p.colorVariants.length) return null;
+    var labels = String(p.colorLabel || p.color || "").split(/[,，;；|]/).map(function (x) { return x.trim(); }).filter(Boolean);
+    var rows = p.colorVariants.filter(Boolean);
+    if (labels.length < 2) return rows;
+    var used = {};
+    var rowKeys = rows.map(function (r) { return colorKey(r.colorLabel || r.label || r.color); });
+    var out = rows.map(function (r, i) {
+      var hit = -1;
+      labels.some(function (label, j) {
+        if (!used[j] && colorKey(label) === rowKeys[i]) { hit = j; return true; }
+        return false;
+      });
+      if (hit < 0) return null;
+      used[hit] = true;
+      return { color: colorKey(labels[hit]), colorLabel: labels[hit], image: r.image || r.src || "" };
+    });
+    var rest = labels.map(function (l, j) { return used[j] ? null : l; }).filter(Boolean);
+    out = out.map(function (o, i) {
+      if (o) return o;
+      if (!rest.length) return null;
+      var label = rest.shift();
+      return { color: colorKey(label), colorLabel: label, image: rows[i].image || rows[i].src || "" };
+    }).filter(Boolean);
+    rest.forEach(function (label) { out.push({ color: colorKey(label), colorLabel: label, image: "" }); });
+    return out;
+  }
+
+  g.maReconcileColorVariants = reconcileColorVariants;
   g.maCatalog = {
     resolveImageUrl: resolveImageUrl,
     resolveProductPageLink: resolveProductPageLink,
