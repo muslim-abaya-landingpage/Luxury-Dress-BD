@@ -1330,6 +1330,7 @@ window.CATEGORY_PRODUCTS = {
       productUrl: "/"
     }
   ]
+  ,"three-piece-dress": []
 };
 
 /** @deprecated — product-catalog-sync.js স্বয়ংক্রিয় বানায় */
