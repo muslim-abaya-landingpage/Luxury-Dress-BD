@@ -105,3 +105,7 @@ body.pm-wp-admin{font-family:Inter,"Segoe UI","Hind Siliguri",sans-serif!importa
 @media(max-width:760px){.pm-wp-admin .pm-overview.pm-wp-table{min-width:950px}.pm-wp-admin .pm-wp-actions select{max-width:100%}.pm-wp-admin .pm-wp-tablenav.top{align-items:stretch}.pm-wp-admin .pm-wp-search button{min-height:44px}}
 
 .pm-wp-admin td.column-tags a.pm-row-link{position:relative;z-index:3;pointer-events:auto}
+
+/* Allow tag links to wrap inside their own cell instead of being clipped/un-clickable. */
+.pm-wp-admin .pm-overview.pm-wp-table td.column-tags{white-space:normal!important;text-overflow:clip!important;overflow:visible!important;overflow-wrap:anywhere!important;line-height:1.8!important}
+.pm-wp-admin .pm-overview.pm-wp-table td.column-tags a.pm-row-link{display:inline!important;white-space:normal!important;position:relative;z-index:4;min-height:unset;line-height:inherit;padding:3px 2px;overflow:visible!important}
