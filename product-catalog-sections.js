@@ -74,5 +74,13 @@ window.CATALOG_SECTIONS = [
     menuBn: "পাঞ্জাবী",
     page: "panjabi.html",
     path: "/panjabi"
+  },
+  {
+    key: "three-piece-dress",
+    row: "⑩",
+    menu: "THREE PIECE DRESS",
+    menuBn: "থ্রি-পিস ড্রেস",
+    page: "three-piece-dress.html",
+    path: "/three-piece-dress"
   }
 ];
