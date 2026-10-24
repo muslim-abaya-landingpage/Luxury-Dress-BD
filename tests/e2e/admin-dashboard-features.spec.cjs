@@ -73,6 +73,8 @@ test('admin dashboard renders alerts, priority orders, lifetime report and conse
   await expect(page.locator('#admPriorityTasks a.adm-task-open')).toHaveAttribute('href', 'admin-order.html?id=P-OLD');
   await expect(page.locator('#admPriorityTasks')).not.toContainText('P-ANCIENT');
   await expect(page.locator('#admPriorityTasks .adm-old-note')).toContainText('1টি');
+  // Analytics are intentionally lazy-loaded; open the report explicitly before asserting totals.
+  await page.locator('#admReportLoad').click();
   await expect(page.locator('#admReportOrders')).toHaveText('7');
   await expect(page.locator('#admReportDeliveredValue')).toHaveText('৳4,200');
   await expect(page.locator('#admSalesMonths')).toContainText('2026-10');
