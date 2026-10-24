@@ -14,6 +14,9 @@ let catalog = real;
 catalog = addFields(catalog, 'ABY-MAROON-1', 'regularPrice: 1299, regularPriceByType: {"Full Set": 1299}');
 catalog = addFields(catalog, 'ABY-BLK-3P-02', 'status: "draft"');
 catalog = addFields(catalog, 'ABY-BLACK-3', 'featured: true, tags: ["eid", "Black Abaya"]');
+// Isolate sale-price assertions from changing real store prices.
+// The fixture deliberately defines two price options; production catalog is untouched.
+catalog += '\n(function(){var p=(window.CATEGORY_PRODUCTS.abaya||[]).find(function(x){return x.id==="ABY-MAROON-1";});if(p){p.price=999;p.types=["Full Set","Abaya Only"];p.priceByType={"Full Set":999,"Abaya Only":799};p.regularPrice=1299;p.regularPriceByType={"Full Set":1299};}})();\n';
 
 async function useCatalog(page) {
   await page.route(/\/category-products\.js(\?.*)?$/, (r) => r.fulfill({ contentType: 'application/javascript', body: catalog }));
