@@ -193,6 +193,16 @@
         })
         .filter(Boolean);
     }
+    // Some imported products store multiple available colors as one comma-separated label.
+    // Render each color as its own selectable option instead of one combined button.
+    var labelList = String(p.colorLabel || "").split(/[,，;；|]/).map(function (v) { return v.trim(); }).filter(Boolean);
+    if (labelList.length > 1) {
+      var colorImages = Array.isArray(p.images) && p.images.length === labelList.length ? p.images : [];
+      return labelList.map(function (label, idx) {
+        return { color: colorKeyFromLabel(label), colorLabel: label,
+          image: colorImages[idx] ? resolveImg(colorImages[idx]) : "" };
+      });
+    }
     var gallery = Array.isArray(p.images) && p.images.length ? p.images : [];
     var looksLikeColors = String(p.colorLabel || p.color || "").toLowerCase().indexOf("multiple") !== -1;
     if (!looksLikeColors && gallery.length > 1) {
@@ -319,9 +329,13 @@
       el.innerHTML = "";
       return;
     }
-    if (!state.selectedColor) {
+    if (!variants.some(function (row) { return row.color === state.selectedColor; })) {
       state.selectedColor = variants[0].color;
       state.selectedColorLabel = variants[0].colorLabel;
+      if (variants[0].image) {
+        var initialIndex = state.galleryImages.indexOf(variants[0].image);
+        if (initialIndex >= 0) state.activeImage = initialIndex;
+      }
     }
     el.innerHTML =
       "<div class='pd-option-label'>Color</div>" +
