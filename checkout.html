@@ -3087,7 +3087,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function formatOrderSlotLine(index, item) {
         var base = checkoutLineBaseName(item);
-        return index + '. ' + base;
+        var color = String(item.colorLabel || item.color || '').trim();
+        // Preserve the product-slot schema while keeping the customer's chosen color.
+        // Historical rows without a selected color remain unchanged.
+        return index + '. ' + base + (color ? ' [Color: ' + color.replace(/[\[\]\r\n]/g, ' ').trim() + ']' : '');
     }
 
     function formatOrderSlotLineDetailed(index, item) {
