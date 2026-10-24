@@ -877,6 +877,7 @@
           syncCardPrice(p, meta);
         } else if (f === "colorLabel") {
           p.colorLabel = inp.value;
+          p.color = inp.value;
           var labels = inp.value.split(/[,，;；|]/).map(function(x){return x.trim();}).filter(Boolean);
           if (Array.isArray(p.colorVariants) && p.colorVariants.length) {
             p.colorVariants = labels.map(function(label,i){
