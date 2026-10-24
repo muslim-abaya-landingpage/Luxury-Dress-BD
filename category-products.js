@@ -1340,6 +1340,11 @@ window.CATEGORY_PRODUCTS = {
       price: 1750,
       color: "Navy Blue, Red , Lime Green",
       colorLabel: "Navy Blue, Red , Lime Green",
+      colorVariants: [
+        { color: "navy-blue", colorLabel: "Navy Blue", image: "/images/uploads/p-197025f0b8ff4107-1.webp" },
+        { color: "red", colorLabel: "Red", image: "/images/uploads/p-197025f0b8ff4107-2.webp" },
+        { color: "lime-green", colorLabel: "Lime Green", image: "/images/uploads/p-197025f0b8ff4107-3.webp" }
+      ],
       fabric: "100% Selap Cotton",
       sizes: ["38", "40", "42", "44", "46"],
       detailNote: "🌸 Premium Cotton Three Piece Collection 🌸\n\nরুচিশীল ডিজাইন ও আকর্ষণীয় কালারের সুন্দর সমন্বয়ে তৈরি প্রিমিয়াম থ্রি-পিস কালেকশন।\n\n✅ কাপড়: ১০০% সেলাপ কটন  \n✅ সালোয়ার: প্যান্ট কাট  \n✅ ডিজাইন: আকর্ষণীয় প্রিন্টেড ডিজাইন  \n✅ কালার: নেভি ব্লু, লাল ও হলুদ  \n✅ মূল্য: ১,৭৫০ টাকা\n\n📦 পাইকারি ও খুচরা বিক্রয় করা হয়।\n\n🚚 সারা বাংলাদেশে ডেলিভারি সুবিধা।",
