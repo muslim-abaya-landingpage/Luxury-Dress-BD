@@ -80,9 +80,28 @@
   if(!result.sha)throw Error('Publish info not found.');
   assets={};base={head:result.sha,shas:result.shas};request=null;setJob({sha:result.sha,shas:result.shas,productId:target&&target.id||'',category:target&&target.category||'',started:Date.now()});
   status('✅ Saved. Updating the website…');
-  // Instant update: the same files go to the site's live copy right away (the deploy follows in ~1 min).
-  if(await pushLive(data.files,queued,result.sha)){var done=job;setJob(null);clearTimeout(timer);status('✅ Saved and live on the website now.');document.dispatchEvent(new CustomEvent('ma-product-live',{detail:done}));result.live=true;return result;}
-  status('✅ Changes saved. Instant publish unavailable ('+lastLiveError+'). Cloudflare deployment is pending.');check();return result;
+  // GitHub has confirmed the save. Release the Save controls now instead of
+  // keeping the editor blocked during the separate validation/D1 request.
+  // Do not claim the product is live until the D1 endpoint confirms it.
+  var currentJob = job, liveFiles = data.files, livePhotos = queued;
+  status('✅ Saved to GitHub. Updating the live website…');
+  Promise.resolve().then(function(){return pushLive(liveFiles,livePhotos,result.sha);}).then(function(ok){
+    if(!job || job.sha !== currentJob.sha)return;
+    if(ok){
+      setJob(null);clearTimeout(timer);
+      status('✅ Saved and live on the website now.');
+      document.dispatchEvent(new CustomEvent('ma-product-live',{detail:currentJob}));
+    }else{
+      status('✅ Saved. Instant publish unavailable ('+lastLiveError+'). Waiting for Cloudflare deployment.');
+      check();
+    }
+  }).catch(function(){
+    if(job && job.sha===currentJob.sha){
+      status('Saved to GitHub; instant publish failed. Checking deployment…');
+      check();
+    }
+  });
+  return result;
  }
  g.MaCatalogPublisher={init:init,publish:publish,enqueue:function(rows){rows.forEach(function(a){assets[a.path]=a;});},pendingPhotos:function(){return Object.keys(assets).length;},check:check,_buildValidation:buildValidation,isReady:function(){return !!base;},gitHash:gitHash};
 })(window);
