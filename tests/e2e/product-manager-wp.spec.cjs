@@ -35,9 +35,10 @@ test('edit screen: name, description, product data tabs, tags, brand, featured, 
   await page.click('[data-etab="inventory"]');
   await expect(page.locator('[data-epanel="inventory"]')).toBeVisible();
   await expect(page.locator('[data-epanel="general"]')).toBeHidden();
+  const initialTagCount = await page.locator('.pm-wp-tags li').count();
   await page.fill('#pmEditTagInput', 'eid, black abaya');
   await page.press('#pmEditTagInput', 'Enter');
-  await expect(page.locator('.pm-wp-tags li')).toHaveCount(2);
+  await expect(page.locator('.pm-wp-tags li')).toHaveCount(initialTagCount + 2);
   await page.fill('[data-ef="brand"]', 'Muslim Abaya');
   await page.check('[data-ef="featured"]');
   await page.fill('[data-ef="detailNote"]', 'Dubai cherry fabric, full set');
