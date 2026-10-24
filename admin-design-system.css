@@ -36,3 +36,10 @@ input:not([type=checkbox]):not([type=radio]),select,textarea{accent-color:#a77d3
 :where(.adm-main,.pn-main) [role=status]{font-size:13px}
 @media(max-width:760px){.adm-heading h1,.pn-head h1{font-size:22px!important}.pn-main{padding-inline:12px}.adm-main{padding-inline:12px}}
 @media(prefers-reduced-motion:reduce){.adm-sidebar-nav .adm-sidebar-item,.pn-nav a{transition:none!important}}
+
+/* Layout consistency 2026-10-24: avoid clipping and unused canvas widths across admin pages. */
+:where(.adm-shell,.pn-app,.adm-main,.pn-main,.adm-content){min-width:0}
+:where(.adm-main,.pn-main,.adm-content) > :where(section,article,.pn-card,.adm-panel){max-width:100%;box-sizing:border-box}
+:where(.adm-main,.pn-main) :where(img,svg,video){max-width:100%}
+:where(.adm-main,.pn-main) :where(.pn-row2,.pn-grid,.adm-grid){min-width:0}
+@media(max-width:760px){:where(.adm-main,.pn-main){max-width:100%;overflow-wrap:anywhere}}
