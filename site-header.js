@@ -163,6 +163,7 @@
     '/cover-up': 'cover-up.html',
     '/tops-kurti': 'tops-kurti.html',
     '/premium-two-piece': 'premium-two-piece.html',
+    '/three-piece-dress': 'three-piece-dress.html',
     '/embroidery': 'embroidery.html',
     '/karchupi': 'karchupi.html',
     '/kaftan': 'kaftan.html',
