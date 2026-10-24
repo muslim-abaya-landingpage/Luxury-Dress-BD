@@ -27,7 +27,7 @@
 <link rel="stylesheet" href="product-quick-upload.css?v=20261016-publish">
 
 <link rel="stylesheet" href="admin-dashboard-design.css?v=20261018-3">
-<script src="admin-dashboard-design.js?v=20261018-3"></script>
+<script defer src="admin-dashboard-design.js?v=20261018-3"></script>
 <link rel="stylesheet" href="admin-premium-layout.css?v=20261021-1">
 <link rel="stylesheet" href="product-manager-wp.css?v=20261024-wc">
 <link rel="stylesheet" href="admin-design-system.css?v=20261024-1">
@@ -144,10 +144,42 @@
   <script src="product-links-data.js?v=49a0ee4ca9e20d0b"></script>
   <script id="pmRawCatalog">window.MA_CATALOG_INCLUDE_UNPUBLISHED = true; window.MA_RAW_CATEGORY_PRODUCTS = JSON.parse(JSON.stringify(window.CATEGORY_PRODUCTS || {}));</script>
   <script src="product-catalog-loader.js?v=20261013-manager"></script>
-  <script src="product-publish-utils.js?v=4d87960bbc2baa44"></script><script src="product-csv.js?v=1"></script><script src="product-publisher.js?v=20261024-live-verified"></script><script src="product-quick-upload.js?v=4215657447c68aba"></script>
+  <script src="product-publish-utils.js?v=4d87960bbc2baa44"></script><script src="product-publisher.js?v=20261024-live-verified"></script>
 <script id="pmStockAdmin">
 (function () {
   var ROW_CIRCLES = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "⑪", "⑫"];
+  var lazyScripts = Object.create(null);
+  var quickUploadOptions = null;
+  var quickUploadMounted = false;
+  function loadScriptOnce(src) {
+    if (lazyScripts[src]) return lazyScripts[src];
+    lazyScripts[src] = new Promise(function (resolve, reject) {
+      var existing = document.querySelector('script[data-pm-lazy-src="' + src + '"]');
+      if (existing) { existing.addEventListener("load", resolve, { once: true }); existing.addEventListener("error", reject, { once: true }); return; }
+      var script = document.createElement("script");
+      script.src = src; script.async = true; script.dataset.pmLazySrc = src;
+      script.onload = resolve; script.onerror = function () { reject(new Error("Could not load " + src)); };
+      document.head.appendChild(script);
+    });
+    return lazyScripts[src];
+  }
+  function ensureCsvTools() { return loadScriptOnce("product-csv.js?v=20261025-lazy"); }
+  function ensureQuickUpload() {
+    return loadScriptOnce("product-quick-upload.js?v=20261025-lazy").then(function () {
+      if (!quickUploadMounted) {
+        if (!window.MaProductQuickUpload || !quickUploadOptions) throw new Error("Quick upload is not ready");
+        window.MaProductQuickUpload.mount(quickUploadOptions);
+        quickUploadMounted = true;
+      }
+      return window.MaProductQuickUpload;
+    });
+  }
+  function openQuickUpload() {
+    return ensureQuickUpload().then(function () {
+      var trigger = document.getElementById("pmQuickUpload");
+      if (trigger) trigger.click();
+    }).catch(function (err) { toast(err.message || "Quick upload is unavailable"); });
+  }
   // Dynamic editor/list views can replace their controls between renders.
   // Bind defensively so a transient missing control never aborts the publisher bootstrap.
   function bindById(id, event, handler) {
@@ -1038,7 +1070,7 @@
     bindById("pmEditUpdate", "click", saveEdit);
     bindById("pmEditBarSave", "click", saveEdit);
     bindById("pmEditBack", "click", function () { activeKey = ALL_PRODUCTS_KEY; renderCatList(); renderMain(); });
-    bindById("pmEditAddNew", "click", function () { var q = document.getElementById("pmQuickUpload"); if (q) q.click(); });
+    bindById("pmEditAddNew", "click", openQuickUpload);
     wireImageUploader(root, p);
     wireGalleryUploader(root, p);
     wireWpMediaBoxes(root, p, changed);
@@ -1223,8 +1255,7 @@
       '<div class="pm-overview-wrap"><table class="pm-overview pm-wp-table"><thead>' + headRow + '</thead><tbody id="pmAllRows"></tbody><tfoot>' + headRow + '</tfoot></table></div>' +
       '<div class="pm-wp-tablenav bottom"><div class="pm-wp-pages" id="pmPagerBottom"></div></div></div>';
     bindById("pmAllQuickUpload", "click", function () {
-      var quickUpload = document.getElementById("pmQuickUpload");
-      if (quickUpload) quickUpload.click();
+      openQuickUpload();
     });
     bindById("pmManageCats", "click", function () {
       if (!sections.length) return;
@@ -1266,21 +1297,24 @@
     });
     // CSV export / import (product-csv.js). Import shows what will change first, then saves at once.
     bindById("pmCsvExport", "click", function () {
-      if (!window.MaProductCsv) { toast("CSV tool did not load — reload the page"); return; }
-      var blob = new Blob([window.MaProductCsv.exportCsv(products, sections, { metaFor: getCategoryTypeMeta })], { type: "text/csv;charset=utf-8" });
-      var a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "muslimabaya-products-" + todayKey() + ".csv";
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+      ensureCsvTools().then(function () {
+        var blob = new Blob([window.MaProductCsv.exportCsv(products, sections, { metaFor: getCategoryTypeMeta })], { type: "text/csv;charset=utf-8" });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "muslimabaya-products-" + todayKey() + ".csv";
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+      }).catch(function (err) { toast(err.message || "CSV export is unavailable"); });
     });
-    bindById("pmCsvImport", "click", function () { document.getElementById("pmCsvFile").click(); });
+    bindById("pmCsvImport", "click", function () {
+      ensureCsvTools().then(function () { var input = document.getElementById("pmCsvFile"); if (input) input.click(); }).catch(function (err) { toast(err.message || "CSV import is unavailable"); });
+    });
     bindById("pmCsvFile", "change", function (e) {
       var file = e.target.files && e.target.files[0];
       e.target.value = "";
       if (!file) return;
       if (file.size > 3 * 1024 * 1024) { toast("The CSV file is too large (max 3 MB)"); return; }
-      file.text().then(function (text) { showImportPlan(text); }).catch(function () { toast("Could not read the file"); });
+      ensureCsvTools().then(function () { return file.text(); }).then(function (text) { showImportPlan(text); }).catch(function () { toast("Could not read the file"); });
     });
     function showImportPlan(text) {
       var plan = window.MaProductCsv.planImport(text, products, sections, {
@@ -1495,7 +1529,7 @@
         button.addEventListener("click", function () {
           var cat = button.getAttribute("data-pm-copy-cat");
           var p = (products[cat] || [])[parseInt(button.getAttribute("data-pm-copy-index"), 10)];
-          if (p && window.MaProductQuickUpload && window.MaProductQuickUpload.copyFrom) window.MaProductQuickUpload.copyFrom(p, cat);
+          if (p) ensureQuickUpload().then(function (api) { api.copyFrom(p, cat); }).catch(function (err) { toast(err.message || "Quick upload is unavailable"); });
         });
       });
       document.querySelectorAll("[data-pm-cat]").forEach(function (button) {
@@ -1890,7 +1924,7 @@
       });
     }
 
-    var easyEdit=document.createElement('button');easyEdit.type='button';easyEdit.className='pl-btn pl-btn-secondary';easyEdit.textContent='Edit photos & details';easyEdit.addEventListener('click',function(){window.MaProductQuickUpload.edit(p,catKey);});card.appendChild(easyEdit);
+    var easyEdit=document.createElement('button');easyEdit.type='button';easyEdit.className='pl-btn pl-btn-secondary';easyEdit.textContent='Edit photos & details';easyEdit.addEventListener('click',function(){ensureQuickUpload().then(function(api){api.edit(p,catKey);}).catch(function(err){toast(err.message||"Quick upload is unavailable");});});card.appendChild(easyEdit);
     return card;
   }
 
@@ -3003,7 +3037,7 @@
   renderCatList();
   renderMain();
   savedSnapshot = catalogSnapshot();
-  window.MaProductQuickUpload.mount({sections:function(){return sections;},products:function(){return products;},status:setSaveStatus,isSaved:function(){return savedSnapshot===catalogSnapshot();},stage:function(category,product){if(!sections.some(function(sec){return sec.key===category;}))throw new Error("Choose a category.");Object.keys(products).forEach(function(k){products[k]=products[k].filter(function(p){return p.id!==product.id;});});products[category].unshift(product);renderCatList();renderMain();},publish:saveAll});
+  quickUploadOptions = {sections:function(){return sections;},products:function(){return products;},status:setSaveStatus,isSaved:function(){return savedSnapshot===catalogSnapshot();},stage:function(category,product){if(!sections.some(function(sec){return sec.key===category;}))throw new Error("Choose a category.");Object.keys(products).forEach(function(k){products[k]=products[k].filter(function(p){return p.id!==product.id;});});products[category].unshift(product);renderCatList();renderMain();},publish:saveAll};
   reloadPublishingData().then(refreshLiveStockOverrides);
   // The publisher fires this once the new catalog is actually served by the website.
   document.addEventListener("ma-product-live", function () {

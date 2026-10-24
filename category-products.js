@@ -646,7 +646,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "KURTI-EMB-01",
       name: "Charcoal Black Embroidered Kurti",
-      image: "https://muslimabaya.netlify.app/catalog/images/charcoal-black-embroidered-kurti.webp",
+      image: "/images/embroidery/charcoal-black-embroidered-kurti.webp",
       price: 750,
       color: "charcoal-black",
       colorLabel: "Charcoal Black",
@@ -661,7 +661,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "KURTI-EMB-02",
       name: "Mustard Yellow Embroidered Kurti",
-      image: "https://muslimabaya.netlify.app/catalog/images/mustard-yellow-embroidered-kurti.webp",
+      image: "/images/embroidery/mustard-yellow-embroidered-kurti.webp",
       price: 750,
       color: "mustard-yellow",
       colorLabel: "Mustard Yellow",
@@ -676,7 +676,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "KURTI-EMB-03",
       name: "Pastel Pink Embroidered Kurti",
-      image: "https://muslimabaya.netlify.app/catalog/images/pastel-pink-embroidered-kurti.webp",
+      image: "/images/embroidery/pastel-pink-embroidered-kurti.webp",
       price: 750,
       color: "pastel-pink",
       colorLabel: "Pastel Pink",
@@ -691,7 +691,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "KURTI-EMB-04",
       name: "Maroon Embroidered Kurti",
-      image: "https://muslimabaya.netlify.app/catalog/images/maroon-embroidered-kurti-for-women.webp",
+      image: "/images/embroidery/maroon-embroidered-kurti-for-women.webp",
       price: 750,
       color: "maroon",
       colorLabel: "Maroon",
@@ -706,7 +706,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "KURTI-EMB-05",
       name: "Dusty Rose Embroidered Kurti",
-      image: "https://muslimabaya.netlify.app/catalog/images/dusty-rose-embroidered-kurti-for-women-bangladesh.webp",
+      image: "/images/embroidery/dusty-rose-embroidered-kurti-for-women-bangladesh.webp",
       price: 750,
       color: "dusty-rose",
       colorLabel: "Dusty Rose",
@@ -721,7 +721,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "KURTI-EMB-06",
       name: "Mauve Lavender Embroidered Kurta",
-      image: "https://muslimabaya.netlify.app/catalog/images/mauve-lavender-embroidered-kurta-for-women.webp",
+      image: "/images/embroidery/mauve-lavender-embroidered-kurta-for-women.webp",
       price: 750,
       color: "mauve-lavender",
       colorLabel: "Mauve Lavender",
@@ -736,7 +736,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "KURTI-EMB-07",
       name: "Cream Beige Floral Embroidered Kurti",
-      image: "https://muslimabaya.netlify.app/catalog/images/cream-beige-womens-embroidered-kurti-floral-design.webp",
+      image: "/images/embroidery/cream-beige-womens-embroidered-kurti-floral-design.webp",
       price: 750,
       color: "cream-beige",
       colorLabel: "Cream Beige",
