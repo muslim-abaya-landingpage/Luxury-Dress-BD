@@ -103,3 +103,5 @@ body.pm-wp-admin{font-family:Inter,"Segoe UI","Hind Siliguri",sans-serif!importa
 .pm-wp-admin .pm-view-tip{font-size:13px;color:#64758a;margin:10px 0;line-height:1.5}
 .pm-wp-admin .pm-view-tip strong{color:#203551}
 @media(max-width:760px){.pm-wp-admin .pm-overview.pm-wp-table{min-width:950px}.pm-wp-admin .pm-wp-actions select{max-width:100%}.pm-wp-admin .pm-wp-tablenav.top{align-items:stretch}.pm-wp-admin .pm-wp-search button{min-height:44px}}
+
+.pm-wp-admin td.column-tags a.pm-row-link{position:relative;z-index:3;pointer-events:auto}
