@@ -39,6 +39,17 @@
 <script src="admin-courier-tracking.js?v=20261021-notify1"></script>
   <style>.wo-stale-note{margin:0 0 12px;padding:8px 12px;border-radius:10px;background:var(--adm-accent-wash,#f2edfc);color:var(--adm-accent-ink,#6240b2);font-size:13px}.wo-stale-note[hidden]{display:none}#oGrid.wo-stale{opacity:.92}.pn-head .adm-heading{flex:1 1 260px;min-width:220px}.pn-head .adm-heading h1{overflow-wrap:anywhere}</style>
 <link rel="stylesheet" href="admin-design-system.css?v=20261024-1">
+<style>
+/* Order details: balance both columns while keeping actions and totals easy to reach. */
+@media (min-width: 761px) {
+ .wo-edit-page #oGrid.pn-grid{grid-template-columns:minmax(0,1fr) minmax(300px,355px);gap:18px;align-items:start}
+ .wo-edit-page #oGrid .wo-primary-column,.wo-edit-page #oGrid .wo-sidebar-column{min-width:0;display:flex;flex-direction:column;gap:16px}
+ .wo-edit-page #oGrid .pn-card{margin-bottom:0;min-width:0}
+ .wo-edit-page #oGrid #btnSave{order:20;position:static}
+}
+.wo-edit-page .pn-main{width:100%;min-width:0;max-width:none}
+.wo-edit-page .pn-field input,.wo-edit-page .pn-field textarea,.wo-edit-page .pn-field select{max-width:100%;box-sizing:border-box}
+</style>
 </head>
 <body class="pn-body wo-edit-page">
   <div class="pn-app adm-shell">
@@ -127,6 +138,20 @@
               <div class="pn-field"><label for="fCourierNote">Courier Note</label><textarea class="pn-ta" id="fCourierNote" rows="2" placeholder="Note for the courier"></textarea></div>
             </div>
           </section>
+          <section class="pn-card wo-ip-card" id="ipPanel" aria-labelledby="ipPanelTitle">
+            <h2 id="ipPanelTitle"><i>⌖</i> IP ও ডিভাইস</h2>
+            <div id="ipBody"><p class="pn-note-muted">IP তথ্য লোড হচ্ছে…</p></div>
+            <button type="button" class="pn-btn pn-btn-sm" id="ipBlockedList" style="margin-top:8px">ব্লক করা সব IP</button>
+          </section>
+          <section class="pn-card wo-customer-history" id="customerHistoryPanel" aria-labelledby="customerHistoryTitle">
+            <h2 id="customerHistoryTitle"><i>◷</i> Customer history</h2>
+            <div class="wo-history-kpis" id="customerHistoryStats" aria-live="polite"></div>
+            <div class="wo-history-list" id="customerHistoryRows">
+              <p class="pn-note-muted">Customer history loading…</p>
+            </div>
+            <button type="button" class="pn-btn pn-btn-sm wo-history-more" id="customerHistoryMore">View full history</button>
+          </section>
+
         </div>
 
         <div class="wo-sidebar-column">
@@ -162,20 +187,6 @@
             <div id="oTrack" style="margin-top:8px"></div>
             <button type="button" class="pn-btn pn-btn-blue pn-btn-block" id="btnCourierSend" style="margin-top:10px">🚚 Send to Steadfast</button>
           </section>
-          <section class="pn-card wo-ip-card" id="ipPanel" aria-labelledby="ipPanelTitle">
-            <h2 id="ipPanelTitle"><i>⌖</i> IP ও ডিভাইস</h2>
-            <div id="ipBody"><p class="pn-note-muted">IP তথ্য লোড হচ্ছে…</p></div>
-            <button type="button" class="pn-btn pn-btn-sm" id="ipBlockedList" style="margin-top:8px">ব্লক করা সব IP</button>
-          </section>
-          <section class="pn-card wo-customer-history" id="customerHistoryPanel" aria-labelledby="customerHistoryTitle">
-            <h2 id="customerHistoryTitle"><i>◷</i> Customer history</h2>
-            <div class="wo-history-kpis" id="customerHistoryStats" aria-live="polite"></div>
-            <div class="wo-history-list" id="customerHistoryRows">
-              <p class="pn-note-muted">Customer history loading…</p>
-            </div>
-            <button type="button" class="pn-btn pn-btn-sm wo-history-more" id="customerHistoryMore">View full history</button>
-          </section>
-
           <button type="button" class="pn-btn pn-btn-primary pn-btn-block" id="btnSave">✓ Update Order</button>
         </div>
       </div>
