@@ -848,8 +848,12 @@
       if (b2 && b2.disabled) return;
       [b1, b2].forEach(function (b) { if (b) b.disabled = true; });
       editMsg("Saving…", "busy");
-      saveAll().then(function () {
-        editMsg("Saved ✓ — now updating the website (about 1–2 minutes). This message turns green when it is live.", "pub");
+      saveAll().then(function (result) {
+        if (result && result.live) {
+          editMsg("✅ Saved and live on the website. Open product pages may need a refresh.", "ok");
+        } else {
+          editMsg("Saved ✓ — instant publish is not confirmed. Cloudflare deployment is in progress; use Check publish status.", "pub");
+        }
       }).catch(function (err) {
         editMsg("Not saved: " + ((err && err.message) || "try again") + " — your changes are kept.", "err");
       }).finally(function () { [b1, b2].forEach(function (b) { if (b) b.disabled = false; }); });
