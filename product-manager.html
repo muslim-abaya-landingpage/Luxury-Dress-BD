@@ -875,7 +875,17 @@
           if (!p.priceByType) p.priceByType = {};
           p.priceByType[f.slice(10)] = parseInt(inp.value, 10) || 0;
           syncCardPrice(p, meta);
-        } else if (f === "sizes") p.sizes = inputToSizes(inp.value);
+        } else if (f === "colorLabel") {
+          p.colorLabel = inp.value;
+          var labels = inp.value.split(/[,，;；|]/).map(function(x){return x.trim();}).filter(Boolean);
+          if (Array.isArray(p.colorVariants) && p.colorVariants.length) {
+            p.colorVariants = labels.map(function(label,i){
+              var previous = p.colorVariants[i] || {};
+              return { color: label.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,""), colorLabel: label, image: previous.image || "" };
+            });
+          }
+        }
+        else if (f === "sizes") p.sizes = inputToSizes(inp.value);
         else if (f === "brand") { var b = inp.value.trim(); if (b) p.brand = b; else delete p.brand; }
         else p[f] = inp.value;
         changed();
