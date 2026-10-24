@@ -197,10 +197,20 @@
     // Render each color as its own selectable option instead of one combined button.
     var labelList = String(p.colorLabel || "").split(/[,，;；|]/).map(function (v) { return v.trim(); }).filter(Boolean);
     if (labelList.length > 1) {
-      var colorImages = Array.isArray(p.images) && p.images.length === labelList.length ? p.images : [];
-      return labelList.map(function (label, idx) {
-        return { color: colorKeyFromLabel(label), colorLabel: label,
-          image: colorImages[idx] ? resolveImg(colorImages[idx]) : "" };
+      var colorImages = Array.isArray(p.images) ? p.images : [];
+      return labelList.map(function (label) {
+        var key = colorKeyFromLabel(label);
+        var image = "";
+        // Map only when a filename clearly identifies the selected color.
+        colorImages.some(function (raw) {
+          var filename = String(raw || "").split("/").pop().toLowerCase();
+          var normalized = filename.replace(/[^a-z0-9]+/g, "-");
+          if (key && ("-" + normalized + "-").indexOf("-" + key + "-") !== -1) {
+            image = resolveImg(raw); return true;
+          }
+          return false;
+        });
+        return { color: key, colorLabel: label, image: image };
       });
     }
     var gallery = Array.isArray(p.images) && p.images.length ? p.images : [];
@@ -754,7 +764,12 @@
       state.galleryImages && state.galleryImages.length
         ? state.galleryImages[state.activeImage]
         : "";
-    var img = activeGalleryImg || resolveImg(state.product.image || state.product.img);
+    // Keep the selected color's mapped image with the order, even if another gallery
+    // thumbnail was browsed afterward. Never infer a color-image mapping from order alone.
+    var mappedColor = getProductColorVariants(state.product).filter(function (v) {
+      return v.color === state.selectedColor && v.image;
+    })[0];
+    var img = (mappedColor && mappedColor.image) || activeGalleryImg || resolveImg(state.product.image || state.product.img);
     var line = {
       id: state.product.id,
       name: state.product.name,
