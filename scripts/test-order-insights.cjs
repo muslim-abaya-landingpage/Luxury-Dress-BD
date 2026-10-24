@@ -45,7 +45,10 @@ assert.deepEqual(model.analyze([], {today:'2026-10-16'}).groups.delivered,{count
 const original = JSON.stringify(fixture); model.analyze(fixture); assert.equal(JSON.stringify(fixture),original);
 // Execute the real order page controller with its existing authenticated API contract.
 const html = fs.readFileSync(path.join(__dirname,'../admin-orders.html'),'utf8');
-const inline = [...html.matchAll(/<script>([\s\S]*?)<\/script>/gi)].at(-1)[1];
+// The page's main inline script (the one that loads the order list); small helper scripts may follow it.
+// Empty-state rows must span the whole order table, however many columns the page has.
+const tableCols = (((html.match(/<thead>[\s\S]*?<\/thead>/) || [''])[0]).match(/<th\b/g) || []).length;
+const inline = [...html.matchAll(/<script>([\s\S]*?)<\/script>/gi)].map((m) => m[1]).find((code) => code.includes('AdminOrderList'));
 class Element {
   constructor(){ this.listeners={}; this.textContent=''; this.innerHTML=''; this.hidden=true; this.children=[]; }
   addEventListener(k,fn){this.listeners[k]=fn;}
@@ -76,7 +79,7 @@ setImmediate(()=>{
     assert.equal(document.getElementById('ordFinance').innerHTML,finance);
     assert.equal(calls.length,1,'filters do not write or refetch orders');
     document.getElementById('ordSearch').listeners.input({target:{value:'does-not-exist'}});
-    assert(document.getElementById('ordBody').innerHTML.includes('colspan="9"'));
+    assert(document.getElementById('ordBody').innerHTML.includes('colspan="' + tableCols + '"'));
     console.log('PASS: finance separation, strict dates, Dhaka boundary, audit flags, no mutation, page/API integration, escaping, scope and combined filters.');
   } catch(error) { console.error(error); process.exitCode=1; }
 });
