@@ -135,7 +135,7 @@ test('owner save goes live at once; photos, verbatim copies, new product page, t
   assert.equal(site.headers.get('X-MA-Live'), '1');
   assert.match(text, /price: 1200/, 'the saved price is served before the deploy');
   assert.match(text, /"\/api\/live-img\/images\/uploads\/new-1\.webp"/, 'new photo points at its live copy');
-  assert.equal(site.headers.get('Cache-Control'), 'no-cache');
+  assert.equal(site.headers.get('Cache-Control'), 'no-store');
   const again = await live.serveLiveFile(get('category-products.js?v=123', { 'If-None-Match': site.headers.get('ETag') }), env, 'category-products.js', deps);
   assert.equal(again.status, 304);
 
