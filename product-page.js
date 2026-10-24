@@ -177,6 +177,15 @@
 
   function getProductColorVariants(p) {
     if (!p) return [];
+    // The editor's displayed color list is authoritative. Old explicit variants
+    // must not override a more recently saved comma-separated color label.
+    var savedLabels = String(p.colorLabel || "").split(/[,，;；|]/).map(function(x){return x.trim();}).filter(Boolean);
+    if (savedLabels.length > 1 && Array.isArray(p.colorVariants) && p.colorVariants.length) {
+      return savedLabels.map(function(label,i){
+        var old = p.colorVariants[i] || {};
+        return { color: colorKeyFromLabel(label), colorLabel: label, image: resolveImg(old.image || old.src || "") };
+      });
+    }
     if (Array.isArray(p.colorVariants) && p.colorVariants.length) {
       return p.colorVariants
         .map(function (row) {
