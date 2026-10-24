@@ -16,9 +16,11 @@ test('_routes.json sends every blocked path to the middleware and stays within t
   for (const d of BLOCKED_DIRS) assert.ok(routes.include.includes('/' + d + '/*'), 'missing /' + d + '/*');
   for (const f of BLOCKED_FILES) {
     assert.ok(routes.include.includes('/' + f), 'missing /' + f);
-    if (/[^\x00-\x7f]/.test(f)) assert.ok(routes.include.includes(encodeURI('/' + f)), 'missing encoded /' + f);
+    // The percent-encoded form is added too when it fits Cloudflare's 100-character rule limit.
+    if (/[^\x00-\x7f]/.test(f) && encodeURI('/' + f).length <= 100) assert.ok(routes.include.includes(encodeURI('/' + f)), 'missing encoded /' + f);
   }
-  assert.ok(routes.include.length + routes.exclude.length <= 100);
+  assert.ok(routes.include.length + routes.exclude.length <= 100, 'at most 100 rules');
+  for (const rule of routes.include.concat(routes.exclude)) assert.ok(rule.length <= 100, 'rule over 100 characters: ' + rule);
 });
 
 test('blocked: source, tests, notes, tool files; allowed: every page and asset the site serves', () => {
