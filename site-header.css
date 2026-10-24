@@ -882,3 +882,10 @@ body.site-search-open .site-search-drawer {
 @media(min-width:1024px) and (max-width:1199px){.desktop-menu ul{gap:0 10px!important}.desktop-menu ul li a{font-size:11px!important}}
 @media(max-width:1023px){.desktop-menu{display:none!important}.nav-row{gap:8px!important}.brand-text-logo{min-width:0!important}.nav-icons{flex-shrink:0!important}}
 .desktop-menu ul li a:focus-visible{outline:2px solid #ab8048!important;outline-offset:2px!important}
+
+/* A clean luxury navigation: retain horizontal scrolling without the grey track. */
+@media (min-width:1024px){
+  .header-middle-nav .desktop-menu{scrollbar-width:none!important;-ms-overflow-style:none!important;scroll-behavior:smooth}
+  .header-middle-nav .desktop-menu::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
+  .header-middle-nav .desktop-menu ul{padding-bottom:4px!important}
+}
