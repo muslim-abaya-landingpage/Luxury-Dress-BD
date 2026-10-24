@@ -1,0 +1,116 @@
+name: Worker Deploy
+
+# Deploys cloudflare-worker/worker.js to the Cloudflare Worker "white-lab-3589" (order safety net, IP blocking,
+# Meta/TikTok server events, GTM loader) whenever it changes on main.
+#
+# Only the CODE is replaced ("Replace Worker Script Content"): bindings (D1 "DB"), secrets, the */2 cron and the
+# routes (muslimabaya.com/_ma/*, gtm.js*, shop.muslimabaya.com/*) are left exactly as they are.
+#
+# One-time setup (docs/WORKER-AUTO-DEPLOY.md): add the repository secret CLOUDFLARE_API_TOKEN
+# (a Cloudflare API token with "Account → Workers Scripts → Edit" for this account). Without it the job is skipped.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "cloudflare-worker/**"
+      - "functions/_lib/ip-guard.js"
+      - ".github/workflows/worker-deploy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: worker-deploy
+  cancel-in-progress: false
+
+env:
+  ACCOUNT_ID: b24e0c217c57ed7b4e19e104a1411309
+  SCRIPT: white-lab-3589
+
+jobs:
+  deploy:
+    name: Test and deploy the Worker
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check credentials secret
+        id: creds
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -z "$CF_TOKEN" ]; then
+            echo "::warning::CLOUDFLARE_API_TOKEN secret is not set; skipping Worker deploy. See docs/WORKER-AUTO-DEPLOY.md."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout
+        if: steps.creds.outputs.ready == 'true'
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        if: steps.creds.outputs.ready == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Worker tests (order queue, IP blocking, admin IP API)
+        if: steps.creds.outputs.ready == 'true'
+        run: node --test tests/backend/order-ip-guard.test.mjs
+
+      - name: Back up the live Worker code
+        if: steps.creds.outputs.ready == 'true'
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p backup
+          curl -fsS -H "Authorization: Bearer $CF_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/workers/scripts/$SCRIPT/content/v2" -o backup/live-worker.multipart
+          ls -l backup
+
+      - name: Upload backup
+        if: steps.creds.outputs.ready == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-worker-before-deploy
+          path: backup/
+          retention-days: 30
+
+      - name: Deploy code (bindings, secrets, cron and routes unchanged)
+        if: steps.creds.outputs.ready == 'true'
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          node --check cloudflare-worker/worker.js
+          curl -fsS -X PUT -H "Authorization: Bearer $CF_TOKEN" \
+            -F 'metadata={"main_module":"worker.js"};type=application/json' \
+            -F "worker.js=@cloudflare-worker/worker.js;type=application/javascript+module" \
+            "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/workers/scripts/$SCRIPT/content" -o deploy.json
+          node -e "const r=require('./deploy.json'); if(!r.success){console.error(JSON.stringify(r.errors)); process.exit(1)} console.log('Deployed', r.result && r.result.id || '')"
+
+      - name: Verify live code and routes
+        if: steps.creds.outputs.ready == 'true'
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          curl -fsS -H "Authorization: Bearer $CF_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/workers/scripts/$SCRIPT/content/v2" -o live.multipart
+          node -e "
+            const fs=require('fs'), crypto=require('crypto');
+            const raw=fs.readFileSync('live.multipart','utf8');
+            const live=raw.slice(raw.indexOf('\r\n\r\n')+4, raw.lastIndexOf('\r\n--'));
+            const want=fs.readFileSync('cloudflare-worker/worker.js','utf8');
+            const h=s=>crypto.createHash('sha256').update(s).digest('hex');
+            if(h(live)!==h(want)){console.error('Live Worker code differs from the repository'); process.exit(1)}
+            console.log('Live Worker code matches the repository:', h(want).slice(0,12));"
+          sleep 5
+          test "$(curl -s -o /dev/null -w '%{http_code}' https://muslimabaya.com/_ma/order)" = "405"
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Origin: https://evil.example' https://muslimabaya.com/_ma/order)" = "403"
+          test "$(curl -s -o /dev/null -w '%{http_code}' 'https://muslimabaya.com/gtm.js?id=GTM-ML7RL6BR')" = "200"
+          echo "Routes answer as expected."
