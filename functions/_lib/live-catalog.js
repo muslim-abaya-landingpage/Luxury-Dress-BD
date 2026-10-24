@@ -17,7 +17,7 @@ export const VALIDATION_FILE = 'catalog-validation.json';
 export const LIVE_FILES = CATALOG_FILES.concat(VALIDATION_FILE);
 export const ASSET_PATH = /^images\/uploads\/[a-z0-9-]+\.(webp|jpg|png)$/;
 export const MAX_ASSET_BYTES = 1900000; // D1 row limit is 2 MB; larger photos simply wait for the deploy.
-const STATE_TTL_SECONDS = 3; // how long one edge location reuses the saved state before re-reading D1
+const STATE_TTL_SECONDS = 1; // short edge-state TTL limits stale product data after an owner save
 // Requests that check the exact committed text (admin panel, order price check) get it verbatim.
 const VERBATIM_PARAMS = ['catalog', 'catalog_check', 'live', 'publish'];
 
@@ -137,7 +137,7 @@ export async function serveLiveFile(request, env, path, deps = {}) {
         const verbatim = path === VALIDATION_FILE || wantsVerbatim(url);
         if (!verbatim) body = rewriteAssets(body, state.liveAssets || []);
         const etag = '"live-' + state.sha.slice(0, 16) + '-' + (verbatim ? 'v' : 'r') + '"';
-        const headers = { 'Content-Type': typeFor(path), 'Cache-Control': 'no-cache', ETag: etag, 'X-MA-Live': '1' };
+        const headers = { 'Content-Type': typeFor(path), 'Cache-Control': 'no-store', ETag: etag, 'X-MA-Live': '1' };
         if (request.headers.get('If-None-Match') === etag) return new Response(null, { status: 304, headers });
         return new Response(request.method === 'HEAD' ? null : body, { status: 200, headers });
       }
