@@ -96,7 +96,7 @@ test('Quick Edit in the list: name, option prices and colour save at once; a fai
   await row.hover();
   await row.locator('[data-qe-cat]').click();
   await page.fill('.pm-qe [data-qe="name"]', 'Maroon Abaya Set (Eid)');
-  await page.fill('.pm-qe [data-qe-type="Full Set"]', '1111');
+  await page.fill('.pm-qe [data-qe-type="Full Set Borka, Hijab+ Niqab"]', '1111');
   await page.click('.pm-qe [data-qe-save]');
   await expect(page.locator('.pm-qe-msg')).toContainText('Not saved');
   expect(await page.evaluate(() => window.CATEGORY_PRODUCTS && 1)).toBe(1);
@@ -108,7 +108,7 @@ test('Quick Edit in the list: name, option prices and colour save at once; a fai
   await page.locator('#pmAllRows tr').first().hover();
   await page.locator('#pmAllRows tr').first().locator('[data-qe-cat]').click();
   await page.fill('.pm-qe [data-qe="name"]', 'Maroon Abaya Set (Eid)');
-  await page.fill('.pm-qe [data-qe-type="Full Set"]', '1111');
+  await page.fill('.pm-qe [data-qe-type="Full Set Borka, Hijab+ Niqab"]', '1111');
   await page.fill('.pm-qe [data-qe="colorLabel"]', 'Deep Maroon');
   await page.click('.pm-qe [data-qe-save]');
   await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
@@ -116,7 +116,7 @@ test('Quick Edit in the list: name, option prices and colour save at once; a fai
   const b = block(file, 'ABY-MAROON-1');
   expect(b).toContain('name: "Maroon Abaya Set (Eid)"');
   expect(b).toContain('price: 1111');
-  expect(b).toContain('"Full Set": 1111');
+  expect(b).toContain('"Full Set Borka, Hijab+ Niqab": 1111');
   expect(b).toContain('colorLabel: "Deep Maroon"');
 });
 
@@ -174,7 +174,7 @@ test('edit screen: an option can be renamed (Hijab → Hijab + Niqab) and reorde
   await expect(page.locator('[data-ef="typePrice:Hijab + Niqab"]')).toHaveValue('450');
   await expect(page.locator('#pmEditBar')).toHaveAttribute('data-state', 'dirty');
   // Duplicate name is refused and the old name stays.
-  await renamed.fill('full set'); await renamed.press('Enter');
+  await renamed.fill('full set borka, hijab+ niqab'); await renamed.press('Enter');
   await expect(page.locator('#pmOptEditMsg')).toContainText('already exists');
   await expect(page.locator('[data-opt-name="Hijab + Niqab"]')).toBeVisible();
   // Move it to the top: it becomes the card price.
