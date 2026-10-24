@@ -690,15 +690,17 @@ body {
 </script>
 <link rel="stylesheet" href="site-header.css?v=20261024-menu-scroll" media="all">
 <style id="ma-premium-home-category-bar">
-/* Premium category navigation: readable pills, horizontal swipe, visible focus. */
-#homeCatnav{position:relative;max-width:100%;min-width:0;margin:10px auto 22px;padding:8px clamp(10px,3vw,28px)!important;background:transparent!important;overflow:hidden}
-#homeCatnav .home-catnav-inner{display:flex!important;align-items:center!important;gap:10px!important;flex-wrap:nowrap!important;max-width:1400px;width:100%;margin:0 auto;padding:10px 8px!important;background:#fff!important;border:1px solid #e9e2d9;border-radius:18px;box-shadow:0 8px 28px rgba(29,37,52,.055);overflow-x:auto!important;overflow-y:hidden!important;scroll-snap-type:x proximity;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#d8b98e transparent}
-#homeCatnav .home-catnav-label{flex:0 0 auto;white-space:nowrap;display:inline-flex;align-items:center;gap:7px;padding:11px 14px;margin:0!important;background:#202d3e;color:#fff!important;border:0;border-radius:11px;font-size:12px;letter-spacing:.045em;font-weight:750;text-transform:uppercase}
-#homeCatnav .home-catnav-inner>a{flex:0 0 auto!important;display:inline-flex!important;align-items:center;min-height:43px;padding:10px 17px!important;margin:0!important;border:1px solid #e6e8eb;border-radius:999px;background:#fafbfc;color:#253346!important;text-decoration:none!important;white-space:nowrap!important;font-size:13px!important;font-weight:650!important;letter-spacing:.015em!important;transition:background .15s,color .15s,border-color .15s}
-#homeCatnav .home-catnav-inner>a:hover{background:#f7efe5!important;border-color:#c5a67d!important;color:#5f401e!important}
-#homeCatnav .home-catnav-inner>a:focus-visible{outline:3px solid #b78a55!important;outline-offset:2px}
-@media(max-width:767px){#homeCatnav{margin:6px auto 14px;padding:5px 8px!important}#homeCatnav .home-catnav-inner{gap:7px!important;border-radius:13px;padding:7px!important}#homeCatnav .home-catnav-label{font-size:11px;padding:10px 11px}#homeCatnav .home-catnav-inner>a{min-height:44px;padding:10px 13px!important;font-size:12px!important}}
-@media(prefers-reduced-motion:reduce){#homeCatnav .home-catnav-inner>a{transition:none}}
+/* Luxury editorial category rail — only the rail scrolls, never the entire page. */
+#homeCatnav{max-width:100%;min-width:0;margin:16px auto 28px!important;padding:0 clamp(12px,3vw,36px)!important;background:transparent!important;overflow:hidden!important}
+#homeCatnav .home-catnav-inner{display:flex!important;align-items:center!important;gap:0!important;min-width:0;width:100%;max-width:1400px;margin:auto;padding:6px 0 11px!important;background:transparent!important;box-shadow:none!important;border:0!important;border-bottom:1px solid #d9dce2!important;border-radius:0!important;overflow-x:auto!important;overflow-y:hidden!important;overscroll-behavior-x:contain;scrollbar-width:thin;scrollbar-color:#bfc5ce transparent;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
+#homeCatnav .home-catnav-label{display:flex!important;align-items:center;gap:7px;flex:0 0 auto;padding:10px 21px 10px 2px!important;margin-right:10px!important;border-right:1px solid #ddd;background:transparent!important;color:#1e2c3b!important;white-space:nowrap;font:700 13px/1.5 "Segoe UI",sans-serif!important;letter-spacing:.13em!important;text-transform:uppercase}
+#homeCatnav .home-catnav-inner>a{position:relative;display:inline-flex!important;align-items:center;flex:0 0 auto!important;padding:10px 16px!important;min-height:44px;margin:0!important;border:0!important;border-radius:0!important;background:transparent!important;color:#485466!important;text-decoration:none!important;white-space:nowrap!important;font:600 12px/1.4 "Segoe UI",sans-serif!important;letter-spacing:.075em!important;text-transform:uppercase;scroll-snap-align:start;transition:color .15s ease}
+#homeCatnav .home-catnav-inner>a:after{content:"";position:absolute;bottom:3px;left:16px;right:16px;height:2px;background:#a77b48;transform:scaleX(0);transform-origin:center;transition:transform .15s}
+#homeCatnav .home-catnav-inner>a:hover,#homeCatnav .home-catnav-inner>a:focus-visible{color:#8c5f32!important}
+#homeCatnav .home-catnav-inner>a:hover:after,#homeCatnav .home-catnav-inner>a:focus-visible:after{transform:scaleX(1)}
+#homeCatnav .home-catnav-inner>a:focus-visible{outline:2px solid #b68a52!important;outline-offset:-2px}
+@media(max-width:767px){#homeCatnav{margin:8px auto 16px!important;padding:0 10px!important}#homeCatnav .home-catnav-label{font-size:11px!important;padding-right:13px!important;margin-right:4px!important}#homeCatnav .home-catnav-inner>a{font-size:11px!important;padding:10px 12px!important;min-height:44px}}
+@media(prefers-reduced-motion:reduce){#homeCatnav .home-catnav-inner>a,#homeCatnav .home-catnav-inner>a:after{transition:none}}
 </style>
 </head>
 <body>
@@ -770,11 +772,11 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- Catalog scripts are static + deferred so they download in parallel (not one-by-one after DOMContentLoaded) and run in this order before the homepage renderer. -->
 <script defer src="product-config.js?v=688f61c91ffaf2a7"></script>
 <script defer src="home-catalog-utils.min.js?v=20261024-wc1"></script>
-<script defer src="category-products.js?v=126fab2bb4752683"></script>
+<script defer src="category-products.js?v=20261024-three-piece-data"></script>
 <script defer src="product-links-data.js?v=16d3b6ba47d02931"></script>
 <script defer src="site-api-config.js?v=20261009-inbox"></script>
 <script defer src="stock-sync.js?v=5084bbe06d902387"></script>
-<script defer src="home-render.min.js?v=20261024-wc1"></script>
+<script defer src="home-render.min.js?v=20261024-all-category-rail"></script>
 
 <section id="main-video-section" style="background:#fff; padding:25px 15px; scroll-margin-top:100px;">
     <div class="lux-video-wrap">
