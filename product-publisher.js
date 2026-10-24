@@ -31,7 +31,18 @@
    v.products.forEach(function(p){index[p.id]=p.category;names[p.id]=p.name;});
    var res=await fetch('/api/live-publish',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({Token:session.token,sha:sha,files:map,validation:v.json,index:index,names:names,assets:(sent||[]).map(function(a){return {path:a.path,content:a.content};})})});
    var r=await res.json().catch(function(){return null;});
-   if(r&&r.ok){lastLiveError='';return true;}
+   if(r&&r.ok){
+     // The D1 write succeeding is not proof that customers receive this catalog.
+     // Verify the actual served catalog bytes before showing a green Live status.
+     for(var attempt=0;attempt<3;attempt++){
+       try{
+         var response=await fetch('/category-products.js?live_verify='+encodeURIComponent(sha)+'-'+Date.now(),{cache:'no-store'});
+         if(response.ok&&(await response.text())===map['category-products.js']){lastLiveError='';return true;}
+       }catch(verifyError){}
+       if(attempt<2)await new Promise(function(resolve){setTimeout(resolve,700);});
+     }
+     lastLiveError='LIVE_CATALOG_NOT_YET_VISIBLE';return false;
+   }
    lastLiveError=(r&&r.error)||('HTTP '+res.status);
    return false;
   }catch(e){lastLiveError='Connection or validation failed';return false;}
