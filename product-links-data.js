@@ -20,6 +20,7 @@ window.PRODUCT_LINKS_DATA = {
     "/images/Butterfly-Ababa...jpg",
     "/images/Butterfly-Ababa..jpg",
     "/images/Butterfly-Ababa.jpg",
+    "/images/uploads/p-197025f0b8ff4107-1.webp",
   ],
   "cover-up": [
     "/images/cover-up/premium-black-butterfly-khimar-abaya-with-niqab-luxury-modest-fashion-bangladesh-1080x1350.webp",
@@ -102,6 +103,5 @@ window.PRODUCT_LINKS_DATA = {
     "/images/premium-white-cotton-panjabi-mens-islamic-fashion-modern-design-1080x1350.webp",
   ],
   "three-piece-dress": [
-    "/images/uploads/p-197025f0b8ff4107-1.webp",
   ]
 };
