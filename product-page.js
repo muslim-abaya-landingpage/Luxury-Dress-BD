@@ -1200,6 +1200,40 @@
     render();
   }
 
+  // Refresh an already-open product tab when a catalog save becomes available.
+  // Keep the chosen options when still valid; never assume a save succeeded.
+  var catalogRefreshing = false, lastCatalogRefresh = 0;
+  function refreshCurrentProduct() {
+    if (catalogRefreshing || document.hidden || !state.product || Date.now() - lastCatalogRefresh < 9000) return;
+    catalogRefreshing = true;
+    lastCatalogRefresh = Date.now();
+    var previous = JSON.stringify(state.product);
+    var selectedSize = state.selectedSize, selectedColor = state.selectedColor;
+    var loader = document.createElement("script");
+    loader.src = "/category-products.js?product_refresh=" + Date.now();
+    loader.onload = function () {
+      catalogRefreshing = false;
+      loader.remove();
+      var found = findProductEverywhere(getIdFromUrl());
+      if (!found || JSON.stringify(found.product) === previous) return;
+      state.product = found.product;
+      state.category = found.category;
+      state.galleryImages = buildGallery(found.product, found.list);
+      var sizes = Array.isArray(found.product.sizes) ? found.product.sizes.map(String) : [];
+      state.selectedSize = sizes.indexOf(String(selectedSize)) >= 0 ? selectedSize : "";
+      var colors = getProductColorVariants(found.product);
+      state.selectedColor = colors.some(function(c) { return c.color === selectedColor; }) ? selectedColor : "";
+      if (!state.selectedColor) state.selectedColorLabel = "";
+      state.activeImage = 0;
+      render();
+    };
+    loader.onerror = function () { catalogRefreshing = false; loader.remove(); };
+    document.head.appendChild(loader);
+  }
+  window.addEventListener("focus", refreshCurrentProduct);
+  document.addEventListener("visibilitychange", function() { if (!document.hidden) refreshCurrentProduct(); });
+  setInterval(refreshCurrentProduct, 20000);
+
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", boot);
   } else {
