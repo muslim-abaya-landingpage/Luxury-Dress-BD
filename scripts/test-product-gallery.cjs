@@ -17,7 +17,7 @@ assert.deepEqual(Array.from(context.collectGalleryImages({image:'main.webp'}, []
 
 const quick = fs.readFileSync('product-quick-upload.js','utf8');
 const openFn = quick.slice(quick.indexOf('function open(){'),quick.indexOf('async function submit('));
-const elements = Object.fromEntries(['pqPhotos','pqSubmit','pqView','pq_name'].map(k=>[k,{}]));
+const elements = Object.fromEntries(['pqPhotos','pqSubmit','pqView','pq_name','pqAnother','pqCopyWrap','pqCopy','pqCopyList'].map(k=>[k,{}]));
 let resets=0, restored=0;
 elements.pqForm = {reset(){resets++;}};
 elements.pq_name.focus=()=>{};
@@ -26,5 +26,7 @@ const ui={editing:{id:'EXISTING'},completed:false,currentId:'EXISTING',cachedAss
   $:id=>elements[id],dialog:{querySelector:()=>heading,showModal(){}},preview(){},kind(){},message(){},restoreDraft(){restored++;}};
 vm.createContext(ui);vm.runInContext(openFn,ui);ui.open();
 assert.equal(ui.editing,null);assert.equal(ui.currentId,null);assert.equal(elements.pqPhotos.required,true);
+assert.equal(elements.pqAnother.hidden,true);
+assert.equal(elements.pqCopyWrap.hidden,false);
 assert.equal(resets,1);assert.equal(restored,1);assert.equal(heading.textContent,'Upload new product');
 console.log('PASS: gallery preserves main photo, deduplicates views, keeps explicit color variants, and new upload clears edit identity.');
