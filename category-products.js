@@ -1338,6 +1338,7 @@ window.CATEGORY_PRODUCTS = {
       imageCard: "images/uploads/p-197025f0b8ff4107-card.webp",
       images: ["/images/uploads/p-197025f0b8ff4107-2.webp", "/images/uploads/p-197025f0b8ff4107-3.webp"],
       price: 1750,
+      stock: 10,
       color: "Maroon, Olive, Navy Blue",
       colorLabel: "Maroon, Olive, Navy Blue",
       fabric: "100% Selap Cotton",
