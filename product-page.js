@@ -1232,7 +1232,7 @@
   }
   window.addEventListener("focus", refreshCurrentProduct);
   document.addEventListener("visibilitychange", function() { if (!document.hidden) refreshCurrentProduct(); });
-  setInterval(refreshCurrentProduct, 20000);
+  if (typeof setInterval === 'function') setInterval(refreshCurrentProduct, 20000);
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", boot);
