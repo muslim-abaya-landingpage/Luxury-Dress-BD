@@ -869,3 +869,16 @@ body.site-search-open .site-search-drawer {
 @media (max-width: 380px) {
   .brand-logo-img { max-width: 100%; }
 }
+
+/* 2026-10-24: responsive customer navigation, no cropped last category */
+@media(min-width:1024px){
+ .header-middle-nav .custom-container.nav-row,.header-middle-nav .nav-row.custom-container{grid-template-columns:minmax(135px,185px) minmax(0,1fr) minmax(145px,max-content)!important;column-gap:12px!important;padding-left:16px!important;padding-right:16px!important}
+ .desktop-menu{width:100%!important;min-width:0!important;overflow-x:auto!important;overflow-y:hidden!important;justify-content:flex-start!important;scrollbar-width:thin;scrollbar-color:#c4b9ac transparent}
+ .desktop-menu ul{flex-wrap:nowrap!important;justify-content:flex-start!important;align-items:center!important;width:max-content!important;max-width:none!important;min-width:max-content!important;gap:0 14px!important;padding:4px 5px!important}
+ .desktop-menu ul li{flex:0 0 auto!important;white-space:nowrap!important}
+ .desktop-menu ul li a{display:inline-flex!important;align-items:center!important;white-space:nowrap!important;font-size:12px!important;letter-spacing:.035em!important;padding:8px 2px!important;line-height:1.4!important;background:transparent!important}
+ .nav-icons{flex-shrink:0!important;margin-left:0!important;z-index:5!important}
+}
+@media(min-width:1024px) and (max-width:1199px){.desktop-menu ul{gap:0 10px!important}.desktop-menu ul li a{font-size:11px!important}}
+@media(max-width:1023px){.desktop-menu{display:none!important}.nav-row{gap:8px!important}.brand-text-logo{min-width:0!important}.nav-icons{flex-shrink:0!important}}
+.desktop-menu ul li a:focus-visible{outline:2px solid #ab8048!important;outline-offset:2px!important}
