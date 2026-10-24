@@ -14,7 +14,7 @@ muslimabaya.com এর সোর্স কোড।
 
 লোকাল প্রিভিউ: `python3 scripts/serve-gzip.py` → http://127.0.0.1:43147/
 
-বিস্তারিত: [PERFORMANCE-REPORT.md](PERFORMANCE-REPORT.md)
+বিস্তারিত: [PERFORMANCE-REPORT.md](docs/PERFORMANCE-REPORT.md)
 
 ## E2E Testing ও Production Operations
 
@@ -29,7 +29,7 @@ E2E suite-টি Google Apps Script API mock করে—production order বা
 
 - GitHub Actions: [`.github/workflows/e2e.yml`](.github/workflows/e2e.yml) — `main`-এর PR/push-এ Apps Script security contract + E2E gate; `workflow_dispatch` দিয়ে deploy-পরবর্তী HTTPS target smoke run করা যায়। Branch protection-এর নির্দেশনা: [main branch protection ও required E2E check (বাংলা)](docs/GITHUB-MAIN-BRANCH-PROTECTION-BN.md)।
 - Apps Script contract tests: `npm run test:backend` — GET Subscribe mutation block, POST subscription path, default-deny rate limit bypass এবং generated copy synchronization যাচাই করে।
-- [Apps Script security patch ও redeploy নির্দেশনা](APPS-SCRIPT-SETUP.md)
+- [Apps Script security patch ও redeploy নির্দেশনা](docs/APPS-SCRIPT-SETUP.md)
 - [GitHub Actions CI/CD ও release gate guide (বাংলা)](docs/GITHUB-ACTIONS-CI-CD-BN.md)
 - [Prometheus/Grafana setup, scope ও Alertmanager instructions](monitoring/README.md)
 - [E2E report performance/UX analysis (বাংলা)](docs/E2E-PERFORMANCE-UX-ANALYSIS-BN.md)

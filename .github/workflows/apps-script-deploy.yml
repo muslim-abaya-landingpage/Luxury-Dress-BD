@@ -3,7 +3,7 @@ name: Apps Script Deploy
 # Pushes apps-script/ to the Google Apps Script project and updates the
 # EXISTING web-app deployment in place, so the /exec URL never changes.
 #
-# One-time setup (see APPS-SCRIPT-AUTO-DEPLOY.md):
+# One-time setup (see docs/APPS-SCRIPT-AUTO-DEPLOY.md):
 #   1. Turn on "Google Apps Script API" at https://script.google.com/home/usersettings
 #   2. Add the contents of your .clasprc.json as the repository secret CLASPRC_JSON
 #
@@ -48,7 +48,7 @@ jobs:
           CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
         run: |
           if [ -z "$CLASPRC_JSON" ]; then
-            echo "::warning::CLASPRC_JSON secret is not set; skipping Apps Script deploy. See APPS-SCRIPT-AUTO-DEPLOY.md."
+            echo "::warning::CLASPRC_JSON secret is not set; skipping Apps Script deploy. See docs/APPS-SCRIPT-AUTO-DEPLOY.md."
             echo "ready=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
