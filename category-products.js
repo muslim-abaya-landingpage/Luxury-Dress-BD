@@ -22,7 +22,9 @@ window.CATEGORY_PRODUCTS = {
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
       dateAdded: "2026-05-28",
-      productUrl: "/"
+      productUrl: "/",
+      brand: "Muslim Abaya",
+      tags: ["Abaya","বোরখা","বুরকা","বুরখা","টু-পিস ড্রেস","কাপড়"]
     },
     {
       id: "ABY-BLK-3P-02",
