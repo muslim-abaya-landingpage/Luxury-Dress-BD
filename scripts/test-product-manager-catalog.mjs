@@ -25,8 +25,8 @@ function fixture(extra) {
 }
 test('all registered categories and every catalog entry survive editor loading and export', () => {
   const f = fixture();
-  assert.equal(f.state.sections.length, 9);
-  assert.equal(Object.values(f.state.products).reduce((n, rows) => n + rows.length, 0), 79);
+  assert.equal(f.state.sections.length, 10);
+  assert.equal(Object.values(f.state.products).reduce((n, rows) => n + rows.length, 0), 80);
   for (const [key, rows] of Object.entries(f.original)) {
     assert.deepEqual(Array.from(f.exported[key], p => p.id), rows.map(p => p.id));
   }

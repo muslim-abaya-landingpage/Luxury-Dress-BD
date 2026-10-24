@@ -148,6 +148,13 @@
 <script id="pmStockAdmin">
 (function () {
   var ROW_CIRCLES = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "⑪", "⑫"];
+  // Dynamic editor/list views can replace their controls between renders.
+  // Bind defensively so a transient missing control never aborts the publisher bootstrap.
+  function bindById(id, event, handler) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener(event, handler);
+    return el;
+  }
 
   var mountLayout = document.getElementById("pmLayout");
   var catListEl = document.getElementById("pmCatList");
@@ -485,7 +492,7 @@
       '<div class="pm-product-list" id="pmProductList"></div>';
 
     bindCategoryTypePricePanel(sec.key);
-    document.getElementById("pmBackToAll").addEventListener("click", function () {
+    bindById("pmBackToAll", "click", function () {
       activeKey = ALL_PRODUCTS_KEY;
       searchTerm = "";
       renderCatList();
@@ -521,19 +528,19 @@
 
     renderList();
 
-    document.getElementById("pmSearch").addEventListener("input", function (e) {
+    bindById("pmSearch", "input", function (e) {
       searchTerm = e.target.value;
       renderList();
     });
 
-    document.getElementById("pmAddProduct").addEventListener("click", function () {
+    bindById("pmAddProduct", "click", function () {
       list.push(defaultProduct(sec));
       products[sec.key] = list;
       renderCatList();
       renderMain();
     });
 
-    document.getElementById("pmEditCat").addEventListener("click", function () {
+    bindById("pmEditCat", "click", function () {
       openCategoryModal(sec);
     });
   function getSelectedIdxs() {
@@ -991,8 +998,8 @@
       if (next.length) p.tags = next; else delete p.tags;
       renderProductEditor(); changed();
     }
-    document.getElementById("pmEditTagAdd").addEventListener("click", addTags);
-    document.getElementById("pmEditTagInput").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); addTags(); } });
+    bindById("pmEditTagAdd", "click", addTags);
+    bindById("pmEditTagInput", "keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); addTags(); } });
     root.querySelectorAll("[data-tag-i]").forEach(function (b) {
       b.addEventListener("click", function () {
         var next = productTags(p); next.splice(parseInt(b.getAttribute("data-tag-i"), 10), 1);
@@ -1010,8 +1017,8 @@
         renderProductEditor(); changed("Moved to " + enName(sections.find(function (x) { return x.key === r.value; })) + " — click Update to publish.");
       });
     });
-    document.getElementById("pmEditStock").addEventListener("click", function () { publishStockToggle(p, renderProductEditor); });
-    document.getElementById("pmEditTrash").addEventListener("click", function () {
+    bindById("pmEditStock", "click", function () { publishStockToggle(p, renderProductEditor); });
+    bindById("pmEditTrash", "click", function () {
       if (!confirm("Move this product to Trash? It disappears from the website now; you can restore it from Products → Trash.")) return;
       var before = JSON.stringify(p);
       setProductStatus(p, "trash");
@@ -1028,10 +1035,10 @@
     });
     paintStatusNote();
     updateSeoPreview();
-    document.getElementById("pmEditUpdate").addEventListener("click", saveEdit);
-    document.getElementById("pmEditBarSave").addEventListener("click", saveEdit);
-    document.getElementById("pmEditBack").addEventListener("click", function () { activeKey = ALL_PRODUCTS_KEY; renderCatList(); renderMain(); });
-    document.getElementById("pmEditAddNew").addEventListener("click", function () { var q = document.getElementById("pmQuickUpload"); if (q) q.click(); });
+    bindById("pmEditUpdate", "click", saveEdit);
+    bindById("pmEditBarSave", "click", saveEdit);
+    bindById("pmEditBack", "click", function () { activeKey = ALL_PRODUCTS_KEY; renderCatList(); renderMain(); });
+    bindById("pmEditAddNew", "click", function () { var q = document.getElementById("pmQuickUpload"); if (q) q.click(); });
     wireImageUploader(root, p);
     wireGalleryUploader(root, p);
     wireWpMediaBoxes(root, p, changed);
@@ -1215,20 +1222,20 @@
       '<span id="pmOverviewSelected" class="pm-wp-selected" role="status"></span>' +
       '<div class="pm-overview-wrap"><table class="pm-overview pm-wp-table"><thead>' + headRow + '</thead><tbody id="pmAllRows"></tbody><tfoot>' + headRow + '</tfoot></table></div>' +
       '<div class="pm-wp-tablenav bottom"><div class="pm-wp-pages" id="pmPagerBottom"></div></div></div>';
-    document.getElementById("pmAllQuickUpload").addEventListener("click", function () {
+    bindById("pmAllQuickUpload", "click", function () {
       var quickUpload = document.getElementById("pmQuickUpload");
       if (quickUpload) quickUpload.click();
     });
-    document.getElementById("pmManageCats").addEventListener("click", function () {
+    bindById("pmManageCats", "click", function () {
       if (!sections.length) return;
       activeKey = overviewCategory || sections[0].key;
       searchTerm = "";
       renderCatList();
       renderMain();
     });
-    document.getElementById("pmAllSearchBtn").addEventListener("click", function () { overviewPage = 1; draw(); });
-    document.getElementById("pmFilterBtn").addEventListener("click", function () { overviewPage = 1; draw(); });
-    document.getElementById("pmBulkApply").addEventListener("click", function () {
+    bindById("pmAllSearchBtn", "click", function () { overviewPage = 1; draw(); });
+    bindById("pmFilterBtn", "click", function () { overviewPage = 1; draw(); });
+    bindById("pmBulkApply", "click", function () {
       var action = document.getElementById("pmBulkAction").value;
       if (!action) return;
       if (!Object.keys(overviewSelected).length) { toast("Select products first"); return; }
@@ -1258,7 +1265,7 @@
       });
     });
     // CSV export / import (product-csv.js). Import shows what will change first, then saves at once.
-    document.getElementById("pmCsvExport").addEventListener("click", function () {
+    bindById("pmCsvExport", "click", function () {
       if (!window.MaProductCsv) { toast("CSV tool did not load — reload the page"); return; }
       var blob = new Blob([window.MaProductCsv.exportCsv(products, sections, { metaFor: getCategoryTypeMeta })], { type: "text/csv;charset=utf-8" });
       var a = document.createElement("a");
@@ -1267,8 +1274,8 @@
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
     });
-    document.getElementById("pmCsvImport").addEventListener("click", function () { document.getElementById("pmCsvFile").click(); });
-    document.getElementById("pmCsvFile").addEventListener("change", function (e) {
+    bindById("pmCsvImport", "click", function () { document.getElementById("pmCsvFile").click(); });
+    bindById("pmCsvFile", "change", function (e) {
       var file = e.target.files && e.target.files[0];
       e.target.value = "";
       if (!file) return;
@@ -1618,18 +1625,18 @@
         setSaveStatus("Prices not saved: " + (err && err.message || "try again") + " — nothing was changed.");
       });
     }
-    document.getElementById("pmAllSearch").addEventListener("input", function (e) { allSearchTerm = e.target.value; overviewPage = 1; overviewSelected = {}; draw(); });
-    document.getElementById("pmOverviewCategory").addEventListener("change", function (e) { overviewCategory = e.target.value; overviewPage = 1; overviewSelected = {}; draw(); });
-    document.getElementById("pmOverviewStock").addEventListener("change", function (e) { overviewStock = e.target.value; overviewPage = 1; overviewSelected = {}; draw(); });
-    document.getElementById("pmClearSelection").addEventListener("click", function () { overviewSelected = {}; draw(); });
+    bindById("pmAllSearch", "input", function (e) { allSearchTerm = e.target.value; overviewPage = 1; overviewSelected = {}; draw(); });
+    bindById("pmOverviewCategory", "change", function (e) { overviewCategory = e.target.value; overviewPage = 1; overviewSelected = {}; draw(); });
+    bindById("pmOverviewStock", "change", function (e) { overviewStock = e.target.value; overviewPage = 1; overviewSelected = {}; draw(); });
+    bindById("pmClearSelection", "click", function () { overviewSelected = {}; draw(); });
     function bulkStock(out) {
       var items = Object.keys(overviewSelected).map(function(key) {
         var ref = JSON.parse(key); return (products[ref[0]] || [])[ref[1]];
       }).filter(Boolean);
       publishStockChanges(items, !out, function() { overviewSelected = {}; draw(); });
     }
-    document.getElementById("pmOverviewOff").addEventListener("click", function () { bulkStock(true); });
-    document.getElementById("pmOverviewOn").addEventListener("click", function () { bulkStock(false); });
+    bindById("pmOverviewOff", "click", function () { bulkStock(true); });
+    bindById("pmOverviewOn", "click", function () { bulkStock(false); });
     draw();
   }
 
@@ -2815,7 +2822,7 @@
     modal.addEventListener("click", function (e) {
       if (e.target === modal) closeMediaLibrary();
     });
-    document.getElementById("pmMlSearch").addEventListener("input", function (e) {
+    bindById("pmMlSearch", "input", function (e) {
       mediaLibState.filter = e.target.value || "";
       renderMediaLibGrid();
     });
@@ -2974,7 +2981,7 @@
     return window.MaCatalogPublisher.publish(files,target).then(function(result){savedSnapshot=snapshot;return result;}).catch(function(err){setSaveStatus("Not published: "+err.message+" — your changes are kept.");throw err;}).finally(function(){button.disabled=false;});
   }
 
-  document.getElementById("pmSave").addEventListener("click", function(){saveAll().catch(function(){});});
+  bindById("pmSave", "click", function(){saveAll().catch(function(){});});
   var chkBtn = document.getElementById("pmCheckImages");
   if (chkBtn) chkBtn.addEventListener("click", checkAllImages);
 
@@ -2982,13 +2989,13 @@
     mainEl.inert=true;catListEl.inert=true;
     return window.MaCatalogPublisher.init(function(text,error){setSaveStatus(text);document.getElementById("pmSaveStatus").classList.toggle("pm-quick-error",!!error);},function(){window.MA_RAW_CATEGORY_PRODUCTS=JSON.parse(JSON.stringify(window.CATEGORY_PRODUCTS||{}));loadState();overviewSelected={};renderCatList();renderMain();savedSnapshot=catalogSnapshot();}).then(function(){mainEl.inert=false;catListEl.inert=false;}).catch(function(err){mainEl.inert=false;catListEl.inert=false;setSaveStatus("Could not reach the publisher: "+err.message);});
   }
-  document.getElementById("pmReload").addEventListener("click",function(){if(savedSnapshot!==catalogSnapshot()&&!confirm("Discard unsaved changes and reload current data?"))return;reloadPublishingData();});
+  bindById("pmReload", "click",function(){if(savedSnapshot!==catalogSnapshot()&&!confirm("Discard unsaved changes and reload current data?"))return;reloadPublishingData();});
 
-  document.getElementById("pmAddCategory").addEventListener("click", function () {
+  bindById("pmAddCategory", "click", function () {
     openCategoryModal(null);
   });
 
-  document.getElementById("pmCatModalClose").addEventListener("click", function () {
+  bindById("pmCatModalClose", "click", function () {
     document.getElementById("pmCatModal").hidden = true;
   });
 
