@@ -1,5 +1,5 @@
 (function(g){'use strict';
- var MAX_ASSETS=6,base=null,assets={},request=null,job=null,checking=false,timer=null,notify=function(){};
+ var MAX_ASSETS=6,base=null,assets={},request=null,job=null,checking=false,timer=null,notify=function(){},lastLiveError='';
  function call(type,data){return g.MaAdmin.call(type,data||{},{maxAgeMs:0});}
  function bytes(text){return new TextEncoder().encode(text);}
  function hex(buf){return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');}
@@ -31,8 +31,10 @@
    v.products.forEach(function(p){index[p.id]=p.category;names[p.id]=p.name;});
    var res=await fetch('/api/live-publish',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({Token:session.token,sha:sha,files:map,validation:v.json,index:index,names:names,assets:(sent||[]).map(function(a){return {path:a.path,content:a.content};})})});
    var r=await res.json().catch(function(){return null;});
-   return !!(r&&r.ok);
-  }catch(e){return false;}
+   if(r&&r.ok){lastLiveError='';return true;}
+   lastLiveError=(r&&r.error)||('HTTP '+res.status);
+   return false;
+  }catch(e){lastLiveError='Connection or validation failed';return false;}
  }
  async function servesFiles(shas){
   try{for(var path of Object.keys(shas)){var r=await fetch('/'+path+'?live='+Date.now(),{cache:'no-store'});if(!r.ok||await gitHash(await r.text())!==shas[path])return false;}return Object.keys(shas).length>0;}catch(e){return false;}
@@ -80,7 +82,7 @@
   status('✅ Saved. Updating the website…');
   // Instant update: the same files go to the site's live copy right away (the deploy follows in ~1 min).
   if(await pushLive(data.files,queued,result.sha)){var done=job;setJob(null);clearTimeout(timer);status('✅ Saved and live on the website now.');document.dispatchEvent(new CustomEvent('ma-product-live',{detail:done}));result.live=true;return result;}
-  status('✅ Photos and product details saved. Publishing to the website…');check();return result;
+  status('✅ Changes saved. Instant publish unavailable ('+lastLiveError+'). Cloudflare deployment is pending.');check();return result;
  }
  g.MaCatalogPublisher={init:init,publish:publish,enqueue:function(rows){rows.forEach(function(a){assets[a.path]=a;});},pendingPhotos:function(){return Object.keys(assets).length;},check:check,_buildValidation:buildValidation,isReady:function(){return !!base;},gitHash:gitHash};
 })(window);
