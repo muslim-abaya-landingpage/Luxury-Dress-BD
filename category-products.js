@@ -1,6 +1,6 @@
 /**
  * প্রোডাক্ট ডেটা — product-manager.html থেকে এডিট করুন
- * আপডেট: 2026-10-23
+ * আপডেট: 2026-10-24
  */
 window.CATEGORY_PRODUCTS = {
   abaya: [
@@ -8,20 +8,21 @@ window.CATEGORY_PRODUCTS = {
       id: "ABY-MAROON-1",
       name: "Maroon Abaya Set",
       image: "/images/Maroon Abaya Set...jpeg",
-      price: 999,
+      price: 1250,
       color: "maroon",
       colorLabel: "Maroon",
       fabric: "Dubai Cherry",
       sizes: ["44", "46", "48", "50", "52", "54", "56"],
+      types: ["Full Set Borka, Hijab+ Niqab", "Abaya Only"],
       inStock: true,
       priceByType: {
-        "Abaya Only": 799,
-        "Full Set": 999
+        "Full Set Borka, Hijab+ Niqab": 1250,
+        "Abaya Only": 1000
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/",
-      dateAdded: "2026-05-28"
+      dateAdded: "2026-05-28",
+      productUrl: "/"
     },
     {
       id: "ABY-BLK-3P-02",
@@ -39,8 +40,8 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/",
-      dateAdded: "2026-07-06"
+      dateAdded: "2026-07-06",
+      productUrl: "/"
     },
     {
       id: "ABY-BLACK-3",
@@ -57,8 +58,8 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/",
-      dateAdded: "2026-05-28"
+      dateAdded: "2026-05-28",
+      productUrl: "/"
     },
     {
       id: "ABY-BLACK-4",
@@ -75,8 +76,8 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/",
-      dateAdded: "2026-07-17"
+      dateAdded: "2026-07-17",
+      productUrl: "/"
     },
     {
       id: "ABY-BLACK-6",
@@ -93,8 +94,8 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/",
-      dateAdded: "2026-07-17"
+      dateAdded: "2026-07-17",
+      productUrl: "/"
     },
     {
       id: "ABY-White-7",
@@ -115,10 +116,10 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/",
-      dateAdded: "2026-09-13",
+      tags: ["Abaya","বোরখা","বুরকা","বুরখা","টু-পিস ড্রেস","কাপড়"],
       brand: "Muslim Abaya",
-      tags: ["Abaya","বোরখা","বুরকা","বুরখা","টু-পিস ড্রেস","কাপড়"]
+      dateAdded: "2026-09-13",
+      productUrl: "/"
     },
     {
       id: "ABY-HAFEZA-1",
@@ -142,10 +143,10 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/",
-      dateAdded: "2026-09-29",
+      tags: ["Borka","Abaya","বোরখা","বুরকা","বুরখা","টু-পিস ড্রেস","কাপড়"],
       brand: "Muslim Abaya",
-      tags: ["Borka","Abaya","বোরখা","বুরকা","বুরখা","টু-পিস ড্রেস","কাপড়"]
+      dateAdded: "2026-09-29",
+      productUrl: "/"
     },
     {
       id: "ABY-VERSACE-9",
@@ -164,8 +165,8 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/",
-      dateAdded: "2026-07-17"
+      dateAdded: "2026-07-17",
+      productUrl: "/"
     },
     {
       id: "ABY-FLORAL-10",
@@ -182,8 +183,8 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/",
-      dateAdded: "2026-07-17"
+      dateAdded: "2026-07-17",
+      productUrl: "/"
     },
     {
       id: "ABY-FLORAL-11",
@@ -200,8 +201,8 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/",
-      dateAdded: "2026-07-17"
+      dateAdded: "2026-07-17",
+      productUrl: "/"
     },
     {
       id: "ABY-FLORAL-12",
@@ -218,8 +219,8 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/",
-      dateAdded: "2026-07-17"
+      dateAdded: "2026-07-17",
+      productUrl: "/"
     },
     {
       id: "ABY-BUTTERFLY-13",
@@ -236,8 +237,8 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/",
-      dateAdded: "2026-07-17"
+      dateAdded: "2026-07-17",
+      productUrl: "/"
     },
     {
       id: "ABY-BUTTERFLY-14",
@@ -254,8 +255,8 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/",
-      dateAdded: "2026-07-17"
+      dateAdded: "2026-07-17",
+      productUrl: "/"
     },
     {
       id: "ABY-BUTTERFLY-15",
@@ -272,8 +273,8 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/",
-      dateAdded: "2026-07-17"
+      dateAdded: "2026-07-17",
+      productUrl: "/"
     },
     {
       id: "ABY-BUTTERFLY-16",
@@ -290,8 +291,8 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      productUrl: "/",
-      dateAdded: "2026-07-17"
+      dateAdded: "2026-07-17",
+      productUrl: "/"
     }
   ],
   "cover-up": [
@@ -307,8 +308,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Premium butterfly khimar abaya with matching niqab, crafted from high-quality Cherry Fabric. Soft, breathable, lightweight, and designed for elegant modest wear with a graceful flow and premium finishing.",
       category: "cover-up",
       categoryLabel: "কভার আপ",
-      productUrl: "/",
-      dateAdded: "2026-08-02"
+      dateAdded: "2026-08-02",
+      productUrl: "/"
     }
   ],
   "premium-two-piece": [
@@ -326,8 +327,8 @@ window.CATEGORY_PRODUCTS = {
       inStock: false,
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/",
-      dateAdded: "2026-05-28"
+      dateAdded: "2026-05-28",
+      productUrl: "/"
     },
     {
       id: "DR-02",
@@ -341,8 +342,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Length: 37–38 Inches",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/",
-      dateAdded: "2026-08-01"
+      dateAdded: "2026-08-01",
+      productUrl: "/"
     },
     {
       id: "DR-03",
@@ -356,8 +357,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Length: 37–38 Inches",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/",
-      dateAdded: "2026-08-01"
+      dateAdded: "2026-08-01",
+      productUrl: "/"
     },
     {
       id: "DR-4",
@@ -371,8 +372,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Length: 37–38 Inches",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/",
-      dateAdded: "2026-08-01"
+      dateAdded: "2026-08-01",
+      productUrl: "/"
     },
     {
       id: "DR-5",
@@ -386,8 +387,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Length: 37–38 Inches",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/",
-      dateAdded: "2026-08-01"
+      dateAdded: "2026-08-01",
+      productUrl: "/"
     },
     {
       id: "TP-6",
@@ -403,8 +404,8 @@ window.CATEGORY_PRODUCTS = {
       inStock: false,
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/",
-      dateAdded: "2026-08-07"
+      dateAdded: "2026-08-07",
+      productUrl: "/"
     },
     {
       id: "DR-7",
@@ -418,8 +419,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Length: 37–38 Inches",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/",
-      dateAdded: "2026-08-01"
+      dateAdded: "2026-08-01",
+      productUrl: "/"
     },
     {
       id: "DR-8",
@@ -435,8 +436,8 @@ window.CATEGORY_PRODUCTS = {
       inStock: false,
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/",
-      dateAdded: "2026-08-01"
+      dateAdded: "2026-08-01",
+      productUrl: "/"
     },
     {
       id: "DR-9",
@@ -452,8 +453,8 @@ window.CATEGORY_PRODUCTS = {
       inStock: false,
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/",
-      dateAdded: "2026-08-01"
+      dateAdded: "2026-08-01",
+      productUrl: "/"
     },
     {
       id: "DR-10",
@@ -469,8 +470,8 @@ window.CATEGORY_PRODUCTS = {
       inStock: false,
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/",
-      dateAdded: "2026-08-01"
+      dateAdded: "2026-08-01",
+      productUrl: "/"
     },
     {
       id: "DR-11",
@@ -486,8 +487,8 @@ window.CATEGORY_PRODUCTS = {
       inStock: false,
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/",
-      dateAdded: "2026-08-01"
+      dateAdded: "2026-08-01",
+      productUrl: "/"
     },
     {
       id: "DR-12",
@@ -503,8 +504,8 @@ window.CATEGORY_PRODUCTS = {
       inStock: false,
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/",
-      dateAdded: "2026-08-01"
+      dateAdded: "2026-08-01",
+      productUrl: "/"
     },
     {
       id: "DR-13",
@@ -520,8 +521,8 @@ window.CATEGORY_PRODUCTS = {
       inStock: false,
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/",
-      dateAdded: "2026-08-01"
+      dateAdded: "2026-08-01",
+      productUrl: "/"
     },
     {
       id: "TP-14",
@@ -537,8 +538,8 @@ window.CATEGORY_PRODUCTS = {
       inStock: false,
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/",
-      dateAdded: "2026-08-07"
+      dateAdded: "2026-08-07",
+      productUrl: "/"
     },
     {
       id: "TP-15",
@@ -554,8 +555,8 @@ window.CATEGORY_PRODUCTS = {
       inStock: false,
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/",
-      dateAdded: "2026-08-19"
+      dateAdded: "2026-08-19",
+      productUrl: "/"
     },
     {
       id: "TP-16",
@@ -571,8 +572,8 @@ window.CATEGORY_PRODUCTS = {
       inStock: false,
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/",
-      dateAdded: "2026-08-19"
+      dateAdded: "2026-08-19",
+      productUrl: "/"
     },
     {
       id: "TP-17",
@@ -588,8 +589,8 @@ window.CATEGORY_PRODUCTS = {
       inStock: false,
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/",
-      dateAdded: "2026-08-19"
+      dateAdded: "2026-08-19",
+      productUrl: "/"
     },
     {
       id: "TP-18",
@@ -605,8 +606,8 @@ window.CATEGORY_PRODUCTS = {
       inStock: false,
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/",
-      dateAdded: "2026-08-19"
+      dateAdded: "2026-08-19",
+      productUrl: "/"
     },
     {
       id: "DR-19",
@@ -620,8 +621,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Two-Piece Dress | Dress Length: 38, 39 & 40 Inches | Palazzo Length: 37 & 38 Inches | Alex Soft Georgette | 14 Colors | 100% Color Quality Assurance",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/",
-      dateAdded: "2026-08-20"
+      dateAdded: "2026-08-20",
+      productUrl: "/"
     },
     {
       id: "DR-20",
@@ -637,8 +638,8 @@ window.CATEGORY_PRODUCTS = {
       inStock: false,
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/",
-      dateAdded: "2026-09-06"
+      dateAdded: "2026-09-06",
+      productUrl: "/"
     },
     {
       id: "KURTI-EMB-01",
@@ -652,8 +653,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear.",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/",
-      dateAdded: "2026-09-10"
+      dateAdded: "2026-09-10",
+      productUrl: "/"
     },
     {
       id: "KURTI-EMB-02",
@@ -667,8 +668,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear.",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/",
-      dateAdded: "2026-09-10"
+      dateAdded: "2026-09-10",
+      productUrl: "/"
     },
     {
       id: "KURTI-EMB-03",
@@ -682,8 +683,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear.",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/",
-      dateAdded: "2026-09-10"
+      dateAdded: "2026-09-10",
+      productUrl: "/"
     },
     {
       id: "KURTI-EMB-04",
@@ -697,8 +698,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear.",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/",
-      dateAdded: "2026-09-10"
+      dateAdded: "2026-09-10",
+      productUrl: "/"
     },
     {
       id: "KURTI-EMB-05",
@@ -712,8 +713,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear.",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/",
-      dateAdded: "2026-09-10"
+      dateAdded: "2026-09-10",
+      productUrl: "/"
     },
     {
       id: "KURTI-EMB-06",
@@ -727,8 +728,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear.",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/",
-      dateAdded: "2026-09-10"
+      dateAdded: "2026-09-10",
+      productUrl: "/"
     },
     {
       id: "KURTI-EMB-07",
@@ -742,8 +743,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Gold thread hand embroidery on chest and sleeves, tassel string design at the neckline. Free Size (Body up to 42 inches). Soft, comfortable and breathable fabric - suitable for daily wear and party wear.",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      productUrl: "/",
-      dateAdded: "2026-09-10"
+      dateAdded: "2026-09-10",
+      productUrl: "/"
     }
   ],
   "tops-kurti": [
@@ -759,8 +760,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Comfortable lace-work kurti made with premium cotton fabric. Length: 34 inches.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-06-21"
+      dateAdded: "2026-06-21",
+      productUrl: "/"
     },
     {
       id: "KURTI-02",
@@ -774,8 +775,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Stylish leaf print design for daily wear.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-06-21"
+      dateAdded: "2026-06-21",
+      productUrl: "/"
     },
     {
       id: "KURTI-03",
@@ -789,8 +790,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Floral printed kurti suitable for office and casual wear.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-06-21"
+      dateAdded: "2026-06-21",
+      productUrl: "/"
     },
     {
       id: "KURTI-04",
@@ -804,8 +805,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Light and breathable cotton fabric perfect for summer.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-06-21"
+      dateAdded: "2026-06-21",
+      productUrl: "/"
     },
     {
       id: "KURTI-05",
@@ -819,8 +820,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Soft pink floral design for everyday comfort.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-06-21"
+      dateAdded: "2026-06-21",
+      productUrl: "/"
     },
     {
       id: "KURTI-06",
@@ -834,8 +835,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Soft cotton kurti with vibrant magenta color.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-06-21"
+      dateAdded: "2026-06-21",
+      productUrl: "/"
     },
     {
       id: "KURTI-07",
@@ -849,8 +850,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Stylish tassel design kurti for modern look.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-06-21"
+      dateAdded: "2026-06-21",
+      productUrl: "/"
     },
     {
       id: "KURTI-08",
@@ -864,8 +865,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Elegant lace work floral kurti design.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-06-21"
+      dateAdded: "2026-06-21",
+      productUrl: "/"
     },
     {
       id: "KURTI-09",
@@ -879,8 +880,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Bright floral kurti for stylish daily wear.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-06-21"
+      dateAdded: "2026-06-21",
+      productUrl: "/"
     },
     {
       id: "KURTI-10",
@@ -894,8 +895,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Attractive tie-dye design maxi dress. Length: 43–44 inches, Flare: 80 inches.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-07-03"
+      dateAdded: "2026-07-03",
+      productUrl: "/"
     },
     {
       id: "KURTI-11",
@@ -909,8 +910,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Floral printed midi dress in soft cotton fabric.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-07-03"
+      dateAdded: "2026-07-03",
+      productUrl: "/"
     },
     {
       id: "KURTI-12",
@@ -924,8 +925,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Beautiful cherry print one-piece dress.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-07-03"
+      dateAdded: "2026-07-03",
+      productUrl: "/"
     },
     {
       id: "KURTI-13",
@@ -939,8 +940,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Soft lavender floral cotton dress.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-07-03"
+      dateAdded: "2026-07-03",
+      productUrl: "/"
     },
     {
       id: "KURTI-14",
@@ -954,8 +955,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Traditional block print cotton dress.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-07-03"
+      dateAdded: "2026-07-03",
+      productUrl: "/"
     },
     {
       id: "KURTI-15",
@@ -969,8 +970,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Cute heart print cotton dress.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-07-03"
+      dateAdded: "2026-07-03",
+      productUrl: "/"
     },
     {
       id: "KURTI-16",
@@ -984,8 +985,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Comfortable flared cotton dress.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-07-03"
+      dateAdded: "2026-07-03",
+      productUrl: "/"
     },
     {
       id: "KURTI-17",
@@ -999,8 +1000,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Casual striped cotton dress.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-07-03"
+      dateAdded: "2026-07-03",
+      productUrl: "/"
     },
     {
       id: "KURTI-18",
@@ -1016,8 +1017,8 @@ window.CATEGORY_PRODUCTS = {
       inStock: false,
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-07-03"
+      dateAdded: "2026-07-03",
+      productUrl: "/"
     },
     {
       id: "KURTI-19",
@@ -1033,8 +1034,8 @@ window.CATEGORY_PRODUCTS = {
       inStock: false,
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-07-03"
+      dateAdded: "2026-07-03",
+      productUrl: "/"
     },
     {
       id: "KURTI-20",
@@ -1050,8 +1051,8 @@ window.CATEGORY_PRODUCTS = {
       inStock: false,
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-07-04"
+      dateAdded: "2026-07-04",
+      productUrl: "/"
     },
     {
       id: "KURTI-21",
@@ -1067,8 +1068,8 @@ window.CATEGORY_PRODUCTS = {
       inStock: false,
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-07-04"
+      dateAdded: "2026-07-04",
+      productUrl: "/"
     },
     {
       id: "KURTI-22",
@@ -1084,8 +1085,8 @@ window.CATEGORY_PRODUCTS = {
       inStock: false,
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-07-04"
+      dateAdded: "2026-07-04",
+      productUrl: "/"
     },
     {
       id: "KURTI-23",
@@ -1099,8 +1100,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Elegant Cream & Black floral print cotton maxi dress. Length: 38–40 Inches, Flare: 80 Inches.",
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-07-04"
+      dateAdded: "2026-07-04",
+      productUrl: "/"
     },
     {
       id: "KURTI-24",
@@ -1116,8 +1117,8 @@ window.CATEGORY_PRODUCTS = {
       inStock: false,
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-07-04"
+      dateAdded: "2026-07-04",
+      productUrl: "/"
     },
     {
       id: "KURTI-25",
@@ -1133,8 +1134,8 @@ window.CATEGORY_PRODUCTS = {
       inStock: false,
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-07-05"
+      dateAdded: "2026-07-05",
+      productUrl: "/"
     },
     {
       id: "KURTI-26",
@@ -1150,8 +1151,8 @@ window.CATEGORY_PRODUCTS = {
       inStock: false,
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-07-06"
+      dateAdded: "2026-07-06",
+      productUrl: "/"
     },
     {
       id: "KURTI-27",
@@ -1167,8 +1168,8 @@ window.CATEGORY_PRODUCTS = {
       inStock: false,
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-07-06"
+      dateAdded: "2026-07-06",
+      productUrl: "/"
     },
     {
       id: "KURTI-28",
@@ -1184,8 +1185,8 @@ window.CATEGORY_PRODUCTS = {
       inStock: false,
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-07-06"
+      dateAdded: "2026-07-06",
+      productUrl: "/"
     },
     {
       id: "KURTI-29",
@@ -1201,8 +1202,8 @@ window.CATEGORY_PRODUCTS = {
       inStock: false,
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-07-06"
+      dateAdded: "2026-07-06",
+      productUrl: "/"
     },
     {
       id: "KURTI-32",
@@ -1218,8 +1219,8 @@ window.CATEGORY_PRODUCTS = {
       inStock: false,
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-07-06"
+      dateAdded: "2026-07-06",
+      productUrl: "/"
     },
     {
       id: "KURTI-33",
@@ -1235,8 +1236,8 @@ window.CATEGORY_PRODUCTS = {
       inStock: false,
       category: "tops-kurti",
       categoryLabel: "টপস/কুর্তি",
-      productUrl: "/",
-      dateAdded: "2026-07-06"
+      dateAdded: "2026-07-06",
+      productUrl: "/"
     }
   ],
   embroidery: [
@@ -1254,8 +1255,8 @@ window.CATEGORY_PRODUCTS = {
       },
       category: "embroidery",
       categoryLabel: "এম্ব্রয়ডারি",
-      productUrl: "/",
-      dateAdded: "2026-05-28"
+      dateAdded: "2026-05-28",
+      productUrl: "/"
     }
   ],
   karchupi: [
@@ -1276,8 +1277,8 @@ window.CATEGORY_PRODUCTS = {
       inStock: true,
       category: "hijab",
       categoryLabel: "হিজাব",
-      productUrl: "/",
-      dateAdded: "2026-07-21"
+      dateAdded: "2026-07-21",
+      productUrl: "/"
     }
   ],
   panjabi: [
@@ -1293,8 +1294,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Premium Full Sleeve Islamic Panjabi",
       category: "panjabi",
       categoryLabel: "পাঞ্জাবী",
-      productUrl: "/",
-      dateAdded: "2026-07-10"
+      dateAdded: "2026-07-10",
+      productUrl: "/"
     },
     {
       id: "PAN-002",
@@ -1308,8 +1309,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Premium Full Sleeve Islamic Panjabi",
       category: "panjabi",
       categoryLabel: "পাঞ্জাবী",
-      productUrl: "/",
-      dateAdded: "2026-07-12"
+      dateAdded: "2026-07-12",
+      productUrl: "/"
     },
     {
       id: "PAN-003",
@@ -1323,8 +1324,8 @@ window.CATEGORY_PRODUCTS = {
       detailNote: "Premium Full Sleeve Islamic Panjabi",
       category: "panjabi",
       categoryLabel: "পাঞ্জাবী",
-      productUrl: "/",
-      dateAdded: "2026-07-12"
+      dateAdded: "2026-07-12",
+      productUrl: "/"
     }
   ]
 };
