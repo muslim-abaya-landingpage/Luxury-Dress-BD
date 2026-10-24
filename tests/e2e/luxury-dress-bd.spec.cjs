@@ -184,14 +184,14 @@ test.describe('Luxury Dress BD — integration / E2E', () => {
 
   test('a price changed after adding to cart is updated in the cart before the order is sent', async ({ page }) => {
     const orders = await mockAppsScript(page, async () => 'Success|E2E-ORDER-0002');
-    const stale = [{ id: 'ABY-MAROON-1', name: 'Maroon Abaya Set', price: 850, quantity: 1, size: 'Body 44 / Length 52', productType: 'Full Set', category: 'abaya', selected: true }];
+    const stale = [{ id: 'ABY-MAROON-1', name: 'Maroon Abaya Set', price: 850, quantity: 1, size: 'Body 44 / Length 52', productType: 'Full Set Borka, Hijab+ Niqab', category: 'abaya', selected: true }];
     // The catalog the order server checks: the price changes once more while the customer is on checkout.
     let catalogFetches = 0;
     await page.route('**/catalog-validation.json*', async (route) => {
       const res = await route.fetch();
       const data = await res.json();
       catalogFetches++;
-      if (catalogFetches > 1) data.products.forEach((p) => { if (p.id === 'ABY-MAROON-1') p.prices['Full Set'] = 1099; });
+      data.products.forEach((p) => { if (p.id === 'ABY-MAROON-1') p.prices['Full Set Borka, Hijab+ Niqab'] = catalogFetches > 1 ? 1099 : 999; });
       await route.fulfill({ response: res, body: JSON.stringify(data) });
     });
     await openCheckoutWithCart(page, stale);
@@ -208,7 +208,7 @@ test.describe('Luxury Dress BD — integration / E2E', () => {
     await page.locator('#submitBtn').click();
     await expect(page).toHaveURL(/thank-you/);
     expect(orders).toHaveLength(1);
-    expect(JSON.parse(orders[0].CartJSON)).toEqual([expect.objectContaining({ id: 'ABY-MAROON-1', price: 1099, productType: 'Full Set' })]);
+    expect(JSON.parse(orders[0].CartJSON)).toEqual([expect.objectContaining({ id: 'ABY-MAROON-1', price: 1099, productType: 'Full Set Borka, Hijab+ Niqab' })]);
     expect(orders[0].Total).toBe('1179'); // ৳1099 + ৳80 Dhaka delivery
   });
 
