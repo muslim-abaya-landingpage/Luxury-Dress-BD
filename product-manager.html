@@ -24,7 +24,6 @@
   <link rel="stylesheet" href="admin-sidebar.css?v=20261003sb">
   <link rel="stylesheet" href="admin-premium.css?v=20261003pm2">
 <style>.pm-overview-product{display:flex;align-items:center;gap:12px}.pm-overview-photo{display:flex;align-items:center;justify-content:center;width:64px;height:80px;flex-shrink:0;background:#f3f3f3;border-radius:8px;overflow:hidden;font-size:11px;text-align:center;color:#666}.pm-overview-photo img{width:100%;height:100%;object-fit:contain}</style>
-<link rel="stylesheet" href="product-quick-upload.css?v=20261016-publish">
 
 <link rel="stylesheet" href="admin-dashboard-design.css?v=20261018-3">
 <script defer src="admin-dashboard-design.js?v=20261018-3"></script>
@@ -164,8 +163,18 @@
     return lazyScripts[src];
   }
   function ensureCsvTools() { return loadScriptOnce("product-csv.js?v=20261025-lazy"); }
+  function loadStyleOnce(href) {
+    var existing = document.querySelector('link[data-pm-lazy-href="' + href + '"]');
+    if (existing) return Promise.resolve();
+    return new Promise(function (resolve, reject) {
+      var link = document.createElement("link");
+      link.rel = "stylesheet"; link.href = href; link.dataset.pmLazyHref = href;
+      link.onload = resolve; link.onerror = function () { reject(new Error("Could not load " + href)); };
+      document.head.appendChild(link);
+    });
+  }
   function ensureQuickUpload() {
-    return loadScriptOnce("product-quick-upload.js?v=20261025-lazy").then(function () {
+    return Promise.all([loadScriptOnce("product-quick-upload.js?v=20261025-lazy"), loadStyleOnce("product-quick-upload.css?v=20261016-publish")]).then(function () {
       if (!quickUploadMounted) {
         if (!window.MaProductQuickUpload || !quickUploadOptions) throw new Error("Quick upload is not ready");
         window.MaProductQuickUpload.mount(quickUploadOptions);
