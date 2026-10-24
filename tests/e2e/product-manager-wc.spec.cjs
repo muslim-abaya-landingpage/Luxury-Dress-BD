@@ -27,12 +27,12 @@ test('sale price: before-sale price per option, card price follows the first opt
   await page.click('#pmEditBarSave');
   await expect.poll(() => productsFile(page)).toBeTruthy();
   const e = entry(await productsFile(page), 'ABY-MAROON-1');
-  expect(e).toMatch(/regularPriceByType: \{"Full Set":1299,"Abaya Only":999\}/);
+  expect(e).toMatch(/regularPriceByType: \{"Full Set Borka, Hijab\+ Niqab":1299,"Abaya Only":999\}/);
   expect(e).toContain('regularPrice: 1299');
   await page.click('#pmEditBack');
   // Several option prices: the list shows the range and a Sale tag.
   const row = page.locator('#pmAllRows tr').first();
-  await expect(row.locator('.column-price')).toContainText('৳799 – ৳999');
+  await expect(row.locator('.column-price')).toContainText('৳1000 – ৳1250');
   await expect(row.locator('.column-price .pm-sale-tag')).toHaveText('Sale');
 });
 
@@ -140,7 +140,7 @@ test('CSV: export downloads every product; import previews changes and problems,
   await expect(dlg).toHaveCount(0);
   const e = entry(await productsFile(page), 'ABY-MAROON-1');
   expect(e).toContain('tags: ["eid","offer"]');
-  expect(e).toContain('price: 999'); // empty Price cell left it unchanged
+  expect(e).toContain('price: 1250'); // empty Price cell left current catalog price unchanged
 });
 
 test('sale price on a single-price product shows the crossed-out price in the list', async ({ page }) => {
