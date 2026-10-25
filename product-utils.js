@@ -219,6 +219,8 @@
       color: entry.color || "",
       colorLabel: entry.colorLabel || "",
       detailNote: entry.detailNote || "",
+      isImageView: entry.isImageView === true,
+      imageViewOf: entry.imageViewOf || "",
       link: entry.link || entry.productUrl || entry.page || "",
       category: entry.category || categoryKey || "",
       categoryLabel: entry.categoryLabel || categoryLabelForKey(categoryKey),
@@ -350,7 +352,9 @@
 
   /** Storefront view of one category: published products only, featured ones first (stable order). */
   function storefrontList(list) {
-    var out = (list || []).filter(isPublishedProduct);
+    var out = (list || []).filter(function (product) {
+      return isPublishedProduct(product) && product.isImageView !== true;
+    });
     if (!out.some(function (p) { return p.featured === true; })) return out;
     return out.map(function (p, i) { return { p: p, i: i }; })
       .sort(function (a, b) { return ((b.p.featured === true) - (a.p.featured === true)) || (a.i - b.i); })
@@ -974,4 +978,3 @@ g.getCartLineBaseName = getCartLineBaseName;
     getStockStatus: getStockStatus
   };
 })(window);
-

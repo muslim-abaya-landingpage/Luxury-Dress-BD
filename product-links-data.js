@@ -12,7 +12,7 @@ window.PRODUCT_LINKS_DATA = {
     "/images/Black.jpeg",
     "/images/aby-versace-7-1789238735544.webp",
     "/images/Abaya/premium-black-layered-khimar-niqab-abaya-for-women-muslimabaya.webp",
-    "/images/Versace Border Premium Abaya Set.jpg",
+    "/images/Versace Border Premium Abaya Set...jpg",
     "/images/Premium-Floral-Motif-Abaya-Set...jpeg",
     "/images/Premium-Floral-Motif-Abaya-Set..jpeg",
     "/images/Premium-Floral-Motif-Abaya-Set.jpeg",

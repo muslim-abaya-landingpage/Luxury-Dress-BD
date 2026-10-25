@@ -10,6 +10,7 @@ const ctx={window:{},console};vm.createContext(ctx);
 for(const f of ['product-config.js','product-utils.js','category-products.js','product-links-data.js','product-catalog-sync.js'])vm.runInContext(read(f),ctx);
 const w=ctx.window;
 const cats=w.maCatalog.normalizeAll(w.CATEGORY_PRODUCTS,w.PRODUCT_LINKS_DATA||w.PRODUCT_IMAGE_LISTS||{});
+const allCats=w.maCatalog.normalizeAll(w.CATEGORY_PRODUCTS,w.PRODUCT_LINKS_DATA||w.PRODUCT_IMAGE_LISTS||{}, {includeUnpublished:true});
 let count=0;
 for(const [cat,rows] of Object.entries(cats))for(const p of rows){
   const html=read('product/'+p.id+'.html');const url='https://muslimabaya.com/product/'+encodeURIComponent(p.id);
@@ -23,8 +24,16 @@ for(const [cat,rows] of Object.entries(cats))for(const p of rows){
   const product=data.find(d=>d['@type']==='Product');
   assert.equal(product.sku,p.id);assert.equal(product.offers.price,p.price);assert.equal(product.offers.url,url);
   const stock = w.maCatalog.getStockStatus(p);
-  assert.equal(product.offers.availability, stock.qty == null ? undefined : 'https://schema.org/'+(stock.inStock?'InStock':'OutOfStock')); 
+  assert.equal(product.offers.availability, 'https://schema.org/'+(stock.inStock?'InStock':'OutOfStock'));
   count++;
+}
+for(const rows of Object.values(allCats))for(const p of rows.filter(row=>row.isImageView===true)){
+  const html=read('product/'+p.id+'.html');
+  const primary=allCats[p.category].find(row=>row.id===p.imageViewOf);
+  assert(primary, `Missing primary product for image view ${p.id}`);
+  assert(html.includes('<link rel="canonical" href="https://muslimabaya.com/product/'+encodeURIComponent(primary.id)+'">'));
+  const data=[...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(m=>JSON.parse(m[1]));
+  assert(!data.some(d=>d['@type']==='Product'), `Image view ${p.id} must not emit Product schema`);
 }
 // The same renderer boot must resolve path-based pages and old hash URLs.
 const renderer=read('category-renderer.js');
