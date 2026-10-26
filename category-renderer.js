@@ -1439,6 +1439,14 @@ function pqvHomeRowAutoplayAllowed() {
   return !(mm && mm("(prefers-reduced-motion: reduce)").matches) &&
     !(mm && mm("(max-width: 900px), (pointer: coarse)").matches);
 }
+function categoryScrollBehavior() {
+  var reduceMotion = false;
+  try {
+    reduceMotion = typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  } catch (_) {}
+  return reduceMotion ? "auto" : "smooth";
+}
 function pqvHomeRowCanSlide(rowEl) {
   return rowEl && rowEl.scrollWidth > rowEl.clientWidth + 8;
 }
@@ -1447,12 +1455,12 @@ function pqvHomeScrollRowBy(rowEl, dir) {
   var page = Math.max(rowEl.clientWidth * 0.8, 1);
   var max = rowEl.scrollWidth - rowEl.clientWidth;
   if (dir > 0) {
-    if (rowEl.scrollLeft >= max - 8) rowEl.scrollTo({ left: 0, behavior: "smooth" });
-    else rowEl.scrollBy({ left: page, behavior: "smooth" });
+    if (rowEl.scrollLeft >= max - 8) rowEl.scrollTo({ left: 0, behavior: categoryScrollBehavior() });
+    else rowEl.scrollBy({ left: page, behavior: categoryScrollBehavior() });
     return;
   }
-  if (rowEl.scrollLeft <= 8) rowEl.scrollTo({ left: max, behavior: "smooth" });
-  else rowEl.scrollBy({ left: -page, behavior: "smooth" });
+  if (rowEl.scrollLeft <= 8) rowEl.scrollTo({ left: max, behavior: categoryScrollBehavior() });
+  else rowEl.scrollBy({ left: -page, behavior: categoryScrollBehavior() });
 }
 function pqvHomeStartRowAuto(body, rowEl) {
   if (body.__ahRowTimer) {
@@ -1772,7 +1780,7 @@ function bindPqvInteractions(p, idx, categoryKey, scopeRoot) {
   if (jumpDesc) {
     jumpDesc.addEventListener("click", function () {
       var block = modal.querySelector("#pqvDescBlock");
-      if (block) block.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (block) block.scrollIntoView({ behavior: categoryScrollBehavior(), block: "start" });
     });
   }
   var qtyInput = modal.querySelector("#pqvQty");
@@ -3586,6 +3594,22 @@ function bindShopCategoryControls(root, products) {
     return;
   }
   var filterState = { colors: [], sizes: [], categories: [], availability: [], priceMin: null, priceMax: null };
+  var filterApplyFrame = null;
+  var filterBindingEpoch = (root.__maCategoryFilterEpoch || 0) + 1;
+  root.__maCategoryFilterEpoch = filterBindingEpoch;
+  function scheduleFilterApply() {
+    if (filterApplyFrame !== null) return;
+    var run = function () {
+      filterApplyFrame = null;
+      if (root.__maCategoryFilterEpoch !== filterBindingEpoch) return;
+      applyFilters();
+    };
+    if (typeof window.requestAnimationFrame === "function") {
+      filterApplyFrame = window.requestAnimationFrame(run);
+    } else {
+      filterApplyFrame = window.setTimeout(run, 16);
+    }
+  }
   function applyFilters() {
     var grid = root.querySelector("#productGrid");
     var countEl = root.querySelector("#shopCount");
@@ -3626,7 +3650,7 @@ function bindShopCategoryControls(root, products) {
   grid.appendChild(el);
     }
   }
-  function updatePriceTrack() {
+  function updatePriceTrack(event) {
     var minInput = root.querySelector("#priceMin");
     var maxInput = root.querySelector("#priceMax");
     var fill = root.querySelector("#priceTrackFill");
@@ -3653,7 +3677,8 @@ function bindShopCategoryControls(root, products) {
     var range = max - min || 1;
     fill.style.left = ((lo - min) / range) * 100 + "%";
     fill.style.width = ((hi - lo) / range) * 100 + "%";
-    applyFilters();
+    if (event && event.type === "input") scheduleFilterApply();
+    else applyFilters();
   }
   var priceMin = root.querySelector("#priceMin");
   var priceMax = root.querySelector("#priceMax");
@@ -3668,7 +3693,7 @@ function bindShopCategoryControls(root, products) {
       colorFilterWrap.querySelectorAll(".color-filter-check:checked").forEach(function (cb) {
         filterState.colors.push(cb.value);
       });
-      applyFilters();
+      scheduleFilterApply();
     });
   }
   function bindCheckboxFilter(id, className, stateKey) {
@@ -3677,7 +3702,7 @@ function bindShopCategoryControls(root, products) {
     wrap.addEventListener("change", function (ev) {
       if (!ev.target.classList.contains(className)) return;
       filterState[stateKey] = Array.prototype.slice.call(wrap.querySelectorAll("." + className + ":checked")).map(function (cb) { return cb.value; });
-      applyFilters();
+      scheduleFilterApply();
     });
   }
   bindCheckboxFilter("#sizeFilters", "size-filter-check", "sizes");
@@ -3693,7 +3718,7 @@ function bindShopCategoryControls(root, products) {
       filterState.sizes = [];
       filterState.categories = [];
       filterState.availability = [];
-      updatePriceTrack();
+      updatePriceTrack({ type: "input" });
     });
   }
   syncShopCartBadge();

@@ -90,6 +90,59 @@ test('search: /category?q= filters products instead of listing everything', asyn
   for (const name of hits) expect(name).toContain('butterfly');
 });
 
+test('category range filters coalesce rapid input to one frame update', async ({ page }) => {
+  await useCatalog(page);
+  await page.goto('/abaya');
+  await expect(page.locator('#priceMin')).toBeVisible();
+  const updates = await page.evaluate(async () => {
+    const range = document.querySelector('#priceMin');
+    const count = document.querySelector('#shopCount');
+    if (!range || !count) throw new Error('Category filter controls did not render');
+    let countWrites = 0;
+    const observer = new MutationObserver((records) => {
+      countWrites += records.filter((record) => record.target === count).length;
+    });
+    observer.observe(count, { childList: true, characterData: true, subtree: true });
+    const min = Number(range.min);
+    const max = Number(range.max);
+    [0.15, 0.3, 0.45, 0.6, 0.75].forEach((fraction) => {
+      range.value = String(Math.round(min + (max - min) * fraction));
+      range.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    observer.disconnect();
+    return countWrites;
+  });
+  expect(updates).toBe(1);
+});
+
+test('Hafeza full-set and Hijab+Niqab options retain the requested BDT prices', async ({ page }) => {
+  await useCatalog(page);
+  await page.goto('/product/ABY-HAFEZA-1');
+  const price = page.locator('#pqvPrice');
+  await expect(price).toHaveAttribute('data-price', '2385');
+  await page.locator('.pqv-type-opt[data-type-value="Hijab+Niqab"]').click();
+  await expect(price).toHaveAttribute('data-price', '1200');
+});
+
+test('quick-view carousel uses instant scrolling when reduced motion is requested', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/category');
+  const behavior = await page.evaluate(() => {
+    const calls = [];
+    const row = {
+      scrollWidth: 500,
+      clientWidth: 200,
+      scrollLeft: 0,
+      scrollBy(options) { calls.push(options.behavior); },
+      scrollTo(options) { calls.push(options.behavior); },
+    };
+    window.pqvHomeScrollRowBy(row, 1);
+    return calls;
+  });
+  expect(behavior).toEqual(['auto']);
+});
+
 test('home page: sale price on the card, Draft not shown', async ({ page }) => {
   await useCatalog(page);
   await page.goto('/');
