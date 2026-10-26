@@ -247,6 +247,14 @@
     contain-intrinsic-size: auto 700px;
   }
 }
+/* Keep offscreen product sections cheap to lay out on phones too. The first
+   section stays fully rendered; later sections are revealed near the viewport. */
+@media (max-width: 900px), (pointer: coarse) {
+  .home-section ~ .home-section {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 520px;
+  }
+}
 .home-section-head {
   display: flex;
   align-items: center;

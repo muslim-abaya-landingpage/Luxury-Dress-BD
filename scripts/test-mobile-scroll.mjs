@@ -142,12 +142,12 @@ test('autoplay follows width and motion preference changes after the page is run
   api.bindRowSlider(r.body); api.ready(3);
   env.observers[0].callback([{ target: r.body, isIntersecting: true }]); api.startHero(hero, 3);
   assert.equal(env.intervals.size, 2);
-  env.state.width = 390; env.notifyMedia(); env.flushFrames(); assert.equal(env.intervals.size, 1);
+  env.state.width = 390; env.notifyMedia(); env.flushFrames(); assert.equal(env.intervals.size, 0);
   env.state.reduced = true; env.notifyMedia(); env.flushFrames(); assert.equal(env.intervals.size, 0);
   env.state.width = 1200; env.state.reduced = false; env.notifyMedia(); env.flushFrames(); assert.equal(env.intervals.size, 2);
 });
 
-test('touch hover events keep hero controls and autoplay working; desktop hover pauses', () => {
+test('mobile hero keeps manual controls without auto-rotation; desktop hover pauses autoplay', () => {
   for (const coarse of [true, false]) {
     const env = environment({ width: coarse ? 390 : 1200, coarse });
     const api = env.expose('index-home-muslim-abaya.js', '{ bindHero, getIndex() { return heroIdx; } }');
@@ -156,22 +156,29 @@ test('touch hover events keep hero controls and autoplay working; desktop hover 
     hero.querySelector = selector => selector.endsWith('.prev') ? prev : next;
     hero.querySelectorAll = selector => selector === '.home-hero-slide' ? slides : [];
     env.ids.set('homeHero', hero); api.bindHero(hero, 3);
-    env.observers[0].callback([{ target: hero, isIntersecting: true }]); assert.equal(env.intervals.size, 1);
-    hero.emit('mouseenter'); assert.equal(env.intervals.size, coarse ? 1 : 0);
-    next.emit('click'); assert.equal(api.getIndex(), 1); assert.equal(env.intervals.size, coarse ? 1 : 0);
-    hero.emit('mouseleave'); assert.equal(env.intervals.size, 1);
+    env.observers[0].callback([{ target: hero, isIntersecting: true }]); assert.equal(env.intervals.size, coarse ? 0 : 1);
+    hero.emit('mouseenter'); assert.equal(env.intervals.size, 0);
+    next.emit('click'); assert.equal(api.getIndex(), 1); assert.equal(env.intervals.size, 0);
+    hero.emit('mouseleave'); assert.equal(env.intervals.size, coarse ? 0 : 1);
   }
 });
 
 test('hero autoplay pauses offscreen and in hidden tabs', () => {
-  const env = environment(); const api = env.expose('index-home-muslim-abaya.js', '{ startHero }'); const hero = new env.El();
+  const env = environment({ width: 1200, coarse: false }); const api = env.expose('index-home-muslim-abaya.js', '{ startHero }'); const hero = new env.El();
   hero.__ahHeroVisible = false; api.startHero(hero, 3); assert.equal(env.intervals.size, 0);
   hero.__ahHeroVisible = true; api.startHero(hero, 3); assert.equal(env.intervals.size, 1);
   env.ctx.document.hidden = true; api.startHero(hero, 3); assert.equal(env.intervals.size, 0);
 });
 
 test('reduced motion avoids automatic hero changes', () => {
-  const env = environment({ reduced: true }); const api = env.expose('index-home-muslim-abaya.js', '{ startHero }'); api.startHero(new env.El(), 3); assert.equal(env.intervals.size, 0);
+  const env = environment({ width: 1200, coarse: false, reduced: true }); const api = env.expose('index-home-muslim-abaya.js', '{ startHero }'); api.startHero(new env.El(), 3); assert.equal(env.intervals.size, 0);
+});
+
+test('mobile homepage contains below-fold sections and skips entrance animations', () => {
+  const homeCss = fs.readFileSync(path.join(root, 'index-home-muslim-abaya.css'), 'utf8');
+  const glassCss = fs.readFileSync(path.join(root, 'home-glass.css'), 'utf8');
+  assert.match(homeCss, /@media\s*\(max-width:\s*900px\),\s*\(pointer:\s*coarse\)[\s\S]*?\.home-section\s*~\s*\.home-section\s*\{[^}]*content-visibility:\s*auto;[^}]*contain-intrinsic-size:\s*auto\s+520px;/);
+  assert.match(glassCss, /@media\s*\(max-width:\s*900px\),\s*\(pointer:\s*coarse\)[\s\S]*?\.home-section\s*\{\s*animation:\s*none;/);
 });
 
 test('first swipe does not load all deferred hero images; idle warming loads one', () => {

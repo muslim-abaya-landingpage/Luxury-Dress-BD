@@ -43,6 +43,9 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
+      - name: Run homepage scroll-performance regression tests
+        run: npm run test:scroll
+
       - name: Run Apps Script security contract tests
         run: npm run test:backend
 

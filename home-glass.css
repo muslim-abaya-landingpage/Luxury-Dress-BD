@@ -183,3 +183,8 @@ body.global-layout #homeCatnav {
   .home-hero-cap .eyebrow, .home-hero-cap .head, .home-hero-cap .sub { display: none; }
   .home-hero-cap .hero-btn { min-height: 36px; padding: 8px 16px; font-size: 11px; box-shadow: 0 4px 12px rgba(0,0,0,.18); }
 }
+
+/* Avoid animating every catalog section while a touch visitor starts scrolling. */
+@media (max-width: 900px), (pointer: coarse) {
+  .home-section { animation: none; }
+}

@@ -812,7 +812,7 @@
 
   function startHero(hero, total) {
     stopHero();
-    if (!hero || total <= 1 || prefersReducedMotion() || document.hidden ||
+    if (!hero || total <= 1 || !heroAutoplayAllowed() || document.hidden ||
         hero.__ahHeroVisible === false || hero.__ahHeroPaused) return;
     heroTimer = setInterval(function () {
       goToSlide(hero, heroIdx + 1, total);
@@ -824,6 +824,13 @@
       clearInterval(heroTimer);
       heroTimer = null;
     }
+  }
+
+  function heroAutoplayAllowed() {
+    // Keep touch visitors in control: carousel transitions during a vertical
+    // fling compete with page scrolling on lower-powered mobile devices.
+    return !prefersReducedMotion() &&
+      !(window.matchMedia && window.matchMedia("(max-width: 900px), (pointer: coarse)").matches);
   }
 
   function bindHero(hero, total) {
@@ -980,4 +987,3 @@
     });
   }
 })();
-
