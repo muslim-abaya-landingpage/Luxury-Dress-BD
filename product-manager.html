@@ -28,7 +28,7 @@
 <link rel="stylesheet" href="admin-dashboard-design.css?v=20261018-3">
 <script defer src="admin-dashboard-design.js?v=20261018-3"></script>
 <link rel="stylesheet" href="admin-premium-layout.css?v=20261021-1">
-<link rel="stylesheet" href="product-manager-wp.css?v=20261028-dresslength-discount">
+<link rel="stylesheet" href="product-manager-wp.css?v=20261028-color-variations">
 <link rel="stylesheet" href="admin-design-system.css?v=20261024-1">
 <link rel="stylesheet" href="product-manager-premium.css?v=20261024-tags-wrap">
 </head>
@@ -813,6 +813,61 @@
       '<small id="pmOptMsg" role="status">Customers pick it on the product page, with this price.</small></span></div>';
   }
 
+  function colorKeyFromLabel(label, index) {
+    return String(label || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "color-" + (Number(index) + 1 || 1);
+  }
+  function initialColorRows(p) {
+    if (Array.isArray(p.colorVariants) && p.colorVariants.length) {
+      return p.colorVariants.filter(Boolean).map(function (row, index) {
+        var label = String(row.colorLabel || row.label || row.color || "").trim();
+        return { color: String(row.color || colorKeyFromLabel(label, index)), colorLabel: label, image: String(row.image || row.src || "") };
+      });
+    }
+    var labels = String(p.colorLabel || p.color || "").split(/[,，;；|]/).map(function (label) { return label.trim(); }).filter(Boolean);
+    var images = (Array.isArray(p.images) ? p.images.slice() : []).concat(p.image ? [p.image] : []);
+    return labels.map(function (label, index) {
+      var key = labels.length === 1 && p.color ? String(p.color) : colorKeyFromLabel(label, index);
+      var image = labels.length === 1 ? String(p.image || "") : "";
+      if (!image) images.some(function (url) {
+        var filename = String(url || "").split("/").pop().toLowerCase().replace(/[^a-z0-9]+/g, "-");
+        if (key && ("-" + filename + "-").indexOf("-" + key + "-") !== -1) { image = url; return true; }
+        return false;
+      });
+      return { color: key, colorLabel: label, image: image };
+    });
+  }
+  function colorRowsMarkup(rows) {
+    return rows.map(function (row, index) {
+      return '<div class="pm-color-variation-row" data-color-row="' + index + '">' +
+        '<label>Color name<input type="text" data-color-field="label" value="' + escapeAttr(row.colorLabel || "") + '" placeholder="e.g. Black"></label>' +
+        '<label>Image URL<input type="text" data-color-field="image" value="' + escapeAttr(row.image || "") + '" placeholder="Paste this color’s image URL"></label>' +
+        '<button type="button" class="pm-wp-link-danger" data-color-remove="' + index + '" aria-label="Remove color variation">Remove</button>' +
+      '</div>';
+    }).join("");
+  }
+  function syncColorRows(p, list) {
+    var rows = Array.prototype.slice.call(list.querySelectorAll("[data-color-row]")).map(function (row, index) {
+      var label = String(row.querySelector('[data-color-field="label"]').value || "").replace(/\s+/g, " ").trim();
+      var color = colorKeyFromLabel(label, index);
+      var image = String(row.querySelector('[data-color-field="image"]').value || "").trim();
+      return label ? { color: color, colorLabel: label, image: image } : null;
+    }).filter(Boolean);
+    if (rows.length) {
+      p.colorVariants = rows;
+      p.colorLabel = rows.map(function (row) { return row.colorLabel; }).join(", ");
+      p.color = rows.map(function (row) { return row.color; }).join("-");
+      var gallery = Array.isArray(p.images) ? p.images.slice() : [];
+      rows.forEach(function (row) {
+        if (row.image && row.image !== p.image && gallery.indexOf(row.image) === -1) gallery.push(row.image);
+      });
+      if (gallery.length) p.images = gallery;
+    } else {
+      delete p.colorVariants;
+      delete p.colorLabel;
+      delete p.color;
+    }
+  }
+
   function renderProductEditor() {
     var list = editTarget && products[editTarget.cat];
     var p = list && list[editTarget.index];
@@ -824,6 +879,7 @@
     if (!Object.prototype.hasOwnProperty.call(liveStockOverrides, String(p.id)) && typeof window.isInStock === "function") out = !window.isInStock(p);
     var tabs = [["general", "General"], ["inventory", "Inventory"], ["attributes", "Attributes"]];
     var tags = productTags(p);
+    var colorRows = initialColorRows(p);
     mainEl.innerHTML =
       '<div class="pm-wp-edit">' +
       '<button type="button" class="pm-wp-back" id="pmEditBack">← All products</button>' +
@@ -847,8 +903,9 @@
               '<button type="button" class="pm-wp-button" id="pmEditStock">' + (out ? "Mark in stock" : "Mark out of stock") + '</button></span></p>' +
             '</div>' +
             '<div class="pm-wp-panel" data-epanel="attributes"' + (editTab === "attributes" ? "" : " hidden") + '>' +
-              efield("colorLabel", "Color (shown)", p.colorLabel) +
-              efield("color", "Color code", p.color, "text", "e.g. black, maroon — used for color filters.") +
+              '<div class="pm-wp-form-row pm-color-variation-field"><label>Color variations</label><div><div id="pmColorVariationList">' + colorRowsMarkup(colorRows) + '</div>' +
+                '<button type="button" class="pm-wp-button" id="pmColorAdd">+ Add color</button>' +
+                '<small>Add one row per color. Use a unique color name and paste the matching photo URL; new URLs are added to the product gallery automatically. Color keys are generated automatically.</small></div></div>' +
               efield("fabric", "Fabric", p.fabric) +
               efield("sizes", "Sizes", sizesToInput(p.sizes), "text", "Separate with commas.") +
               efield("bodySizes", "Body sizes (inches)", sizesToInput(p.bodySizes), "text", "e.g. 38, 40, 42 — separate with commas.") +
@@ -996,6 +1053,43 @@
         else p[f] = inp.value;
         changed();
       });
+    });
+    var colorList = root.querySelector("#pmColorVariationList");
+    var colorAdd = root.querySelector("#pmColorAdd");
+    function colorRowsFromDom() {
+      return Array.prototype.slice.call(colorList.querySelectorAll("[data-color-row]")).map(function (row, index) {
+        return {
+          colorLabel: row.querySelector('[data-color-field="label"]').value.trim(),
+          color: colorKeyFromLabel(row.querySelector('[data-color-field="label"]').value, index),
+          image: row.querySelector('[data-color-field="image"]').value.trim()
+        };
+      });
+    }
+    if (colorList) {
+      colorList.addEventListener("input", function (event) {
+        var input = event.target.closest("[data-color-field]");
+        if (!input) return;
+        syncColorRows(p, colorList);
+        changed();
+      });
+      colorList.addEventListener("click", function (event) {
+        var remove = event.target.closest("[data-color-remove]");
+        if (!remove) return;
+        event.preventDefault();
+        colorRows = colorRowsFromDom();
+        colorRows.splice(parseInt(remove.getAttribute("data-color-remove"), 10), 1);
+        colorList.innerHTML = colorRowsMarkup(colorRows);
+        syncColorRows(p, colorList);
+        changed();
+      });
+    }
+    if (colorAdd && colorList) colorAdd.addEventListener("click", function () {
+      colorRows = colorRowsFromDom();
+      colorRows.push({ color: "", colorLabel: "", image: "" });
+      colorList.innerHTML = colorRowsMarkup(colorRows);
+      changed();
+      var newLabel = colorList.querySelector('[data-color-row]:last-child [data-color-field="label"]');
+      if (newLabel) newLabel.focus();
     });
     // Options (Full Set / Abaya Only / anything added here, e.g. Hijab), each with its own price.
     var optAdd = document.getElementById("pmOptAdd");
@@ -3078,6 +3172,16 @@
     var snapshot;
     try {
       if(!window.MaCatalogPublisher.isReady())throw new Error("Publishing is not ready. Reload current data.");
+      if (activeKey === EDIT_KEY && editTarget) {
+        var editedProduct = (products[editTarget.cat] || [])[editTarget.index];
+        var colorKeys = {};
+        (editedProduct && editedProduct.colorVariants || []).forEach(function (row) {
+          var key = String(row.color || "").trim().toLowerCase();
+          if (!key) throw new Error("Each color variation needs a unique color key.");
+          if (colorKeys[key]) throw new Error("Color variation keys must be unique. Update the duplicate color key before saving.");
+          colorKeys[key] = true;
+        });
+      }
       window.MaProductPublishUtils.validateCatalog(products);
       if(sections.some(function(sec){return !(window.CATALOG_SECTIONS||[]).some(function(old){return old.key===sec.key;});}))throw new Error("A new category must be set up before it goes live. Add products to an existing category.");
       reconcileAllColorVariants();stripHomeLinksFromProducts();snapshot=catalogSnapshot();

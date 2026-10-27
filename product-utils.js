@@ -939,7 +939,7 @@ g.getCartLineBaseName = getCartLineBaseName;
     var rows = p.colorVariants.filter(Boolean);
     if (labels.length < 2) return rows;
     var used = {};
-    var rowKeys = rows.map(function (r) { return colorKey(r.colorLabel || r.label || r.color); });
+    var rowKeys = rows.map(function (r) { return colorKey(r.colorLabel || r.label || r.color) || String(r.color || ""); });
     var out = rows.map(function (r, i) {
       var hit = -1;
       labels.some(function (label, j) {
@@ -948,16 +948,16 @@ g.getCartLineBaseName = getCartLineBaseName;
       });
       if (hit < 0) return null;
       used[hit] = true;
-      return { color: colorKey(labels[hit]), colorLabel: labels[hit], image: r.image || r.src || "" };
+      return { color: colorKey(labels[hit]) || String(r.color || "color-" + (hit + 1)), colorLabel: labels[hit], image: r.image || r.src || "" };
     });
     var rest = labels.map(function (l, j) { return used[j] ? null : l; }).filter(Boolean);
     out = out.map(function (o, i) {
       if (o) return o;
       if (!rest.length) return null;
       var label = rest.shift();
-      return { color: colorKey(label), colorLabel: label, image: rows[i].image || rows[i].src || "" };
+      return { color: colorKey(label) || String(rows[i].color || "color-" + (i + 1)), colorLabel: label, image: rows[i].image || rows[i].src || "" };
     }).filter(Boolean);
-    rest.forEach(function (label) { out.push({ color: colorKey(label), colorLabel: label, image: "" }); });
+    rest.forEach(function (label) { out.push({ color: colorKey(label) || "color-" + (out.length + 1), colorLabel: label, image: "" }); });
     return out;
   }
 

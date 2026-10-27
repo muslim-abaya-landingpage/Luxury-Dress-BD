@@ -1,4 +1,5 @@
 const { test, expect } = require('@playwright/test');
+const vm = require('node:vm');
 
 async function stub(page) {
   await page.route('**/admin-guard.js*', (r) => r.fulfill({ contentType: 'application/javascript', body: 'window.MaAdminGuard={require:function(){return Promise.resolve({ok:true,role:"admin"});}};' }));
@@ -109,6 +110,41 @@ test('edit screen: discount percent calculates a simple-product sale price and D
   expect(b).toContain('price: 1615');
   expect(b).toContain('regularPrice: 1900');
   expect(b).toContain('dressLengths: ["52","54"]');
+});
+
+test('edit screen: structured color variations publish names and images, with five measurement fields', async ({ page }) => {
+  await stub(page);
+  page.on('dialog', (d) => d.accept());
+  await page.goto('/product-manager.html');
+  await page.waitForTimeout(500);
+  await withPublisher(page, false);
+  await page.fill('#pmAllSearch', 'DR-01');
+  await page.click('#pmAllSearchBtn');
+  await page.locator('#pmAllRows tr').filter({ hasText: 'DR-01' }).first().locator('.pm-row-title').click();
+  await page.click('[data-etab="attributes"]');
+
+  const measurements = ['sizes', 'bodySizes', 'sleeveSizes', 'dressLengths', 'palazzoLengths'];
+  for (const field of measurements) await expect(page.locator(`[data-ef="${field}"]`)).toHaveCount(1);
+  await expect(page.locator('.pm-color-variation-row')).toHaveCount(1);
+  await page.fill('.pm-color-variation-row [data-color-field="label"]', 'White / Black');
+  await page.fill('.pm-color-variation-row [data-color-field="image"]', '/images/white-black.webp');
+  await page.click('#pmColorAdd');
+  await page.locator('.pm-color-variation-row').nth(1).locator('[data-color-field="label"]').fill('কালো');
+  await page.locator('.pm-color-variation-row').nth(1).locator('[data-color-field="image"]').fill('/images/black.webp');
+  await page.click('#pmEditBarSave');
+  await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
+
+  const file = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
+  const context = { window: {} };
+  vm.runInNewContext(file, context);
+  const product = JSON.parse(JSON.stringify(context.window.CATEGORY_PRODUCTS['premium-two-piece'].find((p) => p.id === 'DR-01')));
+  expect(product.colorLabel).toBe('White / Black, কালো');
+  expect(product.colorVariants).toEqual([
+    { color: 'white-black', colorLabel: 'White / Black', image: '/images/white-black.webp' },
+    { color: 'color-2', colorLabel: 'কালো', image: '/images/black.webp' }
+  ]);
+  expect(product.images).toContain('/images/white-black.webp');
+  expect(product.images).toContain('/images/black.webp');
 });
 
 async function withPublisher(page, fail) {
