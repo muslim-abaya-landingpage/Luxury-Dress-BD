@@ -764,6 +764,8 @@ html[data-admin-theme="dark"] .pm-wp-list, html[data-admin-theme="dark"] .pm-wp-
 .pm-opt-row > span { flex-wrap: wrap; }
 .pm-opt-row > span .pm-opt-was { flex: 0 1 100px; width: 100px; min-width: 80px; }
 @media (max-width: 782px) { .pm-opt-row > span .pm-opt-was { flex: 1 1 100px; width: auto; } }
+.pm-opt-row > span .pm-opt-discount { flex: 0 1 76px; width: 76px; min-width: 68px; }
+@media (max-width: 782px) { .pm-opt-row > span .pm-opt-discount { flex: 1 1 80px; width: auto; } }
 .pm-wp-status-row select { margin-left: 4px; }
 .pm-seo-preview { border: 1px solid var(--pm-wp-border); background: #fff; padding: 10px 12px; margin-bottom: 12px; font-family: Arial, sans-serif; }
 .pm-seo-prev-title { color: #1a0dab; font-size: 18px; line-height: 1.3; }

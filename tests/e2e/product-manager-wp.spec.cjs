@@ -63,6 +63,9 @@ test('edit screen: option prices keep the card price in step, and a new option (
   const first = page.locator('.pm-opt-row .pm-opt-price').first();
   await first.fill('1999');
   await expect(page.locator('#pmCardPrice')).toHaveText('৳1999');
+  await page.locator('.pm-opt-row .pm-opt-discount').first().fill('10');
+  await expect(first).toHaveValue('1799');
+  await expect(page.locator('#pmCardPrice')).toHaveText('৳1799');
   await page.fill('#pmOptName', 'Hijab');
   await page.fill('#pmOptPrice', '450');
   await page.click('#pmOptAdd');
@@ -73,12 +76,39 @@ test('edit screen: option prices keep the card price in step, and a new option (
   await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
   const file = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
   const block = file.slice(file.indexOf('"ABY-MAROON-1"'), file.indexOf('"ABY-MAROON-1"') + 900);
-  expect(block).toContain('price: 1999');
+  expect(block).toContain('price: 1799');
   expect(block).toMatch(/types: \[[^\]]*"Hijab"\]/);
   expect(block).toContain('"Hijab": 450');
+  expect(block).toContain('regularPriceByType');
   // Removing it again restores the category's default options.
   await page.click('[data-opt-del="Hijab"]');
   await expect(page.locator('[data-opt-name="Hijab"]')).toHaveCount(0);
+});
+
+test('edit screen: discount percent calculates a simple-product sale price and Dress Lengths publish', async ({ page }) => {
+  await stub(page);
+  page.on('dialog', (d) => d.accept());
+  await page.goto('/product-manager.html');
+  await page.waitForTimeout(500);
+  await withPublisher(page, false);
+  await page.fill('#pmAllSearch', 'DR-01');
+  await page.click('#pmAllSearchBtn');
+  const row = page.locator('#pmAllRows tr').filter({ hasText: 'DR-01' }).first();
+  await row.locator('.pm-row-title').click();
+  await expect(page.locator('[data-ef="discountPercent"]')).toHaveValue('10');
+  await page.fill('[data-ef="discountPercent"]', '15');
+  await expect(page.locator('[data-ef="price"]')).toHaveValue('1615');
+  await expect(page.locator('[data-ef="regularPrice"]')).toHaveValue('1900');
+  await page.click('[data-etab="attributes"]');
+  await page.fill('[data-ef="dressLengths"]', '52, 54');
+  await page.click('#pmEditBarSave');
+  await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
+  const file = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
+  const start = file.indexOf('"DR-01"');
+  const b = file.slice(start, start + 5000);
+  expect(b).toContain('price: 1615');
+  expect(b).toContain('regularPrice: 1900');
+  expect(b).toContain('dressLengths: ["52","54"]');
 });
 
 async function withPublisher(page, fail) {

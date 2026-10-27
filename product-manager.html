@@ -28,7 +28,7 @@
 <link rel="stylesheet" href="admin-dashboard-design.css?v=20261018-3">
 <script defer src="admin-dashboard-design.js?v=20261018-3"></script>
 <link rel="stylesheet" href="admin-premium-layout.css?v=20261021-1">
-<link rel="stylesheet" href="product-manager-wp.css?v=20261024-wc">
+<link rel="stylesheet" href="product-manager-wp.css?v=20261028-dresslength-discount">
 <link rel="stylesheet" href="admin-design-system.css?v=20261024-1">
 <link rel="stylesheet" href="product-manager-premium.css?v=20261024-tags-wrap">
 </head>
@@ -162,7 +162,7 @@
     });
     return lazyScripts[src];
   }
-  function ensureCsvTools() { return loadScriptOnce("product-csv.js?v=20261025-lazy"); }
+  function ensureCsvTools() { return loadScriptOnce("product-csv.js?v=20261028-dresslength-discount"); }
   function loadStyleOnce(href) {
     var existing = document.querySelector('link[data-pm-lazy-href="' + href + '"]');
     if (existing) return Promise.resolve();
@@ -707,6 +707,37 @@
       if (!Object.keys(p.regularPriceByType).length) delete p.regularPriceByType;
     } else if (n > 0) p.regularPrice = n; else delete p.regularPrice;
   }
+  function salePercent(price, regular) {
+    var sale = parseInt(price, 10), was = parseInt(regular, 10);
+    return sale > 0 && was > sale ? Math.round((1 - sale / was) * 100) : "";
+  }
+  function discountedPrice(regular, percent) {
+    var was = parseInt(regular, 10), pct = Number(percent);
+    if (!(was > 0) || !isFinite(pct) || pct < 1 || pct >= 100) return null;
+    return Math.max(1, Math.round(was * (100 - pct) / 100));
+  }
+  function applyDiscountPercent(p, typeLabel, value) {
+    var prices = typeLabel ? (p.priceByType || {}) : p;
+    var regulars = typeLabel ? (p.regularPriceByType || {}) : p;
+    var sale = typeLabel ? parseInt(prices[typeLabel], 10) : parseInt(p.price, 10);
+    var was = typeLabel ? parseInt(regulars[typeLabel], 10) : parseInt(p.regularPrice, 10);
+    if (value === "") {
+      if (was > sale) sale = was;
+      if (typeLabel) prices[typeLabel] = sale;
+      else p.price = sale;
+      setRegularPrice(p, typeLabel, "");
+      return true;
+    }
+    var pct = Number(value);
+    if (!isFinite(pct) || pct < 1 || pct >= 100) return false;
+    if (!(was > sale)) was = sale;
+    var nextPrice = discountedPrice(was, pct);
+    if (nextPrice == null) return false;
+    if (typeLabel) prices[typeLabel] = nextPrice;
+    else p.price = nextPrice;
+    setRegularPrice(p, typeLabel, was);
+    return true;
+  }
   function productOnSale(p) {
     if (parseInt(p.regularPrice, 10) > parseInt(p.price, 10)) return true;
     var r = p.regularPriceByType, s = p.priceByType || {};
@@ -754,7 +785,8 @@
     var rows = "";
     if (!types.length) {
       rows = efield("price", "Price (৳)", p.price, "number", "What the customer pays.") +
-        efield("regularPrice", "Before-sale price (৳)", p.regularPrice == null ? "" : p.regularPrice, "number", "Optional. When higher than the price, the shop shows it crossed out (sale). Leave empty when there is no sale.");
+        efield("regularPrice", "Regular price (৳)", p.regularPrice == null ? "" : p.regularPrice, "number", "Enter the original price; the percentage below calculates the sale price.") +
+        '<p class="pm-wp-form-row"><label for="pmEf_discountPercent">Discount (%)</label><span><input id="pmEf_discountPercent" type="number" min="1" max="99" step="1" data-ef="discountPercent" value="' + salePercent(p.price, p.regularPrice) + '" placeholder="e.g. 10"><small>Enter 1–99. Sale price is calculated from the regular price; clear to remove the discount.</small></span></p>';
     } else {
       rows = '<p class="pm-wp-form-row"><label>Price on product cards</label><span><b id="pmCardPrice">৳' + (parseInt(p.price, 10) || 0) + '</b><small>Always the same as the first option (' + escapeHtml(types[0]) + ').</small></span></p>' +
         types.map(function (t) {
@@ -764,13 +796,14 @@
             '<input type="text" class="pm-opt-name" maxlength="40" data-opt-name="' + escapeAttr(t) + '" value="' + escapeAttr(t) + '" aria-label="Option name (' + escapeAttr(t) + ')" title="Option name — edit to rename">' +
             '<input id="pmEf_typePrice:' + escapeAttr(t) + '" class="pm-opt-price" type="number" min="0" data-ef="typePrice:' + escapeAttr(t) + '" value="' + escapeAttr(v) + '" aria-label="' + escapeAttr(t) + ' price">' +
             '<input class="pm-opt-was" type="number" min="0" data-ef="typeRegular:' + escapeAttr(t) + '" value="' + escapeAttr(p.regularPriceByType && p.regularPriceByType[t] != null ? p.regularPriceByType[t] : "") + '" placeholder="Was ৳" aria-label="' + escapeAttr(t) + ' before-sale price" title="Optional before-sale price — shown crossed out when higher than the price">' +
+            '<input class="pm-opt-discount" type="number" min="1" max="99" step="1" data-ef="typeDiscount:' + escapeAttr(t) + '" value="' + salePercent(v, p.regularPriceByType && p.regularPriceByType[t]) + '" placeholder="% off" aria-label="' + escapeAttr(t) + ' discount percent" title="Enter 1–99 to calculate this option’s sale price">' +
             '<span class="pm-opt-tools">' +
             (types.length > 1 ? '<button type="button" class="pm-wp-button pm-opt-move" data-opt-up="' + i + '"' + (i === 0 ? ' disabled' : '') + ' aria-label="Move ' + escapeAttr(t) + ' up" title="Move up">↑</button>' +
               '<button type="button" class="pm-wp-button pm-opt-move" data-opt-down="' + i + '"' + (i === types.length - 1 ? ' disabled' : '') + ' aria-label="Move ' + escapeAttr(t) + ' down" title="Move down">↓</button>' +
               '<button type="button" class="pm-wp-link-danger" data-opt-del="' + escapeAttr(t) + '">Remove</button>' : '') +
             '</span></span></div>';
         }).join("") +
-        '<p class="pm-wp-form-row pm-opt-help"><label></label><span><small id="pmOptEditMsg" role="status">Edit an option name to rename it (e.g. Hijab → Hijab + Niqab). ↑ ↓ change the order; the first option is the card price. “Was ৳” (before-sale price) is optional: when higher than the price, the shop shows a sale.</small></span></p>';
+        '<p class="pm-wp-form-row pm-opt-help"><label></label><span><small id="pmOptEditMsg" role="status">Edit an option name to rename it (e.g. Hijab → Hijab + Niqab). ↑ ↓ change the order; the first option is the card price. Enter a % off to calculate that option’s sale price; the regular price stays struck through.</small></span></p>';
     }
     return rows +
       '<div class="pm-wp-form-row pm-opt-add"><label for="pmOptName">Add option</label><span>' +
@@ -820,6 +853,7 @@
               efield("sizes", "Sizes", sizesToInput(p.sizes), "text", "Separate with commas.") +
               efield("bodySizes", "Body sizes (inches)", sizesToInput(p.bodySizes), "text", "e.g. 38, 40, 42 — separate with commas.") +
               efield("sleeveSizes", "Sleeve sizes (inches)", sizesToInput(p.sleeveSizes), "text", "e.g. 22, 23, 24 — separate with commas.") +
+              efield("dressLengths", "Dress lengths (inches)", sizesToInput(p.dressLengths), "text", "Two-Piece dress length options, e.g. 38, 40, 42.") +
               efield("palazzoLengths", "Pajama / Palazzo lengths (inches)", sizesToInput(p.palazzoLengths), "text", "e.g. 38, 40 — separate with commas.") +
             '</div>' +
           '</div></div></section>' +
@@ -914,9 +948,28 @@
       inp.addEventListener(inp.type === "checkbox" ? "change" : "input", function () {
         var f = inp.getAttribute("data-ef");
         if (f === "featured") { if (inp.checked) p.featured = true; else delete p.featured; }
-        else if (f === "price") p.price = parseInt(inp.value, 10) || 0;
-        else if (f === "regularPrice") setRegularPrice(p, null, inp.value);
-        else if (f.indexOf("typeRegular:") === 0) { setRegularPrice(p, f.slice(12), inp.value); syncCardPrice(p, meta); }
+        else if (f === "price") { p.price = parseInt(inp.value, 10) || 0; var dp = document.getElementById("pmEf_discountPercent"); if (dp) dp.value = salePercent(p.price, p.regularPrice); }
+        else if (f === "regularPrice") { setRegularPrice(p, null, inp.value); var dp2 = document.getElementById("pmEf_discountPercent"); if (dp2) dp2.value = salePercent(p.price, p.regularPrice); }
+        else if (f === "discountPercent") {
+          if (!applyDiscountPercent(p, null, inp.value)) { inp.setCustomValidity("Enter a whole-number discount from 1 to 99%."); inp.reportValidity(); inp.setCustomValidity(""); return; }
+          var priceInput = root.querySelector('[data-ef="price"]'), regularInput = root.querySelector('[data-ef="regularPrice"]');
+          if (priceInput) priceInput.value = p.price;
+          if (regularInput) regularInput.value = p.regularPrice == null ? "" : p.regularPrice;
+        }
+        else if (f.indexOf("typeRegular:") === 0) {
+          var regularType = f.slice(12); setRegularPrice(p, regularType, inp.value); syncCardPrice(p, meta);
+          var discountTypeInput = root.querySelector('[data-ef="typeDiscount:' + CSS.escape(regularType) + '"]');
+          if (discountTypeInput) discountTypeInput.value = salePercent(p.priceByType && p.priceByType[regularType], p.regularPriceByType && p.regularPriceByType[regularType]);
+        }
+        else if (f.indexOf("typeDiscount:") === 0) {
+          var discountType = f.slice(13);
+          if (!applyDiscountPercent(p, discountType, inp.value)) { inp.setCustomValidity("Enter a whole-number discount from 1 to 99%."); inp.reportValidity(); inp.setCustomValidity(""); return; }
+          var optionPriceInput = root.querySelector('[data-ef="typePrice:' + CSS.escape(discountType) + '"]');
+          var optionRegularInput = root.querySelector('[data-ef="typeRegular:' + CSS.escape(discountType) + '"]');
+          if (optionPriceInput) optionPriceInput.value = p.priceByType[discountType];
+          if (optionRegularInput) optionRegularInput.value = p.regularPriceByType && p.regularPriceByType[discountType] || "";
+          syncCardPrice(p, meta);
+        }
         else if (f === "status") { setProductStatus(p, inp.value); paintStatusNote(); }
         else if (f === "seoTitle" || f === "seoDescription") { var sv = inp.value.replace(/\s+/g, " ").trim(); if (sv) p[f] = sv; else delete p[f]; updateSeoPreview(); }
         else if (f === "stock") {
@@ -924,14 +977,17 @@
           else { p.stock = Math.max(0, parseInt(inp.value, 10) || 0); if (p.stock === 0) p.inStock = false; else delete p.inStock; }
         } else if (f.indexOf("typePrice:") === 0) {
           if (!p.priceByType) p.priceByType = {};
-          p.priceByType[f.slice(10)] = parseInt(inp.value, 10) || 0;
+          var priceType = f.slice(10);
+          p.priceByType[priceType] = parseInt(inp.value, 10) || 0;
+          var priceDiscountInput = root.querySelector('[data-ef="typeDiscount:' + CSS.escape(priceType) + '"]');
+          if (priceDiscountInput) priceDiscountInput.value = salePercent(p.priceByType[priceType], p.regularPriceByType && p.regularPriceByType[priceType]);
           syncCardPrice(p, meta);
         } else if (f === "colorLabel") {
           p.colorLabel = inp.value;
           p.color = inp.value;
           // The per-photo color list is brought in line when saving (reconcileAllColorVariants).
         }
-        else if (f === "sizes" || f === "bodySizes" || f === "sleeveSizes" || f === "palazzoLengths") {
+        else if (f === "sizes" || f === "bodySizes" || f === "sleeveSizes" || f === "dressLengths" || f === "palazzoLengths") {
           var values = inputToSizes(inp.value);
           if (values.length) p[f] = values;
           else delete p[f];

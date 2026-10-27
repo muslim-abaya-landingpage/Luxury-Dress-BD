@@ -11,13 +11,13 @@
   'use strict';
 
   var COLUMNS = ['SKU', 'Name', 'Category', 'Status', 'Price', 'Before-sale price', 'Option prices', 'Option before-sale prices',
-    'Stock', 'Featured', 'Tags', 'Brand', 'Color', 'Color code', 'Fabric', 'Sizes', 'Body sizes', 'Sleeve sizes', 'Pajama/Palazzo lengths', 'Description', 'SEO title', 'SEO description',
+    'Stock', 'Featured', 'Tags', 'Brand', 'Color', 'Color code', 'Fabric', 'Sizes', 'Body sizes', 'Sleeve sizes', 'Dress lengths', 'Pajama/Palazzo lengths', 'Description', 'SEO title', 'SEO description',
     'Image', 'Gallery images', 'Date added'];
   var SKU_RE = /^[A-Za-z0-9][A-Za-z0-9_-]{1,100}$/;
   var STATUS = { publish: 'Published', draft: 'Draft', trash: 'Trash' };
   var FIELD_LABEL = { name: 'Name', status: 'Status', price: 'Price', regularPrice: 'Before-sale price', priceByType: 'Option prices',
     types: 'Option prices', regularPriceByType: 'Option before-sale prices', stock: 'Stock', inStock: 'Stock', featured: 'Featured',
-    tags: 'Tags', brand: 'Brand', colorLabel: 'Color', color: 'Color code', fabric: 'Fabric', sizes: 'Sizes', bodySizes: 'Body sizes', sleeveSizes: 'Sleeve sizes', palazzoLengths: 'Pajama/Palazzo lengths', detailNote: 'Description',
+    tags: 'Tags', brand: 'Brand', colorLabel: 'Color', color: 'Color code', fabric: 'Fabric', sizes: 'Sizes', bodySizes: 'Body sizes', sleeveSizes: 'Sleeve sizes', dressLengths: 'Dress lengths', palazzoLengths: 'Pajama/Palazzo lengths', detailNote: 'Description',
     seoTitle: 'SEO title', seoDescription: 'SEO description', image: 'Image', images: 'Gallery images', dateAdded: 'Date added' };
 
   function bnDigits(s) { return String(s == null ? '' : s).replace(/[০-৯]/g, function (c) { return String('০১২৩৪৫৬৭৮৯'.indexOf(c)); }); }
@@ -82,7 +82,7 @@
       pricesToText(p.priceByType, optionOrder(p, meta)), pricesToText(p.regularPriceByType, optionOrder(p, meta)),
       stock, p.featured ? 'yes' : '', safeText((p.tags || []).join(', ')), safeText(p.brand || ''),
       safeText(p.colorLabel || ''), safeText(p.color || ''), safeText(p.fabric || ''), safeText((p.sizes || []).join(', ')),
-      safeText((p.bodySizes || []).join(', ')), safeText((p.sleeveSizes || []).join(', ')), safeText((p.palazzoLengths || []).join(', ')),
+      safeText((p.bodySizes || []).join(', ')), safeText((p.sleeveSizes || []).join(', ')), safeText((p.dressLengths || []).join(', ')), safeText((p.palazzoLengths || []).join(', ')),
       safeText(p.detailNote || ''), safeText(p.seoTitle || ''), safeText(p.seoDescription || ''),
       p.image || '', (p.images || []).join(' | '), p.dateAdded || ''
     ];
@@ -261,6 +261,7 @@
         if (v('Sizes')) p.sizes = list(v('Sizes'), /\s*,\s*/);
         if (v('Body sizes')) p.bodySizes = list(v('Body sizes'), /\s*,\s*/);
         if (v('Sleeve sizes')) p.sleeveSizes = list(v('Sleeve sizes'), /\s*,\s*/);
+        if (v('Dress lengths')) p.dressLengths = list(v('Dress lengths'), /\s*,\s*/);
         if (v('Pajama/Palazzo lengths')) p.palazzoLengths = list(v('Pajama/Palazzo lengths'), /\s*,\s*/);
         if (v('Gallery images')) p.images = list(v('Gallery images'), /\s*\|\s*/).slice(0, 12);
         if (v('Date added')) {
