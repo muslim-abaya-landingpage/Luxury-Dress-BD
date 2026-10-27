@@ -155,3 +155,31 @@
 @media(max-width:980px){.adm-report-grid{grid-template-columns:1fr 1fr}.adm-report-grid>section:first-child{grid-column:1/-1}}
 @media(max-width:720px){.adm-alert-columns{grid-template-columns:1fr}.adm-report-head{display:block}.adm-report-controls{margin-top:10px}.adm-report-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.adm-task-row{grid-template-columns:7px minmax(0,1fr) auto;gap:8px}.adm-task-value{grid-column:2;grid-row:2}.adm-task-open{grid-column:3;grid-row:1/3}.adm-task-summary small{width:100%;margin-left:0}}
 @media(max-width:480px){.adm-report-grid{grid-template-columns:1fr}.adm-report-grid>section:first-child{grid-column:auto}.adm-report-kpis{grid-template-columns:1fr 1fr}.adm-report-controls{align-items:flex-start}.adm-report-controls span{width:100%}.adm-report-controls input{flex:1;min-width:120px}}
+
+
+/* WooCommerce-style recent-orders table on the admin dashboard. */
+.adm-recent-table-hint{margin:0 0 8px;color:var(--adm-muted);font-size:12px}
+.adm-recent-table-wrap{max-width:100%;overflow-x:auto;border:1px solid var(--adm-border);border-radius:8px;background:var(--adm-card);overscroll-behavior-inline:contain}
+.adm-recent-table-wrap:focus-visible{outline:3px solid #d4a72c;outline-offset:2px}
+.adm-recent-table{width:100%;min-width:900px;border-collapse:collapse;font-size:13px;line-height:1.45}
+.adm-recent-table th{padding:12px 13px;text-align:left;white-space:nowrap;background:var(--adm-bg-alt);color:var(--adm-muted);border-bottom:1px solid var(--adm-border);font-size:11px;font-weight:800;letter-spacing:.03em;text-transform:uppercase}
+.adm-recent-table td{padding:12px 13px;vertical-align:middle;border-bottom:1px solid var(--adm-border)}
+.adm-recent-table tbody tr:last-child td{border-bottom:0}
+.adm-recent-table tbody tr:hover td{background:color-mix(in srgb,var(--adm-bg-alt) 72%,transparent)}
+.adm-recent-order-id a{font-weight:800;color:var(--adm-accent-ink);text-decoration:none;white-space:nowrap}
+.adm-recent-order-id a:hover{text-decoration:underline}
+.adm-recent-date{min-width:125px;color:var(--adm-muted);white-space:nowrap}
+.adm-recent-customer strong,.adm-recent-customer small,.adm-recent-total strong,.adm-recent-total small,.adm-recent-status small{display:block}
+.adm-recent-customer strong{font-size:13px;color:var(--adm-text)}
+.adm-recent-customer small,.adm-recent-total small,.adm-recent-status small{margin-top:3px;color:var(--adm-muted);font-size:11px}
+.adm-recent-products{max-width:260px;min-width:160px;color:var(--adm-text);overflow-wrap:anywhere}
+.adm-recent-total{white-space:nowrap}
+.adm-recent-total strong{font-size:14px;color:var(--adm-text)}
+.adm-recent-status{min-width:130px}
+.adm-recent-status .dz-chip{white-space:nowrap}
+.adm-recent-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.adm-recent-tags em{font-style:normal;font-size:10px;font-weight:700;padding:1px 6px;border-radius:99px;background:#eef;color:#337}
+.adm-recent-tags em.bad{background:#fee;color:#a33}
+.adm-recent-table td .dz-row-actions{flex-wrap:nowrap}
+.adm-recent-table .dz-empty{text-align:center;padding:26px;color:var(--adm-muted)}
+@media(max-width:720px){.adm-recent-table{min-width:850px}.adm-recent-table th,.adm-recent-table td{padding:10px 11px}.adm-recent-table-hint{font-size:11px}}

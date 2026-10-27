@@ -14,7 +14,7 @@
   <title>Admin Dashboard | Muslim Abaya</title>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="admin.css?v=20260929modern1">
-  <link rel="stylesheet" href="admin-dash.css?v=20261021-1">
+  <link rel="stylesheet" href="admin-dash.css?v=20261028-orders-table">
 <script src="config.js?v=20261009-inbox"></script>
   <link rel="stylesheet" href="admin-sidebar.css?v=20261003sb">
 
@@ -136,7 +136,13 @@
           <div class="adm-recent-tools"><input type="search" id="admRecentSearch" aria-label="Search recent orders" placeholder="Search loaded orders by ID, name or phone" autocomplete="off"><span id="admRecentCount" role="status" aria-live="polite"></span></div>
           <div class="dz-load-notice" id="admLoadNotice" role="alert" aria-live="assertive" hidden></div>
           <p class="adm-courier-note">Open an order to view detailed courier status.</p>
-          <div id="admOrdersBody" aria-live="polite" aria-busy="true"><div class="dz-empty">Loading orders…</div></div>
+          <p id="admRecentTableHint" class="adm-recent-table-hint">Recent orders from the latest loaded records. Scroll the table sideways on smaller screens.</p>
+          <div class="adm-recent-table-wrap" role="region" tabindex="0" aria-label="Recent orders" aria-describedby="admRecentTableHint">
+            <table class="adm-recent-table">
+              <thead><tr><th>Order</th><th>Date</th><th>Customer</th><th>Products</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="admOrdersBody" aria-live="polite" aria-busy="true"><tr><td colspan="7" class="dz-empty">Loading orders…</td></tr></tbody>
+            </table>
+          </div>
         </section>
         <details class="adm-disclosure adm-dashboard-reports"><summary>Detailed Reports & Analytics</summary><div class="adm-disclosure-body">
         <p class="dzc-tools">Useful links: <a id="admOpenSheet" href="#" target="_blank" rel="noopener" hidden>Google Sheet</a> <a id="admOpenScript" href="#" target="_blank" rel="noopener" hidden>Apps Script</a></p>
@@ -256,7 +262,7 @@
         var count = document.getElementById("admRecentCount");
         if(count)count.textContent = "Showing " + Math.min(8,filtered.length) + " of " + recentOrders.length + " loaded orders";
         var body = document.getElementById("admOrdersBody");
-        if (!filtered.length) { body.innerHTML = '<div class="dz-empty">' + (recentQuery ? 'No matching orders among the loaded records.' : 'No recent orders available.') + '</div>'; return; }
+        if (!filtered.length) { body.innerHTML = '<tr><td colspan="7" class="dz-empty">' + (recentQuery ? 'No matching orders among the loaded records.' : 'No recent orders available.') + '</td></tr>'; return; }
         var stats = phoneStats(recentOrders);
         window.__admOrdersById = {};
         body.innerHTML = filtered.slice(0, 8).map(function (o, idx) {
@@ -270,20 +276,18 @@
           var displayStatus = MaOrderStatus.describe(o);
           key = displayStatus.badgeKey;
           var confirmMsg = "আসসালামু আলাইকুম " + (o.name || "") + ", আপনার অর্ডার #" + (o.orderId || "") + " (৳" + (o.total || 0) + ") কনফার্ম হয়েছে। শীঘ্রই ডেলিভারি করা হবে, ধন্যবাদ।";
-          var ini = String(o.name || "?").trim().charAt(0).toUpperCase() || "?";
-          var orderLink = o.orderId
-            ? '<a class="adm-order-open" href="admin-order.html?id=' + encodeURIComponent(o.orderId) + '">' + escapeHtml(o.name) + '</a>'
-            : '<span>' + escapeHtml(o.name) + '</span>';
-          return '<div class="dz-order">' +
-            '<div class="dz-av">' + escapeHtml(ini) + "</div>" +
-            '<div class="dz-who"><b>' + orderLink + "</b><span>" + escapeHtml(o.orderId || "—") + " · " + escapeHtml(o.time) + "</span>" +
-            (tags ? '<div class="dz-tags">' + tags + "</div>" : "") + "</div>" +
-            '<div class="dz-items">' + escapeHtml((o.design || (Array.isArray(o.items)?o.items.join(", "):"") || "No product details").replace(/\s*\n\s*/g, " ").slice(0, 90)) + "</div>" +
-            '<div class="dz-amt">৳' + escapeHtml(o.total) + "<small>" + escapeHtml(o.payment || "") + (o.district ? " · " + escapeHtml(o.district) : "") + "</small></div>" +
-            '<div class="dz-st" title="' + escapeHtml(displayStatus.note) + '"><span class="dz-chip ' + statusKey(o.status) + '">Order: ' + escapeHtml(displayStatus.orderRaw) + '</span>' + '<small class="adm-courier-state">Courier: ' + escapeHtml(displayStatus.hasCourier ? displayStatus.courierLabel : 'Not sent') + '</small>' + "</div>" +
-            '<div class="dz-row-actions">' + (waLink(o.phone, confirmMsg) ? '<a target="_blank" rel="noopener" href="' + waLink(o.phone, confirmMsg) + '">WhatsApp</a>' : '') +
-            '<button type="button" onclick="printInvoice(window.__admOrdersById[\'' + rowId + '\'])">Print</button></div>' +
-            "</div>";
+          var orderLink = o.orderId ? '<a class="adm-order-open" href="admin-order.html?id=' + encodeURIComponent(o.orderId) + '">#' + escapeHtml(o.orderId) + '</a>' : '<span>—</span>';
+          var productText = (o.design || (Array.isArray(o.items) ? o.items.join(", ") : "") || "No product details").replace(/\s*\n\s*/g, " ").slice(0, 120);
+          var wa = waLink(o.phone, confirmMsg);
+          return '<tr class="adm-recent-order-row" data-order-id="' + escapeHtml(o.orderId || "") + '">' +
+            '<td class="adm-recent-order-id">' + orderLink + '</td>' +
+            '<td class="adm-recent-date">' + escapeHtml(o.time || "—") + '</td>' +
+            '<td class="adm-recent-customer"><strong>' + escapeHtml(o.name || "—") + '</strong><small>' + escapeHtml(o.phone || "—") + '</small>' + (tags ? '<span class="adm-recent-tags">' + tags + '</span>' : '') + '</td>' +
+            '<td class="adm-recent-products">' + escapeHtml(productText) + '</td>' +
+            '<td class="adm-recent-total"><strong>৳' + escapeHtml(o.total) + '</strong><small>' + escapeHtml(o.payment || "") + (o.district ? " · " + escapeHtml(o.district) : "") + '</small></td>' +
+            '<td class="adm-recent-status" title="' + escapeHtml(displayStatus.note) + '"><span class="dz-chip ' + key + '">' + escapeHtml(displayStatus.orderRaw) + '</span><small class="adm-courier-state">Courier: ' + escapeHtml(displayStatus.hasCourier ? displayStatus.courierLabel : 'Not sent') + '</small></td>' +
+            '<td><div class="dz-row-actions">' + (wa ? '<a target="_blank" rel="noopener" href="' + wa + '">WhatsApp</a>' : '') + '<button type="button" onclick="printInvoice(window.__admOrdersById[\'' + rowId + '\'])">Print</button></div></td>' +
+            '</tr>';
         }).join("");
       }
 
@@ -424,7 +428,7 @@
             notice.hidden = false;
           } else {
             var body = document.getElementById("admOrdersBody");
-            body.innerHTML = '<div class="dz-error" role="alert"><b>অর্ডার ডেটা পাওয়া যায়নি</b><span>' + escapeHtml(message) + '</span><button type="button" id="admRetry">আবার চেষ্টা করুন</button></div>';
+            body.innerHTML = '<tr><td colspan="7"><div class="dz-error" role="alert"><b>অর্ডার ডেটা পাওয়া যায়নি</b><span>' + escapeHtml(message) + '</span><button type="button" id="admRetry">আবার চেষ্টা করুন</button></div></td></tr>';
             var retry = document.getElementById("admRetry");
             if (retry) retry.addEventListener("click", function () { loadOrders(); });
           }

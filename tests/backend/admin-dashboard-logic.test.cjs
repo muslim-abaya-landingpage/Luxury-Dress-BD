@@ -57,8 +57,8 @@ test('dashboard money parser preserves negative totals and Bengali digits', () =
   assert.equal(parseContext.parseAmount('৳ -1,250'), -1250);
   assert.equal(parseContext.parseAmount('৳ ১,২৫০'), 1250);
 });
-test('orders without IDs are not given a broken admin-order link', () => {
-  assert.match(dashboardHtml, /var orderLink = o\.orderId\s*\?[\s\S]*?:\s*'<span>'/);
-  assert.ok(dashboardHtml.includes(": '<span>' + escapeHtml(o.name) + '</span>'"));
-  assert.match(dashboardHtml, /'<div class="dz-who"><b>' \+ orderLink/);
+test('recent dashboard orders render as table rows and orders without IDs are not linked', () => {
+  assert.match(dashboardHtml, /var orderLink = o\.orderId \? '<a class="adm-order-open" href="admin-order\.html\?id=' \+ encodeURIComponent\(o\.orderId\) \+ '\">#/);
+  assert.ok(dashboardHtml.includes(": '<span>—</span>'"));
+  assert.ok(dashboardHtml.includes('return \'<tr class="adm-recent-order-row" data-order-id="'));
 });

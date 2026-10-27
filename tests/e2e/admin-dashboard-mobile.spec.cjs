@@ -29,11 +29,16 @@ test('dashboard on a phone: nothing wider than the screen', async ({ page }) => 
   await page.setViewportSize({ width: 390, height: 844 });
   await stub(page);
   await page.goto('/admin-dashboard.html');
-  await expect(page.locator('#admOrdersBody .dz-order').first()).toBeVisible();
+  await expect(page.locator('.adm-recent-table')).toBeVisible();
+  await expect(page.locator('.adm-recent-table thead')).toContainText('Order');
+  await expect(page.locator('#admOrdersBody .adm-recent-order-row')).toHaveCount(8);
+  await expect(page.locator('#admOrdersBody .adm-recent-order-row').first()).toContainText('Customer With A Fairly Long Name');
+  const tableScroll = await page.locator('.adm-recent-table-wrap').evaluate(el => el.scrollWidth > el.clientWidth);
+  expect(tableScroll).toBe(true);
   await page.waitForTimeout(400);
   const m = await page.evaluate(() => {
     const vw = document.documentElement.clientWidth;
-    const wide = [...document.querySelectorAll('body *')].filter((el) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.right > vw + 1 && getComputedStyle(el).position !== 'fixed' && !el.closest('[hidden],details:not([open])'); })
+    const wide = [...document.querySelectorAll('body *')].filter((el) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.right > vw + 1 && getComputedStyle(el).position !== 'fixed' && !el.closest('[hidden],details:not([open]),.adm-recent-table-wrap'); })
       .slice(0, 8).map((el) => el.tagName + '#' + el.id + '.' + String(el.className).split(' ')[0] + ' right=' + Math.round(el.getBoundingClientRect().right));
     return { scrollW: document.documentElement.scrollWidth, vw, wide };
   });
