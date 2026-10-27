@@ -174,7 +174,7 @@
     });
   }
   function ensureQuickUpload() {
-    return Promise.all([loadScriptOnce("product-quick-upload.js?v=20261028-size-fields"), loadStyleOnce("product-quick-upload.css?v=20261016-publish")]).then(function () {
+    return Promise.all([loadScriptOnce("product-quick-upload.js?v=20261028-clarify-size-labels"), loadStyleOnce("product-quick-upload.css?v=20261016-publish")]).then(function () {
       if (!quickUploadMounted) {
         if (!window.MaProductQuickUpload || !quickUploadOptions) throw new Error("Quick upload is not ready");
         window.MaProductQuickUpload.mount(quickUploadOptions);
@@ -907,8 +907,8 @@
                 '<button type="button" class="pm-wp-button" id="pmColorAdd">+ Add color</button>' +
                 '<small>Add one row per color. Use a unique color name and paste the matching photo URL; new URLs are added to the product gallery automatically. Color keys are generated automatically.</small></div></div>' +
               efield("fabric", "Fabric", p.fabric) +
-              efield("sizes", "Sizes", sizesToInput(p.sizes), "text", "Separate with commas.") +
-              efield("bodySizes", "Body sizes (inches)", sizesToInput(p.bodySizes), "text", "e.g. 38, 40, 42 — separate with commas.") +
+              efield("sizes", "Product size options", sizesToInput(p.sizes), "text", "Options customers can select, e.g. 44 or M, L — separate with commas.") +
+              efield("bodySizes", "Body measurement (inches)", sizesToInput(p.bodySizes), "text", "Garment/body measurement, e.g. 38, 40, 42 — separate with commas.") +
               efield("sleeveSizes", "Sleeve sizes (inches)", sizesToInput(p.sleeveSizes), "text", "e.g. 22, 23, 24 — separate with commas.") +
               efield("dressLengths", "Dress lengths (inches)", sizesToInput(p.dressLengths), "text", "Two-Piece dress length options, e.g. 38, 40, 42.") +
               efield("palazzoLengths", "Pajama / Palazzo lengths (inches)", sizesToInput(p.palazzoLengths), "text", "e.g. 38, 40 — separate with commas.") +
