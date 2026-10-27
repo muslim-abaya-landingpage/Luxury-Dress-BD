@@ -351,17 +351,16 @@ window.CATEGORY_PRODUCTS = {
   "premium-two-piece": [
     {
       id: "DR-01",
-      name: "White Strawberry Print Women's Two-Piece Set",
+      name: "White Leaf Print Long Shirt Two-Piece Set for Women",
       image: "images/uploads/dr-01-1793126083919.webp",
       imageCard: "images/uploads/dr-01-1793126083919-card.webp",
       price: 1900,
-      stock: 0,
-      color: "white",
-      colorLabel: "White / Strawberry Print",
+      stock: 12,
+      color: "white-black",
+      colorLabel: "White / Black",
       fabric: "Premium Cotton Fabric",
-      sizes: ["34", "36", "38", "40", "42", "44", "46"],
+      sizes: ["44"],
       detailNote: "Material: Premium Cotton Fabric | Top Length: 38–40 Inches | Pant Length: 38 Inches",
-      inStock: false,
       isImageView: false,
       imageViewOf: "",
       category: "premium-two-piece",
@@ -369,7 +368,10 @@ window.CATEGORY_PRODUCTS = {
       dateAdded: "2026-05-28",
       productUrl: "/",
       regularPrice: 1710,
-      tags: ["Twopiece","Long Shirt","Pant","Women's Clothing","Clothing"]
+      brand: "Muslim Abaya",
+      seoTitle: "White Leaf Print Two-Piece Set | Muslim Abaya",
+      seoDescription: "Shop the White Leaf Print Long Shirt Two-Piece Set at Muslim Abaya. Elegant white printed shirt with black pants for a stylish, modest look. Order online in Bangladesh.",
+      tags: ["Long Shirt","Leaf Print","Two Piece","Women's Clothing","White Shirt","Black Pants","Muslim Abaya"]
     },
     {
       id: "DR-02",
