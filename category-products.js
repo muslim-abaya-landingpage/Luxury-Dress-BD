@@ -374,6 +374,7 @@ window.CATEGORY_PRODUCTS = {
       productUrl: "/",
       sleeveSizes: ["19"],
       bodySizes: ["52"],
+      dressLengths: ["44"],
       palazzoLengths: ["40"]
     },
     {

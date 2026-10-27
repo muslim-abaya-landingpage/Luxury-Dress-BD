@@ -301,7 +301,7 @@ esc(SOCIAL.linkedin) +
       return;
     }
     var s = document.createElement("script");
-    s.src = footerAssetAbs("site-api-config.js?v=20260529");
+    s.src = footerAssetAbs("site-api-config.js?v=b4eb7cb7438aad24");
     s.onload = function () {
       cb(getScriptUrl());
     };
@@ -606,7 +606,7 @@ esc(SOCIAL.linkedin) +
   function loadSupportChat() {
     if (window.__maSupportChat || shouldSkipChat()) return;
     var s = document.createElement("script");
-    s.src = footerAssetAbs("support-chat.js?v=20261023-speed1");
+    s.src = footerAssetAbs("support-chat.js?v=fc9afc94b7d64c97");
     s.async = true;
     (document.head || document.documentElement).appendChild(s);
   }
@@ -627,7 +627,7 @@ esc(SOCIAL.linkedin) +
       return;
     }
     var s = document.createElement("script");
-    s.src = footerAssetAbs("customer-reviews.js?v=20261006scroll2");
+    s.src = footerAssetAbs("customer-reviews.js?v=fa7cb3124d06fa42");
     s.onload = function () {
       if (window.MaCustomerReviews && typeof window.MaCustomerReviews.mount === "function") {
         window.MaCustomerReviews.mount();

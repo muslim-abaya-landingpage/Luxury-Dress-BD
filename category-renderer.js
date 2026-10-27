@@ -81,7 +81,7 @@ function ensureCategoryStyles() {
     link = document.createElement("link");
     link.id = "category-sidebar-css";
     link.rel = "stylesheet";
-    link.href = "/category-sidebar.css?v=20261017filterpolish";
+    link.href = "/category-sidebar.css?v=d097ea36dd24f03a";
     document.head.appendChild(link);
   }
   var qtyLink =
@@ -91,7 +91,7 @@ function ensureCategoryStyles() {
     qtyLink = document.createElement("link");
     qtyLink.id = "qty-stepper-css";
     qtyLink.rel = "stylesheet";
-    qtyLink.href = "/qty-stepper.css?v=20260531qty2";
+    qtyLink.href = "/qty-stepper.css?v=cb5533d3baadf468";
     document.head.appendChild(qtyLink);
   }
   // shop-page.css: only touch it if this page genuinely never declared it
@@ -101,7 +101,7 @@ function ensureCategoryStyles() {
   if (!shopLink) {
     shopLink = document.createElement("link");
     shopLink.rel = "stylesheet";
-    shopLink.href = "/shop-page.css?v=20260824list";
+    shopLink.href = "/shop-page.css?v=474313ab9fc66a60";
     document.head.appendChild(shopLink);
   }
 }
@@ -1294,7 +1294,7 @@ function buildPqvRelatedHtml(p, idx, allProducts, categoryKey) {
    index-home-muslim-abaya.js; styles come from related-home-cards.css
    (generated from the homepage CSS by scripts/build-related-home-cards.mjs).
    ---------------------------------------------------------------------- */
-var PQV_HOME_RELATED_CSS = "/related-home-cards.css?v=20261023-rel1";
+var PQV_HOME_RELATED_CSS = "/related-home-cards.css?v=300467398a59587c";
 var PQV_HOME_ROW_INTERVAL = 4500;
 var PQV_HOME_CART_ICON =
   "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='M3 4h1.6l1.1 11.2A2 2 0 0 0 7.7 17h9.7a2 2 0 0 0 2-1.7L21 8H7'/><circle cx='9' cy='20' r='1.35'/><circle cx='18' cy='20' r='1.35'/></svg>";
@@ -1654,7 +1654,7 @@ function loadSizeFinder() {
   if (sizeFinderLoading) return sizeFinderLoading;
   sizeFinderLoading = new Promise(function (resolve) {
     var s = document.createElement("script");
-    s.src = "/size-finder.js?v=20261021-1";
+    s.src = "/size-finder.js?v=d006102088412816";
     s.defer = true;
     s.onload = function () { resolve(window.MaSizeFinder || null); };
     s.onerror = function () { sizeFinderLoading = null; resolve(null); };
@@ -2234,7 +2234,7 @@ function ensureReviewsWidgetLoaded() {
   if (window.MAReviews || document.getElementById("ma-reviews-widget-script")) return;
   var s = document.createElement("script");
   s.id = "ma-reviews-widget-script";
-  s.src = "/reviews-widget.js?v=20261016-ops";
+  s.src = "/reviews-widget.js?v=547bc050b5f29a07";
   document.head.appendChild(s);
 }
 function callMAReviewsMount(root, p, tries) {

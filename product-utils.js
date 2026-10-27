@@ -275,6 +275,9 @@
     if (Array.isArray(entry.bodySizes) && entry.bodySizes.length) {
       normalized.bodySizes = entry.bodySizes.slice();
     }
+    if (Array.isArray(entry.sleeveSizes) && entry.sleeveSizes.length) {
+      normalized.sleeveSizes = entry.sleeveSizes.slice();
+    }
     if (Array.isArray(entry.lengthSizes) && entry.lengthSizes.length) {
       normalized.lengthSizes = entry.lengthSizes.slice();
       normalized.sizes = entry.lengthSizes.slice();
@@ -619,12 +622,15 @@
     }
     var dressLengths =
       Array.isArray(p.dressLengths) && p.dressLengths.length ? p.dressLengths.slice() : null;
+    var sleeveSizes =
+      Array.isArray(p.sleeveSizes) && p.sleeveSizes.length ? p.sleeveSizes.slice() : null;
     var palazzoLengths =
       Array.isArray(p.palazzoLengths) && p.palazzoLengths.length ? p.palazzoLengths.slice() : null;
     return {
       bodySizeLabel: bodySizeLabel,
       bodySizes: bodySizes,
       dressLengths: dressLengths,
+      sleeveSizes: sleeveSizes,
       palazzoLengths: palazzoLengths,
       lengthSizeLabel:
         p.lengthSizeLabel ||

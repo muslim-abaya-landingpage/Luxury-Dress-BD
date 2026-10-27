@@ -14,6 +14,7 @@ assert.equal(c.opsResult_(c.opsFinance_({...money,courierRemitted:900})).courier
 // Every catalog product must have at least one accepted variant and authoritative price.
 for(const p of catalog.products){let size;
  if(p.kind==='abaya')size='Body '+(p.bodySizes[0]||(p.bodyLabel.match(/\d+/)||[])[0])+' · Length '+p.lengths[0];
+ else if(p.kind==='two-piece'&&p.dressLengths&&p.dressLengths.length){size='Body '+(p.bodySizes[0]||(p.bodyLabel.match(/\d+/)||[])[0])+' · Length '+p.dressLengths[0];if(p.sleeveSizes&&p.sleeveSizes.length)size+=' · Sleeve '+p.sleeveSizes[0];if(p.palazzoLengths&&p.palazzoLengths.length)size+=' · Palazzo '+p.palazzoLengths[0];}
  else if(p.kind==='two-piece')size=p.sizes[0];else size=p.sizes[0];
  const it={id:p.id,qty:1,price:1,size,productType:p.prices?Object.keys(p.prices)[0]:''};
  const expected=p.prices?p.prices[it.productType]:p.price;
@@ -88,16 +89,28 @@ c.SpreadsheetApp={getActiveSpreadsheet:()=>({getSheetByName:()=>({getLastRow:()=
 c.opsNotifyVariant_('TEST-PRODUCT','38',1);assert.equal(emails.length,1);assert.equal(waiting[1][5],'');assert.equal(waiting[2][5],'pending-whatsapp');
 c.opsNotifyVariant_('TEST-PRODUCT','38',1);assert.equal(emails.length,1,'restock retries do not resend successful emails');
 // Product-page cart and stock keys must use the same complete size as the server.
-const browser={window:{addEventListener(){}},document:{readyState:'loading',addEventListener(){}},console};
+const browserElements={};function browserElement(id){return{id:id||'',innerHTML:'',children:[],querySelectorAll(){return[];},querySelector(){return null;},appendChild(child){this.children.push(child);if(child.id)browserElements[child.id]=child;}};}
+const browser={window:{addEventListener(){},SITE_LINKS:{}},document:{readyState:'loading',addEventListener(){},getElementById(id){return browserElements[id]||(browserElements[id]=browserElement(id));},createElement(){return browserElement('');}},console};
 vm.createContext(browser);
 for(const file of catalog.sources)vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),browser);
-const pageSource=fs.readFileSync(path.join(root,'product-page.js'),'utf8').replace('if (document.readyState === "loading") {','window.__opsTest={state:state,selectedVariant:selectedVariant}; if (document.readyState === "loading") {');
+const pageSource=fs.readFileSync(path.join(root,'product-page.js'),'utf8').replace('if (document.readyState === "loading") {','window.__opsTest={state:state,selectedVariant:selectedVariant,renderSizeOptions:renderSizeOptions}; if (document.readyState === "loading") {');
 vm.runInContext(pageSource,browser);
 const pd=browser.window.__opsTest;
 pd.state.category='abaya';pd.state.product={id:'TEST-ABAYA',category:'abaya',bodySizes:['42','44'],lengthSizes:['52']};pd.state.selectedBody='44';pd.state.selectedSize='52';
 assert.equal(pd.selectedVariant(),'Body 44 · Length 52');
-pd.state.category='premium-two-piece';pd.state.product={id:'TEST-TWO',category:'premium-two-piece',bodySizes:['38'],dressLengths:['40'],palazzoLengths:['38']};pd.state.selectedSize='38';pd.state.selectedDressLength='40';pd.state.selectedPalazzoLength='38';
-assert.equal(pd.selectedVariant(),'Body 38 · Length 40 · Palazzo 38');
+pd.state.category='premium-two-piece';pd.state.product={id:'TEST-TWO',category:'premium-two-piece',bodySizes:['38'],dressLengths:['40'],sleeveSizes:['21'],palazzoLengths:['38']};pd.state.selectedSize='38';pd.state.selectedDressLength='40';pd.state.selectedSleeveLength='21';pd.state.selectedPalazzoLength='38';
+assert.equal(pd.selectedVariant(),'Body 38 · Length 40 · Sleeve 21 · Palazzo 38');
+const drSource=browser.window.CATEGORY_PRODUCTS['premium-two-piece'].find(p=>p.id==='DR-01');
+const drNormalized=browser.window.maCatalog.normalizeProductEntry(drSource,'premium-two-piece',0);
+assert.deepEqual(Array.from(drNormalized.sleeveSizes),['19']);
+pd.state.product=drNormalized;pd.state.category='premium-two-piece';pd.state.selectedSize='52';pd.state.selectedDressLength='44';pd.state.selectedSleeveLength='19';pd.state.selectedPalazzoLength='40';
+browser.window.SITE_LINKS={};
+pd.renderSizeOptions();
+for(const [id,label,value] of [['pdSizeGroup','Body Size','52'],['pdDressOptions','Dress Length (inches)','44'],['pdSleeveOptions','Sleeve Length (inches)','19'],['pdPalazzoOptions','Palazzo Length (inches)','40']]){assert(browserElements[id].innerHTML.includes(label),id+' label');assert(browserElements[id].innerHTML.includes(value),id+' value');}
+const drVariant=pd.selectedVariant();
+assert.equal(drVariant,'Body 52 · Length 44 · Sleeve 19 · Palazzo 40');
+const dr01=catalog.products.find(p=>p.id==='DR-01');
+assert.equal(c.opsLinePrice_({qty:1,size:drVariant},dr01),dr01.price);
 pd.state.category='tops-kurti';pd.state.product={id:'TEST-KURTI'};pd.state.selectedSize='38';assert.equal(pd.selectedVariant(),'38');
 for(const file of ['apps-script/Code.gs','apps-script/AdminOrders.gs','apps-script/Operations.gs','admin-operations.js','product-page.js','custom-size-modal.js','category-renderer.js','reviews-widget.js'])new vm.Script(fs.readFileSync(path.join(root,file),'utf8'),{filename:file});
 for(const file of ['admin-operations.html','help.html','product.html','shopping-guide.html'])for(const m of fs.readFileSync(path.join(root,file),'utf8').matchAll(/<script(?:\s([^>]*))?>([\s\S]*?)<\/script\b[^>]*>/gi)){if(/application\/ld\+json/.test(m[1]||'')){JSON.parse(m[2]);}else new vm.Script(m[2]);}

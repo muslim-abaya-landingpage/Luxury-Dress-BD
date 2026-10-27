@@ -17,12 +17,12 @@
   }
 
   var chain = [
-    "product-config.js?v=20261024-wc1",
-    "product-utils.js?v=20261024-wc1",
-    "product-catalog-sync.js?v=20260604",
-    "category-products.js?v=20261024-wc1",
-    "product-links-data.js?v=20260604",
-    "product-catalog-loader.js?v=20261024-wc1",
+    "product-config.js?v=9f0fe21a5d0fbb0f",
+    "product-utils.js?v=72b921b6721f1fcf",
+    "product-catalog-sync.js?v=ab0c6a1d0c536477",
+    "category-products.js?v=e12061816c7e9d6f",
+    "product-links-data.js?v=202cec5a853e9f49",
+    "product-catalog-loader.js?v=52b440e993917f01",
   ];
 
   function afterCatalog() {

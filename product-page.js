@@ -19,6 +19,7 @@
     selectedSize: "",
     selectedBody: "",
     selectedDressLength: "",
+    selectedSleeveLength: "",
     selectedPalazzoLength: "",
     selectedColor: "",
     selectedColorLabel: "",
@@ -437,29 +438,33 @@
   }
 
   function renderSizeOptions() {
+    var ab = window.isAbayaProduct && window.isAbayaProduct(state.product, state.category);
+    var tp = window.isTwoPieceProduct && window.isTwoPieceProduct(state.product, state.category);
+    var cfg = ab ? window.getAbayaSizeConfig(state.product) : tp ? window.getTwoPieceSizeConfig(state.product) : null;
     var sizes = state.product.sizes || siteDefaults(state.category).cat.sizes || siteDefaults(state.category).base.sizes || [];
-    if (!sizes.length) { $("pdSizeGroup").innerHTML = ""; return; }
-    if (!state.selectedSize) state.selectedSize = sizes[0];
+    var mainOptions = tp && cfg && cfg.bodySizes && cfg.bodySizes.length ? cfg.bodySizes.map(String) : sizes.map(String);
+    if (!mainOptions.length && tp && cfg && cfg.bodySizeLabel) mainOptions = [String(cfg.bodySizeLabel)];
+    if (!mainOptions.length) { $("pdSizeGroup").innerHTML = ""; return; }
+    if (!state.selectedSize || mainOptions.indexOf(String(state.selectedSize)) < 0) state.selectedSize = mainOptions[0];
     var el = $("pdSizeGroup");
-    renderOptionGroup("pdSizeGroup", "Size", sizes, state.selectedSize, function (val) {
+    renderOptionGroup("pdSizeGroup", tp ? "Body Size" : "Size", mainOptions, state.selectedSize, function (val) {
       state.selectedSize = val;
       renderSizeOptions();
       updateSendMessageLink();
       applyStockUi();
     });
-    var ab = window.isAbayaProduct && window.isAbayaProduct(state.product, state.category);
-    var tp = window.isTwoPieceProduct && window.isTwoPieceProduct(state.product, state.category);
-    var cfg = ab ? window.getAbayaSizeConfig(state.product) : tp ? window.getTwoPieceSizeConfig(state.product) : null;
     function extraOptions(id, label, options, key) {
       if (!options || !options.length) return;
-      if (!state[key]) state[key] = String(options[0]);
+      options = options.map(String);
+      if (!state[key] || options.indexOf(String(state[key])) < 0) state[key] = options[0];
       var box = document.createElement("div"); box.id = id; el.appendChild(box);
-      renderOptionGroup(id, label, options.map(String), state[key], function (value) { state[key] = value; renderSizeOptions(); updateSendMessageLink(); applyStockUi(); });
+      renderOptionGroup(id, label, options, state[key], function (value) { state[key] = value; renderSizeOptions(); updateSendMessageLink(); applyStockUi(); });
     }
     if (ab) extraOptions("pdBodyOptions", "Body", cfg.bodySizes && cfg.bodySizes.length ? cfg.bodySizes : [cfg.bodySizeLabel], "selectedBody");
-    if (tp && cfg.dressLengths) {
-      extraOptions("pdDressOptions", "Dress Length", cfg.dressLengths, "selectedDressLength");
-      extraOptions("pdPalazzoOptions", "Palazzo Length", cfg.palazzoLengths, "selectedPalazzoLength");
+    if (tp && cfg) {
+      extraOptions("pdDressOptions", "Dress Length (inches)", cfg.dressLengths, "selectedDressLength");
+      extraOptions("pdSleeveOptions", "Sleeve Length (inches)", cfg.sleeveSizes, "selectedSleeveLength");
+      extraOptions("pdPalazzoOptions", "Palazzo Length (inches)", cfg.palazzoLengths, "selectedPalazzoLength");
     }
     var chartData =
       (window.SITE_LINKS &&
@@ -745,15 +750,21 @@
 
   function selectedVariant() {
     var p = state.product, s = String(state.selectedSize || "");
-    if (!s || /^Custom/i.test(s) || /Body\s/i.test(s)) return s;
+    if (!s || /^Custom/i.test(s)) return s;
     if (window.isAbayaProduct && window.isAbayaProduct(p, state.category)) {
       var ab = window.getAbayaSizeConfig(p);
       return "Body " + (state.selectedBody || ab.bodySizeLabel) + " · Length " + s;
     }
     if (window.isTwoPieceProduct && window.isTwoPieceProduct(p, state.category)) {
       var tp = window.getTwoPieceSizeConfig(p);
-      var body = /^\d+$/.test(s) ? s : tp.bodySizeLabel;
-      return "Body " + body + " · Length " + (state.selectedDressLength || tp.lengthSizeLabel) + (state.selectedPalazzoLength ? " · Palazzo " + state.selectedPalazzoLength : "");
+      var bodyMatch = /Body\s+(\d+)/i.exec(s);
+      var body = /^\d+$/.test(s) ? s : (bodyMatch ? bodyMatch[1] : tp.bodySizeLabel);
+      var parts = body ? ["Body " + body] : [];
+      var dressLength = state.selectedDressLength || (!tp.dressLengths ? tp.lengthSizeLabel : "");
+      if (dressLength) parts.push("Length " + dressLength);
+      if (state.selectedSleeveLength) parts.push("Sleeve " + state.selectedSleeveLength);
+      if (state.selectedPalazzoLength) parts.push("Palazzo " + state.selectedPalazzoLength);
+      return parts.join(" · ");
     }
     return s;
   }
