@@ -143,7 +143,7 @@
   <script src="product-links-data.js?v=49a0ee4ca9e20d0b"></script>
   <script id="pmRawCatalog">window.MA_CATALOG_INCLUDE_UNPUBLISHED = true; window.MA_RAW_CATEGORY_PRODUCTS = JSON.parse(JSON.stringify(window.CATEGORY_PRODUCTS || {}));</script>
   <script src="product-catalog-loader.js?v=20261013-manager"></script>
-  <script src="product-publish-utils.js?v=4d87960bbc2baa44"></script><script src="product-publisher.js?v=20261024-live-verified"></script>
+  <script src="product-publish-utils.js?v=20261028-size-fields"></script><script src="product-publisher.js?v=20261024-live-verified"></script>
 <script id="pmStockAdmin">
 (function () {
   var ROW_CIRCLES = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "⑪", "⑫"];
@@ -174,7 +174,7 @@
     });
   }
   function ensureQuickUpload() {
-    return Promise.all([loadScriptOnce("product-quick-upload.js?v=20261025-lazy"), loadStyleOnce("product-quick-upload.css?v=20261016-publish")]).then(function () {
+    return Promise.all([loadScriptOnce("product-quick-upload.js?v=20261028-size-fields"), loadStyleOnce("product-quick-upload.css?v=20261016-publish")]).then(function () {
       if (!quickUploadMounted) {
         if (!window.MaProductQuickUpload || !quickUploadOptions) throw new Error("Quick upload is not ready");
         window.MaProductQuickUpload.mount(quickUploadOptions);
