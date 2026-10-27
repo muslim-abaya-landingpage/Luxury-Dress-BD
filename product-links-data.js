@@ -25,7 +25,7 @@ window.PRODUCT_LINKS_DATA = {
     "/images/cover-up/premium-black-butterfly-khimar-abaya-with-niqab-luxury-modest-fashion-bangladesh-1080x1350.webp",
   ],
   "premium-two-piece": [
-    "images/uploads/dr-01-1793126083919.webp",
+    "/images/uploads/dr-01-1793126083919.webp",
     "/images/Baby-Pink-Floral-Print.jpeg",
     "/images/Black-Base-Rose-Floral.jpeg",
     "/images/Black-White-Polka-Dots.jpeg",

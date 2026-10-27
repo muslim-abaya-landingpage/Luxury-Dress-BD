@@ -352,7 +352,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "DR-01",
       name: "White Leaf Print Long Shirt Two-Piece Set for Women",
-      image: "images/uploads/dr-01-1793126083919.webp",
+      image: "/images/uploads/dr-01-1793126083919.webp",
       imageCard: "images/uploads/dr-01-1793126083919-card.webp",
       price: 1710,
       stock: 12,
@@ -365,13 +365,16 @@ window.CATEGORY_PRODUCTS = {
       imageViewOf: "",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      dateAdded: "2026-05-28",
-      productUrl: "/",
       regularPrice: 1900,
+      tags: ["Long Shirt","Leaf Print","Two Piece","Women's Clothing","White Shirt","Black Pants","Muslim Abaya"],
       brand: "Muslim Abaya",
+      dateAdded: "2026-05-28",
       seoTitle: "White Leaf Print Two-Piece Set | Muslim Abaya",
       seoDescription: "Shop the White Leaf Print Long Shirt Two-Piece Set at Muslim Abaya. Elegant white printed shirt with black pants for a stylish, modest look. Order online in Bangladesh.",
-      tags: ["Long Shirt","Leaf Print","Two Piece","Women's Clothing","White Shirt","Black Pants","Muslim Abaya"]
+      productUrl: "/",
+      sleeveSizes: ["19"],
+      bodySizes: ["52"],
+      palazzoLengths: ["40"]
     },
     {
       id: "DR-02",
