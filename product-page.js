@@ -615,6 +615,9 @@
     if (state.product.fabric) rows.push(["Fabric", state.product.fabric]);
     var sizes = state.product.sizes || [];
     if (sizes.length) rows.push(["Available Sizes", sizes.join(", ")]);
+    if (state.product.bodySizes && state.product.bodySizes.length) rows.push(["Body sizes", state.product.bodySizes.join(", ") + " inches"]);
+    if (state.product.sleeveSizes && state.product.sleeveSizes.length) rows.push(["Sleeve sizes", state.product.sleeveSizes.join(", ") + " inches"]);
+    if (state.product.palazzoLengths && state.product.palazzoLengths.length) rows.push(["Pajama / Palazzo lengths", state.product.palazzoLengths.join(", ") + " inches"]);
     if (state.selectedColorLabel || state.product.colorLabel) {
       rows.push(["Color", state.selectedColorLabel || state.product.colorLabel]);
     }

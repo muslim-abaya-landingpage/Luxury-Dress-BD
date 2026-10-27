@@ -102,7 +102,7 @@ const sections = [{ key: 'abaya', menu: 'ABAYA', menuBn: 'আবায়া' },
 test('CSV export: one row per product incl. Draft/Trash, Excel-safe text, round-trips through the parser', () => {
   const w = load(fixture, links);
   // A1 has no own option order: its category's order (Full Set first) decides, whatever order the prices are stored in.
-  const products = { abaya: [P('A1', { name: '=HYPERLINK("x")', price: 1650, priceByType: { 'Abaya Only': 1350, 'Full Set': 1650 }, regularPriceByType: { 'Abaya Only': 1500 }, detailNote: 'Line one, "quoted"\nline two' })], 'tops-kurti': JSON.parse(JSON.stringify(fixture['tops-kurti'])) };
+  const products = { abaya: [P('A1', { name: '=HYPERLINK("x")', price: 1650, priceByType: { 'Abaya Only': 1350, 'Full Set': 1650 }, regularPriceByType: { 'Abaya Only': 1500 }, detailNote: 'Line one, "quoted"\nline two', bodySizes: ['42', '44'], sleeveSizes: ['22', '23'], palazzoLengths: ['38', '40'] })], 'tops-kurti': JSON.parse(JSON.stringify(fixture['tops-kurti'])) };
   const metaFor = (key) => (key === 'abaya' ? { types: ['Full Set', 'Abaya Only'] } : null);
   const csv = w.MaProductCsv.exportCsv(products, sections, { metaFor });
   assert.ok(csv.startsWith('﻿SKU,Name,Category,Status'));
@@ -114,11 +114,17 @@ test('CSV export: one row per product incl. Draft/Trash, Excel-safe text, round-
   assert.equal(a1[head.indexOf('Option prices')], 'Full Set=1650 | Abaya Only=1350');
   assert.equal(a1[head.indexOf('Option before-sale prices')], 'Abaya Only=1500');
   assert.equal(a1[head.indexOf('Description')], 'Line one, "quoted"\nline two');
+  assert.equal(a1[head.indexOf('Body sizes')], '42, 44');
+  assert.equal(a1[head.indexOf('Sleeve sizes')], '22, 23');
+  assert.equal(a1[head.indexOf('Pajama/Palazzo lengths')], '38, 40');
   eq(rows.slice(2).map((r) => r[head.indexOf('Status')]), ['Published', 'Draft', 'Published', 'Trash', 'Published']);
   // Importing the unchanged export changes nothing.
   const plan = w.MaProductCsv.planImport(csv, products, sections, { today: '2026-10-24', metaFor });
   eq({ u: plan.updates.length, c: plan.created.length, e: plan.errors.length }, { u: 0, c: 0, e: 0 });
   eq(plan.staged.abaya[0].price, 1650);
+  eq(plan.staged.abaya[0].bodySizes, ['42', '44']);
+  eq(plan.staged.abaya[0].sleeveSizes, ['22', '23']);
+  eq(plan.staged.abaya[0].palazzoLengths, ['38', '40']);
   assert.equal(plan.staged.abaya[0].types, undefined);
 });
 
