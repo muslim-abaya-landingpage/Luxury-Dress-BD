@@ -1,7 +1,7 @@
 /**
  * ═══ সব ক্যাটাগরির প্রোডাক্ট ছবির লিংক — এক জায়গা ═══
  * এডিট: product-manager.html (প্রতি প্রোডাক্টে ছবির URL) → সেভ
- * আপডেট: 2026-10-24
+ * আপডেট: 2026-10-27
  */
 window.PRODUCT_LINKS_DATA = {
   abaya: [
@@ -20,13 +20,12 @@ window.PRODUCT_LINKS_DATA = {
     "/images/Butterfly-Ababa...jpg",
     "/images/Butterfly-Ababa..jpg",
     "/images/Butterfly-Ababa.jpg",
-    "/images/uploads/p-197025f0b8ff4107-1.webp",
   ],
   "cover-up": [
     "/images/cover-up/premium-black-butterfly-khimar-abaya-with-niqab-luxury-modest-fashion-bangladesh-1080x1350.webp",
   ],
   "premium-two-piece": [
-    "/images/two-piece-dress/muslimabaya-white-strawberry-print-cotton-kurti-set-for-women.webp",
+    "images/uploads/dr-01-1793126083919.webp",
     "/images/Baby-Pink-Floral-Print.jpeg",
     "/images/Black-Base-Rose-Floral.jpeg",
     "/images/Black-White-Polka-Dots.jpeg",
@@ -103,5 +102,6 @@ window.PRODUCT_LINKS_DATA = {
     "/images/premium-white-cotton-panjabi-mens-islamic-fashion-modern-design-1080x1350.webp",
   ],
   "three-piece-dress": [
+    "/images/uploads/p-197025f0b8ff4107-1.webp",
   ]
 };
