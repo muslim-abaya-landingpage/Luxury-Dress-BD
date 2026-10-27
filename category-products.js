@@ -360,7 +360,7 @@ window.CATEGORY_PRODUCTS = {
       colorLabel: "White / Black",
       fabric: "Premium Cotton Fabric",
       sizes: ["44"],
-      detailNote: "Material: Premium Cotton Fabric | Top Length: 38–40 Inches | Pant Length: 38 Inches",
+      detailNote: "✨ MUSLIM ABAYA | Premium Long Shirt Collection ✨\n\nDiscover effortless elegance with our White Leaf Print Long Shirt Two-Piece Set. Featuring a beautiful white shirt with delicate leaf prints paired with classic black pants, this outfit offers a simple, stylish, and sophisticated look.\n\nPerfect for everyday wear, office, university, casual outings, and other occasions.\n\nProduct Details\n\nProduct Type: Women's Long Shirt Two-Piece Set\n\nShirt Color: White\n\nPrint Design: Elegant Leaf Print\n\nPant Color: Black\n\nStyle: Modern, Modest & Elegant\n\nLook: Simple, Smart & Stylish\n\nWhy You'll Love It\n\nElegant and attractive print\n\nBeautiful white and black color combination\n\nStylish design for everyday wear\n\nComfortable and versatile outfit\n\nSuitable for casual and semi-casual occasions\n\n✨ Upgrade your everyday wardrobe with this elegant two-piece set!\n\n🛍️ Order Now\n\nWebsite: https://muslimabaya.com\nWhatsApp: 01971642683\n\nFor orders and product inquiries, please message us on WhatsApp.\n\nMUSLIM ABAYA — Your Trusted Destination for Elegant Fashion.",
       isImageView: false,
       imageViewOf: "",
       category: "premium-two-piece",
