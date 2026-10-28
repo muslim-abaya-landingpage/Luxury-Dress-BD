@@ -26,7 +26,8 @@
   var IMG_CARD_MAX_W = 800;
   var IMG_QUALITY = 0.82;
   var IMG_GALLERY_MAX_W = 1600;
-  var MAX_GALLERY_IMAGES = 4;
+  // Six extra photos plus the main photo makes seven visible product photos.
+  var MAX_GALLERY_IMAGES = 6;
 
   function slugify(text) {
     return String(text || "")

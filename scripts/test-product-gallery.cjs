@@ -15,11 +15,15 @@ assert.equal(context.galleryLooksLikeColorways({...product, colorVariants:[{},{}
 assert.equal(context.galleryLooksLikeColorways({...product, images:['red.webp','blue.webp']}), true);
 assert.deepEqual(Array.from(context.collectGalleryImages({image:'main.webp'}, [])), ['main.webp']);
 const manager = fs.readFileSync('product-manager.html','utf8');
-assert.match(manager,/var MAX_GALLERY_IMAGES = 10;/);
+assert.match(manager,/var MAX_GALLERY_IMAGES = 6;/);
 assert.match(manager,/accept="image\/\*" multiple class="pm-gallery-file-input"/);
 assert.match(manager,/Select multiple files \(up to /);
 
 const quick = fs.readFileSync('product-quick-upload.js','utf8');
+assert.match(quick,/files\.length>7/);
+assert.match(quick,/Choose 1–7 images including the main one/);
+const admin = fs.readFileSync('product-manager-admin.js','utf8');
+assert.match(admin,/var MAX_GALLERY_IMAGES = 6;/);
 const openFn = quick.slice(quick.indexOf('function open(){'),quick.indexOf('async function submit('));
 const elements = Object.fromEntries(['pqPhotos','pqSubmit','pqView','pq_name','pqAnother','pqCopyWrap','pqCopy','pqCopyList'].map(k=>[k,{}]));
 let resets=0, restored=0;
