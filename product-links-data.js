@@ -30,7 +30,7 @@ window.PRODUCT_LINKS_DATA = {
     "/images/Black-Base-Rose-Floral.jpeg",
     "/images/Black-White-Polka-Dots.jpeg",
     "/images/Royal-Blue-Golden-Floral-Print.jpeg",
-    "images/uploads/tp-6-1793221122854.webp",
+    "/images/uploads/tp-6-1793221122854.webp",
     "/images/white-pink-floral-print-womens-co-ord-set-premium.webp",
     "/images/premium-black-floral-womens-co-ord-set-bangladesh.webp",
     "/images/premium-blue-floral-co-ord-set.webp",
