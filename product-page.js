@@ -739,6 +739,19 @@
     }).slice(0, 8);
   }
 
+  function relatedImageCandidates(product) {
+    var raw = [];
+    function add(value) {
+      if (typeof value === "string" && value.trim() && raw.indexOf(value.trim()) === -1) raw.push(value.trim());
+    }
+    add(product && (product.image || product.img));
+    add(product && product.imageCard);
+    if (product && Array.isArray(product.images)) product.images.forEach(add);
+    return raw.map(resolveImg).filter(function (url, index, urls) {
+      return !!url && urls.indexOf(url) === index;
+    });
+  }
+
   function renderRelated(list) {
     var current = state.product;
     var items = selectRelatedProducts(list, current);
@@ -752,11 +765,13 @@
 
     $("pdRelatedRow").innerHTML = items
       .map(function (p) {
-        var img = resolveImg(p.image || p.img);
+        var images = relatedImageCandidates(p);
+        var img = images[0] || "images/Baby-Pink-Floral-Print.jpeg";
+        var fallbacks = images.slice(1).concat(["images/Baby-Pink-Floral-Print.jpeg"]);
         var price = parseInt(p.price, 10) || 550;
         return (
           "<a class='pd-rel-card' href='" + escapeHtml(href("/product/" + encodeURIComponent(p.id))) + "'>" +
-          "<img src='" + escapeHtml(img) + "' alt='" + escapeHtml(p.name) + "' loading='lazy' onerror=\"this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg'\">" +
+          "<img src='" + escapeHtml(img) + "' data-related-fallbacks='" + escapeHtml(JSON.stringify(fallbacks)) + "' alt='" + escapeHtml(p.name) + "' loading='lazy'>" +
           "<div class='pd-rel-info'>" +
           "<div class='name'>" + escapeHtml(p.name) + "</div>" +
           "<div class='price'>" + TK + price + "</div>" +
@@ -765,6 +780,21 @@
         );
       })
       .join("");
+
+    $("pdRelatedRow").querySelectorAll(".pd-rel-card img[data-related-fallbacks]").forEach(function (image) {
+      image.addEventListener("error", function () {
+        var fallbacks = [];
+        try { fallbacks = JSON.parse(image.getAttribute("data-related-fallbacks") || "[]"); } catch (_) {}
+        var next = fallbacks.shift();
+        image.setAttribute("data-related-fallbacks", JSON.stringify(fallbacks));
+        if (next && next !== image.getAttribute("src")) image.src = next;
+        else {
+          image.onerror = null;
+          var card = image.closest(".pd-rel-card");
+          if (card) card.remove();
+        }
+      });
+    });
   }
 
   function selectedVariant() {
