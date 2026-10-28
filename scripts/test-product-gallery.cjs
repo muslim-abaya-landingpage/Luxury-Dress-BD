@@ -20,6 +20,10 @@ assert.match(manager,/accept="image\/\*" multiple class="pm-gallery-file-input"/
 assert.match(manager,/Select multiple files \(up to /);
 assert.match(manager,/Matching product photo<select data-color-field="image"/);
 assert.match(manager,/Add any color name, then select the matching photo/);
+assert.match(manager,/Upload at least one photo per color/);
+assert.match(manager,/product\.colorVariants=variants/);
+assert.match(manager,/matching gallery photo for every color variation before publishing/);
+assert.match(manager,/main photo = first color/);
 assert.match(fs.readFileSync('product-manager-wp.css','utf8'),/\.pm-color-variation-row select/);
 assert.match(manager,/page = "category\.html"/);
 assert.match(manager,/path = "\/category\?category=" \+ encodeURIComponent\(key\)/);

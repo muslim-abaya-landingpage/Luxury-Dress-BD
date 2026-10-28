@@ -90,7 +90,7 @@
         <button class="pl-btn pl-btn-primary" id="pmQuickUpload" type="button" hidden>+ Upload new product</button>
         <div class="pm-wp-notice" id="pmLiveNotice"><a id="pmLiveLink" target="_blank" rel="noopener" hidden>✅ New product is live — view →</a></div>
 
-        <div class="pm-guide"><strong>Easy publishing</strong><span>Products: choose a category, add photos and publish — product links are automatic. Categories: add a name and the page/link are generated for you.</span><a href="stock-analytics.html">Stock & Analytics →</a></div>
+        <div class="pm-guide"><strong>Easy publishing</strong><span>Products: for multiple colors, enter names in photo order (main photo = first color); matching variants and product links are generated automatically. Categories: add a name and the page/link are generated for you.</span><a href="stock-analytics.html">Stock & Analytics →</a></div>
         <div class="pm-layout" id="pmLayout">
           <aside class="pm-sidebar">
             <h2>Categories</h2>
@@ -3206,8 +3206,13 @@
       if(!window.MaCatalogPublisher.isReady())throw new Error("Publishing is not ready. Reload current data.");
       if (activeKey === EDIT_KEY && editTarget) {
         var editedProduct = (products[editTarget.cat] || [])[editTarget.index];
+        var colorLabels = String(editedProduct && (editedProduct.colorLabel || editedProduct.color) || "").split(/[,，;；|]/).map(function (label) { return label.trim(); }).filter(Boolean);
+        var variantRows = editedProduct && editedProduct.colorVariants || [];
+        if (colorLabels.length > 1 && (variantRows.length !== colorLabels.length || variantRows.some(function (row) { return !row || !String(row.image || row.src || "").trim(); }))) {
+          throw new Error("Choose a matching gallery photo for every color variation before publishing.");
+        }
         var colorKeys = {};
-        (editedProduct && editedProduct.colorVariants || []).forEach(function (row) {
+        variantRows.forEach(function (row) {
           var key = String(row.color || "").trim().toLowerCase();
           if (!key) throw new Error("Each color variation needs a unique color key.");
           if (colorKeys[key]) throw new Error("Color variation keys must be unique. Update the duplicate color key before saving.");
@@ -3244,7 +3249,27 @@
   renderCatList();
   renderMain();
   savedSnapshot = catalogSnapshot();
-  quickUploadOptions = {sections:function(){return sections;},products:function(){return products;},status:setSaveStatus,isSaved:function(){return savedSnapshot===catalogSnapshot();},stage:function(category,product){if(!sections.some(function(sec){return sec.key===category;}))throw new Error("Choose a category.");Object.keys(products).forEach(function(k){products[k]=products[k].filter(function(p){return p.id!==product.id;});});products[category].unshift(product);renderCatList();renderMain();},publish:saveAll};
+  quickUploadOptions = {sections:function(){return sections;},products:function(){return products;},status:setSaveStatus,isSaved:function(){return savedSnapshot===catalogSnapshot();},stage:function(category,product){
+    if(!sections.some(function(sec){return sec.key===category;}))throw new Error("Choose a category.");
+    var labels=String(product.colorLabel||product.color||"").split(/[,，;；|]/).map(function(label){return label.trim();}).filter(Boolean);
+    if(labels.length>1){
+      var variants=Array.isArray(product.colorVariants)?product.colorVariants.slice():[];
+      if(typeof window.maReconcileColorVariants==="function"&&variants.length)variants=window.maReconcileColorVariants(product)||variants;
+      var complete=variants.length===labels.length&&variants.every(function(row){return row&&String(row.image||row.src||"").trim();});
+      if(!complete){
+        var photos=[product.image].concat(Array.isArray(product.images)?product.images:[]);
+        if(photos.length<labels.length)throw new Error("Upload at least one photo per color. Enter color names in the same order as photos; the main photo is for the first color.");
+        var keys={};
+        variants=labels.map(function(label,index){var key=String(label).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"color-"+(index+1);if(keys[key])throw new Error("Each color name must be unique.");keys[key]=true;return {color:key,colorLabel:label,image:photos[index]};});
+      }
+      product.colorVariants=variants;
+    }else if(labels.length===1){
+      var singleKey=String(labels[0]).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"color-1";
+      product.color=singleKey;product.colorLabel=labels[0];product.colorVariants=[{color:singleKey,colorLabel:labels[0],image:product.image||""}];
+    }else{delete product.colorVariants;}
+    Object.keys(products).forEach(function(k){products[k]=products[k].filter(function(p){return p.id!==product.id;});});
+    products[category].unshift(product);renderCatList();renderMain();
+  },publish:saveAll};
   reloadPublishingData().then(refreshLiveStockOverrides);
   // The publisher fires this once the new catalog is actually served by the website.
   document.addEventListener("ma-product-live", function () {
