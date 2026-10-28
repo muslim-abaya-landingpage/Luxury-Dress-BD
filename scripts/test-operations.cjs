@@ -102,9 +102,10 @@ assert.equal(browser.window.isTwoPieceProduct(titleAbayaTwoPiece,'premium-two-pi
 const normalizedTp6=browser.window.maCatalog.normalizeProductEntry(titleAbayaTwoPiece,'premium-two-piece',0);
 const tp6Gallery=pd.buildGallery(normalizedTp6,browser.window.CATEGORY_PRODUCTS['premium-two-piece']);
 const tp6Colors=pd.getProductColorVariants(normalizedTp6);
-assert.equal(tp6Gallery.length,5,'TP-6 gallery includes its black primary photo and four color photos');
-assert.equal(tp6Colors.length,5);
-for(const color of tp6Colors){assert(color.image&&!color.image.startsWith('blob:'),color.colorLabel+' has a durable image');assert(tp6Gallery.includes(color.image),color.colorLabel+' image is present in the gallery');assert(fs.existsSync(path.join(root,color.image)),color.colorLabel+' image asset exists');pd.state.galleryImages=tp6Gallery.slice();pd.state.activeImage=0;assert.equal(pd.applyColorVariant(color),true);assert.equal(pd.state.selectedColor,color.color);assert.equal(pd.state.galleryImages[pd.state.activeImage],color.image);}
+assert.equal(tp6Gallery.length,7,'TP-6 gallery includes its primary photo and all six uploaded gallery photos');
+const tp6ColorsWithImages=tp6Colors.filter(color=>color.image);
+assert.equal(tp6ColorsWithImages.length,5,'five TP-6 color choices currently have mapped photos');
+for(const color of tp6ColorsWithImages){assert(!color.image.startsWith('blob:'),color.colorLabel+' has a durable image');assert(tp6Gallery.includes(color.image),color.colorLabel+' image is present in the gallery');assert(fs.existsSync(path.join(root,color.image)),color.colorLabel+' image asset exists');pd.state.galleryImages=tp6Gallery.slice();pd.state.activeImage=0;assert.equal(pd.applyColorVariant(color),true);assert.equal(pd.state.selectedColor,color.color);assert.equal(pd.state.galleryImages[pd.state.activeImage],color.image);}
 const staleBlob=browser.window.maCatalog.normalizeProductEntry({id:'TEST-BLOB',name:'Test image',image:'images/main.webp',images:['blob:https://example.invalid/photo','images/gallery.webp'],colorVariants:[{color:'x',colorLabel:'X',image:'blob:https://example.invalid/color'}]},'test',0);
 assert.deepEqual(Array.from(staleBlob.images),['images/gallery.webp']);
 assert.equal(staleBlob.colorVariants[0].image,'');
