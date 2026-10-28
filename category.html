@@ -31,6 +31,17 @@
   <script defer src="config.js?v=00107b4d68a09227"></script>
 </head>
 <body class="shop-page" data-shop-hub="1">
+  <script>
+    (function () {
+      var key = new URLSearchParams(window.location.search).get("category");
+      if (!key || !/^[A-Za-z0-9_-]{1,100}$/.test(key)) return;
+      window.__maDynamicCategoryKey = key;
+      document.body.setAttribute("data-shop-hub", "0");
+      document.body.setAttribute("data-shop-category", key);
+      document.documentElement.setAttribute("data-shop-category", key);
+      document.documentElement.setAttribute("data-seo-page", "/category?category=" + encodeURIComponent(key));
+    })();
+  </script>
   <div id="site-header-mount"></div>
   <main>
     <div id="list"></div>
@@ -62,6 +73,17 @@
   <script>
     (function() {
       function forceStart() {
+        var key = window.__maDynamicCategoryKey;
+        if (key) {
+          var section = (window.CATALOG_SECTIONS || []).find(function (item) { return item.key === key; });
+          if (section) {
+            document.title = (section.menuBn || section.menu || key) + " Collection | Muslim Abaya";
+            var canonical = document.querySelector('link[rel="canonical"]');
+            if (canonical) canonical.href = window.location.origin + window.location.pathname + window.location.search;
+          }
+          if (typeof window.bootShopCategory === "function") window.bootShopCategory(key);
+          return;
+        }
         if (typeof window.bootAllCategories === "function") {
           window.bootAllCategories();
         } else if (typeof window.renderAllCategories === "function") {
@@ -81,4 +103,3 @@
   </script>
 </body>
 </html>
-

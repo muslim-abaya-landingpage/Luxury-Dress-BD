@@ -90,7 +90,7 @@
         <button class="pl-btn pl-btn-primary" id="pmQuickUpload" type="button" hidden>+ Upload new product</button>
         <div class="pm-wp-notice" id="pmLiveNotice"><a id="pmLiveLink" target="_blank" rel="noopener" hidden>✅ New product is live — view →</a></div>
 
-        <div class="pm-guide"><strong>Product workflow</strong><span>1. Upload product → 2. Check photos & details → 3. Confirm publish status</span><a href="stock-analytics.html">Stock & Analytics →</a></div>
+        <div class="pm-guide"><strong>Easy publishing</strong><span>Products: choose a category, add photos and publish — product links are automatic. Categories: add a name and the page/link are generated for you.</span><a href="stock-analytics.html">Stock & Analytics →</a></div>
         <div class="pm-layout" id="pmLayout">
           <aside class="pm-sidebar">
             <h2>Categories</h2>
@@ -119,12 +119,12 @@
         <input type="text" id="pmCatMenuBn" placeholder="Festive Special">
       </div>
       <div class="pm-field" style="margin-bottom:10px">
-        <label>HTML Page</label>
-        <input type="text" id="pmCatPage" placeholder="festive-special.html">
+        <label>Category page (generated automatically)</label>
+        <input type="text" id="pmCatPage" placeholder="category.html" readonly>
       </div>
       <div class="pm-field" style="margin-bottom:10px">
-        <label>URL Path</label>
-        <input type="text" id="pmCatPath" placeholder="/festive-special">
+        <label>Category link (generated automatically)</label>
+        <input type="text" id="pmCatPath" placeholder="/category?category=festive-special" readonly>
       </div>
       <div class="pm-modal-actions">
         <button type="button" class="pl-btn pl-btn-secondary" id="pmCatModalClose">Cancel</button>
@@ -2703,6 +2703,7 @@
       : "Edit category";
     document.getElementById("pmCatKey").value = sec.key;
     document.getElementById("pmCatKey").disabled = !isNew;
+    document.getElementById("pmCatKey").readOnly = isNew;
     document.getElementById("pmCatMenu").value = sec.menu || "";
     document.getElementById("pmCatMenuBn").value = sec.menuBn || "";
     document.getElementById("pmCatPage").value = sec.page || "";
@@ -2715,8 +2716,8 @@
         var slug = slugify(document.getElementById("pmCatMenu").value);
         if (slug) {
           document.getElementById("pmCatKey").value = slug;
-          document.getElementById("pmCatPage").value = slug + ".html";
-          document.getElementById("pmCatPath").value = "/" + slug;
+          document.getElementById("pmCatPage").value = "category.html";
+          document.getElementById("pmCatPath").value = "/category?category=" + encodeURIComponent(slug);
         }
       }
     };
@@ -2730,6 +2731,11 @@
       if (!key || !menu) {
         toast("Enter a key and menu name");
         return;
+      }
+      if (isNew) {
+        key = slugify(key);
+        page = "category.html";
+        path = "/category?category=" + encodeURIComponent(key);
       }
       if (!page) page = key + ".html";
       if (!path) path = "/" + key;
@@ -2765,7 +2771,7 @@
       modal.hidden = true;
       renderCatList();
       renderMain();
-      toast(isNew ? "Category added — save it" : "Updated — save it");
+      toast(isNew ? "Category added with its link and page generated — click Save changes to publish" : "Updated — save it");
     };
   }
 
@@ -3196,7 +3202,6 @@
         });
       }
       window.MaProductPublishUtils.validateCatalog(products);
-      if(sections.some(function(sec){return !(window.CATALOG_SECTIONS||[]).some(function(old){return old.key===sec.key;});}))throw new Error("A new category must be set up before it goes live. Add products to an existing category.");
       reconcileAllColorVariants();stripHomeLinksFromProducts();snapshot=catalogSnapshot();
       var files=[{path:"category-products.js",content:generateProductsFile()},{path:"product-links-data.js",content:generateProductLinksFile()},{path:"product-catalog-sections.js",content:generateSectionsFile()},{path:"product-config.js",content:generateProductConfigFile()}];
     } catch(err){setSaveStatus(err.message);return Promise.reject(err);}

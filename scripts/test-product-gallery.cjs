@@ -18,6 +18,13 @@ const manager = fs.readFileSync('product-manager.html','utf8');
 assert.match(manager,/var MAX_GALLERY_IMAGES = 6;/);
 assert.match(manager,/accept="image\/\*" multiple class="pm-gallery-file-input"/);
 assert.match(manager,/Select multiple files \(up to /);
+assert.match(manager,/page = "category\.html"/);
+assert.match(manager,/path = "\/category\?category=" \+ encodeURIComponent\(key\)/);
+assert.match(manager,/Category link \(generated automatically\)/);
+assert.doesNotMatch(manager,/A new category must be set up before it goes live/);
+const categoryPage=fs.readFileSync('category.html','utf8');
+assert.match(categoryPage,/__maDynamicCategoryKey/);
+assert.match(categoryPage,/bootShopCategory\(key\)/);
 
 const quick = fs.readFileSync('product-quick-upload.js','utf8');
 assert.match(quick,/files\.length>7/);
