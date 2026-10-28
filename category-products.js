@@ -462,7 +462,7 @@ window.CATEGORY_PRODUCTS = {
       imageViewOf: "",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      colorVariants: [{"color":"black","colorLabel":"Black","image":"blob:https://muslimabaya.com/d119fdde-1788-4fdc-a68d-67b53093816c"},{"color":"baby-pink","colorLabel":"Baby Pink","image":"blob:https://muslimabaya.com/064c2710-c1b8-4f8a-afb4-67f82117ba52"},{"color":"rust-brown","colorLabel":"Rust Brown","image":"blob:https://muslimabaya.com/31d1df05-a746-4f44-8c5d-7a20b9e60bd9"},{"color":"burgundy","colorLabel":"Burgundy","image":"blob:https://muslimabaya.com/e6ef1a2b-c943-4428-b4f6-971988a28bc8"},{"color":"red","colorLabel":"Red","image":"blob:https://muslimabaya.com/29dbbed1-870b-4fcf-b1d4-2088adc251ec"}],
+      colorVariants: [{"color":"black","colorLabel":"Black","image":"/images/uploads/tp-6-1793221122854.webp"},{"color":"baby-pink","colorLabel":"Baby Pink","image":"/images/uploads/tp-6-1793221132905-g4.webp"},{"color":"rust-brown","colorLabel":"Rust Brown","image":"/images/uploads/tp-6-1793221132684-g3.webp"},{"color":"burgundy","colorLabel":"Burgundy","image":"/images/uploads/tp-6-1793221132478-g2.webp"},{"color":"red","colorLabel":"Red","image":"/images/uploads/tp-6-1793221132274-g1.webp"}],
       bodySizes: ["46","48","50","52"],
       sleeveSizes: ["18"],
       dressLengths: ["46"],

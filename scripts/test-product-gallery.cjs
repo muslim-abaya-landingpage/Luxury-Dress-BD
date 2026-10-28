@@ -14,6 +14,10 @@ assert.equal(context.galleryLooksLikeColorways({...product, images:['images/uplo
 assert.equal(context.galleryLooksLikeColorways({...product, colorVariants:[{},{}]}), true);
 assert.equal(context.galleryLooksLikeColorways({...product, images:['red.webp','blue.webp']}), true);
 assert.deepEqual(Array.from(context.collectGalleryImages({image:'main.webp'}, [])), ['main.webp']);
+const manager = fs.readFileSync('product-manager.html','utf8');
+assert.match(manager,/var MAX_GALLERY_IMAGES = 10;/);
+assert.match(manager,/accept="image\/\*" multiple class="pm-gallery-file-input"/);
+assert.match(manager,/Select multiple files \(up to /);
 
 const quick = fs.readFileSync('product-quick-upload.js','utf8');
 const openFn = quick.slice(quick.indexOf('function open(){'),quick.indexOf('async function submit('));

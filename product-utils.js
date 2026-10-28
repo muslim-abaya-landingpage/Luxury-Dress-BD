@@ -88,6 +88,7 @@
   function resolveImageUrlRaw(raw) {
     var url = String(raw || "").trim();
     if (!url) return "";
+    if (/^blob:/i.test(url)) return "";
     url = applyReplaceRules(url);
 
     if (/^https?:\/\//i.test(url) || url.indexOf("data:") === 0) {
@@ -245,7 +246,15 @@
     }
 
     if (Array.isArray(entry.colorVariants) && entry.colorVariants.length) {
-      normalized.colorVariants = entry.colorVariants.slice();
+      normalized.colorVariants = entry.colorVariants.filter(Boolean).map(function (row) {
+        var copy = {};
+        Object.keys(row).forEach(function (key) { copy[key] = row[key]; });
+        var resolvedImage = resolveImageUrl(row.image || "");
+        if (!resolvedImage && row.src) resolvedImage = resolveImageUrl(row.src);
+        copy.image = resolvedImage;
+        if (Object.prototype.hasOwnProperty.call(copy, "src")) copy.src = resolvedImage;
+        return copy;
+      });
     }
 
     if (entry.priceByType && typeof entry.priceByType === "object") {

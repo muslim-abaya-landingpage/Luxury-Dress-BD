@@ -93,12 +93,21 @@ const browserElements={};function browserElement(id){return{id:id||'',innerHTML:
 const browser={window:{addEventListener(){},SITE_LINKS:{}},document:{readyState:'loading',addEventListener(){},getElementById(id){return browserElements[id]||(browserElements[id]=browserElement(id));},createElement(){return browserElement('');}},console};
 vm.createContext(browser);
 for(const file of catalog.sources)vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),browser);
-const pageSource=fs.readFileSync(path.join(root,'product-page.js'),'utf8').replace('if (document.readyState === "loading") {','window.__opsTest={state:state,selectedVariant:selectedVariant,renderSizeOptions:renderSizeOptions}; if (document.readyState === "loading") {');
+const pageSource=fs.readFileSync(path.join(root,'product-page.js'),'utf8').replace('if (document.readyState === "loading") {','window.__opsTest={state:state,selectedVariant:selectedVariant,renderSizeOptions:renderSizeOptions,buildGallery:buildGallery,getProductColorVariants:getProductColorVariants,applyColorVariant:applyColorVariant}; if (document.readyState === "loading") {');
 vm.runInContext(pageSource,browser);
 const pd=browser.window.__opsTest;
 const titleAbayaTwoPiece=browser.window.CATEGORY_PRODUCTS['premium-two-piece'].find(p=>p.id==='TP-6');
 assert.equal(browser.window.isAbayaProduct(titleAbayaTwoPiece,'premium-two-piece'),false);
 assert.equal(browser.window.isTwoPieceProduct(titleAbayaTwoPiece,'premium-two-piece'),true);
+const normalizedTp6=browser.window.maCatalog.normalizeProductEntry(titleAbayaTwoPiece,'premium-two-piece',0);
+const tp6Gallery=pd.buildGallery(normalizedTp6,browser.window.CATEGORY_PRODUCTS['premium-two-piece']);
+const tp6Colors=pd.getProductColorVariants(normalizedTp6);
+assert.equal(tp6Gallery.length,5,'TP-6 gallery includes its black primary photo and four color photos');
+assert.equal(tp6Colors.length,5);
+for(const color of tp6Colors){assert(color.image&&!color.image.startsWith('blob:'),color.colorLabel+' has a durable image');assert(tp6Gallery.includes(color.image),color.colorLabel+' image is present in the gallery');assert(fs.existsSync(path.join(root,color.image)),color.colorLabel+' image asset exists');pd.state.galleryImages=tp6Gallery.slice();pd.state.activeImage=0;assert.equal(pd.applyColorVariant(color),true);assert.equal(pd.state.selectedColor,color.color);assert.equal(pd.state.galleryImages[pd.state.activeImage],color.image);}
+const staleBlob=browser.window.maCatalog.normalizeProductEntry({id:'TEST-BLOB',name:'Test image',image:'images/main.webp',images:['blob:https://example.invalid/photo','images/gallery.webp'],colorVariants:[{color:'x',colorLabel:'X',image:'blob:https://example.invalid/color'}]},'test',0);
+assert.deepEqual(Array.from(staleBlob.images),['images/gallery.webp']);
+assert.equal(staleBlob.colorVariants[0].image,'');
 pd.state.category='abaya';pd.state.product={id:'TEST-ABAYA',category:'abaya',bodySizes:['42','44'],lengthSizes:['52']};pd.state.selectedBody='44';pd.state.selectedSize='52';
 assert.equal(pd.selectedVariant(),'Body 44 · Length 52');
 pd.state.category='premium-two-piece';pd.state.product={id:'TEST-TWO',category:'premium-two-piece',bodySizes:['38'],dressLengths:['40'],sleeveSizes:['21'],palazzoLengths:['38']};pd.state.selectedSize='38';pd.state.selectedDressLength='40';pd.state.selectedSleeveLength='21';pd.state.selectedPalazzoLength='38';

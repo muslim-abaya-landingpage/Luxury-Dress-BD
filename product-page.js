@@ -95,9 +95,8 @@
     return null;
   }
 
-  /* Build this product's gallery images.
-     Priority: product.images[] -> product.image + "- Back"/"- Side" siblings -> fallback image.
-     Duplicate URLs are only kept once (whichever occurrence comes first). */
+  /* Build this product's gallery: primary image, extra photos, then any
+     separately mapped color images. Duplicate URLs are kept only once. */
   function buildGallery(product, list) {
     var seen = {};
     var out = [];
@@ -108,12 +107,11 @@
       out.push(img);
     }
 
+    pushRaw(product.image || product.img);
     if (Array.isArray(product.images) && product.images.length) {
-      // New multi-image gallery: take every image straight from images[].
       product.images.forEach(function (raw) { pushRaw(raw); });
     } else {
-      // Legacy behavior: single main image + any "- Back" / "- Side" variant siblings.
-      pushRaw(product.image || product.img);
+      // Legacy behavior: add any "- Back" / "- Side" variant siblings.
       var base = baseName(product.name).toLowerCase();
       list.forEach(function (p) {
         if (!p || p === product) return;
@@ -121,6 +119,9 @@
           pushRaw(p.image || p.img);
         }
       });
+    }
+    if (Array.isArray(product.colorVariants)) {
+      product.colorVariants.forEach(function (row) { if (row) pushRaw(row.image || row.src); });
     }
 
     if (!out.length) out.push("images/Baby-Pink-Floral-Print.jpeg");
@@ -323,6 +324,21 @@
     }
   }
 
+  function applyColorVariant(variant) {
+    if (!variant) return false;
+    state.selectedColor = variant.color || "";
+    state.selectedColorLabel = variant.colorLabel || "";
+    var img = resolveImg(variant.image || "");
+    if (!img) return false;
+    var gi = state.galleryImages.indexOf(img);
+    if (gi < 0) {
+      state.galleryImages.push(img);
+      gi = state.galleryImages.length - 1;
+    }
+    state.activeImage = gi;
+    return true;
+  }
+
   function renderColorOptions() {
     var el = $("pdColorPickGroup");
     if (!el) return;
@@ -343,12 +359,7 @@
       return;
     }
     if (!variants.some(function (row) { return row.color === state.selectedColor; })) {
-      state.selectedColor = variants[0].color;
-      state.selectedColorLabel = variants[0].colorLabel;
-      if (variants[0].image) {
-        var initialIndex = state.galleryImages.indexOf(variants[0].image);
-        if (initialIndex >= 0) state.activeImage = initialIndex;
-      }
+      applyColorVariant(variants[0]);
     }
     el.innerHTML =
       "<div class='pd-option-label'>Color</div>" +
@@ -373,11 +384,11 @@
       "</div>";
     el.querySelectorAll(".pd-option-btn").forEach(function (btn) {
       btn.addEventListener("click", function () {
-        state.selectedColor = btn.getAttribute("data-color") || "";
-        state.selectedColorLabel = btn.getAttribute("data-label") || "";
-        var img = btn.getAttribute("data-image") || "";
-        var gi = state.galleryImages.indexOf(img);
-        if (gi >= 0) state.activeImage = gi;
+        applyColorVariant({
+          color: btn.getAttribute("data-color") || "",
+          colorLabel: btn.getAttribute("data-label") || "",
+          image: btn.getAttribute("data-image") || ""
+        });
         renderGallery();
         renderColorOptions();
         renderDescription();
