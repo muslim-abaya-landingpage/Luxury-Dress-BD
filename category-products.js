@@ -462,7 +462,7 @@ window.CATEGORY_PRODUCTS = {
       imageViewOf: "",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      colorVariants: [{"color":"black","colorLabel":"Black","image":"/images/uploads/tp-6-1793221122854.webp"},{"color":"baby-pink","colorLabel":"Baby Pink","image":"/images/uploads/tp-6-1793221132905-g4.webp"},{"color":"rust-brown","colorLabel":"Rust Brown","image":"/images/uploads/tp-6-1793221132684-g3.webp"},{"color":"burgundy","colorLabel":"Burgundy","image":"/images/uploads/tp-6-1793221132478-g2.webp"},{"color":"red","colorLabel":"Red","image":"/images/uploads/tp-6-1793221132274-g1.webp"},{"color":"white","colorLabel":"White","image":""},{"color":"olive","colorLabel":"Olive","image":""}],
+      colorVariants: [{"color":"black","colorLabel":"Black","image":"/images/uploads/tp-6-1793221122854.webp"},{"color":"baby-pink","colorLabel":"Baby Pink","image":"/images/uploads/tp-6-1793221132905-g4.webp"},{"color":"rust-brown","colorLabel":"Rust Brown","image":"/images/uploads/tp-6-1793221132684-g3.webp"},{"color":"burgundy","colorLabel":"Burgundy","image":"/images/uploads/tp-6-1793221132478-g2.webp"},{"color":"red","colorLabel":"Red","image":"/images/uploads/tp-6-1793221132274-g1.webp"},{"color":"white","colorLabel":"White","image":"/images/uploads/tp-6-1793227684221-g5.webp"},{"color":"olive","colorLabel":"Olive","image":"/images/uploads/tp-6-1793227689173-g6.webp"}],
       bodySizes: ["46","48","50","52"],
       sleeveSizes: ["18"],
       dressLengths: ["46"],

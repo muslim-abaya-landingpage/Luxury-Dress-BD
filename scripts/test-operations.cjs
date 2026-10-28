@@ -90,7 +90,7 @@ c.opsNotifyVariant_('TEST-PRODUCT','38',1);assert.equal(emails.length,1);assert.
 c.opsNotifyVariant_('TEST-PRODUCT','38',1);assert.equal(emails.length,1,'restock retries do not resend successful emails');
 // Product-page cart and stock keys must use the same complete size as the server.
 const browserElements={};function browserElement(id){return{id:id||'',innerHTML:'',children:[],querySelectorAll(){return[];},querySelector(){return null;},appendChild(child){this.children.push(child);if(child.id)browserElements[child.id]=child;}};}
-const browser={window:{addEventListener(){},SITE_LINKS:{}},document:{readyState:'loading',addEventListener(){},getElementById(id){return browserElements[id]||(browserElements[id]=browserElement(id));},createElement(){return browserElement('');}},console};
+const browser={window:{addEventListener(){},location:{protocol:'https:',origin:'https://example.invalid'},SITE_LINKS:{}},document:{readyState:'loading',addEventListener(){},getElementById(id){return browserElements[id]||(browserElements[id]=browserElement(id));},createElement(){return browserElement('');}},console};
 vm.createContext(browser);
 for(const file of catalog.sources)vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),browser);
 const pageSource=fs.readFileSync(path.join(root,'product-page.js'),'utf8').replace('if (document.readyState === "loading") {','window.__opsTest={state:state,selectedVariant:selectedVariant,renderSizeOptions:renderSizeOptions,buildGallery:buildGallery,getProductColorVariants:getProductColorVariants,applyColorVariant:applyColorVariant,selectRelatedProducts:selectRelatedProducts,renderRelated:renderRelated,normalizeCatalogAfterRefresh:normalizeCatalogAfterRefresh,didRefreshedCatalogChange:didRefreshedCatalogChange}; if (document.readyState === "loading") {');
@@ -104,10 +104,16 @@ const tp6Gallery=pd.buildGallery(normalizedTp6,browser.window.CATEGORY_PRODUCTS[
 const tp6Colors=pd.getProductColorVariants(normalizedTp6);
 assert.equal(tp6Gallery.length,7,'TP-6 gallery includes its primary photo and all six uploaded gallery photos');
 const tp6ColorsWithImages=tp6Colors.filter(color=>color.image);
-assert.equal(tp6ColorsWithImages.length,5,'five TP-6 color choices currently have mapped photos');
+assert.equal(tp6ColorsWithImages.length,7,'all seven TP-6 color choices have mapped photos');
 for(const color of tp6ColorsWithImages){assert(!color.image.startsWith('blob:'),color.colorLabel+' has a durable image');assert(tp6Gallery.includes(color.image),color.colorLabel+' image is present in the gallery');assert(fs.existsSync(path.join(root,color.image)),color.colorLabel+' image asset exists');pd.state.galleryImages=tp6Gallery.slice();pd.state.activeImage=0;assert.equal(pd.applyColorVariant(color),true);assert.equal(pd.state.selectedColor,color.color);assert.equal(pd.state.galleryImages[pd.state.activeImage],color.image);}
+const customColorProduct=browser.window.maCatalog.normalizeProductEntry({id:'CUSTOM-COLOR',name:'Custom color test',image:'/images/uploads/custom-black.webp',images:['/images/uploads/custom-plum.webp'],colorLabel:'Black, Deep Plum',colorVariants:[{color:'black',colorLabel:'Black',image:'/images/uploads/custom-black.webp'},{color:'deep-plum',colorLabel:'Deep Plum',image:'/images/uploads/custom-plum.webp'}]},'test',0);
+const customColorRows=pd.getProductColorVariants(customColorProduct);
+assert.equal(customColorRows.length,2,'arbitrary future color labels remain separate variants');
+pd.state.galleryImages=[customColorProduct.image].concat(Array.from(customColorProduct.images));pd.state.activeImage=0;
+assert.equal(pd.applyColorVariant(customColorRows[1]),true,'selecting a custom color switches to its mapped photo');
+assert.equal(pd.state.galleryImages[pd.state.activeImage],'/images/uploads/custom-plum.webp');
 const staleBlob=browser.window.maCatalog.normalizeProductEntry({id:'TEST-BLOB',name:'Test image',image:'images/main.webp',images:['blob:https://example.invalid/photo','images/gallery.webp'],colorVariants:[{color:'x',colorLabel:'X',image:'blob:https://example.invalid/color'}]},'test',0);
-assert.deepEqual(Array.from(staleBlob.images),['images/gallery.webp']);
+assert.deepEqual(Array.from(staleBlob.images),['/images/gallery.webp']);
 assert.equal(staleBlob.colorVariants[0].image,'');
 const relatedRows=[normalizedTp6,{id:'RELATED-1',name:'Rose Abaya',image:'images/uploads/rose.webp',price:990},{id:'RELATED-1-DUP',name:'Rose Abaya',image:'images/uploads/rose.webp'},{id:'RELATED-2',name:'Modest Dress',image:'images/uploads/modest.webp'},{id:'IMAGE-VIEW',name:'Image View',image:'images/uploads/view.webp',isImageView:true},{id:'DRAFT',name:'Draft Item',image:'images/uploads/draft.webp',status:'draft'},{id:'TRASH',name:'Trash Item',image:'images/uploads/trash.webp',status:'trash'},{id:null,name:'Missing ID',image:'images/uploads/no-id.webp'},{id:'NO-NAME',name:'',image:'images/uploads/no-name.webp'},{id:'NO-IMAGE',name:'Missing Photo'},{id:'BACK',name:'Rose Abaya - Back',image:'images/uploads/rose-back.webp'}];
 assert.deepEqual(Array.from(pd.selectRelatedProducts(relatedRows,normalizedTp6),p=>p.id),['RELATED-1','RELATED-2']);

@@ -837,11 +837,22 @@
       return { color: key, colorLabel: label, image: image };
     });
   }
-  function colorRowsMarkup(rows) {
+  function colorRowsMarkup(rows, product) {
+    var photos = [];
+    [product && product.image].concat(product && Array.isArray(product.images) ? product.images : []).forEach(function (url) {
+      url = String(url || "").trim();
+      if (url && photos.indexOf(url) === -1) photos.push(url);
+    });
     return rows.map(function (row, index) {
+      var options = '<option value="">Choose matching gallery photo…</option>' + photos.map(function (url, photoIndex) {
+        var label = photoIndex === 0 ? "Main photo" : "Gallery photo " + photoIndex;
+        var fileName = String(url).split("/").pop();
+        return '<option value="' + escapeAttr(url) + '"' + (row.image === url ? " selected" : "") + '>' + escapeHtml(label + " — " + fileName) + '</option>';
+      }).join("");
+      if (row.image && photos.indexOf(row.image) === -1) options += '<option value="' + escapeAttr(row.image) + '" selected>Current mapped photo</option>';
       return '<div class="pm-color-variation-row" data-color-row="' + index + '">' +
         '<label>Color name<input type="text" data-color-field="label" value="' + escapeAttr(row.colorLabel || "") + '" placeholder="e.g. Black"></label>' +
-        '<label>Image URL<input type="text" data-color-field="image" value="' + escapeAttr(row.image || "") + '" placeholder="Paste this color’s image URL"></label>' +
+        '<label>Matching product photo<select data-color-field="image">' + options + '</select></label>' +
         '<button type="button" class="pm-wp-link-danger" data-color-remove="' + index + '" aria-label="Remove color variation">Remove</button>' +
       '</div>';
     }).join("");
@@ -905,9 +916,9 @@
               '<button type="button" class="pm-wp-button" id="pmEditStock">' + (out ? "Mark in stock" : "Mark out of stock") + '</button></span></p>' +
             '</div>' +
             '<div class="pm-wp-panel" data-epanel="attributes"' + (editTab === "attributes" ? "" : " hidden") + '>' +
-              '<div class="pm-wp-form-row pm-color-variation-field"><label>Color variations</label><div><div id="pmColorVariationList">' + colorRowsMarkup(colorRows) + '</div>' +
+              '<div class="pm-wp-form-row pm-color-variation-field"><label>Color variations</label><div><div id="pmColorVariationList">' + colorRowsMarkup(colorRows, p) + '</div>' +
                 '<button type="button" class="pm-wp-button" id="pmColorAdd">+ Add color</button>' +
-                '<small>Add one row per color. Use a unique color name and paste the matching photo URL; new URLs are added to the product gallery automatically. Color keys are generated automatically.</small></div></div>' +
+                '<small>Add any color name, then select the matching photo already in this product’s gallery. Color keys are generated automatically. Add the photo to the gallery first if it is not listed.</small></div></div>' +
               efield("fabric", "Fabric", p.fabric) +
               efield("sizes", "Product size options", sizesToInput(p.sizes), "text", "Options customers can select, e.g. 44 or M, L — separate with commas.") +
               efield("bodySizes", "Body measurement (inches)", sizesToInput(p.bodySizes), "text", "Garment/body measurement, e.g. 38, 40, 42 — separate with commas.") +
@@ -1068,19 +1079,21 @@
       });
     }
     if (colorList) {
-      colorList.addEventListener("input", function (event) {
+      function handleColorFieldChange(event) {
         var input = event.target.closest("[data-color-field]");
         if (!input) return;
         syncColorRows(p, colorList);
         changed();
-      });
+      }
+      colorList.addEventListener("input", handleColorFieldChange);
+      colorList.addEventListener("change", handleColorFieldChange);
       colorList.addEventListener("click", function (event) {
         var remove = event.target.closest("[data-color-remove]");
         if (!remove) return;
         event.preventDefault();
         colorRows = colorRowsFromDom();
         colorRows.splice(parseInt(remove.getAttribute("data-color-remove"), 10), 1);
-        colorList.innerHTML = colorRowsMarkup(colorRows);
+        colorList.innerHTML = colorRowsMarkup(colorRows, p);
         syncColorRows(p, colorList);
         changed();
       });
@@ -1088,7 +1101,7 @@
     if (colorAdd && colorList) colorAdd.addEventListener("click", function () {
       colorRows = colorRowsFromDom();
       colorRows.push({ color: "", colorLabel: "", image: "" });
-      colorList.innerHTML = colorRowsMarkup(colorRows);
+      colorList.innerHTML = colorRowsMarkup(colorRows, p);
       changed();
       var newLabel = colorList.querySelector('[data-color-row]:last-child [data-color-field="label"]');
       if (newLabel) newLabel.focus();
