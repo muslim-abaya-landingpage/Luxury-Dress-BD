@@ -760,12 +760,21 @@ html[data-admin-theme="dark"] .pm-wp-list, html[data-admin-theme="dark"] .pm-wp-
 .pm-sort-ind { font-size: 10px; }
 .pm-sale-tag { display: inline-block; padding: 0 5px; font-size: 11px; font-weight: 700; color: #fff; background: #b32d2e; vertical-align: middle; }
 .column-price del { color: var(--pm-wp-muted); }
-.pm-color-variation-field > div { min-width: 0; }
+.pm-color-variation-field > div { min-width: 0; container-type: inline-size; }
 .pm-color-variation-field small { display: block; margin-top: 7px; color: var(--pm-wp-muted); }
 .pm-color-variation-row { display: grid; grid-template-columns: minmax(120px, 1fr) minmax(180px, 1.5fr) auto; align-items: end; gap: 8px; margin: 0 0 10px; padding: 10px; border: 1px solid var(--pm-wp-border); background: #f6f7f7; }
 .pm-color-variation-row label { display: flex; flex-direction: column; gap: 4px; color: var(--pm-wp-text); font-size: 12px; }
 .pm-color-variation-row input { width: 100%; min-height: 34px; padding: 4px 8px; border: 1px solid #8c8f94; background: #fff; font: inherit; font-size: 13px; }
 .pm-color-variation-row .pm-wp-link-danger { padding: 6px 4px; border: 0; background: none; color: #b32d2e; font: inherit; cursor: pointer; text-decoration: underline; }
+@container (max-width: 430px) {
+  .pm-color-variation-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); }
+  .pm-color-variation-row label, .pm-color-variation-row input { min-width: 0; }
+  .pm-color-variation-row .pm-wp-link-danger { grid-column: 1 / -1; justify-self: end; }
+}
+@container (max-width: 320px) {
+  .pm-color-variation-row { grid-template-columns: minmax(0, 1fr); }
+  .pm-color-variation-row .pm-wp-link-danger { grid-column: 1; }
+}
 @media (max-width: 760px) { .pm-color-variation-row { grid-template-columns: 1fr; } }
 :root[data-admin-theme="dark"] .pm-color-variation-row { background: #23282d; border-color: #3c434a; }
 :root[data-admin-theme="dark"] .pm-color-variation-row label { color: #c3c4c7; }

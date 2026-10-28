@@ -571,6 +571,7 @@
   function isAbayaProduct(p, categoryKey) {
     var ck = String(categoryKey || (p && (p.category || "")) || "").trim();
     if (ck === "abaya") return true;
+    if (isTwoPieceProduct(p, ck)) return false;
     if (p && p.name && p.name.toLowerCase().indexOf("abaya") !== -1) return true;
     return false;
   }
