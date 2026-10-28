@@ -1,6 +1,6 @@
 /**
  * প্রোডাক্ট ডেটা — product-manager.html থেকে এডিট করুন
- * আপডেট: 2026-10-27
+ * আপডেট: 2026-10-28
  */
 window.CATEGORY_PRODUCTS = {
   abaya: [
@@ -365,17 +365,17 @@ window.CATEGORY_PRODUCTS = {
       imageViewOf: "",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
+      bodySizes: ["52"],
+      sleeveSizes: ["19"],
+      dressLengths: ["44"],
+      palazzoLengths: ["40"],
       regularPrice: 1900,
       tags: ["Long Shirt","Leaf Print","Two Piece","Women's Clothing","White Shirt","Black Pants","Muslim Abaya"],
       brand: "Muslim Abaya",
       dateAdded: "2026-05-28",
       seoTitle: "White Leaf Print Two-Piece Set | Muslim Abaya",
       seoDescription: "Shop the White Leaf Print Long Shirt Two-Piece Set at Muslim Abaya. Elegant white printed shirt with black pants for a stylish, modest look. Order online in Bangladesh.",
-      productUrl: "/",
-      sleeveSizes: ["19"],
-      bodySizes: ["52"],
-      dressLengths: ["44"],
-      palazzoLengths: ["40"]
+      productUrl: "/"
     },
     {
       id: "DR-02",
@@ -447,22 +447,33 @@ window.CATEGORY_PRODUCTS = {
     },
     {
       id: "TP-6",
-      name: "Premium Navy Blue Bicycle Print Women's Tiered Maxi Dress",
-      image: "/images/two-piece-dress/premium-navy-blue-bicycle-print-womens-tiered-maxi-dress-bangladesh-1080x1350.webp",
-      price: 1000,
-      stock: 0,
-      color: "navy-blue",
-      colorLabel: "Navy Blue",
-      fabric: "Premium V.I.P Linen",
-      sizes: ["38 inch"],
-      detailNote: "Pant: 40 in | Gher: 120 in",
-      inStock: false,
+      name: "Premium Popcorn Dress Set for Women | Muslim Abaya",
+      image: "images/uploads/tp-6-1793221122854.webp",
+      imageCard: "images/uploads/tp-6-1793221122854-card.webp",
+      images: ["images/uploads/tp-6-1793221132274-g1.webp", "images/uploads/tp-6-1793221132478-g2.webp", "images/uploads/tp-6-1793221132684-g3.webp", "images/uploads/tp-6-1793221132905-g4.webp", "blob:https://muslimabaya.com/29dbbed1-870b-4fcf-b1d4-2088adc251ec", "blob:https://muslimabaya.com/e6ef1a2b-c943-4428-b4f6-971988a28bc8", "blob:https://muslimabaya.com/31d1df05-a746-4f44-8c5d-7a20b9e60bd9", "blob:https://muslimabaya.com/064c2710-c1b8-4f8a-afb4-67f82117ba52", "blob:https://muslimabaya.com/d119fdde-1788-4fdc-a68d-67b53093816c"],
+      price: 1485,
+      stock: 18,
+      color: "olive-green-black-white-baby-pink-rust-brown-burgundy-red",
+      colorLabel: "Olive Green, Black, White, Baby Pink, Rust Brown, Burgundy, Red",
+      fabric: "Popcorn Fabric",
+      sizes: ["46 inch", "48 inch", "50 inch", "52 inch"],
+      detailNote: "Discover the elegant Premium Popcorn Dress Set for Women from Muslim Abaya. Designed for a stylish and comfortable look, this outfit is suitable for everyday wear and casual occasions.\n\nProduct Details:\n\nFabric: Popcorn Fabric\n\nDress Length: 46 inches\n\nAvailable Body Sizes: 46, 48, 50 and 52 inches\n\nSalwar Length: 40 inches\n\nThigh: 29 inches\n\nSleeve Length: 18 inches\n\nHeight: 17–18 inches\n\nAvailable Colors: Olive Green, Black, White, Baby Pink, Rust Brown, Burgundy and Red.\n\nOrder online from Muslim Abaya and enjoy convenient shopping across Bangladesh.\n\nWebsite: https://muslimabaya.com\nWhatsApp: 01971642683",
       isImageView: false,
       imageViewOf: "",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
       dateAdded: "2026-08-07",
-      productUrl: "/"
+      productUrl: "/",
+      regularPrice: 1650,
+      tags: ["Popcorn Dress Women Dress Popcorn Dress Set Ladies Dress Bangladesh Plus Size Dress Muslim Abaya Two Piece Dress"],
+      brand: "Muslim Abaya",
+      seoTitle: "Popcorn Dress Set for Women | Muslim Abaya",
+      seoDescription: "Shop premium popcorn dress sets for women at Muslim Abaya. Available in multiple colors and sizes. Order online in Bangladesh.",
+      colorVariants: [{"color":"olive-green","colorLabel":"Olive Green","image":""},{"color":"black","colorLabel":"Black","image":"blob:https://muslimabaya.com/d119fdde-1788-4fdc-a68d-67b53093816c"},{"color":"white","colorLabel":"White","image":""},{"color":"baby-pink","colorLabel":"Baby Pink","image":"blob:https://muslimabaya.com/064c2710-c1b8-4f8a-afb4-67f82117ba52"},{"color":"rust-brown","colorLabel":"Rust Brown","image":"blob:https://muslimabaya.com/31d1df05-a746-4f44-8c5d-7a20b9e60bd9"},{"color":"burgundy","colorLabel":"Burgundy","image":"blob:https://muslimabaya.com/e6ef1a2b-c943-4428-b4f6-971988a28bc8"},{"color":"red","colorLabel":"Red","image":"blob:https://muslimabaya.com/29dbbed1-870b-4fcf-b1d4-2088adc251ec"}],
+      bodySizes: ["46","48","50","52"],
+      sleeveSizes: ["18"],
+      dressLengths: ["46"],
+      palazzoLengths: ["40"]
     },
     {
       id: "DR-7",
