@@ -191,7 +191,8 @@
         setText('Name', 'name', 150);
         setText('Brand', 'brand', 80);
         setText('Color', 'colorLabel', 80);
-        setText('Color code', 'color', 40);
+        // Multi-color products may store a concatenated slug such as black-baby-pink-rust-brown.
+        setText('Color code', 'color', 80);
         setText('Fabric', 'fabric', 150);
         setText('Description', 'detailNote', 3000);
         setText('SEO title', 'seoTitle', 120);
