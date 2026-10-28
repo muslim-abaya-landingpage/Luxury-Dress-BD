@@ -722,18 +722,26 @@
     if (reviewsTimer) { clearInterval(reviewsTimer); reviewsTimer = null; }
   }
 
-  function renderRelated(list) {
-    var current = state.product;
+  function selectRelatedProducts(list, current) {
+    var currentId = current && current.id != null ? String(current.id) : "";
+    var currentBase = baseName(current && current.name).toLowerCase();
     var seenBase = {};
-    var items = list.filter(function (p) {
-      if (!p || p.id === current.id) return false;
-      if (isVariantSuffix(p.name)) return false;
+    return (Array.isArray(list) ? list : []).filter(function (p) {
+      if (!p || p.id == null || !String(p.id).trim() || !String(p.name || "").trim()) return false;
+      if (String(p.id) === currentId || p.isImageView === true) return false;
+      if (p.status === "draft" || p.status === "trash" || isVariantSuffix(p.name)) return false;
       var b = baseName(p.name).toLowerCase();
-      if (b === baseName(current.name).toLowerCase()) return false;
-      if (seenBase[b]) return false;
+      if (!b || b === currentBase || seenBase[b]) return false;
+      var rawImage = p.image || p.img || (Array.isArray(p.images) && p.images[0]) || "";
+      if (!resolveImg(rawImage)) return false;
       seenBase[b] = true;
       return true;
     }).slice(0, 8);
+  }
+
+  function renderRelated(list) {
+    var current = state.product;
+    var items = selectRelatedProducts(list, current);
 
     var secs = window.CATALOG_SECTIONS || [];
     var meta = null;
@@ -747,7 +755,7 @@
         var img = resolveImg(p.image || p.img);
         var price = parseInt(p.price, 10) || 550;
         return (
-          "<a class='pd-rel-card' href='product.html?id=" + encodeURIComponent(p.id) + "'>" +
+          "<a class='pd-rel-card' href='" + escapeHtml(href("/product/" + encodeURIComponent(p.id))) + "'>" +
           "<img src='" + escapeHtml(img) + "' alt='" + escapeHtml(p.name) + "' loading='lazy' onerror=\"this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg'\">" +
           "<div class='pd-rel-info'>" +
           "<div class='name'>" + escapeHtml(p.name) + "</div>" +
@@ -1229,20 +1237,39 @@
 
   // Refresh an already-open product tab when a catalog save becomes available.
   // Keep the chosen options when still valid; never assume a save succeeded.
+  function normalizeCatalogAfterRefresh() {
+    if (typeof window.applyProductLinks === "function") {
+      window.applyProductLinks();
+    } else if (window.maCatalog && typeof window.maCatalog.normalizeAll === "function") {
+      window.CATEGORY_PRODUCTS = window.maCatalog.normalizeAll(
+        window.CATEGORY_PRODUCTS || {},
+        window.PRODUCT_LINKS_DATA || window.PRODUCT_IMAGE_LISTS || {}
+      );
+      if (typeof window.syncCatalogFromSections === "function") window.syncCatalogFromSections();
+    }
+  }
+
+  function didRefreshedCatalogChange(previousProduct, previousList, nextProduct, nextList) {
+    return JSON.stringify(nextProduct) !== previousProduct || JSON.stringify(nextList || []) !== previousList;
+  }
+
   var catalogRefreshing = false, lastCatalogRefresh = 0;
   function refreshCurrentProduct() {
     if (catalogRefreshing || document.hidden || !state.product || Date.now() - lastCatalogRefresh < 9000) return;
     catalogRefreshing = true;
     lastCatalogRefresh = Date.now();
     var previous = JSON.stringify(state.product);
+    var previousList = JSON.stringify((window.CATEGORY_PRODUCTS || {})[state.category] || []);
     var selectedSize = state.selectedSize, selectedColor = state.selectedColor;
     var loader = document.createElement("script");
     loader.src = "/category-products.js?product_refresh=" + Date.now();
     loader.onload = function () {
       catalogRefreshing = false;
       loader.remove();
+      normalizeCatalogAfterRefresh();
       var found = findProductEverywhere(getIdFromUrl());
-      if (!found || JSON.stringify(found.product) === previous) return;
+      if (!found) { state.product = null; renderNotFound(); return; }
+      if (!didRefreshedCatalogChange(previous, previousList, found.product, found.list)) return;
       state.product = found.product;
       state.category = found.category;
       state.galleryImages = buildGallery(found.product, found.list);
