@@ -820,3 +820,21 @@ html[data-admin-theme="dark"] .pm-wp-list, html[data-admin-theme="dark"] .pm-wp-
 .pm-attr-field > div { min-width: 0; }
 .pm-attr-add, .pm-attr-new { flex-wrap: wrap; }
 .pm-attr-add select, .pm-attr-new input { flex: 1 1 160px; min-width: 0; max-width: 100%; }
+.pm-attr-unusual { color: #996800; font-weight: 400; }
+
+/* Product type select and Variations tab (WooCommerce layout) */
+.pm-wp-type { font-size: 13px; margin-left: 4px; }
+.pm-wp-type-note { font-weight: 400; color: #646970; }
+.pm-wp-linkbtn { border: 0; background: none; padding: 0; color: #2271b1; text-decoration: underline; cursor: pointer; font: inherit; }
+.pm-var-row { border: 1px solid #dcdcde; background: #fff; padding: 8px 10px; margin-bottom: 8px; }
+.pm-var-top { display: flex; align-items: center; gap: 8px; }
+.pm-var-top .pm-opt-name { flex: 1; min-width: 0; font-weight: 600; }
+.pm-var-n { white-space: nowrap; color: #50575e; font-weight: 600; }
+.pm-var-n em { font-size: 11px; font-style: normal; font-weight: 400; color: #646970; }
+.pm-var-prices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+.pm-var-prices label { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: #50575e; }
+.pm-var-prices input { width: 100%; min-width: 0; }
+.pm-var-add { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.pm-var-add input { flex: 1 1 140px; min-width: 0; }
+.pm-var-add small { flex-basis: 100%; }
+@media (max-width: 600px) { .pm-var-prices { grid-template-columns: 1fr 1fr; } }

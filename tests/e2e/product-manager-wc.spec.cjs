@@ -17,17 +17,19 @@ async function open(page, { fail = false } = {}) {
 const productsFile = (page) => page.evaluate(() => window.__published && window.__published.find((f) => f.path === 'category-products.js').content);
 const entry = (file, id) => { const i = file.indexOf('id: "' + id + '"'); const j = file.indexOf('\n    }', i); return i === -1 ? '' : file.slice(i, j); };
 
-test('sale price: before-sale price per option, card price follows the first option, list shows the sale', async ({ page }) => {
+test('sale price: regular and sale price per variation, card price follows the first one, list shows the sale', async ({ page }) => {
   await open(page);
   await page.locator('#pmAllRows tr').first().locator('.pm-row-title').click(); // ABY-MAROON-1 (Full Set / Abaya Only)
-  const was = page.locator('.pm-opt-row .pm-opt-was');
-  await expect(was).toHaveCount(2);
-  await was.nth(0).fill('1299');
-  await was.nth(1).fill('999');
+  await page.click('[data-etab="variations"]');
+  const regular = page.locator('.pm-opt-row .pm-opt-price'), sale = page.locator('.pm-opt-row .pm-opt-was');
+  await expect(sale).toHaveCount(2);
+  await regular.nth(0).fill('1299'); await sale.nth(0).fill('1250');
+  await regular.nth(1).fill('1200'); await sale.nth(1).fill('1000');
+  await expect(page.locator('#pmCardPrice')).toHaveText('৳1250');
   await page.click('#pmEditBarSave');
   await expect.poll(() => productsFile(page)).toBeTruthy();
   const e = entry(await productsFile(page), 'ABY-MAROON-1');
-  expect(e).toMatch(/regularPriceByType: \{"Full Set Borka, Hijab\+ Niqab":1299,"Abaya Only":999\}/);
+  expect(e).toMatch(/regularPriceByType: \{"Full Set Borka, Hijab\+ Niqab":1299,"Abaya Only":1200\}/);
   expect(e).toContain('regularPrice: 1299');
   await page.click('#pmEditBack');
   // Several option prices: the list shows the range and a Sale tag.
@@ -149,12 +151,17 @@ test('sale price on a single-price product shows the crossed-out price in the li
   const idx = await page.evaluate(() => Array.from(document.querySelectorAll('#pmAllRows tr .column-price')).findIndex((td) => !/–/.test(td.textContent)));
   test.skip(idx < 0, 'no single-price product on the first page');
   await page.locator('#pmAllRows tr').nth(idx).locator('.pm-row-title').click();
-  const simple = (await page.locator('[data-ef="price"]').count()) > 0;
-  const price = simple ? parseInt(await page.locator('[data-ef="price"]').inputValue(), 10)
+  const simple = (await page.locator('[data-ef="regular"]').count()) > 0;
+  const price = simple ? parseInt(await page.locator('[data-ef="regular"]').inputValue(), 10)
     : parseInt((await page.locator('#pmCardPrice').textContent()).replace(/\D/g, ''), 10);
-  const before = page.locator('[data-ef="regularPrice"]');
-  if (await before.count()) await before.fill(String(price + 300));
-  else await page.locator('.pm-opt-row .pm-opt-was').first().fill(String(price + 300));
+  if (simple) {
+    await page.fill('[data-ef="regular"]', String(price + 300));
+    await page.fill('[data-ef="sale"]', String(price));
+  } else {
+    await page.click('[data-etab="variations"]');
+    await page.locator('.pm-opt-row .pm-opt-price').first().fill(String(price + 300));
+    await page.locator('.pm-opt-row .pm-opt-was').first().fill(String(price));
+  }
   await page.click('#pmEditBack');
   await expect(page.locator('#pmAllRows tr').nth(idx).locator('.column-price del')).toHaveText('৳' + (price + 300));
 });

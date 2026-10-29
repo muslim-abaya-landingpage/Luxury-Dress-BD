@@ -133,3 +133,37 @@ test('attributes: add and remove whole attributes and single values, reorder val
   expect(e).not.toContain('sleeveSizes');
   expect(e).not.toContain('attributes:');
 });
+
+test('product type: a simple product becomes variable and back; abaya always stays variable; picker suggests the category’s attributes', async ({ page }) => {
+  await open(page);
+  await page.locator('#pmAllRows tr').first().locator('.pm-row-title').click(); // abaya
+  await expect(page.locator('#pmProductType option[value="simple"]')).toBeDisabled();
+  await page.click('[data-etab="attributes"]');
+  await expect(page.locator('#pmAttrPick optgroup').first()).toHaveAttribute('label', /Abaya/);
+  await expect(page.locator('#pmAttrPick optgroup').first().locator('option[value="palazzoLengths"]')).toHaveCount(0);
+  await page.click('#pmEditBack');
+  await page.fill('#pmAllSearch', 'panjabi');
+  await page.click('#pmAllSearchBtn');
+  await page.locator('#pmAllRows tr').first().locator('.pm-row-title').click();
+  const id = await page.locator('[data-ef="id"]').inputValue();
+  const price = await page.locator('[data-ef="regular"]').inputValue();
+  await page.selectOption('#pmProductType', 'variable');
+  await expect(page.locator('[data-epanel="variations"]')).toBeVisible();
+  await expect(page.locator('[data-ef="varRegular:Standard"]')).toHaveValue(price);
+  await page.fill('[data-opt-name="Standard"]', 'M'); await page.press('[data-opt-name="Standard"]', 'Enter');
+  await page.fill('#pmOptName', 'XL'); await page.fill('#pmOptPrice', '1500'); await page.click('#pmOptAdd');
+  await page.click('#pmEditBarSave');
+  await expect.poll(() => productsFile(page)).toBeTruthy();
+  let e = entry(await productsFile(page), id);
+  expect(e).toContain('types: ["M", "XL"]');
+  expect(e).toContain('"XL": 1500');
+  page.removeAllListeners('dialog'); page.on('dialog', (d) => d.accept());
+  await page.selectOption('#pmProductType', 'simple');
+  await expect(page.locator('[data-ef="regular"]')).toHaveValue(price);
+  await page.evaluate(() => { window.__published = null; });
+  await page.click('#pmEditBarSave');
+  await expect.poll(() => productsFile(page)).toBeTruthy();
+  e = entry(await productsFile(page), id);
+  expect(e).not.toContain('types:');
+  expect(e).not.toContain('priceByType');
+});
