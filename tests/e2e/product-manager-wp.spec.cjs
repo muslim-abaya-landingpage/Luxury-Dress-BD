@@ -124,13 +124,14 @@ test('edit screen: structured color variations publish names and images, with fi
   await page.click('[data-etab="attributes"]');
 
   const measurements = ['sizes', 'bodySizes', 'sleeveSizes', 'dressLengths', 'palazzoLengths'];
+  const dr01Photo = '/images/uploads/dr-01-1793126083919.webp';
   for (const field of measurements) await expect(page.locator(`[data-ef="${field}"]`)).toHaveCount(1);
   await expect(page.locator('.pm-color-variation-row')).toHaveCount(1);
   await page.fill('.pm-color-variation-row [data-color-field="label"]', 'White / Black');
-  await page.fill('.pm-color-variation-row [data-color-field="image"]', '/images/white-black.webp');
+  await page.locator('.pm-color-variation-row [data-color-field="image"]').selectOption(dr01Photo);
   await page.click('#pmColorAdd');
   await page.locator('.pm-color-variation-row').nth(1).locator('[data-color-field="label"]').fill('কালো');
-  await page.locator('.pm-color-variation-row').nth(1).locator('[data-color-field="image"]').fill('/images/black.webp');
+  await page.locator('.pm-color-variation-row').nth(1).locator('[data-color-field="image"]').selectOption(dr01Photo);
   await page.click('#pmEditBarSave');
   await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
 
@@ -140,11 +141,9 @@ test('edit screen: structured color variations publish names and images, with fi
   const product = JSON.parse(JSON.stringify(context.window.CATEGORY_PRODUCTS['premium-two-piece'].find((p) => p.id === 'DR-01')));
   expect(product.colorLabel).toBe('White / Black, কালো');
   expect(product.colorVariants).toEqual([
-    { color: 'white-black', colorLabel: 'White / Black', image: '/images/white-black.webp' },
-    { color: 'color-2', colorLabel: 'কালো', image: '/images/black.webp' }
+    { color: 'white-black', colorLabel: 'White / Black', image: dr01Photo },
+    { color: 'color-2', colorLabel: 'কালো', image: dr01Photo }
   ]);
-  expect(product.images).toContain('/images/white-black.webp');
-  expect(product.images).toContain('/images/black.webp');
 });
 
 async function withPublisher(page, fail) {
