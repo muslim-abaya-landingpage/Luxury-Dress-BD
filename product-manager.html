@@ -721,7 +721,7 @@
     if (!ids.length) return '<li class="pm-wp-hint">No upsells yet.</li>';
     return ids.map(function (id, i) {
       var q = findProductBySku(id);
-      var note = !q ? ' <em class="pm-upsell-missing">(not found)</em>' : productStatus(q) !== "publish" ? ' <em class="pm-upsell-missing">(' + productStatus(q) + ' — not shown)</em>' : '';
+      var note = !q ? ' <em class="pm-upsell-missing">(not found)</em>' : productStatus(q) !== "publish" ? ' <em class="pm-upsell-missing">(' + (productStatus(q) === "draft" ? "Draft" : "Trash") + ' — not shown)</em>' : '';
       return '<li><button type="button" class="pm-wp-tag-x" data-upsell-i="' + i + '" aria-label="Remove upsell ' + escapeAttr(id) + '">×</button> ' + escapeHtml(id) + (q ? ' — ' + escapeHtml(q.name || "") : '') + note + '</li>';
     }).join("");
   }
@@ -989,7 +989,7 @@
             : '<select id="pmEditStatus" data-ef="status"><option value="publish"' + (productStatus(p) === "publish" ? " selected" : "") + '>Published</option><option value="draft"' + (productStatus(p) === "draft" ? " selected" : "") + '>Draft (hidden)</option></select>') + '</p>' +
           '<p class="pm-wp-hint" id="pmStatusNote"></p>' +
           '<p>Catalog: <b>' + escapeHtml(enName(sections.find(function (x) { return x.key === catKey; }) || { menu: catKey })) + '</b></p>' +
-          '<p>Added: <b>' + (formatDay(p.dateAdded) || "—") + '</b></p>' +
+          '<p>Added: <b>' + escapeHtml(formatDay(p.dateAdded) || "—") + '</b></p>' +
           '<p><label class="pm-wp-check"><input type="checkbox" data-ef="featured"' + (p.featured ? " checked" : "") + '> ★ Featured product</label></p>' +
           '<div class="pm-wp-publish-actions"><button type="button" class="pm-wp-trash" id="pmEditTrash">Move to Trash</button>' +
           '<button type="button" class="pm-wp-primary" id="pmEditUpdate">Update (Save)</button></div>' +
