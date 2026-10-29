@@ -55,3 +55,15 @@ test('stock toggle exports zero and numeric zero remains visible', () => {
   assert.equal(p.stock, undefined);
   assert.equal(p.inStock, undefined);
 });
+
+test('category key is canonical after a legacy move and a new upload', () => {
+  const f = fixture();
+  const moved = f.state.products['premium-two-piece'].find(p => p.id === 'DR-01');
+  moved.category = 'three-piece-dress';
+  moved.categoryLabel = 'থ্রি-পিস ড্রেস';
+  f.manager.loadState();
+  assert.equal(f.manager.state().products['premium-two-piece'].find(p => p.id === 'DR-01').category, 'premium-two-piece');
+  const out = vm.createContext({ window: {} });
+  vm.runInContext(f.manager.generateProductsFile(), out);
+  assert.equal(out.window.CATEGORY_PRODUCTS['premium-two-piece'].find(p => p.id === 'DR-01').category, 'premium-two-piece');
+});

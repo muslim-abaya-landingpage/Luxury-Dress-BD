@@ -276,6 +276,11 @@
     Object.keys(products).forEach(function (key) {
       if (!Array.isArray(products[key])) return;
       products[key].forEach(function (product) {
+        // The outer catalog key is canonical. Repair legacy exports where a
+        // moved product kept its previous embedded category metadata.
+        product.category = key;
+        var sec = sections.find(function (item) { return item.key === key; });
+        if (sec) product.categoryLabel = sec.menuBn || sec.menu || key;
         var raw = (rawCatalog[key] || []).find(function (row) { return row && row.id === product.id && row.name === product.name; });
         if (!raw) return;
         Object.keys(raw).forEach(function (fieldName) {
@@ -3267,7 +3272,17 @@
       var singleKey=String(labels[0]).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"color-1";
       product.color=singleKey;product.colorLabel=labels[0];product.colorVariants=[{color:singleKey,colorLabel:labels[0],image:product.image||""}];
     }else{delete product.colorVariants;}
+    var duplicate = false;
+    Object.keys(products).forEach(function (k) {
+      (products[k] || []).forEach(function (p) {
+        if (p && String(p.id) === String(product.id) && p !== product) duplicate = true;
+      });
+    });
+    if (duplicate) throw new Error("A product with this ID already exists. Use a unique product ID.");
     Object.keys(products).forEach(function(k){products[k]=products[k].filter(function(p){return p.id!==product.id;});});
+    product.category = category;
+    var targetSection = sections.find(function (sec) { return sec.key === category; });
+    if (targetSection) product.categoryLabel = targetSection.menuBn || targetSection.menu || category;
     products[category].unshift(product);renderCatList();renderMain();
   },publish:saveAll};
   reloadPublishingData().then(refreshLiveStockOverrides);

@@ -168,8 +168,11 @@
 
   function normalizeProductEntry(raw, categoryKey, index) {
     if (raw && raw._catalogNormalized) {
-      if (raw.category == null) raw.category = categoryKey || "";
-      if (!raw.categoryLabel) raw.categoryLabel = categoryLabelForKey(categoryKey);
+      // The array key is the source of truth. A product can be moved between
+      // categories in the manager, so never let stale embedded metadata make
+      // it look like it belongs to its previous category.
+      if (categoryKey) raw.category = categoryKey;
+      if (categoryKey) raw.categoryLabel = categoryLabelForKey(categoryKey);
       return raw;
     }
     if (categoryKey === "panjabi" && (!raw.sizes || !raw.sizes.length)) {
@@ -223,8 +226,10 @@
       isImageView: entry.isImageView === true,
       imageViewOf: entry.imageViewOf || "",
       link: entry.link || entry.productUrl || entry.page || "",
-      category: entry.category || categoryKey || "",
-      categoryLabel: entry.categoryLabel || categoryLabelForKey(categoryKey),
+      // Do not preserve a stale category copied from an older export. The
+      // category-products object key is canonical for every catalog entry.
+      category: categoryKey || entry.category || "",
+      categoryLabel: categoryKey ? categoryLabelForKey(categoryKey) : (entry.categoryLabel || ""),
       _catalogNormalized: true
     };
 
