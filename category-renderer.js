@@ -2379,6 +2379,29 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
         escapeHtml(priceText) +
         "</strong></li>"
       : "") +
+    // Measurements that this product type has no picker for are listed here, so nothing set in Product Manager is lost.
+    [
+      ["bodySizes", "Body sizes", !isAbaya && !isTwoPiece],
+      ["sleeveSizes", "Sleeve sizes", true],
+      ["dressLengths", "Dress lengths", !isTwoPiece],
+      ["palazzoLengths", "Pajama / Palazzo lengths", !isTwoPiece]
+    ]
+      .map(function (row) {
+        var list = Array.isArray(p[row[0]]) ? p[row[0]].filter(Boolean) : [];
+        return row[2] && list.length
+          ? "<li><span>" + row[1] + "</span><strong>" + escapeHtml(list.join(", ") + " inches") + "</strong></li>"
+          : "";
+      })
+      .join("") +
+    (Array.isArray(p.attributes)
+      ? p.attributes
+          .map(function (attr) {
+            return attr && attr.name && Array.isArray(attr.values) && attr.values.length
+              ? "<li><span>" + escapeHtml(attr.name) + "</span><strong>" + escapeHtml(attr.values.join(", ")) + "</strong></li>"
+              : "";
+          })
+          .join("")
+      : "") +
     "<li><span>SKU</span><strong>" +
     escapeHtml(p.id || "—") +
     "</strong></li>" +

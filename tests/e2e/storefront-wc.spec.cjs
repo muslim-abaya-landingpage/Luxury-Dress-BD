@@ -164,3 +164,15 @@ test('product page: short description under the price, upsells first in Related 
   await related.first().locator('button[data-action="add"]').click({ force: true });
   await expect.poll(() => page.evaluate(() => Object.keys(localStorage).map((k) => localStorage.getItem(k)).join(' '))).toContain('"category":"premium-two-piece"');
 });
+
+test('product page: custom attributes and measurements without a picker are listed in the details', async ({ page }) => {
+  const src = addFields(real, 'ABY-BLACK-4', 'sleeveSizes: ["22", "23"], attributes: [{"name": "Work", "values": ["Stone", "Embroidery"]}, {"name": "", "values": ["x"]}]');
+  await page.route(/\/category-products\.js(\?.*)?$/, (r) => r.fulfill({ contentType: 'application/javascript', body: src }));
+  await page.route(/googletagmanager|gtm\.js|analytics\.tiktok|connect\.facebook|script\.google\.com/, (r) => r.fulfill({ status: 204, body: '' }));
+  await page.goto('/product/ABY-BLACK-4.html');
+  const specs = page.locator('.pqv-spec-table').first();
+  await expect(specs).toContainText('Sleeve sizes');
+  await expect(specs).toContainText('22, 23 inches');
+  await expect(specs).toContainText('Work');
+  await expect(specs).toContainText('Stone, Embroidery');
+});

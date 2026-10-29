@@ -318,6 +318,9 @@
           return { label: String(row.label || ""), value: String(row.value || "") };
         });
     }
+    if (Array.isArray(entry.sleeveSizes) && entry.sleeveSizes.length) {
+      normalized.sleeveSizes = entry.sleeveSizes.slice();
+    }
     if (Array.isArray(entry.dressLengths) && entry.dressLengths.length) {
       normalized.dressLengths = entry.dressLengths.slice();
     }
@@ -361,6 +364,14 @@
     if (entry.shortDescription) normalized.shortDescription = String(entry.shortDescription);
     if (Array.isArray(entry.upsellIds) && entry.upsellIds.length) {
       normalized.upsellIds = entry.upsellIds.map(function (id) { return String(id || "").trim(); }).filter(Boolean);
+    }
+    // Custom attributes from Product Manager (shown under the product details, not choices).
+    if (Array.isArray(entry.attributes)) {
+      var attrs = entry.attributes.map(function (a) {
+        var values = a && Array.isArray(a.values) ? a.values.map(function (v) { return String(v || "").trim(); }).filter(Boolean) : [];
+        return { name: String((a && a.name) || "").trim(), values: values };
+      }).filter(function (a) { return a.name && a.values.length; });
+      if (attrs.length) normalized.attributes = attrs;
     }
     var menuOrder = parseInt(entry.menuOrder, 10);
     if (menuOrder) normalized.menuOrder = menuOrder;

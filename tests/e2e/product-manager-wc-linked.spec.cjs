@@ -94,3 +94,42 @@ test('bulk edit: move to another category; a failed save changes nothing', async
   expect(start).toBeGreaterThan(-1);
   expect(file.indexOf('id: "ABY-MAROON-1"')).toBeGreaterThan(start);
 });
+
+test('attributes: add and remove whole attributes and single values, reorder values, custom attribute', async ({ page }) => {
+  await open(page);
+  await page.locator('#pmAllRows tr').first().locator('.pm-row-title').click(); // ABY-MAROON-1, sizes 44–56
+  const id = await page.locator('[data-ef="id"]').inputValue();
+  await page.click('[data-etab="attributes"]');
+  const sizes = page.locator('[data-attr="sizes"] .pm-attr-values li');
+  await expect(sizes).toHaveCount(7);
+  await page.locator('[data-attr-del="sizes"][data-i="0"]').click(); // remove 44
+  await page.locator('[data-attr-move="sizes"][data-i="0"][data-dir="1"]').click(); // 46 ↔ 48
+  await page.fill('[data-attr-new="sizes"]', '58, 46');
+  await page.keyboard.press('Enter'); // 46 is already there: only 58 is added
+  await expect(sizes).toHaveCount(7);
+  await page.selectOption('#pmAttrPick', 'sleeveSizes');
+  await page.click('#pmAttrAdd');
+  await page.fill('[data-attr-new="sleeveSizes"]', '22, 23');
+  await page.click('[data-attr-add-val="sleeveSizes"]');
+  await page.selectOption('#pmAttrPick', 'custom');
+  await page.click('#pmAttrAdd');
+  await page.fill('[data-attr-name="0"]', 'Work');
+  await page.fill('[data-attr-new="c0"]', 'Stone, Embroidery');
+  await page.click('[data-attr-add-val="c0"]');
+  await page.click('#pmEditBarSave');
+  await expect.poll(() => productsFile(page)).toBeTruthy();
+  let e = entry(await productsFile(page), id);
+  expect(e).toContain('sizes: ["48", "46", "50", "52", "54", "56", "58"]');
+  expect(e).toContain('sleeveSizes: ["22","23"]');
+  expect(e).toContain('attributes: [{"name":"Work","values":["Stone","Embroidery"]}]');
+  // Remove whole attributes.
+  await page.click('[data-attr-remove="sleeveSizes"]');
+  await page.click('[data-attr-remove="c0"]');
+  await expect(page.locator('#pmAttrPick option[value="sleeveSizes"]')).toHaveCount(1);
+  await page.evaluate(() => { window.__published = null; });
+  await page.click('#pmEditBarSave');
+  await expect.poll(() => productsFile(page)).toBeTruthy();
+  e = entry(await productsFile(page), id);
+  expect(e).not.toContain('sleeveSizes');
+  expect(e).not.toContain('attributes:');
+});

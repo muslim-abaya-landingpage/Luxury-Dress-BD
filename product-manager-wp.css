@@ -804,3 +804,19 @@ html[data-admin-theme="dark"] .pm-wp-list, html[data-admin-theme="dark"] .pm-wp-
 .pm-wp-table mark.pm-lowstock { color: #c27c0e; background: none; font-weight: 600; }
 .pm-upsell-list { margin-top: 8px; }
 .pm-upsell-missing { color: #b32d2e; font-style: normal; }
+
+/* Attributes tab: one card per attribute, values as removable chips */
+.pm-attr { border: 1px solid #dcdcde; background: #fff; padding: 10px 12px; margin: 0 0 10px; }
+.pm-attr-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.pm-attr-name { flex: 1; max-width: 260px; }
+.pm-attr-values { list-style: none; margin: 0 0 8px; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.pm-attr-values li { display: inline-flex; align-items: center; gap: 2px; padding: 2px 4px 2px 8px; background: #f0f0f1; border: 1px solid #dcdcde; border-radius: 3px; }
+.pm-attr-values li.pm-wp-hint { background: none; border: 0; padding: 0; }
+.pm-attr-move { border: 0; background: none; cursor: pointer; padding: 0 3px; color: #2271b1; font-size: 14px; line-height: 1; }
+.pm-attr-move:disabled { color: #c3c4c7; cursor: default; }
+.pm-attr-new, .pm-attr-add { display: flex; gap: 6px; margin: 0; }
+.pm-attr-new input { flex: 1; }
+.pm-attr-add { margin: 4px 0 8px; }
+.pm-attr-field > div { min-width: 0; }
+.pm-attr-add, .pm-attr-new { flex-wrap: wrap; }
+.pm-attr-add select, .pm-attr-new input { flex: 1 1 160px; min-width: 0; max-width: 100%; }

@@ -699,6 +699,49 @@
   }
   function productTags(p) { return Array.isArray(p.tags) ? p.tags.filter(Boolean) : []; }
   var SHORT_DESC_MAX = 300;
+  // Attributes tab (WooCommerce "Attributes"): the product page reads these fields; each value is one choice.
+  var STD_ATTRS = [
+    ["sizes", "Size", "e.g. 44, 46 or M, L"],
+    ["bodySizes", "Body measurement (inches)", "e.g. 38, 40, 42"],
+    ["sleeveSizes", "Sleeve size (inches)", "e.g. 22, 23, 24"],
+    ["dressLengths", "Dress length (inches)", "e.g. 38, 40, 42"],
+    ["palazzoLengths", "Pajama / Palazzo length (inches)", "e.g. 38, 40"]
+  ];
+  var attrShown = {}; // attributes added in this editor session but still empty
+  function attrValues(p, key) { return Array.isArray(p[key]) ? p[key].map(String).filter(Boolean) : []; }
+  function customAttrs(p) { return Array.isArray(p.attributes) ? p.attributes.filter(function (a) { return a && typeof a === "object"; }) : []; }
+  function valueChips(values, ref) {
+    return '<ul class="pm-attr-values">' + (values.length ? values.map(function (v, i) {
+      return '<li><span>' + escapeHtml(v) + '</span>' +
+        '<button type="button" class="pm-attr-move" data-attr-move="' + ref + '" data-i="' + i + '" data-dir="-1"' + (i === 0 ? ' disabled' : '') + ' aria-label="Move ' + escapeAttr(v) + ' left">‹</button>' +
+        '<button type="button" class="pm-attr-move" data-attr-move="' + ref + '" data-i="' + i + '" data-dir="1"' + (i === values.length - 1 ? ' disabled' : '') + ' aria-label="Move ' + escapeAttr(v) + ' right">›</button>' +
+        '<button type="button" class="pm-wp-tag-x" data-attr-del="' + ref + '" data-i="' + i + '" aria-label="Remove ' + escapeAttr(v) + '">×</button></li>';
+    }).join("") : '<li class="pm-wp-hint">No values yet — add one below.</li>') + '</ul>';
+  }
+  function attributeCardsMarkup(p) {
+    var html = STD_ATTRS.filter(function (a) { return attrValues(p, a[0]).length || attrShown[a[0]]; }).map(function (a) {
+      return '<div class="pm-attr" data-attr="' + a[0] + '"><div class="pm-attr-head"><b>' + escapeHtml(a[1]) + '</b>' +
+        '<button type="button" class="pm-wp-link-danger" data-attr-remove="' + a[0] + '">Remove attribute</button></div>' +
+        valueChips(attrValues(p, a[0]), a[0]) +
+        '<p class="pm-attr-new"><input type="text" data-attr-new="' + a[0] + '" placeholder="Add value(s): ' + escapeAttr(a[2]) + '" aria-label="Add ' + escapeAttr(a[1]) + ' values"> ' +
+        '<button type="button" class="pm-wp-button" data-attr-add-val="' + a[0] + '">Add</button></p></div>';
+    }).join("");
+    html += customAttrs(p).map(function (a, n) {
+      var ref = "c" + n;
+      return '<div class="pm-attr pm-attr-custom" data-attr="' + ref + '"><div class="pm-attr-head">' +
+        '<input type="text" class="pm-attr-name" data-attr-name="' + n + '" maxlength="40" value="' + escapeAttr(a.name || "") + '" placeholder="Attribute name, e.g. Work" aria-label="Custom attribute name">' +
+        '<button type="button" class="pm-wp-link-danger" data-attr-remove="' + ref + '">Remove attribute</button></div>' +
+        valueChips((Array.isArray(a.values) ? a.values : []).map(String).filter(Boolean), ref) +
+        '<p class="pm-attr-new"><input type="text" data-attr-new="' + ref + '" placeholder="Add value(s), separate with commas" aria-label="Add values"> ' +
+        '<button type="button" class="pm-wp-button" data-attr-add-val="' + ref + '">Add</button></p></div>';
+    }).join("");
+    return html || '<p class="pm-wp-hint">No attributes yet. Pick one below and click “Add attribute”.</p>';
+  }
+  function attributePickMarkup(p) {
+    return '<option value="">Choose an attribute…</option>' + STD_ATTRS.filter(function (a) { return !attrValues(p, a[0]).length && !attrShown[a[0]]; })
+      .map(function (a) { return '<option value="' + a[0] + '">' + escapeHtml(a[1]) + '</option>'; }).join("") +
+      '<option value="custom">Custom attribute (shown in product details)</option>';
+  }
   var LOW_STOCK_DEFAULT = 2; // WooCommerce's default low-stock threshold
   // "low" = a counted stock at or below the product's threshold (but not 0, which is out of stock).
   function isLowStock(p) {
@@ -790,6 +833,7 @@
   function openProductEditor(cat, index) {
     editTarget = { cat: cat, index: index };
     editTab = "general";
+    attrShown = {};
     activeKey = EDIT_KEY;
     renderCatList();
     renderMain();
@@ -961,11 +1005,10 @@
                 '<button type="button" class="pm-wp-button" id="pmColorAdd">+ Add color</button>' +
                 '<small>Add any color name, then select the matching photo already in this product’s gallery. Color keys are generated automatically. Add the photo to the gallery first if it is not listed.</small></div></div>' +
               efield("fabric", "Fabric", p.fabric) +
-              efield("sizes", "Product size options", sizesToInput(p.sizes), "text", "Options customers can select, e.g. 44 or M, L — separate with commas.") +
-              efield("bodySizes", "Body measurement (inches)", sizesToInput(p.bodySizes), "text", "Garment/body measurement, e.g. 38, 40, 42 — separate with commas.") +
-              efield("sleeveSizes", "Sleeve sizes (inches)", sizesToInput(p.sleeveSizes), "text", "e.g. 22, 23, 24 — separate with commas.") +
-              efield("dressLengths", "Dress lengths (inches)", sizesToInput(p.dressLengths), "text", "Two-Piece dress length options, e.g. 38, 40, 42.") +
-              efield("palazzoLengths", "Pajama / Palazzo lengths (inches)", sizesToInput(p.palazzoLengths), "text", "e.g. 38, 40 — separate with commas.") +
+              '<div class="pm-wp-form-row pm-attr-field"><label>Variations &amp; attributes</label><div>' +
+                '<div id="pmAttrList">' + attributeCardsMarkup(p) + '</div>' +
+                '<p class="pm-attr-add"><select id="pmAttrPick" aria-label="Attribute to add"></select> <button type="button" class="pm-wp-button" id="pmAttrAdd">+ Add attribute</button></p>' +
+                '<small>× removes a value, ‹ › change the order customers see, “Remove attribute” removes the whole list. On the product page, sizes (and body sizes / dress and pajama lengths where that product type has a picker) are choices; other measurements and custom attributes (e.g. Work: Stone) are listed under the product details.</small></div></div>' +
             '</div>' +
             '<div class="pm-wp-panel" data-epanel="advanced"' + (editTab === "advanced" ? "" : " hidden") + '>' +
               efield("menuOrder", "Menu order", p.menuOrder == null ? "" : p.menuOrder, "number", "Position on the category page and homepage: lower numbers show first (e.g. -1 before 0). Featured products still come first. Blank = catalog order.") +
@@ -1159,6 +1202,80 @@
       var newLabel = colorList.querySelector('[data-color-row]:last-child [data-color-field="label"]');
       if (newLabel) newLabel.focus();
     });
+    // Attributes: add / remove whole attributes and single values, reorder values. Only the attribute list redraws,
+    // so unsaved color rows above are kept.
+    var attrList = document.getElementById("pmAttrList"), attrPick = document.getElementById("pmAttrPick");
+    function attrRef(ref) {
+      if (ref.charAt(0) === "c") { var a = customAttrs(p)[parseInt(ref.slice(1), 10)]; return a ? { get: function () { return (a.values || []).map(String).filter(Boolean); }, set: function (v) { a.values = v; } } : null; }
+      return { get: function () { return attrValues(p, ref); }, set: function (v) { if (v.length) p[ref] = v; else delete p[ref]; } };
+    }
+    function cleanCustomAttrs() {
+      var list = customAttrs(p);
+      if (list.length) p.attributes = list; else delete p.attributes;
+    }
+    function redrawAttrs(msg) {
+      if (attrList) attrList.innerHTML = attributeCardsMarkup(p);
+      if (attrPick) attrPick.innerHTML = attributePickMarkup(p);
+      changed(msg);
+    }
+    function addAttrValues(ref) {
+      var input = attrList.querySelector('[data-attr-new="' + ref + '"]'), r = attrRef(ref);
+      if (!input || !r) return;
+      var next = r.get(), lower = next.map(function (v) { return v.toLowerCase(); });
+      inputToSizes(input.value).forEach(function (v) { v = v.slice(0, 60); if (lower.indexOf(v.toLowerCase()) === -1) { next.push(v); lower.push(v.toLowerCase()); } });
+      r.set(next);
+      redrawAttrs();
+      var again = attrList.querySelector('[data-attr-new="' + ref + '"]'); if (again) again.focus();
+    }
+    if (attrPick) attrPick.innerHTML = attributePickMarkup(p);
+    bindById("pmAttrAdd", "click", function () {
+      var key = attrPick && attrPick.value;
+      if (!key) return;
+      if (key === "custom") {
+        p.attributes = customAttrs(p).concat([{ name: "", values: [] }]);
+        redrawAttrs();
+        var names = attrList.querySelectorAll("[data-attr-name]"); if (names.length) names[names.length - 1].focus();
+      } else {
+        attrShown[key] = true;
+        redrawAttrs();
+        var first = attrList.querySelector('[data-attr-new="' + key + '"]'); if (first) first.focus();
+      }
+    });
+    if (attrList) {
+      attrList.addEventListener("click", function (e) {
+        var b = e.target.closest("button");
+        if (!b) return;
+        var r, vals, i;
+        if (b.hasAttribute("data-attr-add-val")) { addAttrValues(b.getAttribute("data-attr-add-val")); return; }
+        if (b.hasAttribute("data-attr-remove")) {
+          var ref = b.getAttribute("data-attr-remove");
+          if (ref.charAt(0) === "c") { var list = customAttrs(p); list.splice(parseInt(ref.slice(1), 10), 1); p.attributes = list; cleanCustomAttrs(); }
+          else { delete p[ref]; delete attrShown[ref]; }
+          redrawAttrs("Attribute removed — click Save changes.");
+          return;
+        }
+        if (b.hasAttribute("data-attr-del") || b.hasAttribute("data-attr-move")) {
+          var key = b.getAttribute("data-attr-del") || b.getAttribute("data-attr-move");
+          r = attrRef(key); if (!r) return;
+          vals = r.get(); i = parseInt(b.getAttribute("data-i"), 10);
+          if (b.hasAttribute("data-attr-del")) vals.splice(i, 1);
+          else { var j = i + parseInt(b.getAttribute("data-dir"), 10); if (j < 0 || j >= vals.length) return; var t = vals[i]; vals[i] = vals[j]; vals[j] = t; }
+          if (!vals.length && key.charAt(0) !== "c") attrShown[key] = true; // keep the empty card visible
+          r.set(vals);
+          redrawAttrs();
+        }
+      });
+      attrList.addEventListener("keydown", function (e) {
+        var input = e.target.closest("[data-attr-new]");
+        if (input && e.key === "Enter") { e.preventDefault(); addAttrValues(input.getAttribute("data-attr-new")); }
+      });
+      attrList.addEventListener("input", function (e) {
+        var name = e.target.closest("[data-attr-name]");
+        if (!name) return;
+        var a = customAttrs(p)[parseInt(name.getAttribute("data-attr-name"), 10)];
+        if (a) { a.name = name.value.replace(/\s+/g, " ").trim().slice(0, 40); changed(); }
+      });
+    }
     // Options (Full Set / Abaya Only / anything added here, e.g. Hijab), each with its own price.
     var optAdd = document.getElementById("pmOptAdd");
     if (optAdd) {

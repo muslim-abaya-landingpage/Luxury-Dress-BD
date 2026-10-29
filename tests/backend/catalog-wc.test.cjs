@@ -236,3 +236,14 @@ test('CSV: short description, upsells, menu order and low-stock threshold export
   eq(plan.staged['tops-kurti'][1].menuOrder, -4);
   eq(plan.errors.map((e) => e.line), [3]);
 });
+
+test('custom attributes and sleeve sizes reach the storefront; publish validation checks attributes', () => {
+  const w = load({ 'tops-kurti': [P('T1', { sleeveSizes: ['22', '23'], attributes: [{ name: ' Work ', values: ['Stone', ' ', 'Embroidery'] }, { name: '', values: ['x'] }, { name: 'Empty', values: [] }] })] });
+  const t1 = w.maCatalog.normalizeAll(w.CATEGORY_PRODUCTS, {})['tops-kurti'][0];
+  eq(t1.sleeveSizes, ['22', '23']);
+  eq(t1.attributes, [{ name: 'Work', values: ['Stone', 'Embroidery'] }]);
+  const V = w.MaProductPublishUtils.validateCatalog;
+  assert.doesNotThrow(() => V({ a: [P('A1', { attributes: [{ name: 'Work', values: ['Stone'] }, { name: '', values: [] }] })] }));
+  assert.throws(() => V({ a: [P('A1', { attributes: [{ name: '', values: ['Stone'] }] })] }), /custom attribute/);
+  assert.throws(() => V({ a: [P('A1', { attributes: 'Work: Stone' })] }), /custom attribute/);
+});
