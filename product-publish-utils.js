@@ -18,6 +18,10 @@
   if(p.regularPrice!=null&&!whole(p.regularPrice))throw Error(p.id+': before-sale price must be whole taka.');
   if(p.regularPriceByType!=null&&(typeof p.regularPriceByType!=='object'||Object.keys(p.regularPriceByType).some(function(k){return !whole(p.regularPriceByType[k]);})))throw Error(p.id+': option before-sale prices must be whole taka.');
   if(String(p.seoTitle||'').length>120||String(p.seoDescription||'').length>320)throw Error(p.id+': SEO title max 120 and description max 320 characters.');
+  if(String(p.shortDescription||'').length>300)throw Error(p.id+': short description max 300 characters.');
+  if(p.upsellIds!=null&&(!Array.isArray(p.upsellIds)||p.upsellIds.length>8||p.upsellIds.some(function(id){return !/^[A-Za-z0-9][A-Za-z0-9_-]{1,100}$/.test(String(id||''));})))throw Error(p.id+': upsells must be up to 8 product SKUs.');
+  if(p.menuOrder!=null&&!Number.isSafeInteger(Number(p.menuOrder)))throw Error(p.id+': menu order must be a whole number.');
+  if(p.lowStockAmount!=null&&!(Number.isSafeInteger(Number(p.lowStockAmount))&&Number(p.lowStockAmount)>=0))throw Error(p.id+': low stock threshold must be 0 or more.');
  });});}
  g.MaProductPublishUtils={sizes:sizes,money:money,mode:mode,makeProduct:makeProduct,validateCatalog:validateCatalog};
 })(window);

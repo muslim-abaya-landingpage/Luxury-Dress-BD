@@ -357,6 +357,13 @@
     if (entry.dateAdded) normalized.dateAdded = String(entry.dateAdded);
     if (entry.seoTitle) normalized.seoTitle = String(entry.seoTitle);
     if (entry.seoDescription) normalized.seoDescription = String(entry.seoDescription);
+    // Short description, linked products (upsells) and menu order, as in WooCommerce.
+    if (entry.shortDescription) normalized.shortDescription = String(entry.shortDescription);
+    if (Array.isArray(entry.upsellIds) && entry.upsellIds.length) {
+      normalized.upsellIds = entry.upsellIds.map(function (id) { return String(id || "").trim(); }).filter(Boolean);
+    }
+    var menuOrder = parseInt(entry.menuOrder, 10);
+    if (menuOrder) normalized.menuOrder = menuOrder;
 
     normalized.productUrl = resolveProductPageLink(normalized);
     return normalized;
@@ -367,14 +374,18 @@
     return !!product && product.status !== "draft" && product.status !== "trash";
   }
 
-  /** Storefront view of one category: published products only, featured ones first (stable order). */
+  /** Storefront view of one category: published products only, featured ones first, then by menu order
+   *  (lower first, like WooCommerce), otherwise the catalog order. */
   function storefrontList(list) {
     var out = (list || []).filter(function (product) {
       return isPublishedProduct(product) && product.isImageView !== true;
     });
-    if (!out.some(function (p) { return p.featured === true; })) return out;
+    if (!out.some(function (p) { return p.featured === true || p.menuOrder; })) return out;
     return out.map(function (p, i) { return { p: p, i: i }; })
-      .sort(function (a, b) { return ((b.p.featured === true) - (a.p.featured === true)) || (a.i - b.i); })
+      .sort(function (a, b) {
+        return ((b.p.featured === true) - (a.p.featured === true)) ||
+          ((parseInt(a.p.menuOrder, 10) || 0) - (parseInt(b.p.menuOrder, 10) || 0)) || (a.i - b.i);
+      })
       .map(function (x) { return x.p; });
   }
 

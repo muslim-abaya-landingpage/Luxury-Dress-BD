@@ -849,6 +849,7 @@ function formatSizeLabel(size) {
   return PQV_SIZE_LABELS[s] || s;
 }
 function getProductShortNote(p, categoryKey) {
+  if (p && p.shortDescription) return String(p.shortDescription);
   if (p && p.shortNote) return String(p.shortNote);
   var notes =
     window.SITE_LINKS &&
@@ -1236,6 +1237,21 @@ function buildPqvRelatedHtml(p, idx, allProducts, categoryKey) {
     var s = String(rp && rp.name || "").toLowerCase();
     return s.indexOf("- back") === -1 && s.indexOf("- side") === -1;
   }
+  // Upsells chosen in Product Manager (Linked Products) come first, from any category.
+  seen[p.id || p.name] = true;
+  (Array.isArray(p.upsellIds) ? p.upsellIds : []).forEach(function (id) {
+    var all = window.CATEGORY_PRODUCTS || {};
+    Object.keys(all).some(function (catKey) {
+      return (all[catKey] || []).some(function (rp) {
+        if (!rp || String(rp.id) !== String(id) || seen[rp.id] || !rp.name) return false;
+        if (rp.status === "draft" || rp.status === "trash") return false;
+        seen[rp.id] = true;
+        picked.push({ product: rp, index: -1, catKey: catKey });
+        return true;
+      });
+    });
+  });
+  var upsellCount = picked.length;
   allProducts.forEach(function (rp, ri) {
     if (ri === idx || !rp || !rp.name || !isPrimaryRelated(rp)) return;
     var base = getProductBaseName(rp.name);
@@ -1261,14 +1277,16 @@ function buildPqvRelatedHtml(p, idx, allProducts, categoryKey) {
   ensurePqvHomeRelatedCss();
   var sec = pqvHomeSectionMeta(categoryKey);
   var registry = {};
+  var secs = {};
   var cards = picked
-    .slice(0, 4)
+    .slice(0, Math.min(8, Math.max(4, upsellCount)))
     .map(function (row) {
       registry[String(row.product.id)] = row.product;
+      if (row.catKey) secs[String(row.product.id)] = pqvHomeSectionMeta(row.catKey);
       return pqvHomeCardHtml(row.product);
     })
     .join("");
-  window.__pqvHomeRelated = { sec: sec, products: registry };
+  window.__pqvHomeRelated = { sec: sec, secs: secs, products: registry };
   var seeAllHref = shopHref("/category");
   return (
     '<section class="pqv-related pqv-home-related" data-cat="' +
@@ -1490,9 +1508,10 @@ function bindPqvHomeRelated(root) {
     var card = btn.closest(".ah-card");
     var state = window.__pqvHomeRelated;
     if (!card || !state) return;
-    var p = state.products[String(card.getAttribute("data-pid"))];
+    var pid = String(card.getAttribute("data-pid"));
+    var p = state.products[pid];
     if (!p || productStockStatus(p).inStock === false) return;
-    pqvHomeAddToCart(state.sec, p);
+    pqvHomeAddToCart((state.secs && state.secs[pid]) || state.sec, p);
     if (typeof window.playCartButtonAddedUi === "function") {
       window.playCartButtonAddedUi(btn);
     }

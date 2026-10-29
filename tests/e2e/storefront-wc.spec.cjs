@@ -150,3 +150,17 @@ test('home page: sale price on the card, Draft not shown', async ({ page }) => {
   await expect(maroon.locator('.ah-card-price del')).toHaveText('৳1299', { timeout: 15000 });
   expect(await page.locator('a[href="/product/ABY-BLK-3P-02"]').count()).toBe(0);
 });
+
+test('product page: short description under the price, upsells first in Related Products (any category, right cart category)', async ({ page }) => {
+  let src = real;
+  src = addFields(src, 'ABY-BLACK-4', 'shortDescription: "Ready to ship in 24 hours", upsellIds: ["DR-01", "ABY-BLACK-3"]');
+  await page.route(/\/category-products\.js(\?.*)?$/, (r) => r.fulfill({ contentType: 'application/javascript', body: src }));
+  await page.route(/googletagmanager|gtm\.js|analytics\.tiktok|connect\.facebook|script\.google\.com/, (r) => r.fulfill({ status: 204, body: '' }));
+  await page.goto('/product/ABY-BLACK-4.html');
+  await expect(page.getByText('Ready to ship in 24 hours')).toBeVisible();
+  const related = page.locator('.pqv-home-related .ah-card');
+  await expect(related.first()).toHaveAttribute('data-pid', 'DR-01');
+  await expect(related.nth(1)).toHaveAttribute('data-pid', 'ABY-BLACK-3');
+  await related.first().locator('button[data-action="add"]').click({ force: true });
+  await expect.poll(() => page.evaluate(() => Object.keys(localStorage).map((k) => localStorage.getItem(k)).join(' '))).toContain('"category":"premium-two-piece"');
+});

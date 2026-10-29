@@ -162,7 +162,7 @@
     });
     return lazyScripts[src];
   }
-  function ensureCsvTools() { return loadScriptOnce("product-csv.js?v=20261028-dresslength-discount"); }
+  function ensureCsvTools() { return loadScriptOnce("product-csv.js?v=20261029-linked-advanced"); }
   function loadStyleOnce(href) {
     var existing = document.querySelector('link[data-pm-lazy-href="' + href + '"]');
     if (existing) return Promise.resolve();
@@ -698,6 +698,33 @@
     return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][parseInt(m[2], 10) - 1] + " " + parseInt(m[3], 10) + ", " + m[1];
   }
   function productTags(p) { return Array.isArray(p.tags) ? p.tags.filter(Boolean) : []; }
+  var SHORT_DESC_MAX = 300;
+  var LOW_STOCK_DEFAULT = 2; // WooCommerce's default low-stock threshold
+  // "low" = a counted stock at or below the product's threshold (but not 0, which is out of stock).
+  function isLowStock(p) {
+    if (p == null || p.stock == null || p.stock === "" || managerOutOfStock(p)) return false;
+    var qty = parseInt(p.stock, 10), limit = p.lowStockAmount == null || p.lowStockAmount === "" ? LOW_STOCK_DEFAULT : parseInt(p.lowStockAmount, 10);
+    return !isNaN(qty) && !isNaN(limit) && qty <= limit;
+  }
+  function findProductBySku(sku) {
+    var hit = null;
+    Object.keys(products).some(function (k) { return (products[k] || []).some(function (q) { if (q && String(q.id) === String(sku)) { hit = q; return true; } return false; }); });
+    return hit;
+  }
+  function allSkuOptions(p) {
+    var out = [];
+    Object.keys(products).forEach(function (k) { (products[k] || []).forEach(function (q) { if (q && q.id && q !== p && productStatus(q) !== "trash") out.push('<option value="' + escapeAttr(q.id) + '">' + escapeHtml(q.name || "") + '</option>'); }); });
+    return out.join("");
+  }
+  function upsellItems(p) {
+    var ids = Array.isArray(p.upsellIds) ? p.upsellIds : [];
+    if (!ids.length) return '<li class="pm-wp-hint">No upsells yet.</li>';
+    return ids.map(function (id, i) {
+      var q = findProductBySku(id);
+      var note = !q ? ' <em class="pm-upsell-missing">(not found)</em>' : productStatus(q) !== "publish" ? ' <em class="pm-upsell-missing">(' + productStatus(q) + ' — not shown)</em>' : '';
+      return '<li><button type="button" class="pm-wp-tag-x" data-upsell-i="' + i + '" aria-label="Remove upsell ' + escapeAttr(id) + '">×</button> ' + escapeHtml(id) + (q ? ' — ' + escapeHtml(q.name || "") : '') + note + '</li>';
+    }).join("");
+  }
   // WooCommerce-style status. Published = no field; Draft / Trash stay in the catalog but are hidden from the website.
   function productStatus(p) { return p && (p.status === "draft" || p.status === "trash") ? p.status : "publish"; }
   function setProductStatus(p, status) {
@@ -895,7 +922,7 @@
     var meta = getCategoryTypeMeta(catKey);
     var out = managerOutOfStock(p);
     if (!Object.prototype.hasOwnProperty.call(liveStockOverrides, String(p.id)) && typeof window.isInStock === "function") out = !window.isInStock(p);
-    var tabs = [["general", "General"], ["inventory", "Inventory"], ["attributes", "Attributes"]];
+    var tabs = [["general", "General"], ["inventory", "Inventory"], ["linked", "Linked Products"], ["attributes", "Attributes"], ["advanced", "Advanced"]];
     var tags = productTags(p);
     var colorRows = initialColorRows(p);
     mainEl.innerHTML =
@@ -917,8 +944,17 @@
             '<div class="pm-wp-panel" data-epanel="inventory"' + (editTab === "inventory" ? "" : " hidden") + '>' +
               efield("id", "SKU", p.id, "text", "Also the product link. Changing it changes the URL.") +
               efield("stock", "Stock quantity", p.stock == null ? "" : p.stock, "number", "Leave blank for unlimited. 0 = out of stock.") +
+              efield("lowStockAmount", "Low stock threshold", p.lowStockAmount == null ? "" : p.lowStockAmount, "number", "The product list shows “Low stock” when the quantity is at or below this. Blank = " + LOW_STOCK_DEFAULT + ".") +
               '<p class="pm-wp-form-row"><label>Stock status</label><span><mark class="' + (out ? "outofstock" : "instock") + '">' + (out ? "Out of stock" : "In stock") + '</mark> ' +
               '<button type="button" class="pm-wp-button" id="pmEditStock">' + (out ? "Mark in stock" : "Mark out of stock") + '</button></span></p>' +
+            '</div>' +
+            '<div class="pm-wp-panel" data-epanel="linked"' + (editTab === "linked" ? "" : " hidden") + '>' +
+              '<div class="pm-wp-form-row"><label for="pmUpsellInput">Upsells</label><span>' +
+              '<input type="text" id="pmUpsellInput" list="pmSkuList" placeholder="Type a SKU or product name" aria-label="Add an upsell product"> ' +
+              '<button type="button" class="pm-wp-button" id="pmUpsellAdd">Add</button>' +
+              '<small>Shown first under “Related Products” on this product’s page (any category). Drafts and Trash are skipped.</small>' +
+              '<ul class="pm-wp-tags pm-upsell-list" id="pmUpsellList">' + upsellItems(p) + '</ul></span></div>' +
+              '<datalist id="pmSkuList">' + allSkuOptions(p) + '</datalist>' +
             '</div>' +
             '<div class="pm-wp-panel" data-epanel="attributes"' + (editTab === "attributes" ? "" : " hidden") + '>' +
               '<div class="pm-wp-form-row pm-color-variation-field"><label>Color variations</label><div><div id="pmColorVariationList">' + colorRowsMarkup(colorRows, p) + '</div>' +
@@ -931,7 +967,13 @@
               efield("dressLengths", "Dress lengths (inches)", sizesToInput(p.dressLengths), "text", "Two-Piece dress length options, e.g. 38, 40, 42.") +
               efield("palazzoLengths", "Pajama / Palazzo lengths (inches)", sizesToInput(p.palazzoLengths), "text", "e.g. 38, 40 — separate with commas.") +
             '</div>' +
+            '<div class="pm-wp-panel" data-epanel="advanced"' + (editTab === "advanced" ? "" : " hidden") + '>' +
+              efield("menuOrder", "Menu order", p.menuOrder == null ? "" : p.menuOrder, "number", "Position on the category page and homepage: lower numbers show first (e.g. -1 before 0). Featured products still come first. Blank = catalog order.") +
+            '</div>' +
           '</div></div></section>' +
+        '<section class="pm-wp-box" id="pmShortDescBox"><h3 class="pm-wp-box-title">Product short description</h3><div class="pm-wp-box-body">' +
+          '<textarea id="pmShortDesc" data-ef="shortDescription" rows="3" maxlength="' + SHORT_DESC_MAX + '" placeholder="One or two lines shown under the price on the product page">' + escapeHtml(p.shortDescription || "") + '</textarea>' +
+          '<p class="pm-wp-hint">Shown under the price. Leave empty to show the category’s default note.</p></div></section>' +
         '<section class="pm-wp-box" id="pmSeoBox"><h3 class="pm-wp-box-title">Search engine listing (SEO)</h3><div class="pm-wp-box-body">' +
           '<div class="pm-seo-preview" aria-label="Google preview"><div class="pm-seo-prev-title" id="pmSeoPrevTitle"></div>' +
           '<div class="pm-seo-prev-url">muslimabaya.com › product › ' + escapeHtml(p.id || "") + '</div><div class="pm-seo-prev-desc" id="pmSeoPrevDesc"></div></div>' +
@@ -1068,6 +1110,12 @@
           else delete p[f];
         }
         else if (f === "brand") { var b = inp.value.trim(); if (b) p.brand = b; else delete p.brand; }
+        else if (f === "shortDescription") { var sd = inp.value.replace(/\s+/g, " ").trim().slice(0, SHORT_DESC_MAX); if (sd) p.shortDescription = sd; else delete p.shortDescription; }
+        else if (f === "lowStockAmount" || f === "menuOrder") {
+          var whole = parseInt(inp.value, 10);
+          if (inp.value === "" || isNaN(whole) || (f === "menuOrder" && whole === 0)) delete p[f];
+          else p[f] = f === "lowStockAmount" ? Math.max(0, whole) : whole;
+        }
         else p[f] = inp.value;
         changed();
       });
@@ -1218,6 +1266,31 @@
     }
     bindById("pmEditTagAdd", "click", addTags);
     bindById("pmEditTagInput", "keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); addTags(); } });
+    // Linked Products → Upsells: stored as SKUs (upsellIds); a name is turned into its SKU.
+    function addUpsell() {
+      var input = document.getElementById("pmUpsellInput");
+      var text = input ? input.value.trim() : "";
+      if (!text) return;
+      var q = findProductBySku(text);
+      if (!q) Object.keys(products).some(function (k) { return (products[k] || []).some(function (x) { if (x && String(x.name || "").trim().toLowerCase() === text.toLowerCase()) { q = x; return true; } return false; }); });
+      if (!q || !q.id) { toast("No product with SKU or name “" + text + "”"); return; }
+      if (q === p) { toast("A product cannot be its own upsell"); return; }
+      var ids = Array.isArray(p.upsellIds) ? p.upsellIds.slice() : [];
+      if (ids.indexOf(String(q.id)) === -1) ids.push(String(q.id));
+      p.upsellIds = ids.slice(0, 8);
+      editTab = "linked";
+      renderProductEditor(); changed();
+    }
+    bindById("pmUpsellAdd", "click", addUpsell);
+    bindById("pmUpsellInput", "keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); addUpsell(); } });
+    root.querySelectorAll("[data-upsell-i]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var ids = (p.upsellIds || []).slice(); ids.splice(parseInt(b.getAttribute("data-upsell-i"), 10), 1);
+        if (ids.length) p.upsellIds = ids; else delete p.upsellIds;
+        editTab = "linked";
+        renderProductEditor(); changed();
+      });
+    });
     root.querySelectorAll("[data-tag-i]").forEach(function (b) {
       b.addEventListener("click", function () {
         var next = productTags(p); next.splice(parseInt(b.getAttribute("data-tag-i"), 10), 1);
@@ -1389,6 +1462,7 @@
       return managerOutOfStock(row.product);
     }).length;
     var inStockCount = liveRows.length - outOfStockCount;
+    var lowStockCount = liveRows.filter(function (row) { return isLowStock(row.product); }).length;
     var inTrash = overviewStatus === "trash";
     function sortHead(key, label) {
       var on = overviewSort.key === key;
@@ -1421,17 +1495,20 @@
       '<ul class="pm-wp-subsubsub pm-status-tabs">' +
       '<li><button type="button" data-overview-stock="" class="' + (overviewStock === "" ? "is-active" : "") + '">All stock <span class="count">(' + liveRows.length + ')</span></button> |</li>' +
       '<li><button type="button" data-overview-stock="in" class="' + (overviewStock === "in" ? "is-active" : "") + '">In stock <span class="count">(' + inStockCount + ')</span></button> |</li>' +
-      '<li><button type="button" data-overview-stock="out" class="' + (overviewStock === "out" ? "is-active" : "") + '">Out of stock <span class="count">(' + outOfStockCount + ')</span></button></li></ul>' +
+      '<li><button type="button" data-overview-stock="out" class="' + (overviewStock === "out" ? "is-active" : "") + '">Out of stock <span class="count">(' + outOfStockCount + ')</span></button>' + (lowStockCount ? ' |' : '') + '</li>' +
+      (lowStockCount ? '<li><button type="button" data-overview-stock="low" class="' + (overviewStock === "low" ? "is-active" : "") + '">Low stock <span class="count">(' + lowStockCount + ')</span></button></li>' : '') + '</ul>' +
       '<p class="pm-wp-search"><label class="pm-sr-only" for="pmAllSearch">Search products</label><input type="search" id="pmAllSearch" value="' + escapeAttr(allSearchTerm) + '">' +
       '<button type="button" class="pm-wp-button" id="pmAllSearchBtn">Search products</button><span id="pmAllCount" class="pm-sr-only"></span></p>' +
       '<div class="pm-wp-tablenav top">' +
       '<div class="pm-wp-actions"><label class="pm-sr-only" for="pmBulkAction">Bulk actions</label><select id="pmBulkAction"><option value="">Bulk actions</option>' + (inTrash
         ? '<option value="restore">Restore</option><option value="delete">Delete permanently</option>'
         : '<option value="in">Mark in stock</option><option value="out">Mark out of stock</option><option value="price">Change price (%)</option>' +
+          '<option value="sale">Set sale (% off)</option><option value="feature">Mark as featured</option><option value="unfeature">Remove featured</option>' +
+          '<option value="tags">Add tags</option><option value="category">Move to category</option>' +
           '<option value="publish">Publish</option><option value="draft">Set to Draft</option><option value="trash">Move to Trash</option>') + '</select>' +
       '<button type="button" class="pm-wp-button" id="pmBulkApply">Apply</button></div>' +
       '<div class="pm-wp-actions"><select id="pmOverviewCategory" aria-label="Filter by category"><option value="">Select a category</option>' + catOptions + '</select>' +
-      '<select id="pmOverviewStock" aria-label="Filter by stock status"><option value="">Filter by stock status</option><option value="in"' + (overviewStock === 'in' ? ' selected' : '') + '>In stock</option><option value="out"' + (overviewStock === 'out' ? ' selected' : '') + '>Out of stock</option></select>' +
+      '<select id="pmOverviewStock" aria-label="Filter by stock status"><option value="">Filter by stock status</option><option value="in"' + (overviewStock === 'in' ? ' selected' : '') + '>In stock</option><option value="out"' + (overviewStock === 'out' ? ' selected' : '') + '>Out of stock</option><option value="low"' + (overviewStock === 'low' ? ' selected' : '') + '>Low stock</option></select>' +
       '<button type="button" class="pm-wp-button" id="pmFilterBtn">Filter</button></div>' +
       '<div class="pm-wp-pages" id="pmPagerTop"></div></div>' +
       // Kept for the bulk stock logic and its tests; the bulk-action select above drives them.
@@ -1457,6 +1534,7 @@
       if (!action) return;
       if (!Object.keys(overviewSelected).length) { toast("Select products first"); return; }
       if (action === "price") { bulkReprice(); return; }
+      if (["sale", "feature", "unfeature", "tags", "category"].indexOf(action) !== -1) { bulkEdit(action); return; }
       if (["publish", "draft", "trash", "restore", "delete"].indexOf(action) !== -1) { bulkStatus(action); return; }
       document.getElementById(action === "out" ? "pmOverviewOff" : "pmOverviewOn").click();
     });
@@ -1564,7 +1642,7 @@
         var st = productStatus(p);
         if (overviewStatus ? st !== overviewStatus : st === "trash") return false;
         if (overviewCategory && s.key !== overviewCategory) return false;
-        if (overviewStock === "out" && !out || overviewStock === "in" && out) return false;
+        if (overviewStock === "out" && !out || overviewStock === "in" && out || overviewStock === "low" && !isLowStock(p)) return false;
         return [p.name, p.id, s.key, s.menu, s.menuBn, p.brand || ""].concat(productTags(p)).join(" ").toLowerCase().indexOf(term) !== -1;
       });
       if (overviewSort.key) {
@@ -1606,6 +1684,12 @@
           draw();
         });
       });
+      // WooCommerce shows the counted quantity next to the stock status: "In stock (12)", "Low stock (2)".
+      function stockCell(p, out) {
+        if (out) return '<mark class="outofstock">Out of stock</mark>';
+        var qty = p.stock == null || p.stock === "" ? "" : ' (' + (parseInt(p.stock, 10) || 0) + ')';
+        return isLowStock(p) ? '<mark class="onbackorder pm-lowstock">Low stock' + qty + '</mark>' : '<mark class="instock">In stock' + qty + '</mark>';
+      }
       function priceText(p) {
         var values = p.priceByType ? Object.keys(p.priceByType).map(function (k) { return parseInt(p.priceByType[k], 10); }).filter(function (n) { return !isNaN(n); }) : [];
         var sale = productOnSale(p) ? ' <span class="pm-sale-tag">Sale</span>' : '';
@@ -1641,7 +1725,7 @@
           '<button type="button" class="pm-row-link pm-overview-stock" data-stock-cat="' + escapeAttr(s.key) + '" data-stock-index="' + row.index + '" aria-pressed="' + out + '">' + (out ? 'Mark in stock' : 'Mark out of stock') + '</button>' +
           (p.id ? ' | <a class="pm-row-link" href="/product/' + encodeURIComponent(p.id) + '" target="_blank" rel="noopener">View</a>' : '') + '</div></td>' +
           '<td class="column-sku">' + (p.id ? escapeHtml(p.id) : '<span class="na">–</span>') + '</td>' +
-          '<td class="column-stock"><mark class="' + (out ? 'outofstock' : 'instock') + '">' + (out ? 'Out of stock' : 'In stock') + '</mark></td>' +
+          '<td class="column-stock">' + stockCell(p, out) + '</td>' +
           '<td class="column-price">' + priceText(p) + '</td>' +
           '<td class="column-cats"><button type="button" class="pm-row-link" data-filter-cat="' + escapeAttr(s.key) + '">' + escapeHtml(catName(s)) + '</button></td>' +
           '<td class="column-tags">' + (productTags(p).length ? productTags(p).map(function (t) { return '<button type="button" class="pm-row-link" data-filter-term="' + escapeAttr(t) + '">' + escapeHtml(t) + '</button>'; }).join(', ') : '<span class="na">–</span>') + '</td>' +
@@ -1803,6 +1887,71 @@
         refs.forEach(function (ref) { setProductStatus(products[ref[0]][ref[1]], action === "restore" ? "publish" : action); });
       }
       var label = { publish: "published", draft: "set to Draft", trash: "moved to Trash", restore: "restored", delete: "deleted permanently" }[action];
+      setSaveStatus("Saving: " + n + " product(s) " + label + "…");
+      saveAll(null).then(function () {
+        overviewSelected = {};
+        toast(n + " product(s) " + label + " — the website updates in about 2 minutes");
+        renderCatList(); renderMain();
+      }).catch(function (err) {
+        var restored = JSON.parse(backup);
+        Object.keys(products).forEach(function (k) { delete products[k]; });
+        Object.assign(products, restored);
+        renderMain();
+        setSaveStatus("Not saved: " + ((err && err.message) || "try again") + " — nothing was changed.");
+      });
+    }
+    // WooCommerce-style Bulk Edit: sale % off, featured, add tags, move to another category. Saves at once;
+    // if saving fails, the catalog goes back to how it was.
+    function bulkEdit(action) {
+      var refs = Object.keys(overviewSelected).map(function (key) { return JSON.parse(key); })
+        .filter(function (ref) { return (products[ref[0]] || [])[ref[1]]; });
+      if (!refs.length) { toast("Select products first"); return; }
+      var n = refs.length, label, input, target = null, pct = null, newTags = [];
+      if (action === "sale") {
+        input = prompt("Sale for " + n + " product(s): what percent off the regular price?\n1–99, e.g. 10. Enter 0 to end the sale.", "10");
+        if (input === null) return;
+        pct = Number(String(input).trim());
+        if (!Number.isInteger(pct) || pct < 0 || pct > 99) { toast("Enter a whole percent from 0 to 99"); return; }
+        label = pct ? "on sale (" + pct + "% off)" : "sale ended";
+      } else if (action === "tags") {
+        input = prompt("Add which tags to " + n + " product(s)? Separate with commas.", "");
+        if (input === null) return;
+        newTags = input.split(",").map(function (t) { return t.trim(); }).filter(Boolean);
+        if (!newTags.length) { toast("Enter at least one tag"); return; }
+        label = "tagged " + newTags.join(", ");
+      } else if (action === "category") {
+        var names = sections.map(function (sec, i) { return (i + 1) + " = " + enName(sec); }).join("\n");
+        input = prompt("Move " + n + " product(s) to which category? Enter the number:\n" + names, "");
+        if (input === null) return;
+        target = sections[parseInt(input, 10) - 1];
+        if (!target) { toast("Enter one of the category numbers"); return; }
+        label = "moved to " + enName(target);
+      } else {
+        label = action === "feature" ? "marked as featured" : "no longer featured";
+      }
+      var backup = JSON.stringify(products);
+      var moving = [];
+      refs.forEach(function (ref) {
+        var p = products[ref[0]][ref[1]], meta = getCategoryTypeMeta(ref[0]);
+        if (action === "feature") p.featured = true;
+        else if (action === "unfeature") delete p.featured;
+        else if (action === "tags") {
+          var tags = productTags(p), lower = tags.map(function (t) { return t.toLowerCase(); });
+          newTags.forEach(function (t) { if (lower.indexOf(t.toLowerCase()) === -1) { tags.push(t); lower.push(t.toLowerCase()); } });
+          p.tags = tags;
+        } else if (action === "sale") {
+          var types = productOptionTypes(p, meta).filter(function (t) { return p.priceByType && p.priceByType[t] != null; });
+          if (types.length) types.forEach(function (t) { applyDiscountPercent(p, t, pct ? String(pct) : ""); });
+          else applyDiscountPercent(p, null, pct ? String(pct) : "");
+          syncCardPrice(p, meta);
+        } else if (action === "category" && ref[0] !== target.key) moving.push(ref);
+      });
+      // Move from the end of each list so the other indexes stay valid.
+      moving.sort(function (a, b) { return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : b[1] - a[1]; }).forEach(function (ref) {
+        var p = products[ref[0]].splice(ref[1], 1)[0];
+        (products[target.key] = products[target.key] || []).push(p);
+        ensureProductPriceByType(p, target.key);
+      });
       setSaveStatus("Saving: " + n + " product(s) " + label + "…");
       saveAll(null).then(function () {
         overviewSelected = {};

@@ -799,3 +799,8 @@ html[data-admin-theme="dark"] .pm-wp-list, html[data-admin-theme="dark"] .pm-wp-
 .pm-import-dialog li span { color: var(--pm-wp-muted); }
 .pm-import-errors li { color: #b32d2e; }
 .pm-import-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+
+/* Low stock (quantity at or below the product's threshold), Linked Products upsells */
+.pm-wp-table mark.pm-lowstock { color: #c27c0e; background: none; font-weight: 600; }
+.pm-upsell-list { margin-top: 8px; }
+.pm-upsell-missing { color: #b32d2e; font-style: normal; }

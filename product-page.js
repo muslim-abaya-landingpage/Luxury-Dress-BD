@@ -1219,7 +1219,7 @@
     if (descLink) descLink.href = window.location.href;
 
     var shortNotes = (window.SITE_LINKS && window.SITE_LINKS.productShortNotes) || {};
-    $("pdShortNote").textContent = shortNotes[state.category] || shortNotes.default || "";
+    $("pdShortNote").textContent = state.product.shortDescription || shortNotes[state.category] || shortNotes.default || "";
 
     renderColorOptions();
     renderTypeOptions();
