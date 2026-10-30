@@ -9,7 +9,7 @@
  */
 import { SIZE_CATEGORIES } from './size-defaults.js';
 
-const KEY_RE = /^[a-z0-9_]{1,40}$/;
+const KEY_RE = /^(?!__proto__$)[a-z0-9_]{1,40}$/; // same as size-core.js
 const TEMPLATE_ID_RE = /^[a-z0-9][a-z0-9-]{0,39}$/;
 const PRODUCT_ID_RE = /^[A-Za-z0-9][A-Za-z0-9_-]{1,100}$/;
 const BAD_TEXT_RE = /[<>{}`\\\u0000-\u001f]/;

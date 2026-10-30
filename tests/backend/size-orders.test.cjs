@@ -102,3 +102,21 @@ test('quick-add paths send products with fields to their page; checkout can chan
   assert.match(bundle, /maSizeStore/);
   assert.match(read('index.html'), /home-catalog-utils\.min\.js[^\n]*\n<script defer src="size-core\.js"><\/script>\n<script defer src="size-storefront\.js">/);
 });
+
+test('security: "__proto__" is never a measurement key (store, shop and order check)', async () => {
+  const store = await import(path.join(root, 'functions/_lib/size-store.js'));
+  const tpl = (key) => ({ id: 'x-tpl', name_bn: '', name_en: 'X', fields: [{ key, label_bn: '', label_en: 'A', required: true, enabled: true, allowCustom: false, default: '', legacy: [], options: [{ value: '1', label_bn: '', label_en: '' }] }] });
+  assert.throws(() => store.validateTemplate(tpl('__proto__')), /BAD_FIELD_KEY/);
+  assert.doesNotThrow(() => store.validateTemplate(tpl('proto_ok')));
+  const c = {};
+  vm.createContext(c);
+  vm.runInContext(read('apps-script/SizeCore.gs'), c);
+  const resolved = { templateId: 't', version: 1, fields: [{ key: 'body', label: 'Body', required: true, allowCustom: false, options: [{ value: '46', label: '46' }], default: '' }] };
+  const r = c.maSizeCore.validate(resolved, JSON.parse('{"__proto__": "x", "body": "46"}'));
+  assert.equal(r.ok, false);
+  assert.ok(r.errors.some((e) => e.code === 'MALFORMED'));
+  assert.ok(Array.isArray(r.measurements));
+  const arr = c.maSizeCore.validate(resolved, [{ key: '__proto__', value: { polluted: true } }, { key: 'body', value: '46' }]);
+  assert.equal(arr.ok, false);
+  assert.equal(({}).polluted, undefined);
+});
