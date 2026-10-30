@@ -26,6 +26,10 @@
         "label": "প্রোডাক্ট ম্যানেজার"
       },
       {
+        "href": "admin-sizes.html",
+        "label": "সাইজ ম্যানেজার"
+      },
+      {
         "href": "stock-analytics.html",
         "label": "স্টক ও অ্যানালিটিক্স"
       },

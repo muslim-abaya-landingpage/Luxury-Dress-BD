@@ -8,7 +8,7 @@ import sys
 ROOT = Path(__file__).resolve().parent.parent
 PAGES = ['admin-dashboard', 'admin-orders', 'admin-order', 'admin-operations',
          'admin-inbox', 'product-manager', 'product-links', 'admin-links',
-         'stock-analytics', 'admin-staff', 'admin-growth']
+         'stock-analytics', 'admin-staff', 'admin-growth', 'admin-sizes']
 GROUPS = json.loads((ROOT / 'admin-navigation.json').read_text())
 
 def navigation(active):
