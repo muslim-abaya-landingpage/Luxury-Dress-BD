@@ -1647,39 +1647,6 @@ function bindPqvGalleryArrows(modal) {
    এখানে সেট হয়।
    ---------------------------------------------------------------------- */
 
-/** "আমার সাইজ কোনটা?" — size-finder.js is loaded on first use so no page needs an extra script tag. */
-var sizeFinderLoading = null;
-function loadSizeFinder() {
-  if (window.MaSizeFinder && window.MaSizeFinder.attach) return Promise.resolve(window.MaSizeFinder);
-  if (sizeFinderLoading) return sizeFinderLoading;
-  sizeFinderLoading = new Promise(function (resolve) {
-    var s = document.createElement("script");
-    s.src = "/size-finder.js?v=d006102088412816";
-    s.defer = true;
-    s.onload = function () { resolve(window.MaSizeFinder || null); };
-    s.onerror = function () { sizeFinderLoading = null; resolve(null); };
-    document.head.appendChild(s);
-  });
-  return sizeFinderLoading;
-}
-function attachPqvSizeFinder(modal, idx) {
-  var field = modal && modal.querySelector(".pqv-field-size");
-  var head = field && field.querySelector(".pqv-field-head");
-  if (!head) return;
-  var own = "[data-product-idx='" + idx + "']";
-  var groups = [];
-  if (modal.querySelector(".pqv-body-opt" + own)) groups.push({ selector: ".pqv-body-opt" + own, attr: "data-body-value", mode: "body", label: "বডি" });
-  if (modal.querySelector(".pqv-length-opt" + own)) groups.push({ selector: ".pqv-length-opt" + own, attr: "data-length-value", mode: "length", label: "দৈর্ঘ্য" });
-  if (modal.querySelector(".pqv-size-opt" + own)) groups.push({ selector: ".pqv-size-opt" + own, attr: "data-size-value", mode: "body", label: "সাইজ" });
-  if (!groups.length) return;
-  loadSizeFinder().then(function (sf) {
-    if (!sf || !document.body.contains(head)) return;
-    try {
-      sf.attach({ scope: modal, labelHost: head, boxAfter: head, groups: groups, hasCustom: !!modal.querySelector("[data-pqv-custom-size]") });
-    } catch (e) {}
-  });
-}
-
 function bindPqvInteractions(p, idx, categoryKey, scopeRoot) {
   var modal = scopeRoot || getActivePqvScope();
   if (!modal) return;
@@ -1762,7 +1729,6 @@ function bindPqvInteractions(p, idx, categoryKey, scopeRoot) {
       openSizeChartModal(chartBtn.getAttribute("data-chart-category") || "");
     });
   }
-  attachPqvSizeFinder(modal, idx);
   var customSizeBtnEl = modal.querySelector("[data-pqv-custom-size]");
   if (customSizeBtnEl && typeof window.openCustomSizeModal === "function") {
     customSizeBtnEl.addEventListener("click", function () {
