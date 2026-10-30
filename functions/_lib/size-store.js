@@ -68,6 +68,8 @@ export function validateTemplate(input) {
     if (out.legacy.some((s) => !LEGACY_SLOTS.includes(s))) fail('BAD_LEGACY');
     // A field with no values of its own is allowed when customers may type one, or when it only serves old products' size lists.
     if (!out.options.length && !out.allowCustom && !out.legacy.length) fail('FIELD_HAS_NO_CHOICES');
+    // A default must be something the customer could actually submit.
+    if (out.default && !out.allowCustom && !out.options.some((o) => norm(o.value) === norm(out.default))) fail('BAD_DEFAULT');
     return out;
   });
   return { id, name_bn, name_en, fields };
@@ -258,7 +260,22 @@ export async function saveTemplate(db, input, { now, actor, expectedUpdatedAt })
   // Someone else saved this template since it was loaded: refuse instead of overwriting their change.
   if (cur && expectedUpdatedAt !== undefined && Number(expectedUpdatedAt) !== Number(cur.updated_at)) fail('CONFLICT');
   const before = cur ? (await readDraft(db)).config.templates[t.id] : undefined;
-  await runStatements(db, templateStatements(t, now, actor).concat(auditStatement(now, actor, 'save_template', t.id, before, t)));
+  // Orders and stock refer to field keys, so a key in use is never dropped or renamed: switch it off instead.
+  if (before && before.fields.some((f) => !t.fields.some((n) => n.key === f.key))) fail('FIELD_KEY_REMOVED');
+  const audit = auditStatement(now, actor, 'save_template', t.id, before, t);
+  if (cur && expectedUpdatedAt !== undefined) {
+    // Same check inside the write transaction: if another save landed in between, the audit row gets a NULL
+    // target, the NOT NULL constraint fails and the whole batch is rolled back.
+    audit.sql = 'INSERT INTO size_audit_log (at, actor, action, target, before_json, after_json) VALUES (?, ?, ?, ' +
+      '(SELECT ? WHERE (SELECT updated_at FROM size_templates WHERE id = ?) = ?), ?, ?)';
+    audit.params = [now, actor, 'save_template', t.id, t.id, Number(expectedUpdatedAt), audit.params[4], audit.params[5]];
+  }
+  try {
+    await runStatements(db, [audit].concat(templateStatements(t, now, actor)));
+  } catch (e) {
+    if (/NOT NULL constraint failed: size_audit_log\.target/i.test(String(e && e.message))) fail('CONFLICT');
+    throw e;
+  }
   return t;
 }
 

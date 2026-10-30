@@ -546,9 +546,9 @@ function validateOrderInput_(e) {
             productType: String((it && it.productType) || '').trim().slice(0, 80),
             category: String((it && it.category) || '').trim().slice(0, 80)
           };
-          // Size Manager: measurement choices ({key, value}); checked against the size template in opsLinePrice_.
+          // Size Manager: measurement choices ({key, value}, up to 20 = the template field limit); checked in opsLinePrice_.
           if (it && Array.isArray(it.measurements) && it.measurements.length) {
-            line.measurements = it.measurements.slice(0, 12).map(function (m) {
+            line.measurements = it.measurements.slice(0, 20).map(function (m) {
               return { key: String((m && m.key) || '').slice(0, 40), value: String(m && m.value != null ? m.value : '').slice(0, 80) };
             });
           }
