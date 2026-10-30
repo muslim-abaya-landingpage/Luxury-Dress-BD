@@ -1,12 +1,11 @@
 /**
  * Instant live catalog.
  *
- * When the owner saves products in the admin panel, the change is committed to GitHub as before (the
- * permanent copy, which Cloudflare then builds and deploys in about a minute). Right after that commit
- * the admin panel also sends the same files here (POST /api/live-publish), and they are kept in D1
- * (binding STOCK_DB, table live_catalog). Until the deploy that contains that commit is live, the site
- * serves the saved files from D1, so visitors see the change immediately. New photos from that save are
- * served from D1 under /api/live-img/... until the deploy has them.
+ * Product catalog text is committed to GitHub as before (Cloudflare then builds and deploys it).
+ * Product photo bytes are uploaded separately to R2; catalog data stores only the public R2 URL.
+ * The admin panel also sends the catalog text here (POST /api/live-publish), where it is kept in D1
+ * (binding STOCK_DB, table live_catalog) until the deployment is live. The /api/live-img route remains
+ * only as a compatibility fallback for older in-flight publications that stored photos in D1.
  *
  * Safety: anything unexpected (no D1, no saved state, a read error) falls back to the deployed static
  * files, i.e. exactly how the site worked before.
@@ -15,7 +14,7 @@
 export const CATALOG_FILES = ['category-products.js', 'product-links-data.js', 'product-catalog-sections.js', 'product-config.js'];
 export const VALIDATION_FILE = 'catalog-validation.json';
 export const LIVE_FILES = CATALOG_FILES.concat(VALIDATION_FILE);
-export const ASSET_PATH = /^images\/uploads\/[a-z0-9-]+\.(webp|jpg|png)$/;
+export const ASSET_PATH = /^images\/(?:uploads|gallery|main(?:\/cards)?)\/[a-z0-9_-]+\.(webp|jpg|png)$/;
 export const MAX_ASSET_BYTES = 1900000; // D1 row limit is 2 MB; larger photos simply wait for the deploy.
 import { CARRIER_FILE, loadStorefrontSizeConfig, sizeConfigScript, fingerprint } from './size-carrier.js';
 

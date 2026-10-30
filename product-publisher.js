@@ -1,5 +1,5 @@
 (function(g){'use strict';
- var MAX_ASSETS=6,base=null,assets={},request=null,job=null,checking=false,timer=null,notify=function(){},lastLiveError='';
+ var MAX_ASSETS=8,base=null,assets={},request=null,job=null,checking=false,timer=null,notify=function(){},lastLiveError='';
  function call(type,data){return g.MaAdmin.call(type,data||{},{maxAgeMs:0});}
  function bytes(text){return new TextEncoder().encode(text);}
  function hex(buf){return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');}
@@ -77,14 +77,20 @@
  }
  async function publish(files,target){
   if(!base)throw Error('Current data is not ready. Refresh the page and try again.');
-  // Photos picked in the editor wait here and go up in the same commit as the details, so one save = one
-  // website build. Photos removed again before saving are dropped (only paths the catalog uses are sent).
+  // Only referenced photos are uploaded. Image bytes go to R2 first; the catalog commit contains URLs only.
   var text=files.map(function(f){return f.content;}).join('\n');
   Object.keys(assets).forEach(function(k){if(text.indexOf(k)<0)delete assets[k];});
   var queued=Object.keys(assets).map(function(k){return assets[k];});
-  // The publisher accepts at most 6 photos per save; any extra ones are uploaded on their own first.
-  while(queued.length>MAX_ASSETS){var extra=queued.pop();status('Uploading extra photos… keep this page open.');var up=await g.MaAdmin.uploadImage(extra.path,extra.content,'image/webp');if(!up||!up.ok)throw Error((up&&(up.message||up.error))||'Photo upload failed.');delete assets[extra.path];}
-  var data={baseShas:base.shas,files:files.map(function(f){return {path:f.path,content:f.content};}),assets:queued};
+  if(queued.length>MAX_ASSETS)throw Error('Too many photos in one save. Choose at most 7 photos.');
+  var urls={};
+  for(var i=0;i<queued.length;i++){
+   status('Uploading product photo '+(i+1)+'/'+queued.length+' to Cloudflare R2… keep this page open.');
+   var up=await g.MaAdmin.uploadImage(queued[i].path,queued[i].content,'image/webp');
+   if(!up||!up.ok||!up.url)throw Error((up&&(up.message||up.error))||'Cloudflare R2 photo upload failed.');
+   urls[queued[i].path]=up.url;
+  }
+  var savedFiles=files.map(function(f){var content=f.content;Object.keys(urls).forEach(function(path){content=content.split(path).join(urls[path]);});return {path:f.path,content:content};});
+  var data={baseShas:base.shas,files:savedFiles,assets:[]};
   var fingerprint=JSON.stringify(data);if(!request||request.fingerprint!==fingerprint)request={fingerprint:fingerprint,id:crypto.randomUUID()};data.requestId=request.id;
   status('Saving photos and product details… keep this page open.');
   var result=await call('AdminCatalogPublish',{Payload:JSON.stringify(data)});
@@ -94,7 +100,7 @@
   // GitHub has confirmed the save. Release the Save controls now instead of
   // keeping the editor blocked during the separate validation/D1 request.
   // Do not claim the product is live until the D1 endpoint confirms it.
-  var currentJob = job, liveFiles = data.files, livePhotos = queued;
+  var currentJob = job, liveFiles = data.files, livePhotos = [];
   status('✅ Saved to GitHub. Updating the live website…');
   Promise.resolve().then(function(){return pushLive(liveFiles,livePhotos,result.sha);}).then(function(ok){
     if(!job || job.sha !== currentJob.sha)return;

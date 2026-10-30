@@ -1,5 +1,4 @@
-// Instant live catalog: an owner save is served to visitors at once from D1, and the site falls back to
-// the deployed files as soon as the deploy that contains the save is live (or whenever anything fails).
+// Instant live catalog: catalog text is served from D1 until deployed; photo bytes live in R2.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const crypto = require('node:crypto');
@@ -50,7 +49,7 @@ const STATIC = {
   'catalog-validation.json': '{"version":1,"releaseSha":"' + OLD + '"}',
 };
 const SAVED = Object.assign({}, STATIC, {
-  'category-products.js': 'window.CATEGORY_PRODUCTS = {abaya: [{id: "OLD-1", name: "Old", price: 1200, image: "/images/old.webp"}, {id: "NEW-1", name: "New", image: "images/uploads/new-1.webp"}]};',
+  'category-products.js': 'window.CATEGORY_PRODUCTS = {abaya: [{id: "OLD-1", name: "Old", price: 1200, image: "/images/old.webp"}, {id: "NEW-1", name: "New", image: "https://images.muslimabaya.com/images/uploads/new-1.webp"}]};',
 });
 
 async function signedEnv(db) {
@@ -90,7 +89,7 @@ function payload(token, over = {}) {
     files: { 'category-products.js': SAVED['category-products.js'], 'product-links-data.js': SAVED['product-links-data.js'], 'product-catalog-sections.js': SAVED['product-catalog-sections.js'], 'product-config.js': SAVED['product-config.js'] },
     validation: JSON.stringify({ version: 1, releaseSha: SHA, sources: [], sourceSha256: 'c'.repeat(64), products: [{ id: 'NEW-1' }] }),
     index: { 'OLD-1': 'abaya', 'NEW-1': 'abaya' }, names: { 'NEW-1': 'New' },
-    assets: [{ path: 'images/uploads/new-1.webp', content: WEBP.toString('base64') }],
+    assets: [],
   }, over);
 }
 
@@ -105,7 +104,7 @@ test('pending rule: a save shows until a deploy that contains it (or anything ne
   assert.equal(isPending({ sha: 'bad', files: {} }, { sha: OLD }), false);
 });
 
-test('owner save goes live at once; photos, verbatim copies, new product page, then back to static', async () => {
+test('owner save goes live at once; catalog-only copy, R2 URLs, new product page, then back to static', async () => {
   const { handleLivePublish } = await lib('api/live-publish.js');
   const live = await lib('_lib/live-catalog.js');
   const db = fakeD1();
@@ -123,7 +122,7 @@ test('owner save goes live at once; photos, verbatim copies, new product page, t
   const res = await handleLivePublish(post(payload('tok-owner')), env, { fetch: fakeFetch, now: () => NOW, cache });
   const body = await res.json();
   assert.equal(res.status, 200, JSON.stringify(body));
-  assert.deepEqual([body.ok, body.photos], [true, 1]);
+  assert.deepEqual([body.ok, body.photos], [true, 0]);
 
   live._resetDeployedMemo();
   env.ASSETS = assetsFor(STATIC, { sha: OLD, commitTime: NOW / 1000 - 600, history: [OLD] });
@@ -134,7 +133,7 @@ test('owner save goes live at once; photos, verbatim copies, new product page, t
   const text = await site.text();
   assert.equal(site.headers.get('X-MA-Live'), '1');
   assert.match(text, /price: 1200/, 'the saved price is served before the deploy');
-  assert.match(text, /"\/api\/live-img\/images\/uploads\/new-1\.webp"/, 'new photo points at its live copy');
+  assert.match(text, /https:\/\/images\.muslimabaya\.com\/images\/uploads\/new-1\.webp/, 'product photo remains on the R2 CDN');
   assert.equal(site.headers.get('Cache-Control'), 'no-store');
   const again = await live.serveLiveFile(get('category-products.js?v=123', { 'If-None-Match': site.headers.get('ETag') }), env, 'category-products.js', deps);
   assert.equal(again.status, 304);
@@ -145,7 +144,7 @@ test('owner save goes live at once; photos, verbatim copies, new product page, t
   assert.equal(validation.releaseSha, SHA);
 
   const row = db._db.prepare('SELECT ctype, length(data) AS n FROM live_assets WHERE path = ?').get('images/uploads/new-1.webp');
-  assert.deepEqual([row.ctype, row.n], ['image/webp', WEBP.length]);
+  assert.equal(row, undefined, 'new product image bytes are not copied into D1');
 
   const next = () => env.ASSETS.fetch(new Request('https://muslimabaya.com/product/NEW-1'));
   const page = await live.serveProductPage(get('product/NEW-1'), env, 'NEW-1', next);

@@ -288,25 +288,16 @@
       });
   }
 
-  // নতুন: প্রোডাক্ট ছবি সরাসরি আপলোড (Base64) — GitHub-এর images/ ফোল্ডারে কমিট হয়
+  // Product photo bytes go directly to the authenticated Cloudflare R2 Pages endpoint.
   function uploadImage(fileName, base64Content, mimeType) {
     var s = getSession();
     if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
     return timeoutPromise(
       45000,
-      fetch(API_URL, {
+      fetch("/api/image-upload", {
         method: "POST",
-        mode: "cors",
-        credentials: "omit",
-        body: (function () {
-          var body = new URLSearchParams();
-          body.append("RecordType", "AdminUploadImage");
-          body.append("Token", s.token);
-          body.append("FileName", fileName);
-          body.append("ContentBase64", base64Content);
-          body.append("MimeType", mimeType || "image/webp");
-          return body;
-        })()
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ Token: s.token, path: fileName, content: base64Content, mimeType: mimeType || "image/webp" })
       })
     )
       .then(function (res) {
