@@ -49,13 +49,32 @@ function opsCatalog_(){
 }
 function opsNorm_(s){return String(s||'').trim().toLowerCase().replace(/[–—]/g,'-').replace(/\s+/g,' ');}
 function opsLinePrice_(it,p){if(!Number.isSafeInteger(it.qty)||it.qty<1||it.qty>500)throw Error('INVALID_QTY');var price=Number(p.price),type=String(it.productType||'');if(p.prices){var key=Object.keys(p.prices).filter(function(k){return k.replace(/\s/g,'').toLowerCase()===type.replace(/\s/g,'').toLowerCase();})[0];if(!key)throw Error('PRODUCT_TYPE_REQUIRED');price=Number(p.prices[key]);it.productType=key;}
- var size=String(it.size||'').trim();if(!size)throw Error('SIZE_REQUIRED');var custom=/^Custom\s*\(L:?([\d.]+)[\s/]+W:?([\d.]+)/i.exec(size),direct=(p.sizes||[]).some(function(s){var v=typeof s==='object'?s.value:s;return opsNorm_(v)===opsNorm_(size);});
- if(/^Custom/i.test(size)&&!custom)throw Error('INVALID_CUSTOM_SIZE');
- if(custom){var l=Number(custom[1]),w=Number(custom[2]);if(!isFinite(l)||!isFinite(w)||l<=0||w<=0)throw Error('INVALID_CUSTOM_SIZE');[['length','lengthExtra',l],['width','widthExtra',w]].forEach(function(dim){var rows=p.custom.slice().sort(function(a,b){return a[dim[0]]-b[dim[0]];}),row=rows.filter(function(r){return Number(r[dim[0]])>=dim[2];})[0]||rows[rows.length-1];price+=row?(Number(row[dim[1]])||0):0;});}
+ var tpl=Array.isArray(it.measurements)&&it.measurements.length?opsTemplateSize_(it,p):'';
+ var size=tpl||String(it.size||'').trim();if(!size)throw Error('SIZE_REQUIRED');var custom=!tpl&&/^Custom\s*\(L:?([\d.]+)[\s/]+W:?([\d.]+)/i.exec(size),direct=(p.sizes||[]).some(function(s){var v=typeof s==='object'?s.value:s;return opsNorm_(v)===opsNorm_(size);});
+ if(!tpl&&/^Custom/i.test(size)&&!custom)throw Error('INVALID_CUSTOM_SIZE');
+ if(tpl){}
+ else if(custom){var l=Number(custom[1]),w=Number(custom[2]);if(!isFinite(l)||!isFinite(w)||l<=0||w<=0)throw Error('INVALID_CUSTOM_SIZE');[['length','lengthExtra',l],['width','widthExtra',w]].forEach(function(dim){var rows=p.custom.slice().sort(function(a,b){return a[dim[0]]-b[dim[0]];}),row=rows.filter(function(r){return Number(r[dim[0]])>=dim[2];})[0]||rows[rows.length-1];price+=row?(Number(row[dim[1]])||0):0;});}
  else if(p.kind==='abaya'){var b=/Body\s+(\d+)/i.exec(size),len=/Length\s+(\d+)/i.exec(size),bodies=p.bodySizes.length?p.bodySizes:[(p.bodyLabel.match(/\d+/)||[])[0]];if(!b||!len||bodies.map(String).indexOf(b[1])<0||p.lengths.map(String).indexOf(len[1])<0)throw Error('INVALID_SIZE');}
  else if(p.kind==='two-piece'&&!direct){var body=/Body\s+(\d+)/i.exec(size),allowed=p.bodySizes.length?p.bodySizes:[(p.bodyLabel.match(/\d+/)||[])[0]];if(!body||allowed.map(String).indexOf(body[1])<0)throw Error('INVALID_SIZE');if(p.dressLengths.length){var dl=/Length\s+([\d.-]+)/i.exec(size),pl=/Palazzo(?: Length)?\s+([\d.-]+)/i.exec(size);if(!dl||!pl||p.dressLengths.map(String).indexOf(dl[1])<0||p.palazzoLengths.map(String).indexOf(pl[1])<0)throw Error('INVALID_SIZE');}else if(p.lengthLabel&&opsNorm_(size).indexOf(opsNorm_(p.lengthLabel))<0)throw Error('INVALID_SIZE');}
  else if(p.kind==='simple'&&!direct&&!(p.category==='panjabi'&&(p.sizes||[]).some(function(s){return opsNorm_(s).split(' ')[0]===opsNorm_(size).split(' ')[0];})))throw Error('INVALID_SIZE');
  if(!isFinite(price)||price<=0)throw Error('CATALOG_PRICE_INVALID');it.name=p.name;it.category=p.category;it.price=price;return price*it.qty;
+}
+// Size Manager: the published size configuration (Cloudflare D1, served by the website at /api/size-config).
+function opsSizeConfig_(){
+ var cache=CacheService.getScriptCache(),c=cache.get('ops_size_config_v1');if(c)return JSON.parse(c);
+ var res=UrlFetchApp.fetch('https://muslimabaya.com/api/size-config?check='+Date.now(),{muteHttpExceptions:true,headers:{'Cache-Control':'no-cache'}});
+ if(res.getResponseCode()!==200)throw Error('SIZE_CONFIG_UNAVAILABLE');var data=JSON.parse(res.getContentText());
+ if(!data||data.ok!==true)throw Error('SIZE_CONFIG_UNAVAILABLE');var cfg=data.config||null;
+ var text=JSON.stringify(cfg);if(text.length<90000)cache.put('ops_size_config_v1',text,60);return cfg;
+}
+// Checks the customer's measurement choices with size-core.js (SizeCore.gs) and rebuilds the size text and the
+// stored choices on the server. A product whose size template is off ignores them and keeps the old size check.
+function opsTemplateSize_(it,p){
+ var cfg=opsSizeConfig_(),resolved=maSizeCore.resolve(cfg,{id:p.id,category:p.category,sizeLegacy:p.sizeLegacy||{}});
+ if(!resolved){delete it.measurements;return '';}
+ var r=maSizeCore.validate(resolved,it.measurements);
+ if(!r.ok)throw Error(r.errors.some(function(e){return e.code==='REQUIRED';})?'MEASUREMENT_REQUIRED':'INVALID_MEASUREMENT');
+ it.measurements=r.measurements;it.sizeTemplate=resolved.templateId;it.sizeConfigVersion=resolved.version;it.size=r.size;return r.size;
 }
 function opsVerifiedPricing_(items,charge,couponCode){if(!items||!items.length)throw Error('STRUCTURED_CART_REQUIRED');var map={};opsCatalog_().products.forEach(function(p){map[p.id]=p;});var subtotal=0;items.forEach(function(it){if(!Object.prototype.hasOwnProperty.call(map,it.id))throw Error('UNKNOWN_PRODUCT');subtotal+=opsLinePrice_(it,map[it.id]);});var coupon=couponCode?validateCouponCode_(couponCode,subtotal):null;if(couponCode&&(!coupon||!coupon.ok))throw Error('INVALID_COUPON');return {catalogOk:true,subtotal:subtotal,unverifiedIds:[],couponDiscountVal:coupon?coupon.discount:0,couponRowIndex:coupon?coupon.rowIndex:null,hasItems:true};}
 function opsReviewHeaders_(sh){var h=['VerifiedPurchase','VerifiedOrderId'],range=sh.getRange(1,9,1,2),old=range.getValues()[0];for(var i=0;i<2;i++)if(old[i]&&old[i]!==h[i])throw Error('REVIEW_HEADER_CONFLICT');range.setValues([h]);}

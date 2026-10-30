@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8"><title>Apps Script কোড</title><style>body { font-family: system-ui, sans-serif; margin: 16px; max-width: 960px; } textarea { width: 100%; height: 52vh; font: 11px Consolas, monospace; } button { margin-top: 10px; padding: 12px 20px; font-size: 15px; cursor: pointer; } .step { background: #fff8e1; border: 1px solid #f0d58a; padding: 10px 14px; border-radius: 6px; }</style></head><body><h1>Apps Script কোড (সম্পূর্ণ project)</h1><p>এই page-এ canonical project-এর সব source file আছে: Code.gs, AdminOrders.gs, FixSheetHeaders.gs, BoostAutoDate.gs, CatalogPublish.gs, CourierIntegrationAudit.gs, DataFixes.gs, Fix-doGet.gs, InstallDateTrigger.gs, LiveStock.gs, Monitor.gs, Operations.gs, OrderSync.gs, ProductPicker.html</p><div class="step"><p><strong>গুরুত্বপূর্ণ:</strong> Admin dashboard-এর সব API চালাতে নিচের সব ফাইল একই Apps Script project-এ রাখতে হবে। <code>.gs</code> ফাইলের জন্য <strong>＋ → Script</strong>, আর <code>.html</code> ফাইলের জন্য <strong>＋ → HTML</strong> ব্যবহার করুন; একই নাম রেখে প্রতিটি কোড সংশ্লিষ্ট ফাইলে কপি করুন। একাধিক <code>doGet</code> function রাখবেন না—canonical router শুধু <code>Code.gs</code>-এ।</p><ol><li>প্রতিটি source file-এর নাম অনুযায়ী Apps Script file তৈরি বা update করুন।</li><li><strong>Save</strong> চাপুন এবং <code>npm run test:backend</code> parity test পাস হয়েছে কি নিশ্চিত করুন।</li><li><strong>Deploy → Manage deployments → Edit → Version: New version → Deploy</strong> করে বিদ্যমান Web App URL রাখুন।</li></ol></div><h2>1. Code.gs</h2>
+<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8"><title>Apps Script কোড</title><style>body { font-family: system-ui, sans-serif; margin: 16px; max-width: 960px; } textarea { width: 100%; height: 52vh; font: 11px Consolas, monospace; } button { margin-top: 10px; padding: 12px 20px; font-size: 15px; cursor: pointer; } .step { background: #fff8e1; border: 1px solid #f0d58a; padding: 10px 14px; border-radius: 6px; }</style></head><body><h1>Apps Script কোড (সম্পূর্ণ project)</h1><p>এই page-এ canonical project-এর সব source file আছে: Code.gs, AdminOrders.gs, FixSheetHeaders.gs, BoostAutoDate.gs, CatalogPublish.gs, CourierIntegrationAudit.gs, DataFixes.gs, Fix-doGet.gs, InstallDateTrigger.gs, LiveStock.gs, Monitor.gs, Operations.gs, OrderSync.gs, ProductPicker.html, SizeCore.gs</p><div class="step"><p><strong>গুরুত্বপূর্ণ:</strong> Admin dashboard-এর সব API চালাতে নিচের সব ফাইল একই Apps Script project-এ রাখতে হবে। <code>.gs</code> ফাইলের জন্য <strong>＋ → Script</strong>, আর <code>.html</code> ফাইলের জন্য <strong>＋ → HTML</strong> ব্যবহার করুন; একই নাম রেখে প্রতিটি কোড সংশ্লিষ্ট ফাইলে কপি করুন। একাধিক <code>doGet</code> function রাখবেন না—canonical router শুধু <code>Code.gs</code>-এ।</p><ol><li>প্রতিটি source file-এর নাম অনুযায়ী Apps Script file তৈরি বা update করুন।</li><li><strong>Save</strong> চাপুন এবং <code>npm run test:backend</code> parity test পাস হয়েছে কি নিশ্চিত করুন।</li><li><strong>Deploy → Manage deployments → Edit → Version: New version → Deploy</strong> করে বিদ্যমান Web App URL রাখুন।</li></ol></div><h2>1. Code.gs</h2>
 <textarea id="codeBox" readonly>/**
  * Muslim Abaya — সম্পূর্ণ Web App (এক ফাইলে পেস্ট করুন)
  * Code.gs → Ctrl+A → Ctrl+V → Save → Deploy → New version
@@ -530,7 +530,7 @@ function validateOrderInput_(e) {
       var parsedCart = JSON.parse(cartJsonRaw);
       if (Array.isArray(parsedCart)) {
         cartItems = parsedCart.map(function (it) {
-          return {
+          var line = {
             id: String((it &amp;&amp; it.id) || '').trim(),
             name: String((it &amp;&amp; it.name) || '').trim(),
             qty: Number(it &amp;&amp; it.qty),
@@ -540,6 +540,13 @@ function validateOrderInput_(e) {
             productType: String((it &amp;&amp; it.productType) || '').trim().slice(0, 80),
             category: String((it &amp;&amp; it.category) || '').trim().slice(0, 80)
           };
+          // Size Manager: measurement choices ({key, value}); checked against the size template in opsLinePrice_.
+          if (it &amp;&amp; Array.isArray(it.measurements) &amp;&amp; it.measurements.length) {
+            line.measurements = it.measurements.slice(0, 12).map(function (m) {
+              return { key: String((m &amp;&amp; m.key) || '').slice(0, 40), value: String(m &amp;&amp; m.value != null ? m.value : '').slice(0, 80) };
+            });
+          }
+          return line;
         }).filter(function (it) { return it.id; });
       }
     }
@@ -8842,13 +8849,32 @@ function opsCatalog_(){
 }
 function opsNorm_(s){return String(s||'').trim().toLowerCase().replace(/[–—]/g,'-').replace(/\s+/g,' ');}
 function opsLinePrice_(it,p){if(!Number.isSafeInteger(it.qty)||it.qty&lt;1||it.qty>500)throw Error('INVALID_QTY');var price=Number(p.price),type=String(it.productType||'');if(p.prices){var key=Object.keys(p.prices).filter(function(k){return k.replace(/\s/g,'').toLowerCase()===type.replace(/\s/g,'').toLowerCase();})[0];if(!key)throw Error('PRODUCT_TYPE_REQUIRED');price=Number(p.prices[key]);it.productType=key;}
- var size=String(it.size||'').trim();if(!size)throw Error('SIZE_REQUIRED');var custom=/^Custom\s*\(L:?([\d.]+)[\s/]+W:?([\d.]+)/i.exec(size),direct=(p.sizes||[]).some(function(s){var v=typeof s==='object'?s.value:s;return opsNorm_(v)===opsNorm_(size);});
- if(/^Custom/i.test(size)&amp;&amp;!custom)throw Error('INVALID_CUSTOM_SIZE');
- if(custom){var l=Number(custom[1]),w=Number(custom[2]);if(!isFinite(l)||!isFinite(w)||l&lt;=0||w&lt;=0)throw Error('INVALID_CUSTOM_SIZE');[['length','lengthExtra',l],['width','widthExtra',w]].forEach(function(dim){var rows=p.custom.slice().sort(function(a,b){return a[dim[0]]-b[dim[0]];}),row=rows.filter(function(r){return Number(r[dim[0]])>=dim[2];})[0]||rows[rows.length-1];price+=row?(Number(row[dim[1]])||0):0;});}
+ var tpl=Array.isArray(it.measurements)&amp;&amp;it.measurements.length?opsTemplateSize_(it,p):'';
+ var size=tpl||String(it.size||'').trim();if(!size)throw Error('SIZE_REQUIRED');var custom=!tpl&amp;&amp;/^Custom\s*\(L:?([\d.]+)[\s/]+W:?([\d.]+)/i.exec(size),direct=(p.sizes||[]).some(function(s){var v=typeof s==='object'?s.value:s;return opsNorm_(v)===opsNorm_(size);});
+ if(!tpl&amp;&amp;/^Custom/i.test(size)&amp;&amp;!custom)throw Error('INVALID_CUSTOM_SIZE');
+ if(tpl){}
+ else if(custom){var l=Number(custom[1]),w=Number(custom[2]);if(!isFinite(l)||!isFinite(w)||l&lt;=0||w&lt;=0)throw Error('INVALID_CUSTOM_SIZE');[['length','lengthExtra',l],['width','widthExtra',w]].forEach(function(dim){var rows=p.custom.slice().sort(function(a,b){return a[dim[0]]-b[dim[0]];}),row=rows.filter(function(r){return Number(r[dim[0]])>=dim[2];})[0]||rows[rows.length-1];price+=row?(Number(row[dim[1]])||0):0;});}
  else if(p.kind==='abaya'){var b=/Body\s+(\d+)/i.exec(size),len=/Length\s+(\d+)/i.exec(size),bodies=p.bodySizes.length?p.bodySizes:[(p.bodyLabel.match(/\d+/)||[])[0]];if(!b||!len||bodies.map(String).indexOf(b[1])&lt;0||p.lengths.map(String).indexOf(len[1])&lt;0)throw Error('INVALID_SIZE');}
  else if(p.kind==='two-piece'&amp;&amp;!direct){var body=/Body\s+(\d+)/i.exec(size),allowed=p.bodySizes.length?p.bodySizes:[(p.bodyLabel.match(/\d+/)||[])[0]];if(!body||allowed.map(String).indexOf(body[1])&lt;0)throw Error('INVALID_SIZE');if(p.dressLengths.length){var dl=/Length\s+([\d.-]+)/i.exec(size),pl=/Palazzo(?: Length)?\s+([\d.-]+)/i.exec(size);if(!dl||!pl||p.dressLengths.map(String).indexOf(dl[1])&lt;0||p.palazzoLengths.map(String).indexOf(pl[1])&lt;0)throw Error('INVALID_SIZE');}else if(p.lengthLabel&amp;&amp;opsNorm_(size).indexOf(opsNorm_(p.lengthLabel))&lt;0)throw Error('INVALID_SIZE');}
  else if(p.kind==='simple'&amp;&amp;!direct&amp;&amp;!(p.category==='panjabi'&amp;&amp;(p.sizes||[]).some(function(s){return opsNorm_(s).split(' ')[0]===opsNorm_(size).split(' ')[0];})))throw Error('INVALID_SIZE');
  if(!isFinite(price)||price&lt;=0)throw Error('CATALOG_PRICE_INVALID');it.name=p.name;it.category=p.category;it.price=price;return price*it.qty;
+}
+// Size Manager: the published size configuration (Cloudflare D1, served by the website at /api/size-config).
+function opsSizeConfig_(){
+ var cache=CacheService.getScriptCache(),c=cache.get('ops_size_config_v1');if(c)return JSON.parse(c);
+ var res=UrlFetchApp.fetch('https://muslimabaya.com/api/size-config?check='+Date.now(),{muteHttpExceptions:true,headers:{'Cache-Control':'no-cache'}});
+ if(res.getResponseCode()!==200)throw Error('SIZE_CONFIG_UNAVAILABLE');var data=JSON.parse(res.getContentText());
+ if(!data||data.ok!==true)throw Error('SIZE_CONFIG_UNAVAILABLE');var cfg=data.config||null;
+ var text=JSON.stringify(cfg);if(text.length&lt;90000)cache.put('ops_size_config_v1',text,60);return cfg;
+}
+// Checks the customer's measurement choices with size-core.js (SizeCore.gs) and rebuilds the size text and the
+// stored choices on the server. A product whose size template is off ignores them and keeps the old size check.
+function opsTemplateSize_(it,p){
+ var cfg=opsSizeConfig_(),resolved=maSizeCore.resolve(cfg,{id:p.id,category:p.category,sizeLegacy:p.sizeLegacy||{}});
+ if(!resolved){delete it.measurements;return '';}
+ var r=maSizeCore.validate(resolved,it.measurements);
+ if(!r.ok)throw Error(r.errors.some(function(e){return e.code==='REQUIRED';})?'MEASUREMENT_REQUIRED':'INVALID_MEASUREMENT');
+ it.measurements=r.measurements;it.sizeTemplate=resolved.templateId;it.sizeConfigVersion=resolved.version;it.size=r.size;return r.size;
 }
 function opsVerifiedPricing_(items,charge,couponCode){if(!items||!items.length)throw Error('STRUCTURED_CART_REQUIRED');var map={};opsCatalog_().products.forEach(function(p){map[p.id]=p;});var subtotal=0;items.forEach(function(it){if(!Object.prototype.hasOwnProperty.call(map,it.id))throw Error('UNKNOWN_PRODUCT');subtotal+=opsLinePrice_(it,map[it.id]);});var coupon=couponCode?validateCouponCode_(couponCode,subtotal):null;if(couponCode&amp;&amp;(!coupon||!coupon.ok))throw Error('INVALID_COUPON');return {catalogOk:true,subtotal:subtotal,unverifiedIds:[],couponDiscountVal:coupon?coupon.discount:0,couponRowIndex:coupon?coupon.rowIndex:null,hasItems:true};}
 function opsReviewHeaders_(sh){var h=['VerifiedPurchase','VerifiedOrderId'],range=sh.getRange(1,9,1,2),old=range.getValues()[0];for(var i=0;i&lt;2;i++)if(old[i]&amp;&amp;old[i]!==h[i])throw Error('REVIEW_HEADER_CONFLICT');range.setValues([h]);}
@@ -10033,7 +10059,157 @@ function setupOperationsTriggersFromMenu() {
 &lt;/body>
 &lt;/html>
 </textarea><br>
-<button type="button" id="copyFile14">ProductPicker.html কপি</button><script>function bind(btn, box) { document.getElementById(btn).onclick = function () { var t = document.getElementById(box).value; navigator.clipboard.writeText(t).then(function () { alert("কপি হয়েছে!"); }); }; }bind('copyBtn', 'codeBox');
+<button type="button" id="copyFile14">ProductPicker.html কপি</button>
+<h2>15. SizeCore.gs</h2>
+<textarea id="fileBox15" readonly>// AUTO-GENERATED by scripts/build-size-core.mjs from size-core.js — do not edit by hand.
+/* Size Manager core: turns the published size configuration (from D1, served by /api/size-config) into the
+   measurement fields one product shows, and checks a customer's choices against them.
+   The same file runs in the browser (window.maSizeCore) and in Apps Script (apps-script/SizeCore.gs is
+   generated from it by scripts/build-size-core.mjs), so the website and the order check never disagree.
+   ES5 only, no DOM / network / storage.
+
+   config = { version, categories: {key: {template, enabled}}, templates: {id: {id, name_bn, name_en, fields: [
+     {key, label_bn, label_en, required, enabled, allowCustom, default, legacy: [slot], options: [{value, label_bn, label_en}]}]}},
+     products: {id: {template, enabled, useTemplate, fields: {key: {label_bn, label_en, required, enabled, allowCustom, default, options}}}} }
+   product = { id, category, sizeLegacy: {slot: [values]} }  (sizeLegacy: the size lists the old pickers show) */
+(function (root) {
+  var KEY_RE = /^[a-z0-9_]{1,40}$/;
+  var BAD_TEXT_RE = /[&lt;>{}`\\\u0000-\u001f]/;
+  var MAX_CUSTOM = 40;
+  var LEGACY_SLOTS = ["body", "length", "dressLength", "sleeve", "palazzo", "sizes"];
+
+  function has(o, k) { return !!o &amp;&amp; Object.prototype.hasOwnProperty.call(o, k); }
+  function str(v) { return v == null ? "" : String(v); }
+  function norm(s) {
+    return str(s).trim().toLowerCase().replace(/[–—]/g, "-").replace(/\s+/g, " ");
+  }
+  function label(bn, en, fallback) { return str(bn).trim() || str(en).trim() || str(fallback); }
+  function safeText(v, max) {
+    var s = str(v).trim();
+    return s.length &lt;= max &amp;&amp; !BAD_TEXT_RE.test(s);
+  }
+
+  function toOptions(list) {
+    var seen = {}, out = [];
+    (Array.isArray(list) ? list : []).forEach(function (o) {
+      var isObj = o &amp;&amp; typeof o === "object";
+      var value = str(isObj ? o.value : o).trim();
+      if (!value || has(seen, norm(value))) return;
+      seen[norm(value)] = true;
+      out.push({ value: value, label: label(isObj ? o.label_bn : "", isObj ? o.label_en : "", value) });
+    });
+    return out;
+  }
+
+  function hasLegacy(product) {
+    var l = product &amp;&amp; product.sizeLegacy;
+    if (!l || typeof l !== "object") return false;
+    return LEGACY_SLOTS.some(function (s) { return Array.isArray(l[s]) &amp;&amp; l[s].length; });
+  }
+
+  /** The fields one product shows, or null when it keeps the old size pickers (category off, no template). */
+  function resolve(config, product) {
+    if (!config || typeof config !== "object" || !config.templates || !product) return null;
+    var cat = (config.categories &amp;&amp; config.categories[product.category]) || null;
+    var own = (config.products &amp;&amp; has(config.products, product.id) &amp;&amp; config.products[product.id]) || null;
+    var enabled = own &amp;&amp; typeof own.enabled === "boolean" ? own.enabled : !!(cat &amp;&amp; cat.enabled === true);
+    if (!enabled) return null;
+    var templateId = (own &amp;&amp; own.template) || (cat &amp;&amp; cat.template) || "";
+    var template = has(config.templates, templateId) ? config.templates[templateId] : null;
+    if (!template || !Array.isArray(template.fields)) return null;
+    // Existing products keep offering exactly their old sizes; new products get the template's values.
+    var legacyMode = !(own &amp;&amp; own.useTemplate === true) &amp;&amp; hasLegacy(product);
+    var overrides = (own &amp;&amp; own.fields &amp;&amp; typeof own.fields === "object") ? own.fields : {};
+    var fields = [];
+    template.fields.forEach(function (f) {
+      if (!f || !KEY_RE.test(str(f.key))) return;
+      var o = has(overrides, f.key) &amp;&amp; overrides[f.key] &amp;&amp; typeof overrides[f.key] === "object" ? overrides[f.key] : {};
+      var on = typeof o.enabled === "boolean" ? o.enabled : f.enabled !== false;
+      if (!on) return;
+      var ownOptions = Array.isArray(o.options);
+      var options;
+      if (ownOptions) options = toOptions(o.options);
+      else if (legacyMode) {
+        options = [];
+        (Array.isArray(f.legacy) ? f.legacy : []).some(function (slot) {
+          var v = product.sizeLegacy[slot];
+          if (Array.isArray(v) &amp;&amp; v.length) { options = toOptions(v); return true; }
+          return false;
+        });
+      } else options = toOptions(f.options);
+      var allowCustom = typeof o.allowCustom === "boolean" ? o.allowCustom : f.allowCustom === true;
+      // An old product that never had this measurement keeps not asking for it.
+      if (!options.length &amp;&amp; (!allowCustom || (legacyMode &amp;&amp; !ownOptions))) return;
+      fields.push({
+        key: f.key,
+        label: label(has(o, "label_bn") ? o.label_bn : f.label_bn, has(o, "label_en") ? o.label_en : f.label_en, f.key),
+        required: typeof o.required === "boolean" ? o.required : f.required !== false,
+        allowCustom: allowCustom,
+        options: options,
+        "default": str(has(o, "default") ? o["default"] : f["default"]).trim()
+      });
+    });
+    if (!fields.length) return null;
+    return { templateId: template.id || templateId, version: config.version || 0, fields: fields };
+  }
+
+  function toMap(measurements) {
+    var map = {}, dup = false, bad = false;
+    if (Array.isArray(measurements)) {
+      measurements.forEach(function (m) {
+        var k = str(m &amp;&amp; m.key);
+        if (!KEY_RE.test(k)) bad = true;
+        if (has(map, k)) dup = true;
+        map[k] = str(m &amp;&amp; m.value).trim();
+      });
+    } else if (measurements &amp;&amp; typeof measurements === "object") {
+      Object.keys(measurements).forEach(function (k) {
+        if (!KEY_RE.test(k)) bad = true;
+        map[k] = str(measurements[k]).trim();
+      });
+    }
+    return { map: map, dup: dup, bad: bad };
+  }
+
+  /** Checks a customer's choices. Returns {ok, errors: [{key, code}], measurements: [{key, label, value, custom}], size}. */
+  function validate(resolved, measurements) {
+    var fields = (resolved &amp;&amp; resolved.fields) || [];
+    var given = toMap(measurements), errors = [], clean = [], parts = [], known = {};
+    if (given.dup || given.bad) errors.push({ key: "", code: "MALFORMED" });
+    fields.forEach(function (f) {
+      known[f.key] = true;
+      var v = has(given.map, f.key) ? given.map[f.key] : "";
+      if (!v) { if (f.required) errors.push({ key: f.key, code: "REQUIRED" }); return; }
+      var opt = null;
+      f.options.forEach(function (o) { if (!opt &amp;&amp; norm(o.value) === norm(v)) opt = o; });
+      if (!opt &amp;&amp; (!f.allowCustom || !safeText(v, MAX_CUSTOM))) { errors.push({ key: f.key, code: "INVALID" }); return; }
+      clean.push({ key: f.key, label: f.label, value: opt ? opt.value : v, custom: !opt });
+      parts.push(f.label + " " + (opt ? opt.label : v));
+    });
+    Object.keys(given.map).forEach(function (k) { if (!known[k] &amp;&amp; KEY_RE.test(k)) errors.push({ key: k, code: "UNKNOWN" }); });
+    return { ok: !errors.length, errors: errors, measurements: clean, size: parts.join(" · ").slice(0, 160) };
+  }
+
+  /** Label-independent stock key, e.g. "body=46|length=54". */
+  function variantKey(measurements) {
+    return (Array.isArray(measurements) ? measurements : []).map(function (m) {
+      return m.key + "=" + norm(m.value);
+    }).join("|");
+  }
+
+  root.maSizeCore = {
+    LEGACY_SLOTS: LEGACY_SLOTS,
+    KEY_RE: KEY_RE,
+    BAD_TEXT_RE: BAD_TEXT_RE,
+    norm: norm,
+    safeText: safeText,
+    resolve: resolve,
+    validate: validate,
+    variantKey: variantKey
+  };
+})(typeof window !== "undefined" ? window : this);
+</textarea><br>
+<button type="button" id="copyFile15">SizeCore.gs কপি</button><script>function bind(btn, box) { document.getElementById(btn).onclick = function () { var t = document.getElementById(box).value; navigator.clipboard.writeText(t).then(function () { alert("কপি হয়েছে!"); }); }; }bind('copyBtn', 'codeBox');
 bind('copyAdm', 'admBox');
 bind('copyFix', 'fixBox');
 bind('copyFile4', 'fileBox4');
@@ -10046,4 +10222,5 @@ bind('copyFile10', 'fileBox10');
 bind('copyFile11', 'fileBox11');
 bind('copyFile12', 'fileBox12');
 bind('copyFile13', 'fileBox13');
-bind('copyFile14', 'fileBox14');</script></body></html>
+bind('copyFile14', 'fileBox14');
+bind('copyFile15', 'fileBox15');</script></body></html>

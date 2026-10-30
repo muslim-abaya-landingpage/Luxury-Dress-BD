@@ -529,7 +529,7 @@ function validateOrderInput_(e) {
       var parsedCart = JSON.parse(cartJsonRaw);
       if (Array.isArray(parsedCart)) {
         cartItems = parsedCart.map(function (it) {
-          return {
+          var line = {
             id: String((it && it.id) || '').trim(),
             name: String((it && it.name) || '').trim(),
             qty: Number(it && it.qty),
@@ -539,6 +539,13 @@ function validateOrderInput_(e) {
             productType: String((it && it.productType) || '').trim().slice(0, 80),
             category: String((it && it.category) || '').trim().slice(0, 80)
           };
+          // Size Manager: measurement choices ({key, value}); checked against the size template in opsLinePrice_.
+          if (it && Array.isArray(it.measurements) && it.measurements.length) {
+            line.measurements = it.measurements.slice(0, 12).map(function (m) {
+              return { key: String((m && m.key) || '').slice(0, 40), value: String(m && m.value != null ? m.value : '').slice(0, 80) };
+            });
+          }
+          return line;
         }).filter(function (it) { return it.id; });
       }
     }
