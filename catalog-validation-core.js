@@ -19,7 +19,9 @@ window.__maBuildValidationProducts = function (w) {
         lengths: ab ? (p.lengthSizes || p.sizes || cfg.lengthSizes) : [],
         dressLengths: (cfg && cfg.dressLengths) || [], palazzoLengths: (cfg && cfg.palazzoLengths) || [],
         lengthLabel: (cfg && cfg.lengthSizeLabel) || '',
-        custom: custom, kind: ab ? 'abaya' : tp ? 'two-piece' : 'simple'
+        custom: custom, kind: ab ? 'abaya' : tp ? 'two-piece' : 'simple',
+        // Size Manager: the old size lists, so the order check keeps existing products' sizes (size-core.js).
+        sizeLegacy: w.getSizeLegacySlots(p, category)
       });
     });
   });

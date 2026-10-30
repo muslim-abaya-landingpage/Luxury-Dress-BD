@@ -770,6 +770,33 @@ function parsePanjabiSize(sizeStr) {
     return "";
   }
 
+  /** Size Manager: the size lists the old pickers show for a product, by slot (see size-core.js).
+   *  Existing products keep exactly these when their category is switched to a size template. */
+  function getSizeLegacySlots(p, categoryKey) {
+    var out = {};
+    function put(slot, list) {
+      if (!Array.isArray(list)) return;
+      var values = list.map(function (v) { return String(v && typeof v === "object" ? v.value : v == null ? "" : v).trim(); })
+        .filter(Boolean);
+      if (values.length) out[slot] = values;
+    }
+    p = p || {};
+    if (isAbayaProduct(p, categoryKey)) {
+      var ab = getAbayaSizeConfig(p);
+      put("body", ab.bodySizes && ab.bodySizes.length ? ab.bodySizes : [ab.bodySizeLabel]);
+      put("length", p.lengthSizes && p.lengthSizes.length ? p.lengthSizes : p.sizes);
+    } else if (isTwoPieceProduct(p, categoryKey)) {
+      var tp = getTwoPieceSizeConfig(p);
+      put("body", tp.bodySizes && tp.bodySizes.length ? tp.bodySizes : p.sizes);
+      put("dressLength", tp.dressLengths || [tp.lengthSizeLabel]);
+      put("sleeve", tp.sleeveSizes);
+      put("palazzo", tp.palazzoLengths);
+    } else {
+      put("sizes", p.sizes);
+    }
+    return out;
+  }
+
   function getCartLineBaseName(item) {
     return stripSizeFromCartName(item && item.name);
   }
@@ -783,6 +810,8 @@ g.getTwoPieceSizeConfig = getTwoPieceSizeConfig;
 g.isTwoPieceProduct = isTwoPieceProduct;
 g.formatTwoPieceCartSize = formatTwoPieceCartSize;
 g.parseTwoPieceLengthSize = parseTwoPieceLengthSize;
+
+g.getSizeLegacySlots = getSizeLegacySlots;
 
 g.getPanjabiSizeConfig = getPanjabiSizeConfig;
 g.isPanjabiProduct = isPanjabiProduct;

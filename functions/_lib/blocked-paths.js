@@ -7,7 +7,7 @@
  * middleware answers 404 for them before any stored file is looked at. _routes.json must include every entry
  * (tests/backend/blocked-paths.test.mjs checks this), otherwise the middleware would not run for that path.
  */
-export const BLOCKED_DIRS = ["apps-script", "cloudflare-worker", "scripts", "tests", "supabase", "monitoring", "docs", ".github", "hosting-pack", "muslimabaya-fonts-setup", "src", "tools"];
+export const BLOCKED_DIRS = ["apps-script", "cloudflare-worker", "scripts", "tests", "supabase", "migrations", "monitoring", "docs", ".github", "hosting-pack", "muslimabaya-fonts-setup", "src", "tools"];
 export const BLOCKED_FILES = [
   "ADMIN-INBOX-ALERTS-CODE-BN.md",
   "ADMIN-ORDERS-PERFORMANCE-AUDIT.md",
