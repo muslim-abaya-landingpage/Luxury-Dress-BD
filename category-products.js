@@ -514,10 +514,10 @@ window.CATEGORY_PRODUCTS = {
       colorVariants: [{"color":"black-dress","colorLabel":"Black Dress","image":"/images/premium-black-floral-womens-co-ord-set-bangladesh.webp"}],
       seoTitle: "Charcoal Black CY Fabric Dress | Muslim Abaya",
       seoDescription: "Shop elegant Charcoal Black CY Fabric Dress at Muslim Abaya. Available in sizes 46, 48, 50 and 52 inches. Order online across Bangladesh.",
-      dressLengths: ["40 Inches"],
-      sleeveSizes: ["18 Inches"],
-      bodySizes: ["46","48","50","52 Inches"],
-      palazzoLengths: ["40 Inches"],
+      dressLengths: ["40"],
+      sleeveSizes: ["18"],
+      bodySizes: ["46","48","50","52"],
+      palazzoLengths: ["40"],
       tags: ["CY Fabric Dress","Black Dress","Ladies Dress","Modest Fashion","Women Clothing","Printed Dress","Premium Dress","Muslim Abaya","Bangladesh Fashion"]
     },
     {
