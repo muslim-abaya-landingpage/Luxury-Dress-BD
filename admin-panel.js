@@ -7,6 +7,7 @@
     { key: "dashboard", href: "admin-dashboard.html", ico: "▦", label: "ড্যাশবোর্ড" },
     { key: "orders", href: "admin-orders.html", ico: "🧾", label: "অর্ডার প্যানেল" },
     { key: "operations", href: "admin-operations.html", ico: "৳", label: "হিসাব ও রিটার্ন" },
+    { key: "sizes", href: "admin-sizes.html", ico: "📏", label: "সাইজ ম্যানেজার" },
     { key: "inbox", href: "admin-inbox.html", ico: "💬", label: "Messenger ইনবক্স" },
     { key: "growth", href: "admin-growth.html", ico: "📈", label: "Growth" },
     { key: "products", href: "product-manager.html", ico: "🛍", label: "প্রোডাক্ট ম্যানেজার" },
