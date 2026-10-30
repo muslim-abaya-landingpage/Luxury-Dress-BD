@@ -54,6 +54,23 @@ test('product page: sale on the first option, plain price on an option without a
   await expect(price).toHaveAttribute('data-price', '799');
 });
 
+test('product page Related Products falls back from a failed card image to the full product image', async ({ page }) => {
+  await useCatalog(page);
+  let thumbRequestFailed = false;
+  await page.route('**/images/card/images/uploads/dr-01-1793126083919.webp.webp*', (route) => {
+    thumbRequestFailed = true;
+    return route.fulfill({ status: 404, body: '' });
+  });
+  await page.goto('/product/DR-8');
+  const image = page.locator('.pqv-home-related .ah-card[data-pid="DR-01"] img').first();
+  await image.scrollIntoViewIfNeeded();
+  await expect.poll(() => thumbRequestFailed).toBe(true);
+  await expect(image).toHaveAttribute('src', '/images/uploads/dr-01-1793126083919.webp');
+  await expect.poll(() => image.evaluate((img) => img.naturalWidth)).toBeGreaterThan(0);
+  await expect.poll(() => image.evaluate((img) => img.currentSrc)).toContain('/images/uploads/dr-01-1793126083919.webp');
+  await expect.poll(() => image.evaluate((img) => img.currentSrc)).not.toContain('/images/card/');
+});
+
 test('a Draft product is not sold: no card, not in search, product page shows no product view', async ({ page }) => {
   await useCatalog(page);
   await page.goto('/category?q=premium%20black%203%20part');

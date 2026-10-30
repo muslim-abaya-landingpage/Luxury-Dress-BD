@@ -1353,7 +1353,8 @@ function pqvHomeWaLink() {
 }
 function pqvHomeCardHtml(p) {
   var img = resolveCardImageSrc(p);
-  var thumb = deriveCardThumbSrc(img) || img;
+  var card = resolveCardImageCardSrc(p);
+  var thumb = card || deriveCardThumbSrc(img) || img;
   var dHref = pqvHomeHref("/product/" + encodeURIComponent(p.id || ""));
   var st = productStockStatus(p);
   var outOfStock = st.inStock === false;
@@ -1377,7 +1378,7 @@ function pqvHomeCardHtml(p) {
     "' alt='" +
     escapeHtml(p.name) +
     "' width='480' height='600' loading='lazy' decoding='async'" +
-    " onerror=\"var f=this.getAttribute('data-full');if(f&&this.src.indexOf(f)<0&&this.src.indexOf('/images/card/')>-1){this.src=f;return}this.onerror=null;this.src='/images/Baby-Pink-Floral-Print.jpeg'\">" +
+    " onerror=\"var f=this.getAttribute('data-full');var a=(this.currentSrc||this.src).split('?')[0];if(a.indexOf(location.origin)===0)a=a.slice(location.origin.length);var b=f?f.split('?')[0]:'';if(f&&a!==b){this.src=f;return}this.onerror=null;this.src='/images/Baby-Pink-Floral-Print.jpeg'\">" +
     "</a>" +
     "<div class='ah-card-body'>" +
     "<div class='ah-card-row'>" +
