@@ -182,8 +182,8 @@ test('shop helper: same fields as the order check; old pickers when off, for Kaf
   assert.ok(compared > 20, 'compared ' + compared + ' products');
   const abaya = catalog.abaya[0];
   assert.ok(w.maSizeStore.resolveFor(abaya, 'abaya'));
-  // Per-size stock rows are keyed by the old size text: keep the old pickers. A whole-product pool is fine.
-  assert.equal(w.maSizeStore.resolveFor(Object.assign({}, abaya, { stockVariants: { 'Body 46 · Length 54': { tracked: true, available: 2 } } }), 'abaya'), null);
+  // Per-size stock rows the fields cannot produce: keep the old pickers (size-orders.test.cjs covers matching rows).
+  assert.equal(w.maSizeStore.resolveFor(Object.assign({}, abaya, { stockVariants: { 'Free Size': { tracked: true, available: 2 } } }), 'abaya'), null);
   assert.ok(w.maSizeStore.resolveFor(Object.assign({}, abaya, { stockVariants: { _default: { tracked: true, available: 5 } } }), 'abaya'));
   // No published config on the page: old pickers.
   w.MA_SIZE_CONFIG = undefined;

@@ -162,6 +162,11 @@
 
   /* ---------------- Cart ---------------- */
   function addToCart(sec, p) {
+    // Products with Size Manager fields need the customer's measurements: open their page instead.
+    if (p && p.id && window.maSizeStore && window.maSizeStore.resolveFor(p, sec.key)) {
+      window.location.href = "/product/" + encodeURIComponent(p.id);
+      return;
+    }
     var price = basePrice(p);
     var line = {
       id: p.id,

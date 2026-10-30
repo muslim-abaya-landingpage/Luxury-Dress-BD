@@ -2136,6 +2136,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="auth-api.js?v=e3c85f88e33e5adf"></script>
 <script src="product-config.js?v=9f0fe21a5d0fbb0f"></script>
 <script src="product-utils.js?v=72b921b6721f1fcf"></script>
+<script src="size-core.js"></script>
+<script src="size-storefront.js"></script>
 <!-- Needed so "Customers also bought" has access to the real product catalog on this page -->
 <script src="category-products.js?v=e12061816c7e9d6f"></script>
 <script src="product-catalog-sync.js?v=ab0c6a1d0c536477"></script>
@@ -2683,13 +2685,81 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         return s;
     }
 
+    /** Size Manager fields for a cart line's product (size-storefront.js), or null. */
+    function checkoutSizeFields(item) {
+        if (!window.maSizeStore) return null;
+        var product = checkoutStockProduct(item);
+        return product ? window.maSizeStore.resolveFor(product, item.category || product.category) : null;
+    }
+
+    /** Applies one changed measurement to cart line idx: re-checked, size text rebuilt, same lines merged. */
+    function changeCheckoutMeasurement(idx, key, value) {
+        var line = cart[idx];
+        var resolved = checkoutSizeFields(line);
+        if (!resolved) { displayOrder(); return; }
+        var values = {};
+        (line.measurements || []).forEach(function (m) { values[m.key] = m.value; });
+        if (value) values[key] = value; else delete values[key];
+        var checked = window.maSizeCore.validate(resolved, values);
+        if (!checked.ok) {
+            checkoutAlert('এই মাপটি গ্রহণযোগ্য নয়।');
+            displayOrder();
+            return;
+        }
+        var before = { size: line.size, selectedSize: line.selectedSize, measurements: line.measurements, name: line.name };
+        line.measurements = checked.measurements;
+        line.size = checked.size;
+        line.selectedSize = checked.size;
+        // Only a name that ends with the old size text gets the new one (product-page lines carry none).
+        var suffix = before.size ? ' (' + before.size + ')' : '';
+        var name = String(line.name || '');
+        if (suffix && name.slice(-suffix.length) === suffix) line.name = name.slice(0, -suffix.length) + (checked.size ? ' (' + checked.size + ')' : '');
+        var cap = checkoutStockCap(line);
+        if (cap === 0 || (typeof cap === 'number' && checkoutQtyForSameProduct(line) > cap)) {
+            Object.keys(before).forEach(function (k) { line[k] = before[k]; });
+            checkoutAlert(cap === 0 ? 'এই সাইজটি বর্তমানে স্টকে নেই।' : 'এই সাইজে available stock-এর চেয়ে বেশি পণ্য কার্টে আছে।');
+            displayOrder();
+            return;
+        }
+        var keyFn = typeof cartLineMergeKey === 'function' ? cartLineMergeKey : null;
+        if (keyFn) {
+            for (var j = 0; j < cart.length; j++) {
+                if (j !== idx && keyFn(cart[j]) === keyFn(line)) {
+                    cart[j].quantity = (parseInt(cart[j].quantity, 10) || 1) + (parseInt(line.quantity, 10) || 1);
+                    cart.splice(idx, 1);
+                    break;
+                }
+            }
+        }
+        persistCart();
+        displayOrder();
+    }
+
     function buildCheckoutSizeControl(item, idx) {
-        // Size Manager lines: the measurements chosen on the product page (changed there, not here).
+        // Size Manager lines: each measurement with options can be changed here; typed values are shown as text.
         if (Array.isArray(item.measurements) && item.measurements.length) {
+            var resolvedSz = checkoutSizeFields(item);
+            var chosen = {};
+            item.measurements.forEach(function (m) { chosen[m.key] = m; });
+            var rows = resolvedSz ? resolvedSz.fields.filter(function (f) { return chosen[f.key] || (f.options.length && f.required); }) : [];
             return '<div class="gb-order-size-wrap gb-order-size-wrap--abaya">' +
-                item.measurements.map(function (m) {
+                (rows.length ? rows.map(function (f) {
+                    var cur = chosen[f.key] ? String(chosen[f.key].value) : '';
+                    if (!f.options.length) {
+                        return '<span class="gb-order-size-body">' + escapeHtml(f.label) + ': ' + escapeHtml(cur) + '</span>';
+                    }
+                    var known = f.options.some(function (o) { return o.value === cur; });
+                    return '<label class="gb-order-size-row"><span class="gb-order-qty-label">' + escapeHtml(f.label) + ':</span>' +
+                        '<select class="gb-order-size-select" data-cart-action="measure" data-sz-key="' + escapeHtml(f.key) + '" data-cart-idx="' + idx + '" aria-label="' + escapeHtml(f.label) + '">' +
+                        (known || !cur ? '' : '<option value="' + escapeHtml(cur) + '" selected>' + escapeHtml(cur) + '</option>') +
+                        (f.required ? '' : '<option value=""' + (cur ? '' : ' selected') + '>—</option>') +
+                        f.options.map(function (o) {
+                            return '<option value="' + escapeHtml(o.value) + '"' + (o.value === cur ? ' selected' : '') + '>' + escapeHtml(o.label) + '</option>';
+                        }).join('') +
+                        '</select></label>';
+                }).join('') : item.measurements.map(function (m) {
                     return '<span class="gb-order-size-body">' + escapeHtml(m.label || m.key) + ': ' + escapeHtml(m.value) + '</span>';
-                }).join('') +
+                }).join('')) +
                 '</div>';
         }
         if (typeof isAbayaProduct === 'function' && isAbayaProduct(item, item.category || item.categoryKey)) {
@@ -3301,11 +3371,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     if (summaryDiv) {
         summaryDiv.addEventListener('change', function(e) {
-            var sel = e.target.closest('[data-cart-action="size"], [data-cart-action="length-size"]');
+            var sel = e.target.closest('[data-cart-action="size"], [data-cart-action="length-size"], [data-cart-action="measure"]');
             if (!sel) return;
             var idx = parseInt(sel.getAttribute('data-cart-idx'), 10);
             if (isNaN(idx) || !cart[idx]) return;
             var action = sel.getAttribute('data-cart-action');
+            if (action === 'measure') {
+                changeCheckoutMeasurement(idx, sel.getAttribute('data-sz-key'), String(sel.value || '').trim());
+                return;
+            }
             if (action === 'length-size') {
                 var nextLength = String(sel.value || '').trim();
                 var dupIdx = -1;
@@ -3361,7 +3435,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             var idx = parseInt(el.getAttribute('data-cart-idx'), 10);
             if (isNaN(idx) || !cart[idx]) return;
             var action = el.getAttribute('data-cart-action');
-            if (action === 'size' || action === 'length-size') return;
+            if (action === 'size' || action === 'length-size' || action === 'measure') return;
             if (action === 'add-abaya-size') {
                 addAnotherAbayaSize(idx);
                 return;
@@ -3470,7 +3544,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     oldPrice: priceFull && priceFull > p.price ? priceFull : null,
                     category: key,
                     categoryLabel: meta.title || key,
-                    fabric: p.fabric || ''
+                    fabric: p.fabric || '',
+                    product: p
                 });
             });
         });
@@ -3535,6 +3610,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             if (!btn) return;
             var p = crossSellPool[crossSellIdx];
             if (!p) return;
+            // Products with Size Manager fields are chosen on their own page (measurements needed).
+            if (p.product && p.product.id && window.maSizeStore && window.maSizeStore.resolveFor(p.product, p.category)) {
+                window.location.href = '/product/' + encodeURIComponent(p.product.id);
+                return;
+            }
             var line = {
                 name: p.name,
                 price: p.price,

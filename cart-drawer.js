@@ -196,6 +196,11 @@ window.addRelatedProductToCart = function (productId, categoryKey) {
 
   if (!product) return;
   categoryKey = foundCategoryKey;
+  // Products with Size Manager fields need the customer's measurements: open their page instead.
+  if (window.maSizeStore && window.maSizeStore.resolveFor(product, categoryKey)) {
+    window.location.href = '/product/' + encodeURIComponent(product.id);
+    return;
+  }
   const meta = (window.CATEGORY_META && window.CATEGORY_META[categoryKey]) || {};
 
   let existing = typeof window.loadStoreCart === 'function' ? window.loadStoreCart({ readOnly: true }) : [];
