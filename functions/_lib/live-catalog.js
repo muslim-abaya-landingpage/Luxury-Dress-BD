@@ -17,6 +17,8 @@ export const VALIDATION_FILE = 'catalog-validation.json';
 export const LIVE_FILES = CATALOG_FILES.concat(VALIDATION_FILE);
 export const ASSET_PATH = /^images\/uploads\/[a-z0-9-]+\.(webp|jpg|png)$/;
 export const MAX_ASSET_BYTES = 1900000; // D1 row limit is 2 MB; larger photos simply wait for the deploy.
+import { CARRIER_FILE, loadStorefrontSizeConfig, sizeConfigScript, fingerprint } from './size-carrier.js';
+
 const STATE_TTL_SECONDS = 1; // short edge-state TTL limits stale product data after an owner save
 // Requests that check the exact committed text (admin panel, order price check) get it verbatim.
 const VERBATIM_PARAMS = ['catalog', 'catalog_check', 'live', 'publish'];
@@ -128,6 +130,32 @@ async function passThrough(request, env) {
 
 /** GET for one of LIVE_FILES. */
 export async function serveLiveFile(request, env, path, deps = {}) {
+  const url = new URL(request.url);
+  if (path === CARRIER_FILE && !wantsVerbatim(url)) {
+    const sizeConfig = await loadStorefrontSizeConfig(env, url.origin, deps);
+    if (sizeConfig) return withSizeConfig(request, env, path, deps, sizeConfig);
+  }
+  return serveCatalogFile(request, env, path, deps);
+}
+
+/** product-config.js with the published size configuration appended (functions/_lib/size-carrier.js). */
+async function withSizeConfig(request, env, path, deps, sizeConfig) {
+  // Fetch the whole file (no conditional headers): a 304 from the static copy could not carry the config.
+  const headers = new Headers(request.headers);
+  headers.delete('If-None-Match');
+  headers.delete('If-Modified-Since');
+  const base = await serveCatalogFile(new Request(request.url, { method: 'GET', headers }), env, path, deps);
+  if (base.status !== 200) return base;
+  const body = (await base.text()) + sizeConfigScript(sizeConfig);
+  const etag = '"sz-' + fingerprint(body) + '"';
+  const live = base.headers.get('X-MA-Live') === '1';
+  const out = { 'Content-Type': typeFor(path), 'Cache-Control': live ? 'no-store' : 'no-cache', ETag: etag, 'X-MA-Size': String(sizeConfig.version) };
+  if (live) out['X-MA-Live'] = '1';
+  if (request.headers.get('If-None-Match') === etag) return new Response(null, { status: 304, headers: out });
+  return new Response(request.method === 'HEAD' ? null : body, { status: 200, headers: out });
+}
+
+async function serveCatalogFile(request, env, path, deps) {
   const url = new URL(request.url);
   try {
     const [state, deployed] = await Promise.all([loadState(env, url.origin, deps), loadDeployed(env, url.origin)]);

@@ -449,15 +449,28 @@
   }
 
   function renderSizeOptions() {
+    var el = $("pdSizeGroup");
+    // Size Manager: the published measurement fields replace the old pickers when this product uses them.
+    var tpl = window.maSizeStore ? window.maSizeStore.resolveFor(state.product, state.category) : null;
+    var keep = state.sizeTemplate && tpl && state.sizeTemplate.templateId === tpl.templateId ? state.sizeValues : null;
+    state.sizeTemplate = tpl;
+    if (tpl) {
+      el.innerHTML = window.maSizeStore.html(tpl, {
+        fieldClass: "pd-sz-field", labelClass: "pd-option-label", rowClass: "pd-option-row", btnClass: "pd-option-btn", values: keep
+      });
+    } else if (!renderLegacySizeOptions(el)) return;
+    renderSizeHelpers(el, !!tpl);
+  }
+
+  function renderLegacySizeOptions(el) {
     var ab = window.isAbayaProduct && window.isAbayaProduct(state.product, state.category);
     var tp = window.isTwoPieceProduct && window.isTwoPieceProduct(state.product, state.category);
     var cfg = ab ? window.getAbayaSizeConfig(state.product) : tp ? window.getTwoPieceSizeConfig(state.product) : null;
     var sizes = state.product.sizes || siteDefaults(state.category).cat.sizes || siteDefaults(state.category).base.sizes || [];
     var mainOptions = tp && cfg && cfg.bodySizes && cfg.bodySizes.length ? cfg.bodySizes.map(String) : sizes.map(String);
     if (!mainOptions.length && tp && cfg && cfg.bodySizeLabel) mainOptions = [String(cfg.bodySizeLabel)];
-    if (!mainOptions.length) { $("pdSizeGroup").innerHTML = ""; return; }
+    if (!mainOptions.length) { el.innerHTML = ""; return false; }
     if (!state.selectedSize || mainOptions.indexOf(String(state.selectedSize)) < 0) state.selectedSize = mainOptions[0];
-    var el = $("pdSizeGroup");
     renderOptionGroup("pdSizeGroup", tp ? "Body Size" : "Size", mainOptions, state.selectedSize, function (val) {
       state.selectedSize = val;
       renderSizeOptions();
@@ -477,6 +490,10 @@
       extraOptions("pdSleeveOptions", "Sleeve Length (inches)", cfg.sleeveSizes, "selectedSleeveLength");
       extraOptions("pdPalazzoOptions", "Palazzo Length (inches)", cfg.palazzoLengths, "selectedPalazzoLength");
     }
+    return true;
+  }
+
+  function renderSizeHelpers(el, isTemplate) {
     var chartData =
       (window.SITE_LINKS &&
         window.SITE_LINKS.sizeChart &&
@@ -484,6 +501,12 @@
       (window.SITE_LINKS && window.SITE_LINKS.sizeChart && window.SITE_LINKS.sizeChart.default);
     if (chartData && Array.isArray(chartData.customSize) && chartData.customSize.length) {
       var row = el.querySelector(".pd-option-row");
+      if (isTemplate) {
+        // After the measurement fields, not inside the first one.
+        row = document.createElement("div");
+        row.className = "pd-option-row";
+        el.appendChild(row);
+      }
       if (row && typeof window.openCustomSizeModal === "function") {
         row.insertAdjacentHTML(
           "beforeend",
@@ -785,6 +808,7 @@
   }
 
   function selectedVariant() {
+    if (state.sizeTemplate) return window.maSizeStore.check(state.sizeTemplate, $("pdSizeGroup")).size;
     var p = state.product, s = String(state.selectedSize || "");
     if (!s || /^Custom/i.test(s)) return s;
     if (window.isAbayaProduct && window.isAbayaProduct(p, state.category)) {
@@ -835,6 +859,10 @@
       size: selectedVariant(),
       productType: state.selectedType || ""
     };
+    if (state.sizeTemplate) {
+      var sized = window.maSizeStore.check(state.sizeTemplate, $("pdSizeGroup"));
+      if (sized.ok) line.measurements = sized.measurements;
+    }
     return line;
   }
 
@@ -874,7 +902,20 @@
     document.body.classList.toggle("pd-oos", !st.inStock);
   }
 
-  window.addEventListener("ma:stock-updated", applyStockUi);
+  window.addEventListener("ma:stock-updated", function () {
+    // Per-size stock switches a product back to the old pickers (size-storefront.js), so redraw if that changed.
+    if (state.product && window.maSizeStore &&
+        !!window.maSizeStore.resolveFor(state.product, state.category) !== !!state.sizeTemplate) {
+      renderSizeOptions();
+      updateSendMessageLink();
+    }
+    applyStockUi();
+  });
+
+  /** False (and the missing measurement is shown) while the Size Manager fields are not filled in correctly. */
+  function sizeChoiceReady() {
+    return !state.sizeTemplate || window.maSizeStore.check(state.sizeTemplate, $("pdSizeGroup"), true).ok;
+  }
 
   function addToCart(silent) {
     if (!stockStatus().inStock) return;
@@ -967,7 +1008,13 @@
           });
       });
     }
+    $("pdSizeGroup").addEventListener("ma:size-change", function () {
+      state.sizeValues = window.maSizeStore.read($("pdSizeGroup"));
+      updateSendMessageLink();
+      applyStockUi();
+    });
     $("pdAddCart").addEventListener("click", function (e) {
+      if (!sizeChoiceReady()) return;
       addToCart(false);
       var btn = e.currentTarget;
       var original = btn.textContent;
@@ -979,6 +1026,7 @@
       }, 1500);
     });
     $("pdBuyNow").addEventListener("click", function () {
+      if (!sizeChoiceReady()) return;
       addToCart(true);
       window.location.href = href("/checkout");
     });

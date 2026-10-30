@@ -2684,6 +2684,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
 
     function buildCheckoutSizeControl(item, idx) {
+        // Size Manager lines: the measurements chosen on the product page (changed there, not here).
+        if (Array.isArray(item.measurements) && item.measurements.length) {
+            return '<div class="gb-order-size-wrap gb-order-size-wrap--abaya">' +
+                item.measurements.map(function (m) {
+                    return '<span class="gb-order-size-body">' + escapeHtml(m.label || m.key) + ': ' + escapeHtml(m.value) + '</span>';
+                }).join('') +
+                '</div>';
+        }
         if (typeof isAbayaProduct === 'function' && isAbayaProduct(item, item.category || item.categoryKey)) {
             var cfg = typeof getAbayaSizeConfig === 'function' ? getAbayaSizeConfig() : { bodySizeLabel: '46 [Free size]', lengthSizes: ['50', '52', '54', '56'] };
             var lengthSizes = getCheckoutLengthSizes(item);
@@ -3903,7 +3911,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         size: String(item.size || item.selectedSize || '').trim(),
                         color: String(item.color || '').trim(),
                         productType: String(item.productType || '').trim(),
-                        category: String(item.category || '').trim()
+                        category: String(item.category || '').trim(),
+                        // Size Manager choices: the order server checks them and rebuilds the size text.
+                        measurements: Array.isArray(item.measurements) && item.measurements.length
+                            ? item.measurements.map(function(m){ return { key: m.key, value: m.value }; })
+                            : undefined
                     };
                 });
                 formData.append('CartJSON', JSON.stringify(cartJsonLines));
