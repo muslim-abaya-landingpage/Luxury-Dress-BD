@@ -171,6 +171,19 @@
     return q;
   }
 
+  /** Size Manager choices on a cart line ({key, label, value, custom}); the order server checks them again. */
+  function cleanMeasurements(list) {
+    if (!Array.isArray(list) || !list.length) return null;
+    var out = [];
+    list.slice(0, 20).forEach(function (m) {
+      var key = String((m && m.key) || "");
+      var value = String(m && m.value != null ? m.value : "").trim().slice(0, 80);
+      if (!/^[a-z0-9_]{1,40}$/.test(key) || !value) return;
+      out.push({ key: key, label: String((m && m.label) || "").slice(0, 60), value: value, custom: !!(m && m.custom) });
+    });
+    return out.length ? out : null;
+  }
+
   function normalizeLine(item) {
     if (!item || !item.name) return null;
     var qty = parseInt(item.quantity, 10);
@@ -196,6 +209,8 @@
     if (item.bodySize) line.bodySize = String(item.bodySize);
     if (item.selectedSize) line.selectedSize = String(item.selectedSize);
     if (item.productType) line.productType = String(item.productType);
+    var measurements = cleanMeasurements(item.measurements);
+    if (measurements) line.measurements = measurements;
     if (!line.size && line.lengthSize && typeof global.getCartLineSizeLabel === "function") {
       var rebuilt = global.getCartLineSizeLabel(line);
       if (rebuilt) line.size = rebuilt;
