@@ -1,36 +1,20 @@
 /**
- * POST /api/live-publish — the admin panel calls this right after a product save was committed to GitHub,
- * with the same catalog files, so the site shows the change immediately (functions/_lib/live-catalog.js).
- * Only the owner admin may call it; the login is checked against the admin sheet exactly like
- * /api/admin-read does. Body: JSON {Token, sha, files:{path:text}, validation, index, names, assets:[{path, content(base64)}]}
+ * POST /api/live-publish — the admin panel sends catalog text after its GitHub commit so the site can
+ * show the change immediately (functions/_lib/live-catalog.js). Photo bytes are not accepted here;
+ * they must be uploaded to R2 through /api/image-upload first. Only the owner admin may call it.
+ * Body: JSON {Token, sha, files:{path:text}, validation, index, names, assets:[]}
  */
 import { createCore } from '../_lib/gs-core.js';
 import { buildEnv } from '../_lib/sheets-shim.js';
 import { loadSnapshot } from '../_lib/sheet-snapshot.js';
 import { getAccessToken } from '../_lib/google-auth.js';
-import { CATALOG_FILES, ASSET_PATH, MAX_ASSET_BYTES, ensureTables, rememberState } from '../_lib/live-catalog.js';
+import { CATALOG_FILES, ensureTables, rememberState } from '../_lib/live-catalog.js';
 
 const DEFAULT_SHEET_ID = '1kHt7Bdd4OnpX0jb1ApBXMZIIYqvmv5q2EyOnPV9HJKo';
 const MAX_BODY = 14 * 1024 * 1024;
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });
-}
-
-function b64ToBytes(b64) {
-  const bin = atob(b64);
-  const out = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-  return out;
-}
-
-function imageType(bytes, path) {
-  const ext = path.split('.').pop();
-  const b = (i) => bytes[i];
-  if (ext === 'webp' && b(0) === 82 && b(1) === 73 && b(2) === 70 && b(3) === 70 && b(8) === 87 && b(9) === 69 && b(10) === 66 && b(11) === 80) return 'image/webp';
-  if (ext === 'jpg' && b(0) === 255 && b(1) === 216 && b(2) === 255) return 'image/jpeg';
-  if (ext === 'png' && b(0) === 137 && b(1) === 80 && b(2) === 78 && b(3) === 71) return 'image/png';
-  return '';
 }
 
 /** Checks the payload; returns {state, assets} or throws Error(code). */
@@ -56,16 +40,8 @@ export function validatePayload(p) {
       if (p.names && typeof p.names[id] === 'string') names[id] = p.names[id].slice(0, 160);
     }
   });
-  const assets = [];
-  (Array.isArray(p.assets) ? p.assets : []).slice(0, 12).forEach((a) => {
-    const path = String(a && a.path || '');
-    if (!ASSET_PATH.test(path) || typeof a.content !== 'string' || !/^[A-Za-z0-9+/]+={0,2}$/.test(a.content)) throw Error('BAD_ASSET');
-    const bytes = b64ToBytes(a.content);
-    const ctype = imageType(bytes, path);
-    if (!ctype) throw Error('BAD_ASSET');
-    if (bytes.length <= MAX_ASSET_BYTES) assets.push({ path, bytes, ctype });
-  });
-  return { state: { sha: p.sha, files, validation: p.validation, index, names }, assets };
+  if (Array.isArray(p.assets) && p.assets.length) throw Error('R2_REQUIRED');
+  return { state: { sha: p.sha, files, validation: p.validation, index, names }, assets: [] };
 }
 
 export async function handleLivePublish(request, env, deps = {}) {
@@ -105,9 +81,8 @@ export async function handleLivePublish(request, env, deps = {}) {
   try {
     const db = env.STOCK_DB;
     await ensureTables(db);
-    const state = Object.assign({}, checked.state, { savedAt: now, liveAssets: checked.assets.map((a) => a.path) });
-    const stmts = checked.assets.map((a) =>
-      db.prepare('INSERT OR REPLACE INTO live_assets (path, data, ctype, saved_at) VALUES (?, ?, ?, ?)').bind(a.path, a.bytes, a.ctype, now));
+    const state = Object.assign({}, checked.state, { savedAt: now, liveAssets: [] });
+    const stmts = [];
     stmts.push(db.prepare('INSERT OR REPLACE INTO live_catalog (k, v, saved_at) VALUES (?, ?, ?)').bind('state', JSON.stringify(state), now));
     // Photos from earlier saves have long been deployed by now.
     stmts.push(db.prepare('DELETE FROM live_assets WHERE saved_at < ?').bind(now - 2 * 24 * 3600 * 1000));
