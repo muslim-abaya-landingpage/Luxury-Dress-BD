@@ -2,8 +2,8 @@
    (window.MA_SIZE_CONFIG, attached to product-config.js by functions/_lib/size-carrier.js) and reads the
    customer's choices. size-core.js decides which fields a product shows and checks the choices, the same way
    the order check (apps-script/SizeCore.gs) does.
-   No configuration, a category that is switched off, Kaftan / Karchupi, or a product whose stock is counted
-   per size: resolveFor() returns null and the page keeps its old size pickers. ES5. */
+   No configuration, a category that is switched off, Kaftan / Karchupi, or a product whose per-size stock rows
+   do not match the fields' size texts: resolveFor() returns null and the page keeps its old size pickers. ES5. */
 (function (g) {
   "use strict";
 
@@ -13,25 +13,62 @@
     });
   }
 
-  // Stock rows are keyed by the old size text ("Body 46 · Length 54"). Until those rows follow the new
-  // fields, a product with per-size stock keeps the old pickers so its stock keeps matching.
-  function hasPerSizeStock(p) {
+  function trackedSizeRows(p) {
     var v = p && p.stockVariants;
-    if (!v || typeof v !== "object") return false;
-    return Object.keys(v).some(function (k) { return k !== "_default" && v[k] && v[k].tracked === true; });
+    if (!v || typeof v !== "object") return [];
+    return Object.keys(v).filter(function (k) { return k !== "_default" && v[k] && v[k].tracked === true; });
+  }
+  function hasPerSizeStock(p) { return trackedSizeRows(p).length > 0; }
+
+  function stockKey(s) { return String(s || "").replace(/\s+/g, " ").trim().toLowerCase(); }
+
+  /** Every size text the required option fields can produce (size-core validate), or null if too many / free text. */
+  function sizeTexts(resolved, limit) {
+    var fields = resolved.fields.filter(function (f) { return f.required; });
+    if (fields.some(function (f) { return !f.options.length; })) return null;
+    var combos = [{}];
+    for (var i = 0; i < fields.length; i++) {
+      var next = [];
+      for (var c = 0; c < combos.length; c++) {
+        for (var o = 0; o < fields[i].options.length; o++) {
+          var m = {};
+          Object.keys(combos[c]).forEach(function (k) { m[k] = combos[c][k]; });
+          m[fields[i].key] = fields[i].options[o].value;
+          next.push(m);
+        }
+      }
+      if (next.length > limit) return null;
+      combos = next;
+    }
+    return combos.map(function (m) { return g.maSizeCore.validate(resolved, m).size; });
+  }
+
+  // Stock rows are keyed by the size text. A product with per-size stock uses the new fields only when every
+  // tracked row is a size text the fields produce (e.g. abaya "Body 46 · Length 54"); otherwise it keeps the
+  // old pickers, so stock keeps matching. The order check rebuilds the same text from the choices.
+  function stockRowsMatch(resolved, p) {
+    var rows = trackedSizeRows(p);
+    if (!rows.length) return true;
+    var texts = sizeTexts(resolved, 400);
+    if (!texts) return false;
+    var set = {};
+    texts.forEach(function (t) { set[stockKey(t)] = true; });
+    return rows.every(function (k) { return set[stockKey(k)] === true; });
   }
 
   /** The fields this product shows ({templateId, version, fields}), or null for the old size pickers. */
   function resolveFor(p, categoryKey) {
     var core = g.maSizeCore, cfg = g.MA_SIZE_CONFIG;
-    if (!core || !cfg || !p || !p.id || hasPerSizeStock(p)) return null;
+    if (!core || !cfg || !p || !p.id) return null;
     var category = String(p.category || categoryKey || "");
     var legacy = typeof g.getSizeLegacySlots === "function" ? g.getSizeLegacySlots(p, category) : {};
+    var resolved = null;
     try {
-      return core.resolve(cfg, { id: String(p.id), category: category, sizeLegacy: legacy || {} });
+      resolved = core.resolve(cfg, { id: String(p.id), category: category, sizeLegacy: legacy || {} });
     } catch (e) {
       return null;
     }
+    return resolved && stockRowsMatch(resolved, p) ? resolved : null;
   }
 
   function hasOption(f, value) {
@@ -200,6 +237,7 @@
   g.maSizeStore = {
     resolveFor: resolveFor,
     hasPerSizeStock: hasPerSizeStock,
+    sizeTexts: sizeTexts,
     initialValues: initialValues,
     html: html,
     read: read,

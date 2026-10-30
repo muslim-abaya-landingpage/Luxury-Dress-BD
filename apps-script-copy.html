@@ -8860,12 +8860,15 @@ function opsLinePrice_(it,p){if(!Number.isSafeInteger(it.qty)||it.qty&lt;1||it.q
  if(!isFinite(price)||price&lt;=0)throw Error('CATALOG_PRICE_INVALID');it.name=p.name;it.category=p.category;it.price=price;return price*it.qty;
 }
 // Size Manager: the published size configuration (Cloudflare D1, served by the website at /api/size-config).
+// A short outage of the website API falls back to the last copy read in the past 6 hours.
 function opsSizeConfig_(){
  var cache=CacheService.getScriptCache(),c=cache.get('ops_size_config_v1');if(c)return JSON.parse(c);
- var res=UrlFetchApp.fetch('https://muslimabaya.com/api/size-config?check='+Date.now(),{muteHttpExceptions:true,headers:{'Cache-Control':'no-cache'}});
- if(res.getResponseCode()!==200)throw Error('SIZE_CONFIG_UNAVAILABLE');var data=JSON.parse(res.getContentText());
- if(!data||data.ok!==true)throw Error('SIZE_CONFIG_UNAVAILABLE');var cfg=data.config||null;
- var text=JSON.stringify(cfg);if(text.length&lt;90000)cache.put('ops_size_config_v1',text,60);return cfg;
+ var data=null;
+ try{var res=UrlFetchApp.fetch('https://muslimabaya.com/api/size-config?check='+Date.now(),{muteHttpExceptions:true,headers:{'Cache-Control':'no-cache'}});
+  if(res.getResponseCode()===200)data=JSON.parse(res.getContentText());}catch(err){data=null;}
+ if(!data||data.ok!==true){var last=cache.get('ops_size_config_last');if(last)return JSON.parse(last);throw Error('SIZE_CONFIG_UNAVAILABLE');}
+ var cfg=data.config||null,text=JSON.stringify(cfg);
+ if(text.length&lt;90000){cache.put('ops_size_config_v1',text,60);cache.put('ops_size_config_last',text,21600);}return cfg;
 }
 // Checks the customer's measurement choices with size-core.js (SizeCore.gs) and rebuilds the size text and the
 // stored choices on the server. A product whose size template is off ignores them and keeps the old size check.

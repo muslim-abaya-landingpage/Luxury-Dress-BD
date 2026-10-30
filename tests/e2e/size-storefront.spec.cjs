@@ -67,8 +67,8 @@ test('abaya switched on: published fields with the product\'s own sizes, cart ca
     { key: 'length', label: 'Length', value: '54', custom: false },
   ]);
   await page.goto('/checkout');
-  await expect(page.locator('#orderSummary')).toContainText('Body: 46');
-  await expect(page.locator('#orderSummary')).toContainText('Length: 54');
+  await expect(page.locator('#orderSummary select[data-sz-key="body"]')).toHaveValue('46');
+  await expect(page.locator('#orderSummary select[data-sz-key="length"]')).toHaveValue('54');
   await expect(page.locator('#orderSummary [data-cart-action="length-size"]')).toHaveCount(0);
 });
 
@@ -131,4 +131,62 @@ test('phone width: the fields fit without sideways scrolling', async ({ page }) 
   await expect(page.locator('.ma-sz .ma-sz-field').first()).toBeVisible();
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(overflow).toBeLessThanOrEqual(1);
+});
+
+// ── Stage 5: cart, checkout and order ──
+const realCatalog = fs.readFileSync(path.join(__dirname, '../../category-products.js'), 'utf8');
+
+test('checkout: a measurement can be changed; the line text follows and equal lines merge', async ({ page }) => {
+  await serve(page, await sizeConfig((c) => { c.categories.abaya.enabled = true; }));
+  await page.goto('/product/ABY-MAROON-1');
+  const fields = page.locator('.ma-sz .ma-sz-field');
+  await fields.nth(1).locator('[data-sz-value]', { hasText: '52' }).click();
+  await page.locator('button[data-action="add"]').first().click();
+  await page.reload(); // the cart drawer opened over the page
+  await fields.nth(1).locator('[data-sz-value]', { hasText: '54' }).click();
+  await page.locator('button[data-action="add"]').first().click();
+  expect((await cartLines(page)).map((l) => l.size)).toEqual(['Body 42 · Length 52', 'Body 42 · Length 54']);
+  await page.goto('/checkout');
+  const selects = page.locator('#orderSummary select[data-cart-action="measure"][data-sz-key="length"]');
+  await expect(selects).toHaveCount(2);
+  await selects.first().selectOption('56');
+  await expect.poll(async () => (await cartLines(page)).map((l) => l.size)).toEqual(['Body 42 · Length 56', 'Body 42 · Length 54']);
+  const first = (await cartLines(page))[0];
+  expect(first.measurements.map((m) => m.value)).toEqual(['42', '56']);
+  expect(first.name).not.toContain('Length 52');
+  // Changing it to the other line's size merges the two.
+  await page.locator('#orderSummary select[data-cart-action="measure"][data-sz-key="length"]').first().selectOption('54');
+  await expect.poll(async () => (await cartLines(page)).map((l) => [l.size, l.quantity])).toEqual([['Body 42 · Length 54', 2]]);
+});
+
+test('per-size stock rows in the old text: fields shown, stock follows the choice', async ({ page }) => {
+  const marker = 'id: "ABY-MAROON-1",';
+  const withStock = realCatalog.replace(marker, marker + '\n      stockVariants: {"Body 42 · Length 44": {tracked: true, available: 3}, "Body 46 · Length 54": {tracked: true, available: 0}},');
+  await page.route(/\/category-products\.js(\?.*)?$/, (r) => r.fulfill({ contentType: 'application/javascript', body: withStock }));
+  await serve(page, await sizeConfig((c) => { c.categories.abaya.enabled = true; }));
+  await page.goto('/product.html?id=ABY-MAROON-1');
+  const fields = page.locator('#pdSizeGroup .ma-sz-field');
+  await expect(fields).toHaveCount(2);
+  await expect(page.locator('#pdAddCart')).toBeEnabled();
+  await fields.nth(0).locator('[data-sz-value]', { hasText: '46' }).click();
+  await fields.nth(1).locator('[data-sz-value]', { hasText: '54' }).click();
+  await expect(page.locator('#pdStock')).toHaveText('Out of Stock');
+  await expect(page.locator('#pdAddCart')).toBeDisabled();
+});
+
+test('home page: quick add of a product with fields opens its page', async ({ page }) => {
+  await page.route(/googletagmanager|gtm\.js|analytics\.tiktok|connect\.facebook|script\.google\.com/, (r) => r.fulfill({ status: 204, body: '' }));
+  await page.goto('/');
+  const card = page.locator('.ah-card[data-pid]').first();
+  await expect(card).toBeVisible({ timeout: 15000 });
+  const pid = await card.getAttribute('data-pid');
+  await page.unrouteAll({ behavior: 'ignoreErrors' });
+  await serve(page, await sizeConfig((c) => { c.products[pid] = { enabled: true }; }));
+  await page.goto('/');
+  const target = page.locator('.ah-card[data-pid="' + pid + '"] button[data-action="add"]').first();
+  await expect(target).toBeVisible({ timeout: 15000 });
+  await expect.poll(() => page.evaluate(() => !!(window.maSizeStore && window.MA_SIZE_CONFIG))).toBe(true);
+  await target.click();
+  await expect(page).toHaveURL(new RegExp('/product/' + pid + '$'));
+  expect(await cartLines(page)).toHaveLength(0);
 });

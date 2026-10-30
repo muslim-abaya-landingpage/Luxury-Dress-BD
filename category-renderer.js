@@ -1416,6 +1416,11 @@ function pqvHomeCardHtml(p) {
 }
 /* Same as addToCart() in index-home-muslim-abaya.js */
 function pqvHomeAddToCart(sec, p) {
+  // Products with Size Manager fields need the customer's measurements: open their page instead.
+  if (p && p.id && shopSizeTemplate(p, sec.key)) {
+    window.location.href = "/product/" + encodeURIComponent(p.id);
+    return;
+  }
   var price = listingCardPrice(p);
   var line = {
     id: p.id,
