@@ -241,3 +241,16 @@ test('bulk edit: add and remove attribute values on many products at once', asyn
     expect(s).not.toContain('44');
   }
 });
+
+test('admin menu: same WooCommerce-style menu on every admin page; Add New Product and Categories open from the menu', async ({ page }) => {
+  const fs = require('fs');
+  const pages = ['admin-dashboard', 'admin-orders', 'admin-order', 'admin-operations', 'admin-inbox', 'admin-order-new', 'product-manager', 'product-links', 'admin-links', 'stock-analytics', 'admin-staff', 'admin-growth'];
+  const menus = pages.map((p) => (fs.readFileSync(p + '.html', 'utf8').match(/<nav class="adm-sidebar-nav"[\s\S]*?<\/nav>/) || [''])[0].replace(/ is-current| has-current| open| aria-current="page"/g, ''));
+  menus.forEach((m, i) => { expect(m, pages[i]).toBe(menus[0]); });
+  expect(menus[0]).toContain('href="product-manager.html#add-new"');
+  await open(page);
+  await page.goto('/product-manager.html#categories');
+  await page.waitForTimeout(500);
+  await expect(page).not.toHaveURL(/#categories/);
+  await expect(page.locator('#pmAllRows')).toHaveCount(0); // the category screen replaced the list
+});

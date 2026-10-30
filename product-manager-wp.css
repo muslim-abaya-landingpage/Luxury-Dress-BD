@@ -840,3 +840,19 @@ html[data-admin-theme="dark"] .pm-wp-list, html[data-admin-theme="dark"] .pm-wp-
 @media (max-width: 600px) { .pm-var-prices { grid-template-columns: 1fr 1fr; } }
 .pm-attr-preset { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 8px; }
 .pm-attr-preset small { color: #646970; min-width: 0; overflow-wrap: anywhere; }
+
+/* List screen like WordPress → Products: search box on the status-links row, no wrapped button; at laptop widths
+   (menu + list) the table drops Brands, then Tags, instead of scrolling sideways. */
+.pm-wp-admin .pm-wp-search { flex-wrap: nowrap; align-items: center; max-width: 420px; }
+.pm-wp-admin .pm-wp-search .pm-wp-button { flex: none; white-space: nowrap; }
+@media (max-width: 1500px) { .pm-wp-admin .pm-wp-table .column-brand { display: none; } }
+.pm-wp-admin .pm-wp-table .column-name { min-width: 180px; }
+@media (max-width: 1440px) { .pm-wp-admin .pm-wp-table .column-date { display: none; } }
+@media (max-width: 1100px) {
+  .pm-wp-admin .pm-wp-table .column-sku, .pm-wp-admin .pm-wp-table .column-cats, .pm-wp-admin .pm-wp-table .column-tags { display: none; }
+  .pm-wp-admin .pm-row-actions .pm-row-id { display: inline; } /* SKU moves under the name, like WordPress on small screens */
+}
+/* The list fits the screen next to the menu (no sideways scroll) from tablet width up; phones keep the scrolling table. */
+@media (min-width: 761px) { .pm-wp-admin .pm-overview-wrap .pm-overview.pm-wp-table { min-width: 0; table-layout: auto; } }
+.pm-wp-admin .pm-tools-help { margin: 8px 0 0; color: #646970; font-size: 13px; max-width: 760px; }
+@media (max-width: 1300px) { .pm-wp-admin .pm-wp-table .column-cats { display: none; } }

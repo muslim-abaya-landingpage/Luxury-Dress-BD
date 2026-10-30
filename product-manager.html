@@ -31,8 +31,9 @@
 <link rel="stylesheet" href="product-manager-wp.css?v=595b93a1a1714781">
 <link rel="stylesheet" href="admin-design-system.css?v=1eaf4362bddc4ad0">
 <link rel="stylesheet" href="product-manager-premium.css?v=79981ef6394660d4">
+<link rel="stylesheet" href="admin-wp-shell.css?v=1">
 </head>
-<body class="pl-admin adm-body pm-wp-admin" data-admin-guard="1">
+<body class="pl-admin adm-body pm-wp-admin adm-wp" data-admin-guard="1">
   <div class="adm-shell">
     <div class="adm-sidebar-backdrop" id="admSbBackdrop"></div>
     <aside class="adm-sidebar" id="admSidebar">
@@ -43,19 +44,25 @@
         <button type="button" class="adm-sidebar-close" id="admSbClose" aria-label="Close menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
       </div>
       <div class="adm-sidebar-profile"><div class="adm-profile-avatar" aria-hidden="true">MA</div><div class="adm-profile-copy"><strong>Your workspace</strong><small>Store management</small></div></div>
-      <nav class="adm-sidebar-nav" aria-label="Admin menu">
+      <nav class="adm-sidebar-nav" aria-label="অ্যাডমিন মেনু">
 <a class="adm-sidebar-item" href="admin-dashboard.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Dashboard</span></a>
-<details class="adm-nav-group" name="adm-navigation"><summary class="adm-sidebar-item" title="Orders & Accounts"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z M9 7h6M9 11h6M9 15h4"/></svg><span>Orders & Accounts</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
-<a class="adm-sidebar-item adm-nav-child" href="admin-orders.html"><span>Orders</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="admin-operations.html"><span>Accounts & Returns</span></a>
+<details class="adm-nav-group" name="adm-navigation"><summary class="adm-sidebar-item" title="Orders"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z M9 7h6M9 11h6M9 15h4"/></svg><span>Orders</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
+<a class="adm-sidebar-item adm-nav-child" href="admin-orders.html"><span>All Orders</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-order-new.html"><span>Add New Order</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-operations.html"><span>Finance &amp; Returns</span></a>
 </div></details>
-<details class="adm-nav-group has-current" name="adm-navigation" open><summary class="adm-sidebar-item" title="Products & Stock"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="6" width="16" height="15" rx="2"/><path d="M9 6V5a3 3 0 0 1 6 0v1M9 10a3 3 0 0 0 6 0"/></svg><span>Products & Stock</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
-<a class="adm-sidebar-item adm-nav-child is-current" href="product-manager.html" aria-current="page"><span>Products</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="stock-analytics.html"><span>Stock & Analytics</span></a>
+<details class="adm-nav-group has-current" name="adm-navigation" open><summary class="adm-sidebar-item" title="Products"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="6" width="16" height="15" rx="2"/><path d="M9 6V5a3 3 0 0 1 6 0v1M9 10a3 3 0 0 0 6 0"/></svg><span>Products</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
+<a class="adm-sidebar-item adm-nav-child is-current" href="product-manager.html" aria-current="page"><span>All Products</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="product-manager.html#add-new"><span>Add New Product</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="product-manager.html#categories"><span>Categories</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="stock-analytics.html"><span>Stock &amp; Analytics</span></a>
 <a class="adm-sidebar-item adm-nav-child" href="product-links.html"><span>Product Links</span></a>
 </div></details>
-<a class="adm-sidebar-item" href="admin-inbox.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h18v13H8l-5 4V4ZM7 9h10M7 13h7"/></svg><span>Customer Inbox</span></a>
-<details class="adm-nav-group" name="adm-navigation"><summary class="adm-sidebar-item" title="Settings & More"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 9v12"/></svg><span>Settings & More</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
+<details class="adm-nav-group" name="adm-navigation"><summary class="adm-sidebar-item" title="Customer Inbox"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h18v13H8l-5 4V4ZM7 9h10M7 13h7"/></svg><span>Customer Inbox</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
+<a class="adm-sidebar-item adm-nav-child" href="admin-inbox.html"><span>Inbox</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-support-inbox.html"><span>Live Support</span></a>
+</div></details>
+<details class="adm-nav-group" name="adm-navigation"><summary class="adm-sidebar-item" title="Settings &amp; Tools"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 9v12"/></svg><span>Settings &amp; Tools</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
 <a class="adm-sidebar-item adm-nav-child" href="admin-staff.html"><span>Staff</span></a>
 <a class="adm-sidebar-item adm-nav-child" href="admin-growth.html"><span>Growth Tools</span></a>
 <a class="adm-sidebar-item adm-nav-child" href="admin-links.html"><span>Admin Links</span></a>
@@ -81,6 +88,7 @@
           <button class="pl-btn pl-btn-secondary" id="pmPublishCheck" type="button">Check publish status</button>
           <a class="pl-btn pl-btn-secondary" href="product-links.html" style="text-decoration:none;display:inline-flex;align-items:center" title="Categories — Product Link URL">Product Links</a>
         </div>
+        <p class="pm-tools-help">Tip: for a product in several colors, enter the color names in photo order (main photo = first color); color variants and product links are made automatically. A new category only needs a name; its page and link are made for you.</p>
 </details>
         <p id="pmSaveStatus" role="status" aria-live="polite">Stock changes save automatically.</p>
       </header>
@@ -90,7 +98,6 @@
         <button class="pl-btn pl-btn-primary" id="pmQuickUpload" type="button" hidden>+ Upload new product</button>
         <div class="pm-wp-notice" id="pmLiveNotice"><a id="pmLiveLink" target="_blank" rel="noopener" hidden>✅ New product is live — view →</a></div>
 
-        <div class="pm-guide"><strong>Easy publishing</strong><span>Products: for multiple colors, enter names in photo order (main photo = first color); matching variants and product links are generated automatically. Categories: add a name and the page/link are generated for you.</span><a href="stock-analytics.html">Stock & Analytics →</a></div>
         <div class="pm-layout" id="pmLayout">
           <aside class="pm-sidebar">
             <h2>Categories</h2>
@@ -1703,7 +1710,7 @@
       '<li><button type="button" data-overview-stock="in" class="' + (overviewStock === "in" ? "is-active" : "") + '">In stock <span class="count">(' + inStockCount + ')</span></button> |</li>' +
       '<li><button type="button" data-overview-stock="out" class="' + (overviewStock === "out" ? "is-active" : "") + '">Out of stock <span class="count">(' + outOfStockCount + ')</span></button>' + (lowStockCount ? ' |' : '') + '</li>' +
       (lowStockCount ? '<li><button type="button" data-overview-stock="low" class="' + (overviewStock === "low" ? "is-active" : "") + '">Low stock <span class="count">(' + lowStockCount + ')</span></button></li>' : '') + '</ul>' +
-      '<p class="pm-wp-search"><label class="pm-sr-only" for="pmAllSearch">Search products</label><input type="search" id="pmAllSearch" value="' + escapeAttr(allSearchTerm) + '">' +
+      '<p class="pm-wp-search"><label class="pm-sr-only" for="pmAllSearch">Search products</label><input type="search" id="pmAllSearch" placeholder="Name, SKU or tag" value="' + escapeAttr(allSearchTerm) + '">' +
       '<button type="button" class="pm-wp-button" id="pmAllSearchBtn">Search products</button><span id="pmAllCount" class="pm-sr-only"></span></p>' +
       '<div class="pm-wp-tablenav top">' +
       '<div class="pm-wp-actions"><label class="pm-sr-only" for="pmBulkAction">Bulk actions</label><select id="pmBulkAction"><option value="">Bulk actions</option>' + (inTrash
@@ -3630,6 +3637,17 @@
   renderCatList();
   renderMain();
   savedSnapshot = catalogSnapshot();
+  // Admin menu shortcuts (like WooCommerce's Products → Add New / Categories): product-manager.html#add-new, #categories.
+  function openMenuRoute() {
+    var route = location.hash.replace(/^#/, "");
+    if (route !== "add-new" && route !== "categories") return;
+    history.replaceState(null, "", location.pathname + location.search); // the same menu link works again
+    if (route === "add-new") { openQuickUpload(); return; }
+    if (!document.getElementById("pmManageCats")) { activeKey = ALL_PRODUCTS_KEY; renderCatList(); renderMain(); }
+    var cats = document.getElementById("pmManageCats"); if (cats) cats.click();
+  }
+  window.addEventListener("hashchange", openMenuRoute);
+  openMenuRoute();
   quickUploadOptions = {sections:function(){return sections;},products:function(){return products;},status:setSaveStatus,isSaved:function(){return savedSnapshot===catalogSnapshot();},stage:function(category,product){
     if(!sections.some(function(sec){return sec.key===category;}))throw new Error("Choose a category.");
     var labels=String(product.colorLabel||product.color||"").split(/[,，;；|]/).map(function(label){return label.trim();}).filter(Boolean);
