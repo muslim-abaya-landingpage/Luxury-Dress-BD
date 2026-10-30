@@ -781,7 +781,7 @@
         var price = parseInt(p.price, 10) || 550;
         return (
           "<a class='pd-rel-card' href='" + escapeHtml(href("/product/" + encodeURIComponent(p.id))) + "'>" +
-          "<img src='" + escapeHtml(img) + "' data-related-fallbacks='" + escapeHtml(JSON.stringify(fallbacks)) + "' alt='" + escapeHtml(p.name) + "' loading='lazy'>" +
+          "<img data-related-src='" + escapeHtml(img) + "' data-related-fallbacks='" + escapeHtml(JSON.stringify(fallbacks)) + "' alt='" + escapeHtml(p.name) + "' loading='lazy'>" +
           "<div class='pd-rel-info'>" +
           "<div class='name'>" + escapeHtml(p.name) + "</div>" +
           "<div class='price'>" + TK + price + "</div>" +
@@ -791,7 +791,8 @@
       })
       .join("");
 
-    $("pdRelatedRow").querySelectorAll(".pd-rel-card img[data-related-fallbacks]").forEach(function (image) {
+    var relatedImages = $("pdRelatedRow").querySelectorAll(".pd-rel-card img[data-related-fallbacks]");
+    relatedImages.forEach(function (image) {
       image.addEventListener("error", function () {
         var fallbacks = [];
         try { fallbacks = JSON.parse(image.getAttribute("data-related-fallbacks") || "[]"); } catch (_) {}
@@ -804,6 +805,10 @@
           if (card) card.remove();
         }
       });
+    });
+    // Start loading only after every card has its fallback handler attached.
+    relatedImages.forEach(function (image) {
+      image.src = image.getAttribute("data-related-src") || "images/Baby-Pink-Floral-Print.jpeg";
     });
   }
 
