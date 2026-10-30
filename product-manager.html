@@ -717,6 +717,28 @@
     "hijab": ["sizes"]
   };
   function categoryAttrs(catKey) { return CATEGORY_ATTRS[catKey] || ["sizes", "bodySizes", "sleeveSizes"]; }
+  // Ready-made size sets: "Use … size set" adds these values in one click (values already there are kept).
+  var CATEGORY_PRESETS = {
+    "abaya": { sizes: ["44", "46", "48", "50", "52", "54", "56"] },
+    "cover-up": { sizes: ["50", "52", "54", "56", "58"] },
+    "embroidery": { sizes: ["50", "52", "54", "56", "58"] },
+    "premium-two-piece": { dressLengths: ["38", "40", "42"], palazzoLengths: ["38", "40"] },
+    "three-piece-dress": { dressLengths: ["38", "40", "42"], palazzoLengths: ["38", "40"] },
+    "tops-kurti": { sizes: ["34", "36", "38", "40", "42", "44", "46"] },
+    "hijab": { sizes: ["Free Size"] },
+    "panjabi": { sizes: ["M (Long 40 • Body 42)", "L (Long 42 • Body 44)", "XL (Long 44 • Body 46)"] }
+  };
+  function attrLabel(key) { var a = STD_ATTRS.find(function (x) { return x[0] === key; }); return a ? a[1] : key; }
+  function presetSummary(catKey) {
+    var set = CATEGORY_PRESETS[catKey];
+    return set ? Object.keys(set).map(function (k) { return attrLabel(k).replace(/ \(inches\)$/, "") + " " + set[k].join(", "); }).join(" + ") : "";
+  }
+  // Adds values to a list without duplicates (case-insensitive); returns how many were new.
+  function mergeValues(list, add) {
+    var lower = list.map(function (v) { return v.toLowerCase(); }), n = 0;
+    add.forEach(function (v) { v = String(v).trim().slice(0, 60); if (v && lower.indexOf(v.toLowerCase()) === -1) { list.push(v); lower.push(v.toLowerCase()); n++; } });
+    return n;
+  }
   function attrValues(p, key) { return Array.isArray(p[key]) ? p[key].map(String).filter(Boolean) : []; }
   function customAttrs(p) { return Array.isArray(p.attributes) ? p.attributes.filter(function (a) { return a && typeof a === "object"; }) : []; }
   function valueChips(values, ref) {
@@ -1053,6 +1075,7 @@
               '<div class="pm-wp-form-row pm-attr-field"><label>Variations &amp; attributes</label><div>' +
                 '<div id="pmAttrList">' + attributeCardsMarkup(p, catKey) + '</div>' +
                 '<p class="pm-attr-add"><select id="pmAttrPick" aria-label="Attribute to add"></select> <button type="button" class="pm-wp-button" id="pmAttrAdd">+ Add attribute</button></p>' +
+                (CATEGORY_PRESETS[catKey] ? '<p class="pm-attr-preset"><button type="button" class="pm-wp-button" id="pmAttrPreset">Use ' + escapeHtml(categoryName(catKey)) + ' size set</button> <small>' + escapeHtml(presetSummary(catKey)) + '</small></p>' : '') +
                 '<small>× removes a value, ‹ › change the order customers see, “Remove attribute” removes the whole list. On the product page, sizes (and body sizes / dress and pajama lengths where that product type has a picker) are choices; other measurements and custom attributes (e.g. Work: Stone) are listed under the product details.</small></div></div>' +
             '</div>' +
             (isVariable ? '<div class="pm-wp-panel pm-var-panel" data-epanel="variations"' + (editTab === "variations" ? "" : " hidden") + '>' + buildVariationRows(p, meta) + '</div>' : '') +
@@ -1270,6 +1293,11 @@
       var again = attrList.querySelector('[data-attr-new="' + ref + '"]'); if (again) again.focus();
     }
     if (attrPick) attrPick.innerHTML = attributePickMarkup(p, catKey);
+    bindById("pmAttrPreset", "click", function () {
+      var set = CATEGORY_PRESETS[catKey] || {}, added = 0;
+      Object.keys(set).forEach(function (key) { var vals = attrValues(p, key); added += mergeValues(vals, set[key]); if (vals.length) p[key] = vals; });
+      redrawAttrs(added ? added + " value(s) added from the size set — click Save changes." : "This product already has every value in the size set.");
+    });
     bindById("pmAttrAdd", "click", function () {
       var key = attrPick && attrPick.value;
       if (!key) return;
@@ -1683,6 +1711,7 @@
         : '<option value="in">Mark in stock</option><option value="out">Mark out of stock</option><option value="price">Change price (%)</option>' +
           '<option value="sale">Set sale (% off)</option><option value="feature">Mark as featured</option><option value="unfeature">Remove featured</option>' +
           '<option value="tags">Add tags</option><option value="category">Move to category</option>' +
+          '<option value="attradd">Add attribute values</option><option value="attrremove">Remove attribute values</option>' +
           '<option value="publish">Publish</option><option value="draft">Set to Draft</option><option value="trash">Move to Trash</option>') + '</select>' +
       '<button type="button" class="pm-wp-button" id="pmBulkApply">Apply</button></div>' +
       '<div class="pm-wp-actions"><select id="pmOverviewCategory" aria-label="Filter by category"><option value="">Select a category</option>' + catOptions + '</select>' +
@@ -1712,7 +1741,7 @@
       if (!action) return;
       if (!Object.keys(overviewSelected).length) { toast("Select products first"); return; }
       if (action === "price") { bulkReprice(); return; }
-      if (["sale", "feature", "unfeature", "tags", "category"].indexOf(action) !== -1) { bulkEdit(action); return; }
+      if (["sale", "feature", "unfeature", "tags", "category", "attradd", "attrremove"].indexOf(action) !== -1) { bulkEdit(action); return; }
       if (["publish", "draft", "trash", "restore", "delete"].indexOf(action) !== -1) { bulkStatus(action); return; }
       document.getElementById(action === "out" ? "pmOverviewOff" : "pmOverviewOn").click();
     });
@@ -2104,6 +2133,19 @@
         target = sections[parseInt(input, 10) - 1];
         if (!target) { toast("Enter one of the category numbers"); return; }
         label = "moved to " + enName(target);
+      } else if (action === "attradd" || action === "attrremove") {
+        var adding = action === "attradd";
+        var attrMenu = STD_ATTRS.map(function (a, i) { return (i + 1) + " = " + a[1]; }).join("\n");
+        input = prompt((adding ? "Add values to" : "Remove values from") + " which attribute of " + n + " product(s)? Enter the number:\n" + attrMenu, "1");
+        if (input === null) return;
+        var attr = STD_ATTRS[parseInt(input, 10) - 1];
+        if (!attr) { toast("Enter one of the attribute numbers"); return; }
+        input = prompt((adding ? "Which values to add to " : "Which values to remove from ") + attr[1] + "? Separate with commas, e.g. 58 or 56, 58", "");
+        if (input === null) return;
+        var attrVals = inputToSizes(input);
+        if (!attrVals.length) { toast("Enter at least one value"); return; }
+        var attrLower = attrVals.map(function (v) { return v.toLowerCase(); });
+        label = (adding ? "got " : "lost ") + attr[1] + " " + attrVals.join(", ");
       } else {
         label = action === "feature" ? "marked as featured" : "no longer featured";
       }
@@ -2122,6 +2164,11 @@
           if (types.length) types.forEach(function (t) { applyDiscountPercent(p, t, pct ? String(pct) : ""); });
           else applyDiscountPercent(p, null, pct ? String(pct) : "");
           syncCardPrice(p, meta);
+        } else if (action === "attradd") {
+          var have = attrValues(p, attr[0]); mergeValues(have, attrVals); p[attr[0]] = have;
+        } else if (action === "attrremove") {
+          var keep = attrValues(p, attr[0]).filter(function (v) { return attrLower.indexOf(v.toLowerCase()) === -1; });
+          if (keep.length) p[attr[0]] = keep; else delete p[attr[0]];
         } else if (action === "category" && ref[0] !== target.key) moving.push(ref);
       });
       // Move from the end of each list so the other indexes stay valid.

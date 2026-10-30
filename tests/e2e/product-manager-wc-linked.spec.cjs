@@ -167,3 +167,77 @@ test('product type: a simple product becomes variable and back; abaya always sta
   expect(e).not.toContain('types:');
   expect(e).not.toContain('priceByType');
 });
+
+function answerPromptsInOrder(page, answers) {
+  const queue = answers.slice();
+  page.removeAllListeners('dialog');
+  page.on('dialog', (d) => d.accept(d.type() === 'prompt' ? queue.shift() : undefined));
+}
+const listOf = (e, key) => { const m = new RegExp(key + ': (\\[[^\\]]*\\])').exec(e); return m ? JSON.parse(m[1]) : null; };
+
+test('attributes: the category size set fills missing values in one click, without duplicates', async ({ page }) => {
+  await open(page);
+  await page.locator('#pmAllRows tr').first().locator('.pm-row-title').click(); // abaya, sizes 44–56
+  const id = await page.locator('[data-ef="id"]').inputValue();
+  await page.click('[data-etab="attributes"]');
+  await page.locator('[data-attr-del="sizes"][data-i="0"]').click(); // remove 44
+  await expect(page.locator('[data-attr="sizes"] .pm-attr-values li')).toHaveCount(6);
+  await expect(page.locator('.pm-attr-preset small')).toContainText('Size 44, 46, 48, 50, 52, 54, 56');
+  await page.click('#pmAttrPreset');
+  await expect(page.locator('[data-attr="sizes"] .pm-attr-values li')).toHaveCount(7);
+  await page.click('#pmEditBarSave');
+  await expect.poll(() => productsFile(page)).toBeTruthy();
+  expect(listOf(entry(await productsFile(page), id), 'sizes')).toEqual(['46', '48', '50', '52', '54', '56', '44']);
+  // Two-piece: Dress length 38/40/42 + Palazzo 38/40.
+  await page.click('#pmEditBack');
+  await page.selectOption('#pmOverviewCategory', 'premium-two-piece');
+  await page.click('#pmFilterBtn');
+  await page.locator('#pmAllRows tr').first().locator('.pm-row-title').click();
+  const id2 = await page.locator('[data-ef="id"]').inputValue();
+  await page.click('[data-etab="attributes"]');
+  await page.click('#pmAttrPreset');
+  await expect(page.locator('[data-attr="dressLengths"]')).toBeVisible();
+  await page.evaluate(() => { window.__published = null; });
+  await page.click('#pmEditBarSave');
+  await expect.poll(() => productsFile(page)).toBeTruthy();
+  const e2 = entry(await productsFile(page), id2);
+  const dress = listOf(e2, 'dressLengths');
+  expect(dress).toEqual(expect.arrayContaining(['38', '40', '42']));
+  expect(new Set(dress).size).toBe(dress.length); // no duplicates
+  expect(listOf(e2, 'palazzoLengths')).toEqual(expect.arrayContaining(['38', '40']));
+});
+
+test('bulk edit: add and remove attribute values on many products at once', async ({ page }) => {
+  await open(page);
+  const rows = page.locator('#pmAllRows tr');
+  const ids = [];
+  for (const i of [0, 1]) {
+    await rows.nth(i).locator('.pm-row-title').click();
+    ids.push(await page.locator('[data-ef="id"]').inputValue());
+    await page.click('#pmEditBack');
+  }
+  await rows.nth(0).locator('.pm-overview-check').check();
+  await rows.nth(1).locator('.pm-overview-check').check();
+  answerPromptsInOrder(page, ['1', '58']);
+  await page.selectOption('#pmBulkAction', 'attradd');
+  await page.click('#pmBulkApply');
+  await expect.poll(() => productsFile(page)).toBeTruthy();
+  let file = await productsFile(page);
+  for (const id of ids) {
+    const s = listOf(entry(file, id), 'sizes');
+    expect(s.filter((v) => v === '58')).toHaveLength(1);
+  }
+  await page.evaluate(() => { window.__published = null; });
+  await rows.nth(0).locator('.pm-overview-check').check();
+  await rows.nth(1).locator('.pm-overview-check').check();
+  answerPromptsInOrder(page, ['1', '58, 44']);
+  await page.selectOption('#pmBulkAction', 'attrremove');
+  await page.click('#pmBulkApply');
+  await expect.poll(() => productsFile(page)).toBeTruthy();
+  file = await productsFile(page);
+  for (const id of ids) {
+    const s = listOf(entry(file, id), 'sizes');
+    expect(s).not.toContain('58');
+    expect(s).not.toContain('44');
+  }
+});

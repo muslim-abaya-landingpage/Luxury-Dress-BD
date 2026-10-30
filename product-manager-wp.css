@@ -838,3 +838,5 @@ html[data-admin-theme="dark"] .pm-wp-list, html[data-admin-theme="dark"] .pm-wp-
 .pm-var-add input { flex: 1 1 140px; min-width: 0; }
 .pm-var-add small { flex-basis: 100%; }
 @media (max-width: 600px) { .pm-var-prices { grid-template-columns: 1fr 1fr; } }
+.pm-attr-preset { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 8px; }
+.pm-attr-preset small { color: #646970; min-width: 0; overflow-wrap: anywhere; }
