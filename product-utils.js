@@ -327,6 +327,10 @@
     if (entry.lengthSizeLabel != null) {
       normalized.lengthSizeLabel = entry.lengthSizeLabel;
     }
+    // Size Manager: per-product template choice / field overrides (see maSizeTemplates below).
+    if (entry.sizeTemplate && typeof entry.sizeTemplate === "object") {
+      normalized.sizeTemplate = JSON.parse(JSON.stringify(entry.sizeTemplate));
+    }
 
     if (typeof entry.inStock === "boolean") {
       normalized.inStock = entry.inStock;
@@ -997,5 +1001,151 @@ g.getCartLineBaseName = getCartLineBaseName;
     getStockQty: getStockQty,
     isInStock: isInStock,
     getStockStatus: getStockStatus
+  };
+})(window);
+/* Size Manager: category size templates (SITE_LINKS.sizeTemplates in product-config.js).
+   Each category points to a template of measurement fields. A field has a fixed `key` (used in orders and stock)
+   and an editable `label` (only for display), so renaming জামা to Kameez never breaks old orders.
+   Products saved before the Size Manager have no `sizeTemplate` object: they keep their own size lists
+   (each field's `legacy` property names), so switching a category on does not change what they offer.
+   No DOM, network or storage here: catalog-validation-core.js runs this inside a sandboxed worker. */
+(function (g) {
+  var KEY_RE = /^[a-z0-9_]{1,40}$/;
+  var BAD_CUSTOM_RE = /[<>{}`\\\u0000-\u001f]/;
+  var MAX_CUSTOM = 40;
+
+  function norm(s) {
+    return String(s == null ? "" : s).trim().toLowerCase().replace(/[–—]/g, "-").replace(/\s+/g, " ");
+  }
+  function config() {
+    var c = g.SITE_LINKS && g.SITE_LINKS.sizeTemplates;
+    return c && typeof c === "object" && c.templates ? c : null;
+  }
+  function getTemplate(id) {
+    var c = config();
+    return (c && id && Object.prototype.hasOwnProperty.call(c.templates, id) && c.templates[id]) || null;
+  }
+  function categorySetting(categoryKey) {
+    var c = config();
+    return (c && c.categories && c.categories[categoryKey]) || null;
+  }
+  function toOptions(list) {
+    var seen = {}, out = [];
+    (Array.isArray(list) ? list : []).forEach(function (o) {
+      var value = String(o && typeof o === "object" ? o.value : o == null ? "" : o).trim();
+      if (!value || seen[norm(value)]) return;
+      seen[norm(value)] = true;
+      var label = String(o && typeof o === "object" && o.label ? o.label : value).trim();
+      out.push({ value: value, label: label });
+    });
+    return out;
+  }
+  function categoryDefaults(categoryKey) {
+    var d = g.SITE_LINKS && g.SITE_LINKS.defaults && g.SITE_LINKS.defaults.byCategory;
+    return (d && categoryKey && d[categoryKey]) || null;
+  }
+  // Size list a pre-Size-Manager product already offers for this field: the product's own list first,
+  // then the category default list (the same fallbacks the old pickers used).
+  function legacyOptions(field, product, categoryKey, template) {
+    var props = Array.isArray(field.legacy) ? field.legacy : [];
+    var sources = [product, categoryDefaults(categoryKey), categoryDefaults(template.legacyDefaults)];
+    for (var s = 0; s < sources.length; s++) {
+      for (var i = 0; i < props.length; i++) {
+        var v = sources[s] && sources[s][props[i]];
+        if (Array.isArray(v) && v.length) return toOptions(v);
+      }
+    }
+    return [];
+  }
+
+  /** The measurement fields a product shows, or null when the product still uses the old size pickers. */
+  function resolve(product, categoryKey) {
+    var p = product || {};
+    var ck = String(categoryKey || p.category || "").trim();
+    var own = p.sizeTemplate && typeof p.sizeTemplate === "object" ? p.sizeTemplate : null;
+    var cat = categorySetting(ck);
+    var enabled = own && typeof own.enabled === "boolean" ? own.enabled : !!(cat && cat.enabled === true);
+    if (!enabled) return null;
+    var templateId = (own && own.template) || (cat && cat.template) || "";
+    var template = getTemplate(templateId);
+    if (!template || !Array.isArray(template.fields)) return null;
+    var overrides = (own && own.fields && typeof own.fields === "object") ? own.fields : {};
+    var fields = [];
+    template.fields.forEach(function (f) {
+      if (!f || !KEY_RE.test(String(f.key || ""))) return;
+      var o = Object.prototype.hasOwnProperty.call(overrides, f.key) ? overrides[f.key] || {} : {};
+      var on = typeof o.enabled === "boolean" ? o.enabled : f.enabled !== false;
+      if (!on) return;
+      var options = Array.isArray(o.options) ? toOptions(o.options)
+        : own ? toOptions(f.options) : legacyOptions(f, p, ck, template);
+      var allowCustom = typeof o.allowCustom === "boolean" ? o.allowCustom : f.allowCustom === true;
+      // An old product that never had this measurement keeps not asking for it.
+      if (!options.length && (!allowCustom || (!own && !Array.isArray(o.options)))) return;
+      var label = String(o.label || f.label || f.key).trim();
+      var def = String(o["default"] != null ? o["default"] : f["default"] != null ? f["default"] : "").trim();
+      fields.push({
+        key: f.key,
+        label: label,
+        required: typeof o.required === "boolean" ? o.required : f.required !== false,
+        allowCustom: allowCustom,
+        options: options,
+        "default": def
+      });
+    });
+    return fields.length ? { templateId: template.id || templateId, fields: fields } : null;
+  }
+
+  function toMap(measurements) {
+    var map = {}, dup = false;
+    if (Array.isArray(measurements)) {
+      measurements.forEach(function (m) {
+        var k = String((m && m.key) || "");
+        if (Object.prototype.hasOwnProperty.call(map, k)) dup = true;
+        map[k] = m && m.value != null ? String(m.value) : "";
+      });
+    } else if (measurements && typeof measurements === "object") {
+      Object.keys(measurements).forEach(function (k) { map[k] = measurements[k] != null ? String(measurements[k]) : ""; });
+    }
+    return { map: map, dup: dup };
+  }
+
+  /** Checks a customer's choices against resolved fields. Same rules as opsTemplateSize_ in Operations.gs.
+   *  Returns {ok, errors:[{key, code}], measurements:[{key,label,value,custom}], size}. */
+  function validate(resolved, measurements) {
+    var fields = (resolved && resolved.fields) || [];
+    var given = toMap(measurements), errors = [], clean = [], parts = [], known = {};
+    if (given.dup) errors.push({ key: "", code: "DUPLICATE" });
+    fields.forEach(function (f) {
+      known[f.key] = true;
+      var v = String(Object.prototype.hasOwnProperty.call(given.map, f.key) ? given.map[f.key] : "").trim();
+      if (!v) { if (f.required) errors.push({ key: f.key, code: "REQUIRED" }); return; }
+      var opt = null;
+      f.options.forEach(function (o) { if (!opt && norm(o.value) === norm(v)) opt = o; });
+      if (!opt && (!f.allowCustom || v.length > MAX_CUSTOM || BAD_CUSTOM_RE.test(v))) {
+        errors.push({ key: f.key, code: "INVALID" });
+        return;
+      }
+      var value = opt ? opt.value : v;
+      clean.push({ key: f.key, label: f.label, value: value, custom: !opt });
+      parts.push(f.label + " " + (opt ? opt.label : v));
+    });
+    Object.keys(given.map).forEach(function (k) { if (!known[k]) errors.push({ key: k, code: "UNKNOWN" }); });
+    return { ok: !errors.length, errors: errors, measurements: clean, size: parts.join(" · ").slice(0, 160) };
+  }
+
+  /** Label-independent stock key, e.g. "body=46|length=54". */
+  function variantKey(measurements) {
+    return (Array.isArray(measurements) ? measurements : []).map(function (m) {
+      return m.key + "=" + norm(m.value);
+    }).join("|");
+  }
+
+  g.maSizeTemplates = {
+    config: config,
+    getTemplate: getTemplate,
+    categorySetting: categorySetting,
+    resolve: resolve,
+    validate: validate,
+    variantKey: variantKey
   };
 })(window);

@@ -21,6 +21,12 @@ window.__maBuildValidationProducts = function (w) {
         lengthLabel: (cfg && cfg.lengthSizeLabel) || '',
         custom: custom, kind: ab ? 'abaya' : tp ? 'two-piece' : 'simple'
       });
+      // Size Manager: only for products whose size template is switched on, so other products are unchanged.
+      var sized = w.maSizeTemplates && w.maSizeTemplates.resolve(p, category);
+      if (sized) {
+        products[products.length - 1].sizeTemplate = sized.templateId;
+        products[products.length - 1].sizeFields = sized.fields;
+      }
     });
   });
   var ids = {};

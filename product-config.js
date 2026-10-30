@@ -377,5 +377,483 @@ window.SITE_LINKS = {
   },
   "productNotes": {
     "default": "<div class='pqv-desc-rich'><p><strong>Important Notice:</strong></p><ol><li>Actual product color may vary slightly due to lighting conditions and your screen settings.</li><li>Fabric texture and color may appear slightly different in person than in photographs.</li><li>Once an order is confirmed, modifications or cancellations may be subject to our order policy.</li></ol><p><strong>Delivery:</strong> Nationwide home delivery across Bangladesh. Cash on Delivery (COD) is available.</p><p><strong>Returns:</strong> If you receive a defective product, please contact us within 24 hours of delivery for assistance.</p></div>"
+  },
+  "sizeTemplates": {
+    "version": 1,
+    "categories": {
+      "abaya": {
+        "template": "abaya",
+        "enabled": false
+      },
+      "cover-up": {
+        "template": "cover-up",
+        "enabled": false
+      },
+      "premium-two-piece": {
+        "template": "premium-two-piece",
+        "enabled": false
+      },
+      "tops-kurti": {
+        "template": "tops-kurti",
+        "enabled": false
+      },
+      "embroidery": {
+        "template": "embroidery",
+        "enabled": false
+      },
+      "hijab": {
+        "template": "hijab",
+        "enabled": false
+      },
+      "panjabi": {
+        "template": "panjabi",
+        "enabled": false
+      },
+      "three-piece-dress": {
+        "template": "three-piece-dress",
+        "enabled": false
+      }
+    },
+    "templates": {
+      "abaya": {
+        "id": "abaya",
+        "name": "Abaya",
+        "fields": [
+          {
+            "key": "body",
+            "label": "Body",
+            "options": [
+              "40",
+              "42",
+              "44",
+              "46",
+              "48",
+              "50",
+              "52"
+            ],
+            "required": true,
+            "enabled": true,
+            "allowCustom": false,
+            "legacy": [
+              "bodySizes"
+            ]
+          },
+          {
+            "key": "length",
+            "label": "Length",
+            "options": [
+              "50",
+              "52",
+              "54",
+              "56",
+              "58"
+            ],
+            "required": true,
+            "enabled": true,
+            "allowCustom": false,
+            "legacy": [
+              "lengthSizes",
+              "sizes"
+            ]
+          }
+        ]
+      },
+      "cover-up": {
+        "id": "cover-up",
+        "name": "Cover Up",
+        "legacyDefaults": "abaya",
+        "fields": [
+          {
+            "key": "body",
+            "label": "Body",
+            "options": [
+              "40",
+              "42",
+              "44",
+              "46",
+              "48",
+              "50"
+            ],
+            "required": true,
+            "enabled": true,
+            "allowCustom": false,
+            "legacy": [
+              "bodySizes"
+            ]
+          },
+          {
+            "key": "length",
+            "label": "Length",
+            "options": [
+              "50",
+              "52",
+              "54",
+              "56",
+              "58"
+            ],
+            "required": true,
+            "enabled": true,
+            "allowCustom": false,
+            "legacy": [
+              "lengthSizes",
+              "sizes"
+            ]
+          },
+          {
+            "key": "sleeve",
+            "label": "Sleeve Length",
+            "options": [],
+            "required": false,
+            "enabled": true,
+            "allowCustom": true,
+            "legacy": [
+              "sleeveSizes"
+            ]
+          }
+        ]
+      },
+      "premium-two-piece": {
+        "id": "premium-two-piece",
+        "name": "Premium Two-Piece",
+        "fields": [
+          {
+            "key": "top",
+            "label": "জামা",
+            "options": [
+              "36",
+              "38",
+              "40",
+              "42",
+              "44",
+              "46"
+            ],
+            "required": true,
+            "enabled": true,
+            "allowCustom": false,
+            "legacy": [
+              "bodySizes",
+              "sizes"
+            ]
+          },
+          {
+            "key": "top_length",
+            "label": "Top Length",
+            "options": [
+              "38",
+              "40",
+              "42",
+              "44"
+            ],
+            "required": true,
+            "enabled": true,
+            "allowCustom": false,
+            "legacy": [
+              "dressLengths",
+              "lengthSizes"
+            ]
+          },
+          {
+            "key": "sleeve",
+            "label": "Sleeve Length",
+            "options": [],
+            "required": false,
+            "enabled": true,
+            "allowCustom": false,
+            "legacy": [
+              "sleeveSizes"
+            ]
+          },
+          {
+            "key": "bottom",
+            "label": "পায়জামা / প্লাজু",
+            "options": [
+              "36",
+              "38",
+              "40",
+              "42",
+              "44",
+              "46"
+            ],
+            "required": true,
+            "enabled": true,
+            "allowCustom": false,
+            "legacy": [
+              "palazzoLengths"
+            ]
+          },
+          {
+            "key": "bottom_type",
+            "label": "Bottom Type",
+            "options": [
+              "Pajama",
+              "Plazo"
+            ],
+            "required": false,
+            "enabled": true,
+            "allowCustom": false,
+            "legacy": []
+          }
+        ]
+      },
+      "tops-kurti": {
+        "id": "tops-kurti",
+        "name": "Tops/Kurti",
+        "fields": [
+          {
+            "key": "size",
+            "label": "Size",
+            "options": [
+              "36",
+              "38",
+              "40",
+              "42",
+              "44",
+              "46"
+            ],
+            "required": true,
+            "enabled": true,
+            "allowCustom": false,
+            "legacy": [
+              "sizes"
+            ]
+          },
+          {
+            "key": "length",
+            "label": "Length",
+            "options": [
+              "36",
+              "38",
+              "40",
+              "42",
+              "44"
+            ],
+            "required": true,
+            "enabled": true,
+            "allowCustom": false,
+            "legacy": [
+              "lengthSizes"
+            ]
+          },
+          {
+            "key": "body",
+            "label": "Body / Chest",
+            "options": [],
+            "required": false,
+            "enabled": true,
+            "allowCustom": true,
+            "legacy": [
+              "bodySizes"
+            ]
+          },
+          {
+            "key": "sleeve",
+            "label": "Sleeve Length",
+            "options": [],
+            "required": false,
+            "enabled": true,
+            "allowCustom": true,
+            "legacy": [
+              "sleeveSizes"
+            ]
+          }
+        ]
+      },
+      "embroidery": {
+        "id": "embroidery",
+        "name": "Embroidery",
+        "legacyDefaults": "abaya",
+        "fields": [
+          {
+            "key": "garment",
+            "label": "Garment Type",
+            "options": [
+              "Abaya",
+              "Dress",
+              "Other"
+            ],
+            "required": true,
+            "enabled": true,
+            "allowCustom": false,
+            "legacy": []
+          },
+          {
+            "key": "body",
+            "label": "Body",
+            "options": [
+              "40",
+              "42",
+              "44",
+              "46",
+              "48",
+              "50"
+            ],
+            "required": true,
+            "enabled": true,
+            "allowCustom": false,
+            "legacy": [
+              "bodySizes"
+            ]
+          },
+          {
+            "key": "length",
+            "label": "Length",
+            "options": [
+              "50",
+              "52",
+              "54",
+              "56",
+              "58"
+            ],
+            "required": true,
+            "enabled": true,
+            "allowCustom": false,
+            "legacy": [
+              "lengthSizes",
+              "sizes"
+            ]
+          }
+        ]
+      },
+      "hijab": {
+        "id": "hijab",
+        "name": "Hijab",
+        "fields": [
+          {
+            "key": "size",
+            "label": "Size",
+            "options": [
+              "Free Size"
+            ],
+            "required": true,
+            "enabled": true,
+            "allowCustom": true,
+            "default": "Free Size",
+            "legacy": [
+              "sizes"
+            ]
+          },
+          {
+            "key": "length",
+            "label": "Length",
+            "options": [],
+            "required": false,
+            "enabled": true,
+            "allowCustom": true,
+            "legacy": []
+          },
+          {
+            "key": "width",
+            "label": "Width",
+            "options": [],
+            "required": false,
+            "enabled": true,
+            "allowCustom": true,
+            "legacy": []
+          }
+        ]
+      },
+      "panjabi": {
+        "id": "panjabi",
+        "name": "Panjabi",
+        "fields": [
+          {
+            "key": "size",
+            "label": "Size",
+            "options": [
+              {
+                "value": "M",
+                "label": "M (Length 40\" • Body 42\")"
+              },
+              {
+                "value": "L",
+                "label": "L (Length 42\" • Body 44\")"
+              },
+              {
+                "value": "XL",
+                "label": "XL (Length 44\" • Body 46\")"
+              }
+            ],
+            "required": true,
+            "enabled": true,
+            "allowCustom": false,
+            "legacy": [
+              "sizes"
+            ]
+          }
+        ]
+      },
+      "three-piece-dress": {
+        "id": "three-piece-dress",
+        "name": "Three Piece Dress",
+        "fields": [
+          {
+            "key": "top",
+            "label": "জামা",
+            "options": [
+              "36",
+              "38",
+              "40",
+              "42",
+              "44",
+              "46"
+            ],
+            "required": true,
+            "enabled": true,
+            "allowCustom": false,
+            "legacy": [
+              "bodySizes",
+              "sizes"
+            ]
+          },
+          {
+            "key": "top_length",
+            "label": "Top Length",
+            "options": [
+              "38",
+              "40",
+              "42",
+              "44"
+            ],
+            "required": true,
+            "enabled": true,
+            "allowCustom": false,
+            "legacy": [
+              "dressLengths",
+              "lengthSizes"
+            ]
+          },
+          {
+            "key": "bottom",
+            "label": "পায়জামা / প্লাজু",
+            "options": [
+              "36",
+              "38",
+              "40",
+              "42",
+              "44",
+              "46"
+            ],
+            "required": true,
+            "enabled": true,
+            "allowCustom": false,
+            "legacy": [
+              "palazzoLengths"
+            ]
+          },
+          {
+            "key": "dupatta",
+            "label": "Dupatta",
+            "options": [
+              "Standard"
+            ],
+            "required": false,
+            "enabled": true,
+            "allowCustom": true,
+            "default": "Standard",
+            "legacy": []
+          }
+        ]
+      }
+    }
   }
 };
