@@ -540,9 +540,9 @@ function validateOrderInput_(e) {
             productType: String((it &amp;&amp; it.productType) || '').trim().slice(0, 80),
             category: String((it &amp;&amp; it.category) || '').trim().slice(0, 80)
           };
-          // Size Manager: measurement choices ({key, value}); checked against the size template in opsLinePrice_.
+          // Size Manager: measurement choices ({key, value}, up to 20 = the template field limit); checked in opsLinePrice_.
           if (it &amp;&amp; Array.isArray(it.measurements) &amp;&amp; it.measurements.length) {
-            line.measurements = it.measurements.slice(0, 12).map(function (m) {
+            line.measurements = it.measurements.slice(0, 20).map(function (m) {
               return { key: String((m &amp;&amp; m.key) || '').slice(0, 40), value: String(m &amp;&amp; m.value != null ? m.value : '').slice(0, 80) };
             });
           }
@@ -10110,7 +10110,9 @@ function setupOperationsTriggersFromMenu() {
   /** The fields one product shows, or null when it keeps the old size pickers (category off, no template). */
   function resolve(config, product) {
     if (!config || typeof config !== "object" || !config.templates || !product) return null;
-    var cat = (config.categories &amp;&amp; config.categories[product.category]) || null;
+    var cat = (config.categories &amp;&amp; has(config.categories, product.category) &amp;&amp; config.categories[product.category]) || null;
+    // Only the Size Manager categories take part (Kaftan / Karchupi never do, even with a product override).
+    if (!cat) return null;
     var own = (config.products &amp;&amp; has(config.products, product.id) &amp;&amp; config.products[product.id]) || null;
     var enabled = own &amp;&amp; typeof own.enabled === "boolean" ? own.enabled : !!(cat &amp;&amp; cat.enabled === true);
     if (!enabled) return null;
@@ -10140,13 +10142,16 @@ function setupOperationsTriggersFromMenu() {
       var allowCustom = typeof o.allowCustom === "boolean" ? o.allowCustom : f.allowCustom === true;
       // An old product that never had this measurement keeps not asking for it.
       if (!options.length &amp;&amp; (!allowCustom || (legacyMode &amp;&amp; !ownOptions))) return;
+      var dflt = str(has(o, "default") ? o["default"] : f["default"]).trim();
+      // Never preselect a value the customer could not submit.
+      if (dflt &amp;&amp; !allowCustom &amp;&amp; !options.some(function (x) { return norm(x.value) === norm(dflt); })) dflt = "";
       fields.push({
         key: f.key,
         label: label(has(o, "label_bn") ? o.label_bn : f.label_bn, has(o, "label_en") ? o.label_en : f.label_en, f.key),
         required: typeof o.required === "boolean" ? o.required : f.required !== false,
         allowCustom: allowCustom,
         options: options,
-        "default": str(has(o, "default") ? o["default"] : f["default"]).trim()
+        "default": dflt
       });
     });
     if (!fields.length) return null;

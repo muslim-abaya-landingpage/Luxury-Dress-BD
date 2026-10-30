@@ -354,8 +354,8 @@ test('Apps Script intake keeps measurements only when sent, capped and trimmed',
   const fn = new Function('parsedCart', 'var cartItems;' + src.slice(start, end) + '}).filter(function (it) { return it.id; }); return cartItems;');
   const [oldLine] = fn([{ id: 'A', name: 'n', qty: 1, price: 1, size: 'Body 42' }]);
   assert.equal('measurements' in oldLine, false, 'old carts are unchanged');
-  const [line] = fn([{ id: 'A', qty: 1, measurements: Array.from({ length: 20 }, (_, i) => ({ key: 'k'.repeat(50) + i, value: 'v'.repeat(100) })) }]);
-  assert.equal(line.measurements.length, 12);
+  const [line] = fn([{ id: 'A', qty: 1, measurements: Array.from({ length: 30 }, (_, i) => ({ key: 'k'.repeat(50) + i, value: 'v'.repeat(100) })) }]);
+  assert.equal(line.measurements.length, 20, 'as many as a template may have');
   assert.equal(line.measurements[0].key.length, 40);
   assert.equal(line.measurements[0].value.length, 80);
 });
@@ -366,4 +366,44 @@ test('website never ships migrations; routes and prune list agree', async () => 
   assert.ok(JSON.parse(read('_routes.json')).include.includes('/migrations/*'));
   assert.match(read('scripts/prune-deploy.mjs'), /'migrations'/);
   assert.doesNotMatch(read('functions/api/size-config.js') + read('size-core.js'), /SERVICE_ROLE|GOOGLE_SA_JSON|private_key/);
+});
+
+test('review fixes: field keys stay, defaults are submittable, saves are atomic, Kaftan/Karchupi overrides ignored', async () => {
+  const store = await lib('_lib/size-store.js');
+  const core = sizeCore();
+  const d1 = fakeD1();
+  migrate(d1, '0001_size_manager.sql', '0002_size_manager_seed.sql');
+  const { config, updatedAt } = await store.readDraft(d1);
+  const code = async (p) => { try { await p; return 'OK'; } catch (e) { return e.code; } };
+  const abaya = config.templates.abaya;
+  const ctx = { now: NOW + 5, actor: 'owner' };
+
+  // A used key cannot be dropped or renamed; switching it off is fine.
+  assert.equal(await code(store.saveTemplate(d1, { ...abaya, fields: [abaya.fields[0]] }, ctx)), 'FIELD_KEY_REMOVED');
+  assert.equal(await code(store.saveTemplate(d1, { ...abaya, fields: [abaya.fields[0], { ...abaya.fields[1], key: 'len' }] }, ctx)), 'FIELD_KEY_REMOVED');
+  assert.equal(await code(store.saveTemplate(d1, { ...abaya, fields: [abaya.fields[0], { ...abaya.fields[1], enabled: false }] }, { ...ctx, expectedUpdatedAt: updatedAt.abaya })), 'OK');
+
+  // Defaults must be a listed value unless typing is allowed.
+  const f0 = abaya.fields[0];
+  assert.equal(await code(Promise.resolve().then(() => store.validateTemplate({ ...abaya, fields: [{ ...f0, default: '99' }] }))), 'BAD_DEFAULT');
+  assert.equal(await code(Promise.resolve().then(() => store.validateTemplate({ ...abaya, fields: [{ ...f0, default: '44' }] }))), 'OK');
+  assert.equal(await code(Promise.resolve().then(() => store.validateTemplate({ ...abaya, fields: [{ ...f0, default: '99', allowCustom: true }] }))), 'OK');
+  const cfg = { categories: { abaya: { template: 'abaya', enabled: true } }, templates: { abaya }, products: { X: { fields: { body: { default: '99' } } } } };
+  assert.equal(core.resolve(cfg, { id: 'X', category: 'abaya', sizeLegacy: {} }).fields[0].default, '', 'override default outside the choices is not preselected');
+
+  // Product overrides never switch on Kaftan / Karchupi.
+  cfg.products['K-1'] = { enabled: true, template: 'abaya', useTemplate: true };
+  assert.equal(core.resolve(cfg, { id: 'K-1', category: 'kaftan', sizeLegacy: {} }), null);
+  assert.equal(core.resolve(cfg, { id: 'K-1', category: 'karchupi', sizeLegacy: {} }), null);
+
+  // Two editors with the same starting point: the one whose write lands second gets CONFLICT, nothing half-saved.
+  const fresh = (await store.readDraft(d1));
+  const raced = Object.assign({}, d1, { batch: async (list) => {
+    d1._db.prepare('UPDATE size_templates SET updated_at = updated_at + 1, name_en = ? WHERE id = ?').run('Other editor', 'abaya');
+    return d1.batch(list);
+  } });
+  assert.equal(await code(store.saveTemplate(raced, { ...fresh.config.templates.abaya, name_en: 'Mine' }, { now: NOW + 9, actor: 'owner', expectedUpdatedAt: fresh.updatedAt.abaya })), 'CONFLICT');
+  const after = await store.readDraft(d1);
+  assert.equal(after.config.templates.abaya.name_en, 'Other editor');
+  assert.equal(after.config.templates.abaya.fields.length, 2, 'fields untouched by the refused save');
 });

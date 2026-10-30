@@ -46,7 +46,9 @@
   /** The fields one product shows, or null when it keeps the old size pickers (category off, no template). */
   function resolve(config, product) {
     if (!config || typeof config !== "object" || !config.templates || !product) return null;
-    var cat = (config.categories && config.categories[product.category]) || null;
+    var cat = (config.categories && has(config.categories, product.category) && config.categories[product.category]) || null;
+    // Only the Size Manager categories take part (Kaftan / Karchupi never do, even with a product override).
+    if (!cat) return null;
     var own = (config.products && has(config.products, product.id) && config.products[product.id]) || null;
     var enabled = own && typeof own.enabled === "boolean" ? own.enabled : !!(cat && cat.enabled === true);
     if (!enabled) return null;
@@ -76,13 +78,16 @@
       var allowCustom = typeof o.allowCustom === "boolean" ? o.allowCustom : f.allowCustom === true;
       // An old product that never had this measurement keeps not asking for it.
       if (!options.length && (!allowCustom || (legacyMode && !ownOptions))) return;
+      var dflt = str(has(o, "default") ? o["default"] : f["default"]).trim();
+      // Never preselect a value the customer could not submit.
+      if (dflt && !allowCustom && !options.some(function (x) { return norm(x.value) === norm(dflt); })) dflt = "";
       fields.push({
         key: f.key,
         label: label(has(o, "label_bn") ? o.label_bn : f.label_bn, has(o, "label_en") ? o.label_en : f.label_en, f.key),
         required: typeof o.required === "boolean" ? o.required : f.required !== false,
         allowCustom: allowCustom,
         options: options,
-        "default": str(has(o, "default") ? o["default"] : f["default"]).trim()
+        "default": dflt
       });
     });
     if (!fields.length) return null;
