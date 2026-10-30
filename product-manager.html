@@ -31,8 +31,9 @@
 <link rel="stylesheet" href="product-manager-wp.css?v=595b93a1a1714781">
 <link rel="stylesheet" href="admin-design-system.css?v=1eaf4362bddc4ad0">
 <link rel="stylesheet" href="product-manager-premium.css?v=79981ef6394660d4">
+<link rel="stylesheet" href="admin-wp-shell.css?v=1">
 </head>
-<body class="pl-admin adm-body pm-wp-admin" data-admin-guard="1">
+<body class="pl-admin adm-body pm-wp-admin adm-wp" data-admin-guard="1">
   <div class="adm-shell">
     <div class="adm-sidebar-backdrop" id="admSbBackdrop"></div>
     <aside class="adm-sidebar" id="admSidebar">
@@ -43,19 +44,25 @@
         <button type="button" class="adm-sidebar-close" id="admSbClose" aria-label="Close menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
       </div>
       <div class="adm-sidebar-profile"><div class="adm-profile-avatar" aria-hidden="true">MA</div><div class="adm-profile-copy"><strong>Your workspace</strong><small>Store management</small></div></div>
-      <nav class="adm-sidebar-nav" aria-label="Admin menu">
+      <nav class="adm-sidebar-nav" aria-label="অ্যাডমিন মেনু">
 <a class="adm-sidebar-item" href="admin-dashboard.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Dashboard</span></a>
-<details class="adm-nav-group" name="adm-navigation"><summary class="adm-sidebar-item" title="Orders & Accounts"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z M9 7h6M9 11h6M9 15h4"/></svg><span>Orders & Accounts</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
-<a class="adm-sidebar-item adm-nav-child" href="admin-orders.html"><span>Orders</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="admin-operations.html"><span>Accounts & Returns</span></a>
+<details class="adm-nav-group" name="adm-navigation"><summary class="adm-sidebar-item" title="Orders"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z M9 7h6M9 11h6M9 15h4"/></svg><span>Orders</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
+<a class="adm-sidebar-item adm-nav-child" href="admin-orders.html"><span>All Orders</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-order-new.html"><span>Add New Order</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-operations.html"><span>Finance &amp; Returns</span></a>
 </div></details>
-<details class="adm-nav-group has-current" name="adm-navigation" open><summary class="adm-sidebar-item" title="Products & Stock"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="6" width="16" height="15" rx="2"/><path d="M9 6V5a3 3 0 0 1 6 0v1M9 10a3 3 0 0 0 6 0"/></svg><span>Products & Stock</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
-<a class="adm-sidebar-item adm-nav-child is-current" href="product-manager.html" aria-current="page"><span>Products</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="stock-analytics.html"><span>Stock & Analytics</span></a>
+<details class="adm-nav-group has-current" name="adm-navigation" open><summary class="adm-sidebar-item" title="Products"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="6" width="16" height="15" rx="2"/><path d="M9 6V5a3 3 0 0 1 6 0v1M9 10a3 3 0 0 0 6 0"/></svg><span>Products</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
+<a class="adm-sidebar-item adm-nav-child is-current" href="product-manager.html" aria-current="page"><span>All Products</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="product-manager.html#add-new"><span>Add New Product</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="product-manager.html#categories"><span>Categories</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="stock-analytics.html"><span>Stock &amp; Analytics</span></a>
 <a class="adm-sidebar-item adm-nav-child" href="product-links.html"><span>Product Links</span></a>
 </div></details>
-<a class="adm-sidebar-item" href="admin-inbox.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h18v13H8l-5 4V4ZM7 9h10M7 13h7"/></svg><span>Customer Inbox</span></a>
-<details class="adm-nav-group" name="adm-navigation"><summary class="adm-sidebar-item" title="Settings & More"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 9v12"/></svg><span>Settings & More</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
+<details class="adm-nav-group" name="adm-navigation"><summary class="adm-sidebar-item" title="Customer Inbox"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h18v13H8l-5 4V4ZM7 9h10M7 13h7"/></svg><span>Customer Inbox</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
+<a class="adm-sidebar-item adm-nav-child" href="admin-inbox.html"><span>Inbox</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-support-inbox.html"><span>Live Support</span></a>
+</div></details>
+<details class="adm-nav-group" name="adm-navigation"><summary class="adm-sidebar-item" title="Settings &amp; Tools"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 9v12"/></svg><span>Settings &amp; Tools</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
 <a class="adm-sidebar-item adm-nav-child" href="admin-staff.html"><span>Staff</span></a>
 <a class="adm-sidebar-item adm-nav-child" href="admin-growth.html"><span>Growth Tools</span></a>
 <a class="adm-sidebar-item adm-nav-child" href="admin-links.html"><span>Admin Links</span></a>
@@ -81,6 +88,7 @@
           <button class="pl-btn pl-btn-secondary" id="pmPublishCheck" type="button">Check publish status</button>
           <a class="pl-btn pl-btn-secondary" href="product-links.html" style="text-decoration:none;display:inline-flex;align-items:center" title="Categories — Product Link URL">Product Links</a>
         </div>
+        <p class="pm-tools-help">Tip: for a product in several colors, enter the color names in photo order (main photo = first color); color variants and product links are made automatically. A new category only needs a name; its page and link are made for you.</p>
 </details>
         <p id="pmSaveStatus" role="status" aria-live="polite">Stock changes save automatically.</p>
       </header>
@@ -90,7 +98,6 @@
         <button class="pl-btn pl-btn-primary" id="pmQuickUpload" type="button" hidden>+ Upload new product</button>
         <div class="pm-wp-notice" id="pmLiveNotice"><a id="pmLiveLink" target="_blank" rel="noopener" hidden>✅ New product is live — view →</a></div>
 
-        <div class="pm-guide"><strong>Easy publishing</strong><span>Products: for multiple colors, enter names in photo order (main photo = first color); matching variants and product links are generated automatically. Categories: add a name and the page/link are generated for you.</span><a href="stock-analytics.html">Stock & Analytics →</a></div>
         <div class="pm-layout" id="pmLayout">
           <aside class="pm-sidebar">
             <h2>Categories</h2>
@@ -162,7 +169,7 @@
     });
     return lazyScripts[src];
   }
-  function ensureCsvTools() { return loadScriptOnce("product-csv.js?v=20261028-dresslength-discount"); }
+  function ensureCsvTools() { return loadScriptOnce("product-csv.js?v=20261029-linked-advanced"); }
   function loadStyleOnce(href) {
     var existing = document.querySelector('link[data-pm-lazy-href="' + href + '"]');
     if (existing) return Promise.resolve();
@@ -698,6 +705,117 @@
     return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][parseInt(m[2], 10) - 1] + " " + parseInt(m[3], 10) + ", " + m[1];
   }
   function productTags(p) { return Array.isArray(p.tags) ? p.tags.filter(Boolean) : []; }
+  var SHORT_DESC_MAX = 300;
+  // Attributes tab (WooCommerce "Attributes"): the product page reads these fields; each value is one choice.
+  var STD_ATTRS = [
+    ["sizes", "Size", "e.g. 44, 46 or M, L"],
+    ["bodySizes", "Body measurement (inches)", "e.g. 38, 40, 42"],
+    ["sleeveSizes", "Sleeve size (inches)", "e.g. 22, 23, 24"],
+    ["dressLengths", "Dress length (inches)", "e.g. 38, 40, 42"],
+    ["palazzoLengths", "Pajama / Palazzo length (inches)", "e.g. 38, 40"]
+  ];
+  var attrShown = {}; // attributes added in this editor session but still empty
+  // Which measurements belong to which category (the rest stay available under "Other attributes").
+  var CATEGORY_ATTRS = {
+    "abaya": ["sizes", "bodySizes", "sleeveSizes"],
+    "cover-up": ["sizes", "bodySizes", "sleeveSizes"],
+    "premium-two-piece": ["bodySizes", "dressLengths", "palazzoLengths"],
+    "three-piece-dress": ["bodySizes", "dressLengths", "palazzoLengths"],
+    "hijab": ["sizes"]
+  };
+  function categoryAttrs(catKey) { return CATEGORY_ATTRS[catKey] || ["sizes", "bodySizes", "sleeveSizes"]; }
+  // Ready-made size sets: "Use … size set" adds these values in one click (values already there are kept).
+  var CATEGORY_PRESETS = {
+    "abaya": { sizes: ["44", "46", "48", "50", "52", "54", "56"] },
+    "cover-up": { sizes: ["50", "52", "54", "56", "58"] },
+    "embroidery": { sizes: ["50", "52", "54", "56", "58"] },
+    "premium-two-piece": { dressLengths: ["38", "40", "42"], palazzoLengths: ["38", "40"] },
+    "three-piece-dress": { dressLengths: ["38", "40", "42"], palazzoLengths: ["38", "40"] },
+    "tops-kurti": { sizes: ["34", "36", "38", "40", "42", "44", "46"] },
+    "hijab": { sizes: ["Free Size"] },
+    "panjabi": { sizes: ["M (Long 40 • Body 42)", "L (Long 42 • Body 44)", "XL (Long 44 • Body 46)"] }
+  };
+  function attrLabel(key) { var a = STD_ATTRS.find(function (x) { return x[0] === key; }); return a ? a[1] : key; }
+  function presetSummary(catKey) {
+    var set = CATEGORY_PRESETS[catKey];
+    return set ? Object.keys(set).map(function (k) { return attrLabel(k).replace(/ \(inches\)$/, "") + " " + set[k].join(", "); }).join(" + ") : "";
+  }
+  // Adds values to a list without duplicates (case-insensitive); returns how many were new.
+  function mergeValues(list, add) {
+    var lower = list.map(function (v) { return v.toLowerCase(); }), n = 0;
+    add.forEach(function (v) { v = String(v).trim().slice(0, 60); if (v && lower.indexOf(v.toLowerCase()) === -1) { list.push(v); lower.push(v.toLowerCase()); n++; } });
+    return n;
+  }
+  function attrValues(p, key) { return Array.isArray(p[key]) ? p[key].map(String).filter(Boolean) : []; }
+  function customAttrs(p) { return Array.isArray(p.attributes) ? p.attributes.filter(function (a) { return a && typeof a === "object"; }) : []; }
+  function valueChips(values, ref) {
+    return '<ul class="pm-attr-values">' + (values.length ? values.map(function (v, i) {
+      return '<li><span>' + escapeHtml(v) + '</span>' +
+        '<button type="button" class="pm-attr-move" data-attr-move="' + ref + '" data-i="' + i + '" data-dir="-1"' + (i === 0 ? ' disabled' : '') + ' aria-label="Move ' + escapeAttr(v) + ' left">‹</button>' +
+        '<button type="button" class="pm-attr-move" data-attr-move="' + ref + '" data-i="' + i + '" data-dir="1"' + (i === values.length - 1 ? ' disabled' : '') + ' aria-label="Move ' + escapeAttr(v) + ' right">›</button>' +
+        '<button type="button" class="pm-wp-tag-x" data-attr-del="' + ref + '" data-i="' + i + '" aria-label="Remove ' + escapeAttr(v) + '">×</button></li>';
+    }).join("") : '<li class="pm-wp-hint">No values yet — add one below.</li>') + '</ul>';
+  }
+  function attributeCardsMarkup(p, catKey) {
+    var usual = categoryAttrs(catKey);
+    var html = STD_ATTRS.filter(function (a) { return attrValues(p, a[0]).length || attrShown[a[0]]; }).map(function (a) {
+      return '<div class="pm-attr" data-attr="' + a[0] + '"><div class="pm-attr-head"><b>' + escapeHtml(a[1]) +
+        (usual.indexOf(a[0]) === -1 ? ' <small class="pm-attr-unusual">— not usual for ' + escapeHtml(categoryName(catKey)) + '</small>' : '') + '</b>' +
+        '<button type="button" class="pm-wp-link-danger" data-attr-remove="' + a[0] + '">Remove attribute</button></div>' +
+        valueChips(attrValues(p, a[0]), a[0]) +
+        '<p class="pm-attr-new"><input type="text" data-attr-new="' + a[0] + '" placeholder="Add value(s): ' + escapeAttr(a[2]) + '" aria-label="Add ' + escapeAttr(a[1]) + ' values"> ' +
+        '<button type="button" class="pm-wp-button" data-attr-add-val="' + a[0] + '">Add</button></p></div>';
+    }).join("");
+    html += customAttrs(p).map(function (a, n) {
+      var ref = "c" + n;
+      return '<div class="pm-attr pm-attr-custom" data-attr="' + ref + '"><div class="pm-attr-head">' +
+        '<input type="text" class="pm-attr-name" data-attr-name="' + n + '" maxlength="40" value="' + escapeAttr(a.name || "") + '" placeholder="Attribute name, e.g. Work" aria-label="Custom attribute name">' +
+        '<button type="button" class="pm-wp-link-danger" data-attr-remove="' + ref + '">Remove attribute</button></div>' +
+        valueChips((Array.isArray(a.values) ? a.values : []).map(String).filter(Boolean), ref) +
+        '<p class="pm-attr-new"><input type="text" data-attr-new="' + ref + '" placeholder="Add value(s), separate with commas" aria-label="Add values"> ' +
+        '<button type="button" class="pm-wp-button" data-attr-add-val="' + ref + '">Add</button></p></div>';
+    }).join("");
+    return html || '<p class="pm-wp-hint">No attributes yet. Pick one below and click “Add attribute”.</p>';
+  }
+  function categoryName(catKey) {
+    var sec = sections.find(function (x) { return x.key === catKey; });
+    return sec ? enName(sec) : String(catKey || "this category");
+  }
+  function attributePickMarkup(p, catKey) {
+    var usual = categoryAttrs(catKey);
+    var free = STD_ATTRS.filter(function (a) { return !attrValues(p, a[0]).length && !attrShown[a[0]]; });
+    var opt = function (a) { return '<option value="' + a[0] + '">' + escapeHtml(a[1]) + '</option>'; };
+    var mine = free.filter(function (a) { return usual.indexOf(a[0]) !== -1; }), other = free.filter(function (a) { return usual.indexOf(a[0]) === -1; });
+    return '<option value="">Choose an attribute…</option>' +
+      (mine.length ? '<optgroup label="For ' + escapeAttr(categoryName(catKey)) + '">' + mine.map(opt).join("") + '</optgroup>' : '') +
+      '<optgroup label="Other attributes">' + other.map(opt).join("") + '<option value="custom">Custom attribute (shown in product details)</option></optgroup>';
+  }
+  var LOW_STOCK_DEFAULT = 2; // WooCommerce's default low-stock threshold
+  // "low" = a counted stock at or below the product's threshold (but not 0, which is out of stock).
+  function isLowStock(p) {
+    if (p == null || p.stock == null || p.stock === "" || managerOutOfStock(p)) return false;
+    var qty = parseInt(p.stock, 10), limit = p.lowStockAmount == null || p.lowStockAmount === "" ? LOW_STOCK_DEFAULT : parseInt(p.lowStockAmount, 10);
+    return !isNaN(qty) && !isNaN(limit) && qty <= limit;
+  }
+  function findProductBySku(sku) {
+    var hit = null;
+    Object.keys(products).some(function (k) { return (products[k] || []).some(function (q) { if (q && String(q.id) === String(sku)) { hit = q; return true; } return false; }); });
+    return hit;
+  }
+  function allSkuOptions(p) {
+    var out = [];
+    Object.keys(products).forEach(function (k) { (products[k] || []).forEach(function (q) { if (q && q.id && q !== p && productStatus(q) !== "trash") out.push('<option value="' + escapeAttr(q.id) + '">' + escapeHtml(q.name || "") + '</option>'); }); });
+    return out.join("");
+  }
+  function upsellItems(p) {
+    var ids = Array.isArray(p.upsellIds) ? p.upsellIds : [];
+    if (!ids.length) return '<li class="pm-wp-hint">No upsells yet.</li>';
+    return ids.map(function (id, i) {
+      var q = findProductBySku(id);
+      var note = !q ? ' <em class="pm-upsell-missing">(not found)</em>' : productStatus(q) !== "publish" ? ' <em class="pm-upsell-missing">(' + (productStatus(q) === "draft" ? "Draft" : "Trash") + ' — not shown)</em>' : '';
+      return '<li><button type="button" class="pm-wp-tag-x" data-upsell-i="' + i + '" aria-label="Remove upsell ' + escapeAttr(id) + '">×</button> ' + escapeHtml(id) + (q ? ' — ' + escapeHtml(q.name || "") : '') + note + '</li>';
+    }).join("");
+  }
   // WooCommerce-style status. Published = no field; Draft / Trash stay in the catalog but are hidden from the website.
   function productStatus(p) { return p && (p.status === "draft" || p.status === "trash") ? p.status : "publish"; }
   function setProductStatus(p, status) {
@@ -763,6 +881,7 @@
   function openProductEditor(cat, index) {
     editTarget = { cat: cat, index: index };
     editTab = "general";
+    attrShown = {};
     activeKey = EDIT_KEY;
     renderCatList();
     renderMain();
@@ -786,37 +905,59 @@
     var shown = document.getElementById("pmCardPrice");
     if (shown) shown.textContent = "৳" + (parseInt(p.price, 10) || 0);
   }
-  function buildOptionPriceRows(p, meta) {
+  // WooCommerce wording: "Regular price" is the normal price, "Sale price" (optional, lower) is what the customer pays
+  // during a sale. Stored as price / priceByType = what the customer pays, regularPrice / regularPriceByType = before-sale.
+  function regularOf(p, t) {
+    var pay = parseInt(t ? (p.priceByType || {})[t] : p.price, 10), was = parseInt(t ? (p.regularPriceByType || {})[t] : p.regularPrice, 10);
+    return was > pay ? was : (pay > 0 ? pay : "");
+  }
+  function saleOf(p, t) {
+    var pay = parseInt(t ? (p.priceByType || {})[t] : p.price, 10), was = parseInt(t ? (p.regularPriceByType || {})[t] : p.regularPrice, 10);
+    return was > pay && pay > 0 ? pay : "";
+  }
+  function setWooPrices(p, t, regular, sale) {
+    var r = parseInt(regular, 10), sp = parseInt(sale, 10);
+    if (!(r > 0)) return false;
+    var pay = sp > 0 && sp < r ? sp : r;
+    if (t) { if (!p.priceByType || typeof p.priceByType !== "object") p.priceByType = {}; p.priceByType[t] = pay; }
+    else p.price = pay;
+    setRegularPrice(p, t || null, pay < r ? r : "");
+    return true;
+  }
+  function productIsVariable(p, meta) { return productOptionTypes(p, meta).length > 0; }
+  function buildGeneralPriceRows(p, meta) {
     var types = productOptionTypes(p, meta);
-    var rows = "";
-    if (!types.length) {
-      rows = efield("price", "Price (৳)", p.price, "number", "What the customer pays.") +
-        efield("regularPrice", "Regular price (৳)", p.regularPrice == null ? "" : p.regularPrice, "number", "Enter the original price; the percentage below calculates the sale price.") +
-        '<p class="pm-wp-form-row"><label for="pmEf_discountPercent">Discount (%)</label><span><input id="pmEf_discountPercent" type="number" min="1" max="99" step="1" data-ef="discountPercent" value="' + salePercent(p.price, p.regularPrice) + '" placeholder="e.g. 10"><small>Enter 1–99. Sale price is calculated from the regular price; clear to remove the discount.</small></span></p>';
-    } else {
-      rows = '<p class="pm-wp-form-row"><label>Price on product cards</label><span><b id="pmCardPrice">৳' + (parseInt(p.price, 10) || 0) + '</b><small>Always the same as the first option (' + escapeHtml(types[0]) + ').</small></span></p>' +
-        types.map(function (t) {
-          var v = p.priceByType && p.priceByType[t] != null ? p.priceByType[t] : "";
-          var i = types.indexOf(t);
-          return '<div class="pm-wp-form-row pm-opt-row"><label for="pmEf_typePrice:' + escapeAttr(t) + '">Option ' + (i + 1) + (i === 0 ? ' <em>(card price)</em>' : '') + '</label><span>' +
-            '<input type="text" class="pm-opt-name" maxlength="40" data-opt-name="' + escapeAttr(t) + '" value="' + escapeAttr(t) + '" aria-label="Option name (' + escapeAttr(t) + ')" title="Option name — edit to rename">' +
-            '<input id="pmEf_typePrice:' + escapeAttr(t) + '" class="pm-opt-price" type="number" min="0" data-ef="typePrice:' + escapeAttr(t) + '" value="' + escapeAttr(v) + '" aria-label="' + escapeAttr(t) + ' price">' +
-            '<input class="pm-opt-was" type="number" min="0" data-ef="typeRegular:' + escapeAttr(t) + '" value="' + escapeAttr(p.regularPriceByType && p.regularPriceByType[t] != null ? p.regularPriceByType[t] : "") + '" placeholder="Was ৳" aria-label="' + escapeAttr(t) + ' before-sale price" title="Optional before-sale price — shown crossed out when higher than the price">' +
-            '<input class="pm-opt-discount" type="number" min="1" max="99" step="1" data-ef="typeDiscount:' + escapeAttr(t) + '" value="' + salePercent(v, p.regularPriceByType && p.regularPriceByType[t]) + '" placeholder="% off" aria-label="' + escapeAttr(t) + ' discount percent" title="Enter 1–99 to calculate this option’s sale price">' +
-            '<span class="pm-opt-tools">' +
-            (types.length > 1 ? '<button type="button" class="pm-wp-button pm-opt-move" data-opt-up="' + i + '"' + (i === 0 ? ' disabled' : '') + ' aria-label="Move ' + escapeAttr(t) + ' up" title="Move up">↑</button>' +
-              '<button type="button" class="pm-wp-button pm-opt-move" data-opt-down="' + i + '"' + (i === types.length - 1 ? ' disabled' : '') + ' aria-label="Move ' + escapeAttr(t) + ' down" title="Move down">↓</button>' +
-              '<button type="button" class="pm-wp-link-danger" data-opt-del="' + escapeAttr(t) + '">Remove</button>' : '') +
-            '</span></span></div>';
-        }).join("") +
-        '<p class="pm-wp-form-row pm-opt-help"><label></label><span><small id="pmOptEditMsg" role="status">Edit an option name to rename it (e.g. Hijab → Hijab + Niqab). ↑ ↓ change the order; the first option is the card price. Enter a % off to calculate that option’s sale price; the regular price stays struck through.</small></span></p>';
+    if (types.length) {
+      return '<p class="pm-wp-form-row"><label>Price on product cards</label><span><b id="pmCardPrice">৳' + (parseInt(p.price, 10) || 0) + '</b>' +
+        '<small>Prices are set for each variation in the <button type="button" class="pm-wp-linkbtn" data-goto-tab="variations">Variations</button> tab. The card shows the first variation (' + escapeHtml(types[0]) + ').</small></span></p>';
     }
-    return rows +
-      '<div class="pm-wp-form-row pm-opt-add"><label for="pmOptName">Add option</label><span>' +
-      '<input type="text" id="pmOptName" maxlength="40" placeholder="Option name, e.g. Hijab"> ' +
-      '<input type="number" id="pmOptPrice" min="1" placeholder="Price ৳"> ' +
-      '<button type="button" class="pm-wp-button" id="pmOptAdd">+ Add option</button>' +
-      '<small id="pmOptMsg" role="status">Customers pick it on the product page, with this price.</small></span></div>';
+    return '<p class="pm-wp-form-row"><label for="pmEf_regular">Regular price (৳)</label><span><input id="pmEf_regular" type="number" min="1" data-ef="regular" value="' + escapeAttr(regularOf(p)) + '"><small>The normal price.</small></span></p>' +
+      '<p class="pm-wp-form-row"><label for="pmEf_sale">Sale price (৳)</label><span><input id="pmEf_sale" type="number" min="1" data-ef="sale" value="' + escapeAttr(saleOf(p)) + '" placeholder="Optional"><small>Lower than the regular price. Customers pay this; the regular price is shown struck through. Leave empty for no sale.</small></span></p>' +
+      '<p class="pm-wp-form-row"><label for="pmEf_discountPercent">Discount (%)</label><span><input id="pmEf_discountPercent" type="number" min="1" max="99" step="1" data-ef="discountPercent" value="' + salePercent(p.price, p.regularPrice) + '" placeholder="e.g. 10"><small>Optional: 1–99 fills the sale price from the regular price.</small></span></p>';
+  }
+  function buildVariationRows(p, meta) {
+    var types = productOptionTypes(p, meta);
+    var rows = types.map(function (t, i) {
+      return '<div class="pm-var-row pm-opt-row" data-var-row="' + i + '">' +
+        '<div class="pm-var-top"><span class="pm-var-n">#' + (i + 1) + (i === 0 ? ' <em>card price</em>' : '') + '</span>' +
+        '<input type="text" class="pm-opt-name" maxlength="40" data-opt-name="' + escapeAttr(t) + '" value="' + escapeAttr(t) + '" aria-label="Variation name (' + escapeAttr(t) + ')" title="Edit to rename">' +
+        '<span class="pm-opt-tools">' +
+        '<button type="button" class="pm-wp-button pm-opt-move" data-opt-up="' + i + '"' + (i === 0 ? ' disabled' : '') + ' aria-label="Move ' + escapeAttr(t) + ' up" title="Move up">↑</button>' +
+        '<button type="button" class="pm-wp-button pm-opt-move" data-opt-down="' + i + '"' + (i === types.length - 1 ? ' disabled' : '') + ' aria-label="Move ' + escapeAttr(t) + ' down" title="Move down">↓</button>' +
+        (types.length > 1 ? '<button type="button" class="pm-wp-link-danger" data-opt-del="' + escapeAttr(t) + '">Remove</button>' : '') +
+        '</span></div>' +
+        '<div class="pm-var-prices">' +
+        '<label>Regular price (৳)<input type="number" min="1" class="pm-opt-price" data-ef="varRegular:' + escapeAttr(t) + '" value="' + escapeAttr(regularOf(p, t)) + '"></label>' +
+        '<label>Sale price (৳)<input type="number" min="1" class="pm-opt-was" data-ef="varSale:' + escapeAttr(t) + '" value="' + escapeAttr(saleOf(p, t)) + '" placeholder="Optional"></label>' +
+        '<label>Discount (%)<input type="number" min="1" max="99" step="1" class="pm-opt-discount" data-ef="typeDiscount:' + escapeAttr(t) + '" value="' + salePercent(p.priceByType && p.priceByType[t], p.regularPriceByType && p.regularPriceByType[t]) + '" placeholder="e.g. 10"></label>' +
+        '</div></div>';
+    }).join("");
+    return (types.length ? rows : '<p class="pm-wp-hint">No variations yet.</p>') +
+      '<p class="pm-wp-hint" id="pmOptEditMsg" role="status">Customers choose one variation on the product page and pay its price. Edit a name to rename it; ↑ ↓ change the order (the first one is the card price).</p>' +
+      '<div class="pm-var-add"><input type="text" id="pmOptName" maxlength="40" placeholder="New variation, e.g. Hijab" aria-label="New variation name"> ' +
+      '<input type="number" id="pmOptPrice" min="1" placeholder="Regular price ৳" aria-label="New variation regular price"> ' +
+      '<button type="button" class="pm-wp-button" id="pmOptAdd">+ Add variation</button>' +
+      '<small id="pmOptMsg" role="status"></small></div>';
   }
 
   function colorKeyFromLabel(label, index) {
@@ -895,7 +1036,9 @@
     var meta = getCategoryTypeMeta(catKey);
     var out = managerOutOfStock(p);
     if (!Object.prototype.hasOwnProperty.call(liveStockOverrides, String(p.id)) && typeof window.isInStock === "function") out = !window.isInStock(p);
-    var tabs = [["general", "General"], ["inventory", "Inventory"], ["attributes", "Attributes"]];
+    var isVariable = productIsVariable(p, meta);
+    if (!isVariable && editTab === "variations") editTab = "general";
+    var tabs = [["general", "General"], ["inventory", "Inventory"], ["linked", "Linked Products"], ["attributes", "Attributes"]].concat(isVariable ? [["variations", "Variations"]] : [], [["advanced", "Advanced"]]);
     var tags = productTags(p);
     var colorRows = initialColorRows(p);
     mainEl.innerHTML =
@@ -908,30 +1051,48 @@
         '<p class="pm-wp-permalink">Permalink: ' + (p.id ? '<a href="/product/' + encodeURIComponent(p.id) + '" target="_blank" rel="noopener">https://muslimabaya.com/product/' + escapeHtml(p.id) + '</a>' : "—") + '</p>' +
         '<section class="pm-wp-box"><h3 class="pm-wp-box-title">Product description</h3><div class="pm-wp-box-body">' +
           '<textarea data-ef="detailNote" rows="8" placeholder="What is in the set, fabric, care notes…">' + escapeHtml(p.detailNote || "") + '</textarea></div></section>' +
-        '<section class="pm-wp-box pm-wp-data"><h3 class="pm-wp-box-title">Product data <span>— ' + (productOptionTypes(p, meta).length ? "Variable product (options)" : "Simple product") + '</span></h3>' +
+        '<section class="pm-wp-box pm-wp-data"><h3 class="pm-wp-box-title">Product data — <label class="pm-sr-only" for="pmProductType">Product type</label>' +
+          '<select id="pmProductType" class="pm-wp-type"><option value="simple"' + (isVariable ? '' : ' selected') + (meta ? ' disabled' : '') + '>Simple product</option><option value="variable"' + (isVariable ? ' selected' : '') + '>Variable product</option></select>' +
+          (meta ? ' <small class="pm-wp-type-note">This category always has variations.</small>' : '') + '</h3>' +
           '<div class="pm-wp-data-wrap"><ul class="pm-wp-data-tabs">' + tabs.map(function (t) { return '<li><button type="button" data-etab="' + t[0] + '" class="' + (editTab === t[0] ? "is-active" : "") + '">' + t[1] + '</button></li>'; }).join("") + '</ul>' +
           '<div class="pm-wp-data-panels">' +
             '<div class="pm-wp-panel" data-epanel="general"' + (editTab === "general" ? "" : " hidden") + '>' +
-              buildOptionPriceRows(p, meta) +
+              buildGeneralPriceRows(p, meta) +
             '</div>' +
             '<div class="pm-wp-panel" data-epanel="inventory"' + (editTab === "inventory" ? "" : " hidden") + '>' +
               efield("id", "SKU", p.id, "text", "Also the product link. Changing it changes the URL.") +
               efield("stock", "Stock quantity", p.stock == null ? "" : p.stock, "number", "Leave blank for unlimited. 0 = out of stock.") +
+              efield("lowStockAmount", "Low stock threshold", p.lowStockAmount == null ? "" : p.lowStockAmount, "number", "The product list shows “Low stock” when the quantity is at or below this. Blank = " + LOW_STOCK_DEFAULT + ".") +
               '<p class="pm-wp-form-row"><label>Stock status</label><span><mark class="' + (out ? "outofstock" : "instock") + '">' + (out ? "Out of stock" : "In stock") + '</mark> ' +
               '<button type="button" class="pm-wp-button" id="pmEditStock">' + (out ? "Mark in stock" : "Mark out of stock") + '</button></span></p>' +
+            '</div>' +
+            '<div class="pm-wp-panel" data-epanel="linked"' + (editTab === "linked" ? "" : " hidden") + '>' +
+              '<div class="pm-wp-form-row"><label for="pmUpsellInput">Upsells</label><span>' +
+              '<input type="text" id="pmUpsellInput" list="pmSkuList" placeholder="Type a SKU or product name" aria-label="Add an upsell product"> ' +
+              '<button type="button" class="pm-wp-button" id="pmUpsellAdd">Add</button>' +
+              '<small>Shown first under “Related Products” on this product’s page (any category). Drafts and Trash are skipped.</small>' +
+              '<ul class="pm-wp-tags pm-upsell-list" id="pmUpsellList">' + upsellItems(p) + '</ul></span></div>' +
+              '<datalist id="pmSkuList">' + allSkuOptions(p) + '</datalist>' +
             '</div>' +
             '<div class="pm-wp-panel" data-epanel="attributes"' + (editTab === "attributes" ? "" : " hidden") + '>' +
               '<div class="pm-wp-form-row pm-color-variation-field"><label>Color variations</label><div><div id="pmColorVariationList">' + colorRowsMarkup(colorRows, p) + '</div>' +
                 '<button type="button" class="pm-wp-button" id="pmColorAdd">+ Add color</button>' +
                 '<small>Add any color name, then select the matching photo already in this product’s gallery. Color keys are generated automatically. Add the photo to the gallery first if it is not listed.</small></div></div>' +
               efield("fabric", "Fabric", p.fabric) +
-              efield("sizes", "Product size options", sizesToInput(p.sizes), "text", "Options customers can select, e.g. 44 or M, L — separate with commas.") +
-              efield("bodySizes", "Body measurement (inches)", sizesToInput(p.bodySizes), "text", "Garment/body measurement, e.g. 38, 40, 42 — separate with commas.") +
-              efield("sleeveSizes", "Sleeve sizes (inches)", sizesToInput(p.sleeveSizes), "text", "e.g. 22, 23, 24 — separate with commas.") +
-              efield("dressLengths", "Dress lengths (inches)", sizesToInput(p.dressLengths), "text", "Two-Piece dress length options, e.g. 38, 40, 42.") +
-              efield("palazzoLengths", "Pajama / Palazzo lengths (inches)", sizesToInput(p.palazzoLengths), "text", "e.g. 38, 40 — separate with commas.") +
+              '<div class="pm-wp-form-row pm-attr-field"><label>Variations &amp; attributes</label><div>' +
+                '<div id="pmAttrList">' + attributeCardsMarkup(p, catKey) + '</div>' +
+                '<p class="pm-attr-add"><select id="pmAttrPick" aria-label="Attribute to add"></select> <button type="button" class="pm-wp-button" id="pmAttrAdd">+ Add attribute</button></p>' +
+                (CATEGORY_PRESETS[catKey] ? '<p class="pm-attr-preset"><button type="button" class="pm-wp-button" id="pmAttrPreset">Use ' + escapeHtml(categoryName(catKey)) + ' size set</button> <small>' + escapeHtml(presetSummary(catKey)) + '</small></p>' : '') +
+                '<small>× removes a value, ‹ › change the order customers see, “Remove attribute” removes the whole list. On the product page, sizes (and body sizes / dress and pajama lengths where that product type has a picker) are choices; other measurements and custom attributes (e.g. Work: Stone) are listed under the product details.</small></div></div>' +
+            '</div>' +
+            (isVariable ? '<div class="pm-wp-panel pm-var-panel" data-epanel="variations"' + (editTab === "variations" ? "" : " hidden") + '>' + buildVariationRows(p, meta) + '</div>' : '') +
+            '<div class="pm-wp-panel" data-epanel="advanced"' + (editTab === "advanced" ? "" : " hidden") + '>' +
+              efield("menuOrder", "Menu order", p.menuOrder == null ? "" : p.menuOrder, "number", "Position on the category page and homepage: lower numbers show first (e.g. -1 before 0). Featured products still come first. Blank = catalog order.") +
             '</div>' +
           '</div></div></section>' +
+        '<section class="pm-wp-box" id="pmShortDescBox"><h3 class="pm-wp-box-title">Product short description</h3><div class="pm-wp-box-body">' +
+          '<textarea id="pmShortDesc" data-ef="shortDescription" rows="3" maxlength="' + SHORT_DESC_MAX + '" placeholder="One or two lines shown under the price on the product page">' + escapeHtml(p.shortDescription || "") + '</textarea>' +
+          '<p class="pm-wp-hint">Shown under the price. Leave empty to show the category’s default note.</p></div></section>' +
         '<section class="pm-wp-box" id="pmSeoBox"><h3 class="pm-wp-box-title">Search engine listing (SEO)</h3><div class="pm-wp-box-body">' +
           '<div class="pm-seo-preview" aria-label="Google preview"><div class="pm-seo-prev-title" id="pmSeoPrevTitle"></div>' +
           '<div class="pm-seo-prev-url">muslimabaya.com › product › ' + escapeHtml(p.id || "") + '</div><div class="pm-seo-prev-desc" id="pmSeoPrevDesc"></div></div>' +
@@ -947,7 +1108,7 @@
             : '<select id="pmEditStatus" data-ef="status"><option value="publish"' + (productStatus(p) === "publish" ? " selected" : "") + '>Published</option><option value="draft"' + (productStatus(p) === "draft" ? " selected" : "") + '>Draft (hidden)</option></select>') + '</p>' +
           '<p class="pm-wp-hint" id="pmStatusNote"></p>' +
           '<p>Catalog: <b>' + escapeHtml(enName(sections.find(function (x) { return x.key === catKey; }) || { menu: catKey })) + '</b></p>' +
-          '<p>Added: <b>' + (formatDay(p.dateAdded) || "—") + '</b></p>' +
+          '<p>Added: <b>' + escapeHtml(formatDay(p.dateAdded) || "—") + '</b></p>' +
           '<p><label class="pm-wp-check"><input type="checkbox" data-ef="featured"' + (p.featured ? " checked" : "") + '> ★ Featured product</label></p>' +
           '<div class="pm-wp-publish-actions"><button type="button" class="pm-wp-trash" id="pmEditTrash">Move to Trash</button>' +
           '<button type="button" class="pm-wp-primary" id="pmEditUpdate">Update (Save)</button></div>' +
@@ -1023,26 +1184,29 @@
       inp.addEventListener(inp.type === "checkbox" ? "change" : "input", function () {
         var f = inp.getAttribute("data-ef");
         if (f === "featured") { if (inp.checked) p.featured = true; else delete p.featured; }
-        else if (f === "price") { p.price = parseInt(inp.value, 10) || 0; var dp = document.getElementById("pmEf_discountPercent"); if (dp) dp.value = salePercent(p.price, p.regularPrice); }
-        else if (f === "regularPrice") { setRegularPrice(p, null, inp.value); var dp2 = document.getElementById("pmEf_discountPercent"); if (dp2) dp2.value = salePercent(p.price, p.regularPrice); }
+        else if (f === "regular" || f === "sale") {
+          var regIn = root.querySelector('[data-ef="regular"]'), saleIn = root.querySelector('[data-ef="sale"]');
+          if (!setWooPrices(p, null, regIn.value, saleIn.value)) return;
+          var dp = document.getElementById("pmEf_discountPercent"); if (dp) dp.value = salePercent(p.price, p.regularPrice);
+        }
         else if (f === "discountPercent") {
           if (!applyDiscountPercent(p, null, inp.value)) { inp.setCustomValidity("Enter a whole-number discount from 1 to 99%."); inp.reportValidity(); inp.setCustomValidity(""); return; }
-          var priceInput = root.querySelector('[data-ef="price"]'), regularInput = root.querySelector('[data-ef="regularPrice"]');
-          if (priceInput) priceInput.value = p.price;
-          if (regularInput) regularInput.value = p.regularPrice == null ? "" : p.regularPrice;
+          var r0 = root.querySelector('[data-ef="regular"]'), s0 = root.querySelector('[data-ef="sale"]');
+          if (r0) r0.value = regularOf(p); if (s0) s0.value = saleOf(p);
         }
-        else if (f.indexOf("typeRegular:") === 0) {
-          var regularType = f.slice(12); setRegularPrice(p, regularType, inp.value); syncCardPrice(p, meta);
-          var discountTypeInput = root.querySelector('[data-ef="typeDiscount:' + CSS.escape(regularType) + '"]');
-          if (discountTypeInput) discountTypeInput.value = salePercent(p.priceByType && p.priceByType[regularType], p.regularPriceByType && p.regularPriceByType[regularType]);
+        else if (f.indexOf("varRegular:") === 0 || f.indexOf("varSale:") === 0) {
+          var vt = f.slice(f.indexOf(":") + 1);
+          var vr = root.querySelector('[data-ef="varRegular:' + CSS.escape(vt) + '"]'), vs = root.querySelector('[data-ef="varSale:' + CSS.escape(vt) + '"]');
+          if (!setWooPrices(p, vt, vr.value, vs.value)) return;
+          var vd = root.querySelector('[data-ef="typeDiscount:' + CSS.escape(vt) + '"]');
+          if (vd) vd.value = salePercent(p.priceByType[vt], p.regularPriceByType && p.regularPriceByType[vt]);
+          syncCardPrice(p, meta);
         }
         else if (f.indexOf("typeDiscount:") === 0) {
           var discountType = f.slice(13);
           if (!applyDiscountPercent(p, discountType, inp.value)) { inp.setCustomValidity("Enter a whole-number discount from 1 to 99%."); inp.reportValidity(); inp.setCustomValidity(""); return; }
-          var optionPriceInput = root.querySelector('[data-ef="typePrice:' + CSS.escape(discountType) + '"]');
-          var optionRegularInput = root.querySelector('[data-ef="typeRegular:' + CSS.escape(discountType) + '"]');
-          if (optionPriceInput) optionPriceInput.value = p.priceByType[discountType];
-          if (optionRegularInput) optionRegularInput.value = p.regularPriceByType && p.regularPriceByType[discountType] || "";
+          var dr = root.querySelector('[data-ef="varRegular:' + CSS.escape(discountType) + '"]'), ds = root.querySelector('[data-ef="varSale:' + CSS.escape(discountType) + '"]');
+          if (dr) dr.value = regularOf(p, discountType); if (ds) ds.value = saleOf(p, discountType);
           syncCardPrice(p, meta);
         }
         else if (f === "status") { setProductStatus(p, inp.value); paintStatusNote(); }
@@ -1050,13 +1214,6 @@
         else if (f === "stock") {
           if (inp.value === "") { delete p.stock; delete p.inStock; }
           else { p.stock = Math.max(0, parseInt(inp.value, 10) || 0); if (p.stock === 0) p.inStock = false; else delete p.inStock; }
-        } else if (f.indexOf("typePrice:") === 0) {
-          if (!p.priceByType) p.priceByType = {};
-          var priceType = f.slice(10);
-          p.priceByType[priceType] = parseInt(inp.value, 10) || 0;
-          var priceDiscountInput = root.querySelector('[data-ef="typeDiscount:' + CSS.escape(priceType) + '"]');
-          if (priceDiscountInput) priceDiscountInput.value = salePercent(p.priceByType[priceType], p.regularPriceByType && p.regularPriceByType[priceType]);
-          syncCardPrice(p, meta);
         } else if (f === "colorLabel") {
           p.colorLabel = inp.value;
           p.color = inp.value;
@@ -1068,6 +1225,12 @@
           else delete p[f];
         }
         else if (f === "brand") { var b = inp.value.trim(); if (b) p.brand = b; else delete p.brand; }
+        else if (f === "shortDescription") { var sd = inp.value.replace(/\s+/g, " ").trim().slice(0, SHORT_DESC_MAX); if (sd) p.shortDescription = sd; else delete p.shortDescription; }
+        else if (f === "lowStockAmount" || f === "menuOrder") {
+          var whole = parseInt(inp.value, 10);
+          if (inp.value === "" || isNaN(whole) || (f === "menuOrder" && whole === 0)) delete p[f];
+          else p[f] = f === "lowStockAmount" ? Math.max(0, whole) : whole;
+        }
         else p[f] = inp.value;
         changed();
       });
@@ -1111,6 +1274,85 @@
       var newLabel = colorList.querySelector('[data-color-row]:last-child [data-color-field="label"]');
       if (newLabel) newLabel.focus();
     });
+    // Attributes: add / remove whole attributes and single values, reorder values. Only the attribute list redraws,
+    // so unsaved color rows above are kept.
+    var attrList = document.getElementById("pmAttrList"), attrPick = document.getElementById("pmAttrPick");
+    function attrRef(ref) {
+      if (ref.charAt(0) === "c") { var a = customAttrs(p)[parseInt(ref.slice(1), 10)]; return a ? { get: function () { return (a.values || []).map(String).filter(Boolean); }, set: function (v) { a.values = v; } } : null; }
+      return { get: function () { return attrValues(p, ref); }, set: function (v) { if (v.length) p[ref] = v; else delete p[ref]; } };
+    }
+    function cleanCustomAttrs() {
+      var list = customAttrs(p);
+      if (list.length) p.attributes = list; else delete p.attributes;
+    }
+    function redrawAttrs(msg) {
+      if (attrList) attrList.innerHTML = attributeCardsMarkup(p, catKey);
+      if (attrPick) attrPick.innerHTML = attributePickMarkup(p, catKey);
+      changed(msg);
+    }
+    function addAttrValues(ref) {
+      var input = attrList.querySelector('[data-attr-new="' + ref + '"]'), r = attrRef(ref);
+      if (!input || !r) return;
+      var next = r.get(), lower = next.map(function (v) { return v.toLowerCase(); });
+      inputToSizes(input.value).forEach(function (v) { v = v.slice(0, 60); if (lower.indexOf(v.toLowerCase()) === -1) { next.push(v); lower.push(v.toLowerCase()); } });
+      r.set(next);
+      redrawAttrs();
+      var again = attrList.querySelector('[data-attr-new="' + ref + '"]'); if (again) again.focus();
+    }
+    if (attrPick) attrPick.innerHTML = attributePickMarkup(p, catKey);
+    bindById("pmAttrPreset", "click", function () {
+      var set = CATEGORY_PRESETS[catKey] || {}, added = 0;
+      Object.keys(set).forEach(function (key) { var vals = attrValues(p, key); added += mergeValues(vals, set[key]); if (vals.length) p[key] = vals; });
+      redrawAttrs(added ? added + " value(s) added from the size set — click Save changes." : "This product already has every value in the size set.");
+    });
+    bindById("pmAttrAdd", "click", function () {
+      var key = attrPick && attrPick.value;
+      if (!key) return;
+      if (key === "custom") {
+        p.attributes = customAttrs(p).concat([{ name: "", values: [] }]);
+        redrawAttrs();
+        var names = attrList.querySelectorAll("[data-attr-name]"); if (names.length) names[names.length - 1].focus();
+      } else {
+        attrShown[key] = true;
+        redrawAttrs();
+        var first = attrList.querySelector('[data-attr-new="' + key + '"]'); if (first) first.focus();
+      }
+    });
+    if (attrList) {
+      attrList.addEventListener("click", function (e) {
+        var b = e.target.closest("button");
+        if (!b) return;
+        var r, vals, i;
+        if (b.hasAttribute("data-attr-add-val")) { addAttrValues(b.getAttribute("data-attr-add-val")); return; }
+        if (b.hasAttribute("data-attr-remove")) {
+          var ref = b.getAttribute("data-attr-remove");
+          if (ref.charAt(0) === "c") { var list = customAttrs(p); list.splice(parseInt(ref.slice(1), 10), 1); p.attributes = list; cleanCustomAttrs(); }
+          else { delete p[ref]; delete attrShown[ref]; }
+          redrawAttrs("Attribute removed — click Save changes.");
+          return;
+        }
+        if (b.hasAttribute("data-attr-del") || b.hasAttribute("data-attr-move")) {
+          var key = b.getAttribute("data-attr-del") || b.getAttribute("data-attr-move");
+          r = attrRef(key); if (!r) return;
+          vals = r.get(); i = parseInt(b.getAttribute("data-i"), 10);
+          if (b.hasAttribute("data-attr-del")) vals.splice(i, 1);
+          else { var j = i + parseInt(b.getAttribute("data-dir"), 10); if (j < 0 || j >= vals.length) return; var t = vals[i]; vals[i] = vals[j]; vals[j] = t; }
+          if (!vals.length && key.charAt(0) !== "c") attrShown[key] = true; // keep the empty card visible
+          r.set(vals);
+          redrawAttrs();
+        }
+      });
+      attrList.addEventListener("keydown", function (e) {
+        var input = e.target.closest("[data-attr-new]");
+        if (input && e.key === "Enter") { e.preventDefault(); addAttrValues(input.getAttribute("data-attr-new")); }
+      });
+      attrList.addEventListener("input", function (e) {
+        var name = e.target.closest("[data-attr-name]");
+        if (!name) return;
+        var a = customAttrs(p)[parseInt(name.getAttribute("data-attr-name"), 10)];
+        if (a) { a.name = name.value.replace(/\s+/g, " ").trim().slice(0, 40); changed(); }
+      });
+    }
     // Options (Full Set / Abaya Only / anything added here, e.g. Hijab), each with its own price.
     var optAdd = document.getElementById("pmOptAdd");
     if (optAdd) {
@@ -1200,6 +1442,25 @@
     // The shared image helpers bind to [data-f="image"]; keep the URL box in sync with uploads.
     var urlBox = root.querySelector('[data-f="image"]');
     if (urlBox) urlBox.addEventListener("input", function () { p.image = urlBox.value; changed(); });
+    bindById("pmProductType", "change", function (e) {
+      var types = productOptionTypes(p, meta);
+      if (e.target.value === "variable" && !types.length) {
+        p.types = ["Standard"];
+        p.priceByType = { Standard: parseInt(p.price, 10) || 0 };
+        if (parseInt(p.regularPrice, 10) > 0) p.regularPriceByType = { Standard: parseInt(p.regularPrice, 10) };
+        editTab = "variations";
+        renderProductEditor(); changed("Now a variable product — rename “Standard” and add more variations, then Save changes.");
+      } else if (e.target.value === "simple" && types.length && !meta) {
+        if (types.length > 1 && !confirm("Make this a simple product? Only the first variation (" + types[0] + ") and its price are kept.")) { e.target.value = "variable"; return; }
+        syncCardPrice(p, meta);
+        delete p.types; delete p.priceByType; delete p.regularPriceByType;
+        editTab = "general";
+        renderProductEditor(); changed("Now a simple product — click Save changes.");
+      }
+    });
+    root.querySelectorAll("[data-goto-tab]").forEach(function (b) {
+      b.addEventListener("click", function () { var t = root.querySelector('[data-etab="' + b.getAttribute("data-goto-tab") + '"]'); if (t) t.click(); });
+    });
     root.querySelectorAll("[data-etab]").forEach(function (b) {
       b.addEventListener("click", function () {
         editTab = b.getAttribute("data-etab");
@@ -1218,6 +1479,31 @@
     }
     bindById("pmEditTagAdd", "click", addTags);
     bindById("pmEditTagInput", "keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); addTags(); } });
+    // Linked Products → Upsells: stored as SKUs (upsellIds); a name is turned into its SKU.
+    function addUpsell() {
+      var input = document.getElementById("pmUpsellInput");
+      var text = input ? input.value.trim() : "";
+      if (!text) return;
+      var q = findProductBySku(text);
+      if (!q) Object.keys(products).some(function (k) { return (products[k] || []).some(function (x) { if (x && String(x.name || "").trim().toLowerCase() === text.toLowerCase()) { q = x; return true; } return false; }); });
+      if (!q || !q.id) { toast("No product with SKU or name “" + text + "”"); return; }
+      if (q === p) { toast("A product cannot be its own upsell"); return; }
+      var ids = Array.isArray(p.upsellIds) ? p.upsellIds.slice() : [];
+      if (ids.indexOf(String(q.id)) === -1) ids.push(String(q.id));
+      p.upsellIds = ids.slice(0, 8);
+      editTab = "linked";
+      renderProductEditor(); changed();
+    }
+    bindById("pmUpsellAdd", "click", addUpsell);
+    bindById("pmUpsellInput", "keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); addUpsell(); } });
+    root.querySelectorAll("[data-upsell-i]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var ids = (p.upsellIds || []).slice(); ids.splice(parseInt(b.getAttribute("data-upsell-i"), 10), 1);
+        if (ids.length) p.upsellIds = ids; else delete p.upsellIds;
+        editTab = "linked";
+        renderProductEditor(); changed();
+      });
+    });
     root.querySelectorAll("[data-tag-i]").forEach(function (b) {
       b.addEventListener("click", function () {
         var next = productTags(p); next.splice(parseInt(b.getAttribute("data-tag-i"), 10), 1);
@@ -1389,6 +1675,7 @@
       return managerOutOfStock(row.product);
     }).length;
     var inStockCount = liveRows.length - outOfStockCount;
+    var lowStockCount = liveRows.filter(function (row) { return isLowStock(row.product); }).length;
     var inTrash = overviewStatus === "trash";
     function sortHead(key, label) {
       var on = overviewSort.key === key;
@@ -1421,17 +1708,21 @@
       '<ul class="pm-wp-subsubsub pm-status-tabs">' +
       '<li><button type="button" data-overview-stock="" class="' + (overviewStock === "" ? "is-active" : "") + '">All stock <span class="count">(' + liveRows.length + ')</span></button> |</li>' +
       '<li><button type="button" data-overview-stock="in" class="' + (overviewStock === "in" ? "is-active" : "") + '">In stock <span class="count">(' + inStockCount + ')</span></button> |</li>' +
-      '<li><button type="button" data-overview-stock="out" class="' + (overviewStock === "out" ? "is-active" : "") + '">Out of stock <span class="count">(' + outOfStockCount + ')</span></button></li></ul>' +
-      '<p class="pm-wp-search"><label class="pm-sr-only" for="pmAllSearch">Search products</label><input type="search" id="pmAllSearch" value="' + escapeAttr(allSearchTerm) + '">' +
+      '<li><button type="button" data-overview-stock="out" class="' + (overviewStock === "out" ? "is-active" : "") + '">Out of stock <span class="count">(' + outOfStockCount + ')</span></button>' + (lowStockCount ? ' |' : '') + '</li>' +
+      (lowStockCount ? '<li><button type="button" data-overview-stock="low" class="' + (overviewStock === "low" ? "is-active" : "") + '">Low stock <span class="count">(' + lowStockCount + ')</span></button></li>' : '') + '</ul>' +
+      '<p class="pm-wp-search"><label class="pm-sr-only" for="pmAllSearch">Search products</label><input type="search" id="pmAllSearch" placeholder="Name, SKU or tag" value="' + escapeAttr(allSearchTerm) + '">' +
       '<button type="button" class="pm-wp-button" id="pmAllSearchBtn">Search products</button><span id="pmAllCount" class="pm-sr-only"></span></p>' +
       '<div class="pm-wp-tablenav top">' +
       '<div class="pm-wp-actions"><label class="pm-sr-only" for="pmBulkAction">Bulk actions</label><select id="pmBulkAction"><option value="">Bulk actions</option>' + (inTrash
         ? '<option value="restore">Restore</option><option value="delete">Delete permanently</option>'
         : '<option value="in">Mark in stock</option><option value="out">Mark out of stock</option><option value="price">Change price (%)</option>' +
+          '<option value="sale">Set sale (% off)</option><option value="feature">Mark as featured</option><option value="unfeature">Remove featured</option>' +
+          '<option value="tags">Add tags</option><option value="category">Move to category</option>' +
+          '<option value="attradd">Add attribute values</option><option value="attrremove">Remove attribute values</option>' +
           '<option value="publish">Publish</option><option value="draft">Set to Draft</option><option value="trash">Move to Trash</option>') + '</select>' +
       '<button type="button" class="pm-wp-button" id="pmBulkApply">Apply</button></div>' +
       '<div class="pm-wp-actions"><select id="pmOverviewCategory" aria-label="Filter by category"><option value="">Select a category</option>' + catOptions + '</select>' +
-      '<select id="pmOverviewStock" aria-label="Filter by stock status"><option value="">Filter by stock status</option><option value="in"' + (overviewStock === 'in' ? ' selected' : '') + '>In stock</option><option value="out"' + (overviewStock === 'out' ? ' selected' : '') + '>Out of stock</option></select>' +
+      '<select id="pmOverviewStock" aria-label="Filter by stock status"><option value="">Filter by stock status</option><option value="in"' + (overviewStock === 'in' ? ' selected' : '') + '>In stock</option><option value="out"' + (overviewStock === 'out' ? ' selected' : '') + '>Out of stock</option><option value="low"' + (overviewStock === 'low' ? ' selected' : '') + '>Low stock</option></select>' +
       '<button type="button" class="pm-wp-button" id="pmFilterBtn">Filter</button></div>' +
       '<div class="pm-wp-pages" id="pmPagerTop"></div></div>' +
       // Kept for the bulk stock logic and its tests; the bulk-action select above drives them.
@@ -1457,6 +1748,7 @@
       if (!action) return;
       if (!Object.keys(overviewSelected).length) { toast("Select products first"); return; }
       if (action === "price") { bulkReprice(); return; }
+      if (["sale", "feature", "unfeature", "tags", "category", "attradd", "attrremove"].indexOf(action) !== -1) { bulkEdit(action); return; }
       if (["publish", "draft", "trash", "restore", "delete"].indexOf(action) !== -1) { bulkStatus(action); return; }
       document.getElementById(action === "out" ? "pmOverviewOff" : "pmOverviewOn").click();
     });
@@ -1564,7 +1856,7 @@
         var st = productStatus(p);
         if (overviewStatus ? st !== overviewStatus : st === "trash") return false;
         if (overviewCategory && s.key !== overviewCategory) return false;
-        if (overviewStock === "out" && !out || overviewStock === "in" && out) return false;
+        if (overviewStock === "out" && !out || overviewStock === "in" && out || overviewStock === "low" && !isLowStock(p)) return false;
         return [p.name, p.id, s.key, s.menu, s.menuBn, p.brand || ""].concat(productTags(p)).join(" ").toLowerCase().indexOf(term) !== -1;
       });
       if (overviewSort.key) {
@@ -1606,6 +1898,12 @@
           draw();
         });
       });
+      // WooCommerce shows the counted quantity next to the stock status: "In stock (12)", "Low stock (2)".
+      function stockCell(p, out) {
+        if (out) return '<mark class="outofstock">Out of stock</mark>';
+        var qty = p.stock == null || p.stock === "" ? "" : ' (' + (parseInt(p.stock, 10) || 0) + ')';
+        return isLowStock(p) ? '<mark class="onbackorder pm-lowstock">Low stock' + qty + '</mark>' : '<mark class="instock">In stock' + qty + '</mark>';
+      }
       function priceText(p) {
         var values = p.priceByType ? Object.keys(p.priceByType).map(function (k) { return parseInt(p.priceByType[k], 10); }).filter(function (n) { return !isNaN(n); }) : [];
         var sale = productOnSale(p) ? ' <span class="pm-sale-tag">Sale</span>' : '';
@@ -1641,7 +1939,7 @@
           '<button type="button" class="pm-row-link pm-overview-stock" data-stock-cat="' + escapeAttr(s.key) + '" data-stock-index="' + row.index + '" aria-pressed="' + out + '">' + (out ? 'Mark in stock' : 'Mark out of stock') + '</button>' +
           (p.id ? ' | <a class="pm-row-link" href="/product/' + encodeURIComponent(p.id) + '" target="_blank" rel="noopener">View</a>' : '') + '</div></td>' +
           '<td class="column-sku">' + (p.id ? escapeHtml(p.id) : '<span class="na">–</span>') + '</td>' +
-          '<td class="column-stock"><mark class="' + (out ? 'outofstock' : 'instock') + '">' + (out ? 'Out of stock' : 'In stock') + '</mark></td>' +
+          '<td class="column-stock">' + stockCell(p, out) + '</td>' +
           '<td class="column-price">' + priceText(p) + '</td>' +
           '<td class="column-cats"><button type="button" class="pm-row-link" data-filter-cat="' + escapeAttr(s.key) + '">' + escapeHtml(catName(s)) + '</button></td>' +
           '<td class="column-tags">' + (productTags(p).length ? productTags(p).map(function (t) { return '<button type="button" class="pm-row-link" data-filter-term="' + escapeAttr(t) + '">' + escapeHtml(t) + '</button>'; }).join(', ') : '<span class="na">–</span>') + '</td>' +
@@ -1803,6 +2101,89 @@
         refs.forEach(function (ref) { setProductStatus(products[ref[0]][ref[1]], action === "restore" ? "publish" : action); });
       }
       var label = { publish: "published", draft: "set to Draft", trash: "moved to Trash", restore: "restored", delete: "deleted permanently" }[action];
+      setSaveStatus("Saving: " + n + " product(s) " + label + "…");
+      saveAll(null).then(function () {
+        overviewSelected = {};
+        toast(n + " product(s) " + label + " — the website updates in about 2 minutes");
+        renderCatList(); renderMain();
+      }).catch(function (err) {
+        var restored = JSON.parse(backup);
+        Object.keys(products).forEach(function (k) { delete products[k]; });
+        Object.assign(products, restored);
+        renderMain();
+        setSaveStatus("Not saved: " + ((err && err.message) || "try again") + " — nothing was changed.");
+      });
+    }
+    // WooCommerce-style Bulk Edit: sale % off, featured, add tags, move to another category. Saves at once;
+    // if saving fails, the catalog goes back to how it was.
+    function bulkEdit(action) {
+      var refs = Object.keys(overviewSelected).map(function (key) { return JSON.parse(key); })
+        .filter(function (ref) { return (products[ref[0]] || [])[ref[1]]; });
+      if (!refs.length) { toast("Select products first"); return; }
+      var n = refs.length, label, input, target = null, pct = null, newTags = [];
+      if (action === "sale") {
+        input = prompt("Sale for " + n + " product(s): what percent off the regular price?\n1–99, e.g. 10. Enter 0 to end the sale.", "10");
+        if (input === null) return;
+        pct = Number(String(input).trim());
+        if (!Number.isInteger(pct) || pct < 0 || pct > 99) { toast("Enter a whole percent from 0 to 99"); return; }
+        label = pct ? "on sale (" + pct + "% off)" : "sale ended";
+      } else if (action === "tags") {
+        input = prompt("Add which tags to " + n + " product(s)? Separate with commas.", "");
+        if (input === null) return;
+        newTags = input.split(",").map(function (t) { return t.trim(); }).filter(Boolean);
+        if (!newTags.length) { toast("Enter at least one tag"); return; }
+        label = "tagged " + newTags.join(", ");
+      } else if (action === "category") {
+        var names = sections.map(function (sec, i) { return (i + 1) + " = " + enName(sec); }).join("\n");
+        input = prompt("Move " + n + " product(s) to which category? Enter the number:\n" + names, "");
+        if (input === null) return;
+        target = sections[parseInt(input, 10) - 1];
+        if (!target) { toast("Enter one of the category numbers"); return; }
+        label = "moved to " + enName(target);
+      } else if (action === "attradd" || action === "attrremove") {
+        var adding = action === "attradd";
+        var attrMenu = STD_ATTRS.map(function (a, i) { return (i + 1) + " = " + a[1]; }).join("\n");
+        input = prompt((adding ? "Add values to" : "Remove values from") + " which attribute of " + n + " product(s)? Enter the number:\n" + attrMenu, "1");
+        if (input === null) return;
+        var attr = STD_ATTRS[parseInt(input, 10) - 1];
+        if (!attr) { toast("Enter one of the attribute numbers"); return; }
+        input = prompt((adding ? "Which values to add to " : "Which values to remove from ") + attr[1] + "? Separate with commas, e.g. 58 or 56, 58", "");
+        if (input === null) return;
+        var attrVals = inputToSizes(input);
+        if (!attrVals.length) { toast("Enter at least one value"); return; }
+        var attrLower = attrVals.map(function (v) { return v.toLowerCase(); });
+        label = (adding ? "got " : "lost ") + attr[1] + " " + attrVals.join(", ");
+      } else {
+        label = action === "feature" ? "marked as featured" : "no longer featured";
+      }
+      var backup = JSON.stringify(products);
+      var moving = [];
+      refs.forEach(function (ref) {
+        var p = products[ref[0]][ref[1]], meta = getCategoryTypeMeta(ref[0]);
+        if (action === "feature") p.featured = true;
+        else if (action === "unfeature") delete p.featured;
+        else if (action === "tags") {
+          var tags = productTags(p), lower = tags.map(function (t) { return t.toLowerCase(); });
+          newTags.forEach(function (t) { if (lower.indexOf(t.toLowerCase()) === -1) { tags.push(t); lower.push(t.toLowerCase()); } });
+          p.tags = tags;
+        } else if (action === "sale") {
+          var types = productOptionTypes(p, meta).filter(function (t) { return p.priceByType && p.priceByType[t] != null; });
+          if (types.length) types.forEach(function (t) { applyDiscountPercent(p, t, pct ? String(pct) : ""); });
+          else applyDiscountPercent(p, null, pct ? String(pct) : "");
+          syncCardPrice(p, meta);
+        } else if (action === "attradd") {
+          var have = attrValues(p, attr[0]); mergeValues(have, attrVals); p[attr[0]] = have;
+        } else if (action === "attrremove") {
+          var keep = attrValues(p, attr[0]).filter(function (v) { return attrLower.indexOf(v.toLowerCase()) === -1; });
+          if (keep.length) p[attr[0]] = keep; else delete p[attr[0]];
+        } else if (action === "category" && ref[0] !== target.key) moving.push(ref);
+      });
+      // Move from the end of each list so the other indexes stay valid.
+      moving.sort(function (a, b) { return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : b[1] - a[1]; }).forEach(function (ref) {
+        var p = products[ref[0]].splice(ref[1], 1)[0];
+        (products[target.key] = products[target.key] || []).push(p);
+        ensureProductPriceByType(p, target.key);
+      });
       setSaveStatus("Saving: " + n + " product(s) " + label + "…");
       saveAll(null).then(function () {
         overviewSelected = {};
@@ -2698,11 +3079,13 @@
     return String(s == null ? "" : s)
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
   }
 
   function escapeAttr(s) {
-    return escapeHtml(s).replace(/"/g, "&quot;");
+    return escapeHtml(s);
   }
 
   function openCategoryModal(secOrNull) {
@@ -3254,6 +3637,17 @@
   renderCatList();
   renderMain();
   savedSnapshot = catalogSnapshot();
+  // Admin menu shortcuts (like WooCommerce's Products → Add New / Categories): product-manager.html#add-new, #categories.
+  function openMenuRoute() {
+    var route = location.hash.replace(/^#/, "");
+    if (route !== "add-new" && route !== "categories") return;
+    history.replaceState(null, "", location.pathname + location.search); // the same menu link works again
+    if (route === "add-new") { openQuickUpload(); return; }
+    if (!document.getElementById("pmManageCats")) { activeKey = ALL_PRODUCTS_KEY; renderCatList(); renderMain(); }
+    var cats = document.getElementById("pmManageCats"); if (cats) cats.click();
+  }
+  window.addEventListener("hashchange", openMenuRoute);
+  openMenuRoute();
   quickUploadOptions = {sections:function(){return sections;},products:function(){return products;},status:setSaveStatus,isSaved:function(){return savedSnapshot===catalogSnapshot();},stage:function(category,product){
     if(!sections.some(function(sec){return sec.key===category;}))throw new Error("Choose a category.");
     var labels=String(product.colorLabel||product.color||"").split(/[,，;；|]/).map(function(label){return label.trim();}).filter(Boolean);

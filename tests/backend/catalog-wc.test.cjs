@@ -200,3 +200,50 @@ test('the real catalog survives CSV export → import unchanged (byte for byte)'
   assert.equal(JSON.stringify(plan.staged), JSON.stringify(raw));
   assert.equal(w.MaProductCsv.parseCsv(csv).length - 1, Object.values(raw).reduce((n, l) => n + l.length, 0));
 });
+
+test('menu order: lower numbers first after featured; short description and upsells reach the storefront', () => {
+  const w = load({ 'tops-kurti': [P('M1'), P('M2', { menuOrder: -2, shortDescription: 'Ready to ship', upsellIds: ['M1', ' M3 ', ''] }), P('M3', { menuOrder: 5 }), P('M4', { featured: true, menuOrder: 9 }), P('M5')] });
+  const shop = w.maCatalog.normalizeAll(w.CATEGORY_PRODUCTS, {});
+  eq(shop['tops-kurti'].map((p) => p.id), ['M4', 'M2', 'M1', 'M5', 'M3']);
+  const m2 = shop['tops-kurti'][1];
+  assert.equal(m2.shortDescription, 'Ready to ship');
+  eq(m2.upsellIds, ['M1', 'M3']);
+  const all = w.maCatalog.normalizeAll(w.CATEGORY_PRODUCTS, {}, { includeUnpublished: true });
+  eq(all['tops-kurti'].map((p) => p.id), ['M1', 'M2', 'M3', 'M4', 'M5']); // editor order untouched
+});
+
+test('publish validation: short description length, upsell SKUs, whole menu order and low-stock threshold', () => {
+  const w = load(fixture, links);
+  const V = w.MaProductPublishUtils.validateCatalog;
+  assert.doesNotThrow(() => V({ a: [P('A1', { shortDescription: 'ok', upsellIds: ['A2'], menuOrder: -1, lowStockAmount: 0 })] }));
+  assert.throws(() => V({ a: [P('A1', { shortDescription: 'x'.repeat(301) })] }), /short description/);
+  assert.throws(() => V({ a: [P('A1', { upsellIds: ['bad sku'] })] }), /upsells/);
+  assert.throws(() => V({ a: [P('A1', { menuOrder: 1.5 })] }), /menu order/);
+  assert.throws(() => V({ a: [P('A1', { lowStockAmount: -1 })] }), /low stock/);
+});
+
+test('CSV: short description, upsells, menu order and low-stock threshold export and import', () => {
+  const w = load(fixture, links);
+  const products = { abaya: [], 'tops-kurti': [P('C1', { shortDescription: 'Soft', upsellIds: ['C2'], menuOrder: 3, lowStockAmount: 4 }), P('C2')] };
+  const csv = w.MaProductCsv.exportCsv(products, sections, {});
+  const rows = w.MaProductCsv.parseCsv(csv);
+  const head = rows[0];
+  eq([rows[1][head.indexOf('Short description')], rows[1][head.indexOf('Upsells')], rows[1][head.indexOf('Menu order')], rows[1][head.indexOf('Low stock threshold')]], ['Soft', 'C2', '3', '4']);
+  let plan = w.MaProductCsv.planImport(csv, products, sections, { today: '2026-10-29' });
+  eq({ u: plan.updates.length, e: plan.errors.length }, { u: 0, e: 0 });
+  plan = w.MaProductCsv.planImport('SKU,Upsells,Menu order\nC2,"C1, C2",-4\nC1,bad sku,\n', products, sections, { today: '2026-10-29' });
+  eq(plan.staged['tops-kurti'][1].upsellIds, ['C1']); // a product is never its own upsell
+  eq(plan.staged['tops-kurti'][1].menuOrder, -4);
+  eq(plan.errors.map((e) => e.line), [3]);
+});
+
+test('custom attributes and sleeve sizes reach the storefront; publish validation checks attributes', () => {
+  const w = load({ 'tops-kurti': [P('T1', { sleeveSizes: ['22', '23'], attributes: [{ name: ' Work ', values: ['Stone', ' ', 'Embroidery'] }, { name: '', values: ['x'] }, { name: 'Empty', values: [] }] })] });
+  const t1 = w.maCatalog.normalizeAll(w.CATEGORY_PRODUCTS, {})['tops-kurti'][0];
+  eq(t1.sleeveSizes, ['22', '23']);
+  eq(t1.attributes, [{ name: 'Work', values: ['Stone', 'Embroidery'] }]);
+  const V = w.MaProductPublishUtils.validateCatalog;
+  assert.doesNotThrow(() => V({ a: [P('A1', { attributes: [{ name: 'Work', values: ['Stone'] }, { name: '', values: [] }] })] }));
+  assert.throws(() => V({ a: [P('A1', { attributes: [{ name: '', values: ['Stone'] }] })] }), /custom attribute/);
+  assert.throws(() => V({ a: [P('A1', { attributes: 'Work: Stone' })] }), /custom attribute/);
+});

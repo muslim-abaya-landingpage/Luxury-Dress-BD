@@ -12,13 +12,14 @@
 
   var COLUMNS = ['SKU', 'Name', 'Category', 'Status', 'Price', 'Before-sale price', 'Option prices', 'Option before-sale prices',
     'Stock', 'Featured', 'Tags', 'Brand', 'Color', 'Color code', 'Fabric', 'Sizes', 'Body sizes', 'Sleeve sizes', 'Dress lengths', 'Pajama/Palazzo lengths', 'Description', 'SEO title', 'SEO description',
-    'Image', 'Gallery images', 'Date added'];
+    'Image', 'Gallery images', 'Date added', 'Short description', 'Upsells', 'Menu order', 'Low stock threshold'];
   var SKU_RE = /^[A-Za-z0-9][A-Za-z0-9_-]{1,100}$/;
   var STATUS = { publish: 'Published', draft: 'Draft', trash: 'Trash' };
   var FIELD_LABEL = { name: 'Name', status: 'Status', price: 'Price', regularPrice: 'Before-sale price', priceByType: 'Option prices',
     types: 'Option prices', regularPriceByType: 'Option before-sale prices', stock: 'Stock', inStock: 'Stock', featured: 'Featured',
     tags: 'Tags', brand: 'Brand', colorLabel: 'Color', color: 'Color code', fabric: 'Fabric', sizes: 'Sizes', bodySizes: 'Body sizes', sleeveSizes: 'Sleeve sizes', dressLengths: 'Dress lengths', palazzoLengths: 'Pajama/Palazzo lengths', detailNote: 'Description',
-    seoTitle: 'SEO title', seoDescription: 'SEO description', image: 'Image', images: 'Gallery images', dateAdded: 'Date added' };
+    seoTitle: 'SEO title', seoDescription: 'SEO description', image: 'Image', images: 'Gallery images', dateAdded: 'Date added',
+    shortDescription: 'Short description', upsellIds: 'Upsells', menuOrder: 'Menu order', lowStockAmount: 'Low stock threshold' };
 
   function bnDigits(s) { return String(s == null ? '' : s).replace(/[০-৯]/g, function (c) { return String('০১২৩৪৫৬৭৮৯'.indexOf(c)); }); }
   function money(v) { var n = Number(bnDigits(v).replace(/[৳,\s]/g, '')); return Number.isSafeInteger(n) && n >= 1 && n <= 1000000 ? n : NaN; }
@@ -84,7 +85,8 @@
       safeText(p.colorLabel || ''), safeText(p.color || ''), safeText(p.fabric || ''), safeText((p.sizes || []).join(', ')),
       safeText((p.bodySizes || []).join(', ')), safeText((p.sleeveSizes || []).join(', ')), safeText((p.dressLengths || []).join(', ')), safeText((p.palazzoLengths || []).join(', ')),
       safeText(p.detailNote || ''), safeText(p.seoTitle || ''), safeText(p.seoDescription || ''),
-      p.image || '', (p.images || []).join(' | '), p.dateAdded || ''
+      p.image || '', (p.images || []).join(' | '), p.dateAdded || '',
+      safeText(p.shortDescription || ''), (p.upsellIds || []).join(', '), p.menuOrder || '', p.lowStockAmount != null ? p.lowStockAmount : ''
     ];
   }
 
@@ -197,6 +199,18 @@
         setText('Description', 'detailNote', 3000);
         setText('SEO title', 'seoTitle', 120);
         setText('SEO description', 'seoDescription', 320);
+        setText('Short description', 'shortDescription', 300);
+        if (v('Upsells')) {
+          var ups = list(v('Upsells'), /\s*,\s*/);
+          if (ups.some(function (id) { return !SKU_RE.test(id); })) throw Error('Upsells must be SKUs separated by commas.');
+          p.upsellIds = ups.filter(function (id, i, a) { return id !== sku && a.indexOf(id) === i; }).slice(0, 8);
+        }
+        ['Menu order', 'Low stock threshold'].forEach(function (name) {
+          if (!v(name)) return;
+          var whole = Number(bnDigits(v(name)));
+          if (!Number.isSafeInteger(whole) || (name === 'Low stock threshold' && whole < 0)) throw Error(name + ' must be a whole number.');
+          if (name === 'Menu order') { if (whole) p.menuOrder = whole; else delete p.menuOrder; } else p.lowStockAmount = whole;
+        });
         setText('Image', 'image', 500);
         if (v('Status')) {
           var st = v('Status').toLowerCase();

@@ -1,0 +1,42 @@
+/* WordPress-style admin shell for every admin page (Product Manager has the same look in product-manager-wp.css):
+   one flush, full-height dark menu on the left, blue current item, grey submenu, square corners. Loaded last. */
+body.adm-wp { background: #f0f0f1 !important; }
+body.adm-wp .adm-shell { max-width: none; min-height: 100vh; padding: 0; gap: 0; display: flex; background: #f0f0f1; }
+body.adm-wp .adm-shell > :not(.adm-sidebar):not(.adm-sidebar-backdrop) { padding-left: 28px; padding-right: 28px; }
+body.adm-wp .adm-sidebar {
+  position: sticky; top: 0; left: 0; width: 220px; flex: 0 0 220px; height: 100dvh; margin: 0;
+  border: 0 !important; border-radius: 0 !important; box-shadow: none !important;
+  background: #1d2327 !important; color: #f0f0f1 !important;
+}
+body.adm-wp .adm-sidebar.is-collapsed { width: 68px; flex-basis: 68px; }
+body.adm-wp .adm-sidebar-brand { padding: 15px 14px !important; border-bottom: 1px solid #3c434a !important; }
+body.adm-wp .adm-sidebar-crest { width: 34px !important; height: 34px !important; border-radius: 3px !important; box-shadow: none !important; }
+body.adm-wp .adm-sidebar-brand-text .t1 { font-size: 14px !important; color: #fff !important; }
+body.adm-wp .adm-sidebar-brand-text .t2 { color: #a7aaad !important; letter-spacing: .12em !important; }
+body.adm-wp .adm-sidebar-profile { margin: 12px 10px 6px; padding: 10px; border: 1px solid #3c434a !important; border-radius: 3px; background: #23282d !important; color: #f0f0f1 !important; }
+body.adm-wp .adm-profile-copy small { color: #a7aaad !important; }
+body.adm-wp .adm-sidebar-nav { padding: 8px 0 !important; gap: 0 !important; }
+body.adm-wp .adm-sidebar .adm-sidebar-nav .adm-sidebar-item {
+  min-height: 40px; padding: 8px 12px !important; margin: 0 !important; border: 0 !important; border-radius: 0 !important;
+  background: transparent !important; color: #c3c4c7 !important; font-size: 13px !important; font-weight: 400 !important; box-shadow: none !important;
+}
+body.adm-wp .adm-sidebar-item svg { color: #a7aaad; }
+body.adm-wp .adm-sidebar .adm-sidebar-nav .adm-sidebar-item:hover { transform: none !important; background: #2c3338 !important; color: #72aee6 !important; }
+body.adm-wp .adm-sidebar .adm-sidebar-nav .adm-sidebar-item.is-current,
+body.adm-wp .adm-sidebar .adm-sidebar-nav .adm-nav-group.has-current > summary { background: #2271b1 !important; color: #fff !important; }
+body.adm-wp .adm-sidebar-item.is-current svg,
+body.adm-wp .adm-nav-group.has-current > summary svg { color: #fff; }
+body.adm-wp .adm-sidebar .adm-sidebar-item.is-current::before { display: none !important; }
+body.adm-wp .adm-sidebar .adm-sidebar-nav .adm-sidebar-item.is-current, body.adm-wp .adm-sidebar .adm-nav-child.is-current { box-shadow: none !important; }
+body.adm-wp .adm-sidebar .adm-nav-children { margin: 0; padding: 4px 0 5px 17px; border: 0 !important; border-radius: 0; background: #2c3338 !important; }
+body.adm-wp .adm-sidebar .adm-sidebar-nav .adm-nav-children .adm-nav-child { min-height: 32px; padding: 6px 10px !important; color: #c3c4c7 !important; font-size: 12px !important; background: transparent !important; }
+body.adm-wp .adm-sidebar .adm-sidebar-nav .adm-nav-children .adm-nav-child.is-current { color: #72aee6 !important; font-weight: 600 !important; background: transparent !important; }
+body.adm-wp .adm-sidebar-foot { padding: 10px; border-top: 1px solid #3c434a !important; }
+body.adm-wp .adm-sidebar .adm-btn-secondary,
+body.adm-wp .adm-sidebar .adm-theme-toggle { border-radius: 3px !important; background: transparent !important; color: #c3c4c7 !important; border-color: #3c434a !important; }
+body.adm-wp .adm-topbar,
+body.adm-wp .pn-head { border-radius: 0 !important; box-shadow: none !important; }
+@media (max-width: 980px) {
+  body.adm-wp .adm-shell > :not(.adm-sidebar):not(.adm-sidebar-backdrop) { padding-left: 12px; padding-right: 12px; }
+  body.adm-wp .adm-sidebar { position: fixed; top: 0; left: 0; height: 100dvh; z-index: 60; }
+}
