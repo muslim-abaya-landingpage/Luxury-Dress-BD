@@ -497,7 +497,6 @@ window.CATEGORY_PRODUCTS = {
       name: "Elegant Charcoal Black CY Fabric Dress",
       image: "images/uploads/dr-8-1793386027997.webp",
       imageCard: "images/uploads/dr-8-1793386027997-card.webp",
-      images: ["/images/premium-black-floral-womens-co-ord-set-bangladesh.webp"],
       price: 1305,
       stock: 6,
       color: "black-dress",
