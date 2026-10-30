@@ -430,11 +430,14 @@
     return String(sizes || "");
   }
 
-  function inputToSizes(text) {
+  function inputToSizes(text, inches) {
     return String(text || "")
       .split(/[,，]/)
       .map(function (s) {
-        return s.trim();
+        s = s.trim();
+        // Measurement fields hold plain numbers: the order check reads "Body 52" and compares it with "52".
+        var m = inches && /^(\d+(?:\.\d+)?)\s*(?:inches|inch|in\.?|"|”|″|ইঞ্চি)$/i.exec(s);
+        return m ? m[1] : s;
       })
       .filter(Boolean);
   }
@@ -1067,7 +1070,7 @@
           // The per-photo color list is brought in line when saving (reconcileAllColorVariants).
         }
         else if (f === "sizes" || f === "bodySizes" || f === "sleeveSizes" || f === "dressLengths" || f === "palazzoLengths") {
-          var values = inputToSizes(inp.value);
+          var values = inputToSizes(inp.value, f !== "sizes");
           if (values.length) p[f] = values;
           else delete p[f];
         }

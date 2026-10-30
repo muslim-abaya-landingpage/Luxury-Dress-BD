@@ -200,3 +200,15 @@ test('the real catalog survives CSV export → import unchanged (byte for byte)'
   assert.equal(JSON.stringify(plan.staged), JSON.stringify(raw));
   assert.equal(w.MaProductCsv.parseCsv(csv).length - 1, Object.values(raw).reduce((n, l) => n + l.length, 0));
 });
+
+test('Product Manager stores measurement sizes as plain numbers ("52 Inches" → "52")', () => {
+  const src = read('product-manager.html').match(/function inputToSizes\(text, inches\) \{[\s\S]*?\n  \}/)[0];
+  const ctx = {};
+  vm.createContext(ctx);
+  vm.runInContext(src, ctx);
+  eq(ctx.inputToSizes('46, 48,50 ,52 Inches', true), ['46', '48', '50', '52']);
+  eq(ctx.inputToSizes('40 inch, 41.5in, 42", 44 ইঞ্চি', true), ['40', '41.5', '42', '44']);
+  // Anything that is not a number with a unit stays as typed; the general Sizes field is untouched.
+  eq(ctx.inputToSizes('Free Size, 42 (Free Size)', true), ['Free Size', '42 (Free Size)']);
+  eq(ctx.inputToSizes('Body 42 Inches', false), ['Body 42 Inches']);
+});
