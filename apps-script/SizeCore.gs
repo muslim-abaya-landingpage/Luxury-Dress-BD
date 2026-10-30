@@ -10,7 +10,7 @@
      products: {id: {template, enabled, useTemplate, fields: {key: {label_bn, label_en, required, enabled, allowCustom, default, options}}}} }
    product = { id, category, sizeLegacy: {slot: [values]} }  (sizeLegacy: the size lists the old pickers show) */
 (function (root) {
-  var KEY_RE = /^[a-z0-9_]{1,40}$/;
+  var KEY_RE = /^(?!__proto__$)[a-z0-9_]{1,40}$/; // never "__proto__": keys become object property names
   var BAD_TEXT_RE = /[<>{}`\\\u0000-\u001f]/;
   var MAX_CUSTOM = 40;
   var LEGACY_SLOTS = ["body", "length", "dressLength", "sleeve", "palazzo", "sizes"];
@@ -100,13 +100,13 @@
     if (Array.isArray(measurements)) {
       measurements.forEach(function (m) {
         var k = str(m && m.key);
-        if (!KEY_RE.test(k)) bad = true;
+        if (!KEY_RE.test(k)) { bad = true; return; }
         if (has(map, k)) dup = true;
         map[k] = str(m && m.value).trim();
       });
     } else if (measurements && typeof measurements === "object") {
       Object.keys(measurements).forEach(function (k) {
-        if (!KEY_RE.test(k)) bad = true;
+        if (!KEY_RE.test(k)) { bad = true; return; }
         map[k] = str(measurements[k]).trim();
       });
     }
