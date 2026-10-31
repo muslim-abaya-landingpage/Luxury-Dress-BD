@@ -39,6 +39,13 @@ function productStockStatus(p) {
     buttonLabel: "Add to Cart"
   };
 }
+/** Same stock row as the order check (colour · size, size, colour, pool); see product-utils.js stockLineKey. */
+function shopStockLineKey(product, line) {
+  var keyFn = window.stockLineKey || (window.maCatalog && window.maCatalog.stockLineKey);
+  if (typeof keyFn === "function") return keyFn(product, line);
+  return String((line && (line.size || line.selectedSize || line.color)) || "").replace(/\s+/g, " ").trim().toLowerCase();
+}
+
 function productIsInStock(p) {
   return productStockStatus(p).inStock !== false;
 }
@@ -474,8 +481,8 @@ function shopAddProductToCart(item, qtyToAdd, sizeValue, categoryKeyOpt, bodyVal
   var stockQtyFn = window.getStockQty || (window.maCatalog && window.maCatalog.getStockQty);
   var variantTrackedFn = window.hasTrackedStockVariants || (window.maCatalog && window.maCatalog.hasTrackedStockVariants);
   if (typeof stockQtyFn === "function") {
-    var variantKey = String(line.size || line.selectedSize || line.color || "").replace(/\s+/g, " ").trim().toLowerCase();
-    var cap = stockQtyFn(item, line.size || line.selectedSize || line.color || "");
+    var variantKey = shopStockLineKey(item, line);
+    var cap = stockQtyFn(item, line.size || line.selectedSize || line.color || "", line.color || "");
     if (cap === 0) {
       alert("দুঃখিত, এই সাইজটি বর্তমানে স্টকে নেই। অন্য সাইজ বেছে নিন।");
       return;
@@ -484,7 +491,7 @@ function shopAddProductToCart(item, qtyToAdd, sizeValue, categoryKeyOpt, bodyVal
       var perVariant = typeof variantTrackedFn === "function" ? variantTrackedFn(item) : false;
       var currentCart = typeof loadStoreCart === "function" ? loadStoreCart({ readOnly: true }) : [];
       var already = currentCart.reduce(function (sum, existing) {
-        var existingKey = String(existing.size || existing.selectedSize || existing.color || "").replace(/\s+/g, " ").trim().toLowerCase();
+        var existingKey = shopStockLineKey(item, existing);
         return sum + (String(existing.id) === String(line.id) && (!perVariant || existingKey === variantKey) ? parseInt(existing.quantity, 10) || 0 : 0);
       }, 0);
       var room = cap - already;
@@ -557,13 +564,13 @@ function shopAddBulkProductsToCart(item, entries, categoryKey, selectedType) {
     var stockQtyFn = window.getStockQty || (window.maCatalog && window.maCatalog.getStockQty);
     var variantTrackedFn = window.hasTrackedStockVariants || (window.maCatalog && window.maCatalog.hasTrackedStockVariants);
     if (typeof stockQtyFn === "function") {
-      var variantKey = String(line.size || line.selectedSize || line.color || "").replace(/\s+/g, " ").trim().toLowerCase();
-      var cap = stockQtyFn(item, line.size || line.selectedSize || line.color || "");
+      var variantKey = shopStockLineKey(item, line);
+      var cap = stockQtyFn(item, line.size || line.selectedSize || line.color || "", line.color || "");
       if (cap === 0) return;
       if (typeof cap === "number") {
         var perVariant = typeof variantTrackedFn === "function" ? variantTrackedFn(item) : false;
         var already = cart.reduce(function (sum, existing) {
-          var existingKey = String(existing.size || existing.selectedSize || existing.color || "").replace(/\s+/g, " ").trim().toLowerCase();
+          var existingKey = shopStockLineKey(item, existing);
           return sum + (String(existing.id) === String(line.id) && (!perVariant || existingKey === variantKey) ? parseInt(existing.quantity, 10) || 0 : 0);
         }, 0);
         var room = cap - already;

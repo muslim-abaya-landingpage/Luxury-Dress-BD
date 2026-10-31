@@ -2910,7 +2910,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     // Catalog stock limit for a cart line (null = not tracked). Mirrors the cap
     // addOrMergeStoreCartItem applies on product pages, so the checkout "+" button
     // cannot push quantity past available stock.
-    function checkoutStockVariantKey(item) {
+    function checkoutStockVariantKey(item, product) {
+        var keyFn = window.stockLineKey || (window.maCatalog && window.maCatalog.stockLineKey);
+        if (typeof keyFn === 'function') return keyFn(product, item);
         return String((item && (item.size || item.selectedSize || item.color)) || '')
             .replace(/\s+/g, ' ').trim().toLowerCase();
     }
@@ -2938,19 +2940,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     function checkoutStockCap(item) {
         if (!item || typeof window.getStockQty !== 'function') return null;
         var product = checkoutStockProduct(item);
-        return product ? window.getStockQty(product, item.size || item.selectedSize || item.color || '') : null;
+        return product ? window.getStockQty(product, item.size || item.selectedSize || item.color || '', item.color || '') : null;
     }
 
     function checkoutQtyForSameProduct(item) {
         var id = String((item && item.id) || '').trim();
-        var variantKey = checkoutStockVariantKey(item);
         var product = checkoutStockProduct(item);
+        var variantKey = checkoutStockVariantKey(item, product);
         var variantTrackedFn = window.hasTrackedStockVariants || (window.maCatalog && window.maCatalog.hasTrackedStockVariants);
         var perVariant = product && typeof variantTrackedFn === 'function' ? variantTrackedFn(product) : false;
         var total = 0;
         cart.forEach(function (line) {
             var same = id
-                ? String(line.id || '').trim() === id && (!perVariant || checkoutStockVariantKey(line) === variantKey)
+                ? String(line.id || '').trim() === id && (!perVariant || checkoutStockVariantKey(line, product) === variantKey)
                 : line === item;
             if (same) total += parseInt(line.quantity, 10) || 1;
         });

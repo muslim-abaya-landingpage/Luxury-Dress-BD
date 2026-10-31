@@ -185,6 +185,16 @@ test('shop helper: same fields as the order check; old pickers when off, for Kaf
   // Per-size stock rows the fields cannot produce: keep the old pickers (size-orders.test.cjs covers matching rows).
   assert.equal(w.maSizeStore.resolveFor(Object.assign({}, abaya, { stockVariants: { 'Free Size': { tracked: true, available: 2 } } }), 'abaya'), null);
   assert.ok(w.maSizeStore.resolveFor(Object.assign({}, abaya, { stockVariants: { _default: { tracked: true, available: 5 } } }), 'abaya'));
+  // "Colour · Size" rows (Smart Upload stage 3) count as their size text for one of the product's colours.
+  const fields = w.maSizeStore.resolveFor(abaya, 'abaya');
+  const choice = {};
+  fields.fields.filter((f) => f.required).forEach((f) => { choice[f.key] = f.options[0].value; });
+  const sizeText = w.maSizeCore.validate(fields, choice).size;
+  assert.ok(sizeText);
+  const twoColours = Object.assign({}, abaya, { colorVariants: [{ color: 'navy' }, { color: 'black' }] });
+  const colourRows = { ['navy · ' + sizeText]: { tracked: true, available: 2 }, ['black · ' + sizeText]: { tracked: true, available: 0 } };
+  assert.ok(w.maSizeStore.resolveFor(Object.assign({}, twoColours, { stockVariants: colourRows }), 'abaya'));
+  assert.equal(w.maSizeStore.resolveFor(Object.assign({}, twoColours, { stockVariants: { ['red · ' + sizeText]: { tracked: true, available: 1 } } }), 'abaya'), null);
   // No published config on the page: old pickers.
   w.MA_SIZE_CONFIG = undefined;
   page.MA_SIZE_CONFIG = undefined;

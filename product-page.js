@@ -875,9 +875,9 @@
     var p = state.product;
     var variant = selectedVariant() || state.selectedColor || "";
     if (window.maCatalog && typeof window.maCatalog.getStockStatus === "function") {
-      return window.maCatalog.getStockStatus(p, variant);
+      return window.maCatalog.getStockStatus(p, variant, state.selectedColor || "");
     }
-    if (typeof window.getStockStatus === "function") return window.getStockStatus(p, variant);
+    if (typeof window.getStockStatus === "function") return window.getStockStatus(p, variant, state.selectedColor || "");
     return { inStock: true, label: "In Stock", buttonLabel: "Add to Cart", qty: null };
   }
 

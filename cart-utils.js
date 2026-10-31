@@ -409,7 +409,9 @@
     };
   }
 
-  function stockVariantForLine(line) {
+  function stockVariantForLine(line, product) {
+    var keyFn = global.stockLineKey || (global.maCatalog && global.maCatalog.stockLineKey);
+    if (typeof keyFn === "function") return keyFn(product, line);
     return String((line && (line.size || line.selectedSize || line.color)) || "")
       .replace(/\s+/g, " ").trim().toLowerCase();
   }
@@ -423,15 +425,15 @@
     var stockQtyFn = global.getStockQty || (global.maCatalog && global.maCatalog.getStockQty);
     var variantTrackedFn = global.hasTrackedStockVariants || (global.maCatalog && global.maCatalog.hasTrackedStockVariants);
     var variant = line.size || line.selectedSize || line.color || "";
-    if (catalogItem && typeof inStockFn === "function" && !inStockFn(catalogItem, variant)) {
+    if (catalogItem && typeof inStockFn === "function" && !inStockFn(catalogItem, variant, line.color)) {
       return list;
     }
-    var cap = catalogItem && typeof stockQtyFn === "function" ? stockQtyFn(catalogItem, variant) : null;
+    var cap = catalogItem && typeof stockQtyFn === "function" ? stockQtyFn(catalogItem, variant, line.color) : null;
     if (typeof cap === "number") {
       var perVariant = typeof variantTrackedFn === "function" ? variantTrackedFn(catalogItem) : false;
       var already = 0;
       list.forEach(function (x) {
-        if (String(x.id) === String(line.id) && (!perVariant || stockVariantForLine(x) === stockVariantForLine(line))) {
+        if (String(x.id) === String(line.id) && (!perVariant || stockVariantForLine(x, catalogItem) === stockVariantForLine(line, catalogItem))) {
           already += parseInt(x.quantity, 10) || 0;
         }
       });
