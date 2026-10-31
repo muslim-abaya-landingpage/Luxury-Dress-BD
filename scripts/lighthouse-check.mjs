@@ -33,11 +33,14 @@ const LIGHTHOUSE_VERSION = '13.5.0';
 //   Home      score 96, LCP 2.72 s (single runs 90-97, LCP 2.6-3.5 s)
 //   /abaya    score 78, LCP 5.88 s (single runs 75-78, LCP 5.9-7.7 s; the first card photo is added by JavaScript,
 //             so the browser cannot discover it from the HTML. That is a known gap, not something this check fixes.)
+//   On the GitHub runner (first PR run) /abaya LCP was 5.9 s or ~7.75 s (two modes) with a median of 7.75 s, so the
+//   LCP budget sits above the upper mode. The first Lighthouse run of a job was also an outlier (home 80, TBT 430 ms),
+//   so one warm-up run is made and thrown away before measuring.
 // See docs/LIGHTHOUSE-SPEED-CHECK-BN.md. Raise a budget when a page gets faster; never lower one just to make a PR
 // pass without a reason written in the PR.
 const PAGES = [
   {name: 'Home', path: '/', minScore: 90, maxLcpMs: 3500, maxTbtMs: 600, maxCls: 0.1},
-  {name: 'Category (abaya)', path: '/abaya', minScore: 70, maxLcpMs: 7500, maxTbtMs: 600, maxCls: 0.1},
+  {name: 'Category (abaya)', path: '/abaya', minScore: 70, maxLcpMs: 9000, maxTbtMs: 600, maxCls: 0.1},
 ];
 
 const BLOCKED = [
@@ -115,6 +118,14 @@ fs.mkdirSync(OUT, {recursive: true});
 
 const rows = [];
 const failures = [];
+
+// Warm-up: the first Chrome/Lighthouse start in a fresh job is slower and would add noise; its result is discarded.
+try {
+  runLighthouse(BASE + PAGES[0].path, path.join(OUT, 'warmup'));
+} catch (error) {
+  console.warn(`Warm-up run failed (${error.message}); continuing.`);
+}
+for (const f of fs.readdirSync(OUT)) if (f.startsWith('warmup')) fs.rmSync(path.join(OUT, f));
 
 for (const page of PAGES) {
   const url = BASE + page.path;
