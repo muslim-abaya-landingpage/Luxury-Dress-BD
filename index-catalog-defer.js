@@ -1,20 +1,5 @@
 (function () {
-  function loadFontAwesome() {
-    if (document.querySelector("link[data-ma-fa]")) return;
-    var l = document.createElement("link");
-    l.rel = "stylesheet";
-    l.href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css";
-    l.setAttribute("data-ma-fa", "1");
-    document.head.appendChild(l);
-  }
-
-  function scheduleFa() {
-    if (typeof window.requestIdleCallback === "function") {
-      window.requestIdleCallback(loadFontAwesome, { timeout: 3500 });
-    } else {
-      window.addEventListener("load", loadFontAwesome, { once: true });
-    }
-  }
+  // Font Awesome is no longer loaded on the homepage: its four icons are inline SVG in index.html.
 
   var chain = [
     "product-config.js?v=9f0fe21a5d0fbb0f",
@@ -82,9 +67,7 @@
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", start, { once: true });
-    document.addEventListener("DOMContentLoaded", scheduleFa, { once: true });
   } else {
     start();
-    scheduleFa();
   }
 })();

@@ -48,7 +48,8 @@ const header=read('site-header.js');const hrefFn=header.slice(header.indexOf('  
 const links={prefersCleanUrls:()=>true};vm.createContext(links);vm.runInContext(hrefFn,links);
 for(const [input,expected] of [['/privacy','/privacy'],['privacy.html','/privacy'],['/order-track','/order-track'],['/help#order-status','/help#order-status'],['/product/ABY-BLK-3P-02','/product/ABY-BLK-3P-02'],['https://example.com','https://example.com']])assert.equal(links.siteHref(input),expected);
 w.location={protocol:'https:'};assert.equal(w.maCatalog.resolveImageUrl('images/test.webp'),'/images/test.webp');
-assert(read('home-render.min.js').includes('return x("/product/"+encodeURIComponent(t.id||""))'));
+// Homepage cards link to /product/<id> (the minifier may rename the helper, so match any identifier).
+assert(/return [A-Za-z_$][\w$]*\("\/product\/"\+encodeURIComponent\(\w+\.id\|\|""\)\)/.test(read('home-render.min.js')));
 assert(renderer.includes('href="/product/'));
 // Back navigation may only select a fixed, safe collection route.
 let backKey='abaya';
