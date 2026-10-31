@@ -1,6 +1,6 @@
 /**
  * প্রোডাক্ট ডেটা — product-manager.html থেকে এডিট করুন
- * আপডেট: 2026-10-30
+ * আপডেট: 2026-10-31
  */
 window.CATEGORY_PRODUCTS = {
   abaya: [
@@ -9,12 +9,12 @@ window.CATEGORY_PRODUCTS = {
       name: "Maroon Abaya Set",
       image: "/images/Maroon Abaya Set...jpeg",
       price: 1250,
+      stock: 12,
       color: "maroon",
       colorLabel: "Maroon",
       fabric: "Dubai Cherry",
       sizes: ["44", "46", "48", "50", "52", "54", "56"],
       types: ["Full Set Borka, Hijab+ Niqab", "Abaya Only"],
-      inStock: true,
       priceByType: {
         "Full Set Borka, Hijab+ Niqab": 1250,
         "Abaya Only": 1000
@@ -495,7 +495,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "DR-8",
       name: "Elegant Charcoal Black CY Fabric Dress",
-      image: "images/uploads/dr-8-1793388836531.webp",
+      image: "/images/uploads/dr-8-1793388836531.webp",
       imageCard: "images/uploads/dr-8-1793388836531-card.webp",
       price: 1305,
       stock: 6,
