@@ -519,6 +519,28 @@
     return variants._default ? "_default" : "";
   }
 
+  /**
+   * Photo description (alt text) for search engines and screen readers: name, the colour that photo shows
+   * (from the product's colour photos) or its single colour, and fabric. Later photos get "(photo 2)" etc.
+   */
+  function productImageAlt(product, src, index) {
+    if (!product) return "";
+    var file = function (u) { return String(u || "").split(/[?#]/)[0].split("/").pop().toLowerCase(); };
+    var colour = "";
+    var rows = Array.isArray(product.colorVariants) ? product.colorVariants : [];
+    if (src && rows.length) {
+      rows.some(function (r) {
+        if (r && r.image && file(r.image) === file(src)) { colour = r.colorLabel || r.color || ""; return true; }
+        return false;
+      });
+    } else if (!rows.length && !/[,/]|multiple/i.test(String(product.colorLabel || ""))) {
+      colour = product.colorLabel || "";
+    }
+    var parts = [product.name, colour, product.fabric].map(function (v) { return String(v || "").trim(); })
+      .filter(function (v, i, a) { return v && a.indexOf(v) === i; });
+    return parts.join(" – ") + (index > 0 ? " (photo " + (index + 1) + ")" : "");
+  }
+
   /** Key for "do these cart lines share one stock row": lines with the same key draw from the same count. */
   function stockLineKey(product, line) {
     var variant = (line && (line.size || line.selectedSize || line.color)) || "";
@@ -1007,6 +1029,7 @@ g.getCartLineBaseName = getCartLineBaseName;
   g.hasTrackedStockVariants = hasTrackedStockVariants;
   g.getStockQty = getStockQty;
   g.stockRowKey = stockRowKey;
+  g.productImageAlt = productImageAlt;
   g.stockLineKey = stockLineKey;
   g.colorSizeStockVariant = colorSizeStockVariant;
   g.isInStock = isInStock;
@@ -1067,6 +1090,7 @@ g.getCartLineBaseName = getCartLineBaseName;
     hasTrackedStockVariants: hasTrackedStockVariants,
     getStockQty: getStockQty,
     stockRowKey: stockRowKey,
+    imageAlt: productImageAlt,
     stockLineKey: stockLineKey,
     colorSizeStockVariant: colorSizeStockVariant,
     isInStock: isInStock,

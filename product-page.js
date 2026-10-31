@@ -282,6 +282,11 @@
     $("pdPrice").innerHTML = html;
   }
 
+  function imageAlt(src, i) {
+    var fn = window.productImageAlt || (window.maCatalog && window.maCatalog.imageAlt);
+    return typeof fn === "function" ? fn(state.product, src, i) : state.product.name + (i > 0 ? " " + (i + 1) : "");
+  }
+
   function renderGallery() {
     var thumbsEl = $("pdThumbs");
     var mainImg = $("pdMainImg");
@@ -289,12 +294,12 @@
       .map(function (img, i) {
         return (
           "<button type='button' class='pd-thumb" + (i === state.activeImage ? " is-active" : "") +
-          "' data-idx='" + i + "'><img src='" + escapeHtml(img) + "' alt='" + escapeHtml(state.product.name) + " " + (i + 1) + "'></button>"
+          "' data-idx='" + i + "'><img src='" + escapeHtml(img) + "' alt='" + escapeHtml(imageAlt(img, i)) + "'></button>"
         );
       })
       .join("");
     mainImg.src = state.galleryImages[state.activeImage];
-    mainImg.alt = escapeHtml(state.product.name);
+    mainImg.alt = imageAlt(state.galleryImages[state.activeImage], state.activeImage);
     mainImg.onerror = function () {
       mainImg.onerror = null;
       mainImg.src = "/images/Baby-Pink-Floral-Print.jpeg";

@@ -1180,9 +1180,11 @@ function applySelectedColorToProduct(product, colorVariant) {
   if (colorVariant.image) next.image = colorVariant.image;
   return next;
 }
-function buildPqvThumbsHtml(images, altText) {
+function buildPqvThumbsHtml(images, altText, product) {
+  var altFn = window.productImageAlt || (window.maCatalog && window.maCatalog.imageAlt);
   return images
     .map(function (src, i) {
+      var alt = product && typeof altFn === "function" ? altFn(product, src, i) : altText;
       var esc = escapeHtml(src);
       return (
         '<button type="button" class="pqv-thumb' +
@@ -1192,7 +1194,7 @@ function buildPqvThumbsHtml(images, altText) {
         '"><img src="' +
         esc +
         '" alt="' +
-        escapeHtml(altText || "") +
+        escapeHtml(alt || "") +
         '"></button>'
       );
     })
@@ -1636,6 +1638,8 @@ function setPqvGallerySlide(modal, slideIndex) {
   var mainImg = modal.querySelector("#pqvMainImg");
   if (!src || !mainImg) return;
   mainImg.src = src;
+  var thumbImg = thumb.querySelector("img");
+  if (thumbImg && thumbImg.alt) mainImg.alt = thumbImg.alt;
   thumbs.forEach(function (t, j) {
     t.classList.toggle("is-active", j === i);
   });
@@ -2424,7 +2428,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     '<div class="pqv-top">' +
     '<div class="pqv-gallery">' +
     '<div class="pqv-thumbs">' +
-    buildPqvThumbsHtml(gallery, p.name) +
+    buildPqvThumbsHtml(gallery, p.name, p) +
     "</div>" +
     '<div class="pqv-main-wrap">' +
     '<div class="pqv-main pqv-zoom-stage">' +
@@ -2435,7 +2439,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     '<img id="pqvMainImg" class="pqv-zoom-img" src="' +
     imgSrc +
     '" alt="' +
-    escapeHtml(p.name) +
+    escapeHtml(typeof window.productImageAlt === "function" ? window.productImageAlt(p, imgSrc, 0) : p.name) +
     '" width="1080" height="1350" fetchpriority="high" decoding="async" onerror="this.onerror=null;this.src=\'' +
     imgFallback.replace(/'/g, "\\'") +
     '\'">' +
