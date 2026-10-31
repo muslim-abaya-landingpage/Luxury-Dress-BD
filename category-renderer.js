@@ -88,7 +88,7 @@ function ensureCategoryStyles() {
     link = document.createElement("link");
     link.id = "category-sidebar-css";
     link.rel = "stylesheet";
-    link.href = "/category-sidebar.css?v=d097ea36dd24f03a";
+    link.href = "/category-sidebar.css?v=1f6afd258fbf9d2f";
     document.head.appendChild(link);
   }
   var qtyLink =
@@ -1662,6 +1662,7 @@ function setPqvGallerySlide(modal, slideIndex) {
     if (specColor && activeColor) {
       specColor.textContent = activeColor.getAttribute("data-color-label") || "";
     }
+    syncPqvColorStock(modal);
   }
   updatePqvGalleryNav(modal);
 }
@@ -1710,6 +1711,7 @@ function bindPqvInteractions(p, idx, categoryKey, scopeRoot) {
     });
   });
   bindPqvGalleryArrows(modal);
+  syncPqvColorStock(modal);
   modal.querySelectorAll(".pqv-color-opt").forEach(function (btn) {
     btn.addEventListener("click", function () {
       modal.querySelectorAll(".pqv-color-opt").forEach(function (b) {
@@ -1721,6 +1723,7 @@ function bindPqvInteractions(p, idx, categoryKey, scopeRoot) {
       btn.setAttribute("aria-pressed", "true");
       var specColor = modal.querySelector("#pqvSpecColor");
       if (specColor) specColor.textContent = btn.getAttribute("data-color-label") || "";
+      syncPqvColorStock(modal);
       var img = btn.getAttribute("data-color-image") || "";
       var thumbs = modal.querySelectorAll(".pqv-thumb");
       for (var t = 0; t < thumbs.length; t++) {
@@ -4202,6 +4205,51 @@ function refreshVisibleShopStockCards() {
     if (buyButton) buyButton.disabled = !status.inStock;
   });
 }
+/** Stock of one colour from its own rows ("navy" or "navy · 52"); null when that colour has no counted rows. */
+function shopColorStockQty(product, color) {
+  var variants = product && product.stockVariants && typeof product.stockVariants === "object" ? product.stockVariants : null;
+  var key = String(color || "").replace(/\s+/g, " ").trim().toLowerCase();
+  if (!variants || !key) return null;
+  var found = false;
+  var total = Object.keys(variants).reduce(function (sum, k) {
+    var nk = String(k).replace(/\s+/g, " ").trim().toLowerCase();
+    var row = variants[k];
+    if ((nk === key || nk.indexOf(key + " \u00b7 ") === 0) && row && row.tracked === true) {
+      found = true;
+      return sum + Math.max(0, parseInt(row.available, 10) || 0);
+    }
+    return sum;
+  }, 0);
+  return found ? total : null;
+}
+/** Quick view: a colour whose rows are all 0 is marked sold out, and choosing it disables Add to Cart / Buy Now. */
+function syncPqvColorStock(root) {
+  var products = shopCartCtx && shopCartCtx.products;
+  if (!root || !Array.isArray(products)) return;
+  var btn = root.querySelector(".pqv-act-cart[data-product-idx]:not(.pqv-wholesale-add)");
+  var product = btn && products[parseInt(btn.getAttribute("data-product-idx"), 10)];
+  if (!product) return;
+  var status = productStockStatus(product);
+  var activeSoldOut = false;
+  Array.prototype.forEach.call(root.querySelectorAll(".pqv-color-opt"), function (pill) {
+    var qty = status.inStock ? shopColorStockQty(product, pill.getAttribute("data-color-value")) : null;
+    var soldOut = qty === 0;
+    pill.classList.toggle("is-soldout", soldOut);
+    if (soldOut) pill.setAttribute("title", "Sold out in this color");
+    else pill.removeAttribute("title");
+    if (soldOut && pill.classList.contains("is-active")) activeSoldOut = true;
+  });
+  if (!status.inStock) return; // whole product out of stock: refreshOpenProductPanels already shows it
+  var stockEl = root.querySelector(".pqv-stock");
+  if (stockEl) {
+    stockEl.classList.toggle("is-oos", activeSoldOut);
+    stockEl.textContent = activeSoldOut ? "This color is sold out" : status.label;
+  }
+  btn.disabled = activeSoldOut;
+  btn.textContent = activeSoldOut ? "Out of Stock" : status.buttonLabel;
+  var buy = root.querySelector(".pqv-act-buy");
+  if (buy) buy.disabled = activeSoldOut;
+}
 // The open product page / quick view follows live stock changes too (stock-sync runs after first paint).
 function refreshOpenProductPanels() {
   var products = shopCartCtx && shopCartCtx.products;
@@ -4218,6 +4266,7 @@ function refreshOpenProductPanels() {
     btn.textContent = status.buttonLabel;
     var buy = root.querySelector(".pqv-act-buy");
     if (buy) buy.disabled = !status.inStock;
+    syncPqvColorStock(root);
   });
 }
 window.addEventListener("ma:stock-updated", refreshVisibleShopStockCards);
