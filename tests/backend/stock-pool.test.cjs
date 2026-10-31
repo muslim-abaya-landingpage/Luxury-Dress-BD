@@ -77,6 +77,7 @@ function extractFunction(name) {
 }
 
 const names = ['normStockVariant_', 'stockVariantCompareKey_', 'findStockVariantRowIndex_', 'cartItemVariantKey_',
+  'colorSizeStockVariant_', 'cartItemStockCandidates_',
   'stockRowIsTracked_', 'stockRequirementsForCart_', 'resolveStockRequirementsForCart_', 'trackedStockRequirements_',
   'reservedStockRequirements_', 'assertStockRequirementsAvailable_'];
 const sandbox = {};
@@ -126,6 +127,44 @@ test('release/finalize resolve to the same pool row the reservation used', () =>
   assert.equal(reqs.length, 1);
   assert.equal(reqs[0].variant, '');
   assert.equal(reqs[0].qty, 2);
+  assert.equal(reqs[0].reserved, 2);
+});
+
+const colorCart = (...lines) => lines.map(([id, color, size, qty]) => ({ id, color, size, qty, name: id }));
+
+test('a "Colour · Size" row keeps separate stock for each colour of the same size', () => {
+  const data = [header,
+    ['AB-9', 'Abaya', 'abaya', 'Navy · 52', true, 3, 0],
+    ['AB-9', 'Abaya', 'abaya', 'Black · 52', true, 1, 0]];
+  const reqs = api.trackedStockRequirements_(colorCart(['AB-9', 'Navy', '52', 2], ['AB-9', 'Black', '52', 1]), data, true);
+  const by = Object.fromEntries(reqs.map(r => [r.variant, r]));
+  assert.equal(by['Navy · 52'].available, 3);
+  assert.equal(by['Navy · 52'].qty, 2);
+  assert.equal(by['Black · 52'].qty, 1);
+  api.assertStockRequirementsAvailable_(reqs);
+  const tooMany = api.trackedStockRequirements_(colorCart(['AB-9', 'black', '52', 2]), data, true);
+  assert.throws(() => api.assertStockRequirementsAvailable_(tooMany), /OUT_OF_STOCK/);
+});
+
+test('without a colour row the size row, then the colour row, then the pool is used', () => {
+  const sizeRow = [header, ['AB-9', 'Abaya', 'abaya', '52', true, 4, 0], ['AB-9', 'Abaya', 'abaya', '', true, 9, 0]];
+  const merged = api.trackedStockRequirements_(colorCart(['AB-9', 'Navy', '52', 1], ['AB-9', 'Black', '52', 2]), sizeRow, true);
+  assert.equal(merged.length, 1);
+  assert.equal(merged[0].variant, '52');
+  assert.equal(merged[0].qty, 3);
+  const colourRow = [header, ['AB-9', 'Abaya', 'abaya', 'Navy', true, 2, 0]];
+  assert.equal(api.trackedStockRequirements_(colorCart(['AB-9', 'Navy', '52', 1]), colourRow, true)[0].variant, 'Navy');
+  const pool = [header, ['AB-9', 'Abaya', 'abaya', '', true, 5, 0]];
+  assert.equal(api.trackedStockRequirements_(colorCart(['AB-9', 'Navy', '52', 1]), pool, true)[0].variant, '');
+  const strict = [header, ['AB-9', 'Abaya', 'abaya', '54', true, 5, 0]];
+  assert.throws(() => api.trackedStockRequirements_(colorCart(['AB-9', 'Navy', '52', 1]), strict, true), /VARIANT_NOT_TRACKED:AB-9 \(52\)/);
+});
+
+test('release finds the same "Colour · Size" row the reservation used', () => {
+  const data = [header, ['AB-9', 'Abaya', 'abaya', 'Navy · 52', true, 3, 2], ['AB-9', 'Abaya', 'abaya', '52', true, 7, 0]];
+  const reqs = api.reservedStockRequirements_(colorCart(['AB-9', 'Navy', '52', 2]), data);
+  assert.equal(reqs.length, 1);
+  assert.equal(reqs[0].variant, 'Navy · 52');
   assert.equal(reqs[0].reserved, 2);
 });
 

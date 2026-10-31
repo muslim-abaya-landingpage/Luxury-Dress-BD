@@ -6002,6 +6002,27 @@ function cartItemVariantKey_(item) {
   return '';
 }
 
+/** রং ও মাপ দুটোই থাকলে ভ্যারিয়েশনের স্টক সারির নাম, যেমন "Navy · Body 46"। একটা না থাকলে ফাঁকা। */
+function colorSizeStockVariant_(color, size) {
+  color = normStockVariant_(color);
+  size = normStockVariant_(size);
+  return color && size ? color + ' · ' + size : '';
+}
+
+/**
+ * কার্ট-আইটেমের স্টক সারি খোঁজার ক্রম: রং·মাপ → মাপ → রং। যেটার সারি আগে পাওয়া যায় সেটাই ব্যবহার হয়;
+ * কোনোটাই না থাকলে পুরো পণ্যের সারি (খালি Variant), নইলে আগের মতো cartItemVariantKey_।
+ * পুরনো পণ্যে রং·মাপ সারি নেই, তাই তাদের আচরণ আগের মতোই থাকে।
+ */
+function cartItemStockCandidates_(item) {
+  var out = [];
+  [colorSizeStockVariant_(item && item.color, item && item.size), item && item.size, item && item.color].forEach(function (v) {
+    v = normStockVariant_(v);
+    if (v && out.map(stockVariantCompareKey_).indexOf(stockVariantCompareKey_(v)) === -1) out.push(v);
+  });
+  return out;
+}
+
 function stockRowIsTracked_(row) {
   return !!row && ((String(row[4]).toUpperCase() === 'TRUE') || row[4] === true);
 }
@@ -6014,7 +6035,8 @@ function stockRequirementsForCart_(cartItems) {
     var qty = parseInt(item && item.qty, 10) || 0;
     if (!productId || qty <= 0) return;
     var variant = normStockVariant_(cartItemVariantKey_(item));
-    var key = productId + '\u001f' + stockVariantCompareKey_(variant);
+    var candidates = cartItemStockCandidates_(item);
+    var key = productId + '\u001f' + candidates.map(stockVariantCompareKey_).join('\u001e');
     var req = byKey[key];
     if (!req) {
       req = byKey[key] = {
@@ -6022,6 +6044,7 @@ function stockRequirementsForCart_(cartItems) {
         productName: String((item && item.name) || productId),
         category: String((item && item.category) || ''),
         variant: variant,
+        candidates: candidates,
         qty: 0
       };
       out.push(req);
@@ -6033,7 +6056,8 @@ function stockRequirementsForCart_(cartItems) {
 
 /**
  * Flexible stock: a StockVariants row with an empty Variant is the product's
- * "all sizes" pool. A cart line whose exact size has no row uses that pool,
+ * "all sizes" pool. A line first looks for a "Colour · Size" row, then the size,
+ * then the colour (cartItemStockCandidates_). A line with none of these rows uses that pool,
  * so the owner can keep one total per product, per-size counts, or a mix,
  * and change between them at any time. Lines that resolve to the same row are
  * merged so availability is checked against the combined quantity.
@@ -6044,8 +6068,10 @@ function resolveStockRequirementsForCart_(cartItems, data) {
   var out = [];
   stockRequirementsForCart_(cartItems).forEach(function (req) {
     var variant = req.variant;
-    if (variant && findStockVariantRowIndex_(data, req.productId, variant) === -1 &&
-        findStockVariantRowIndex_(data, req.productId, '') !== -1) {
+    var found = (req.candidates || []).filter(function (c) { return findStockVariantRowIndex_(data, req.productId, c) !== -1; })[0];
+    if (found) {
+      variant = found;
+    } else if (variant && findStockVariantRowIndex_(data, req.productId, '') !== -1) {
       variant = '';
     }
     var key = req.productId + '\u001f' + stockVariantCompareKey_(variant);
@@ -6733,6 +6759,8 @@ function commitAdminStockCsvBatch_(e) {
     var variant = normStockVariant_(row.variant || row.Variant);
     var qtyRaw = row.qty != null ? row.qty : row.Qty;
     var reason = String(row.reason || row.Reason || '').trim();
+    var productName = String(row.productName || row.ProductName || '').trim();
+    var category = String(row.category || row.Category || '').trim();
     var issues = [];
     if (!productId) issues.push('Product ID খালি');
     var qty = parseInt(qtyRaw, 10);
@@ -6744,7 +6772,7 @@ function commitAdminStockCsvBatch_(e) {
     if (productId && !knownIds[productId]) issues.push('অজানা Product ID (StockVariants-এ নেই — নতুন হিসেবে যোগ হবে)');
     var ok = !issues.some(function (m) { return m !== ('অজানা Product ID (StockVariants-এ নেই — নতুন হিসেবে যোগ হবে)'); }) && productId && !isNaN(qty) && qty >= 0 && reason;
     if (ok) validCount++;
-    results.push({ rowIndex: idx, productId: productId, variant: variant, qty: qtyRaw, reason: reason, ok: !!ok, issues: issues });
+    results.push({ rowIndex: idx, productId: productId, productName: productName, category: category, variant: variant, qty: qtyRaw, reason: reason, ok: !!ok, issues: issues });
   });
 
   if (previewOnly) {
@@ -6758,10 +6786,11 @@ function commitAdminStockCsvBatch_(e) {
   try {
     results.forEach(function (res) {
       if (!res.ok) { skipped++; return; }
-      var row = getOrCreateStockVariantRow_(sheet, res.productId, '', res.variant, '');
+      var row = getOrCreateStockVariantRow_(sheet, res.productId, res.productName, res.variant, res.category);
       var before = readStockVariantRow_(sheet, row);
       var nextAvailable = parseInt(res.qty, 10);
-      writeStockVariantRow_(sheet, row, { available: nextAvailable, tracked: true, updatedBy: v.email || 'admin' });
+      // Optional name/category (sent by the new-product upload form) only fill or refresh those columns.
+      writeStockVariantRow_(sheet, row, { available: nextAvailable, tracked: true, productName: res.productName, category: res.category, updatedBy: v.email || 'admin' });
       appendStockLedger_({
         productId: res.productId,
         variant: res.variant,
