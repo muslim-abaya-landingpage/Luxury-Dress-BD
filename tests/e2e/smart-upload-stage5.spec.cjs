@@ -35,7 +35,7 @@ async function addPhotos(page, n) {
     const input = document.getElementById('pqPhotos'); input.files = dt.files; input.dispatchEvent(new Event('change'));
   }, n);
 }
-const submit = (page) => page.evaluate(() => document.getElementById('pqForm').requestSubmit());
+const submit = (page) => page.evaluate(() => (() => { const f = document.getElementById('pqForm'); f.requestSubmit(); const r = document.getElementById('pqReview'); if (r && !r.hidden) f.requestSubmit(); })());
 const fill = async (page) => {
   await page.fill('#pq_name', 'Draft Hijab');
   await page.fill('#pq_price', '650');

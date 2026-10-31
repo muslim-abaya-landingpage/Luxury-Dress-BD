@@ -178,7 +178,7 @@
     });
   }
   function ensureQuickUpload() {
-    return Promise.all([loadScriptOnce("product-color-detect.js?v=20261030-detect"), loadScriptOnce("product-quick-upload.js?v=20261031-recover"), loadStyleOnce("product-quick-upload.css?v=20261031-recover")]).then(function () {
+    return Promise.all([loadScriptOnce("product-color-detect.js?v=20261030-detect"), loadScriptOnce("product-quick-upload.js?v=20261031-review"), loadStyleOnce("product-quick-upload.css?v=20261031-review")]).then(function () {
       if (!quickUploadMounted) {
         if (!window.MaProductQuickUpload || !quickUploadOptions) throw new Error("Quick upload is not ready");
         window.MaProductQuickUpload.mount(quickUploadOptions);

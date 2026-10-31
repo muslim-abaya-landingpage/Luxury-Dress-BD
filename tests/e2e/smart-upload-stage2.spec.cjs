@@ -60,7 +60,7 @@ test('publish: different colours are linked to their own photos, in the chosen p
   await page.locator('.pm-quick-thumb').nth(1).locator('.pm-quick-color').fill('Wine Red'); // own wording wins
   await page.locator('.pm-quick-thumb').nth(1).locator('[data-act="main"]').click(); // Wine Red photo becomes the main one
   await page.fill('#pq_sku', 'HJ-COL-1');
-  await page.evaluate(() => document.getElementById('pqForm').requestSubmit());
+  await page.evaluate(() => (() => { const f = document.getElementById('pqForm'); f.requestSubmit(); const r = document.getElementById('pqReview'); if (r && !r.hidden) f.requestSubmit(); })());
   await expect.poll(() => page.evaluate(() => window.__staged.length)).toBe(1);
   const p = (await page.evaluate(() => window.__staged[0]))[1];
   expect(p.colorLabel).toBe('Wine Red, Navy');
@@ -75,7 +75,7 @@ test('publish: one colour on every photo is a plain single-colour product (no co
   await addPhotos(page, ['#161e50', '#1a2258']);
   await page.click('#pqUseAll');
   await page.fill('#pq_sku', 'HJ-COL-2');
-  await page.evaluate(() => document.getElementById('pqForm').requestSubmit());
+  await page.evaluate(() => (() => { const f = document.getElementById('pqForm'); f.requestSubmit(); const r = document.getElementById('pqReview'); if (r && !r.hidden) f.requestSubmit(); })());
   await expect.poll(() => page.evaluate(() => window.__staged.length)).toBe(1);
   const p = (await page.evaluate(() => window.__staged[0]))[1];
   expect(p.colorLabel).toBe('Navy');
@@ -88,7 +88,7 @@ test('publish: a hand-edited Color box that disagrees with the photo colours sto
   await page.click('#pqUseAll');
   await page.fill('#pq_color', 'Navy, Burgundy'); // user's own list differs from the photo tags
   await page.fill('#pq_sku', 'HJ-COL-3');
-  await page.evaluate(() => document.getElementById('pqForm').requestSubmit());
+  await page.evaluate(() => (() => { const f = document.getElementById('pqForm'); f.requestSubmit(); const r = document.getElementById('pqReview'); if (r && !r.hidden) f.requestSubmit(); })());
   await expect.poll(() => page.evaluate(() => window.__staged.length)).toBe(1);
   const p = (await page.evaluate(() => window.__staged[0]))[1];
   expect(p.colorLabel).toBe('Navy, Burgundy');
