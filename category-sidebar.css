@@ -2181,6 +2181,11 @@ body.pqv-sc-open {
   padding: 0 16px;
 }
 
+.pqv-color-opt.is-soldout {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
 .pqv-color-group {
   display: flex;
   flex-wrap: wrap;
