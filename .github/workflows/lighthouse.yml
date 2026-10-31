@@ -1,0 +1,80 @@
+name: Page Speed
+
+# Mobile Lighthouse check on every pull request: builds the site the same way Cloudflare Pages does
+# (scripts/build-cloudflare.mjs), serves it locally, runs Lighthouse 5 times per page and fails when the median
+# drops below the budgets in scripts/lighthouse-check.mjs, or when a page requests one of our own files that is
+# missing (404). Third-party scripts and the Apps Script API are blocked, so no production data is read or written.
+# Guide: docs/LIGHTHOUSE-SPEED-CHECK-BN.md
+
+on:
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+      - "apps-script/**"
+      - "**/*.gs"
+      - "**/*.bat"
+      - "**/*.ps1"
+      - "tests/backend/**"
+      - "migrations/**"
+      - "supabase/**"
+      - "monitoring/**"
+      - "cloudflare-worker/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: page-speed-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lighthouse:
+    name: Mobile Lighthouse budget
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Build the site like Cloudflare Pages
+        run: node scripts/build-cloudflare.mjs
+
+      - name: Find Chrome
+        run: |
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          if [ -z "$CHROME" ]; then
+            npx --yes playwright@1.56.1 install --with-deps chromium
+            CHROME="$(ls -d "$HOME"/.cache/ms-playwright/chromium-*/chrome-linux*/chrome | head -n 1)"
+          fi
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          "$CHROME" --version
+
+      - name: Start local server
+        run: |
+          HOST=127.0.0.1 PORT=43147 nohup python3 scripts/serve-gzip.py > /tmp/serve.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsS -o /dev/null http://127.0.0.1:43147/index.html && exit 0
+            sleep 1
+          done
+          cat /tmp/serve.log
+          exit 1
+
+      - name: Run Lighthouse (mobile, median of 5 runs)
+        run: node scripts/lighthouse-check.mjs --base http://127.0.0.1:43147 --runs 5
+
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: lighthouse-reports-${{ github.run_id }}-${{ github.run_attempt }}
+          path: lighthouse-reports/
+          if-no-files-found: ignore
+          retention-days: 14
