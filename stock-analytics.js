@@ -87,7 +87,7 @@
       list.forEach(function (p) {
         if (!p || !p.id || seen[p.id]) return;
         seen[p.id] = true;
-        out.push({ id: p.id, name: p.name || p.id, category: key, image: (p.images && p.images[0]) || p.image || "" });
+        out.push({ id: p.id, name: p.name || p.id, category: key, image: (p.images && p.images[0]) || p.image || "", colorVariants: p.colorVariants, variationSkus: p.variationSkus });
       });
     });
     return out;
@@ -174,6 +174,21 @@
     return '<span class="sa-badge ' + m[0] + '">' + m[1] + '</span>';
   }
 
+  /** "navy · 52" → "Navy · 52" (the product's colour name), plus the variation SKU when the upload form saved one. */
+  function variantLabel(g, variant) {
+    if (!variant) return "সব সাইজ (মোট)";
+    var p = g.product || {};
+    var text = String(variant), lower = text.toLowerCase();
+    (p.colorVariants || []).some(function (c) {
+      var key = String((c && c.color) || "").toLowerCase();
+      if (key && (lower === key || lower.indexOf(key + " \u00b7 ") === 0)) { text = (c.colorLabel || c.color) + text.slice(key.length); return true; }
+      return false;
+    });
+    var sku = p.variationSkus && p.variationSkus[variant];
+    var esc = function (v) { return String(v).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+    return esc(text) + (sku ? '<br><span style="color:#888;font-size:0.75rem;font-family:monospace">' + esc(sku) + "</span>" : "");
+  }
+
   function buildProductGroups(variantRows, threshold) {
     // প্রতিটি প্রোডাক্টের নিচে তার ভ্যারিয়েন্টগুলো — যেসব প্রোডাক্টের কোনো StockVariants সারি নেই, তারা "ট্র্যাক করা হয়নি" হিসেবে দেখানো হবে
     var byProduct = {};
@@ -198,7 +213,7 @@
         });
         return;
       }
-      groups.push({ productId: p.id, productName: p.name, category: p.category, image: p.image, variants: rows });
+      groups.push({ productId: p.id, productName: p.name, category: p.category, image: p.image, product: p, variants: rows });
     });
     // ক্যাটালগে নেই এমন প্রোডাক্ট আইডি (পুরনো/মুছে যাওয়া প্রোডাক্ট) — তাও দেখাও যাতে ডেটা হারিয়ে না যায়
     Object.keys(byProduct).forEach(function (pid) {
@@ -246,7 +261,7 @@
         '<td style="padding:6px">' + imgHtml + '</td>' +
         '<td style="padding:6px"><strong>' + g.productName + '</strong><br><span style="color:#888;font-size:0.8rem">' + catLabel + '</span></td>' +
         '<td style="padding:6px;font-family:monospace;font-size:0.85rem">' + g.productId + '</td>' +
-        '<td style="padding:6px">' + (multi ? (g.variants.length + ' টি') : (g.variants[0].variant || 'সব সাইজ (মোট)')) + '</td>' +
+        '<td style="padding:6px">' + (multi ? (g.variants.length + ' টি') : variantLabel(g, g.variants[0].variant)) + '</td>' +
         '<td style="padding:6px">' + (multi || !g.variants[0].tracked ? '—' : g.variants[0].available) + '</td>' +
         '<td style="padding:6px">' + (multi ? '—' : g.variants[0].reserved) + '</td>' +
         '<td style="padding:6px">' + statusBadge(worst) + '</td>' +
@@ -259,7 +274,7 @@
           '<table style="width:100%;border-collapse:collapse;font-size:0.85rem">' +
           g.variants.map(function (v) {
             return '<tr style="border-bottom:1px solid #eee">' +
-              '<td style="padding:4px 8px;width:120px">' + (v.variant || 'সব সাইজ (মোট)') + '</td>' +
+              '<td style="padding:4px 8px;width:160px">' + variantLabel(g, v.variant) + '</td>' +
               '<td style="padding:4px 8px">Available: <strong>' + v.available + '</strong></td>' +
               '<td style="padding:4px 8px">Reserved: <strong>' + v.reserved + '</strong></td>' +
               '<td style="padding:4px 8px">' + statusBadge(v.status) + '</td>' +

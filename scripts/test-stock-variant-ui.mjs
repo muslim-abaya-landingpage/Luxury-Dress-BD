@@ -27,4 +27,9 @@ rows[0].tracked=false;rows[0].available=0;t.openStockEditModal('KURTI-03','38','
 el('saSearchInput').value='KURTI-03';assert.equal(t.buildProductGroups(rows,5).length,1);
 el('saSearchInput').value='';t.setCategory('abaya');assert.equal(t.buildProductGroups([],5)[0].productId,'ABY-HAFEZA-1');
 t.setCategory('');el('saStockStatusFilter').value='OUT';assert.equal(t.buildProductGroups([],5).length,0);
-console.log('PASS: exact single-variant keys, edit payload, unknown quantities, whole-unit validation, search/category/status filtering.');
+w.CATEGORY_PRODUCTS.abaya.push({id:'AB-9',name:'Two colour abaya',colorVariants:[{color:'navy-blue',colorLabel:'Navy Blue'},{color:'black',colorLabel:'Black'}],variationSkus:{'navy-blue · 52':'AB-9-NAVY-BLUE-52'}});
+const colourRows=[{productId:'AB-9',productName:'Two colour abaya',category:'abaya',variant:'navy-blue · 52',tracked:true,available:2,reserved:0,status:'OK'},{productId:'AB-9',productName:'Two colour abaya',category:'abaya',variant:'black · 52',tracked:true,available:0,reserved:0,status:'OUT'}];
+t.setCategory('');el('saStockStatusFilter').value='all';el('saSearchInput').value='AB-9';t.setRows(colourRows);t.renderStockTable(colourRows);
+const html=el('saStockBody').innerHTML;
+assert(html.includes('Navy Blue · 52'));assert(html.includes('Black · 52'));assert(html.includes('AB-9-NAVY-BLUE-52'));assert(html.includes('data-variant="navy-blue · 52"'));
+console.log('PASS: colour names and variation SKUs for colour · size rows, exact single-variant keys, edit payload, unknown quantities, whole-unit validation, search/category/status filtering.');
