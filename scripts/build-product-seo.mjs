@@ -18,7 +18,9 @@ const catalog = w.maCatalog.normalizeAll(w.CATEGORY_PRODUCTS, w.PRODUCT_LINKS_DA
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const json = data => JSON.stringify(data).replace(/</g, '\\u003c');
 const site = 'https://muslimabaya.com';
-const template = read('abaya.html');
+// Category pages carry a pre-built product list (see below); a product page must start from an empty list.
+const STATIC_LIST_RE = /<div id="list"><!--ma-static-list-->[\s\S]*?<!--\/ma-static-list--><\/div>/;
+const template = read('abaya.html').replace(STATIC_LIST_RE, '<div id="list"></div>');
 const products = [];
 const seen = new Set();
 const byId = new Map(Object.values(catalog).flat().map(p => [p.id, p]));
@@ -74,6 +76,51 @@ if (seen.size) {
     }
   }
 }
+// Category pages: write the published products into the HTML itself (name, price, photo, link) so search
+// engines see real content without running JavaScript. category-renderer.js replaces #list on load, so
+// visitors see the normal page. No intro/SEO text is added — only the products that are on the page anyway.
+const listed = w.maCatalog.normalizeAll(w.CATEGORY_PRODUCTS, w.PRODUCT_LINKS_DATA || w.PRODUCT_IMAGE_LISTS || {});
+const navLabel = Object.fromEntries((w.CATEGORY_NAV || []).map(c => [c.key, c.label]));
+const imgUrl = raw => { const v = String(raw || ''); if (!v) return ''; return /^https?:\/\//.test(v) ? v : encodeURI('/' + v.replace(/^\.?\//, '')); };
+function staticList(heading, rows, pageUrl) {
+  const items = rows.filter(p => p && p.id && p.name && !p.isImageView);
+  const cards = items.map(p => {
+    const href = `/product/${encodeURIComponent(p.id)}`;
+    const src = imgUrl(p.imageCard || p.image);
+    return `<li><a href="${href}">${src ? `<img src="${esc(src)}" alt="${esc(p.name)}" width="400" height="500" loading="lazy" decoding="async">` : ''}<span>${esc(p.name)}</span></a><b>৳${esc(p.price)}</b></li>`;
+  }).join('');
+  const style = '<style>.ma-static-list{list-style:none;margin:0;padding:12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}.ma-static-list a{display:block;color:inherit;text-decoration:none}.ma-static-list img{display:block;width:100%;height:auto;aspect-ratio:4/5;object-fit:cover}.ma-static-list span{display:block;font-size:14px;margin-top:6px}.ma-static-list b{font-size:14px}.ma-static-h1{font-size:20px;margin:12px}</style>';
+  const ld = {'@context':'https://schema.org','@type':'CollectionPage',name:`${heading} | Muslim Abaya`,url:pageUrl,
+    mainEntity:{'@type':'ItemList',numberOfItems:items.length,itemListElement:items.map((p, i) => ({'@type':'ListItem',position:i + 1,url:`${site}/product/${encodeURIComponent(p.id)}`,name:p.name}))}};
+  return { html: `<div id="list"><!--ma-static-list-->${style}<h1 class="ma-static-h1">${esc(heading)}</h1><ul class="ma-static-list">${cards}</ul><!--/ma-static-list--></div>`, ld };
+}
+function fillCategoryPage(file, heading, rows, pageUrl) {
+  const full = path.join(root, file);
+  if (!fs.existsSync(full)) return;
+  let html = fs.readFileSync(full, 'utf8');
+  // Heading = the page's own title text after "Muslim Abaya |" (e.g. "বোরখা ও আবায়া কালেকশন বাংলাদেশ").
+  const t = /<title>([^<]*)<\/title>/.exec(html);
+  const fromTitle = t ? t[1].replace(/^\s*Muslim Abaya\s*\|\s*/, '').replace(/\s*\|\s*Muslim Abaya[\s\S]*$/, '').trim() : '';
+  const { html: listHtml, ld } = staticList(fromTitle || heading, rows, pageUrl);
+  const before = html;
+  html = STATIC_LIST_RE.test(html) ? html.replace(STATIC_LIST_RE, listHtml) : html.replace('<div id="list"></div>', listHtml);
+  if (html === before && !html.includes(listHtml)) throw new Error(`${file}: could not find <div id="list"></div> to fill`);
+  // Replace older hand-written CollectionPage / ItemList blocks (some listed product names that no longer
+  // exist) with one generated from the live catalog. Other structured data on the page is left alone.
+  html = html.replace(/\s*<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g, (block, body) =>
+    /^\s*\{\s*"@context"\s*:\s*"https:\/\/schema\.org"\s*,\s*"@type"\s*:\s*"(CollectionPage|ItemList)"/.test(body) ? '' : block);
+  html = html.replace('</head>', `<script type="application/ld+json">${json(ld)}</script>\n</head>`);
+  if (html !== fs.readFileSync(full, 'utf8')) fs.writeFileSync(full, html);
+}
+let categoryPages = 0;
+for (const [category, rows] of Object.entries(listed)) {
+  if (!/^[a-z0-9-]+$/.test(category)) continue;
+  const label = navLabel[category] || category.replace(/-/g, ' ').toUpperCase();
+  fillCategoryPage(`${category}.html`, label, rows, `${site}/${category}`);
+  categoryPages++;
+}
+fillCategoryPage('category.html', 'All Products', Object.values(listed).flat(), `${site}/category`);
+console.log(`Pre-rendered product lists on ${categoryPages} category pages + /category.`);
 let sitemap = read('sitemap.xml').replace(/\s*<url>\s*<loc>https:\/\/muslimabaya\.com\/product\/[^<]+<\/loc>[\s\S]*?<\/url>/g, '');
 if (!sitemap.includes('<loc>'+site+'/panjabi</loc>')) sitemap = sitemap.replace('</urlset>', `  <url><loc>${site}/panjabi</loc></url>\n</urlset>`);
 sitemap = sitemap.replace('</urlset>', products.map(p => `  <url><loc>${p.url}</loc></url>`).join('\n')+'\n</urlset>');

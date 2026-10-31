@@ -44,3 +44,17 @@ test('photo description: name, the colour shown in that photo, fabric; later pho
   assert.equal(alt({ name: 'Mixed', colorLabel: 'Multiple colors' }, 'x.webp', 0), 'Mixed');
   assert.equal(alt(null, 'x', 0), '');
 });
+
+test('category pages carry a pre-built product list (links + ItemList) so search engines see products without JavaScript', () => {
+  const abaya = fs.readFileSync(path.join(root, 'abaya.html'), 'utf8');
+  const m = /<div id="list"><!--ma-static-list-->([\s\S]*?)<!--\/ma-static-list--><\/div>/.exec(abaya);
+  assert.ok(m, 'abaya.html has the static list');
+  assert.match(m[1], /<h1 class="ma-static-h1">[^<]+<\/h1>/);
+  assert.match(m[1], /<a href="\/product\/[A-Za-z0-9_-]+">/);
+  assert.doesNotMatch(m[1], /<script/i);
+  assert.match(abaya, /"@type":"CollectionPage"[\s\S]*"@type":"ItemList"/);
+  // Product pages are built from abaya.html but must never inherit the category list.
+  const prod = fs.readFileSync(path.join(root, 'product', 'ABY-MAROON-1.html'), 'utf8');
+  assert.ok(!prod.includes('ma-static-list'), 'product page has no category list');
+  assert.ok(prod.includes('<div id="list"><article>'), 'product page keeps its own article');
+});
