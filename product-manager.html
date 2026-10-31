@@ -856,15 +856,21 @@
       if (url && photos.indexOf(url) === -1) photos.push(url);
     });
     return rows.map(function (row, index) {
-      var options = '<option value="">Choose matching gallery photo…</option>' + photos.map(function (url, photoIndex) {
-        var label = photoIndex === 0 ? "Main photo" : "Gallery photo " + photoIndex;
-        var fileName = String(url).split("/").pop();
-        return '<option value="' + escapeAttr(url) + '"' + (row.image === url ? " selected" : "") + '>' + escapeHtml(label + " — " + fileName) + '</option>';
+      // The photos themselves, not file names: tap the one that shows this colour.
+      var list = photos.slice();
+      if (row.image && list.indexOf(row.image) === -1) list.push(row.image);
+      var tiles = list.map(function (url, photoIndex) {
+        var name = photoIndex === 0 && url === photos[0] ? "Main photo" : "Photo " + (photoIndex + 1);
+        var on = row.image === url;
+        return '<button type="button" class="pm-color-photo-opt' + (on ? " is-selected" : "") + '" role="radio" aria-checked="' + (on ? "true" : "false") + '" data-color-photo="' + escapeAttr(url) + '" title="' + escapeAttr(name) + '">' +
+          '<img src="' + escapeAttr(url) + '" alt="' + escapeAttr(name) + '" loading="lazy" decoding="async"><span>' + escapeHtml(photoIndex === 0 && url === photos[0] ? "Main" : String(photoIndex + 1)) + '</span></button>';
       }).join("");
-      if (row.image && photos.indexOf(row.image) === -1) options += '<option value="' + escapeAttr(row.image) + '" selected>Current mapped photo</option>';
       return '<div class="pm-color-variation-row" data-color-row="' + index + '">' +
         '<label>Color name<input type="text" data-color-field="label" value="' + escapeAttr(row.colorLabel || "") + '" placeholder="e.g. Black"></label>' +
-        '<label>Matching product photo<select data-color-field="image">' + options + '</select></label>' +
+        '<div class="pm-color-photo-field"><span>Photo of this color</span>' +
+        '<input type="hidden" data-color-field="image" value="' + escapeAttr(row.image || "") + '">' +
+        (tiles ? '<div class="pm-color-photo-pick" role="radiogroup" aria-label="Photo of this color">' + tiles + '</div>' : '<small>Add product photos first.</small>') +
+        '</div>' +
         '<button type="button" class="pm-wp-link-danger" data-color-remove="' + index + '" aria-label="Remove color variation">Remove</button>' +
       '</div>';
     }).join("");
@@ -930,7 +936,7 @@
             '<div class="pm-wp-panel" data-epanel="attributes"' + (editTab === "attributes" ? "" : " hidden") + '>' +
               '<div class="pm-wp-form-row pm-color-variation-field"><label>Color variations</label><div><div id="pmColorVariationList">' + colorRowsMarkup(colorRows, p) + '</div>' +
                 '<button type="button" class="pm-wp-button" id="pmColorAdd">+ Add color</button>' +
-                '<small>Add any color name, then select the matching photo already in this product’s gallery. Color keys are generated automatically. Add the photo to the gallery first if it is not listed.</small></div></div>' +
+                '<small>Add any color name, then tap the photo that shows that color (photos come from this product’s gallery). Color keys are generated automatically. Add the photo to the gallery first if it is not shown.</small></div></div>' +
               efield("fabric", "Fabric", p.fabric) +
               efield("sizes", "Product size options", sizesToInput(p.sizes), "text", "Options customers can select, e.g. 44 or M, L — separate with commas.") +
               efield("bodySizes", "Body measurement (inches)", sizesToInput(p.bodySizes), "text", "Garment/body measurement, e.g. 38, 40, 42 — separate with commas.") +
@@ -1100,6 +1106,19 @@
       colorList.addEventListener("input", handleColorFieldChange);
       colorList.addEventListener("change", handleColorFieldChange);
       colorList.addEventListener("click", function (event) {
+        var pick = event.target.closest("[data-color-photo]");
+        if (pick) {
+          event.preventDefault();
+          var holder = pick.closest("[data-color-row]");
+          holder.querySelector('[data-color-field="image"]').value = pick.getAttribute("data-color-photo");
+          Array.prototype.forEach.call(holder.querySelectorAll("[data-color-photo]"), function (b) {
+            b.classList.toggle("is-selected", b === pick);
+            b.setAttribute("aria-checked", b === pick ? "true" : "false");
+          });
+          syncColorRows(p, colorList);
+          changed();
+          return;
+        }
         var remove = event.target.closest("[data-color-remove]");
         if (!remove) return;
         event.preventDefault();
