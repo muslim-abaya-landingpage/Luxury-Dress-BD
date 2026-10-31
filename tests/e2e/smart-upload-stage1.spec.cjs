@@ -63,7 +63,7 @@ test('publish: the chosen main photo and order are what is staged; description i
   await page.setInputFiles('#pqPhotos', [file(1), file(2), file(3)]);
   await page.locator('.pm-quick-thumb').nth(2).locator('[data-act="main"]').click();
   await page.fill('#pq_sku', 'HJ-TEST-1');
-  await page.evaluate(() => document.getElementById('pqForm').requestSubmit());
+  await page.evaluate(() => (() => { const f = document.getElementById('pqForm'); f.requestSubmit(); const r = document.getElementById('pqReview'); if (r && !r.hidden) f.requestSubmit(); })());
   await expect.poll(() => page.evaluate(() => window.__staged.length)).toBe(1);
   const [cat, p] = await page.evaluate(() => window.__staged[0]);
   expect(cat).toBe('hijab');
@@ -84,13 +84,13 @@ test('SKU: empty makes an automatic one from the name; invalid or duplicate is r
     await page.fill('#pq_sku', bad);
     await expect(page.locator('#pqSkuHint')).toHaveClass(/pm-quick-error/);
     expect(await page.evaluate(() => document.getElementById('pq_sku').checkValidity())).toBe(false);
-    await page.evaluate(() => document.getElementById('pqForm').requestSubmit());
+    await page.evaluate(() => (() => { const f = document.getElementById('pqForm'); f.requestSubmit(); const r = document.getElementById('pqReview'); if (r && !r.hidden) f.requestSubmit(); })());
     expect(await page.evaluate(() => window.__staged.length)).toBe(0);
   }
   await expect(page.locator('#pqSkuHint')).toContainText('already used'); // last value was the duplicate (any case)
   await page.fill('#pq_sku', '');
   expect(await page.evaluate(() => document.getElementById('pq_sku').checkValidity())).toBe(true);
-  await page.evaluate(() => document.getElementById('pqForm').requestSubmit());
+  await page.evaluate(() => (() => { const f = document.getElementById('pqForm'); f.requestSubmit(); const r = document.getElementById('pqReview'); if (r && !r.hidden) f.requestSubmit(); })());
   await expect.poll(() => page.evaluate(() => window.__staged.length)).toBe(1);
   // Stage 4: an empty SKU now takes a readable link from the name (Bangla-only names keep the P- code, see stage 4 tests).
   expect(await page.evaluate(() => window.__staged[0][1].id)).toBe('test-hijab');

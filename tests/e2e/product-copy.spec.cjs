@@ -37,7 +37,7 @@ test('copy an existing product into the upload form: details copied, name/colour
 
   // submitting without photos is refused, and the source product is untouched
   await page.fill('#pq_name', 'Butterfly Abaya Set - Maroon');
-  await page.evaluate(() => document.getElementById('pqForm').requestSubmit());
+  await page.evaluate(() => (() => { const f = document.getElementById('pqForm'); f.requestSubmit(); const r = document.getElementById('pqReview'); if (r && !r.hidden) f.requestSubmit(); })());
   expect(await page.evaluate(() => window.__staged.length)).toBe(0);
   expect(await page.evaluate(() => window.__products.abaya[0].name)).toBe('Butterfly Abaya Set');
 

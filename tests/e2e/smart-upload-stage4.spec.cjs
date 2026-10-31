@@ -27,7 +27,7 @@ async function addPhoto(page) {
     const input = document.getElementById('pqPhotos'); input.files = dt.files; input.dispatchEvent(new Event('change'));
   });
 }
-const submit = (page) => page.evaluate(() => document.getElementById('pqForm').requestSubmit());
+const submit = (page) => page.evaluate(() => (() => { const f = document.getElementById('pqForm'); f.requestSubmit(); const r = document.getElementById('pqReview'); if (r && !r.hidden) f.requestSubmit(); })());
 const staged = (page) => page.evaluate(() => window.__staged[0] && window.__staged[0][1]);
 
 test('no SKU typed: the link comes from the name and is made unique; the listing is written automatically', async ({ page }) => {

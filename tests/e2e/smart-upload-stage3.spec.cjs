@@ -43,7 +43,7 @@ async function addPhotos(page, colours) {
   }, colours);
 }
 const box = (page, variant) => page.locator(`#pqStock input[data-variant="${variant}"]`);
-const submit = (page) => page.evaluate(() => document.getElementById('pqForm').requestSubmit());
+const submit = (page) => page.evaluate(() => (() => { const f = document.getElementById('pqForm'); f.requestSubmit(); const r = document.getElementById('pqReview'); if (r && !r.hidden) f.requestSubmit(); })());
 
 test('one colour: a box per size; only filled boxes become stock rows, saved after publishing', async ({ page }) => {
   await setup(page);
