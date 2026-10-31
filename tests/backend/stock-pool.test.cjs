@@ -186,6 +186,27 @@ test('storefront uses the same pool rule for size availability', () => {
   assert.equal(qty(strict, '40'), 0);
 });
 
+test('storefront uses the same "Colour · Size" rows as the order check', () => {
+  const qty = g.maCatalog.getStockQty;
+  const p = { id: 'AB', stockVariants: { 'navy · 52': { tracked: true, available: 3 }, 'black · 52': { tracked: true, available: 0 },
+    'black · 54': { tracked: true, available: 2 } } };
+  assert.equal(qty(p, '52', 'navy'), 3);
+  assert.equal(qty(p, '52', 'black'), 0);
+  assert.equal(g.maCatalog.isInStock(p, '52', 'black'), false);
+  assert.equal(qty(p, '52', 'red'), 0);
+  assert.equal(qty(p, 'black', 'black'), 2, 'colour chosen, no size yet: that colour\'s total');
+  assert.equal(qty(p, '52'), 0, 'old callers without a colour: no plain size row');
+  const sized = { id: 'AB', stockVariants: { '52': { tracked: true, available: 4 }, 'navy · 52': { tracked: true, available: 1 } } };
+  assert.equal(qty(sized, '52', 'navy'), 1);
+  assert.equal(qty(sized, '52', 'black'), 4);
+  const key = g.maCatalog.stockLineKey;
+  assert.equal(key(sized, { size: '52', color: 'black' }), key(sized, { size: '52', color: 'red' }));
+  assert.notEqual(key(sized, { size: '52', color: 'navy' }), key(sized, { size: '52', color: 'black' }));
+  const pooled = { id: 'K', stockVariants: { _default: { tracked: true, available: 4 } } };
+  assert.equal(key(pooled, { size: '38' }), key(pooled, { size: '40' }), 'sizes sharing the pool count together');
+  assert.equal(key(null, { size: ' 38 ' }), '38');
+});
+
 test('expired login sessions are removed, valid and undated ones are kept', () => {
   const now = Date.UTC(2026, 9, 20);
   const rows = [

@@ -190,3 +190,29 @@ test('home page: quick add of a product with fields opens its page', async ({ pa
   await expect(page).toHaveURL(new RegExp('/product/' + pid + '$'));
   expect(await cartLines(page)).toHaveLength(0);
 });
+
+test('"colour · size" stock rows: the product page follows the chosen colour, the cart refuses a sold-out colour', async ({ page }) => {
+  const marker = 'id: "ABY-MAROON-1",';
+  const withStock = realCatalog.replace(marker, marker + '\n      colorVariants: [{color: "maroon", colorLabel: "Maroon", image: "/images/Maroon Abaya Set...jpeg"}, {color: "black", colorLabel: "Black", image: "/images/Maroon Abaya Set...jpeg"}],' +
+    '\n      stockVariants: {"maroon · Body 44 · Length 52": {tracked: true, available: 2}, "black · Body 44 · Length 52": {tracked: true, available: 0}},');
+  await page.route(/\/category-products\.js(\?.*)?$/, (r) => r.fulfill({ contentType: 'application/javascript', body: withStock }));
+  await serve(page, await sizeConfig());
+  await page.goto('/product.html?id=ABY-MAROON-1');
+  await page.locator('#pdColorPickGroup .pd-option-btn', { hasText: 'Maroon' }).click();
+  await page.locator('#pdBodyOptions .pd-option-btn', { hasText: '44' }).click();
+  await page.locator('#pdSizeGroup .pd-option-btn', { hasText: '52' }).first().click();
+  const size = await page.evaluate(() => window.maCatalog.getStockQty(window.CATEGORY_PRODUCTS.abaya.find((p) => p.id === 'ABY-MAROON-1'), 'Body 44 · Length 52', 'maroon'));
+  expect(size).toBe(2);
+  await expect(page.locator('#pdStock')).toHaveText('In Stock');
+  await page.locator('#pdColorPickGroup .pd-option-btn', { hasText: 'Black' }).click();
+  await expect(page.locator('#pdStock')).toHaveText('Out of Stock');
+  await expect(page.locator('#pdAddCart')).toBeDisabled();
+  // The cart helper itself also refuses the sold-out colour and caps the other one at its own count.
+  const lines = await page.evaluate(() => {
+    var add = window.addOrMergeStoreCartItem;
+    var cart = add([], { id: 'ABY-MAROON-1', name: 'x', price: 1, quantity: 1, size: 'Body 44 · Length 52', color: 'black' });
+    cart = add(cart, { id: 'ABY-MAROON-1', name: 'x', price: 1, quantity: 5, size: 'Body 44 · Length 52', color: 'maroon' });
+    return cart.map((l) => [l.color, l.quantity]);
+  });
+  expect(lines).toEqual([['maroon', 2]]);
+});

@@ -13,14 +13,27 @@
     });
   }
 
+  function stockKey(s) { return String(s || "").replace(/\s+/g, " ").trim().toLowerCase(); }
+
+  /** A "Colour · Size" stock row ("Navy · Body 46 · Length 54") counts as its size text for one of the product's colours. */
+  function withoutColor(p, k) {
+    var colors = [p.color].concat((p.colorVariants || []).map(function (c) { return c && c.color; }));
+    var key = stockKey(k), out = k;
+    colors.some(function (c) {
+      var prefix = stockKey(c) + " \u00b7 ";
+      if (c && key.indexOf(prefix) === 0) { out = key.slice(prefix.length); return true; }
+      return false;
+    });
+    return out;
+  }
+
   function trackedSizeRows(p) {
     var v = p && p.stockVariants;
     if (!v || typeof v !== "object") return [];
-    return Object.keys(v).filter(function (k) { return k !== "_default" && v[k] && v[k].tracked === true; });
+    return Object.keys(v).filter(function (k) { return k !== "_default" && v[k] && v[k].tracked === true; })
+      .map(function (k) { return withoutColor(p, k); });
   }
   function hasPerSizeStock(p) { return trackedSizeRows(p).length > 0; }
-
-  function stockKey(s) { return String(s || "").replace(/\s+/g, " ").trim().toLowerCase(); }
 
   /** Every size text the required option fields can produce (size-core validate), or null if too many / free text. */
   function sizeTexts(resolved, limit) {

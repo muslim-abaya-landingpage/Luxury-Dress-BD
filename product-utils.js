@@ -489,7 +489,44 @@
     });
   }
 
-  function getStockQty(product, variant) {
+  /** "Navy · 52": the stock row name for one colour of one size (same text as Apps Script colorSizeStockVariant_). */
+  function colorSizeStockVariant(color, size) {
+    color = String(color || "").replace(/\s+/g, " ").trim();
+    size = String(size || "").replace(/\s+/g, " ").trim();
+    return color && size ? color + " \u00b7 " + size : "";
+  }
+
+  /**
+   * Which stock row a choice uses, in the order the order check uses (Apps Script cartItemStockCandidates_):
+   * "Colour · Size", then the size, then the colour, then the product's "all sizes" pool (_default).
+   * variant is the size (or the colour when there is no size), as before. Returns the row's key, or "".
+   */
+  function stockRowKey(product, variant, color) {
+    var variants = product && product.stockVariants && typeof product.stockVariants === "object"
+      ? product.stockVariants
+      : null;
+    if (!variants || !String(variant || "").trim()) return "";
+    var keys = Object.keys(variants);
+    var wanted = [colorSizeStockVariant(color, variant), variant, color].map(stockVariantKey).filter(Boolean);
+    var found = "";
+    wanted.some(function (w) {
+      return keys.some(function (key) {
+        if (key !== "_default" && stockVariantKey(key) === w) { found = key; return true; }
+        return false;
+      });
+    });
+    if (found) return found;
+    return variants._default ? "_default" : "";
+  }
+
+  /** Key for "do these cart lines share one stock row": lines with the same key draw from the same count. */
+  function stockLineKey(product, line) {
+    var variant = (line && (line.size || line.selectedSize || line.color)) || "";
+    var row = product ? stockRowKey(product, variant, line && line.color) : "";
+    return row ? stockVariantKey(row) : stockVariantKey(variant);
+  }
+
+  function getStockQty(product, variant, color) {
     if (!product) return null;
     if (product.inStock === false) return 0; // Product Manager-এর explicit stock-off override
     var variants = product.stockVariants && typeof product.stockVariants === "object"
@@ -499,22 +536,24 @@
     var hasTrackedVariants = hasTrackedStockVariants(product);
 
     if (variants && String(variant || "").trim()) {
-      var requestedKey = stockVariantKey(variant);
-      var matched = null;
-      variantKeys.some(function (key) {
-        if (stockVariantKey(key) === requestedKey) {
-          matched = variants[key];
-          return true;
-        }
-        return false;
-      });
-      if (matched && matched.tracked === true) {
-        return Math.max(0, parseInt(matched.available, 10) || 0);
+      // রং·মাপ → মাপ → রং → পণ্যের "সব সাইজ" পুল (খালি Variant) — Apps Script-এর একই নিয়ম।
+      var rowKey = stockRowKey(product, variant, color);
+      var row = rowKey ? variants[rowKey] : null;
+      if (row && row.tracked === true) {
+        return Math.max(0, parseInt(row.available, 10) || 0);
       }
-      // সাইজের আলাদা সারি না থাকলে পণ্যের "সব সাইজ" পুল (খালি Variant) ব্যবহার হয় — Apps Script-এর একই নিয়ম।
-      var pool = !matched ? variants._default : null;
-      if (pool && pool.tracked === true) {
-        return Math.max(0, parseInt(pool.available, 10) || 0);
+      // শুধু রং বাছা হয়েছে, মাপ এখনো না: সেই রঙের সব "রং · মাপ" সারির যোগফল।
+      var colorOnly = String(color || "").trim() && stockVariantKey(color) === stockVariantKey(variant);
+      if (!row && colorOnly) {
+        var prefix = stockVariantKey(color) + " \u00b7 ";
+        var colorRows = variantKeys.filter(function (key) {
+          return stockVariantKey(key).indexOf(prefix) === 0 && variants[key] && variants[key].tracked === true;
+        });
+        if (colorRows.length) {
+          return colorRows.reduce(function (sum, key) {
+            return sum + Math.max(0, parseInt(variants[key].available, 10) || 0);
+          }, 0);
+        }
       }
       if (hasTrackedVariants) return 0; // tracked product-এর অজানা/untracked size বিক্রিযোগ্য নয়
     }
@@ -531,15 +570,15 @@
     return Math.max(0, n);
   }
 
-  function isInStock(product, variant) {
-    var qty = getStockQty(product, variant);
+  function isInStock(product, variant, color) {
+    var qty = getStockQty(product, variant, color);
     if (qty === null) return true;
     return qty > 0;
   }
 
-  function getStockStatus(product, variant) {
-    var inStock = isInStock(product, variant);
-    var qty = getStockQty(product, variant);
+  function getStockStatus(product, variant, color) {
+    var inStock = isInStock(product, variant, color);
+    var qty = getStockQty(product, variant, color);
     // No stock count entered (and not marked out of stock): shown as "In Stock" everywhere, the same
     // as the homepage always showed (owner's choice, 2026-10-23).
     return {
@@ -967,6 +1006,9 @@ g.getCartLineBaseName = getCartLineBaseName;
   g.formatFabricLabelEn = formatFabricLabelEn;
   g.hasTrackedStockVariants = hasTrackedStockVariants;
   g.getStockQty = getStockQty;
+  g.stockRowKey = stockRowKey;
+  g.stockLineKey = stockLineKey;
+  g.colorSizeStockVariant = colorSizeStockVariant;
   g.isInStock = isInStock;
   g.getStockStatus = getStockStatus;
 
@@ -1024,6 +1066,9 @@ g.getCartLineBaseName = getCartLineBaseName;
     titleFromFileName: titleFromFileName,
     hasTrackedStockVariants: hasTrackedStockVariants,
     getStockQty: getStockQty,
+    stockRowKey: stockRowKey,
+    stockLineKey: stockLineKey,
+    colorSizeStockVariant: colorSizeStockVariant,
     isInStock: isInStock,
     getStockStatus: getStockStatus
   };
