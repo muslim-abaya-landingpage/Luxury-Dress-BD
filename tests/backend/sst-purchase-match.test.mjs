@@ -41,8 +41,9 @@ test('worker forwards the real shopper IP as ClientIP and drops a spoofed one', 
   const sent = [];
   const realFetch = globalThis.fetch;
   globalThis.fetch = async (url, opts) => {
-    if (String(url).includes('script.google.com')) { sent.push([...opts.body.entries()]); return new Response('Success|MA-1', { status: 200 }); }
-    if (String(url).includes('api.telegram.org')) return new Response('{}');
+    const host = new URL(String(url)).hostname;
+    if (host === 'script.google.com') { sent.push([...opts.body.entries()]); return new Response('Success|MA-1', { status: 200 }); }
+    if (host === 'api.telegram.org') return new Response('{}');
     return realFetch(url, opts);
   };
   try {
@@ -78,7 +79,7 @@ function loadCode() {
     UrlFetchApp: {
       fetch(url, opts) {
         calls.push({ url, body: JSON.parse(opts.payload) });
-        const meta = url.includes('graph.facebook.com');
+        const meta = new URL(url).hostname === 'graph.facebook.com';
         return { getResponseCode: () => 200, getContentText: () => JSON.stringify(meta ? { events_received: 1 } : { code: 0 }) };
       },
     },
