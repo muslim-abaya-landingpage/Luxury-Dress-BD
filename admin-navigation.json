@@ -51,6 +51,10 @@
       {
         "href": "admin-support-inbox.html",
         "label": "রিয়েল-টাইম লাইভ সাপোর্ট"
+      },
+      {
+        "href": "support-agent-telegram.html",
+        "label": "টেলিগ্রাম সাপোর্ট এজেন্ট"
       }
     ]
   },
