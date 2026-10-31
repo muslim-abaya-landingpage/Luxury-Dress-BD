@@ -71,11 +71,27 @@
     return raw;
   }
 
+  /* Uploaded products carry their own small card image (p.imageCard, e.g. images/uploads/<id>-card.webp).
+     Use it when present: no images/card/... copy is generated for uploads, so deriving one gave a 404. */
+  function resolveCardImg(p) {
+    var raw = (p && p.imageCard) || "";
+    if (!raw) return "";
+    if (window.maCatalog && typeof window.maCatalog.resolveImageUrl === "function") {
+      return window.maCatalog.resolveImageUrl(raw);
+    }
+    return raw;
+  }
+
   /* Small (480px) card variant: images/card/<original path>.webp — falls back to the original on 404. */
   function cardThumbSrc(src) {
     if (!src || /^(https?:)?\/\//i.test(src) || /[?#]/.test(src)) return src;
     var m = String(src).replace(/^\.?\//, "");
-    if (m.indexOf("images/") !== 0 || m.indexOf("images/card/") === 0 || m.indexOf("images/hero-banner/") === 0) {
+    if (
+      m.indexOf("images/") !== 0 ||
+      m.indexOf("images/card/") === 0 ||
+      m.indexOf("images/hero-banner/") === 0 ||
+      m.indexOf("images/uploads/") === 0
+    ) {
       return src;
     }
     return "images/card/" + m + ".webp";
@@ -227,6 +243,7 @@
   /* ---------------- Card ---------------- */
   function cardHtml(sec, p, eagerLevel) {
     var img = resolveImg(p);
+    var thumb = resolveCardImg(p) || cardThumbSrc(img);
     var dHref = detailHref(sec, p);
     var outOfStock = isOutOfStock(p);
     var st = stockStatus(p);
@@ -247,7 +264,7 @@
         ? "<span class='ah-card-badge ah-card-badge-oos'>Sold Out</span>"
         : "<span class='ah-card-badge'>Sale</span>") +
       "<img src='" +
-      escapeHtml(cardThumbSrc(img)) +
+      escapeHtml(thumb) +
       "' data-full='" +
       escapeHtml(img) +
       "' alt='" +
@@ -258,7 +275,7 @@
         : eagerLevel === 1
           ? "decoding='async'"
           : "loading='lazy' decoding='async'") +
-      " onerror=\"var f=this.getAttribute('data-full');if(f&&this.src.indexOf(f)<0&&this.src.indexOf('/images/card/')>-1){this.src=f;return}this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg'\">" +
+      " onerror=\"var f=this.getAttribute('data-full');if(f&&!this.hasAttribute('data-tried-full')){this.setAttribute('data-tried-full','1');if(this.getAttribute('src')!==f){this.src=f;return}}this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg'\">" +
       "</a>" +
       "<div class='ah-card-body'>" +
       "<div class='ah-card-row'>" +

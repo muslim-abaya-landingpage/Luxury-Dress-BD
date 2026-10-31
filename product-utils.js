@@ -1018,7 +1018,7 @@ g.getCartLineBaseName = getCartLineBaseName;
   if (typeof document !== "undefined" && document.head && !document.getElementById("ma-sale-price-css")) {
     var saleCss = document.createElement("style");
     saleCss.id = "ma-sale-price-css";
-    saleCss.textContent = ".ma-price-was{color:#8a8f98;font-weight:400;text-decoration:line-through;margin-right:4px;font-size:.86em}" +
+    saleCss.textContent = ".ma-price-was{color:#666b74;font-weight:400;text-decoration:line-through;margin-right:4px;font-size:.86em}" +
       ".ma-price-now{color:#b42318}.ma-price-off{display:inline-block;margin-left:6px;padding:1px 6px;font-size:.62em;font-weight:700;" +
       "line-height:1.5;vertical-align:middle;color:#fff;background:#b42318}.pqv-spec-tags a{color:inherit;text-decoration:underline}";
     document.head.appendChild(saleCss);
