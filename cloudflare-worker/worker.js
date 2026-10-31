@@ -175,8 +175,13 @@ async function handleOrder(request, env, ctx) {
   const target = String(form.get('_ma_target') || '');
   if (!ORDER_TARGET_RE.test(target)) return textOut('Bad request', 400);
   const pairs = [];
-  for (const [k, v] of form.entries()) if (k !== '_ma_target' && typeof v === 'string') pairs.push([k, v]);
+  for (const [k, v] of form.entries()) if (k !== '_ma_target' && k !== 'ClientIP' && typeof v === 'string') pairs.push([k, v]);
   if (pairValue(pairs, 'RecordType') !== 'Order') return textOut('Bad request', 400);
+  // Server-side tracking: the shopper's IP is only known here, so pass it on for the
+  // confirmed-order Purchase event (Meta client_ip_address / TikTok context.ip).
+  // A ClientIP sent by the browser is dropped above, so it cannot be spoofed.
+  const shopperIp = String(request.headers.get('CF-Connecting-IP') || '').trim();
+  if (/^[0-9A-Fa-f:.]{3,45}$/.test(shopperIp)) pairs.push(['ClientIP', shopperIp]);
   const eventId = pairValue(pairs, 'EventID');
   if (!ORDER_EVENT_ID_RE.test(eventId)) return textOut('Bad request', 400);
   const payload = JSON.stringify(pairs);
