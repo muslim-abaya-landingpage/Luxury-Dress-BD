@@ -27,6 +27,10 @@ export default {
       return handleEvent(request, env, ctx, url);
     }
 
+    // Landing page order submit: same safety net as the main site (save first, retry later).
+    if (url.hostname === 'shop.muslimabaya.com' && path === '/api/order' && request.method === 'POST') {
+      return handleLandingOrder(request, env, ctx);
+    }
     // Landing page (shop.muslimabaya.com, Cloudflare Pages): add the server-side relay script.
     if (url.hostname === 'shop.muslimabaya.com') {
       return serveLanding(request);
@@ -231,6 +235,110 @@ async function handleOrder(request, env, ctx) {
   return textOut('Success|', 200, { 'X-MA-Queued': '1' });
 }
 
+// ---------------- Landing page orders (added 2026-10-31) ----------------
+// shop.muslimabaya.com posts its order form (urlencoded) to its own Pages Function /api/order,
+// which writes it to the sheet. The live request is passed through to that function unchanged
+// (so the customer's IP and headers reach it exactly as before); the Worker only keeps a copy in
+// D1 first. The landing page treats only "Success|<id>" (HTTP 2xx) as success and "Error|..." as a
+// real rejection; anything else (error page, timeout, crash) used to show the customer an error and
+// the order was gone. Now such orders are kept and retried, and the customer gets a reference.
+const LANDING_RETRY_URL = 'https://muslimabaya-shop-landing.pages.dev/api/order';
+const LANDING_TARGET = 'landing:' + LANDING_RETRY_URL;
+
+function classifyLanding(status, text) {
+  text = String(text || '').trim();
+  if (status >= 200 && status < 300 && text.indexOf('Success|') === 0 && text.slice(8).trim()) {
+    return { kind: 'success', text, orderId: text.slice(8).trim() };
+  }
+  if (text.indexOf('Error|') === 0) {
+    if (text.indexOf('DUPLICATE_ORDER') !== -1) return { kind: 'duplicate', text };
+    return { kind: 'rejected', text };
+  }
+  return { kind: 'transient', text: 'HTTP ' + status + ' ' + text.slice(0, 200) };
+}
+
+async function forwardLandingRetry(pairs) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), ORDER_TIMEOUT_MS);
+  try {
+    const res = await fetch(LANDING_RETRY_URL, {
+      method: 'POST', body: new URLSearchParams(pairs), signal: ctrl.signal,
+      headers: { Origin: 'https://shop.muslimabaya.com', Referer: 'https://shop.muslimabaya.com/' }
+    });
+    return classifyLanding(res.status, await res.text());
+  } catch (e) {
+    return { kind: 'transient', text: 'FETCH ' + String(e && e.name === 'AbortError' ? 'TIMEOUT' : e).slice(0, 200) };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function landingRef(eventId) {
+  return 'MA-' + String(eventId).replace(/[^A-Za-z0-9]/g, '').slice(-8).toUpperCase();
+}
+
+async function handleLandingOrder(request, env, ctx) {
+  // Anything unexpected here must never block an order: fall back to the plain pass-through.
+  let pairs = null, eventId = '';
+  try {
+    const ct = request.headers.get('Content-Type') || '';
+    if (env.DB && ct.indexOf('application/x-www-form-urlencoded') !== -1) {
+      const raw = await request.clone().text();
+      if (raw.length <= ORDER_MAX_PAYLOAD) {
+        pairs = [...new URLSearchParams(raw).entries()];
+        eventId = pairValue(pairs, 'EventID');
+        if (!ORDER_EVENT_ID_RE.test(eventId)) pairs = null;
+      }
+    }
+  } catch (e) { pairs = null; }
+  if (!pairs) return fetch(request);
+
+  const now = Date.now();
+  let existing = null;
+  try {
+    existing = await env.DB.prepare('SELECT status, attempts, order_id, last_response FROM order_inbox WHERE event_id = ?').bind(eventId).first();
+    if (existing && existing.status === 'saved' && existing.last_response) return textOut(existing.last_response);
+    if (existing && existing.status === 'retry') return textOut('Success|' + landingRef(eventId), 200, { 'X-MA-Queued': '1' });
+    const payload = JSON.stringify(pairs);
+    if (existing) {
+      await env.DB.prepare("UPDATE order_inbox SET payload = ?, target = ?, status = 'sending', updated_at = ? WHERE event_id = ?").bind(payload, LANDING_TARGET, now, eventId).run();
+    } else {
+      await env.DB.prepare("INSERT INTO order_inbox (event_id, created_at, updated_at, status, attempts, next_at, target, payload, name, phone, total) VALUES (?, ?, ?, 'sending', 0, 0, ?, ?, ?, ?, ?)")
+        .bind(eventId, now, now, LANDING_TARGET, payload, pairValue(pairs, 'Name').slice(0, 120), pairValue(pairs, 'Phone').slice(0, 40), pairValue(pairs, 'Total').slice(0, 20)).run();
+    }
+  } catch (e) {
+    console.log('landing_order_db_error', String(e).slice(0, 200));
+    return fetch(request);
+  }
+  const attempts = (existing ? Number(existing.attempts) || 0 : 0) + 1;
+
+  let res = null, text = '', r;
+  try {
+    res = await fetch(request);
+    text = await res.text();
+    r = classifyLanding(res.status, text);
+  } catch (e) {
+    r = { kind: 'transient', text: 'FETCH ' + String(e).slice(0, 200) };
+  }
+  const done = Date.now();
+  const upd = (status, extraSql, binds) => env.DB.prepare('UPDATE order_inbox SET status = ?, attempts = ?, last_response = ?, updated_at = ?' + extraSql + ' WHERE event_id = ?')
+    .bind(status, attempts, r.text, done, ...binds, eventId).run().catch((e) => console.log('landing_order_db_error', String(e).slice(0, 200)));
+
+  if (r.kind === 'success') {
+    ctx.waitUntil(upd('saved', ', order_id = ?', [r.orderId]));
+  } else if (r.kind === 'rejected' || r.kind === 'duplicate') {
+    ctx.waitUntil(upd('rejected', '', []));
+  } else {
+    await upd('retry', ', next_at = ?', [done + backoffMs(1)]);
+    console.log('landing_order_queued', eventId, r.text.slice(0, 200));
+    return textOut('Success|' + landingRef(eventId), 200, { 'X-MA-Queued': '1' });
+  }
+  // Return the landing function's own answer unchanged.
+  const h = new Headers(res.headers);
+  h.delete('Content-Length'); h.delete('Content-Encoding');
+  return new Response(text, { status: res.status, headers: h });
+}
+
 async function processOrderQueue(env) {
   if (!env.DB) return;
   const now = Date.now();
@@ -242,7 +350,7 @@ async function processOrderQueue(env) {
     let pairs;
     try { pairs = JSON.parse(row.payload); } catch (e) { pairs = null; }
     if (!Array.isArray(pairs)) continue;
-    const r = await forwardOrder(row.target, pairs);
+    const r = String(row.target || '').indexOf('landing:') === 0 ? await forwardLandingRetry(pairs) : await forwardOrder(row.target, pairs);
     const attempts = (Number(row.attempts) || 0) + 1;
     const t = Date.now();
     if (r.kind === 'success') {
@@ -645,13 +753,23 @@ function scan(){var dl=window.dataLayer;if(!dl||!dl.length)return;for(;idx<dl.le
 setInterval(scan,700);window.addEventListener('pagehide',scan);
 }catch(e){}})();`;
 
+// Microsoft Clarity (free session recordings + heatmaps) for the landing page, same
+// project as the main site (vxaqs8nk80). Skipped if the page already loads Clarity.
+const LANDING_CLARITY = `(function(c,l,a,r,i,t,y){try{
+if(l.querySelector('script[src*="clarity.ms/tag/"]'))return;
+c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+c[a]("set","site","landing");
+}catch(e){}})(window,document,"clarity","script","vxaqs8nk80");`;
+
 async function serveLanding(request) {
   const resp = await fetch(request);
   try {
     const ct = resp.headers.get('Content-Type') || '';
     if (request.method !== 'GET' || !resp.ok || !ct.includes('text/html')) return resp;
     return new HTMLRewriter()
-      .on('head', { element(el) { el.prepend('<script data-cfasync="false">' + LANDING_RELAY + '</script>', { html: true }); } })
+      .on('head', { element(el) { el.prepend('<script data-cfasync="false">' + LANDING_RELAY + '</script><script data-cfasync="false">' + LANDING_CLARITY + '</script>', { html: true }); } })
       .transform(resp);
   } catch (e) {
     return resp;

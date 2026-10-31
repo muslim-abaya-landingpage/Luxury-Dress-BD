@@ -59,7 +59,7 @@ jobs:
 
       - name: Worker tests (order queue, IP blocking, admin IP API)
         if: steps.creds.outputs.ready == 'true'
-        run: node --test tests/backend/order-ip-guard.test.mjs
+        run: node --test tests/backend/order-ip-guard.test.mjs tests/backend/landing-order-queue.test.mjs
 
       - name: Back up the live Worker code
         if: steps.creds.outputs.ready == 'true'
