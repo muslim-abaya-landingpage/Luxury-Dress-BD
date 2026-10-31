@@ -48,7 +48,7 @@ elements.pqForm = {reset(){resets++;}};
 elements.pq_name.focus=()=>{};
 const heading={};
 const ui={editing:{id:'EXISTING'},completed:false,currentId:'EXISTING',cachedAssets:{},staged:true,
-  $:id=>elements[id],dialog:{querySelector:()=>heading,showModal(){}},kind(){},message(){},restoreDraft(){restored++;},resetPhotos(){},skuLock(){},renderStock(){},renderSeo(){}};
+  $:id=>elements[id],dialog:{querySelector:()=>heading,showModal(){}},kind(){},message(){},restoreDraft(){restored++;},resetPhotos(){},skuLock(){},renderStock(){},renderSeo(){},restorePhotos(){},markProblems(){},clearDrafts(){},draftNote(){}};
 vm.createContext(ui);vm.runInContext(openFn,ui);ui.open();
 assert.equal(ui.editing,null);assert.equal(ui.currentId,null);assert.equal(elements.pqPhotos.required,true);
 assert.equal(elements.pqAnother.hidden,true);
