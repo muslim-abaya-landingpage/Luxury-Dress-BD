@@ -154,3 +154,15 @@ test('full journey: copy, two colours, stock, automatic SEO, summary, publish, l
   await expect(review(page)).toBeHidden();
   await expect(page.locator('#pqSubmit')).toHaveText('Publish to website with images');
 });
+
+test('editing with new photos: a colour that pointed to an old photo now points to the new main photo', async ({ page }) => {
+  const existing = { id: 'HJ-OLD', name: 'Old Hijab', price: '500', sizes: ['Free Size'], color: 'black', colorLabel: 'Black', image: 'images/uploads/hj-old.webp', images: [], colorVariants: [{ color: 'black', colorLabel: 'Black', image: 'images/uploads/hj-old.webp' }] };
+  await setup(page, [existing]);
+  await page.evaluate((p) => window.MaProductQuickUpload.edit(p, 'hijab'), existing);
+  await addPhotos(page, ['#111111']);
+  await press(page);
+  await expect.poll(() => page.evaluate(() => window.__staged.length)).toBe(1);
+  const p = await page.evaluate(() => window.__staged[0][1]);
+  expect(p.image).not.toBe('images/uploads/hj-old.webp');
+  expect(p.colorVariants.map((c) => c.image)).toEqual([p.image]);
+});

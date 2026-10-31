@@ -178,7 +178,7 @@
     });
   }
   function ensureQuickUpload() {
-    return Promise.all([loadScriptOnce("product-color-detect.js?v=20261030-detect"), loadScriptOnce("product-quick-upload.js?v=20261031-review"), loadStyleOnce("product-quick-upload.css?v=20261031-review")]).then(function () {
+    return Promise.all([loadScriptOnce("product-color-detect.js?v=20261030-detect"), loadScriptOnce("product-quick-upload.js?v=20261031-replace"), loadStyleOnce("product-quick-upload.css?v=20261031-review")]).then(function () {
       if (!quickUploadMounted) {
         if (!window.MaProductQuickUpload || !quickUploadOptions) throw new Error("Quick upload is not ready");
         window.MaProductQuickUpload.mount(quickUploadOptions);
@@ -829,6 +829,22 @@
   function colorKeyFromLabel(label, index) {
     return String(label || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "color-" + (Number(index) + 1 || 1);
   }
+  function samePhoto(a, b) {
+    return String(a || "").replace(/^\/+/, "") === String(b || "").replace(/^\/+/, "");
+  }
+  /** Main photo replaced: colours that pointed to the old main photo now point to the new one, so the old
+   *  photo is not kept (or put back into the gallery) by a colour link. Old files are not deleted. */
+  function replaceMainPhotoRefs(p, oldPath, newPath) {
+    if (!p || !oldPath || samePhoto(oldPath, newPath)) return;
+    if (Array.isArray(p.colorVariants)) p.colorVariants.forEach(function (row) {
+      if (row && samePhoto(row.image || row.src, oldPath)) {
+        row.image = newPath;
+        if (Object.prototype.hasOwnProperty.call(row, "src")) row.src = newPath;
+      }
+    });
+    var list = document.getElementById("pmColorVariationList");
+    if (list && Array.isArray(p.colorVariants)) list.innerHTML = colorRowsMarkup(initialColorRows(p), p);
+  }
   function initialColorRows(p) {
     if (Array.isArray(p.colorVariants) && p.colorVariants.length) {
       return p.colorVariants.filter(Boolean).map(function (row, index) {
@@ -887,11 +903,12 @@
       p.colorVariants = rows;
       p.colorLabel = rows.map(function (row) { return row.colorLabel; }).join(", ");
       p.color = rows.map(function (row) { return row.color; }).join("-");
+      // A colour may only use one of this product's own photos. A link to any other photo (e.g. a replaced
+      // main photo) is dropped instead of putting that old photo back into the gallery.
       var gallery = Array.isArray(p.images) ? p.images.filter(function (url) { return url && !/^blob:/i.test(String(url)); }) : [];
       rows.forEach(function (row) {
-        if (row.image && row.image !== p.image && gallery.indexOf(row.image) === -1) gallery.push(row.image);
+        if (row.image && !samePhoto(row.image, p.image) && !gallery.some(function (url) { return samePhoto(url, row.image); })) row.image = "";
       });
-      if (gallery.length) p.images = gallery;
     } else {
       delete p.colorVariants;
       delete p.colorLabel;
@@ -2391,6 +2408,7 @@
           queuePhotos([{ path: mainName, content: base64s[0] }, { path: cardName, content: base64s[1] }]);
           localPreviews[mainName] = previewUrl;
           localPreviews[cardName] = previewUrl;
+          replaceMainPhotoRefs(p, p.image, mainName);
           p.image = mainName;
           p.imageCard = cardName;
           if (urlInput) {
@@ -2428,6 +2446,7 @@
     if (libBtn) {
       libBtn.addEventListener("click", function () {
         window.openMediaLibrary(function (path) {
+          replaceMainPhotoRefs(p, p.image, path);
           p.image = path;
           setPreview(resolveImgForPreview(path));
           if (urlInput) {

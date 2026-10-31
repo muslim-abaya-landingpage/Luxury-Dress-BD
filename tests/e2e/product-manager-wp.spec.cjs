@@ -291,3 +291,43 @@ test('edit screen: new main and gallery photos are not committed one by one; the
   const catalog = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
   for (const p of queued) expect(catalog).toContain(p);
 });
+
+test('replacing the main photo moves its colour to the new photo; the old photo is not kept in the gallery', async ({ page }) => {
+  await stub(page);
+  page.on('dialog', (d) => d.accept());
+  await page.goto('/product-manager.html');
+  await page.waitForTimeout(500);
+  await page.evaluate(() => {
+    window.__queued = {};
+    window.MaCatalogPublisher = Object.assign({}, window.MaCatalogPublisher, {
+      isReady: () => true,
+      enqueue: (rows) => rows.forEach((r) => { window.__queued[r.path] = r; }),
+      publish: (files) => { window.__published = files; return Promise.resolve({ ok: true }); }
+    });
+  });
+  await page.fill('#pmAllSearch', 'DR-8');
+  await page.click('#pmAllSearchBtn');
+  await page.locator('#pmAllRows tr').filter({ hasText: 'DR-8' }).first().locator('.pm-row-title').click();
+  const before = await page.evaluate(() => { const p = (window.CATEGORY_PRODUCTS['premium-two-piece'] || []).find((x) => x.id === 'DR-8'); return { image: p.image, images: (p.images || []).slice() }; });
+  // The colour points to the current main photo.
+  await page.click('[data-etab="attributes"]');
+  await page.locator('.pm-color-variation-row').first().locator('.pm-color-photo-opt').first().click();
+  // Replace the main photo.
+  const png = await page.evaluate(() => { const c = document.createElement('canvas'); c.width = 64; c.height = 80; c.getContext('2d').fillRect(0, 0, 64, 80); return c.toDataURL('image/png').split(',')[1]; });
+  await page.locator('.pm-file-input').first().setInputFiles({ name: 'new.png', mimeType: 'image/png', buffer: Buffer.from(png, 'base64') });
+  await expect.poll(() => page.evaluate(() => Object.keys(window.__queued).length)).toBe(2);
+  const newMain = await page.evaluate(() => Object.keys(window.__queued).find((p) => !/-card\.webp$/.test(p)));
+  // Touching the colour again must not bring the old photo back.
+  await page.click('[data-etab="attributes"]');
+  await page.locator('.pm-color-variation-row').first().locator('[data-color-field="label"]').fill('Charcoal Black');
+  await page.click('#pmEditBarSave');
+  await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
+  const file = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
+  const context = { window: {} };
+  vm.runInNewContext(file, context);
+  const product = context.window.CATEGORY_PRODUCTS['premium-two-piece'].find((p) => p.id === 'DR-8');
+  expect(product.image).toBe(newMain);
+  expect(product.colorVariants.map((c) => c.image)).toEqual([newMain]);
+  expect(product.images || []).not.toContain(before.image);
+  expect((product.images || []).length).toBe(before.images.length);
+});
