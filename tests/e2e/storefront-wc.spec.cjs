@@ -167,3 +167,15 @@ test('home page: sale price on the card, Draft not shown', async ({ page }) => {
   await expect(maroon.locator('.ah-card-price del')).toHaveText('৳1299', { timeout: 15000 });
   expect(await page.locator('a[href="/product/ABY-BLK-3P-02"]').count()).toBe(0);
 });
+
+test('photo descriptions (alt text): name, colour and fabric on the product view and product.html gallery', async ({ page }) => {
+  await useCatalog(page);
+  await page.goto('/product/ABY-MAROON-1');
+  const p = await page.evaluate(() => window.CATEGORY_PRODUCTS.abaya.find((x) => x.id === 'ABY-MAROON-1'));
+  const expected = [p.name, p.colorLabel, p.fabric].filter(Boolean).join(' – ');
+  await expect(page.locator('#pqvMainImg')).toHaveAttribute('alt', expected);
+  await page.goto('/product.html?id=ABY-MAROON-1');
+  await expect(page.locator('#pdMainImg')).toHaveAttribute('alt', expected);
+  const thumbs = await page.locator('#pdThumbs img').evaluateAll((l) => l.map((i) => i.alt));
+  if (thumbs.length > 1) expect(thumbs[1]).toBe(expected + ' (photo 2)');
+});
