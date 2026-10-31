@@ -765,6 +765,13 @@ html[data-admin-theme="dark"] .pm-wp-list, html[data-admin-theme="dark"] .pm-wp-
 .pm-color-variation-row { display: grid; grid-template-columns: minmax(120px, 1fr) minmax(180px, 1.5fr) auto; align-items: end; gap: 8px; margin: 0 0 10px; padding: 10px; border: 1px solid var(--pm-wp-border); background: #f6f7f7; }
 .pm-color-variation-row label { display: flex; flex-direction: column; gap: 4px; color: var(--pm-wp-text); font-size: 12px; }
 .pm-color-variation-row input, .pm-color-variation-row select { width: 100%; min-height: 34px; padding: 4px 8px; border: 1px solid #8c8f94; background: #fff; font: inherit; font-size: 13px; }
+.pm-color-photo-field { display: flex; flex-direction: column; gap: 4px; min-width: 0; font-size: 12px; }
+.pm-color-photo-pick { display: flex; flex-wrap: wrap; gap: 6px; }
+.pm-color-photo-opt { position: relative; width: 56px; padding: 2px; border: 2px solid transparent; border-radius: 6px; background: #fff; cursor: pointer; }
+.pm-color-photo-opt img { display: block; width: 100%; height: 68px; object-fit: cover; border-radius: 4px; }
+.pm-color-photo-opt span { display: block; font-size: 11px; text-align: center; color: #50575e; }
+.pm-color-photo-opt.is-selected { border-color: #2271b1; box-shadow: 0 0 0 1px #2271b1; }
+.pm-color-photo-opt.is-selected span { color: #2271b1; font-weight: 700; }
 .pm-color-variation-row .pm-wp-link-danger { padding: 6px 4px; border: 0; background: none; color: #b32d2e; font: inherit; cursor: pointer; text-decoration: underline; }
 @container (max-width: 430px) {
   .pm-color-variation-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); }

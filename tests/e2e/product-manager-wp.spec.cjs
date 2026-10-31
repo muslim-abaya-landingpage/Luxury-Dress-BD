@@ -128,10 +128,14 @@ test('edit screen: structured color variations publish names and images, with fi
   for (const field of measurements) await expect(page.locator(`[data-ef="${field}"]`)).toHaveCount(1);
   await expect(page.locator('.pm-color-variation-row')).toHaveCount(1);
   await page.fill('.pm-color-variation-row [data-color-field="label"]', 'White / Black');
-  await page.locator('.pm-color-variation-row [data-color-field="image"]').selectOption(dr01Photo);
+  // Photos are shown as pictures (not file names); tapping one picks it.
+  await expect(page.locator('.pm-color-variation-row').first().locator('.pm-color-photo-opt img').first()).toHaveAttribute('src', dr01Photo);
+  await expect(page.locator('.pm-color-variation-row').first().locator('select')).toHaveCount(0);
+  await page.locator('.pm-color-variation-row').first().locator(`[data-color-photo="${dr01Photo}"]`).click();
+  await expect(page.locator('.pm-color-variation-row').first().locator(`[data-color-photo="${dr01Photo}"]`)).toHaveAttribute('aria-checked', 'true');
   await page.click('#pmColorAdd');
   await page.locator('.pm-color-variation-row').nth(1).locator('[data-color-field="label"]').fill('কালো');
-  await page.locator('.pm-color-variation-row').nth(1).locator('[data-color-field="image"]').selectOption(dr01Photo);
+  await page.locator('.pm-color-variation-row').nth(1).locator(`[data-color-photo="${dr01Photo}"]`).click();
   await page.click('#pmEditBarSave');
   await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
 
