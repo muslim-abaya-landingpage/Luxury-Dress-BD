@@ -8,4 +8,5 @@ coverage/
 !.env.example
 playwright-report/
 test-results/
+lighthouse-reports/
 live-build.json
