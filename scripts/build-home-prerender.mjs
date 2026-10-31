@@ -56,10 +56,12 @@ export function renderHomeParts() {
   return parts;
 }
 
+const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 export function prerenderIndex(html, parts) {
   let out = html;
   for (const css of INLINE_CSS) {
-    const re = new RegExp(`[ \\t]*<link rel="stylesheet" href="${css.replace(/\./g, '\\.')}[^"]*" media="print" onload="this\\.media='all'">\\s*<noscript><link rel="stylesheet" href="${css.replace(/\./g, '\\.')}[^"]*"></noscript>`);
+    const re = new RegExp(`[ \\t]*<link rel="stylesheet" href="${escapeRegExp(css)}[^"]*" media="print" onload="this\\.media='all'">\\s*<noscript><link rel="stylesheet" href="${escapeRegExp(css)}[^"]*"></noscript>`);
     if (!re.test(out)) throw new Error('index.html: deferred link for ' + css + ' not found');
     const body = read(css).replace(/<\/style/gi, '<\\/style');
     out = out.replace(re, () => `    <style data-inline-from="${css}">${body}</style>`);

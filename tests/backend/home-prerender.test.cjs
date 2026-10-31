@@ -26,7 +26,7 @@ test('prerenderIndex inlines the card CSS and fills the empty containers once', 
   const out = prerenderIndex(html, renderHomeParts());
   for (const css of ['index-home-muslim-abaya.min.css', 'home-glass.css', 'liquid-glass-ui.min.css']) {
     assert.ok(out.includes(`<style data-inline-from="${css}">`), css + ' inlined');
-    assert.ok(!new RegExp(`<link rel="stylesheet" href="${css.replace(/\./g, '\\.')}`).test(out), css + ' link removed');
+    assert.ok(!out.includes(`<link rel="stylesheet" href="${css}`), css + ' link removed');
   }
   assert.equal((out.match(/data-prerendered="1"/g) || []).length, 1);
   assert.equal((out.match(/id="ma-home-btn-row"/g) || []).length, 1);
