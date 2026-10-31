@@ -3063,7 +3063,13 @@ function buildShopSidebar(categoryKey, products) {
 function deriveCardThumbSrc(src) {
   if (!src || /^(https?:)?\/\//i.test(src) || /[?#]/.test(src)) return "";
   var m = String(src).replace(/^\.?\//, "");
-  if (m.indexOf("images/") !== 0 || m.indexOf("images/card/") === 0 || m.indexOf("images/hero-banner/") === 0) {
+  // images/uploads/ (Smart Upload) has no images/card/ copy; those products carry imageCard instead.
+  if (
+    m.indexOf("images/") !== 0 ||
+    m.indexOf("images/card/") === 0 ||
+    m.indexOf("images/hero-banner/") === 0 ||
+    m.indexOf("images/uploads/") === 0
+  ) {
     return "";
   }
   // Keep a root-absolute source root-absolute so nested pages such as
@@ -3077,9 +3083,12 @@ function buildCardImageBlock(p, idx, categoryKey, allProducts) {
   var hover = resolveCardHoverImage(p, allProducts);
   var imgFallback = getCategoryFallbackImage(categoryKey || "");
   var fb = imgFallback.replace(/'/g, "\\'");
-  var thumb = !(card && card !== main) ? deriveCardThumbSrc(main) : "";
-  var errOn = thumb
-    ? "var f=this.getAttribute('data-full');if(f&&this.src.indexOf('/images/card/')>-1){this.src=f;return}this.onerror=null;this.removeAttribute('srcset');this.src='" + fb + "'"
+  var hasCard = !!(card && card !== main);
+  var thumb = !hasCard ? deriveCardThumbSrc(main) : "";
+  // Card-size photo first (uploaded imageCard, else the generated images/card/ copy); on error try the full photo once.
+  var primary = hasCard ? card : thumb || main;
+  var errOn = primary !== main
+    ? "var f=this.getAttribute('data-full');if(f&&!this.hasAttribute('data-tried-full')){this.setAttribute('data-tried-full','1');this.removeAttribute('srcset');this.src=f;return}this.onerror=null;this.removeAttribute('srcset');this.src='" + fb + "'"
     : "this.onerror=null;this.removeAttribute('srcset');this.src='" + fb + "'";
   var eager = idx < 2 && document.documentElement.hasAttribute("data-shop-category");
   var hoverHtml = hover
@@ -3087,15 +3096,9 @@ function buildCardImageBlock(p, idx, categoryKey, allProducts) {
       escapeHtml(hover) +
       '" alt="" loading="lazy" decoding="async" aria-hidden="true" onerror="this.removeAttribute(\'src\')">'
     : "";
-  // ছোট (কার্ড সাইজ) ভ্যারিয়েন্ট থাকলে srcset যোগ — না থাকলে আগের মতোই একটাই src (পুরনো প্রোডাক্টে কোনো পরিবর্তন নেই)
-  var srcsetHtml =
-    card && card !== main
-      ? ' srcset="' +
-        escapeHtml(card) +
-        ' 800w, ' +
-        escapeHtml(main) +
-        ' 1600w" sizes="(max-width: 720px) 100vw, (max-width: 960px) 50vw, 380px"'
-      : "";
+  // The card photo (≤800px) is already sharp enough for a listing card at 2-3x pixel density. A srcset with the
+  // full photo as "1600w" made phones pick the full photo anyway, so the card photo is the only source.
+  var srcsetHtml = "";
   return (
     '<a href="/product/' + encodeURIComponent(p.id) + '" class="img-wrap" data-product-idx="' +
     idx +
@@ -3105,9 +3108,9 @@ function buildCardImageBlock(p, idx, categoryKey, allProducts) {
     stockImageBadgeHtml(p) +
     '<span class="card-img-stack">' +
     '<img class="card-img-primary" src="' +
-    escapeHtml(thumb || main) +
+    escapeHtml(primary) +
     '"' +
-    (thumb ? ' data-full="' + escapeHtml(main) + '"' : "") +
+    (primary !== main ? ' data-full="' + escapeHtml(main) + '"' : "") +
     srcsetHtml +
     ' alt="' +
     escapeHtml(p.name) +

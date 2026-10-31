@@ -8,13 +8,14 @@
 (function () {
   "use strict";
 
+  var homeBtnCssText =
+    ".ah-card .ah-actions{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:stretch;gap:8px;width:100%}" +
+    ".ah-card .ah-btn{flex:1 1 0!important;width:0!important;min-width:0!important;border:none!important}" +
+    ".ah-card .ah-btn-msg{background:#4a4a4a!important;color:#fff!important}";
   if (!document.getElementById("ma-home-btn-row")) {
     var homeBtnCss = document.createElement("style");
     homeBtnCss.id = "ma-home-btn-row";
-    homeBtnCss.textContent =
-      ".ah-card .ah-actions{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:stretch;gap:8px;width:100%}" +
-      ".ah-card .ah-btn{flex:1 1 0!important;width:0!important;min-width:0!important;border:none!important}" +
-      ".ah-card .ah-btn-msg{background:#4a4a4a!important;color:#fff!important}";
+    homeBtnCss.textContent = homeBtnCssText;
     document.head.appendChild(homeBtnCss);
   }
 
@@ -313,6 +314,8 @@
   }
 
   /* ---------------- Sections ---------------- */
+  var PRERENDER_CARDS = 6;
+
   function renderSections() {
     var root = $("homeSections");
     if (!root) return;
@@ -323,45 +326,104 @@
     }
     var secs = activeSections();
     if (!secs.length) return;
+    if (!extendPrerendered(root, secs)) root.innerHTML = sectionsHtml(secs, 0, 0);
+    bindSections(root, secs);
+  }
 
-    var html = "";
-    var firstSectionDone = false;
+  /* index.html can arrive with the start of the first section already in it (scripts/build-home-prerender.mjs).
+     Keep those card elements (they are the LCP element; replacing them would restart LCP and can shift the
+     page) and only add the rest. If the catalog no longer matches what was prerendered, re-render everything. */
+  function extendPrerendered(root, secs) {
+    if (root.getAttribute("data-prerendered") !== "1") return false;
+    root.removeAttribute("data-prerendered");
+    var plan = sectionPlan(secs);
+    if (!plan.length) return false;
+    var first = plan[0];
+    var sectionEl = root.querySelector("section.home-section");
+    var row = sectionEl && sectionEl.querySelector(".home-row");
+    if (!row || root.querySelectorAll("section.home-section").length !== 1 || sectionEl.getAttribute("data-cat") !== first.sec.key) {
+      return false;
+    }
+    var arts = row.querySelectorAll("article.ah-card");
+    var n = Math.min(PRERENDER_CARDS, first.products.length);
+    if (arts.length !== n) return false;
+    for (var i = 0; i < n; i++) {
+      if (arts[i].getAttribute("data-pid") !== String(first.products[i].id)) return false;
+    }
+    // Stock / price may have changed since the build: refresh those cards' contents in place only when they differ.
+    var fresh = document.createElement("div");
+    fresh.innerHTML = cardsHtml(first, 0, n);
+    var freshArts = fresh.querySelectorAll("article.ah-card");
+    for (var k = 0; k < n; k++) {
+      var body = arts[k].querySelector(".ah-card-body");
+      var freshBody = freshArts[k] && freshArts[k].querySelector(".ah-card-body");
+      if (body && freshBody && body.innerHTML !== freshBody.innerHTML) body.innerHTML = freshBody.innerHTML;
+      var badge = arts[k].querySelector(".ah-card-badge");
+      var freshBadge = freshArts[k] && freshArts[k].querySelector(".ah-card-badge");
+      if (badge && freshBadge && badge.outerHTML !== freshBadge.outerHTML) badge.outerHTML = freshBadge.outerHTML;
+      if (freshArts[k]) arts[k].className = freshArts[k].className;
+    }
+    row.insertAdjacentHTML("beforeend", cardsHtml(first, n, first.products.length));
+    var rest = "";
+    for (var s = 1; s < plan.length; s++) rest += sectionHtml(plan[s], 0);
+    root.insertAdjacentHTML("beforeend", rest);
+    return true;
+  }
+
+  /* Sections that have products, in order, with the first one flagged (its first cards load eagerly). */
+  function sectionPlan(secs) {
+    var plan = [];
     secs.forEach(function (sec) {
       var products = sectionProducts(sec.key);
       if (!products.length) return;
-      var isFirstSection = !firstSectionDone;
-      firstSectionDone = true;
-      var title = sec.menu || sec.key;
-      var viewAll = href(sec.path || "/" + sec.key);
-      var cards = products
-        .map(function (p, i) {
-          /* first-viewport cards: eager (LCP candidate), first one high priority */
-          return cardHtml(sec, p, isFirstSection && i < 2 ? (i === 0 ? 2 : 1) : 0);
-        })
-        .join("");
-      html +=
-        "<section class='home-section' data-cat='" +
-        escapeHtml(sec.key) +
-        "'>" +
-        "<div class='home-section-head'>" +
-        "<h2 class='home-section-title'>" +
-        escapeHtml(title) +
-        "</h2>" +
-        "<a class='home-section-viewall' href='" +
-        escapeHtml(viewAll) +
-        "'>View All</a>" +
-        "</div>" +
-        "<div class='home-section-body'>" +
-        "<button type='button' class='home-row-arrow prev' aria-label='Previous'>&#8249;</button>" +
-        "<div class='home-row'>" +
-        cards +
-        "</div>" +
-        "<button type='button' class='home-row-arrow next' aria-label='Next'>&#8250;</button>" +
-        "</div>" +
-        "</section>";
+      plan.push({ sec: sec, products: products, isFirst: plan.length === 0 });
     });
-    root.innerHTML = html;
-    bindSections(root, secs);
+    return plan;
+  }
+
+  function cardsHtml(entry, from, to) {
+    var html = "";
+    for (var i = from; i < to && i < entry.products.length; i++) {
+      /* first-viewport cards: eager (LCP candidate), first one high priority */
+      html += cardHtml(entry.sec, entry.products[i], entry.isFirst && i < 2 ? (i === 0 ? 2 : 1) : 0);
+    }
+    return html;
+  }
+
+  function sectionHtml(entry, cardLimit) {
+    var sec = entry.sec;
+    var title = sec.menu || sec.key;
+    var viewAll = href(sec.path || "/" + sec.key);
+    return (
+      "<section class='home-section' data-cat='" +
+      escapeHtml(sec.key) +
+      "'>" +
+      "<div class='home-section-head'>" +
+      "<h2 class='home-section-title'>" +
+      escapeHtml(title) +
+      "</h2>" +
+      "<a class='home-section-viewall' href='" +
+      escapeHtml(viewAll) +
+      "'>View All</a>" +
+      "</div>" +
+      "<div class='home-section-body'>" +
+      "<button type='button' class='home-row-arrow prev' aria-label='Previous'>&#8249;</button>" +
+      "<div class='home-row'>" +
+      cardsHtml(entry, 0, cardLimit > 0 ? cardLimit : entry.products.length) +
+      "</div>" +
+      "<button type='button' class='home-row-arrow next' aria-label='Next'>&#8250;</button>" +
+      "</div>" +
+      "</section>"
+    );
+  }
+
+  /* HTML for the category sections (limit > 0: only the first `limit` sections; cardLimit > 0: only the first
+     `cardLimit` cards of each). Also used at build time by scripts/build-home-prerender.mjs. */
+  function sectionsHtml(secs, limit, cardLimit) {
+    var plan = sectionPlan(secs);
+    var html = "";
+    for (var i = 0; i < plan.length && (!(limit > 0) || i < limit); i++) html += sectionHtml(plan[i], cardLimit);
+    return html;
   }
 
   function bindSections(root, secs) {
@@ -529,6 +591,10 @@
     if (!nav) return;
     var secs = activeSections();
     if (!secs.length) return;
+    nav.innerHTML = catnavHtml(secs);
+  }
+
+  function catnavHtml(secs) {
     var links = secs
       .map(function (s) {
         return (
@@ -540,15 +606,23 @@
         );
       })
       .join("");
-    nav.innerHTML =
+    return (
       "<div class='home-catnav-inner'>" +
       "<span class='home-catnav-label'>Women" +
       "<svg viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg' aria-hidden='true'>" +
       "<path d='M1 1l4 4 4-4' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/>" +
       "</svg></span>" +
       links +
-      "</div>";
+      "</div>"
+    );
   }
+
+  /* Build-time prerender hook (scripts/build-home-prerender.mjs). Not used in the browser. */
+  window.__maHomePrerender = function () {
+    var secs = activeSections();
+    if (!secs.length) return null;
+    return { catnav: catnavHtml(secs), sections: sectionsHtml(secs, 1, PRERENDER_CARDS), btnCss: homeBtnCssText };
+  };
 
   /* ---------------- Hero slider ---------------- */
   var HERO_LCP_FULL =

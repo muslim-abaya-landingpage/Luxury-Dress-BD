@@ -3,7 +3,8 @@
    Flat, quiet, hairline-bordered. One restrained accent color.
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Cormorant+Garamond:ital,wght@1,500&display=swap');
+/* No web-font download: the reviews section used to pull ~73 KB of Google Fonts (Inter + Cormorant Garamond)
+   for one block below the fold. The font stacks below fall back to the system sans-serif and Georgia. */
 
 .ma-reviews-wrap {
   --ma-ink: #111111;

@@ -238,6 +238,13 @@
      *  undefined হয়ে product-page.js এ পৌঁছাত এবং গ্যালারিতে শুধু একটাই
      *  ছবি (product.image) দেখাত। এখন প্রতিটা URL resolveImageUrl() দিয়ে
      *  resolve করে, duplicate বাদ দিয়ে normalized.images এ রাখা হচ্ছে। */
+    // Smaller card-size photo made by Smart Upload (images/uploads/<id>-card.webp). It used to be
+    // dropped here, so listings always downloaded the full photo instead.
+    if (entry.imageCard) {
+      var cardResolved = resolveImageUrl(String(entry.imageCard).trim());
+      if (cardResolved) normalized.imageCard = cardResolved;
+    }
+
     if (Array.isArray(entry.images) && entry.images.length) {
       var seenGalleryUrl = {};
       var galleryImages = [];
