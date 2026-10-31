@@ -586,6 +586,8 @@ body {
   border: 0;
 }
     </style>
+    <!-- Product cards render only after this stylesheet loads (no unstyled flash). As a print-media link alone it was fetched at the lowest priority, so preload it. -->
+    <link rel="preload" as="style" href="index-home-muslim-abaya.min.css?v=e93c15c0e750f01a">
     <link rel="stylesheet" href="index-home-muslim-abaya.min.css?v=e93c15c0e750f01a" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="index-home-muslim-abaya.min.css?v=e93c15c0e750f01a"></noscript>
     <link rel="stylesheet" href="home-glass.css?v=cc94b346a7cdbd75" media="print" onload="this.media='all'">
@@ -689,7 +691,9 @@ body {
 ]
 }
 </script>
-<link rel="stylesheet" href="site-header.css?v=311296f3645e4034" media="all">
+<!-- Full header CSS: not render-blocking. The header is mounted by deferred site-header.js and its first-paint rules are inlined above (#site-header-inline); a high-priority preload makes sure this arrives before the header mounts. -->
+<link rel="preload" as="style" href="site-header.css?v=311296f3645e4034" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="site-header.css?v=311296f3645e4034"></noscript>
 <style id="ma-premium-home-category-bar">
 /* Luxury editorial category rail — only the rail scrolls, never the entire page. */
 #homeCatnav{max-width:100%;min-width:0;margin:16px auto 28px!important;padding:0 clamp(12px,3vw,36px)!important;background:transparent!important;overflow:hidden!important}
@@ -790,10 +794,6 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
     </a>
 </div>
 </section>
-<script defer src="cart-utils.js?v=e34f3d87a8026b33"></script>
-<script defer src="cart-toast.js?v=e9cff3857f9ebdf1"></script>
-<script defer src="cart-drawer.js?v=8a0d2d850d4a01e6"></script>
-<script defer src="custom-size-modal.js?v=eefc27194c414118"></script>
 <script defer src="hero-banner-config.js?v=3971164f6e45a095"></script>
 <!-- Catalog scripts are static + deferred so they download in parallel (not one-by-one after DOMContentLoaded) and run in this order before the homepage renderer. -->
 <script defer src="product-config.js?v=9f0fe21a5d0fbb0f"></script>
@@ -805,6 +805,11 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
 <script defer src="site-api-config.js?v=b4eb7cb7438aad24"></script>
 <script defer src="stock-sync.js?v=2345b9e2e152dce3"></script>
 <script defer src="home-render.min.js?v=cb8c75f18f47d9c5"></script>
+<!-- Cart scripts are only needed on a click (every call into them is guarded), so they run after the homepage renderer: product cards (the mobile LCP element) no longer wait for them to download and execute. -->
+<script defer src="cart-utils.js?v=e34f3d87a8026b33"></script>
+<script defer src="cart-toast.js?v=e9cff3857f9ebdf1"></script>
+<script defer src="cart-drawer.js?v=8a0d2d850d4a01e6"></script>
+<script defer src="custom-size-modal.js?v=eefc27194c414118"></script>
 
 <section id="main-video-section" style="background:#fff; padding:25px 15px; scroll-margin-top:100px;">
     <div class="lux-video-wrap">

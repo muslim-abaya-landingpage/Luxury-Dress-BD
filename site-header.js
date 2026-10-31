@@ -92,19 +92,16 @@
     hint('dns-prefetch', 'https://muslimabaya.com');
     hint('dns-prefetch', 'https://www.youtube.com');
     hint('dns-prefetch', 'https://cdnjs.cloudflare.com');
-    // GTM/pixel scripts are the heaviest things the page fetches (GTM container +
-    // fbevents.js + the TikTok pixel + Clarity together run well past 300 KB) and they
-    // all load from different third-party origins. A plain dns-prefetch only resolves
-    // DNS; preconnect also opens the TCP + TLS handshake ahead of time, so by the time
-    // each script tag actually requests its file the connection is already warm. These
-    // domains are exactly the ones gtm.js / fbevents.js / the TikTok pixel loader /
-    // Clarity use, so warming them here shaves real time off when those scripts
-    // (deferred as they already are) do fire.
-    hint('preconnect', 'https://www.googletagmanager.com');
-    hint('preconnect', 'https://connect.facebook.net', true);
-    hint('preconnect', 'https://analytics.tiktok.com', true);
-    hint('preconnect', 'https://www.clarity.ms', true);
-    hint('preconnect', 'https://scripts.clarity.ms', true);
+    // Tracking origins (GTM itself loads first-party from /gtm.js, ~3 s after the page
+    // has loaded; fbevents.js, the TikTok pixel and Clarity come even later). Opening
+    // TCP + TLS connections to them at page start only competed with the LCP image and
+    // went unused long enough for browsers to close them, and Lighthouse flags more than
+    // 4 preconnects. A DNS lookup is cheap and still saves time when those scripts fire.
+    hint('dns-prefetch', 'https://www.googletagmanager.com');
+    hint('dns-prefetch', 'https://connect.facebook.net');
+    hint('dns-prefetch', 'https://analytics.tiktok.com');
+    hint('dns-prefetch', 'https://www.clarity.ms');
+    hint('dns-prefetch', 'https://scripts.clarity.ms');
   })();
 
   function getSiteRoot() {
