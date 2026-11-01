@@ -11,6 +11,32 @@
 (function (g) {
   "use strict";
 
+  function norm(s) { return String(s || "").trim().toLowerCase().replace(/[\u2013\u2014]/g, "-").replace(/\s+/g, " "); }
+  function colorKey(s) { return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
+  function sizeParts(s) { return norm(s).split(/\s*\u00b7\s*/).filter(Boolean); }
+
+  /** The product variation (Product Manager "Variations") for this line, or null. Port of Operations.gs
+   *  opsVariation_: empty type/color/size means "any"; the most specific match wins. */
+  function variationFor(p, line) {
+    var list = p && p.variations;
+    if (!Array.isArray(list) || !list.length || !line) return null;
+    var type = norm(line.productType).replace(/\s/g, ""), color = String(line.color || ""), size = sizeParts(line.size || line.selectedSize);
+    var best = null, top = -1;
+    list.forEach(function (v) {
+      if (!v || typeof v !== "object") return;
+      var n = 0;
+      if (v.type) { if (norm(v.type).replace(/\s/g, "") !== type) return; n++; }
+      if (v.color) { if (!((colorKey(v.color) && colorKey(v.color) === colorKey(color)) || norm(v.color) === norm(color))) return; n++; }
+      if (v.size) {
+        var parts = sizeParts(v.size);
+        if (!parts.every(function (x) { return size.indexOf(x) >= 0; })) return;
+        n += parts.length;
+      }
+      if (n > top) { best = v; top = n; }
+    });
+    return best;
+  }
+
   /** Unit price the order server will charge for this cart line, or null if it cannot be worked out. */
   function serverUnitPrice(line, p) {
     if (!line || !p) return null;
@@ -22,6 +48,11 @@
       })[0];
       if (!key) return null;
       price = Number(p.prices[key]);
+    }
+    var variation = variationFor(p, line);
+    if (variation) {
+      if (variation.enabled === false) return null;
+      if (Number(variation.price) > 0) price = Number(variation.price);
     }
     var size = String(line.size || line.selectedSize || "").trim();
     if (!size) return null;
@@ -82,4 +113,5 @@
   g.maCartReprice = reprice;
   g.maCartRepriceLastSource = function () { return lastSource; };
   g.maServerUnitPrice = serverUnitPrice;
+  g.maVariationFor = variationFor;
 })(window);

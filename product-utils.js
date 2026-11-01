@@ -166,6 +166,59 @@
     return "";
   }
 
+  /**
+   * Cleans product.variations: [{type, color, size, price, regularPrice, sku, image, enabled}].
+   * type/color/size empty = "any"; size uses the stock-row form ("52", "Body 46 · Length 54", "Length 54").
+   * The order server (Operations.gs opsVariation_) and cart-reprice.js pick the most specific match.
+   */
+  function cleanVariations(list) {
+    if (!Array.isArray(list)) return [];
+    var out = [];
+    list.slice(0, 500).forEach(function (v) {
+      if (!v || typeof v !== "object") return;
+      var row = {};
+      ["type", "color", "size", "sku", "image"].forEach(function (k) {
+        var t = String(v[k] == null ? "" : v[k]).replace(/\s+/g, " ").trim().slice(0, k === "image" ? 500 : 160);
+        if (t) row[k] = t;
+      });
+      var price = parseInt(v.price, 10);
+      if (price > 0) row.price = price;
+      var regular = parseInt(v.regularPrice, 10);
+      if (regular > 0 && (!row.price || regular > row.price)) row.regularPrice = regular;
+      if (v.enabled === false) row.enabled = false;
+      if (row.type || row.color || row.size) out.push(row);
+    });
+    return out;
+  }
+
+  /**
+   * The product variation for a cart line {productType, color, size}, or null. Same rule as the order
+   * server (Operations.gs opsVariation_) and cart-reprice.js: empty type/color/size = any; the most
+   * specific match wins (size counts one per " · " part); ties go to the first row.
+   */
+  function variationFor(p, line) {
+    var list = p && p.variations;
+    if (!Array.isArray(list) || !list.length || !line) return null;
+    var norm = function (s) { return String(s || "").trim().toLowerCase().replace(/[\u2013\u2014]/g, "-").replace(/\s+/g, " "); };
+    var key = function (s) { return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); };
+    var parts = function (s) { return norm(s).split(/\s*\u00b7\s*/).filter(Boolean); };
+    var type = norm(line.productType).replace(/\s/g, ""), color = String(line.color || ""), size = parts(line.size);
+    var best = null, top = -1;
+    list.forEach(function (v) {
+      if (!v || typeof v !== "object") return;
+      var n = 0;
+      if (v.type) { if (norm(v.type).replace(/\s/g, "") !== type) return; n++; }
+      if (v.color) { if (!((key(v.color) && key(v.color) === key(color)) || norm(v.color) === norm(color))) return; n++; }
+      if (v.size) {
+        var want = parts(v.size);
+        if (!want.every(function (x) { return size.indexOf(x) >= 0; })) return;
+        n += want.length;
+      }
+      if (n > top) { best = v; top = n; }
+    });
+    return best;
+  }
+
   function normalizeProductEntry(raw, categoryKey, index) {
     if (raw && raw._catalogNormalized) {
       // The array key is the source of truth. A product can be moved between
@@ -344,6 +397,9 @@
     if (entry.stockVariants && typeof entry.stockVariants === "object") {
       normalized.stockVariants = entry.stockVariants;
     }
+    // WooCommerce-style variations (Product Manager "Variations" tab): own price/sale/SKU/photo/on-off.
+    var variations = cleanVariations(entry.variations);
+    if (variations.length) normalized.variations = variations;
     if (entry.stock != null && entry.stock !== "") {
       var stockN = parseInt(entry.stock, 10);
       if (!isNaN(stockN)) normalized.stock = Math.max(0, stockN);
@@ -1090,6 +1146,8 @@ g.getCartLineBaseName = getCartLineBaseName;
     hasExplicitProductLink: hasExplicitProductLink,
     normalizeProductEntry: normalizeProductEntry,
     normalizeAll: normalizeAll,
+    cleanVariations: cleanVariations,
+    variationFor: variationFor,
     isPublishedProduct: isPublishedProduct,
     getSaleInfo: getSaleInfo,
     categoryHasProducts: categoryHasProducts,

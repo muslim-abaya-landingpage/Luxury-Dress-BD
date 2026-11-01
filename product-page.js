@@ -259,7 +259,7 @@
     return map;
   }
 
-  function currentPrice() {
+  function basePrice() {
     var p = state.product;
     var map = typePriceFrom(p);
     if (map) {
@@ -270,11 +270,38 @@
     return parseInt(p && p.price, 10) || siteDefaults(state.category).base.price || 550;
   }
 
+  /** Product Manager variation (own price / sale / on-off) for what is selected now, or null. */
+  function currentVariation() {
+    var p = state.product;
+    if (!p || !Array.isArray(p.variations) || !p.variations.length || !window.maCatalog || typeof window.maCatalog.variationFor !== "function") return null;
+    var size = "";
+    try { size = selectedVariant() || ""; } catch (_) { size = ""; }
+    return window.maCatalog.variationFor(p, { productType: state.selectedType || "", color: state.selectedColor || p.color || "", size: size });
+  }
+
+  function currentPrice() {
+    var v = currentVariation();
+    if (v && v.enabled !== false && parseInt(v.price, 10) > 0) return parseInt(v.price, 10);
+    return basePrice();
+  }
+
   function renderPrice() {
     var map = typePriceFrom(state.product);
     var price = currentPrice();
     var html = TK + price;
-    if (map) {
+    var variations = Array.isArray(state.product && state.product.variations) ? state.product.variations : [];
+    var v = currentVariation();
+    if (variations.length && v && v.enabled !== false && (v.size || !variations.some(function (x) { return x && x.size; }))) {
+      // A variation is chosen: its own price, crossed-out regular price when it is on sale.
+      var was = parseInt(v.regularPrice, 10);
+      html = was > price ? "<del class='ma-price-was'>" + TK + was + "</del> <span class='ma-price-now'>" + TK + price + "</span>" : TK + price;
+    } else if (variations.length) {
+      var all = variations.filter(function (x) { return x && x.enabled !== false && parseInt(x.price, 10) > 0; }).map(function (x) { return parseInt(x.price, 10); });
+      if (map) Object.keys(map).forEach(function (k) { var n = parseInt(map[k], 10); if (n) all.push(n); });
+      else all.push(basePrice());
+      var low = Math.min.apply(null, all), high = Math.max.apply(null, all);
+      html = low < high ? TK + low + "<span class='from'>starting from</span>" : TK + low;
+    } else if (map) {
       var vals = Object.keys(map).map(function (k) { return parseInt(map[k], 10) || 0; }).filter(Boolean);
       if (vals.length > 1) html = TK + Math.min.apply(null, vals) + "<span class='from'>starting from</span>";
       else html = TK + price;
@@ -878,6 +905,9 @@
 
   function stockStatus() {
     var p = state.product;
+    var picked = currentVariation();
+    // A variation switched off in Product Manager cannot be bought (the order server refuses it too).
+    if (picked && picked.enabled === false) return { inStock: false, label: "Unavailable", buttonLabel: "Unavailable", qty: 0 };
     var variant = selectedVariant() || state.selectedColor || "";
     if (window.maCatalog && typeof window.maCatalog.getStockStatus === "function") {
       return window.maCatalog.getStockStatus(p, variant, state.selectedColor || "");
@@ -887,6 +917,7 @@
   }
 
   function applyStockUi() {
+    if (state.product && Array.isArray(state.product.variations) && state.product.variations.length) renderPrice();
     var st = stockStatus();
     var stockEl = $("pdStock");
     var addBtn = $("pdAddCart");
@@ -903,7 +934,7 @@
     }
     if (buyBtn) buyBtn.disabled = !st.inStock;
     var notifyBtn = $("pdNotifyBtn");
-    if (notifyBtn) notifyBtn.style.display = st.inStock ? "none" : "";
+    if (notifyBtn) notifyBtn.style.display = st.inStock || st.label === "Unavailable" ? "none" : "";
     if (stickyCart) {
       stickyCart.disabled = !st.inStock;
       stickyCart.textContent = st.inStock ? "Add to Cart" : st.buttonLabel;

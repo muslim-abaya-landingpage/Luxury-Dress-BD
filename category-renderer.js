@@ -368,6 +368,18 @@ function shopCartHasMatchingLine(item, sizeValue, categoryKey, bodyValueOpt, siz
   }
   return false;
 }
+/** Product Manager variation (own price / sale / on-off) for a cart line, or null. Same rule as the order server. */
+function shopLineVariation(item, line) {
+  if (!item || !Array.isArray(item.variations) || !item.variations.length) return null;
+  var fn = window.maCatalog && window.maCatalog.variationFor;
+  return typeof fn === "function" ? fn(item, line) : null;
+}
+/** Charges the matching variation's own price (switched-off variations are refused when adding to the cart). */
+function applyShopLineVariation(item, line) {
+  var v = shopLineVariation(item, line);
+  if (v && v.enabled !== false && parseInt(v.price, 10) > 0) line.price = parseInt(v.price, 10);
+  return line;
+}
 function buildShopCartLineItem(item, qtyToAdd, sizeValue, categoryKeyOpt, selectedTypeOpt, bodyValueOpt, sizedOpt) {
   if (sizedOpt) return buildShopTemplateCartLine(item, qtyToAdd, categoryKeyOpt, selectedTypeOpt, sizedOpt);
   var categoryKey =
@@ -403,7 +415,7 @@ function buildShopCartLineItem(item, qtyToAdd, sizeValue, categoryKeyOpt, select
         ? formatTwoPieceCartSize(pickedLength, resolvedBodyLabel)
         : "Size " + pickedSize;
   cartName += " (" + sizeLabel + ")";
-  return {
+  return applyShopLineVariation(item, {
     id: item.id || (cat ? cat.id : ""),
     name: cartName,
     price: unitPrice,
@@ -424,7 +436,7 @@ function buildShopCartLineItem(item, qtyToAdd, sizeValue, categoryKeyOpt, select
     productType: pickedType,
     category: item.category || categoryKey || "",
     categoryLabel: item.categoryLabel || ""
-  };
+  });
 }
 /** A cart line for the Size Manager fields: the checked size text plus the measurement choices. */
 function buildShopTemplateCartLine(item, qtyToAdd, categoryKeyOpt, selectedTypeOpt, sized) {
@@ -434,7 +446,7 @@ function buildShopTemplateCartLine(item, qtyToAdd, categoryKeyOpt, selectedTypeO
   var cartName = item.name;
   if (pickedType) cartName += " (" + pickedType + ")";
   if (sized.size) cartName += " (" + sized.size + ")";
-  return {
+  return applyShopLineVariation(item, {
     id: item.id || (cat ? cat.id : ""),
     name: cartName,
     price: resolveProductPrice(item, categoryKey, pickedType),
@@ -449,7 +461,7 @@ function buildShopTemplateCartLine(item, qtyToAdd, categoryKeyOpt, selectedTypeO
     productType: pickedType,
     category: item.category || categoryKey || "",
     categoryLabel: item.categoryLabel || ""
-  };
+  });
 }
 function shopAddProductToCart(item, qtyToAdd, sizeValue, categoryKeyOpt, bodyValueOpt, sizedOpt) {
   if (!productIsInStock(item)) return;
@@ -478,6 +490,11 @@ function shopAddProductToCart(item, qtyToAdd, sizeValue, categoryKeyOpt, bodyVal
   shopCartCtx.lastCartAddKey = addGuardKey;
   shopCartCtx.lastCartAddAt = now;
   var line = buildShopCartLineItem(item, qtyToAdd, sizeValue, categoryKeyOpt, item._cartType || "", bodyValueOpt, sizedOpt);
+  var pickedVariation = shopLineVariation(item, line);
+  if (pickedVariation && pickedVariation.enabled === false) {
+    alert("দুঃখিত, নির্বাচিত কালার/সাইজটি এখন পাওয়া যাচ্ছে না। অন্য কালার বা সাইজ বেছে নিন।");
+    return;
+  }
   var stockQtyFn = window.getStockQty || (window.maCatalog && window.maCatalog.getStockQty);
   var variantTrackedFn = window.hasTrackedStockVariants || (window.maCatalog && window.maCatalog.hasTrackedStockVariants);
   if (typeof stockQtyFn === "function") {
@@ -1696,6 +1713,42 @@ function bindPqvGalleryArrows(modal) {
    এখানে সেট হয়।
    ---------------------------------------------------------------------- */
 
+/** Product page / quick view: shows the chosen variation's own price (crossed-out regular price on sale)
+ *  and blocks Add to Cart / Buy Now for a variation that is switched off in Product Manager. */
+function refreshPqvVariation(modal, p, categoryKey, idx) {
+  if (!modal || !p || !Array.isArray(p.variations) || !p.variations.length) return;
+  if (shopSizeTemplate(p, categoryKey)) return; // Size Manager fields: the cart line still gets the variation price
+  var type = getSelectedTypeForIdx(modal, idx) || getDefaultProductType(p, categoryKey);
+  var item = applySelectedColorToProduct(Object.assign({}, p, { _cartType: type }), getSelectedColorVariantForIdx(modal, idx, p));
+  var line = buildShopCartLineItem(item, 1, getSelectedSizeForIdx(modal, idx), categoryKey, type, getSelectedBodyValueForIdx(modal, idx));
+  var v = shopLineVariation(item, line);
+  var off = !!(v && v.enabled === false);
+  var priceEl = modal.querySelector("#pqvPrice");
+  if (priceEl && v && !off && parseInt(v.price, 10) > 0) {
+    var now = parseInt(v.price, 10), was = parseInt(v.regularPrice, 10);
+    priceEl.innerHTML = was > now
+      ? '<del class="ma-price-was" aria-label="Regular price \u09F3' + was + '">\u09F3' + was + '</del> <span class="ma-price-now">\u09F3' + now + '</span> <span class="ma-price-off">-' + Math.round((1 - now / was) * 100) + '%</span>'
+      : formatBdtPrice(now);
+    priceEl.setAttribute("data-price", String(now));
+  } else if (priceEl && !off) {
+    updatePqvPriceDisplay(modal, p, categoryKey, type);
+  }
+  var btn = modal.querySelector(".pqv-act-cart[data-product-idx]:not(.pqv-wholesale-add)");
+  var buy = modal.querySelector(".pqv-act-buy");
+  var stockEl = modal.querySelector(".pqv-stock");
+  if (off) {
+    if (btn) { btn.disabled = true; btn.textContent = "Unavailable"; }
+    if (buy) buy.disabled = true;
+    if (stockEl) { stockEl.classList.add("is-oos"); stockEl.textContent = "This option is not available"; }
+    modal.setAttribute("data-variation-off", "1");
+  } else if (modal.getAttribute("data-variation-off") === "1") {
+    modal.removeAttribute("data-variation-off");
+    if (btn) btn.disabled = false;
+    if (buy) buy.disabled = false;
+    syncPqvColorStock(modal);
+    refreshOpenProductPanels();
+  }
+}
 function bindPqvInteractions(p, idx, categoryKey, scopeRoot) {
   var modal = scopeRoot || getActivePqvScope();
   if (!modal) return;
@@ -1724,6 +1777,7 @@ function bindPqvInteractions(p, idx, categoryKey, scopeRoot) {
       var specColor = modal.querySelector("#pqvSpecColor");
       if (specColor) specColor.textContent = btn.getAttribute("data-color-label") || "";
       syncPqvColorStock(modal);
+      refreshPqvVariation(modal, p, categoryKey, idx);
       var img = btn.getAttribute("data-color-image") || "";
       var thumbs = modal.querySelectorAll(".pqv-thumb");
       for (var t = 0; t < thumbs.length; t++) {
@@ -1772,6 +1826,7 @@ function bindPqvInteractions(p, idx, categoryKey, scopeRoot) {
             formatBdtPrice(typePrice || resolveProductPrice(p, categoryKey, typeVal));
         }
       }
+      refreshPqvVariation(modal, p, categoryKey, idx);
     });
   });
   var chartBtn = modal.querySelector("[data-pqv-size-chart]");
@@ -1832,6 +1887,7 @@ function bindPqvInteractions(p, idx, categoryKey, scopeRoot) {
   var activeType =
     getSelectedTypeForIdx(modal, idx) || getDefaultProductType(p, categoryKey);
   updatePqvPriceDisplay(modal, p, categoryKey, activeType);
+  refreshPqvVariation(modal, p, categoryKey, idx);
 }
 function bindPqvQtyInput(modal) {
   var qtyInput = modal.querySelector("#pqvQty");
@@ -4270,6 +4326,12 @@ function refreshOpenProductPanels() {
     var buy = root.querySelector(".pqv-act-buy");
     if (buy) buy.disabled = !status.inStock;
     syncPqvColorStock(root);
+    // A switched-off variation stays blocked when live stock refreshes (refreshPqvVariation).
+    if (root.closest("[data-variation-off]") || root.querySelector("[data-variation-off]")) {
+      btn.disabled = true;
+      btn.textContent = "Unavailable";
+      if (buy) buy.disabled = true;
+    }
   });
 }
 window.addEventListener("ma:stock-updated", refreshVisibleShopStockCards);
