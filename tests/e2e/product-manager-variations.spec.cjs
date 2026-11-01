@@ -121,3 +121,16 @@ test('Add manually, remove, and switching back to a simple product removes the v
   const block = await publishedBlock(page);
   expect(block).not.toContain('variations');
 });
+
+test('ticks changed on Attributes are kept when opening Variations without pressing Save attributes', async ({ page }) => {
+  await openMaroon(page);
+  await page.selectOption('#pmProductType', 'variable');
+  const mount = page.locator('#pmAttrMount');
+  await mount.locator('[data-pa="used"][data-id="type"]').uncheck();
+  await mount.locator('[data-pa="values"][data-id="length"]').fill('50 | 52');
+  await page.click('[data-etab="variations"]');
+  await expect(page.locator('[data-epanel="variations"]')).toBeVisible();
+  await expect(page.locator('#pmEditNote')).toContainText('Attributes saved automatically');
+  await page.click('[data-pv="generate"]');
+  await expect(page.locator('[data-epanel="variations"] .pmw-var')).toHaveCount(2); // Long 50, 52 only
+});
