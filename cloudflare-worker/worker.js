@@ -725,12 +725,19 @@ async function handleEvent(request, env, ctx, url) {
     return json({ meta_status: r.status, meta: metaBody, sent_event: { event_name: event.event_name, event_id: event.event_id, user_data_keys: Object.keys(userData), custom_data: event.custom_data }, tiktok });
   }
 
-  ctx.waitUntil(send.then((r) => { if (!r.ok) return r.text().then((t) => console.log('meta_capi_error', r.status, t.slice(0, 500))); }).catch((e) => console.log('meta_capi_fetch_error', String(e))));
+  // Success lines carry only the event name, event_id and Meta's counters (no customer data, no token),
+  // so Workers Logs can show which events Meta accepted and match them with the browser Pixel's eventID.
+  ctx.waitUntil(send.then((r) => r.text().then((t) => {
+    if (!r.ok) return console.log('meta_capi_error', r.status, t.slice(0, 500));
+    let b = {}; try { b = JSON.parse(t) || {}; } catch (e) {}
+    console.log('meta_capi_ok', JSON.stringify({ event_name: eventName, event_id: eventId, events_received: b.events_received, fbtrace_id: b.fbtrace_id, test: !!env.META_TEST_EVENT_CODE }));
+  })).catch((e) => console.log('meta_capi_fetch_error', String(e))));
   if (ttSend) {
     ctx.waitUntil(ttSend.then((r) => r.text().then((t) => {
       // TikTok answers HTTP 200 with a non-zero "code" on errors.
       let c = null; try { c = JSON.parse(t).code; } catch (e) {}
       if (!r.ok || c !== 0) console.log('tiktok_eapi_error', r.status, t.slice(0, 500));
+      else console.log('tiktok_eapi_ok', JSON.stringify({ event_name: eventName, event_id: String(body.tt_event_id || '').slice(0, 120) }));
     })).catch((e) => console.log('tiktok_eapi_fetch_error', String(e))));
   }
   return noContent();
