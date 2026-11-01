@@ -772,8 +772,11 @@ const LANDING_CLARITY = `(function(c,l,a,r,i,t,y){try{
 if(l.querySelector('script[src*="clarity.ms/tag/"]'))return;
 c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
 t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 c[a]("set","site","landing");
+// Speed: insert Clarity after the page is shown (first touch/scroll or idle after load); the queue above keeps calls.
+var go=function(){if(go.d)return;go.d=1;if(l.querySelector('script[src*="clarity.ms/tag/"]'))return;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);};
+["pointerdown","keydown","touchstart","scroll"].forEach(function(e){c.addEventListener(e,go,{once:true,passive:true});});
+c.addEventListener("load",function(){setTimeout(go,2500);},{once:true});
 }catch(e){}})(window,document,"clarity","script","vxaqs8nk80");`;
 
 async function serveLanding(request) {

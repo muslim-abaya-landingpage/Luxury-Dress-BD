@@ -15,13 +15,22 @@
   for (const key of keys) if (query.get(key)) attribution[key] = query.get(key).slice(0,200);
   try { sessionStorage.setItem(`landing-attribution:${channel}`,JSON.stringify(attribution)); } catch {}
   window.landingAttribution = attribution;
+  // Speed: third-party scripts (Meta, TikTok, Google, Clarity) load right after the page is shown — on the
+  // visitor's first touch/scroll/click, or when the browser is idle after load (max ~2.5s). Their command
+  // queues (fbq/ttq/gtag/clarity stubs) are created immediately, so no event is lost while waiting.
+  const thirdPartyQueue=[]; let thirdPartyGo=false;
+  const releaseThirdParty=()=>{ if(thirdPartyGo)return; thirdPartyGo=true; thirdPartyQueue.splice(0).forEach(fn=>{try{fn()}catch(_){}}); };
+  const whenReady=fn=>{ thirdPartyGo ? fn() : thirdPartyQueue.push(fn); };
+  ['pointerdown','keydown','touchstart','scroll'].forEach(ev=>addEventListener(ev,releaseThirdParty,{once:true,passive:true}));
+  const idle=()=>('requestIdleCallback' in window)?requestIdleCallback(releaseThirdParty,{timeout:1500}):setTimeout(releaseThirdParty,1200);
+  if(document.readyState==='complete') idle(); else addEventListener('load',idle,{once:true});
   window.landingNewEventId = () => (globalThis.crypto?.randomUUID ? globalThis.crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
 
   if (mode === 'gtm' && /^GTM-[A-Z0-9]+$/.test(String(m.gtmId || ''))) {
     window.dataLayer.push({'gtm.start':Date.now(),event:'gtm.js'});
     const script=document.createElement('script'); script.async=true;
     script.src=`https://www.googletagmanager.com/gtm.js?id=${encodeURIComponent(m.gtmId)}`;
-    document.head.appendChild(script);
+    whenReady(()=>document.head.appendChild(script));
   }
   const ga4Ready = mode === 'direct' && /^G-[A-Z0-9]+$/.test(String(m.ga4MeasurementId || ''));
   // Google Ads conversion tracking shares the same gtag.js loader as GA4 — gtag.js is
@@ -33,7 +42,7 @@
     window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
     const script=document.createElement('script'); script.async=true;
     script.src=`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(ga4Ready ? m.ga4MeasurementId : m.googleAdsConversionId)}`;
-    document.head.appendChild(script);
+    whenReady(()=>document.head.appendChild(script));
     window.gtag('js',new Date());
     if (ga4Ready) window.gtag('config',m.ga4MeasurementId);
     if (googleAdsReady) window.gtag('config',m.googleAdsConversionId);
@@ -43,14 +52,13 @@
     (function(win,doc,tag,src,id){
       win[tag]=win[tag]||function(){(win[tag].q=win[tag].q||[]).push(arguments);};
       const s=doc.createElement(src); s.async=1; s.src='https://www.clarity.ms/tag/'+id;
-      const first=doc.getElementsByTagName(src)[0];
-      first.parentNode.insertBefore(s,first);
+      whenReady(()=>{ const first=doc.getElementsByTagName(src)[0]; first.parentNode.insertBefore(s,first); });
     })(window,document,'clarity','script',m.clarityId);
   }
   if (mode === 'direct' && /^\d{5,25}$/.test(String(m.metaPixelId || ''))) {
     window.fbq=window.fbq||function(){if(window.fbq.callMethod)window.fbq.callMethod.apply(window.fbq,arguments);else window.fbq.queue.push(arguments);};
     window.fbq.queue=window.fbq.queue||[]; window.fbq.loaded=true; window.fbq.version='2.0';
-    const script=document.createElement('script');script.async=true;script.src='https://connect.facebook.net/en_US/fbevents.js';document.head.appendChild(script);
+    const script=document.createElement('script');script.async=true;script.src='https://connect.facebook.net/en_US/fbevents.js';whenReady(()=>document.head.appendChild(script));
     window.fbq('init',m.metaPixelId);window.fbq('track','PageView');
   }
   const tiktokReady = mode === 'direct' && /^[A-Z0-9]{10,30}$/i.test(String(m.tiktokPixelId || ''));
@@ -69,7 +77,7 @@
       ttq._o = ttq._o || {}; ttq._o[id] = options || {};
       const script = document.createElement('script'); script.async = true;
       script.src = `${url}?sdkid=${encodeURIComponent(id)}&lib=ttq`;
-      document.head.appendChild(script);
+      whenReady(()=>document.head.appendChild(script));
     };
     ttq.load(m.tiktokPixelId); ttq.page();
   }

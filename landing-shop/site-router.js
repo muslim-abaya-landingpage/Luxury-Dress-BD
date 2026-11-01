@@ -1,7 +1,7 @@
 /* Load each dependency only after the site override is ready. */
 (async () => {
   'use strict';
-  const runtimeFiles = {"landing":"runtime-landing.fa404732b156.js","thanks":"runtime-thanks.c6cb6f41898d.js"};
+  const runtimeFiles = {"landing":"runtime-landing.b435b8bc4ed8.js","thanks":"runtime-thanks.a2cabccfd46f.js"};
   const host = location.hostname.toLowerCase().replace(/^www\./, '');
   const rootDomains = ['muslimabaya.com', 'muslimabaya.co'];
   const params = new URLSearchParams(location.search);

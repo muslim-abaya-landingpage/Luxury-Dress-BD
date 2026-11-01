@@ -64,7 +64,11 @@
     startAuto();
   }
   function stopAuto() { clearInterval(autoTimer); autoTimer = undefined; $('galleryProgress').classList.remove('running'); }
-  function startAuto() { clearInterval(autoTimer); if (!galleryVisible || $('productLightbox')?.hidden === false || c.hero.images.length < 2 || document.hidden || window.matchMedia('(prefers-reduced-motion: reduce)').matches || $('photoStage').matches(':hover,:focus-within')) return; if(c.hero.galleryAutoPlay===false)return; autoTimer = setInterval(() => showImage(photoIndex + 1), Math.max(2500,Number(c.hero.galleryInterval)||5000)); }
+  // Speed: the slider starts only after the page has loaded and settled, so the first photo is painted once and
+  // stays the main (LCP) element instead of being redrawn by the first slide change.
+  let autoReady=false; const armAuto=()=>setTimeout(()=>{autoReady=true;startAuto();},3500);
+  if(document.readyState==='complete') armAuto(); else addEventListener('load',armAuto,{once:true});
+  function startAuto() { clearInterval(autoTimer); if (!autoReady || !galleryVisible || $('productLightbox')?.hidden === false || c.hero.images.length < 2 || document.hidden || window.matchMedia('(prefers-reduced-motion: reduce)').matches || $('photoStage').matches(':hover,:focus-within')) return; if(c.hero.galleryAutoPlay===false)return; autoTimer = setInterval(() => showImage(photoIndex + 1), Math.max(2500,Number(c.hero.galleryInterval)||5000)); }
   if ('IntersectionObserver' in window) {
     const visibilityObserver = new IntersectionObserver(entries => entries.forEach(entry => {
       if (entry.target === $('gallery')) { galleryVisible = entry.isIntersecting; galleryVisible ? startAuto() : stopAuto(); }
