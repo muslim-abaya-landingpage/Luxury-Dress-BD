@@ -17,7 +17,7 @@ let count=0;const ok=name=>{console.log('PASS '+name);count++};
  }
  ok('Preloaded bundles preserve original source execution order');
  const box={window:{},location:{search:''}};vm.runInNewContext(read('config.js'),box);const cfg=box.window.LANDING_CONFIG;
- const html=read('index.html');const schema=JSON.parse(html.match(/id="product-schema"[^>]*>(.*?)<\/script>/s)[1]);assert.equal(schema.length,cfg.products.length);assert.equal(schema[0].offers.price,2385);assert(html.includes('৳2385'));assert(html.includes(cfg.sections.features[0]));ok('Static HTML contains actual product prices, features and matching schema');
+ const html=read('index.html');const schema=JSON.parse(html.match(/id="product-schema"[^>]*>(.*?)<\/script>/s)[1]);assert.equal(schema.length,cfg.products.length);const firstPrice=cfg.products[0].variants?.[0]?.price??cfg.products[0].price;assert.equal(schema[0].offers.price,firstPrice);assert(html.includes('৳'+cfg.products[0].price));assert(html.includes(cfg.sections.features[0]));ok('Static HTML contains actual product prices, features and matching schema');
  for(const ref of [...cfg.hero.images,...cfg.products.map(p=>p.image),...cfg.reviews.map(r=>r.image)])assert(fs.existsSync(path.join(root,ref)),ref);ok('Configured product, gallery and review assets exist');
  let worker=read('_worker.js').replace("import siteMetadata from './seo-data.js';",'const siteMetadata={};').replace('export default {','globalThis.worker = {');
  let forwarded=0;const sandbox={URL,URLSearchParams,Request,Response,Headers,TextEncoder,crypto:require('node:crypto').webcrypto,console,fetch:async()=>{forwarded++;return new Response('Success|TEST-123')}};vm.runInNewContext(worker,sandbox);
@@ -47,10 +47,11 @@ let count=0;const ok=name=>{console.log('PASS '+name);count++};
  assert(read('app.js').includes("location.assign('/thank-you')"));assert(/isThanks=\/\\\/thank-you\(\?:\\\.html\)\?\$\//.test(read('tracking.js')));ok('Lead tracking recognises /thank-you');
  const meta=JSON.parse(read('_worker.js').match(/const siteMetadata = (.*);\n\/\* SEO-DATA-END/s)[1]);for(const f of fs.readdirSync(path.join(root,'sites')))assert(meta[f.slice(0,-3)],'metadata missing '+f);assert(meta.main.deliveryAreas.length);ok('Worker metadata covers every sites/*.js and delivery areas');
  let sent='';sandbox.fetch=async(u,o)=>{sent=o.body;return new Response('Success|T-1')};
- const good={...order,Total:'2465',Quantity:'1',DeliveryArea:'inside',Site:'main',CartJSON:JSON.stringify([{id:'hafeza-set',qty:1,size:'54',variant:'black'}])};
+ const cfgM=(()=>{const b={window:{},location:{search:''}};vm.runInNewContext(read('config.js'),b);return b.window.LANDING_CONFIG})();const P=cfgM.products[0],V=P.variants?.[0],unit=Number(V?.price??P.price),inside=cfgM.deliveryAreas.find(a=>a.id==='inside'),outside=cfgM.deliveryAreas.find(a=>a.id==='outside');
+ const good={...order,Total:String(unit+inside.charge),Quantity:'1',DeliveryArea:'inside',Site:'main',CartJSON:JSON.stringify([{id:P.id,qty:1,size:P.sizes?.[0]||'',variant:V?.id||''}])};
  assert.equal(await (await handler(request(good),env,ctx)).text(),'Success|T-1');assert.equal(new URLSearchParams(sent).get('PriceCheck'),'OK');
- await handler(request({...good,Total:'100'}),env,ctx);const bad=new URLSearchParams(sent);assert.equal(bad.get('PriceCheck'),'FAILED');assert(bad.get('SpecialNotes').includes('expected total 2465'));
- await handler(request({...good,DeliveryArea:'outside',Total:'2535'}),env,ctx);assert.equal(new URLSearchParams(sent).get('PriceCheck'),'OK');
+ await handler(request({...good,Total:'100'}),env,ctx);const bad=new URLSearchParams(sent);assert.equal(bad.get('PriceCheck'),'FAILED');assert(bad.get('SpecialNotes').includes('expected total '+(unit+inside.charge)));
+ await handler(request({...good,DeliveryArea:'outside',Total:String(unit+outside.charge)}),env,ctx);assert.equal(new URLSearchParams(sent).get('PriceCheck'),'OK');
  ok('Worker re-checks total from catalog and flags tampered orders without losing them');
  const appSrc=read('app.js');assert(appSrc.includes('restoreDraft(); saveDraft();'));ok('Restored draft is saved back with product selection');
  // v8.2 first-party cookies

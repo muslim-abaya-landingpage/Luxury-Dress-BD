@@ -50,9 +50,10 @@ jobs:
       - name: Regression tests (prices, order proxy, tracking, SEO)
         if: steps.creds.outputs.ready == 'true'
         working-directory: landing-shop
+        # build-seo.cjs regenerates index.html, sitemap and the Worker's price list from config.js,
+        # so editing config.js on GitHub (pencil icon) is enough to change names/prices.
         run: |
           node build-seo.cjs
-          git diff --exit-code -- . || (echo "::error::Generated files are stale: run 'node build-seo.cjs' in landing-shop and commit"; exit 1)
           node tests/regression.cjs
 
       - name: Prepare upload folder (no notes, tests or build tools)
