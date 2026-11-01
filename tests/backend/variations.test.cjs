@@ -114,3 +114,14 @@ test('product-utils keeps clean variations and validation data drops SKU/photo/s
   const n = w.maCatalog.normalizeProductEntry({ id: 'X', name: 'X', price: 900, variations: [{ size: 'M', price: 950 }] }, 'tops-kurti', 0);
   assert.deepEqual(JSON.parse(JSON.stringify(n.variations)), [{ size: 'M', price: 950 }]);
 });
+
+test('product page (product-utils variationFor) picks the same variation as the order server', () => {
+  const w = { location: { origin: 'https://muslimabaya.com', pathname: '/' } };
+  w.window = w;
+  const ctx = vm.createContext(w);
+  ['product-config.js', 'product-utils.js'].forEach((f) => vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), ctx));
+  const c = server();
+  cases.forEach(([p, line]) => {
+    assert.equal(JSON.stringify(w.maCatalog.variationFor(p, line)), JSON.stringify(c.opsVariation_(p, line)), JSON.stringify(line));
+  });
+});
