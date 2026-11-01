@@ -186,6 +186,7 @@
       var regular = parseInt(v.regularPrice, 10);
       if (regular > 0 && (!row.price || regular > row.price)) row.regularPrice = regular;
       if (v.enabled === false) row.enabled = false;
+      if (v.stockStatus === "outofstock") row.stockStatus = "outofstock";
       if (row.type || row.color || row.size) out.push(row);
     });
     return out;
@@ -559,9 +560,28 @@
     return color && size ? color + " \u00b7 " + size : "";
   }
 
+  /** Shorter stock rows for a multi-part size ("Length 50" for "Body 46 · Length 50"), longest first.
+   *  Same as Code.gs stockSizePartCandidates_: Product Manager variations can count stock per part. */
+  function stockSizePartCandidates(color, size) {
+    var parts = String(size || "").replace(/\s+/g, " ").trim().split(/\s*\u00b7\s*/).filter(Boolean);
+    if (parts.length < 2 || parts.length > 5) return [];
+    var subsets = [];
+    for (var mask = (1 << parts.length) - 2; mask > 0; mask--) {
+      subsets.push(parts.filter(function (_, i) { return mask & (1 << i); }));
+    }
+    subsets.sort(function (a, b) { return b.length - a.length; });
+    var out = [];
+    subsets.forEach(function (pick) {
+      var joined = pick.join(" \u00b7 ");
+      out.push(colorSizeStockVariant(color, joined), joined);
+    });
+    return out.filter(Boolean);
+  }
+
   /**
    * Which stock row a choice uses, in the order the order check uses (Apps Script cartItemStockCandidates_):
-   * "Colour · Size", then the size, then the colour, then the product's "all sizes" pool (_default).
+   * "Colour · Size", then the size, then shorter parts of the size (stockSizePartCandidates), then the
+   * colour, then the product's "all sizes" pool (_default).
    * variant is the size (or the colour when there is no size), as before. Returns the row's key, or "".
    */
   function stockRowKey(product, variant, color) {
@@ -570,7 +590,7 @@
       : null;
     if (!variants || !String(variant || "").trim()) return "";
     var keys = Object.keys(variants);
-    var wanted = [colorSizeStockVariant(color, variant), variant, color].map(stockVariantKey).filter(Boolean);
+    var wanted = [colorSizeStockVariant(color, variant), variant].concat(stockSizePartCandidates(color, variant), [color]).map(stockVariantKey).filter(Boolean);
     var found = "";
     wanted.some(function (w) {
       return keys.some(function (key) {

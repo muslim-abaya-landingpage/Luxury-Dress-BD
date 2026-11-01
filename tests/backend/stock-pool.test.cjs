@@ -77,7 +77,7 @@ function extractFunction(name) {
 }
 
 const names = ['normStockVariant_', 'stockVariantCompareKey_', 'findStockVariantRowIndex_', 'cartItemVariantKey_',
-  'colorSizeStockVariant_', 'cartItemStockCandidates_',
+  'colorSizeStockVariant_', 'stockSizePartCandidates_', 'cartItemStockCandidates_',
   'stockRowIsTracked_', 'stockRequirementsForCart_', 'resolveStockRequirementsForCart_', 'trackedStockRequirements_',
   'reservedStockRequirements_', 'assertStockRequirementsAvailable_'];
 const sandbox = {};

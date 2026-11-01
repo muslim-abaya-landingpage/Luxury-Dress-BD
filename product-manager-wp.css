@@ -806,3 +806,7 @@ html[data-admin-theme="dark"] .pm-wp-list, html[data-admin-theme="dark"] .pm-wp-
 .pm-import-dialog li span { color: var(--pm-wp-muted); }
 .pm-import-errors li { color: #b32d2e; }
 .pm-import-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+
+/* WooCommerce-style product type select and the Attributes tab sub-heading (product-variations-admin.js) */
+#pmProductType{margin-left:6px;min-height:32px;padding:2px 6px;font-size:14px;font-weight:400}
+.pm-wp-subhead{margin:18px 0 6px;padding-top:12px;border-top:1px solid #eee;font-size:13px;color:#50575e}

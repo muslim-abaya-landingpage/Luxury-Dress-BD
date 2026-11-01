@@ -125,3 +125,40 @@ test('product page (product-utils variationFor) picks the same variation as the 
     assert.equal(JSON.stringify(w.maCatalog.variationFor(p, line)), JSON.stringify(c.opsVariation_(p, line)), JSON.stringify(line));
   });
 });
+
+test('stock counted per part of a size (e.g. "Length 50" for every body size) is found by the order server and the site', () => {
+  const src = fs.readFileSync(path.join(root, 'apps-script/Code.gs'), 'utf8');
+  const grab = (name) => {
+    const i = src.indexOf('function ' + name + '(');
+    let depth = 0;
+    for (let k = src.indexOf('{', i); k < src.length; k++) {
+      if (src[k] === '{') depth++;
+      else if (src[k] === '}' && --depth === 0) return src.slice(i, k + 1);
+    }
+    throw new Error('missing ' + name);
+  };
+  const ctx = vm.createContext({});
+  vm.runInContext(['normStockVariant_', 'stockVariantCompareKey_', 'colorSizeStockVariant_', 'stockSizePartCandidates_', 'cartItemStockCandidates_'].map(grab).join('\n'), ctx);
+  assert.deepEqual(Array.from(ctx.cartItemStockCandidates_({ color: 'navy', size: 'Body 46 · Length 50' })),
+    ['navy · Body 46 · Length 50', 'Body 46 · Length 50', 'navy · Length 50', 'Length 50', 'navy · Body 46', 'Body 46', 'navy']);
+  assert.deepEqual(Array.from(ctx.cartItemStockCandidates_({ color: 'navy', size: '52' })), ['navy · 52', '52', 'navy'], 'one-part sizes unchanged');
+
+  const w = { location: { origin: 'https://muslimabaya.com', pathname: '/' } };
+  w.window = w;
+  const site = vm.createContext(w);
+  ['product-config.js', 'product-utils.js'].forEach((f) => vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), site));
+  const p = { id: 'X', stockVariants: { 'Length 50': { tracked: true, available: 3 }, 'Length 52': { tracked: true, available: 0 } } };
+  assert.equal(w.maCatalog.getStockQty(p, 'Body 46 [Free size] · Length 50', 'black'), 3);
+  assert.equal(w.maCatalog.isInStock(p, 'Body 46 [Free size] · Length 52', 'black'), false);
+});
+
+test('a variation marked Out of stock is refused by the order server like a disabled one', () => {
+  const w = { location: { origin: 'https://muslimabaya.com', pathname: '/' } };
+  w.window = w;
+  const site = vm.createContext(w);
+  ['product-config.js', 'product-utils.js'].forEach((f) => vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), site));
+  const clean = w.maCatalog.cleanVariations([{ size: 'Length 56', price: 1500, stockStatus: 'outofstock' }]);
+  assert.equal(clean[0].stockStatus, 'outofstock');
+  const core = fs.readFileSync(path.join(root, 'catalog-validation-core.js'), 'utf8');
+  assert.match(core, /v\.enabled === false \|\| v\.stockStatus === 'outofstock'/);
+});

@@ -908,6 +908,7 @@
     var picked = currentVariation();
     // A variation switched off in Product Manager cannot be bought (the order server refuses it too).
     if (picked && picked.enabled === false) return { inStock: false, label: "Unavailable", buttonLabel: "Unavailable", qty: 0 };
+    if (picked && picked.stockStatus === "outofstock") return { inStock: false, label: "Out of Stock", buttonLabel: "Out of Stock", qty: 0 };
     var variant = selectedVariant() || state.selectedColor || "";
     if (window.maCatalog && typeof window.maCatalog.getStockStatus === "function") {
       return window.maCatalog.getStockStatus(p, variant, state.selectedColor || "");

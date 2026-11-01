@@ -6095,13 +6095,36 @@ function colorSizeStockVariant_(color, size) {
 }
 
 /**
+ * Product Manager variations can count stock for part of a size, e.g. "Length 50" for every body size, or
+ * "navy · Length 50". For a cart size with several " · " parts this lists those shorter rows, longest first
+ * (each with the colour, then without). A one-part size gives nothing, so old products behave as before.
+ */
+function stockSizePartCandidates_(color, size) {
+  var parts = normStockVariant_(size).split(/\s*·\s*/).filter(Boolean);
+  if (parts.length &lt; 2 || parts.length > 5) return [];
+  var subsets = [];
+  for (var mask = (1 &lt;&lt; parts.length) - 2; mask > 0; mask--) {
+    var pick = parts.filter(function (_, i) { return mask &amp; (1 &lt;&lt; i); });
+    subsets.push(pick);
+  }
+  subsets.sort(function (a, b) { return b.length - a.length; });
+  var out = [];
+  subsets.forEach(function (pick) {
+    var joined = pick.join(' · ');
+    out.push(colorSizeStockVariant_(color, joined), joined);
+  });
+  return out.filter(Boolean);
+}
+
+/**
  * কার্ট-আইটেমের স্টক সারি খোঁজার ক্রম: রং·মাপ → মাপ → রং। যেটার সারি আগে পাওয়া যায় সেটাই ব্যবহার হয়;
  * কোনোটাই না থাকলে পুরো পণ্যের সারি (খালি Variant), নইলে আগের মতো cartItemVariantKey_।
  * পুরনো পণ্যে রং·মাপ সারি নেই, তাই তাদের আচরণ আগের মতোই থাকে।
  */
 function cartItemStockCandidates_(item) {
   var out = [];
-  [colorSizeStockVariant_(item &amp;&amp; item.color, item &amp;&amp; item.size), item &amp;&amp; item.size, item &amp;&amp; item.color].forEach(function (v) {
+  var color = item &amp;&amp; item.color, size = item &amp;&amp; item.size;
+  [colorSizeStockVariant_(color, size), size].concat(stockSizePartCandidates_(color, size), [color]).forEach(function (v) {
     v = normStockVariant_(v);
     if (v &amp;&amp; out.map(stockVariantCompareKey_).indexOf(stockVariantCompareKey_(v)) === -1) out.push(v);
   });

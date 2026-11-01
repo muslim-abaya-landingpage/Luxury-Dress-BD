@@ -7,7 +7,7 @@ const path = require('path');
 const real = fs.readFileSync(path.join(__dirname, '../../category-products.js'), 'utf8');
 const marker = 'id: "ABY-MAROON-1",';
 if (real.indexOf(marker) === -1) throw new Error('fixture product missing');
-const catalog = real.replace(marker, marker + '\n      variations: [{size: "Length 56", price: 1450, regularPrice: 1600}, {type: "Abaya Only", size: "Length 52", enabled: false}],');
+const catalog = real.replace(marker, marker + '\n      variations: [{size: "Length 56", price: 1450, regularPrice: 1600}, {type: "Abaya Only", size: "Length 52", enabled: false}, {type: "Abaya Only", size: "Length 56", stockStatus: "outofstock"}],');
 
 async function useCatalog(page) {
   await page.route(/\/category-products\.js(\?.*)?$/, (r) => r.fulfill({ contentType: 'application/javascript', body: catalog }));
@@ -43,4 +43,8 @@ test('product page: variation price and sale, cart charges it, switched-off vari
   await root.locator('.pqv-length-opt[data-length-value="54"]').first().click();
   await expect(root.locator('.pqv-act-cart[data-product-idx]:not(.pqv-wholesale-add)').first()).toBeEnabled();
   await expect(price).toHaveAttribute('data-price', '1000');
+  // A variation marked Out of stock in Product Manager.
+  await root.locator('.pqv-length-opt[data-length-value="56"]').first().click();
+  await expect(root.locator('.pqv-act-cart[data-product-idx]:not(.pqv-wholesale-add)').first()).toHaveText('Out of Stock');
+  await expect(root.locator('.pqv-act-cart[data-product-idx]:not(.pqv-wholesale-add)').first()).toBeDisabled();
 });
