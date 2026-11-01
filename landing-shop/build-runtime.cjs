@@ -1,7 +1,7 @@
 /* No npm dependencies. Run after editing any JS source. */
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const root=__dirname, bundles={};
-for(const [kind,files] of Object.entries({landing:['theme.js','seo.js','tracking.js','app.js'],thanks:['theme.js','tracking.js','thank-you.js']})){
+for(const [kind,files] of Object.entries({landing:['discount.js','theme.js','seo.js','tracking.js','app.js'],thanks:['discount.js','theme.js','tracking.js','thank-you.js']})){
  const source=files.map(file=>'\n/* '+file+' */\n'+fs.readFileSync(path.join(root,file),'utf8')).join('\n;\n');
  const hash=crypto.createHash('sha256').update(source).digest('hex').slice(0,12), name=`runtime-${kind}.${hash}.js`;
  fs.writeFileSync(path.join(root,name),source);bundles[kind]=name;

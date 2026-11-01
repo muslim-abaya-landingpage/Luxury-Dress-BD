@@ -55,6 +55,7 @@ jobs:
         run: |
           node build-seo.cjs
           node tests/regression.cjs
+          node tests/discount.test.cjs
 
       - name: Prepare upload folder (no notes, tests or build tools)
         if: steps.creds.outputs.ready == 'true'

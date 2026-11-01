@@ -29,10 +29,11 @@ for(const file of fs.readdirSync(__dirname+'/sites').filter(f=>f.endsWith('.js')
  const site={window:{LANDING_CONFIG:JSON.parse(JSON.stringify(c))},location:{origin:url.origin}};
  vm.runInNewContext(fs.readFileSync(__dirname+'/sites/'+file,'utf8'),site);
  const cfg=site.window.LANDING_CONFIG;
- metadata[file.slice(0,-3)]={brand:cfg.brand,hero:cfg.hero,products:cfg.products,deliveryAreas:cfg.deliveryAreas,order:{freeShippingThreshold:cfg.order?.freeShippingThreshold||0,coupons:cfg.order?.coupons||[]}};
+ metadata[file.slice(0,-3)]={brand:cfg.brand,hero:cfg.hero,products:cfg.products,deliveryAreas:cfg.deliveryAreas,discount:cfg.discount||null,order:{freeShippingThreshold:cfg.order?.freeShippingThreshold||0,coupons:cfg.order?.coupons||[]}};
 }
 const workerPath=__dirname+'/_worker.js';
 let worker=fs.readFileSync(workerPath,'utf8').replace(/import siteMetadata from '\.\/seo-data\.js';\n/, '').replace(/\/\* SEO-DATA-START \*\/[\s\S]*?\/\* SEO-DATA-END \*\/\n/, '');
-fs.writeFileSync(workerPath,'/* SEO-DATA-START */\nconst siteMetadata = '+JSON.stringify(metadata)+';\n/* SEO-DATA-END */\n'+worker);
+const dsrc=fs.readFileSync(__dirname+'/discount.js','utf8');const discountFn=dsrc.slice(dsrc.indexOf('/* DISCOUNT-FN-START */')+23,dsrc.indexOf('/* DISCOUNT-FN-END */')).trim();
+fs.writeFileSync(workerPath,'/* SEO-DATA-START */\nconst siteMetadata = '+JSON.stringify(metadata)+';\n'+discountFn+'\n/* SEO-DATA-END */\n'+worker);
 
 require('./build-runtime.cjs');

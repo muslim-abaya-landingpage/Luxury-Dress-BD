@@ -572,3 +572,6 @@ body{background:var(--bg);color:var(--text)}
   .announcement-shell .announcement-bar{grid-template-columns:50px 1fr}
   .announcement-shell .announcement-bar .brand-logo{width:50px;height:50px}
 }
+
+/* ডিসকাউন্ট: আগের দাম কেটে দেখানো (discount.js → regularPrice) */
+[data-was]:not([data-was=""])::after{content:attr(data-was);margin-left:.4em;font-size:.72em;font-weight:500;opacity:.7;text-decoration:line-through}
