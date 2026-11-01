@@ -149,3 +149,36 @@ test('old orders without stored client info still send Purchase as before', () =
   assert.equal(meta.custom_data.content_ids, undefined);
   assert.equal(meta.custom_data.value, 1650);
 });
+
+test('worker logs a success line for accepted events without customer data or token', async () => {
+  const realFetch = globalThis.fetch;
+  const realLog = console.log;
+  const lines = [];
+  globalThis.fetch = async (url) => {
+    const host = new URL(String(url)).hostname;
+    if (host === 'graph.facebook.com') return new Response(JSON.stringify({ events_received: 1, fbtrace_id: 'TRACE1' }), { status: 200 });
+    if (host === 'business-api.tiktok.com') return new Response(JSON.stringify({ code: 0 }), { status: 200 });
+    throw new Error('unexpected fetch ' + url);
+  };
+  console.log = (...a) => lines.push(a.join(' '));
+  try {
+    const body = { event_name: 'AddToCart', event_id: 'evt_123', tt_event_id: 'evt_123', event_source_url: 'https://muslimabaya.com/product/X',
+      user_data: { em: 'buyer@example.com', ph: '01712345678' }, custom_data: { currency: 'BDT', value: 1350 } };
+    const req = new Request('https://muslimabaya.com/_ma/e', { method: 'POST', body: JSON.stringify(body),
+      headers: { Origin: 'https://muslimabaya.com', 'Content-Type': 'application/json', 'CF-Connecting-IP': '103.4.5.6', 'User-Agent': 'UA' } });
+    const pending = [];
+    const res = await worker.fetch(req, { META_CAPI_TOKEN: 'secret-token-xyz', TIKTOK_EAPI_TOKEN: 'tt-secret' }, { waitUntil: (p) => pending.push(p) });
+    await Promise.all(pending);
+    assert.equal(res.status, 204);
+  } finally {
+    globalThis.fetch = realFetch;
+    console.log = realLog;
+  }
+  const ok = lines.find((l) => l.startsWith('meta_capi_ok'));
+  assert.ok(ok, 'meta_capi_ok line written');
+  const parsed = JSON.parse(ok.slice('meta_capi_ok '.length));
+  assert.deepEqual(parsed, { event_name: 'AddToCart', event_id: 'evt_123', events_received: 1, fbtrace_id: 'TRACE1', test: false });
+  assert.ok(lines.some((l) => l.startsWith('tiktok_eapi_ok') && l.includes('evt_123')));
+  const all = lines.join('\n');
+  for (const secret of ['buyer@example.com', '01712345678', 'secret-token-xyz', 'tt-secret', '103.4.5.6']) assert.ok(!all.includes(secret), 'log leaks ' + secret);
+});
