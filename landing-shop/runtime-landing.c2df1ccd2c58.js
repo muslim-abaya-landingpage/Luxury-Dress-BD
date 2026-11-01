@@ -393,7 +393,9 @@ if (typeof window !== 'undefined' && window.LANDING_CONFIG) maApplyDiscount(wind
   } else $('countdown').hidden=true;
   const reviews = Array.isArray(c.reviews) ? c.reviews.filter(r => r.image) : [];
   $('reviewEmpty').hidden = reviews.length > 0; $('reviewControls').hidden = reviews.length < 2;
-  $('reviewList').innerHTML = reviews.map((r,i) => `<article class="review-card"><button type="button" data-review="${i}" aria-label="রিভিউ ${i+1} বড় করে দেখুন"><img src="${escape(r.image)}" alt="${escape(r.alt || 'গ্রাহকের রিভিউ স্ক্রিনশট')}" width="300" height="310" loading="lazy" decoding="async"><span class="review-foot"><span>গ্রাহকের মেসেজ ${i+1}</span><span aria-hidden="true">↗</span></span></button></article>`).join('');
+  $('reviewList').innerHTML = reviews.map((r,i) => `<article class="review-card"><button type="button" data-review="${i}" aria-label="গ্রাহকের মেসেজ ${i+1} — বড় করে দেখুন"><img src="${escape(r.thumb||r.image)}" alt="${escape(r.alt || 'গ্রাহকের রিভিউ স্ক্রিনশট')}" width="300" height="310" loading="lazy" decoding="async"><span class="review-foot"><span>গ্রাহকের মেসেজ ${i+1}</span><span aria-hidden="true">↗</span></span></button></article>`).join('');
+  // Seamless continuous loop: a hidden copy of the cards follows the originals.
+  if (reviews.length > 1) { const rl=$('reviewList'); rl.insertAdjacentHTML('beforeend', rl.innerHTML.replace(/<article class="review-card"/g,'<article class="review-card review-clone" aria-hidden="true"')); rl.querySelectorAll('.review-clone button').forEach(b=>b.tabIndex=-1); }
   const reviewPhone = String(c.order.whatsappNumber || '').replace(/\D/g,'');
   if (/^\d{11,15}$/.test(reviewPhone)) $('reviewWhatsapp').href=`https://wa.me/${reviewPhone}?text=${encodeURIComponent('আসসালামু আলাইকুম। আমার কেনাকাটার অভিজ্ঞতা শেয়ার করতে চাই।')}`;
   else $('reviewWhatsapp').hidden=true;
@@ -405,13 +407,20 @@ if (typeof window !== 'undefined' && window.LANDING_CONFIG) maApplyDiscount(wind
   $('reviewLightPrev').onclick=()=>openReview(activeReview-1); $('reviewLightNext').onclick=()=>openReview(activeReview+1);
   $('reviewZoom').onclick=()=>{reviewZoomed=!reviewZoomed;$('reviewFull').classList.toggle('is-zoomed',reviewZoomed)};
   $('reviewFull').ondblclick=()=>$('reviewZoom').click();
-  let reviewAuto;
-  const reviewPosition = () => { const list=$('reviewList'), cards=[...list.querySelectorAll('.review-card')]; if(!cards.length)return 0; const center=list.getBoundingClientRect().left+list.clientWidth/2; let best=0,dist=Infinity; cards.forEach((card,i)=>{const r=card.getBoundingClientRect(),d=Math.abs((r.left+r.width/2)-center);if(d<dist){dist=d;best=i}}); return best; };
+  let reviewMarqueeRAF=0, reviewMarqueeLast=0, reviewMarqueePos=0, reviewMarqueePausedUntil=0, reviewLastMove=0, reviewLastTarget=0;
+  const reviewSetWidth = () => { const cards=$('reviewList').querySelectorAll('.review-card'); return reviews.length>1 && cards.length>reviews.length ? cards[reviews.length].offsetLeft-cards[0].offsetLeft : 0; };
+  const reviewNearest = () => { const list=$('reviewList'), cards=[...list.querySelectorAll('.review-card')]; if(!cards.length)return 0; const center=list.scrollLeft+list.clientWidth/2; let best=0,dist=Infinity; cards.forEach((card,i)=>{const d=Math.abs(card.offsetLeft+card.offsetWidth/2-center);if(d<dist){dist=d;best=i}}); return best; };
+  const reviewPosition = () => reviews.length ? reviewNearest()%reviews.length : 0;
   const moveReview = step => {
     const list=$('reviewList'), cards=[...list.querySelectorAll('.review-card')];
     if (!cards.length) return;
-    const next=(reviewPosition()+step+cards.length)%cards.length;
-    const card=cards[next];
+    pauseReviewMarquee(4000);
+    const w=reviewSetWidth(), now=performance.now(); let next=(now-reviewLastMove<700 ? reviewLastTarget : reviewNearest())+step; reviewLastMove=now;
+    // Jump invisibly between the identical original/copy halves so the loop never hits an edge.
+    if (w && next < 0) { list.scrollLeft += w; next += reviews.length; }
+    if (w && next >= cards.length) { list.scrollLeft -= w; next -= reviews.length; }
+    next=Math.max(0,Math.min(cards.length-1,next));
+    reviewLastTarget=next; const card=cards[next];
     // Horizontal-only movement. scrollIntoView can move the whole document vertically.
     const target=card.offsetLeft - (list.clientWidth-card.offsetWidth)/2;
     list.scrollTo({left:Math.max(0,target),behavior:'smooth'});
@@ -425,7 +434,7 @@ if (typeof window !== 'undefined' && window.LANDING_CONFIG) maApplyDiscount(wind
     const bar=$('reviewProgressBar'); if(bar) bar.style.width=reviews.length ? `${((pos+1)/reviews.length)*100}%` : '0%';
   };
   let reviewScrollRAF;
-  $('reviewList').addEventListener('scroll',()=>{cancelAnimationFrame(reviewScrollRAF);reviewScrollRAF=requestAnimationFrame(updateReviewCount)},{passive:true}); updateReviewCount();
+  $('reviewList').addEventListener('scroll',()=>{cancelAnimationFrame(reviewScrollRAF);reviewScrollRAF=requestAnimationFrame(()=>{const l=$('reviewList'),w=reviewSetWidth();if(w&&!reviewMarqueeRAF&&l.scrollLeft>=w+2)l.scrollLeft-=w;updateReviewCount();})},{passive:true}); updateReviewCount();
   $('reviewList').addEventListener('wheel',e=>{if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){e.preventDefault();$('reviewList').scrollBy({left:e.deltaY*.8,behavior:'auto'});stopReviewAuto();}}, {passive:false});
   document.addEventListener('keydown',e=>{if(!$('reviewDialog').open)return;if(e.key==='ArrowLeft')openReview(activeReview-1);if(e.key==='ArrowRight')openReview(activeReview+1);if(e.key==='Escape')$('reviewDialog').close();});
   if ('IntersectionObserver' in window) {
@@ -435,8 +444,21 @@ if (typeof window !== 'undefined' && window.LANDING_CONFIG) maApplyDiscount(wind
     }),{threshold:.45});
     requestAnimationFrame(()=>document.querySelectorAll('#productList [data-product]').forEach(card=>observer.observe(card)));
   }
-  function stopReviewAuto(){ clearInterval(reviewAuto); reviewAuto=undefined; }
-  function startReviewAuto(){ stopReviewAuto(); if(!reviewsVisible || reviews.length<2 || document.hidden || $('reviewDialog').open || window.matchMedia('(prefers-reduced-motion: reduce)').matches || $('reviews').matches(':hover,:focus-within')) return; reviewAuto=setInterval(()=>moveReview(1),4500); }
+  // Continuous, smooth movement (requestAnimationFrame) instead of jumping one card every few seconds.
+  // Pauses on hover/touch/focus, while the lightbox is open, off-screen, in a hidden tab, or for reduced motion.
+  const REVIEW_SPEED = Math.max(10, Math.min(120, Number(c.reviewsSpeed) || 32)); // pixels per second
+  function reviewMarqueeTick(t){
+    reviewMarqueeRAF=requestAnimationFrame(reviewMarqueeTick);
+    const list=$('reviewList');
+    if(!reviewMarqueeLast || t<reviewMarqueePausedUntil){ reviewMarqueeLast=t; reviewMarqueePos=list.scrollLeft; return; }
+    const dt=Math.min(64,t-reviewMarqueeLast); reviewMarqueeLast=t;
+    reviewMarqueePos+=REVIEW_SPEED*dt/1000;
+    const w=reviewSetWidth(); if(w && reviewMarqueePos>=w) reviewMarqueePos-=w;
+    list.scrollLeft=reviewMarqueePos;
+  }
+  function pauseReviewMarquee(ms){ reviewMarqueePausedUntil=performance.now()+ms; }
+  function stopReviewAuto(){ cancelAnimationFrame(reviewMarqueeRAF); reviewMarqueeRAF=0; $('reviewList').classList.remove('is-marquee'); }
+  function startReviewAuto(){ stopReviewAuto(); if(!reviewsVisible || reviews.length<2 || document.hidden || $('reviewDialog').open || window.matchMedia('(prefers-reduced-motion: reduce)').matches || $('reviews').matches(':hover,:focus-within')) return; $('reviewList').classList.add('is-marquee'); reviewMarqueeLast=0; reviewMarqueeRAF=requestAnimationFrame(reviewMarqueeTick); }
   $('reviews').addEventListener('mouseenter',stopReviewAuto); $('reviews').addEventListener('mouseleave',startReviewAuto);
   $('reviews').addEventListener('focusin',stopReviewAuto); $('reviews').addEventListener('focusout',()=>setTimeout(startReviewAuto,0));
   $('reviewDialog').addEventListener('close',startReviewAuto);

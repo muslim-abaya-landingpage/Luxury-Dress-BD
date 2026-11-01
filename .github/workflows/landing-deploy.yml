@@ -62,7 +62,7 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf dist && mkdir dist
-          rsync -a --exclude 'tests/' --exclude '*.md' --exclude '*.txt' --exclude '*.cjs' landing-shop/ dist/
+          rsync -a --exclude 'tests/' --exclude '*.md' --exclude '*.txt' --exclude '*.cjs' --exclude '*.mjs' --exclude '*.bat' landing-shop/ dist/
           test -f dist/_worker.js && test -f dist/index.html && test -f dist/config.js
           ls dist
 

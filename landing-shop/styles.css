@@ -602,3 +602,11 @@ body{background:var(--bg);color:var(--text)}
   #reviews .review-controls button{width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important}
 }
 @media(prefers-reduced-motion:reduce){#reviews .review-card{transition:none!important}}
+/* Continuous review scroll: no snapping or smooth-scroll fighting the frame-by-frame movement. */
+#reviews .review-list.is-marquee{scroll-snap-type:none!important;scroll-behavior:auto!important}
+#reviews .review-list.is-marquee .review-card{scroll-snap-align:none}
+#reviews .review-list.is-marquee .review-card.is-active:not(:hover){transform:none!important;border-color:color-mix(in srgb,var(--accent) 28%,#fff)!important;box-shadow:0 6px 18px #1022190f!important}
+/* Reserve the thumbnail strip's height before JavaScript fills it (prevents a layout shift). */
+.thumb-list:empty{min-height:56px}
+/* Readable small gold labels on light backgrounds (WCAG AA contrast). */
+.section-kicker,.product-eyebrow,.form-kicker{color:color-mix(in srgb,var(--accent) 35%,#3a2905)!important}

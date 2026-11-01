@@ -71,13 +71,13 @@ window.LANDING_CONFIG = {
     { id: 'inside', label: 'ঢাকা সিটির ভিতরে', charge: 80 }
   ],
   reviews: [
-    { image: 'reviews/review-01.webp', alt: 'গ্রাহকের সন্তুষ্টির মেসেজের স্ক্রিনশট' },
-    { image: 'reviews/review-02.webp', alt: 'দ্রুত ডেলিভারি নিয়ে গ্রাহকের মেসেজ' },
-    { image: 'reviews/review-03.webp', alt: 'পণ্য পাওয়ার পর গ্রাহকের মেসেজ ও ছবি' },
-    { image: 'reviews/review-04.webp', alt: 'বোরকার মান নিয়ে গ্রাহকের মেসেজ ও ছবি' },
-    { image: 'reviews/review-05.webp', alt: 'পণ্য পাওয়ার পর গ্রাহকের মেসেজ ও ছবি' },
-    { image: 'reviews/review-06.webp', alt: 'পণ্যের মান নিয়ে গ্রাহকের মেসেজ' },
-    { image: 'reviews/review-07.webp', alt: 'বোরকা পাওয়ার পর গ্রাহকের মেসেজ' }
+    { image: 'reviews/review-01.webp', thumb: 'reviews/card/review-01.webp', alt: 'গ্রাহকের সন্তুষ্টির মেসেজের স্ক্রিনশট' },
+    { image: 'reviews/review-02.webp', thumb: 'reviews/card/review-02.webp', alt: 'দ্রুত ডেলিভারি নিয়ে গ্রাহকের মেসেজ' },
+    { image: 'reviews/review-03.webp', thumb: 'reviews/card/review-03.webp', alt: 'পণ্য পাওয়ার পর গ্রাহকের মেসেজ ও ছবি' },
+    { image: 'reviews/review-04.webp', thumb: 'reviews/card/review-04.webp', alt: 'বোরকার মান নিয়ে গ্রাহকের মেসেজ ও ছবি' },
+    { image: 'reviews/review-05.webp', thumb: 'reviews/card/review-05.webp', alt: 'পণ্য পাওয়ার পর গ্রাহকের মেসেজ ও ছবি' },
+    { image: 'reviews/review-06.webp', thumb: 'reviews/card/review-06.webp', alt: 'পণ্যের মান নিয়ে গ্রাহকের মেসেজ' },
+    { image: 'reviews/review-07.webp', thumb: 'reviews/card/review-07.webp', alt: 'বোরকা পাওয়ার পর গ্রাহকের মেসেজ' }
   ],
   // ===== ডিসকাউন্ট (অটো) =====
   // চালু করতে enabled: true। দাম, কার্ট, অর্ডারের মোট টাকা আর সার্ভারের দাম-যাচাই সব নিজে থেকে বদলায়।

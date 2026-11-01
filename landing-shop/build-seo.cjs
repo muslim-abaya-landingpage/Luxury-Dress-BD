@@ -6,6 +6,8 @@ const c=box.window.LANDING_CONFIG, url=new URL(c.brand.siteUrl);
 const esc=s=>String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 let html=fs.readFileSync(__dirname+'/index.html','utf8');
 const fill=(id,tag,body)=>{html=html.replace(new RegExp('(<'+tag+'[^>]*id="'+id+'"[^>]*>)[\\s\\S]*?(</'+tag+'>)'),(_,a,b)=>a+body+b)};
+// Gallery style is known at build time: put it in the HTML so the layout is final at first paint (no layout shift).
+{const gs=['classic','glass','glass3d'].includes(c.hero.galleryStyle)?c.hero.galleryStyle:'glass3d';html=html.replace(/<section class="gallery wrap" id="gallery"([^>]*?)(?: data-gallery-style="[^"]*")?>/,'<section class="gallery wrap" id="gallery"$1 data-gallery-style="'+gs+'">');}
 fill('featureTitle','h2',esc(c.sections.featuresTitle));
 fill('featureList','ul',c.sections.features.map(x=>'<li>'+esc(x)+'</li>').join(''));
 fill('productsTitle','h2',esc(c.sections.productsTitle));

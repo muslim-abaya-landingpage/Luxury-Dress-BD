@@ -213,10 +213,12 @@ export default {
     let response = await env.ASSETS.fetch(request);
     const isHtml = String(response.headers.get('Content-Type') || '').includes('text/html');
     if (request.method === 'GET' && response.ok && isHtml && url.pathname === '/') {
-      const cfg=siteMetadata[siteSlug(url.hostname)] || siteMetadata.main, canonical=url.origin+'/';
+      const cfg=maApplyDiscount(JSON.parse(JSON.stringify(siteMetadata[siteSlug(url.hostname)] || siteMetadata.main)), Date.now()), canonical=url.origin+'/';
+      // Schema price = the price the visitor sees right now (discount included), as Google requires.
+      const saleEnds=maDiscountActive(cfg.discount, Date.now()) && Date.parse(cfg.discount.endsAt||'') ? new Date(Date.parse(cfg.discount.endsAt)).toISOString().slice(0,10) : '';
       const absolute=path=>new URL(path,canonical).href;
       const meta={'description':cfg.brand.description,'og:site_name':cfg.brand.name,'og:title':cfg.brand.pageTitle,'og:description':cfg.brand.description,'og:url':canonical,'og:image':absolute(cfg.hero.images[0]),'twitter:title':cfg.brand.pageTitle,'twitter:description':cfg.brand.description,'twitter:image':absolute(cfg.hero.images[0])};
-      const schema=cfg.products.map(p=>({'@context':'https://schema.org','@type':'Product',name:p.name,description:[p.name,p.details].filter(Boolean).join(' '),image:absolute(p.image),brand:{'@type':'Brand',name:cfg.brand.name},offers:{'@type':'Offer',url:canonical+'#products',priceCurrency:'BDT',price:p.variants?.[0]?.price??p.price,availability:p.inStock===false?'https://schema.org/OutOfStock':'https://schema.org/InStock'}}));
+      const schema=cfg.products.map(p=>({'@context':'https://schema.org','@type':'Product',name:p.name,description:[p.name,p.details].filter(Boolean).join(' '),image:absolute(p.image),brand:{'@type':'Brand',name:cfg.brand.name},offers:{'@type':'Offer',url:canonical+'#products',priceCurrency:'BDT',price:p.variants?.[0]?.price??p.price,...(saleEnds&&p.regularPrice?{priceValidUntil:saleEnds}:{}),availability:p.inStock===false?'https://schema.org/OutOfStock':'https://schema.org/InStock',itemCondition:'https://schema.org/NewCondition'}}));
       response=new HTMLRewriter().on('title',{element(el){el.setInnerContent(cfg.brand.pageTitle);}})
         .on('link[rel="canonical"]',{element(el){el.setAttribute('href',canonical);}})
         .on('meta',{element(el){const key=el.getAttribute('name')||el.getAttribute('property');if(meta[key])el.setAttribute('content',meta[key]);}})
