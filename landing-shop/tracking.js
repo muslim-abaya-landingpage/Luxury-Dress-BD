@@ -55,6 +55,8 @@
   }
   const tiktokReady = mode === 'direct' && /^[A-Z0-9]{10,30}$/i.test(String(m.tiktokPixelId || ''));
   if (tiktokReady) {
+    // TikTok's events.js looks the queue up by this name; without it the script throws and no event is sent.
+    window.TiktokAnalyticsObject = 'ttq';
     const ttq = window.ttq = window.ttq || [];
     ttq.methods = ['page','track','identify','instances','debug','on','off','once','ready','alias','group','enableCookie','disableCookie'];
     ttq.setAndDefer = (queue,method) => { queue[method] = (...args) => queue.push([method,...args]); };
