@@ -518,6 +518,19 @@
   </script>
 
   <script>
+  // Deep link from the support inbox: admin-orders.html?q=<phone or order ID> pre-fills the search box.
+  (function(){
+    var q=""; try{q=(new URLSearchParams(location.search).get("q")||"").trim().slice(0,40);}catch(_){}
+    if(!q)return;
+    var tries=0;
+    (function apply(){
+      var search=document.getElementById("ordSearch");
+      if(search){if(tries&&search.value!==q)return;search.value=q;search.dispatchEvent(new Event("input",{bubbles:true}));}
+      if(++tries<6)setTimeout(apply,1500);
+    })();
+  })();
+  </script>
+  <script>
   (function(){
     var btn=document.getElementById("ordResetFilters");
     if(!btn)return;
