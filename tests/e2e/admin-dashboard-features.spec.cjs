@@ -99,3 +99,48 @@ test('admin dashboard renders alerts, priority orders, lifetime report and conse
   expect(JSON.stringify(notices)).not.toContain('Private Customer Name');
   expect(JSON.stringify(notices)).not.toContain('Private customer message');
 });
+
+
+test('dashboard paints session-cached cards while bounded live refreshes are pending', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-10-18T12:00:00+06:00'));
+  await page.setContent(`<!doctype html><html><body>
+    <button id="admDesktopAlerts" hidden></button><span id="admDesktopStatus"></span>
+    <button id="admAlertsRefresh"></button><span id="admAlertState"></span><span id="admStockAlertCount"></span><span id="admInboxAlertCount"></span>
+    <div id="admStockAlerts"></div><div id="admInboxAlerts"></div>
+    <button id="admTasksRefresh"></button><span id="admTaskState"></span><span id="admTaskPendingCount"></span><span id="admTaskOverdueCount"></span><span id="admTaskScope"></span><div id="admPriorityTasks"></div>
+    <button id="admRefresh"></button><button id="admReportLoad"></button><button id="admReportExport" disabled></button>
+    <select id="admReportRange"><option value="all" selected>all</option><option value="custom">custom</option></select>
+    <div id="admReportCustomDates" hidden></div><input id="admReportFrom"><input id="admReportTo">
+    <span id="admReportState"></span><div id="admReportError" hidden></div><div id="admReportBody" hidden></div>
+    <span id="admReportRangeLabel"></span><p id="admUndatedNote" hidden></p>
+    <span id="admReportOrders"></span><span id="admReportOrderValue"></span><span id="admReportDeliveredValue"></span>
+    <span id="admReportDelivered"></span><span id="admReportCancelRate"></span><span id="admReportDeliveryRate"></span>
+    <div id="admSalesMonths"></div><div id="admReportProducts"></div><div id="admReportSources"></div>
+  </body></html>`);
+  await page.evaluate(() => {
+    class TestNotification { static permission = 'default'; static requestPermission() { return Promise.resolve('default'); } }
+    Object.defineProperty(window, 'Notification', { configurable: true, value: TestNotification });
+    window.__timeouts = {};
+    const snapshots = {
+      AdminStockVariantsList: { defaultThreshold: 5, items: [{ productId: 'C-1', productName: 'Cached Abaya', variant: 'M', tracked: true, available: 2, threshold: 3, status: 'LOW' }] },
+      InboxList: { stats: { unread: 1 }, contacts: [{ pageId: 'page-1', psid: 'cached-1', name: 'Cached Inbox Customer', unread: 1, lastMessage: 'Cached message' }] },
+      AdminOrderList: { counts: { all: 1 }, orders: [{ orderId: 'CACHE-1', name: 'Cached Customer', status: 'Pending', time: '18-10-2026 10:00:00', total: '1000' }] }
+    };
+    window.MaAdmin = {
+      getSession: () => ({ token: 'test-session' }),
+      cached: (recordType) => snapshots[recordType] || null,
+      getStockVariants: options => { window.__timeouts.stock = options.timeoutMs; return new Promise(() => {}); },
+      inboxCall: (_type, _fields, options) => { window.__timeouts.inbox = options.timeoutMs; return new Promise(() => {}); },
+      call: (_type, _fields, options) => { window.__timeouts.tasks = options.timeoutMs; return new Promise(() => {}); }
+    };
+  });
+  await page.addScriptTag({ path: path.join(root, 'admin-dashboard-logic.js') });
+  await page.addScriptTag({ path: path.join(root, 'admin-dashboard-features.js') });
+
+  await expect(page.locator('#admStockAlerts')).toContainText('Cached Abaya');
+  await expect(page.locator('#admInboxAlerts')).toContainText('Cached Inbox Customer');
+  await expect(page.locator('#admPriorityTasks')).toContainText('CACHE-1');
+  await expect(page.locator('#admAlertState')).toContainText('সংরক্ষিত ডেটা দেখানো হচ্ছে');
+  await expect(page.locator('#admTaskState')).toContainText('সংরক্ষিত ডেটা দেখানো হচ্ছে');
+  expect(await page.evaluate(() => window.__timeouts)).toEqual({ stock: 15000, inbox: 15000, tasks: 15000 });
+});

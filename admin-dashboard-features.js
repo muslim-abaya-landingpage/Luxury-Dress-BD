@@ -28,6 +28,7 @@
   function errorText(error) {
     var message = String(error && (error.code || error.message) || "").toUpperCase();
     if (/INVALID_TOKEN|EXPIRED|NOT_ADMIN|NO_TOKEN|NOT_LOGGED_IN/.test(message)) return "অ্যাডমিন সেশন শেষ হয়েছে—আবার লগ ইন করুন।";
+    if (/TIMEOUT/.test(message)) return "সার্ভার সাড়া দিতে সময় নিচ্ছে—কিছুক্ষণ পরে আবার চেষ্টা করুন।";
     if (message.indexOf("API_MISSING") !== -1) return "অ্যাডমিন API কনফিগার করা নেই।";
     if (message.indexOf("INVALID_DATE_RANGE") !== -1) return "তারিখের সীমা সঠিক নয়।";
     return "সার্ভার থেকে ডেটা পাওয়া যায়নি। সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।";
@@ -37,6 +38,10 @@
     if (!node) return;
     node.textContent = text;
     node.classList.toggle("is-error", !!isError);
+  }
+  function cachedResult(recordType, fields) {
+    if (!window.MaAdmin || typeof MaAdmin.cached !== "function") return null;
+    try { return MaAdmin.cached(recordType, fields, ALERT_POLL_MS); } catch (e) { return null; }
   }
   function dateTimeDhaka() {
     return new Intl.DateTimeFormat("bn-BD", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Dhaka" }).format(new Date());
@@ -135,21 +140,25 @@
   function refreshAlerts() {
     if (state.alertBusy || document.hidden || !window.MaAdmin || !MaAdmin.getSession || !MaAdmin.getSession()) return Promise.resolve();
     state.alertBusy = true;
-    setStatus("admAlertState", "অ্যালার্ট আপডেট হচ্ছে…", false);
-    var stockPromise = MaAdmin.getStockVariants({ stockStatus: "all" }).then(function (res) { return { ok: true, data: res }; }, function (error) { return { ok: false, error: error }; });
-    var inboxPromise = MaAdmin.inboxCall("InboxList", { Unread: "1", Limit: 300 }, { edgeSummary: true }).then(function (res) { return { ok: true, data: res }; }, function (error) { return { ok: false, error: error }; });
+    var cachedStock = cachedResult("AdminStockVariantsList", { Search: "", StockStatus: "all", Category: "", CategoryMap: "" });
+    var cachedInbox = cachedResult("InboxList", { Unread: "1", Limit: 300 });
+    var hasCached = !!cachedStock || !!cachedInbox;
+    var currentStock = cachedStock ? (renderStockAlerts(cachedStock.items, cachedStock.defaultThreshold) || []) : [];
+    var currentInbox = cachedInbox ? (renderInboxAlerts(cachedInbox) || []) : [];
+    setStatus("admAlertState", hasCached ? "সংরক্ষিত ডেটা দেখানো হচ্ছে · লাইভ আপডেট যাচাই হচ্ছে…" : "অ্যালার্ট আপডেট হচ্ছে…", false);
+    var stockPromise = MaAdmin.getStockVariants({ stockStatus: "all", timeoutMs: 15000 }).then(function (res) { return { ok: true, data: res }; }, function (error) { return { ok: false, error: error }; });
+    var inboxPromise = MaAdmin.inboxCall("InboxList", { Unread: "1", Limit: 300 }, { edgeSummary: true, timeoutMs: 15000 }).then(function (res) { return { ok: true, data: res }; }, function (error) { return { ok: false, error: error }; });
     // Each card renders as soon as its own data arrives (the inbox is slower and must not hold up stock).
-    var currentStock = [], currentInbox = [];
     stockPromise = stockPromise.then(function (stockResult) {
       var stockNode = byId("admStockAlerts");
       if (stockResult.ok) currentStock = renderStockAlerts(stockResult.data.items, stockResult.data.defaultThreshold) || [];
-      else if (stockNode) stockNode.innerHTML = '<div class="adm-feature-error" role="alert">' + escapeHtml(errorText(stockResult.error)) + '</div>';
+      else if (stockNode && !cachedStock) stockNode.innerHTML = '<div class="adm-feature-error" role="alert">' + escapeHtml(errorText(stockResult.error)) + '</div>';
       return stockResult;
     });
     inboxPromise = inboxPromise.then(function (inboxResult) {
       var inboxNode = byId("admInboxAlerts");
       if (inboxResult.ok) currentInbox = renderInboxAlerts(inboxResult.data) || [];
-      else if (inboxNode) inboxNode.innerHTML = '<div class="adm-feature-error" role="alert">' + escapeHtml(errorText(inboxResult.error)) + '</div>';
+      else if (inboxNode && !cachedInbox) inboxNode.innerHTML = '<div class="adm-feature-error" role="alert">' + escapeHtml(errorText(inboxResult.error)) + '</div>';
       return inboxResult;
     });
     return Promise.all([stockPromise, inboxPromise]).then(function (results) {
@@ -173,7 +182,8 @@
         state.inboxBaseline = true;
       }
       var failed = (!stockResult.ok ? 1 : 0) + (!inboxResult.ok ? 1 : 0);
-      setStatus("admAlertState", (failed ? failed + "টি উৎস আপডেট হয়নি · " : "সর্বশেষ আপডেট ") + dateTimeDhaka() + " (বাংলাদেশ সময়)", failed > 0);
+      var statusText = failed ? failed + "টি উৎস আপডেট হয়নি" + (hasCached ? " · সংরক্ষিত ডেটা দেখানো হচ্ছে" : "") + " · শেষ চেষ্টা " + dateTimeDhaka() : "সর্বশেষ আপডেট " + dateTimeDhaka();
+      setStatus("admAlertState", statusText + " (বাংলাদেশ সময়)", failed > 0);
     }).finally(function () { state.alertBusy = false; });
   }
 
@@ -216,15 +226,20 @@
     if (state.taskBusy || document.hidden || !window.MaAdmin || !MaAdmin.getSession || !MaAdmin.getSession()) return Promise.resolve();
     if (!force && Date.now() - state.lastTaskRefresh < ALERT_POLL_MS) return Promise.resolve();
     state.taskBusy = true;
-    setStatus("admTaskState", "অর্ডার যাচাই হচ্ছে…", false);
-    return MaAdmin.call("AdminOrderList", { Limit: TASK_LIMIT }).then(function (result) {
+    var cached = cachedResult("AdminOrderList", { Limit: TASK_LIMIT });
+    if (cached) renderTasks(cached);
+    setStatus("admTaskState", cached ? "সংরক্ষিত ডেটা দেখানো হচ্ছে · লাইভ যাচাই হচ্ছে…" : "অর্ডার যাচাই হচ্ছে…", false);
+    return MaAdmin.call("AdminOrderList", { Limit: TASK_LIMIT }, { timeoutMs: 15000 }).then(function (result) {
       renderTasks(result);
       state.lastTaskRefresh = Date.now();
       setStatus("admTaskState", "সর্বশেষ যাচাই " + dateTimeDhaka() + " · দেরি ধরা হয়: Pending ১ ঘণ্টা, Confirmed ২৪ ঘণ্টা, Shipped ৪৮ ঘণ্টা পার হলে", false);
     }).catch(function (error) {
-      setStatus("admTaskState", errorText(error), true);
-      byId("admPriorityTasks").innerHTML = '<div class="adm-feature-error" role="alert">' + escapeHtml(errorText(error)) + ' <button type="button" id="admRetryTasks">আবার চেষ্টা করুন</button></div>';
-      byId("admRetryTasks").addEventListener("click", function () { refreshTasks(true); });
+      var message = errorText(error);
+      setStatus("admTaskState", cached ? message + " · আগের ডেটা দেখানো হচ্ছে" : message, true);
+      if (!cached) {
+        byId("admPriorityTasks").innerHTML = '<div class="adm-feature-error" role="alert">' + escapeHtml(message) + ' <button type="button" id="admRetryTasks">আবার চেষ্টা করুন</button></div>';
+        byId("admRetryTasks").addEventListener("click", function () { refreshTasks(true); });
+      }
     }).finally(function () { state.taskBusy = false; });
   }
 

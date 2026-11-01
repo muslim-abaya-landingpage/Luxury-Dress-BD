@@ -66,20 +66,28 @@
       var off = Number(sessionStorage.getItem(EDGE_OFF_KEY) || 0);
       if (off && Date.now() < off) return Promise.resolve(null);
     } catch (e) { return Promise.resolve(null); }
-    return timeoutPromise(6000, fetch(EDGE_URL, { method: "POST", credentials: "same-origin", body: body }))
-      .then(function (res) {
+    var controller = typeof AbortController === "function" ? new AbortController() : null;
+    var init = { method: "POST", credentials: "same-origin", body: body };
+    if (controller) init.signal = controller.signal;
+    var responseText = fetch(EDGE_URL, init).then(function (res) {
+      return res.text().then(function (text) { return { response: res, text: text }; });
+    });
+    return timeoutPromise(6000, responseText)
+      .then(function (result) {
+        var res = result.response;
         var edge = res.headers.get("X-MA-Source") === "edge";
-        return res.text().then(function (text) {
-          var data = null;
-          try { data = JSON.parse(text); } catch (e) {}
-          if (edge && res.ok && data && data.ok === true) return text;
-          // Not deployed / not configured: skip for 10 min. A passing Google error: skip for 1 min.
-          var pause = !edge || (data && data.error === "NOT_CONFIGURED") ? 10 : (res.status === 503 ? 1 : 0);
-          if (pause) { try { sessionStorage.setItem(EDGE_OFF_KEY, String(Date.now() + pause * 60 * 1000)); } catch (e) {} }
-          return null;
-        });
+        var data = null;
+        try { data = JSON.parse(result.text); } catch (e) {}
+        if (edge && res.ok && data && data.ok === true) return result.text;
+        // Not deployed / not configured: skip for 10 min. A passing Google error: skip for 1 min.
+        var pause = !edge || (data && data.error === "NOT_CONFIGURED") ? 10 : (res.status === 503 ? 1 : 0);
+        if (pause) { try { sessionStorage.setItem(EDGE_OFF_KEY, String(Date.now() + pause * 60 * 1000)); } catch (e) {} }
+        return null;
       })
-      .catch(function () { return null; });
+      .catch(function () {
+        if (controller) controller.abort();
+        return null;
+      });
   }
 
   function request(fields, timeout, options) {
@@ -131,8 +139,13 @@
     return task;
   }
 
+  function requestTimeout(options, fallback) {
+    var value = Number(options && options.timeoutMs);
+    return Number.isFinite(value) && value > 0 ? Math.min(value, 120000) : fallback;
+  }
+
   function apiPost(fields, options) {
-    return request(fields, 30000, options).catch(function (err) {
+    return request(fields, requestTimeout(options, 30000), options).catch(function (err) {
       return { ok: false, error: "NETWORK_FAILURE", message: err.message };
     });
   }
@@ -487,7 +500,8 @@
     var s = getSession();
     if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
     var params = Object.assign({}, fields || {}, { RecordType: recordType, Token: s.token });
-    return request(params, recordType === "AdminCatalogPublish" ? 120000 : 30000, options).then(function (res) {
+    var timeout = recordType === "AdminCatalogPublish" ? 120000 : requestTimeout(options, 30000);
+    return request(params, timeout, options).then(function (res) {
       if (!res.ok) {
         var err = new Error(res.message || res.error || "REQUEST_FAILED");
         err.code = res.error || "";
@@ -509,7 +523,7 @@
       StockStatus: opts.stockStatus || "all",
       Category: opts.category || "",
       CategoryMap: opts.categoryMap ? JSON.stringify(opts.categoryMap) : ""
-    }).then(function (res) {
+    }, opts).then(function (res) {
       if (!res.ok) throw new Error(res.message || res.error || "STOCK_VARIANTS_FETCH_FAILED");
       return res;
     });
