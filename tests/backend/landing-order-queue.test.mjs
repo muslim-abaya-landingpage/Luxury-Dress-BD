@@ -27,7 +27,7 @@ globalThis.fetch = async (input, opts) => {
   }
   const url = String(input);
   if (url.startsWith('https://muslimabaya-shop-landing.pages.dev/api/order')) {
-    retryCalls.push({ body: String(opts.body), origin: opts.headers.Origin });
+    retryCalls.push({ body: String(opts.body), origin: (opts.headers || {}).Origin });
     return originResponder(String(opts.body));
   }
   if (url.startsWith('https://api.telegram.org/')) { tg.push(JSON.parse(opts.body)); return new Response('{}'); }
@@ -73,7 +73,7 @@ originCalls = []; r = await worker.fetch(req('lp_3'), env, ctx); assert.match(aw
 env.DB.raw.prepare("UPDATE order_inbox SET next_at = 0 WHERE status = 'retry'").run();
 originResponder = ok('Success|LP-777'); retryCalls = [];
 await worker.scheduled({}, env, ctx); await settle();
-assert.equal(retryCalls.length, 2); assert.equal(retryCalls[0].origin, 'https://shop.muslimabaya.com');
+assert.equal(retryCalls.length, 2); assert.equal(retryCalls[0].origin, undefined, 'no Origin header, or the landing Worker answers 403');
 assert.match(retryCalls[0].body, /EventID=lp_3/); assert.match(retryCalls[0].body, /Design=Hafeza/);
 assert.equal(row(env, 'lp_3').status, 'saved'); assert.equal(row(env, 'lp_3').order_id, 'LP-777');
 

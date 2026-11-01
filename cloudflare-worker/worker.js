@@ -267,8 +267,9 @@ async function forwardLandingRetry(pairs) {
   const timer = setTimeout(() => ctrl.abort(), ORDER_TIMEOUT_MS);
   try {
     const res = await fetch(LANDING_RETRY_URL, {
-      method: 'POST', body: new URLSearchParams(pairs), signal: ctrl.signal,
-      headers: { Origin: 'https://shop.muslimabaya.com', Referer: 'https://shop.muslimabaya.com/' }
+      // No Origin header: the landing Worker refuses a request whose Origin differs from its own
+      // host (pages.dev here); a server-to-server request without Origin is accepted.
+      method: 'POST', body: new URLSearchParams(pairs), signal: ctrl.signal
     });
     return classifyLanding(res.status, await res.text());
   } catch (e) {
