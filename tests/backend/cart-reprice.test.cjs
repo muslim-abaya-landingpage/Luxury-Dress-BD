@@ -22,7 +22,7 @@ function serverPricer() {
   };
   const ctx = {};
   vm.createContext(ctx);
-  vm.runInContext(grab('opsNorm_') + '\n' + grab('opsLinePrice_'), ctx);
+  vm.runInContext(grab('opsNorm_') + '\n' + grab('opsVariation_') + '\n' + grab('opsLinePrice_'), ctx);
   return (line, p) => { try { return ctx.opsLinePrice_(Object.assign({ qty: 1 }, line), p); } catch (e) { return null; } };
 }
 

@@ -48,7 +48,12 @@ function opsCatalog_(){
  if(hash!==data.sourceSha256)throw Error('CATALOG_OUTDATED');cache.put('ops_catalog_v2',JSON.stringify(data),60);return data;
 }
 function opsNorm_(s){return String(s||'').trim().toLowerCase().replace(/[–—]/g,'-').replace(/\s+/g,' ');}
+/** WooCommerce-style variation for a cart line (product.variations from Product Manager), or null.
+ * Each variation names any of type / color / size; an empty one means "any". The most specific match wins
+ * (size counts one per " · " part, so "Body 46 · Length 54" beats "Length 54"). Mirrored in cart-reprice.js. */
+function opsVariation_(p,it){var vs=p&&p.variations;if(!Array.isArray(vs)||!vs.length)return null;var ck=function(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');},parts=function(s){return opsNorm_(s).split(/\s*·\s*/).filter(Boolean);},type=opsNorm_(it.productType).replace(/\s/g,''),color=String(it.color||''),size=parts(it.size),best=null,top=-1;vs.forEach(function(v){if(!v||typeof v!=='object')return;var n=0;if(v.type){if(opsNorm_(v.type).replace(/\s/g,'')!==type)return;n++;}if(v.color){if(!((ck(v.color)&&ck(v.color)===ck(color))||opsNorm_(v.color)===opsNorm_(color)))return;n++;}if(v.size){var t=parts(v.size);if(!t.every(function(x){return size.indexOf(x)>=0;}))return;n+=t.length;}if(n>top){best=v;top=n;}});return best;}
 function opsLinePrice_(it,p){if(!Number.isSafeInteger(it.qty)||it.qty<1||it.qty>500)throw Error('INVALID_QTY');var price=Number(p.price),type=String(it.productType||'');if(p.prices){var key=Object.keys(p.prices).filter(function(k){return k.replace(/\s/g,'').toLowerCase()===type.replace(/\s/g,'').toLowerCase();})[0];if(!key)throw Error('PRODUCT_TYPE_REQUIRED');price=Number(p.prices[key]);it.productType=key;}
+ var variation=opsVariation_(p,it);if(variation){if(variation.enabled===false)throw Error('VARIATION_UNAVAILABLE');if(Number(variation.price)>0)price=Number(variation.price);}
  var tpl=Array.isArray(it.measurements)&&it.measurements.length?opsTemplateSize_(it,p):'';
  var size=tpl||String(it.size||'').trim();if(!size)throw Error('SIZE_REQUIRED');var custom=!tpl&&/^Custom\s*\(L:?([\d.]+)[\s/]+W:?([\d.]+)/i.exec(size),direct=(p.sizes||[]).some(function(s){var v=typeof s==='object'?s.value:s;return opsNorm_(v)===opsNorm_(size);});
  if(!tpl&&/^Custom/i.test(size)&&!custom)throw Error('INVALID_CUSTOM_SIZE');

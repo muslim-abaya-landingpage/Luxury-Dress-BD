@@ -478,7 +478,8 @@ function orderErrorMessage_(code) {
     MIN_ORDER: 'ন্যূনতম অর্ডার ৳১০০।',
     EMPTY_CART: 'কার্টে কোনো পণ্য নেই।',
     ORDER_RATE_LIMIT: 'এই নম্বর থেকে খুব দ্রুত অর্ডার হয়েছে। ৩০ মিনিট পর আবার চেষ্টা করুন।',
-    DUPLICATE_ORDER: 'একই অর্ডার ইতিমধ্যে পাঠানো হয়েছে।'
+    DUPLICATE_ORDER: 'একই অর্ডার ইতিমধ্যে পাঠানো হয়েছে।',
+    VARIATION_UNAVAILABLE: 'দুঃখিত, নির্বাচিত কালার/সাইজটি এখন পাওয়া যাচ্ছে না। অন্য কালার বা সাইজ বেছে নিন।'
   };
   if (map[code]) return map[code];
   if (/^(UNKNOWN_PRODUCT|INVALID_SIZE|SIZE_REQUIRED|PRODUCT_TYPE_REQUIRED|STRUCTURED_CART_REQUIRED|CATALOG_|PRICE_CHANGED|INVALID_CUSTOM_SIZE|INVALID_COUPON)/.test(String(code))) return 'পণ্য, সাইজ বা দাম নতুন করে যাচাই প্রয়োজন। পেজ রিফ্রেশ করে পণ্য/সাইজ আবার বেছে নিন অথবা WhatsApp-এ যোগাযোগ করুন।';

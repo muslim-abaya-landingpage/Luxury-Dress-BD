@@ -23,6 +23,16 @@ window.__maBuildValidationProducts = function (w) {
         // Size Manager: the old size lists, so the order check keeps existing products' sizes (size-core.js).
         sizeLegacy: w.getSizeLegacySlots(p, category)
       });
+      // Product Manager variations: only what the order price check needs (no SKU/photo/sale price).
+      if (Array.isArray(p.variations) && p.variations.length) {
+        products[products.length - 1].variations = p.variations.map(function (v) {
+          var row = {};
+          ['type', 'color', 'size'].forEach(function (k) { if (v[k]) row[k] = v[k]; });
+          if (v.price > 0) row.price = v.price;
+          if (v.enabled === false) row.enabled = false;
+          return row;
+        });
+      }
     });
   });
   var ids = {};

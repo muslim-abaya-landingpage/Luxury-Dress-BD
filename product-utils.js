@@ -166,6 +166,31 @@
     return "";
   }
 
+  /**
+   * Cleans product.variations: [{type, color, size, price, regularPrice, sku, image, enabled}].
+   * type/color/size empty = "any"; size uses the stock-row form ("52", "Body 46 · Length 54", "Length 54").
+   * The order server (Operations.gs opsVariation_) and cart-reprice.js pick the most specific match.
+   */
+  function cleanVariations(list) {
+    if (!Array.isArray(list)) return [];
+    var out = [];
+    list.slice(0, 500).forEach(function (v) {
+      if (!v || typeof v !== "object") return;
+      var row = {};
+      ["type", "color", "size", "sku", "image"].forEach(function (k) {
+        var t = String(v[k] == null ? "" : v[k]).replace(/\s+/g, " ").trim().slice(0, k === "image" ? 500 : 160);
+        if (t) row[k] = t;
+      });
+      var price = parseInt(v.price, 10);
+      if (price > 0) row.price = price;
+      var regular = parseInt(v.regularPrice, 10);
+      if (regular > 0 && (!row.price || regular > row.price)) row.regularPrice = regular;
+      if (v.enabled === false) row.enabled = false;
+      if (row.type || row.color || row.size) out.push(row);
+    });
+    return out;
+  }
+
   function normalizeProductEntry(raw, categoryKey, index) {
     if (raw && raw._catalogNormalized) {
       // The array key is the source of truth. A product can be moved between
@@ -344,6 +369,9 @@
     if (entry.stockVariants && typeof entry.stockVariants === "object") {
       normalized.stockVariants = entry.stockVariants;
     }
+    // WooCommerce-style variations (Product Manager "Variations" tab): own price/sale/SKU/photo/on-off.
+    var variations = cleanVariations(entry.variations);
+    if (variations.length) normalized.variations = variations;
     if (entry.stock != null && entry.stock !== "") {
       var stockN = parseInt(entry.stock, 10);
       if (!isNaN(stockN)) normalized.stock = Math.max(0, stockN);
@@ -1090,6 +1118,7 @@ g.getCartLineBaseName = getCartLineBaseName;
     hasExplicitProductLink: hasExplicitProductLink,
     normalizeProductEntry: normalizeProductEntry,
     normalizeAll: normalizeAll,
+    cleanVariations: cleanVariations,
     isPublishedProduct: isPublishedProduct,
     getSaleInfo: getSaleInfo,
     categoryHasProducts: categoryHasProducts,
