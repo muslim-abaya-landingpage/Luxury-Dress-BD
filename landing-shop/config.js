@@ -27,7 +27,7 @@ window.LANDING_CONFIG = {
   hero: {
     galleryStyle: 'glass3d', // classic | glass | glass3d
     galleryAutoPlay: true,
-    galleryInterval: 5000,
+    galleryInterval: 3000, // ছবি বদলের সময় (মিলিসেকেন্ড); সর্বনিম্ন 2500
     galleryLightbox: true,
     galleryZoom: true,
     gallerySidePreview: true,

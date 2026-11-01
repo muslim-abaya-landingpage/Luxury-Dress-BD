@@ -60,7 +60,7 @@
     const active = $('thumbList').querySelectorAll('button')[photoIndex], list = $('thumbList');
     if (active) list.scrollTo({left:list.scrollLeft+active.getBoundingClientRect().left-list.getBoundingClientRect().left-list.clientWidth/2+active.clientWidth/2,behavior:'smooth'});
     const progress = $('galleryProgress'); progress.classList.remove('running'); void progress.offsetWidth;
-    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) progress.classList.add('running');
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) { progress.style.animationDuration = (Math.max(2500, Number(c.hero.galleryInterval) || 5000) / 1000) + 's'; progress.classList.add('running'); }
     startAuto();
   }
   function stopAuto() { clearInterval(autoTimer); autoTimer = undefined; $('galleryProgress').classList.remove('running'); }
