@@ -575,3 +575,30 @@ body{background:var(--bg);color:var(--text)}
 
 /* ডিসকাউন্ট: আগের দাম কেটে দেখানো (discount.js → regularPrice) */
 [data-was]:not([data-was=""])::after{content:attr(data-was);margin-left:.4em;font-size:.72em;font-weight:500;opacity:.7;text-decoration:line-through}
+
+/* ============================================================
+   v8.4 — COMPACT PREMIUM REVIEWS (overrides earlier review styles)
+   ছোট, পরিপাটি কার্ড; ডেস্কটপে একসাথে ~৪টা, মোবাইলে ১.৫টা দেখা যায়।
+   ============================================================ */
+#reviews.reviews{max-width:980px!important;margin:40px auto 0!important;padding:30px 0 22px!important;border-radius:22px}
+#reviews .section-kicker{font-size:12px;letter-spacing:.18em;margin-bottom:4px}
+#reviews h2{font-size:clamp(22px,2.6vw,28px)!important;line-height:1.25!important;letter-spacing:-.01em}
+#reviews .reviews-intro{font-size:14px;margin:6px 0 4px!important;opacity:.85}
+#reviews .review-glass-stage{margin-top:8px!important;padding:6px 0 4px!important}
+#reviews .review-glow{opacity:.08!important;width:160px;height:160px}
+#reviews .review-list{gap:14px!important;padding:10px 22px 16px!important;scroll-padding-inline:22px!important;perspective:none!important;mask-image:none!important;-webkit-mask-image:none!important;justify-content:flex-start}
+#reviews .review-card{flex:0 0 210px!important;border-radius:16px!important;border:1px solid color-mix(in srgb,var(--accent) 28%,#fff)!important;background:var(--surface)!important;box-shadow:0 6px 18px #1022190f!important;opacity:1!important;filter:none!important;transform:none!important;transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease!important}
+#reviews .review-card.is-active,#reviews .review-card:hover{transform:translateY(-3px)!important;border-color:color-mix(in srgb,var(--accent) 70%,#fff)!important;box-shadow:0 12px 26px color-mix(in srgb,var(--primary) 14%,transparent)!important}
+#reviews .review-card img{height:250px!important;border-radius:15px 15px 0 0!important;object-fit:cover;object-position:top}
+#reviews .review-card .review-foot{padding:9px 12px!important;font-size:12.5px!important;font-weight:600!important;gap:8px}
+#reviews .review-progress{width:min(220px,50%)!important;height:2px!important;margin-top:2px!important}
+#reviews .review-controls{margin-top:12px!important;gap:12px!important;padding:5px 8px!important;font-size:12px!important}
+#reviews .review-controls button{width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;font-size:16px!important}
+@media(max-width:700px){
+  #reviews.reviews{margin-top:30px!important;padding:24px 0 18px!important;border-radius:18px}
+  #reviews .review-list{padding:8px 16px 14px!important;scroll-padding-inline:16px!important;gap:12px!important}
+  #reviews .review-card{flex-basis:58vw!important;max-width:230px}
+  #reviews .review-card img{height:min(64vw,250px)!important}
+  #reviews .review-controls button{width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important}
+}
+@media(prefers-reduced-motion:reduce){#reviews .review-card{transition:none!important}}
