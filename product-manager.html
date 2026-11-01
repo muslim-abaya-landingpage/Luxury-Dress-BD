@@ -909,7 +909,7 @@
     var meta = getCategoryTypeMeta(catKey);
     var out = managerOutOfStock(p);
     if (!Object.prototype.hasOwnProperty.call(liveStockOverrides, String(p.id)) && typeof window.isInStock === "function") out = !window.isInStock(p);
-    var tabs = [["general", "General"], ["inventory", "Inventory"], ["attributes", "Attributes"]];
+    var tabs = [["general", "General"], ["inventory", "Inventory"], ["attributes", "Attributes"], ["variations", "Variations"]];
     var tags = productTags(p);
     var colorRows = initialColorRows(p);
     mainEl.innerHTML =
@@ -922,7 +922,7 @@
         '<p class="pm-wp-permalink">Permalink: ' + (p.id ? '<a href="/product/' + encodeURIComponent(p.id) + '" target="_blank" rel="noopener">https://muslimabaya.com/product/' + escapeHtml(p.id) + '</a>' : "—") + '</p>' +
         '<section class="pm-wp-box"><h3 class="pm-wp-box-title">Product description</h3><div class="pm-wp-box-body">' +
           '<textarea data-ef="detailNote" rows="8" placeholder="What is in the set, fabric, care notes…">' + escapeHtml(p.detailNote || "") + '</textarea></div></section>' +
-        '<section class="pm-wp-box pm-wp-data"><h3 class="pm-wp-box-title">Product data <span>— ' + (productOptionTypes(p, meta).length ? "Variable product (options)" : "Simple product") + '</span></h3>' +
+        '<section class="pm-wp-box pm-wp-data"><h3 class="pm-wp-box-title">Product data <span>— ' + (Array.isArray(p.variations) && p.variations.length ? "Variable product (" + p.variations.length + " variations)" : productOptionTypes(p, meta).length ? "Variable product (options)" : "Simple product") + '</span></h3>' +
           '<div class="pm-wp-data-wrap"><ul class="pm-wp-data-tabs">' + tabs.map(function (t) { return '<li><button type="button" data-etab="' + t[0] + '" class="' + (editTab === t[0] ? "is-active" : "") + '">' + t[1] + '</button></li>'; }).join("") + '</ul>' +
           '<div class="pm-wp-data-panels">' +
             '<div class="pm-wp-panel" data-epanel="general"' + (editTab === "general" ? "" : " hidden") + '>' +
@@ -945,6 +945,7 @@
               efield("dressLengths", "Dress lengths (inches)", sizesToInput(p.dressLengths), "text", "Two-Piece dress length options, e.g. 38, 40, 42.") +
               efield("palazzoLengths", "Pajama / Palazzo lengths (inches)", sizesToInput(p.palazzoLengths), "text", "e.g. 38, 40 — separate with commas.") +
             '</div>' +
+            '<div class="pm-wp-panel" data-epanel="variations"' + (editTab === "variations" ? "" : " hidden") + '><div id="pmVariationsMount"><p>Loading variations…</p></div></div>' +
           '</div></div></section>' +
         '<section class="pm-wp-box" id="pmSeoBox"><h3 class="pm-wp-box-title">Search engine listing (SEO)</h3><div class="pm-wp-box-body">' +
           '<div class="pm-seo-preview" aria-label="Google preview"><div class="pm-seo-prev-title" id="pmSeoPrevTitle"></div>' +
@@ -1232,8 +1233,31 @@
         editTab = b.getAttribute("data-etab");
         root.querySelectorAll("[data-etab]").forEach(function (x) { x.classList.toggle("is-active", x === b); });
         root.querySelectorAll("[data-epanel]").forEach(function (panel) { panel.hidden = panel.getAttribute("data-epanel") !== editTab; });
+        if (editTab === "variations") renderVariationsTab();
       });
     });
+    // WooCommerce-style Variations tab (product-variations-admin.js). Re-drawn when opened, so it uses the
+    // options, colours and sizes as they are now in the General and Attributes tabs.
+    function renderVariationsTab() {
+      var mount = document.getElementById("pmVariationsMount");
+      if (!mount) return;
+      loadScriptOnce("product-variations-admin.js?v=20261101-variations").then(function () {
+        if (!window.MaVariationsAdmin || !document.body.contains(mount)) return;
+        var photos = [];
+        [p.image].concat(Array.isArray(p.images) ? p.images : []).forEach(function (u) { u = String(u || "").trim(); if (u && !/^blob:/i.test(u) && photos.indexOf(u) === -1) photos.push(u); });
+        window.MaVariationsAdmin.render(mount, {
+          product: p,
+          category: catKey,
+          types: productOptionTypes(p, getCategoryTypeMeta(catKey)),
+          colors: initialColorRows(p).map(function (r) { return { key: r.color, label: r.colorLabel, image: r.image }; }),
+          photos: photos,
+          basePrice: function (type) { var v = type && p.priceByType ? parseInt(p.priceByType[type], 10) : NaN; return v > 0 ? v : (parseInt(p.price, 10) || 0); },
+          changed: function (note) { changed(note); },
+          admin: window.MaAdmin
+        });
+      }).catch(function (err) { mount.textContent = "Could not load the Variations tab: " + err.message; });
+    }
+    if (editTab === "variations") renderVariationsTab();
     function addTags() {
       var input = document.getElementById("pmEditTagInput");
       var next = productTags(p);
