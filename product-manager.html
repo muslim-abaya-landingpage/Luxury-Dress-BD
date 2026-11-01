@@ -155,7 +155,7 @@
   var lazyScripts = Object.create(null);
   var quickUploadOptions = null;
   var quickUploadMounted = false;
-  var VARIATIONS_SRC = "product-variations-admin.js?v=20261101-woo";
+  var VARIATIONS_SRC = "product-variations-admin.js?v=20261101-woo2";
   function loadScriptOnce(src) {
     if (lazyScripts[src]) return lazyScripts[src];
     lazyScripts[src] = new Promise(function (resolve, reject) {
@@ -1025,6 +1025,8 @@
     function saveEdit() {
       var b1 = document.getElementById("pmEditUpdate"), b2 = document.getElementById("pmEditBarSave");
       if (b2 && b2.disabled) return;
+      var attrLive = (document.getElementById("pmAttrMount") || {}).__pmwAttrLive;
+      if (attrLive && attrLive.flush && !attrLive.flush()) return;
       [b1, b2].forEach(function (b) { if (b) b.disabled = true; });
       editMsg("Saving…", "busy");
       saveAll().then(function (result) {
@@ -1237,6 +1239,12 @@
     if (urlBox) urlBox.addEventListener("input", function () { p.image = urlBox.value; changed(); });
     root.querySelectorAll("[data-etab]").forEach(function (b) {
       b.addEventListener("click", function () {
+        // Leaving Attributes with unsaved ticks/values: save them first (like pressing Save attributes).
+        var attrLive = (document.getElementById("pmAttrMount") || {}).__pmwAttrLive;
+        if (editTab === "attributes" && b.getAttribute("data-etab") !== "attributes" && attrLive && attrLive.dirty) {
+          attrLive.saveTo(b.getAttribute("data-etab"));
+          return;
+        }
         editTab = b.getAttribute("data-etab");
         root.querySelectorAll("[data-etab]").forEach(function (x) { x.classList.toggle("is-active", x === b); });
         root.querySelectorAll("[data-epanel]").forEach(function (panel) { panel.hidden = panel.getAttribute("data-epanel") !== editTab; });
@@ -1250,7 +1258,7 @@
         p.productType = "variable";
         editTab = "attributes";
         renderProductEditor();
-        changed("Variable product: tick “Used for variations” on the Attributes tab, then open Variations.");
+        changed("Variable product: check the ticks below, click Save attributes, then Variations → Generate variations.");
         return;
       }
       var n = Array.isArray(p.variations) ? p.variations.length : 0;

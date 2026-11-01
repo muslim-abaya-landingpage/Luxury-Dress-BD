@@ -206,7 +206,8 @@
       var ta = box.querySelector('[data-pa="values"][data-id="' + id + '"]');
       if (ta && !ta.readOnly) ta.focus();
     }
-    function save() {
+    // Writes the boxes into the product. Returns false when a value is too long.
+    function apply() {
       var bad = "";
       present.forEach(function (d) {
         if (!d.field) return;
@@ -224,12 +225,23 @@
       // Boxes that are closed keep their earlier choice.
       used.forEach(function (id) { if (!box.querySelector('[data-pa="used"][data-id="' + id + '"]') && next.indexOf(id) === -1) next.push(id); });
       p.variationAttributes = next;
-      if (ctx.changed) ctx.changed("Attributes saved — click Save changes to publish.");
-      if (ctx.rerender) ctx.rerender("attributes", "Attributes saved. Open Variations to generate them.");
-      else { defs = attributeDefs(p, ctx.category, ctx); used = next; draw(); msg("Attributes saved.", "ok"); }
+      return true;
+    }
+    // tab: the tab to open afterwards (set when the attributes are saved automatically on leaving the tab).
+    function save(tab) {
+      if (!apply()) return false;
+      if (box.__pmwAttrLive) box.__pmwAttrLive.dirty = false;
+      if (ctx.changed) ctx.changed(tab ? "Attributes saved automatically — click Save changes to publish." : "Attributes saved — open Variations, then click Save changes.");
+      if (ctx.rerender) ctx.rerender(tab || "attributes", tab ? "Attributes saved automatically — click Save changes to publish." : "Attributes saved — open Variations, then click Save changes.");
+      else { defs = attributeDefs(p, ctx.category, ctx); used = p.variationAttributes; draw(); msg("Attributes saved.", "ok"); }
+      return true;
     }
 
     box.__pmwAttrLive = {
+      // Unsaved edits in the boxes (values or "Used for variations"); saved for the user on leaving the tab or on Save changes.
+      dirty: false,
+      saveTo: function (tab) { return save(tab); },
+      flush: function () { if (!this.dirty) return true; var ok = apply(); if (ok) this.dirty = false; return ok; },
       click: function (t) {
         var a = t.closest("[data-pa]");
         if (!a) return;
@@ -257,6 +269,7 @@
         else if (k === "save") save();
       },
       change: function (t) {
+        if (t.matches('[data-pa="used"], [data-pa="values"]')) this.dirty = true;
         if (t.matches('[data-pa="global"]') && t.value) addAttr(t.value);
       }
     };
@@ -264,6 +277,7 @@
       box.__pmwAttrBound = true;
       box.addEventListener("click", function (e) { if (box.__pmwAttrLive) box.__pmwAttrLive.click(e.target); });
       box.addEventListener("change", function (e) { if (box.__pmwAttrLive) box.__pmwAttrLive.change(e.target); });
+      box.addEventListener("input", function (e) { if (box.__pmwAttrLive && e.target.matches('[data-pa="values"]')) box.__pmwAttrLive.dirty = true; });
     }
     draw();
   }
