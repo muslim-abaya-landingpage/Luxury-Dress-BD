@@ -5,6 +5,9 @@ const SUPABASE_URL = env('SUPABASE_URL');
 const SERVICE_KEY = env('SUPABASE_SERVICE_ROLE_KEY');
 const BOT_TOKEN = env('TELEGRAM_BOT_TOKEN');
 const BOT_SECRET = env('TELEGRAM_WEBHOOK_SECRET');
+// Optional: Telegram chat ID (number) of the team member/group that should be alerted about new website chats.
+const ADMIN_CHAT_ID = env('TELEGRAM_ADMIN_CHAT_ID');
+const INBOX_URL = 'https://muslimabaya.com/admin-support-inbox.html';
 const ALLOWED_ORIGINS = new Set(
   (env('ALLOWED_ORIGINS') || 'https://muslimabaya.com,https://www.muslimabaya.com')
     .split(',').map((v) => v.trim()).filter(Boolean),
@@ -64,21 +67,42 @@ async function saveMessage(
   return data;
 }
 
-async function getTelegramConversation(chatId: number) {
+const isMissingColumn = (e: { code?: string } | null) => !!e && (e.code === '42703' || e.code === 'PGRST204');
+
+function telegramName(from: any) {
+  const full = [from?.first_name, from?.last_name].filter(Boolean).join(' ').trim();
+  return (full || (from?.username ? `@${from.username}` : '')).slice(0, 80) || null;
+}
+
+async function getTelegramConversation(chatId: number, from: any = null) {
   const { data: existing, error } = await db.from('support_conversations')
     .select('id,status').eq('telegram_chat_id', chatId).maybeSingle();
   if (error) throw error;
-  if (existing) return existing;
-  const { data, error: createError } = await db.from('support_conversations').insert({
+  if (existing) {
+    // A customer writing again reopens a closed chat so it shows up in the inbox.
+    if (existing.status === 'closed') {
+      await db.from('support_conversations').update({ status: 'open' }).eq('id', existing.id);
+      existing.status = 'open';
+    }
+    return existing;
+  }
+  const row: Record<string, unknown> = {
     visitor_id: null,
     channel: 'telegram',
     telegram_chat_id: chatId,
     status: 'open',
     subject: 'Telegram support',
     page_path: '/',
-  }).select('id,status').single();
-  if (createError) throw createError;
-  return data;
+    customer_name: telegramName(from),
+  };
+  let created = await db.from('support_conversations').insert(row).select('id,status').single();
+  if (isMissingColumn(created.error)) {
+    // Contact-details migration not applied yet: create the chat without the name.
+    delete row.customer_name;
+    created = await db.from('support_conversations').insert(row).select('id,status').single();
+  }
+  if (created.error) throw created.error;
+  return created.data;
 }
 
 async function botReply(chatId: number, conversationId: string, message: string) {
@@ -137,7 +161,7 @@ async function handleUpdate(update: any) {
   const chatId = Number(msg.chat.id);
   const input = String(msg.text ?? '').trim();
   if (!input) return;
-  const conversation = await getTelegramConversation(chatId);
+  const conversation = await getTelegramConversation(chatId, msg.from);
   await saveMessage(conversation.id, input, 'customer', null, String(chatId));
   const lower = input.toLowerCase();
 
@@ -189,6 +213,62 @@ async function telegramWebhook(req: Request) {
     await db.from('telegram_support_updates').delete().eq('update_id', update.update_id);
     return plain('Retry', 500);
   }
+}
+
+async function signedInUser(req: Request) {
+  const header = req.headers.get('authorization') ?? '';
+  const token = header.toLowerCase().startsWith('bearer ') ? header.slice(7).trim() : '';
+  if (!token) return null;
+  const { data, error } = await db.auth.getUser(token);
+  return error || !data.user ? null : data.user;
+}
+
+// Website customer message -> alert the team on Telegram (deduplicated, at most one alert per chat per 2 minutes).
+async function notifyTeam(req: Request) {
+  const user = await signedInUser(req);
+  if (!user) return json(req, { error: 'Unauthorized' }, 401);
+  if (!BOT_TOKEN || !/^-?\d+$/.test(ADMIN_CHAT_ID)) return json(req, { ok: false, skipped: 'not_configured' });
+  const payload = await req.json().catch(() => null);
+  const messageId = String(payload?.message_id ?? '');
+  if (!/^[0-9a-f-]{36}$/i.test(messageId)) return json(req, { error: 'Invalid message' }, 400);
+  const { data: message, error } = await db.from('support_messages')
+    .select('id,conversation_id,sender_id,sender_role,body,created_at').eq('id', messageId).maybeSingle();
+  if (error || !message || message.sender_role !== 'customer' || message.sender_id !== user.id) {
+    return json(req, { error: 'Message not found' }, 404);
+  }
+  if (Date.now() - new Date(message.created_at).getTime() > 10 * 60 * 1000) return json(req, { ok: false, skipped: 'too_old' });
+  const { data: conv } = await db.from('support_conversations').select('*').eq('id', message.conversation_id).maybeSingle();
+  if (!conv || conv.channel !== 'website') return json(req, { ok: false, skipped: 'not_website' });
+
+  const { error: ledgerError } = await db.from('telegram_support_notification_deliveries')
+    .insert({ message_id: message.id, status: 'sending' });
+  if (ledgerError?.code === '23505') return json(req, { ok: true, skipped: 'duplicate' });
+  if (ledgerError) return json(req, { error: 'Could not record notification' }, 500);
+
+  const since = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+  const { data: recent } = await db.from('support_messages').select('id')
+    .eq('conversation_id', message.conversation_id).eq('sender_role', 'customer').gte('created_at', since).neq('id', message.id);
+  const recentIds = (recent ?? []).map((r: { id: string }) => r.id);
+  if (recentIds.length) {
+    const { data: sent } = await db.from('telegram_support_notification_deliveries').select('message_id')
+      .in('message_id', recentIds).eq('status', 'sent').limit(1);
+    if (sent?.length) {
+      await db.from('telegram_support_notification_deliveries').update({ status: 'sent', delivered_at: new Date().toISOString() }).eq('message_id', message.id);
+      return json(req, { ok: true, skipped: 'throttled' });
+    }
+  }
+
+  const who = [conv.customer_name, conv.customer_phone].filter(Boolean).join(' · ') || `ভিজিটর ${String(conv.id).slice(0, 6)}`;
+  const text = `🛍 নতুন ওয়েবসাইট মেসেজ\n${who}\nপেজ: ${conv.page_path || '/'}\n\n${String(message.body).slice(0, 500)}\n\nউত্তর দিন: ${INBOX_URL}`;
+  try {
+    await telegramSend(Number(ADMIN_CHAT_ID), text);
+  } catch (e) {
+    console.error('Team notification failed:', e instanceof Error ? e.message : 'unknown');
+    await db.from('telegram_support_notification_deliveries').delete().eq('message_id', message.id);
+    return json(req, { error: 'Notification failed' }, 502);
+  }
+  await db.from('telegram_support_notification_deliveries').update({ status: 'sent', delivered_at: new Date().toISOString() }).eq('message_id', message.id);
+  return json(req, { ok: true });
 }
 
 async function authorizedAgent(req: Request) {
@@ -252,6 +332,7 @@ Deno.serve(async (req: Request) => {
   const path = new URL(req.url).pathname;
   try {
     if (req.method === 'POST' && path.endsWith('/telegram-support')) return await telegramWebhook(req);
+    if (req.method === 'POST' && path.endsWith('/notify')) return await notifyTeam(req);
     if (path.includes('/admin/')) return await adminApi(req, path);
     return json(req, { error: 'Not found' }, 404);
   } catch (e) {

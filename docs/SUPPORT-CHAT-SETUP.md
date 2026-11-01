@@ -88,3 +88,31 @@ In the admin inbox, select **Enable alerts** to grant this browser permission fo
 ## Admin inbox alerts code
 
 The full, copyable browser notification and sound integration is documented in [`ADMIN-INBOX-ALERTS-CODE-BN.md`](ADMIN-INBOX-ALERTS-CODE-BN.md) and runs in `admin-support-inbox.html`. It is opt-in and requires the agent's inbox tab to remain open and Realtime-connected; it is not a push-notification service.
+
+
+## ২০২৬-১১-০১ আপডেট: পূর্ণাঙ্গ সাপোর্ট ইনবক্স
+
+কোডে যা যোগ হয়েছে:
+- `admin-support-inbox.html` + `admin-support-inbox.js`: বাংলা UI, অ্যাডমিন মেনু (sync-admin-navigation.py এখন এই পেজও আপডেট করে), মোবাইলে তালিকা/চ্যাট আলাদা স্ক্রিন, ওয়েবসাইট ও টেলিগ্রাম চ্যাট এক তালিকায় (চ্যানেল ফিল্টার), না-পড়া সংখ্যা, খালি চ্যাট লুকানো, দায়িত্ব (আমার/কারো নয়) ফিল্টার, কাস্টমারের নাম/ফোন দেখা ও সংশোধন, রেডিমেড রিপ্লাই (এই ব্রাউজারে সংরক্ষিত), "অর্ডার খুঁজুন" (`admin-orders.html?q=<ফোন>`), পুরোনো মেসেজ লোড, টাইপিং চিহ্ন, ছবি পাঠানো/দেখা।
+- `support-chat.js`: ঐচ্ছিক নাম/ফোন ফর্ম, ছবি পাঠানো (৫MB, JPG/PNG/WEBP/GIF), টাইপিং চিহ্ন, প্রতিটি কাস্টমার মেসেজের পর টিমকে টেলিগ্রাম নোটিফিকেশন (সার্ভারে কনফিগার থাকলে)।
+- `supabase/functions/telegram-support`: নতুন `POST /notify` (ওয়েবসাইট মেসেজ → টিমের টেলিগ্রাম চ্যাটে অ্যালার্ট, প্রতি চ্যাটে ২ মিনিটে সর্বোচ্চ একটি), টেলিগ্রাম কাস্টমারের নাম সংরক্ষণ, বন্ধ টেলিগ্রাম চ্যাটে নতুন মেসেজ এলে আবার খোলা।
+- `supabase/migrations/20261101230000_support_inbox_complete.sql`: `customer_name`/`customer_phone` কলাম + `set_support_contact` RPC, `attachment_path` কলাম + প্রাইভেট `support-attachments` বাকেট ও পলিসি (প্রতি ভিজিটর ১০ মিনিটে সর্বোচ্চ ১০টি আপলোড), `support_events` Realtime-এ যোগ, এবং `orders`/`products` টেবিলের খোলা `authenticated` পলিসি বন্ধ।
+
+পেজটি মাইগ্রেশন ছাড়াও চলে (নাম/ফোন ও ছবির অংশ নিষ্ক্রিয় থাকে), তবে পুরো ফিচারের জন্য নিচের তিনটি ধাপ লাগবে।
+
+### ধাপ ১ — ডাটাবেস আপডেট
+Supabase Dashboard → SQL Editor → নতুন query → `supabase/migrations/20261101230000_support_inbox_complete.sql` ফাইলের পুরো লেখা পেস্ট করে **Run**। ফাইলটি একাধিকবার চালালেও সমস্যা নেই।
+
+### ধাপ ২ — Edge Function আপডেট
+Supabase Dashboard → Edge Functions → `telegram-support` → Code → পুরো কোড মুছে `supabase/functions/telegram-support/index.ts` পেস্ট করে **Deploy**। "Verify JWT" বন্ধ-ই রাখুন (টেলিগ্রাম webhook-এর জন্য; ফাংশন নিজেই লগইন যাচাই করে)। অথবা CLI: `supabase functions deploy telegram-support --no-verify-jwt`।
+
+### ধাপ ৩ — টিমের টেলিগ্রাম নোটিফিকেশন (ঐচ্ছিক)
+1. যে টেলিগ্রাম অ্যাকাউন্টে অ্যালার্ট চান, সেখান থেকে আপনার সাপোর্ট বটকে যেকোনো একটি মেসেজ পাঠান (বট শুধু প্রাইভেট চ্যাটে কাজ করে, গ্রুপে নয়)।
+2. `/admin-support-inbox.html`-এ সেই টেলিগ্রাম চ্যাটটি খুলুন; উপরে "টেলিগ্রাম আইডি ..." সংখ্যাটি দেখাবে, সেটি কপি করুন। (webhook চালু থাকলে টেলিগ্রামের `getUpdates` কাজ করে না, তাই এই পথ।)
+3. Supabase → Edge Functions → Secrets → `TELEGRAM_ADMIN_CHAT_ID` = সেই সংখ্যা → Save।
+সিক্রেট না থাকলে `/notify` কিছু না পাঠিয়ে `skipped: not_configured` ফেরত দেয়; চ্যাট স্বাভাবিকভাবে চলে।
+
+### যাচাই
+- প্রাইভেট উইন্ডোতে সাইটের চ্যাট খুলে নাম/ফোন সেভ করুন, একটি মেসেজ ও একটি ছবি পাঠান।
+- অন্য ব্রাউজারে `/admin-support-inbox.html`-এ দেখুন: নাম/ফোন, ছবি, না-পড়া সংখ্যা, টাইপিং চিহ্ন আসছে কিনা; উত্তর দিন।
+- টেলিগ্রাম বটে একটি মেসেজ পাঠিয়ে দেখুন সেটি একই ইনবক্সে "টেলিগ্রাম" ট্যাগসহ আসে এবং সেখান থেকে উত্তর দিলে বটে পৌঁছায়।

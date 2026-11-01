@@ -1,100 +1,183 @@
 <!doctype html>
-<html lang="en">
+<html lang="bn">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
-  <title>Support Inbox · Muslim Abaya</title>
+  <title>লাইভ সাপোর্ট ইনবক্স | Muslim Abaya Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
   <style>
-    :root{--ink:#181715;--muted:#77736b;--line:#e9e5dc;--paper:#fff;--wash:#f7f5f1;--gold:#b59657;--green:#14824b;--red:#a4322d;--shadow:0 18px 60px rgba(30,24,14,.11);}
-    *{box-sizing:border-box}body{margin:0;background:#f3f1ed;color:var(--ink);font:14px/1.45 "DM Sans",system-ui,sans-serif;min-height:100vh}button,input,select,textarea{font:inherit}button{cursor:pointer}
-    .topbar{height:72px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 clamp(16px,4vw,52px)}.brand{display:flex;align-items:center;gap:12px}.brand-mark{width:38px;height:38px;border:1px solid var(--gold);border-radius:50%;display:grid;place-items:center;color:var(--gold);font-family:"Playfair Display",serif;font-size:20px}.brand-title{font:700 18px "Playfair Display",serif}.brand-sub{font-size:10px;letter-spacing:.17em;text-transform:uppercase;color:var(--muted)}.top-actions{display:flex;align-items:center;gap:9px}.alert-btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:9px;padding:8px 10px;font-size:12px}.alert-btn:hover{border-color:var(--gold)}.connection{font-size:12px;color:var(--muted);display:flex;gap:7px;align-items:center}.dot{width:8px;height:8px;border-radius:50%;background:#b4b0a6}.dot.on{background:#16a36a;box-shadow:0 0 0 3px #16a36a20}.plain-btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:9px;padding:9px 12px}.plain-btn:hover{border-color:#bbb3a3}
-    .shell{max-width:1440px;margin:28px auto;padding:0 22px}.page-head{display:flex;justify-content:space-between;align-items:end;margin:0 2px 16px}.eyebrow{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);font-weight:700}.page-head h1{margin:5px 0 0;font:700 clamp(25px,3vw,34px) "Playfair Display",serif}.subhead{color:var(--muted);margin:5px 0 0}.workspace{height:min(760px,calc(100vh - 180px));min-height:520px;display:grid;grid-template-columns:320px minmax(0,1fr);background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}
-    .sidebar{border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:0}.side-head{padding:18px;border-bottom:1px solid var(--line)}.side-title{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:16px}.count{background:var(--wash);border-radius:999px;padding:3px 9px;font-size:11px;color:var(--muted)}.filters{display:flex;gap:8px;margin-top:13px}.search,.filter{height:38px;border:1px solid var(--line);border-radius:9px;background:#fff;padding:0 10px;min-width:0}.search{flex:1}.filter{width:112px}.conversation-list{overflow:auto;padding:8px}.conversation{width:100%;text-align:left;display:block;border:1px solid transparent;background:#fff;border-radius:12px;padding:12px;margin:2px 0;color:var(--ink)}.conversation:hover{background:#faf9f6}.conversation.selected{background:#f8f5ee;border-color:#eadfc9}.conv-top,.conv-foot{display:flex;justify-content:space-between;gap:10px;align-items:center}.conv-name{font-weight:700}.conv-time,.conv-foot{font-size:11px;color:var(--muted)}.conv-preview{display:block;margin:7px 0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#68645d;font-size:12px}.status-pill{display:inline-flex;align-items:center;border-radius:999px;padding:3px 8px;font-size:10px;text-transform:capitalize;background:#f0eee9;color:#6a665e}.status-open{background:#eef8f2;color:#17764a}.status-pending{background:#fff5e4;color:#95620c}.status-closed{background:#eee;color:#676767}.empty-list{padding:28px 14px;text-align:center;color:var(--muted);font-size:13px}
-    .thread{display:flex;flex-direction:column;min-width:0}.thread-head{min-height:72px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px}.thread-name{font-size:15px;font-weight:700}.thread-meta{font-size:11px;color:var(--muted);margin-top:3px}.thread-controls{display:flex;align-items:center;gap:8px}.thread-controls select{height:36px;border:1px solid var(--line);border-radius:8px;background:#fff;padding:0 9px}.thread-controls button{height:36px;border:1px solid var(--line);border-radius:8px;background:#fff;padding:0 11px}.thread-controls button:hover{border-color:var(--gold)}.messages{flex:1;overflow:auto;padding:20px clamp(14px,3vw,32px);display:flex;flex-direction:column;gap:10px;background:linear-gradient(#fff,#fff 70%,#fdfcfb)}.message{max-width:min(74%,620px);padding:11px 13px;border:1px solid var(--line);border-radius:15px 15px 15px 4px;background:#fff;align-self:flex-start;overflow-wrap:anywhere;box-shadow:0 2px 9px #00000007}.message.agent{background:#1b1a18;color:#fff;border-color:#1b1a18;align-self:flex-end;border-radius:15px 15px 4px 15px}.message-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;opacity:.67;margin-bottom:5px}.message-body{white-space:pre-wrap}.message time{display:block;margin-top:7px;font-size:10px;opacity:.64}.welcome-thread{margin:auto;text-align:center;color:var(--muted);max-width:380px;padding:20px}.welcome-thread strong{display:block;color:#38352f;font:700 22px "Playfair Display",serif;margin-bottom:6px}.events{border-top:1px solid var(--line);padding:8px 18px;display:flex;gap:7px;overflow:auto;min-height:42px}.event-chip{white-space:nowrap;font-size:10px;border:1px solid #eadfc9;background:#fbf8f1;padding:5px 9px;border-radius:999px;color:#7b6233}.composer{border-top:1px solid var(--line);padding:14px 18px 17px;display:flex;gap:10px;align-items:end}.composer textarea{resize:none;min-height:44px;max-height:110px;flex:1;border:1px solid var(--line);border-radius:11px;padding:11px 12px;outline:none}.composer textarea:focus,.search:focus{border-color:var(--gold)}.send-btn{height:44px;border:0;border-radius:11px;background:var(--green);color:#fff;font-weight:700;padding:0 19px}.send-btn:disabled{opacity:.55;cursor:wait}.hint{font-size:10px;color:var(--muted);padding:0 18px 12px}
-    .login-wrap{display:none;min-height:calc(100vh - 72px);place-items:center;padding:22px}.login-card{width:min(420px,100%);background:#fff;border:1px solid var(--line);border-radius:18px;padding:30px;box-shadow:var(--shadow)}.login-card h1{font:700 27px "Playfair Display",serif;margin:8px 0}.login-card p{color:var(--muted)}.login-card label{display:block;font-weight:600;font-size:12px;margin:14px 0 6px}.login-card input{width:100%;height:44px;border:1px solid var(--line);border-radius:9px;padding:0 12px}.primary-btn{width:100%;height:44px;border:0;border-radius:9px;background:#171615;color:#fff;font-weight:700;margin-top:16px}.secondary-btn{width:100%;height:42px;border:1px solid var(--line);border-radius:9px;background:#fff;margin-top:8px}.notice{min-height:18px;margin-top:12px;color:var(--red);font-size:12px}.notice.success{color:var(--green)}.howto{font-size:11px;line-height:1.6;background:#f8f6f2;border-radius:9px;padding:11px;margin-top:16px;color:#68645d}.hidden{display:none!important}.status-line{color:var(--muted);font-size:12px}
-    @media(max-width:760px){.topbar{height:62px;padding:0 14px}.brand-title{font-size:16px}.brand-sub,.connection{display:none}.alert-btn{padding:7px 8px;font-size:10px}.shell{margin:13px auto;padding:0 10px}.page-head{margin:0 2px 11px}.page-head .subhead{font-size:12px}.workspace{height:calc(100dvh - 142px);min-height:430px;grid-template-columns:115px minmax(0,1fr);border-radius:13px}.side-head{padding:10px 7px}.side-title{font-size:12px}.count{padding:2px 6px;font-size:9px}.filters{display:block;margin-top:8px}.search{width:100%;height:32px;font-size:11px}.filter{display:none}.conversation-list{padding:3px}.conversation{padding:9px 6px;margin:1px 0;border-radius:9px}.conv-top{display:block}.conv-name{display:block;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.conv-time{font-size:9px}.conv-preview{font-size:10px;margin:5px 0;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.conv-foot{font-size:9px}.status-pill{font-size:8px;padding:2px 5px}.thread-head{padding:10px;min-height:64px}.thread-name{font-size:13px}.thread-meta{max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.thread-controls{gap:5px}.thread-controls select,.thread-controls button{height:31px;font-size:10px;padding:0 6px}.messages{padding:14px 9px}.message{max-width:92%;padding:9px 10px;font-size:13px}.events{padding:6px;min-height:34px}.composer{padding:10px 8px;gap:5px}.composer textarea{min-height:40px;padding:8px;font-size:12px}.send-btn{height:40px;padding:0 9px;font-size:11px}.hint{padding:0 9px 9px;font-size:9px}}
+    :root{--ink:#181715;--muted:#77736b;--line:#e9e5dc;--paper:#fff;--wash:#f7f5f1;--gold:#b59657;--green:#14824b;--red:#a4322d;--blue:#2a6db0;--shadow:0 18px 60px rgba(30,24,14,.11);--side:248px}
+    *{box-sizing:border-box}html,body{height:100%}body{margin:0;background:#f3f1ed;color:var(--ink);font:14px/1.5 "Hind Siliguri","DM Sans",system-ui,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}
+    a{color:#775e32}
+    /* App shell + admin menu */
+    .app{display:grid;grid-template-columns:var(--side) minmax(0,1fr);min-height:100vh}
+    .adm-sidebar{background:#17150f;color:#e9e3d6;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:auto;padding:18px 12px}
+    .adm-brand{display:flex;align-items:center;gap:10px;padding:4px 8px 16px;border-bottom:1px solid #ffffff14;margin-bottom:10px}.adm-brand .mark{width:34px;height:34px;border:1px solid var(--gold);border-radius:50%;display:grid;place-items:center;color:var(--gold);font:700 18px "Playfair Display",serif}.adm-brand b{display:block;font:700 15px "Playfair Display",serif;color:#fff}.adm-brand small{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#a99f8b}
+    .adm-sidebar-nav{display:flex;flex-direction:column;gap:2px}
+    .adm-sidebar-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;color:#d8d1c2;text-decoration:none;font-size:13.5px;list-style:none;cursor:pointer}
+    .adm-sidebar-item:hover{background:#ffffff10;color:#fff}.adm-sidebar-item.is-current{background:#b5965726;color:#f3dfb2}
+    .adm-sidebar-item svg{flex:none}.adm-sidebar-item span{flex:1}
+    .adm-nav-group summary::-webkit-details-marker{display:none}.adm-nav-chevron{transition:transform .15s}.adm-nav-group[open] .adm-nav-chevron{transform:rotate(90deg)}
+    .adm-nav-children{display:flex;flex-direction:column;gap:1px;padding:2px 0 6px 30px}.adm-nav-child{font-size:13px;padding:7px 10px}
+    .side-backdrop{display:none}
+    .main{min-width:0;display:flex;flex-direction:column}
+    .topbar{min-height:64px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px clamp(12px,3vw,32px);flex-wrap:wrap}
+    .top-left{display:flex;align-items:center;gap:10px;min-width:0}.menu-btn{display:none;border:1px solid var(--line);background:#fff;border-radius:9px;width:38px;height:38px;font-size:18px}
+    .top-title{font-weight:700;font-size:16px}.top-sub{font-size:11px;color:var(--muted)}
+    .top-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.alert-btn,.plain-btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:9px;padding:7px 10px;font-size:12px}.alert-btn:hover,.plain-btn:hover{border-color:var(--gold)}
+    .connection{font-size:12px;color:var(--muted);display:flex;gap:7px;align-items:center}.dot{width:8px;height:8px;border-radius:50%;background:#b4b0a6}.dot.on{background:#16a36a;box-shadow:0 0 0 3px #16a36a20}
+    /* Login */
+    .login-wrap{flex:1;display:grid;place-items:center;padding:28px 16px}.login-card{width:min(430px,100%);background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:28px}
+    .eyebrow{font-size:11px;letter-spacing:.12em;color:var(--gold);font-weight:700}.login-card h1{margin:6px 0 6px;font-size:26px}.login-card p{color:var(--muted);margin:0 0 16px}
+    .login-card label{display:block;font-size:12px;font-weight:600;margin:12px 0 5px}.login-card input{width:100%;height:42px;border:1px solid var(--line);border-radius:10px;padding:0 12px}
+    .primary-btn{width:100%;height:44px;margin-top:16px;border:0;border-radius:10px;background:var(--ink);color:#fff;font-weight:700}.secondary-btn{width:100%;height:40px;margin-top:8px;border:1px solid var(--line);border-radius:10px;background:#fff}
+    .notice{min-height:20px;margin-top:10px;font-size:12px;color:var(--red)}.notice.success{color:var(--green)}.howto{margin-top:12px;padding:10px 12px;background:var(--wash);border-radius:10px;font-size:12px;color:var(--muted)}
+    /* Inbox */
+    .shell{flex:1;padding:18px clamp(10px,2vw,24px);min-height:0}.alert-btn .ico{margin-right:4px}
+    .workspace{height:calc(100vh - 100px);min-height:520px;display:grid;grid-template-columns:330px minmax(0,1fr);background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+    .sidebar{border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:0;min-height:0}
+    .side-head{padding:14px;border-bottom:1px solid var(--line)}.side-title{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:15px}.count{background:var(--wash);border-radius:999px;padding:2px 9px;font-size:11px;color:var(--muted)}
+    .filters{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px}.search{grid-column:1/-1;height:38px;border:1px solid var(--line);border-radius:9px;padding:0 10px;min-width:0}.filter{height:34px;border:1px solid var(--line);border-radius:8px;background:#fff;padding:0 6px;min-width:0;font-size:12px}
+    .empty-toggle{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;color:var(--muted)}
+    .conversation-list{overflow:auto;padding:6px;flex:1;min-height:0}
+    .conversation{width:100%;text-align:left;display:block;border:1px solid transparent;background:#fff;border-radius:11px;padding:10px 11px;margin:2px 0;color:var(--ink)}.conversation:hover{background:#faf9f6}.conversation.selected{background:#f8f5ee;border-color:#eadfc9}
+    .conv-top,.conv-foot{display:flex;justify-content:space-between;gap:8px;align-items:center}.conv-name{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.conv-time,.conv-foot{font-size:11px;color:var(--muted);flex:none}
+    .conv-preview{display:block;margin:4px 0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#68645d;font-size:12.5px}
+    .conversation.has-unread .conv-name,.conversation.has-unread .conv-preview{font-weight:700;color:var(--ink)}
+    .unread-badge{display:inline-flex;align-items:center;justify-content:center;min-width:19px;height:19px;padding:0 6px;border-radius:999px;background:var(--green);color:#fff;font-size:10px;font-weight:700;margin-left:6px}
+    .pill{display:inline-flex;align-items:center;border-radius:999px;padding:2px 8px;font-size:10.5px;background:#f0eee9;color:#6a665e;white-space:nowrap}.status-open{background:#eef8f2;color:#17764a}.status-pending{background:#fff5e4;color:#95620c}.status-closed{background:#eee;color:#676767}.ch-telegram{background:#e8f2fc;color:var(--blue)}.ch-website{background:#f5efe2;color:#7a5d24}
+    .foot-left{display:flex;gap:5px;align-items:center;min-width:0;overflow:hidden}.assignee{font-size:10.5px;color:var(--muted);white-space:nowrap}
+    .empty-list{padding:28px 14px;text-align:center;color:var(--muted);font-size:13px}
+    .thread{display:flex;flex-direction:column;min-width:0;min-height:0}
+    .thread-head{border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px;flex-wrap:wrap}
+    .thread-id{display:flex;align-items:center;gap:8px;min-width:0}.back-btn{display:none;border:1px solid var(--line);background:#fff;border-radius:8px;width:34px;height:34px}
+    .thread-name{font-size:15px;font-weight:700;display:flex;gap:6px;align-items:center;flex-wrap:wrap}.thread-meta{font-size:11.5px;color:var(--muted);margin-top:2px}
+    .edit-contact{border:0;background:none;color:#775e32;font-size:12px;padding:0 2px;text-decoration:underline}
+    .thread-controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.thread-controls select,.thread-controls button,.thread-controls a{height:34px;border:1px solid var(--line);border-radius:8px;background:#fff;padding:0 10px;font-size:12.5px;color:var(--ink);text-decoration:none;display:inline-flex;align-items:center}.thread-controls button:hover,.thread-controls a:hover{border-color:var(--gold)}.thread-controls button:disabled{opacity:.6;cursor:default}
+    .messages{flex:1;overflow:auto;padding:16px clamp(12px,3vw,28px);display:flex;flex-direction:column;gap:9px;background:#fbfaf7;min-height:0}
+    .older-btn{align-self:center;border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 12px;font-size:12px}
+    .message{max-width:min(560px,82%);padding:9px 12px;border-radius:14px;border:1px solid var(--line);background:#fff;overflow-wrap:anywhere}.message.agent{align-self:flex-end;background:#17150f;color:#fff;border-color:#17150f;border-radius:14px 14px 4px 14px}.message.customer{align-self:flex-start;border-radius:14px 14px 14px 4px}.message.bot{background:#f1efe9}
+    .message-label{font-size:10.5px;opacity:.7;margin-bottom:2px}.message-body{white-space:pre-wrap}.message time{display:block;font-size:10px;opacity:.6;margin-top:4px}
+    .message img{display:block;max-width:100%;max-height:280px;border-radius:9px;margin-top:6px;background:#eee}
+    .welcome-thread{margin:auto;text-align:center;color:var(--muted)}.welcome-thread strong{display:block;font-size:18px;color:var(--ink);margin-bottom:4px}
+    .typing{min-height:18px;padding:0 18px;font-size:11.5px;color:var(--muted);font-style:italic}
+    .events{display:flex;gap:6px;flex-wrap:wrap;padding:6px 16px;border-top:1px solid var(--line);font-size:11px;color:var(--muted)}.event-chip{background:var(--wash);border-radius:999px;padding:2px 9px}
+    .canned{display:flex;gap:6px;overflow-x:auto;padding:8px 16px 0;scrollbar-width:thin}.canned button{flex:none;border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 11px;font-size:12px;white-space:nowrap}.canned button:hover{border-color:var(--gold)}.canned .add{color:#775e32}
+    .composer{display:flex;gap:8px;align-items:flex-end;padding:8px 16px 10px}.composer textarea{flex:1;min-width:0;resize:none;border:1px solid var(--line);border-radius:12px;padding:10px 12px;max-height:140px;min-height:44px}
+    .icon-btn{flex:none;width:44px;height:44px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:18px}.send-btn{flex:none;height:44px;padding:0 18px;border:0;border-radius:12px;background:var(--green);color:#fff;font-weight:700}.send-btn:disabled,.icon-btn:disabled{opacity:.55;cursor:default}
+    .hint{padding:0 16px 10px;font-size:11px;color:var(--muted)}
+    @media(max-width:1000px){
+      .app{grid-template-columns:minmax(0,1fr)}
+      .adm-sidebar{position:fixed;left:0;top:0;bottom:0;width:min(280px,84vw);z-index:60;transform:translateX(-102%);transition:transform .18s}
+      body.menu-open .adm-sidebar{transform:none}body.menu-open .side-backdrop{display:block;position:fixed;inset:0;background:#0006;z-index:55}
+      .menu-btn{display:inline-grid;place-items:center}
+    }
+    @media(max-width:760px){
+      .shell{padding:0}.workspace{min-height:0;border-radius:0;border:0;grid-template-columns:minmax(0,1fr)}
+      .workspace .thread{display:none}.workspace.show-thread .sidebar{display:none}.workspace.show-thread .thread{display:flex}
+      .back-btn{display:inline-grid;place-items:center}.thread-head{padding:8px 10px}.thread-controls{width:100%}.thread-controls select,.thread-controls button,.thread-controls a{flex:1 1 auto;justify-content:center;padding:0 6px}
+      .message{max-width:90%}.composer{padding:8px 10px calc(10px + env(safe-area-inset-bottom,0px))}.canned{padding:8px 10px 0}.hint{display:none}
+      .top-sub,.connection span,.alert-btn .lbl{display:none}
+      .main{height:100dvh;overflow:hidden}.login-wrap{overflow:auto}.topbar{flex-wrap:nowrap;min-height:56px;padding:8px 10px}.top-title{font-size:15px;white-space:nowrap}
+      .shell:not(.hidden){display:flex;flex:1;min-height:0}.workspace{height:auto;flex:1}
+    }
   </style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand"><div class="brand-mark" aria-hidden="true">M</div><div><div class="brand-title">Muslim Abaya</div><div class="brand-sub">Customer care workspace</div></div></div>
-    <div class="top-actions"><span class="connection"><i class="dot" id="connectionDot"></i><span id="connectionText">Not connected</span></span><button class="alert-btn hidden" id="browserAlertBtn" type="button" title="Enable browser notifications">Enable alerts</button><button class="alert-btn hidden" id="soundAlertBtn" type="button" aria-pressed="false" title="Toggle incoming-message sound">Sound: Off</button><button class="plain-btn hidden" id="logoutBtn" type="button">Sign out</button></div>
-  </header>
-  <main class="login-wrap" id="loginWrap">
-    <section class="login-card">
-      <div class="eyebrow">Private support workspace</div><h1>Admin inbox</h1>
-      <p>Sign in with an approved support-agent account to view and reply to customer chats.</p>
-      <form id="loginForm" autocomplete="on">
-        <label for="email">Work email</label><input id="email" type="email" autocomplete="username" required>
-        <label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required>
-        <button class="primary-btn" type="submit">Sign in</button>
-      </form>
-      <button class="secondary-btn" id="signupBtn" type="button">Create an account</button>
-      <p style="text-align:center;margin:10px 0 0;font-size:12px"><a href="/admin-support-reset.html" style="color:#775e32">Forgot password? Reset it</a></p>
-      <div class="notice" id="loginNotice" role="status"></div>
-      <div class="howto">New agent? Create the account, verify the email if prompted, then ask the project owner to add that email to the <code>support_agents</code> allow-list. Accounts that are not allow-listed cannot read chats.</div>
-    </section>
-  </main>
-  <main class="shell hidden" id="inboxWrap">
-    <div class="page-head"><div><div class="eyebrow">Customer care</div><h1>Support inbox</h1><p class="subhead">Live conversations from your storefront.</p></div><div class="status-line" id="agentLabel"></div></div>
-    <section class="workspace" aria-label="Customer support inbox">
-      <aside class="sidebar">
-        <div class="side-head"><div class="side-title">Conversations <span class="count" id="conversationCount">0</span></div><div class="filters"><input class="search" id="searchInput" placeholder="Search chats" aria-label="Search chats"><select class="filter" id="statusFilter" aria-label="Filter by status"><option value="all">All status</option><option value="open">Open</option><option value="pending">Pending</option><option value="closed">Closed</option></select></div></div>
-        <div class="conversation-list" id="conversationList"><div class="empty-list">Loading conversations…</div></div>
-      </aside>
-      <section class="thread">
-        <div class="thread-head"><div><div class="thread-name" id="threadTitle">Choose a conversation</div><div class="thread-meta" id="threadMeta">Visitors stay anonymous; messages and page path are stored.</div></div><div class="thread-controls"><select id="threadStatus" aria-label="Conversation status" disabled><option value="open">Open</option><option value="pending">Pending</option><option value="closed">Closed</option></select><button id="assignBtn" type="button" disabled>Assign to me</button></div></div>
-        <div class="messages" id="messages"><div class="welcome-thread"><strong>Welcome to support</strong>Select a customer conversation to read and reply in real time.</div></div>
-        <div class="events" id="events"><span class="status-line">Quick-action selections will appear here.</span></div>
-        <form class="composer" id="replyForm"><textarea id="replyInput" maxlength="2000" rows="1" placeholder="Select a conversation to reply…" aria-label="Write a reply" disabled></textarea><button class="send-btn" id="sendBtn" type="submit" disabled>Send</button></form>
-        <div class="hint">Messages are saved in Supabase. Never request or send card or password details here.</div>
+<div class="app">
+  <div class="side-backdrop" id="sideBackdrop"></div>
+  <aside class="adm-sidebar" id="admSidebar" aria-label="অ্যাডমিন মেনু">
+    <div class="adm-brand"><div class="mark" aria-hidden="true">M</div><div><b>Muslim Abaya</b><small>Admin Panel</small></div></div>
+    <nav class="adm-sidebar-nav" aria-label="অ্যাডমিন মেনু">
+<a class="adm-sidebar-item" href="admin-dashboard.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>ড্যাশবোর্ড</span></a>
+<details class="adm-nav-group" name="adm-navigation"><summary class="adm-sidebar-item" title="অর্ডার ও হিসাব"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z M9 7h6M9 11h6M9 15h4"/></svg><span>অর্ডার ও হিসাব</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
+<a class="adm-sidebar-item adm-nav-child" href="admin-orders.html"><span>অর্ডার প্যানেল</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-operations.html"><span>হিসাব ও রিটার্ন</span></a>
+</div></details>
+<details class="adm-nav-group" name="adm-navigation"><summary class="adm-sidebar-item" title="পণ্য ও স্টক"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="6" width="16" height="15" rx="2"/><path d="M9 6V5a3 3 0 0 1 6 0v1M9 10a3 3 0 0 0 6 0"/></svg><span>পণ্য ও স্টক</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
+<a class="adm-sidebar-item adm-nav-child" href="product-manager.html"><span>প্রোডাক্ট ম্যানেজার</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-sizes.html"><span>সাইজ ম্যানেজার</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="stock-analytics.html"><span>স্টক ও অ্যানালিটিক্স</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="product-links.html"><span>প্রোডাক্ট লিংক</span></a>
+</div></details>
+<details class="adm-nav-group has-current" name="adm-navigation" open><summary class="adm-sidebar-item" title="কাস্টমার ইনবক্স"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h18v13H8l-5 4V4ZM7 9h10M7 13h7"/></svg><span>কাস্টমার ইনবক্স</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
+<a class="adm-sidebar-item adm-nav-child" href="admin-inbox.html"><span>বর্তমান কাস্টমার ইনবক্স</span></a>
+<a class="adm-sidebar-item adm-nav-child is-current" href="admin-support-inbox.html" aria-current="page"><span>রিয়েল-টাইম লাইভ সাপোর্ট</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="support-agent-telegram.html"><span>টেলিগ্রাম সাপোর্ট এজেন্ট</span></a>
+</div></details>
+<details class="adm-nav-group" name="adm-navigation"><summary class="adm-sidebar-item" title="সেটিংস ও অন্যান্য"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 9v12"/></svg><span>সেটিংস ও অন্যান্য</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
+<a class="adm-sidebar-item adm-nav-child" href="admin-staff.html"><span>স্টাফ ম্যানেজমেন্ট</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-growth.html"><span>গ্রোথ টুলস</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-links.html"><span>পরিচালনা লিংক</span></a>
+</div></details>
+</nav>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <div class="top-left"><button class="menu-btn" id="menuBtn" type="button" aria-label="মেনু খুলুন" aria-controls="admSidebar" aria-expanded="false">☰</button><div><div class="top-title">লাইভ সাপোর্ট ইনবক্স</div><div class="top-sub" id="agentLabel">ওয়েবসাইট ও টেলিগ্রামের কাস্টমার চ্যাট</div></div></div>
+      <div class="top-actions"><span class="connection" title="রিয়েল-টাইম সংযোগ"><i class="dot" id="connectionDot"></i><span id="connectionText">সংযুক্ত নয়</span></span><button class="alert-btn hidden" id="browserAlertBtn" type="button" title="ব্রাউজার নোটিফিকেশন চালু করুন"><span class="ico" aria-hidden="true">🔔</span><span class="lbl">অ্যালার্ট চালু</span></button><button class="alert-btn hidden" id="soundAlertBtn" type="button" aria-pressed="false" title="নতুন মেসেজে শব্দ"><span class="ico" aria-hidden="true">🔈</span><span class="lbl">শব্দ: বন্ধ</span></button><button class="plain-btn hidden" id="logoutBtn" type="button">সাইন আউট</button></div>
+    </header>
+    <main class="login-wrap" id="loginWrap">
+      <section class="login-card">
+        <div class="eyebrow">সাপোর্ট এজেন্ট লগইন</div><h1>লাইভ সাপোর্ট ইনবক্স</h1>
+        <p>অনুমোদিত সাপোর্ট-এজেন্ট অ্যাকাউন্ট দিয়ে সাইন ইন করুন। এই লগইন অ্যাডমিন ড্যাশবোর্ডের লগইন থেকে আলাদা।</p>
+        <form id="loginForm" autocomplete="on">
+          <label for="email">ইমেইল</label><input id="email" type="email" autocomplete="username" required>
+          <label for="password">পাসওয়ার্ড</label><input id="password" type="password" autocomplete="current-password" required>
+          <button class="primary-btn" type="submit">সাইন ইন</button>
+        </form>
+        <button class="secondary-btn" id="signupBtn" type="button">নতুন অ্যাকাউন্ট খুলুন</button>
+        <p style="text-align:center;margin:10px 0 0;font-size:12px"><a href="/admin-support-reset.html">পাসওয়ার্ড ভুলে গেছেন? রিসেট করুন</a></p>
+        <div class="notice" id="loginNotice" role="status"></div>
+        <div class="howto">নতুন এজেন্ট? অ্যাকাউন্ট খুলে ইমেইল যাচাই করুন, তারপর মালিককে বলুন ইমেইলটি <code>support_agents</code> তালিকায় যোগ করতে। তালিকায় না থাকলে চ্যাট দেখা যাবে না।</div>
       </section>
-    </section>
-  </main>
+    </main>
+    <main class="shell hidden" id="inboxWrap">
+      <section class="workspace" id="workspace" aria-label="কাস্টমার সাপোর্ট ইনবক্স">
+        <aside class="sidebar">
+          <div class="side-head">
+            <div class="side-title">কথোপকথন <span class="count" id="conversationCount">0</span></div>
+            <div class="filters">
+              <input class="search" id="searchInput" type="search" placeholder="নাম, ফোন বা মেসেজ খুঁজুন" aria-label="চ্যাট খুঁজুন">
+              <select class="filter" id="statusFilter" aria-label="স্ট্যাটাস"><option value="active">চলমান</option><option value="all">সব স্ট্যাটাস</option><option value="open">খোলা</option><option value="pending">অপেক্ষমাণ</option><option value="closed">বন্ধ</option></select>
+              <select class="filter" id="channelFilter" aria-label="চ্যানেল"><option value="all">সব চ্যানেল</option><option value="website">ওয়েবসাইট</option><option value="telegram">টেলিগ্রাম</option></select>
+              <select class="filter" id="ownerFilter" aria-label="দায়িত্ব"><option value="all">সবার</option><option value="mine">আমার</option><option value="unassigned">কারো নয়</option><option value="unread">না-পড়া</option></select>
+            </div>
+            <label class="empty-toggle"><input type="checkbox" id="showEmptyToggle"> মেসেজ ছাড়া চ্যাটও দেখাও <span id="emptyCount"></span></label>
+          </div>
+          <div class="conversation-list" id="conversationList"><div class="empty-list">কথোপকথন লোড হচ্ছে…</div></div>
+        </aside>
+        <section class="thread">
+          <div class="thread-head">
+            <div class="thread-id"><button class="back-btn" id="backBtn" type="button" aria-label="তালিকায় ফিরুন">←</button><div><div class="thread-name" id="threadTitle">একটি কথোপকথন বেছে নিন</div><div class="thread-meta" id="threadMeta">ওয়েবসাইটের ভিজিটর নাম/ফোন দিলে এখানে দেখাবে।</div></div></div>
+            <div class="thread-controls">
+              <select id="threadStatus" aria-label="কথোপকথনের স্ট্যাটাস" disabled><option value="open">খোলা</option><option value="pending">অপেক্ষমাণ</option><option value="closed">বন্ধ</option></select>
+              <button id="assignBtn" type="button" disabled>আমাকে দিন</button>
+              <button id="contactBtn" type="button" disabled>নাম/ফোন</button>
+              <a id="orderBtn" class="hidden" href="/admin-orders.html" target="_blank" rel="noopener">অর্ডার খুঁজুন</a>
+            </div>
+          </div>
+          <div class="messages" id="messages"><div class="welcome-thread"><strong>স্বাগতম</strong>বাম পাশ থেকে একটি চ্যাট বেছে নিয়ে রিয়েল-টাইমে উত্তর দিন।</div></div>
+          <div class="typing" id="typingLine" aria-live="polite"></div>
+          <div class="events" id="events"><span>কাস্টমারের কুইক-অ্যাকশন এখানে দেখাবে।</span></div>
+          <div class="canned" id="cannedBar" aria-label="রেডিমেড রিপ্লাই"></div>
+          <form class="composer" id="replyForm">
+            <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
+            <button class="icon-btn" id="attachBtn" type="button" title="ছবি পাঠান (সর্বোচ্চ ৫MB)" aria-label="ছবি পাঠান" disabled>📎</button>
+            <textarea id="replyInput" maxlength="2000" rows="1" placeholder="উত্তর লিখতে আগে একটি চ্যাট বেছে নিন…" aria-label="উত্তর লিখুন" disabled></textarea>
+            <button class="send-btn" id="sendBtn" type="submit" disabled>পাঠান</button>
+          </form>
+          <div class="hint">Enter = পাঠান, Shift+Enter = নতুন লাইন। কার্ড নম্বর, OTP বা পাসওয়ার্ড কখনো চাইবেন না।</div>
+        </section>
+      </section>
+    </main>
+  </div>
+</div>
   <script src="/site-footer-config.js?v=4997c01bf75eafe3"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script>
-  (function(){
-    "use strict";
-    var config=(window.SITE_FOOTER_CONFIG||{}).supportChat||{};
-    var client=null, agent=null, conversations=[], selectedId="", inboxChannel=null, soundEnabled=false, notificationAudio=null, notifiedMessageIds=Object.create(null);
-    var $=function(id){return document.getElementById(id);};
-    var loginWrap=$("loginWrap"), inboxWrap=$("inboxWrap"), loginNotice=$("loginNotice");
-    function setNotice(text,success){loginNotice.textContent=text||"";loginNotice.className="notice"+(success?" success":"");}
-    function setConnected(yes,text){$("connectionDot").classList.toggle("on",!!yes);$("connectionText").textContent=text|| (yes?"Connected":"Not connected");}
-    function formatTime(value){if(!value)return "";var d=new Date(value);return isNaN(d.getTime())?"":d.toLocaleString([], {month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});}
-    function escapeText(value){return String(value==null?"":value);}
-    function displayLogin(){loginWrap.style.display="grid";inboxWrap.classList.add("hidden");$("logoutBtn").classList.add("hidden");$("browserAlertBtn").classList.add("hidden");$("soundAlertBtn").classList.add("hidden");}
-    function displayInbox(){loginWrap.style.display="none";inboxWrap.classList.remove("hidden");$("logoutBtn").classList.remove("hidden");$("browserAlertBtn").classList.remove("hidden");$("soundAlertBtn").classList.remove("hidden");$("agentLabel").textContent=agent?agent.display_name+" · "+agent.email:"";}
-    function requireClient(){if(!config.supabaseUrl||!config.supabaseKey)throw new Error("Supabase client configuration is missing.");if(!window.supabase||!window.supabase.createClient)throw new Error("Supabase client library did not load.");if(!client)client=window.supabase.createClient(config.supabaseUrl,config.supabaseKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});return client;}
-    async function checkAgent(user){var c=requireClient();if(!user||!user.email)return null;var result=await c.from("support_agents").select("email,display_name,active").eq("email",user.email.toLowerCase()).maybeSingle();if(result.error)throw result.error;if(!result.data||!result.data.active)return null;return result.data;}
-    function playIncomingTone(){if(!soundEnabled)return;try{var Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;if(!notificationAudio)notificationAudio=new Audio();var ctx=notificationAudio;var beep=function(){var osc=ctx.createOscillator(),gain=ctx.createGain();osc.type="sine";osc.frequency.value=880;gain.gain.setValueAtTime(.0001,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.12,ctx.currentTime+.025);gain.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+.32);osc.connect(gain);gain.connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+.34);};if(ctx.state==="suspended")ctx.resume().then(beep).catch(function(){});else beep();}catch(_){}}
-    function notifyIncomingMessage(row){if(!row||row.sender_role!=="customer"||!row.id||notifiedMessageIds[row.id])return;notifiedMessageIds[row.id]=true;playIncomingTone();if(document.visibilityState==="visible"||!("Notification" in window)||Notification.permission!=="granted")return;var notice=new Notification("New customer message · Muslim Abaya",{body:"Open the inbox to read the new customer message.",tag:"support-"+row.conversation_id});notice.onclick=function(){window.focus();notice.close();selectConversation(row.conversation_id);};}
-    function statusPill(status){var span=document.createElement("span");span.className="status-pill status-"+status;span.textContent=status;return span;}
-    function renderConversations(){var list=$("conversationList");list.textContent="";var query=$("searchInput").value.trim().toLowerCase(),filter=$("statusFilter").value;var rows=conversations.filter(function(c){return(filter==="all"||c.status===filter)&&(!query||(c.id+" "+c.page_path+" "+(c.last_body||"")).toLowerCase().includes(query));});$("conversationCount").textContent=String(rows.length);if(!rows.length){var empty=document.createElement("div");empty.className="empty-list";empty.textContent=conversations.length?"No chats match this filter.":"No conversations yet. New customer chats will appear here.";list.appendChild(empty);return;}rows.forEach(function(c){var button=document.createElement("button");button.type="button";button.className="conversation"+(c.id===selectedId?" selected":"");var top=document.createElement("span");top.className="conv-top";var name=document.createElement("span");name.className="conv-name";name.textContent="Customer · "+c.id.slice(0,8);var time=document.createElement("span");time.className="conv-time";time.textContent=formatTime(c.last_message_at);top.append(name,time);var preview=document.createElement("span");preview.className="conv-preview";preview.textContent=c.last_body||c.page_path||"New conversation";var foot=document.createElement("span");foot.className="conv-foot";var location=document.createElement("span");location.textContent=c.page_path||"/";foot.append(location,statusPill(c.status));button.append(top,preview,foot);button.addEventListener("click",function(){selectConversation(c.id);});list.appendChild(button);});}
-    async function refreshConversations(){if(!agent)return;var c=requireClient();var result=await c.from("support_conversations").select("id,status,page_path,assigned_agent_email,created_at,updated_at,last_message_at").eq("channel","website").order("last_message_at",{ascending:false}).limit(100);if(result.error)throw result.error;var rows=result.data||[];var ids=rows.map(function(r){return r.id;});if(ids.length){var messages=await c.from("support_messages").select("conversation_id,body,sender_role,created_at,read_at").in("conversation_id",ids).order("created_at",{ascending:false}).limit(100);if(!messages.error){var latest={};(messages.data||[]).forEach(function(m){if(!latest[m.conversation_id])latest[m.conversation_id]=m;});rows.forEach(function(r){var m=latest[r.id];if(m){r.last_body=m.sender_role==="agent"?"You: "+m.body:m.body;r.last_message_at=m.created_at;}});}}conversations=rows;renderConversations();}
-    function renderMessages(rows){var box=$("messages");box.textContent="";if(!rows.length){var welcome=document.createElement("div");welcome.className="welcome-thread";var strong=document.createElement("strong");strong.textContent="Conversation started";welcome.append(strong,document.createTextNode("No messages yet. Reply to begin."));box.appendChild(welcome);return;}rows.forEach(function(row){var bubble=document.createElement("div");bubble.className="message "+(row.sender_role==="agent"?"agent":"customer");var label=document.createElement("div");label.className="message-label";label.textContent=row.sender_role==="agent"?"Support agent":"Customer";var text=document.createElement("div");text.className="message-body";text.textContent=escapeText(row.body);var time=document.createElement("time");time.dateTime=row.created_at||"";time.textContent=formatTime(row.created_at);bubble.append(label,text,time);box.appendChild(bubble);});box.scrollTop=box.scrollHeight;}
-    async function loadEvents(id){var c=requireClient();var result=await c.from("support_events").select("event_type,action_key,created_at").eq("conversation_id",id).order("created_at",{ascending:false}).limit(12);var container=$("events");container.textContent="";if(result.error||!result.data||!result.data.length){var empty=document.createElement("span");empty.className="status-line";empty.textContent="No quick actions recorded.";container.appendChild(empty);return;}result.data.forEach(function(e){var chip=document.createElement("span");chip.className="event-chip";chip.textContent=e.action_key.replace(/_/g," ")+" · "+formatTime(e.created_at);container.appendChild(chip);});}
-    async function loadThread(id){var c=requireClient();var result=await c.from("support_messages").select("id,conversation_id,sender_id,sender_role,body,created_at,read_at").eq("conversation_id",id).order("created_at",{ascending:true}).limit(200);if(result.error)throw result.error;renderMessages(result.data||[]);await c.from("support_messages").update({read_at:new Date().toISOString()}).eq("conversation_id",id).eq("sender_role","customer").is("read_at",null);await loadEvents(id);}
-    async function selectConversation(id){selectedId=id;var row=conversations.find(function(c){return c.id===id;});$("threadTitle").textContent=row?"Customer · "+row.id.slice(0,8):"Conversation";$("threadMeta").textContent=row?"Started "+formatTime(row.created_at)+" · "+(row.page_path||"/"):"";$("threadStatus").disabled=false;$("threadStatus").value=row?row.status:"open";$("assignBtn").disabled=false;$("replyInput").disabled=false;$("sendBtn").disabled=false;$("replyInput").placeholder="Write a reply…";renderConversations();try{await loadThread(id);}catch(error){$("messages").textContent="Could not load this conversation. Please refresh and try again.";}}
-    async function openInbox(user){window.__supportAgentUserId=user&&user.id;agent=await checkAgent(user);if(!agent){await requireClient().auth.signOut();displayLogin();setNotice("This email is not on the support-agent allow-list. Ask the project owner to approve it.");return;}displayInbox();setConnected(true,"Connected");await refreshConversations();if(inboxChannel)await requireClient().removeChannel(inboxChannel);inboxChannel=requireClient().channel("support-agent-inbox").on("postgres_changes",{event:"*",schema:"public",table:"support_conversations"},function(){refreshConversations().catch(function(){});}).on("postgres_changes",{event:"INSERT",schema:"public",table:"support_messages"},function(payload){if(payload.new){notifyIncomingMessage(payload.new);if(payload.new.conversation_id===selectedId){loadThread(selectedId).catch(function(){});}}refreshConversations().catch(function(){});}).on("postgres_changes",{event:"INSERT",schema:"public",table:"support_events"},function(payload){if(payload.new&&payload.new.conversation_id===selectedId){loadEvents(selectedId).catch(function(){});}}).subscribe(function(status){setConnected(status==="SUBSCRIBED",status==="SUBSCRIBED"?"Live":"Connecting");});}
-    $("loginForm").addEventListener("submit",async function(event){event.preventDefault();setNotice("Signing in…");try{var c=requireClient();var result=await c.auth.signInWithPassword({email:$("email").value.trim().toLowerCase(),password:$("password").value});if(result.error)throw result.error;setNotice("");await openInbox(result.data.user);}catch(error){setConnected(false);setNotice(error.message||"Sign-in failed.");}});
-    $("signupBtn").addEventListener("click",async function(){var email=$("email").value.trim().toLowerCase(),password=$("password").value;if(!email||password.length<8){setNotice("Enter an email and a password with at least 8 characters.");return;}setNotice("Creating account…");try{var result=await requireClient().auth.signUp({email:email,password:password});if(result.error)throw result.error;if(result.data.session){setNotice("Account created. Sign in after the owner allow-lists this email.",true);await requireClient().auth.signOut();}else setNotice("Account created. Check your email to confirm it, then ask the owner to allow-list this address.",true);}catch(error){setNotice(error.message||"Could not create account.");}});
-    $("browserAlertBtn").addEventListener("click",async function(){if(!("Notification" in window)){setNotice("This browser does not support desktop notifications.");return;}try{var permission=Notification.permission;if(permission==="default")permission=await Notification.requestPermission();if(permission==="granted"){this.textContent="Alerts: On";this.title="Browser alerts enabled while this inbox is open.";setNotice("Browser alerts enabled. Keep this inbox tab open to receive them.",true);}else{this.textContent="Alerts blocked";setNotice("Notifications are blocked by the browser. Allow them in site settings, then try again.");}}catch(_){setNotice("Could not enable browser notifications.");}});
-    $("soundAlertBtn").addEventListener("click",function(){soundEnabled=!soundEnabled;this.textContent=soundEnabled?"Sound: On":"Sound: Off";this.setAttribute("aria-pressed",soundEnabled?"true":"false");if(soundEnabled)playIncomingTone();});
-    $("logoutBtn").addEventListener("click",async function(){if(inboxChannel)await requireClient().removeChannel(inboxChannel);inboxChannel=null;await requireClient().auth.signOut();agent=null;selectedId="";displayLogin();setConnected(false);});
-    $("searchInput").addEventListener("input",renderConversations);$("statusFilter").addEventListener("change",renderConversations);
-    $("replyForm").addEventListener("submit",async function(event){event.preventDefault();var body=$("replyInput").value.trim();if(!body||!selectedId)return;var button=$("sendBtn");button.disabled=true;try{var result=await requireClient().from("support_messages").insert({conversation_id:selectedId,sender_id:agentUserId(),sender_role:"agent",body:body}).select("id").single();if(result.error)throw result.error;$("replyInput").value="";await loadThread(selectedId);await refreshConversations();}catch(error){alert("Reply could not be sent. Please try again.");}finally{button.disabled=false;$("replyInput").focus();}});
-    function agentUserId(){return window.__supportAgentUserId;}
-    $("threadStatus").addEventListener("change",async function(){if(!selectedId)return;var result=await requireClient().from("support_conversations").update({status:this.value}).eq("id",selectedId);if(result.error){alert("Could not update conversation status.");return;}await refreshConversations();});
-    $("assignBtn").addEventListener("click",async function(){if(!selectedId||!agent)return;var result=await requireClient().from("support_conversations").update({assigned_agent_email:agent.email}).eq("id",selectedId);if(result.error){alert("Could not assign conversation.");return;}this.textContent="Assigned to me";await refreshConversations();});
-    (async function init(){try{var c=requireClient();var result=await c.auth.getSession();var session=result.data&&result.data.session;if(session&&session.user){window.__supportAgentUserId=session.user.id;await openInbox(session.user);}else displayLogin();}catch(error){displayLogin();setNotice(error.message||"Could not connect to the support service.");}})();
-    if(window.supabase){requireClient().auth.onAuthStateChange(function(_event,session){if(session&&session.user)window.__supportAgentUserId=session.user.id;});}
-  })();
-  </script>
+  <script src="/admin-support-inbox.js?v=1"></script>
 </body>
 </html>

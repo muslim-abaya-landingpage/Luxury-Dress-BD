@@ -54,6 +54,10 @@
   var conversationPromise = null;
   var seenMessageIds = Object.create(null);
   var isSendingMessage = false;
+  var hasAttachmentColumn = true;
+  var typingChannel = null;
+  var lastTypingSent = 0;
+  var typingTimer = null;
 
   var QUICK = userCfg.quickQuestions || [
     { key: "order_status", label: "Order status", labelBn: "অর্ডার স্ট্যাটাস", text: "Hello! I would like to check my order status. My order ID is: " },
@@ -138,6 +142,14 @@
     ".ma-chat-turnstile{display:flex;justify-content:center;max-width:100%;overflow:hidden;margin:8px 0}" +
     "@media (min-width:769px){.ma-chat-fab{right:22px;bottom:22px;padding:0 20px 0 16px}.ma-chat-fab .ma-chat-fab-label{display:inline}.ma-chat-panel{right:22px;bottom:90px}body:has(#stickyOrderBar) .ma-chat-fab{bottom:22px}body:has(#stickyOrderBar) .ma-chat-panel{bottom:90px}}" +
     "@media (max-width:560px){.ma-chat-fab{right:12px;bottom:calc(16px + env(safe-area-inset-bottom,0px));min-height:50px;min-width:50px}.ma-chat-panel{inset:auto 8px calc(76px + env(safe-area-inset-bottom,0px)) 8px;width:auto;max-height:min(72dvh,620px);border-radius:18px}.ma-chat-head{padding:10px 12px}.ma-chat-body{padding:14px 12px}.ma-chat-welcome{padding:14px 10px 16px}.ma-chat-chip{min-height:40px;padding:8px 10px}.ma-chat-foot{padding:9px 10px calc(10px + env(safe-area-inset-bottom,0px))}.ma-chat-send{padding:0 11px}.ma-chat-panel.is-expanded{inset:0;width:auto;max-height:none;height:100dvh;border-radius:0}.ma-chat-panel.is-expanded .ma-chat-body{max-height:none}.ma-chat-fab:has(+ .ma-chat-panel.is-expanded){display:none}body:has(#stickyOrderBar) .ma-chat-fab{bottom:calc(82px + env(safe-area-inset-bottom,0px))}body:has(#stickyOrderBar) .ma-chat-panel{bottom:calc(140px + env(safe-area-inset-bottom,0px))}body:has(#mobile-bottom-nav):not(:has(#stickyOrderBar)) .ma-chat-fab{bottom:calc(76px + env(safe-area-inset-bottom,0px))}body:has(#mobile-bottom-nav):not(:has(#stickyOrderBar)) .ma-chat-panel{bottom:calc(136px + env(safe-area-inset-bottom,0px))}}" +
+    ".ma-chat-contact{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:0 0 10px;padding:10px;border:1px solid #eee8db;border-radius:12px;background:#fffdf8}" +
+    ".ma-chat-contact[hidden]{display:none!important}.ma-chat-contact p{grid-column:1/-1;margin:0;font-size:12px;color:#5d5546}" +
+    ".ma-chat-contact input{min-width:0;min-height:38px;border:1px solid #dedbd4;border-radius:9px;padding:7px 9px;font:inherit;font-size:13px}" +
+    ".ma-chat-contact .ma-contact-actions{grid-column:1/-1;display:flex;gap:6px;justify-content:flex-end}" +
+    ".ma-chat-contact button{min-height:34px;border:1px solid #dedbd4;border-radius:9px;padding:0 12px;background:#fff;font:600 12px system-ui;cursor:pointer}.ma-chat-contact button[type=submit]{background:#0a7d3b;border-color:#0a7d3b;color:#fff}" +
+    ".ma-chat-attach{flex:none;display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border:1px solid #d9d9d9;border-radius:12px;background:#fff;cursor:pointer;font-size:17px}.ma-chat-attach[hidden]{display:none}" +
+    ".ma-chat-message img{display:block;max-width:100%;max-height:240px;border-radius:9px;margin-top:6px;background:#eee}" +
+    ".ma-chat-typing{min-height:16px;font-size:11px;color:#8a8170;font-style:italic;padding:2px 2px 0}" +
     "@media (prefers-reduced-motion:reduce){.ma-chat-fab,.ma-chat-chip{transition:none}}";
 
   var ICON_CHAT =
@@ -321,6 +333,27 @@
     var captchaBox = el("div", "ma-chat-turnstile");
     captchaBox.id = "ma-support-chat-turnstile";
     captchaBox.hidden = true;
+    var contactForm = el("form", "ma-chat-contact");
+    contactForm.hidden = true;
+    contactForm.appendChild(el("p", "", "দ্রুত সাহায্যের জন্য নাম ও ফোন দিন (ঐচ্ছিক)"));
+    var contactName = doc.createElement("input");
+    contactName.type = "text"; contactName.maxLength = 80; contactName.autocomplete = "name";
+    contactName.placeholder = "আপনার নাম"; contactName.setAttribute("aria-label", "আপনার নাম");
+    var contactPhone = doc.createElement("input");
+    contactPhone.type = "tel"; contactPhone.maxLength = 24; contactPhone.autocomplete = "tel";
+    contactPhone.placeholder = "ফোন নম্বর"; contactPhone.setAttribute("aria-label", "ফোন নম্বর");
+    var contactActions = el("div", "ma-contact-actions");
+    var contactSkip = el("button", "", "পরে");
+    contactSkip.type = "button";
+    var contactSave = el("button", "", "সেভ করুন");
+    contactSave.type = "submit";
+    contactActions.appendChild(contactSkip);
+    contactActions.appendChild(contactSave);
+    contactForm.appendChild(contactName);
+    contactForm.appendChild(contactPhone);
+    contactForm.appendChild(contactActions);
+    var typingLine = el("div", "ma-chat-typing");
+    typingLine.setAttribute("aria-live", "polite");
     var transcript = el("div", "ma-chat-transcript");
     transcript.setAttribute("aria-live", "polite");
     transcript.setAttribute("aria-relevant", "additions");
@@ -329,7 +362,9 @@
     body.appendChild(chips);
     body.appendChild(orderForm);
     body.appendChild(captchaBox);
+    body.appendChild(contactForm);
     body.appendChild(transcript);
+    body.appendChild(typingLine);
     var foot = el("div", "ma-chat-foot");
     var row = el("div", "ma-chat-row");
     var input = el("textarea", "ma-chat-input");
@@ -341,6 +376,17 @@
     send.target = "_blank";
     send.rel = "noopener";
     send.setAttribute("aria-label", "Send this message on WhatsApp");
+    var fileInput = doc.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "image/jpeg,image/png,image/webp,image/gif";
+    fileInput.hidden = true;
+    var attach = el("button", "ma-chat-attach", "📎");
+    attach.type = "button";
+    attach.title = "ছবি পাঠান (সর্বোচ্চ ৫MB)";
+    attach.setAttribute("aria-label", "ছবি পাঠান");
+    attach.hidden = !liveEnabled;
+    row.appendChild(fileInput);
+    row.appendChild(attach);
     row.appendChild(input);
     row.appendChild(send);
     foot.appendChild(row);
@@ -416,6 +462,15 @@
       var messageBody = el("div", "ma-chat-message-body");
       messageBody.textContent = String(row.body || "");
       bubble.appendChild(messageBody);
+      if (row.attachment_path && supabaseClient) {
+        var img = el("img");
+        img.alt = "ছবি";
+        img.loading = "lazy";
+        bubble.appendChild(img);
+        supabaseClient.storage.from("support-attachments").createSignedUrl(row.attachment_path, 3600).then(function (res) {
+          if (res && res.data && res.data.signedUrl) img.src = res.data.signedUrl; else img.remove();
+        }, function () { img.remove(); });
+      }
       var time = el("time");
       time.dateTime = row.created_at || "";
       time.textContent = row.created_at ? new Date(row.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "";
@@ -445,6 +500,10 @@
         if (conversationChannel) {
           await client.removeChannel(conversationChannel);
           conversationChannel = null;
+        }
+        if (typingChannel) {
+          await client.removeChannel(typingChannel);
+          typingChannel = null;
         }
       }
       var storedId = "";
@@ -479,6 +538,8 @@
       }
       await loadThread(client);
       subscribeThread(client);
+      subscribeTyping(client);
+      maybeShowContact();
       return { client: client, id: conversationId };
     }
     function ensureLiveConversation() {
@@ -486,9 +547,44 @@
       conversationPromise = ensureLiveConversationImpl().finally(function () { conversationPromise = null; });
       return conversationPromise;
     }
+    function missingColumn(error) { return !!error && (error.code === "42703" || error.code === "PGRST204" || /column .* does not exist/i.test(error.message || "")); }
+    function messageColumns() { return "id,conversation_id,sender_id,sender_role,body,created_at,read_at" + (hasAttachmentColumn ? ",attachment_path" : ""); }
+    function contactKey() { return "maSupportContact:" + conversationId; }
+    function maybeShowContact() {
+      var done = "";
+      try { done = global.localStorage.getItem(contactKey()) || ""; } catch (_) {}
+      contactForm.hidden = Boolean(done);
+    }
+    function subscribeTyping(client) {
+      if (typingChannel || !conversationId) return;
+      typingChannel = client.channel("support-typing-" + conversationId, { config: { broadcast: { self: false } } })
+        .on("broadcast", { event: "typing" }, function (msg) {
+          if (!msg || !msg.payload || msg.payload.role !== "agent") return;
+          typingLine.textContent = "সাপোর্ট টিম লিখছেন…";
+          global.clearTimeout(typingTimer);
+          typingTimer = global.setTimeout(function () { typingLine.textContent = ""; }, 4000);
+        })
+        .subscribe();
+    }
+    function sendTyping() {
+      if (!typingChannel || Date.now() - lastTypingSent < 2500) return;
+      lastTypingSent = Date.now();
+      typingChannel.send({ type: "broadcast", event: "typing", payload: { role: "customer" } }).catch(function () {});
+    }
+    function notifyTeam(client, messageId) {
+      // Best effort: asks the server to alert the team on Telegram. Failure never affects the chat.
+      try {
+        client.functions.invoke("telegram-support/notify", { body: { message_id: messageId } }).catch(function () {});
+      } catch (_) {}
+    }
     async function loadThread(client) {
-      var result = await client.from("support_messages").select("id,conversation_id,sender_id,sender_role,body,created_at,read_at")
+      var result = await client.from("support_messages").select(messageColumns())
         .eq("conversation_id", conversationId).order("created_at", { ascending: true }).limit(150);
+      if (missingColumn(result.error) && hasAttachmentColumn) {
+        hasAttachmentColumn = false;
+        result = await client.from("support_messages").select(messageColumns())
+          .eq("conversation_id", conversationId).order("created_at", { ascending: true }).limit(150);
+      }
       if (result.error) throw result.error;
       transcript.textContent = "";
       seenMessageIds = Object.create(null);
@@ -544,6 +640,7 @@
         }).select("id,conversation_id,sender_id,sender_role,body,created_at,read_at").single();
         if (inserted.error) throw inserted.error;
         appendMessage(inserted.data);
+        notifyTeam(state.client, inserted.data.id);
         input.value = "";
         updateLinks();
         note.textContent = "Message sent to the support inbox.";
@@ -616,7 +713,65 @@
       });
       chips.appendChild(b);
     });
-    input.addEventListener("input", updateLinks);
+    input.addEventListener("input", function () { updateLinks(); if (liveEnabled) sendTyping(); });
+    contactSkip.addEventListener("click", function () {
+      try { global.localStorage.setItem(contactKey(), "skipped"); } catch (_) {}
+      contactForm.hidden = true;
+    });
+    contactForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      var name = contactName.value.trim();
+      var phone = contactPhone.value.replace(/[^0-9+ -]/g, "").trim();
+      if (!name && !phone) { contactName.focus(); return; }
+      if (phone && !/^[0-9+ -]{6,24}$/.test(phone)) { contactPhone.focus(); note.textContent = "ফোন নম্বরটি ঠিকভাবে লিখুন।"; return; }
+      contactSave.disabled = true;
+      try {
+        var state = await ensureLiveConversation();
+        var res = await state.client.rpc("set_support_contact", { p_conversation_id: state.id, p_name: name, p_phone: phone });
+        if (res.error) throw res.error;
+        try { global.localStorage.setItem(contactKey(), "saved"); } catch (_) {}
+        contactForm.hidden = true;
+        note.textContent = "ধন্যবাদ! আপনার তথ্য সাপোর্ট টিম দেখতে পাবে।";
+      } catch (_) {
+        note.textContent = "তথ্য সেভ করা যায়নি। মেসেজে লিখে দিলেও চলবে।";
+      } finally {
+        contactSave.disabled = false;
+      }
+    });
+    attach.addEventListener("click", function () { fileInput.click(); });
+    fileInput.addEventListener("change", async function () {
+      var file = fileInput.files && fileInput.files[0];
+      fileInput.value = "";
+      if (!file || !liveEnabled) return;
+      if (!/^image\/(jpeg|png|webp|gif)$/.test(file.type)) { note.textContent = "শুধু JPG, PNG, WEBP বা GIF ছবি পাঠানো যাবে।"; return; }
+      if (file.size > 5 * 1024 * 1024) { note.textContent = "ছবিটি ৫MB-এর বেশি। ছোট ছবি দিন।"; return; }
+      attach.disabled = true;
+      attach.textContent = "⏳";
+      try {
+        var state = await ensureLiveConversation();
+        if (!hasAttachmentColumn) throw new Error("Attachments unavailable");
+        var ext = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" }[file.type];
+        var rand = global.crypto && global.crypto.randomUUID ? global.crypto.randomUUID() : Date.now() + "-" + Math.random().toString(36).slice(2);
+        var path = state.id + "/" + rand + "." + ext;
+        var up = await state.client.storage.from("support-attachments").upload(path, file, { contentType: file.type, upsert: false });
+        if (up.error) throw up.error;
+        var caption = String(input.value || "").trim().slice(0, 500) || "📷 ছবি";
+        var inserted = await state.client.from("support_messages").insert({
+          conversation_id: state.id, sender_id: currentUser.id, sender_role: "customer", body: caption, attachment_path: path
+        }).select(messageColumns()).single();
+        if (inserted.error) throw inserted.error;
+        appendMessage(inserted.data);
+        notifyTeam(state.client, inserted.data.id);
+        input.value = "";
+        updateLinks();
+        note.textContent = "ছবি পাঠানো হয়েছে।";
+      } catch (_) {
+        note.textContent = "ছবি পাঠানো যায়নি। একটু পরে আবার চেষ্টা করুন বা WhatsApp-এ পাঠান।";
+      } finally {
+        attach.disabled = false;
+        attach.textContent = "📎";
+      }
+    });
     input.addEventListener("keydown", function (ev) {
       if (ev.key === "Enter" && !ev.shiftKey) {
         ev.preventDefault();
