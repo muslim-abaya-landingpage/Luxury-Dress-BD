@@ -29,7 +29,8 @@ window.__maBuildValidationProducts = function (w) {
           var row = {};
           ['type', 'color', 'size'].forEach(function (k) { if (v[k]) row[k] = v[k]; });
           if (v.price > 0) row.price = v.price;
-          if (v.enabled === false) row.enabled = false;
+          // Disabled or out of stock (Stock status without counted stock): the order server refuses it.
+          if (v.enabled === false || v.stockStatus === 'outofstock') row.enabled = false;
           return row;
         });
       }

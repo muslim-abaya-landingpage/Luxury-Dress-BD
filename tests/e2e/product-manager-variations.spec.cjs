@@ -1,4 +1,4 @@
-// Product Manager → Edit product → Variations tab (WooCommerce-style variable products).
+// Product Manager → Edit product: WooCommerce-style product type, Attributes and Variations panels.
 const { test, expect } = require('@playwright/test');
 
 async function stub(page) {
@@ -6,79 +6,118 @@ async function stub(page) {
   await page.route('**/admin-api.js*', (r) => r.fulfill({
     contentType: 'application/javascript',
     body: 'window.__stockCommits=[];window.MaAdmin={getSession:function(){return {token:"t",role:"admin"}},isLoggedIn:function(){return true},call:function(){return Promise.resolve({ok:true})},cached:function(){return null},' +
-      'getStockVariants:function(){return Promise.resolve({ok:true,items:[{productId:"ABY-MAROON-1",variant:"Body 42 · Length 50",tracked:true,available:7}]})},' +
+      'getStockVariants:function(){return Promise.resolve({ok:true,items:[{productId:"ABY-MAROON-1",variant:"Length 54",tracked:true,available:7}]})},' +
       'commitStockCsv:function(rows){window.__stockCommits.push(rows);return Promise.resolve({ok:true,applied:rows.length,skipped:0})}};'
   }));
 }
 
-async function openMaroon(page) {
+async function openMaroon(page, answers) {
   await stub(page);
-  page.on('dialog', (d) => d.accept(d.message().indexOf('Regular price') === 0 ? '1600' : undefined));
+  page.on('dialog', (d) => {
+    const m = d.message();
+    const hit = Object.keys(answers || {}).find((k) => m.indexOf(k) !== -1);
+    d.accept(hit ? answers[hit] : undefined);
+  });
   await page.goto('/product-manager.html');
   await page.waitForTimeout(500);
   await page.evaluate(() => { window.MaCatalogPublisher = Object.assign({}, window.MaCatalogPublisher, { isReady: () => true, publish: (files) => { window.__published = files; return Promise.resolve({ ok: true }); } }); });
   await page.locator('#pmAllRows tr').first().locator('.pm-row-title').click();
   await expect(page.locator('.pm-wp-name')).toHaveValue('Maroon Abaya Set');
-  await page.click('[data-etab="variations"]');
-  await expect(page.locator('[data-epanel="variations"] .pmv')).toBeVisible();
 }
 
-test('generate variations, set prices / sale / off, bulk price, and publish them', async ({ page }) => {
-  await openMaroon(page);
-  await expect(page.locator('.pmv-empty')).toContainText('No variations yet');
-  await page.click('[data-pmv-act="generate"]');
-  // 2 options × 3 body sizes × 7 lengths
-  const rows = page.locator('.pmv tbody tr');
-  await expect(rows).toHaveCount(42);
-  await expect(page.locator('.pmv-count')).toHaveText('42 variations');
-  await expect(page.locator('#pmEditNote')).toHaveClass(/is-dirty/);
-  // Stock loaded from the stock panel lands on the matching colour·size row.
-  await expect(page.locator('[data-pmv-stock="Body 42 · Length 50"]')).toHaveValue('7');
-
-  const first = rows.first();
-  await first.locator('[data-pmv="regular"]').fill('1800');
-  await first.locator('[data-pmv="regular"]').blur();
-  await first.locator('[data-pmv="sale"]').fill('1650');
-  await first.locator('[data-pmv="sale"]').blur();
-  await rows.nth(1).locator('[data-pmv="enabled"]').uncheck();
-  await expect(rows.nth(1)).toHaveClass(/is-off/);
-
-  // Bulk: regular price for all (dialog answers 1600); a sale price that is no longer below it is dropped.
-  await page.selectOption('[data-pmv-bulk]', 'regular');
-  await page.click('[data-pmv-act="bulk"]');
-  await expect(rows.nth(5).locator('[data-pmv="regular"]')).toHaveValue('1600');
-  await expect(rows.first().locator('[data-pmv="sale"]')).toHaveValue('');
-  await rows.first().locator('[data-pmv="sale"]').fill('1500');
-  await rows.first().locator('[data-pmv="sale"]').blur();
-  await expect(rows.first().locator('[data-pmv="sale"]')).toHaveValue('1500');
-
-  // Generating again keeps the edited rows and adds nothing.
-  await page.click('[data-pmv-act="generate"]');
-  await expect(rows).toHaveCount(42);
-  await expect(page.locator('[data-pmv-msg]')).toContainText('already exist');
-
-  await page.click('#pmEditBarSave');
+async function publishedBlock(page) {
   await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
   const file = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
   const start = file.indexOf('"ABY-MAROON-1"');
-  const block = file.slice(start, file.indexOf('\n    }', start));
+  return file.slice(start, file.indexOf('\n    }', start));
+}
+
+test('product type, attributes with "Used for variations", generate, edit variation cards and publish', async ({ page }) => {
+  await openMaroon(page, { 'regular prices by': '10%' });
+  // Simple product: no Variations tab, like WooCommerce.
+  await expect(page.locator('#pmProductType')).toHaveValue('simple');
+  await expect(page.locator('[data-etab="variations"]')).toHaveCount(0);
+  await page.selectOption('#pmProductType', 'variable');
+  await expect(page.locator('[data-etab="variations"]')).toBeVisible();
+  await expect(page.locator('[data-epanel="attributes"]')).toBeVisible();
+
+  // Attributes: one box per attribute; Long values edited with "|", Option not used for variations.
+  const mount = page.locator('#pmAttrMount');
+  await expect(mount.locator('.pmw-box-head b')).toHaveText(['Option', 'Color', 'Body', 'Long']);
+  await expect(mount.locator('[data-pa="used"][data-id="body"]')).not.toBeChecked();
+  await expect(mount.locator('[data-pa="used"][data-id="length"]')).toBeChecked();
+  await mount.locator('[data-pa="values"][data-id="length"]').fill('50 | 52 | 54 | 56');
+  await mount.locator('[data-pa="used"][data-id="type"]').uncheck();
+  await mount.locator('[data-pa="save"]').click();
+  await expect(page.locator('[data-ef="sizes"]')).toHaveValue('50, 52, 54, 56');
+
+  // Variations: generate one per Long value (4), WooCommerce cards.
+  await page.click('[data-etab="variations"]');
+  const vars = page.locator('[data-epanel="variations"] .pmw-var');
+  await expect(page.locator('.pmw-empty')).toContainText('Long');
+  await page.click('[data-pv="generate"]');
+  await expect(vars).toHaveCount(4);
+  await expect(vars.nth(0).locator('.pmw-id')).toHaveText('#1');
+  await expect(vars.nth(0).locator('[data-pv="attr"]')).toHaveValue('Length 50');
+  await expect(vars.nth(0).locator('[data-pv="attr"] option').first()).toHaveText('Any Long…');
+
+  await vars.nth(0).locator('[data-pv="edit"]').click();
+  const c1 = vars.nth(0);
+  await c1.locator('[data-pv="regular"]').fill('1800');
+  await c1.locator('[data-pv="regular"]').blur();
+  await c1.locator('[data-pv="sale"]').fill('1650');
+  await c1.locator('[data-pv="sale"]').blur();
+  await c1.locator('[data-pv="picker"]').click();
+  await c1.locator('[data-pv="pick"]').first().click();
+  await expect(c1.locator('.pmw-img img')).toBeVisible();
+
+  await vars.nth(1).locator('[data-pv="edit"]').click();
+  await vars.nth(1).locator('[data-pv="enabled"]').uncheck();
+  await expect(vars.nth(1)).toHaveClass(/is-off/);
+
+  // Counted stock loads into Manage stock; another variation can switch to Out of stock.
+  await vars.nth(2).locator('[data-pv="edit"]').click();
+  await expect(vars.nth(2).locator('[data-pv="manage"]')).toBeChecked();
+  await expect(vars.nth(2).locator('[data-pv="stock"]')).toHaveValue('7');
+  await vars.nth(3).locator('[data-pv="edit"]').click();
+  await vars.nth(3).locator('[data-pv="status"]').selectOption('outofstock');
+  await expect(vars.nth(3).locator('.pmw-var-head')).toContainText('Out of stock');
+  await vars.nth(3).locator('[data-pv="manage"]').check();
+  await vars.nth(3).locator('[data-pv="stock"]').fill('5');
+
+  // Bulk: increase regular prices by 10% (the first variation 1800 → 1980, keeping its 1650 sale).
+  await page.selectOption('[data-pv="bulk"]', 'regular-up');
+  await expect(vars.nth(0).locator('[data-pv="regular"]')).toHaveValue('1980');
+  await expect(vars.nth(0).locator('[data-pv="sale"]')).toHaveValue('1650');
+
+  await page.click('#pmEditBarSave');
+  const block = await publishedBlock(page);
+  await expect(page.locator('#pmEditNote')).toContainText('Stock saved for 1');
   expect(block).toContain('variations: [');
-  expect(block).toMatch(/"size":"Body 42 · Length 44"[^}]*"price":1500,"regularPrice":1600/);
-  expect(block).toMatch(/"enabled":false/);
-  expect(block).toMatch(/"sku":"ABY-MAROON-1-/);
+  expect(block).toMatch(/"size":"Length 50"[^}]*"price":1650,"regularPrice":1980/);
+  expect(block).toMatch(/"size":"Length 52"[^}]*"enabled":false/);
+  expect(block).toMatch(/"size":"Length 56"[^}]*"stockStatus":"outofstock"/);
+  expect(block).toContain('variationAttributes: ["length"]');
+  expect(block).toContain('productType: "variable"');
+  const commits = await page.evaluate(() => window.__stockCommits);
+  expect(commits).toEqual([[{ productId: 'ABY-MAROON-1', productName: 'Maroon Abaya Set', category: 'abaya', variant: 'Length 56', qty: 5, reason: 'Product Manager variations' }]]);
 });
 
-test('stock edits are saved to the stock panel; delete-all brings the product back to simple pricing', async ({ page }) => {
+test('Add manually, remove, and switching back to a simple product removes the variations', async ({ page }) => {
   await openMaroon(page);
-  await page.click('[data-pmv-act="generate"]');
-  const input = page.locator('[data-pmv-stock="Body 44 · Length 52"]');
-  await input.fill('3');
-  await page.click('[data-pmv-act="stock"]');
-  await expect(page.locator('[data-pmv-stockmsg]')).toContainText('Stock saved for 1');
-  const commits = await page.evaluate(() => window.__stockCommits);
-  expect(commits).toEqual([[{ productId: 'ABY-MAROON-1', productName: 'Maroon Abaya Set', category: 'abaya', variant: 'Body 44 · Length 52', qty: 3, reason: 'Product Manager variations' }]]);
-  await page.selectOption('[data-pmv-bulk]', 'delete');
-  await page.click('[data-pmv-act="bulk"]');
-  await expect(page.locator('.pmv tbody tr')).toHaveCount(0);
-  await expect(page.locator('.pmv-empty')).toBeVisible();
+  await page.selectOption('#pmProductType', 'variable');
+  await page.click('[data-etab="variations"]');
+  await page.click('[data-pv="generate"]');
+  const vars = page.locator('[data-epanel="variations"] .pmw-var');
+  await expect(vars).toHaveCount(14); // 2 options × 7 lengths (Body is off for abaya)
+  await vars.nth(0).locator('[data-pv="del"]').click();
+  await expect(vars).toHaveCount(13);
+  await page.click('[data-pv="add"]');
+  await expect(vars).toHaveCount(14);
+  await expect(vars.nth(13).locator('[data-pv="attr"]').first()).toHaveValue('');
+  await page.selectOption('#pmProductType', 'simple');
+  await expect(page.locator('[data-etab="variations"]')).toHaveCount(0);
+  await page.click('#pmEditBarSave');
+  const block = await publishedBlock(page);
+  expect(block).not.toContain('variations');
 });

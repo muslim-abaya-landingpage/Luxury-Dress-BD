@@ -155,6 +155,7 @@
   var lazyScripts = Object.create(null);
   var quickUploadOptions = null;
   var quickUploadMounted = false;
+  var VARIATIONS_SRC = "product-variations-admin.js?v=20261101-woo";
   function loadScriptOnce(src) {
     if (lazyScripts[src]) return lazyScripts[src];
     lazyScripts[src] = new Promise(function (resolve, reject) {
@@ -909,7 +910,9 @@
     var meta = getCategoryTypeMeta(catKey);
     var out = managerOutOfStock(p);
     if (!Object.prototype.hasOwnProperty.call(liveStockOverrides, String(p.id)) && typeof window.isInStock === "function") out = !window.isInStock(p);
-    var tabs = [["general", "General"], ["inventory", "Inventory"], ["attributes", "Attributes"], ["variations", "Variations"]];
+    var isVariable = p.productType === "variable" || (Array.isArray(p.variations) && p.variations.length > 0);
+    if (!isVariable && editTab === "variations") editTab = "attributes";
+    var tabs = [["general", "General"], ["inventory", "Inventory"], ["attributes", "Attributes"]].concat(isVariable ? [["variations", "Variations"]] : []);
     var tags = productTags(p);
     var colorRows = initialColorRows(p);
     mainEl.innerHTML =
@@ -922,7 +925,7 @@
         '<p class="pm-wp-permalink">Permalink: ' + (p.id ? '<a href="/product/' + encodeURIComponent(p.id) + '" target="_blank" rel="noopener">https://muslimabaya.com/product/' + escapeHtml(p.id) + '</a>' : "—") + '</p>' +
         '<section class="pm-wp-box"><h3 class="pm-wp-box-title">Product description</h3><div class="pm-wp-box-body">' +
           '<textarea data-ef="detailNote" rows="8" placeholder="What is in the set, fabric, care notes…">' + escapeHtml(p.detailNote || "") + '</textarea></div></section>' +
-        '<section class="pm-wp-box pm-wp-data"><h3 class="pm-wp-box-title">Product data <span>— ' + (Array.isArray(p.variations) && p.variations.length ? "Variable product (" + p.variations.length + " variations)" : productOptionTypes(p, meta).length ? "Variable product (options)" : "Simple product") + '</span></h3>' +
+        '<section class="pm-wp-box pm-wp-data"><h3 class="pm-wp-box-title">Product data <span>— <select id="pmProductType" aria-label="Product type"><option value="simple"' + (isVariable ? "" : " selected") + '>Simple product</option><option value="variable"' + (isVariable ? " selected" : "") + '>Variable product</option></select></span></h3>' +
           '<div class="pm-wp-data-wrap"><ul class="pm-wp-data-tabs">' + tabs.map(function (t) { return '<li><button type="button" data-etab="' + t[0] + '" class="' + (editTab === t[0] ? "is-active" : "") + '">' + t[1] + '</button></li>'; }).join("") + '</ul>' +
           '<div class="pm-wp-data-panels">' +
             '<div class="pm-wp-panel" data-epanel="general"' + (editTab === "general" ? "" : " hidden") + '>' +
@@ -935,6 +938,7 @@
               '<button type="button" class="pm-wp-button" id="pmEditStock">' + (out ? "Mark in stock" : "Mark out of stock") + '</button></span></p>' +
             '</div>' +
             '<div class="pm-wp-panel" data-epanel="attributes"' + (editTab === "attributes" ? "" : " hidden") + '>' +
+              '<div id="pmAttrMount"><p>Loading attributes…</p></div><h4 class="pm-wp-subhead">Colours, fabric and size details</h4>' +
               '<div class="pm-wp-form-row pm-color-variation-field"><label>Color variations</label><div><div id="pmColorVariationList">' + colorRowsMarkup(colorRows, p) + '</div>' +
                 '<button type="button" class="pm-wp-button" id="pmColorAdd">+ Add color</button>' +
                 '<small>Add any color name, then tap the photo that shows that color (photos come from this product’s gallery). Color keys are generated automatically. Add the photo to the gallery first if it is not shown.</small></div></div>' +
@@ -1024,11 +1028,14 @@
       [b1, b2].forEach(function (b) { if (b) b.disabled = true; });
       editMsg("Saving…", "busy");
       saveAll().then(function (result) {
-        if (result && result.live) {
-          editMsg("✅ Saved and live on the website. Open product pages may need a refresh.", "ok");
-        } else {
-          editMsg("Saved ✓ — instant publish is not confirmed. Cloudflare deployment is in progress; use Check publish status.", "pub");
-        }
+        var flush = window.MaVariationsAdmin && window.MaVariationsAdmin.hasPendingStock() ? window.MaVariationsAdmin.flushStock() : Promise.resolve("");
+        return flush.then(function (stockNote) {
+          if (result && result.live) {
+            editMsg("✅ Saved and live on the website. Open product pages may need a refresh." + stockNote, /NOT saved/.test(stockNote) ? "err" : "ok");
+          } else {
+            editMsg("Saved ✓ — instant publish is not confirmed. Cloudflare deployment is in progress; use Check publish status." + stockNote, /NOT saved/.test(stockNote) ? "err" : "pub");
+          }
+        });
       }).catch(function (err) {
         editMsg("Not saved: " + ((err && err.message) || "try again") + " — your changes are kept.", "err");
       }).finally(function () { [b1, b2].forEach(function (b) { if (b) b.disabled = false; }); });
@@ -1234,30 +1241,59 @@
         root.querySelectorAll("[data-etab]").forEach(function (x) { x.classList.toggle("is-active", x === b); });
         root.querySelectorAll("[data-epanel]").forEach(function (panel) { panel.hidden = panel.getAttribute("data-epanel") !== editTab; });
         if (editTab === "variations") renderVariationsTab();
+        if (editTab === "attributes") renderAttributesTab();
       });
     });
+    var typeSelect = document.getElementById("pmProductType");
+    if (typeSelect) typeSelect.addEventListener("change", function () {
+      if (typeSelect.value === "variable") {
+        p.productType = "variable";
+        editTab = "attributes";
+        renderProductEditor();
+        changed("Variable product: tick “Used for variations” on the Attributes tab, then open Variations.");
+        return;
+      }
+      var n = Array.isArray(p.variations) ? p.variations.length : 0;
+      if (n && !window.confirm("Change to a simple product? Its " + n + " variations will be removed.")) { typeSelect.value = "variable"; return; }
+      delete p.productType; delete p.variations; delete p.variationAttributes;
+      if (editTab === "variations") editTab = "general";
+      renderProductEditor();
+      changed("Simple product — click Save changes.");
+    });
+    function variationCtx() {
+      var photos = [];
+      [p.image].concat(Array.isArray(p.images) ? p.images : []).forEach(function (u) { u = String(u || "").trim(); if (u && !/^blob:/i.test(u) && photos.indexOf(u) === -1) photos.push(u); });
+      return {
+        product: p,
+        category: catKey,
+        types: productOptionTypes(p, getCategoryTypeMeta(catKey)),
+        colors: initialColorRows(p).map(function (r) { return { key: r.color, label: r.colorLabel, image: r.image }; }),
+        photos: photos,
+        basePrice: function (type) { var v = type && p.priceByType ? parseInt(p.priceByType[type], 10) : NaN; return v > 0 ? v : (parseInt(p.price, 10) || 0); },
+        changed: function (note) { changed(note); },
+        rerender: function (tab, note) { editTab = tab; renderProductEditor(); changed(note); },
+        admin: window.MaAdmin
+      };
+    }
+    function renderAttributesTab() {
+      var mount = document.getElementById("pmAttrMount");
+      if (!mount) return;
+      loadScriptOnce(VARIATIONS_SRC).then(function () {
+        if (window.MaVariationsAdmin && document.body.contains(mount)) window.MaVariationsAdmin.renderAttributes(mount, variationCtx());
+      }).catch(function (err) { mount.textContent = "Could not load attributes: " + err.message; });
+    }
     // WooCommerce-style Variations tab (product-variations-admin.js). Re-drawn when opened, so it uses the
     // options, colours and sizes as they are now in the General and Attributes tabs.
     function renderVariationsTab() {
       var mount = document.getElementById("pmVariationsMount");
       if (!mount) return;
-      loadScriptOnce("product-variations-admin.js?v=20261101-variations").then(function () {
+      loadScriptOnce(VARIATIONS_SRC).then(function () {
         if (!window.MaVariationsAdmin || !document.body.contains(mount)) return;
-        var photos = [];
-        [p.image].concat(Array.isArray(p.images) ? p.images : []).forEach(function (u) { u = String(u || "").trim(); if (u && !/^blob:/i.test(u) && photos.indexOf(u) === -1) photos.push(u); });
-        window.MaVariationsAdmin.render(mount, {
-          product: p,
-          category: catKey,
-          types: productOptionTypes(p, getCategoryTypeMeta(catKey)),
-          colors: initialColorRows(p).map(function (r) { return { key: r.color, label: r.colorLabel, image: r.image }; }),
-          photos: photos,
-          basePrice: function (type) { var v = type && p.priceByType ? parseInt(p.priceByType[type], 10) : NaN; return v > 0 ? v : (parseInt(p.price, 10) || 0); },
-          changed: function (note) { changed(note); },
-          admin: window.MaAdmin
-        });
+        window.MaVariationsAdmin.render(mount, variationCtx());
       }).catch(function (err) { mount.textContent = "Could not load the Variations tab: " + err.message; });
     }
     if (editTab === "variations") renderVariationsTab();
+    if (editTab === "attributes") renderAttributesTab();
     function addTags() {
       var input = document.getElementById("pmEditTagInput");
       var next = productTags(p);

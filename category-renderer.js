@@ -491,7 +491,7 @@ function shopAddProductToCart(item, qtyToAdd, sizeValue, categoryKeyOpt, bodyVal
   shopCartCtx.lastCartAddAt = now;
   var line = buildShopCartLineItem(item, qtyToAdd, sizeValue, categoryKeyOpt, item._cartType || "", bodyValueOpt, sizedOpt);
   var pickedVariation = shopLineVariation(item, line);
-  if (pickedVariation && pickedVariation.enabled === false) {
+  if (pickedVariation && (pickedVariation.enabled === false || pickedVariation.stockStatus === "outofstock")) {
     alert("দুঃখিত, নির্বাচিত কালার/সাইজটি এখন পাওয়া যাচ্ছে না। অন্য কালার বা সাইজ বেছে নিন।");
     return;
   }
@@ -1722,7 +1722,8 @@ function refreshPqvVariation(modal, p, categoryKey, idx) {
   var item = applySelectedColorToProduct(Object.assign({}, p, { _cartType: type }), getSelectedColorVariantForIdx(modal, idx, p));
   var line = buildShopCartLineItem(item, 1, getSelectedSizeForIdx(modal, idx), categoryKey, type, getSelectedBodyValueForIdx(modal, idx));
   var v = shopLineVariation(item, line);
-  var off = !!(v && v.enabled === false);
+  var soldOut = !!(v && v.enabled !== false && v.stockStatus === "outofstock");
+  var off = !!(v && v.enabled === false) || soldOut;
   var priceEl = modal.querySelector("#pqvPrice");
   if (priceEl && v && !off && parseInt(v.price, 10) > 0) {
     var now = parseInt(v.price, 10), was = parseInt(v.regularPrice, 10);
@@ -1733,13 +1734,30 @@ function refreshPqvVariation(modal, p, categoryKey, idx) {
   } else if (priceEl && !off) {
     updatePqvPriceDisplay(modal, p, categoryKey, type);
   }
+  // The variation's own photo (Product Manager → Variations → Variation image) is shown when it is chosen.
+  if (v && v.image) {
+    var file = function (u) { return String(u || "").split(/[?#]/)[0].split("/").pop().toLowerCase(); };
+    var thumbs = modal.querySelectorAll(".pqv-thumb");
+    for (var t = 0; t < thumbs.length; t++) {
+      if (file(thumbs[t].getAttribute("data-src")) !== file(v.image)) continue;
+      // Only the photo changes; the chosen colour stays as it is (setPqvGallerySlide would re-pick it).
+      var mainImgEl = modal.querySelector("#pqvMainImg");
+      // Only an http(s) photo URL is put back into the main image.
+      var photoUrl = null;
+      try { photoUrl = new URL(thumbs[t].getAttribute("data-src") || "", window.location.href); } catch (e) { photoUrl = null; }
+      if (mainImgEl && photoUrl && /^https?:$/.test(photoUrl.protocol)) mainImgEl.src = photoUrl.href;
+      for (var u = 0; u < thumbs.length; u++) thumbs[u].classList.toggle("is-active", u === t);
+      modal.setAttribute("data-pqv-slide", String(t));
+      break;
+    }
+  }
   var btn = modal.querySelector(".pqv-act-cart[data-product-idx]:not(.pqv-wholesale-add)");
   var buy = modal.querySelector(".pqv-act-buy");
   var stockEl = modal.querySelector(".pqv-stock");
   if (off) {
-    if (btn) { btn.disabled = true; btn.textContent = "Unavailable"; }
+    if (btn) { btn.disabled = true; btn.textContent = soldOut ? "Out of Stock" : "Unavailable"; }
     if (buy) buy.disabled = true;
-    if (stockEl) { stockEl.classList.add("is-oos"); stockEl.textContent = "This option is not available"; }
+    if (stockEl) { stockEl.classList.add("is-oos"); stockEl.textContent = soldOut ? "Out of stock" : "This option is not available"; }
     modal.setAttribute("data-variation-off", "1");
   } else if (modal.getAttribute("data-variation-off") === "1") {
     modal.removeAttribute("data-variation-off");
