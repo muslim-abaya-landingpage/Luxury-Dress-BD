@@ -1742,7 +1742,10 @@ function refreshPqvVariation(modal, p, categoryKey, idx) {
       if (file(thumbs[t].getAttribute("data-src")) !== file(v.image)) continue;
       // Only the photo changes; the chosen colour stays as it is (setPqvGallerySlide would re-pick it).
       var mainImgEl = modal.querySelector("#pqvMainImg");
-      if (mainImgEl) mainImgEl.src = thumbs[t].getAttribute("data-src");
+      // Only an http(s) photo URL is put back into the main image.
+      var photoUrl = null;
+      try { photoUrl = new URL(thumbs[t].getAttribute("data-src") || "", window.location.href); } catch (e) { photoUrl = null; }
+      if (mainImgEl && photoUrl && /^https?:$/.test(photoUrl.protocol)) mainImgEl.src = photoUrl.href;
       for (var u = 0; u < thumbs.length; u++) thumbs[u].classList.toggle("is-active", u === t);
       modal.setAttribute("data-pqv-slide", String(t));
       break;
