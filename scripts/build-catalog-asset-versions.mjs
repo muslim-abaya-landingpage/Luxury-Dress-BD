@@ -15,7 +15,7 @@ import {fileURLToPath} from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 // Not part of the website (or generated/owned elsewhere): never rewritten.
-const SKIP_DIRS = new Set(['node_modules', 'upload', 'originals', 'tests', 'scripts', 'functions', 'cloudflare-worker', 'apps-script', 'docs', 'test-results', 'playwright-report']);
+const SKIP_DIRS = new Set(['node_modules', 'upload', 'originals', 'tests', 'scripts', 'functions', 'cloudflare-worker', 'apps-script', 'docs', 'test-results', 'playwright-report', 'landing-shop']);
 
 function walk(dir, out) {
   for (const entry of fs.readdirSync(dir, {withFileTypes: true})) {

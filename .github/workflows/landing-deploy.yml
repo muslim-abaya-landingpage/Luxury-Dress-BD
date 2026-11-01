@@ -1,0 +1,81 @@
+name: Landing Deploy
+
+# Deploys landing-shop/ to the Cloudflare Pages project "muslimabaya-shop-landing" (shop.muslimabaya.com)
+# whenever it changes on main, or on demand (Actions → Landing Deploy → Run workflow).
+# Uses wrangler so the folder's _worker.js (order proxy /api/order, price check, Lead events, SEO) is deployed
+# with the files — a dashboard drag-and-drop upload can leave it out and break orders.
+# Needs the repository secret CLOUDFLARE_API_TOKEN with "Account → Cloudflare Pages → Edit" (docs/LANDING-DEPLOY.md).
+# Project settings (env vars/secrets such as META_CAPI_TOKEN, the STOCK_DB binding, the custom domain) are not touched.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "landing-shop/**"
+      - ".github/workflows/landing-deploy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: landing-deploy
+  cancel-in-progress: false
+
+env:
+  ACCOUNT_ID: b24e0c217c57ed7b4e19e104a1411309
+  PROJECT: muslimabaya-shop-landing
+
+jobs:
+  deploy:
+    name: Test and deploy the landing page
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check credentials secret
+        id: creds
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -z "$CF_TOKEN" ]; then echo "::warning::CLOUDFLARE_API_TOKEN not set; skipping."; echo "ready=false" >> "$GITHUB_OUTPUT"; else echo "ready=true" >> "$GITHUB_OUTPUT"; fi
+
+      - uses: actions/checkout@v5
+        if: steps.creds.outputs.ready == 'true'
+
+      - uses: actions/setup-node@v5
+        if: steps.creds.outputs.ready == 'true'
+        with:
+          node-version: 22
+
+      - name: Regression tests (prices, order proxy, tracking, SEO)
+        if: steps.creds.outputs.ready == 'true'
+        working-directory: landing-shop
+        run: |
+          node build-seo.cjs
+          git diff --exit-code -- . || (echo "::error::Generated files are stale: run 'node build-seo.cjs' in landing-shop and commit"; exit 1)
+          node tests/regression.cjs
+
+      - name: Prepare upload folder (no notes, tests or build tools)
+        if: steps.creds.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          rm -rf dist && mkdir dist
+          rsync -a --exclude 'tests/' --exclude '*.md' --exclude '*.txt' --exclude '*.cjs' landing-shop/ dist/
+          test -f dist/_worker.js && test -f dist/index.html && test -f dist/config.js
+          ls dist
+
+      - name: Deploy to Cloudflare Pages (production)
+        if: steps.creds.outputs.ready == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ env.ACCOUNT_ID }}
+        run: npx --yes wrangler@4 pages deploy dist --project-name "$PROJECT" --branch main --commit-dirty=true
+
+      - name: Verify live
+        if: steps.creds.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          sleep 20
+          code=$(curl -s -o /dev/null -w '%{http_code}' https://shop.muslimabaya.com/api/order); echo "GET /api/order -> $code"; test "$code" = "405"
+          curl -fsS https://shop.muslimabaya.com/config.js -o live-config.js
+          cmp live-config.js landing-shop/config.js && echo "Live config.js matches the repository."

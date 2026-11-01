@@ -1,0 +1,42 @@
+Muslim Abaya landing page — investigation summary
+
+Fixed
+1. Mobile horizontal-overflow risk hardened across body, sections, product cards, forms and summaries.
+2. Small-screen announcement bar made resilient at 360px and below.
+3. Touch targets raised to ~44–48px for navigation, size, quantity and CTA controls.
+4. Product card image/text layout hardened for 320–360px screens.
+5. Countdown grid hardened against narrow-screen overflow.
+6. Review modal constrained to dynamic mobile viewport and made scroll-safe.
+7. iOS/mobile text zoom protected by keeping form fields at 16px+ and text-size-adjust.
+8. Phone field now has numeric keyboard hint, 11-digit maxlength/pattern and helper text.
+9. HTML escaping bug fixed: apostrophes previously mapped to undefined in generated content.
+10. Reduced-motion accessibility fallback added.
+
+Verified
+- viewport meta exists on both pages.
+- no duplicate HTML IDs found in index.html.
+- app.js, config.js, tracking.js and seo.js pass JavaScript syntax checks.
+- CSS opening/closing brace counts match.
+- product/delivery config has valid IDs/prices under existing runtime validation.
+
+Potential deployment/config checks (not code failures)
+- Netlify Forms only submits after deployment; local file/localhost is intentionally blocked by app.js.
+- Tracking config includes GTM + direct GA4; ensure the same GA4 tag is not also fired from GTM or analytics may duplicate.
+- Canonical/OG URLs point to https://muslimabaya.co/; change config/site metadata if deploying on another permanent domain.
+- Session countdown is visit-based (30 minutes), not a fixed offer deadline. Use offerEndsAt for a real campaign deadline.
+
+ORDER FLOW UPGRADE (2026-09-27)
+- Duplicate submit guard: same order is blocked for 60 seconds.
+- Delivery area is now required; no default area is silently selected.
+- Phone normalization supports +880 / 880 / spaces / Bangla digits.
+- Draft recovery stores form + cart locally for up to 7 days and clears after successful thank-you page.
+- Customer-facing order ID is generated and displayed on thank-you page.
+- Product stock, size stock and max quantity controls are configurable in config.js.
+- Missing size is visually highlighted.
+- Mobile sticky cart/order bar added.
+- Submit button gets a processing state.
+- Fake visit countdown disabled; countdown only appears when a real offerEndsAt is configured.
+- Order payload includes authoritative catalog unit prices calculated from config.js at submit time.
+
+SECURITY NOTE
+This remains a static Netlify Forms storefront. Client-side totals are recalculated from the catalog before submit, but no browser-only implementation can be cryptographically authoritative against a malicious user who edits JavaScript. If payments or automatic fulfillment are added later, validate product IDs/prices/stock in a server-side function/database before charging or fulfilling.

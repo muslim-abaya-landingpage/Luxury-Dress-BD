@@ -19,7 +19,7 @@ if (process.env.CF_PAGES !== '1' && !process.argv.includes('--force')) {
 
 // Folders that are tooling, source for other systems, or old copies — never website pages.
 const DIRS = ['apps-script', 'tests', 'scripts', 'cloudflare-worker', 'docs', 'supabase', 'migrations', 'monitoring', 'src', 'tools',
-  'hosting-pack', 'muslimabaya-fonts-setup', 'test-results', 'playwright-report', '.github'];
+  'hosting-pack', 'muslimabaya-fonts-setup', 'test-results', 'playwright-report', '.github', 'landing-shop'];
 // Root files that are tooling/notes. Everything the site serves (html, js, css, images, robots.txt, sitemap.xml,
 // llms.txt, CNAME, catalog-validation.json, live-build.json, …) is kept.
 const ROOT_FILE = /\.(md|bat|ps1|gs|ts|toml|rules|cjs|py|sh)$/i;

@@ -1,0 +1,2 @@
+# Static HTML and assets are served directly by Cloudflare Pages.
+# Add only explicit route rewrites when needed.
