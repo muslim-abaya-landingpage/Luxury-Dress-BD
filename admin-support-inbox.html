@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
   <style>
     :root{--ink:#181715;--muted:#77736b;--line:#e9e5dc;--paper:#fff;--wash:#f7f5f1;--gold:#b59657;--green:#14824b;--red:#a4322d;--blue:#2a6db0;--shadow:0 18px 60px rgba(30,24,14,.11);--side:248px}
-    *{box-sizing:border-box}html,body{height:100%}body{margin:0;background:#f3f1ed;color:var(--ink);font:14px/1.5 "Hind Siliguri","DM Sans",system-ui,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}
+    *{box-sizing:border-box}html,body{height:100%}body{margin:0;background:#f3f1ed;color:var(--ink);font:14px/1.5 "Hind Siliguri","DM Sans",system-ui,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}.captcha-box{margin:10px 0;max-width:100%;overflow:hidden}
     a{color:#775e32}
     /* App shell + admin menu */
     .app{display:grid;grid-template-columns:var(--side) minmax(0,1fr);min-height:100vh}
@@ -127,6 +127,7 @@
         <form id="loginForm" autocomplete="on">
           <label for="email">ইমেইল</label><input id="email" type="email" autocomplete="username" required>
           <label for="password">পাসওয়ার্ড</label><input id="password" type="password" autocomplete="current-password" required>
+          <div id="loginCaptcha" class="captcha-box" hidden></div>
           <button class="primary-btn" type="submit">সাইন ইন</button>
         </form>
         <button class="secondary-btn" id="signupBtn" type="button">নতুন অ্যাকাউন্ট খুলুন</button>
@@ -178,6 +179,7 @@
 </div>
   <script src="/site-footer-config.js?v=4997c01bf75eafe3"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="/admin-support-inbox.js?v=1"></script>
+  <script src="/support-captcha.js?v=1"></script>
+  <script src="/admin-support-inbox.js?v=2"></script>
 </body>
 </html>
