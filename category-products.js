@@ -530,9 +530,9 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "DR-9",
       name: "Premium Blue Floral Women's Co-ord Set",
-      image: "https://images.muslimabaya.com/images/uploads/dr-9-1793650456408-0eb28448bd4d13901821.webp",
-      imageCard: "https://images.muslimabaya.com/images/uploads/dr-9-1793650456408-card-b96918254c89edbf5776.webp",
-      images: ["https://images.muslimabaya.com/images/uploads/dr-9-1793650461587-g1-8c37b4c73ca75c949706.webp", "https://images.muslimabaya.com/images/uploads/dr-9-1793652126070-g2-614661074f628ac36beb.webp"],
+      image: "images/uploads/dr-9-1793650456408.webp",
+      imageCard: "images/uploads/dr-9-1793650456408-card.webp",
+      images: ["images/uploads/dr-9-1793650461587-g1.webp", "images/uploads/dr-9-1793652126070-g2.webp"],
       price: 945,
       stock: 12,
       color: "blue",
@@ -549,7 +549,9 @@ window.CATEGORY_PRODUCTS = {
       sleeveSizes: ["18"],
       dressLengths: ["44"],
       palazzoLengths: ["40"],
-      bodySizes: ["52"]
+      bodySizes: ["52"],
+      brand: "Muslim Abaya",
+      tags: ["Jafran Clothing","Two piece dress","Women's Clothing"]
     },
     {
       id: "DR-10",
