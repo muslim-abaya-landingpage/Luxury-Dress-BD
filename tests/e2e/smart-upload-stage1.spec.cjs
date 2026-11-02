@@ -77,6 +77,24 @@ test('publish: the chosen main photo and order are what is staged; description i
   expect(await order(page)).toEqual([]);
 });
 
+test('body and garment measurements are available and saved for a non-Abaya category', async ({ page }) => {
+  await setup(page);
+  await expect(page.locator('#pqBodyWrap')).toBeVisible();
+  await page.fill('#pq_body', '42, 44');
+  await page.fill('#pq_sleeve', '22');
+  await page.fill('#pq_dress', '40');
+  await page.fill('#pq_palazzo', '38');
+  await page.setInputFiles('#pqPhotos', [file(1)]);
+  await page.fill('#pq_sku', 'HJ-MEASURED');
+  await page.evaluate(() => (() => { const f = document.getElementById('pqForm'); f.requestSubmit(); const r = document.getElementById('pqReview'); if (r && !r.hidden) f.requestSubmit(); })());
+  await expect.poll(() => page.evaluate(() => window.__staged.length)).toBe(1);
+  const product = await page.evaluate(() => window.__staged[0][1]);
+  expect(product.bodySizes).toEqual(['42', '44']);
+  expect(product.sleeveSizes).toEqual(['22']);
+  expect(product.dressLengths).toEqual(['40']);
+  expect(product.palazzoLengths).toEqual(['38']);
+});
+
 test('SKU: empty makes an automatic one from the name; invalid or duplicate is refused before anything is staged', async ({ page }) => {
   await setup(page);
   await page.setInputFiles('#pqPhotos', [file(1)]);
