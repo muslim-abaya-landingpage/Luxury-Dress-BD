@@ -18,6 +18,7 @@
 .pqv-home-related .ah-card:hover{box-shadow:0 8px 24px #11111114;border-color:#e2e2e2}
 }
 .pqv-home-related .ah-card-media{position:relative;display:block;border-radius:0;overflow:hidden;background:var(--ah-soft);aspect-ratio:4 / 5;margin:0}
+.pqv-home-related .ah-card-picture{position:absolute;inset:0;display:block}
 .pqv-home-related .ah-card-media img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .2s ease}
 .pqv-home-related .ah-card:hover .ah-card-media img{transform:scale(1.02)}
 .pqv-home-related .ah-card-badge{position:absolute;top:10px;left:10px;background:#111;color:#fff;font-family:var(--ah-sans);font-size:11px;font-weight:600;letter-spacing:.04em;padding:3px 9px;border-radius:4px;z-index:2}

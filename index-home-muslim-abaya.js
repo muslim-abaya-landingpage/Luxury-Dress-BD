@@ -107,6 +107,21 @@
     return "images/card/" + m + ".webp";
   }
 
+  function homeCardAvifSrc(src) {
+    var value = String(src || "");
+    if (/^(https?:)?\/\//i.test(value) || /[?#]/.test(value)) return "";
+    var card = value.match(/^(\/*)images\/card\/(.+)\.webp$/i);
+    if (card) return card[1] + "images/card-avif/" + card[2] + ".avif";
+    var uploaded = value.match(/^\/*images\/uploads\/[^/?#]+-card\.webp$/i);
+    return uploaded ? value.replace(/\.webp$/i, ".avif") : "";
+  }
+
+  function encodeCardSrcsetUrl(src) {
+    return String(src || "").split("/").map(function (part) {
+      return encodeURIComponent(part);
+    }).join("/");
+  }
+
   /* Stock — reuse product-utils helpers when catalog is loaded. */
   function stockStatus(p) {
     if (window.maCatalog && typeof window.maCatalog.getStockStatus === "function") {
@@ -254,6 +269,7 @@
   function cardHtml(sec, p, eagerLevel) {
     var img = resolveImg(p);
     var thumb = resolveCardImg(p) || cardThumbSrc(img);
+    var mobileAvif = homeCardAvifSrc(thumb);
     var dHref = detailHref(sec, p);
     var outOfStock = isOutOfStock(p);
     var st = stockStatus(p);
@@ -269,7 +285,13 @@
       (outOfStock
         ? "<span class='ah-card-badge ah-card-badge-oos'>Sold Out</span>"
         : "<span class='ah-card-badge'>Sale</span>") +
+      "<picture class='ah-card-picture'>" +
+      (mobileAvif
+        ? "<source media='(max-width: 767px)' type='image/avif' srcset='" + escapeHtml(encodeCardSrcsetUrl(mobileAvif)) + "'>"
+        : "") +
       "<img src='" +
+      escapeHtml(thumb) +
+      "' data-card-src='" +
       escapeHtml(thumb) +
       "' data-full='" +
       escapeHtml(img) +
@@ -281,7 +303,8 @@
         : eagerLevel === 1
           ? "decoding='async'"
           : "loading='lazy' decoding='async'") +
-      " onerror=\"var f=this.getAttribute('data-full');if(f&&!this.hasAttribute('data-tried-full')){this.setAttribute('data-tried-full','1');if(this.getAttribute('src')!==f){this.src=f;return}}this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg'\">" +
+      " onerror=\"var pic=this.parentNode;var av=pic&&pic.tagName==='PICTURE'&&pic.firstElementChild;if(av&&av.tagName==='SOURCE'&&av.type==='image/avif'&&!this.hasAttribute('data-tried-avif')){this.setAttribute('data-tried-avif','1');av.remove();var c=this.getAttribute('data-card-src');if(c){this.src=c;return}}var f=this.getAttribute('data-full');if(f&&!this.hasAttribute('data-tried-full')){this.setAttribute('data-tried-full','1');if(this.getAttribute('src')!==f){this.src=f;return}}this.onerror=null;this.src='images/Baby-Pink-Floral-Print.jpeg'\">" +
+      "</picture>" +
       "</a>" +
       "<div class='ah-card-body'>" +
       "<div class='ah-card-row'>" +

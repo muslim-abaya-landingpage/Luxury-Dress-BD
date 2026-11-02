@@ -1413,7 +1413,7 @@ function buildPqvRelatedHtml(p, idx, allProducts, categoryKey) {
    index-home-muslim-abaya.js; styles come from related-home-cards.css
    (generated from the homepage CSS by scripts/build-related-home-cards.mjs).
    ---------------------------------------------------------------------- */
-var PQV_HOME_RELATED_CSS = "/related-home-cards.css?v=047255d7a866b970";
+var PQV_HOME_RELATED_CSS = "/related-home-cards.css?v=cb8b6c4965fce543";
 var PQV_HOME_ROW_INTERVAL = 4500;
 var PQV_HOME_CART_ICON =
   "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='M3 4h1.6l1.1 11.2A2 2 0 0 0 7.7 17h9.7a2 2 0 0 0 2-1.7L21 8H7'/><circle cx='9' cy='20' r='1.35'/><circle cx='18' cy='20' r='1.35'/></svg>";
@@ -1443,6 +1443,7 @@ function pqvHomeCardHtml(p) {
   var img = resolveCardImageSrc(p);
   var card = resolveCardImageCardSrc(p);
   var thumb = card || deriveCardThumbSrc(img) || img;
+  var mobileAvif = deriveMobileCardAvifSrc(thumb);
   var dHref = pqvHomeHref("/product/" + encodeURIComponent(p.id || ""));
   var st = productStockStatus(p);
   var outOfStock = st.inStock === false;
@@ -1458,14 +1459,21 @@ function pqvHomeCardHtml(p) {
     (outOfStock
       ? "<span class='ah-card-badge ah-card-badge-oos'>Sold Out</span>"
       : "<span class='ah-card-badge'>Sale</span>") +
+    "<picture class='ah-card-picture'>" +
+    (mobileAvif
+      ? "<source media='(max-width: 767px)' type='image/avif' srcset='" + escapeHtml(encodeCardSrcsetUrl(mobileAvif)) + "'>"
+      : "") +
     "<img src='" +
+    escapeHtml(thumb) +
+    "' data-card-src='" +
     escapeHtml(thumb) +
     "' data-full='" +
     escapeHtml(img) +
     "' alt='" +
     escapeHtml(p.name) +
     "' width='480' height='600' loading='lazy' decoding='async'" +
-    " onerror=\"var f=this.getAttribute('data-full');var a=(this.currentSrc||this.src).split('?')[0];if(a.indexOf(location.origin)===0)a=a.slice(location.origin.length);var b=f?f.split('?')[0]:'';if(f&&a!==b){this.src=f;return}this.onerror=null;this.src='/images/Baby-Pink-Floral-Print.jpeg'\">" +
+    " onerror=\"var pic=this.parentNode;var av=pic&&pic.tagName==='PICTURE'&&pic.firstElementChild;if(av&&av.tagName==='SOURCE'&&av.type==='image/avif'&&!this.hasAttribute('data-tried-avif')){this.setAttribute('data-tried-avif','1');av.remove();var c=this.getAttribute('data-card-src');if(c){this.src=c;return}}var f=this.getAttribute('data-full');var a=(this.currentSrc||this.src).split('?')[0];if(a.indexOf(location.origin)===0)a=a.slice(location.origin.length);var b=f?f.split('?')[0]:'';if(f&&a!==b){this.src=f;return}this.onerror=null;this.src='/images/Baby-Pink-Floral-Print.jpeg'\">" +
+    "</picture>" +
     "</a>" +
     "<div class='ah-card-body'>" +
     "<div class='ah-card-row'>" +
@@ -3214,10 +3222,23 @@ function deriveCardThumbSrc(src) {
   ) {
     return "";
   }
-  // Keep a root-absolute source root-absolute so nested pages such as
-  // /product/<id> do not request /product/images/card/... (404).
+  // Keep a root-absolute source root-absolute so nested /product/<id> pages stay at the site root.
   var prefix = String(src).charAt(0) === "/" ? "/" : "";
   return prefix + "images/card/" + m + ".webp";
+}
+function deriveMobileCardAvifSrc(src) {
+  var value = String(src || "");
+  if (/^(https?:)?\/\//i.test(value) || /[?#]/.test(value)) return "";
+  var card = value.match(/^(\/*)images\/card\/(.+)\.webp$/i);
+  if (card) return card[1] + "images/card-avif/" + card[2] + ".avif";
+  var uploaded = value.match(/^\/*images\/uploads\/[^/?#]+-card\.webp$/i);
+  return uploaded ? value.replace(/\.webp$/i, ".avif") : "";
+}
+
+function encodeCardSrcsetUrl(src) {
+  return String(src || "").split("/").map(function (part) {
+    return encodeURIComponent(part);
+  }).join("/");
 }
 function buildCardImageBlock(p, idx, categoryKey, allProducts) {
   var main = resolveCardImageSrc(p);
@@ -3227,19 +3248,21 @@ function buildCardImageBlock(p, idx, categoryKey, allProducts) {
   var fb = imgFallback.replace(/'/g, "\\'");
   var hasCard = !!(card && card !== main);
   var thumb = !hasCard ? deriveCardThumbSrc(main) : "";
-  // Card-size photo first (uploaded imageCard, else the generated images/card/ copy); on error try the full photo once.
+  // Keep the sharp card-sized WebP source, with a mobile AVIF option and full-photo fallback.
   var primary = hasCard ? card : thumb || main;
-  var errOn = primary !== main
+  var mobileAvif = deriveMobileCardAvifSrc(primary);
+  var avifErrorFallback = mobileAvif
+    ? "var pic=this.parentNode;var av=pic&&pic.tagName==='PICTURE'&&pic.firstElementChild;if(av&&av.tagName==='SOURCE'&&av.type==='image/avif'&&!this.hasAttribute('data-tried-avif')){this.setAttribute('data-tried-avif','1');av.remove();var c=this.getAttribute('data-card-src');if(c){this.src=c;return}}"
+    : "";
+  var errOn = avifErrorFallback + (primary !== main
     ? "var f=this.getAttribute('data-full');if(f&&!this.hasAttribute('data-tried-full')){this.setAttribute('data-tried-full','1');this.removeAttribute('srcset');this.src=f;return}this.onerror=null;this.removeAttribute('srcset');this.src='" + fb + "'"
-    : "this.onerror=null;this.removeAttribute('srcset');this.src='" + fb + "'";
+    : "this.onerror=null;this.removeAttribute('srcset');this.src='" + fb + "'");
   var eager = idx < 2 && document.documentElement.hasAttribute("data-shop-category");
   var hoverHtml = hover
     ? '<img class="card-img-hover" src="' +
       escapeHtml(hover) +
       '" alt="" loading="lazy" decoding="async" aria-hidden="true" onerror="this.removeAttribute(\'src\')">'
     : "";
-  // The card photo (≤800px) is already sharp enough for a listing card at 2-3x pixel density. A srcset with the
-  // full photo as "1600w" made phones pick the full photo anyway, so the card photo is the only source.
   var srcsetHtml = "";
   return (
     '<a href="/product/' + encodeURIComponent(p.id) + '" class="img-wrap" data-product-idx="' +
@@ -3249,9 +3272,11 @@ function buildCardImageBlock(p, idx, categoryKey, allProducts) {
     '">' +
     stockImageBadgeHtml(p) +
     '<span class="card-img-stack">' +
+    '<picture class="card-img-picture">' +
+    (mobileAvif ? '<source media="(max-width: 767px)" type="image/avif" srcset="' + escapeHtml(encodeCardSrcsetUrl(mobileAvif)) + '">' : "") +
     '<img class="card-img-primary" src="' +
     escapeHtml(primary) +
-    '"' +
+    '" data-card-src="' + escapeHtml(primary) + '"' +
     (primary !== main ? ' data-full="' + escapeHtml(main) + '"' : "") +
     srcsetHtml +
     ' alt="' +
@@ -3261,9 +3286,10 @@ function buildCardImageBlock(p, idx, categoryKey, allProducts) {
     ' decoding="async" onerror="' +
     errOn +
     '">' +
+    '</picture>' +
     hoverHtml +
-    "</span>" +
-    "</a>"
+    '</span>' +
+    '</a>'
   );
 }
 function resolveCardImageSrc(p) {
