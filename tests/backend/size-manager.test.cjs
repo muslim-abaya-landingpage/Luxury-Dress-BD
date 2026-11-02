@@ -144,7 +144,8 @@ test('size core: with every category ON, existing products offer exactly their o
   const { config } = await store.readActive(d1);
   CATEGORIES.forEach((k) => { config.categories[k].enabled = true; });
   let checked = 0;
-  catalog.products.forEach((p) => {
+  const managedProducts = catalog.products.filter((p) => CATEGORIES.includes(p.category));
+  managedProducts.forEach((p) => {
     assert.ok(p.sizeLegacy && Object.keys(p.sizeLegacy).length, p.id + ' has old size lists');
     const r = core.resolve(config, p);
     assert.ok(r, p.id);
@@ -164,7 +165,7 @@ test('size core: with every category ON, existing products offer exactly their o
     });
     checked++;
   });
-  assert.equal(checked, catalog.products.length);
+  assert.equal(checked, managedProducts.length);
   assert.equal(core.resolve(config, { id: 'K-1', category: 'kaftan', sizeLegacy: { sizes: ['52'] } }), null, 'Kaftan untouched');
   assert.equal(core.resolve(config, { id: 'K-2', category: 'karchupi', sizeLegacy: { sizes: ['52'] } }), null, 'Karchupi untouched');
 });
