@@ -80,6 +80,7 @@ test('publish: the chosen main photo and order are what is staged; description i
 test('body and garment measurements are available and saved for a non-Abaya category', async ({ page }) => {
   await setup(page);
   await expect(page.locator('#pqBodyWrap')).toBeVisible();
+  await expect(page.locator('#pqBodyWrap')).toContainText('Body size / measurement (inches)');
   await page.fill('#pq_body', '42, 44');
   await page.fill('#pq_sleeve', '22');
   await page.fill('#pq_dress', '40');
