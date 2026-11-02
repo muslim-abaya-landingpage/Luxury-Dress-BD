@@ -60,26 +60,26 @@
   var typingTimer = null;
 
   var QUICK = userCfg.quickQuestions || [
-    { key: "order_status", label: "Order status", labelBn: "অর্ডার স্ট্যাটাস", text: "Hello! I would like to check my order status. My order ID is: " },
-    { key: "size_help", label: "Size help", labelBn: "সাইজ পরামর্শ", text: "Hello! I need help choosing the right size." },
-    { key: "delivery_cod", label: "Delivery & COD", labelBn: "ডেলিভারি ও COD", text: "Hello! Could you tell me about delivery time and cash on delivery?" },
-    { key: "product_question", label: "Product question", labelBn: "পণ্যের তথ্য", text: "Hello! I have a question about this product." },
-    { key: "return_exchange", label: "Return / exchange", labelBn: "রিটার্ন / এক্সচেঞ্জ", text: "Hello! I need help with a return or exchange." }
+    { key: "order_status", icon: "📦", label: "আমার অর্ডার কোথায়?", text: "আসসালামু আলাইকুম! আমার অর্ডারের খবর জানতে চাই। অর্ডার আইডি: " },
+    { key: "size_help", icon: "📏", label: "সাইজ বুঝতে সাহায্য", text: "আসসালামু আলাইকুম! আমার জন্য কোন সাইজ ঠিক হবে, একটু সাহায্য করবেন? আমার উচ্চতা: " },
+    { key: "delivery_cod", icon: "🚚", label: "ডেলিভারি ও ক্যাশ অন ডেলিভারি", text: "আসসালামু আলাইকুম! ডেলিভারি কতদিনে হয় আর ক্যাশ অন ডেলিভারি আছে কি?" },
+    { key: "product_question", icon: "👗", label: "পণ্য নিয়ে প্রশ্ন", text: "আসসালামু আলাইকুম! এই পণ্যটি সম্পর্কে জানতে চাই।" },
+    { key: "return_exchange", icon: "🔄", label: "রিটার্ন / এক্সচেঞ্জ", text: "আসসালামু আলাইকুম! রিটার্ন বা এক্সচেঞ্জ নিয়ে সাহায্য দরকার।" }
   ];
 
   var CSS =
-    ".ma-chat-fab{position:fixed;right:16px;bottom:calc(80px + env(safe-area-inset-bottom,0px));z-index:510;display:flex;align-items:center;gap:10px;border:0;cursor:pointer;background:#111;color:#fff;border-radius:999px;padding:0;height:54px;min-width:54px;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,.28);font:600 12px/1 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;letter-spacing:.12em;text-transform:uppercase;transition:transform .15s ease,box-shadow .15s ease}" +
+    ".ma-chat-fab{position:fixed;right:16px;bottom:calc(80px + env(safe-area-inset-bottom,0px));z-index:510;display:flex;align-items:center;gap:10px;border:0;cursor:pointer;background:#111;color:#fff;border-radius:999px;padding:0;height:54px;min-width:54px;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,.28);font:600 14px/1 'Hind Siliguri',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;transition:transform .15s ease,box-shadow .15s ease}" +
     ".ma-chat-fab:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(0,0,0,.32)}" +
-    ".ma-chat-fab:focus-visible{outline:3px solid #c9a24d;outline-offset:3px}" +
+    ".ma-chat-fab:focus-visible{outline:3px solid #c9a24d;outline-offset:3px}.ma-chat-fab svg{color:#d9b866}" +
     ".ma-chat-fab svg{width:24px;height:24px;flex:none}" +
     ".ma-chat-fab .ma-chat-fab-label{display:none}" +
     ".ma-chat-dot{position:absolute;top:6px;right:6px;width:11px;height:11px;border-radius:50%;background:#25d366;border:2px solid #111}" +
-    ".ma-chat-panel{position:fixed;right:16px;bottom:calc(144px + env(safe-area-inset-bottom,0px));z-index:511;width:min(390px,calc(100vw - 28px));max-height:min(620px,calc(100vh - 130px));display:none;flex-direction:column;background:#fff;color:#111;border-radius:16px;box-shadow:0 18px 50px rgba(0,0,0,.28);overflow:hidden;font:14px/1.45 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}" +
-    ".ma-chat-panel.is-open{display:flex}" +
-    ".ma-chat-head{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #eee;background:#fff}" +
+    ".ma-chat-panel{position:fixed;right:16px;bottom:calc(144px + env(safe-area-inset-bottom,0px));z-index:511;width:min(390px,calc(100vw - 28px));max-height:min(620px,calc(100vh - 130px));display:none;flex-direction:column;background:#fff;color:#111;border-radius:16px;box-shadow:0 18px 50px rgba(0,0,0,.28);overflow:hidden;font:14px/1.5 'Hind Siliguri',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}" +
+    ".ma-chat-panel.is-open{display:flex;z-index:10050}" +
+    ".ma-chat-head{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #2a2a2a;background:#111;color:#fff}.ma-chat-head .ma-chat-title span{color:#d9cfb8}.ma-chat-head .ma-chat-icon-btn{background:rgba(255,255,255,.12);color:#fff}.ma-chat-head .ma-chat-icon-btn:hover{background:rgba(255,255,255,.22)}.ma-chat-head .ma-chat-avatar{background:#fff;border-color:#c9a24d}" +
     ".ma-chat-avatar{width:40px;height:40px;border-radius:50%;object-fit:contain;background:#f3f3f3;border:1px solid #eee;flex:none}" +
     ".ma-chat-title{flex:1;min-width:0}" +
-    ".ma-chat-title strong{display:block;font-size:14px;letter-spacing:.06em;text-transform:uppercase}" +
+    ".ma-chat-title strong{display:block;font-size:15px;letter-spacing:.02em}" +
     ".ma-chat-title span{display:flex;align-items:center;gap:6px;font-size:12px;color:#5b5b5b}" +
     ".ma-chat-status-dot{width:8px;height:8px;border-radius:50%;background:#b69655;display:inline-block;flex:none}" +
     ".ma-chat-expand{font-size:18px;line-height:1}" +
@@ -87,15 +87,11 @@
     ".ma-chat-icon-btn:hover{background:#e9e9e9}" +
     ".ma-chat-icon-btn svg{width:18px;height:18px}" +
     ".ma-chat-body{padding:18px 16px;overflow:auto;background:linear-gradient(180deg,#fff 0%,#fbfaf7 100%);flex:1}" +
-    ".ma-chat-welcome{text-align:center;padding:18px 12px 20px;margin:0 0 16px;background:#fff;border:1px solid #eee;border-radius:16px}" +
-    ".ma-chat-welcome img{width:50px;height:50px;object-fit:contain;border-radius:50%;margin:0 auto 8px;background:#f7f4ed;border:1px solid #eee}" +
-    ".ma-chat-welcome strong{display:block;font-family:Georgia,'Times New Roman',serif;font-size:23px;letter-spacing:.02em;color:#171717}" +
-    ".ma-chat-welcome b{display:block;margin:3px 0 4px;font-size:15px}" +
-    ".ma-chat-welcome small{display:block;color:#666;font-size:13px}" +
-    ".ma-chat-welcome .ma-chat-online{display:inline-flex;align-items:center;gap:7px;margin-top:13px;padding:7px 11px;border:1px solid #e7e7e7;border-radius:999px;background:#fbfbfb;font-size:11px;color:#555}" +
-    ".ma-chat-section-title{margin:0 0 9px;font-size:12px;font-weight:700;letter-spacing:.08em;color:#777;text-transform:uppercase}" +
+    ".ma-chat-welcome{display:flex;align-items:flex-end;gap:8px;margin:0 0 16px}" +
+    ".ma-chat-welcome img{width:32px;height:32px;flex:none;object-fit:contain;border-radius:50%;background:#fff;border:1px solid #e3d6b5}.ma-chat-greet{max-width:86%;padding:11px 13px;background:#fff;border:1px solid #ece4d2;border-radius:16px 16px 16px 4px;box-shadow:0 2px 8px rgba(60,45,10,.05)}.ma-chat-greet small{display:block;font-size:11px;color:#9a7b3c;font-weight:600;margin-bottom:2px}.ma-chat-greet strong{display:block;font-size:16px;color:#171717}.ma-chat-greet p{margin:4px 0 0;font-size:13.5px;color:#444}" +
+    ".ma-chat-section-title{margin:0 0 9px;font-size:13px;font-weight:700;color:#555}" +
     ".ma-chat-chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 6px}" +
-    ".ma-chat-chip{border:1px solid #e3e1dc;background:#fff;border-radius:999px;padding:9px 12px;font:inherit;font-size:13px;cursor:pointer;color:#222;box-shadow:0 1px 2px rgba(0,0,0,.025);transition:border-color .15s ease,background .15s ease,transform .15s ease}" +
+    ".ma-chat-chip{border:1px solid #e3d6b5;background:#fffdf8;border-radius:999px;padding:9px 13px;font:inherit;font-size:13px;cursor:pointer;color:#222;box-shadow:0 1px 2px rgba(0,0,0,.025);transition:border-color .15s ease,background .15s ease,transform .15s ease}" +
     ".ma-chat-chip:hover{border-color:#b69655;background:#fffdf8;transform:translateY(-1px)}" +
     ".ma-chat-chip:focus-visible{outline:2px solid #b69655;outline-offset:2px}" +
     ".ma-chat-transcript{display:none;flex-direction:column;gap:9px;padding:4px 0 10px}" +
@@ -109,15 +105,15 @@
     ".ma-chat-foot{padding:10px 12px 12px;border-top:1px solid #eee;background:#fff}" +
     ".ma-chat-row{display:flex;gap:8px;align-items:flex-end}" +
     ".ma-chat-input{flex:1;min-width:0;resize:none;border:1px solid #d9d9d9;border-radius:12px;padding:10px 12px;font:inherit;font-size:14px;max-height:96px;min-height:42px}" +
-    ".ma-chat-input:focus{outline:2px solid #111;outline-offset:0;border-color:#111}" +
-    ".ma-chat-send{flex:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;height:42px;padding:0 14px;border-radius:12px;background:#0a7d3b;color:#fff;font-weight:700;font-size:13px;text-decoration:none;border:0;cursor:pointer}" +
-    ".ma-chat-send:hover{background:#08662f}" +
+    ".ma-chat-input:focus{outline:2px solid #c9a24d;outline-offset:0;border-color:#c9a24d}" +
+    ".ma-chat-send{flex:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;height:42px;padding:0 14px;border-radius:12px;background:#111;color:#fff;font-weight:700;font-size:13px;text-decoration:none;border:0;cursor:pointer}" +
+    ".ma-chat-send:hover{background:#000}.ma-chat-send svg{color:#d9b866}" +
     ".ma-chat-send svg{width:18px;height:18px}" +
     ".ma-chat-alt{display:flex;gap:8px;margin-top:10px}" +
     ".ma-chat-alt a{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;height:38px;border-radius:10px;border:1px solid #e1e1e1;background:#fff;color:#111;font-size:13px;font-weight:600;text-decoration:none}" +
-    ".ma-chat-alt a:hover{border-color:#111}" +
+    ".ma-chat-alt a:hover{border-color:#111}.ma-chat-alt a.ma-chat-alt-wa{color:#0a7d3b;border-color:#bfe3cb}" +
     ".ma-chat-alt svg{width:18px;height:18px;flex:none}" +
-    ".ma-chat-note{margin:8px 2px 0;font-size:11px;color:#666}" +
+    ".ma-chat-note{margin:8px 2px 0;font-size:11.5px;color:#666;text-align:center}" +
     "body:has(#stickyOrderBar) .ma-chat-fab{bottom:calc(144px + env(safe-area-inset-bottom,0px))}" +
     "body:has(#stickyOrderBar) .ma-chat-panel{bottom:calc(208px + env(safe-area-inset-bottom,0px))}" +
     ".ma-chat-panel.is-expanded{width:min(460px,calc(100vw - 28px));max-height:min(760px,calc(100vh - 100px))}" +
@@ -150,6 +146,21 @@
     ".ma-chat-attach{flex:none;display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border:1px solid #d9d9d9;border-radius:12px;background:#fff;cursor:pointer;font-size:17px}.ma-chat-attach[hidden]{display:none}" +
     ".ma-chat-message img{display:block;max-width:100%;max-height:240px;border-radius:9px;margin-top:6px;background:#eee}" +
     ".ma-chat-typing{min-height:16px;font-size:11px;color:#8a8170;font-style:italic;padding:2px 2px 0}" +
+    /* Compact layout: shorter panel on desktop and mobile */
+    ".ma-chat-panel{width:min(370px,calc(100vw - 28px));max-height:min(500px,calc(100vh - 120px))}" +
+    ".ma-chat-head{padding:9px 12px;gap:9px}.ma-chat-avatar{width:34px;height:34px}.ma-chat-icon-btn{width:32px;height:32px;border-radius:9px}.ma-chat-icon-btn svg{width:16px;height:16px}" +
+    ".ma-chat-title strong{font-size:14px}.ma-chat-title span{font-size:11.5px}" +
+    ".ma-chat-body{padding:12px 12px 8px}" +
+    ".ma-chat-welcome{margin:0 0 12px}.ma-chat-welcome img{width:28px;height:28px}.ma-chat-greet{padding:9px 12px}.ma-chat-greet strong{font-size:15px}.ma-chat-greet p{font-size:13px;margin-top:2px}" +
+    ".ma-chat-section-title{margin:0 0 7px;font-size:12.5px}" +
+    ".ma-chat-chips{flex-wrap:nowrap;overflow-x:auto;gap:6px;margin:0 -12px 4px;padding:0 12px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.ma-chat-chips::-webkit-scrollbar{display:none}" +
+    ".ma-chat-chip{flex:none;white-space:nowrap;padding:7px 11px;font-size:12.5px;min-height:0}" +
+    ".ma-chat-foot{padding:8px 10px 9px}" +
+    ".ma-chat-input{min-height:40px;padding:9px 11px}.ma-chat-send,.ma-chat-attach{height:40px}.ma-chat-attach{width:40px}" +
+    ".ma-chat-alt{margin-top:7px;gap:6px}.ma-chat-alt a{height:32px;font-size:12.5px;border-radius:9px}.ma-chat-alt svg{width:16px;height:16px}" +
+    ".ma-chat-note{margin-top:5px;font-size:10.5px}" +
+    ".ma-chat-panel.is-expanded{max-height:min(720px,calc(100vh - 100px))}" +
+    "@media (max-width:560px){.ma-chat-panel{max-height:min(66dvh,500px)}.ma-chat-chip{min-height:36px}.ma-chat-head{padding:9px 10px}.ma-chat-body{padding:10px 10px 6px}.ma-chat-chips{margin:0 -10px 4px;padding:0 10px 6px}.ma-chat-foot{padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px))}.ma-chat-panel.is-expanded{max-height:none}}" +
     "@media (prefers-reduced-motion:reduce){.ma-chat-fab,.ma-chat-chip{transition:none}}";
 
   var ICON_CHAT =
@@ -217,8 +228,8 @@
     fab.setAttribute("aria-haspopup", "dialog");
     fab.setAttribute("aria-expanded", "false");
     fab.setAttribute("aria-controls", "maChatPanel");
-    fab.setAttribute("aria-label", "Open customer support chat");
-    fab.innerHTML = ICON_CHAT + '<span class="ma-chat-fab-label">Customer Support</span><span class="ma-chat-dot" aria-hidden="true"></span>';
+    fab.setAttribute("aria-label", "সাহায্যের জন্য চ্যাট খুলুন");
+    fab.innerHTML = ICON_CHAT + '<span class="ma-chat-fab-label">সাহায্য লাগবে? চ্যাট করুন</span><span class="ma-chat-dot" aria-hidden="true"></span>';
 
     var panel = el("div", "ma-chat-panel");
     panel.id = "maChatPanel";
@@ -237,16 +248,16 @@
     title.innerHTML =
       '<strong id="maChatTitle"></strong><span id="maChatSub"><i class="ma-chat-status-dot" aria-hidden="true"></i></span>';
     title.querySelector("strong").textContent = brand;
-    title.querySelector("#maChatSub").appendChild(doc.createTextNode(replyTime || "WhatsApp & Messenger support"));
+    title.querySelector("#maChatSub").appendChild(doc.createTextNode(replyTime || "কাস্টমার সাপোর্ট · বাংলায় লিখুন"));
     var call = el("a", "ma-chat-icon-btn", ICON_PHONE);
     call.href = "tel:" + String(phoneTel).replace(/[^\d+]/g, "");
-    call.setAttribute("aria-label", "Call us");
+    call.setAttribute("aria-label", "আমাদের ফোন করুন");
     var expand = el("button", "ma-chat-icon-btn ma-chat-expand", ICON_EXPAND);
     expand.type = "button";
-    expand.setAttribute("aria-label", "Expand chat");
+    expand.setAttribute("aria-label", "চ্যাট বড় করুন");
     var close = el("button", "ma-chat-icon-btn", ICON_CLOSE);
     close.type = "button";
-    close.setAttribute("aria-label", "Close chat");
+    close.setAttribute("aria-label", "চ্যাট বন্ধ করুন");
     head.appendChild(avatar);
     head.appendChild(title);
     head.appendChild(call);
@@ -259,14 +270,14 @@
     welcomeLogo.alt = "";
     welcomeLogo.onerror = function () { welcomeLogo.style.display = "none"; };
     welcome.appendChild(welcomeLogo);
-    var brandMark = el("strong");
-    brandMark.textContent = brand;
-    welcome.appendChild(brandMark);
-    welcome.appendChild(el("b", "", "Customer Support"));
-    welcome.appendChild(el("small", "", "How can we help you today?"));
-    welcome.appendChild(el("small", "", "আমরা কীভাবে সাহায্য করতে পারি?"));
-    welcome.appendChild(el("span", "ma-chat-online", '<i class="ma-chat-status-dot" aria-hidden="true"></i> Chat with our team here or continue on WhatsApp/Messenger'));
-    var sectionTitle = el("p", "ma-chat-section-title", "Quick help · দ্রুত সহায়তা");
+    var greet = el("div", "ma-chat-greet");
+    var greetName = el("small");
+    greetName.textContent = brand + " টিম";
+    greet.appendChild(greetName);
+    greet.appendChild(el("strong", "", "আসসালামু আলাইকুম 👋"));
+    greet.appendChild(el("p", "", "অর্ডার, সাইজ বা ডেলিভারি, যেকোনো প্রশ্ন লিখুন। আমরা এখানেই উত্তর দেবো।"));
+    welcome.appendChild(greet);
+    var sectionTitle = el("p", "ma-chat-section-title", "কী নিয়ে সাহায্য লাগবে?");
     var chips = el("div", "ma-chat-chips");
     var orderForm = el("form", "ma-chat-order-form");
     orderForm.hidden = true;
@@ -275,8 +286,8 @@
     orderIdInput.maxLength = 80;
     orderIdInput.required = true;
     orderIdInput.autocomplete = "off";
-    orderIdInput.placeholder = "Order ID";
-    orderIdInput.setAttribute("aria-label", "Order ID");
+    orderIdInput.placeholder = "অর্ডার আইডি (যেমন MA-20261102-1234)";
+    orderIdInput.setAttribute("aria-label", "অর্ডার আইডি");
     var orderPhoneInput = doc.createElement("input");
     orderPhoneInput.type = "tel";
     orderPhoneInput.maxLength = 24;
@@ -286,7 +297,7 @@
     orderPhoneInput.setAttribute("aria-label", "অর্ডারে ব্যবহৃত ফোন নম্বর");
     var lookupButton = doc.createElement("button");
     lookupButton.type = "submit";
-    lookupButton.textContent = "অর্ডার খুঁজুন · Check status";
+    lookupButton.textContent = "অর্ডার খুঁজুন";
     var orderResult = el("div", "ma-chat-order-result");
     orderResult.setAttribute("aria-live", "polite");
     orderForm.appendChild(orderIdInput);
@@ -370,12 +381,12 @@
     var input = el("textarea", "ma-chat-input");
     input.rows = 1;
     input.maxLength = 500;
-    input.placeholder = "Type your message…";
-    input.setAttribute("aria-label", "Your message");
-    var send = el("a", "ma-chat-send", ICON_SEND + "<span>Send</span>");
+    input.placeholder = "এখানে আপনার প্রশ্ন লিখুন…";
+    input.setAttribute("aria-label", "আপনার মেসেজ");
+    var send = el("a", "ma-chat-send", ICON_SEND + "<span>পাঠান</span>");
     send.target = "_blank";
     send.rel = "noopener";
-    send.setAttribute("aria-label", "Send this message on WhatsApp");
+    send.setAttribute("aria-label", "মেসেজ পাঠান");
     var fileInput = doc.createElement("input");
     fileInput.type = "file";
     fileInput.accept = "image/jpeg,image/png,image/webp,image/gif";
@@ -392,7 +403,7 @@
     foot.appendChild(row);
 
     var alt = el("div", "ma-chat-alt");
-    var wa = el("a", "", "WhatsApp");
+    var wa = el("a", "ma-chat-alt-wa", "WhatsApp-এ কথা বলুন");
     wa.target = "_blank";
     wa.rel = "noopener";
     alt.appendChild(wa);
@@ -404,7 +415,7 @@
       alt.appendChild(ms);
     }
     foot.appendChild(alt);
-    var note = el("p", "ma-chat-note", liveEnabled ? "Messages are saved in our support inbox. Please do not send card or password details." : "Your message opens WhatsApp. Do not send card or password details.");
+    var note = el("p", "ma-chat-note", liveEnabled ? "🔒 নিরাপদ চ্যাট। কার্ড নম্বর বা পাসওয়ার্ড কখনো পাঠাবেন না।" : "মেসেজটি WhatsApp-এ খুলবে। কার্ড নম্বর বা পাসওয়ার্ড পাঠাবেন না।");
     foot.appendChild(note);
 
     panel.appendChild(head);
@@ -602,8 +613,8 @@
           filter: "conversation_id=eq." + conversationId
         }, function (payload) { appendMessage(payload.new); })
         .subscribe(function (status) {
-          if (status === "SUBSCRIBED") note.textContent = "Live chat connected — messages are saved securely.";
-          else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") note.textContent = "Live connection interrupted. Please use WhatsApp if this continues.";
+          if (status === "SUBSCRIBED") note.textContent = "✅ সংযুক্ত। মেসেজ লিখুন, আমরা এখানেই উত্তর দেবো।";
+          else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") note.textContent = "সংযোগ একটু বিঘ্নিত হয়েছে। সমস্যা থাকলে WhatsApp-এ লিখুন।";
         });
     }
     async function recordQuickAction(actionKey) {
@@ -620,7 +631,7 @@
         });
         if (result.error) throw result.error;
       } catch (error) {
-        note.textContent = "Could not connect to live support. You can still use WhatsApp or Messenger.";
+        note.textContent = "এই মুহূর্তে লাইভ চ্যাটে সংযোগ হচ্ছে না। WhatsApp বা Messenger-এ লিখতে পারেন।";
       }
     }
     async function sendLiveMessage() {
@@ -643,9 +654,9 @@
         notifyTeam(state.client, inserted.data.id);
         input.value = "";
         updateLinks();
-        note.textContent = "Message sent to the support inbox.";
+        note.textContent = "মেসেজ পৌঁছেছে ✓ আমাদের টিম উত্তর দিলে এখানেই দেখবেন।";
       } catch (error) {
-        note.textContent = "Message was not sent. Please try again or contact us on WhatsApp.";
+        note.textContent = "মেসেজ যায়নি। আবার চেষ্টা করুন, অথবা WhatsApp-এ লিখুন।";
       } finally {
         isSendingMessage = false;
         send.removeAttribute("aria-disabled");
@@ -690,13 +701,13 @@
         showOrderError("এখন অর্ডার যাচাই করা যাচ্ছে না। CAPTCHA সম্পন্ন করে আবার চেষ্টা করুন, অথবা WhatsApp-এ যোগাযোগ করুন।");
       } finally {
         lookupButton.disabled = false;
-        lookupButton.textContent = "অর্ডার খুঁজুন · Check status";
+        lookupButton.textContent = "অর্ডার খুঁজুন";
       }
     });
     QUICK.forEach(function (q) {
       var b = el("button", "ma-chat-chip");
       b.type = "button";
-      b.textContent = q.label + (q.labelBn ? " · " + q.labelBn : "");
+      b.textContent = q.icon ? q.icon + " " + q.label : q.label + (q.labelBn ? " · " + q.labelBn : "");
       b.addEventListener("click", function () {
         if (q.key === "order_status") {
           orderForm.hidden = false;
@@ -783,13 +794,13 @@
     function setOpen(open) {
       panel.classList.toggle("is-open", open);
       fab.setAttribute("aria-expanded", open ? "true" : "false");
-      fab.setAttribute("aria-label", open ? "Close customer support chat" : "Open customer support chat");
+      fab.setAttribute("aria-label", open ? "চ্যাট বন্ধ করুন" : "সাহায্যের জন্য চ্যাট খুলুন");
       var dot = fab.querySelector(".ma-chat-dot");
       if (dot) dot.style.display = open ? "none" : "";
       if (open) {
         updateLinks();
         if (liveEnabled) ensureLiveConversation().catch(function () {
-          note.textContent = "Live support is temporarily unavailable. Use WhatsApp or Messenger instead.";
+          note.textContent = "লাইভ চ্যাট সাময়িকভাবে বন্ধ। WhatsApp বা Messenger-এ লিখুন।";
         });
         global.setTimeout(function () { input.focus(); }, 60);
       } else {
@@ -801,7 +812,7 @@
     close.addEventListener("click", function () { setOpen(false); });
     expand.addEventListener("click", function () {
       var expanded = panel.classList.toggle("is-expanded");
-      expand.setAttribute("aria-label", expanded ? "Restore chat size" : "Expand chat");
+      expand.setAttribute("aria-label", expanded ? "চ্যাট ছোট করুন" : "চ্যাট বড় করুন");
     });
     doc.addEventListener("keydown", function (ev) {
       if (ev.key === "Escape" && panel.classList.contains("is-open")) setOpen(false);
