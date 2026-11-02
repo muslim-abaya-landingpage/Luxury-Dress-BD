@@ -1,7 +1,7 @@
 /**
  * ═══ সব ক্যাটাগরির প্রোডাক্ট ছবির লিংক — এক জায়গা ═══
  * এডিট: product-manager.html (প্রতি প্রোডাক্টে ছবির URL) → সেভ
- * আপডেট: 2026-10-31
+ * আপডেট: 2026-11-02
  */
 window.PRODUCT_LINKS_DATA = {
   abaya: [
@@ -92,6 +92,7 @@ window.PRODUCT_LINKS_DATA = {
   karchupi: [
   ],
   kaftan: [
+    "https://images.muslimabaya.com/images/uploads/premium-linen-kaftan-1-ad0becb2cffa7a8a7feb.webp",
   ],
   hijab: [
     "/images/premium-short-khimar-hijab-dusty-pink-soft-jersey.webp",

@@ -1,6 +1,6 @@
 /**
  * প্রোডাক্ট ডেটা — product-manager.html থেকে এডিট করুন
- * আপডেট: 2026-10-31
+ * আপডেট: 2026-11-02
  */
 window.CATEGORY_PRODUCTS = {
   abaya: [
@@ -353,7 +353,7 @@ window.CATEGORY_PRODUCTS = {
       id: "DR-01",
       name: "White Leaf Print Long Shirt Two-Piece Set for Women",
       image: "/images/uploads/dr-01-1793126083919.webp",
-      imageCard: "images/uploads/dr-01-1793126083919-card.webp",
+      imageCard: "/images/uploads/dr-01-1793126083919-card.webp",
       price: 1710,
       stock: 12,
       color: "white-black",
@@ -449,7 +449,7 @@ window.CATEGORY_PRODUCTS = {
       id: "TP-6",
       name: "Premium Popcorn Dress Set for Women | Muslim Abaya",
       image: "/images/uploads/tp-6-1793221122854.webp",
-      imageCard: "images/uploads/tp-6-1793221122854-card.webp",
+      imageCard: "/images/uploads/tp-6-1793221122854-card.webp",
       images: ["/images/uploads/tp-6-1793221132274-g1.webp", "/images/uploads/tp-6-1793221132478-g2.webp", "/images/uploads/tp-6-1793221132684-g3.webp", "/images/uploads/tp-6-1793221132905-g4.webp", "/images/uploads/tp-6-1793227684221-g5.webp", "/images/uploads/tp-6-1793227689173-g6.webp"],
       price: 1485,
       stock: 18,
@@ -496,7 +496,7 @@ window.CATEGORY_PRODUCTS = {
       id: "DR-8",
       name: "Elegant Charcoal Black CY Fabric Dress",
       image: "/images/uploads/dr-8-1793388836531.webp",
-      imageCard: "images/uploads/dr-8-1793388836531-card.webp",
+      imageCard: "/images/uploads/dr-8-1793388836531-card.webp",
       images: ["/images/premium-black-floral-womens-co-ord-set-bangladesh.webp"],
       price: 1305,
       stock: 6,
@@ -509,6 +509,7 @@ window.CATEGORY_PRODUCTS = {
       imageViewOf: "",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
+      colorVariants: [{"color":"charcoal-black","colorLabel":"Charcoal Black","image":""}],
       bodySizes: ["46","48","50","52"],
       sleeveSizes: ["18"],
       dressLengths: ["40"],
@@ -519,8 +520,7 @@ window.CATEGORY_PRODUCTS = {
       dateAdded: "2026-08-01",
       seoTitle: "Charcoal Black CY Fabric Dress | Muslim Abaya",
       seoDescription: "Shop elegant Charcoal Black CY Fabric Dress at Muslim Abaya. Available in sizes 46, 48, 50 and 52 inches. Order online across Bangladesh.",
-      productUrl: "/",
-      colorVariants: [{"color":"charcoal-black","colorLabel":"Charcoal Black","image":""}]
+      productUrl: "/"
     },
     {
       id: "DR-9",
@@ -1447,6 +1447,28 @@ window.CATEGORY_PRODUCTS = {
   karchupi: [
   ],
   kaftan: [
+    {
+      id: "premium-linen-kaftan",
+      name: "Premium Linen Kaftan",
+      image: "https://images.muslimabaya.com/images/uploads/premium-linen-kaftan-1-ad0becb2cffa7a8a7feb.webp",
+      imageCard: "https://images.muslimabaya.com/images/uploads/premium-linen-kaftan-card-61565c08189ac7ee6ec7.webp",
+      price: 1150,
+      color: "teal-blue",
+      colorLabel: "Teal Blue",
+      fabric: "Linen",
+      sizes: ["Free Size"],
+      detailNote: "Premium Linen Kaftan – Teal Blue\n\n🌸 Fabric: Premium Linen\n\n📏 Product Measurements:\n\nDress Length: 42 Inches\n\nBody Width: 60 Inches\n\nPalazzo Length: 40 Inches\n\n🌐 Website: https://muslimabaya.com\n\n📲 WhatsApp: 01971642683 (Only Message)",
+      sleeveSizes: ["18"],
+      dressLengths: ["42"],
+      palazzoLengths: ["40"],
+      bodySizes: ["60"],
+      seoTitle: "Luluatun Noor Linen Kaftan | Muslim Abaya",
+      seoDescription: "Luluatun Noor Premium Linen Kaftan in Teal Blue. আরামদায়ক লিনেন কাপড় ও আকর্ষণীয় ফ্লোরাল ডিজাইন। অর্ডার করুন Muslim Abaya-তে।",
+      dateAdded: "2026-11-03",
+      colorVariants: [{"color":"teal-blue","colorLabel":"Teal Blue","image":"https://images.muslimabaya.com/images/uploads/premium-linen-kaftan-1-ad0becb2cffa7a8a7feb.webp"}],
+      category: "kaftan",
+      categoryLabel: "কাফতান"
+    }
   ],
   hijab: [
     {
@@ -1526,7 +1548,7 @@ window.CATEGORY_PRODUCTS = {
       id: "P-197025F0B8FF4107",
       name: "Premium Cotton Three Piece",
       image: "/images/uploads/p-197025f0b8ff4107-1.webp",
-      imageCard: "images/uploads/p-197025f0b8ff4107-card.webp",
+      imageCard: "/images/uploads/p-197025f0b8ff4107-card.webp",
       images: ["/images/uploads/p-197025f0b8ff4107-2.webp", "/images/uploads/p-197025f0b8ff4107-3.webp"],
       price: 1750,
       stock: 10,
