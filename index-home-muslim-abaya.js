@@ -72,6 +72,15 @@
     return raw;
   }
 
+  function homeAbsoluteUrl(src) {
+    if (!src) return "";
+    try {
+      return new URL(src, window.location.origin).href;
+    } catch (e) {
+      return String(src);
+    }
+  }
+
   /* Uploaded products carry their own small card image (p.imageCard, e.g. images/uploads/<id>-card.webp).
      Use it when present: no images/card/... copy is generated for uploads, so deriving one gave a 404. */
   function resolveCardImg(p) {
@@ -248,10 +257,13 @@
     var dHref = detailHref(sec, p);
     var outOfStock = isOutOfStock(p);
     var st = stockStatus(p);
-    var msg =
-      waLink() +
-      "?text=" +
-      encodeURIComponent("I want to order " + p.name);
+    var msgText = [
+      "আসসালামু আলাইকুম, আমি এই পণ্যটি অর্ডার করতে চাই:",
+      "পণ্যের নাম: " + p.name,
+      "দাম: ৳" + listingPrice(p),
+      "ছবির লিংক: " + homeAbsoluteUrl(img)
+    ].join("\n");
+    var msg = waLink() + "?text=" + encodeURIComponent(msgText);
     return (
       "<article class='ah-card" +
       (outOfStock ? " ah-card-oos" : "") +

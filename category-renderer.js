@@ -881,6 +881,20 @@ function resolveProductPrice(p, categoryKey, typeLabel) {
 function formatBdtPrice(amount) {
   return "\u09F3" + (parseInt(amount, 10) || 0);
 }
+function productCardWhatsAppOrderText(p, amount, imageSrc) {
+  var imageUrl = "";
+  try {
+    imageUrl = imageSrc ? new URL(imageSrc, window.location.origin).href : "";
+  } catch (e) {
+    imageUrl = String(imageSrc || "");
+  }
+  return [
+    "আসসালামু আলাইকুম, আমি এই পণ্যটি অর্ডার করতে চাই:",
+    "পণ্যের নাম: " + String((p && p.name) || ""),
+    "দাম: " + formatBdtPrice(amount),
+    "ছবির লিংক: " + imageUrl
+  ].join("\n");
+}
 function colorLabelDiffersFromName(p, colorLabel) {
   if (!colorLabel) return false;
   var name = String(p && p.name ? p.name : "")
@@ -1384,7 +1398,9 @@ function pqvHomeCardHtml(p) {
   var dHref = pqvHomeHref("/product/" + encodeURIComponent(p.id || ""));
   var st = productStockStatus(p);
   var outOfStock = st.inStock === false;
-  var msg = pqvHomeWaLink() + "?text=" + encodeURIComponent("I want to order " + p.name);
+  var msg = pqvHomeWaLink() + "?text=" + encodeURIComponent(
+    productCardWhatsAppOrderText(p, listingCardPrice(p), img)
+  );
   return (
     "<article class='ah-card" +
     (outOfStock ? " ah-card-oos" : "") +
@@ -3453,6 +3469,9 @@ function buildProductCard(p, idx, waLink, detailMode, categoryKey, allProducts) 
 
   var colorAttr = p.color ? " data-color='" + escapeHtml(p.color) + "'" : "";
   var stock = productStockStatus(p);
+  var waOrderText = encodeURIComponent(
+    productCardWhatsAppOrderText(p, productPrice, resolveCardImageSrc(p))
+  );
 
   if (detailMode) {
     return (
@@ -3505,7 +3524,7 @@ maShopBagIcon(16) +
 "<a href='" +
 waLink +
 "?text=" +
-encodeURIComponent("I want to order " + p.name) +
+waOrderText +
 "' target='_blank' rel='noopener' class='msg-btn btn-msg'>Message Us</a>" +
 "</div>" +
 "</div>" +
@@ -3565,7 +3584,7 @@ encodeURIComponent("I want to order " + p.name) +
     "<a href='" +
     waLink +
     "?text=" +
-   encodeURIComponent("I want to order " + p.name) +
+   waOrderText +
 "' target='_blank' rel='noopener' class='muslim-abaya-btn muslim-abaya-btn-msg' onclick='event.stopPropagation()'><span lang='bn'>অর্ডার করুন</span></a>" +
 "</div></div></article>"
 );
