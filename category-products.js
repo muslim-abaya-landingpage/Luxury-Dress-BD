@@ -415,18 +415,23 @@ window.CATEGORY_PRODUCTS = {
       id: "DR-4",
       name: "Black White Polka Dot Women's Two-Piece Set",
       image: "/images/Black-White-Polka-Dots.jpeg",
-      price: 550,
+      price: 990,
       color: "black",
       colorLabel: "Black / White Polka Dot",
       fabric: "Alex Soft Georgette",
-      sizes: ["Body 42 (Free Size)"],
+      sizes: ["Body 42"],
       detailNote: "Length: 37–38 Inches",
       isImageView: false,
       imageViewOf: "",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
       dateAdded: "2026-08-01",
-      productUrl: "/"
+      productUrl: "/",
+      regularPrice: 1100,
+      sleeveSizes: ["15"],
+      dressLengths: ["38"],
+      palazzoLengths: ["38"],
+      bodySizes: ["Free size"]
     },
     {
       id: "DR-5",
@@ -1467,13 +1472,13 @@ window.CATEGORY_PRODUCTS = {
       sleeveSizes: ["18"],
       dressLengths: ["42"],
       palazzoLengths: ["40"],
+      regularPrice: 1200,
+      tags: ["Kaftan","Linen Kaftan","Premium Kaftan","Teal Blue","Floral Kaftan","Ladies Kaftan","Modest Fashion","Luluatun Noor"],
+      brand: "Muslim Abaya",
       dateAdded: "2026-11-03",
       seoTitle: "Luluatun Noor Linen Kaftan | Muslim Abaya",
       seoDescription: "Luluatun Noor Premium Linen Kaftan in Teal Blue. আরামদায়ক লিনেন কাপড় ও আকর্ষণীয় ফ্লোরাল ডিজাইন। অর্ডার করুন Muslim Abaya-তে।",
-      productUrl: "/",
-      regularPrice: 1200,
-      brand: "Muslim Abaya",
-      tags: ["Kaftan","Linen Kaftan","Premium Kaftan","Teal Blue","Floral Kaftan","Ladies Kaftan","Modest Fashion","Luluatun Noor"]
+      productUrl: "/"
     }
   ],
   hijab: [
