@@ -566,6 +566,61 @@
     return normalizeArray(lines);
   }
 
+  /* ---------- Order Now popup checkout (lazy) ----------
+     The popup and the district / upazila lists load on the first Order Now click only, so no page
+     gets heavier. Returns true when the popup takes over; opts.fallback() runs if it cannot load. */
+  var POPUP_ASSETS = [
+    ["CHECKOUT_DISTRICTS", "/checkout-location-labels.js?v=1d04956cd4baedee"],
+    ["CHECKOUT_UPAZILAS_BY_DISTRICT", "/checkout-locations.js?v=f33df14e7a66da3e"],
+    ["maCheckoutPopup", "/checkout-popup.js?v=20261102a"]
+  ];
+  var popupLoading = null;
+  function loadPopupScript(globalName, src) {
+    if (global[globalName]) return Promise.resolve();
+    return new Promise(function (resolve, reject) {
+      var s = document.createElement("script");
+      s.src = src;
+      s.async = true;
+      s.onload = function () { resolve(); };
+      s.onerror = function () { reject(new Error("load " + src)); };
+      document.head.appendChild(s);
+    });
+  }
+  function loadCheckoutPopup() {
+    if (global.maCheckoutPopup && global.maCheckoutPopup.open) return Promise.resolve(global.maCheckoutPopup);
+    if (!popupLoading) {
+      popupLoading = Promise.all(POPUP_ASSETS.map(function (a) { return loadPopupScript(a[0], a[1]); }))
+        .then(function () {
+          if (!global.maCheckoutPopup || !global.maCheckoutPopup.open) throw new Error("popup missing");
+          return global.maCheckoutPopup;
+        })
+        .catch(function (err) { popupLoading = null; throw err; });
+    }
+    return popupLoading;
+  }
+  function maOpenCheckoutPopup(line, opts) {
+    opts = opts || {};
+    if (!line || !line.id || typeof document === "undefined" || typeof fetch !== "function") return false;
+    loadCheckoutPopup().then(function (popup) {
+      if (!popup.open(line, opts) && typeof opts.fallback === "function") opts.fallback();
+    }, function () {
+      if (typeof opts.fallback === "function") opts.fallback();
+    });
+    return true;
+  }
+  global.maOpenCheckoutPopup = maOpenCheckoutPopup;
+  global.maLoadCheckoutPopup = loadCheckoutPopup;
+  // Start downloading the popup as soon as a finger/mouse goes down on Order Now (before the click).
+  if (typeof document !== "undefined" && document.addEventListener) {
+    var warmPopup = function (ev) {
+      var t = ev.target;
+      if (t && t.closest && t.closest('button[data-action="buy-now"]')) {
+        loadCheckoutPopup().catch(function () {});
+      }
+    };
+    document.addEventListener("pointerdown", warmPopup, { passive: true, capture: true });
+  }
+
   global.STORE_CATALOG = CATALOG;
   global.loadStoreCart = loadStoreCart;
   global.syncCartBadgeFromStore = syncCartBadgeFromStore;

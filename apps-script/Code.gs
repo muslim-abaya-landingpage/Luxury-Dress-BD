@@ -1623,7 +1623,7 @@ function syncProductListDropdown_() {
 }
 
 function getOrderStatusOptions_() {
-  return ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled', 'Fake'];
+  return ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Fake'];
 }
 
 function setupOrderStatusDropdown_(sheet) {
@@ -1702,6 +1702,56 @@ function generateOrderId_() {
   return 'MA-' + datePart + '-' + rand;
 }
 
+/** Order IDs already in the last rows of Online Order (the same day's IDs are always near the bottom). */
+function recentOnlineOrderIds_(sheet, maxRows) {
+  var ids = {};
+  if (!sheet) return ids;
+  var last = lastOnlineOrderDataRow_(sheet);
+  if (last < 2) return ids;
+  var n = Math.min(maxRows || 3000, last - 1);
+  var vals = sheet.getRange(last - n + 1, onlineOrderColumn_(sheet, 9), n, 1).getValues();
+  for (var i = 0; i < vals.length; i++) {
+    var id = String(vals[i][0] || '').trim();
+    if (id) ids[id] = true;
+  }
+  return ids;
+}
+
+/**
+ * Same format as generateOrderId_ (MA-yyyyMMdd-NNNN), but never one that is already in the sheet.
+ * Call while holding the order lock so two orders cannot pick the same free ID.
+ */
+function generateUniqueOrderId_(sheet, preferredId) {
+  var taken = {};
+  try { taken = recentOnlineOrderIds_(sheet, 3000); } catch (readErr) {}
+  if (preferredId && !taken[preferredId]) return preferredId;
+  for (var attempt = 0; attempt < 40; attempt++) {
+    var id = generateOrderId_();
+    if (!taken[id]) return id;
+  }
+  // Practically unreachable (9,000 IDs per day); a longer suffix keeps the ID unique anyway.
+  return generateOrderId_() + '-' + String(Date.now()).slice(-4);
+}
+
+/** Same checkout attempt (EventID) + same phone already saved → its order ID, else ''. */
+function orderIdempotencyKey_(eventId, phone) {
+  var ev = String(eventId || '').trim();
+  if (!/^[A-Za-z0-9_.:-]{6,100}$/.test(ev)) return '';
+  return 'evt_' + Utilities.base64EncodeWebSafe(ev + '|' + normalizePhone_(phone)).slice(0, 200);
+}
+
+function findSavedOrderForEvent_(eventId, phone) {
+  var key = orderIdempotencyKey_(eventId, phone);
+  if (!key) return '';
+  try { return String(CacheService.getScriptCache().get(key) || ''); } catch (cacheErr) { return ''; }
+}
+
+function rememberSavedOrderForEvent_(eventId, phone, orderId) {
+  var key = orderIdempotencyKey_(eventId, phone);
+  if (!key || !orderId) return;
+  try { CacheService.getScriptCache().put(key, String(orderId), 21600); } catch (cacheErr) {}
+}
+
 function computeCatalogPriceMap_() {
   var map = {};
   try {
@@ -1753,6 +1803,12 @@ function computeVerifiedOrderPricing_(cartItems, charge, couponCodeVal) {
 
 function handleOnlineOrderPost_(e) {
   var validated = validateOrderInput_(e);
+  // A retry of an order that was already saved (lost response, double tap, Worker re-send)
+  // gets the same order ID back instead of an error or a second order.
+  var alreadySavedId = findSavedOrderForEvent_(param_(e, 'EventID'), validated.phone);
+  if (alreadySavedId) {
+    return ContentService.createTextOutput('Success|' + alreadySavedId).setMimeType(ContentService.MimeType.TEXT);
+  }
   assertLiveStockAvailable_(validated.cartItems);
   if (isPhoneBlocked_(validated.phone)) throw new Error('ORDER_BLOCKED');
   rateLimitOrder_(validated.phone);
@@ -1796,7 +1852,7 @@ function handleOnlineOrderPost_(e) {
   var totalStr = String(verifiedTotal);
   var payment = param_(e, 'PaymentMethod') || 'Cash On Delivery';
   var txn = (param_(e, 'TransactionID') || param_(e, 'SenderNumber') || '').trim();
-  var notes = (param_(e, 'SpecialNotes') || '').trim();
+  var notes = sanitizeCellText_(param_(e, 'SpecialNotes') || '', 1000);
   if (priceAdjustNote) notes = notes ? (notes + ' | ' + priceAdjustNote) : priceAdjustNote;
   var district = param_(e, 'District') || validated.district || '';
   var sourceVal = String(param_(e, 'Source') || param_(e, 'UtmSource') || '').trim();
@@ -1822,6 +1878,11 @@ function handleOnlineOrderPost_(e) {
   var newRow = 0;
   var reservedVariantCount = 0;
   try {
+    var uniqueOrderId = generateUniqueOrderId_(sheet, orderId);
+    if (uniqueOrderId !== orderId) {
+      if (trackingId === 'order_' + orderId) trackingId = 'order_' + uniqueOrderId;
+      orderId = uniqueOrderId;
+    }
     reservedVariantCount = reserveStockForOrderItems_(validated.cartItems, orderId, 'order-intake');
     newRow = appendOnlineOrderRowLocked_(sheet, [
       timestamp,
@@ -1863,6 +1924,7 @@ function handleOnlineOrderPost_(e) {
   } finally {
     orderLock.releaseLock();
   }
+  rememberSavedOrderForEvent_(param_(e, 'EventID'), validated.phone, orderId);
 
   // Server-side tracking: keep the shopper's IP + browser for the Purchase event that is
   // sent later, when the order is Confirmed. Never blocks the order.
@@ -3956,8 +4018,8 @@ function findStuckOrders_(data, nowMs) {
     var courier = String(r[12] || '').toLowerCase().trim();
     var sent = !!(String(r[10] || '').trim() || String(r[11] || '').trim());
     var total = parseSignedOrderAmount_(r[7]);
-    if ((st === 'pending' || st === 'confirmed') && !sent && age >= STUCK_UNSENT_DAYS_) {
-      out.push({ orderId: id, total: total, age: age, why: age + ' দিন ধরে ' + (st === 'pending' ? 'Pending' : 'Confirmed') + ', কুরিয়ারে পাঠানো হয়নি' });
+    if ((st === 'pending' || st === 'confirmed' || st === 'processing') && !sent && age >= STUCK_UNSENT_DAYS_) {
+      out.push({ orderId: id, total: total, age: age, why: age + ' দিন ধরে ' + (st === 'pending' ? 'Pending' : (st === 'processing' ? 'Processing' : 'Confirmed')) + ', কুরিয়ারে পাঠানো হয়নি' });
     } else if (sent && age >= STUCK_COURIER_DAYS_ && !/^(delivered|partial_delivered|cancelled)$/.test(courier) && st !== 'cancelled' && st !== 'fake') {
       out.push({ orderId: id, total: total, age: age, why: age + ' দিন আগে কুরিয়ারে গেছে, Steadfast স্ট্যাটাস এখনো "' + (courier || 'নেই') + '"' });
     }

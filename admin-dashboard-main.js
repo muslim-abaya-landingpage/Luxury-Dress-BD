@@ -5,7 +5,7 @@
   function statusClass(s) {
     var x = String(s || "").toLowerCase();
     if (x.indexOf("ship") !== -1) return "shipped";
-    if (x.indexOf("confirm") !== -1) return "confirmed";
+    if (x.indexOf("confirm") !== -1 || x.indexOf("process") !== -1) return "confirmed";
     return "pending";
   }
 
@@ -38,7 +38,7 @@
     if (!x || x.indexOf("pend") !== -1) return "pending";
     if (x.indexOf("deliver") !== -1) return "delivered";
     if (x.indexOf("ship") !== -1) return "shipped";
-    if (x.indexOf("confirm") !== -1) return "confirmed";
+    if (x.indexOf("confirm") !== -1 || x.indexOf("process") !== -1) return "confirmed";
     if (x.indexOf("cancel") !== -1) return "cancelled";
     if (x.indexOf("return") !== -1) return "returned";
     return "other";

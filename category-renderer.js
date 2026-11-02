@@ -463,6 +463,54 @@ function buildShopTemplateCartLine(item, qtyToAdd, categoryKeyOpt, selectedTypeO
     categoryLabel: item.categoryLabel || ""
   });
 }
+/**
+ * Order Now (popup checkout): the same line Add to Cart would make, with the same variation and stock
+ * checks, but the cart is left alone. Returns { line, cap } (cap = units in stock, null = not tracked)
+ * or null after telling the customer why it cannot be ordered.
+ */
+function shopPrepareDirectOrderLine(item, qtyToAdd, sizeValue, categoryKeyOpt, bodyValueOpt, sizedOpt) {
+  if (!productIsInStock(item)) return null;
+  var line = buildShopCartLineItem(item, qtyToAdd, sizeValue, categoryKeyOpt, item._cartType || "", bodyValueOpt, sizedOpt);
+  var pickedVariation = shopLineVariation(item, line);
+  if (pickedVariation && (pickedVariation.enabled === false || pickedVariation.stockStatus === "outofstock")) {
+    alert("দুঃখিত, নির্বাচিত কালার/সাইজটি এখন পাওয়া যাচ্ছে না। অন্য কালার বা সাইজ বেছে নিন।");
+    return null;
+  }
+  var cap = null;
+  var stockQtyFn = window.getStockQty || (window.maCatalog && window.maCatalog.getStockQty);
+  if (typeof stockQtyFn === "function") {
+    var c = stockQtyFn(item, line.size || line.selectedSize || line.color || "", line.color || "");
+    if (c === 0) {
+      alert("দুঃখিত, এই সাইজটি বর্তমানে স্টকে নেই। অন্য সাইজ বেছে নিন।");
+      return null;
+    }
+    if (typeof c === "number") {
+      cap = c;
+      line.quantity = Math.min(parseInt(line.quantity, 10) || 1, c);
+    }
+  }
+  return { line: line, cap: cap };
+}
+function shopGoToCheckoutWithLine(cartItem, qty, selectedSize, categoryKey, selectedBodyValue, sized) {
+  if (!shopCartHasMatchingLine(cartItem, selectedSize, categoryKey, selectedBodyValue, sized)) {
+    shopAddProductToCart(cartItem, qty, selectedSize, categoryKey, selectedBodyValue, sized);
+  }
+  var checkoutHref =
+    typeof window.siteHref === "function" ? window.siteHref("/checkout") : "checkout.html";
+  var cartLines =
+    typeof loadStoreCart === "function" ? loadStoreCart({ readOnly: true }) : [];
+  if (!cartLines.length) {
+    alert("Please add at least one product to your cart.");
+    return;
+  }
+  if (typeof flushStoreCartForCheckout === "function") {
+    flushStoreCartForCheckout(cartLines);
+  } else if (typeof persistStoreCart === "function") {
+    persistStoreCart(cartLines);
+    if (typeof markStoreCartSession === "function") markStoreCartSession();
+  }
+  window.location.href = checkoutHref;
+}
 function shopAddProductToCart(item, qtyToAdd, sizeValue, categoryKeyOpt, bodyValueOpt, sizedOpt) {
   if (!productIsInStock(item)) return;
   var categoryKey =
@@ -1398,9 +1446,6 @@ function pqvHomeCardHtml(p) {
   var dHref = pqvHomeHref("/product/" + encodeURIComponent(p.id || ""));
   var st = productStockStatus(p);
   var outOfStock = st.inStock === false;
-  var msg = pqvHomeWaLink() + "?text=" + encodeURIComponent(
-    productCardWhatsAppOrderText(p, listingCardPrice(p), img)
-  );
   return (
     "<article class='ah-card" +
     (outOfStock ? " ah-card-oos" : "") +
@@ -1449,9 +1494,10 @@ function pqvHomeCardHtml(p) {
         "<span data-cart-label>Add to Cart</span></button>") +
     (outOfStock
       ? ""
-      : "<a class='ah-btn ah-btn-msg' href='" +
-        escapeHtml(msg) +
-        "' target='_blank' rel='noopener'><span>অর্ডার করুন</span></a>") +
+      : // Order Now: the product page, where size/colour are chosen and the popup checkout opens.
+        '<a class="ah-btn ah-btn-msg" href="' +
+        escapeHtml(dHref) +
+        '"><span>অর্ডার করুন</span></a>') +
     "</div>" +
     "</div>" +
     "</article>"
@@ -2731,6 +2777,16 @@ function onGlobalShopCartClick(ev) {
     openProductQuickView(idx);
     return;
   }
+  // Order Now on a grid card: the card's size list is hidden, so when there is a real size choice the
+  // customer picks it in the quick view first (the popup itself never guesses a size).
+  if (!inProductView && action === "buy-now") {
+    var cardSizeSel = root.querySelector('.card-size-select[data-size-idx="' + idx + '"]');
+    if (cardSizeSel && cardSizeSel.options && cardSizeSel.options.length > 1) {
+      ev.preventDefault();
+      openProductQuickView(idx);
+      return;
+    }
+  }
   var scope = inProductView ? pqvScope : root;
   // Size Manager fields: stop here (showing what is missing) until they are filled in correctly.
   var sizeTpl = inProductView ? shopSizeTemplate(products[idx], categoryKey) : null;
@@ -2752,24 +2808,20 @@ function onGlobalShopCartClick(ev) {
   );
 
   if (action === "buy-now") {
-    if (!shopCartHasMatchingLine(cartItem, selectedSize, categoryKey, selectedBodyValue, sized)) {
-      shopAddProductToCart(cartItem, qty, selectedSize, categoryKey, selectedBodyValue, sized);
+    // Order Now opens the on-site popup checkout for this one product; the checkout page stays
+    // the fallback (popup could not load) and the route for the whole cart.
+    if (typeof window.maOpenCheckoutPopup === "function") {
+      var direct = shopPrepareDirectOrderLine(cartItem, qty, selectedSize, categoryKey, selectedBodyValue, sized);
+      if (!direct) return;
+      var opened = window.maOpenCheckoutPopup(direct.line, {
+        stockCap: direct.cap,
+        fallback: function () {
+          shopGoToCheckoutWithLine(cartItem, qty, selectedSize, categoryKey, selectedBodyValue, sized);
+        }
+      });
+      if (opened) return;
     }
-    var checkoutHref =
-      typeof window.siteHref === "function" ? window.siteHref("/checkout") : "checkout.html";
-    var cartLines =
-      typeof loadStoreCart === "function" ? loadStoreCart({ readOnly: true }) : [];
-    if (!cartLines.length) {
-      alert("Please add at least one product to your cart.");
-      return;
-    }
-    if (typeof flushStoreCartForCheckout === "function") {
-      flushStoreCartForCheckout(cartLines);
-    } else if (typeof persistStoreCart === "function") {
-      persistStoreCart(cartLines);
-      if (typeof markStoreCartSession === "function") markStoreCartSession();
-    }
-    window.location.href = checkoutHref;
+    shopGoToCheckoutWithLine(cartItem, qty, selectedSize, categoryKey, selectedBodyValue, sized);
     return;
   }
   shopAddProductToCart(cartItem, qty, selectedSize, categoryKey, selectedBodyValue, sized);
@@ -3581,11 +3633,12 @@ waOrderText +
     '><span class="muslim-abaya-btn-ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M6 6L5 3H2"/></svg></span><span class="ah-btn-spin" aria-hidden="true"></span><span data-cart-label>' +
     (stock.inStock ? "Add to Cart" : "Out of Stock") +
     "</span></button>" +
-    "<a href='" +
-    waLink +
-    "?text=" +
-   waOrderText +
-"' target='_blank' rel='noopener' class='muslim-abaya-btn muslim-abaya-btn-msg' onclick='event.stopPropagation()'><span lang='bn'>অর্ডার করুন</span></a>" +
+    // Order Now → on-site popup checkout (the quick view opens first when a size/colour must be chosen).
+    '<button type="button" class="muslim-abaya-btn muslim-abaya-btn-msg" data-product-idx="' +
+    idx +
+    '" data-action="buy-now"' +
+    (stock.inStock ? "" : " disabled") +
+    "><span lang='bn'>অর্ডার করুন</span></button>" +
 "</div></div></article>"
 );
 

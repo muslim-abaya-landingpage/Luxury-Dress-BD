@@ -29,7 +29,7 @@ var ADM_COL_SOURCE = 45;
 var ADM_COL_COURIER = 46;
 var ADM_LAST_COL = 46;
 
-var ADM_STATUSES = ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled', 'Fake'];
+var ADM_STATUSES = ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Fake'];
 
 function admExtraHeaders_() {
   return ['Admin Note', 'Courier Note', 'Advance', 'Discount', 'Assigned To', 'Source', 'Courier'];
@@ -754,7 +754,7 @@ function adminManualOrderCreate_(e) {
 
 /* ───────────── Full "Add new order" page (admin-order-new.html), WooCommerce-style ───────────── */
 
-var ADM_CREATE_STATUSES = ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'];
+var ADM_CREATE_STATUSES = ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
 var ADM_SOURCES = ['Website', 'Facebook', 'WhatsApp', 'Phone', 'Instagram', 'TikTok', 'Walk-in', 'Other'];
 
 /** Items from the page: [{id,name,size,type,price,qty,category}] → validated cart items (same shape as the website cart). */

@@ -7,7 +7,7 @@
 (function (root) {
   "use strict";
 
-  var STATUSES = ["Pending", "Confirmed", "Shipped", "Delivered", "Cancelled"];
+  var STATUSES = ["Pending", "Confirmed", "Processing", "Shipped", "Delivered", "Cancelled"];
 
   function num(v) { var n = Number(String(v == null ? "" : v).replace(/[^\d.\-]/g, "")); return isFinite(n) ? n : 0; }
   function money(n) { return "৳" + Math.round(Number(n) || 0).toLocaleString("en-US"); }
