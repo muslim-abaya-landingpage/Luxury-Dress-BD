@@ -593,9 +593,9 @@ body {
     <!-- First-paint header height = the real mounted header height (measured 2026-11: 180px up to 449px wide, 164px up to 1023px, 158px above). The old 148px fallback made the hero and everything under it jump down ~31px when site-header.js mounted the header (layout shift). site-header.js still sets the exact value. -->
     <style id="header-height-fallback">:root{--site-header-h:158px}@media(max-width:1023px){:root{--site-header-h:164px}}@media(max-width:449px){:root{--site-header-h:180px}}#site-header-mount{min-height:var(--site-header-h,158px)}</style>
     <!-- Product cards render only after this stylesheet loads (no unstyled flash). As a print-media link alone it was fetched at the lowest priority, so preload it. -->
-    <link rel="preload" as="style" href="index-home-muslim-abaya.min.css?v=e93c15c0e750f01a">
-    <link rel="stylesheet" href="index-home-muslim-abaya.min.css?v=e93c15c0e750f01a" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="index-home-muslim-abaya.min.css?v=e93c15c0e750f01a"></noscript>
+    <link rel="preload" as="style" href="index-home-muslim-abaya.min.css?v=c3d830da091cf234">
+    <link rel="stylesheet" href="index-home-muslim-abaya.min.css?v=c3d830da091cf234" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="index-home-muslim-abaya.min.css?v=c3d830da091cf234"></noscript>
     <link rel="stylesheet" href="home-glass.css?v=cc94b346a7cdbd75" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="home-glass.css?v=cc94b346a7cdbd75"></noscript>
     <link rel="stylesheet" href="site-footer.min.css?v=d4a7be9590138da6" media="print" onload="this.media='all'">

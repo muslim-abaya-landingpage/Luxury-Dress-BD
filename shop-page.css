@@ -318,9 +318,10 @@ body.shop-page .muslim-abaya-btn-msg {
   background: #4a4a4a;
   color: #fff;
   font-family: "Inter", "Hind Siliguri", system-ui, sans-serif;
-  font-weight: 500;
-  font-size: 15px;
+  font-weight: 700;
+  font-size: 16px;
   letter-spacing: .01em;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, .24);
   cursor: pointer;
   transition: background 250ms ease, color 250ms ease, box-shadow 250ms ease, transform 250ms ease;
 }
@@ -423,6 +424,10 @@ body.shop-page .card-actions-muslim-abaya .ma-qty-stepper__btn:disabled {
     height: 48px;
     font-size: 14px;
     padding: 0 8px;
+  }
+  body.shop-page .muslim-abaya-btn-msg {
+    font-size: 16px;
+    font-weight: 700;
   }
 
   body.shop-page .muslim-abaya-btn-cart.is-oos,
