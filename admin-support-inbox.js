@@ -518,7 +518,8 @@
   $("loginForm").addEventListener("submit", async function (event) {
     event.preventDefault(); setNotice("সাইন ইন হচ্ছে…");
     try {
-      var result = await requireClient().auth.signInWithPassword({ email: $("email").value.trim().toLowerCase(), password: $("password").value });
+      var captchaToken = await window.maSupportCaptcha.getToken($("loginCaptcha"), "agent_login");
+      var result = await requireClient().auth.signInWithPassword({ email: $("email").value.trim().toLowerCase(), password: $("password").value, options: { captchaToken: captchaToken } });
       if (result.error) throw result.error;
       setNotice(""); await openInbox(result.data.user);
     } catch (error) { setConnected(false); setNotice(error.message || "সাইন ইন ব্যর্থ হয়েছে।"); }
@@ -528,7 +529,8 @@
     if (!email || password.length < 8) { setNotice("ইমেইল ও কমপক্ষে ৮ অক্ষরের পাসওয়ার্ড দিন।"); return; }
     setNotice("অ্যাকাউন্ট খোলা হচ্ছে…");
     try {
-      var result = await requireClient().auth.signUp({ email: email, password: password });
+      var captchaToken = await window.maSupportCaptcha.getToken($("loginCaptcha"), "agent_signup");
+      var result = await requireClient().auth.signUp({ email: email, password: password, options: { captchaToken: captchaToken } });
       if (result.error) throw result.error;
       if (result.data.session) { setNotice("অ্যাকাউন্ট খোলা হয়েছে। মালিক অনুমোদন দিলে সাইন ইন করুন।", true); await requireClient().auth.signOut(); }
       else setNotice("অ্যাকাউন্ট খোলা হয়েছে। ইমেইল যাচাই করে মালিককে অনুমোদন দিতে বলুন।", true);
