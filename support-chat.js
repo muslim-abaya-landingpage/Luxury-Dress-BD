@@ -146,6 +146,21 @@
     ".ma-chat-attach{flex:none;display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border:1px solid #d9d9d9;border-radius:12px;background:#fff;cursor:pointer;font-size:17px}.ma-chat-attach[hidden]{display:none}" +
     ".ma-chat-message img{display:block;max-width:100%;max-height:240px;border-radius:9px;margin-top:6px;background:#eee}" +
     ".ma-chat-typing{min-height:16px;font-size:11px;color:#8a8170;font-style:italic;padding:2px 2px 0}" +
+    /* Compact layout: shorter panel on desktop and mobile */
+    ".ma-chat-panel{width:min(370px,calc(100vw - 28px));max-height:min(500px,calc(100vh - 120px))}" +
+    ".ma-chat-head{padding:9px 12px;gap:9px}.ma-chat-avatar{width:34px;height:34px}.ma-chat-icon-btn{width:32px;height:32px;border-radius:9px}.ma-chat-icon-btn svg{width:16px;height:16px}" +
+    ".ma-chat-title strong{font-size:14px}.ma-chat-title span{font-size:11.5px}" +
+    ".ma-chat-body{padding:12px 12px 8px}" +
+    ".ma-chat-welcome{margin:0 0 12px}.ma-chat-welcome img{width:28px;height:28px}.ma-chat-greet{padding:9px 12px}.ma-chat-greet strong{font-size:15px}.ma-chat-greet p{font-size:13px;margin-top:2px}" +
+    ".ma-chat-section-title{margin:0 0 7px;font-size:12.5px}" +
+    ".ma-chat-chips{flex-wrap:nowrap;overflow-x:auto;gap:6px;margin:0 -12px 4px;padding:0 12px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.ma-chat-chips::-webkit-scrollbar{display:none}" +
+    ".ma-chat-chip{flex:none;white-space:nowrap;padding:7px 11px;font-size:12.5px;min-height:0}" +
+    ".ma-chat-foot{padding:8px 10px 9px}" +
+    ".ma-chat-input{min-height:40px;padding:9px 11px}.ma-chat-send,.ma-chat-attach{height:40px}.ma-chat-attach{width:40px}" +
+    ".ma-chat-alt{margin-top:7px;gap:6px}.ma-chat-alt a{height:32px;font-size:12.5px;border-radius:9px}.ma-chat-alt svg{width:16px;height:16px}" +
+    ".ma-chat-note{margin-top:5px;font-size:10.5px}" +
+    ".ma-chat-panel.is-expanded{max-height:min(720px,calc(100vh - 100px))}" +
+    "@media (max-width:560px){.ma-chat-panel{max-height:min(66dvh,500px)}.ma-chat-chip{min-height:36px}.ma-chat-head{padding:9px 10px}.ma-chat-body{padding:10px 10px 6px}.ma-chat-chips{margin:0 -10px 4px;padding:0 10px 6px}.ma-chat-foot{padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px))}.ma-chat-panel.is-expanded{max-height:none}}" +
     "@media (prefers-reduced-motion:reduce){.ma-chat-fab,.ma-chat-chip{transition:none}}";
 
   var ICON_CHAT =
@@ -260,7 +275,7 @@
     greetName.textContent = brand + " টিম";
     greet.appendChild(greetName);
     greet.appendChild(el("strong", "", "আসসালামু আলাইকুম 👋"));
-    greet.appendChild(el("p", "", "আমাদের সাথে যোগাযোগের জন্য ধন্যবাদ! অর্ডার, সাইজ, ডেলিভারি, যেকোনো প্রশ্ন নিচে লিখুন। আমাদের টিম এখানেই উত্তর দেবে।"));
+    greet.appendChild(el("p", "", "অর্ডার, সাইজ বা ডেলিভারি, যেকোনো প্রশ্ন লিখুন। আমরা এখানেই উত্তর দেবো।"));
     welcome.appendChild(greet);
     var sectionTitle = el("p", "ma-chat-section-title", "কী নিয়ে সাহায্য লাগবে?");
     var chips = el("div", "ma-chat-chips");

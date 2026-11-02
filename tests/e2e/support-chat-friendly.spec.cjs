@@ -34,3 +34,17 @@ test('mobile: chat header and close button are on top of the site header', async
   await closeBtn.click();
   await expect(page.locator('#maChatPanel')).not.toHaveClass(/is-open/);
 });
+
+test('chat panel stays compact on desktop and mobile', async ({ page }) => {
+  for (const vp of [{ width: 1280, height: 800 }, { width: 390, height: 844 }, { width: 360, height: 640 }]) {
+    await page.setViewportSize(vp);
+    await openChat(page);
+    const box = await page.locator('#maChatPanel').boundingBox();
+    expect(box.height).toBeLessThanOrEqual(500);
+    expect(box.x).toBeGreaterThanOrEqual(0);
+    expect(box.x + box.width).toBeLessThanOrEqual(vp.width);
+    // quick-help chips are one swipeable row
+    const tops = await page.locator('.ma-chat-chip').evaluateAll((els) => [...new Set(els.map((e) => Math.round(e.offsetTop)))]);
+    expect(tops.length).toBe(1);
+  }
+});
