@@ -20,6 +20,13 @@ for(const p of catalog.products){let size;
  const expected=p.prices?p.prices[it.productType]:p.price;
  assert.equal(c.opsLinePrice_(it,p),expected,p.id);assert.equal(it.price,expected,p.id+' overwrites client price');
 }
+const dr4=catalog.products.find(p=>p.id==='DR-4');
+assert(dr4,'DR-4 must be present in the generated catalog validation model');
+let dr4Size='Body '+dr4.bodySizes[0]+' · Length '+dr4.dressLengths[0];
+if(dr4.sleeveSizes&&dr4.sleeveSizes.length)dr4Size+=' · Sleeve '+dr4.sleeveSizes[0];
+if(dr4.palazzoLengths&&dr4.palazzoLengths.length)dr4Size+=' · Palazzo '+dr4.palazzoLengths[0];
+const dr4Line={id:dr4.id,qty:1,price:1,size:dr4Size};
+assert.equal(c.opsLinePrice_(dr4Line,dr4),dr4.price,'DR-4 free-size combination must follow the catalog bodySizes/dressLengths model');
 const ab={id:'TEST-ABAYA',name:'Test Abaya',category:'abaya',kind:'abaya',price:1750,prices:{'Full Set':1750,'Abaya Only':1550},bodySizes:['42'],lengths:['52'],custom:[{length:59,lengthExtra:250,width:49,widthExtra:250},{length:60,lengthExtra:250,width:50,widthExtra:250}]};
 assert.equal(c.opsLinePrice_({qty:1,size:'Body 42 · Length 52',productType:'FullSet'},ab),ab.prices['Full Set']);
 assert.throws(()=>c.opsLinePrice_({qty:1,size:'52',productType:'Full Set'},ab),/INVALID_SIZE/);
