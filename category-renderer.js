@@ -1495,9 +1495,9 @@ function pqvHomeCardHtml(p) {
     (outOfStock
       ? ""
       : // Order Now: the product page, where size/colour are chosen and the popup checkout opens.
-        "<a class='ah-btn ah-btn-msg' href='" +
+        '<a class="ah-btn ah-btn-msg" href="' +
         escapeHtml(dHref) +
-        "'><span>অর্ডার করুন</span></a>") +
+        '"><span>অর্ডার করুন</span></a>') +
     "</div>" +
     "</div>" +
     "</article>"
