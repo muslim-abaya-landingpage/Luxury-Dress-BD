@@ -33,7 +33,7 @@ window.PRODUCT_LINKS_DATA = {
     "/images/uploads/tp-6-1793221122854.webp",
     "/images/white-pink-floral-print-womens-co-ord-set-premium.webp",
     "/images/uploads/dr-8-1793388836531.webp",
-    "/images/premium-blue-floral-co-ord-set.webp",
+    "https://images.muslimabaya.com/images/uploads/dr-9-1793650456408-0eb28448bd4d13901821.webp",
     "/images/premium-navy-blue-floral-co-ord-set.webp",
     "/images/premium-pink-floral-co-ord-set.webp",
     "/images/Gowns/black-cream-floral-womens-two-piece-dress.jpg",
