@@ -144,6 +144,7 @@
     ".ma-chat-contact .ma-contact-actions{grid-column:1/-1;display:flex;gap:6px;justify-content:flex-end}" +
     ".ma-chat-contact button{min-height:34px;border:1px solid #dedbd4;border-radius:9px;padding:0 12px;background:#fff;font:600 12px system-ui;cursor:pointer}.ma-chat-contact button[type=submit]{background:#0a7d3b;border-color:#0a7d3b;color:#fff}" +
     ".ma-chat-attach{flex:none;display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border:1px solid #d9d9d9;border-radius:12px;background:#fff;cursor:pointer;font-size:17px}.ma-chat-attach[hidden]{display:none}" +
+    ".ma-chat-image-draft{display:flex;align-items:center;gap:10px;margin:0 10px 8px;padding:8px;border:1px solid #e8e2d6;border-radius:12px;background:#fffdf8}.ma-chat-image-draft[hidden]{display:none!important}.ma-chat-image-draft img{width:48px;height:48px;object-fit:cover;border-radius:8px;background:#eee}.ma-chat-image-draft-copy{min-width:0;flex:1}.ma-chat-image-draft-copy strong{display:block;font-size:12px}.ma-chat-image-draft-copy small{display:block;color:#777;font-size:10.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ma-chat-image-remove{flex:none;width:34px;height:34px;border:1px solid #e4d8d5;border-radius:9px;background:#fff;color:#9c332c;font-size:18px;line-height:1}.ma-chat-image-remove:focus-visible{outline:2px solid #b59657;outline-offset:2}" +
     ".ma-chat-message img{display:block;max-width:100%;max-height:240px;border-radius:9px;margin-top:6px;background:#eee}" +
     ".ma-chat-typing{min-height:16px;font-size:11px;color:#8a8170;font-style:italic;padding:2px 2px 0}" +
     /* Compact layout: shorter panel on desktop and mobile */
@@ -378,6 +379,7 @@
     body.appendChild(typingLine);
     var foot = el("div", "ma-chat-foot");
     var row = el("div", "ma-chat-row");
+    var pendingImage = null, pendingImageUrl = "";
     var input = el("textarea", "ma-chat-input");
     input.rows = 1;
     input.maxLength = 500;
@@ -396,6 +398,20 @@
     attach.title = "ছবি পাঠান (সর্বোচ্চ ৫MB)";
     attach.setAttribute("aria-label", "ছবি পাঠান");
     attach.hidden = !liveEnabled;
+    var imageDraft = el("div", "ma-chat-image-draft");
+    imageDraft.hidden = true;
+    imageDraft.setAttribute("aria-live", "polite");
+    var imagePreview = el("img");
+    imagePreview.alt = "পাঠানোর জন্য নির্বাচিত ছবির প্রিভিউ";
+    var imageCopy = el("div", "ma-chat-image-draft-copy");
+    imageCopy.appendChild(el("strong", "", "ছবি পাঠানোর জন্য প্রস্তুত"));
+    var imageName = el("small");
+    imageCopy.appendChild(imageName);
+    var removeImage = el("button", "ma-chat-image-remove", "×");
+    removeImage.type = "button";
+    removeImage.setAttribute("aria-label", "ছবি সরান");
+    imageDraft.append(imagePreview, imageCopy, removeImage);
+    foot.appendChild(imageDraft);
     row.appendChild(fileInput);
     row.appendChild(attach);
     row.appendChild(input);
@@ -634,15 +650,55 @@
         note.textContent = "এই মুহূর্তে লাইভ চ্যাটে সংযোগ হচ্ছে না। WhatsApp বা Messenger-এ লিখতে পারেন।";
       }
     }
+    function clearPendingImage() {
+      if (pendingImageUrl && global.URL && global.URL.revokeObjectURL) global.URL.revokeObjectURL(pendingImageUrl);
+      pendingImage = null; pendingImageUrl = "";
+      imagePreview.removeAttribute("src"); imageName.textContent = "";
+      imageDraft.hidden = true; fileInput.value = "";
+    }
+    function showPendingImage(file) {
+      clearPendingImage();
+      pendingImage = file;
+      imageName.textContent = file.name || "ছবি";
+      if (global.URL && global.URL.createObjectURL) {
+        pendingImageUrl = global.URL.createObjectURL(file);
+        imagePreview.src = pendingImageUrl;
+      }
+      imageDraft.hidden = false;
+    }
+    removeImage.addEventListener("click", function () {
+      clearPendingImage();
+      note.textContent = "ছবিটি মেসেজ থেকে সরানো হয়েছে।";
+      attach.focus();
+    });
     async function sendLiveMessage() {
       var messageText = String(input.value || "").trim();
-      if (!messageText) { input.focus(); return; }
+      if (!messageText && !pendingImage) { input.focus(); return; }
       if (isSendingMessage) return;
       isSendingMessage = true;
       send.setAttribute("aria-disabled", "true");
       send.style.opacity = ".65";
       try {
         var state = await ensureLiveConversation();
+        if (pendingImage) {
+          if (!hasAttachmentColumn) throw new Error("Attachments unavailable");
+          var ext = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" }[pendingImage.type];
+          var rand = global.crypto && global.crypto.randomUUID ? global.crypto.randomUUID() : Date.now() + "-" + Math.random().toString(36).slice(2);
+          var path = state.id + "/" + rand + "." + ext;
+          var upload = await state.client.storage.from("support-attachments").upload(path, pendingImage, { contentType: pendingImage.type, upsert: false });
+          if (upload.error) throw upload.error;
+          var withImage = await state.client.from("support_messages").insert({
+            conversation_id: state.id, sender_id: currentUser.id, sender_role: "customer",
+            body: messageText || "📷 ছবি", attachment_path: path
+          }).select(messageColumns()).single();
+          if (withImage.error) throw withImage.error;
+          appendMessage(withImage.data);
+          notifyTeam(state.client, withImage.data.id);
+          clearPendingImage();
+          input.value = ""; updateLinks();
+          note.textContent = "ছবিসহ মেসেজ পৌঁছেছে ✓ আমাদের টিম উত্তর দিলে এখানেই দেখবেন।";
+          return;
+        }
         var inserted = await state.client.from("support_messages").insert({
           conversation_id: state.id,
           sender_id: currentUser.id,
@@ -750,38 +806,13 @@
       }
     });
     attach.addEventListener("click", function () { fileInput.click(); });
-    fileInput.addEventListener("change", async function () {
+    fileInput.addEventListener("change", function () {
       var file = fileInput.files && fileInput.files[0];
-      fileInput.value = "";
       if (!file || !liveEnabled) return;
-      if (!/^image\/(jpeg|png|webp|gif)$/.test(file.type)) { note.textContent = "শুধু JPG, PNG, WEBP বা GIF ছবি পাঠানো যাবে।"; return; }
-      if (file.size > 5 * 1024 * 1024) { note.textContent = "ছবিটি ৫MB-এর বেশি। ছোট ছবি দিন।"; return; }
-      attach.disabled = true;
-      attach.textContent = "⏳";
-      try {
-        var state = await ensureLiveConversation();
-        if (!hasAttachmentColumn) throw new Error("Attachments unavailable");
-        var ext = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" }[file.type];
-        var rand = global.crypto && global.crypto.randomUUID ? global.crypto.randomUUID() : Date.now() + "-" + Math.random().toString(36).slice(2);
-        var path = state.id + "/" + rand + "." + ext;
-        var up = await state.client.storage.from("support-attachments").upload(path, file, { contentType: file.type, upsert: false });
-        if (up.error) throw up.error;
-        var caption = String(input.value || "").trim().slice(0, 500) || "📷 ছবি";
-        var inserted = await state.client.from("support_messages").insert({
-          conversation_id: state.id, sender_id: currentUser.id, sender_role: "customer", body: caption, attachment_path: path
-        }).select(messageColumns()).single();
-        if (inserted.error) throw inserted.error;
-        appendMessage(inserted.data);
-        notifyTeam(state.client, inserted.data.id);
-        input.value = "";
-        updateLinks();
-        note.textContent = "ছবি পাঠানো হয়েছে।";
-      } catch (_) {
-        note.textContent = "ছবি পাঠানো যায়নি। একটু পরে আবার চেষ্টা করুন বা WhatsApp-এ পাঠান।";
-      } finally {
-        attach.disabled = false;
-        attach.textContent = "📎";
-      }
+      if (!/^image\/(jpeg|png|webp|gif)$/.test(file.type)) { fileInput.value = ""; note.textContent = "শুধু JPG, PNG, WEBP বা GIF ছবি পাঠানো যাবে।"; return; }
+      if (file.size > 5 * 1024 * 1024) { fileInput.value = ""; note.textContent = "ছবিটি ৫MB-এর বেশি। ছোট ছবি দিন।"; return; }
+      showPendingImage(file);
+      note.textContent = "ছবিটি প্রিভিউ করুন; × চাপলে সরবে। পাঠাতে মেসেজ বাটন চাপুন।";
     });
     input.addEventListener("keydown", function (ev) {
       if (ev.key === "Enter" && !ev.shiftKey) {

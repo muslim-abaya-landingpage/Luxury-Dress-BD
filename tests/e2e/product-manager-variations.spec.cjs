@@ -11,13 +11,14 @@ async function stub(page) {
   }));
 }
 
-async function openMaroon(page, answers) {
+async function openMaroon(page, answers, beforeNavigation) {
   await stub(page);
   page.on('dialog', (d) => {
     const m = d.message();
     const hit = Object.keys(answers || {}).find((k) => m.indexOf(k) !== -1);
     d.accept(hit ? answers[hit] : undefined);
   });
+  if (beforeNavigation) await beforeNavigation();
   await page.goto('/product-manager.html');
   await page.waitForTimeout(500);
   await page.evaluate(() => { window.MaCatalogPublisher = Object.assign({}, window.MaCatalogPublisher, { isReady: () => true, publish: (files) => { window.__published = files; return Promise.resolve({ ok: true }); } }); });
@@ -133,4 +134,64 @@ test('ticks changed on Attributes are kept when opening Variations without press
   await expect(page.locator('#pmEditNote')).toContainText('Attributes saved automatically');
   await page.click('[data-pv="generate"]');
   await expect(page.locator('[data-epanel="variations"] .pmw-var')).toHaveCount(2); // Long 50, 52 only
+});
+
+test('variation image remains attached to the same photo after gallery reorder', async ({ page }) => {
+  await openMaroon(page, undefined, async () => {
+    await page.route('**/category-products.js*', async (route) => {
+      const response = await route.fetch();
+      const body = (await response.text()).replace(
+        'image: "/images/Maroon Abaya Set...jpeg",',
+        'image: "/images/Maroon Abaya Set...jpeg", images: ["/images/e2e-photo-a.webp", "/images/e2e-photo-b.webp"],'
+      );
+      await route.fulfill({ response, body });
+    });
+  });
+  await page.selectOption('#pmProductType', 'variable');
+  await page.locator('[data-etab="variations"]').click();
+  await page.locator('[data-pv="generate"]').click();
+  const variation = page.locator('[data-epanel="variations"] .pmw-var').first();
+  await variation.locator('[data-pv="edit"]').click();
+  await variation.locator('[data-pv="picker"]').click();
+  await variation.locator('[data-pv="pick"][data-src="/images/e2e-photo-b.webp"]').click();
+  await expect(variation.locator('.pmw-img img')).toHaveAttribute('src', '/images/e2e-photo-b.webp');
+
+  // Reorder gallery photos through the same UI controls used by administrators.
+  await page.locator('[data-etab="general"]').click();
+  const rightArrow = page.locator('.pm-gallery-move[data-gi="0"][data-dir="1"]');
+  if (await rightArrow.count()) await rightArrow.evaluate((button) => button.click());
+  await page.locator('[data-etab="variations"]').click();
+  await expect(page.locator('[data-epanel="variations"] .pmw-var').first().locator('.pmw-img img'))
+    .toHaveAttribute('src', '/images/e2e-photo-b.webp');
+});
+
+test('renaming a color updates the selected variation key before publish', async ({ page }) => {
+  await openMaroon(page);
+  await page.locator('[data-etab="attributes"]').click();
+  await page.locator('#pmColorAdd').click();
+  const secondColor = page.locator('#pmColorVariationList [data-color-row]:last-child');
+  await secondColor.locator('[data-color-field="label"]').fill('Black');
+  await secondColor.locator('[data-color-photo]').first().click();
+  await page.selectOption('#pmProductType', 'variable');
+  await page.locator('[data-etab="variations"]').click();
+  await page.locator('[data-pv="generate"]').click();
+  const first = page.locator('[data-epanel="variations"] .pmw-var').first();
+  await first.locator('[data-pv="edit"]').click();
+
+  // Change the product's color label (the editor derives its variation key from that label).
+  await page.locator('[data-etab="attributes"]').click();
+  const colorLabel = page.locator('#pmColorVariationList [data-color-field="label"]').first();
+  await colorLabel.fill('Deep Maroon');
+  await colorLabel.dispatchEvent('change');
+  await page.locator('[data-etab="variations"]').click();
+
+  const colorSelects = page.locator('[data-epanel="variations"] .pmw-var [data-pv="attr"][data-attr="color"]');
+  await expect(colorSelects.first().locator('option[value="deep-maroon"]')).toHaveCount(1);
+  for (let i = 0; i < await colorSelects.count(); i++) {
+    if (await colorSelects.nth(i).inputValue() === 'maroon') await colorSelects.nth(i).selectOption('deep-maroon');
+  }
+  await page.locator('#pmEditBarSave').click();
+  const block = await publishedBlock(page);
+  expect(block).toContain('"color":"deep-maroon"');
+  expect(block).not.toContain('"color":"maroon"');
 });

@@ -21,6 +21,25 @@ test('chat greets in Bangla and chips fill a Bangla message', async ({ page }) =
   await expect(page.locator('.ma-chat-order-form')).toBeVisible();
 });
 
+test('image attachment is previewed as a draft and can be removed before sending', async ({ page }) => {
+  await openChat(page);
+  const file = { name: 'customer-photo.png', mimeType: 'image/png', buffer: Buffer.from('fake-png-for-preview') };
+  await page.locator('.ma-chat-panel input[type="file"]').setInputFiles(file);
+  const draft = page.locator('.ma-chat-image-draft');
+  await expect(draft).toBeVisible();
+  await expect(draft.locator('img')).toHaveAttribute('alt', 'পাঠানোর জন্য নির্বাচিত ছবির প্রিভিউ');
+  await expect(draft).toContainText('customer-photo.png');
+  await expect(page.locator('.ma-chat-transcript .ma-chat-message')).toHaveCount(0);
+  await page.locator('.ma-chat-panel input[type="file"]').setInputFiles({
+    name: 'replacement-photo.webp', mimeType: 'image/webp', buffer: Buffer.from('replacement-image')
+  });
+  await expect(draft).toContainText('replacement-photo.webp');
+  await expect(draft).not.toContainText('customer-photo.png');
+  await page.getByRole('button', { name: 'ছবি সরান' }).click();
+  await expect(draft).toBeHidden();
+  await expect(page.locator('.ma-chat-transcript .ma-chat-message')).toHaveCount(0);
+});
+
 test('mobile: chat header and close button are on top of the site header', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await openChat(page);
