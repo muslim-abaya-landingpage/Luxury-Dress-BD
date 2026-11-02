@@ -1435,7 +1435,7 @@ function pqvHomeCardHtml(p) {
       ? ""
       : "<a class='ah-btn ah-btn-msg' href='" +
         escapeHtml(msg) +
-        "' target='_blank' rel='noopener'><span>Send Message</span></a>") +
+        "' target='_blank' rel='noopener'><span>অর্ডার করুন</span></a>") +
     "</div>" +
     "</div>" +
     "</article>"
@@ -3566,7 +3566,7 @@ encodeURIComponent("I want to order " + p.name) +
     waLink +
     "?text=" +
    encodeURIComponent("I want to order " + p.name) +
-"' target='_blank' rel='noopener' class='muslim-abaya-btn muslim-abaya-btn-msg' onclick='event.stopPropagation()'><span lang='en'>Send Message</span></a>" +
+"' target='_blank' rel='noopener' class='muslim-abaya-btn muslim-abaya-btn-msg' onclick='event.stopPropagation()'><span lang='bn'>অর্ডার করুন</span></a>" +
 "</div></div></article>"
 );
 

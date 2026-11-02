@@ -306,7 +306,7 @@
         ? ""
         : "<a class='ah-btn ah-btn-msg' href='" +
           escapeHtml(msg) +
-          "' target='_blank' rel='noopener'><span>Send Message</span></a>") +
+          "' target='_blank' rel='noopener'><span>অর্ডার করুন</span></a>") +
       "</div>" +
       "</div>" +
       "</article>"
