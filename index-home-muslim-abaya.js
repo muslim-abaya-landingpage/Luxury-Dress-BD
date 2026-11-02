@@ -257,13 +257,6 @@
     var dHref = detailHref(sec, p);
     var outOfStock = isOutOfStock(p);
     var st = stockStatus(p);
-    var msgText = [
-      "আসসালামু আলাইকুম, আমি এই পণ্যটি অর্ডার করতে চাই:",
-      "পণ্যের নাম: " + p.name,
-      "দাম: ৳" + listingPrice(p),
-      "ছবির লিংক: " + homeAbsoluteUrl(img)
-    ].join("\n");
-    var msg = waLink() + "?text=" + encodeURIComponent(msgText);
     return (
       "<article class='ah-card" +
       (outOfStock ? " ah-card-oos" : "") +
@@ -316,9 +309,10 @@
           "<span data-cart-label>Add to Cart</span></button>") +
       (outOfStock
         ? ""
-        : "<a class='ah-btn ah-btn-msg' href='" +
-          escapeHtml(msg) +
-          "' target='_blank' rel='noopener'><span>অর্ডার করুন</span></a>") +
+        : // Order Now: the product page, where size/colour are chosen and the popup checkout opens.
+          "<a class='ah-btn ah-btn-msg' href='" +
+          escapeHtml(dHref) +
+          "'><span>অর্ডার করুন</span></a>") +
       "</div>" +
       "</div>" +
       "</article>"

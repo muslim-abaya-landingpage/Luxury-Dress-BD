@@ -35,7 +35,7 @@
   function statusKey(status) {
     var value = String(status || "").trim().toLowerCase();
     if (value.indexOf("pend") !== -1 || value.indexOf("অপেক্ষ") !== -1) return "pending";
-    if (value.indexOf("confirm") !== -1 || value.indexOf("নিশ্চিত") !== -1) return "confirmed";
+    if (value.indexOf("confirm") !== -1 || value.indexOf("নিশ্চিত") !== -1 || value.indexOf("process") !== -1) return "confirmed";
     if (value.indexOf("ship") !== -1 || value.indexOf("কুরিয়ার") !== -1) return "shipped";
     return "other";
   }
