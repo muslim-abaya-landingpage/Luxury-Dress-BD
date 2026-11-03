@@ -3327,7 +3327,7 @@ function wrapProductImageLink(innerHtml, p) {
 }
 function getCategoryFallbackImage(categoryKey) {
   var fallbacks = {
-    abaya: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/Maroon%20Abaya%20Set.jpeg",
+    abaya: "images/Maroon Abaya Set.jpeg",
     "premium-two-piece": "images/premium-pink-floral-co-ord-set.webp",
     "cover-up": "images/Royal-Blue-Golden-Floral-Print.jpeg",
     "tops-kurti": "images/Black-White-Polka-Dots.jpeg",
@@ -3335,7 +3335,7 @@ function getCategoryFallbackImage(categoryKey) {
     karchupi: "images/Black-Base-Rose-Floral.jpeg",
     kaftan: "images/Baby-Pink-Floral-Print.jpeg",
     hijab: "images/Black-White-Polka-Dots.jpeg",
-    panjabi: "https://raw.githubusercontent.com/muslim-abaya-landingpage/Luxury-Dress-BD/main/images/premium-white-islamic-mens-kurta-full-sleeve-outdoor-portrait-bangladesh.webp"
+    panjabi: "images/premium-white-islamic-mens-kurta-full-sleeve-outdoor-portrait-bangladesh.webp"
   };
   return fallbacks[categoryKey] || "images/Baby-Pink-Floral-Print.jpeg";
 }
