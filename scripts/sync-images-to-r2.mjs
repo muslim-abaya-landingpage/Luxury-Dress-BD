@@ -50,7 +50,11 @@ async function remoteObjects() {
 
 async function main() {
   if (!TOKEN) throw new Error('CF_TOKEN is not set');
-  const files = imageFiles();
+  // The Cloudflare API refuses object names containing ".." (HTTP 403, even percent-encoded), e.g.
+  // "Black...jpeg". Those few stay on Pages/GitHub only and are listed here instead of failing the run.
+  const all = imageFiles();
+  const files = all.filter((f) => !f.includes('..'));
+  all.filter((f) => f.includes('..')).forEach((f) => console.log('::warning::not backed up (".." in name):', f));
   const before = await remoteObjects();
   const todo = files.filter((f) => !before.has(f));
   console.log(`images/: ${files.length} files, already in R2: ${files.length - todo.length}, to upload: ${todo.length}`);
@@ -63,8 +67,7 @@ async function main() {
     for (let f = queue.shift(); f; f = queue.shift()) {
       const body = fs.readFileSync(f);
       const type = TYPES[f.split('.').pop().toLowerCase()];
-      // Dots are percent-encoded too: names like "Black...jpeg" are otherwise refused by the API edge (HTTP 403).
-      const key = f.split('/').map((p) => encodeURIComponent(p).replace(/\./g, '%2E')).join('/');
+      const key = f.split('/').map(encodeURIComponent).join('/');
       for (let attempt = 1; ; attempt++) {
         try {
           await cf('PUT', `${API}/${key}`, f, body, { 'Content-Type': type });
@@ -86,7 +89,7 @@ async function main() {
   const sha = crypto.createHash('sha256').update(files.join('\n')).digest('hex').slice(0, 12);
   console.log(`verify: ${files.length - missing.length}/${files.length} in R2, size mismatches: ${wrongSize.length}, list hash ${sha}`);
   failed.forEach((x) => console.error('upload failed', x));
-  if (missing.length || wrongSize.length) {
+  if (missing.length || wrongSize.length || failed.length) {
     missing.forEach((f) => console.error('missing', f));
     wrongSize.forEach((f) => console.error('size differs', f, fs.statSync(f).size, after.get(f)));
     process.exit(1);
