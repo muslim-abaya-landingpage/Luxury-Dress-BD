@@ -2897,3 +2897,35 @@ body.pqv-sc-open {
 /* Product names on cards: no underline (owner preference), only a colour change on hover. */
 .premium-card .card-title-btn, .premium-card .card-title-btn:hover, .premium-card .card-title-btn:focus { text-decoration: none !important; }
 .premium-card .card-title-btn:hover { color: #000; }
+
+/* Compact Abaya selectors: paired measurement cards with short, uniform size chips. */
+.pqv-options--abaya { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.pqv-options--abaya > .pqv-field-body,
+.pqv-options--abaya > .pqv-field-size {
+  grid-column: span 1;
+  min-width: 0;
+  padding: 10px 11px 11px;
+  border: 1px solid #e9e5df;
+  border-radius: 12px;
+  background: #fcfbf9;
+}
+.pqv-options--abaya > .pqv-field:not(.pqv-field-body):not(.pqv-field-size),
+.pqv-options--abaya > .pqv-wholesale { grid-column: 1 / -1; }
+.pqv-options--abaya:not(:has(> .pqv-field-size)) > .pqv-field-body,
+.pqv-options--abaya:not(:has(> .pqv-field-body)):has(> .pqv-field-size):not(:has(> .pqv-field-size ~ .pqv-field-size)) > .pqv-field-size {
+  grid-column: 1 / -1;
+}
+.pqv-options--abaya .pqv-field-label { margin-bottom: 7px; font-size: 10px; letter-spacing: .07em; }
+.pqv-options--abaya .pqv-field-body .pqv-opt-group,
+.pqv-options--abaya .pqv-field-size .pqv-opt-group {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  gap: 6px;
+}
+.pqv-options--abaya .pqv-field-body .pqv-opt-btn,
+.pqv-options--abaya .pqv-field-size .pqv-opt-btn {
+  width: 100%; min-width: 0; min-height: 34px; height: 34px;
+  padding: 0 7px; border-radius: 9px; font-size: 12px; justify-content: center;
+}
+.pqv-options--abaya .pqv-custom-size-btn { grid-column: 1 / -1; }
