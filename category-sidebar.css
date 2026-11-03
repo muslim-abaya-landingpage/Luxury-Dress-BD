@@ -1931,11 +1931,28 @@ body.shop-product-open > main {
 }
 
 .pqv-options {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 16px 12px;
   margin-bottom: 16px;
 }
+/* Size choices use two clear columns across abaya, two-piece and standard products. */
+.pqv-options > .pqv-field-body,
+.pqv-options > .pqv-field-size {
+  grid-column: span 1;
+  min-width: 0;
+}
+.pqv-options > .pqv-field:not(.pqv-field-body):not(.pqv-field-size),
+.pqv-options > .pqv-wholesale {
+  grid-column: 1 / -1;
+}
+.pqv-options > .pqv-field-body:only-child,
+.pqv-options > .pqv-field-size:only-child {
+  grid-column: 1 / -1;
+}
+.pqv-options .pqv-field-head { min-width: 0; flex-wrap: wrap; }
+.pqv-options .pqv-opt-group { min-width: 0; }
 
 .pqv-field {
   margin-bottom: 0;
