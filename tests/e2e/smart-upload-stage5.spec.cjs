@@ -10,6 +10,7 @@ async function setup(page, opts) {
   await page.route('**/__upload-test', (r) => r.fulfill({ contentType: 'text/html', body: '<!doctype html><html><body><button id="pmQuickUpload">new</button><a id="pmLiveLink" hidden></a><button id="pmPublishCheck"></button></body></html>' }));
   await page.goto('/__upload-test');
   await page.addScriptTag({ path: path.join(root, 'product-publish-utils.js') });
+  await page.addScriptTag({ path: path.join(root, 'image-processing-client.js') });
   await page.addScriptTag({ path: path.join(root, 'product-color-detect.js') });
   await page.evaluate((o) => {
     window.__staged = []; window.__stock = []; window.__products = {}; window.__failPublish = o.failPublish || 0; window.__failStock = o.failStock || 0;

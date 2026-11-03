@@ -7,6 +7,7 @@ test('copy an existing product into the upload form: details copied, name/colour
     <button id="pmQuickUpload">new</button><a id="pmLiveLink" hidden></a><button id="pmPublishCheck"></button>
   </body></html>`);
   await page.addScriptTag({ path: path.join(root, 'product-publish-utils.js') });
+  await page.addScriptTag({ path: path.join(root, 'image-processing-client.js') });
   await page.evaluate(() => {
     window.MaCatalogPublisher = { isReady: () => true, enqueue() {}, check() {} };
     window.__staged = [];
