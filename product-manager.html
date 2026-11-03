@@ -1236,7 +1236,12 @@
     });
     // The shared image helpers bind to [data-f="image"]; keep the URL box in sync with uploads.
     var urlBox = root.querySelector('[data-f="image"]');
-    if (urlBox) urlBox.addEventListener("input", function () { p.image = urlBox.value; changed(); });
+    if (urlBox) urlBox.addEventListener("input", function () {
+      var nextImage = String(urlBox.value || "").trim();
+      if (String(p.image || "").trim() !== nextImage) delete p.imageCard;
+      p.image = nextImage;
+      changed();
+    });
     root.querySelectorAll("[data-etab]").forEach(function (b) {
       b.addEventListener("click", function () {
         // Leaving Attributes with unsaved ticks/values: save them first (like pressing Save attributes).
@@ -2378,6 +2383,9 @@
         canvas.toBlob(
           function (blob) {
             if (!blob) return reject(new Error("ENCODE_FAILED"));
+            if (String(blob.type || "").toLowerCase() !== "image/webp") {
+              return reject(new Error("WebP conversion is not supported in this browser. Update your browser and try again."));
+            }
             resolve(blob);
           },
           "image/webp",
@@ -2412,6 +2420,8 @@
     var input = card.querySelector(".pm-file-input");
     var statusEl = card.querySelector(".pm-dropzone-status");
     var urlInput = card.querySelector('[data-f="image"]');
+    var libBtn = card.querySelector(".pm-media-lib-btn");
+    var uploading = false;
     if (!dz || !input) return;
 
     function setStatus(msg, isErr) {
@@ -2431,6 +2441,10 @@
     }
 
     function handleFile(file) {
+      if (uploading) {
+        setStatus("Another photo is already being prepared. Please wait.", true);
+        return;
+      }
       if (!file || file.type.indexOf("image/") !== 0) {
         setStatus("Images only (JPG/PNG/WebP)", true);
         return;
@@ -2439,6 +2453,9 @@
         setStatus("Admin login required to upload", true);
         return;
       }
+      uploading = true;
+      input.disabled = true;
+      if (libBtn) libBtn.disabled = true;
       setStatus("Optimizing...");
       var base = slugifyFileBase(p);
       var previewUrl = "";
@@ -2470,6 +2487,11 @@
         })
         .catch(function (err) {
           setStatus("Problem: " + (err && err.message ? err.message : err), true);
+        })
+        .then(function () {
+          uploading = false;
+          input.disabled = false;
+          if (libBtn) libBtn.disabled = false;
         });
     }
 
@@ -2493,10 +2515,14 @@
       if (f) handleFile(f);
     });
 
-    var libBtn = card.querySelector(".pm-media-lib-btn");
     if (libBtn) {
       libBtn.addEventListener("click", function () {
         window.openMediaLibrary(function (path) {
+          if (uploading) {
+            setStatus("Wait for the current photo to finish first.", true);
+            return;
+          }
+          if (String(p.image || "").trim() !== String(path || "").trim()) delete p.imageCard;
           p.image = path;
           setPreview(resolveImgForPreview(path));
           if (urlInput) {

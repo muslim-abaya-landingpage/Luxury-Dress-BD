@@ -258,6 +258,33 @@ test('edit screen: an option can be renamed (Hijab → Hijab + Niqab) and reorde
   expect(file).not.toMatch(/"Hijab": 450/);
 });
 
+test('edit screen: changing the main image URL removes the old card thumbnail', async ({ page }) => {
+  await stub(page);
+  page.on('dialog', (d) => d.accept());
+  await page.route('**/category-products.js*', async (route) => {
+    const response = await route.fetch();
+    const source = await response.text();
+    await route.fulfill({ response, body: source + '\nwindow.CATEGORY_PRODUCTS.abaya[0].imageCard = "/images/stale-main-card.webp";\n' });
+  });
+  await page.goto('/product-manager.html');
+  await page.waitForTimeout(500);
+  await withPublisher(page, false);
+  await expect.poll(() => page.evaluate(() => window.CATEGORY_PRODUCTS.abaya.find((p) => p.id === 'ABY-MAROON-1').imageCard)).toBe('/images/stale-main-card.webp');
+  await page.fill('#pmAllSearch', 'ABY-MAROON-1');
+  await page.click('#pmAllSearchBtn');
+  await page.locator('#pmAllRows tr').filter({ hasText: 'ABY-MAROON-1' }).first().locator('.pm-row-title').click();
+  await page.locator('[data-f="image"]').first().evaluate((input) => {
+    input.value = '/images/replacement-main.webp';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  await page.click('#pmEditBarSave');
+  await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
+  const file = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
+  const product = block(file, 'ABY-MAROON-1');
+  expect(product).toContain('image: "/images/replacement-main.webp"');
+  expect(product).not.toContain('stale-main-card.webp');
+});
+
 test('edit screen: new main and gallery photos are not committed one by one; they go up with Save in one publish', async ({ page }) => {
   await stub(page);
   page.on('dialog', (d) => d.accept());
