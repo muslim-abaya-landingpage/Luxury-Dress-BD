@@ -52,3 +52,14 @@ test('every local photo path in the catalog exists in the repository', () => {
   }
   assert.deepEqual([...new Set(missing)], [], `Catalog points at photos that are not in the repository:\n${missing.join('\n')}`);
 });
+
+// Site pages must not load photos straight from GitHub (raw.githubusercontent.com): GitHub is not image hosting
+// (Acceptable Use Policies, excessive bandwidth). Photos come from Cloudflare (Pages /images/ or R2).
+test('site pages and scripts do not load images from raw.githubusercontent.com', () => {
+  const root = path.resolve(__dirname, '../..');
+  const files = ['category-renderer.js', 'category-products.js', 'product-links-data.js', 'hero-banner-config.js', 'index-home-app.js', 'cart-utils.js']
+    .concat(fs.readdirSync(root).filter((n) => n.endsWith('.html') && n !== 'apps-script-copy.html'));
+  const hits = files.filter((n) => fs.existsSync(path.join(root, n)))
+    .filter((n) => /raw\.githubusercontent\.com\/[^"'\s]+\.(webp|jpe?g|png|avif|gif)/i.test(fs.readFileSync(path.join(root, n), 'utf8')));
+  assert.deepEqual(hits, [], `Image loaded from raw.githubusercontent.com in:\n${hits.join('\n')}`);
+});
