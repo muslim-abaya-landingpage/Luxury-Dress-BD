@@ -35,3 +35,20 @@ test('static image bytes match their filename extensions', () => {
   const mismatches = imageFiles(imageRoot).filter((filePath) => !formatMatches(filePath)).map((filePath) => path.relative(path.resolve(__dirname, '../..'), filePath));
   assert.deepEqual(mismatches, [], `Image extension/content mismatch or corrupt image:\n${mismatches.join('\n')}`);
 });
+
+// A product photo saved as a local path must exist in the repository; R2 photos are full https URLs.
+// (DR-9, 2026-11-02: a second save committed local upload paths that were never in git, so its photos were blank.)
+test('every local photo path in the catalog exists in the repository', () => {
+  const root = path.resolve(__dirname, '../..');
+  const missing = [];
+  for (const file of ['category-products.js', 'product-links-data.js']) {
+    const text = fs.readFileSync(path.join(root, file), 'utf8');
+    const re = /["'](\/?images\/[^"']+\.(?:webp|avif|jpe?g|png))["']/g;
+    let m;
+    while ((m = re.exec(text))) {
+      const rel = m[1].replace(/^\//, '');
+      if (!fs.existsSync(path.join(root, rel))) missing.push(`${file}: ${rel}`);
+    }
+  }
+  assert.deepEqual([...new Set(missing)], [], `Catalog points at photos that are not in the repository:\n${missing.join('\n')}`);
+});

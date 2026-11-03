@@ -1,5 +1,20 @@
 (function(g){'use strict';
  var MAX_ASSETS=8,base=null,assets={},request=null,job=null,checking=false,timer=null,notify=function(){},lastLiveError='';
+ // Photos already sent to R2 in this browser session (local path -> CDN URL). A later save of the same
+ // product may still carry the local path from the editor; it is swapped for the URL instead of being
+ // committed as a file that does not exist in the repository (DR-9, 2026-11-02).
+ var uploaded={};try{uploaded=JSON.parse(sessionStorage.getItem('ma_r2_uploaded')||'{}')||{};}catch(e){uploaded={};}
+ function rememberUploaded(){try{sessionStorage.setItem('ma_r2_uploaded',JSON.stringify(uploaded));}catch(e){}}
+ async function assertPhotosExist(files){
+  var re=/(^|["'(\s])\/?(images\/uploads\/[A-Za-z0-9_.-]+\.(?:webp|avif|jpg|png))/g,seen={},missing=[];
+  files.forEach(function(f){var m;re.lastIndex=0;while((m=re.exec(f.content))){seen[m[2]]=1;}});
+  var list=Object.keys(seen);
+  for(var i=0;i<list.length;i++){
+   var ok=false;try{var r=await fetch('/'+list[i],{method:'HEAD',cache:'no-store',redirect:'manual'});ok=r.ok;}catch(e){ok=false;}
+   if(!ok)missing.push(list[i]);
+  }
+  if(missing.length)throw Error('PHOTO_NOT_UPLOADED: '+missing.join(', ')+' — this photo is not on the website or Cloudflare R2. Choose the photo again, then save.');
+ }
  function call(type,data){return g.MaAdmin.call(type,data||{},{maxAgeMs:0});}
  function bytes(text){return new TextEncoder().encode(text);}
  function hex(buf){return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');}
@@ -87,9 +102,12 @@
    status('Uploading product photo '+(i+1)+'/'+queued.length+' to Cloudflare R2… keep this page open.');
    var up=await g.MaAdmin.uploadImage(queued[i].path,queued[i].content,'image/webp');
    if(!up||!up.ok||!up.url)throw Error((up&&(up.message||up.error))||'Cloudflare R2 photo upload failed.');
-   urls[queued[i].path]=up.url;
+   urls[queued[i].path]=up.url;uploaded[queued[i].path]=up.url;
   }
+  rememberUploaded();
+  Object.keys(uploaded).forEach(function(k){if(!urls[k])urls[k]=uploaded[k];});
   var savedFiles=files.map(function(f){var content=f.content;Object.keys(urls).forEach(function(path){content=content.split(path).join(urls[path]);});return {path:f.path,content:content};});
+  await assertPhotosExist(savedFiles);
   var data={baseShas:base.shas,files:savedFiles,assets:[]};
   var fingerprint=JSON.stringify(data);if(!request||request.fingerprint!==fingerprint)request={fingerprint:fingerprint,id:crypto.randomUUID()};data.requestId=request.id;
   status('Saving photos and product details… keep this page open.');
@@ -118,6 +136,8 @@
       check();
     }
   });
+  // The editor still holds the local paths it queued; it swaps them for these URLs so the next save is correct.
+  result.uploadedUrls=Object.assign({},urls);
   return result;
  }
  g.MaCatalogPublisher={init:init,publish:publish,enqueue:function(rows){rows.forEach(function(a){assets[a.path]=a;});},pendingPhotos:function(){return Object.keys(assets).length;},check:check,_buildValidation:buildValidation,isReady:function(){return !!base;},gitHash:gitHash};
