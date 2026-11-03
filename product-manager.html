@@ -148,6 +148,7 @@
   <script src="product-links-data.js?v=c1b707f5b52bc9d5"></script>
   <script id="pmRawCatalog">window.MA_CATALOG_INCLUDE_UNPUBLISHED = true; window.MA_RAW_CATEGORY_PRODUCTS = JSON.parse(JSON.stringify(window.CATEGORY_PRODUCTS || {}));</script>
   <script src="product-catalog-loader.js?v=52b440e993917f01"></script>
+  <script src="image-processing-client.js?v=20261104-shared"></script>
   <script src="product-publish-utils.js?v=bb2ad248f3b4ca8b"></script><script src="product-publisher.js?v=20261104-r2-keep"></script>
 <script id="pmStockAdmin">
 (function () {
@@ -2386,42 +2387,6 @@
     return (base || "product") + "-" + Date.now();
   }
 
-  function resizeToWebp(file, maxW, quality) {
-    return new Promise(function (resolve, reject) {
-      var img = new Image();
-      var url = URL.createObjectURL(file);
-      img.onload = function () {
-        URL.revokeObjectURL(url);
-        var w = img.naturalWidth || img.width;
-        var h = img.naturalHeight || img.height;
-        var scale = w > maxW ? maxW / w : 1;
-        var cw = Math.round(w * scale);
-        var ch = Math.round(h * scale);
-        var canvas = document.createElement("canvas");
-        canvas.width = cw;
-        canvas.height = ch;
-        var ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, cw, ch);
-        canvas.toBlob(
-          function (blob) {
-            if (!blob) return reject(new Error("ENCODE_FAILED"));
-            if (String(blob.type || "").toLowerCase() !== "image/webp") {
-              return reject(new Error("WebP conversion is not supported in this browser. Update your browser and try again."));
-            }
-            resolve(blob);
-          },
-          "image/webp",
-          quality
-        );
-      };
-      img.onerror = function () {
-        URL.revokeObjectURL(url);
-        reject(new Error("IMAGE_LOAD_FAILED"));
-      };
-      img.src = url;
-    });
-  }
-
   function blobToBase64(blob) {
     return new Promise(function (resolve, reject) {
       var reader = new FileReader();
@@ -2482,8 +2447,8 @@
       var base = slugifyFileBase(p);
       var previewUrl = "";
       Promise.all([
-        resizeToWebp(file, IMG_MAX_W, IMG_QUALITY),
-        resizeToWebp(file, IMG_CARD_MAX_W, IMG_QUALITY)
+        window.MaImageTools.resizeToWebp(file, IMG_MAX_W, IMG_QUALITY),
+        window.MaImageTools.resizeToWebp(file, IMG_CARD_MAX_W, IMG_QUALITY)
       ])
         .then(function (blobs) {
           previewUrl = URL.createObjectURL(blobs[0]);
@@ -2719,7 +2684,7 @@
       function uploadGalleryFile(file, n) {
         var base = slugifyFileBase(p) + "-g" + n;
         var localBlob = null;
-        return resizeToWebp(file, IMG_GALLERY_MAX_W, IMG_QUALITY)
+        return window.MaImageTools.resizeToWebp(file, IMG_GALLERY_MAX_W, IMG_QUALITY)
           .then(function (blob) {
             localBlob = blob;
             return blobToBase64(blob);

@@ -7,6 +7,7 @@ async function setup(page, stockReply) {
   await page.setContent(`<!doctype html><html><body><button id="pmQuickUpload">new</button><a id="pmLiveLink" hidden></a><button id="pmPublishCheck"></button></body></html>`);
   await page.evaluate(() => { if (!crypto.randomUUID) crypto.randomUUID = () => 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'; });
   await page.addScriptTag({ path: path.join(root, 'product-publish-utils.js') });
+  await page.addScriptTag({ path: path.join(root, 'image-processing-client.js') });
   await page.addScriptTag({ path: path.join(root, 'product-color-detect.js') });
   await page.addScriptTag({ content: 'window.__staged=[];window.__stock=[];window.MaCatalogPublisher={isReady:()=>true,enqueue(){},check(){}};window.__products={};' });
   await page.evaluate((reply) => {

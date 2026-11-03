@@ -13,6 +13,7 @@ async function setup(page) {
   await page.evaluate(() => { if (!crypto.randomUUID) crypto.randomUUID = () => '0123456789abcdef-0123-4567-89ab-cdef01234567'.replace(/[^-]/g, () => 'a'); });
   await page.setContent(`<!doctype html><html><body><button id="pmQuickUpload">new</button><a id="pmLiveLink" hidden></a><button id="pmPublishCheck"></button></body></html>`);
   await page.addScriptTag({ path: path.join(root, 'product-publish-utils.js') });
+  await page.addScriptTag({ path: path.join(root, 'image-processing-client.js') });
   await page.addScriptTag({ content: 'window.__staged=[];window.__assets=[];window.MaCatalogPublisher={isReady:()=>true,enqueue:(a)=>{window.__assets=a.map(x=>x.path);},check(){}};' +
     'window.__products={hijab:[{id:"HJ-EXISTING-1",name:"Existing Hijab",price:500,image:"images/a.webp"}]};' });
   await page.addScriptTag({ path: path.join(root, 'product-quick-upload.js') });
