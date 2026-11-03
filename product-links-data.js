@@ -1,7 +1,7 @@
 /**
  * ═══ সব ক্যাটাগরির প্রোডাক্ট ছবির লিংক — এক জায়গা ═══
  * এডিট: product-manager.html (প্রতি প্রোডাক্টে ছবির URL) → সেভ
- * আপডেট: 2026-11-02
+ * আপডেট: 2026-11-03
  */
 window.PRODUCT_LINKS_DATA = {
   abaya: [
@@ -33,7 +33,7 @@ window.PRODUCT_LINKS_DATA = {
     "/images/uploads/tp-6-1793221122854.webp",
     "/images/white-pink-floral-print-womens-co-ord-set-premium.webp",
     "/images/uploads/dr-8-1793388836531.webp",
-    "images/uploads/dr-9-1793650456408.webp",
+    "/images/uploads/dr-9-1793650456408.webp",
     "/images/premium-navy-blue-floral-co-ord-set.webp",
     "/images/premium-pink-floral-co-ord-set.webp",
     "/images/Gowns/black-cream-floral-womens-two-piece-dress.jpg",
