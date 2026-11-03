@@ -72,7 +72,8 @@
 </div>
 <h3>মাপের ঘর <small>(টেনে বা ↑↓ দিয়ে ক্রম বদলান)</small></h3>
 <ol id="szFields" class="sz-fields"></ol>
-<button type="button" class="pn-btn" id="szFieldAdd">+ নতুন ঘর</button>
+<div class="sz-actions"><button type="button" class="pn-btn" id="szFieldAdd">+ নতুন ঘর</button><button type="button" class="pn-btn" id="szAllCustom">সব ঘরে কাস্টম মাপ চালু</button></div>
+<p class="sz-note">কাস্টম মাপ চালু করলে ক্রেতা preset তালিকার বাইরে নিজের মাপও লিখতে পারবেন। নতুন product-এর catalog size থাকলে তা স্বয়ংক্রিয়ভাবে সংশ্লিষ্ট ঘরে ব্যবহার হবে; প্রকাশ না করা পর্যন্ত কোনো পরিবর্তন live হবে না।</p>
 <div class="sz-actions"><button type="submit" class="pn-btn sz-primary" id="szTemplateSave">টেমপ্লেট সংরক্ষণ</button><span id="szTemplateMsg" class="sz-msg" role="status"></span></div>
 </form>
 <div class="sz-preview-box"><div class="sz-row"><h3>প্রিভিউ</h3><label class="sz-inline">প্রোডাক্ট <select id="szTplPreviewProduct"></select></label></div><div id="szTplPreview" class="sz-preview"></div></div>

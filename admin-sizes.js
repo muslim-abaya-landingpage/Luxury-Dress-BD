@@ -275,6 +275,14 @@
     var items = $('szFields').querySelectorAll('li.sz-field');
     items[items.length - 1].querySelector('[data-f="label_bn"]').focus();
   });
+  $('szAllCustom').addEventListener('click', function () {
+    if (!editor) return;
+    readEditor();
+    editor.fields.forEach(function (f) { f.allowCustom = true; });
+    editor.dirty = true;
+    renderEditor();
+    message($('szTemplateMsg'), 'সব ঘরে কাস্টম মাপ চালু হয়েছে। সংরক্ষণ করে প্রকাশ করুন।');
+  });
   function move(from, to) {
     if (to < 0 || to >= editor.fields.length || from === to) return;
     var f = editor.fields.splice(from, 1)[0];

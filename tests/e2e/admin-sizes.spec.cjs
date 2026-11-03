@@ -174,6 +174,18 @@ test('staff cannot use the page', async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
+test('owner can enable custom sizing for every field in one action', async ({ page }) => {
+  const { errors } = await setup(page);
+  await page.goto('/admin-sizes.html');
+  await page.locator('#szTabTemplates').click();
+  await page.locator('#szTemplatePick').selectOption('abaya');
+  await page.locator('#szAllCustom').click();
+  await expect(page.locator('#szFields [data-f="allowCustom"]')).toHaveCount(2);
+  await expect(page.locator('#szFields [data-f="allowCustom"]:checked')).toHaveCount(2);
+  await expect(page.locator('#szTemplateMsg')).toContainText('সব ঘরে কাস্টম মাপ চালু হয়েছে');
+  expect(errors).toEqual([]);
+});
+
 test('phone layout fits the screen', async ({ page }) => {
   await setup(page);
   await page.setViewportSize({ width: 375, height: 800 });
