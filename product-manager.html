@@ -148,7 +148,7 @@
   <script src="product-links-data.js?v=c1b707f5b52bc9d5"></script>
   <script id="pmRawCatalog">window.MA_CATALOG_INCLUDE_UNPUBLISHED = true; window.MA_RAW_CATEGORY_PRODUCTS = JSON.parse(JSON.stringify(window.CATEGORY_PRODUCTS || {}));</script>
   <script src="product-catalog-loader.js?v=52b440e993917f01"></script>
-  <script src="product-publish-utils.js?v=bb2ad248f3b4ca8b"></script><script src="product-publisher.js?v=20261031-r2-upload"></script>
+  <script src="product-publish-utils.js?v=bb2ad248f3b4ca8b"></script><script src="product-publisher.js?v=20261104-r2-keep"></script>
 <script id="pmStockAdmin">
 (function () {
   var ROW_CIRCLES = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "⑪", "⑫"];
@@ -2347,6 +2347,28 @@
     window.MaCatalogPublisher.enqueue(rows);
   }
 
+  // After a save, photos queued as local paths (images/uploads/…) now live in Cloudflare R2. Swap every
+  // reference in the editor's data for the R2 URL; otherwise the next save writes the local path back and
+  // the product shows a blank photo (DR-9 / DR-4, 2026-11-02/03).
+  function applyUploadedUrls(map) {
+    var keys = Object.keys(map || {});
+    if (!keys.length) return false;
+    var changed = false;
+    function swap(v) {
+      if (typeof v !== "string") return v;
+      var bare = v.charAt(0) === "/" ? v.slice(1) : v;
+      if (map[bare]) { changed = true; return map[bare]; }
+      return v;
+    }
+    function walk(node) {
+      if (Array.isArray(node)) { for (var i = 0; i < node.length; i++) { if (node[i] && typeof node[i] === "object") walk(node[i]); else node[i] = swap(node[i]); } return; }
+      Object.keys(node).forEach(function (k) { var v = node[k]; if (v && typeof v === "object") walk(v); else node[k] = swap(v); });
+    }
+    walk(products);
+    keys.forEach(function (k) { if (localPreviews[k] && !localPreviews[map[k]]) localPreviews[map[k]] = localPreviews[k]; });
+    return changed;
+  }
+
   function resolveImgForPreview(src) {
     var s = String(src || "").trim();
     if (!s) return "";
@@ -3354,7 +3376,7 @@
       var files=[{path:"category-products.js",content:generateProductsFile()},{path:"product-links-data.js",content:generateProductLinksFile()},{path:"product-catalog-sections.js",content:generateSectionsFile()},{path:"product-config.js",content:generateProductConfigFile()}];
     } catch(err){setSaveStatus(err.message);return Promise.reject(err);}
     button.disabled=true;
-    return window.MaCatalogPublisher.publish(files,target).then(function(result){savedSnapshot=snapshot;return result;}).catch(function(err){setSaveStatus("Not published: "+err.message+" — your changes are kept.");throw err;}).finally(function(){button.disabled=false;});
+    return window.MaCatalogPublisher.publish(files,target).then(function(result){savedSnapshot=snapshot;if(applyUploadedUrls(result&&result.uploadedUrls))savedSnapshot=catalogSnapshot();return result;}).catch(function(err){setSaveStatus("Not published: "+err.message+" — your changes are kept.");throw err;}).finally(function(){button.disabled=false;});
   }
 
   bindById("pmSave", "click", function(){saveAll().catch(function(){});});

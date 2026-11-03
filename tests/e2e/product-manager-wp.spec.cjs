@@ -318,3 +318,41 @@ test('edit screen: new main and gallery photos are not committed one by one; the
   const catalog = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
   for (const p of queued) expect(catalog).toContain(p);
 });
+
+test('edit screen: after a save, uploaded photos keep their R2 URLs on the next save (no blank photos)', async ({ page }) => {
+  await stub(page);
+  page.on('dialog', (d) => d.accept());
+  await page.goto('/product-manager.html');
+  await page.waitForTimeout(500);
+  await page.evaluate(() => {
+    window.__queued = {}; window.__publishes = [];
+    window.MaCatalogPublisher = Object.assign({}, window.MaCatalogPublisher, {
+      isReady: () => true,
+      enqueue: (rows) => rows.forEach((r) => { window.__queued[r.path] = r; }),
+      // Like the real publisher: queued local paths go to R2 and come back as URLs.
+      publish: (files) => {
+        window.__publishes.push(files);
+        const urls = {};
+        Object.keys(window.__queued).forEach((p) => { urls[p] = 'https://images.muslimabaya.com/' + p.replace(/\.webp$/, '-0123456789abcdef0123.webp'); });
+        window.__queued = {};
+        return Promise.resolve({ ok: true, uploadedUrls: urls });
+      }
+    });
+  });
+  await page.locator('#pmAllRows tr').first().locator('.pm-row-title').click();
+  const png = await page.evaluate(() => { const c = document.createElement('canvas'); c.width = 64; c.height = 80; c.getContext('2d').fillRect(0, 0, 64, 80); return c.toDataURL('image/png').split(',')[1]; });
+  const file = { name: 'photo.png', mimeType: 'image/png', buffer: Buffer.from(png, 'base64') };
+  await page.locator('.pm-gallery-file-input').first().setInputFiles([file, { ...file, name: 'photo2.png' }]);
+  await expect.poll(() => page.evaluate(() => Object.keys(window.__queued).length)).toBe(2);
+  const queued = await page.evaluate(() => Object.keys(window.__queued));
+  await page.click('#pmSave');
+  await expect.poll(() => page.evaluate(() => window.__publishes.length)).toBe(1);
+  // Second save (e.g. a small edit right after): the catalog must carry the R2 URLs, not the local paths.
+  await page.evaluate(() => { const b = document.getElementById('pmSave'); b.disabled = false; b.click(); });
+  await expect.poll(() => page.evaluate(() => window.__publishes.length)).toBe(2);
+  const second = await page.evaluate(() => window.__publishes[1].find((f) => f.path === 'category-products.js').content);
+  for (const p of queued) {
+    expect(second).not.toContain('"' + p + '"');
+    expect(second).toContain('https://images.muslimabaya.com/' + p.replace(/\.webp$/, '-0123456789abcdef0123.webp'));
+  }
+});

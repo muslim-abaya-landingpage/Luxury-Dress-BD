@@ -415,7 +415,7 @@ window.CATEGORY_PRODUCTS = {
       id: "DR-4",
       name: "Black White Polka Dot Women's Two-Piece Set",
       image: "/images/Black-White-Polka-Dots.jpeg",
-      images: ["images/uploads/dr-4-1793730936367-g1.webp", "images/uploads/dr-4-1793730936423-g2.webp", "images/uploads/dr-4-1793730936465-g3.webp", "images/uploads/dr-4-1793730936503-g4.webp", "images/uploads/dr-4-1793730936548-g5.webp", "images/uploads/dr-4-1793730936587-g6.webp"],
+      images: ["https://images.muslimabaya.com/images/uploads/dr-4-1793730936367-g1-ff9273e79008af62bf73.webp", "https://images.muslimabaya.com/images/uploads/dr-4-1793730936423-g2-058271df63b7d43207d9.webp", "https://images.muslimabaya.com/images/uploads/dr-4-1793730936465-g3-bd8cc279119d221fb6e7.webp", "https://images.muslimabaya.com/images/uploads/dr-4-1793730936503-g4-b64bc8d51b30f101e0a2.webp", "https://images.muslimabaya.com/images/uploads/dr-4-1793730936548-g5-751e054ee7e4a06b7516.webp", "https://images.muslimabaya.com/images/uploads/dr-4-1793730936587-g6-b5ed4eef97ffb66d1b81.webp"],
       price: 990,
       stock: 12,
       color: "black",

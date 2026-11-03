@@ -136,6 +136,8 @@
       check();
     }
   });
+  // The editor still holds the local paths it queued; it swaps them for these URLs so the next save is correct.
+  result.uploadedUrls=Object.assign({},urls);
   return result;
  }
  g.MaCatalogPublisher={init:init,publish:publish,enqueue:function(rows){rows.forEach(function(a){assets[a.path]=a;});},pendingPhotos:function(){return Object.keys(assets).length;},check:check,_buildValidation:buildValidation,isReady:function(){return !!base;},gitHash:gitHash};
