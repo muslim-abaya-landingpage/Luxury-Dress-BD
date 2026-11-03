@@ -57,18 +57,20 @@ async function main() {
   if (DRY) { todo.forEach((f) => console.log('would upload', f)); return; }
 
   let done = 0;
+  const failed = [];
   const queue = todo.slice();
   async function worker() {
     for (let f = queue.shift(); f; f = queue.shift()) {
       const body = fs.readFileSync(f);
       const type = TYPES[f.split('.').pop().toLowerCase()];
-      const key = f.split('/').map(encodeURIComponent).join('/');
+      // Dots are percent-encoded too: names like "Black...jpeg" are otherwise refused by the API edge (HTTP 403).
+      const key = f.split('/').map((p) => encodeURIComponent(p).replace(/\./g, '%2E')).join('/');
       for (let attempt = 1; ; attempt++) {
         try {
           await cf('PUT', `${API}/${key}`, f, body, { 'Content-Type': type });
           break;
         } catch (e) {
-          if (attempt >= 4) throw e;
+          if (attempt >= 4) { failed.push(`${f}: ${e.message}`); break; }
           await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
         }
       }
@@ -83,6 +85,7 @@ async function main() {
   const wrongSize = files.filter((f) => after.has(f) && after.get(f) !== fs.statSync(f).size);
   const sha = crypto.createHash('sha256').update(files.join('\n')).digest('hex').slice(0, 12);
   console.log(`verify: ${files.length - missing.length}/${files.length} in R2, size mismatches: ${wrongSize.length}, list hash ${sha}`);
+  failed.forEach((x) => console.error('upload failed', x));
   if (missing.length || wrongSize.length) {
     missing.forEach((f) => console.error('missing', f));
     wrongSize.forEach((f) => console.error('size differs', f, fs.statSync(f).size, after.get(f)));
