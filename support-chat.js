@@ -101,6 +101,7 @@
     ".ma-chat-message.is-customer{align-self:flex-end;background:#171717;color:#fff;border-color:#171717;border-radius:14px 14px 4px 14px}" +
     ".ma-chat-message.is-agent{align-self:flex-start;border-radius:14px 14px 14px 4px}" +
     ".ma-chat-message-body{white-space:pre-wrap}" +
+    ".ma-chat-delete-image{display:inline-flex;align-items:center;margin-top:6px;padding:4px 8px;border:1px solid rgba(255,255,255,.35);border-radius:8px;background:transparent;color:inherit;font:600 11px system-ui;cursor:pointer;opacity:.88}.ma-chat-delete-image:hover{opacity:1;background:rgba(255,255,255,.1)}.ma-chat-delete-image:disabled{opacity:.5;cursor:wait}" +
     ".ma-chat-message time{display:block;margin-top:5px;font-size:10px;opacity:.68}" +
     ".ma-chat-foot{padding:10px 12px 12px;border-top:1px solid #eee;background:#fff}" +
     ".ma-chat-row{display:flex;gap:8px;align-items:flex-end}" +
@@ -497,6 +498,14 @@
         supabaseClient.storage.from("support-attachments").createSignedUrl(row.attachment_path, 3600).then(function (res) {
           if (res && res.data && res.data.signedUrl) img.src = res.data.signedUrl; else img.remove();
         }, function () { img.remove(); });
+        var sentAt = new Date(row.created_at || 0).getTime();
+        if (row.sender_role === "customer" && row.sender_id === currentUser.id && Date.now() - sentAt <= 24 * 60 * 60 * 1000) {
+          var deleteImage = el("button", "ma-chat-delete-image", "ছবি মুছুন");
+          deleteImage.type = "button";
+          deleteImage.setAttribute("aria-label", "পাঠানো ছবিটি মুছুন");
+          deleteImage.addEventListener("click", function () { deleteSentImage(row, bubble, deleteImage); });
+          bubble.appendChild(deleteImage);
+        }
       }
       var time = el("time");
       time.dateTime = row.created_at || "";
@@ -505,6 +514,26 @@
       transcript.appendChild(bubble);
       body.classList.add("has-conversation", "has-messages");
       body.scrollTop = body.scrollHeight;
+    }
+    async function deleteSentImage(row, bubble, button) {
+      if (!global.confirm("আপনি কি পাঠানো ছবিটি মুছে ফেলতে চান? এই কাজটি ফিরিয়ে নেওয়া যাবে না।")) return;
+      button.disabled = true;
+      button.textContent = "মুছছে…";
+      try {
+        var client = await loadSupabase();
+        var result = await client.from("support_messages").delete().eq("id", row.id)
+          .eq("conversation_id", conversationId).eq("sender_id", currentUser.id).eq("sender_role", "customer");
+        if (result.error) throw result.error;
+        bubble.remove();
+        delete seenMessageIds[row.id];
+        var removed = await client.storage.from("support-attachments").remove([row.attachment_path]);
+        if (removed.error) console.warn("Chat image storage cleanup failed", removed.error);
+        note.textContent = "ছবিটি চ্যাট থেকে মুছে ফেলা হয়েছে।";
+      } catch (error) {
+        button.disabled = false;
+        button.textContent = "ছবি মুছুন";
+        note.textContent = "ছবিটি মুছতে পারেনি। আবার চেষ্টা করুন।";
+      }
     }
     async function ensureLiveConversationImpl() {
       var client = await loadSupabase();
