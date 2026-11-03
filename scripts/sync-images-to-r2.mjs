@@ -6,8 +6,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 
-const ACCOUNT = process.env.ACCOUNT_ID || 'b24e0c217c57ed7b4e19e104a1411309';
-const BUCKET = process.env.BUCKET || 'muslimabaya-product-images';
+const ACCOUNT = 'b24e0c217c57ed7b4e19e104a1411309';
+const BUCKET = 'muslimabaya-product-images';
 const TOKEN = process.env.CF_TOKEN || '';
 const DRY = process.env.DRY_RUN === '1';
 const API = `https://api.cloudflare.com/client/v4/accounts/${ACCOUNT}/r2/buckets/${BUCKET}/objects`;
@@ -24,11 +24,13 @@ export function imageFiles(root = 'images') {
   return walk(root).filter((p) => TYPES[p.split('.').pop().toLowerCase()]).sort();
 }
 
-async function cf(method, url, body, headers = {}) {
+// `what` names the request in errors; nothing from the environment is ever logged.
+async function cf(method, url, what, body, headers = {}) {
   const res = await fetch(url, { method, body, headers: { Authorization: `Bearer ${TOKEN}`, ...headers } });
   const json = await res.json().catch(() => ({}));
   if (!res.ok || json.success === false) {
-    throw new Error(`${method} ${url.replace(API, '<bucket>')} -> ${res.status} ${JSON.stringify(json.errors || [])}`);
+    const codes = (json.errors || []).map((e) => Number(e.code)).join(',');
+    throw new Error(`${method} ${what} -> HTTP ${res.status} (Cloudflare error ${codes || 'none'})`);
   }
   return json;
 }
@@ -39,7 +41,7 @@ async function remoteObjects() {
   do {
     const q = new URLSearchParams({ per_page: '1000', prefix: 'images/' });
     if (cursor) q.set('cursor', cursor);
-    const r = await cf('GET', `${API}?${q}`);
+    const r = await cf('GET', `${API}?${q}`, 'object list');
     for (const o of r.result || []) out.set(o.key, Number(o.size));
     cursor = r.result_info && r.result_info.is_truncated ? r.result_info.cursor : '';
   } while (cursor);
@@ -63,7 +65,7 @@ async function main() {
       const key = f.split('/').map(encodeURIComponent).join('/');
       for (let attempt = 1; ; attempt++) {
         try {
-          await cf('PUT', `${API}/${key}`, body, { 'Content-Type': type });
+          await cf('PUT', `${API}/${key}`, f, body, { 'Content-Type': type });
           break;
         } catch (e) {
           if (attempt >= 4) throw e;
