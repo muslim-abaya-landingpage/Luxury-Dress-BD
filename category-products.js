@@ -1,6 +1,6 @@
 /**
  * প্রোডাক্ট ডেটা — product-manager.html থেকে এডিট করুন
- * আপডেট: 2026-11-02
+ * আপডেট: 2026-11-03
  */
 window.CATEGORY_PRODUCTS = {
   abaya: [
@@ -415,12 +415,13 @@ window.CATEGORY_PRODUCTS = {
       id: "DR-4",
       name: "Black White Polka Dot Women's Two-Piece Set",
       image: "/images/Black-White-Polka-Dots.jpeg",
+      images: ["https://images.muslimabaya.com/images/uploads/dr-4-1793730936367-g1-ff9273e79008af62bf73.webp", "https://images.muslimabaya.com/images/uploads/dr-4-1793730936423-g2-058271df63b7d43207d9.webp", "https://images.muslimabaya.com/images/uploads/dr-4-1793730936465-g3-bd8cc279119d221fb6e7.webp", "https://images.muslimabaya.com/images/uploads/dr-4-1793730936503-g4-b64bc8d51b30f101e0a2.webp", "https://images.muslimabaya.com/images/uploads/dr-4-1793730936548-g5-751e054ee7e4a06b7516.webp", "https://images.muslimabaya.com/images/uploads/dr-4-1793730936587-g6-b5ed4eef97ffb66d1b81.webp"],
       price: 990,
       color: "black",
       colorLabel: "Black / White Polka Dot",
       fabric: "Alex Soft Georgette",
       sizes: ["Body 42"],
-      detailNote: "Length: 37–38 Inches",
+      detailNote: "Black White Polka Dot Women's Two-Piece Set\n\nFabric: Premium Alex Soft Georgette\n\nFeatures:\n• Soft, lightweight and comfortable fabric\n• Stylish black and white polka dot design\n• Elegant look for everyday wear\n• Comfortable for all-day use\n\nSize Information:\n• Free Size (Fits up to Body Size 42)\n• Top Length: 37–38 Inches\n• Pajama Length: 37–38 Inches\n\nPrice: ৳990\nRegular Price: ৳1,100\n\nDelivery Charge:\n• Inside Dhaka: ৳80\n• Outside Dhaka: ৳150\n\nCash on Delivery Available.",
       isImageView: false,
       imageViewOf: "",
       category: "premium-two-piece",
@@ -431,7 +432,11 @@ window.CATEGORY_PRODUCTS = {
       palazzoLengths: ["38"],
       regularPrice: 1100,
       dateAdded: "2026-08-01",
-      productUrl: "/"
+      productUrl: "/",
+      brand: "Muslim Abaya",
+      tags: ["Two Piece Set Women's Two Piece Georgette Two Piece Black White Dress Polka Dot Dress Premium Two Piece Ladies Fashion Muslim Abaya"],
+      seoTitle: "Black White Polka Dot Two-Piece Set | Muslim Abaya",
+      seoDescription: "Shop Black White Polka Dot Women's Two-Piece Set at Muslim Abaya. Premium Alex Soft Georgette fabric, free size up to body 42, comfortable and stylish design. Order online in Bangladesh."
     },
     {
       id: "DR-5",
@@ -538,20 +543,21 @@ window.CATEGORY_PRODUCTS = {
       color: "blue",
       colorLabel: "Blue",
       fabric: "Jafran",
+      sizes: ["42 (Free size)"],
       detailNote: "Gown: 40–44 Inches | Body: 36–44 Inches | Palazzo: 38–40 Inches | 100+ Inch Flare",
       isImageView: false,
       imageViewOf: "",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      dateAdded: "2026-08-01",
-      productUrl: "/",
-      regularPrice: 1050,
+      bodySizes: ["52"],
       sleeveSizes: ["18"],
       dressLengths: ["44"],
       palazzoLengths: ["40"],
-      bodySizes: ["52"],
+      regularPrice: 1050,
+      tags: ["Jafran Clothing","Two piece dress","Women's Clothing"],
       brand: "Muslim Abaya",
-      tags: ["Jafran Clothing","Two piece dress","Women's Clothing"]
+      dateAdded: "2026-08-01",
+      productUrl: "/"
     },
     {
       id: "DR-10",
