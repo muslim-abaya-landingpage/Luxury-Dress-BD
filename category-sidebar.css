@@ -2929,3 +2929,28 @@ body.pqv-sc-open {
   padding: 0 7px; border-radius: 9px; font-size: 12px; justify-content: center;
 }
 .pqv-options--abaya .pqv-custom-size-btn { grid-column: 1 / -1; }
+
+/* Shopper size choices: generous tap targets, visible focus, unmistakable selection. */
+.pqv-opt-btn { min-height: 44px; height: 44px; touch-action: manipulation; }
+.pqv-opt-btn:focus-visible { outline: 3px solid rgba(166, 139, 82, .55); outline-offset: 2px; }
+.pqv-opt-btn.is-active { box-shadow: 0 0 0 2px rgba(17,17,17,.1), 0 3px 10px rgba(17,17,17,.12); }
+.pqv-opt-btn:disabled { opacity: .5; cursor: not-allowed; }
+.premium-card .card-size-select,
+.premium-card-detail .detail-size-block .card-size-select {
+  min-height: 44px; height: 44px; border-radius: 10px; border-color: #d8d8d4;
+  font-size: 14px; font-weight: 600; touch-action: manipulation;
+}
+.premium-card .card-size-select:hover,
+.premium-card-detail .detail-size-block .card-size-select:hover { border-color: #a6a08f; }
+.premium-card .card-size-select:focus-visible,
+.premium-card-detail .detail-size-block .card-size-select:focus-visible {
+  outline: 3px solid rgba(166, 139, 82, .45); outline-offset: 2px;
+}
+
+/* Size categories in every quick view share an even two-column button grid. */
+.pqv-field-body .pqv-opt-group:not(.pqv-opt-group--scroll),
+.pqv-field-size .pqv-opt-group:not(.pqv-opt-group--scroll) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+}

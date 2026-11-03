@@ -88,7 +88,7 @@ function ensureCategoryStyles() {
     link = document.createElement("link");
     link.id = "category-sidebar-css";
     link.rel = "stylesheet";
-    link.href = "/category-sidebar.css?v=94c1addfd64bc185";
+    link.href = "/category-sidebar.css?v=3c76955e979b087e";
     document.head.appendChild(link);
   }
   var qtyLink =

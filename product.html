@@ -109,12 +109,17 @@
 
     .pd-option-group { margin-bottom: 16px; }
     .pd-option-label { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); margin-bottom: 8px; }
-    .pd-option-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pd-option-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; align-items: stretch; }
+    .pd-option-row .pd-option-btn { width: 100%; min-width: 0; }
+    .pd-option-row .pd-option-btn:only-child, .pd-option-row .pd-custom-size-btn { grid-column: 1 / -1; }
     .pd-option-btn {
-      padding: 10px 16px; border: 1px solid var(--line); border-radius: var(--radius);
-      background: #fff; font-size: 13.5px; font-weight: 600; color: var(--ink-soft); cursor: pointer;
+      min-height: 44px; padding: 0 16px; border: 1px solid var(--line); border-radius: 12px;
+      background: #fff; font-size: 14px; font-weight: 600; color: var(--ink-soft); cursor: pointer;
+      touch-action: manipulation; transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
     }
-    .pd-option-btn.is-active { border-color: var(--ink); color: var(--ink); background: var(--gold-soft); }
+    .pd-option-btn:hover { border-color: var(--ink); }
+    .pd-option-btn:focus-visible { outline: 3px solid rgba(166,139,82,.45); outline-offset: 2px; }
+    .pd-option-btn.is-active { border-color: var(--ink); color: #fff; background: var(--ink); box-shadow: 0 0 0 2px rgba(17,17,17,.1); }
     .pd-custom-size-btn { font-weight: 700; }
     .pd-size-chart-link { font-size: 12.5px; font-weight: 600; color: var(--ink); text-decoration: underline; margin-left: 6px; white-space: nowrap; background: none; border: none; padding: 0; cursor: pointer; font-family: inherit; }
 
