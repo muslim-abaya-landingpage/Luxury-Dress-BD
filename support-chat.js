@@ -144,9 +144,9 @@
     ".ma-chat-contact input{min-width:0;min-height:38px;border:1px solid #dedbd4;border-radius:9px;padding:7px 9px;font:inherit;font-size:13px}" +
     ".ma-chat-contact .ma-contact-actions{grid-column:1/-1;display:flex;gap:6px;justify-content:flex-end}" +
     ".ma-chat-contact button{min-height:34px;border:1px solid #dedbd4;border-radius:9px;padding:0 12px;background:#fff;font:600 12px system-ui;cursor:pointer}.ma-chat-contact button[type=submit]{background:#0a7d3b;border-color:#0a7d3b;color:#fff}" +
-    ".ma-chat-attach{flex:none;display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border:1px solid #d9d9d9;border-radius:12px;background:#fff;cursor:pointer;font-size:17px}.ma-chat-attach[hidden]{display:none}" +
-    ".ma-chat-image-draft{display:flex;align-items:center;gap:10px;margin:0 10px 8px;padding:8px;border:1px solid #e8e2d6;border-radius:12px;background:#fffdf8}.ma-chat-image-draft[hidden]{display:none!important}.ma-chat-image-draft img{width:48px;height:48px;object-fit:cover;border-radius:8px;background:#eee}.ma-chat-image-draft-copy{min-width:0;flex:1}.ma-chat-image-draft-copy strong{display:block;font-size:12px}.ma-chat-image-draft-copy small{display:block;color:#777;font-size:10.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ma-chat-image-remove{flex:none;width:34px;height:34px;border:1px solid #e4d8d5;border-radius:9px;background:#fff;color:#9c332c;font-size:18px;line-height:1}.ma-chat-image-remove:focus-visible{outline:2px solid #b59657;outline-offset:2}" +
-    ".ma-chat-message img{display:block;max-width:100%;max-height:240px;border-radius:9px;margin-top:6px;background:#eee}" +
+    ".ma-chat-attach{flex:none;display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border:1px solid #d9d9d9;border-radius:12px;background:#fff;cursor:pointer;font-size:17px}.ma-chat-attach[hidden]{display:none}.ma-chat-record{flex:none;width:42px;height:42px;border:1px solid #d9d9d9;border-radius:12px;background:#fff;cursor:pointer;font-size:17px}.ma-chat-record[hidden]{display:none}.ma-chat-record.is-recording{color:#b42318;border-color:#b42318;background:#fff5f4}" +
+    ".ma-chat-image-draft{display:flex;align-items:center;gap:10px;margin:0 10px 8px;padding:8px;border:1px solid #e8e2d6;border-radius:12px;background:#fffdf8}.ma-chat-image-draft[hidden]{display:none!important}.ma-chat-image-draft img{width:48px;height:48px;object-fit:cover;border-radius:8px;background:#eee}.ma-chat-image-draft audio{width:180px;height:34px}.ma-chat-image-draft-copy{min-width:0;flex:1}.ma-chat-image-draft-copy strong{display:block;font-size:12px}.ma-chat-image-draft-copy small{display:block;color:#777;font-size:10.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ma-chat-image-remove{flex:none;width:34px;height:34px;border:1px solid #e4d8d5;border-radius:9px;background:#fff;color:#9c332c;font-size:18px;line-height:1}.ma-chat-image-remove:focus-visible{outline:2px solid #b59657;outline-offset:2}" +
+    ".ma-chat-message img{display:block;max-width:100%;max-height:240px;border-radius:9px;margin-top:6px;background:#eee}.ma-chat-message audio{display:block;max-width:100%;width:260px;margin-top:7px}.ma-chat-file-link{display:inline-block;margin-top:7px;color:inherit;text-decoration:underline;overflow-wrap:anywhere}" +
     ".ma-chat-typing{min-height:16px;font-size:11px;color:#8a8170;font-style:italic;padding:2px 2px 0}" +
     /* Compact layout: shorter panel on desktop and mobile */
     ".ma-chat-panel{width:min(370px,calc(100vw - 28px));max-height:min(500px,calc(100vh - 120px))}" +
@@ -380,7 +380,7 @@
     body.appendChild(typingLine);
     var foot = el("div", "ma-chat-foot");
     var row = el("div", "ma-chat-row");
-    var pendingImage = null, pendingImageUrl = "";
+    var pendingImage = null, pendingImageUrl = "", mediaRecorder = null, recordingStream = null, recordingChunks = [];
     var input = el("textarea", "ma-chat-input");
     input.rows = 1;
     input.maxLength = 500;
@@ -392,29 +392,36 @@
     send.setAttribute("aria-label", "মেসেজ পাঠান");
     var fileInput = doc.createElement("input");
     fileInput.type = "file";
-    fileInput.accept = "image/jpeg,image/png,image/webp,image/gif";
+    fileInput.accept = "image/jpeg,image/png,image/webp,image/gif,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt";
     fileInput.hidden = true;
     var attach = el("button", "ma-chat-attach", "📎");
     attach.type = "button";
-    attach.title = "ছবি পাঠান (সর্বোচ্চ ৫MB)";
-    attach.setAttribute("aria-label", "ছবি পাঠান");
+    attach.title = "ছবি, অডিও বা ডকুমেন্ট পাঠান (সর্বোচ্চ ১০MB)";
+    attach.setAttribute("aria-label", "ফাইল পাঠান");
     attach.hidden = !liveEnabled;
+    var recordButton = el("button", "ma-chat-record", "🎙️");
+    recordButton.type = "button";
+    recordButton.title = "ভয়েস রেকর্ড শুরু করুন";
+    recordButton.setAttribute("aria-label", "ভয়েস রেকর্ড করুন");
+    recordButton.hidden = !liveEnabled || !global.MediaRecorder || !global.navigator.mediaDevices || !global.navigator.mediaDevices.getUserMedia;
     var imageDraft = el("div", "ma-chat-image-draft");
     imageDraft.hidden = true;
     imageDraft.setAttribute("aria-live", "polite");
     var imagePreview = el("img");
     imagePreview.alt = "পাঠানোর জন্য নির্বাচিত ছবির প্রিভিউ";
+    var audioPreview = doc.createElement("audio"); audioPreview.controls = true; audioPreview.hidden = true;
     var imageCopy = el("div", "ma-chat-image-draft-copy");
-    imageCopy.appendChild(el("strong", "", "ছবি পাঠানোর জন্য প্রস্তুত"));
+    imageCopy.appendChild(el("strong", "", "সংযুক্তি পাঠানোর জন্য প্রস্তুত"));
     var imageName = el("small");
     imageCopy.appendChild(imageName);
     var removeImage = el("button", "ma-chat-image-remove", "×");
     removeImage.type = "button";
     removeImage.setAttribute("aria-label", "ছবি সরান");
-    imageDraft.append(imagePreview, imageCopy, removeImage);
+    imageDraft.append(imagePreview, audioPreview, imageCopy, removeImage);
     foot.appendChild(imageDraft);
     row.appendChild(fileInput);
     row.appendChild(attach);
+    row.appendChild(recordButton);
     row.appendChild(input);
     row.appendChild(send);
     foot.appendChild(row);
@@ -491,18 +498,27 @@
       messageBody.textContent = String(row.body || "");
       bubble.appendChild(messageBody);
       if (row.attachment_path && supabaseClient) {
-        var img = el("img");
-        img.alt = "ছবি";
-        img.loading = "lazy";
-        bubble.appendChild(img);
+        var mime = String(row.attachment_mime || "");
+        var attachmentName = String(row.attachment_name || "সংযুক্ত ফাইল");
+        var media;
+        if (mime.indexOf("image/") === 0) {
+          media = el("img"); media.alt = attachmentName; media.loading = "lazy";
+        } else if (mime.indexOf("audio/") === 0) {
+          media = doc.createElement("audio"); media.controls = true; media.preload = "metadata";
+        } else {
+          media = el("a", "ma-chat-file-link", "📄 " + attachmentName);
+          media.target = "_blank"; media.rel = "noopener"; media.download = attachmentName;
+        }
+        bubble.appendChild(media);
         supabaseClient.storage.from("support-attachments").createSignedUrl(row.attachment_path, 3600).then(function (res) {
-          if (res && res.data && res.data.signedUrl) img.src = res.data.signedUrl; else img.remove();
-        }, function () { img.remove(); });
+          if (res && res.data && res.data.signedUrl) { media.src = res.data.signedUrl; if (media.tagName === "A") media.href = res.data.signedUrl; }
+          else media.remove();
+        }, function () { media.remove(); });
         var sentAt = new Date(row.created_at || 0).getTime();
         if (row.sender_role === "customer" && row.sender_id === currentUser.id && Date.now() - sentAt <= 24 * 60 * 60 * 1000) {
-          var deleteImage = el("button", "ma-chat-delete-image", "ছবি মুছুন");
+          var deleteImage = el("button", "ma-chat-delete-image", "মুছুন");
           deleteImage.type = "button";
-          deleteImage.setAttribute("aria-label", "পাঠানো ছবিটি মুছুন");
+          deleteImage.setAttribute("aria-label", "পাঠানো অ্যাটাচমেন্টটি মুছুন");
           deleteImage.addEventListener("click", function () { deleteSentImage(row, bubble, deleteImage); });
           bubble.appendChild(deleteImage);
         }
@@ -516,7 +532,7 @@
       body.scrollTop = body.scrollHeight;
     }
     async function deleteSentImage(row, bubble, button) {
-      if (!global.confirm("আপনি কি পাঠানো ছবিটি মুছে ফেলতে চান? এই কাজটি ফিরিয়ে নেওয়া যাবে না।")) return;
+      if (!global.confirm("আপনি কি পাঠানো অ্যাটাচমেন্টটি মুছে ফেলতে চান? এই কাজটি ফিরিয়ে নেওয়া যাবে না।")) return;
       button.disabled = true;
       button.textContent = "মুছছে…";
       try {
@@ -528,11 +544,11 @@
         delete seenMessageIds[row.id];
         var removed = await client.storage.from("support-attachments").remove([row.attachment_path]);
         if (removed.error) console.warn("Chat image storage cleanup failed", removed.error);
-        note.textContent = "ছবিটি চ্যাট থেকে মুছে ফেলা হয়েছে।";
+        note.textContent = "অ্যাটাচমেন্টটি চ্যাট থেকে মুছে ফেলা হয়েছে।";
       } catch (error) {
         button.disabled = false;
-        button.textContent = "ছবি মুছুন";
-        note.textContent = "ছবিটি মুছতে পারেনি। আবার চেষ্টা করুন।";
+        button.textContent = "মুছুন";
+        note.textContent = "অ্যাটাচমেন্টটি মুছতে পারেনি। আবার চেষ্টা করুন।";
       }
     }
     async function ensureLiveConversationImpl() {
@@ -604,7 +620,7 @@
       return conversationPromise;
     }
     function missingColumn(error) { return !!error && (error.code === "42703" || error.code === "PGRST204" || /column .* does not exist/i.test(error.message || "")); }
-    function messageColumns() { return "id,conversation_id,sender_id,sender_role,body,created_at,read_at" + (hasAttachmentColumn ? ",attachment_path" : ""); }
+    function messageColumns() { return "id,conversation_id,sender_id,sender_role,body,created_at,read_at" + (hasAttachmentColumn ? ",attachment_path,attachment_name,attachment_mime" : ""); }
     function contactKey() { return "maSupportContact:" + conversationId; }
     function maybeShowContact() {
       var done = "";
@@ -682,22 +698,81 @@
     function clearPendingImage() {
       if (pendingImageUrl && global.URL && global.URL.revokeObjectURL) global.URL.revokeObjectURL(pendingImageUrl);
       pendingImage = null; pendingImageUrl = "";
-      imagePreview.removeAttribute("src"); imageName.textContent = "";
+      imagePreview.removeAttribute("src"); audioPreview.removeAttribute("src"); audioPreview.hidden = true;
+      imagePreview.hidden = false; imageName.textContent = "";
       imageDraft.hidden = true; fileInput.value = "";
     }
     function showPendingImage(file) {
       clearPendingImage();
       pendingImage = file;
-      imageName.textContent = file.name || "ছবি";
-      if (global.URL && global.URL.createObjectURL) {
-        pendingImageUrl = global.URL.createObjectURL(file);
-        imagePreview.src = pendingImageUrl;
-      }
+      imageName.textContent = file.name || "সংযুক্ত ফাইল";
+      pendingImageUrl = global.URL.createObjectURL(file);
+      if (file.type.indexOf("image/") === 0) imagePreview.src = pendingImageUrl;
+      else if (file.type.indexOf("audio/") === 0) { imagePreview.hidden = true; audioPreview.hidden = false; audioPreview.src = pendingImageUrl; }
+      else imagePreview.hidden = true;
       imageDraft.hidden = false;
+    }
+    var attachmentTypes = {
+      "image/jpeg":"jpg", "image/png":"png", "image/webp":"webp", "image/gif":"gif",
+      "audio/webm":"webm", "audio/ogg":"ogg", "audio/mp4":"m4a", "audio/mpeg":"mp3",
+      "audio/wav":"wav", "audio/aac":"aac", "audio/3gpp":"3gp",
+      "application/pdf":"pdf", "application/msword":"doc",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":"docx",
+      "application/vnd.ms-excel":"xls",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":"xlsx",
+      "text/csv":"csv", "text/plain":"txt"
+    };
+    function extFor(file) {
+      var mime = String(file.type || "").toLowerCase();
+      if (mime === "audio/x-m4a" || mime === "audio/m4a") mime = "audio/mp4";
+      return attachmentTypes[mime] ? { mime: mime, ext: attachmentTypes[mime] } : null;
+    }
+    function stopRecordingStream() {
+      if (recordingStream) recordingStream.getTracks().forEach(function (track) { track.stop(); });
+      recordingStream = null;
+    }
+    var recordingTimer = 0;
+    async function toggleVoiceRecording() {
+      if (mediaRecorder && mediaRecorder.state === "recording") { mediaRecorder.stop(); return; }
+      if (!global.MediaRecorder || !global.navigator.mediaDevices || !global.navigator.mediaDevices.getUserMedia) {
+        note.textContent = "এই ব্রাউজারে ভয়েস রেকর্ডিং সমর্থিত নয়। অডিও ফাইল বেছে নিতে পারেন।"; return;
+      }
+      try {
+        recordingStream = await global.navigator.mediaDevices.getUserMedia({ audio: true });
+        var mimeType = "";
+        ["audio/webm;codecs=opus", "audio/ogg;codecs=opus", "audio/mp4"].some(function (type) {
+          if (global.MediaRecorder.isTypeSupported(type)) { mimeType = type; return true; }
+          return false;
+        });
+        mediaRecorder = new global.MediaRecorder(recordingStream, mimeType ? { mimeType: mimeType } : undefined);
+        recordingChunks = [];
+        mediaRecorder.ondataavailable = function (event) { if (event.data && event.data.size) recordingChunks.push(event.data); };
+        mediaRecorder.onerror = function () { stopRecordingStream(); recordButton.classList.remove("is-recording"); recordButton.textContent = "🎙️"; note.textContent = "রেকর্ডিং ব্যর্থ হয়েছে। আবার চেষ্টা করুন।"; };
+        mediaRecorder.onstop = function () {
+          global.clearTimeout(recordingTimer); stopRecordingStream();
+          recordButton.classList.remove("is-recording"); recordButton.textContent = "🎙️"; recordButton.title = "ভয়েস রেকর্ড শুরু করুন";
+          if (!recordingChunks.length) return;
+          var blob = new Blob(recordingChunks, { type: mediaRecorder.mimeType || "audio/webm" });
+          var normalized = blob.type.indexOf("audio/") === 0 ? blob.type.split(";")[0] : "audio/webm";
+          if (normalized === "audio/x-m4a") normalized = "audio/mp4";
+          var ext = attachmentTypes[normalized];
+          if (!ext || blob.size > 10 * 1024 * 1024) { note.textContent = "রেকর্ডটি অনুমোদিত নয় বা ১০MB-এর বেশি।"; return; }
+          var voiceFile = new File([blob], "voice-message." + ext, { type: normalized });
+          showPendingImage(voiceFile);
+          note.textContent = "ভয়েস রেকর্ড প্রস্তুত। শুনে নিয়ে পাঠান।";
+        };
+        mediaRecorder.start();
+        recordButton.classList.add("is-recording"); recordButton.textContent = "■"; recordButton.title = "রেকর্ডিং বন্ধ করুন";
+        note.textContent = "রেকর্ড হচ্ছে… শেষ হলে ■ চাপুন। সর্বোচ্চ ২ মিনিট।";
+        recordingTimer = global.setTimeout(function () { if (mediaRecorder && mediaRecorder.state === "recording") mediaRecorder.stop(); }, 120000);
+      } catch (_) {
+        stopRecordingStream();
+        note.textContent = "মাইক্রোফোন ব্যবহারের অনুমতি দিন, অথবা অডিও ফাইল বেছে নিন।";
+      }
     }
     removeImage.addEventListener("click", function () {
       clearPendingImage();
-      note.textContent = "ছবিটি মেসেজ থেকে সরানো হয়েছে।";
+      note.textContent = "সংযুক্তিটি মেসেজ থেকে সরানো হয়েছে।";
       attach.focus();
     });
     async function sendLiveMessage() {
@@ -711,21 +786,25 @@
         var state = await ensureLiveConversation();
         if (pendingImage) {
           if (!hasAttachmentColumn) throw new Error("Attachments unavailable");
-          var ext = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" }[pendingImage.type];
+          var file = pendingImage, fileInfo = extFor(file);
+          if (!fileInfo) throw new Error("এই ফাইলের ধরন সমর্থিত নয়।");
           var rand = global.crypto && global.crypto.randomUUID ? global.crypto.randomUUID() : Date.now() + "-" + Math.random().toString(36).slice(2);
-          var path = state.id + "/" + rand + "." + ext;
-          var upload = await state.client.storage.from("support-attachments").upload(path, pendingImage, { contentType: pendingImage.type, upsert: false });
+          var path = state.id + "/" + rand + "." + fileInfo.ext;
+          var upload = await state.client.storage.from("support-attachments").upload(path, file, { contentType: fileInfo.mime, upsert: false });
           if (upload.error) throw upload.error;
-          var withImage = await state.client.from("support_messages").insert({
+          var isImage = fileInfo.mime.indexOf("image/") === 0;
+          var isAudio = fileInfo.mime.indexOf("audio/") === 0;
+          var defaultText = isImage ? "📷 ছবি" : isAudio ? "🎙️ ভয়েস মেসেজ" : "📎 " + (file.name || "ফাইল");
+          var withAttachment = await state.client.from("support_messages").insert({
             conversation_id: state.id, sender_id: currentUser.id, sender_role: "customer",
-            body: messageText || "📷 ছবি", attachment_path: path
+            body: messageText || defaultText, attachment_path: path, attachment_name: String(file.name || (isAudio ? "voice-message." + fileInfo.ext : "file." + fileInfo.ext)).slice(0,255), attachment_mime: fileInfo.mime
           }).select(messageColumns()).single();
-          if (withImage.error) throw withImage.error;
-          appendMessage(withImage.data);
-          notifyTeam(state.client, withImage.data.id);
+          if (withAttachment.error) throw withAttachment.error;
+          appendMessage(withAttachment.data);
+          notifyTeam(state.client, withAttachment.data.id);
           clearPendingImage();
           input.value = ""; updateLinks();
-          note.textContent = "ছবিসহ মেসেজ পৌঁছেছে ✓ আমাদের টিম উত্তর দিলে এখানেই দেখবেন।";
+          note.textContent = (isImage ? "ছবি" : isAudio ? "ভয়েস মেসেজ" : "ফাইল") + " পাঠানো হয়েছে ✓";
           return;
         }
         var inserted = await state.client.from("support_messages").insert({
@@ -838,10 +917,10 @@
     fileInput.addEventListener("change", function () {
       var file = fileInput.files && fileInput.files[0];
       if (!file || !liveEnabled) return;
-      if (!/^image\/(jpeg|png|webp|gif)$/.test(file.type)) { fileInput.value = ""; note.textContent = "শুধু JPG, PNG, WEBP বা GIF ছবি পাঠানো যাবে।"; return; }
-      if (file.size > 5 * 1024 * 1024) { fileInput.value = ""; note.textContent = "ছবিটি ৫MB-এর বেশি। ছোট ছবি দিন।"; return; }
+      if (!extFor(file)) { fileInput.value = ""; note.textContent = "JPG/PNG/WEBP/GIF, PDF/Word/Excel/CSV/TXT বা MP3/WAV/OGG/WEBM অডিও দিন।"; return; }
+      if (file.size > 10 * 1024 * 1024) { fileInput.value = ""; note.textContent = "ফাইলটি ১০MB-এর বেশি। ছোট ফাইল দিন।"; return; }
       showPendingImage(file);
-      note.textContent = "ছবিটি প্রিভিউ করুন; × চাপলে সরবে। পাঠাতে মেসেজ বাটন চাপুন।";
+      note.textContent = "ফাইলটি প্রিভিউ/শুনে নিন; × চাপলে সরবে। পাঠাতে পাঠান চাপুন।";
     });
     input.addEventListener("keydown", function (ev) {
       if (ev.key === "Enter" && !ev.shiftKey) {

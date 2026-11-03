@@ -4,7 +4,7 @@
   var config = (window.SITE_FOOTER_CONFIG || {}).supportChat || {};
   var BUCKET = "support-attachments";
   var PAGE = 100;
-  var MAX_IMAGE = 5 * 1024 * 1024;
+  var MAX_IMAGE = 10 * 1024 * 1024;
   var DEFAULT_CANNED = [
     "আসসালামু আলাইকুম! Muslim Abaya-তে যোগাযোগ করার জন্য ধন্যবাদ। কীভাবে সাহায্য করতে পারি?",
     "ঢাকার ভেতরে ডেলিভারি সাধারণত ১-২ দিন, ঢাকার বাইরে ২-৪ দিন লাগে।",
@@ -273,15 +273,21 @@
       bubble.appendChild(make("div", "message-label", label));
       bubble.appendChild(make("div", "message-body", row.body));
       if (row.attachment_path) {
-        var img = make("img"); img.alt = "কাস্টমারের পাঠানো ছবি"; img.loading = "lazy";
+        var mime = String(row.attachment_mime || "");
+        var fileName = String(row.attachment_name || "সংযুক্ত ফাইল");
+        var media;
+        if (mime.indexOf("image/") === 0 || !mime) { media = make("img"); media.alt = fileName; media.loading = "lazy"; }
+        else if (mime.indexOf("audio/") === 0) { media = document.createElement("audio"); media.controls = true; media.preload = "metadata"; }
+        else { media = make("a", "file-attachment", "📄 " + fileName); media.target = "_blank"; media.rel = "noopener"; media.download = fileName; }
         signedUrl(row.attachment_path).then(function (url) {
-          if (!url) { img.replaceWith(make("div", "message-label", "ছবি লোড করা যায়নি")); return; }
+          if (!url) { media.replaceWith(make("div", "message-label", "ফাইল লোড করা যায়নি")); return; }
           var nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 160;
-          img.onload = function () { if (nearBottom) box.scrollTop = box.scrollHeight; };
-          img.src = url;
-          var link = make("a"); link.href = url; link.target = "_blank"; link.rel = "noopener"; img.replaceWith(link); link.appendChild(img);
+          media.onload = function () { if (nearBottom) box.scrollTop = box.scrollHeight; };
+          if (media.tagName === "A") media.href = url;
+          else media.src = url;
+          if (media.tagName === "IMG") { var link = make("a"); link.href = url; link.target = "_blank"; link.rel = "noopener"; media.replaceWith(link); link.appendChild(media); }
         });
-        bubble.appendChild(img);
+        bubble.appendChild(media);
       }
       var time = make("time", "", formatTime(row.created_at)); time.dateTime = row.created_at || "";
       bubble.appendChild(time);
@@ -291,7 +297,7 @@
     else box.scrollTop = box.scrollHeight - prevHeight + prevTop;
   }
 
-  function messageColumns() { return "id,conversation_id,sender_id,sender_role,sender_external_id,body,created_at,read_at" + (hasAttachmentColumn ? ",attachment_path" : ""); }
+  function messageColumns() { return "id,conversation_id,sender_id,sender_role,sender_external_id,body,created_at,read_at" + (hasAttachmentColumn ? ",attachment_path,attachment_name,attachment_mime" : ""); }
   async function queryMessages(id, before) {
     var c = requireClient();
     var build = function () {
