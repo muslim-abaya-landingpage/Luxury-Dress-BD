@@ -88,7 +88,7 @@ function ensureCategoryStyles() {
     link = document.createElement("link");
     link.id = "category-sidebar-css";
     link.rel = "stylesheet";
-    link.href = "/category-sidebar.css?v=a6992cb63d9a36b8";
+    link.href = "/category-sidebar.css?v=bf99c16036f33268";
     document.head.appendChild(link);
   }
   var qtyLink =
@@ -2611,7 +2611,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     (shortNoteRaw
       ? '<p class="pqv-note">' + escapeHtml(shortNoteRaw) + "</p>"
       : "") +
-    '<div class="pqv-options">' +
+    '<div class="pqv-options' + (isAbaya ? ' pqv-options--abaya' : '') + '">' +
     typeField +
     colorField +
     sizeField +

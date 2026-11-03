@@ -1953,6 +1953,22 @@ body.shop-product-open > main {
 }
 .pqv-options .pqv-field-head { min-width: 0; flex-wrap: wrap; }
 .pqv-options .pqv-opt-group { min-width: 0; }
+/* Abaya uses full-width measurement groups with regularly aligned two-column choices. */
+.pqv-options--abaya { grid-template-columns: minmax(0, 1fr); }
+.pqv-options--abaya > .pqv-field-body,
+.pqv-options--abaya > .pqv-field-size,
+.pqv-options--abaya > .pqv-field:not(.pqv-field-body):not(.pqv-field-size) { grid-column: 1 / -1; }
+.pqv-options--abaya .pqv-field-body .pqv-opt-group,
+.pqv-options--abaya .pqv-field-size .pqv-opt-group {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.pqv-options--abaya .pqv-field-body .pqv-opt-btn,
+.pqv-options--abaya .pqv-field-size .pqv-opt-btn {
+  width: 100%; min-width: 0; justify-content: center;
+}
+
 
 .pqv-field {
   margin-bottom: 0;
