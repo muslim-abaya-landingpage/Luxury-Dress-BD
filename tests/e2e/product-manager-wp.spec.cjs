@@ -16,21 +16,27 @@ test('product list looks like WordPress Products and shows dates from the catalo
   await expect(page.locator('#pmPagerTop')).toContainText('items');
 });
 
-test('premium Product Manager keeps categories beside the editor and compact on narrow screens', async ({ page }) => {
+test('simple product list uses full width; category editor keeps compact navigation', async ({ page }) => {
   await stub(page);
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto('/product-manager.html');
-  await expect(page.locator('#pmCatList li').first()).toBeVisible();
+  await expect(page.locator('.pm-layout')).toHaveClass(/pm-all-view/);
+  await expect(page.locator('.pm-sidebar')).toBeHidden();
   await expect(page.locator('#pmMain .pm-wp-list')).toBeVisible();
+  await expect(page.locator('.pl-admin-header .adm-heading')).toBeVisible();
+  await expect(page.locator('.pl-admin-header > p:not(#pmSaveStatus)')).toBeVisible();
 
   const desktop = await page.evaluate(() => {
     const layout = document.querySelector('.pm-layout');
-    const sidebar = document.querySelector('.pm-sidebar').getBoundingClientRect();
     const main = document.querySelector('.pm-main').getBoundingClientRect();
-    return { display: getComputedStyle(layout).display, sidebarRight: sidebar.right, mainLeft: main.left };
+    return { display: getComputedStyle(layout).display, layoutWidth: layout.getBoundingClientRect().width, mainWidth: main.width };
   });
-  expect(desktop.display).toBe('grid');
-  expect(desktop.mainLeft).toBeGreaterThan(desktop.sidebarRight);
+  expect(desktop.display).toBe('block');
+  expect(Math.abs(desktop.layoutWidth - desktop.mainWidth)).toBeLessThan(2);
+
+  await page.click('#pmManageCats');
+  await expect(page.locator('.pm-sidebar')).toBeVisible();
+  await expect(page.locator('#pmCatList li').first()).toBeVisible();
 
   await page.setViewportSize({ width: 850, height: 900 });
   const compact = await page.evaluate(() => ({
