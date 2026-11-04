@@ -82,7 +82,7 @@
         <a class="pl-back" href="/" style="margin-left:8px">Home</a>
         <div class="adm-heading"><span class="adm-page-kicker">Muslim Abaya / Products & Stock</span><h1>Products</h1></div>
         <p>পণ্য যোগ, এডিট, স্টক ও Trash—সব এক জায়গা থেকে পরিচালনা করুন।</p>
-        <div class="pl-toolbar pm-header-actions"><button type="button" class="pl-btn pl-btn-primary pm-header-add" id="pmHeaderAdd">+ Add product</button><button type="button" class="pl-btn pl-btn-secondary" id="pmSave">Publish changes</button></div>
+        <div class="pl-toolbar pm-header-actions"><button type="button" class="pl-btn pl-btn-primary pm-header-add" id="pmHeaderAdd">+ Add product</button><button type="button" class="pl-btn pl-btn-secondary" id="pmHeaderBulkUpload">Bulk Upload</button><button type="button" class="pl-btn pl-btn-secondary" id="pmSave">Publish changes</button></div>
         <details class="adm-disclosure adm-product-tools"><summary>More tools</summary>        <div class="pl-toolbar">
           <button type="button" class="pl-btn pl-btn-secondary" id="pmCheckImages" title="Check every product photo for broken or duplicate images">🔍 Check images</button>
           <button type="button" class="pl-btn pl-btn-secondary" id="pmReload">Reload current data</button>
@@ -195,6 +195,17 @@
       }
       return window.MaProductQuickUpload;
     });
+  }
+  var bulkUploadMounted = false;
+  function openBulkUpload() {
+    return Promise.all([loadScriptOnce("product-csv.js?v=20261028-dresslength-discount"), loadScriptOnce("product-bulk-upload.js?v=20261105-bulk-v1"), loadStyleOnce("product-bulk-upload.css?v=20261105-bulk-v1")]).then(function () {
+      if (!bulkUploadMounted) {
+        if (!window.MaProductBulkUpload || !quickUploadOptions) throw new Error("Bulk upload is not ready");
+        window.MaProductBulkUpload.mount(quickUploadOptions);
+        bulkUploadMounted = true;
+      }
+      window.MaProductBulkUpload.open();
+    }).catch(function (err) { toast(err.message || "Bulk upload is unavailable"); });
   }
   function openQuickUpload() {
     var trigger = document.getElementById("pmQuickUpload");
@@ -1569,6 +1580,7 @@
     bindById("pmHeaderAdd", "click", function () {
       openQuickUpload();
     });
+    bindById("pmHeaderBulkUpload", "click", openBulkUpload);
     bindById("pmManageCats", "click", function () {
       if (!sections.length) return;
       activeKey = overviewCategory || sections[0].key;
@@ -3434,6 +3446,10 @@
     var targetSection = sections.find(function (sec) { return sec.key === category; });
     if (targetSection) product.categoryLabel = targetSection.menuBn || targetSection.menu || category;
     products[category].unshift(product);renderCatList();renderMain();
+  },stageMany:function(rows){
+    var before=JSON.parse(JSON.stringify(products));
+    try{rows.forEach(function(row){quickUploadOptions.stage(row.category,row.product);});}
+    catch(error){products=before;renderCatList();renderMain();throw error;}
   },publish:saveAll};
   reloadPublishingData().then(refreshLiveStockOverrides);
   // The publisher fires this once the new catalog is actually served by the website.
