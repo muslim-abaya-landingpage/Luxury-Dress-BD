@@ -1,0 +1,103 @@
+/* MUSLIM ABAYA — NOIR-inspired premium commerce dashboard.
+   Presentation only: preserves existing data bindings, reports and actions. */
+:root{
+  --noir-ink:#262321;--noir-muted:#827b76;--noir-line:#eee4df;
+  --noir-cream:#fbf5f2;--noir-blush:#f8eeea;--noir-blush-2:#f4e7e1;
+  --noir-accent:#b88f7b;--noir-accent-dark:#896451;
+}
+html:not([data-admin-theme="dark"]) body.adm-body{background:#fff;color:var(--noir-ink)}
+html:not([data-admin-theme="dark"]) .adm-shell{gap:26px;padding:16px;background:#fff}
+html:not([data-admin-theme="dark"]) .adm-sidebar{
+  background:var(--noir-blush)!important;color:var(--noir-ink)!important;
+  border:0!important;border-radius:0 18px 18px 0!important;box-shadow:none!important;
+  top:0!important;left:0!important;height:100dvh!important;width:250px;overflow-y:auto
+}
+html:not([data-admin-theme="dark"]) .adm-sidebar-brand{border-color:#eadbd4!important}
+html:not([data-admin-theme="dark"]) .adm-sidebar-brand-text .t1{font-family:Georgia,"Times New Roman",serif;font-size:19px!important;color:var(--noir-ink)!important}
+html:not([data-admin-theme="dark"]) .adm-sidebar-brand-text .t2{color:var(--noir-accent-dark)!important;letter-spacing:.16em!important}
+html:not([data-admin-theme="dark"]) .adm-sidebar-crest{background:#282321!important;box-shadow:none!important}
+html:not([data-admin-theme="dark"]) .adm-sidebar-profile{background:#fff9f6;border:1px solid #efdfd8;border-radius:14px;margin:8px 12px;padding:12px}
+html:not([data-admin-theme="dark"]) .adm-profile-avatar{background:#ead9d0;color:#654c40}
+html:not([data-admin-theme="dark"]) .adm-sidebar-item{color:#5c514c!important;border-radius:9px!important}
+html:not([data-admin-theme="dark"]) .adm-sidebar-item:hover{background:#fff8f5!important;color:#302722!important}
+html:not([data-admin-theme="dark"]) .adm-sidebar-item.is-current{background:#302722!important;color:#fff!important}
+html:not([data-admin-theme="dark"]) .adm-sidebar-item.is-current svg{color:#fff!important}
+html:not([data-admin-theme="dark"]) .adm-sidebar-item.is-current:before{display:none}
+html:not([data-admin-theme="dark"]) .adm-sidebar-foot{border-color:#eadbd4!important}
+html:not([data-admin-theme="dark"]) .adm-sidebar .adm-btn-secondary{background:transparent!important;color:#5c514c!important;border-color:#d9c6bd!important}
+html:not([data-admin-theme="dark"]) .adm-collapse-btn{background:#fff8f5;color:#5c514c}
+html:not([data-admin-theme="dark"]) .adm-content{min-width:0}
+html:not([data-admin-theme="dark"]) .adm-topbar{position:relative!important;top:auto!important;background:#fff;border:0;border-bottom:1px solid var(--noir-line);border-radius:0;box-shadow:none;padding:10px 4px 18px}
+html:not([data-admin-theme="dark"]) .adm-heading h1{font-family:Georgia,"Times New Roman",serif;font-size:28px;letter-spacing:-.025em;color:var(--noir-ink)}
+html:not([data-admin-theme="dark"]) .adm-page-kicker,.adm-topbar-user{color:var(--noir-muted)}
+html:not([data-admin-theme="dark"]) .adm-sync{background:var(--noir-cream);border:1px solid var(--noir-line);border-radius:999px;padding:8px 12px}
+html:not([data-admin-theme="dark"]) .adm-main{max-width:none;padding:22px 4px 40px;display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:18px 22px;align-items:start}
+html:not([data-admin-theme="dark"]) .adm-main>.dzc-overview,
+html:not([data-admin-theme="dark"]) .adm-main>.adm-daily,
+html:not([data-admin-theme="dark"]) .adm-main>.adm-dashboard-reports{grid-column:1/-1}
+html:not([data-admin-theme="dark"]) .adm-main>.adm-best-sellers{grid-column:2;grid-row:3}
+html:not([data-admin-theme="dark"]) .adm-main>.adm-feature-card[aria-labelledby="admAlertHeading"]{grid-column:1;grid-row:3}
+html:not([data-admin-theme="dark"]) .adm-main>.adm-feature-card[aria-labelledby="admTasksHeading"]{grid-column:2;grid-row:4}
+html:not([data-admin-theme="dark"]) .adm-main>section.dz-card:not(.adm-best-sellers):not(.adm-feature-card){grid-column:1/-1}
+html:not([data-admin-theme="dark"]) .dzc-overview{background:#fff;border:0;border-radius:0;padding:0;margin:0;box-shadow:none}
+html:not([data-admin-theme="dark"]) .dzc-greet{padding:0 0 14px;border-bottom:1px solid var(--noir-line)}
+html:not([data-admin-theme="dark"]) .dzc-greet h2{font-family:Georgia,"Times New Roman",serif;font-size:23px}
+html:not([data-admin-theme="dark"]) .dzc-kpis{gap:12px}
+html:not([data-admin-theme="dark"]) .dzc-kpi{background:var(--noir-cream)!important;border:1px solid #f1e8e3!important;border-radius:4px!important;box-shadow:none!important;padding:16px!important}
+html:not([data-admin-theme="dark"]) .dzc-kpi:before{display:none}
+html:not([data-admin-theme="dark"]) .dzc-kpi b{color:var(--noir-ink);font-size:clamp(21px,2vw,27px)}
+html:not([data-admin-theme="dark"]) .dzc-kpi span,html:not([data-admin-theme="dark"]) .dzc-kpi small{color:var(--noir-muted)}
+html:not([data-admin-theme="dark"]) .dzc-note{font-size:11px}
+html:not([data-admin-theme="dark"]) .adm-daily{margin:0}
+html:not([data-admin-theme="dark"]) .adm-daily h2{font-family:Georgia,"Times New Roman",serif;font-size:17px;color:var(--noir-ink)}
+html:not([data-admin-theme="dark"]) .adm-daily .adm-daily-action{background:#fff!important;border:1px solid var(--noir-line)!important;border-radius:5px!important;box-shadow:none!important}
+html:not([data-admin-theme="dark"]) .adm-daily-icon{background:var(--noir-blush)!important;color:var(--noir-accent-dark)!important}
+html:not([data-admin-theme="dark"]) .adm-main .dz-card{background:#fff;border:1px solid var(--noir-line);border-radius:6px;box-shadow:none}
+html:not([data-admin-theme="dark"]) .adm-main .dz-card h3,
+html:not([data-admin-theme="dark"]) .adm-feature-head h3,
+html:not([data-admin-theme="dark"]) .dz-orders-head h3{font-family:Georgia,"Times New Roman",serif;color:var(--noir-ink)}
+html:not([data-admin-theme="dark"]) .adm-alert-panel{background:var(--noir-cream);border-color:var(--noir-line)}
+html:not([data-admin-theme="dark"]) .adm-alert-item{border-color:var(--noir-line);border-radius:5px}
+html:not([data-admin-theme="dark"]) .adm-task-row{border-color:var(--noir-line)}
+html:not([data-admin-theme="dark"]) .adm-recent-table-wrap{border-color:var(--noir-line);border-radius:5px}
+html:not([data-admin-theme="dark"]) .adm-recent-table th{background:var(--noir-cream);color:#74675f}
+html:not([data-admin-theme="dark"]) .adm-recent-table td{border-color:#f2e9e4}
+html:not([data-admin-theme="dark"]) .adm-dashboard-reports{border-color:var(--noir-line);border-radius:6px}
+html:not([data-admin-theme="dark"]) .adm-dashboard-reports>summary{font-family:Georgia,"Times New Roman",serif}
+html:not([data-admin-theme="dark"]) .adm-btn-primary{background:#302722;border-color:#302722}
+html:not([data-admin-theme="dark"]) .adm-btn-primary:hover{background:#4b3b33}
+html:not([data-admin-theme="dark"]) .adm-btn-secondary{background:#fff;border-color:#e7d9d2;color:#554941}
+@media(max-width:1100px){
+ html:not([data-admin-theme="dark"]) .adm-main{grid-template-columns:minmax(0,1fr) 250px;gap:14px}
+ html:not([data-admin-theme="dark"]) .adm-sidebar{width:230px}
+}
+@media(max-width:980px){
+ html:not([data-admin-theme="dark"]) .adm-shell{padding:0;gap:0}
+ html:not([data-admin-theme="dark"]) .adm-sidebar{border-radius:0!important;height:100dvh!important}
+ html:not([data-admin-theme="dark"]) .adm-main{grid-template-columns:minmax(0,1fr);padding:18px 0}
+ html:not([data-admin-theme="dark"]) .adm-main>.dzc-overview,
+ html:not([data-admin-theme="dark"]) .adm-main>.adm-daily,
+ html:not([data-admin-theme="dark"]) .adm-main>.adm-dashboard-reports,
+ html:not([data-admin-theme="dark"]) .adm-main>.adm-best-sellers,
+ html:not([data-admin-theme="dark"]) .adm-main>.adm-feature-card[aria-labelledby="admAlertHeading"],
+ html:not([data-admin-theme="dark"]) .adm-main>.adm-feature-card[aria-labelledby="admTasksHeading"],
+ html:not([data-admin-theme="dark"]) .adm-main>section.dz-card:not(.adm-best-sellers):not(.adm-feature-card){grid-column:1;grid-row:auto}
+ html:not([data-admin-theme="dark"]) .adm-topbar{padding:14px 14px 16px}
+ html:not([data-admin-theme="dark"]) .adm-main>.dzc-overview,
+ html:not([data-admin-theme="dark"]) .adm-main>.adm-daily,
+ html:not([data-admin-theme="dark"]) .adm-main>.dz-card,
+ html:not([data-admin-theme="dark"]) .adm-main>.adm-dashboard-reports{margin-left:14px;margin-right:14px}
+}
+@media(max-width:640px){
+ html:not([data-admin-theme="dark"]) .adm-heading h1{font-size:22px}
+ html:not([data-admin-theme="dark"]) .adm-topbar{gap:10px}
+ html:not([data-admin-theme="dark"]) .adm-topbar-actions{flex-wrap:wrap}
+ html:not([data-admin-theme="dark"]) .adm-main .adm-commerce-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+ html:not([data-admin-theme="dark"]) .adm-main .adm-commerce-kpis .dzc-kpi{min-height:94px;padding:12px!important}
+ html:not([data-admin-theme="dark"]) .adm-daily-grid{grid-template-columns:1fr}
+}
+@media(max-width:380px){
+ html:not([data-admin-theme="dark"]) .adm-main .adm-commerce-kpis{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){html:not([data-admin-theme="dark"]) .adm-sidebar-item{transition:none}}
+/* Dark mode intentionally keeps the existing dark admin theme. */
