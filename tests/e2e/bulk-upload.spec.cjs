@@ -56,21 +56,30 @@ test('bulk upload validates the full CSV and publishes multiple products togethe
   expect(result.assetCount).toBe(4); // main + small card image for each product
 });
 
-test('bulk upload blocks every row if one SKU duplicates an existing product', async ({ page }) => {
+test('bulk upload updates an exact existing SKU and adds an unmatched SKU as a new product', async ({ page }) => {
   await page.setContent('<!doctype html><html><body></body></html>');
   await page.addScriptTag({ path: path.join(root, 'product-csv.js') });
   await page.addScriptTag({ path: path.join(root, 'product-publish-utils.js') });
-  await page.evaluate(() => { window.MaCatalogPublisher = { isReady: () => true }; });
+  await page.evaluate(() => { window.__staged = []; window.__published = 0; window.MaCatalogPublisher = { isReady: () => true, enqueue() {} }; window.MaImageTools = { resizeToWebp: async (_file, width) => new Blob(['webp-' + width], { type: 'image/webp' }) }; });
   await page.addScriptTag({ path: path.join(root, 'product-bulk-upload.js') });
   await page.evaluate(() => window.MaProductBulkUpload.mount({
     sections: () => [{ key: 'hijab', menu: 'Hijab' }],
-    products: () => ({ hijab: [{ id: 'HIJAB-EXISTING' }] }),
-    stageMany() { throw new Error('Should not stage an invalid batch'); }, publish() { throw new Error('Should not publish an invalid batch'); }
+    products: () => ({ hijab: [{ id: 'HIJAB-EXISTING', name: 'Old name', price: 400, image: 'old.webp', customField: 'keep me' }] }),
+    stageMany: rows => window.__staged.push(...rows),
+    publish: async () => { window.__published++; }
   }));
   await page.evaluate(() => window.MaProductBulkUpload.open());
-  const csv = 'category,name,sku,price,sizes,photos\nhijab,New Hijab,HIJAB-EXISTING,650,Free Size,new.jpg';
-  await page.locator('#pbuCsv').setInputFiles({ name: 'duplicate.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
+  const csv = 'category,name,sku,price,sizes,photos\\nhijab,Updated Hijab,HIJAB-EXISTING,650,Free Size,old.jpg';
+  await page.locator('#pbuCsv').setInputFiles({ name: 'update.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
   await page.locator('#pbuImages').setInputFiles({ name: 'new.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('image') });
-  await expect(page.locator('#pbuPreview')).toContainText('SKU আগে থেকেই আছে');
-  await expect(page.locator('#pbuPublish')).toBeDisabled();
+  await expect(page.locator('#pbuPreview')).toContainText('Existing SKU update');
+  await expect(page.locator('#pbuPublish')).toBeEnabled();
+  await page.locator('#pbuPublish').click();
+  await expect(page.locator('#pbuNote')).toContainText('সফল!');
+  const product = await page.evaluate(() => window.__staged[0].product);
+  expect(product.id).toBe('HIJAB-EXISTING');
+  expect(product.name).toBe('Updated Hijab');
+  expect(product.customField).toBe('keep me');
+  expect(product.image).not.toBe('old.webp');
+  expect(await page.evaluate(() => window.__published)).toBe(1);
 });
