@@ -6,8 +6,8 @@ const SITE_CONFIG = {
     
     // ডেলিভারি সেটিংস
     deliveryCharge: {
-        insideDhaka: 60,
-        outsideDhaka: 120
+        insideDhaka: 80,
+        outsideDhaka: 150
     },
     
     // ট্যাক্স বা বাড়তি চার্জ
