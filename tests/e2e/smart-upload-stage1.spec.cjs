@@ -111,7 +111,8 @@ test('SKU: exact existing ID updates that product; case-different ID remains a n
   expect(exact.customField).toBe('keep me');
 
   // Same letters with different case is NOT an exact match and must not overwrite the original.
-  await page.evaluate(() => { document.querySelector('.pm-quick-dialog').close(); window.MaProductQuickUpload.open(); });
+  await page.evaluate(() => { document.querySelector('.pm-quick-dialog').close(); });
+  await page.click('#pmQuickUpload');
   await page.fill('#pq_name', 'Case Variant Hijab');
   await page.fill('#pq_price', '650');
   await page.fill('#pq_sizes', 'Free Size');
