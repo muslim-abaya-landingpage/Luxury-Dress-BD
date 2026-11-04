@@ -17,7 +17,7 @@ window.PRODUCT_LINKS_DATA = {
     "/images/Premium-Floral-Motif-Abaya-Set..jpeg",
     "/images/Premium-Floral-Motif-Abaya-Set.jpeg",
     "/images/Butterfly-Ababa....jpg",
-    "/images/Butterfly-Ababa...jpg",
+    "https://images.muslimabaya.com/images/uploads/aby-butterfly-14-1793831187440-ca8b4af1530b6cc32b18.webp",
     "https://images.muslimabaya.com/images/uploads/aby-butterfly-15-1793829407059-ca8b4af1530b6cc32b18.webp",
     "/images/Butterfly-Ababa.jpg",
   ],
