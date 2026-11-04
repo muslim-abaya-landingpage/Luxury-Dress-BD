@@ -1,0 +1,104 @@
+/* Smart sticky workspace for Product Manager — layout-only; preserves editor and publish logic. */
+.pm-wp-admin .pm-layout{
+  grid-template-columns:clamp(220px,18vw,280px) minmax(0,1fr)!important;
+  align-items:start!important;
+  gap:20px!important;
+}
+.pm-wp-admin .pm-sidebar{
+  position:sticky!important;
+  top:16px!important;
+  align-self:start!important;
+  display:flex!important;
+  flex-direction:column!important;
+  max-height:calc(100dvh - 32px)!important;
+  min-height:0!important;
+  overflow:hidden!important;
+  padding:16px!important;
+  z-index:8;
+}
+.pm-wp-admin .pm-sidebar h2{
+  flex:0 0 auto;
+  margin:0 0 12px!important;
+  padding-bottom:10px;
+  border-bottom:1px solid var(--adm-border,#e5e7eb);
+}
+.pm-wp-admin .pm-cat-list{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain;
+  scrollbar-width:thin;
+  padding:2px 4px 8px 0;
+}
+.pm-wp-admin .pm-cat-list li{margin-bottom:5px!important}
+.pm-wp-admin .pm-cat-btn{
+  display:block;
+  width:100%;
+  text-align:left!important;
+  line-height:1.45!important;
+}
+.pm-wp-admin .pm-add-cat{
+  flex:0 0 auto;
+  margin-top:10px!important;
+}
+.pm-wp-admin .pm-main{min-width:0!important}
+.pm-wp-admin .pm-cat-head{
+  position:sticky;
+  top:10px;
+  z-index:6;
+  padding:10px 12px;
+  margin:0 0 14px!important;
+  border:1px solid var(--adm-border,#e5e7eb);
+  border-radius:12px;
+  background:var(--adm-card,#fff);
+  box-shadow:0 5px 18px rgba(20,35,55,.07);
+}
+.pm-wp-admin .pm-product-head{
+  position:sticky;
+  top:8px;
+  z-index:4;
+}
+.pm-wp-admin .pm-product-card{scroll-margin-top:16px}
+.pm-wp-admin .pm-overview-wrap{scroll-margin-top:16px}
+.pm-wp-admin .pm-wp-savebar{
+  position:sticky!important;
+  bottom:0!important;
+  z-index:30!important;
+  margin-top:16px;
+  box-shadow:0 -8px 24px rgba(20,35,55,.08);
+}
+.pm-wp-admin :where(button,a,input,select,textarea):focus-visible{
+  scroll-margin-top:18px;
+}
+@media(min-width:901px) and (max-height:650px){
+  .pm-wp-admin .pm-sidebar{top:10px!important;max-height:calc(100dvh - 20px)!important}
+}
+@media(max-width:900px){
+  .pm-wp-admin .pm-layout{display:flex!important;flex-direction:column!important}
+  .pm-wp-admin .pm-sidebar{
+    position:relative!important;
+    top:auto!important;
+    display:block!important;
+    max-height:none!important;
+    overflow:visible!important;
+    width:100%!important;
+  }
+  .pm-wp-admin .pm-sidebar h2{border:0;padding-bottom:0}
+  .pm-wp-admin .pm-cat-list{
+    display:flex!important;
+    flex-direction:row!important;
+    max-height:none!important;
+    min-height:0!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    padding:2px 2px 10px!important;
+  }
+  .pm-wp-admin .pm-cat-list li{flex:0 0 auto;min-width:140px}
+  .pm-wp-admin .pm-cat-head,.pm-wp-admin .pm-product-head{position:relative;top:auto;z-index:auto}
+  .pm-wp-admin .pm-wp-savebar{position:sticky!important;bottom:0!important}
+}
+@media(prefers-reduced-motion:no-preference){
+  .pm-wp-admin .pm-cat-list{scroll-behavior:smooth}
+}
