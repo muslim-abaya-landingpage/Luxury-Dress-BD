@@ -11,6 +11,7 @@ test('admin dashboard renders alerts, priority orders, lifetime report and conse
     <button id="admDesktopAlerts" hidden></button><span id="admDesktopStatus"></span>
     <button id="admAlertsRefresh"></button><span id="admAlertState"></span><span id="admStockAlertCount"></span><span id="admInboxAlertCount"></span>
     <div id="admStockAlerts"></div><div id="admInboxAlerts"></div>
+    <span id="admOverviewProducts"></span><span id="admOverviewLowStock"></span><span id="admOverviewOrders"></span><span id="admOverviewRevenue"></span><div id="admOverviewTopProducts"></div>
     <button id="admTasksRefresh"></button><span id="admTaskState"></span><span id="admTaskPendingCount"></span><span id="admTaskOverdueCount"></span><span id="admTaskScope"></span><div id="admPriorityTasks"></div>
     <button id="admRefresh"></button><button id="admReportLoad"></button><button id="admReportExport" disabled></button>
     <select id="admReportRange"><option value="all" selected>all</option><option value="custom">custom</option></select>
@@ -64,6 +65,8 @@ test('admin dashboard renders alerts, priority orders, lifetime report and conse
   await page.addScriptTag({ path: path.join(root, 'admin-dashboard-features.js') });
 
   await expect(page.locator('#admStockAlertCount')).toHaveText('2');
+  await expect(page.locator('#admOverviewProducts')).toHaveText('2');
+  await expect(page.locator('#admOverviewLowStock')).toHaveText('2');
   await expect(page.locator('#admInboxAlertCount')).toHaveText('1');
   await expect(page.locator('#admStockAlerts')).toContainText('Black Abaya');
   await expect(page.locator('#admInboxAlerts')).toContainText('Customer A');
@@ -76,8 +79,11 @@ test('admin dashboard renders alerts, priority orders, lifetime report and conse
   // Analytics are intentionally lazy-loaded; open the report explicitly before asserting totals.
   await page.locator('#admReportLoad').click();
   await expect(page.locator('#admReportOrders')).toHaveText('7');
+  await expect(page.locator('#admOverviewOrders')).toHaveText('7');
+  await expect(page.locator('#admOverviewRevenue')).toHaveText('৳9,000');
   await expect(page.locator('#admReportDeliveredValue')).toHaveText('৳4,200');
   await expect(page.locator('#admSalesMonths')).toContainText('2026-10');
+  await expect(page.locator('#admOverviewTopProducts')).toContainText('Black Abaya');
   await expect(page.locator('#admReportExport')).toBeEnabled();
 
   await page.locator('#admDesktopAlerts').click();
@@ -107,6 +113,7 @@ test('dashboard paints session-cached cards while bounded live refreshes are pen
     <button id="admDesktopAlerts" hidden></button><span id="admDesktopStatus"></span>
     <button id="admAlertsRefresh"></button><span id="admAlertState"></span><span id="admStockAlertCount"></span><span id="admInboxAlertCount"></span>
     <div id="admStockAlerts"></div><div id="admInboxAlerts"></div>
+    <span id="admOverviewProducts"></span><span id="admOverviewLowStock"></span><span id="admOverviewOrders"></span><span id="admOverviewRevenue"></span><div id="admOverviewTopProducts"></div>
     <button id="admTasksRefresh"></button><span id="admTaskState"></span><span id="admTaskPendingCount"></span><span id="admTaskOverdueCount"></span><span id="admTaskScope"></span><div id="admPriorityTasks"></div>
     <button id="admRefresh"></button><button id="admReportLoad"></button><button id="admReportExport" disabled></button>
     <select id="admReportRange"><option value="all" selected>all</option><option value="custom">custom</option></select>
