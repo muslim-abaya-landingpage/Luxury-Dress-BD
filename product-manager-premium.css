@@ -109,3 +109,70 @@ body.pm-wp-admin{font-family:Inter,"Segoe UI","Hind Siliguri",sans-serif!importa
 /* Allow tag links to wrap inside their own cell instead of being clipped/un-clickable. */
 .pm-wp-admin .pm-overview.pm-wp-table td.column-tags{white-space:normal!important;text-overflow:clip!important;overflow:visible!important;overflow-wrap:anywhere!important;line-height:1.8!important}
 .pm-wp-admin .pm-overview.pm-wp-table td.column-tags a.pm-row-link{display:inline!important;white-space:normal!important;position:relative;z-index:4;min-height:unset;line-height:inherit;padding:3px 2px;overflow:visible!important}
+
+
+/* Responsive product overview: keep every management column reachable. */
+.pm-wp-admin .pm-overview-wrap{
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  overflow-x:auto!important;
+  overflow-y:visible!important;
+  overscroll-behavior-inline:contain;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;
+  scrollbar-gutter:stable;
+  border:1px solid #dfe6ef!important;
+}
+.pm-wp-admin .pm-overview.pm-wp-table{
+  width:max-content!important;
+  min-width:1280px!important;
+  table-layout:fixed!important;
+}
+.pm-wp-admin .pm-overview.pm-wp-table th,
+.pm-wp-admin .pm-overview.pm-wp-table td{
+  box-sizing:border-box;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+  word-break:normal!important;
+}
+.pm-wp-admin .pm-overview.pm-wp-table th.column-name,
+.pm-wp-admin .pm-overview.pm-wp-table td.column-name{
+  position:sticky!important;
+  left:108px!important;
+  z-index:4;
+  min-width:220px!important;
+  background:#fff!important;
+  box-shadow:5px 0 8px -7px rgba(24,41,64,.55);
+}
+.pm-wp-admin .pm-overview.pm-wp-table thead th.column-name,
+.pm-wp-admin .pm-overview.pm-wp-table tfoot th.column-name{
+  z-index:7;
+  background:#f3f6fa!important;
+}
+.pm-wp-admin .pm-overview.pm-wp-table td.column-cats,
+.pm-wp-admin .pm-overview.pm-wp-table td.column-tags,
+.pm-wp-admin .pm-overview.pm-wp-table td.column-brand{
+  white-space:normal!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  overflow-wrap:anywhere!important;
+  max-width:160px!important;
+  line-height:1.65!important;
+}
+.pm-wp-admin .pm-overview.pm-wp-table td.column-cats button,
+.pm-wp-admin .pm-overview.pm-wp-table td.column-tags button,
+.pm-wp-admin .pm-overview.pm-wp-table td.column-brand button{
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+  max-width:100%;
+}
+.pm-wp-admin .pm-overview-wrap:focus-visible{
+  outline:3px solid #2878bd;
+  outline-offset:2px;
+}
+@media(max-width:760px){
+  .pm-wp-admin .pm-overview.pm-wp-table{min-width:1280px!important}
+  .pm-wp-admin .pm-overview.pm-wp-table th.column-name,
+  .pm-wp-admin .pm-overview.pm-wp-table td.column-name{position:static!important;left:auto!important;box-shadow:none!important}
+}
