@@ -3434,14 +3434,17 @@
       var singleKey=String(labels[0]).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"color-1";
       product.color=singleKey;product.colorLabel=labels[0];product.colorVariants=[{color:singleKey,colorLabel:labels[0],image:product.image||""}];
     }else{delete product.colorVariants;}
-    var duplicate = false;
+    // Exact, case-sensitive Product ID match: update that one record and move it if its category changed.
+    // If no exact match exists, this is a genuinely new product; other IDs are never overwritten.
+    var matches = [];
     Object.keys(products).forEach(function (k) {
-      (products[k] || []).forEach(function (p) {
-        if (p && String(p.id) === String(product.id) && p !== product) duplicate = true;
+      (products[k] || []).forEach(function (p, index) {
+        if (p && String(p.id || "") === String(product.id || "")) matches.push({ category: k, index: index, product: p });
       });
     });
-    if (duplicate) throw new Error("A product with this ID already exists. Use a unique product ID.");
-    Object.keys(products).forEach(function(k){products[k]=products[k].filter(function(p){return p.id!==product.id;});});
+    if (matches.length > 1) throw new Error("This exact Product ID is already duplicated in the catalog. Resolve the duplicate before updating.");
+    if (matches.length === 1 && matches[0].product !== product) product = Object.assign({}, matches[0].product, product);
+    Object.keys(products).forEach(function(k){products[k]=products[k].filter(function(p){return String(p.id || "")!==String(product.id || "");});});
     product.category = category;
     var targetSection = sections.find(function (sec) { return sec.key === category; });
     if (targetSection) product.categoryLabel = targetSection.menuBn || targetSection.menu || category;
