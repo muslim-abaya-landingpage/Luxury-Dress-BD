@@ -73,7 +73,7 @@ test('bulk upload updates an exact existing SKU and adds an unmatched SKU as a n
     'category,name,sku,price,sizes,photos',
     'hijab,Updated Hijab,HIJAB-EXISTING,650,Free Size,update.jpg',
     'hijab,New Hijab,HIJAB-NEW-2,750,Free Size,new.jpg'
-  ].join('\\n');
+  ].join('\n');
   await page.locator('#pbuCsv').setInputFiles({ name: 'update.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
   await page.locator('#pbuImages').setInputFiles([
     { name: 'update.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('updated image') },
