@@ -187,7 +187,7 @@
     });
   }
   function ensureQuickUpload() {
-    return Promise.all([loadScriptOnce("product-color-detect.js?v=20261030-detect"), loadScriptOnce("product-quick-upload.js?v=20261103-body-size"), loadStyleOnce("product-quick-upload.css?v=20261031-review")]).then(function () {
+    return Promise.all([loadScriptOnce("product-color-detect.js?v=20261030-detect"), loadScriptOnce("product-quick-upload.js?v=20261105-faster-upload"), loadStyleOnce("product-quick-upload.css?v=20261031-review")]).then(function () {
       if (!quickUploadMounted) {
         if (!window.MaProductQuickUpload || !quickUploadOptions) throw new Error("Quick upload is not ready");
         window.MaProductQuickUpload.mount(quickUploadOptions);
@@ -197,10 +197,28 @@
     });
   }
   function openQuickUpload() {
+    var trigger = document.getElementById("pmQuickUpload");
+    var originalLabel = trigger && trigger.textContent;
+    if (trigger) {
+      trigger.disabled = true;
+      trigger.textContent = "ফর্ম প্রস্তুত হচ্ছে…";
+      trigger.setAttribute("aria-busy", "true");
+    }
     return ensureQuickUpload().then(function () {
-      var trigger = document.getElementById("pmQuickUpload");
-      if (trigger) trigger.click();
-    }).catch(function (err) { toast(err.message || "Quick upload is unavailable"); });
+      if (trigger) {
+        trigger.disabled = false;
+        trigger.textContent = originalLabel;
+        trigger.removeAttribute("aria-busy");
+        trigger.click();
+      }
+    }).catch(function (err) {
+      if (trigger) {
+        trigger.disabled = false;
+        trigger.textContent = originalLabel;
+        trigger.removeAttribute("aria-busy");
+      }
+      toast(err.message || "Quick upload is unavailable");
+    });
   }
   // Dynamic editor/list views can replace their controls between renders.
   // Bind defensively so a transient missing control never aborts the publisher bootstrap.

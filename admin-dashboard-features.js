@@ -394,7 +394,6 @@
     toggleCustomDates();
     refreshAlerts();
     refreshTasks(true);
-    loadAnalytics();
     var reportSection = document.querySelector(".adm-dashboard-reports");
     if (reportSection) reportSection.addEventListener("toggle", function () { if (reportSection.open && !window.__maDashboardSalesReport) loadAnalytics(); });
     window.setInterval(function () {
