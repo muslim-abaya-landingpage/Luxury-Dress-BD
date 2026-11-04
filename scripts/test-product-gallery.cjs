@@ -23,7 +23,7 @@ assert.match(manager,/Add any color name, then tap the photo that shows that col
 assert.match(manager,/Upload at least one photo per color/);
 assert.match(manager,/product\.colorVariants=variants/);
 assert.match(manager,/matching gallery photo for every color variation before publishing/);
-assert.match(manager,/main photo = first color/);
+assert.match(manager,/একাধিক রঙ হলে প্রথম ছবিটিই প্রধান ছবি হবে/);
 assert.match(fs.readFileSync('product-manager-wp.css','utf8'),/\.pm-color-variation-row select/);
 assert.match(manager,/page = "category\.html"/);
 assert.match(manager,/path = "\/category\?category=" \+ encodeURIComponent\(key\)/);
