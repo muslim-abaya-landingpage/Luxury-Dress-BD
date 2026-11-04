@@ -104,7 +104,7 @@
       document.getElementById("dzDist").innerHTML = "";
       return;
     }
-    var revenue = 0, pending = 0, shipped = 0, counts = {}, districts = {};
+    var revenue = 0, pending = 0, delivered = 0, cancelled = 0, shipped = 0, counts = {}, districts = {}, customers = {};
     var todayKey = MaOrderInsights.dhakaToday(), todayCount = 0, todayRev = 0;
     var days = [];
     var todayParts = todayKey.split("-").map(Number);
@@ -115,7 +115,11 @@
       var k = statusKey(o.status);
       counts[k] = (counts[k] || 0) + 1;
       if (k === "pending") pending++;
+      if (k === "delivered") delivered++;
+      if (k === "cancelled" || k === "returned") cancelled++;
       if (k === "shipped" || k === "delivered") shipped++;
+      var phone = String(o.phone || "").trim();
+      if (phone) customers[phone] = true;
       if (o.district) districts[o.district] = (districts[o.district] || 0) + 1;
       var od = parseDate(o.time);
       if (od) {
@@ -124,6 +128,13 @@
         days.forEach(function (x) { if (x.key === ok) x.n++; });
       }
     });
+    var overview = function (id, value) { var node = document.getElementById(id); if (node) node.textContent = value; };
+    overview("admOverviewOrders", orders.length.toLocaleString("en-US"));
+    overview("admOverviewRevenue", "৳" + revenue.toLocaleString("en-US"));
+    overview("admOverviewCustomers", Object.keys(customers).length.toLocaleString("en-US"));
+    overview("admOverviewPending", pending.toLocaleString("en-US"));
+    overview("admOverviewDelivered", delivered.toLocaleString("en-US"));
+    overview("admOverviewCancelled", cancelled.toLocaleString("en-US"));
     document.getElementById("admStatCount").textContent = orders.length;
     document.getElementById("admStatRevenue").textContent = "৳" + revenue.toLocaleString("en-US");
     document.getElementById("admStatDeliveredValue").textContent = "৳" + MaOrderInsights.analyze(orders).groups.delivered.value.toLocaleString("en-US");

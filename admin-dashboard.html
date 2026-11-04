@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="admin-dashboard-design.css?v=76d87a7fcd8f0d87">
 <script src="admin-dashboard-design.js?v=389d008aafabe1a6"></script>
 <link rel="stylesheet" href="admin-premium-layout.css?v=385b5e49870868f4">
-  <link rel="stylesheet" href="admin-dashboard-clean.css?v=5419e16907883cbc">
+  <link rel="stylesheet" href="admin-dashboard-clean.css?v=20261105-overview">
   <link rel="stylesheet" href="admin-premium-v3.css?v=1d6aafea0aa4a3ed">
 <link rel="stylesheet" href="admin-design-system.css?v=1eaf4362bddc4ad0">
 
@@ -95,13 +95,17 @@
             <div><span class="dzc-hello" id="dzHello">Welcome back,</span> <h2 id="dzName">Admin</h2></div>
             <span class="dzc-date" id="dzDate"></span>
           </div>
-          <div class="dzc-kpis">
-            <div class="dzc-kpi"><span>Today's Orders</span><b id="dzTodayCount">—</b></div>
-            <div class="dzc-kpi"><span>Today's Order Value</span><b id="dzTodayRev">—</b></div>
-            <div class="dzc-kpi"><span>Orders — Last 7 Days</span><b id="dzWeekCount">—</b></div>
-            <div class="dzc-kpi"><span>Returning Customers</span><b id="dzRepeat">—</b></div>
+          <div class="dzc-kpis adm-commerce-kpis">
+            <div class="dzc-kpi adm-kpi-revenue"><span>Total Sales / Order Value</span><b id="admOverviewRevenue">—</b><small>লাইফটাইম · লাভ নয়</small></div>
+            <div class="dzc-kpi"><span>Total Orders</span><b id="admOverviewOrders">—</b><small>লাইফটাইম রিপোর্ট</small></div>
+            <div class="dzc-kpi"><span>Products in Inventory</span><b id="admOverviewProducts">—</b><small>স্টক ট্র্যাকিং ডেটা</small></div>
+            <div class="dzc-kpi"><span>Total Customers</span><b id="admOverviewCustomers">—</b><small>সর্বশেষ ১০০ অর্ডারে ইউনিক</small></div>
+            <div class="dzc-kpi"><span>Pending Orders</span><b id="admOverviewPending">—</b><small>সর্বশেষ ১০০ অর্ডার</small></div>
+            <div class="dzc-kpi"><span>Delivered Orders</span><b id="admOverviewDelivered">—</b><small>সর্বশেষ ১০০ অর্ডার</small></div>
+            <div class="dzc-kpi"><span>Cancelled Orders</span><b id="admOverviewCancelled">—</b><small>সর্বশেষ ১০০ অর্ডার</small></div>
+            <div class="dzc-kpi adm-kpi-stock"><span>Low Stock Products</span><b id="admOverviewLowStock">—</b><small>কম / শেষ স্টক · ইউনিক পণ্য</small></div>
           </div>
-          <p class="dzc-note" id="dzScopeNote">Based on the latest 100 orders. Open Order Management for the full report.</p>
+          <p class="dzc-note" id="dzScopeNote">রাজস্ব ও মোট অর্ডার লাইফটাইম রিপোর্ট থেকে; অন্যান্য অর্ডার-ভিত্তিক হিসাব সর্বশেষ ১০০টি লোড করা অর্ডারের ওপর।</p>
         </section>
 
         <section class="adm-daily" aria-labelledby="admDailyHeading">
@@ -111,6 +115,11 @@
             <a class="adm-daily-action" href="product-manager.html#pmQuickUpload"><span class="adm-daily-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="7" width="16" height="14" rx="3"/><path d="M9 7V5a3 3 0 0 1 6 0v2M9 12h6M12 9v6"/></svg></span><strong>Add Product <span aria-hidden="true">→</span></strong><span>নতুন Add Product</span></a>
             <a class="adm-daily-action" href="stock-analytics.html"><span class="adm-daily-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m3 7 9-4 9 4-9 4-9-4ZM3 7v10l9 4 9-4V7M12 11v10"/></svg></span><strong>Update Inventory <span aria-hidden="true">→</span></strong><span>Check and update stock</span></a>
           </div>
+        </section>
+
+        <section class="dz-card adm-best-sellers" aria-labelledby="admBestSellerHeading">
+          <div class="adm-feature-head"><div><h3 id="admBestSellerHeading">Best Selling Products</h3><small>লাইফটাইম রিপোর্ট · বিক্রিত পরিমাণ</small></div><a class="adm-feature-more" href="product-manager.html">পণ্য ম্যানেজ করুন →</a></div>
+          <div id="admOverviewTopProducts" class="adm-report-list"><div class="adm-feature-empty">বিক্রির রিপোর্ট লোড হচ্ছে…</div></div>
         </section>
 
         <section class="dz-card adm-feature-card" aria-labelledby="admAlertHeading">
@@ -150,7 +159,7 @@
             </table>
           </div>
         </section>
-        <details class="adm-disclosure adm-dashboard-reports"><summary>Detailed Reports & Analytics</summary><div class="adm-disclosure-body">
+        <details class="adm-disclosure adm-dashboard-reports" open><summary>Sales Analytics & Best Selling Products</summary><div class="adm-disclosure-body">
         <p class="dzc-tools">Useful links: <a id="admOpenSheet" href="#" target="_blank" rel="noopener" hidden>Google Sheet</a> <a id="admOpenScript" href="#" target="_blank" rel="noopener" hidden>Apps Script</a></p>
         <div class="dz-kpis" id="admStats" hidden>
           <div class="dz-kpi" style="--c:#d4a72c"><b id="admStatCount">—</b><span>Orders (latest 100)</span></div>

@@ -95,7 +95,16 @@
   function renderStockAlerts(items, defaultThreshold) {
     var node = byId("admStockAlerts");
     if (!node) return;
-    var tracked = Array.isArray(items) ? items.filter(function (item) { return item && item.tracked && (item.status === "LOW" || item.status === "OUT"); }) : [];
+    var inventoryItems = Array.isArray(items) ? items.filter(function (item) { return !!item; }) : [];
+    var productIds = Object.create(null);
+    inventoryItems.forEach(function (item) { var id = String(item.productId || item.productName || "").trim(); if (id) productIds[id] = true; });
+    var productCount = byId("admOverviewProducts");
+    if (productCount) productCount.textContent = Object.keys(productIds).length.toLocaleString("en-US");
+    var tracked = inventoryItems.filter(function (item) { return item.tracked && (item.status === "LOW" || item.status === "OUT"); });
+    var lowStockProducts = Object.create(null);
+    tracked.forEach(function (item) { var id = String(item.productId || item.productName || "").trim(); if (id) lowStockProducts[id] = true; });
+    var lowStockCount = byId("admOverviewLowStock");
+    if (lowStockCount) lowStockCount.textContent = Object.keys(lowStockProducts).length.toLocaleString("en-US");
     var out = tracked.filter(function (item) { return item.status === "OUT"; });
     var low = tracked.filter(function (item) { return item.status === "LOW"; });
     byId("admStockAlertCount").textContent = tracked.length.toLocaleString("en-US");
@@ -274,6 +283,12 @@
     byId("admReportRangeLabel").textContent = rangeLabel(data);
     byId("admReportOrders").textContent = Number(summary.totalOrders || 0).toLocaleString("en-US");
     byId("admReportOrderValue").textContent = money(summary.totalOrderValue);
+    if (data.range === "all") {
+      var overviewOrders = byId("admOverviewOrders");
+      var overviewRevenue = byId("admOverviewRevenue");
+      if (overviewOrders) overviewOrders.textContent = Number(summary.totalOrders || 0).toLocaleString("en-US");
+      if (overviewRevenue) overviewRevenue.textContent = money(summary.totalOrderValue);
+    }
     byId("admReportDeliveredValue").textContent = money(summary.deliveredSalesValue);
     byId("admReportDelivered").textContent = Number(summary.deliveredCount || 0).toLocaleString("en-US");
     byId("admReportCancelRate").textContent = percent(summary.cancellationRate);
@@ -282,6 +297,7 @@
     if (Number(data.undatedOrderCount) > 0) byId("admUndatedNote").textContent = Number(data.undatedOrderCount) + "টি তারিখহীন অর্ডার মোট lifetime সংখ্যা/মূল্যে অন্তর্ভুক্ত; মাসিক চার্টে নেই।";
     renderMonths(data.salesByMonth);
     renderRanked("admReportProducts", data.topProducts, "name", "qty");
+    renderRanked("admOverviewTopProducts", data.topProducts, "name", "qty");
     renderRanked("admReportSources", data.sourceBreakdown, "source", "orders");
     var note = data.sourceMessage || "";
     if (data.range === "all") note = "পূর্ণ সময়ের অর্ডার হিসাব" + (note ? " · " + note : "");
@@ -378,6 +394,7 @@
     toggleCustomDates();
     refreshAlerts();
     refreshTasks(true);
+    loadAnalytics();
     var reportSection = document.querySelector(".adm-dashboard-reports");
     if (reportSection) reportSection.addEventListener("toggle", function () { if (reportSection.open && !window.__maDashboardSalesReport) loadAnalytics(); });
     window.setInterval(function () {

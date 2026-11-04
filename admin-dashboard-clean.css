@@ -79,3 +79,19 @@ html[data-admin-theme="dark"] .adm-btn-secondary:hover{background:var(--adm-prim
     min-height: 44px;
   }
 }
+
+
+/* Premium commerce overview inspired by the supplied reference: quiet cards, clear hierarchy, warm accent. */
+.adm-main .adm-commerce-kpis{grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}
+.adm-main .adm-commerce-kpis .dzc-kpi{position:relative;min-height:108px;padding:17px 17px 14px;border-radius:13px;overflow:hidden}
+.adm-main .adm-commerce-kpis .dzc-kpi:before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:#b89a72;opacity:.8}
+.adm-main .adm-commerce-kpis .dzc-kpi span{font-size:12px;letter-spacing:.015em}
+.adm-main .adm-commerce-kpis .dzc-kpi b{font-size:clamp(21px,2vw,28px);letter-spacing:-.03em}
+.adm-main .adm-commerce-kpis .dzc-kpi small{display:block;margin-top:7px;color:var(--adm-muted);font-size:10.5px;line-height:1.3}
+.adm-main .adm-commerce-kpis .adm-kpi-revenue:before{background:#967348}
+.adm-main .adm-commerce-kpis .adm-kpi-stock:before{background:#c68136}
+.adm-main .adm-dashboard-reports>summary{font-size:16px;font-weight:700;color:var(--adm-text);padding:15px 18px}
+.adm-main .adm-dashboard-reports[open]>summary{border-bottom:1px solid var(--adm-border)}
+.adm-main .adm-report-grid>section{min-width:0}
+@media(max-width:980px){.adm-main .adm-commerce-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.adm-main .adm-commerce-kpis{gap:9px}.adm-main .adm-commerce-kpis .dzc-kpi{min-height:98px;padding:13px}.adm-main .adm-commerce-kpis .dzc-kpi b{font-size:21px}.adm-main .adm-commerce-kpis .dzc-kpi small{font-size:10px}}
