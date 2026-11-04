@@ -23,15 +23,17 @@ test('bulk upload validates the full CSV and publishes multiple products togethe
   await page.evaluate(() => window.MaProductBulkUpload.open());
   const csv = [
     'category,name,sku,price,abaya_only_price,color,fabric,sizes,body,sleeve,dress,palazzo,description,photos',
-    'hijab,Navy Silk Hijab,HIJAB-NAVY-1,650,,Navy,Silk,Free Size,,,,,Soft silk hijab,navy.jpg',
-    'Hijab,Olive Cotton Hijab,HIJAB-OLIVE-2,720,,Olive,Cotton,Free Size,,,,,Breathable cotton,olive.jpg'
+    'hijab,Navy Silk Hijab,HIJAB-NAVY-1,650,,Navy,Silk,Free Size,,,,,Soft silk hijab,',
+    'Hijab,Olive Cotton Hijab,,720,,Olive,Cotton,Free Size,,,,,Breathable cotton,'
   ].join('\n');
   await page.locator('#pbuCsv').setInputFiles({ name: 'bulk.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
   await page.locator('#pbuImages').setInputFiles([
-    { name: 'navy.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('navy') },
-    { name: 'olive.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('olive') }
+    { name: 'hijab-navy-1-main.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('navy') },
+    { name: 'Olive-Cotton-Hijab-front.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('olive') }
   ]);
   await expect(page.locator('#pbuPreview')).toContainText('2/2');
+  await expect(page.locator('#pbuPreview')).toContainText('Auto-match: SKU');
+  await expect(page.locator('#pbuPreview')).toContainText('Auto-match: product name');
   await expect(page.locator('#pbuPublish')).toBeEnabled();
   expect(await page.evaluate(() => [window.__batch.length, window.__published, window.__assets.length])).toEqual([0, 0, 0]);
   await page.locator('#pbuPublish').click();
