@@ -295,3 +295,11 @@
 :root[data-admin-theme="dark"] .pm-wp-admin .pm-search-row input[type="search"],
 :root[data-admin-theme="dark"] .pm-wp-admin select { background: #171d27 !important; color: var(--pm-lux-ink) !important; border-color: var(--pm-lux-line) !important; }
 :root[data-admin-theme="dark"] .pm-wp-admin .pm-overview.pm-wp-table tbody tr:hover { background: #263345 !important; }
+
+
+/* Usability pass: keep the default products view simple and give the table its full width. */
+.pm-wp-admin .pl-admin-header .adm-heading { display: block !important; }
+.pm-wp-admin .pl-admin-header > p:not(#pmSaveStatus) { display: block !important; }
+.pm-wp-admin .pm-layout.pm-all-view { display: block !important; }
+.pm-wp-admin .pm-layout.pm-all-view > .pm-sidebar { display: none !important; }
+.pm-wp-admin .pm-layout.pm-all-view > .pm-main { width: 100% !important; max-width: 100% !important; }

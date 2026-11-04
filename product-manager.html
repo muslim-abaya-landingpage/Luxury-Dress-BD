@@ -81,7 +81,7 @@
         <a class="pl-back" href="admin-links.html">← Admin</a>
         <a class="pl-back" href="/" style="margin-left:8px">Home</a>
         <div class="adm-heading"><span class="adm-page-kicker">Muslim Abaya / Products & Stock</span><h1>Products</h1></div>
-        <p>Publish products to the website with photos and details. No separate upload or deploy needed.</p>
+        <p>পণ্যের নাম, ছবি, দাম ও স্টক আপডেট করুন। শেষে “Publish edited products” চাপুন।</p>
         <div class="pl-toolbar"><button type="button" class="pl-btn pl-btn-secondary" id="pmSave">Publish edited products</button></div>
         <details class="adm-disclosure adm-product-tools"><summary>More tools</summary>        <div class="pl-toolbar">
           <button type="button" class="pl-btn pl-btn-secondary" id="pmCheckImages" title="Check every product photo for broken or duplicate images">🔍 Check images</button>
@@ -98,7 +98,7 @@
         <button class="pl-btn pl-btn-primary" id="pmQuickUpload" type="button" hidden>+ Upload new product</button>
         <div class="pm-wp-notice" id="pmLiveNotice"><a id="pmLiveLink" target="_blank" rel="noopener" hidden>✅ New product is live — view →</a></div>
 
-        <div class="pm-guide"><strong>Easy publishing</strong><span>Products: for multiple colors, enter names in photo order (main photo = first color); matching variants and product links are generated automatically. Categories: add a name and the page/link are generated for you.</span><a href="stock-analytics.html">Stock & Analytics →</a></div>
+        <div class="pm-guide"><strong>সহজে শুরু করুন</strong><span>পণ্য যোগ করুন → ছবি, দাম ও স্টক দিন → “Publish edited products” চাপুন।</span><a href="stock-analytics.html">স্টক রিপোর্ট →</a></div>
         <div class="pm-layout" id="pmLayout">
           <aside class="pm-sidebar">
             <h2>Categories</h2>
@@ -1512,7 +1512,7 @@
     mainEl.innerHTML = '<div class="pm-wp-list">' +
       '<div class="pm-wp-heading"><h2 class="pm-wp-title">Products</h2>' +
       '<button type="button" class="pm-wp-title-action" id="pmAllQuickUpload">Add new product</button>' +
-      '<button type="button" class="pm-wp-title-action" id="pmManageCats">Categories</button>' +
+      '<button type="button" class="pm-wp-title-action" id="pmManageCats">Edit by category</button>' +
       '<button type="button" class="pm-wp-title-action" id="pmCsvExport">Export CSV</button>' +
       '<button type="button" class="pm-wp-title-action" id="pmCsvImport">Import CSV</button>' +
       '<input type="file" id="pmCsvFile" accept=".csv,text/csv" hidden></div>' +
