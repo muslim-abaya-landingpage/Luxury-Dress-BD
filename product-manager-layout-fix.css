@@ -1,5 +1,5 @@
 /* Product Manager: keep Categories in normal document flow, never covering products. */
-.pm-wp-admin .pm-layout:not(.pm-all-view){
+.pm-wp-admin .pm-layout{
   display:grid!important;
   grid-template-columns:minmax(210px,240px) minmax(0,1fr)!important;
   align-items:start!important;
@@ -34,7 +34,7 @@
 .pm-wp-admin .pm-cat-head,
 .pm-wp-admin .pm-product-head{position:static!important;top:auto!important;z-index:auto!important}
 @media(max-width:900px){
- .pm-wp-admin .pm-layout:not(.pm-all-view){display:flex!important;flex-direction:column!important;gap:12px!important}
+ .pm-wp-admin .pm-layout{display:flex!important;flex-direction:column!important;gap:12px!important}
  .pm-wp-admin .pm-sidebar{width:100%!important;max-width:100%!important}
  .pm-wp-admin .pm-cat-list{
    display:flex!important;flex-direction:row!important;gap:8px!important;
