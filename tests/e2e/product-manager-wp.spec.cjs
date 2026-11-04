@@ -16,6 +16,33 @@ test('product list looks like WordPress Products and shows dates from the catalo
   await expect(page.locator('#pmPagerTop')).toContainText('items');
 });
 
+test('premium Product Manager keeps categories beside the editor and compact on narrow screens', async ({ page }) => {
+  await stub(page);
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto('/product-manager.html');
+  await expect(page.locator('#pmCatList li').first()).toBeVisible();
+  await expect(page.locator('#pmMain .pm-wp-list')).toBeVisible();
+
+  const desktop = await page.evaluate(() => {
+    const layout = document.querySelector('.pm-layout');
+    const sidebar = document.querySelector('.pm-sidebar').getBoundingClientRect();
+    const main = document.querySelector('.pm-main').getBoundingClientRect();
+    return { display: getComputedStyle(layout).display, sidebarRight: sidebar.right, mainLeft: main.left };
+  });
+  expect(desktop.display).toBe('grid');
+  expect(desktop.mainLeft).toBeGreaterThan(desktop.sidebarRight);
+
+  await page.setViewportSize({ width: 850, height: 900 });
+  const compact = await page.evaluate(() => ({
+    direction: getComputedStyle(document.querySelector('.pm-cat-list')).flexDirection,
+    maxHeight: getComputedStyle(document.querySelector('.pm-cat-list')).maxHeight,
+    overflowX: getComputedStyle(document.querySelector('.pm-cat-list')).overflowX
+  }));
+  expect(compact.direction).toBe('row');
+  expect(compact.maxHeight).toBe('none');
+  expect(compact.overflowX).toBe('auto');
+});
+
 test('edit screen: name, description, product data tabs, tags, brand, featured, category', async ({ page }) => {
   await stub(page);
   page.on('dialog', (d) => d.accept());
