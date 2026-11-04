@@ -33,7 +33,7 @@
 <link rel="stylesheet" href="product-manager-premium.css?v=20261104-no-sticky-table">
 <link rel="stylesheet" href="product-management-design.css?v=019dfa4f3bfe4efb">
 <link rel="stylesheet" href="product-manager-sticky.css?v=20261104-smart-sticky">
-<link rel="stylesheet" href="product-manager-luxury.css?v=20261105-premium-ui">
+<link rel="stylesheet" href="product-manager-luxury.css?v=20261105-minimal-woo">
 </head>
 <body class="pl-admin adm-body pm-wp-admin" data-admin-guard="1">
   <div class="adm-shell">
@@ -81,12 +81,15 @@
         <a class="pl-back" href="admin-links.html">← Admin</a>
         <a class="pl-back" href="/" style="margin-left:8px">Home</a>
         <div class="adm-heading"><span class="adm-page-kicker">Muslim Abaya / Products & Stock</span><h1>Products</h1></div>
-        <p>পণ্যের নাম, ছবি, দাম ও স্টক আপডেট করুন। শেষে “Publish edited products” চাপুন।</p>
-        <div class="pl-toolbar"><button type="button" class="pl-btn pl-btn-secondary" id="pmSave">Publish edited products</button></div>
+        <p>পণ্য যোগ, এডিট, স্টক ও Trash—সব এক জায়গা থেকে পরিচালনা করুন।</p>
+        <div class="pl-toolbar pm-header-actions"><button type="button" class="pl-btn pl-btn-primary pm-header-add" id="pmHeaderAdd">+ Add product</button><button type="button" class="pl-btn pl-btn-secondary" id="pmSave">Publish changes</button></div>
         <details class="adm-disclosure adm-product-tools"><summary>More tools</summary>        <div class="pl-toolbar">
           <button type="button" class="pl-btn pl-btn-secondary" id="pmCheckImages" title="Check every product photo for broken or duplicate images">🔍 Check images</button>
           <button type="button" class="pl-btn pl-btn-secondary" id="pmReload">Reload current data</button>
           <button class="pl-btn pl-btn-secondary" id="pmPublishCheck" type="button">Check publish status</button>
+          <button type="button" class="pl-btn pl-btn-secondary" id="pmManageCatsTop">Edit categories</button>
+          <button type="button" class="pl-btn pl-btn-secondary" id="pmCsvExportTop">Export CSV</button>
+          <button type="button" class="pl-btn pl-btn-secondary" id="pmCsvImportTop">Import CSV</button>
           <a class="pl-btn pl-btn-secondary" href="product-links.html" style="text-decoration:none;display:inline-flex;align-items:center" title="Categories — Product Link URL">Product Links</a>
         </div>
 </details>
@@ -1511,10 +1514,8 @@
     // Same layout as WordPress → Products: title + "Add new", status links, search, bulk actions / filters / pages, list table.
     mainEl.innerHTML = '<div class="pm-wp-list">' +
       '<div class="pm-wp-heading"><h2 class="pm-wp-title">Products</h2>' +
-      '<button type="button" class="pm-wp-title-action" id="pmAllQuickUpload">Add new product</button>' +
-      '<button type="button" class="pm-wp-title-action" id="pmManageCats">Edit by category</button>' +
-      '<button type="button" class="pm-wp-title-action" id="pmCsvExport">Export CSV</button>' +
-      '<button type="button" class="pm-wp-title-action" id="pmCsvImport">Import CSV</button>' +
+      '<button type="button" class="pm-wp-title-action pm-wp-title-action-primary" id="pmAllQuickUpload">Add new product</button>' +
+      '<span class="pm-secondary-tool-hooks" aria-hidden="true"><button type="button" id="pmManageCats">Edit by category</button><button type="button" id="pmCsvExport">Export CSV</button><button type="button" id="pmCsvImport">Import CSV</button></span>' +
       '<input type="file" id="pmCsvFile" accept=".csv,text/csv" hidden></div>' +
       '<ul class="pm-wp-subsubsub pm-post-status">' +
       [["", "All", statusCount.all], ["publish", "Published", statusCount.publish], ["draft", "Drafts", statusCount.draft], ["trash", "Trash", statusCount.trash]]
@@ -1547,12 +1548,27 @@
     bindById("pmAllQuickUpload", "click", function () {
       openQuickUpload();
     });
+    bindById("pmHeaderAdd", "click", function () {
+      openQuickUpload();
+    });
     bindById("pmManageCats", "click", function () {
       if (!sections.length) return;
       activeKey = overviewCategory || sections[0].key;
       searchTerm = "";
       renderCatList();
       renderMain();
+    });
+    bindById("pmManageCatsTop", "click", function () {
+      var button = document.getElementById("pmManageCats");
+      if (button) button.click();
+    });
+    bindById("pmCsvExportTop", "click", function () {
+      var button = document.getElementById("pmCsvExport");
+      if (button) button.click();
+    });
+    bindById("pmCsvImportTop", "click", function () {
+      var button = document.getElementById("pmCsvImport");
+      if (button) button.click();
     });
     bindById("pmAllSearchBtn", "click", function () { overviewPage = 1; draw(); });
     bindById("pmFilterBtn", "click", function () { overviewPage = 1; draw(); });
@@ -1743,6 +1759,7 @@
           '<button type="button" class="pm-row-link" data-qe-cat="' + escapeAttr(s.key) + '" data-qe-index="' + row.index + '">Quick Edit</button> | ' +
           '<button type="button" class="pm-row-link" title="New product with this one’s price, sizes and description" data-pm-copy-cat="' + escapeAttr(s.key) + '" data-pm-copy-index="' + row.index + '">Copy</button> | ' +
           '<button type="button" class="pm-row-link pm-overview-stock" data-stock-cat="' + escapeAttr(s.key) + '" data-stock-index="' + row.index + '" aria-pressed="' + out + '">' + (out ? 'Mark in stock' : 'Mark out of stock') + '</button>' +
+          ' | <button type="button" class="pm-row-link pm-row-danger" data-status-action="trash" data-status-cat="' + escapeAttr(s.key) + '" data-status-index="' + row.index + '">Trash</button>' +
           (p.id ? ' | <a class="pm-row-link" href="/product/' + encodeURIComponent(p.id) + '" target="_blank" rel="noopener">View</a>' : '') + '</div></td>' +
           '<td class="column-sku">' + (p.id ? escapeHtml(p.id) : '<span class="na">–</span>') + '</td>' +
           '<td class="column-stock"><mark class="' + (out ? 'outofstock' : 'instock') + '">' + (out ? 'Out of stock' : 'In stock') + '</mark></td>' +

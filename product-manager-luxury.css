@@ -303,3 +303,34 @@
 .pm-wp-admin .pm-layout.pm-all-view { display: block !important; }
 .pm-wp-admin .pm-layout.pm-all-view > .pm-sidebar { display: none !important; }
 .pm-wp-admin .pm-layout.pm-all-view > .pm-main { width: 100% !important; max-width: 100% !important; }
+
+/* Minimal WooCommerce-style product workflow. Keep the primary screen focused on add, search, edit and trash. */
+.pm-wp-admin .pm-header-actions { display: flex; align-items: center; gap: 8px; }
+.pm-wp-admin .pm-header-add { background: var(--pm-lux-navy) !important; border-color: var(--pm-lux-navy) !important; color: #fff !important; }
+.pm-wp-admin .pm-header-add:hover { background: #172a42 !important; }
+.pm-wp-admin .pm-secondary-tool-hooks { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.pm-wp-admin .pm-layout { display: block !important; }
+.pm-wp-admin .pm-layout > .pm-sidebar { display: none !important; }
+.pm-wp-admin .pm-main { width: 100% !important; }
+.pm-wp-admin .pm-guide { display: none !important; }
+.pm-wp-admin .pm-wp-list { padding: 20px !important; }
+.pm-wp-admin .pm-wp-heading { align-items: center; }
+.pm-wp-admin .pm-wp-title-action-primary,
+.pm-wp-admin .pm-wp-title-action#pmAllQuickUpload { background: var(--pm-lux-navy) !important; border-color: var(--pm-lux-navy) !important; color: #fff !important; }
+.pm-wp-admin .pm-wp-title-action-primary:hover,
+.pm-wp-admin .pm-wp-title-action#pmAllQuickUpload:hover { background: #172a42 !important; }
+.pm-wp-admin .pm-row-actions { opacity: .55; transition: opacity .15s ease; }
+.pm-wp-admin .pm-overview tr:hover .pm-row-actions,
+.pm-wp-admin .pm-row-actions:focus-within { opacity: 1; }
+.pm-wp-admin .pm-row-actions .pm-overview-stock,
+.pm-wp-admin .pm-row-actions [data-qe-cat],
+.pm-wp-admin .pm-row-actions [data-pm-copy-cat] { display: none; }
+.pm-wp-admin .pm-row-actions .pm-row-danger { color: #b42318 !important; font-weight: 700; }
+.pm-wp-admin .pm-row-actions .pm-row-danger:hover { color: #8f1d14 !important; text-decoration: underline; }
+.pm-wp-admin .pm-wp-search { display: flex; gap: 8px; max-width: 560px; }
+.pm-wp-admin .pm-wp-search input { flex: 1 1 auto; min-width: 0; }
+@media (max-width: 640px) {
+  .pm-wp-admin .pm-header-actions { width: 100%; }
+  .pm-wp-admin .pm-header-actions > * { flex: 1 1 0; }
+  .pm-wp-admin .pm-wp-list { padding: 12px !important; }
+}
