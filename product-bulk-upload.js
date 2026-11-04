@@ -4,7 +4,7 @@
   var MAX_PHOTOS = 7;
   var MAX_FILE_BYTES = 20 * 1024 * 1024;
   var HEADERS = ['category', 'name', 'sku', 'price', 'abaya_only_price', 'color', 'fabric', 'sizes', 'body', 'sleeve', 'dress', 'palazzo', 'description', 'photos'];
-  var dialog, options, parsed = [], validated = [], pendingPublish = false, busy = false;
+  var dialog, options, parsed = [], validated = [], pendingPublish = false, busy = false, photoAliases = Object.create(null), parseRevision = 0, aliasesDirty = false;
   function el(id) { return document.getElementById(id); }
   function esc(value) { return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
   function categoryFor(value) {
@@ -13,14 +13,28 @@
   }
   function filesByName() {
     var map = Object.create(null);
-    Array.prototype.forEach.call(el('pbuImages').files || [], function (f) { map[String(f.name).toLowerCase()] = f; });
+    Array.prototype.forEach.call(el('pbuImages').files || [], function (f) {
+      map[String(f.name).toLowerCase()] = f;
+      var alias = String(photoAliases[String(f.name).toLowerCase()] || '').trim();
+      if (alias) map[alias.toLowerCase()] = f;
+    });
     return map;
+  }
+  function renderPhotoNames() {
+    var files = Array.prototype.slice.call(el('pbuImages').files || []), box = el('pbuImageNames');
+    box.hidden = !files.length;
+    box.innerHTML = files.length ? '<b>Preview filename mapping</b><small>নাম বদলালে Auto-match photos চাপুন। এটি শুধু মিল খোঁজার alias; আপনার ডিভাইসের মূল ফাইলের নাম বদলায় না।</small>' + files.map(function (file, index) { var alias = photoAliases[file.name.toLowerCase()] || file.name; return '<label class="pbu-name-row">' + (index + 1) + '. <span>' + esc(file.name) + '</span><input class="pbu-name-input" data-photo-index="' + index + '" aria-label="Preview filename for ' + esc(file.name) + '" value="' + esc(alias) + '"></label>'; }).join('') : '';
+  }
+  function handleImagesChanged() {
+    photoAliases = Object.create(null);
+    Array.prototype.forEach.call(el('pbuImages').files || [], function (file) { photoAliases[file.name.toLowerCase()] = file.name; });
+    aliasesDirty = false; renderPhotoNames(); parseAndPreview();
   }
   function normalizeFileKey(value) { return String(value || '').toLowerCase().replace(/\.[^.]+$/, '').replace(/[^a-z0-9\u0980-\u09ff]/g, ''); }
   function matchPhotoFiles(rows, files) {
     var automaticRows = rows.filter(function (row) { return !row.manualPhotoNames.length && row.product; });
     files.forEach(function (file) {
-      var stem = normalizeFileKey(file.name), ranked = [];
+      var stem = normalizeFileKey(photoAliases[String(file.name).toLowerCase()] || file.name), ranked = [];
       automaticRows.forEach(function (row) {
         var sku = normalizeFileKey(row.source.sku), name = normalizeFileKey(row.source.name), score = 0, method = '';
         if (sku.length >= 3 && stem.indexOf(sku) >= 0) { score = 10000 + sku.length; method = 'SKU'; }
@@ -40,11 +54,13 @@
     });
   }
   function parseAndPreview() {
-    parsed = []; validated = [];
+    var revision = ++parseRevision;
+    parsed = []; validated = []; aliasesDirty = false; el('pbuPublish').disabled = true;
     var csv = el('pbuCsv').files[0];
     if (!csv) { el('pbuPreview').innerHTML = '<p>CSV ফাইল নির্বাচন করুন।</p>'; el('pbuPublish').disabled = true; return; }
     if (csv.size > 2 * 1024 * 1024) { el('pbuPreview').innerHTML = '<p class="pbu-error">CSV ফাইল সর্বোচ্চ ২ MB হতে পারবে।</p>'; el('pbuPublish').disabled = true; return; }
     csv.text().then(function (text) {
+      if (revision !== parseRevision) return;
       if (!g.MaProductCsv || !g.MaProductPublishUtils) throw Error('CSV tools are still loading. Try again.');
       var table = g.MaProductCsv.parseCsv(text);
       if (!table.length) throw Error('CSV ফাইলটি খালি।');
@@ -92,18 +108,18 @@
       });
       validated = parsed.filter(function (r) { return !r.errors.length && r.product; });
       renderPreview();
-    }).catch(function (error) { el('pbuPreview').innerHTML = '<p class="pbu-error">' + esc(error.message || 'CSV পড়া যায়নি।') + '</p>'; el('pbuPublish').disabled = true; });
+    }).catch(function (error) { if (revision !== parseRevision) return; el('pbuPreview').innerHTML = '<p class="pbu-error">' + esc(error.message || 'CSV পড়া যায়নি।') + '</p>'; el('pbuPublish').disabled = true; });
   }
   function renderPreview() {
     if (!parsed.length) { el('pbuPreview').innerHTML = '<p>CSV ফাইলে কোনো পণ্যের সারি নেই।</p>'; el('pbuPublish').disabled = true; return; }
     var bad = parsed.filter(function (r) { return r.errors.length; });
-    var html = '<p><b>' + validated.length + '/' + parsed.length + '</b>টি পণ্য প্রস্তুত' + (bad.length ? ' · ' + bad.length + 'টি সারিতে সমস্যা' : '') + '</p><ol class="pbu-rows">' + parsed.map(function (r) { var photos = r.photos.map(function (f) { return f.name; }).join(', '); var mode = r.photoMatch ? ' · Auto-match: ' + r.photoMatch : r.manualPhotoNames.length ? ' · CSV filename' : ''; return '<li class="' + (r.errors.length ? 'is-error' : 'is-ok') + '"><b>সারি ' + r.line + ':</b> ' + esc(r.source.name || '(নাম নেই)') + (r.errors.length ? '<span>' + esc(r.errors.join(' · ')) + '</span>' : '<span>' + esc(r.category) + ' · ৳' + esc(r.product.price) + ' · ' + r.photos.length + ' ছবি' + esc(mode) + (photos ? ': ' + esc(photos) : '') + '</span>'); }).join('') + '</ol>';
+    var html = '<p><b>' + validated.length + '/' + parsed.length + '</b>টি পণ্য প্রস্তুত' + (bad.length ? ' · ' + bad.length + 'টি সারিতে সমস্যা' : '') + '</p><ol class="pbu-rows">' + parsed.map(function (r) { var photos = r.photos.map(function (f) { var alias = String(photoAliases[f.name.toLowerCase()] || f.name); return alias === f.name ? f.name : alias + ' (' + f.name + ')'; }).join(', '); var mode = r.photoMatch ? ' · Auto-match: ' + r.photoMatch : r.manualPhotoNames.length ? ' · CSV filename' : ''; return '<li class="' + (r.errors.length ? 'is-error' : 'is-ok') + '"><b>সারি ' + r.line + ':</b> ' + esc(r.source.name || '(নাম নেই)') + (r.errors.length ? '<span>' + esc(r.errors.join(' · ')) + '</span>' : '<span>' + esc(r.category) + ' · ৳' + esc(r.product.price) + ' · ' + r.photos.length + ' ছবি' + esc(mode) + (photos ? ': ' + esc(photos) : '') + '</span>'); }).join('') + '</ol>';
     el('pbuPreview').innerHTML = html;
     el('pbuPublish').disabled = !!busy || !validated.length || !!bad.length || pendingPublish;
     if (bad.length) el('pbuNote').textContent = 'সব সারি ঠিক করে আবার preview করুন; ভুল সারি থাকলে publish হবে না।';
     else el('pbuNote').textContent = 'সব পণ্য যাচাই হয়েছে। Confirm করলে পণ্যগুলো একসঙ্গে publish হবে। Stock পরে Stock panel থেকে যোগ করা যাবে।';
   }
-  function setBusy(value) { busy = value; ['pbuCsv','pbuImages','pbuClose'].forEach(function (id) { el(id).disabled = value; }); el('pbuPublish').disabled = value; }
+  function setBusy(value) { busy = value; ['pbuCsv','pbuImages','pbuClose','pbuAutoMatch'].forEach(function (id) { el(id).disabled = value; }); el('pbuPublish').disabled = value; }
   function todayDhaka() { return new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString().slice(0, 10); }
   function photoPath(id, index, card) { return 'images/uploads/bulk-' + id.toLowerCase() + '-' + Date.now().toString(36) + '-' + (index + 1) + (card ? '-card' : '') + '.webp'; }
   async function resize(file, width) {
@@ -166,13 +182,13 @@
   function build() {
     if (dialog) return;
     dialog = document.createElement('dialog'); dialog.className = 'pbu-dialog'; dialog.setAttribute('aria-labelledby', 'pbuTitle');
-    dialog.innerHTML = '<div class="pbu-head"><div><p class="pbu-kicker">PRODUCT CATALOG</p><h2 id="pbuTitle">Bulk product upload</h2><p>CSV-তে প্রতি পণ্যের একটি row, আর ছবির filename দিন। একসঙ্গে সব পণ্য যাচাই করে একবারে publish করুন।</p></div><button type="button" id="pbuClose" aria-label="Close">×</button></div><div class="pbu-content"><div class="pbu-actions"><button type="button" class="pl-btn pl-btn-secondary" id="pbuTemplate">Download CSV template</button><button type="button" class="pl-btn pl-btn-secondary" id="pbuAutoMatch">Auto-match photos</button></div><label>১. CSV ফাইল<input id="pbuCsv" type="file" accept=".csv,text/csv"></label><small>Required columns: category, name, price, sizes. Photos column optional—খালি রাখলে selected ছবির নাম SKU বা product name-এর সঙ্গে মিলিয়ে auto-match হবে; manual mapping-এ | দিয়ে একাধিক filename লিখুন।</small><label>২. পণ্যের ছবিগুলো একসঙ্গে নির্বাচন করুন<input id="pbuImages" type="file" accept="image/jpeg,image/png,image/webp" multiple></label><small>Auto-match-এর জন্য filename-এ SKU বা product name/slug রাখুন (যেমন AB-123-front.jpg)। Preview-তে প্রতিটি match দেখে নিন; না মিললে Photos column-এ filename লিখুন। প্রতি পণ্যে সর্বোচ্চ ৭টি JPG, PNG বা WebP; প্রতিটি ২০ MB পর্যন্ত। সর্বোচ্চ ৫০ পণ্য/বার।</small><div id="pbuPreview" class="pbu-preview" aria-live="polite"><p>CSV ফাইল নির্বাচন করুন।</p></div><p id="pbuNote" class="pbu-note" role="status">কোনো পরিবর্তন হয় না—Confirm না করা পর্যন্ত কিছু upload বা publish করা হবে না।</p></div><div class="pbu-footer"><button type="button" class="pl-btn pl-btn-secondary" id="pbuCancel">Cancel</button><button type="button" class="pl-btn pl-btn-primary" id="pbuPublish" disabled>Confirm & publish batch</button></div>';
+    dialog.innerHTML = '<div class="pbu-head"><div><p class="pbu-kicker">PRODUCT CATALOG</p><h2 id="pbuTitle">Bulk product upload</h2><p>CSV-তে প্রতি পণ্যের একটি row, আর ছবির filename দিন। একসঙ্গে সব পণ্য যাচাই করে একবারে publish করুন।</p></div><button type="button" id="pbuClose" aria-label="Close">×</button></div><div class="pbu-content"><div class="pbu-actions"><button type="button" class="pl-btn pl-btn-secondary" id="pbuTemplate">Download CSV template</button><button type="button" class="pl-btn pl-btn-secondary" id="pbuAutoMatch">Auto-match photos</button></div><label>১. CSV ফাইল<input id="pbuCsv" type="file" accept=".csv,text/csv"></label><small>Required columns: category, name, price, sizes. Photos column optional—খালি রাখলে selected ছবির নাম SKU বা product name-এর সঙ্গে মিলিয়ে auto-match হবে; manual mapping-এ | দিয়ে একাধিক filename লিখুন।</small><label>২. পণ্যের ছবিগুলো একসঙ্গে নির্বাচন করুন<input id="pbuImages" type="file" accept="image/jpeg,image/png,image/webp" multiple></label><div id="pbuImageNames" class="pbu-name-list" hidden></div><small>Auto-match-এর জন্য filename-এ SKU বা product name/slug রাখুন (যেমন AB-123-front.jpg)। Preview-তে প্রতিটি match দেখে নিন; না মিললে Photos column-এ filename লিখুন। প্রতি পণ্যে সর্বোচ্চ ৭টি JPG, PNG বা WebP; প্রতিটি ২০ MB পর্যন্ত। সর্বোচ্চ ৫০ পণ্য/বার।</small><div id="pbuPreview" class="pbu-preview" aria-live="polite"><p>CSV ফাইল নির্বাচন করুন।</p></div><p id="pbuNote" class="pbu-note" role="status">কোনো পরিবর্তন হয় না—Confirm না করা পর্যন্ত কিছু upload বা publish করা হবে না।</p></div><div class="pbu-footer"><button type="button" class="pl-btn pl-btn-secondary" id="pbuCancel">Cancel</button><button type="button" class="pl-btn pl-btn-primary" id="pbuPublish" disabled>Confirm & publish batch</button></div>';
     document.body.appendChild(dialog);
-    el('pbuCsv').addEventListener('change', parseAndPreview); el('pbuImages').addEventListener('change', parseAndPreview);
+    el('pbuCsv').addEventListener('change', parseAndPreview); el('pbuImages').addEventListener('change', handleImagesChanged); el('pbuImageNames').addEventListener('input', function (event) { var input = event.target; if (!input.classList.contains('pbu-name-input')) return; var file = el('pbuImages').files[Number(input.getAttribute('data-photo-index'))]; if (!file) return; photoAliases[file.name.toLowerCase()] = input.value.trim() || file.name; aliasesDirty = true; el('pbuPublish').disabled = true; el('pbuNote').textContent = 'Filename alias বদলেছে। নতুন মিল দেখতে Auto-match photos চাপুন।'; });
     el('pbuTemplate').addEventListener('click', downloadTemplate); el('pbuAutoMatch').addEventListener('click', parseAndPreview); el('pbuPublish').addEventListener('click', publishBatch);
     el('pbuClose').addEventListener('click', function () { if (!busy) dialog.close(); }); el('pbuCancel').addEventListener('click', function () { if (!busy) dialog.close(); });
     dialog.addEventListener('cancel', function (event) { if (busy) event.preventDefault(); });
   }
   function mount(config) { options = config; build(); }
-  g.MaProductBulkUpload = { mount: mount, open: function () { if (!dialog) throw Error('Bulk uploader is not ready'); parsed = []; validated = []; pendingPublish = false; el('pbuCsv').value = ''; el('pbuImages').value = ''; el('pbuPublish').hidden = false; el('pbuPublish').textContent = 'Confirm & publish batch'; el('pbuNote').textContent = 'কোনো পরিবর্তন হয় না—Confirm না করা পর্যন্ত কিছু upload বা publish করা হবে না।'; el('pbuPreview').innerHTML = '<p>CSV ফাইল নির্বাচন করুন।</p>'; dialog.showModal(); } };
+  g.MaProductBulkUpload = { mount: mount, open: function () { if (!dialog) throw Error('Bulk uploader is not ready'); parsed = []; validated = []; pendingPublish = false; el('pbuCsv').value = ''; el('pbuImages').value = ''; photoAliases = Object.create(null); aliasesDirty = false; el('pbuImageNames').hidden = true; el('pbuImageNames').innerHTML = ''; el('pbuPublish').hidden = false; el('pbuPublish').textContent = 'Confirm & publish batch'; el('pbuNote').textContent = 'কোনো পরিবর্তন হয় না—Confirm না করা পর্যন্ত কিছু upload বা publish করা হবে না।'; el('pbuPreview').innerHTML = '<p>CSV ফাইল নির্বাচন করুন।</p>'; dialog.showModal(); } };
 })(window);

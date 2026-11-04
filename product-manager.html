@@ -198,7 +198,7 @@
   }
   var bulkUploadMounted = false;
   function openBulkUpload() {
-    return Promise.all([loadScriptOnce("product-csv.js?v=20261028-dresslength-discount"), loadScriptOnce("product-bulk-upload.js?v=20261105-auto-match-v2"), loadStyleOnce("product-bulk-upload.css?v=20261105-bulk-v1")]).then(function () {
+    return Promise.all([loadScriptOnce("product-csv.js?v=20261028-dresslength-discount"), loadScriptOnce("product-bulk-upload.js?v=20261105-photo-rename-v3"), loadStyleOnce("product-bulk-upload.css?v=20261105-photo-rename-v3")]).then(function () {
       if (!bulkUploadMounted) {
         if (!window.MaProductBulkUpload || !quickUploadOptions) throw new Error("Bulk upload is not ready");
         window.MaProductBulkUpload.mount(quickUploadOptions);

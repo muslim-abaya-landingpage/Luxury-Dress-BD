@@ -28,12 +28,16 @@ test('bulk upload validates the full CSV and publishes multiple products togethe
   ].join('\n');
   await page.locator('#pbuCsv').setInputFiles({ name: 'bulk.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
   await page.locator('#pbuImages').setInputFiles([
-    { name: 'hijab-navy-1-main.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('navy') },
+    { name: 'wrong-name.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('navy') },
     { name: 'Olive-Cotton-Hijab-front.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('olive') }
   ]);
+  await expect(page.locator('#pbuPreview')).toContainText('1/2');
+  await expect(page.locator('#pbuPreview')).toContainText('Auto-match: product name');
+  await expect(page.locator('#pbuPublish')).toBeDisabled();
+  await page.locator('.pbu-name-input').nth(0).fill('HIJAB-NAVY-1-main.jpg');
+  await page.locator('#pbuAutoMatch').click();
   await expect(page.locator('#pbuPreview')).toContainText('2/2');
   await expect(page.locator('#pbuPreview')).toContainText('Auto-match: SKU');
-  await expect(page.locator('#pbuPreview')).toContainText('Auto-match: product name');
   await expect(page.locator('#pbuPublish')).toBeEnabled();
   expect(await page.evaluate(() => [window.__batch.length, window.__published, window.__assets.length])).toEqual([0, 0, 0]);
   await page.locator('#pbuPublish').click();
