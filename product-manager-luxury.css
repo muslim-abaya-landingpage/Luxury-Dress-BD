@@ -308,9 +308,11 @@
 .pm-wp-admin .pm-header-actions { display: flex; align-items: center; gap: 8px; }
 .pm-wp-admin .pm-header-add { background: var(--pm-lux-navy) !important; border-color: var(--pm-lux-navy) !important; color: #fff !important; }
 .pm-wp-admin .pm-header-add:hover { background: #172a42 !important; }
-.pm-wp-admin .pm-secondary-tool-hooks { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-.pm-wp-admin .pm-layout { display: block !important; }
-.pm-wp-admin .pm-layout > .pm-sidebar { display: none !important; }
+.pm-wp-admin .pm-secondary-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin: 10px 0 2px; }
+.pm-wp-admin .pm-secondary-tools .pm-wp-button { min-height: 32px !important; padding: 4px 9px !important; font-size: 12px; }
+.pm-wp-admin .pm-layout { display: grid !important; }
+.pm-wp-admin .pm-layout.pm-all-view { display: block !important; }
+.pm-wp-admin .pm-layout.pm-all-view > .pm-sidebar { display: none !important; }
 .pm-wp-admin .pm-main { width: 100% !important; }
 .pm-wp-admin .pm-guide { display: none !important; }
 .pm-wp-admin .pm-wp-list { padding: 20px !important; }
@@ -323,7 +325,6 @@
 .pm-wp-admin .pm-overview tr:hover .pm-row-actions,
 .pm-wp-admin .pm-row-actions:focus-within { opacity: 1; }
 .pm-wp-admin .pm-row-actions .pm-overview-stock,
-.pm-wp-admin .pm-row-actions [data-qe-cat],
 .pm-wp-admin .pm-row-actions [data-pm-copy-cat] { display: none; }
 .pm-wp-admin .pm-row-actions .pm-row-danger { color: #b42318 !important; font-weight: 700; }
 .pm-wp-admin .pm-row-actions .pm-row-danger:hover { color: #8f1d14 !important; text-decoration: underline; }

@@ -33,7 +33,7 @@
 <link rel="stylesheet" href="product-manager-premium.css?v=20261104-no-sticky-table">
 <link rel="stylesheet" href="product-management-design.css?v=019dfa4f3bfe4efb">
 <link rel="stylesheet" href="product-manager-sticky.css?v=20261104-smart-sticky">
-<link rel="stylesheet" href="product-manager-luxury.css?v=20261105-minimal-woo">
+<link rel="stylesheet" href="product-manager-luxury.css?v=20261105-minimal-woo3">
 </head>
 <body class="pl-admin adm-body pm-wp-admin" data-admin-guard="1">
   <div class="adm-shell">
@@ -1515,7 +1515,7 @@
     mainEl.innerHTML = '<div class="pm-wp-list">' +
       '<div class="pm-wp-heading"><h2 class="pm-wp-title">Products</h2>' +
       '<button type="button" class="pm-wp-title-action pm-wp-title-action-primary" id="pmAllQuickUpload">Add new product</button>' +
-      '<span class="pm-secondary-tool-hooks" aria-hidden="true"><button type="button" id="pmManageCats">Edit by category</button><button type="button" id="pmCsvExport">Export CSV</button><button type="button" id="pmCsvImport">Import CSV</button></span>' +
+      '<div class="pm-secondary-tools"><button type="button" class="pm-wp-button" id="pmManageCats">Edit by category</button><button type="button" class="pm-wp-button" id="pmCsvExport">Export CSV</button><button type="button" class="pm-wp-button" id="pmCsvImport">Import CSV</button></div>' +
       '<input type="file" id="pmCsvFile" accept=".csv,text/csv" hidden></div>' +
       '<ul class="pm-wp-subsubsub pm-post-status">' +
       [["", "All", statusCount.all], ["publish", "Published", statusCount.publish], ["draft", "Drafts", statusCount.draft], ["trash", "Trash", statusCount.trash]]
