@@ -176,3 +176,49 @@ body.pm-wp-admin{font-family:Inter,"Segoe UI","Hind Siliguri",sans-serif!importa
   .pm-wp-admin .pm-overview.pm-wp-table th.column-name,
   .pm-wp-admin .pm-overview.pm-wp-table td.column-name{position:static!important;left:auto!important;box-shadow:none!important}
 }
+
+
+/* 2026-11-04: simplify Product Manager table - remove sticky columns.
+   Keep one predictable horizontally scrollable table on every screen. */
+.pm-wp-admin .pm-overview-wrap{
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-x:contain;
+  scrollbar-width:thin;
+}
+.pm-wp-admin .pm-overview.pm-wp-table{
+  width:1280px!important;
+  min-width:1280px!important;
+  max-width:none!important;
+  table-layout:fixed!important;
+}
+.pm-wp-admin .pm-overview.pm-wp-table th.column-name,
+.pm-wp-admin .pm-overview.pm-wp-table td.column-name{
+  position:static!important;
+  left:auto!important;
+  z-index:auto!important;
+  box-shadow:none!important;
+}
+.pm-wp-admin .pm-overview.pm-wp-table td.column-cats,
+.pm-wp-admin .pm-overview.pm-wp-table td.column-tags,
+.pm-wp-admin .pm-overview.pm-wp-table td.column-brand{
+  white-space:normal!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  overflow-wrap:anywhere!important;
+  word-break:normal!important;
+}
+.pm-wp-admin .pm-overview.pm-wp-table td.column-tags a.pm-row-link{
+  display:inline!important;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+}
+.pm-wp-admin .pm-overview-wrap:focus-visible{
+  outline:2px solid #2878bd;
+  outline-offset:2px;
+}
