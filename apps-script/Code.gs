@@ -2387,10 +2387,25 @@ function sheetOrderStatusFromCourier_(courierStatus, currentStatus) {
 }
 
 function extractSteadfastDeliveryStatus_(res) {
-  if (!res) return '';
-  if (typeof res.delivery_status === 'string' && res.delivery_status) return res.delivery_status;
-  if (res.consignment && typeof res.consignment.status === 'string') return res.consignment.status;
-  if (typeof res.status === 'string' && res.status && !/^\d+$/.test(res.status)) return res.status;
+  if (!res || typeof res !== 'object') return '';
+  var candidates = [
+    res.delivery_status,
+    res.consignment && res.consignment.status,
+    res.data && res.data.delivery_status,
+    res.data && res.data.consignment && res.data.consignment.status,
+    res.status
+  ];
+  var envelope = {
+    success: true, ok: true, error: true, failed: true, failure: true,
+    not_found: true, 'not found': true, 'no data': true, unauthorized: true,
+    forbidden: true, invalid: true, pending_request: true
+  };
+  for (var i = 0; i < candidates.length; i++) {
+    if (typeof candidates[i] !== 'string') continue;
+    var status = candidates[i].trim();
+    if (!status || /^\d+$/.test(status) || envelope[status.toLowerCase()]) continue;
+    return status;
+  }
   return '';
 }
 
@@ -2410,6 +2425,33 @@ function steadfastGetStatusByInvoice_(invoice) {
   var inv = String(invoice || '').trim();
   if (!inv) return null;
   return steadfastApiRequest_('get', '/status_by_invoice/' + encodeURIComponent(inv), null);
+}
+
+
+/**
+ * Try every known Steadfast identifier in order. A failed lookup or an API
+ * envelope (success/error/not-found) is not a delivery status; continue to
+ * the next identifier and never persist the envelope as courier status.
+ */
+function steadfastGetStatusForOrder_(row) {
+  row = row || [];
+  var lookups = [
+    { value: String(row[10] || '').trim(), fetch: steadfastGetStatusByTrackingCode_ },
+    { value: String(row[11] || '').trim(), fetch: steadfastGetStatusByConsignmentId_ },
+    { value: String(row[8] || '').trim(), fetch: steadfastGetStatusByInvoice_ }
+  ];
+  var lastError = '';
+  for (var i = 0; i < lookups.length; i++) {
+    if (!lookups[i].value) continue;
+    try {
+      var response = lookups[i].fetch(lookups[i].value);
+      var status = extractSteadfastDeliveryStatus_(response);
+      if (status) return { response: response, status: status, lookup: i };
+    } catch (err) {
+      lastError = String(err && err.message ? err.message : err);
+    }
+  }
+  return { response: null, status: '', error: lastError };
 }
 
 function applySteadfastStatusToRow_(sheet, row, payload) {
@@ -7526,17 +7568,20 @@ function adminCourierTracking_(e) {
   if (!match) return { ok: false, error: 'ORDER_NOT_UNIQUE', message: 'একটি নির্দিষ্ট অর্ডার শনাক্ত করা যায়নি।' };
   var row = match.values, raw = String(row[12] || ''), fetchedAt = '', warning = '';
   var refresh = String(param_(e, 'Refresh') || '') === '1';
-  if (refresh && (row[10] || row[11])) {
+  if (refresh && (row[10] || row[11] || row[8])) {
     try {
-      var response = row[11] ? steadfastGetStatusByConsignmentId_(row[11]) : steadfastGetStatusByTrackingCode_(row[10]);
-      var status = extractSteadfastDeliveryStatus_(response);
-      if (!status) warning = 'কুরিয়ার থেকে নতুন স্ট্যাটাস পাওয়া যায়নি।';
+      var lookup = steadfastGetStatusForOrder_(row);
+      var response = lookup.response;
+      var status = lookup.status;
+      if (!status) warning = lookup.error
+        ? 'কুরিয়ারের সংযোগে নতুন স্ট্যাটাস আনা যায়নি। সংরক্ষিত তথ্য দেখানো হচ্ছে।'
+        : 'কুরিয়ার থেকে নতুন স্ট্যাটাস পাওয়া যায়নি। সংরক্ষিত তথ্য দেখানো হচ্ছে।';
       else {
         raw = String(status); fetchedAt = new Date().toISOString();
         // Preserve the workflow column: fetching tracking never marks an order delivered.
         sheet.getRange(match.row, onlineOrderColumn_(sheet, 13)).setValue(courierTrackingCell_(raw, 100));
         appendCourierTrackingEvent_(row, { delivery_status: raw, notification_type: 'status_check',
-          tracking_message: response.tracking_message || '', updated_at: response.updated_at || '' }, 'api');
+          tracking_message: response && response.tracking_message || '', updated_at: response && response.updated_at || '' }, 'api');
       }
     } catch (err) { warning = 'কুরিয়ারের সংযোগে নতুন স্ট্যাটাস আনা যায়নি। সংরক্ষিত তথ্য দেখানো হচ্ছে।'; }
   }
