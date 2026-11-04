@@ -280,9 +280,10 @@ window.CATEGORY_PRODUCTS = {
       fabric: "Dubai Cherry",
       sizes: ["44", "46", "48", "50", "52", "54", "56"],
       detailNote: "✨ আভিজাত্য ও সৌন্দর্যের অনন্য সমন্বয়!\n\nপ্রিমিয়াম Dubai Cherry Fabrics দিয়ে তৈরি আকর্ষণীয় এমব্রয়ডারি ডিজাইনের আবায়া। মার্জিত লুক, আরামদায়ক ফিটিং ও প্রিমিয়াম ফিনিশিংয়ে আপনার পছন্দের কালেকশন।\n\n🖤 Body: 46\" (Free Size)\n📏 Length: 50\", 52\", 54\", 56\"\n✨ Gher: 90\"+\n\n💰 শুধু আবায়া: ১,০৫০ টাকা\n💰 ফুল সেট: ১,৩৫০ টাকা",
+      types: ["Full Set Abaya", "Only Abaya"],
       priceByType: {
-        "Abaya Only": 799,
-        "Full Set": 1350
+        "Full Set Abaya": 1350,
+        "Only Abaya": 1050
       },
       isImageView: true,
       imageViewOf: "ABY-BUTTERFLY-13",
