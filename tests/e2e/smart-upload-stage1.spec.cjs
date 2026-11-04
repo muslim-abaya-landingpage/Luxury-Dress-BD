@@ -97,23 +97,29 @@ test('body and garment measurements are available and saved for a non-Abaya cate
   expect(product.palazzoLengths).toEqual(['38']);
 });
 
-test('SKU: empty makes an automatic one from the name; invalid or duplicate is refused before anything is staged', async ({ page }) => {
+test('SKU: exact existing ID updates that product; case-different ID remains a new product', async ({ page }) => {
   await setup(page);
   await page.setInputFiles('#pqPhotos', [file(1)]);
-  for (const bad of ['a', 'bad sku!', '-start', 'hj-existing-1']) {
-    await page.fill('#pq_sku', bad);
-    await expect(page.locator('#pqSkuHint')).toHaveClass(/pm-quick-error/);
-    expect(await page.evaluate(() => document.getElementById('pq_sku').checkValidity())).toBe(false);
-    await page.evaluate(() => (() => { const f = document.getElementById('pqForm'); f.requestSubmit(); const r = document.getElementById('pqReview'); if (r && !r.hidden) f.requestSubmit(); })());
-    expect(await page.evaluate(() => window.__staged.length)).toBe(0);
-  }
-  await expect(page.locator('#pqSkuHint')).toContainText('already used'); // last value was the duplicate (any case)
-  await page.fill('#pq_sku', '');
-  expect(await page.evaluate(() => document.getElementById('pq_sku').checkValidity())).toBe(true);
+  await page.fill('#pq_sku', 'HJ-EXISTING-1');
+  await expect(page.locator('#pqSkuHint')).toContainText('Exact SKU match');
+  await page.fill('#pq_name', 'Updated Existing Hijab');
   await page.evaluate(() => (() => { const f = document.getElementById('pqForm'); f.requestSubmit(); const r = document.getElementById('pqReview'); if (r && !r.hidden) f.requestSubmit(); })());
   await expect.poll(() => page.evaluate(() => window.__staged.length)).toBe(1);
-  // Stage 4: an empty SKU now takes a readable link from the name (Bangla-only names keep the P- code, see stage 4 tests).
-  expect(await page.evaluate(() => window.__staged[0][1].id)).toBe('test-hijab');
+  const exact = await page.evaluate(() => window.__staged[0][1]);
+  expect(exact.id).toBe('HJ-EXISTING-1');
+  expect(exact.name).toBe('Updated Existing Hijab');
+  expect(exact.customField).toBeUndefined();
+
+  // Same letters with different case is NOT an exact match and must not overwrite the original.
+  await page.evaluate(() => { document.querySelector('.pm-quick-dialog').close(); window.MaProductQuickUpload.open(); });
+  await page.fill('#pq_name', 'Case Variant Hijab');
+  await page.fill('#pq_price', '650');
+  await page.fill('#pq_sizes', 'Free Size');
+  await page.setInputFiles('#pqPhotos', [file(2)]);
+  await page.fill('#pq_sku', 'hj-existing-1');
+  await page.evaluate(() => (() => { const f = document.getElementById('pqForm'); f.requestSubmit(); const r = document.getElementById('pqReview'); if (r && !r.hidden) f.requestSubmit(); })());
+  await expect.poll(() => page.evaluate(() => window.__staged.length)).toBe(2);
+  expect(await page.evaluate(() => window.__staged[1][1].id)).toBe('hj-existing-1');
 });
 
 test('editing an existing product shows its SKU locked; a new product after it starts clean', async ({ page }) => {
