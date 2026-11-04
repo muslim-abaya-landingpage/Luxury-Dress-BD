@@ -69,17 +69,28 @@ test('bulk upload updates an exact existing SKU and adds an unmatched SKU as a n
     publish: async () => { window.__published++; }
   }));
   await page.evaluate(() => window.MaProductBulkUpload.open());
-  const csv = 'category,name,sku,price,sizes,photos\\nhijab,Updated Hijab,HIJAB-EXISTING,650,Free Size,old.jpg';
+  const csv = [
+    'category,name,sku,price,sizes,photos',
+    'hijab,Updated Hijab,HIJAB-EXISTING,650,Free Size,update.jpg',
+    'hijab,New Hijab,HIJAB-NEW-2,750,Free Size,new.jpg'
+  ].join('\\n');
   await page.locator('#pbuCsv').setInputFiles({ name: 'update.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
-  await page.locator('#pbuImages').setInputFiles({ name: 'new.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('image') });
+  await page.locator('#pbuImages').setInputFiles([
+    { name: 'update.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('updated image') },
+    { name: 'new.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('new image') }
+  ]);
   await expect(page.locator('#pbuPreview')).toContainText('Existing SKU update');
+  await expect(page.locator('#pbuPreview')).toContainText('New visible product');
   await expect(page.locator('#pbuPublish')).toBeEnabled();
   await page.locator('#pbuPublish').click();
   await expect(page.locator('#pbuNote')).toContainText('সফল!');
-  const product = await page.evaluate(() => window.__staged[0].product);
-  expect(product.id).toBe('HIJAB-EXISTING');
-  expect(product.name).toBe('Updated Hijab');
-  expect(product.customField).toBe('keep me');
-  expect(product.image).not.toBe('old.webp');
+  const rows = await page.evaluate(() => window.__staged);
+  expect(rows).toHaveLength(2);
+  const updated = rows.find(row => row.product.id === 'HIJAB-EXISTING').product;
+  const added = rows.find(row => row.product.id === 'HIJAB-NEW-2').product;
+  expect(updated.name).toBe('Updated Hijab');
+  expect(updated.customField).toBe('keep me');
+  expect(updated.image).not.toBe('old.webp');
+  expect(added.name).toBe('New Hijab');
   expect(await page.evaluate(() => window.__published)).toBe(1);
 });
