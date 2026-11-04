@@ -47,6 +47,7 @@
 <script src="admin-dashboard-design.js?v=389d008aafabe1a6"></script>
 <link rel="stylesheet" href="admin-premium-layout.css?v=385b5e49870868f4">
 <link rel="stylesheet" href="admin-design-system.css?v=1eaf4362bddc4ad0">
+<link rel="stylesheet" href="inventory-category-workspace.css?v=20261104-v1">
 </head>
 <body class="pl-admin adm-body" data-admin-guard="1">
   <div class="adm-shell">
@@ -97,6 +98,20 @@
         <p>প্রোডাক্টের স্টক দেখুন/আপডেট করুন এবং অর্ডার থেকে রেভিনিউ ও বেস্ট-সেলার বিশ্লেষণ দেখুন</p>
       </header>
 
+      <div class="inv-workspace">
+      <aside class="inv-category-sidebar" aria-label="Inventory categories">
+        <div class="inv-category-heading">
+          <span class="inv-eyebrow">WORKSPACE</span>
+          <h2>Inventory &amp; Size</h2>
+          <p>Browse stock by product category.</p>
+        </div>
+        <div class="inv-category-label">PRODUCT CATEGORIES</div>
+        <div id="saCategoryCounts" class="inv-category-host" aria-label="Filter stock by category"></div>
+        <div class="inv-sidebar-foot">
+          <a class="pl-btn pl-btn-secondary" href="admin-sizes.html">Size Manager <span aria-hidden="true">→</span></a>
+          <p>Category filters apply to the stock list.</p>
+        </div>
+      </aside>
       <main class="pl-main">
         <div class="sa-tabs" style="display:flex;gap:8px;margin-bottom:16px;border-bottom:1px solid #e2e2e2;padding-bottom:0">
           <button type="button" class="pl-btn pl-btn-secondary sa-tab-btn is-active" id="saTabStockBtn" data-tab="stock">স্টক</button>
@@ -134,7 +149,7 @@
             </div>
             <p style="margin:0 0 10px;font-size:0.82rem;color:#888">CSV ফরম্যাট: <code>productId,variant,qty,reason</code> (প্রথম লাইনে হেডার থাকলেও চলবে) — আপলোডের আগে প্রিভিউ দেখানো হবে, নিশ্চিত করার পরেই প্রয়োগ হবে।</p>
           </details>
-          <div id="saCategoryCounts" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px"></div>
+          
           <div style="overflow-x:auto">
             <table id="saStockTable" style="width:100%;border-collapse:collapse;font-size:0.92rem">
               <thead>
@@ -278,7 +293,7 @@
 
   <div class="pl-toast" id="saToast" role="status"></div>
 
-  <script src="product-catalog-sync.js?v=ab0c6a1d0c536477"></script>
+  <script src="</div>product-catalog-sync.js?v=ab0c6a1d0c536477"></script>
   <script src="product-config.js?v=9f0fe21a5d0fbb0f"></script>
   <script src="product-utils.js?v=72b921b6721f1fcf"></script>
   <script src="category-products.js?v=e12061816c7e9d6f"></script>
