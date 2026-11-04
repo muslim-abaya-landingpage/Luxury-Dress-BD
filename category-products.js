@@ -1096,7 +1096,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "KURTI-13",
       name: "White Lavender Floral Cotton Dress",
-      image: "/images/white-lavender-floral-cotton-one-piece-dress-for-women-muslimabaya.webp",
+      image: "/images/card/images/white-lavender-floral-cotton-one-piece-dress-for-women-muslimabaya.webp.webp",
       price: 350,
       color: "white",
       colorLabel: "White / Lavender",
@@ -1113,7 +1113,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "KURTI-14",
       name: "White Maroon Block Print Cotton Dress",
-      image: "/images/white-maroon-block-print-cotton-one-piece-dress-for-women.webp",
+      image: "/images/card/images/white-maroon-block-print-cotton-one-piece-dress-for-women.webp.webp",
       price: 350,
       color: "white",
       colorLabel: "White / Maroon",
