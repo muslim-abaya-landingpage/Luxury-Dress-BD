@@ -5,6 +5,35 @@
 window.CATEGORY_PRODUCTS = {
   abaya: [
     {
+      id: "premium-dubai-cherry-fabrics-abaya",
+      name: "Premium Dubai Cherry Fabrics Abaya",
+      image: "https://images.muslimabaya.com/images/uploads/premium-dubai-cherry-fabrics-abaya-1-ca8b4af1530b6cc32b18.webp",
+      imageCard: "https://images.muslimabaya.com/images/uploads/premium-dubai-cherry-fabrics-abaya-card-a5fe7a9e1f5e026a1a05.webp",
+      images: ["https://images.muslimabaya.com/images/uploads/premium-dubai-cherry-fabrics-abaya-2-5f07bf3e76ee79a3d7d1.webp"],
+      price: 1350,
+      color: "black",
+      colorLabel: "Black",
+      fabric: "Dubai Cherry Fabrics",
+      sizes: ["50", "52", "54", "56"],
+      detailNote: "✨ আভিজাত্য ও সৌন্দর্যের অনন্য সমন্বয়! 🖤\n\nMUSLIM ABAYA নিয়ে এসেছে প্রিমিয়াম Dubai Cherry Fabrics Abaya।\n\nমার্জিত ডিজাইন, আকর্ষণীয় এমব্রয়ডারি এবং আরামদায়ক ফিটিংয়ের সমন্বয়ে তৈরি এই আবায়া আপনার পোশাকে যোগ করবে প্রিমিয়াম সৌন্দর্য।\n\n📌 PRODUCT DETAILS\n\n• Fabric: Dubai Cherry Fabrics\n• Body: 46\" (Free Size)\n• Length: 50\", 52\", 54\", 56\"\n• Gher: 90\"+\n\n💰 PRICE\n\n• Only Abaya: ৳1,050\n• Full Set: ৳1,350\n\n🛍️ ORDER NOW\n\nWebsite: https://muslimabaya.com\n\nWhatsApp Only (Message): 01971642683\n\nঅর্ডার বা বিস্তারিত জানতে WhatsApp-এ মেসেজ করুন।\n\nMUSLIM ABAYA\nElegance in Every Style. 🖤",
+      types: ["Full Set", "Abaya Only"],
+      priceByType: {
+        "Full Set": 1350,
+        "Abaya Only": 1050
+      },
+      sleeveSizes: [],
+      dressLengths: ["50","52","54","56"],
+      palazzoLengths: [],
+      bodySizes: ["46"],
+      lengthSizes: ["50","52","54","56"],
+      seoTitle: "Dubai Cherry Fabrics Abaya | MUSLIM ABAYA",
+      seoDescription: "Premium Dubai Cherry Fabrics Abaya with beautiful embroidery. Body 46\", length 50–56\", Gher 90\"+. Price starts at ৳1050. Order online.",
+      dateAdded: "2026-11-05",
+      colorVariants: [{"color":"black","colorLabel":"Black","image":"https://images.muslimabaya.com/images/uploads/premium-dubai-cherry-fabrics-abaya-1-ca8b4af1530b6cc32b18.webp"}],
+      category: "abaya",
+      categoryLabel: "আবায়া · বোরকা"
+    },
+    {
       id: "ABY-MAROON-1",
       name: "Maroon Abaya Set",
       image: "/images/Maroon Abaya Set...jpeg",
@@ -290,13 +319,13 @@ window.CATEGORY_PRODUCTS = {
       imageViewOf: "ABY-BUTTERFLY-13",
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
-      dateAdded: "2026-07-17",
-      productUrl: "/",
-      brand: "Muslim Abaya",
+      bodySizes: ["46"],
       tags: ["Dubai Cherry Abaya","Premium Abaya","Embroidery Abaya","Ladies Abaya","Luxury Abaya","Muslim Abaya","Dubai Fabric","Premium Collection","Black Abaya"],
+      brand: "Muslim Abaya",
+      dateAdded: "2026-07-17",
       seoTitle: "Premium Dubai Cherry Fabrics Abaya | MUSLIM ABAYA",
       seoDescription: "Shop Premium Dubai Cherry Fabrics Abaya with beautiful embroidery. Free size, body 46\", length 50-56\". Price starts at ৳1050. Order from MUSLIM ABAYA.",
-      bodySizes: ["46"],
+      productUrl: "/",
       variationAttributes: ["type","color","body","length"]
     },
     {

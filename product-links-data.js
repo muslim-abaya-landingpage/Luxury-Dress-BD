@@ -5,6 +5,7 @@
  */
 window.PRODUCT_LINKS_DATA = {
   abaya: [
+    "https://images.muslimabaya.com/images/uploads/premium-dubai-cherry-fabrics-abaya-1-ca8b4af1530b6cc32b18.webp",
     "/images/Maroon Abaya Set...jpeg",
     "/images/premium-black-3-part-abaya-set-muslim-abaya-bd.webp",
     "/images/premium-black-gold-stone-work-abaya-1080x1350.webp",
