@@ -15,7 +15,7 @@ async function setup(page) {
   await page.addScriptTag({ path: path.join(root, 'product-publish-utils.js') });
   await page.addScriptTag({ path: path.join(root, 'image-processing-client.js') });
   await page.addScriptTag({ content: 'window.__staged=[];window.__assets=[];window.MaCatalogPublisher={isReady:()=>true,enqueue:(a)=>{window.__assets=a.map(x=>x.path);},check(){}};' +
-    'window.__products={hijab:[{id:"HJ-EXISTING-1",name:"Existing Hijab",price:500,image:"images/a.webp"}]};' });
+    'window.__products={hijab:[{id:"HJ-EXISTING-1",name:"Existing Hijab",price:500,image:"images/a.webp",customField:"keep me"}]};' });
   await page.addScriptTag({ path: path.join(root, 'product-quick-upload.js') });
   await page.evaluate(() => window.MaProductQuickUpload.mount({
     sections: () => [{ key: 'hijab', menuBn: 'হিজাব' }], products: () => window.__products, status() {}, isSaved: () => true,
@@ -108,7 +108,7 @@ test('SKU: exact existing ID updates that product; case-different ID remains a n
   const exact = await page.evaluate(() => window.__staged[0][1]);
   expect(exact.id).toBe('HJ-EXISTING-1');
   expect(exact.name).toBe('Updated Existing Hijab');
-  expect(exact.customField).toBeUndefined();
+  expect(exact.customField).toBe('keep me');
 
   // Same letters with different case is NOT an exact match and must not overwrite the original.
   await page.evaluate(() => { document.querySelector('.pm-quick-dialog').close(); window.MaProductQuickUpload.open(); });
