@@ -76,9 +76,10 @@ if (seen.size) {
     }
   }
 }
-// Category pages: write the published products into the HTML itself (name, price, photo, link) so search
-// engines see real content without running JavaScript. category-renderer.js replaces #list on load, so
-// visitors see the normal page. No intro/SEO text is added — only the products that are on the page anyway.
+// Category pages: keep published products in a no-JavaScript fallback so crawlers and visitors without JS
+// still see product links and prices. Keep the fallback inside <noscript>: with JS enabled, browsers were
+// downloading all of these (sometimes full-size) image URLs before category-renderer replaced #list and
+// fetched the responsive card images, duplicating image traffic on every category-page visit.
 const listed = w.maCatalog.normalizeAll(w.CATEGORY_PRODUCTS, w.PRODUCT_LINKS_DATA || w.PRODUCT_IMAGE_LISTS || {});
 const navLabel = Object.fromEntries((w.CATEGORY_NAV || []).map(c => [c.key, c.label]));
 const imgUrl = raw => { const v = String(raw || ''); if (!v) return ''; return /^https?:\/\//.test(v) ? v : encodeURI('/' + v.replace(/^\.?\//, '')); };
@@ -92,7 +93,7 @@ function staticList(heading, rows, pageUrl) {
   const style = '<style>.ma-static-list{list-style:none;margin:0;padding:12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}.ma-static-list a{display:block;color:inherit;text-decoration:none}.ma-static-list img{display:block;width:100%;height:auto;aspect-ratio:4/5;object-fit:cover}.ma-static-list span{display:block;font-size:14px;margin-top:6px}.ma-static-list b{font-size:14px}.ma-static-h1{font-size:20px;margin:12px}</style>';
   const ld = {'@context':'https://schema.org','@type':'CollectionPage',name:`${heading} | Muslim Abaya`,url:pageUrl,
     mainEntity:{'@type':'ItemList',numberOfItems:items.length,itemListElement:items.map((p, i) => ({'@type':'ListItem',position:i + 1,url:`${site}/product/${encodeURIComponent(p.id)}`,name:p.name}))}};
-  return { html: `<div id="list"><!--ma-static-list-->${style}<h1 class="ma-static-h1">${esc(heading)}</h1><ul class="ma-static-list">${cards}</ul><!--/ma-static-list--></div>`, ld };
+  return { html: `<div id="list"><!--ma-static-list-->${style}<noscript><h1 class="ma-static-h1">${esc(heading)}</h1><ul class="ma-static-list">${cards}</ul></noscript><!--/ma-static-list--></div>`, ld };
 }
 function fillCategoryPage(file, heading, rows, pageUrl) {
   const full = path.join(root, file);

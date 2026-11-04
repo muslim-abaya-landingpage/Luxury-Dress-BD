@@ -4,6 +4,12 @@ html:not(.category-ready) #list {
   min-height: 55vh;
 }
 
+/* With scripts disabled, render the SEO fallback instead of leaving the loading skeleton blank.
+   With scripts enabled, noscript contents are text and this selector does not match. */
+html:not(.category-ready) #list:has(.ma-static-list) {
+  visibility: visible;
+}
+
 html.category-ready #list {
   visibility: visible;
 }

@@ -51,6 +51,9 @@ test('category pages carry a pre-built product list (links + ItemList) so search
   assert.ok(m, 'abaya.html has the static list');
   assert.match(m[1], /<h1 class="ma-static-h1">[^<]+<\/h1>/);
   assert.match(m[1], /<a href="\/product\/[A-Za-z0-9_-]+">/);
+  assert.match(m[1], /<noscript>[\s\S]*<img src="[^"]+"[\s\S]*<\/noscript>/, 'fallback images are available when JavaScript is disabled');
+  assert.doesNotMatch(m[1].replace(/<noscript>[\s\S]*?<\/noscript>/, ''), /<img\b[^>]*\bsrc=/i, 'JavaScript-enabled visitors must not start fallback image downloads');
+  assert.match(fs.readFileSync(path.join(root, 'shop-page.css'), 'utf8'), /html:not\(\.category-ready\) #list:has\(\.ma-static-list\)\s*\{\s*visibility:\s*visible/s);
   assert.doesNotMatch(m[1], /<script/i);
   assert.match(abaya, /"@type":"CollectionPage"[\s\S]*"@type":"ItemList"/);
   // Product pages are built from abaya.html but must never inherit the category list.
