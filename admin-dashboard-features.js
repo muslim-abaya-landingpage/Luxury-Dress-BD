@@ -2,6 +2,7 @@
   "use strict";
 
   var ALERT_POLL_MS = 5 * 60 * 1000;
+  var DASHBOARD_CACHE_MS = 60 * 1000;
   var TASK_LIMIT = 1000;
   var state = {
     alertBusy: false,
@@ -39,9 +40,9 @@
     node.textContent = text;
     node.classList.toggle("is-error", !!isError);
   }
-  function cachedResult(recordType, fields) {
+  function cachedResult(recordType, fields, maxAgeMs) {
     if (!window.MaAdmin || typeof MaAdmin.cached !== "function") return null;
-    try { return MaAdmin.cached(recordType, fields, ALERT_POLL_MS); } catch (e) { return null; }
+    try { return MaAdmin.cached(recordType, fields, maxAgeMs == null ? ALERT_POLL_MS : maxAgeMs); } catch (e) { return null; }
   }
   function dateTimeDhaka() {
     return new Intl.DateTimeFormat("bn-BD", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Dhaka" }).format(new Date());
@@ -146,17 +147,24 @@
     return unread;
   }
 
-  function refreshAlerts() {
+  function refreshAlerts(force) {
     if (state.alertBusy || document.hidden || !window.MaAdmin || !MaAdmin.getSession || !MaAdmin.getSession()) return Promise.resolve();
-    state.alertBusy = true;
-    var cachedStock = cachedResult("AdminStockVariantsList", { Search: "", StockStatus: "all", Category: "", CategoryMap: "" });
-    var cachedInbox = cachedResult("InboxList", { Unread: "1", Limit: 300 });
+    var cachedStock = cachedResult("AdminStockVariantsList", { Search: "", StockStatus: "all", Category: "", CategoryMap: "" }, DASHBOARD_CACHE_MS);
+    var cachedInbox = cachedResult("InboxList", { Unread: "1", Limit: 300 }, DASHBOARD_CACHE_MS);
     var hasCached = !!cachedStock || !!cachedInbox;
     var currentStock = cachedStock ? (renderStockAlerts(cachedStock.items, cachedStock.defaultThreshold) || []) : [];
     var currentInbox = cachedInbox ? (renderInboxAlerts(cachedInbox) || []) : [];
+    if (!force && cachedStock && cachedInbox) {
+      state.stockSignature = currentStock.map(stockKey).sort(); state.stockBaseline = true;
+      state.inboxUnread = {}; currentInbox.forEach(function (contact) { state.inboxUnread[inboxKey(contact)] = Number(contact.unread) || 0; }); state.inboxBaseline = true;
+      setStatus("admAlertState", "সাম্প্রতিক সংরক্ষিত ডেটা দেখানো হচ্ছে · লাইভ যাচাই করতে Refresh চাপুন", false);
+      return Promise.resolve();
+    }
+    state.alertBusy = true;
     setStatus("admAlertState", hasCached ? "সংরক্ষিত ডেটা দেখানো হচ্ছে · লাইভ আপডেট যাচাই হচ্ছে…" : "অ্যালার্ট আপডেট হচ্ছে…", false);
-    var stockPromise = MaAdmin.getStockVariants({ stockStatus: "all", timeoutMs: 15000 }).then(function (res) { return { ok: true, data: res }; }, function (error) { return { ok: false, error: error }; });
-    var inboxPromise = MaAdmin.inboxCall("InboxList", { Unread: "1", Limit: 300 }, { edgeSummary: true, timeoutMs: 15000 }).then(function (res) { return { ok: true, data: res }; }, function (error) { return { ok: false, error: error }; });
+    var cacheAge = force ? 0 : DASHBOARD_CACHE_MS;
+    var stockPromise = MaAdmin.getStockVariants({ stockStatus: "all", timeoutMs: 15000, maxAgeMs: cacheAge }).then(function (res) { return { ok: true, data: res }; }, function (error) { return { ok: false, error: error }; });
+    var inboxPromise = MaAdmin.inboxCall("InboxList", { Unread: "1", Limit: 300 }, { edgeSummary: true, timeoutMs: 15000, maxAgeMs: cacheAge }).then(function (res) { return { ok: true, data: res }; }, function (error) { return { ok: false, error: error }; });
     // Each card renders as soon as its own data arrives (the inbox is slower and must not hold up stock).
     stockPromise = stockPromise.then(function (stockResult) {
       var stockNode = byId("admStockAlerts");
@@ -234,11 +242,12 @@
   function refreshTasks(force) {
     if (state.taskBusy || document.hidden || !window.MaAdmin || !MaAdmin.getSession || !MaAdmin.getSession()) return Promise.resolve();
     if (!force && Date.now() - state.lastTaskRefresh < ALERT_POLL_MS) return Promise.resolve();
-    state.taskBusy = true;
-    var cached = cachedResult("AdminOrderList", { Limit: TASK_LIMIT });
+    var cached = cachedResult("AdminOrderList", { Limit: TASK_LIMIT }, DASHBOARD_CACHE_MS);
     if (cached) renderTasks(cached);
-    setStatus("admTaskState", cached ? "সংরক্ষিত ডেটা দেখানো হচ্ছে · লাইভ যাচাই হচ্ছে…" : "অর্ডার যাচাই হচ্ছে…", false);
-    return MaAdmin.call("AdminOrderList", { Limit: TASK_LIMIT }, { timeoutMs: 15000 }).then(function (result) {
+    if (!force && cached) { state.lastTaskRefresh = Date.now(); setStatus("admTaskState", "সাম্প্রতিক সংরক্ষিত ডেটা দেখানো হচ্ছে · লাইভ যাচাই করতে Refresh চাপুন", false); return Promise.resolve(); }
+    state.taskBusy = true;
+    setStatus("admTaskState", cached ? "সংরক্ষিত ডেটা দেখানো হচ্ছে · লাইভ আপডেট যাচাই হচ্ছে…" : "অর্ডার যাচাই হচ্ছে…", false);
+    return MaAdmin.call("AdminOrderList", { Limit: TASK_LIMIT }, { timeoutMs: 15000, maxAgeMs: force ? 0 : DASHBOARD_CACHE_MS }).then(function (result) {
       renderTasks(result);
       state.lastTaskRefresh = Date.now();
       setStatus("admTaskState", "সর্বশেষ যাচাই " + dateTimeDhaka() + " · দেরি ধরা হয়: Pending ১ ঘণ্টা, Confirmed ২৪ ঘণ্টা, Shipped ৪৮ ঘণ্টা পার হলে", false);
@@ -385,15 +394,15 @@
     state.desktopEnabled = storedDesktopOptIn() && ("Notification" in window) && Notification.permission === "granted";
     updateDesktopButton();
     byId("admDesktopAlerts").addEventListener("click", requestDesktopPermission);
-    byId("admAlertsRefresh").addEventListener("click", refreshAlerts);
+    byId("admAlertsRefresh").addEventListener("click", function () { refreshAlerts(true); });
     byId("admTasksRefresh").addEventListener("click", function () { refreshTasks(true); });
     byId("admReportLoad").addEventListener("click", loadAnalytics);
-    byId("admRefresh").addEventListener("click", function () { refreshAlerts(); refreshTasks(true); if (document.querySelector(".adm-dashboard-reports[open]")) loadAnalytics(); });
+    byId("admRefresh").addEventListener("click", function () { refreshAlerts(true); refreshTasks(true); if (document.querySelector(".adm-dashboard-reports[open]")) loadAnalytics(); });
     byId("admReportRange").addEventListener("change", function () { toggleCustomDates(); if (this.value !== "custom") loadAnalytics(); });
     byId("admReportExport").addEventListener("click", exportCsv);
     toggleCustomDates();
     refreshAlerts();
-    refreshTasks(true);
+    refreshTasks(false);
     var reportSection = document.querySelector(".adm-dashboard-reports");
     if (reportSection) reportSection.addEventListener("toggle", function () { if (reportSection.open && !window.__maDashboardSalesReport) loadAnalytics(); });
     window.setInterval(function () {

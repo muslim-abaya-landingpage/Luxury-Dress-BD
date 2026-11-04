@@ -107,7 +107,7 @@ test('admin dashboard renders alerts, priority orders, lifetime report and conse
 });
 
 
-test('dashboard paints session-cached cards while bounded live refreshes are pending', async ({ page }) => {
+test('dashboard skips network reads for fresh cached cards; manual refresh bypasses cache', async ({ page }) => {
   await page.clock.setFixedTime(new Date('2026-10-18T12:00:00+06:00'));
   await page.setContent(`<!doctype html><html><body>
     <button id="admDesktopAlerts" hidden></button><span id="admDesktopStatus"></span>
@@ -128,6 +128,7 @@ test('dashboard paints session-cached cards while bounded live refreshes are pen
     class TestNotification { static permission = 'default'; static requestPermission() { return Promise.resolve('default'); } }
     Object.defineProperty(window, 'Notification', { configurable: true, value: TestNotification });
     window.__timeouts = {};
+    window.__cacheAges = {};
     const snapshots = {
       AdminStockVariantsList: { defaultThreshold: 5, items: [{ productId: 'C-1', productName: 'Cached Abaya', variant: 'M', tracked: true, available: 2, threshold: 3, status: 'LOW' }] },
       InboxList: { stats: { unread: 1 }, contacts: [{ pageId: 'page-1', psid: 'cached-1', name: 'Cached Inbox Customer', unread: 1, lastMessage: 'Cached message' }] },
@@ -135,10 +136,10 @@ test('dashboard paints session-cached cards while bounded live refreshes are pen
     };
     window.MaAdmin = {
       getSession: () => ({ token: 'test-session' }),
-      cached: (recordType) => snapshots[recordType] || null,
-      getStockVariants: options => { window.__timeouts.stock = options.timeoutMs; return new Promise(() => {}); },
-      inboxCall: (_type, _fields, options) => { window.__timeouts.inbox = options.timeoutMs; return new Promise(() => {}); },
-      call: (_type, _fields, options) => { window.__timeouts.tasks = options.timeoutMs; return new Promise(() => {}); }
+      cached: (recordType, _fields, maxAge) => { window.__cacheAges[recordType] = maxAge; return snapshots[recordType] || null; },
+      getStockVariants: options => { window.__timeouts.stock = { timeout: options.timeoutMs, maxAge: options.maxAgeMs }; return new Promise(() => {}); },
+      inboxCall: (_type, _fields, options) => { window.__timeouts.inbox = { timeout: options.timeoutMs, maxAge: options.maxAgeMs }; return new Promise(() => {}); },
+      call: (_type, _fields, options) => { window.__timeouts.tasks = { timeout: options.timeoutMs, maxAge: options.maxAgeMs }; return new Promise(() => {}); }
     };
   });
   await page.addScriptTag({ path: path.join(root, 'admin-dashboard-logic.js') });
@@ -149,5 +150,12 @@ test('dashboard paints session-cached cards while bounded live refreshes are pen
   await expect(page.locator('#admPriorityTasks')).toContainText('CACHE-1');
   await expect(page.locator('#admAlertState')).toContainText('সংরক্ষিত ডেটা দেখানো হচ্ছে');
   await expect(page.locator('#admTaskState')).toContainText('সংরক্ষিত ডেটা দেখানো হচ্ছে');
-  expect(await page.evaluate(() => window.__timeouts)).toEqual({ stock: 15000, inbox: 15000, tasks: 15000 });
+  expect(await page.evaluate(() => window.__timeouts)).toEqual({});
+  expect(await page.evaluate(() => window.__cacheAges)).toEqual({ AdminStockVariantsList: 60000, InboxList: 60000, AdminOrderList: 60000 });
+  await page.locator('#admAlertsRefresh').click();
+  await page.locator('#admTasksRefresh').click();
+  await expect.poll(() => page.evaluate(() => Object.keys(window.__timeouts).length)).toBe(3);
+  expect(await page.evaluate(() => window.__timeouts)).toEqual({
+    stock: { timeout: 15000, maxAge: 0 }, inbox: { timeout: 15000, maxAge: 0 }, tasks: { timeout: 15000, maxAge: 0 }
+  });
 });
