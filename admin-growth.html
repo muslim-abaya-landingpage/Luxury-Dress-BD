@@ -92,8 +92,8 @@
         </div>
 
         <section class="adm-panel">
-          <h2>Abandoned Cart Recovery</h2>
-          <p style="font-size:0.85rem;color:var(--adm-muted);margin-top:-8px">যারা চেকআউট পেজে ফোন নম্বর দিয়েছেন কিন্তু অর্ডার সম্পন্ন করেননি (গত ৭ দিনের মধ্যে)। WhatsApp-এ মেসেজ দিয়ে অর্ডার সম্পন্ন করতে বলুন।</p>
+          <h2>অসম্পূর্ণ অর্ডার — WhatsApp ফলো-আপ</h2>
+          <p style="font-size:0.85rem;color:var(--adm-muted);margin-top:-8px">যারা checkout শুরু করেছেন কিন্তু অর্ডার সম্পন্ন করেননি (গত ৭ দিনের মধ্যে)। WhatsApp চাপলে বার্তাটি প্রস্তুত হবে—পাঠানোর আগে দেখে নিন; নিজে থেকে পাঠানো হবে না।</p>
           <div class="adm-table-wrap">
             <table class="adm-table" id="admCartsTable">
               <thead><tr><th>সময়</th><th>নাম</th><th>ফোন</th><th>কার্ট</th><th>মূল্য</th><th>একশন</th></tr></thead>
@@ -143,11 +143,30 @@
 
       function waLink(phone, text) {
         var digits = String(phone || "").replace(/\D/g, "");
+        if (digits.indexOf("00880") === 0) digits = digits.slice(2);
         if (digits.indexOf("880") !== 0) {
-          digits = digits.replace(/^0/, "");
-          digits = "880" + digits;
+          if (digits.indexOf("0") === 0) digits = "880" + digits.slice(1);
+          else if (digits.indexOf("1") === 0) digits = "880" + digits;
+          else return "";
         }
+        if (!/^8801[3-9]\d{8}$/.test(digits)) return "";
         return "https://wa.me/" + digits + "?text=" + encodeURIComponent(text || "");
+      }
+
+      function abandonedCartMessage(c) {
+        c = c || {};
+        var name = String(c.name || "").trim().slice(0, 60);
+        var summary = String(c.summary || "").replace(/\s+/g, " ").trim().slice(0, 220);
+        var value = Number(c.value);
+        var parts = [
+          "আসসালামু আলাইকুম" + (name ? " " + name : "") + ",",
+          "আপনি Muslim Abaya-তে checkout শুরু করেছিলেন, তবে অর্ডারটি সম্পন্ন হয়নি।",
+          summary ? "আপনার কার্ট: " + summary : "",
+          Number.isFinite(value) && value > 0 ? "কার্টের আনুমানিক মূল্য: ৳" + Math.round(value) : "",
+          "অর্ডার সম্পন্ন করতে কোনো সাহায্য লাগলে এই মেসেজে reply দিন।",
+          "আর follow-up না চাইলে জানাবেন—আমরা আর যোগাযোগ করব না।"
+        ];
+        return parts.filter(Boolean).join("\n");
       }
 
       function fmtTime(iso) {
@@ -174,14 +193,17 @@
         document.getElementById("admStatCarts").textContent = list.length;
         if (!list.length) { body.innerHTML = '<tr><td colspan="6" class="adm-empty">কোনো abandoned cart নেই</td></tr>'; return; }
         body.innerHTML = list.map(function (c) {
-          var msg = "আসসালামু আলাইকুম " + (c.name || "") + ", আপনার কার্টে থাকা প্রোডাক্টটি এখনো রিজার্ভ আছে। অর্ডার সম্পন্ন করতে সাহায্য লাগলে জানান।";
+          var msg = abandonedCartMessage(c);
+          var followUp = waLink(c.phone, msg);
           return "<tr>" +
             "<td>" + escapeHtml(fmtTime(c.updatedAt)) + "</td>" +
             "<td>" + escapeHtml(c.name || "—") + "</td>" +
             "<td>" + escapeHtml(c.phone) + "</td>" +
             "<td>" + escapeHtml((c.summary || "").slice(0, 50)) + "</td>" +
             "<td>৳" + escapeHtml(c.value || 0) + "</td>" +
-            '<td><a class="adm-btn adm-btn-secondary" style="padding:4px 10px;font-size:0.8rem" target="_blank" rel="noopener" href="' + waLink(c.phone, msg) + '">WhatsApp</a> ' +
+            '<td>' + (followUp
+              ? '<a class="adm-btn adm-btn-secondary" style="padding:4px 10px;font-size:0.8rem" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp-এ ফলো-আপ বার্তা খুলুন" href="' + followUp + '">WhatsApp ফলো-আপ ↗</a>'
+              : '<span title="ফোন নম্বরটি WhatsApp-এ ব্যবহারের উপযোগী নয়" style="font-size:0.8rem;color:var(--adm-muted)">ফোন নম্বর যাচাই দরকার</span>') + ' ' +
             '<button type="button" class="adm-btn adm-btn-secondary" style="padding:4px 10px;font-size:0.8rem" onclick="window.__dismissCart(this,\'' + escapeHtml(c.phone).replace(/'/g, "") + '\')">মুছুন</button></td>' +
             "</tr>";
         }).join("");
@@ -264,4 +286,3 @@
   </script>
 </body>
 </html>
-
