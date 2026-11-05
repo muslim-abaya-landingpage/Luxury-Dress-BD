@@ -70,7 +70,7 @@
       if (table.length - 1 > MAX_ROWS) throw Error('একবারে সর্বোচ্চ ' + MAX_ROWS + 'টি পণ্য যোগ করা যাবে।');
       var indexes = Object.create(null); HEADERS.forEach(function (name) { indexes[name] = header.indexOf(name); });
       var imageMap = filesByName(), imageFiles = Array.prototype.slice.call(el('pbuImages').files || []), existing = Object.create(null), seen = Object.create(null);
-      Object.keys(options.products() || {}).forEach(function (cat) { (options.products()[cat] || []).forEach(function (p) { existing[String(p.id || '').toLowerCase()] = true; }); });
+      Object.keys(options.products() || {}).forEach(function (cat) { (options.products()[cat] || []).forEach(function (p) { var key=String(p.id||''); if(key) existing[key]=(existing[key]||[]).concat([{category:cat,product:p}]); }); });
       parsed = table.slice(1).map(function (values, index) {
         var row = { line: index + 2, errors: [], photos: [], manualPhotoNames: [] };
         function get(name) { var i = indexes[name]; return i < 0 ? '' : String(values[i] || '').trim(); }
@@ -87,11 +87,14 @@
         });
         try {
           var util = g.MaProductPublishUtils;
-          var id = row.source.sku || util.slug(row.source.name) || ('P-' + Date.now().toString(36).toUpperCase() + '-' + (index + 1));
+          var suppliedSku = String(row.source.sku || '').trim();
+          var id = suppliedSku || util.slug(row.source.name) || ('P-' + Date.now().toString(36).toUpperCase() + '-' + (index + 1));
           if (!/^[A-Za-z0-9][A-Za-z0-9_-]{1,100}$/.test(id)) throw Error('SKU-তে অক্ষর/সংখ্যা, _ বা - ব্যবহার করুন');
-          var folded = id.toLowerCase();
-          if (existing[folded] || seen[folded]) throw Error('SKU আগে থেকেই আছে বা batch-এ পুনরাবৃত্তি হয়েছে');
-          seen[folded] = true;
+          if (!suppliedSku) { var base=id, suffix=2; while(existing[id] || seen[id]) id=base+'-'+(suffix++); }
+          if (seen[id]) throw Error('একই SKU batch-এ একাধিকবার দেওয়া হয়েছে');
+          if (suppliedSku && existing[id] && existing[id].length !== 1) throw Error('এই Product ID একাধিক পণ্যে আছে; নিরাপদে update করা যাচ্ছে না');
+          seen[id] = true;
+          row.match = suppliedSku && existing[id] ? existing[id][0] : null;
           row.product = util.makeProduct({ category: row.category || row.source.category, name: row.source.name, price: row.source.price, onlyPrice: row.source.onlyPrice, color: row.source.color, fabric: row.source.fabric, sizes: row.source.sizes, body: row.source.body, sleeve: row.source.sleeve, dress: row.source.dress, palazzo: row.source.palazzo, note: row.source.note }, id);
         } catch (error) { row.errors.push(error.message); }
         return row;
@@ -113,11 +116,11 @@
   function renderPreview() {
     if (!parsed.length) { el('pbuPreview').innerHTML = '<p>CSV ফাইলে কোনো পণ্যের সারি নেই।</p>'; el('pbuPublish').disabled = true; return; }
     var bad = parsed.filter(function (r) { return r.errors.length; });
-    var html = '<p><b>' + validated.length + '/' + parsed.length + '</b>টি পণ্য প্রস্তুত' + (bad.length ? ' · ' + bad.length + 'টি সারিতে সমস্যা' : '') + '</p><ol class="pbu-rows">' + parsed.map(function (r) { var photos = r.photos.map(function (f) { var alias = String(photoAliases[f.name.toLowerCase()] || f.name); return alias === f.name ? f.name : alias + ' (' + f.name + ')'; }).join(', '); var mode = r.photoMatch ? ' · Auto-match: ' + r.photoMatch : r.manualPhotoNames.length ? ' · CSV filename' : ''; return '<li class="' + (r.errors.length ? 'is-error' : 'is-ok') + '"><b>সারি ' + r.line + ':</b> ' + esc(r.source.name || '(নাম নেই)') + (r.errors.length ? '<span>' + esc(r.errors.join(' · ')) + '</span>' : '<span>' + esc(r.category) + ' · ৳' + esc(r.product.price) + ' · ' + r.photos.length + ' ছবি' + esc(mode) + (photos ? ': ' + esc(photos) : '') + '</span>'); }).join('') + '</ol>';
+    var html = '<p><b>' + validated.length + '/' + parsed.length + '</b>টি পণ্য প্রস্তুত' + (bad.length ? ' · ' + bad.length + 'টি সারিতে সমস্যা' : '') + '</p><ol class="pbu-rows">' + parsed.map(function (r) { var photos = r.photos.map(function (f) { var alias = String(photoAliases[f.name.toLowerCase()] || f.name); return alias === f.name ? f.name : alias + ' (' + f.name + ')'; }).join(', '); var mode = r.photoMatch ? ' · Auto-match: ' + r.photoMatch : r.manualPhotoNames.length ? ' · CSV filename' : ''; var action = r.match ? ' · Existing SKU update' : ' · New visible product'; return '<li class="' + (r.errors.length ? 'is-error' : 'is-ok') + '"><b>সারি ' + r.line + ':</b> ' + esc(r.source.name || '(নাম নেই)') + (r.errors.length ? '<span>' + esc(r.errors.join(' · ')) + '</span>' : '<span>' + esc(r.category) + ' · ৳' + esc(r.product.price) + action + ' · ' + r.photos.length + ' ছবি' + esc(mode) + (photos ? ': ' + esc(photos) : '') + '</span>'); }).join('') + '</ol>';
     el('pbuPreview').innerHTML = html;
     el('pbuPublish').disabled = !!busy || !validated.length || !!bad.length || pendingPublish;
     if (bad.length) el('pbuNote').textContent = 'সব সারি ঠিক করে আবার preview করুন; ভুল সারি থাকলে publish হবে না।';
-    else el('pbuNote').textContent = 'সব পণ্য যাচাই হয়েছে। Confirm করলে পণ্যগুলো একসঙ্গে publish হবে। Stock পরে Stock panel থেকে যোগ করা যাবে।';
+    else el('pbuNote').textContent = 'সব পণ্য যাচাই হয়েছে। Exact SKU মিললে সেটি update হবে; না মিললে নতুন visible product যোগ হবে। Confirm করলে সব একসঙ্গে publish হবে। Stock পরে Stock panel থেকে যোগ করা যাবে।';
   }
   function setBusy(value) { busy = value; ['pbuCsv','pbuImages','pbuClose','pbuAutoMatch'].forEach(function (id) { el(id).disabled = value; }); el('pbuPublish').disabled = value; }
   function todayDhaka() { return new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString().slice(0, 10); }
@@ -155,6 +158,7 @@
         var seo = g.MaProductPublishUtils.seo(product); product.seoTitle = seo.title; product.seoDescription = seo.description;
         var labels = String(product.colorLabel || '').split(/[,，;；|]/).map(function (v) { return v.trim(); }).filter(Boolean);
         if (labels.length > 1) product.colorVariants = labels.map(function (label, j) { return { color: label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'color-' + (j + 1), colorLabel: label, image: paths[j] }; });
+        if (row.match) product = Object.assign({}, row.match.product, product);
         stagedRows.push({ category: row.category, product: product, line: row.line });
         el('pbuNote').textContent = 'ছবি প্রস্তুত হচ্ছে… ' + stagedRows.length + '/' + validated.length + ' পণ্য';
       }

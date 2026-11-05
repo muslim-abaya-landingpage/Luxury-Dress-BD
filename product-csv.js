@@ -242,7 +242,9 @@
           var firstType = (p.types && p.types[0]) || (opts.metaFor && opts.metaFor(catKey) && opts.metaFor(catKey).types[0]);
           if (firstType && orp.map[firstType]) p.regularPrice = orp.map[firstType];
         }
-        if (p.regularPrice != null && !(p.regularPrice > p.price)) delete p.regularPrice;
+        // Do not normalize legacy sale-price metadata during a read-only round-trip import.
+        // Revalidate it only when a price field was actually supplied in this CSV row.
+        if (p.regularPrice != null && !(p.regularPrice > p.price) && (v('Price') || v('Before-sale price') || v('Option prices') || v('Option before-sale prices'))) delete p.regularPrice;
         if (v('Stock')) {
           var sv = v('Stock').toLowerCase();
           if (sv === 'out' || sv === 'out of stock') { delete p.stock; p.inStock = false; }

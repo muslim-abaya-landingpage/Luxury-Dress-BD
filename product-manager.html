@@ -188,7 +188,7 @@
     });
   }
   function ensureQuickUpload() {
-    return Promise.all([loadScriptOnce("product-color-detect.js?v=20261030-detect"), loadScriptOnce("product-quick-upload.js?v=20261105-faster-upload"), loadStyleOnce("product-quick-upload.css?v=20261031-review")]).then(function () {
+    return Promise.all([loadScriptOnce("product-color-detect.js?v=20261030-detect"), loadScriptOnce("product-quick-upload.js?v=20261105-exact-sku-v1"), loadStyleOnce("product-quick-upload.css?v=20261031-review")]).then(function () {
       if (!quickUploadMounted) {
         if (!window.MaProductQuickUpload || !quickUploadOptions) throw new Error("Quick upload is not ready");
         window.MaProductQuickUpload.mount(quickUploadOptions);
@@ -199,7 +199,7 @@
   }
   var bulkUploadMounted = false;
   function openBulkUpload() {
-    return Promise.all([loadScriptOnce("product-csv.js?v=20261028-dresslength-discount"), loadScriptOnce("product-bulk-upload.js?v=20261105-photo-rename-v3"), loadStyleOnce("product-bulk-upload.css?v=20261105-photo-rename-v3")]).then(function () {
+    return Promise.all([loadScriptOnce("product-csv.js?v=20261028-dresslength-discount"), loadScriptOnce("product-bulk-upload.js?v=20261105-exact-sku-v1"), loadStyleOnce("product-bulk-upload.css?v=20261105-photo-rename-v3")]).then(function () {
       if (!bulkUploadMounted) {
         if (!window.MaProductBulkUpload || !quickUploadOptions) throw new Error("Bulk upload is not ready");
         window.MaProductBulkUpload.mount(quickUploadOptions);
@@ -1017,6 +1017,22 @@
   function colorKeyFromLabel(label, index) {
     return String(label || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "color-" + (Number(index) + 1 || 1);
   }
+  function samePhoto(a, b) {
+    return String(a || "").replace(/^\/+/, "") === String(b || "").replace(/^\/+/, "");
+  }
+  /** Main photo replaced: colours that pointed to the old main photo now point to the new one, so the old
+   *  photo is not kept (or put back into the gallery) by a colour link. Old files are not deleted. (PR #130) */
+  function replaceMainPhotoRefs(p, oldPath, newPath) {
+    if (!p || !oldPath || samePhoto(oldPath, newPath)) return;
+    if (Array.isArray(p.colorVariants)) p.colorVariants.forEach(function (row) {
+      if (row && samePhoto(row.image || row.src, oldPath)) {
+        row.image = newPath;
+        if (Object.prototype.hasOwnProperty.call(row, "src")) row.src = newPath;
+      }
+    });
+    var list = document.getElementById("pmColorVariationList");
+    if (list && Array.isArray(p.colorVariants)) list.innerHTML = colorRowsMarkup(initialColorRows(p), p);
+  }
   function initialColorRows(p) {
     if (Array.isArray(p.colorVariants) && p.colorVariants.length) {
       return p.colorVariants.filter(Boolean).map(function (row, index) {
@@ -1075,11 +1091,12 @@
       p.colorVariants = rows;
       p.colorLabel = rows.map(function (row) { return row.colorLabel; }).join(", ");
       p.color = rows.map(function (row) { return row.color; }).join("-");
+      // A colour may only use one of this product's own photos. A link to any other photo (e.g. a replaced
+      // main photo) is dropped instead of putting that old photo back into the gallery. (PR #130)
       var gallery = Array.isArray(p.images) ? p.images.filter(function (url) { return url && !/^blob:/i.test(String(url)); }) : [];
       rows.forEach(function (row) {
-        if (row.image && row.image !== p.image && gallery.indexOf(row.image) === -1) gallery.push(row.image);
+        if (row.image && !samePhoto(row.image, p.image) && !gallery.some(function (url) { return samePhoto(url, row.image); })) row.image = "";
       });
-      if (gallery.length) p.images = gallery;
     } else {
       delete p.colorVariants;
       delete p.colorLabel;
@@ -2173,6 +2190,8 @@
       '<div class="pm-wp-actions"><label class="pm-sr-only" for="pmBulkAction">Bulk actions</label><select id="pmBulkAction"><option value="">Bulk actions</option>' + (inTrash
         ? '<option value="restore">Restore</option><option value="delete">Delete permanently</option>'
         : '<option value="in">Mark in stock</option><option value="out">Mark out of stock</option><option value="price">Change price (%)</option>' +
+          '<option value="sale">Set sale (% off)</option><option value="feature">Mark as featured</option><option value="unfeature">Remove featured</option>' +
+          '<option value="tags">Add tags</option><option value="category">Move to category</option>' +
           '<option value="publish">Publish</option><option value="draft">Set to Draft</option><option value="trash">Move to Trash</option>') + '</select>' +
       '<button type="button" class="pm-wp-button" id="pmBulkApply">Apply</button></div>' +
       '<div class="pm-wp-actions"><select id="pmOverviewCategory" aria-label="Filter by category"><option value="">Select a category</option>' + catOptions + '</select>' +
@@ -2218,6 +2237,7 @@
       if (!action) return;
       if (!Object.keys(overviewSelected).length) { toast("Select products first"); return; }
       if (action === "price") { bulkReprice(); return; }
+      if (["sale", "feature", "unfeature", "tags", "category"].indexOf(action) !== -1) { bulkEdit(action); return; }
       if (["publish", "draft", "trash", "restore", "delete"].indexOf(action) !== -1) { bulkStatus(action); return; }
       document.getElementById(action === "out" ? "pmOverviewOff" : "pmOverviewOn").click();
     });
@@ -2583,6 +2603,72 @@
       });
     }
     // Bulk "Change price (%)": raises or lowers every price of the selected products, then saves at once.
+    // Bulk Edit (from PR #109): sale % off, featured on/off, add tags, move to another category — saved at once;
+    // if saving fails nothing is changed.
+    function bulkEdit(action) {
+      var refs = Object.keys(overviewSelected).map(function (key) { return JSON.parse(key); })
+        .filter(function (ref) { return (products[ref[0]] || [])[ref[1]]; });
+      if (!refs.length) { toast("Select products first"); return; }
+      var n = refs.length, label, input, target = null, pct = null, newTags = [];
+      if (action === "sale") {
+        input = prompt("Sale for " + n + " product(s): what percent off the regular price?\n1–99, e.g. 10. Enter 0 to end the sale.", "10");
+        if (input === null) return;
+        pct = Number(String(input).trim());
+        if (!Number.isInteger(pct) || pct < 0 || pct > 99) { toast("Enter a whole percent from 0 to 99"); return; }
+        label = pct ? "on sale (" + pct + "% off)" : "sale ended";
+      } else if (action === "tags") {
+        input = prompt("Add which tags to " + n + " product(s)? Separate with commas.", "");
+        if (input === null) return;
+        newTags = input.split(",").map(function (t) { return t.trim(); }).filter(Boolean);
+        if (!newTags.length) { toast("Enter at least one tag"); return; }
+        label = "tagged " + newTags.join(", ");
+      } else if (action === "category") {
+        var names = sections.map(function (sec, i) { return (i + 1) + " = " + enName(sec); }).join("\n");
+        input = prompt("Move " + n + " product(s) to which category? Enter the number:\n" + names, "");
+        if (input === null) return;
+        target = sections[parseInt(input, 10) - 1];
+        if (!target) { toast("Enter one of the category numbers"); return; }
+        label = "moved to " + enName(target);
+      } else {
+        label = action === "feature" ? "marked as featured" : "no longer featured";
+      }
+      var backup = JSON.stringify(products);
+      var moving = [];
+      refs.forEach(function (ref) {
+        var p = products[ref[0]][ref[1]], meta = getCategoryTypeMeta(ref[0]);
+        if (action === "feature") p.featured = true;
+        else if (action === "unfeature") delete p.featured;
+        else if (action === "tags") {
+          var tags = productTags(p), lower = tags.map(function (t) { return t.toLowerCase(); });
+          newTags.forEach(function (t) { if (lower.indexOf(t.toLowerCase()) === -1) { tags.push(t); lower.push(t.toLowerCase()); } });
+          p.tags = tags;
+        } else if (action === "sale") {
+          var types = productOptionTypes(p, meta).filter(function (t) { return p.priceByType && p.priceByType[t] != null; });
+          if (types.length) types.forEach(function (t) { applyDiscountPercent(p, t, pct ? String(pct) : ""); });
+          else applyDiscountPercent(p, null, pct ? String(pct) : "");
+          syncCardPrice(p, meta);
+        } else if (action === "category" && ref[0] !== target.key) moving.push(ref);
+      });
+      // Move from the end of each list so the other indexes stay valid.
+      moving.sort(function (a, b) { return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : b[1] - a[1]; }).forEach(function (ref) {
+        var p = products[ref[0]].splice(ref[1], 1)[0];
+        if (Array.isArray(p.extraCategories)) { p.extraCategories = p.extraCategories.filter(function (k) { return k !== target.key; }); if (!p.extraCategories.length) delete p.extraCategories; }
+        (products[target.key] = products[target.key] || []).push(p);
+        ensureProductPriceByType(p, target.key);
+      });
+      setSaveStatus("Saving: " + n + " product(s) " + label + "…");
+      saveAll(null).then(function () {
+        overviewSelected = {};
+        toast(n + " product(s) " + label + " — saved, live in about 2 minutes");
+        renderMain();
+      }).catch(function (err) {
+        var restored = JSON.parse(backup);
+        Object.keys(products).forEach(function (k) { delete products[k]; });
+        Object.keys(restored).forEach(function (k) { products[k] = restored[k]; });
+        renderMain();
+        setSaveStatus("Not saved: " + (err && err.message || "try again") + " — nothing was changed.");
+      });
+    }
     function bulkReprice() {
       var refs = Object.keys(overviewSelected).map(function (key) { return JSON.parse(key); });
       var items = refs.map(function (ref) { return { p: (products[ref[0]] || [])[ref[1]], cat: ref[0] }; }).filter(function (x) { return x.p; });
@@ -3130,6 +3216,7 @@
           queuePhotos([{ path: mainName, content: base64s[0] }, { path: cardName, content: base64s[1] }]);
           localPreviews[mainName] = previewUrl;
           localPreviews[cardName] = previewUrl;
+          replaceMainPhotoRefs(p, p.image, mainName);
           p.image = mainName;
           p.imageCard = cardName;
           if (urlInput) {
@@ -3176,6 +3263,7 @@
             return;
           }
           if (String(p.image || "").trim() !== String(path || "").trim()) delete p.imageCard;
+          replaceMainPhotoRefs(p, p.image, path);
           p.image = path;
           setPreview(resolveImgForPreview(path));
           if (urlInput) {
@@ -4050,14 +4138,17 @@
       var singleKey=String(labels[0]).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"color-1";
       product.color=singleKey;product.colorLabel=labels[0];product.colorVariants=[{color:singleKey,colorLabel:labels[0],image:product.image||""}];
     }else{delete product.colorVariants;}
-    var duplicate = false;
+    // Exact, case-sensitive Product ID match: update that one record and move it if its category changed.
+    // If no exact match exists, this is a genuinely new product; other IDs are never overwritten.
+    var matches = [];
     Object.keys(products).forEach(function (k) {
-      (products[k] || []).forEach(function (p) {
-        if (p && String(p.id) === String(product.id) && p !== product) duplicate = true;
+      (products[k] || []).forEach(function (p, index) {
+        if (p && String(p.id || "") === String(product.id || "")) matches.push({ category: k, index: index, product: p });
       });
     });
-    if (duplicate) throw new Error("A product with this ID already exists. Use a unique product ID.");
-    Object.keys(products).forEach(function(k){products[k]=products[k].filter(function(p){return p.id!==product.id;});});
+    if (matches.length > 1) throw new Error("This exact Product ID is already duplicated in the catalog. Resolve the duplicate before updating.");
+    if (matches.length === 1 && matches[0].product !== product) product = Object.assign({}, matches[0].product, product);
+    Object.keys(products).forEach(function(k){products[k]=products[k].filter(function(p){return String(p.id || "")!==String(product.id || "");});});
     product.category = category;
     var targetSection = sections.find(function (sec) { return sec.key === category; });
     if (targetSection) product.categoryLabel = targetSection.menuBn || targetSection.menu || category;

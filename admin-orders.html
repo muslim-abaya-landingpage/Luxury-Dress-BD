@@ -24,6 +24,7 @@
   <link rel="stylesheet" href="admin-orders-premium.css?v=a9beb06d06d64ea8">
   <script src="admin-order-status.js?v=3ceef0a991bf604f"></script>
 <link rel="stylesheet" href="admin-design-system.css?v=1eaf4362bddc4ad0">
+<link rel="stylesheet" href="order-management-workspace.css?v=20261104-v1">
 </head>
 <body class="pn-body wo-orders-page">
   <div class="pn-app adm-shell">
@@ -63,7 +64,21 @@
         <button type="button" class="adm-btn adm-btn-secondary" id="admLogout">Log Out</button>
       </div>
     </aside>
-    <main class="pn-main">
+    <div class="om-workspace">
+      <aside class="om-category-sidebar" aria-label="Order categories">
+        <div class="om-category-heading">
+          <span class="om-eyebrow">WORKSPACE</span>
+          <h2>Order Management</h2>
+          <p>Manage every order from one place.</p>
+        </div>
+        <div class="om-category-label">ORDER STATUS</div>
+        <div class="om-status-host" id="omStatusHost" aria-label="Filter orders by status"></div>
+        <div class="om-sidebar-foot">
+          <a class="pn-btn" href="admin-operations.html">Finance &amp; Returns <span aria-hidden="true">→</span></a>
+          <p>Choose a status to filter the order list.</p>
+        </div>
+      </aside>
+      <main class="pn-main">
       <div class="pn-head">
         <button type="button" class="pn-btn pn-menu-btn" id="pnMenuBtn" aria-label="Menu">☰</button>
         <div class="adm-heading"><span class="adm-page-kicker">Muslim Abaya / Orders</span><h1>Order Management</h1></div>
@@ -152,6 +167,7 @@
         <button type="button" class="pn-btn" id="ordLoadAll" hidden>Load All for Search</button><span class="pn-note-muted" id="ordPageStatus"></span>
       </div>
     </main>
+    </div>
   </div>
 
   <script src="site-api-config.js?v=b4eb7cb7438aad24"></script>
@@ -555,5 +571,23 @@
 .pn-table th,.pn-table td{vertical-align:middle;overflow-wrap:anywhere}
 @media(max-width:1150px){.pn-table th:nth-child(7),.pn-table td:nth-child(7),.pn-table th:nth-child(8),.pn-table td:nth-child(8),.pn-table th:nth-child(9),.pn-table td:nth-child(9){display:none}.pn-table{min-width:680px}}
 @media(max-width:600px){.ma-product-fields{grid-template-columns:1fr}}
-</style></body>
+</style>
+<script>
+(function(){
+  function mountOrderCategories(){
+    var host=document.getElementById("omStatusHost");
+    var tabs=document.getElementById("ordTabs");
+    if(!host||!tabs||tabs.dataset.workspaceMounted==="1")return;
+    tabs.dataset.workspaceMounted="1";
+    tabs.setAttribute("aria-label","Order status categories");
+    tabs.classList.add("om-status-list");
+    host.appendChild(tabs);
+    var clear=document.getElementById("ordResetFilters");
+    if(clear){clear.classList.add("om-clear-filters");}
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",mountOrderCategories,{once:true});
+  else mountOrderCategories();
+})();
+</script>
+</body>
 </html>
