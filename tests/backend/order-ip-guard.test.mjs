@@ -54,8 +54,10 @@ const telegramAlerts = [];
 const realFetch = globalThis.fetch;
 globalThis.fetch = async (url, opts) => {
   const u = String(url);
-  if (u.indexOf('script.google.com') !== -1) { appsScriptCalls++; return new Response(appsScriptReply, { status: 200 }); }
-  if (u.indexOf('api.telegram.org') !== -1) {
+  let hostname = '';
+  try { hostname = new URL(u).hostname.toLowerCase(); } catch (e) {}
+  if (hostname === 'script.google.com') { appsScriptCalls++; return new Response(appsScriptReply, { status: 200 }); }
+  if (hostname === 'api.telegram.org') {
     try { telegramAlerts.push(JSON.parse(opts.body).text); } catch (e) {}
     return new Response('{}', { status: 200 });
   }
