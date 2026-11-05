@@ -1,0 +1,26 @@
+name: Site Health
+
+# Checks the live website, landing page, product pages and the order price data every 6 hours.
+# Read-only (only downloads public pages). If something is broken the run fails and GitHub sends the
+# repository owner an e-mail with the problem list (Actions → Site Health → the failed run → Summary).
+# Free GitHub Actions; no secrets needed.
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check live site
+        run: node scripts/site-health.mjs
