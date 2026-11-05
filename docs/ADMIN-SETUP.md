@@ -21,6 +21,8 @@ scripts\clasp-push.bat
 
 অথবা `clasp push` → Apps Script → **Deploy → New version**
 
+**নতুন Admin Forgot Password চালুর একবারের অনুমতি:** Apps Script Editor-এ `authorizeAdminPasswordRecoveryMail` ফাংশন নির্বাচন করে **Run** চাপুন এবং Google-এর MailApp permission Allow করুন। অনুমতি না দিলে রিকভারি ইমেইল পাঠানো যাবে না।
+
 ---
 
 ## ৩. ওয়েবসাইটে আপলোড — আর লাগে না
