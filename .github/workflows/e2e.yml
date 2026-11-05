@@ -46,6 +46,9 @@ jobs:
       - name: Generate catalog validation from canonical sources
         run: node scripts/build-catalog-validation.mjs
 
+      - name: Validate Meta product feed generation
+        run: node scripts/build-meta-product-feed.mjs
+
       - name: Run homepage scroll-performance regression tests
         run: npm run test:scroll
 
