@@ -61,7 +61,8 @@ for (const [category, products] of Object.entries(catalog)) {
       Array.isArray(product.sizes) && product.sizes.length ? 'Available sizes: ' + product.sizes.map(cleanText).join(', ') : '',
       product.detailNote ? cleanText(product.detailNote) : ''
     ].filter(Boolean).join(' | ');
-    const inventory = Number.isFinite(Number(stock.qty)) ? Math.max(0, Number(stock.qty)) : '';
+    const inventory = stock.qty != null && stock.qty !== '' && Number.isFinite(Number(stock.qty))
+      ? Math.max(0, Number(stock.qty)) : '';
     rows.push([
       String(product.id),
       cleanText(product.name).slice(0, 150),
