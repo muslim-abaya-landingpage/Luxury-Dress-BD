@@ -184,32 +184,34 @@ function esc(s) {
  */
 export async function serveProductPage(request, env, id, next) {
   const url = new URL(request.url);
+  // Fast path: the built product page already exists (almost every request) -> serve it straight away,
+  // without reading the live catalog state. Only a product published after the last build needs the
+  // state lookup and the on-the-fly page below. (Same result as before, much lower TTFB.)
+  let res;
+  try { res = await next(); } catch (e) { return next(); }
   try {
-    if (/^[A-Za-z0-9_-]+$/.test(id)) {
-      const [state, deployed] = await Promise.all([loadState(env, url.origin), loadDeployed(env, url.origin)]);
-      const category = state && state.index && state.index[id];
-      if (category && isPending(state, deployed) && /^[a-z0-9_-]+$/i.test(category)) {
-        const res = await next();
-        const html = res.ok ? await res.clone().text() : '';
-        if (html.indexOf('data-product-id="' + id + '"') >= 0) return res;
-        const tplRes = await env.ASSETS.fetch(new Request(url.origin + '/abaya'));
-        if (tplRes.ok) {
-          const name = state.names && state.names[id] || id;
-          const title = name + ' | Muslim Abaya Bangladesh';
-          const page = (await tplRes.text())
-            .replace(/data-shop-category="abaya"/g, 'data-shop-category="' + esc(category) + '"')
-            .replace(/<html\b([^>]*)>/, (m, attrs) => '<html' + attrs.replace(/\s+data-(seo-managed|product-id)="[^"]*"/g, '') + ' data-seo-managed="full" data-product-id="' + esc(id) + '">')
-            .replace(/\s*<section class="seo-category-intro"[\s\S]*?<\/section>/, '')
-            .replace(/<title>[\s\S]*?<\/title>/, '<title>' + esc(title) + '</title>')
-            .replace(/<link rel="canonical"[^>]*>/, '<link rel="canonical" href="https://muslimabaya.com/product/' + encodeURIComponent(id) + '">')
-            .replace(/\b(src|href)="(?!https?:|\/|#|data:)([^"\s]+)"/g, '$1="/$2"');
-          if (page.indexOf('data-product-id="' + esc(id) + '"') >= 0) {
-            return new Response(page, { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-MA-Live': '1' } });
-          }
+    if (!/^[A-Za-z0-9_-]+$/.test(id)) return res;
+    const html = res.ok ? await res.clone().text() : '';
+    if (html.indexOf('data-product-id="' + id + '"') >= 0) return res;
+    const [state, deployed] = await Promise.all([loadState(env, url.origin), loadDeployed(env, url.origin)]);
+    const category = state && state.index && state.index[id];
+    if (category && isPending(state, deployed) && /^[a-z0-9_-]+$/i.test(category)) {
+      const tplRes = await env.ASSETS.fetch(new Request(url.origin + '/abaya'));
+      if (tplRes.ok) {
+        const name = state.names && state.names[id] || id;
+        const title = name + ' | Muslim Abaya Bangladesh';
+        const page = (await tplRes.text())
+          .replace(/data-shop-category="abaya"/g, 'data-shop-category="' + esc(category) + '"')
+          .replace(/<html\b([^>]*)>/, (m, attrs) => '<html' + attrs.replace(/\s+data-(seo-managed|product-id)="[^"]*"/g, '') + ' data-seo-managed="full" data-product-id="' + esc(id) + '">')
+          .replace(/\s*<section class="seo-category-intro"[\s\S]*?<\/section>/, '')
+          .replace(/<title>[\s\S]*?<\/title>/, '<title>' + esc(title) + '</title>')
+          .replace(/<link rel="canonical"[^>]*>/, '<link rel="canonical" href="https://muslimabaya.com/product/' + encodeURIComponent(id) + '">')
+          .replace(/\b(src|href)="(?!https?:|\/|#|data:)([^"\s]+)"/g, '$1="/$2"');
+        if (page.indexOf('data-product-id="' + esc(id) + '"') >= 0) {
+          return new Response(page, { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-MA-Live': '1' } });
         }
-        return res;
       }
     }
   } catch (e) {}
-  return next();
+  return res;
 }

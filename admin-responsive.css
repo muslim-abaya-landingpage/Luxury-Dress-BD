@@ -1,0 +1,46 @@
+/* Admin responsive layer — loaded last on every admin page (phone + desktop fixes in one place). */
+html { -webkit-text-size-adjust: 100%; }
+img, video { max-width: 100%; height: auto; }
+
+/* Page headers: the title keeps a readable width; buttons wrap to the next line instead of squeezing it
+   (the "Order Management" title was breaking one letter per line on phones). */
+.pn-head, .adm-topbar { flex-wrap: wrap !important; row-gap: 10px; }
+.pn-head .adm-heading, .adm-topbar .adm-heading { flex: 1 1 auto; min-width: min(100%, 240px); }
+.pn-head h1, .adm-heading h1, .pl-admin-header h1 { overflow-wrap: normal; word-break: normal; hyphens: none; }
+.pn-head .pn-spacer { flex: 1 1 0; min-width: 0; }
+
+/* Buttons and actions inside tables never break into letters. */
+table button, table .pn-btn, table a, .dz-row-actions, .dz-row-actions > * { white-space: nowrap; }
+.dz-row-actions { display: flex; gap: 6px; align-items: center; }
+
+/* Stock & Analytics: tables scroll sideways on small screens instead of squeezing every column. */
+#saStockTable { min-width: 760px; }
+#saStockTable td, #saStockTable th { vertical-align: middle; }
+#saStockTable td:nth-child(2) { min-width: 150px; }
+
+@media (max-width: 760px) {
+  /* Bigger touch targets (about 40px) for the main admin buttons. */
+  .pn-btn, .pl-btn, .adm-btn, .pn-sel, .pn-search, .pn-toolbar input, .pn-toolbar select { min-height: 40px; }
+  .pn-head { padding: 14px !important; }
+  .pn-head .pn-menu-btn { order: -1; }
+  .pn-head .adm-heading { flex-basis: calc(100% - 60px); }
+  .pn-head > .pn-btn:not(.pn-menu-btn), .pn-head > a.pn-btn { flex: 1 1 auto; justify-content: center; text-align: center; }
+  .pn-head .pn-note-muted { flex: 1 1 100%; order: 1; }
+  .pn-toolbar { flex-wrap: wrap; gap: 8px; }
+  .pn-toolbar > * { flex: 1 1 140px; min-width: 0; }
+  /* Any wide table area scrolls by itself, not the whole page. */
+  .pn-table-wrap, .adm-recent-table-wrap, .oi-panel > div[style*="overflow-x"] { -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
+  /* Cards / panels use the full width. */
+  .oi-panel, .adm-card, .pl-card { border-radius: 12px; }
+  /* Forms: inputs never wider than the screen; 16px text stops iPhone zooming in on focus. */
+  input, select, textarea { max-width: 100%; }
+  input[type="text"], input[type="search"], input[type="email"], input[type="tel"], input[type="number"], input[type="password"], input[type="url"], select, textarea { font-size: 16px !important; }
+}
+@media (max-width: 420px) {
+  .pn-head h1, .adm-heading h1 { font-size: 20px !important; }
+}
+/* Phones: the workspace boxes repeat the page title — keep only the status/category chips. */
+@media (max-width: 900px) {
+  .om-category-heading, .inv-category-heading { display: none !important; }
+  .om-category-label, .inv-category-label { padding-top: 0 !important; }
+}

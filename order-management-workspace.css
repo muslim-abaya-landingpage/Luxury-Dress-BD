@@ -60,3 +60,9 @@
  .om-workspace .pn-head{position:relative;top:auto}
 }
 @media(prefers-reduced-motion:reduce){.om-status-list .pn-tab{transition:none}}
+/* Phones: page title first, then the status tabs, then the orders (the status box used to sit above the title). */
+@media(max-width:900px){
+ .om-workspace>.pn-main{display:contents}
+ .om-workspace .pn-head{order:-2}
+ .om-category-sidebar{order:-1}
+}

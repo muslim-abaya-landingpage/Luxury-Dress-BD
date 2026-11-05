@@ -173,3 +173,19 @@ test('no D1 / broken D1 / nothing saved: the site behaves exactly as before', as
     assert.equal(res.headers.get('X-MA-Live'), null);
   }
 });
+
+test('product page fast path: a built page is served without reading the live catalog (D1)', async () => {
+  const live = await lib('_lib/live-catalog.js');
+  let dbReads = 0;
+  const env = {
+    STOCK_DB: { prepare() { dbReads++; throw new Error('D1 must not be read'); } },
+    ASSETS: { fetch: async () => new Response('x') }
+  };
+  const built = '<html data-product-id="ABY-1"><body>ok</body></html>';
+  const res = await live.serveProductPage(new Request('https://muslimabaya.com/product/ABY-1'), env, 'ABY-1', async () => new Response(built, { headers: { 'Content-Type': 'text/html' } }));
+  assert.equal(await res.text(), built);
+  assert.equal(dbReads, 0);
+  // Unknown product with no saved state: the normal (404) response comes back unchanged.
+  const miss = await live.serveProductPage(new Request('https://muslimabaya.com/product/NOPE'), { ASSETS: env.ASSETS }, 'NOPE', async () => new Response('not found', { status: 404 }));
+  assert.equal(miss.status, 404);
+});

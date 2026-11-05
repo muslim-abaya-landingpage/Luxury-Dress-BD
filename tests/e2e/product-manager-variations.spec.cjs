@@ -148,8 +148,8 @@ test('variation image remains attached to the same photo after gallery reorder',
     await page.route('**/category-products.js*', async (route) => {
       const response = await route.fetch();
       const body = (await response.text()).replace(
-        'image: "/images/Maroon Abaya Set...jpeg",',
-        'image: "/images/Maroon Abaya Set...jpeg", images: ["/images/e2e-photo-a.webp", "/images/e2e-photo-b.webp"],'
+        'image: "/images/opt/Maroon-Abaya-Set.webp",',
+        'image: "/images/opt/Maroon-Abaya-Set.webp", images: ["/images/e2e-photo-a.webp", "/images/e2e-photo-b.webp"],'
       );
       await route.fulfill({ response, body });
     });
