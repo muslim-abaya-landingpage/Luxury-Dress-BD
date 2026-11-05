@@ -536,6 +536,7 @@
     // The full product list looks like WordPress → Products (no category column); a category opens its editor beside the list.
     var layoutEl = document.getElementById("pmLayout");
     if (layoutEl) layoutEl.classList.toggle("pm-all-view", activeKey === ALL_PRODUCTS_KEY || activeKey === EDIT_KEY);
+    document.body.classList.toggle("pm-editing", activeKey === EDIT_KEY);
     if (activeKey === EDIT_KEY) {
       renderProductEditor();
       return;
@@ -751,6 +752,16 @@
   function setProductStatus(p, status) {
     if (status === "draft" || status === "trash" || status === "pending") p.status = status; else delete p.status;
     if (status === "trash") p.trashedAt = todayKey(); else delete p.trashedAt;
+  }
+  // WooCommerce Stock column: "In stock (12)", "Low stock (2)", "On backorder", "Out of stock".
+  function stockCell(p, out) {
+    var qty = p.stock != null && p.stock !== "" ? parseInt(p.stock, 10) : NaN;
+    var low = isFinite(parseInt(p.lowStockAmount, 10)) ? parseInt(p.lowStockAmount, 10) : 2;
+    var back = !out && (p.stockStatus === "onbackorder" || ((p.backorders === "yes" || p.backorders === "notify") && isFinite(qty) && qty <= 0));
+    if (back) return '<mark class="onbackorder">On backorder</mark>';
+    if (out) return '<mark class="outofstock">Out of stock</mark>';
+    if (isFinite(qty) && qty <= low) return '<mark class="lowstock">Low stock</mark> <span class="pm-stock-qty">(' + qty + ')</span>';
+    return '<mark class="instock">In stock</mark>' + (isFinite(qty) ? ' <span class="pm-stock-qty">(' + qty + ')</span>' : '');
   }
   function statusLabel(st) { return { publish: "Published", draft: "Draft", pending: "Pending Review", trash: "In Trash" }[st] || "Published"; }
   // WooCommerce "Catalog visibility": visible (shop and search) / catalog (shop only) / search (search only) / hidden.
@@ -1799,6 +1810,16 @@
       });
     });
     bindById("pmPubNow", "click", function (e) { e.preventDefault(); delete p.publishDate; redraw(); });
+    // Preview / Preview Changes: shows this product as it is in the editor now (saved or not) on its
+    // category page, in a new tab. Uses this browser only; nothing is published.
+    bindById("pmPreview", "click", function (e) {
+      e.preventDefault();
+      var sec = sections.find(function (x) { return x.key === catKey; }) || {};
+      var path = sec.path && /^\/[a-z0-9/_-]*$/i.test(sec.path) ? sec.path : "/" + catKey;
+      try { localStorage.setItem("ma_pm_preview", JSON.stringify({ id: p.id, cat: catKey, product: p, at: Date.now() })); }
+      catch (err) { toast("Preview needs browser storage — it is blocked in this browser."); return; }
+      window.open(path + "?ma_preview=" + encodeURIComponent(p.id), "_blank", "noopener");
+    });
     bindById("pmSaveDraft", "click", saveEdit);
     bindById("pmCopyDraft", "click", function (e) {
       e.preventDefault();
@@ -2038,7 +2059,67 @@
       (hint ? '<small>' + hint + '</small>' : '') + '</span></p>';
   }
 
+  // WooCommerce "Sorting": drag products (or use ↑ ↓) to set their order in a category, then Save order.
+  var sortingMode = false, sortingCat = "";
+  function renderSortingView() {
+    var key = sortingCat && products[sortingCat] ? sortingCat : (overviewCategory || (sections[0] && sections[0].key));
+    sortingCat = key;
+    var list = products[key] || [];
+    var shown = list.filter(function (p) { return p && p.isImageView !== true && productStatus(p) !== "trash"; });
+    mainEl.innerHTML = '<div class="pm-wp-list pm-woo-sorting">' +
+      '<div class="pm-wp-heading"><h2 class="pm-wp-title">Sorting</h2></div>' +
+      '<p><button type="button" class="pm-wp-back" id="pmSortBack">← All products</button></p>' +
+      '<p class="pm-wp-hint">Drag products (or use ↑ ↓) into the order customers should see them in this category, then <b>Save order</b>. Featured products still show first.</p>' +
+      '<div class="pm-wp-actions"><select id="pmSortCat" aria-label="Category">' + sections.map(function (sec) { return '<option value="' + escapeAttr(sec.key) + '"' + (sec.key === key ? " selected" : "") + '>' + escapeHtml(enName(sec)) + ' (' + (products[sec.key] || []).filter(function (q) { return q && q.isImageView !== true && productStatus(q) !== "trash"; }).length + ')</option>'; }).join("") + '</select>' +
+      ' <button type="button" class="pm-wp-primary" id="pmSortSave">Save order</button> <span id="pmSortMsg" role="status"></span></div>' +
+      '<ol class="pm-sort-list" id="pmSortList">' + shown.map(function (p, i) {
+        var img = resolveImgForPreview(p.imageCard || p.image);
+        return '<li draggable="true" data-sort-i="' + i + '"><span class="pm-sort-handle" aria-hidden="true">⋮⋮</span>' +
+          (img ? '<img src="' + escapeAttr(img) + '" alt="" loading="lazy">' : '<span class="pm-sort-noimg"></span>') +
+          '<span class="pm-sort-name">' + escapeHtml(p.name || p.id) + (p.featured ? ' <em>★ Featured</em>' : '') + (productStatus(p) !== "publish" ? ' <em>— ' + statusLabel(productStatus(p)) + '</em>' : '') + '</span>' +
+          '<span class="pm-sort-btns"><button type="button" class="pm-wp-button" data-sort-up="' + i + '" aria-label="Move up"' + (i === 0 ? " disabled" : "") + '>↑</button>' +
+          '<button type="button" class="pm-wp-button" data-sort-down="' + i + '" aria-label="Move down"' + (i === shown.length - 1 ? " disabled" : "") + '>↓</button></span></li>';
+      }).join("") + '</ol></div>';
+    var order = shown.slice();
+    function apply() {
+      // Put the shown products back into the same array slots in the new order (hidden photo-only rows stay put).
+      var slots = [];
+      list.forEach(function (p, i) { if (shown.indexOf(p) !== -1) slots.push(i); });
+      slots.forEach(function (slot, k) { list[slot] = order[k]; });
+      shown = order.slice();
+      renderSortingView();
+      var m = document.getElementById("pmSortMsg"); if (m) m.textContent = "Order changed — click Save order.";
+    }
+    function move(from, to) {
+      if (to < 0 || to >= order.length || from === to) return;
+      var item = order.splice(from, 1)[0];
+      order.splice(to, 0, item);
+      apply();
+    }
+    bindById("pmSortBack", "click", function () { sortingMode = false; renderMain(); });
+    bindById("pmSortCat", "change", function (e) { sortingCat = e.target.value; renderSortingView(); });
+    mainEl.querySelectorAll("[data-sort-up]").forEach(function (b) { b.addEventListener("click", function () { var i = +b.getAttribute("data-sort-up"); move(i, i - 1); }); });
+    mainEl.querySelectorAll("[data-sort-down]").forEach(function (b) { b.addEventListener("click", function () { var i = +b.getAttribute("data-sort-down"); move(i, i + 1); }); });
+    var dragFrom = -1;
+    mainEl.querySelectorAll("#pmSortList li").forEach(function (li) {
+      li.addEventListener("dragstart", function (e) { dragFrom = +li.getAttribute("data-sort-i"); li.classList.add("is-dragging"); try { e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", String(dragFrom)); } catch (err) {} });
+      li.addEventListener("dragend", function () { li.classList.remove("is-dragging"); });
+      li.addEventListener("dragover", function (e) { e.preventDefault(); li.classList.add("is-over"); });
+      li.addEventListener("dragleave", function () { li.classList.remove("is-over"); });
+      li.addEventListener("drop", function (e) { e.preventDefault(); li.classList.remove("is-over"); move(dragFrom, +li.getAttribute("data-sort-i")); });
+    });
+    bindById("pmSortSave", "click", function () {
+      // The drag order wins over earlier "Menu order" numbers in this category.
+      list.forEach(function (p) { if (p) delete p.menuOrder; });
+      var b = document.getElementById("pmSortSave"), m = document.getElementById("pmSortMsg");
+      b.disabled = true; m.textContent = "Saving…";
+      saveAll().then(function () { m.textContent = "✅ Order saved."; })
+        .catch(function (err) { m.textContent = "Not saved: " + ((err && err.message) || "try again"); })
+        .finally(function () { b.disabled = false; });
+    });
+  }
   function renderAllProducts() {
+    if (sortingMode) { renderSortingView(); return; }
     overviewSelected = {};
     var rows = [];
     sections.forEach(function (sec) {
@@ -2079,6 +2160,7 @@
       [["", "All", statusCount.all], ["publish", "Published", statusCount.publish], ["draft", "Drafts", statusCount.draft], ["pending", "Pending", statusCount.pending], ["trash", "Trash", statusCount.trash]]
         .filter(function (x) { return x[0] === "" || x[2] > 0; })
         .map(function (x, i, arr) { return '<li><button type="button" data-overview-status="' + x[0] + '" class="' + (overviewStatus === x[0] ? "is-active" : "") + '">' + x[1] + ' <span class="count">(' + x[2] + ')</span></button>' + (i < arr.length - 1 ? ' |' : '') + '</li>'; }).join("") +
+      ' | <li><button type="button" id="pmSortingLink">Sorting</button></li>' +
       (inTrash && statusCount.trash ? '<li> <button type="button" class="pm-wp-button" id="pmEmptyTrash">Empty Trash</button></li>' : '') +
       '</ul>' +
       '<ul class="pm-wp-subsubsub pm-status-tabs">' +
@@ -2109,6 +2191,7 @@
     bindById("pmAllQuickUpload", "click", function () { startNewProduct(overviewCategory); });
     bindById("pmHeaderAdd", "click", function () { startNewProduct(overviewCategory); });
     bindById("pmHeaderBulkUpload", "click", openBulkUpload);
+    bindById("pmSortingLink", "click", function () { sortingMode = true; sortingCat = overviewCategory || ""; renderSortingView(); });
     bindById("pmManageCats", "click", function () {
       if (!sections.length) return;
       activeKey = overviewCategory || sections[0].key;
@@ -2319,12 +2402,12 @@
           '<div class="pm-row-actions"><span class="pm-row-id">ID: ' + escapeHtml(p.id || "—") + ' | </span>' +
           '<button type="button" class="pm-row-link"' + cat + '>Edit</button> | ' +
           '<button type="button" class="pm-row-link" data-qe-cat="' + escapeAttr(s.key) + '" data-qe-index="' + row.index + '">Quick Edit</button> | ' +
-          '<button type="button" class="pm-row-link" title="New product with this one’s price, sizes and description" data-pm-copy-cat="' + escapeAttr(s.key) + '" data-pm-copy-index="' + row.index + '">Copy</button> | ' +
+          '<button type="button" class="pm-row-link" title="Copy to a new draft (same details and photos)" data-pm-copy-cat="' + escapeAttr(s.key) + '" data-pm-copy-index="' + row.index + '">Duplicate</button> | ' +
           '<button type="button" class="pm-row-link pm-overview-stock" data-stock-cat="' + escapeAttr(s.key) + '" data-stock-index="' + row.index + '" aria-pressed="' + out + '">' + (out ? 'Mark in stock' : 'Mark out of stock') + '</button>' +
           ' | <button type="button" class="pm-row-link pm-row-danger" data-status-action="trash" data-status-cat="' + escapeAttr(s.key) + '" data-status-index="' + row.index + '">Trash</button>' +
           (p.id ? ' | <a class="pm-row-link" href="/product/' + encodeURIComponent(p.id) + '" target="_blank" rel="noopener">View</a>' : '') + '</div></td>' +
           '<td class="column-sku">' + (p.id ? escapeHtml(p.id) : '<span class="na">–</span>') + '</td>' +
-          '<td class="column-stock"><mark class="' + (out ? 'outofstock' : 'instock') + '">' + (out ? 'Out of stock' : 'In stock') + '</mark></td>' +
+          '<td class="column-stock">' + stockCell(p, out) + '</td>' +
           '<td class="column-price">' + priceText(p) + '</td>' +
           '<td class="column-cats"><button type="button" class="pm-row-link" data-filter-cat="' + escapeAttr(s.key) + '">' + escapeHtml(catName(s)) + '</button></td>' +
           '<td class="column-tags">' + (productTags(p).length ? productTags(p).map(function (t) { return '<button type="button" class="pm-row-link" data-filter-term="' + escapeAttr(t) + '">' + escapeHtml(t) + '</button>'; }).join(', ') : '<span class="na">–</span>') + '</td>' +

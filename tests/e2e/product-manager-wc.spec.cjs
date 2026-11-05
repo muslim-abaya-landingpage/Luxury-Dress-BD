@@ -224,3 +224,33 @@ test('WooCommerce fields: inventory, shipping, linked products, advanced, short 
   for (const want of ['sku: "MA-001"', 'gtin: "1234567890123"', 'soldIndividually: true', 'weight: 0.6', 'dimLength: 30', 'upsells: [', 'purchaseNote: "Thank you!"',
     'menuOrder: 3', 'reviewsAllowed: false', 'shortDescription: "<p>Soft <em>Dubai cherry</em></p>"', 'visibility: "private"', 'publishDate: "2030-05-01T10:30"']) expect(e).toContain(want);
 });
+
+test('Sorting: drag order with ↑ ↓ is saved as the category order; stock column shows quantity', async ({ page }) => {
+  await open(page);
+  await page.click('#pmSortingLink');
+  await page.selectOption('#pmSortCat', 'abaya');
+  const names = page.locator('#pmSortList .pm-sort-name');
+  const first = (await names.nth(0).textContent()).trim();
+  const second = (await names.nth(1).textContent()).trim();
+  await page.click('[data-sort-down="0"]');
+  await expect(names.nth(0)).toHaveText(second);
+  await expect(names.nth(1)).toHaveText(first);
+  await page.click('#pmSortSave');
+  await expect(page.locator('#pmSortMsg')).toContainText('Order saved');
+  const file = await productsFile(page);
+  const abaya = file.slice(file.indexOf('abaya:'), file.indexOf('"cover-up"') > 0 ? file.indexOf('"cover-up"') : undefined);
+  expect(abaya.indexOf(second.replace(/ ★ Featured.*$/, ''))).toBeLessThan(abaya.indexOf(first.replace(/ ★ Featured.*$/, '')));
+  await page.click('#pmSortBack');
+  await expect(page.locator('#pmAllRows .column-stock').first()).toContainText(/In stock|Out of stock|Low stock|On backorder/);
+});
+
+test('Preview: the editor saves the product for preview and opens its category page with ?ma_preview', async ({ page, context }) => {
+  await open(page);
+  await page.locator('#pmAllRows tr').first().locator('.pm-row-title').click();
+  await page.fill('.pm-wp-name', 'Preview Name Test');
+  const [tab] = await Promise.all([context.waitForEvent('page'), page.click('#pmPreview')]);
+  await tab.waitForLoadState('domcontentloaded');
+  expect(tab.url()).toMatch(/\/abaya(\.html)?\?ma_preview=ABY-MAROON-1/);
+  await expect(tab.locator('.pqv-preview-banner')).toBeVisible({ timeout: 15000 });
+  await expect(tab.locator('#pqvTitle')).toHaveText('Preview Name Test');
+});

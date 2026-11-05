@@ -2202,6 +2202,7 @@ function openProductQuickView(idx) {
   ensureReviewsWidgetLoaded();
   callMAReviewsMount(root, p);
   bindPqvInteractions(p, idx, categoryKey, root);
+  try { applyPqvWooExtras(p, root, products); } catch (wooErr) {}
   bindPqvHomeRelated(root);
   initStickyOrderBar(root);
   var pqvQtyInput = root.querySelector("#pqvQty");
@@ -2485,7 +2486,10 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
   }
   var shortNoteRaw = String(getProductShortNote(p, categoryKey) || "").trim();
   var stock = productStockStatus(p);
-  var descHtml = (p.detailNote ? '<p>' + escapeHtml(p.detailNote) + '</p>' : '') + getProductDescriptionHtml(p, categoryKey);
+  var safeHtmlFn = window.maCatalog && window.maCatalog.safeHtml;
+  // Product Manager "Product description" (Visual editor): cleaned HTML; older products: plain text.
+  var descHtml = (p.descriptionHtml && safeHtmlFn ? '<div class="pd-desc-html">' + safeHtmlFn(p.descriptionHtml) + '</div>'
+    : p.detailNote ? '<p>' + escapeHtml(p.detailNote) + '</p>' : '') + getProductDescriptionHtml(p, categoryKey);
   var relatedHtml = buildPqvRelatedHtml(p, idx, allProducts, categoryKey);
   var specRows =
     "<ul class='pqv-spec-table'>" +
@@ -2521,9 +2525,13 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
         escapeHtml(priceText) +
         "</strong></li>"
       : "") +
+    (p.weight ? "<li><span>Weight</span><strong>" + escapeHtml(p.weight) + " kg</strong></li>" : "") +
+    ([p.dimLength, p.dimWidth, p.dimHeight].filter(Boolean).length
+      ? "<li><span>Dimensions</span><strong>" + escapeHtml([p.dimLength, p.dimWidth, p.dimHeight].filter(Boolean).join(" × ")) + " cm</strong></li>" : "") +
     "<li><span>SKU</span><strong>" +
-    escapeHtml(p.id || "—") +
+    escapeHtml(p.sku || p.id || "—") +
     "</strong></li>" +
+    (p.gtin ? "<li><span>GTIN</span><strong>" + escapeHtml(p.gtin) + "</strong></li>" : "") +
     (Array.isArray(p.tags) && p.tags.length
       ? "<li class='pqv-spec-tags'><span>Tags</span><strong>" +
         p.tags.map(function (t) {
@@ -2609,7 +2617,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     '<span>এই মুহূর্তে অর্ডার নেওয়া যাচ্ছে না। নতুন স্টক কবে আসবে জানতে নিচের <b>Send Message</b> বাটনে আমাদের জানান।</span>' +
     "</div>" +
     (shortNoteRaw
-      ? '<p class="pqv-note">' + escapeHtml(shortNoteRaw) + "</p>"
+      ? (p.shortDescription && safeHtmlFn ? '<div class="pqv-note pqv-short-desc">' + safeHtmlFn(p.shortDescription) + "</div>" : '<p class="pqv-note">' + escapeHtml(shortNoteRaw) + "</p>")
       : "") +
     '<div class="pqv-options' + (isAbaya ? ' pqv-options--abaya' : '') + '">' +
     typeField +
@@ -2859,7 +2867,109 @@ function findProductIdxById(id) {
   return -1;
 }
 /* হোম/বাইরে থেকে #p=<id> বা #p-<idx> দিয়ে এসে নির্দিষ্ট প্রোডাক্টের বড় ভিউ খোলে */
+/* Product Manager "Preview": the unsaved / draft product from the editor (localStorage, same browser), shown on
+   its category page as the product view, with a "Preview" banner. Nothing is published. */
+function readPmPreview() {
+  var m = /[?&]ma_preview=([^&#]+)/.exec(window.location.search || "");
+  if (!m) return null;
+  try {
+    var data = JSON.parse(localStorage.getItem("ma_pm_preview") || "null");
+    if (!data || String(data.id) !== decodeURIComponent(m[1]) || Date.now() - Number(data.at) > 6 * 3600000 || !data.product) return null;
+    return data;
+  } catch (e) { return null; }
+}
+function openPmPreview() {
+  var pv = readPmPreview();
+  if (!pv || !window.maCatalog || typeof window.maCatalog.normalizeProductEntry !== "function") return false;
+  var raw = JSON.parse(JSON.stringify(pv.product));
+  ["status", "publishDate", "visibility", "postPassword", "catalogVisibility"].forEach(function (k) { delete raw[k]; });
+  var n = window.maCatalog.normalizeProductEntry(raw, pv.cat || getShopCategoryKey(), 0);
+  if (!n) return false;
+  n._pmPreview = true;
+  var list = shopCartCtx.products || (shopCartCtx.products = []);
+  var at = -1;
+  for (var i = 0; i < list.length; i++) if (list[i] && String(list[i].id) === String(n.id)) at = i;
+  if (at >= 0) list[at] = n; else { list.push(n); at = list.length - 1; }
+  document.documentElement.setAttribute("data-product-id", String(n.id));
+  openProductQuickView(at);
+  return true;
+}
+/* WooCommerce fields from Product Manager on the product view: sold individually, external / grouped products,
+   upsells ("You may also like…"), reviews on/off, preview banner. */
+function applyPqvWooExtras(p, root, allProducts) {
+  if (!p || !root) return;
+  var esc = escapeHtml;
+  // Password protected (Publish box → Visibility). Only hides the view: the catalog file itself is public.
+  if (p.visibility === "password" && p.postPassword && !p._pmPreview) {
+    var pwKey = "ma_pw_" + p.id, unlocked = false;
+    try { unlocked = sessionStorage.getItem(pwKey) === "1"; } catch (e) {}
+    if (!unlocked) {
+      root.innerHTML = "<div class='pqv-pass' style='max-width:420px;margin:48px auto;padding:24px;border:1px solid #e5e7eb;border-radius:10px;text-align:center'>" +
+        "<h1 style='font-size:20px;margin:0 0 8px'>" + esc(p.name) + "</h1><p style='color:#555'>This content is password protected. To view it please enter your password below:</p>" +
+        "<form id='pqvPassForm'><input type='password' id='pqvPassInput' aria-label='Password' style='width:100%;padding:10px;margin:8px 0;border:1px solid #ccc;border-radius:6px'>" +
+        "<button type='submit' class='pqv-act pqv-act-buy' style='width:100%'>Enter</button><p id='pqvPassMsg' style='color:#b42318;min-height:1em'></p></form></div>";
+      root.querySelector("#pqvPassForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        if (root.querySelector("#pqvPassInput").value === p.postPassword) { try { sessionStorage.setItem(pwKey, "1"); } catch (err) {} window.location.reload(); }
+        else root.querySelector("#pqvPassMsg").textContent = "Wrong password.";
+      });
+      return;
+    }
+  }
+  if (p._pmPreview) {
+    root.insertAdjacentHTML("afterbegin", "<div class='pqv-preview-banner' role='status' style='margin:0 0 12px;padding:10px 14px;border:1px solid #dba617;background:#fcf9e8;border-radius:6px;font-size:14px'>" +
+      "<strong>Preview</strong> — this is how the product will look. It is not published; close this tab and go back to Product Manager to save.</div>");
+  }
+  if (p.soldIndividually) {
+    root.querySelectorAll(".pqv-qty-btn").forEach(function (b) { b.disabled = true; b.style.visibility = "hidden"; });
+    var q = root.querySelector("#pqvQty"); if (q) { q.value = "1"; q.readOnly = true; q.title = "Sold individually — 1 per order"; }
+  }
+  var actions = root.querySelector(".pqv-actions-row");
+  var qtyRow = root.querySelector(".pqv-qty-row");
+  if (p.productType === "external" && p.externalUrl && /^https?:\/\//i.test(p.externalUrl) && actions) {
+    actions.className = "pqv-actions-row";
+    actions.innerHTML = "<a class='pqv-act pqv-act-buy' href='" + esc(p.externalUrl) + "' target='_blank' rel='nofollow noopener sponsored'>" + esc(p.buttonText || "Buy product") + "</a>";
+    if (qtyRow) qtyRow.style.display = "none";
+  }
+  var all = window.CATEGORY_PRODUCTS || {};
+  function byId(id) {
+    var hit = null;
+    Object.keys(all).some(function (k) { return (all[k] || []).some(function (x) { if (x && String(x.id) === String(id) && !x._extraCategory) { hit = x; return true; } return false; }); });
+    return hit;
+  }
+  function cards(ids) {
+    return (ids || []).map(byId).filter(Boolean).map(function (x) {
+      var img = resolveCardImageSrc(x);
+      return "<a class='pqv-woo-card' href='/product/" + encodeURIComponent(x.id) + "'>" + (img ? "<img src='" + esc(img) + "' alt='" + esc(x.name) + "' loading='lazy'>" : "") +
+        "<span>" + esc(x.name) + "</span><b>" + esc(formatBdtPrice(listingCardPrice(x))) + "</b></a>";
+    }).join("");
+  }
+  if (p.productType === "grouped" && Array.isArray(p.groupedProducts) && p.groupedProducts.length && actions) {
+    var g = cards(p.groupedProducts);
+    if (g) {
+      actions.insertAdjacentHTML("beforebegin", "<div class='pqv-grouped'><h3 style='font-size:16px;margin:8px 0'>This set includes</h3><div class='pqv-woo-row'>" + g + "</div></div>");
+      actions.style.display = "none";
+      if (qtyRow) qtyRow.style.display = "none";
+    }
+  }
+  if (Array.isArray(p.upsells) && p.upsells.length) {
+    var up = cards(p.upsells), bottom = root.querySelector(".pqv-bottom-row");
+    if (up && bottom) bottom.insertAdjacentHTML("beforebegin", "<section class='pqv-upsells' style='margin:24px 0'><h2 style='font-size:20px;margin:0 0 12px'>You may also like…</h2><div class='pqv-woo-row'>" + up + "</div></section>");
+  }
+  if (p.reviewsAllowed === false) {
+    var rev = root.querySelector(".pqv-reviews-section"); if (rev) rev.style.display = "none";
+  }
+  if (!document.getElementById("pqvWooCss")) {
+    var st = document.createElement("style");
+    st.id = "pqvWooCss";
+    st.textContent = ".pqv-woo-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}.pqv-woo-card{display:block;color:inherit;text-decoration:none;font-size:14px}" +
+      ".pqv-woo-card img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:6px;margin-bottom:6px}.pqv-woo-card span{display:block;line-height:1.3}.pqv-woo-card b{display:block;margin-top:2px}" +
+      ".pd-desc-html img{max-width:100%;height:auto}.pd-desc-html blockquote{margin:0 0 1em;padding-left:12px;border-left:3px solid #ddd}.pqv-short-desc p{margin:0 0 .5em}";
+    document.head.appendChild(st);
+  }
+}
 function openProductFromLocationHash() {
+  if (openPmPreview()) return;
   var hash = window.location.hash || "";
   var idx = -1;
   var productId = document.documentElement.getAttribute('data-product-id');
@@ -3769,7 +3879,8 @@ function collectCategoryViewData(categoryKey) {
   // WooCommerce "Catalog visibility": Shop only / Search results only / Hidden.
   if (window.maCatalog && typeof window.maCatalog.listable === "function") {
     var listWhere = (searchQ || tagQ) ? "search" : "shop";
-    products = products.filter(function (p) { return window.maCatalog.listable(p, listWhere); });
+    var pageProductId = document.documentElement.getAttribute("data-product-id") || "";
+    products = products.filter(function (p) { return window.maCatalog.listable(p, listWhere) || (pageProductId && String(p.id) === pageProductId); });
   }
   var title = tagQ
     ? 'Tag: ' + tagQ

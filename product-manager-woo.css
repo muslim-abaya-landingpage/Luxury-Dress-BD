@@ -210,3 +210,42 @@
 .pm-woo .pm-woo-radios { display: inline-flex; }
 .pm-woo .pm-woo-ctl:has(> .pm-woo-radios) { align-items: flex-start; }
 .pm-woo .pm-woo-ctl:has(> .pm-woo-radios) > .pm-woo-tip { margin-top: 6px; }
+
+/* Editing: compact page header (WordPress shows only "Edit product" there) */
+body.pm-editing .pl-admin-header { padding-top: 10px !important; padding-bottom: 10px !important; }
+body.pm-editing .pl-admin-header .adm-heading, body.pm-editing .pl-admin-header > p:not(#pmSaveStatus), body.pm-editing .pl-admin-header .adm-product-tools { display: none !important; }
+body.pm-editing .pl-admin-header .pm-header-actions { margin: 0; }
+body.pm-editing #pmSaveStatus { margin: 4px 0 0; font-size: 12px; }
+/* Stock column marks */
+.pm-wp-table mark.lowstock { background: none; color: #dba617; font-weight: 700; }
+.pm-wp-table mark.onbackorder { background: none; color: #eaa600; font-weight: 700; }
+.pm-wp-table .pm-stock-qty { color: #50575e; }
+/* Mobile: Product data tabs as a scrollable bar with labels */
+@media (max-width: 782px) {
+  .pm-woo .pm-wp-data-wrap { flex-direction: column; }
+  .pm-woo .pm-wp-data-tabs { display: flex; flex: none; max-width: none; min-width: 0; width: 100%; overflow-x: auto; padding: 0; border-right: 0; border-bottom: 1px solid #eee; scrollbar-width: thin; }
+  .pm-woo .pm-wp-data-tabs li { flex: none; border-bottom: 0; border-right: 1px solid #eee; }
+  .pm-woo .pm-wp-data-tabs button { padding: 10px 12px; white-space: nowrap; }
+  .pm-woo .pm-wp-data-tabs button span { position: static; width: auto; height: auto; overflow: visible; clip: auto; }
+  .pm-woo .pm-wp-data-tabs button.is-active { box-shadow: inset 0 -2px 0 #50575e; }
+  .pm-woo .pm-wp-data .pm-wp-box-title { padding-top: 6px !important; padding-bottom: 6px !important; }
+  .pm-woo .pm-wp-heading { gap: 8px; }
+  .pm-woo .pm-wp-title { font-size: 20px !important; }
+}
+/* Sorting view */
+.pm-woo-sorting .pm-sort-list { margin: 12px 0 0; padding: 0; list-style: none; border: 1px solid #c3c4c7; background: #fff; }
+.pm-woo-sorting .pm-sort-list li { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-bottom: 1px solid #f0f0f1; cursor: move; background: #fff; }
+.pm-woo-sorting .pm-sort-list li:last-child { border-bottom: 0; }
+.pm-woo-sorting .pm-sort-list li.is-dragging { opacity: .5; }
+.pm-woo-sorting .pm-sort-list li.is-over { box-shadow: inset 0 2px 0 #2271b1; }
+.pm-woo-sorting .pm-sort-handle { color: #8c8f94; letter-spacing: -2px; }
+.pm-woo-sorting img, .pm-woo-sorting .pm-sort-noimg { width: 40px; height: 50px; object-fit: cover; background: #f0f0f1; flex: none; }
+.pm-woo-sorting .pm-sort-name { flex: 1 1 auto; min-width: 0; font-size: 14px; }
+.pm-woo-sorting .pm-sort-name em { color: #646970; font-style: normal; font-size: 12px; }
+.pm-woo-sorting .pm-sort-btns { display: flex; gap: 4px; }
+@media (max-width: 782px) {
+  .pm-woo .pm-wp-savebar { display: flex !important; flex-direction: row !important; align-items: center; gap: 10px; padding: 8px 12px !important; }
+  .pm-woo .pm-wp-savebar .pm-wp-savebar-msg { flex: 1 1 auto; min-width: 0; font-size: 12px; line-height: 1.3; }
+  .pm-woo .pm-wp-savebar .pm-wp-primary { width: auto !important; flex: none; }
+  .pm-woo #pmDataBox > .pm-wp-box-title .pm-wp-box-tools { display: none; }
+}
