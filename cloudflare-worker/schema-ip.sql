@@ -2,7 +2,7 @@
 -- IP tracking & blocking, added 2026-10-24. Safe to run more than once.
 
 -- One row per order attempt that reached the Worker (/_ma/order).
--- outcome: received | saved | queued | rejected | needs_attention | blocked
+-- outcome: received | saved | queued | rejected | needs_attention | risk_review | blocked
 CREATE TABLE IF NOT EXISTS order_ip_log (
   event_id   TEXT PRIMARY KEY,
   created_at INTEGER NOT NULL,

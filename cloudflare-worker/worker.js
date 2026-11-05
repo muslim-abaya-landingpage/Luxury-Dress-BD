@@ -164,6 +164,77 @@ function orderSummaryFromPairs(eventId, pairs) {
   return orderSummary({ event_id: eventId, name: pairValue(pairs, 'Name'), phone: pairValue(pairs, 'Phone'), total: pairValue(pairs, 'Total') });
 }
 
+function scoreWorkerOrderRisk(signals) {
+  let score = 0;
+  const reasons = [];
+  const samePhone = Number(signals.samePhoneAttempts10m) || 0;
+  const ipAttempts = Number(signals.ipAttempts30m) || 0;
+  const distinctPhones = Number(signals.distinctPhones30m) || 0;
+  if (samePhone >= 5) {
+    score += 50;
+    reasons.push('একই ফোন থেকে ১০ মিনিটে ' + samePhone + 'টি আগের অর্ডার-চেষ্টা');
+  } else if (samePhone >= 3) {
+    score += 35;
+    reasons.push('একই ফোন থেকে ১০ মিনিটে ' + samePhone + 'টি আগের অর্ডার-চেষ্টা');
+  } else if (samePhone >= 2) {
+    score += 25;
+    reasons.push('একই ফোন থেকে ১০ মিনিটে ' + samePhone + 'টি আগের অর্ডার-চেষ্টা');
+  }
+  if (ipAttempts >= 5 && distinctPhones >= 3) {
+    score += 15;
+    reasons.push('একই IP থেকে ৩০ মিনিটে ' + ipAttempts + 'টি চেষ্টা ও ' + distinctPhones + 'টি ফোন');
+  }
+  score = Math.min(100, score);
+  return { score, level: score >= 60 ? 'high' : score >= 30 ? 'review' : 'low', reasons };
+}
+
+async function assessWorkerOrderRisk(env, eventId, ip, phoneRaw, now) {
+  const phone = localPhone(phoneRaw);
+  const signals = { samePhoneAttempts10m: 0, ipAttempts30m: 0, distinctPhones30m: 0 };
+  try {
+    if (phone) {
+      const own = await env.DB.prepare("SELECT COUNT(*) AS n FROM order_ip_log WHERE phone = ? AND created_at >= ? AND event_id <> ? AND outcome <> 'blocked'")
+        .bind(phone, now - 10 * 60 * 1000, eventId).first();
+      signals.samePhoneAttempts10m = Number(own && own.n) || 0;
+    }
+    if (ip) {
+      const shared = await env.DB.prepare("SELECT COUNT(*) AS n, COUNT(DISTINCT NULLIF(phone, '')) AS phones FROM order_ip_log WHERE ip = ? AND created_at >= ? AND event_id <> ? AND outcome <> 'blocked'")
+        .bind(ip, now - 30 * 60 * 1000, eventId).first();
+      signals.ipAttempts30m = Number(shared && shared.n) || 0;
+      signals.distinctPhones30m = Number(shared && shared.phones) || 0;
+    }
+  } catch (e) {
+    // Risk telemetry is best-effort: a D1 issue must never prevent a customer order.
+    console.log('order_risk_query_error', String(e).slice(0, 200));
+  }
+  return Object.assign(scoreWorkerOrderRisk(signals), signals);
+}
+
+function encodeOrderPayload(pairs, risk, riskEventId) {
+  return JSON.stringify({ version: 2, pairs, risk: risk || null, riskEventId: riskEventId || '' });
+}
+
+function decodeOrderPayload(raw, fallbackEventId) {
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return { pairs: parsed, risk: null, riskEventId: fallbackEventId || '' };
+    if (parsed && Array.isArray(parsed.pairs)) return {
+      pairs: parsed.pairs,
+      risk: parsed.risk || null,
+      riskEventId: parsed.riskEventId || fallbackEventId || ''
+    };
+  } catch (e) {}
+  return { pairs: null, risk: null, riskEventId: fallbackEventId || '' };
+}
+
+function workerRiskAlert(env, eventId, pairs, risk, orderId) {
+  if (!risk || risk.level === 'low') return;
+  const label = risk.level === 'high' ? 'উচ্চ' : 'রিভিউ';
+  const reason = (risk.reasons || []).join(' · ') || 'অল্প সময়ে একাধিক অর্ডার-চেষ্টা';
+  return sendAlert(env, '⚠️ অর্ডারটি ম্যানুয়াল রিভিউ করুন (Worker ঝুঁকি ' + label + ', ' + risk.score + '/100)।\n' +
+    'Order ID: ' + (orderId || 'পাওয়া যায়নি') + '\n' + reason + '\n' + orderSummaryFromPairs(eventId, pairs));
+}
+
 async function handleOrder(request, env, ctx) {
   if (request.method !== 'POST') return textOut('Method not allowed', 405, { Allow: 'POST' });
   const srcHost = hostOf(request.headers.get('Origin') || '') || hostOf(request.headers.get('Referer') || '');
@@ -200,12 +271,14 @@ async function handleOrder(request, env, ctx) {
     return textOut('Error|' + IP_BLOCKED_MESSAGE);
   }
   await logOrderIp(env, eventId, ipInfo, pairs, 'received', now);
+  const risk = await assessWorkerOrderRisk(env, eventId, ipInfo.ip, pairValue(pairs, 'Phone'), now);
+  const storedPayload = encodeOrderPayload(pairs, risk, eventId);
   if (existing) {
     await env.DB.prepare("UPDATE order_inbox SET payload = ?, target = ?, status = 'sending', updated_at = ? WHERE event_id = ?")
-      .bind(payload, target, now, eventId).run();
+      .bind(storedPayload, target, now, eventId).run();
   } else {
     await env.DB.prepare("INSERT INTO order_inbox (event_id, created_at, updated_at, status, attempts, next_at, target, payload, name, phone, total) VALUES (?, ?, ?, 'sending', 0, 0, ?, ?, ?, ?, ?)")
-      .bind(eventId, now, now, target, payload, pairValue(pairs, 'Name').slice(0, 120), pairValue(pairs, 'Phone').slice(0, 40), pairValue(pairs, 'Total').slice(0, 20)).run();
+      .bind(eventId, now, now, target, storedPayload, pairValue(pairs, 'Name').slice(0, 120), pairValue(pairs, 'Phone').slice(0, 40), pairValue(pairs, 'Total').slice(0, 20)).run();
   }
   const priorAttempts = existing ? Number(existing.attempts) || 0 : 0;
 
@@ -215,7 +288,9 @@ async function handleOrder(request, env, ctx) {
   if (r.kind === 'success') {
     await env.DB.prepare("UPDATE order_inbox SET status = 'saved', attempts = ?, order_id = ?, last_response = ?, updated_at = ? WHERE event_id = ?")
       .bind(attempts, r.orderId || '', r.text, done, eventId).run();
-    ctx.waitUntil(setOrderIpOutcome(env, eventId, 'saved', r.orderId));
+    const review = risk.level !== 'low';
+    ctx.waitUntil(setOrderIpOutcome(env, eventId, review ? 'risk_review' : 'saved', r.orderId));
+    if (review) ctx.waitUntil(workerRiskAlert(env, eventId, pairs, risk, r.orderId));
     return textOut(r.text);
   }
   if (r.kind === 'duplicate' && priorAttempts > 0) {
@@ -300,12 +375,17 @@ async function handleLandingOrder(request, env, ctx) {
   if (!pairs) return fetch(request);
 
   const now = Date.now();
+  const riskEventId = 'landing:' + eventId;
+  const ipInfo = clientIpInfo(request);
+  let risk = null;
   let existing = null;
   try {
     existing = await env.DB.prepare('SELECT status, attempts, order_id, last_response FROM order_inbox WHERE event_id = ?').bind(eventId).first();
     if (existing && existing.status === 'saved' && existing.last_response) return textOut(existing.last_response);
     if (existing && existing.status === 'retry') return textOut('Success|' + landingRef(eventId), 200, { 'X-MA-Queued': '1' });
-    const payload = JSON.stringify(pairs);
+    await logOrderIp(env, riskEventId, ipInfo, pairs, 'received', now);
+    risk = await assessWorkerOrderRisk(env, riskEventId, ipInfo.ip, pairValue(pairs, 'Phone'), now);
+    const payload = encodeOrderPayload(pairs, risk, riskEventId);
     if (existing) {
       await env.DB.prepare("UPDATE order_inbox SET payload = ?, target = ?, status = 'sending', updated_at = ? WHERE event_id = ?").bind(payload, LANDING_TARGET, now, eventId).run();
     } else {
@@ -332,10 +412,15 @@ async function handleLandingOrder(request, env, ctx) {
 
   if (r.kind === 'success') {
     ctx.waitUntil(upd('saved', ', order_id = ?', [r.orderId]));
+    const review = risk.level !== 'low';
+    ctx.waitUntil(setOrderIpOutcome(env, riskEventId, review ? 'risk_review' : 'saved', r.orderId));
+    if (review) ctx.waitUntil(workerRiskAlert(env, eventId, pairs, risk, r.orderId));
   } else if (r.kind === 'rejected' || r.kind === 'duplicate') {
     ctx.waitUntil(upd('rejected', '', []));
+    ctx.waitUntil(setOrderIpOutcome(env, riskEventId, 'rejected', ''));
   } else {
     await upd('retry', ', next_at = ?', [done + backoffMs(1)]);
+    ctx.waitUntil(setOrderIpOutcome(env, riskEventId, 'queued', ''));
     console.log('landing_order_queued', eventId, r.text.slice(0, 200));
     return textOut('Success|' + landingRef(eventId), 200, { 'X-MA-Queued': '1' });
   }
@@ -353,8 +438,8 @@ async function processOrderQueue(env) {
     .bind(now, now - 5 * 60 * 1000).run();
   const due = await env.DB.prepare("SELECT * FROM order_inbox WHERE status = 'retry' AND next_at <= ? ORDER BY created_at LIMIT 10").bind(now).all();
   for (const row of (due.results || [])) {
-    let pairs;
-    try { pairs = JSON.parse(row.payload); } catch (e) { pairs = null; }
+    const decoded = decodeOrderPayload(row.payload, row.event_id);
+    const pairs = decoded.pairs;
     if (!Array.isArray(pairs)) continue;
     const r = String(row.target || '').indexOf('landing:') === 0 ? await forwardLandingRetry(pairs) : await forwardOrder(row.target, pairs);
     const attempts = (Number(row.attempts) || 0) + 1;
@@ -362,7 +447,9 @@ async function processOrderQueue(env) {
     if (r.kind === 'success') {
       await env.DB.prepare("UPDATE order_inbox SET status = 'saved', attempts = ?, order_id = ?, last_response = ?, updated_at = ? WHERE event_id = ?")
         .bind(attempts, r.orderId || '', r.text, t, row.event_id).run();
-      await setOrderIpOutcome(env, row.event_id, 'saved', r.orderId);
+      const review = decoded.risk && decoded.risk.level !== 'low';
+      await setOrderIpOutcome(env, decoded.riskEventId || row.event_id, review ? 'risk_review' : 'saved', r.orderId);
+      if (review) await workerRiskAlert(env, row.event_id, pairs, decoded.risk, r.orderId);
     } else if (r.kind === 'duplicate') {
       await env.DB.prepare("UPDATE order_inbox SET status = 'needs_attention', attempts = ?, last_response = ?, updated_at = ? WHERE event_id = ?")
         .bind(attempts, r.text, t, row.event_id).run();

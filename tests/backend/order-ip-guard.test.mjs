@@ -50,11 +50,17 @@ function ctx() {
 
 let appsScriptCalls = 0;
 let appsScriptReply = 'Success|MA-20261024-1234';
+const telegramAlerts = [];
 const realFetch = globalThis.fetch;
 globalThis.fetch = async (url, opts) => {
   const u = String(url);
-  if (u.indexOf('script.google.com') !== -1) { appsScriptCalls++; return new Response(appsScriptReply, { status: 200 }); }
-  if (u.indexOf('api.telegram.org') !== -1) return new Response('{}', { status: 200 });
+  let hostname = '';
+  try { hostname = new URL(u).hostname.toLowerCase(); } catch (e) {}
+  if (hostname === 'script.google.com') { appsScriptCalls++; return new Response(appsScriptReply, { status: 200 }); }
+  if (hostname === 'api.telegram.org') {
+    try { telegramAlerts.push(JSON.parse(opts.body).text); } catch (e) {}
+    return new Response('{}', { status: 200 });
+  }
   return realFetch(url, opts);
 };
 
@@ -157,6 +163,72 @@ test('queued order: IP outcome follows the retry to "saved" with the order id', 
   await c2.done();
   const row = DB.raw.prepare('SELECT outcome, order_id FROM order_ip_log WHERE event_id = ?').get(eventId);
   assert.deepEqual({ ...row }, { outcome: 'saved', order_id: 'MA-20261024-9999' });
+  appsScriptReply = 'Success|MA-20261024-1234';
+});
+
+test('Worker flags rapid repeat-phone orders for manual review without rejecting the order', async () => {
+  const DB = makeD1();
+  const now = Date.now();
+  for (let i = 0; i < 3; i++) {
+    DB.raw.prepare('INSERT INTO order_ip_log (event_id, created_at, ip, phone, outcome) VALUES (?, ?, ?, ?, ?)')
+      .run('prior-' + i, now - (i + 1) * 10000, '103.4.5.6', '01712345678', 'saved');
+  }
+  telegramAlerts.length = 0;
+  appsScriptReply = 'Success|MA-RISK-123';
+  const c = ctx();
+  const { req, eventId } = orderRequest({ ip: '103.4.5.6', phone: '01712345678' });
+  const res = await worker.fetch(req, { DB, TELEGRAM_BOT_TOKEN: 'test-token', TELEGRAM_CHAT_ID: 'test-chat' }, c);
+  await c.done();
+  assert.equal(await res.text(), 'Success|MA-RISK-123', 'risk scoring must not reject the order');
+  assert.equal(DB.raw.prepare('SELECT outcome FROM order_ip_log WHERE event_id = ?').get(eventId).outcome, 'risk_review');
+  assert.equal(telegramAlerts.length, 1);
+  assert.match(telegramAlerts[0], /রিভিউ/);
+  assert.match(telegramAlerts[0], /35\/100/);
+  const lookup = await (await handleAdminIp(adminRequest({ Action: 'lookup', Token: 'good', OrderId: 'MA-RISK-123', Phone: '01712345678' }),
+    { ORDERS_DB: DB }, { verify: staffVerify })).json();
+  assert.equal(lookup.order.outcome, 'risk_review');
+  appsScriptReply = 'Success|MA-20261024-1234';
+});
+
+test('a busy shared IP by itself does not trigger review or block a different customer', async () => {
+  const DB = makeD1();
+  const now = Date.now();
+  for (let i = 0; i < 5; i++) {
+    DB.raw.prepare('INSERT INTO order_ip_log (event_id, created_at, ip, phone, outcome) VALUES (?, ?, ?, ?, ?)')
+      .run('shared-' + i, now - (i + 1) * 10000, '103.4.5.6', '0171234567' + i, 'saved');
+  }
+  telegramAlerts.length = 0;
+  appsScriptReply = 'Success|MA-SHARED-IP';
+  const c = ctx();
+  const { req, eventId } = orderRequest({ ip: '103.4.5.6', phone: '01955555555' });
+  const res = await worker.fetch(req, { DB, TELEGRAM_BOT_TOKEN: 'test-token', TELEGRAM_CHAT_ID: 'test-chat' }, c);
+  await c.done();
+  assert.equal(await res.text(), 'Success|MA-SHARED-IP');
+  assert.equal(DB.raw.prepare('SELECT outcome FROM order_ip_log WHERE event_id = ?').get(eventId).outcome, 'saved');
+  assert.equal(telegramAlerts.length, 0);
+  appsScriptReply = 'Success|MA-20261024-1234';
+});
+
+test('risk-review status survives a transient failure and queued retry', async () => {
+  const DB = makeD1();
+  const now = Date.now();
+  for (let i = 0; i < 3; i++) {
+    DB.raw.prepare('INSERT INTO order_ip_log (event_id, created_at, ip, phone, outcome) VALUES (?, ?, ?, ?, ?)')
+      .run('prior-queue-' + i, now - (i + 1) * 10000, '103.4.5.6', '01712345678', 'saved');
+  }
+  appsScriptReply = '<html>Google error</html>';
+  const first = ctx();
+  const { req, eventId } = orderRequest({ ip: '103.4.5.6', phone: '01712345678' });
+  await worker.fetch(req, { DB, TELEGRAM_BOT_TOKEN: 'test-token', TELEGRAM_CHAT_ID: 'test-chat' }, first);
+  await first.done();
+  assert.equal(DB.raw.prepare('SELECT outcome FROM order_ip_log WHERE event_id = ?').get(eventId).outcome, 'queued');
+  DB.raw.prepare('UPDATE order_inbox SET next_at = 0 WHERE event_id = ?').run(eventId);
+  appsScriptReply = 'Success|MA-RISK-QUEUED';
+  const retry = ctx();
+  await worker.scheduled({}, { DB, TELEGRAM_BOT_TOKEN: 'test-token', TELEGRAM_CHAT_ID: 'test-chat' }, retry);
+  await retry.done();
+  const row = DB.raw.prepare('SELECT outcome, order_id FROM order_ip_log WHERE event_id = ?').get(eventId);
+  assert.deepEqual({ ...row }, { outcome: 'risk_review', order_id: 'MA-RISK-QUEUED' });
   appsScriptReply = 'Success|MA-20261024-1234';
 });
 
