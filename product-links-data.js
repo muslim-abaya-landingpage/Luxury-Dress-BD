@@ -1,11 +1,10 @@
 /**
  * ═══ সব ক্যাটাগরির প্রোডাক্ট ছবির লিংক — এক জায়গা ═══
  * এডিট: product-manager.html (প্রতি প্রোডাক্টে ছবির URL) → সেভ
- * আপডেট: 2026-11-04
+ * আপডেট: 2026-11-05
  */
 window.PRODUCT_LINKS_DATA = {
   abaya: [
-    "https://images.muslimabaya.com/images/uploads/premium-dubai-cherry-fabrics-abaya-1-ca8b4af1530b6cc32b18.webp",
     "/images/Maroon Abaya Set...jpeg",
     "/images/premium-black-3-part-abaya-set-muslim-abaya-bd.webp",
     "/images/premium-black-gold-stone-work-abaya-1080x1350.webp",
@@ -89,6 +88,7 @@ window.PRODUCT_LINKS_DATA = {
   ],
   embroidery: [
     "/images/dil-bahar-black-stone-work-abaya-original-dubai-cherry-fabric-bangladesh.webp",
+    "https://images.muslimabaya.com/images/uploads/premium-dubai-cherry-fabrics-abaya-1-ca8b4af1530b6cc32b18.webp",
   ],
   karchupi: [
   ],
