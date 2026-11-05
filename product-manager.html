@@ -252,6 +252,7 @@
   var allSearchTerm = "";
   var overviewCategory = "";
   var overviewStock = "";
+  var overviewType = ""; // WooCommerce "Filter by product type"
   var overviewStatus = ""; // "" = all except Trash | "publish" | "draft" | "trash"
   var overviewSort = { key: "", dir: 1 };
   var overviewSelected = {};
@@ -539,6 +540,7 @@
       renderProductEditor();
       return;
     }
+    dropUnsavedNewProduct();
     if (activeKey === ALL_PRODUCTS_KEY) {
       renderAllProducts();
       return;
@@ -858,7 +860,68 @@
     Object.keys(products).forEach(function (k) { (products[k] || []).forEach(function (q) { if (q.brand) seen[q.brand] = true; }); });
     return Object.keys(seen).sort();
   }
+  // WooCommerce "Add new product": the same Edit product screen, empty, as a Draft. The link (ID) follows the
+  // product name until it is edited by hand. Nothing is published until Save Draft / Publish.
+  function uniqueProductId(base) {
+    base = String(base || "product").replace(/[^A-Za-z0-9_-]+/g, "-").replace(/^[-_]+|[-_]+$/g, "").slice(0, 80) || "product";
+    if (base.length < 2) base = "product-" + base;
+    var id = base, n = 2;
+    while (findProductById(id)) id = base + "-" + (n++);
+    return id;
+  }
+  function slugFromName(name) {
+    var s = window.MaProductPublishUtils && window.MaProductPublishUtils.slug ? window.MaProductPublishUtils.slug(name) : String(name || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    return s || "";
+  }
+  function startNewProduct(catKey) {
+    if (!sections.length) return;
+    dropUnsavedNewProduct();
+    var key = catKey && products[catKey] ? catKey : (overviewCategory && products[overviewCategory] ? overviewCategory : (sections.filter(function (x) { return x.enabled !== false; })[0] || sections[0]).key);
+    if (!products[key]) products[key] = [];
+    var p = { id: uniqueProductId("new-product"), name: "", price: 0, image: "", status: "draft", dateAdded: todayKey() };
+    products[key].push(p);
+    editTarget = { cat: key, index: products[key].length - 1, isNew: true, autoId: true };
+    editTab = "general";
+    activeKey = EDIT_KEY;
+    renderCatList();
+    renderMain();
+    window.scrollTo(0, 0);
+    var t = document.getElementById("pmWooTitle"); if (t) t.focus();
+  }
+  // WooCommerce "Copy to a new draft": same details and photos, new link, Draft, no SKU.
+  function duplicateProduct(p, catKey) {
+    if (!p) return;
+    dropUnsavedNewProduct();
+    var copy = JSON.parse(JSON.stringify(p));
+    copy.id = uniqueProductId(String(p.id || "product") + "-copy");
+    copy.name = String(p.name || "") + " (Copy)";
+    copy.status = "draft";
+    copy.dateAdded = todayKey();
+    ["sku", "gtin", "publishDate", "trashedAt", "featured", "seoTitle", "seoDescription"].forEach(function (k) { delete copy[k]; });
+    if (Array.isArray(copy.variations)) copy.variations.forEach(function (v) { delete v.sku; });
+    if (!products[catKey]) products[catKey] = [];
+    products[catKey].push(copy);
+    editTarget = { cat: catKey, index: products[catKey].length - 1, isNew: true, autoId: false };
+    editTab = "general";
+    activeKey = EDIT_KEY;
+    renderCatList();
+    renderMain();
+    window.scrollTo(0, 0);
+    toast("Copied to a new draft — change what you need, then Save Draft or Publish.");
+  }
+  // A new product that was never saved and has no name or photo is removed when you leave its screen.
+  function dropUnsavedNewProduct() {
+    if (!editTarget || !editTarget.isNew) return;
+    var list = products[editTarget.cat] || [], p = list[editTarget.index];
+    if (p && !String(p.name || "").trim() && !p.image) list.splice(editTarget.index, 1);
+    editTarget.isNew = false;
+  }
   function openProductEditor(cat, index) {
+    if (editTarget && editTarget.isNew && !(editTarget.cat === cat && editTarget.index === index)) {
+      var nl = products[editTarget.cat] || [], np = nl[editTarget.index];
+      if (np && !String(np.name || "").trim() && !np.image && editTarget.cat === cat && editTarget.index < index) index--;
+      dropUnsavedNewProduct();
+    }
     editTarget = { cat: cat, index: index };
     editTab = "general";
     activeKey = EDIT_KEY;
@@ -1090,7 +1153,7 @@
     mainEl.innerHTML =
       '<div class="pm-wp-edit pm-woo">' +
       '<button type="button" class="pm-wp-back" id="pmEditBack">← All products</button>' +
-      '<div class="pm-wp-heading"><h2 class="pm-wp-title">Edit product</h2><button type="button" class="pm-wp-title-action" id="pmEditAddNew">Add new product</button></div>' +
+      '<div class="pm-wp-heading"><h2 class="pm-wp-title">' + (editTarget.isNew && productStatus(p) !== "publish" ? "Add new product" : "Edit product") + '</h2><button type="button" class="pm-wp-title-action" id="pmEditAddNew">Add new product</button></div>' +
       '<div class="pm-wp-columns">' +
       '<div class="pm-wp-col-main">' +
         '<div class="pm-woo-titlewrap"><label class="pm-sr-only" for="pmWooTitle">Product name</label>' +
@@ -1272,6 +1335,7 @@
       [b1, b2].forEach(function (b) { if (b) b.disabled = true; });
       editMsg("Saving…", "busy");
       saveAll().then(function (result) {
+        if (editTarget) { editTarget.isNew = false; editTarget.autoId = false; }
         var flush = window.MaVariationsAdmin && window.MaVariationsAdmin.hasPendingStock() ? window.MaVariationsAdmin.flushStock() : Promise.resolve("");
         return flush.then(function (stockNote) {
           if (result && result.live) {
@@ -1647,7 +1711,7 @@
     });
     bindById("pmEditBarSave", "click", saveEdit);
     bindById("pmEditBack", "click", function () { activeKey = ALL_PRODUCTS_KEY; renderCatList(); renderMain(); });
-    bindById("pmEditAddNew", "click", openQuickUpload);
+    bindById("pmEditAddNew", "click", function () { startNewProduct(editTarget && editTarget.cat); });
     wireImageUploader(root, p);
     wireGalleryUploader(root, p);
     wireWpMediaBoxes(root, p, changed);
@@ -1674,6 +1738,19 @@
         onChange: function (h) { if (h) p.shortDescription = h; else delete p.shortDescription; changed(); }
       });
     }
+    // New product: the link follows the name (like WordPress) until the slug is edited by hand.
+    var titleInput = $("#pmWooTitle");
+    if (titleInput && editTarget && editTarget.isNew && editTarget.autoId) titleInput.addEventListener("input", function () {
+      var base = slugFromName(titleInput.value);
+      if (!base || !editTarget.autoId) return;
+      var keep = p.id; p.id = "\u0000";
+      var id = uniqueProductId(base);
+      p.id = id === keep ? keep : id;
+      var slugView = $("#pmPermaSlug"); if (slugView) slugView.textContent = p.id;
+      var link = slugView && slugView.parentNode; if (link && link.tagName === "A") link.href = "/product/" + encodeURIComponent(p.id);
+      ["#pmPermaInput", "#pmEf_id"].forEach(function (sel) { var el = $(sel); if (el) el.value = p.id; });
+    });
+    var slugBox = $("#pmEf_id"); if (slugBox) slugBox.addEventListener("input", function () { if (editTarget) editTarget.autoId = false; });
     // Permalink "Edit" (same as the Slug box).
     var permaView = $("#pmPermaView"), permaForm = $("#pmPermaForm"), permaInput = $("#pmPermaInput");
     bindById("pmPermaEdit", "click", function () { permaView.hidden = true; permaForm.hidden = false; permaInput.focus(); permaInput.select(); });
@@ -1683,7 +1760,7 @@
       if (!/^[A-Za-z0-9][A-Za-z0-9_-]{1,100}$/.test(v)) { window.alert("Use letters, numbers, - and _ only (at least 2 characters)."); return; }
       if (v !== p.id && findProductById(v)) { window.alert("Another product already uses this link."); return; }
       if (v === p.id) { permaForm.hidden = true; permaView.hidden = false; return; }
-      p.id = v; redraw("Product link changed — click Save changes.");
+      p.id = v; if (editTarget) editTarget.autoId = false; redraw("Product link changed — click Save changes.");
     });
     // Publish box: Status / Visibility / Publish date / Catalog visibility, each with Edit → OK / Cancel.
     root.querySelectorAll("[data-misc]").forEach(function (a) {
@@ -1725,7 +1802,7 @@
     bindById("pmSaveDraft", "click", saveEdit);
     bindById("pmCopyDraft", "click", function (e) {
       e.preventDefault();
-      ensureQuickUpload().then(function (api) { api.copyFrom(p, catKey); }).catch(function (err) { toast(err.message || "Quick upload is unavailable"); });
+      duplicateProduct(p, catKey);
     });
     // Tags: "Choose from the most used tags".
     bindById("pmMostTags", "click", function (e) { e.preventDefault(); var c = $("#pmTagCloud"); c.hidden = !c.hidden; });
@@ -2017,6 +2094,9 @@
           '<option value="publish">Publish</option><option value="draft">Set to Draft</option><option value="trash">Move to Trash</option>') + '</select>' +
       '<button type="button" class="pm-wp-button" id="pmBulkApply">Apply</button></div>' +
       '<div class="pm-wp-actions"><select id="pmOverviewCategory" aria-label="Filter by category"><option value="">Select a category</option>' + catOptions + '</select>' +
+      '<select id="pmOverviewType" aria-label="Filter by product type"><option value="">Filter by product type</option>' +
+        [["simple", "Simple product"], ["downloadable", "\u00a0\u00a0→ Downloadable"], ["virtual", "\u00a0\u00a0→ Virtual"], ["grouped", "Grouped product"], ["external", "External/Affiliate product"], ["variable", "Variable product"]]
+          .map(function (o) { return '<option value="' + o[0] + '"' + (overviewType === o[0] ? " selected" : "") + '>' + o[1] + '</option>'; }).join("") + '</select>' +
       '<select id="pmOverviewStock" aria-label="Filter by stock status"><option value="">Filter by stock status</option><option value="in"' + (overviewStock === 'in' ? ' selected' : '') + '>In stock</option><option value="out"' + (overviewStock === 'out' ? ' selected' : '') + '>Out of stock</option></select>' +
       '<button type="button" class="pm-wp-button" id="pmFilterBtn">Filter</button></div>' +
       '<div class="pm-wp-pages" id="pmPagerTop"></div></div>' +
@@ -2026,12 +2106,8 @@
       '<span id="pmOverviewSelected" class="pm-wp-selected" role="status"></span>' +
       '<div class="pm-overview-wrap"><table class="pm-overview pm-wp-table"><thead>' + headRow + '</thead><tbody id="pmAllRows"></tbody><tfoot>' + headRow + '</tfoot></table></div>' +
       '<div class="pm-wp-tablenav bottom"><div class="pm-wp-pages" id="pmPagerBottom"></div></div></div>';
-    bindById("pmAllQuickUpload", "click", function () {
-      openQuickUpload();
-    });
-    bindById("pmHeaderAdd", "click", function () {
-      openQuickUpload();
-    });
+    bindById("pmAllQuickUpload", "click", function () { startNewProduct(overviewCategory); });
+    bindById("pmHeaderAdd", "click", function () { startNewProduct(overviewCategory); });
     bindById("pmHeaderBulkUpload", "click", openBulkUpload);
     bindById("pmManageCats", "click", function () {
       if (!sections.length) return;
@@ -2167,6 +2243,10 @@
         if (overviewStatus ? st !== overviewStatus : st === "trash") return false;
         if (overviewCategory && s.key !== overviewCategory) return false;
         if (overviewStock === "out" && !out || overviewStock === "in" && out) return false;
+        if (overviewType) {
+          var pt = p.productType === "variable" || (Array.isArray(p.variations) && p.variations.length) ? "variable" : (p.productType === "grouped" || p.productType === "external") ? p.productType : "simple";
+          if (overviewType === "virtual" ? !p.virtual : overviewType === "downloadable" ? !p.downloadable : pt !== overviewType) return false;
+        }
         return [p.name, p.id, s.key, s.menu, s.menuBn, p.brand || ""].concat(productTags(p)).join(" ").toLowerCase().indexOf(term) !== -1;
       });
       if (overviewSort.key) {
@@ -2318,7 +2398,7 @@
         button.addEventListener("click", function () {
           var cat = button.getAttribute("data-pm-copy-cat");
           var p = (products[cat] || [])[parseInt(button.getAttribute("data-pm-copy-index"), 10)];
-          if (p) ensureQuickUpload().then(function (api) { api.copyFrom(p, cat); }).catch(function (err) { toast(err.message || "Quick upload is unavailable"); });
+          if (p) duplicateProduct(p, cat);
         });
       });
       document.querySelectorAll("[data-pm-cat]").forEach(function (button) {
@@ -2451,6 +2531,7 @@
     bindById("pmAllSearch", "input", function (e) { allSearchTerm = e.target.value; overviewPage = 1; overviewSelected = {}; draw(); });
     bindById("pmOverviewCategory", "change", function (e) { overviewCategory = e.target.value; overviewPage = 1; overviewSelected = {}; draw(); });
     bindById("pmOverviewStock", "change", function (e) { overviewStock = e.target.value; overviewPage = 1; overviewSelected = {}; draw(); });
+    bindById("pmOverviewType", "change", function (e) { overviewType = e.target.value; overviewPage = 1; overviewSelected = {}; draw(); });
     bindById("pmClearSelection", "click", function () { overviewSelected = {}; draw(); });
     function bulkStock(out) {
       var items = Object.keys(overviewSelected).map(function(key) {

@@ -424,3 +424,71 @@ test('edit screen: after a save, uploaded photos keep their R2 URLs on the next 
     expect(second).toContain('https://images.muslimabaya.com/' + p.replace(/\.webp$/, '-0123456789abcdef0123.webp'));
   }
 });
+
+test('Add new product opens the WooCommerce edit screen empty; draft saves without photo, Publish needs price and photo', async ({ page }) => {
+  await stub(page);
+  page.on('dialog', (d) => d.accept());
+  await page.goto('/product-manager.html');
+  await page.waitForTimeout(500);
+  await page.evaluate(() => {
+    window.__uploads = []; window.__queued = {}; window.__published = null;
+    window.MaAdmin.uploadImage = (path) => { window.__uploads.push(path); return Promise.resolve({ ok: true, path }); };
+    window.MaCatalogPublisher = Object.assign({}, window.MaCatalogPublisher, {
+      isReady: () => true,
+      enqueue: (rows) => rows.forEach((r) => { window.__queued[r.path] = r; }),
+      publish: (files) => { window.__published = files; return Promise.resolve({ ok: true }); }
+    });
+  });
+  await page.click('#pmHeaderAdd');
+  await expect(page.locator('.pm-wp-edit .pm-wp-title')).toHaveText('Add new product');
+  await expect(page.locator('#pmQuickDialog, dialog[open]')).toHaveCount(0);
+  await expect(page.locator('.pm-wp-name')).toHaveValue('');
+  await expect(page.locator('#pmStatusLabel')).toHaveText('Draft');
+  await expect(page.locator('#pmSaveDraft')).toBeVisible();
+  await expect(page.locator('#pmEditUpdate')).toHaveText('Publish');
+  await page.fill('.pm-wp-name', 'Navy Chiffon Abaya');
+  await expect(page.locator('#pmEf_id')).toHaveValue('navy-chiffon-abaya');
+  // Draft without price or photo is allowed.
+  await page.click('#pmSaveDraft');
+  await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
+  let file = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
+  expect(file).toContain('id: "navy-chiffon-abaya"');
+  expect(file).toContain('status: "draft"');
+  // Publish without a photo is refused with a clear message.
+  await page.evaluate(() => { window.__published = null; });
+  await page.click('#pmEditUpdate');
+  await expect(page.locator('#pmEditNote')).toContainText('প্রকাশ করতে দাম ও প্রধান ছবি প্রয়োজন');
+  // Add a price and a photo, then Publish.
+  const regular = page.locator('[data-ef="regularPrice"], .pm-opt-row .pm-opt-regular').first();
+  await regular.fill('1450');
+  const png = await page.evaluate(() => { const c = document.createElement('canvas'); c.width = 64; c.height = 80; c.getContext('2d').fillRect(0, 0, 64, 80); return c.toDataURL('image/png').split(',')[1]; });
+  await page.locator('.pm-file-input').first().setInputFiles({ name: 'photo.png', mimeType: 'image/png', buffer: Buffer.from(png, 'base64') });
+  await expect.poll(() => page.evaluate(() => Object.keys(window.__queued).length)).toBeGreaterThan(0);
+  await page.click('#pmEditUpdate');
+  await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
+  file = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
+  const at = file.indexOf('id: "navy-chiffon-abaya"'), entry = file.slice(at, file.indexOf('\n    }', at));
+  expect(entry).not.toContain('status:');
+  expect(entry).toMatch(/image: "images\/uploads\/[a-z0-9-]+\.webp"/);
+});
+
+test('Copy to a new draft duplicates the product in the editor; leaving an empty new product removes it', async ({ page }) => {
+  await stub(page);
+  page.on('dialog', (d) => d.accept());
+  await page.goto('/product-manager.html');
+  await page.waitForTimeout(500);
+  const allCount = async () => parseInt((await page.locator('[data-overview-status=""] .count').textContent()).replace(/\D/g, ''), 10);
+  const before = await allCount();
+  await page.locator('#pmAllRows tr').first().locator('.pm-row-title').click();
+  const name = await page.locator('.pm-wp-name').inputValue();
+  await page.click('#pmCopyDraft');
+  await expect(page.locator('.pm-wp-name')).toHaveValue(name + ' (Copy)');
+  await expect(page.locator('#pmStatusLabel')).toHaveText('Draft');
+  await expect(page.locator('#pmEf_id')).toHaveValue(/-copy$/);
+  await page.click('#pmEditBack');
+  expect(await allCount()).toBe(before + 1);
+  await page.click('#pmHeaderAdd');
+  await expect(page.locator('.pm-wp-title')).toHaveText('Add new product');
+  await page.click('#pmEditBack');
+  expect(await allCount()).toBe(before + 1);
+});

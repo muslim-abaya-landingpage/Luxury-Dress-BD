@@ -23,7 +23,7 @@
   var tail=(p.price?' ৳'+p.price+'.':'')+' Cash on delivery across Bangladesh.';
   var desc=bits+'.'+(note?' '+(/[.!?।]$/.test(note)?note:note+'.'):'');
   return {title:title,description:(cut(desc,160-tail.length)+tail).trim()};}
- function validateCatalog(products){var ids={};Object.keys(products).forEach(function(cat){(products[cat]||[]).forEach(function(p){if(!/^[A-Za-z0-9][A-Za-z0-9_-]{1,100}$/.test(String(p.id||''))||ids[p.id])throw Error('পণ্যের ID ফাঁকা বা একই ID একাধিক পণ্যে আছে।');ids[p.id]=true;if(!String(p.name||'').trim()||!Number.isFinite(Number(p.price))||Number(p.price)<=0||!p.image)throw Error('প্রতিটি পণ্যের নাম, দাম ও প্রধান ছবি প্রয়োজন।');
+ function validateCatalog(products){var ids={};Object.keys(products).forEach(function(cat){(products[cat]||[]).forEach(function(p){if(!/^[A-Za-z0-9][A-Za-z0-9_-]{1,100}$/.test(String(p.id||''))||ids[p.id])throw Error('পণ্যের ID ফাঁকা বা একই ID একাধিক পণ্যে আছে।');ids[p.id]=true;var unlisted=p.status==='draft'||p.status==='pending'||p.status==='trash';if(!String(p.name||'').trim())throw Error('প্রতিটি পণ্যের নাম প্রয়োজন।');if(!unlisted&&(!Number.isFinite(Number(p.price))||Number(p.price)<=0||!p.image))throw Error((p.name||p.id)+': প্রকাশ করতে দাম ও প্রধান ছবি প্রয়োজন (Draft হিসেবে ছাড়া সেভ করা যায়)।');
   if(p.status!=null&&p.status!=='draft'&&p.status!=='trash'&&p.status!=='pending')throw Error(p.id+': status must be Published, Pending, Draft or Trash.');
   if(p.publishDate!=null&&!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(String(p.publishDate)))throw Error(p.id+': publish date must be YYYY-MM-DDTHH:MM.');
   if(p.visibility!=null&&p.visibility!=='private'&&p.visibility!=='password')throw Error(p.id+': visibility must be Public, Private or Password protected.');
