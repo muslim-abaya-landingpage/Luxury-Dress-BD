@@ -492,3 +492,72 @@ test('Copy to a new draft duplicates the product in the editor; leaving an empty
   await page.click('#pmEditBack');
   expect(await allCount()).toBe(before + 1);
 });
+
+test('replacing the main photo moves its colour to the new photo; the old photo is not kept in the gallery', async ({ page }) => {
+  await stub(page);
+  page.on('dialog', (d) => d.accept());
+  await page.goto('/product-manager.html');
+  await page.waitForTimeout(500);
+  await page.evaluate(() => {
+    window.__queued = {};
+    window.MaCatalogPublisher = Object.assign({}, window.MaCatalogPublisher, {
+      isReady: () => true,
+      enqueue: (rows) => rows.forEach((r) => { window.__queued[r.path] = r; }),
+      publish: (files) => { window.__published = files; return Promise.resolve({ ok: true }); }
+    });
+  });
+  await page.fill('#pmAllSearch', 'DR-8');
+  await page.click('#pmAllSearchBtn');
+  await page.locator('#pmAllRows tr').filter({ hasText: 'DR-8' }).first().locator('.pm-row-title').click();
+  const before = await page.evaluate(() => { const p = (window.CATEGORY_PRODUCTS['premium-two-piece'] || []).find((x) => x.id === 'DR-8'); return { image: p.image, images: (p.images || []).slice() }; });
+  // The colour points to the current main photo.
+  await page.click('[data-etab="attributes"]');
+  await page.locator('.pm-color-variation-row').first().locator('.pm-color-photo-opt').first().click();
+  // Replace the main photo.
+  const png = await page.evaluate(() => { const c = document.createElement('canvas'); c.width = 64; c.height = 80; c.getContext('2d').fillRect(0, 0, 64, 80); return c.toDataURL('image/png').split(',')[1]; });
+  await page.locator('.pm-file-input').first().setInputFiles({ name: 'new.png', mimeType: 'image/png', buffer: Buffer.from(png, 'base64') });
+  await expect.poll(() => page.evaluate(() => Object.keys(window.__queued).length)).toBe(2);
+  const newMain = await page.evaluate(() => Object.keys(window.__queued).find((p) => !/-card\.webp$/.test(p)));
+  // Touching the colour again must not bring the old photo back.
+  await page.click('[data-etab="attributes"]');
+  await page.locator('.pm-color-variation-row').first().locator('[data-color-field="label"]').fill('Charcoal Black');
+  await page.click('#pmEditBarSave');
+  await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
+  const file = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
+  const context = { window: {} };
+  vm.runInNewContext(file, context);
+  const product = context.window.CATEGORY_PRODUCTS['premium-two-piece'].find((p) => p.id === 'DR-8');
+  expect(product.image).toBe(newMain);
+  expect(product.colorVariants.map((c) => c.image)).toEqual([newMain]);
+  expect(product.images || []).not.toContain(before.image);
+  expect((product.images || []).length).toBe(before.images.length);
+});
+
+test('Bulk edit: add tags, mark featured and set a % sale on the selected products (PR #109)', async ({ page }) => {
+  await stub(page);
+  let answer = 'eid sale, new';
+  page.on('dialog', (d) => (d.type() === 'prompt' ? d.accept(answer) : d.accept()));
+  await page.goto('/product-manager.html');
+  await page.waitForTimeout(500);
+  await withPublisher(page, false);
+  const full = (file) => { const a = file.indexOf('id: "ABY-MAROON-1"'); return file.slice(a, file.indexOf('\n    }', a)); };
+  const pub = () => page.evaluate(() => window.__published && window.__published.find((f) => f.path === 'category-products.js').content);
+  await page.locator('#pmAllRows tr').filter({ hasText: 'ABY-MAROON-1' }).first().locator('.pm-overview-check').check();
+  await page.selectOption('#pmBulkAction', 'tags');
+  await page.click('#pmBulkApply');
+  await expect.poll(pub).toBeTruthy();
+  expect(full(await pub())).toContain('"eid sale"');
+  await page.evaluate(() => { window.__published = null; });
+  await page.locator('#pmAllRows tr').filter({ hasText: 'ABY-MAROON-1' }).first().locator('.pm-overview-check').check();
+  await page.selectOption('#pmBulkAction', 'feature');
+  await page.click('#pmBulkApply');
+  await expect.poll(pub).toBeTruthy();
+  expect(full(await pub())).toContain('featured: true');
+  await page.evaluate(() => { window.__published = null; });
+  answer = '10';
+  await page.locator('#pmAllRows tr').filter({ hasText: 'ABY-MAROON-1' }).first().locator('.pm-overview-check').check();
+  await page.selectOption('#pmBulkAction', 'sale');
+  await page.click('#pmBulkApply');
+  await expect.poll(pub).toBeTruthy();
+  expect(full(await pub())).toContain('regularPriceByType');
+});
