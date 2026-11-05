@@ -14,7 +14,7 @@ function adminPasswordRecoveryKey_(email) {
 
 function requestAdminPasswordReset_(e) {
   var email = normalizeEmail_(param_(e, 'Email'));
-  if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) return adminPasswordRecoveryReply_();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return adminPasswordRecoveryReply_();
   try { rateLimit_('admin_pw_reset_' + email); } catch (err) { return adminPasswordRecoveryReply_(); }
 
   var user = findAdminByEmail_(email);
@@ -53,7 +53,7 @@ function confirmAdminPasswordReset_(e) {
   var email = normalizeEmail_(param_(e, 'Email'));
   var code = String(param_(e, 'Code') || '').trim();
   var password = String(param_(e, 'Password') || '');
-  if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email) || !/^\\d{6}$/.test(code) || password.length < 8 || password.length > 128) {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !/^\d{6}$/.test(code) || password.length < 8 || password.length > 128) {
     return { ok: false, error: 'INVALID_RESET', message: 'ইমেইল, ৬ সংখ্যার কোড এবং কমপক্ষে ৮ অক্ষরের নতুন পাসওয়ার্ড দিন।' };
   }
   try { rateLimit_('admin_pw_confirm_' + email); } catch (err) {
