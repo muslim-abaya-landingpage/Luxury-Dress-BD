@@ -659,6 +659,25 @@
   }
   setTimeout(function () { if (getSession()) checkPendingSaves(); }, 2500);
 
+  function requestPasswordReset(email) {
+    return apiPost({ RecordType: "AdminPasswordResetRequest", Email: String(email || "").trim().toLowerCase() }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "RESET_REQUEST_FAILED");
+      return res;
+    });
+  }
+
+  function confirmPasswordReset(email, code, password) {
+    return apiPost({
+      RecordType: "AdminPasswordResetConfirm",
+      Email: String(email || "").trim().toLowerCase(),
+      Code: String(code || "").trim(),
+      Password: String(password || "")
+    }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "RESET_CONFIRM_FAILED");
+      return res;
+    });
+  }
+
   g.MaAdmin = {
     markPendingSave: markPendingSave,
     clearPendingSave: clearPendingSave,
@@ -668,6 +687,8 @@
     call: call,
     inboxCall: inboxCall,
     login: login,
+    requestPasswordReset: requestPasswordReset,
+    confirmPasswordReset: confirmPasswordReset,
     logout: logout,
     getSession: getSession,
     verifySession: verifySession,
