@@ -7,15 +7,15 @@
   <title>লাইভ সাপোর্ট ইনবক্স | Muslim Abaya Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root{--ink:#181715;--muted:#77736b;--line:#e9e5dc;--paper:#fff;--wash:#f7f5f1;--gold:#b59657;--green:#14824b;--red:#a4322d;--blue:#2a6db0;--shadow:0 18px 60px rgba(30,24,14,.11);--side:248px}
-    *{box-sizing:border-box}html,body{height:100%}body{margin:0;background:#f3f1ed;color:var(--ink);font:14px/1.5 "Hind Siliguri","DM Sans",system-ui,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}.captcha-box{margin:10px 0;max-width:100%;overflow:hidden}
+    :root{--ink:#1b2738;--muted:#637184;--line:#e4e8ef;--paper:#fff;--wash:#f6f8fb;--gold:#b58a48;--green:#14824b;--red:#a4322d;--blue:#2a6db0;--shadow:0 1px 2px rgba(20,32,54,.04),0 12px 32px rgba(20,32,54,.07);--side:248px}
+    *{box-sizing:border-box}html,body{height:100%}body{margin:0;background:#f4f6f9;color:var(--ink);font:14px/1.5 Inter,"Hind Siliguri",system-ui,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}.captcha-box{margin:10px 0;max-width:100%;overflow:hidden}
     a{color:#775e32}
     /* App shell + admin menu */
     .app{display:grid;grid-template-columns:var(--side) minmax(0,1fr);min-height:100vh}
     .adm-sidebar{background:#17150f;color:#e9e3d6;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:auto;padding:18px 12px}
-    .adm-brand{display:flex;align-items:center;gap:10px;padding:4px 8px 16px;border-bottom:1px solid #ffffff14;margin-bottom:10px}.adm-brand .mark{width:34px;height:34px;border:1px solid var(--gold);border-radius:50%;display:grid;place-items:center;color:var(--gold);font:700 18px "Playfair Display",serif}.adm-brand b{display:block;font:700 15px "Playfair Display",serif;color:#fff}.adm-brand small{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#a99f8b}
+    .adm-brand{display:flex;align-items:center;gap:10px;padding:4px 8px 16px;border-bottom:1px solid #ffffff14;margin-bottom:10px}.adm-brand .mark{width:34px;height:34px;border:1px solid var(--gold);border-radius:50%;display:grid;place-items:center;color:var(--gold);font:700 17px Inter,sans-serif;background:linear-gradient(135deg,#6d5bd0,#8b5cf6);border:0;color:#fff;border-radius:10px}.adm-brand b{display:block;font:750 16px Inter,sans-serif;color:#fff}.adm-brand small{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#d8b77b}
     .adm-sidebar-nav{display:flex;flex-direction:column;gap:2px}
     .adm-sidebar-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;color:#d8d1c2;text-decoration:none;font-size:13.5px;list-style:none;cursor:pointer}
     .adm-sidebar-item:hover{background:#ffffff10;color:#fff}.adm-sidebar-item.is-current{background:#b5965726;color:#f3dfb2}
@@ -33,7 +33,7 @@
     .login-wrap{flex:1;display:grid;place-items:center;padding:28px 16px}.login-card{width:min(430px,100%);background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:28px}
     .eyebrow{font-size:11px;letter-spacing:.12em;color:var(--gold);font-weight:700}.login-card h1{margin:6px 0 6px;font-size:26px}.login-card p{color:var(--muted);margin:0 0 16px}
     .login-card label{display:block;font-size:12px;font-weight:600;margin:12px 0 5px}.login-card input{width:100%;height:42px;border:1px solid var(--line);border-radius:10px;padding:0 12px}
-    .primary-btn{width:100%;height:44px;margin-top:16px;border:0;border-radius:10px;background:var(--ink);color:#fff;font-weight:700}.secondary-btn{width:100%;height:40px;margin-top:8px;border:1px solid var(--line);border-radius:10px;background:#fff}
+    .primary-btn{width:100%;height:44px;margin-top:16px;border:0;border-radius:10px;background:linear-gradient(180deg,#2b4062,#1b2a41);color:#fff;font-weight:700}.secondary-btn{width:100%;height:40px;margin-top:8px;border:1px solid var(--line);border-radius:10px;background:#fff}
     .notice{min-height:20px;margin-top:10px;font-size:12px;color:var(--red)}.notice.success{color:var(--green)}.howto{margin-top:12px;padding:10px 12px;background:var(--wash);border-radius:10px;font-size:12px;color:var(--muted)}
     /* Inbox */
     .shell{flex:1;padding:18px clamp(10px,2vw,24px);min-height:0}.alert-btn .ico{margin-right:4px}
@@ -86,6 +86,7 @@
     }
   </style>
 <link rel="stylesheet" href="admin-responsive.css?v=1">
+<link rel="stylesheet" href="admin-theme.css?v=1">
 </head>
 <body>
 <div class="app">

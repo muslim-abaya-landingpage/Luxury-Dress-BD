@@ -1,9 +1,9 @@
 /* Product Manager → Edit product, drawn like the WordPress / WooCommerce "Edit product" screen.
    Scoped to .pm-woo so the product list and other admin pages are not affected. */
 .pm-woo {
-  --wp-blue: #2271b1; --wp-blue-dark: #135e96; --wp-border: #c3c4c7; --wp-border-soft: #dcdcde; --wp-input: #8c8f94;
-  --wp-text: #3c434a; --wp-muted: #646970; --wp-bg: #f0f0f1; --wp-panel: #fafafa;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", "Hind Siliguri", sans-serif !important;
+  --wp-blue: #23395b; --wp-blue-dark: #8a6326; --wp-border: #e2e7ee; --wp-border-soft: #e9edf2; --wp-input: #cfd6e0;
+  --wp-text: #1c2a3c; --wp-muted: #637184; --wp-bg: #f4f6f9; --wp-panel: #fafbfc;
+  font-family: Inter, "Segoe UI", "Hind Siliguri", system-ui, sans-serif !important;
   font-size: 13px !important; line-height: 1.4em; color: var(--wp-text);
   background: var(--wp-bg); margin: -4px -4px 0; padding: 4px 4px 84px;
 }

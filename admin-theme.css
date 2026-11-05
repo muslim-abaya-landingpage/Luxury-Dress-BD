@@ -1,0 +1,95 @@
+/* Muslim Abaya admin — one shared premium theme.
+   Loaded LAST on every admin page so all screens share the same colours, sidebar,
+   cards, buttons, inputs and tables. Visual only: no layout logic or hidden states. */
+:root{
+ --mt-bg:#f4f6f9;--mt-card:#fff;--mt-line:#e4e8ef;--mt-line-2:#d5dce6;
+ --mt-ink:#1b2738;--mt-muted:#637184;
+ --mt-navy:#1b2a41;--mt-navy-2:#2b4062;
+ --mt-gold:#b58a48;--mt-gold-2:#d8b77b;--mt-gold-ink:#7d5a24;--mt-gold-wash:#fbf6ec;
+ --mt-radius:14px;
+ --mt-shadow:0 1px 2px rgba(20,32,54,.04),0 8px 24px rgba(20,32,54,.05);
+ --mt-shadow-hover:0 2px 4px rgba(20,32,54,.05),0 14px 32px rgba(20,32,54,.09);
+ --mt-ring:0 0 0 3px rgba(181,138,72,.22);
+}
+html:not([data-admin-theme="dark"]) body{
+ background:radial-gradient(1200px 380px at 70% -120px,rgba(216,183,123,.10),transparent 70%),var(--mt-bg)!important;
+ background-attachment:fixed!important;color:var(--mt-ink);
+}
+body{font-family:Inter,"Segoe UI","Hind Siliguri",system-ui,sans-serif!important;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+::selection{background:rgba(216,183,123,.35)}
+
+/* ---- Sidebar: same dark navy card with gold active state on every page ---- */
+.adm-sidebar{
+ background:linear-gradient(180deg,#1c2739 0%,#151d2b 100%)!important;color:#d6deea!important;
+ font-family:Inter,"Segoe UI","Hind Siliguri",system-ui,sans-serif!important;
+}
+.adm-sidebar-brand-text .t1{font-family:Inter,"Segoe UI",sans-serif!important;color:#fff!important;font-weight:750!important;letter-spacing:.01em!important}
+.adm-sidebar-brand-text .t2{color:var(--mt-gold-2)!important;letter-spacing:.14em!important}
+.adm-sidebar .adm-sidebar-item{color:#cfd8e5!important;border-radius:10px!important;transition:background .15s,color .15s}
+.adm-sidebar .adm-sidebar-item svg{color:#9fb0c6}
+.adm-sidebar .adm-sidebar-item:hover{background:rgba(255,255,255,.06)!important;color:#fff!important}
+.adm-sidebar .adm-sidebar-item.is-current,
+.adm-sidebar .adm-sidebar-item[aria-current="page"]{
+ background:linear-gradient(90deg,rgba(216,183,123,.20),rgba(216,183,123,.06))!important;
+ color:#f3d59f!important;box-shadow:inset 3px 0 var(--mt-gold)!important;
+}
+.adm-sidebar .adm-sidebar-item.is-current svg,.adm-sidebar .adm-sidebar-item[aria-current="page"] svg{color:#e6c07f!important}
+.adm-sidebar .adm-nav-group.has-current>summary{color:#fff!important;background:rgba(255,255,255,.07)!important;font-weight:700}
+.adm-sidebar .adm-nav-group.has-current>summary svg{color:#e6c07f!important}
+.adm-sidebar .adm-nav-children{background:rgba(0,0,0,.14)!important;border-radius:10px}
+
+/* ---- Cards / panels ---- */
+.adm-card,.adm-panel,.pn-head,.pn-card,.oi-panel,.pl-card,.pl-admin-header,.pm-wp-box,.pm-wp-list,
+.adm-quick-card,.adm-stat,.wo-box,.om-panel,.sa-panel{
+ border-color:var(--mt-line)!important;border-radius:var(--mt-radius);box-shadow:var(--mt-shadow)!important;
+}
+.adm-quick-card,.adm-stat{transition:box-shadow .2s,transform .2s}
+.adm-quick-card:hover{box-shadow:var(--mt-shadow-hover)!important;transform:translateY(-1px)}
+h1,h2,h3{letter-spacing:-.01em}
+
+/* ---- Buttons ---- */
+.pn-btn,.pl-btn,.adm-btn,.pm-wp-button,.button{border-radius:10px!important;font-weight:600;transition:background .15s,border-color .15s,box-shadow .15s,transform .1s}
+.pn-btn:active,.pl-btn:active,.adm-btn:active,.pm-wp-button:active,.button:active{transform:translateY(1px)}
+.pn-btn.primary,.pn-btn-primary,.pl-btn.primary,.pl-btn-primary,.adm-btn-primary,.pm-wp-primary,.button-primary,.pm-wp-button.button-primary{
+ background:linear-gradient(180deg,var(--mt-navy-2),var(--mt-navy))!important;border-color:var(--mt-navy)!important;color:#fff!important;
+ box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 4px 12px rgba(27,42,65,.18)!important;
+}
+.pn-btn.primary:hover,.pn-btn-primary:hover,.pl-btn.primary:hover,.pl-btn-primary:hover,.adm-btn-primary:hover,.pm-wp-primary:hover,.button-primary:hover{
+ background:linear-gradient(180deg,#324a70,#203251)!important;
+}
+
+/* ---- Inputs ---- */
+.adm-main input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),
+.pn-main input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),
+.pl-main input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),
+.adm-main select,.pn-main select,.pl-main select,.adm-main textarea,.pn-main textarea,.pl-main textarea{
+ border-radius:10px!important;border-color:var(--mt-line-2);transition:border-color .15s,box-shadow .15s;
+}
+input:focus-visible,select:focus-visible,textarea:focus-visible{border-color:var(--mt-gold)!important;box-shadow:var(--mt-ring)!important;outline:0!important}
+button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var(--mt-gold)!important;outline-offset:2px}
+input[type=checkbox],input[type=radio]{accent-color:var(--mt-navy)}
+
+/* ---- Tables ---- */
+html:not([data-admin-theme="dark"]) :is(.adm-main,.pn-main,.pl-main) table thead th{
+ background:#f8f9fb;color:#55627a;font-weight:650;border-bottom:1px solid var(--mt-line)!important;
+}
+.adm-main table tbody tr,.pn-main table tbody tr,.pl-main table tbody tr{transition:background .12s}
+html:not([data-admin-theme="dark"]) :is(.adm-main,.pn-main,.pl-main) table tbody tr:hover{background:#fbf8f1!important}
+
+/* ---- Product manager: same palette, links navy → gold on hover ---- */
+.pm-wp-admin .pm-wp-table thead th,.pm-wp-admin .pm-wp-table thead th a{color:#55627a}
+.pm-wp-admin .pm-row-title{color:var(--mt-navy)!important}
+.pm-wp-admin .pm-row-title:hover{color:var(--mt-gold-ink)!important}
+.pm-wp-admin .pm-wp-table{border-radius:12px;overflow:hidden}
+
+/* ---- Support inbox (own inline styles) ---- */
+.side-backdrop+.adm-sidebar,.adm-sidebar#admSidebar{border-right:0!important}
+
+/* ---- Thin, quiet scrollbars ---- */
+*{scrollbar-width:thin;scrollbar-color:#c7cfdb transparent}
+.adm-sidebar,.adm-sidebar *{scrollbar-color:#3a4a63 transparent}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:#c7cfdb;border-radius:10px;border:3px solid transparent;background-clip:content-box}
+.adm-sidebar::-webkit-scrollbar-thumb{background:#3a4a63;background-clip:content-box}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
