@@ -99,6 +99,8 @@ function doPost(e) {
       return handleSteadfastWebhookPost_(e);
     }
     var type = param_(e, 'RecordType');
+    if (type === 'AdminPasswordResetRequest') return jsonOut_(requestAdminPasswordReset_(e));
+    if (type === 'AdminPasswordResetConfirm') return jsonOut_(confirmAdminPasswordReset_(e));
     if (type === 'AdminLiveStockList' || type === 'AdminLiveStockSet') {
       adminRateLimit_(param_(e, 'Token') || 'admin_global');
       return jsonOut_(adminLiveStockHandle_(type, e));
