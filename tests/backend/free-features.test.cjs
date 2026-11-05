@@ -102,12 +102,29 @@ test('new order from a risky number gets a warning in Admin Note; clean numbers 
   const box = { normalizePhone_, formatCell_, onlineOrderColumn_: (s, c) => c, ADM_COL_ADMIN_NOTE: 40, admReadHistory_: () => rows };
   let rows = historyRows([['01711111111', 'Fake'], ['01711111111', 'Delivered'], ['01933333333', 'Delivered']]);
   vm.createContext(box);
-  vm.runInContext(extractFrom(ADM, 'admNum_') + '\n' + extractFrom(ADM, 'admHistoryForPhone_') + '\n' + extractFrom(CODE, 'flagNewOrderRisk_'), box);
+  vm.runInContext(extractFrom(ADM, 'admNum_') + '\n' + extractFrom(ADM, 'admHistoryForPhone_') + '\n' +
+    extractFrom(CODE, 'assessOrderHistoryRisk_') + '\n' + extractFrom(CODE, 'flagNewOrderRisk_'), box);
   const line = box.flagNewOrderRisk_(sheet, 55, '01711111111', 'NEW');
   assert.match(line, /ঝুঁকি বেশি/);
+  assert.match(line, /90\/100/);
   assert.match(written[55], /Fake 1/);
   assert.equal(box.flagNewOrderRisk_(sheet, 56, '01933333333', 'NEW'), '');
   assert.equal(written[56], undefined);
+});
+
+test('history risk score separates a review signal from a high-risk signal', () => {
+  const box = {};
+  vm.createContext(box);
+  vm.runInContext(extractFrom(CODE, 'assessOrderHistoryRisk_'), box);
+  const review = box.assessOrderHistoryRisk_({ fake: 0, cancelled: 1, returned: 0 }, 67);
+  const high = box.assessOrderHistoryRisk_({ fake: 1, cancelled: 0, returned: 0 }, 0);
+  const clean = box.assessOrderHistoryRisk_({ fake: 0, cancelled: 0, returned: 0 }, 100);
+  assert.equal(review.score, 30);
+  assert.equal(review.level, 'review');
+  assert.equal(high.score, 90);
+  assert.equal(high.level, 'high');
+  assert.equal(clean.score, 0);
+  assert.equal(clean.level, 'low');
 });
 
 test('instant auto-courier holds a risky customer\'s order and still sends clean ones', () => {

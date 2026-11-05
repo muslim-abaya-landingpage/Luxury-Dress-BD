@@ -1685,13 +1685,40 @@ function checkDuplicateOrder_(phone, total, design) {
  * Returns a one-line risk warning (and writes it to the order's Admin Note)
  * when this phone has earlier Fake/cancelled/returned orders; '' otherwise.
  */
+function assessOrderHistoryRisk_(stats, successRate) {
+  stats = stats || {};
+  var score = 0;
+  var reasons = [];
+  var fake = Number(stats.fake) || 0;
+  var failed = (Number(stats.cancelled) || 0) + fake + (Number(stats.returned) || 0);
+  if (fake > 0) {
+    score += 60;
+    reasons.push('আগের Fake অর্ডার আছে');
+  }
+  if (failed >= 2 &amp;&amp; successRate !== null &amp;&amp; Number(successRate) &lt; 50) {
+    score += 35;
+    reasons.push('একাধিক আগের অর্ডার ব্যর্থ; ডেলিভারি সফলতার হার ৫০%-এর নিচে');
+  } else if (failed >= 1 &amp;&amp; successRate !== null &amp;&amp; Number(successRate) &lt; 80) {
+    score += 30;
+    reasons.push('আগের অর্ডার ব্যর্থ এবং ডেলিভারি সফলতার হার ৮০%-এর নিচে');
+  }
+  score = Math.min(100, score);
+  return {
+    score: score,
+    level: score >= 60 ? 'high' : score >= 30 ? 'review' : 'low',
+    reasons: reasons
+  };
+}
+
 function flagNewOrderRisk_(sheet, row, phone, orderId) {
   if (typeof admHistoryForPhone_ !== 'function' || !row) return '';
   var h = admHistoryForPhone_(admReadHistory_(sheet), normalizePhone_(phone), orderId);
-  if (h.risk !== 'high' &amp;&amp; h.risk !== 'medium') return '';
+  var assessment = assessOrderHistoryRisk_(h.stats, h.successRate);
+  if (assessment.level === 'low') return '';
   var s = h.stats;
-  var line = '⚠ ঝুঁকি ' + (h.risk === 'high' ? 'বেশি' : 'মাঝারি') + ': আগের অর্ডার ' + s.total +
-    'টি — ডেলিভারি ' + s.delivered + ', Fake ' + s.fake + ', বাতিল ' + s.cancelled + ', রিটার্ন ' + s.returned +
+  var line = '⚠ ঝুঁকি ' + (assessment.level === 'high' ? 'বেশি' : 'রিভিউ') + ' (' + assessment.score + '/100): ' +
+    assessment.reasons.join(' · ') + ' — আগের অর্ডার ' + s.total +
+    'টি (ডেলিভারি ' + s.delivered + ', Fake ' + s.fake + ', বাতিল ' + s.cancelled + ', রিটার্ন ' + s.returned + ')' +
     (h.successRate === null ? '' : ' (সফলতা ' + h.successRate + '%)');
   var cell = sheet.getRange(row, onlineOrderColumn_(sheet, ADM_COL_ADMIN_NOTE));
   var existing = String(cell.getValue() || '');

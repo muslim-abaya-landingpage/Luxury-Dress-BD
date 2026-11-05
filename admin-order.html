@@ -695,6 +695,9 @@
         var html = o
           ? '<div class="wo-ip-meta">এই অর্ডার: <b>' + esc(o.device || "—") + "</b> · " + esc(o.network || "নেটওয়ার্ক অজানা") + (o.country ? " · " + esc(o.country) : "") + " · " + esc(fmtTime(o.time)) + "</div>"
           : '<p class="pn-note-muted">এই অর্ডারের IP রেকর্ড নেই। IP রেকর্ড ২৪ অক্টোবর ২০২৬ থেকে, শুধু ওয়েবসাইটের অর্ডারে রাখা হয়।</p>';
+        if (o && o.outcome === "risk_review") {
+          html += '<div class="wo-ip-meta" style="color:#8a5a00;font-weight:700">⚠ অর্ডারটি ম্যানুয়াল রিভিউ প্রয়োজন: একই ফোন/IP থেকে অল্প সময়ে একাধিক অর্ডার-চেষ্টা হয়েছে। শুধু IP সংকেতের ভিত্তিতে ব্লক করবেন না।</div>';
+        }
         if (ipInfo.ips && ipInfo.ips.length) {
           html += ipInfo.ips.map(function (x, i) {
             var phones = x.otherPhones && x.otherPhones.length
