@@ -10595,6 +10595,16 @@ function confirmAdminPasswordReset_(e) {
     lock.releaseLock();
   }
 }
+
+/**
+ * Run once from the Apps Script editor as the deployment owner.
+ * This grants MailApp permission before the public web app attempts to send recovery codes.
+ */
+function authorizeAdminPasswordRecoveryMail() {
+  var remaining = MailApp.getRemainingDailyQuota();
+  Logger.log('Admin password recovery mail authorization is ready. Remaining recipient quota: ' + remaining);
+  return { ok: true, remainingDailyQuota: remaining };
+}
 </textarea><br>
 <button type="button" id="copyFile16">AdminPasswordRecovery.gs কপি</button>
 <script>bind("copyFile16", "fileBox16");</script>
