@@ -227,11 +227,11 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   max-width: 1280px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1.25fr 0.7fr 0.75fr 1fr 1fr;
-  gap: 20px 28px;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.25fr) minmax(0, 0.95fr) minmax(0, 1.15fr) minmax(0, 1.15fr);
+  gap: 20px 20px;
   padding: 24px 16px 20px;
   box-sizing: border-box;
-  align-items: start;
+  align-items: stretch;
   width: 100%;
 }
 
@@ -358,6 +358,27 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   list-style: none;
   padding: 0;
   margin: 0;
+}
+
+/* The Shop panel has the longest list. Two balanced columns prevent it from
+   becoming much taller than the neighboring Brand, Contact, and Newsletter cards. */
+#site-footer-mount .anz-col-shop #anz-footer-shop {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 14px;
+  row-gap: 2px;
+  align-content: start;
+}
+
+#site-footer-mount .anz-col-shop #anz-footer-shop li {
+  min-width: 0;
+  margin: 0;
+}
+
+#site-footer-mount .anz-col-shop #anz-footer-shop a {
+  display: block;
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 
 .anz-link-list li {
@@ -617,13 +638,33 @@ a.anz-contact-link:hover {
 
 @media (max-width: 1100px) {
   .anz-footer-main {
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "brand brand"
+      "shop about"
+      "contact newsletter";
     gap: 14px 16px;
     padding: 16px 18px 12px;
   }
 
   .anz-col-brand {
-    grid-column: 1 / -1;
+    grid-area: brand;
+  }
+
+  .anz-col-shop {
+    grid-area: shop;
+  }
+
+  .anz-col-links {
+    grid-area: about;
+  }
+
+  .anz-col-contact {
+    grid-area: contact;
+  }
+
+  .anz-col-newsletter {
+    grid-area: newsletter;
   }
 
   .anz-text {
@@ -834,6 +875,12 @@ a.anz-contact-link:hover {
   .anz-link-list {
     margin: 0;
     padding: 0;
+  }
+
+  #site-footer-mount .anz-col-shop #anz-footer-shop {
+    grid-template-columns: 1fr;
+    column-gap: 0;
+    row-gap: 4px;
   }
 
   .anz-link-list a {
