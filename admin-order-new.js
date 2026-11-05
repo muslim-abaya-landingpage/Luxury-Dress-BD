@@ -299,6 +299,14 @@
       customerList = customers(res.orders || []);
       $("noCustList").innerHTML = customerList.map(function (c) { return '<option value="' + esc(c.name + " · " + c.phone) + '">'; }).join("");
       $("noNextId").textContent = "নতুন";
+      // Opened from the customer profile (?phone=01…): fill that customer's last name and address.
+      var askPhone = "";
+      try { askPhone = (new URLSearchParams(location.search).get("phone") || "").replace(/\D/g, "").slice(-11); } catch (qErr) {}
+      if (/^01\d{9}$/.test(askPhone) && !$("noPhone").value) {
+        $("noCustomer").value = askPhone;
+        fillCustomer();
+        if (!$("noPhone").value) $("noPhone").value = askPhone;
+      }
     }).catch(function () {});
   }
 

@@ -36,6 +36,9 @@
 </style>
 <link rel="stylesheet" href="admin-responsive.css?v=1">
 <link rel="stylesheet" href="admin-theme.css?v=1">
+<link rel="manifest" href="/admin-manifest.webmanifest">
+<meta name="theme-color" content="#1b2a41">
+<link rel="apple-touch-icon" href="/images/admin/admin-icon-192.png">
 </head>
 <body class="adm-body">
   <div class="adm-shell">
@@ -53,6 +56,7 @@
 <details class="adm-nav-group" name="adm-navigation"><summary class="adm-sidebar-item" title="অর্ডার ও হিসাব"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z M9 7h6M9 11h6M9 15h4"/></svg><span>অর্ডার ও হিসাব</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
 <a class="adm-sidebar-item adm-nav-child" href="admin-orders.html"><span>অর্ডার প্যানেল</span></a>
 <a class="adm-sidebar-item adm-nav-child" href="admin-operations.html"><span>হিসাব ও রিটার্ন</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-profit.html"><span>পণ্যভিত্তিক লাভ</span></a>
 </div></details>
 <details class="adm-nav-group" name="adm-navigation"><summary class="adm-sidebar-item" title="পণ্য ও স্টক"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="6" width="16" height="15" rx="2"/><path d="M9 6V5a3 3 0 0 1 6 0v1M9 10a3 3 0 0 0 6 0"/></svg><span>পণ্য ও স্টক</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
 <a class="adm-sidebar-item adm-nav-child" href="product-manager.html"><span>প্রোডাক্ট ম্যানেজার</span></a>
@@ -61,14 +65,17 @@
 <a class="adm-sidebar-item adm-nav-child" href="product-links.html"><span>প্রোডাক্ট লিংক</span></a>
 </div></details>
 <details class="adm-nav-group" name="adm-navigation"><summary class="adm-sidebar-item" title="কাস্টমার ইনবক্স"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h18v13H8l-5 4V4ZM7 9h10M7 13h7"/></svg><span>কাস্টমার ইনবক্স</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
+<a class="adm-sidebar-item adm-nav-child" href="admin-customers.html"><span>কাস্টমার প্রোফাইল</span></a>
 <a class="adm-sidebar-item adm-nav-child" href="admin-inbox.html"><span>বর্তমান কাস্টমার ইনবক্স</span></a>
 <a class="adm-sidebar-item adm-nav-child" href="admin-support-inbox.html"><span>রিয়েল-টাইম লাইভ সাপোর্ট</span></a>
 <a class="adm-sidebar-item adm-nav-child" href="support-agent-telegram.html"><span>টেলিগ্রাম সাপোর্ট এজেন্ট</span></a>
 </div></details>
 <details class="adm-nav-group" name="adm-navigation"><summary class="adm-sidebar-item" title="সেটিংস ও অন্যান্য"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 9v12"/></svg><span>সেটিংস ও অন্যান্য</span><svg class="adm-nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div class="adm-nav-children">
+<a class="adm-sidebar-item adm-nav-child" href="admin-setup.html"><span>Setup ও স্ট্যাটাস</span></a>
 <a class="adm-sidebar-item adm-nav-child" href="admin-staff.html"><span>স্টাফ ম্যানেজমেন্ট</span></a>
 <a class="adm-sidebar-item adm-nav-child" href="admin-growth.html"><span>গ্রোথ টুলস</span></a>
 <a class="adm-sidebar-item adm-nav-child" href="admin-links.html"><span>পরিচালনা লিংক</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-activity.html"><span>কার্যকলাপ লগ</span></a>
 </div></details>
 </nav>
       <div class="adm-sidebar-foot">
@@ -98,14 +105,18 @@
             <div><span class="dzc-hello" id="dzHello">Welcome back,</span> <h2 id="dzName">Admin</h2></div>
             <span class="dzc-date" id="dzDate"></span>
           </div>
+          <div class="dzc-range" id="dzRange" role="group" aria-label="হিসাবের সময়সীমা">
+            <button type="button" data-range="today">আজ</button><button type="button" data-range="7d">৭ দিন</button><button type="button" data-range="30d">৩০ দিন</button><button type="button" data-range="month">এই মাস</button><button type="button" data-range="all">সব সময়</button><button type="button" data-range="custom">তারিখ বাছুন</button>
+            <span class="dzc-range-custom" id="dzRangeCustom" hidden><input type="date" id="dzFrom" aria-label="শুরুর তারিখ"><span aria-hidden="true">–</span><input type="date" id="dzTo" aria-label="শেষ তারিখ"><button type="button" class="dzc-range-go" id="dzRangeGo">দেখুন</button></span>
+          </div>
           <div class="dzc-kpis adm-commerce-kpis">
-            <div class="dzc-kpi adm-kpi-revenue"><span>Total Sales / Order Value</span><b id="admOverviewRevenue">—</b><small>লাইফটাইম · লাভ নয়</small></div>
-            <div class="dzc-kpi"><span>Total Orders</span><b id="admOverviewOrders">—</b><small>লাইফটাইম রিপোর্ট</small></div>
+            <div class="dzc-kpi adm-kpi-revenue"><span>Total Sales / Order Value</span><b id="admOverviewRevenue">—</b><small data-kpi-scope>লাইফটাইম · লাভ নয়</small></div>
+            <div class="dzc-kpi"><span>Total Orders</span><b id="admOverviewOrders">—</b><small data-kpi-scope>লাইফটাইম রিপোর্ট</small></div>
             <div class="dzc-kpi"><span>Products in Inventory</span><b id="admOverviewProducts">—</b><small>স্টক ট্র্যাকিং ডেটা</small></div>
-            <div class="dzc-kpi"><span>Total Customers</span><b id="admOverviewCustomers">—</b><small>সর্বশেষ ১০০ অর্ডারে ইউনিক</small></div>
-            <div class="dzc-kpi"><span>Pending Orders</span><b id="admOverviewPending">—</b><small>সর্বশেষ ১০০ অর্ডার</small></div>
-            <div class="dzc-kpi"><span>Delivered Orders</span><b id="admOverviewDelivered">—</b><small>সর্বশেষ ১০০ অর্ডার</small></div>
-            <div class="dzc-kpi"><span>Cancelled Orders</span><b id="admOverviewCancelled">—</b><small>সর্বশেষ ১০০ অর্ডার</small></div>
+            <div class="dzc-kpi"><span>Total Customers</span><b id="admOverviewCustomers">—</b><small data-kpi-scope>সর্বশেষ ১০০ অর্ডারে ইউনিক</small></div>
+            <div class="dzc-kpi"><span>Pending Orders</span><b id="admOverviewPending">—</b><small data-kpi-scope>সর্বশেষ ১০০ অর্ডার</small></div>
+            <div class="dzc-kpi"><span>Delivered Orders</span><b id="admOverviewDelivered">—</b><small data-kpi-scope>সর্বশেষ ১০০ অর্ডার</small></div>
+            <div class="dzc-kpi"><span>Cancelled Orders</span><b id="admOverviewCancelled">—</b><small data-kpi-scope>সর্বশেষ ১০০ অর্ডার</small></div>
             <div class="dzc-kpi adm-kpi-stock"><span>Low Stock Products</span><b id="admOverviewLowStock">—</b><small>কম / শেষ স্টক · ইউনিক পণ্য</small></div>
           </div>
           <p class="dzc-note" id="dzScopeNote">রাজস্ব ও মোট অর্ডার লাইফটাইম রিপোর্ট থেকে; অন্যান্য অর্ডার-ভিত্তিক হিসাব সর্বশেষ ১০০টি লোড করা অর্ডারের ওপর।</p>
@@ -188,7 +199,7 @@
         <section class="dz-card adm-feature-card" aria-labelledby="admReportHeading">
           <div class="adm-feature-head adm-report-head">
             <div><h3 id="admReportHeading">Sales & Performance Reports</h3><small id="admReportState" role="status" aria-live="polite">Loading reports…</small></div>
-            <div class="adm-report-controls"><label for="admReportRange">Date Range</label><select id="admReportRange"><option value="all">All Time</option><option value="today">Today</option><option value="7d">Last 7 Days</option><option value="30d">Last 30 Days</option><option value="custom">Custom Range</option></select><span id="admReportCustomDates" hidden><label for="admReportFrom">From</label><input type="date" id="admReportFrom"><label for="admReportTo">To</label><input type="date" id="admReportTo"></span><button type="button" class="adm-btn adm-btn-secondary" id="admReportLoad">View Report</button><button type="button" class="adm-btn adm-btn-secondary" id="admReportExport" disabled>Download CSV</button></div>
+            <div class="adm-report-controls"><label for="admReportRange">Date Range</label><select id="admReportRange"><option value="all">All Time</option><option value="today">Today</option><option value="7d">Last 7 Days</option><option value="30d">Last 30 Days</option><option value="month">This Month</option><option value="custom">Custom Range</option></select><span id="admReportCustomDates" hidden><label for="admReportFrom">From</label><input type="date" id="admReportFrom"><label for="admReportTo">To</label><input type="date" id="admReportTo"></span><button type="button" class="adm-btn adm-btn-secondary" id="admReportLoad">View Report</button><button type="button" class="adm-btn adm-btn-secondary" id="admReportExport" disabled>Download CSV</button></div>
           </div>
           <div class="adm-feature-error" id="admReportError" role="alert" hidden></div>
           <div id="admReportBody" hidden>
@@ -216,5 +227,7 @@
   <script src="admin-dashboard-features.js?v=20261105-lazy-analytics"></script>
   <script src="admin-order-status.js?v=source"></script>
   <script src="admin-dashboard-main.js?v=source"></script>
+<script src="admin-search.js?v=1" defer></script>
+<script src="admin-app.js?v=1" defer></script>
 </body>
 </html>

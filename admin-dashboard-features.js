@@ -292,12 +292,7 @@
     byId("admReportRangeLabel").textContent = rangeLabel(data);
     byId("admReportOrders").textContent = Number(summary.totalOrders || 0).toLocaleString("en-US");
     byId("admReportOrderValue").textContent = money(summary.totalOrderValue);
-    if (data.range === "all") {
-      var overviewOrders = byId("admOverviewOrders");
-      var overviewRevenue = byId("admOverviewRevenue");
-      if (overviewOrders) overviewOrders.textContent = Number(summary.totalOrders || 0).toLocaleString("en-US");
-      if (overviewRevenue) overviewRevenue.textContent = money(summary.totalOrderValue);
-    }
+    renderOverview(data);
     byId("admReportDeliveredValue").textContent = money(summary.deliveredSalesValue);
     byId("admReportDelivered").textContent = Number(summary.deliveredCount || 0).toLocaleString("en-US");
     byId("admReportCancelRate").textContent = percent(summary.cancellationRate);
@@ -315,6 +310,68 @@
     byId("admReportError").hidden = true;
     window.__maDashboardSalesReport = data;
     byId("admReportExport").disabled = false;
+  }
+  var RANGE_NAMES = { today: "আজ", "7d": "গত ৭ দিন", "30d": "গত ৩০ দিন", month: "এই মাস", all: "সব সময়", custom: "" };
+  /** Top KPI cards follow the chosen range when the server sends the full summary (pending/customers). */
+  function renderOverview(data) {
+    var summary = data.summary || {};
+    var full = typeof summary.pendingCount === "number" && typeof summary.customerCount === "number";
+    if (!full && data.range !== "all") return;
+    var set = function (id, value) { var node = byId(id); if (node) node.textContent = value; };
+    var n = function (v) { return Number(v || 0).toLocaleString("en-US"); };
+    set("admOverviewOrders", n(summary.totalOrders));
+    set("admOverviewRevenue", money(summary.totalOrderValue));
+    if (!full) return;
+    set("admOverviewCustomers", n(summary.customerCount));
+    set("admOverviewPending", n(summary.pendingCount));
+    set("admOverviewDelivered", n(summary.deliveredCount));
+    set("admOverviewCancelled", n(Number(summary.cancelledCount || 0) + Number(summary.returnedCount || 0)));
+    window.__maOverviewFromServer = data.range;
+    var label = (RANGE_NAMES[data.range] || "") || rangeLabel(data);
+    Array.prototype.forEach.call(document.querySelectorAll("[data-kpi-scope]"), function (node) {
+      node.textContent = node.parentNode.querySelector("#admOverviewRevenue") ? label + " · লাভ নয়" : label;
+    });
+    var note = byId("dzScopeNote");
+    if (note) note.textContent = "সময়সীমা: " + rangeLabel(data) + " · পুরো অর্ডার শিট থেকে হিসাব" + (summary.repeatCustomerCount ? " · " + n(summary.repeatCustomerCount) + " জন একাধিকবার কিনেছেন" : "") + ".";
+  }
+  function syncRangeChips() {
+    var value = byId("admReportRange").value;
+    Array.prototype.forEach.call(document.querySelectorAll("#dzRange [data-range]"), function (btn) {
+      btn.setAttribute("aria-pressed", String(btn.getAttribute("data-range") === value));
+    });
+    var custom = byId("dzRangeCustom");
+    if (custom) custom.hidden = value !== "custom";
+  }
+  function chooseRange(range) {
+    byId("admReportRange").value = range;
+    try { localStorage.setItem("ma_dash_range", range); } catch (e) {}
+    toggleCustomDates();
+    syncRangeChips();
+    if (range === "custom") {
+      var from = byId("dzFrom");
+      if (from && !from.value) from.focus();
+      return;
+    }
+    loadAnalytics();
+  }
+  function initRangeChips() {
+    var box = byId("dzRange");
+    if (!box) return;
+    var saved = "";
+    try { saved = localStorage.getItem("ma_dash_range") || ""; } catch (e) {}
+    if (saved && saved !== "custom" && byId("admReportRange").querySelector('option[value="' + saved + '"]')) byId("admReportRange").value = saved;
+    box.addEventListener("click", function (event) {
+      var btn = event.target.closest("[data-range]");
+      if (btn) chooseRange(btn.getAttribute("data-range"));
+    });
+    byId("dzRangeGo").addEventListener("click", function () {
+      byId("admReportFrom").value = byId("dzFrom").value;
+      byId("admReportTo").value = byId("dzTo").value;
+      loadAnalytics();
+    });
+    byId("admReportRange").addEventListener("change", syncRangeChips);
+    syncRangeChips();
+    if (byId("admReportRange").value !== "custom") loadAnalytics();
   }
   function loadAnalytics() {
     if (state.analyticsBusy || !window.MaAdmin || !MaAdmin.getSession || !MaAdmin.getSession()) return Promise.resolve();
@@ -400,6 +457,7 @@
     byId("admRefresh").addEventListener("click", function () { refreshAlerts(true); refreshTasks(true); if (document.querySelector(".adm-dashboard-reports[open]")) loadAnalytics(); });
     byId("admReportRange").addEventListener("change", function () { toggleCustomDates(); if (this.value !== "custom") loadAnalytics(); });
     byId("admReportExport").addEventListener("click", exportCsv);
+    initRangeChips();
     toggleCustomDates();
     refreshAlerts();
     refreshTasks(false);

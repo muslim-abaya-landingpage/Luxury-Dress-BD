@@ -209,3 +209,14 @@
 /*.csv
   Content-Type: text/csv; charset=utf-8
   Cache-Control: public, max-age=300, must-revalidate
+
+# Admin app service worker: always fetch the newest version.
+/admin-sw.js
+  ! Cache-Control
+  Cache-Control: no-cache
+  Service-Worker-Allowed: /admin
+
+/admin-manifest.webmanifest
+  ! Cache-Control
+  Cache-Control: public, max-age=3600
+  Content-Type: application/manifest+json

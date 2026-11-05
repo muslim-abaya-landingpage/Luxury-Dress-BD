@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8"><title>Apps Script কোড</title><style>body { font-family: system-ui, sans-serif; margin: 16px; max-width: 960px; } textarea { width: 100%; height: 52vh; font: 11px Consolas, monospace; } button { margin-top: 10px; padding: 12px 20px; font-size: 15px; cursor: pointer; } .step { background: #fff8e1; border: 1px solid #f0d58a; padding: 10px 14px; border-radius: 6px; }</style></head><body><h1>Apps Script কোড (সম্পূর্ণ project)</h1><p>এই page-এ canonical project-এর সব source file আছে: Code.gs, AdminOrders.gs, FixSheetHeaders.gs, AdminPasswordRecovery.gs, BoostAutoDate.gs, CatalogPublish.gs, CourierIntegrationAudit.gs, DataFixes.gs, Fix-doGet.gs, InstallDateTrigger.gs, LiveStock.gs, Monitor.gs, Operations.gs, OrderSync.gs, ProductPicker.html, SizeCore.gs</p><div class="step"><p><strong>গুরুত্বপূর্ণ:</strong> Admin dashboard-এর সব API চালাতে নিচের সব ফাইল একই Apps Script project-এ রাখতে হবে। <code>.gs</code> ফাইলের জন্য <strong>＋ → Script</strong>, আর <code>.html</code> ফাইলের জন্য <strong>＋ → HTML</strong> ব্যবহার করুন; একই নাম রেখে প্রতিটি কোড সংশ্লিষ্ট ফাইলে কপি করুন। একাধিক <code>doGet</code> function রাখবেন না—canonical router শুধু <code>Code.gs</code>-এ।</p><ol><li>প্রতিটি source file-এর নাম অনুযায়ী Apps Script file তৈরি বা update করুন।</li><li><strong>Save</strong> চাপুন এবং <code>npm run test:backend</code> parity test পাস হয়েছে কি নিশ্চিত করুন।</li><li><strong>Deploy → Manage deployments → Edit → Version: New version → Deploy</strong> করে বিদ্যমান Web App URL রাখুন।</li></ol></div><h2>1. Code.gs</h2>
+<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8"><title>Apps Script কোড</title><style>body { font-family: system-ui, sans-serif; margin: 16px; max-width: 960px; } textarea { width: 100%; height: 52vh; font: 11px Consolas, monospace; } button { margin-top: 10px; padding: 12px 20px; font-size: 15px; cursor: pointer; } .step { background: #fff8e1; border: 1px solid #f0d58a; padding: 10px 14px; border-radius: 6px; }</style></head><body><h1>Apps Script কোড (সম্পূর্ণ project)</h1><p>এই page-এ canonical project-এর সব source file আছে: Code.gs, AdminOrders.gs, FixSheetHeaders.gs, ActivityLog.gs, AdminPasswordRecovery.gs, BoostAutoDate.gs, CatalogPublish.gs, CourierIntegrationAudit.gs, DataFixes.gs, Fix-doGet.gs, InstallDateTrigger.gs, LiveStock.gs, Monitor.gs, Operations.gs, OrderSync.gs, ProductPicker.html, ProductProfit.gs, SetupStatus.gs, SizeCore.gs</p><div class="step"><p><strong>গুরুত্বপূর্ণ:</strong> Admin dashboard-এর সব API চালাতে নিচের সব ফাইল একই Apps Script project-এ রাখতে হবে। <code>.gs</code> ফাইলের জন্য <strong>＋ → Script</strong>, আর <code>.html</code> ফাইলের জন্য <strong>＋ → HTML</strong> ব্যবহার করুন; একই নাম রেখে প্রতিটি কোড সংশ্লিষ্ট ফাইলে কপি করুন। একাধিক <code>doGet</code> function রাখবেন না—canonical router শুধু <code>Code.gs</code>-এ।</p><ol><li>প্রতিটি source file-এর নাম অনুযায়ী Apps Script file তৈরি বা update করুন।</li><li><strong>Save</strong> চাপুন এবং <code>npm run test:backend</code> parity test পাস হয়েছে কি নিশ্চিত করুন।</li><li><strong>Deploy → Manage deployments → Edit → Version: New version → Deploy</strong> করে বিদ্যমান Web App URL রাখুন।</li></ol></div><h2>1. Code.gs</h2>
 <textarea id="codeBox" readonly>/**
  * Muslim Abaya — সম্পূর্ণ Web App (এক ফাইলে পেস্ট করুন)
  * Code.gs → Ctrl+A → Ctrl+V → Save → Deploy → New version
@@ -92,6 +92,7 @@ function doGet(e) {
 
 function doPost(e) {
   try {
+    if (typeof adminActivityRequest_ !== 'undefined') adminActivityRequest_ = e; // ActivityLog.gs records successful admin changes
     if (e &amp;&amp; e.postData &amp;&amp; e.postData.contents &amp;&amp;
         e.postData.contents.indexOf('"object":"page"') !== -1) {
       return messengerWebhook_(e);
@@ -222,6 +223,21 @@ function doPost(e) {
     }
     if (type === 'AdminStockCsvCommit') {
       return jsonOut_(commitAdminStockCsvBatch_(e));
+    }
+    if (type === 'AdminActivityList') {
+      return jsonOut_(adminActivityList_(e));
+    }
+    if (type === 'AdminProductProfit') {
+      return jsonOut_(adminProductProfit_(e));
+    }
+    if (type === 'AdminProductCostsSave') {
+      return jsonOut_(adminProductCostsSave_(e));
+    }
+    if (type === 'AdminSetupStatus') {
+      return jsonOut_(getAdminSetupStatus_(e));
+    }
+    if (type === 'AdminSetupAction') {
+      return jsonOut_(runAdminSetupAction_(e));
     }
     if (type === 'AdminAnalyticsV2') {
       return jsonOut_(getAdminAnalyticsV2_(e));
@@ -3476,6 +3492,9 @@ function SHA256_Hash(input) {
 // ── Helpers + Auth ──
 
 function jsonOut_(obj) {
+  if (typeof adminActivityLog_ === 'function') {
+    try { adminActivityLog_(obj); } catch (logErr) {}
+  }
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
 
@@ -4056,6 +4075,15 @@ function sendDailySummaryEmail_() {
       '\n\nঅর্ডার প্যানেলে Order ID দিয়ে খুঁজুন।';
     }
     result.stuck = stuck.length;
+    try {
+      var low = dailySummaryLowStock_();
+      if (low.length) {
+        body += '\n\n📉 স্টক কম / শেষ (' + low.length + 'টি):\n' + low.slice(0, 10).map(function (x) {
+          return '• ' + x.name + (x.variant ? ' (' + x.variant + ')' : '') + ' — ' + (x.available &lt;= 0 ? 'শেষ' : x.available + 'টি বাকি');
+        }).join('\n') + (low.length > 10 ? '\n…আরও ' + (low.length - 10) + 'টি' : '');
+      }
+      result.lowStock = low.length;
+    } catch (lowErr) {}
     var subject = '📊 গতকালের সেলস সামারি — ' + yKey;
     if (emails.length) {
       try { MailApp.sendEmail({ to: emails.join(','), subject: subject, body: body }); result.email = true; }
@@ -4098,6 +4126,20 @@ function findStuckOrders_(data, nowMs) {
     }
   }
   return out.sort(function (a, b) { return b.age - a.age; });
+}
+
+/** Tracked stock variants at or below their low-stock threshold (same rule as the dashboard). */
+function dailySummaryLowStock_() {
+  var out = [];
+  var rows = ensureStockVariantsSheet_().getDataRange().getValues();
+  for (var i = 1; i &lt; rows.length; i++) {
+    var r = rows[i];
+    if (!(String(r[4]).toUpperCase() === 'TRUE' || r[4] === true)) continue;
+    var available = Number(r[5]) || 0;
+    var threshold = (r[7] === '' || r[7] === null || typeof r[7] === 'undefined') ? STOCK_LOW_DEFAULT_THRESHOLD_ : Number(r[7]);
+    if (available &lt;= threshold) out.push({ name: String(r[1] || r[0] || ''), variant: String(r[3] || ''), available: available });
+  }
+  return out.sort(function (a, b) { return a.available - b.available; });
 }
 
 function installDailySummaryTrigger_() {
@@ -7074,6 +7116,8 @@ function bdRangeBounds_(range, fromStr, toStr) {
   } else if (range === '30d') {
     var d30 = new Date(now.getTime() - 29 * 24 * 60 * 60 * 1000);
     fromKey = Utilities.formatDate(d30, 'GMT+6', 'yyyy-MM-dd'); toKey = todayKey;
+  } else if (range === 'month') {
+    fromKey = todayKey.slice(0, 8) + '01'; toKey = todayKey;
   } else if (range === 'all') {
     fromKey = ''; toKey = todayKey;
   } else if (range === 'custom') {
@@ -7111,8 +7155,10 @@ function getAdminAnalyticsV2_(e) {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
   var summary = {
     totalOrders: 0, confirmedCount: 0, cancelledCount: 0, deliveredCount: 0, returnedCount: 0,
-    totalOrderValue: 0, deliveredSalesValue: 0
+    totalOrderValue: 0, deliveredSalesValue: 0,
+    pendingCount: 0, shippedCount: 0, customerCount: 0, repeatCustomerCount: 0
   };
+  var customerOrders = {}; // normalized phone -> orders in range
   var productSales = {}; // id -> { name, qty }
   var categorySales = {}; // category -> qty
   var sizeSales = {}; // size -> qty
@@ -7156,6 +7202,10 @@ function getAdminAnalyticsV2_(e) {
       else if (isPlainCancel) summary.cancelledCount++;
 
       if (status === 'confirmed') summary.confirmedCount++;
+      if (!status || status.indexOf('pend') !== -1) summary.pendingCount++;
+      if (status.indexOf('ship') !== -1) summary.shippedCount++;
+      var custPhone = normalizePhone_(r[2]);
+      if (custPhone) customerOrders[custPhone] = (customerOrders[custPhone] || 0) + 1;
       if (status === 'delivered') {
         summary.deliveredCount++;
         summary.deliveredSalesValue += total;
@@ -7205,6 +7255,10 @@ function getAdminAnalyticsV2_(e) {
     }
   }
 
+  Object.keys(customerOrders).forEach(function (ph) {
+    summary.customerCount++;
+    if (customerOrders[ph] >= 2) summary.repeatCustomerCount++;
+  });
   summary.cancellationRate = summary.totalOrders ? ((summary.cancelledCount + summary.returnedCount) / summary.totalOrders) : 0;
   summary.deliverySuccessRate = summary.totalOrders ? (summary.deliveredCount / summary.totalOrders) : 0;
 
@@ -8618,8 +8672,106 @@ function setupOnlineOrderHeadersNow() {
 }
 </textarea><br>
 <button type="button" id="copyFix">FixSheetHeaders.gs কপি</button>
-<h2>4. AdminPasswordRecovery.gs</h2>
+<h2>4. ActivityLog.gs</h2>
 <textarea id="fileBox4" readonly>/**
+ * Admin activity log: who changed what, and when.
+ * doPost stores the request in adminActivityRequest_; jsonOut_ calls adminActivityLog_
+ * with the response. Only successful CHANGES are written (no reads, no logins), and only a
+ * short whitelist of fields — never tokens, passwords, file contents or full payloads.
+ * Sheet: "Admin Activity". Reading it (AdminActivityList) is owner-only.
+ */
+var adminActivityRequest_ = null;
+var adminActivityDone_ = false;
+var ADMIN_ACTIVITY_SHEET_ = 'Admin Activity';
+var ADMIN_ACTIVITY_HEADERS_ = ['Time', 'Admin', 'Role', 'Action', 'Target', 'Details'];
+var ADMIN_ACTIVITY_LABELS_ = {
+  AdminOrderUpdate: 'অর্ডার আপডেট', AdminOrderCreate: 'নতুন অর্ডার', AdminManualOrderCreate: 'নতুন অর্ডার (ম্যানুয়াল)',
+  AdminSendCourier: 'কুরিয়ারে পাঠানো', AdminBlockCustomer: 'কাস্টমার ব্লক/আনব্লক',
+  AdminCatalogPublish: 'পণ্য পাবলিশ', AdminPublishFile: 'ফাইল পাবলিশ', AdminUploadImage: 'ছবি আপলোড', AdminDeleteImage: 'ছবি মুছে ফেলা',
+  AdminLiveStockSet: 'লাইভ স্টক বদল', AdminStockSet: 'স্টক বদল', AdminStockVariantSave: 'স্টক (রং/সাইজ) বদল',
+  AdminStockQuickAdjust: 'স্টক দ্রুত বদল', AdminStockCsvCommit: 'স্টক CSV ইমপোর্ট', AdminStockMigrate: 'স্টক মাইগ্রেশন',
+  AdminStaffSave: 'স্টাফ যোগ/বদল', AdminStaffDelete: 'স্টাফ মুছে ফেলা', AdminGrowthDismiss: 'গ্রোথ আইটেম মুছে ফেলা',
+  AdminSetupAction: 'সেটআপ কাজ', AdminOperationsSave: 'হিসাব/রিটার্ন সেভ', AdminProductCostsSave: 'পণ্যের কেনা দাম সেভ'
+};
+var ADMIN_ACTIVITY_FIELDS_ = ['OrderId', 'Status', 'CourierStatus', 'Block', 'Phone', 'ProductId', 'Variant', 'Available', 'Reason',
+  'Path', 'Message', 'Action', 'Email', 'Role', 'Kind', 'Count'];
+
+function adminActivityText_(value, max) {
+  var s = String(value == null ? '' : value).replace(/[\r\n\t]+/g, ' ').trim();
+  if (/^[=+\-@]/.test(s)) s = "'" + s; // never let the sheet treat it as a formula
+  return s.length > max ? s.slice(0, max - 1) + '…' : s;
+}
+
+function adminActivityLog_(response) {
+  var e = adminActivityRequest_;
+  if (adminActivityDone_ || !e || !response || response.ok !== true) return;
+  var type = String(param_(e, 'RecordType') || '');
+  if (!Object.prototype.hasOwnProperty.call(ADMIN_ACTIVITY_LABELS_, type)) return;
+  adminActivityDone_ = true;
+  try {
+    var v = verifyAdminSession_(param_(e, 'Token'));
+    if (!v || !v.ok) return;
+    var details = [];
+    ADMIN_ACTIVITY_FIELDS_.forEach(function (key) {
+      var val = param_(e, key);
+      if (val !== '' &amp;&amp; val != null) details.push(key + '=' + adminActivityText_(val, 80));
+    });
+    if (type === 'AdminCatalogPublish') {
+      try {
+        var payload = JSON.parse(param_(e, 'Payload') || '{}');
+        if (payload &amp;&amp; payload.message) details.push('Message=' + adminActivityText_(payload.message, 120));
+      } catch (pe) {}
+    }
+    var target = param_(e, 'OrderId') || param_(e, 'ProductId') || param_(e, 'Phone') || param_(e, 'Path') || param_(e, 'Email') || response.orderId || '';
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sh = ss.getSheetByName(ADMIN_ACTIVITY_SHEET_);
+    if (!sh) {
+      sh = ss.insertSheet(ADMIN_ACTIVITY_SHEET_);
+      sh.getRange(1, 1, 1, ADMIN_ACTIVITY_HEADERS_.length).setValues([ADMIN_ACTIVITY_HEADERS_]);
+      sh.setFrozenRows(1);
+    }
+    sh.appendRow([
+      Utilities.formatDate(new Date(), 'Asia/Dhaka', 'yyyy-MM-dd HH:mm:ss'),
+      adminActivityText_(v.email || v.phone || v.name || '', 120),
+      v.role === 'staff' ? 'staff' : 'admin',
+      type,
+      adminActivityText_(target, 120),
+      adminActivityText_(details.join(' · '), 400)
+    ]);
+  } catch (err) {
+    try { console.log('ADMIN_ACTIVITY_LOG_FAILED ' + (err &amp;&amp; err.message || err)); } catch (x) {}
+  }
+}
+
+/** Newest first. Optional Admin (email/phone) and Q (text) filters. Owner only. */
+function adminActivityList_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var owner = requireOwnerAdmin_(v);
+  if (owner) return owner;
+  var limit = Math.max(1, Math.min(500, parseInt(param_(e, 'Limit'), 10) || 200));
+  var who = String(param_(e, 'Admin') || '').trim().toLowerCase();
+  var q = String(param_(e, 'Q') || '').trim().toLowerCase();
+  var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ADMIN_ACTIVITY_SHEET_);
+  var items = [], admins = {};
+  if (sh &amp;&amp; sh.getLastRow() >= 2) {
+    var start = Math.max(2, sh.getLastRow() - 3000 + 1);
+    var rows = sh.getRange(start, 1, sh.getLastRow() - start + 1, ADMIN_ACTIVITY_HEADERS_.length).getDisplayValues();
+    for (var i = rows.length - 1; i >= 0 &amp;&amp; items.length &lt; limit; i--) {
+      var r = rows[i];
+      var admin = String(r[1] || '');
+      if (admin) admins[admin] = true;
+      if (who &amp;&amp; admin.toLowerCase() !== who) continue;
+      if (q &amp;&amp; r.join(' ').toLowerCase().indexOf(q) === -1) continue;
+      items.push({ time: r[0], admin: admin, role: r[2], type: r[3], label: ADMIN_ACTIVITY_LABELS_[r[3]] || r[3], target: r[4], details: r[5] });
+    }
+  }
+  return { ok: true, items: items, admins: Object.keys(admins).sort() };
+}
+</textarea><br>
+<button type="button" id="copyFile4">ActivityLog.gs কপি</button>
+<h2>5. AdminPasswordRecovery.gs</h2>
+<textarea id="fileBox5" readonly>/**
  * Admin password recovery for the Google Sheets Admins account.
  * Uses a short-lived email OTP; never exposes whether an account exists.
  */
@@ -8736,9 +8888,9 @@ function authorizeAdminPasswordRecoveryMail() {
   return { ok: true, remainingDailyQuota: remaining };
 }
 </textarea><br>
-<button type="button" id="copyFile4">AdminPasswordRecovery.gs কপি</button>
-<h2>5. BoostAutoDate.gs</h2>
-<textarea id="fileBox5" readonly>function boostAutoDateOnEdit(e) {
+<button type="button" id="copyFile5">AdminPasswordRecovery.gs কপি</button>
+<h2>6. BoostAutoDate.gs</h2>
+<textarea id="fileBox6" readonly>function boostAutoDateOnEdit(e) {
   if (!e || !e.range) return;
   const sheet = e.range.getSheet();
   const name = sheet.getName();
@@ -8767,9 +8919,9 @@ function authorizeAdminPasswordRecoveryMail() {
     }
   }
 }</textarea><br>
-<button type="button" id="copyFile5">BoostAutoDate.gs কপি</button>
-<h2>6. CatalogPublish.gs</h2>
-<textarea id="fileBox6" readonly>// Owner-only, atomic product publication. Reuses the existing repository token and access scope.
+<button type="button" id="copyFile6">BoostAutoDate.gs কপি</button>
+<h2>7. CatalogPublish.gs</h2>
+<textarea id="fileBox7" readonly>// Owner-only, atomic product publication. Reuses the existing repository token and access scope.
 var CP_FILES_ = ['category-products.js','product-links-data.js','product-catalog-sections.js','product-config.js'];
 function cpGit_(method,path,payload) {
   var token=PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
@@ -8844,9 +8996,9 @@ function catalogPublishHandle_(type,e) {
   }
 }
 </textarea><br>
-<button type="button" id="copyFile6">CatalogPublish.gs কপি</button>
-<h2>7. CourierIntegrationAudit.gs</h2>
-<textarea id="fileBox7" readonly>/** Editor-only, read-only audit. Never logs keys, tokens or customer data. */
+<button type="button" id="copyFile7">CatalogPublish.gs কপি</button>
+<h2>8. CourierIntegrationAudit.gs</h2>
+<textarea id="fileBox8" readonly>/** Editor-only, read-only audit. Never logs keys, tokens or customer data. */
 function courierIntegrationAudit() {
   var props = PropertiesService.getScriptProperties();
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
@@ -8874,9 +9026,9 @@ function courierIntegrationAudit() {
   return result;
 }
 </textarea><br>
-<button type="button" id="copyFile7">CourierIntegrationAudit.gs কপি</button>
-<h2>8. DataFixes.gs</h2>
-<textarea id="fileBox8" readonly>/**
+<button type="button" id="copyFile8">CourierIntegrationAudit.gs কপি</button>
+<h2>9. DataFixes.gs</h2>
+<textarea id="fileBox9" readonly>/**
  * One-off data corrections approved by the owner on 2026-10-21. Editor-only.
  * Run dataFix20261021DryRun() first (read-only; logs no names/phones), then dataFix20261021Apply().
  * Apply re-checks every cell before writing and records before/after in AutomationLogs.
@@ -8981,27 +9133,27 @@ function dataFix20261021Apply() {
   return done;
 }
 </textarea><br>
-<button type="button" id="copyFile8">DataFixes.gs কপি</button>
-<h2>9. Fix-doGet.gs</h2>
-<textarea id="fileBox9" readonly>/**
+<button type="button" id="copyFile9">DataFixes.gs কপি</button>
+<h2>10. Fix-doGet.gs</h2>
+<textarea id="fileBox10" readonly>/**
  * Compatibility note: this file intentionally defines no doGet().
  * A former fallback implementation here shadowed Code.gs and returned the
  * generic health text for StockStatus, OrderSchema, auth and other GET APIs.
  * The canonical GET router is the single doGet() in Code.gs.
  */
 </textarea><br>
-<button type="button" id="copyFile9">Fix-doGet.gs কপি</button>
-<h2>10. InstallDateTrigger.gs</h2>
-<textarea id="fileBox10" readonly>function installBoostAutoDateTriggerNow() {
+<button type="button" id="copyFile10">Fix-doGet.gs কপি</button>
+<h2>11. InstallDateTrigger.gs</h2>
+<textarea id="fileBox11" readonly>function installBoostAutoDateTriggerNow() {
   const triggers = ScriptApp.getProjectTriggers();
   const exists = triggers.some(t => t.getHandlerFunction() === 'boostAutoDateOnEdit' &amp;&amp; t.getEventType() === ScriptApp.EventType.ON_EDIT);
   if (!exists) {
     ScriptApp.newTrigger('boostAutoDateOnEdit').forSpreadsheet(SpreadsheetApp.getActive()).onEdit().create();
   }
 }</textarea><br>
-<button type="button" id="copyFile10">InstallDateTrigger.gs কপি</button>
-<h2>11. LiveStock.gs</h2>
-<textarea id="fileBox11" readonly>/**
+<button type="button" id="copyFile11">InstallDateTrigger.gs কপি</button>
+<h2>12. LiveStock.gs</h2>
+<textarea id="fileBox12" readonly>/**
  * Live Stock overrides: a fast, authenticated stock switch separate from GitHub catalog publishing.
  * Deploy this file alongside Code.gs in the SAME Apps Script project.
  * Stock quantities/variant reservations remain managed by the existing inventory workflow.
@@ -9058,9 +9210,9 @@ function assertLiveStockAvailable_(cartItems) {
   });
 }
 </textarea><br>
-<button type="button" id="copyFile11">LiveStock.gs কপি</button>
-<h2>12. Monitor.gs</h2>
-<textarea id="fileBox12" readonly>/**
+<button type="button" id="copyFile12">LiveStock.gs কপি</button>
+<h2>13. Monitor.gs</h2>
+<textarea id="fileBox13" readonly>/**
  * Free uptime monitor: checks the storefront every hour and e-mails the admin
  * (and Telegram, if configured) after 2 failed checks in a row, then once more
  * when the site is reachable again. One-time setup: run setupUptimeMonitorTrigger().
@@ -9195,9 +9347,9 @@ function ensureRecentBackup_(nowMs) {
   return 'RETRY_FAILED';
 }
 </textarea><br>
-<button type="button" id="copyFile12">Monitor.gs কপি</button>
-<h2>13. Operations.gs</h2>
-<textarea id="fileBox13" readonly>function opsNotifyVariant_(id,variant,available){
+<button type="button" id="copyFile13">Monitor.gs কপি</button>
+<h2>14. Operations.gs</h2>
+<textarea id="fileBox14" readonly>function opsNotifyVariant_(id,variant,available){
  if(available&lt;=0)return;
  var sh=SpreadsheetApp.getActiveSpreadsheet().getSheetByName('StockWaitlist');if(!sh||sh.getLastRow()&lt;2)return;
  var rows=sh.getRange(2,1,sh.getLastRow()-1,7).getValues(),sent=0;
@@ -9296,9 +9448,9 @@ function opsReviewVerification_(e,productId){var id=String(param_(e,'OrderID')||
 function opsSaveWaitlist_(e){try{var id=String(param_(e,'ProductId')||'').trim(),variant=String(param_(e,'Variant')||'').trim().slice(0,160),contact=normalizeSubscribeContact_(param_(e,'Contact'));if(!contact)throw Error('INVALID_CONTACT');var p=opsCatalog_().products.filter(function(x){return x.id===id;})[0];if(!p)throw Error('UNKNOWN_PRODUCT');opsLinePrice_({qty:1,size:variant,productType:param_(e,'ProductType')},p);rateLimit_('size_wait_'+contact.slice(0,40));var lock=LockService.getScriptLock();lock.waitLock(15000);try{var sh=ensureStockWaitlistSheet_(),h=sh.getRange(1,7).getValue();if(h&amp;&amp;h!=='Variant')throw Error('WAITLIST_HEADER_CONFLICT');sh.getRange(1,7).setValue('Variant');var rows=sh.getDataRange().getValues();for(var i=1;i&lt;rows.length;i++)if(String(rows[i][0])===id&amp;&amp;String(rows[i][2]).toLowerCase()===contact.toLowerCase()&amp;&amp;opsNorm_(rows[i][6])===opsNorm_(variant))return {ok:true,message:'এই সাইজের তালিকায় আছেন।'};sh.appendRow([admCellText_(id,100),admCellText_(p.name,200),admCellText_(contact,150),/@/.test(contact)?'yes':'',new Date(),'',admCellText_(variant,160)]);return {ok:true,message:'নির্বাচিত সাইজের অনুরোধ সংরক্ষিত হয়েছে।'};}finally{lock.releaseLock();}}catch(err){return {ok:false,error:String(err.message||err),message:'পণ্য, সাইজ ও যোগাযোগের তথ্য যাচাই করুন।'};}}
 function opsDhakaTime_(iso){if(!iso)return null;var d=new Date(iso);return isNaN(d.getTime())?String(iso):Utilities.formatDate(d,'Asia/Dhaka','yyyy-MM-dd HH:mm');}
 </textarea><br>
-<button type="button" id="copyFile13">Operations.gs কপি</button>
-<h2>14. OrderSync.gs</h2>
-<textarea id="fileBox14" readonly>/**
+<button type="button" id="copyFile14">Operations.gs কপি</button>
+<h2>15. OrderSync.gs</h2>
+<textarea id="fileBox15" readonly>/**
  * OrderSync — Online Order sheet mirror
  *
  * Setup:
@@ -10260,9 +10412,9 @@ function setupOperationsTriggersFromMenu() {
   );
 }
 </textarea><br>
-<button type="button" id="copyFile14">OrderSync.gs কপি</button>
-<h2>15. ProductPicker.html</h2>
-<textarea id="fileBox15" readonly>&lt;!DOCTYPE html>
+<button type="button" id="copyFile15">OrderSync.gs কপি</button>
+<h2>16. ProductPicker.html</h2>
+<textarea id="fileBox16" readonly>&lt;!DOCTYPE html>
 &lt;html>
 &lt;head>
   &lt;base target="_top">
@@ -10473,9 +10625,288 @@ function setupOperationsTriggersFromMenu() {
 &lt;/body>
 &lt;/html>
 </textarea><br>
-<button type="button" id="copyFile15">ProductPicker.html কপি</button>
-<h2>16. SizeCore.gs</h2>
-<textarea id="fileBox16" readonly>// AUTO-GENERATED by scripts/build-size-core.mjs from size-core.js — do not edit by hand.
+<button type="button" id="copyFile16">ProductPicker.html কপি</button>
+<h2>17. ProductProfit.gs</h2>
+<textarea id="fileBox17" readonly>/**
+ * Per-product profit (owner only).
+ * Buying prices are private, so they live in the "Product Costs" sheet — never in the public catalog.
+ * AdminProductProfit: for a date range, sold quantity, sales and (when a buying price is set) profit per product,
+ *   from order lines (CartJSON, column 33). Basis "delivered" (default) counts only Delivered orders;
+ *   "confirmed" also counts Confirmed and Shipped.
+ * AdminProductCostsSave: Costs = JSON {productId: {cost, name}} — cost '' or null removes it.
+ */
+var PRODUCT_COST_SHEET_ = 'Product Costs';
+var PRODUCT_COST_HEADERS_ = ['Product ID', 'Product Name', 'Buying Price', 'Updated At', 'Updated By'];
+
+function productCostSheet_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(PRODUCT_COST_SHEET_);
+  if (!sh) {
+    sh = ss.insertSheet(PRODUCT_COST_SHEET_);
+    sh.getRange(1, 1, 1, PRODUCT_COST_HEADERS_.length).setValues([PRODUCT_COST_HEADERS_]);
+    sh.setFrozenRows(1);
+  }
+  return sh;
+}
+
+function productCostMap_() {
+  var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(PRODUCT_COST_SHEET_);
+  var map = {};
+  if (!sh || sh.getLastRow() &lt; 2) return map;
+  sh.getRange(2, 1, sh.getLastRow() - 1, 3).getValues().forEach(function (r) {
+    var id = String(r[0] || '').trim(), cost = Number(r[2]);
+    if (id &amp;&amp; isFinite(cost) &amp;&amp; cost >= 0) map[id] = cost;
+  });
+  return map;
+}
+
+/** Pure: totals per product from order rows. Exported for tests. */
+function productProfitFromRows_(rows, bounds, range, basis, costs) {
+  var products = {}, orders = 0;
+  for (var i = 1; i &lt; rows.length; i++) {
+    var r = rows[i];
+    if (!r[1] &amp;&amp; !r[2]) continue;
+    var dk = dayKeyFromCell_(r[0]);
+    if (dk &amp;&amp; !bdIsValidDateKey_(dk)) dk = '';
+    if (range === 'all') { if (dk &amp;&amp; dk > bounds.toKey) continue; }
+    else if (!dk || dk &lt; bounds.fromKey || dk > bounds.toKey) continue;
+    var status = String(r[9] || '').trim().toLowerCase();
+    var counted = status === 'delivered' || (basis === 'confirmed' &amp;&amp; (status === 'confirmed' || status.indexOf('ship') !== -1));
+    if (!counted) continue;
+    var items = [];
+    try { items = JSON.parse(String(r[32] || '').trim() || '[]'); } catch (pe) { items = []; }
+    if (!Array.isArray(items) || !items.length) continue;
+    orders++;
+    items.forEach(function (it) {
+      var id = String((it &amp;&amp; it.id) || '').trim();
+      var qty = parseInt(it &amp;&amp; it.qty, 10) || 0;
+      if (!id || qty &lt;= 0) return;
+      var price = parseFloat(it &amp;&amp; it.price) || 0;
+      if (!products[id]) products[id] = { productId: id, name: String((it &amp;&amp; it.name) || id), qty: 0, sales: 0, unpricedQty: 0 };
+      var p = products[id];
+      p.qty += qty;
+      if (price > 0) p.sales += price * qty; else p.unpricedQty += qty;
+    });
+  }
+  var list = Object.keys(products).map(function (id) {
+    var p = products[id];
+    var cost = Object.prototype.hasOwnProperty.call(costs, id) ? costs[id] : null;
+    p.sales = Math.round(p.sales);
+    p.cost = cost;
+    p.totalCost = cost == null ? null : Math.round(cost * p.qty);
+    p.profit = cost == null ? null : p.sales - p.totalCost;
+    p.margin = cost == null || !p.sales ? null : Math.round(p.profit / p.sales * 1000) / 10;
+    return p;
+  }).sort(function (a, b) { return b.sales - a.sales; });
+  var withCost = list.filter(function (p) { return p.profit != null; });
+  return {
+    orders: orders,
+    products: list,
+    totals: {
+      qty: list.reduce(function (s, p) { return s + p.qty; }, 0),
+      sales: list.reduce(function (s, p) { return s + p.sales; }, 0),
+      costedSales: withCost.reduce(function (s, p) { return s + p.sales; }, 0),
+      profit: withCost.reduce(function (s, p) { return s + p.profit; }, 0),
+      missingCost: list.length - withCost.length
+    }
+  };
+}
+
+function adminProductProfit_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var owner = requireOwnerAdmin_(v);
+  if (owner) return owner;
+  var range = String(param_(e, 'Range') || '30d').trim().toLowerCase();
+  var bounds = bdRangeBounds_(range, String(param_(e, 'From') || '').trim(), String(param_(e, 'To') || '').trim());
+  if (bounds.ok === false) return bounds;
+  var basis = param_(e, 'Basis') === 'confirmed' ? 'confirmed' : 'delivered';
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
+  var rows = sheet ? readOnlineOrderRows_(sheet) : [];
+  var result = productProfitFromRows_(rows, bounds, range, basis, productCostMap_());
+  result.ok = true;
+  result.range = range;
+  result.basis = basis;
+  result.from = bounds.fromKey;
+  result.to = bounds.toKey;
+  result.costs = productCostMap_();
+  return result;
+}
+
+function adminProductCostsSave_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var owner = requireOwnerAdmin_(v);
+  if (owner) return owner;
+  var input;
+  try { input = JSON.parse(param_(e, 'Costs') || '{}'); } catch (err) { return { ok: false, error: 'BAD_JSON', message: 'ডেটা পড়া যায়নি।' }; }
+  if (!input || typeof input !== 'object' || Array.isArray(input)) return { ok: false, error: 'BAD_JSON', message: 'ডেটা পড়া যায়নি।' };
+  var ids = Object.keys(input);
+  if (ids.length > 500) return { ok: false, error: 'TOO_MANY', message: 'একবারে সর্বোচ্চ ৫০০টি পণ্য।' };
+  var clean = {};
+  for (var k = 0; k &lt; ids.length; k++) {
+    var id = String(ids[k] || '').trim();
+    if (!/^[A-Za-z0-9][A-Za-z0-9_-]{0,100}$/.test(id)) return { ok: false, error: 'BAD_ID', message: 'পণ্যের ID ঠিক নেই: ' + id };
+    var raw = input[ids[k]] || {};
+    var costRaw = raw.cost;
+    if (costRaw === '' || costRaw === null || costRaw === undefined) { clean[id] = { remove: true }; continue; }
+    var cost = Number(costRaw);
+    if (!isFinite(cost) || cost &lt; 0 || cost > 1000000) return { ok: false, error: 'BAD_COST', message: id + ': কেনা দাম ০ থেকে ১০,০০,০০০ টাকার মধ্যে দিন।' };
+    clean[id] = { cost: Math.round(cost * 100) / 100, name: String(raw.name || '').replace(/[\r\n\t]+/g, ' ').replace(/^[=+\-@]/, "'$&amp;").slice(0, 150) };
+  }
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(20000)) return { ok: false, error: 'BUSY', message: 'একটু পরে আবার চেষ্টা করুন।' };
+  try {
+    var sh = productCostSheet_();
+    var last = sh.getLastRow();
+    var rows = last >= 2 ? sh.getRange(2, 1, last - 1, PRODUCT_COST_HEADERS_.length).getValues() : [];
+    var at = Utilities.formatDate(new Date(), 'Asia/Dhaka', 'yyyy-MM-dd HH:mm');
+    var who = String(v.email || v.phone || v.name || '');
+    var index = {};
+    rows.forEach(function (r, i) { index[String(r[0] || '').trim()] = i; });
+    var saved = 0, removed = 0;
+    Object.keys(clean).forEach(function (id) {
+      var c = clean[id];
+      if (c.remove) {
+        if (index[id] !== undefined) { rows[index[id]] = null; removed++; }
+        return;
+      }
+      var row = [id, c.name || (index[id] !== undefined ? rows[index[id]][1] : ''), c.cost, at, who];
+      if (index[id] !== undefined &amp;&amp; rows[index[id]]) rows[index[id]] = row;
+      else { index[id] = rows.length; rows.push(row); }
+      saved++;
+    });
+    rows = rows.filter(Boolean);
+    if (last >= 2) sh.getRange(2, 1, last - 1, PRODUCT_COST_HEADERS_.length).clearContent();
+    if (rows.length) sh.getRange(2, 1, rows.length, PRODUCT_COST_HEADERS_.length).setValues(rows);
+    return { ok: true, saved: saved, removed: removed, Count: saved + removed };
+  } finally {
+    lock.releaseLock();
+  }
+}
+</textarea><br>
+<button type="button" id="copyFile17">ProductProfit.gs কপি</button>
+<h2>18. SetupStatus.gs</h2>
+<textarea id="fileBox18" readonly>/**
+ * Admin → "Setup ও স্ট্যাটাস" page backend.
+ * AdminSetupStatus: which connections and automatic jobs are ready (owner only).
+ *   Only says whether a secret is SET — never returns any key, token or ID.
+ * AdminSetupAction: one-click turn-on / test for a fixed list of jobs (owner only).
+ */
+
+var SETUP_TRIGGERS_ = [
+  { handler: 'orderSyncTriggerHandler', label: 'অর্ডার সিঙ্ক (প্রতি ১৫ মিনিট)', action: 'installOrderSync' },
+  { handler: 'dailySafetyBackupTriggerHandler', label: 'প্রতিদিন শিটের ব্যাকআপ', action: 'installBackup' },
+  { handler: 'sendDailySummaryEmail_', label: 'প্রতিদিন সকাল ৮টায় বিক্রির সারাংশ', action: 'installDailySummary' },
+  { handler: 'siteUptimeCheck', label: 'সাইট বন্ধ হলে সতর্কবার্তা (প্রতি ঘণ্টা)', action: 'installUptimeMonitor' },
+  { handler: 'steadfastStatusSyncTriggerHandler', label: 'Steadfast ডেলিভারি স্ট্যাটাস আপডেট', action: 'installSteadfastSync' },
+  { handler: 'autoCourierOnEditTrigger', label: 'Confirmed হলে কুরিয়ারে পাঠানো', action: '' },
+  { handler: 'automationSummaryTriggerHandler', label: 'সাপ্তাহিক অটোমেশন রিপোর্ট', action: '' },
+  { handler: 'automationLogVerificationTriggerHandler', label: 'অটোমেশন ত্রুটি যাচাই', action: '' }
+];
+
+function setupHasProp_(props, name) {
+  return !!String(props.getProperty(name) || '').trim();
+}
+
+function setupTriggerCounts_() {
+  var counts = {};
+  try {
+    ScriptApp.getProjectTriggers().forEach(function (t) {
+      var h = t.getHandlerFunction();
+      counts[h] = (counts[h] || 0) + 1;
+    });
+  } catch (err) { counts.__error = String(err &amp;&amp; err.message || err); }
+  return counts;
+}
+
+function getAdminSetupStatus_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var owner = requireOwnerAdmin_(v);
+  if (owner) return owner;
+  var props = PropertiesService.getScriptProperties();
+  var has = function (name) { return setupHasProp_(props, name); };
+  var emails = [];
+  try { emails = getAdminNotifyEmails_(); } catch (mailErr) {}
+  var quota = null;
+  try { quota = MailApp.getRemainingDailyQuota(); } catch (quotaErr) {}
+  var counts = setupTriggerCounts_();
+  var connections = [
+    { id: 'telegram', label: 'Telegram নোটিফিকেশন', ok: has('TELEGRAM_BOT_TOKEN') &amp;&amp; has('TELEGRAM_CHAT_ID'),
+      partial: has('TELEGRAM_BOT_TOKEN') &amp;&amp; !has('TELEGRAM_CHAT_ID'),
+      help: has('TELEGRAM_BOT_TOKEN') ? 'বটকে একটা মেসেজ পাঠিয়ে Apps Script-এ telegramSetupChatId চালান।' : 'Apps Script → Project Settings → Script Properties-এ TELEGRAM_BOT_TOKEN বসান।' },
+    { id: 'email', label: 'অ্যাডমিন ই-মেইল', ok: emails.length > 0 || has('NOTIFICATION_ALERT_EMAIL'),
+      detail: emails.length + 'টি ঠিকানা' + (quota != null ? ' · আজ আরও ' + quota + 'টি ই-মেইল পাঠানো যাবে' : ''),
+      help: 'Staff পেজে মূল অ্যাডমিনের ই-মেইল দিন।' },
+    { id: 'steadfast', label: 'Steadfast কুরিয়ার', ok: has('STEADFAST_API_KEY') &amp;&amp; has('STEADFAST_SECRET_KEY'),
+      help: 'Script Properties-এ STEADFAST_API_KEY ও STEADFAST_SECRET_KEY বসান।' },
+    { id: 'publisher', label: 'প্রোডাক্ট পাবলিশ (GitHub)', ok: has('GITHUB_TOKEN'),
+      help: 'Script Properties-এ GITHUB_TOKEN বসান।' },
+    { id: 'backup', label: 'ব্যাকআপ শিট', ok: has('SAFETY_BACKUP_SPREADSHEET_ID'),
+      detail: props.getProperty('OPS_LAST_BACKUP_AT') ? 'শেষ ব্যাকআপ: ' + props.getProperty('OPS_LAST_BACKUP_AT') : 'এখনো কোনো ব্যাকআপ রেকর্ড নেই',
+      help: 'প্রথম ব্যাকআপ চালু হলে এটি নিজে তৈরি হয়।' },
+    { id: 'meta', label: 'Facebook Conversions API', ok: has('META_ACCESS_TOKEN') &amp;&amp; (has('META_PIXEL_ID') || has('PIXEL_ID')), optional: true,
+      help: 'ঐচ্ছিক — Script Properties-এ META_ACCESS_TOKEN ও META_PIXEL_ID।' },
+    { id: 'tiktok', label: 'TikTok Events API', ok: has('TIKTOK_ACCESS_TOKEN') &amp;&amp; (has('TIKTOK_PIXEL_ID') || has('TIKTOK_PIXEL_CODE')), optional: true,
+      help: 'ঐচ্ছিক — Script Properties-এ TIKTOK_ACCESS_TOKEN ও TIKTOK_PIXEL_ID।' },
+    { id: 'whatsapp', label: 'WhatsApp Cloud API', ok: has('WHATSAPP_ACCESS_TOKEN') &amp;&amp; has('WHATSAPP_PHONE_NUMBER_ID'), optional: true,
+      help: 'ঐচ্ছিক — configureWhatsAppProperties দিয়ে সেট করুন।' }
+  ];
+  var jobs = SETUP_TRIGGERS_.map(function (t) {
+    return { handler: t.handler, label: t.label, on: (counts[t.handler] || 0) > 0, duplicates: Math.max(0, (counts[t.handler] || 0) - 1), action: t.action };
+  });
+  return {
+    ok: true,
+    checkedAt: Utilities.formatDate(new Date(), 'Asia/Dhaka', 'yyyy-MM-dd HH:mm'),
+    connections: connections,
+    jobs: jobs,
+    triggerError: counts.__error || '',
+    lastOrderSyncAt: props.getProperty('ORDERSYNC_LAST_SYNC_AT') || '',
+    siteDown: props.getProperty('MONITOR_DOWN') === '1' || props.getProperty('MONITOR_DOWN') === 'true'
+  };
+}
+
+var SETUP_ACTIONS_ = {
+  installDailySummary: function () { installDailySummaryTrigger_(); return 'প্রতিদিন সকাল ৮টায় সারাংশ চালু হয়েছে।'; },
+  sendDailySummaryNow: function () {
+    var r = sendDailySummaryEmail_() || {};
+    if (r.error) throw new Error(r.error);
+    if (!r.email &amp;&amp; !r.telegram) throw new Error('পাঠানো যায়নি: ই-মেইল বা Telegram কোনোটাই সেট নেই।' + (r.telegramError ? ' (' + r.telegramError + ')' : ''));
+    return 'গতকালের সারাংশ পাঠানো হয়েছে' + (r.email ? ' · ই-মেইল' : '') + (r.telegram ? ' · Telegram' : '') + '।';
+  },
+  testTelegram: function () {
+    var r = sendTelegramText_('✅ Muslim Abaya অ্যাডমিন: Telegram টেস্ট মেসেজ।');
+    if (!r.ok) throw new Error(r.error || 'Telegram মেসেজ যায়নি।');
+    return 'Telegram-এ টেস্ট মেসেজ পাঠানো হয়েছে।';
+  },
+  installUptimeMonitor: function () { setupUptimeMonitorTrigger(); return 'সাইট মনিটর চালু হয়েছে (প্রতি ঘণ্টা)।'; },
+  installOrderSync: function () { setupOrderSyncNewOrderAutomation(); return 'অর্ডার সিঙ্ক চালু হয়েছে (প্রতি ১৫ মিনিট)।'; },
+  installBackup: function () { setupDailySafetyBackupTriggerInternal_(); return 'প্রতিদিনের ব্যাকআপ চালু হয়েছে।'; },
+  installSteadfastSync: function () { setupSteadfastStatusSyncTriggerInternal_(); return 'Steadfast স্ট্যাটাস আপডেট চালু হয়েছে।'; }
+};
+
+function runAdminSetupAction_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var owner = requireOwnerAdmin_(v);
+  if (owner) return owner;
+  var name = String(param_(e, 'Action') || '');
+  if (!Object.prototype.hasOwnProperty.call(SETUP_ACTIONS_, name)) return { ok: false, error: 'UNKNOWN_ACTION', message: 'অজানা কাজ।' };
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(20000)) return { ok: false, error: 'BUSY', message: 'অন্য একটি সেটআপ চলছে, একটু পরে আবার চাপুন।' };
+  try {
+    return { ok: true, action: name, message: SETUP_ACTIONS_[name]() };
+  } catch (err) {
+    return { ok: false, error: 'ACTION_FAILED', message: String(err &amp;&amp; err.message || err) };
+  } finally {
+    lock.releaseLock();
+  }
+}
+</textarea><br>
+<button type="button" id="copyFile18">SetupStatus.gs কপি</button>
+<h2>19. SizeCore.gs</h2>
+<textarea id="fileBox19" readonly>// AUTO-GENERATED by scripts/build-size-core.mjs from size-core.js — do not edit by hand.
 /* Size Manager core: turns the published size configuration (from D1, served by /api/size-config) into the
    measurement fields one product shows, and checks a customer's choices against them.
    The same file runs in the browser (window.maSizeCore) and in Apps Script (apps-script/SizeCore.gs is
@@ -10628,7 +11059,7 @@ function setupOperationsTriggersFromMenu() {
   };
 })(typeof window !== "undefined" ? window : this);
 </textarea><br>
-<button type="button" id="copyFile16">SizeCore.gs কপি</button><script>function bind(btn, box) { document.getElementById(btn).onclick = function () { var t = document.getElementById(box).value; navigator.clipboard.writeText(t).then(function () { alert("কপি হয়েছে!"); }); }; }bind('copyBtn', 'codeBox');
+<button type="button" id="copyFile19">SizeCore.gs কপি</button><script>function bind(btn, box) { document.getElementById(btn).onclick = function () { var t = document.getElementById(box).value; navigator.clipboard.writeText(t).then(function () { alert("কপি হয়েছে!"); }); }; }bind('copyBtn', 'codeBox');
 bind('copyAdm', 'admBox');
 bind('copyFix', 'fixBox');
 bind('copyFile4', 'fileBox4');
@@ -10643,4 +11074,7 @@ bind('copyFile12', 'fileBox12');
 bind('copyFile13', 'fileBox13');
 bind('copyFile14', 'fileBox14');
 bind('copyFile15', 'fileBox15');
-bind('copyFile16', 'fileBox16');</script></body></html>
+bind('copyFile16', 'fileBox16');
+bind('copyFile17', 'fileBox17');
+bind('copyFile18', 'fileBox18');
+bind('copyFile19', 'fileBox19');</script></body></html>

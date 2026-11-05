@@ -128,7 +128,9 @@
         days.forEach(function (x) { if (x.key === ok) x.n++; });
       }
     });
-    var overview = function (id, value) { var node = document.getElementById(id); if (node) node.textContent = value; };
+    // Once the server report for the chosen date range has filled these cards, the last-100-orders numbers must not overwrite them.
+    var SERVER_KPIS = ["admOverviewOrders", "admOverviewRevenue", "admOverviewCustomers", "admOverviewPending", "admOverviewDelivered", "admOverviewCancelled"];
+    var overview = function (id, value) { if (window.__maOverviewFromServer && SERVER_KPIS.indexOf(id) !== -1) return; var node = document.getElementById(id); if (node) node.textContent = value; };
     overview("admOverviewOrders", orders.length.toLocaleString("en-US"));
     overview("admOverviewRevenue", "৳" + revenue.toLocaleString("en-US"));
     overview("admOverviewCustomers", Object.keys(customers).length.toLocaleString("en-US"));

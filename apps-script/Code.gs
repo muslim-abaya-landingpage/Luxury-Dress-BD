@@ -91,6 +91,7 @@ function doGet(e) {
 
 function doPost(e) {
   try {
+    if (typeof adminActivityRequest_ !== 'undefined') adminActivityRequest_ = e; // ActivityLog.gs records successful admin changes
     if (e && e.postData && e.postData.contents &&
         e.postData.contents.indexOf('"object":"page"') !== -1) {
       return messengerWebhook_(e);
@@ -221,6 +222,21 @@ function doPost(e) {
     }
     if (type === 'AdminStockCsvCommit') {
       return jsonOut_(commitAdminStockCsvBatch_(e));
+    }
+    if (type === 'AdminActivityList') {
+      return jsonOut_(adminActivityList_(e));
+    }
+    if (type === 'AdminProductProfit') {
+      return jsonOut_(adminProductProfit_(e));
+    }
+    if (type === 'AdminProductCostsSave') {
+      return jsonOut_(adminProductCostsSave_(e));
+    }
+    if (type === 'AdminSetupStatus') {
+      return jsonOut_(getAdminSetupStatus_(e));
+    }
+    if (type === 'AdminSetupAction') {
+      return jsonOut_(runAdminSetupAction_(e));
     }
     if (type === 'AdminAnalyticsV2') {
       return jsonOut_(getAdminAnalyticsV2_(e));
@@ -3475,6 +3491,9 @@ function SHA256_Hash(input) {
 // ── Helpers + Auth ──
 
 function jsonOut_(obj) {
+  if (typeof adminActivityLog_ === 'function') {
+    try { adminActivityLog_(obj); } catch (logErr) {}
+  }
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
 
@@ -4055,6 +4074,15 @@ function sendDailySummaryEmail_() {
       '\n\nঅর্ডার প্যানেলে Order ID দিয়ে খুঁজুন।';
     }
     result.stuck = stuck.length;
+    try {
+      var low = dailySummaryLowStock_();
+      if (low.length) {
+        body += '\n\n📉 স্টক কম / শেষ (' + low.length + 'টি):\n' + low.slice(0, 10).map(function (x) {
+          return '• ' + x.name + (x.variant ? ' (' + x.variant + ')' : '') + ' — ' + (x.available <= 0 ? 'শেষ' : x.available + 'টি বাকি');
+        }).join('\n') + (low.length > 10 ? '\n…আরও ' + (low.length - 10) + 'টি' : '');
+      }
+      result.lowStock = low.length;
+    } catch (lowErr) {}
     var subject = '📊 গতকালের সেলস সামারি — ' + yKey;
     if (emails.length) {
       try { MailApp.sendEmail({ to: emails.join(','), subject: subject, body: body }); result.email = true; }
@@ -4097,6 +4125,20 @@ function findStuckOrders_(data, nowMs) {
     }
   }
   return out.sort(function (a, b) { return b.age - a.age; });
+}
+
+/** Tracked stock variants at or below their low-stock threshold (same rule as the dashboard). */
+function dailySummaryLowStock_() {
+  var out = [];
+  var rows = ensureStockVariantsSheet_().getDataRange().getValues();
+  for (var i = 1; i < rows.length; i++) {
+    var r = rows[i];
+    if (!(String(r[4]).toUpperCase() === 'TRUE' || r[4] === true)) continue;
+    var available = Number(r[5]) || 0;
+    var threshold = (r[7] === '' || r[7] === null || typeof r[7] === 'undefined') ? STOCK_LOW_DEFAULT_THRESHOLD_ : Number(r[7]);
+    if (available <= threshold) out.push({ name: String(r[1] || r[0] || ''), variant: String(r[3] || ''), available: available });
+  }
+  return out.sort(function (a, b) { return a.available - b.available; });
 }
 
 function installDailySummaryTrigger_() {
@@ -7073,6 +7115,8 @@ function bdRangeBounds_(range, fromStr, toStr) {
   } else if (range === '30d') {
     var d30 = new Date(now.getTime() - 29 * 24 * 60 * 60 * 1000);
     fromKey = Utilities.formatDate(d30, 'GMT+6', 'yyyy-MM-dd'); toKey = todayKey;
+  } else if (range === 'month') {
+    fromKey = todayKey.slice(0, 8) + '01'; toKey = todayKey;
   } else if (range === 'all') {
     fromKey = ''; toKey = todayKey;
   } else if (range === 'custom') {
@@ -7110,8 +7154,10 @@ function getAdminAnalyticsV2_(e) {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
   var summary = {
     totalOrders: 0, confirmedCount: 0, cancelledCount: 0, deliveredCount: 0, returnedCount: 0,
-    totalOrderValue: 0, deliveredSalesValue: 0
+    totalOrderValue: 0, deliveredSalesValue: 0,
+    pendingCount: 0, shippedCount: 0, customerCount: 0, repeatCustomerCount: 0
   };
+  var customerOrders = {}; // normalized phone -> orders in range
   var productSales = {}; // id -> { name, qty }
   var categorySales = {}; // category -> qty
   var sizeSales = {}; // size -> qty
@@ -7155,6 +7201,10 @@ function getAdminAnalyticsV2_(e) {
       else if (isPlainCancel) summary.cancelledCount++;
 
       if (status === 'confirmed') summary.confirmedCount++;
+      if (!status || status.indexOf('pend') !== -1) summary.pendingCount++;
+      if (status.indexOf('ship') !== -1) summary.shippedCount++;
+      var custPhone = normalizePhone_(r[2]);
+      if (custPhone) customerOrders[custPhone] = (customerOrders[custPhone] || 0) + 1;
       if (status === 'delivered') {
         summary.deliveredCount++;
         summary.deliveredSalesValue += total;
@@ -7204,6 +7254,10 @@ function getAdminAnalyticsV2_(e) {
     }
   }
 
+  Object.keys(customerOrders).forEach(function (ph) {
+    summary.customerCount++;
+    if (customerOrders[ph] >= 2) summary.repeatCustomerCount++;
+  });
   summary.cancellationRate = summary.totalOrders ? ((summary.cancelledCount + summary.returnedCount) / summary.totalOrders) : 0;
   summary.deliverySuccessRate = summary.totalOrders ? (summary.deliveredCount / summary.totalOrders) : 0;
 

@@ -97,7 +97,8 @@ test('lifetime analytics includes all dated and undated orders and groups valid 
     isReturnKeywordStatus_: value => /return|ফেরত|refund/i.test(String(value || '')),
     isPlainCancelStatus_: value => /cancel|বাতিল/i.test(String(value || '')),
     ensureStockVariantsSheet_: () => ({ getDataRange: () => ({ getValues: () => [['Product ID']] }) }),
-    STOCK_LOW_DEFAULT_THRESHOLD_: 5
+    STOCK_LOW_DEFAULT_THRESHOLD_: 5,
+    normalizePhone_: value => String(value || '').replace(/\D/g, '')
   };
   vm.runInNewContext(helpers[0] + '\n' + signedAmount[0] + '\n' + analytics[0] + '\nthis.runAnalytics = getAdminAnalyticsV2_;', testSandbox);
   const result = testSandbox.runAnalytics({ Token: 'valid', Range: 'all' });
@@ -109,4 +110,13 @@ test('lifetime analytics includes all dated and undated orders and groups valid 
   assert.equal(result.undatedOrderCount, 1);
   assert.deepEqual(Array.from(result.salesByMonth, row => row.month), ['2025-12', '2026-10']);
   assert.equal(result.salesByMonth[1].deliveredOrders, 1);
+  assert.equal(result.summary.pendingCount, 1);
+  assert.equal(result.summary.customerCount, 4);
+  assert.equal(result.summary.repeatCustomerCount, 0);
+});
+
+test('this-month range starts on the 1st of the Bangladesh month', () => {
+  const result = sandbox.bdRangeBounds_('month', '', '');
+  assert.equal(result.fromKey, today.slice(0, 8) + '01');
+  assert.equal(result.toKey, today);
 });

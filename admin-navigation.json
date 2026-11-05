@@ -14,6 +14,10 @@
       {
         "href": "admin-operations.html",
         "label": "হিসাব ও রিটার্ন"
+      },
+      {
+        "href": "admin-profit.html",
+        "label": "পণ্যভিত্তিক লাভ"
       }
     ],
     "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M6 3h12v18l-3-2-3 2-3-2-3 2V3Z M9 7h6M9 11h6M9 15h4\"/></svg>"
@@ -45,6 +49,10 @@
     "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M3 4h18v13H8l-5 4V4ZM7 9h10M7 13h7\"/></svg>",
     "links": [
       {
+        "href": "admin-customers.html",
+        "label": "কাস্টমার প্রোফাইল"
+      },
+      {
         "href": "admin-inbox.html",
         "label": "বর্তমান কাস্টমার ইনবক্স"
       },
@@ -62,6 +70,10 @@
     "label": "সেটিংস ও অন্যান্য",
     "links": [
       {
+        "href": "admin-setup.html",
+        "label": "Setup ও স্ট্যাটাস"
+      },
+      {
         "href": "admin-staff.html",
         "label": "স্টাফ ম্যানেজমেন্ট"
       },
@@ -72,6 +84,10 @@
       {
         "href": "admin-links.html",
         "label": "পরিচালনা লিংক"
+      },
+      {
+        "href": "admin-activity.html",
+        "label": "কার্যকলাপ লগ"
       }
     ],
     "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"3\"/><path d=\"M3 9h18M9 9v12\"/></svg>"

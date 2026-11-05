@@ -573,6 +573,14 @@
     });
   }
 
+  function getSetupStatus() { return call("AdminSetupStatus", {}); }
+  function getActivity(opts) { opts = opts || {}; return call("AdminActivityList", { Limit: opts.limit || 200, Admin: opts.admin || "", Q: opts.q || "" }); }
+  function getProductProfit(opts) { opts = opts || {}; return call("AdminProductProfit", { Range: opts.range || "30d", From: opts.from || "", To: opts.to || "", Basis: opts.basis || "delivered" }, { timeoutMs: 60000 }); }
+  function saveProductCosts(costs) { return call("AdminProductCostsSave", { Costs: JSON.stringify(costs || {}) }); }
+  function lookupCustomer(phone) { return call("AdminCustomerLookup", { Phone: phone }); }
+  function blockCustomer(phone, block) { return call("AdminBlockCustomer", { Phone: phone, Block: block ? "1" : "0" }); }
+  function runSetupAction(action) { return call("AdminSetupAction", { Action: action }, { timeoutMs: 60000 }); }
+
   function getAnalyticsV2(opts) {
     var s = getSession();
     if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
@@ -705,6 +713,13 @@
     getStockLedger: getStockLedger,
     commitStockCsv: commitStockCsv,
     getAnalyticsV2: getAnalyticsV2,
+    getSetupStatus: getSetupStatus,
+    runSetupAction: runSetupAction,
+    getActivity: getActivity,
+    getProductProfit: getProductProfit,
+    saveProductCosts: saveProductCosts,
+    lookupCustomer: lookupCustomer,
+    blockCustomer: blockCustomer,
     migrateStockVariants: migrateStockVariants,
     quickAdjustStock: quickAdjustStock,
     getGrowthData: getGrowthData,
