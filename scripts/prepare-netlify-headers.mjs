@@ -1,4 +1,5 @@
 import { readdir, readFile, writeFile } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
 import { resolve, relative, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -65,6 +66,8 @@ async function collectPublicPaths(root, directory = root) {
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   const root = resolve(process.argv[2] || '.');
+  // Generate the public Meta feed from the same catalog used by the storefront.
+  execFileSync(process.execPath, [resolve(root, 'scripts/build-meta-product-feed.mjs')], { cwd: root, stdio: 'inherit' });
   const file = resolve(root, '_headers');
   const source = await readFile(file, 'utf8');
   const paths = ['/', ...await collectPublicPaths(root)];
