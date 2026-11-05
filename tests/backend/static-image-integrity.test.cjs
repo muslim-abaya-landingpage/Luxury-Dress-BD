@@ -67,10 +67,13 @@ test('site pages and scripts do not load images from raw.githubusercontent.com',
 test('footer cards align as a balanced grid and Shop links collapse cleanly on mobile', () => {
   const root = path.resolve(__dirname, '../..');
   const css = fs.readFileSync(path.join(root, 'site-footer.css'), 'utf8');
+  const minCss = fs.readFileSync(path.join(root, 'site-footer.min.css'), 'utf8');
 
   assert.match(css, /grid-template-columns:\s*minmax\(0,\s*1\.2fr\)\s+minmax\(0,\s*1\.25fr\)/);
   assert.match(css, /\.anz-footer-main,[\s\S]*?align-items:\s*stretch;/);
   assert.match(css, /#site-footer-mount \.anz-col-shop #anz-footer-shop\s*\{\s*display:\s*grid;\s*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/);
   assert.match(css, /@media \(max-width: 1100px\)[\s\S]*?"shop about"[\s\S]*?"contact newsletter"/);
   assert.match(css, /@media \(max-width: 768px\)[\s\S]*?#site-footer-mount \.anz-col-shop #anz-footer-shop\s*\{\s*grid-template-columns:\s*1fr;/);
+  assert.match(minCss, /#site-footer-mount \.anz-col-shop #anz-footer-shop\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+  assert.match(minCss, /@media\(max-width:768px\)[\s\S]*?#site-footer-mount \.anz-col-shop #anz-footer-shop\{grid-template-columns:1fr;/);
 });
