@@ -831,6 +831,28 @@
     var shown = document.getElementById("pmCardPrice");
     if (shown) shown.textContent = "৳" + (parseInt(p.price, 10) || 0);
   }
+  // WooCommerce "Schedule": the sale prices above (and variation sale prices) apply only between these dates
+  // (Bangladesh time, whole days). Outside them the website and the order server use the regular prices.
+  function saleScheduleRow(p) {
+    var has = !!(p.saleFrom || p.saleTo);
+    return '<div class="pm-wp-form-row pm-sale-schedule"><label>Sale price dates</label><span>' +
+      '<a href="#" id="pmSaleSchedule"' + (has ? ' hidden' : '') + '>Schedule</a>' +
+      '<span id="pmSaleDates" class="pm-sale-dates"' + (has ? '' : ' hidden') + '>' +
+      '<input type="date" id="pmEf_saleFrom" data-ef="saleFrom" value="' + escapeAttr(p.saleFrom || "") + '" aria-label="Sale starts (From…)" title="From… (00:00)">' +
+      '<input type="date" id="pmEf_saleTo" data-ef="saleTo" value="' + escapeAttr(p.saleTo || "") + '" aria-label="Sale ends (To…)" title="To… (23:59)">' +
+      '<a href="#" id="pmSaleCancel">Cancel</a></span>' +
+      '<small id="pmSaleNote" role="status">' + escapeHtml(saleScheduleNote(p)) + '</small></span></div>';
+  }
+  function saleScheduleNote(p) {
+    if (!p.saleFrom && !p.saleTo) return "Optional: choose dates and the sale starts and ends by itself.";
+    if (p.saleFrom && p.saleTo && p.saleFrom > p.saleTo) return "⚠ The end date is before the start date.";
+    var info = window.maCatalog && window.maCatalog.saleWindow ? window.maCatalog.saleWindow(p) : null;
+    var now = Date.now(), noSale = !productOnSale(p) && !(Array.isArray(p.variations) && p.variations.some(function (v) { return v && parseInt(v.regularPrice, 10) > parseInt(v.price, 10); }));
+    var base = noSale ? "⚠ No sale price is set yet — enter a regular (Was) price above the price. " : "";
+    if (info && info.from != null && now < info.from) return base + "Scheduled: the sale starts on " + p.saleFrom + (p.saleTo ? " and ends after " + p.saleTo : "") + ". Until then customers pay the regular price.";
+    if (info && info.to != null && now > info.to) return base + "The sale ended on " + p.saleTo + ". Customers pay the regular price.";
+    return base + "On sale now" + (p.saleTo ? " until the end of " + p.saleTo : "") + ". Applies to option and variation sale prices too.";
+  }
   function buildOptionPriceRows(p, meta) {
     var types = productOptionTypes(p, meta);
     var rows = "";
@@ -856,7 +878,7 @@
         }).join("") +
         '<p class="pm-wp-form-row pm-opt-help"><label></label><span><small id="pmOptEditMsg" role="status">Edit an option name to rename it (e.g. Hijab → Hijab + Niqab). ↑ ↓ change the order; the first option is the card price. Enter a % off to calculate that option’s sale price; the regular price stays struck through.</small></span></p>';
     }
-    return rows +
+    return rows + saleScheduleRow(p) +
       '<div class="pm-wp-form-row pm-opt-add"><label for="pmOptName">Add option</label><span>' +
       '<input type="text" id="pmOptName" maxlength="40" placeholder="Option name, e.g. Hijab"> ' +
       '<input type="number" id="pmOptPrice" min="1" placeholder="Price ৳"> ' +
@@ -1105,6 +1127,10 @@
           if (optionRegularInput) optionRegularInput.value = p.regularPriceByType && p.regularPriceByType[discountType] || "";
           syncCardPrice(p, meta);
         }
+        else if (f === "saleFrom" || f === "saleTo") {
+          if (/^\d{4}-\d{2}-\d{2}$/.test(inp.value)) p[f] = inp.value; else delete p[f];
+          var saleNote = document.getElementById("pmSaleNote"); if (saleNote) saleNote.textContent = saleScheduleNote(p);
+        }
         else if (f === "status") { setProductStatus(p, inp.value); paintStatusNote(); }
         else if (f === "seoTitle" || f === "seoDescription") { var sv = inp.value.replace(/\s+/g, " ").trim(); if (sv) p[f] = sv; else delete p[f]; updateSeoPreview(); }
         else if (f === "stock") {
@@ -1131,6 +1157,19 @@
         else p[f] = inp.value;
         changed();
       });
+    });
+    var saleLink = root.querySelector("#pmSaleSchedule"), saleCancel = root.querySelector("#pmSaleCancel");
+    if (saleLink) saleLink.addEventListener("click", function (ev) {
+      ev.preventDefault(); saleLink.hidden = true; root.querySelector("#pmSaleDates").hidden = false; root.querySelector("#pmEf_saleFrom").focus();
+    });
+    if (saleCancel) saleCancel.addEventListener("click", function (ev) {
+      ev.preventDefault();
+      var had = !!(p.saleFrom || p.saleTo);
+      delete p.saleFrom; delete p.saleTo;
+      root.querySelector("#pmEf_saleFrom").value = ""; root.querySelector("#pmEf_saleTo").value = "";
+      root.querySelector("#pmSaleDates").hidden = true; saleLink.hidden = false;
+      root.querySelector("#pmSaleNote").textContent = saleScheduleNote(p);
+      if (had) changed();
     });
     var colorList = root.querySelector("#pmColorVariationList");
     var colorAdd = root.querySelector("#pmColorAdd");

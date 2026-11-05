@@ -28,6 +28,9 @@
   var whole=function(v){return Number.isSafeInteger(Number(v))&&Number(v)>0&&Number(v)<=1000000;};
   if(p.regularPrice!=null&&!whole(p.regularPrice))throw Error(p.id+': before-sale price must be whole taka.');
   if(p.regularPriceByType!=null&&(typeof p.regularPriceByType!=='object'||Object.keys(p.regularPriceByType).some(function(k){return !whole(p.regularPriceByType[k]);})))throw Error(p.id+': option before-sale prices must be whole taka.');
+  var day=/^\d{4}-\d{2}-\d{2}$/;
+  if((p.saleFrom!=null&&!day.test(String(p.saleFrom)))||(p.saleTo!=null&&!day.test(String(p.saleTo))))throw Error(p.id+': sale dates must be YYYY-MM-DD.');
+  if(p.saleFrom&&p.saleTo&&String(p.saleFrom)>String(p.saleTo))throw Error(p.id+': sale end date is before the start date.');
   if(String(p.seoTitle||'').length>120||String(p.seoDescription||'').length>320)throw Error(p.id+': SEO title max 120 and description max 320 characters.');
  });});}
  g.MaProductPublishUtils={sizes:sizes,money:money,mode:mode,makeProduct:makeProduct,validateCatalog:validateCatalog,slug:slug,seo:seo};

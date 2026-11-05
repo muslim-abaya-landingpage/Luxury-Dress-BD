@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8"><title>Apps Script কোড</title><style>body { font-family: system-ui, sans-serif; margin: 16px; max-width: 960px; } textarea { width: 100%; height: 52vh; font: 11px Consolas, monospace; } button { margin-top: 10px; padding: 12px 20px; font-size: 15px; cursor: pointer; } .step { background: #fff8e1; border: 1px solid #f0d58a; padding: 10px 14px; border-radius: 6px; }</style></head><body><h1>Apps Script কোড (সম্পূর্ণ project)</h1><p>এই page-এ canonical project-এর সব source file আছে: Code.gs, AdminOrders.gs, FixSheetHeaders.gs, BoostAutoDate.gs, CatalogPublish.gs, CourierIntegrationAudit.gs, DataFixes.gs, Fix-doGet.gs, InstallDateTrigger.gs, LiveStock.gs, Monitor.gs, Operations.gs, OrderSync.gs, ProductPicker.html, SizeCore.gs, AdminPasswordRecovery.gs</p><div class="step"><p><strong>গুরুত্বপূর্ণ:</strong> Admin dashboard-এর সব API চালাতে নিচের সব ফাইল একই Apps Script project-এ রাখতে হবে। <code>.gs</code> ফাইলের জন্য <strong>＋ → Script</strong>, আর <code>.html</code> ফাইলের জন্য <strong>＋ → HTML</strong> ব্যবহার করুন; একই নাম রেখে প্রতিটি কোড সংশ্লিষ্ট ফাইলে কপি করুন। একাধিক <code>doGet</code> function রাখবেন না—canonical router শুধু <code>Code.gs</code>-এ।</p><ol><li>প্রতিটি source file-এর নাম অনুযায়ী Apps Script file তৈরি বা update করুন।</li><li><strong>Save</strong> চাপুন এবং <code>npm run test:backend</code> parity test পাস হয়েছে কি নিশ্চিত করুন।</li><li><strong>Deploy → Manage deployments → Edit → Version: New version → Deploy</strong> করে বিদ্যমান Web App URL রাখুন।</li></ol></div><h2>1. Code.gs</h2>
+<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8"><title>Apps Script কোড</title><style>body { font-family: system-ui, sans-serif; margin: 16px; max-width: 960px; } textarea { width: 100%; height: 52vh; font: 11px Consolas, monospace; } button { margin-top: 10px; padding: 12px 20px; font-size: 15px; cursor: pointer; } .step { background: #fff8e1; border: 1px solid #f0d58a; padding: 10px 14px; border-radius: 6px; }</style></head><body><h1>Apps Script কোড (সম্পূর্ণ project)</h1><p>এই page-এ canonical project-এর সব source file আছে: Code.gs, AdminOrders.gs, FixSheetHeaders.gs, AdminPasswordRecovery.gs, BoostAutoDate.gs, CatalogPublish.gs, CourierIntegrationAudit.gs, DataFixes.gs, Fix-doGet.gs, InstallDateTrigger.gs, LiveStock.gs, Monitor.gs, Operations.gs, OrderSync.gs, ProductPicker.html, SizeCore.gs</p><div class="step"><p><strong>গুরুত্বপূর্ণ:</strong> Admin dashboard-এর সব API চালাতে নিচের সব ফাইল একই Apps Script project-এ রাখতে হবে। <code>.gs</code> ফাইলের জন্য <strong>＋ → Script</strong>, আর <code>.html</code> ফাইলের জন্য <strong>＋ → HTML</strong> ব্যবহার করুন; একই নাম রেখে প্রতিটি কোড সংশ্লিষ্ট ফাইলে কপি করুন। একাধিক <code>doGet</code> function রাখবেন না—canonical router শুধু <code>Code.gs</code>-এ।</p><ol><li>প্রতিটি source file-এর নাম অনুযায়ী Apps Script file তৈরি বা update করুন।</li><li><strong>Save</strong> চাপুন এবং <code>npm run test:backend</code> parity test পাস হয়েছে কি নিশ্চিত করুন।</li><li><strong>Deploy → Manage deployments → Edit → Version: New version → Deploy</strong> করে বিদ্যমান Web App URL রাখুন।</li></ol></div><h2>1. Code.gs</h2>
 <textarea id="codeBox" readonly>/**
  * Muslim Abaya — সম্পূর্ণ Web App (এক ফাইলে পেস্ট করুন)
  * Code.gs → Ctrl+A → Ctrl+V → Save → Deploy → New version
@@ -8590,8 +8590,127 @@ function setupOnlineOrderHeadersNow() {
 }
 </textarea><br>
 <button type="button" id="copyFix">FixSheetHeaders.gs কপি</button>
-<h2>4. BoostAutoDate.gs</h2>
-<textarea id="fileBox4" readonly>function boostAutoDateOnEdit(e) {
+<h2>4. AdminPasswordRecovery.gs</h2>
+<textarea id="fileBox4" readonly>/**
+ * Admin password recovery for the Google Sheets Admins account.
+ * Uses a short-lived email OTP; never exposes whether an account exists.
+ */
+function adminPasswordRecoveryReply_() {
+  return { ok: true, message: 'If this email belongs to an active admin, a recovery code has been sent.' };
+}
+
+function adminPasswordRecoveryKey_(email) {
+  var bytes = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, normalizeEmail_(email), Utilities.Charset.UTF_8);
+  var hex = bytes.map(function (b) { return ('0' + ((b + 256) % 256).toString(16)).slice(-2); }).join('');
+  return 'ADMIN_PW_RESET_' + hex;
+}
+
+function requestAdminPasswordReset_(e) {
+  var email = normalizeEmail_(param_(e, 'Email'));
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return adminPasswordRecoveryReply_();
+  try { rateLimit_('admin_pw_reset_' + email); } catch (err) { return adminPasswordRecoveryReply_(); }
+
+  var user = findAdminByEmail_(email);
+  if (!user || String(user.status || '').trim().toLowerCase() === 'blocked') return adminPasswordRecoveryReply_();
+
+  var role = String(user.role || 'admin').trim().toLowerCase();
+  if (role !== 'admin' &amp;&amp; role !== 'staff') return adminPasswordRecoveryReply_();
+
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(5000)) return adminPasswordRecoveryReply_();
+  try {
+    var code = ('000000' + (parseInt(Utilities.getUuid().replace(/-/g, '').slice(0, 8), 16) % 1000000)).slice(-6);
+    var hashed = hashPassword_(code);
+    var expires = Date.now() + 10 * 60 * 1000;
+    var record = { hash: hashed.hash, salt: hashed.salt, expires: expires, attempts: 0 };
+    PropertiesService.getScriptProperties().setProperty(adminPasswordRecoveryKey_(email), JSON.stringify(record));
+
+    var subject = 'Muslim Abaya Admin password recovery';
+    var body = 'Your Muslim Abaya Admin password recovery code is: ' + code +
+      '\n\nThis code expires in 10 minutes and can be used once. If you did not request this, ignore this email.';
+    var htmlBody = '&lt;div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;padding:24px;color:#20242a">' +
+      '&lt;h2>Muslim Abaya Admin&lt;/h2>&lt;p>Your password recovery code is:&lt;/p>' +
+      '&lt;div style="font-size:30px;font-weight:700;letter-spacing:8px;padding:16px;background:#f3f5f8;border-radius:10px;text-align:center">' + code + '&lt;/div>' +
+      '&lt;p>This code expires in 10 minutes and can be used once. If you did not request this, ignore this email.&lt;/p>&lt;/div>';
+    MailApp.sendEmail({ to: user.email, subject: subject, body: body, htmlBody: htmlBody, name: 'Muslim Abaya Admin' });
+  } catch (err) {
+    PropertiesService.getScriptProperties().deleteProperty(adminPasswordRecoveryKey_(email));
+    console.error('Admin password recovery email failed: ' + String(err &amp;&amp; err.message || err));
+  } finally {
+    lock.releaseLock();
+  }
+  return adminPasswordRecoveryReply_();
+}
+
+function confirmAdminPasswordReset_(e) {
+  var email = normalizeEmail_(param_(e, 'Email'));
+  var code = String(param_(e, 'Code') || '').trim();
+  var password = String(param_(e, 'Password') || '');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !/^\d{6}$/.test(code) || password.length &lt; 8 || password.length > 128) {
+    return { ok: false, error: 'INVALID_RESET', message: 'ইমেইল, ৬ সংখ্যার কোড এবং কমপক্ষে ৮ অক্ষরের নতুন পাসওয়ার্ড দিন।' };
+  }
+  try { rateLimit_('admin_pw_confirm_' + email); } catch (err) {
+    return { ok: false, error: 'RATE_LIMIT', message: 'অনেকবার চেষ্টা হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।' };
+  }
+
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(5000)) return { ok: false, error: 'BUSY', message: 'অনুগ্রহ করে আবার চেষ্টা করুন।' };
+  var key = adminPasswordRecoveryKey_(email);
+  try {
+    var props = PropertiesService.getScriptProperties();
+    var raw = props.getProperty(key);
+    if (!raw) return { ok: false, error: 'INVALID_RESET', message: 'কোডটি ভুল বা মেয়াদোত্তীর্ণ। নতুন কোড নিন।' };
+    var record;
+    try { record = JSON.parse(raw); } catch (parseErr) { props.deleteProperty(key); return { ok: false, error: 'INVALID_RESET', message: 'নতুন কোড নিন।' }; }
+    if (!record || Date.now() > Number(record.expires) || Number(record.attempts || 0) >= 5) {
+      props.deleteProperty(key);
+      return { ok: false, error: 'EXPIRED_RESET', message: 'কোডটির মেয়াদ শেষ। নতুন কোড নিন।' };
+    }
+    if (hashPassword_(code, record.salt).hash !== record.hash) {
+      record.attempts = Number(record.attempts || 0) + 1;
+      if (record.attempts >= 5) props.deleteProperty(key);
+      else props.setProperty(key, JSON.stringify(record));
+      return { ok: false, error: 'INVALID_RESET', message: 'কোডটি সঠিক নয়। আবার চেষ্টা করুন।' };
+    }
+
+    var user = findAdminByEmail_(email);
+    if (!user || String(user.status || '').trim().toLowerCase() === 'blocked') {
+      props.deleteProperty(key);
+      return { ok: false, error: 'INVALID_RESET', message: 'অ্যাকাউন্টটি পাওয়া যায়নি বা বন্ধ রয়েছে।' };
+    }
+    var hashed = hashPassword_(password);
+    var adminSheet = getAdminsSheet_();
+    adminSheet.getRange(user.row, 4).setValue(hashed.hash);
+    adminSheet.getRange(user.row, 5).setValue(hashed.salt);
+    if (adminSheet.getLastColumn() >= 9) adminSheet.getRange(user.row, 9).setValue(new Date());
+
+    // Revoke every existing session for this account immediately.
+    var sessions = getSessionsSheet_();
+    var rows = sessions.getDataRange().getValues();
+    for (var i = rows.length - 1; i >= 1; i--) {
+      if (normalizeEmail_(rows[i][1]) === email) sessions.deleteRow(i + 1);
+    }
+    props.deleteProperty(key);
+    bumpAdminAuthGeneration_();
+    return { ok: true, message: 'পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে। এখন নতুন পাসওয়ার্ড দিয়ে লগইন করুন।' };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * Run once from the Apps Script editor as the deployment owner.
+ * This grants MailApp permission before the public web app attempts to send recovery codes.
+ */
+function authorizeAdminPasswordRecoveryMail() {
+  var remaining = MailApp.getRemainingDailyQuota();
+  Logger.log('Admin password recovery mail authorization is ready. Remaining recipient quota: ' + remaining);
+  return { ok: true, remainingDailyQuota: remaining };
+}
+</textarea><br>
+<button type="button" id="copyFile4">AdminPasswordRecovery.gs কপি</button>
+<h2>5. BoostAutoDate.gs</h2>
+<textarea id="fileBox5" readonly>function boostAutoDateOnEdit(e) {
   if (!e || !e.range) return;
   const sheet = e.range.getSheet();
   const name = sheet.getName();
@@ -8620,9 +8739,9 @@ function setupOnlineOrderHeadersNow() {
     }
   }
 }</textarea><br>
-<button type="button" id="copyFile4">BoostAutoDate.gs কপি</button>
-<h2>5. CatalogPublish.gs</h2>
-<textarea id="fileBox5" readonly>// Owner-only, atomic product publication. Reuses the existing repository token and access scope.
+<button type="button" id="copyFile5">BoostAutoDate.gs কপি</button>
+<h2>6. CatalogPublish.gs</h2>
+<textarea id="fileBox6" readonly>// Owner-only, atomic product publication. Reuses the existing repository token and access scope.
 var CP_FILES_ = ['category-products.js','product-links-data.js','product-catalog-sections.js','product-config.js'];
 function cpGit_(method,path,payload) {
   var token=PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
@@ -8697,9 +8816,9 @@ function catalogPublishHandle_(type,e) {
   }
 }
 </textarea><br>
-<button type="button" id="copyFile5">CatalogPublish.gs কপি</button>
-<h2>6. CourierIntegrationAudit.gs</h2>
-<textarea id="fileBox6" readonly>/** Editor-only, read-only audit. Never logs keys, tokens or customer data. */
+<button type="button" id="copyFile6">CatalogPublish.gs কপি</button>
+<h2>7. CourierIntegrationAudit.gs</h2>
+<textarea id="fileBox7" readonly>/** Editor-only, read-only audit. Never logs keys, tokens or customer data. */
 function courierIntegrationAudit() {
   var props = PropertiesService.getScriptProperties();
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
@@ -8727,9 +8846,9 @@ function courierIntegrationAudit() {
   return result;
 }
 </textarea><br>
-<button type="button" id="copyFile6">CourierIntegrationAudit.gs কপি</button>
-<h2>7. DataFixes.gs</h2>
-<textarea id="fileBox7" readonly>/**
+<button type="button" id="copyFile7">CourierIntegrationAudit.gs কপি</button>
+<h2>8. DataFixes.gs</h2>
+<textarea id="fileBox8" readonly>/**
  * One-off data corrections approved by the owner on 2026-10-21. Editor-only.
  * Run dataFix20261021DryRun() first (read-only; logs no names/phones), then dataFix20261021Apply().
  * Apply re-checks every cell before writing and records before/after in AutomationLogs.
@@ -8834,27 +8953,27 @@ function dataFix20261021Apply() {
   return done;
 }
 </textarea><br>
-<button type="button" id="copyFile7">DataFixes.gs কপি</button>
-<h2>8. Fix-doGet.gs</h2>
-<textarea id="fileBox8" readonly>/**
+<button type="button" id="copyFile8">DataFixes.gs কপি</button>
+<h2>9. Fix-doGet.gs</h2>
+<textarea id="fileBox9" readonly>/**
  * Compatibility note: this file intentionally defines no doGet().
  * A former fallback implementation here shadowed Code.gs and returned the
  * generic health text for StockStatus, OrderSchema, auth and other GET APIs.
  * The canonical GET router is the single doGet() in Code.gs.
  */
 </textarea><br>
-<button type="button" id="copyFile8">Fix-doGet.gs কপি</button>
-<h2>9. InstallDateTrigger.gs</h2>
-<textarea id="fileBox9" readonly>function installBoostAutoDateTriggerNow() {
+<button type="button" id="copyFile9">Fix-doGet.gs কপি</button>
+<h2>10. InstallDateTrigger.gs</h2>
+<textarea id="fileBox10" readonly>function installBoostAutoDateTriggerNow() {
   const triggers = ScriptApp.getProjectTriggers();
   const exists = triggers.some(t => t.getHandlerFunction() === 'boostAutoDateOnEdit' &amp;&amp; t.getEventType() === ScriptApp.EventType.ON_EDIT);
   if (!exists) {
     ScriptApp.newTrigger('boostAutoDateOnEdit').forSpreadsheet(SpreadsheetApp.getActive()).onEdit().create();
   }
 }</textarea><br>
-<button type="button" id="copyFile9">InstallDateTrigger.gs কপি</button>
-<h2>10. LiveStock.gs</h2>
-<textarea id="fileBox10" readonly>/**
+<button type="button" id="copyFile10">InstallDateTrigger.gs কপি</button>
+<h2>11. LiveStock.gs</h2>
+<textarea id="fileBox11" readonly>/**
  * Live Stock overrides: a fast, authenticated stock switch separate from GitHub catalog publishing.
  * Deploy this file alongside Code.gs in the SAME Apps Script project.
  * Stock quantities/variant reservations remain managed by the existing inventory workflow.
@@ -8911,9 +9030,9 @@ function assertLiveStockAvailable_(cartItems) {
   });
 }
 </textarea><br>
-<button type="button" id="copyFile10">LiveStock.gs কপি</button>
-<h2>11. Monitor.gs</h2>
-<textarea id="fileBox11" readonly>/**
+<button type="button" id="copyFile11">LiveStock.gs কপি</button>
+<h2>12. Monitor.gs</h2>
+<textarea id="fileBox12" readonly>/**
  * Free uptime monitor: checks the storefront every hour and e-mails the admin
  * (and Telegram, if configured) after 2 failed checks in a row, then once more
  * when the site is reachable again. One-time setup: run setupUptimeMonitorTrigger().
@@ -9048,9 +9167,9 @@ function ensureRecentBackup_(nowMs) {
   return 'RETRY_FAILED';
 }
 </textarea><br>
-<button type="button" id="copyFile11">Monitor.gs কপি</button>
-<h2>12. Operations.gs</h2>
-<textarea id="fileBox12" readonly>function opsNotifyVariant_(id,variant,available){
+<button type="button" id="copyFile12">Monitor.gs কপি</button>
+<h2>13. Operations.gs</h2>
+<textarea id="fileBox13" readonly>function opsNotifyVariant_(id,variant,available){
  if(available&lt;=0)return;
  var sh=SpreadsheetApp.getActiveSpreadsheet().getSheetByName('StockWaitlist');if(!sh||sh.getLastRow()&lt;2)return;
  var rows=sh.getRange(2,1,sh.getLastRow()-1,7).getValues(),sent=0;
@@ -9104,8 +9223,13 @@ function opsNorm_(s){return String(s||'').trim().toLowerCase().replace(/[–—]
  * Each variation names any of type / color / size; an empty one means "any". The most specific match wins
  * (size counts one per " · " part, so "Body 46 · Length 54" beats "Length 54"). Mirrored in cart-reprice.js. */
 function opsVariation_(p,it){var vs=p&amp;&amp;p.variations;if(!Array.isArray(vs)||!vs.length)return null;var ck=function(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');},parts=function(s){return opsNorm_(s).split(/\s*·\s*/).filter(Boolean);},type=opsNorm_(it.productType).replace(/\s/g,''),color=String(it.color||''),size=parts(it.size),best=null,top=-1;vs.forEach(function(v){if(!v||typeof v!=='object')return;var n=0;if(v.type){if(opsNorm_(v.type).replace(/\s/g,'')!==type)return;n++;}if(v.color){if(!((ck(v.color)&amp;&amp;ck(v.color)===ck(color))||opsNorm_(v.color)===opsNorm_(color)))return;n++;}if(v.size){var t=parts(v.size);if(!t.every(function(x){return size.indexOf(x)>=0;}))return;n+=t.length;}if(n>top){best=v;top=n;}});return best;}
+/** Scheduled sale (Product Manager → Schedule): true when the product has sale dates and now is outside them,
+ * so the regular (before-sale) prices apply. saleFrom/saleTo are milliseconds from catalog-validation.json.
+ * Mirrored in cart-reprice.js and product-utils.js. */
+function opsSaleOff_(p,now){var f=p&amp;&amp;p.saleFrom!=null?Number(p.saleFrom):null,t=p&amp;&amp;p.saleTo!=null?Number(p.saleTo):null;if(f==null&amp;&amp;t==null)return false;return (f!=null&amp;&amp;now&lt;f)||(t!=null&amp;&amp;now>t);}
 function opsLinePrice_(it,p){if(!Number.isSafeInteger(it.qty)||it.qty&lt;1||it.qty>500)throw Error('INVALID_QTY');var price=Number(p.price),type=String(it.productType||'');if(p.prices){var key=Object.keys(p.prices).filter(function(k){return k.replace(/\s/g,'').toLowerCase()===type.replace(/\s/g,'').toLowerCase();})[0];if(!key)throw Error('PRODUCT_TYPE_REQUIRED');price=Number(p.prices[key]);it.productType=key;}
- var variation=opsVariation_(p,it);if(variation){if(variation.enabled===false)throw Error('VARIATION_UNAVAILABLE');if(Number(variation.price)>0)price=Number(variation.price);}
+ var off=opsSaleOff_(p,Date.now());if(off){if(p.prices){var rp=p.regularPrices&amp;&amp;Number(p.regularPrices[it.productType]);if(rp>price)price=rp;}else if(Number(p.regularPrice)>price)price=Number(p.regularPrice);}
+ var variation=opsVariation_(p,it);if(variation){if(variation.enabled===false)throw Error('VARIATION_UNAVAILABLE');if(Number(variation.price)>0)price=Number(variation.price);if(off&amp;&amp;Number(variation.regularPrice)>(Number(variation.price)||0))price=Number(variation.regularPrice);}
  var tpl=Array.isArray(it.measurements)&amp;&amp;it.measurements.length?opsTemplateSize_(it,p):'';
  var size=tpl||String(it.size||'').trim();if(!size)throw Error('SIZE_REQUIRED');var custom=!tpl&amp;&amp;/^Custom\s*\(L:?([\d.]+)[\s/]+W:?([\d.]+)/i.exec(size),direct=(p.sizes||[]).some(function(s){var v=typeof s==='object'?s.value:s;return opsNorm_(v)===opsNorm_(size);});
  if(!tpl&amp;&amp;/^Custom/i.test(size)&amp;&amp;!custom)throw Error('INVALID_CUSTOM_SIZE');
@@ -9142,9 +9266,9 @@ function opsReviewVerification_(e,productId){var id=String(param_(e,'OrderID')||
 function opsSaveWaitlist_(e){try{var id=String(param_(e,'ProductId')||'').trim(),variant=String(param_(e,'Variant')||'').trim().slice(0,160),contact=normalizeSubscribeContact_(param_(e,'Contact'));if(!contact)throw Error('INVALID_CONTACT');var p=opsCatalog_().products.filter(function(x){return x.id===id;})[0];if(!p)throw Error('UNKNOWN_PRODUCT');opsLinePrice_({qty:1,size:variant,productType:param_(e,'ProductType')},p);rateLimit_('size_wait_'+contact.slice(0,40));var lock=LockService.getScriptLock();lock.waitLock(15000);try{var sh=ensureStockWaitlistSheet_(),h=sh.getRange(1,7).getValue();if(h&amp;&amp;h!=='Variant')throw Error('WAITLIST_HEADER_CONFLICT');sh.getRange(1,7).setValue('Variant');var rows=sh.getDataRange().getValues();for(var i=1;i&lt;rows.length;i++)if(String(rows[i][0])===id&amp;&amp;String(rows[i][2]).toLowerCase()===contact.toLowerCase()&amp;&amp;opsNorm_(rows[i][6])===opsNorm_(variant))return {ok:true,message:'এই সাইজের তালিকায় আছেন।'};sh.appendRow([admCellText_(id,100),admCellText_(p.name,200),admCellText_(contact,150),/@/.test(contact)?'yes':'',new Date(),'',admCellText_(variant,160)]);return {ok:true,message:'নির্বাচিত সাইজের অনুরোধ সংরক্ষিত হয়েছে।'};}finally{lock.releaseLock();}}catch(err){return {ok:false,error:String(err.message||err),message:'পণ্য, সাইজ ও যোগাযোগের তথ্য যাচাই করুন।'};}}
 function opsDhakaTime_(iso){if(!iso)return null;var d=new Date(iso);return isNaN(d.getTime())?String(iso):Utilities.formatDate(d,'Asia/Dhaka','yyyy-MM-dd HH:mm');}
 </textarea><br>
-<button type="button" id="copyFile12">Operations.gs কপি</button>
-<h2>13. OrderSync.gs</h2>
-<textarea id="fileBox13" readonly>/**
+<button type="button" id="copyFile13">Operations.gs কপি</button>
+<h2>14. OrderSync.gs</h2>
+<textarea id="fileBox14" readonly>/**
  * OrderSync — Online Order sheet mirror
  *
  * Setup:
@@ -10106,9 +10230,9 @@ function setupOperationsTriggersFromMenu() {
   );
 }
 </textarea><br>
-<button type="button" id="copyFile13">OrderSync.gs কপি</button>
-<h2>14. ProductPicker.html</h2>
-<textarea id="fileBox14" readonly>&lt;!DOCTYPE html>
+<button type="button" id="copyFile14">OrderSync.gs কপি</button>
+<h2>15. ProductPicker.html</h2>
+<textarea id="fileBox15" readonly>&lt;!DOCTYPE html>
 &lt;html>
 &lt;head>
   &lt;base target="_top">
@@ -10319,9 +10443,9 @@ function setupOperationsTriggersFromMenu() {
 &lt;/body>
 &lt;/html>
 </textarea><br>
-<button type="button" id="copyFile14">ProductPicker.html কপি</button>
-<h2>15. SizeCore.gs</h2>
-<textarea id="fileBox15" readonly>// AUTO-GENERATED by scripts/build-size-core.mjs from size-core.js — do not edit by hand.
+<button type="button" id="copyFile15">ProductPicker.html কপি</button>
+<h2>16. SizeCore.gs</h2>
+<textarea id="fileBox16" readonly>// AUTO-GENERATED by scripts/build-size-core.mjs from size-core.js — do not edit by hand.
 /* Size Manager core: turns the published size configuration (from D1, served by /api/size-config) into the
    measurement fields one product shows, and checks a customer's choices against them.
    The same file runs in the browser (window.maSizeCore) and in Apps Script (apps-script/SizeCore.gs is
@@ -10474,7 +10598,7 @@ function setupOperationsTriggersFromMenu() {
   };
 })(typeof window !== "undefined" ? window : this);
 </textarea><br>
-<button type="button" id="copyFile15">SizeCore.gs কপি</button><script>function bind(btn, box) { document.getElementById(btn).onclick = function () { var t = document.getElementById(box).value; navigator.clipboard.writeText(t).then(function () { alert("কপি হয়েছে!"); }); }; }bind('copyBtn', 'codeBox');
+<button type="button" id="copyFile16">SizeCore.gs কপি</button><script>function bind(btn, box) { document.getElementById(btn).onclick = function () { var t = document.getElementById(box).value; navigator.clipboard.writeText(t).then(function () { alert("কপি হয়েছে!"); }); }; }bind('copyBtn', 'codeBox');
 bind('copyAdm', 'admBox');
 bind('copyFix', 'fixBox');
 bind('copyFile4', 'fileBox4');
@@ -10488,124 +10612,5 @@ bind('copyFile11', 'fileBox11');
 bind('copyFile12', 'fileBox12');
 bind('copyFile13', 'fileBox13');
 bind('copyFile14', 'fileBox14');
-bind('copyFile15', 'fileBox15');</script><h2>16. AdminPasswordRecovery.gs</h2>
-<textarea id="fileBox16" readonly>/**
- * Admin password recovery for the Google Sheets Admins account.
- * Uses a short-lived email OTP; never exposes whether an account exists.
- */
-function adminPasswordRecoveryReply_() {
-  return { ok: true, message: 'If this email belongs to an active admin, a recovery code has been sent.' };
-}
-
-function adminPasswordRecoveryKey_(email) {
-  var bytes = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, normalizeEmail_(email), Utilities.Charset.UTF_8);
-  var hex = bytes.map(function (b) { return ('0' + ((b + 256) % 256).toString(16)).slice(-2); }).join('');
-  return 'ADMIN_PW_RESET_' + hex;
-}
-
-function requestAdminPasswordReset_(e) {
-  var email = normalizeEmail_(param_(e, 'Email'));
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return adminPasswordRecoveryReply_();
-  try { rateLimit_('admin_pw_reset_' + email); } catch (err) { return adminPasswordRecoveryReply_(); }
-
-  var user = findAdminByEmail_(email);
-  if (!user || String(user.status || '').trim().toLowerCase() === 'blocked') return adminPasswordRecoveryReply_();
-
-  var role = String(user.role || 'admin').trim().toLowerCase();
-  if (role !== 'admin' &amp;&amp; role !== 'staff') return adminPasswordRecoveryReply_();
-
-  var lock = LockService.getScriptLock();
-  if (!lock.tryLock(5000)) return adminPasswordRecoveryReply_();
-  try {
-    var code = ('000000' + (parseInt(Utilities.getUuid().replace(/-/g, '').slice(0, 8), 16) % 1000000)).slice(-6);
-    var hashed = hashPassword_(code);
-    var expires = Date.now() + 10 * 60 * 1000;
-    var record = { hash: hashed.hash, salt: hashed.salt, expires: expires, attempts: 0 };
-    PropertiesService.getScriptProperties().setProperty(adminPasswordRecoveryKey_(email), JSON.stringify(record));
-
-    var subject = 'Muslim Abaya Admin password recovery';
-    var body = 'Your Muslim Abaya Admin password recovery code is: ' + code +
-      '\n\nThis code expires in 10 minutes and can be used once. If you did not request this, ignore this email.';
-    var htmlBody = '&lt;div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;padding:24px;color:#20242a">' +
-      '&lt;h2>Muslim Abaya Admin&lt;/h2>&lt;p>Your password recovery code is:&lt;/p>' +
-      '&lt;div style="font-size:30px;font-weight:700;letter-spacing:8px;padding:16px;background:#f3f5f8;border-radius:10px;text-align:center">' + code + '&lt;/div>' +
-      '&lt;p>This code expires in 10 minutes and can be used once. If you did not request this, ignore this email.&lt;/p>&lt;/div>';
-    MailApp.sendEmail({ to: user.email, subject: subject, body: body, htmlBody: htmlBody, name: 'Muslim Abaya Admin' });
-  } catch (err) {
-    PropertiesService.getScriptProperties().deleteProperty(adminPasswordRecoveryKey_(email));
-    console.error('Admin password recovery email failed: ' + String(err &amp;&amp; err.message || err));
-  } finally {
-    lock.releaseLock();
-  }
-  return adminPasswordRecoveryReply_();
-}
-
-function confirmAdminPasswordReset_(e) {
-  var email = normalizeEmail_(param_(e, 'Email'));
-  var code = String(param_(e, 'Code') || '').trim();
-  var password = String(param_(e, 'Password') || '');
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !/^\d{6}$/.test(code) || password.length &lt; 8 || password.length > 128) {
-    return { ok: false, error: 'INVALID_RESET', message: 'ইমেইল, ৬ সংখ্যার কোড এবং কমপক্ষে ৮ অক্ষরের নতুন পাসওয়ার্ড দিন।' };
-  }
-  try { rateLimit_('admin_pw_confirm_' + email); } catch (err) {
-    return { ok: false, error: 'RATE_LIMIT', message: 'অনেকবার চেষ্টা হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।' };
-  }
-
-  var lock = LockService.getScriptLock();
-  if (!lock.tryLock(5000)) return { ok: false, error: 'BUSY', message: 'অনুগ্রহ করে আবার চেষ্টা করুন।' };
-  var key = adminPasswordRecoveryKey_(email);
-  try {
-    var props = PropertiesService.getScriptProperties();
-    var raw = props.getProperty(key);
-    if (!raw) return { ok: false, error: 'INVALID_RESET', message: 'কোডটি ভুল বা মেয়াদোত্তীর্ণ। নতুন কোড নিন।' };
-    var record;
-    try { record = JSON.parse(raw); } catch (parseErr) { props.deleteProperty(key); return { ok: false, error: 'INVALID_RESET', message: 'নতুন কোড নিন।' }; }
-    if (!record || Date.now() > Number(record.expires) || Number(record.attempts || 0) >= 5) {
-      props.deleteProperty(key);
-      return { ok: false, error: 'EXPIRED_RESET', message: 'কোডটির মেয়াদ শেষ। নতুন কোড নিন।' };
-    }
-    if (hashPassword_(code, record.salt).hash !== record.hash) {
-      record.attempts = Number(record.attempts || 0) + 1;
-      if (record.attempts >= 5) props.deleteProperty(key);
-      else props.setProperty(key, JSON.stringify(record));
-      return { ok: false, error: 'INVALID_RESET', message: 'কোডটি সঠিক নয়। আবার চেষ্টা করুন।' };
-    }
-
-    var user = findAdminByEmail_(email);
-    if (!user || String(user.status || '').trim().toLowerCase() === 'blocked') {
-      props.deleteProperty(key);
-      return { ok: false, error: 'INVALID_RESET', message: 'অ্যাকাউন্টটি পাওয়া যায়নি বা বন্ধ রয়েছে।' };
-    }
-    var hashed = hashPassword_(password);
-    var adminSheet = getAdminsSheet_();
-    adminSheet.getRange(user.row, 4).setValue(hashed.hash);
-    adminSheet.getRange(user.row, 5).setValue(hashed.salt);
-    if (adminSheet.getLastColumn() >= 9) adminSheet.getRange(user.row, 9).setValue(new Date());
-
-    // Revoke every existing session for this account immediately.
-    var sessions = getSessionsSheet_();
-    var rows = sessions.getDataRange().getValues();
-    for (var i = rows.length - 1; i >= 1; i--) {
-      if (normalizeEmail_(rows[i][1]) === email) sessions.deleteRow(i + 1);
-    }
-    props.deleteProperty(key);
-    bumpAdminAuthGeneration_();
-    return { ok: true, message: 'পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে। এখন নতুন পাসওয়ার্ড দিয়ে লগইন করুন।' };
-  } finally {
-    lock.releaseLock();
-  }
-}
-
-/**
- * Run once from the Apps Script editor as the deployment owner.
- * This grants MailApp permission before the public web app attempts to send recovery codes.
- */
-function authorizeAdminPasswordRecoveryMail() {
-  var remaining = MailApp.getRemainingDailyQuota();
-  Logger.log('Admin password recovery mail authorization is ready. Remaining recipient quota: ' + remaining);
-  return { ok: true, remainingDailyQuota: remaining };
-}
-</textarea><br>
-<button type="button" id="copyFile16">AdminPasswordRecovery.gs কপি</button>
-<script>bind("copyFile16", "fileBox16");</script>
-</body></html>
+bind('copyFile15', 'fileBox15');
+bind('copyFile16', 'fileBox16');</script></body></html>

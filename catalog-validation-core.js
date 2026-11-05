@@ -13,8 +13,12 @@ window.__maBuildValidationProducts = function (w) {
       var sc = w.SITE_LINKS && w.SITE_LINKS.sizeChart;
       var custom = (sc && sc.byCategory && sc.byCategory[category] && sc.byCategory[category].customSize) ||
         (sc && sc.default && sc.default.customSize) || [];
+      // Scheduled sale (saleFrom / saleTo): send the sale prices plus the regular prices and the dates, so the
+      // order server picks the right one at order time (not at build time). See Operations.gs opsSaleOff_.
+      var sale = p._saleRaw || null;
       products.push({
-        id: p.id, name: p.name, category: category, price: p.price, prices: p.priceByType || null, sizes: p.sizes || [],
+        id: p.id, name: p.name, category: category, price: sale ? sale.price : p.price,
+        prices: (sale ? sale.priceByType : p.priceByType) || null, sizes: p.sizes || [],
         bodySizes: (cfg && cfg.bodySizes) || [], bodyLabel: (cfg && cfg.bodySizeLabel) || '',
         lengths: ab ? (p.lengthSizes || p.sizes || cfg.lengthSizes) : [],
         dressLengths: (cfg && cfg.dressLengths) || [], palazzoLengths: (cfg && cfg.palazzoLengths) || [],
@@ -23,12 +27,22 @@ window.__maBuildValidationProducts = function (w) {
         // Size Manager: the old size lists, so the order check keeps existing products' sizes (size-core.js).
         sizeLegacy: w.getSizeLegacySlots(p, category)
       });
-      // Product Manager variations: only what the order price check needs (no SKU/photo/sale price).
-      if (Array.isArray(p.variations) && p.variations.length) {
-        products[products.length - 1].variations = p.variations.map(function (v) {
+      var row0 = products[products.length - 1];
+      if (sale) {
+        if (sale.from != null) row0.saleFrom = sale.from;
+        if (sale.to != null) row0.saleTo = sale.to;
+        if (sale.regularPrice > 0) row0.regularPrice = sale.regularPrice;
+        if (sale.regularPriceByType) row0.regularPrices = sale.regularPriceByType;
+      }
+      // Product Manager variations: only what the order price check needs (no SKU/photo; the before-sale
+      // price only when the sale has dates).
+      var vlist = sale ? sale.variations : p.variations;
+      if (Array.isArray(vlist) && vlist.length) {
+        row0.variations = vlist.map(function (v) {
           var row = {};
           ['type', 'color', 'size'].forEach(function (k) { if (v[k]) row[k] = v[k]; });
           if (v.price > 0) row.price = v.price;
+          if (sale && v.regularPrice > 0) row.regularPrice = v.regularPrice;
           // Disabled or out of stock (Stock status without counted stock): the order server refuses it.
           if (v.enabled === false || v.stockStatus === 'outofstock') row.enabled = false;
           return row;

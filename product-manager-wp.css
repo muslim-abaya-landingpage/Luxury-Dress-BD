@@ -810,3 +810,9 @@ html[data-admin-theme="dark"] .pm-wp-list, html[data-admin-theme="dark"] .pm-wp-
 /* WooCommerce-style product type select and the Attributes tab sub-heading (product-variations-admin.js) */
 #pmProductType{margin-left:6px;min-height:32px;padding:2px 6px;font-size:14px;font-weight:400}
 .pm-wp-subhead{margin:18px 0 6px;padding-top:12px;border-top:1px solid #eee;font-size:13px;color:#50575e}
+/* Sale price dates (WooCommerce "Schedule") */
+.pm-sale-schedule > span { display: flex !important; flex-direction: row !important; flex-wrap: wrap; gap: 8px; align-items: center; }
+.pm-sale-dates { display: inline-flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.pm-sale-dates[hidden] { display: none; }
+.pm-sale-dates input[type="date"] { width: 160px; height: auto; }
+.pm-sale-schedule small { flex: 1 1 100%; }

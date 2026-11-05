@@ -37,6 +37,12 @@
     return best;
   }
 
+  function saleOff(p, now) {
+    var f = p && p.saleFrom != null ? Number(p.saleFrom) : null, t = p && p.saleTo != null ? Number(p.saleTo) : null;
+    if (f == null && t == null) return false;
+    return (f != null && now < f) || (t != null && now > t);
+  }
+
   /** Unit price the order server will charge for this cart line, or null if it cannot be worked out. */
   function serverUnitPrice(line, p) {
     if (!line || !p) return null;
@@ -49,10 +55,17 @@
       if (!key) return null;
       price = Number(p.prices[key]);
     }
+    // Scheduled sale outside its dates: regular prices (port of Operations.gs opsSaleOff_).
+    var off = saleOff(p, Date.now());
+    if (off) {
+      if (p.prices) { var rp = p.regularPrices && Number(p.regularPrices[key]); if (rp > price) price = rp; }
+      else if (Number(p.regularPrice) > price) price = Number(p.regularPrice);
+    }
     var variation = variationFor(p, line);
     if (variation) {
       if (variation.enabled === false) return null;
       if (Number(variation.price) > 0) price = Number(variation.price);
+      if (off && Number(variation.regularPrice) > (Number(variation.price) || 0)) price = Number(variation.regularPrice);
     }
     var size = String(line.size || line.selectedSize || "").trim();
     if (!size) return null;

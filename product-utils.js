@@ -422,8 +422,65 @@
     if (entry.seoTitle) normalized.seoTitle = String(entry.seoTitle);
     if (entry.seoDescription) normalized.seoDescription = String(entry.seoDescription);
 
+    applySaleSchedule(normalized, entry, Date.now());
+
     normalized.productUrl = resolveProductPageLink(normalized);
     return normalized;
+  }
+
+  /**
+   * WooCommerce-style "Schedule" for sale prices: saleFrom / saleTo are dates (YYYY-MM-DD, Bangladesh time).
+   * The sale starts at 00:00 on saleFrom and ends after 23:59 on saleTo; either may be empty.
+   * Returns {from, to} in milliseconds (null = open), or null when the product has no schedule.
+   */
+  function saleWindow(entry) {
+    var day = function (s) { return /^\d{4}-\d{2}-\d{2}$/.test(String(s || "").trim()) ? String(s).trim() : ""; };
+    var from = day(entry && entry.saleFrom), to = day(entry && entry.saleTo);
+    if (!from && !to) return null;
+    return {
+      from: from ? Date.parse(from + "T00:00:00+06:00") : null,
+      to: to ? Date.parse(to + "T23:59:59.999+06:00") : null
+    };
+  }
+  function saleWindowOpen(w, now) {
+    return !w || ((w.from == null || now >= w.from) && (w.to == null || now <= w.to));
+  }
+  /**
+   * Keeps the scheduled sale prices in normalized._saleRaw (catalog-validation.json sends them to the
+   * order server, which decides at order time) and, outside the dates, shows the regular prices instead:
+   * price ← regularPrice, priceByType ← regularPriceByType, variation price ← its regularPrice.
+   */
+  function applySaleSchedule(normalized, entry, now) {
+    var w = saleWindow(entry);
+    if (!w) return;
+    normalized.saleFrom = String(entry.saleFrom || "").trim();
+    normalized.saleTo = String(entry.saleTo || "").trim();
+    if (normalized.priceByType) normalized.priceByType = Object.assign({}, normalized.priceByType);
+    normalized._saleRaw = {
+      from: w.from, to: w.to, price: normalized.price, regularPrice: normalized.regularPrice || null,
+      priceByType: normalized.priceByType ? Object.assign({}, normalized.priceByType) : null,
+      regularPriceByType: normalized.regularPriceByType ? Object.assign({}, normalized.regularPriceByType) : null,
+      variations: normalized.variations ? normalized.variations.map(function (v) { return Object.assign({}, v); }) : null
+    };
+    if (saleWindowOpen(w, now)) return;
+    if (normalized.regularPrice > normalized.price) normalized.price = normalized.regularPrice;
+    delete normalized.regularPrice;
+    var regs = normalized.regularPriceByType;
+    if (normalized.priceByType && regs) {
+      Object.keys(normalized.priceByType).forEach(function (t) {
+        var r = parseInt(regs[t], 10);
+        if (r > parseInt(normalized.priceByType[t], 10)) normalized.priceByType[t] = r;
+      });
+    }
+    delete normalized.regularPriceByType;
+    if (normalized.variations) {
+      normalized.variations = normalized.variations.map(function (v) {
+        var row = Object.assign({}, v);
+        if (row.regularPrice > (row.price || 0)) row.price = row.regularPrice;
+        delete row.regularPrice;
+        return row;
+      });
+    }
   }
 
   /** Draft and Trash products are kept in the catalog file but never shown or sold. */
@@ -1167,6 +1224,9 @@ g.getCartLineBaseName = getCartLineBaseName;
     normalizeProductEntry: normalizeProductEntry,
     normalizeAll: normalizeAll,
     cleanVariations: cleanVariations,
+    saleWindow: saleWindow,
+    saleWindowOpen: saleWindowOpen,
+    applySaleSchedule: applySaleSchedule,
     variationFor: variationFor,
     isPublishedProduct: isPublishedProduct,
     getSaleInfo: getSaleInfo,

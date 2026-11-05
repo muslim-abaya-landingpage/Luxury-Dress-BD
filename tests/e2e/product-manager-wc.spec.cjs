@@ -158,3 +158,26 @@ test('sale price on a single-price product shows the crossed-out price in the li
   await page.click('#pmEditBack');
   await expect(page.locator('#pmAllRows tr').nth(idx).locator('.column-price del')).toHaveText('৳' + (price + 300));
 });
+
+test('sale schedule: Schedule shows From/To dates, they publish with the product, Cancel removes them', async ({ page }) => {
+  await open(page);
+  await page.locator('#pmAllRows tr').first().locator('.pm-row-title').click(); // ABY-MAROON-1
+  await expect(page.locator('#pmSaleDates')).toBeHidden();
+  await page.click('#pmSaleSchedule');
+  await expect(page.locator('#pmSaleDates')).toBeVisible();
+  await page.fill('#pmEf_saleFrom', '2030-01-01');
+  await page.fill('#pmEf_saleTo', '2030-01-10');
+  await expect(page.locator('#pmSaleNote')).toContainText('starts on 2030-01-01');
+  await page.click('#pmEditBarSave');
+  await expect.poll(() => productsFile(page)).toBeTruthy();
+  let e = entry(await productsFile(page), 'ABY-MAROON-1');
+  expect(e).toContain('saleFrom: "2030-01-01"');
+  expect(e).toContain('saleTo: "2030-01-10"');
+  await page.evaluate(() => { window.__published = null; });
+  await page.click('#pmSaleCancel');
+  await expect(page.locator('#pmSaleSchedule')).toBeVisible();
+  await page.click('#pmEditBarSave');
+  await expect.poll(() => productsFile(page)).toBeTruthy();
+  e = entry(await productsFile(page), 'ABY-MAROON-1');
+  expect(e).not.toContain('saleFrom');
+});

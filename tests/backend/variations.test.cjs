@@ -22,7 +22,7 @@ function server() {
   };
   const ctx = {};
   vm.createContext(ctx);
-  vm.runInContext(['opsNorm_', 'opsVariation_', 'opsLinePrice_'].map(grab).join('\n'), ctx);
+  vm.runInContext(['opsNorm_', 'opsVariation_', 'opsSaleOff_', 'opsLinePrice_'].map(grab).join('\n'), ctx);
   return ctx;
 }
 
