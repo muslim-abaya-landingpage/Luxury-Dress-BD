@@ -187,6 +187,8 @@
       if (regular > 0 && (!row.price || regular > row.price)) row.regularPrice = regular;
       if (v.enabled === false) row.enabled = false;
       if (v.stockStatus === "outofstock") row.stockStatus = "outofstock";
+      // Own sale dates (Variations → Schedule); empty = the product's sale dates.
+      ["saleFrom", "saleTo"].forEach(function (k) { if (/^\d{4}-\d{2}-\d{2}$/.test(String(v[k] || "").trim())) row[k] = String(v[k]).trim(); });
       if (row.type || row.color || row.size) out.push(row);
     });
     return out;
@@ -452,29 +454,35 @@
    */
   function applySaleSchedule(normalized, entry, now) {
     var w = saleWindow(entry);
-    if (!w) return;
-    normalized.saleFrom = String(entry.saleFrom || "").trim();
-    normalized.saleTo = String(entry.saleTo || "").trim();
+    var vOwn = (normalized.variations || []).some(function (v) { return v.saleFrom || v.saleTo; });
+    if (!w && !vOwn) return;
+    if (w) {
+      normalized.saleFrom = String(entry.saleFrom || "").trim();
+      normalized.saleTo = String(entry.saleTo || "").trim();
+    }
     if (normalized.priceByType) normalized.priceByType = Object.assign({}, normalized.priceByType);
     normalized._saleRaw = {
-      from: w.from, to: w.to, price: normalized.price, regularPrice: normalized.regularPrice || null,
+      from: w ? w.from : null, to: w ? w.to : null, price: normalized.price, regularPrice: normalized.regularPrice || null,
       priceByType: normalized.priceByType ? Object.assign({}, normalized.priceByType) : null,
       regularPriceByType: normalized.regularPriceByType ? Object.assign({}, normalized.regularPriceByType) : null,
       variations: normalized.variations ? normalized.variations.map(function (v) { return Object.assign({}, v); }) : null
     };
-    if (saleWindowOpen(w, now)) return;
-    if (normalized.regularPrice > normalized.price) normalized.price = normalized.regularPrice;
-    delete normalized.regularPrice;
-    var regs = normalized.regularPriceByType;
-    if (normalized.priceByType && regs) {
-      Object.keys(normalized.priceByType).forEach(function (t) {
-        var r = parseInt(regs[t], 10);
-        if (r > parseInt(normalized.priceByType[t], 10)) normalized.priceByType[t] = r;
-      });
+    if (w && !saleWindowOpen(w, now)) {
+      if (normalized.regularPrice > normalized.price) normalized.price = normalized.regularPrice;
+      delete normalized.regularPrice;
+      var regs = normalized.regularPriceByType;
+      if (normalized.priceByType && regs) {
+        Object.keys(normalized.priceByType).forEach(function (t) {
+          var r = parseInt(regs[t], 10);
+          if (r > parseInt(normalized.priceByType[t], 10)) normalized.priceByType[t] = r;
+        });
+      }
+      delete normalized.regularPriceByType;
     }
-    delete normalized.regularPriceByType;
     if (normalized.variations) {
       normalized.variations = normalized.variations.map(function (v) {
+        var vw = saleWindow(v) || w;
+        if (!vw || saleWindowOpen(vw, now)) return v;
         var row = Object.assign({}, v);
         if (row.regularPrice > (row.price || 0)) row.price = row.regularPrice;
         delete row.regularPrice;
@@ -482,6 +490,7 @@
       });
     }
   }
+
 
   /** Draft and Trash products are kept in the catalog file but never shown or sold. */
   function isPublishedProduct(product) {

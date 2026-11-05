@@ -118,6 +118,7 @@
     ".pmw-var{border-bottom:1px solid #eee}.pmw-var-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 0}.pmw-var-head .pmw-id{font-weight:600}" +
     ".pmw-var-head .pmw-actions{margin-left:auto;display:flex;gap:12px}.pmw-var-head select{max-width:180px}.pmw-var.is-off .pmw-var-head{opacity:.6}" +
     ".pmw-var.is-bad .pmw-var-head{background:#fcf0f1}.pmw-var-body{padding:4px 0 16px;display:grid;gap:12px}" +
+    ".pmw-sched span{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.pmw-field.pmw-sched input{width:160px;flex:0 1 160px}.pmw-sched small{display:block;color:#646970;margin-top:4px}.pmw-row2 label .pmw-link{font-weight:400;margin-left:6px}" +
     ".pmw-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.pmw-row2 label,.pmw-field label{display:block;margin-bottom:4px}.pmw-row2 input,.pmw-row2 select,.pmw-field input,.pmw-field select{width:100%;box-sizing:border-box;min-height:36px}" +
     ".pmw-img{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:150px;border:2px dashed #c3c4c7;border-radius:4px;color:#50575e;cursor:pointer;background:#fff}" +
     ".pmw-img img{max-width:100%;max-height:150px;object-fit:contain}.pmw-img .pmw-plus{font-size:30px;line-height:1}" +
@@ -293,8 +294,9 @@
     var photos = (ctx.photos || []).filter(Boolean);
     if (!Array.isArray(p.variations)) p.variations = [];
     var rows = p.variations;
-    var st = box.__pmwVar || (box.__pmwVar = { open: {}, picker: {}, productId: "" });
-    if (st.productId !== String(p.id)) { st.open = {}; st.picker = {}; st.productId = String(p.id); }
+    var st = box.__pmwVar || (box.__pmwVar = { open: {}, picker: {}, sched: {}, productId: "" });
+    if (!st.sched) st.sched = {};
+    if (st.productId !== String(p.id)) { st.open = {}; st.picker = {}; st.sched = {}; st.productId = String(p.id); }
     var stockOk = !!(shared.admin && typeof shared.admin.getStockVariants === "function" && typeof shared.admin.commitStockCsv === "function");
 
     function fallback(v) { return ctx.basePrice ? ctx.basePrice(v.type) : p.price; }
@@ -341,7 +343,12 @@
           '<div class="pmw-cb"><label><input type="checkbox" data-pv="enabled" data-i="' + i + '"' + (v.enabled === false ? "" : " checked") + "> Enabled</label>" +
             (stockOk && sk ? '<label><input type="checkbox" data-pv="manage" data-sk="' + esc(sk) + '"' + (managed ? " checked" : "") + (firstForStock ? "" : " disabled") + "> Manage stock?</label>" : "") + "</div>" +
           '<div class="pmw-row2"><div><label>Regular price (৳)</label><input type="number" min="0" data-pv="regular" data-i="' + i + '" value="' + esc(regularOf(v)) + '" placeholder="' + esc(fallback(v) || "") + '"></div>' +
-            '<div><label>Sale price (৳)</label><input type="number" min="0" data-pv="sale" data-i="' + i + '" value="' + esc(saleOf(v)) + '"></div></div>' +
+            '<div><label>Sale price (৳) ' + (v.saleFrom || v.saleTo || st.sched[i] ? "" : '<a class="pmw-link" data-pv="sched" data-i="' + i + '">Schedule</a>') + '</label><input type="number" min="0" data-pv="sale" data-i="' + i + '" value="' + esc(saleOf(v)) + '"></div></div>' +
+          (v.saleFrom || v.saleTo || st.sched[i] ? '<div class="pmw-field pmw-sched"><label>Sale price dates</label><span>' +
+            '<input type="date" data-pv="sfrom" data-i="' + i + '" value="' + esc(v.saleFrom || "") + '" aria-label="Sale starts (From…)" title="From… (00:00)">' +
+            '<input type="date" data-pv="sto" data-i="' + i + '" value="' + esc(v.saleTo || "") + '" aria-label="Sale ends (To…)" title="To… (23:59)">' +
+            '<a class="pmw-link" data-pv="nosched" data-i="' + i + '">Cancel</a></span>' +
+            '<small>Bangladesh time. Outside these dates this variation sells at its regular price. Empty = follows the product’s Sale price dates.</small></div>' : "") +
           stockHtml + "</div>";
       }
       return '<div class="pmw-var' + (v.enabled === false ? " is-off" : "") + (bad ? " is-bad" : "") + '" data-row="' + i + '"' + (dup[i] ? ' title="This combination appears twice"' : "") + ">" +
@@ -494,13 +501,15 @@
         } else if (k === "del") {
           if (!g.confirm("Are you sure you want to remove this variation?")) return;
           rows.splice(i, 1);
-          st.open = {}; st.picker = {};
+          st.open = {}; st.picker = {}; st.sched = {};
           draw(); save("Variation removed — click Save changes.");
         } else if (k === "edit") { st.open[i] = !st.open[i]; draw(); }
         else if (k === "expand" || k === "close") { rows.forEach(function (_, j) { st.open[j] = k === "expand"; }); draw(); }
         else if (k === "picker") { st.picker[i] = !st.picker[i]; draw(); }
         else if (k === "pick" && v) { v.image = a.getAttribute("data-src"); st.picker[i] = false; draw(); save(); }
         else if (k === "noimg" && v) { delete v.image; draw(); save(); }
+        else if (k === "sched") { st.sched[i] = true; draw(); }
+        else if (k === "nosched" && v) { var hadDates = !!(v.saleFrom || v.saleTo); delete v.saleFrom; delete v.saleTo; st.sched[i] = false; draw(); if (hadDates) save(); }
       },
       input: function (t) {
         if (t.matches('[data-pv="stock"]')) { shared.stockEdits[t.getAttribute("data-sk")] = String(t.value).trim(); if (ctx.changed) ctx.changed(); }
@@ -526,6 +535,10 @@
         else if (k === "regular" || k === "sale") {
           var cardEl = t.closest(".pmw-var");
           setPrices(v, cardEl.querySelector('[data-pv="regular"]').value, cardEl.querySelector('[data-pv="sale"]').value);
+        } else if (k === "sfrom" || k === "sto") {
+          var key = k === "sfrom" ? "saleFrom" : "saleTo";
+          if (/^\d{4}-\d{2}-\d{2}$/.test(t.value)) v[key] = t.value; else delete v[key];
+          if (v.saleFrom && v.saleTo && v.saleFrom > v.saleTo) msg("Variation #" + (i + 1) + ": the end date is before the start date.", "err");
         } else if (k === "sku") { var sku = String(t.value).trim().toUpperCase(); if (sku) v.sku = sku; else delete v.sku; }
         else if (k === "status") { if (t.value === "outofstock") v.stockStatus = "outofstock"; else delete v.stockStatus; }
         else return;

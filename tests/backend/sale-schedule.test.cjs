@@ -134,3 +134,32 @@ test('publish refuses bad sale dates', () => {
   assert.throws(() => w.MaProductPublishUtils.validateCatalog({ abaya: [abaya('5/11/2026', '')] }), /YYYY-MM-DD/);
   assert.throws(() => w.MaProductPublishUtils.validateCatalog({ abaya: [abaya(tomorrow, yesterday)] }), /before the start/);
 });
+
+test('a variation can have its own sale dates (WooCommerce variation Schedule)', () => {
+  const w = site(), c = server(), cartW = cart();
+  const p = {
+    id: 'KT-V2', name: 'Variation dates', image: '/images/k.webp', price: 900, sizes: ['M', 'L', 'XL'],
+    variations: [
+      { size: 'L', price: 700, regularPrice: 1000, saleFrom: tomorrow },          // own sale not started
+      { size: 'XL', price: 750, regularPrice: 1100, saleFrom: yesterday, saleTo: tomorrow }, // own sale running
+      { size: 'M', price: 800, regularPrice: 950 }                                 // no dates: always on sale
+    ]
+  };
+  w.CATEGORY_PRODUCTS = { 'tops-kurti': [p] };
+  const row = w.__maBuildValidationProducts(w)[0];
+  assert.equal(row.variations[0].saleFrom, Date.parse(tomorrow + 'T00:00:00+06:00'));
+  const shown = w.maCatalog.normalizeProductEntry(JSON.parse(JSON.stringify(p)), 'tops-kurti', 0);
+  [['L', 1000], ['XL', 750], ['M', 800]].forEach(([size, want]) => {
+    assert.equal(c.opsLinePrice_({ qty: 1, size }, row), want, 'server ' + size);
+    assert.equal(cartW.maServerUnitPrice({ size }, row), want, 'cart ' + size);
+    assert.equal(w.maCatalog.variationFor(shown, { size }).price, want, 'website ' + size);
+  });
+  // Product dates ended, but a variation with its own running dates keeps its sale.
+  const q = JSON.parse(JSON.stringify(p));
+  q.saleFrom = lastWeek; q.saleTo = yesterday;
+  w.CATEGORY_PRODUCTS = { 'tops-kurti': [q] };
+  const row2 = w.__maBuildValidationProducts(w)[0];
+  assert.equal(c.opsLinePrice_({ qty: 1, size: 'XL' }, row2), 750);
+  assert.equal(c.opsLinePrice_({ qty: 1, size: 'M' }, row2), 950, 'M follows the ended product dates');
+  assert.equal(cartW.maServerUnitPrice({ size: 'M' }, row2), 950);
+});

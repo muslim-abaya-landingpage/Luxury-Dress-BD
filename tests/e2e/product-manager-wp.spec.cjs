@@ -94,11 +94,12 @@ test('edit screen: option prices keep the card price in step, and a new option (
   await page.waitForTimeout(500);
   await page.evaluate(() => { window.MaCatalogPublisher = Object.assign({}, window.MaCatalogPublisher, { isReady: () => true, publish: (files) => { window.__published = files; return Promise.resolve({ ok: true }); } }); });
   await page.locator('#pmAllRows tr').first().locator('.pm-row-title').click();
-  const first = page.locator('.pm-opt-row .pm-opt-price').first();
+  const first = page.locator('.pm-opt-row .pm-opt-regular').first();
   await first.fill('1999');
   await expect(page.locator('#pmCardPrice')).toHaveText('৳1999');
   await page.locator('.pm-opt-row .pm-opt-discount').first().fill('10');
-  await expect(first).toHaveValue('1799');
+  await expect(first).toHaveValue('1999');
+  await expect(page.locator('.pm-opt-row .pm-opt-sale').first()).toHaveValue('1799');
   await expect(page.locator('#pmCardPrice')).toHaveText('৳1799');
   await page.fill('#pmOptName', 'Hijab');
   await page.fill('#pmOptPrice', '450');
@@ -131,7 +132,7 @@ test('edit screen: discount percent calculates a simple-product sale price and D
   await row.locator('.pm-row-title').click();
   await expect(page.locator('[data-ef="discountPercent"]')).toHaveValue('10');
   await page.fill('[data-ef="discountPercent"]', '15');
-  await expect(page.locator('[data-ef="price"]')).toHaveValue('1615');
+  await expect(page.locator('[data-ef="salePrice"]')).toHaveValue('1615');
   await expect(page.locator('[data-ef="regularPrice"]')).toHaveValue('1900');
   await page.click('[data-etab="attributes"]');
   await page.fill('[data-ef="dressLengths"]', '52, 54');
@@ -143,6 +144,30 @@ test('edit screen: discount percent calculates a simple-product sale price and D
   expect(b).toContain('price: 1615');
   expect(b).toContain('regularPrice: 1900');
   expect(b).toContain('dressLengths: ["52","54"]');
+});
+
+test('edit screen: WooCommerce Regular / Sale price boxes write the sale and refuse a sale that is not lower', async ({ page }) => {
+  await stub(page);
+  page.on('dialog', (d) => d.accept());
+  await page.goto('/product-manager.html');
+  await page.waitForTimeout(500);
+  await withPublisher(page, false);
+  await page.fill('#pmAllSearch', 'DR-01');
+  await page.click('#pmAllSearchBtn');
+  await page.locator('#pmAllRows tr').filter({ hasText: 'DR-01' }).first().locator('.pm-row-title').click();
+  await expect(page.locator('[data-ef="regularPrice"]')).toHaveValue('1900');
+  await expect(page.locator('[data-ef="salePrice"]')).toHaveValue('1710');
+  await page.fill('[data-ef="salePrice"]', '1500');
+  await expect(page.locator('[data-ef="discountPercent"]')).toHaveValue('21');
+  await page.fill('[data-ef="salePrice"]', '2000');
+  await expect(page.locator('[data-ef="salePrice"]')).toHaveClass(/pm-price-bad/);
+  await page.fill('[data-ef="salePrice"]', '');
+  await page.click('#pmEditBarSave');
+  await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
+  const file = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
+  const at = file.indexOf('"DR-01"'), b = file.slice(at, file.indexOf('\n    }', at));
+  expect(b).toContain('price: 1900');
+  expect(b).not.toContain('regularPrice');
 });
 
 test('edit screen: structured color variations publish names and images, with five measurement fields', async ({ page }) => {
@@ -245,7 +270,7 @@ test('edit screen: the save bar is always visible, shows unsaved / saved / faile
   await withPublisher(page, true);
   await page.locator('#pmAllRows tr').first().locator('.pm-row-title').click();
   const bar = page.locator('#pmEditBar');
-  await page.locator('.pm-opt-row .pm-opt-price').first().fill('1777');
+  await page.locator('.pm-opt-row .pm-opt-regular').first().fill('1777');
   await expect(bar).toHaveAttribute('data-state', 'dirty');
   await expect(bar).toBeInViewport();
   await page.click('#pmEditBarSave');
@@ -273,7 +298,7 @@ test('edit screen: an option can be renamed (Hijab → Hijab + Niqab) and reorde
   await hijab.fill('Hijab + Niqab'); await hijab.press('Enter');
   const renamed = page.locator('[data-opt-name="Hijab + Niqab"]');
   await expect(renamed).toBeVisible();
-  await expect(page.locator('[data-ef="typePrice:Hijab + Niqab"]')).toHaveValue('450');
+  await expect(page.locator('[data-ef="typeRegular:Hijab + Niqab"]')).toHaveValue('450');
   await expect(page.locator('#pmEditBar')).toHaveAttribute('data-state', 'dirty');
   // Duplicate name is refused and the old name stays.
   await renamed.fill('full set borka, hijab+ niqab'); await renamed.press('Enter');

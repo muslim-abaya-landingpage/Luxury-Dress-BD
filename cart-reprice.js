@@ -65,7 +65,8 @@
     if (variation) {
       if (variation.enabled === false) return null;
       if (Number(variation.price) > 0) price = Number(variation.price);
-      if (off && Number(variation.regularPrice) > (Number(variation.price) || 0)) price = Number(variation.regularPrice);
+      var voff = variation.saleFrom != null || variation.saleTo != null ? saleOff(variation, Date.now()) : off;
+      if (voff && Number(variation.regularPrice) > (Number(variation.price) || 0)) price = Number(variation.regularPrice);
     }
     var size = String(line.size || line.selectedSize || "").trim();
     if (!size) return null;

@@ -22,6 +22,10 @@ for (const [cat, list] of Object.entries(w.CATEGORY_PRODUCTS || {})) {
     if (!p || typeof p !== 'object') continue;
     if (p.saleFrom === today) hits.push(`${cat}/${p.id}: sale starts ${today}`);
     if (p.saleTo === yesterday) hits.push(`${cat}/${p.id}: sale ended ${yesterday}`);
+    for (const v of Array.isArray(p.variations) ? p.variations : []) {
+      if (v && v.saleFrom === today) hits.push(`${cat}/${p.id} variation ${v.size || v.color || v.type || ''}: sale starts ${today}`);
+      if (v && v.saleTo === yesterday) hits.push(`${cat}/${p.id} variation ${v.size || v.color || v.type || ''}: sale ended ${yesterday}`);
+    }
   }
 }
 hits.forEach((h) => console.log(h));

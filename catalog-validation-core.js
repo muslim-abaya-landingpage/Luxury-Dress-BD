@@ -43,6 +43,9 @@ window.__maBuildValidationProducts = function (w) {
           ['type', 'color', 'size'].forEach(function (k) { if (v[k]) row[k] = v[k]; });
           if (v.price > 0) row.price = v.price;
           if (sale && v.regularPrice > 0) row.regularPrice = v.regularPrice;
+          var vw = (v.saleFrom || v.saleTo) && w.maCatalog.saleWindow ? w.maCatalog.saleWindow(v) : null;
+          if (vw && vw.from != null) row.saleFrom = vw.from;
+          if (vw && vw.to != null) row.saleTo = vw.to;
           // Disabled or out of stock (Stock status without counted stock): the order server refuses it.
           if (v.enabled === false || v.stockStatus === 'outofstock') row.enabled = false;
           return row;

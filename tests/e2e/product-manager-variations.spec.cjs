@@ -68,6 +68,12 @@ test('product type, attributes with "Used for variations", generate, edit variat
   await c1.locator('[data-pv="regular"]').blur();
   await c1.locator('[data-pv="sale"]').fill('1650');
   await c1.locator('[data-pv="sale"]').blur();
+  // Variation Schedule: own sale dates.
+  await c1.locator('[data-pv="sched"]').click();
+  await c1.locator('[data-pv="sfrom"]').fill('2030-02-01');
+  await c1.locator('[data-pv="sto"]').fill('2030-02-05');
+  await c1.locator('[data-pv="sto"]').blur();
+  await expect(c1.locator('[data-pv="nosched"]')).toBeVisible();
   await c1.locator('[data-pv="picker"]').click();
   await c1.locator('[data-pv="pick"]').first().click();
   await expect(c1.locator('.pmw-img img')).toBeVisible();
@@ -96,6 +102,7 @@ test('product type, attributes with "Used for variations", generate, edit variat
   await expect(page.locator('#pmEditNote')).toContainText('Stock saved for 1');
   expect(block).toContain('variations: [');
   expect(block).toMatch(/"size":"Length 50"[^}]*"price":1650,"regularPrice":1980/);
+  expect(block).toMatch(/"size":"Length 50"[^}]*"saleFrom":"2030-02-01","saleTo":"2030-02-05"/);
   expect(block).toMatch(/"size":"Length 52"[^}]*"enabled":false/);
   expect(block).toMatch(/"size":"Length 56"[^}]*"stockStatus":"outofstock"/);
   expect(block).toContain('variationAttributes: ["length"]');

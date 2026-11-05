@@ -758,6 +758,28 @@
       if (!Object.keys(p.regularPriceByType).length) delete p.regularPriceByType;
     } else if (n > 0) p.regularPrice = n; else delete p.regularPrice;
   }
+  // WooCommerce layout: "Regular price" and "Sale price" boxes. Stored as price = what the customer pays and
+  // regularPrice(ByType) = the before-sale price, so the website, cart and order server need no change.
+  function wooRegular(p, typeLabel) {
+    var price = typeLabel ? (p.priceByType || {})[typeLabel] : p.price;
+    var reg = typeLabel ? (p.regularPriceByType || {})[typeLabel] : p.regularPrice;
+    return parseInt(reg, 10) > parseInt(price, 10) ? reg : (price == null ? "" : price);
+  }
+  function wooSale(p, typeLabel) {
+    var price = typeLabel ? (p.priceByType || {})[typeLabel] : p.price;
+    var reg = typeLabel ? (p.regularPriceByType || {})[typeLabel] : p.regularPrice;
+    return parseInt(reg, 10) > parseInt(price, 10) ? price : "";
+  }
+  /** Writes Regular / Sale boxes into the product. Returns "" or a message when the sale is not lower. */
+  function applyWooPrices(p, typeLabel, regularValue, saleValue) {
+    var r = parseInt(regularValue, 10) || 0, sale = parseInt(saleValue, 10) || 0;
+    if (!(r > 0)) return "Enter the regular price.";
+    var pay = sale > 0 && sale < r ? sale : r;
+    if (typeLabel) { if (!p.priceByType) p.priceByType = {}; p.priceByType[typeLabel] = pay; }
+    else p.price = pay;
+    setRegularPrice(p, typeLabel, pay < r ? r : "");
+    return sale > 0 && sale >= r ? "The sale price must be lower than the regular price — ignored." : "";
+  }
   function salePercent(price, regular) {
     var sale = parseInt(price, 10), was = parseInt(regular, 10);
     return sale > 0 && was > sale ? Math.round((1 - sale / was) * 100) : "";
@@ -857,18 +879,19 @@
     var types = productOptionTypes(p, meta);
     var rows = "";
     if (!types.length) {
-      rows = efield("price", "Price (৳)", p.price, "number", "What the customer pays.") +
-        efield("regularPrice", "Regular price (৳)", p.regularPrice == null ? "" : p.regularPrice, "number", "Enter the original price; the percentage below calculates the sale price.") +
+      rows = efield("regularPrice", "Regular price (৳)", wooRegular(p, null), "number", "The normal price.") +
+        efield("salePrice", "Sale price (৳)", wooSale(p, null), "number", "Optional. Lower than the regular price; the regular price is shown crossed out.") +
         '<p class="pm-wp-form-row"><label for="pmEf_discountPercent">Discount (%)</label><span><input id="pmEf_discountPercent" type="number" min="1" max="99" step="1" data-ef="discountPercent" value="' + salePercent(p.price, p.regularPrice) + '" placeholder="e.g. 10"><small>Enter 1–99. Sale price is calculated from the regular price; clear to remove the discount.</small></span></p>';
     } else {
       rows = '<p class="pm-wp-form-row"><label>Price on product cards</label><span><b id="pmCardPrice">৳' + (parseInt(p.price, 10) || 0) + '</b><small>Always the same as the first option (' + escapeHtml(types[0]) + ').</small></span></p>' +
+        '<div class="pm-wp-form-row pm-opt-head" aria-hidden="true"><label></label><span><span class="pm-opt-h-name">Option name</span><span class="pm-opt-h">Regular (৳)</span><span class="pm-opt-h">Sale (৳)</span><span class="pm-opt-h pm-opt-h-off">% off</span></span></div>' +
         types.map(function (t) {
           var v = p.priceByType && p.priceByType[t] != null ? p.priceByType[t] : "";
           var i = types.indexOf(t);
           return '<div class="pm-wp-form-row pm-opt-row"><label for="pmEf_typePrice:' + escapeAttr(t) + '">Option ' + (i + 1) + (i === 0 ? ' <em>(card price)</em>' : '') + '</label><span>' +
             '<input type="text" class="pm-opt-name" maxlength="40" data-opt-name="' + escapeAttr(t) + '" value="' + escapeAttr(t) + '" aria-label="Option name (' + escapeAttr(t) + ')" title="Option name — edit to rename">' +
-            '<input id="pmEf_typePrice:' + escapeAttr(t) + '" class="pm-opt-price" type="number" min="0" data-ef="typePrice:' + escapeAttr(t) + '" value="' + escapeAttr(v) + '" aria-label="' + escapeAttr(t) + ' price">' +
-            '<input class="pm-opt-was" type="number" min="0" data-ef="typeRegular:' + escapeAttr(t) + '" value="' + escapeAttr(p.regularPriceByType && p.regularPriceByType[t] != null ? p.regularPriceByType[t] : "") + '" placeholder="Was ৳" aria-label="' + escapeAttr(t) + ' before-sale price" title="Optional before-sale price — shown crossed out when higher than the price">' +
+            '<input id="pmEf_typePrice:' + escapeAttr(t) + '" class="pm-opt-regular" type="number" min="0" data-ef="typeRegular:' + escapeAttr(t) + '" value="' + escapeAttr(wooRegular(p, t)) + '" placeholder="Regular ৳" aria-label="' + escapeAttr(t) + ' regular price" title="Regular price">' +
+            '<input class="pm-opt-sale" type="number" min="0" data-ef="typeSale:' + escapeAttr(t) + '" value="' + escapeAttr(wooSale(p, t)) + '" placeholder="Sale ৳" aria-label="' + escapeAttr(t) + ' sale price" title="Optional sale price — lower than the regular price">' +
             '<input class="pm-opt-discount" type="number" min="1" max="99" step="1" data-ef="typeDiscount:' + escapeAttr(t) + '" value="' + salePercent(v, p.regularPriceByType && p.regularPriceByType[t]) + '" placeholder="% off" aria-label="' + escapeAttr(t) + ' discount percent" title="Enter 1–99 to calculate this option’s sale price">' +
             '<span class="pm-opt-tools">' +
             (types.length > 1 ? '<button type="button" class="pm-wp-button pm-opt-move" data-opt-up="' + i + '"' + (i === 0 ? ' disabled' : '') + ' aria-label="Move ' + escapeAttr(t) + ' up" title="Move up">↑</button>' +
@@ -876,7 +899,7 @@
               '<button type="button" class="pm-wp-link-danger" data-opt-del="' + escapeAttr(t) + '">Remove</button>' : '') +
             '</span></span></div>';
         }).join("") +
-        '<p class="pm-wp-form-row pm-opt-help"><label></label><span><small id="pmOptEditMsg" role="status">Edit an option name to rename it (e.g. Hijab → Hijab + Niqab). ↑ ↓ change the order; the first option is the card price. Enter a % off to calculate that option’s sale price; the regular price stays struck through.</small></span></p>';
+        '<p class="pm-wp-form-row pm-opt-help"><label></label><span><small id="pmOptEditMsg" role="status">Edit an option name to rename it (e.g. Hijab → Hijab + Niqab). ↑ ↓ change the order; the first option is the card price. Regular ৳ = normal price, Sale ৳ = optional lower price (or enter a % off to calculate it). The regular price is shown crossed out during a sale.</small></span></p>';
     }
     return rows + saleScheduleRow(p) +
       '<div class="pm-wp-form-row pm-opt-add"><label for="pmOptName">Add option</label><span>' +
@@ -1105,26 +1128,33 @@
       inp.addEventListener(inp.type === "checkbox" ? "change" : "input", function () {
         var f = inp.getAttribute("data-ef");
         if (f === "featured") { if (inp.checked) p.featured = true; else delete p.featured; }
-        else if (f === "price") { p.price = parseInt(inp.value, 10) || 0; var dp = document.getElementById("pmEf_discountPercent"); if (dp) dp.value = salePercent(p.price, p.regularPrice); }
-        else if (f === "regularPrice") { setRegularPrice(p, null, inp.value); var dp2 = document.getElementById("pmEf_discountPercent"); if (dp2) dp2.value = salePercent(p.price, p.regularPrice); }
+        else if (f === "regularPrice" || f === "salePrice") {
+          var simpleWarn = applyWooPrices(p, null, root.querySelector('[data-ef="regularPrice"]').value, root.querySelector('[data-ef="salePrice"]').value);
+          var dp = document.getElementById("pmEf_discountPercent"); if (dp) dp.value = salePercent(p.price, p.regularPrice);
+          priceWarn(root.querySelector('[data-ef="salePrice"]'), simpleWarn);
+        }
         else if (f === "discountPercent") {
           if (!applyDiscountPercent(p, null, inp.value)) { inp.setCustomValidity("Enter a whole-number discount from 1 to 99%."); inp.reportValidity(); inp.setCustomValidity(""); return; }
-          var priceInput = root.querySelector('[data-ef="price"]'), regularInput = root.querySelector('[data-ef="regularPrice"]');
-          if (priceInput) priceInput.value = p.price;
-          if (regularInput) regularInput.value = p.regularPrice == null ? "" : p.regularPrice;
+          var saleInput = root.querySelector('[data-ef="salePrice"]'), regularInput = root.querySelector('[data-ef="regularPrice"]');
+          if (saleInput) saleInput.value = wooSale(p, null);
+          if (regularInput) regularInput.value = wooRegular(p, null);
         }
-        else if (f.indexOf("typeRegular:") === 0) {
-          var regularType = f.slice(12); setRegularPrice(p, regularType, inp.value); syncCardPrice(p, meta);
-          var discountTypeInput = root.querySelector('[data-ef="typeDiscount:' + CSS.escape(regularType) + '"]');
-          if (discountTypeInput) discountTypeInput.value = salePercent(p.priceByType && p.priceByType[regularType], p.regularPriceByType && p.regularPriceByType[regularType]);
+        else if (f.indexOf("typeRegular:") === 0 || f.indexOf("typeSale:") === 0) {
+          var wooType = f.slice(f.indexOf(":") + 1), q = CSS.escape(wooType);
+          var wooSaleInput = root.querySelector('[data-ef="typeSale:' + q + '"]');
+          var typeWarn = applyWooPrices(p, wooType, root.querySelector('[data-ef="typeRegular:' + q + '"]').value, wooSaleInput.value);
+          syncCardPrice(p, meta);
+          var discountTypeInput = root.querySelector('[data-ef="typeDiscount:' + q + '"]');
+          if (discountTypeInput) discountTypeInput.value = salePercent(p.priceByType && p.priceByType[wooType], p.regularPriceByType && p.regularPriceByType[wooType]);
+          priceWarn(wooSaleInput, typeWarn);
         }
         else if (f.indexOf("typeDiscount:") === 0) {
           var discountType = f.slice(13);
           if (!applyDiscountPercent(p, discountType, inp.value)) { inp.setCustomValidity("Enter a whole-number discount from 1 to 99%."); inp.reportValidity(); inp.setCustomValidity(""); return; }
-          var optionPriceInput = root.querySelector('[data-ef="typePrice:' + CSS.escape(discountType) + '"]');
+          var optionSaleInput = root.querySelector('[data-ef="typeSale:' + CSS.escape(discountType) + '"]');
           var optionRegularInput = root.querySelector('[data-ef="typeRegular:' + CSS.escape(discountType) + '"]');
-          if (optionPriceInput) optionPriceInput.value = p.priceByType[discountType];
-          if (optionRegularInput) optionRegularInput.value = p.regularPriceByType && p.regularPriceByType[discountType] || "";
+          if (optionSaleInput) optionSaleInput.value = wooSale(p, discountType);
+          if (optionRegularInput) optionRegularInput.value = wooRegular(p, discountType);
           syncCardPrice(p, meta);
         }
         else if (f === "saleFrom" || f === "saleTo") {
@@ -1136,13 +1166,6 @@
         else if (f === "stock") {
           if (inp.value === "") { delete p.stock; delete p.inStock; }
           else { p.stock = Math.max(0, parseInt(inp.value, 10) || 0); if (p.stock === 0) p.inStock = false; else delete p.inStock; }
-        } else if (f.indexOf("typePrice:") === 0) {
-          if (!p.priceByType) p.priceByType = {};
-          var priceType = f.slice(10);
-          p.priceByType[priceType] = parseInt(inp.value, 10) || 0;
-          var priceDiscountInput = root.querySelector('[data-ef="typeDiscount:' + CSS.escape(priceType) + '"]');
-          if (priceDiscountInput) priceDiscountInput.value = salePercent(p.priceByType[priceType], p.regularPriceByType && p.regularPriceByType[priceType]);
-          syncCardPrice(p, meta);
         } else if (f === "colorLabel") {
           p.colorLabel = inp.value;
           p.color = inp.value;
@@ -1543,6 +1566,13 @@
       });
     });
   }
+  function priceWarn(input, msg) {
+    if (!input) return;
+    input.classList.toggle("pm-price-bad", !!msg);
+    input.title = msg || "";
+    if (msg) editMsgSafe(msg);
+  }
+  function editMsgSafe(msg) { var el = document.getElementById("pmEditBarMsg"); if (el) el.textContent = msg; }
   function efield(name, label, value, type, hint) {
     return '<p class="pm-wp-form-row"><label for="pmEf_' + escapeAttr(name) + '">' + label + '</label><span><input id="pmEf_' + escapeAttr(name) + '" type="' + (type || "text") + '" data-ef="' + escapeAttr(name) + '" value="' + escapeAttr(value == null ? "" : value) + '">' +
       (hint ? '<small>' + hint + '</small>' : '') + '</span></p>';

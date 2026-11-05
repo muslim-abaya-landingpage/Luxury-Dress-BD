@@ -20,14 +20,18 @@ const entry = (file, id) => { const i = file.indexOf('id: "' + id + '"'); const 
 test('sale price: before-sale price per option, card price follows the first option, list shows the sale', async ({ page }) => {
   await open(page);
   await page.locator('#pmAllRows tr').first().locator('.pm-row-title').click(); // ABY-MAROON-1 (Full Set / Abaya Only)
-  const was = page.locator('.pm-opt-row .pm-opt-was');
-  await expect(was).toHaveCount(2);
-  await was.nth(0).fill('1299');
-  await was.nth(1).fill('999');
+  // WooCommerce boxes: Regular 1299 / Sale 1250 and Regular 999 / Sale 1000 → refused (not lower), so Sale = 1000 is rejected.
+  const reg = page.locator('.pm-opt-row .pm-opt-regular'), sale = page.locator('.pm-opt-row .pm-opt-sale');
+  await expect(reg).toHaveCount(2);
+  await reg.nth(0).fill('1299'); await sale.nth(0).fill('1250');
+  await reg.nth(1).fill('999'); await sale.nth(1).fill('1000');
+  await expect(sale.nth(1)).toHaveClass(/pm-price-bad/);
+  await reg.nth(1).fill('1100'); await sale.nth(1).fill('1000');
   await page.click('#pmEditBarSave');
   await expect.poll(() => productsFile(page)).toBeTruthy();
   const e = entry(await productsFile(page), 'ABY-MAROON-1');
-  expect(e).toMatch(/regularPriceByType: \{"Full Set Borka, Hijab\+ Niqab":1299,"Abaya Only":999\}/);
+  expect(e).toMatch(/regularPriceByType: \{"Full Set Borka, Hijab\+ Niqab":1299,"Abaya Only":1100\}/);
+  expect(e).toMatch(/\bpriceByType: \{\s*"Full Set Borka, Hijab\+ Niqab":\s*1250,\s*"Abaya Only":\s*1000\s*\}/);
   expect(e).toContain('regularPrice: 1299');
   await page.click('#pmEditBack');
   // Several option prices: the list shows the range and a Sale tag.
@@ -149,12 +153,11 @@ test('sale price on a single-price product shows the crossed-out price in the li
   const idx = await page.evaluate(() => Array.from(document.querySelectorAll('#pmAllRows tr .column-price')).findIndex((td) => !/–/.test(td.textContent)));
   test.skip(idx < 0, 'no single-price product on the first page');
   await page.locator('#pmAllRows tr').nth(idx).locator('.pm-row-title').click();
-  const simple = (await page.locator('[data-ef="price"]').count()) > 0;
-  const price = simple ? parseInt(await page.locator('[data-ef="price"]').inputValue(), 10)
-    : parseInt((await page.locator('#pmCardPrice').textContent()).replace(/\D/g, ''), 10);
-  const before = page.locator('[data-ef="regularPrice"]');
-  if (await before.count()) await before.fill(String(price + 300));
-  else await page.locator('.pm-opt-row .pm-opt-was').first().fill(String(price + 300));
+  const simple = (await page.locator('[data-ef="salePrice"]').count()) > 0;
+  const price = parseInt(simple ? await page.locator('[data-ef="regularPrice"]').inputValue()
+    : (await page.locator('#pmCardPrice').textContent()).replace(/\D/g, ''), 10);
+  if (simple) { await page.fill('[data-ef="regularPrice"]', String(price + 300)); await page.fill('[data-ef="salePrice"]', String(price)); }
+  else { await page.locator('.pm-opt-row .pm-opt-regular').first().fill(String(price + 300)); await page.locator('.pm-opt-row .pm-opt-sale').first().fill(String(price)); }
   await page.click('#pmEditBack');
   await expect(page.locator('#pmAllRows tr').nth(idx).locator('.column-price del')).toHaveText('৳' + (price + 300));
 });
