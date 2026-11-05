@@ -87,7 +87,7 @@
     for (var i = 0; i < keys.length; i++) {
       var list = cats[keys[i]] || [];
       for (var j = 0; j < list.length; j++) {
-        if (list[j] && String(list[j].id) === String(id)) {
+        if (list[j] && String(list[j].id) === String(id) && !list[j]._extraCategory) {
           return { product: list[j], category: keys[i], list: list };
         }
       }
@@ -665,7 +665,10 @@
     var links = window.SITE_LINKS || {};
     var notes = links.productNotes || {};
     var html = notes[state.category] || notes.default || "";
-    $("pdDescPanel").innerHTML = state.product.detailNote
+    var safe = window.maCatalog && window.maCatalog.safeHtml;
+    $("pdDescPanel").innerHTML = state.product.descriptionHtml && safe
+      ? "<div class='pd-desc-html'>" + safe(state.product.descriptionHtml) + "</div>" + html
+      : state.product.detailNote
       ? "<p>" + escapeHtml(state.product.detailNote) + "</p>" + html
       : html;
 
@@ -679,7 +682,11 @@
     if (state.selectedColorLabel || state.product.colorLabel) {
       rows.push(["Color", state.selectedColorLabel || state.product.colorLabel]);
     }
-    rows.push(["SKU", state.product.id]);
+    if (state.product.weight) rows.push(["Weight", state.product.weight + " kg"]);
+    var dims = [state.product.dimLength, state.product.dimWidth, state.product.dimHeight].filter(function (x) { return x; });
+    if (dims.length) rows.push(["Dimensions", dims.join(" × ") + " cm"]);
+    rows.push(["SKU", state.product.sku || state.product.id]);
+    if (state.product.gtin) rows.push(["GTIN", state.product.gtin]);
     $("pdSpecPanel").innerHTML =
       "<table class='pd-spec-table'>" +
       rows.map(function (r) {
@@ -771,7 +778,8 @@
     return (Array.isArray(list) ? list : []).filter(function (p) {
       if (!p || p.id == null || !String(p.id).trim() || !String(p.name || "").trim()) return false;
       if (String(p.id) === currentId || p.isImageView === true) return false;
-      if (p.status === "draft" || p.status === "trash" || isVariantSuffix(p.name)) return false;
+      if (p.status === "draft" || p.status === "trash" || p.status === "pending" || isVariantSuffix(p.name)) return false;
+      if (window.maCatalog && window.maCatalog.listable && !window.maCatalog.listable(p, "shop")) return false;
       var b = baseName(p.name).toLowerCase();
       if (!b || b === currentBase || seenBase[b]) return false;
       var rawImage = p.image || p.img || (Array.isArray(p.images) && p.images[0]) || "";
@@ -1091,7 +1099,7 @@
       "<div class='pd-info'>" +
       "<h1 class='pd-name' id='pdName'></h1>" +
       "<div class='pd-price' id='pdPrice'></div>" +
-      "<p class='pd-shortnote' id='pdShortNote'></p>" +
+      "<div class='pd-shortnote' id='pdShortNote'></div>" +
       "<div class='pd-option-group' id='pdColorPickGroup'></div>" +
       "<div class='pd-option-group' id='pdColorGroup'></div>" +
       "<div class='pd-option-group' id='pdSizeGroup'></div>" +
@@ -1287,7 +1295,88 @@
     document.documentElement.style.removeProperty("--pd-mobile-nav-offset");
   }
 
+  // Password protected (Publish box → Visibility). Only hides the page: the catalog file is public.
+  function passwordGate() {
+    var p = state.product;
+    if (!p || p.visibility !== "password" || !p.postPassword) return false;
+    var key = "ma_pw_" + p.id;
+    try { if (sessionStorage.getItem(key) === "1") return false; } catch (e) {}
+    var main = document.getElementById("pdMain");
+    if (!main) return false;
+    main.innerHTML = "<div class='pd-pass' style='max-width:420px;margin:48px auto;padding:24px;border:1px solid #e5e7eb;border-radius:10px;text-align:center'>" +
+      "<h1 style='font-size:20px;margin:0 0 8px'>" + escapeHtml(p.name) + "</h1>" +
+      "<p style='color:#555'>This content is password protected. To view it please enter your password below:</p>" +
+      "<form id='pdPassForm'><input type='password' id='pdPassInput' aria-label='Password' style='width:100%;padding:10px;margin:8px 0;border:1px solid #ccc;border-radius:6px'>" +
+      "<button type='submit' class='pd-btn pd-btn-dark' style='width:100%'>Enter</button><p id='pdPassMsg' style='color:#b42318;min-height:1em'></p></form></div>";
+    document.getElementById("pdPassForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (document.getElementById("pdPassInput").value === p.postPassword) {
+        try { sessionStorage.setItem(key, "1"); } catch (err) {}
+        window.location.reload();
+      } else document.getElementById("pdPassMsg").textContent = "Wrong password.";
+    });
+    return true;
+  }
+
+  // WooCommerce fields from Product Manager: short description, external / grouped products, upsells,
+  // sold individually, reviews on/off.
+  function applyWooExtras() {
+    var p = state.product, cm = window.maCatalog || {};
+    var shortEl = $("pdShortNote");
+    if (p.shortDescription && cm.safeHtml && shortEl) shortEl.innerHTML = cm.safeHtml(p.shortDescription);
+    if (p.soldIndividually) {
+      state.qty = 1;
+      ["pdQtyMinus", "pdQtyPlus"].forEach(function (id) { var b = document.getElementById(id); if (b) { b.disabled = true; b.style.visibility = "hidden"; } });
+      var qv = document.getElementById("pdQtyVal"); if (qv) { qv.textContent = "1"; qv.title = "Sold individually — 1 per order"; }
+    }
+    var actions = document.querySelector(".pd-actions");
+    if (p.productType === "external" && p.externalUrl && actions && /^https?:\/\//i.test(p.externalUrl)) {
+      actions.innerHTML = "<a class='pd-btn pd-btn-dark' id='pdExternalBuy' href='" + escapeHtml(p.externalUrl) + "' target='_blank' rel='nofollow noopener sponsored'>" + escapeHtml(p.buttonText || "Buy product") + "</a>";
+      var qtyRow = document.querySelector(".pd-qty-row");
+      if (qtyRow) qtyRow.style.display = "none";
+    }
+    function findById(id) {
+      var cats = window.CATEGORY_PRODUCTS || {}, hit = null;
+      Object.keys(cats).some(function (k) { return (cats[k] || []).some(function (x) { if (x && String(x.id) === String(id) && !x._extraCategory) { hit = x; return true; } return false; }); });
+      return hit;
+    }
+    function miniCards(ids) {
+      return ids.map(findById).filter(Boolean).map(function (x) {
+        var img = resolveImg(x.imageCard || x.image || "");
+        return "<a class='pd-woo-card' href='" + escapeHtml(href("/product/" + encodeURIComponent(x.id))) + "'>" +
+          (img ? "<img src='" + escapeHtml(img) + "' alt='" + escapeHtml(x.name) + "' loading='lazy'>" : "") +
+          "<span>" + escapeHtml(x.name) + "</span><b>৳" + escapeHtml(x.price) + "</b></a>";
+      }).join("");
+    }
+    if (p.productType === "grouped" && Array.isArray(p.groupedProducts) && p.groupedProducts.length) {
+      var html = miniCards(p.groupedProducts);
+      if (html && actions) {
+        actions.insertAdjacentHTML("beforebegin", "<div class='pd-grouped'><h2 style='font-size:16px;margin:12px 0 8px'>This set includes</h2><div class='pd-woo-row'>" + html + "</div></div>");
+        actions.style.display = "none";
+        var qr = document.querySelector(".pd-qty-row"); if (qr) qr.style.display = "none";
+      }
+    }
+    if (Array.isArray(p.upsells) && p.upsells.length) {
+      var up = miniCards(p.upsells);
+      var related = document.querySelector(".pd-related");
+      if (up && related) related.insertAdjacentHTML("beforebegin", "<section class='pd-related pd-upsells'><div class='pd-related-head'><h2>You may also like…</h2></div><div class='pd-woo-row'>" + up + "</div></section>");
+    }
+    if (p.reviewsAllowed === false) {
+      var rev = document.getElementById("pdReviewsSection");
+      if (rev) rev.style.display = "none";
+    }
+    if (!document.getElementById("pdWooCss")) {
+      var st = document.createElement("style");
+      st.id = "pdWooCss";
+      st.textContent = ".pd-woo-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}.pd-woo-card{display:block;color:inherit;text-decoration:none;font-size:14px}" +
+        ".pd-woo-card img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:6px;margin-bottom:6px}.pd-woo-card span{display:block}.pd-woo-card b{display:block;margin-top:2px}" +
+        ".pd-desc-html img{max-width:100%;height:auto}.pd-desc-html blockquote{margin:0 0 1em;padding-left:12px;border-left:3px solid #ddd}.pd-shortnote p{margin:0 0 .5em}";
+      document.head.appendChild(st);
+    }
+  }
+
   function render() {
+    if (passwordGate()) return;
     renderShell();
     renderBreadcrumb();
     $("pdName").textContent = state.product.name;
@@ -1314,6 +1403,7 @@
     startReviewsAutoplay();
     initStickyOrderBar();
     applyStockUi();
+    applyWooExtras();
   }
 
   function boot() {

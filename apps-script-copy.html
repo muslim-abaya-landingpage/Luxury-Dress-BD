@@ -470,6 +470,7 @@ function orderErrorMessage_(code) {
     INVALID_PHONE: 'সঠিক ১১ ডিজিট মোবাইল নম্বর দিন (01XXXXXXXXX)।',
     INVALID_ADDRESS: 'সম্পূর্ণ ডেলিভারি ঠিকানা লিখুন।',
     INVALID_QTY: 'অর্ডার পরিমাণ সঠিক নয়।',
+    SOLD_INDIVIDUALLY: 'এই পণ্যটি একটি অর্ডারে শুধু ১টি কেনা যায়।',
     ORDER_BLOCKED: 'এই নম্বর থেকে অনলাইনে অর্ডার নেওয়া সম্ভব নয়। WhatsApp এ যোগাযোগ করুন।',
     MIN_ORDER: 'ন্যূনতম অর্ডার ৳১০০।',
     EMPTY_CART: 'কার্টে কোনো পণ্য নেই।',
@@ -1828,7 +1829,7 @@ function handleOnlineOrderPost_(e) {
 
   var districtChargeMap = getDistrictChargeMap_();
   var charge = 0;
-  if (validated.qty > 0 &amp;&amp; validated.qty &lt; 3) {
+  if (validated.qty > 0 &amp;&amp; validated.qty &lt; 3 &amp;&amp; !(typeof opsAllVirtual_ === 'function' &amp;&amp; opsAllVirtual_(validated.cartItems))) {
     charge = districtChargeMap[validated.district] || 150;
   }
 
@@ -9227,7 +9228,7 @@ function opsVariation_(p,it){var vs=p&amp;&amp;p.variations;if(!Array.isArray(vs
  * so the regular (before-sale) prices apply. saleFrom/saleTo are milliseconds from catalog-validation.json.
  * Mirrored in cart-reprice.js and product-utils.js. */
 function opsSaleOff_(p,now){var f=p&amp;&amp;p.saleFrom!=null?Number(p.saleFrom):null,t=p&amp;&amp;p.saleTo!=null?Number(p.saleTo):null;if(f==null&amp;&amp;t==null)return false;return (f!=null&amp;&amp;now&lt;f)||(t!=null&amp;&amp;now>t);}
-function opsLinePrice_(it,p){if(!Number.isSafeInteger(it.qty)||it.qty&lt;1||it.qty>500)throw Error('INVALID_QTY');var price=Number(p.price),type=String(it.productType||'');if(p.prices){var key=Object.keys(p.prices).filter(function(k){return k.replace(/\s/g,'').toLowerCase()===type.replace(/\s/g,'').toLowerCase();})[0];if(!key)throw Error('PRODUCT_TYPE_REQUIRED');price=Number(p.prices[key]);it.productType=key;}
+function opsLinePrice_(it,p){if(!Number.isSafeInteger(it.qty)||it.qty&lt;1||it.qty>500)throw Error('INVALID_QTY');if(p.soldIndividually&amp;&amp;it.qty>1)throw Error('SOLD_INDIVIDUALLY');var price=Number(p.price),type=String(it.productType||'');if(p.prices){var key=Object.keys(p.prices).filter(function(k){return k.replace(/\s/g,'').toLowerCase()===type.replace(/\s/g,'').toLowerCase();})[0];if(!key)throw Error('PRODUCT_TYPE_REQUIRED');price=Number(p.prices[key]);it.productType=key;}
  var off=opsSaleOff_(p,Date.now());if(off){if(p.prices){var rp=p.regularPrices&amp;&amp;Number(p.regularPrices[it.productType]);if(rp>price)price=rp;}else if(Number(p.regularPrice)>price)price=Number(p.regularPrice);}
  var variation=opsVariation_(p,it);if(variation){if(variation.enabled===false)throw Error('VARIATION_UNAVAILABLE');if(Number(variation.price)>0)price=Number(variation.price);var voff=(variation.saleFrom!=null||variation.saleTo!=null)?opsSaleOff_(variation,Date.now()):off;if(voff&amp;&amp;Number(variation.regularPrice)>(Number(variation.price)||0))price=Number(variation.regularPrice);}
  var tpl=Array.isArray(it.measurements)&amp;&amp;it.measurements.length?opsTemplateSize_(it,p):'';
@@ -9260,6 +9261,8 @@ function opsTemplateSize_(it,p){
  if(!r.ok)throw Error(r.errors.some(function(e){return e.code==='REQUIRED';})?'MEASUREMENT_REQUIRED':'INVALID_MEASUREMENT');
  it.measurements=r.measurements;it.sizeTemplate=resolved.templateId;it.sizeConfigVersion=resolved.version;it.size=r.size;return r.size;
 }
+/** Every cart item is a Virtual product (Product Manager): no delivery charge. Mirrored in cart-utils.js allLinesVirtual. */
+function opsAllVirtual_(items){try{if(!items||!items.length)return false;var map={};opsCatalog_().products.forEach(function(p){map[p.id]=p;});return items.every(function(it){var p=map[it.id];return !!(p&amp;&amp;p.virtual===true);});}catch(e){return false;}}
 function opsVerifiedPricing_(items,charge,couponCode){if(!items||!items.length)throw Error('STRUCTURED_CART_REQUIRED');var map={};opsCatalog_().products.forEach(function(p){map[p.id]=p;});var subtotal=0;items.forEach(function(it){if(!Object.prototype.hasOwnProperty.call(map,it.id))throw Error('UNKNOWN_PRODUCT');subtotal+=opsLinePrice_(it,map[it.id]);});var coupon=couponCode?validateCouponCode_(couponCode,subtotal):null;if(couponCode&amp;&amp;(!coupon||!coupon.ok))throw Error('INVALID_COUPON');return {catalogOk:true,subtotal:subtotal,unverifiedIds:[],couponDiscountVal:coupon?coupon.discount:0,couponRowIndex:coupon?coupon.rowIndex:null,hasItems:true};}
 function opsReviewHeaders_(sh){var h=['VerifiedPurchase','VerifiedOrderId'],range=sh.getRange(1,9,1,2),old=range.getValues()[0];for(var i=0;i&lt;2;i++)if(old[i]&amp;&amp;old[i]!==h[i])throw Error('REVIEW_HEADER_CONFLICT');range.setValues([h]);}
 function opsReviewVerification_(e,productId){var id=String(param_(e,'OrderID')||'').trim(),phone=normalizePhone_(param_(e,'Phone'));if(!id&amp;&amp;!phone)return {verified:false,orderId:''};if(!id||!/^01\d{9}$/.test(phone))throw Error('REVIEW_VERIFICATION_FAILED');var rows=admReadAll_(admGetSheet_()),found=null;rows.forEach(function(r){if(String(r[8]||'').trim()!==id)return;if(found)throw Error('REVIEW_VERIFICATION_FAILED');found=r;});if(!found||normalizePhone_(found[2])!==phone||String(found[9]).toLowerCase()!=='delivered')throw Error('REVIEW_VERIFICATION_FAILED');var cart=[];try{cart=JSON.parse(String(found[32]||'[]'));}catch(err){}if(!Array.isArray(cart)||!cart.some(function(it){return it.id===productId;}))throw Error('REVIEW_VERIFICATION_FAILED');if(getReviewsSheet_().getDataRange().getValues().some(function(r){return String(r[1])===productId&amp;&amp;String(r[9])===id;}))throw Error('REVIEW_ALREADY_EXISTS');return {verified:true,orderId:id};}

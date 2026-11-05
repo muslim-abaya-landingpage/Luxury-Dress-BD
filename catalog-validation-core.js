@@ -4,7 +4,16 @@
    product-config.js, product-utils.js, category-products.js, product-links-data.js and
    product-catalog-sync.js (in that order); it must not touch the DOM, the network or storage. */
 window.__maBuildValidationProducts = function (w) {
-  var catalog = w.maCatalog.normalizeAll(w.CATEGORY_PRODUCTS, w.PRODUCT_LINKS_DATA || {});
+  // Published products, plus Scheduled ones (Publish box date): those can be ordered the moment they go live,
+  // without waiting for the next build. Draft, Pending, Private and Trash stay out.
+  var all = w.maCatalog.normalizeAll(w.CATEGORY_PRODUCTS, w.PRODUCT_LINKS_DATA || {}, { includeUnpublished: true });
+  var catalog = {};
+  Object.keys(all).forEach(function (k) {
+    catalog[k] = all[k].filter(function (p) {
+      return p && p.isImageView !== true && (w.maCatalog.isPublishedProduct(p) || (w.maCatalog.isScheduledProduct && w.maCatalog.isScheduledProduct(p) &&
+        p.status !== 'draft' && p.status !== 'trash' && p.status !== 'pending' && p.visibility !== 'private'));
+    });
+  });
   var products = [];
   Object.keys(catalog).forEach(function (category) {
     catalog[category].forEach(function (p) {
@@ -28,6 +37,8 @@ window.__maBuildValidationProducts = function (w) {
         sizeLegacy: w.getSizeLegacySlots(p, category)
       });
       var row0 = products[products.length - 1];
+      if (p.soldIndividually) row0.soldIndividually = true;
+      if (p.virtual) row0.virtual = true;
       if (sale) {
         if (sale.from != null) row0.saleFrom = sale.from;
         if (sale.to != null) row0.saleTo = sale.to;

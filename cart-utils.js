@@ -190,6 +190,9 @@
     if (isNaN(qty) || qty < 1) return null;
     var lineId = String(item.id || "").trim();
     var cat = catalogEntryForLine(item, lineId);
+    // "Sold individually" (Product Manager → Inventory): at most 1 per order; the order server checks too.
+    var fullForLimit = lineId ? findCatalogProductFull(lineId, "") : null;
+    if (fullForLimit && fullForLimit.soldIndividually === true) qty = 1;
     var line = {
       id: lineId || (cat && cat.id) || "",
       name: item.name,
@@ -428,7 +431,12 @@
     if (catalogItem && typeof inStockFn === "function" && !inStockFn(catalogItem, variant, line.color)) {
       return list;
     }
-    var cap = catalogItem && typeof stockQtyFn === "function" ? stockQtyFn(catalogItem, variant, line.color) : null;
+    if (catalogItem && catalogItem.soldIndividually === true) {
+      if (list.some(function (x) { return String(x.id) === String(line.id); })) return list;
+      line.quantity = 1;
+    }
+    var backorder = catalogItem && global.maCatalog && typeof global.maCatalog.onBackorder === "function" && global.maCatalog.onBackorder(catalogItem);
+    var cap = catalogItem && !backorder && typeof stockQtyFn === "function" ? stockQtyFn(catalogItem, variant, line.color) : null;
     if (typeof cap === "number") {
       var perVariant = typeof variantTrackedFn === "function" ? variantTrackedFn(catalogItem) : false;
       var already = 0;
@@ -980,6 +988,51 @@
     } catch (e) {}
   }
 
+  /**
+   * Product Manager → Advanced "Purchase note" and General "Downloadable files" of the ordered products, kept for
+   * the order confirmation (thank-you page / checkout popup). Returns [{name, note, downloads:[{name,file}]}].
+   */
+  function orderNotesForLines(lines) {
+    var out = [], seen = {};
+    (Array.isArray(lines) ? lines : []).forEach(function (line) {
+      var id = String(line && line.id || "").trim();
+      if (!id || seen[id]) return;
+      seen[id] = true;
+      var p = findCatalogProductFull(id, "");
+      if (!p) return;
+      var note = String(p.purchaseNote || "").trim().slice(0, 1000);
+      var downloads = Array.isArray(p.downloads) ? p.downloads.filter(function (d) { return d && /^https?:\/\//i.test(String(d.file || "")); }).slice(0, 20) : [];
+      if (note || downloads.length) out.push({ name: String(p.name || line.name || ""), note: note, downloads: downloads.map(function (d) { return { name: String(d.name || "Download"), file: String(d.file) }; }) });
+    });
+    return out;
+  }
+  /** Every line is a Virtual product (Product Manager → Product data): no delivery charge (the order server agrees). */
+  function allLinesVirtual(lines) {
+    var list = Array.isArray(lines) ? lines.filter(Boolean) : [];
+    if (!list.length) return false;
+    return list.every(function (line) { var p = findCatalogProductFull(String(line.id || "").trim(), ""); return !!(p && p.virtual === true); });
+  }
+  function saveOrderNotes(lines) {
+    try {
+      var notes = orderNotesForLines(lines);
+      if (notes.length) sessionStorage.setItem("ma_last_order_notes", JSON.stringify(notes));
+      else sessionStorage.removeItem("ma_last_order_notes");
+    } catch (e) {}
+  }
+  /** Safe HTML block for the notes above (text escaped; links only http/https). */
+  function orderNotesHtml(notes) {
+    var e = function (s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
+    if (!Array.isArray(notes) || !notes.length) return "";
+    return "<div class='ma-order-notes' style='margin:16px 0;text-align:left;border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;background:#fafafa'>" +
+      notes.map(function (n) {
+        return "<div style='margin:0 0 10px'><strong>" + e(n.name) + "</strong>" +
+          (n.note ? "<p style='margin:4px 0;white-space:pre-line'>" + e(n.note) + "</p>" : "") +
+          (n.downloads && n.downloads.length ? "<ul style='margin:4px 0 0;padding-left:18px'>" + n.downloads.map(function (d) {
+            return "<li><a href='" + e(d.file) + "' target='_blank' rel='noopener' download>" + e(d.name) + "</a></li>";
+          }).join("") + "</ul>" : "") + "</div>";
+      }).join("") + "</div>";
+  }
+
   function readOrderTracking() {
     try {
       var raw = sessionStorage.getItem(ORDER_TRACKING_KEY);
@@ -1230,6 +1283,10 @@
   global.afterCartMutation = afterCartMutation;
   global.saveOrderTracking = saveOrderTracking;
   global.readOrderTracking = readOrderTracking;
+  global.saveOrderNotes = saveOrderNotes;
+  global.allLinesVirtual = allLinesVirtual;
+  global.orderNotesForLines = orderNotesForLines;
+  global.orderNotesHtml = orderNotesHtml;
   global.clearOrderTracking = clearOrderTracking;
   global.pushPurchaseCompleteEvent = pushPurchaseCompleteEvent;
   global.pushTrackingEvent = pushTrackingEvent;

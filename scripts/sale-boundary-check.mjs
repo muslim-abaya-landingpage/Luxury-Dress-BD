@@ -1,4 +1,5 @@
-// Prints the products whose scheduled sale (Product Manager → Schedule) starts today or ended yesterday,
+// Prints the products whose scheduled sale (Product Manager → Schedule) starts today or ended yesterday, or whose
+// scheduled publish date (Publish box) was reached in the last hour,
 // Bangladesh time. Used by .github/workflows/sale-schedule-rebuild.yml: on those days the website is rebuilt
 // so the pre-rendered pages and Google product data show the new price. (Prices customers see and pay are
 // already decided live; this only refreshes the built HTML.)
@@ -12,6 +13,9 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dhaka = (ms) => new Date(ms + 6 * 3600000).toISOString().slice(0, 10);
 const today = process.argv[2] || dhaka(Date.now());
 const yesterday = dhaka(Date.parse(today + 'T12:00:00+06:00') - 86400000);
+const now = Date.now();
+// Sales start/end at midnight: those are checked in the first run after midnight (or when a date is given).
+const midnightRun = !!process.argv[2] || new Date(now + 6 * 3600000).getUTCHours() === 0;
 
 const w = {};
 w.window = w;
@@ -20,6 +24,12 @@ const hits = [];
 for (const [cat, list] of Object.entries(w.CATEGORY_PRODUCTS || {})) {
   for (const p of Array.isArray(list) ? list : []) {
     if (!p || typeof p !== 'object') continue;
+    // Scheduled publishing (Publish box date, Bangladesh time): rebuild in the hour it goes live.
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(String(p.publishDate || ''))) {
+      const at = Date.parse(p.publishDate + ':00+06:00');
+      if (at <= now && at > now - 65 * 60000) hits.push(`${cat}/${p.id}: published at ${p.publishDate}`);
+    }
+    if (!midnightRun) continue;
     if (p.saleFrom === today) hits.push(`${cat}/${p.id}: sale starts ${today}`);
     if (p.saleTo === yesterday) hits.push(`${cat}/${p.id}: sale ended ${yesterday}`);
     for (const v of Array.isArray(p.variations) ? p.variations : []) {

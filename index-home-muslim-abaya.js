@@ -163,6 +163,7 @@
     for (var i = 0; i < list.length; i++) {
       var p = list[i];
       if (!p || !p.name || !isPrimaryName(p.name)) continue;
+      if (window.maCatalog && typeof window.maCatalog.listable === "function" && !window.maCatalog.listable(p, "shop")) continue;
       var img = resolveImg(p);
       if (!img) continue;
       var k = img.split("?")[0];

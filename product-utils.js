@@ -414,7 +414,8 @@
     if (entry.regularPriceByType && typeof entry.regularPriceByType === "object") {
       normalized.regularPriceByType = entry.regularPriceByType;
     }
-    if (entry.status === "draft" || entry.status === "trash") normalized.status = entry.status;
+    if (entry.status === "draft" || entry.status === "trash" || entry.status === "pending") normalized.status = entry.status;
+    copyWooFields(normalized, entry);
     if (entry.featured === true) normalized.featured = true;
     if (Array.isArray(entry.tags) && entry.tags.length) {
       normalized.tags = entry.tags.map(function (t) { return String(t || "").trim(); }).filter(Boolean);
@@ -492,9 +493,91 @@
   }
 
 
-  /** Draft and Trash products are kept in the catalog file but never shown or sold. */
+  /**
+   * WooCommerce fields from Product Manager → Edit product (kept as given; HTML is cleaned again by safeHtml()
+   * when shown). Text: sku, gtin, externalUrl, buttonText, purchaseNote, shippingClass, publishDate,
+   * postPassword. Flags: virtual, downloadable, soldIndividually, reviewsAllowed=false. Lists of product IDs:
+   * upsells, crossSells, groupedProducts; extraCategories = more categories that also list the product.
+   */
+  function copyWooFields(normalized, entry) {
+    ["sku", "gtin", "externalUrl", "buttonText", "purchaseNote", "shippingClass", "publishDate", "postPassword", "shortDescription", "descriptionHtml"].forEach(function (k) {
+      if (entry[k] != null && String(entry[k]).trim()) normalized[k] = String(entry[k]).trim();
+    });
+    ["virtual", "downloadable", "soldIndividually"].forEach(function (k) { if (entry[k] === true) normalized[k] = true; });
+    if (entry.reviewsAllowed === false) normalized.reviewsAllowed = false;
+    if (entry.visibility === "private" || entry.visibility === "password") normalized.visibility = entry.visibility;
+    if (["catalog", "search", "hidden"].indexOf(entry.catalogVisibility) !== -1) normalized.catalogVisibility = entry.catalogVisibility;
+    if (["grouped", "external", "variable"].indexOf(entry.productType) !== -1) normalized.productType = entry.productType;
+    if (entry.stockStatus === "onbackorder") normalized.stockStatus = "onbackorder";
+    if (entry.backorders === "notify" || entry.backorders === "yes") normalized.backorders = entry.backorders;
+    ["menuOrder", "weight", "dimLength", "dimWidth", "dimHeight", "lowStockAmount", "downloadLimit", "downloadExpiry"].forEach(function (k) {
+      var n = Number(entry[k]);
+      if (entry[k] !== "" && entry[k] != null && isFinite(n)) normalized[k] = n;
+    });
+    ["upsells", "crossSells", "groupedProducts", "extraCategories"].forEach(function (k) {
+      if (Array.isArray(entry[k])) {
+        var ids = entry[k].map(function (x) { return String(x || "").trim(); }).filter(Boolean);
+        if (ids.length) normalized[k] = ids;
+      }
+    });
+    if (Array.isArray(entry.downloads)) {
+      var files = entry.downloads.filter(function (d) { return d && /^https?:\/\//i.test(String(d.file || "")); })
+        .map(function (d) { return { name: String(d.name || "").trim() || "Download", file: String(d.file).trim() }; });
+      if (files.length) normalized.downloads = files;
+    }
+  }
+
+  /** Product description HTML from the Visual editor, cleaned again before it is shown (allowlist). */
+  function safeHtml(html) {
+    if (!html) return "";
+    var ALLOWED = { P: 1, BR: 1, STRONG: 1, B: 1, EM: 1, I: 1, U: 1, UL: 1, OL: 1, LI: 1, BLOCKQUOTE: 1, H2: 1, H3: 1, H4: 1, H5: 1, H6: 1, PRE: 1, A: 1, HR: 1, IMG: 1, SPAN: 1, DIV: 1, DEL: 1, S: 1 };
+    var esc = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+    if (typeof DOMParser === "undefined") return esc(String(html).replace(/<[^>]*>/g, " "));
+    var doc = new DOMParser().parseFromString("<div>" + String(html) + "</div>", "text/html");
+    var okUrl = function (u, img) { u = String(u || "").trim(); return /^(https?:)?\/\//i.test(u) || /^\/(?!\/)/.test(u) || (!img && /^(mailto:|tel:|#)/i.test(u)) ? u : ""; };
+    var out = doc.createElement("div");
+    (function copy(from, to) {
+      Array.prototype.forEach.call(from.childNodes, function (n) {
+        if (n.nodeType === 3) { to.appendChild(doc.createTextNode(n.nodeValue)); return; }
+        if (n.nodeType !== 1) return;
+        var tag = n.tagName.toUpperCase();
+        if (/^(SCRIPT|STYLE|IFRAME|OBJECT|TEMPLATE|SVG|MATH)$/.test(tag)) return;
+        if (!ALLOWED[tag]) { copy(n, to); return; }
+        var el = doc.createElement(tag === "B" ? "strong" : tag === "I" ? "em" : tag.toLowerCase());
+        var al = (n.getAttribute("style") || "").match(/text-align\s*:\s*(left|center|right|justify)/i);
+        if (al) el.setAttribute("style", "text-align:" + al[1].toLowerCase());
+        if (tag === "A") { var h = okUrl(n.getAttribute("href")); if (h) el.setAttribute("href", h); if (/^https?:/i.test(h)) { el.setAttribute("target", "_blank"); el.setAttribute("rel", "noopener"); } }
+        if (tag === "IMG") { var src = okUrl(n.getAttribute("src"), true); if (!src) return; el.setAttribute("src", src); el.setAttribute("alt", String(n.getAttribute("alt") || "").slice(0, 200)); el.setAttribute("loading", "lazy"); }
+        to.appendChild(el);
+        if (tag !== "IMG" && tag !== "BR" && tag !== "HR") copy(n, el);
+      });
+    })(doc.body.firstChild || doc.body, out);
+    return out.innerHTML;
+  }
+
+  /** Publish date (Bangladesh time) still in the future = Scheduled: not on the website yet. */
+  function isScheduledProduct(product, now) {
+    var v = String(product && product.publishDate || "");
+    if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(v)) return false;
+    return Date.parse(v + ":00+06:00") > (now == null ? Date.now() : now);
+  }
+
+  /** Draft, Pending, Trash, Private and Scheduled products are kept in the catalog file but never shown or sold. */
   function isPublishedProduct(product) {
-    return !!product && product.status !== "draft" && product.status !== "trash";
+    return !!product && product.status !== "draft" && product.status !== "trash" && product.status !== "pending" &&
+      product.visibility !== "private" && !isScheduledProduct(product);
+  }
+
+  /**
+   * WooCommerce "Catalog visibility": where a product is listed. where = "shop" (category pages, home, related)
+   * or "search". Hidden products still open from a direct link and can still be ordered.
+   */
+  function listable(product, where) {
+    if (!product || product.isImageView === true) return false;
+    var v = product.catalogVisibility;
+    if (v === "hidden") return false;
+    if (where === "search") return v !== "catalog";
+    return v !== "search";
   }
 
   /** Storefront view of one category: published products only, featured ones first (stable order). */
@@ -502,9 +585,10 @@
     var out = (list || []).filter(function (product) {
       return isPublishedProduct(product) && product.isImageView !== true;
     });
-    if (!out.some(function (p) { return p.featured === true; })) return out;
+    // Featured first, then "Menu order" (Advanced tab; lower first), then the saved order.
+    if (!out.some(function (p) { return p.featured === true || p.menuOrder; })) return out;
     return out.map(function (p, i) { return { p: p, i: i }; })
-      .sort(function (a, b) { return ((b.p.featured === true) - (a.p.featured === true)) || (a.i - b.i); })
+      .sort(function (a, b) { return ((b.p.featured === true) - (a.p.featured === true)) || ((a.p.menuOrder || 0) - (b.p.menuOrder || 0)) || (a.i - b.i); })
       .map(function (x) { return x.p; });
   }
 
@@ -549,6 +633,18 @@
     if (options && options.includeUnpublished) return all;
     var out = {};
     Object.keys(all).forEach(function (key) { out[key] = storefrontList(all[key]); });
+    // Product categories ticked besides the main one: list the product there too (marked _extraCategory;
+    // the product page, order check and sitemap use the main entry).
+    Object.keys(out).forEach(function (key) {
+      out[key].forEach(function (p) {
+        if (p._extraCategory || !Array.isArray(p.extraCategories)) return;
+        p.extraCategories.forEach(function (extra) {
+          if (extra === key || !out[extra] || out[extra].some(function (q) { return String(q.id) === String(p.id); })) return;
+          var copy = Object.assign({}, p, { _extraCategory: true, _primaryCategory: key });
+          out[extra].push(copy);
+        });
+      });
+    });
     return out;
   }
 
@@ -741,7 +837,14 @@
     return Math.max(0, n);
   }
 
+  /** On backorder (Inventory tab): can be ordered while the catalog quantity is 0 (not for sheet-tracked stock). */
+  function onBackorder(product) {
+    if (!product || product.inStock === false || hasTrackedStockVariants(product)) return false;
+    return product.stockStatus === "onbackorder" || ((product.backorders === "yes" || product.backorders === "notify") && product.stock != null && product.stock !== "" && !(parseInt(product.stock, 10) > 0));
+  }
+
   function isInStock(product, variant, color) {
+    if (onBackorder(product)) return true;
     var qty = getStockQty(product, variant, color);
     if (qty === null) return true;
     return qty > 0;
@@ -752,6 +855,9 @@
     var qty = getStockQty(product, variant, color);
     // No stock count entered (and not marked out of stock): shown as "In Stock" everywhere, the same
     // as the homepage always showed (owner's choice, 2026-10-23).
+    if (onBackorder(product)) {
+      return { inStock: true, qty: qty, backorder: true, label: "Available on backorder", badge: "Backorder", buttonLabel: "Add to Cart" };
+    }
     return {
       inStock: inStock,
       qty: qty,
@@ -1102,7 +1208,7 @@ g.getCartLineBaseName = getCartLineBaseName;
   }
   function productMatches(p, key, meta, q) {
     var terms = searchTerms(q);
-    if (!terms.length || !p) return false;
+    if (!terms.length || !p || !listable(p, "search")) return false;
     var hay = " " + productSearchText(p, key, meta) + " ";
     return terms.every(function (t) { return hay.indexOf(t) !== -1; });
   }
@@ -1234,6 +1340,10 @@ g.getCartLineBaseName = getCartLineBaseName;
     normalizeAll: normalizeAll,
     cleanVariations: cleanVariations,
     saleWindow: saleWindow,
+    listable: listable,
+    isScheduledProduct: isScheduledProduct,
+    onBackorder: onBackorder,
+    safeHtml: safeHtml,
     saleWindowOpen: saleWindowOpen,
     applySaleSchedule: applySaleSchedule,
     variationFor: variationFor,

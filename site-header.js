@@ -557,6 +557,7 @@ function buildNavMenuItems() {
     Object.keys(all).forEach(function (key) {
       (all[key] || []).forEach(function (p) {
         if (!p || !p.name) return;
+        if (window.maCatalog && window.maCatalog.listable && !window.maCatalog.listable(p, 'search')) return;
         out.push({
           name: p.name,
           href: hrefByKey[key] || '/abaya',
@@ -619,6 +620,7 @@ function buildNavMenuItems() {
           var categoryHit = window.maSearch.categoryMatches(key, meta, q);
           catProducts.forEach(function (p) {
             if (!p || !p.name) return;
+            if (window.maCatalog && window.maCatalog.listable && !window.maCatalog.listable(p, 'search')) return;
             var id = p.id || p.name;
             if (seen[id]) return;
             if (categoryHit || window.maSearch.productMatches(p, key, meta, q)) {

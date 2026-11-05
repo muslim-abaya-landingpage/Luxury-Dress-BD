@@ -3766,6 +3766,11 @@ function collectCategoryViewData(categoryKey) {
   } else {
     products = categoryKey ? (allProducts[categoryKey] || []).slice() : getAllCategoryProducts();
   }
+  // WooCommerce "Catalog visibility": Shop only / Search results only / Hidden.
+  if (window.maCatalog && typeof window.maCatalog.listable === "function") {
+    var listWhere = (searchQ || tagQ) ? "search" : "shop";
+    products = products.filter(function (p) { return window.maCatalog.listable(p, listWhere); });
+  }
   var title = tagQ
     ? 'Tag: ' + tagQ
     : searchQ

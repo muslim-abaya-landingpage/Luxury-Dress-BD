@@ -29,6 +29,7 @@
 <script defer src="admin-dashboard-design.js?v=389d008aafabe1a6"></script>
 <link rel="stylesheet" href="admin-premium-layout.css?v=385b5e49870868f4">
 <link rel="stylesheet" href="product-manager-wp.css?v=595b93a1a1714781">
+<link rel="stylesheet" href="product-manager-woo.css?v=1">
 <link rel="stylesheet" href="admin-design-system.css?v=1eaf4362bddc4ad0">
 <link rel="stylesheet" href="product-manager-premium.css?v=20261104-no-sticky-table">
 <link rel="stylesheet" href="product-management-design.css?v=019dfa4f3bfe4efb">
@@ -155,7 +156,7 @@
   <script id="pmRawCatalog">window.MA_CATALOG_INCLUDE_UNPUBLISHED = true; window.MA_RAW_CATEGORY_PRODUCTS = JSON.parse(JSON.stringify(window.CATEGORY_PRODUCTS || {}));</script>
   <script src="product-catalog-loader.js?v=52b440e993917f01"></script>
   <script src="image-processing-client.js?v=20261104-shared"></script>
-  <script src="product-publish-utils.js?v=bb2ad248f3b4ca8b"></script><script src="product-publisher.js?v=20261104-r2-keep"></script>
+  <script src="product-woo-editor.js?v=1"></script><script src="product-publish-utils.js?v=bb2ad248f3b4ca8b"></script><script src="product-publisher.js?v=20261104-r2-keep"></script>
 <script id="pmStockAdmin">
 (function () {
   var ROW_CIRCLES = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "⑪", "⑫"];
@@ -744,10 +745,40 @@
   }
   function productTags(p) { return Array.isArray(p.tags) ? p.tags.filter(Boolean) : []; }
   // WooCommerce-style status. Published = no field; Draft / Trash stay in the catalog but are hidden from the website.
-  function productStatus(p) { return p && (p.status === "draft" || p.status === "trash") ? p.status : "publish"; }
+  function productStatus(p) { return p && (p.status === "draft" || p.status === "trash" || p.status === "pending") ? p.status : "publish"; }
   function setProductStatus(p, status) {
-    if (status === "draft" || status === "trash") p.status = status; else delete p.status;
+    if (status === "draft" || status === "trash" || status === "pending") p.status = status; else delete p.status;
     if (status === "trash") p.trashedAt = todayKey(); else delete p.trashedAt;
+  }
+  function statusLabel(st) { return { publish: "Published", draft: "Draft", pending: "Pending Review", trash: "In Trash" }[st] || "Published"; }
+  // WooCommerce "Catalog visibility": visible (shop and search) / catalog (shop only) / search (search only) / hidden.
+  function catalogVisibility(p) { return ["catalog", "search", "hidden"].indexOf(p && p.catalogVisibility) !== -1 ? p.catalogVisibility : "visible"; }
+  function catVisLabel(v) { return { visible: "Shop and search results", catalog: "Shop only", search: "Search results only", hidden: "Hidden" }[v] || "Shop and search results"; }
+  // Publish date (Bangladesh time, "YYYY-MM-DDTHH:MM"). A future date = Scheduled: hidden on the website until then.
+  function publishInfo(p) {
+    var v = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(String(p.publishDate || "")) ? p.publishDate : "";
+    var future = !!v && Date.parse(v + ":00+06:00") > Date.now();
+    var when = v ? formatDay(v) + " at " + v.slice(11) : "";
+    var label = future ? "Scheduled for: <b>" + when + "</b>" : v ? "Published on: <b>" + when + "</b>"
+      : productStatus(p) === "publish" && p.dateAdded ? "Published on: <b>" + formatDay(p.dateAdded) + "</b>" : "Publish <b>immediately</b>";
+    return { value: v, future: future, label: label };
+  }
+  function findProductById(id) {
+    var hit = null;
+    Object.keys(products).some(function (k) { return (products[k] || []).some(function (q) { if (q && String(q.id) === String(id)) { hit = q; return true; } return false; }); });
+    return hit;
+  }
+  function allShippingClasses() {
+    var seen = {};
+    Object.keys(products).forEach(function (k) { (products[k] || []).forEach(function (q) { if (q && q.shippingClass) seen[q.shippingClass] = true; }); });
+    return Object.keys(seen).sort();
+  }
+  function mostUsedTags(n) {
+    var count = {};
+    Object.keys(products).forEach(function (k) { (products[k] || []).forEach(function (q) { productTags(q).forEach(function (t) { count[t] = (count[t] || 0) + 1; }); }); });
+    var list = Object.keys(count).sort(function (a, b) { return count[b] - count[a] || a.localeCompare(b); }).slice(0, n);
+    var max = list.length ? count[list[0]] : 1, min = list.length ? count[list[list.length - 1]] : 1;
+    return list.map(function (t) { return { name: t, size: Math.round(8 + (max === min ? 6 : (count[t] - min) / (max - min) * 14)) }; }).sort(function (a, b) { return a.name.localeCompare(b.name); });
   }
   // Sale: price / priceByType = what the customer pays; regularPrice / regularPriceByType = optional "before sale" price.
   function setRegularPrice(p, typeLabel, value) {
@@ -993,30 +1024,128 @@
     if (!Object.prototype.hasOwnProperty.call(liveStockOverrides, String(p.id)) && typeof window.isInStock === "function") out = !window.isInStock(p);
     var isVariable = p.productType === "variable" || (Array.isArray(p.variations) && p.variations.length > 0);
     if (!isVariable && editTab === "variations") editTab = "attributes";
-    var tabs = [["general", "General"], ["inventory", "Inventory"], ["attributes", "Attributes"]].concat(isVariable ? [["variations", "Variations"]] : []);
+    var ptype = isVariable ? "variable" : (p.productType === "grouped" || p.productType === "external") ? p.productType : "simple";
+    var showTab = {
+      general: ptype !== "grouped", inventory: true, shipping: !p.virtual && (ptype === "simple" || ptype === "variable"),
+      linked: true, attributes: true, variations: ptype === "variable", advanced: true
+    };
+    var TAB_ICON = {
+      general: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16.7 4.3l-2.6 2.6-1.4-.3-.3-1.4 2.6-2.6A4.5 4.5 0 0 0 9.3 8L2.6 14.7a1.4 1.4 0 0 0 2 2L11.3 10a4.5 4.5 0 0 0 5.4-5.7z"/></svg>',
+      inventory: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10.6 2H17a1 1 0 0 1 1 1v6.4a1 1 0 0 1-.3.7l-7.6 7.6a1 1 0 0 1-1.4 0L2.3 11.3a1 1 0 0 1 0-1.4l7.6-7.6a1 1 0 0 1 .7-.3zM14 7.5A1.5 1.5 0 1 0 14 4.5a1.5 1.5 0 0 0 0 3z"/></svg>',
+      shipping: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M1 5h11v8H1zM12 8h4l3 3v2h-7zM4.5 16.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm11 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/></svg>',
+      linked: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8.6 11.4a3.5 3.5 0 0 0 5 0l3-3a3.5 3.5 0 0 0-5-5l-1 1 1.4 1.4 1-1a1.5 1.5 0 0 1 2.2 2.2l-3 3a1.5 1.5 0 0 1-2.2 0zM11.4 8.6a3.5 3.5 0 0 0-5 0l-3 3a3.5 3.5 0 0 0 5 5l1-1-1.4-1.4-1 1a1.5 1.5 0 0 1-2.2-2.2l3-3a1.5 1.5 0 0 1 2.2 0z"/></svg>',
+      attributes: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 3h16v4H2zm0 5h16v4H2zm0 5h16v4H2z" opacity=".9"/></svg>',
+      variations: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 2h7v7H2zm9 0h7v7h-7zM2 11h7v7H2zm9 0h7v7h-7z"/></svg>',
+      advanced: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M11 1l.6 2.4 1.9.8 2.2-1.3 1.4 1.4-1.3 2.2.8 1.9L19 9v2l-2.4.6-.8 1.9 1.3 2.2-1.4 1.4-2.2-1.3-1.9.8L11 19H9l-.6-2.4-1.9-.8-2.2 1.3-1.4-1.4 1.3-2.2-.8-1.9L1 11V9l2.4-.6.8-1.9-1.3-2.2 1.4-1.4 2.2 1.3 1.9-.8L9 1zm-1 6a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg>'
+    };
+    var tabs = [["general", "General"], ["inventory", "Inventory"], ["shipping", "Shipping"], ["linked", "Linked Products"], ["attributes", "Attributes"], ["variations", "Variations"], ["advanced", "Advanced"]]
+      .filter(function (t) { return showTab[t[0]]; });
+    if (!showTab[editTab]) editTab = tabs[0][0];
     var tags = productTags(p);
     var colorRows = initialColorRows(p);
+    var managed = p.manageStock === true || (p.stock != null && p.stock !== "");
+    var stockState = p.stockStatus === "onbackorder" ? "onbackorder" : out ? "outofstock" : "instock";
+    var catState = catalogVisibility(p);
+    var vis = p.visibility === "private" || p.visibility === "password" ? p.visibility : "public";
+    var pub = publishInfo(p);
+    var status = productStatus(p);
+    var allSecs = sections.slice();
+    var extraCats = Array.isArray(p.extraCategories) ? p.extraCategories : [];
+    function tip(text) { return ' <span class="pm-woo-tip" tabindex="0" role="img" aria-label="' + escapeAttr(text) + '" title="' + escapeAttr(text) + '">?</span>'; }
+    function row(label, control, help, cls) { return '<p class="pm-woo-field' + (cls ? " " + cls : "") + '"><label>' + label + '</label><span class="pm-woo-ctl">' + control + (help ? tip(help) : "") + '</span></p>'; }
+    function inp(field, value, type, attrs) { return '<input type="' + (type || "text") + '" data-ef="' + field + '" id="pmEf_' + field + '" value="' + escapeAttr(value == null ? "" : value) + '"' + (attrs || "") + '>'; }
+    function radios(name, field, current, list) {
+      return '<span class="pm-woo-radios">' + list.map(function (o) {
+        return '<label><input type="radio" name="' + name + '" data-ef="' + field + '" value="' + o[0] + '"' + (current === o[0] ? " checked" : "") + '> ' + o[1] + '</label>';
+      }).join("") + '</span>';
+    }
+    function box(id, title, body, cls) { return '<section class="pm-wp-box' + (cls ? " " + cls : "") + '"' + (id ? ' id="' + id + '"' : "") + '><h3 class="pm-wp-box-title">' + title + '</h3>' + body + '</section>'; }
+    function productPicker(field, label, help) {
+      var ids = Array.isArray(p[field]) ? p[field] : [];
+      return '<div class="pm-woo-field pm-woo-picker-row"><label>' + label + '</label><span class="pm-woo-ctl"><span class="pm-woo-picker" data-picker="' + field + '">' +
+        ids.map(function (id) { var q = findProductById(id); return '<span class="pm-woo-chip" data-chip="' + escapeAttr(id) + '">' + escapeHtml(q ? q.name : id) + ' <button type="button" data-chip-x="' + escapeAttr(id) + '" aria-label="Remove ' + escapeAttr(q ? q.name : id) + '">×</button></span>'; }).join("") +
+        '<input type="search" placeholder="Search for a product…" data-picker-input="' + field + '" aria-label="' + escapeAttr(label) + '" autocomplete="off"><span class="pm-woo-picker-list" data-picker-list="' + field + '" hidden></span></span>' + tip(help) + '</span></div>';
+    }
+    var catCounts = {};
+    Object.keys(products).forEach(function (k) { catCounts[k] = (products[k] || []).filter(function (q) { return productStatus(q) !== "trash"; }).length; });
+    var mostUsedCats = allSecs.slice().sort(function (a, b) { return (catCounts[b.key] || 0) - (catCounts[a.key] || 0); }).slice(0, 10);
+    function catList(list, prefix) {
+      return '<ul class="pm-woo-checklist">' + list.map(function (sec) {
+        var on = sec.key === catKey || extraCats.indexOf(sec.key) !== -1;
+        return '<li><label><input type="checkbox" data-cat-check="' + escapeAttr(sec.key) + '" value="' + escapeAttr(sec.key) + '"' + (on ? " checked" : "") + '> ' + escapeHtml(enName(sec)) + (sec.key === catKey ? ' <em class="pm-woo-primary-cat">(main)</em>' : "") + '</label></li>';
+      }).join("") + '</ul>';
+    }
+    var brandList = allBrands();
+    var myBrands = String(p.brand || "").split(",").map(function (b) { return b.trim(); }).filter(Boolean);
+    myBrands.forEach(function (b) { if (brandList.indexOf(b) === -1) brandList.push(b); });
+    var brandCounts = {};
+    Object.keys(products).forEach(function (k) { (products[k] || []).forEach(function (q) { String(q.brand || "").split(",").forEach(function (b) { b = b.trim(); if (b) brandCounts[b] = (brandCounts[b] || 0) + 1; }); }); });
+    function brandChecklist(list) {
+      return '<ul class="pm-woo-checklist">' + list.map(function (b) {
+        return '<li><label><input type="checkbox" data-brand-check="' + escapeAttr(b) + '"' + (myBrands.indexOf(b) !== -1 ? " checked" : "") + '> ' + escapeHtml(b) + '</label></li>';
+      }).join("") + (list.length ? "" : '<li class="pm-woo-empty">No brands yet.</li>') + '</ul>';
+    }
+    var downloads = Array.isArray(p.downloads) ? p.downloads : [];
+
     mainEl.innerHTML =
-      '<div class="pm-wp-edit">' +
+      '<div class="pm-wp-edit pm-woo">' +
       '<button type="button" class="pm-wp-back" id="pmEditBack">← All products</button>' +
       '<div class="pm-wp-heading"><h2 class="pm-wp-title">Edit product</h2><button type="button" class="pm-wp-title-action" id="pmEditAddNew">Add new product</button></div>' +
       '<div class="pm-wp-columns">' +
       '<div class="pm-wp-col-main">' +
-        '<input type="text" class="pm-wp-name" data-ef="name" value="' + escapeAttr(p.name || "") + '" placeholder="Product name" aria-label="Product name">' +
-        '<p class="pm-wp-permalink">Permalink: ' + (p.id ? '<a href="/product/' + encodeURIComponent(p.id) + '" target="_blank" rel="noopener">https://muslimabaya.com/product/' + escapeHtml(p.id) + '</a>' : "—") + '</p>' +
-        '<section class="pm-wp-box"><h3 class="pm-wp-box-title">Product description</h3><div class="pm-wp-box-body">' +
-          '<textarea data-ef="detailNote" rows="8" placeholder="What is in the set, fabric, care notes…">' + escapeHtml(p.detailNote || "") + '</textarea></div></section>' +
-        '<section class="pm-wp-box pm-wp-data"><h3 class="pm-wp-box-title">Product data <span>— <select id="pmProductType" aria-label="Product type"><option value="simple"' + (isVariable ? "" : " selected") + '>Simple product</option><option value="variable"' + (isVariable ? " selected" : "") + '>Variable product</option></select></span></h3>' +
-          '<div class="pm-wp-data-wrap"><ul class="pm-wp-data-tabs">' + tabs.map(function (t) { return '<li><button type="button" data-etab="' + t[0] + '" class="' + (editTab === t[0] ? "is-active" : "") + '">' + t[1] + '</button></li>'; }).join("") + '</ul>' +
+        '<div class="pm-woo-titlewrap"><label class="pm-sr-only" for="pmWooTitle">Product name</label>' +
+        '<input type="text" id="pmWooTitle" class="pm-wp-name" data-ef="name" value="' + escapeAttr(p.name || "") + '" placeholder="Product name" spellcheck="true" autocomplete="off"></div>' +
+        '<p class="pm-wp-permalink"><b>Permalink:</b> <span id="pmPermaView">' + (p.id ? '<a href="/product/' + encodeURIComponent(p.id) + '" target="_blank" rel="noopener">https://muslimabaya.com/product/<span id="pmPermaSlug">' + escapeHtml(p.id) + '</span>/</a>' : "—") +
+          ' <button type="button" class="pm-woo-btn-sm" id="pmPermaEdit">Edit</button></span>' +
+          '<span id="pmPermaForm" hidden>https://muslimabaya.com/product/ <input type="text" id="pmPermaInput" value="' + escapeAttr(p.id || "") + '" aria-label="URL slug"> <button type="button" class="pm-woo-btn-sm" id="pmPermaOk">OK</button> <a href="#" id="pmPermaCancel">Cancel</a></span></p>' +
+        box("pmDescBox", "Product description", '<div class="pm-wp-box-body"><div id="pmDescEditor"></div></div>') +
+        '<section class="pm-wp-box pm-wp-data" id="pmDataBox"><h3 class="pm-wp-box-title">Product data <span class="pm-woo-data-head">— <select id="pmProductType" aria-label="Product type"><optgroup label="Product Type">' +
+          [["simple", "Simple product"], ["grouped", "Grouped product"], ["external", "External/Affiliate product"], ["variable", "Variable product"]].map(function (o) { return '<option value="' + o[0] + '"' + (ptype === o[0] ? " selected" : "") + '>' + o[1] + '</option>'; }).join("") +
+          '</optgroup></select>' + tip("Simple: one product. Grouped: a set of related products. External: sold on another website (button links there). Variable: options such as colour and size, each with its own price, SKU and stock.") +
+          (ptype === "simple" || ptype === "variable" ? '<label class="pm-woo-check"><input type="checkbox" data-ef="virtual"' + (p.virtual ? " checked" : "") + '> Virtual</label>' + tip("Virtual products are intangible and are not delivered (no delivery charge).") +
+          '<label class="pm-woo-check"><input type="checkbox" data-ef="downloadable"' + (p.downloadable ? " checked" : "") + '> Downloadable</label>' + tip("Downloadable products give the customer a file after the order is confirmed.") : "") +
+          '</span></h3>' +
+          '<div class="pm-wp-data-wrap"><ul class="pm-wp-data-tabs">' + tabs.map(function (t) { return '<li class="pm-woo-tab-' + t[0] + '"><button type="button" data-etab="' + t[0] + '" class="' + (editTab === t[0] ? "is-active" : "") + '">' + TAB_ICON[t[0]] + '<span>' + t[1] + '</span></button></li>'; }).join("") + '</ul>' +
           '<div class="pm-wp-data-panels">' +
             '<div class="pm-wp-panel" data-epanel="general"' + (editTab === "general" ? "" : " hidden") + '>' +
-              buildOptionPriceRows(p, meta) +
+              (ptype === "external" ? '<div class="pm-woo-group">' +
+                row("Product URL", inp("externalUrl", p.externalUrl, "url", ' placeholder="https://"'), "Enter the external URL to the product.") +
+                row("Button text", inp("buttonText", p.buttonText, "text", ' placeholder="Buy product"'), "This text will be shown on the button linking to the external product.") + '</div>' : "") +
+              '<div class="pm-woo-group">' + buildOptionPriceRows(p, meta) + '</div>' +
+              (p.downloadable && ptype !== "grouped" && ptype !== "external" ? '<div class="pm-woo-group pm-woo-downloads"><div class="pm-woo-field"><label>Downloadable files</label><span class="pm-woo-ctl"><table class="pm-woo-dl"><thead><tr><th>Name' + tip("This is the name of the download shown to the customer.") + '</th><th>File URL' + tip("This is the URL or absolute path to the file which customers will get access to.") + '</th><th></th></tr></thead><tbody id="pmDlRows">' +
+                downloads.map(function (d, i) { return '<tr><td><input type="text" data-dl="name" data-dl-i="' + i + '" value="' + escapeAttr(d.name || "") + '" placeholder="File name"></td><td><input type="url" data-dl="file" data-dl-i="' + i + '" value="' + escapeAttr(d.file || "") + '" placeholder="https://"></td><td><a href="#" data-dl-del="' + i + '">Delete</a></td></tr>'; }).join("") +
+                '</tbody></table><button type="button" class="pm-wp-button" id="pmDlAdd">Add File</button></span></div>' +
+                row("Download limit", inp("downloadLimit", p.downloadLimit, "number", ' min="0" step="1" placeholder="Unlimited"'), "Leave blank for unlimited re-downloads.") +
+                row("Download expiry", inp("downloadExpiry", p.downloadExpiry, "number", ' min="0" step="1" placeholder="Never"'), "Enter the number of days before a download link expires, or leave blank.") + '</div>' : "") +
             '</div>' +
             '<div class="pm-wp-panel" data-epanel="inventory"' + (editTab === "inventory" ? "" : " hidden") + '>' +
-              efield("id", "SKU", p.id, "text", "Also the product link. Changing it changes the URL.") +
-              efield("stock", "Stock quantity", p.stock == null ? "" : p.stock, "number", "Leave blank for unlimited. 0 = out of stock.") +
-              '<p class="pm-wp-form-row"><label>Stock status</label><span><mark class="' + (out ? "outofstock" : "instock") + '">' + (out ? "Out of stock" : "In stock") + '</mark> ' +
-              '<button type="button" class="pm-wp-button" id="pmEditStock">' + (out ? "Mark in stock" : "Mark out of stock") + '</button></span></p>' +
+              '<div class="pm-woo-group">' +
+                row("SKU", inp("sku", p.sku, "text", ' placeholder="' + escapeAttr(p.id || "") + '"'), "SKU refers to a Stock-keeping unit, a unique identifier for each distinct product and service that can be purchased. Empty = the product ID.") +
+                row("GTIN, UPC, EAN, or ISBN", inp("gtin", p.gtin, "text", ' inputmode="numeric" maxlength="14"'), "Enter a barcode or any other identifier unique to this product. It can help you list this product on other channels or marketplaces.") +
+              '</div>' +
+              (ptype === "simple" || ptype === "variable" ? '<div class="pm-woo-group">' +
+                row("Stock management", '<label class="pm-woo-check"><input type="checkbox" data-ef="manageStock" id="pmManageStock"' + (managed ? " checked" : "") + '> Track stock quantity for this product</label>') +
+                (managed ? row("Quantity", inp("stock", p.stock == null ? "" : p.stock, "number", ' min="0" step="1"'), "Stock quantity. 0 = out of stock.") +
+                  '<div class="pm-woo-field"><label>Allow backorders?</label><span class="pm-woo-ctl">' + radios("pmBackorders", "backorders", p.backorders || "no", [["no", "Do not allow"], ["notify", "Allow, but notify customer"], ["yes", "Allow"]]) + tip("If managing stock, this controls whether or not backorders are allowed. If enabled, stock quantity can go below 0.") + '</span></div>' +
+                  row("Low stock threshold", inp("lowStockAmount", p.lowStockAmount, "number", ' min="0" step="1" placeholder="Store-wide threshold (2)"'), "When product stock reaches this amount you will be notified (Stock & Analytics).")
+                  : '<div class="pm-woo-field"><label>Stock status</label><span class="pm-woo-ctl">' + radios("pmStockStatus", "stockStatusRadio", stockState, [["instock", "In stock"], ["outofstock", "Out of stock"], ["onbackorder", "On backorder"]]) + tip("Controls whether or not the product is listed as \"in stock\" or \"out of stock\" on the frontend.") + '</span></div>') +
+              '</div>' : "") +
+              (ptype !== "grouped" && ptype !== "external" ? '<div class="pm-woo-group">' + row("Sold individually", '<label class="pm-woo-check"><input type="checkbox" data-ef="soldIndividually"' + (p.soldIndividually ? " checked" : "") + '> Limit purchases to 1 item per order</label>', "Check to let customers to purchase only 1 item in a single order. This is particularly useful for items that have limited quantity, for example art or handmade goods.") + '</div>' : "") +
+            '</div>' +
+            '<div class="pm-wp-panel" data-epanel="shipping"' + (editTab === "shipping" ? "" : " hidden") + '>' +
+              '<div class="pm-woo-group">' +
+                row("Weight (kg)", inp("weight", p.weight, "number", ' min="0" step="0.01" placeholder="0"'), "Weight in decimal form.") +
+                row("Dimensions (cm)", '<span class="pm-woo-dims">' + inp("dimLength", p.dimLength, "number", ' min="0" step="0.1" placeholder="Length" aria-label="Length"') + inp("dimWidth", p.dimWidth, "number", ' min="0" step="0.1" placeholder="Width" aria-label="Width"') + inp("dimHeight", p.dimHeight, "number", ' min="0" step="0.1" placeholder="Height" aria-label="Height"') + '</span>', "LxWxH in decimal form.") +
+              '</div><div class="pm-woo-group">' +
+                row("Shipping class", '<select data-ef="shippingClass" id="pmEf_shippingClass"><option value="">No shipping class</option>' + allShippingClasses().map(function (c) { return '<option' + (p.shippingClass === c ? " selected" : "") + '>' + escapeHtml(c) + '</option>'; }).join("") + '<option value="__new">+ Add new shipping class…</option></select>', "Shipping classes are used by certain shipping methods to group similar products.") +
+              '</div>' +
+            '</div>' +
+            '<div class="pm-wp-panel" data-epanel="linked"' + (editTab === "linked" ? "" : " hidden") + '>' +
+              '<div class="pm-woo-group">' +
+                (ptype === "grouped" ? productPicker("groupedProducts", "Grouped products", "This lets you choose which products are part of this group.") : "") +
+                productPicker("upsells", "Upsells", "Upsells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive.") +
+                (ptype !== "grouped" && ptype !== "external" ? productPicker("crossSells", "Cross-sells", "Cross-sells are products which you promote in the cart, based on the current product.") : "") +
+              '</div>' +
             '</div>' +
             '<div class="pm-wp-panel" data-epanel="attributes"' + (editTab === "attributes" ? "" : " hidden") + '>' +
               '<div id="pmAttrMount"><p>Loading attributes…</p></div><h4 class="pm-wp-subhead">Colours, fabric and size details</h4>' +
@@ -1031,7 +1160,13 @@
               efield("palazzoLengths", "Pajama / Palazzo lengths (inches)", sizesToInput(p.palazzoLengths), "text", "e.g. 38, 40 — separate with commas.") +
             '</div>' +
             '<div class="pm-wp-panel" data-epanel="variations"' + (editTab === "variations" ? "" : " hidden") + '><div id="pmVariationsMount"><p>Loading variations…</p></div></div>' +
+            '<div class="pm-wp-panel" data-epanel="advanced"' + (editTab === "advanced" ? "" : " hidden") + '>' +
+              '<div class="pm-woo-group">' + '<p class="pm-woo-field"><label for="pmEf_purchaseNote">Purchase note</label><span class="pm-woo-ctl"><textarea data-ef="purchaseNote" id="pmEf_purchaseNote" rows="2">' + escapeHtml(p.purchaseNote || "") + '</textarea>' + tip("Enter an optional note to send the customer after purchase (shown on the order confirmation page).") + '</span></p></div>' +
+              '<div class="pm-woo-group">' + row("Menu order", inp("menuOrder", p.menuOrder == null ? 0 : p.menuOrder, "number", ' step="1"'), "Custom ordering position. Lower numbers show first in the category list.") + '</div>' +
+              '<div class="pm-woo-group">' + row("Enable reviews", '<input type="checkbox" data-ef="reviewsAllowed"' + (p.reviewsAllowed === false ? "" : " checked") + ' aria-label="Enable reviews">') + '</div>' +
+            '</div>' +
           '</div></div></section>' +
+        box("pmShortBox", "Product short description" + tip("Shown next to the price on the product page."), '<div class="pm-wp-box-body"><div id="pmShortEditor"></div></div>') +
         '<section class="pm-wp-box" id="pmSeoBox"><h3 class="pm-wp-box-title">Search engine listing (SEO)</h3><div class="pm-wp-box-body">' +
           '<div class="pm-seo-preview" aria-label="Google preview"><div class="pm-seo-prev-title" id="pmSeoPrevTitle"></div>' +
           '<div class="pm-seo-prev-url">muslimabaya.com › product › ' + escapeHtml(p.id || "") + '</div><div class="pm-seo-prev-desc" id="pmSeoPrevDesc"></div></div>' +
@@ -1041,37 +1176,63 @@
         '</div></section>' +
       '</div>' +
       '<div class="pm-wp-col-side">' +
-        '<section class="pm-wp-box"><h3 class="pm-wp-box-title">Publish</h3><div class="pm-wp-box-body pm-wp-publish">' +
-          '<p class="pm-wp-status-row"><label for="pmEditStatus">Status:</label> ' + (productStatus(p) === "trash"
-            ? '<b>In Trash</b>'
-            : '<select id="pmEditStatus" data-ef="status"><option value="publish"' + (productStatus(p) === "publish" ? " selected" : "") + '>Published</option><option value="draft"' + (productStatus(p) === "draft" ? " selected" : "") + '>Draft (hidden)</option></select>') + '</p>' +
-          '<p class="pm-wp-hint" id="pmStatusNote"></p>' +
-          '<p>Catalog: <b>' + escapeHtml(enName(sections.find(function (x) { return x.key === catKey; }) || { menu: catKey })) + '</b></p>' +
-          '<p>Added: <b>' + (formatDay(p.dateAdded) || "—") + '</b></p>' +
-          '<p><label class="pm-wp-check"><input type="checkbox" data-ef="featured"' + (p.featured ? " checked" : "") + '> ★ Featured product</label></p>' +
-          '<div class="pm-wp-publish-actions"><button type="button" class="pm-wp-trash" id="pmEditTrash">Move to Trash</button>' +
-          '<button type="button" class="pm-wp-primary" id="pmEditUpdate">Update (Save)</button></div>' +
+        '<section class="pm-wp-box" id="pmPublishBox"><h3 class="pm-wp-box-title">Publish</h3><div class="pm-wp-publish pm-woo-pub">' +
+          '<div class="pm-woo-pub-top">' + (status === "draft" || status === "pending" ? '<button type="button" class="pm-wp-button" id="pmSaveDraft">' + (status === "pending" ? "Save as Pending" : "Save Draft") + '</button>' : "<span></span>") +
+            '<a class="pm-wp-button" id="pmPreview" href="/product/' + encodeURIComponent(p.id || "") + '" target="_blank" rel="noopener">' + (status === "publish" ? "Preview Changes" : "Preview") + '</a></div>' +
+          '<div class="pm-woo-misc">' +
+            '<div class="pm-woo-misc-sec pm-woo-ic-status">Status: <b id="pmStatusLabel">' + statusLabel(status) + '</b>' + (status === "trash" ? "" : ' <a href="#" data-misc="status">Edit</a>') +
+              '<div class="pm-woo-misc-edit" data-misc-box="status" hidden><select id="pmEditStatus" aria-label="Set status">' +
+                [["publish", "Published"], ["pending", "Pending Review"], ["draft", "Draft"]].map(function (o) { return '<option value="' + o[0] + '"' + (status === o[0] ? " selected" : "") + '>' + o[1] + '</option>'; }).join("") +
+              '</select> <button type="button" class="pm-wp-button" data-misc-ok="status">OK</button> <a href="#" data-misc-cancel="status">Cancel</a></div></div>' +
+            '<div class="pm-woo-misc-sec pm-woo-ic-vis">Visibility: <b id="pmVisLabel">' + ({ "public": "Public", password: "Password protected", "private": "Private" })[vis] + '</b> <a href="#" data-misc="vis">Edit</a>' +
+              '<div class="pm-woo-misc-edit" data-misc-box="vis" hidden>' +
+                '<label><input type="radio" name="pmVis" value="public"' + (vis === "public" ? " checked" : "") + '> Public</label>' +
+                '<label><input type="radio" name="pmVis" value="password"' + (vis === "password" ? " checked" : "") + '> Password protected</label>' +
+                '<span class="pm-woo-pass"' + (vis === "password" ? "" : " hidden") + '><label for="pmPostPass">Password:</label> <input type="text" id="pmPostPass" maxlength="40" value="' + escapeAttr(p.postPassword || "") + '"></span>' +
+                '<label><input type="radio" name="pmVis" value="private"' + (vis === "private" ? " checked" : "") + '> Private</label>' +
+                '<p><button type="button" class="pm-wp-button" data-misc-ok="vis">OK</button> <a href="#" data-misc-cancel="vis">Cancel</a></p></div></div>' +
+            '<div class="pm-woo-misc-sec pm-woo-ic-date"><span id="pmPubLabel">' + pub.label + '</span> <a href="#" data-misc="date">Edit</a>' +
+              '<div class="pm-woo-misc-edit" data-misc-box="date" hidden><input type="datetime-local" id="pmPubDate" value="' + escapeAttr(pub.value) + '" aria-label="Publish date and time (Bangladesh time)">' +
+              '<p><button type="button" class="pm-wp-button" data-misc-ok="date">OK</button> <a href="#" data-misc-cancel="date">Cancel</a> <a href="#" id="pmPubNow">Publish immediately</a></p></div></div>' +
+            '<div class="pm-woo-misc-sec pm-woo-ic-cat">Catalog visibility: <b id="pmCatVisLabel">' + catVisLabel(catState) + (p.featured ? ", Featured" : "") + '</b> <a href="#" data-misc="catvis">Edit</a>' +
+              '<div class="pm-woo-misc-edit" data-misc-box="catvis" hidden><p class="pm-woo-small">This setting determines which shop pages products will be listed on.</p>' +
+                [["visible", "Shop and search results"], ["catalog", "Shop only"], ["search", "Search results only"], ["hidden", "Hidden"]].map(function (o) { return '<label><input type="radio" name="pmCatVis" value="' + o[0] + '"' + (catState === o[0] ? " checked" : "") + '> ' + o[1] + '</label>'; }).join("") +
+                '<label class="pm-woo-feat"><input type="checkbox" data-ef="featured" id="pmFeatured"' + (p.featured ? " checked" : "") + '> This is a featured product</label>' +
+                '<p><button type="button" class="pm-wp-button" data-misc-ok="catvis">OK</button> <a href="#" data-misc-cancel="catvis">Cancel</a></p></div></div>' +
+          '</div>' +
+          '<div class="pm-woo-pub-copy"><a href="#" id="pmCopyDraft">Copy to a new draft</a></div>' +
+          '<div class="pm-wp-publish-actions">' + (status === "trash" ? "<span></span>" : '<a href="#" class="pm-wp-trash" id="pmEditTrash">Move to Trash</a>') +
+            '<button type="button" class="pm-wp-primary" id="pmEditUpdate">' + (status === "publish" ? (pub.future ? "Schedule" : "Update") : pub.future ? "Schedule" : "Publish") + '</button></div>' +
           '<p class="pm-wp-publish-note" id="pmEditNote">Changes go live after Update.</p>' +
-        '</div></section>' +
-        '<section class="pm-wp-box"><h3 class="pm-wp-box-title">Product categories</h3><div class="pm-wp-box-body"><ul class="pm-wp-cats">' +
-          sections.map(function (sec) { return '<li><label><input type="radio" name="pmEditCat" value="' + escapeAttr(sec.key) + '"' + (sec.key === catKey ? " checked" : "") + '> ' + escapeHtml(enName(sec)) + '</label></li>'; }).join("") +
-        '</ul></div></section>' +
-        '<section class="pm-wp-box"><h3 class="pm-wp-box-title">Product tags</h3><div class="pm-wp-box-body">' +
-          '<div class="pm-wp-tag-add"><input type="text" id="pmEditTagInput" placeholder="Add tag" aria-label="Add tag"><button type="button" class="pm-wp-button" id="pmEditTagAdd">Add</button></div>' +
-          '<p class="pm-wp-hint">Separate tags with commas</p><ul class="pm-wp-tags">' +
-          tags.map(function (t, i) { return '<li><button type="button" class="pm-wp-tag-x" data-tag-i="' + i + '" aria-label="Remove tag ' + escapeAttr(t) + '">×</button> ' + escapeHtml(t) + '</li>'; }).join("") +
-        '</ul></div></section>' +
-        '<section class="pm-wp-box"><h3 class="pm-wp-box-title">Product brand</h3><div class="pm-wp-box-body">' +
-          '<input type="text" data-ef="brand" list="pmBrandList" value="' + escapeAttr(p.brand || "") + '" placeholder="e.g. Muslim Abaya" aria-label="Product brand">' +
-          '<datalist id="pmBrandList">' + allBrands().map(function (b) { return '<option value="' + escapeAttr(b) + '">'; }).join("") + '</datalist>' +
+          '<p class="pm-wp-hint" id="pmStatusNote"></p>' +
         '</div></section>' +
         '<section class="pm-wp-box pm-wp-media" id="pmImgBox"><h3 class="pm-wp-box-title">Product image</h3><div class="pm-wp-box-body">' +
           '<div id="pmImgView"></div><p class="pm-wp-upload-status" id="pmImgStatus" hidden></p>' +
-          // The real uploader (upload, WebP, media library) stays in the page, hidden; the links above drive it.
           '<div class="pm-wp-hidden-uploader" hidden>' + buildImageUploader(p) + fieldWide("image", "Image URL", p.image) + '</div></div></section>' +
         '<section class="pm-wp-box pm-wp-media" id="pmGalBox"><h3 class="pm-wp-box-title">Product gallery</h3><div class="pm-wp-box-body">' +
           '<div id="pmGalView"></div><p class="pm-wp-upload-status" id="pmGalStatus" hidden></p>' +
           '<div class="pm-wp-hidden-uploader" id="pmGalHidden" hidden>' + buildGalleryUploader(p) + '</div></div></section>' +
+        '<section class="pm-wp-box" id="pmTagBox"><h3 class="pm-wp-box-title">Product tags</h3><div class="pm-wp-box-body">' +
+          '<div class="pm-wp-tag-add"><input type="text" id="pmEditTagInput" aria-label="Add new tag" autocomplete="off"><button type="button" class="pm-wp-button" id="pmEditTagAdd">Add</button></div>' +
+          '<p class="pm-wp-hint">Separate tags with commas</p><ul class="pm-wp-tags">' +
+          tags.map(function (t, i) { return '<li><button type="button" class="pm-wp-tag-x" data-tag-i="' + i + '" aria-label="Remove term: ' + escapeAttr(t) + '">×</button> ' + escapeHtml(t) + '</li>'; }).join("") +
+          '</ul><p><a href="#" id="pmMostTags">Choose from the most used tags</a></p><div class="pm-woo-tagcloud" id="pmTagCloud" hidden>' +
+          mostUsedTags(45).map(function (t) { return '<a href="#" data-tag-add="' + escapeAttr(t.name) + '" style="font-size:' + t.size + 'px">' + escapeHtml(t.name) + '</a>'; }).join(" ") + '</div></div></section>' +
+        '<section class="pm-wp-box" id="pmBrandBox"><h3 class="pm-wp-box-title">Product brands</h3><div class="pm-wp-box-body">' +
+          '<div class="pm-woo-taxtabs"><button type="button" class="is-on" data-taxtab="brand-all">All Brands</button><button type="button" data-taxtab="brand-pop">Most Used</button></div>' +
+          '<div class="pm-woo-taxpanel" data-taxpanel="brand-all">' + brandChecklist(brandList) + '</div>' +
+          '<div class="pm-woo-taxpanel" data-taxpanel="brand-pop" hidden>' + brandChecklist(Object.keys(brandCounts).sort(function (a, b) { return brandCounts[b] - brandCounts[a]; }).slice(0, 10)) + '</div>' +
+          '<p><a href="#" id="pmBrandNewLink">+ Add New Brand</a></p><p id="pmBrandNewForm" hidden><input type="text" id="pmBrandNew" aria-label="New brand name" data-ef-brand-new> <button type="button" class="pm-wp-button" id="pmBrandNewAdd">Add New Brand</button></p>' +
+        '</div></section>' +
+        '<section class="pm-wp-box" id="pmSlugBox"><h3 class="pm-wp-box-title">Slug</h3><div class="pm-wp-box-body">' +
+          '<input type="text" data-ef="id" id="pmEf_id" value="' + escapeAttr(p.id || "") + '" aria-label="Slug"><p class="pm-wp-hint">The product link: muslimabaya.com/product/<b>' + escapeHtml(p.id || "") + '</b>. Changing it changes the URL.</p>' +
+        '</div></section>' +
+        '<section class="pm-wp-box" id="pmCatBox"><h3 class="pm-wp-box-title">Product categories</h3><div class="pm-wp-box-body">' +
+          '<div class="pm-woo-taxtabs"><button type="button" class="is-on" data-taxtab="cat-all">All categories</button><button type="button" data-taxtab="cat-pop">Most Used</button></div>' +
+          '<div class="pm-woo-taxpanel" data-taxpanel="cat-all">' + catList(allSecs, "") + '</div>' +
+          '<div class="pm-woo-taxpanel" data-taxpanel="cat-pop" hidden>' + catList(mostUsedCats, "pop") + '</div>' +
+          '<p><a href="#" id="pmCatNewLink">+ Add new category</a></p>' +
+        '</div></section>' +
       '</div></div>' +
       // Always-visible save bar (stays at the bottom of the screen while editing).
       '<div class="pm-wp-savebar" id="pmEditBar"><span class="pm-wp-savebar-msg" id="pmEditBarMsg">No unsaved changes.</span>' +
@@ -1124,6 +1285,14 @@
       }).finally(function () { [b1, b2].forEach(function (b) { if (b) b.disabled = false; }); });
     }
     if (savedSnapshot && savedSnapshot !== catalogSnapshot()) changed();
+    // Stock status radios (stock not tracked): In stock / Out of stock publish at once (same as the list's
+    // stock button); On backorder = can be ordered while waiting for new stock.
+    function setStockStatusRadio(v) {
+      if (v === "onbackorder") p.stockStatus = "onbackorder"; else delete p.stockStatus;
+      var wantOut = v === "outofstock";
+      changed();
+      if (wantOut !== managerOutOfStock(p)) publishStockToggle(p, renderProductEditor);
+    }
     root.querySelectorAll("[data-ef]").forEach(function (inp) {
       inp.addEventListener(inp.type === "checkbox" ? "change" : "input", function () {
         var f = inp.getAttribute("data-ef");
@@ -1177,6 +1346,32 @@
           else delete p[f];
         }
         else if (f === "brand") { var b = inp.value.trim(); if (b) p.brand = b; else delete p.brand; }
+        else if (f === "virtual" || f === "downloadable") {
+          if (inp.checked) p[f] = true; else delete p[f];
+          if (f === "virtual" && inp.checked && editTab === "shipping") editTab = "general";
+          renderProductEditor(); changed(); return;
+        }
+        else if (f === "manageStock") {
+          if (inp.checked) p.manageStock = true;
+          else { delete p.manageStock; delete p.stock; delete p.backorders; delete p.lowStockAmount; }
+          renderProductEditor(); changed(); return;
+        }
+        else if (f === "stockStatusRadio") { if (inp.checked) setStockStatusRadio(inp.value); return; }
+        else if (f === "backorders") { if (!inp.checked) return; if (inp.value === "no") delete p.backorders; else p.backorders = inp.value; }
+        else if (f === "soldIndividually") { if (inp.checked) p.soldIndividually = true; else delete p.soldIndividually; }
+        else if (f === "reviewsAllowed") { if (inp.checked) delete p.reviewsAllowed; else p.reviewsAllowed = false; }
+        else if (f === "weight" || f === "dimLength" || f === "dimWidth" || f === "dimHeight") { var num = parseFloat(inp.value); if (num > 0) p[f] = num; else delete p[f]; }
+        else if (f === "menuOrder") { var mo = parseInt(inp.value, 10); if (mo) p.menuOrder = mo; else delete p.menuOrder; }
+        else if (f === "lowStockAmount" || f === "downloadLimit" || f === "downloadExpiry") { var ni = parseInt(inp.value, 10); if (inp.value !== "" && ni >= 0) p[f] = ni; else delete p[f]; }
+        else if (f === "shippingClass") {
+          if (inp.value === "__new") {
+            var nc = String(window.prompt("New shipping class name (e.g. Heavy parcel)") || "").trim().slice(0, 60);
+            if (nc) p.shippingClass = nc;
+            renderProductEditor(); changed(); return;
+          }
+          if (inp.value) p.shippingClass = inp.value; else delete p.shippingClass;
+        }
+        else if (f === "sku" || f === "gtin" || f === "externalUrl" || f === "buttonText" || f === "purchaseNote") { var tv = inp.value.trim(); if (tv) p[f] = tv; else delete p[f]; }
         else p[f] = inp.value;
         changed();
       });
@@ -1357,7 +1552,8 @@
     });
     var typeSelect = document.getElementById("pmProductType");
     if (typeSelect) typeSelect.addEventListener("change", function () {
-      if (typeSelect.value === "variable") {
+      var v = typeSelect.value;
+      if (v === "variable") {
         p.productType = "variable";
         editTab = "attributes";
         renderProductEditor();
@@ -1365,12 +1561,14 @@
         return;
       }
       var n = Array.isArray(p.variations) ? p.variations.length : 0;
-      if (n && !window.confirm("Change to a simple product? Its " + n + " variations will be removed.")) { typeSelect.value = "variable"; return; }
-      delete p.productType; delete p.variations; delete p.variationAttributes;
+      if (n && !window.confirm("Change the product type? Its " + n + " variations will be removed.")) { typeSelect.value = "variable"; return; }
+      delete p.variations; delete p.variationAttributes;
+      if (v === "simple") delete p.productType; else p.productType = v;
       if (editTab === "variations") editTab = "general";
       renderProductEditor();
-      changed("Simple product — click Save changes.");
+      changed(typeSelect.options[typeSelect.selectedIndex].text + " — click Save changes.");
     });
+    wireWooEditor(root, p, catKey, list, changed, updateSeoPreview, saveEdit);
     function variationCtx() {
       var photos = [];
       [p.image].concat(Array.isArray(p.images) ? p.images : []).forEach(function (u) { u = String(u || "").trim(); if (u && !/^blob:/i.test(u) && photos.indexOf(u) === -1) photos.push(u); });
@@ -1423,18 +1621,9 @@
         renderProductEditor(); changed();
       });
     });
-    root.querySelectorAll('input[name="pmEditCat"]').forEach(function (r) {
-      r.addEventListener("change", function () {
-        if (!r.checked || r.value === catKey) return;
-        list.splice(editTarget.index, 1);
-        if (!products[r.value]) products[r.value] = [];
-        products[r.value].push(p);
-        editTarget = { cat: r.value, index: products[r.value].length - 1 };
-        renderProductEditor(); changed("Moved to " + enName(sections.find(function (x) { return x.key === r.value; })) + " — click Update to publish.");
-      });
-    });
     bindById("pmEditStock", "click", function () { publishStockToggle(p, renderProductEditor); });
-    bindById("pmEditTrash", "click", function () {
+    bindById("pmEditTrash", "click", function (e) {
+      if (e) e.preventDefault();
       if (!confirm("Move this product to Trash? It disappears from the website now; you can restore it from Products → Trash.")) return;
       var before = JSON.stringify(p);
       setProductStatus(p, "trash");
@@ -1451,7 +1640,11 @@
     });
     paintStatusNote();
     updateSeoPreview();
-    bindById("pmEditUpdate", "click", saveEdit);
+    bindById("pmEditUpdate", "click", function () {
+      var st = productStatus(p);
+      if (st === "draft" || st === "pending") setProductStatus(p, "publish");
+      saveEdit();
+    });
     bindById("pmEditBarSave", "click", saveEdit);
     bindById("pmEditBack", "click", function () { activeKey = ALL_PRODUCTS_KEY; renderCatList(); renderMain(); });
     bindById("pmEditAddNew", "click", openQuickUpload);
@@ -1459,6 +1652,196 @@
     wireGalleryUploader(root, p);
     wireWpMediaBoxes(root, p, changed);
     wireWpBoxControls(root);
+  }
+
+  // WooCommerce edit screen extras: Visual/Code editors, permalink, Publish box "Edit" sections, tags cloud,
+  // brands and categories checklists, product pickers (upsells / cross-sells / grouped) and downloadable files.
+  function wireWooEditor(root, p, catKey, list, changed, updateSeoPreview, saveEdit) {
+    var $ = function (sel) { return root.querySelector(sel); };
+    var redraw = function (note) { renderProductEditor(); changed(note); };
+    function photos() { return [p.image].concat(Array.isArray(p.images) ? p.images : []).filter(function (u) { return u && !/^blob:/i.test(u); }); }
+    if (window.MaWooEditor) {
+      var descMount = $("#pmDescEditor"), shortMount = $("#pmShortEditor");
+      if (descMount) window.MaWooEditor.mount(descMount, {
+        html: p.descriptionHtml || window.MaWooEditor.textToHtml(p.detailNote), photos: photos, minHeight: 300,
+        onChange: function (h) {
+          if (h) { p.descriptionHtml = h; p.detailNote = window.MaWooEditor.htmlToText(h); } else { delete p.descriptionHtml; delete p.detailNote; }
+          changed(); updateSeoPreview();
+        }
+      });
+      if (shortMount) window.MaWooEditor.mount(shortMount, {
+        html: p.shortDescription || "", photos: photos, minHeight: 150,
+        onChange: function (h) { if (h) p.shortDescription = h; else delete p.shortDescription; changed(); }
+      });
+    }
+    // Permalink "Edit" (same as the Slug box).
+    var permaView = $("#pmPermaView"), permaForm = $("#pmPermaForm"), permaInput = $("#pmPermaInput");
+    bindById("pmPermaEdit", "click", function () { permaView.hidden = true; permaForm.hidden = false; permaInput.focus(); permaInput.select(); });
+    bindById("pmPermaCancel", "click", function (e) { e.preventDefault(); permaForm.hidden = true; permaView.hidden = false; permaInput.value = p.id || ""; });
+    bindById("pmPermaOk", "click", function () {
+      var v = permaInput.value.trim().replace(/\s+/g, "-");
+      if (!/^[A-Za-z0-9][A-Za-z0-9_-]{1,100}$/.test(v)) { window.alert("Use letters, numbers, - and _ only (at least 2 characters)."); return; }
+      if (v !== p.id && findProductById(v)) { window.alert("Another product already uses this link."); return; }
+      if (v === p.id) { permaForm.hidden = true; permaView.hidden = false; return; }
+      p.id = v; redraw("Product link changed — click Save changes.");
+    });
+    // Publish box: Status / Visibility / Publish date / Catalog visibility, each with Edit → OK / Cancel.
+    root.querySelectorAll("[data-misc]").forEach(function (a) {
+      a.addEventListener("click", function (e) { e.preventDefault(); var k = a.getAttribute("data-misc"); $('[data-misc-box="' + k + '"]').hidden = false; a.hidden = true; });
+    });
+    root.querySelectorAll("[data-misc-cancel]").forEach(function (a) {
+      a.addEventListener("click", function (e) { e.preventDefault(); renderProductEditor(); });
+    });
+    root.querySelectorAll('input[name="pmVis"]').forEach(function (r) {
+      r.addEventListener("change", function () { $(".pm-woo-pass").hidden = !(r.checked && r.value === "password"); });
+    });
+    root.querySelectorAll("[data-misc-ok]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var k = b.getAttribute("data-misc-ok");
+        if (k === "status") { setProductStatus(p, $("#pmEditStatus").value); redraw(); return; }
+        if (k === "vis") {
+          var v = ($('input[name="pmVis"]:checked') || {}).value || "public";
+          if (v === "password") {
+            var pass = $("#pmPostPass").value.trim();
+            if (!pass) { window.alert("Enter a password."); return; }
+            p.visibility = "password"; p.postPassword = pass;
+          } else if (v === "private") { p.visibility = "private"; delete p.postPassword; }
+          else { delete p.visibility; delete p.postPassword; }
+          redraw(); return;
+        }
+        if (k === "date") {
+          var dv = String($("#pmPubDate").value || "").slice(0, 16);
+          if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(dv)) p.publishDate = dv; else delete p.publishDate;
+          redraw(); return;
+        }
+        if (k === "catvis") {
+          var cv = ($('input[name="pmCatVis"]:checked') || {}).value || "visible";
+          if (cv === "visible") delete p.catalogVisibility; else p.catalogVisibility = cv;
+          redraw(); return;
+        }
+      });
+    });
+    bindById("pmPubNow", "click", function (e) { e.preventDefault(); delete p.publishDate; redraw(); });
+    bindById("pmSaveDraft", "click", saveEdit);
+    bindById("pmCopyDraft", "click", function (e) {
+      e.preventDefault();
+      ensureQuickUpload().then(function (api) { api.copyFrom(p, catKey); }).catch(function (err) { toast(err.message || "Quick upload is unavailable"); });
+    });
+    // Tags: "Choose from the most used tags".
+    bindById("pmMostTags", "click", function (e) { e.preventDefault(); var c = $("#pmTagCloud"); c.hidden = !c.hidden; });
+    root.querySelectorAll("[data-tag-add]").forEach(function (a) {
+      a.addEventListener("click", function (e) {
+        e.preventDefault();
+        var t = a.getAttribute("data-tag-add"), next = productTags(p);
+        if (next.map(function (x) { return x.toLowerCase(); }).indexOf(t.toLowerCase()) === -1) next.push(t);
+        p.tags = next; redraw();
+      });
+    });
+    // "All … | Most Used" tabs in the Brands and Categories boxes.
+    root.querySelectorAll("[data-taxtab]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var boxEl = b.closest(".pm-wp-box"), id = b.getAttribute("data-taxtab");
+        boxEl.querySelectorAll("[data-taxtab]").forEach(function (x) { x.classList.toggle("is-on", x === b); });
+        boxEl.querySelectorAll("[data-taxpanel]").forEach(function (x) { x.hidden = x.getAttribute("data-taxpanel") !== id; });
+      });
+    });
+    // Brands (checkboxes; several brands are saved as "A, B").
+    root.querySelectorAll("[data-brand-check]").forEach(function (cb) {
+      cb.addEventListener("change", function () {
+        var name = cb.getAttribute("data-brand-check");
+        root.querySelectorAll("[data-brand-check]").forEach(function (x) { if (x.getAttribute("data-brand-check") === name) x.checked = cb.checked; });
+        var chosen = [];
+        root.querySelectorAll('[data-taxpanel="brand-all"] [data-brand-check]').forEach(function (x) { if (x.checked) chosen.push(x.getAttribute("data-brand-check")); });
+        if (chosen.length) p.brand = chosen.join(", "); else delete p.brand;
+        changed();
+      });
+    });
+    bindById("pmBrandNewLink", "click", function (e) { e.preventDefault(); var f = $("#pmBrandNewForm"); f.hidden = !f.hidden; if (!f.hidden) $("#pmBrandNew").focus(); });
+    function addBrand() {
+      var name = $("#pmBrandNew").value.replace(/,/g, " ").replace(/\s+/g, " ").trim().slice(0, 60);
+      if (!name) return;
+      var mine = String(p.brand || "").split(",").map(function (b) { return b.trim(); }).filter(Boolean);
+      if (mine.indexOf(name) === -1) mine.push(name);
+      p.brand = mine.join(", "); redraw();
+    }
+    bindById("pmBrandNewAdd", "click", addBrand);
+    bindById("pmBrandNew", "keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); addBrand(); } });
+    // Categories (checkboxes). The first ticked category is where the product lives ("main"); the others list it too.
+    root.querySelectorAll("[data-cat-check]").forEach(function (cb) {
+      cb.addEventListener("change", function () {
+        var key = cb.getAttribute("data-cat-check");
+        root.querySelectorAll("[data-cat-check]").forEach(function (x) { if (x.getAttribute("data-cat-check") === key) x.checked = cb.checked; });
+        var chosen = [];
+        root.querySelectorAll('[data-taxpanel="cat-all"] [data-cat-check]').forEach(function (x) { if (x.checked) chosen.push(x.getAttribute("data-cat-check")); });
+        if (!chosen.length) { cb.checked = true; toast("A product needs at least one category."); return; }
+        var primary = chosen.indexOf(catKey) !== -1 ? catKey : chosen[0];
+        var extra = chosen.filter(function (k) { return k !== primary; });
+        if (extra.length) p.extraCategories = extra; else delete p.extraCategories;
+        if (primary !== catKey) {
+          list.splice(editTarget.index, 1);
+          if (!products[primary]) products[primary] = [];
+          products[primary].push(p);
+          editTarget = { cat: primary, index: products[primary].length - 1 };
+        }
+        redraw(primary !== catKey ? "Moved to " + enName(sections.find(function (x) { return x.key === primary; }) || { menu: primary }) + " — click Save changes." : undefined);
+      });
+    });
+    bindById("pmCatNewLink", "click", function (e) { e.preventDefault(); if (typeof openCategoryModal === "function") openCategoryModal(null); });
+    // Product pickers: Upsells, Cross-sells, Grouped products.
+    root.querySelectorAll("[data-picker-input]").forEach(function (input) {
+      var field = input.getAttribute("data-picker-input"), box = $('[data-picker-list="' + field + '"]');
+      input.addEventListener("input", function () {
+        var q = input.value.trim().toLowerCase();
+        if (!q) { box.hidden = true; return; }
+        var hits = [], have = Array.isArray(p[field]) ? p[field] : [];
+        Object.keys(products).forEach(function (k) {
+          (products[k] || []).forEach(function (x) {
+            if (!x || x === p || productStatus(x) === "trash" || x.isImageView === true || have.indexOf(String(x.id)) !== -1) return;
+            if ((String(x.name || "") + " " + x.id).toLowerCase().indexOf(q) !== -1) hits.push(x);
+          });
+        });
+        box.innerHTML = hits.slice(0, 12).map(function (x) { return '<button type="button" data-pick-id="' + escapeAttr(x.id) + '">' + escapeHtml(x.name) + ' <small>(#' + escapeHtml(x.id) + ')</small></button>'; }).join("") ||
+          '<span class="pm-woo-none">No products found</span>';
+        box.hidden = false;
+      });
+      input.addEventListener("blur", function () { setTimeout(function () { box.hidden = true; }, 150); });
+      box.addEventListener("mousedown", function (e) {
+        var b = e.target.closest("[data-pick-id]");
+        if (!b) return;
+        e.preventDefault();
+        var ids = Array.isArray(p[field]) ? p[field].slice() : [];
+        ids.push(b.getAttribute("data-pick-id"));
+        p[field] = ids;
+        redraw();
+        var again = root.ownerDocument.querySelector('[data-picker-input="' + field + '"]'); if (again) again.focus();
+      });
+    });
+    root.querySelectorAll("[data-chip-x]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var field = b.closest("[data-picker]").getAttribute("data-picker"), id = b.getAttribute("data-chip-x");
+        var ids = (Array.isArray(p[field]) ? p[field] : []).filter(function (x) { return String(x) !== id; });
+        if (ids.length) p[field] = ids; else delete p[field];
+        redraw();
+      });
+    });
+    // Downloadable files.
+    bindById("pmDlAdd", "click", function () { var d = Array.isArray(p.downloads) ? p.downloads : []; d.push({ name: "", file: "" }); p.downloads = d; redraw(); });
+    root.querySelectorAll("[data-dl]").forEach(function (i) {
+      i.addEventListener("input", function () {
+        var d = (p.downloads || [])[parseInt(i.getAttribute("data-dl-i"), 10)];
+        if (!d) return;
+        d[i.getAttribute("data-dl")] = i.value.trim();
+        changed();
+      });
+    });
+    root.querySelectorAll("[data-dl-del]").forEach(function (a) {
+      a.addEventListener("click", function (e) {
+        e.preventDefault();
+        (p.downloads || []).splice(parseInt(a.getAttribute("data-dl-del"), 10), 1);
+        if (!p.downloads || !p.downloads.length) delete p.downloads;
+        redraw();
+      });
+    });
   }
 
   // WordPress-style "Product image" / "Product gallery" boxes: a link when empty, thumbnails when set.
@@ -1586,7 +1969,7 @@
         rows.push({ section: sec, product: p, index: index });
       });
     });
-    var statusCount = { all: 0, publish: 0, draft: 0, trash: 0 };
+    var statusCount = { all: 0, publish: 0, draft: 0, pending: 0, trash: 0 };
     rows.forEach(function (row) { var st = productStatus(row.product); statusCount[st]++; if (st !== "trash") statusCount.all++; });
     if (overviewStatus && !statusCount[overviewStatus]) overviewStatus = "";
     var liveRows = rows.filter(function (row) { return productStatus(row.product) !== "trash"; });
@@ -1616,7 +1999,7 @@
       '<div class="pm-secondary-tools"><button type="button" class="pm-wp-button" id="pmManageCats">Edit by category</button><button type="button" class="pm-wp-button" id="pmCsvExport">Export CSV</button><button type="button" class="pm-wp-button" id="pmCsvImport">Import CSV</button></div>' +
       '<input type="file" id="pmCsvFile" accept=".csv,text/csv" hidden></div>' +
       '<ul class="pm-wp-subsubsub pm-post-status">' +
-      [["", "All", statusCount.all], ["publish", "Published", statusCount.publish], ["draft", "Drafts", statusCount.draft], ["trash", "Trash", statusCount.trash]]
+      [["", "All", statusCount.all], ["publish", "Published", statusCount.publish], ["draft", "Drafts", statusCount.draft], ["pending", "Pending", statusCount.pending], ["trash", "Trash", statusCount.trash]]
         .filter(function (x) { return x[0] === "" || x[2] > 0; })
         .map(function (x, i, arr) { return '<li><button type="button" data-overview-status="' + x[0] + '" class="' + (overviewStatus === x[0] ? "is-active" : "") + '">' + x[1] + ' <span class="count">(' + x[2] + ')</span></button>' + (i < arr.length - 1 ? ' |' : '') + '</li>'; }).join("") +
       (inTrash && statusCount.trash ? '<li> <button type="button" class="pm-wp-button" id="pmEmptyTrash">Empty Trash</button></li>' : '') +
@@ -1842,7 +2225,7 @@
           '<th class="check-column" scope="row"><input type="checkbox" class="pm-overview-check" data-select-cat="' + escapeAttr(s.key) + '" data-select-index="' + row.index + '" aria-label="' + escapeAttr((p.name || 'Product') + ' select') + '"' + (overviewSelected[selectionKey] ? ' checked' : '') + '></th>' +
           '<td class="column-thumb"><span class="pm-overview-photo">' + (p.image ? '<img loading="lazy" decoding="async" src="' + escapeAttr(p.image) + '" alt="">' : '<span class="pm-no-photo" aria-label="No image"></span>') + '</span></td>' +
           '<td class="column-name"><strong><button type="button" class="pm-row-title"' + cat + '>' + name + '</button>' +
-          (productStatus(p) === "draft" ? ' <span class="pm-post-state">— Draft</span>' : '') + '</strong>' +
+          (productStatus(p) === "draft" ? ' <span class="pm-post-state">— Draft</span>' : productStatus(p) === "pending" ? ' <span class="pm-post-state">— Pending</span>' : p.visibility === "private" ? ' <span class="pm-post-state">— Private</span>' : p.visibility === "password" ? ' <span class="pm-post-state">— Password protected</span>' : publishInfo(p).future ? ' <span class="pm-post-state">— Scheduled</span>' : '') + '</strong>' +
           '<div class="pm-row-meta"><mark class="' + (out ? 'outofstock' : 'instock') + '">' + (out ? 'Out of stock' : 'In stock') + '</mark> · ' + priceText(p) + '</div>' +
           (productStatus(p) === "trash"
             ? '<div class="pm-row-actions"><span class="pm-row-id">ID: ' + escapeHtml(p.id || "—") + ' | </span>' +

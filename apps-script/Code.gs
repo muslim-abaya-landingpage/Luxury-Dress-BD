@@ -469,6 +469,7 @@ function orderErrorMessage_(code) {
     INVALID_PHONE: 'সঠিক ১১ ডিজিট মোবাইল নম্বর দিন (01XXXXXXXXX)।',
     INVALID_ADDRESS: 'সম্পূর্ণ ডেলিভারি ঠিকানা লিখুন।',
     INVALID_QTY: 'অর্ডার পরিমাণ সঠিক নয়।',
+    SOLD_INDIVIDUALLY: 'এই পণ্যটি একটি অর্ডারে শুধু ১টি কেনা যায়।',
     ORDER_BLOCKED: 'এই নম্বর থেকে অনলাইনে অর্ডার নেওয়া সম্ভব নয়। WhatsApp এ যোগাযোগ করুন।',
     MIN_ORDER: 'ন্যূনতম অর্ডার ৳১০০।',
     EMPTY_CART: 'কার্টে কোনো পণ্য নেই।',
@@ -1827,7 +1828,7 @@ function handleOnlineOrderPost_(e) {
 
   var districtChargeMap = getDistrictChargeMap_();
   var charge = 0;
-  if (validated.qty > 0 && validated.qty < 3) {
+  if (validated.qty > 0 && validated.qty < 3 && !(typeof opsAllVirtual_ === 'function' && opsAllVirtual_(validated.cartItems))) {
     charge = districtChargeMap[validated.district] || 150;
   }
 

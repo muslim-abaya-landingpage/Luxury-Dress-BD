@@ -28,6 +28,8 @@ fs.mkdirSync(path.join(root, 'product'), { recursive: true });
 for (const [category, rows] of Object.entries(catalog)) {
   for (const p of rows) {
     if (!p.id || !p.name) continue;
+    // Draft, Pending, Private and Scheduled products get no page yet (Product Manager → Publish box).
+    if (!w.maCatalog.isPublishedProduct(p)) continue;
     if (seen.has(p.id)) throw new Error(`Duplicate product id: ${p.id}`);
     if (!/^[A-Za-z0-9_-]+$/.test(p.id)) throw new Error(`Unsafe product id: ${p.id}`);
     seen.add(p.id);
@@ -43,7 +45,7 @@ for (const [category, rows] of Object.entries(catalog)) {
       .filter((value, index, values) => values.indexOf(value) === index);
     const image = images[0];
     const stock = w.maCatalog.getStockStatus(p);
-    const schema = primary ? null : {'@context':'https://schema.org','@type':'Product',name:p.name,image:images,description:desc,sku:p.id,brand:{'@type':'Brand',name:'Muslim Abaya'},offers:{'@type':'Offer',url,priceCurrency:'BDT',price:p.price,...(p.saleTo && p.regularPrice > p.price ? {priceValidUntil:p.saleTo} : {}),availability:'https://schema.org/' + (stock.inStock ? 'InStock' : 'OutOfStock')}};
+    const schema = primary ? null : {'@context':'https://schema.org','@type':'Product',name:p.name,image:images,description:desc,sku:p.sku||p.id,...(p.gtin && /^\d{8,14}$/.test(p.gtin) ? {gtin:p.gtin} : {}),...(p.weight ? {weight:{'@type':'QuantitativeValue',value:p.weight,unitCode:'KGM'}} : {}),brand:{'@type':'Brand',name:'Muslim Abaya'},offers:{'@type':'Offer',url,priceCurrency:'BDT',price:p.price,...(p.saleTo && p.regularPrice > p.price ? {priceValidUntil:p.saleTo} : {}),availability:'https://schema.org/' + (stock.inStock ? 'InStock' : 'OutOfStock')}};
     const crumbs = {'@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:[{ '@type':'ListItem',position:1,name:'Home',item:site+'/'},{'@type':'ListItem',position:2,name:category,item:site+'/'+category},{'@type':'ListItem',position:3,name:p.name,item:canonicalUrl}]};
     let html = template.replace(/data-shop-category="abaya"/g, `data-shop-category="${esc(category)}"`)
       .replace(/<html\b([^>]*)>/, (m, attrs) => `<html${attrs.replace(/\s+data-(seo-managed|product-id)="[^"]*"/g, '')} data-seo-managed="full" data-product-id="${esc(p.id)}">`)

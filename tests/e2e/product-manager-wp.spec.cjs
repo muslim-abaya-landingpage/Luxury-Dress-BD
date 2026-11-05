@@ -56,7 +56,7 @@ test('edit screen: name, description, product data tabs, tags, brand, featured, 
   await page.locator('#pmAllRows tr').first().locator('.pm-row-title').click();
   await expect(page.locator('.pm-wp-edit .pm-wp-title')).toHaveText('Edit product');
   await expect(page.locator('.pm-wp-name')).toHaveValue('Maroon Abaya Set');
-  for (const box of ['Publish', 'Product categories', 'Product tags', 'Product brand', 'Product image', 'Product gallery', 'Product description']) await expect(page.locator('.pm-wp-box-title', { hasText: box }).first()).toBeVisible();
+  for (const box of ['Publish', 'Product categories', 'Product tags', 'Product brands', 'Product image', 'Product gallery', 'Product description', 'Product data', 'Product short description', 'Slug']) await expect(page.locator('.pm-wp-box-title', { hasText: box }).first()).toBeVisible();
   // Product image / gallery boxes behave like WordPress: thumbnail + "Remove product image", or a "Set product image" link.
   await expect(page.locator('#pmImgView img')).toBeVisible();
   await page.click('#pmImgRemove');
@@ -73,9 +73,19 @@ test('edit screen: name, description, product data tabs, tags, brand, featured, 
   await page.fill('#pmEditTagInput', 'eid, black abaya');
   await page.press('#pmEditTagInput', 'Enter');
   await expect(page.locator('.pm-wp-tags li')).toHaveCount(initialTagCount + 2);
-  await page.fill('[data-ef="brand"]', 'Muslim Abaya');
+  await page.click('#pmBrandNewLink');
+  await page.fill('#pmBrandNew', 'Muslim Abaya');
+  await page.click('#pmBrandNewAdd');
+  await expect(page.locator('#pmBrandBox [data-taxpanel="brand-all"] [data-brand-check="Muslim Abaya"]')).toBeChecked();
+  await page.click('[data-misc="catvis"]');
   await page.check('[data-ef="featured"]');
-  await page.fill('[data-ef="detailNote"]', 'Dubai cherry fabric, full set');
+  await page.click('[data-misc-ok="catvis"]');
+  await expect(page.locator('#pmCatVisLabel')).toContainText('Featured');
+  await page.click('#pmDescEditor [data-ed-mode="code"]');
+  await page.fill('#pmDescEditor .pm-woo-ed-code', '<p>Dubai cherry fabric, <strong>full set</strong></p><script>x()</script>');
+  await page.click('#pmDescEditor [data-ed-mode="visual"]');
+  await expect(page.locator('#pmDescEditor .pm-woo-ed-visual strong')).toHaveText('full set');
+  await expect(page.locator('#pmDescEditor .pm-woo-ed-visual script')).toHaveCount(0);
   await expect(page.locator('#pmEditNote')).toHaveClass(/is-dirty/);
   await page.click('#pmEditBack');
   const first = page.locator('#pmAllRows tr').first();
@@ -107,7 +117,7 @@ test('edit screen: option prices keep the card price in step, and a new option (
   await expect(page.locator('[data-opt-name="Hijab"]')).toBeVisible();
   await page.fill('#pmOptName', 'HIJAB'); await page.fill('#pmOptPrice', '1'); await page.click('#pmOptAdd');
   await expect(page.locator('#pmOptMsg')).toContainText('already exists');
-  await page.click('text=Update');
+  await page.click('#pmEditUpdate');
   await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
   const file = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
   const block = file.slice(file.indexOf('"ABY-MAROON-1"'), file.indexOf('"ABY-MAROON-1"') + 900);

@@ -118,6 +118,7 @@
         <div class="icon"><i class="fas fa-check"></i></div>
         <p class="thank-message">Thank you! Your order has been received. We will contact you shortly to confirm delivery.</p>
         <p id="orderIdLine" class="order-id-line"></p>
+        <div id="orderNotes"></div>
         <p class="thank-sub">Save your order ID for reference, or track your order on our help page.</p>
         <div class="actions">
             <a href="/" class="btn btn-dark"><i class="fas fa-shopping-bag"></i> Continue Shopping</a>
@@ -133,6 +134,13 @@
             clearStoreCartSession();
         }
         try { sessionStorage.removeItem('cart'); } catch (e) {}
+        (function () {
+            try {
+                var notes = JSON.parse(sessionStorage.getItem('ma_last_order_notes') || '[]');
+                var box = document.getElementById('orderNotes');
+                if (box && typeof orderNotesHtml === 'function') box.innerHTML = orderNotesHtml(notes);
+            } catch (e) {}
+        })();
         (function () {
             var oid = '';
             try { oid = sessionStorage.getItem('ma_last_order_id') || ''; } catch (e) {}

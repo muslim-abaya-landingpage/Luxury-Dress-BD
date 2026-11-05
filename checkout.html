@@ -2307,6 +2307,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function finishCheckoutSuccess(nameValue, phoneValue, emailValue, gTotal, orderId, stableEventId) {
         var eventId = stableEventId || (orderId ? ('order_' + orderId) : ('order_' + Date.now()));
+        var orderedLinesForNotes = orderLines();
         var cartSnap = typeof buildCartTrackingSnapshot === 'function'
             ? buildCartTrackingSnapshot(orderLines())
             : { value: parseFloat(gTotal) || 0, currency: 'BDT' };
@@ -2344,6 +2345,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (orderId) {
             try { sessionStorage.setItem('ma_last_order_id', orderId); } catch (e) {}
         }
+        if (typeof saveOrderNotes === 'function') saveOrderNotes(orderedLinesForNotes);
         window.location.href = pageLink('/thank-you');
     }
 
@@ -3032,6 +3034,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     function shippingCharge() {
         var q = cartQty();
         if (q === 0 || q >= 3) return 0; // 3 বা তার বেশি পণ্যে বিনামূল্যে ডেলিভারি
+        if (typeof allLinesVirtual === 'function' && allLinesVirtual(orderLines())) return 0; // Virtual পণ্য: ডেলিভারি নেই
         // জেলা বাছাই করা থাকলে চার্জ জেলা থেকেই নেওয়া হয় (Apps Script-ও জেলা দেখে চার্জ লেখে),
         // যাতে টগল/localStorage আর জেলার মধ্যে অমিল হলে ভুল টোটাল না যায়।
         var districtZone = areaSelect ? districtZoneFromValue(areaSelect.value) : null;
@@ -3325,7 +3328,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var sideDiscount = document.getElementById('side-discount');
         var sideTotal = document.getElementById('side-total');
         if (sideSubtotal) sideSubtotal.textContent = formatBdtCheckout(sub);
-        if (sideDelivery) sideDelivery.textContent = (q >= 3 ? formatBdtCheckout(0) : formatBdtCheckout(ship));
+        if (sideDelivery) sideDelivery.textContent = formatBdtCheckout(q >= 3 ? 0 : ship);
         if (sideDiscount) {
             var discAmt = currentDiscountAmount();
             sideDiscount.textContent = (discAmt > 0 ? '-' : '') + formatBdtCheckout(discAmt);

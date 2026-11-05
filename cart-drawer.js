@@ -281,7 +281,25 @@ window.renderCartDrawerRelated = function (cartItems) {
   cartItems.forEach(item => { inCart[String(item.id)] = true; });
 
   const primaryCategory = cartItems[0].category || cartItems[0].categoryKey || '';
-  const candidates = collectRelatedCandidatesAllCategories(primaryCategory, inCart).slice(0, 20);
+  // WooCommerce "Cross-sells" (Product Manager → Linked Products) of the products in the cart come first.
+  const cats = window.CATEGORY_PRODUCTS || {};
+  const byId = {};
+  Object.keys(cats).forEach(key => (Array.isArray(cats[key]) ? cats[key] : []).forEach(p => {
+    if (p && p.id && !p._extraCategory && !byId[String(p.id)]) byId[String(p.id)] = Object.assign({}, p, { category: p.category || key });
+  }));
+  const cross = [];
+  cartItems.forEach(item => {
+    const p = byId[String(item.id)];
+    (p && Array.isArray(p.crossSells) ? p.crossSells : []).forEach(id => {
+      const c = byId[String(id)];
+      if (c && !inCart[String(c.id)] && cross.indexOf(c) === -1) cross.push(c);
+    });
+  });
+  const shown = {};
+  const listable = p => !(window.maCatalog && window.maCatalog.listable) || window.maCatalog.listable(p, 'shop');
+  const candidates = cross.concat(collectRelatedCandidatesAllCategories(primaryCategory, inCart).filter(listable))
+    .filter(p => { const k = String(p.id); if (shown[k] || p._extraCategory) return false; shown[k] = true; return true; })
+    .slice(0, 20);
 
   if (!candidates.length) {
     section.style.display = 'none';

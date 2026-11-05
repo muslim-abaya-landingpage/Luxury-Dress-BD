@@ -44,7 +44,11 @@ test('Draft: hidden status is saved, shown in the list and counted under Drafts'
   await open(page);
   await page.locator('#pmAllRows tr').nth(1).locator('.pm-row-title').click();
   const id = (await page.locator('[data-ef="id"]').inputValue());
+  await page.click('[data-misc="status"]');
   await page.selectOption('#pmEditStatus', 'draft');
+  await page.click('[data-misc-ok="status"]');
+  await expect(page.locator('#pmStatusLabel')).toHaveText('Draft');
+  await expect(page.locator('#pmEditUpdate')).toHaveText('Publish');
   await expect(page.locator('#pmStatusNote')).toContainText('Hidden from the website');
   await page.click('#pmEditBarSave');
   await expect.poll(() => productsFile(page)).toBeTruthy();
@@ -183,4 +187,40 @@ test('sale schedule: Schedule shows From/To dates, they publish with the product
   await expect.poll(() => productsFile(page)).toBeTruthy();
   e = entry(await productsFile(page), 'ABY-MAROON-1');
   expect(e).not.toContain('saleFrom');
+});
+
+test('WooCommerce fields: inventory, shipping, linked products, advanced, short description, visibility and publish date are saved', async ({ page }) => {
+  await open(page);
+  await page.locator('#pmAllRows tr').first().locator('.pm-row-title').click(); // ABY-MAROON-1
+  await page.click('[data-etab="inventory"]');
+  await page.fill('[data-ef="sku"]', 'MA-001');
+  await page.fill('[data-ef="gtin"]', '1234567890123');
+  await page.check('[data-ef="soldIndividually"]');
+  await page.click('[data-etab="shipping"]');
+  await page.fill('[data-ef="weight"]', '0.6');
+  await page.fill('[data-ef="dimLength"]', '30');
+  await page.click('[data-etab="linked"]');
+  await page.fill('[data-picker-input="upsells"]', 'two');
+  await page.locator('[data-picker-list="upsells"] [data-pick-id]').first().dispatchEvent('mousedown');
+  await expect(page.locator('[data-picker="upsells"] .pm-woo-chip')).toHaveCount(1);
+  await page.click('[data-etab="advanced"]');
+  await page.fill('[data-ef="purchaseNote"]', 'Thank you!');
+  await page.fill('[data-ef="menuOrder"]', '3');
+  await page.uncheck('[data-ef="reviewsAllowed"]');
+  await page.click('#pmShortEditor [data-ed-mode="code"]');
+  await page.fill('#pmShortEditor .pm-woo-ed-code', '<p>Soft <em>Dubai cherry</em></p>');
+  await page.click('[data-misc="vis"]');
+  await page.check('input[name="pmVis"][value="private"]');
+  await page.click('[data-misc-ok="vis"]');
+  await expect(page.locator('#pmVisLabel')).toHaveText('Private');
+  await page.click('[data-misc="date"]');
+  await page.fill('#pmPubDate', '2030-05-01T10:30');
+  await page.click('[data-misc-ok="date"]');
+  await expect(page.locator('#pmPubLabel')).toContainText('Scheduled for');
+  await expect(page.locator('#pmEditUpdate')).toHaveText('Schedule');
+  await page.click('#pmEditBarSave');
+  await expect.poll(() => productsFile(page)).toBeTruthy();
+  const e = entry(await productsFile(page), 'ABY-MAROON-1');
+  for (const want of ['sku: "MA-001"', 'gtin: "1234567890123"', 'soldIndividually: true', 'weight: 0.6', 'dimLength: 30', 'upsells: [', 'purchaseNote: "Thank you!"',
+    'menuOrder: 3', 'reviewsAllowed: false', 'shortDescription: "<p>Soft <em>Dubai cherry</em></p>"', 'visibility: "private"', 'publishDate: "2030-05-01T10:30"']) expect(e).toContain(want);
 });

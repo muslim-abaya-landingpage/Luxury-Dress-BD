@@ -104,6 +104,7 @@
     var subtotal = unit * qty;
     var fee = null;
     if (qty >= FREE_DELIVERY_QTY) fee = 0;
+    else if (typeof window.allLinesVirtual === "function" && window.allLinesVirtual([state.line])) fee = 0;
     else if (state.district) fee = state.district.fee === FEE_DHAKA ? FEE_DHAKA : (parseInt(state.district.fee, 10) || FEE_OUTSIDE);
     return { qty: qty, unit: unit, subtotal: subtotal, fee: fee, total: subtotal + (fee || 0) };
   }
@@ -570,6 +571,7 @@
       "<p style='margin:0;color:#555;font-size:14px'>ধন্যবাদ! আমাদের টিম শীঘ্রই কল করে অর্ডার কনফার্ম করবে।</p>" +
       "<div class='ma-cop__oid'><span data-cop-oid>" + esc(shownId) + "</span><button type='button' class='ma-cop__copy' data-cop-copy>কপি</button></div>" +
       "<dl class='ma-cop__det'>" + rows.map(function (r) { return "<div><dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd></div>"; }).join("") + "</dl>" +
+      (typeof window.orderNotesHtml === "function" && typeof window.orderNotesForLines === "function" ? window.orderNotesHtml(window.orderNotesForLines([line])) : "") +
       "<div class='ma-cop__acts'>" +
       "<button type='button' class='ma-cop__btn2 ma-cop__btn2--dark' data-cop-close>কেনাকাটা চালিয়ে যান</button>" +
       "<a class='ma-cop__btn2 ma-cop__btn2--wa' data-cop-wa target='_blank' rel='noopener' href='https://wa.me/" + WA_NUMBER + "?text=" + encodeURIComponent(waText) + "'>WhatsApp-এ অর্ডারের বিবরণ পাঠান (ঐচ্ছিক)</a>" +

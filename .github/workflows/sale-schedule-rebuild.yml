@@ -1,6 +1,7 @@
 name: Sale Schedule Rebuild
 
-# Product Manager → Schedule: sale prices start at 00:00 and end after 23:59 (Bangladesh time).
+# Product Manager → Schedule: sale prices start at 00:00 and end after 23:59 (Bangladesh time);
+# Publish box: a product scheduled for a date and time goes live then.
 # Prices on the website, in the cart and on the order server switch by themselves at that moment.
 # The pre-rendered product pages and Google product data are built files, so on a day a sale starts
 # or ends this job asks Cloudflare Pages to rebuild the site from the latest commit (no new commit).
@@ -8,7 +9,7 @@ name: Sale Schedule Rebuild
 
 on:
   schedule:
-    - cron: "3 18 * * *"   # 00:03 Bangladesh time, every day
+    - cron: "3 * * * *"   # every hour at :03 (sales: the 00:03 Bangladesh-time run; scheduled publish: that hour)
   workflow_dispatch:
     inputs:
       force:
