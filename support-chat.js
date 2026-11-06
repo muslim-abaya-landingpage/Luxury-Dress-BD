@@ -425,9 +425,7 @@
       if (action) action();
     });
     localDeleteDialog.addEventListener("cancel", function () { pendingLocalAction = null; });
-    body.appendChild(welcome);
-    body.appendChild(sectionTitle);
-    body.appendChild(chips);
+    // Keep the chat conversation area clean on first open: no welcome card or quick prompts.
     body.appendChild(contactPrompt);
     body.appendChild(orderForm);
     body.appendChild(captchaBox);
