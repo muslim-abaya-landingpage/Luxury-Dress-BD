@@ -232,3 +232,52 @@ html[data-admin-theme="dark"] .wo-orders-page .wc-list .pn-sel { border-color: v
   .wo-orders-page .wc-orders-table td:nth-child(2),
   .wo-orders-page .wc-orders-table th:nth-child(2) { box-shadow: 2px 0 0 var(--wc-line-soft); }
 }
+
+/* ---- Round 2: closer to the WooCommerce screen ---- */
+/* Sortable column headers (Order / Date / Total) with the up-down arrows. */
+.wo-orders-page .wc-sort {
+  all: unset; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+  color: var(--wc-link); font: inherit; font-size: 14px;
+}
+.wo-orders-page .wc-sort:hover { color: var(--wc-link-hover); }
+.wo-orders-page .wc-sort:focus-visible { outline: 2px solid var(--wc-link); outline-offset: 2px; }
+.wo-orders-page .wc-sort-ind {
+  display: inline-block; width: 8px; height: 12px; opacity: .55; position: relative;
+}
+.wo-orders-page .wc-sort-ind::before,
+.wo-orders-page .wc-sort-ind::after {
+  content: ""; position: absolute; left: 0; border-left: 4px solid transparent; border-right: 4px solid transparent;
+}
+.wo-orders-page .wc-sort-ind::before { top: 0; border-bottom: 5px solid currentColor; }
+.wo-orders-page .wc-sort-ind::after { bottom: 0; border-top: 5px solid currentColor; }
+.wo-orders-page .wc-sort.is-sorted .wc-sort-ind { opacity: 1; }
+.wo-orders-page .wc-sort.is-sorted:not(.is-asc) .wc-sort-ind::before { opacity: .2; }
+.wo-orders-page .wc-sort.is-sorted.is-asc .wc-sort-ind::after { opacity: .2; }
+.wo-orders-page .wc-col-total .wc-sort { flex-direction: row-reverse; }
+
+/* One-line rows like WooCommerce: wide Order column, name kept on one line on desktop. */
+@media (min-width: 761px) {
+  .wo-orders-page .wc-orders-table .wc-col-order { min-width: 320px; width: 34%; }
+  .wo-orders-page .wc-order-line > .wc-order-link { white-space: nowrap !important; overflow: hidden; text-overflow: ellipsis; }
+}
+.wo-orders-page .wc-order-line .wc-eye { margin-left: auto; }
+
+/* Search: input + "All" field selector + button. */
+.wo-orders-page .wc-search-box #ordSearchField { width: auto; min-width: 0; }
+@media (min-width: 761px) {
+  .wo-orders-page .wc-search-box #ordSearch { flex: 0 1 150px !important; width: 150px !important; min-width: 0 !important; }
+  .wo-orders-page .wc-search-box #ordSearchBtn { flex: none; }
+  .wo-orders-page .wc-search-box #ordSearchField { flex: none !important; width: 92px !important; padding: 0 26px 0 10px !important; text-indent: 0 !important; background-position: right 8px center !important; }
+  .wc-subnav { flex-wrap: nowrap; }
+  .wo-orders-page .wc-status-links { min-width: 0; }
+}
+
+/* Bottom bulk actions under the table, as in WooCommerce. */
+.wo-orders-page .wc-tablenav-bottom { margin: 10px 0 0 !important; }
+.wo-orders-page .wc-paging { margin-top: 8px; gap: 10px; align-items: center; background: none !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; }
+.wc-preview-wa { margin: 0 0 12px; }
+@media (max-width: 760px) {
+  .wo-orders-page .wc-tablenav #ordOriginFilter { grid-column: 1 / -1; }
+  .wo-orders-page .wc-search-box { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+  .wo-orders-page .wc-search-box #ordSearch { grid-column: 1 / -1; }
+}

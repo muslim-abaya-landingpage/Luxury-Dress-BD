@@ -81,16 +81,19 @@
         <div class="adm-heading"><span class="adm-page-kicker">Muslim Abaya / Orders</span><h1>Orders</h1></div>
         <a class="pn-btn wc-add-order" href="admin-order-new.html" id="ordNewOrder">Add order</a>
         <span class="pn-spacer"></span>
-        <span class="pn-note-muted" id="ordCount"></span>
-        <a class="pn-btn" href="admin-operations.html">Finance &amp; Returns</a>
-        <button type="button" class="pn-btn" id="ordRefresh">Refresh</button>
       </div>
 
       <div class="wc-subnav">
         <div class="pn-tabs wc-status-links" id="ordTabs" aria-label="Filter orders by status"></div>
         <form class="wc-search-box" id="ordSearchForm" role="search" onsubmit="return false">
           <label class="wc-sr-only" for="ordSearch">Search orders</label>
-          <input class="pn-in" id="ordSearch" type="search" placeholder="Name, phone or order ID" autocomplete="off">
+          <input class="pn-in" id="ordSearch" type="search" placeholder="নাম, ফোন বা অর্ডার নম্বর" autocomplete="off">
+          <select class="pn-sel" id="ordSearchField" aria-label="কোথায় খুঁজবেন">
+            <option value="all">All</option>
+            <option value="id">Order ID</option>
+            <option value="name">Customer name</option>
+            <option value="phone">Phone</option>
+          </select>
           <button type="submit" class="pn-btn" id="ordSearchBtn">Search orders</button>
         </form>
       </div>
@@ -111,6 +114,9 @@
           <option value="yesterday">Yesterday</option>
           <option value="7d">Last 7 days</option>
           <option value="month">This month</option>
+        </select>
+        <select class="pn-sel wo-filter" id="ordOriginFilter" aria-label="Filter by sales channel">
+          <option value="all">All sales channels</option>
         </select>
         <span class="pn-spacer"></span>
         <span class="wc-displaying" id="ordIssueCountTop" aria-hidden="true"></span>
@@ -143,7 +149,7 @@
             <option value="unassigned">Unassigned</option>
           </select>
           <select class="pn-sel wo-filter" id="ordPriorityFilter" aria-label="Order priority"><option value="all">All priorities</option><option value="attention">Needs attention</option><option value="unassigned">Unassigned orders</option><option value="courier">Courier pending</option></select>
-          <select class="pn-sel wo-filter" id="ordSort" aria-label="Sort orders"><option value="original">Default order</option><option value="value-desc">Highest value</option><option value="value-asc">Lowest value</option><option value="name">Customer A–Z</option></select>
+          <select class="pn-sel wo-filter" id="ordSort" aria-label="Sort orders"><option value="original">Default order</option><option value="date-desc">Newest first</option><option value="date-asc">Oldest first</option><option value="id-desc">Order ID (high–low)</option><option value="id-asc">Order ID (low–high)</option><option value="value-desc">Highest value</option><option value="value-asc">Lowest value</option><option value="name">Customer A–Z</option></select>
         </div>
         <p class="wc-filter-note">প্রোডাক্ট তালিকা বর্তমানে লোড করা অর্ডার থেকে তৈরি।</p>
         <div class="wo-toolbar-actions"><button type="button" class="pn-btn pn-btn-sm" id="ordResetFilters">Clear Filters</button>
@@ -169,10 +175,10 @@
           <thead>
             <tr>
               <th class="wc-col-cb"><input type="checkbox" class="ot-sel" id="otSelAll" aria-label="দেখানো সব অর্ডার বাছুন"></th>
-              <th class="wc-col-order">Order</th>
-              <th class="wc-col-date">Date</th>
+              <th class="wc-col-order" aria-sort="none"><button type="button" class="wc-sort" data-sort="id">Order <span class="wc-sort-ind" aria-hidden="true"></span></button></th>
+              <th class="wc-col-date" aria-sort="none"><button type="button" class="wc-sort" data-sort="date">Date <span class="wc-sort-ind" aria-hidden="true"></span></button></th>
               <th class="wc-col-status">Status</th>
-              <th class="wc-col-total">Total</th>
+              <th class="wc-col-total" aria-sort="none"><button type="button" class="wc-sort" data-sort="value">Total <span class="wc-sort-ind" aria-hidden="true"></span></button></th>
               <th class="wc-col-origin">Origin</th>
             </tr>
           </thead>
@@ -180,16 +186,31 @@
           <tfoot>
             <tr>
               <th class="wc-col-cb"></th>
-              <th class="wc-col-order">Order</th>
-              <th class="wc-col-date">Date</th>
+              <th class="wc-col-order" aria-sort="none"><button type="button" class="wc-sort" data-sort="id">Order <span class="wc-sort-ind" aria-hidden="true"></span></button></th>
+              <th class="wc-col-date" aria-sort="none"><button type="button" class="wc-sort" data-sort="date">Date <span class="wc-sort-ind" aria-hidden="true"></span></button></th>
               <th class="wc-col-status">Status</th>
-              <th class="wc-col-total">Total</th>
+              <th class="wc-col-total" aria-sort="none"><button type="button" class="wc-sort" data-sort="value">Total <span class="wc-sort-ind" aria-hidden="true"></span></button></th>
               <th class="wc-col-origin">Origin</th>
             </tr>
           </tfoot>
         </table>
       </div>
-      <div class="pn-toolbar" id="ordPaging" aria-live="polite">
+      <div class="pn-toolbar wc-tablenav wc-tablenav-bottom">
+        <label class="wc-sr-only" for="ordBulkAction2">Bulk actions</label>
+        <select class="pn-sel wo-filter" id="ordBulkAction2" aria-label="Bulk actions">
+          <option value="">Bulk actions</option>
+          <option value="print">প্যাকিং স্লিপ প্রিন্ট</option>
+          <option value="sync">Courier status sync</option>
+          <option value="send">Steadfast-এ পাঠান</option>
+          <option value="clear">বাছাই মুছুন</option>
+        </select>
+        <button type="button" class="pn-btn" id="ordBulkApply2">Apply</button>
+        <span class="pn-spacer"></span>
+        <span class="wc-displaying" id="ordIssueCountBottom" aria-hidden="true"></span>
+      </div>
+      <div class="pn-toolbar wc-paging" id="ordPaging" aria-live="polite">
+        <span class="pn-note-muted" id="ordCount"></span>
+        <button type="button" class="pn-btn pn-btn-sm" id="ordRefresh">Refresh</button>
         <button type="button" class="pn-btn" id="ordLoadMore" hidden style="display:none">আরও Order দেখুন</button>
         <button type="button" class="pn-btn" id="ordLoadAll" hidden>Load All for Search</button><span class="pn-note-muted" id="ordPageStatus"></span>
       </div>
@@ -226,6 +247,8 @@
       var assignedFilter = "all";
       var priorityFilter = "all";
       var orderSort = "original";
+      var searchField = "all";
+      var originFilter = "all";
       var categoryFilter = "all";
       var productFilter = "all";
       function orderProducts(o){return (Array.isArray(o.items) && o.items.length ? o.items : [o.design || ""]).map(function(x){return String(x || "").trim();}).filter(Boolean);}
@@ -272,8 +295,9 @@
         if (priorityFilter === "attention" && !(issueRows.get(o) || []).length && !o.blocked) return false;
         if (priorityFilter === "unassigned" && String(o.assignedTo || "").trim()) return false;
         if (priorityFilter === "courier" && (o.tracking || o.consignmentId || o.courierStatus) ) return false;
+        if (originFilter !== "all" && String(o.source || "") !== originFilter) return false;
         if (!q) return true;
-        var hay = (o.name + " " + o.phone + " " + o.orderId).toLowerCase();
+        var hay = (searchField === "id" ? String(o.orderId || "") : searchField === "name" ? String(o.name || "") : searchField === "phone" ? String(o.phone || "") : (o.name + " " + o.phone + " " + o.orderId)).toLowerCase();
         return hay.indexOf(q) !== -1;
       }
 
@@ -375,13 +399,16 @@
         if (orderSort !== "original") {
           list.sort(function (a,b) {
             if(orderSort === "name") return String(a.name||"").localeCompare(String(b.name||""));
+            if(orderSort === "date-desc" || orderSort === "date-asc"){var ta=orderTimestamp(a),tb=orderTimestamp(b);ta=ta==null?-Infinity:ta;tb=tb==null?-Infinity:tb;return orderSort === "date-desc" ? tb-ta : ta-tb;}
+            if(orderSort === "id-desc" || orderSort === "id-asc"){var c=String(a.orderId||"").localeCompare(String(b.orderId||""),undefined,{numeric:true});return orderSort === "id-desc" ? -c : c;}
             var va=MaOrderInsights.amount(a.total), vb=MaOrderInsights.amount(b.total);
             va=va == null ? -1 : va; vb=vb == null ? -1 : vb;
             return orderSort === "value-desc" ? vb-va : va-vb;
           });
         }
         document.getElementById("ordIssueCount").textContent = "Showing " + list.length + " of " + all.length + " loaded orders";
-        document.getElementById("ordIssueCountTop").textContent = list.length + (list.length === 1 ? " item" : " items");
+        document.getElementById("ordIssueCountTop").textContent = document.getElementById("ordIssueCountBottom").textContent = list.length + (list.length === 1 ? " item" : " items");
+        paintSortHeaders();
         try { window.MaOrdersState = { all: all, filtered: list, total: Number(counts.all) || all.length }; } catch (stateErr) {}
         var body = document.getElementById("ordBody");
         if (!list.length) {
@@ -403,9 +430,8 @@
             '<td class="wc-col-order"><div class="wc-order-line">' +
               (canOpen ? '<a class="oi-link wc-order-link" href="admin-order.html?id=' + encodeURIComponent(o.orderId) + '">' + esc(label) + '</a>' : '<span class="wc-order-link is-plain">' + esc(label) + (o.row ? ' <span class="sub">(সারি ' + esc(o.row) + ')</span>' : '') + '</span>') +
               (o.blocked ? ' <span class="pn-badge blocked">Blocked</span>' : '') +
-              (issues.length ? ' <span class="wc-flag" title="' + esc(flagTitle) + '" aria-label="যাচাই প্রয়োজন: ' + esc(flagTitle) + '">!</span>' : '') +
               '<button type="button" class="wc-eye wo-preview-btn" data-preview-id="' + esc(o.orderId || "") + '" data-preview-row="' + esc(o.row || "") + '" title="Preview" aria-label="' + esc(label) + ' প্রিভিউ">' + eyeSvg + '</button>' +
-            '</div><div class="ot-wa-slot"></div></td>' +
+            '</div><div class="ot-wa-slot" hidden></div></td>' +
             '<td class="wc-col-date"><time title="' + esc(when.title) + '">' + esc(when.text) + '</time></td>' +
             '<td class="wc-col-status"><mark class="wc-status wc-status-' + MaPanel.statusClass(status) + '">' + esc(status) + '</mark></td>' +
             '<td class="wc-col-total">' + (amount === null ? '<span class="sub">অবৈধ মান</span>' : esc(MaPanel.money(o.total))) + '</td>' +
@@ -471,6 +497,7 @@
         document.getElementById("ordCount").textContent = (counts.all || 0) + "টি অর্ডার";
         updateAssignedOptions();
         updateProductOptions();
+        updateOriginOptions();
         renderInsights(res);
         renderTabs();
         renderRows();
@@ -550,8 +577,8 @@
       });
 
       // WooCommerce-style "Bulk actions + Apply": runs the existing selection buttons from admin-order-tools.js.
-      document.getElementById("ordBulkApply").addEventListener("click", function () {
-        var select = document.getElementById("ordBulkAction");
+      function runBulk(selectId) {
+        var select = document.getElementById(selectId);
         var target = { print: "otPrintSel", sync: "otSyncSel", send: "otSendSel", clear: "otClearSel" }[select.value];
         if (!target) { MaPanel.toast("আগে একটি Bulk action বেছে নিন।", true); return; }
         if (target !== "otClearSel" && !document.querySelector("#ordBody .ot-sel:checked")) { MaPanel.toast("আগে অন্তত একটি অর্ডার বাছুন।", true); return; }
@@ -559,7 +586,37 @@
         if (!btn) { MaPanel.toast("এই অ্যাকশনটি এখন পাওয়া যাচ্ছে না।", true); return; }
         btn.click();
         select.value = "";
+      }
+      document.getElementById("ordBulkApply").addEventListener("click", function () { runBulk("ordBulkAction"); });
+      document.getElementById("ordBulkApply2").addEventListener("click", function () { runBulk("ordBulkAction2"); });
+      document.getElementById("ordSearchField").addEventListener("change", function (e) { searchField = e.target.value; renderRows(); });
+      document.getElementById("ordOriginFilter").addEventListener("change", function (e) { originFilter = e.target.value; renderRows(); });
+
+      // Column sorting like WooCommerce: click Order / Date / Total; a second click flips the direction.
+      function paintSortHeaders() {
+        var m = /^(id|date|value)-(asc|desc)$/.exec(orderSort);
+        Array.prototype.forEach.call(document.querySelectorAll(".wc-orders-table .wc-sort"), function (b) {
+          var on = m && b.getAttribute("data-sort") === m[1];
+          b.parentNode.setAttribute("aria-sort", on ? (m[2] === "asc" ? "ascending" : "descending") : "none");
+          b.classList.toggle("is-sorted", !!on);
+          b.classList.toggle("is-asc", !!(on && m[2] === "asc"));
+        });
+      }
+      document.querySelector(".wc-orders-table").addEventListener("click", function (e) {
+        var b = e.target.closest(".wc-sort"); if (!b) return;
+        var key = b.getAttribute("data-sort");
+        orderSort = orderSort === key + "-desc" ? key + "-asc" : key + "-desc";
+        var sel = document.getElementById("ordSort");
+        if (sel) sel.value = orderSort;
+        renderRows();
       });
+      function updateOriginOptions() {
+        var names = Array.from(new Set(all.map(function (o) { return String(o.source || "").trim(); }).filter(Boolean))).sort();
+        var select = document.getElementById("ordOriginFilter");
+        select.innerHTML = '<option value="all">All sales channels</option>' + names.map(function (n) { return '<option value="' + esc(n) + '">' + esc(n) + '</option>'; }).join("");
+        if (names.indexOf(originFilter) < 0) originFilter = "all";
+        select.value = originFilter;
+      }
       document.getElementById("ordSearchForm").addEventListener("submit", function (e) {
         e.preventDefault();
         q = document.getElementById("ordSearch").value.trim().toLowerCase();
@@ -572,6 +629,9 @@
         var flags=(issueRows.get(o)||[]).map(function(k){return MaOrderInsights.labels[k]||k;}).join(", ");
         var rows=[["Order ID",o.orderId],["Date",o.time],["Customer",o.name],["Phone",o.phone],["District",o.district],["Address",o.address],["Size",o.size],["Total",MaPanel.money(o.total)],["Payment",o.payment],["Order Status",status.orderRaw],["Courier Status",status.hasCourier?status.courierLabel:"Not sent"],["Tracking",status.hasCourier?((o.tracking||o.consignmentId||"—")+(o.courier?" · "+o.courier:"")):""],["Assigned Staff",o.assignedTo],["Origin",o.source],["Review Flags",flags||"None"]];
         document.getElementById("ordPreviewContent").innerHTML='<section class="ma-product-section"><h3>অর্ডারকৃত পণ্য</h3>'+previewItems(o)+'</section>'+'<dl class="wo-preview-grid">'+rows.map(function(pair){return '<div><dt>'+esc(pair[0])+'</dt><dd>'+esc(pair[1]==null||pair[1]===""?"—":pair[1])+'</dd></div>';}).join("")+'</dl><p class="wo-preview-note">Courier status is the last recorded value, not a live location update.</p>';
+        var tr=o.orderId?document.querySelector('#ordBody tr[data-oid="'+(window.CSS&&CSS.escape?CSS.escape(String(o.orderId)):String(o.orderId))+'"]'):null;
+        var wa=tr&&tr.querySelector(".ot-wa-slot");
+        if(wa&&wa.innerHTML.trim())document.getElementById("ordPreviewContent").insertAdjacentHTML("afterbegin",'<p class="wc-preview-wa">'+wa.innerHTML+'</p>');
         var link=document.getElementById("ordPreviewOpen");
         link.hidden=!o.orderId||(issueRows.get(o)||[]).indexOf("duplicate_id")!==-1;
         if(!link.hidden)link.href="admin-order.html?id="+encodeURIComponent(o.orderId);
@@ -640,7 +700,7 @@
     btn.addEventListener("click",function(){
       var search=document.getElementById("ordSearch");
       if(search){search.value="";search.dispatchEvent(new Event("input",{bubbles:true}));}
-      ["ordDateFilter","ordCourierFilter","ordPaymentFilter","ordAssignedFilter","ordIssueFilter","ordPriorityFilter"].forEach(function(id){
+      ["ordDateFilter","ordOriginFilter","ordSearchField","ordCourierFilter","ordPaymentFilter","ordAssignedFilter","ordIssueFilter","ordPriorityFilter"].forEach(function(id){
         var el=document.getElementById(id);if(el){el.value="all";el.dispatchEvent(new Event("change",{bubbles:true}));}
       });
       categoryFilter="all";productFilter="all";["ordCategoryFilter","ordProductFilter"].forEach(function(id){var el=document.getElementById(id);if(el){el.value="all";el.dispatchEvent(new Event("change",{bubbles:true}));}});
@@ -658,6 +718,10 @@
 .pn-table th,.pn-table td{vertical-align:middle;overflow-wrap:anywhere}
 @media(max-width:600px){.ma-product-fields{grid-template-columns:1fr}}
 </style>
+<script>
+// "+ হাতে অর্ডার" (admin-manual-order.js) attaches itself beside Refresh; on this page keep it next to "Add order" in the title row.
+window.addEventListener("load",function(){var b=document.getElementById("moOpen"),add=document.getElementById("ordNewOrder");if(b&&add){b.classList.remove("pn-btn-primary");b.classList.add("wc-add-order");add.parentNode.insertBefore(b,add.nextSibling);}});
+</script>
 <script src="admin-search.js?v=1" defer></script>
 <script src="admin-app.js?v=1" defer></script>
 </body>
