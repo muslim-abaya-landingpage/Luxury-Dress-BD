@@ -425,13 +425,10 @@
       if (action) action();
     });
     localDeleteDialog.addEventListener("cancel", function () { pendingLocalAction = null; });
-    body.appendChild(welcome);
-    body.appendChild(sectionTitle);
-    body.appendChild(chips);
-    body.appendChild(contactPrompt);
+    // Keep the chat conversation area clean on first open: no welcome card or quick prompts.
+    // Initial chat stays blank; optional prompts/forms are not mounted until explicitly needed.
     body.appendChild(orderForm);
     body.appendChild(captchaBox);
-    body.appendChild(contactForm);
     body.appendChild(clearLocalButton);
     body.appendChild(transcript);
     body.appendChild(typingLine);

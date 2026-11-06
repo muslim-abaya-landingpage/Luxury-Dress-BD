@@ -53,27 +53,20 @@ async function openChatWithMockHistory(page) {
   await expect(page.locator('.ma-chat-transcript .ma-chat-message')).toHaveCount(2);
 }
 
-test('chat greets in Bangla and chips fill a Bangla message', async ({ page }) => {
+test('chat opens with an empty conversation area and a ready message composer', async ({ page }) => {
   await openChat(page);
-  await expect(page.locator('.ma-chat-greet')).toContainText('আসসালামু আলাইকুম');
+  await expect(page.locator('.ma-chat-greet')).toHaveCount(0);
+  await expect(page.locator('.ma-chat-section-title')).toHaveCount(0);
+  await expect(page.locator('.ma-chat-chip')).toHaveCount(0);
+  await expect(page.locator('.ma-chat-transcript .ma-chat-message')).toHaveCount(0);
   await expect(page.locator('.ma-chat-input')).toHaveAttribute('placeholder', 'এখানে আপনার প্রশ্ন লিখুন…');
-  await expect(page.locator('.ma-chat-chip')).toHaveCount(5);
-  await page.locator('.ma-chat-chip', { hasText: 'সাইজ বুঝতে সাহায্য' }).click();
-  await expect(page.locator('.ma-chat-input')).toHaveValue(/কোন সাইজ ঠিক হবে/);
-  await page.locator('.ma-chat-chip', { hasText: 'আমার অর্ডার কোথায়?' }).click();
-  await expect(page.locator('.ma-chat-order-form')).toBeVisible();
+  await expect(page.locator('.ma-chat-row')).toBeVisible();
 });
 
-test('contact details are optional and only shown when requested', async ({ page }) => {
+test('optional contact capture does not clutter the initial chat', async ({ page }) => {
   await openChat(page);
-  const prompt = page.getByRole('button', { name: /নাম ও ফোন শেয়ার করুন/ });
-  const form = page.locator('.ma-chat-contact');
-  await expect(prompt).toBeVisible();
-  await expect(form).toBeHidden();
-  await prompt.click();
-  await expect(prompt).toBeHidden();
-  await expect(form).toBeVisible();
-  await expect(page.locator('#maChatContactName')).toBeFocused();
+  await expect(page.locator('.ma-chat-contact-prompt')).toHaveCount(0);
+  await expect(page.locator('.ma-chat-contact')).toHaveCount(0);
 });
 
 test('message delete and clear only hide local history; support-team records remain', async ({ page }) => {
@@ -157,13 +150,7 @@ test('chat panel stays compact on desktop and mobile', async ({ page }) => {
     expect(box.height).toBeLessThanOrEqual(heightLimit);
     expect(box.x).toBeGreaterThanOrEqual(0);
     expect(box.x + box.width).toBeLessThanOrEqual(vp.width);
-    // quick-help options are a visible two-column grid without a horizontal scroll trap
-    const layout = await page.locator('.ma-chat-chips').evaluate((el) => {
-      const style = getComputedStyle(el);
-      return { display: style.display, columns: style.gridTemplateColumns.trim().split(/\s+/).length, width: el.clientWidth, scrollWidth: el.scrollWidth };
-    });
-    expect(layout.display).toBe('grid');
-    expect(layout.columns).toBe(2);
-    expect(layout.scrollWidth).toBeLessThanOrEqual(layout.width);
+    // Empty initial state: no welcome panel, suggested prompts, or contact capture.
+    await expect(page.locator('.ma-chat-welcome, .ma-chat-chips, .ma-chat-contact-prompt')).toHaveCount(0);
   }
 });
