@@ -171,7 +171,40 @@
     ".ma-chat-clear-local{display:inline-flex;align-items:center;justify-content:center;gap:6px;margin:0 0 7px auto;padding:6px 10px;border:1px solid #e6dfd2;border-radius:999px;background:#fff;color:#765d30;font:600 11px system-ui;cursor:pointer}.ma-chat-clear-local:hover{border-color:#b69655;background:#fffaf0}.ma-chat-clear-local:focus-visible{outline:2px solid #b69655;outline-offset:2px}.ma-chat-clear-local[hidden]{display:none!important}" +
     ".ma-chat-message-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:5px}.ma-chat-message time{display:block;margin:0;font-size:10px;opacity:.68}.ma-chat-message-remove{border:0;border-radius:6px;padding:2px 5px;background:transparent;color:inherit;font:600 10px system-ui;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;opacity:.76}.ma-chat-message-remove:hover,.ma-chat-message-remove:focus-visible{opacity:1;background:rgba(0,0,0,.07);outline:2px solid #b69655;outline-offset:1px}.ma-chat-message.is-customer .ma-chat-message-remove:hover{background:rgba(255,255,255,.13)}" +
     ".ma-chat-local-dialog{box-sizing:border-box;width:min(340px,calc(100vw - 36px));max-width:340px;margin:auto;padding:18px;border:1px solid #e6dcc8;border-radius:18px;background:#fffdf8;color:#211f1a;box-shadow:0 18px 50px rgba(0,0,0,.25);font:14px/1.55 'Hind Siliguri',system-ui,sans-serif}.ma-chat-local-dialog::backdrop{background:rgba(17,17,17,.42)}.ma-chat-local-dialog h3{margin:0;color:#201e19;font-size:16px;line-height:1.35}.ma-chat-local-dialog p{margin:8px 0 16px;color:#665d4d;font-size:13px}.ma-chat-local-dialog-actions{display:flex;justify-content:flex-end;gap:8px}.ma-chat-local-dialog button{min-height:38px;padding:0 12px;border:1px solid #ded8cb;border-radius:10px;background:#fff;color:#3d3931;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}.ma-chat-local-dialog button:focus-visible{outline:2px solid #b69655;outline-offset:2px}.ma-chat-local-dialog .ma-chat-local-dialog-confirm{border-color:#171717;background:#171717;color:#fff}" +
-    "@media (prefers-reduced-motion:reduce){.ma-chat-fab,.ma-chat-chip{transition:none}}";
+    "@media (prefers-reduced-motion:reduce){.ma-chat-fab,.ma-chat-chip{transition:none}}" +
+    /* ---- Clean layout (white header, quiet start screen, round input) ---- */
+    "#maChatPanel{border-radius:20px;border:1px solid #ececec;box-shadow:0 24px 60px rgba(20,20,20,.18);overflow:hidden;background:#fff}" +
+    "#maChatPanel .ma-chat-head{background:#fff;color:#111;border-bottom:1px solid #f0f0f0;padding:14px 16px;gap:12px}" +
+    "#maChatPanel .ma-chat-avatar{width:42px;height:42px;background:#fff;border:1px solid #e8e8e8;box-shadow:0 0 0 3px #fff}" +
+    "#maChatPanel .ma-chat-head .ma-chat-title strong{display:flex;align-items:center;gap:6px;font-size:15px;letter-spacing:.12em;text-transform:uppercase;color:#111}" +
+    "#maChatPanel .ma-chat-verified{font-size:13px;letter-spacing:0;color:#c9a24d}" +
+    "#maChatPanel .ma-chat-head .ma-chat-title span{color:#1f8a4c;font-size:11.5px}#maChatPanel .ma-chat-head .ma-chat-title span.ma-chat-verified{color:#c9a24d}" +
+    "#maChatPanel .ma-chat-status-dot{background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.15)}" +
+    "#maChatPanel .ma-chat-head .ma-chat-icon-btn{background:transparent;color:#9a9a9a;width:34px;height:34px;border-radius:10px}" +
+    "#maChatPanel .ma-chat-head .ma-chat-icon-btn:hover{background:#f4f4f4;color:#111}" +
+    "#maChatPanel .ma-chat-head a.ma-chat-icon-btn{color:#16a34a;background:#f0fdf4;border:1px solid #bbf7d0}" +
+    "#maChatPanel .ma-chat-body{background:#fff;display:flex;flex-direction:column;min-height:300px}" +
+    "#maChatPanel .ma-chat-empty{margin:auto;padding:24px 12px;text-align:center}" +
+    "#maChatPanel .ma-chat-empty strong{display:block;font-size:17px;color:#111}" +
+    "#maChatPanel .ma-chat-empty p{margin:6px 0 14px;font-size:13.5px;color:#6b6b6b}" +
+    "#maChatPanel .ma-chat-online{display:inline-flex;align-items:center;gap:7px;padding:6px 13px;border:1px solid #ececec;border-radius:999px;background:#fafafa;font-size:12px;color:#555}" +
+    "#maChatPanel .ma-chat-online i{width:7px;height:7px;border-radius:50%;background:#22c55e}" +
+    "#maChatPanel .ma-chat-body.has-messages .ma-chat-empty{display:none}" +
+    "#maChatPanel.ma-chat-live .ma-chat-welcome,#maChatPanel.ma-chat-live .ma-chat-section-title,#maChatPanel.ma-chat-live .ma-chat-chips,#maChatPanel.ma-chat-live .ma-chat-contact-prompt,#maChatPanel .ma-chat-record{display:none!important}" +
+    "#maChatPanel:not(.ma-chat-live) .ma-chat-empty,#maChatPanel.ma-chat-live:not(.ma-chat-fallback) .ma-chat-alt{display:none}" +
+    "#maChatPanel .ma-chat-foot{border-top:1px solid #f0f0f0;padding:12px 14px}" +
+    "#maChatPanel .ma-chat-row{display:flex;align-items:center;gap:10px}" +
+    "#maChatPanel .ma-chat-attach{width:38px;height:38px;border:0;background:transparent;color:#6b6b6b;border-radius:10px}" +
+    "#maChatPanel .ma-chat-attach:hover{background:#f4f4f4;color:#111}#maChatPanel .ma-chat-attach svg{width:22px;height:22px}" +
+    "#maChatPanel .ma-chat-input{flex:1;min-height:44px;padding:11px 16px;border:1px solid #e3e3e3;border-radius:999px;background:#fff;font-size:14px;resize:none}" +
+    "#maChatPanel .ma-chat-input:focus{border-color:#c9a24d;box-shadow:0 0 0 3px rgba(201,162,77,.15);outline:0}" +
+    "#maChatPanel .ma-chat-send{width:42px;height:42px;padding:0;border-radius:50%;background:#f1f1f1;color:#a3a3a3;justify-content:center}" +
+    "#maChatPanel .ma-chat-send svg{color:currentColor;width:18px;height:18px}" +
+    "#maChatPanel .ma-chat-send:hover{background:#111;color:#d9b866}" +
+    "#maChatPanel .ma-chat-foot:focus-within .ma-chat-send{background:#111;color:#d9b866}" +
+    "#maChatPanel .ma-chat-note{margin:8px 2px 0;font-size:11.5px;color:#8a8a8a;text-align:center}" +
+    "#maChatPanel .ma-chat-message.is-customer{background:#111;border-color:#111}" +
+    "@media (max-width:560px){#maChatPanel{border-radius:18px}#maChatPanel .ma-chat-body{min-height:240px}}";
 
   var ICON_CHAT =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.5L3 21l1.6-5.2A8.5 8.5 0 1 1 21 12z"/></svg>';
@@ -181,6 +214,8 @@
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5"/><path d="m3 3 6 6m12-6-6 6M3 21l6-6m12 6-6-6"/></svg>';
   var ICON_PHONE =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2.1z"/></svg>';
+  var ICON_IMAGE =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="9" cy="10" r="1.8"/><path d="m21 16-5-5-8 9"/></svg>';
   var ICON_SEND =
     '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.4 20.4 21 12 3.4 3.6l.1 6.5L15 12 3.5 13.9z"/></svg>';
   var ICON_MSGR =
@@ -243,6 +278,7 @@
 
     var panel = el("div", "ma-chat-panel");
     panel.id = "maChatPanel";
+    if (liveEnabled) panel.classList.add("ma-chat-live");
     panel.setAttribute("role", "dialog");
     panel.setAttribute("aria-modal", "false");
     panel.setAttribute("aria-labelledby", "maChatTitle");
@@ -258,7 +294,8 @@
     title.innerHTML =
       '<strong id="maChatTitle"></strong><span id="maChatSub"><i class="ma-chat-status-dot" aria-hidden="true"></i></span>';
     title.querySelector("strong").textContent = brand;
-    title.querySelector("#maChatSub").appendChild(doc.createTextNode(replyTime || (liveEnabled ? "সরাসরি চ্যাট · বাংলায় লিখুন" : "WhatsApp-এ সহায়তা · বাংলায় লিখুন")));
+    title.querySelector("strong").appendChild(el("span", "ma-chat-verified", "✓"));
+    title.querySelector("#maChatSub").appendChild(doc.createTextNode(replyTime || (liveEnabled ? "লাইভ সাপোর্ট • বাংলায় লিখুন" : "WhatsApp-এ সহায়তা • বাংলায় লিখুন")));
     var call = el("a", "ma-chat-icon-btn", ICON_PHONE);
     call.href = "tel:" + String(phoneTel).replace(/[^\d+]/g, "");
     call.setAttribute("aria-label", "আমাদের ফোন করুন");
@@ -425,6 +462,12 @@
       if (action) action();
     });
     localDeleteDialog.addEventListener("cancel", function () { pendingLocalAction = null; });
+    // Clean start screen (same idea as other Bangladeshi shop chats): just a heading and one line.
+    var emptyState = el("div", "ma-chat-empty");
+    emptyState.appendChild(el("strong", "", "কাস্টমার সাপোর্ট"));
+    emptyState.appendChild(el("p", "", "কীভাবে সাহায্য করতে পারি?"));
+    emptyState.appendChild(el("span", "ma-chat-online", '<i aria-hidden="true"></i>' + (liveEnabled ? "লাইভ সাপোর্ট • নিচে মেসেজ লিখুন" : "নিচে লিখুন • WhatsApp-এ পাঠানো হবে")));
+    body.appendChild(emptyState);
     body.appendChild(welcome);
     body.appendChild(sectionTitle);
     body.appendChild(chips);
@@ -443,7 +486,7 @@
     input.maxLength = 500;
     input.placeholder = "এখানে আপনার প্রশ্ন লিখুন…";
     input.setAttribute("aria-label", "আপনার মেসেজ");
-    var send = el("a", "ma-chat-send", ICON_SEND + "<span>পাঠান</span>");
+    var send = el("a", "ma-chat-send", ICON_SEND);
     send.target = "_blank";
     send.rel = "noopener";
     send.setAttribute("aria-label", "মেসেজ পাঠান");
@@ -451,7 +494,7 @@
     fileInput.type = "file";
     fileInput.accept = "image/jpeg,image/png,image/webp,image/gif,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt";
     fileInput.hidden = true;
-    var attach = el("button", "ma-chat-attach", "📎");
+    var attach = el("button", "ma-chat-attach", ICON_IMAGE);
     attach.type = "button";
     attach.title = "ছবি, অডিও বা ডকুমেন্ট পাঠান (সর্বোচ্চ ১০MB)";
     attach.setAttribute("aria-label", "ফাইল পাঠান");
@@ -1053,7 +1096,7 @@
       if (open) {
         updateLinks();
         if (liveEnabled) ensureLiveConversation().catch(function () {
-          note.textContent = "লাইভ চ্যাট সাময়িকভাবে বন্ধ। WhatsApp বা Messenger-এ লিখুন।";
+          panel.classList.add("ma-chat-fallback"); note.textContent = "লাইভ চ্যাট সাময়িকভাবে বন্ধ। WhatsApp বা Messenger-এ লিখুন।";
         });
         global.setTimeout(function () { input.focus(); }, 60);
       } else {
