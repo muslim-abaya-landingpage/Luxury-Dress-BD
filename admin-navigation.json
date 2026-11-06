@@ -1,95 +1,103 @@
 [
   {
-    "label": "ড্যাশবোর্ড",
+    "label": "Dashboard",
     "href": "admin-dashboard.html",
     "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"/></svg>"
   },
   {
-    "label": "অর্ডার ও হিসাব",
+    "label": "Orders",
+    "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M6 3h12v18l-3-2-3 2-3-2-3 2V3Z M9 7h6M9 11h6M9 15h4\"/></svg>",
     "links": [
       {
         "href": "admin-orders.html",
-        "label": "অর্ডার প্যানেল"
+        "label": "Orders"
+      },
+      {
+        "href": "admin-order-new.html",
+        "label": "Add order"
       },
       {
         "href": "admin-operations.html",
-        "label": "হিসাব ও রিটার্ন"
+        "label": "Finance & Returns"
       },
       {
         "href": "admin-profit.html",
-        "label": "পণ্যভিত্তিক লাভ"
-      }
-    ],
-    "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M6 3h12v18l-3-2-3 2-3-2-3 2V3Z M9 7h6M9 11h6M9 15h4\"/></svg>"
-  },
-  {
-    "label": "পণ্য ও স্টক",
-    "links": [
-      {
-        "href": "product-manager.html",
-        "label": "প্রোডাক্ট ম্যানেজার"
-      },
-      {
-        "href": "admin-sizes.html",
-        "label": "সাইজ ম্যানেজার"
-      },
-      {
-        "href": "stock-analytics.html",
-        "label": "স্টক ও অ্যানালিটিক্স"
-      },
-      {
-        "href": "product-links.html",
-        "label": "প্রোডাক্ট লিংক"
-      }
-    ],
-    "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><rect x=\"4\" y=\"6\" width=\"16\" height=\"15\" rx=\"2\"/><path d=\"M9 6V5a3 3 0 0 1 6 0v1M9 10a3 3 0 0 0 6 0\"/></svg>"
-  },
-  {
-    "label": "কাস্টমার ইনবক্স",
-    "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M3 4h18v13H8l-5 4V4ZM7 9h10M7 13h7\"/></svg>",
-    "links": [
-      {
-        "href": "admin-customers.html",
-        "label": "কাস্টমার প্রোফাইল"
-      },
-      {
-        "href": "admin-inbox.html",
-        "label": "বর্তমান কাস্টমার ইনবক্স"
-      },
-      {
-        "href": "admin-support-inbox.html",
-        "label": "রিয়েল-টাইম লাইভ সাপোর্ট"
-      },
-      {
-        "href": "support-agent-telegram.html",
-        "label": "টেলিগ্রাম সাপোর্ট এজেন্ট"
+        "label": "Product profit"
       }
     ]
   },
   {
-    "label": "সেটিংস ও অন্যান্য",
+    "label": "Products",
+    "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><rect x=\"4\" y=\"6\" width=\"16\" height=\"15\" rx=\"2\"/><path d=\"M9 6V5a3 3 0 0 1 6 0v1M9 10a3 3 0 0 0 6 0\"/></svg>",
+    "links": [
+      {
+        "href": "product-manager.html",
+        "label": "All Products"
+      },
+      {
+        "href": "product-manager.html?action=new",
+        "label": "Add new product"
+      },
+      {
+        "href": "admin-sizes.html",
+        "label": "Sizes"
+      },
+      {
+        "href": "stock-analytics.html",
+        "label": "Stock & Analytics"
+      },
+      {
+        "href": "product-links.html",
+        "label": "Product links"
+      }
+    ]
+  },
+  {
+    "label": "Customers",
+    "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M3 4h18v13H8l-5 4V4ZM7 9h10M7 13h7\"/></svg>",
+    "links": [
+      {
+        "href": "admin-customers.html",
+        "label": "Customers"
+      },
+      {
+        "href": "admin-inbox.html",
+        "label": "Inbox"
+      },
+      {
+        "href": "admin-support-inbox.html",
+        "label": "Live support"
+      },
+      {
+        "href": "support-agent-telegram.html",
+        "label": "Telegram support"
+      }
+    ]
+  },
+  {
+    "label": "Settings",
+    "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"3\"/><path d=\"M3 9h18M9 9v12\"/></svg>",
     "links": [
       {
         "href": "admin-setup.html",
-        "label": "Setup ও স্ট্যাটাস"
+        "label": "Setup & Status"
       },
       {
         "href": "admin-staff.html",
-        "label": "স্টাফ ম্যানেজমেন্ট"
+        "label": "Staff"
       },
       {
         "href": "admin-growth.html",
-        "label": "গ্রোথ টুলস"
+        "label": "Growth tools"
       },
       {
         "href": "admin-links.html",
-        "label": "পরিচালনা লিংক"
+        "label": "Links"
       },
       {
         "href": "admin-activity.html",
-        "label": "কার্যকলাপ লগ"
+        "label": "Activity log"
       }
-    ],
-    "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"3\"/><path d=\"M3 9h18M9 9v12\"/></svg>"
+    ]
   }
 ]

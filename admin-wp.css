@@ -1,0 +1,380 @@
+/* WordPress / WooCommerce-style admin shell ("Coffee" colour scheme, as on afnanaeiza.com).
+   Loaded LAST on every admin page by scripts/sync-admin-navigation.py.
+   Visual only: the menu markup comes from admin-navigation.json, the top bar from admin-wp.js. */
+
+html.wp-admin-shell {
+  --wp-menu: #59524c;
+  --wp-menu-dark: #46403c;
+  --wp-menu-text: #fff;
+  --wp-menu-icon: rgba(240, 246, 252, .6);
+  --wp-sub-text: #cdcbc9;
+  --wp-highlight: #c7a589;
+  --wp-page: #f0f0f1;
+  --wp-box-line: #c3c4c7;
+  --wp-text: #1d2327;
+  --wp-muted: #646970;
+  --wp-link: #2271b1;
+  --wp-link-hover: #135e96;
+  --wp-primary: #2f2a26;
+  --wp-menu-w: 160px;
+  --wp-bar-h: 32px;
+}
+
+/* ---------- Page ---------- */
+html.wp-admin-shell body {
+  background: var(--wp-page) !important;
+  color: var(--wp-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", "Hind Siliguri", sans-serif !important;
+  font-size: 13px;
+  padding-top: var(--wp-bar-h) !important;
+  margin: 0;
+}
+html.wp-admin-shell .adm-shell,
+html.wp-admin-shell .pn-app.adm-shell {
+  display: block !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  gap: 0 !important;
+  min-height: calc(100vh - var(--wp-bar-h));
+  max-width: none !important;
+  background: none !important;
+}
+@media (min-width: 981px) {
+  html.wp-admin-shell .adm-shell > :not(.adm-sidebar):not(.adm-sidebar-backdrop):not(script):not(style) {
+    margin-left: var(--wp-menu-w) !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0;
+  }
+  html.wp-admin-shell .adm-shell:has(.adm-sidebar.is-collapsed) > :not(.adm-sidebar):not(.adm-sidebar-backdrop):not(script):not(style) {
+    margin-left: 36px !important;
+  }
+}
+html.wp-admin-shell .adm-main,
+html.wp-admin-shell .pn-main,
+html.wp-admin-shell .pl-main {
+  padding: 10px 20px 40px !important;
+  max-width: none !important;
+  margin: 0 !important;
+  background: none !important;
+}
+html.wp-admin-shell .om-workspace > .pn-main { padding: 10px 20px 40px !important; }
+html.wp-admin-shell .pl-admin-header,
+html.wp-admin-shell .adm-shell > div > header.pl-admin-header { margin: 0 !important; padding: 10px 20px 0 !important; }
+
+/* ---------- Top admin bar ---------- */
+.wp-adminbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 99999;
+  height: var(--wp-bar-h); display: flex; justify-content: space-between; align-items: stretch;
+  background: var(--wp-menu); color: #f0f0f1; font-size: 13px; line-height: var(--wp-bar-h);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+.wp-adminbar ul { list-style: none; margin: 0; padding: 0; display: flex; }
+.wp-adminbar li { position: relative; }
+.wp-adminbar a,
+.wp-adminbar button {
+  display: flex; align-items: center; gap: 6px; height: var(--wp-bar-h); padding: 0 10px;
+  color: #f0f0f1; text-decoration: none; background: none; border: 0; font: inherit; cursor: pointer;
+}
+.wp-adminbar svg { color: var(--wp-menu-icon); flex: none; }
+.wp-adminbar li:hover > a, .wp-adminbar li:hover > button,
+.wp-adminbar a:focus-visible, .wp-adminbar button:focus-visible { background: var(--wp-menu-dark); color: var(--wp-highlight); outline: none; }
+.wp-adminbar li:hover > a svg { color: var(--wp-highlight); }
+.wp-ab-site span { font-weight: 400; }
+.wp-ab-menu { display: none; }
+.wp-ab-sub {
+  display: none !important; position: absolute; top: var(--wp-bar-h); left: 0; min-width: 160px;
+  flex-direction: column; background: var(--wp-menu-dark); padding: 6px 0 !important;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, .2);
+}
+.wp-ab-sub a, .wp-ab-sub button { height: 26px; line-height: 26px; padding: 0 12px; width: 100%; text-align: left; color: var(--wp-sub-text); }
+.wp-ab-sub-right { left: auto; right: 0; }
+.wp-adminbar li:hover > .wp-ab-sub,
+.wp-adminbar li:focus-within > .wp-ab-sub { display: flex !important; }
+.wp-ab-user { display: flex; align-items: center; gap: 8px; padding: 0 10px; cursor: default; }
+.wp-ab-user:hover { background: var(--wp-menu-dark); }
+.wp-ab-avatar { width: 16px; height: 16px; background: #c3c4c7; border: 1px solid #8c8f94; }
+
+/* ---------- Left menu ---------- */
+html.wp-admin-shell .adm-sidebar {
+  position: fixed !important; top: var(--wp-bar-h) !important; left: 0 !important; bottom: 0 !important;
+  width: var(--wp-menu-w) !important; height: auto !important; min-height: 0 !important;
+  margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important;
+  box-shadow: none !important; background: var(--wp-menu) !important; color: var(--wp-menu-text) !important;
+  overflow: visible !important; z-index: 9990; display: flex !important; flex-direction: column;
+  font-family: inherit !important;
+}
+html.wp-admin-shell .adm-sidebar::before,
+html.wp-admin-shell .adm-sidebar::after { display: none !important; }
+html.wp-admin-shell .adm-sidebar-brand,
+html.wp-admin-shell .adm-sidebar-profile { display: none !important; }
+html.wp-admin-shell .adm-sidebar-nav {
+  display: block !important; padding: 12px 0 !important; margin: 0 !important; gap: 0 !important; flex: 1 1 auto;
+  overflow: visible !important; border: 0 !important; background: none !important;
+}
+html.wp-admin-shell .adm-sidebar .adm-sidebar-item {
+  display: flex !important; align-items: center; gap: 8px; position: relative;
+  min-height: 34px; margin: 0 !important; padding: 0 8px 0 10px !important;
+  border: 0 !important; border-radius: 0 !important; box-shadow: none !important; transform: none !important;
+  background: none !important; color: var(--wp-menu-text) !important;
+  font-size: 14px !important; font-weight: 400 !important; line-height: 1.3; text-decoration: none;
+}
+html.wp-admin-shell .adm-sidebar .adm-sidebar-item::before { display: none !important; }
+html.wp-admin-shell .adm-sidebar .adm-sidebar-item svg { width: 20px !important; height: 20px !important; color: var(--wp-menu-icon) !important; opacity: 1 !important; flex: none; }
+html.wp-admin-shell .adm-sidebar .adm-sidebar-item span { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html.wp-admin-shell .adm-sidebar .adm-sidebar-item:hover,
+html.wp-admin-shell .adm-sidebar .adm-nav-group:hover > .adm-nav-top,
+html.wp-admin-shell .adm-sidebar .adm-sidebar-item:focus-visible {
+  background: var(--wp-menu-dark) !important; color: var(--wp-highlight) !important; outline: none;
+}
+html.wp-admin-shell .adm-sidebar .adm-sidebar-item:hover svg,
+html.wp-admin-shell .adm-sidebar .adm-nav-group:hover > .adm-nav-top svg { color: var(--wp-highlight) !important; }
+
+/* Current top-level item: highlight + the little notch pointing at the page. */
+html.wp-admin-shell .adm-sidebar .adm-sidebar-item.is-current:not(.adm-nav-child),
+html.wp-admin-shell .adm-sidebar .adm-nav-group.has-current > .adm-nav-top {
+  background: var(--wp-highlight) !important; color: #fff !important;
+}
+html.wp-admin-shell .adm-sidebar .adm-sidebar-item.is-current:not(.adm-nav-child) svg,
+html.wp-admin-shell .adm-sidebar .adm-nav-group.has-current > .adm-nav-top svg { color: #fff !important; }
+html.wp-admin-shell .adm-sidebar .adm-sidebar-item.is-current:not(.adm-nav-child)::after,
+html.wp-admin-shell .adm-sidebar .adm-nav-group.has-current > .adm-nav-top::after {
+  content: ""; position: absolute; right: 0; top: 50%; margin-top: -8px;
+  border: 8px solid transparent; border-right-color: var(--wp-page);
+}
+
+/* Submenus: inline under the current group, flyout for the others. */
+html.wp-admin-shell .adm-nav-group { position: relative; }
+html.wp-admin-shell .adm-nav-children {
+  display: none; margin: 0 !important; padding: 7px 0 !important; border: 0 !important;
+  background: var(--wp-menu-dark) !important; box-shadow: none !important;
+}
+html.wp-admin-shell .adm-nav-group.has-current > .adm-nav-children { display: block; }
+html.wp-admin-shell .adm-sidebar .adm-nav-child {
+  min-height: 0 !important; padding: 5px 12px !important; font-size: 13px !important;
+  color: var(--wp-sub-text) !important; background: none !important;
+}
+html.wp-admin-shell .adm-sidebar .adm-nav-child:hover,
+html.wp-admin-shell .adm-sidebar .adm-nav-child:focus-visible { color: var(--wp-highlight) !important; background: none !important; }
+html.wp-admin-shell .adm-sidebar .adm-nav-child.is-current { color: #fff !important; font-weight: 600 !important; }
+@media (min-width: 981px) {
+  html.wp-admin-shell .adm-nav-group:not(.has-current):hover > .adm-nav-children,
+  html.wp-admin-shell .adm-nav-group:not(.has-current):focus-within > .adm-nav-children {
+    display: block; position: absolute; left: 100%; top: 0; width: 160px; z-index: 9991;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, .2) !important;
+  }
+  html.wp-admin-shell .adm-nav-group:not(.has-current):hover > .adm-nav-top::after,
+  html.wp-admin-shell .adm-nav-group:not(.has-current):focus-within > .adm-nav-top::after {
+    content: ""; position: absolute; right: 0; top: 50%; margin-top: -8px;
+    border: 8px solid transparent; border-right-color: var(--wp-menu-dark);
+  }
+}
+html.wp-admin-shell .adm-nav-chevron { display: none !important; }
+
+/* Foot: dark mode switch + "Collapse menu"; Log Out lives in the top bar. */
+html.wp-admin-shell .adm-sidebar-foot {
+  margin: 0 !important; padding: 6px 0 10px !important; border: 0 !important; background: none !important;
+  display: flex !important; flex-direction: column; gap: 0 !important;
+}
+html.wp-admin-shell .adm-sidebar-foot #admLogout { display: none !important; }
+html.wp-admin-shell .adm-sidebar-foot .adm-theme-toggle,
+html.wp-admin-shell .adm-sidebar-foot .wp-collapse {
+  display: flex !important; align-items: center; gap: 8px; width: 100% !important; height: 34px !important;
+  margin: 0 !important; padding: 0 10px !important; border: 0 !important; border-radius: 0 !important;
+  background: none !important; color: #a7aaad !important; font: inherit !important; font-size: 13px !important;
+  box-shadow: none !important; cursor: pointer; justify-content: flex-start !important;
+}
+html.wp-admin-shell .adm-sidebar-foot .adm-theme-toggle:hover,
+html.wp-admin-shell .adm-sidebar-foot .wp-collapse:hover { color: var(--wp-highlight) !important; }
+html.wp-admin-shell .adm-sidebar-foot svg { width: 18px; height: 18px; flex: none; }
+html.wp-admin-shell .adm-sidebar-foot .adm-theme-label { flex: 1 1 auto; text-align: left; }
+
+/* Collapsed (desktop): icons only, labels in flyouts. */
+@media (min-width: 981px) {
+  html.wp-admin-shell .adm-sidebar.is-collapsed { width: 36px !important; }
+  html.wp-admin-shell .adm-sidebar.is-collapsed .adm-sidebar-item { padding: 0 8px !important; }
+  html.wp-admin-shell .adm-sidebar.is-collapsed .adm-sidebar-item > span,
+  html.wp-admin-shell .adm-sidebar.is-collapsed .wp-collapse-label,
+  html.wp-admin-shell .adm-sidebar.is-collapsed .adm-theme-label,
+  html.wp-admin-shell .adm-sidebar.is-collapsed .adm-theme-track { display: none !important; }
+  html.wp-admin-shell .adm-sidebar.is-collapsed .adm-nav-group.has-current > .adm-nav-children { display: none; }
+  html.wp-admin-shell .adm-sidebar.is-collapsed .adm-nav-group:hover > .adm-nav-children,
+  html.wp-admin-shell .adm-sidebar.is-collapsed .adm-nav-group:focus-within > .adm-nav-children {
+    display: block; position: absolute; left: 100%; top: 0; width: 160px; z-index: 9991;
+  }
+  html.wp-admin-shell .adm-sidebar.is-collapsed .adm-nav-child > span { display: block !important; }
+  html.wp-admin-shell .adm-sidebar.is-collapsed .wp-collapse svg { transform: scaleX(-1); }
+}
+
+/* ---------- Content: flat white boxes, WordPress headings and buttons ---------- */
+html.wp-admin-shell .pn-head,
+html.wp-admin-shell .adm-topbar,
+html.wp-admin-shell .pl-admin-header {
+  background: transparent !important; border: 0 !important; border-radius: 0 !important;
+  box-shadow: none !important; padding: 9px 0 4px !important; margin: 0 0 10px !important;
+  position: relative !important; top: auto !important;
+}
+html.wp-admin-shell .adm-page-kicker,
+html.wp-admin-shell .pl-breadcrumb,
+html.wp-admin-shell .adm-eyebrow { display: none !important; }
+html.wp-admin-shell .adm-heading h1,
+html.wp-admin-shell .pn-head h1,
+html.wp-admin-shell .adm-topbar h1,
+html.wp-admin-shell .pl-admin-header h1,
+html.wp-admin-shell .pm-wp-title {
+  font-size: 23px !important; font-weight: 400 !important; line-height: 1.3 !important;
+  letter-spacing: 0 !important; color: var(--wp-text) !important; font-family: inherit !important; margin: 0 !important;
+}
+html.wp-admin-shell .adm-card,
+html.wp-admin-shell .adm-panel,
+html.wp-admin-shell .pn-card,
+html.wp-admin-shell .oi-panel,
+html.wp-admin-shell .pl-card,
+html.wp-admin-shell .pm-wp-box,
+html.wp-admin-shell .pm-wp-list,
+html.wp-admin-shell .adm-quick-card,
+html.wp-admin-shell .adm-stat,
+html.wp-admin-shell .wo-box,
+html.wp-admin-shell .om-panel,
+html.wp-admin-shell .sa-panel,
+html.wp-admin-shell .pn-table-wrap,
+html.wp-admin-shell .adm-table-wrap,
+html.wp-admin-shell .wo-advanced-filters {
+  background: #fff !important; border: 1px solid var(--wp-box-line) !important; border-radius: 0 !important;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, .04) !important; transform: none !important;
+}
+html.wp-admin-shell .pn-toolbar:not(.wc-tablenav) { border-radius: 0 !important; box-shadow: none !important; }
+
+/* Links and buttons */
+html.wp-admin-shell .adm-main a:not([class]),
+html.wp-admin-shell .pn-main a:not([class]),
+html.wp-admin-shell .pl-main a:not([class]) { color: var(--wp-link); }
+html.wp-admin-shell .pn-btn,
+html.wp-admin-shell .adm-btn,
+html.wp-admin-shell .pl-btn {
+  min-height: 30px; padding: 0 10px !important; border-radius: 3px !important;
+  border: 1px solid var(--wp-primary) !important; background: #fff !important; color: var(--wp-primary) !important;
+  font-size: 13px !important; font-weight: 400 !important; line-height: 2.15 !important;
+  box-shadow: none !important; transform: none !important; text-shadow: none !important;
+}
+html.wp-admin-shell .pn-btn:hover,
+html.wp-admin-shell .adm-btn:hover,
+html.wp-admin-shell .pl-btn:hover { background: #f6f7f7 !important; }
+html.wp-admin-shell .pn-btn-primary,
+html.wp-admin-shell .adm-btn-primary,
+html.wp-admin-shell .pl-btn-primary {
+  background: var(--wp-primary) !important; border-color: var(--wp-primary) !important; color: #fff !important;
+}
+html.wp-admin-shell .pn-btn-primary:hover,
+html.wp-admin-shell .adm-btn-primary:hover,
+html.wp-admin-shell .pl-btn-primary:hover { background: #46403c !important; border-color: #46403c !important; }
+html.wp-admin-shell .adm-sidebar .pn-btn,
+html.wp-admin-shell .adm-sidebar .adm-btn { all: revert-layer; }
+html.wp-admin-shell input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]),
+html.wp-admin-shell select,
+html.wp-admin-shell textarea {
+  border-radius: 4px !important; border-color: #8c8f94 !important; box-shadow: none !important;
+}
+html.wp-admin-shell input:focus,
+html.wp-admin-shell select:focus,
+html.wp-admin-shell textarea:focus { border-color: var(--wp-link) !important; box-shadow: 0 0 0 1px var(--wp-link) !important; outline: 2px solid transparent; }
+
+/* ---------- Phones / tablets: WordPress-style drawer under a 46px admin bar ---------- */
+@media (max-width: 980px) {
+  html.wp-admin-shell { --wp-bar-h: 46px; }
+  .wp-adminbar { font-size: 14px; }
+  .wp-ab-menu { display: block; }
+  .wp-ab-menu button { width: 52px; justify-content: center; padding: 0; }
+  .wp-ab-menu svg { width: 26px; height: 26px; color: #f0f0f1; }
+  .wp-ab-site span, .wp-ab-link, .wp-ab-user > span:first-child { display: none; }
+  .wp-ab-new span { display: none; }
+  .wp-adminbar a, .wp-adminbar button { min-width: 44px; justify-content: center; }
+  html.wp-admin-shell .pn-menu-btn,
+  html.wp-admin-shell #admMenuBtn,
+  html.wp-admin-shell .adm-menu-btn { display: none !important; }
+  html.wp-admin-shell .adm-sidebar {
+    width: 190px !important; height: calc(100vh - var(--wp-bar-h)) !important; transform: translateX(-100%); transition: transform .2s ease;
+    overflow-y: auto !important;
+  }
+  html.wp-admin-shell .adm-sidebar.is-open { transform: translateX(0) !important; }
+  html.wp-admin-shell .adm-sidebar .adm-sidebar-brand {
+    display: flex !important; justify-content: flex-end; padding: 6px 8px 0 !important; margin: 0 !important;
+    border: 0 !important; background: none !important; min-height: 0;
+  }
+  html.wp-admin-shell .adm-sidebar .adm-sidebar-brand > :not(.adm-sidebar-close) { display: none !important; }
+  html.wp-admin-shell .adm-sidebar .adm-sidebar-close { color: #fff !important; width: 44px; height: 44px; }
+  html.wp-admin-shell .adm-sidebar .adm-sidebar-item { min-height: 44px; }
+  html.wp-admin-shell .adm-sidebar .adm-nav-child { min-height: 40px !important; display: flex !important; align-items: center; }
+  html.wp-admin-shell .adm-sidebar .adm-sidebar-item.is-current::after,
+  html.wp-admin-shell .adm-sidebar .adm-nav-top::after { display: none !important; }
+  html.wp-admin-shell .adm-sidebar-foot .wp-collapse { display: none !important; }
+  html.wp-admin-shell .adm-sidebar-backdrop { top: var(--wp-bar-h) !important; }
+  html.wp-admin-shell .adm-main,
+  html.wp-admin-shell .pn-main,
+  html.wp-admin-shell .pl-main,
+  html.wp-admin-shell .om-workspace > .pn-main { padding: 10px 12px 32px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.wp-admin-shell .adm-sidebar { transition: none; }
+}
+
+/* ---------- Full-height menu column, page padding, flat WordPress boxes everywhere ---------- */
+@media (min-width: 981px) {
+  html.wp-admin-shell .adm-sidebar { height: calc(100vh - var(--wp-bar-h)) !important; max-height: none !important; }
+  /* WordPress paints the menu colour down the whole left edge, even past the last item. */
+  html.wp-admin-shell body::before {
+    content: ""; position: fixed; top: 0; bottom: 0; left: 0; width: var(--wp-menu-w);
+    background: var(--wp-menu); z-index: 0; pointer-events: none;
+  }
+  html.wp-admin-shell body:has(.adm-sidebar.is-collapsed)::before { width: 36px; }
+}
+html.wp-admin-shell .adm-sidebar .adm-nav-children { border-radius: 0 !important; }
+html.wp-admin-shell .adm-content > .adm-topbar { padding: 9px 20px 4px !important; margin: 0 !important; }
+
+/* Square corners and no floating shadows inside the content area (buttons 3px, fields 4px, like wp-admin). */
+html.wp-admin-shell :is(.adm-main, .pn-main, .pl-main, .adm-topbar, .pl-admin-header, .pn-head) :is(div, section, article, aside, details, header, footer, ul, li, table, figure, nav, form, fieldset, dialog, label):not(.wc-status):not([class*="avatar"]):not([class*="dot"]):not([class*="badge"]):not([class*="pill"]):not([class*="chip"]):not([class*="toggle"]):not([class*="switch"]):not([class*="track"]):not([class*="spinner"]) {
+  border-radius: 0 !important;
+}
+html.wp-admin-shell :is(.adm-main, .pn-main, .pl-main) :is(div, section, article, aside, details, li, figure, a, table) {
+  box-shadow: none !important;
+}
+html.wp-admin-shell :is(.adm-main, .pn-main, .pl-main, .adm-topbar, .pl-admin-header, .pn-head) :is(button, .pn-btn, .adm-btn, .pl-btn, a[class*="btn"]):not(.adm-theme-toggle) {
+  border-radius: 3px !important; box-shadow: none !important; transform: none !important;
+}
+html.wp-admin-shell :is(.adm-main, .pn-main, .pl-main, .adm-topbar, .pl-admin-header, .pn-head) :is(input, select, textarea) { border-radius: 4px !important; }
+
+/* Cards and panels on the dashboard and other pages: white box with the wp-admin border. */
+html.wp-admin-shell .adm-main :is([class*="-card"], [class*="-panel"], [class*="-box"], [class*="-tile"], [class*="-widget"]):not(button):not(a[class*="btn"]) {
+  background-color: #fff; border-color: var(--wp-box-line) !important;
+}
+
+/* Primary buttons: WordPress dark coffee (matches the menu) instead of the old navy. */
+html.wp-admin-shell :is(.adm-main, .pn-main, .pl-main, .adm-topbar, .pl-admin-header, .pn-head) :is(.pn-btn-primary, .adm-btn-primary, .pl-btn-primary, .is-primary, .btn-primary, [class*="primary"]):is(button, a) {
+  background: var(--wp-primary) !important; border-color: var(--wp-primary) !important; color: #fff !important;
+}
+html.wp-admin-shell :is(.adm-main, .pn-main, .pl-main) :is(a, button):is([class*="card"], [class*="action"], [class*="todo"], [class*="kpi"], [class*="tile"], [class*="quick"]):not([class*="btn"]) {
+  border-radius: 0 !important; box-shadow: none !important; transform: none !important;
+}
+html.wp-admin-shell :is(.adm-main, .pn-main, .pl-main) :is(button, a):is(.active, .is-active, [aria-pressed="true"], [aria-selected="true"]):not(.pn-tab):not([role="tab"]) {
+  background: var(--wp-primary) !important; border-color: var(--wp-primary) !important; color: #fff !important;
+}
+
+/* ---------- Live support page (its own ".app" grid instead of .adm-shell) ---------- */
+html.wp-admin-shell body > .app { display: block !important; min-height: calc(100vh - var(--wp-bar-h)); }
+html.wp-admin-shell .adm-sidebar > .adm-brand { display: none !important; }
+@media (min-width: 981px) {
+  html.wp-admin-shell body > .app > .main { margin-left: var(--wp-menu-w) !important; min-width: 0; }
+  html.wp-admin-shell body > .app > .main > .topbar { position: relative !important; top: auto !important; }
+}
+@media (max-width: 980px) {
+  html.wp-admin-shell body.menu-open .adm-sidebar { transform: translateX(0) !important; }
+  html.wp-admin-shell body > .app > .main > .topbar .menu-btn { display: none !important; }
+}
+
+/* Phones: keep tap targets at least 44px tall (WordPress does the same on small screens). */
+@media (max-width: 980px) {
+  html.wp-admin-shell :is(.adm-main, .pn-main, .pl-main, .adm-topbar, .pl-admin-header, .pn-head) :is(button, .pn-btn, .adm-btn, .pl-btn, a[class*="btn"]) {
+    min-height: 44px !important;
+  }
+}

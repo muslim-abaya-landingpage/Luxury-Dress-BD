@@ -40,7 +40,9 @@
     });
     sidebar.querySelectorAll('.adm-sidebar-item').forEach(function (link) { link.title = link.textContent.trim(); });
     sidebar.querySelectorAll('.adm-nav-group').forEach(function (group) {
-      group.querySelector('summary').addEventListener('click', function (event) {
+      var summary = group.querySelector('summary');
+      if (!summary) return; // WordPress-style menu (admin-wp.js) uses plain links instead of <details>.
+      summary.addEventListener('click', function (event) {
         if (!mobile.matches && sidebar.classList.contains('is-collapsed')) {
           event.preventDefault();
           setCollapsed(false); save('ma-admin-sidebar-collapsed', 'false');
