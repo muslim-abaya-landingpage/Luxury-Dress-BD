@@ -1,0 +1,59 @@
+name: IndexNow
+
+# After each deploy, tells Bing (and other IndexNow search engines) exactly which public pages changed —
+# new products, prices, categories — so they are re-read within hours instead of days. Free; no secrets.
+# Script: scripts/indexnow-submit.mjs (only URLs from sitemap.xml are sent). Key file: <key>.txt at the root.
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+      - "apps-script/**"
+      - "tests/**"
+      - ".github/**"
+      - "landing-shop/**"
+  workflow_dispatch:
+    inputs:
+      all:
+        description: "Send every page in sitemap.xml"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: indexnow
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 50
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Wait until this commit is live on muslimabaya.com
+        run: |
+          for i in $(seq 1 40); do
+            live=$(curl -fsS "https://muslimabaya.com/live-build.json?cb=$RANDOM" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{console.log(JSON.parse(s).sha||"")}catch(e){console.log("")}})')
+            if [ "$live" = "$GITHUB_SHA" ]; then echo "Live."; exit 0; fi
+            sleep 30
+          done
+          echo "::warning::Deploy not confirmed after 20 minutes; sending anyway."
+      - name: Send changed pages
+        env:
+          BEFORE: ${{ github.event.before }}
+          SEND_ALL: ${{ inputs.all }}
+        run: |
+          if [ "$SEND_ALL" = "true" ] || [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            node scripts/indexnow-submit.mjs --all
+          else
+            node scripts/indexnow-submit.mjs "$BEFORE" "$GITHUB_SHA"
+          fi
