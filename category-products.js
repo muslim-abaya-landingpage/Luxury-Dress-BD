@@ -1,13 +1,13 @@
 /**
  * প্রোডাক্ট ডেটা — product-manager.html থেকে এডিট করুন
- * আপডেট: 2026-11-05
+ * আপডেট: 2026-11-06
  */
 window.CATEGORY_PRODUCTS = {
   abaya: [
     {
       id: "ABY-MAROON-1",
       name: "Maroon Abaya Set",
-      image: "/images/opt/Maroon-Abaya-Set.webp",
+      image: "/images/Maroon Abaya Set...jpeg",
       price: 1250,
       stock: 12,
       color: "maroon",
@@ -92,7 +92,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "ABY-BLACK-6",
       name: "Black Abaya Set - Side",
-      image: "/images/opt/Black.webp",
+      image: "/images/Black.jpeg",
       price: 999,
       color: "black",
       colorLabel: "Classic Black",
@@ -167,7 +167,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "ABY-VERSACE-9",
       name: "Versace Border Premium Abaya Set",
-      image: "/images/opt/Versace-Border-Premium-Abaya-Set.webp",
+      image: "/images/Versace Border Premium Abaya Set...jpg",
       images: ["/images/gallery/aby-versace-9-1792180650386-g1.webp", "/images/gallery/aby-versace-9-1792180660161-g2.webp", "/images/gallery/aby-versace-9-1792180671387-g3.webp", "/images/gallery/aby-versace-9-1792180680076-g4.webp"],
       price: 2050,
       color: "black",
@@ -189,8 +189,8 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "ABY-FLORAL-10",
       name: "Premium Floral Motif Abaya Set",
-      image: "/images/opt/Premium-Floral-Motif-Abaya-Set.webp",
-      images: ["/images/opt/Premium-Floral-Motif-Abaya-Set.webp", "/images/opt/Premium-Floral-Motif-Abaya-Set.webp"],
+      image: "/images/Premium-Floral-Motif-Abaya-Set...jpeg",
+      images: ["/images/opt/Premium-Floral-Motif-Abaya-Set.webp"],
       price: 1850,
       color: "black",
       colorLabel: "Classic Black",
@@ -210,7 +210,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "ABY-FLORAL-11",
       name: "Premium Floral Motif Abaya Set - Back",
-      image: "/images/opt/Premium-Floral-Motif-Abaya-Set.webp",
+      image: "/images/Premium-Floral-Motif-Abaya-Set..jpeg",
       price: 1850,
       color: "black",
       colorLabel: "Classic Black",
@@ -230,7 +230,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "ABY-FLORAL-12",
       name: "Premium Floral Motif Abaya Set - Side",
-      image: "/images/opt/Premium-Floral-Motif-Abaya-Set.webp",
+      image: "/images/Premium-Floral-Motif-Abaya-Set.jpeg",
       price: 1850,
       color: "black",
       colorLabel: "Classic Black",
@@ -250,8 +250,8 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "ABY-BUTTERFLY-13",
       name: "Butterfly Abaya Set",
-      image: "/images/opt/Butterfly-Ababa.webp",
-      images: ["/images/opt/Butterfly-Ababa.webp", "/images/opt/Butterfly-Ababa.webp", "/images/opt/Butterfly-Ababa.webp"],
+      image: "/images/Butterfly-Ababa....jpg",
+      images: ["/images/opt/Butterfly-Ababa.webp"],
       price: 1350,
       color: "black",
       colorLabel: "Classic Black",
@@ -333,7 +333,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "ABY-BUTTERFLY-16",
       name: "Butterfly Abaya Set - Detail",
-      image: "/images/opt/Butterfly-Ababa.webp",
+      image: "/images/Butterfly-Ababa.jpg",
       price: 1350,
       color: "black",
       colorLabel: "Classic Black",
@@ -402,7 +402,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "DR-02",
       name: "Baby Pink Floral Print Women's Two-Piece Set",
-      image: "/images/opt/Baby-Pink-Floral-Print.webp",
+      image: "/images/Baby-Pink-Floral-Print.jpeg",
       price: 550,
       color: "pink",
       colorLabel: "Baby Pink Floral",
@@ -419,7 +419,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "DR-03",
       name: "Black Rose Floral Print Women's Two-Piece Set",
-      image: "/images/opt/Black-Base-Rose-Floral.webp",
+      image: "/images/Black-Base-Rose-Floral.jpeg",
       price: 550,
       color: "black",
       colorLabel: "Black / Rose Floral",
@@ -436,7 +436,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "DR-4",
       name: "Black White Polka Dot Women's Two-Piece Set",
-      image: "/images/opt/Black-White-Polka-Dots.webp",
+      image: "/images/Black-White-Polka-Dots.jpeg",
       images: ["https://images.muslimabaya.com/images/uploads/dr-4-1793730936367-g1-ff9273e79008af62bf73.webp", "https://images.muslimabaya.com/images/uploads/dr-4-1793730936423-g2-058271df63b7d43207d9.webp", "https://images.muslimabaya.com/images/uploads/dr-4-1793730936465-g3-bd8cc279119d221fb6e7.webp", "https://images.muslimabaya.com/images/uploads/dr-4-1793730936503-g4-b64bc8d51b30f101e0a2.webp", "https://images.muslimabaya.com/images/uploads/dr-4-1793730936548-g5-751e054ee7e4a06b7516.webp", "https://images.muslimabaya.com/images/uploads/dr-4-1793730936587-g6-b5ed4eef97ffb66d1b81.webp"],
       price: 990,
       stock: 12,
@@ -465,7 +465,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "DR-5",
       name: "Royal Blue Golden Floral Print Women's Two-Piece Set",
-      image: "/images/opt/Royal-Blue-Golden-Floral-Print.webp",
+      image: "/images/Royal-Blue-Golden-Floral-Print.jpeg",
       price: 550,
       color: "blue",
       colorLabel: "Royal Blue / Golden Floral",
@@ -624,7 +624,7 @@ window.CATEGORY_PRODUCTS = {
     {
       id: "DR-12",
       name: "Premium Floral Women's Co-ord Set",
-      image: "/images/opt/Gowns/black-cream-floral-womens-two-piece-dress.webp",
+      image: "/images/Gowns/black-cream-floral-womens-two-piece-dress.jpg",
       price: 650,
       stock: 0,
       color: "multi-color",
