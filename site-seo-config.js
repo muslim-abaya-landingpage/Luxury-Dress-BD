@@ -34,10 +34,6 @@ window.SITE_SEO = {
       description:
         "Muslim Abaya সম্পর্কে জানুন — বাংলাদেশে প্রিমিয়াম আবায়া ও মডেস্ট ফ্যাশন। ক্যাশ অন ডেলিভারি, সারাদেশে শিপিং।"
     },
-    "/shopping-guide": {
-      title: "কেনাকাটার গাইড — Full Set, কাপড়ের যত্ন ও এক্সচেঞ্জ | Muslim Abaya",
-      description: "Muslim Abaya থেকে কেনার আগে জেনে নিন: Full Set ও Only Abaya-র পার্থক্য, কাপড় বাছাই ও যত্ন, এবং পণ্য না মিললে ৩ দিনের মধ্যে কীভাবে এক্সচেঞ্জ চাইবেন।"
-    },
     "/order-track": {
       title: "অর্ডার ট্র্যাক করুন | Muslim Abaya",
       description: "আপনার মোবাইল নম্বর ও অর্ডার আইডি দিয়ে Muslim Abaya অর্ডারের সর্বশেষ স্ট্যাটাস ও কুরিয়ার তথ্য দেখুন।",

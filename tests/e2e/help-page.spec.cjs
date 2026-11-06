@@ -15,21 +15,6 @@ test('help page: every FAQ shown is in the structured data, links work, no sidew
   expect((await request.get(new URL(og).pathname)).status()).toBe(200);
 });
 
-test('shopping guide: site header/footer, no size section, three dropdown topics that match the structured data', async ({ page }) => {
-  await page.route(/facebook|gtag|doubleclick|cloudflareinsights|googletagmanager|clarity|tiktok|script\.google/, (r) => r.abort());
-  await page.goto('/shopping-guide.html');
-  await expect(page.locator('#site-footer-mount *').first()).toBeAttached();
-  await expect(page.locator('#sgForm, #size')).toHaveCount(0);
-  await expect(page.locator('.sg-faq details')).toHaveCount(3);
-  const data = JSON.parse(await page.locator('script[type="application/ld+json"]').first().textContent());
-  const faq = data['@graph'].find((n) => n['@type'] === 'FAQPage').mainEntity.map((q) => q.name);
-  expect(faq).toEqual((await page.locator('.sg-faq summary').allInnerTexts()).map((t) => t.trim()));
-  await page.click('#exchange summary');
-  await page.click('#set summary');
-  await expect(page.locator('#exchange')).not.toHaveAttribute('open', '');
-  await expect(page.locator('#set')).toHaveAttribute('open', '');
-});
-
 test('dropdowns open and close smoothly (height animates) and one stays open per group', async ({ page }) => {
   await page.route(/facebook|gtag|doubleclick|cloudflareinsights|googletagmanager|clarity|tiktok|script\.google/, (r) => r.abort());
   await page.goto('/help.html');

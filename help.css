@@ -1,5 +1,5 @@
 /* Help & FAQ page — flat, clean, phone first. */
-/* Type scale (shared by Help, Shopping guide, Order tracking): 32/26 page title, 20 section,
+/* Type scale (shared by Help and Order tracking): 32/26 page title, 20 section,
    17 question, 16 body, 15 labels & buttons, 14 small text, 13 kicker. */
 :root { --hp-ink: #151515; --hp-muted: #646464; --hp-line: #e6e4e0; --hp-soft: #f7f6f3; --hp-gold: #9a7440; --hp-green: #1f7a45; }
 body.help-page { margin: 0; background: #fff; color: var(--hp-ink); font-family: "Hind Siliguri", "Inter", system-ui, sans-serif; }
@@ -80,23 +80,6 @@ body.help-page { margin: 0; background: #fff; color: var(--hp-ink); font-family:
   .hp-faq summary { font-size: 16px; }
 }
 @media (prefers-reduced-motion: reduce) { .hp-faq summary::after, .hp-tile { transition: none; } }
-
-/* ---------- Shopping guide ---------- */
-.sg-faq { padding-top: 6px; }
-.sg-faq details { scroll-margin-top: calc(var(--site-header-h, 0px) + 60px); }
-.sg-list { margin: 0; padding-left: 20px; }
-.sg-list li { margin: 0 0 10px; }
-.sg-list--num { padding-left: 22px; }
-.sg-tip { margin: 6px 0 0 !important; padding: 10px 12px; background: var(--hp-soft); font-size: 16px; }
-.sg-links { margin-top: 10px !important; }
-.sg-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 0 14px; }
-.sg-compare div { padding: 12px 14px; border: 1px solid var(--hp-line); }
-.sg-compare strong { display: block; margin-bottom: 4px; font-size: 16px; }
-.sg-compare p { margin: 0; color: var(--hp-muted); font-size: 16px; line-height: 1.5; }
-
-@media (max-width: 420px) {
-  .sg-compare { grid-template-columns: 1fr; }
-}
 
 /* Smooth dropdown: the answer area animates its height (details-smooth.js). */
 .hp-faq details > summary { transition: color .2s ease; }

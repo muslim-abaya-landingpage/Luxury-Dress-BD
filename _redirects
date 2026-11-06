@@ -1,3 +1,6 @@
+# Removed guide: preserve old links by sending visitors to the support hub.
+/shopping-guide       /help   301
+/shopping-guide.html  /help   301
 # Homepage (permanent)
 /index.html   /   301
 

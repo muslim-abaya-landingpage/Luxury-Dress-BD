@@ -153,7 +153,15 @@ const dr01=catalog.products.find(p=>p.id==='DR-01');
 assert.equal(c.opsLinePrice_({qty:1,size:drVariant},dr01),dr01.price);
 pd.state.category='tops-kurti';pd.state.product={id:'TEST-KURTI'};pd.state.selectedSize='38';assert.equal(pd.selectedVariant(),'38');
 for(const file of ['apps-script/Code.gs','apps-script/AdminOrders.gs','apps-script/Operations.gs','admin-operations.js','product-page.js','custom-size-modal.js','category-renderer.js','reviews-widget.js'])new vm.Script(fs.readFileSync(path.join(root,file),'utf8'),{filename:file});
-for(const file of ['admin-operations.html','help.html','product.html','shopping-guide.html'])for(const m of fs.readFileSync(path.join(root,file),'utf8').matchAll(/<script(?:\s([^>]*))?>([\s\S]*?)<\/script\b[^>]*>/gi)){if(/application\/ld\+json/.test(m[1]||'')){JSON.parse(m[2]);}else new vm.Script(m[2]);}
+for(const file of ['admin-operations.html','help.html','product.html'])for(const m of fs.readFileSync(path.join(root,file),'utf8').matchAll(/<script(?:\s([^>]*))?>([\s\S]*?)<\/script\b[^>]*>/gi)){if(/application\/ld\+json/.test(m[1]||'')){JSON.parse(m[2]);}else new vm.Script(m[2]);}
+const retiredGuideRedirects=fs.readFileSync(path.join(root,'_redirects'),'utf8');
+assert.match(retiredGuideRedirects,/^\/shopping-guide\s+\/help\s+301$/m);
+assert.match(retiredGuideRedirects,/^\/shopping-guide\.html\s+\/help\s+301$/m);
+assert.equal(fs.existsSync(path.join(root,'shopping-guide.html')),false);
+assert.doesNotMatch(fs.readFileSync(path.join(root,'site-header-config.js'),'utf8'),/shopping-guide/);
+assert.doesNotMatch(fs.readFileSync(path.join(root,'help.html'),'utf8'),/shopping-guide/);
+assert.doesNotMatch(fs.readFileSync(path.join(root,'sitemap.xml'),'utf8'),/shopping-guide/);
+for(const file of fs.readdirSync(path.join(root,'product')).filter(f=>f.endsWith('.html')))assert.doesNotMatch(fs.readFileSync(path.join(root,'product',file),'utf8'),/shopping-guide/);
 console.log('PASS: '+catalog.products.length+' catalog products, price/type/size/custom validation, incomplete money, profit and settlement, owner auth, append-only revisions, duplicate retries, return lifecycle, quantity limits, syntax and JSON-LD.');
 
 const backend=fs.readFileSync(path.join(root,'apps-script/Code.gs'),'utf8');
