@@ -367,6 +367,7 @@ function admOrderListSummary_(order) {
     adminNote: order.adminNote,
     assignedTo: order.assignedTo,
     courier: order.courier,
+    source: order.source,
     blocked: order.blocked
   };
 }

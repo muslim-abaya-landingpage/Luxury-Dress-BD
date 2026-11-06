@@ -27,6 +27,7 @@
 <link rel="stylesheet" href="order-management-workspace.css?v=20261104-v1">
 <link rel="stylesheet" href="admin-responsive.css?v=1">
 <link rel="stylesheet" href="admin-theme.css?v=1">
+<link rel="stylesheet" href="admin-orders-wc-list.css?v=1">
 <link rel="manifest" href="/admin-manifest.webmanifest">
 <meta name="theme-color" content="#1b2a41">
 <link rel="apple-touch-icon" href="/images/admin/admin-icon-192.png">
@@ -73,46 +74,37 @@
         <button type="button" class="adm-btn adm-btn-secondary" id="admLogout">Log Out</button>
       </div>
     </aside>
-    <div class="om-workspace">
-      <aside class="om-category-sidebar" aria-label="Order categories">
-        <div class="om-category-heading">
-          <span class="om-eyebrow">WORKSPACE</span>
-          <h2>Order Management</h2>
-          <p>Manage every order from one place.</p>
-        </div>
-        <div class="om-category-label">ORDER STATUS</div>
-        <div class="om-status-host" id="omStatusHost" aria-label="Filter orders by status"></div>
-        <div class="om-sidebar-foot">
-          <a class="pn-btn" href="admin-operations.html">Finance &amp; Returns <span aria-hidden="true">→</span></a>
-          <p>Choose a status to filter the order list.</p>
-        </div>
-      </aside>
+    <div class="om-workspace wc-list">
       <main class="pn-main">
       <div class="pn-head">
         <button type="button" class="pn-btn pn-menu-btn" id="pnMenuBtn" aria-label="Menu">☰</button>
-        <div class="adm-heading"><span class="adm-page-kicker">Muslim Abaya / Orders</span><h1>Order Management</h1></div>
+        <div class="adm-heading"><span class="adm-page-kicker">Muslim Abaya / Orders</span><h1>Orders</h1></div>
+        <a class="pn-btn wc-add-order" href="admin-order-new.html" id="ordNewOrder">Add order</a>
         <span class="pn-spacer"></span>
         <span class="pn-note-muted" id="ordCount"></span>
-        <a class="pn-btn pn-btn-primary" href="admin-order-new.html" id="ordNewOrder">+ New Order</a>
+        <a class="pn-btn" href="admin-operations.html">Finance &amp; Returns</a>
         <button type="button" class="pn-btn" id="ordRefresh">Refresh</button>
       </div>
 
-      <section class="oi-panel" id="ordInsights" aria-labelledby="ordInsightsTitle" hidden>
-        <h2 id="ordInsightsTitle">Order Overview</h2>
-        <p class="oi-note" id="ordScope"></p>
-        <div class="oi-cards" id="ordFinance"></div>
-        <p class="oi-note">Order totals include charges; they do not represent profit or courier payouts.</p>
-        <div class="oi-controls">
-          <label for="ordIssueFilter">Review Queue</label>
-          <select id="ordIssueFilter"><option value="all">All Orders</option><option value="flagged">Needs Review</option></select>
-          <span class="oi-note" id="ordIssueCount" role="status" aria-live="polite"></span>
-        </div>
-        <details><summary>Review Guidance</summary><p class="oi-note">Open flagged orders to review. When IDs are missing or duplicated, refer to the source sheet row. An empty size does not always mean an error.</p></details>
-      </section>
-      <p><a class="pn-btn" href="admin-operations.html">Finance & Returns →</a></p><div class="pn-tabs" id="ordTabs"></div>
+      <div class="wc-subnav">
+        <div class="pn-tabs wc-status-links" id="ordTabs" aria-label="Filter orders by status"></div>
+        <form class="wc-search-box" id="ordSearchForm" role="search" onsubmit="return false">
+          <label class="wc-sr-only" for="ordSearch">Search orders</label>
+          <input class="pn-in" id="ordSearch" type="search" placeholder="Name, phone or order ID" autocomplete="off">
+          <button type="submit" class="pn-btn" id="ordSearchBtn">Search orders</button>
+        </form>
+      </div>
 
-      <div class="pn-toolbar wo-primary-toolbar">
-        <input class="pn-in" id="ordSearch" type="search" placeholder="Search loaded orders by customer, phone or order ID…" autocomplete="off">
+      <div class="pn-toolbar wo-primary-toolbar wc-tablenav">
+        <label class="wc-sr-only" for="ordBulkAction">Bulk actions</label>
+        <select class="pn-sel wo-filter" id="ordBulkAction" aria-label="Bulk actions">
+          <option value="">Bulk actions</option>
+          <option value="print">প্যাকিং স্লিপ প্রিন্ট</option>
+          <option value="sync">Courier status sync</option>
+          <option value="send">Steadfast-এ পাঠান</option>
+          <option value="clear">বাছাই মুছুন</option>
+        </select>
+        <button type="button" class="pn-btn" id="ordBulkApply">Apply</button>
         <select class="pn-sel wo-filter" id="ordDateFilter" aria-label="Filter by date">
           <option value="all">All dates</option>
           <option value="today">Today</option>
@@ -120,55 +112,81 @@
           <option value="7d">Last 7 days</option>
           <option value="month">This month</option>
         </select>
+        <span class="pn-spacer"></span>
+        <span class="wc-displaying" id="ordIssueCountTop" aria-hidden="true"></span>
       </div>
-      <div class="pn-toolbar" style="align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0"><label for="ordCategoryFilter" style="font-weight:650">পণ্যের ক্যাটাগরি</label><select class="pn-sel wo-filter" id="ordCategoryFilter" aria-label="পণ্যের ক্যাটাগরি"><option value="all">সব ক্যাটাগরি</option><option value="abaya">আবায়া / বোরকা</option><option value="threepiece">থ্রি-পিস / সালোয়ার</option><option value="kurti">কুর্তি</option><option value="dress">ড্রেস / গাউন</option><option value="other">অন্যান্য / শনাক্ত হয়নি</option></select><select class="pn-sel wo-filter" id="ordProductFilter" aria-label="নির্দিষ্ট প্রোডাক্ট"><option value="all">সব প্রোডাক্ট</option></select><span class="sub">প্রোডাক্ট তালিকা বর্তমানে লোড করা অর্ডার থেকে তৈরি</span></div><details class="wo-advanced-filters" id="ordAdvancedFilters"><summary>More Filters <span aria-hidden="true">⌄</span></summary><div class="pn-toolbar wo-secondary-toolbar">
-        <select class="pn-sel wo-filter" id="ordCourierFilter" aria-label="Filter by courier">
-          <option value="all">All couriers</option>
-          <option value="sent">Sent to courier</option>
-          <option value="not-sent">Not sent</option>
-          <option value="Steadfast">Steadfast</option>
-          <option value="Pathao">Pathao</option>
-          <option value="RedX">RedX</option>
-          <option value="Paperfly">Paperfly</option>
-          <option value="Manual">Manual</option>
-        </select>
-        <select class="pn-sel wo-filter" id="ordPaymentFilter" aria-label="Filter by payment">
-          <option value="all">All payments</option>
-          <option value="cod">COD</option>
-          <option value="advance">Advance paid</option>
-          <option value="paid">Fully paid</option>
-          <option value="due">Due amount</option>
-        </select>
-        <select class="pn-sel wo-filter" id="ordAssignedFilter" aria-label="Filter by assigned staff">
-          <option value="all">All staff</option>
-          <option value="assigned">Assigned</option>
-          <option value="unassigned">Unassigned</option>
-        </select>
-        <select class="pn-sel wo-filter" id="ordPriorityFilter" aria-label="Order priority"><option value="all">All priorities</option><option value="attention">Needs attention</option><option value="unassigned">Unassigned orders</option><option value="courier">Courier pending</option></select>
-        <select class="pn-sel wo-filter" id="ordSort" aria-label="Sort orders"><option value="original">Default order</option><option value="value-desc">Highest value</option><option value="value-asc">Lowest value</option><option value="name">Customer A–Z</option></select>
-      </div></details>
-      <div class="wo-toolbar-actions"><button type="button" class="pn-btn pn-btn-sm" id="ordResetFilters">Clear Filters</button>
-        <button type="button" class="pn-btn pn-btn-sm wo-export-btn" id="ordExportFiltered">Export filtered CSV</button></div>
 
-      <p class="wo-workflow-hint">Tip: Start with <strong>Today</strong>, use <strong>Needs attention</strong> when reviewing issues, and open an Order ID to manage that order.</p>
-      <p id="ordersTableHint" class="wo-table-hint">↔ Order IDs remain visible. Scroll horizontally for courier, tracking and other details.</p>
+      <details class="wo-advanced-filters" id="ordAdvancedFilters"><summary>More Filters <span aria-hidden="true">⌄</span></summary>
+        <div class="pn-toolbar wo-secondary-toolbar">
+          <select class="pn-sel wo-filter" id="ordCategoryFilter" aria-label="পণ্যের ক্যাটাগরি"><option value="all">সব ক্যাটাগরি</option><option value="abaya">আবায়া / বোরকা</option><option value="threepiece">থ্রি-পিস / সালোয়ার</option><option value="kurti">কুর্তি</option><option value="dress">ড্রেস / গাউন</option><option value="other">অন্যান্য / শনাক্ত হয়নি</option></select>
+          <select class="pn-sel wo-filter" id="ordProductFilter" aria-label="নির্দিষ্ট প্রোডাক্ট"><option value="all">সব প্রোডাক্ট</option></select>
+          <select class="pn-sel wo-filter" id="ordCourierFilter" aria-label="Filter by courier">
+            <option value="all">All couriers</option>
+            <option value="sent">Sent to courier</option>
+            <option value="not-sent">Not sent</option>
+            <option value="Steadfast">Steadfast</option>
+            <option value="Pathao">Pathao</option>
+            <option value="RedX">RedX</option>
+            <option value="Paperfly">Paperfly</option>
+            <option value="Manual">Manual</option>
+          </select>
+          <select class="pn-sel wo-filter" id="ordPaymentFilter" aria-label="Filter by payment">
+            <option value="all">All payments</option>
+            <option value="cod">COD</option>
+            <option value="advance">Advance paid</option>
+            <option value="paid">Fully paid</option>
+            <option value="due">Due amount</option>
+          </select>
+          <select class="pn-sel wo-filter" id="ordAssignedFilter" aria-label="Filter by assigned staff">
+            <option value="all">All staff</option>
+            <option value="assigned">Assigned</option>
+            <option value="unassigned">Unassigned</option>
+          </select>
+          <select class="pn-sel wo-filter" id="ordPriorityFilter" aria-label="Order priority"><option value="all">All priorities</option><option value="attention">Needs attention</option><option value="unassigned">Unassigned orders</option><option value="courier">Courier pending</option></select>
+          <select class="pn-sel wo-filter" id="ordSort" aria-label="Sort orders"><option value="original">Default order</option><option value="value-desc">Highest value</option><option value="value-asc">Lowest value</option><option value="name">Customer A–Z</option></select>
+        </div>
+        <p class="wc-filter-note">প্রোডাক্ট তালিকা বর্তমানে লোড করা অর্ডার থেকে তৈরি।</p>
+        <div class="wo-toolbar-actions"><button type="button" class="pn-btn pn-btn-sm" id="ordResetFilters">Clear Filters</button>
+          <button type="button" class="pn-btn pn-btn-sm wo-export-btn" id="ordExportFiltered">Export filtered CSV</button></div>
+        <section class="oi-panel" id="ordInsights" aria-labelledby="ordInsightsTitle" hidden>
+          <h2 id="ordInsightsTitle">Order Overview</h2>
+          <p class="oi-note" id="ordScope"></p>
+          <div class="oi-cards" id="ordFinance"></div>
+          <p class="oi-note">Order totals include charges; they do not represent profit or courier payouts.</p>
+          <div class="oi-controls">
+            <label for="ordIssueFilter">Review Queue</label>
+            <select id="ordIssueFilter"><option value="all">All Orders</option><option value="flagged">Needs Review</option></select>
+            <span class="oi-note" id="ordIssueCount" role="status" aria-live="polite"></span>
+          </div>
+          <details><summary>Review Guidance</summary><p class="oi-note">Open flagged orders to review. When IDs are missing or duplicated, refer to the source sheet row. An empty size does not always mean an error.</p></details>
+        </section>
+      </details>
+
+      <p id="ordersTableHint" class="wo-table-hint">↔ Order নম্বর স্থির থাকে। Date, Status, Total, Origin দেখতে পাশে স্ক্রল করুন। বাকি তথ্য 👁 প্রিভিউতে।</p>
       <dialog id="ordQuickPreview" class="wo-quick-preview" aria-labelledby="ordPreviewTitle"><div class="wo-preview-head"><h2 id="ordPreviewTitle">Order Quick Preview</h2><button type="button" class="pn-btn" id="ordPreviewClose">Close</button></div><div id="ordPreviewContent"></div><div class="wo-preview-foot"><a id="ordPreviewOpen" class="pn-btn pn-btn-primary" href="#">Open Order</a></div></dialog>
-      <div class="pn-table-wrap" role="region" tabindex="0" aria-label="Full order list" aria-describedby="ordersTableHint">
-        <table class="pn-table">
+      <div class="pn-table-wrap wc-table-wrap" role="region" tabindex="0" aria-label="Full order list" aria-describedby="ordersTableHint">
+        <table class="pn-table wc-orders-table">
           <thead>
             <tr>
-              <th style="width:34px"><input type="checkbox" class="ot-sel" id="otSelAll" aria-label="দেখানো All Orders বাছুন"></th>
-              <th>Order</th>
-              <th>Customer</th>
-              <th>Products</th>
-              <th>Total</th>
-              <th>Courier Status</th>
-              <th>Tracking</th>
-              <th>Assigned To</th>
-              <th>Review</th><th>Preview</th>
+              <th class="wc-col-cb"><input type="checkbox" class="ot-sel" id="otSelAll" aria-label="দেখানো সব অর্ডার বাছুন"></th>
+              <th class="wc-col-order">Order</th>
+              <th class="wc-col-date">Date</th>
+              <th class="wc-col-status">Status</th>
+              <th class="wc-col-total">Total</th>
+              <th class="wc-col-origin">Origin</th>
             </tr>
           </thead>
-          <tbody id="ordBody" aria-live="polite"><tr class="pn-skeleton-row"><td colspan="10"><div class="pn-skeleton-stack"><i></i><i></i><i></i><i></i></div></td></tr></tbody>
+          <tbody id="ordBody" aria-live="polite"><tr class="pn-skeleton-row"><td colspan="6"><div class="pn-skeleton-stack"><i></i><i></i><i></i><i></i></div></td></tr></tbody>
+          <tfoot>
+            <tr>
+              <th class="wc-col-cb"></th>
+              <th class="wc-col-order">Order</th>
+              <th class="wc-col-date">Date</th>
+              <th class="wc-col-status">Status</th>
+              <th class="wc-col-total">Total</th>
+              <th class="wc-col-origin">Origin</th>
+            </tr>
+          </tfoot>
         </table>
       </div>
       <div class="pn-toolbar" id="ordPaging" aria-live="polite">
@@ -319,11 +337,37 @@
         assignedFilter = select.value;
       }
 
+      // WooCommerce-style status links: "All (3) | Processing (1) | …".
+      // Like WooCommerce, statuses with no orders are left out (the active one always stays visible).
       function renderTabs() {
-        var tabs = [["all", "All"], ["today", "Today"]].concat(statuses.map(function (s) { return [s, s]; }));
+        var tabs = [["all", "All"], ["today", "Today"]].concat(statuses.map(function (s) { return [s, s]; }))
+          .filter(function (t) { return t[0] === "all" || t[0] === filter || (counts[t[0]] || 0) > 0; });
         document.getElementById("ordTabs").innerHTML = tabs.map(function (t) {
-          return '<button type="button" class="pn-tab' + (filter === t[0] ? " active" : "") + '" data-f="' + esc(t[0]) + '">' + esc(t[1]) + "<em>" + (counts[t[0]] || 0) + "</em></button>";
+          return '<button type="button" class="pn-tab' + (filter === t[0] ? " active" : "") + '" data-f="' + esc(t[0]) + '"' + (filter === t[0] ? ' aria-current="true"' : '') + '>' + esc(t[1]) + " <em>(" + (counts[t[0]] || 0) + ")</em></button>";
         }).join("");
+      }
+
+      // Order times arrive as "dd-MM-yyyy HH:mm" in Dhaka time (GMT+6).
+      var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      function orderTimestamp(o) {
+        var m = /^(\d{1,2})-(\d{1,2})-(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/.exec(String(o.time || "").trim());
+        if (m) return Date.UTC(+m[3], +m[2] - 1, +m[1], +(m[4] || 0) - 6, +(m[5] || 0));
+        var key = MaOrderInsights.dateKey(o.time);
+        return key ? new Date(key + "T00:00:00+06:00").getTime() : null;
+      }
+      function displayDate(o) {
+        var ts = orderTimestamp(o);
+        if (ts == null || !Number.isFinite(ts)) return { text: String(o.time || "—"), title: "" };
+        var diff = Date.now() - ts, title = String(o.time || "");
+        if (diff >= 0 && diff < 86400000) {
+          var mins = Math.floor(diff / 60000);
+          if (mins < 1) return { text: "Just now", title: title };
+          if (mins < 60) return { text: mins + (mins === 1 ? " minute ago" : " minutes ago"), title: title };
+          var hrs = Math.floor(mins / 60);
+          return { text: hrs + (hrs === 1 ? " hour ago" : " hours ago"), title: title };
+        }
+        var d = new Date(ts + 6 * 3600000);
+        return { text: MONTHS[d.getUTCMonth()] + " " + d.getUTCDate() + ", " + d.getUTCFullYear(), title: title };
       }
 
       function renderRows() {
@@ -337,29 +381,35 @@
           });
         }
         document.getElementById("ordIssueCount").textContent = "Showing " + list.length + " of " + all.length + " loaded orders";
+        document.getElementById("ordIssueCountTop").textContent = list.length + (list.length === 1 ? " item" : " items");
         try { window.MaOrdersState = { all: all, filtered: list, total: Number(counts.all) || all.length }; } catch (stateErr) {}
         var body = document.getElementById("ordBody");
         if (!list.length) {
-          body.innerHTML = '<tr><td colspan="10" class="pn-empty">কোনো অর্ডার পাওয়া যায়নি</td></tr>';
+          body.innerHTML = '<tr><td colspan="6" class="pn-empty">কোনো অর্ডার পাওয়া যায়নি</td></tr>';
           return;
         }
+        var eyeSvg = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 5C6.5 5 2.7 9.4 1.6 11.4a1.3 1.3 0 0 0 0 1.2C2.7 14.6 6.5 19 12 19s9.3-4.4 10.4-6.4a1.3 1.3 0 0 0 0-1.2C21.3 9.4 17.5 5 12 5Zm0 11.5a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9Zm0-2.3a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4Z"/></svg>';
         body.innerHTML = list.map(function (o) {
-          var productNames=orderProducts(o);
-          var items=productNames.length ? '<details class="ma-order-products"><summary style="cursor:pointer;font-weight:600;line-height:1.5">'+esc(productNames[0])+ (productNames.length>1 ? ' <span class="sub">(+'+(productNames.length-1)+' আরও)</span>' : '') +'</summary><ul style="margin:8px 0 2px;padding-left:18px;line-height:1.7">'+productNames.map(function(n){return '<li>'+esc(n)+'</li>';}).join("")+'</ul></details>' : "—";
-          var displayStatus = MaOrderStatus.describe(o);
-          var canOpen = o.orderId && (issueRows.get(o) || []).indexOf("duplicate_id") === -1;
+          var issues = issueRows.get(o) || [];
+          var canOpen = o.orderId && issues.indexOf("duplicate_id") === -1;
+          var label = (o.orderId ? "#" + o.orderId : "ID নেই") + " " + (o.name || "");
+          var flagTitle = issues.map(function (key) { return MaOrderInsights.labels[key] || key; }).join(", ");
+          var when = displayDate(o);
+          var amount = MaOrderInsights.amount(o.total);
+          var status = String(o.status || "Pending");
           return (
             '<tr class="' + (canOpen ? 'click' : '') + '" data-id="' + (canOpen ? esc(o.orderId) : '') + '"' + (canOpen ? ' data-oid="' + esc(o.orderId) + '"' : '') + '>' +
-            '<td>' + (canOpen ? '<input type="checkbox" class="ot-sel" data-oid="' + esc(o.orderId) + '" aria-label="' + esc(o.orderId) + ' বাছুন">' : '') + '</td>' +
-            '<td><div class="oid">' + (canOpen ? '<a class="oi-link" href="admin-order.html?id=' + encodeURIComponent(o.orderId) + '">' + esc(o.orderId) + '</a>' : esc(o.orderId || "ID নেই")) + '</div><div class="sub">' + esc(o.time) + (o.row && !canOpen ? " · সারি " + esc(o.row) : "") + "</div></td>" +
-            "<td><div>" + esc(o.name) + (o.blocked ? ' <span class="pn-badge blocked">Blocked</span>' : "") + '</div><div class="sub">' + esc(o.phone) + (o.district ? " · " + esc(o.district) : "") + '</div><div class="ot-wa-slot"></div></td>' +
-            "<td>" + items + '<div class="sub">সাইজ: ' + esc(o.size || "তথ্য নেই") + '</div></td>' +
-            "<td><b>" + (MaOrderInsights.amount(o.total) === null ? 'অবৈধ মান' : MaPanel.money(o.total)) + '</b><div class="sub">' + esc(o.payment || "") + "</div></td>" +
-            '<td><span class="pn-badge ' + MaPanel.statusClass(o.status) + '">Order: ' + esc(displayStatus.orderRaw) + '</span><div class="wo-courier-status ' + (displayStatus.hasCourier ? 'is-live' : 'is-empty') + '">Courier: ' + esc(displayStatus.hasCourier ? displayStatus.courierLabel : 'Not sent') + "</div></td>" +
-            "<td>" + (displayStatus.hasCourier ? esc(o.tracking || o.consignmentId || "—") + '<div class="sub">' + esc(o.courier || 'Steadfast') + "</div>" : '<span class="sub">—</span>') + "</td>" +
-            "<td>" + esc(o.assignedTo || "—") + "</td>" +
-            '<td><div class="oi-issues">' + (issueRows.get(o) || []).map(function (key) { return '<span class="oi-issue">' + esc(MaOrderInsights.labels[key]) + '</span>'; }).join("") + ((issueRows.get(o) || []).length ? '' : '<span class="sub">—</span>') + '</div></td>' +
-            '<td><button type="button" class="pn-btn wo-preview-btn" data-preview-id="' + esc(o.orderId || "") + '" data-preview-row="' + esc(o.row || "") + '">Preview</button></td>' +
+            '<td class="wc-col-cb">' + (canOpen ? '<input type="checkbox" class="ot-sel" data-oid="' + esc(o.orderId) + '" aria-label="' + esc(o.orderId) + ' বাছুন">' : '') + '</td>' +
+            '<td class="wc-col-order"><div class="wc-order-line">' +
+              (canOpen ? '<a class="oi-link wc-order-link" href="admin-order.html?id=' + encodeURIComponent(o.orderId) + '">' + esc(label) + '</a>' : '<span class="wc-order-link is-plain">' + esc(label) + (o.row ? ' <span class="sub">(সারি ' + esc(o.row) + ')</span>' : '') + '</span>') +
+              (o.blocked ? ' <span class="pn-badge blocked">Blocked</span>' : '') +
+              (issues.length ? ' <span class="wc-flag" title="' + esc(flagTitle) + '" aria-label="যাচাই প্রয়োজন: ' + esc(flagTitle) + '">!</span>' : '') +
+              '<button type="button" class="wc-eye wo-preview-btn" data-preview-id="' + esc(o.orderId || "") + '" data-preview-row="' + esc(o.row || "") + '" title="Preview" aria-label="' + esc(label) + ' প্রিভিউ">' + eyeSvg + '</button>' +
+            '</div><div class="ot-wa-slot"></div></td>' +
+            '<td class="wc-col-date"><time title="' + esc(when.title) + '">' + esc(when.text) + '</time></td>' +
+            '<td class="wc-col-status"><mark class="wc-status wc-status-' + MaPanel.statusClass(status) + '">' + esc(status) + '</mark></td>' +
+            '<td class="wc-col-total">' + (amount === null ? '<span class="sub">অবৈধ মান</span>' : esc(MaPanel.money(o.total))) + '</td>' +
+            '<td class="wc-col-origin">' + esc(o.source || "—") + '</td>' +
             "</tr>"
           );
         }).join("");
@@ -444,7 +494,7 @@
           btn.disabled = true;
         }
         document.getElementById("ordCount").textContent = (ordersShown ? (counts.all || 0) + " orders · " : "") + "আপডেট হচ্ছে…";
-        if (!append && !ordersShown) document.getElementById("ordBody").innerHTML = '<tr><td colspan="10" class="pn-empty">অর্ডার আনা হচ্ছে…</td></tr>';
+        if (!append && !ordersShown) document.getElementById("ordBody").innerHTML = '<tr><td colspan="6" class="pn-empty">অর্ডার আনা হচ্ছে…</td></tr>';
         return MaAdmin.call("AdminOrderList", params, options).then(function (res) {
           if (append && typeof res.nextCursor !== "number") throw new Error("ORDER_PAGINATION_API_OLD");
           apply(res, append);
@@ -454,7 +504,7 @@
             return;
           }
           if (ordersShown) { MaPanel.toast("আপডেট করা যায়নি: " + err.message, true); return; }
-          document.getElementById("ordBody").innerHTML = '<tr><td colspan="10" class="pn-empty">Error: ' + esc(err.message) + "</td></tr>";
+          document.getElementById("ordBody").innerHTML = '<tr><td colspan="6" class="pn-empty">Error: ' + esc(err.message) + "</td></tr>";
         }).then(function () {
           btn.disabled = false;
           loadingMore = false;
@@ -499,11 +549,28 @@
         renderRows();
       });
 
+      // WooCommerce-style "Bulk actions + Apply": runs the existing selection buttons from admin-order-tools.js.
+      document.getElementById("ordBulkApply").addEventListener("click", function () {
+        var select = document.getElementById("ordBulkAction");
+        var target = { print: "otPrintSel", sync: "otSyncSel", send: "otSendSel", clear: "otClearSel" }[select.value];
+        if (!target) { MaPanel.toast("আগে একটি Bulk action বেছে নিন।", true); return; }
+        if (target !== "otClearSel" && !document.querySelector("#ordBody .ot-sel:checked")) { MaPanel.toast("আগে অন্তত একটি অর্ডার বাছুন।", true); return; }
+        var btn = document.getElementById(target);
+        if (!btn) { MaPanel.toast("এই অ্যাকশনটি এখন পাওয়া যাচ্ছে না।", true); return; }
+        btn.click();
+        select.value = "";
+      });
+      document.getElementById("ordSearchForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        q = document.getElementById("ordSearch").value.trim().toLowerCase();
+        renderRows();
+      });
+
       function openQuickPreview(o) {
         if(!o)return;
         var box=document.getElementById("ordQuickPreview"), status=MaOrderStatus.describe(o);
         var flags=(issueRows.get(o)||[]).map(function(k){return MaOrderInsights.labels[k]||k;}).join(", ");
-        var rows=[["Order ID",o.orderId],["Customer",o.name],["Phone",o.phone],["Total",MaPanel.money(o.total)],["Payment",o.payment],["Order Status",status.orderRaw],["Courier Status",status.hasCourier?status.courierLabel:"Not sent"],["Tracking",o.tracking||o.consignmentId],["Assigned Staff",o.assignedTo],["Review Flags",flags||"None"]];
+        var rows=[["Order ID",o.orderId],["Date",o.time],["Customer",o.name],["Phone",o.phone],["District",o.district],["Address",o.address],["Size",o.size],["Total",MaPanel.money(o.total)],["Payment",o.payment],["Order Status",status.orderRaw],["Courier Status",status.hasCourier?status.courierLabel:"Not sent"],["Tracking",status.hasCourier?((o.tracking||o.consignmentId||"—")+(o.courier?" · "+o.courier:"")):""],["Assigned Staff",o.assignedTo],["Origin",o.source],["Review Flags",flags||"None"]];
         document.getElementById("ordPreviewContent").innerHTML='<section class="ma-product-section"><h3>অর্ডারকৃত পণ্য</h3>'+previewItems(o)+'</section>'+'<dl class="wo-preview-grid">'+rows.map(function(pair){return '<div><dt>'+esc(pair[0])+'</dt><dd>'+esc(pair[1]==null||pair[1]===""?"—":pair[1])+'</dd></div>';}).join("")+'</dl><p class="wo-preview-note">Courier status is the last recorded value, not a live location update.</p>';
         var link=document.getElementById("ordPreviewOpen");
         link.hidden=!o.orderId||(issueRows.get(o)||[]).indexOf("duplicate_id")!==-1;
@@ -589,26 +656,8 @@
 .wo-quick-preview{width:min(94vw,680px);max-height:90vh;overflow:auto}
 .pn-table-wrap{max-width:100%;overflow-x:auto}
 .pn-table th,.pn-table td{vertical-align:middle;overflow-wrap:anywhere}
-@media(max-width:1150px){.pn-table th:nth-child(7),.pn-table td:nth-child(7),.pn-table th:nth-child(8),.pn-table td:nth-child(8),.pn-table th:nth-child(9),.pn-table td:nth-child(9){display:none}.pn-table{min-width:680px}}
 @media(max-width:600px){.ma-product-fields{grid-template-columns:1fr}}
 </style>
-<script>
-(function(){
-  function mountOrderCategories(){
-    var host=document.getElementById("omStatusHost");
-    var tabs=document.getElementById("ordTabs");
-    if(!host||!tabs||tabs.dataset.workspaceMounted==="1")return;
-    tabs.dataset.workspaceMounted="1";
-    tabs.setAttribute("aria-label","Order status categories");
-    tabs.classList.add("om-status-list");
-    host.appendChild(tabs);
-    var clear=document.getElementById("ordResetFilters");
-    if(clear){clear.classList.add("om-clear-filters");}
-  }
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",mountOrderCategories,{once:true});
-  else mountOrderCategories();
-})();
-</script>
 <script src="admin-search.js?v=1" defer></script>
 <script src="admin-app.js?v=1" defer></script>
 </body>

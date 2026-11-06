@@ -1,0 +1,234 @@
+/* Orders list laid out like the WooCommerce "Orders" screen:
+   title + Add order, status links, bulk actions / date / search, then a plain
+   striped table (Order · Date · Status · Total · Origin). Loaded last on
+   admin-orders.html only. Everything else (filters, overview, courier,
+   tracking, staff) lives in "More Filters" and the 👁 preview. */
+
+.wo-orders-page {
+  --wc-link: #2271b1;
+  --wc-link-hover: #135e96;
+  --wc-text: #1d2327;
+  --wc-muted: #646970;
+  --wc-line: #c3c4c7;
+  --wc-line-soft: #dcdcde;
+  --wc-card: #fff;
+  --wc-stripe: #f6f7f7;
+  --wc-hover: #f0f6fc;
+  --wc-input: #fff;
+}
+/* This page keeps a light background in dark mode, so only elements that paint
+   their own background (table, inputs, buttons) switch to the dark palette. */
+html[data-admin-theme="dark"] .wo-orders-page .wc-table-wrap,
+html[data-admin-theme="dark"] .wo-orders-page .wc-search-box,
+html[data-admin-theme="dark"] .wo-orders-page .wc-tablenav,
+html[data-admin-theme="dark"] .wo-orders-page .wc-add-order {
+  --wc-link: #72aee6;
+  --wc-link-hover: #9ec2e6;
+  --wc-text: #e6e9ee;
+  --wc-muted: #a7aeb8;
+  --wc-line: #3a4352;
+  --wc-line-soft: #2f3744;
+  --wc-card: #1b2230;
+  --wc-stripe: #202938;
+  --wc-hover: #243247;
+  --wc-input: #151b26;
+}
+
+/* One column: no separate status sidebar any more. */
+.om-workspace.wc-list { display: block; flex: 1 1 auto; min-width: 0; max-width: 100%; }
+.om-workspace.wc-list > .pn-main { min-width: 0; width: 100%; }
+.om-workspace.wc-list .pn-head { position: relative; top: auto; }
+
+.wc-sr-only {
+  position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ---- Title row: "Orders  [Add order]" ---- */
+.wo-orders-page .wc-list .pn-head {
+  background: transparent !important; border: 0 !important; box-shadow: none !important;
+  padding: 4px 0 14px !important; gap: 10px; align-items: center;
+}
+.wo-orders-page .wc-list .pn-head h1 { font-size: 23px !important; font-weight: 500 !important; color: var(--wc-text); }
+.wo-orders-page .wc-list .pn-head .adm-heading { flex: 0 0 auto; min-width: 0; }
+.wo-orders-page .wc-add-order {
+  border: 1px solid var(--wc-link) !important; color: var(--wc-link) !important;
+  background: var(--wc-card) !important; border-radius: 3px !important;
+  min-height: 32px; padding: 4px 10px !important; font-weight: 500; text-decoration: none;
+}
+.wo-orders-page .wc-add-order:hover { background: var(--wc-hover) !important; color: var(--wc-link-hover) !important; }
+
+/* ---- Status links + search ---- */
+.wc-subnav {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 10px 16px; margin: 0 0 10px;
+}
+.wo-orders-page .wc-status-links {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0;
+  margin: 0 !important; padding: 0; border: 0 !important; background: none !important;
+}
+.wo-orders-page .wc-status-links .pn-tab {
+  border: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important;
+  padding: 2px 0 !important; min-height: 0; color: var(--wc-link) !important;
+  font-size: 14px !important; font-weight: 400 !important; cursor: pointer;
+}
+.wo-orders-page .wc-status-links .pn-tab::after,
+.wo-orders-page .wc-status-links .pn-tab::before { display: none !important; }
+.wo-orders-page .wc-status-links .pn-tab + .pn-tab { border-left: 0 !important; }
+.wo-orders-page .wc-status-links .pn-tab + .pn-tab::before {
+  content: "|"; display: inline !important; position: static; margin: 0 8px; color: var(--wc-muted);
+  background: none; width: auto; height: auto;
+}
+.wo-orders-page .wc-status-links .pn-tab:hover { color: var(--wc-link-hover) !important; text-decoration: underline; }
+.wo-orders-page .wc-status-links .pn-tab.active { color: var(--wc-text) !important; font-weight: 600 !important; }
+.wo-orders-page .wc-status-links .pn-tab em {
+  all: unset; color: var(--wc-muted); font-weight: 400; font-variant-numeric: tabular-nums;
+}
+
+.wc-search-box { display: flex; gap: 6px; align-items: center; margin: 0; }
+.wo-orders-page .wc-search-box .pn-in { width: 220px; max-width: 100%; }
+
+/* ---- Inputs and buttons in WordPress proportions ---- */
+.wo-orders-page .wc-list .pn-in,
+.wo-orders-page .wc-list .pn-sel {
+  min-height: 32px; border: 1px solid #8c8f94 !important; border-radius: 4px !important;
+  background-color: var(--wc-input) !important; color: var(--wc-text) !important;
+  font-size: 14px; padding: 0 8px; box-shadow: none !important;
+}
+@media (min-width: 761px) {
+  .wo-orders-page .wc-list .pn-in,
+  .wo-orders-page .wc-list .pn-sel {
+    height: 34px !important; min-height: 34px !important;
+    padding-top: 0 !important; padding-bottom: 0 !important; line-height: 32px !important;
+  }
+}
+html[data-admin-theme="dark"] .wo-orders-page .wc-list .pn-in,
+html[data-admin-theme="dark"] .wo-orders-page .wc-list .pn-sel { border-color: var(--wc-line) !important; }
+.wo-orders-page .wc-list .pn-sel { padding-right: 26px; }
+.wo-orders-page .wc-search-box .pn-btn,
+.wo-orders-page .wc-tablenav .pn-btn {
+  min-height: 32px; padding: 0 10px !important; border-radius: 3px !important;
+  border: 1px solid var(--wc-link) !important; color: var(--wc-link) !important;
+  background: var(--wc-card) !important; font-weight: 400 !important; box-shadow: none !important;
+  white-space: nowrap;
+}
+.wo-orders-page .wc-search-box .pn-btn:hover,
+.wo-orders-page .wc-tablenav .pn-btn:hover { background: var(--wc-hover) !important; }
+
+.wo-orders-page .wc-tablenav {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  margin: 0 0 10px !important; padding: 0 !important; background: none !important; border: 0 !important; box-shadow: none !important;
+}
+.wo-orders-page .wc-tablenav #ordDateFilter { margin-left: 4px; }
+.wo-orders-page .wc-displaying { color: #646970; font-size: 13px; }
+
+/* "More Filters" keeps the old extras out of the way. */
+.wo-orders-page .wc-list .wo-advanced-filters { margin: 0 0 12px; }
+.wo-orders-page .wc-list .wo-advanced-filters > summary { font-size: 13px; }
+.wo-orders-page .wc-list .wo-advanced-filters .oi-panel { margin: 12px 0 0; }
+.wo-orders-page .wc-list .wo-advanced-filters .ot-report { margin: 12px 0 0; }
+.wc-filter-note { font-size: 12px; color: var(--wc-muted); margin: 6px 0 8px; }
+
+/* ---- The table ---- */
+.wo-orders-page .wc-table-wrap {
+  border: 1px solid var(--wc-line) !important; border-radius: 0 !important;
+  background: var(--wc-card) !important; box-shadow: 0 1px 1px rgba(0, 0, 0, .04) !important;
+}
+.wo-orders-page .wc-orders-table { width: 100%; border-collapse: collapse; min-width: 640px; background: var(--wc-card); }
+.wo-orders-page .wc-orders-table th,
+.wo-orders-page .wc-orders-table td {
+  padding: 10px 12px !important; text-align: left; vertical-align: middle;
+  border: 0 !important; color: var(--wc-text); background: transparent;
+  font-size: 14px !important; line-height: 1.45;
+}
+.wo-orders-page .wc-orders-table thead th { border-bottom: 1px solid var(--wc-line) !important; }
+.wo-orders-page .wc-orders-table tfoot th { border-top: 1px solid var(--wc-line) !important; }
+.wo-orders-page .wc-orders-table thead th,
+.wo-orders-page .wc-orders-table tfoot th {
+  font-weight: 400 !important; color: var(--wc-link) !important; background: var(--wc-card) !important;
+  text-transform: none; letter-spacing: 0;
+}
+.wo-orders-page .wc-orders-table tbody tr:nth-child(odd) td { background: var(--wc-stripe); }
+.wo-orders-page .wc-orders-table tbody tr:nth-child(even) td { background: var(--wc-card); }
+.wo-orders-page .wc-orders-table tbody tr.click { cursor: pointer; }
+.wo-orders-page .wc-orders-table tbody tr.click:hover td { background: var(--wc-hover); }
+
+.wo-orders-page .wc-col-cb { width: 40px; padding-right: 0 !important; }
+.wo-orders-page .wc-col-cb .ot-sel { width: 16px; height: 16px; margin: 0; vertical-align: middle; accent-color: var(--wc-link); }
+.wo-orders-page .wc-col-order { min-width: 230px; }
+.wo-orders-page .wc-col-date { white-space: nowrap; color: var(--wc-muted) !important; }
+.wo-orders-page .wc-col-status { white-space: nowrap; }
+.wo-orders-page .wc-col-total { white-space: nowrap; text-align: right !important; font-variant-numeric: tabular-nums; }
+.wo-orders-page .wc-col-origin { white-space: nowrap; color: var(--wc-muted) !important; }
+
+.wc-order-line { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.wo-orders-page .wc-order-line > .wc-order-link { flex: 0 1 auto; min-width: 0; white-space: normal !important; overflow-wrap: break-word !important; word-break: normal !important; }
+.wo-orders-page .wc-order-link {
+  color: var(--wc-link) !important; font-weight: 600; text-decoration: none; overflow-wrap: anywhere;
+}
+.wo-orders-page .wc-order-link:hover { color: var(--wc-link-hover) !important; text-decoration: underline; }
+.wo-orders-page .wc-order-link.is-plain { color: var(--wc-text) !important; }
+.wo-orders-page .wc-order-line .pn-badge { font-size: 11px; }
+.wc-flag {
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  width: 18px; height: 18px; border-radius: 50%; background: #dba617; color: #1d2327;
+  font-size: 12px; font-weight: 700; cursor: help;
+}
+.wo-orders-page .wc-eye {
+  margin-left: auto; flex: none; display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; padding: 0 !important; border: 0 !important; border-radius: 4px !important;
+  background: transparent !important; color: var(--wc-link) !important; box-shadow: none !important; cursor: pointer;
+}
+.wo-orders-page .wc-eye:hover { color: var(--wc-link-hover) !important; background: rgba(34, 113, 177, .08) !important; }
+.wo-orders-page .wc-eye:focus-visible { outline: 2px solid var(--wc-link); outline-offset: 1px; }
+.wo-orders-page .wc-col-order .ot-wa-slot:empty { display: none; }
+.wo-orders-page .wc-col-order .ot-wa-slot { margin-top: 2px; font-size: 12px; }
+
+/* Status marks: WooCommerce colours. */
+.wc-status {
+  display: inline-flex; align-items: center; min-height: 32px; padding: 0 12px;
+  border-radius: 4px; font-size: 14px; line-height: 1; white-space: nowrap;
+  background: #e5e5e5; color: #454545; border-bottom: 1px solid rgba(0, 0, 0, .05);
+}
+.wc-status-processing { background: #c6e1c6; color: #2c4700; }
+.wc-status-confirmed { background: #f8dda7; color: #573b00; }
+.wc-status-shipped { background: #c8d7e1; color: #003d66; }
+.wc-status-delivered { background: #c8d7e1; color: #003d66; }
+.wc-status-cancelled { background: #e5e5e5; color: #454545; }
+.wc-status-fake { background: #eba3a3; color: #570000; }
+.wc-status-returned { background: #e5e5e5; color: #454545; }
+
+.wo-orders-page .wc-list .pn-empty { background: var(--wc-card) !important; color: var(--wc-muted); }
+.wo-orders-page .wc-list .wo-table-hint { color: var(--wc-muted); }
+
+/* ---- Small screens: the table scrolls sideways; checkbox + Order stay pinned. ---- */
+@media (max-width: 760px) {
+  .wc-subnav { flex-direction: column; align-items: stretch; }
+  .wc-search-box { width: 100%; }
+  .wo-orders-page .wc-search-box #ordSearch { flex: 1 1 auto !important; width: auto !important; min-width: 0 !important; }
+  .wo-orders-page .wc-list .pn-in,
+  .wo-orders-page .wc-list .pn-sel,
+  .wo-orders-page .wc-search-box .pn-btn,
+  .wo-orders-page .wc-tablenav .pn-btn,
+  .wo-orders-page .wc-list .wo-advanced-filters .pn-sel,
+  .wo-orders-page #ordIssueFilter { min-height: 44px !important; font-size: 16px !important; }
+  .wo-orders-page .wc-col-cb .ot-sel { width: 22px; height: 22px; }
+  .wo-orders-page .wc-tablenav { display: grid !important; grid-template-columns: minmax(0, 1fr) auto; }
+  .wo-orders-page .wc-tablenav > * { width: auto !important; margin: 0 !important; }
+  .wo-orders-page .wc-tablenav #ordDateFilter,
+  .wo-orders-page .wc-tablenav .wc-displaying { grid-column: 1 / -1; }
+  .wo-orders-page .wc-tablenav .pn-spacer { display: none; }
+  .wo-orders-page .wc-status-links .pn-tab { min-height: 32px; }
+  .wo-orders-page .wc-orders-table { min-width: 600px; }
+  .wo-orders-page .wc-orders-table .wc-col-order { min-width: 190px !important; width: 190px; max-width: 190px; }
+  .wo-orders-page .wc-orders-table tbody tr:nth-child(odd) td:first-child,
+  .wo-orders-page .wc-orders-table tbody tr:nth-child(odd) td:nth-child(2) { background: var(--wc-stripe); }
+  .wo-orders-page .wc-orders-table tbody tr:nth-child(even) td:first-child,
+  .wo-orders-page .wc-orders-table tbody tr:nth-child(even) td:nth-child(2) { background: var(--wc-card); }
+  .wo-orders-page .wc-orders-table thead th:first-child,
+  .wo-orders-page .wc-orders-table thead th:nth-child(2),
+  .wo-orders-page .wc-orders-table tfoot th:first-child,
+  .wo-orders-page .wc-orders-table tfoot th:nth-child(2) { background: var(--wc-card) !important; }
+  .wo-orders-page .wc-orders-table td:nth-child(2),
+  .wo-orders-page .wc-orders-table th:nth-child(2) { box-shadow: 2px 0 0 var(--wc-line-soft); }
+}
