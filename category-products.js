@@ -286,8 +286,8 @@ window.CATEGORY_PRODUCTS = {
         "Full Set Abaya": 1350,
         "Only Abaya": 1050
       },
-      isImageView: true,
-      imageViewOf: "ABY-BUTTERFLY-13",
+      isImageView: false,
+      imageViewOf: "",
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
       bodySizes: ["46"],
