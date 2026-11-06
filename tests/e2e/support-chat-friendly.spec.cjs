@@ -21,6 +21,18 @@ test('chat greets in Bangla and chips fill a Bangla message', async ({ page }) =
   await expect(page.locator('.ma-chat-order-form')).toBeVisible();
 });
 
+test('contact details are optional and only shown when requested', async ({ page }) => {
+  await openChat(page);
+  const prompt = page.getByRole('button', { name: /নাম ও ফোন শেয়ার করুন/ });
+  const form = page.locator('.ma-chat-contact');
+  await expect(prompt).toBeVisible();
+  await expect(form).toBeHidden();
+  await prompt.click();
+  await expect(prompt).toBeHidden();
+  await expect(form).toBeVisible();
+  await expect(page.locator('#maChatContactName')).toBeFocused();
+});
+
 test('image attachment is previewed as a draft and can be removed before sending', async ({ page }) => {
   await openChat(page);
   const file = { name: 'customer-photo.png', mimeType: 'image/png', buffer: Buffer.from('fake-png-for-preview') };
@@ -59,11 +71,17 @@ test('chat panel stays compact on desktop and mobile', async ({ page }) => {
     await page.setViewportSize(vp);
     await openChat(page);
     const box = await page.locator('#maChatPanel').boundingBox();
-    expect(box.height).toBeLessThanOrEqual(500);
+    const heightLimit = vp.width <= 560 ? Math.min(560, vp.height * 0.72) + 2 : 600;
+    expect(box.height).toBeLessThanOrEqual(heightLimit);
     expect(box.x).toBeGreaterThanOrEqual(0);
     expect(box.x + box.width).toBeLessThanOrEqual(vp.width);
-    // quick-help chips are one swipeable row
-    const tops = await page.locator('.ma-chat-chip').evaluateAll((els) => [...new Set(els.map((e) => Math.round(e.offsetTop)))]);
-    expect(tops.length).toBe(1);
+    // quick-help options are a visible two-column grid without a horizontal scroll trap
+    const layout = await page.locator('.ma-chat-chips').evaluate((el) => {
+      const style = getComputedStyle(el);
+      return { display: style.display, columns: style.gridTemplateColumns.trim().split(/\s+/).length, width: el.clientWidth, scrollWidth: el.scrollWidth };
+    });
+    expect(layout.display).toBe('grid');
+    expect(layout.columns).toBe(2);
+    expect(layout.scrollWidth).toBeLessThanOrEqual(layout.width);
   }
 });

@@ -149,20 +149,25 @@
     ".ma-chat-message img{display:block;max-width:100%;max-height:240px;border-radius:9px;margin-top:6px;background:#eee}.ma-chat-message audio{display:block;max-width:100%;width:260px;margin-top:7px}.ma-chat-file-link{display:inline-block;margin-top:7px;color:inherit;text-decoration:underline;overflow-wrap:anywhere}" +
     ".ma-chat-typing{min-height:16px;font-size:11px;color:#8a8170;font-style:italic;padding:2px 2px 0}" +
     /* Compact layout: shorter panel on desktop and mobile */
-    ".ma-chat-panel{width:min(370px,calc(100vw - 28px));max-height:min(500px,calc(100vh - 120px))}" +
+    ".ma-chat-panel{width:min(410px,calc(100vw - 28px));max-height:min(600px,calc(100vh - 120px))}" +
     ".ma-chat-head{padding:9px 12px;gap:9px}.ma-chat-avatar{width:34px;height:34px}.ma-chat-icon-btn{width:32px;height:32px;border-radius:9px}.ma-chat-icon-btn svg{width:16px;height:16px}" +
     ".ma-chat-title strong{font-size:14px}.ma-chat-title span{font-size:11.5px}" +
     ".ma-chat-body{padding:12px 12px 8px}" +
     ".ma-chat-welcome{margin:0 0 12px}.ma-chat-welcome img{width:28px;height:28px}.ma-chat-greet{padding:9px 12px}.ma-chat-greet strong{font-size:15px}.ma-chat-greet p{font-size:13px;margin-top:2px}" +
     ".ma-chat-section-title{margin:0 0 7px;font-size:12.5px}" +
-    ".ma-chat-chips{flex-wrap:nowrap;overflow-x:auto;gap:6px;margin:0 -12px 4px;padding:0 12px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.ma-chat-chips::-webkit-scrollbar{display:none}" +
-    ".ma-chat-chip{flex:none;white-space:nowrap;padding:7px 11px;font-size:12.5px;min-height:0}" +
+    ".ma-chat-chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 10px;padding:0}" +
+    ".ma-chat-chip{display:flex;align-items:center;justify-content:flex-start;text-align:left;white-space:normal;min-width:0;min-height:46px;padding:8px 11px;border-radius:13px;font-size:13px;line-height:1.35}.ma-chat-chip:last-child{grid-column:1/-1}" +
     ".ma-chat-foot{padding:8px 10px 9px}" +
     ".ma-chat-input{min-height:40px;padding:9px 11px}.ma-chat-send,.ma-chat-attach{height:40px}.ma-chat-attach{width:40px}" +
     ".ma-chat-alt{margin-top:7px;gap:6px}.ma-chat-alt a{height:32px;font-size:12.5px;border-radius:9px}.ma-chat-alt svg{width:16px;height:16px}" +
     ".ma-chat-note{margin-top:5px;font-size:10.5px}" +
     ".ma-chat-panel.is-expanded{max-height:min(720px,calc(100vh - 100px))}" +
-    "@media (max-width:560px){.ma-chat-panel{max-height:min(66dvh,500px)}.ma-chat-chip{min-height:36px}.ma-chat-head{padding:9px 10px}.ma-chat-body{padding:10px 10px 6px}.ma-chat-chips{margin:0 -10px 4px;padding:0 10px 6px}.ma-chat-foot{padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px))}.ma-chat-panel.is-expanded{max-height:none}}" +
+    "@media (max-width:560px){.ma-chat-panel{max-height:min(72dvh,560px)}.ma-chat-chip{min-height:44px}.ma-chat-head{padding:10px 11px}.ma-chat-body{padding:12px 11px 8px}.ma-chat-foot{padding:9px 9px calc(9px + env(safe-area-inset-bottom,0px))}.ma-chat-panel.is-expanded{max-height:none}}" +
+    ".ma-chat-chip:last-child{grid-column:1/-1}" +
+    ".ma-chat-contact-prompt{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:42px;margin:0 0 10px;padding:9px 12px;border:1px dashed #d5c293;border-radius:12px;background:#fffdf7;color:#50442d;font-family:inherit;font-size:13px;font-weight:600;text-align:left;cursor:pointer}" +
+    ".ma-chat-contact-prompt:hover{border-color:#b69655;background:#fff9e9}.ma-chat-contact-prompt:focus-visible{outline:2px solid #b69655;outline-offset:2px}.ma-chat-contact-prompt[hidden]{display:none!important}" +
+    ".ma-chat-contact{grid-template-columns:1fr;gap:7px;padding:12px;background:#fffdf7}.ma-chat-contact label{display:block;margin:0 0 -4px;color:#5d5546;font-size:12px;font-weight:650}.ma-chat-contact input{box-sizing:border-box;width:100%;min-height:42px;padding:9px 11px;font-size:14px}.ma-chat-contact .ma-contact-actions{justify-content:space-between}.ma-chat-contact button{min-height:40px;padding:0 14px;font-size:13px}" +
+    ".ma-chat-contact button[type=submit]{background:#117a3f;border-color:#117a3f}" +
     "@media (prefers-reduced-motion:reduce){.ma-chat-fab,.ma-chat-chip{transition:none}}";
 
   var ICON_CHAT =
@@ -250,7 +255,7 @@
     title.innerHTML =
       '<strong id="maChatTitle"></strong><span id="maChatSub"><i class="ma-chat-status-dot" aria-hidden="true"></i></span>';
     title.querySelector("strong").textContent = brand;
-    title.querySelector("#maChatSub").appendChild(doc.createTextNode(replyTime || "কাস্টমার সাপোর্ট · বাংলায় লিখুন"));
+    title.querySelector("#maChatSub").appendChild(doc.createTextNode(replyTime || (liveEnabled ? "সরাসরি চ্যাট · বাংলায় লিখুন" : "WhatsApp-এ সহায়তা · বাংলায় লিখুন")));
     var call = el("a", "ma-chat-icon-btn", ICON_PHONE);
     call.href = "tel:" + String(phoneTel).replace(/[^\d+]/g, "");
     call.setAttribute("aria-label", "আমাদের ফোন করুন");
@@ -277,9 +282,9 @@
     greetName.textContent = brand + " টিম";
     greet.appendChild(greetName);
     greet.appendChild(el("strong", "", "আসসালামু আলাইকুম 👋"));
-    greet.appendChild(el("p", "", "অর্ডার, সাইজ বা ডেলিভারি, যেকোনো প্রশ্ন লিখুন। আমরা এখানেই উত্তর দেবো।"));
+    greet.appendChild(el("p", "", liveEnabled ? "অর্ডার, সাইজ বা ডেলিভারি—যে কোনো প্রশ্ন করুন, আমরা সাহায্য করতে আছি।" : "অর্ডার, সাইজ বা ডেলিভারি—যে কোনো প্রশ্ন লিখুন; পাঠালে WhatsApp খুলবে।"));
     welcome.appendChild(greet);
-    var sectionTitle = el("p", "ma-chat-section-title", "কী নিয়ে সাহায্য লাগবে?");
+    var sectionTitle = el("p", "ma-chat-section-title", "কী বিষয়ে সাহায্য চান?");
     var chips = el("div", "ma-chat-chips");
     var orderForm = el("form", "ma-chat-order-form");
     orderForm.hidden = true;
@@ -346,15 +351,27 @@
     var captchaBox = el("div", "ma-chat-turnstile");
     captchaBox.id = "ma-support-chat-turnstile";
     captchaBox.hidden = true;
+    var contactPrompt = el("button", "ma-chat-contact-prompt", "নাম ও ফোন শেয়ার করুন (ঐচ্ছিক)");
+    contactPrompt.type = "button";
+    contactPrompt.setAttribute("aria-controls", "maChatContact");
+    contactPrompt.setAttribute("aria-expanded", "false");
+    contactPrompt.hidden = !liveEnabled;
     var contactForm = el("form", "ma-chat-contact");
+    contactForm.id = "maChatContact";
     contactForm.hidden = true;
-    contactForm.appendChild(el("p", "", "দ্রুত সাহায্যের জন্য নাম ও ফোন দিন (ঐচ্ছিক)"));
+    contactForm.appendChild(el("p", "", "প্রয়োজনে যোগাযোগের জন্য তথ্য দিন। এটি সম্পূর্ণ ঐচ্ছিক।"));
     var contactName = doc.createElement("input");
+    contactName.id = "maChatContactName";
     contactName.type = "text"; contactName.maxLength = 80; contactName.autocomplete = "name";
-    contactName.placeholder = "আপনার নাম"; contactName.setAttribute("aria-label", "আপনার নাম");
+    contactName.placeholder = "যেমন: আয়েশা"; contactName.setAttribute("aria-label", "আপনার নাম (ঐচ্ছিক)");
+    var contactNameLabel = el("label", "", "আপনার নাম (ঐচ্ছিক)");
+    contactNameLabel.htmlFor = contactName.id;
     var contactPhone = doc.createElement("input");
+    contactPhone.id = "maChatContactPhone";
     contactPhone.type = "tel"; contactPhone.maxLength = 24; contactPhone.autocomplete = "tel";
-    contactPhone.placeholder = "ফোন নম্বর"; contactPhone.setAttribute("aria-label", "ফোন নম্বর");
+    contactPhone.placeholder = "যে নম্বরে যোগাযোগ করা যাবে"; contactPhone.setAttribute("aria-label", "ফোন নম্বর (ঐচ্ছিক)");
+    var contactPhoneLabel = el("label", "", "ফোন নম্বর (ঐচ্ছিক)");
+    contactPhoneLabel.htmlFor = contactPhone.id;
     var contactActions = el("div", "ma-contact-actions");
     var contactSkip = el("button", "", "পরে");
     contactSkip.type = "button";
@@ -362,7 +379,9 @@
     contactSave.type = "submit";
     contactActions.appendChild(contactSkip);
     contactActions.appendChild(contactSave);
+    contactForm.appendChild(contactNameLabel);
     contactForm.appendChild(contactName);
+    contactForm.appendChild(contactPhoneLabel);
     contactForm.appendChild(contactPhone);
     contactForm.appendChild(contactActions);
     var typingLine = el("div", "ma-chat-typing");
@@ -373,6 +392,7 @@
     body.appendChild(welcome);
     body.appendChild(sectionTitle);
     body.appendChild(chips);
+    body.appendChild(contactPrompt);
     body.appendChild(orderForm);
     body.appendChild(captchaBox);
     body.appendChild(contactForm);
@@ -439,7 +459,7 @@
       alt.appendChild(ms);
     }
     foot.appendChild(alt);
-    var note = el("p", "ma-chat-note", liveEnabled ? "🔒 নিরাপদ চ্যাট। কার্ড নম্বর বা পাসওয়ার্ড কখনো পাঠাবেন না।" : "মেসেজটি WhatsApp-এ খুলবে। কার্ড নম্বর বা পাসওয়ার্ড পাঠাবেন না।");
+    var note = el("p", "ma-chat-note", liveEnabled ? "নিরাপদ চ্যাট · কার্ডের তথ্য বা পাসওয়ার্ড শেয়ার করবেন না" : "মেসেজ WhatsApp-এ যাবে · কার্ডের তথ্য বা পাসওয়ার্ড শেয়ার করবেন না");
     foot.appendChild(note);
 
     panel.appendChild(head);
@@ -625,7 +645,8 @@
     function maybeShowContact() {
       var done = "";
       try { done = global.localStorage.getItem(contactKey()) || ""; } catch (_) {}
-      contactForm.hidden = Boolean(done);
+      contactForm.hidden = true;
+      contactPrompt.hidden = !liveEnabled || Boolean(done);
     }
     function subscribeTyping(client) {
       if (typingChannel || !conversationId) return;
@@ -889,9 +910,17 @@
       chips.appendChild(b);
     });
     input.addEventListener("input", function () { updateLinks(); if (liveEnabled) sendTyping(); });
+    contactPrompt.addEventListener("click", function () {
+      contactPrompt.hidden = true;
+      contactPrompt.setAttribute("aria-expanded", "true");
+      contactForm.hidden = false;
+      contactName.focus();
+    });
     contactSkip.addEventListener("click", function () {
       try { global.localStorage.setItem(contactKey(), "skipped"); } catch (_) {}
       contactForm.hidden = true;
+      contactPrompt.hidden = true;
+      contactPrompt.setAttribute("aria-expanded", "false");
     });
     contactForm.addEventListener("submit", async function (event) {
       event.preventDefault();
@@ -906,6 +935,8 @@
         if (res.error) throw res.error;
         try { global.localStorage.setItem(contactKey(), "saved"); } catch (_) {}
         contactForm.hidden = true;
+        contactPrompt.hidden = true;
+        contactPrompt.setAttribute("aria-expanded", "false");
         note.textContent = "ধন্যবাদ! আপনার তথ্য সাপোর্ট টিম দেখতে পাবে।";
       } catch (_) {
         note.textContent = "তথ্য সেভ করা যায়নি। মেসেজে লিখে দিলেও চলবে।";
