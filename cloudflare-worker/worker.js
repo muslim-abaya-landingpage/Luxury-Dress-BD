@@ -844,6 +844,7 @@ var seen={};var idx=0;
 function send(e){var n=MAP[e.event];if(!n||!e.event_id||seen[e.event_id+n])return;seen[e.event_id+n]=1;
 var items=Array.isArray(e.items)?e.items:[];
 var body={event_name:n,event_id:String(e.event_id),tt_event_id:String(e.event_id),event_source_url:location.href,referrer:document.referrer||undefined,
+user_data:{em:e.user_email||e.email,ph:e.user_phone||e.phone,fn:e.user_first_name||e.first_name,ln:e.user_last_name||e.last_name,external_id:e.external_id,fbp:e.fbp,fbc:e.fbc},
 custom_data:{currency:e.currency||'BDT',value:Number(e.value)||0,content_type:'product',
 contents:items.map(function(i){return{id:String(i.item_id||i.id||''),quantity:Number(i.quantity)||1,item_price:Number(i.price)||0}})}};
 var p=JSON.stringify(body);

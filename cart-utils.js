@@ -1253,6 +1253,17 @@
         if (Object.prototype.hasOwnProperty.call(data, k)) base[k] = data[k];
       }
     }
+    // Enrich events only with values the shopper has already entered into the checkout form.
+    // applyMetaTrackingFields normalizes them for the data layer; the CAPI relay hashes them
+    // before sending to Meta. Do not scrape arbitrary page text or include address fields.
+    if (typeof document !== "undefined") {
+      var phoneEl = document.getElementById("userPhone");
+      var emailEl = document.getElementById("userEmail");
+      var nameEl = document.getElementById("userName");
+      if (phoneEl && phoneEl.value && !base.phone && !base.user_phone) base.phone = phoneEl.value;
+      if (emailEl && emailEl.value && !base.email && !base.user_email) base.email = emailEl.value;
+      if (nameEl && nameEl.value && !base.first_name && !base.user_first_name) base.first_name = nameEl.value;
+    }
     var payload = applyMetaTrackingFields(base);
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push(payload);
