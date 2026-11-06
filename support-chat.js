@@ -168,6 +168,9 @@
     ".ma-chat-contact-prompt:hover{border-color:#b69655;background:#fff9e9}.ma-chat-contact-prompt:focus-visible{outline:2px solid #b69655;outline-offset:2px}.ma-chat-contact-prompt[hidden]{display:none!important}" +
     ".ma-chat-contact{grid-template-columns:1fr;gap:7px;padding:12px;background:#fffdf7}.ma-chat-contact label{display:block;margin:0 0 -4px;color:#5d5546;font-size:12px;font-weight:650}.ma-chat-contact input{box-sizing:border-box;width:100%;min-height:42px;padding:9px 11px;font-size:14px}.ma-chat-contact .ma-contact-actions{justify-content:space-between}.ma-chat-contact button{min-height:40px;padding:0 14px;font-size:13px}" +
     ".ma-chat-contact button[type=submit]{background:#117a3f;border-color:#117a3f}" +
+    ".ma-chat-clear-local{display:inline-flex;align-items:center;justify-content:center;gap:6px;margin:0 0 7px auto;padding:6px 10px;border:1px solid #e6dfd2;border-radius:999px;background:#fff;color:#765d30;font:600 11px system-ui;cursor:pointer}.ma-chat-clear-local:hover{border-color:#b69655;background:#fffaf0}.ma-chat-clear-local:focus-visible{outline:2px solid #b69655;outline-offset:2px}.ma-chat-clear-local[hidden]{display:none!important}" +
+    ".ma-chat-message-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:5px}.ma-chat-message time{display:block;margin:0;font-size:10px;opacity:.68}.ma-chat-message-remove{border:0;border-radius:6px;padding:2px 5px;background:transparent;color:inherit;font:600 10px system-ui;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;opacity:.76}.ma-chat-message-remove:hover,.ma-chat-message-remove:focus-visible{opacity:1;background:rgba(0,0,0,.07);outline:2px solid #b69655;outline-offset:1px}.ma-chat-message.is-customer .ma-chat-message-remove:hover{background:rgba(255,255,255,.13)}" +
+    ".ma-chat-local-dialog{box-sizing:border-box;width:min(340px,calc(100vw - 36px));max-width:340px;margin:auto;padding:18px;border:1px solid #e6dcc8;border-radius:18px;background:#fffdf8;color:#211f1a;box-shadow:0 18px 50px rgba(0,0,0,.25);font:14px/1.55 'Hind Siliguri',system-ui,sans-serif}.ma-chat-local-dialog::backdrop{background:rgba(17,17,17,.42)}.ma-chat-local-dialog h3{margin:0;color:#201e19;font-size:16px;line-height:1.35}.ma-chat-local-dialog p{margin:8px 0 16px;color:#665d4d;font-size:13px}.ma-chat-local-dialog-actions{display:flex;justify-content:flex-end;gap:8px}.ma-chat-local-dialog button{min-height:38px;padding:0 12px;border:1px solid #ded8cb;border-radius:10px;background:#fff;color:#3d3931;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}.ma-chat-local-dialog button:focus-visible{outline:2px solid #b69655;outline-offset:2px}.ma-chat-local-dialog .ma-chat-local-dialog-confirm{border-color:#171717;background:#171717;color:#fff}" +
     "@media (prefers-reduced-motion:reduce){.ma-chat-fab,.ma-chat-chip{transition:none}}";
 
   var ICON_CHAT =
@@ -389,6 +392,39 @@
     var transcript = el("div", "ma-chat-transcript");
     transcript.setAttribute("aria-live", "polite");
     transcript.setAttribute("aria-relevant", "additions");
+    var clearLocalButton = el("button", "ma-chat-clear-local", "এই ডিভাইসে চ্যাট পরিষ্কার");
+    clearLocalButton.type = "button";
+    clearLocalButton.hidden = true;
+    clearLocalButton.title = "শুধু এই ব্রাউজারে মেসেজ সরবে; সাপোর্ট টিমের কপি থাকবে";
+    clearLocalButton.setAttribute("aria-label", "এই ডিভাইসের চ্যাট পরিষ্কার করুন");
+    var localDeleteDialog = doc.createElement("dialog");
+    localDeleteDialog.className = "ma-chat-local-dialog";
+    localDeleteDialog.setAttribute("role", "alertdialog");
+    localDeleteDialog.setAttribute("aria-labelledby", "maChatLocalDeleteTitle");
+    localDeleteDialog.setAttribute("aria-describedby", "maChatLocalDeleteCopy");
+    var localDialogTitle = el("h3");
+    localDialogTitle.id = "maChatLocalDeleteTitle";
+    var localDialogCopy = el("p");
+    localDialogCopy.id = "maChatLocalDeleteCopy";
+    var localDialogActions = el("div", "ma-chat-local-dialog-actions");
+    var localDialogCancel = el("button", "", "বাতিল");
+    localDialogCancel.type = "button";
+    var localDialogConfirm = el("button", "ma-chat-local-dialog-confirm", "সরান");
+    localDialogConfirm.type = "button";
+    localDialogActions.append(localDialogCancel, localDialogConfirm);
+    localDeleteDialog.append(localDialogTitle, localDialogCopy, localDialogActions);
+    var pendingLocalAction = null;
+    localDialogCancel.addEventListener("click", function () {
+      pendingLocalAction = null;
+      localDeleteDialog.close();
+    });
+    localDialogConfirm.addEventListener("click", function () {
+      var action = pendingLocalAction;
+      pendingLocalAction = null;
+      localDeleteDialog.close();
+      if (action) action();
+    });
+    localDeleteDialog.addEventListener("cancel", function () { pendingLocalAction = null; });
     body.appendChild(welcome);
     body.appendChild(sectionTitle);
     body.appendChild(chips);
@@ -396,6 +432,7 @@
     body.appendChild(orderForm);
     body.appendChild(captchaBox);
     body.appendChild(contactForm);
+    body.appendChild(clearLocalButton);
     body.appendChild(transcript);
     body.appendChild(typingLine);
     var foot = el("div", "ma-chat-foot");
@@ -465,6 +502,7 @@
     panel.appendChild(head);
     panel.appendChild(body);
     panel.appendChild(foot);
+    panel.appendChild(localDeleteDialog);
     doc.body.appendChild(fab);
     doc.body.appendChild(panel);
 
@@ -510,10 +548,69 @@
       send.href = url;
       wa.href = waBase + "?text=" + encodeURIComponent("Hello! I have a question." + pageContext());
     }
+    function hiddenMessageKey() { return "maSupportHiddenMessages:" + conversationId; }
+    function readHiddenMessageIds() {
+      try {
+        var ids = JSON.parse(global.localStorage.getItem(hiddenMessageKey()) || "[]");
+        return Array.isArray(ids) ? ids.filter(function (id) { return typeof id === "string"; }) : [];
+      } catch (_) { return []; }
+    }
+    function writeHiddenMessageIds(ids) {
+      try { global.localStorage.setItem(hiddenMessageKey(), JSON.stringify(ids)); return true; }
+      catch (_) { return false; }
+    }
+    function refreshTranscriptState() {
+      var hasVisibleMessages = Boolean(transcript.querySelector(".ma-chat-message"));
+      body.classList.toggle("has-messages", hasVisibleMessages);
+      clearLocalButton.hidden = !hasVisibleMessages;
+    }
+    function requestLocalAction(title, copy, confirmLabel, action) {
+      localDialogTitle.textContent = title;
+      localDialogCopy.textContent = copy;
+      localDialogConfirm.textContent = confirmLabel;
+      pendingLocalAction = action;
+      if (typeof localDeleteDialog.showModal === "function") {
+        localDeleteDialog.showModal();
+        localDialogCancel.focus();
+      } else {
+        pendingLocalAction = null;
+        if (global.confirm(copy)) action();
+      }
+    }
+    function hideMessageLocally(row, bubble) {
+      if (!bubble.isConnected) return;
+      var id = String(row.id);
+      var ids = readHiddenMessageIds();
+      if (ids.indexOf(id) < 0) ids.push(id);
+      if (!writeHiddenMessageIds(ids)) {
+        note.textContent = "ব্রাউজারের স্টোরেজে সেভ করা যায়নি। কিছু storage space খালি করে আবার চেষ্টা করুন।";
+        return;
+      }
+      bubble.remove();
+      refreshTranscriptState();
+      note.textContent = "মেসেজটি শুধু এই ডিভাইস থেকে সরানো হয়েছে; সাপোর্ট টিমের কপি থাকবে।";
+    }
+    function clearVisibleMessagesLocally() {
+      var bubbles = Array.prototype.slice.call(transcript.querySelectorAll(".ma-chat-message[data-message-id]"));
+      var newIds = bubbles.map(function (bubble) { return bubble.getAttribute("data-message-id"); }).filter(Boolean);
+      if (!newIds.length) return;
+      var ids = readHiddenMessageIds();
+      newIds.forEach(function (id) { if (ids.indexOf(id) < 0) ids.push(id); });
+      if (!writeHiddenMessageIds(ids)) {
+        note.textContent = "চ্যাট পরিষ্কার করা যায়নি। ব্রাউজারের storage space যাচাই করে আবার চেষ্টা করুন।";
+        return;
+      }
+      transcript.replaceChildren();
+      refreshTranscriptState();
+      note.textContent = "এই ডিভাইসের চ্যাট পরিষ্কার হয়েছে। সাপোর্ট টিমের কপি অক্ষত আছে।";
+    }
     function appendMessage(row) {
       if (!row || !row.id || seenMessageIds[row.id]) return;
       seenMessageIds[row.id] = true;
+      var messageId = String(row.id);
+      if (readHiddenMessageIds().indexOf(messageId) >= 0) return;
       var bubble = el("div", "ma-chat-message " + (row.sender_role === "customer" ? "is-customer" : "is-agent"));
+      bubble.setAttribute("data-message-id", messageId);
       var messageBody = el("div", "ma-chat-message-body");
       messageBody.textContent = String(row.body || "");
       bubble.appendChild(messageBody);
@@ -534,42 +631,24 @@
           if (res && res.data && res.data.signedUrl) { media.src = res.data.signedUrl; if (media.tagName === "A") media.href = res.data.signedUrl; }
           else media.remove();
         }, function () { media.remove(); });
-        var sentAt = new Date(row.created_at || 0).getTime();
-        if (row.sender_role === "customer" && row.sender_id === currentUser.id && Date.now() - sentAt <= 24 * 60 * 60 * 1000) {
-          var deleteImage = el("button", "ma-chat-delete-image", "মুছুন");
-          deleteImage.type = "button";
-          deleteImage.setAttribute("aria-label", "পাঠানো অ্যাটাচমেন্টটি মুছুন");
-          deleteImage.addEventListener("click", function () { deleteSentImage(row, bubble, deleteImage); });
-          bubble.appendChild(deleteImage);
-        }
       }
+      var messageFooter = el("div", "ma-chat-message-footer");
       var time = el("time");
       time.dateTime = row.created_at || "";
       time.textContent = row.created_at ? new Date(row.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "";
-      bubble.appendChild(time);
+      var removeMessage = el("button", "ma-chat-message-remove", "মুছুন");
+      removeMessage.type = "button";
+      removeMessage.title = "শুধু এই ডিভাইস থেকে সরবে; সাপোর্ট টিমের কপি থাকবে";
+      removeMessage.setAttribute("aria-label", "এই ডিভাইসের চ্যাট থেকে মেসেজটি মুছুন");
+      removeMessage.addEventListener("click", function () {
+        requestLocalAction("মেসেজটি সরাবেন?", "এটি শুধু এই ব্রাউজারের চ্যাট থেকে সরবে। সাপোর্ট টিমের কাছে আসল মেসেজ ও সংযুক্তির কপি থাকবে।", "এই ডিভাইস থেকে সরান", function () { hideMessageLocally(row, bubble); });
+      });
+      messageFooter.append(time, removeMessage);
+      bubble.appendChild(messageFooter);
       transcript.appendChild(bubble);
-      body.classList.add("has-conversation", "has-messages");
+      body.classList.add("has-conversation");
+      refreshTranscriptState();
       body.scrollTop = body.scrollHeight;
-    }
-    async function deleteSentImage(row, bubble, button) {
-      if (!global.confirm("আপনি কি পাঠানো অ্যাটাচমেন্টটি মুছে ফেলতে চান? এই কাজটি ফিরিয়ে নেওয়া যাবে না।")) return;
-      button.disabled = true;
-      button.textContent = "মুছছে…";
-      try {
-        var client = await loadSupabase();
-        var result = await client.from("support_messages").delete().eq("id", row.id)
-          .eq("conversation_id", conversationId).eq("sender_id", currentUser.id).eq("sender_role", "customer");
-        if (result.error) throw result.error;
-        bubble.remove();
-        delete seenMessageIds[row.id];
-        var removed = await client.storage.from("support-attachments").remove([row.attachment_path]);
-        if (removed.error) console.warn("Chat image storage cleanup failed", removed.error);
-        note.textContent = "অ্যাটাচমেন্টটি চ্যাট থেকে মুছে ফেলা হয়েছে।";
-      } catch (error) {
-        button.disabled = false;
-        button.textContent = "মুছুন";
-        note.textContent = "অ্যাটাচমেন্টটি মুছতে পারেনি। আবার চেষ্টা করুন।";
-      }
     }
     async function ensureLiveConversationImpl() {
       var client = await loadSupabase();
@@ -683,7 +762,7 @@
       seenMessageIds = Object.create(null);
       (result.data || []).forEach(appendMessage);
       body.classList.add("has-conversation");
-      body.classList.toggle("has-messages", Boolean((result.data || []).length));
+      refreshTranscriptState();
       await client.from("support_messages").update({ read_at: new Date().toISOString() })
         .eq("conversation_id", conversationId).eq("sender_role", "agent").is("read_at", null);
     }
@@ -910,6 +989,10 @@
       chips.appendChild(b);
     });
     input.addEventListener("input", function () { updateLinks(); if (liveEnabled) sendTyping(); });
+    clearLocalButton.addEventListener("click", function () {
+      if (!transcript.querySelector(".ma-chat-message[data-message-id]")) return;
+      requestLocalAction("এই ডিভাইসের চ্যাট পরিষ্কার করবেন?", "এই ব্রাউজারে দেখা মেসেজগুলো সরবে; সাপোর্ট টিমের কাছে সব কপি থাকবে।", "চ্যাট পরিষ্কার করুন", clearVisibleMessagesLocally);
+    });
     contactPrompt.addEventListener("click", function () {
       contactPrompt.hidden = true;
       contactPrompt.setAttribute("aria-expanded", "true");
@@ -985,7 +1068,10 @@
       expand.setAttribute("aria-label", expanded ? "চ্যাট ছোট করুন" : "চ্যাট বড় করুন");
     });
     doc.addEventListener("keydown", function (ev) {
-      if (ev.key === "Escape" && panel.classList.contains("is-open")) setOpen(false);
+      if (ev.key === "Escape" && panel.classList.contains("is-open")) {
+        if (localDeleteDialog.open) return;
+        setOpen(false);
+      }
     });
   }
 

@@ -10,6 +10,49 @@ async function openChat(page) {
   await expect(page.locator('#maChatPanel')).toHaveClass(/is-open/);
 }
 
+async function openChatWithMockHistory(page) {
+  await page.route('https://cdn.jsdelivr.net/**', (r) => r.abort());
+  await page.addInitScript(() => {
+    window.SITE_CHAT = { supabaseUrl: 'https://mock.supabase.co', supabaseKey: 'test-public-key' };
+    window.__supportMessageRows = [
+      { id: 'customer-message-1', conversation_id: 'test-conversation', sender_id: 'test-visitor', sender_role: 'customer', body: '1080', created_at: '2026-11-06T01:43:00.000Z' },
+      { id: 'agent-message-1', conversation_id: 'test-conversation', sender_id: 'support-agent', sender_role: 'agent', body: 'আপনাকে সাইজে সাহায্য করছি।', created_at: '2026-11-06T01:44:00.000Z' }
+    ];
+    window.__supportMessageDeleteCalls = 0;
+    function query() {
+      return {
+        select() { return this; },
+        insert() { return Promise.resolve({ data: null, error: null }); },
+        update() { return this; },
+        delete() { window.__supportMessageDeleteCalls += 1; return this; },
+        eq() { return this; },
+        order() { return this; },
+        limit() { return Promise.resolve({ data: window.__supportMessageRows, error: null }); },
+        maybeSingle() { return Promise.resolve({ data: { id: 'test-conversation', status: 'open' }, error: null }); },
+        is() { return Promise.resolve({ error: null }); }
+      };
+    }
+    window.supabase = {
+      createClient() {
+        return {
+          auth: { getSession: () => Promise.resolve({ data: { session: { user: { id: 'test-visitor' } } } }) },
+          from: () => query(),
+          channel: () => ({ on() { return this; }, subscribe(callback) { if (callback) callback('SUBSCRIBED'); return this; } }),
+          removeChannel: () => Promise.resolve(),
+          storage: { from: () => ({ createSignedUrl: () => Promise.resolve({ data: { signedUrl: 'https://mock.supabase.co/test-file' }, error: null }) }) },
+          functions: { invoke: () => Promise.resolve({ error: null }) }
+        };
+      }
+    };
+    localStorage.setItem('maSupportConversation:test-visitor', 'test-conversation');
+  });
+  await page.goto('/index.html');
+  await page.waitForSelector('#maChatFab', { timeout: 20000 });
+  await page.click('#maChatFab');
+  await expect(page.locator('#maChatPanel')).toHaveClass(/is-open/);
+  await expect(page.locator('.ma-chat-transcript .ma-chat-message')).toHaveCount(2);
+}
+
 test('chat greets in Bangla and chips fill a Bangla message', async ({ page }) => {
   await openChat(page);
   await expect(page.locator('.ma-chat-greet')).toContainText('আসসালামু আলাইকুম');
@@ -31,6 +74,45 @@ test('contact details are optional and only shown when requested', async ({ page
   await expect(prompt).toBeHidden();
   await expect(form).toBeVisible();
   await expect(page.locator('#maChatContactName')).toBeFocused();
+});
+
+test('message delete and clear only hide local history; support-team records remain', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openChatWithMockHistory(page);
+  const firstMessage = page.locator('.ma-chat-transcript .ma-chat-message').first();
+  const panelBounds = await page.locator('#maChatPanel').boundingBox();
+  const removeBounds = await firstMessage.getByRole('button', { name: 'এই ডিভাইসের চ্যাট থেকে মেসেজটি মুছুন' }).boundingBox();
+  expect(panelBounds.x).toBeGreaterThanOrEqual(0);
+  expect(panelBounds.x + panelBounds.width).toBeLessThanOrEqual(390);
+  expect(removeBounds.x).toBeGreaterThanOrEqual(0);
+  expect(removeBounds.x + removeBounds.width).toBeLessThanOrEqual(390);
+  await firstMessage.getByRole('button', { name: 'এই ডিভাইসের চ্যাট থেকে মেসেজটি মুছুন' }).click();
+  const dialog = page.getByRole('alertdialog');
+  await expect(dialog).toContainText('সাপোর্ট টিমের কাছে আসল মেসেজ ও সংযুক্তির কপি থাকবে');
+  await dialog.getByRole('button', { name: 'এই ডিভাইস থেকে সরান' }).click();
+  await expect(page.locator('.ma-chat-transcript .ma-chat-message')).toHaveCount(1);
+  await expect(page.locator('.ma-chat-note')).toContainText('সাপোর্ট টিমের কপি থাকবে');
+  let hiddenIds = await page.evaluate(() => JSON.parse(localStorage.getItem('maSupportHiddenMessages:test-conversation')));
+  expect(hiddenIds).toContain('customer-message-1');
+  expect(await page.evaluate(() => window.__supportMessageDeleteCalls)).toBe(0);
+
+  await page.reload();
+  await page.waitForSelector('#maChatFab');
+  await page.click('#maChatFab');
+  await expect(page.locator('.ma-chat-transcript .ma-chat-message')).toHaveCount(1);
+  await expect(page.locator('.ma-chat-transcript .ma-chat-message')).toContainText('আপনাকে সাইজে সাহায্য করছি।');
+  await page.getByRole('button', { name: 'এই ডিভাইসের চ্যাট পরিষ্কার করুন' }).click();
+  const clearDialog = page.getByRole('alertdialog');
+  await expect(clearDialog).toContainText('সাপোর্ট টিমের কাছে সব কপি থাকবে');
+  await clearDialog.getByRole('button', { name: 'চ্যাট পরিষ্কার করুন' }).click();
+  await expect(page.locator('.ma-chat-transcript .ma-chat-message')).toHaveCount(0);
+  await expect(page.locator('.ma-chat-body')).not.toHaveClass(/has-messages/);
+  await expect(page.locator('.ma-chat-note')).toContainText('সাপোর্ট টিমের কপি অক্ষত আছে');
+  hiddenIds = await page.evaluate(() => JSON.parse(localStorage.getItem('maSupportHiddenMessages:test-conversation')));
+  expect(hiddenIds).toContain('customer-message-1');
+  expect(hiddenIds).toContain('agent-message-1');
+  expect(await page.evaluate(() => window.__supportMessageRows.length)).toBe(2);
+  expect(await page.evaluate(() => window.__supportMessageDeleteCalls)).toBe(0);
 });
 
 test('image attachment is previewed as a draft and can be removed before sending', async ({ page }) => {
