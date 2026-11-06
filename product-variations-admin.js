@@ -125,7 +125,7 @@
     ".pmw-tiles{display:flex;flex-wrap:wrap;gap:6px}.pmw-tiles button{padding:0;border:2px solid transparent;background:none;cursor:pointer}.pmw-tiles button.is-on{border-color:#2271b1}" +
     ".pmw-tiles img{width:56px;height:56px;object-fit:cover;display:block}.pmw-cb{display:flex;flex-wrap:wrap;gap:18px;padding:8px 0;border-top:1px solid #f0f0f1;border-bottom:1px solid #f0f0f1}" +
     ".pmw-cb label{display:flex;gap:6px;align-items:center}.pmw-msg{font-size:12px;color:#646970;margin:8px 0 0}.pmw-msg.is-err{color:#b32d2e}.pmw-msg.is-ok{color:#008a20}" +
-    ".pmw-empty{padding:18px 0;color:#646970}@media(max-width:700px){.pmw-box-body,.pmw-row2{grid-template-columns:1fr}}";
+    ".pmw-empty{padding:18px 0;color:#646970}.pmw-inline-add{display:flex;align-items:end;flex-wrap:wrap;gap:10px;margin:12px 0 16px;padding:16px;border:1px solid #dcdcde;border-left:4px solid #2271b1;border-radius:8px;background:#f6f7f7}.pmw-inline-add label{display:block;width:100%;font-weight:600}.pmw-inline-add input{width:min(100%,360px);min-height:38px;padding:6px 10px;border:1px solid #8c8f94;border-radius:4px}.pmw-inline-add .pmw-hint{flex-basis:100%;margin:0}.pmw-box{margin:10px 0;border:1px solid #dcdcde;border-radius:5px;background:#fff;overflow:hidden}.pmw-box-head{padding:12px 14px;background:#f6f7f7}.pmw-box-body{padding:14px}.pmw-var{margin:10px 0;border:1px solid #dcdcde;border-radius:5px;background:#fff;overflow:hidden}.pmw-var-head{padding:12px;background:#f6f7f7}.pmw-var-body{padding:14px}.pmw-var-head select{min-height:38px;padding:4px 8px;border:1px solid #c3c4c7;border-radius:4px;background:#fff}.pmw-row2 input,.pmw-row2 select,.pmw-field input,.pmw-field select{min-height:40px;padding:6px 10px;border:1px solid #c3c4c7;border-radius:4px}.pmw-img{border-radius:5px;background:#f6f7f7}.pmw-btn{border-radius:4px;font-weight:600}.pmw-btn:focus-visible,.pmw a:focus-visible,.pmw input:focus-visible,.pmw select:focus-visible,.pmw textarea:focus-visible{outline:2px solid #2271b1;outline-offset:2px}@media(max-width:700px){.pmw-box-body,.pmw-row2{grid-template-columns:1fr}.pmw-inline-add{align-items:stretch}.pmw-inline-add input,.pmw-inline-add button{width:100%;min-width:0}.pmw-var-head select{max-width:100%;min-width:0;flex:1 1 100%}.pmw-var-head .pmw-actions{width:100%;justify-content:flex-end}}";
   function injectCss() {
     if (document.getElementById("pmw-css")) return;
     var s = document.createElement("style");
@@ -179,6 +179,7 @@
         '<div class="pmw-bar"><button type="button" class="pmw-btn" data-pa="new">Add new</button>' +
         '<select data-pa="global" aria-label="Add global attribute"><option value="">Add global</option>' + missing.map(function (d) { return '<option value="' + d.id + '">' + esc(d.name) + "</option>"; }).join("") + "</select>" +
         '<span class="pmw-right"><a data-pa="expand">Expand</a> / <a data-pa="close">Close</a></span></div>' +
+        (st.showAdd ? '<div class="pmw-inline-add"><label for="pmw-new-attribute">Name</label><input id="pmw-new-attribute" type="text" data-pa="new-name" list="pmw-supported-attributes" placeholder="e.g. Long, Body, Size, Sleeve, Color or Option" autocomplete="off"><datalist id="pmw-supported-attributes">' + missing.map(function (d) { return '<option value="' + esc(d.name) + '"></option>'; }).join('') + '</datalist><button type="button" class="pmw-btn pmw-btn-primary" data-pa="add-selected">Add attribute</button><button type="button" class="pmw-btn" data-pa="cancel-new">Cancel</button><p class="pmw-hint">Enter a supported product attribute name. Values remain connected to the product’s existing size, color and option fields.</p></div>' : '') +
         present.map(function (d) {
           var open = st.open[d.id] !== false;
           var readonly = !d.field;
@@ -202,6 +203,7 @@
       if (!d) return;
       if (present.indexOf(d) === -1) { present.push(d); st.added.push(id); missing = missing.filter(function (x) { return x !== d; }); }
       st.open[id] = true;
+      st.showAdd = false;
       draw();
       if (!d.field) msg(d.name + " values are edited in " + d.editIn + ".", "");
       var ta = box.querySelector('[data-pa="values"][data-id="' + id + '"]');
@@ -248,15 +250,17 @@
         if (!a) return;
         var k = a.getAttribute("data-pa"), id = a.getAttribute("data-id");
         if (k === "notice") { st.notice = false; draw(); }
-        else if (k === "new") {
-          var name = g.prompt("Attribute name (for example Long, Body, Size, Sleeve, Palazzo, Color or Option):");
-          if (name == null) return;
-          var n = norm(name);
+        else if (k === "new") { st.showAdd = !st.showAdd; draw(); }
+        else if (k === "add-selected") {
+          var field = box.querySelector('[data-pa="new-name"]');
+          var n = norm(field && field.value);
           var map = { long: "length", length: "length", "dress length": "length", body: "body", size: "size", sizes: "size", sleeve: "sleeve", palazzo: "palazzo", pajama: "palazzo", color: "color", colour: "color", option: "type", type: "type" };
-          var want = map[n];
-          if (!want || !defById(defs, want)) { msg("The product page can show these attributes for this product: " + defs.map(function (d) { return d.name; }).join(", ") + ".", "err"); return; }
-          addAttr(want);
-        } else if (k === "remove") {
+          var wanted = map[n];
+          if (!wanted || !defById(defs, wanted)) { msg("This product supports: " + defs.map(function (d) { return d.name; }).join(", ") + ". Enter one of these names.", "err"); if (field) field.focus(); return; }
+          if (present.indexOf(defById(defs, wanted)) !== -1) { msg("This attribute is already added.", "err"); if (field) field.focus(); return; }
+          addAttr(wanted);
+        } else if (k === "cancel-new") { st.showAdd = false; draw(); }
+        else if (k === "remove") {
           var d = defById(defs, id);
           if (!d || !d.field) return;
           if (!g.confirm("Remove this attribute? Its values are removed from the product.")) return;
