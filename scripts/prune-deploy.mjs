@@ -23,7 +23,7 @@ const DIRS = ['apps-script', 'tests', 'scripts', 'cloudflare-worker', 'docs', 's
 // Root files that are tooling/notes. Everything the site serves (html, js, css, images, robots.txt, sitemap.xml,
 // llms.txt, CNAME, catalog-validation.json, live-build.json, …) is kept.
 const ROOT_FILE = /\.(md|bat|ps1|gs|ts|toml|rules|cjs|py|sh)$/i;
-const ROOT_NAMES = new Set(['package.json', 'package-lock.json', 'tsconfig.json', 'metadata.json', 'manus-routes.json',
+const ROOT_NAMES = new Set(['package.json', 'package-lock.json', 'tsconfig.json', 'metadata.json',
   'firebase-applet-config.json', 'apps-script-copy.html', '.gitignore', '.env.example']);
 
 let removed = 0;
@@ -37,7 +37,7 @@ for (const name of fs.readdirSync(root)) {
   if (ROOT_FILE.test(name) || ROOT_NAMES.has(name)) { fs.rmSync(full); removed++; }
 }
 // Must never remove what the site or Pages Functions need.
-for (const keep of ['index.html', 'functions', '_headers', '_redirects', '_routes.json', 'catalog-validation.json', 'robots.txt', 'sitemap.xml']) {
+for (const keep of ['index.html', 'functions', '_headers', '_redirects', '_routes.json', 'manus-routes.json', 'catalog-validation.json', 'robots.txt', 'sitemap.xml']) {
   if (!fs.existsSync(path.join(root, keep))) throw new Error('prune-deploy removed a required file: ' + keep);
 }
 console.log(`prune-deploy: removed ${removed} non-website files/folders from the upload.`);
