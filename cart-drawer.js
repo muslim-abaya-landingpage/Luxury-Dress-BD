@@ -139,6 +139,13 @@ function ensureCartDrawerRelatedStyles() {
       position: sticky; bottom: 0; background: #fff; border-top: 1px solid rgba(17,17,17,.08);
       padding: 14px 18px 18px;
     }
+    .cart-drawer-freeship { margin: 0 0 12px; padding: 10px 12px; border: 1px solid #efe3c4; border-radius: 10px; background: #fffaf0; }
+    .cart-drawer-freeship p { margin: 0 0 7px; font-size: 13px; font-weight: 600; color: #5b4a1d; }
+    .cart-drawer-freeship-bar { height: 6px; border-radius: 99px; background: #f0e6cc; overflow: hidden; }
+    .cart-drawer-freeship-bar span { display: block; height: 100%; width: 0; border-radius: 99px; background: #b69655; transition: width .3s ease; }
+    .cart-drawer-freeship.is-done { border-color: #bfe3cb; background: #f0fbf4; }
+    .cart-drawer-freeship.is-done p { color: #11663a; margin: 0; }
+    .cart-drawer-freeship.is-done .cart-drawer-freeship-bar { display: none; }
     .cart-drawer-total-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
     .cart-drawer-total-row span { font-size: 13px; color: #555; }
     .cart-drawer-total-row strong { font-size: 17px; color: #111; }
@@ -459,6 +466,7 @@ function ensureCartDrawerHtml() {
       </div>
     </div>
     <div class="cart-drawer-foot">
+      <div class="cart-drawer-freeship" id="cart-drawer-freeship" hidden aria-live="polite"><p></p><div class="cart-drawer-freeship-bar"><span></span></div></div>
       <div class="cart-drawer-total-row">
         <span>Subtotal</span>
         <strong id="cart-drawer-total-price">৳0</strong>
@@ -526,6 +534,23 @@ document.addEventListener('keydown', function (e) {
   }
 }
 
+// Free delivery from FREE_DELIVERY_QTY pieces (same rule as checkout and the order server: qty >= 3).
+var FREE_DELIVERY_QTY = 3;
+function renderFreeDeliveryHint(cartItems, totalPcs) {
+  const box = document.getElementById('cart-drawer-freeship');
+  if (!box) return;
+  const virtualOnly = typeof window.allLinesVirtual === 'function' && cartItems && cartItems.length && window.allLinesVirtual(cartItems);
+  if (!cartItems || !cartItems.length || virtualOnly) { box.hidden = true; return; }
+  const left = Math.max(0, FREE_DELIVERY_QTY - totalPcs);
+  box.hidden = false;
+  box.classList.toggle('is-done', left === 0);
+  box.querySelector('p').textContent = left === 0
+    ? '🎉 অভিনন্দন! আপনার ডেলিভারি একদম ফ্রি'
+    : '🚚 আর ' + (left === 1 ? '১টি' : '২টি') + ' পণ্য যোগ করলে সারা দেশে ডেলিভারি ফ্রি';
+  box.querySelector('.cart-drawer-freeship-bar span').style.width = Math.min(100, Math.round(totalPcs / FREE_DELIVERY_QTY * 100)) + '%';
+}
+window.renderFreeDeliveryHint = renderFreeDeliveryHint;
+
 window.renderCartList = function (cartItems) {
   const listContainer = document.getElementById('cart-items-list');
   if (!listContainer) return;
@@ -534,6 +559,7 @@ window.renderCartList = function (cartItems) {
   const totalEl = document.getElementById('cart-drawer-total-price');
 
   const totalPcs = typeof window.cartTotalQty === 'function' ? window.cartTotalQty(cartItems) : (cartItems || []).length;
+  renderFreeDeliveryHint(cartItems, totalPcs);
 
   if (!cartItems || cartItems.length === 0) {
     listContainer.innerHTML = `

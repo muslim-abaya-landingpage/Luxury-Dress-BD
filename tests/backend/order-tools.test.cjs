@@ -91,3 +91,28 @@ test('district guess: only an unambiguous match, Bengali spelling variants and D
   const rep = T.report([{ orderId: 'A', address: 'Mirpur 10', status: 'Delivered', total: 100, items: ['x'] }], D);
   assert.equal(rep.districts[0].key, 'ঢাকা'); assert.equal(rep.guessedDistricts, 1);
 });
+
+test('advance delivery-charge request: only before shipping, with charge and no advance; reason for new/risky customers', () => {
+  const o = order({ charge: 130 });
+  assert.equal(T.canAskAdvance(o), true);
+  const msg = decodeURIComponent(T.advanceUrl(o).split('text=')[1]);
+  assert.match(msg, /ডেলিভারি চার্জ ৳130 অগ্রিম/);
+  assert.match(msg, /01971642683/);
+  assert.equal(T.advanceUrl(order({ charge: 130, advance: 130 })), '');
+  assert.equal(T.advanceUrl(order({ charge: 0 })), '');
+  assert.equal(T.advanceUrl(order({ charge: 130, status: 'Shipped' })), '');
+  assert.equal(T.advanceUrl(order({ charge: 130, tracking: 'SF1' })), '');
+  assert.match(T.advanceReason(o, { risk: 'low', stats: { delivered: 0 } }), /নতুন কাস্টমার/);
+  assert.match(T.advanceReason(o, { risk: 'high', stats: { delivered: 3 } }), /ঝুঁকি বেশি/);
+  assert.equal(T.advanceReason(o, { risk: 'low', stats: { delivered: 2 } }), '');
+  assert.equal(T.advanceReason(o, null), '');
+});
+
+test('review request appears only for delivered orders and carries the Google review link', () => {
+  assert.equal(T.reviewUrl(order({ status: 'Pending' })), '');
+  const url = T.reviewUrl(order({ status: 'Delivered' }));
+  const msg = decodeURIComponent(url.split('text=')[1]);
+  assert.match(msg, /search\.google\.com\/local\/writereview\?placeid=/);
+  assert.match(msg, /MA-1/);
+  assert.match(T.reviewUrl(order({ status: 'Shipped', courierStatus: 'Delivered' })), /^https:\/\/wa\.me\//);
+});

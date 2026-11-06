@@ -309,6 +309,8 @@
       }
 
       function renderCustomerHistory() {
+        window.MaOrderHistory = history;
+        document.dispatchEvent(new CustomEvent("ma-order-history", { detail: history }));
         var stats = history && history.stats ? history.stats : {};
         var recent = history && Array.isArray(history.recent) ? history.recent : [];
         var total = Number(stats.total) || recent.length || 0;
@@ -349,6 +351,7 @@
         b.textContent = displayStatus.orderLabel;
         b.title = displayStatus.note;
         b.className = "pn-badge " + displayStatus.badgeKey;
+        window.MaOrderCurrent = o;
         document.dispatchEvent(new CustomEvent("ma-order-rendered", { detail: o }));
         $("oSource").textContent = o.source;
         $("oCreated").textContent = "Created : " + o.time;

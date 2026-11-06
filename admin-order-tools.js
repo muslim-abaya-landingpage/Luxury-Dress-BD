@@ -1,6 +1,8 @@
 /**
  * Muslim Abaya — order panel tools (admin-orders.html + admin-order.html).
  *  - WhatsApp-এ কনফার্ম: wa.me লিংক, অর্ডারের বিবরণ আগে থেকে লেখা
+ *  - অগ্রিম ডেলিভারি চার্জ চান: নতুন / ঝুঁকিপূর্ণ কাস্টমারের জন্য bKash নম্বরসহ মেসেজ
+ *  - রিভিউ চান: Delivered অর্ডারে Google রিভিউ লিংকসহ ধন্যবাদ মেসেজ
  *  - বাতিল/Fake/রিটার্নের কারণ: Admin Note-এ "[কারণ: …]" ট্যাগ হিসেবে
  *  - একসাথে অনেক অর্ডার: প্যাকিং স্লিপ প্রিন্ট ও Steadfast-এ পাঠানো
  *  - রিপোর্ট: জেলা, পণ্য ও বাতিলের কারণ অনুযায়ী
@@ -47,6 +49,50 @@
     lines.push("", "সব ঠিক থাকলে \"হ্যাঁ\" লিখে জানান। কিছু বদলাতে চাইলে এখানেই বলুন। ধন্যবাদ।");
     return lines.join("\n");
   }
+
+  /* Public shop contacts used in customer messages. Override with window.MA_SHOP_CONTACT = { bkash, reviewUrl }. */
+  var SHOP_DEFAULT = { bkash: "01971642683",
+    reviewUrl: "https://search.google.com/local/writereview?placeid=ChIJH42n6d23VTcR5pph1yG8RUQ" };
+  function shop() {
+    var c = (root && root.MA_SHOP_CONTACT) || {};
+    return { bkash: text(c.bkash) || SHOP_DEFAULT.bkash, reviewUrl: text(c.reviewUrl) || SHOP_DEFAULT.reviewUrl };
+  }
+  function hello(o) { return "আসসালামু আলাইকুম" + (text(o.name) ? " " + text(o.name) : "") + ","; }
+
+  function advanceMessage(o) {
+    var charge = num(o.charge), s = shop();
+    return [hello(o),
+      "Muslim Abaya থেকে বলছি। আপনার অর্ডার " + (text(o.orderId) || "") + " পাঠানোর জন্য প্রস্তুত।", "",
+      "অর্ডারটি নিশ্চিত করতে ডেলিভারি চার্জ " + (charge > 0 ? money(charge) : "") + " অগ্রিম পাঠাতে অনুরোধ করছি।",
+      "bKash / Nagad (Personal, Send Money): " + s.bkash,
+      "টাকা পাঠিয়ে Transaction ID বা স্ক্রিনশট এখানে দিন।", "",
+      "বাকি টাকা পণ্য হাতে পেয়ে দেবেন। অগ্রিম টাকা মোট বিল থেকে বাদ যাবে। ধন্যবাদ।"].join("\n");
+  }
+  function reviewMessage(o) {
+    return [hello(o),
+      "Muslim Abaya থেকে বলছি। আপনার অর্ডার " + (text(o.orderId) || "") + " পেয়েছেন জেনে ভালো লাগছে, কেনাকাটার জন্য ধন্যবাদ।", "",
+      "পণ্য পছন্দ হলে এক মিনিট সময় নিয়ে Google-এ একটি রিভিউ দিলে আমরা খুব উপকৃত হব:",
+      shop().reviewUrl, "",
+      "কোনো সমস্যা থাকলে এখানেই জানান, আমরা সমাধান করে দেব।"].join("\n");
+  }
+  /** Why to ask for the delivery charge in advance: "" when there is no reason. history = AdminOrderGet history. */
+  function advanceReason(o, history) {
+    if (o && o.blocked) return "নম্বর ব্লক করা";
+    var risk = history && history.risk, st = (history && history.stats) || {};
+    if (risk === "high") return "ঝুঁকি বেশি — আগে অর্ডার ফেরত/বাতিল হয়েছে";
+    if (risk === "medium") return "সতর্কতা — আগে কিছু অর্ডার ব্যর্থ";
+    if (history && !(Number(st.delivered) > 0)) return "নতুন কাস্টমার — আগে কোনো অর্ডার ডেলিভার হয়নি";
+    return "";
+  }
+  /** The advance request makes sense only before shipping, with a delivery charge and no advance yet. */
+  function canAskAdvance(o) {
+    if (!o || !waPhone(o.phone) || num(o.advance) > 0 || num(o.charge) <= 0) return false;
+    if (text(o.tracking) || text(o.consignmentId)) return false;
+    return /^(pending|confirmed|)$/i.test(text(o.status));
+  }
+  function waText(o, message) { var p = waPhone(o && o.phone); return p ? "https://wa.me/" + p + "?text=" + encodeURIComponent(message) : ""; }
+  function advanceUrl(o) { return canAskAdvance(o) ? waText(o, advanceMessage(o)) : ""; }
+  function reviewUrl(o) { return o && outcome(o) === "delivered" ? waText(o, reviewMessage(o)) : ""; }
 
   function waUrl(o) {
     var p = waPhone(o && o.phone);
@@ -175,7 +221,9 @@
 
   var api = { REASONS: REASONS, waPhone: waPhone, confirmMessage: confirmMessage, waUrl: waUrl, needsReason: needsReason,
     reasonOf: reasonOf, withReason: withReason, outcome: outcome, parseItem: parseItem, parseItems: parseItems, report: report,
-    courierPlan: courierPlan, failRate: failRate, guessDistrict: guessDistrict };
+    courierPlan: courierPlan, failRate: failRate, guessDistrict: guessDistrict,
+    advanceMessage: advanceMessage, reviewMessage: reviewMessage, advanceReason: advanceReason, canAskAdvance: canAskAdvance,
+    advanceUrl: advanceUrl, reviewUrl: reviewUrl };
   root.MaOrderTools = api;
   if (typeof module !== "undefined" && module.exports) { module.exports = api; return; }
   if (typeof document === "undefined") return;
@@ -194,7 +242,8 @@
     ".ot-grid h3{font-size:.95rem;margin:0 0 6px}.ot-tbl{width:100%;border-collapse:collapse;font-size:.85rem}" +
     ".ot-tbl th,.ot-tbl td{padding:5px 6px;border-bottom:1px solid rgba(127,127,127,.18);text-align:right}.ot-tbl th:first-child,.ot-tbl td:first-child{text-align:left}" +
     ".ot-bad{color:#c62828;font-weight:700}.ot-note{font-size:.8rem;opacity:.75;margin:4px 0 0}" +
-    ".ot-reasons{display:flex;flex-direction:column;gap:6px}.ot-reasons button{text-align:left}";
+    ".ot-reasons{display:flex;flex-direction:column;gap:6px}.ot-reasons button{text-align:left}" +
+    ".ot-suggest{box-shadow:0 0 0 3px rgba(201,162,74,.35)}";
   function addStyle() { if ($("otStyle")) return; var st = document.createElement("style"); st.id = "otStyle"; st.textContent = CSS; document.head.appendChild(st); }
 
   /* --- single order page --- */
@@ -208,23 +257,50 @@
     wa.textContent = "💬 WhatsApp-এ কনফার্ম"; wa.style.display = "none";
     var pr = document.createElement("button");
     pr.type = "button"; pr.className = "pn-btn pn-btn-sm"; pr.id = "otPrint"; pr.textContent = "🖨 ইনভয়েস"; pr.style.display = "none";
+    function waBtn(id, label) {
+      var a = document.createElement("a");
+      a.className = "pn-btn pn-btn-sm"; a.id = id; a.target = "_blank"; a.rel = "noopener"; a.textContent = label; a.style.display = "none";
+      return a;
+    }
+    var adv = waBtn("otWaAdvance", "💳 অগ্রিম ডেলিভারি চার্জ চান");
+    var rev = waBtn("otWaReview", "⭐ রিভিউ চান");
     var mapBtn = $("btnMap"), row = mapBtn && mapBtn.parentNode;
-    if (row) { row.insertBefore(wa, mapBtn.nextSibling); row.insertBefore(pr, wa.nextSibling); }
-    else { head.appendChild(wa); head.appendChild(pr); }
+    if (row) { row.insertBefore(wa, mapBtn.nextSibling); row.insertBefore(adv, wa.nextSibling); row.insertBefore(rev, adv.nextSibling); row.insertBefore(pr, rev.nextSibling); }
+    else { head.appendChild(wa); head.appendChild(adv); head.appendChild(rev); head.appendChild(pr); }
+    function paintExtra(o) {
+      var aUrl = o ? advanceUrl(o) : "", why = aUrl ? advanceReason(o, root.MaOrderHistory) : "";
+      adv.style.display = aUrl ? "" : "none";
+      if (aUrl) adv.href = aUrl;
+      adv.classList.toggle("pn-btn-primary", !!why);
+      adv.classList.toggle("ot-suggest", !!why);
+      adv.title = why ? "পরামর্শ: " + why + " — পাঠানোর আগে ডেলিভারি চার্জ অগ্রিম নিন" : "কাস্টমারকে bKash-এ ডেলিভারি চার্জ অগ্রিম পাঠাতে বলুন";
+      var rUrl = o ? reviewUrl(o) : "";
+      rev.style.display = rUrl ? "" : "none";
+      if (rUrl) rev.href = rUrl;
+    }
+    document.addEventListener("ma-order-history", function () { paintExtra(liveOrder()); });
     function liveOrder() {
       if (!current) return null;
       var o = {}; Object.keys(current).forEach(function (k) { o[k] = current[k]; });
       o.name = $("fName") ? $("fName").value : o.name;
       o.address = $("fAddress") ? $("fAddress").value : o.address;
+      if ($("fCharge") && $("fCharge").value !== "") o.charge = $("fCharge").value;
+      if ($("fAdvance") && $("fAdvance").value !== "") o.advance = $("fAdvance").value;
       return o;
     }
-    document.addEventListener("ma-order-rendered", function (e) {
+    function onRendered(e) {
       current = e.detail || null; lastStatus = current ? text(current.status) : "";
       var url = current ? waUrl(current) : "";
       wa.style.display = url ? "" : "none";
       if (url) wa.href = url;
       pr.style.display = current && root.MaInvoice ? "" : "none";
-    });
+      paintExtra(current);
+    }
+    document.addEventListener("ma-order-rendered", onRendered);
+    // The page may paint an order (cached copy or a fast reply) before this runs at DOMContentLoaded.
+    if (root.MaOrderCurrent) onRendered({ detail: root.MaOrderCurrent });
+    adv.addEventListener("click", function () { var o = liveOrder(); if (o) adv.href = advanceUrl(o) || adv.href; });
+    rev.addEventListener("click", function () { var o = liveOrder(); if (o) rev.href = reviewUrl(o) || rev.href; });
     wa.addEventListener("click", function () { var o = liveOrder(); if (o) wa.href = waUrl(o) || wa.href; });
     pr.addEventListener("click", function () { var o = liveOrder(); if (o && root.MaInvoice) root.MaInvoice.print(o); });
     statusSel.addEventListener("change", function () {
