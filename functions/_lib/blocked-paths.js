@@ -54,7 +54,6 @@ export const BLOCKED_FILES = [
   "firebase-applet-config.json",
   "firestore.rules",
   "google-apps-script-backend.gs",
-  "manus-routes.json",
   "metadata.json",
   "package-lock.json",
   "package.json",
