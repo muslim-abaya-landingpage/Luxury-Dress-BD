@@ -171,7 +171,7 @@
       <p id="ordersTableHint" class="wo-table-hint">↔ Order নম্বর স্থির থাকে। Date, Status, Total, Origin দেখতে পাশে স্ক্রল করুন। বাকি তথ্য 👁 প্রিভিউতে।</p>
       <dialog id="ordQuickPreview" class="wo-quick-preview" aria-labelledby="ordPreviewTitle"><div class="wo-preview-head"><h2 id="ordPreviewTitle">Order Quick Preview</h2><button type="button" class="pn-btn" id="ordPreviewClose">Close</button></div><div id="ordPreviewContent"></div><div class="wo-preview-foot"><a id="ordPreviewOpen" class="pn-btn pn-btn-primary" href="#">Open Order</a></div></dialog>
       <div class="pn-table-wrap wc-table-wrap" role="region" tabindex="0" aria-label="Full order list" aria-describedby="ordersTableHint">
-        <table class="pn-table wc-orders-table">
+        <table class="pn-table wc-orders-table" id="ordTable">
           <thead>
             <tr>
               <th class="wc-col-cb"><input type="checkbox" class="ot-sel" id="otSelAll" aria-label="দেখানো সব অর্ডার বাছুন"></th>
@@ -595,14 +595,16 @@
       // Column sorting like WooCommerce: click Order / Date / Total; a second click flips the direction.
       function paintSortHeaders() {
         var m = /^(id|date|value)-(asc|desc)$/.exec(orderSort);
-        Array.prototype.forEach.call(document.querySelectorAll(".wc-orders-table .wc-sort"), function (b) {
+        var table = document.getElementById("ordTable");
+        if (!table || !table.querySelectorAll) return;
+        Array.prototype.forEach.call(table.querySelectorAll(".wc-sort"), function (b) {
           var on = m && b.getAttribute("data-sort") === m[1];
           b.parentNode.setAttribute("aria-sort", on ? (m[2] === "asc" ? "ascending" : "descending") : "none");
           b.classList.toggle("is-sorted", !!on);
           b.classList.toggle("is-asc", !!(on && m[2] === "asc"));
         });
       }
-      document.querySelector(".wc-orders-table").addEventListener("click", function (e) {
+      document.getElementById("ordTable").addEventListener("click", function (e) {
         var b = e.target.closest(".wc-sort"); if (!b) return;
         var key = b.getAttribute("data-sort");
         orderSort = orderSort === key + "-desc" ? key + "-asc" : key + "-desc";
