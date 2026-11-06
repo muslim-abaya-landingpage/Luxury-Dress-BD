@@ -195,3 +195,23 @@ html.maqs-open{overflow:hidden}
 html[data-admin-theme="dark"] .maqs-panel,html[data-admin-theme="dark"] .maqs-btn{background:#1d2431;color:#e8edf5}
 .ma-install-btn{width:100%;margin-bottom:8px}
 .st-btns{display:flex;gap:6px;flex-wrap:wrap}
+
+/* ---- Dashboard: "এখন যা করতে হবে" strip ---- */
+.dzc-todo{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:4px 0 16px}
+.dzc-todo-item{display:flex;align-items:center;gap:12px;min-height:64px;padding:12px 14px;border:1px solid var(--mt-line);border-radius:14px;background:var(--mt-card);color:var(--mt-ink);text-decoration:none;box-shadow:var(--mt-shadow);transition:transform .15s,box-shadow .15s,border-color .15s}
+.dzc-todo-item:hover{transform:translateY(-1px);box-shadow:var(--mt-shadow-hover);border-color:var(--mt-gold-2)}
+.dzc-todo-item b{flex:none;display:grid;place-items:center;min-width:42px;height:42px;padding:0 8px;border-radius:12px;background:#f1f3f6;color:#4b5565;font-size:19px;font-weight:800;font-variant-numeric:tabular-nums}
+.dzc-todo-item span{font-weight:650;font-size:14px;line-height:1.3}
+.dzc-todo-item.is-hot{border-color:#f3c98b;background:#fffaf1}
+.dzc-todo-item.is-hot b{background:#b54708;color:#fff}
+.dzc-todo-item.is-clear b{background:#e9f7ef;color:#16794a}
+.adm-daily-grid.adm-daily-grid-6{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+@media (max-width:900px){.dzc-todo{grid-template-columns:repeat(2,minmax(0,1fr))}.adm-daily-grid.adm-daily-grid-6{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media (max-width:640px){
+  .dzc-todo-item{min-height:58px;padding:10px 12px;gap:10px}
+  .dzc-todo-item b{min-width:38px;height:38px;font-size:17px}
+  .dzc-todo-item span{font-size:13px}
+  .adm-daily-grid.adm-daily-grid-6 .adm-daily-action{padding:12px!important;min-height:0}
+  .adm-daily-grid.adm-daily-grid-6 .adm-daily-action>span:last-child{display:none}
+}
+html[data-admin-theme="dark"] .dzc-todo-item{background:#1d2431;color:#e8edf5}

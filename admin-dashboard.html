@@ -89,7 +89,7 @@
         <div>
           <button type="button" class="adm-menu-btn" id="admMenuBtn" aria-label="Open menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
           <div>
-            <div class="adm-heading"><span class="adm-page-kicker">Muslim Abaya / Dashboard</span><h1>Store Overview</h1></div>
+            <div class="adm-heading"><span class="adm-page-kicker">Muslim Abaya / Dashboard</span><h1>ড্যাশবোর্ড</h1></div>
             <div class="adm-topbar-user" id="admUserLabel">—</div>
           </div>
         </div>
@@ -102,79 +102,81 @@
       <main class="adm-main">
         <section class="dzc-overview" aria-labelledby="dzName">
           <div class="dzc-greet">
-            <div><span class="dzc-hello" id="dzHello">Welcome back,</span> <h2 id="dzName">Admin</h2></div>
+            <div><span class="dzc-hello" id="dzHello">স্বাগতম,</span> <h2 id="dzName">Admin</h2></div>
             <span class="dzc-date" id="dzDate"></span>
           </div>
+          <nav class="dzc-todo" id="dzTodo" aria-label="এখন যা করতে হবে">
+            <a class="dzc-todo-item" href="admin-orders.html?status=Pending" data-src="admTaskPendingCount"><b>—</b><span>কনফার্ম বাকি</span></a>
+            <a class="dzc-todo-item" href="#admTasksHeading" data-src="admTaskOverdueCount"><b>—</b><span>দেরি হচ্ছে</span></a>
+            <a class="dzc-todo-item" href="stock-analytics.html" data-src="admStockAlertCount"><b>—</b><span>স্টক কম / শেষ</span></a>
+            <a class="dzc-todo-item" href="admin-inbox.html" data-src="admInboxAlertCount"><b>—</b><span>অপঠিত মেসেজ</span></a>
+          </nav>
           <div class="dzc-range" id="dzRange" role="group" aria-label="হিসাবের সময়সীমা">
             <button type="button" data-range="today">আজ</button><button type="button" data-range="7d">৭ দিন</button><button type="button" data-range="30d">৩০ দিন</button><button type="button" data-range="month">এই মাস</button><button type="button" data-range="all">সব সময়</button><button type="button" data-range="custom">তারিখ বাছুন</button>
             <span class="dzc-range-custom" id="dzRangeCustom" hidden><input type="date" id="dzFrom" aria-label="শুরুর তারিখ"><span aria-hidden="true">–</span><input type="date" id="dzTo" aria-label="শেষ তারিখ"><button type="button" class="dzc-range-go" id="dzRangeGo">দেখুন</button></span>
           </div>
           <div class="dzc-kpis adm-commerce-kpis">
-            <div class="dzc-kpi adm-kpi-revenue"><span>Total Sales / Order Value</span><b id="admOverviewRevenue">—</b><small data-kpi-scope>লাইফটাইম · লাভ নয়</small></div>
-            <div class="dzc-kpi"><span>Total Orders</span><b id="admOverviewOrders">—</b><small data-kpi-scope>লাইফটাইম রিপোর্ট</small></div>
-            <div class="dzc-kpi"><span>Products in Inventory</span><b id="admOverviewProducts">—</b><small>স্টক ট্র্যাকিং ডেটা</small></div>
-            <div class="dzc-kpi"><span>Total Customers</span><b id="admOverviewCustomers">—</b><small data-kpi-scope>সর্বশেষ ১০০ অর্ডারে ইউনিক</small></div>
-            <div class="dzc-kpi"><span>Pending Orders</span><b id="admOverviewPending">—</b><small data-kpi-scope>সর্বশেষ ১০০ অর্ডার</small></div>
-            <div class="dzc-kpi"><span>Delivered Orders</span><b id="admOverviewDelivered">—</b><small data-kpi-scope>সর্বশেষ ১০০ অর্ডার</small></div>
-            <div class="dzc-kpi"><span>Cancelled Orders</span><b id="admOverviewCancelled">—</b><small data-kpi-scope>সর্বশেষ ১০০ অর্ডার</small></div>
-            <div class="dzc-kpi adm-kpi-stock"><span>Low Stock Products</span><b id="admOverviewLowStock">—</b><small>কম / শেষ স্টক · ইউনিক পণ্য</small></div>
+            <div class="dzc-kpi adm-kpi-revenue"><span>মোট বিক্রি (অর্ডার মূল্য)</span><b id="admOverviewRevenue">—</b><small data-kpi-scope>লাইফটাইম · লাভ নয়</small></div>
+            <div class="dzc-kpi"><span>মোট অর্ডার</span><b id="admOverviewOrders">—</b><small data-kpi-scope>লাইফটাইম রিপোর্ট</small></div>
+            <div class="dzc-kpi"><span>স্টকে পণ্য</span><b id="admOverviewProducts">—</b><small>স্টক ট্র্যাকিং ডেটা</small></div>
+            <div class="dzc-kpi"><span>মোট কাস্টমার</span><b id="admOverviewCustomers">—</b><small data-kpi-scope>সর্বশেষ ১০০ অর্ডারে ইউনিক</small></div>
+            <div class="dzc-kpi"><span>Pending অর্ডার</span><b id="admOverviewPending">—</b><small data-kpi-scope>সর্বশেষ ১০০ অর্ডার</small></div>
+            <div class="dzc-kpi"><span>Delivered অর্ডার</span><b id="admOverviewDelivered">—</b><small data-kpi-scope>সর্বশেষ ১০০ অর্ডার</small></div>
+            <div class="dzc-kpi"><span>বাতিল/ফেরত</span><b id="admOverviewCancelled">—</b><small data-kpi-scope>সর্বশেষ ১০০ অর্ডার</small></div>
+            <div class="dzc-kpi adm-kpi-stock"><span>স্টক কম</span><b id="admOverviewLowStock">—</b><small>কম / শেষ স্টক · ইউনিক পণ্য</small></div>
           </div>
           <p class="dzc-note" id="dzScopeNote">রাজস্ব ও মোট অর্ডার লাইফটাইম রিপোর্ট থেকে; অন্যান্য অর্ডার-ভিত্তিক হিসাব সর্বশেষ ১০০টি লোড করা অর্ডারের ওপর।</p>
         </section>
 
         <section class="adm-daily" aria-labelledby="admDailyHeading">
-          <h2 id="admDailyHeading">Quick Actions</h2>
-          <div class="adm-daily-grid">
-            <a class="adm-daily-action" href="admin-orders.html"><span class="adm-daily-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></span><strong>Manage Orders <span aria-hidden="true">→</span></strong><span>View and update orders</span></a>
-            <a class="adm-daily-action" href="product-manager.html#pmQuickUpload"><span class="adm-daily-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="7" width="16" height="14" rx="3"/><path d="M9 7V5a3 3 0 0 1 6 0v2M9 12h6M12 9v6"/></svg></span><strong>Add Product <span aria-hidden="true">→</span></strong><span>নতুন Add Product</span></a>
-            <a class="adm-daily-action" href="stock-analytics.html"><span class="adm-daily-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m3 7 9-4 9 4-9 4-9-4ZM3 7v10l9 4 9-4V7M12 11v10"/></svg></span><strong>Update Inventory <span aria-hidden="true">→</span></strong><span>Check and update stock</span></a>
-          </div>
+          <h2 id="admDailyHeading">দ্রুত কাজ</h2>
+          <div class="adm-daily-grid adm-daily-grid-6"><a class="adm-daily-action" href="admin-order-new.html"><span class="adm-daily-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg></span><strong>নতুন অর্ডার <span aria-hidden="true">→</span></strong><span>ফোন/মেসেজের অর্ডার তুলুন</span></a><a class="adm-daily-action" href="admin-orders.html"><span class="adm-daily-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></span><strong>অর্ডার প্যানেল <span aria-hidden="true">→</span></strong><span>কনফার্ম, কুরিয়ার, স্ট্যাটাস</span></a><a class="adm-daily-action" href="product-manager.html#pmQuickUpload"><span class="adm-daily-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="7" width="16" height="14" rx="3"/><path d="M9 7V5a3 3 0 0 1 6 0v2M9 12h6M12 9v6"/></svg></span><strong>নতুন পণ্য <span aria-hidden="true">→</span></strong><span>ছবি, দাম, সাইজ দিয়ে যোগ করুন</span></a><a class="adm-daily-action" href="stock-analytics.html"><span class="adm-daily-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m3 7 9-4 9 4-9 4-9-4ZM3 7v10l9 4 9-4V7M12 11v10"/></svg></span><strong>স্টক আপডেট <span aria-hidden="true">→</span></strong><span>কোনটা কম/শেষ দেখুন</span></a><a class="adm-daily-action" href="admin-customers.html"><span class="adm-daily-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.2-3.6 4-5.5 7-5.5s5.8 1.9 7 5.5"/></svg></span><strong>কাস্টমার খুঁজুন <span aria-hidden="true">→</span></strong><span>ফোন নম্বর দিয়ে ইতিহাস</span></a><a class="adm-daily-action" href="admin-profit.html"><span class="adm-daily-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16"/><path d="M7 15l3-4 3 2 4-6"/></svg></span><strong>লাভের হিসাব <span aria-hidden="true">→</span></strong><span>কোন পণ্যে কত লাভ</span></a></div>
         </section>
 
         <section class="dz-card adm-best-sellers" aria-labelledby="admBestSellerHeading">
-          <div class="adm-feature-head"><div><h3 id="admBestSellerHeading">Best Selling Products</h3><small>লাইফটাইম রিপোর্ট · বিক্রিত পরিমাণ</small></div><a class="adm-feature-more" href="product-manager.html">পণ্য ম্যানেজ করুন →</a></div>
+          <div class="adm-feature-head"><div><h3 id="admBestSellerHeading">সবচেয়ে বেশি বিক্রি</h3><small>লাইফটাইম রিপোর্ট · বিক্রিত পরিমাণ</small></div><a class="adm-feature-more" href="product-manager.html">পণ্য ম্যানেজ করুন →</a></div>
           <div id="admOverviewTopProducts" class="adm-report-list"><div class="adm-feature-empty">বিক্রির রিপোর্ট লোড হচ্ছে…</div></div>
         </section>
 
         <section class="dz-card adm-feature-card" aria-labelledby="admAlertHeading">
           <div class="adm-feature-head">
-            <div><h3 id="admAlertHeading">Needs Your Attention</h3><small id="admAlertState" role="status" aria-live="polite">Loading alerts…</small></div>
-            <div class="adm-feature-actions"><button type="button" class="adm-btn adm-btn-secondary" id="admDesktopAlerts" hidden>Enable Desktop Alerts</button><button type="button" class="adm-btn adm-btn-secondary" id="admAlertsRefresh">Refresh</button></div>
+            <div><h3 id="admAlertHeading">খেয়াল রাখুন</h3><small id="admAlertState" role="status" aria-live="polite">লোড হচ্ছে…</small></div>
+            <div class="adm-feature-actions"><button type="button" class="adm-btn adm-btn-secondary" id="admDesktopAlerts" hidden>নোটিফিকেশন চালু করুন</button><button type="button" class="adm-btn adm-btn-secondary" id="admAlertsRefresh">Refresh</button></div>
           </div>
           <div class="adm-desktop-status" id="admDesktopStatus" role="status" aria-live="polite"></div>
           <div class="adm-alert-columns">
-            <section class="adm-alert-panel" aria-labelledby="admStockHeading"><h4 id="admStockHeading">Low / Out of Stock <span class="adm-count-badge" id="admStockAlertCount">—</span></h4><div class="adm-alert-list" id="admStockAlerts" aria-live="polite"><div class="adm-feature-empty">Checking inventory…</div></div></section>
-            <section class="adm-alert-panel" aria-labelledby="admInboxHeading"><h4 id="admInboxHeading">অপঠিত Customer Inbox <span class="adm-count-badge" id="admInboxAlertCount">—</span></h4><div class="adm-alert-list" id="admInboxAlerts" aria-live="polite"><div class="adm-feature-empty">Checking messages…</div></div></section>
+            <section class="adm-alert-panel" aria-labelledby="admStockHeading"><h4 id="admStockHeading">স্টক কম / শেষ <span class="adm-count-badge" id="admStockAlertCount">—</span></h4><div class="adm-alert-list" id="admStockAlerts" aria-live="polite"><div class="adm-feature-empty">স্টক দেখা হচ্ছে…</div></div></section>
+            <section class="adm-alert-panel" aria-labelledby="admInboxHeading"><h4 id="admInboxHeading">অপঠিত মেসেজ <span class="adm-count-badge" id="admInboxAlertCount">—</span></h4><div class="adm-alert-list" id="admInboxAlerts" aria-live="polite"><div class="adm-feature-empty">মেসেজ দেখা হচ্ছে…</div></div></section>
           </div>
         </section>
 
         <section class="dz-card adm-feature-card" aria-labelledby="admTasksHeading">
           <div class="adm-feature-head">
-            <div><h3 id="admTasksHeading">Orders Requiring Action</h3><small id="admTaskState" role="status" aria-live="polite">Checking orders…</small></div>
+            <div><h3 id="admTasksHeading">যে অর্ডারে কাজ বাকি</h3><small id="admTaskState" role="status" aria-live="polite">অর্ডার দেখা হচ্ছে…</small></div>
             <button type="button" class="adm-btn adm-btn-secondary" id="admTasksRefresh">Refresh</button>
           </div>
-          <div class="adm-task-summary"><span>Pending <b id="admTaskPendingCount">—</b></span><span>Overdue <b id="admTaskOverdueCount">—</b></span><small id="admTaskScope"></small></div>
-          <div id="admPriorityTasks" aria-live="polite"><div class="adm-feature-empty">Loading priority tasks…</div></div>
+          <div class="adm-task-summary"><span>কনফার্ম বাকি <b id="admTaskPendingCount">—</b></span><span>দেরি <b id="admTaskOverdueCount">—</b></span><small id="admTaskScope"></small></div>
+          <div id="admPriorityTasks" aria-live="polite"><div class="adm-feature-empty">লোড হচ্ছে…</div></div>
         </section>
 
         <section class="dz-card">
           <div class="dz-orders-head">
-            <h3>Recent Orders</h3>
-            <a href="admin-orders.html">সব Manage Orders →</a>
+            <h3>সাম্প্রতিক অর্ডার</h3>
+            <a href="admin-orders.html">সব অর্ডার দেখুন →</a>
           </div>
-          <div class="adm-recent-tools"><input type="search" id="admRecentSearch" aria-label="Search recent orders" placeholder="Search loaded orders by ID, name or phone" autocomplete="off"><span id="admRecentCount" role="status" aria-live="polite"></span></div>
+          <div class="adm-recent-tools"><input type="search" id="admRecentSearch" aria-label="Search recent orders" placeholder="অর্ডার নম্বর, নাম বা ফোন দিয়ে খুঁজুন" autocomplete="off"><span id="admRecentCount" role="status" aria-live="polite"></span></div>
           <div class="dz-load-notice" id="admLoadNotice" role="alert" aria-live="assertive" hidden></div>
-          <p class="adm-courier-note">Open an order to view detailed courier status.</p>
-          <p id="admRecentTableHint" class="adm-recent-table-hint">Recent orders from the latest loaded records. Scroll the table sideways on smaller screens.</p>
+          <p class="adm-courier-note">অর্ডারে চাপ দিলে কুরিয়ারের বিস্তারিত দেখা যাবে।</p>
+          <p id="admRecentTableHint" class="adm-recent-table-hint">সর্বশেষ অর্ডারগুলো। ফোনে টেবিল পাশে সরিয়ে দেখুন।</p>
           <div class="adm-recent-table-wrap" role="region" tabindex="0" aria-label="Recent orders" aria-describedby="admRecentTableHint">
             <table class="adm-recent-table">
               <thead><tr><th>Order</th><th>Date</th><th>Customer</th><th>Products</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead>
-              <tbody id="admOrdersBody" aria-live="polite" aria-busy="true"><tr><td colspan="7" class="dz-empty">Loading orders…</td></tr></tbody>
+              <tbody id="admOrdersBody" aria-live="polite" aria-busy="true"><tr><td colspan="7" class="dz-empty">লোড হচ্ছে…</td></tr></tbody>
             </table>
           </div>
         </section>
-        <details class="adm-disclosure adm-dashboard-reports" open><summary>Sales Analytics & Best Selling Products</summary><div class="adm-disclosure-body">
-        <p class="dzc-tools">Useful links: <a id="admOpenSheet" href="#" target="_blank" rel="noopener" hidden>Google Sheet</a> <a id="admOpenScript" href="#" target="_blank" rel="noopener" hidden>Apps Script</a></p>
+        <details class="adm-disclosure adm-dashboard-reports" open><summary>বিক্রির বিশ্লেষণ ও রিপোর্ট</summary><div class="adm-disclosure-body">
+        <p class="dzc-tools">দরকারি লিংক: <a id="admOpenSheet" href="#" target="_blank" rel="noopener" hidden>Google Sheet</a> <a id="admOpenScript" href="#" target="_blank" rel="noopener" hidden>Apps Script</a></p>
         <div class="dz-kpis" id="admStats" hidden>
           <div class="dz-kpi" style="--c:#d4a72c"><b id="admStatCount">—</b><span>Orders (latest 100)</span></div>
           <div class="dz-kpi" style="--c:#14161a"><b id="admStatRevenue">—</b><span>Order Value (latest 100)</span></div>
@@ -189,7 +191,7 @@
             <div class="dz-bars" id="dzBars"><div class="dz-skel" style="width:100%;height:100px"></div></div>
           </section>
           <section class="dz-card">
-            <h3>Status Breakdown <small id="admOrderCount"></small></h3>
+            <h3>স্ট্যাটাস অনুযায়ী <small id="admOrderCount"></small></h3>
             <div class="dz-split" id="dzSplit"></div>
             <div class="dz-legend" id="dzLegend"></div>
             <div class="dz-dist" id="dzDist"></div>
@@ -198,17 +200,17 @@
 
         <section class="dz-card adm-feature-card" aria-labelledby="admReportHeading">
           <div class="adm-feature-head adm-report-head">
-            <div><h3 id="admReportHeading">Sales & Performance Reports</h3><small id="admReportState" role="status" aria-live="polite">Loading reports…</small></div>
-            <div class="adm-report-controls"><label for="admReportRange">Date Range</label><select id="admReportRange"><option value="all">All Time</option><option value="today">Today</option><option value="7d">Last 7 Days</option><option value="30d">Last 30 Days</option><option value="month">This Month</option><option value="custom">Custom Range</option></select><span id="admReportCustomDates" hidden><label for="admReportFrom">From</label><input type="date" id="admReportFrom"><label for="admReportTo">To</label><input type="date" id="admReportTo"></span><button type="button" class="adm-btn adm-btn-secondary" id="admReportLoad">View Report</button><button type="button" class="adm-btn adm-btn-secondary" id="admReportExport" disabled>Download CSV</button></div>
+            <div><h3 id="admReportHeading">বিক্রির রিপোর্ট</h3><small id="admReportState" role="status" aria-live="polite">লোড হচ্ছে…</small></div>
+            <div class="adm-report-controls"><label for="admReportRange">Date Range</label><select id="admReportRange"><option value="all">All Time</option><option value="today">Today</option><option value="7d">Last 7 Days</option><option value="30d">Last 30 Days</option><option value="month">This Month</option><option value="custom">Custom Range</option></select><span id="admReportCustomDates" hidden><label for="admReportFrom">From</label><input type="date" id="admReportFrom"><label for="admReportTo">To</label><input type="date" id="admReportTo"></span><button type="button" class="adm-btn adm-btn-secondary" id="admReportLoad">রিপোর্ট দেখুন</button><button type="button" class="adm-btn adm-btn-secondary" id="admReportExport" disabled>CSV ডাউনলোড</button></div>
           </div>
           <div class="adm-feature-error" id="admReportError" role="alert" hidden></div>
           <div id="admReportBody" hidden>
             <p class="adm-report-range">রিপোর্টের Date Range: <b id="admReportRangeLabel">—</b></p>
             <p class="adm-undated-note" id="admUndatedNote" hidden></p>
             <div class="adm-report-kpis">
-              <div><b id="admReportOrders">—</b><span>Total Orders</span></div><div><b id="admReportOrderValue">—</b><span>Total Order Value</span></div><div><b id="admReportDeliveredValue">—</b><span>Delivered Order Value</span></div><div><b id="admReportDelivered">—</b><span>Delivered Orders</span></div><div><b id="admReportCancelRate">—</b><span>Cancellation / Return Rate</span></div><div><b id="admReportDeliveryRate">—</b><span>Delivery Success Rate</span></div>
+              <div><b id="admReportOrders">—</b><span>মোট অর্ডার</span></div><div><b id="admReportOrderValue">—</b><span>Total Order Value</span></div><div><b id="admReportDeliveredValue">—</b><span>Delivered Order Value</span></div><div><b id="admReportDelivered">—</b><span>Delivered অর্ডার</span></div><div><b id="admReportCancelRate">—</b><span>Cancellation / Return Rate</span></div><div><b id="admReportDeliveryRate">—</b><span>Delivery Success Rate</span></div>
             </div>
-            <div class="adm-report-grid"><section><h4>Monthly Order Value <small>Last 12 Months</small></h4><div id="admSalesMonths" class="adm-sales-months"></div></section><section><h4>Top Products <small>Ordered Quantity</small></h4><div id="admReportProducts" class="adm-report-list"></div></section><section><h4>Order Sources</h4><div id="admReportSources" class="adm-report-list"></div></section></div>
+            <div class="adm-report-grid"><section><h4>মাসভিত্তিক অর্ডার মূল্য <small>গত ১২ মাস</small></h4><div id="admSalesMonths" class="adm-sales-months"></div></section><section><h4>সেরা পণ্য <small>অর্ডারকৃত পরিমাণ</small></h4><div id="admReportProducts" class="adm-report-list"></div></section><section><h4>অর্ডার কোথা থেকে</h4><div id="admReportSources" class="adm-report-list"></div></section></div>
           </div>
         </section>
 
@@ -229,5 +231,6 @@
   <script src="admin-dashboard-main.js?v=source"></script>
 <script src="admin-search.js?v=1" defer></script>
 <script src="admin-app.js?v=1" defer></script>
+<script src="admin-dashboard-simple.js?v=1" defer></script>
 </body>
 </html>

@@ -543,6 +543,17 @@
   </script>
 
   <script>
+  // Deep link from the dashboard: admin-orders.html?status=Pending opens that status tab.
+  (function(){
+    var st=""; try{st=(new URLSearchParams(location.search).get("status")||"").trim().toLowerCase().slice(0,40);}catch(_){}
+    if(!st)return;
+    var tries=0;
+    (function apply(){
+      var tab=Array.prototype.find.call(document.querySelectorAll("#ordTabs [data-f]"),function(b){return String(b.getAttribute("data-f")).toLowerCase()===st;});
+      if(tab){if(!tab.classList.contains("active"))tab.click();return;}
+      if(++tries<12)setTimeout(apply,700);
+    })();
+  })();
   // Deep link from the support inbox: admin-orders.html?q=<phone or order ID> pre-fills the search box.
   (function(){
     var q=""; try{q=(new URLSearchParams(location.search).get("q")||"").trim().slice(0,40);}catch(_){}

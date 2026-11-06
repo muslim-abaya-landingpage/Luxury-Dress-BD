@@ -60,3 +60,18 @@ test('quick search: Ctrl+K, a phone number opens the customer profile', async ({
   await expect(page.locator('#cuName')).toHaveText('Fatema');
   await expect(page.locator('#cuNewOrder')).toHaveAttribute('href', 'admin-order-new.html?phone=01711223344');
 });
+
+test('dashboard to-do strip mirrors the action counts and links to the right place', async ({ page }) => {
+  await stub(page, `{getAnalyticsV2:function(o){return Promise.resolve(${summary(10)});}}`);
+  await page.goto('/admin-dashboard.html');
+  await page.evaluate(() => {
+    document.getElementById('admTaskPendingCount').textContent = '3';
+    document.getElementById('admInboxAlertCount').textContent = '0';
+  });
+  const pending = page.locator('#dzTodo [data-src="admTaskPendingCount"]');
+  await expect(pending.locator('b')).toHaveText('3');
+  await expect(pending).toHaveClass(/is-hot/);
+  await expect(pending).toHaveAttribute('href', 'admin-orders.html?status=Pending');
+  await expect(page.locator('#dzTodo [data-src="admInboxAlertCount"]')).toHaveClass(/is-clear/);
+  await expect(page.locator('.adm-daily-grid-6 .adm-daily-action')).toHaveCount(6);
+});

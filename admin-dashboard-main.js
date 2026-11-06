@@ -62,7 +62,7 @@
     recentOrders = Array.isArray(orders) ? orders : [];
     var filtered = recentOrders.filter(function(o){ return !recentQuery || [o.orderId,o.name,o.phone].join(" ").toLowerCase().indexOf(recentQuery)!==-1; });
     var count = document.getElementById("admRecentCount");
-    if(count)count.textContent = "Showing " + Math.min(8,filtered.length) + " of " + recentOrders.length + " loaded orders";
+    if(count)count.textContent = recentOrders.length + "টির মধ্যে " + Math.min(8,filtered.length) + "টি দেখানো হচ্ছে";
     var body = document.getElementById("admOrdersBody");
     if (!filtered.length) { body.innerHTML = '<tr><td colspan="7" class="dz-empty">' + (recentQuery ? 'No matching orders among the loaded records.' : 'No recent orders available.') + '</td></tr>'; return; }
     var stats = phoneStats(recentOrders);
