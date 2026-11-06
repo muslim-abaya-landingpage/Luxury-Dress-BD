@@ -23,7 +23,7 @@
 - Live Apps Script/Google Sheet delivery and Cloudflare's deployed HTMLRewriter runtime have not been tested. The tests use mocked upstream requests and rewrite handlers.
 
 ## Deploy and maintain
-1. Upload the ZIP contents to the existing **Cloudflare Pages** project, keeping index.html and _worker.js at the project root. The default /api/order depends on this Worker; this ZIP does not add a Netlify order function.
+1. Upload the ZIP contents to the existing **Cloudflare Pages** project, keeping index.html and _worker.js at the project root. The default /api/order depends on this Worker; no other order function is needed.
 2. Keep existing ORDER_API_URL and tracking secrets/settings. No credentials were added to client code.
 3. After changing config.js or sites/*.js, run `node build-seo.cjs` from this folder. It updates index.html, robots.txt, sitemap.xml and the embedded Worker metadata. No build is needed for this supplied version.
 4. Optional reproducible checks: `node tests/regression.cjs` (Node 18+).

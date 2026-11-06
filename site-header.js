@@ -320,7 +320,7 @@ function buildNavMenuItems() {
     });
   }
 
-  /** Breadcrumb / body links — href="/" works on Netlify; file:// needs real .html paths */
+  /** Breadcrumb / body links — href="/" works on Cloudflare Pages; file:// needs real .html paths */
   function fixAllPageLinks() {
     fixHeaderLinks(document.body);
   }

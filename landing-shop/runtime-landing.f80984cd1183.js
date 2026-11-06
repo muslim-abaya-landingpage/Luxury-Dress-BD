@@ -228,7 +228,7 @@ if (typeof window !== 'undefined' && window.LANDING_CONFIG) maApplyDiscount(wind
     try {
       const pending=JSON.parse(sessionStorage.getItem(pendingKey)||'null');
       sessionStorage.removeItem(pendingKey);
-      if(pending && Date.now()-pending.time<10*60*1000 && pending.value>0 && ['netlify','apps-script'].includes(pending.orderMode)) {
+      if(pending && Date.now()-pending.time<10*60*1000 && pending.value>0 && ['apps-script'].includes(pending.orderMode)) {
         window.trackLandingEvent('generate_lead',{value:pending.value,items:pending.items,event_id:pending.event_id});
         // Purchase is browser-only right now — the Worker's server-side CAPI call (see
         // _worker.js) only ever sends 'Lead', so there is no matching server event to
@@ -592,11 +592,6 @@ if (typeof window !== 'undefined' && window.LANDING_CONFIG) maApplyDiscount(wind
       e.preventDefault();
       submitting = true;
       submitToAdmin(v,eventId,signature).catch(err=>{submitting=false;try{sessionStorage.removeItem(DUP_KEY)}catch{} $('submit').classList.remove('is-loading');$('submit').textContent='অর্ডার কনফার্ম করুন';update();text('feedback',err instanceof TypeError?'সার্ভারের সঙ্গে যোগাযোগ করা যায়নি। ইন্টারনেট ও API সেটিংস যাচাই করে আবার চেষ্টা করুন।':String(err.message||err));});
-      return;
-    }
-    if (c.order.mode === 'netlify') {
-      if (location.protocol === 'file:' || ['localhost','127.0.0.1'].includes(location.hostname)) { e.preventDefault(); $('submit').disabled=false; $('submit').classList.remove('is-loading'); text('submit','অর্ডার কনফার্ম করুন'); text('feedback','লোকাল প্রিভিউতে অর্ডার জমা হবে না। Netlify-তে প্রকাশ করে Forms চালু করুন।'); }
-      else try { saveDraft(); sessionStorage.setItem(window.landingPendingKey,JSON.stringify({time:Date.now(),value:v.total,items:trackingItems(),event_id:eventId,orderMode:'netlify'})); } catch {}
       return;
     }
     e.preventDefault();

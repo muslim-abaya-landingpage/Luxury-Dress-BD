@@ -1,6 +1,6 @@
 # ক্লায়েন্টের জন্য সহজে সম্পাদনযোগ্য ল্যান্ডিং পেজ
 
-এটি Netlify-তে সরাসরি প্রকাশ করার উপযোগী static site। `dist/` ফোল্ডারের ভেতরেই `index.html` আছে। ZIP আপলোড করলে ZIP-এর প্রথম স্তরেও `index.html` থাকবে। কোনো npm install বা build command দরকার নেই।
+এটি Cloudflare Pages-এ চলা static site (প্রজেক্ট `muslimabaya-shop-landing`, ঠিকানা shop.muslimabaya.com)। GitHub-এর `main`-এ `landing-shop/` বদলালে **Landing Deploy** workflow পরীক্ষা চালিয়ে নিজে প্রকাশ করে। কোনো npm install দরকার নেই; JS বদলালে `node build-runtime.cjs` চালান।
 
 ## নতুন ক্লায়েন্টের জন্য যা বদলাবেন
 
@@ -14,7 +14,7 @@
 | `sections` | বৈশিষ্ট্যের তালিকা ও শিরোনাম |
 | `products` | প্রতিটি পণ্যের আলাদা `id`, নাম, দাম, ছবি, সাইজের তালিকা |
 | `deliveryAreas` | এলাকা, নাম ও চার্জ |
-| `order` | অর্ডার নেওয়ার পদ্ধতি: `netlify`, `whatsapp` বা `copy` |
+| `order` | অর্ডার নেওয়ার পদ্ধতি: `apps-script` (Muslim Abaya অ্যাডমিন), `whatsapp` বা `copy` |
 | `marketing` | `gtmId`, `trackingMode`, ঐচ্ছিক সরাসরি `metaPixelId`; GTM ID ফাঁকা থাকলে GTM লোড হয় না |
 
 ছবি `images/` ফোল্ডারে রাখুন এবং `config.js`-এ `images/ছবির-নাম.webp` লিখুন। একই `id` দুবার ব্যবহার করবেন না। দাম ও চার্জ ইংরেজি সংখ্যায় লিখবেন। পণ্য বা সাইজ যত খুশি যোগ/বাদ দিতে পারবেন। অর্ডারের লজিক বদলাতে `app.js` সম্পাদনার প্রয়োজন নেই; নতুন ব্র্যান্ডের SEO সেটিংসের জন্য নিচের নির্দেশনা অনুসরণ করুন।
@@ -35,32 +35,29 @@
 
 ## অর্ডার নেওয়ার তিনটি পদ্ধতি
 
-- **`netlify` (বর্তমান সেটিং):** ক্রেতা ফর্ম পূরণ করলে Netlify Forms-এ `orders` নামে অর্ডার সংরক্ষিত হয় এবং সফল হলে `thank-you.html` দেখা যায়। Netlify Dashboard → আপনার Site → Forms → **Enable form detection** চালু করে *তারপর* নতুন deploy দিন। Forms → Submission notifications-এ আপনার ইমেইল যুক্ত করুন। Deploy-এর পর Forms-এ `orders` ফর্ম দেখা যাচ্ছে কি না নিশ্চিত করুন এবং নিজের নম্বর দিয়ে একটি বাস্তব পরীক্ষামূলক অর্ডার পাঠান। Netlify-তে প্রকাশ না করলে এই পদ্ধতি কাজ করবে না।
-- **`whatsapp`:** `order.mode: 'whatsapp'` এবং `whatsappNumber: '8801XXXXXXXXX'` দিন। ক্রেতা ফর্ম পূরণ করলে WhatsApp-এ লেখা প্রস্তুত হবে; ক্রেতাকে সেখানে **Send** চাপতে হবে। এটি Netlify Forms-এ অর্ডার সংরক্ষণ করে না।
+- **`apps-script` (বর্তমান সেটিং):** ক্রেতা ফর্ম পূরণ করলে অর্ডার সরাসরি Muslim Abaya অ্যাডমিনের অর্ডার শিটে (Apps Script) জমা হয় এবং সফল হলে `thank-you.html` দেখা যায়। অর্ডার দেখবেন অ্যাডমিন প্যানেলের অর্ডার পেজে।
+- **`whatsapp`:** `order.mode: 'whatsapp'` এবং `whatsappNumber: '8801XXXXXXXXX'` দিন। ক্রেতা ফর্ম পূরণ করলে WhatsApp-এ লেখা প্রস্তুত হবে; ক্রেতাকে সেখানে **Send** চাপতে হবে। এটি অ্যাডমিনে অর্ডার জমা করে না।
 - **`copy`:** ক্রেতা অর্ডারের তথ্য কপি করতে পারবেন। এটি নিজে কোথাও অর্ডার পাঠায় না।
 
 `brand.phone`-এ কল নম্বর এবং `order.whatsappNumber`-এ একই নম্বরের আন্তর্জাতিক ফরম্যাট দিলে পেজে কল বাটন ও ফর্মের নিচে **“অর্ডার করতে সমস্যা হলে WhatsApp-এ অর্ডার করুন”** বাটন দেখা যাবে। নম্বর `01971642683` হলে WhatsApp ফরম্যাট `8801971642683`। এই সহায়তা বাটন সব `mode`-এ থাকে; পণ্য বাছা থাকলে মেসেজে পণ্যের তথ্য ও আনুমানিক মোট যুক্ত হয়। ক্রেতাকে WhatsApp-এ Send চাপতে হবে।
 
-পণ্য ও ডেলিভারি মূল্য ব্রাউজারে হিসাব হয়। Netlify Forms-এ জমা হওয়া মূল্যকে চূড়ান্ত পেমেন্টের আগে কর্মী দিয়ে যাচাই করুন; ব্রাউজারের পাঠানো মান গ্রাহক বদলাতে পারেন। পেমেন্ট বা স্টক ব্যবস্থাপনার স্বয়ংক্রিয় ব্যবস্থা এতে নেই।
+পণ্য ও ডেলিভারি মূল্য ব্রাউজারে হিসাব হয়। অর্ডারে জমা হওয়া মূল্যকে চূড়ান্ত পেমেন্টের আগে কর্মী দিয়ে যাচাই করুন; ব্রাউজারের পাঠানো মান গ্রাহক বদলাতে পারেন। পেমেন্ট বা স্টক ব্যবস্থাপনার স্বয়ংক্রিয় ব্যবস্থা এতে নেই।
 
-বিজ্ঞাপনের জন্য `tracking.js`-এ GTM dataLayer event প্রস্তুত আছে। `marketing.gtmId`-এ প্রকৃত GTM ID দিলে container লোড হবে; GTM-এ GA4 tag ও trigger প্রকাশ করতে হবে। `trackingMode: 'direct'`-এ বর্তমান Meta ও TikTok browser Pixel চলে; GTM-এ একই Pixel আবার বসাবেন না। `generate_lead` শুধু সফল Netlify অর্ডারের thank-you পেজে একবার পাঠানো হয়; TikTok-এ এটি `SubmitForm`। WhatsApp খোলাকে `Contact` বলা হয়; এটি অর্ডার নিশ্চিত হওয়ার প্রমাণ নয়। `Purchase` event নেই, কারণ এই সাইটে পেমেন্ট বা কর্মীর যাচাই সম্পন্ন হয় না। UTM ও `fbclid`/`ttclid` Netlify Forms-এর hidden field-এ জমা হয়। বিস্তারিত `TRACKING-SETUP.md`-এ।
+বিজ্ঞাপনের জন্য `tracking.js`-এ GTM dataLayer event প্রস্তুত আছে। `marketing.gtmId`-এ প্রকৃত GTM ID দিলে container লোড হবে; GTM-এ GA4 tag ও trigger প্রকাশ করতে হবে। `trackingMode: 'direct'`-এ বর্তমান Meta ও TikTok browser Pixel চলে; GTM-এ একই Pixel আবার বসাবেন না। `generate_lead` শুধু সফল অর্ডারের thank-you পেজে একবার পাঠানো হয়; TikTok-এ এটি `SubmitForm`। WhatsApp খোলাকে `Contact` বলা হয়; এটি অর্ডার নিশ্চিত হওয়ার প্রমাণ নয়। `Purchase` event নেই, কারণ এই সাইটে পেমেন্ট বা কর্মীর যাচাই সম্পন্ন হয় না। UTM ও `fbclid`/`ttclid` অর্ডারের hidden field-এ জমা হয়। বিস্তারিত `TRACKING-SETUP.md`-এ।
 
-GTM ও GA4-এর পাবলিক ID, Netlify verified form event-এর server-side Meta/TikTok/GA4 relay, গোপন environment variables এবং Git/CLI deploy পদ্ধতি `TRACKING-SETUP.md`-এ আছে। `netlify.toml` দিয়ে পূর্ণ প্রজেক্ট deploy করতে হবে; শুধু static ZIP-এ server function চলে না।
+GTM ও GA4-এর পাবলিক ID, server-side Meta/TikTok/GA4 relay (`_worker.js`, Cloudflare) ও গোপন environment variables-এর নিয়ম `TRACKING-SETUP.md`-এ আছে।
 
-## Netlify-তে প্রকাশ
+## প্রকাশ (Cloudflare Pages)
 
-1. প্রয়োজনমতো `config.js` ও ছবি বদলান।
-2. ZIP-এর প্রথম স্তরে `index.html`, `config.js`, `seo.js`, `tracking.js`, `app.js`, `styles.css`, `robots.txt`, `sitemap.xml`, `thank-you.html`, `images/` ও `reviews/` আছে কি না দেখুন।
-3. আপনার Netlify সাইটে নতুন deploy-তে ফাইলগুলো প্রকাশ করুন। Netlify Drop-এ ZIP বা এই ফাইলগুলোর ফোল্ডার ব্যবহার করুন। GitHub-সংযুক্ত সাইট হলে সেই repository-তে ফাইলগুলো commit করুন; আলাদা Drop সাইট তৈরি করলে মূল ডোমেইন নিজে বদলাবে না।
-4. Netlify Forms detection চালু ও deploy সম্পন্ন হওয়ার পর টেস্ট অর্ডার দিয়ে Dashboard-এ জমা হয়েছে কি না দেখুন।
-
-**বর্তমান সীমাবদ্ধতা:** আপনার দেওয়া Netlify স্ক্রিনশটে production deploy সাময়িকভাবে paused দেখাচ্ছে। Netlify-তে credits/plan সমস্যা মিটলে বা পরের billing cycle-এ deploy চালু হলে এই ZIP প্রকাশ করা যাবে।
+1. প্রয়োজনমতো `config.js` ও ছবি বদলান; JS বদলালে `node build-runtime.cjs` চালান।
+2. GitHub-এ `main`-এ commit/push করুন। **Landing Deploy** workflow পরীক্ষা (দাম, অর্ডার, ট্র্যাকিং, SEO) চালিয়ে Cloudflare Pages-এ প্রকাশ করে।
+3. প্রকাশের পর নিজের নম্বর দিয়ে একটি টেস্ট অর্ডার দিয়ে অ্যাডমিনের অর্ডার পেজে জমা হয়েছে কি না দেখুন।
 
 ## Google Sheet ও ৩০টি সাবডোমেইন
 
-আলাদা **Developer Toolkit ZIP**-এ `integrations/LandingOrders.gs` এবং `integrations/README.md` ফাইলে Netlify Forms থেকে আপনার `অর্ডার শিট 2026`-এর `Online Order` ট্যাবে অর্ডার কপি করার কোড ও সেটআপ দেওয়া আছে। Apps Script এডিটর লিংক নিজে Web App endpoint নয়; বিদ্যমান script-এর `doPost` রাউটিং না দেখে সেটি পরিবর্তন করা হয়নি। পরীক্ষামূলক অর্ডার জমা দিয়ে Netlify Forms ও Sheet মিলিয়ে নিতে হবে। মূল সাইটের ZIP-এ কোনো গোপন কী নেই।
+অর্ডার সরাসরি `অর্ডার শিট 2026`-এর `Online Order` ট্যাবে জমা হয় (`apps-script` mode, `_worker.js`-এর `/api/order` হয়ে)। মূল সাইটের ফাইলে কোনো গোপন কী নেই।
 
-Toolkit-এ `subdomains/clients/example.json`, `subdomains/build-site.mjs` এবং `subdomains/README.md`-এ `muslimabaya.com`-এর অধীনে একেকটি আলাদা সাবডোমেইন সাইট তৈরি ও প্রকাশের পদ্ধতি আছে। এখনো কোনো DNS, Netlify custom domain বা live সাবডোমেইন তৈরি হয়নি। একেকটি slug ও Netlify site hostname পাওয়ার পর ধাপে ধাপে CNAME যুক্ত করতে হবে। মূল সাইটের `muslimabaya.co` SEO URL এবং সাবডোমেইনের `muslimabaya.com` আলাদা করে রাখা হয়েছে।
+Toolkit-এ `subdomains/clients/example.json`, `subdomains/build-site.mjs` এবং `subdomains/README.md`-এ `muslimabaya.com`-এর অধীনে একেকটি আলাদা সাবডোমেইন সাইট তৈরি ও প্রকাশের পদ্ধতি আছে। প্রতিটি সাবডোমেইন একটি আলাদা Cloudflare Pages প্রজেক্ট হিসেবে প্রকাশ করুন এবং Cloudflare DNS-এ ওই সাবডোমেইন যুক্ত করুন।
 
 রেফারেন্স সাইটের যাচাইহীন স্টক সংখ্যা বা রেটিং এই টেমপ্লেটে রাখা হয়নি। ছবিগুলো আপনার আপলোড করা ফাইল থেকে নেওয়া। অন্য ক্লায়েন্টের জন্য ছবি ব্যবহারের অনুমতি যাচাই করুন।
 
@@ -87,4 +84,4 @@ This build adds a luxury conversion hero: balanced 3D side previews, compact ful
 
 
 ## V7 Order & Sales Desk
-Orders button opens a local order dashboard. Import Netlify Forms CSV, manage statuses, see delivered revenue, add manual orders, and export CSV. See AGENCY-BUILDER-v7-GUIDE.md.
+Orders button opens a local order dashboard. Import an orders CSV, manage statuses, see delivered revenue, add manual orders, and export CSV. See AGENCY-BUILDER-v7-GUIDE.md.

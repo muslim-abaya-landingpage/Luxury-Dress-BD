@@ -56,7 +56,6 @@ export const BLOCKED_FILES = [
   "google-apps-script-backend.gs",
   "manus-routes.json",
   "metadata.json",
-  "netlify.toml",
   "package-lock.json",
   "package.json",
   "playwright.config.cjs",

@@ -345,11 +345,6 @@
       submitToAdmin(v,eventId,signature).catch(err=>{submitting=false;try{sessionStorage.removeItem(DUP_KEY)}catch{} $('submit').classList.remove('is-loading');$('submit').textContent='অর্ডার কনফার্ম করুন';update();text('feedback',err instanceof TypeError?'সার্ভারের সঙ্গে যোগাযোগ করা যায়নি। ইন্টারনেট ও API সেটিংস যাচাই করে আবার চেষ্টা করুন।':String(err.message||err));});
       return;
     }
-    if (c.order.mode === 'netlify') {
-      if (location.protocol === 'file:' || ['localhost','127.0.0.1'].includes(location.hostname)) { e.preventDefault(); $('submit').disabled=false; $('submit').classList.remove('is-loading'); text('submit','অর্ডার কনফার্ম করুন'); text('feedback','লোকাল প্রিভিউতে অর্ডার জমা হবে না। Netlify-তে প্রকাশ করে Forms চালু করুন।'); }
-      else try { saveDraft(); sessionStorage.setItem(window.landingPendingKey,JSON.stringify({time:Date.now(),value:v.total,items:trackingItems(),event_id:eventId,orderMode:'netlify'})); } catch {}
-      return;
-    }
     e.preventDefault();
     if (c.order.mode === 'whatsapp') { $('submit').disabled=false; $('submit').classList.remove('is-loading'); text('submit','WhatsApp-এ অর্ডার পাঠান'); track('contact',{value:v.total,items:trackingItems()}); window.open(`https://wa.me/${c.order.whatsappNumber}?text=${encodeURIComponent(orderText)}`,'_blank','noopener,noreferrer'); text('feedback','WhatsApp-এ Send চাপলে অর্ডার পাঠানো হবে।'); }
     else { $('submit').disabled=false; $('submit').classList.remove('is-loading'); text('submit','অর্ডারের তথ্য প্রস্তুত করুন'); $('copy').style.display='block'; text('feedback','অর্ডারের তথ্য প্রস্তুত। নিচে কপি করুন।'); }

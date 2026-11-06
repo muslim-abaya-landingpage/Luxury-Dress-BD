@@ -179,7 +179,7 @@ if (typeof window !== 'undefined' && window.LANDING_CONFIG) maApplyDiscount(wind
     try {
       const pending=JSON.parse(sessionStorage.getItem(pendingKey)||'null');
       sessionStorage.removeItem(pendingKey);
-      if(pending && Date.now()-pending.time<10*60*1000 && pending.value>0 && ['netlify','apps-script'].includes(pending.orderMode)) {
+      if(pending && Date.now()-pending.time<10*60*1000 && pending.value>0 && ['apps-script'].includes(pending.orderMode)) {
         window.trackLandingEvent('generate_lead',{value:pending.value,items:pending.items,event_id:pending.event_id});
         // Purchase is browser-only right now — the Worker's server-side CAPI call (see
         // _worker.js) only ever sends 'Lead', so there is no matching server event to

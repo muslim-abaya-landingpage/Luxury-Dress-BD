@@ -2,7 +2,7 @@
 
 **সিস্টেম:** Luxury Dress BD / Muslim Abaya (`muslimabaya.com`)
 **প্রস্তুতির ভিত্তি:** নির্বাচিত repository-তে দেখা static HTML/CSS/JS storefront; Google Apps Script Web App; Google Sheets-এ `Online Order`, `Customers`, `Admins`, `Sessions`, `Subscribe` ও stock data; storefront-এর cart/checkout; Apps Script-ভিত্তিক admin; optional courier, Meta CAPI, GTM/Meta/TikTok tracking।
-**গুরুত্বপূর্ণ:** এই গাইড একটি rollout plan। এখানে Cloudflare/Netlify/GitHub Pages, Google Cloud alert, uptime probe বা alarm আগে থেকেই configure আছে—এমন দাবি করা হচ্ছে না। ব্যবহৃত hosting ও account অনুযায়ী ধাপগুলো বাস্তবে চালু করুন।
+**গুরুত্বপূর্ণ:** এই গাইড একটি rollout plan। এখানে Cloudflare/GitHub Pages, Google Cloud alert, uptime probe বা alarm আগে থেকেই configure আছে—এমন দাবি করা হচ্ছে না। ব্যবহৃত hosting ও account অনুযায়ী ধাপগুলো বাস্তবে চালু করুন।
 
 ## 1. পর্যবেক্ষণের লক্ষ্য ও প্রথম মাসের SLO
 
@@ -71,7 +71,7 @@ Sheets-এ সীমিত admin-only reconciliation চালু করুন (
 
 ### D. Frontend/asset ও security
 
-Host/edge analytics থেকে 4xx/5xx, HTML/JS/CSS/image 404, cache status, TLS expiry, DNS resolution ও deploy commit/version মাপুন। GitHub Pages বনাম Cloudflare Pages/Netlify কোনটি live origin—একবার DNS ও hosting dashboard দিয়ে নিশ্চিত করুন; `_headers` ফাইল GitHub Pages-এ কার্যকর নয় বলে repository performance notes সতর্ক করে। Deploy-এর পরে cache purge/asset versioning plan ঠিক করুন।
+Host/edge analytics থেকে 4xx/5xx, HTML/JS/CSS/image 404, cache status, TLS expiry, DNS resolution ও deploy commit/version মাপুন। GitHub Pages বনাম Cloudflare Pages কোনটি live origin—একবার DNS ও hosting dashboard দিয়ে নিশ্চিত করুন; `_headers` ফাইল GitHub Pages-এ কার্যকর নয় বলে repository performance notes সতর্ক করে। Deploy-এর পরে cache purge/asset versioning plan ঠিক করুন।
 
 Sentry/সমতুল্য RUM-এ JavaScript exceptions ও failed fetch class সংগ্রহ করা যেতে পারে, তবে request/DOM data scrub করুন। CSP/security header, admin login redirect, `robots` exclusion এবং Firestore rules—যদি Firebase project এখনও ব্যবহৃত হয়—আলাদা security check। Repository-র `firestore.rules` অনুযায়ী Firestore prototype/live checkout-এর order backend নয়; প্রকৃত checkout source Apps Script + Sheets। Repository-র বাইরে live Firebase rules ও deployment state যাচাই করুন।
 

@@ -38,7 +38,7 @@ Lighthouse mobile, simulated 4G, against **https://muslimabaya.com/**:
 | Oversized catalog images | Cards on a ~180 px column downloaded 4–6 MB originals | **High** bytes, mid LCP if hero is delayed | `images/Maroon Abaya Set.jpeg` (4.2 MB), `images/Abaya/premium-black-layered-khimar-niqab-abaya-for-women-muslimabaya.webp` (1.8 MB PNG mislabeled as WebP) |
 | GitHub `raw.githubusercontent.com` as image host | Extra origin, no CDN resize, rate limits | **High** if `useLocalImages` is off | `category-products.js` (already rewritten locally via `product-config.js`) |
 | Logo preload competing with LCP | Two image preloads share the first connection | **Low–medium** | `index.html` |
-| `_headers` is Netlify/Cloudflare Pages syntax | GitHub Pages ignores it; origin cache ~10 min on HTML, ~4 h on assets | **Medium** repeat visits | `_headers` |
+| `_headers` is Cloudflare Pages syntax | GitHub Pages ignores it; origin cache ~10 min on HTML, ~4 h on assets | **Medium** repeat visits | `_headers` |
 | Font Awesome `all.min.css` ~99% unused | Large CSS after idle | **Low** (already idle-loaded) | `index-catalog-defer.js` |
 | No self-hosted fonts (Poppins/Playfair referenced, files missing) | 404 previously; now system stack — already the live look | **n/a** | `muslimabaya-fonts-setup/` |
 
@@ -97,7 +97,7 @@ Lab **99** is measured without GTM/Meta/TikTok executing, because those scripts 
 - `images/Maroon Abaya Set.jpeg`
 - `images/Abaya/premium-black-layered-khimar-niqab-abaya-for-women-muslimabaya.webp`
 - `images/Premium-Floral-Motif-Abaya-Set.jpeg`
-- `_headers` — long-cache WebP (honored on Cloudflare Pages / Netlify; **not** GitHub Pages origin)
+- `_headers` — long-cache WebP (honored on Cloudflare Pages; **not** GitHub Pages origin)
 - `scripts/serve-gzip.py` — local gzip preview
 
 ## Remaining recommendations (not applied — would change tracking, hosting, or catalog workflow)

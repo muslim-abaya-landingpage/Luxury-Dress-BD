@@ -264,7 +264,7 @@
     });
   }
 
-  // নতুন: Admin Panel থেকে সরাসরি GitHub-এ ফাইল পাবলিশ (Netlify অটো-ডিপ্লয় ট্রিগার করে)
+  // নতুন: Admin Panel থেকে সরাসরি GitHub-এ ফাইল পাবলিশ (Cloudflare Pages অটো-ডিপ্লয় ট্রিগার করে)
   // path: category-products.js / product-links-data.js / product-catalog-sections.js / product-config.js
   function publishFile(path, content, message) {
     var s = getSession();

@@ -16,7 +16,7 @@ Google/Facebook অটোমেটিক #১ এ নিয়ে যায় �
 
 1. [Google Search Console](https://search.google.com/search-console) → প্রপার্টি `https://muslimabaya.com` → Sitemap জমা: `https://muslimabaya.com/sitemap.xml`
 2. “URL Inspection” দিয়ে হোম ও `/abaya` ইনডেক্স রিকোয়েস্ট
-3. প্রতি নতুন প্রোডাক্ট/ক্যাটাগরিতে আপডেট থাকলে সাইটম্যাপ আবার সাবমিট (Netlify deploy পর)
+3. প্রতি নতুন প্রোডাক্ট/ক্যাটাগরিতে আপডেট থাকলে সাইটম্যাপ আবার সাবমিট (Cloudflare Pages deploy পর)
 
 ### Facebook পেজ + ওয়েবসাইট লিংক
 
@@ -37,4 +37,4 @@ Google/Facebook অটোমেটিক #১ এ নিয়ে যায় �
 
 ---
 
-Facebook URL পরিবর্তন: শুধু `site-seo-config.js` → `social.facebook` এডিট → Netlify deploy।
+Facebook URL পরিবর্তন: শুধু `site-seo-config.js` → `social.facebook` এডিট → Cloudflare Pages deploy।

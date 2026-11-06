@@ -13,4 +13,4 @@ V6 turns the local builder into an agency workspace while keeping the landing pa
 Create Client → configure brand/theme → add products/gallery → delivery/order → tracking → Save Project → Launch Audit → Preview mobile/tablet/desktop → test order → Download config.js / deploy → Backup All Projects.
 
 ## Important security / cloud note
-V6 is still a static browser-based agency builder. Projects live in localStorage and can be moved with the backup file. Do not publish `admin.html`, `admin.js` or client backup JSON publicly. Real login, cross-device cloud sync, authoritative orders/stock, roles and a central sales dashboard require a backend/database/auth layer (for example Supabase/Firebase/custom API + Netlify functions).
+V6 is still a static browser-based agency builder. Projects live in localStorage and can be moved with the backup file. Do not publish `admin.html`, `admin.js` or client backup JSON publicly. Real login, cross-device cloud sync, authoritative orders/stock, roles and a central sales dashboard require a backend/database/auth layer (for example Supabase/Firebase/custom API + Cloudflare Workers).

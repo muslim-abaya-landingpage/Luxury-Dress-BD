@@ -4982,7 +4982,7 @@ function publishFileToGitHub_(e) {
 
   return {
     ok: true,
-    message: 'পাবলিশ সফল — Netlify ১-২ মিনিটে সাইট আপডেট করবে।',
+    message: 'পাবলিশ সফল — Cloudflare ১-২ মিনিটে সাইট আপডেট করবে।',
     path: path,
     commitUrl: (putBody && putBody.commit && putBody.commit.html_url) || '',
     sha: (putBody && putBody.content && putBody.content.sha) || ''
@@ -5128,7 +5128,7 @@ function publishImageToGitHub_(e) {
 
   return {
     ok: true,
-    message: 'ছবি আপলোড সফল — Netlify ১-২ মিনিটে সাইটে যুক্ত হবে।',
+    message: 'ছবি আপলোড সফল — Cloudflare ১-২ মিনিটে সাইটে যুক্ত হবে।',
     path: path,
     commitUrl: (putBody && putBody.commit && putBody.commit.html_url) || '',
     sha: (putBody && putBody.content && putBody.content.sha) || ''

@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 // Build a Meta Commerce Manager CSV from the canonical storefront catalog.
-// Run automatically during the Netlify production build; never reads private/admin data.
+// Run automatically during the Cloudflare Pages build (scripts/build-cloudflare.mjs); never reads private/admin data.
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const site = 'https://muslimabaya.com';

@@ -53,8 +53,8 @@ custom: {
 - Return/refund policy
 - Facebook Pixel / GA4 / TikTok Pixel IDs
 - Test order (mobile + desktop)
-- Netlify form submission test
+- একটি টেস্ট অর্ডার দিয়ে অ্যাডমিনে জমা হয় কি না দেখা
 - Thank-you page test
 
 ## গুরুত্বপূর্ণ
-এই template static Netlify landing page। Payment, authoritative stock, order status, abandoned checkout বা admin login দরকার হলে backend/database প্রয়োজন।
+এই template Cloudflare Pages-এ চলা static landing page। Payment, authoritative stock, order status, abandoned checkout বা admin login দরকার হলে backend/database প্রয়োজন।

@@ -94,7 +94,7 @@ window.LANDING_CONFIG = {
   order: {
     freeShippingThreshold: 0, // 0 = বন্ধ; যেমন 3000 দিলে ৳3000+ অর্ডারে ফ্রি ডেলিভারি
     coupons: [], // উদাহরণ: [{code:'SAVE100', type:'fixed', value:100}] বা type:'percent'
-    mode: 'apps-script', // 'apps-script', 'netlify', 'whatsapp' অথবা 'copy'
+    mode: 'apps-script', // 'apps-script', 'whatsapp' অথবা 'copy'
     apiUrl: '/api/order', // Cloudflare Pages _worker.js → Muslim Abaya Apps Script
     whatsappNumber: '8801971642683', // 01971642683-এর আন্তর্জাতিক ফরম্যাট; + বা স্পেস নয়
     paymentText: 'ক্যাশ অন ডেলিভারি — অগ্রিম প্রয়োজন নেই'
@@ -102,7 +102,7 @@ window.LANDING_CONFIG = {
   marketing: {
     gtmId: 'GTM-ML7RL6BR', // শুধু trackingMode: 'gtm' হলে লোড হবে; direct mode-এ duplicate ঠেকাতে বন্ধ
     ga4MeasurementId: 'G-L2BNEXE0XG', // GA4 web data stream-এ ID মিলিয়ে নিন
-    ga4LeadViaServer: false, // Netlify function-এ GA4_MP সক্রিয় করলে true; browser+server-এ একই Lead পাঠাবেন না
+    ga4LeadViaServer: false, // সার্ভার থেকে GA4 Lead পাঠানো চালু থাকলে true; browser+server-এ একই Lead পাঠাবেন না
     metaPixelId: '1465090315322833', // ব্যবহারকারীর দেওয়া ID; Meta Pixel ID হিসেবে ধরে নেওয়া হয়েছে
     tiktokPixelId: 'D6FK9GBC77UC649NNCP0', // TikTok Ads Manager-এর Pixel ID
     trackingMode: 'direct', // direct: GA4/Meta/TikTok এখানে; gtm: সব ট্যাগ GTM-এ কনফিগ করতে হবে

@@ -308,7 +308,7 @@ test('every local card photo has its small phone copy (run python3 scripts/build
   assert.deepEqual([...missing], []);
 });
 
-test('product photos come only from our own site (no old Netlify or other hosts)', () => {
+test('product photos come only from our own site (no outside hosts)', () => {
   const bad = [];
   for (const f of ['category-products.js', 'product-links-data.js']) {
     for (const m of fs.readFileSync(path.join(root, f), 'utf8').matchAll(/["'](https?:\/\/[^"'\/]+)\//g)) {
