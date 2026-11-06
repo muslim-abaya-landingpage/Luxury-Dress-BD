@@ -97,13 +97,22 @@
   Object.keys(assets).forEach(function(k){if(text.indexOf(k)<0)delete assets[k];});
   var queued=Object.keys(assets).map(function(k){return assets[k];});
   if(queued.length>MAX_ASSETS)throw Error('Too many photos in one save. Choose at most 7 photos.');
-  var urls={};
-  for(var i=0;i<queued.length;i++){
-   status('Uploading product photo '+(i+1)+'/'+queued.length+' to Cloudflare R2… keep this page open.');
-   var up=await g.MaAdmin.uploadImage(queued[i].path,queued[i].content,'image/webp');
-   if(!up||!up.ok||!up.url)throw Error((up&&(up.message||up.error))||'Cloudflare R2 photo upload failed.');
-   urls[queued[i].path]=up.url;uploaded[queued[i].path]=up.url;
+  var urls={},done=0,next=0,failed=null;
+  // Up to 3 photos upload at the same time instead of one after another.
+  if(queued.length)status('Uploading product photos 0/'+queued.length+' to Cloudflare R2… keep this page open.');
+  async function uploadWorker(){
+   while(!failed&&next<queued.length){
+    var item=queued[next++];
+    var up=await g.MaAdmin.uploadImage(item.path,item.content,'image/webp').catch(function(e){return {ok:false,message:e&&e.message};});
+    if(!up||!up.ok||!up.url){failed=failed||Error((up&&(up.message||up.error))||'Cloudflare R2 photo upload failed.');return;}
+    urls[item.path]=up.url;uploaded[item.path]=up.url;done++;
+    status('Uploading product photos '+done+'/'+queued.length+' to Cloudflare R2… keep this page open.');
+   }
   }
+  var workers=[];for(var w=0;w<Math.min(3,queued.length);w++)workers.push(uploadWorker());
+  await Promise.all(workers);
+  if(Object.keys(urls).length){Object.keys(urls).forEach(function(k){uploaded[k]=urls[k];});rememberUploaded();}
+  if(failed)throw failed;
   rememberUploaded();
   Object.keys(uploaded).forEach(function(k){if(!urls[k])urls[k]=uploaded[k];});
   var savedFiles=files.map(function(f){var content=f.content;Object.keys(urls).forEach(function(path){content=content.split(path).join(urls[path]);});return {path:f.path,content:content};});

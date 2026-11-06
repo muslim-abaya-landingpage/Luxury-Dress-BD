@@ -49,3 +49,33 @@ test('uploads to a content-addressed R2 key and returns the public CDN URL', asy
   assert.equal(puts[0][2].httpMetadata.contentType, 'image/webp');
   assert.match(puts[0][2].httpMetadata.cacheControl, /immutable/);
 });
+
+test('owner login check is read once per token for a short time; failures are not remembered', async () => {
+  const { isOwnerCached, _resetOwnerCache } = await import('../../functions/api/image-upload.js');
+  _resetOwnerCache();
+  let reads = 0;
+  const ok = async () => { reads++; return ''; };
+  const t0 = 1_000_000;
+  // Three photos of one save arriving together share a single Sheets read.
+  assert.deepEqual(await Promise.all([isOwnerCached('tok', t0, ok), isOwnerCached('tok', t0, ok), isOwnerCached('tok', t0 + 10, ok)]), ['', '', '']);
+  assert.equal(reads, 1);
+  // Still remembered a few seconds later, re-checked after a minute.
+  await isOwnerCached('tok', t0 + 30_000, ok);
+  assert.equal(reads, 1);
+  await isOwnerCached('tok', t0 + 61_000, ok);
+  assert.equal(reads, 2);
+  // A different token is checked on its own.
+  await isOwnerCached('other', t0 + 61_000, ok);
+  assert.equal(reads, 3);
+  // A refusal or an error is checked again on the next photo.
+  let denied = 0;
+  const deny = async () => { denied++; return 'NOT_LOGGED_IN'; };
+  assert.equal(await isOwnerCached('bad', t0, deny), 'NOT_LOGGED_IN');
+  assert.equal(await isOwnerCached('bad', t0, deny), 'NOT_LOGGED_IN');
+  assert.equal(denied, 2);
+  let boom = 0;
+  const fail = async () => { boom++; throw new Error('sheets down'); };
+  await assert.rejects(isOwnerCached('x', t0, fail));
+  await assert.rejects(isOwnerCached('x', t0, fail));
+  assert.equal(boom, 2);
+});
