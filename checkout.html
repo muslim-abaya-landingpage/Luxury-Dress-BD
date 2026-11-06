@@ -4225,10 +4225,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         bindCheckoutTikTokMatchSync();
         initCheckoutSteps();
         if (typeof pushTrackingEvent === 'function') {
-            var checkoutSnap = typeof buildCartTrackingSnapshot === 'function'
-                ? buildCartTrackingSnapshot(orderLines())
-                : { currency: 'BDT', value: cartSubtotal() };
-            (function(){var fired=false;function fireIC(){if(fired)return;fired=true;pushTrackingEvent('InitiateCheckout', checkoutSnap);}['userName','userPhone','userEmail','userAddress','userDistrict','userThana'].forEach(function(id){var el=document.getElementById(id);if(!el)return;el.addEventListener('input',fireIC,{once:true});el.addEventListener('focus',fireIC,{once:true});});window.addEventListener('scroll',function onScroll(){if((window.scrollY||window.pageYOffset||0)>200){fireIC();window.removeEventListener('scroll',onScroll);}},{passive:true});window.setTimeout(fireIC,8000);})();
+            (function(){
+                var fired = false;
+                function fireIC(){
+                    if (fired) return;
+                    fired = true;
+                    var checkoutSnap = typeof buildCartTrackingSnapshot === 'function'
+                        ? buildCartTrackingSnapshot(orderLines())
+                        : { currency: 'BDT', value: cartSubtotal() };
+                    // Use the payable checkout amount, not only the product subtotal.
+                    checkoutSnap.value = typeof grandTotal === 'function' ? grandTotal() : checkoutSnap.value;
+                    checkoutSnap.order_value = checkoutSnap.value;
+                    checkoutSnap.delivery_fee = typeof shippingCharge === 'function' ? shippingCharge() : 0;
+                    checkoutSnap.discount = typeof currentDiscountAmount === 'function' ? currentDiscountAmount() : 0;
+                    pushTrackingEvent('InitiateCheckout', checkoutSnap);
+                }
+                ['userName','userPhone','userEmail','userAddress','userDistrict','userThana'].forEach(function(id){var el=document.getElementById(id);if(!el)return;el.addEventListener('input',fireIC,{once:true});el.addEventListener('focus',fireIC,{once:true});});window.addEventListener('scroll',function onScroll(){if((window.scrollY||window.pageYOffset||0)>200){fireIC();window.removeEventListener('scroll',onScroll);}},{passive:true});window.setTimeout(fireIC,8000);
+            })();
         }
     });
 
