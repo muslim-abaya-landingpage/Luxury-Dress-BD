@@ -125,7 +125,7 @@
     ".pmw-tiles{display:flex;flex-wrap:wrap;gap:6px}.pmw-tiles button{padding:0;border:2px solid transparent;background:none;cursor:pointer}.pmw-tiles button.is-on{border-color:#2271b1}" +
     ".pmw-tiles img{width:56px;height:56px;object-fit:cover;display:block}.pmw-cb{display:flex;flex-wrap:wrap;gap:18px;padding:8px 0;border-top:1px solid #f0f0f1;border-bottom:1px solid #f0f0f1}" +
     ".pmw-cb label{display:flex;gap:6px;align-items:center}.pmw-msg{font-size:12px;color:#646970;margin:8px 0 0}.pmw-msg.is-err{color:#b32d2e}.pmw-msg.is-ok{color:#008a20}" +
-    ".pmw-empty{padding:18px 0;color:#646970}.pmw-inline-add{display:flex;align-items:end;flex-wrap:wrap;gap:10px;margin:12px 0 16px;padding:16px;border:1px solid #dcdcde;border-left:4px solid #2271b1;border-radius:8px;background:#f6f7f7}.pmw-inline-add label{display:block;width:100%;font-weight:600}.pmw-inline-add select{min-width:220px;min-height:38px}.pmw-inline-add .pmw-hint{flex-basis:100%;margin:0}@media(max-width:700px){.pmw-box-body,.pmw-row2{grid-template-columns:1fr}.pmw-inline-add{align-items:stretch}.pmw-inline-add select,.pmw-inline-add button{width:100%;min-width:0}}";
+    ".pmw-empty{padding:18px 0;color:#646970}.pmw-inline-add{display:flex;align-items:end;flex-wrap:wrap;gap:10px;margin:12px 0 16px;padding:16px;border:1px solid #dcdcde;border-left:4px solid #2271b1;border-radius:8px;background:#f6f7f7}.pmw-inline-add label{display:block;width:100%;font-weight:600}.pmw-inline-add input{width:min(100%,360px);min-height:38px;padding:6px 10px;border:1px solid #8c8f94;border-radius:4px}.pmw-inline-add .pmw-hint{flex-basis:100%;margin:0}.pmw-box{margin:10px 0;border:1px solid #dcdcde;border-radius:5px;background:#fff;overflow:hidden}.pmw-box-head{padding:12px 14px;background:#f6f7f7}.pmw-box-body{padding:14px}.pmw-var{margin:10px 0;border:1px solid #dcdcde;border-radius:5px;background:#fff;overflow:hidden}.pmw-var-head{padding:12px;background:#f6f7f7}.pmw-var-body{padding:14px}.pmw-var-head select{min-height:38px;padding:4px 8px;border:1px solid #c3c4c7;border-radius:4px;background:#fff}.pmw-row2 input,.pmw-row2 select,.pmw-field input,.pmw-field select{min-height:40px;padding:6px 10px;border:1px solid #c3c4c7;border-radius:4px}.pmw-img{border-radius:5px;background:#f6f7f7}.pmw-btn{border-radius:4px;font-weight:600}.pmw-btn:focus-visible,.pmw a:focus-visible,.pmw input:focus-visible,.pmw select:focus-visible,.pmw textarea:focus-visible{outline:2px solid #2271b1;outline-offset:2px}@media(max-width:700px){.pmw-box-body,.pmw-row2{grid-template-columns:1fr}.pmw-inline-add{align-items:stretch}.pmw-inline-add input,.pmw-inline-add button{width:100%;min-width:0}.pmw-var-head select{max-width:100%;min-width:0;flex:1 1 100%}.pmw-var-head .pmw-actions{width:100%;justify-content:flex-end}}";
   function injectCss() {
     if (document.getElementById("pmw-css")) return;
     var s = document.createElement("style");
@@ -179,7 +179,7 @@
         '<div class="pmw-bar"><button type="button" class="pmw-btn" data-pa="new">Add new</button>' +
         '<select data-pa="global" aria-label="Add global attribute"><option value="">Add global</option>' + missing.map(function (d) { return '<option value="' + d.id + '">' + esc(d.name) + "</option>"; }).join("") + "</select>" +
         '<span class="pmw-right"><a data-pa="expand">Expand</a> / <a data-pa="close">Close</a></span></div>' +
-        (st.showAdd ? '<div class="pmw-inline-add"><label for="pmw-new-attribute">Attribute name</label><select id="pmw-new-attribute" data-pa="new-choice"><option value="">Select an attribute…</option>' + missing.map(function (d) { return '<option value="' + d.id + '">' + esc(d.name) + '</option>'; }).join('') + '</select><button type="button" class="pmw-btn pmw-btn-primary" data-pa="add-selected">Add attribute</button><button type="button" class="pmw-btn" data-pa="cancel-new">Cancel</button><p class="pmw-hint">Choose an attribute to add it here. This form stays inside the Attributes panel.</p></div>' : '') +
+        (st.showAdd ? '<div class="pmw-inline-add"><label for="pmw-new-attribute">Name</label><input id="pmw-new-attribute" type="text" data-pa="new-name" list="pmw-supported-attributes" placeholder="e.g. Long, Body, Size, Sleeve, Color or Option" autocomplete="off"><datalist id="pmw-supported-attributes">' + missing.map(function (d) { return '<option value="' + esc(d.name) + '"></option>'; }).join('') + '</datalist><button type="button" class="pmw-btn pmw-btn-primary" data-pa="add-selected">Add attribute</button><button type="button" class="pmw-btn" data-pa="cancel-new">Cancel</button><p class="pmw-hint">Enter a supported product attribute name. Values remain connected to the product’s existing size, color and option fields.</p></div>' : '') +
         present.map(function (d) {
           var open = st.open[d.id] !== false;
           var readonly = !d.field;
@@ -252,9 +252,13 @@
         if (k === "notice") { st.notice = false; draw(); }
         else if (k === "new") { st.showAdd = !st.showAdd; draw(); }
         else if (k === "add-selected") {
-          var choice = box.querySelector('[data-pa="new-choice"]');
-          if (!choice || !choice.value) { msg("Please select an attribute first.", "err"); return; }
-          addAttr(choice.value);
+          var field = box.querySelector('[data-pa="new-name"]');
+          var n = norm(field && field.value);
+          var map = { long: "length", length: "length", "dress length": "length", body: "body", size: "size", sizes: "size", sleeve: "sleeve", palazzo: "palazzo", pajama: "palazzo", color: "color", colour: "color", option: "type", type: "type" };
+          var wanted = map[n];
+          if (!wanted || !defById(defs, wanted)) { msg("This product supports: " + defs.map(function (d) { return d.name; }).join(", ") + ". Enter one of these names.", "err"); if (field) field.focus(); return; }
+          if (present.indexOf(defById(defs, wanted)) !== -1) { msg("This attribute is already added.", "err"); if (field) field.focus(); return; }
+          addAttr(wanted);
         } else if (k === "cancel-new") { st.showAdd = false; draw(); }
         else if (k === "remove") {
           var d = defById(defs, id);
