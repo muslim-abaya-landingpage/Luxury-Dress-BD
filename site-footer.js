@@ -613,8 +613,12 @@ esc(SOCIAL.linkedin) +
 
   function scheduleSupportChat() {
     function go() {
-      if (typeof window.requestIdleCallback === "function") window.requestIdleCallback(loadSupportChat, { timeout: 4000 });
-      else window.setTimeout(loadSupportChat, 1500);
+      // Shared helper from site-header.js: start the chat widget only when the visitor is not mid-swipe.
+      window.setTimeout(function () {
+        if (typeof window.maRunWhenStill === "function") window.maRunWhenStill(loadSupportChat);
+        else if (typeof window.requestIdleCallback === "function") window.requestIdleCallback(loadSupportChat, { timeout: 4000 });
+        else loadSupportChat();
+      }, 1500);
     }
     if (document.readyState === "complete") go();
     else window.addEventListener("load", go, { once: true });

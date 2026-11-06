@@ -889,3 +889,30 @@ body.site-search-open .site-search-drawer {
   .header-middle-nav .desktop-menu::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
   .header-middle-nav .desktop-menu ul{padding-bottom:4px!important}
 }
+
+/* ===== Smooth scrolling on phones (keep at the end of this file) =====
+   site-header.css is loaded on every storefront page, so these rules apply site-wide.
+   On touch screens and narrow windows:
+   - backdrop-filter (frosted glass) is switched off: the browser has to re-blur everything
+     behind each glass card on every scrolled frame, which is the main cause of jerky scrolling
+     on mid-range Android phones. The glass backgrounds are already 66–86% opaque white, so the
+     look barely changes.
+   - the footer's never-ending background/orb animations stop (they repaint the whole footer
+     every frame), and blur filters on decorative glows are dropped.
+   Guarded by scripts/test-mobile-scroll.mjs — do not remove. */
+@media (hover: none), (pointer: coarse), (max-width: 900px) {
+  *, *::before, *::after {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+  .anz-footer, .anz-footer::before, .anz-footer::after, .anz-footer-strip::before {
+    animation: none !important;
+  }
+  .anz-footer::before, .anz-footer::after { filter: none !important; }
+}
+/* Spinners inside add-to-cart buttons only run while the button is busy. */
+.ah-btn-spin { animation-play-state: paused !important; }
+.is-adding .ah-btn-spin, .is-loading .ah-btn-spin { animation-play-state: running !important; }
+@media (prefers-reduced-motion: reduce) {
+  .anz-footer, .anz-footer::before, .anz-footer::after, .anz-footer-strip::before { animation: none !important; }
+}

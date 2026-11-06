@@ -254,3 +254,56 @@ test('header waits for the static homepage catalog instead of loading duplicate 
   assert.equal(finished, 1);
   assert.equal(bundle.getAttribute('data-loaded'), '1');
 });
+
+// ---- Site-wide guards for smooth phone scrolling (added 2026-11). Keep these passing. ----
+test('touch screens: frosted-glass blur is off site-wide and footer animations stop', () => {
+  const css = fs.readFileSync(path.join(root, 'site-header.css'), 'utf8');
+  const block = css.match(/@media\s*\(hover:\s*none\),\s*\(pointer:\s*coarse\),\s*\(max-width:\s*900px\)\s*\{([\s\S]*?)\n\}/);
+  assert.ok(block, 'site-header.css must keep the touch-screen performance block at the end');
+  assert.match(block[1], /\*,\s*\*::before,\s*\*::after\s*\{\s*-webkit-backdrop-filter:\s*none\s*!important;\s*backdrop-filter:\s*none\s*!important;/);
+  assert.match(block[1], /\.anz-footer[^{]*\{\s*animation:\s*none\s*!important;/);
+  assert.match(css, /\.ah-btn-spin\s*\{\s*animation-play-state:\s*paused\s*!important;/);
+});
+
+test('every storefront page loads site-header.css (where the phone performance rules live)', () => {
+  const skip = /^(admin|product-manager|stock-analytics|product-links|googlec|muslim-abaya-premium-modal|size-chart|support-agent-telegram|apps-script-copy)/;
+  const pages = fs.readdirSync(root).filter(f => f.endsWith('.html') && !skip.test(f));
+  const missing = pages.filter(f => !/site-header(\.min)?\.css/.test(fs.readFileSync(path.join(root, f), 'utf8')));
+  assert.deepEqual(missing, []);
+});
+
+test('scroll, touch and wheel listeners in storefront scripts are passive', () => {
+  const files = fs.readdirSync(root).filter(f => f.endsWith('.js') && !/\.min\.js$|^admin|^product-manager|^stock-analytics/.test(f));
+  const bad = [];
+  for (const f of files) {
+    const src = fs.readFileSync(path.join(root, f), 'utf8');
+    const re = /addEventListener\(\s*['"](scroll|touchmove|touchstart|wheel)['"]/g;
+    let m;
+    while ((m = re.exec(src))) {
+      let depth = 0, i = m.index + 'addEventListener'.length, end = src.length;
+      for (; i < src.length; i++) { const c = src[i]; if (c === '(') depth++; else if (c === ')') { depth--; if (depth === 0) { end = i; break; } } }
+      if (!/passive\s*:\s*true/.test(src.slice(m.index, end + 1))) bad.push(f + ': ' + m[1]);
+    }
+  }
+  assert.deepEqual(bad, [], 'add { passive: true } so the browser can scroll without waiting for JavaScript');
+});
+
+test('tracking (GTM) and the chat widget never start mid-swipe; header mount does not force layout', () => {
+  const src = fs.readFileSync(path.join(root, 'site-header.js'), 'utf8');
+  assert.match(src, /window\.maRunWhenStill = function/);
+  assert.match(src, /Date\.now\(\) - lastMove < 700/);
+  assert.match(src, /window\.maRunWhenStill\(run\)/);
+  assert.match(fs.readFileSync(path.join(root, 'site-footer.js'), 'utf8'), /window\.maRunWhenStill\(loadSupportChat\)/);
+  assert.doesNotMatch(src.slice(src.indexOf('function mountHeader'), src.indexOf('function mountHeader') + 2600), /\n\s*syncSiteHeaderOffset\(\);/, 'mountHeader must not force a layout');
+});
+
+test('every local card photo has its small phone copy (run python3 scripts/build-card-thumbs.py)', () => {
+  const ctx = { window: {} }; ctx.window = ctx; vm.runInNewContext(fs.readFileSync(path.join(root, 'category-products.js'), 'utf8'), ctx);
+  const missing = new Set();
+  for (const list of Object.values(ctx.CATEGORY_PRODUCTS || {})) for (const p of list || []) {
+    const img = String(p.image || '').replace(/^\.?\//, '');
+    if (!img.startsWith('images/') || /^images\/(card|card-avif|hero-banner|uploads)\//.test(img) || /[?#]/.test(img)) continue;
+    if (!fs.existsSync(path.join(root, 'images/card', img + '.webp')) || !fs.existsSync(path.join(root, 'images/card-avif', img + '.avif'))) missing.add(img);
+  }
+  assert.deepEqual([...missing], []);
+});

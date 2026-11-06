@@ -874,7 +874,7 @@ function buildNavMenuItems() {
     ensureProductCatalog(function () {
       var applyNav = function () {
         applyDynamicNavMenu();
-        syncSiteHeaderOffset();
+        scheduleSiteHeaderOffset();
       };
       if (typeof window.requestIdleCallback === "function") {
         window.requestIdleCallback(applyNav, { timeout: 600 });
@@ -882,7 +882,9 @@ function buildNavMenuItems() {
         applyNav();
       }
     });
-    syncSiteHeaderOffset();
+    // Measure in the next frame (and via ResizeObserver) instead of right now: reading the header
+    // height here forced a full-page layout while the rest of the page was still being built.
+    scheduleSiteHeaderOffset();
     observeSiteHeaderSize(mount);
     if (document.fonts && typeof document.fonts.ready === 'object' && document.fonts.ready.then) {
       document.fonts.ready.then(scheduleSiteHeaderOffset);
@@ -939,6 +941,25 @@ function buildNavMenuItems() {
     document.head.appendChild(gtmScript);
   }
 
+  /* Run non-urgent work (tracking, chat widget) only when the visitor is not in the middle of a
+     swipe: waits until the page has been still for 0.7 s (at most ~6 s more), then an idle slot.
+     Heavy scripts that start mid-scroll are what make phone scrolling stutter. */
+  (function () {
+    var lastMove = 0;
+    function noteMove() { lastMove = Date.now(); }
+    window.addEventListener('scroll', noteMove, { passive: true });
+    window.addEventListener('touchmove', noteMove, { passive: true });
+    window.maRunWhenStill = function (fn) {
+      var waits = 0;
+      function attempt() {
+        if (Date.now() - lastMove < 700 && waits < 8) { waits++; window.setTimeout(attempt, 750); return; }
+        if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(function () { fn(); }, { timeout: 2000 });
+        else fn();
+      }
+      attempt();
+    };
+  })();
+
   /** GTM — first user gesture or tab hide (keeps Ads pixels, stays off the LCP path) */
   function scheduleDeferredGtm() {
     if (window.__maGtmScheduled) return;
@@ -953,8 +974,7 @@ function buildNavMenuItems() {
        instead made the heavy tracking scripts start exactly while the visitor began browsing. */
     function afterLoad() {
       window.setTimeout(function () {
-        if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(run, { timeout: 2000 });
-        else run();
+        window.maRunWhenStill(run);
       }, 3000);
     }
     if (document.readyState === 'complete') afterLoad();

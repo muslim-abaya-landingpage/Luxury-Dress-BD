@@ -1,0 +1,49 @@
+name: Phone Images
+
+# Makes the small copies of product photos that phones load (480 px card + AVIF, 900 px product photo)
+# whenever photos or the catalog change, and commits them. Without them phones download full-size
+# photos, which makes pages slower and scrolling heavier. Script: scripts/build-card-thumbs.py.
+# Free GitHub Actions; only adds missing files, never changes or deletes existing photos.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "images/**"
+      - "category-products.js"
+      - "product-links-data.js"
+      - "scripts/build-card-thumbs.py"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: phone-images
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Pillow (WebP + AVIF)
+        run: pip install "pillow>=11.3"
+      - name: Make missing phone copies
+        run: python3 scripts/build-card-thumbs.py
+      - name: Commit new copies
+        run: |
+          git add images/card images/card-avif images/m900
+          if git diff --cached --quiet; then echo "Nothing new."; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898699+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Phone copies of new product photos"
+          for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && exit 0; sleep 5; done
+          exit 1

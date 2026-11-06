@@ -21,6 +21,21 @@ on:
       - "supabase/**"
       - "monitoring/**"
       - "cloudflare-worker/**"
+  # Changes pushed straight to main are checked too (GitHub e-mails you when a budget breaks).
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+      - "apps-script/**"
+      - "**/*.gs"
+      - "**/*.bat"
+      - "**/*.ps1"
+      - "tests/backend/**"
+      - "migrations/**"
+      - "supabase/**"
+      - "monitoring/**"
+      - "cloudflare-worker/**"
   workflow_dispatch:
 
 permissions:

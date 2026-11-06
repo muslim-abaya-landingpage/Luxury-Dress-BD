@@ -25,7 +25,7 @@
           '<div class="lux-video-card">' +
           '<div class="lux-video-ratio" data-video-id="' + id + '">' +
           '<button type="button" class="lux-video-facade">' +
-          '<img src="https://i.ytimg.com/vi/' + id + '/hqdefault.jpg" alt="' + title + ' video" loading="lazy" onerror="this.onerror=null;this.src=\'images/Baby-Pink-Floral-Print.jpeg\';">' +
+          '<img src="https://i.ytimg.com/vi/' + id + '/hqdefault.jpg" alt="' + title + ' video" loading="lazy" onerror="this.onerror=null;this.src=\'images/card/images/Baby-Pink-Floral-Print.jpeg.webp\';">' +
           '<span class="lux-video-play"></span>' +
           "</button>" +
           "</div>" +

@@ -1259,6 +1259,36 @@ function applySelectedColorToProduct(product, colorVariant) {
   if (colorVariant.image) next.image = colorVariant.image;
   return next;
 }
+/* Product-page photos on phones (copies made by scripts/build-card-thumbs.py, automatically on push):
+   images/card/<path>.webp (480 px) for gallery thumbnails, images/m900/<path>.webp (900 px) for the
+   main photo on phones. Desktop keeps the original photo (needed for zoom). Missing copy → original. */
+function pqvLocalPhotoPath(src) {
+  var v = String(src || "");
+  if (!v || /^(https?:)?\/\//i.test(v) || /[?#]/.test(v)) return null;
+  var m = v.match(/^(\/?)(images\/.+)$/i);
+  if (!m || /^images\/(card|card-avif|m900|hero-banner)\//i.test(m[2])) return null;
+  return { prefix: m[1], path: m[2] };
+}
+function pqvSmallPhoto(src) {
+  var p = pqvLocalPhotoPath(src);
+  return p ? p.prefix + "images/card/" + p.path + ".webp" : "";
+}
+function pqvPhoneSrcset(src) {
+  var p = pqvLocalPhotoPath(src);
+  if (!p) return "";
+  // 1600w is only a selection hint for the original; phones (340 px slot) pick the 900 px copy.
+  return encodeCardSrcsetUrl(p.prefix + "images/m900/" + p.path + ".webp") + " 900w, " + encodeCardSrcsetUrl(src) + " 1600w";
+}
+var PQV_MAIN_SIZES = "(max-width: 700px) 340px, 1600px";
+/** Put a photo in the main product image, with the phone copy when there is one. */
+function setPqvMainPhoto(img, src) {
+  if (!img) return;
+  var set = pqvPhoneSrcset(src);
+  img.removeAttribute("data-tried-orig");
+  if (set) { img.setAttribute("sizes", PQV_MAIN_SIZES); img.setAttribute("srcset", set); }
+  else { img.removeAttribute("srcset"); img.removeAttribute("sizes"); }
+  img.src = src;
+}
 function buildPqvThumbsHtml(images, altText, product) {
   var altFn = window.productImageAlt || (window.maCatalog && window.maCatalog.imageAlt);
   return images
@@ -1271,8 +1301,10 @@ function buildPqvThumbsHtml(images, altText, product) {
         '" data-src="' +
         esc +
         '"><img src="' +
+        escapeHtml(pqvSmallPhoto(src) || src) +
+        '" data-full="' +
         esc +
-        '" alt="' +
+        '"' + (i > 3 ? ' loading="lazy"' : '') + ' decoding="async" width="96" height="120" onerror="var f=this.getAttribute(\'data-full\');if(f&&this.src.indexOf(\'images/card/\')!==-1){this.src=f}else{this.onerror=null}" alt="' +
         escapeHtml(alt || "") +
         '"></button>'
       );
@@ -1724,7 +1756,7 @@ function setPqvGallerySlide(modal, slideIndex) {
   var src = thumb.getAttribute("data-src");
   var mainImg = modal.querySelector("#pqvMainImg");
   if (!src || !mainImg) return;
-  mainImg.src = src;
+  setPqvMainPhoto(mainImg, src);
   var thumbImg = thumb.querySelector("img");
   if (thumbImg && thumbImg.alt) mainImg.alt = thumbImg.alt;
   thumbs.forEach(function (t, j) {
@@ -1815,7 +1847,7 @@ function refreshPqvVariation(modal, p, categoryKey, idx) {
       // Only an http(s) photo URL is put back into the main image.
       var photoUrl = null;
       try { photoUrl = new URL(thumbs[t].getAttribute("data-src") || "", window.location.href); } catch (e) { photoUrl = null; }
-      if (mainImgEl && photoUrl && /^https?:$/.test(photoUrl.protocol)) mainImgEl.src = photoUrl.href;
+      if (mainImgEl && photoUrl && /^https?:$/.test(photoUrl.protocol)) setPqvMainPhoto(mainImgEl, thumbs[t].getAttribute("data-src"));
       for (var u = 0; u < thumbs.length; u++) thumbs[u].classList.toggle("is-active", u === t);
       modal.setAttribute("data-pqv-slide", String(t));
       break;
@@ -1967,7 +1999,7 @@ function bindPqvInteractions(p, idx, categoryKey, scopeRoot) {
   });
   if (mainImg && !mainImg.getAttribute("data-bound")) {
     mainImg.setAttribute("data-bound", "1");
-    mainImg.src = imgSrc;
+    setPqvMainPhoto(mainImg, imgSrc);
   }
   bindPqvImageZoom(modal);
   bindPqvQtyInput(modal);
@@ -2593,9 +2625,10 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     '<span class="pqv-soldout-ribbon" aria-hidden="true">STOCK OUT</span>' +
     '<img id="pqvMainImg" class="pqv-zoom-img" src="' +
     imgSrc +
-    '" alt="' +
+    '"' + (pqvPhoneSrcset(imgSrc) ? ' srcset="' + escapeHtml(pqvPhoneSrcset(imgSrc)) + '" sizes="' + PQV_MAIN_SIZES + '"' : "") +
+    ' alt="' +
     escapeHtml(typeof window.productImageAlt === "function" ? window.productImageAlt(p, imgSrc, 0) : p.name) +
-    '" width="1080" height="1350" fetchpriority="high" decoding="async" onerror="this.onerror=null;this.src=\'' +
+    '" width="1080" height="1350" fetchpriority="high" decoding="async" onerror="if(this.hasAttribute(\'srcset\')&&!this.hasAttribute(\'data-tried-orig\')){this.setAttribute(\'data-tried-orig\',\'1\');this.removeAttribute(\'srcset\');this.removeAttribute(\'sizes\');return}this.onerror=null;this.src=\'' +
     imgFallback.replace(/'/g, "\\'") +
     '\'">' +
     '<button type="button" class="pqv-nav pqv-nav-next" data-pqv-nav="next" aria-label="Next image" hidden>' +
