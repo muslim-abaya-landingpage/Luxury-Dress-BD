@@ -48,4 +48,8 @@ test('middleware answers 404 (no-store, noindex) for a blocked path and passes o
   const ok = await onRequest(ctx('/abaya'));
   assert.equal(await ok.text(), 'static');
   assert.equal(nextCalled, 1);
+  const manifest = await onRequest(ctx('/manus-routes.json'));
+  assert.equal(manifest.status, 200);
+  assert.equal(manifest.headers.get('Content-Type'), 'application/json; charset=utf-8');
+  assert.ok(JSON.parse(await manifest.text()).routes.some((r) => r.path === '/'));
 });
