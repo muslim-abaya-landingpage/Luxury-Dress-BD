@@ -9,7 +9,6 @@ window.SITE_HEADER_CONFIG = {
     facebookUrl: "https://www.facebook.com/muslimabayaofficial",
     links: [
       { label: "Help", href: "/help" },
-      { label: "কেনাকাটার গাইড", href: "/shopping-guide" },
       { label: "Track Order", href: "/order-track" },
       { label: "Sign Up", href: "/signup" },
       { label: "Sign In", href: "/signin" }
