@@ -899,11 +899,16 @@
 
     var qty = parseInt(out.quantity, 10) || 1;
     if (!out.contents && Array.isArray(out.content_ids) && out.content_ids.length) {
+      // Meta expects value to be the event total while item_price is the unit price.
+      // AddToCart events can represent multiple units, so do not copy the total into
+      // every generated content item.
+      var eventValue = typeof out.value === "number" ? out.value : parseFloat(out.value) || 0;
+      var unitPrice = qty > 0 ? eventValue / qty : eventValue;
       out.contents = out.content_ids.map(function (id) {
         return {
           id: String(id),
           quantity: qty,
-          item_price: typeof out.value === "number" ? out.value : parseFloat(out.value) || 0
+          item_price: unitPrice
         };
       });
     }
