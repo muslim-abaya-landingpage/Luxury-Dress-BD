@@ -111,10 +111,12 @@ test('a retry of the same request returns the first result without a second comm
   const env = { STOCK_DB: db, GOOGLE_SA_JSON: 'x', GITHUB_TOKEN: 'gh-token' };
   const deps = Object.assign({ fetch: p._gh.fetchImpl }, owner);
   const first = await (await handleCatalogSave(req(p), env, deps)).json();
-  const before = p._gh.calls.length;
+  const writes = () => p._gh.calls.filter((c) => !c.startsWith('GET ')).length;
+  const before = writes();
   const again = await (await handleCatalogSave(req(p), env, deps)).json();
   assert.deepEqual(again, first);
-  assert.equal(p._gh.calls.length, before);
+  // GitHub is read in parallel with the owner check, but a retry never writes a second commit.
+  assert.equal(writes(), before);
   const changed = Object.assign({}, p, { files: p.files.map((f) => ({ path: f.path, content: f.content + ' changed' })) });
   const r = await handleCatalogSave(req(changed), env, deps);
   assert.equal(r.status, 409);
@@ -152,4 +154,54 @@ test('refuses staff, other sites, missing files, stale base and photo bytes', as
   assert.equal((await (await handleCatalogSave(req(stale), env, deps)).json()).error, 'CATALOG_REFRESH_REQUIRED');
   const photo = body({ assets: [{ path: 'images/uploads/a.webp', content: 'AAAA' }] });
   assert.equal((await (await handleCatalogSave(req(photo), env, deps)).json()).error, 'R2_REQUIRED');
+});
+
+test('an unknown login never writes to GitHub, even though the reads start alongside the owner check', async () => {
+  const { handleCatalogSave } = await lib('api/catalog-save.js');
+  const p = body({ Token: 'tok-stranger' });
+  const r = await handleCatalogSave(req(p), { STOCK_DB: fakeD1(), GOOGLE_SA_JSON: 'x', GITHUB_TOKEN: 'gh-token' }, Object.assign({ fetch: p._gh.fetchImpl }, owner));
+  assert.equal(r.status, 403);
+  await new Promise((res) => setTimeout(res, 20));
+  assert.equal(p._gh.calls.filter((c) => !c.startsWith('GET ')).length, 0);
+});
+
+test('/api/catalog-state: owner gets head + catalog SHAs from GitHub; others get nothing', async () => {
+  const { handleCatalogState } = await lib('api/catalog-state.js');
+  const gh = fakeGitHub();
+  const env = { GOOGLE_SA_JSON: 'x', GITHUB_TOKEN: 'gh-token' };
+  const mk = (t) => new Request('https://muslimabaya.com/api/catalog-state', { method: 'POST', headers: { Origin: 'https://muslimabaya.com' }, body: JSON.stringify({ Token: t }) });
+  const r = await (await handleCatalogState(mk('tok-owner'), env, Object.assign({ fetch: gh.fetchImpl }, owner))).json();
+  assert.equal(r.ok, true);
+  assert.equal(r.version, 1);
+  assert.equal(r.head, gh.state.head);
+  assert.deepEqual(r.shas, gh.state.files);
+  const bad = await handleCatalogState(mk('tok-stranger'), env, Object.assign({ fetch: gh.fetchImpl }, owner));
+  assert.equal(bad.status, 403);
+  assert.equal((await bad.json()).head, undefined);
+  const off = await handleCatalogState(mk('tok-owner'), { GOOGLE_SA_JSON: 'x' }, owner);
+  assert.equal((await off.json()).error, 'NOT_CONFIGURED');
+});
+
+test('owner check is shared between Worker instances for 3 minutes (Cache API); failures are never stored', async () => {
+  const { isOwnerCached, _resetOwnerCache } = await lib('_lib/owner-auth.js');
+  const store = new Map();
+  globalThis.caches = { default: {
+    match: async (req) => (store.has(req.url) ? new Response(store.get(req.url)) : undefined),
+    put: async (req, res) => { store.set(req.url, await res.text()); },
+  } };
+  try {
+    let reads = 0;
+    const check = async () => { reads++; return ''; };
+    assert.equal(await isOwnerCached('tok-a', NOW, check), '');
+    _resetOwnerCache(); // a different Worker instance: no in-memory copy
+    assert.equal(await isOwnerCached('tok-a', NOW, check), '');
+    assert.equal(reads, 1, 'second instance used the shared result');
+    assert.ok([...store.keys()].every((k) => !k.includes('tok-a')), 'the token itself is never a cache key');
+    let bad = 0;
+    const deny = async () => { bad++; return 'NOT_LOGGED_IN'; };
+    assert.equal(await isOwnerCached('tok-b', NOW, deny), 'NOT_LOGGED_IN');
+    _resetOwnerCache();
+    assert.equal(await isOwnerCached('tok-b', NOW, deny), 'NOT_LOGGED_IN');
+    assert.equal(bad, 2, 'a failed check is asked again');
+  } finally { delete globalThis.caches; }
 });

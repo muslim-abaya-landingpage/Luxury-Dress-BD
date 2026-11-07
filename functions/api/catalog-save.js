@@ -55,6 +55,7 @@ export function validateSave(p) {
   return p;
 }
 
+export function githubClient(env, fetchImpl) { return github(env, fetchImpl); }
 function github(env, fetchImpl) {
   const repo = env.GITHUB_REPO || DEFAULT_REPO;
   return async function gh(method, path, body) {
@@ -77,13 +78,20 @@ function github(env, fetchImpl) {
 }
 
 /** Commits the 4 files on top of main; fails with CATALOG_CONFLICT if they changed since the panel loaded them. */
-export async function commitCatalog(gh, files, baseShas) {
+/** main's head commit, its tree and the catalog files' SHAs (3 reads; no writes). */
+export async function readHead(gh) {
   const ref = await gh('GET', 'git/ref/heads/main');
   const head = ref.object.sha;
   const commit = await gh('GET', 'git/commits/' + head);
   const tree = await gh('GET', 'git/trees/' + commit.tree.sha);
   const current = {};
   (tree.tree || []).forEach((f) => { if (CATALOG_FILES.indexOf(f.path) >= 0) current[f.path] = f.sha; });
+  return { head, treeSha: commit.tree.sha, current };
+}
+
+export async function commitCatalog(gh, files, baseShas, headInfo) {
+  const { head, treeSha, current } = headInfo || await readHead(gh);
+  const commit = { tree: { sha: treeSha } };
   if (CATALOG_FILES.some((path) => !current[path])) throw Error('CATALOG_FILES_MISSING');
   if (CATALOG_FILES.some((path) => current[path] !== baseShas[path])) throw Error('CATALOG_CONFLICT');
   const newTree = await gh('POST', 'git/trees', {
@@ -120,6 +128,10 @@ export async function handleCatalogSave(request, env, deps = {}) {
   const token = String(payload && payload.Token || '').trim();
   if (!token) return json({ ok: false, error: 'NO_TOKEN' }, 401);
 
+  // GitHub reads start now, alongside the owner check (~1 s each); nothing is written until the check passes.
+  const gh = github(env, fetchImpl);
+  const headRead = readHead(gh);
+  headRead.catch(() => {});
   try {
     const error = deps.authorize ? await deps.authorize(token, env) : await isOwnerCached(token, now, () => isOwner(token, env, fetchImpl, now));
     if (error === 'NOT_LOGGED_IN') return json({ ok: false, error }, 401);
@@ -139,7 +151,7 @@ export async function handleCatalogSave(request, env, deps = {}) {
 
   let saved;
   try {
-    saved = await commitCatalog(github(env, fetchImpl), payload.files, payload.baseShas);
+    saved = await commitCatalog(gh, payload.files, payload.baseShas, await headRead);
   } catch (e) {
     const code = String(e.message || 'PUBLISH_FAILED');
     return fail(code, code === 'CATALOG_CONFLICT' ? 409 : 502);

@@ -15,6 +15,19 @@
   }
   if(missing.length)throw Error('PHOTO_NOT_UPLOADED: '+missing.join(', ')+' — this photo is not on the website or Cloudflare R2. Choose the photo again, then save.');
  }
+ // Photos start going to R2 the moment they are chosen (like the WordPress media library), so Publish
+ // only waits for the ones still on their way. One shared limit of 3 uploads at a time.
+ var pending={},active=0,waiting=[],UPLOAD_LIMIT=3;
+ function slot(){if(active<UPLOAD_LIMIT){active++;return Promise.resolve();}return new Promise(function(r){waiting.push(r);});}
+ function release(){var n=waiting.shift();if(n)n();else active--;}
+ function ensureUpload(item){
+  if(uploaded[item.path])return Promise.resolve({ok:true,url:uploaded[item.path]});
+  if(pending[item.path])return pending[item.path];
+  var job=slot().then(function(){return g.MaAdmin.uploadImage(item.path,item.content,'image/webp');})
+   .catch(function(e){return {ok:false,message:e&&e.message};})
+   .then(function(up){release();if(up&&up.ok&&up.url){uploaded[item.path]=up.url;rememberUploaded();}else delete pending[item.path];return up;});
+  pending[item.path]=job;return job;
+ }
  function call(type,data){return g.MaAdmin.call(type,data||{},{maxAgeMs:0});}
  function bytes(text){return new TextEncoder().encode(text);}
  function hex(buf){return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');}
@@ -23,11 +36,19 @@
  function setJob(j){job=j;storeJob();}
  function status(s,error){notify(s,!!error);}
  function sha256Hex(text){return crypto.subtle.digest('SHA-256',bytes(text)).then(hex);}
- async function codeText(path){var r=await fetch('/'+path+'?live='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('LIVE_CODE_'+path);return r.text();}
+ // The order-check code files change only with a website deploy: fetched together, reused for 10 minutes.
+ var codeCache={};
+ function codeText(path){
+  var c=codeCache[path];if(c&&Date.now()-c.at<600000)return c.text;
+  var text=fetch('/'+path+'?live='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw Error('LIVE_CODE_'+path);return r.text();});
+  codeCache[path]={at:Date.now(),text:text};text.catch(function(){delete codeCache[path];});return text;
+ }
+ function prefetchCode(){['catalog-validation-core.js','product-utils.js','product-catalog-sync.js'].forEach(function(p){codeText(p).catch(function(){});});}
  // Same order-check data the website build makes (scripts/build-catalog-validation.mjs), computed in a
  // sandboxed Web Worker from the files just saved, so order prices match what visitors now see.
  async function buildValidation(map,sha){
-  var core=await codeText('catalog-validation-core.js'),utils=await codeText('product-utils.js'),sync=await codeText('product-catalog-sync.js');
+  var code3=await Promise.all([codeText('catalog-validation-core.js'),codeText('product-utils.js'),codeText('product-catalog-sync.js')]);
+  var core=code3[0],utils=code3[1],sync=code3[2];
   var sources=['product-config.js','product-utils.js','category-products.js','product-links-data.js','product-catalog-sync.js'];
   var texts={'product-config.js':map['product-config.js'],'product-utils.js':utils,'category-products.js':map['category-products.js'],'product-links-data.js':map['product-links-data.js'],'product-catalog-sync.js':sync};
   if(sources.some(function(f){return typeof texts[f]!=='string';}))throw Error('LIVE_FILES_MISSING');
@@ -115,9 +136,17 @@
   if(job&&Date.now()-job.started<10*60*1000)timer=setTimeout(check,5000);
   else if(job)status('Details are saved; publishing is not confirmed yet. Click “Check publish status”.',true);
  }
+ // GitHub head + catalog file SHAs straight from Cloudflare (/api/catalog-state); null → Apps Script.
+ async function edgeState(){
+  var session=g.MaAdmin&&g.MaAdmin.getSession&&g.MaAdmin.getSession();if(!session||!session.token)return null;
+  var r=await fetch('/api/catalog-state',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({Token:session.token})});
+  var j=await r.json().catch(function(){return null;});
+  return j&&j.ok&&j.version===1&&j.head&&j.shas?j:null;
+ }
  async function init(onStatus,reloadData){
   notify=onStatus;status('Syncing current product data…');
-  base=await call('AdminCatalogState');if(base.version!==1)throw Error('The new publishing system is not active yet.');
+  base=await edgeState().catch(function(){return null;})||await call('AdminCatalogState');if(base.version!==1)throw Error('The new publishing system is not active yet.');
+  prefetchCode();
   var paths=['product-config.js','category-products.js','product-links-data.js','product-catalog-sections.js'];
   for(var path of paths){var response=await fetch('/'+path+'?catalog='+base.head,{cache:'reload'});if(!response.ok||await gitHash(await response.text())!==base.shas[path])throw Error('Earlier changes are being published. Reload current data in a moment.');}
   for(var path of paths)await new Promise(function(resolve,reject){var script=document.createElement('script');script.src='/'+path+'?catalog='+base.head;script.onload=resolve;script.onerror=reject;document.head.appendChild(script);});
@@ -131,20 +160,17 @@
   Object.keys(assets).forEach(function(k){if(text.indexOf(k)<0)delete assets[k];});
   var queued=Object.keys(assets).map(function(k){return assets[k];});
   if(queued.length>MAX_ASSETS)throw Error('Too many photos in one save. Choose at most 7 photos.');
-  var urls={},done=0,next=0,failed=null;
-  // Up to 3 photos upload at the same time instead of one after another.
-  if(queued.length)status('Uploading product photos 0/'+queued.length+' to Cloudflare R2… keep this page open.');
-  async function uploadWorker(){
-   while(!failed&&next<queued.length){
-    var item=queued[next++];
-    var up=await g.MaAdmin.uploadImage(item.path,item.content,'image/webp').catch(function(e){return {ok:false,message:e&&e.message};});
+  var urls={},done=0,failed=null,t0=Date.now();
+  // Most photos are already uploaded (they start when chosen); wait for the rest, 3 at a time.
+  var left=queued.filter(function(q){return !uploaded[q.path];}).length;
+  if(left)status('Uploading product photos '+(queued.length-left)+'/'+queued.length+' to Cloudflare R2… keep this page open.');
+  await Promise.all(queued.map(function(item){
+   return ensureUpload(item).then(function(up){
     if(!up||!up.ok||!up.url){failed=failed||Error((up&&(up.message||up.error))||'Cloudflare R2 photo upload failed.');return;}
-    urls[item.path]=up.url;uploaded[item.path]=up.url;done++;
-    status('Uploading product photos '+done+'/'+queued.length+' to Cloudflare R2… keep this page open.');
-   }
-  }
-  var workers=[];for(var w=0;w<Math.min(3,queued.length);w++)workers.push(uploadWorker());
-  await Promise.all(workers);
+    urls[item.path]=up.url;done++;
+    if(left)status('Uploading product photos '+done+'/'+queued.length+' to Cloudflare R2… keep this page open.');
+   });
+  }));
   if(Object.keys(urls).length){Object.keys(urls).forEach(function(k){uploaded[k]=urls[k];});rememberUploaded();}
   if(failed)throw failed;
   rememberUploaded();
@@ -160,7 +186,7 @@
    var fastJob={sha:fast.sha,shas:fast.shas,productId:target&&target.id||'',category:target&&target.category||'',started:Date.now()};
    if(fast.live){
     setJob(null);clearTimeout(timer);
-    status('✅ Saved and live on the website now.');
+    status('✅ Saved and live on the website now ('+((Date.now()-t0)/1000).toFixed(1)+' s).');
     document.dispatchEvent(new CustomEvent('ma-product-live',{detail:fastJob}));
    }else{
     setJob(fastJob);
@@ -199,5 +225,5 @@
   result.uploadedUrls=Object.assign({},urls);
   return result;
  }
- g.MaCatalogPublisher={init:init,publish:publish,enqueue:function(rows){rows.forEach(function(a){assets[a.path]=a;});},pendingPhotos:function(){return Object.keys(assets).length;},check:check,_buildValidation:buildValidation,isReady:function(){return !!base;},gitHash:gitHash};
+ g.MaCatalogPublisher={init:init,publish:publish,enqueue:function(rows){rows.forEach(function(a){assets[a.path]=a;if(base)ensureUpload(a);});},pendingPhotos:function(){return Object.keys(assets).length;},check:check,_buildValidation:buildValidation,isReady:function(){return !!base;},gitHash:gitHash};
 })(window);
