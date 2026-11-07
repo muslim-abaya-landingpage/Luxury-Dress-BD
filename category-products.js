@@ -358,23 +358,30 @@ window.CATEGORY_PRODUCTS = {
       imageCard: "https://images.muslimabaya.com/images/uploads/new-product-1794075821175-card-9d9b72a0c1f859f8d356.webp",
       images: ["https://images.muslimabaya.com/images/uploads/new-product-1794075831805-g1-14959a2c3fa730f91755.webp", "https://images.muslimabaya.com/images/uploads/new-product-1794075831958-g2-fc4da2259b48b096c19d.webp", "https://images.muslimabaya.com/images/uploads/new-product-1794075832117-g3-666c2d0b7007ed9ffd31.webp", "https://images.muslimabaya.com/images/uploads/new-product-1794075832271-g4-4a7632553a913d5e5697.webp"],
       price: 1150,
+      fabric: "Dubai Cherry",
+      sizes: ["50", "52", "54", "56"],
       detailNote: "✨ প্রিমিয়াম ডিজাইনের স্টাইলিশ বোরকা – মার্জিত লুকে অনন্য! 💜\n\nআরামদায়ক ও রুচিশীল ডিজাইনের এই সুন্দর বোরকাটি আপনার প্রতিদিনের পর্দার পোশাকে যোগ করবে আভিজাত্য। প্রিমিয়াম ফিনিশিং ও আকর্ষণীয় ডিজাইনে এটি হতে পারে আপনার পছন্দের কালেকশন। 🌸\n\n📏 পণ্যের বিস্তারিত:\n\n• Fabric: CY\n\n• Dress Length: 42 Inch\n\n• Body: 52 Inch\n\n• Sleeve Length: 15 Inch\n\n• Shalwar Length: 40 Inch\n\n• Height (Hy): 17 Inch\n\n💰 অফার প্রাইস: ১,১৫০ টাকা মাত্র!\n\n🛍️ অর্ডার করতে ভিজিট করুন:\n🌐 https://muslimabaya.com\n\n📲 WhatsApp: 01971642683\nশুধুমাত্র মেসেজ করুন।\n\n🚚 ঘরে বসেই অর্ডার করুন আপনার পছন্দের পোশাকটি।\n\nMUSLIM ABAYA – মার্জিত পর্দায় আভিজাত্যের ছোঁয়া। 💜",
       types: ["Full Set Abaya", "Abaya Only"],
       priceByType: {
         "Full Set Abaya": 1150,
         "Abaya Only": 850
       },
-      dateAdded: "2026-11-08",
+      isImageView: false,
+      imageViewOf: "",
+      category: "abaya",
+      categoryLabel: "আবায়া · বোরকা",
+      bodySizes: ["52"],
+      sleeveSizes: ["15"],
+      dressLengths: ["42"],
+      palazzoLengths: ["40"],
       descriptionHtml: "<p>✨ <strong>প্রিমিয়াম ডিজাইনের স্টাইলিশ বোরকা – মার্জিত লুকে অনন্য!</strong> 💜</p><p>আরামদায়ক ও রুচিশীল ডিজাইনের এই সুন্দর বোরকাটি আপনার প্রতিদিনের পর্দার পোশাকে যোগ করবে আভিজাত্য। প্রিমিয়াম ফিনিশিং ও আকর্ষণীয় ডিজাইনে এটি হতে পারে আপনার পছন্দের কালেকশন। 🌸</p><p>📏 <strong>পণ্যের বিস্তারিত:</strong></p><ul><li><p>Fabric: CY</p></li><li><p>Dress Length: 42 Inch</p></li><li><p>Body: 52 Inch</p></li><li><p>Sleeve Length: 15 Inch</p></li><li><p>Shalwar Length: 40 Inch</p></li><li><p>Height (Hy): 17 Inch</p></li></ul><p>💰 <strong>অফার প্রাইস: ১,১৫০ টাকা মাত্র!</strong></p><p>🛍️ <strong>অর্ডার করতে ভিজিট করুন:</strong><br>🌐 <a href=\"https://muslimabaya.com/\" target=\"_blank\" rel=\"noopener\">https://muslimabaya.com</a></p><p>📲 WhatsApp: 01971642683<br>শুধুমাত্র মেসেজ করুন।</p><p>🚚 ঘরে বসেই অর্ডার করুন আপনার পছন্দের পোশাকটি।</p><p><strong>MUSLIM ABAYA – মার্জিত পর্দায় আভিজাত্যের ছোঁয়া।</strong> 💜</p>",
-      shortDescription: "<p>✨ Premium CY Fabric Stylish Burqa</p><p>📏 Length: 42 Inch<br>Body: 52 Inch<br>Sleeve: 15 Inch<br>Shalwar: 40 Inch<br>Hy: 17 Inch</p><p>💰 Price: ৳১,১৫০ মাত্র!</p><p>🌐 muslimabaya.com<br>📲 WhatsApp: 01971642683 (Message Only)</p>",
       tags: ["CY Burqa","Premium Burqa","Stylish Burqa","Ladies Burqa","Muslim Abaya","Modest Fashion","Islamic Clothing","Women Fashion","Burqa Set","Premium Dress","CY Fabric"],
+      dateAdded: "2026-11-08",
       seoTitle: "Premium CY Fabric Burqa Set | Muslim Abaya",
       seoDescription: "Shop premium CY fabric burqa set at Muslim Abaya. Stylish modest wear with 42-inch length, comfortable fitting and elegant design. Price ৳1,150.",
-      bodySizes: ["52"],
+      productUrl: "/",
       variationAttributes: ["type","body"],
-      dressLengths: ["42"],
-      sleeveSizes: ["15"],
-      palazzoLengths: ["40"]
+      shortDescription: "<p>✨ Elegant &amp; Stylish CY Fabric Abaya with Matching Shalwar.</p><p>Designed for effortless elegance, comfort &amp; modest style.</p><p><strong>Set Includes:</strong> Abaya &amp; Shalwar Only (Hijab Not Included).</p>"
     }
   ],
   "cover-up": [
