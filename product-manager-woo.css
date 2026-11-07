@@ -251,3 +251,33 @@ body.pm-editing #pmSaveStatus { margin: 4px 0 0; font-size: 12px; }
 }
 /* In the product editor, Publish / Update (side box or bottom bar) is the one button; the list-page "Publish changes" is not needed there. */
 body.pm-editing #pmSave { display: none !important; }
+
+/* Size & measurements card (Attributes tab). */
+.pm-ms { margin: 14px 12px 6px; border: 1px solid #e3ddd0; border-radius: 12px; background: #fffdf8; overflow: hidden; }
+.pm-ms-head { padding: 12px 16px 8px; border-bottom: 1px solid #eee6d6; background: linear-gradient(180deg, #fffaf0, #fffdf8); }
+.pm-ms-head h4 { margin: 0 0 2px; font-size: 14px; color: #1f2937; }
+.pm-ms-head p { margin: 0; font-size: 12px; color: #6b7280; }
+.pm-ms-row { display: grid; grid-template-columns: 190px minmax(0, 1fr) 32px; gap: 10px; align-items: start; padding: 10px 16px; border-bottom: 1px dashed #eee6d6; }
+.pm-ms-name-fixed label { display: block; font-weight: 600; font-size: 13px; color: #1f2937; padding-top: 6px; }
+.pm-ms-name-fixed small { display: block; font-size: 11px; color: #9ca3af; }
+.pm-ms-vals input, .pm-ms-name { width: 100%; box-sizing: border-box; height: 34px; padding: 0 10px; border: 1px solid #d6d0c4; border-radius: 8px; font-size: 13px; background: #fff; }
+.pm-ms-vals input:focus, .pm-ms-name:focus { outline: none; border-color: #c9a24a; box-shadow: 0 0 0 3px rgba(201, 162, 74, .2); }
+.pm-ms-name { font-weight: 600; }
+.pm-ms-preview { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; min-height: 20px; }
+.pm-ms-chip { display: inline-flex; align-items: center; height: 22px; padding: 0 9px; border-radius: 999px; background: #1f2937; color: #fff; font-size: 11.5px; font-weight: 600; }
+.pm-ms-empty { font-size: 11px; color: #b0aaa0; font-style: italic; }
+.pm-ms-own-title { padding: 12px 16px 4px; font-size: 13px; font-weight: 700; color: #1f2937; background: #fbf6ea; border-bottom: 1px solid #eee6d6; }
+.pm-ms-own-title small { font-weight: 400; color: #8a8a8a; }
+.pm-ms-own { background: #fff; }
+.pm-ms-del { width: 32px; height: 34px; border: 1px solid #f1c5c5; border-radius: 8px; background: #fff; color: #b42318; font-size: 18px; line-height: 1; cursor: pointer; }
+.pm-ms-del:hover { background: #fdecec; }
+.pm-ms-add { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 12px 16px 14px; }
+.pm-ms-add > span { font-size: 12px; color: #6b7280; margin-right: 2px; }
+.pm-ms-addbtn { height: 30px; padding: 0 12px; border: 1px dashed #c9a24a; border-radius: 999px; background: #fff; color: #7a5b16; font-size: 12px; font-weight: 600; cursor: pointer; }
+.pm-ms-addbtn:hover { background: #fbf3df; border-style: solid; }
+.pm-ms-addnew { border-color: #1f2937; color: #1f2937; }
+@media (max-width: 760px) {
+  .pm-ms-row { grid-template-columns: minmax(0, 1fr) 32px; }
+  .pm-ms-row > .pm-ms-name-fixed { grid-column: 1 / -1; }
+}
+body.ma-dark .pm-ms, html.ma-dark .pm-ms { background: #1b1f27; border-color: #313744; }

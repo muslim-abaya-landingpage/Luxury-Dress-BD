@@ -38,6 +38,10 @@ window.__maBuildValidationProducts = function (w) {
       });
       var row0 = products[products.length - 1];
       if (p.soldIndividually) row0.soldIndividually = true;
+      // Owner's own measurements (e.g. Pant Crotch Depth): the order check accepts only these values.
+      if (Array.isArray(p.measures) && p.measures.length) {
+        row0.measures = p.measures.map(function (m) { return { name: m.name, values: m.values.slice() }; });
+      }
       if (p.virtual) row0.virtual = true;
       if (sale) {
         if (sale.from != null) row0.saleFrom = sale.from;

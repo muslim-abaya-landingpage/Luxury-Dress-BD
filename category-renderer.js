@@ -414,12 +414,13 @@ function buildShopCartLineItem(item, qtyToAdd, sizeValue, categoryKeyOpt, select
   var unitPrice = resolveProductPrice(item, categoryKey, pickedType);
   var cartName = item.name;
   if (pickedType) cartName += " (" + pickedType + ")";
+  var measureText = item._measureText != null ? String(item._measureText) : getSelectedMeasuresText(null, -1, item);
   var sizeLabel =
-    isAbaya && typeof formatAbayaCartSize === "function"
+    (isAbaya && typeof formatAbayaCartSize === "function"
       ? formatAbayaCartSize(pickedLength, resolvedBodyLabel)
       : isTwoPiece && typeof formatTwoPieceCartSize === "function"
         ? formatTwoPieceCartSize(pickedLength, resolvedBodyLabel)
-        : "Size " + pickedSize;
+        : "Size " + pickedSize) + measureText;
   cartName += " (" + sizeLabel + ")";
   return applyShopLineVariation(item, {
     id: item.id || (cat ? cat.id : ""),
@@ -432,11 +433,11 @@ function buildShopCartLineItem(item, qtyToAdd, sizeValue, categoryKeyOpt, select
     fabric: item.fabric || "",
     description: item.description || item.fabric || "",
     size:
-      isAbaya && typeof formatAbayaCartSize === "function"
+      (isAbaya && typeof formatAbayaCartSize === "function"
         ? formatAbayaCartSize(pickedLength, resolvedBodyLabel)
         : isTwoPiece && typeof formatTwoPieceCartSize === "function"
           ? formatTwoPieceCartSize(pickedLength, resolvedBodyLabel)
-          : pickedSize,
+          : pickedSize) + measureText,
     lengthSize: isAbaya || isTwoPiece ? pickedLength : "",
     bodySize: resolvedBodyLabel,
     productType: pickedType,
@@ -699,6 +700,35 @@ function getSelectedPalazzoForIdx(scopeRoot, idx) {
     ".pqv-palazzo-opt.is-active[data-product-idx='" + idx + "']"
   );
   return pill ? pill.getAttribute("data-palazzo-value") || "" : "";
+}
+/* Owner's own measurements (Product Manager → Size & measurements), e.g. Pant Crotch Depth.
+   Each is a row of pills; the first value is chosen at the start, like the other size pills.
+   They go into the cart size text as " · Pant Crotch Depth: 11" (Operations.gs opsOwnMeasures_). */
+function productOwnMeasures(p) {
+  return p && Array.isArray(p.measures) ? p.measures.filter(function (m) {
+    return m && m.name && Array.isArray(m.values) && m.values.length;
+  }) : [];
+}
+function buildPqvMeasuresHtml(p, idx) {
+  return productOwnMeasures(p).map(function (m, mi) {
+    return '<div class="pqv-field pqv-field-size pqv-field-measure"><div class="pqv-field-head"><span class="pqv-field-label">' +
+      escapeHtml(m.name) + '</span><span class="pqv-field-unit">inch</span></div><div class="pqv-opt-group pqv-opt-group-wrap">' +
+      m.values.map(function (v, i) {
+        return '<button type="button" class="pqv-opt-btn pqv-measure-opt' + (i === 0 ? " is-active" : "") +
+          '" data-product-idx="' + idx + '" data-measure-i="' + mi + '" data-measure-value="' + escapeHtml(v) +
+          '" aria-pressed="' + (i === 0 ? "true" : "false") + '">' + escapeHtml(v) + "</button>";
+      }).join("") + "</div></div>";
+  }).join("");
+}
+/** " · Name: value" for every own measurement (the picked pill, or the first value when there are no pills). */
+function getSelectedMeasuresText(scopeRoot, idx, p) {
+  return productOwnMeasures(p).map(function (m, mi) {
+    var pill = scopeRoot && scopeRoot.querySelector(
+      ".pqv-measure-opt.is-active[data-product-idx='" + idx + "'][data-measure-i='" + mi + "']"
+    );
+    var v = pill ? pill.getAttribute("data-measure-value") || "" : m.values[0];
+    return v ? " \u00b7 " + m.name + ": " + v : "";
+  }).join("");
 }
 function getSelectedSizeForIdx(scopeRoot, idx) {
   if (!scopeRoot) return "50";
@@ -1914,6 +1944,18 @@ function bindPqvInteractions(p, idx, categoryKey, scopeRoot) {
       }
     });
   });
+  modal.querySelectorAll(".pqv-measure-opt").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var mi = btn.getAttribute("data-measure-i");
+      modal.querySelectorAll(".pqv-measure-opt[data-measure-i='" + mi + "']").forEach(function (b) {
+        if (b.getAttribute("data-product-idx") !== String(idx)) return;
+        b.classList.remove("is-active");
+        b.setAttribute("aria-pressed", "false");
+      });
+      btn.classList.add("is-active");
+      btn.setAttribute("aria-pressed", "true");
+    });
+  });
   modal.querySelectorAll(".pqv-size-opt, .pqv-length-opt, .pqv-type-opt, .pqv-body-opt, .pqv-palazzo-opt").forEach(function (btn) {
     btn.addEventListener("click", function () {
       var groupClass = btn.classList.contains("pqv-type-opt")
@@ -2601,6 +2643,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
         buildPqvOptionPills(sizes, idx, "pqv-size-opt", "data-size-value", formatSizeLabel) +
         customSizeBtn +
         "</div></div>";
+  sizeField += buildPqvMeasuresHtml(p, idx);
   var sizeTpl = shopSizeTemplate(p, categoryKey);
   if (sizeTpl) {
     sizeField = window.maSizeStore.html(sizeTpl, {
@@ -2858,7 +2901,7 @@ function onGlobalShopCartClick(ev) {
   ev.preventDefault();
   ev.stopPropagation();
   var cartItem = applySelectedColorToProduct(
-    Object.assign({}, products[idx], { _cartType: selectedType }),
+    Object.assign({}, products[idx], { _cartType: selectedType, _measureText: getSelectedMeasuresText(inProductView ? scope : null, idx, products[idx]) }),
     getSelectedColorVariantForIdx(scope, idx, products[idx])
   );
 

@@ -1289,11 +1289,7 @@
                 '<button type="button" class="pm-wp-button" id="pmColorAdd">+ Add color</button>' +
                 '<small>Add any color name, then tap the photo that shows that color (photos come from this product’s gallery). Color keys are generated automatically. Add the photo to the gallery first if it is not shown.</small></div></div>' +
               efield("fabric", "Fabric", p.fabric) +
-              efield("sizes", "Product size options", sizesToInput(p.sizes), "text", "Options customers can select, e.g. 44 or M, L — separate with commas.") +
-              efield("bodySizes", "Body size / measurement (inches)", sizesToInput(p.bodySizes), "text", "Garment/body measurement, e.g. 38, 40, 42 — separate with commas.") +
-              efield("sleeveSizes", "Sleeve sizes (inches)", sizesToInput(p.sleeveSizes), "text", "e.g. 22, 23, 24 — separate with commas.") +
-              efield("dressLengths", "Dress lengths (inches)", sizesToInput(p.dressLengths), "text", "Two-Piece dress length options, e.g. 38, 40, 42.") +
-              efield("palazzoLengths", "Pajama / Palazzo lengths (inches)", sizesToInput(p.palazzoLengths), "text", "e.g. 38, 40 — separate with commas.") +
+              measuresCardHtml(p) +
             '</div>' +
             '<div class="pm-wp-panel" data-epanel="variations"' + (editTab === "variations" ? "" : " hidden") + '><div id="pmVariationsMount"><p>Loading variations…</p></div></div>' +
             '<div class="pm-wp-panel" data-epanel="advanced"' + (editTab === "advanced" ? "" : " hidden") + '>' +
@@ -1786,6 +1782,50 @@
       saveEdit();
     }
     bindById("pmEditUpdate", "click", publishEdit);
+    // Size & measurements: own measurement rows (name + values), add from the quick list, remove.
+    (function wireMeasures() {
+      var box = document.getElementById("pmMeasures");
+      if (!box) return;
+      function cleanName(v) { return String(v || "").replace(/[:·|<>{}`\\]/g, "").replace(/\s+/g, " ").replace(/^\s+/, "").slice(0, 40); }
+      function readRows() {
+        var list = [];
+        box.querySelectorAll(".pm-ms-own").forEach(function (row) {
+          var name = cleanName(row.querySelector("[data-measure-name]").value).trim();
+          var values = inputToSizes(row.querySelector("[data-measure-values]").value, true).map(function (v) { return v.replace(/[:·|<>{}`\\]/g, "").trim(); }).filter(Boolean);
+          list.push({ name: name, values: values });
+        });
+        if (list.length) p.measures = list; else delete p.measures;
+      }
+      box.addEventListener("input", function (e) {
+        var t = e.target;
+        if (t.hasAttribute("data-measure-name")) {
+          var c = cleanName(t.value);
+          if (c !== t.value) t.value = c;
+        }
+        if (t.hasAttribute("data-measure-name") || t.hasAttribute("data-measure-values")) readRows();
+        // live chips under every row (fixed rows are saved by the usual data-ef handler)
+        var row = t.closest(".pm-ms-row"), prev = row && row.querySelector(".pm-ms-preview");
+        if (prev && (t.hasAttribute("data-measure-values") || t.hasAttribute("data-ef"))) prev.innerHTML = measureChips(inputToSizes(t.value, true).filter(Boolean), t.hasAttribute("data-ef"));
+        if (t.hasAttribute("data-measure-name") || t.hasAttribute("data-measure-values")) changed();
+      });
+      box.addEventListener("click", function (e) {
+        var add = e.target.closest("[data-measure-add]"), del = e.target.closest("[data-measure-del]");
+        if (!add && !del) return;
+        e.preventDefault();
+        readRows();
+        var list = Array.isArray(p.measures) ? p.measures : [];
+        if (add) list.push({ name: add.getAttribute("data-measure-add"), values: [] });
+        else list.splice(parseInt(del.getAttribute("data-measure-del"), 10), 1);
+        if (list.length) p.measures = list; else delete p.measures;
+        renderProductEditor();
+        changed(add ? "Measurement added — write its values, then click " + mainAction() + "." : "Measurement removed — click " + mainAction() + ".");
+        if (add) {
+          var rows = document.querySelectorAll("#pmMeasures .pm-ms-own"), last = rows[rows.length - 1];
+          var focus = last && last.querySelector(add.getAttribute("data-measure-add") ? "[data-measure-values]" : "[data-measure-name]");
+          if (focus) focus.focus();
+        }
+      });
+    })();
     bindById("pmEditBarSave", "click", publishEdit);
     bindById("pmEditBack", "click", function () { activeKey = ALL_PRODUCTS_KEY; renderCatList(); renderMain(); });
     bindById("pmEditAddNew", "click", function () { startNewProduct(editTarget && editTarget.cat); });
@@ -2120,6 +2160,56 @@
     if (msg) editMsgSafe(msg);
   }
   function editMsgSafe(msg) { var el = document.getElementById("pmEditBarMsg"); if (el) el.textContent = msg; }
+  /* Size & measurements card: the fixed size rows plus the owner's own measurements (p.measures), e.g.
+     Pant Crotch Depth. Any name can be added; names used on other products are offered again. */
+  var MEASURE_PRESETS = ["Pant Crotch Depth", "Pant Length", "Waist", "Hip", "Chest", "Shoulder", "Kameez Length", "Thigh"];
+  function usedMeasureNames() {
+    var seen = {}, out = [];
+    MEASURE_PRESETS.concat([].concat.apply([], Object.keys(products).map(function (k) {
+      return (products[k] || []).map(function (x) { return x && Array.isArray(x.measures) ? x.measures.map(function (m) { return m && m.name; }) : []; });
+    }).reduce(function (a, b) { return a.concat(b); }, []))).forEach(function (n) {
+      n = String(n || "").trim();
+      if (n && !seen[n.toLowerCase()]) { seen[n.toLowerCase()] = true; out.push(n); }
+    });
+    return out;
+  }
+  function measureChips(values, fixed) {
+    return values.length ? values.map(function (v) { return '<span class="pm-ms-chip">' + escapeHtml(v) + '</span>'; }).join("") :
+      '<span class="pm-ms-empty">' + (fixed ? "Empty — the category's usual sizes are used" : "Write values — without them it is not shown") + '</span>';
+  }
+  function fixedMeasureRow(field, label, hint, list) {
+    var vals = Array.isArray(list) ? list.map(String) : (list ? [String(list)] : []);
+    return '<div class="pm-ms-row" data-ms-fixed="' + field + '"><div class="pm-ms-name-fixed"><label for="pmEf_' + field + '">' + label + '</label><small>' + hint + '</small></div>' +
+      '<div class="pm-ms-vals"><input id="pmEf_' + field + '" type="text" data-ef="' + field + '" value="' + escapeAttr(sizesToInput(list)) + '" placeholder="e.g. ' + escapeAttr(hint.replace(/^e\.g\. /, "")) + '">' +
+      '<div class="pm-ms-preview">' + measureChips(vals, true) + '</div></div><span></span></div>';
+  }
+  function measuresCardHtml(p) {
+    var own = Array.isArray(p.measures) ? p.measures : [];
+    var taken = {};
+    own.forEach(function (m) { if (m && m.name) taken[String(m.name).toLowerCase()] = true; });
+    var names = usedMeasureNames();
+    return '<section class="pm-ms" id="pmMeasures"><div class="pm-ms-head"><h4>📏 Size &amp; measurements</h4>' +
+      '<p>Write the values customers can choose, separated by commas (inches). Leave a row empty and it is not shown.</p></div>' +
+      fixedMeasureRow("sizes", "Size options", "e.g. 50, 52, 54 or M, L", p.sizes) +
+      fixedMeasureRow("bodySizes", "Body", "e.g. 40, 42, 44", p.bodySizes) +
+      fixedMeasureRow("sleeveSizes", "Sleeve", "e.g. 22, 23, 24", p.sleeveSizes) +
+      fixedMeasureRow("dressLengths", "Dress length", "e.g. 38, 40, 42", p.dressLengths) +
+      fixedMeasureRow("palazzoLengths", "Pajama / Palazzo length", "e.g. 38, 40", p.palazzoLengths) +
+      '<div class="pm-ms-own-title">Your own measurements <small>— customers pick one value of each</small></div>' +
+      '<div id="pmMeasureList">' + own.map(function (m, i) {
+        var vals = Array.isArray(m.values) ? m.values.map(String) : [];
+        return '<div class="pm-ms-row pm-ms-own" data-mi="' + i + '"><div class="pm-ms-name-fixed"><input type="text" class="pm-ms-name" data-measure-name maxlength="40" list="pmMeasureNames" value="' + escapeAttr(m.name || "") + '" placeholder="Measurement name" aria-label="Measurement name"></div>' +
+          '<div class="pm-ms-vals"><input type="text" data-measure-values value="' + escapeAttr(vals.join(", ")) + '" placeholder="e.g. 10, 11, 12" aria-label="' + escapeAttr((m.name || "Measurement") + " values") + '">' +
+          '<div class="pm-ms-preview">' + measureChips(vals) + '</div></div>' +
+          '<button type="button" class="pm-ms-del" data-measure-del="' + i + '" aria-label="Remove ' + escapeAttr(m.name || "measurement") + '" title="Remove">×</button></div>';
+      }).join("") + '</div>' +
+      '<div class="pm-ms-add"><span>Add:</span>' + names.filter(function (n) { return !taken[n.toLowerCase()]; }).slice(0, 14).map(function (n) {
+        return '<button type="button" class="pm-ms-addbtn" data-measure-add="' + escapeAttr(n) + '">+ ' + escapeHtml(n) + '</button>';
+      }).join("") + '<button type="button" class="pm-ms-addbtn pm-ms-addnew" data-measure-add="">+ New measurement…</button></div>' +
+      '<datalist id="pmMeasureNames">' + names.map(function (n) { return '<option value="' + escapeAttr(n) + '">'; }).join("") + '</datalist>' +
+      '</section>';
+  }
+
   function efield(name, label, value, type, hint) {
     return '<p class="pm-wp-form-row"><label for="pmEf_' + escapeAttr(name) + '">' + label + '</label><span><input id="pmEf_' + escapeAttr(name) + '" type="' + (type || "text") + '" data-ef="' + escapeAttr(name) + '" value="' + escapeAttr(value == null ? "" : value) + '">' +
       (hint ? '<small>' + hint + '</small>' : '') + '</span></p>';

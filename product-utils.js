@@ -1,4 +1,25 @@
 (function (g) {
+/** Owner-defined measurements: [{name, values}] with safe, short texts; anything else is dropped. */
+function cleanProductMeasures(list) {
+  var out = [], seen = {};
+  (Array.isArray(list) ? list : []).forEach(function (m) {
+    if (!m || typeof m !== "object" || out.length >= 12) return;
+    var name = String(m.name || "").replace(/\s+/g, " ").trim();
+    if (!name || name.length > 40 || /[<>{}`\\:·|]/.test(name) || seen[name.toLowerCase()]) return;
+    var vals = [], vseen = {};
+    (Array.isArray(m.values) ? m.values : []).forEach(function (v) {
+      v = String(v == null ? "" : v).replace(/\s+/g, " ").trim();
+      if (!v || v.length > 20 || /[<>{}`\\:·|]/.test(v) || vseen[v.toLowerCase()] || vals.length >= 40) return;
+      vseen[v.toLowerCase()] = true;
+      vals.push(v);
+    });
+    if (!vals.length) return;
+    seen[name.toLowerCase()] = true;
+    out.push({ name: name, values: vals });
+  });
+  return out;
+}
+if (typeof window !== "undefined") window.cleanProductMeasures = cleanProductMeasures;
   function getLinks() {
     return g.SITE_LINKS || {};
   }
@@ -384,6 +405,11 @@
     if (Array.isArray(entry.dressLengths) && entry.dressLengths.length) {
       normalized.dressLengths = entry.dressLengths.slice();
     }
+    /** Owner's own measurements (Product Manager → Size & measurements), e.g.
+     *  measures: [{ name: "Pant Crotch Depth", values: ["10", "11", "12"] }]. The customer picks one value of
+     *  each; it is added to the size text as "Pant Crotch Depth: 11" (checked by Operations.gs). */
+    var ownMeasures = cleanProductMeasures(entry.measures);
+    if (ownMeasures.length) normalized.measures = ownMeasures;
     if (Array.isArray(entry.palazzoLengths) && entry.palazzoLengths.length) {
       normalized.palazzoLengths = entry.palazzoLengths.slice();
     }
