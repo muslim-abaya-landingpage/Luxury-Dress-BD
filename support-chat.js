@@ -440,11 +440,6 @@
     var transcript = el("div", "ma-chat-transcript");
     transcript.setAttribute("aria-live", "polite");
     transcript.setAttribute("aria-relevant", "additions");
-    var clearLocalButton = el("button", "ma-chat-clear-local", "এই ডিভাইসে চ্যাট পরিষ্কার");
-    clearLocalButton.type = "button";
-    clearLocalButton.hidden = true;
-    clearLocalButton.title = "শুধু এই ব্রাউজারে মেসেজ সরবে; সাপোর্ট টিমের কপি থাকবে";
-    clearLocalButton.setAttribute("aria-label", "এই ডিভাইসের চ্যাট পরিষ্কার করুন");
     var localDeleteDialog = doc.createElement("dialog");
     localDeleteDialog.className = "ma-chat-local-dialog";
     localDeleteDialog.setAttribute("role", "alertdialog");
@@ -486,7 +481,6 @@
     body.appendChild(orderForm);
     body.appendChild(captchaBox);
     body.appendChild(contactForm);
-    body.appendChild(clearLocalButton);
     body.appendChild(transcript);
     body.appendChild(typingLine);
     var foot = el("div", "ma-chat-foot");
@@ -616,7 +610,6 @@
     function refreshTranscriptState() {
       var hasVisibleMessages = Boolean(transcript.querySelector(".ma-chat-message"));
       body.classList.toggle("has-messages", hasVisibleMessages);
-      clearLocalButton.hidden = !hasVisibleMessages;
     }
     function requestLocalAction(title, copy, confirmLabel, action) {
       localDialogTitle.textContent = title;
@@ -1042,11 +1035,14 @@
       });
       chips.appendChild(b);
     });
-    input.addEventListener("input", function () { updateLinks(); if (liveEnabled) sendTyping(); });
-    clearLocalButton.addEventListener("click", function () {
-      if (!transcript.querySelector(".ma-chat-message[data-message-id]")) return;
-      requestLocalAction("এই ডিভাইসের চ্যাট পরিষ্কার করবেন?", "এই ব্রাউজারে দেখা মেসেজগুলো সরবে; সাপোর্ট টিমের কাছে সব কপি থাকবে।", "চ্যাট পরিষ্কার করুন", clearVisibleMessagesLocally);
+    var hasAutoDraftedWelcomeQuestion = false;
+    input.addEventListener("focus", function () {
+      if (hasAutoDraftedWelcomeQuestion || String(input.value || "").trim() || body.classList.contains("has-messages")) return;
+      hasAutoDraftedWelcomeQuestion = true;
+      input.value = "আসসালামু আলাইকুম। আমি MUSLIM ABAYA-এর একটি পণ্য সম্পর্কে জানতে চাই। পণ্যটির দাম, সাইজ ও কাপড়ের বিস্তারিত জানাবেন কি?";
+      updateLinks();
     });
+    input.addEventListener("input", function () { updateLinks(); if (liveEnabled) sendTyping(); });
     contactPrompt.addEventListener("click", function () {
       contactPrompt.hidden = true;
       contactPrompt.setAttribute("aria-expanded", "true");
