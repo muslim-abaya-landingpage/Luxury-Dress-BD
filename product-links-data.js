@@ -20,6 +20,7 @@ window.PRODUCT_LINKS_DATA = {
     "https://images.muslimabaya.com/images/uploads/aby-butterfly-14-1793831187440-ca8b4af1530b6cc32b18.webp",
     "https://images.muslimabaya.com/images/uploads/aby-butterfly-15-1793829407059-ca8b4af1530b6cc32b18.webp",
     "/images/Butterfly-Ababa.jpg",
+    "https://images.muslimabaya.com/images/uploads/new-product-1794075821175-edb223634a6118e4f99e.webp",
   ],
   "cover-up": [
     "/images/cover-up/premium-black-butterfly-khimar-abaya-with-niqab-luxury-modest-fashion-bangladesh-1080x1350.webp",
