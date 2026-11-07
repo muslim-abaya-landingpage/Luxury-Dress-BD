@@ -175,7 +175,7 @@
 
     function draw() {
       box.innerHTML = '<div class="pmw">' +
-        (st.notice ? '<div class="pmw-notice">Add descriptive pieces of information that customers can use to search for this product on your store, such as “Long” or “Size”. <button type="button" class="pmw-remove" data-pa="notice" aria-label="Dismiss" style="position:absolute;right:10px;top:8px;color:#1d2327">✕</button></div>' : "") +
+        // (No WooCommerce “Add descriptive pieces…” tip here: it only took space.)
         '<div class="pmw-bar"><button type="button" class="pmw-btn" data-pa="new">Add new</button>' +
         '<select data-pa="global" aria-label="Add global attribute"><option value="">Add global</option>' + missing.map(function (d) { return '<option value="' + d.id + '">' + esc(d.name) + "</option>"; }).join("") + "</select>" +
         '<span class="pmw-right"><a data-pa="expand">Expand</a> / <a data-pa="close">Close</a></span></div>' +
