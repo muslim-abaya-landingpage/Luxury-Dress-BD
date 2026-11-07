@@ -37,7 +37,26 @@
       var state = c.ok ? "ok" : c.partial ? "warn" : c.optional ? "off" : "bad";
       var detail = c.ok ? (c.detail || "সেট করা আছে") : (c.optional ? "ঐচ্ছিক · " : "") + (c.help || "সেট করা নেই");
       return row(state, c.label, detail, "");
-    }).join("");
+    }).join("");    loadCloudflareTokens();
+  }
+
+  // Secrets stored in Cloudflare (checked by /api/token-status): shown at the top of “সংযোগ”.
+  function loadCloudflareTokens() {
+    var session = window.MaAdmin && MaAdmin.getSession && MaAdmin.getSession();
+    if (!session || !session.token) return;
+    fetch("/api/token-status", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ Token: session.token }) })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (!res || !res.ok || !res.items) return;
+        var html = res.items.filter(function (i) { return i.id === "cf-github"; }).map(function (i) {
+          return row(i.state, "প্রোডাক্ট দ্রুত-সেভ — Cloudflare GITHUB_TOKEN", i.message, "");
+        }).join("");
+        var list = byId("stConnections");
+        var old = list.querySelector("[data-cf-token]");
+        if (old) old.remove();
+        list.insertAdjacentHTML("afterbegin", html.replace('<li class="', '<li data-cf-token="1" class="'));
+      })
+      .catch(function () {});
   }
 
   function load() {

@@ -26,6 +26,7 @@
 <meta name="theme-color" content="#1b2a41">
 <link rel="apple-touch-icon" href="/images/admin/admin-icon-192.png">
 <link rel="stylesheet" href="admin-wp.css?v=1">
+<style>.st-token-table{overflow-x:auto;margin:8px 0}.st-token-table table{border-collapse:collapse;width:100%;min-width:640px;font-size:13px}.st-token-table th,.st-token-table td{border:1px solid #dcdcde;padding:8px;text-align:left;vertical-align:top}.st-token-table th{background:#f6f7f7}.st-token-table code{font-size:12px}.st-howto{margin-top:10px}.st-howto summary{cursor:pointer;font-weight:600}.st-howto ol{margin:8px 0 0 18px;line-height:1.6}</style>
 </head>
 <body class="adm-body">
   <div class="adm-shell">
@@ -110,6 +111,34 @@
           <p class="st-hint">কোনো key বা পাসওয়ার্ড এখানে দেখানো হয় না — শুধু বসানো আছে কি না।</p>
           <ul class="st-list" id="stConnections"><li class="st-empty">Loading…</li></ul>
         </section>
+        <section class="adm-panel" id="stTokens">
+          <h2>টোকেন: কোনটা, কোথায়, মেয়াদ, কীভাবে বদলাবেন</h2>
+          <p class="st-hint">উপরের “সংযোগ” তালিকায় GitHub টোকেনের মেয়াদ নিজে থেকে যাচাই হয়; ১৪ দিন বাকি থাকলে হলুদ (!), মেয়াদ শেষ হলে লাল (×) দেখাবে। প্রোডাক্ট ম্যানেজারেও তখন সতর্কতা আসবে। কোনো টোকেন চ্যাট, ই-মেইল বা কোডে পেস্ট করবেন না।</p>
+          <div class="st-token-table" role="region" aria-label="টোকেনের তালিকা" tabindex="0">
+          <table>
+            <thead><tr><th>কাজ</th><th>টোকেনের নাম (যেখানে বসানো)</th><th>কোথায় বানাবেন</th><th>মেয়াদ</th></tr></thead>
+            <tbody>
+              <tr><td>প্রোডাক্ট দ্রুত-সেভ</td><td><code>GITHUB_TOKEN</code><br>Cloudflare → Workers &amp; Pages → <b>luxury-dress-bd</b> → Settings → Variables and Secrets (Type: Secret)</td><td>GitHub → Settings → Developer settings → Personal access tokens → Fine-grained (যেমন নাম <i>muslimabaya-catalog-save</i>)। Repository: শুধু <b>Luxury-Dress-BD</b>; Permission: <b>Contents: Read and write</b></td><td>বানানোর সময় যা দিয়েছেন। না থাকলে/ভাঙলে সেভ বন্ধ হয় না, পুরোনো পথে ধীরে হয়।</td></tr>
+              <tr><td>প্রোডাক্ট সেভ (বিকল্প পথ), অর্ডার শিটের কিছু কাজ</td><td><code>GITHUB_TOKEN</code><br>Apps Script → Project Settings → Script Properties</td><td>একই নিয়মে GitHub-এ আলাদা একটা টোকেন (আগের নাম সম্ভবত <i>muslimabaya-catalog</i>)</td><td>GitHub টোকেনের পেজে নামের পাশে লেখা থাকে</td></tr>
+              <tr><td>Google Sheet পড়া (লগইন, স্টক)</td><td><code>GOOGLE_SA_JSON</code><br>Cloudflare → luxury-dress-bd → Variables and Secrets</td><td>Google Cloud Console → IAM → Service accounts → Keys → Add key (JSON)</td><td>সাধারণত মেয়াদ থাকে না; মুছে না ফেললে চলতে থাকে</td></tr>
+              <tr><td>Meta Conversions API</td><td><code>META_ACCESS_TOKEN</code> (Apps Script Script Properties), <code>META_CAPI_TOKEN</code> (Cloudflare → muslimabaya-shop-landing)</td><td>Meta Events Manager → Pixel → Settings → Conversions API → Generate access token</td><td>Meta-তে দেখুন; বদলালে দুই জায়গাতেই বসান</td></tr>
+              <tr><td>Steadfast কুরিয়ার</td><td><code>STEADFAST_API_KEY</code>, <code>STEADFAST_SECRET_KEY</code> (Apps Script Script Properties)</td><td>Steadfast প্যানেল → API</td><td>Steadfast বদলালে</td></tr>
+              <tr><td>Telegram নোটিফিকেশন</td><td><code>TELEGRAM_BOT_TOKEN</code> (Apps Script Script Properties)</td><td>Telegram-এ @BotFather</td><td>মেয়াদ নেই</td></tr>
+            </tbody>
+          </table>
+          </div>
+          <details class="st-howto">
+            <summary>GitHub টোকেন বদলানোর ধাপ (মেয়াদ শেষ হলে বা ভুলে মুছে গেলে)</summary>
+            <ol>
+              <li>github.com → ছবিতে ক্লিক → <b>Settings</b> → নিচে <b>Developer settings</b> → <b>Personal access tokens</b> → <b>Fine-grained tokens</b>।</li>
+              <li>পুরোনো টোকেন থাকলে নামের ওপর ক্লিক করে <b>Regenerate token</b> চাপুন (একই নাম ও পারমিশন থাকে), নইলে <b>Generate new token</b>।</li>
+              <li>নতুন হলে: Resource owner <b>muslim-abaya-landingpage</b>; Repository access → <b>Only select repositories</b> → <b>Luxury-Dress-BD</b>; Permissions → Add permissions → <b>Contents</b> → <b>Read and write</b>।</li>
+              <li>টোকেন (<code>github_pat_…</code>) একবারই দেখায় — সাথে সাথে কপি করুন।</li>
+              <li>Cloudflare → Workers &amp; Pages → <b>luxury-dress-bd</b> → Settings → Variables and Secrets → <code>GITHUB_TOKEN</code>-এর পাশে Edit → নতুন টোকেন পেস্ট → Save। (Apps Script-এর টোকেন হলে: Apps Script → Project Settings → Script Properties → <code>GITHUB_TOKEN</code> → Edit।)</li>
+              <li>Cloudflare-এ বদলালে নতুন টোকেন পরের ডিপ্লয় থেকে কাজ করে — যেকোনো একটা প্রোডাক্ট সেভ করলেই ডিপ্লয় হয়। তারপর এই পেজে “আবার যাচাই” চাপুন; সবুজ ✓ দেখালে কাজ শেষ।</li>
+            </ol>
+          </details>
+        </section>
         <section class="adm-panel">
           <h2>টেস্ট</h2>
           <div class="st-tests">
@@ -127,7 +156,7 @@
   <script src="admin-api.js?v=2823eb7bcff4e142"></script>
   <script src="admin-guard.js?v=42341dd9adc288ea"></script>
   <script src="admin-page-shell.js?v=1"></script>
-  <script src="admin-setup.js?v=1"></script>
+  <script src="admin-setup.js?v=2"></script>
 <script src="admin-search.js?v=1" defer></script>
 <script src="admin-app.js?v=1" defer></script>
 <script src="admin-wp.js?v=1" defer></script>

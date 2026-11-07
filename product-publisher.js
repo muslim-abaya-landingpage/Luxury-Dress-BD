@@ -74,8 +74,27 @@
   catch(e){throw Error('Connection lost while saving. Reload current data to see whether the save went through.');}
   var r=await res.json().catch(function(){return null;});
   if(res.status===404||res.status===405||(r&&r.error==='NOT_CONFIGURED'))return null;
+  // Token expired, deleted or without access: save the old way so nothing is lost, and tell the owner.
+  if(r&&/^GITHUB_ACCESS_/.test(String(r.error||''))){tokenNotice('bad','দ্রুত-সেভ বন্ধ: Cloudflare-এর GitHub টোকেন কাজ করছে না ('+r.error+')। এই সেভ পুরোনো পথে হচ্ছে।');return null;}
   if(!r||!r.ok||!r.sha)throw Error((r&&(r.message||r.error))||('HTTP '+res.status));
   return r;
+ }
+ // Owner notice when a GitHub token is about to expire or no longer works (Settings has the replacement steps).
+ function tokenNotice(state,message){
+  var host=document.getElementById('pmSaveStatus');if(!host)return;
+  var el=document.getElementById('pmTokenNotice');
+  if(!el){el=document.createElement('p');el.id='pmTokenNotice';el.setAttribute('role','alert');host.parentNode.insertBefore(el,host.nextSibling);}
+  el.style.cssText='margin:8px 0;padding:10px 12px;border-left:4px solid '+(state==='bad'?'#d63638':'#dba617')+';background:'+(state==='bad'?'#fcf0f1':'#fcf9e8')+';color:#1d2327;font-size:14px';
+  el.innerHTML='';el.appendChild(document.createTextNode('⚠ '+message+' '));
+  var a=document.createElement('a');a.href='admin-setup.html#stTokens';a.textContent='কীভাবে বদলাবেন →';el.appendChild(a);
+ }
+ function checkTokens(){
+  var session=g.MaAdmin&&g.MaAdmin.getSession&&g.MaAdmin.getSession();if(!session||!session.token)return;
+  fetch('/api/token-status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({Token:session.token})})
+   .then(function(r){return r.json();}).then(function(res){
+    var gh=res&&res.ok&&(res.items||[]).filter(function(i){return i.id==='cf-github';})[0];
+    if(gh&&(gh.state==='bad'||gh.state==='warn'))tokenNotice(gh.state,'দ্রুত-সেভের GitHub টোকেন: '+gh.message);
+   }).catch(function(){});
  }
  async function servesFiles(shas){
   try{for(var path of Object.keys(shas)){var r=await fetch('/'+path+'?live='+Date.now(),{cache:'no-store'});if(!r.ok||await gitHash(await r.text())!==shas[path])return false;}return Object.keys(shas).length>0;}catch(e){return false;}
@@ -102,7 +121,7 @@
   var paths=['product-config.js','category-products.js','product-links-data.js','product-catalog-sections.js'];
   for(var path of paths){var response=await fetch('/'+path+'?catalog='+base.head,{cache:'reload'});if(!response.ok||await gitHash(await response.text())!==base.shas[path])throw Error('Earlier changes are being published. Reload current data in a moment.');}
   for(var path of paths)await new Promise(function(resolve,reject){var script=document.createElement('script');script.src='/'+path+'?catalog='+base.head;script.onload=resolve;script.onerror=reject;document.head.appendChild(script);});
-  reloadData();status('Ready. Add a new product or edit an existing one.');
+  reloadData();status('Ready. Add a new product or edit an existing one.');checkTokens();
   try{job=JSON.parse(sessionStorage.getItem('ma_product_publish_job')||'null');}catch(e){}if(job)check();
  }
  async function publish(files,target){

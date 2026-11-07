@@ -10842,8 +10842,7 @@ function getAdminSetupStatus_(e) {
       help: 'Staff পেজে মূল অ্যাডমিনের ই-মেইল দিন।' },
     { id: 'steadfast', label: 'Steadfast কুরিয়ার', ok: has('STEADFAST_API_KEY') &amp;&amp; has('STEADFAST_SECRET_KEY'),
       help: 'Script Properties-এ STEADFAST_API_KEY ও STEADFAST_SECRET_KEY বসান।' },
-    { id: 'publisher', label: 'প্রোডাক্ট পাবলিশ (GitHub)', ok: has('GITHUB_TOKEN'),
-      help: 'Script Properties-এ GITHUB_TOKEN বসান।' },
+    setupGithubConnection_(props),
     { id: 'backup', label: 'ব্যাকআপ শিট', ok: has('SAFETY_BACKUP_SPREADSHEET_ID'),
       detail: props.getProperty('OPS_LAST_BACKUP_AT') ? 'শেষ ব্যাকআপ: ' + props.getProperty('OPS_LAST_BACKUP_AT') : 'এখনো কোনো ব্যাকআপ রেকর্ড নেই',
       help: 'প্রথম ব্যাকআপ চালু হলে এটি নিজে তৈরি হয়।' },
@@ -10902,6 +10901,35 @@ function runAdminSetupAction_(e) {
     return { ok: false, error: 'ACTION_FAILED', message: String(err &amp;&amp; err.message || err) };
   } finally {
     lock.releaseLock();
+  }
+}
+
+
+/**
+ * Apps Script GITHUB_TOKEN (used when the fast Cloudflare save is unavailable): checks it against GitHub and
+ * reads its expiry from the "github-authentication-token-expiration" response header (absent = no expiry).
+ */
+function setupGithubConnection_(props) {
+  var label = 'প্রোডাক্ট সেভ — Apps Script GITHUB_TOKEN (বিকল্প পথ)';
+  var token = props.getProperty('GITHUB_TOKEN');
+  if (!token) return { id: 'publisher', label: label, ok: false, help: 'Apps Script → Project Settings → Script Properties-এ GITHUB_TOKEN বসান।' };
+  try {
+    var res = UrlFetchApp.fetch('https://api.github.com/repos/muslim-abaya-landingpage/Luxury-Dress-BD', {
+      headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json', 'User-Agent': 'MuslimAbaya-Setup' }, muteHttpExceptions: true });
+    var code = res.getResponseCode();
+    if (code === 401) return { id: 'publisher', label: label, ok: false, help: 'টোকেন কাজ করছে না (মেয়াদ শেষ বা মুছে ফেলা)। নতুন টোকেন বানিয়ে Script Properties-এ GITHUB_TOKEN বদলান।' };
+    if (code &lt; 200 || code >= 300) return { id: 'publisher', label: label, ok: false, partial: true, help: 'GitHub উত্তর দিয়েছে ' + code + '। টোকেনে Luxury-Dress-BD রিপো ও Contents: Read and write আছে কিনা দেখুন।' };
+    var headers = res.getAllHeaders(), exp = '';
+    Object.keys(headers).forEach(function (k) { if (k.toLowerCase() === 'github-authentication-token-expiration') exp = String(headers[k]); });
+    if (!exp) return { id: 'publisher', label: label, ok: true, detail: 'ঠিক আছে · মেয়াদ নেই (No expiration)' };
+    var when = new Date(exp.replace(' UTC', 'Z').replace(/^(\d{4}-\d\d-\d\d) /, '$1T'));
+    var days = isNaN(when) ? null : Math.floor((when.getTime() - Date.now()) / 86400000);
+    var date = isNaN(when) ? exp : Utilities.formatDate(when, 'Asia/Dhaka', 'yyyy-MM-dd');
+    if (days !== null &amp;&amp; days &lt; 0) return { id: 'publisher', label: label, ok: false, help: 'মেয়াদ শেষ হয়েছে ' + date + '। নতুন টোকেন বানিয়ে বদলান।' };
+    if (days !== null &amp;&amp; days &lt;= 14) return { id: 'publisher', label: label, ok: false, partial: true, help: 'মেয়াদ শেষ হবে ' + date + ' (' + days + ' দিন বাকি)। এখনই নতুন টোকেন বানিয়ে বদলান।' };
+    return { id: 'publisher', label: label, ok: true, detail: 'ঠিক আছে · মেয়াদ শেষ ' + date };
+  } catch (e) {
+    return { id: 'publisher', label: label, ok: false, partial: true, help: 'GitHub-এ যাচাই করা যায়নি: ' + String(e.message || e).slice(0, 80) };
   }
 }
 </textarea><br>
