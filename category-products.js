@@ -1,6 +1,6 @@
 /**
  * প্রোডাক্ট ডেটা — product-manager.html থেকে এডিট করুন
- * আপডেট: 2026-11-06
+ * আপডেট: 2026-11-07
  */
 window.CATEGORY_PRODUCTS = {
   abaya: [
@@ -273,7 +273,7 @@ window.CATEGORY_PRODUCTS = {
       name: "Premium Dubai Cherry Fabrics Abaya – Embroidery Design",
       image: "https://images.muslimabaya.com/images/uploads/aby-butterfly-14-1793831187440-ca8b4af1530b6cc32b18.webp",
       imageCard: "https://images.muslimabaya.com/images/uploads/aby-butterfly-14-1793831187440-card-a5fe7a9e1f5e026a1a05.webp",
-      images: ["https://images.muslimabaya.com/images/uploads/aby-butterfly-14-1793831193945-g1-5f07bf3e76ee79a3d7d1.webp", "https://images.muslimabaya.com/images/uploads/aby-butterfly-14-1794005692471-g2-b03408d3dd6d6f459726.webp"],
+      images: ["https://images.muslimabaya.com/images/uploads/aby-butterfly-14-1793831193945-g1-5f07bf3e76ee79a3d7d1.webp", "https://images.muslimabaya.com/images/uploads/aby-butterfly-14-1794009951768-g2-b03408d3dd6d6f459726.webp"],
       price: 1350,
       stock: 12,
       color: "black",
