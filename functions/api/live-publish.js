@@ -44,6 +44,19 @@ export function validatePayload(p) {
   return { state: { sha: p.sha, files, validation: p.validation, index, names }, assets: [] };
 }
 
+/** Stores a checked catalog state in D1 so the site serves it until the deployment catches up. */
+export async function writeLiveState(db, origin, checkedState, now, deps = {}) {
+  await ensureTables(db);
+  const state = Object.assign({}, checkedState, { savedAt: now, liveAssets: [] });
+  const stmts = [];
+  stmts.push(db.prepare('INSERT OR REPLACE INTO live_catalog (k, v, saved_at) VALUES (?, ?, ?)').bind('state', JSON.stringify(state), now));
+  // Photos from earlier saves have long been deployed by now.
+  stmts.push(db.prepare('DELETE FROM live_assets WHERE saved_at < ?').bind(now - 2 * 24 * 3600 * 1000));
+  await db.batch(stmts);
+  await rememberState(origin, state, deps);
+  return state;
+}
+
 export async function handleLivePublish(request, env, deps = {}) {
   const fetchImpl = deps.fetch || fetch;
   const now = deps.now ? deps.now() : Date.now();
@@ -79,15 +92,7 @@ export async function handleLivePublish(request, env, deps = {}) {
   try { checked = validatePayload(payload); } catch (e) { return json({ ok: false, error: String(e.message || 'BAD_REQUEST') }, 400); }
 
   try {
-    const db = env.STOCK_DB;
-    await ensureTables(db);
-    const state = Object.assign({}, checked.state, { savedAt: now, liveAssets: [] });
-    const stmts = [];
-    stmts.push(db.prepare('INSERT OR REPLACE INTO live_catalog (k, v, saved_at) VALUES (?, ?, ?)').bind('state', JSON.stringify(state), now));
-    // Photos from earlier saves have long been deployed by now.
-    stmts.push(db.prepare('DELETE FROM live_assets WHERE saved_at < ?').bind(now - 2 * 24 * 3600 * 1000));
-    await db.batch(stmts);
-    await rememberState(new URL(request.url).origin, state, deps);
+    const state = await writeLiveState(env.STOCK_DB, new URL(request.url).origin, checked.state, now, deps);
     return json({ ok: true, live: true, sha: state.sha, photos: state.liveAssets.length });
   } catch (e) {
     return json({ ok: false, error: 'SAVE_FAILED' }, 503);

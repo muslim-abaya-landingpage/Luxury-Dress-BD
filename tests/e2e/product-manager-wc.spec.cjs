@@ -42,6 +42,8 @@ test('sale price: before-sale price per option, card price follows the first opt
 
 test('Draft: hidden status is saved, shown in the list and counted under Drafts', async ({ page }) => {
   await open(page);
+  // The live catalog may already hold drafts; count relative to what is there now.
+  const draftsBefore = Number(((await page.locator('[data-overview-status="draft"]').textContent().catch(() => '')) || '').replace(/\D+/g, '') || 0);
   await page.locator('#pmAllRows tr').nth(1).locator('.pm-row-title').click();
   const id = (await page.locator('[data-ef="id"]').inputValue());
   await page.click('[data-misc="status"]');
@@ -54,10 +56,11 @@ test('Draft: hidden status is saved, shown in the list and counted under Drafts'
   await expect.poll(() => productsFile(page)).toBeTruthy();
   expect(entry(await productsFile(page), id)).toContain('status: "draft"');
   await page.click('#pmEditBack');
-  await expect(page.locator('[data-overview-status="draft"]')).toContainText('(1)');
+  await expect(page.locator('[data-overview-status="draft"]')).toContainText('(' + (draftsBefore + 1) + ')');
   await expect(page.locator('#pmAllRows tr').nth(1).locator('.pm-post-state')).toHaveText('— Draft');
   await page.click('[data-overview-status="draft"]');
-  await expect(page.locator('#pmAllRows tr')).toHaveCount(1);
+  await expect(page.locator('#pmAllRows tr')).toHaveCount(draftsBefore + 1);
+  await expect(page.locator('#pmAllRows .column-sku', { hasText: id })).toHaveCount(1);
 });
 
 test('Trash: bulk move, then restore one and delete the other permanently; a failed save changes nothing', async ({ page }) => {

@@ -62,6 +62,21 @@
    return false;
   }catch(e){lastLiveError='Connection or validation failed';return false;}
  }
+ // Fast save (/api/catalog-save): one Cloudflare request commits to GitHub and makes the catalog live.
+ // Returns null when that endpoint is not set up yet (or not deployed), so the old Apps Script path runs.
+ async function fastSave(data){
+  var session=g.MaAdmin&&g.MaAdmin.getSession&&g.MaAdmin.getSession();if(!session||!session.token)return null;
+  var map={};data.files.forEach(function(f){map[f.path]=f.content;});
+  var v;try{v=await buildValidation(map,'0'.repeat(40));}catch(e){return null;}
+  var index={},names={};v.products.forEach(function(p){index[p.id]=p.category;names[p.id]=p.name;});
+  var res;
+  try{res=await fetch('/api/catalog-save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({Token:session.token,requestId:data.requestId,baseShas:data.baseShas,files:data.files,validation:v.json,index:index,names:names})});}
+  catch(e){throw Error('Connection lost while saving. Reload current data to see whether the save went through.');}
+  var r=await res.json().catch(function(){return null;});
+  if(res.status===404||res.status===405||(r&&r.error==='NOT_CONFIGURED'))return null;
+  if(!r||!r.ok||!r.sha)throw Error((r&&(r.message||r.error))||('HTTP '+res.status));
+  return r;
+ }
  async function servesFiles(shas){
   try{for(var path of Object.keys(shas)){var r=await fetch('/'+path+'?live='+Date.now(),{cache:'no-store'});if(!r.ok||await gitHash(await r.text())!==shas[path])return false;}return Object.keys(shas).length>0;}catch(e){return false;}
  }
@@ -120,6 +135,22 @@
   var data={baseShas:base.shas,files:savedFiles,assets:[]};
   var fingerprint=JSON.stringify(data);if(!request||request.fingerprint!==fingerprint)request={fingerprint:fingerprint,id:crypto.randomUUID()};data.requestId=request.id;
   status('Saving photos and product details… keep this page open.');
+  var fast=await fastSave(data);
+  if(fast){
+   assets={};base={head:fast.sha,shas:fast.shas};request=null;
+   var fastJob={sha:fast.sha,shas:fast.shas,productId:target&&target.id||'',category:target&&target.category||'',started:Date.now()};
+   if(fast.live){
+    setJob(null);clearTimeout(timer);
+    status('✅ Saved and live on the website now.');
+    document.dispatchEvent(new CustomEvent('ma-product-live',{detail:fastJob}));
+   }else{
+    setJob(fastJob);
+    status('✅ Saved. Instant publish unavailable ('+(fast.liveError||'live')+'). Waiting for Cloudflare deployment.');
+    check();
+   }
+   fast.uploadedUrls=Object.assign({},urls);
+   return fast;
+  }
   var result=await call('AdminCatalogPublish',{Payload:JSON.stringify(data)});
   if(!result.sha)throw Error('Publish info not found.');
   assets={};base={head:result.sha,shas:result.shas};request=null;setJob({sha:result.sha,shas:result.shas,productId:target&&target.id||'',category:target&&target.category||'',started:Date.now()});

@@ -1,10 +1,6 @@
-import { createCore } from '../_lib/gs-core.js';
-import { buildEnv } from '../_lib/sheets-shim.js';
-import { loadSnapshot } from '../_lib/sheet-snapshot.js';
-import { getAccessToken } from '../_lib/google-auth.js';
+import { isOwner, isOwnerCached } from '../_lib/owner-auth.js';
 import { ASSET_PATH } from '../_lib/live-catalog.js';
 
-const DEFAULT_SHEET_ID = '1kHt7Bdd4OnpX0jb1ApBXMZIIYqvmv5q2EyOnPV9HJKo';
 const MAX_BODY = 6_000_000;
 const MAX_IMAGE_BYTES = 4_194_304;
 const CDN_BASE = 'https://images.muslimabaya.com/';
@@ -28,45 +24,7 @@ export function decodeWebP(base64, path) {
   return bytes;
 }
 
-// A save uploads several photos in a row with the same login. Reading the Sessions/Admins sheet for every
-// photo made each upload wait on Google Sheets, so a successful owner check is reused for a short time
-// (per Worker instance, keyed by a hash of the token; failures are never cached).
-const OWNER_CACHE_MS = 60_000;
-const ownerChecks = new Map();
-async function tokenKey(token) {
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token));
-  return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('');
-}
-export async function isOwnerCached(token, now, check) {
-  const key = await tokenKey(token);
-  for (const [k, v] of ownerChecks) if (v.exp <= now) ownerChecks.delete(k);
-  const hit = ownerChecks.get(key);
-  if (hit && hit.exp > now) return hit.result;
-  // Store the pending check so photos uploading at the same time share one Sheets read.
-  const result = Promise.resolve().then(check);
-  ownerChecks.set(key, { result, exp: now + OWNER_CACHE_MS });
-  try {
-    const error = await result;
-    if (error) ownerChecks.delete(key);
-    return error;
-  } catch (e) { ownerChecks.delete(key); throw e; }
-}
-export function _resetOwnerCache() { ownerChecks.clear(); }
-
-async function isOwner(token, env, fetchImpl, now) {
-  const access = await getAccessToken(env.GOOGLE_SA_JSON, fetchImpl, now);
-  const snapshot = await loadSnapshot({
-    spreadsheetId: env.SHEET_ID || DEFAULT_SHEET_ID,
-    token: access,
-    sheets: ['Sessions', 'Admins'],
-    fetchImpl,
-    nowMs: now,
-  });
-  const core = createCore(buildEnv(snapshot));
-  const who = core.verifyAdminSession_(token);
-  if (!who || !who.ok) return 'NOT_LOGGED_IN';
-  return core.requireOwnerAdmin_(who) ? 'OWNER_ONLY' : '';
-}
+export { isOwnerCached, _resetOwnerCache } from '../_lib/owner-auth.js';
 
 export async function handleImageUpload(request, env, deps = {}) {
   const fetchImpl = deps.fetch || fetch;
