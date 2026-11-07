@@ -1372,17 +1372,20 @@
       '</div></div>' +
       // Always-visible save bar (stays at the bottom of the screen while editing).
       '<div class="pm-wp-savebar" id="pmEditBar"><span class="pm-wp-savebar-msg" id="pmEditBarMsg">No unsaved changes.</span>' +
-      '<button type="button" class="pm-wp-primary" id="pmEditBarSave">Save changes</button></div>' +
+      '<button type="button" class="pm-wp-primary" id="pmEditBarSave">' + (status === "publish" ? (pub.future ? "Schedule" : "Update") : pub.future ? "Schedule" : "Publish") + '</button></div>' +
       '</div>';
 
     var root = mainEl.querySelector(".pm-wp-edit");
+    // One button publishes: messages point at "Publish" (new / draft) or "Update" (already live).
+    function mainAction() { var b = document.getElementById("pmEditUpdate"); return (b && b.textContent.trim()) || "Publish"; }
     function editMsg(text, state) {
+      text = String(text).replace(/([Cc])lick Save changes/g, function (m, c) { return c + "lick " + mainAction(); });
       var note = document.getElementById("pmEditNote"), bar = document.getElementById("pmEditBar"), barMsg = document.getElementById("pmEditBarMsg");
       [note, barMsg].forEach(function (el) { if (el) el.textContent = text; });
       if (note) { note.classList.toggle("is-dirty", state === "dirty"); note.classList.toggle("is-ok", state === "ok"); note.classList.toggle("is-err", state === "err"); }
       if (bar) bar.setAttribute("data-state", state || "");
     }
-    function changed(msg) { editMsg(msg || "Unsaved changes — click Save changes.", "dirty"); }
+    function changed(msg) { editMsg(msg || "Unsaved changes — click " + mainAction() + ".", "dirty"); }
     function paintStatusNote() {
       var note = document.getElementById("pmStatusNote");
       if (!note) return;
@@ -1777,12 +1780,13 @@
     });
     paintStatusNote();
     updateSeoPreview();
-    bindById("pmEditUpdate", "click", function () {
+    function publishEdit() {
       var st = productStatus(p);
       if (st === "draft" || st === "pending") setProductStatus(p, "publish");
       saveEdit();
-    });
-    bindById("pmEditBarSave", "click", saveEdit);
+    }
+    bindById("pmEditUpdate", "click", publishEdit);
+    bindById("pmEditBarSave", "click", publishEdit);
     bindById("pmEditBack", "click", function () { activeKey = ALL_PRODUCTS_KEY; renderCatList(); renderMain(); });
     bindById("pmEditAddNew", "click", function () { startNewProduct(editTarget && editTarget.cat); });
     wireImageUploader(root, p);
@@ -4220,7 +4224,7 @@
   });
   document.addEventListener("keydown", function (e) {
     if ((e.ctrlKey || e.metaKey) && !e.altKey && String(e.key).toLowerCase() === "s") {
-      var b = document.getElementById("pmEditBarSave");
+      var b = document.getElementById("pmSaveDraft") || document.getElementById("pmEditBarSave");
       if (b) { e.preventDefault(); b.click(); }
     }
   });

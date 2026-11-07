@@ -7,7 +7,7 @@ const path = require('path');
 const real = fs.readFileSync(path.join(__dirname, '../../category-products.js'), 'utf8');
 function catalogWith(stockVariants) {
   return real + '\n(function(){var p=(window.CATEGORY_PRODUCTS.abaya||[]).find(function(x){return x.id==="ABY-MAROON-1";});if(p){' +
-    'p.colorLabel="Maroon, Navy";p.color="maroon";p.colorVariants=[{color:"maroon",colorLabel:"Maroon",image:p.image},{color:"navy",colorLabel:"Navy",image:p.image.replace(/\\.webp$/,"-navy.webp")}];' +
+    'p.colorLabel="Maroon, Navy";p.color="maroon";p.colorVariants=[{color:"maroon",colorLabel:"Maroon",image:p.image},{color:"navy",colorLabel:"Navy",image:"/images/e2e-navy-photo.webp"}];' +
     'p.images=[p.colorVariants[1].image];delete p.stock;p.stockVariants=' + JSON.stringify(stockVariants) + ';}})();\n';
 }
 async function open(page, stockVariants) {

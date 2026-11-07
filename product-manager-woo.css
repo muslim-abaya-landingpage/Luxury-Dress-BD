@@ -249,3 +249,5 @@ body.pm-editing #pmSaveStatus { margin: 4px 0 0; font-size: 12px; }
   .pm-woo .pm-wp-savebar .pm-wp-primary { width: auto !important; flex: none; }
   .pm-woo #pmDataBox > .pm-wp-box-title .pm-wp-box-tools { display: none; }
 }
+/* In the product editor, Publish / Update (side box or bottom bar) is the one button; the list-page "Publish changes" is not needed there. */
+body.pm-editing #pmSave { display: none !important; }

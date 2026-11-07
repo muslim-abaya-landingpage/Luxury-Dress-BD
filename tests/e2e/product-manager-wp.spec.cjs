@@ -381,7 +381,7 @@ test('edit screen: new main and gallery photos are not committed one by one; the
   const srcs = await page.evaluate(() => Array.from(document.querySelectorAll('#pmImgView img, #pmGalView img')).map((i) => i.getAttribute('src')));
   expect(srcs.length).toBeGreaterThanOrEqual(3);
   expect(srcs.filter((s) => /^blob:/.test(s)).length).toBeGreaterThanOrEqual(3);
-  await page.click('#pmSave');
+  await page.click('#pmEditBarSave');
   await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
   const catalog = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
   for (const p of queued) expect(catalog).toContain(p);
@@ -413,10 +413,10 @@ test('edit screen: after a save, uploaded photos keep their R2 URLs on the next 
   await page.locator('.pm-gallery-file-input').first().setInputFiles([file, { ...file, name: 'photo2.png' }]);
   await expect.poll(() => page.evaluate(() => Object.keys(window.__queued).length)).toBe(2);
   const queued = await page.evaluate(() => Object.keys(window.__queued));
-  await page.click('#pmSave');
+  await page.click('#pmEditBarSave');
   await expect.poll(() => page.evaluate(() => window.__publishes.length)).toBe(1);
   // Second save (e.g. a small edit right after): the catalog must carry the R2 URLs, not the local paths.
-  await page.evaluate(() => { const b = document.getElementById('pmSave'); b.disabled = false; b.click(); });
+  await page.evaluate(() => { const b = document.getElementById('pmEditBarSave'); b.disabled = false; b.click(); });
   await expect.poll(() => page.evaluate(() => window.__publishes.length)).toBe(2);
   const second = await page.evaluate(() => window.__publishes[1].find((f) => f.path === 'category-products.js').content);
   for (const p of queued) {

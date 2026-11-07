@@ -52,7 +52,9 @@ test('Draft: hidden status is saved, shown in the list and counted under Drafts'
   await expect(page.locator('#pmStatusLabel')).toHaveText('Draft');
   await expect(page.locator('#pmEditUpdate')).toHaveText('Publish');
   await expect(page.locator('#pmStatusNote')).toContainText('Hidden from the website');
-  await page.click('#pmEditBarSave');
+  // The bottom bar button is the same one-click Publish; keeping it hidden means Save Draft.
+  await expect(page.locator('#pmEditBarSave')).toHaveText('Publish');
+  await page.click('#pmSaveDraft');
   await expect.poll(() => productsFile(page)).toBeTruthy();
   expect(entry(await productsFile(page), id)).toContain('status: "draft"');
   await page.click('#pmEditBack');
@@ -256,4 +258,28 @@ test('Preview: the editor saves the product for preview and opens its category p
   expect(tab.url()).toMatch(/\/abaya(\.html)?\?ma_preview=ABY-MAROON-1/);
   await expect(tab.locator('.pqv-preview-banner')).toBeVisible({ timeout: 15000 });
   await expect(tab.locator('#pqvTitle')).toHaveText('Preview Name Test');
+});
+
+test('one Publish button: a new (draft) product goes live from the bottom bar too — no separate Save changes', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await open(page);
+  await page.click('#pmHeaderAdd');
+  await expect(page.locator('#pmSave')).toBeHidden();
+  await expect(page.locator('#pmEditUpdate')).toHaveText('Publish');
+  await expect(page.locator('#pmEditBarSave')).toHaveText('Publish');
+  await page.click('#pmEditBack');
+  // A copy is a complete draft (price and photo), like a new product ready to go.
+  await page.locator('#pmAllRows tr').nth(1).locator('.pm-row-title').click();
+  await page.click('#pmCopyDraft');
+  await expect(page.locator('#pmStatusLabel')).toHaveText('Draft');
+  await expect(page.locator('#pmEditBarSave')).toHaveText('Publish');
+  await page.fill('[data-ef="name"]', 'E2E One Click Abaya');
+  await expect(page.locator('#pmEditBarMsg')).toContainText('click Publish');
+  await page.screenshot({ path: 'test-results/pm-one-publish.png' });
+  const id = await page.locator('[data-ef="id"]').inputValue();
+  await page.click('#pmEditBarSave');
+  await expect.poll(() => productsFile(page)).toBeTruthy();
+  const e = entry(await productsFile(page), id);
+  expect(e).toContain('E2E One Click Abaya');
+  expect(e).not.toContain('status: "draft"');
 });

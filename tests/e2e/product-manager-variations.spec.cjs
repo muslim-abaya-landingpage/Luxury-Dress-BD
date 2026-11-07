@@ -147,9 +147,10 @@ test('variation image remains attached to the same photo after gallery reorder',
   await openMaroon(page, undefined, async () => {
     await page.route('**/category-products.js*', async (route) => {
       const response = await route.fetch();
+      // Whatever the Maroon set's main photo is today (the owner can change it from the panel).
       const body = (await response.text()).replace(
-        'image: "/images/opt/Maroon-Abaya-Set.webp",',
-        'image: "/images/opt/Maroon-Abaya-Set.webp", images: ["/images/e2e-photo-a.webp", "/images/e2e-photo-b.webp"],'
+        /(image: "[^"]*Maroon[^"]*",)/,
+        '$1 images: ["/images/e2e-photo-a.webp", "/images/e2e-photo-b.webp"],'
       );
       await route.fulfill({ response, body });
     });
