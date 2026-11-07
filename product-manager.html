@@ -1366,9 +1366,6 @@
           '<p><a href="#" id="pmCatNewLink">+ Add new category</a></p>' +
         '</div></section>' +
       '</div></div>' +
-      // Always-visible save bar (stays at the bottom of the screen while editing).
-      '<div class="pm-wp-savebar" id="pmEditBar"><span class="pm-wp-savebar-msg" id="pmEditBarMsg">No unsaved changes.</span>' +
-      '<button type="button" class="pm-wp-primary" id="pmEditBarSave">' + (status === "publish" ? (pub.future ? "Schedule" : "Update") : pub.future ? "Schedule" : "Publish") + '</button></div>' +
       '</div>';
 
     var root = mainEl.querySelector(".pm-wp-edit");
@@ -1376,8 +1373,8 @@
     function mainAction() { var b = document.getElementById("pmEditUpdate"); return (b && b.textContent.trim()) || "Publish"; }
     function editMsg(text, state) {
       text = String(text).replace(/([Cc])lick Save changes/g, function (m, c) { return c + "lick " + mainAction(); });
-      var note = document.getElementById("pmEditNote"), bar = document.getElementById("pmEditBar"), barMsg = document.getElementById("pmEditBarMsg");
-      [note, barMsg].forEach(function (el) { if (el) el.textContent = text; });
+      var note = document.getElementById("pmEditNote"), bar = note;
+      if (note) note.textContent = text;
       if (note) { note.classList.toggle("is-dirty", state === "dirty"); note.classList.toggle("is-ok", state === "ok"); note.classList.toggle("is-err", state === "err"); }
       if (bar) bar.setAttribute("data-state", state || "");
     }
@@ -1400,8 +1397,8 @@
       if (dc) { dc.textContent = desc.length + " / 160 characters" + (p.seoDescription ? "" : " (automatic)"); dc.classList.toggle("is-err", desc.length > 160); }
     }
     function saveEdit() {
-      var b1 = document.getElementById("pmEditUpdate"), b2 = document.getElementById("pmEditBarSave");
-      if (b2 && b2.disabled) return;
+      var b1 = document.getElementById("pmEditUpdate"), b2 = document.getElementById("pmSaveDraft");
+      if (b1 && b1.disabled) return;
       var attrLive = (document.getElementById("pmAttrMount") || {}).__pmwAttrLive;
       if (attrLive && attrLive.flush && !attrLive.flush()) return;
       [b1, b2].forEach(function (b) { if (b) b.disabled = true; });
@@ -1826,7 +1823,6 @@
         }
       });
     })();
-    bindById("pmEditBarSave", "click", publishEdit);
     bindById("pmEditBack", "click", function () { activeKey = ALL_PRODUCTS_KEY; renderCatList(); renderMain(); });
     bindById("pmEditAddNew", "click", function () { startNewProduct(editTarget && editTarget.cat); });
     wireImageUploader(root, p);
@@ -2159,7 +2155,7 @@
     input.title = msg || "";
     if (msg) editMsgSafe(msg);
   }
-  function editMsgSafe(msg) { var el = document.getElementById("pmEditBarMsg"); if (el) el.textContent = msg; }
+  function editMsgSafe(msg) { var el = document.getElementById("pmEditNote"); if (el) el.textContent = msg; }
   /* Size & measurements card: the fixed size rows plus the owner's own measurements (p.measures), e.g.
      Pant Crotch Depth. Any name can be added; names used on other products are offered again. */
   var MEASURE_PRESETS = ["Pant Crotch Depth", "Pant Length", "Waist", "Hip", "Chest", "Shoulder", "Kameez Length", "Thigh"];
@@ -4304,17 +4300,15 @@
   reloadPublishingData().then(refreshLiveStockOverrides);
   // The publisher fires this once the new catalog is actually served by the website.
   document.addEventListener("ma-product-live", function () {
-    var bar = document.getElementById("pmEditBar");
-    if (!bar || bar.getAttribute("data-state") !== "pub") return;
-    var text = "✅ Live on the website now. If an open product page still shows the old details, refresh it.";
-    var msg = document.getElementById("pmEditBarMsg"), note = document.getElementById("pmEditNote");
-    if (msg) msg.textContent = text;
-    if (note) { note.textContent = text; note.classList.add("is-ok"); }
-    bar.setAttribute("data-state", "ok");
+    var note = document.getElementById("pmEditNote");
+    if (!note || note.getAttribute("data-state") !== "pub") return;
+    note.textContent = "✅ Live on the website now. If an open product page still shows the old details, refresh it.";
+    note.classList.add("is-ok");
+    note.setAttribute("data-state", "ok");
   });
   document.addEventListener("keydown", function (e) {
     if ((e.ctrlKey || e.metaKey) && !e.altKey && String(e.key).toLowerCase() === "s") {
-      var b = document.getElementById("pmSaveDraft") || document.getElementById("pmEditBarSave");
+      var b = document.getElementById("pmSaveDraft") || document.getElementById("pmEditUpdate");
       if (b) { e.preventDefault(); b.click(); }
     }
   });

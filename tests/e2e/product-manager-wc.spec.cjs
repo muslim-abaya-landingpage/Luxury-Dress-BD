@@ -27,7 +27,7 @@ test('sale price: before-sale price per option, card price follows the first opt
   await reg.nth(1).fill('999'); await sale.nth(1).fill('1000');
   await expect(sale.nth(1)).toHaveClass(/pm-price-bad/);
   await reg.nth(1).fill('1100'); await sale.nth(1).fill('1000');
-  await page.click('#pmEditBarSave');
+  await page.click('#pmEditUpdate');
   await expect.poll(() => productsFile(page)).toBeTruthy();
   const e = entry(await productsFile(page), 'ABY-MAROON-1');
   expect(e).toMatch(/regularPriceByType: \{"Full Set Borka, Hijab\+ Niqab":1299,"Abaya Only":1100\}/);
@@ -52,8 +52,6 @@ test('Draft: hidden status is saved, shown in the list and counted under Drafts'
   await expect(page.locator('#pmStatusLabel')).toHaveText('Draft');
   await expect(page.locator('#pmEditUpdate')).toHaveText('Publish');
   await expect(page.locator('#pmStatusNote')).toContainText('Hidden from the website');
-  // The bottom bar button is the same one-click Publish; keeping it hidden means Save Draft.
-  await expect(page.locator('#pmEditBarSave')).toHaveText('Publish');
   await page.click('#pmSaveDraft');
   await expect.poll(() => productsFile(page)).toBeTruthy();
   expect(entry(await productsFile(page), id)).toContain('status: "draft"');
@@ -113,7 +111,7 @@ test('SEO box: preview and counters, the custom title and description are saved'
   await page.fill('#pmSeoDesc', 'Dubai cherry maroon abaya with hijab. Cash on delivery all over Bangladesh.');
   await expect(page.locator('#pmSeoPrevTitle')).toHaveText('Maroon Abaya Set — Eid Offer');
   await expect(page.locator('#pmSeoTitleCount')).toHaveText('28 / 60 characters');
-  await page.click('#pmEditBarSave');
+  await page.click('#pmEditUpdate');
   await expect.poll(() => productsFile(page)).toBeTruthy();
   const e = entry(await productsFile(page), 'ABY-MAROON-1');
   expect(e).toContain('seoTitle: "Maroon Abaya Set — Eid Offer"');
@@ -180,7 +178,7 @@ test('sale schedule: Schedule shows From/To dates, they publish with the product
   await page.fill('#pmEf_saleFrom', '2030-01-01');
   await page.fill('#pmEf_saleTo', '2030-01-10');
   await expect(page.locator('#pmSaleNote')).toContainText('starts on 2030-01-01');
-  await page.click('#pmEditBarSave');
+  await page.click('#pmEditUpdate');
   await expect.poll(() => productsFile(page)).toBeTruthy();
   let e = entry(await productsFile(page), 'ABY-MAROON-1');
   expect(e).toContain('saleFrom: "2030-01-01"');
@@ -188,7 +186,7 @@ test('sale schedule: Schedule shows From/To dates, they publish with the product
   await page.evaluate(() => { window.__published = null; });
   await page.click('#pmSaleCancel');
   await expect(page.locator('#pmSaleSchedule')).toBeVisible();
-  await page.click('#pmEditBarSave');
+  await page.click('#pmEditUpdate');
   await expect.poll(() => productsFile(page)).toBeTruthy();
   e = entry(await productsFile(page), 'ABY-MAROON-1');
   expect(e).not.toContain('saleFrom');
@@ -223,7 +221,7 @@ test('WooCommerce fields: inventory, shipping, linked products, advanced, short 
   await page.click('[data-misc-ok="date"]');
   await expect(page.locator('#pmPubLabel')).toContainText('Scheduled for');
   await expect(page.locator('#pmEditUpdate')).toHaveText('Schedule');
-  await page.click('#pmEditBarSave');
+  await page.click('#pmEditUpdate');
   await expect.poll(() => productsFile(page)).toBeTruthy();
   const e = entry(await productsFile(page), 'ABY-MAROON-1');
   for (const want of ['sku: "MA-001"', 'gtin: "1234567890123"', 'soldIndividually: true', 'weight: 0.6', 'dimLength: 30', 'upsells: [', 'purchaseNote: "Thank you!"',
@@ -260,24 +258,24 @@ test('Preview: the editor saves the product for preview and opens its category p
   await expect(tab.locator('#pqvTitle')).toHaveText('Preview Name Test');
 });
 
-test('one Publish button: a new (draft) product goes live from the bottom bar too — no separate Save changes', async ({ page }) => {
+test('one Publish button in the Publish box: no floating save bar, a draft goes live with one click', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await open(page);
   await page.click('#pmHeaderAdd');
   await expect(page.locator('#pmSave')).toBeHidden();
+  await expect(page.locator('#pmEditBar, .pm-wp-savebar')).toHaveCount(0);
   await expect(page.locator('#pmEditUpdate')).toHaveText('Publish');
-  await expect(page.locator('#pmEditBarSave')).toHaveText('Publish');
   await page.click('#pmEditBack');
   // A copy is a complete draft (price and photo), like a new product ready to go.
   await page.locator('#pmAllRows tr').nth(1).locator('.pm-row-title').click();
   await page.click('#pmCopyDraft');
   await expect(page.locator('#pmStatusLabel')).toHaveText('Draft');
-  await expect(page.locator('#pmEditBarSave')).toHaveText('Publish');
   await page.fill('[data-ef="name"]', 'E2E One Click Abaya');
-  await expect(page.locator('#pmEditBarMsg')).toContainText('click Publish');
+  await expect(page.locator('#pmEditNote')).toContainText('click Publish');
+  await expect(page.locator('#pmEditNote')).toHaveAttribute('data-state', 'dirty');
   await page.screenshot({ path: 'test-results/pm-one-publish.png' });
   const id = await page.locator('[data-ef="id"]').inputValue();
-  await page.click('#pmEditBarSave');
+  await page.click('#pmEditUpdate');
   await expect.poll(() => productsFile(page)).toBeTruthy();
   const e = entry(await productsFile(page), id);
   expect(e).toContain('E2E One Click Abaya');

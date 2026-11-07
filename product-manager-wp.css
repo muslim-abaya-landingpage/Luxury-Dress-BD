@@ -724,3 +724,5 @@ html[data-admin-theme="dark"] .pm-wp-list, html[data-admin-theme="dark"] .pm-wp-
 .pm-opt-head .pm-opt-h { flex: 0 1 90px; width: 90px; min-width: 70px; line-height: 1.2; }
 .pm-opt-head .pm-opt-h-off { flex: 0 1 76px; width: 76px; min-width: 68px; margin-right: auto; }
 @media (max-width: 760px) { .pm-opt-head { display: none !important; } }
+/* Publish box note: saving / published (the floating save bar is gone; this note carries the state). */
+.pm-wp-publish-note[data-state="pub"], .pm-wp-publish-note[data-state="busy"] { color: var(--pm-wp-blue-dark, #135e96) !important; font-weight: 600; }

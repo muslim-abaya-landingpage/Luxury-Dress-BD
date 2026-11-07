@@ -146,7 +146,7 @@ test('edit screen: discount percent calculates a simple-product sale price and D
   await expect(page.locator('[data-ef="regularPrice"]')).toHaveValue('1900');
   await page.click('[data-etab="attributes"]');
   await page.fill('[data-ef="dressLengths"]', '52, 54');
-  await page.click('#pmEditBarSave');
+  await page.click('#pmEditUpdate');
   await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
   const file = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
   const start = file.indexOf('"DR-01"');
@@ -172,7 +172,7 @@ test('edit screen: WooCommerce Regular / Sale price boxes write the sale and ref
   await page.fill('[data-ef="salePrice"]', '2000');
   await expect(page.locator('[data-ef="salePrice"]')).toHaveClass(/pm-price-bad/);
   await page.fill('[data-ef="salePrice"]', '');
-  await page.click('#pmEditBarSave');
+  await page.click('#pmEditUpdate');
   await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
   const file = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
   const at = file.indexOf('"DR-01"'), b = file.slice(at, file.indexOf('\n    }', at));
@@ -204,7 +204,7 @@ test('edit screen: structured color variations publish names and images, with fi
   await page.click('#pmColorAdd');
   await page.locator('.pm-color-variation-row').nth(1).locator('[data-color-field="label"]').fill('কালো');
   await page.locator('.pm-color-variation-row').nth(1).locator(`[data-color-photo="${dr01Photo}"]`).click();
-  await page.click('#pmEditBarSave');
+  await page.click('#pmEditUpdate');
   await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
 
   const file = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
@@ -272,18 +272,17 @@ test('Bulk "Change price (%)" raises every option price of the selected products
   for (const [t, v] of Object.entries(before.types)) expect(b).toContain('"' + t + '": ' + Math.round(v * 1.1));
 });
 
-test('edit screen: the save bar is always visible, shows unsaved / saved / failed, and Ctrl+S saves', async ({ page }) => {
+test('edit screen: the Publish box note shows unsaved / saved / failed, and Ctrl+S saves', async ({ page }) => {
   await stub(page);
   page.on('dialog', (d) => d.accept());
   await page.goto('/product-manager.html');
   await page.waitForTimeout(500);
   await withPublisher(page, true);
   await page.locator('#pmAllRows tr').first().locator('.pm-row-title').click();
-  const bar = page.locator('#pmEditBar');
+  const bar = page.locator('#pmEditNote');
   await page.locator('.pm-opt-row .pm-opt-regular').first().fill('1777');
   await expect(bar).toHaveAttribute('data-state', 'dirty');
-  await expect(bar).toBeInViewport();
-  await page.click('#pmEditBarSave');
+  await page.click('#pmEditUpdate');
   await expect(bar).toHaveAttribute('data-state', 'err');
   await expect(page.locator('#pmEditNote')).toContainText('Not saved');
   await withPublisher(page, false);
@@ -292,7 +291,7 @@ test('edit screen: the save bar is always visible, shows unsaved / saved / faile
   await expect(page.locator('#pmEditNote')).toContainText('Saved');
   await page.evaluate(() => document.dispatchEvent(new CustomEvent('ma-product-live')));
   await expect(bar).toHaveAttribute('data-state', 'ok');
-  await expect(page.locator('#pmEditBarMsg')).toContainText('Live on the website');
+  await expect(page.locator('#pmEditNote')).toContainText('Live on the website');
   expect(await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content.includes('1777'))).toBe(true);
 });
 
@@ -309,7 +308,7 @@ test('edit screen: an option can be renamed (Hijab → Hijab + Niqab) and reorde
   const renamed = page.locator('[data-opt-name="Hijab + Niqab"]');
   await expect(renamed).toBeVisible();
   await expect(page.locator('[data-ef="typeRegular:Hijab + Niqab"]')).toHaveValue('450');
-  await expect(page.locator('#pmEditBar')).toHaveAttribute('data-state', 'dirty');
+  await expect(page.locator('#pmEditNote')).toHaveAttribute('data-state', 'dirty');
   // Duplicate name is refused and the old name stays.
   await renamed.fill('full set borka, hijab+ niqab'); await renamed.press('Enter');
   await expect(page.locator('#pmOptEditMsg')).toContainText('already exists');
@@ -319,8 +318,8 @@ test('edit screen: an option can be renamed (Hijab → Hijab + Niqab) and reorde
   await page.locator('[data-opt-up="1"]').click();
   await expect(page.locator('.pm-opt-name').first()).toHaveValue('Hijab + Niqab');
   await expect(page.locator('#pmCardPrice')).toHaveText('৳450');
-  await page.click('#pmEditBarSave');
-  await expect(page.locator('#pmEditBar')).toHaveAttribute('data-state', 'pub');
+  await page.click('#pmEditUpdate');
+  await expect(page.locator('#pmEditNote')).toHaveAttribute('data-state', 'pub');
   const file = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
   expect(file).toContain('"Hijab + Niqab": 450');
   expect(file).not.toMatch(/"Hijab": 450/);
@@ -345,7 +344,7 @@ test('edit screen: changing the main image URL removes the old card thumbnail', 
     input.value = '/images/replacement-main.webp';
     input.dispatchEvent(new Event('input', { bubbles: true }));
   });
-  await page.click('#pmEditBarSave');
+  await page.click('#pmEditUpdate');
   await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
   const file = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
   const product = block(file, 'ABY-MAROON-1');
@@ -381,7 +380,7 @@ test('edit screen: new main and gallery photos are not committed one by one; the
   const srcs = await page.evaluate(() => Array.from(document.querySelectorAll('#pmImgView img, #pmGalView img')).map((i) => i.getAttribute('src')));
   expect(srcs.length).toBeGreaterThanOrEqual(3);
   expect(srcs.filter((s) => /^blob:/.test(s)).length).toBeGreaterThanOrEqual(3);
-  await page.click('#pmEditBarSave');
+  await page.click('#pmEditUpdate');
   await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
   const catalog = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
   for (const p of queued) expect(catalog).toContain(p);
@@ -413,10 +412,10 @@ test('edit screen: after a save, uploaded photos keep their R2 URLs on the next 
   await page.locator('.pm-gallery-file-input').first().setInputFiles([file, { ...file, name: 'photo2.png' }]);
   await expect.poll(() => page.evaluate(() => Object.keys(window.__queued).length)).toBe(2);
   const queued = await page.evaluate(() => Object.keys(window.__queued));
-  await page.click('#pmEditBarSave');
+  await page.click('#pmEditUpdate');
   await expect.poll(() => page.evaluate(() => window.__publishes.length)).toBe(1);
   // Second save (e.g. a small edit right after): the catalog must carry the R2 URLs, not the local paths.
-  await page.evaluate(() => { const b = document.getElementById('pmEditBarSave'); b.disabled = false; b.click(); });
+  await page.evaluate(() => { const b = document.getElementById('pmEditUpdate'); b.disabled = false; b.click(); });
   await expect.poll(() => page.evaluate(() => window.__publishes.length)).toBe(2);
   const second = await page.evaluate(() => window.__publishes[1].find((f) => f.path === 'category-products.js').content);
   for (const p of queued) {
@@ -521,7 +520,7 @@ test('replacing the main photo moves its colour to the new photo; the old photo 
   // Touching the colour again must not bring the old photo back.
   await page.click('[data-etab="attributes"]');
   await page.locator('.pm-color-variation-row').first().locator('[data-color-field="label"]').fill('Charcoal Black');
-  await page.click('#pmEditBarSave');
+  await page.click('#pmEditUpdate');
   await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
   const file = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
   const context = { window: {} };

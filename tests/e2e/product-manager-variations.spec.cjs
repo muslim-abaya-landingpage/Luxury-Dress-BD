@@ -97,7 +97,7 @@ test('product type, attributes with "Used for variations", generate, edit variat
   await expect(vars.nth(0).locator('[data-pv="regular"]')).toHaveValue('1980');
   await expect(vars.nth(0).locator('[data-pv="sale"]')).toHaveValue('1650');
 
-  await page.click('#pmEditBarSave');
+  await page.click('#pmEditUpdate');
   const block = await publishedBlock(page);
   await expect(page.locator('#pmEditNote')).toContainText('Stock saved for 1');
   expect(block).toContain('variations: [');
@@ -125,7 +125,7 @@ test('Add manually, remove, and switching back to a simple product removes the v
   await expect(vars.nth(13).locator('[data-pv="attr"]').first()).toHaveValue('');
   await page.selectOption('#pmProductType', 'simple');
   await expect(page.locator('[data-etab="variations"]')).toHaveCount(0);
-  await page.click('#pmEditBarSave');
+  await page.click('#pmEditUpdate');
   const block = await publishedBlock(page);
   expect(block).not.toContain('variations');
 });
@@ -198,7 +198,7 @@ test('renaming a color updates the selected variation key before publish', async
   for (let i = 0; i < await colorSelects.count(); i++) {
     if (await colorSelects.nth(i).inputValue() === 'maroon') await colorSelects.nth(i).selectOption('deep-maroon');
   }
-  await page.locator('#pmEditBarSave').click();
+  await page.locator('#pmEditUpdate').click();
   const block = await publishedBlock(page);
   expect(block).toContain('"color":"deep-maroon"');
   expect(block).not.toContain('"color":"maroon"');

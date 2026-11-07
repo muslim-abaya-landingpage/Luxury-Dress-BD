@@ -44,7 +44,7 @@ test('Product Manager: add Pant Crotch Depth and a new custom measurement, then 
   await page.click('[data-measure-add=""]');
   await rows.nth(1).locator('[data-measure-name]').fill('Knee Width');
   await rows.nth(1).locator('[data-measure-values]').fill('16, 17');
-  await page.click('#pmEditBarSave');
+  await page.click('#pmEditUpdate');
   await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
   const file = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
   const i = file.indexOf('id: "' + id + '"');
