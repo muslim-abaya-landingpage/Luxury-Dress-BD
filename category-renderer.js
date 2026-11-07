@@ -68,7 +68,13 @@ function ensureCategoryStyles() {
       ".card-actions-muslim-abaya{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:stretch;gap:8px;width:100%}" +
       ".card-actions-muslim-abaya>.muslim-abaya-btn-cart,.card-actions-muslim-abaya>.muslim-abaya-btn-msg{flex:1 1 0!important;width:0!important;min-width:0!important;border:none!important}" +
       ".card-actions-muslim-abaya>.muslim-abaya-btn-msg{background:#4a4a4a!important;color:#fff!important}" +
-      ".card-actions-muslim-abaya>.muslim-abaya-btn-msg:hover{background:#3a3a3a!important;color:#fff!important}";
+      ".card-actions-muslim-abaya>.muslim-abaya-btn-msg:hover{background:#3a3a3a!important;color:#fff!important}" +
+      // Even cards (do not remove; tests/e2e/card-alignment.spec.cjs checks it): same height per row, the title
+      // always takes 2 lines and the buttons sit at the bottom, with or without a size box or a sale price.
+      ".product-grid>.card{display:flex!important;flex-direction:column!important;height:100%}" +
+      ".product-grid>.card>.card-foot{display:flex!important;flex-direction:column!important;flex:1 1 auto!important}" +
+      ".product-grid>.card .card-title-text{min-height:2.8em}" +
+      ".product-grid>.card .card-actions-muslim-abaya{margin-top:auto!important;padding-top:16px!important}";
     document.head.appendChild(btnCss);
   }
   // ⚠️ SPEED FIX — this used to unconditionally overwrite .href on links

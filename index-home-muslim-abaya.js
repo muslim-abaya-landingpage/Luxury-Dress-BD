@@ -11,7 +11,13 @@
   var homeBtnCssText =
     ".ah-card .ah-actions{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:stretch;gap:8px;width:100%}" +
     ".ah-card .ah-btn{flex:1 1 0!important;width:0!important;min-width:0!important;border:none!important}" +
-    ".ah-card .ah-btn-msg{background:#4a4a4a!important;color:#fff!important}";
+    ".ah-card .ah-btn-msg{background:#4a4a4a!important;color:#fff!important}" +
+    // Even cards (do not remove; tests/e2e/card-alignment.spec.cjs checks it): every card in a row is the same
+    // height, the name always takes 2 lines and the buttons sit at the bottom, whatever the name or price length.
+    ".ah-card{display:flex!important;flex-direction:column!important;height:100%}" +
+    ".ah-card-body{display:flex!important;flex-direction:column!important;flex:1 1 auto!important}" +
+    ".ah-card-name{min-height:2.8em}" +
+    ".ah-card .ah-actions{margin-top:auto!important;padding-top:12px}";
   if (!document.getElementById("ma-home-btn-row")) {
     var homeBtnCss = document.createElement("style");
     homeBtnCss.id = "ma-home-btn-row";

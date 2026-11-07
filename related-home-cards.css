@@ -204,6 +204,10 @@
 .pqv-home-related .ah-card .ah-actions{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:stretch;gap:8px;width:100%}
 .pqv-home-related .ah-card .ah-btn{flex:1 1 0!important;width:0!important;min-width:0!important;border:none!important}
 .pqv-home-related .ah-card .ah-btn-msg{background:#4a4a4a!important;color:#fff!important}
+.pqv-home-related .ah-card{display:flex!important;flex-direction:column!important;height:100%}
+.pqv-home-related .ah-card-body{display:flex!important;flex-direction:column!important;flex:1 1 auto!important}
+.pqv-home-related .ah-card-name{min-height:2.8em}
+.pqv-home-related .ah-card .ah-actions{margin-top:auto!important;padding-top:12px}
 /* --- product page placement --- */
 .pqv-bottom-row>.pqv-home-related{grid-column:1 / -1;min-width:0;width:100%}
 @keyframes ah-spin{to{transform:rotate(360deg)}}

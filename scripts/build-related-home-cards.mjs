@@ -11,10 +11,13 @@ const SCOPE = '.pqv-home-related';
 // Same order as index.html (later files win on equal specificity).
 const SOURCES = ['index-home-muslim-abaya.min.css', 'home-glass.css', 'liquid-glass-ui.min.css'];
 // Injected at runtime by index-home-muslim-abaya.js (id="ma-home-btn-row"), so it comes last.
-const INJECTED =
-  '.ah-card .ah-actions{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:stretch;gap:8px;width:100%}' +
-  '.ah-card .ah-btn{flex:1 1 0!important;width:0!important;min-width:0!important;border:none!important}' +
-  '.ah-card .ah-btn-msg{background:#4a4a4a!important;color:#fff!important}';
+// Read from that file (not copied by hand) so the two never drift apart.
+const INJECTED = (() => {
+  const src = fs.readFileSync('index-home-muslim-abaya.js', 'utf8');
+  const m = /var homeBtnCssText =([\s\S]*?";)\n/.exec(src);
+  if (!m) throw new Error('homeBtnCssText not found in index-home-muslim-abaya.js');
+  return new Function('return (' + m[1].replace(/;\s*$/, '') + ')')();
+})();
 
 const WANT = /\.ah-(card|actions|btn)|\.home-row|\.home-section-(head|title|viewall|body)/;
 
