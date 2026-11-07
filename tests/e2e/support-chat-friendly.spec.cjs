@@ -142,13 +142,24 @@ test('mobile: chat header and close button are on top of the site header', async
   await expect(page.locator('#maChatPanel')).not.toHaveClass(/is-open/);
 });
 
-test('chat panel stays compact on desktop and mobile', async ({ page }) => {
-  for (const vp of [{ width: 1280, height: 800 }, { width: 390, height: 844 }, { width: 360, height: 640 }]) {
+test('chat panel: compact box on desktop, full screen that fits the visible area on phones', async ({ page }) => {
+  for (const vp of [{ width: 1280, height: 800 }, { width: 390, height: 844 }, { width: 360, height: 640 }, { width: 360, height: 420 }]) {
     await page.setViewportSize(vp);
     await openChat(page);
     const box = await page.locator('#maChatPanel').boundingBox();
-    const heightLimit = vp.width <= 560 ? Math.min(560, vp.height * 0.72) + 2 : 600;
-    expect(box.height).toBeLessThanOrEqual(heightLimit);
+    if (vp.width <= 560) {
+      // phone: whole visible screen (the keyboard shrinks it), header and message box both on screen
+      expect(Math.abs(box.y)).toBeLessThanOrEqual(1);
+      expect(Math.abs(box.height - vp.height)).toBeLessThanOrEqual(2);
+      const head = await page.locator('#maChatPanel .ma-chat-head').boundingBox();
+      const foot = await page.locator('#maChatPanel .ma-chat-input').boundingBox();
+      expect(head.y).toBeGreaterThanOrEqual(0);
+      expect(foot.y + foot.height).toBeLessThanOrEqual(vp.height);
+      await expect(page.locator('.ma-chat-fab')).toBeHidden();
+      await expect(page.locator('body')).toHaveClass(/ma-chat-mobile-open/);
+    } else {
+      expect(box.height).toBeLessThanOrEqual(600);
+    }
     expect(box.x).toBeGreaterThanOrEqual(0);
     expect(box.x + box.width).toBeLessThanOrEqual(vp.width);
     // message box fits: image button, input and send on one row without sideways scrolling

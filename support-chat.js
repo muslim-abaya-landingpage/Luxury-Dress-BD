@@ -204,7 +204,18 @@
     "#maChatPanel .ma-chat-foot:focus-within .ma-chat-send{background:#111;color:#d9b866}" +
     "#maChatPanel .ma-chat-note{margin:8px 2px 0;font-size:11.5px;color:#8a8a8a;text-align:center}" +
     "#maChatPanel .ma-chat-message.is-customer{background:#111;border-color:#111}" +
-    "@media (max-width:560px){#maChatPanel{border-radius:18px}#maChatPanel .ma-chat-body{min-height:240px}}";
+    "@media (max-width:560px){#maChatPanel{border-radius:18px}#maChatPanel .ma-chat-body{min-height:240px}}" +
+    /* Phone: the open chat is a full-screen sheet sized to the part of the screen the keyboard leaves free,
+       so the header, messages and the message box always fit (no half page peeking out below). */
+    "@media (max-width:560px){body.ma-chat-mobile-open{overflow:hidden}" +
+    "body.ma-chat-mobile-open #maChatPanel.is-open{inset:auto 0 auto 0;top:var(--ma-chat-top,0px);height:var(--ma-chat-h,100dvh);max-height:none;width:100%;border-radius:0;border:0;box-shadow:none;z-index:1000200}" +
+    "body.ma-chat-mobile-open #maChatPanel .ma-chat-head{padding-top:calc(10px + env(safe-area-inset-top,0px))}" +
+    "body.ma-chat-mobile-open #maChatPanel .ma-chat-body{min-height:0;flex:1 1 auto;overscroll-behavior:contain}" +
+    "body.ma-chat-mobile-open #maChatPanel .ma-chat-foot{flex-shrink:0;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))}" +
+    "body.ma-chat-mobile-open.ma-chat-kb #maChatPanel .ma-chat-foot{padding-bottom:8px}" +
+    "body.ma-chat-mobile-open.ma-chat-kb #maChatPanel .ma-chat-note{display:none}" +
+    "body.ma-chat-mobile-open #maChatPanel .ma-chat-expand,body.ma-chat-mobile-open .ma-chat-fab,body.ma-chat-mobile-open #mobile-bottom-nav,body.ma-chat-mobile-open #stickyOrderBar{display:none!important}" +
+    "body.ma-chat-mobile-open #maChatPanel .ma-chat-input{font-size:16px}}";
 
   var ICON_CHAT =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.5L3 21l1.6-5.2A8.5 8.5 0 1 1 21 12z"/></svg>';
@@ -1087,8 +1098,30 @@
       }
     });
     updateLinks();
+    // Phone: keep the open chat exactly inside the visible area (the keyboard shrinks it).
+    var phoneQuery = global.matchMedia ? global.matchMedia("(max-width:560px)") : null;
+    var vv = global.visualViewport || null;
+    function fitToScreen() {
+      if (!doc.body.classList.contains("ma-chat-mobile-open")) return;
+      var h = vv ? vv.height : global.innerHeight, top = vv ? vv.offsetTop : 0;
+      panel.style.setProperty("--ma-chat-h", Math.round(h) + "px");
+      panel.style.setProperty("--ma-chat-top", Math.round(top) + "px");
+      doc.body.classList.toggle("ma-chat-kb", global.innerHeight - h > 120);
+      body.scrollTop = body.scrollHeight;
+    }
+    if (vv) { vv.addEventListener("resize", fitToScreen, { passive: true }); vv.addEventListener("scroll", fitToScreen, { passive: true }); }
+    global.addEventListener("resize", fitToScreen, { passive: true });
+    if (phoneQuery && phoneQuery.addEventListener) phoneQuery.addEventListener("change", function () { setPhoneMode(panel.classList.contains("is-open")); });
+    function setPhoneMode(open) {
+      var on = !!(open && phoneQuery && phoneQuery.matches);
+      doc.body.classList.toggle("ma-chat-mobile-open", on);
+      if (on) fitToScreen();
+      else { doc.body.classList.remove("ma-chat-kb"); panel.style.removeProperty("--ma-chat-h"); panel.style.removeProperty("--ma-chat-top"); }
+    }
+
     function setOpen(open) {
       panel.classList.toggle("is-open", open);
+      setPhoneMode(open);
       fab.setAttribute("aria-expanded", open ? "true" : "false");
       fab.setAttribute("aria-label", open ? "চ্যাট বন্ধ করুন" : "সাহায্যের জন্য চ্যাট খুলুন");
       var dot = fab.querySelector(".ma-chat-dot");
@@ -1098,7 +1131,7 @@
         if (liveEnabled) ensureLiveConversation().catch(function () {
           panel.classList.add("ma-chat-fallback"); note.textContent = "লাইভ চ্যাট সাময়িকভাবে বন্ধ। WhatsApp বা Messenger-এ লিখুন।";
         });
-        global.setTimeout(function () { input.focus(); }, 60);
+        if (!(phoneQuery && phoneQuery.matches)) global.setTimeout(function () { input.focus(); }, 60);
       } else {
         fab.focus();
       }
