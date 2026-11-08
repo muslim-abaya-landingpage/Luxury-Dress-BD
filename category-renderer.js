@@ -2620,6 +2620,11 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
         "</strong></li>"
       : "") +
     "</ul>";
+  // Size choices sit in one even row of cards (Body | Length… | own measurements, up to 3 per row);
+  // Size Chart and Custom Size get their own line under them instead of squeezing into the last card.
+  var sizeTools = chartBtn || customSizeBtn ? '<div class="pqv-size-tools">' + customSizeBtn + chartBtn + "</div>" : "";
+  var gridChart = chartBtn, gridCustom = customSizeBtn;
+  chartBtn = ""; customSizeBtn = "";
   var sizeField =
     isAbaya && abayaCfg
       ? '<div class="pqv-field pqv-field-body"><span class="pqv-field-label">Body Size</span><div class="pqv-opt-group">' +
@@ -2644,6 +2649,9 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
         customSizeBtn +
         "</div></div>";
   sizeField += buildPqvMeasuresHtml(p, idx);
+  var sizeCount = (sizeField.match(/class="pqv-field pqv-field-(?:body|size)/g) || []).length;
+  sizeField = '<div class="pqv-size-grid" data-cols="' + Math.max(1, Math.min(3, sizeCount)) + '">' + sizeField + "</div>" + sizeTools;
+  chartBtn = gridChart; customSizeBtn = gridCustom;
   var sizeTpl = shopSizeTemplate(p, categoryKey);
   if (sizeTpl) {
     sizeField = window.maSizeStore.html(sizeTpl, {
