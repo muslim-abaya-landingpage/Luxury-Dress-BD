@@ -78,13 +78,13 @@
       })
       .then(cb)
       .catch(function () {
-        cb({ ok: false, message: "নেটওয়ার মাস্যা হয়েছে, আবার চেষ্টা করুন।" });
+        cb({ ok: false, message: "নেটওয়ার্কে সমস্যা হয়েছে, আবার চেষ্টা করুন।" });
       });
   }
 
   function renderList(reviews) {
     if (!reviews.length) {
-      return '<p class="pqv-reviews-empty">এখনো কোনো রিভিউ নেই — প্রথম রিভিউ আপনিই দিন!</p>';
+      return ""; // the summary line already says "এখনো কোনো রিভিউ নেই"
     }
     return reviews
       .map(function (r) {
@@ -96,7 +96,7 @@
           "</span>" +
           '<span class="pqv-review-name">' +
           esc(r.name) +
-          (r.verifiedPurchase === true ? ' <span class="pqv-review-verified">✓ কেনাকাটা যাচাই করা</span>' : '') +
+          (r.verifiedPurchase === true ? ' <span class="pqv-review-verified">✓ যাচাইকৃত ক্রেতা</span>' : '') +
           "</span>" +
           '<span class="pqv-review-date">' +
           esc(r.date) +
@@ -165,7 +165,7 @@
         '<div class="pqv-review-list">' +
         renderList(reviews) +
         "</div>" +
-        '<button type="button" class="pqv-review-write-btn" data-ma-review-toggle="1">+ একটি রিভিউ লিখুন</button>' +
+        '<button type="button" class="pqv-review-write-btn" data-ma-review-toggle="1">রিভিউ লিখুন</button>' +
         '<form class="pqv-review-form" data-ma-review-form="1" hidden>' +
         '<div class="pqv-review-form-stars" data-ma-rating-picker="1">' +
         [1, 2, 3, 4, 5]
@@ -176,10 +176,10 @@
         "</div>" +
         '<input type="hidden" name="rating" value="0">' +
         '<input type="text" class="pqv-review-input" name="name" maxlength="60" placeholder="আপনার নাম" required>' +
-        '<label>কেনাকাটা যাচাইয়ের Order ID (ঐচ্ছিক)<input type="text" class="pqv-review-input" name="orderId" maxlength="100" autocomplete="off"></label>' +
-        '<label>অর্ডারের মোবাইল নম্বর (যাচাইয়ের জন্য)<input type="tel" class="pqv-review-input" name="phone" maxlength="16" autocomplete="tel"></label>' +
-        '<p class="pqv-review-form-msg">অর্ডার ও মোবাইল শুধু কেনাকাটা যাচাইয়ে ব্যবহৃত হবে; প্রকাশ করা হবে না। পুরোনো অর্ডারে Product ID না থাকলে যাচাই সম্ভব নাও হতে পারে।</p>' +
-        '<textarea class="pqv-review-input" name="comment" maxlength="600" rows="3" placeholder="আপনার অভিজ্ঞতা লিখুন (ঐচ্ছিক)"></textarea>' +
+        '<input type="text" class="pqv-review-input" name="orderId" maxlength="100" autocomplete="off" placeholder="অর্ডার নম্বর (ঐচ্ছিক)" aria-label="অর্ডার নম্বর (ঐচ্ছিক)">' +
+        '<input type="tel" class="pqv-review-input" name="phone" maxlength="16" autocomplete="tel" placeholder="অর্ডারের মোবাইল নম্বর (ঐচ্ছিক)" aria-label="অর্ডারের মোবাইল নম্বর (ঐচ্ছিক)">' +
+        '<p class="pqv-review-form-msg">অর্ডার নম্বর ও মোবাইল দিলে রিভিউতে “✓ যাচাইকৃত ক্রেতা” দেখাবে। এগুলো প্রকাশ করা হবে না।</p>' +
+        '<textarea class="pqv-review-input" name="comment" maxlength="600" rows="3" placeholder="আপনার মতামত লিখুন (ঐচ্ছিক)" aria-label="আপনার মতামত"></textarea>' +
         '<button type="submit" class="pqv-review-submit-btn">জমা দিন</button>' +
         '<p class="pqv-review-form-msg" data-ma-review-msg="1"></p>' +
         "</form>";
@@ -226,7 +226,7 @@
             return;
           }
           if (!rating) {
-            if (msgEl) msgEl.textContent = "রেটিং দিন (স্টারে ক্লিক করুন)।";
+            if (msgEl) msgEl.textContent = "রেটিং দিন (তারায় চাপুন)।";
             return;
           }
           var submitBtn = form.querySelector(".pqv-review-submit-btn");
