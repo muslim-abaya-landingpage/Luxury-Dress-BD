@@ -71,6 +71,8 @@
     .ibx-attachment { display:block;margin-top:8px; }
     .ibx-attachment img { max-width:100%;max-height:320px;border-radius:10px;object-fit:contain;display:block; }
     .ibx-attachment video,.ibx-attachment audio { max-width:100%; }
+    .ibx-attachment-missing,.ibx-media-failed { display:inline-block;margin-top:8px;padding:8px 10px;border:1px dashed var(--adm-border-strong);border-radius:8px;color:var(--adm-muted);font-size:.82rem;background:var(--adm-card-2); }
+    .ibx-media-failed { color:var(--adm-primary);text-decoration:underline;background:transparent; }
   </style>
   <link rel="stylesheet" href="admin-sidebar.css?v=729b41e6cb4c74e8">
 
@@ -244,16 +246,29 @@
       }
       function attachments(m) {
         return (Array.isArray(m.attachments) ? m.attachments : []).map(function (a) {
-          var url = mediaUrl(a.url); if (!url) return '';
+          var url = mediaUrl(a && a.url), type = String(a && a.type || 'file').toLowerCase();
+          if (!url) return '<div class="ibx-attachment ibx-attachment-missing">📎 ' +
+            (type === 'image' ? 'ছবি এসেছে, কিন্তু Meta ছবির লিংক দেয়নি।' : 'সংযুক্তি এসেছে, কিন্তু খোলার লিংক পাওয়া যায়নি।') +
+            '</div>';
           var safe = esc(url);
-          if (a.type === 'image') return '<a class="ibx-attachment" href="' + safe + '" target="_blank" rel="noopener noreferrer"><img src="' + safe + '" alt="গ্রাহকের পাঠানো ছবি" loading="lazy" referrerpolicy="no-referrer"></a>';
-          if (a.type === 'video' || a.type === 'audio') return '<div class="ibx-attachment"><' + a.type + ' controls preload="none" src="' + safe + '"></' + a.type + '></div>';
+          if (type === 'image' || type === 'sticker') return '<a class="ibx-attachment" href="' + safe + '" target="_blank" rel="noopener noreferrer"><img src="' + safe + '" alt="' + (type === 'sticker' ? 'গ্রাহকের পাঠানো স্টিকার' : 'গ্রাহকের পাঠানো ছবি') + '" loading="lazy"></a>';
+          if (type === 'video' || type === 'audio') return '<div class="ibx-attachment"><' + type + ' controls preload="none" src="' + safe + '"></' + type + '></div>';
           return '<a class="ibx-attachment" href="' + safe + '" target="_blank" rel="noopener noreferrer">সংযুক্ত ফাইল খুলুন</a>';
         }).join('');
       }
       function mediaFallbacks(root) {
         root.querySelectorAll('.ibx-avatar').forEach(function (img) { if (img.tagName === 'IMG') img.addEventListener('error', function () { var span = document.createElement('span'); span.className = 'ibx-avatar'; span.textContent = '👤'; img.replaceWith(span); }); });
-        root.querySelectorAll('.ibx-attachment img').forEach(function (img) { img.addEventListener('error', function () { img.replaceWith(document.createTextNode('ছবিটি লোড হয়নি—খুলে দেখুন')); }); });
+        root.querySelectorAll('.ibx-attachment img').forEach(function (img) {
+          img.addEventListener('error', function () {
+            var link = document.createElement('a');
+            link.className = 'ibx-media-failed';
+            link.href = img.parentNode.href;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            link.textContent = 'ছবিটি এখানে লোড হয়নি — নতুন ট্যাবে খুলুন';
+            img.replaceWith(link);
+          });
+        });
       }
       function renderList() {
         var el = $('ibxList');
