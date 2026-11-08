@@ -5879,6 +5879,19 @@ function msgrSubscribeReceipts_() {
   return out;
 }
 
+/** Which Page each saved token really belongs to (a token of another Page gives #100/33 for customers). */
+function msgrTokenOwners_() {
+  return Object.keys(MSGR_PAGES).map(function (pid) {
+    var token = msgrPageToken_(pid);
+    if (!token) return MSGR_PAGES[pid] + ': token নেই';
+    try {
+      var me = JSON.parse(UrlFetchApp.fetch('https://graph.facebook.com/v25.0/me?fields=id,name', { headers: { Authorization: 'Bearer ' + token }, muteHttpExceptions: true }).getContentText() || '{}');
+      if (me.error) return MSGR_PAGES[pid] + ': token কাজ করছে না — ' + String(me.error.message || '').slice(0, 120);
+      return MSGR_PAGES[pid] + (String(me.id) === pid ? ': token ঠিক Page-এর ✓' : ': ⚠ token অন্য Page-এর (' + me.name + ', ID ' + me.id + ') — MSGR_PAGE_TOKEN_' + pid + ' বদলাতে হবে');
+    } catch (err) { return MSGR_PAGES[pid] + ': ' + String(err.message || err).slice(0, 120); }
+  });
+}
+
 /** Setup button: ask Facebook for the newest unnamed customer's name/photo and report the answer. */
 function msgrProfileCheck_() {
   var values = msgrContactsSheet_().getDataRange().getValues();
@@ -5888,11 +5901,12 @@ function msgrProfileCheck_() {
     if (!r[MC.PSID - 1] || String(r[MC.NAME - 1] || '').trim()) continue;
     if (!best || msgrCellMs_(r[MC.LAST - 1]) > msgrCellMs_(best[MC.LAST - 1])) best = r;
   }
-  if (!best) return 'সব কাস্টমারের নাম আছে।';
+  var owners = ' · Token: ' + msgrTokenOwners_().join(' · ');
+  if (!best) return 'সব কাস্টমারের নাম আছে।' + owners;
   var pageId = msgrRowPageId_(best);
   CacheService.getScriptCache().remove('msgr_profile_' + pageId + '_' + best[MC.PSID - 1]);
   var p = getMessengerProfile_(String(best[MC.PSID - 1]), pageId);
-  return p.name ? 'Facebook নাম দিচ্ছে ✓ (' + p.name + ')। ইনবক্সে কথোপকথন খুললে নাম/ছবি বসে যাবে।' : 'Facebook নাম/ছবি দিচ্ছে না (' + msgrPageName_(pageId) + '): ' + (p.error || 'কারণ জানা যায়নি');
+  return (p.name ? 'Facebook নাম দিচ্ছে ✓ (' + p.name + ')। ইনবক্সে কথোপকথন খুললে নাম/ছবি বসে যাবে।' : 'Facebook নাম/ছবি দিচ্ছে না (' + msgrPageName_(pageId) + '): ' + (p.error || 'কারণ জানা যায়নি')) + owners;
 }
 
 function inboxReply_(e, session) {
