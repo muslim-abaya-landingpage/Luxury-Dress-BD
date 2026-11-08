@@ -42,6 +42,9 @@
     .ibx-msg.in { align-self:flex-start; background:var(--adm-card); border:1px solid var(--adm-border); }
     .ibx-msg.out { align-self:flex-end; background:var(--adm-primary); color:#fff; }
     .ibx-msg-meta { font-size:.7rem; opacity:.7; margin-top:4px; }
+    .ibx-receipt { align-self:flex-end; margin:-4px 2px 0; font-size:.72rem; color:var(--adm-muted, #6b7280); }
+    .ibx-receipt.seen { color:#0a7c42; font-weight:600; }
+    .ibx-profile-why { margin:0 14px 8px; padding:6px 10px; border-radius:8px; background:#fff7e6; color:#8a5a00; font-size:.78rem; }
     .ibx-manage { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:8px; padding:10px 14px; border-top:1px solid var(--adm-border); }
     .ibx-manage label { font-size:.75rem; color:var(--adm-muted); display:flex; flex-direction:column; gap:3px; }
     .ibx-manage select, .ibx-manage input { padding:7px 9px; border:1px solid var(--adm-border); border-radius:8px; font:inherit; background:var(--adm-card); color:var(--adm-text); }
@@ -260,7 +263,7 @@
           return '<button type="button" class="ibx-item' + (isActive ? ' is-active' : '') + '" data-page="' + esc(c.pageId) + '" data-psid="' + esc(c.psid) + '">' +
             '<div class="ibx-item-top"><span class="ibx-name">' + avatar(c) + esc(c.name || 'অজানা গ্রাহক') + '</span>' +
             '<span class="ibx-time">' + (c.unread ? '<span class="ibx-unread">' + c.unread + '</span> ' : '') + esc(c.lastSeen) + '</span></div>' +
-            '<div class="ibx-preview">' + (c.lastDirection === 'out' ? 'আপনি: ' : '') + esc(c.lastMessage) + '</div>' +
+            '<div class="ibx-preview">' + (c.lastDirection === 'out' ? (c.seenAtMs && c.seenAtMs >= c.lastSeenMs ? '✓✓ ' : '') + 'আপনি: ' : '') + esc(c.lastMessage) + '</div>' +
             '<div class="ibx-tags"><span class="ibx-tag page">' + esc(c.pageName) + '</span>' +
             '<span class="ibx-tag' + (isWon(c.status) ? ' won' : '') + '">' + esc(c.status) + '</span>' +
             (c.fromAd ? '<span class="ibx-tag ad">বিজ্ঞাপন</span>' : '') +
@@ -319,6 +322,21 @@
         return null;
       }
 
+      // Messenger-style receipt under our last reply: দেখেছে / পৌঁছেছে / পাঠানো হয়েছে.
+      function lastOutIndex(messages) {
+        for (var i = messages.length - 1; i >= 0; i--) if (messages[i].direction === 'out') return i;
+        return -1;
+      }
+      function shortTime(ms) {
+        try { return new Date(ms).toLocaleString('bn-BD', { hour: 'numeric', minute: '2-digit', day: 'numeric', month: 'short' }); } catch (e) { return ''; }
+      }
+      function receiptHtml(c, m) {
+        var t = Number(m.timeMs) || 0, seen = Number(c.seenAtMs) || 0, got = Number(c.deliveredAtMs) || 0;
+        if (t && seen >= t) return '<div class="ibx-receipt seen" title="' + esc(shortTime(seen)) + '">✓✓ দেখেছে · ' + esc(shortTime(seen)) + '</div>';
+        if (t && got >= t) return '<div class="ibx-receipt">✓✓ পৌঁছেছে</div>';
+        return '<div class="ibx-receipt">✓ পাঠানো হয়েছে</div>';
+      }
+
       function renderThread(contact, messages, note) {
         var c = contact || {};
         var assignees = meta.team.slice();
@@ -328,10 +346,12 @@
           '<span id="ibxThreadAvatar">' + avatar(c) + '</span><strong id="ibxThreadName">' + esc(c.name || 'অজানা গ্রাহক') + '</strong> <span class="ibx-tag page">' + esc(c.pageName || '') + '</span>' +
           (c.fromAd ? ' <span class="ibx-tag ad">বিজ্ঞাপন</span>' : '') + '</div>' +
           '<span class="ibx-time">প্রথম মেসেজ: ' + esc(c.firstSeen || '') + '</span></div>' +
+          '<div class="ibx-profile-why" id="ibxProfileWhy" hidden></div>' +
           '<div class="ibx-msgs" id="ibxMsgs">' +
-          (messages.length ? messages.map(function (m) {
+          (messages.length ? messages.map(function (m, i) {
             return '<div class="ibx-msg ' + (m.direction === 'out' ? 'out' : 'in') + '">' + esc(m.text) + attachments(m) +
-              '<div class="ibx-msg-meta">' + esc(m.time) + (m.by ? ' · ' + esc(m.by) : '') + '</div></div>';
+              '<div class="ibx-msg-meta">' + esc(m.time) + (m.by ? ' · ' + esc(m.by) : '') + '</div></div>' +
+              (i === lastOutIndex(messages) ? receiptHtml(c, m) : '');
           }).join('') : '<div class="ibx-empty">এই সিস্টেম চালুর পর থেকে কোনো মেসেজ সেভ হয়নি।</div>') +
           '</div>' +
           '<div class="ibx-manage">' +
@@ -408,6 +428,11 @@
           renderList();
           if (sequence !== threadSequence || !active || active.pageId !== pageId || active.psid !== psid) return;
           $('ibxThreadName').textContent = c.name || 'অজানা গ্রাহক';
+          var why = $('ibxProfileWhy');
+          if (why) {
+            why.hidden = !(!c.name && res.profileError);
+            why.textContent = 'Facebook এই কাস্টমারের নাম/ছবি দিচ্ছে না: ' + (res.profileError || '') + ' — Setup পেজে “Messenger: কাস্টমারের নাম/ছবি পরীক্ষা” দেখুন।';
+          }
           $('ibxThreadAvatar').innerHTML = avatar(c);
           mediaFallbacks($('ibxThreadAvatar'));
         }).catch(function () { /* Optional profile lookup cannot block messages or replies. */ });

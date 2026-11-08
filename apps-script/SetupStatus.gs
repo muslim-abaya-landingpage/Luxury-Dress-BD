@@ -93,7 +93,9 @@ var SETUP_ACTIONS_ = {
   installUptimeMonitor: function () { setupUptimeMonitorTrigger(); return 'সাইট মনিটর চালু হয়েছে (প্রতি ঘণ্টা)।'; },
   installOrderSync: function () { setupOrderSyncNewOrderAutomation(); return 'অর্ডার সিঙ্ক চালু হয়েছে (প্রতি ১৫ মিনিট)।'; },
   installBackup: function () { setupDailySafetyBackupTriggerInternal_(); return 'প্রতিদিনের ব্যাকআপ চালু হয়েছে।'; },
-  installSteadfastSync: function () { setupSteadfastStatusSyncTriggerInternal_(); return 'Steadfast স্ট্যাটাস আপডেট চালু হয়েছে।'; }
+  installSteadfastSync: function () { setupSteadfastStatusSyncTriggerInternal_(); return 'Steadfast স্ট্যাটাস আপডেট চালু হয়েছে।'; },
+  messengerReceipts: function () { return 'Messenger “দেখেছে” — ' + msgrSubscribeReceipts_().join(' · '); },
+  messengerProfileCheck: function () { return msgrProfileCheck_(); }
 };
 
 function runAdminSetupAction_(e) {
