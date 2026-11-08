@@ -2914,19 +2914,8 @@ function onGlobalShopCartClick(ev) {
   );
 
   if (action === "buy-now") {
-    // Order Now opens the on-site popup checkout for this one product; the checkout page stays
-    // the fallback (popup could not load) and the route for the whole cart.
-    if (typeof window.maOpenCheckoutPopup === "function") {
-      var direct = shopPrepareDirectOrderLine(cartItem, qty, selectedSize, categoryKey, selectedBodyValue, sized);
-      if (!direct) return;
-      var opened = window.maOpenCheckoutPopup(direct.line, {
-        stockCap: direct.cap,
-        fallback: function () {
-          shopGoToCheckoutWithLine(cartItem, qty, selectedSize, categoryKey, selectedBodyValue, sized);
-        }
-      });
-      if (opened) return;
-    }
+    // Keep Buy Now on the exact same full-page checkout as the cart flow.
+    // The selected size, colour, quantity and variation price are added to the cart first.
     shopGoToCheckoutWithLine(cartItem, qty, selectedSize, categoryKey, selectedBodyValue, sized);
     return;
   }
