@@ -2578,7 +2578,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function orderItemDetail(item) {
         var lines = [];
+        var size = checkoutLineSizeLabel(item);
         var color = item.colorLabel || item.color;
+        if (size) lines.push('Size: ' + String(size).trim());
         if (color) lines.push('Color: ' + String(color).trim());
         return lines.map(function (line) { return escapeHtml(line); }).join('<br>');
     }
