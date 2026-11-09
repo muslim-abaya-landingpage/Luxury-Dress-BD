@@ -1849,16 +1849,10 @@ function computeVerifiedOrderPricing_(cartItems, charge, couponCodeVal) {
 
 function handleOnlineOrderPost_(e) {
   var validated = validateOrderInput_(e);
-  // A retry of an order that was already saved (lost response, double tap, Worker re-send)
-  // gets the same order ID back instead of an error or a second order.
-  var alreadySavedId = findSavedOrderForEvent_(param_(e, 'EventID'), validated.phone);
-  if (alreadySavedId) {
-    return ContentService.createTextOutput('Success|' + alreadySavedId).setMimeType(ContentService.MimeType.TEXT);
-  }
+  // Keep the fast stock/blocked-phone checks outside the critical section.
+  // Idempotency + abuse counters are checked again under the same lock that writes the row.
   assertLiveStockAvailable_(validated.cartItems);
   if (isPhoneBlocked_(validated.phone)) throw new Error('ORDER_BLOCKED');
-  rateLimitOrder_(validated.phone);
-  checkDuplicateOrder_(validated.phone, validated.total, validated.design);
 
   var SHEET_NAME = 'Online Order';
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -1924,6 +1918,15 @@ function handleOnlineOrderPost_(e) {
   var newRow = 0;
   var reservedVariantCount = 0;
   try {
+    // Serialize retries and per-phone abuse counters with the actual sheet write.
+    // A second concurrent request sees the first request's saved EventID before it can append.
+    var alreadySavedId = findSavedOrderForEvent_(param_(e, 'EventID'), validated.phone);
+    if (alreadySavedId) {
+      return ContentService.createTextOutput('Success|' + alreadySavedId).setMimeType(ContentService.MimeType.TEXT);
+    }
+    rateLimitOrder_(validated.phone);
+    checkDuplicateOrder_(validated.phone, validated.total, validated.design);
+
     var uniqueOrderId = generateUniqueOrderId_(sheet, orderId);
     if (uniqueOrderId !== orderId) {
       if (trackingId === 'order_' + orderId) trackingId = 'order_' + uniqueOrderId;
@@ -1959,6 +1962,9 @@ function handleOnlineOrderPost_(e) {
       sourceVal,
       trackingId
     ]]);
+    // Persist the idempotency result before releasing the lock so concurrent retries
+    // cannot pass the lookup in the gap between the Sheet write and CacheService update.
+    rememberSavedOrderForEvent_(param_(e, 'EventID'), validated.phone, orderId);
   } catch (orderCreateErr) {
     if (newRow) {
       try { sheet.getRange(newRow, 1, 1, sheet.getLastColumn()).clearContent(); } catch (clearErr) {}
@@ -1970,8 +1976,6 @@ function handleOnlineOrderPost_(e) {
   } finally {
     orderLock.releaseLock();
   }
-  rememberSavedOrderForEvent_(param_(e, 'EventID'), validated.phone, orderId);
-
   // Server-side tracking: keep the shopper's IP + browser for the Purchase event that is
   // sent later, when the order is Confirmed. Never blocks the order.
   try { saveOnlineOrderTrackingClient_(sheet, newRow, param_(e, 'ClientIP'), param_(e, 'ClientUserAgent')); } catch (trackClientErr) {}
