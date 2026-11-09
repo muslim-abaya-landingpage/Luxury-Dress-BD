@@ -238,6 +238,9 @@ function doPost(e) {
     if (type === 'AdminSetupAction') {
       return jsonOut_(runAdminSetupAction_(e));
     }
+    if (type === 'AdminMessengerTokenSave') {
+      return jsonOut_(saveMessengerPageToken_(e));
+    }
     if (type === 'AdminAnalyticsV2') {
       return jsonOut_(getAdminAnalyticsV2_(e));
     }

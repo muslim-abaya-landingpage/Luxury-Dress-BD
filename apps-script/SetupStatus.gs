@@ -70,6 +70,7 @@ function getAdminSetupStatus_(e) {
     ok: true,
     checkedAt: Utilities.formatDate(new Date(), 'Asia/Dhaka', 'yyyy-MM-dd HH:mm'),
     connections: connections,
+    messengerPages: messengerPageTokenStatus_(props),
     jobs: jobs,
     triggerError: counts.__error || '',
     lastOrderSyncAt: props.getProperty('ORDERSYNC_LAST_SYNC_AT') || '',
@@ -97,6 +98,50 @@ var SETUP_ACTIONS_ = {
   messengerReceipts: function () { return 'Messenger “দেখেছে” — ' + msgrSubscribeReceipts_().join(' · '); },
   messengerProfileCheck: function () { return msgrProfileCheck_(); }
 };
+
+function messengerPageTokenStatus_(props) {
+  return Object.keys(MSGR_PAGES).map(function (pageId) {
+    var configured = !!String(props.getProperty('MSGR_PAGE_TOKEN_' + pageId) || '').trim();
+    if (!configured && String(pageId) === MSGR_PAGE_ID) configured = !!String(props.getProperty('MSGR_PAGE_TOKEN') || '').trim();
+    return { id: pageId, name: MSGR_PAGES[pageId], configured: configured };
+  });
+}
+
+/** Accept a Page token only after Facebook confirms it belongs to the selected Page. Never return or log the token. */
+function saveMessengerPageToken_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var owner = requireOwnerAdmin_(v);
+  if (owner) return owner;
+  var pageId = String(param_(e, 'PageId') || '').trim();
+  var accessToken = String(param_(e, 'AccessToken') || '').trim();
+  if (!Object.prototype.hasOwnProperty.call(MSGR_PAGES, pageId)) {
+    return { ok: false, error: 'INVALID_PAGE', message: 'তালিকার একটি Facebook Page নির্বাচন করুন।' };
+  }
+  if (accessToken.length < 20 || accessToken.length > 5000 || /\s/.test(accessToken)) {
+    return { ok: false, error: 'INVALID_TOKEN_FORMAT', message: 'সম্পূর্ণ Page Access Token পেস্ট করুন; শুরু বা শেষে অতিরিক্ত ফাঁকা স্থান রাখবেন না।' };
+  }
+  try {
+    var response = UrlFetchApp.fetch('https://graph.facebook.com/v25.0/me?fields=id,name', {
+      headers: { Authorization: 'Bearer ' + accessToken }, muteHttpExceptions: true
+    });
+    var body = {};
+    try { body = JSON.parse(response.getContentText() || '{}'); } catch (parseErr) {}
+    if (response.getResponseCode() !== 200 || body.error || !body.id) {
+      var message = body.error && body.error.message ? String(body.error.message) : 'Facebook Token যাচাই করতে পারেনি।';
+      return { ok: false, error: 'FACEBOOK_TOKEN_INVALID', message: message.slice(0, 220) };
+    }
+    if (String(body.id) !== pageId) {
+      return { ok: false, error: 'TOKEN_PAGE_MISMATCH',
+        message: 'এই Tokenটি "' + String(body.name || 'অন্য Page') + '" Page-এর। নির্বাচিত Page "' + MSGR_PAGES[pageId] + '"-এর Token ব্যবহার করুন।' };
+    }
+    PropertiesService.getScriptProperties().setProperty('MSGR_PAGE_TOKEN_' + pageId, accessToken);
+    return { ok: true, pageId: pageId, pageName: MSGR_PAGES[pageId],
+      message: MSGR_PAGES[pageId] + ' Page-এর Token যাচাই করে নিরাপদে সংরক্ষণ করা হয়েছে।' };
+  } catch (err) {
+    return { ok: false, error: 'TOKEN_VERIFY_FAILED', message: 'Facebook-এর সঙ্গে যাচাই করা যায়নি: ' + String(err && err.message || err).slice(0, 160) };
+  }
+}
 
 function runAdminSetupAction_(e) {
   var v = verifyAdminSession_(param_(e, 'Token'));

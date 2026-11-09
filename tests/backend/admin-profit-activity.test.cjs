@@ -70,3 +70,15 @@ test('setup status reports whether secrets are set, never their values', () => {
   assert.match(fn, /requireOwnerAdmin_/);
   assert.match(pick(setupSrc, 'runAdminSetupAction_'), /hasOwnProperty\.call\(SETUP_ACTIONS_, name\)/);
 });
+
+
+test('Messenger Page token save is owner-only, Page-scoped, and never returns the secret', () => {
+  const fn = pick(setupSrc, 'saveMessengerPageToken_');
+  assert.ok(fn.includes('verifyAdminSession_'));
+  assert.ok(fn.includes('requireOwnerAdmin_'));
+  assert.ok(fn.includes('Object.prototype.hasOwnProperty.call(MSGR_PAGES, pageId)'));
+  assert.ok(fn.includes('String(body.id) !== pageId'));
+  assert.ok(fn.includes("setProperty('MSGR_PAGE_TOKEN_' + pageId, accessToken)"));
+  assert.ok(!fn.includes('console.log(accessToken)'));
+  assert.ok(code.includes("type === 'AdminMessengerTokenSave'"));
+});

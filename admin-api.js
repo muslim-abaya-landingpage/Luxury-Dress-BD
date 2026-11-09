@@ -580,6 +580,7 @@
   function lookupCustomer(phone) { return call("AdminCustomerLookup", { Phone: phone }); }
   function blockCustomer(phone, block) { return call("AdminBlockCustomer", { Phone: phone, Block: block ? "1" : "0" }); }
   function runSetupAction(action) { return call("AdminSetupAction", { Action: action }, { timeoutMs: 60000 }); }
+  function saveMessengerPageToken(pageId, accessToken) { return call("AdminMessengerTokenSave", { PageId: pageId, AccessToken: accessToken }, { timeoutMs: 30000 }); }
 
   function getAnalyticsV2(opts) {
     var s = getSession();
@@ -715,6 +716,7 @@
     getAnalyticsV2: getAnalyticsV2,
     getSetupStatus: getSetupStatus,
     runSetupAction: runSetupAction,
+    saveMessengerPageToken: saveMessengerPageToken,
     getActivity: getActivity,
     getProductProfit: getProductProfit,
     saveProductCosts: saveProductCosts,
