@@ -35,11 +35,12 @@
 .st-msgr-status-head,.st-msgr-form-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 11px}
 .st-msgr-status-head>span,.st-msgr-form-title>span{color:#64748b;font-size:12px}
 .st-msgr-grid{list-style:none!important;padding:0!important;margin:0 0 22px!important;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
-.st-msgr-card{display:flex;align-items:center;gap:11px;min-width:0;padding:13px;border:1px solid #e2e8f0;border-radius:13px;background:#fff}
-.st-msgr-avatar{width:38px;height:38px;flex:0 0 38px;border-radius:12px;display:grid;place-items:center;background:#edf3ff;color:#3159a8;font-size:13px;font-weight:800}
-.st-msgr-card-copy{min-width:0;flex:1}.st-msgr-card-copy strong{display:block;overflow-wrap:anywhere;font-size:13px;color:#17243a}
-.st-msgr-card-copy small{display:block;margin-top:3px;color:#718096;font-size:11px}
-.st-msgr-state{flex:0 0 auto;padding:5px 8px;border-radius:20px;font-size:10px;font-weight:700;background:#fff1f0;color:#b42318}
+.st-msgr-card{display:grid;grid-template-columns:38px minmax(0,1fr);grid-template-areas:"avatar copy" "state state";align-items:center;gap:10px 11px;min-width:0;padding:14px;border:1px solid #e2e8f0;border-radius:13px;background:#fff}
+.st-msgr-avatar{grid-area:avatar;width:38px;height:38px;flex:0 0 38px;border-radius:12px;display:grid;place-items:center;background:#edf3ff;color:#3159a8;font-size:13px;font-weight:800}
+.st-msgr-card-copy{grid-area:copy;display:flex;flex-direction:column;align-items:flex-start;gap:5px;min-width:0}
+.st-msgr-card-copy strong{display:block;max-width:100%;overflow-wrap:anywhere;font-size:13px;line-height:1.4;color:#17243a}
+.st-msgr-page-id{display:inline-block;max-width:100%;padding:4px 7px;border:1px solid #e8edf4;border-radius:6px;background:#f8fafc;color:#64748b;font:11px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:normal;overflow-wrap:anywhere;user-select:all}
+.st-msgr-state{grid-area:state;justify-self:start;display:inline-flex;align-items:center;gap:4px;padding:5px 9px;border-radius:20px;font-size:10px;font-weight:700;background:#fff1f0;color:#b42318}
 .st-msgr-state.is-ok{background:#eaf8ef;color:#18794e}
 .st-msgr-form-wrap{padding:17px;border:1px solid #e0e7f0;border-radius:15px;background:#fff}
 .st-msgr-form{display:grid;grid-template-columns:minmax(180px,.8fr) minmax(220px,1.4fr) auto;align-items:end;gap:12px}
