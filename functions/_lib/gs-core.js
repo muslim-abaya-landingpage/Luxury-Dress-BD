@@ -7306,7 +7306,7 @@ function getAdminAnalyticsV2_(e) {
       if (isReturn) summary.returnedCount++;
       else if (isPlainCancel) summary.cancelledCount++;
 
-      if (status === 'confirmed') summary.confirmedCount++;
+      if (status === 'confirmed' || status === 'processing') summary.confirmedCount++;
       if (!status || status.indexOf('pend') !== -1) summary.pendingCount++;
       if (status.indexOf('ship') !== -1) summary.shippedCount++;
       var custPhone = normalizePhone_(r[2]);
