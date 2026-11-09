@@ -5555,9 +5555,12 @@ function msgrFindContactRow_(values, pageId, psid) {
 function msgrEventText_(ev) {
   if (ev.message) {
     if (ev.message.text) return String(ev.message.text);
-    var atts = ev.message.attachments || [];
+    var atts = ev.message.attachments || (ev.message.attachment ? [ev.message.attachment] : []);
     if (atts.length) return '[' + atts.map(function (a) { return a.type || 'attachment'; }).join(', ') + ']';
-    return '[message]';
+    if (ev.message.sticker_id) return '[স্টিকার]';
+    if (ev.message.quick_reply) return '[দ্রুত উত্তর]';
+    // Keep a visible diagnostic instead of silently saving an empty "[message]".
+    return '[মিডিয়া/মেসেজের তথ্য Meta পাঠায়নি]';
   }
   if (ev.postback) return '[বাটন] ' + String(ev.postback.title || ev.postback.payload || '');
   if (ev.referral) return '[বিজ্ঞাপন/লিংক থেকে এসেছে]';
@@ -5636,10 +5639,14 @@ function upsertMessengerContact_(sh, psid, fromAd) {
 
 function msgrAttachments_(items) {
   if (typeof items === 'string') { try { items = JSON.parse(items); } catch (e) { items = []; } }
+  if (items && !Array.isArray(items) && items.type) items = [items];
   return (Array.isArray(items) ? items : []).slice(0, 20).map(function (a) {
-    var url = String(a.url || (a.payload && a.payload.url) || '');
-    return { type: String(a.type || 'file'), url: /^https:\/\//i.test(url) ? url : '' };
-  }).filter(function (a) { return a.url; });
+    a = a || {};
+    var payload = a.payload || {};
+    var url = String(a.url || a.image_url || payload.url || payload.image_url || payload.src || '');
+    var type = String(a.type || (payload.sticker_id ? 'sticker' : 'file')).toLowerCase();
+    return { type: type, url: /^https:\/\//i.test(url) ? url : '' };
+  });
 }
 
 function getMessengerProfile_(psid, pageId) {
