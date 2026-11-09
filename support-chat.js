@@ -668,7 +668,7 @@
       var messageBody = el("div", "ma-chat-message-body");
       messageBody.textContent = String(row.body || "");
       bubble.appendChild(messageBody);
-      if (row.attachment_path && supabaseClient) {
+      if (row.attachment_path && !row.deleted_at && supabaseClient) {
         var mime = String(row.attachment_mime || "");
         var attachmentName = String(row.attachment_name || "সংযুক্ত ফাইল");
         var media;
@@ -773,7 +773,7 @@
       return conversationPromise;
     }
     function missingColumn(error) { return !!error && (error.code === "42703" || error.code === "PGRST204" || /column .* does not exist/i.test(error.message || "")); }
-    function messageColumns() { return "id,conversation_id,sender_id,sender_role,body,created_at,read_at" + (hasAttachmentColumn ? ",attachment_path,attachment_name,attachment_mime" : ""); }
+    function messageColumns() { return "id,conversation_id,sender_id,sender_role,body,created_at,read_at,deleted_at" + (hasAttachmentColumn ? ",attachment_path,attachment_name,attachment_mime" : ""); }
     function contactKey() { return "maSupportContact:" + conversationId; }
     function maybeShowContact() {
       var done = "";
@@ -827,6 +827,16 @@
           event: "INSERT", schema: "public", table: "support_messages",
           filter: "conversation_id=eq." + conversationId
         }, function (payload) { appendMessage(payload.new); })
+        .on("postgres_changes", {
+          event: "UPDATE", schema: "public", table: "support_messages",
+          filter: "conversation_id=eq." + conversationId
+        }, function (payload) {
+          var row = payload && payload.new; if (!row || !row.id) return;
+          var bubble = Array.prototype.slice.call(transcript.querySelectorAll(".ma-chat-message[data-message-id]")).find(function (node) { return node.getAttribute("data-message-id") === String(row.id); });
+          if (!bubble) return;
+          var text = bubble.querySelector(".ma-chat-message-body"); if (text) text.textContent = String(row.deleted_at ? row.body : row.body || "");
+          if (row.deleted_at) bubble.querySelectorAll("img,audio,.ma-chat-file-link").forEach(function (node) { node.remove(); });
+        })
         .subscribe(function (status) {
           if (status === "SUBSCRIBED") note.textContent = "✅ সংযুক্ত। মেসেজ লিখুন, আমরা এখানেই উত্তর দেবো।";
           else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") note.textContent = "সংযোগ একটু বিঘ্নিত হয়েছে। সমস্যা থাকলে WhatsApp-এ লিখুন।";

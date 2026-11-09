@@ -24,6 +24,8 @@
   var soundEnabled = false, notificationAudio = null, notifiedMessageIds = Object.create(null);
   var previewCache = Object.create(null), threadRows = [], threadHasOlder = false, signedUrlCache = Object.create(null);
   var hasContactColumns = true, hasAttachmentColumn = true, refreshQueued = false, refreshRunning = false;
+  var replyTarget = null, forwardSource = null, activeActionRow = null, actionMenuEl = null, actionTriggerEl = null;
+  var actionReactionRows = [], starredMessageIds = Object.create(null), conversationPin = null, actionNoticeTimer = null;
 
   var $ = function (id) { return document.getElementById(id); };
   var loginWrap = $("loginWrap"), inboxWrap = $("inboxWrap"), loginNotice = $("loginNotice");
@@ -64,6 +66,290 @@
     if (c.channel === "telegram") return "টেলিগ্রাম কাস্টমার · " + String(c.telegram_chat_id || c.id).slice(-6);
     return "ভিজিটর · " + c.id.slice(0, 6);
   }
+
+  function actionNotice(text) {
+    var node = $("actionStatus");
+    if (!node) return;
+    node.textContent = text || "";
+    clearTimeout(actionNoticeTimer);
+    if (text) actionNoticeTimer = setTimeout(function () { node.textContent = ""; }, 5000);
+  }
+  function messageSummary(row) {
+    if (!row) return "বার্তাটি আর পাওয়া যাচ্ছে না";
+    if (row.deleted_at) return "এই মেসেজটি মুছে ফেলা হয়েছে।";
+    var text = String(row.body || "").trim();
+    if (!text && row.attachment_name) text = "📎 " + row.attachment_name;
+    return text || "সংযুক্তি";
+  }
+  function closeActionMenu(restoreFocus) {
+    if (actionMenuEl) actionMenuEl.remove();
+    actionMenuEl = null; activeActionRow = null;
+    var trigger = actionTriggerEl; actionTriggerEl = null;
+    if (restoreFocus && trigger && document.contains(trigger)) trigger.focus();
+  }
+  function appendMenuButton(menu, label, action, disabled, icon) {
+    var button = make("button", "message-menu-item", "");
+    button.type = "button"; button.dataset.action = action;
+    button.disabled = !!disabled;
+    button.append(make("span", "message-menu-icon", icon || ""), make("span", "", label));
+    menu.appendChild(button);
+    return button;
+  }
+  function openActionMenu(row, x, y, trigger, view) {
+    closeActionMenu(false);
+    if (!row) return;
+    activeActionRow = row; actionTriggerEl = trigger || null;
+    var menu = make("div", "message-action-menu");
+    menu.setAttribute("role", "dialog"); menu.setAttribute("aria-label", "মেসেজ অপশন");
+    if (view === "react") {
+      var back = appendMenuButton(menu, "ফিরে যান", "back", false, "←");
+      var title = make("div", "message-menu-heading", "রিঅ্যাকশন বেছে নিন");
+      menu.insertBefore(title, back);
+      ["👍", "❤️", "😂", "😮", "😢", "🙏"].forEach(function (emoji) {
+        var b = make("button", "message-emoji-option", emoji); b.type = "button"; b.dataset.emoji = emoji;
+        b.setAttribute("aria-label", emoji + " রিঅ্যাকশন"); menu.appendChild(b);
+      });
+    } else {
+      menu.appendChild(make("div", "message-menu-heading", "মেসেজ অপশন"));
+      appendMenuButton(menu, "মেসেজের তথ্য", "info", false, "ⓘ");
+      if (row.deleted_at) {
+        if (row.attachment_path) appendMenuButton(menu, "সংযুক্তি পরিষ্কার আবার চেষ্টা", "cleanup", false, "↻");
+      } else {
+        appendMenuButton(menu, "Reply", "reply", !selectedId || (selectedRow() && selectedRow().status === "closed"), "↩");
+        appendMenuButton(menu, "Copy", "copy", !String(row.body || "").trim(), "▢");
+        appendMenuButton(menu, "React", "react", false, "☺");
+        if (row.attachment_path) appendMenuButton(menu, "Download", "download", false, "↓");
+        appendMenuButton(menu, "Forward", "forward", false, "➦");
+        appendMenuButton(menu, conversationPin && conversationPin.message_id === row.id ? "Unpin" : "Pin", "pin", false, "⌖");
+        appendMenuButton(menu, starredMessageIds[row.id] ? "Unstar" : "Star", "star", false, "☆");
+        appendMenuButton(menu, "Delete", "delete", false, "▤");
+      }
+    }
+    document.body.appendChild(menu); actionMenuEl = menu;
+    menu.addEventListener("click", function (event) {
+      var button = event.target.closest("button"); if (!button || button.disabled) return;
+      if (button.dataset.emoji) { var current = activeActionRow; var emoji = button.dataset.emoji; closeActionMenu(false); toggleMessageReaction(current, emoji).catch(function (e) { actionNotice(e.message || "রিঅ্যাকশন সেভ করা যায়নি।"); }); return; }
+      var action = button.dataset.action;
+      if (action === "back") { openActionMenu(activeActionRow, x, y, trigger, "main"); return; }
+      if (action === "react") { openActionMenu(activeActionRow, x, y, trigger, "react"); return; }
+      var current = activeActionRow; closeActionMenu(false);
+      handleMessageAction(current, action).catch(function (e) { actionNotice(e.message || "কাজটি সম্পন্ন করা যায়নি।"); });
+    });
+    var bounds = trigger ? trigger.getBoundingClientRect() : { left: x || 0, top: y || 0, bottom: y || 0, right: x || 0 };
+    var left = Number.isFinite(x) && x > 0 ? x : bounds.right;
+    var top = Number.isFinite(y) && y > 0 ? y : bounds.bottom;
+    requestAnimationFrame(function () {
+      var r = menu.getBoundingClientRect();
+      menu.style.left = Math.max(8, Math.min(left, window.innerWidth - r.width - 8)) + "px";
+      menu.style.top = Math.max(8, Math.min(top, window.innerHeight - r.height - 8)) + "px";
+      var first = menu.querySelector("button:not(:disabled)"); if (first) first.focus();
+    });
+  }
+  document.addEventListener("pointerdown", function (event) {
+    if (actionMenuEl && !actionMenuEl.contains(event.target) && !event.target.closest(".message-actions-trigger")) closeActionMenu(false);
+  });
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" && actionMenuEl) closeActionMenu(true);
+  });
+  $("messages").addEventListener("contextmenu", function (event) {
+    var bubble = event.target.closest(".message[data-message-id]"); if (!bubble) return;
+    var row = threadRows.find(function (m) { return m.id === bubble.dataset.messageId; });
+    if (!row) return;
+    event.preventDefault(); openActionMenu(row, event.clientX, event.clientY, null);
+  });
+  function clearReplyContext() {
+    replyTarget = null;
+    $("replyPreview").classList.add("hidden");
+    $("replyPreviewText").textContent = "";
+  }
+  function beginReply(row) {
+    if (!row || !selectedId || (selectedRow() && selectedRow().status === "closed")) return;
+    replyTarget = row;
+    $("replyPreviewText").textContent = messageSummary(row).slice(0, 220);
+    $("replyPreview").classList.remove("hidden");
+    $("replyInput").focus();
+  }
+  $("replyCancel").addEventListener("click", clearReplyContext);
+  $("messageInfoClose").addEventListener("click", function () { $("messageInfoDialog").close(); });
+  $("messageInfoDialog").addEventListener("click", function (event) { if (event.target === this) this.close(); });
+  function showMessageInfo(row) {
+    $("messageInfoTitle").textContent = "মেসেজের তথ্য";
+    var content = $("messageInfoContent"); content.textContent = "";
+    var sender = row.sender_role === "agent" ? (row.sender_external_id === "telegram-bot" ? "টেলিগ্রাম বট" : "সাপোর্ট এজেন্ট") : "কাস্টমার";
+    var fields = [
+      ["প্রেরক", sender], ["চ্যানেল", (selectedRow() && selectedRow().channel === "telegram") ? "টেলিগ্রাম" : "ওয়েবসাইট"],
+      ["সময়", row.created_at ? new Date(row.created_at).toLocaleString("bn-BD") : "—"],
+      ["ইনবক্সে পড়া", row.read_at ? "হ্যাঁ · " + new Date(row.read_at).toLocaleString("bn-BD") : "এখনো পড়া/চিহ্নিত হয়নি"],
+      ["বার্তা ID", row.id], ["সংযুক্তি", row.attachment_name || "নেই"], ["অবস্থা", row.deleted_at ? "মুছে ফেলা হয়েছে" : "সক্রিয়"]
+    ];
+    fields.forEach(function (pair) { var line = make("div", "message-info-row"); line.append(make("strong", "", pair[0]), make("span", "", String(pair[1] || "—"))); content.appendChild(line); });
+    $("messageInfoDialog").showModal();
+  }
+  async function loadMessageActions(id) {
+    var ids = threadRows.map(function (row) { return row.id; });
+    actionReactionRows = []; starredMessageIds = Object.create(null); conversationPin = null;
+    if (!id || !ids.length || !agentUserId) { renderMessages(false); return; }
+    var c = requireClient();
+    var results = await Promise.all([
+      c.from("support_message_reactions").select("message_id,actor_id,emoji").in("message_id", ids),
+      c.from("support_message_stars").select("message_id").in("message_id", ids).eq("agent_id", agentUserId),
+      c.from("support_conversation_pins").select("conversation_id,message_id,pinned_by,pinned_at").eq("conversation_id", id).maybeSingle()
+    ]);
+    if (id !== selectedId) return;
+    if (results[0].error || results[1].error || results[2].error) throw (results.find(function (r) { return r.error; }) || {}).error || new Error("মেসেজ অ্যাকশন লোড হয়নি");
+    actionReactionRows = results[0].data || [];
+    (results[1].data || []).forEach(function (r) { starredMessageIds[r.message_id] = true; });
+    conversationPin = results[2].data || null;
+    renderMessages(false);
+  }
+  async function toggleMessageReaction(row, emoji) {
+    if (!row || row.deleted_at) return;
+    var c = requireClient();
+    var existing = actionReactionRows.find(function (r) { return r.message_id === row.id && r.actor_id === agentUserId; });
+    var result = existing && existing.emoji === emoji
+      ? await c.from("support_message_reactions").delete().eq("message_id", row.id).eq("actor_id", agentUserId)
+      : await c.from("support_message_reactions").upsert({ message_id: row.id, actor_id: agentUserId, emoji: emoji }, { onConflict: "message_id,actor_id" });
+    if (result.error) throw result.error;
+    await loadMessageActions(selectedId);
+  }
+  async function toggleStar(row) {
+    if (starredMessageIds[row.id]) {
+      var removed = await requireClient().from("support_message_stars").delete().eq("message_id", row.id).eq("agent_id", agentUserId);
+      if (removed.error) throw removed.error;
+    } else {
+      var added = await requireClient().from("support_message_stars").insert({ message_id: row.id, agent_id: agentUserId });
+      if (added.error) throw added.error;
+    }
+    await loadMessageActions(selectedId);
+  }
+  async function togglePin(row) {
+    var c = requireClient();
+    var result = conversationPin && conversationPin.message_id === row.id
+      ? await c.from("support_conversation_pins").delete().eq("conversation_id", selectedId)
+      : await c.from("support_conversation_pins").upsert({ conversation_id: selectedId, message_id: row.id, pinned_by: agentUserId, pinned_at: new Date().toISOString() }, { onConflict: "conversation_id" });
+    if (result.error) throw result.error;
+    await loadMessageActions(selectedId);
+  }
+  async function copyMessage(row) {
+    var text = String(row.body || row.attachment_name || "");
+    if (!text) throw new Error("কপি করার মতো লেখা নেই।");
+    try { await navigator.clipboard.writeText(text); }
+    catch (_) {
+      var input = make("textarea"); input.value = text; input.style.position = "fixed"; input.style.opacity = "0"; document.body.appendChild(input); input.select();
+      var ok = document.execCommand("copy"); input.remove(); if (!ok) throw new Error("কপি করা যায়নি; browser clipboard permission পরীক্ষা করুন।");
+    }
+    actionNotice("মেসেজের লেখা কপি হয়েছে।");
+  }
+  function safeFilename(value) { return String(value || "support-attachment").replace(/[\\/:*?"<>|\x00-\x1f]/g, "_").slice(0, 180) || "support-attachment"; }
+  async function downloadAttachment(row) {
+    if (!row.attachment_path) throw new Error("এই মেসেজে কোনো ফাইল নেই।");
+    var url = await signedUrl(row.attachment_path); if (!url) throw new Error("ফাইলের নিরাপদ লিংক তৈরি হয়নি।");
+    try {
+      var response = await fetch(url); if (!response.ok) throw new Error("ফাইল ডাউনলোড হয়নি");
+      var blobUrl = URL.createObjectURL(await response.blob());
+      var a = make("a"); a.href = blobUrl; a.download = safeFilename(row.attachment_name); document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(blobUrl); }, 30000);
+    } catch (_) {
+      var fallback = make("a"); fallback.href = url; fallback.target = "_blank"; fallback.rel = "noopener"; fallback.download = safeFilename(row.attachment_name); document.body.appendChild(fallback); fallback.click(); fallback.remove();
+    }
+    actionNotice("ফাইল ডাউনলোড/খোলার জন্য পাঠানো হয়েছে।");
+  }
+  function openForwardDialog(row) {
+    forwardSource = row;
+    var select = $("forwardTarget"); select.textContent = "";
+    var targets = conversations.filter(function (c) { return c.id !== row.conversation_id && c.status !== "closed"; });
+    if (!targets.length) { forwardSource = null; actionNotice("ফরোয়ার্ড করার জন্য অন্য কোনো খোলা কথোপকথন নেই।"); return; }
+    var placeholder = make("option", "", "কথোপকথন নির্বাচন করুন"); placeholder.value = ""; placeholder.disabled = true; placeholder.selected = true; select.appendChild(placeholder);
+    targets.forEach(function (c) {
+      var option = make("option", "", displayName(c) + " · " + (CHANNEL_BN[c.channel || "website"] || c.channel)); option.value = c.id;
+      if (row.attachment_path && c.channel === "telegram") { option.disabled = true; option.textContent += " · ফাইল unsupported"; }
+      select.appendChild(option);
+    });
+    $("forwardPreview").textContent = messageSummary(row).slice(0, 500);
+    $("forwardNotice").textContent = row.attachment_path ? "ওয়েবসাইট চ্যাটে ফাইল কপি হবে; Telegram-এ ফাইল পাঠানো সমর্থিত নয়।" : "ফরোয়ার্ড করলে নির্বাচিত কথোপকথনে নতুন মেসেজ যাবে।";
+    var submit = $("forwardConfirm"); submit.disabled = true;
+    select.onchange = function () { var choice = select.options[select.selectedIndex]; submit.disabled = !select.value || !choice || choice.disabled; };
+    $("forwardDialog").showModal();
+  }
+  async function forwardMessage(source, target) {
+    var c = requireClient();
+    var body = String(source.body || "").trim();
+    if (!body) body = "📎 " + String(source.attachment_name || "সংযুক্ত ফাইল");
+    if (target.channel === "telegram") {
+      if (source.attachment_path) throw new Error("Telegram-এ ছবি/ফাইল forward করা এখনো সমর্থিত নয়; অন্য website chat বেছে নিন।");
+      var forwardedText = ("↗ ফরওয়ার্ড করা মেসেজ:\n" + body).slice(0, 2000);
+      var response = await c.functions.invoke("telegram-support/admin/reply", { body: { conversation_id: target.id, message: forwardedText } });
+      if (response.error) throw new Error("Telegram-এ forward করা যায়নি।");
+      return;
+    }
+    var newPath = "";
+    if (source.attachment_path) {
+      var downloaded = await c.storage.from(BUCKET).download(source.attachment_path);
+      if (downloaded.error || !downloaded.data) throw downloaded.error || new Error("সংযুক্ত ফাইল পড়া যায়নি।");
+      var extension = ({ "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif", "audio/webm": "webm", "audio/ogg": "ogg", "audio/mp4": "m4a", "audio/mpeg": "mp3", "audio/wav": "wav", "application/pdf": "pdf" })[source.attachment_mime] || "bin";
+      var uid = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : Date.now() + "-" + Math.random().toString(36).slice(2);
+      newPath = target.id + "/" + uid + "." + extension;
+      var uploaded = await c.storage.from(BUCKET).upload(newPath, downloaded.data, { contentType: source.attachment_mime || "application/octet-stream", upsert: false });
+      if (uploaded.error) throw uploaded.error;
+    }
+    var insert = { conversation_id: target.id, sender_id: agentUserId, sender_role: "agent", body: body.slice(0, 2000), forwarded_from_message_id: source.id };
+    if (newPath) { insert.attachment_path = newPath; insert.attachment_name = source.attachment_name; insert.attachment_mime = source.attachment_mime; }
+    var saved = await c.from("support_messages").insert(insert).select(messageColumns()).single();
+    if (saved.error) {
+      if (newPath) await c.storage.from(BUCKET).remove([newPath]);
+      throw saved.error;
+    }
+    refreshConversations();
+  }
+  async function cleanupDeletedAttachment(row) {
+    if (!row || !row.deleted_at || !row.attachment_path) return;
+    var result = await requireClient().storage.from(BUCKET).remove([row.attachment_path]);
+    if (result.error) throw result.error;
+    var finalized = await requireClient().rpc("support_agent_finalize_message_delete", { p_message_id: row.id });
+    if (finalized.error) throw finalized.error;
+    row.attachment_path = null; row.attachment_name = null; row.attachment_mime = null;
+    renderMessages(false); actionNotice("মেসেজটি মুছে ফেলা হয়েছে এবং সংযুক্তি পরিষ্কার হয়েছে।");
+  }
+  async function deleteMessage(row) {
+    if (!row || row.deleted_at) return;
+    var confirmText = "এই মেসেজটি সাপোর্ট ইনবক্সে ‘মুছে ফেলা হয়েছে’ হিসেবে দেখানো হবে। গ্রাহকও এই অবস্থাটি দেখবেন।";
+    if (row.attachment_path) confirmText += " সংযুক্তি ফাইলটিও পরিষ্কার করা হবে।";
+    if (selectedRow() && selectedRow().channel === "telegram") confirmText += " Telegram অ্যাপের আসল মেসেজ অক্ষত থাকবে।";
+    if (!window.confirm(confirmText + " চালিয়ে যাবেন?")) return;
+    var result = await requireClient().rpc("support_agent_mark_message_deleted", { p_message_id: row.id });
+    if (result.error) throw result.error;
+    row.deleted_at = new Date().toISOString(); row.body = "এই মেসেজটি মুছে ফেলা হয়েছে।";
+    await loadMessageActions(selectedId);
+    if (row.attachment_path) {
+      try { await cleanupDeletedAttachment(row); }
+      catch (_) { actionNotice("মেসেজটি মুছে গেছে, কিন্তু সংযুক্তি পরিষ্কার হয়নি। মেনু থেকে আবার চেষ্টা করুন।"); }
+    } else { renderMessages(false); actionNotice("মেসেজটি মুছে ফেলা হয়েছে।"); }
+  }
+  async function handleMessageAction(row, action) {
+    if (!row) return;
+    if (action === "info") { showMessageInfo(row); return; }
+    if (action === "reply") { beginReply(row); return; }
+    if (action === "copy") { await copyMessage(row); return; }
+    if (action === "download") { await downloadAttachment(row); return; }
+    if (action === "forward") { openForwardDialog(row); return; }
+    if (action === "pin") { await togglePin(row); actionNotice(conversationPin && conversationPin.message_id === row.id ? "মেসেজটি pin হয়েছে।" : "মেসেজটি unpin হয়েছে।"); return; }
+    if (action === "star") { await toggleStar(row); actionNotice(starredMessageIds[row.id] ? "মেসেজটি star করা হয়েছে।" : "Star সরানো হয়েছে।"); return; }
+    if (action === "delete") { await deleteMessage(row); return; }
+    if (action === "cleanup") { await cleanupDeletedAttachment(row); return; }
+  }
+  $("forwardCancel").addEventListener("click", function () { $("forwardDialog").close(); forwardSource = null; });
+  $("forwardCancelBottom").addEventListener("click", function () { $("forwardDialog").close(); forwardSource = null; });
+  $("forwardDialog").addEventListener("click", function (event) { if (event.target === this) { this.close(); forwardSource = null; } });
+  $("forwardDialog").addEventListener("close", function () { forwardSource = null; });
+  $("forwardConfirm").addEventListener("click", async function () {
+    if (!forwardSource) return;
+    var target = conversations.find(function (c) { return c.id === $("forwardTarget").value; });
+    if (!target || target.status === "closed" || (forwardSource.attachment_path && target.channel === "telegram")) { actionNotice("সমর্থিত খোলা কথোপকথন বেছে নিন।"); return; }
+    this.disabled = true;
+    try { await forwardMessage(forwardSource, target); $("forwardDialog").close(); forwardSource = null; actionNotice("মেসেজটি " + displayName(target) + " কথোপকথনে forward হয়েছে।"); }
+    catch (e) { actionNotice(e.message || "ফরোয়ার্ড করা যায়নি।"); }
+    finally { this.disabled = false; }
+  });
 
   /* ---------- admin menu (mobile) ---------- */
   function setMenu(open) { document.body.classList.toggle("menu-open", open); $("menuBtn").setAttribute("aria-expanded", open ? "true" : "false"); }
@@ -261,40 +547,42 @@
   }
 
   function renderMessages(stickToBottom) {
+    if (actionMenuEl) closeActionMenu(false);
     var box = $("messages");
     var prevHeight = box.scrollHeight, prevTop = box.scrollTop;
     box.textContent = "";
     if (threadHasOlder) {
       var older = make("button", "older-btn", "পুরোনো মেসেজ দেখুন");
-      older.type = "button";
-      older.addEventListener("click", loadOlder);
-      box.appendChild(older);
+      older.type = "button"; older.addEventListener("click", loadOlder); box.appendChild(older);
     }
     if (!threadRows.length) {
-      var welcome = make("div", "welcome-thread"); welcome.append(make("strong", "", "কথোপকথন শুরু হয়েছে"), document.createTextNode("এখনো কোনো মেসেজ নেই। উত্তর লিখে শুরু করুন।"));
+      var welcome = make("div", "welcome-thread"); welcome.append(make("strong", "", "কথোপকথন শুরু হয়েছে"), document.createTextNode("এখনো কোনো মেসেজ নেই। উত্তর লিখে শুরু করুন."));
       box.appendChild(welcome); return;
     }
     threadRows.forEach(function (row) {
       var bot = row.sender_role === "agent" && row.sender_external_id === "telegram-bot";
-      var bubble = make("div", "message " + (row.sender_role === "agent" ? "agent" : "customer") + (bot ? " bot" : ""));
+      var bubble = make("div", "message " + (row.sender_role === "agent" ? "agent" : "customer") + (bot ? " bot" : "") + (row.deleted_at ? " deleted-message" : ""));
+      bubble.dataset.messageId = row.id;
+      var trigger = make("button", "message-actions-trigger", "⋮"); trigger.type = "button"; trigger.setAttribute("aria-label", "মেসেজ অপশন"); trigger.setAttribute("aria-haspopup", "dialog");
+      trigger.addEventListener("click", function (event) { event.stopPropagation(); var r = trigger.getBoundingClientRect(); openActionMenu(row, r.right, r.bottom, trigger); });
+      bubble.appendChild(trigger);
       var label = bot ? "টেলিগ্রাম বট" : row.sender_role === "agent" ? "সাপোর্ট এজেন্ট" : "কাস্টমার";
       bubble.appendChild(make("div", "message-label", label));
-      bubble.appendChild(make("div", "message-body", row.body));
-      if (row.attachment_path) {
-        var mime = String(row.attachment_mime || "");
-        var fileName = String(row.attachment_name || "সংযুক্ত ফাইল");
-        var isCustomerImage = row.sender_role === "customer" && (mime.indexOf("image/") === 0 || !mime);
-        var media;
+      if (row.forwarded_from_message_id || String(row.body || "").indexOf("↗ ফরওয়ার্ড করা মেসেজ:") === 0) bubble.appendChild(make("div", "forwarded-label", "↗ ফরোয়ার্ড করা"));
+      if (row.reply_to_message_id) {
+        var quoted = threadRows.find(function (m) { return m.id === row.reply_to_message_id; });
+        var quote = make("div", "message-reply-quote"); quote.append(make("strong", "", "↩ উত্তর"), make("span", "", messageSummary(quoted).slice(0, 180))); bubble.appendChild(quote);
+      }
+      bubble.appendChild(make("div", "message-body", row.deleted_at ? "এই মেসেজটি মুছে ফেলা হয়েছে।" : row.body));
+      if (row.attachment_path && !row.deleted_at) {
+        var mime = String(row.attachment_mime || ""); var fileName = String(row.attachment_name || "সংযুক্ত ফাইল");
+        var isCustomerImage = row.sender_role === "customer" && (mime.indexOf("image/") === 0 || !mime); var media;
         if (mime.indexOf("image/") === 0 || !mime) { media = make("img"); media.alt = fileName; media.loading = "lazy"; }
         else if (mime.indexOf("audio/") === 0) { media = document.createElement("audio"); media.controls = true; media.preload = "metadata"; }
-        else { media = make("a", "file-attachment", "📄 " + fileName); media.target = "_blank"; media.rel = "noopener"; media.download = fileName; }
+        else { media = make("a", "file-attachment", "📄 " + fileName); media.target = "_blank"; media.rel = "noopener"; media.download = safeFilename(fileName); }
         if (isCustomerImage) {
-          media.classList.add("image-reply-target");
-          media.title = "ছবিতে ক্লিক করে ‘এই পণ্যটি নেই’ উত্তরটি তৈরি করুন";
-          media.addEventListener("click", function (event) {
-            event.preventDefault();
-            if (selectedId === row.conversation_id) insertReplyDraft(PRODUCT_UNAVAILABLE_REPLY);
-          });
+          media.classList.add("image-reply-target"); media.title = "ছবিতে ক্লিক করে ‘এই পণ্যটি নেই’ উত্তরটি তৈরি করুন";
+          media.addEventListener("click", function (event) { event.preventDefault(); if (selectedId === row.conversation_id) insertReplyDraft(PRODUCT_UNAVAILABLE_REPLY); });
         }
         signedUrl(row.attachment_path).then(function (url) {
           if (!url) { media.replaceWith(make("div", "message-label", "ফাইল লোড করা যায়নি")); return; }
@@ -306,25 +594,27 @@
         });
         bubble.appendChild(media);
         if (isCustomerImage) {
-          var unavailableButton = make("button", "image-reply-shortcut", "এই পণ্যটি নেই");
-          unavailableButton.type = "button";
+          var unavailableButton = make("button", "image-reply-shortcut", "এই পণ্যটি নেই"); unavailableButton.type = "button";
           unavailableButton.title = "উত্তরটি লেখার ঘরে বসবে; পাঠানোর আগে দেখে নিন";
           unavailableButton.disabled = row.conversation_id !== selectedId || (selectedRow() && selectedRow().status === "closed");
-          unavailableButton.addEventListener("click", function () {
-            if (selectedId === row.conversation_id) insertReplyDraft(PRODUCT_UNAVAILABLE_REPLY);
-          });
+          unavailableButton.addEventListener("click", function () { if (selectedId === row.conversation_id) insertReplyDraft(PRODUCT_UNAVAILABLE_REPLY); });
           bubble.appendChild(unavailableButton);
         }
       }
-      var time = make("time", "", formatTime(row.created_at)); time.dateTime = row.created_at || "";
-      bubble.appendChild(time);
-      box.appendChild(bubble);
+      var rowReactions = actionReactionRows.filter(function (r) { return r.message_id === row.id; });
+      var grouped = Object.create(null); rowReactions.forEach(function (r) { if (!grouped[r.emoji]) grouped[r.emoji] = { count: 0, mine: false }; grouped[r.emoji].count++; if (r.actor_id === agentUserId) grouped[r.emoji].mine = true; });
+      var reactionBar = make("div", "message-reactions");
+      Object.keys(grouped).forEach(function (emoji) { var chip = make("button", "message-reaction" + (grouped[emoji].mine ? " mine" : ""), emoji + " " + grouped[emoji].count); chip.type = "button"; chip.title = "রিঅ্যাকশন পরিবর্তন করতে ক্লিক করুন"; chip.addEventListener("click", function () { toggleMessageReaction(row, emoji).catch(function (e) { actionNotice(e.message || "রিঅ্যাকশন সেভ করা যায়নি।"); }); }); reactionBar.appendChild(chip); });
+      if (grouped && Object.keys(grouped).length) bubble.appendChild(reactionBar);
+      if (starredMessageIds[row.id]) bubble.appendChild(make("span", "message-starred", "★ Star"));
+      if (conversationPin && conversationPin.message_id === row.id) bubble.appendChild(make("span", "message-pinned", "⌖ Pinned"));
+      var time = make("time", "", formatTime(row.created_at)); time.dateTime = row.created_at || ""; bubble.appendChild(time); box.appendChild(bubble);
     });
     if (stickToBottom) box.scrollTop = box.scrollHeight;
     else box.scrollTop = box.scrollHeight - prevHeight + prevTop;
   }
 
-  function messageColumns() { return "id,conversation_id,sender_id,sender_role,sender_external_id,body,created_at,read_at" + (hasAttachmentColumn ? ",attachment_path,attachment_name,attachment_mime" : ""); }
+  function messageColumns() { return "id,conversation_id,sender_id,sender_role,sender_external_id,body,created_at,read_at,reply_to_message_id,forwarded_from_message_id,deleted_at" + (hasAttachmentColumn ? ",attachment_path,attachment_name,attachment_mime" : ""); }
   async function queryMessages(id, before) {
     var c = requireClient();
     var build = function () {
@@ -343,7 +633,9 @@
     var page = await queryMessages(id);
     if (id !== selectedId) return;
     threadRows = page.rows; threadHasOlder = page.more;
+    actionReactionRows = []; starredMessageIds = Object.create(null); conversationPin = null;
     renderMessages(true);
+    loadMessageActions(id).catch(function () { actionNotice("মেসেজ অ্যাকশন লোড করা যায়নি।"); });
     if (document.visibilityState === "visible") {
       await requireClient().from("support_messages").update({ read_at: new Date().toISOString() }).eq("conversation_id", id).eq("sender_role", "customer").is("read_at", null);
     }
@@ -388,6 +680,7 @@
   }
 
   async function selectConversation(id) {
+    closeActionMenu(false); clearReplyContext();
     selectedId = id;
     var row = selectedRow();
     if (row) row.unread_count = 0;
@@ -416,55 +709,57 @@
     if (inboxChannel) await c.removeChannel(inboxChannel);
     inboxChannel = c.channel("support-agent-inbox")
       .on("postgres_changes", { event: "*", schema: "public", table: "support_conversations" }, function () { refreshConversations(); })
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "support_messages" }, function (payload) {
-        var row = payload.new;
-        if (row) {
+      .on("postgres_changes", { event: "*", schema: "public", table: "support_messages" }, function (payload) {
+        var row = payload.new || payload.old;
+        if (payload.eventType === "INSERT" && row) {
           notifyIncomingMessage(row);
           if (row.conversation_id === selectedId && !threadRows.some(function (m) { return m.id === row.id; })) {
-            threadRows.push(row); renderMessages(true);
+            threadRows.push(row); renderMessages(true); loadMessageActions(selectedId).catch(function () {});
             if (row.sender_role === "customer") { $("typingLine").textContent = ""; if (document.visibilityState === "visible") requireClient().from("support_messages").update({ read_at: new Date().toISOString() }).eq("id", row.id).then(function () {}, function () {}); }
           }
+        } else if (payload.eventType === "UPDATE" && row && row.conversation_id === selectedId) {
+          var i = threadRows.findIndex(function (m) { return m.id === row.id; }); if (i >= 0) threadRows[i] = row;
+          if (row.deleted_at) delete previewCache[row.conversation_id];
+          renderMessages(false);
+          if (row.deleted_at && i >= 0) loadMessageActions(selectedId).catch(function () {});
+        } else if (payload.eventType === "DELETE" && row && row.conversation_id === selectedId) {
+          threadRows = threadRows.filter(function (m) { return m.id !== row.id; }); renderMessages(false); loadMessageActions(selectedId).catch(function () {});
         }
         refreshConversations();
       })
+      .on("postgres_changes", { event: "*", schema: "public", table: "support_message_reactions" }, function () { if (selectedId) loadMessageActions(selectedId).catch(function () {}); })
+      .on("postgres_changes", { event: "*", schema: "public", table: "support_message_stars" }, function () { if (selectedId) loadMessageActions(selectedId).catch(function () {}); })
+      .on("postgres_changes", { event: "*", schema: "public", table: "support_conversation_pins" }, function () { if (selectedId) loadMessageActions(selectedId).catch(function () {}); })
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "support_events" }, function (payload) { if (payload.new && payload.new.conversation_id === selectedId) loadEvents(selectedId).catch(function () {}); })
       .subscribe(function (status) { setConnected(status === "SUBSCRIBED", status === "SUBSCRIBED" ? "লাইভ" : "সংযোগ হচ্ছে…"); });
   }
 
   /* ---------- sending ---------- */
-  async function sendReply(body, attachmentPath) {
-    var row = selectedRow();
-    if (!row) return;
-    var c = requireClient();
+  async function sendReply(body, attachmentPath, replyingTo) {
+    var row = selectedRow(); if (!row) return;
+    var c = requireClient(); var output = body;
     if (row.channel === "telegram") {
-      // Telegram replies go through the Edge Function, which saves the message and delivers it to the bot chat.
-      var res = await c.functions.invoke("telegram-support/admin/reply", { body: { conversation_id: row.id, message: body } });
-      if (res.error) {
-        var detail = "";
-        try { detail = (await res.error.context.json()).error || ""; } catch (_) {}
-        throw new Error(detail || "টেলিগ্রামে পাঠানো যায়নি");
-      }
+      if (replyingTo) { var prefix = "↪ " + messageSummary(replyingTo).slice(0, 350) + "\n\n"; output = (prefix + body).slice(0, 2000); }
+      var res = await c.functions.invoke("telegram-support/admin/reply", { body: { conversation_id: row.id, message: output } });
+      if (res.error) { var detail = ""; try { detail = (await res.error.context.json()).error || ""; } catch (_) {} throw new Error(detail || "টেলিগ্রামে পাঠানো যায়নি"); }
       return;
     }
     var insert = { conversation_id: row.id, sender_id: agentUserId, sender_role: "agent", body: body };
     if (attachmentPath) insert.attachment_path = attachmentPath;
+    if (replyingTo && replyingTo.conversation_id === row.id) insert.reply_to_message_id = replyingTo.id;
     var result = await c.from("support_messages").insert(insert).select(messageColumns()).single();
     if (result.error) throw result.error;
-    if (result.data && !threadRows.some(function (m) { return m.id === result.data.id; })) { threadRows.push(result.data); renderMessages(true); }
+    if (result.data && !threadRows.some(function (m) { return m.id === result.data.id; })) { threadRows.push(result.data); renderMessages(true); loadMessageActions(selectedId).catch(function () {}); }
   }
   $("replyForm").addEventListener("submit", async function (event) {
-    event.preventDefault();
-    var body = $("replyInput").value.trim();
-    if (!body || !selectedId) return;
-    var button = $("sendBtn"); button.disabled = true;
+    event.preventDefault(); var body = $("replyInput").value.trim(); if (!body || !selectedId) return;
+    var button = $("sendBtn"); button.disabled = true; var target = replyTarget;
     try {
-      await sendReply(body);
-      $("replyInput").value = ""; autoGrow();
+      await sendReply(body, null, target); $("replyInput").value = ""; autoGrow(); clearReplyContext();
       if (selectedRow() && selectedRow().channel === "telegram") await loadThread(selectedId);
       refreshConversations();
-    } catch (error) {
-      alert("উত্তর পাঠানো যায়নি: " + (error && error.message ? error.message : "আবার চেষ্টা করুন।"));
-    } finally { button.disabled = false; $("replyInput").focus(); }
+    } catch (error) { alert("উত্তর পাঠানো যায়নি: " + (error && error.message ? error.message : "আবার চেষ্টা করুন।")); }
+    finally { button.disabled = false; $("replyInput").focus(); }
   });
   function autoGrow() { var t = $("replyInput"); t.style.height = "auto"; t.style.height = Math.min(140, t.scrollHeight) + "px"; }
   $("replyInput").addEventListener("input", function () { autoGrow(); sendTyping(); });
@@ -484,8 +779,8 @@
       var up = await requireClient().storage.from(BUCKET).upload(path, file, { contentType: file.type, upsert: false });
       if (up.error) throw up.error;
       var caption = $("replyInput").value.trim() || "📷 ছবি";
-      await sendReply(caption, path);
-      $("replyInput").value = ""; autoGrow();
+      await sendReply(caption, path, replyTarget);
+      $("replyInput").value = ""; autoGrow(); clearReplyContext();
       refreshConversations();
     } catch (error) {
       alert("ছবি পাঠানো যায়নি: " + (error && error.message ? error.message : "আবার চেষ্টা করুন।"));
