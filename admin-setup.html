@@ -26,7 +26,31 @@
 <meta name="theme-color" content="#1b2a41">
 <link rel="apple-touch-icon" href="/images/admin/admin-icon-192.png">
 <link rel="stylesheet" href="admin-wp.css?v=1">
-<style>.st-token-table{overflow-x:auto;margin:8px 0}.st-token-table table{border-collapse:collapse;width:100%;min-width:640px;font-size:13px}.st-token-table th,.st-token-table td{border:1px solid #dcdcde;padding:8px;text-align:left;vertical-align:top}.st-token-table th{background:#f6f7f7}.st-token-table code{font-size:12px}.st-howto{margin-top:10px}.st-howto summary{cursor:pointer;font-weight:600}.st-howto ol{margin:8px 0 0 18px;line-height:1.6}</style>
+<style>.st-token-table{overflow-x:auto;margin:8px 0}.st-token-table table{border-collapse:collapse;width:100%;min-width:640px;font-size:13px}.st-token-table th,.st-token-table td{border:1px solid #dcdcde;padding:8px;text-align:left;vertical-align:top}.st-token-table th{background:#f6f7f7}.st-token-table code{font-size:12px}.st-howto{margin-top:10px}.st-howto summary{cursor:pointer;font-weight:600}.st-howto ol{margin:8px 0 0 18px;line-height:1.6}
+.st-msgr-panel{overflow:hidden;border:1px solid #d8e2f0;background:linear-gradient(145deg,#fff 0%,#f8faff 100%)}
+.st-msgr-heading{display:flex;align-items:flex-start;gap:14px;margin-bottom:22px}
+.st-msgr-mark{width:48px;height:48px;flex:0 0 48px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(145deg,#0866ff,#7447e8);color:#fff;font-size:25px;font-weight:800;box-shadow:0 8px 20px #2868d52b}
+.st-msgr-eyebrow{display:block;margin:0 0 4px;color:#64748b;font-size:10px;font-weight:800;letter-spacing:1.25px}
+.st-msgr-heading h2{margin:0 0 6px}.st-msgr-heading .st-hint{margin:0;max-width:760px;line-height:1.65}
+.st-msgr-status-head,.st-msgr-form-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 11px}
+.st-msgr-status-head>span,.st-msgr-form-title>span{color:#64748b;font-size:12px}
+.st-msgr-grid{list-style:none!important;padding:0!important;margin:0 0 22px!important;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.st-msgr-card{display:flex;align-items:center;gap:11px;min-width:0;padding:13px;border:1px solid #e2e8f0;border-radius:13px;background:#fff}
+.st-msgr-avatar{width:38px;height:38px;flex:0 0 38px;border-radius:12px;display:grid;place-items:center;background:#edf3ff;color:#3159a8;font-size:13px;font-weight:800}
+.st-msgr-card-copy{min-width:0;flex:1}.st-msgr-card-copy strong{display:block;overflow-wrap:anywhere;font-size:13px;color:#17243a}
+.st-msgr-card-copy small{display:block;margin-top:3px;color:#718096;font-size:11px}
+.st-msgr-state{flex:0 0 auto;padding:5px 8px;border-radius:20px;font-size:10px;font-weight:700;background:#fff1f0;color:#b42318}
+.st-msgr-state.is-ok{background:#eaf8ef;color:#18794e}
+.st-msgr-form-wrap{padding:17px;border:1px solid #e0e7f0;border-radius:15px;background:#fff}
+.st-msgr-form{display:grid;grid-template-columns:minmax(180px,.8fr) minmax(220px,1.4fr) auto;align-items:end;gap:12px}
+.st-msgr-field{min-width:0;display:flex;flex-direction:column;gap:7px}.st-msgr-field label{font-size:12px;font-weight:700;color:#344054}
+.st-msgr-field input,.st-msgr-field select{width:100%;min-height:43px;border:1px solid #cbd5e1;border-radius:9px;padding:9px 11px;background:#fff;color:#17243a;font:inherit;box-sizing:border-box}
+.st-msgr-field input:focus,.st-msgr-field select:focus{outline:3px solid #2563eb24;border-color:#3677df}
+.st-msgr-field small{color:#718096;font-size:10px}.st-msgr-form .adm-btn{min-height:43px;white-space:nowrap}
+.st-msgr-security{display:flex;gap:8px;align-items:flex-start;margin-top:13px;color:#64748b;font-size:11px;line-height:1.55}
+.st-msgr-security strong{color:#344054}.st-msgr-panel .st-result{margin-top:12px}
+@media(max-width:760px){.st-msgr-form{grid-template-columns:1fr}.st-msgr-form .adm-btn{width:100%}.st-msgr-status-head,.st-msgr-form-title{align-items:flex-start;flex-direction:column;gap:3px}.st-msgr-heading{gap:10px}.st-msgr-mark{width:42px;height:42px;flex-basis:42px}}
+</style>
 </head>
 <body class="adm-body">
   <div class="adm-shell">
@@ -139,21 +163,34 @@
             </ol>
           </details>
         </section>
-        <section class="adm-panel" id="stMessengerTokens">
-          <h2>Messenger Page Access Token</h2>
-          <p class="st-hint">Facebook থেকে কপি করা Page Access Token এখানে পেস্ট করুন। সার্ভার Token-এর Page ID যাচাই করে Apps Script Script Properties-এ নিরাপদে রাখবে। Token কখনো আবার দেখানো হবে না।</p>
-          <ul class="st-list" id="stMessengerTokenStatus"><li class="st-empty">লোড হচ্ছে…</li></ul>
-          <form id="stMessengerTokenForm" autocomplete="off">
-            <label for="stMessengerPage">Facebook Page</label>
-            <select id="stMessengerPage" name="pageId" required>
-              <option value="381729145014885">Muslim Abaya</option>
-              <option value="964928770039259">Luxury Dress BD</option>
-              <option value="258170054039575">Luxury Dress</option>
-            </select>
-            <label for="stMessengerAccessToken">Page Access Token</label>
-            <input id="stMessengerAccessToken" name="accessToken" type="password" autocomplete="new-password" placeholder="Facebook Page Access Token পেস্ট করুন" required minlength="20" maxlength="5000">
-            <button type="submit" class="adm-btn adm-btn-primary" id="stMessengerTokenSave">Token যাচাই করে Save করুন</button>
-          </form>
+        <section class="adm-panel st-msgr-panel" id="stMessengerTokens">
+          <div class="st-msgr-heading">
+            <div class="st-msgr-mark" aria-hidden="true">M</div>
+            <div><span class="st-msgr-eyebrow">META · MESSENGER INTEGRATION</span><h2>Messenger Page Access Token</h2>
+              <p class="st-hint">প্রতিটি Facebook Page-এর Token আলাদাভাবে যাচাই ও সংরক্ষণ করুন। Token শুধু নিরাপদ Apps Script properties-এ থাকবে—এই পেজে কখনো প্রকাশ হবে না।</p></div>
+          </div>
+          <div class="st-msgr-status-head"><strong>আপনার সংযুক্ত Page</strong><span>৫টি Page · আলাদা Token</span></div>
+          <ul class="st-msgr-grid" id="stMessengerTokenStatus" aria-live="polite"><li class="st-empty">লোড হচ্ছে…</li></ul>
+          <div class="st-msgr-form-wrap">
+            <div class="st-msgr-form-title"><strong>নতুন Token যোগ / আপডেট</strong><span>Page নির্বাচন করে Token পেস্ট করুন</span></div>
+            <form id="stMessengerTokenForm" class="st-msgr-form" autocomplete="off">
+              <div class="st-msgr-field"><label for="stMessengerPage">Facebook Page</label>
+                <select id="stMessengerPage" name="pageId" required>
+                  <option value="381729145014885">Muslim Abaya</option>
+                  <option value="964928770039259">Luxury Dress BD</option>
+                  <option value="258170054039575">Luxury Dress</option>
+                  <option value="1373328422533938">Luluatun Noor</option>
+                  <option value="1343804848819482">Muslimabaya.com</option>
+                </select>
+              </div>
+              <div class="st-msgr-field st-msgr-token-field"><label for="stMessengerAccessToken">Page Access Token</label>
+                <input id="stMessengerAccessToken" name="accessToken" type="password" autocomplete="new-password" placeholder="Facebook Page Access Token পেস্ট করুন" required minlength="20" maxlength="5000" spellcheck="false">
+                <small>Meta-র Generate Access Token থেকে কপি করা সম্পূর্ণ Token দিন।</small>
+              </div>
+              <button type="submit" class="adm-btn adm-btn-primary" id="stMessengerTokenSave">✓ Token যাচাই করে Save করুন</button>
+            </form>
+          </div>
+          <div class="st-msgr-security"><span aria-hidden="true">🔒</span><span><strong>নিরাপদ সংরক্ষণ</strong> · Token সার্ভারে Page ID-এর সঙ্গে মিলিয়ে যাচাই হয়। ভুল Page-এর Token গ্রহণ করা হবে না।</span></div>
           <p class="st-result" id="stMessengerTokenResult" role="status" aria-live="polite"></p>
         </section>
         <section class="adm-panel">
@@ -175,7 +212,7 @@
   <script src="admin-api.js?v=2823eb7bcff4e142"></script>
   <script src="admin-guard.js?v=42341dd9adc288ea"></script>
   <script src="admin-page-shell.js?v=1"></script>
-  <script src="admin-setup.js?v=2"></script>
+  <script src="admin-setup.js?v=3"></script>
 <script src="admin-search.js?v=1" defer></script>
 <script src="admin-app.js?v=1" defer></script>
 <script src="admin-wp.js?v=1" defer></script>

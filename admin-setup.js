@@ -65,8 +65,11 @@
     var node = byId("stMessengerTokenStatus");
     if (!node) return;
     node.innerHTML = pages.map(function (p) {
-      return row(p.configured ? "ok" : "bad", p.name,
-        p.configured ? "Page Access Token সংরক্ষিত আছে" : "Token সংরক্ষিত নেই — নিচে যোগ করুন", "");
+      var name = String(p.name || "Facebook Page");
+      var initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(function (part) { return part.charAt(0); }).join("").toUpperCase();
+      return '<li class="st-msgr-card"><span class="st-msgr-avatar" aria-hidden="true">' + initials + '</span>' +
+        '<span class="st-msgr-card-copy"><strong>' + name + '</strong><small>ID: ' + String(p.id || "") + '</small></span>' +
+        '<span class="st-msgr-state' + (p.configured ? ' is-ok' : '') + '">' + (p.configured ? '✓ সংরক্ষিত' : 'Token নেই') + '</span></li>';
     }).join("") || '<li class="st-empty">Messenger Page-এর তথ্য পাওয়া যায়নি।</li>';
   }
 
