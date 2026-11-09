@@ -37,7 +37,9 @@
       var state = c.ok ? "ok" : c.partial ? "warn" : c.optional ? "off" : "bad";
       var detail = c.ok ? (c.detail || "সেট করা আছে") : (c.optional ? "ঐচ্ছিক · " : "") + (c.help || "সেট করা নেই");
       return row(state, c.label, detail, "");
-    }).join("");    loadCloudflareTokens();
+    }).join("");
+    renderMessengerTokenStatus(res.messengerPages || []);
+    loadCloudflareTokens();
   }
 
   // Secrets stored in Cloudflare (checked by /api/token-status): shown at the top of “সংযোগ”.
@@ -57,6 +59,40 @@
         list.insertAdjacentHTML("afterbegin", html.replace('<li class="', '<li data-cf-token="1" class="'));
       })
       .catch(function () {});
+  }
+
+  function renderMessengerTokenStatus(pages) {
+    var node = byId("stMessengerTokenStatus");
+    if (!node) return;
+    node.innerHTML = pages.map(function (p) {
+      return row(p.configured ? "ok" : "bad", p.name,
+        p.configured ? "Page Access Token সংরক্ষিত আছে" : "Token সংরক্ষিত নেই — নিচে যোগ করুন", "");
+    }).join("") || '<li class="st-empty">Messenger Page-এর তথ্য পাওয়া যায়নি।</li>';
+  }
+
+  function saveMessengerToken(event) {
+    event.preventDefault();
+    var tokenInput = byId("stMessengerAccessToken");
+    var token = tokenInput.value.trim();
+    var button = byId("stMessengerTokenSave");
+    var out = byId("stMessengerTokenResult");
+    if (!token) return;
+    button.disabled = true;
+    button.textContent = "যাচাই হচ্ছে…";
+    out.className = "st-result";
+    out.textContent = "";
+    MaAdmin.saveMessengerPageToken(byId("stMessengerPage").value, token).then(function (res) {
+      tokenInput.value = "";
+      out.className = "st-result is-ok";
+      out.textContent = "✓ " + (res.message || "Token যাচাই করে নিরাপদে সংরক্ষণ করা হয়েছে।");
+      load();
+    }).catch(function (err) {
+      out.className = "st-result is-bad";
+      out.textContent = "× " + String(err && err.message || err);
+    }).finally(function () {
+      button.disabled = false;
+      button.textContent = "Token যাচাই করে Save করুন";
+    });
   }
 
   function load() {
@@ -131,6 +167,9 @@
     var btn = event.target.closest("[data-action]");
     if (btn && !btn.disabled) runAction(btn);
   });
+
+  var messengerTokenForm = byId("stMessengerTokenForm");
+  if (messengerTokenForm) messengerTokenForm.addEventListener("submit", saveMessengerToken);
 
   MaAdminShell.start(function () { load(); });
 })();
