@@ -90,6 +90,16 @@ test('order intake serializes idempotency, rate limiting and duplicate checks wi
   assert.match(body, /sanitizeCellText_\(param_\(e, 'SpecialNotes'\) \|\| '', 1000\)/);
 });
 
+
+test('Messenger single-object attachments are labelled and persisted', () => {
+  const ctx = load(['msgrEventText_', 'msgrAttachments_']);
+  assert.equal(ctx.msgrEventText_({ message: { attachment: { type: 'image' } } }), '[image]');
+  assert.deepEqual(
+    JSON.parse(JSON.stringify(ctx.msgrAttachments_({ type: 'image', payload: { url: 'https://cdn.example.test/photo.jpg' } }))),
+    [{ type: 'image', url: 'https://cdn.example.test/photo.jpg' }]
+  );
+});
+
 test('Processing status is offered by the sheet, admin API and manual order form', () => {
   assert.match(fnSource('getOrderStatusOptions_'), /'Confirmed', 'Processing', 'Shipped'/);
   const admin = read('apps-script/AdminOrders.gs');
