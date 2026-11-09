@@ -81,4 +81,6 @@ test('Messenger Page token save is owner-only, Page-scoped, and never returns th
   assert.ok(fn.includes("setProperty('MSGR_PAGE_TOKEN_' + pageId, accessToken)"));
   assert.ok(!fn.includes('console.log(accessToken)'));
   assert.ok(code.includes("type === 'AdminMessengerTokenSave'"));
+  assert.ok(code.includes("'1373328422533938': 'Luluatun Noor'"));
+  assert.ok(code.includes("'1343804848819482': 'Muslimabaya.com'"));
 });
