@@ -64,13 +64,41 @@
   function renderMessengerTokenStatus(pages) {
     var node = byId("stMessengerTokenStatus");
     if (!node) return;
-    node.innerHTML = pages.map(function (p) {
+    node.textContent = "";
+    if (!pages.length) {
+      var empty = document.createElement("li");
+      empty.className = "st-empty";
+      empty.textContent = "Messenger Page-এর তথ্য পাওয়া যায়নি।";
+      node.appendChild(empty);
+      return;
+    }
+    pages.forEach(function (p) {
       var name = String(p.name || "Facebook Page");
+      var pageId = String(p.id == null ? "" : p.id);
       var initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(function (part) { return part.charAt(0); }).join("").toUpperCase();
-      return '<li class="st-msgr-card"><span class="st-msgr-avatar" aria-hidden="true">' + initials + '</span>' +
-        '<span class="st-msgr-card-copy"><strong>' + name + '</strong><small>ID: ' + String(p.id || "") + '</small></span>' +
-        '<span class="st-msgr-state' + (p.configured ? ' is-ok' : '') + '">' + (p.configured ? '✓ সংরক্ষিত' : 'Token নেই') + '</span></li>';
-    }).join("") || '<li class="st-empty">Messenger Page-এর তথ্য পাওয়া যায়নি।</li>';
+      var card = document.createElement("li");
+      card.className = "st-msgr-card";
+      var avatar = document.createElement("span");
+      avatar.className = "st-msgr-avatar";
+      avatar.setAttribute("aria-hidden", "true");
+      avatar.textContent = initials;
+      var copy = document.createElement("span");
+      copy.className = "st-msgr-card-copy";
+      var title = document.createElement("strong");
+      title.textContent = name;
+      var id = document.createElement("code");
+      id.className = "st-msgr-page-id";
+      id.textContent = "Page ID: " + pageId;
+      copy.appendChild(title);
+      copy.appendChild(id);
+      var state = document.createElement("span");
+      state.className = "st-msgr-state" + (p.configured ? " is-ok" : "");
+      state.textContent = p.configured ? "✓ সংরক্ষিত" : "Token নেই";
+      card.appendChild(avatar);
+      card.appendChild(copy);
+      card.appendChild(state);
+      node.appendChild(card);
+    });
   }
 
   function saveMessengerToken(event) {
