@@ -5438,7 +5438,7 @@ function messengerWebhook_(e) {
         } catch (lookupErr) {}
 
         try {
-          msgrRecordMessage_(pageId, String(psid), 'in', msgrEventText_(ev), (ev.message && ev.message.mid) ? String(ev.message.mid) : '', '', fromAd, ev.message && ev.message.attachments);
+          msgrRecordMessage_(pageId, String(psid), 'in', msgrEventText_(ev), (ev.message && ev.message.mid) ? String(ev.message.mid) : '', '', fromAd, ev.message && (ev.message.attachments && ev.message.attachments.length ? ev.message.attachments : ev.message.attachment));
         } catch (recErr) {}
 
         try {
@@ -5559,8 +5559,10 @@ function msgrFindContactRow_(values, pageId, psid) {
 function msgrEventText_(ev) {
   if (ev.message) {
     if (ev.message.text) return String(ev.message.text);
-    var atts = ev.message.attachments || (ev.message.attachment ? [ev.message.attachment] : []);
-    if (atts.length) return '[' + atts.map(function (a) { return a.type || 'attachment'; }).join(', ') + ']';
+    var atts = ev.message.attachments;
+    if (!atts || !atts.length) atts = ev.message.attachment || [];
+    if (!Array.isArray(atts)) atts = [atts];
+    if (atts.length) return '[' + atts.map(function (a) { return (a && a.type) || 'attachment'; }).join(', ') + ']';
     if (ev.message.sticker_id) return '[স্টিকার]';
     if (ev.message.quick_reply) return '[দ্রুত উত্তর]';
     // Keep a visible diagnostic instead of silently saving an empty "[message]".
@@ -5643,7 +5645,7 @@ function upsertMessengerContact_(sh, psid, fromAd) {
 
 function msgrAttachments_(items) {
   if (typeof items === 'string') { try { items = JSON.parse(items); } catch (e) { items = []; } }
-  if (items && !Array.isArray(items) && items.type) items = [items];
+  if (items && !Array.isArray(items)) items = [items];
   return (Array.isArray(items) ? items : []).slice(0, 20).map(function (a) {
     a = a || {};
     var payload = a.payload || {};
