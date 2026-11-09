@@ -1849,16 +1849,10 @@ function computeVerifiedOrderPricing_(cartItems, charge, couponCodeVal) {
 
 function handleOnlineOrderPost_(e) {
   var validated = validateOrderInput_(e);
-  // A retry of an order that was already saved (lost response, double tap, Worker re-send)
-  // gets the same order ID back instead of an error or a second order.
-  var alreadySavedId = findSavedOrderForEvent_(param_(e, 'EventID'), validated.phone);
-  if (alreadySavedId) {
-    return ContentService.createTextOutput('Success|' + alreadySavedId).setMimeType(ContentService.MimeType.TEXT);
-  }
+  // Keep the fast stock/blocked-phone checks outside the critical section.
+  // Idempotency + abuse counters are checked again under the same lock that writes the row.
   assertLiveStockAvailable_(validated.cartItems);
   if (isPhoneBlocked_(validated.phone)) throw new Error('ORDER_BLOCKED');
-  rateLimitOrder_(validated.phone);
-  checkDuplicateOrder_(validated.phone, validated.total, validated.design);
 
   var SHEET_NAME = 'Online Order';
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -1924,6 +1918,15 @@ function handleOnlineOrderPost_(e) {
   var newRow = 0;
   var reservedVariantCount = 0;
   try {
+    // Serialize retries and per-phone abuse counters with the actual sheet write.
+    // A second concurrent request sees the first request's saved EventID before it can append.
+    var alreadySavedId = findSavedOrderForEvent_(param_(e, 'EventID'), validated.phone);
+    if (alreadySavedId) {
+      return ContentService.createTextOutput('Success|' + alreadySavedId).setMimeType(ContentService.MimeType.TEXT);
+    }
+    rateLimitOrder_(validated.phone);
+    checkDuplicateOrder_(validated.phone, validated.total, validated.design);
+
     var uniqueOrderId = generateUniqueOrderId_(sheet, orderId);
     if (uniqueOrderId !== orderId) {
       if (trackingId === 'order_' + orderId) trackingId = 'order_' + uniqueOrderId;
@@ -1959,6 +1962,9 @@ function handleOnlineOrderPost_(e) {
       sourceVal,
       trackingId
     ]]);
+    // Persist the idempotency result before releasing the lock so concurrent retries
+    // cannot pass the lookup in the gap between the Sheet write and CacheService update.
+    rememberSavedOrderForEvent_(param_(e, 'EventID'), validated.phone, orderId);
   } catch (orderCreateErr) {
     if (newRow) {
       try { sheet.getRange(newRow, 1, 1, sheet.getLastColumn()).clearContent(); } catch (clearErr) {}
@@ -1970,8 +1976,6 @@ function handleOnlineOrderPost_(e) {
   } finally {
     orderLock.releaseLock();
   }
-  rememberSavedOrderForEvent_(param_(e, 'EventID'), validated.phone, orderId);
-
   // Server-side tracking: keep the shopper's IP + browser for the Purchase event that is
   // sent later, when the order is Confirmed. Never blocks the order.
   try { saveOnlineOrderTrackingClient_(sheet, newRow, param_(e, 'ClientIP'), param_(e, 'ClientUserAgent')); } catch (trackClientErr) {}
@@ -5427,7 +5431,7 @@ function messengerWebhook_(e) {
         } catch (lookupErr) {}
 
         try {
-          msgrRecordMessage_(pageId, String(psid), 'in', msgrEventText_(ev), (ev.message && ev.message.mid) ? String(ev.message.mid) : '', '', fromAd, ev.message && ev.message.attachments);
+          msgrRecordMessage_(pageId, String(psid), 'in', msgrEventText_(ev), (ev.message && ev.message.mid) ? String(ev.message.mid) : '', '', fromAd, ev.message && (ev.message.attachments && ev.message.attachments.length ? ev.message.attachments : ev.message.attachment));
         } catch (recErr) {}
 
         try {
@@ -5548,8 +5552,10 @@ function msgrFindContactRow_(values, pageId, psid) {
 function msgrEventText_(ev) {
   if (ev.message) {
     if (ev.message.text) return String(ev.message.text);
-    var atts = ev.message.attachments || (ev.message.attachment ? [ev.message.attachment] : []);
-    if (atts.length) return '[' + atts.map(function (a) { return a.type || 'attachment'; }).join(', ') + ']';
+    var atts = ev.message.attachments;
+    if (!atts || !atts.length) atts = ev.message.attachment || [];
+    if (!Array.isArray(atts)) atts = [atts];
+    if (atts.length) return '[' + atts.map(function (a) { return (a && a.type) || 'attachment'; }).join(', ') + ']';
     if (ev.message.sticker_id) return '[স্টিকার]';
     if (ev.message.quick_reply) return '[দ্রুত উত্তর]';
     // Keep a visible diagnostic instead of silently saving an empty "[message]".
@@ -5632,7 +5638,7 @@ function upsertMessengerContact_(sh, psid, fromAd) {
 
 function msgrAttachments_(items) {
   if (typeof items === 'string') { try { items = JSON.parse(items); } catch (e) { items = []; } }
-  if (items && !Array.isArray(items) && items.type) items = [items];
+  if (items && !Array.isArray(items)) items = [items];
   return (Array.isArray(items) ? items : []).slice(0, 20).map(function (a) {
     a = a || {};
     var payload = a.payload || {};

@@ -37,7 +37,7 @@ reverting this PR brings the site back to it.
 | `cart-utils.js` | `window.maOpenCheckoutPopup()`: loads the popup and the district/upazila lists on the first Order Now press. It starts the download on pointer-down. If loading fails, it calls the fallback. |
 | `category-renderer.js` | Buy Now builds the same cart line as Add to Cart, with the same variation and stock checks, and hands it to the popup (`shopPrepareDirectOrderLine`). The old route is kept as `shopGoToCheckoutWithLine`. The grid card's WhatsApp link is now a Buy Now button. The Related cards' link now points to the product page. |
 | `index-home-muslim-abaya.js`, `home-render.min.js` (rebuilt) | The home card's “অর্ডার করুন” now links to the product page instead of WhatsApp. |
-| `apps-script/Code.gs` | Order ID is checked against existing IDs, inside the order lock (`generateUniqueOrderId_`). A repeat of the same attempt (same EventID and same phone) returns the saved order ID instead of creating a second order or showing a duplicate error. This uses a 6-hour cache. The order note (`SpecialNotes`) is cleaned (`sanitizeCellText_`, 1000 characters). The **Processing** status is added to the sheet dropdown and to the stuck-order check. |
+| `apps-script/Code.gs` | Order ID is checked against existing IDs, inside the order lock (`generateUniqueOrderId_`). The EventID retry lookup, per-phone rate-limit counter, duplicate-signature guard, Sheet append and 6-hour idempotency-cache write now run under the same script lock. A concurrent retry with the same EventID and phone waits, then returns the saved order ID instead of appending a second row. Cache eviction still means the 6-hour cache is best-effort, not permanent idempotency. The order note (`SpecialNotes`) is cleaned (`sanitizeCellText_`, 1000 characters). The **Processing** status is added to the sheet dropdown and to the stuck-order check. |
 | `apps-script/AdminOrders.gs`, `admin-order-new.js` | **Processing** status in the admin order editor and the manual order form. |
 | `admin-dashboard-main.js`, `admin-dashboard-logic.js` | Processing is counted with Confirmed in the dashboard. |
 | `functions/_lib/gs-core.js`, `apps-script-copy.html` | Regenerated from the Apps Script sources (`build-gs-core.mjs`, `build-apps-script-copy.mjs`). |
@@ -65,7 +65,7 @@ These were run locally on 2026-11-02: a local static server with headless Chromi
 | 7 | Invalid mobile | `0171234` and `012…` refused; `+৮৮০ ১৮১২-৩৪৫৬৭৮` sent as `01812345678` | Pass |
 | 8 | Missing information | Every required field is marked; nothing is sent | Pass |
 | 9 | Out of stock | Buy Now disabled for an out-of-stock product; the server's OUT_OF_STOCK message is shown with no success screen | Pass |
-| 10 | Duplicate submission | Double tap and form re-submit while sending: 1 request. Backend test: the same EventID and phone return the saved ID | Pass |
+| 10 | Duplicate submission | Double tap and form re-submit while sending: 1 request. Backend contract verifies that concurrent retries serialize the EventID lookup, rate limit, duplicate check, row append and cache write under one script lock | Pass |
 | 11 | Network failure | Request aborted: clear message, no success; the retry sends the same EventID and succeeds | Pass |
 | 12 | Google Sheets submission | Mocked only. **Must be checked on the live site** (see Deployment) | Not run live |
 | 13 | Mobile and desktop | 360, 390 and 1280 px: the panel fits, no sideways scroll, button ≥ 48 px, inputs 16 px, Esc closes | Pass |

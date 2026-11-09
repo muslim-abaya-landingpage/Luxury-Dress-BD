@@ -71,15 +71,33 @@ test('same checkout attempt (EventID + phone) returns the saved order ID', () =>
   assert.equal(Object.keys(ctx.__store).length, 1);
 });
 
-test('order intake checks the saved attempt first and remembers it after the row is written', () => {
+test('order intake serializes idempotency, rate limiting and duplicate checks with the sheet write', () => {
   const body = fnSource('handleOnlineOrderPost_');
-  const check = body.indexOf('findSavedOrderForEvent_');
-  assert.ok(check > 0 && check < body.indexOf('assertLiveStockAvailable_'), 'retry check runs before stock/duplicate checks');
-  assert.ok(check < body.indexOf('checkDuplicateOrder_'));
+  const lock = body.indexOf('orderLock.waitLock');
+  const retry = body.indexOf('findSavedOrderForEvent_');
+  const rate = body.indexOf('rateLimitOrder_');
+  const duplicate = body.indexOf('checkDuplicateOrder_');
+  const append = body.indexOf('appendOnlineOrderRowLocked_');
+  const remember = body.indexOf('rememberSavedOrderForEvent_');
+  const release = body.indexOf('orderLock.releaseLock');
+
+  assert.ok(lock > 0 && lock < retry, 'idempotency lookup runs under the order lock');
+  assert.ok(retry < rate && rate < duplicate, 'retry lookup happens before counters and duplicate guard');
+  assert.ok(duplicate < append, 'duplicate guard runs before a row is appended');
+  assert.ok(append < remember && remember < release, 'saved EventID is cached before releasing the order lock');
   const unique = body.indexOf('generateUniqueOrderId_');
-  assert.ok(unique > body.indexOf('orderLock.waitLock') && unique < body.indexOf('reserveStockForOrderItems_'), 'unique ID picked inside the order lock');
-  assert.ok(body.indexOf('rememberSavedOrderForEvent_') > body.indexOf('orderLock.releaseLock'));
+  assert.ok(unique > lock && unique < append, 'unique ID picked inside the order lock');
   assert.match(body, /sanitizeCellText_\(param_\(e, 'SpecialNotes'\) \|\| '', 1000\)/);
+});
+
+
+test('Messenger single-object attachments are labelled and persisted', () => {
+  const ctx = load(['msgrEventText_', 'msgrAttachments_']);
+  assert.equal(ctx.msgrEventText_({ message: { attachment: { type: 'image' } } }), '[image]');
+  assert.deepEqual(
+    JSON.parse(JSON.stringify(ctx.msgrAttachments_({ type: 'image', payload: { url: 'https://cdn.example.test/photo.jpg' } }))),
+    [{ type: 'image', url: 'https://cdn.example.test/photo.jpg' }]
+  );
 });
 
 test('Processing status is offered by the sheet, admin API and manual order form', () => {
