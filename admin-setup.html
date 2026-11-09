@@ -139,6 +139,23 @@
             </ol>
           </details>
         </section>
+        <section class="adm-panel" id="stMessengerTokens">
+          <h2>Messenger Page Access Token</h2>
+          <p class="st-hint">Facebook থেকে কপি করা Page Access Token এখানে পেস্ট করুন। সার্ভার Token-এর Page ID যাচাই করে Apps Script Script Properties-এ নিরাপদে রাখবে। Token কখনো আবার দেখানো হবে না।</p>
+          <ul class="st-list" id="stMessengerTokenStatus"><li class="st-empty">লোড হচ্ছে…</li></ul>
+          <form id="stMessengerTokenForm" autocomplete="off">
+            <label for="stMessengerPage">Facebook Page</label>
+            <select id="stMessengerPage" name="pageId" required>
+              <option value="381729145014885">Muslim Abaya</option>
+              <option value="964928770039259">Luxury Dress BD</option>
+              <option value="258170054039575">Luxury Dress</option>
+            </select>
+            <label for="stMessengerAccessToken">Page Access Token</label>
+            <input id="stMessengerAccessToken" name="accessToken" type="password" autocomplete="new-password" placeholder="Facebook Page Access Token পেস্ট করুন" required minlength="20" maxlength="5000">
+            <button type="submit" class="adm-btn adm-btn-primary" id="stMessengerTokenSave">Token যাচাই করে Save করুন</button>
+          </form>
+          <p class="st-result" id="stMessengerTokenResult" role="status" aria-live="polite"></p>
+        </section>
         <section class="adm-panel">
           <h2>টেস্ট</h2>
           <div class="st-tests">
