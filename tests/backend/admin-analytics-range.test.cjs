@@ -112,6 +112,7 @@ test('lifetime analytics includes all dated and undated orders and groups valid 
   assert.deepEqual(Array.from(result.salesByMonth, row => row.month), ['2025-12', '2026-10']);
   assert.equal(result.salesByMonth[1].deliveredOrders, 1);
   assert.equal(result.summary.pendingCount, 1);
+  assert.equal(result.summary.confirmedCount, 2);
   assert.equal(result.summary.customerCount, 5);
   assert.equal(result.summary.repeatCustomerCount, 0);
   assert.deepEqual(Array.from(result.topProducts, product => [product.productId, product.qty]), [['p2', 4], ['p1', 3]]);
