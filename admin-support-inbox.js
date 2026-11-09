@@ -15,6 +15,7 @@
     "দুঃখিত, এই সাইজ/কালার এখন স্টকে নেই। বিকল্প দেখাতে পারি?",
     "ধন্যবাদ! আর কোনো প্রশ্ন থাকলে জানাবেন।"
   ];
+  var PRODUCT_UNAVAILABLE_REPLY = "দুঃখিত, ছবির এই পণ্যটি বর্তমানে আমাদের কাছে নেই। এটি সংগ্রহ করে দেওয়ার ব্যবস্থাও আপাতত নেই।";
   var STATUS_BN = { open: "খোলা", pending: "অপেক্ষমাণ", closed: "বন্ধ" };
   var CHANNEL_BN = { website: "ওয়েবসাইট", telegram: "টেলিগ্রাম" };
 
@@ -50,6 +51,13 @@
     return client;
   }
   function selectedRow() { return conversations.find(function (c) { return c.id === selectedId; }) || null; }
+  function insertReplyDraft(text) {
+    var input = $("replyInput");
+    if (!input || input.disabled || !selectedId) return;
+    input.value = input.value ? input.value.replace(/\s*$/, "\n") + text : text;
+    autoGrow();
+    input.focus();
+  }
   function displayName(c) {
     if (!c) return "কথোপকথন";
     if (c.customer_name) return c.customer_name;
@@ -275,10 +283,19 @@
       if (row.attachment_path) {
         var mime = String(row.attachment_mime || "");
         var fileName = String(row.attachment_name || "সংযুক্ত ফাইল");
+        var isCustomerImage = row.sender_role === "customer" && (mime.indexOf("image/") === 0 || !mime);
         var media;
         if (mime.indexOf("image/") === 0 || !mime) { media = make("img"); media.alt = fileName; media.loading = "lazy"; }
         else if (mime.indexOf("audio/") === 0) { media = document.createElement("audio"); media.controls = true; media.preload = "metadata"; }
         else { media = make("a", "file-attachment", "📄 " + fileName); media.target = "_blank"; media.rel = "noopener"; media.download = fileName; }
+        if (isCustomerImage) {
+          media.classList.add("image-reply-target");
+          media.title = "ছবিতে ক্লিক করে ‘এই পণ্যটি নেই’ উত্তরটি তৈরি করুন";
+          media.addEventListener("click", function (event) {
+            event.preventDefault();
+            if (selectedId === row.conversation_id) insertReplyDraft(PRODUCT_UNAVAILABLE_REPLY);
+          });
+        }
         signedUrl(row.attachment_path).then(function (url) {
           if (!url) { media.replaceWith(make("div", "message-label", "ফাইল লোড করা যায়নি")); return; }
           var nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 160;
@@ -288,6 +305,16 @@
           if (media.tagName === "IMG") { var link = make("a"); link.href = url; link.target = "_blank"; link.rel = "noopener"; media.replaceWith(link); link.appendChild(media); }
         });
         bubble.appendChild(media);
+        if (isCustomerImage) {
+          var unavailableButton = make("button", "image-reply-shortcut", "এই পণ্যটি নেই");
+          unavailableButton.type = "button";
+          unavailableButton.title = "উত্তরটি লেখার ঘরে বসবে; পাঠানোর আগে দেখে নিন";
+          unavailableButton.disabled = row.conversation_id !== selectedId || (selectedRow() && selectedRow().status === "closed");
+          unavailableButton.addEventListener("click", function () {
+            if (selectedId === row.conversation_id) insertReplyDraft(PRODUCT_UNAVAILABLE_REPLY);
+          });
+          bubble.appendChild(unavailableButton);
+        }
       }
       var time = make("time", "", formatTime(row.created_at)); time.dateTime = row.created_at || "";
       bubble.appendChild(time);
