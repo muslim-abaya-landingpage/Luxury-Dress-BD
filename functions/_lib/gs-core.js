@@ -5499,7 +5499,9 @@ var MSGR_MSG_SHEET = 'MessengerMessages';
 var MSGR_PAGES = {
   '964928770039259': 'Luxury Dress BD',
   '381729145014885': 'Muslim Abaya',
-  '258170054039575': 'Luxury Dress'
+  '258170054039575': 'Luxury Dress',
+  '1373328422533938': 'Luluatun Noor',
+  '1343804848819482': 'Muslimabaya.com'
 };
 var MSGR_STATUSES = ['নতুন', 'দাম জিজ্ঞেস', 'অর্ডার কনফার্ম', 'ডেলিভারি হয়েছে', 'বাতিল'];
 var MSGR_CONFIRMED_STATUS = 'অর্ডার কনফার্ম';
@@ -8760,5 +8762,5 @@ function adminCouponCheck_(e) {
   return res.ok ? { ok: true, discount: res.discount, message: res.message } : { ok: false, error: res.error, message: res.message };
 }
 
-  return { verifyAdminSessionUncached_: verifyAdminSessionUncached_, verifyAdminSession_: verifyAdminSession_, requireOwnerAdmin_: requireOwnerAdmin_, param_: param_, adminOrderList_: adminOrderList_, adminOrderGet_: adminOrderGet_, listAdminOrders_: listAdminOrders_, adminFraudCheck_: adminFraudCheck_, adminStaffList_: adminStaffList_, adminCustomerLookup_: adminCustomerLookup_, getAdminStockVariants_: getAdminStockVariants_, getAdminAnalyticsV2_: getAdminAnalyticsV2_, inboxList_: inboxList_, inboxThread_: inboxThread_, getAdminStockLedger_: getAdminStockLedger_, getAdminGrowthData_: getAdminGrowthData_ };
+  return { verifyAdminSessionUncached_, verifyAdminSession_, requireOwnerAdmin_, param_, adminOrderList_, adminOrderGet_, listAdminOrders_, adminFraudCheck_, adminStaffList_, adminCustomerLookup_, getAdminStockVariants_, getAdminAnalyticsV2_, inboxList_, inboxThread_, getAdminStockLedger_, getAdminGrowthData_ };
 }
