@@ -75,6 +75,7 @@ test('lifetime analytics includes all dated and undated orders and groups valid 
   const rows = [Array(37).fill('header'),
     makeRow({ time: '15-12-2025 10:00:00', name: 'A', phone: '01000000001', total: 1000, status: 'Confirmed', cart: [{ id: 'p1', name: 'Abaya', qty: 1 }] }),
     makeRow({ time: '17-10-2026 11:00:00', name: 'B', phone: '01000000002', total: 1200, status: 'delivered', cart: [{ id: 'p1', name: 'Abaya', qty: 2 }], sourceName: 'Facebook' }),
+    makeRow({ time: '16-10-2026 09:00:00', name: 'Processing', phone: '01000000006', total: 800, status: 'Processing', cart: [{ id: 'p2', name: 'Processing Abaya', qty: 4 }] }),
     makeRow({ time: '', name: 'C', phone: '01000000003', total: 500, status: 'Pending' }),
     makeRow({ time: '19-10-2026 11:00:00', name: 'Future', phone: '01000000004', total: 900, status: 'Pending' }),
     makeRow({ time: '17-10-2026 11:00:00', name: '', phone: '', total: 400, status: 'Pending' }),
@@ -103,16 +104,17 @@ test('lifetime analytics includes all dated and undated orders and groups valid 
   vm.runInNewContext(helpers[0] + '\n' + signedAmount[0] + '\n' + analytics[0] + '\nthis.runAnalytics = getAdminAnalyticsV2_;', testSandbox);
   const result = testSandbox.runAnalytics({ Token: 'valid', Range: 'all' });
   assert.equal(result.ok, true);
-  assert.equal(result.summary.totalOrders, 4);
-  assert.equal(result.summary.totalOrderValue, 2600);
+  assert.equal(result.summary.totalOrders, 5);
+  assert.equal(result.summary.totalOrderValue, 3400);
   assert.equal(result.summary.deliveredCount, 1);
   assert.equal(result.summary.deliveredSalesValue, 1200);
   assert.equal(result.undatedOrderCount, 1);
   assert.deepEqual(Array.from(result.salesByMonth, row => row.month), ['2025-12', '2026-10']);
   assert.equal(result.salesByMonth[1].deliveredOrders, 1);
   assert.equal(result.summary.pendingCount, 1);
-  assert.equal(result.summary.customerCount, 4);
+  assert.equal(result.summary.customerCount, 5);
   assert.equal(result.summary.repeatCustomerCount, 0);
+  assert.deepEqual(Array.from(result.topProducts, product => [product.productId, product.qty]), [['p2', 4], ['p1', 3]]);
 });
 
 test('this-month range starts on the 1st of the Bangladesh month', () => {
