@@ -68,6 +68,18 @@ test('clean start screen: heading, one line and the message box only (no quick-t
   await expect(page.locator('.ma-chat-alt')).toBeHidden();
   await expect(page.locator('.ma-chat-attach')).toBeVisible();
   await expect(page.locator('.ma-chat-verified')).toHaveText('✓');
+  const send = page.locator('.ma-chat-send');
+  const composerInput = page.locator('.ma-chat-input');
+  await expect(send).toHaveAttribute('aria-disabled', 'true');
+  await expect(send).toHaveClass(/is-disabled/);
+  await expect(send.locator('svg')).toHaveAttribute('stroke', 'currentColor');
+  await expect(composerInput).toHaveCSS('background-color', 'rgb(245, 245, 244)');
+  await expect(page.locator('.ma-chat-note')).toHaveCSS('font-size', '10px');
+  await composerInput.fill('Hello Muslim Abaya');
+  await expect(send).toHaveAttribute('aria-disabled', 'false');
+  await expect(send).not.toHaveClass(/is-disabled/);
+  await composerInput.fill('');
+  await expect(send).toHaveAttribute('aria-disabled', 'true');
 });
 
 test('message delete and clear only hide local history; support-team records remain', async ({ page }) => {
