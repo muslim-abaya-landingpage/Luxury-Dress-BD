@@ -642,7 +642,7 @@
       // read_at is written by the recipient: customer reads agent messages, agent reads customer messages.
       if (row.sender_role === "agent" && row.sender_external_id !== "telegram-bot") {
         var receipt = make("div", "message-receipt" + (row.read_at ? " is-seen" : ""), "");
-        receipt.append(make("span", "receipt-check", row.read_at ? "✓✓" : "✓"), document.createTextNode(row.read_at ? " Seen" : " Sent"));
+        receipt.append(make("span", "receipt-check", row.read_at ? "✓✓" : "✓"), document.createTextNode(row.read_at ? " Seen" : " Sent · Unseen"));
         if (row.read_at) receipt.title = "কাস্টমার " + new Date(row.read_at).toLocaleString("bn-BD") + " সময়ে মেসেজটি দেখেছেন";
         bubble.appendChild(receipt);
       }
