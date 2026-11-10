@@ -2,12 +2,23 @@
 // stays visible above the site's sticky header on mobile. Live chat backend is blocked here.
 const { test, expect } = require('@playwright/test');
 
+async function waitForChatDrawer(page) {
+  const panel = page.locator('#maChatPanel');
+  await expect(panel).toHaveClass(/is-open/);
+  // The panel intentionally slides in; wait until its transform finishes before
+  // checking hit targets or viewport bounds (class visibility alone is immediate).
+  await expect.poll(() => panel.evaluate((el) => {
+    const box = el.getBoundingClientRect();
+    return box.left >= -0.5 && box.right <= window.innerWidth + 0.5;
+  })).toBe(true);
+}
+
 async function openChat(page) {
   await page.route('https://cdn.jsdelivr.net/**', (r) => r.abort());
   await page.goto('/index.html');
   await page.waitForSelector('#maChatFab', { timeout: 20000 });
   await page.click('#maChatFab');
-  await expect(page.locator('#maChatPanel')).toHaveClass(/is-open/);
+  await waitForChatDrawer(page);
 }
 
 async function openChatWithMockHistory(page) {
@@ -49,7 +60,7 @@ async function openChatWithMockHistory(page) {
   await page.goto('/index.html');
   await page.waitForSelector('#maChatFab', { timeout: 20000 });
   await page.click('#maChatFab');
-  await expect(page.locator('#maChatPanel')).toHaveClass(/is-open/);
+  await waitForChatDrawer(page);
   await expect(page.locator('.ma-chat-transcript .ma-chat-message')).toHaveCount(2);
 }
 
