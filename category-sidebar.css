@@ -2987,3 +2987,14 @@ body.pqv-sc-open {
   .pqv-size-grid[data-cols="3"] .pqv-field-label { font-size: 9.5px; letter-spacing: .03em; min-height: 2.5em; }
   .pqv-options .pqv-size-grid .pqv-field .pqv-opt-btn { min-width: 42px; height: 36px; min-height: 36px; padding: 0 11px; font-size: 12.5px; }
 }
+
+/* Final mobile guarantee: every category uses a two-column product grid on phones,
+   including narrow 320px screens and categories whose own rules were added later. */
+@media (max-width: 600px) {
+  .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .product-grid > * {
+    min-width: 0;
+  }
+}
