@@ -19,6 +19,27 @@ for(const [cat,rows] of Object.entries(cats))for(const p of rows){
   assert(html.includes('data-product-id="'+p.id+'"'));
   assert(html.includes('data-shop-category="'+cat+'"'));
   assert(html.includes('<h1>'));
+  const metaValue = (attr, key) => {
+    const tags = html.match(new RegExp('<meta\\\\s+' + attr + '=["\\\\']' + key + '["\\\\'][^>]*>', 'gi')) || [];
+    assert.equal(tags.length, 1, p.id + ' must have exactly one ' + attr + '=' + key);
+    const content = /\\\\bcontent=["\\\\']([^"\\\\']*)["\\\\']/i.exec(tags[0]);
+    assert(content, p.id + ' ' + key + ' must have a content value');
+    return content[1];
+  };
+  const expectedTitle = String(p.seoTitle || '').trim() || `${p.name} | Muslim Abaya Bangladesh`;
+  const expectedDescription = String(p.seoDescription || '').trim() || `${p.name} — ${p.fabric || 'modest fashion'}. ${p.detailNote || ''} Price ৳${p.price}. Cash on delivery in Bangladesh.`.trim();
+  const expectedImageRaw = [p.image].concat(Array.isArray(p.images) ? p.images : []).filter(Boolean)[0] || '';
+  const expectedImage = /^https?:\\\\/\\\\//.test(expectedImageRaw) ? expectedImageRaw : 'https://muslimabaya.com/' + expectedImageRaw.replace(/^\\\\//, '');
+  assert.equal(metaValue('property', 'og:site_name'), 'Muslim Abaya');
+  assert.equal(metaValue('property', 'og:locale'), 'bn_BD');
+  assert.equal(metaValue('property', 'og:title'), expectedTitle.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])));
+  assert.equal(metaValue('property', 'og:description'), expectedDescription.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])));
+  assert.equal(metaValue('property', 'og:url'), url);
+  assert.equal(metaValue('property', 'og:image'), expectedImage);
+  assert.equal(metaValue('name', 'twitter:card'), 'summary_large_image');
+  assert.equal(metaValue('name', 'twitter:title'), metaValue('property', 'og:title'));
+  assert.equal(metaValue('name', 'twitter:description'), metaValue('property', 'og:description'));
+  assert.equal(metaValue('name', 'twitter:image'), expectedImage);
   assert(!/\b(?:src|href)="(?:site-|product-|category-|images\/)/.test(html));
   const data=[...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(m=>JSON.parse(m[1]));
   const product=data.find(d=>d['@type']==='Product');
