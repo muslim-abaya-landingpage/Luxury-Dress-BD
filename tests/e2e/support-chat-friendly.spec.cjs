@@ -199,3 +199,31 @@ test('chat panel: compact box on desktop, full screen that fits the visible area
     expect(row.scrollWidth).toBeLessThanOrEqual(row.width);
   }
 });
+
+
+test('product message opens internal chat with the selected product context', async ({ page }) => {
+  await openChat(page);
+  const opened = await page.evaluate(() => window.maOpenProductChat({
+    id: 'ABY-TEST-01',
+    name: 'Premium Test Abaya',
+    price: 1250,
+    quantity: 2,
+    image: 'https://muslimabaya.com/images/test-abaya.webp',
+    size: '54',
+    color: 'Black',
+    variant: 'Full Set',
+    url: 'https://muslimabaya.com/product/ABY-TEST-01'
+  }));
+  expect(opened).toBe(true);
+  await expect(page.locator('#maChatPanel')).toHaveClass(/is-open/);
+  const card = page.locator('.ma-chat-product-context');
+  await expect(card).toBeVisible();
+  await expect(card).toContainText('Premium Test Abaya');
+  await expect(card).toContainText('৳1,250');
+  await expect(card).toContainText('54');
+  await expect(card).toContainText('Black');
+  await expect(card.locator('img')).toHaveAttribute('src', 'https://muslimabaya.com/images/test-abaya.webp');
+  await expect(card.getByRole('link', { name: 'পণ্য দেখুন' })).toHaveAttribute('href', 'https://muslimabaya.com/product/ABY-TEST-01');
+  await expect(page.locator('.ma-chat-input')).toContainText('');
+  await expect(page.locator('.ma-chat-input')).toHaveValue(/এই পণ্যটি সম্পর্কে জানতে চাই/);
+});
