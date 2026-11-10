@@ -169,7 +169,7 @@
     ".ma-chat-contact{grid-template-columns:1fr;gap:7px;padding:12px;background:#fffdf7}.ma-chat-contact label{display:block;margin:0 0 -4px;color:#5d5546;font-size:12px;font-weight:650}.ma-chat-contact input{box-sizing:border-box;width:100%;min-height:42px;padding:9px 11px;font-size:14px}.ma-chat-contact .ma-contact-actions{justify-content:space-between}.ma-chat-contact button{min-height:40px;padding:0 14px;font-size:13px}" +
     ".ma-chat-contact button[type=submit]{background:#117a3f;border-color:#117a3f}" +
     ".ma-chat-clear-local{display:inline-flex;align-items:center;justify-content:center;gap:6px;margin:0 0 7px auto;padding:6px 10px;border:1px solid #e6dfd2;border-radius:999px;background:#fff;color:#765d30;font:600 11px system-ui;cursor:pointer}.ma-chat-clear-local:hover{border-color:#b69655;background:#fffaf0}.ma-chat-clear-local:focus-visible{outline:2px solid #b69655;outline-offset:2px}.ma-chat-clear-local[hidden]{display:none!important}" +
-    ".ma-chat-message-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:5px}.ma-chat-message time{display:block;margin:0;font-size:10px;opacity:.68}.ma-chat-message-remove{border:0;border-radius:6px;padding:2px 5px;background:transparent;color:inherit;font:600 10px system-ui;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;opacity:.76}.ma-chat-message-remove:hover,.ma-chat-message-remove:focus-visible{opacity:1;background:rgba(0,0,0,.07);outline:2px solid #b69655;outline-offset:1px}.ma-chat-message.is-customer .ma-chat-message-remove:hover{background:rgba(255,255,255,.13)}" +
+    ".ma-chat-message-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:5px}.ma-chat-message time{display:block;margin:0;font-size:10px;opacity:.68}.ma-chat-receipt{margin-left:auto;font-size:10px;color:#777;white-space:nowrap}.ma-chat-receipt.is-seen{color:#147b48;font-weight:700}.ma-chat-message-remove{border:0;border-radius:6px;padding:2px 5px;background:transparent;color:inherit;font:600 10px system-ui;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;opacity:.76}.ma-chat-message-remove:hover,.ma-chat-message-remove:focus-visible{opacity:1;background:rgba(0,0,0,.07);outline:2px solid #b69655;outline-offset:1px}.ma-chat-message.is-customer .ma-chat-message-remove:hover{background:rgba(255,255,255,.13)}" +
     ".ma-chat-local-dialog{box-sizing:border-box;width:min(340px,calc(100vw - 36px));max-width:340px;margin:auto;padding:18px;border:1px solid #e6dcc8;border-radius:18px;background:#fffdf8;color:#211f1a;box-shadow:0 18px 50px rgba(0,0,0,.25);font:14px/1.55 'Hind Siliguri',system-ui,sans-serif}.ma-chat-local-dialog::backdrop{background:rgba(17,17,17,.42)}.ma-chat-local-dialog h3{margin:0;color:#201e19;font-size:16px;line-height:1.35}.ma-chat-local-dialog p{margin:8px 0 16px;color:#665d4d;font-size:13px}.ma-chat-local-dialog-actions{display:flex;justify-content:flex-end;gap:8px}.ma-chat-local-dialog button{min-height:38px;padding:0 12px;border:1px solid #ded8cb;border-radius:10px;background:#fff;color:#3d3931;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}.ma-chat-local-dialog button:focus-visible{outline:2px solid #b69655;outline-offset:2px}.ma-chat-local-dialog .ma-chat-local-dialog-confirm{border-color:#171717;background:#171717;color:#fff}" +
     "@media (prefers-reduced-motion:reduce){.ma-chat-fab,.ma-chat-chip{transition:none}}" +
     /* ---- Clean layout (white header, quiet start screen, round input) ---- */
@@ -708,7 +708,14 @@
       removeMessage.addEventListener("click", function () {
         requestLocalAction("মেসেজটি সরাবেন?", "এটি শুধু এই ব্রাউজারের চ্যাট থেকে সরবে। সাপোর্ট টিমের কাছে আসল মেসেজ ও সংযুক্তির কপি থাকবে।", "এই ডিভাইস থেকে সরান", function () { hideMessageLocally(row, bubble); });
       });
-      messageFooter.append(time, removeMessage);
+      messageFooter.append(time);
+      if (row.sender_role === "customer") {
+        var receipt = el("span", "ma-chat-receipt" + (row.read_at ? " is-seen" : ""), row.read_at ? "✓✓ সাপোর্ট টিম দেখেছেন" : "✓ পাঠানো হয়েছে");
+        receipt.setAttribute("data-message-receipt", "true");
+        if (row.read_at) receipt.title = "সাপোর্ট টিম " + new Date(row.read_at).toLocaleString("bn-BD") + " সময়ে মেসেজটি দেখেছেন";
+        messageFooter.appendChild(receipt);
+      }
+      messageFooter.appendChild(removeMessage);
       bubble.appendChild(messageFooter);
       transcript.appendChild(bubble);
       body.classList.add("has-conversation");
@@ -837,7 +844,16 @@
         .on("postgres_changes", {
           event: "INSERT", schema: "public", table: "support_messages",
           filter: "conversation_id=eq." + conversationId
-        }, function (payload) { appendMessage(payload.new); })
+        }, function (payload) {
+          var row = payload && payload.new;
+          if (!row) return;
+          appendMessage(row);
+          if (row.sender_role === "agent" && row.read_at == null) {
+            client.from("support_messages").update({ read_at: new Date().toISOString() })
+              .eq("id", row.id).eq("sender_role", "agent").is("read_at", null)
+              .then(function (result) { if (result && result.error) note.textContent = "মেসেজ দেখা হয়েছে, তবে Seen Status আপডেট হয়নি।"; });
+          }
+        })
         .on("postgres_changes", {
           event: "UPDATE", schema: "public", table: "support_messages",
           filter: "conversation_id=eq." + conversationId
@@ -846,6 +862,12 @@
           var bubble = Array.prototype.slice.call(transcript.querySelectorAll(".ma-chat-message[data-message-id]")).find(function (node) { return node.getAttribute("data-message-id") === String(row.id); });
           if (!bubble) return;
           var text = bubble.querySelector(".ma-chat-message-body"); if (text) text.textContent = String(row.deleted_at ? row.body : row.body || "");
+          var receipt = bubble.querySelector("[data-message-receipt]");
+          if (receipt && row.sender_role === "customer") {
+            receipt.classList.toggle("is-seen", Boolean(row.read_at));
+            receipt.textContent = row.read_at ? "✓✓ সাপোর্ট টিম দেখেছেন" : "✓ পাঠানো হয়েছে";
+            receipt.title = row.read_at ? "সাপোর্ট টিম " + new Date(row.read_at).toLocaleString("bn-BD") + " সময়ে মেসেজটি দেখেছেন" : "মেসেজটি সাপোর্ট টিমের কাছে পাঠানো হয়েছে";
+          }
           if (row.deleted_at) bubble.querySelectorAll("img,audio,.ma-chat-file-link").forEach(function (node) { node.remove(); });
         })
         .subscribe(function (status) {
