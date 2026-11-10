@@ -228,7 +228,7 @@
     "#maChatPanel .ma-chat-send svg{color:#d9b866}" +
     "#maChatPanel .ma-chat-send:hover{background:#242424;color:#f0d28a}" +
     "#maChatPanel .ma-chat-foot:focus-within .ma-chat-send{background:#111;color:#d9b866}" +
-    /* Anzaar-inspired composer: balanced attachment, soft input surface and a true disabled send state. */
+    /* Branded composer: balanced attachment, soft input surface and a clear disabled send state. */
     "#maChatPanel .ma-chat-title .ma-chat-status-dot{background:#22c55e}" +
     "#maChatPanel .ma-chat-foot{padding:12px 14px 8px;border-top:1px solid #eee9df;background:#fff}" +
     "#maChatPanel .ma-chat-row{display:flex;align-items:center;gap:9px}" +
