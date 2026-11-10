@@ -606,7 +606,7 @@ esc(SOCIAL.linkedin) +
   function loadSupportChat() {
     if (window.__maSupportChat || shouldSkipChat()) return;
     var s = document.createElement("script");
-    s.src = footerAssetAbs("support-chat.js?v=fc9afc94b7d64c97");
+    s.src = footerAssetAbs("support-chat.js?v=a0041822ebbc5531");
     s.async = true;
     (document.head || document.documentElement).appendChild(s);
   }
