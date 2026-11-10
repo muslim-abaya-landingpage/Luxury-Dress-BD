@@ -608,6 +608,37 @@ esc(SOCIAL.linkedin) +
     var s = document.createElement("script");
     s.src = footerAssetAbs("support-chat.js?v=a0041822ebbc5531");
     s.async = true;
+    s.onload = function () {
+      var empty = document.querySelector("#maChatPanel .ma-chat-empty");
+      if (!empty || empty.querySelector(".ma-chat-brand-name")) return;
+
+      var brand = document.createElement("div");
+      brand.className = "ma-chat-brand-name";
+      brand.textContent = "MUSLIM ABAYA";
+      brand.setAttribute("aria-label", "Muslim Abaya");
+
+      var heading = empty.querySelector("strong");
+      if (heading) empty.insertBefore(brand, heading);
+      else empty.insertBefore(brand, empty.firstChild);
+
+      if (!document.getElementById("ma-chat-brand-style")) {
+        var style = document.createElement("style");
+        style.id = "ma-chat-brand-style";
+        style.textContent =
+          "#maChatPanel .ma-chat-brand-name{" +
+          "display:block;margin:0 auto 9px;color:#171717;" +
+          "font-family:Inter,Arial,sans-serif;font-size:clamp(15px,3.5vw,19px);" +
+          "font-weight:800;letter-spacing:.14em;line-height:1.25;text-align:center;" +
+          "text-transform:uppercase}" +
+          "#maChatPanel .ma-chat-brand-name:after{" +
+          "content:'';display:block;width:54px;height:2px;margin:8px auto 0;" +
+          "border-radius:2px;background:#c9a24d}" +
+          "@media(max-width:560px){" +
+          "#maChatPanel .ma-chat-brand-name{font-size:16px;letter-spacing:.12em;margin-bottom:8px}" +
+          "}";
+        (document.head || document.documentElement).appendChild(style);
+      }
+    };
     (document.head || document.documentElement).appendChild(s);
   }
 
