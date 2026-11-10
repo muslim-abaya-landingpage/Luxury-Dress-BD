@@ -228,6 +228,7 @@
     "#maChatPanel .ma-chat-send:hover{background:#242424;color:#f0d28a}" +
     "#maChatPanel .ma-chat-foot:focus-within .ma-chat-send{background:#111;color:#d9b866}" +
     /* Anzaar-inspired composer: balanced attachment, soft input surface and a true disabled send state. */
+    "#maChatPanel .ma-chat-title .ma-chat-status-dot{background:#22c55e}" +
     "#maChatPanel .ma-chat-foot{padding:12px 14px 8px;border-top:1px solid #eee9df;background:#fff}" +
     "#maChatPanel .ma-chat-row{display:flex;align-items:center;gap:9px}" +
     "#maChatPanel .ma-chat-attach{width:38px;height:42px;flex:0 0 38px;display:inline-flex;align-items:center;justify-content:center;margin:0;border:0;border-radius:11px;background:transparent;color:#777}" +
@@ -243,7 +244,7 @@
   var ICON_CHAT =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.5L3 21l1.6-5.2A8.5 8.5 0 1 1 21 12z"/></svg>';
   var ICON_CLOSE =
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>';
   var ICON_EXPAND =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5"/><path d="m3 3 6 6m12-6-6 6M3 21l6-6m12 6-6-6"/></svg>';
   var ICON_PHONE =
@@ -329,7 +330,7 @@
       '<strong id="maChatTitle"></strong><span id="maChatSub"><i class="ma-chat-status-dot" aria-hidden="true"></i></span>';
     title.querySelector("strong").textContent = brand;
     title.querySelector("strong").appendChild(el("span", "ma-chat-verified", "✓"));
-    title.querySelector("#maChatSub").appendChild(doc.createTextNode(replyTime || (liveEnabled ? "লাইভ সাপোর্ট • বাংলায় লিখুন" : "WhatsApp-এ সহায়তা • বাংলায় লিখুন")));
+    title.querySelector("#maChatSub").appendChild(doc.createTextNode(replyTime || (liveEnabled ? "Online · Replies in 2m" : "WhatsApp-এ সহায়তা • বাংলায় লিখুন")));
     var call = el("a", "ma-chat-icon-btn", ICON_PHONE);
     call.href = "tel:" + String(phoneTel).replace(/[^\d+]/g, "");
     call.setAttribute("aria-label", "আমাদের ফোন করুন");
@@ -518,8 +519,8 @@
     var input = el("textarea", "ma-chat-input");
     input.rows = 1;
     input.maxLength = 500;
-    input.placeholder = "এখানে আপনার প্রশ্ন লিখুন…";
-    input.setAttribute("aria-label", "আপনার মেসেজ");
+    input.placeholder = "Write your message / এখানে লিখুন…";
+    input.setAttribute("aria-label", "Your message / আপনার মেসেজ");
     var send = el("a", "ma-chat-send", ICON_SEND);
     send.target = "_blank";
     send.rel = "noopener";
