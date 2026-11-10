@@ -57,7 +57,10 @@ test('clean start screen: heading, one line and the message box only (no quick-t
   await openChat(page);
   await expect(page.locator('.ma-chat-empty')).toBeVisible();
   await expect(page.locator('.ma-chat-brand img')).toHaveAttribute('src', '/assets/logo-muslim-abaya.svg');
-  await expect(page.locator('.ma-chat-brand')).toHaveText('MUSLIM ABAYA');
+  await expect(page.locator('.ma-chat-brand img')).toHaveAttribute('alt', 'Muslim Abaya');
+  await expect(page.locator('.ma-chat-brand img')).toBeVisible();
+  await expect(page.locator('.ma-chat-brand-text')).toHaveCount(0);
+  await expect(page.locator('.ma-chat-empty strong')).toHaveText('কাস্টমার সাপোর্ট');
   await expect(page.locator('#maChatFab .ma-chat-fab-label')).toHaveText('CUSTOMER SUPPORT');
   await expect(page.locator('#maChatFab .ma-chat-fab-badge img')).toBeVisible();
   await expect(page.locator('.ma-chat-empty strong')).toHaveText('কাস্টমার সাপোর্ট');
