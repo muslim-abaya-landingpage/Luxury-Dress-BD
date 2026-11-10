@@ -56,6 +56,7 @@ async function openChatWithMockHistory(page) {
 test('clean start screen: heading, one line and the message box only (no quick-topic buttons)', async ({ page }) => {
   await openChat(page);
   await expect(page.locator('.ma-chat-empty')).toBeVisible();
+  await expect(page.locator('.ma-chat-brand')).toHaveText('MUSLIM ABAYA');
   await expect(page.locator('.ma-chat-empty strong')).toHaveText('কাস্টমার সাপোর্ট');
   await expect(page.locator('.ma-chat-online')).toContainText('লাইভ সাপোর্ট');
   await expect(page.locator('.ma-chat-input')).toHaveAttribute('placeholder', 'Write your message / এখানে লিখুন…');
@@ -75,7 +76,7 @@ test('clean start screen: heading, one line and the message box only (no quick-t
   await expect(send).toHaveAttribute('aria-disabled', 'true');
   await expect(send).toHaveClass(/is-disabled/);
   await expect(send.locator('svg')).toHaveAttribute('stroke', 'currentColor');
-  await expect(composerInput).toHaveCSS('background-color', 'rgb(245, 245, 244)');
+  await expect(composerInput).toHaveCSS('background-color', 'rgb(247, 246, 243)');
   await expect(page.locator('.ma-chat-note')).toHaveCSS('font-size', '10px');
   await composerInput.fill('Hello Muslim Abaya');
   await expect(send).toHaveAttribute('aria-disabled', 'false');
