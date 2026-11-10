@@ -61,7 +61,7 @@ for(const rows of Object.values(allCats))for(const p of rows.filter(row=>row.isI
 // The same renderer boot must resolve path-based pages and old hash URLs.
 const renderer=read('category-renderer.js');
 const getFn=name=>renderer.slice(renderer.indexOf('function '+name+'('),renderer.indexOf('\n}',renderer.indexOf('function '+name+'('))+2);
-const test={window:{location:{hash:''}},document:{documentElement:{getAttribute:()=> 'ABY-BLK-3P-02'}},shopCartCtx:{products:[{id:'ABY-BLK-3P-02'}]},decodeURIComponent,opened:null};
+const test={openPmPreview:()=>false,window:{location:{hash:''}},document:{documentElement:{getAttribute:()=> 'ABY-BLK-3P-02'}},shopCartCtx:{products:[{id:'ABY-BLK-3P-02'}]},decodeURIComponent,opened:null};
 test.openProductQuickView=i=>test.opened=i;vm.createContext(test);
 vm.runInContext(getFn('findProductIdxById')+'\n'+getFn('openProductFromLocationHash'),test);
 test.openProductFromLocationHash();assert.equal(test.opened,0);
