@@ -264,7 +264,17 @@
     "#maChatPanel .ma-chat-online{padding:7px 13px;border:1px solid #e9e7e2;border-radius:999px;background:#fafafa;color:#626262;font-size:11.5px}" +
     "#maChatPanel .ma-chat-foot{background:#fff;border-top:1px solid #eeeae3}" +
     "@media (min-width:769px){.ma-chat-fab{right:22px;bottom:22px}.ma-chat-panel{width:min(420px,calc(100vw - 28px));height:min(620px,calc(100vh - 110px));max-height:min(620px,calc(100vh - 110px))}}" +
-    "@media (max-width:560px){.ma-chat-fab{right:12px;bottom:calc(76px + env(safe-area-inset-bottom,0px));height:52px;padding-left:14px;gap:10px;font-size:9.5px;letter-spacing:.11em}.ma-chat-fab-badge{width:42px;height:42px;flex-basis:42px}.ma-chat-fab-badge img{width:28px;height:28px}#maChatPanel .ma-chat-body{min-height:0;padding:18px 12px}#maChatPanel .ma-chat-brand{margin-bottom:13px}#maChatPanel .ma-chat-brand img{width:min(164px,62vw)}#maChatPanel .ma-chat-empty strong{font-size:19px}}";
+    "@media (max-width:560px){.ma-chat-fab{right:12px;bottom:calc(76px + env(safe-area-inset-bottom,0px));height:52px;padding-left:14px;gap:10px;font-size:9.5px;letter-spacing:.11em}.ma-chat-fab-badge{width:42px;height:42px;flex-basis:42px}.ma-chat-fab-badge img{width:28px;height:28px}#maChatPanel .ma-chat-body{min-height:0;padding:18px 12px}#maChatPanel .ma-chat-brand{margin-bottom:13px}#maChatPanel .ma-chat-brand img{width:min(164px,62vw)}#maChatPanel .ma-chat-empty strong{font-size:19px}}" +
+    /* Final restraint: one brand wordmark only, followed by the support title. */
+    "#maChatPanel .ma-chat-brand{margin:0 auto 14px;max-width:100%}" +
+    "#maChatPanel .ma-chat-brand img{width:min(176px,64vw);height:auto;max-height:52px;object-fit:contain}" +
+    "#maChatPanel .ma-chat-brand-text{display:none!important}" +
+    "#maChatPanel .ma-chat-empty{padding:22px 12px}" +
+    "#maChatPanel .ma-chat-empty strong{margin:0;font-size:20px;line-height:1.45}" +
+    "#maChatPanel .ma-chat-empty p{margin:5px 0 14px;font-size:14px;line-height:1.55}" +
+    "#maChatPanel .ma-chat-online{font-size:12px;padding:7px 13px}" +
+    "@media (min-width:561px){#maChatPanel.ma-chat-panel{width:min(410px,calc(100vw - 28px));height:min(600px,calc(100dvh - 110px));max-height:min(600px,calc(100dvh - 110px))}}" +
+    "@media (max-width:560px){#maChatPanel .ma-chat-brand{margin-bottom:12px}#maChatPanel .ma-chat-brand img{width:min(160px,60vw)}#maChatPanel .ma-chat-empty strong{font-size:19px}}";
 
   var ICON_CHAT =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.5L3 21l1.6-5.2A8.5 8.5 0 1 1 21 12z"/></svg>';
@@ -541,7 +551,6 @@
     brandMarkImage.width = 180;
     brandMarkImage.height = 34;
     brandMark.appendChild(brandMarkImage);
-    brandMark.appendChild(el("span", "ma-chat-brand-text", "MUSLIM ABAYA"));
     emptyState.appendChild(brandMark);
     emptyState.appendChild(el("strong", "", "কাস্টমার সাপোর্ট"));
     emptyState.appendChild(el("p", "", "কীভাবে সাহায্য করতে পারি?"));
