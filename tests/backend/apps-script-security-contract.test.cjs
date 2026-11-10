@@ -103,9 +103,9 @@ function makeRateLimiter(properties) {
 test('web checkout persists the selected Thana/Upazila in the stored delivery address', () => {
   const sandbox = {
     sanitizeCellText_: (value, maxLen) => {
-      let text = String(value == null ? '' : value).replace(/[\\u0000-\\u001f\\u007f]/g, ' ').replace(/\\s+/g, ' ').trim();
+      let text = String(value == null ? '' : value).replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim();
       if (maxLen) text = text.slice(0, maxLen);
-      if (/^[=+\\-@]/.test(text)) text = "'" + text;
+      if (/^[=+\-@]/.test(text)) text = "'" + text;
       return text;
     }
   };
