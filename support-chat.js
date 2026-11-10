@@ -184,7 +184,8 @@
     "#maChatPanel .ma-chat-head .ma-chat-icon-btn:hover{background:#f4f4f4;color:#111}" +
     "#maChatPanel .ma-chat-head a.ma-chat-icon-btn{color:#16a34a;background:#f0fdf4;border:1px solid #bbf7d0}" +
     "#maChatPanel .ma-chat-body{background:#fff;display:flex;flex-direction:column;min-height:300px}" +
-    "#maChatPanel .ma-chat-empty{margin:auto;padding:24px 12px;text-align:center}" +
+    "#maChatPanel .ma-chat-empty{margin:auto;padding:24px 12px;text-align:center;max-width:100%}" +
+    "#maChatPanel .ma-chat-brand{display:block;margin:0 0 7px;color:#171717;font:800 16px/1.25 system-ui,-apple-system,'Segoe UI',sans-serif;letter-spacing:.12em;text-transform:uppercase}" +
     "#maChatPanel .ma-chat-empty strong{display:block;font-size:17px;color:#111}" +
     "#maChatPanel .ma-chat-empty p{margin:6px 0 14px;font-size:13.5px;color:#6b6b6b}" +
     "#maChatPanel .ma-chat-online{display:inline-flex;align-items:center;gap:7px;padding:6px 13px;border:1px solid #ececec;border-radius:999px;background:#fafafa;font-size:12px;color:#555}" +
@@ -499,6 +500,7 @@
     localDeleteDialog.addEventListener("cancel", function () { pendingLocalAction = null; });
     // Clean start screen (same idea as other Bangladeshi shop chats): just a heading and one line.
     var emptyState = el("div", "ma-chat-empty");
+    emptyState.appendChild(el("div", "ma-chat-brand", "MUSLIM ABAYA"));
     emptyState.appendChild(el("strong", "", "কাস্টমার সাপোর্ট"));
     emptyState.appendChild(el("p", "", "কীভাবে সাহায্য করতে পারি?"));
     emptyState.appendChild(el("span", "ma-chat-online", '<i aria-hidden="true"></i>' + (liveEnabled ? "লাইভ সাপোর্ট • নিচে মেসেজ লিখুন" : "নিচে লিখুন • WhatsApp-এ পাঠানো হবে")));
