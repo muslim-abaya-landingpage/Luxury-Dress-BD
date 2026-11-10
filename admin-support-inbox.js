@@ -458,6 +458,9 @@
     rows.forEach(function (c) {
       var button = make("button", "conversation" + (c.id === selectedId ? " selected" : "") + (c.unread_count ? " has-unread" : ""));
       button.type = "button";
+      var avatar = make("span", "conv-avatar", (displayName(c).trim().charAt(0) || "M").toLocaleUpperCase("bn-BD"));
+      avatar.setAttribute("aria-hidden", "true");
+      var content = make("span", "conversation-content");
       var top = make("span", "conv-top");
       var name = make("span", "conv-name", displayName(c));
       if (c.unread_count) { var badge = make("span", "unread-badge", c.unread_count.toLocaleString("bn-BD")); badge.setAttribute("aria-label", c.unread_count + " টি না-পড়া"); name.appendChild(badge); }
@@ -468,7 +471,8 @@
       left.append(pill(CHANNEL_BN[c.channel || "website"] || c.channel, "ch-" + (c.channel || "website")), pill(STATUS_BN[c.status] || c.status, "status-" + c.status));
       var who = make("span", "assignee", c.assigned_agent_email ? (agent && c.assigned_agent_email === agent.email ? "আমার" : c.assigned_agent_email.split("@")[0]) : "");
       foot.append(left, who);
-      button.append(top, preview, foot);
+      content.append(top, preview, foot);
+      button.append(avatar, content);
       button.addEventListener("click", function () { selectConversation(c.id); });
       list.appendChild(button);
     });
@@ -634,7 +638,15 @@
       if (grouped && Object.keys(grouped).length) bubble.appendChild(reactionBar);
       if (starredMessageIds[row.id]) bubble.appendChild(make("span", "message-starred", "★ Star"));
       if (conversationPin && conversationPin.message_id === row.id) bubble.appendChild(make("span", "message-pinned", "⌖ Pinned"));
-      var time = make("time", "", formatTime(row.created_at)); time.dateTime = row.created_at || ""; bubble.appendChild(time); box.appendChild(bubble);
+      var time = make("time", "", formatTime(row.created_at)); time.dateTime = row.created_at || ""; bubble.appendChild(time);
+      // read_at is written by the recipient: customer reads agent messages, agent reads customer messages.
+      if (row.sender_role === "agent" && row.sender_external_id !== "telegram-bot") {
+        var receipt = make("div", "message-receipt" + (row.read_at ? " is-seen" : ""), "");
+        receipt.append(make("span", "receipt-check", row.read_at ? "✓✓" : "✓"), document.createTextNode(row.read_at ? " Seen" : " Sent"));
+        if (row.read_at) receipt.title = "কাস্টমার " + new Date(row.read_at).toLocaleString("bn-BD") + " সময়ে মেসেজটি দেখেছেন";
+        bubble.appendChild(receipt);
+      }
+      box.appendChild(bubble);
     });
     if (stickToBottom) box.scrollTop = box.scrollHeight;
     else box.scrollTop = box.scrollHeight - prevHeight + prevTop;
