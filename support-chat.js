@@ -933,6 +933,7 @@
       else if (file.type.indexOf("audio/") === 0) { imagePreview.hidden = true; audioPreview.hidden = false; audioPreview.src = pendingImageUrl; }
       else imagePreview.hidden = true;
       imageDraft.hidden = false;
+      if (typeof updateLinks === "function") updateLinks();
     }
     var attachmentTypes = {
       "image/jpeg":"jpg", "image/png":"png", "image/webp":"webp", "image/gif":"gif",
