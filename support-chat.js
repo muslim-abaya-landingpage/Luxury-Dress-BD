@@ -53,6 +53,8 @@
   var conversationChannel = null;
   var conversationPromise = null;
   var seenMessageIds = Object.create(null);
+  var activeProductContext = null;
+  var productContextSent = false;
   var isSendingMessage = false;
   var hasAttachmentColumn = true;
   var typingChannel = null;
@@ -273,6 +275,7 @@
     "#maChatPanel .ma-chat-empty strong{margin:0;font-size:20px;line-height:1.45}" +
     "#maChatPanel .ma-chat-empty p{margin:5px 0 14px;font-size:14px;line-height:1.55}" +
     "#maChatPanel .ma-chat-online{font-size:12px;padding:7px 13px}" +
+    ".ma-chat-product-context{display:flex;gap:11px;align-items:flex-start;margin:0 0 14px;padding:10px;border:1px solid #e8e1d4;border-radius:12px;background:#fff}.ma-chat-product-context[hidden]{display:none!important}.ma-chat-product-context img{width:68px;height:82px;flex:0 0 68px;object-fit:cover;border-radius:8px;background:#f3f1ed}.ma-chat-product-copy{min-width:0;flex:1}.ma-chat-product-copy strong{display:block;color:#171717;font-size:13px;line-height:1.4}.ma-chat-product-copy small{display:block;margin-top:4px;color:#777;font-size:11px}.ma-chat-product-copy b{display:block;margin-top:4px;color:#111;font-size:14px}.ma-chat-product-link{display:inline-flex;margin-top:7px;padding:5px 9px;border-radius:7px;background:#111;color:#fff;text-decoration:none;font-size:11px;font-weight:700}" +
     "@media (min-width:561px){#maChatPanel.ma-chat-panel{width:min(410px,calc(100vw - 28px));height:min(600px,calc(100dvh - 110px));max-height:min(600px,calc(100dvh - 110px))}}" +
     "@media (max-width:560px){#maChatPanel .ma-chat-brand{margin-bottom:12px}#maChatPanel .ma-chat-brand img{width:min(160px,60vw)}#maChatPanel .ma-chat-empty strong{font-size:19px}}";
 
@@ -391,6 +394,8 @@
     head.appendChild(expand);
     head.appendChild(close);
     var body = el("div", "ma-chat-body");
+    var productContextCard = el("section", "ma-chat-product-context");
+    productContextCard.hidden = true;
     var welcome = el("div", "ma-chat-welcome");
     var welcomeLogo = el("img");
     welcomeLogo.src = logo;
@@ -557,6 +562,7 @@
     emptyState.appendChild(el("span", "ma-chat-online", '<i aria-hidden="true"></i>' + (liveEnabled ? "লাইভ সাপোর্ট • নিচে মেসেজ লিখুন" : "নিচে লিখুন • WhatsApp-এ পাঠানো হবে")));
     body.appendChild(emptyState);
     body.appendChild(welcome);
+    body.appendChild(productContextCard);
     body.appendChild(sectionTitle);
     body.appendChild(chips);
     body.appendChild(contactPrompt);
@@ -1052,8 +1058,32 @@
       note.textContent = "সংযুক্তিটি মেসেজ থেকে সরানো হয়েছে।";
       attach.focus();
     });
+    function renderProductContext(product) {
+      productContextCard.replaceChildren();
+      productContextCard.hidden = !product;
+      if (!product) return;
+      if (product.image) {
+        var image = doc.createElement("img"); image.src = product.image; image.alt = product.name; image.loading = "lazy";
+        image.onerror = function () { image.style.display = "none"; };
+        productContextCard.appendChild(image);
+      }
+      var copy = el("div", "ma-chat-product-copy");
+      copy.appendChild(el("strong", "", product.name));
+      var attrs = [product.variant, product.color, product.size, product.quantity ? "পরিমাণ: " + product.quantity : ""].filter(Boolean).join(" · ");
+      if (attrs) copy.appendChild(el("small", "", attrs));
+      copy.appendChild(el("b", "", "৳" + Number(product.price || 0).toLocaleString("en-US")));
+      if (product.url) { var link = el("a", "ma-chat-product-link", "পণ্য দেখুন / অর্ডার করুন"); link.href = product.url; copy.appendChild(link); }
+      productContextCard.appendChild(copy);
+    }
     async function sendLiveMessage() {
       var messageText = String(input.value || "").trim();
+      if (activeProductContext && !productContextSent) {
+        var pc = activeProductContext;
+        var details = ["পণ্য সম্পর্কে জানতে চাই:", "পণ্যের নাম: " + pc.name, "পণ্য ID: " + pc.id, "দাম: ৳" + pc.price,
+          pc.quantity ? "পরিমাণ: " + pc.quantity : "", pc.size ? "সাইজ: " + pc.size : "", pc.color ? "রং: " + pc.color : "",
+          pc.variant ? "ভ্যারিয়েন্ট: " + pc.variant : "", pc.image ? "পণ্যের ছবি: " + pc.image : "", pc.url ? "পণ্যের লিংক: " + pc.url : ""].filter(Boolean).join("\n");
+        messageText = [messageText || "আসসালামু আলাইকুম! এই পণ্যটি সম্পর্কে জানতে চাই।", details].join("\n\n");
+      }
       if (!messageText && !pendingImage) { input.focus(); return; }
       if (isSendingMessage) return;
       isSendingMessage = true;
@@ -1093,6 +1123,7 @@
         if (inserted.error) throw inserted.error;
         appendMessage(inserted.data);
         notifyTeam(state.client, inserted.data.id);
+        if (activeProductContext) productContextSent = true;
         input.value = "";
         updateLinks();
         note.textContent = "মেসেজ পৌঁছেছে ✓ আমাদের টিম উত্তর দিলে এখানেই দেখবেন।";
@@ -1264,6 +1295,24 @@
       }
     }
 
+    global.maOpenProductChat = function (product) {
+      if (!product || !product.id || !product.name) return false;
+      activeProductContext = {
+        id: String(product.id).slice(0, 120), name: String(product.name).slice(0, 240),
+        price: Math.max(0, Number(product.price) || 0), quantity: Math.max(1, Math.min(99, Number(product.quantity) || 1)),
+        image: String(product.image || "").slice(0, 2000), size: String(product.size || "").slice(0, 120),
+        color: String(product.color || "").slice(0, 120), variant: String(product.variant || "").slice(0, 160),
+        url: String(product.url || "").slice(0, 2000)
+      };
+      productContextSent = false;
+      renderProductContext(activeProductContext);
+      input.value = "আসসালামু আলাইকুম! এই পণ্যটি সম্পর্কে জানতে চাই।";
+      updateLinks(); setOpen(true);
+      if (liveEnabled) ensureLiveConversation().catch(function () {
+        panel.classList.add("ma-chat-fallback"); note.textContent = "লাইভ চ্যাট সাময়িকভাবে বন্ধ। WhatsApp বা Messenger-এ লিখুন।";
+      });
+      return true;
+    };
     fab.addEventListener("click", function () { setOpen(!panel.classList.contains("is-open")); });
     close.addEventListener("click", function () { setOpen(false); });
     expand.addEventListener("click", function () {
