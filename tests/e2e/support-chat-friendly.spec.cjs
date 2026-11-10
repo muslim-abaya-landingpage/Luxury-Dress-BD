@@ -56,7 +56,10 @@ async function openChatWithMockHistory(page) {
 test('clean start screen: heading, one line and the message box only (no quick-topic buttons)', async ({ page }) => {
   await openChat(page);
   await expect(page.locator('.ma-chat-empty')).toBeVisible();
+  await expect(page.locator('.ma-chat-brand img')).toHaveAttribute('src', '/assets/logo-muslim-abaya.svg');
   await expect(page.locator('.ma-chat-brand')).toHaveText('MUSLIM ABAYA');
+  await expect(page.locator('#maChatFab .ma-chat-fab-label')).toHaveText('CUSTOMER SUPPORT');
+  await expect(page.locator('#maChatFab .ma-chat-fab-badge img')).toBeVisible();
   await expect(page.locator('.ma-chat-empty strong')).toHaveText('কাস্টমার সাপোর্ট');
   await expect(page.locator('.ma-chat-online')).toContainText('লাইভ সাপোর্ট');
   await expect(page.locator('.ma-chat-input')).toHaveAttribute('placeholder', 'Write your message / এখানে লিখুন…');
