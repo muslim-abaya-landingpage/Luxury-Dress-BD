@@ -1081,7 +1081,7 @@
       var attrs = [product.variant, product.color, product.size, product.quantity ? "পরিমাণ: " + product.quantity : ""].filter(Boolean).join(" · ");
       if (attrs) copy.appendChild(el("small", "", attrs));
       copy.appendChild(el("b", "", "৳" + Number(product.price || 0).toLocaleString("en-US")));
-      if (product.url) { var link = el("a", "ma-chat-product-link", "পণ্য দেখুন / অর্ডার করুন"); link.href = product.url; copy.appendChild(link); }
+      if (product.url) { var link = el("a", "ma-chat-product-link", "পণ্য দেখুন"); link.href = product.url; copy.appendChild(link); }
       productContextCard.appendChild(copy);
     }
     async function sendLiveMessage() {
