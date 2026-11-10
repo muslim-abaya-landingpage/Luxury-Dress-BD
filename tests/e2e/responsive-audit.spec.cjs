@@ -195,7 +195,7 @@ for (const categoryPath of categoryGridPages) {
       expect(response.status(), 'category page should load').toBeLessThan(400);
       const grid = page.locator('.product-grid').first();
       await expect(grid).toBeVisible({ timeout: 15000 });
-      const columns = await grid.evaluate(el => getComputedStyle(el).gridTemplateColumns.trim().split(/\\s+/).length);
+      const columns = await grid.evaluate(el => getComputedStyle(el).gridTemplateColumns.trim().split(/\s+/).length);
       expect(columns, categoryPath + ' at ' + width + 'px').toBe(2);
     });
   }
