@@ -100,6 +100,22 @@ function makeRateLimiter(properties) {
   return runFunction('rateLimitOrder_', sandbox);
 }
 
+test('web checkout persists the selected Thana/Upazila in the stored delivery address', () => {
+  const sandbox = {
+    sanitizeCellText_: (value, maxLen) => {
+      let text = String(value == null ? '' : value).replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim();
+      if (maxLen) text = text.slice(0, maxLen);
+      if (['=', '+', '-', '@'].includes(text.charAt(0))) text = "'" + text;
+      return text;
+    }
+  };
+  const appendThana = runFunction('appendOrderThanaToAddress_', sandbox);
+  assert.equal(appendThana('House 12, Road 4, Mirpur', 'Mirpur'), 'House 12, Road 4, Mirpur');
+  assert.equal(appendThana('House 12, Road 4', 'Mirpur'), 'House 12, Road 4, Thana/Upazila: Mirpur');
+  assert.equal(appendThana('House 12, Road 4', '=IMPORTXML'), "House 12, Road 4, Thana/Upazila: '=IMPORTXML");
+  assert.ok(source.includes("validated.address = appendOrderThanaToAddress_(validated.address, param_(e, 'Thana'));"));
+});
+
 test('GET Subscribe is explicitly rejected and does not call the sheet-writing helper', () => {
   let writeAttempts = 0;
   const sandbox = {

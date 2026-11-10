@@ -1859,6 +1859,10 @@ function handleOnlineOrderPost_(e) {
   if (alreadySavedId) {
     return ContentService.createTextOutput('Success|' + alreadySavedId).setMimeType(ContentService.MimeType.TEXT);
   }
+  // Keep the required district-specific Thana/Upazila in the address stored on the
+  // Online Order sheet and passed to the courier. Older checkout versions sent
+  // Thana separately, but the order row had no dedicated column for it.
+  validated.address = appendOrderThanaToAddress_(validated.address, param_(e, 'Thana'));
   assertLiveStockAvailable_(validated.cartItems);
   if (isPhoneBlocked_(validated.phone)) throw new Error('ORDER_BLOCKED');
   rateLimitOrder_(validated.phone);
@@ -3527,6 +3531,16 @@ function getParams_(e) {
     });
   }
   return out;
+}
+
+function appendOrderThanaToAddress_(address, thana) {
+  var base = sanitizeCellText_(address, 400);
+  var area = sanitizeCellText_(thana, 100);
+  if (!area || base.toLowerCase().indexOf(area.toLowerCase()) !== -1) return base;
+  var suffix = 'Thana/Upazila: ' + area;
+  var maxBaseLength = Math.max(0, 400 - suffix.length - 2);
+  base = base.slice(0, maxBaseLength).trim();
+  return (base ? base + ', ' : '') + suffix;
 }
 
 function param_(e, key) {

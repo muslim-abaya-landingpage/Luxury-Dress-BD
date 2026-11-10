@@ -170,3 +170,40 @@ for (const spec of paths) {
     });
   }
 }
+
+// Every category page shares the same mobile product-grid stylesheet.
+// Keep this explicit: a one-column override on a single category must not slip through.
+const categoryGridPages = [
+  '/abaya.html',
+  '/cover-up.html',
+  '/tops-kurti.html',
+  '/premium-two-piece.html',
+  '/three-piece-dress.html',
+  '/embroidery.html',
+  '/karchupi.html',
+  '/kaftan.html',
+  '/hijab.html',
+  '/panjabi.html',
+];
+for (const categoryPath of categoryGridPages) {
+  for (const width of [320, 360, 390]) {
+    test('mobile category grid uses exactly two columns: ' + categoryPath + ' at ' + width + 'px', async ({ page }) => {
+      await page.setViewportSize({ width, height: 780 });
+      await mockNetwork(page, false);
+      const response = await page.goto(categoryPath, { waitUntil: 'domcontentloaded', timeout: 25000 });
+      expect(response, 'category page should exist').not.toBeNull();
+      expect(response.status(), 'category page should load').toBeLessThan(400);
+      // Some valid categories currently have no published products. Probe the
+      // page's loaded category stylesheet directly so empty categories are covered too.
+      const columns = await page.evaluate(() => {
+        const probe = document.createElement('div');
+        probe.className = 'product-grid';
+        document.body.appendChild(probe);
+        const count = getComputedStyle(probe).gridTemplateColumns.trim().split(/\s+/).length;
+        probe.remove();
+        return count;
+      });
+      expect(columns, categoryPath + ' at ' + width + 'px').toBe(2);
+    });
+  }
+}

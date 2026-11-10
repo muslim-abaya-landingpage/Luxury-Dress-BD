@@ -19,6 +19,29 @@ for(const [cat,rows] of Object.entries(cats))for(const p of rows){
   assert(html.includes('data-product-id="'+p.id+'"'));
   assert(html.includes('data-shop-category="'+cat+'"'));
   assert(html.includes('<h1>'));
+  const metaValue = (attr, key) => {
+    const tags = (html.match(/<meta\b[^>]*>/gi) || []).filter(tag => tag.includes(`${attr}="${key}"`) || tag.includes(`${attr}='${key}'`));
+    assert.equal(tags.length, 1, p.id + ' must have exactly one ' + attr + '=' + key);
+    const content = /\bcontent="([^"]*)"/i.exec(tags[0]) || /\bcontent='([^']*)'/i.exec(tags[0]);
+    assert(content, p.id + ' ' + key + ' must have a content value');
+    return content[1];
+  };
+  const expectedTitle = String(p.seoTitle || '').trim() || `${p.name} | Muslim Abaya Bangladesh`;
+  const expectedDescription = String(p.seoDescription || '').trim() || `${p.name} — ${p.fabric || 'modest fashion'}. ${p.detailNote || ''} Price ৳${p.price}. Cash on delivery in Bangladesh.`.trim();
+  const expectedImageRaw = [p.image].concat(Array.isArray(p.images) ? p.images : []).filter(Boolean)[0] || '';
+  const expectedImage = expectedImageRaw.startsWith('http://') || expectedImageRaw.startsWith('https://') ? expectedImageRaw : 'https://muslimabaya.com/' + expectedImageRaw.replace(/^\/+/, '');
+  const escapeMeta = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  assert.equal(metaValue('property', 'og:site_name'), 'Muslim Abaya');
+  assert.equal(metaValue('property', 'og:locale'), 'bn_BD');
+  assert.equal(metaValue('property', 'og:title'), escapeMeta(expectedTitle));
+  assert.equal(metaValue('property', 'og:description'), escapeMeta(expectedDescription));
+  assert.equal(metaValue('property', 'og:type'), 'product');
+  assert.equal(metaValue('property', 'og:url'), url);
+  assert.equal(metaValue('property', 'og:image'), expectedImage);
+  assert.equal(metaValue('name', 'twitter:card'), 'summary_large_image');
+  assert.equal(metaValue('name', 'twitter:title'), escapeMeta(expectedTitle));
+  assert.equal(metaValue('name', 'twitter:description'), escapeMeta(expectedDescription));
+  assert.equal(metaValue('name', 'twitter:image'), expectedImage);
   assert(!/\b(?:src|href)="(?:site-|product-|category-|images\/)/.test(html));
   const data=[...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(m=>JSON.parse(m[1]));
   const product=data.find(d=>d['@type']==='Product');
@@ -38,7 +61,7 @@ for(const rows of Object.values(allCats))for(const p of rows.filter(row=>row.isI
 // The same renderer boot must resolve path-based pages and old hash URLs.
 const renderer=read('category-renderer.js');
 const getFn=name=>renderer.slice(renderer.indexOf('function '+name+'('),renderer.indexOf('\n}',renderer.indexOf('function '+name+'('))+2);
-const test={window:{location:{hash:''}},document:{documentElement:{getAttribute:()=> 'ABY-BLK-3P-02'}},shopCartCtx:{products:[{id:'ABY-BLK-3P-02'}]},decodeURIComponent,opened:null};
+const test={openPmPreview:()=>false,window:{location:{hash:''}},document:{documentElement:{getAttribute:()=> 'ABY-BLK-3P-02'}},shopCartCtx:{products:[{id:'ABY-BLK-3P-02'}]},decodeURIComponent,opened:null};
 test.openProductQuickView=i=>test.opened=i;vm.createContext(test);
 vm.runInContext(getFn('findProductIdxById')+'\n'+getFn('openProductFromLocationHash'),test);
 test.openProductFromLocationHash();assert.equal(test.opened,0);
