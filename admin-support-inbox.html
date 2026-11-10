@@ -87,7 +87,15 @@
       .main{height:100dvh;overflow:hidden}.login-wrap{overflow:auto}.topbar{flex-wrap:nowrap;min-height:56px;padding:8px 10px}.top-title{font-size:15px;white-space:nowrap}
       .shell:not(.hidden){display:flex;flex:1;min-height:0}.workspace{height:auto;flex:1}
     }
-  </style>
+  
+    .unified-channel-tabs{display:flex;gap:8px;padding:10px 14px;background:var(--paper,#fff);border-bottom:1px solid var(--line,#e4e8ef);flex-wrap:wrap}
+    .unified-tab{border:1px solid var(--line,#e4e8ef);background:var(--wash,#f6f8fb);color:var(--ink,#1b2738);border-radius:9px;padding:9px 14px;font-weight:600}
+    .unified-tab.is-active{background:#1b2a41;color:#fff;border-color:#1b2a41}
+    .unified-messenger-panel{height:calc(100dvh - 150px);min-height:560px;background:var(--paper,#fff)}
+    .unified-messenger-panel.hidden{display:none!important}
+    .unified-messenger-panel iframe{display:block;width:100%;height:100%;min-height:560px;border:0;background:#f4f6f9}
+    @media(max-width:700px){.unified-channel-tabs{padding:8px}.unified-tab{flex:1 1 100%;font-size:13px}.unified-messenger-panel{height:calc(100dvh - 170px);min-height:520px}}
+</style>
 <link rel="stylesheet" href="admin-responsive.css?v=1">
 <link rel="stylesheet" href="admin-theme.css?v=1">
 <link rel="manifest" href="/admin-manifest.webmanifest">
@@ -153,7 +161,12 @@
       </section>
     </main>
     <main class="shell hidden" id="inboxWrap">
-      <section class="workspace" id="workspace" aria-label="কাস্টমার সাপোর্ট ইনবক্স">
+      
+      <nav class="unified-channel-tabs" aria-label="ইনবক্স চ্যানেল">
+        <button type="button" class="unified-tab is-active" data-inbox-view="support" aria-pressed="true">Website Live Chat + Telegram</button>
+        <button type="button" class="unified-tab" data-inbox-view="messenger" aria-pressed="false">Facebook Messenger</button>
+      </nav>
+<section class="workspace" id="workspace" aria-label="কাস্টমার সাপোর্ট ইনবক্স">
         <aside class="sidebar">
           <div class="side-head">
             <div class="side-title">কথোপকথন <span class="count" id="conversationCount">0</span></div>
@@ -192,11 +205,30 @@
           <dialog class="message-info-dialog" id="messageInfoDialog" aria-labelledby="messageInfoTitle"><div class="dialog-head"><h2 id="messageInfoTitle">মেসেজের তথ্য</h2><button class="dialog-close" id="messageInfoClose" type="button" aria-label="বন্ধ করুন">×</button></div><div id="messageInfoContent"></div></dialog>
           <dialog class="forward-dialog" id="forwardDialog" aria-labelledby="forwardTitle"><div class="dialog-head"><h2 id="forwardTitle">মেসেজ Forward করুন</h2><button class="dialog-close" id="forwardCancel" type="button" aria-label="বন্ধ করুন">×</button></div><label for="forwardTarget">কোন কথোপকথনে পাঠাবেন</label><select id="forwardTarget"></select><div class="forward-preview" id="forwardPreview"></div><p class="forward-notice" id="forwardNotice"></p><div class="dialog-actions"><button id="forwardCancelBottom" type="button">বাতিল</button><button class="confirm" id="forwardConfirm" type="button">Forward করুন</button></div></dialog>
           <div class="hint">Enter = পাঠান, Shift+Enter = নতুন লাইন। কার্ড নম্বর, OTP বা পাসওয়ার্ড কখনো চাইবেন না।</div>
-        </section>
+      </section>
+      </section>
+      <section class="unified-messenger-panel hidden" id="messengerInboxPanel" aria-label="Facebook Messenger ইনবক্স">
+        <iframe id="messengerInboxFrame" title="Facebook Messenger ইনবক্স" src="about:blank" data-src="/admin-inbox.html?embedded=unified" loading="lazy"></iframe>
       </section>
     </main>
   </div>
 </div>
+  
+<script>
+(function(){
+  var tabs=document.querySelectorAll('[data-inbox-view]');
+  var workspace=document.getElementById('workspace');
+  var panel=document.getElementById('messengerInboxPanel');
+  var frame=document.getElementById('messengerInboxFrame');
+  if(!tabs.length||!workspace||!panel||!frame)return;
+  tabs.forEach(function(tab){tab.addEventListener('click',function(){
+    var messenger=tab.getAttribute('data-inbox-view')==='messenger';
+    tabs.forEach(function(t){var active=t===tab;t.classList.toggle('is-active',active);t.setAttribute('aria-pressed',active?'true':'false');});
+    workspace.classList.toggle('hidden',messenger);panel.classList.toggle('hidden',!messenger);
+    if(messenger&&frame.src==='about:blank')frame.src=frame.getAttribute('data-src');
+  });});
+})();
+</script>
   <script src="/site-footer-config.js?v=4997c01bf75eafe3"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="/support-captcha.js?v=1"></script>
