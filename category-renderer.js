@@ -2914,9 +2914,23 @@ function onGlobalShopCartClick(ev) {
   );
 
   if (action === "buy-now") {
-    // Keep Buy Now on the exact same full-page checkout as the cart flow.
-    // The selected size, colour, quantity and variation price are added to the cart first.
-    shopGoToCheckoutWithLine(cartItem, qty, selectedSize, categoryKey, selectedBodyValue, sized);
+    // Open the one-item popup checkout without changing the customer's saved cart.
+    // If the popup assets cannot load, preserve the established full-page checkout fallback.
+    var directOrder = shopPrepareDirectOrderLine(
+      cartItem, qty, selectedSize, categoryKey, selectedBodyValue, sized
+    );
+    if (!directOrder) return;
+    var checkoutFallback = function () {
+      shopGoToCheckoutWithLine(cartItem, qty, selectedSize, categoryKey, selectedBodyValue, sized);
+    };
+    if (typeof window.maOpenCheckoutPopup !== "function" ||
+        window.maOpenCheckoutPopup(directOrder.line, {
+          stockCap: directOrder.cap,
+          sourceProduct: cartItem,
+          fallback: checkoutFallback
+        }) === false) {
+      checkoutFallback();
+    }
     return;
   }
   shopAddProductToCart(cartItem, qty, selectedSize, categoryKey, selectedBodyValue, sized);
