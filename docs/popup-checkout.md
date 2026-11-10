@@ -111,7 +111,6 @@ Other checks:
 - The popup orders one product. The whole cart still goes through `/checkout`.
 - `product.html?id=…` (the older product page script `product-page.js`) still has its own optional “WhatsApp-এ অর্ডার”
   button. Live product URLs (`/product/ID`) use the new flow.
-- Found while reading the code, not changed: `/checkout` sends `Thana`, but the order server never stores it. The popup
-  adds the upazila and district into the address so they reach the sheet.
+- The order backend now appends a submitted Thana/Upazila to the stored delivery address, so it is retained in the Online Order sheet and passed to the courier even though the existing sheet has no dedicated Thana column.
 - The Purchase event to GTM is pushed the same way as on `/checkout` (`purchase_complete`). Whether any GTM tag
   depends on the `/thank-you` page URL was not checked.
