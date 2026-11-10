@@ -1005,9 +1005,8 @@
       line.productType ? "ধরন: " + line.productType : "",
       "পণ্যের লিংক: " + window.location.href
     ].filter(Boolean).join("\n");
-    msgLink.textContent = "WhatsApp-এ অর্ডার";
-    msgLink.setAttribute("aria-label", "WhatsApp-এ " + line.name + " অর্ডার করুন");
-    msgLink.href = waLink() + "?text=" + encodeURIComponent(msgText);
+    msgLink.textContent = "মেসেজ করুন";
+    msgLink.setAttribute("aria-label", line.name + " সম্পর্কে মেসেজ করুন");
   }
 
   function wireActions() {
