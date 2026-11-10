@@ -215,7 +215,7 @@
     "body.ma-chat-mobile-open.ma-chat-kb #maChatPanel .ma-chat-foot{padding-bottom:8px}" +
     "body.ma-chat-mobile-open.ma-chat-kb #maChatPanel .ma-chat-note{display:none}" +
     "body.ma-chat-mobile-open #maChatPanel .ma-chat-expand,body.ma-chat-mobile-open .ma-chat-fab,body.ma-chat-mobile-open #mobile-bottom-nav,body.ma-chat-mobile-open #stickyOrderBar{display:none!important}" +
-    "body.ma-chat-mobile-open #maChatPanel .ma-chat-input{font-size:16px}" +
+    "body.ma-chat-mobile-open #maChatPanel .ma-chat-input{font-size:16px}}" +
     /* Keep the floating support button above the stacked mobile purchase bar and bottom navigation. */
     "@media (max-width:768px){body:has(.ma-sales-sticky) .ma-chat-fab,body:has(#stickyOrderBar) .ma-chat-fab{bottom:calc(164px + env(safe-area-inset-bottom,0px))!important}" +
     "body:has(.ma-sales-sticky) .ma-chat-panel,body:has(#stickyOrderBar) .ma-chat-panel{bottom:calc(226px + env(safe-area-inset-bottom,0px))!important}}" +
