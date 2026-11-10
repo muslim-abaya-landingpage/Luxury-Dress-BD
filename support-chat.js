@@ -226,7 +226,19 @@
     "#maChatPanel .ma-chat-send{background:#111;color:#d9b866;border:0;box-shadow:none}" +
     "#maChatPanel .ma-chat-send svg{color:#d9b866}" +
     "#maChatPanel .ma-chat-send:hover{background:#242424;color:#f0d28a}" +
-    "#maChatPanel .ma-chat-foot:focus-within .ma-chat-send{background:#111;color:#d9b866}";
+    "#maChatPanel .ma-chat-foot:focus-within .ma-chat-send{background:#111;color:#d9b866}" +
+    /* Anzaar-inspired composer: balanced attachment, soft input surface and a true disabled send state. */
+    "#maChatPanel .ma-chat-foot{padding:12px 14px 8px;border-top:1px solid #eee9df;background:#fff}" +
+    "#maChatPanel .ma-chat-row{display:flex;align-items:center;gap:9px}" +
+    "#maChatPanel .ma-chat-attach{width:38px;height:42px;flex:0 0 38px;display:inline-flex;align-items:center;justify-content:center;margin:0;border:0;border-radius:11px;background:transparent;color:#777}" +
+    "#maChatPanel .ma-chat-input{box-sizing:border-box;flex:1 1 auto;width:0;min-width:0;min-height:44px;height:44px;margin:0;padding:11px 15px;border:1px solid #ececec;border-radius:14px;background:#f5f5f4;color:#171717;line-height:20px;box-shadow:none}" +
+    "#maChatPanel .ma-chat-input:focus{background:#f7f6f3;border-color:#c9a24d;box-shadow:0 0 0 3px rgba(201,162,77,.12);outline:0}" +
+    "#maChatPanel .ma-chat-send{width:42px;height:42px;flex:0 0 42px;display:inline-flex;align-items:center;justify-content:center;margin:0;padding:0;border:0;border-radius:13px;background:#111;color:#d9b866;box-shadow:none;transition:background .16s ease,color .16s ease,opacity .16s ease}" +
+    "#maChatPanel .ma-chat-send svg{width:19px;height:19px;stroke:currentColor;fill:none}" +
+    "#maChatPanel .ma-chat-send[aria-disabled=true],#maChatPanel .ma-chat-send.is-disabled{background:#efefed;color:#aaa;opacity:1;pointer-events:none;cursor:not-allowed}" +
+    "#maChatPanel .ma-chat-foot:focus-within .ma-chat-send[aria-disabled=true]{background:#efefed;color:#aaa}" +
+    "#maChatPanel .ma-chat-note{display:block;width:max-content;max-width:100%;margin:7px auto 0;padding:3px 9px;border:1px solid #f0eee9;border-radius:999px;background:#faf9f6;color:#89857c;font-size:10px;line-height:1.4;text-align:center}" +
+    "@media (max-width:560px){#maChatPanel .ma-chat-foot{padding:10px 12px 7px}#maChatPanel .ma-chat-row{gap:7px}#maChatPanel .ma-chat-attach{width:34px;flex-basis:34px}#maChatPanel .ma-chat-send{width:42px;flex-basis:42px}#maChatPanel .ma-chat-note{font-size:9.5px;margin-top:6px}}";
 
   var ICON_CHAT =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.5L3 21l1.6-5.2A8.5 8.5 0 1 1 21 12z"/></svg>';
@@ -239,7 +251,7 @@
   var ICON_IMAGE =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="9" cy="10" r="1.8"/><path d="m21 16-5-5-8 9"/></svg>';
   var ICON_SEND =
-    '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.4 20.4 21 12 3.4 3.6l.1 6.5L15 12 3.5 13.9z"/></svg>';
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4 20-7Z"/></svg>';
   var ICON_MSGR =
     '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.5 2 2 6.1 2 11.2c0 2.9 1.4 5.5 3.7 7.2V22l3.4-1.9c.9.2 1.9.4 2.9.4 5.5 0 10-4.1 10-9.2S17.5 2 12 2zm1 12.4-2.6-2.7-5 2.7L10.9 8.6l2.6 2.7 5-2.7z"/></svg>';
 
@@ -608,9 +620,21 @@
     }
     function updateLinks() {
       var text = String(input.value || "").trim();
+      var hasPayload = !!text || !!pendingImage;
+      var disabled = !hasPayload || isSendingMessage;
       var full = (text || "Hello! I have a question.") + pageContext();
       var url = waBase + "?text=" + encodeURIComponent(full);
-      send.href = url;
+      if (disabled) {
+        send.setAttribute("aria-disabled", "true");
+        send.setAttribute("tabindex", "-1");
+        send.classList.add("is-disabled");
+      } else {
+        send.setAttribute("aria-disabled", "false");
+        send.removeAttribute("tabindex");
+        send.classList.remove("is-disabled");
+      }
+      if (!liveEnabled && !disabled) send.href = url;
+      else send.removeAttribute("href");
       wa.href = waBase + "?text=" + encodeURIComponent("Hello! I have a question." + pageContext());
     }
     function hiddenMessageKey() { return "maSupportHiddenMessages:" + conversationId; }
@@ -898,6 +922,7 @@
       imagePreview.removeAttribute("src"); audioPreview.removeAttribute("src"); audioPreview.hidden = true;
       imagePreview.hidden = false; imageName.textContent = "";
       imageDraft.hidden = true; fileInput.value = "";
+      if (typeof updateLinks === "function") updateLinks();
     }
     function showPendingImage(file) {
       clearPendingImage();
@@ -1020,11 +1045,15 @@
         note.textContent = "মেসেজ যায়নি। আবার চেষ্টা করুন, অথবা WhatsApp-এ লিখুন।";
       } finally {
         isSendingMessage = false;
-        send.removeAttribute("aria-disabled");
+        updateLinks();
         send.style.opacity = "";
       }
     }
     send.addEventListener("click", function (event) {
+      if (send.getAttribute("aria-disabled") === "true" || isSendingMessage) {
+        event.preventDefault();
+        return;
+      }
       if (!liveEnabled) return;
       event.preventDefault();
       sendLiveMessage();
