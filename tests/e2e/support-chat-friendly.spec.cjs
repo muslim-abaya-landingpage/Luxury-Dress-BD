@@ -58,7 +58,7 @@ test('clean start screen: heading, one line and the message box only (no quick-t
   await expect(page.locator('.ma-chat-empty')).toBeVisible();
   await expect(page.locator('.ma-chat-empty strong')).toHaveText('কাস্টমার সাপোর্ট');
   await expect(page.locator('.ma-chat-online')).toContainText('লাইভ সাপোর্ট');
-  await expect(page.locator('.ma-chat-input')).toHaveAttribute('placeholder', 'এখানে আপনার প্রশ্ন লিখুন…');
+  await expect(page.locator('.ma-chat-input')).toHaveAttribute('placeholder', 'Write your message / এখানে লিখুন…');
   await expect(page.locator('.ma-chat-chips')).toBeHidden();
   await expect(page.locator('.ma-chat-contact-prompt')).toBeHidden();
   // WhatsApp / Messenger links show only when the live chat cannot connect (this mock cannot connect).
@@ -68,6 +68,8 @@ test('clean start screen: heading, one line and the message box only (no quick-t
   await expect(page.locator('.ma-chat-alt')).toBeHidden();
   await expect(page.locator('.ma-chat-attach')).toBeVisible();
   await expect(page.locator('.ma-chat-verified')).toHaveText('✓');
+  await expect(page.locator('#maChatSub')).toContainText('Online · Replies in 2m');
+  await expect(page.locator('.ma-chat-head button[aria-label="চ্যাট বন্ধ করুন"] svg path').first()).toHaveAttribute('d', 'M19 12H5');
   const send = page.locator('.ma-chat-send');
   const composerInput = page.locator('.ma-chat-input');
   await expect(send).toHaveAttribute('aria-disabled', 'true');
