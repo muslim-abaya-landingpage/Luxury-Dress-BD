@@ -215,7 +215,10 @@
     "body.ma-chat-mobile-open.ma-chat-kb #maChatPanel .ma-chat-foot{padding-bottom:8px}" +
     "body.ma-chat-mobile-open.ma-chat-kb #maChatPanel .ma-chat-note{display:none}" +
     "body.ma-chat-mobile-open #maChatPanel .ma-chat-expand,body.ma-chat-mobile-open .ma-chat-fab,body.ma-chat-mobile-open #mobile-bottom-nav,body.ma-chat-mobile-open #stickyOrderBar{display:none!important}" +
-    "body.ma-chat-mobile-open #maChatPanel .ma-chat-input{font-size:16px}}";
+    "body.ma-chat-mobile-open #maChatPanel .ma-chat-input{font-size:16px}" +
+    /* Keep the floating support button above the stacked mobile purchase bar and bottom navigation. */
+    "@media (max-width:768px){body:has(.ma-sales-sticky) .ma-chat-fab,body:has(#stickyOrderBar) .ma-chat-fab{bottom:calc(164px + env(safe-area-inset-bottom,0px))!important}" +
+    "body:has(.ma-sales-sticky) .ma-chat-panel,body:has(#stickyOrderBar) .ma-chat-panel{bottom:calc(226px + env(safe-area-inset-bottom,0px))!important}}";
 
   var ICON_CHAT =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.5L3 21l1.6-5.2A8.5 8.5 0 1 1 21 12z"/></svg>';
