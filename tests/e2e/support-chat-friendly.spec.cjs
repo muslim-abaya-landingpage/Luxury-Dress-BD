@@ -224,6 +224,5 @@ test('product message opens internal chat with the selected product context', as
   await expect(card).toContainText('Black');
   await expect(card.locator('img')).toHaveAttribute('src', 'https://muslimabaya.com/images/test-abaya.webp');
   await expect(card.getByRole('link', { name: 'পণ্য দেখুন' })).toHaveAttribute('href', 'https://muslimabaya.com/product/ABY-TEST-01');
-  await expect(page.locator('.ma-chat-input')).toContainText('');
   await expect(page.locator('.ma-chat-input')).toHaveValue(/এই পণ্যটি সম্পর্কে জানতে চাই/);
 });
