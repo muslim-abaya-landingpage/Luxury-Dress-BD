@@ -682,7 +682,16 @@
       var text = String(input.value || "").trim();
       var hasPayload = !!text || !!pendingImage;
       var disabled = !hasPayload || isSendingMessage;
-      var full = (text || "Hello! I have a question.") + pageContext();
+      var productText = activeProductContext && !productContextSent ? [
+        "পণ্য: " + activeProductContext.name,
+        "পণ্য ID: " + activeProductContext.id,
+        "দাম: ৳" + activeProductContext.price,
+        activeProductContext.size ? "সাইজ: " + activeProductContext.size : "",
+        activeProductContext.color ? "রং: " + activeProductContext.color : "",
+        activeProductContext.image ? "ছবি: " + activeProductContext.image : "",
+        activeProductContext.url ? "লিংক: " + activeProductContext.url : ""
+      ].filter(Boolean).join("\\n") : "";
+      var full = (text || "Hello! I have a question.") + (productText ? "\\n\\n" + productText : "") + pageContext();
       var url = waBase + "?text=" + encodeURIComponent(full);
       if (disabled) {
         send.setAttribute("aria-disabled", "true");
