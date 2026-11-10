@@ -87,13 +87,39 @@
     var trigger = actionTriggerEl; actionTriggerEl = null;
     if (restoreFocus && trigger && document.contains(trigger)) trigger.focus();
   }
+  var messageMenuIcons = {
+    info: '<circle cx="12" cy="12" r="9"></circle><path d="M12 11v5"></path><path d="M12 8h.01"></path>',
+    reply: '<path d="m9 17-5-5 5-5"></path><path d="M4 12h9a7 7 0 0 1 7 7"></path>',
+    copy: '<rect x="8" y="8" width="12" height="12" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"></path>',
+    react: '<circle cx="12" cy="12" r="9"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><path d="M9 9h.01M15 9h.01"></path>',
+    download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="m7 10 5 5 5-5"></path><path d="M12 15V3"></path>',
+    forward: '<path d="m15 17 5-5-5-5"></path><path d="M4 18v-2a4 4 0 0 1 4-4h12"></path>',
+    pin: '<path d="m16 3 5 5-4 1-4 4-1 5-2-2-2 2"></path><path d="m8 8 8 8"></path><path d="m5 21 6-6"></path>',
+    star: '<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9L12 3z"></path>',
+    delete: '<path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="m19 6-1 14H6L5 6"></path><path d="M10 11v5M14 11v5"></path>',
+    back: '<path d="m9 17-5-5 5-5"></path><path d="M4 12h9a7 7 0 0 1 7 7"></path>'
+  };
   function appendMenuButton(menu, label, action, disabled, icon) {
     var button = make("button", "message-menu-item", "");
     button.type = "button"; button.dataset.action = action;
     button.disabled = !!disabled;
-    button.append(make("span", "message-menu-icon", icon || ""), make("span", "", label));
+    button.setAttribute("aria-label", label);
+    var iconWrap = make("span", "message-menu-icon", "");
+    iconWrap.setAttribute("aria-hidden", "true");
+    var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("width", "18"); svg.setAttribute("height", "18");
+    svg.setAttribute("fill", "none"); svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "1.8"); svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+    svg.innerHTML = messageMenuIcons[icon] || messageMenuIcons.info;
+    iconWrap.appendChild(svg);
+    button.append(iconWrap, make("span", "message-menu-label", label));
     menu.appendChild(button);
     return button;
+  }
+  function appendMenuDivider(menu) {
+    menu.appendChild(make("div", "message-menu-divider"));
   }
   function openActionMenu(row, x, y, trigger, view) {
     closeActionMenu(false);
@@ -110,19 +136,19 @@
         b.setAttribute("aria-label", emoji + " রিঅ্যাকশন"); menu.appendChild(b);
       });
     } else {
-      menu.appendChild(make("div", "message-menu-heading", "মেসেজ অপশন"));
-      appendMenuButton(menu, "মেসেজের তথ্য", "info", false, "ⓘ");
+      appendMenuButton(menu, "Message info", "info", false, "info");
       if (row.deleted_at) {
-        if (row.attachment_path) appendMenuButton(menu, "সংযুক্তি পরিষ্কার আবার চেষ্টা", "cleanup", false, "↻");
+        if (row.attachment_path) appendMenuButton(menu, "Retry attachment cleanup", "cleanup", false, "back");
       } else {
-        appendMenuButton(menu, "Reply", "reply", !selectedId || (selectedRow() && selectedRow().status === "closed"), "↩");
-        appendMenuButton(menu, "Copy", "copy", !String(row.body || "").trim(), "▢");
-        appendMenuButton(menu, "React", "react", false, "☺");
-        if (row.attachment_path) appendMenuButton(menu, "Download", "download", false, "↓");
-        appendMenuButton(menu, "Forward", "forward", false, "➦");
-        appendMenuButton(menu, conversationPin && conversationPin.message_id === row.id ? "Unpin" : "Pin", "pin", false, "⌖");
-        appendMenuButton(menu, starredMessageIds[row.id] ? "Unstar" : "Star", "star", false, "☆");
-        appendMenuButton(menu, "Delete", "delete", false, "▤");
+        appendMenuButton(menu, "Reply", "reply", !selectedId || (selectedRow() && selectedRow().status === "closed"), "reply");
+        appendMenuButton(menu, "Copy", "copy", !String(row.body || "").trim(), "copy");
+        appendMenuButton(menu, "React", "react", false, "react");
+        if (row.attachment_path) appendMenuButton(menu, "Download", "download", false, "download");
+        appendMenuButton(menu, "Forward", "forward", false, "forward");
+        appendMenuButton(menu, conversationPin && conversationPin.message_id === row.id ? "Unpin" : "Pin", "pin", false, "pin");
+        appendMenuButton(menu, starredMessageIds[row.id] ? "Unstar" : "Star", "star", false, "star");
+        appendMenuDivider(menu);
+        appendMenuButton(menu, "Delete", "delete", false, "delete");
       }
     }
     document.body.appendChild(menu); actionMenuEl = menu;
