@@ -240,7 +240,7 @@
     "#maChatPanel .ma-chat-send[aria-disabled=true],#maChatPanel .ma-chat-send.is-disabled{background:#efefed;color:#aaa;opacity:1;pointer-events:none;cursor:not-allowed}" +
     "#maChatPanel .ma-chat-foot:focus-within .ma-chat-send[aria-disabled=true]{background:#efefed;color:#aaa}" +
     "#maChatPanel .ma-chat-note{display:block;width:max-content;max-width:100%;margin:7px auto 0;padding:3px 9px;border:1px solid #f0eee9;border-radius:999px;background:#faf9f6;color:#89857c;font-size:10px;line-height:1.4;text-align:center}" +
-    /* Anzaar-inspired brand presentation, using Muslim Abaya's own logo and gold identity. */
+    /* Muslim Abaya brand presentation with its own logo and gold identity. */
     ".ma-chat-fab{height:54px;min-width:0;padding:0 5px 0 18px;gap:13px;overflow:visible;border:1px solid #e9e6df;background:#fff;color:#171717;box-shadow:0 8px 26px rgba(25,22,16,.13);font:800 10.5px/1 Inter,system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase}" +
     ".ma-chat-fab:hover{background:#fff;box-shadow:0 12px 30px rgba(25,22,16,.18);transform:translateY(-2px)}" +
     ".ma-chat-fab:focus-visible{outline:3px solid rgba(201,162,77,.45);outline-offset:3px}" +
