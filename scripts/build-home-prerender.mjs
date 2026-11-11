@@ -25,6 +25,43 @@ const INLINE_CSS = ['index-home-muslim-abaya.min.css', 'home-glass.css', 'liquid
 // Same order as the deferred catalog <script>s in index.html (network-only scripts left out).
 const SCRIPTS = ['product-config.js', 'home-catalog-utils.min.js', 'size-core.js', 'size-storefront.js', 'category-products.js', 'product-links-data.js', 'home-render.min.js'];
 
+function renderCategoryTiles(ctx) {
+  const categories = [
+    ['abaya', 'ABAYA', '/abaya'],
+    ['cover-up', 'COVER UP', '/cover-up'],
+    ['premium-two-piece', 'PREMIUM TWO-PIECE', '/premium-two-piece'],
+    ['tops-kurti', 'TOPS / KURTI', '/tops-kurti'],
+    ['embroidery', 'EMBROIDERY', '/embroidery'],
+    ['hijab', 'HIJAB', '/hijab'],
+    ['panjabi', 'PANJABI', '/panjabi'],
+    ['three-piece-dress', 'THREE PIECE DRESS', '/three-piece-dress'],
+  ];
+  const escapeHtml = (value) => String(value || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  const products = ctx.CATEGORY_PRODUCTS || {};
+  const cards = categories.map(([key, label, route]) => {
+    const list = Array.isArray(products[key]) ? products[key] : [];
+    let image = '';
+    for (const product of list) {
+      const raw = product && (product.image || product.img);
+      if (!product || !raw || /- back|- side/i.test(product.name || '')) continue;
+      image = ctx.maCatalog && typeof ctx.maCatalog.resolveImageUrl === 'function'
+        ? ctx.maCatalog.resolveImageUrl(raw)
+        : raw;
+      if (image) break;
+    }
+    const href = typeof ctx.siteHref === 'function' ? ctx.siteHref(route) : route;
+    return '<a class="ma-image-category-card' + (image ? '' : ' is-placeholder') + '" href="' + escapeHtml(href) + '">' +
+      (image
+        ? '<img src="' + escapeHtml(image) + '" alt="" loading="lazy" decoding="async" width="480" height="600">'
+        : '<span class="ma-cat-placeholder-mark">M</span>') +
+      '<span class="ma-image-category-shade"></span><span class="ma-image-category-name">' + escapeHtml(label) +
+      '</span><span class="ma-image-category-arrow" aria-hidden="true">↗</span></a>';
+  }).join('');
+  return '<section id="ma-image-category-grid" class="ma-image-category-section" aria-label="Shop by category">' +
+    '<div class="ma-image-category-heading"><span>DISCOVER OUR COLLECTION</span><h2>SHOP BY CATEGORY</h2></div>' +
+    '<div class="ma-image-category-grid">' + cards + '</div></section>';
+}
+
 export function renderHomeParts() {
   const noop = () => {};
   const el = () => ({style: {}, setAttribute: noop, appendChild: noop, addEventListener: noop, classList: {add: noop, remove: noop, contains: () => false}});
@@ -53,7 +90,7 @@ export function renderHomeParts() {
   if (typeof ctx.__maHomePrerender !== 'function') throw new Error('home-render.min.js has no __maHomePrerender hook (rebuild with scripts/build-home-speed.mjs)');
   const parts = ctx.__maHomePrerender();
   if (!parts || !parts.sections || !parts.catnav) throw new Error('Homepage prerender produced no sections');
-  return parts;
+  return {...parts, categoryTiles: renderCategoryTiles(ctx)};
 }
 
 const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -73,7 +110,9 @@ export function prerenderIndex(html, parts) {
   const main = '<main id="homeSections" class="home-sections"></main>';
   if (!out.includes(nav) || !out.includes(main)) throw new Error('index.html: empty #homeCatnav / #homeSections not found');
   out = out.replace(nav, () => nav.replace('></nav>', '>' + parts.catnav + '</nav>'));
-  out = out.replace(main, () => main.replace('></main>', ' data-prerendered="1">' + parts.sections + '</main>'));
+  // The image-led category cards must be in the first HTML response. Injecting them after DOMContentLoaded
+  // used to push the already-rendered first product section down by ~700px (CLS ~0.80 on mobile).
+  out = out.replace(main, () => parts.categoryTiles + main.replace('></main>', ' data-prerendered="1">' + parts.sections + '</main>'));
   // The card button-row rules index-home-muslim-abaya.js injects at runtime (same id, so it is not added twice).
   if (parts.btnCss && !out.includes('id="ma-home-btn-row"')) out = out.replace('</head>', () => '<style id="ma-home-btn-row">' + parts.btnCss + '</style>\n</head>');
   return out;
