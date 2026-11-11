@@ -52,7 +52,7 @@ function renderCategoryTiles(ctx) {
     const href = typeof ctx.siteHref === 'function' ? ctx.siteHref(route) : route;
     return '<a class="ma-image-category-card' + (image ? '' : ' is-placeholder') + '" href="' + escapeHtml(href) + '">' +
       (image
-        ? '<img src="' + escapeHtml(image) + '" alt="" loading="lazy" decoding="async" width="480" height="600">'
+        ? '<img src="' + escapeHtml(image) + '" alt="" loading="lazy" fetchpriority="low" decoding="async" width="480" height="600">'
         : '<span class="ma-cat-placeholder-mark">M</span>') +
       '<span class="ma-image-category-shade"></span><span class="ma-image-category-name">' + escapeHtml(label) +
       '</span><span class="ma-image-category-arrow" aria-hidden="true">↗</span></a>';
