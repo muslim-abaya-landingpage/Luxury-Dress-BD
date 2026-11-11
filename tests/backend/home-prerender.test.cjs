@@ -20,7 +20,7 @@ test('prerender renders the first section with the browser renderer', async () =
   assert.ok(parts.btnCss.includes('.ah-card .ah-actions'));
   assert.match(parts.categoryTiles, /id="ma-image-category-grid"/);
   assert.equal((parts.categoryTiles.match(/class="ma-image-category-card/g) || []).length, 8);
-  assert.match(parts.categoryTiles, /loading="lazy" decoding="async" width="480" height="600"/);
+  assert.match(parts.categoryTiles, /loading="lazy" fetchpriority="low" decoding="async" width="480" height="600"/);
 });
 
 test('prerenderIndex inlines the card CSS and fills the empty containers once', async () => {
@@ -38,6 +38,7 @@ test('prerenderIndex inlines the card CSS and fills the empty containers once', 
   assert.equal((out.match(/id="ma-image-category-grid"/g) || []).length, 1, 'category tiles are emitted once');
   assert.ok(!out.includes('<nav id="homeCatnav" class="home-catnav" aria-label="Shop categories"></nav>'));
   assert.ok(out.includes('home-render.min.js'), 'renderer script still loads');
+  assert.doesNotMatch(out, /rel="preload" as="image"[^>]*images\/card/, 'below-the-fold product card is not competing with the hero preload');
 });
 
 test('Cloudflare build runs the prerender before content versioning', () => {
