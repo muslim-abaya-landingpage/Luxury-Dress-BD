@@ -74,7 +74,21 @@ function ensureCategoryStyles() {
       ".product-grid>.card{display:flex!important;flex-direction:column!important;height:100%}" +
       ".product-grid>.card>.card-foot{display:flex!important;flex-direction:column!important;flex:1 1 auto!important}" +
       ".product-grid>.card .card-title-text{min-height:2.8em}" +
-      ".product-grid>.card .card-actions-muslim-abaya{margin-top:auto!important;padding-top:16px!important}";
+      ".product-grid>.card .card-actions-muslim-abaya{margin-top:auto!important;padding-top:16px!important}" +
+      // Narrow screens: override this injected row rule after it is created.
+      "@media(max-width:640px){" +
+      "body.shop-page .product-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}" +
+      "body.shop-page .product-grid>.card{min-width:0!important;max-width:100%!important;overflow:hidden!important;box-sizing:border-box!important}" +
+      "body.shop-page .product-grid>.card>.card-foot{min-width:0!important;max-width:100%!important;box-sizing:border-box!important}" +
+      "body.shop-page .product-grid>.card .card-meta{display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:6px!important;min-width:0!important;flex-wrap:wrap!important}" +
+      "body.shop-page .product-grid>.card .card-title-btn{min-width:0!important;max-width:100%!important;flex:1 1 100%!important}" +
+      "body.shop-page .product-grid>.card .card-title-text{display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:2!important;overflow:hidden!important;overflow-wrap:anywhere!important;line-height:1.35!important;min-height:0!important}" +
+      "body.shop-page .product-grid>.card .card-price{flex:0 1 auto!important;white-space:nowrap!important}" +
+      "body.shop-page .product-grid>.card .card-actions-muslim-abaya{display:flex!important;flex-direction:column!important;flex-wrap:nowrap!important;align-items:stretch!important;gap:7px!important;width:100%!important;min-width:0!important;margin-top:auto!important;padding-top:12px!important;box-sizing:border-box!important}" +
+      "body.shop-page .product-grid>.card .card-actions-muslim-abaya>.muslim-abaya-btn-cart,body.shop-page .product-grid>.card .card-actions-muslim-abaya>.muslim-abaya-btn-msg{display:flex!important;flex:0 0 auto!important;width:100%!important;min-width:0!important;max-width:100%!important;height:auto!important;min-height:42px!important;padding:9px 6px!important;box-sizing:border-box!important;white-space:normal!important;overflow-wrap:anywhere!important;text-align:center!important;justify-content:center!important;line-height:1.25!important;font-size:12px!important}" +
+      "body.shop-page .wrap{padding-left:12px!important;padding-right:12px!important}" +
+      "}" +
+      "@media(max-width:360px){body.shop-page .product-grid{gap:7px!important}body.shop-page .product-grid>.card .card-actions-muslim-abaya>.muslim-abaya-btn-cart,body.shop-page .product-grid>.card .card-actions-muslim-abaya>.muslim-abaya-btn-msg{font-size:11px!important;min-height:40px!important}}";
     document.head.appendChild(btnCss);
   }
   // ⚠️ SPEED FIX — this used to unconditionally overwrite .href on links
