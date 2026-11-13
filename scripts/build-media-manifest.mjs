@@ -41,6 +41,8 @@ function gitDates() {
 export function buildManifest() {
   const dates = gitDates();
   const items = walk(ROOT).filter(isLibraryPhoto).map((p) => ({ path: p, date: dates[p] || 0 }));
+  // A shallow clone (Cloudflare build) gives every file the same date; a wrong date is worse than none.
+  if (new Set(items.map((i) => i.date)).size <= 1) items.forEach((i) => { i.date = 0; });
   items.sort((a, b) => b.date - a.date || a.path.localeCompare(b.path));
   return { version: 1, items };
 }
