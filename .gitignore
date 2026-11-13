@@ -10,3 +10,4 @@ playwright-report/
 test-results/
 lighthouse-reports/
 live-build.json
+media-manifest.json

@@ -62,7 +62,11 @@ test('edit screen: name, description, product data tabs, tags, brand, featured, 
   await page.click('#pmImgRemove');
   await expect(page.locator('#pmImgView')).toContainText('Set product image');
   await page.click('#pmImgEdit');
-  await expect(page.locator('.pm-wp-chooser')).toContainText('Upload from computer');
+  // Like WordPress, the link opens the media window straight away (Upload files / Media Library tabs).
+  await expect(page.locator('#maMediaModal')).toBeVisible();
+  await expect(page.locator('#maMediaModal .mam-tab', { hasText: 'Upload files' })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#maMediaModal')).toBeHidden();
   await expect(page.locator('#pmGalView')).toContainText('Add product gallery images');
   await page.click('#pmGalBox [data-box="toggle"]');
   await expect(page.locator('#pmGalBox')).toHaveClass(/is-closed/);
