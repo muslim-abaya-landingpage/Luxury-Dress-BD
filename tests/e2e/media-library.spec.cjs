@@ -40,6 +40,15 @@ test('set product image from the library: newest first, details panel, single ch
   const titles = await modal.locator('.mam-item').evaluateAll((els) => els.map((e) => e.getAttribute('title')));
   expect(titles).toEqual(['new.webp', 'old.webp', 'site-photo.webp']);
   await expect(modal.locator('.mam-go')).toBeDisabled();
+  // Tiles are squares and rows never overlap, even with many photos (live bug: rows collapsed into strips).
+  await page.evaluate(() => { const s = window.MaMediaLibrary._state; for (let i = 0; i < 40; i++) s.items.push(Object.assign({}, s.items[2], { id: 'x' + i, name: 'x' + i + '.webp' })); });
+  await modal.locator('#mamSearch').fill('.webp');
+  const boxes = await modal.locator('.mam-item').evaluateAll((els) => els.map((e) => { const r = e.getBoundingClientRect(); return [Math.round(r.top), Math.round(r.width), Math.round(r.height)]; }));
+  expect(boxes.length).toBeGreaterThan(20);
+  boxes.forEach(([, w, h]) => expect(Math.abs(w - h)).toBeLessThanOrEqual(1));
+  const rowsTop = [...new Set(boxes.map((b) => b[0]))];
+  for (let i = 1; i < rowsTop.length; i++) expect(rowsTop[i] - rowsTop[i - 1]).toBeGreaterThanOrEqual(boxes[0][2]);
+  await modal.locator('#mamSearch').fill('');
   await modal.locator('.mam-item').first().click();
   await expect(modal.locator('.mam-side')).toContainText('new.webp');
   await expect(modal.locator('.mam-side')).toContainText('Not used by any product');

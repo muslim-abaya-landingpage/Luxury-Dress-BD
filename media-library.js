@@ -195,13 +195,14 @@
     ".mam-note{margin:0 16px 8px;padding:8px 12px;border-left:4px solid #72aee6;background:#f0f6fc}" +
     ".mam-note.is-err{border-left-color:#d63638;background:#fcf0f1}" +
     ".mam-grid{flex:1;overflow:auto;padding:0 16px 16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;align-content:start}" +
-    ".mam-item{position:relative;padding:0;border:0;background:#f0f0f1;cursor:pointer;aspect-ratio:1/1;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1);overflow:hidden}" +
-    ".mam-item img{width:100%;height:100%;object-fit:cover;display:block}" +
+    // Square tiles via padding-bottom (aspect-ratio on grid buttons collapses the rows in Chrome with many photos).
+    ".mam-item{position:relative;display:block;width:100%;height:0!important;min-height:0!important;padding:0 0 100%!important;margin:0;border:0;background:#f0f0f1;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1);overflow:hidden}" +
+    ".mam-item img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}" +
     ".mam-item:focus{outline:2px solid #2271b1;outline-offset:2px}" +
-    ".mam-item.is-sel{box-shadow:inset 0 0 0 3px #fff,0 0 0 4px #2271b1}" +
-    ".mam-check{display:none;position:absolute;top:0;right:0;width:24px;height:24px;background:#2271b1;color:#fff;font-size:15px;line-height:24px;text-align:center}" +
+    ".mam-item.is-sel{box-shadow:inset 0 0 0 3px #fff,0 0 0 4px #2271b1;z-index:1}" +
+    ".mam-check{display:none;position:absolute;z-index:2;top:0;right:0;width:24px;height:24px;background:#2271b1;color:#fff;font-size:15px;line-height:24px;text-align:center}" +
     ".mam-item.is-sel .mam-check{display:block}" +
-    ".mam-badge{position:absolute;left:4px;bottom:4px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;padding:1px 5px;border-radius:2px}" +
+    ".mam-badge{position:absolute;z-index:2;left:4px;bottom:4px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;padding:1px 5px;border-radius:2px}" +
     ".mam-empty{grid-column:1/-1;text-align:center;color:#646970;padding:40px 10px;font-size:14px}" +
     ".mam-side{width:280px;flex:0 0 280px;border-left:1px solid #dcdcde;background:#f6f7f7;overflow:auto;padding:16px}" +
     ".mam-side h2{font-size:12px;text-transform:uppercase;color:#646970;margin:0 0 10px;font-weight:600}" +
