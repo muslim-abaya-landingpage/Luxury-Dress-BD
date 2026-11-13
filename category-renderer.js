@@ -317,6 +317,11 @@ function syncShopCartBadge() {
 }
 function resolveTwoPieceCartLength(item, sizeValue) {
   var picked = String(sizeValue || "").trim();
+  if (/^Palazzo\s/i.test(picked)) {
+    // Only a palazzo length was chosen: keep the product's dress length in front of it.
+    var cfgP = typeof getTwoPieceSizeConfig === "function" ? getTwoPieceSizeConfig(item) : null;
+    return ((cfgP && cfgP.lengthSizeLabel) || "37-38 inch") + " · " + picked;
+  }
   if (picked) return picked;
   if (item && Array.isArray(item.sizeSpecs) && item.sizeSpecs.length) {
     return item.sizeSpecs
@@ -744,8 +749,11 @@ function getSelectedMeasuresText(scopeRoot, idx, p) {
     return v ? " \u00b7 " + m.name + ": " + v : "";
   }).join("");
 }
+// Returns "" when the view has no length/size control (e.g. a free-size two-piece): the cart line then uses the
+// product's own default (two-piece "37-38 inch", abaya its first length). Never guess the abaya length "50" here —
+// that put "Length 50" on free-size two-piece orders while the page showed 37-38 inch.
 function getSelectedSizeForIdx(scopeRoot, idx) {
-  if (!scopeRoot) return "50";
+  if (!scopeRoot) return "";
   var lengthVal = "";
   var activePill = scopeRoot.querySelector(
     ".pqv-length-opt.is-active[data-product-idx='" + idx + "']"
@@ -760,12 +768,12 @@ function getSelectedSizeForIdx(scopeRoot, idx) {
       lengthVal = activePill.getAttribute("data-size-value") || "50";
     } else {
       var sizeEl = scopeRoot.querySelector("[data-size-idx='" + idx + "']");
-      lengthVal = sizeEl ? sizeEl.value : "50";
+      lengthVal = sizeEl ? sizeEl.value : "";
     }
   }
   var palazzoVal = getSelectedPalazzoForIdx(scopeRoot, idx);
   if (palazzoVal) {
-    return String(lengthVal || "").trim() + " · Palazzo " + palazzoVal;
+    return (String(lengthVal || "").trim() ? String(lengthVal).trim() + " · " : "") + "Palazzo " + palazzoVal;
   }
   return lengthVal;
 }
@@ -2192,7 +2200,7 @@ function initStickyOrderBar(root) {
   }
   bar.innerHTML =
     '<button type="button" class="sob-btn sob-cart">Add to Cart</button>' +
-    '<button type="button" class="sob-btn sob-buy">Buy Now</button>' +
+    '<button type="button" class="sob-btn sob-buy" lang="bn">অর্ডার করুন</button>' +
     '<a class="sob-btn sob-msg" target="_blank" rel="noopener">Send Message</a>';
 
   bar.querySelector(".sob-cart").addEventListener("click", function () {
@@ -2757,7 +2765,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     (stock.inStock ? "" : " disabled") +
     ">" +
     maShopBagIcon(16) +
-    '<span lang="en">Buy Now</span></button>' +
+    '<span lang="bn">অর্ডার করুন</span></button>' +
     '<a class="pqv-act pqv-act-msg" href="' +
     waLink +
     "?text=" +

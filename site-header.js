@@ -628,12 +628,15 @@ function buildNavMenuItems() {
               out.push({
                 name: p.name,
                 href: hrefByKey[key] || '/abaya',
-                key: key
+                key: key,
+                rank: window.maSearch.searchRank ? window.maSearch.searchRank(p, key, meta, q) : 1,
+                i: out.length
               });
             }
           });
         });
-        return out;
+        // Best matches first: whole category, then product name, then tags only.
+        return out.sort(function (a, b) { return b.rank - a.rank || a.i - b.i; });
       }
       if (!catalog.length) catalog = flattenCatalog();
       var qLower = q.toLowerCase();

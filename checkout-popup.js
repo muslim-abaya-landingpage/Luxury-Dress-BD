@@ -201,7 +201,7 @@
       "<div class='ma-cop__sum' aria-live='polite'>" +
       "<div class='ma-cop__row'><span>সাবটোটাল</span><span data-cop-sub></span></div>" +
       "<div class='ma-cop__row'><span>ডেলিভারি চার্জ</span><span data-cop-fee></span></div>" +
-      "<div class='ma-cop__row ma-cop__row--total'><span>সর্বমোট</span><span data-cop-total></span></div>" +
+      "<div class='ma-cop__row ma-cop__row--total'><span data-cop-totallabel>সর্বমোট</span><span data-cop-total></span></div>" +
       "</div>" +
       "<p class='ma-cop__fine'>ঢাকা ৳" + FEE_DHAKA + " · ঢাকার বাইরে ৳" + FEE_OUTSIDE + " · " + FREE_DELIVERY_QTY + "টি বা বেশি পণ্যে ফ্রি ডেলিভারি</p>" +
       "<p class='ma-cop__h'>আপনার তথ্য</p>" +
@@ -233,6 +233,9 @@
     $("[data-cop-sub]", root).textContent = money(t.subtotal);
     $("[data-cop-fee]", root).textContent = t.fee === null ? "জেলা বাছাই করুন" : (t.fee === 0 ? "ফ্রি" : money(t.fee));
     $("[data-cop-total]", root).textContent = money(t.total);
+    // Before a district is chosen the total has no delivery charge yet: say so, so it is not a surprise later.
+    var totalLabel = $("[data-cop-totallabel]", root);
+    if (totalLabel) totalLabel.textContent = t.fee === null ? "সর্বমোট (ডেলিভারি চার্জ ছাড়া)" : "সর্বমোট";
     var minus = $("[data-cop-qty='-1']", root);
     var plus = $("[data-cop-qty='1']", root);
     if (minus) minus.disabled = state.busy || t.qty <= 1;

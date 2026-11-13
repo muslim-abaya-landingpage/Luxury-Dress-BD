@@ -59,7 +59,7 @@
                     '</div>' +
                     '<div class="csm-price">Product Price : <strong id="csmPrice">৳0</strong></div>' +
                     '<div class="csm-buttons">' +
-                        '<button type="button" id="csmBuyNow">Buy Now</button>' +
+                        '<button type="button" id="csmBuyNow" lang="bn">অর্ডার করুন</button>' +
                         '<button type="button" id="csmAddCart">Add to Cart</button>' +
                     '</div>' +
                 '</div>' +

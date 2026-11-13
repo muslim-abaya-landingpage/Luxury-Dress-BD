@@ -1217,11 +1217,37 @@ g.getCartLineBaseName = getCartLineBaseName;
   }
 
   /* ---------- Site search (header search box, /category?q=…, /category?tag=…) ---------- */
+  // Bangla and common spellings → one word, applied to the query and to the product text alike, so
+  // "টু পিস", "2 piece" and "two-piece" find the same products, "পাঞ্জাবি" finds "পাঞ্জাবী", "burka" finds "borka".
+  var SEARCH_SYNONYMS = [
+    [/(?:^| )(?:two piece|2 piece|২ পিস|টু পিস|টুপিস|co ord|coord)(?= |$)/g, " twopiece "],
+    [/(?:^| )(?:three piece|3 piece|৩ পিস|থ্রি পিস|থ্রিপিস)(?= |$)/g, " threepiece "],
+    [/(?:^| )(?:বোরকা|বোরখা|বুরকা|বুরখা|borka|borkha|burka|burkha|burqa|burqah|burqa)(?= |$)/g, " borka "],
+    [/(?:^| )(?:আবায়া|আবায়া|এবায়া|abaya|abayas)(?= |$)/g, " abaya "],
+    [/(?:^| )(?:পাঞ্জাবি|পাঞ্জাবী|panjabi|punjabi)(?= |$)/g, " panjabi "],
+    [/(?:^| )(?:হিজাব|hijab|hijabs)(?= |$)/g, " hijab "],
+    [/(?:^| )(?:খিমার|khimar)(?= |$)/g, " khimar "],
+    [/(?:^| )(?:নিকাব|নেকাব|niqab|nikab)(?= |$)/g, " niqab "],
+    [/(?:^| )(?:কুর্তি|কুর্তী|kurti|kurtis)(?= |$)/g, " kurti "],
+    [/(?:^| )(?:টপস|tops)(?= |$)/g, " tops "],
+    [/(?:^| )(?:কাফতান|kaftan|caftan)(?= |$)/g, " kaftan "],
+    [/(?:^| )(?:কারচুপি|karchupi)(?= |$)/g, " karchupi "],
+    [/(?:^| )(?:এম্ব্রয়ডারি|এমব্রয়ডারি|এম্ব্রয়ডারি|embroidery|embroidered)(?= |$)/g, " embroidery "],
+    [/(?:^| )(?:কভার আপ|cover up|coverup)(?= |$)/g, " coverup "]
+  ];
+  // Words people use for the same thing: searching one also finds products that use the other.
+  var SEARCH_ALSO = { borka: ["abaya"], abaya: ["borka"], hijab: ["khimar"], khimar: ["hijab"], kurti: ["tops"], tops: ["kurti"] };
   function searchText(v) {
-    return String(v == null ? "" : v).toLowerCase().replace(/[\s\-_/.,()+]+/g, " ").trim();
+    var t = " " + String(v == null ? "" : v).normalize("NFC").toLowerCase().replace(/[\s\-_/.,()+·|]+/g, " ").trim() + " ";
+    // Run each rule twice: neighbouring matches share the space between them.
+    SEARCH_SYNONYMS.forEach(function (r) { t = t.replace(r[0], r[1]).replace(r[0], r[1]); });
+    return t.replace(/\s+/g, " ").trim();
   }
   function searchTerms(q) {
     return searchText(q).split(" ").filter(function (t) { return t.length > 0; });
+  }
+  function termFound(hay, t) {
+    return hay.indexOf(t) !== -1 || (SEARCH_ALSO[t] || []).some(function (a) { return hay.indexOf(" " + a + " ") !== -1; });
   }
   function categoryLabelText(key, meta) {
     var secs = g.CATALOG_SECTIONS || [];
@@ -1236,11 +1262,19 @@ g.getCartLineBaseName = getCartLineBaseName;
     var terms = searchTerms(q);
     if (!terms.length || !p || !listable(p, "search")) return false;
     var hay = " " + productSearchText(p, key, meta) + " ";
-    return terms.every(function (t) { return hay.indexOf(t) !== -1; });
+    return terms.every(function (t) { return termFound(hay, t); });
+  }
+  /** Ranking for search results: 3 = the whole category matches, 2 = the name matches, 1 = only tags/other text. */
+  function searchRank(p, key, meta, q) {
+    if (categoryMatches(key, meta, q)) return 3;
+    var name = " " + searchText([p && p.name, p && p.id].join(" ")) + " ";
+    return searchTerms(q).every(function (t) { return termFound(name, t); }) ? 2 : 1;
   }
   function categoryMatches(key, meta, q) {
     var t = searchText(q);
-    return !!t && categoryLabelText(key, meta).split(" ").indexOf(t) !== -1;
+    if (!t || t.indexOf(" ") !== -1) return false;
+    var words = categoryLabelText(key, meta).split(" ");
+    return words.indexOf(t) !== -1 || (SEARCH_ALSO[t] || []).some(function (a) { return words.indexOf(a) !== -1; });
   }
   function productHasTag(p, tag) {
     var want = searchText(tag);
@@ -1258,10 +1292,11 @@ g.getCartLineBaseName = getCartLineBaseName;
         var id = p.id || p.name;
         if (seen[id]) return;
         seen[id] = true;
-        out.push(p);
+        out.push({ p: p, rank: searchRank(p, key, meta, q), i: out.length });
       });
     });
-    return out;
+    // Best matches first (category, then name, then tags); same rank keeps the shop order.
+    return out.sort(function (a, b) { return b.rank - a.rank || a.i - b.i; }).map(function (x) { return x.p; });
   }
   function collectProductsByTag(all, tag) {
     var out = [], seen = {};
@@ -1289,6 +1324,7 @@ g.getCartLineBaseName = getCartLineBaseName;
     getTerms: searchTerms,
     productMatches: productMatches,
     categoryMatches: categoryMatches,
+    searchRank: searchRank,
     productHasTag: productHasTag,
     collectProducts: collectProducts,
     collectProductsInCategory: collectProductsInCategory,

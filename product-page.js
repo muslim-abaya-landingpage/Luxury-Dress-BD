@@ -1110,7 +1110,7 @@
       "</div>" +
       "<div class='pd-actions'>" +
       "<button type='button' class='pd-btn pd-btn-outline' id='pdAddCart'>Add to Cart</button>" +
-      "<button type='button' class='pd-btn pd-btn-dark' id='pdBuyNow'>Buy Now</button>" +
+      "<button type='button' class='pd-btn pd-btn-dark' id='pdBuyNow' lang='bn'>অর্ডার করুন</button>" +
       "<button type='button' class='pd-btn pd-btn-outline' id='pdNotifyBtn' style='display:none'>স্টকে এলে জানান</button>" +
       "<a class='pd-btn pd-btn-whatsapp' id='pdSendMsg' target='_blank' rel='noopener noreferrer'>WhatsApp-এ অর্ডার</a>" +
       "</div>" +
@@ -1226,7 +1226,7 @@
     }
     bar.innerHTML =
       '<button type="button" class="sob-btn sob-cart">Add to Cart</button>' +
-      '<button type="button" class="sob-btn sob-buy">Buy Now</button>';
+      '<button type="button" class="sob-btn sob-buy" lang="bn">অর্ডার করুন</button>';
 
     stickyLayoutHandler = syncStickyOrderBarLayout;
     window.addEventListener("resize", stickyLayoutHandler, { passive: true });
