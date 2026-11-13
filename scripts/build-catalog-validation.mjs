@@ -13,5 +13,6 @@ for(const f of sources){const code=fs.readFileSync(path.join(root,f),'utf8');sou
 vm.runInContext(fs.readFileSync(path.join(root,'catalog-validation-core.js'),'utf8'),ctx,{filename:'catalog-validation-core.js'});
 if(JSON.stringify(ctx.window.__maValidationSources)!==JSON.stringify(sources))throw Error('catalog-validation-core.js source list differs');
 const products=ctx.window.__maBuildValidationProducts(ctx.window);
-fs.writeFileSync(path.join(root,'catalog-validation.json'),JSON.stringify({version:1,releaseSha:process.env.CF_PAGES_COMMIT_SHA||'',sources,sourceSha256:createHash('sha256').update(sourceText).digest('hex'),products}));
+const delivery=ctx.window.__maValidationDelivery(ctx.window);
+fs.writeFileSync(path.join(root,'catalog-validation.json'),JSON.stringify({version:1,releaseSha:process.env.CF_PAGES_COMMIT_SHA||'',sources,sourceSha256:createHash('sha256').update(sourceText).digest('hex'),products,delivery}));
 console.log('Validation catalog: '+products.length+' products');

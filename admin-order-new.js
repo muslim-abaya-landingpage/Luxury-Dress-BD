@@ -31,10 +31,15 @@
     return { qty: qty, subtotal: subtotal, shipping: ship, discount: disc, coupon: cp, total: total, advance: adv, due: Math.max(0, total - adv) };
   }
 
-  /** District → delivery charge, from the checkout's own list. */
+  /** District → delivery charge: Store settings (SITE_LINKS.delivery) when loaded, else the checkout's own list. */
   function chargeFor(district, districts) {
     var d = clean(district);
     var hit = (districts || []).filter(function (x) { return x.bn === d || x.en === d; })[0];
+    var set = typeof window !== "undefined" && window.SITE_LINKS && window.SITE_LINKS.delivery;
+    if (set && hit) {
+      var n = parseInt(hit.bn === "ঢাকা" ? set.dhaka : set.outside, 10);
+      if (n >= 0) return n;
+    }
     return hit ? num(hit.fee) : 150;
   }
 

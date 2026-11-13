@@ -1895,7 +1895,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <select id="userArea" required>
                         <option value="">Select district</option>
                     </select>
-                    <p class="delivery-fee-hint">Dhaka ৳80 &middot; Other districts ৳150 &middot; Free delivery on 3+ items</p>
+                    <p class="delivery-fee-hint" id="deliveryFeeHint">Dhaka ৳80 &middot; Other districts ৳150 &middot; Free delivery on 3+ items</p>
                 </div>
                 <div class="form-group form-group-last">
                     <label for="userThana">Thana / Upazila</label>
@@ -1938,11 +1938,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         <span class="delivery-zone-thumb" aria-hidden="true"></span>
                         <label class="delivery-zone-option is-active" data-zone="inside">
                             <input type="radio" name="deliveryZone" value="inside" checked class="visually-hidden">
-                            <span>Inside Dhaka — ৳80</span>
+                            <span data-zone-label="inside">Inside Dhaka — ৳80</span>
                         </label>
                         <label class="delivery-zone-option" data-zone="outside">
                             <input type="radio" name="deliveryZone" value="outside" class="visually-hidden">
-                            <span>Outside Dhaka — ৳150</span>
+                            <span data-zone-label="outside">Outside Dhaka — ৳150</span>
                         </label>
                     </div>
                     <div class="gb-order-summary">
@@ -1954,7 +1954,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     </div>
                     <span id="side-design" class="visually-hidden">0</span>
                     <span id="side-qty" class="visually-hidden">0</span>
-                    <p class="sidebar-meta">Free delivery on 3 or more items</p>
+                    <p class="sidebar-meta" id="sideFreeMeta">Free delivery on 3 or more items</p>
             </div>
             <div class="gb-panel gb-panel-payment" id="paymentMethodPanel">
                 <h3 class="gb-panel-title">Payment method</h3>
@@ -3000,7 +3000,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
 
     var DELIVERY_ZONE_KEY = 'ma_delivery_zone';
-    var DELIVERY_ZONE_RATES = { inside: 80, outside: 150 };
+    // Store settings (Product Manager) → product-config.js → window.maDelivery; same numbers as the order server.
+    var DELIVERY_SET = window.maDelivery ? window.maDelivery.settings() : { dhaka: 80, outside: 150, freeQty: 3 };
+    var DELIVERY_ZONE_RATES = { inside: DELIVERY_SET.dhaka, outside: DELIVERY_SET.outside };
+    (function () {
+        var hint = document.getElementById('deliveryFeeHint');
+        if (hint) hint.textContent = 'Dhaka \u09F3' + DELIVERY_SET.dhaka + ' \u00B7 Other districts \u09F3' + DELIVERY_SET.outside + (DELIVERY_SET.freeQty > 0 ? ' \u00B7 Free delivery on ' + DELIVERY_SET.freeQty + '+ items' : '');
+        var inside = document.querySelector('[data-zone-label="inside"]'), outside = document.querySelector('[data-zone-label="outside"]');
+        if (inside) inside.textContent = 'Inside Dhaka \u2014 \u09F3' + DELIVERY_SET.dhaka;
+        if (outside) outside.textContent = 'Outside Dhaka \u2014 \u09F3' + DELIVERY_SET.outside;
+        var meta = document.getElementById('sideFreeMeta');
+        if (meta) { if (DELIVERY_SET.freeQty > 0) meta.textContent = 'Free delivery on ' + DELIVERY_SET.freeQty + ' or more items'; else meta.hidden = true; }
+    })();
 
     function getDeliveryZone() {
         try {
@@ -3020,7 +3031,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function districtZoneFromValue(val) {
         if (!val) return null;
-        return (parseInt(val, 10) === 80) ? 'inside' : 'outside';
+        var opt = areaSelect && areaSelect.options[areaSelect.selectedIndex];
+        var zone = opt && opt.value === val && opt.getAttribute('data-zone');
+        if (zone) return zone;
+        return (parseInt(val, 10) === DELIVERY_ZONE_RATES.inside) ? 'inside' : 'outside';
     }
 
     function applyDeliveryZoneUI(zone) {
@@ -3037,7 +3051,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function shippingCharge() {
         var q = cartQty();
-        if (q === 0 || q >= 3) return 0; // 3 বা তার বেশি পণ্যে বিনামূল্যে ডেলিভারি
+        if (q === 0 || (DELIVERY_SET.freeQty > 0 && q >= DELIVERY_SET.freeQty)) return 0; // এতগুলো বা বেশি পণ্যে বিনামূল্যে ডেলিভারি
         if (typeof allLinesVirtual === 'function' && allLinesVirtual(orderLines())) return 0; // Virtual পণ্য: ডেলিভারি নেই
         // জেলা বাছাই করা থাকলে চার্জ জেলা থেকেই নেওয়া হয় (Apps Script-ও জেলা দেখে চার্জ লেখে),
         // যাতে টগল/localStorage আর জেলার মধ্যে অমিল হলে ভুল টোটাল না যায়।
@@ -3332,14 +3346,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var sideDiscount = document.getElementById('side-discount');
         var sideTotal = document.getElementById('side-total');
         if (sideSubtotal) sideSubtotal.textContent = formatBdtCheckout(sub);
-        if (sideDelivery) sideDelivery.textContent = formatBdtCheckout(q >= 3 ? 0 : ship);
+        if (sideDelivery) sideDelivery.textContent = formatBdtCheckout(DELIVERY_SET.freeQty > 0 && q >= DELIVERY_SET.freeQty ? 0 : ship);
         var freeHint = document.getElementById('side-freeship');
         if (freeHint) {
             var virtualOnly = typeof window.allLinesVirtual === 'function' && window.allLinesVirtual(orderLines());
-            var left = Math.max(0, 3 - q);
-            freeHint.hidden = !q || virtualOnly;
+            var freeQty = DELIVERY_SET.freeQty;
+            var bn = function (n) { return String(n).replace(/\d/g, function (d) { return '০১২৩৪৫৬৭৮৯'.charAt(+d); }); };
+            var left = Math.max(0, freeQty - q);
+            freeHint.hidden = !q || virtualOnly || !freeQty;
             freeHint.classList.toggle('is-done', left === 0);
-            freeHint.textContent = left === 0 ? '🎉 ৩টি বা বেশি পণ্য — ডেলিভারি ফ্রি' : '🚚 আর ' + (left === 1 ? '১টি' : '২টি') + ' পণ্য যোগ করলে ডেলিভারি ফ্রি';
+            freeHint.textContent = left === 0 ? '🎉 ' + bn(freeQty) + 'টি বা বেশি পণ্য — ডেলিভারি ফ্রি' : '🚚 আর ' + bn(left) + 'টি পণ্য যোগ করলে ডেলিভারি ফ্রি';
         }
         if (sideDiscount) {
             var discAmt = currentDiscountAmount();

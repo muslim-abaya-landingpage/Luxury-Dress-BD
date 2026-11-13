@@ -67,6 +67,7 @@
 <a class="adm-sidebar-item adm-nav-child" href="admin-sizes.html"><span>Sizes</span></a>
 <a class="adm-sidebar-item adm-nav-child" href="stock-analytics.html"><span>Stock &amp; Analytics</span></a>
 <a class="adm-sidebar-item adm-nav-child" href="product-links.html"><span>Product links</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="product-manager.html#store-settings"><span>Store settings</span></a>
 </div></div>
 <div class="adm-nav-group"><a class="adm-sidebar-item adm-nav-top" href="admin-customers.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h18v13H8l-5 4V4ZM7 9h10M7 13h7"/></svg><span>Customers</span></a><div class="adm-nav-children" role="group" aria-label="Customers">
 <a class="adm-sidebar-item adm-nav-child" href="admin-customers.html"><span>Customers</span></a>
@@ -101,6 +102,7 @@
           <button type="button" class="pl-btn pl-btn-secondary" id="pmReload">Reload current data</button>
           <button class="pl-btn pl-btn-secondary" id="pmPublishCheck" type="button">Check publish status</button>
           <button type="button" class="pl-btn pl-btn-secondary" id="pmManageCatsTop">Edit categories</button>
+          <button type="button" class="pl-btn pl-btn-secondary" id="pmStoreSettings" title="Delivery charge and search words">⚙ Store settings</button>
           <button type="button" class="pl-btn pl-btn-secondary" id="pmCsvExportTop">Export CSV</button>
           <button type="button" class="pl-btn pl-btn-secondary" id="pmCsvImportTop">Import CSV</button>
           <a class="pl-btn pl-btn-secondary" href="product-links.html" style="text-decoration:none;display:inline-flex;align-items:center" title="Categories — Product Link URL">Product Links</a>
@@ -4093,6 +4095,74 @@
   }
 
   bindById("pmSave", "click", function(){saveAll().catch(function(){});});
+
+  // ── Store settings: delivery charge + search words (saved in product-config.js with the next publish) ──
+  // The website, both checkouts, the cart and the order server all read these numbers (see maDelivery in
+  // product-utils.js and opsDeliverySettings_ in Apps Script), so what the customer sees is what is charged.
+  function openStoreSettings() {
+    var old = document.getElementById("pmStoreModal"); if (old) old.remove();
+    var cfg = window.SITE_LINKS || (window.SITE_LINKS = {});
+    var d = window.maDelivery ? window.maDelivery.settings() : { dhaka: 80, outside: 150, freeQty: 3 };
+    var words = (Array.isArray(cfg.searchWords) ? cfg.searchWords : []).map(function (g) { return Array.isArray(g) ? g.join(", ") : String(g); }).join("\n");
+    var m = document.createElement("div");
+    m.id = "pmStoreModal";
+    m.setAttribute("role", "dialog"); m.setAttribute("aria-modal", "true"); m.setAttribute("aria-labelledby", "pmStoreTitle");
+    m.innerHTML =
+      '<style>#pmStoreModal{position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:20px;font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1d2327}' +
+      '#pmStoreModal .ss-box{background:#fff;width:100%;max-width:640px;max-height:92vh;overflow:auto;box-shadow:0 5px 15px rgba(0,0,0,.6)}' +
+      '#pmStoreModal h1{font-size:20px;font-weight:600;margin:0;padding:14px 18px;border-bottom:1px solid #dcdcde}' +
+      '#pmStoreModal h2{font-size:14px;margin:0 0 4px}#pmStoreModal section{padding:14px 18px;border-bottom:1px solid #f0f0f1}' +
+      '#pmStoreModal .ss-row{display:grid;grid-template-columns:200px 1fr;gap:6px 12px;align-items:center;margin:8px 0}' +
+      '#pmStoreModal input,#pmStoreModal textarea{border:1px solid #8c8f94;border-radius:4px;padding:6px 8px;font:inherit;width:100%;box-sizing:border-box}#pmStoreModal input{max-width:140px}' +
+      '#pmStoreModal textarea{min-height:120px}#pmStoreModal .ss-help{color:#646970;font-size:12px;margin:4px 0 0}' +
+      '#pmStoreModal .ss-foot{display:flex;gap:8px;justify-content:flex-end;align-items:center;padding:12px 18px}#pmStoreModal .ss-msg{flex:1;color:#b32d2e}' +
+      '#pmStoreModal .ss-go{background:#2271b1;border:1px solid #2271b1;color:#fff;border-radius:3px;padding:0 14px;min-height:34px;cursor:pointer}#pmStoreModal .ss-go[disabled]{opacity:.6}' +
+      '#pmStoreModal .ss-cancel{background:#f6f7f7;border:1px solid #2271b1;color:#2271b1;border-radius:3px;padding:0 14px;min-height:34px;cursor:pointer}' +
+      '@media (max-width:600px){#pmStoreModal{padding:0}#pmStoreModal .ss-box{max-height:100vh;height:100%}#pmStoreModal .ss-row{grid-template-columns:1fr}}</style>' +
+      '<div class="ss-box"><h1 id="pmStoreTitle">Store settings</h1>' +
+      '<section><h2>Delivery charge</h2><p class="ss-help">Used everywhere at once: product order form, checkout page, cart and the order server.</p>' +
+      '<div class="ss-row"><label for="ssDhaka">Dhaka district (৳)</label><input id="ssDhaka" type="number" min="0" max="5000" step="1" inputmode="numeric" value="' + d.dhaka + '"></div>' +
+      '<div class="ss-row"><label for="ssOutside">Other districts (৳)</label><input id="ssOutside" type="number" min="0" max="5000" step="1" inputmode="numeric" value="' + d.outside + '"></div>' +
+      '<div class="ss-row"><label for="ssFree">Free delivery from (pieces)</label><input id="ssFree" type="number" min="0" max="99" step="1" inputmode="numeric" value="' + d.freeQty + '"></div>' +
+      '<p class="ss-help">0 = no free delivery. Example: 3 → an order of 3 or more pieces has free delivery.</p></section>' +
+      '<section><h2>Search words</h2><p class="ss-help">One group per line, words separated by commas. Every word in a line finds the same products. ' +
+      'Built in already: বোরকা/burka/borka, আবায়া, টু পিস/two piece, থ্রি পিস, পাঞ্জাবি/পাঞ্জাবী, হিজাব/khimar, কুর্তি/tops, কাফতান, কারচুপি.</p>' +
+      '<textarea id="ssWords" placeholder="গাউন, gown, maxi&#10;জামা, frock, dress">' + escapeHtml(words) + '</textarea></section>' +
+      '<div class="ss-foot"><span class="ss-msg" id="ssMsg" role="status"></span><button type="button" class="ss-cancel" id="ssCancel">Cancel</button><button type="button" class="ss-go" id="ssSave">Save &amp; publish</button></div></div>';
+    document.body.appendChild(m);
+    var close = function () { m.remove(); };
+    m.addEventListener("click", function (e) { if (e.target === m) close(); });
+    m.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
+    m.querySelector("#ssCancel").addEventListener("click", close);
+    m.querySelector("#ssSave").addEventListener("click", function () {
+      var msg = m.querySelector("#ssMsg");
+      var read = function (id, max) { var v = String(m.querySelector(id).value).trim(); var n = Number(v); return v !== "" && Number.isInteger(n) && n >= 0 && n <= max ? n : null; };
+      var dhaka = read("#ssDhaka", 5000), outside = read("#ssOutside", 5000), freeQty = read("#ssFree", 99);
+      if (dhaka === null || outside === null) { msg.textContent = "Delivery charge must be a whole number from 0 to 5000."; return; }
+      if (freeQty === null) { msg.textContent = "Free delivery must be a whole number from 0 to 99."; return; }
+      var groups = String(m.querySelector("#ssWords").value).split(/\n+/).map(function (line) {
+        return line.split(/[,，;]/).map(function (w) { return w.replace(/\s+/g, " ").trim(); }).filter(Boolean);
+      }).filter(function (g) { return g.length; });
+      var bad = groups.filter(function (g) { return g.length < 2; })[0];
+      if (bad) { msg.textContent = "Each line needs at least two words (\u201c" + bad[0] + "\u201d is alone)."; return; }
+      if (groups.length > 100 || groups.some(function (g) { return g.length > 20 || g.some(function (w) { return w.length > 40; }); })) { msg.textContent = "Too many search words (at most 100 lines, 20 words each)."; return; }
+      var before = { delivery: cfg.delivery, searchWords: cfg.searchWords };
+      cfg.delivery = { dhaka: dhaka, outside: outside, freeQty: freeQty };
+      if (groups.length) cfg.searchWords = groups.map(function (g) { return g.join(", "); }); else delete cfg.searchWords;
+      var btn = m.querySelector("#ssSave"); btn.disabled = true; msg.style.color = "#646970"; msg.textContent = "Publishing…";
+      saveAll(null).then(function () { close(); toast("Store settings saved — live on the website"); }, function (err) {
+        // Not published: put the old values back so the page matches the website.
+        if (before.delivery) cfg.delivery = before.delivery; else delete cfg.delivery;
+        if (before.searchWords) cfg.searchWords = before.searchWords; else delete cfg.searchWords;
+        btn.disabled = false; msg.style.color = "#b32d2e"; msg.textContent = "Not saved: " + (err && err.message || err);
+      });
+    });
+    setTimeout(function () { var first = m.querySelector("#ssDhaka"); if (first) first.focus(); }, 0);
+  }
+  window.pmOpenStoreSettings = openStoreSettings;
+  bindById("pmStoreSettings", "click", openStoreSettings);
+  if (/store-settings/.test(location.hash)) setTimeout(openStoreSettings, 800);
+  window.addEventListener("hashchange", function () { if (/store-settings/.test(location.hash)) openStoreSettings(); });
   var chkBtn = document.getElementById("pmCheckImages");
   if (chkBtn) chkBtn.addEventListener("click", checkAllImages);
 

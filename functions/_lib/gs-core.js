@@ -1562,8 +1562,7 @@ function submitWhatsappMiniOrder(payload) {
   var now = new Date();
   var timestamp = Utilities.formatDate(now, 'GMT+6', 'dd-MM-yyyy HH:mm:ss');
   var orderId = generateOrderId_();
-  var districtChargeMap = getDistrictChargeMap_();
-  var charge = qty > 0 && qty < 3 ? (districtChargeMap[district] || 150) : 0;
+  var charge = opsDeliveryCharge_(district, qty);
   var finalNotes = notes ? ('WhatsApp manual | ' + notes) : 'WhatsApp manual';
 
   var row = appendOnlineOrderRow_(sheet, [
@@ -1883,10 +1882,9 @@ function handleOnlineOrderPost_(e) {
   var orderId = generateOrderId_();
   var eventID = param_(e, 'EventID') || ('order_' + orderId);
 
-  var districtChargeMap = getDistrictChargeMap_();
   var charge = 0;
-  if (validated.qty > 0 && validated.qty < 3 && !(typeof opsAllVirtual_ === 'function' && opsAllVirtual_(validated.cartItems))) {
-    charge = districtChargeMap[validated.district] || 150;
+  if (!(typeof opsAllVirtual_ === 'function' && opsAllVirtual_(validated.cartItems))) {
+    charge = opsDeliveryCharge_(validated.district, validated.qty);
   }
 
   // ── নিরাপত্তা: সার্ভার নিজে দাম হিসাব করে — ক্লায়েন্টের পাঠানো Total সরাসরি বিশ্বাস করা হয় না ──
@@ -3291,7 +3289,24 @@ function updateOrderFromSteadfastWebhook_(payload) {
 }
 
 function getDistrictChargeMap_() {
-  return { 'ঢাকা': 80 };
+  return { 'ঢাকা': opsDeliverySettings_().dhaka };
+}
+
+/** Delivery charge settings from Product Manager → Store settings (product-config.js, delivered in
+ *  catalog-validation.json and checked against the site files by opsCatalog_). Defaults: 80 / 150 / 3. */
+function opsDeliverySettings_() {
+  var d = null;
+  try { d = opsCatalog_().delivery; } catch (e) {}
+  var num = function (v, def, max) { var n = parseInt(v, 10); return isFinite(n) && n >= 0 && n <= max ? n : def; };
+  d = d || {};
+  return { dhaka: num(d.dhaka, 80, 5000), outside: num(d.outside, 150, 5000), freeQty: num(d.freeQty, 3, 99) };
+}
+
+/** Delivery charge for a district (Bangla name) and number of pieces — same rule as the website (maDelivery). */
+function opsDeliveryCharge_(district, qty) {
+  var s = opsDeliverySettings_();
+  if (!(qty > 0) || (s.freeQty > 0 && qty >= s.freeQty)) return 0;
+  return String(district || '').trim() === 'ঢাকা' ? s.dhaka : s.outside;
 }
 
 function getFacebookCapiConfig_() {

@@ -339,8 +339,31 @@ function buildNavMenuItems() {
   var ICON_CHEV_RIGHT =
     '<svg class="slider-arrow-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
 
+  // "Buy 3 Dresses & Enjoy FREE …" follows Product Manager → Store settings (free delivery from N pieces).
+  // With free delivery switched off (0) that line says nationwide home delivery / cash on delivery instead.
+  // site-header.js can run before product-config.js, so the slides are updated again once the page has loaded.
+  function announcementsForDelivery(list) {
+    var d = window.SITE_LINKS && window.SITE_LINKS.delivery;
+    var n = d ? parseInt(d.freeQty, 10) : NaN;
+    if (!(n >= 0 && n <= 99)) return list;
+    return list.map(function (t) {
+      t = String(t);
+      if (!/free\s+(nationwide\s+)?delivery/i.test(t)) return t;
+      if (n === 0) return '🚚 Nationwide Home Delivery · Cash on Delivery';
+      return t.replace(/\bBuy \d+ (Dresses|Items|Pieces)\b/i, function (m, w) { return 'Buy ' + n + ' ' + w; });
+    });
+  }
+  function refreshAnnouncementSlides() {
+    var wanted = announcementsForDelivery(ANNOUNCEMENTS);
+    var slides = document.querySelectorAll('.ann-slide');
+    if (slides.length !== wanted.length) return;
+    for (var i = 0; i < slides.length; i++) if (slides[i].innerHTML !== wanted[i]) slides[i].innerHTML = wanted[i];
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', refreshAnnouncementSlides);
+  else setTimeout(refreshAnnouncementSlides, 0);
+  window.addEventListener('load', refreshAnnouncementSlides);
   function buildAnnouncementSlidesHtml() {
-    return ANNOUNCEMENTS.map(function (text, i) {
+    return announcementsForDelivery(ANNOUNCEMENTS).map(function (text, i) {
       return '<div class="ann-slide' + (i === 0 ? ' active' : '') + '">' + text + '</div>';
     }).join('');
   }

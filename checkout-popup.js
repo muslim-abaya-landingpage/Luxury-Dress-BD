@@ -103,9 +103,11 @@
     var unit = parseInt(state.line.price, 10) || 0;
     var subtotal = unit * qty;
     var fee = null;
-    if (qty >= FREE_DELIVERY_QTY) fee = 0;
+    var rule = window.maDelivery;
+    var freeQty = rule ? rule.settings().freeQty : FREE_DELIVERY_QTY;
+    if (freeQty > 0 && qty >= freeQty) fee = 0;
     else if (typeof window.allLinesVirtual === "function" && window.allLinesVirtual([state.line])) fee = 0;
-    else if (state.district) fee = state.district.fee === FEE_DHAKA ? FEE_DHAKA : (parseInt(state.district.fee, 10) || FEE_OUTSIDE);
+    else if (state.district) fee = rule ? rule.fee(state.district.bn, qty) : (state.district.fee === FEE_DHAKA ? FEE_DHAKA : (parseInt(state.district.fee, 10) || FEE_OUTSIDE));
     return { qty: qty, unit: unit, subtotal: subtotal, fee: fee, total: subtotal + (fee || 0) };
   }
 
@@ -203,7 +205,7 @@
       "<div class='ma-cop__row'><span>ডেলিভারি চার্জ</span><span data-cop-fee></span></div>" +
       "<div class='ma-cop__row ma-cop__row--total'><span data-cop-totallabel>সর্বমোট</span><span data-cop-total></span></div>" +
       "</div>" +
-      "<p class='ma-cop__fine'>ঢাকা ৳" + FEE_DHAKA + " · ঢাকার বাইরে ৳" + FEE_OUTSIDE + " · " + FREE_DELIVERY_QTY + "টি বা বেশি পণ্যে ফ্রি ডেলিভারি</p>" +
+      "<p class='ma-cop__fine'>" + esc(window.maDelivery ? window.maDelivery.hintBn() : "ঢাকা ৳" + FEE_DHAKA + " · ঢাকার বাইরে ৳" + FEE_OUTSIDE + " · " + FREE_DELIVERY_QTY + "টি বা বেশি পণ্যে ফ্রি ডেলিভারি") + "</p>" +
       "<p class='ma-cop__h'>আপনার তথ্য</p>" +
       "<input type='text' name='_hp' tabindex='-1' autocomplete='off' aria-hidden='true' style='position:absolute;left:-9999px;width:1px;height:1px;opacity:0'>" +
       field("name", "আপনার পূর্ণ নাম", true, "<input id='ma-cop-name' name='name' type='text' autocomplete='name' maxlength='80' placeholder='যেমন: ফাতেমা আক্তার'>", "আপনার নাম লিখুন।") +

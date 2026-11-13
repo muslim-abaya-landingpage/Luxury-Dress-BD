@@ -541,13 +541,15 @@ function renderFreeDeliveryHint(cartItems, totalPcs) {
   if (!box) return;
   const virtualOnly = typeof window.allLinesVirtual === 'function' && cartItems && cartItems.length && window.allLinesVirtual(cartItems);
   if (!cartItems || !cartItems.length || virtualOnly) { box.hidden = true; return; }
-  const left = Math.max(0, FREE_DELIVERY_QTY - totalPcs);
+  const freeQty = window.maDelivery ? window.maDelivery.settings().freeQty : FREE_DELIVERY_QTY;
+  if (!freeQty) { box.hidden = true; return; } // free delivery switched off in Store settings
+  const left = Math.max(0, freeQty - totalPcs);
   box.hidden = false;
   box.classList.toggle('is-done', left === 0);
   box.querySelector('p').textContent = left === 0
     ? '🎉 অভিনন্দন! আপনার ডেলিভারি একদম ফ্রি'
-    : '🚚 আর ' + (left === 1 ? '১টি' : '২টি') + ' পণ্য যোগ করলে সারা দেশে ডেলিভারি ফ্রি';
-  box.querySelector('.cart-drawer-freeship-bar span').style.width = Math.min(100, Math.round(totalPcs / FREE_DELIVERY_QTY * 100)) + '%';
+    : '🚚 আর ' + String(left).replace(/\d/g, function (d) { return '০১২৩৪৫৬৭৮৯'.charAt(+d); }) + 'টি পণ্য যোগ করলে সারা দেশে ডেলিভারি ফ্রি';
+  box.querySelector('.cart-drawer-freeship-bar span').style.width = Math.min(100, Math.round(totalPcs / freeQty * 100)) + '%';
 }
 window.renderFreeDeliveryHint = renderFreeDeliveryHint;
 

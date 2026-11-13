@@ -72,4 +72,8 @@ window.__maBuildValidationProducts = function (w) {
   products.forEach(function (p) { if (ids[p.id]) throw Error('Duplicate product IDs'); ids[p.id] = true; });
   return products;
 };
+// Delivery charge for the order server (Store settings in Product Manager → SITE_LINKS.delivery).
+window.__maValidationDelivery = function (w) {
+  return w.maDelivery ? w.maDelivery.settings() : { dhaka: 80, outside: 150, freeQty: 3 };
+};
 window.__maValidationSources = ['product-config.js', 'product-utils.js', 'category-products.js', 'product-links-data.js', 'product-catalog-sync.js'];

@@ -1216,6 +1216,34 @@ g.getCartLineBaseName = getCartLineBaseName;
       '<span class="ma-price-now">\u09F3' + info.sale + '</span>';
   }
 
+  /* ---------- Delivery charge (Product Manager → Store settings; SITE_LINKS.delivery in product-config.js) ----
+   * One rule for the cart, both checkouts and the order server (which reads the same file through
+   * catalog-validation.json): Dhaka district = dhaka, every other district = outside, free from freeQty pieces
+   * (0 = never free). Defaults: 80 / 150 / 3. */
+  var DELIVERY_DEFAULTS = { dhaka: 80, outside: 150, freeQty: 3 };
+  function deliverySettings() {
+    var d = (g.SITE_LINKS && g.SITE_LINKS.delivery) || {};
+    var num = function (v, def, max) { var n = parseInt(v, 10); return isFinite(n) && n >= 0 && n <= max ? n : def; };
+    return {
+      dhaka: num(d.dhaka, DELIVERY_DEFAULTS.dhaka, 5000),
+      outside: num(d.outside, DELIVERY_DEFAULTS.outside, 5000),
+      freeQty: num(d.freeQty, DELIVERY_DEFAULTS.freeQty, 99)
+    };
+  }
+  /** Delivery charge for a district (Bangla name, e.g. "ঢাকা") and number of pieces; null when no district. */
+  function deliveryFee(districtBn, qty) {
+    if (!districtBn) return null;
+    var s = deliverySettings();
+    if (s.freeQty > 0 && (parseInt(qty, 10) || 0) >= s.freeQty) return 0;
+    return String(districtBn).trim() === "ঢাকা" ? s.dhaka : s.outside;
+  }
+  /** "ঢাকা ৳80 · ঢাকার বাইরে ৳150 · 3টি বা বেশি পণ্যে ফ্রি ডেলিভারি" */
+  function deliveryHintBn() {
+    var s = deliverySettings();
+    return "ঢাকা \u09F3" + s.dhaka + " · ঢাকার বাইরে \u09F3" + s.outside + (s.freeQty > 0 ? " · " + s.freeQty + "টি বা বেশি পণ্যে ফ্রি ডেলিভারি" : "");
+  }
+  g.maDelivery = { settings: deliverySettings, fee: deliveryFee, hintBn: deliveryHintBn, defaults: DELIVERY_DEFAULTS };
+
   /* ---------- Site search (header search box, /category?q=…, /category?tag=…) ---------- */
   // Bangla and common spellings → one word, applied to the query and to the product text alike, so
   // "টু পিস", "2 piece" and "two-piece" find the same products, "পাঞ্জাবি" finds "পাঞ্জাবী", "burka" finds "borka".
@@ -1237,10 +1265,30 @@ g.getCartLineBaseName = getCartLineBaseName;
   ];
   // Words people use for the same thing: searching one also finds products that use the other.
   var SEARCH_ALSO = { borka: ["abaya"], abaya: ["borka"], hijab: ["khimar"], khimar: ["hijab"], kurti: ["tops"], tops: ["kurti"] };
+  function baseSearchText(v) {
+    return String(v == null ? "" : v).normalize("NFC").toLowerCase().replace(/[\s\-_/.,()+·|]+/g, " ").trim();
+  }
+  function escapeRe(x) { return x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+  // Owner's own word groups (Product Manager → Store settings → Search words), e.g. "বোরকা, borka, burqa":
+  // every word in a group finds the same products. Built once per settings change.
+  var customRulesKey = null, customRules = [];
+  function customSearchRules() {
+    var groups = (g.SITE_LINKS && Array.isArray(g.SITE_LINKS.searchWords)) ? g.SITE_LINKS.searchWords : [];
+    var key = JSON.stringify(groups);
+    if (key === customRulesKey) return customRules;
+    customRulesKey = key; customRules = [];
+    groups.forEach(function (group, i) {
+      var words = (Array.isArray(group) ? group : String(group || "").split(/[,，;]/)).map(baseSearchText).filter(Boolean);
+      if (words.length < 2) return;
+      var token = "sw" + i + "x";
+      customRules.push([new RegExp("(?:^| )(?:" + words.sort(function (a, b) { return b.length - a.length; }).map(escapeRe).join("|") + ")(?= |$)", "g"), " " + token + " "]);
+    });
+    return customRules;
+  }
   function searchText(v) {
-    var t = " " + String(v == null ? "" : v).normalize("NFC").toLowerCase().replace(/[\s\-_/.,()+·|]+/g, " ").trim() + " ";
+    var t = " " + baseSearchText(v) + " ";
     // Run each rule twice: neighbouring matches share the space between them.
-    SEARCH_SYNONYMS.forEach(function (r) { t = t.replace(r[0], r[1]).replace(r[0], r[1]); });
+    customSearchRules().concat(SEARCH_SYNONYMS).forEach(function (r) { t = t.replace(r[0], r[1]).replace(r[0], r[1]); });
     return t.replace(/\s+/g, " ").trim();
   }
   function searchTerms(q) {

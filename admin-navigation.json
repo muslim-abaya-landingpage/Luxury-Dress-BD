@@ -49,6 +49,10 @@
       {
         "href": "product-links.html",
         "label": "Product links"
+      },
+      {
+        "href": "product-manager.html#store-settings",
+        "label": "Store settings"
       }
     ]
   },

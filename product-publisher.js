@@ -52,12 +52,13 @@
   var sources=['product-config.js','product-utils.js','category-products.js','product-links-data.js','product-catalog-sync.js'];
   var texts={'product-config.js':map['product-config.js'],'product-utils.js':utils,'category-products.js':map['category-products.js'],'product-links-data.js':map['product-links-data.js'],'product-catalog-sync.js':sync};
   if(sources.some(function(f){return typeof texts[f]!=='string';}))throw Error('LIVE_FILES_MISSING');
-  var code='var __post=self.postMessage.bind(self);(function(){var window={},console={log:function(){},info:function(){},warn:function(){},error:function(){}},self,fetch,XMLHttpRequest,importScripts,setTimeout,setInterval,localStorage,sessionStorage,indexedDB,document,location,navigator,postMessage,caches;\n'+sources.map(function(f){return texts[f];}).join('\n;\n')+'\n;\n'+core+'\n;try{__post({ok:true,sources:window.__maValidationSources,products:window.__maBuildValidationProducts(window)});}catch(e){__post({ok:false,error:String(e&&e.message||e)});}})();';
+  var code='var __post=self.postMessage.bind(self);(function(){var window={},console={log:function(){},info:function(){},warn:function(){},error:function(){}},self,fetch,XMLHttpRequest,importScripts,setTimeout,setInterval,localStorage,sessionStorage,indexedDB,document,location,navigator,postMessage,caches;\n'+sources.map(function(f){return texts[f];}).join('\n;\n')+'\n;\n'+core+'\n;try{__post({ok:true,sources:window.__maValidationSources,products:window.__maBuildValidationProducts(window),delivery:window.__maValidationDelivery?window.__maValidationDelivery(window):null});}catch(e){__post({ok:false,error:String(e&&e.message||e)});}})();';
   var url=URL.createObjectURL(new Blob([code],{type:'text/javascript'})),worker=new Worker(url);
   var out=await new Promise(function(resolve,reject){var t=setTimeout(function(){reject(Error('LIVE_TIMEOUT'));},15000);worker.onmessage=function(e){clearTimeout(t);resolve(e.data);};worker.onerror=function(e){clearTimeout(t);e.preventDefault&&e.preventDefault();reject(Error('LIVE_WORKER'));};}).finally(function(){worker.terminate();URL.revokeObjectURL(url);});
   if(!out||!out.ok||JSON.stringify(out.sources)!==JSON.stringify(sources))throw Error('LIVE_VALIDATION');
   var hash=await sha256Hex(sources.map(function(f){return f+'\u0000'+texts[f]+'\u0000';}).join(''));
-  return {products:out.products,json:JSON.stringify({version:1,releaseSha:sha,sources:sources,sourceSha256:hash,products:out.products})};
+  var vj={version:1,releaseSha:sha,sources:sources,sourceSha256:hash,products:out.products};if(out.delivery)vj.delivery=out.delivery;
+  return {products:out.products,json:JSON.stringify(vj)};
  }
  async function pushLive(files,sent,sha){
   try{

@@ -157,9 +157,11 @@ window.CHECKOUT_UPAZILAS_BY_DISTRICT={"বরগুনা":["আমতলী","�
     sel.setAttribute("data-districts-built", "1");
     list.forEach(function (row) {
       var opt = document.createElement("option");
-      opt.value = String(row.fee);
+      var fee = window.maDelivery ? window.maDelivery.fee(row.bn, 1) : row.fee;
+      opt.value = String(fee);
       opt.setAttribute("data-district", row.bn);
-      opt.textContent = row.en === "Dhaka" ? row.en + " (\u09f380)" : row.en;
+      opt.setAttribute("data-zone", row.bn === "ঢাকা" ? "inside" : "outside");
+      opt.textContent = row.en === "Dhaka" ? row.en + " (\u09f3" + fee + ")" : row.en;
       sel.appendChild(opt);
     });
     return true;
