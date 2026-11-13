@@ -23,7 +23,8 @@ window.SITE_FOOTER_CONFIG = {
     instagram: "https://www.instagram.com/muslimabaya.shop/",
     youtube: "https://www.youtube.com/@luxurydress_shop",
     tiktok: "https://www.tiktok.com/@muslimabaya.shop",
-    linkedin: "https://www.linkedin.com/in/muslimabayabd"
+    linkedin: "https://www.linkedin.com/in/muslimabayabd",
+    pinterest: "https://www.pinterest.com/muslimabayabd/"
   },
 
   /** ফুটারের উপরের ট্রাস্ট ব্যাজ স্ট্রিপ — যত খুশি আইটেম যোগ/বাদ দিতে পারবেন */

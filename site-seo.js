@@ -247,7 +247,7 @@
 
   function buildOrganizationSchema() {
     var sameAs = [];
-    ["facebook", "instagram", "youtube", "tiktok"].forEach(function (k) {
+    ["facebook", "instagram", "youtube", "tiktok", "pinterest"].forEach(function (k) {
       if (SOCIAL[k]) sameAs.push(SOCIAL[k]);
     });
     return {

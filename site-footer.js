@@ -7,7 +7,8 @@
   instagram: "https://www.instagram.com/muslimabaya.shop/",
   youtube: "https://www.youtube.com/@luxurydress_shop",
   tiktok: "https://www.tiktok.com/@muslimabaya.shop",
-  linkedin: "https://www.linkedin.com/in/muslimabayabd"
+  linkedin: "https://www.linkedin.com/in/muslimabayabd",
+  pinterest: "https://www.pinterest.com/muslimabayabd/"
 };
   var CONTACT = FOOTER_CFG.contact || {
     email: "muslimabaya@gmail.com",
@@ -233,7 +234,7 @@ esc(SOCIAL.youtube) +
 
 '<a href="' +
 esc(SOCIAL.instagram) +
-'" target="_blank" rel="noopener" class="anz-social-link" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>' +
+'" target="_blank" rel="noopener" class="anz-social-link" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" style="fill:none"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>' +
 
 '<a href="' +
 esc(SOCIAL.tiktok) +
@@ -242,6 +243,10 @@ esc(SOCIAL.tiktok) +
 '<a href="' +
 esc(SOCIAL.linkedin) +
 '" target="_blank" rel="noopener" class="anz-social-link" aria-label="LinkedIn"><svg viewBox="0 0 24 24"><path d="M4.98 3.5C4.98 4.88 3.86 6 2.48 6S0 4.88 0 3.5 1.12 1 2.48 1s2.5 1.12 2.5 2.5zM.5 8h4V24h-4V8zm7 0h3.8v2.2h.1c.5-1 1.9-2.2 4-2.2 4.3 0 5.1 2.8 5.1 6.5V24h-4v-7.4c0-1.8 0-4.1-2.5-4.1s-2.9 1.9-2.9 4V24h-4V8z"/></svg></a>' +
+
+(SOCIAL.pinterest ? '<a href="' +
+esc(SOCIAL.pinterest) +
+'" target="_blank" rel="noopener" class="anz-social-link" aria-label="Pinterest"><svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.08 3.16 9.42 7.62 11.17-.1-.95-.2-2.4.04-3.44.22-.93 1.4-5.94 1.4-5.94s-.36-.72-.36-1.78c0-1.67.97-2.92 2.17-2.92 1.02 0 1.52.77 1.52 1.69 0 1.03-.66 2.57-1 4-.28 1.2.6 2.17 1.78 2.17 2.14 0 3.78-2.26 3.78-5.51 0-2.88-2.07-4.9-5.03-4.9-3.42 0-5.43 2.57-5.43 5.22 0 1.03.4 2.14.9 2.74.1.12.11.22.08.34l-.33 1.36c-.05.22-.18.27-.41.16-1.5-.7-2.44-2.9-2.44-4.66 0-3.79 2.75-7.28 7.94-7.28 4.17 0 7.41 2.97 7.41 6.94 0 4.14-2.61 7.48-6.24 7.48-1.22 0-2.36-.63-2.75-1.38l-.75 2.85c-.27 1.04-1 2.35-1.49 3.15A12 12 0 0 0 12 24c6.63 0 12-5.37 12-12S18.63 0 12 0z"/></svg></a>' : '') +
 
 "</div>" +
       "</div>" +

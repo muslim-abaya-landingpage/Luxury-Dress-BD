@@ -16,7 +16,8 @@ window.SITE_SEO = {
     youtube: "https://www.youtube.com/@luxurydress_shop",
     tiktok: "https://www.tiktok.com/@muslimabaya.shop",
     linkedin: "https://www.linkedin.com/in/muslimabayabd",
-    threads: "https://www.threads.com/@muslimabaya.shop"
+    threads: "https://www.threads.com/@muslimabaya.shop",
+    pinterest: "https://www.pinterest.com/muslimabayabd/"
   },
   pages: {
     "/signin": {
@@ -144,7 +145,8 @@ window.SITE_SEO = {
         window.SITE_SEO.social.youtube,
         window.SITE_SEO.social.tiktok,
         window.SITE_SEO.social.linkedin,
-        window.SITE_SEO.social.threads
+        window.SITE_SEO.social.threads,
+        window.SITE_SEO.social.pinterest
     ]
 };
 

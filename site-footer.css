@@ -550,6 +550,11 @@ a.anz-contact-link:hover {
   margin-top: 7px;
   flex-wrap: wrap;
 }
+/* Desktop: all icons stay on one line; they shrink a little (30px → 24px min) when the column is narrow. */
+@media (min-width: 769px) {
+  .anz-socials { flex-wrap: nowrap; }
+  .anz-socials .anz-social-link { flex: 0 1 30px; min-width: 24px; height: auto; aspect-ratio: 1 / 1; }
+}
 
 .anz-social-link {
   width: 30px;
