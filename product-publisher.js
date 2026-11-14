@@ -73,7 +73,7 @@ function buildMetaFeed(w){
   });
  });
  if(!rows.length)throw Error('META_FEED_EMPTY');
- return [columns].concat(rows).map(function(row){return row.map(cell).join(',');}).join('\\r\\n')+'\\r\\n';
+ return [columns].concat(rows).map(function(row){return row.map(cell).join(',');}).join('\r\n')+'\r\n';
 }`;
   var code='var __post=self.postMessage.bind(self);(function(){var window={},console={log:function(){},info:function(){},warn:function(){},error:function(){}},self,fetch,XMLHttpRequest,importScripts,setTimeout,setInterval,localStorage,sessionStorage,indexedDB,document,location,navigator,postMessage,caches;\n'+(texts['product-catalog-sections.js']||'')+'\n;\n'+sources.map(function(f){return texts[f];}).join('\n;\n')+'\n;\n'+core+'\n;\n'+feedBuilder+'\n;try{__post({ok:true,sources:window.__maValidationSources,products:window.__maBuildValidationProducts(window),delivery:window.__maValidationDelivery?window.__maValidationDelivery(window):null,metaFeed:buildMetaFeed(window)});}catch(e){__post({ok:false,error:String(e&&e.message||e)});}})();';
   var url=URL.createObjectURL(new Blob([code],{type:'text/javascript'})),worker=new Worker(url);
