@@ -123,8 +123,16 @@ if (process.argv[1] && process.argv[1].endsWith('seo-live-audit.mjs')) {
   console.log('Live SEO audit: ' + s.urls + ' sitemap URLs, ' + s.linksChecked + ' other links, ' + s.errors + ' errors, ' + s.warnings + ' warnings, avg ' + s.msAverage + ' ms.');
   report.issues.slice(0, 40).forEach((i) => console.log('  ' + i.level.toUpperCase() + ' [' + i.type + '] ' + i.url + ' — ' + i.message));
   if (process.argv.includes('--send')) {
-    if (!process.env.SEO_AUDIT_KEY) { console.log('SEO_AUDIT_KEY is not set: report not sent.'); process.exit(1); }
-    const res = await fetch(SITE + '/api/seo-report', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-SEO-Audit-Key': process.env.SEO_AUDIT_KEY }, body: JSON.stringify(report) });
+    // GitHub Actions: a short-lived token signed by GitHub for this workflow run (no secret needed).
+    // Otherwise (by hand): SEO_AUDIT_KEY, if the Pages secret of the same name is set.
+    const headers = { 'Content-Type': 'application/json' };
+    if (process.env.ACTIONS_ID_TOKEN_REQUEST_URL && process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN) {
+      const t = await fetch(process.env.ACTIONS_ID_TOKEN_REQUEST_URL + '&audience=' + encodeURIComponent(SITE + '/api/seo-report'), { headers: { Authorization: 'bearer ' + process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN } }).then((r) => r.json());
+      if (!t || !t.value) { console.log('Could not get the GitHub OIDC token: report not sent.'); process.exit(1); }
+      headers.Authorization = 'Bearer ' + t.value;
+    } else if (process.env.SEO_AUDIT_KEY) headers['X-SEO-Audit-Key'] = process.env.SEO_AUDIT_KEY;
+    else { console.log('No GitHub OIDC token and no SEO_AUDIT_KEY: report not sent.'); process.exit(1); }
+    const res = await fetch(SITE + '/api/seo-report', { method: 'POST', headers, body: JSON.stringify(report) });
     const out = await res.json().catch(() => ({}));
     console.log('Report sent: HTTP ' + res.status + ' ' + JSON.stringify(out));
     if (!res.ok || !out.ok) process.exit(1);

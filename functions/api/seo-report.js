@@ -2,10 +2,14 @@
  * POST /api/seo-report
  *   Owner (Admin → SEO Manager):   {Token, action:"get"} → {ok, build, pages, live:[latest scheduled audits]}
  *       build = seo-report.json (checked at every deploy), pages = seo-pages.json (automatic vs manual page SEO)
- *   Scheduled audit (GitHub Actions, .github/workflows/seo-audit.yml):
- *       header X-SEO-Audit-Key = Pages secret SEO_AUDIT_KEY, body = the live-site report → stored in D1 (last 60 kept)
+ *   Scheduled audit (GitHub Actions, .github/workflows/seo-audit.yml), body = the live-site report → stored in D1:
+ *       Authorization: Bearer <GitHub OIDC token> — signed by GitHub for this repository's main-branch seo-audit
+ *       workflow (no secret to set up or rotate), or header X-SEO-Audit-Key = Pages secret SEO_AUDIT_KEY.
  */
 import { ownerRequest } from './seo-settings.js';
+import { verifyGithubOidc } from '../_lib/github-oidc.js';
+
+export const OIDC = { audience: 'https://muslimabaya.com/api/seo-report', repository: 'muslim-abaya-landingpage/Luxury-Dress-BD', workflow: '.github/workflows/seo-audit.yml', ref: 'refs/heads/main' };
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });
@@ -38,9 +42,15 @@ export function cleanLiveReport(r) {
 export async function handleSeoReport(request, env, deps = {}) {
   const db = env && env.STOCK_DB;
   const auditKey = request.headers.get('X-SEO-Audit-Key');
-  if (auditKey !== null) {
+  const bearer = /^Bearer\s+(\S+)$/.exec(request.headers.get('Authorization') || '');
+  if (auditKey !== null || bearer) {
     if (request.method !== 'POST') return json({ ok: false, error: 'METHOD' }, 405);
-    if (!env.SEO_AUDIT_KEY || !sameKey(auditKey, env.SEO_AUDIT_KEY)) return json({ ok: false, error: 'FORBIDDEN' }, 403);
+    let allowed = auditKey !== null && !!env.SEO_AUDIT_KEY && sameKey(auditKey, env.SEO_AUDIT_KEY);
+    if (!allowed && bearer) {
+      try { await verifyGithubOidc(bearer[1], OIDC, deps.fetch || fetch, deps.now ? deps.now() : Date.now()); allowed = true; }
+      catch (e) { return json({ ok: false, error: 'FORBIDDEN', reason: String(e.message || '').slice(0, 30) }, 403); }
+    }
+    if (!allowed) return json({ ok: false, error: 'FORBIDDEN' }, 403);
     if (!db) return json({ ok: false, error: 'NOT_CONFIGURED' }, 503);
     let report;
     try { const text = await request.text(); if (text.length > 600000) throw Error('big'); report = cleanLiveReport(JSON.parse(text)); }
@@ -75,7 +85,7 @@ export async function handleSeoReport(request, env, deps = {}) {
       });
     } catch (e) { live = []; }
   }
-  return json({ ok: true, build, pages, live, scheduled: !!env.SEO_AUDIT_KEY });
+  return json({ ok: true, build, pages, live, scheduled: true });
 }
 
 export const onRequestPost = ({ request, env }) => handleSeoReport(request, env);

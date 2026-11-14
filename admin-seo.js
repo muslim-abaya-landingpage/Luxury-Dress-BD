@@ -57,7 +57,7 @@
     if (r.build) info.push("Deploy check: " + new Date(r.build.generatedAt).toLocaleString() + ".");
     else info.push("The deploy check report appears after the next deploy.");
     if (live) info.push("Daily live check: " + new Date(live.storedAt || live.generatedAt).toLocaleString() + " (" + (live.summary.urls || 0) + " URLs, average " + (live.summary.msAverage || 0) + " ms).");
-    else info.push(r.scheduled ? "The daily live check has not reported yet (it runs every night)." : "The daily live check is not connected yet (secret SEO_AUDIT_KEY).");
+    else info.push("The daily live check has not reported yet (it runs every night at 02:41).");
     if (r.live && r.live.length > 1) info.push("Trend (newest first): " + r.live.map(function (x) { return (x.summary ? x.summary.errors : "?") + " err"; }).join(" · "));
     $("seoAuditInfo").textContent = info.join(" ");
     var sc = $("seoSitemapCount"); if (sc && b) sc.textContent = "Now: " + b.sitemapUrls + " URLs.";

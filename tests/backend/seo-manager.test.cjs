@@ -233,7 +233,8 @@ test('SEO Manager is wired into the deploy, the admin menu, robots and the sched
   assert.match(read('robots.txt'), /^Disallow: \/admin-$/m);
   const wf = read('.github/workflows/seo-audit.yml');
   assert.match(wf, /schedule:/);
-  assert.match(wf, /secrets\.SEO_AUDIT_KEY/);
+  assert.match(wf, /id-token: write/);
+  assert.doesNotMatch(wf, /secrets\./);
   assert.match(read('site-seo.js'), /meta\.inStock === false \? "out of stock" : "in stock"/);
 });
 
@@ -263,4 +264,38 @@ test('a product ticked in extra categories does not break the deploy checks (its
   assert.equal(cats.abaya[0]._extraCategory, undefined);
   assert.equal(cats.embroidery[0]._extraCategory, true);
   assert.equal(cats.embroidery[0].id, 'X1');
+});
+
+test('scheduled audit proves itself with a GitHub OIDC token: only this repo, main, seo-audit.yml, our audience', async () => {
+  const { verifyGithubOidc, _resetJwksCache } = await import(path.join(root, 'functions/_lib/github-oidc.js'));
+  const { handleSeoReport, OIDC } = await import(path.join(root, 'functions/api/seo-report.js'));
+  const { subtle } = globalThis.crypto;
+  const pair = await subtle.generateKey({ name: 'RSASSA-PKCS1-v1_5', modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' }, true, ['sign', 'verify']);
+  const other = await subtle.generateKey({ name: 'RSASSA-PKCS1-v1_5', modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' }, true, ['sign', 'verify']);
+  const pub = await subtle.exportKey('jwk', pair.publicKey);
+  const b64 = (o) => Buffer.from(typeof o === 'string' ? o : JSON.stringify(o)).toString('base64url');
+  const now = Date.parse('2026-11-15T00:00:00Z'), sec = now / 1000;
+  const good = { iss: 'https://token.actions.githubusercontent.com', aud: OIDC.audience, exp: sec + 300, nbf: sec - 10, repository: OIDC.repository, ref: 'refs/heads/main', job_workflow_ref: OIDC.repository + '/.github/workflows/seo-audit.yml@refs/heads/main' };
+  const sign = async (claims, key = pair.privateKey, kid = 'k1') => { const h = b64({ alg: 'RS256', kid }), c = b64(claims); const sig = Buffer.from(await subtle.sign('RSASSA-PKCS1-v1_5', key, Buffer.from(h + '.' + c))).toString('base64url'); return h + '.' + c + '.' + sig; };
+  const fetchJwks = async (url) => { assert.equal(url, 'https://token.actions.githubusercontent.com/.well-known/jwks'); return new Response(JSON.stringify({ keys: [Object.assign({ kid: 'k1' }, pub)] })); };
+  _resetJwksCache();
+  assert.equal((await verifyGithubOidc(await sign(good), OIDC, fetchJwks, now)).repository, OIDC.repository);
+  const bad = async (claims, key, msg) => assert.rejects(verifyGithubOidc(await sign(claims, key), OIDC, fetchJwks, now), new RegExp(msg));
+  await bad(Object.assign({}, good, { repository: 'someone/fork' }), undefined, 'BAD_REPOSITORY');
+  await bad(Object.assign({}, good, { ref: 'refs/heads/feature' }), undefined, 'BAD_REF');
+  await bad(Object.assign({}, good, { job_workflow_ref: OIDC.repository + '/.github/workflows/other.yml@refs/heads/main' }), undefined, 'BAD_WORKFLOW');
+  await bad(Object.assign({}, good, { aud: 'https://evil.example' }), undefined, 'BAD_AUDIENCE');
+  await bad(Object.assign({}, good, { exp: sec - 1 }), undefined, 'EXPIRED');
+  await bad(good, other.privateKey, 'BAD_SIGNATURE');
+  // End to end through the endpoint: stored with a good token, refused with a forged one.
+  const db = fakeDb();
+  const env = { STOCK_DB: db };
+  const deps = { fetch: fetchJwks, now: () => now };
+  const report = { generatedAt: '2026-11-15T00:00:00Z', summary: { urls: 1 }, issues: [] };
+  const okRes = await handleSeoReport(req('/api/seo-report', report, { Authorization: 'Bearer ' + await sign(good) }), env, deps);
+  assert.equal(okRes.status, 200);
+  assert.equal(db.rows.length, 1);
+  const forged = await handleSeoReport(req('/api/seo-report', report, { Authorization: 'Bearer ' + await sign(good, other.privateKey) }), env, deps);
+  assert.equal(forged.status, 403);
+  assert.equal(db.rows.length, 1);
 });
