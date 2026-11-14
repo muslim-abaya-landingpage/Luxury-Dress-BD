@@ -216,3 +216,20 @@ test('"colour · size" stock rows: the product page follows the chosen colour, t
   });
   expect(lines).toEqual([['maroon', 2]]);
 });
+
+test('PDP color buttons switch to the matching image for every saved colorway', async ({ page }) => {
+  await page.route(/\/category-products\.js(\?.*)?$/, (r) => r.fulfill({ contentType: 'application/javascript', body: realCatalog }));
+  await serve(page, await sizeConfig());
+  await page.goto('/product.html?id=premium-linen-floral-two-piece');
+  const main = page.locator('#pdMainImg');
+  const expected = {
+    'Dark Teal': 'dr-10-1794682838198-0-cc836176d9bb68e6c9e3.webp',
+    Multicolor: 'dr-10-1794682426794-0-70b6d4d91a86aecfa6a5.webp',
+    'Navy Blue & White': 'dr-10-1794682079414-0-bceac8de83b8e8599d82.webp',
+  };
+  for (const [color, filename] of Object.entries(expected)) {
+    await page.locator('#pdColorPickGroup .pd-option-btn', { hasText: color }).click();
+    await expect(main).toHaveAttribute('src', new RegExp(filename.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    await expect(page.locator('#pdColorPickGroup .pd-option-btn.is-active')).toHaveText(color);
+  }
+});

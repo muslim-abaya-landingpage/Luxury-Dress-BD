@@ -634,7 +634,7 @@ window.CATEGORY_PRODUCTS = {
       imageViewOf: "",
       category: "premium-two-piece",
       categoryLabel: "প্রিমিয়াম টু-পিস",
-      colorVariants: [{"color":"dark-teal","colorLabel":"Dark Teal","image":"https://images.muslimabaya.com/images/uploads/dr-10-1794682426794-0-70b6d4d91a86aecfa6a5.webp"},{"color":"multicolor","colorLabel":"Multicolor","image":""},{"color":"navy-blue-white","colorLabel":"Navy Blue & White","image":""}],
+      colorVariants: [{"color":"dark-teal","colorLabel":"Dark Teal","image":"https://images.muslimabaya.com/images/uploads/dr-10-1794682838198-0-cc836176d9bb68e6c9e3.webp"},{"color":"multicolor","colorLabel":"Multicolor","image":"https://images.muslimabaya.com/images/uploads/dr-10-1794682426794-0-70b6d4d91a86aecfa6a5.webp"},{"color":"navy-blue-white","colorLabel":"Navy Blue & White","image":"https://images.muslimabaya.com/images/uploads/dr-10-1794682079414-0-bceac8de83b8e8599d82.webp"}],
       bodySizes: ["48","50","52"],
       sleeveSizes: ["18"],
       dressLengths: ["44"],

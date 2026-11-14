@@ -1469,11 +1469,36 @@ g.getCartLineBaseName = getCartLineBaseName;
   function colorKey(label) {
     return String(label || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   }
+  function assignColorVariantImages(p, variants) {
+    var gallery = [];
+    [p && (p.image || p.img)].concat(p && Array.isArray(p.images) ? p.images : []).forEach(function (src) {
+      src = String(src || "").trim();
+      if (!src || gallery.some(function (item) { return item.toLowerCase() === src.toLowerCase(); })) return;
+      gallery.push(src);
+    });
+    var used = {};
+    (variants || []).forEach(function (row) {
+      var src = row && String(row.image || row.src || "").trim();
+      if (src) used[src.split(/[?#]/)[0].toLowerCase()] = true;
+    });
+    var remaining = gallery.filter(function (src) { return !used[src.split(/[?#]/)[0].toLowerCase()]; });
+    return (variants || []).map(function (row) {
+      if (!row || row.image || row.src) return row;
+      var key = colorKey(row.colorLabel || row.label || row.color);
+      var index = remaining.findIndex(function (src) {
+        var name = fileNameFromUrl(src).toLowerCase().replace(/[^a-z0-9]+/g, "-");
+        return key && ("-" + name + "-").indexOf("-" + key + "-") !== -1;
+      });
+      if (index < 0 && remaining.length) index = 0;
+      var image = index >= 0 ? remaining.splice(index, 1)[0] : "";
+      return Object.assign({}, row, { image: image });
+    });
+  }
   function reconcileColorVariants(p) {
     if (!p || !Array.isArray(p.colorVariants) || !p.colorVariants.length) return null;
     var labels = String(p.colorLabel || p.color || "").split(/[,，;；|]/).map(function (x) { return x.trim(); }).filter(Boolean);
     var rows = p.colorVariants.filter(Boolean);
-    if (labels.length < 2) return rows;
+    if (labels.length < 2) return assignColorVariantImages(p, rows);
     var used = {};
     var rowKeys = rows.map(function (r) { return colorKey(r.colorLabel || r.label || r.color) || String(r.color || ""); });
     var out = rows.map(function (r, i) {
@@ -1494,10 +1519,11 @@ g.getCartLineBaseName = getCartLineBaseName;
       return { color: colorKey(label) || String(rows[i].color || "color-" + (i + 1)), colorLabel: label, image: rows[i].image || rows[i].src || "" };
     }).filter(Boolean);
     rest.forEach(function (label) { out.push({ color: colorKey(label) || "color-" + (out.length + 1), colorLabel: label, image: "" }); });
-    return out;
+    return assignColorVariantImages(p, out);
   }
 
   g.maReconcileColorVariants = reconcileColorVariants;
+  g.maAssignColorVariantImages = assignColorVariantImages;
   g.maCatalog = {
     resolveImageUrl: resolveImageUrl,
     resolveProductPageLink: resolveProductPageLink,

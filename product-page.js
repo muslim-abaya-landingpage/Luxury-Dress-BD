@@ -182,6 +182,7 @@
     if (Array.isArray(p.colorVariants) && p.colorVariants.length) {
       // Follow the colors saved in the admin panel, not an older per-photo list (product-utils.js).
       var rows = typeof window.maReconcileColorVariants === "function" ? window.maReconcileColorVariants(p) || p.colorVariants : p.colorVariants;
+      if (typeof window.maAssignColorVariantImages === "function") rows = window.maAssignColorVariantImages(p, rows);
       return rows
         .map(function (row) {
           if (!row) return null;
@@ -202,7 +203,7 @@
     var labelList = String(p.colorLabel || "").split(/[,，;；|]/).map(function (v) { return v.trim(); }).filter(Boolean);
     if (labelList.length > 1) {
       var colorImages = Array.isArray(p.images) ? p.images : [];
-      return labelList.map(function (label) {
+      var parsedVariants = labelList.map(function (label) {
         var key = colorKeyFromLabel(label);
         var image = "";
         // Map only when a filename clearly identifies the selected color.
@@ -216,6 +217,7 @@
         });
         return { color: key, colorLabel: label, image: image };
       });
+      return typeof window.maAssignColorVariantImages === "function" ? window.maAssignColorVariantImages(p, parsedVariants) : parsedVariants;
     }
     var gallery = Array.isArray(p.images) && p.images.length ? p.images : [];
     var looksLikeColors = String(p.colorLabel || p.color || "").toLowerCase().indexOf("multiple") !== -1;

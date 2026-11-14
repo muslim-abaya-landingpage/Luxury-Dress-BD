@@ -1244,6 +1244,7 @@ function getProductColorVariants(p) {
   if (Array.isArray(p.colorVariants) && p.colorVariants.length) {
     // Follow the colors saved in the admin panel, not an older per-photo list (product-utils.js).
     var rows = typeof window.maReconcileColorVariants === "function" ? window.maReconcileColorVariants(p) || p.colorVariants : p.colorVariants;
+    if (typeof window.maAssignColorVariantImages === "function") rows = window.maAssignColorVariantImages(p, rows);
     return rows
       .map(function (row) {
         if (!row) return null;
@@ -1274,7 +1275,7 @@ function getProductColorVariants(p) {
         image: image
       });
     });
-    if (out.length > 1) return out;
+    if (out.length > 1) return typeof window.maAssignColorVariantImages === "function" ? window.maAssignColorVariantImages(p, out) : out;
   }
   if (p.color || p.colorLabel) {
     return [
