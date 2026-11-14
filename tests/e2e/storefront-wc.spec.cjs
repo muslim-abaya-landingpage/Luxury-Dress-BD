@@ -14,6 +14,7 @@ let catalog = real;
 catalog = addFields(catalog, 'ABY-MAROON-1', 'regularPrice: 1299, regularPriceByType: {"Full Set": 1299}');
 catalog = addFields(catalog, 'ABY-BLK-3P-02', 'status: "draft"');
 catalog = addFields(catalog, 'ABY-BLACK-3', 'featured: true, tags: ["eid", "Black Abaya"]');
+catalog += '\n(function(){var p=(window.CATEGORY_PRODUCTS.abaya||[]).find(function(x){return x.id==="ABY-MAROON-1";});if(p)p.colorVariants=[{color:"maroon",colorLabel:"Maroon",image:p.image},{color:"navy-blue",colorLabel:"Navy Blue",image:p.image}];var q=(window.CATEGORY_PRODUCTS.abaya||[]).find(function(x){return x.id==="ABY-BLACK-3";});if(q)q.colorLabel="MAROON, Navy Blue";})();\n';
 // Isolate sale-price assertions from changing real store prices.
 // The fixture deliberately defines two price options; production catalog is untouched.
 catalog += '\n(function(){var p=(window.CATEGORY_PRODUCTS.abaya||[]).find(function(x){return x.id==="ABY-MAROON-1";});if(p){p.price=999;p.types=["Full Set","Abaya Only"];p.priceByType={"Full Set":999,"Abaya Only":799};p.regularPrice=1299;p.regularPriceByType={"Full Set":1299};}})();\n';
@@ -40,6 +41,21 @@ test('category page: Draft is hidden, featured comes first, sale price is crosse
   await expect(maroon.locator('.card-price .ma-price-now')).toHaveText('৳999');
   // "Newest" sort exists and orders by date added.
   await expect(page.locator('#shopSort option[value="newest"]')).toHaveCount(1);
+});
+
+test('colour filters auto-list every saved colourway and match normalized labels', async ({ page }) => {
+  await useCatalog(page);
+  await page.goto('/abaya');
+  const navy = page.locator('.color-filter-check[value="navy blue"]');
+  await expect(navy).toHaveCount(1);
+  await navy.check();
+  await expect(page.locator('#productGrid a[href="/product/ABY-MAROON-1"]').first()).toBeVisible();
+  await expect(page.locator('#productGrid a[href="/product/ABY-BLACK-3"]').first()).toBeVisible();
+  await expect(page.locator('#productGrid a[href="/product/ABY-BLK-3P-02"]').first()).toBeHidden();
+  await navy.uncheck();
+  await page.locator('.color-filter-check[value="maroon"]').check();
+  await expect(page.locator('#productGrid a[href="/product/ABY-MAROON-1"]').first()).toBeVisible();
+  await expect(page.locator('#productGrid a[href="/product/ABY-BLACK-3"]').first()).toBeVisible();
 });
 
 test('product page: sale on the first option, plain price on an option without a sale', async ({ page }) => {

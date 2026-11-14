@@ -3218,36 +3218,48 @@ function escapeHtml(str) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 }
-/** Unique color keys from products → one checkbox each (auto when `color` is set in category-products.js). */
-function formatColorKeyLabel(key) {
-  return String(key)
-    .replace(/-/g, " ")
-    .replace(/\b\w/g, function (ch) {
-      return ch.toUpperCase();
-    });
+/** Unique color keys from products → one checkbox each (auto from saved colors/colourways). */
+function normalizeProductColorFilterKey(value) {
+  return String(value || "").replace(/\s+/g, " ").trim().toLocaleLowerCase();
 }
-function getProductColorFilterKey(p) {
-  if (p.colorLabel) return String(p.colorLabel).trim();
-  if (p.color) return String(p.color).trim();
-  return "";
+function splitProductColorFilterLabels(value) {
+  return String(value || "").split(/[,，;；|]/).map(function (label) {
+    return label.replace(/\s+/g, " ").trim();
+  }).filter(Boolean);
 }
-function getProductColorFilterLabel(p, colorMap) {
-  if (p.colorLabel) return String(p.colorLabel).trim();
-  if (p.color && colorMap[p.color] && colorMap[p.color].label) return colorMap[p.color].label;
-  if (p.color) return formatColorKeyLabel(p.color);
-  return "";
+/** A product may have several saved colourways; each is a match, not one combined label. */
+function getProductColorFilterValues(p) {
+  if (!p) return [];
+  var variants = Array.isArray(p.colorVariants) ? p.colorVariants : [];
+  var values = variants.map(function (row) {
+    return row && (row.colorLabel || row.label || row.color);
+  }).filter(Boolean);
+  if (!values.length) {
+    values = splitProductColorFilterLabels(p.colorLabel || "");
+    if (values.length === 1 && /^(?:\d+\s+)?colou?rs?$|^multiple colou?rs?$/i.test(values[0])) values = [];
+    if (!values.length && p.color) values = splitProductColorFilterLabels(p.color);
+  }
+  var seen = {};
+  return values.filter(function (value) {
+    var key = normalizeProductColorFilterKey(value);
+    if (!key || seen[key]) return false;
+    seen[key] = true;
+    return true;
+  });
+}
+function getProductColorFilterEntries(p) {
+  return getProductColorFilterValues(p).map(function (label) {
+    return { key: normalizeProductColorFilterKey(label), label: label };
+  });
 }
 function getProductColorOptions(products) {
-  var colorMap = window.FILTER_COLOR_MAP || {};
   var seen = {};
   var options = [];
   products.forEach(function (p) {
-    var key = getProductColorFilterKey(p);
-    if (!key || seen[key]) return;
-    seen[key] = true;
-    options.push({
-      key: key,
-      label: getProductColorFilterLabel(p, colorMap)
+    getProductColorFilterEntries(p).forEach(function (entry) {
+      if (seen[entry.key]) return;
+      seen[entry.key] = true;
+      options.push(entry);
     });
   });
   options.sort(function (a, b) {
@@ -4063,8 +4075,8 @@ function bindShopCategoryControls(root, products) {
       var price = parseInt(p.price, 10) || 550;
       var show = true;
       if (filterState.colors.length) {
-        var productColorKey = getProductColorFilterKey(p);
-        if (!productColorKey || filterState.colors.indexOf(productColorKey) === -1) show = false;
+        var productColorKeys = getProductColorFilterEntries(p).map(function (entry) { return entry.key; });
+        if (!filterState.colors.some(function (key) { return productColorKeys.indexOf(key) !== -1; })) show = false;
       }
       if (filterState.sizes.length) {
         var productSizes = Array.isArray(p.sizes) ? p.sizes.map(String) : [];
