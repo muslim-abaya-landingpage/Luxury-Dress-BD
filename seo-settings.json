@@ -1,6 +1,9 @@
 {
   "version": 1,
-  "global": {},
+  "global": {
+    "ga4PropertyId": "519625321",
+    "gscProperty": "https://muslimabaya.com/"
+  },
   "pages": {
     "/help": {
       "description": "Muslim Abaya সহায়তা: কীভাবে অর্ডার করবেন, ক্যাশ অন ডেলিভারি, bKash/Nagad পেমেন্ট, ডেলিভারি চার্জ, রিটার্ন ও অর্ডার ট্র্যাকিং—সব প্রশ্নের উত্তর এক জায়গায়।"
