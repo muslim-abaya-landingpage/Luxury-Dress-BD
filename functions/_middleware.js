@@ -29,7 +29,24 @@ export async function onRequest(context) {
     return new Response('Not found', { status: 404, headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex' } });
   }
   if (request.method !== 'GET' && request.method !== 'HEAD') return next();
-  const path = url.pathname.replace(/^\//, '');
+  // Serve the generated Meta Commerce CSV explicitly through Pages Assets.
+  // This keeps the feed reachable even when the static asset fallback is bypassed by routing.
+  if (url.pathname === '/meta-product-feed.csv') {
+    const assetUrl = new URL('/meta-product-feed.csv', url.origin);
+    const assetRequest = new Request(assetUrl.toString(), { method: 'GET', headers: request.headers });
+    const asset = await env.ASSETS.fetch(assetRequest);
+    if (!asset.ok) return new Response('Meta product feed is not present in this deployment.', {
+      status: 503,
+      headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' }
+    });
+    const headers = new Headers(asset.headers);
+    headers.set('Content-Type', 'text/csv; charset=utf-8');
+    headers.set('Content-Disposition', 'inline; filename="meta-product-feed.csv"');
+    headers.set('Cache-Control', 'public, max-age=300, s-maxage=300');
+    headers.set('X-Content-Type-Options', 'nosniff');
+    return new Response(request.method === 'HEAD' ? null : asset.body, { status: 200, headers });
+  }
+  const path = url.pathname.replace(/^\\//, '');
   if (LIVE_FILES.indexOf(path) >= 0) return serveLiveFile(request, env, path);
   const m = /^product\/([^/]+?)(?:\.html)?$/.exec(path);
   if (m) {
