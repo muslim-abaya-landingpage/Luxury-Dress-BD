@@ -52,7 +52,7 @@
   var sources=['product-config.js','product-utils.js','category-products.js','product-links-data.js','product-catalog-sync.js'];
   var texts={'product-config.js':map['product-config.js'],'product-utils.js':utils,'category-products.js':map['category-products.js'],'product-links-data.js':map['product-links-data.js'],'product-catalog-sync.js':sync};
   if(sources.some(function(f){return typeof texts[f]!=='string';}))throw Error('LIVE_FILES_MISSING');
-  var feedBuilder = \`
+  var feedBuilder = String.raw`
 function buildMetaFeed(w){
  var site='https://muslimabaya.com',columns=['id','title','description','availability','condition','price','link','image_link','brand','product_type','additional_image_link','color','size','inventory'];
  function cell(v){return '"'+String(v==null?'':v).replace(/[\r\n]+/g,' ').replace(/"/g,'""')+'"';}
@@ -75,7 +75,7 @@ function buildMetaFeed(w){
  if(!rows.length)throw Error('META_FEED_EMPTY');
  return [columns].concat(rows).map(function(row){return row.map(cell).join(',');}).join('\\r\\n')+'\\r\\n';
 }\`;
-  var code='var __post=self.postMessage.bind(self);(function(){var window={},console={log:function(){},info:function(){},warn:function(){},error:function(){}},self,fetch,XMLHttpRequest,importScripts,setTimeout,setInterval,localStorage,sessionStorage,indexedDB,document,location,navigator,postMessage,caches;\\n'+(texts['product-catalog-sections.js']||'')+'\\n;\\n'+sources.map(function(f){return texts[f];}).join('\\n;\\n')+'\\n;\\n'+core+'\\n;\\n'+feedBuilder+'\\n;try{__post({ok:true,sources:window.__maValidationSources,products:window.__maBuildValidationProducts(window),delivery:window.__maValidationDelivery?window.__maValidationDelivery(window):null,metaFeed:buildMetaFeed(window)});}catch(e){__post({ok:false,error:String(e&&e.message||e)});}})();';
+  var code='var __post=self.postMessage.bind(self);(function(){var window={},console={log:function(){},info:function(){},warn:function(){},error:function(){}},self,fetch,XMLHttpRequest,importScripts,setTimeout,setInterval,localStorage,sessionStorage,indexedDB,document,location,navigator,postMessage,caches;\n'+(texts['product-catalog-sections.js']||'')+'\n;\n'+sources.map(function(f){return texts[f];}).join('\n;\n')+'\n;\n'+core+'\n;\n'+feedBuilder+'\n;try{__post({ok:true,sources:window.__maValidationSources,products:window.__maBuildValidationProducts(window),delivery:window.__maValidationDelivery?window.__maValidationDelivery(window):null,metaFeed:buildMetaFeed(window)});}catch(e){__post({ok:false,error:String(e&&e.message||e)});}})();';
   var url=URL.createObjectURL(new Blob([code],{type:'text/javascript'})),worker=new Worker(url);
   var out=await new Promise(function(resolve,reject){var t=setTimeout(function(){reject(Error('LIVE_TIMEOUT'));},15000);worker.onmessage=function(e){clearTimeout(t);resolve(e.data);};worker.onerror=function(e){clearTimeout(t);e.preventDefault&&e.preventDefault();reject(Error('LIVE_WORKER'));};}).finally(function(){worker.terminate();URL.revokeObjectURL(url);});
   if(!out||!out.ok||JSON.stringify(out.sources)!==JSON.stringify(sources))throw Error('LIVE_VALIDATION');
