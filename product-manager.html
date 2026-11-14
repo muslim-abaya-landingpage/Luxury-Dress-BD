@@ -2020,7 +2020,13 @@
           list.splice(editTarget.index, 1);
           if (!products[primary]) products[primary] = [];
           products[primary].push(p);
-          editTarget = { cat: primary, index: products[primary].length - 1 };
+          // Keep "new product" / automatic-link flags when moving between categories.
+          editTarget = Object.assign({}, editTarget, { cat: primary, index: products[primary].length - 1 });
+          // Option prices (e.g. Full Set / Abaya Only) belong to the old category's options: a category without
+          // options (and a product without its own options) must not keep them.
+          var newDefs = window.SITE_LINKS && window.SITE_LINKS.defaults && window.SITE_LINKS.defaults.byCategory && window.SITE_LINKS.defaults.byCategory[primary];
+          var newTypes = (Array.isArray(p.types) && p.types.length) ? p.types : ((newDefs && Array.isArray(newDefs.types)) ? newDefs.types : []);
+          if (!newTypes.length) { delete p.priceByType; delete p.regularPriceByType; }
         }
         redraw(primary !== catKey ? "Moved to " + enName(sections.find(function (x) { return x.key === primary; }) || { menu: primary }) + " — click Save changes." : undefined);
       });

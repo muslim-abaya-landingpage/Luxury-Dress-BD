@@ -613,3 +613,27 @@ test('Slug box: clearing it does not erase the link; Bangla is turned into Engli
   const file = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
   expect(file).toContain('id: "Leopard-Linen-Set"');
 });
+
+test('moving a new product to a category without options drops the old option prices and keeps the automatic link', async ({ page }) => {
+  await stub(page);
+  await page.goto('/product-manager.html');
+  await page.waitForTimeout(500);
+  await page.evaluate(() => {
+    window.__published = null;
+    window.MaCatalogPublisher = Object.assign({}, window.MaCatalogPublisher, { isReady: () => true,
+      publish: (files) => { window.__published = files; return Promise.resolve({ ok: true }); } });
+  });
+  await page.click('#pmHeaderAdd'); // starts in Abaya with Full Set / Abaya Only prices
+  await page.check('[data-cat-check="premium-two-piece"]');
+  await page.uncheck('[data-cat-check="abaya"]');
+  await page.fill('.pm-wp-name', 'লেপার্ড প্রিন্ট সেট');
+  await expect(page.locator('#pmEf_id')).toHaveValue('leopard-print-set'); // still automatic after the move
+  await page.fill('[data-ef="regularPrice"]', '750');
+  await page.click('#pmSaveDraft');
+  await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
+  const file = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
+  const at = file.indexOf('id: "leopard-print-set"'), entry = file.slice(at, file.indexOf('\n    }', at));
+  expect(entry).toContain('price: 750');
+  expect(entry).not.toContain('Full Set');
+  expect(entry).not.toContain('Abaya Only');
+});
