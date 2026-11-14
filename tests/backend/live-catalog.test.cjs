@@ -89,6 +89,7 @@ function payload(token, over = {}) {
     files: { 'category-products.js': SAVED['category-products.js'], 'product-links-data.js': SAVED['product-links-data.js'], 'product-catalog-sections.js': SAVED['product-catalog-sections.js'], 'product-config.js': SAVED['product-config.js'] },
     validation: JSON.stringify({ version: 1, releaseSha: SHA, sources: [], sourceSha256: 'c'.repeat(64), products: [{ id: 'NEW-1' }] }),
     index: { 'OLD-1': 'abaya', 'NEW-1': 'abaya' }, names: { 'NEW-1': 'New' },
+    metaFeed: '"id","title","description"\r\n"NEW-1","New","New product"\r\n',
     assets: [],
   }, over);
 }
@@ -128,6 +129,14 @@ test('owner save goes live at once; catalog-only copy, R2 URLs, new product page
   env.ASSETS = assetsFor(STATIC, { sha: OLD, commitTime: NOW / 1000 - 600, history: [OLD] });
   const get = (p, headers = {}) => new Request('https://muslimabaya.com/' + p, { headers });
   const deps = { cache };
+  const saved = JSON.parse(db._db.prepare('SELECT v FROM live_catalog WHERE k = ?').get('state').v);
+  assert.equal(saved.metaFeed, payload('tok-owner').metaFeed, 'the matching Meta feed is persisted with the live catalog');
+  const { onRequest } = await import(path.join(root, 'functions', '_middleware.js'));
+  const feedResponse = await onRequest({ request: get('meta-product-feed.csv'), env, next: async () => new Response('fallback') });
+  assert.equal(feedResponse.status, 200);
+  assert.equal(feedResponse.headers.get('Content-Type'), 'text/csv; charset=utf-8');
+  assert.equal(feedResponse.headers.get('X-MA-Live'), '1');
+  assert.equal(await feedResponse.text(), payload('tok-owner').metaFeed, 'Meta receives the new feed before static deployment');
 
   const site = await live.serveLiveFile(get('category-products.js?v=123'), env, 'category-products.js', deps);
   const text = await site.text();
