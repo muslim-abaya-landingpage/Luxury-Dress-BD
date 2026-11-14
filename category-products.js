@@ -493,7 +493,7 @@ window.CATEGORY_PRODUCTS = {
       brand: "Muslim Abaya",
       dateAdded: "2026-08-01",
       seoTitle: "Black White Polka Dot Two-Piece Set | Muslim Abaya",
-      seoDescription: "Shop Black White Polka Dot Women's Two-Piece Set at Muslim Abaya. Premium Alex Soft Georgette fabric, free size up to body 42, comfortable and stylish design. Order online in Bangladesh.",
+      seoDescription: "Black White Polka Dot Women's Two-Piece Set — premium Alex Soft Georgette, free size up to body 42. দাম ৳990। সারা বাংলাদেশে ক্যাশ অন ডেলিভারি।",
       productUrl: "/",
       variationAttributes: ["body","length"]
     },
@@ -1580,6 +1580,7 @@ window.CATEGORY_PRODUCTS = {
       bodySizes: ["46"],
       lengthSizes: ["50","52","54","56"],
       dressLengths: ["50","52","54","56"],
+      status: "trash",
       tags: ["Dubai Cherry Abaya","Premium Abaya","Embroidery Abaya","Ladies Abaya","Luxury Abaya","Muslim Abaya","Dubai Fabric","Premium Collection","Black Abaya"],
       brand: "Muslim Abaya",
       dateAdded: "2026-11-05",
@@ -1589,7 +1590,6 @@ window.CATEGORY_PRODUCTS = {
       sleeveSizes: [],
       palazzoLengths: [],
       variationAttributes: ["type","color","body","length"],
-      status: "trash",
       trashedAt: "2026-11-15"
     }
   ],
