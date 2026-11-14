@@ -32,6 +32,29 @@ export async function onRequest(context) {
   const path = url.pathname.replace(/^\//, '');
   if (LIVE_FILES.indexOf(path) >= 0) return serveLiveFile(request, env, path);
   const m = /^product\/([^/]+?)(?:\.html)?$/.exec(path);
-  if (m) return serveProductPage(request, env, decodeURIComponent(m[1]), next);
+  if (m) {
+    const res = await serveProductPage(request, env, decodeURIComponent(m[1]), next);
+    return res.status === 404 ? (await seoRedirect(request, env, url)) || res : res;
+  }
   return next();
+}
+
+/**
+ * Admin → SEO Manager redirects for paths served by Functions (/product/…), where _redirects does not run.
+ * Used only when the page does not exist (404), so a live product is never redirected away.
+ * seo-redirects.json is written at deploy by scripts/build-seo-settings.mjs.
+ */
+export async function seoRedirect(request, env, url) {
+  try {
+    if (!env || !env.ASSETS) return null;
+    const res = await env.ASSETS.fetch(new Request(url.origin + '/seo-redirects.json'));
+    if (!res.ok) return null;
+    const map = await res.json();
+    const key = decodeURIComponent(url.pathname).replace(/\.html$/, '').replace(/\/+$/, '').toLowerCase();
+    const hit = map && map[key];
+    if (!hit || !hit.to) return null;
+    const target = hit.to.charAt(0) === '/' ? url.origin + hit.to : hit.to;
+    if (new URL(target).origin !== url.origin) return null;
+    return new Response(null, { status: hit.code === 302 ? 302 : 301, headers: { Location: target, 'Cache-Control': 'public, max-age=300' } });
+  } catch (e) { return null; }
 }

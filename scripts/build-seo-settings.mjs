@@ -134,6 +134,10 @@ export function run() {
   }
   write('seo-pages.json', JSON.stringify({ version: 1, pages: report }));
   write('_redirects', managedBlock(read('_redirects'), redirectLines(settings)));
+  // /product/… is served by Pages Functions, where _redirects does not apply: functions/_middleware.js reads this.
+  const fnRedirects = {};
+  settings.redirects.filter((r) => /^\/product\//i.test(r.from)).forEach((r) => { fnRedirects[r.from.replace(/\.html$/, '').toLowerCase()] = { to: r.to, code: r.code }; });
+  write('seo-redirects.json', JSON.stringify(fnRedirects));
   write('robots.txt', managedBlock(read('robots.txt'), settings.robots.disallow.map((d) => 'Disallow: ' + d), 'Sitemap:'));
   console.log('SEO Manager: ' + Object.keys(settings.pages).length + ' page setting(s) on ' + changed + ' page(s), ' + settings.redirects.length + ' redirect(s), ' + settings.robots.disallow.length + ' robots line(s).');
 }

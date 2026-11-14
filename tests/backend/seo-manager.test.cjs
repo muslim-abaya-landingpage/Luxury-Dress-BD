@@ -236,3 +236,16 @@ test('SEO Manager is wired into the deploy, the admin menu, robots and the sched
   assert.match(wf, /secrets\.SEO_AUDIT_KEY/);
   assert.match(read('site-seo.js'), /meta\.inStock === false \? "out of stock" : "in stock"/);
 });
+
+test('product redirects (SEO Manager): only a missing /product/ page is redirected, only within the site', async () => {
+  const mw = await import(path.join(root, 'functions/_middleware.js'));
+  const map = { '/product/old-dup': { to: '/product/ABY-BUTTERFLY-14', code: 301 }, '/product/evil': { to: 'https://evil.example/x', code: 301 } };
+  const env = { ASSETS: { fetch: async (r) => new URL(r.url).pathname === '/seo-redirects.json' ? new Response(JSON.stringify(map), { status: 200 }) : new Response('missing', { status: 404 }) } };
+  const ctx = (p) => ({ request: new Request('https://muslimabaya.com' + p), env, next: async () => new Response('<html data-product-id="x">', { status: p.indexOf('live-one') >= 0 ? 200 : 404 }) });
+  const red = await mw.onRequest(ctx('/product/Old-Dup'));
+  assert.equal(red.status, 301);
+  assert.equal(red.headers.get('Location'), 'https://muslimabaya.com/product/ABY-BUTTERFLY-14');
+  assert.equal((await mw.onRequest(ctx('/product/evil'))).status, 404);
+  assert.equal((await mw.onRequest(ctx('/product/unknown'))).status, 404);
+  assert.equal((await mw.onRequest(ctx('/product/live-one'))).status, 200);
+});

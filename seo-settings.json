@@ -1,7 +1,22 @@
 {
   "version": 1,
   "global": {},
-  "pages": {},
-  "redirects": [],
-  "robots": { "disallow": [] }
+  "pages": {
+    "/help": {
+      "description": "Muslim Abaya সহায়তা: কীভাবে অর্ডার করবেন, ক্যাশ অন ডেলিভারি, bKash/Nagad পেমেন্ট, ডেলিভারি চার্জ, রিটার্ন ও অর্ডার ট্র্যাকিং—সব প্রশ্নের উত্তর এক জায়গায়।"
+    },
+    "/privacy": {
+      "description": "Muslim Abaya privacy policy: what we collect when you order (name, phone, address), how it is used and kept secure, cookies and tracking, and when it is shared."
+    }
+  },
+  "redirects": [
+    {
+      "from": "/product/premium-dubai-cherry-fabrics-abaya",
+      "to": "/product/ABY-BUTTERFLY-14",
+      "code": 301
+    }
+  ],
+  "robots": {
+    "disallow": []
+  }
 }
