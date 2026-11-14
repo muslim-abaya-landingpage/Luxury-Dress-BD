@@ -299,3 +299,17 @@ test('scheduled audit proves itself with a GitHub OIDC token: only this repo, ma
   assert.equal(forged.status, 403);
   assert.equal(db.rows.length, 1);
 });
+
+test('/api/seo-google: a switched-off Google API is reported as API_DISABLED with its enable link', async () => {
+  const { searchConsole, analytics } = await import(path.join(root, 'functions/api/seo-google.js'));
+  const off = (api) => async () => new Response(JSON.stringify({ error: { code: 403, status: 'PERMISSION_DENIED', message: api + ' has not been used in project 123 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/' + api + '/overview?project=123 then retry.', details: [{ reason: 'SERVICE_DISABLED' }] } }), { status: 403 });
+  const g = plain(await searchConsole(off('searchconsole.googleapis.com'), 't', 'https://muslimabaya.com/', Date.parse('2026-11-15')));
+  assert.equal(g.error, 'API_DISABLED');
+  assert.equal(g.enableUrl, 'https://console.developers.google.com/apis/api/searchconsole.googleapis.com/overview?project=123');
+  const a = plain(await analytics(off('analyticsdata.googleapis.com'), 't', '519625321'));
+  assert.equal(a.error, 'API_DISABLED');
+  assert.match(a.enableUrl, /analyticsdata\.googleapis\.com/);
+  const denied = plain(await analytics(async () => new Response(JSON.stringify({ error: { code: 403, status: 'PERMISSION_DENIED', message: 'User does not have sufficient permissions for this property.' } }), { status: 403 }), 't', '519625321'));
+  assert.equal(denied.error, 'NO_ACCESS');
+  assert.match(denied.detail, /sufficient permissions/);
+});

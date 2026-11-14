@@ -20,7 +20,18 @@ const day = (ms) => new Date(ms).toISOString().slice(0, 10);
 async function call(fetchImpl, token, url, body) {
   const res = await fetchImpl(url, { method: body ? 'POST' : 'GET', headers: { Authorization: 'Bearer ' + token, ...(body ? { 'Content-Type': 'application/json' } : {}) }, body: body ? JSON.stringify(body) : undefined });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) { const e = Error(res.status === 403 || res.status === 401 ? 'NO_ACCESS' : res.status === 404 ? 'NOT_FOUND' : 'GOOGLE_' + res.status); e.status = res.status; throw e; }
+  if (!res.ok) {
+    const g = (data && data.error) || {};
+    const reason = ((g.details || []).map((d) => d && d.reason).filter(Boolean)[0]) || ((g.errors || [])[0] || {}).reason || g.status || '';
+    // An API that is switched off in the Google Cloud project answers 403 SERVICE_DISABLED / accessNotConfigured.
+    const off = /SERVICE_DISABLED|accessNotConfigured/i.test(reason + ' ' + (g.message || ''));
+    const e = Error(off ? 'API_DISABLED' : res.status === 403 || res.status === 401 ? 'NO_ACCESS' : res.status === 404 ? 'NOT_FOUND' : 'GOOGLE_' + res.status);
+    e.status = res.status;
+    e.detail = String(g.message || '').replace(/\s+/g, ' ').slice(0, 300);
+    const link = /https:\/\/console\.(?:developers|cloud)\.google\.com\/[^\s"']+/.exec(g.message || '');
+    if (off && link) e.enableUrl = link[0];
+    throw e;
+  }
   return data;
 }
 
@@ -40,9 +51,9 @@ export async function searchConsole(fetchImpl, token, property, now) {
         queries: (queries.rows || []).map(row), pages: (pages.rows || []).map(row), byDate: (dates.rows || []).map(row),
         sitemaps: (sitemaps.sitemap || []).map((s) => ({ path: s.path, lastSubmitted: s.lastSubmitted || '', lastDownloaded: s.lastDownloaded || '', errors: Number(s.errors) || 0, warnings: Number(s.warnings) || 0, isPending: !!s.isPending })),
       };
-    } catch (e) { lastErr = e; }
+    } catch (e) { lastErr = e; if (e.message === 'API_DISABLED') break; }
   }
-  return { connected: false, error: (lastErr && lastErr.message) || 'NO_ACCESS' };
+  return { connected: false, error: (lastErr && lastErr.message) || 'NO_ACCESS', detail: (lastErr && lastErr.detail) || '', enableUrl: (lastErr && lastErr.enableUrl) || '' };
 }
 
 export async function analytics(fetchImpl, token, propertyId) {
@@ -58,7 +69,7 @@ export async function analytics(fetchImpl, token, propertyId) {
     const v = (r, i) => Number(((r.rows || [])[0] || { metricValues: [] }).metricValues[i] && r.rows[0].metricValues[i].value) || 0;
     const rows = (r) => (r.rows || []).map((x) => ({ key: x.dimensionValues[0].value, sessions: Number(x.metricValues[0].value) || 0 }));
     return { connected: true, propertyId, totals: { sessions: v(totals, 0), users: v(totals, 1), pageViews: v(totals, 2), engagementRate: v(totals, 3) }, channels: rows(channels), organicLandingPages: rows(landing) };
-  } catch (e) { return { connected: false, error: e.message || 'NO_ACCESS' }; }
+  } catch (e) { return { connected: false, error: e.message || 'NO_ACCESS', detail: e.detail || '', enableUrl: e.enableUrl || '' }; }
 }
 
 export async function handleSeoGoogle(request, env, deps = {}) {

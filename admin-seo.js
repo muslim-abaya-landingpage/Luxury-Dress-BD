@@ -198,19 +198,20 @@
   function loadGoogle() {
     state.googleLoaded = true;
     api("/api/seo-google", { action: "summary" }).then(function (res) {
+      var off = function (x, name) { return '<p><b>' + name + ' is switched off</b> in the Google Cloud project of this connection. Turn it on (free): <a href="' + esc(x.enableUrl || "https://console.cloud.google.com/apis/library") + '" target="_blank" rel="noopener">Enable ' + name + '</a>, wait 2 minutes and reload this page.</p>'; };
       var how = function (what, where) { return '<p>Not connected yet. To connect it for free: in ' + where + ' add this e-mail as a user with <b>' + what + '</b> access:</p><p><code>' + esc(res.serviceAccount) + '</code></p><p>Then reload this page. No password or key is shared.</p>'; };
       var g = res.gsc;
       $("seoGsc").innerHTML = g.connected
         ? '<p><b>' + num(g.totals.clicks) + '</b> clicks · <b>' + num(g.totals.impressions) + '</b> impressions · CTR ' + (g.totals.ctr * 100).toFixed(1) + '% · avg. position ' + g.totals.position.toFixed(1) + ' <small>(' + esc(g.startDate) + ' – ' + esc(g.endDate) + ', ' + esc(g.property) + ')</small></p>' +
           '<div class="seo-scroll"><table class="seo-table"><thead><tr><th>Top searches</th><th>Clicks</th><th>Impr.</th><th>Pos.</th></tr></thead><tbody>' + g.queries.slice(0, 15).map(function (q) { return '<tr><td>' + esc(q.key) + '</td><td>' + num(q.clicks) + '</td><td>' + num(q.impressions) + '</td><td>' + q.position.toFixed(1) + '</td></tr>'; }).join("") + '</tbody></table></div>' +
           '<p>Sitemaps: ' + (g.sitemaps.length ? g.sitemaps.map(function (s) { return esc(s.path) + (s.errors ? " — " + s.errors + " errors" : " — OK") + (s.lastDownloaded ? " (read " + esc(s.lastDownloaded.slice(0, 10)) + ")" : ""); }).join("; ") : "none submitted — in Search Console → Sitemaps add sitemap.xml") + '</p>'
-        : how("Restricted", "Search Console → Settings → Users and permissions → Add user,");
+        : g.error === "API_DISABLED" ? off(g, "Google Search Console API") : how("Restricted", "Search Console → Settings → Users and permissions → Add user,") + (g.detail ? '<p><small>Google: ' + esc(g.detail) + '</small></p>' : "");
       var a = res.ga4;
       $("seoGa4").innerHTML = a.connected
         ? '<p>Last 28 days: <b>' + num(a.totals.sessions) + '</b> sessions · <b>' + num(a.totals.users) + '</b> users · ' + num(a.totals.pageViews) + ' page views</p>' +
           '<p>' + a.channels.map(function (c) { return esc(c.key) + ": " + num(c.sessions); }).join(" · ") + '</p>' +
           (a.organicLandingPages.length ? '<p><b>Google (organic) landing pages:</b> ' + a.organicLandingPages.slice(0, 8).map(function (c) { return esc(c.key) + " (" + num(c.sessions) + ")"; }).join(", ") + '</p>' : "")
-        : (a.error === "NO_PROPERTY_ID" ? '<p>Enter the GA4 property ID below and save.</p>' + how("Viewer", "GA4 → Admin → Property access management → +,") : how("Viewer", "GA4 → Admin → Property access management → +,"));
+        : a.error === "API_DISABLED" ? off(a, "Google Analytics Data API") : (a.error === "NO_PROPERTY_ID" ? '<p>Enter the GA4 property ID below and save.</p>' : "") + how("Viewer", "GA4 → Admin → Property access management → +,") + (a.detail ? '<p><small>Google: ' + esc(a.detail) + '</small></p>' : "");
     }).catch(function (err) { $("seoGsc").textContent = "Could not load: " + err.message; $("seoGa4").textContent = ""; state.googleLoaded = false; });
   }
 
