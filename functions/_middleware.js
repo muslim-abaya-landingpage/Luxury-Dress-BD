@@ -46,7 +46,7 @@ export async function onRequest(context) {
     headers.set('X-Content-Type-Options', 'nosniff');
     return new Response(request.method === 'HEAD' ? null : asset.body, { status: 200, headers });
   }
-  const path = url.pathname.replace(/^\\//, '');
+  const path = url.pathname.replace(/^\//, '');
   if (LIVE_FILES.indexOf(path) >= 0) return serveLiveFile(request, env, path);
   const m = /^product\/([^/]+?)(?:\.html)?$/.exec(path);
   if (m) {
