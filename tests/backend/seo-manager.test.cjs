@@ -190,7 +190,7 @@ test('/api/seo-report: the scheduled audit needs the key; stored reports are tri
 test('/api/seo-google: read-only Google calls on the server; "not connected" shows the e-mail to add', async () => {
   const { searchConsole, analytics } = await import(path.join(root, 'functions/api/seo-google.js'));
   const denied = async () => new Response('{}', { status: 403 });
-  assert.deepEqual(plain(await searchConsole(denied, 't', '', Date.parse('2026-11-15'))), { connected: false, error: 'NO_ACCESS' });
+  assert.deepEqual(plain(await searchConsole(denied, 't', '', Date.parse('2026-11-15'))), { connected: false, error: 'NO_ACCESS', detail: '', enableUrl: '' });
   assert.deepEqual(plain(await analytics(denied, 't', '')), { connected: false, error: 'NO_PROPERTY_ID' });
   const seen = [];
   const ok = async (url, init) => {
