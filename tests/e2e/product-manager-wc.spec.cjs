@@ -66,6 +66,9 @@ test('Draft: hidden status is saved, shown in the list and counted under Drafts'
 test('Trash: bulk move, then restore one and delete the other permanently; a failed save changes nothing', async ({ page }) => {
   await open(page);
   const total = await page.locator('[data-overview-status=""] .count').textContent();
+  // The real catalog may already have items in the Trash; count relative to that.
+  const trashCount = async () => { const t = page.locator('[data-overview-status="trash"] .count'); return (await t.count()) ? parseInt((await t.textContent()).replace(/\D/g, ''), 10) : 0; };
+  const trashBefore = await trashCount();
   const ids = [];
   for (const i of [0, 1]) {
     const tr = page.locator('#pmAllRows tr').nth(i);
@@ -77,10 +80,10 @@ test('Trash: bulk move, then restore one and delete the other permanently; a fai
   await expect.poll(async () => (await productsFile(page)) || '').toContain('status: "trash"');
   let file = await productsFile(page);
   for (const id of ids) { expect(entry(file, id)).toContain('status: "trash"'); expect(entry(file, id)).toMatch(/trashedAt: "\d{4}-\d{2}-\d{2}"/); }
-  await expect(page.locator('[data-overview-status="trash"]')).toContainText('(2)');
+  await expect.poll(trashCount).toBe(trashBefore + 2);
   await expect(page.locator('[data-overview-status=""] .count')).not.toHaveText(total);
   await page.click('[data-overview-status="trash"]');
-  await expect(page.locator('#pmAllRows tr')).toHaveCount(2);
+  await expect(page.locator('#pmAllRows tr')).toHaveCount(trashBefore + 2);
   const r0 = page.locator('#pmAllRows tr').filter({ hasText: ids[0] });
   await r0.hover(); // row actions appear on hover, as in WordPress
   await r0.locator('[data-status-action="restore"]').click();
@@ -95,11 +98,14 @@ test('Trash: bulk move, then restore one and delete the other permanently; a fai
 
 test('Trash: when saving fails the products stay where they were', async ({ page }) => {
   await open(page, { fail: true });
+  const trashLink = page.locator('[data-overview-status="trash"]');
+  const before = (await trashLink.count()) ? await trashLink.textContent() : null;
   await page.locator('#pmAllRows tr').first().locator('.pm-overview-check').check();
   await page.selectOption('#pmBulkAction', 'trash');
   await page.click('#pmBulkApply');
   await expect(page.locator('#pmSaveStatus')).toContainText('Not saved');
-  await expect(page.locator('[data-overview-status="trash"]')).toHaveCount(0);
+  if (before === null) await expect(trashLink).toHaveCount(0);
+  else await expect(trashLink).toHaveText(before);
 });
 
 test('SEO box: preview and counters, the custom title and description are saved', async ({ page }) => {

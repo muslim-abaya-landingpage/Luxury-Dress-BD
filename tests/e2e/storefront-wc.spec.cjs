@@ -102,10 +102,11 @@ test('search: /category?q= filters products instead of listing everything', asyn
   const all = (await cardIds(page)).length;
   await page.goto('/category?q=butterfly');
   await expect(page.locator('#productGrid .premium-card').first()).toBeVisible();
-  const hits = await page.$$eval('#productGrid .premium-card .card-title-text', (els) => els.map((e) => e.textContent.toLowerCase()));
+  // Search matches the name or the product code (e.g. ABY-BUTTERFLY-14 is named "Premium Dubai Cherry…").
+  const hits = await page.$$eval('#productGrid .premium-card', (els) => els.map((e) => ((e.querySelector('.card-title-text') || {}).textContent + ' ' + (e.getAttribute('data-product-id') || e.getAttribute('data-id') || (e.querySelector('a[href*="/product/"]') || {}).getAttribute?.('href') || '')).toLowerCase()));
   expect(hits.length).toBeGreaterThan(0);
   expect(hits.length).toBeLessThan(all);
-  for (const name of hits) expect(name).toContain('butterfly');
+  for (const text of hits) expect(text).toContain('butterfly');
 });
 
 test('category range filters coalesce rapid input to one frame update', async ({ page }) => {

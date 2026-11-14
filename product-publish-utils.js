@@ -76,5 +76,13 @@
   if(prices.length){p.price=Math.min.apply(null,prices);return;}
   if(!isPublished||isPublished(p))throw Error((p.name||p.id)+': দাম নেই — Variations-এ প্রতিটি সারির “Price ৳” ঘরে দাম দিন (অথবা Draft হিসেবে সেভ করুন)।');
  });});}
- g.MaProductPublishUtils={sizes:sizes,money:money,mode:mode,makeProduct:makeProduct,validateCatalog:validateCatalog,fillVariablePrices:fillVariablePrices,slug:slug,seo:seo};
+ /* Trash like WordPress: a product in the Trash is deleted permanently TRASH_DAYS days after it was trashed
+    (on the next save). A trashed product without a date gets today, so it also waits the full period.
+    today: "YYYY-MM-DD" (Dhaka). Returns the removed products [{id,name,cat}]. */
+ var TRASH_DAYS=30;
+ function trashDeleteDay(trashedAt){var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(trashedAt||''));if(!m)return '';var d=new Date(Date.UTC(+m[1],+m[2]-1,+m[3]+TRASH_DAYS));return d.toISOString().slice(0,10);}
+ function purgeOldTrash(products,today){var gone=[];Object.keys(products||{}).forEach(function(cat){var list=products[cat]||[];for(var i=list.length-1;i>=0;i--){var p=list[i];if(!p||p.status!=='trash')continue;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(String(p.trashedAt||''))){p.trashedAt=today;continue;}
+  if(trashDeleteDay(p.trashedAt)<=today){gone.push({id:p.id,name:p.name,cat:cat});list.splice(i,1);}}});return gone;}
+ g.MaProductPublishUtils={sizes:sizes,money:money,mode:mode,makeProduct:makeProduct,validateCatalog:validateCatalog,fillVariablePrices:fillVariablePrices,purgeOldTrash:purgeOldTrash,trashDeleteDay:trashDeleteDay,TRASH_DAYS:TRASH_DAYS,slug:slug,seo:seo};
 })(window);

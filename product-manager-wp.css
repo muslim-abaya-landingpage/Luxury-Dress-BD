@@ -735,3 +735,4 @@ html[data-admin-theme="dark"] .pm-wp-list, html[data-admin-theme="dark"] .pm-wp-
 .pm-wp-more>summary small{font-weight:400;color:#646970}
 .pm-wp-more[open]>summary{border-bottom:1px solid #f0f0f1}
 .pm-wp-more>.pm-wp-form-row,.pm-wp-more>.pm-ms{margin-left:14px;margin-right:14px}
+.pm-trash-note{clear:both;margin:8px 0 10px;padding:8px 12px;border-left:4px solid #72aee6;background:#f0f6fc;color:#1d2327;font-size:13px}

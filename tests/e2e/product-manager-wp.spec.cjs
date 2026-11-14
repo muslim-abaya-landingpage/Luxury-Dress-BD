@@ -637,3 +637,29 @@ test('moving a new product to a category without options drops the old option pr
   expect(entry).not.toContain('Full Set');
   expect(entry).not.toContain('Abaya Only');
 });
+
+test('Trash like WordPress: notice, delete date on each row, and old trash removed with the next save', async ({ page }) => {
+  await stub(page);
+  const fs = require('fs'), path = require('path');
+  const real = fs.readFileSync(path.join(__dirname, '../../category-products.js'), 'utf8');
+  // One product trashed long ago, one trashed recently.
+  const extra = '\n(function(){var a=window.CATEGORY_PRODUCTS.abaya;a[0].status="trash";a[0].trashedAt="2026-01-01";a[1].status="trash";a[1].trashedAt="2099-01-01";})();\n';
+  await page.route(/\/category-products\.js(\?.*)?$/, (r) => r.fulfill({ contentType: 'application/javascript', body: real + extra }));
+  await page.goto('/product-manager.html');
+  await page.waitForTimeout(500);
+  await page.evaluate(() => {
+    window.__published = null;
+    window.MaCatalogPublisher = Object.assign({}, window.MaCatalogPublisher, { isReady: () => true,
+      publish: (files) => { window.__published = files; return Promise.resolve({ ok: true }); } });
+  });
+  const ids = await page.evaluate(() => [window.CATEGORY_PRODUCTS.abaya[0].id, window.CATEGORY_PRODUCTS.abaya[1].id]);
+  await page.click('[data-overview-status="trash"]');
+  await expect(page.locator('#pmTrashNote')).toContainText('deleted permanently after 30 days');
+  await expect(page.locator('#pmAllRows')).toContainText('deleted permanently on Jan 31, 2026');
+  // Any save: the old one is gone for good, the recent one stays in the Trash.
+  await page.evaluate(() => document.getElementById('pmSave').click());
+  await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
+  const file = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
+  expect(file).not.toContain('id: "' + ids[0] + '"');
+  expect(file).toContain('id: "' + ids[1] + '"');
+});

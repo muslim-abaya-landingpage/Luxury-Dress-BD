@@ -2347,6 +2347,7 @@
       ' | <li><button type="button" id="pmSortingLink">Sorting</button></li>' +
       (inTrash && statusCount.trash ? '<li> <button type="button" class="pm-wp-button" id="pmEmptyTrash">Empty Trash</button></li>' : '') +
       '</ul>' +
+      (inTrash ? '<p class="pm-trash-note" id="pmTrashNote">Items in the Trash are deleted permanently after ' + window.MaProductPublishUtils.TRASH_DAYS + ' days (ট্র্যাশের প্রোডাক্ট ' + window.MaProductPublishUtils.TRASH_DAYS + ' দিন পর নিজে থেকে স্থায়ীভাবে মুছে যায়)। Their photos stay in the Media Library.</p>' : '') +
       '<ul class="pm-wp-subsubsub pm-status-tabs">' +
       '<li><button type="button" data-overview-stock="" class="' + (overviewStock === "" ? "is-active" : "") + '">All stock <span class="count">(' + liveRows.length + ')</span></button> |</li>' +
       '<li><button type="button" data-overview-stock="in" class="' + (overviewStock === "in" ? "is-active" : "") + '">In stock <span class="count">(' + inStockCount + ')</span></button> |</li>' +
@@ -2582,7 +2583,7 @@
             ? '<div class="pm-row-actions"><span class="pm-row-id">ID: ' + escapeHtml(p.id || "—") + ' | </span>' +
               '<button type="button" class="pm-row-link" data-status-action="restore" data-status-cat="' + escapeAttr(s.key) + '" data-status-index="' + row.index + '">Restore</button> | ' +
               '<button type="button" class="pm-row-link pm-row-danger" data-status-action="delete" data-status-cat="' + escapeAttr(s.key) + '" data-status-index="' + row.index + '">Delete permanently</button>' +
-              (p.trashedAt ? ' <span class="pm-row-id">· trashed ' + escapeHtml(formatDay(p.trashedAt)) + '</span>' : '') + '</div></td>' +
+              (p.trashedAt ? ' <span class="pm-row-id">· trashed ' + escapeHtml(formatDay(p.trashedAt)) + ' · deleted permanently on ' + escapeHtml(formatDay(window.MaProductPublishUtils.trashDeleteDay(p.trashedAt))) + '</span>' : '') + '</div></td>' +
               '<td class="column-sku">' + escapeHtml(p.id || "") + '</td><td class="column-stock"></td><td class="column-price">' + priceText(p) + '</td>' +
               '<td class="column-cats">' + escapeHtml(catName(s)) + '</td><td class="column-tags"></td><td class="column-brand"></td><td class="column-featured"></td>' +
               '<td class="column-date">Trash</td></tr>'
@@ -4163,6 +4164,9 @@
       var promotedViews = promoteEditedPhotoViews();
       if (promotedViews.length) setSaveStatus("Now a product on the website: " + promotedViews.join(", "));
       ensureProductLinks();
+      // Trash older than 30 days is deleted permanently with this save (like WordPress).
+      var purged = window.MaProductPublishUtils.purgeOldTrash(products, todayKey());
+      if (purged.length) console.info("[Product Manager] Deleted permanently after 30 days in Trash:", purged.map(function (x) { return x.id; }).join(", "));
       fillVariablePrices();
       window.MaProductPublishUtils.validateCatalog(products);
       reconcileAllColorVariants();stripHomeLinksFromProducts();snapshot=catalogSnapshot();
