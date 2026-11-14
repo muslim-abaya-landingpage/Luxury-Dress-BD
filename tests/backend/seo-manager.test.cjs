@@ -249,3 +249,18 @@ test('product redirects (SEO Manager): only a missing /product/ page is redirect
   assert.equal((await mw.onRequest(ctx('/product/unknown'))).status, 404);
   assert.equal((await mw.onRequest(ctx('/product/live-one'))).status, 200);
 });
+
+test('a product ticked in extra categories does not break the deploy checks (its page belongs to its main category)', () => {
+  const read = (f) => fs.readFileSync(path.join(root, f), 'utf8');
+  assert.match(read('scripts/check-product-seo.mjs'), /if\(p\._extraCategory\)continue;/);
+  assert.match(read('scripts/build-seo-audit.mjs'), /!p\._extraCategory\) products\.push/);
+  // The storefront really lists such a product twice (main + extra category), with one id.
+  const w = catalog();
+  vm.runInContext(read('product-links-data.js'), vm.createContext(Object.assign({}, { window: w })));
+  const ctx = { window: {}, console }; vm.createContext(ctx);
+  for (const f of ['product-config.js', 'product-utils.js']) vm.runInContext(read(f), ctx);
+  const cats = ctx.window.maCatalog.normalizeAll({ abaya: [{ id: 'X1', name: 'X', price: 100, image: 'a.webp', extraCategories: ['embroidery'] }], embroidery: [] }, {});
+  assert.equal(cats.abaya[0]._extraCategory, undefined);
+  assert.equal(cats.embroidery[0]._extraCategory, true);
+  assert.equal(cats.embroidery[0].id, 'X1');
+});

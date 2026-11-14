@@ -13,6 +13,8 @@ const cats=w.maCatalog.normalizeAll(w.CATEGORY_PRODUCTS,w.PRODUCT_LINKS_DATA||w.
 const allCats=w.maCatalog.normalizeAll(w.CATEGORY_PRODUCTS,w.PRODUCT_LINKS_DATA||w.PRODUCT_IMAGE_LISTS||{}, {includeUnpublished:true});
 let count=0;
 for(const [cat,rows] of Object.entries(cats))for(const p of rows){
+  // A product ticked in more categories is also listed there as a copy (_extraCategory); its page belongs to its main category.
+  if(p._extraCategory)continue;
   const html=read('product/'+p.id+'.html');const url='https://muslimabaya.com/product/'+encodeURIComponent(p.id);
   assert(html.includes('<link rel="canonical" href="'+url+'">'));
   assert(sitemap.includes('<loc>'+url+'</loc>'));

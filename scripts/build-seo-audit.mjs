@@ -27,7 +27,7 @@ export function audit(options = {}) {
   const w = ctx.window;
   const cats = w.maCatalog.normalizeAll(w.CATEGORY_PRODUCTS, w.PRODUCT_LINKS_DATA || w.PRODUCT_IMAGE_LISTS || {});
   const products = [];
-  Object.entries(cats).forEach(([cat, rows]) => rows.forEach((p) => { if (p && p.id && p.name && !p.isImageView) products.push({ p, cat }); }));
+  Object.entries(cats).forEach(([cat, rows]) => rows.forEach((p) => { if (p && p.id && p.name && !p.isImageView && !p._extraCategory) products.push({ p, cat }); }));
 
   // Pages that go live: public pages + one page per published product.
   const pages = publicPages().map((pg) => ({ ...pg, kind: 'page' }));
