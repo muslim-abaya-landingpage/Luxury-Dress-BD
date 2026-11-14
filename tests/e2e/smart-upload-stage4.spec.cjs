@@ -61,14 +61,14 @@ test('typed SKU and typed listing win over the automatic ones', async ({ page })
   expect([p.id, p.seoTitle, p.seoDescription]).toEqual(['HJ-77', 'Soft black hijab for daily wear', 'My own description.']);
 });
 
-test('a Bangla-only name without SKU keeps the automatic P- code', async ({ page }) => {
+test('a Bangla-only name without SKU gets an English-letter link (no random P- code)', async ({ page }) => {
   await setup(page);
   await page.fill('#pq_name', 'কালো হিজাব');
-  await expect(page.locator('#pqSkuHint')).toHaveText('Also the product link: /product/SKU. Cannot be changed after publishing.');
+  await expect(page.locator('#pqSkuHint')).toHaveText('Automatic link: /product/black-hijab (type a SKU to use your own).');
   await addPhoto(page);
   await submit(page);
   await expect.poll(() => page.evaluate(() => window.__staged.length)).toBe(1);
-  expect((await staged(page)).id).toMatch(/^P-[0-9A-F]{16}$/);
+  expect((await staged(page)).id).toBe('black-hijab');
 });
 
 test('editing: the saved listing is shown; clearing it returns to the website automatic text', async ({ page }) => {

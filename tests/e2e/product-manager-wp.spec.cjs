@@ -565,3 +565,24 @@ test('Bulk edit: add tags, mark featured and set a % sale on the selected produc
   await expect.poll(pub).toBeTruthy();
   expect(full(await pub())).toContain('regularPriceByType');
 });
+
+test('new product with a Bangla name gets an English-letter link; an existing product keeps its link', async ({ page }) => {
+  await stub(page);
+  await page.goto('/product-manager.html');
+  await page.waitForTimeout(500);
+  await page.click('#pmHeaderAdd');
+  await page.fill('.pm-wp-name', 'লেপার্ড প্রিন্ট লিলেন কামিজ ও পায়জামা সেট');
+  await expect(page.locator('#pmEf_id')).toHaveValue('leopard-print-linen-kameez-and-pajama-set');
+  await expect(page.locator('#pmPermaSlug')).toHaveText('leopard-print-linen-kameez-and-pajama-set');
+  // Typing in the slug box by hand stops the automatic link.
+  await page.fill('#pmEf_id', 'leopard-set');
+  await page.fill('.pm-wp-name', 'লেপার্ড প্রিন্ট সেট');
+  await expect(page.locator('#pmEf_id')).toHaveValue('leopard-set');
+  // A published product: changing the name never changes its link.
+  await page.goto('/product-manager.html');
+  await page.waitForTimeout(500);
+  await page.locator('#pmAllRows tr').first().locator('.pm-row-title').click();
+  const before = await page.locator('#pmEf_id').inputValue();
+  await page.fill('.pm-wp-name', 'কালো বোরকা সেট');
+  await expect(page.locator('#pmEf_id')).toHaveValue(before);
+});

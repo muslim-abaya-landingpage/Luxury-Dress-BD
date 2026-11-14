@@ -12,11 +12,11 @@ vm.createContext(w);
 ['product-publish-utils.js', 'product-utils.js'].forEach((f) => vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), w));
 const U = w.MaProductPublishUtils;
 
-test('link from the name: lower case, hyphens, at most 50 characters, empty for a Bangla-only name', () => {
+test('link from the name: lower case, hyphens, at most 50 characters; Bangla names in English letters', () => {
   assert.equal(U.slug('Navy Chiffon Abaya (Set)'), 'navy-chiffon-abaya-set');
   assert.equal(U.slug('  Hijab — 2 Piece  '), 'hijab-2-piece');
-  assert.equal(U.slug('কালো বোরকা'), '');
-  assert.equal(U.slug('কালো Abaya'), 'abaya');
+  assert.equal(U.slug('কালো বোরকা'), 'black-borka');
+  assert.equal(U.slug('কালো Abaya'), 'black-abaya');
   const long = U.slug('Premium Dubai Cherry Nida Abaya With Hijab Niqab And Matching Gloves Set');
   assert.ok(long.length <= 50 && !long.endsWith('-'), long);
 });

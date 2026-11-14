@@ -14,7 +14,37 @@
   return p;
  }
  /** Readable product link from the name ("Navy Chiffon Abaya" → "navy-chiffon-abaya"), or '' when the name has too few Latin letters (e.g. Bangla only). */
- function slug(name){var s=String(name||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');if(s.length>50)s=s.slice(0,50).replace(/-[^-]*$/,'');return s.length>=3?s:'';}
+ /* Bangla product names → English-letter links. Common shop words use their usual English spelling
+    (কামিজ → kameez, লিলেন → linen); other words are written by sound (approximate, the owner can edit the slug). */
+ var BN_WORDS={'লেপার্ড':'leopard','প্রিন্ট':'print','প্রিন্টেড':'printed','লিলেন':'linen','লিনেন':'linen','কামিজ':'kameez','কামিজের':'kameez','পায়জামা':'pajama','পাজামা':'pajama','পায়জামা':'pajama','সেট':'set','আবায়া':'abaya','আবায়া':'abaya','বোরকা':'borka','বোরখা':'borka','বুরকা':'borka','হিজাব':'hijab','খিমার':'khimar','নিকাব':'niqab','টু':'two','থ্রি':'three','পিস':'piece','থ্রিপিস':'three-piece','টুপিস':'two-piece','কুর্তি':'kurti','টপস':'tops','পাঞ্জাবি':'panjabi','পাঞ্জাবী':'panjabi','কাফতান':'kaftan','গাউন':'gown','ফ্রক':'frock','জামা':'jama','ড্রেস':'dress','শাড়ি':'saree','শাড়ি':'saree','ওড়না':'orna','ওড়না':'orna','কটন':'cotton','সুতি':'cotton','সিল্ক':'silk','জর্জেট':'georgette','শিফন':'chiffon','ভিসকস':'viscose','রেয়ন':'rayon','রেয়ন':'rayon','চেরি':'cherry','দুবাই':'dubai','প্রিমিয়াম':'premium','প্রিমিয়াম':'premium','ফ্লোরাল':'floral','এমব্রয়ডারি':'embroidery','এমব্রয়ডারি':'embroidery','কারচুপি':'karchupi','স্টোন':'stone','লেস':'lace','বাটারফ্লাই':'butterfly','লেডিস':'ladies','মহিলাদের':'womens','মেয়েদের':'girls','মেয়েদের':'girls','কালো':'black','সাদা':'white','লাল':'red','নীল':'blue','গোলাপি':'pink','সবুজ':'green','হলুদ':'yellow','মেরুন':'maroon','খয়েরি':'brown','খয়েরি':'brown','বেগুনি':'purple','ধূসর':'grey','অফ':'off','ও':'and','এবং':'and','নতুন':'new','ডিজাইন':'design','স্টাইল':'style','লং':'long','শর্ট':'short','ফুল':'full','হাফ':'half','হাতা':'sleeve'};
+ var BN_C={'ক':'k','খ':'kh','গ':'g','ঘ':'gh','ঙ':'ng','চ':'ch','ছ':'chh','জ':'j','ঝ':'jh','ঞ':'n','ট':'t','ঠ':'th','ড':'d','ঢ':'dh','ণ':'n','ত':'t','থ':'th','দ':'d','ধ':'dh','ন':'n','প':'p','ফ':'f','ব':'b','ভ':'bh','ম':'m','য':'j','র':'r','ল':'l','শ':'sh','ষ':'sh','স':'s','হ':'h','ড়':'r','ঢ়':'rh','য়':'y'};
+ var BN_V={'অ':'o','আ':'a','ই':'i','ঈ':'i','উ':'u','ঊ':'u','ঋ':'ri','এ':'e','ঐ':'oi','ও':'o','ঔ':'ou'};
+ var BN_S={'া':'a','ি':'i','ী':'i','ু':'u','ূ':'u','ৃ':'ri','ে':'e','ৈ':'oi','ো':'o','ৌ':'ou'};
+ var BN_X={'ং':'ng','ঃ':'h','ঁ':'','ৎ':'t','০':'0','১':'1','২':'2','৩':'3','৪':'4','৫':'5','৬':'6','৭':'7','৮':'8','৯':'9'};
+ function bnWord(w){
+  var k=w.normalize('NFC');if(BN_WORDS[k])return BN_WORDS[k];
+  var ch=Array.from(w.normalize('NFD')),out='';
+  for(var i=0;i<ch.length;i++){
+   var c=ch[i];
+   if(ch[i+1]==='়'&&({'ড':1,'ঢ':1,'য':1})[c]){c=c+'়';i++;c=c.normalize('NFC');if(c.length>1)c={'ড়':'ড়','ঢ়':'ঢ়','য়':'য়'}[c]||c;}
+   if(BN_C[c]!=null){
+    out+=BN_C[c];var nx=ch[i+1];
+    if(nx==='্'){i++;continue;}
+    if(nx&&BN_S[nx]!=null){out+=BN_S[nx];i++;continue;}
+    var last=i+1>=ch.length||!/[ঀ-৿]/.test(nx);
+    // Inherent vowel: kept inside a word, dropped at the end, and dropped after a vowel when the next letter
+    // carries its own vowel sign (জামদানি → jamdani, মসলিন → moslin, not jamodani / mosolin).
+    var dropMid=!last&&/[aeiou]$/.test(out.slice(0,-BN_C[c].length))&&BN_C[nx]!=null&&BN_S[ch[i+2]]!=null;
+    if(!last&&!dropMid&&c!=='য়')out+='o';
+   }else if(BN_V[c]!=null)out+=BN_V[c];
+   else if(BN_S[c]!=null)out+=BN_S[c];
+   else if(BN_X[c]!=null)out+=BN_X[c];
+   else if(c!=='্'&&c!=='়')out+=c;
+  }
+  return out;
+ }
+ function latin(name){return String(name||'').split(/(\s+)/).map(function(w){return /[ঀ-৿]/.test(w)?w.split(/([^ঀ-৿]+)/).map(function(x){return /[ঀ-৿]/.test(x)?bnWord(x):x;}).join(''):w;}).join('');}
+ function slug(name){var s=latin(name).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');if(s.length>50)s=s.slice(0,50).replace(/-[^-]*$/,'');return s.length>=3?s:'';}
  function cut(text,max){text=String(text||'').replace(/\s+/g,' ').trim();if(text.length<=max)return text;var t=text.slice(0,max-1);return t.slice(0,Math.max(t.lastIndexOf(' '),max/2))+'…';}
  /** Search listing written for a new product: title up to 60 characters, description up to 160 (what Google shows). */
  function seo(p){var name=String(p.name||'').trim(),note=(String(p.detailNote||'').trim().match(/^[^.!?।]*[.!?।]?/)||[''])[0];
