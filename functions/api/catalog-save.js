@@ -164,7 +164,7 @@ export async function handleCatalogSave(request, env, deps = {}) {
     v.releaseSha = saved.sha;
     const files = {};
     payload.files.forEach((f) => { files[f.path] = f.content; });
-    const checked = validatePayload({ sha: saved.sha, files, validation: JSON.stringify(v), index: payload.index, names: payload.names });
+    const checked = validatePayload({ sha: saved.sha, files, validation: JSON.stringify(v), index: payload.index, names: payload.names, metaFeed: payload.metaFeed });
     await writeLiveState(db, site, checked.state, now, deps);
     result.live = true;
   } catch (e) {
