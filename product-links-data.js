@@ -1,7 +1,7 @@
 /**
  * ═══ সব ক্যাটাগরির প্রোডাক্ট ছবির লিংক — এক জায়গা ═══
  * এডিট: product-manager.html (প্রতি প্রোডাক্টে ছবির URL) → সেভ
- * আপডেট: 2026-11-07
+ * আপডেট: 2026-11-14
  */
 window.PRODUCT_LINKS_DATA = {
   abaya: [
@@ -53,6 +53,7 @@ window.PRODUCT_LINKS_DATA = {
     "/images/embroidery/dusty-rose-embroidered-kurti-for-women-bangladesh.webp",
     "/images/embroidery/mauve-lavender-embroidered-kurta-for-women.webp",
     "/images/embroidery/cream-beige-womens-embroidered-kurti-floral-design.webp",
+    "https://images.muslimabaya.com/images/uploads/new-product-1794616761310-0-de2c7b80553e563121df.webp",
   ],
   "tops-kurti": [
     "/images/Classic Purple Lace-Work Kurti  MUSLIM ABAYA.WebP",

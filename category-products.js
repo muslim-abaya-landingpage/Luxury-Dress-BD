@@ -1,6 +1,6 @@
 /**
  * প্রোডাক্ট ডেটা — product-manager.html থেকে এডিট করুন
- * আপডেট: 2026-11-07
+ * আপডেট: 2026-11-14
  */
 window.CATEGORY_PRODUCTS = {
   abaya: [
@@ -374,14 +374,14 @@ window.CATEGORY_PRODUCTS = {
       sleeveSizes: ["15"],
       dressLengths: ["42"],
       palazzoLengths: ["40"],
+      shortDescription: "<p>✨ Elegant &amp; Stylish CY Fabric Abaya with Matching Shalwar.</p><p>Designed for effortless elegance, comfort &amp; modest style.</p><p><strong>Set Includes:</strong> Abaya &amp; Shalwar Only (Hijab Not Included).</p>",
       descriptionHtml: "<p>✨ <strong>প্রিমিয়াম ডিজাইনের স্টাইলিশ বোরকা – মার্জিত লুকে অনন্য!</strong> 💜</p><p>আরামদায়ক ও রুচিশীল ডিজাইনের এই সুন্দর বোরকাটি আপনার প্রতিদিনের পর্দার পোশাকে যোগ করবে আভিজাত্য। প্রিমিয়াম ফিনিশিং ও আকর্ষণীয় ডিজাইনে এটি হতে পারে আপনার পছন্দের কালেকশন। 🌸</p><p>📏 <strong>পণ্যের বিস্তারিত:</strong></p><ul><li><p>Fabric: CY</p></li><li><p>Dress Length: 42 Inch</p></li><li><p>Body: 52 Inch</p></li><li><p>Sleeve Length: 15 Inch</p></li><li><p>Shalwar Length: 40 Inch</p></li><li><p>Height (Hy): 17 Inch</p></li></ul><p>💰 <strong>অফার প্রাইস: ১,১৫০ টাকা মাত্র!</strong></p><p>🛍️ <strong>অর্ডার করতে ভিজিট করুন:</strong><br>🌐 <a href=\"https://muslimabaya.com/\" target=\"_blank\" rel=\"noopener\">https://muslimabaya.com</a></p><p>📲 WhatsApp: 01971642683<br>শুধুমাত্র মেসেজ করুন।</p><p>🚚 ঘরে বসেই অর্ডার করুন আপনার পছন্দের পোশাকটি।</p><p><strong>MUSLIM ABAYA – মার্জিত পর্দায় আভিজাত্যের ছোঁয়া।</strong> 💜</p>",
       tags: ["CY Burqa","Premium Burqa","Stylish Burqa","Ladies Burqa","Muslim Abaya","Modest Fashion","Islamic Clothing","Women Fashion","Burqa Set","Premium Dress","CY Fabric"],
       dateAdded: "2026-11-08",
       seoTitle: "Premium CY Fabric Burqa Set | Muslim Abaya",
       seoDescription: "Shop premium CY fabric burqa set at Muslim Abaya. Stylish modest wear with 42-inch length, comfortable fitting and elegant design. Price ৳1,150.",
       productUrl: "/",
-      variationAttributes: ["type","body"],
-      shortDescription: "<p>✨ Elegant &amp; Stylish CY Fabric Abaya with Matching Shalwar.</p><p>Designed for effortless elegance, comfort &amp; modest style.</p><p><strong>Set Includes:</strong> Abaya &amp; Shalwar Only (Hijab Not Included).</p>"
+      variationAttributes: ["type","body"]
     }
   ],
   "cover-up": [
@@ -941,6 +941,26 @@ window.CATEGORY_PRODUCTS = {
       categoryLabel: "প্রিমিয়াম টু-পিস",
       dateAdded: "2026-09-10",
       productUrl: "/"
+    },
+    {
+      id: "leopard-print-linen-kameez-pajama-set",
+      name: "লেপার্ড প্রিন্ট লিলেন কামিজ ও পায়জামা সেট",
+      image: "https://images.muslimabaya.com/images/uploads/new-product-1794616761310-0-de2c7b80553e563121df.webp",
+      imageCard: "https://images.muslimabaya.com/images/uploads/new-product-1794616761310-0-card-df80781f5b5555b145a0.webp",
+      price: 750,
+      fabric: "লিলেন",
+      detailNote: "🌸 লেপার্ড প্রিন্ট লিলেন কামিজ ও পায়জামা সেট\n\n✨ আকর্ষণীয় ডিজাইন ও আরামদায়ক লিলেন ফেব্রিক।\n\nপণ্যের বিবরণ:\n\n• ফেব্রিক: লিলেন\n\n• কামিজ লং: ৪৪ ইঞ্চি\n\n• পায়জামা লং: ৪০ ইঞ্চি\n\n• বডি সাইজ: ৪৮, ৫০, ৫২\n\n• হাতার লং: ১৮ ইঞ্চি\n\nমূল্য: ৭৫০ টাকা\n\nঅর্ডার করতে:\nWebsite: https://muslimabaya.com\n\nWhatsApp: 01971642683\n(শুধু মেসেজ, কল নয়)",
+      priceByType: {
+        "Full Set": 999,
+        "Abaya Only": 799
+      },
+      status: "draft",
+      dateAdded: "2026-11-14",
+      bodySizes: ["48","50","52"],
+      dressLengths: ["44"],
+      palazzoLengths: ["40"],
+      sleeveSizes: ["18"],
+      descriptionHtml: "<p>🌸 লেপার্ড প্রিন্ট লিলেন কামিজ ও পায়জামা সেট</p><p>✨ আকর্ষণীয় ডিজাইন ও আরামদায়ক লিলেন ফেব্রিক।</p><p><strong>পণ্যের বিবরণ:</strong></p><ul><li><p>ফেব্রিক: লিলেন</p></li><li><p>কামিজ লং: ৪৪ ইঞ্চি</p></li><li><p>পায়জামা লং: ৪০ ইঞ্চি</p></li><li><p>বডি সাইজ: ৪৮, ৫০, ৫২</p></li><li><p>হাতার লং: ১৮ ইঞ্চি</p></li></ul><p><strong>মূল্য: ৭৫০ টাকা</strong></p><p>অর্ডার করতে:<br>Website: <a href=\"https://muslimabaya.com\" target=\"_blank\" rel=\"noopener\">https://muslimabaya.com</a></p><p>WhatsApp: 01971642683<br>(শুধু মেসেজ, কল নয়)</p>"
     }
   ],
   "tops-kurti": [
