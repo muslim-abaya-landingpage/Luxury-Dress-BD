@@ -41,7 +41,8 @@ export function validatePayload(p) {
     }
   });
   if (Array.isArray(p.assets) && p.assets.length) throw Error('R2_REQUIRED');
-  return { state: { sha: p.sha, files, validation: p.validation, index, names }, assets: [] };
+  const metaFeed = typeof p.metaFeed === 'string' && p.metaFeed.length <= 1800000 && p.metaFeed.startsWith('\"id\",\"title\",\"description\"') ? p.metaFeed : '';
+  return { state: { sha: p.sha, files, validation: p.validation, index, names, metaFeed }, assets: [] };
 }
 
 /** Stores a checked catalog state in D1 so the site serves it until the deployment catches up. */
