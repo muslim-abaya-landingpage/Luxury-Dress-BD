@@ -949,18 +949,20 @@ window.CATEGORY_PRODUCTS = {
       imageCard: "https://images.muslimabaya.com/images/uploads/new-product-1794616761310-0-card-df80781f5b5555b145a0.webp",
       price: 750,
       fabric: "লিলেন",
+      sizes: ["42 (Free size)"],
       detailNote: "🌸 লেপার্ড প্রিন্ট লিলেন কামিজ ও পায়জামা সেট\n\n✨ আকর্ষণীয় ডিজাইন ও আরামদায়ক লিলেন ফেব্রিক।\n\nপণ্যের বিবরণ:\n\n• ফেব্রিক: লিলেন\n\n• কামিজ লং: ৪৪ ইঞ্চি\n\n• পায়জামা লং: ৪০ ইঞ্চি\n\n• বডি সাইজ: ৪৮, ৫০, ৫২\n\n• হাতার লং: ১৮ ইঞ্চি\n\nমূল্য: ৭৫০ টাকা\n\nঅর্ডার করতে:\nWebsite: https://muslimabaya.com\n\nWhatsApp: 01971642683\n(শুধু মেসেজ, কল নয়)",
-      priceByType: {
-        "Full Set": 999,
-        "Abaya Only": 799
-      },
-      status: "draft",
-      dateAdded: "2026-11-14",
+      isImageView: false,
+      imageViewOf: "",
+      category: "premium-two-piece",
+      categoryLabel: "প্রিমিয়াম টু-পিস",
       bodySizes: ["48","50","52"],
+      sleeveSizes: ["18"],
       dressLengths: ["44"],
       palazzoLengths: ["40"],
-      sleeveSizes: ["18"],
-      descriptionHtml: "<p>🌸 লেপার্ড প্রিন্ট লিলেন কামিজ ও পায়জামা সেট</p><p>✨ আকর্ষণীয় ডিজাইন ও আরামদায়ক লিলেন ফেব্রিক।</p><p><strong>পণ্যের বিবরণ:</strong></p><ul><li><p>ফেব্রিক: লিলেন</p></li><li><p>কামিজ লং: ৪৪ ইঞ্চি</p></li><li><p>পায়জামা লং: ৪০ ইঞ্চি</p></li><li><p>বডি সাইজ: ৪৮, ৫০, ৫২</p></li><li><p>হাতার লং: ১৮ ইঞ্চি</p></li></ul><p><strong>মূল্য: ৭৫০ টাকা</strong></p><p>অর্ডার করতে:<br>Website: <a href=\"https://muslimabaya.com\" target=\"_blank\" rel=\"noopener\">https://muslimabaya.com</a></p><p>WhatsApp: 01971642683<br>(শুধু মেসেজ, কল নয়)</p>"
+      status: "draft",
+      descriptionHtml: "<p>🌸 লেপার্ড প্রিন্ট লিলেন কামিজ ও পায়জামা সেট</p><p>✨ আকর্ষণীয় ডিজাইন ও আরামদায়ক লিলেন ফেব্রিক।</p><p><strong>পণ্যের বিবরণ:</strong></p><ul><li><p>ফেব্রিক: লিলেন</p></li><li><p>কামিজ লং: ৪৪ ইঞ্চি</p></li><li><p>পায়জামা লং: ৪০ ইঞ্চি</p></li><li><p>বডি সাইজ: ৪৮, ৫০, ৫২</p></li><li><p>হাতার লং: ১৮ ইঞ্চি</p></li></ul><p><strong>মূল্য: ৭৫০ টাকা</strong></p><p>অর্ডার করতে:<br>Website: <a href=\"https://muslimabaya.com\" target=\"_blank\" rel=\"noopener\">https://muslimabaya.com</a></p><p>WhatsApp: 01971642683<br>(শুধু মেসেজ, কল নয়)</p>",
+      dateAdded: "2026-11-14",
+      productUrl: "/"
     }
   ],
   "tops-kurti": [
