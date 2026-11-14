@@ -291,7 +291,6 @@ window.CATEGORY_PRODUCTS = {
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
       bodySizes: ["46"],
-      status: "draft",
       tags: ["Dubai Cherry Abaya","Premium Abaya","Embroidery Abaya","Ladies Abaya","Luxury Abaya","Muslim Abaya","Dubai Fabric","Premium Collection","Black Abaya"],
       brand: "Muslim Abaya",
       dateAdded: "2026-07-17",
