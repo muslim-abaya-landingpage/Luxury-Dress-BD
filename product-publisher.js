@@ -52,13 +52,37 @@
   var sources=['product-config.js','product-utils.js','category-products.js','product-links-data.js','product-catalog-sync.js'];
   var texts={'product-config.js':map['product-config.js'],'product-utils.js':utils,'category-products.js':map['category-products.js'],'product-links-data.js':map['product-links-data.js'],'product-catalog-sync.js':sync};
   if(sources.some(function(f){return typeof texts[f]!=='string';}))throw Error('LIVE_FILES_MISSING');
-  var code='var __post=self.postMessage.bind(self);(function(){var window={},console={log:function(){},info:function(){},warn:function(){},error:function(){}},self,fetch,XMLHttpRequest,importScripts,setTimeout,setInterval,localStorage,sessionStorage,indexedDB,document,location,navigator,postMessage,caches;\n'+sources.map(function(f){return texts[f];}).join('\n;\n')+'\n;\n'+core+'\n;try{__post({ok:true,sources:window.__maValidationSources,products:window.__maBuildValidationProducts(window),delivery:window.__maValidationDelivery?window.__maValidationDelivery(window):null});}catch(e){__post({ok:false,error:String(e&&e.message||e)});}})();';
+  var feedBuilder = \`
+function buildMetaFeed(w){
+ var site='https://muslimabaya.com',columns=['id','title','description','availability','condition','price','link','image_link','brand','product_type','additional_image_link','color','size','inventory'];
+ function cell(v){return '"'+String(v==null?'':v).replace(/[\r\n]+/g,' ').replace(/"/g,'""')+'"';}
+ function absolute(raw){var v=String(raw||'').trim();if(!v||/^(?:data:|blob:|javascript:)/i.test(v))return '';try{return new URL(v,site+'/').href;}catch(e){return '';}}
+ function clean(v){return String(v==null?'':v).replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();}
+ var sections=new Map((w.CATALOG_SECTIONS||[]).map(function(x){return [x.key,x];})),seen=new Set(),rows=[];
+ var catalog=w.maCatalog.normalizeAll(w.CATEGORY_PRODUCTS,w.PRODUCT_LINKS_DATA||w.PRODUCT_IMAGE_LISTS||{});
+ Object.keys(catalog).forEach(function(category){
+  (catalog[category]||[]).forEach(function(p){
+   if(!p||!p.id||!p.name||p.isImageView===true||p.catalogVisibility==='hidden'||seen.has(String(p.id))||!w.maCatalog.isPublishedProduct(p))return;
+   var price=Number(p.price),images=[p.image].concat(Array.isArray(p.images)?p.images:[]).map(absolute).filter(function(u,i,a){return u&&a.indexOf(u)===i;});
+   if(!Number.isFinite(price)||price<=0||!images.length)return;
+   seen.add(String(p.id));
+   var stock=w.maCatalog.getStockStatus(p),section=sections.get(category);
+   var details=[p.name,p.fabric?'Fabric: '+clean(p.fabric):'',p.colorLabel||p.color?'Color: '+clean(p.colorLabel||p.color):'',Array.isArray(p.sizes)&&p.sizes.length?'Available sizes: '+p.sizes.map(clean).join(', '):'',p.detailNote?clean(p.detailNote):''].filter(Boolean).join(' | ');
+   var inventory=stock.qty!=null&&stock.qty!==''&&Number.isFinite(Number(stock.qty))?Math.max(0,Number(stock.qty)):'';
+   rows.push([String(p.id),clean(p.name).slice(0,150),details.slice(0,5000),stock.inStock?'in stock':'out of stock','new',price.toFixed(2)+' BDT',site+'/product/'+encodeURIComponent(String(p.id)),images[0],'MUSLIM ABAYA',clean(section&&(section.menu||section.menuBn)||category),images.slice(1).join(','),clean(p.colorLabel||p.color),Array.isArray(p.sizes)?p.sizes.map(clean).join(', '):'',inventory]);
+  });
+ });
+ if(!rows.length)throw Error('META_FEED_EMPTY');
+ return [columns].concat(rows).map(function(row){return row.map(cell).join(',');}).join('\\r\\n')+'\\r\\n';
+}\`;
+  var code='var __post=self.postMessage.bind(self);(function(){var window={},console={log:function(){},info:function(){},warn:function(){},error:function(){}},self,fetch,XMLHttpRequest,importScripts,setTimeout,setInterval,localStorage,sessionStorage,indexedDB,document,location,navigator,postMessage,caches;\\n'+(texts['product-catalog-sections.js']||'')+'\\n;\\n'+sources.map(function(f){return texts[f];}).join('\\n;\\n')+'\\n;\\n'+core+'\\n;\\n'+feedBuilder+'\\n;try{__post({ok:true,sources:window.__maValidationSources,products:window.__maBuildValidationProducts(window),delivery:window.__maValidationDelivery?window.__maValidationDelivery(window):null,metaFeed:buildMetaFeed(window)});}catch(e){__post({ok:false,error:String(e&&e.message||e)});}})();';
   var url=URL.createObjectURL(new Blob([code],{type:'text/javascript'})),worker=new Worker(url);
   var out=await new Promise(function(resolve,reject){var t=setTimeout(function(){reject(Error('LIVE_TIMEOUT'));},15000);worker.onmessage=function(e){clearTimeout(t);resolve(e.data);};worker.onerror=function(e){clearTimeout(t);e.preventDefault&&e.preventDefault();reject(Error('LIVE_WORKER'));};}).finally(function(){worker.terminate();URL.revokeObjectURL(url);});
   if(!out||!out.ok||JSON.stringify(out.sources)!==JSON.stringify(sources))throw Error('LIVE_VALIDATION');
   var hash=await sha256Hex(sources.map(function(f){return f+'\u0000'+texts[f]+'\u0000';}).join(''));
   var vj={version:1,releaseSha:sha,sources:sources,sourceSha256:hash,products:out.products};if(out.delivery)vj.delivery=out.delivery;
-  return {products:out.products,json:JSON.stringify(vj)};
+  if(typeof out.metaFeed!=='string'||!out.metaFeed.startsWith('"id","title","description"'))throw Error('LIVE_META_FEED');
+  return {products:out.products,json:JSON.stringify(vj),metaFeed:out.metaFeed};
  }
  async function pushLive(files,sent,sha){
   try{
@@ -66,7 +90,7 @@
    var map={};files.forEach(function(f){map[f.path]=f.content;});
    var v=await buildValidation(map,sha),index={},names={};
    v.products.forEach(function(p){index[p.id]=p.category;names[p.id]=p.name;});
-   var res=await fetch('/api/live-publish',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({Token:session.token,sha:sha,files:map,validation:v.json,index:index,names:names,assets:(sent||[]).map(function(a){return {path:a.path,content:a.content};})})});
+   var res=await fetch('/api/live-publish',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({Token:session.token,sha:sha,files:map,validation:v.json,index:index,names:names,metaFeed:v.metaFeed,assets:(sent||[]).map(function(a){return {path:a.path,content:a.content};})})});
    var r=await res.json().catch(function(){return null;});
    if(r&&r.ok){
      // The D1 write succeeding is not proof that customers receive this catalog.
@@ -92,7 +116,7 @@
   var v;try{v=await buildValidation(map,'0'.repeat(40));}catch(e){return null;}
   var index={},names={};v.products.forEach(function(p){index[p.id]=p.category;names[p.id]=p.name;});
   var res;
-  try{res=await fetch('/api/catalog-save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({Token:session.token,requestId:data.requestId,baseShas:data.baseShas,files:data.files,validation:v.json,index:index,names:names})});}
+  try{res=await fetch('/api/catalog-save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({Token:session.token,requestId:data.requestId,baseShas:data.baseShas,files:data.files,validation:v.json,index:index,names:names,metaFeed:v.metaFeed})});}
   catch(e){throw Error('Connection lost while saving. Reload current data to see whether the save went through.');}
   var r=await res.json().catch(function(){return null;});
   if(res.status===404||res.status===405||(r&&r.error==='NOT_CONFIGURED'))return null;
