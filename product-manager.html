@@ -1512,6 +1512,19 @@
           if (inp.value) p.shippingClass = inp.value; else delete p.shippingClass;
         }
         else if (f === "sku" || f === "gtin" || f === "externalUrl" || f === "buttonText" || f === "purchaseNote") { var tv = inp.value.trim(); if (tv) p[f] = tv; else delete p[f]; }
+        else if (f === "id") {
+          // Slug box: spaces → "-", Bangla → English letters, other characters dropped. An empty box does not
+          // erase the link (the product keeps its current one until something valid is typed).
+          var raw = inp.value.trim(), idv = raw.replace(/\s+/g, "-");
+          if (/[^A-Za-z0-9_-]/.test(idv)) idv = slugFromName(raw) || idv.replace(/[^A-Za-z0-9_-]+/g, "-").replace(/^-+|-+$/g, "");
+          var hintEl = inp.parentNode && inp.parentNode.querySelector(".pm-wp-hint b");
+          if (/^[A-Za-z0-9][A-Za-z0-9_-]{1,100}$/.test(idv)) {
+            if (idv !== p.id && findProductById(idv)) { inp.setCustomValidity("Another product already uses this link."); inp.reportValidity(); inp.setCustomValidity(""); return; }
+            p.id = idv;
+          }
+          if (hintEl) hintEl.textContent = p.id || "";
+          var pv = document.getElementById("pmPermaSlug"); if (pv) pv.textContent = p.id || "";
+        }
         else p[f] = inp.value;
         changed();
       });
@@ -4091,6 +4104,30 @@
     });
   }
 
+  // Every product needs a link (Slug = product ID). A product without a valid one gets it from its name (Bangla
+  // names in English letters); a new, never-published product whose link clashes with another gets "-2".
+  // Published products are never renamed here.
+  function ensureProductLinks() {
+    var seen = {};
+    Object.keys(products).forEach(function (key) {
+      (products[key] || []).forEach(function (p) {
+        if (!p) return;
+        var valid = /^[A-Za-z0-9][A-Za-z0-9_-]{1,100}$/.test(String(p.id || ""));
+        var editing = editTarget && products[editTarget.cat] && products[editTarget.cat][editTarget.index] === p;
+        var isNewOne = editing && editTarget.isNew;
+        if (!valid || (seen[p.id] && isNewOne)) {
+          p.id = "\u0000";
+          p.id = uniqueProductId(slugFromName(p.name) || "product");
+          if (editing) {
+            ["#pmPermaInput", "#pmEf_id"].forEach(function (sel) { var el = document.querySelector(sel); if (el) el.value = p.id; });
+            var pv = document.getElementById("pmPermaSlug"); if (pv) pv.textContent = p.id;
+          }
+        }
+        seen[p.id] = true;
+      });
+    });
+  }
+
   // Variable product: the product takes its lowest variation price when it has none (product-publish-utils.js).
   function fillVariablePrices() {
     window.MaProductPublishUtils.fillVariablePrices(products, function (p) { return productStatus(p) === "publish"; });
@@ -4119,6 +4156,7 @@
       }
       var promotedViews = promoteEditedPhotoViews();
       if (promotedViews.length) setSaveStatus("Now a product on the website: " + promotedViews.join(", "));
+      ensureProductLinks();
       fillVariablePrices();
       window.MaProductPublishUtils.validateCatalog(products);
       reconcileAllColorVariants();stripHomeLinksFromProducts();snapshot=catalogSnapshot();

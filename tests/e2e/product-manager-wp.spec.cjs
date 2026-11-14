@@ -586,3 +586,30 @@ test('new product with a Bangla name gets an English-letter link; an existing pr
   await page.fill('.pm-wp-name', 'কালো বোরকা সেট');
   await expect(page.locator('#pmEf_id')).toHaveValue(before);
 });
+
+test('Slug box: clearing it does not erase the link; Bangla is turned into English letters; empty link is filled on save', async ({ page }) => {
+  await stub(page);
+  page.on('dialog', (d) => d.accept());
+  await page.goto('/product-manager.html');
+  await page.waitForTimeout(500);
+  await page.evaluate(() => {
+    window.__published = null;
+    window.MaCatalogPublisher = Object.assign({}, window.MaCatalogPublisher, { isReady: () => true,
+      publish: (files) => { window.__published = files; return Promise.resolve({ ok: true }); } });
+  });
+  await page.click('#pmHeaderAdd');
+  await page.fill('.pm-wp-name', 'লেপার্ড প্রিন্ট লিলেন কামিজ ও পায়জামা সেট');
+  // Clearing the box to retype keeps the link.
+  await page.fill('#pmEf_id', '');
+  await expect(page.locator('#pmPermaSlug')).toHaveText('leopard-print-linen-kameez-and-pajama-set');
+  // Bangla or spaces typed into the box become a valid link.
+  await page.fill('#pmEf_id', 'লেপার্ড সেট');
+  await expect(page.locator('#pmPermaSlug')).toHaveText('leopard-set');
+  await page.fill('#pmEf_id', 'Leopard Linen Set');
+  await expect(page.locator('#pmPermaSlug')).toHaveText('Leopard-Linen-Set');
+  // Save Draft works and the saved product has that link.
+  await page.click('#pmSaveDraft');
+  await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
+  const file = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
+  expect(file).toContain('id: "Leopard-Linen-Set"');
+});
