@@ -297,7 +297,8 @@ window.CATEGORY_PRODUCTS = {
       seoTitle: "Premium Dubai Cherry Fabrics Abaya | MUSLIM ABAYA",
       seoDescription: "Shop Premium Dubai Cherry Fabrics Abaya with beautiful embroidery. Free size, body 46\", length 50-56\". Price starts at ৳1050. Order from MUSLIM ABAYA.",
       productUrl: "/",
-      variationAttributes: ["type","color","body","length"]
+      variationAttributes: ["type","color","body","length"],
+      extraCategories: ["embroidery"]
     },
     {
       id: "ABY-BUTTERFLY-15",
