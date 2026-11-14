@@ -269,3 +269,47 @@ test('Attributes: Bangla names like "কামিজ লং" work, one-click but
   await expect(mount).toContainText('is not an attribute of this product');
   await expect(mount).toContainText('Long (লং)');
 });
+
+test('Color attribute: type any colour names; renaming keeps the photo; a colour without a photo can be published', async ({ page }) => {
+  await stub(page);
+  await page.goto('/product-manager.html');
+  await page.waitForTimeout(500);
+  await page.evaluate(() => {
+    window.__published = null;
+    window.MaCatalogPublisher = Object.assign({}, window.MaCatalogPublisher, { isReady: () => true,
+      publish: (files) => { window.__published = files; return Promise.resolve({ ok: true }); } });
+  });
+  // P-197025F0B8FF4107: Navy Blue, Maroon, Olive — each with a photo.
+  await expect(page.locator('#pmAllRows tr').first()).toBeVisible(); // list loaded before searching
+  const row = page.locator('#pmAllRows tr').filter({ hasText: 'P-197025F0B8FF4107' }).first();
+  await expect(async () => {
+    await page.fill('#pmAllSearch', 'P-197025F0B8FF4107');
+    await page.click('#pmAllSearchBtn');
+    await expect(row).toBeVisible({ timeout: 2000 });
+  }).toPass({ timeout: 15000 });
+  await row.locator('.pm-row-title').click();
+  await page.click('[data-etab="attributes"]');
+  const mount = page.locator('#pmAttrMount');
+  await expect(mount.locator('[data-pa="new"]')).toBeVisible(); // attributes box has loaded
+  if (!(await mount.locator('[data-pa="values"][data-id="color"]').count())) {
+    await mount.locator('[data-pa="new"]').click();
+    await mount.locator('[data-pa="add-quick"][data-id="color"]').click();
+  }
+  const box = mount.locator('[data-pa="values"][data-id="color"]');
+  await expect(box).toBeEditable();
+  await expect(box).toHaveValue('Navy Blue | Maroon | Olive');
+  // Rename Olive → Mint Green (keeps its photo), keep the others, add a new colour without a photo.
+  await box.fill('Navy Blue | Maroon | Mint Green | Peach Pink');
+  await mount.locator('[data-pa="save"]').click();
+  await page.click('[data-etab="attributes"]');
+  await expect(page.locator('#pmColorVariationList [data-color-field="label"]')).toHaveCount(4);
+  await page.click('#pmEditUpdate');
+  await expect.poll(() => page.evaluate(() => !!window.__published)).toBe(true);
+  const file = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
+  const at = file.indexOf('id: "P-197025F0B8FF4107"'), entry = file.slice(at, file.indexOf('\n    }', at));
+  const rows = JSON.parse(/colorVariants: (\[.*\])/.exec(entry)[1]);
+  expect(rows.map((r) => r.colorLabel)).toEqual(['Navy Blue', 'Maroon', 'Mint Green', 'Peach Pink']);
+  expect(rows[2].image).not.toBe('');   // renamed colour kept Olive's photo
+  expect(rows[3].image).toBe('');       // new colour: no photo, still published
+  expect(rows.map((r) => r.color)).toEqual(['navy-blue', 'maroon', 'mint-green', 'peach-pink']);
+});

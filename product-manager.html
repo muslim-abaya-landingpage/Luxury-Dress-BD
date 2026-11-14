@@ -177,7 +177,7 @@
   var lazyScripts = Object.create(null);
   var quickUploadOptions = null;
   var quickUploadMounted = false;
-  var VARIATIONS_SRC = "product-variations-admin.js?v=20261114-woo5";
+  var VARIATIONS_SRC = "product-variations-admin.js?v=20261115-woo6";
   function loadScriptOnce(src) {
     if (lazyScripts[src]) return lazyScripts[src];
     lazyScripts[src] = new Promise(function (resolve, reject) {
@@ -1734,6 +1734,32 @@
         basePrice: function (type) { var v = type && p.priceByType ? parseInt(p.priceByType[type], 10) : NaN; return v > 0 ? v : (parseInt(p.price, 10) || 0); },
         changed: function (note) { changed(note); },
         rerender: function (tab, note) { editTab = tab; renderProductEditor(); changed(note); },
+        // Attributes → Color → Value(s): any colour names. A colour that keeps its name keeps its photo; a renamed
+        // colour (same position) keeps its photo too; new colours start without a photo (optional). Variations
+        // that used a renamed colour follow the new name.
+        setColors: function (labels) {
+          var old = initialColorRows(p), used = {}, rows = [];
+          var key = function (s) { return String(s || "").trim().toLowerCase(); };
+          labels.forEach(function (label, i) {
+            var j = -1;
+            old.forEach(function (r, k) { if (j < 0 && !used[k] && key(r.colorLabel) === key(label)) j = k; });
+            rows[i] = { label: label, from: j };
+            if (j >= 0) used[j] = true;
+          });
+          rows.forEach(function (r, i) { if (r.from < 0 && old[i] && !used[i] && labels.map(key).indexOf(key(old[i].colorLabel)) === -1) { r.from = i; used[i] = true; } });
+          var renamed = {};
+          var next = rows.map(function (r, i) {
+            var src = r.from >= 0 ? old[r.from] : null, color = colorKeyFromLabel(r.label, i);
+            if (src && src.color && src.color !== color) renamed[src.color] = color;
+            return { color: color, colorLabel: r.label, image: src ? src.image || "" : "" };
+          });
+          if (next.length) {
+            p.colorVariants = next;
+            p.colorLabel = next.map(function (r) { return r.colorLabel; }).join(", ");
+            p.color = next.map(function (r) { return r.color; }).join("-");
+          } else { delete p.colorVariants; delete p.colorLabel; delete p.color; }
+          (Array.isArray(p.variations) ? p.variations : []).forEach(function (v) { if (v && v.color && renamed[v.color]) v.color = renamed[v.color]; });
+        },
         // Variation image, like WooCommerce: the Media Library (upload a new photo or choose one). The website shows
         // a variation's photo from the product gallery, so a photo that is not in the gallery yet is added to it.
         openLibrary: function (done, n) {
@@ -4150,8 +4176,9 @@
         var editedProduct = (products[editTarget.cat] || [])[editTarget.index];
         var colorLabels = String(editedProduct && (editedProduct.colorLabel || editedProduct.color) || "").split(/[,，;；|]/).map(function (label) { return label.trim(); }).filter(Boolean);
         var variantRows = editedProduct && editedProduct.colorVariants || [];
-        if (colorLabels.length > 1 && (variantRows.length !== colorLabels.length || variantRows.some(function (row) { return !row || !String(row.image || row.src || "").trim(); }))) {
-          throw new Error("Choose a matching gallery photo for every color variation before publishing.");
+        // A colour's photo is optional (like WooCommerce): picking that colour keeps the current photo.
+        if (variantRows.length && colorLabels.length !== variantRows.length) {
+          editedProduct.colorLabel = variantRows.map(function (row) { return row.colorLabel || row.color; }).join(", ");
         }
         var colorKeys = {};
         variantRows.forEach(function (row) {

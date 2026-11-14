@@ -63,7 +63,9 @@
     var vals = function (arr, prefix) { return list(arr).map(function (v) { return { key: prefix + v, label: v }; }); };
     var defs = [
       { id: "type", name: "Option", values: (ctx.types || []).filter(Boolean).map(function (t) { return { key: t, label: t }; }), editIn: "the General tab (each option has its own price there)" },
-      { id: "color", name: "Color", values: (ctx.colors || []).filter(function (c) { return c && c.key; }).map(function (c) { return { key: c.key, label: c.label || c.key, image: c.image || "" }; }), editIn: "Color variations below (each colour has its photo there)" }
+      // Colours are typed here like any WooCommerce attribute ("Navy Blue | Teal Green"); ctx.setColors keeps each
+      // colour's photo and variations when a colour is renamed. The photo of a colour is optional (More details).
+      { id: "color", name: "Color", values: (ctx.colors || []).filter(function (c) { return c && c.key; }).map(function (c) { return { key: c.key, label: c.label || c.key, image: c.image || "" }; }), editIn: "Color variations below (each colour has its photo there)", setter: typeof ctx.setColors === "function" }
     ];
     if (kind === "abaya") {
       var cfg = typeof g.getAbayaSizeConfig === "function" ? g.getAbayaSizeConfig(p) : {};
@@ -205,7 +207,7 @@
         (st.showAdd ? '<div class="pmw-inline-add"><label for="pmw-new-attribute">Name</label><input id="pmw-new-attribute" type="text" data-pa="new-name" list="pmw-supported-attributes" placeholder="e.g. Long, Body, Size, Sleeve, Color or Option" autocomplete="off"><datalist id="pmw-supported-attributes">' + missing.map(function (d) { return '<option value="' + esc(d.name) + '"></option>'; }).join('') + '</datalist><button type="button" class="pmw-btn pmw-btn-primary" data-pa="add-selected">Add attribute</button><button type="button" class="pmw-btn" data-pa="cancel-new">Cancel</button><p class="pmw-hint">Type a name in English or Bangla (e.g. কামিজ লং, বডি, হাতা) — or tap one:</p><div class="pmw-quick">' + missing.map(function (d) { return '<button type="button" class="pmw-btn" data-pa="add-quick" data-id="' + d.id + '">+ ' + esc(d.name) + (ATTR_BN[d.id] ? " (" + ATTR_BN[d.id] + ")" : "") + "</button>"; }).join("") + '</div></div>' : '') +
         present.map(function (d) {
           var open = st.open[d.id] !== false;
-          var readonly = !d.field;
+          var readonly = !d.field && !d.setter;
           return '<div class="pmw-box" data-attr="' + d.id + '"><div class="pmw-box-head" data-pa="toggle" data-id="' + d.id + '"><b>' + esc(d.name) + "</b>" +
             (readonly ? "" : '<button type="button" class="pmw-remove" data-pa="remove" data-id="' + d.id + '">Remove</button>') + "<span>≡</span><span>" + (open ? "▴" : "▾") + "</span></div>" +
             (open ? '<div class="pmw-box-body"><div><label>Name:</label><input type="text" value="' + esc(d.name) + '" readonly aria-label="Attribute name">' +
@@ -213,7 +215,7 @@
               '<label><input type="checkbox" data-pa="used" data-id="' + d.id + '"' + (used.indexOf(d.id) !== -1 ? " checked" : "") + (d.values.length ? "" : " disabled") + "> Used for variations</label></div></div>" +
               '<div><label>Value(s):</label><textarea data-pa="values" data-id="' + d.id + '"' + (readonly ? " readonly" : "") + ' placeholder="Enter some descriptive text. Use “|” to separate different values.">' +
               esc(d.values.map(function (v) { return v.label; }).join(" | ")) + "</textarea>" +
-              (readonly ? '<p class="pmw-hint">Edit these in ' + esc(d.editIn) + ".</p>" : '<p class="pmw-hint">Use “|” to separate values, e.g. 50 | 52 | 54 | 56.</p>') + "</div></div>" : "") +
+              (readonly ? '<p class="pmw-hint">Edit these in ' + esc(d.editIn) + ".</p>" : d.setter ? '<p class="pmw-hint">Type any colour names, separated by “|”, e.g. Navy Blue | Teal Green | Maroon. A photo for each colour is optional (More details → Color variations).</p>' : '<p class="pmw-hint">Use “|” to separate values, e.g. 50 | 52 | 54 | 56.</p>') + "</div></div>" : "") +
             "</div>";
         }).join("") +
         (present.length ? "" : '<div class="pmw-empty">No attributes yet. Use Add new or Add global.</div>') +
@@ -236,6 +238,15 @@
     function apply() {
       var bad = "";
       present.forEach(function (d) {
+        if (d.setter) {
+          var cta = box.querySelector('[data-pa="values"][data-id="' + d.id + '"]');
+          if (!cta) return;
+          var colours = String(cta.value || "").split(/[|,，]/).map(function (s) { return s.replace(/\s+/g, " ").trim(); }).filter(Boolean);
+          var uniqC = colours.filter(function (v, i) { return colours.map(norm).indexOf(norm(v)) === i; });
+          if (uniqC.some(function (v) { return v.length > 40; })) { bad = d.name; return; }
+          ctx.setColors(uniqC);
+          return;
+        }
         if (!d.field) return;
         var ta = box.querySelector('[data-pa="values"][data-id="' + d.id + '"]');
         if (!ta) return;
