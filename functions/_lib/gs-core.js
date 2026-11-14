@@ -7347,7 +7347,7 @@ function getAdminAnalyticsV2_(e) {
       if (isReturn) summary.returnedCount++;
       else if (isPlainCancel) summary.cancelledCount++;
 
-      if (status === 'confirmed') summary.confirmedCount++;
+      if (status === 'confirmed' || status === 'processing') summary.confirmedCount++;
       if (!status || status.indexOf('pend') !== -1) summary.pendingCount++;
       if (status.indexOf('ship') !== -1) summary.shippedCount++;
       var custPhone = normalizePhone_(r[2]);
@@ -7369,11 +7369,11 @@ function getAdminAnalyticsV2_(e) {
         if (status === 'delivered') sourceStats[sourceVal].delivered++;
       }
 
-      // best-seller হিসাব Confirmed/Shipped/Delivered অর্ডার থেকে (বাতিল/পেন্ডিং বাদ) —
+      // best-seller হিসাব Confirmed/Processing/Shipped/Delivered অর্ডার থেকে (বাতিল/পেন্ডিং বাদ) —
       // Shipped মানে কুরিয়ারে পাঠানো হয়ে গেছে (Steadfast auto), তাই এটাও একটা প্রতিশ্রুত বিক্রি —
       // আগে শুধু Confirmed/Delivered গোনা হতো, ফলে ট্রানজিটে থাকা অর্ডারগুলোর পণ্য বেস্ট-সেলার/
       // ক্যাটাগরি/সাইজ পরিসংখ্যানে বাদ পড়ে যেত।
-      if (status === 'confirmed' || status === 'shipped' || status === 'delivered') {
+      if (status === 'confirmed' || status === 'processing' || status === 'shipped' || status === 'delivered') {
         var cartJsonCell = String(r[32] || '').trim(); // কলাম ৩৩
         if (cartJsonCell) {
           try {
