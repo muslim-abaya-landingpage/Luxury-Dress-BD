@@ -37,8 +37,10 @@ for (const [category, rows] of Object.entries(catalog)) {
     const primary = p.isImageView && p.imageViewOf ? byId.get(p.imageViewOf) : null;
     const canonicalUrl = primary ? `${site}/product/${encodeURIComponent(primary.id)}` : url;
     // Product Manager → "Search engine listing" overrides the generated title / description.
-    const title = String(p.seoTitle || '').trim() || `${p.name} | Muslim Abaya Bangladesh`;
-    const desc = String(p.seoDescription || '').trim() || `${p.name} — ${p.fabric || 'modest fashion'}. ${p.detailNote || ''} Price ৳${p.price}. Cash on delivery in Bangladesh.`.trim();
+    // Automatic SEO (product-utils.js productSeo); a manual / approved seoTitle / seoDescription always wins.
+    const seo = w.maCatalog.productSeo(p);
+    const title = seo.title;
+    const desc = seo.description;
     const images = [p.image].concat(Array.isArray(p.images) ? p.images : [])
       .filter(Boolean)
       .map(raw => /^https?:\/\//.test(raw) ? raw : site + '/' + raw.replace(/^\//, ''))

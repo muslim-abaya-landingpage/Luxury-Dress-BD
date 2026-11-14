@@ -122,18 +122,12 @@
       if (prodData) {
         var p = prodData.product;
         var cat = prodData.category;
-        var pTitle = (p.nameEn || p.name || BRAND) + " | " + BRAND;
-        
-        var pDesc = (p.nameBn || p.name || "") + " - " + (p.fabricBn || p.fabric ? (p.fabricBn || p.fabric) + " কাপড়ের তৈরি প্রিমিয়াম আবায়া/মডেস্ট ড্রেস। " : "");
-        if (p.price) {
-          pDesc += "মূল্য: " + p.price + " BDT। ";
-        }
-        if (p.detailNote) {
-          pDesc += p.detailNote + " ";
-        } else if (p.descriptionBn) {
-          pDesc += p.descriptionBn + " ";
-        }
-        pDesc += "সারাদেশে ক্যাশ অন ডেলিভারি। এখনই অর্ডার করতে ভিজিট করুন মুসলিম আবায়া।";
+        // Same title / description as the server-built page (product-utils.js productSeo): a manual or
+        // approved SEO title / description wins, otherwise the automatic one.
+        var seo = global.maCatalog && typeof global.maCatalog.productSeo === "function" ? global.maCatalog.productSeo(p) : null;
+        var pTitle = seo ? seo.title : (p.seoTitle || (p.name || BRAND) + " | Muslim Abaya Bangladesh");
+        var pDesc = seo ? seo.description : (p.seoDescription || p.name || "");
+        var pInStock = global.maCatalog && typeof global.maCatalog.isInStock === "function" ? global.maCatalog.isInStock(p) : !(p.inStock === false || p.stock === 0);
 
         return {
           path: path,
@@ -143,7 +137,8 @@
             image: resolveProductImageUrl(p),
             ogType: "product",
             robots: "index, follow",
-            priceAmount: p.price
+            priceAmount: p.price,
+            inStock: pInStock
           },
           categoryKey: cat,
           productId: productId
@@ -209,7 +204,7 @@
     if (meta.ogType === "product") {
       upsertMeta('meta[property="product:price:amount"]', "property", "product:price:amount", String(meta.priceAmount || ""));
       upsertMeta('meta[property="product:price:currency"]', "property", "product:price:currency", "BDT");
-      upsertMeta('meta[property="product:availability"]', "property", "product:availability", "instock");
+      upsertMeta('meta[property="product:availability"]', "property", "product:availability", meta.inStock === false ? "out of stock" : "in stock");
       upsertMeta('meta[property="og:price:amount"]', "property", "og:price:amount", String(meta.priceAmount || ""));
       upsertMeta('meta[property="og:price:currency"]', "property", "og:price:currency", "BDT");
     } else {

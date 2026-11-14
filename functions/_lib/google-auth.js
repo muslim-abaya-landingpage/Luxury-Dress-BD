@@ -3,7 +3,8 @@
  * The token is kept in memory for the life of the Worker isolate and refreshed 5 minutes early.
  */
 const SCOPE = 'https://www.googleapis.com/auth/spreadsheets.readonly';
-let cached = { key: '', token: '', exp: 0 };
+// One cached token per scope (Sheets read for most endpoints, Search Console read for the SEO Manager).
+const cache = new Map();
 
 function b64url(input) {
   const bytes = typeof input === 'string' ? new TextEncoder().encode(input) : new Uint8Array(input);
@@ -27,12 +28,14 @@ export function parseServiceAccount(raw) {
   return { email: sa.client_email, key: sa.private_key, tokenUri: sa.token_uri || 'https://oauth2.googleapis.com/token' };
 }
 
-export async function getAccessToken(rawServiceAccount, fetchImpl = fetch, nowMs = Date.now()) {
+export async function getAccessToken(rawServiceAccount, fetchImpl = fetch, nowMs = Date.now(), scope = SCOPE) {
   const sa = parseServiceAccount(rawServiceAccount);
-  if (cached.key === sa.email && cached.token && nowMs < cached.exp - 300000) return cached.token;
+  const cacheKey = sa.email + ' ' + scope;
+  const cached = cache.get(cacheKey);
+  if (cached && cached.token && nowMs < cached.exp - 300000) return cached.token;
   const iat = Math.floor(nowMs / 1000);
   const header = b64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
-  const claims = b64url(JSON.stringify({ iss: sa.email, scope: SCOPE, aud: sa.tokenUri, iat, exp: iat + 3600 }));
+  const claims = b64url(JSON.stringify({ iss: sa.email, scope, aud: sa.tokenUri, iat, exp: iat + 3600 }));
   const key = await crypto.subtle.importKey('pkcs8', pemToDer(sa.key), { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['sign']);
   const sig = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, new TextEncoder().encode(header + '.' + claims));
   const assertion = header + '.' + claims + '.' + b64url(sig);
@@ -43,8 +46,8 @@ export async function getAccessToken(rawServiceAccount, fetchImpl = fetch, nowMs
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok || !data.access_token) throw new Error('SA_TOKEN_FAILED');
-  cached = { key: sa.email, token: data.access_token, exp: nowMs + (Number(data.expires_in) || 3600) * 1000 };
-  return cached.token;
+  cache.set(cacheKey, { token: data.access_token, exp: nowMs + (Number(data.expires_in) || 3600) * 1000 });
+  return data.access_token;
 }
 
-export function _resetTokenCache() { cached = { key: '', token: '', exp: 0 }; }
+export function _resetTokenCache() { cache.clear(); }

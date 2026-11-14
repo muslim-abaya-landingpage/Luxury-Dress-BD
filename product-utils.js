@@ -794,6 +794,62 @@ if (typeof window !== "undefined") window.cleanProductMeasures = cleanProductMea
    * Photo description (alt text) for search engines and screen readers: name, the colour that photo shows
    * (from the product's colour photos) or its single colour, and fabric. Later photos get "(photo 2)" etc.
    */
+  /**
+   * Automatic SEO for a product (SEO Manager). A title / description typed or approved in Product Manager
+   * (seoTitle / seoDescription) always wins and is never replaced; otherwise these are generated from the
+   * product's own data — nothing invented (no ratings, reviews or claims that are not in the product).
+   */
+  var SEO_TITLE_SUFFIX = " | Muslim Abaya Bangladesh";
+  function seoPlain(v) { return String(v == null ? "" : v).replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim(); }
+  function seoCut(text, max) {
+    text = seoPlain(text);
+    if (text.length <= max) return text;
+    var cut = text.slice(0, max - 1), sp = cut.lastIndexOf(" ");
+    return (sp > max * 0.6 ? cut.slice(0, sp) : cut).replace(/[\s,;:|।.\-–—]+$/, "") + "…";
+  }
+  // Shortens a long name from the middle: the start (type) and the end (colour / set, which tells similar
+  // products apart) stay, e.g. "Premium Tribal Print … Dress - Cherry Red".
+  function seoShorten(name, max) {
+    if (name.length <= max) return name;
+    var words = name.split(" "), tail = [], head = [];
+    for (var i = words.length - 1; i > 0; i--) {
+      var t = [words[i]].concat(tail).join(" ");
+      if (t.length > max * 0.45) break;
+      tail.unshift(words[i]);
+    }
+    var budget = max - tail.join(" ").length - 3;
+    for (var j = 0; j < words.length - tail.length; j++) {
+      if (head.concat(words[j]).join(" ").length > budget) break;
+      head.push(words[j]);
+    }
+    if (!head.length || !tail.length) return seoCut(name, max);
+    return head.join(" ") + " … " + tail.join(" ");
+  }
+  function productSeo(p) {
+    p = p || {};
+    // A name that already ends in the brand ("… | Muslim Abaya") does not get it twice.
+    var name = seoPlain(p.name).replace(/\s*[|–—-]\s*Muslim\s+Abaya(?:\s+Bangladesh)?\s*$/i, "") || "Product";
+    // Google shows about 60 characters: long names get the short brand suffix, very long ones are cut.
+    var autoTitle = [name + SEO_TITLE_SUFFIX, name + " | Muslim Abaya"].filter(function (t) { return t.length <= 60; })[0] || seoShorten(name, 45) + " | Muslim Abaya";
+    var price = parseInt(p.price, 10) || 0;
+    var head = name + (p.fabric ? " — " + seoPlain(p.fabric) : "") + ".";
+    var tail = (price > 0 ? " দাম ৳" + price + "।" : "") + " সারা বাংলাদেশে ক্যাশ অন ডেলিভারি।";
+    var detail = seoPlain(p.shortDescription || p.detailNote || "").replace(new RegExp("^" + name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*", "i"), "");
+    var room = 160 - head.length - tail.length - 1;
+    var autoDescription = (head + (detail && room > 25 ? " " + seoCut(detail, room) : "") + tail).trim();
+    var manualTitle = seoPlain(p.seoTitle), manualDescription = seoPlain(p.seoDescription);
+    return {
+      title: manualTitle || autoTitle,
+      description: manualDescription || autoDescription,
+      autoTitle: autoTitle,
+      autoDescription: autoDescription,
+      titleIsManual: !!manualTitle,
+      descriptionIsManual: !!manualDescription,
+      keyword: seoPlain(p.seoKeyword),
+      keywords: Array.isArray(p.seoKeywords) ? p.seoKeywords.map(seoPlain).filter(Boolean) : []
+    };
+  }
+
   function productImageAlt(product, src, index) {
     if (!product) return "";
     var file = function (u) { return String(u || "").split(/[?#]/)[0].split("/").pop().toLowerCase(); };
@@ -1465,6 +1521,7 @@ g.getCartLineBaseName = getCartLineBaseName;
     getStockQty: getStockQty,
     stockRowKey: stockRowKey,
     imageAlt: productImageAlt,
+    productSeo: productSeo,
     stockLineKey: stockLineKey,
     colorSizeStockVariant: colorSizeStockVariant,
     isInStock: isInStock,

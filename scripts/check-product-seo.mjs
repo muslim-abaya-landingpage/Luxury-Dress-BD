@@ -26,8 +26,9 @@ for(const [cat,rows] of Object.entries(cats))for(const p of rows){
     assert(content, p.id + ' ' + key + ' must have a content value');
     return content[1];
   };
-  const expectedTitle = String(p.seoTitle || '').trim() || `${p.name} | Muslim Abaya Bangladesh`;
-  const expectedDescription = String(p.seoDescription || '').trim() || `${p.name} — ${p.fabric || 'modest fashion'}. ${p.detailNote || ''} Price ৳${p.price}. Cash on delivery in Bangladesh.`.trim();
+  const seo = w.maCatalog.productSeo(p);
+  const expectedTitle = seo.title;
+  const expectedDescription = seo.description;
   const expectedImageRaw = [p.image].concat(Array.isArray(p.images) ? p.images : []).filter(Boolean)[0] || '';
   const expectedImage = expectedImageRaw.startsWith('http://') || expectedImageRaw.startsWith('https://') ? expectedImageRaw : 'https://muslimabaya.com/' + expectedImageRaw.replace(/^\/+/, '');
   const escapeMeta = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

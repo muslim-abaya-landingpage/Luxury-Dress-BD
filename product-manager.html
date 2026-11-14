@@ -77,6 +77,7 @@
 </div></div>
 <div class="adm-nav-group"><a class="adm-sidebar-item adm-nav-top" href="admin-setup.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 9v12"/></svg><span>Settings</span></a><div class="adm-nav-children" role="group" aria-label="Settings">
 <a class="adm-sidebar-item adm-nav-child" href="admin-setup.html"><span>Setup &amp; Status</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-seo.html"><span>SEO Manager</span></a>
 <a class="adm-sidebar-item adm-nav-child" href="admin-staff.html"><span>Staff</span></a>
 <a class="adm-sidebar-item adm-nav-child" href="admin-growth.html"><span>Growth tools</span></a>
 <a class="adm-sidebar-item adm-nav-child" href="admin-links.html"><span>Links</span></a>
@@ -958,6 +959,10 @@
     return !!r && Object.keys(r).some(function (t) { return parseInt(r[t], 10) > parseInt(s[t], 10); });
   }
   function seoDefaults(p) {
+    if (window.maCatalog && typeof window.maCatalog.productSeo === "function") {
+      var auto = window.maCatalog.productSeo(p);
+      return { title: auto.autoTitle, description: auto.autoDescription };
+    }
     return {
       title: (p.name || "Product") + " | Muslim Abaya Bangladesh",
       description: ((p.name || "") + " — " + (p.fabric || "modest fashion") + ". " + (p.detailNote || "") + " Price ৳" + (parseInt(p.price, 10) || 0) + ". Cash on delivery in Bangladesh.").replace(/\s+/g, " ").trim()
@@ -1048,6 +1053,28 @@
     renderMain();
     window.scrollTo(0, 0);
   }
+
+  // product-manager.html?edit=<ID>[#seo] (links from Admin → SEO Manager) opens that product once the catalog has loaded.
+  (function () {
+    var want = "";
+    try { want = (new URLSearchParams(location.search).get("edit") || "").trim(); } catch (e) {}
+    if (!/^[A-Za-z0-9_-]{1,100}$/.test(want)) return;
+    var tries = 0;
+    (function openWhenReady() {
+      var hit = null;
+      Object.keys(products || {}).some(function (k) {
+        var i = (products[k] || []).findIndex(function (q) { return q && String(q.id) === want; });
+        if (i >= 0) { hit = [k, i]; return true; }
+        return false;
+      });
+      if (hit && sections.length) {
+        openProductEditor(hit[0], hit[1]);
+        if (/seo/.test(location.hash)) setTimeout(function () { var box = document.getElementById("pmSeoBox"); if (box) box.scrollIntoView({ block: "start" }); }, 300);
+        return;
+      }
+      if (++tries < 60) setTimeout(openWhenReady, 500);
+    })();
+  })();
 
   // Options a customer chooses on the product page; each has its own price.
   function productOptionTypes(p, meta) {
@@ -1372,7 +1399,9 @@
           '<div class="pm-seo-prev-url">muslimabaya.com › product › ' + escapeHtml(p.id || "") + '</div><div class="pm-seo-prev-desc" id="pmSeoPrevDesc"></div></div>' +
           '<p class="pm-wp-form-row"><label for="pmSeoTitle">SEO title</label><span><input id="pmSeoTitle" type="text" maxlength="120" data-ef="seoTitle" value="' + escapeAttr(p.seoTitle || "") + '" placeholder="' + escapeAttr(seoDefaults(p).title) + '"><small id="pmSeoTitleCount"></small></span></p>' +
           '<p class="pm-wp-form-row"><label for="pmSeoDesc">Meta description</label><span><textarea id="pmSeoDesc" rows="3" maxlength="320" data-ef="seoDescription" placeholder="' + escapeAttr(seoDefaults(p).description) + '">' + escapeHtml(p.seoDescription || "") + '</textarea><small id="pmSeoDescCount"></small></span></p>' +
-          '<p class="pm-wp-hint">Leave empty to use the automatic title and description. Google shows about 60 characters of the title and 160 of the description.</p>' +
+          '<p class="pm-wp-form-row"><label for="pmSeoKeyword">Primary keyword</label><span><input id="pmSeoKeyword" type="text" maxlength="80" data-ef="seoKeyword" value="' + escapeAttr(p.seoKeyword || "") + '" placeholder="e.g. লিনেন টু পিস"></span></p>' +
+          '<p class="pm-wp-form-row"><label for="pmSeoKeywords">Secondary keywords</label><span><input id="pmSeoKeywords" type="text" maxlength="300" data-ef="seoKeywords" value="' + escapeAttr((p.seoKeywords || []).join(", ")) + '" placeholder="comma separated, e.g. linen two piece, women dress"></span></p>' +
+          '<p class="pm-wp-hint">Empty = automatic title and description (shown grey above), made from the product name, fabric, details and price. <button type="button" class="pm-wp-button" id="pmSeoApprove">Use suggestion</button> copies them into the boxes so you can edit and approve them; a title or description you write or approve is never replaced automatically. Google shows about 60 characters of the title and 160 of the description.</p>' +
         '</div></section>' +
       '</div>' +
       '<div class="pm-wp-col-side">' +
@@ -1547,6 +1576,11 @@
         }
         else if (f === "status") { setProductStatus(p, inp.value); paintStatusNote(); }
         else if (f === "seoTitle" || f === "seoDescription") { var sv = inp.value.replace(/\s+/g, " ").trim(); if (sv) p[f] = sv; else delete p[f]; updateSeoPreview(); }
+        else if (f === "seoKeyword") { var kv = inp.value.replace(/\s+/g, " ").trim().slice(0, 80); if (kv) p.seoKeyword = kv; else delete p.seoKeyword; }
+        else if (f === "seoKeywords") {
+          var kws = inp.value.split(/[,،]/).map(function (k) { return k.replace(/\s+/g, " ").trim().slice(0, 60); }).filter(Boolean).slice(0, 10);
+          if (kws.length) p.seoKeywords = kws; else delete p.seoKeywords;
+        }
         else if (f === "stock") {
           if (editTarget) editTarget.qtyDirty = true;
           if (inp.value === "") { delete p.stock; delete p.inStock; }
@@ -1914,6 +1948,14 @@
     });
     paintStatusNote();
     updateSeoPreview();
+    // "Use suggestion": the automatic title / description become the product's own (approved) values.
+    var seoApprove = document.getElementById("pmSeoApprove");
+    if (seoApprove) seoApprove.addEventListener("click", function () {
+      var d = seoDefaults(p), ti = document.getElementById("pmSeoTitle"), de = document.getElementById("pmSeoDesc");
+      if (ti && !ti.value.trim()) { ti.value = d.title; p.seoTitle = d.title; }
+      if (de && !de.value.trim()) { de.value = d.description; p.seoDescription = d.description; }
+      updateSeoPreview(); changed("SEO suggestion copied — edit it if you like, then click " + mainAction() + ".");
+    });
     function publishEdit() {
       var st = productStatus(p);
       if (st === "draft" || st === "pending") setProductStatus(p, "publish");

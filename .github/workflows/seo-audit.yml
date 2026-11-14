@@ -1,0 +1,38 @@
+name: SEO Audit
+
+# Daily SEO audit of the live website (scripts/seo-live-audit.mjs): sitemap URLs answer 200, canonical and
+# noindex are right, titles/descriptions exist and are unique, structured data is valid, robots.txt and the
+# 404 page behave, internal links work. The report goes to Admin → SEO Manager (/api/seo-report) and a run
+# with errors fails, so GitHub e-mails the repository owner.
+# Free GitHub Actions. Secret: SEO_AUDIT_KEY (the same value is the Cloudflare Pages secret SEO_AUDIT_KEY).
+
+on:
+  schedule:
+    - cron: "41 20 * * *" # 02:41 Bangladesh time
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: seo-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Audit live site and send the report to the SEO Manager
+        env:
+          SEO_AUDIT_KEY: ${{ secrets.SEO_AUDIT_KEY }}
+        run: |
+          if [ -n "$SEO_AUDIT_KEY" ]; then node scripts/seo-live-audit.mjs --send | tee audit.txt; else node scripts/seo-live-audit.mjs | tee audit.txt; echo "SEO_AUDIT_KEY not set: report printed only."; fi
+          {
+            echo "## Live SEO audit"; echo; echo '```'; cat audit.txt; echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          if grep -q "^  ERROR" audit.txt; then echo "::error::SEO errors found — see Admin → SEO Manager"; exit 1; fi

@@ -172,8 +172,9 @@ test('CSV import: updates by SKU, empty cells keep values, new products need the
 
 test('product pages: SEO title/description override, and pages of unpublished products are removed at build', () => {
   const src = read('scripts/build-product-seo.mjs');
-  assert.match(src, /String\(p\.seoTitle \|\| ''\)\.trim\(\) \|\|/);
-  assert.match(src, /String\(p\.seoDescription \|\| ''\)\.trim\(\) \|\|/);
+  // Manual / approved SEO text wins inside the shared generator (product-utils.js productSeo; see seo-manager.test.cjs).
+  assert.match(src, /const seo = w\.maCatalog\.productSeo\(p\);\s*const title = seo\.title;\s*const desc = seo\.description;/);
+  assert.match(read('product-utils.js'), /title: manualTitle \|\| autoTitle,\s*description: manualDescription \|\| autoDescription,/);
   assert.match(src, /data-seo-managed="full"'\) && html\.includes\('data-product-id="' \+ m\[1\]/);
 });
 

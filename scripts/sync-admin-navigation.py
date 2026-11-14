@@ -14,7 +14,7 @@ PAGES = ['admin-dashboard', 'admin-orders', 'admin-order', 'admin-operations',
          'admin-inbox', 'product-manager', 'product-links', 'admin-links',
          'stock-analytics', 'admin-staff', 'admin-growth', 'admin-sizes',
          'admin-support-inbox', 'admin-setup', 'admin-profit',
-         'admin-customers', 'admin-activity', 'admin-order-new']
+         'admin-customers', 'admin-activity', 'admin-order-new', 'admin-seo']
 GROUPS = json.loads((ROOT / 'admin-navigation.json').read_text())
 
 def navigation(active):

@@ -87,6 +87,10 @@
         "label": "Setup & Status"
       },
       {
+        "href": "admin-seo.html",
+        "label": "SEO Manager"
+      },
+      {
         "href": "admin-staff.html",
         "label": "Staff"
       },
