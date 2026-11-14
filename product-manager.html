@@ -1518,6 +1518,10 @@
         var flush = window.MaVariationsAdmin && window.MaVariationsAdmin.hasPendingStock() ? window.MaVariationsAdmin.flushStock() : Promise.resolve("");
         return flush.then(function (stockNote) {
           stockNote = restockNote + stockNote; restockNote = "";
+          // Publish / Save Draft changed the status: redraw the screen so the Publish box shows the new status
+          // (Status: Published, "Update" instead of "Publish", no "Hidden from the website" note).
+          var shownStatus = document.getElementById("pmStatusLabel");
+          if (shownStatus && shownStatus.textContent !== statusLabel(productStatus(p)) && editTarget) renderProductEditor();
           if (result && result.live) {
             editMsg("✅ Saved and live on the website. Open product pages may need a refresh." + stockNote, /NOT saved/.test(stockNote) ? "err" : "ok");
           } else {

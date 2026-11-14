@@ -44,3 +44,23 @@ test('editing an out-of-stock product without a new main photo keeps it Out of s
   await expect(page.locator('#pmEditNote')).not.toContainText('In stock');
   expect(await stockSets(page)).toEqual([]);
 });
+
+test('Publish on a draft: the Publish box then shows Published / Update and the "Saved" message stays', async ({ page }) => {
+  await page.route('**/category-products.js*', async (route) => {
+    const response = await route.fetch();
+    const body = (await response.text()).replace(/(id: "ABY-MAROON-1",)/, '$1 status: "draft",');
+    await route.fulfill({ response, body });
+  });
+  await open(page);
+  await expect(page.locator('#pmStatusLabel')).toHaveText('Draft');
+  await expect(page.locator('#pmEditUpdate')).toHaveText('Publish');
+  await page.locator('#pmEditUpdate').click();
+  await expect(page.locator('#pmStatusLabel')).toHaveText('Published');
+  await expect(page.locator('#pmEditUpdate')).toHaveText('Update');
+  await expect(page.locator('#pmSaveDraft')).toHaveCount(0);
+  await expect(page.locator('#pmEditNote')).toContainText('Saved');
+  await expect(page.locator('#pmStatusNote')).not.toContainText('Hidden from the website');
+  const file = await page.evaluate(() => window.__published.find((f) => f.path === 'category-products.js').content);
+  const block = file.slice(file.indexOf('"ABY-MAROON-1"'), file.indexOf('\n    }', file.indexOf('"ABY-MAROON-1"')));
+  expect(block).not.toContain('status:');
+});

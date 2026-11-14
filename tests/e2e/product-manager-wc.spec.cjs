@@ -43,7 +43,10 @@ test('sale price: before-sale price per option, card price follows the first opt
 test('Draft: hidden status is saved, shown in the list and counted under Drafts', async ({ page }) => {
   await open(page);
   // The live catalog may already hold drafts; count relative to what is there now.
-  const draftsBefore = Number(((await page.locator('[data-overview-status="draft"]').textContent().catch(() => '')) || '').replace(/\D+/g, '') || 0);
+  // With no drafts the "Drafts" link is not shown at all, so read it only when it exists (no waiting).
+  await expect(page.locator('#pmAllRows tr').first()).toBeVisible();
+  const draftLink = page.locator('[data-overview-status="draft"]');
+  const draftsBefore = (await draftLink.count()) ? Number(((await draftLink.textContent()) || '').replace(/\D+/g, '') || 0) : 0;
   await page.locator('#pmAllRows tr').nth(1).locator('.pm-row-title').click();
   const id = (await page.locator('[data-ef="id"]').inputValue());
   await page.click('[data-misc="status"]');
