@@ -115,7 +115,11 @@
     ".pmw-box-body{display:grid;grid-template-columns:minmax(160px,1fr) 2fr;gap:10px 16px;padding:0 0 14px}.pmw-box-body label{display:block}" +
     ".pmw-box-body input[type=text],.pmw-box-body textarea{width:100%;box-sizing:border-box}.pmw-box-body textarea{min-height:90px}" +
     ".pmw-checks label{display:flex;gap:6px;align-items:center;margin:6px 0}.pmw-hint{color:#646970;font-size:12px;margin:4px 0 0}" +
-    ".pmw-var{border-bottom:1px solid #eee}.pmw-var-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 0}.pmw-var-head .pmw-id{font-weight:600}" +
+    ".pmw-thumb{width:40px;height:40px;flex:0 0 40px;padding:0;border:1px dashed #8c8f94;border-radius:3px;background:#f6f7f7;color:#2271b1;font-size:20px;line-height:1;cursor:pointer;overflow:hidden;display:inline-flex;align-items:center;justify-content:center}" +
+    ".pmw-thumb.has-img{border-style:solid;border-color:#c3c4c7;background:#fff}.pmw-thumb img{width:100%;height:100%;object-fit:cover;display:block}.pmw-thumb:hover{border-color:#2271b1}" +
+    ".pmw-hprice{display:inline-flex;align-items:center;gap:4px;font-size:13px;color:#50575e}.pmw-hprice input{width:90px;min-height:36px;box-sizing:border-box;border:1px solid #8c8f94;border-radius:4px;padding:0 8px}" +
+    ".pmw-hprice.is-missing input{border-color:#d63638;background:#fcf0f1}" +
+    ".pmw-var{border-bottom:1px solid #eee}.pmw-var-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 0}.pmw-var-head .pmw-id{font-weight:600;min-width:30px}" +
     ".pmw-var-head .pmw-actions{margin-left:auto;display:flex;gap:12px}.pmw-var-head select{max-width:180px}.pmw-var.is-off .pmw-var-head{opacity:.6}" +
     ".pmw-var.is-bad .pmw-var-head{background:#fcf0f1}.pmw-var-body{padding:4px 0 16px;display:grid;gap:12px}" +
     ".pmw-sched span{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.pmw-field.pmw-sched input{width:160px;flex:0 1 160px}.pmw-sched small{display:block;color:#646970;margin-top:4px}.pmw-row2 label .pmw-link{font-weight:400;margin-left:6px}" +
@@ -356,7 +360,11 @@
           stockHtml + "</div>";
       }
       return '<div class="pmw-var' + (v.enabled === false ? " is-off" : "") + (bad ? " is-bad" : "") + '" data-row="' + i + '"' + (dup[i] ? ' title="This combination appears twice"' : "") + ">" +
-        '<div class="pmw-var-head"><span class="pmw-id">#' + (i + 1) + "</span>" + heads +
+        '<div class="pmw-var-head"><span class="pmw-id">#' + (i + 1) + "</span>" +
+        '<button type="button" class="pmw-thumb' + (v.image ? " has-img" : "") + '" data-pv="picker" data-i="' + i + '" title="' + (v.image ? "Change variation image" : "Add variation image") + '" aria-label="' + (v.image ? "Change variation image" : "Add variation image") + ' #' + (i + 1) + '">' +
+          (v.image ? '<img src="' + esc(v.image) + '" alt="">' : '<span aria-hidden="true">+</span>') + "</button>" + heads +
+        '<label class="pmw-hprice' + (regularOf(v) || fallback(v) ? "" : " is-missing") + '">Price ৳<input type="number" min="1" step="1" inputmode="numeric" data-pv="hprice" data-i="' + i + '" value="' + esc(regularOf(v)) + '" placeholder="' + esc(fallback(v) || "") + '" aria-label="Regular price of variation #' + (i + 1) + '"></label>' +
+        (saleOf(v) ? '<span class="pmw-hint">Sale ৳' + esc(saleOf(v)) + "</span>" : "") +
         (v.enabled === false ? " <em>Disabled</em>" : v.stockStatus === "outofstock" ? " <em>Out of stock</em>" : "") +
         '<span class="pmw-actions"><button type="button" class="pmw-remove" data-pv="del" data-i="' + i + '">Remove</button><a class="pmw-link" data-pv="edit" data-i="' + i + '">' + (open ? "Close" : "Edit") + "</a></span></div>" + body + "</div>";
     }
@@ -509,7 +517,11 @@
           draw(); save("Variation removed — click Save changes.");
         } else if (k === "edit") { st.open[i] = !st.open[i]; draw(); }
         else if (k === "expand" || k === "close") { rows.forEach(function (_, j) { st.open[j] = k === "expand"; }); draw(); }
-        else if (k === "picker") { st.picker[i] = !st.picker[i]; draw(); }
+        else if (k === "picker") {
+          if (v && typeof ctx.openLibrary === "function") {
+            ctx.openLibrary(function (value) { v.image = value; st.picker[i] = false; draw(); save(); }, i + 1);
+          } else { st.picker[i] = !st.picker[i]; draw(); }
+        }
         else if (k === "pick" && v) { v.image = a.getAttribute("data-src"); st.picker[i] = false; draw(); save(); }
         else if (k === "noimg" && v) { delete v.image; draw(); save(); }
         else if (k === "sched") { st.sched[i] = true; draw(); }
@@ -536,6 +548,11 @@
           var nv = rowFrom(r);
           ["type", "color", "size"].forEach(function (f) { if (nv[f]) v[f] = nv[f]; else delete v[f]; });
         } else if (k === "enabled") { if (t.checked) delete v.enabled; else v.enabled = false; }
+        else if (k === "hprice") {
+          // Price box on the row: the regular price; an existing sale price stays if it is still lower.
+          var sale = saleOf(v), reg = int(t.value);
+          setPrices(v, reg, sale && reg > sale ? sale : "");
+        }
         else if (k === "regular" || k === "sale") {
           var cardEl = t.closest(".pmw-var");
           setPrices(v, cardEl.querySelector('[data-pv="regular"]').value, cardEl.querySelector('[data-pv="sale"]').value);

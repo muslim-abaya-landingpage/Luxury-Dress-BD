@@ -74,9 +74,21 @@ test('product type, attributes with "Used for variations", generate, edit variat
   await c1.locator('[data-pv="sto"]').fill('2030-02-05');
   await c1.locator('[data-pv="sto"]').blur();
   await expect(c1.locator('[data-pv="nosched"]')).toBeVisible();
-  await c1.locator('[data-pv="picker"]').click();
-  await c1.locator('[data-pv="pick"]').first().click();
-  await expect(c1.locator('.pmw-img img')).toBeVisible();
+  // Variation image like WooCommerce: the image button on the row opens the Media Library.
+  await page.route('**/media-manifest.json*', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify({ version: 1, items: [{ path: 'images/variation-photo.webp', date: 1 }] }) }));
+  await page.route('**/api/media-library', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify({ ok: true, items: [] }) }));
+  const galleryBefore = await page.locator('#pmGalView .pm-wp-gallery li').count();
+  await c1.locator('.pmw-thumb').click();
+  const lib = page.locator('#maMediaModal');
+  await expect(lib.locator('.mam-head h1')).toHaveText('Variation image #1');
+  await expect(lib.locator('#mamFilter')).toHaveValue('mine'); // opens on this product's photos
+  await lib.locator('#mamFilter').selectOption('all');
+  await lib.locator('.mam-item[title="variation-photo.webp"]').click();
+  await lib.locator('.mam-go').click();
+  await expect(lib).toBeHidden();
+  await expect(vars.nth(0).locator('.pmw-thumb img')).toHaveAttribute('src', /variation-photo\.webp/);
+  // The website shows a variation photo from the gallery, so it was added there too.
+  await expect(page.locator('#pmGalView .pm-wp-gallery li')).toHaveCount(galleryBefore + 1);
 
   await vars.nth(1).locator('[data-pv="edit"]').click();
   await vars.nth(1).locator('[data-pv="enabled"]').uncheck();
@@ -159,9 +171,15 @@ test('variation image remains attached to the same photo after gallery reorder',
   await page.locator('[data-etab="variations"]').click();
   await page.locator('[data-pv="generate"]').click();
   const variation = page.locator('[data-epanel="variations"] .pmw-var').first();
+  await page.route('**/media-manifest.json*', (r) => r.fulfill({ contentType: 'application/json', body: '{"version":1,"items":[]}' }));
+  await page.route('**/api/media-library', (r) => r.fulfill({ contentType: 'application/json', body: '{"ok":true,"items":[]}' }));
   await variation.locator('[data-pv="edit"]').click();
-  await variation.locator('[data-pv="picker"]').click();
-  await variation.locator('[data-pv="pick"][data-src="/images/e2e-photo-b.webp"]').click();
+  // The Media Library opens on "This product's photos"; choose photo B.
+  await variation.locator('.pmw-thumb').click();
+  const lib = page.locator('#maMediaModal');
+  await expect(lib.locator('#mamFilter')).toHaveValue('mine');
+  await lib.locator('.mam-item[title="e2e-photo-b.webp"]').click();
+  await lib.locator('.mam-go').click();
   await expect(variation.locator('.pmw-img img')).toHaveAttribute('src', '/images/e2e-photo-b.webp');
 
   // Reorder gallery photos through the same UI controls used by administrators.
@@ -202,4 +220,22 @@ test('renaming a color updates the selected variation key before publish', async
   const block = await publishedBlock(page);
   expect(block).toContain('"color":"deep-maroon"');
   expect(block).not.toContain('"color":"maroon"');
+});
+
+test('variation price box on each row (no Edit needed) saves the variation price', async ({ page }) => {
+  await openMaroon(page);
+  await page.selectOption('#pmProductType', 'variable');
+  await page.click('[data-etab="variations"]');
+  await page.click('[data-pv="generate"]');
+  const vars = page.locator('[data-epanel="variations"] .pmw-var');
+  const box = vars.first().locator('[data-pv="hprice"]');
+  await expect(box).toBeVisible();
+  await box.fill('1777');
+  await box.blur();
+  // The same value shows in the Edit panel.
+  await vars.first().locator('[data-pv="edit"]').click();
+  await expect(vars.first().locator('[data-pv="regular"]')).toHaveValue('1777');
+  await page.click('#pmEditUpdate');
+  const block = await publishedBlock(page);
+  expect(block).toContain('"price":1777');
 });

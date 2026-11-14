@@ -177,7 +177,7 @@
   var lazyScripts = Object.create(null);
   var quickUploadOptions = null;
   var quickUploadMounted = false;
-  var VARIATIONS_SRC = "product-variations-admin.js?v=20261101-woo2";
+  var VARIATIONS_SRC = "product-variations-admin.js?v=20261114-woo4";
   function loadScriptOnce(src) {
     if (lazyScripts[src]) return lazyScripts[src];
     lazyScripts[src] = new Promise(function (resolve, reject) {
@@ -1716,6 +1716,25 @@
         basePrice: function (type) { var v = type && p.priceByType ? parseInt(p.priceByType[type], 10) : NaN; return v > 0 ? v : (parseInt(p.price, 10) || 0); },
         changed: function (note) { changed(note); },
         rerender: function (tab, note) { editTab = tab; renderProductEditor(); changed(note); },
+        // Variation image, like WooCommerce: the Media Library (upload a new photo or choose one). The website shows
+        // a variation's photo from the product gallery, so a photo that is not in the gallery yet is added to it.
+        openLibrary: function (done, n) {
+          window.openMediaLibrary(function (value) {
+            var inGallery = value === p.image || (Array.isArray(p.images) && p.images.indexOf(value) !== -1);
+            if (!inGallery && (Array.isArray(p.images) ? p.images.length : 0) >= MAX_GALLERY_IMAGES) {
+              toast("The gallery is full (" + MAX_GALLERY_IMAGES + " photos). Remove one, or choose a photo already in this product.");
+              return;
+            }
+            if (!inGallery) { if (!Array.isArray(p.images)) p.images = []; p.images.push(value); }
+            done(value);
+            if (!inGallery) {
+              var editRoot = document.querySelector(".pm-wp-edit");
+              var hook = editRoot && editRoot.__pmRefreshGallery;
+              if (typeof hook === "function") hook(); else { editTab = "variations"; renderProductEditor(); }
+              changed("Variation image set — also added to the product gallery so the website can show it.");
+            }
+          }, { title: "Variation image" + (n ? " #" + n : ""), button: "Set variation image", fileBase: String(p.id || p.name || "product"), productPhotos: photos });
+        },
         admin: window.MaAdmin
       };
     }
@@ -2096,6 +2115,8 @@
         var lib = root.querySelector("#pmGalHidden .pm-gallery-lib-add"); if (lib) lib.click();
       });
     }
+    // Lets other boxes (Variations → variation image) refresh the gallery without re-drawing the whole editor.
+    root.__pmRefreshGallery = function () { refreshHiddenGallery(); drawGallery(); };
     function refreshHiddenGallery() {
       var holder = root.querySelector("#pmGalHidden");
       holder.innerHTML = buildGalleryUploader(p);
@@ -4015,7 +4036,7 @@
   // The window itself is media-library.js (loaded on first use). It lists every photo: the website folder
   // (media-manifest.json) and photos uploaded from the panel to R2 (/api/media-library), newest first.
   // openMediaLibrary(onSelect, opts): onSelect(value, item) for each chosen photo, or opts.onSelectMany(items).
-  var MEDIA_SRC = "media-library.js?v=20261114-wp2";
+  var MEDIA_SRC = "media-library.js?v=20261114-wp3";
   function mediaUsedBy(value) {
     var v = String(value || "");
     if (!v) return [];
@@ -4041,6 +4062,8 @@
         max: opts.max,
         tab: opts.tab,
         fileBase: opts.fileBase || "product",
+        productPhotos: opts.productPhotos,
+        preview: resolveImgForPreview,
         usedBy: mediaUsedBy,
         onSelect: function (items) {
           if (typeof opts.onSelectMany === "function") { opts.onSelectMany(items); return; }
@@ -4061,6 +4084,11 @@
         if (rows && JSON.stringify(rows) !== JSON.stringify(p.colorVariants)) p.colorVariants = rows;
       });
     });
+  }
+
+  // Variable product: the product takes its lowest variation price when it has none (product-publish-utils.js).
+  function fillVariablePrices() {
+    window.MaProductPublishUtils.fillVariablePrices(products, function (p) { return productStatus(p) === "publish"; });
   }
 
   function saveAll(target) {
@@ -4086,6 +4114,7 @@
       }
       var promotedViews = promoteEditedPhotoViews();
       if (promotedViews.length) setSaveStatus("Now a product on the website: " + promotedViews.join(", "));
+      fillVariablePrices();
       window.MaProductPublishUtils.validateCatalog(products);
       reconcileAllColorVariants();stripHomeLinksFromProducts();snapshot=catalogSnapshot();
       var files=[{path:"category-products.js",content:generateProductsFile()},{path:"product-links-data.js",content:generateProductLinksFile()},{path:"product-catalog-sections.js",content:generateSectionsFile()},{path:"product-config.js",content:generateProductConfigFile()}];

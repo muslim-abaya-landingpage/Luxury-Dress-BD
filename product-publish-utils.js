@@ -37,5 +37,14 @@
   if(p.saleFrom&&p.saleTo&&String(p.saleFrom)>String(p.saleTo))throw Error(p.id+': sale end date is before the start date.');
   if(String(p.seoTitle||'').length>120||String(p.seoDescription||'').length>320)throw Error(p.id+': SEO title max 120 and description max 320 characters.');
  });});}
- g.MaProductPublishUtils={sizes:sizes,money:money,mode:mode,makeProduct:makeProduct,validateCatalog:validateCatalog,slug:slug,seo:seo};
+ /* Variable product (WooCommerce): prices live on the variations. A product with no price of its own takes the
+    lowest enabled variation price (the "from" price on cards), so Publish works. A published variable product
+    with no price anywhere gets a message that points to the variation price boxes. isPublished(p) → boolean. */
+ function fillVariablePrices(products,isPublished){Object.keys(products||{}).forEach(function(cat){(products[cat]||[]).forEach(function(p){
+  if(!p||!Array.isArray(p.variations)||!p.variations.length||Number(p.price)>0)return;
+  var prices=p.variations.filter(function(v){return v&&v.enabled!==false;}).map(function(v){return parseInt(v.price,10);}).filter(function(n){return n>0;});
+  if(prices.length){p.price=Math.min.apply(null,prices);return;}
+  if(!isPublished||isPublished(p))throw Error((p.name||p.id)+': দাম নেই — Variations-এ প্রতিটি সারির “Price ৳” ঘরে দাম দিন (অথবা Draft হিসেবে সেভ করুন)।');
+ });});}
+ g.MaProductPublishUtils={sizes:sizes,money:money,mode:mode,makeProduct:makeProduct,validateCatalog:validateCatalog,fillVariablePrices:fillVariablePrices,slug:slug,seo:seo};
 })(window);

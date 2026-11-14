@@ -59,13 +59,28 @@
       list.sort(function (a, b) { return (b.date || 0) - (a.date || 0); });
       // Photos uploaded in this window stay on top even if the list is reloaded.
       state.items = state.uploads.concat(list.filter(function (it) { return !state.uploads.some(function (u) { return u.value === it.value; }); }));
+      applyProductPhotos();
       if (res[1] && !res[1].ok && res[1].error !== "NOT_LOGGED_IN") state.error = "Uploaded photos could not be listed (" + (res[1].message || res[1].error) + "). Photos in the website folder are shown.";
     }).then(function () { state.loading = false; render(); }, function (e) { state.loading = false; state.error = String(e && e.message || e); render(); });
+  }
+
+  /** The product's own photos (opts.productPhotos) come first and get the "This product" filter, like
+   *  WooCommerce's "Uploaded to this product". */
+  function applyProductPhotos() {
+    var own = (state.opts && state.opts.productPhotos) || [];
+    if (!own.length || !state.items) return;
+    var preview = (state.opts && state.opts.preview) || function (v) { return v; };
+    var mine = own.map(function (v) {
+      var hit = state.items.filter(function (it) { return it.value === v; })[0];
+      return Object.assign({}, hit || { id: "p:" + v, value: v, url: preview(v), card: "", date: 0, size: 0, source: "site", name: fileName(v) }, { mine: true });
+    });
+    state.items = mine.concat(state.items.filter(function (it) { return own.indexOf(it.value) === -1; }));
   }
 
   function visible() {
     var q = state.search.trim().toLowerCase();
     return (state.items || []).filter(function (it) {
+      if (state.filter === "mine" && !it.mine) return false;
       if (state.filter === "upload" && it.source !== "upload") return false;
       if (state.filter === "site" && it.source !== "site") return false;
       return !q || it.name.toLowerCase().indexOf(q) !== -1 || String(it.value).toLowerCase().indexOf(q) !== -1;
@@ -307,6 +322,7 @@
     return '<div class="mam-content">' +
       '<div class="mam-bar"><select id="mamFilter" aria-label="Filter media">' +
       '<option value="all"' + (state.filter === "all" ? " selected" : "") + ">All media items</option>" +
+      ((state.opts && state.opts.productPhotos && state.opts.productPhotos.length) ? '<option value="mine"' + (state.filter === "mine" ? " selected" : "") + ">This product’s photos</option>" : "") +
       '<option value="upload"' + (state.filter === "upload" ? " selected" : "") + ">Uploaded from the panel</option>" +
       '<option value="site"' + (state.filter === "site" ? " selected" : "") + ">Website folder</option></select>" +
       '<input type="search" id="mamSearch" placeholder="Search media" aria-label="Search media" value="' + esc(state.search) + '"></div>' +
@@ -349,8 +365,11 @@
     state.opts = opts || {};
     state.selected = []; state.focus = null; state.search = ""; state.filter = "all"; state.progress = null; noteText = "";
     state.tab = state.opts.tab || "library";
+    if (state.opts.productPhotos && state.opts.productPhotos.length) state.filter = "mine";
     modal.hidden = false;
     document.documentElement.style.overflow = "hidden";
+    if (state.items) state.items = state.items.map(function (it) { var c = Object.assign({}, it); delete c.mine; return c; }).filter(function (it) { return it.id.indexOf("p:") !== 0; });
+    applyProductPhotos();
     render();
     load(!!state.opts.reload);
   }
