@@ -284,7 +284,58 @@
     var img = String(p.image || "");
     if (!img || img === target.origImage) return false;
     if (p.stockStatus === "onbackorder" || p.status === "trash") return false;
+    if (target.livePool) return false; // a product counted on the order server follows its quantity
     return managerOutOfStock(p);
+  }
+  // Inventory → Quantity is the product's stock count on the order server (the StockVariants row with an empty
+  // variant). Orders take from it and cancelled orders give back; at 0 the website shows Out of stock.
+  // Sent only when the box was changed, so an older number in the catalog never overwrites the live count.
+  function stockService() { return window.MaAdmin && typeof window.MaAdmin.call === "function" ? window.MaAdmin : null; }
+  function syncStockCount(p, target) {
+    var admin = stockService();
+    if (!p || !target || !p.id) return Promise.resolve("");
+    if (target.qtyDirty && typeof p.stock === "number") {
+      if (!admin) return Promise.resolve(" Quantity NOT saved to the order server — try Update again.");
+      var qty = p.stock;
+      return admin.call("AdminStockVariantSave", {
+        ProductId: String(p.id), ProductName: p.name || "", Category: target.cat || "", Variant: "", Available: String(qty),
+        Reason: "Product Manager: quantity " + qty
+      }).then(function () {
+        target.qtyDirty = false; target.livePool = { available: qty };
+        var off = liveStockOverrides[String(p.id)] === false && qty > 0;
+        var done = function () { return " Quantity " + qty + " saved — each order takes one off" + (qty > 0 ? "." : "; it shows Out of stock now."); };
+        return off ? publishStockChanges([p], true, function () {}).then(done) : done();
+      }).catch(function (err) { return " Quantity NOT saved to the order server (" + ((err && err.message) || "error") + ") — click Update again."; });
+    }
+    if (target.untrack && target.livePool) {
+      if (!admin) return Promise.resolve("");
+      return admin.call("AdminStockVariantSave", { ProductId: String(p.id), Variant: "", Tracked: "false", Reason: "Product Manager: stopped tracking quantity" })
+        .then(function () { target.untrack = false; target.livePool = null; return " Quantity tracking turned off."; })
+        .catch(function (err) { return " Tracking NOT turned off (" + ((err && err.message) || "error") + ")."; });
+    }
+    return Promise.resolve("");
+  }
+  // Shows the live count under the Quantity box and puts it in the box (orders since the last save are included).
+  function showLiveStockCount(p, target) {
+    var hint = document.getElementById("pmLiveQty");
+    if (!hint || !p || !p.id || !target || target.isNew || !window.MaAdmin || typeof window.MaAdmin.getStockVariants !== "function") return;
+    if (target.livePool) { paintLiveCount(hint, target.livePool); return; }
+    window.MaAdmin.getStockVariants({ search: String(p.id), maxAgeMs: 0 }).then(function (res) {
+      var row = ((res && res.items) || []).filter(function (r) { return String(r.productId) === String(p.id) && !String(r.variant || "").trim() && (r.tracked === true || String(r.tracked).toUpperCase() === "TRUE"); })[0];
+      if (!row) { var h = document.getElementById("pmLiveQty"); if (h) h.textContent = "Not counted yet: type the quantity and click Update to start counting down with orders."; return; }
+      target.livePool = { available: Number(row.available) || 0, reserved: Number(row.reserved) || 0 };
+      var box = document.querySelector('[data-ef="stock"]');
+      if (box && !target.qtyDirty && box.value !== String(target.livePool.available)) {
+        box.value = String(target.livePool.available);
+        p.stock = target.livePool.available;
+        if (p.stock === 0) p.inStock = false; else delete p.inStock;
+      }
+      paintLiveCount(document.getElementById("pmLiveQty"), target.livePool);
+    }).catch(function () {});
+  }
+  function paintLiveCount(hint, pool) {
+    if (!hint) return;
+    hint.textContent = "Live: " + pool.available + " left" + (pool.reserved ? " (" + pool.reserved + " in open orders)" : "") + (pool.available <= 0 ? " — Out of stock on the website" : "");
   }
   function managerOutOfStock(p) {
     if (p && Object.prototype.hasOwnProperty.call(liveStockOverrides, String(p.id))) {
@@ -1273,7 +1324,7 @@
               '</div>' +
               (ptype === "simple" || ptype === "variable" ? '<div class="pm-woo-group">' +
                 row("Stock management", '<label class="pm-woo-check"><input type="checkbox" data-ef="manageStock" id="pmManageStock"' + (managed ? " checked" : "") + '> Track stock quantity for this product</label>') +
-                (managed ? row("Quantity", inp("stock", p.stock == null ? "" : p.stock, "number", ' min="0" step="1"'), "Stock quantity. 0 = out of stock.") +
+                (managed ? row("Quantity", inp("stock", p.stock == null ? "" : p.stock, "number", ' min="0" step="1"') + '<span class="pm-wp-hint" id="pmLiveQty"></span>', "How many pieces you have. Each order takes one off (a cancelled order gives it back); at 0 the website shows Out of stock automatically.") +
                   '<div class="pm-woo-field"><label>Allow backorders?</label><span class="pm-woo-ctl">' + radios("pmBackorders", "backorders", p.backorders || "no", [["no", "Do not allow"], ["notify", "Allow, but notify customer"], ["yes", "Allow"]]) + tip("If managing stock, this controls whether or not backorders are allowed. If enabled, stock quantity can go below 0.") + '</span></div>' +
                   row("Low stock threshold", inp("lowStockAmount", p.lowStockAmount, "number", ' min="0" step="1" placeholder="Store-wide threshold (2)"'), "When product stock reaches this amount you will be notified (Stock & Analytics).")
                   : '<div class="pm-woo-field"><label>Stock status</label><span class="pm-woo-ctl">' + radios("pmStockStatus", "stockStatusRadio", stockState, [["instock", "In stock"], ["outofstock", "Out of stock"], ["onbackorder", "On backorder"]]) + tip("Controls whether or not the product is listed as \"in stock\" or \"out of stock\" on the frontend.") + '</span></div>') +
@@ -1386,6 +1437,7 @@
       '</div>';
 
     var root = mainEl.querySelector(".pm-wp-edit");
+    if (managed) showLiveStockCount(p, editTarget);
     // One button publishes: messages point at "Publish" (new / draft) or "Update" (already live).
     function mainAction() { var b = document.getElementById("pmEditUpdate"); return (b && b.textContent.trim()) || "Publish"; }
     function editMsg(text, state) {
@@ -1424,6 +1476,8 @@
       var restock = replacedOutOfStock(p, editTarget);
       if (restock) setProductAvailability(p, true);
       saveAll().then(function (result) {
+        return syncStockCount(p, editTarget).then(function (note) { restockNote += note; return result; });
+      }).then(function (result) {
         if (!restock) return result;
         return publishStockChanges([p], true, function () {}).then(function (ok) {
           restockNote = ok ? " Stock: new main photo, so it is now In stock (switch it back in Inventory if needed)." :
@@ -1494,6 +1548,7 @@
         else if (f === "status") { setProductStatus(p, inp.value); paintStatusNote(); }
         else if (f === "seoTitle" || f === "seoDescription") { var sv = inp.value.replace(/\s+/g, " ").trim(); if (sv) p[f] = sv; else delete p[f]; updateSeoPreview(); }
         else if (f === "stock") {
+          if (editTarget) editTarget.qtyDirty = true;
           if (inp.value === "") { delete p.stock; delete p.inStock; }
           else { p.stock = Math.max(0, parseInt(inp.value, 10) || 0); if (p.stock === 0) p.inStock = false; else delete p.inStock; }
         } else if (f === "colorLabel") {
@@ -1513,8 +1568,8 @@
           renderProductEditor(); changed(); return;
         }
         else if (f === "manageStock") {
-          if (inp.checked) p.manageStock = true;
-          else { delete p.manageStock; delete p.stock; delete p.backorders; delete p.lowStockAmount; }
+          if (inp.checked) { p.manageStock = true; if (editTarget) editTarget.untrack = false; }
+          else { delete p.manageStock; delete p.stock; delete p.backorders; delete p.lowStockAmount; if (editTarget) { editTarget.untrack = true; editTarget.qtyDirty = false; } }
           renderProductEditor(); changed(); return;
         }
         else if (f === "stockStatusRadio") { if (inp.checked) setStockStatusRadio(inp.value); return; }

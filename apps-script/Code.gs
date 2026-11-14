@@ -4494,6 +4494,13 @@ function getAdminAnalytics_(e) {
 }
 
 // ===== পাবলিক Stock Status (কাস্টমারদের সাইটে এর জন্য, Token লাগে না) =====
+function publicStockIsCounted_(entry) {
+  if (!entry) return false;
+  if (entry.legacyTracked === true) return true;
+  var vs = entry.variants || {};
+  return Object.keys(vs).some(function (k) { return vs[k] && vs[k].tracked === true; });
+}
+
 function getPublicStockStatus_() {
   try {
     var items = {};
@@ -4546,6 +4553,9 @@ function getPublicStockStatus_() {
     var liveOverrides = liveStockOverrides_();
     Object.keys(liveOverrides).forEach(function(id) {
       if (!items[id]) items[id] = {};
+      // A counted quantity decides by itself: the "In stock" switch cannot sell a product whose count is 0.
+      // The "Out of stock" switch still hides a counted product.
+      if (liveOverrides[id] === true && publicStockIsCounted_(items[id])) return;
       items[id].manualOverride = true;
       items[id].inStock = liveOverrides[id];
       items[id].qty = liveOverrides[id] ? Math.max(1, Number(items[id].qty) || 0) : 0;
@@ -7075,6 +7085,8 @@ function saveAdminStockVariant_(e) {
 
   var trackedRaw = String(param_(e, 'Tracked') || '').trim().toLowerCase();
   var setTracked = hasQty || trackedRaw === 'true' || trackedRaw === '1';
+  // Tracked=false (no quantity) turns counting off for this row, e.g. Product Manager → untick "Track stock quantity".
+  var setUntracked = !hasQty && trackedRaw === 'false';
 
   var lock = LockService.getScriptLock();
   lock.waitLock(15000);
@@ -7086,6 +7098,7 @@ function saveAdminStockVariant_(e) {
     var deltaAvailable = nextAvailable - before.available;
     var fields = { available: nextAvailable, updatedBy: v.email || 'admin' };
     if (setTracked) fields.tracked = true;
+    else if (setUntracked) fields.tracked = false;
     if (productName) fields.productName = productName;
     if (category) fields.category = category;
     if (typeof threshold !== 'undefined') fields.threshold = threshold;
