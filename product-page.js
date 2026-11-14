@@ -1005,9 +1005,8 @@
       line.productType ? "ধরন: " + line.productType : "",
       "পণ্যের লিংক: " + window.location.href
     ].filter(Boolean).join("\n");
-    msgLink.textContent = "WhatsApp-এ অর্ডার";
-    msgLink.setAttribute("aria-label", "WhatsApp-এ " + line.name + " অর্ডার করুন");
-    msgLink.href = waLink() + "?text=" + encodeURIComponent(msgText);
+    msgLink.textContent = "মেসেজ করুন";
+    msgLink.setAttribute("aria-label", line.name + " সম্পর্কে মেসেজ করুন");
   }
 
   function wireActions() {
@@ -1058,6 +1057,16 @@
           });
       });
     }
+    var productMessageButton = $("pdSendMsg");
+    if (productMessageButton) productMessageButton.addEventListener("click", function (event) {
+      event.preventDefault();
+      if (!sizeChoiceReady()) return;
+      var line = buildCartLine();
+      if (typeof window.maOpenProductChat !== "function") { alert("চ্যাট লোড হচ্ছে। অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন।"); return; }
+      window.maOpenProductChat({ id: line.id, name: line.name, price: line.price, quantity: line.quantity,
+        image: resolveImg(line.image), size: line.size, color: line.colorLabel || line.color,
+        variant: line.productType, url: window.location.href });
+    });
     $("pdSizeGroup").addEventListener("ma:size-change", function () {
       state.sizeValues = window.maSizeStore.read($("pdSizeGroup"));
       updateSendMessageLink();
@@ -1112,7 +1121,7 @@
       "<button type='button' class='pd-btn pd-btn-outline' id='pdAddCart'>Add to Cart</button>" +
       "<button type='button' class='pd-btn pd-btn-dark' id='pdBuyNow' lang='bn'>অর্ডার করুন</button>" +
       "<button type='button' class='pd-btn pd-btn-outline' id='pdNotifyBtn' style='display:none'>স্টকে এলে জানান</button>" +
-      "<a class='pd-btn pd-btn-whatsapp' id='pdSendMsg' target='_blank' rel='noopener noreferrer'>WhatsApp-এ অর্ডার</a>" +
+      "<button type='button' class='pd-btn pd-btn-whatsapp' id='pdSendMsg'>মেসেজ করুন</button>" +
       "</div>" +
       "<div class='pdp-purchase-assurance' role='note' aria-label='Delivery and payment information'>" +
       "<p><strong>ডেলিভারি:</strong> ঢাকার ভিতরে ৳80 · ঢাকার বাইরে ৳150 · ৩ বা তার বেশি আইটেমে ফ্রি</p>" +
