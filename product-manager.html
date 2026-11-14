@@ -276,6 +276,16 @@
   var stockPublishing = false;
   var queuedStockToggle = null;
   var liveStockOverrides = Object.create(null);
+  var restockNote = "";
+  // An existing out-of-stock product whose main photo was swapped for a different one is treated as a
+  // replacement product: it goes back to In stock on save. Backorder, Trash and new products are left alone.
+  function replacedOutOfStock(p, target) {
+    if (!p || !target || target.isNew || !target.origImage) return false;
+    var img = String(p.image || "");
+    if (!img || img === target.origImage) return false;
+    if (p.stockStatus === "onbackorder" || p.status === "trash") return false;
+    return managerOutOfStock(p);
+  }
   function managerOutOfStock(p) {
     if (p && Object.prototype.hasOwnProperty.call(liveStockOverrides, String(p.id))) {
       return liveStockOverrides[String(p.id)] === false;
@@ -980,7 +990,7 @@
       if (np && !String(np.name || "").trim() && !np.image && editTarget.cat === cat && editTarget.index < index) index--;
       dropUnsavedNewProduct();
     }
-    editTarget = { cat: cat, index: index };
+    editTarget = { cat: cat, index: index, origImage: String(((products[cat] || [])[index] || {}).image || "") };
     editTab = "general";
     activeKey = EDIT_KEY;
     renderCatList();
@@ -1410,10 +1420,21 @@
       if (attrLive && attrLive.flush && !attrLive.flush()) return;
       [b1, b2].forEach(function (b) { if (b) b.disabled = true; });
       editMsg("Saving…", "busy");
+      // Replacing an out-of-stock product (a new main photo in its place) puts it back in stock automatically.
+      var restock = replacedOutOfStock(p, editTarget);
+      if (restock) setProductAvailability(p, true);
       saveAll().then(function (result) {
-        if (editTarget) { editTarget.isNew = false; editTarget.autoId = false; }
+        if (!restock) return result;
+        return publishStockChanges([p], true, function () {}).then(function (ok) {
+          restockNote = ok ? " Stock: new main photo, so it is now In stock (switch it back in Inventory if needed)." :
+            " Stock NOT saved — set In stock in Inventory.";
+          return result;
+        });
+      }).then(function (result) {
+        if (editTarget) { editTarget.isNew = false; editTarget.autoId = false; editTarget.origImage = String(p.image || ""); }
         var flush = window.MaVariationsAdmin && window.MaVariationsAdmin.hasPendingStock() ? window.MaVariationsAdmin.flushStock() : Promise.resolve("");
         return flush.then(function (stockNote) {
+          stockNote = restockNote + stockNote; restockNote = "";
           if (result && result.live) {
             editMsg("✅ Saved and live on the website. Open product pages may need a refresh." + stockNote, /NOT saved/.test(stockNote) ? "err" : "ok");
           } else {
