@@ -291,14 +291,14 @@ window.CATEGORY_PRODUCTS = {
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
       bodySizes: ["46"],
+      extraCategories: ["embroidery"],
       tags: ["Dubai Cherry Abaya","Premium Abaya","Embroidery Abaya","Ladies Abaya","Luxury Abaya","Muslim Abaya","Dubai Fabric","Premium Collection","Black Abaya"],
       brand: "Muslim Abaya",
       dateAdded: "2026-07-17",
       seoTitle: "Premium Dubai Cherry Fabrics Abaya | MUSLIM ABAYA",
       seoDescription: "Shop Premium Dubai Cherry Fabrics Abaya with beautiful embroidery. Free size, body 46\", length 50-56\". Price starts at ৳1050. Order from MUSLIM ABAYA.",
       productUrl: "/",
-      variationAttributes: ["type","color","body","length"],
-      extraCategories: ["embroidery"]
+      variationAttributes: ["type","color","body","length"]
     },
     {
       id: "ABY-BUTTERFLY-15",
@@ -1588,7 +1588,9 @@ window.CATEGORY_PRODUCTS = {
       productUrl: "/",
       sleeveSizes: [],
       palazzoLengths: [],
-      variationAttributes: ["type","color","body","length"]
+      variationAttributes: ["type","color","body","length"],
+      status: "trash",
+      trashedAt: "2026-11-15"
     }
   ],
   karchupi: [
