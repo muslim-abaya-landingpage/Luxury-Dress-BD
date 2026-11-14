@@ -40,19 +40,27 @@ function renderCategoryTiles(ctx) {
   const products = ctx.CATEGORY_PRODUCTS || {};
   const cards = categories.map(([key, label, route]) => {
     const list = Array.isArray(products[key]) ? products[key] : [];
-    let image = '';
+    // Small card thumbnail (same as the product cards), never the full photo: see home-category-tiles.js.
+    let im = null;
     for (const product of list) {
       const raw = product && (product.image || product.img);
       if (!product || !raw || /- back|- side/i.test(product.name || '')) continue;
-      image = ctx.maCatalog && typeof ctx.maCatalog.resolveImageUrl === 'function'
-        ? ctx.maCatalog.resolveImageUrl(raw)
-        : raw;
-      if (image) break;
+      im = typeof ctx.maHomeCardImage === 'function' ? ctx.maHomeCardImage(product) : null;
+      if (!im) {
+        const full = ctx.maCatalog && typeof ctx.maCatalog.resolveImageUrl === 'function' ? ctx.maCatalog.resolveImageUrl(raw) : raw;
+        im = { src: full, full };
+      }
+      if (im && im.src) break;
     }
+    const image = im && im.src;
     const href = typeof ctx.siteHref === 'function' ? ctx.siteHref(route) : route;
     return '<a class="ma-image-category-card' + (image ? '' : ' is-placeholder') + '" href="' + escapeHtml(href) + '">' +
       (image
-        ? '<img src="' + escapeHtml(image) + '" alt="" loading="lazy" decoding="async" width="480" height="600">'
+        // data-tile-src: home-category-tiles.js starts these after the page has loaded (hero banner first).
+        ? (im.avif ? '<picture><source type="image/avif" data-tile-srcset="' + escapeHtml(im.avif.split('/').map(encodeURIComponent).join('/')) + '">' : '') +
+          '<img data-tile-src="' + escapeHtml(image) + '" data-full="' + escapeHtml(im.full || image) + '" alt="" loading="lazy" decoding="async" width="480" height="600"' +
+          ' onerror="var f=this.getAttribute(&#39;data-full&#39;);var s=this.parentNode&amp;&amp;this.parentNode.tagName===&#39;PICTURE&#39;&amp;&amp;this.parentNode.querySelector(&#39;source&#39;);if(s)s.remove();if(f&amp;&amp;this.getAttribute(&#39;src&#39;)!==f){this.src=f}else{this.onerror=null}">' +
+          (im.avif ? '</picture>' : '')
         : '<span class="ma-cat-placeholder-mark">M</span>') +
       '<span class="ma-image-category-shade"></span><span class="ma-image-category-name">' + escapeHtml(label) +
       '</span><span class="ma-image-category-arrow" aria-hidden="true">↗</span></a>';

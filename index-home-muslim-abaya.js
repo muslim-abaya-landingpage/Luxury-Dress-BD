@@ -654,6 +654,15 @@
   }
 
   /* Build-time prerender hook (scripts/build-home-prerender.mjs). Not used in the browser. */
+  // Small photo for a product shown as a tile (Shop by category): the same card thumbnail the product cards use,
+  // never the full-size photo (8 full photos were ~1 MB and slowed the hero image on mobile).
+  window.maHomeCardImage = function (p) {
+    if (!p || !(p.image || p.img)) return null;
+    var full = resolveImg(p);
+    var thumb = resolveCardImg(p) || cardThumbSrc(full);
+    return { src: thumb || full, avif: homeCardAvifSrc(thumb), full: full };
+  };
+
   window.__maHomePrerender = function () {
     var secs = activeSections();
     if (!secs.length) return null;

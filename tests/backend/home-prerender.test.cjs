@@ -21,6 +21,11 @@ test('prerender renders the first section with the browser renderer', async () =
   assert.match(parts.categoryTiles, /id="ma-image-category-grid"/);
   assert.equal((parts.categoryTiles.match(/class="ma-image-category-card/g) || []).length, 8);
   assert.match(parts.categoryTiles, /loading="lazy" decoding="async" width="480" height="600"/);
+  // Small card thumbnails only (8 full-size photos were ~1 MB and slowed the hero on mobile), started after load.
+  const tileSrcs = [...parts.categoryTiles.matchAll(/data-tile-src="([^"]+)"/g)].map((m) => m[1]);
+  assert.equal(tileSrcs.length, 8);
+  tileSrcs.forEach((src) => assert.match(src, /(^|\/)images\/card\/|-card\.webp$/, 'tile uses a thumbnail: ' + src));
+  assert.doesNotMatch(parts.categoryTiles, /<img src=/, 'tile photos must not start before the page has loaded');
 });
 
 test('prerenderIndex inlines the card CSS and fills the empty containers once', async () => {
