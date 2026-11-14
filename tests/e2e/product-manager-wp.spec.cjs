@@ -205,6 +205,7 @@ test('edit screen: structured color variations publish names and images, with fi
   await expect(page.locator('.pm-color-variation-row').first().locator('select')).toHaveCount(0);
   await page.locator('.pm-color-variation-row').first().locator(`[data-color-photo="${dr01Photo}"]`).click();
   await expect(page.locator('.pm-color-variation-row').first().locator(`[data-color-photo="${dr01Photo}"]`)).toHaveAttribute('aria-checked', 'true');
+  await page.evaluate(() => { const d = document.getElementById('pmMoreDetails'); if (d) d.open = true; }); // "More details" box
   await page.click('#pmColorAdd');
   await page.locator('.pm-color-variation-row').nth(1).locator('[data-color-field="label"]').fill('কালো');
   await page.locator('.pm-color-variation-row').nth(1).locator(`[data-color-photo="${dr01Photo}"]`).click();

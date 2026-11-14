@@ -177,7 +177,7 @@
   var lazyScripts = Object.create(null);
   var quickUploadOptions = null;
   var quickUploadMounted = false;
-  var VARIATIONS_SRC = "product-variations-admin.js?v=20261114-woo4";
+  var VARIATIONS_SRC = "product-variations-admin.js?v=20261114-woo5";
   function loadScriptOnce(src) {
     if (lazyScripts[src]) return lazyScripts[src];
     lazyScripts[src] = new Promise(function (resolve, reject) {
@@ -1286,12 +1286,17 @@
               '</div>' +
             '</div>' +
             '<div class="pm-wp-panel" data-epanel="attributes"' + (editTab === "attributes" ? "" : " hidden") + '>' +
-              '<div id="pmAttrMount"><p>Loading attributes…</p></div><h4 class="pm-wp-subhead">Colours, fabric and size details</h4>' +
+              '<div id="pmAttrMount"><p>Loading attributes…</p></div>' +
+              // Optional extras, folded away like WooCommerce keeps the Attributes tab short; opens by itself
+              // when the product already uses colour rows or own measurements.
+              '<details class="pm-wp-more" id="pmMoreDetails"' + ((colorRows && colorRows.length) || (Array.isArray(p.measures) && p.measures.length) ? " open" : "") + '>' +
+              '<summary><span>More details</span><small>Colour photos, fabric, size chart &amp; own measurements (optional)</small></summary>' +
               '<div class="pm-wp-form-row pm-color-variation-field"><label>Color variations</label><div><div id="pmColorVariationList">' + colorRowsMarkup(colorRows, p) + '</div>' +
                 '<button type="button" class="pm-wp-button" id="pmColorAdd">+ Add color</button>' +
                 '<small>Add any color name, then tap the photo that shows that color (photos come from this product’s gallery). Color keys are generated automatically. Add the photo to the gallery first if it is not shown.</small></div></div>' +
               efield("fabric", "Fabric", p.fabric) +
               measuresCardHtml(p) +
+              '</details>' +
             '</div>' +
             '<div class="pm-wp-panel" data-epanel="variations"' + (editTab === "variations" ? "" : " hidden") + '><div id="pmVariationsMount"><p>Loading variations…</p></div></div>' +
             '<div class="pm-wp-panel" data-epanel="advanced"' + (editTab === "advanced" ? "" : " hidden") + '>' +

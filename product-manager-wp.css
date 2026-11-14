@@ -726,3 +726,12 @@ html[data-admin-theme="dark"] .pm-wp-list, html[data-admin-theme="dark"] .pm-wp-
 @media (max-width: 760px) { .pm-opt-head { display: none !important; } }
 /* Publish box note: saving / published (the floating save bar is gone; this note carries the state). */
 .pm-wp-publish-note[data-state="pub"], .pm-wp-publish-note[data-state="busy"] { color: var(--pm-wp-blue-dark, #135e96) !important; font-weight: 600; }
+/* Attributes tab: optional extras folded away (colour photos, fabric, size chart, own measurements) */
+.pm-wp-more{margin:18px 0 4px;border:1px solid #dcdcde;border-radius:4px;background:#fff}
+.pm-wp-more>summary{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;padding:12px 14px;cursor:pointer;list-style:none;font-weight:600;color:#1d2327}
+.pm-wp-more>summary::-webkit-details-marker{display:none}
+.pm-wp-more>summary::before{content:"▸";color:#2271b1;font-size:12px}
+.pm-wp-more[open]>summary::before{content:"▾"}
+.pm-wp-more>summary small{font-weight:400;color:#646970}
+.pm-wp-more[open]>summary{border-bottom:1px solid #f0f0f1}
+.pm-wp-more>.pm-wp-form-row,.pm-wp-more>.pm-ms{margin-left:14px;margin-right:14px}

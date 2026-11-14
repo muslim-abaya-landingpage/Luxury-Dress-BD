@@ -29,6 +29,24 @@
     });
   }
   function norm(v) { return String(v || "").replace(/\s+/g, " ").trim().toLowerCase(); }
+  // Attribute names the owner may type, English or Bangla → supported attribute id.
+  var ATTR_NAMES = {
+    length: ["long", "length", "dress length", "kameez length", "kamiz length", "kameez long", "kamiz long", "লং", "লম্বা", "দৈর্ঘ্য", "কামিজ লং", "কামিজের লং", "কামিজ লম্বা", "জামার লং", "ড্রেস লং"],
+    body: ["body", "bust", "chest", "বডি", "বুক", "বডি সাইজ"],
+    size: ["size", "sizes", "সাইজ"],
+    sleeve: ["sleeve", "হাতা", "হাতার লং"],
+    palazzo: ["palazzo", "pajama", "pyjama", "pant", "pant length", "পায়জামা", "পায়জামা", "প্লাজো", "পালাজো", "পায়জামার লং", "প্যান্ট"],
+    color: ["color", "colour", "রং", "রঙ", "কালার"],
+    type: ["option", "type", "অপশন", "ধরন"]
+  };
+  // Bangla label shown next to each supported attribute.
+  var ATTR_BN = { length: "লং", body: "বডি", size: "সাইজ", sleeve: "হাতা", palazzo: "পায়জামা", color: "রং", type: "অপশন" };
+  function attrIdFromName(n) {
+    n = norm(n).normalize("NFC");
+    var hit = "";
+    Object.keys(ATTR_NAMES).forEach(function (id) { if (!hit && ATTR_NAMES[id].some(function (w) { return norm(w).normalize("NFC") === n; })) hit = id; });
+    return hit;
+  }
   function int(v) { var n = parseInt(v, 10); return n > 0 ? n : 0; }
   function list(a) {
     return (Array.isArray(a) ? a : []).map(function (s) { return String(s && typeof s === "object" ? s.value : s == null ? "" : s).trim(); }).filter(Boolean);
@@ -119,6 +137,7 @@
     ".pmw-thumb.has-img{border-style:solid;border-color:#c3c4c7;background:#fff}.pmw-thumb img{width:100%;height:100%;object-fit:cover;display:block}.pmw-thumb:hover{border-color:#2271b1}" +
     ".pmw-hprice{display:inline-flex;align-items:center;gap:4px;font-size:13px;color:#50575e}.pmw-hprice input{width:90px;min-height:36px;box-sizing:border-box;border:1px solid #8c8f94;border-radius:4px;padding:0 8px}" +
     ".pmw-hprice.is-missing input{border-color:#d63638;background:#fcf0f1}" +
+    ".pmw-quick{display:flex;flex-wrap:wrap;gap:6px;width:100%}.pmw-quick .pmw-btn{min-height:32px;padding:0 10px}" +
     ".pmw-var{border-bottom:1px solid #eee}.pmw-var-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 0}.pmw-var-head .pmw-id{font-weight:600;min-width:30px}" +
     ".pmw-var-head .pmw-actions{margin-left:auto;display:flex;gap:12px}.pmw-var-head select{max-width:180px}.pmw-var.is-off .pmw-var-head{opacity:.6}" +
     ".pmw-var.is-bad .pmw-var-head{background:#fcf0f1}.pmw-var-body{padding:4px 0 16px;display:grid;gap:12px}" +
@@ -183,7 +202,7 @@
         '<div class="pmw-bar"><button type="button" class="pmw-btn" data-pa="new">Add new</button>' +
         '<select data-pa="global" aria-label="Add global attribute"><option value="">Add global</option>' + missing.map(function (d) { return '<option value="' + d.id + '">' + esc(d.name) + "</option>"; }).join("") + "</select>" +
         '<span class="pmw-right"><a data-pa="expand">Expand</a> / <a data-pa="close">Close</a></span></div>' +
-        (st.showAdd ? '<div class="pmw-inline-add"><label for="pmw-new-attribute">Name</label><input id="pmw-new-attribute" type="text" data-pa="new-name" list="pmw-supported-attributes" placeholder="e.g. Long, Body, Size, Sleeve, Color or Option" autocomplete="off"><datalist id="pmw-supported-attributes">' + missing.map(function (d) { return '<option value="' + esc(d.name) + '"></option>'; }).join('') + '</datalist><button type="button" class="pmw-btn pmw-btn-primary" data-pa="add-selected">Add attribute</button><button type="button" class="pmw-btn" data-pa="cancel-new">Cancel</button><p class="pmw-hint">Enter a supported product attribute name. Values remain connected to the product’s existing size, color and option fields.</p></div>' : '') +
+        (st.showAdd ? '<div class="pmw-inline-add"><label for="pmw-new-attribute">Name</label><input id="pmw-new-attribute" type="text" data-pa="new-name" list="pmw-supported-attributes" placeholder="e.g. Long, Body, Size, Sleeve, Color or Option" autocomplete="off"><datalist id="pmw-supported-attributes">' + missing.map(function (d) { return '<option value="' + esc(d.name) + '"></option>'; }).join('') + '</datalist><button type="button" class="pmw-btn pmw-btn-primary" data-pa="add-selected">Add attribute</button><button type="button" class="pmw-btn" data-pa="cancel-new">Cancel</button><p class="pmw-hint">Type a name in English or Bangla (e.g. কামিজ লং, বডি, হাতা) — or tap one:</p><div class="pmw-quick">' + missing.map(function (d) { return '<button type="button" class="pmw-btn" data-pa="add-quick" data-id="' + d.id + '">+ ' + esc(d.name) + (ATTR_BN[d.id] ? " (" + ATTR_BN[d.id] + ")" : "") + "</button>"; }).join("") + '</div></div>' : '') +
         present.map(function (d) {
           var open = st.open[d.id] !== false;
           var readonly = !d.field;
@@ -258,11 +277,12 @@
         else if (k === "add-selected") {
           var field = box.querySelector('[data-pa="new-name"]');
           var n = norm(field && field.value);
-          var map = { long: "length", length: "length", "dress length": "length", body: "body", size: "size", sizes: "size", sleeve: "sleeve", palazzo: "palazzo", pajama: "palazzo", color: "color", colour: "color", option: "type", type: "type" };
-          var wanted = map[n];
-          if (!wanted || !defById(defs, wanted)) { msg("This product supports: " + defs.map(function (d) { return d.name; }).join(", ") + ". Enter one of these names.", "err"); if (field) field.focus(); return; }
+          var wanted = attrIdFromName(n);
+          if (!wanted || !defById(defs, wanted)) { msg("“" + (field && field.value || "") + "” is not an attribute of this product. Use one of: " + defs.map(function (d) { return d.name + (ATTR_BN[d.id] ? " (" + ATTR_BN[d.id] + ")" : ""); }).join(", ") + " — or tap a button below.", "err"); if (field) field.focus(); return; }
           if (present.indexOf(defById(defs, wanted)) !== -1) { msg("This attribute is already added.", "err"); if (field) field.focus(); return; }
           addAttr(wanted);
+        } else if (k === "add-quick") {
+          if (defById(defs, id) && present.indexOf(defById(defs, id)) === -1) addAttr(id);
         } else if (k === "cancel-new") { st.showAdd = false; draw(); }
         else if (k === "remove") {
           var d = defById(defs, id);

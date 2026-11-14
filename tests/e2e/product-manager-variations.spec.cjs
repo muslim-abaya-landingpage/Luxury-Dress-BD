@@ -194,6 +194,7 @@ test('variation image remains attached to the same photo after gallery reorder',
 test('renaming a color updates the selected variation key before publish', async ({ page }) => {
   await openMaroon(page);
   await page.locator('[data-etab="attributes"]').click();
+  await page.evaluate(() => { const d = document.getElementById('pmMoreDetails'); if (d) d.open = true; }); // "More details" box
   await page.locator('#pmColorAdd').click();
   const secondColor = page.locator('#pmColorVariationList [data-color-row]:last-child');
   await secondColor.locator('[data-color-field="label"]').fill('Black');
@@ -238,4 +239,33 @@ test('variation price box on each row (no Edit needed) saves the variation price
   await page.click('#pmEditUpdate');
   const block = await publishedBlock(page);
   expect(block).toContain('"price":1777');
+});
+
+test('Attributes: Bangla names like "কামিজ লং" work, one-click buttons, and extras folded into More details', async ({ page }) => {
+  await stub(page);
+  await page.goto('/product-manager.html');
+  await page.waitForTimeout(500);
+  await page.click('#pmHeaderAdd');
+  await page.check('[data-cat-check="premium-two-piece"]');
+  await page.uncheck('[data-cat-check="abaya"]');
+  await page.click('[data-etab="attributes"]');
+  // The optional size/colour section is folded away on a new product.
+  await expect(page.locator('#pmMoreDetails')).not.toHaveAttribute('open', '');
+  await expect(page.locator('#pmMeasures')).toBeHidden();
+  const mount = page.locator('#pmAttrMount');
+  await mount.locator('[data-pa="new"]').click();
+  await expect(mount.locator('[data-pa="add-quick"]').first()).toBeVisible();
+  await mount.locator('[data-pa="new-name"]').fill('কামিজ লং');
+  await mount.locator('[data-pa="add-selected"]').click();
+  await expect(mount.locator('[data-attr="length"]')).toBeVisible();
+  // One-click button for another attribute.
+  await mount.locator('[data-pa="new"]').click();
+  await mount.locator('[data-pa="add-quick"][data-id="body"]').click();
+  await expect(mount.locator('[data-attr="body"]')).toBeVisible();
+  // An unknown name explains what can be used, in English and Bangla.
+  await mount.locator('[data-pa="new"]').click();
+  await mount.locator('[data-pa="new-name"]').fill('ওড়না');
+  await mount.locator('[data-pa="add-selected"]').click();
+  await expect(mount).toContainText('is not an attribute of this product');
+  await expect(mount).toContainText('Long (লং)');
 });

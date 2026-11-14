@@ -23,6 +23,7 @@ test('Product Manager: add Pant Crotch Depth and a new custom measurement, then 
   await page.locator('#pmAllRows tr').first().locator('.pm-row-title').click();
   const id = await page.locator('[data-ef="id"]').inputValue();
   await page.click('[data-etab="attributes"]');
+  await page.evaluate(() => { const d = document.getElementById('pmMoreDetails'); if (d) d.open = true; }); // "More details" box
   await page.click('[data-measure-add="Pant Crotch Depth"]');
   const rows = page.locator('#pmMeasures .pm-ms-own');
   await expect(rows).toHaveCount(1);
