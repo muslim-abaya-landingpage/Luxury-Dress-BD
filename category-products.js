@@ -1530,9 +1530,6 @@ window.CATEGORY_PRODUCTS = {
       colorLabel: "Classic Black",
       fabric: "Original Dubai Cherry",
       sizes: ["50", "52", "54", "56", "58"],
-      priceByType: {
-        "Full Set": 1899
-      },
       isImageView: false,
       imageViewOf: "",
       category: "embroidery",
@@ -1696,10 +1693,6 @@ window.CATEGORY_PRODUCTS = {
       fabric: "100% Selap Cotton",
       sizes: ["38", "40", "42", "44", "46"],
       detailNote: "🌸 Premium Cotton Three Piece Collection 🌸\n\nরুচিশীল ডিজাইন ও আকর্ষণীয় কালারের সুন্দর সমন্বয়ে তৈরি প্রিমিয়াম থ্রি-পিস কালেকশন।\n\n✅ কাপড়: ১০০% সেলাপ কটন  \n✅ সালোয়ার: প্যান্ট কাট  \n✅ ডিজাইন: আকর্ষণীয় প্রিন্টেড ডিজাইন  \n✅ কালার: নেভি ব্লু, লাল ও হলুদ  \n✅ মূল্য: ১,৭৫০ টাকা\n\n📦 পাইকারি ও খুচরা বিক্রয় করা হয়।\n\n🚚 সারা বাংলাদেশে ডেলিভারি সুবিধা।",
-      priceByType: {
-        "Full Set": 1750,
-        "Abaya Only": 799
-      },
       isImageView: false,
       imageViewOf: "",
       category: "three-piece-dress",
