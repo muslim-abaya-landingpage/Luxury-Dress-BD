@@ -30,7 +30,8 @@
     .ibx-preview { font-size:.85rem; color:var(--adm-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:3px; }
     .ibx-tags { display:flex; flex-wrap:wrap; gap:4px; margin-top:6px; }
     .ibx-tag { font-size:.7rem; padding:2px 7px; border-radius:99px; background:var(--adm-bg-alt); color:var(--adm-text); }
-    .ibx-tag.page { background:#e8eefc; color:#1f3a7a; }
+    .ibx-tag.page { background:#e8eefc; color:#1f3a7a; display:inline-flex; align-items:center; gap:4px; }
+    .ibx-page-logo { width:16px; height:16px; border-radius:50%; object-fit:cover; flex:0 0 16px; background:#fff; }
     .ibx-tag.ad { background:var(--adm-accent-wash); color:var(--adm-accent-ink); }
     .ibx-tag.won { background:var(--adm-ok-wash); color:var(--adm-ok); }
     .ibx-unread { background:var(--adm-danger); color:#fff; border-radius:99px; font-size:.7rem; padding:1px 7px; font-weight:700; }
@@ -242,6 +243,12 @@
       function mediaUrl(url) {
         try { var u = new URL(String(url || '')); return u.protocol === 'https:' ? u.href : ''; } catch (e) { return ''; }
       }
+      // The Page's own profile picture (public on Facebook, no token or extra permission needed).
+      function pageTag(c) {
+        var id = String(c && c.pageId || '');
+        var logo = /^\d{5,20}$/.test(id) ? '<img class="ibx-page-logo" src="https://graph.facebook.com/' + id + '/picture?type=square&width=48&height=48" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">' : '';
+        return '<span class="ibx-tag page">' + logo + esc(c && c.pageName || '') + '</span>';
+      }
       function avatar(c) {
         var url = mediaUrl(c.profilePic);
         return url ? '<img class="ibx-avatar" src="' + esc(url) + '" alt="প্রোফাইল ছবি" loading="lazy" referrerpolicy="no-referrer">' : '<span class="ibx-avatar" aria-label="প্রোফাইল ছবি নেই">👤</span>';
@@ -281,7 +288,7 @@
             '<div class="ibx-item-top"><span class="ibx-name">' + avatar(c) + esc(c.name || 'অজানা গ্রাহক') + '</span>' +
             '<span class="ibx-time">' + (c.unread ? '<span class="ibx-unread">' + c.unread + '</span> ' : '') + esc(c.lastSeen) + '</span></div>' +
             '<div class="ibx-preview">' + (c.lastDirection === 'out' ? (c.seenAtMs && c.seenAtMs >= c.lastSeenMs ? '✓✓ ' : '') + 'আপনি: ' : '') + esc(c.lastMessage) + '</div>' +
-            '<div class="ibx-tags"><span class="ibx-tag page">' + esc(c.pageName) + '</span>' +
+            '<div class="ibx-tags">' + pageTag(c) +
             '<span class="ibx-tag' + (isWon(c.status) ? ' won' : '') + '">' + esc(c.status) + '</span>' +
             (c.fromAd ? '<span class="ibx-tag ad">বিজ্ঞাপন</span>' : '') +
             (c.assignedTo ? '<span class="ibx-tag">👤 ' + esc(c.assignedTo) + '</span>' : '') +
@@ -360,7 +367,7 @@
         if (c.assignedTo && assignees.indexOf(c.assignedTo) === -1) assignees.push(c.assignedTo);
         $('ibxThread').innerHTML =
           '<div class="ibx-thread-head"><div><button type="button" class="adm-btn adm-btn-secondary ibx-back" id="ibxBack">← তালিকা</button> ' +
-          '<span id="ibxThreadAvatar">' + avatar(c) + '</span><strong id="ibxThreadName">' + esc(c.name || 'অজানা গ্রাহক') + '</strong> <span class="ibx-tag page">' + esc(c.pageName || '') + '</span>' +
+          '<span id="ibxThreadAvatar">' + avatar(c) + '</span><strong id="ibxThreadName">' + esc(c.name || 'অজানা গ্রাহক') + '</strong> ' + pageTag(c) +
           (c.fromAd ? ' <span class="ibx-tag ad">বিজ্ঞাপন</span>' : '') + '</div>' +
           '<span class="ibx-time">প্রথম মেসেজ: ' + esc(c.firstSeen || '') + '</span></div>' +
           '<div class="ibx-profile-why" id="ibxProfileWhy" hidden></div>' +
