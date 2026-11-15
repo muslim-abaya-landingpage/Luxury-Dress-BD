@@ -75,3 +75,26 @@ test('a refused profile lookup keeps Facebook\'s reason', () => {
   assert.equal(p.name, undefined);
   assert.match(p.error, /#100\/2018218 No profile available/);
 });
+
+test('InboxProductCard: Messenger card with photo, price and order button; only muslimabaya.com links', () => {
+  const code = require('node:fs').readFileSync(require('node:path').join(__dirname, '../../apps-script/Code.gs'), 'utf8');
+  const fn = (name) => { const s = code.indexOf('function ' + name + '('); let d = 0; for (let i = code.indexOf('{', s); i < code.length; i++) { if (code[i] === '{') d++; else if (code[i] === '}' && --d === 0) return code.slice(s, i + 1); } };
+  const sent = [], recorded = [];
+  const ctx = { JSON, String, Math, Error,
+    param_: (e, k) => e[k], msgrPageToken_: (p) => (p === 'P1' ? 'tok' : ''),
+    UrlFetchApp: { fetch: (url, o) => { sent.push(JSON.parse(o.payload)); return { getResponseCode: () => 200, getContentText: () => '{"message_id":"mid.1"}' }; } },
+    CacheService: { getScriptCache: () => ({ put() {} }) }, LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
+    msgrRecordMessage_: (...a) => recorded.push(a) };
+  require('node:vm').createContext(ctx);
+  ['msgrShopUrl_', 'inboxProductCard_'].forEach((n) => require('node:vm').runInContext(fn(n), ctx));
+  const ok = ctx.inboxProductCard_({ PageId: 'P1', PSID: 'U1', Title: 'Maroon Abaya Set', Subtitle: '৳1250', Url: 'https://muslimabaya.com/product/ABY-MAROON-1', ImageUrl: 'https://images.muslimabaya.com/x.webp' }, { name: 'Owner' });
+  require('node:assert/strict').equal(ok.ok, true);
+  const el = sent[0].message.attachment.payload.elements[0];
+  require('node:assert/strict').deepEqual(JSON.parse(JSON.stringify(el)), { title: 'Maroon Abaya Set', subtitle: '৳1250', default_action: { type: 'web_url', url: 'https://muslimabaya.com/product/ABY-MAROON-1' }, buttons: [{ type: 'web_url', url: 'https://muslimabaya.com/product/ABY-MAROON-1', title: 'অর্ডার করুন' }], image_url: 'https://images.muslimabaya.com/x.webp' });
+  require('node:assert/strict').match(recorded[0][3], /^🛍 Maroon Abaya Set — ৳1250\nhttps:\/\/muslimabaya\.com\/product\/ABY-MAROON-1$/);
+  // Another site's link or photo is refused / dropped; no token → refused.
+  require('node:assert/strict').equal(ctx.inboxProductCard_({ PageId: 'P1', PSID: 'U1', Title: 'x', Url: 'https://evil.example/p' }, {}).ok, false);
+  ctx.inboxProductCard_({ PageId: 'P1', PSID: 'U1', Title: 'x', Url: 'https://muslimabaya.com/product/x', ImageUrl: 'https://evil.example/i.png' }, {});
+  require('node:assert/strict').equal(sent[1].message.attachment.payload.elements[0].image_url, undefined);
+  require('node:assert/strict').equal(ctx.inboxProductCard_({ PageId: 'P2', PSID: 'U1', Title: 'x', Url: 'https://muslimabaya.com/product/x' }, {}).error, 'NO_PAGE_TOKEN');
+});

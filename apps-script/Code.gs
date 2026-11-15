@@ -5774,6 +5774,7 @@ function handleInboxRequest_(type, e) {
   if (type === 'InboxThread') return inboxThread_(e);
   if (type === 'InboxProfile') return inboxProfile_(e);
   if (type === 'InboxReply') return inboxReply_(e, v);
+  if (type === 'InboxProductCard') return inboxProductCard_(e, v);
   if (type === 'InboxUpdate') return inboxUpdate_(e, v);
   return { ok: false, error: 'UNKNOWN_TYPE' };
 }
@@ -5991,6 +5992,60 @@ function inboxReply_(e, session) {
   lock.waitLock(20000);
   try {
     msgrRecordMessage_(pageId, psid, 'out', text, body.message_id, session.name || session.email || 'Admin', '');
+  } finally {
+    lock.releaseLock();
+  }
+  return { ok: true, messageId: body.message_id };
+}
+
+/** https link on this shop only (product page / product photo), else ''. */
+function msgrShopUrl_(value) {
+  var v = String(value || '').trim();
+  var m = /^https:\/\/(muslimabaya\.com|images\.muslimabaya\.com)(\/[^\s"'<>]*)?$/.exec(v);
+  return m && v.length <= 600 ? v : '';
+}
+
+/**
+ * Inbox → "🛍 পণ্য": sends a Messenger product card (photo, name, price, "অর্ডার করুন" button) to the customer.
+ * Only links and photos of muslimabaya.com are accepted. Same 24-hour rule as text replies.
+ */
+function inboxProductCard_(e, session) {
+  var pageId = param_(e, 'PageId');
+  var psid = param_(e, 'PSID');
+  var title = String(param_(e, 'Title') || '').replace(/\s+/g, ' ').trim().slice(0, 80);
+  var subtitle = String(param_(e, 'Subtitle') || '').replace(/\s+/g, ' ').trim().slice(0, 80);
+  var url = msgrShopUrl_(param_(e, 'Url'));
+  var image = msgrShopUrl_(param_(e, 'ImageUrl'));
+  if (!pageId || !psid || !title || !url) return { ok: false, error: 'MISSING_FIELDS', message: 'পণ্যের নাম ও লিংক দরকার।' };
+  if (url.indexOf('https://muslimabaya.com/') !== 0) return { ok: false, error: 'BAD_URL', message: 'শুধু muslimabaya.com-এর পণ্য পাঠানো যায়।' };
+  var token = msgrPageToken_(pageId);
+  if (!token) return { ok: false, error: 'NO_PAGE_TOKEN', message: 'এই Page-এর token সেট করা নেই।' };
+  var element = {
+    title: title,
+    subtitle: subtitle,
+    default_action: { type: 'web_url', url: url },
+    buttons: [{ type: 'web_url', url: url, title: 'অর্ডার করুন' }]
+  };
+  if (image) element.image_url = image;
+  var res = UrlFetchApp.fetch('https://graph.facebook.com/v25.0/me/messages?access_token=' + encodeURIComponent(token), {
+    method: 'post',
+    contentType: 'application/json',
+    payload: JSON.stringify({ recipient: { id: psid }, messaging_type: 'RESPONSE', message: { attachment: { type: 'template', payload: { template_type: 'generic', elements: [element] } } } }),
+    muteHttpExceptions: true
+  });
+  var body = {};
+  try { body = JSON.parse(res.getContentText()) || {}; } catch (err) {}
+  if (res.getResponseCode() !== 200 || !body.message_id) {
+    var fbErr = body.error || {};
+    var msg = fbErr.message || ('HTTP ' + res.getResponseCode());
+    if (fbErr.error_subcode === 2018278 || fbErr.code === 10) msg = 'শেষ মেসেজের ২৪ ঘণ্টা পার হয়ে গেছে — Meta নিয়মে এখন এখান থেকে পাঠানো যাবে না।';
+    return { ok: false, error: 'SEND_FAILED', message: msg };
+  }
+  CacheService.getScriptCache().put('msgr_mid_' + body.message_id, '1', 21600);
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    msgrRecordMessage_(pageId, psid, 'out', '🛍 ' + title + (subtitle ? ' — ' + subtitle : '') + '\n' + url, body.message_id, session.name || session.email || 'Admin', '');
   } finally {
     lock.releaseLock();
   }

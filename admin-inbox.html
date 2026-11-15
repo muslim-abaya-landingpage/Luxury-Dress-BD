@@ -19,7 +19,21 @@
     .ibx-filters select, .ibx-filters input[type="search"] { padding:8px 10px; border:1px solid var(--adm-border); border-radius:8px; font:inherit; background:var(--adm-card); color:var(--adm-text); min-width:0; }
     .ibx-filters input[type="search"] { flex:1 1 180px; }
     .ibx-filters label { display:flex; gap:6px; align-items:center; font-size:.9rem; color:var(--adm-muted); }
-    .ibx-layout { display:grid; grid-template-columns:minmax(260px,360px) 1fr; gap:14px; min-height:60vh; }
+    .ibx-layout { display:grid; grid-template-columns:230px minmax(250px,340px) 1fr; gap:14px; min-height:60vh; align-content:start; }
+    #fPage { display:none; } /* the channel column chooses the Page */
+    /* Channel column (like a unified inbox): every Facebook Page with its logo, then website chat and Telegram. */
+    .ibx-channels { background:var(--adm-card); border:1px solid var(--adm-border); border-radius:12px; padding:8px; align-self:start; display:flex; flex-direction:column; gap:2px; }
+    .ibx-ch-head { font-size:.68rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--adm-muted); padding:10px 8px 4px; }
+    .ibx-ch { display:flex; align-items:center; gap:9px; width:100%; padding:8px; border:0; border-radius:9px; background:none; font:inherit; font-size:.88rem; color:inherit; text-align:left; cursor:pointer; text-decoration:none; min-height:40px; box-sizing:border-box; }
+    .ibx-ch:hover { background:var(--adm-card-2); }
+    .ibx-ch.is-on { background:var(--adm-accent-wash); font-weight:700; }
+    .ibx-ch-icon { width:26px; height:26px; flex:0 0 26px; border-radius:50%; display:grid; place-items:center; overflow:hidden; background:#e8eefc; color:#1f3a7a; font-size:13px; font-weight:700; }
+    .ibx-ch-icon img { width:100%; height:100%; object-fit:cover; }
+    .ibx-ch-icon.web { background:#e7f6ee; color:#0a7c42; } .ibx-ch-icon.tg { background:#e6f3fb; color:#1c8ad1; } .ibx-ch-icon.all { background:#1b2a41; color:#fff; }
+    .ibx-ch-name { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .ibx-ch-count { font-size:.72rem; color:var(--adm-muted); }
+    .ibx-ch .ibx-unread { margin-left:2px; }
+    .ibx-ch-warn { font-size:.68rem; color:var(--adm-danger); display:block; }
     .ibx-list { background:var(--adm-card); border:1px solid var(--adm-border); border-radius:12px; overflow:auto; max-height:72vh; }
     .ibx-item { display:block; width:100%; text-align:left; padding:12px 14px; border:0; border-bottom:1px solid var(--adm-border); background:none; cursor:pointer; font:inherit; color:inherit; }
     .ibx-item:hover { background:var(--adm-card-2); }
@@ -55,14 +69,35 @@
     .ibx-thread .adm-btn { width:auto; }
     .ibx-compose .adm-btn { flex:0 0 auto; align-self:flex-end; }
     .ibx-manage .adm-btn { align-self:end; }
+    .ibx-prod-btn { flex:0 0 auto; align-self:flex-end; border:1px solid var(--adm-border-strong); background:var(--adm-card-2); border-radius:10px; padding:0 12px; min-height:44px; font:inherit; font-size:.85rem; cursor:pointer; color:var(--adm-text); }
+    .ibx-picker { margin:0 14px 10px; border:1px solid var(--adm-border); border-radius:12px; background:var(--adm-card); overflow:hidden; }
+    .ibx-picker[hidden] { display:none; }
+    .ibx-picker input { width:100%; box-sizing:border-box; border:0; border-bottom:1px solid var(--adm-border); padding:10px 12px; font:inherit; background:var(--adm-card); color:var(--adm-text); }
+    .ibx-picker-list { max-height:260px; overflow:auto; }
+    .ibx-prod { display:flex; gap:10px; align-items:center; width:100%; padding:8px 12px; border:0; border-bottom:1px solid var(--adm-border); background:none; font:inherit; color:inherit; text-align:left; cursor:pointer; }
+    .ibx-prod:hover { background:var(--adm-card-2); }
+    .ibx-prod img { width:44px; height:52px; object-fit:cover; border-radius:6px; flex:0 0 44px; background:var(--adm-bg-alt); }
+    .ibx-prod b { display:block; font-size:.86rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .ibx-prod small { color:var(--adm-muted); font-size:.76rem; }
+    .ibx-prod .out { color:var(--adm-danger); }
     .ibx-compose textarea { min-width:0; flex:1; resize:vertical; min-height:44px; max-height:160px; padding:9px 11px; border:1px solid var(--adm-border); border-radius:10px; font:inherit; }
     .ibx-empty { padding:30px 16px; text-align:center; color:var(--adm-muted); }
     .ibx-note { font-size:.85rem; padding:8px 14px; }
     .ibx-note.err { color:var(--adm-danger); }
     .ibx-note.ok { color:var(--adm-ok); }
     .ibx-pages { font-size:.8rem; color:var(--adm-muted); margin:-6px 0 12px; }
+    @media (max-width: 1180px) {
+      .ibx-layout { grid-template-columns:minmax(250px,340px) 1fr; }
+      .ibx-channels { grid-column:1 / -1; flex-direction:row; overflow-x:auto; padding:6px; gap:6px; }
+      .ibx-ch-head { display:none; }
+      .ibx-ch { width:auto; flex:0 0 auto; border:1px solid var(--adm-border); border-radius:99px; padding:5px 12px 5px 6px; min-height:38px; }
+    }
     @media (max-width: 820px) {
+      .ibx-stats { grid-template-columns:none; grid-auto-flow:column; grid-auto-columns:minmax(118px,1fr); overflow-x:auto; gap:8px; margin-bottom:10px; }
+      .ibx-stats .adm-stat-card { padding:10px 12px; }
+      .ibx-stats .adm-stat-value { font-size:1.3rem; }
       .ibx-layout { grid-template-columns:1fr; }
+      .ibx-layout.show-thread .ibx-channels { display:none; }
       .ibx-layout.show-thread .ibx-list { display:none; }
       .ibx-layout:not(.show-thread) .ibx-thread { display:none; }
       .ibx-back { display:inline-flex; }
@@ -169,6 +204,7 @@
         </div>
 
         <div class="ibx-layout" id="ibxLayout">
+          <nav class="ibx-channels" id="ibxChannels" aria-label="চ্যানেল"></nav>
           <div class="ibx-list" id="ibxList"><div class="ibx-empty">লোড হচ্ছে…</div></div>
           <section class="ibx-thread" id="ibxThread">
             <div class="ibx-empty">বাম পাশ থেকে একটি কথোপকথন বাছুন।</div>
@@ -309,6 +345,80 @@
           contacts = res.contacts || [];
           renderStats(res.stats || {});
           renderList();
+          if (!$('fPage').value) rememberPageCounts(contacts, res.stats || {});
+          renderChannels();
+      }
+
+      // ---- Channel column ----
+      var channelCounts = { pages: {}, total: 0, unread: 0 }, supportCounts = null;
+      function rememberPageCounts(list, st) {
+        var pages = {};
+        list.forEach(function (c) {
+          var p = pages[c.pageId] = pages[c.pageId] || { name: c.pageName, total: 0, unread: 0 };
+          p.total++; if (c.unread) p.unread++;
+        });
+        Object.keys(st.byPage || {}).forEach(function (id) { if (!pages[id]) pages[id] = { name: st.byPage[id].name, total: st.byPage[id].total || 0, unread: 0 }; else if (st.byPage[id].total > pages[id].total) pages[id].total = st.byPage[id].total; });
+        channelCounts = { pages: pages, total: st.total != null ? st.total : list.length, unread: st.unread != null ? st.unread : list.filter(function (c) { return c.unread; }).length };
+      }
+      function pageLogo(id, name) {
+        var letter = String(name || '').trim().charAt(0);
+        if (!/[A-Za-z0-9\u0980-\u09FF]/.test(letter)) letter = '•';
+        if (!/^\d{5,20}$/.test(String(id))) return '<span class="ibx-ch-icon">' + esc(letter) + '</span>';
+        return '<span class="ibx-ch-icon" data-letter="' + esc(letter) + '"><img src="https://graph.facebook.com/' + esc(id) + '/picture?type=square&width=52&height=52" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.textContent=this.parentNode.getAttribute(\'data-letter\')"></span>';
+      }
+      function badge(n) { return n ? '<span class="ibx-unread">' + n + '</span>' : ''; }
+      function renderChannels() {
+        var el = $('ibxChannels'); if (!el) return;
+        var current = $('fPage').value;
+        var list = (meta.pages && meta.pages.length ? meta.pages.map(function (p) { return { id: p.id, name: p.name, connected: p.connected }; }) : Object.keys(channelCounts.pages).map(function (id) { return { id: id, name: channelCounts.pages[id].name, connected: true }; }));
+        var html = '<button type="button" class="ibx-ch' + (!current ? ' is-on' : '') + '" data-ch-page=""><span class="ibx-ch-icon all">★</span><span class="ibx-ch-name">সব কথোপকথন</span>' + badge(channelCounts.unread) + '<span class="ibx-ch-count">' + (channelCounts.total || '') + '</span></button>' +
+          '<div class="ibx-ch-head">Facebook Messenger</div>' +
+          list.map(function (p) {
+            var c = channelCounts.pages[p.id] || { total: 0, unread: 0 };
+            return '<button type="button" class="ibx-ch' + (current === p.id ? ' is-on' : '') + '" data-ch-page="' + esc(p.id) + '" title="' + esc(p.name) + '">' + pageLogo(p.id, p.name) +
+              '<span class="ibx-ch-name">' + esc(p.name) + (p.connected === false ? '<span class="ibx-ch-warn">Token নেই</span>' : '') + '</span>' + badge(c.unread) + '<span class="ibx-ch-count">' + (c.total || '') + '</span></button>';
+          }).join('') +
+          '<div class="ibx-ch-head">লাইভ সাপোর্ট</div>' +
+          '<a class="ibx-ch" href="admin-support-inbox.html?channel=website"><span class="ibx-ch-icon web">🌐</span><span class="ibx-ch-name">ওয়েবসাইট চ্যাট</span>' + (supportCounts ? badge(supportCounts.website) : '<span class="ibx-ch-count">খুলুন →</span>') + '</a>' +
+          '<a class="ibx-ch" href="admin-support-inbox.html?channel=telegram"><span class="ibx-ch-icon tg">✈</span><span class="ibx-ch-name">Telegram</span>' + (supportCounts ? badge(supportCounts.telegram) : '<span class="ibx-ch-count">খুলুন →</span>') + '</a>';
+        el.innerHTML = html;
+      }
+      document.addEventListener('click', function (e) {
+        var b = e.target.closest && e.target.closest('[data-ch-page]');
+        if (!b) return;
+        $('fPage').value = b.getAttribute('data-ch-page');
+        renderChannels();
+        loadList();
+      });
+      // Unread website / Telegram chats, read with the Live support login of this browser (Supabase, RLS).
+      // No login here = the two rows just open Live support.
+      function loadSupportCounts() {
+        var hasSession = false;
+        try { for (var i = 0; i < localStorage.length; i++) { if (/^sb-.*-auth-token$/.test(localStorage.key(i))) hasSession = true; } } catch (e) {}
+        if (!hasSession) return;
+        var load = function (src) { return new Promise(function (ok, bad) { var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = bad; document.head.appendChild(s); }); };
+        (window.SITE_FOOTER_CONFIG ? Promise.resolve() : load('/site-footer-config.js')).then(function () {
+          return window.supabase ? null : load('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js');
+        }).then(function () {
+          var cfg = (window.SITE_FOOTER_CONFIG || {}).supportChat || {};
+          if (!cfg.supabaseUrl || !cfg.supabaseKey || !window.supabase) return;
+          var sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false } });
+          return sb.auth.getSession().then(function (r) {
+            if (!r || !r.data || !r.data.session) return;
+            return sb.from('support_conversations').select('id,channel').neq('status', 'closed').order('last_message_at', { ascending: false }).limit(200).then(function (cv) {
+              if (cv.error || !cv.data) return;
+              var channelOf = {}; cv.data.forEach(function (c) { channelOf[c.id] = c.channel || 'website'; });
+              var ids = Object.keys(channelOf);
+              if (!ids.length) { supportCounts = { website: 0, telegram: 0 }; renderChannels(); return; }
+              return sb.from('support_messages').select('conversation_id').in('conversation_id', ids).eq('sender_role', 'customer').is('read_at', null).limit(1000).then(function (um) {
+                if (um.error || !um.data) return;
+                var seen = {}, counts = { website: 0, telegram: 0 };
+                um.data.forEach(function (m) { if (!seen[m.conversation_id]) { seen[m.conversation_id] = true; counts[channelOf[m.conversation_id] === 'telegram' ? 'telegram' : 'website']++; } });
+                supportCounts = counts; renderChannels();
+              });
+            });
+          });
+        }).catch(function () {});
       }
       function loadList() {
         var sequence = ++listSequence;
@@ -394,7 +504,8 @@
           '<div class="ibx-quick" id="ibxQuick">' + quickReplies().map(function (q, i) {
             return '<button type="button" data-q="' + i + '" title="' + esc(q) + '">' + esc(q.slice(0, 28)) + (q.length > 28 ? '…' : '') + '</button>';
           }).join('') + '</div>' +
-          '<form class="ibx-compose" id="ibxCompose"><textarea id="ibxText" placeholder="উত্তর লিখুন… (Enter = পাঠান, Shift+Enter = নতুন লাইন)"></textarea>' +
+          '<div class="ibx-picker" id="ibxPicker" hidden><input type="search" id="ibxProdQ" placeholder="পণ্যের নাম বা কোড খুঁজুন…" aria-label="পণ্য খুঁজুন"><div class="ibx-picker-list" id="ibxProdList"></div></div>' +
+          '<form class="ibx-compose" id="ibxCompose"><button type="button" class="ibx-prod-btn" id="ibxProdBtn" title="পণ্যের কার্ড পাঠান (ছবি, দাম, অর্ডার বাটন)">🛍 পণ্য</button><textarea id="ibxText" placeholder="উত্তর লিখুন… (Enter = পাঠান, Shift+Enter = নতুন লাইন)"></textarea>' +
           '<button type="submit" class="adm-btn adm-btn-primary" id="ibxSend">পাঠান</button></form>';
         mediaFallbacks($('ibxThread'));
         var box = $('ibxMsgs');
@@ -482,6 +593,59 @@
         });
       }
 
+      // ---- Product card: photo, name, price and an "অর্ডার করুন" button, sent as a Messenger card ----
+      // Products come from the shop's own product feed (published products only; prices as on the site).
+      var productsPromise = null;
+      function parseCsv(text) {
+        var rows = [], row = [], cell = '', q = false;
+        for (var i = 0; i < text.length; i++) {
+          var ch = text[i];
+          if (q) { if (ch === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += ch; }
+          else if (ch === '"') q = true;
+          else if (ch === ',') { row.push(cell); cell = ''; }
+          else if (ch === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; }
+          else if (ch !== '\r') cell += ch;
+        }
+        if (cell || row.length) { row.push(cell); rows.push(row); }
+        return rows;
+      }
+      function loadProducts() {
+        if (productsPromise) return productsPromise;
+        productsPromise = fetch('/meta-product-feed.csv', { cache: 'no-cache' }).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); }).then(function (t) {
+          var rows = parseCsv(t), head = rows.shift() || [], col = function (n) { return head.indexOf(n); };
+          return rows.filter(function (r) { return r.length > 3; }).map(function (r) {
+            return { id: r[col('id')], name: r[col('title')], price: Math.round(parseFloat(r[col('price')]) || 0), url: r[col('link')], image: r[col('image_link')], inStock: r[col('availability')] === 'in stock' };
+          });
+        });
+        productsPromise.catch(function () { productsPromise = null; });
+        return productsPromise;
+      }
+      function renderProducts() {
+        var list = $('ibxProdList'); if (!list) return;
+        loadProducts().then(function (items) {
+          var q = ($('ibxProdQ').value || '').trim().toLowerCase();
+          var hits = items.filter(function (p) { return !q || (p.name + ' ' + p.id).toLowerCase().indexOf(q) >= 0; }).slice(0, 40);
+          list.innerHTML = hits.map(function (p) {
+            return '<button type="button" class="ibx-prod" data-prod="' + esc(p.id) + '"><img src="' + esc(p.image) + '" alt="" loading="lazy"><span style="min-width:0"><b>' + esc(p.name) + '</b><small>৳' + p.price + (p.inStock ? '' : ' · <span class="out">স্টকে নেই</span>') + '</small></span></button>';
+          }).join('') || '<div class="ibx-empty">কোনো পণ্য পাওয়া যায়নি।</div>';
+        }).catch(function (err) { list.innerHTML = '<div class="ibx-empty">পণ্যের তালিকা লোড হয়নি: ' + esc(err.message || err) + '</div>'; });
+      }
+      function sendProduct(id) {
+        if (!active) return;
+        loadProducts().then(function (items) {
+          var p = items.filter(function (x) { return x.id === id; })[0];
+          if (!p) return;
+          if (!p.inStock && !confirm('এই পণ্যটি এখন স্টকে নেই। তবু পাঠাবেন?')) return;
+          var target = active;
+          setNote('পণ্যের কার্ড পাঠানো হচ্ছে…');
+          $('ibxPicker').hidden = true;
+          return MaAdmin.inboxCall('InboxProductCard', { PageId: target.pageId, PSID: target.psid, Title: p.name, Subtitle: '৳' + p.price + (p.inStock ? ' · ক্যাশ অন ডেলিভারি' : ' · এখন স্টকে নেই'), Url: p.url, ImageUrl: p.image })
+            .then(function () { return openThread(target.pageId, target.psid); })
+            .then(function () { setNote('✅ পণ্যের কার্ড পাঠানো হয়েছে।'); loadList(); })
+            .catch(function (err) { setNote(err.message || String(err), true); });
+        });
+      }
+
       function saveManage() {
         if (!active) return;
         var btn = $('mSave');
@@ -523,6 +687,13 @@
           return;
         }
         if (e.target.closest('#mSave')) { saveManage(); return; }
+        if (e.target.closest('#ibxProdBtn')) {
+          var pk = $('ibxPicker'); pk.hidden = !pk.hidden;
+          if (!pk.hidden) { renderProducts(); $('ibxProdQ').focus(); }
+          return;
+        }
+        var prod = e.target.closest('[data-prod]');
+        if (prod) { sendProduct(prod.getAttribute('data-prod')); return; }
         var q = e.target.closest('[data-q]');
         if (q) {
           var ta = $('ibxText');
@@ -533,13 +704,14 @@
       $('ibxThread').addEventListener('submit', function (e) {
         if (e.target.id === 'ibxCompose') { e.preventDefault(); sendReply(); }
       });
+      $('ibxThread').addEventListener('input', function (e) { if (e.target.id === 'ibxProdQ') renderProducts(); });
       $('ibxThread').addEventListener('keydown', function (e) {
         if (e.target.id === 'ibxText' && e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
           e.preventDefault();
           sendReply();
         }
       });
-      ['fPage', 'fStatus', 'fAssigned', 'fUnread'].forEach(function (id) { $(id).addEventListener('change', loadList); });
+      ['fPage', 'fStatus', 'fAssigned', 'fUnread'].forEach(function (id) { $(id).addEventListener('change', function () { loadList(); if (id === 'fPage') renderChannels(); }); });
       var qTimer = null;
       $('fQ').addEventListener('input', function () { clearTimeout(qTimer); qTimer = setTimeout(loadList, 400); });
       $('ibxRefresh').addEventListener('click', function () {
@@ -560,6 +732,8 @@
         $('admUserLabel').textContent = (s.name || 'Admin') + (s.email ? ' · ' + s.email : '');
         loadList();
         startPolling();
+        loadSupportCounts();
+        setInterval(function () { if (document.visibilityState === 'visible') loadSupportCounts(); }, 60000);
       });
 
       $('admLogout').addEventListener('click', function () { MaAdmin.logout(); location.href = 'admin-login.html'; });

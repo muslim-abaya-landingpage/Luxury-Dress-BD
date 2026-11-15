@@ -879,6 +879,14 @@
   });
   ["searchInput"].forEach(function (id) { $(id).addEventListener("input", renderConversations); });
   ["statusFilter", "channelFilter", "ownerFilter", "showEmptyToggle"].forEach(function (id) { $(id).addEventListener("change", renderConversations); });
+  // Messenger Inbox → "Website chat" / "Telegram" opens this page with ?channel=website|telegram.
+  (function () {
+    try {
+      var want = new URLSearchParams(location.search).get("channel");
+      var sel = $("channelFilter");
+      if (sel && (want === "website" || want === "telegram")) sel.value = want;
+    } catch (e) {}
+  })();
 
   /* ---------- auth ---------- */
   $("loginForm").addEventListener("submit", async function (event) {
