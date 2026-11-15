@@ -5,6 +5,7 @@
 // Sends the report to /api/seo-report (header X-SEO-Audit-Key) for Admin → SEO Manager.
 //   node scripts/seo-live-audit.mjs                 → prints the report
 //   SEO_AUDIT_KEY=… node scripts/seo-live-audit.mjs --send
+import { blocksSearch, parseHead, robotsIssues, sitemapUrls, pageIssues, duplicateTitleIssues, brokenLinkIssue } from '../functions/_lib/seo-live-checks.js';
 const SITE = process.env.SEO_SITE || 'https://muslimabaya.com';
 const CONCURRENCY = 6;
 const UA = 'MuslimAbaya-SEO-Audit/1.0 (+https://muslimabaya.com/)';
@@ -26,39 +27,14 @@ async function pool(items, fn) {
   await Promise.all(Array.from({ length: CONCURRENCY }, async () => { while (i < items.length) { const k = i++; out[k] = await fn(items[k]); } }));
   return out;
 }
-/** True when the group that applies to Googlebot ("Googlebot", else "*") has "Disallow: /". Other bots' groups are ignored. */
-export function blocksSearch(txt) {
-  const groups = []; let cur = null, lastWasAgent = false;
-  String(txt || '').split(/\r?\n/).forEach((line) => {
-    const m = /^\s*([A-Za-z-]+)\s*:\s*(.*?)\s*(?:#.*)?$/.exec(line);
-    if (!m) return;
-    const k = m[1].toLowerCase(), v = m[2];
-    if (k === 'user-agent') { if (!lastWasAgent) { cur = { agents: [], rules: [] }; groups.push(cur); } cur.agents.push(v.toLowerCase()); lastWasAgent = true; return; }
-    lastWasAgent = false;
-    if (cur && (k === 'disallow' || k === 'allow')) cur.rules.push([k, v]);
-  });
-  const pick = groups.filter((g) => g.agents.includes('googlebot'));
-  const use = pick.length ? pick : groups.filter((g) => g.agents.includes('*'));
-  return use.some((g) => g.rules.some(([k, v]) => k === 'disallow' && v === '/') && !g.rules.some(([k, v]) => k === 'allow' && v === '/'));
-}
-
-export function parseHead(html) {
-  const meta = (attr, key) => { const tag = (html.match(/<meta\b[^>]*>/gi) || []).find((t) => new RegExp(attr + '=["\']' + key + '["\']', 'i').test(t)); const m = tag && /\bcontent=(["'])([\s\S]*?)\1/i.exec(tag); return m ? unesc(m[2]) : ''; };
-  const t = /<title>([\s\S]*?)<\/title>/i.exec(html);
-  const c = /<link\s+rel=["']canonical["']\s+href=["']([^"']*)["']/i.exec(html);
-  return { title: t ? unesc(t[1].trim()) : '', description: meta('name', 'description'), robots: meta('name', 'robots'), canonical: c ? c[1] : '' };
-}
+export { blocksSearch, parseHead };
 
 export async function run() {
   const started = Date.now();
   const robots = await get(SITE + '/robots.txt');
-  if (robots.status !== 200) add('error', 'robots-unreachable', SITE + '/robots.txt', 'robots.txt answered ' + robots.status + '.', '');
-  else {
-    if (!/^Sitemap:\s*https:\/\/muslimabaya\.com\/sitemap\.xml/im.test(robots.body)) add('warning', 'robots-no-sitemap', SITE + '/robots.txt', 'robots.txt does not point to the sitemap.', '');
-    if (blocksSearch(robots.body)) add('error', 'robots-blocks-all', SITE + '/robots.txt', 'robots.txt blocks the whole site for Google (User-agent: * or Googlebot).', '');
-  }
+  robotsIssues(robots.status, robots.body).forEach((i) => issues.push(i));
   const sm = await get(SITE + '/sitemap.xml');
-  const locs = sm.status === 200 ? (sm.body.match(/<loc>([^<]+)<\/loc>/g) || []).map((l) => l.replace(/<\/?loc>/g, '').trim()) : [];
+  const locs = sm.status === 200 ? sitemapUrls(sm.body) : [];
   if (sm.status !== 200 || !locs.length) add('error', 'sitemap-unreachable', SITE + '/sitemap.xml', 'sitemap.xml answered ' + sm.status + ' or is empty.', '');
 
   // Site-wide signals.
@@ -78,34 +54,19 @@ export async function run() {
   const links = new Map();
   const results = await pool(locs, async (loc) => {
     const r = await get(loc);
-    if (r.status !== 200) { add('error', 'sitemap-url-status', loc, 'Sitemap URL answered ' + (r.status || 'no response') + '.', 'Remove it from the sitemap or fix the page.'); return r.ms; }
-    if (r.url && r.url.replace(/\/$/, '') !== loc.replace(/\/$/, '')) add('warning', 'sitemap-redirect', loc, 'Sitemap URL redirects to ' + r.url + '.', 'List the final URL in the sitemap.');
-    const xr = r.headers.get('x-robots-tag') || '';
-    const h = parseHead(r.body);
-    if (/noindex/i.test(xr) || /noindex/i.test(h.robots)) add('error', 'sitemap-noindex', loc, 'Page in the sitemap is noindex.', '');
-    if (!h.title) add('error', 'missing-title', loc, 'No <title>.', ''); else (titles[h.title] = titles[h.title] || []).push(loc);
-    if (!h.description) add('error', 'missing-description', loc, 'No meta description.', '');
-    if (!h.canonical) add('error', 'missing-canonical', loc, 'No canonical URL.', '');
-    else if (h.canonical.replace(/\/$/, '') !== loc.replace(/\/$/, '') && !/\/product\//.test(loc)) add('warning', 'canonical-mismatch', loc, 'Canonical is ' + h.canonical + '.', '');
-    (r.body.match(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g) || []).forEach((b) => {
-      try { const d = JSON.parse(b.replace(/^<script[^>]*>/, '').replace(/<\/script>$/, '')); if (/"(aggregateRating|review)"/.test(JSON.stringify(d))) add('error', 'schema-rating', loc, 'Structured data contains a rating/review.', ''); }
-      catch (e) { add('error', 'schema-invalid-json', loc, 'Structured data is not valid JSON.', ''); }
-    });
-    if (r.ms > 3000) add('warning', 'slow-response', loc, 'Server answered in ' + r.ms + ' ms.', '');
-    (r.body.match(/\bhref="(\/[^"#?]*)/g) || []).forEach((m) => {
-      const p = m.slice(6);
-      if (/^\/(?:api|cdn-cgi)\//.test(p) || /\.(?:css|js|png|jpe?g|webp|avif|svg|ico|json|xml|txt|woff2?|webmanifest|csv|gif|mp4)$/i.test(p)) return;
-      if (!links.has(p)) links.set(p, loc);
-    });
+    const res = pageIssues(loc, { status: r.status, url: r.url, body: r.body, ms: r.ms, robotsHeader: r.headers.get('x-robots-tag') || '' });
+    res.issues.forEach((i) => issues.push(i));
+    if (res.title) (titles[res.title] = titles[res.title] || []).push(loc);
+    res.links.forEach((p) => { if (!links.has(p)) links.set(p, loc); });
     return r.ms;
   });
-  Object.entries(titles).forEach(([t, urls]) => { if (urls.length > 1) add('warning', 'duplicate-title', urls[0], urls.length + ' pages share the title "' + t.slice(0, 70) + '".', 'Give each page its own title.'); });
+  duplicateTitleIssues(titles).forEach((i) => issues.push(i));
 
   const known = new Set(locs.map((l) => new URL(l).pathname.replace(/\/$/, '') || '/'));
   const toCheck = Array.from(links.keys()).filter((p) => !known.has(p.replace(/\/$/, '') || '/')).slice(0, 150);
   await pool(toCheck, async (p) => {
     const r = await get(SITE + p, { body: false });
-    if (r.status === 404 || r.status === 410 || r.status >= 500 || r.status === 0) add('error', 'broken-link', SITE + p, 'Internal link answers ' + (r.status || 'no response') + ' — linked from ' + links.get(p), 'Fix the link or add a redirect in SEO Manager → Redirects.');
+    const b = brokenLinkIssue(p, r.status, links.get(p)); if (b) issues.push(b);
   });
 
   const ms = results.filter(Boolean);

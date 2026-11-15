@@ -48,7 +48,7 @@ test('sale starting today: one rebuild at the first tick after 00:03 Bangladesh 
   const sale = f.calls.filter((c) => /sale-schedule-rebuild\.yml\/dispatches$/.test(c[1]));
   assert.equal(sale.length, 1);
   assert.deepEqual(sale[0][2], { ref: 'main', inputs: { force: 'true' } });
-  assert.equal(out.ran.find((r) => r.job === 'seo-audit').result, 'dispatched'); // 07:20 is also after 02:41
+  assert.equal(out.ran.find((r) => r.job === 'seo-audit').result, 'started'); // 07:20 is also after 02:41
   t += 5 * 60000;
   out = await (await handleCronTick(req(), e, { fetch: f, now: () => t })).json();
   assert.equal(out.ran.filter((r) => r.job === 'sale').length, 0);
@@ -70,14 +70,13 @@ test('scheduled publish: rebuild when the time passes; daily SEO audit once afte
   let t = bd('2026-11-16T10:26:00');
   let out = await (await handleCronTick(req(), e, { fetch: f, now: () => t })).json();
   assert.equal(out.ran.filter((r) => r.job === 'publish').length, 0);
-  assert.equal(out.ran.filter((r) => r.job === 'seo-audit').length, 1);
-  assert.match(f.calls.find((c) => /seo-audit/.test(c[1]))[1], /seo-audit\.yml\/dispatches$/);
+  assert.equal(out.ran.find((r) => r.job === 'seo-audit').result, 'started');
   t = bd('2026-11-16T10:31:00');
   out = await (await handleCronTick(req(), e, { fetch: f, now: () => t })).json();
-  assert.deepEqual(out.ran.map((r) => r.job), ['publish']);
+  assert.ok(out.ran.some((r) => r.job === 'publish'));
   t = bd('2026-11-16T10:36:00');
   out = await (await handleCronTick(req(), e, { fetch: f, now: () => t })).json();
-  assert.deepEqual(out.ran, []); // not again
+  assert.equal(out.ran.filter((r) => r.job === 'publish').length, 0); // not again
 });
 
 test('if the token may not start workflows, a tiny commit makes Cloudflare rebuild instead', async () => {
@@ -110,4 +109,44 @@ test('shared check: sale boundaries and publish window; schedule.json keeps only
 test('the Worker cron calls /api/cron-tick separately from the order queue', () => {
   const src = require('node:fs').readFileSync(path.join(root, 'cloudflare-worker/worker.js'), 'utf8');
   assert.match(src, /ctx\.waitUntil\(processOrderQueue\(env\)\);\s*\/\/[^\n]*\n[^\n]*\n\s*ctx\.waitUntil\(fetch\('https:\/\/muslimabaya\.com\/api\/cron-tick'[^)]*\)\.catch\(\(\) => \{\}\)\);/);
+});
+
+
+test('daily live SEO audit runs on the site itself in small steps and is saved for the SEO Manager', async () => {
+  const { handleCronTick } = await mod();
+  const db = fakeDb(); const reports = [];
+  const realPrepare = db.prepare.bind(db);
+  db.prepare = (sql) => /seo_reports/.test(sql) ? { bind(...a) { this.a = a; return this; }, async run() { if (/^INSERT/.test(sql)) reports.push(JSON.parse(this.a[2])); return {}; } } : realPrepare(sql);
+  const pages = Array.from({ length: 20 }, (_, i) => 'https://muslimabaya.com/p' + i);
+  const page = (u, extra) => '<html><head><title>Page ' + u + '</title><meta name="description" content="d"><link rel="canonical" href="' + u + '"></head><body><a href="/broken-one">x</a>' + (extra || '') + '</body></html>';
+  const site = async (url, init = {}) => {
+    const u = String(url && url.url ? url.url : url);
+    const r = (status, body, final) => Object.defineProperty(new Response(body || '', { status }), 'url', { value: final || u });
+    if (/schedule\.json$/.test(u)) return r(200, '{"catalog":{}}');
+    if (u.endsWith('/robots.txt')) return r(200, 'User-agent: *\nAllow: /\nSitemap: https://muslimabaya.com/sitemap.xml\n');
+    if (u.endsWith('/sitemap.xml')) return r(200, pages.map((p) => '<loc>' + p + '</loc>').join(''));
+    if (u === 'http://muslimabaya.com/' || u === 'https://www.muslimabaya.com/') return r(200, '', 'https://muslimabaya.com/');
+    if (/missing-page-check|broken-one/.test(u)) return r(404, '');
+    if (u === pages[3]) return r(200, '<html><head><title>No description</title><link rel="canonical" href="' + u + '"></head></html>');
+    return r(200, page(u));
+  };
+  const e = { STOCK_DB: db, GITHUB_TOKEN: 'tok', ASSETS: { fetch: site } };
+  let t = bd('2026-11-16T02:45:00');
+  let out = await (await handleCronTick(req(), e, { fetch: site, now: () => t })).json();
+  assert.equal(out.ran.find((r) => r.job === 'seo-audit').result, 'started');
+  const seen = [];
+  for (let k = 0; k < 6 && !reports.length; k++) {
+    t += 5 * 60000;
+    out = await (await handleCronTick(req(), e, { fetch: site, now: () => t })).json();
+    seen.push(out.ran.map((r) => r.result + (r.done ? ' ' + r.done : '')).join(','));
+  }
+  assert.deepEqual(seen, ['step 15/20 pages', 'step 20/20 pages', 'done']);
+  assert.equal(reports.length, 1);
+  assert.equal(reports[0].summary.urls, 20);
+  const types = reports[0].issues.map((i) => i.type).sort();
+  assert.deepEqual(types, ['broken-link', 'missing-description']);
+  assert.equal(db.rows.get('seo-audit:2026-11-16'), 'done: 2 errors, 0 warnings');
+  t += 5 * 60000;
+  out = await (await handleCronTick(req(), e, { fetch: site, now: () => t })).json();
+  assert.equal(out.ran.filter((r) => r.job === 'seo-audit').length, 0); // once a day
 });
