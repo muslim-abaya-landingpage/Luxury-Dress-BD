@@ -1913,7 +1913,7 @@ function handleOnlineOrderPost_(e) {
   var notes = sanitizeCellText_(param_(e, 'SpecialNotes') || '', 1000);
   if (priceAdjustNote) notes = notes ? (notes + ' | ' + priceAdjustNote) : priceAdjustNote;
   var district = param_(e, 'District') || validated.district || '';
-  var sourceVal = String(param_(e, 'Source') || param_(e, 'UtmSource') || '').trim();
+  var sourceVal = sanitizeCellText_(param_(e, 'Source') || param_(e, 'UtmSource') || '', 120);
 
   ensureOnlineOrderHeaders_(sheet);
   ensureOnlineOrderImageHeaders_(sheet);

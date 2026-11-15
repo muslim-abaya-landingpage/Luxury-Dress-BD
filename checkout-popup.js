@@ -404,14 +404,12 @@
   }
 
   function sourceValue() {
+    // cart-utils.js keeps where the visitor came from (utm_*, fbclid, social referrer) for 30 days
+    if (typeof window.maOrderSource === "function") { try { return window.maOrderSource() || ""; } catch (e) {} }
     try {
       var qp = new URLSearchParams(window.location.search);
       var s = qp.get("utm_source") || qp.get("source") || "";
       if (!s) { try { s = localStorage.getItem("ma_source") || ""; } catch (e) {} }
-      if (!s && document.referrer) {
-        if (/facebook\.com|fb\.com|instagram\.com/i.test(document.referrer)) s = "Facebook";
-        else if (/tiktok\.com/i.test(document.referrer)) s = "TikTok";
-      }
       return s;
     } catch (e2) { return ""; }
   }

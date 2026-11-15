@@ -4041,6 +4041,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 formData.append('CartJSON', JSON.stringify(cartJsonLines));
                 try {
                     var maSourceVal = (function () {
+                        if (typeof window.maOrderSource === 'function') { try { return window.maOrderSource() || ''; } catch (osErr) {} }
                         try {
                             var qp = new URLSearchParams(window.location.search);
                             var s = qp.get('utm_source') || qp.get('source') || '';

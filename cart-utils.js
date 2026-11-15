@@ -795,6 +795,86 @@
     return { fbc: nextFbc || "", fbp: nextFbp || "" };
   }
 
+  /* ---------- where the visitor came from (order "Source") ----------
+     Kept for 30 days so it survives the walk from the ad's landing page to /checkout,
+     where the URL no longer carries utm_* and the referrer is our own site.
+     The last ad/social visit wins; a later direct visit does not erase it. */
+  var SOURCE_KEY = "ma_source";
+  var SOURCE_AT_KEY = "ma_source_at";
+  var SOURCE_DAYS = 30;
+
+  function sourceLabel(name) {
+    var n = String(name || "").trim().toLowerCase();
+    if (!n) return "";
+    if (/^(facebook|fb|meta|m\.facebook|l\.facebook|lm\.facebook)$/.test(n) || n.indexOf("facebook") === 0) return "Facebook";
+    if (/^(instagram|ig)$/.test(n)) return "Instagram";
+    if (/^(messenger|msgr)$/.test(n)) return "Messenger";
+    if (/^(whatsapp|wa)$/.test(n)) return "WhatsApp";
+    if (n.indexOf("tiktok") === 0) return "TikTok";
+    if (n.indexOf("google") === 0) return "Google";
+    if (n.indexOf("youtube") === 0) return "YouTube";
+    return String(name).trim().slice(0, 40);
+  }
+
+  function cleanSourcePart(value, max) {
+    return String(value || "").replace(/[\u0000-\u001f\u007f<>"]/g, " ").replace(/\s+/g, " ").trim().replace(/^[=+\-@]+/, "").slice(0, max);
+  }
+
+  // "Facebook Ads · Winter Abaya" for a paid click, "Facebook" for a post or profile link, "" for direct.
+  function detectVisitSource(search, referrer, host) {
+    var qp;
+    try { qp = new URLSearchParams(search || ""); } catch (e) { return ""; }
+    var label = sourceLabel(qp.get("utm_source") || qp.get("source"));
+    var medium = String(qp.get("utm_medium") || "").toLowerCase();
+    var campaign = cleanSourcePart(qp.get("utm_campaign"), 60);
+    if (campaign.indexOf("{{") !== -1) campaign = ""; // an Ads Manager macro that was not filled in
+    if (!label && qp.get("fbclid")) { label = "Facebook"; }
+    if (!label && qp.get("ttclid")) { label = "TikTok"; medium = medium || "paid"; }
+    if (!label && qp.get("gclid")) { label = "Google"; medium = medium || "cpc"; }
+    if (!label && referrer) {
+      var refHost = "";
+      try { refHost = new URL(referrer).hostname.toLowerCase(); } catch (e2) {}
+      if (refHost && refHost !== String(host || "").toLowerCase()) {
+        if (/(^|\.)(facebook\.com|fb\.com|fb\.me)$/.test(refHost)) label = "Facebook";
+        else if (/(^|\.)instagram\.com$/.test(refHost)) label = "Instagram";
+        else if (/(^|\.)messenger\.com$/.test(refHost)) label = "Messenger";
+        else if (/(^|\.)tiktok\.com$/.test(refHost)) label = "TikTok";
+        else if (/(^|\.)google\./.test(refHost)) label = "Google";
+        else if (/(^|\.)(youtube\.com|youtu\.be)$/.test(refHost)) label = "YouTube";
+      }
+    }
+    if (!label) return "";
+    var paid = /^(paid|cpc|ppc|ads?|paid_social|paidsocial|social_paid|cpm)/.test(medium);
+    var out = label + (paid ? " Ads" : "");
+    if (campaign) out += " · " + campaign;
+    return cleanSourcePart(out, 100);
+  }
+
+  function rememberVisitSource() {
+    if (typeof window === "undefined" || !window.location) return "";
+    var found = detectVisitSource(window.location.search, typeof document !== "undefined" ? document.referrer : "", window.location.hostname);
+    if (found) {
+      writeMetaStorage(SOURCE_KEY, found);
+      writeMetaStorage(SOURCE_AT_KEY, String(Date.now()));
+    }
+    return found;
+  }
+
+  // The source to send with an order: this page's own, else the remembered one (if under 30 days old).
+  function orderSourceValue() {
+    var now = rememberVisitSource();
+    if (now) return now;
+    var saved = readMetaStorage(SOURCE_KEY);
+    var at = parseInt(readMetaStorage(SOURCE_AT_KEY), 10) || 0;
+    if (saved && at && Date.now() - at > SOURCE_DAYS * 86400000) {
+      try { localStorage.removeItem(SOURCE_KEY); localStorage.removeItem(SOURCE_AT_KEY); } catch (e) {}
+      return "";
+    }
+    return saved;
+  }
+
+  try { rememberVisitSource(); } catch (e) {}
+
   function cartLinesToContentIds(lines) {
     if (!Array.isArray(lines)) return [];
     return lines
@@ -1309,4 +1389,6 @@
   global.normalizePhoneE164 = normalizePhoneE164;
   global.buildCartTrackingSnapshot = buildCartTrackingSnapshot;
   global.applyMetaTrackingFields = applyMetaTrackingFields;
+  global.maOrderSource = orderSourceValue;
+  global.maDetectVisitSource = detectVisitSource;
 })(typeof window !== "undefined" ? window : this);
