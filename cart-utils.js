@@ -808,7 +808,8 @@
     if (!n) return "";
     if (/^(facebook|fb|meta|m\.facebook|l\.facebook|lm\.facebook)$/.test(n) || n.indexOf("facebook") === 0) return "Facebook";
     if (/^(instagram|ig)$/.test(n)) return "Instagram";
-    if (/^(messenger|msgr)$/.test(n)) return "Messenger";
+    if (/^(messenger|msgr|msg)$/.test(n)) return "Messenger";
+    if (n === "an" || n === "audience_network") return "Audience Network"; // Meta's own automatic utm_source values: fb, ig, msg, an
     if (/^(whatsapp|wa)$/.test(n)) return "WhatsApp";
     if (n.indexOf("tiktok") === 0) return "TikTok";
     if (n.indexOf("google") === 0) return "Google";
