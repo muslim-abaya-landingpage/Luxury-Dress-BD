@@ -29,5 +29,5 @@ test('Page logo next to the Page name in the list and in the open conversation',
   await expect(odd.locator('img')).toHaveCount(0);
   await tag.click();
   await expect(page.locator('#ibxThreadName')).toBeVisible();
-  await expect(page.locator('#ibxThreadName ~ .ibx-tag.page img.ibx-page-logo').first()).toBeVisible();
+  await expect(page.locator('.ibx-thread-sub .ibx-tag.page img.ibx-page-logo').first()).toBeVisible();
 });

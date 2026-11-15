@@ -109,6 +109,96 @@
     .ibx-attachment video,.ibx-attachment audio { max-width:100%; }
     .ibx-attachment-missing,.ibx-media-failed { display:inline-block;margin-top:8px;padding:8px 10px;border:1px dashed var(--adm-border-strong);border-radius:8px;color:var(--adm-muted);font-size:.82rem;background:var(--adm-card-2); }
     .ibx-media-failed { color:var(--adm-primary);text-decoration:underline;background:transparent; }
+    /* ===== Unified inbox look: one rounded app card, three panes, chat bubbles, product cards ===== */
+    .ibx-stats { gap:10px; margin-bottom:10px; }
+    .ibx-stats .adm-stat-card { padding:10px 14px; min-height:0; }
+    .ibx-stats .adm-stat-value { font-size:1.35rem; }
+    .ibx-layout { gap:0; background:#fff; border:1px solid #e3e8f0; border-radius:18px; box-shadow:0 10px 30px rgba(30,50,90,.08); overflow:hidden;
+      height:calc(100vh - 330px); min-height:540px; align-content:stretch; grid-template-rows:minmax(0,1fr); }
+    .ibx-channels, .ibx-list, .ibx-thread { border:0; border-radius:0; box-shadow:none; max-height:none; height:100%; min-height:0; }
+    .ibx-channels { background:#fbfcfe; border-right:1px solid #edf1f6; padding:12px 10px; overflow:auto; align-self:stretch; }
+    .ibx-ch-title { font-weight:700; font-size:.95rem; padding:4px 8px 8px; display:flex; justify-content:space-between; align-items:center; }
+    .ibx-ch { min-height:42px; border-radius:10px; }
+    .ibx-ch.is-on { background:#e9f1ff; color:#1d4ed8; }
+    .ibx-ch-icon { width:30px; height:30px; flex-basis:30px; position:relative; overflow:visible; }
+    .ibx-ch-icon img { border-radius:50%; }
+    .ibx-ch-icon .ibx-ch-badge { position:absolute; right:-3px; bottom:-3px; width:14px; height:14px; border-radius:50%; background:#0866ff; border:2px solid #fff; display:grid; place-items:center; }
+    .ibx-ch-icon .ibx-ch-badge svg { width:8px; height:8px; fill:#fff; }
+    .ibx-ch-count { font-size:.78rem; color:#8a94a6; font-weight:600; min-width:18px; text-align:right; }
+    .ibx-list { border-right:1px solid #edf1f6; overflow:auto; background:#fff; }
+    .ibx-list-head { position:sticky; top:0; z-index:2; background:#fff; padding:12px 14px; border-bottom:1px solid #edf1f6; display:flex; justify-content:space-between; align-items:center; font-weight:700; }
+    .ibx-item { padding:12px 14px; border-bottom:1px solid #f1f4f8; }
+    .ibx-list .ibx-item.is-active, html .ibx-list .ibx-item.is-active:hover { background:#eef4ff !important; color:#111827 !important; box-shadow:inset 3px 0 0 #2563eb; }
+    .ibx-list .ibx-item.is-active .ibx-preview, .ibx-list .ibx-item.is-active .ibx-time { color:#4b5563 !important; }
+    .ibx-thread { background:#fff; align-self:stretch; display:flex; flex-direction:column; }
+    .ibx-thread > .ibx-empty { margin:auto; }
+    .ibx-thread-head { padding:12px 16px; border-bottom:1px solid #edf1f6; flex-wrap:nowrap; }
+    .ibx-thread-who { display:flex; align-items:center; gap:10px; min-width:0; }
+    .ibx-thread-who .ibx-avatar { width:42px; height:42px; margin:0; }
+    .ibx-thread-who strong { display:block; font-size:1rem; }
+    .ibx-thread-sub { display:flex; align-items:center; gap:6px; font-size:.75rem; color:#6b7280; margin-top:2px; }
+    .ibx-thread-sub .ibx-page-logo { width:14px; height:14px; flex-basis:14px; }
+    .ibx-head-actions { display:flex; gap:6px; align-items:center; flex:0 0 auto; }
+    .ibx-icon-btn { width:36px; height:36px; border-radius:50%; border:1px solid #e3e8f0; background:#fff; display:grid; place-items:center; cursor:pointer; color:#475467; }
+    .ibx-icon-btn:hover, .ibx-icon-btn.is-on { background:#eef4ff; color:#1d4ed8; border-color:#c7d7fe; }
+    .ibx-icon-btn svg { width:18px; height:18px; }
+    .ibx-icon-btn.ibx-back { display:none; }
+    @media (max-width:820px) { .ibx-icon-btn.ibx-back { display:grid; } }
+    .ibx-msgs { flex:1; min-height:0; max-height:none; background:#fff; padding:16px 18px; gap:10px; }
+    .ibx-msg { border-radius:16px; padding:9px 13px; max-width:72%; box-shadow:none; }
+    .ibx-msg.in { background:#f1f3f7; border:0; border-bottom-left-radius:4px; color:#1f2937; }
+    .ibx-msg.out { background:#2563eb; color:#fff; border-bottom-right-radius:4px; }
+    .ibx-msg-meta { font-size:.68rem; }
+    .ibx-card { align-self:flex-end; width:260px; max-width:85%; border:1px solid #e3e8f0; border-radius:14px; overflow:hidden; background:#fff; box-shadow:0 2px 8px rgba(30,50,90,.06); display:flex; gap:10px; padding:10px; }
+    .ibx-card img, .ibx-card .ibx-card-noimg { width:64px; height:76px; border-radius:8px; object-fit:cover; flex:0 0 64px; background:#f1f3f7; }
+    .ibx-card-body { min-width:0; display:flex; flex-direction:column; gap:3px; }
+    .ibx-layout .ibx-card-body b { font-size:.85rem !important; line-height:1.3 !important; display:block !important; white-space:normal; }
+    .ibx-layout .ibx-card { align-items:flex-start; overflow:visible; }
+    .ibx-layout .ibx-card-body { flex:1; line-height:1.3; }
+    .ibx-layout .ibx-card-price { display:block; line-height:1.4; }
+    .ibx-layout a.ibx-card-btn { display:inline-block; line-height:1.5; margin-top:6px; }
+    .ibx-card-price { font-weight:700; color:#111827; font-size:.85rem; }
+    .ibx-card-btn { margin-top:auto; align-self:flex-start; border:1px solid #2563eb; color:#2563eb; border-radius:8px; padding:3px 10px; font-size:.78rem; text-decoration:none; font-weight:600; }
+    .ibx-card-meta { align-self:flex-end; font-size:.68rem; color:#8a94a6; margin-top:-6px; }
+    .ibx-details[hidden] { display:none; }
+    .ibx-manage { border-top:1px solid #edf1f6; background:#fbfcfe; }
+    .ibx-quick { padding:8px 16px 0; }
+    .ibx-quick button { background:#fff; border-color:#e3e8f0; color:#344054; }
+    .ibx-compose { margin:8px 14px 14px; padding:6px 6px 6px 8px; border:1px solid #e3e8f0; border-radius:26px; align-items:center; gap:6px; background:#fff; }
+    .ibx-compose textarea { border:0; padding:8px 6px; min-height:24px; max-height:120px; resize:none; outline:none; background:transparent; }
+    .ibx-prod-btn { border:0; background:#f1f5ff; color:#1d4ed8; border-radius:20px; min-height:36px; padding:0 12px; font-weight:600; align-self:center; }
+    .ibx-send { width:42px; height:42px; flex:0 0 42px; border-radius:50%; border:0; background:#2563eb; color:#fff; display:grid; place-items:center; cursor:pointer; align-self:center; }
+    .ibx-send:disabled { opacity:.5; }
+    .ibx-send svg { width:20px; height:20px; }
+    .ibx-picker { margin:0 14px 8px; box-shadow:0 8px 24px rgba(30,50,90,.12); }
+    .ibx-note { padding:4px 16px; font-size:.8rem; }
+    .ibx-note:empty { display:none; }
+    /* The admin theme (admin-wp.css) styles every button with !important (square corners, dark "active"); the inbox keeps its own look. */
+    html.wp-admin-shell body .adm-main .ibx-layout .ibx-list button.ibx-item.is-active:not(.x) { background:#eef4ff !important; color:#111827 !important; border-color:transparent !important; box-shadow:inset 3px 0 0 #2563eb !important; }
+    html.wp-admin-shell body .adm-main .ibx-layout:not(.x) .ibx-item { border-radius:0 !important; min-height:0 !important; }
+    html.wp-admin-shell body .adm-main .ibx-layout:not(.x) .ibx-ch { border-radius:10px !important; min-height:42px !important; }
+    html.wp-admin-shell body .adm-main .ibx-layout:not(.x) .ibx-icon-btn { border-radius:50% !important; min-height:36px !important; width:36px; padding:0 !important; }
+    html.wp-admin-shell body .adm-main .ibx-layout:not(.x) .ibx-send { border-radius:50% !important; min-height:42px !important; background:#2563eb !important; border-color:#2563eb !important; color:#fff !important; padding:0 !important; }
+    html.wp-admin-shell body .adm-main .ibx-layout:not(.x) .ibx-prod-btn { border-radius:20px !important; min-height:36px !important; }
+    html.wp-admin-shell body .adm-main .ibx-layout:not(.x) .ibx-quick button { border-radius:99px !important; min-height:32px !important; }
+    html.wp-admin-shell body .adm-main .ibx-layout:not(.x) .ibx-compose textarea { border-radius:0 !important; border:0 !important; box-shadow:none !important; }
+    html.wp-admin-shell body .adm-main .ibx-layout:not(.x) form.ibx-compose { border-radius:26px !important; border:1px solid #e3e8f0 !important; }
+    html.wp-admin-shell body .adm-main .ibx-layout:not(.x) .ibx-card { border-radius:14px !important; border-color:#e3e8f0 !important; }
+    html.wp-admin-shell body .adm-main .ibx-layout:not(.x) a.ibx-card-btn { border-radius:8px !important; min-height:0 !important; background:#fff !important; color:#2563eb !important; border:1px solid #2563eb !important; }
+    html.wp-admin-shell body .adm-main .ibx-layout:not(.x) .ibx-prod { border-radius:0 !important; min-height:0 !important; }
+    @media (max-width:1180px) { .ibx-layout { grid-template-rows:auto minmax(0,1fr); } .ibx-channels { height:auto; border-right:0; border-bottom:1px solid #edf1f6; } .ibx-ch-title { display:none; } }
+    .ibx-thread-sub .ibx-tag { white-space:nowrap; }
+    @media (max-width:820px) {
+      .ibx-thread-sub > span:last-child, .ibx-thread-sub .ibx-tag.ad { display:none; }
+      .ibx-thread-head { padding:10px; gap:6px; }
+      .ibx-thread-who { gap:8px; }
+      .ibx-thread-who .ibx-avatar { width:36px; height:36px; }
+      /* A chat that is open fills the phone screen: summary, filters and notes step aside. */
+      .adm-main:has(.ibx-layout.show-thread) > :not(.ibx-layout) { display:none; }
+      .adm-content:has(.ibx-layout.show-thread) .adm-topbar { display:none; }
+      .ibx-layout.show-thread { height:calc(100vh - 70px); grid-template-rows:minmax(0,1fr); }
+    }
+    @media (max-width:820px) { .ibx-layout { height:calc(100vh - 120px); min-height:520px; border-radius:14px; } .ibx-msg, .ibx-card { max-width:88%; } }
   </style>
   <link rel="stylesheet" href="admin-sidebar.css?v=729b41e6cb4c74e8">
 
@@ -203,7 +293,7 @@
           <input type="search" id="fQ" placeholder="নাম / মেসেজ / অর্ডার ID খুঁজুন">
         </div>
 
-        <div class="ibx-layout" id="ibxLayout">
+        <div class="ibx-layout ibx-pill" id="ibxLayout">
           <nav class="ibx-channels" id="ibxChannels" aria-label="চ্যানেল"></nav>
           <div class="ibx-list" id="ibxList"><div class="ibx-empty">লোড হচ্ছে…</div></div>
           <section class="ibx-thread" id="ibxThread">
@@ -317,8 +407,9 @@
       }
       function renderList() {
         var el = $('ibxList');
-        if (!contacts.length) { el.innerHTML = '<div class="ibx-empty">কোনো কথোপকথন পাওয়া যায়নি।</div>'; return; }
-        el.innerHTML = contacts.map(function (c) {
+        var head = '<div class="ibx-list-head"><span>কথোপকথন</span><span class="ibx-ch-count">' + contacts.length + '</span></div>';
+        if (!contacts.length) { el.innerHTML = head + '<div class="ibx-empty">কোনো কথোপকথন পাওয়া যায়নি।</div>'; return; }
+        el.innerHTML = head + contacts.map(function (c) {
           var isActive = active && active.pageId === c.pageId && active.psid === c.psid;
           return '<button type="button" class="ibx-item' + (isActive ? ' is-active' : '') + '" data-page="' + esc(c.pageId) + '" data-psid="' + esc(c.psid) + '">' +
             '<div class="ibx-item-top"><span class="ibx-name">' + avatar(c) + esc(c.name || 'অজানা গ্রাহক') + '</span>' +
@@ -339,6 +430,10 @@
           meta.team = res.team || [];
           // The fast copy leaves out which Pages are connected; keep what the first full load said.
           if (!(res.pagesOmitted && meta.pages && meta.pages.length)) meta.pages = res.pages || [];
+          // The fast first answer has no Page list: use the one remembered from the last full answer, so every
+          // Page stays in the channel column even with no conversations yet.
+          if (meta.pages && meta.pages.length) { try { localStorage.setItem('ma_inbox_pages', JSON.stringify(meta.pages)); } catch (e) {} }
+          else { try { meta.pages = JSON.parse(localStorage.getItem('ma_inbox_pages') || '[]') || []; } catch (e) { meta.pages = []; } }
           if (!res.pagesOmitted) pageMetadataLoaded = true;
           fillSelect($('fPage'), meta.pages.map(function (p) { return { value: p.id, label: p.name }; }), 1);
           fillSelect($('fStatus'), meta.statuses.map(function (s) { return { value: s, label: s }; }), 1);
@@ -364,14 +459,15 @@
         var letter = String(name || '').trim().charAt(0);
         if (!/[A-Za-z0-9\u0980-\u09FF]/.test(letter)) letter = '•';
         if (!/^\d{5,20}$/.test(String(id))) return '<span class="ibx-ch-icon">' + esc(letter) + '</span>';
-        return '<span class="ibx-ch-icon" data-letter="' + esc(letter) + '"><img src="https://graph.facebook.com/' + esc(id) + '/picture?type=square&width=52&height=52" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.textContent=this.parentNode.getAttribute(\'data-letter\')"></span>';
+        return '<span class="ibx-ch-icon" data-letter="' + esc(letter) + '"><img src="https://graph.facebook.com/' + esc(id) + '/picture?type=square&width=60&height=60" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.replaceWith(document.createTextNode(this.parentNode.getAttribute(\'data-letter\')))">' +
+          '<span class="ibx-ch-badge" title="Messenger"><svg viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.1 2 11.2c0 2.9 1.4 5.5 3.7 7.2V22l3.4-1.9c.9.3 1.9.4 2.9.4 5.5 0 10-4.1 10-9.2S17.5 2 12 2zm1 12.4-2.6-2.7-5 2.7 5.5-5.8 2.6 2.7 5-2.7-5.5 5.8z"/></svg></span></span>';
       }
       function badge(n) { return n ? '<span class="ibx-unread">' + n + '</span>' : ''; }
       function renderChannels() {
         var el = $('ibxChannels'); if (!el) return;
         var current = $('fPage').value;
         var list = (meta.pages && meta.pages.length ? meta.pages.map(function (p) { return { id: p.id, name: p.name, connected: p.connected }; }) : Object.keys(channelCounts.pages).map(function (id) { return { id: id, name: channelCounts.pages[id].name, connected: true }; }));
-        var html = '<button type="button" class="ibx-ch' + (!current ? ' is-on' : '') + '" data-ch-page=""><span class="ibx-ch-icon all">★</span><span class="ibx-ch-name">সব কথোপকথন</span>' + badge(channelCounts.unread) + '<span class="ibx-ch-count">' + (channelCounts.total || '') + '</span></button>' +
+        var html = '<div class="ibx-ch-title">চ্যানেল</div><button type="button" class="ibx-ch' + (!current ? ' is-on' : '') + '" data-ch-page=""><span class="ibx-ch-icon all">★</span><span class="ibx-ch-name">সব কথোপকথন</span>' + badge(channelCounts.unread) + '<span class="ibx-ch-count">' + (channelCounts.total || '') + '</span></button>' +
           '<div class="ibx-ch-head">Facebook Messenger</div>' +
           list.map(function (p) {
             var c = channelCounts.pages[p.id] || { total: 0, unread: 0 };
@@ -476,19 +572,21 @@
         var assignees = meta.team.slice();
         if (c.assignedTo && assignees.indexOf(c.assignedTo) === -1) assignees.push(c.assignedTo);
         $('ibxThread').innerHTML =
-          '<div class="ibx-thread-head"><div><button type="button" class="adm-btn adm-btn-secondary ibx-back" id="ibxBack">← তালিকা</button> ' +
-          '<span id="ibxThreadAvatar">' + avatar(c) + '</span><strong id="ibxThreadName">' + esc(c.name || 'অজানা গ্রাহক') + '</strong> ' + pageTag(c) +
-          (c.fromAd ? ' <span class="ibx-tag ad">বিজ্ঞাপন</span>' : '') + '</div>' +
-          '<span class="ibx-time">প্রথম মেসেজ: ' + esc(c.firstSeen || '') + '</span></div>' +
+          '<div class="ibx-thread-head"><div class="ibx-thread-who"><button type="button" class="ibx-icon-btn ibx-back" id="ibxBack" aria-label="তালিকায় ফিরুন">' + ICON.back + '</button>' +
+          '<span id="ibxThreadAvatar">' + avatar(c) + '</span><div style="min-width:0"><strong id="ibxThreadName">' + esc(c.name || 'অজানা গ্রাহক') + '</strong>' +
+          '<div class="ibx-thread-sub">' + pageTag(c) + (c.fromAd ? '<span class="ibx-tag ad">বিজ্ঞাপন</span>' : '') + '<span>প্রথম মেসেজ: ' + esc(c.firstSeen || '') + '</span></div></div></div>' +
+          '<div class="ibx-head-actions"><a class="ibx-icon-btn" href="https://business.facebook.com/latest/inbox/all" target="_blank" rel="noopener" title="Meta Business Suite-এ খুলুন" aria-label="Meta Business Suite-এ খুলুন">' + ICON.ext + '</a>' +
+          '<button type="button" class="ibx-icon-btn' + (detailsOpen ? ' is-on' : '') + '" id="ibxDetailsBtn" title="স্ট্যাটাস, অর্ডার ও নোট" aria-label="স্ট্যাটাস, অর্ডার ও নোট" aria-expanded="' + (detailsOpen ? 'true' : 'false') + '">' + ICON.info + '</button></div></div>' +
           '<div class="ibx-profile-why" id="ibxProfileWhy" hidden></div>' +
           '<div class="ibx-msgs" id="ibxMsgs">' +
           (messages.length ? messages.map(function (m, i) {
-            return '<div class="ibx-msg ' + (m.direction === 'out' ? 'out' : 'in') + '">' + esc(m.text) + attachments(m) +
-              '<div class="ibx-msg-meta">' + esc(m.time) + (m.by ? ' · ' + esc(m.by) : '') + '</div></div>' +
+            var card = m.direction === 'out' ? productCardHtml(m) : '';
+            return (card || '<div class="ibx-msg ibx-pill ' + (m.direction === 'out' ? 'out' : 'in') + '">' + esc(m.text) + attachments(m) +
+              '<div class="ibx-msg-meta">' + esc(m.time) + (m.by ? ' · ' + esc(m.by) : '') + '</div></div>') +
               (i === lastOutIndex(messages) ? receiptHtml(c, m) : '');
           }).join('') : '<div class="ibx-empty">এই সিস্টেম চালুর পর থেকে কোনো মেসেজ সেভ হয়নি।</div>') +
           '</div>' +
-          '<div class="ibx-manage">' +
+          '<div class="ibx-details" id="ibxDetails"' + (detailsOpen ? '' : ' hidden') + '><div class="ibx-manage">' +
           '<label>স্ট্যাটাস<select id="mStatus">' + meta.statuses.map(function (s) {
             return '<option' + (s === c.status ? ' selected' : '') + '>' + esc(s) + '</option>';
           }).join('') + '</select></label>' +
@@ -499,17 +597,43 @@
           '<label>অর্ডার মূল্য (৳)<input id="mOrderValue" inputmode="numeric" value="' + esc(c.orderValue || '') + '"></label>' +
           '<label style="grid-column:1/-1">নোট<input id="mNotes" value="' + esc(c.notes || '') + '" placeholder="সাইজ, রং, ফলো-আপ…"></label>' +
           '<button type="button" class="adm-btn adm-btn-secondary" id="mSave">সেভ করুন</button>' +
-          '</div>' +
+          '</div></div>' +
           '<div class="ibx-note' + (note && note.err ? ' err' : ' ok') + '" id="ibxNote">' + esc(note ? note.text : (c.purchaseSent ? 'এই অর্ডার Meta-তে Purchase হিসেবে পাঠানো হয়েছে।' : '')) + '</div>' +
           '<div class="ibx-quick" id="ibxQuick">' + quickReplies().map(function (q, i) {
             return '<button type="button" data-q="' + i + '" title="' + esc(q) + '">' + esc(q.slice(0, 28)) + (q.length > 28 ? '…' : '') + '</button>';
           }).join('') + '</div>' +
-          '<div class="ibx-picker" id="ibxPicker" hidden><input type="search" id="ibxProdQ" placeholder="পণ্যের নাম বা কোড খুঁজুন…" aria-label="পণ্য খুঁজুন"><div class="ibx-picker-list" id="ibxProdList"></div></div>' +
-          '<form class="ibx-compose" id="ibxCompose"><button type="button" class="ibx-prod-btn" id="ibxProdBtn" title="পণ্যের কার্ড পাঠান (ছবি, দাম, অর্ডার বাটন)">🛍 পণ্য</button><textarea id="ibxText" placeholder="উত্তর লিখুন… (Enter = পাঠান, Shift+Enter = নতুন লাইন)"></textarea>' +
-          '<button type="submit" class="adm-btn adm-btn-primary" id="ibxSend">পাঠান</button></form>';
+          '<div class="ibx-picker ibx-pill" id="ibxPicker" hidden><input type="search" id="ibxProdQ" placeholder="পণ্যের নাম বা কোড খুঁজুন…" aria-label="পণ্য খুঁজুন"><div class="ibx-picker-list" id="ibxProdList"></div></div>' +
+          '<form class="ibx-compose ibx-pill" id="ibxCompose"><button type="button" class="ibx-prod-btn" id="ibxProdBtn" title="পণ্যের কার্ড পাঠান (ছবি, দাম, অর্ডার বাটন)">🛍 পণ্য</button><textarea id="ibxText" placeholder="উত্তর লিখুন… (Enter = পাঠান, Shift+Enter = নতুন লাইন)"></textarea>' +
+          '<button type="submit" class="ibx-send" id="ibxSend" aria-label="পাঠান" title="পাঠান">' + ICON.send + '</button></form>';
+        if (productsCache) return afterThreadRender();
+        // Product cards in the chat need the photo from the shop feed: load it once, then redraw the cards.
+        if (messages.some(function (m) { return m.direction === 'out' && /^🛍 /.test(m.text || ''); })) loadProducts().then(function () { if ($('ibxMsgs')) { var keep = $('ibxMsgs').scrollTop; $('ibxMsgs').querySelectorAll('.ibx-card[data-url]').forEach(function (el) { var p = productByUrl(el.getAttribute('data-url')); if (p && p.image) { var ph = el.querySelector('.ibx-card-noimg'); if (ph) ph.outerHTML = '<img src="' + esc(p.image) + '" alt="" loading="lazy">'; } }); $('ibxMsgs').scrollTop = keep; } }).catch(function () {});
+        afterThreadRender();
+      }
+      function afterThreadRender() {
         mediaFallbacks($('ibxThread'));
         var box = $('ibxMsgs');
         box.scrollTop = box.scrollHeight;
+      }
+
+      var detailsOpen = false;
+      var ICON = {
+        back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
+        info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>',
+        ext: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
+        send: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.4 20.4 21 12 3.4 3.6 3.4 10l12.6 2-12.6 2z"/></svg>'
+      };
+      var productsCache = null;
+      function productByUrl(url) { return (productsCache || []).filter(function (p) { return p.url === url; })[0] || null; }
+      // An outgoing "🛍 Name — ৳price\nhttps://muslimabaya.com/product/…" message is drawn as a product card.
+      function productCardHtml(m) {
+        var mm = /^🛍 ([^\n]+)\n(https:\/\/muslimabaya\.com\/product\/[^\s]+)\s*$/.exec(String(m.text || ''));
+        if (!mm) return '';
+        var parts = mm[1].split(' — '), title = parts[0], sub = parts.slice(1).join(' — '), url = mm[2], p = productByUrl(url);
+        var img = p && p.image ? '<img src="' + esc(p.image) + '" alt="" loading="lazy">' : '<span class="ibx-card-noimg" aria-hidden="true"></span>';
+        return '<div class="ibx-card ibx-pill" data-url="' + esc(url) + '">' + img + '<div class="ibx-card-body"><b>' + esc(title) + '</b><span class="ibx-card-price">' + esc((sub.split(' · ')[0]) || '') + '</span>' +
+          '<a class="ibx-card-btn" href="' + esc(url) + '" target="_blank" rel="noopener">View Details</a></div></div>' +
+          '<div class="ibx-card-meta">' + esc(m.time) + (m.by ? ' · ' + esc(m.by) : '') + '</div>';
       }
 
       function setNote(text, err) {
@@ -613,9 +737,10 @@
         if (productsPromise) return productsPromise;
         productsPromise = fetch('/meta-product-feed.csv', { cache: 'no-cache' }).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); }).then(function (t) {
           var rows = parseCsv(t), head = rows.shift() || [], col = function (n) { return head.indexOf(n); };
-          return rows.filter(function (r) { return r.length > 3; }).map(function (r) {
+          productsCache = rows.filter(function (r) { return r.length > 3; }).map(function (r) {
             return { id: r[col('id')], name: r[col('title')], price: Math.round(parseFloat(r[col('price')]) || 0), url: r[col('link')], image: r[col('image_link')], inStock: r[col('availability')] === 'in stock' };
           });
+          return productsCache;
         });
         productsPromise.catch(function () { productsPromise = null; });
         return productsPromise;
@@ -687,6 +812,8 @@
           return;
         }
         if (e.target.closest('#mSave')) { saveManage(); return; }
+        var db = e.target.closest('#ibxDetailsBtn');
+        if (db) { detailsOpen = !detailsOpen; $('ibxDetails').hidden = !detailsOpen; db.classList.toggle('is-on', detailsOpen); db.setAttribute('aria-expanded', detailsOpen ? 'true' : 'false'); return; }
         if (e.target.closest('#ibxProdBtn')) {
           var pk = $('ibxPicker'); pk.hidden = !pk.hidden;
           if (!pk.hidden) { renderProducts(); $('ibxProdQ').focus(); }

@@ -73,3 +73,29 @@ test('phone: summary is one swipe row, channels are chips, no sideways page scro
   const statsH = await page.locator('.ibx-stats').evaluate((el) => el.getBoundingClientRect().height);
   expect(statsH).toBeLessThan(130);
 });
+
+test('chat looks like a messaging app: bubbles, product card with View Details, round send, details folded away', async ({ page }) => {
+  await open(page);
+  await page.route('**/admin-api.js*', (r) => r.continue());
+  await page.evaluate(() => {
+    const orig = window.MaAdmin.inboxCall;
+    window.MaAdmin.inboxCall = function (t, f) {
+      if (t === 'InboxThread') return Promise.resolve({ ok: true, contact: { pageId: '381729145014885', pageName: 'Muslim Abaya', psid: 'a', name: 'Sarah' }, messages: [
+        { direction: 'in', text: 'আছে?', time: '10:24' },
+        { direction: 'out', text: '🛍 Maroon Abaya Set — ৳1250 · ক্যাশ অন ডেলিভারি\nhttps://muslimabaya.com/product/ABY-MAROON-1', time: '10:25', by: 'Owner' }] });
+      return orig.apply(this, arguments);
+    };
+  });
+  await page.locator('#ibxList .ibx-item').first().click();
+  const card = page.locator('.ibx-card[data-url="https://muslimabaya.com/product/ABY-MAROON-1"]');
+  await expect(card).toContainText('Maroon Abaya Set');
+  await expect(card).toContainText('৳1250');
+  await expect(card.locator('a.ibx-card-btn')).toHaveAttribute('href', 'https://muslimabaya.com/product/ABY-MAROON-1');
+  await expect(card.locator('img')).toHaveAttribute('src', 'https://muslimabaya.com/images/maroon.jpeg'); // photo from the shop feed
+  await expect(page.locator('.ibx-msg.in')).toHaveCSS('border-top-left-radius', '16px'); // admin theme does not square it
+  await expect(page.locator('#ibxSend')).toHaveCSS('border-top-left-radius', /^(21px|50%)$/);
+  await expect(page.locator('#ibxDetails')).toBeHidden();
+  await page.click('#ibxDetailsBtn');
+  await expect(page.locator('#mStatus')).toBeVisible();
+  await expect(page.locator('.ibx-list .ibx-item.is-active')).toHaveCSS('background-color', 'rgb(238, 244, 255)');
+});
