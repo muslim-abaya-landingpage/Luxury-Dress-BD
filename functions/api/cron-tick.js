@@ -16,7 +16,7 @@ import { SITE, robotsIssues, sitemapUrls, pageIssues, duplicateTitleIssues, brok
 import { cleanLiveReport } from './seo-report.js';
 
 const DEFAULT_REPO = 'muslim-abaya-landingpage/Luxury-Dress-BD';
-const MIN_GAP_MS = 4 * 60000;
+const MIN_GAP_MS = 3 * 60000; // the Worker calls every 2 minutes → real work every 4
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });
 }
@@ -88,7 +88,9 @@ export async function auditStart(fetchImpl, date, now) {
   const sm = await get(fetchImpl, SITE + '/sitemap.xml', true);
   const locs = sm.status === 200 ? sitemapUrls(sm.body) : [];
   if (!locs.length) issues.push({ level: 'error', type: 'sitemap-unreachable', url: SITE + '/sitemap.xml', message: 'sitemap.xml answered ' + sm.status + ' or is empty.', fix: '' });
-  for (const [url, type, msg] of [['http://muslimabaya.com/', 'http-not-https', 'http:// does not redirect to https://'], ['https://www.muslimabaya.com/', 'www-not-apex', 'www.muslimabaya.com does not redirect to muslimabaya.com']]) {
+  // http→https is not checked here: requests from inside Cloudflare skip the zone's "Always Use HTTPS" redirect,
+  // so it would always look broken (scripts/seo-live-audit.mjs checks it from outside).
+  for (const [url, type, msg] of [['https://www.muslimabaya.com/', 'www-not-apex', 'www.muslimabaya.com does not redirect to muslimabaya.com']]) {
     const r = await get(fetchImpl, url, false);
     if (r.status && r.status !== 200) continue;
     if (r.status === 0 || !String(r.url || '').startsWith(SITE + '/')) issues.push({ level: 'warning', type, url, message: msg + (r.status === 0 ? ' (no answer).' : '.'), fix: 'Check the Cloudflare redirect rules.' });

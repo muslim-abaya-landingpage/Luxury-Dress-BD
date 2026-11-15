@@ -125,7 +125,8 @@ test('daily live SEO audit runs on the site itself in small steps and is saved f
     if (/schedule\.json$/.test(u)) return r(200, '{"catalog":{}}');
     if (u.endsWith('/robots.txt')) return r(200, 'User-agent: *\nAllow: /\nSitemap: https://muslimabaya.com/sitemap.xml\n');
     if (u.endsWith('/sitemap.xml')) return r(200, pages.map((p) => '<loc>' + p + '</loc>').join(''));
-    if (u === 'http://muslimabaya.com/' || u === 'https://www.muslimabaya.com/') return r(200, '', 'https://muslimabaya.com/');
+    if (u === 'http://muslimabaya.com/') throw new Error('must not be checked from inside Cloudflare');
+    if (u === 'https://www.muslimabaya.com/') return r(200, '', 'https://muslimabaya.com/');
     if (/missing-page-check|broken-one/.test(u)) return r(404, '');
     if (u === pages[3]) return r(200, '<html><head><title>No description</title><link rel="canonical" href="' + u + '"></head></html>');
     return r(200, page(u));
