@@ -75,6 +75,9 @@ export default {
   // Cron trigger: deliver queued orders that could not reach the Apps Script yet.
   async scheduled(event, env, ctx) {
     ctx.waitUntil(processOrderQueue(env));
+    // Reliable clock for the website's scheduled jobs (sale start/end and scheduled-publish rebuilds, daily SEO
+    // audit): /api/cron-tick decides what is due. Separate from the order queue; a failure here changes nothing else.
+    ctx.waitUntil(fetch('https://muslimabaya.com/api/cron-tick', { method: 'POST', headers: { 'User-Agent': 'MuslimAbaya-Worker-Cron' } }).catch(() => {}));
   }
 };
 

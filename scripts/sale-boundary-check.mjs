@@ -1,43 +1,32 @@
 // Prints the products whose scheduled sale (Product Manager → Schedule) starts today or ended yesterday, or whose
-// scheduled publish date (Publish box) was reached in the last hour,
-// Bangladesh time. Used by .github/workflows/sale-schedule-rebuild.yml: on those days the website is rebuilt
-// so the pre-rendered pages and Google product data show the new price. (Prices customers see and pay are
-// already decided live; this only refreshes the built HTML.)
+// scheduled publish date (Publish box) was reached in the last hour, Bangladesh time.
+// Used by .github/workflows/sale-schedule-rebuild.yml (GitHub's hourly schedule — often delayed, so the
+// main trigger is /api/cron-tick, called by the Cloudflare Worker cron every 2 minutes).
+// Prices customers see and pay are already decided live; this only refreshes the built HTML.
 // Run: node scripts/sale-boundary-check.mjs [YYYY-MM-DD]   → exit 0 and prints "rebuild=true|false"
+// Also: node scripts/sale-boundary-check.mjs --snapshot  → writes schedule.json (deploy step)
 import fs from 'node:fs';
 import vm from 'node:vm';
 import path from 'node:path';
-import {fileURLToPath} from 'node:url';
+import { fileURLToPath } from 'node:url';
+import { dhakaDate, saleBoundaries, publishesBetween, scheduleSnapshot } from '../functions/_lib/schedule-check.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const dhaka = (ms) => new Date(ms + 6 * 3600000).toISOString().slice(0, 10);
-const today = process.argv[2] || dhaka(Date.now());
-const yesterday = dhaka(Date.parse(today + 'T12:00:00+06:00') - 86400000);
-const now = Date.now();
-// Sales start/end at midnight: those are checked in the first run after midnight (or when a date is given).
-const midnightRun = !!process.argv[2] || new Date(now + 6 * 3600000).getUTCHours() === 0;
-
 const w = {};
 w.window = w;
 vm.runInContext(fs.readFileSync(path.join(root, 'category-products.js'), 'utf8'), vm.createContext(w));
-const hits = [];
-for (const [cat, list] of Object.entries(w.CATEGORY_PRODUCTS || {})) {
-  for (const p of Array.isArray(list) ? list : []) {
-    if (!p || typeof p !== 'object') continue;
-    // Scheduled publishing (Publish box date, Bangladesh time): rebuild in the hour it goes live.
-    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(String(p.publishDate || ''))) {
-      const at = Date.parse(p.publishDate + ':00+06:00');
-      if (at <= now && at > now - 65 * 60000) hits.push(`${cat}/${p.id}: published at ${p.publishDate}`);
-    }
-    if (!midnightRun) continue;
-    if (p.saleFrom === today) hits.push(`${cat}/${p.id}: sale starts ${today}`);
-    if (p.saleTo === yesterday) hits.push(`${cat}/${p.id}: sale ended ${yesterday}`);
-    for (const v of Array.isArray(p.variations) ? p.variations : []) {
-      if (v && v.saleFrom === today) hits.push(`${cat}/${p.id} variation ${v.size || v.color || v.type || ''}: sale starts ${today}`);
-      if (v && v.saleTo === yesterday) hits.push(`${cat}/${p.id} variation ${v.size || v.color || v.type || ''}: sale ended ${yesterday}`);
-    }
-  }
+const catalog = w.CATEGORY_PRODUCTS || {};
+
+if (process.argv[2] === '--snapshot') {
+  fs.writeFileSync(path.join(root, 'schedule.json'), JSON.stringify({ version: 1, catalog: scheduleSnapshot(catalog) }));
+  console.log('schedule.json written.');
+} else {
+  const now = Date.now();
+  const today = process.argv[2] || dhakaDate(now);
+  // Sales start/end at midnight: checked in the first run of the day (00:xx), or when a date is given.
+  const midnightRun = !!process.argv[2] || new Date(now + 6 * 3600000).getUTCHours() === 0;
+  const hits = publishesBetween(catalog, now - 65 * 60000, now).concat(midnightRun ? saleBoundaries(catalog, today) : []);
+  hits.forEach((h) => console.log(h));
+  console.log('rebuild=' + (hits.length > 0));
+  if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, 'rebuild=' + (hits.length > 0) + '\n');
 }
-hits.forEach((h) => console.log(h));
-console.log('rebuild=' + (hits.length > 0));
-if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, 'rebuild=' + (hits.length > 0) + '\n');
