@@ -1,6 +1,6 @@
 /**
  * প্রোডাক্ট ডেটা — product-manager.html থেকে এডিট করুন
- * আপডেট: 2026-11-14
+ * আপডেট: 2026-11-15
  */
 window.CATEGORY_PRODUCTS = {
   abaya: [
@@ -641,7 +641,6 @@ window.CATEGORY_PRODUCTS = {
       dressLengths: ["44"],
       palazzoLengths: ["40"],
       regularPrice: 950,
-      shortDescription: "<p>Premium Linen Floral Two-Piece Set</p><p>Fabric: Linen | Dress Length: 44\" | Pajama Length: 40\" | Sleeve: 18\"</p><p>Body Sizes: 48, 50, 52 Inches.</p><p>Comfortable and stylish women's two-piece outfit.</p>",
       descriptionHtml: "<p><strong>Premium Linen Floral Two-Piece Set</strong></p><p>প্রিমিয়াম লিলেন কাপড়ের সুন্দর ডিজাইনের আরামদায়ক টু-পিস সেট। দৈনন্দিন ব্যবহার ও বিভিন্ন অনুষ্ঠানের জন্য উপযোগী।</p><p><strong>Product Details:</strong></p><ul><li><p>Fabric: Premium Linen</p></li><li><p>Dress Length: 44 Inches</p></li><li><p>Pajama Length: 40 Inches</p></li><li><p>Sleeve Length: 18 Inches</p></li><li><p>Body Size: 48, 50, 52 Inches</p></li><li><p>Set: Two-Piece (Top &amp; Pajama)</p></li></ul><p><strong>Available Sizes:</strong> 48, 50, 52</p><p>আপনার পছন্দের সাইজটি অর্ডারের সময় জানিয়ে দিন।</p>",
       productType: "variable",
       backorders: "notify",
@@ -651,7 +650,8 @@ window.CATEGORY_PRODUCTS = {
       seoTitle: "Premium Linen Two Piece Set | Muslim Abaya",
       seoDescription: "Shop premium linen floral two-piece sets for women. Dress length 44\", pajama 40\", sleeve 18\". Available in body sizes 48, 50 and 52. Cash on delivery in Bangladesh.",
       productUrl: "/",
-      variationAttributes: []
+      variationAttributes: [],
+      shortDescription: "<p><strong>Premium Linen Floral Two-Piece Set</strong></p><p>প্রিমিয়াম লিলেন কাপড়ে তৈরি আকর্ষণীয় ফ্লোরাল ডিজাইনের টু-পিস সেট। আরামদায়ক ও মার্জিত লুকের জন্য দৈনন্দিন ব্যবহার এবং বিভিন্ন অনুষ্ঠানে উপযোগী।</p>"
     },
     {
       id: "DR-11",
