@@ -32,6 +32,10 @@ async function open(page) {
 test('channel column: every Page with its unread count; clicking a Page filters the list; website chat and Telegram open Live support', async ({ page }) => {
   await open(page);
   const ch = page.locator('#ibxChannels');
+  // Two columns: the channel list is the "সব কথোপকথন ⌄" dropdown of the conversation column.
+  await expect(ch).toBeHidden();
+  await expect(page.locator('#ibxChBtn')).toContainText('সব কথোপকথন');
+  await page.click('#ibxChBtn');
   await expect(ch.locator('[data-ch-page=""]')).toContainText('সব কথোপকথন');
   await expect(ch.locator('[data-ch-page=""] .ibx-unread')).toHaveText('2');
   await expect(ch.locator('[data-ch-page="381729145014885"] .ibx-unread')).toHaveText('1'); // 1 unread conversation
@@ -40,7 +44,10 @@ test('channel column: every Page with its unread count; clicking a Page filters 
   // A failed logo leaves the first letter.
   await expect(ch.locator('[data-ch-page="964928770039259"] .ibx-ch-icon')).toHaveText('L');
   await ch.locator('[data-ch-page="964928770039259"]').click();
+  await expect(ch).toBeHidden(); // closes after choosing
+  await expect(page.locator('#ibxChBtn')).toContainText('Luxury Dress BD');
   await expect(page.locator('#ibxList .ibx-item')).toHaveCount(1);
+  await page.click('#ibxChBtn');
   expect(await page.evaluate(() => window.__calls.filter((c) => c[0] === 'InboxList').pop()[1].PageId)).toBe('964928770039259');
   await expect(ch.locator('[data-ch-page="964928770039259"]')).toHaveClass(/is-on/);
   // The full-list counts stay while one Page is shown.
@@ -64,10 +71,12 @@ test('product card: pick a product from the shop feed and it is sent with photo,
   expect(sent).toEqual([{ PageId: '381729145014885', PSID: 'a', Title: 'Maroon Abaya Set', Subtitle: '৳1250 · ক্যাশ অন ডেলিভারি', Url: 'https://muslimabaya.com/product/ABY-MAROON-1', ImageUrl: 'https://muslimabaya.com/images/maroon.jpeg' }]);
 });
 
-test('phone: summary is one swipe row, channels are chips, no sideways page scroll', async ({ page }) => {
+test('phone: summary is one swipe row, channel dropdown, no sideways page scroll', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await open(page);
+  await page.click('#ibxChBtn');
   await expect(page.locator('#ibxChannels [data-ch-page="381729145014885"]')).toBeVisible();
+  await page.keyboard.press('Escape');
   const w = await page.evaluate(() => document.documentElement.scrollWidth);
   expect(w).toBeLessThanOrEqual(390);
   const statsH = await page.locator('.ibx-stats').evaluate((el) => el.getBoundingClientRect().height);
@@ -98,4 +107,19 @@ test('chat looks like a messaging app: bubbles, product card with View Details, 
   await page.click('#ibxDetailsBtn');
   await expect(page.locator('#mStatus')).toBeVisible();
   await expect(page.locator('.ibx-list .ibx-item.is-active')).toHaveCSS('background-color', 'rgb(238, 244, 255)');
+});
+
+
+test('compact rows: customer label, friendly media text, short time, Page logo on the avatar, 🔍 search', async ({ page }) => {
+  await open(page);
+  const rows = page.locator('#ibxList .ibx-item');
+  await expect(rows.first().locator('.ibx-name')).toHaveText('গ্রাহক #a'); // no name from Facebook yet
+  await expect(rows.first().locator('.ibx-ava-letter')).toBeVisible();
+  await expect(rows.first().locator('img.ibx-ava-page')).toHaveCount(0); // logo request blocked in this test → removed
+  await expect(rows.first()).not.toContainText('Muslim Abaya'); // no repeated Page tag on every row
+  await expect(rows.first()).not.toContainText('নতুন');
+  await page.click('#ibxSearchBtn');
+  await page.fill('#ibxSearchInput', 'ধন্যবাদ');
+  await expect.poll(() => page.evaluate(() => window.__calls.filter((c) => c[0] === 'InboxList').pop()[1].Q)).toBe('ধন্যবাদ');
+  expect(await page.evaluate(() => ['[audio]', '[image, video]', 'হ্যালো', '[message]'].map(window.__maInboxText))).toEqual(['🎤 ভয়েস মেসেজ', '📷 ছবি · 🎥 ভিডিও', 'হ্যালো', '💬 মেসেজ']);
 });

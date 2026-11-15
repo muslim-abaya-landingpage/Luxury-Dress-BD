@@ -188,6 +188,46 @@
     html.wp-admin-shell body .adm-main .ibx-layout:not(.x) .ibx-prod { border-radius:0 !important; min-height:0 !important; }
     @media (max-width:1180px) { .ibx-layout { grid-template-rows:auto minmax(0,1fr); } .ibx-channels { height:auto; border-right:0; border-bottom:1px solid #edf1f6; } .ibx-ch-title { display:none; } }
     .ibx-thread-sub .ibx-tag { white-space:nowrap; }
+    /* ===== Two columns (like iDesk360): conversations with a "সব কথোপকথন ⌄" channel switch | chat ===== */
+    .ibx-layout, .ibx-layout.show-thread { grid-template-columns:minmax(300px,370px) 1fr !important; grid-template-rows:minmax(0,1fr) !important; }
+    #fQ { display:none; }
+    .ibx-col { position:relative; display:flex; flex-direction:column; min-height:0; height:100%; border-right:1px solid #edf1f6; background:#fff; }
+    .ibx-col .ibx-list { border-right:0; flex:1; min-height:0; scrollbar-width:thin; scrollbar-color:#d6dce5 transparent; }
+    .ibx-col .ibx-list::-webkit-scrollbar { width:6px; } .ibx-col .ibx-list::-webkit-scrollbar-thumb { background:#d6dce5; border-radius:6px; }
+    .ibx-col-head { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:12px 14px; border-bottom:1px solid #edf1f6; }
+    .ibx-ch-switch { display:inline-flex; align-items:center; gap:8px; border:0; background:none; font:inherit; font-weight:700; font-size:.98rem; color:#111827; cursor:pointer; padding:4px 2px; min-width:0; }
+    .ibx-ch-switch .ibx-ch-icon { width:22px; height:22px; flex:0 0 22px; }
+    #ibxChBtnLabel { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:inline-flex; align-items:center; gap:6px; }
+    .ibx-col-search { padding:8px 12px; border-bottom:1px solid #edf1f6; }
+    .ibx-col-search[hidden] { display:none; }
+    .ibx-col-search input { width:100%; box-sizing:border-box; padding:9px 12px; border:1px solid #e3e8f0; border-radius:20px; font:inherit; font-size:.9rem; background:#f8fafc; }
+    .ibx-col .ibx-channels { position:absolute; z-index:20; top:56px; left:10px; right:10px; max-height:72%; height:auto; overflow:auto; background:#fff; border:1px solid #e3e8f0; border-radius:14px; box-shadow:0 14px 34px rgba(30,50,90,.16); padding:8px; display:flex; flex-direction:column; gap:2px; grid-column:auto; flex-wrap:nowrap; }
+    .ibx-col .ibx-channels[hidden] { display:none; }
+    .ibx-col .ibx-ch-title { display:none; }
+    .ibx-col .ibx-ch { width:100%; border:0; flex:0 0 auto; padding:8px; }
+    .ibx-col .ibx-ch-head { display:block; }
+    .ibx-row { display:flex; gap:11px; align-items:center; }
+    .ibx-ava { position:relative; width:44px; height:44px; flex:0 0 44px; }
+    .ibx-ava > img.ibx-ava-pic, .ibx-ava > .ibx-ava-letter { width:44px; height:44px; border-radius:50%; object-fit:cover; display:grid; place-items:center; color:#fff; font-weight:700; font-size:1.05rem; }
+    .ibx-avatar.ibx-ava-letter { color:#fff; font-weight:700; display:inline-grid; place-items:center; }
+    .ibx-ava .ibx-ava-page { position:absolute; right:-2px; bottom:-2px; width:18px; height:18px; border-radius:50%; border:2px solid #fff; background:#fff; object-fit:cover; }
+    .ibx-row-main { flex:1; min-width:0; }
+    .ibx-row-top, .ibx-row-bottom { display:flex; align-items:center; gap:8px; }
+    .ibx-row-top .ibx-name { flex:1; min-width:0; font-size:.93rem; }
+    .ibx-row-top .ibx-time { font-size:.74rem; color:#8a94a6; }
+    .ibx-row-bottom .ibx-preview { flex:1; min-width:0; margin:2px 0 0; font-size:.84rem; color:#6b7280; }
+    .ibx-item.is-unread .ibx-name, .ibx-item.is-unread .ibx-preview { color:#111827; font-weight:700; }
+    .ibx-row-tags { display:flex; gap:4px; margin-top:4px; flex-wrap:wrap; }
+    .ibx-row-tags .ibx-tag { font-size:.66rem; padding:1px 6px; }
+    html.wp-admin-shell body .adm-main .ibx-layout:not(.x) .ibx-list button.ibx-item { padding:11px 14px !important; }
+    html.wp-admin-shell body .adm-main .ibx-layout:not(.x) .ibx-ch-switch { border-radius:8px !important; min-height:36px !important; background:none !important; color:#111827 !important; border:0 !important; padding:4px 2px !important; }
+    @media (max-width:1180px) { .ibx-col .ibx-channels { flex-direction:column; overflow:auto; } .ibx-col .ibx-ch { border:0; border-radius:10px; padding:8px; } }
+    @media (max-width:820px) {
+      .ibx-layout, .ibx-layout.show-thread { grid-template-columns:1fr !important; }
+      .ibx-layout.show-thread .ibx-col { display:none; }
+      .ibx-layout:not(.show-thread) .ibx-thread { display:none; }
+      .ibx-col { border-right:0; }
+    }
     @media (max-width:820px) {
       .ibx-thread-sub > span:last-child, .ibx-thread-sub .ibx-tag.ad { display:none; }
       .ibx-thread-head { padding:10px; gap:6px; }
@@ -294,8 +334,15 @@
         </div>
 
         <div class="ibx-layout ibx-pill" id="ibxLayout">
-          <nav class="ibx-channels" id="ibxChannels" aria-label="চ্যানেল"></nav>
+          <div class="ibx-col">
+            <div class="ibx-col-head">
+              <button type="button" class="ibx-ch-switch" id="ibxChBtn" aria-haspopup="true" aria-expanded="false" aria-controls="ibxChannels"><span id="ibxChBtnLabel">সব কথোপকথন</span> <span aria-hidden="true">⌄</span></button>
+              <button type="button" class="ibx-icon-btn" id="ibxSearchBtn" aria-label="খুঁজুন" title="খুঁজুন"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+            </div>
+            <div class="ibx-col-search" id="ibxSearchRow" hidden><input type="search" id="ibxSearchInput" placeholder="নাম / মেসেজ / অর্ডার ID খুঁজুন" aria-label="কথোপকথন খুঁজুন"></div>
+            <nav class="ibx-channels ibx-pill" id="ibxChannels" aria-label="চ্যানেল" hidden></nav>
           <div class="ibx-list" id="ibxList"><div class="ibx-empty">লোড হচ্ছে…</div></div>
+          </div>
           <section class="ibx-thread" id="ibxThread">
             <div class="ibx-empty">বাম পাশ থেকে একটি কথোপকথন বাছুন।</div>
           </section>
@@ -375,6 +422,38 @@
         var logo = /^\d{5,20}$/.test(id) ? '<img class="ibx-page-logo" src="https://graph.facebook.com/' + id + '/picture?type=square&width=48&height=48" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">' : '';
         return '<span class="ibx-tag page">' + logo + esc(c && c.pageName || '') + '</span>';
       }
+      // Facebook gives no name without Meta's profile permission: tell customers apart by the end of their id.
+      function customerName(c) { return c && c.name ? c.name : 'গ্রাহক #' + String(c && c.psid || '').slice(-4); }
+      var AVA_COLORS = ['#2563eb', '#7c3aed', '#db2777', '#ea580c', '#059669', '#0891b2', '#4f46e5', '#b45309'];
+      function letterAvatar(c, cls) {
+        var name = customerName(c), letter = c && c.name ? String(c.name).trim().charAt(0).toUpperCase() : '#';
+        var h = 0, key = String(c && c.psid || name); for (var i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0;
+        return '<span class="' + (cls || 'ibx-ava-letter') + '" style="background:' + AVA_COLORS[h % AVA_COLORS.length] + '" aria-label="' + esc(name) + '">' + esc(letter) + '</span>';
+      }
+      function rowAvatar(c) {
+        var url = mediaUrl(c.profilePic), id = String(c.pageId || '');
+        var pic = url ? '<img class="ibx-ava-pic" src="' + esc(url) + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML=this.parentNode.getAttribute(\'data-letter\')">' : letterAvatar(c);
+        var page = /^\d{5,20}$/.test(id) ? '<img class="ibx-ava-page" src="https://graph.facebook.com/' + id + '/picture?type=square&width=40&height=40" alt="" title="' + esc(c.pageName || '') + '" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">' : '';
+        return '<span class="ibx-ava" data-letter="' + esc(letterAvatar(c)) + '">' + pic + page + '</span>';
+      }
+      var BN_MONTHS = ['জানু', 'ফেব্রু', 'মার্চ', 'এপ্রি', 'মে', 'জুন', 'জুলা', 'আগ', 'সেপ্টে', 'অক্টো', 'নভে', 'ডিসে'];
+      function listTime(c) {
+        var ms = Number(c && c.lastSeenMs) || 0;
+        if (!ms) { var m = /^(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2})/.exec(String(c && c.lastSeen || '')); if (m) ms = new Date(+m[3], +m[2] - 1, +m[1], +m[4], +m[5]).getTime(); }
+        if (!ms || ms < 1e11) return String(c && c.lastSeen || '');
+        var d = new Date(ms), now = new Date(), y = new Date(now); y.setDate(now.getDate() - 1);
+        if (d.toDateString() === now.toDateString()) return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+        if (d.toDateString() === y.toDateString()) return 'গতকাল';
+        var label = d.getDate().toLocaleString('bn-BD') + ' ' + BN_MONTHS[d.getMonth()];
+        return d.getFullYear() === now.getFullYear() ? label : label + ' ' + d.getFullYear().toLocaleString('bn-BD', { useGrouping: false });
+      }
+      var MEDIA_BN = { image: '📷 ছবি', photo: '📷 ছবি', video: '🎥 ভিডিও', audio: '🎤 ভয়েস মেসেজ', file: '📎 ফাইল', sticker: '😊 স্টিকার', 'স্টিকার': '😊 স্টিকার', location: '📍 লোকেশন', fallback: '🔗 লিংক', template: '🛍 কার্ড', share: '🔗 শেয়ার', reel: '🎬 রিল', ig_reel: '🎬 রিল', message: '💬 মেসেজ', attachment: '📎 সংযুক্তি', 'দ্রুত উত্তর': '↩ দ্রুত উত্তর' };
+      function friendlyText(t) {
+        var m = /^\[([^\]]{1,80})\]$/.exec(String(t || '').trim());
+        if (!m) return String(t || '');
+        return m[1].split(/\s*,\s*/).map(function (k) { return MEDIA_BN[k] || MEDIA_BN[k.toLowerCase()] || ('📎 ' + k); }).join(' · ');
+      }
+      window.__maInboxText = friendlyText; // for tests
       function avatar(c) {
         var url = mediaUrl(c.profilePic);
         return url ? '<img class="ibx-avatar" src="' + esc(url) + '" alt="প্রোফাইল ছবি" loading="lazy" referrerpolicy="no-referrer">' : '<span class="ibx-avatar" aria-label="প্রোফাইল ছবি নেই">👤</span>';
@@ -407,19 +486,17 @@
       }
       function renderList() {
         var el = $('ibxList');
-        var head = '<div class="ibx-list-head"><span>কথোপকথন</span><span class="ibx-ch-count">' + contacts.length + '</span></div>';
-        if (!contacts.length) { el.innerHTML = head + '<div class="ibx-empty">কোনো কথোপকথন পাওয়া যায়নি।</div>'; return; }
-        el.innerHTML = head + contacts.map(function (c) {
+        if (!contacts.length) { el.innerHTML = '<div class="ibx-empty">কোনো কথোপকথন পাওয়া যায়নি।</div>'; return; }
+        el.innerHTML = contacts.map(function (c) {
           var isActive = active && active.pageId === c.pageId && active.psid === c.psid;
-          return '<button type="button" class="ibx-item' + (isActive ? ' is-active' : '') + '" data-page="' + esc(c.pageId) + '" data-psid="' + esc(c.psid) + '">' +
-            '<div class="ibx-item-top"><span class="ibx-name">' + avatar(c) + esc(c.name || 'অজানা গ্রাহক') + '</span>' +
-            '<span class="ibx-time">' + (c.unread ? '<span class="ibx-unread">' + c.unread + '</span> ' : '') + esc(c.lastSeen) + '</span></div>' +
-            '<div class="ibx-preview">' + (c.lastDirection === 'out' ? (c.seenAtMs && c.seenAtMs >= c.lastSeenMs ? '✓✓ ' : '') + 'আপনি: ' : '') + esc(c.lastMessage) + '</div>' +
-            '<div class="ibx-tags">' + pageTag(c) +
-            '<span class="ibx-tag' + (isWon(c.status) ? ' won' : '') + '">' + esc(c.status) + '</span>' +
-            (c.fromAd ? '<span class="ibx-tag ad">বিজ্ঞাপন</span>' : '') +
-            (c.assignedTo ? '<span class="ibx-tag">👤 ' + esc(c.assignedTo) + '</span>' : '') +
-            '</div></button>';
+          var tags = (c.status && c.status !== 'নতুন' ? '<span class="ibx-tag' + (isWon(c.status) ? ' won' : '') + '">' + esc(c.status) + '</span>' : '') +
+            (c.fromAd ? '<span class="ibx-tag ad">বিজ্ঞাপন</span>' : '') + (c.assignedTo ? '<span class="ibx-tag">👤 ' + esc(c.assignedTo) + '</span>' : '');
+          return '<button type="button" class="ibx-item' + (isActive ? ' is-active' : '') + (c.unread ? ' is-unread' : '') + '" data-page="' + esc(c.pageId) + '" data-psid="' + esc(c.psid) + '">' +
+            '<div class="ibx-row">' + rowAvatar(c) + '<div class="ibx-row-main">' +
+            '<div class="ibx-row-top"><span class="ibx-name">' + esc(customerName(c)) + '</span><span class="ibx-time">' + esc(listTime(c)) + '</span></div>' +
+            '<div class="ibx-row-bottom"><span class="ibx-preview">' + (c.lastDirection === 'out' ? (c.seenAtMs && c.seenAtMs >= c.lastSeenMs ? '✓✓ ' : '') + 'আপনি: ' : '') + esc(friendlyText(c.lastMessage)) + '</span>' + (c.unread ? '<span class="ibx-unread">' + c.unread + '</span>' : '') + '</div>' +
+            (tags ? '<div class="ibx-row-tags">' + tags + '</div>' : '') +
+            '</div></div></button>';
         }).join('');
         mediaFallbacks(el);
       }
@@ -478,11 +555,26 @@
           '<a class="ibx-ch" href="admin-support-inbox.html?channel=website"><span class="ibx-ch-icon web">🌐</span><span class="ibx-ch-name">ওয়েবসাইট চ্যাট</span>' + (supportCounts ? badge(supportCounts.website) : '<span class="ibx-ch-count">খুলুন →</span>') + '</a>' +
           '<a class="ibx-ch" href="admin-support-inbox.html?channel=telegram"><span class="ibx-ch-icon tg">✈</span><span class="ibx-ch-name">Telegram</span>' + (supportCounts ? badge(supportCounts.telegram) : '<span class="ibx-ch-count">খুলুন →</span>') + '</a>';
         el.innerHTML = html;
+        var chosen = list.filter(function (p) { return p.id === current; })[0];
+        $('ibxChBtnLabel').innerHTML = chosen ? pageLogo(chosen.id, chosen.name) + esc(chosen.name) : 'সব কথোপকথন' + (channelCounts.unread ? ' <span class="ibx-unread">' + channelCounts.unread + '</span>' : '');
       }
+      function toggleChannels(open) {
+        var nav = $('ibxChannels'), btn = $('ibxChBtn');
+        if (typeof open !== 'boolean') open = nav.hidden;
+        nav.hidden = !open; btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      document.addEventListener('click', function (e) {
+        if (!e.target.closest) return;
+        if (e.target.closest('#ibxChBtn')) { toggleChannels(); return; }
+        if (e.target.closest('#ibxSearchBtn')) { var row = $('ibxSearchRow'); row.hidden = !row.hidden; if (!row.hidden) $('ibxSearchInput').focus(); return; }
+        if ($('ibxChannels') && !$('ibxChannels').hidden && !e.target.closest('#ibxChannels')) toggleChannels(false);
+      });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && $('ibxChannels') && !$('ibxChannels').hidden) toggleChannels(false); });
       document.addEventListener('click', function (e) {
         var b = e.target.closest && e.target.closest('[data-ch-page]');
         if (!b) return;
         $('fPage').value = b.getAttribute('data-ch-page');
+        toggleChannels(false);
         renderChannels();
         loadList();
       });
@@ -573,7 +665,7 @@
         if (c.assignedTo && assignees.indexOf(c.assignedTo) === -1) assignees.push(c.assignedTo);
         $('ibxThread').innerHTML =
           '<div class="ibx-thread-head"><div class="ibx-thread-who"><button type="button" class="ibx-icon-btn ibx-back" id="ibxBack" aria-label="তালিকায় ফিরুন">' + ICON.back + '</button>' +
-          '<span id="ibxThreadAvatar">' + avatar(c) + '</span><div style="min-width:0"><strong id="ibxThreadName">' + esc(c.name || 'অজানা গ্রাহক') + '</strong>' +
+          '<span id="ibxThreadAvatar">' + (mediaUrl(c.profilePic) ? avatar(c) : letterAvatar(c, 'ibx-avatar ibx-ava-letter')) + '</span><div style="min-width:0"><strong id="ibxThreadName">' + esc(customerName(c)) + '</strong>' +
           '<div class="ibx-thread-sub">' + pageTag(c) + (c.fromAd ? '<span class="ibx-tag ad">বিজ্ঞাপন</span>' : '') + '<span>প্রথম মেসেজ: ' + esc(c.firstSeen || '') + '</span></div></div></div>' +
           '<div class="ibx-head-actions"><a class="ibx-icon-btn" href="https://business.facebook.com/latest/inbox/all" target="_blank" rel="noopener" title="Meta Business Suite-এ খুলুন" aria-label="Meta Business Suite-এ খুলুন">' + ICON.ext + '</a>' +
           '<button type="button" class="ibx-icon-btn' + (detailsOpen ? ' is-on' : '') + '" id="ibxDetailsBtn" title="স্ট্যাটাস, অর্ডার ও নোট" aria-label="স্ট্যাটাস, অর্ডার ও নোট" aria-expanded="' + (detailsOpen ? 'true' : 'false') + '">' + ICON.info + '</button></div></div>' +
@@ -581,7 +673,7 @@
           '<div class="ibx-msgs" id="ibxMsgs">' +
           (messages.length ? messages.map(function (m, i) {
             var card = m.direction === 'out' ? productCardHtml(m) : '';
-            return (card || '<div class="ibx-msg ibx-pill ' + (m.direction === 'out' ? 'out' : 'in') + '">' + esc(m.text) + attachments(m) +
+            return (card || '<div class="ibx-msg ibx-pill ' + (m.direction === 'out' ? 'out' : 'in') + '">' + esc(m.direction === 'out' ? m.text : friendlyText(m.text)) + attachments(m) +
               '<div class="ibx-msg-meta">' + esc(m.time) + (m.by ? ' · ' + esc(m.by) : '') + '</div></div>') +
               (i === lastOutIndex(messages) ? receiptHtml(c, m) : '');
           }).join('') : '<div class="ibx-empty">এই সিস্টেম চালুর পর থেকে কোনো মেসেজ সেভ হয়নি।</div>') +
@@ -686,13 +778,13 @@
           if (local) { local.name = c.name; local.profilePic = c.profilePic; }
           renderList();
           if (sequence !== threadSequence || !active || active.pageId !== pageId || active.psid !== psid) return;
-          $('ibxThreadName').textContent = c.name || 'অজানা গ্রাহক';
+          $('ibxThreadName').textContent = customerName(c);
           var why = $('ibxProfileWhy');
           if (why) {
             why.hidden = !(!c.name && res.profileError);
             why.textContent = 'Facebook এই কাস্টমারের নাম/ছবি দিচ্ছে না: ' + (res.profileError || '') + ' — Setup পেজে “Messenger: কাস্টমারের নাম/ছবি পরীক্ষা” দেখুন।';
           }
-          $('ibxThreadAvatar').innerHTML = avatar(c);
+          $('ibxThreadAvatar').innerHTML = mediaUrl(c.profilePic) ? avatar(c) : letterAvatar(c, 'ibx-avatar ibx-ava-letter');
           mediaFallbacks($('ibxThreadAvatar'));
         }).catch(function () { /* Optional profile lookup cannot block messages or replies. */ });
       }
@@ -841,6 +933,8 @@
       ['fPage', 'fStatus', 'fAssigned', 'fUnread'].forEach(function (id) { $(id).addEventListener('change', function () { loadList(); if (id === 'fPage') renderChannels(); }); });
       var qTimer = null;
       $('fQ').addEventListener('input', function () { clearTimeout(qTimer); qTimer = setTimeout(loadList, 400); });
+      // 🔍 in the conversation column searches through the same filter.
+      $('ibxSearchInput').addEventListener('input', function () { $('fQ').value = this.value; clearTimeout(qTimer); qTimer = setTimeout(loadList, 400); });
       $('ibxRefresh').addEventListener('click', function () {
         loadList();
         if (active) openThread(active.pageId, active.psid);

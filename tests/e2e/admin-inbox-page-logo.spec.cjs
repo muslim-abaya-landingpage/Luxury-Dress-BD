@@ -20,14 +20,12 @@ test('Page logo next to the Page name in the list and in the open conversation',
   const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
   await page.route('https://graph.facebook.com/**', (r) => r.fulfill({ contentType: 'image/png', body: png }));
   await page.goto('/admin-inbox.html');
-  const tag = page.locator('.ibx-tag.page', { hasText: 'Muslim Abaya' }).first();
-  await expect(tag).toBeVisible();
-  await expect(tag.locator('img.ibx-page-logo')).toHaveAttribute('src', 'https://graph.facebook.com/381729145014885/picture?type=square&width=48&height=48');
-  // An id that is not a Facebook Page id gets no picture (and no request), only the name.
-  const odd = page.locator('.ibx-tag.page', { hasText: 'Odd Page' }).first();
-  await expect(odd).toBeVisible();
-  await expect(odd.locator('img')).toHaveCount(0);
-  await tag.click();
+  // In the list the Page logo sits on the customer's avatar.
+  const row = page.locator('#ibxList .ibx-item[data-psid="c1"]');
+  await expect(row.locator('img.ibx-ava-page')).toHaveAttribute('src', 'https://graph.facebook.com/381729145014885/picture?type=square&width=40&height=40');
+  // An id that is not a Facebook Page id gets no picture (and no request).
+  await expect(page.locator('#ibxList .ibx-item[data-psid="c2"] img.ibx-ava-page')).toHaveCount(0);
+  await row.click();
   await expect(page.locator('#ibxThreadName')).toBeVisible();
   await expect(page.locator('.ibx-thread-sub .ibx-tag.page img.ibx-page-logo').first()).toBeVisible();
 });
