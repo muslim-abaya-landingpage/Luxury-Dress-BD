@@ -137,8 +137,45 @@
     });
   }
 
+  /* ---------- Smart toggles: on/off settings show as switches ----------
+     Only settings that turn something on or off become switches; checkboxes that pick rows, categories
+     or brands stay checkboxes. The <input type="checkbox"> itself is restyled (role="switch"), so every
+     page's own code keeps reading .checked and hearing "change" exactly as before. */
+  var SWITCH_SELECTOR = [
+    'input[type=checkbox][data-switch]',
+    '#fUnread', '#showEmptyToggle', '#szOvUseTemplate',
+    'input[data-cat-enabled]', '.sz-check input[data-f="enabled"]', '.sz-check input[data-f="required"]', '.sz-check input[data-f="allowCustom"]',
+    'input[data-ef="virtual"]', 'input[data-ef="downloadable"]', 'input[data-ef="manageStock"]',
+    'input[data-ef="soldIndividually"]', 'input[data-ef="reviewsAllowed"]', 'input[data-ef="featured"]'
+  ].join(',');
+  function upgradeSwitches(root) {
+    var list = [];
+    try {
+      if (root.matches && root.matches(SWITCH_SELECTOR)) list.push(root);
+      if (root.querySelectorAll) list = list.concat(Array.prototype.slice.call(root.querySelectorAll(SWITCH_SELECTOR)));
+    } catch (e) { return; }
+    list.forEach(function (el) {
+      if (el.type !== 'checkbox' || el.classList.contains('ma-switch-pill')) return;
+      el.classList.add('ma-switch-pill');
+      el.setAttribute('role', 'switch');
+      el.setAttribute('aria-checked', el.checked ? 'true' : 'false');
+    });
+  }
+  function watchSwitches() {
+    upgradeSwitches(doc.body);
+    doc.addEventListener('change', function (e) {
+      var t = e.target;
+      if (t && t.classList && t.classList.contains('ma-switch-pill')) t.setAttribute('aria-checked', t.checked ? 'true' : 'false');
+    }, true);
+    if (!window.MutationObserver) return;
+    new MutationObserver(function (records) {
+      records.forEach(function (r) { r.addedNodes.forEach(function (n) { if (n.nodeType === 1) upgradeSwitches(n); }); });
+    }).observe(doc.body, { childList: true, subtree: true });
+  }
+
   function boot() {
     doc.documentElement.classList.add('wp-admin-shell');
+    watchSwitches();
     buildAdminBar();
     tuneSidebar();
   }

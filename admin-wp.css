@@ -389,3 +389,25 @@ html.wp-admin-shell .adm-sidebar > .adm-brand { display: none !important; }
     min-height: 44px !important;
   }
 }
+
+/* ---------- Smart toggle switch (admin-wp.js gives on/off checkboxes class ma-switch-pill + role=switch) ---------- */
+html.wp-admin-shell input[type=checkbox].ma-switch-pill {
+  -webkit-appearance: none; appearance: none; position: relative; flex: 0 0 auto;
+  width: 38px !important; height: 22px !important; min-width: 38px; margin: 0 8px 0 0; padding: 0;
+  border: 0 !important; border-radius: 999px !important; background: #c3c4c7; cursor: pointer;
+  vertical-align: middle; transition: background-color .15s ease; box-shadow: none !important;
+}
+html.wp-admin-shell input[type=checkbox].ma-switch-pill::before {
+  content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.3); transition: transform .15s ease;
+}
+html.wp-admin-shell input[type=checkbox].ma-switch-pill::after { content: none !important; display: none !important; }
+html.wp-admin-shell input[type=checkbox].ma-switch-pill:checked { background: #00a32a; }
+html.wp-admin-shell input[type=checkbox].ma-switch-pill:checked::before { transform: translateX(16px); }
+html.wp-admin-shell input[type=checkbox].ma-switch-pill:focus-visible { outline: 2px solid #2271b1 !important; outline-offset: 2px; }
+html.wp-admin-shell input[type=checkbox].ma-switch-pill:disabled { opacity: .5; cursor: not-allowed; }
+@media (prefers-reduced-motion: reduce) {
+  html.wp-admin-shell input[type=checkbox].ma-switch-pill, html.wp-admin-shell input[type=checkbox].ma-switch-pill::before { transition: none; }
+}
+html.wp-admin-shell label:has(> input.ma-switch-pill) { display: inline-flex; align-items: center; gap: 0; cursor: pointer; }
+html.wp-admin-shell[data-admin-theme="dark"] input[type=checkbox].ma-switch-pill:not(:checked) { background: #50575e; }
