@@ -18,6 +18,7 @@
 import { isOwner, isOwnerCached } from '../_lib/owner-auth.js';
 import { CATALOG_FILES } from '../_lib/live-catalog.js';
 import { validatePayload, writeLiveState } from './live-publish.js';
+import { withGithubToken } from '../_lib/github-app.js';
 
 const MAX_BODY = 14 * 1024 * 1024;
 const DEFAULT_REPO = 'muslim-abaya-landingpage/Luxury-Dress-BD';
@@ -178,4 +179,4 @@ export async function handleCatalogSave(request, env, deps = {}) {
   return json(result);
 }
 
-export const onRequestPost = ({ request, env }) => handleCatalogSave(request, env);
+export const onRequestPost = async ({ request, env }) => handleCatalogSave(request, await withGithubToken(env));

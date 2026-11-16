@@ -9,6 +9,7 @@
  */
 import { ownerRequest } from './seo-settings.js';
 import { commitRebuildTrigger } from './cron-tick.js';
+import { withGithubToken } from '../_lib/github-app.js';
 
 const GAP_MS = 5 * 60000;
 function json(body, status = 200) {
@@ -42,4 +43,4 @@ export async function handleAdminPurge(request, env, deps = {}) {
   return json({ ok: true, started: true, at: now });
 }
 
-export const onRequestPost = ({ request, env }) => handleAdminPurge(request, env);
+export const onRequestPost = async ({ request, env }) => handleAdminPurge(request, await withGithubToken(env));

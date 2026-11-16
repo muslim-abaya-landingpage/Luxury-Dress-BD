@@ -9,6 +9,7 @@
 import { isOwner, isOwnerCached } from '../_lib/owner-auth.js';
 import { githubClient } from './catalog-save.js';
 import { SEO_FILE, DEFAULT_SETTINGS, sanitizeSettings } from '../_lib/seo-settings.js';
+import { withGithubToken } from '../_lib/github-app.js';
 
 const MAX_BODY = 200 * 1024;
 function json(body, status = 200) {
@@ -73,4 +74,4 @@ export async function handleSeoSettings(request, env, deps = {}) {
   }
 }
 
-export const onRequestPost = ({ request, env }) => handleSeoSettings(request, env);
+export const onRequestPost = async ({ request, env }) => handleSeoSettings(request, await withGithubToken(env));

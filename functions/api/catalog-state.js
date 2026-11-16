@@ -7,6 +7,7 @@
 import { isOwner, isOwnerCached } from '../_lib/owner-auth.js';
 import { CATALOG_FILES } from '../_lib/live-catalog.js';
 import { readHead, githubClient } from './catalog-save.js';
+import { withGithubToken } from '../_lib/github-app.js';
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });
@@ -41,4 +42,4 @@ export async function handleCatalogState(request, env, deps = {}) {
   }
 }
 
-export const onRequestPost = ({ request, env }) => handleCatalogState(request, env);
+export const onRequestPost = async ({ request, env }) => handleCatalogState(request, await withGithubToken(env));

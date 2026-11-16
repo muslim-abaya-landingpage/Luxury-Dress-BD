@@ -6,6 +6,7 @@
  * response header (absent when the token was made with "No expiration").
  */
 import { isOwner, isOwnerCached } from '../_lib/owner-auth.js';
+import { withGithubToken } from '../_lib/github-app.js';
 
 const DEFAULT_REPO = 'muslim-abaya-landingpage/Luxury-Dress-BD';
 const WARN_DAYS = 14;
@@ -27,6 +28,11 @@ export function parseGithubExpiry(text) {
 
 export async function checkGithubToken(env, fetchImpl, now) {
   const out = { id: 'cf-github', name: 'GITHUB_TOKEN', where: 'Cloudflare → luxury-dress-bd → Settings → Variables and Secrets', configured: !!env.GITHUB_TOKEN };
+  if (env.GITHUB_APP_ERROR) {
+    const why = { APP_NOT_INSTALLED: 'App-টা Luxury-Dress-BD রিপোতে install করা নেই', BAD_PRIVATE_KEY: 'GITHUB_APP_PRIVATE_KEY ঠিকমতো বসানো হয়নি (.pem ফাইলের পুরো লেখা লাগবে)' }[env.GITHUB_APP_ERROR] || ('GitHub উত্তর: ' + env.GITHUB_APP_ERROR);
+    out.name = 'GitHub App';
+    return Object.assign(out, { state: 'bad', message: 'GitHub App কাজ করছে না — ' + why + '।' + (env.GITHUB_TOKEN ? ' আপাতত পুরোনো GITHUB_TOKEN দিয়ে চলছে।' : '') });
+  }
   if (!env.GITHUB_TOKEN) return Object.assign(out, { state: 'off', message: 'বসানো নেই — দ্রুত-সেভ বন্ধ, সেভ পুরোনো পথে (ধীরে) হচ্ছে।' });
   let res;
   try {
@@ -35,6 +41,10 @@ export async function checkGithubToken(env, fetchImpl, now) {
     });
   } catch (e) {
     return Object.assign(out, { state: 'warn', message: 'GitHub-এ যাচাই করা যায়নি, পরে আবার দেখুন।' });
+  }
+  if (res.ok && env.GITHUB_TOKEN_SOURCE === 'app') {
+    out.name = 'GitHub App';
+    return Object.assign(out, { state: 'ok', expiresAt: null, message: 'ঠিক আছে · GitHub App — টোকেন GitHub নিজেই প্রতি ঘণ্টায় বানায়, কখনো নবায়ন করতে হবে না' });
   }
   if (res.status === 401) return Object.assign(out, { state: 'bad', message: 'টোকেন কাজ করছে না (মেয়াদ শেষ বা মুছে ফেলা)। নতুন টোকেন বানিয়ে বদলান।' });
   if (!res.ok) return Object.assign(out, { state: 'bad', message: 'GitHub উত্তর দিয়েছে ' + res.status + '। টোকেনে Luxury-Dress-BD রিপো আর Contents: Read and write আছে কিনা দেখুন।' });
@@ -73,4 +83,4 @@ export async function handleTokenStatus(request, env, deps = {}) {
   return json({ ok: true, checkedAt: new Date(now).toISOString(), items });
 }
 
-export const onRequestPost = ({ request, env }) => handleTokenStatus(request, env);
+export const onRequestPost = async ({ request, env }) => handleTokenStatus(request, await withGithubToken(env));

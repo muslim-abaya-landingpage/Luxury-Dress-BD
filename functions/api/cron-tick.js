@@ -14,6 +14,7 @@
 import { dhakaDate, dhakaHourMinute, saleBoundaries, publishesBetween } from '../_lib/schedule-check.js';
 import { SITE, robotsIssues, sitemapUrls, pageIssues, duplicateTitleIssues, brokenLinkIssue, report } from '../_lib/seo-live-checks.js';
 import { cleanLiveReport } from './seo-report.js';
+import { withGithubToken } from '../_lib/github-app.js';
 
 const DEFAULT_REPO = 'muslim-abaya-landingpage/Luxury-Dress-BD';
 const MIN_GAP_MS = 3 * 60000; // the Worker calls every 2 minutes → real work every 4
@@ -194,5 +195,5 @@ export async function handleCronTick(request, env, deps = {}) {
   return json({ ok: true, at: new Date(now).toISOString(), ran });
 }
 
-export const onRequestPost = ({ request, env }) => handleCronTick(request, env);
-export const onRequestGet = ({ request, env }) => handleCronTick(request, env);
+export const onRequestPost = async ({ request, env }) => handleCronTick(request, await withGithubToken(env));
+export const onRequestGet = async ({ request, env }) => handleCronTick(request, await withGithubToken(env));
