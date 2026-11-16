@@ -89,8 +89,11 @@ html.wp-admin-shell .adm-shell > div > header.pl-admin-header { margin: 0 !impor
 }
 .wp-ab-sub a, .wp-ab-sub button { height: 26px; line-height: 26px; padding: 0 12px; width: 100%; text-align: left; color: var(--wp-sub-text); }
 .wp-ab-sub-right { left: auto; right: 0; }
-.wp-ab-purge > button { display: flex; align-items: center; gap: 6px; }
-.wp-ab-purge .wp-ab-sub { min-width: 190px; }
+.wp-ab-purge > button { display: flex; align-items: center; padding: 0 10px; }
+.wp-ab-purge-icon { color: #72aee6; }
+.wp-ab-purge:hover .wp-ab-purge-icon, .wp-ab-purge:focus-within .wp-ab-purge-icon { color: #9ec2e6; }
+.wp-ab-purge .wp-ab-purge-sub { min-width: 210px; padding: 6px 0; }
+.wp-ab-purge-sub button { white-space: nowrap; }
 .wp-ab-notice { position: fixed; top: calc(var(--wp-bar-h, 32px) + 10px); right: 12px; z-index: 100000; max-width: min(420px, calc(100vw - 24px));
   padding: 10px 14px; background: #fff; color: #1d2327; border-left: 4px solid #72aee6; box-shadow: 0 2px 8px rgba(0,0,0,.18); font-size: 14px; line-height: 1.5; }
 .wp-ab-notice.is-ok { border-left-color: #00a32a; }
@@ -296,6 +299,7 @@ html.wp-admin-shell textarea:focus { border-color: var(--wp-link) !important; bo
   .wp-ab-site span, .wp-ab-link, .wp-ab-user > span:first-child { display: none; }
   .wp-ab-new span, .wp-ab-purge span { display: none; }
   .wp-adminbar a, .wp-adminbar button { min-width: 44px; justify-content: center; }
+  .wp-adminbar .wp-ab-purge-sub button { justify-content: flex-start; height: 40px; line-height: 40px; padding: 0 16px; }
   html.wp-admin-shell .pn-menu-btn,
   html.wp-admin-shell #admMenuBtn,
   html.wp-admin-shell .adm-menu-btn { display: none !important; }

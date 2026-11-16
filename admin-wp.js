@@ -28,8 +28,12 @@
         '<li class="wp-ab-new"><a href="admin-order-new.html" aria-haspopup="true"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M11 4h2v7h7v2h-7v7h-2v-7H4v-2h7z"/></svg><span>New</span></a>' +
           '<ul class="wp-ab-sub"><li><a href="admin-order-new.html">Order</a></li><li><a href="product-manager.html?action=new">Product</a></li></ul></li>' +
         '<li class="wp-ab-link"><a href="admin-orders.html">Orders</a></li>' +
-        '<li class="wp-ab-purge"><button type="button" aria-haspopup="true" title="Purge cache"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 2 4 12l8 10 8-10zm0 3.2L17.4 12 12 18.8 6.6 12z"/></svg><span>Purge</span></button>' +
-          '<ul class="wp-ab-sub"><li><button type="button" id="wpAbPurgeAll">Purge All</button></li><li><button type="button" id="wpAbPurgeLocal">Purge this browser</button></li></ul></li>' +
+        '<li class="wp-ab-purge"><button type="button" aria-haspopup="true" aria-label="Purge cache" title="Purge cache"><svg class="wp-ab-purge-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 1.5 22.5 12 12 22.5 1.5 12zm0 4.2L5.7 12l6.3 6.3 6.3-6.3z"/><path fill="currentColor" d="M12 8.6 15.4 12 12 15.4 8.6 12z"/></svg></button>' +
+          '<ul class="wp-ab-sub wp-ab-purge-sub">' +
+            '<li><button type="button" id="wpAbPurgePage">Purge this page</button></li>' +
+            '<li><button type="button" id="wpAbPurgeAll">Purge All</button></li>' +
+            '<li><button type="button" id="wpAbPurgeLocal">Purge All - Browser Cache</button></li>' +
+          '</ul></li>' +
       '</ul>' +
       '<ul class="wp-adminbar-right">' +
         '<li class="wp-ab-user"><span>Howdy' + (name ? ', ' + esc(name) : '') + '</span><span class="wp-ab-avatar" aria-hidden="true"></span>' +
@@ -40,6 +44,7 @@
       var btn = byId('admMenuBtn') || byId('pnMenuBtn') || byId('menuBtn');
       if (btn) btn.click();
     });
+    byId('wpAbPurgePage').addEventListener('click', purgePage);
     byId('wpAbPurgeAll').addEventListener('click', purgeAll);
     byId('wpAbPurgeLocal').addEventListener('click', purgeBrowser);
     byId('wpAbLogout').addEventListener('click', function () {
@@ -80,6 +85,13 @@
       })
       .catch(function () { notice('ইন্টারনেট সংযোগ পাওয়া যায়নি। আবার চেষ্টা করুন।', 'error'); })
       .then(function () { purging = false; });
+  }
+  // This page only: fetch it again past the browser cache and reload with fresh data.
+  function purgePage() {
+    closeMenus();
+    notice('এই পেজ নতুন করে লোড হচ্ছে…', 'busy');
+    var done = function () { location.reload(); };
+    try { fetch(location.href, { cache: 'reload', credentials: 'same-origin' }).then(done, done); } catch (e) { done(); }
   }
   // This browser only: saved copies the admin/site keep locally. Login, unsaved work and preferences stay.
   var LOCAL_CACHE_KEYS = ['ma_public_stock_status_v1', 'ma_api_health_v1', 'ma_admin_edge_off'];

@@ -76,10 +76,11 @@ test('a failed GitHub commit is reported and does not block the next try', async
   assert.equal((await (await handleAdminPurge(req({ Token: 'x' }), { STOCK_DB: fakeDb() }, deps)).json()).error, 'NOT_CONFIGURED');
 });
 
-test('admin bar: Purge menu with "Purge All" and "Purge this browser", which keeps login and unsaved work', () => {
+test('admin bar: Purge menu (this page / All / browser cache); which keeps login and unsaved work', () => {
   const src = require('fs').readFileSync(require('path').join(__dirname, '../../admin-wp.js'), 'utf8');
   assert.match(src, /id="wpAbPurgeAll">Purge All</);
-  assert.match(src, /id="wpAbPurgeLocal">Purge this browser</);
+  assert.match(src, /id="wpAbPurgePage">Purge this page</);
+  assert.match(src, /id="wpAbPurgeLocal">Purge All - Browser Cache</);
   assert.match(src, /fetch\('\/api\/admin-purge'/);
   const keys = /LOCAL_CACHE_KEYS = (\[[^\]]*\])/.exec(src)[1];
   assert.doesNotMatch(keys, /session|pending|ma_admin_session/);
