@@ -109,14 +109,30 @@
         '<label for="' + id + 'r">Search engines</label><select id="' + id + 'r" data-k="robots"><option value="">Automatic (' + esc(p.auto.robots || "index, follow") + ')</option>' +
         ["index, follow", "noindex, follow", "noindex, nofollow"].map(function (v) { return '<option' + (robots === v ? " selected" : "") + '>' + v + '</option>'; }).join("") + '</select>' +
         '<label for="' + id + 'i">Share image (optional)</label><input id="' + id + 'i" data-k="image" value="' + esc(m.image || "") + '" placeholder="' + esc(p.auto.image || "automatic") + '">' +
+        (p.category ? '<div class="seo-cat-content"><label for="' + id + 'n">Page introduction (visible under the category heading)</label>' +
+          '<textarea id="' + id + 'n" data-c="intro" maxlength="1200" rows="4" placeholder="2–3 sentences about this category: what it is, fabrics, sizes, delivery.">' + esc(m.intro || "") + '</textarea>' +
+          '<label for="' + id + 'q">Questions &amp; answers (visible below the products)</label>' +
+          '<textarea id="' + id + 'q" data-c="faq" rows="8" placeholder="Question on one line?&#10;Answer on the next line.&#10;&#10;Leave an empty line between questions.">' + esc(faqText(m.faq)) + '</textarea>' +
+          '<small class="seo-help">Write only what is true for every product here (no prices — they change). Up to 12 questions.</small></div>' : "") +
         '<p style="margin:8px 0 0"><button type="button" class="adm-btn adm-btn-secondary" data-approve>Approve automatic text</button> <button type="button" class="adm-btn adm-btn-secondary" data-reset>Back to automatic</button></p></div>';
     }).join("") || '<p class="seo-help">The page list appears after the next deploy.</p>';
     $("seoPages").querySelectorAll("input[data-k='title']").forEach(function (x) { counter(x, 60); });
     $("seoPages").querySelectorAll("textarea[data-k='description']").forEach(function (x) { counter(x, 160); });
   }
+  // "Question?\nAnswer" blocks separated by an empty line  <->  [{q, a}]
+  function faqText(list) { return (Array.isArray(list) ? list : []).map(function (f) { return f.q + "\n" + f.a; }).join("\n\n"); }
+  function parseFaq(text) {
+    return String(text || "").split(/\n\s*\n/).map(function (block) {
+      var lines = block.split("\n").map(function (l) { return l.trim(); }).filter(Boolean);
+      return lines.length ? { q: lines[0], a: lines.slice(1).join(" ") } : null;
+    }).filter(Boolean);
+  }
   function readPage(box) {
     var row = {};
     box.querySelectorAll("[data-k]").forEach(function (el) { var v = el.value.replace(/\s+/g, " ").trim(); if (v) row[el.getAttribute("data-k")] = v; });
+    var intro = box.querySelector("[data-c='intro']"), faq = box.querySelector("[data-c='faq']");
+    if (intro && intro.value.trim()) row.intro = intro.value.replace(/\s+/g, " ").trim();
+    if (faq) { var list = parseFaq(faq.value); if (list.length) row.faq = list; }
     var path = box.getAttribute("data-path");
     if (Object.keys(row).length) state.settings.pages[path] = row; else delete state.settings.pages[path];
     setDirty(true);

@@ -4272,6 +4272,28 @@ function bindShopCategoryControls(root, products) {
    মেনুতে ক্যাটাগরিতে ক্লিক করলে পুরো পেজ রিলোড না করে শুধু কন্টেন্ট
    বদলে দেওয়ার লজিক (URL-ও আপডেট হয়, browser back/forward কাজ করে)।
    ---------------------------------------------------------------------- */
+/* Category introduction + questions & answers written into this page's HTML by the SEO Manager
+   (scripts/build-seo-settings.mjs). The introduction goes under the category heading and the questions
+   under the products, inside the product column; both are shown
+   only while the category they were written for is on screen (menu clicks switch categories in place). */
+var maCatContent = null;
+function syncCategoryContent(categoryKey, root) {
+  try {
+    if (!maCatContent) maCatContent = { intro: document.getElementById("maCatIntro"), faq: document.getElementById("maCatFaq") };
+    var intro = maCatContent.intro, faq = maCatContent.faq;
+    var show = function (el) { return !!el && el.getAttribute("data-cat") === String(categoryKey || ""); };
+    if (intro) {
+      var top = root && root.querySelector(".shop-top");
+      if (top && top.nextSibling !== intro) top.parentNode.insertBefore(intro, top.nextSibling);
+      intro.hidden = !show(intro);
+    }
+    if (faq) {
+      var main = root && root.querySelector(".shop-main");
+      if (main && main.lastChild !== faq) main.appendChild(faq);
+      faq.hidden = !show(faq);
+    }
+  } catch (e) {}
+}
 function softSwitchShopCategory(categoryKey) {
   ensureCategoryStyles();
   var root = document.getElementById("list");
@@ -4340,6 +4362,7 @@ function softSwitchShopCategory(categoryKey) {
       console.error("softSwitchShopCategory failed:", switchErr);
     }
   }
+  syncCategoryContent(categoryKey, root);
   markCategoryReady();
   if (typeof window.syncSiteHeaderOffset === "function") window.syncSiteHeaderOffset();
   window.requestAnimationFrame(function () {
@@ -4531,6 +4554,7 @@ return;
 "</div></section></div>" +
 "";
   fixShopPageLinks(root);
+  syncCategoryContent(categoryKey, root);
   shopCartCtx.root = root;
   shopCartCtx.products = products;
   if (!products.length) {

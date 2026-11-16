@@ -15,7 +15,7 @@ export const SEO_FILE = 'seo-settings.json';
 export const DEFAULT_SETTINGS = { version: 1, global: {}, pages: {}, redirects: [], robots: { disallow: [] } };
 
 export const ROBOTS_VALUES = ['index, follow', 'noindex, follow', 'noindex, nofollow'];
-export const LIMITS = { title: 120, description: 320, redirects: 200, disallow: 50, pages: 200 };
+export const LIMITS = { title: 120, description: 320, redirects: 200, disallow: 50, pages: 200, intro: 1200, faq: 12, question: 200, answer: 1000 };
 const SITE_HOSTS = ['muslimabaya.com', 'www.muslimabaya.com', 'images.muslimabaya.com'];
 // Paths whose behaviour belongs to the shop itself: never redirected away and never blocked by the SEO Manager.
 const PROTECTED = /^\/(?:$|api(?:\/|$)|admin|product-manager|product-links|stock-analytics|checkout|cdn-cgi(?:\/|$)|robots\.txt$|sitemap\.xml$|seo-settings\.json$|_)/i;
@@ -96,6 +96,20 @@ export function sanitizeSettings(input) {
     if (p.image) {
       const img = siteUrl(p.image);
       if (img) row.image = img; else errors.push(path + ': share image must be an https link on muslimabaya.com.');
+    }
+    // Category pages: a short visible introduction and questions & answers (shown on the page, not only to Google).
+    const intro = cleanText(p.intro, LIMITS.intro);
+    if (intro) row.intro = intro;
+    if (Array.isArray(p.faq)) {
+      const faq = [];
+      p.faq.forEach((item) => {
+        const q = cleanText(item && item.q, LIMITS.question), a = cleanText(item && item.a, LIMITS.answer);
+        if (!q && !a) return;
+        if (!q || !a) { errors.push(path + ': every question needs an answer (and every answer a question).'); return; }
+        if (faq.length >= LIMITS.faq) { errors.push(path + ': at most ' + LIMITS.faq + ' questions.'); return; }
+        faq.push({ q, a });
+      });
+      if (faq.length) row.faq = faq;
     }
     if (Object.keys(row).length) out.pages[path] = row;
   });

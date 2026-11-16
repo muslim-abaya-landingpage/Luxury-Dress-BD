@@ -69,6 +69,32 @@ export function applyPage(html, row, pagePath, global) {
   return out;
 }
 
+const CAT_STYLE = '<style>.ma-cat-intro{margin:12px;max-width:860px;color:#3f3f46;font-size:14px;line-height:1.75}.shop-main>.ma-cat-intro{margin:0 0 16px}.shop-main>.ma-cat-faq{margin:28px 0 4px}.ma-cat-faq{margin:28px 12px 12px;max-width:860px}.ma-cat-faq h2{font-size:18px;margin:0 0 8px}.ma-cat-faq details{border-bottom:1px solid #e7e5e4}.ma-cat-faq summary{cursor:pointer;padding:12px 0;font-weight:600;font-size:15px;list-style:none}.ma-cat-faq summary::-webkit-details-marker{display:none}.ma-cat-faq summary::after{content:"+";float:right;font-weight:400}.ma-cat-faq details[open] summary::after{content:"\\2212"}.ma-cat-faq p{margin:0 0 12px;color:#3f3f46;font-size:14px;line-height:1.7}</style>';
+const CAT_RE = /<!--ma-cat-(intro|ld)-->[\s\S]*?<!--\/ma-cat-\1-->\n?|<!--ma-cat-faq-->[\s\S]*?<!--\/ma-cat-faq-->/g;
+
+/**
+ * Category page introduction + questions & answers from the SEO Manager, written into the server HTML so
+ * visitors and Google read the same text. Visible on the page; the FAQPage JSON-LD repeats only that text.
+ * category-renderer.js moves the introduction under the category heading once the product grid is built.
+ */
+export function applyCategoryContent(html, row) {
+  let out = html.replace(CAT_RE, '');
+  const m = /<body\b[^>]*\bdata-shop-category="([^"]+)"/i.exec(out);
+  if (!m || !/<div id="list">/.test(out)) return out;
+  const cat = esc(m[1]);
+  const intro = row && row.intro;
+  const faq = row && Array.isArray(row.faq) ? row.faq : [];
+  if (intro) out = out.replace('<div id="list">', '<!--ma-cat-intro-->' + CAT_STYLE + '<section class="ma-cat-intro" id="maCatIntro" data-cat="' + cat + '"><p>' + esc(intro) + '</p></section><!--/ma-cat-intro-->\n<div id="list">');
+  if (faq.length) {
+    const box = '<!--ma-cat-faq-->' + (intro ? '' : CAT_STYLE) + '<section class="ma-cat-faq" id="maCatFaq" data-cat="' + cat + '"><h2>সাধারণ প্রশ্ন ও উত্তর</h2>' +
+      faq.map((f) => '<details><summary>' + esc(f.q) + '</summary><p>' + esc(f.a) + '</p></details>').join('') + '</section><!--/ma-cat-faq-->';
+    out = out.replace(/(<div id="list">[\s\S]*?<!--\/ma-static-list--><\/div>)/, '$1' + box);
+    const ld = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) };
+    out = out.replace('</head>', '<!--ma-cat-ld--><script type="application/ld+json">' + JSON.stringify(ld).replace(/</g, '\\u003c') + '</script><!--/ma-cat-ld-->\n</head>');
+  }
+  return out;
+}
+
 // Account / order / error pages: useful to visitors, not search results.
 export const AUTO_NOINDEX = new Set(['/404', '/checkout', '/thank-you', '/success', '/signin', '/signup', '/forgot-password', '/order-track']);
 
@@ -126,11 +152,12 @@ export function run() {
     const row = settings.pages[pg.path];
     let next = html;
     if (row) next = applyPage(next, row, pg.path, settings.global);
+    next = applyCategoryContent(next, row);
     const filled = autoPage(next, pg.path);
     next = filled.html;
     if (pg.path === '/') next = applyGlobal(next, settings.global);
     if (next !== html) { write(pg.file, next); changed++; }
-    report.push({ path: pg.path, file: pg.file, auto, manual: row || null, autoAdded: filled.added });
+    report.push({ path: pg.path, file: pg.file, auto, manual: row || null, autoAdded: filled.added, category: /<body\b[^>]*\bdata-shop-category="/i.test(html) || undefined });
   }
   write('seo-pages.json', JSON.stringify({ version: 1, pages: report }));
   write('_redirects', managedBlock(read('_redirects'), redirectLines(settings)));

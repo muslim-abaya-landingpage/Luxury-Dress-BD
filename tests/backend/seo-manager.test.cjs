@@ -313,3 +313,52 @@ test('/api/seo-google: a switched-off Google API is reported as API_DISABLED wit
   assert.equal(denied.error, 'NO_ACCESS');
   assert.match(denied.detail, /sufficient permissions/);
 });
+
+test('category content: intro + FAQ are kept, cleaned and half-filled questions refused', async () => {
+  const { sanitizeSettings } = await lib();
+  const r = sanitizeSettings({ pages: { '/abaya': { intro: 'Soft <b>Dubai</b> Cherry', faq: [{ q: 'Size?', a: 'See chart' }, { q: 'Only a question', a: '' }, { q: '', a: '' }] } } });
+  assert.equal(r.settings.pages['/abaya'].intro, 'Soft Dubai Cherry');
+  assert.deepEqual(r.settings.pages['/abaya'].faq, [{ q: 'Size?', a: 'See chart' }]);
+  assert.equal(r.ok, false);
+  assert.match(r.errors.join(' '), /needs an answer/);
+});
+
+test('category content: written visibly into the category HTML, once, with matching FAQPage data', async () => {
+  const { applyCategoryContent } = await build();
+  const page = '<html><head><title>x</title></head><body class="shop-page" data-shop-category="abaya"><main class="wrap">\n<div id="list"><!--ma-static-list--><noscript>grid</noscript><!--/ma-static-list--></div>\n</main></body></html>';
+  const row = { intro: 'Dubai Cherry <script>x</script>', faq: [{ q: 'ডেলিভারি চার্জ কত?', a: 'ঢাকায় ৳80' }] };
+  const once = applyCategoryContent(page, row);
+  const twice = applyCategoryContent(once, row);
+  assert.equal(twice, once);
+  assert.match(once, /<section class="ma-cat-intro" id="maCatIntro" data-cat="abaya"><p>Dubai Cherry &lt;script&gt;x&lt;\/script&gt;<\/p><\/section><!--\/ma-cat-intro-->\n<div id="list">/);
+  assert.match(once, /<!--\/ma-static-list--><\/div><!--ma-cat-faq-->[\s\S]*<summary>ডেলিভারি চার্জ কত\?<\/summary><p>ঢাকায় ৳80<\/p>/);
+  const ld = JSON.parse(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(once)[1]);
+  assert.equal(ld['@type'], 'FAQPage');
+  assert.equal(ld.mainEntity[0].acceptedAnswer.text, 'ঢাকায় ৳80');
+  // removing the content in the SEO Manager removes it from the page
+  assert.equal(applyCategoryContent(once, {}), page);
+  // pages that are not category pages are never touched
+  const help = '<html><head></head><body><main><div id="list"></div></main></body></html>';
+  assert.equal(applyCategoryContent(help, row), help);
+});
+
+test('category content: the shop shows it only for its own category, under the heading', () => {
+  const src = fs.readFileSync(path.join(root, 'category-renderer.js'), 'utf8');
+  const start = src.indexOf('var maCatContent = null;');
+  const fn = src.slice(start, src.indexOf('function softSwitchShopCategory', start));
+  const mk = (id, cat) => ({ id, hidden: false, nextSibling: null, getAttribute: (k) => (k === 'data-cat' ? cat : null) });
+  const intro = mk('maCatIntro', 'abaya'), faq = mk('maCatFaq', 'abaya');
+  const moved = [];
+  const top = { nextSibling: 'grid', parentNode: { insertBefore: (el, ref) => { moved.push([el.id, ref]); top.nextSibling = el; } } };
+  const ctx = { document: { getElementById: (id) => ({ maCatIntro: intro, maCatFaq: faq })[id] } };
+  vm.runInNewContext(fn + '; this.sync = syncCategoryContent;', ctx);
+  const main = { lastChild: null, appendChild: (el) => { moved.push([el.id, 'end']); main.lastChild = el; } };
+  const listRoot = { querySelector: (s) => (s === '.shop-top' ? top : s === '.shop-main' ? main : null) };
+  ctx.sync('abaya', listRoot);
+  assert.deepEqual(moved, [['maCatIntro', 'grid'], ['maCatFaq', 'end']]);
+  assert.equal(intro.hidden, false); assert.equal(faq.hidden, false);
+  ctx.sync('hijab', listRoot);
+  assert.equal(intro.hidden, true); assert.equal(faq.hidden, true);
+  ctx.sync('abaya', listRoot);
+  assert.equal(intro.hidden, false);
+});
