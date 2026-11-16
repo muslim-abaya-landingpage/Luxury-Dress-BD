@@ -102,10 +102,93 @@ var SETUP_ACTIONS_ = {
 
 function messengerPageTokenStatus_(props) {
   return Object.keys(MSGR_PAGES).map(function (pageId) {
-    var configured = !!String(props.getProperty('MSGR_PAGE_TOKEN_' + pageId) || '').trim();
-    if (!configured && String(pageId) === MSGR_PAGE_ID) configured = !!String(props.getProperty('MSGR_PAGE_TOKEN') || '').trim();
-    return { id: pageId, name: MSGR_PAGES[pageId], configured: configured };
+    var token = String(props.getProperty('MSGR_PAGE_TOKEN_' + pageId) || '').trim();
+    if (!token && String(pageId) === MSGR_PAGE_ID) token = String(props.getProperty('MSGR_PAGE_TOKEN') || '').trim();
+    var row = { id: pageId, name: MSGR_PAGES[pageId], configured: !!token,
+      source: props.getProperty('MSGR_PAGE_SOURCE_' + pageId) === 'system' ? 'system' : (token ? 'manual' : '') };
+    if (token) row.health = msgrTokenHealth_(pageId, token, false);
+    return row;
   });
+}
+
+/**
+ * Is a Page token still accepted by Facebook, and when does it expire? Asks Facebook's debug_token with the
+ * token itself (nothing else is sent). Cached 6 hours so the Setup page stays fast; fresh=true skips the cache.
+ * Returns {state:'ok'|'warn'|'bad'|'unknown', expires:'never'|'yyyy-MM-dd'|'', message}. Never returns the token.
+ */
+var MSGR_HEALTH_WARN_DAYS_ = 14;
+function msgrTokenHealth_(pageId, token, fresh) {
+  var cache = null, key = 'msgr_health_' + pageId;
+  try { cache = CacheService.getScriptCache(); } catch (e) {}
+  if (cache && !fresh) {
+    var hit = cache.get(key);
+    if (hit) { try { return JSON.parse(hit); } catch (e2) {} }
+  }
+  var out;
+  try {
+    var res = UrlFetchApp.fetch('https://graph.facebook.com/v25.0/debug_token?input_token=' + encodeURIComponent(token), {
+      headers: { Authorization: 'Bearer ' + token }, muteHttpExceptions: true });
+    var body = {};
+    try { body = JSON.parse(res.getContentText() || '{}'); } catch (e3) {}
+    var d = body.data || {};
+    if (res.getResponseCode() !== 200 || body.error || d.is_valid === false) {
+      var why = (d.error && d.error.message) || (body.error && body.error.message) || ('HTTP ' + res.getResponseCode());
+      out = { state: 'bad', expires: '', message: 'বাতিল — Facebook আর এই Token মানছে না (' + String(why).slice(0, 120) + ')' };
+    } else {
+      var at = Number(d.expires_at || 0);
+      if (!at) out = { state: 'ok', expires: 'never', message: 'চালু · মেয়াদ: কখনো শেষ হবে না' };
+      else {
+        var days = Math.floor((at * 1000 - Date.now()) / 86400000);
+        var date = Utilities.formatDate(new Date(at * 1000), 'Asia/Dhaka', 'yyyy-MM-dd');
+        out = days <= MSGR_HEALTH_WARN_DAYS_
+          ? { state: 'warn', expires: date, message: 'মেয়াদ শেষ হবে ' + date + ' (' + Math.max(0, days) + ' দিন বাকি) — নতুন Token দিন' }
+          : { state: 'ok', expires: date, message: 'চালু · মেয়াদ শেষ ' + date };
+      }
+    }
+  } catch (err) {
+    out = { state: 'unknown', expires: '', message: 'এখন যাচাই করা যায়নি' };
+  }
+  if (cache && out.state !== 'unknown') { try { cache.put(key, JSON.stringify(out), 6 * 3600); } catch (e4) {} }
+  return out;
+}
+
+/**
+ * Once a day (called from the hourly siteUptimeCheck): check every Page token. A broken token from the System
+ * User is fetched again automatically; anything still broken or about to expire is sent to e-mail/Telegram once,
+ * and once more when it is fixed. Returns a short summary for the log.
+ */
+function messengerTokenDailyCheck_(props) {
+  var today = Utilities.formatDate(new Date(), 'Asia/Dhaka', 'yyyy-MM-dd');
+  if (props.getProperty('MSGR_HEALTH_DAY') === today) return 'SKIP';
+  props.setProperty('MSGR_HEALTH_DAY', today);
+  var check = function () {
+    var problems = {};
+    messengerPageTokenStatus_(props).forEach(function (p) {
+      if (!p.configured) return;
+      var token = String(props.getProperty('MSGR_PAGE_TOKEN_' + p.id) || '').trim() || (String(p.id) === MSGR_PAGE_ID ? String(props.getProperty('MSGR_PAGE_TOKEN') || '').trim() : '');
+      var h = msgrTokenHealth_(p.id, token, true);
+      if (h.state === 'bad' || h.state === 'warn') problems[p.id] = p.name + ': ' + h.message;
+    });
+    return problems;
+  };
+  var problems = check();
+  if (Object.keys(problems).length && props.getProperty('MSGR_SYSTEM_TOKEN')) {
+    try { msgrRefreshFromSystemToken_(); problems = check(); } catch (e) {}
+  }
+  var before = {};
+  try { before = JSON.parse(props.getProperty('MSGR_HEALTH_ALERTED') || '{}'); } catch (e2) {}
+  var fresh = Object.keys(problems).filter(function (id) { return !before[id]; });
+  var fixed = Object.keys(before).filter(function (id) { return !problems[id]; });
+  if (fresh.length) {
+    monitorNotify_('⚠ Messenger Page Token সমস্যা',
+      fresh.map(function (id) { return problems[id]; }).join('\n') +
+      '\n\nAdmin → Setup → Messenger Page Access Token-এ Page বেছে নতুন Token দিন। এই Page-এর Inbox-এ ততক্ষণ মেসেজ আসবে/যাবে না।');
+  }
+  if (fixed.length) {
+    monitorNotify_('✅ Messenger Page Token আবার ঠিক', fixed.map(function (id) { return MSGR_PAGES[id] || id; }).join(', ') + ' — Inbox আবার চালু।');
+  }
+  props.setProperty('MSGR_HEALTH_ALERTED', JSON.stringify(problems));
+  return Object.keys(problems).length ? 'PROBLEMS ' + Object.keys(problems).length : 'OK';
 }
 
 /** Accept a Page token only after Facebook confirms it belongs to the selected Page. Never return or log the token. */
@@ -137,7 +220,10 @@ function saveMessengerPageToken_(e) {
       return { ok: false, error: 'TOKEN_PAGE_MISMATCH',
         message: 'এই Tokenটি "' + String(body.name || 'অন্য Page') + '" Page-এর। নির্বাচিত Page "' + MSGR_PAGES[pageId] + '"-এর Token ব্যবহার করুন।' };
     }
-    PropertiesService.getScriptProperties().setProperty('MSGR_PAGE_TOKEN_' + pageId, accessToken);
+    var props = PropertiesService.getScriptProperties();
+    props.setProperty('MSGR_PAGE_TOKEN_' + pageId, accessToken);
+    props.setProperty('MSGR_PAGE_SOURCE_' + pageId, 'manual');
+    try { CacheService.getScriptCache().remove('msgr_health_' + pageId); } catch (cacheErr) {}
     return { ok: true, pageId: pageId, pageName: MSGR_PAGES[pageId],
       message: MSGR_PAGES[pageId] + ' Page-এর Token যাচাই করে নিরাপদে সংরক্ষণ করা হয়েছে।' };
   } catch (err) {
@@ -185,7 +271,7 @@ function msgrStoreSystemPages_(token, found) {
   var props = PropertiesService.getScriptProperties();
   var saved = [], missing = [];
   Object.keys(MSGR_PAGES).forEach(function (pid) {
-    if (found[pid]) { props.setProperty('MSGR_PAGE_TOKEN_' + pid, found[pid]); saved.push(MSGR_PAGES[pid]); }
+    if (found[pid]) { props.setProperty('MSGR_PAGE_TOKEN_' + pid, found[pid]); props.setProperty('MSGR_PAGE_SOURCE_' + pid, 'system'); saved.push(MSGR_PAGES[pid]); }
     else missing.push(MSGR_PAGES[pid]);
   });
   if (saved.length) props.setProperty('MSGR_SYSTEM_TOKEN', token);

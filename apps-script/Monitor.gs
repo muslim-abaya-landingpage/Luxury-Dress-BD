@@ -37,7 +37,9 @@ function siteUptimeCheck() {
   try { backup = ensureRecentBackup_(); } catch (backupErr) { backup = 'ERROR'; }
   var edge = '';
   try { edge = edgeHealthCheck_(props); } catch (edgeErr) { edge = 'ERROR'; }
-  var result = { ok: true, failures: failures, streak: streak, notified: notified, backup: backup, edge: edge };
+  var messenger = '';
+  try { messenger = typeof messengerTokenDailyCheck_ === 'function' ? messengerTokenDailyCheck_(props) : ''; } catch (msgrErr) { messenger = 'ERROR'; }
+  var result = { ok: true, failures: failures, streak: streak, notified: notified, backup: backup, edge: edge, messenger: messenger };
   console.log('UPTIME ' + JSON.stringify(result));
   return result;
 }

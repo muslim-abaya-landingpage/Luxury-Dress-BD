@@ -76,3 +76,58 @@ test('refresh fetches the Page tokens again from the stored system token', () =>
   assert.match(ctx.refresh(), /নতুন করে আনা হয়েছে: Muslim Abaya, Luluatun Noor/);
   assert.equal(props.MSGR_PAGE_TOKEN_381729145014885, 'PAGE_MA');
 });
+
+function loadHealth(graph, props) {
+  const alerts = []; const cache = {};
+  const ctx = {
+    JSON, String, Number, Object, Date, Math, encodeURIComponent,
+    MSGR_PAGE_ID: '964928770039259',
+    PropertiesService: { getScriptProperties: () => ({ getProperty: (k) => (k in props ? props[k] : null), setProperty: (k, v) => { props[k] = v; } }) },
+    CacheService: { getScriptCache: () => ({ get: (k) => cache[k] || null, put: (k, v) => { cache[k] = v; }, remove: (k) => { delete cache[k]; } }) },
+    Utilities: { formatDate: (d, tz, f) => (f === 'yyyy-MM-dd' ? new Date(d.getTime() + 6 * 3600000).toISOString().slice(0, 10) : d.toISOString()) },
+    UrlFetchApp: { fetch: (url, opt) => { const r = graph(url, opt.headers.Authorization.replace('Bearer ', '')); return { getResponseCode: () => r[0], getContentText: () => JSON.stringify(r[1]) }; } },
+    monitorNotify_: (subject, body) => alerts.push([subject, body]),
+  };
+  vm.runInNewContext(pagesBlock + '\n' + ['msgrGraphGet_', 'msgrPagesFromSystemToken_', 'msgrStoreSystemPages_', 'msgrRefreshFromSystemToken_', 'messengerPageTokenStatus_', 'msgrTokenHealth_', 'messengerTokenDailyCheck_'].map((n) => pick(setup, n)).join('\n') +
+    '\nvar MSGR_HEALTH_WARN_DAYS_ = 14;\nthis.status = messengerPageTokenStatus_; this.daily = messengerTokenDailyCheck_;', ctx);
+  return { ctx, alerts, props };
+}
+
+test('token health: never-expiring, expiring soon and revoked Page tokens are shown without revealing them', () => {
+  const soon = Math.floor(Date.now() / 1000) + 5 * 86400;
+  const props = { MSGR_PAGE_TOKEN_381729145014885: 'T_NEVER', MSGR_PAGE_SOURCE_381729145014885: 'manual', MSGR_PAGE_TOKEN_1373328422533938: 'T_SOON', MSGR_PAGE_TOKEN_1343804848819482: 'T_DEAD', MSGR_PAGE_SOURCE_1343804848819482: 'system' };
+  const { ctx } = loadHealth((url, tok) => (tok === 'T_DEAD' ? [400, { error: { message: 'Session has expired' } }] : [200, { data: { is_valid: true, expires_at: tok === 'T_SOON' ? soon : 0 } }]), props);
+  const rows = Object.fromEntries(ctx.status({ getProperty: (k) => props[k] || null }).map((r) => [r.id, r]));
+  assert.equal(rows['381729145014885'].health.state, 'ok'); assert.equal(rows['381729145014885'].health.expires, 'never'); assert.equal(rows['381729145014885'].source, 'manual');
+  assert.equal(rows['1373328422533938'].health.state, 'warn');
+  assert.equal(rows['1343804848819482'].health.state, 'bad'); assert.equal(rows['1343804848819482'].source, 'system');
+  assert.equal(rows['258170054039575'].configured, false);
+  assert.doesNotMatch(JSON.stringify(rows), /T_NEVER|T_SOON|T_DEAD/);
+});
+
+test('daily check: alerts once for a broken token, not again the same day or while still broken, and says when fixed', () => {
+  const props = { MSGR_PAGE_TOKEN_381729145014885: 'T_DEAD' };
+  let dead = true;
+  const { ctx, alerts } = loadHealth((url, tok) => (dead ? [400, { error: { message: 'Session has expired' } }] : [200, { data: { is_valid: true, expires_at: 0 } }]), props);
+  const p = { getProperty: (k) => (k in props ? props[k] : null), setProperty: (k, v) => { props[k] = v; } };
+  assert.equal(ctx.daily(p), 'PROBLEMS 1');
+  assert.equal(alerts.length, 1); assert.match(alerts[0][0], /Token সমস্যা/); assert.match(alerts[0][1], /Muslim Abaya: বাতিল/);
+  assert.equal(ctx.daily(p), 'SKIP'); // same day
+  props.MSGR_HEALTH_DAY = 'yesterday';
+  ctx.daily(p); assert.equal(alerts.length, 1); // still broken: no repeat
+  dead = false; props.MSGR_HEALTH_DAY = 'yesterday';
+  assert.equal(ctx.daily(p), 'OK'); assert.equal(alerts.length, 2); assert.match(alerts[1][0], /আবার ঠিক/);
+});
+
+test('daily check: a broken System-User Page token is fetched again before anyone is alerted', () => {
+  const props = { MSGR_PAGE_TOKEN_381729145014885: 'OLD', MSGR_SYSTEM_TOKEN: 'SYS' };
+  const { ctx, alerts } = loadHealth((url, tok) => {
+    if (/debug_token/.test(url)) return tok === 'OLD' ? [400, { error: { message: 'expired' } }] : [200, { data: { is_valid: true, expires_at: 0 } }];
+    if (/\/me\?fields/.test(url)) return [200, { id: '1', name: 'bot' }];
+    if (/me\/accounts/.test(url)) return [200, { data: [{ id: '381729145014885', access_token: 'NEW' }] }];
+    return [404, {}];
+  }, props);
+  assert.equal(ctx.daily({ getProperty: (k) => (k in props ? props[k] : null), setProperty: (k, v) => { props[k] = v; } }), 'OK');
+  assert.equal(props.MSGR_PAGE_TOKEN_381729145014885, 'NEW');
+  assert.equal(alerts.length, 0);
+});

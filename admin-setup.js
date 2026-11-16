@@ -92,8 +92,19 @@
       copy.appendChild(title);
       copy.appendChild(id);
       var state = document.createElement("span");
-      state.className = "st-msgr-state" + (p.configured ? " is-ok" : "");
-      state.textContent = p.configured ? "✓ সংরক্ষিত" : "Token নেই";
+      var h = p.health || null;
+      var level = !p.configured ? "bad" : h ? h.state : "ok";
+      state.className = "st-msgr-state" + (level === "ok" ? " is-ok" : level === "warn" || level === "unknown" ? " is-warn" : "");
+      state.textContent = !p.configured ? "Token নেই"
+        : !h ? "✓ সংরক্ষিত"
+        : h.state === "ok" ? (h.expires === "never" ? "✓ চালু · মেয়াদহীন" : "✓ চালু · মেয়াদ " + h.expires)
+        : h.state === "warn" ? "⚠ মেয়াদ শেষ " + h.expires
+        : h.state === "bad" ? "✕ বাতিল — নতুন Token দিন" : "? যাচাই করা যায়নি";
+      if (h && h.message) state.title = h.message;
+      var src = document.createElement("small");
+      src.className = "st-msgr-source";
+      src.textContent = p.source === "system" ? "System User (কারো লগইনের ওপর নির্ভর করে না)" : p.configured ? "ব্যক্তিগত প্রোফাইলের Token" : "";
+      if (src.textContent) copy.appendChild(src);
       card.appendChild(avatar);
       card.appendChild(copy);
       card.appendChild(state);
