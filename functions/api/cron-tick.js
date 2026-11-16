@@ -57,9 +57,9 @@ export async function commitRebuildTrigger(env, fetchImpl, reason, now) {
   const headers = { Authorization: 'Bearer ' + env.GITHUB_TOKEN, Accept: 'application/vnd.github+json', 'User-Agent': 'MuslimAbaya-Cron', 'X-GitHub-Api-Version': '2022-11-28' };
   const cur = await fetchImpl(base + '?ref=main', { headers });
   const sha = cur.ok ? (await cur.json()).sha : undefined;
-  const text = 'Scheduled rebuild ' + new Date(now).toISOString() + ' — ' + reason + '\n';
+  const text = 'Rebuild ' + new Date(now).toISOString() + ' — ' + reason + '\n';
   const bytes = new TextEncoder().encode(text); let bin = ''; bytes.forEach((b) => { bin += String.fromCharCode(b); });
-  const res = await fetchImpl(base, { method: 'PUT', headers: { ...headers, 'Content-Type': 'application/json' }, body: JSON.stringify({ message: 'Scheduled rebuild: ' + reason.slice(0, 120), content: btoa(bin), branch: 'main', ...(sha ? { sha } : {}) }) });
+  const res = await fetchImpl(base, { method: 'PUT', headers: { ...headers, 'Content-Type': 'application/json' }, body: JSON.stringify({ message: 'Rebuild: ' + reason.slice(0, 120), content: btoa(bin), branch: 'main', ...(sha ? { sha } : {}) }) });
   return res.ok ? 'committed' : 'COMMIT_' + res.status;
 }
 

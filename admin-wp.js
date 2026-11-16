@@ -28,6 +28,8 @@
         '<li class="wp-ab-new"><a href="admin-order-new.html" aria-haspopup="true"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M11 4h2v7h7v2h-7v7h-2v-7H4v-2h7z"/></svg><span>New</span></a>' +
           '<ul class="wp-ab-sub"><li><a href="admin-order-new.html">Order</a></li><li><a href="product-manager.html?action=new">Product</a></li></ul></li>' +
         '<li class="wp-ab-link"><a href="admin-orders.html">Orders</a></li>' +
+        '<li class="wp-ab-purge"><button type="button" aria-haspopup="true" title="Purge cache"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 2 4 12l8 10 8-10zm0 3.2L17.4 12 12 18.8 6.6 12z"/></svg><span>Purge</span></button>' +
+          '<ul class="wp-ab-sub"><li><button type="button" id="wpAbPurgeAll">Purge All</button></li><li><button type="button" id="wpAbPurgeLocal">Purge this browser</button></li></ul></li>' +
       '</ul>' +
       '<ul class="wp-adminbar-right">' +
         '<li class="wp-ab-user"><span>Howdy' + (name ? ', ' + esc(name) : '') + '</span><span class="wp-ab-avatar" aria-hidden="true"></span>' +
@@ -38,12 +40,61 @@
       var btn = byId('admMenuBtn') || byId('pnMenuBtn') || byId('menuBtn');
       if (btn) btn.click();
     });
+    byId('wpAbPurgeAll').addEventListener('click', purgeAll);
+    byId('wpAbPurgeLocal').addEventListener('click', purgeBrowser);
     byId('wpAbLogout').addEventListener('click', function () {
       var out = byId('admLogout');
       if (out) { out.click(); return; }
       try { if (window.MaAdmin && window.MaAdmin.logout) window.MaAdmin.logout(); } catch (e) {}
       location.href = 'admin-login.html';
     });
+  }
+
+  /* ---------- Purge (like LiteSpeed Cache's admin-bar menu) ---------- */
+  function notice(text, kind) {
+    var box = byId('wpAbNotice');
+    if (!box) { box = doc.createElement('div'); box.id = 'wpAbNotice'; box.setAttribute('role', 'status'); doc.body.appendChild(box); }
+    box.className = 'wp-ab-notice' + (kind ? ' is-' + kind : '');
+    box.textContent = text;
+    clearTimeout(notice.t);
+    notice.t = setTimeout(function () { box.className = 'wp-ab-notice is-hidden'; }, kind === 'busy' ? 60000 : 9000);
+  }
+  var purging = false;
+  // Whole site: a fresh build + deployment from the newest products and settings (2–4 minutes).
+  function closeMenus() { try { if (doc.activeElement && doc.activeElement.blur) doc.activeElement.blur(); } catch (e) {} }
+  function purgeAll() {
+    closeMenus();
+    if (purging) return;
+    var s = null;
+    try { s = window.MaAdmin && window.MaAdmin.getSession && window.MaAdmin.getSession(); } catch (e) {}
+    if (!s || !s.token) { notice('আবার লগইন করুন, তারপর Purge All চাপুন।', 'error'); return; }
+    purging = true;
+    notice('Purge All শুরু হচ্ছে…', 'busy');
+    fetch('/api/admin-purge', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ Token: s.token }) })
+      .then(function (r) { return r.json().catch(function () { return { ok: false, error: 'HTTP_' + r.status }; }); })
+      .then(function (res) {
+        if (res.ok) notice('Purge All শুরু হয়েছে। পুরো সাইট নতুন করে তৈরি হচ্ছে — ২–৪ মিনিট পর সব পেজে সর্বশেষ সংস্করণ দেখাবে।', 'ok');
+        else if (res.error === 'TOO_SOON') notice('একটু আগেই Purge All চালানো হয়েছে। ' + Math.ceil((res.retryAfter || 60) / 60) + ' মিনিট পর আবার চেষ্টা করুন।', 'error');
+        else if (res.error === 'NOT_LOGGED_IN' || res.error === 'OWNER_ONLY') notice('শুধু মালিকের অ্যাকাউন্ট Purge All চালাতে পারে। আবার লগইন করে দেখুন।', 'error');
+        else notice('Purge All চালু করা যায়নি (' + (res.error || 'error') + ')। কিছুক্ষণ পর আবার চেষ্টা করুন।', 'error');
+      })
+      .catch(function () { notice('ইন্টারনেট সংযোগ পাওয়া যায়নি। আবার চেষ্টা করুন।', 'error'); })
+      .then(function () { purging = false; });
+  }
+  // This browser only: saved copies the admin/site keep locally. Login, unsaved work and preferences stay.
+  var LOCAL_CACHE_KEYS = ['ma_public_stock_status_v1', 'ma_api_health_v1', 'ma_admin_edge_off'];
+  function purgeBrowser() {
+    closeMenus();
+    notice('এই ব্রাউজারের cache মোছা হচ্ছে…', 'busy');
+    LOCAL_CACHE_KEYS.forEach(function (k) { try { localStorage.removeItem(k); } catch (e) {} try { sessionStorage.removeItem(k); } catch (e2) {} });
+    var jobs = [];
+    try { if (window.caches && caches.keys) jobs.push(caches.keys().then(function (keys) { return Promise.all(keys.map(function (k) { return caches.delete(k); })); })); } catch (e3) {}
+    try {
+      if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+        jobs.push(navigator.serviceWorker.getRegistrations().then(function (regs) { return Promise.all(regs.map(function (r) { return r.update().catch(function () {}); })); }));
+      }
+    } catch (e4) {}
+    Promise.all(jobs).catch(function () {}).then(function () { location.reload(); });
   }
 
   function tuneSidebar() {

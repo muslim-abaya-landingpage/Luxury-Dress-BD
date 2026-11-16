@@ -94,7 +94,7 @@ test('if the token may not start workflows, a tiny commit makes Cloudflare rebui
   const put = calls.find((c) => c[0] === 'PUT');
   assert.match(put[1], /contents\/\.rebuild-trigger$/);
   assert.equal(put[2].sha, 'abc');
-  assert.match(put[2].message, /^Scheduled rebuild: abaya\/A1: sale ended 2026-11-15/);
+  assert.match(put[2].message, /^Rebuild: abaya\/A1: sale ended 2026-11-15/);
 });
 
 test('shared check: sale boundaries and publish window; schedule.json keeps only dates', async () => {
