@@ -199,6 +199,17 @@
     if (btn && !btn.disabled) runAction(btn);
   });
 
+  var messengerPageSelect = byId("stMessengerPage");
+  function syncMessengerTokenLabel() {
+    var system = messengerPageSelect && messengerPageSelect.value === "system";
+    var label = document.querySelector('label[for="stMessengerAccessToken"]');
+    var help = byId("stMessengerTokenHelp");
+    var input = byId("stMessengerAccessToken");
+    if (label) label.textContent = system ? "System User Token" : "Page Access Token";
+    if (input) input.placeholder = system ? "Meta Business System User Token পেস্ট করুন" : "Facebook Page Access Token পেস্ট করুন";
+    if (help) help.textContent = system ? "Business Settings → Users → System users → Generate token (মেয়াদ: Never) থেকে কপি করা Token দিন। একটা Token দিয়েই সব Page সংযুক্ত হবে।" : "Meta-র Generate Access Token থেকে কপি করা সম্পূর্ণ Token দিন।";
+  }
+  if (messengerPageSelect) { messengerPageSelect.addEventListener("change", syncMessengerTokenLabel); syncMessengerTokenLabel(); }
   var messengerTokenForm = byId("stMessengerTokenForm");
   if (messengerTokenForm) messengerTokenForm.addEventListener("submit", saveMessengerToken);
 

@@ -179,6 +179,7 @@
             <form id="stMessengerTokenForm" class="st-msgr-form" autocomplete="off">
               <div class="st-msgr-field"><label for="stMessengerPage">Facebook Page</label>
                 <select id="stMessengerPage" name="pageId" required>
+                  <option value="system" selected>সব Page একসাথে — System User Token (মেয়াদহীন)</option>
                   <option value="381729145014885">Muslim Abaya</option>
                   <option value="964928770039259">Luxury Dress BD</option>
                   <option value="258170054039575">Luxury Dress</option>
@@ -188,7 +189,7 @@
               </div>
               <div class="st-msgr-field st-msgr-token-field"><label for="stMessengerAccessToken">Page Access Token</label>
                 <input id="stMessengerAccessToken" name="accessToken" type="password" autocomplete="new-password" placeholder="Facebook Page Access Token পেস্ট করুন" required minlength="20" maxlength="5000" spellcheck="false">
-                <small>Meta-র Generate Access Token থেকে কপি করা সম্পূর্ণ Token দিন।</small>
+                <small id="stMessengerTokenHelp">Business Settings → Users → System users → Generate token (মেয়াদ: Never) থেকে কপি করা Token দিন। একটা Token দিয়েই সব Page সংযুক্ত হবে।</small>
               </div>
               <button type="submit" class="adm-btn adm-btn-primary" id="stMessengerTokenSave">✓ Token যাচাই করে Save করুন</button>
             </form>
@@ -203,6 +204,7 @@
             <button type="button" class="adm-btn adm-btn-secondary" data-action="sendDailySummaryNow">গতকালের সারাংশ এখনই পাঠান</button>
             <button type="button" class="adm-btn adm-btn-secondary" data-action="messengerReceipts">Messenger: “দেখেছে” চালু করুন</button>
             <button type="button" class="adm-btn adm-btn-secondary" data-action="messengerProfileCheck">Messenger: কাস্টমারের নাম/ছবি পরীক্ষা</button>
+            <button type="button" class="adm-btn adm-btn-secondary" data-action="messengerRefreshTokens">Messenger: System User থেকে Page token নতুন করে আনুন</button>
           </div>
           <p class="st-result" id="stResult" role="status" aria-live="polite"></p>
         </section>

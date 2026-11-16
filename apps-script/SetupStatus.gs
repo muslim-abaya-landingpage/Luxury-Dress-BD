@@ -96,7 +96,8 @@ var SETUP_ACTIONS_ = {
   installBackup: function () { setupDailySafetyBackupTriggerInternal_(); return 'প্রতিদিনের ব্যাকআপ চালু হয়েছে।'; },
   installSteadfastSync: function () { setupSteadfastStatusSyncTriggerInternal_(); return 'Steadfast স্ট্যাটাস আপডেট চালু হয়েছে।'; },
   messengerReceipts: function () { return 'Messenger “দেখেছে” — ' + msgrSubscribeReceipts_().join(' · '); },
-  messengerProfileCheck: function () { return msgrProfileCheck_(); }
+  messengerProfileCheck: function () { return msgrProfileCheck_(); },
+  messengerRefreshTokens: function () { return msgrRefreshFromSystemToken_(); }
 };
 
 function messengerPageTokenStatus_(props) {
@@ -115,6 +116,7 @@ function saveMessengerPageToken_(e) {
   if (owner) return owner;
   var pageId = String(param_(e, 'PageId') || '').trim();
   var accessToken = String(param_(e, 'AccessToken') || '').trim();
+  if (pageId === 'system') return saveMessengerSystemToken_(accessToken);
   if (!Object.prototype.hasOwnProperty.call(MSGR_PAGES, pageId)) {
     return { ok: false, error: 'INVALID_PAGE', message: 'তালিকার একটি Facebook Page নির্বাচন করুন।' };
   }
@@ -141,6 +143,82 @@ function saveMessengerPageToken_(e) {
   } catch (err) {
     return { ok: false, error: 'TOKEN_VERIFY_FAILED', message: 'Facebook-এর সঙ্গে যাচাই করা যায়নি: ' + String(err && err.message || err).slice(0, 160) };
   }
+}
+
+/**
+ * One Meta Business "System User" token (made with expiry "Never") for all Pages: Facebook gives back each
+ * assigned Page's own token, which also does not expire and does not depend on anyone's personal login.
+ * The system token is kept so the Page tokens can be fetched again later (Setup → "Messenger token নতুন করে আনুন").
+ * Never returns or logs a token.
+ */
+function msgrGraphGet_(path, token) {
+  var res = UrlFetchApp.fetch('https://graph.facebook.com/v25.0/' + path, { headers: { Authorization: 'Bearer ' + token }, muteHttpExceptions: true });
+  var body = {};
+  try { body = JSON.parse(res.getContentText() || '{}'); } catch (err) {}
+  return { status: res.getResponseCode(), body: body };
+}
+
+function msgrPagesFromSystemToken_(token) {
+  var me = msgrGraphGet_('me?fields=id,name', token);
+  if (me.status !== 200 || me.body.error || !me.body.id) {
+    return { ok: false, error: 'FACEBOOK_TOKEN_INVALID', message: String((me.body.error && me.body.error.message) || 'Facebook Token যাচাই করতে পারেনি।').slice(0, 220) };
+  }
+  if (Object.prototype.hasOwnProperty.call(MSGR_PAGES, String(me.body.id))) {
+    return { ok: false, error: 'NOT_SYSTEM_TOKEN', message: 'এটা একটি Page-এর Token। এখানে Business Settings → System Users থেকে বানানো Token দিন, অথবা উপরের তালিকা থেকে সেই Page বেছে নিন।' };
+  }
+  var list = msgrGraphGet_('me/accounts?fields=id,name,access_token&limit=100', token);
+  if (list.status !== 200 || list.body.error) {
+    return { ok: false, error: 'PAGES_NOT_READABLE', message: 'Page-এর তালিকা পাওয়া যায়নি: ' + String((list.body.error && list.body.error.message) || list.status).slice(0, 200) };
+  }
+  var found = {};
+  (list.body.data || []).forEach(function (p) { if (p && p.id && p.access_token) found[String(p.id)] = String(p.access_token); });
+  var expires = '';
+  var dbg = msgrGraphGet_('debug_token?input_token=' + encodeURIComponent(token), token);
+  if (dbg.status === 200 && dbg.body.data) {
+    var at = Number(dbg.body.data.expires_at || 0);
+    expires = at > 0 ? Utilities.formatDate(new Date(at * 1000), 'Asia/Dhaka', 'yyyy-MM-dd') : 'never';
+  }
+  return { ok: true, pages: found, expires: expires };
+}
+
+function msgrStoreSystemPages_(token, found) {
+  var props = PropertiesService.getScriptProperties();
+  var saved = [], missing = [];
+  Object.keys(MSGR_PAGES).forEach(function (pid) {
+    if (found[pid]) { props.setProperty('MSGR_PAGE_TOKEN_' + pid, found[pid]); saved.push(MSGR_PAGES[pid]); }
+    else missing.push(MSGR_PAGES[pid]);
+  });
+  if (saved.length) props.setProperty('MSGR_SYSTEM_TOKEN', token);
+  return { saved: saved, missing: missing };
+}
+
+function saveMessengerSystemToken_(token) {
+  if (token.length < 20 || token.length > 5000 || /\s/.test(token)) {
+    return { ok: false, error: 'INVALID_TOKEN_FORMAT', message: 'সম্পূর্ণ System User Token পেস্ট করুন; শুরু বা শেষে অতিরিক্ত ফাঁকা স্থান রাখবেন না।' };
+  }
+  try {
+    var r = msgrPagesFromSystemToken_(token);
+    if (!r.ok) return r;
+    var s = msgrStoreSystemPages_(token, r.pages);
+    if (!s.saved.length) {
+      return { ok: false, error: 'NO_PAGES_ASSIGNED', message: 'Token ঠিক আছে, কিন্তু তালিকার কোনো Page এই System User-কে দেওয়া হয়নি। Business Settings → System Users → Assign assets থেকে Page-গুলো দিন (Full control)।' };
+    }
+    return { ok: true, pageId: 'system', saved: s.saved, missing: s.missing, expires: r.expires,
+      message: 'System User Token থেকে ' + s.saved.length + 'টি Page-এর Token সংরক্ষণ হয়েছে: ' + s.saved.join(', ') + '।' +
+        (s.missing.length ? ' পাওয়া যায়নি: ' + s.missing.join(', ') + '।' : '') +
+        (r.expires === 'never' ? ' মেয়াদ: কখনো শেষ হবে না।' : r.expires ? ' মেয়াদ শেষ: ' + r.expires + ' — মেয়াদ "Never" দিয়ে নতুন Token বানান।' : '') };
+  } catch (err) {
+    return { ok: false, error: 'TOKEN_VERIFY_FAILED', message: 'Facebook-এর সঙ্গে যাচাই করা যায়নি: ' + String(err && err.message || err).slice(0, 160) };
+  }
+}
+
+function msgrRefreshFromSystemToken_() {
+  var token = PropertiesService.getScriptProperties().getProperty('MSGR_SYSTEM_TOKEN');
+  if (!token) return 'System User Token বসানো নেই — Messenger Page Access Token অংশে "সব Page একসাথে" বেছে Token দিন।';
+  var r = msgrPagesFromSystemToken_(token);
+  if (!r.ok) return 'হয়নি — ' + r.message;
+  var s = msgrStoreSystemPages_(token, r.pages);
+  return 'নতুন করে আনা হয়েছে: ' + (s.saved.join(', ') || 'কোনো Page না') + (s.missing.length ? ' · পাওয়া যায়নি: ' + s.missing.join(', ') : '');
 }
 
 function runAdminSetupAction_(e) {
