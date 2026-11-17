@@ -43,6 +43,9 @@
 .st-msgr-state{grid-area:state;justify-self:start;display:inline-flex;align-items:center;gap:4px;padding:5px 9px;border-radius:20px;font-size:10px;font-weight:700;background:#fff1f0;color:#b42318}
 .st-msgr-state.is-ok{background:#eaf8ef;color:#18794e}
 .st-msgr-state.is-warn{background:#fff7e6;color:#9a5b00}
+.st-ghkey{display:grid;gap:8px;margin:14px 0 4px;padding:14px;border:1px solid #e5e7eb;background:#fafafa}
+.st-ghkey textarea{width:100%;font:12px/1.4 ui-monospace,Consolas,monospace;padding:8px;border:1px solid #d1d5db;resize:vertical}
+.st-ghkey button{justify-self:start}
 .st-msgr-source{display:block;margin-top:4px;font-size:11px;color:#6b7280}
 .st-msgr-form-wrap{padding:17px;border:1px solid #e0e7f0;border-radius:15px;background:#fff}
 .st-msgr-form{display:grid;grid-template-columns:minmax(180px,.8fr) minmax(220px,1.4fr) auto;align-items:end;gap:12px}
@@ -156,6 +159,12 @@
             </tbody>
           </table>
           </div>
+          <form id="stGhKeyForm" class="st-ghkey" autocomplete="off">
+            <label for="stGhKey"><b>GitHub App key (.pem)</b> — বিকল্প পথের সেভকেও মেয়াদহীন করতে একবার দিন</label>
+            <textarea id="stGhKey" rows="4" spellcheck="false" placeholder="Downloads-এর muslim-abaya-site-bot….private-key.pem ফাইলটা Notepad-এ খুলে পুরো লেখা (-----BEGIN … থেকে -----END … পর্যন্ত) পেস্ট করুন"></textarea>
+            <button type="submit" id="stGhKeySave" class="adm-btn">Key যাচাই করে Save করুন</button>
+            <span id="stGhKeyResult" class="st-result" role="status"></span>
+          </form>
           <details class="st-howto">
             <summary>GitHub টোকেন বদলানোর ধাপ (মেয়াদ শেষ হলে বা ভুলে মুছে গেলে)</summary>
             <ol>

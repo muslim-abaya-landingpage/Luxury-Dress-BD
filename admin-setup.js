@@ -137,6 +137,24 @@
     });
   }
 
+  function saveGithubKey(event) {
+    event.preventDefault();
+    var input = byId("stGhKey"), button = byId("stGhKeySave"), out = byId("stGhKeyResult");
+    var key = input.value.trim();
+    if (!key) return;
+    button.disabled = true; button.textContent = "যাচাই হচ্ছে…";
+    out.className = "st-result"; out.textContent = "";
+    MaAdmin.saveGithubAppKey(key).then(function (res) {
+      input.value = "";
+      out.className = "st-result is-ok";
+      out.textContent = "✓ " + (res.message || "GitHub App সংযুক্ত হয়েছে।");
+      load();
+    }).catch(function (err) {
+      out.className = "st-result is-bad";
+      out.textContent = "× " + String(err && err.message || err);
+    }).finally(function () { button.disabled = false; button.textContent = "Key যাচাই করে Save করুন"; });
+  }
+
   function load() {
     if (busy) return;
     busy = true;
@@ -223,6 +241,8 @@
   if (messengerPageSelect) { messengerPageSelect.addEventListener("change", syncMessengerTokenLabel); syncMessengerTokenLabel(); }
   var messengerTokenForm = byId("stMessengerTokenForm");
   if (messengerTokenForm) messengerTokenForm.addEventListener("submit", saveMessengerToken);
+  var ghKeyForm = byId("stGhKeyForm");
+  if (ghKeyForm) ghKeyForm.addEventListener("submit", saveGithubKey);
 
   MaAdminShell.start(function () { load(); });
 })();

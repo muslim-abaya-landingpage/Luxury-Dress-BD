@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8"><title>Apps Script কোড</title><style>body { font-family: system-ui, sans-serif; margin: 16px; max-width: 960px; } textarea { width: 100%; height: 52vh; font: 11px Consolas, monospace; } button { margin-top: 10px; padding: 12px 20px; font-size: 15px; cursor: pointer; } .step { background: #fff8e1; border: 1px solid #f0d58a; padding: 10px 14px; border-radius: 6px; }</style></head><body><h1>Apps Script কোড (সম্পূর্ণ project)</h1><p>এই page-এ canonical project-এর সব source file আছে: Code.gs, AdminOrders.gs, FixSheetHeaders.gs, ActivityLog.gs, AdminPasswordRecovery.gs, BoostAutoDate.gs, CatalogPublish.gs, CourierIntegrationAudit.gs, DataFixes.gs, Fix-doGet.gs, InstallDateTrigger.gs, LiveStock.gs, Monitor.gs, Operations.gs, OrderSync.gs, ProductPicker.html, ProductProfit.gs, SetupStatus.gs, SizeCore.gs</p><div class="step"><p><strong>গুরুত্বপূর্ণ:</strong> Admin dashboard-এর সব API চালাতে নিচের সব ফাইল একই Apps Script project-এ রাখতে হবে। <code>.gs</code> ফাইলের জন্য <strong>＋ → Script</strong>, আর <code>.html</code> ফাইলের জন্য <strong>＋ → HTML</strong> ব্যবহার করুন; একই নাম রেখে প্রতিটি কোড সংশ্লিষ্ট ফাইলে কপি করুন। একাধিক <code>doGet</code> function রাখবেন না—canonical router শুধু <code>Code.gs</code>-এ।</p><ol><li>প্রতিটি source file-এর নাম অনুযায়ী Apps Script file তৈরি বা update করুন।</li><li><strong>Save</strong> চাপুন এবং <code>npm run test:backend</code> parity test পাস হয়েছে কি নিশ্চিত করুন।</li><li><strong>Deploy → Manage deployments → Edit → Version: New version → Deploy</strong> করে বিদ্যমান Web App URL রাখুন।</li></ol></div><h2>1. Code.gs</h2>
+<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8"><title>Apps Script কোড</title><style>body { font-family: system-ui, sans-serif; margin: 16px; max-width: 960px; } textarea { width: 100%; height: 52vh; font: 11px Consolas, monospace; } button { margin-top: 10px; padding: 12px 20px; font-size: 15px; cursor: pointer; } .step { background: #fff8e1; border: 1px solid #f0d58a; padding: 10px 14px; border-radius: 6px; }</style></head><body><h1>Apps Script কোড (সম্পূর্ণ project)</h1><p>এই page-এ canonical project-এর সব source file আছে: Code.gs, AdminOrders.gs, FixSheetHeaders.gs, ActivityLog.gs, AdminPasswordRecovery.gs, BoostAutoDate.gs, CatalogPublish.gs, CourierIntegrationAudit.gs, DataFixes.gs, Fix-doGet.gs, GithubApp.gs, InstallDateTrigger.gs, LiveStock.gs, Monitor.gs, Operations.gs, OrderSync.gs, ProductPicker.html, ProductProfit.gs, SetupStatus.gs, SizeCore.gs</p><div class="step"><p><strong>গুরুত্বপূর্ণ:</strong> Admin dashboard-এর সব API চালাতে নিচের সব ফাইল একই Apps Script project-এ রাখতে হবে। <code>.gs</code> ফাইলের জন্য <strong>＋ → Script</strong>, আর <code>.html</code> ফাইলের জন্য <strong>＋ → HTML</strong> ব্যবহার করুন; একই নাম রেখে প্রতিটি কোড সংশ্লিষ্ট ফাইলে কপি করুন। একাধিক <code>doGet</code> function রাখবেন না—canonical router শুধু <code>Code.gs</code>-এ।</p><ol><li>প্রতিটি source file-এর নাম অনুযায়ী Apps Script file তৈরি বা update করুন।</li><li><strong>Save</strong> চাপুন এবং <code>npm run test:backend</code> parity test পাস হয়েছে কি নিশ্চিত করুন।</li><li><strong>Deploy → Manage deployments → Edit → Version: New version → Deploy</strong> করে বিদ্যমান Web App URL রাখুন।</li></ol></div><h2>1. Code.gs</h2>
 <textarea id="codeBox" readonly>/**
  * Muslim Abaya — সম্পূর্ণ Web App (এক ফাইলে পেস্ট করুন)
  * Code.gs → Ctrl+A → Ctrl+V → Save → Deploy → New version
@@ -238,6 +238,9 @@ function doPost(e) {
     }
     if (type === 'AdminSetupAction') {
       return jsonOut_(runAdminSetupAction_(e));
+    }
+    if (type === 'AdminGithubAppKeySave') {
+      return jsonOutput_(saveGithubAppKey_(e));
     }
     if (type === 'AdminMessengerTokenSave') {
       return jsonOut_(saveMessengerPageToken_(e));
@@ -4940,7 +4943,7 @@ function publishFileToGitHub_(e) {
   var ownerErr = requireOwnerAdmin_(v);
   if (ownerErr) return ownerErr;
 
-  var ghToken = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+  var ghToken = githubToken_();
   if (!ghToken) {
     return {
       ok: false,
@@ -5095,7 +5098,7 @@ function publishImageToGitHub_(e) {
   var ownerErr = requireOwnerAdmin_(v);
   if (ownerErr) return ownerErr;
 
-  var ghToken = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+  var ghToken = githubToken_();
   if (!ghToken) {
     return {
       ok: false,
@@ -5184,7 +5187,7 @@ function listImagesFromGitHub_(e) {
   var v = verifyAdminSession_(token);
   if (!v.ok) return v;
 
-  var ghToken = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+  var ghToken = githubToken_();
   if (!ghToken) {
     return {
       ok: false,
@@ -5242,7 +5245,7 @@ function deleteImageFromGitHub_(e) {
   var ownerErr = requireOwnerAdmin_(v);
   if (ownerErr) return ownerErr;
 
-  var ghToken = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+  var ghToken = githubToken_();
   if (!ghToken) {
     return {
       ok: false,
@@ -9134,7 +9137,7 @@ function authorizeAdminPasswordRecoveryMail() {
 <textarea id="fileBox7" readonly>// Owner-only, atomic product publication. Reuses the existing repository token and access scope.
 var CP_FILES_ = ['category-products.js','product-links-data.js','product-catalog-sections.js','product-config.js'];
 function cpGit_(method,path,payload) {
-  var token=PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+  var token=githubToken_();
   if(!token)throw Error('PUBLISH_NOT_CONFIGURED');
   var opts={method:method,headers:{Authorization:'Bearer '+token,Accept:'application/vnd.github+json','User-Agent':'MuslimAbaya-Catalog'},muteHttpExceptions:true};
   if(payload){opts.contentType='application/json';opts.payload=JSON.stringify(payload);}
@@ -9353,17 +9356,117 @@ function dataFix20261021Apply() {
  */
 </textarea><br>
 <button type="button" id="copyFile10">Fix-doGet.gs কপি</button>
-<h2>11. InstallDateTrigger.gs</h2>
-<textarea id="fileBox11" readonly>function installBoostAutoDateTriggerNow() {
+<h2>11. GithubApp.gs</h2>
+<textarea id="fileBox11" readonly>/**
+ * GitHub App sign-in for Apps Script's own GitHub writes (the backup save path, image upload/list).
+ *
+ * The owner pastes the GitHub App's .pem once in Admin → Setup (stored in Script Properties as
+ * GITHUB_APP_PRIVATE_KEY, converted to PKCS#8). Every save then asks GitHub for a 1-hour installation token;
+ * nothing to renew. Without the key the old GITHUB_TOKEN property is used, exactly as before.
+ * No key or token is ever returned or logged.
+ */
+var GH_APP_ID_ = '5791466';
+var GH_APP_INSTALLATION_ID_ = '182727794';
+var GH_REPO_ = 'muslim-abaya-landingpage/Luxury-Dress-BD';
+
+function ghB64url_(bytesOrString) {
+  return Utilities.base64EncodeWebSafe(bytesOrString).replace(/=+$/, '');
+}
+
+function ghDerLen_(n) {
+  if (n &lt; 0x80) return [n];
+  var out = [];
+  while (n > 0) { out.unshift(n &amp; 0xff); n = n >> 8; }
+  return [0x80 | out.length].concat(out);
+}
+
+/** GitHub's .pem (PKCS#1 "BEGIN RSA PRIVATE KEY") or a PKCS#8 key → PKCS#8 PEM text, as Apps Script needs. */
+function ghPkcs8Pem_(pem) {
+  var text = String(pem || '').replace(/\\n/g, '\n').replace(/\r/g, '').trim();
+  var m = /-----BEGIN ((?:RSA )?PRIVATE KEY)-----([\s\S]+?)-----END \1-----/.exec(text);
+  if (!m) throw new Error('BAD_PRIVATE_KEY');
+  var body = m[2].replace(/\s+/g, '');
+  if (m[1] === 'RSA PRIVATE KEY') {
+    var raw = Utilities.base64Decode(body).map(function (b) { return b &amp; 0xff; });
+    var octet = [0x04].concat(ghDerLen_(raw.length), raw);
+    var inner = [0x02, 0x01, 0x00, 0x30, 0x0d, 0x06, 0x09, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x01, 0x05, 0x00].concat(octet);
+    var der = [0x30].concat(ghDerLen_(inner.length), inner).map(function (b) { return b > 127 ? b - 256 : b; });
+    body = Utilities.base64Encode(der);
+  }
+  return '-----BEGIN PRIVATE KEY-----\n' + body.replace(/(.{64})/g, '$1\n').replace(/\n$/, '') + '\n-----END PRIVATE KEY-----\n';
+}
+
+function ghAppJwt_(pkcs8Pem, nowMs) {
+  var now = Math.floor(nowMs / 1000);
+  var input = ghB64url_(JSON.stringify({ alg: 'RS256', typ: 'JWT' })) + '.' +
+    ghB64url_(JSON.stringify({ iat: now - 60, exp: now + 540, iss: GH_APP_ID_ }));
+  return input + '.' + ghB64url_(Utilities.computeRsaSha256Signature(input, pkcs8Pem));
+}
+
+/** A fresh (or cached, >5 min left) installation token from a PKCS#8 key; throws Error(code) on failure. */
+function ghAppTokenFromKey_(pkcs8Pem, useCache) {
+  var cache = null;
+  try { cache = CacheService.getScriptCache(); } catch (e) {}
+  if (useCache &amp;&amp; cache) { var hit = cache.get('gh_app_token'); if (hit) return hit; }
+  var res = UrlFetchApp.fetch('https://api.github.com/app/installations/' + GH_APP_INSTALLATION_ID_ + '/access_tokens', {
+    method: 'post', muteHttpExceptions: true,
+    headers: { Authorization: 'Bearer ' + ghAppJwt_(pkcs8Pem, Date.now()), Accept: 'application/vnd.github+json', 'User-Agent': 'MuslimAbaya-GitHubApp' } });
+  var code = res.getResponseCode();
+  if (code &lt; 200 || code >= 300) throw new Error('APP_TOKEN_' + code);
+  var data = JSON.parse(res.getContentText() || '{}');
+  if (!data.token) throw new Error('APP_TOKEN_EMPTY');
+  if (useCache &amp;&amp; cache) { try { cache.put('gh_app_token', data.token, 50 * 60); } catch (e2) {} }
+  return data.token;
+}
+
+/** Token for Apps Script's GitHub calls: the GitHub App when its key is saved, else the old GITHUB_TOKEN. */
+function githubToken_() {
+  var props = PropertiesService.getScriptProperties();
+  var key = props.getProperty('GITHUB_APP_PRIVATE_KEY');
+  if (key) {
+    try { return ghAppTokenFromKey_(key, true); } catch (err) { console.warn('GitHub App token: ' + (err &amp;&amp; err.message)); }
+  }
+  return props.getProperty('GITHUB_TOKEN') || '';
+}
+
+/** Admin → Setup: owner pastes the .pem; saved only after GitHub accepts it for Luxury-Dress-BD. */
+function saveGithubAppKey_(e) {
+  var v = verifyAdminSession_(String(param_(e, 'Token') || ''));
+  if (!v.ok) return { ok: false, error: v.error || 'NOT_LOGGED_IN' };
+  var ownerErr = requireOwnerAdmin_(v);
+  if (ownerErr) return ownerErr;
+  var pem;
+  try { pem = ghPkcs8Pem_(param_(e, 'PrivateKey')); }
+  catch (err) { return { ok: false, error: 'BAD_PRIVATE_KEY', message: '.pem ফাইলের পুরো লেখা পেস্ট করুন — -----BEGIN … থেকে -----END … পর্যন্ত।' }; }
+  try {
+    var token = ghAppTokenFromKey_(pem, false);
+    var res = UrlFetchApp.fetch('https://api.github.com/repos/' + GH_REPO_, { muteHttpExceptions: true,
+      headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json', 'User-Agent': 'MuslimAbaya-GitHubApp' } });
+    if (res.getResponseCode() !== 200) return { ok: false, error: 'REPO_NOT_REACHABLE', message: 'Key ঠিক আছে, কিন্তু App-টা Luxury-Dress-BD রিপো দেখতে পাচ্ছে না (HTTP ' + res.getResponseCode() + ')।' };
+  } catch (err2) {
+    var why = String(err2 &amp;&amp; err2.message || err2);
+    return { ok: false, error: 'APP_KEY_REJECTED', message: why === 'APP_TOKEN_401'
+      ? 'GitHub এই key গ্রহণ করেনি — Muslim Abaya Site Bot App-এর সর্বশেষ .pem ফাইলটা দিন।'
+      : 'GitHub-এর সঙ্গে যাচাই করা যায়নি (' + why.slice(0, 60) + ')।' };
+  }
+  var props = PropertiesService.getScriptProperties();
+  props.setProperty('GITHUB_APP_PRIVATE_KEY', pem);
+  try { CacheService.getScriptCache().remove('gh_app_token'); } catch (e3) {}
+  return { ok: true, message: 'GitHub App সংযুক্ত হয়েছে। বিকল্প পথের সেভও এখন নিজে থেকে নবায়ন হওয়া টোকেনে চলবে — আর কখনো নবায়ন লাগবে না।' };
+}
+</textarea><br>
+<button type="button" id="copyFile11">GithubApp.gs কপি</button>
+<h2>12. InstallDateTrigger.gs</h2>
+<textarea id="fileBox12" readonly>function installBoostAutoDateTriggerNow() {
   const triggers = ScriptApp.getProjectTriggers();
   const exists = triggers.some(t => t.getHandlerFunction() === 'boostAutoDateOnEdit' &amp;&amp; t.getEventType() === ScriptApp.EventType.ON_EDIT);
   if (!exists) {
     ScriptApp.newTrigger('boostAutoDateOnEdit').forSpreadsheet(SpreadsheetApp.getActive()).onEdit().create();
   }
 }</textarea><br>
-<button type="button" id="copyFile11">InstallDateTrigger.gs কপি</button>
-<h2>12. LiveStock.gs</h2>
-<textarea id="fileBox12" readonly>/**
+<button type="button" id="copyFile12">InstallDateTrigger.gs কপি</button>
+<h2>13. LiveStock.gs</h2>
+<textarea id="fileBox13" readonly>/**
  * Live Stock overrides: a fast, authenticated stock switch separate from GitHub catalog publishing.
  * Deploy this file alongside Code.gs in the SAME Apps Script project.
  * Stock quantities/variant reservations remain managed by the existing inventory workflow.
@@ -9420,9 +9523,9 @@ function assertLiveStockAvailable_(cartItems) {
   });
 }
 </textarea><br>
-<button type="button" id="copyFile12">LiveStock.gs কপি</button>
-<h2>13. Monitor.gs</h2>
-<textarea id="fileBox13" readonly>/**
+<button type="button" id="copyFile13">LiveStock.gs কপি</button>
+<h2>14. Monitor.gs</h2>
+<textarea id="fileBox14" readonly>/**
  * Free uptime monitor: checks the storefront every hour and e-mails the admin
  * (and Telegram, if configured) after 2 failed checks in a row, then once more
  * when the site is reachable again. One-time setup: run setupUptimeMonitorTrigger().
@@ -9559,9 +9662,9 @@ function ensureRecentBackup_(nowMs) {
   return 'RETRY_FAILED';
 }
 </textarea><br>
-<button type="button" id="copyFile13">Monitor.gs কপি</button>
-<h2>14. Operations.gs</h2>
-<textarea id="fileBox14" readonly>function opsNotifyVariant_(id,variant,available){
+<button type="button" id="copyFile14">Monitor.gs কপি</button>
+<h2>15. Operations.gs</h2>
+<textarea id="fileBox15" readonly>function opsNotifyVariant_(id,variant,available){
  if(available&lt;=0)return;
  var sh=SpreadsheetApp.getActiveSpreadsheet().getSheetByName('StockWaitlist');if(!sh||sh.getLastRow()&lt;2)return;
  var rows=sh.getRange(2,1,sh.getLastRow()-1,7).getValues(),sent=0;
@@ -9663,9 +9766,9 @@ function opsReviewVerification_(e,productId){var id=String(param_(e,'OrderID')||
 function opsSaveWaitlist_(e){try{var id=String(param_(e,'ProductId')||'').trim(),variant=String(param_(e,'Variant')||'').trim().slice(0,160),contact=normalizeSubscribeContact_(param_(e,'Contact'));if(!contact)throw Error('INVALID_CONTACT');var p=opsCatalog_().products.filter(function(x){return x.id===id;})[0];if(!p)throw Error('UNKNOWN_PRODUCT');opsLinePrice_({qty:1,size:variant,productType:param_(e,'ProductType')},p);rateLimit_('size_wait_'+contact.slice(0,40));var lock=LockService.getScriptLock();lock.waitLock(15000);try{var sh=ensureStockWaitlistSheet_(),h=sh.getRange(1,7).getValue();if(h&amp;&amp;h!=='Variant')throw Error('WAITLIST_HEADER_CONFLICT');sh.getRange(1,7).setValue('Variant');var rows=sh.getDataRange().getValues();for(var i=1;i&lt;rows.length;i++)if(String(rows[i][0])===id&amp;&amp;String(rows[i][2]).toLowerCase()===contact.toLowerCase()&amp;&amp;opsNorm_(rows[i][6])===opsNorm_(variant))return {ok:true,message:'এই সাইজের তালিকায় আছেন।'};sh.appendRow([admCellText_(id,100),admCellText_(p.name,200),admCellText_(contact,150),/@/.test(contact)?'yes':'',new Date(),'',admCellText_(variant,160)]);return {ok:true,message:'নির্বাচিত সাইজের অনুরোধ সংরক্ষিত হয়েছে।'};}finally{lock.releaseLock();}}catch(err){return {ok:false,error:String(err.message||err),message:'পণ্য, সাইজ ও যোগাযোগের তথ্য যাচাই করুন।'};}}
 function opsDhakaTime_(iso){if(!iso)return null;var d=new Date(iso);return isNaN(d.getTime())?String(iso):Utilities.formatDate(d,'Asia/Dhaka','yyyy-MM-dd HH:mm');}
 </textarea><br>
-<button type="button" id="copyFile14">Operations.gs কপি</button>
-<h2>15. OrderSync.gs</h2>
-<textarea id="fileBox15" readonly>/**
+<button type="button" id="copyFile15">Operations.gs কপি</button>
+<h2>16. OrderSync.gs</h2>
+<textarea id="fileBox16" readonly>/**
  * OrderSync — Online Order sheet mirror
  *
  * Setup:
@@ -10627,9 +10730,9 @@ function setupOperationsTriggersFromMenu() {
   );
 }
 </textarea><br>
-<button type="button" id="copyFile15">OrderSync.gs কপি</button>
-<h2>16. ProductPicker.html</h2>
-<textarea id="fileBox16" readonly>&lt;!DOCTYPE html>
+<button type="button" id="copyFile16">OrderSync.gs কপি</button>
+<h2>17. ProductPicker.html</h2>
+<textarea id="fileBox17" readonly>&lt;!DOCTYPE html>
 &lt;html>
 &lt;head>
   &lt;base target="_top">
@@ -10840,9 +10943,9 @@ function setupOperationsTriggersFromMenu() {
 &lt;/body>
 &lt;/html>
 </textarea><br>
-<button type="button" id="copyFile16">ProductPicker.html কপি</button>
-<h2>17. ProductProfit.gs</h2>
-<textarea id="fileBox17" readonly>/**
+<button type="button" id="copyFile17">ProductPicker.html কপি</button>
+<h2>18. ProductProfit.gs</h2>
+<textarea id="fileBox18" readonly>/**
  * Per-product profit (owner only).
  * Buying prices are private, so they live in the "Product Costs" sheet — never in the public catalog.
  * AdminProductProfit: for a date range, sold quantity, sales and (when a buying price is set) profit per product,
@@ -11000,9 +11103,9 @@ function adminProductCostsSave_(e) {
   }
 }
 </textarea><br>
-<button type="button" id="copyFile17">ProductProfit.gs কপি</button>
-<h2>18. SetupStatus.gs</h2>
-<textarea id="fileBox18" readonly>/**
+<button type="button" id="copyFile18">ProductProfit.gs কপি</button>
+<h2>19. SetupStatus.gs</h2>
+<textarea id="fileBox19" readonly>/**
  * Admin → "Setup ও স্ট্যাটাস" page backend.
  * AdminSetupStatus: which connections and automatic jobs are ready (owner only).
  *   Only says whether a secret is SET — never returns any key, token or ID.
@@ -11335,6 +11438,15 @@ function runAdminSetupAction_(e) {
  * reads its expiry from the "github-authentication-token-expiration" response header (absent = no expiry).
  */
 function setupGithubConnection_(props) {
+  if (props.getProperty('GITHUB_APP_PRIVATE_KEY')) {
+    var appLabel = 'প্রোডাক্ট সেভ — Apps Script (বিকল্প পথ) · GitHub App';
+    try {
+      ghAppTokenFromKey_(props.getProperty('GITHUB_APP_PRIVATE_KEY'), true);
+      return { id: 'publisher', label: appLabel, ok: true, detail: 'ঠিক আছে · GitHub App — টোকেন নিজে থেকে নবায়ন হয়, কখনো বদলাতে হবে না' };
+    } catch (appErr) {
+      if (!props.getProperty('GITHUB_TOKEN')) return { id: 'publisher', label: appLabel, ok: false, help: 'GitHub App key কাজ করছে না (' + String(appErr &amp;&amp; appErr.message).slice(0, 40) + ')। Setup-এ নতুন .pem দিন।' };
+    }
+  }
   var label = 'প্রোডাক্ট সেভ — Apps Script GITHUB_TOKEN (বিকল্প পথ)';
   var token = props.getProperty('GITHUB_TOKEN');
   if (!token) return { id: 'publisher', label: label, ok: false, help: 'Apps Script → Project Settings → Script Properties-এ GITHUB_TOKEN বসান।' };
@@ -11358,9 +11470,9 @@ function setupGithubConnection_(props) {
   }
 }
 </textarea><br>
-<button type="button" id="copyFile18">SetupStatus.gs কপি</button>
-<h2>19. SizeCore.gs</h2>
-<textarea id="fileBox19" readonly>// AUTO-GENERATED by scripts/build-size-core.mjs from size-core.js — do not edit by hand.
+<button type="button" id="copyFile19">SetupStatus.gs কপি</button>
+<h2>20. SizeCore.gs</h2>
+<textarea id="fileBox20" readonly>// AUTO-GENERATED by scripts/build-size-core.mjs from size-core.js — do not edit by hand.
 /* Size Manager core: turns the published size configuration (from D1, served by /api/size-config) into the
    measurement fields one product shows, and checks a customer's choices against them.
    The same file runs in the browser (window.maSizeCore) and in Apps Script (apps-script/SizeCore.gs is
@@ -11513,7 +11625,7 @@ function setupGithubConnection_(props) {
   };
 })(typeof window !== "undefined" ? window : this);
 </textarea><br>
-<button type="button" id="copyFile19">SizeCore.gs কপি</button><script>function bind(btn, box) { document.getElementById(btn).onclick = function () { var t = document.getElementById(box).value; navigator.clipboard.writeText(t).then(function () { alert("কপি হয়েছে!"); }); }; }bind('copyBtn', 'codeBox');
+<button type="button" id="copyFile20">SizeCore.gs কপি</button><script>function bind(btn, box) { document.getElementById(btn).onclick = function () { var t = document.getElementById(box).value; navigator.clipboard.writeText(t).then(function () { alert("কপি হয়েছে!"); }); }; }bind('copyBtn', 'codeBox');
 bind('copyAdm', 'admBox');
 bind('copyFix', 'fixBox');
 bind('copyFile4', 'fileBox4');
@@ -11531,4 +11643,5 @@ bind('copyFile15', 'fileBox15');
 bind('copyFile16', 'fileBox16');
 bind('copyFile17', 'fileBox17');
 bind('copyFile18', 'fileBox18');
-bind('copyFile19', 'fileBox19');</script></body></html>
+bind('copyFile19', 'fileBox19');
+bind('copyFile20', 'fileBox20');</script></body></html>

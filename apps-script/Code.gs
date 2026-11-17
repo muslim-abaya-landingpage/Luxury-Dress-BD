@@ -238,6 +238,9 @@ function doPost(e) {
     if (type === 'AdminSetupAction') {
       return jsonOut_(runAdminSetupAction_(e));
     }
+    if (type === 'AdminGithubAppKeySave') {
+      return jsonOutput_(saveGithubAppKey_(e));
+    }
     if (type === 'AdminMessengerTokenSave') {
       return jsonOut_(saveMessengerPageToken_(e));
     }
@@ -4939,7 +4942,7 @@ function publishFileToGitHub_(e) {
   var ownerErr = requireOwnerAdmin_(v);
   if (ownerErr) return ownerErr;
 
-  var ghToken = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+  var ghToken = githubToken_();
   if (!ghToken) {
     return {
       ok: false,
@@ -5094,7 +5097,7 @@ function publishImageToGitHub_(e) {
   var ownerErr = requireOwnerAdmin_(v);
   if (ownerErr) return ownerErr;
 
-  var ghToken = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+  var ghToken = githubToken_();
   if (!ghToken) {
     return {
       ok: false,
@@ -5183,7 +5186,7 @@ function listImagesFromGitHub_(e) {
   var v = verifyAdminSession_(token);
   if (!v.ok) return v;
 
-  var ghToken = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+  var ghToken = githubToken_();
   if (!ghToken) {
     return {
       ok: false,
@@ -5241,7 +5244,7 @@ function deleteImageFromGitHub_(e) {
   var ownerErr = requireOwnerAdmin_(v);
   if (ownerErr) return ownerErr;
 
-  var ghToken = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+  var ghToken = githubToken_();
   if (!ghToken) {
     return {
       ok: false,

@@ -331,6 +331,15 @@ function runAdminSetupAction_(e) {
  * reads its expiry from the "github-authentication-token-expiration" response header (absent = no expiry).
  */
 function setupGithubConnection_(props) {
+  if (props.getProperty('GITHUB_APP_PRIVATE_KEY')) {
+    var appLabel = 'প্রোডাক্ট সেভ — Apps Script (বিকল্প পথ) · GitHub App';
+    try {
+      ghAppTokenFromKey_(props.getProperty('GITHUB_APP_PRIVATE_KEY'), true);
+      return { id: 'publisher', label: appLabel, ok: true, detail: 'ঠিক আছে · GitHub App — টোকেন নিজে থেকে নবায়ন হয়, কখনো বদলাতে হবে না' };
+    } catch (appErr) {
+      if (!props.getProperty('GITHUB_TOKEN')) return { id: 'publisher', label: appLabel, ok: false, help: 'GitHub App key কাজ করছে না (' + String(appErr && appErr.message).slice(0, 40) + ')। Setup-এ নতুন .pem দিন।' };
+    }
+  }
   var label = 'প্রোডাক্ট সেভ — Apps Script GITHUB_TOKEN (বিকল্প পথ)';
   var token = props.getProperty('GITHUB_TOKEN');
   if (!token) return { id: 'publisher', label: label, ok: false, help: 'Apps Script → Project Settings → Script Properties-এ GITHUB_TOKEN বসান।' };

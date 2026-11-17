@@ -1,7 +1,7 @@
 // Owner-only, atomic product publication. Reuses the existing repository token and access scope.
 var CP_FILES_ = ['category-products.js','product-links-data.js','product-catalog-sections.js','product-config.js'];
 function cpGit_(method,path,payload) {
-  var token=PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+  var token=githubToken_();
   if(!token)throw Error('PUBLISH_NOT_CONFIGURED');
   var opts={method:method,headers:{Authorization:'Bearer '+token,Accept:'application/vnd.github+json','User-Agent':'MuslimAbaya-Catalog'},muteHttpExceptions:true};
   if(payload){opts.contentType='application/json';opts.payload=JSON.stringify(payload);}
