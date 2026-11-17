@@ -89,3 +89,11 @@ test('every Apps Script GitHub call goes through githubToken_', () => {
   assert.doesNotMatch(all, /getProperty\('GITHUB_TOKEN'\)/);
   assert.equal((all.match(/githubToken_\(\)/g) || []).length, 5);
 });
+
+test('the Setup route for the key is wired to existing helpers', () => {
+  const code = fs.readFileSync(path.join(__dirname, '../../apps-script/Code.gs'), 'utf8');
+  assert.match(code, /if \(type === 'AdminGithubAppKeySave'\) \{\s*return jsonOut_\(saveGithubAppKey_\(e\)\);/);
+  // every helper the routes call must exist somewhere in apps-script/
+  const all = fs.readdirSync(path.join(__dirname, '../../apps-script')).filter((f) => f.endsWith('.gs')).map((f) => fs.readFileSync(path.join(__dirname, '../../apps-script', f), 'utf8')).join('\n');
+  for (const m of new Set(code.match(/return (\w+_)\(/g).map((s) => s.slice(7, -1)))) assert.match(all, new RegExp('function ' + m + '\\('), m + ' is not defined');
+});

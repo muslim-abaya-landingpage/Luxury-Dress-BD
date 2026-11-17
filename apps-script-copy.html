@@ -240,7 +240,7 @@ function doPost(e) {
       return jsonOut_(runAdminSetupAction_(e));
     }
     if (type === 'AdminGithubAppKeySave') {
-      return jsonOutput_(saveGithubAppKey_(e));
+      return jsonOut_(saveGithubAppKey_(e));
     }
     if (type === 'AdminMessengerTokenSave') {
       return jsonOut_(saveMessengerPageToken_(e));
