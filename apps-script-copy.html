@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8"><title>Apps Script কোড</title><style>body { font-family: system-ui, sans-serif; margin: 16px; max-width: 960px; } textarea { width: 100%; height: 52vh; font: 11px Consolas, monospace; } button { margin-top: 10px; padding: 12px 20px; font-size: 15px; cursor: pointer; } .step { background: #fff8e1; border: 1px solid #f0d58a; padding: 10px 14px; border-radius: 6px; }</style></head><body><h1>Apps Script কোড (সম্পূর্ণ project)</h1><p>এই page-এ canonical project-এর সব source file আছে: Code.gs, AdminOrders.gs, FixSheetHeaders.gs, ActivityLog.gs, AdminPasswordRecovery.gs, BoostAutoDate.gs, CatalogPublish.gs, CourierIntegrationAudit.gs, DataFixes.gs, Fix-doGet.gs, GithubApp.gs, InstallDateTrigger.gs, LiveStock.gs, Monitor.gs, Operations.gs, OrderSync.gs, ProductPicker.html, ProductProfit.gs, SetupStatus.gs, SizeCore.gs</p><div class="step"><p><strong>গুরুত্বপূর্ণ:</strong> Admin dashboard-এর সব API চালাতে নিচের সব ফাইল একই Apps Script project-এ রাখতে হবে। <code>.gs</code> ফাইলের জন্য <strong>＋ → Script</strong>, আর <code>.html</code> ফাইলের জন্য <strong>＋ → HTML</strong> ব্যবহার করুন; একই নাম রেখে প্রতিটি কোড সংশ্লিষ্ট ফাইলে কপি করুন। একাধিক <code>doGet</code> function রাখবেন না—canonical router শুধু <code>Code.gs</code>-এ।</p><ol><li>প্রতিটি source file-এর নাম অনুযায়ী Apps Script file তৈরি বা update করুন।</li><li><strong>Save</strong> চাপুন এবং <code>npm run test:backend</code> parity test পাস হয়েছে কি নিশ্চিত করুন।</li><li><strong>Deploy → Manage deployments → Edit → Version: New version → Deploy</strong> করে বিদ্যমান Web App URL রাখুন।</li></ol></div><h2>1. Code.gs</h2>
+<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8"><title>Apps Script কোড</title><style>body { font-family: system-ui, sans-serif; margin: 16px; max-width: 960px; } textarea { width: 100%; height: 52vh; font: 11px Consolas, monospace; } button { margin-top: 10px; padding: 12px 20px; font-size: 15px; cursor: pointer; } .step { background: #fff8e1; border: 1px solid #f0d58a; padding: 10px 14px; border-radius: 6px; }</style></head><body><h1>Apps Script কোড (সম্পূর্ণ project)</h1><p>এই page-এ canonical project-এর সব source file আছে: Code.gs, AdminOrders.gs, FixSheetHeaders.gs, ActivityLog.gs, AdminPasswordRecovery.gs, BoostAutoDate.gs, CatalogPublish.gs, CourierIntegrationAudit.gs, DataFixes.gs, Fix-doGet.gs, GithubApp.gs, InstallDateTrigger.gs, LiveStock.gs, Monitor.gs, Operations.gs, OrderSync.gs, ProductPicker.html, ProductProfit.gs, ReviewPhotos.gs, SetupStatus.gs, SizeCore.gs</p><div class="step"><p><strong>গুরুত্বপূর্ণ:</strong> Admin dashboard-এর সব API চালাতে নিচের সব ফাইল একই Apps Script project-এ রাখতে হবে। <code>.gs</code> ফাইলের জন্য <strong>＋ → Script</strong>, আর <code>.html</code> ফাইলের জন্য <strong>＋ → HTML</strong> ব্যবহার করুন; একই নাম রেখে প্রতিটি কোড সংশ্লিষ্ট ফাইলে কপি করুন। একাধিক <code>doGet</code> function রাখবেন না—canonical router শুধু <code>Code.gs</code>-এ।</p><ol><li>প্রতিটি source file-এর নাম অনুযায়ী Apps Script file তৈরি বা update করুন।</li><li><strong>Save</strong> চাপুন এবং <code>npm run test:backend</code> parity test পাস হয়েছে কি নিশ্চিত করুন।</li><li><strong>Deploy → Manage deployments → Edit → Version: New version → Deploy</strong> করে বিদ্যমান Web App URL রাখুন।</li></ol></div><h2>1. Code.gs</h2>
 <textarea id="codeBox" readonly>/**
  * Muslim Abaya — সম্পূর্ণ Web App (এক ফাইলে পেস্ট করুন)
  * Code.gs → Ctrl+A → Ctrl+V → Save → Deploy → New version
@@ -81,6 +81,9 @@ function doGet(e) {
     }
     if (type === 'GetReviews') {
       return jsonOut_(getProductReviews_(e));
+    }
+    if (type === 'GetPhotoReviews') {
+      return jsonOut_(getPhotoReviews_(e));
     }
   } catch (err) {
     if (param_(e, 'RecordType') === 'Subscribe') {
@@ -259,6 +262,12 @@ function doPost(e) {
     }
     if (type === 'SubmitReview') {
       return jsonOut_(submitReview_(e));
+    }
+    if (type === 'AdminReviewList') {
+      return jsonOut_(adminReviewList_(e));
+    }
+    if (type === 'AdminReviewStatus') {
+      return jsonOut_(adminReviewStatus_(e));
     }
     if (isSubscribe) {
       var contact = String(param_(e, 'contact') || param_(e, 'email') || '').trim();
@@ -4711,14 +4720,22 @@ function submitReview_(e) {
     reviewLock.waitLock(15000);
     try {
       var verified = opsReviewVerification_(e, productId);
+      var photos = reviewPhotos_(param_(e, 'Photos'));
+      if (photos.length &amp;&amp; !verified.verified) return { ok: false, error: 'PHOTO_NEEDS_ORDER', message: 'ছবি দিতে অর্ডার নম্বর ও অর্ডারের মোবাইল নম্বর দিন — শুধু যাচাইকৃত ক্রেতারা ছবি দিতে পারেন।' };
       var sheet = getReviewsSheet_();
       opsReviewHeaders_(sheet);
+      reviewPhotoHeader_(sheet);
       var reviewId = Utilities.getUuid();
-      appendRow_(sheet, [reviewId, productId, productName, admCellText_(name,60), rating, admCellText_(comment,600), new Date(), 'Pending', verified.verified, verified.orderId]);
+      appendRow_(sheet, [reviewId, productId, productName, admCellText_(name,60), rating, admCellText_(comment,600), new Date(), 'Pending', verified.verified, verified.orderId, photos.length ? JSON.stringify(photos) : '']);
     } finally { reviewLock.releaseLock(); }
     return { ok: true, message: 'ধন্যবাদ! আপনার রিভিউ পর্যালোচনার পর প্রকাশিত হবে।' };
   } catch (err) {
-    return { ok: false, error: 'REVIEW_SUBMIT_FAILED', message: String(err.message || err) };
+    var code = String(err.message || err);
+    var known = {
+      REVIEW_VERIFICATION_FAILED: 'অর্ডার নম্বর ও মোবাইল মেলেনি, অথবা অর্ডারটি এখনো ডেলিভারি হয়নি বা এই পণ্য সেই অর্ডারে নেই।',
+      REVIEW_ALREADY_EXISTS: 'এই অর্ডার থেকে এই পণ্যের রিভিউ আগেই দেওয়া হয়েছে।'
+    };
+    return { ok: false, error: known[code] ? code : 'REVIEW_SUBMIT_FAILED', message: known[code] || 'রিভিউ জমা হয়নি, একটু পর আবার চেষ্টা করুন।' };
   }
 }
 
@@ -4742,6 +4759,7 @@ function getProductReviews_(e) {
         rating: rating,
         comment: String(r[5] || ''),
         verifiedPurchase: r[8] === true,
+        photos: reviewRowPhotos_(r),
         date: r[6] instanceof Date ? Utilities.formatDate(r[6], 'GMT+6', 'dd MMM yyyy') : String(r[6] || '')
       });
     }
@@ -11104,8 +11122,94 @@ function adminProductCostsSave_(e) {
 }
 </textarea><br>
 <button type="button" id="copyFile18">ProductProfit.gs কপি</button>
-<h2>19. SetupStatus.gs</h2>
+<h2>19. ReviewPhotos.gs</h2>
 <textarea id="fileBox19" readonly>/**
+ * Photo reviews: verified buyers may add up to 3 photos (uploaded first to images.muslimabaya.com/reviews/
+ * by /api/review-photo). Nothing is public until the owner approves it in Admin → Reviews.
+ * Sheet "Reviews": … col 9 VerifiedPurchase, col 10 VerifiedOrderId, col 11 Photos (JSON array of URLs).
+ */
+var REVIEW_PHOTO_URL_RE_ = /^https:\/\/images\.muslimabaya\.com\/reviews\/\d{4}\/[a-f0-9-]{36}\.webp$/;
+
+function reviewPhotos_(raw) {
+  var list = [];
+  try { list = JSON.parse(String(raw || '[]')); } catch (e) { list = []; }
+  if (!Array.isArray(list)) return [];
+  var out = [];
+  list.forEach(function (u) { u = String(u || '').trim(); if (REVIEW_PHOTO_URL_RE_.test(u) &amp;&amp; out.indexOf(u) === -1 &amp;&amp; out.length &lt; 3) out.push(u); });
+  return out;
+}
+
+function reviewPhotoHeader_(sheet) {
+  var cell = sheet.getRange(1, 11), old = cell.getValue();
+  if (old &amp;&amp; old !== 'Photos') throw Error('REVIEW_HEADER_CONFLICT');
+  if (!old) cell.setValue('Photos');
+}
+
+function reviewRowPhotos_(row) { return reviewPhotos_(row[10]); }
+
+/** Latest approved reviews that have photos, for the "Customer photos" strip (public). */
+function getPhotoReviews_(e) {
+  try {
+    var data = getReviewsSheet_().getDataRange().getValues(), out = [];
+    for (var i = data.length - 1; i >= 1 &amp;&amp; out.length &lt; 12; i--) {
+      var r = data[i];
+      if (String(r[7] || '').trim() !== 'Approved') continue;
+      var photos = reviewRowPhotos_(r);
+      if (!photos.length) continue;
+      out.push({ productId: String(r[1] || ''), productName: String(r[2] || ''), name: String(r[3] || ''), rating: Number(r[4]) || 0,
+        comment: String(r[5] || '').slice(0, 220), photos: photos, verifiedPurchase: r[8] === true,
+        date: r[6] instanceof Date ? Utilities.formatDate(r[6], 'GMT+6', 'dd MMM yyyy') : String(r[6] || '') });
+    }
+    return { ok: true, reviews: out };
+  } catch (err) {
+    return { ok: false, error: 'PHOTO_REVIEWS_FAILED', reviews: [] };
+  }
+}
+
+function reviewAdminCheck_(e) {
+  var v = verifyAdminSession_(String(param_(e, 'Token') || ''));
+  if (!v.ok) return { ok: false, error: v.error || 'NOT_LOGGED_IN' };
+  return requireOwnerAdmin_(v);
+}
+
+/** Admin → Reviews: newest first (up to 300), with photos, status, verified order id. */
+function adminReviewList_(e) {
+  var denied = reviewAdminCheck_(e);
+  if (denied) return denied;
+  var data = getReviewsSheet_().getDataRange().getValues(), out = [];
+  for (var i = data.length - 1; i >= 1 &amp;&amp; out.length &lt; 300; i--) {
+    var r = data[i];
+    if (!r[0]) continue;
+    out.push({ id: String(r[0]), productId: String(r[1] || ''), productName: String(r[2] || ''), name: String(r[3] || ''),
+      rating: Number(r[4]) || 0, comment: String(r[5] || ''), status: String(r[7] || 'Pending'), verifiedPurchase: r[8] === true,
+      orderId: String(r[9] || ''), photos: reviewRowPhotos_(r),
+      date: r[6] instanceof Date ? Utilities.formatDate(r[6], 'GMT+6', 'yyyy-MM-dd HH:mm') : String(r[6] || '') });
+  }
+  var counts = { Pending: 0, Approved: 0, Rejected: 0 };
+  out.forEach(function (x) { if (counts[x.status] != null) counts[x.status]++; });
+  return { ok: true, reviews: out, counts: counts };
+}
+
+function adminReviewStatus_(e) {
+  var denied = reviewAdminCheck_(e);
+  if (denied) return denied;
+  var id = String(param_(e, 'ReviewID') || '').trim(), status = String(param_(e, 'Status') || '').trim();
+  if (['Approved', 'Rejected', 'Pending'].indexOf(status) === -1) return { ok: false, error: 'BAD_STATUS', message: 'অবস্থা ঠিক নেই।' };
+  if (!id) return { ok: false, error: 'NO_REVIEW', message: 'রিভিউ পাওয়া যায়নি।' };
+  var lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    var sheet = getReviewsSheet_(), ids = sheet.getRange(1, 1, sheet.getLastRow(), 1).getValues();
+    for (var i = 1; i &lt; ids.length; i++) {
+      if (String(ids[i][0]) === id) { sheet.getRange(i + 1, 8).setValue(status); return { ok: true, id: id, status: status }; }
+    }
+  } finally { lock.releaseLock(); }
+  return { ok: false, error: 'NO_REVIEW', message: 'রিভিউ পাওয়া যায়নি।' };
+}
+</textarea><br>
+<button type="button" id="copyFile19">ReviewPhotos.gs কপি</button>
+<h2>20. SetupStatus.gs</h2>
+<textarea id="fileBox20" readonly>/**
  * Admin → "Setup ও স্ট্যাটাস" page backend.
  * AdminSetupStatus: which connections and automatic jobs are ready (owner only).
  *   Only says whether a secret is SET — never returns any key, token or ID.
@@ -11470,9 +11574,9 @@ function setupGithubConnection_(props) {
   }
 }
 </textarea><br>
-<button type="button" id="copyFile19">SetupStatus.gs কপি</button>
-<h2>20. SizeCore.gs</h2>
-<textarea id="fileBox20" readonly>// AUTO-GENERATED by scripts/build-size-core.mjs from size-core.js — do not edit by hand.
+<button type="button" id="copyFile20">SetupStatus.gs কপি</button>
+<h2>21. SizeCore.gs</h2>
+<textarea id="fileBox21" readonly>// AUTO-GENERATED by scripts/build-size-core.mjs from size-core.js — do not edit by hand.
 /* Size Manager core: turns the published size configuration (from D1, served by /api/size-config) into the
    measurement fields one product shows, and checks a customer's choices against them.
    The same file runs in the browser (window.maSizeCore) and in Apps Script (apps-script/SizeCore.gs is
@@ -11625,7 +11729,7 @@ function setupGithubConnection_(props) {
   };
 })(typeof window !== "undefined" ? window : this);
 </textarea><br>
-<button type="button" id="copyFile20">SizeCore.gs কপি</button><script>function bind(btn, box) { document.getElementById(btn).onclick = function () { var t = document.getElementById(box).value; navigator.clipboard.writeText(t).then(function () { alert("কপি হয়েছে!"); }); }; }bind('copyBtn', 'codeBox');
+<button type="button" id="copyFile21">SizeCore.gs কপি</button><script>function bind(btn, box) { document.getElementById(btn).onclick = function () { var t = document.getElementById(box).value; navigator.clipboard.writeText(t).then(function () { alert("কপি হয়েছে!"); }); }; }bind('copyBtn', 'codeBox');
 bind('copyAdm', 'admBox');
 bind('copyFix', 'fixBox');
 bind('copyFile4', 'fileBox4');
@@ -11644,4 +11748,5 @@ bind('copyFile16', 'fileBox16');
 bind('copyFile17', 'fileBox17');
 bind('copyFile18', 'fileBox18');
 bind('copyFile19', 'fileBox19');
-bind('copyFile20', 'fileBox20');</script></body></html>
+bind('copyFile20', 'fileBox20');
+bind('copyFile21', 'fileBox21');</script></body></html>

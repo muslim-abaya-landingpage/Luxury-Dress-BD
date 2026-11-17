@@ -88,6 +88,9 @@ function doGet(e) {
     if (type === 'GetReviews') {
       return jsonOut_(getProductReviews_(e));
     }
+    if (type === 'GetPhotoReviews') {
+      return jsonOut_(getPhotoReviews_(e));
+    }
   } catch (err) {
     if (param_(e, 'RecordType') === 'Subscribe') {
       return jsonOut_({ ok: false, error: String(err.message || err) });
@@ -265,6 +268,12 @@ function doPost(e) {
     }
     if (type === 'SubmitReview') {
       return jsonOut_(submitReview_(e));
+    }
+    if (type === 'AdminReviewList') {
+      return jsonOut_(adminReviewList_(e));
+    }
+    if (type === 'AdminReviewStatus') {
+      return jsonOut_(adminReviewStatus_(e));
     }
     if (isSubscribe) {
       var contact = String(param_(e, 'contact') || param_(e, 'email') || '').trim();
@@ -4717,14 +4726,22 @@ function submitReview_(e) {
     reviewLock.waitLock(15000);
     try {
       var verified = opsReviewVerification_(e, productId);
+      var photos = reviewPhotos_(param_(e, 'Photos'));
+      if (photos.length && !verified.verified) return { ok: false, error: 'PHOTO_NEEDS_ORDER', message: 'ছবি দিতে অর্ডার নম্বর ও অর্ডারের মোবাইল নম্বর দিন — শুধু যাচাইকৃত ক্রেতারা ছবি দিতে পারেন।' };
       var sheet = getReviewsSheet_();
       opsReviewHeaders_(sheet);
+      reviewPhotoHeader_(sheet);
       var reviewId = Utilities.getUuid();
-      appendRow_(sheet, [reviewId, productId, productName, admCellText_(name,60), rating, admCellText_(comment,600), new Date(), 'Pending', verified.verified, verified.orderId]);
+      appendRow_(sheet, [reviewId, productId, productName, admCellText_(name,60), rating, admCellText_(comment,600), new Date(), 'Pending', verified.verified, verified.orderId, photos.length ? JSON.stringify(photos) : '']);
     } finally { reviewLock.releaseLock(); }
     return { ok: true, message: 'ধন্যবাদ! আপনার রিভিউ পর্যালোচনার পর প্রকাশিত হবে।' };
   } catch (err) {
-    return { ok: false, error: 'REVIEW_SUBMIT_FAILED', message: String(err.message || err) };
+    var code = String(err.message || err);
+    var known = {
+      REVIEW_VERIFICATION_FAILED: 'অর্ডার নম্বর ও মোবাইল মেলেনি, অথবা অর্ডারটি এখনো ডেলিভারি হয়নি বা এই পণ্য সেই অর্ডারে নেই।',
+      REVIEW_ALREADY_EXISTS: 'এই অর্ডার থেকে এই পণ্যের রিভিউ আগেই দেওয়া হয়েছে।'
+    };
+    return { ok: false, error: known[code] ? code : 'REVIEW_SUBMIT_FAILED', message: known[code] || 'রিভিউ জমা হয়নি, একটু পর আবার চেষ্টা করুন।' };
   }
 }
 
@@ -4748,6 +4765,7 @@ function getProductReviews_(e) {
         rating: rating,
         comment: String(r[5] || ''),
         verifiedPurchase: r[8] === true,
+        photos: reviewRowPhotos_(r),
         date: r[6] instanceof Date ? Utilities.formatDate(r[6], 'GMT+6', 'dd MMM yyyy') : String(r[6] || '')
       });
     }
