@@ -101,7 +101,7 @@ test('token health: never-expiring, expiring soon and revoked Page tokens are sh
   assert.equal(rows['381729145014885'].health.state, 'ok'); assert.equal(rows['381729145014885'].health.expires, 'never'); assert.equal(rows['381729145014885'].source, 'manual');
   assert.equal(rows['1373328422533938'].health.state, 'warn');
   assert.equal(rows['1343804848819482'].health.state, 'bad'); assert.equal(rows['1343804848819482'].source, 'system');
-  assert.equal(rows['258170054039575'].configured, false);
+  assert.equal(rows['258170054039575'], undefined, 'Luxury Dress is no longer a managed Page');
   assert.doesNotMatch(JSON.stringify(rows), /T_NEVER|T_SOON|T_DEAD/);
 });
 

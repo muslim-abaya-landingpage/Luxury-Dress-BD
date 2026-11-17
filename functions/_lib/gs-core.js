@@ -5501,7 +5501,7 @@ function messengerWebhook_(e) {
 }
 
 function setupMessengerProfileForAllPages_() {
-  var pageIds = ['964928770039259', '381729145014885', '258170054039575'];
+  var pageIds = Object.keys(MSGR_PAGES);
   var results = {};
   pageIds.forEach(function (pid) {
     var token = getPageAccessToken_(pid);
@@ -5535,10 +5535,11 @@ var MSGR_MSG_SHEET = 'MessengerMessages';
 // প্রতিটি Page-এর Page Access Token রাখুন Script Properties-এ:
 //   MSGR_PAGE_TOKEN_<PageID>   (যেমন MSGR_PAGE_TOKEN_381729145014885)
 // পুরোনো MSGR_PAGE_TOKEN শুধু MSGR_PAGE_ID Page-এর জন্য fallback।
+// "Luxury Dress" (258170054039575) was removed on the owner's request (Nov 2026): its token stopped working
+// and it is no longer managed here. Its old conversations stay in the sheet.
 var MSGR_PAGES = {
   '964928770039259': 'Luxury Dress BD',
   '381729145014885': 'Muslim Abaya',
-  '258170054039575': 'Luxury Dress',
   '1373328422533938': 'Luluatun Noor',
   '1343804848819482': 'Muslimabaya.com'
 };
