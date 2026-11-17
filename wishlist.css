@@ -1,0 +1,19 @@
+/* /wishlist page — flat cards (no rounded corners), two columns on phones. */
+.wl{max-width:1100px;margin:0 auto;padding:20px 12px 40px}
+.wl-title{font-size:22px;margin:4px 0 6px;letter-spacing:.02em}
+.wl-sub{margin:0 0 16px;color:#57534e;font-size:14px}
+.wl-empty{padding:28px 16px;border:1px dashed #d6d3d1;text-align:center;color:#57534e;font-size:14px}
+.wl-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (min-width:768px){.wl-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}}
+.wl-card{border:1px solid #e7e5e4;background:#fff;display:flex;flex-direction:column;border-radius:0}
+.wl-media{display:block;aspect-ratio:4/5;background:#f5f5f4}
+.wl-media img{width:100%;height:100%;object-fit:cover;display:block}
+.wl-body{padding:10px;display:flex;flex-direction:column;gap:6px;flex:1}
+.wl-name{color:#111;font-size:14px;font-weight:600;text-decoration:none;line-height:1.35}
+.wl-price{font-size:14px;font-weight:700}
+.wl-stock{font-size:12px;color:#18794e;font-weight:600}
+.wl-stock.is-oos{color:#b42318}
+.wl-actions{margin-top:auto;display:flex;gap:6px}
+.wl-btn{flex:1;text-align:center;background:#111;color:#fff;text-decoration:none;font-size:13px;font-weight:600;padding:9px 6px}
+.wl-remove{border:1px solid #d6d3d1;background:#fff;font-size:13px;padding:9px 10px;cursor:pointer}
+.wl-more{margin-top:20px;font-size:14px}.wl-more a{color:#111}

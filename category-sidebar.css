@@ -18,12 +18,14 @@ html.category-ready #list {
   visibility: visible;
 }
 
-/* Muslim Abaya category shop sidebar */
-.shop-breadcrumb--desktop {
+/* Muslim Abaya category shop sidebar.
+   Two copies of the breadcrumb exist (one per layout); the compound selectors beat the base
+   .shop-breadcrumb { display: flex } further down, so only one shows (before: both on phones). */
+.shop-breadcrumb.shop-breadcrumb--desktop {
   display: none;
 }
 
-.shop-breadcrumb--mobile {
+.shop-breadcrumb.shop-breadcrumb--mobile {
   display: flex;
 }
 
@@ -1075,11 +1077,11 @@ button.img-wrap {
 }
 
 @media (min-width: 961px) {
-  .shop-breadcrumb--desktop {
+  .shop-breadcrumb.shop-breadcrumb--desktop {
     display: flex;
   }
 
-  .shop-breadcrumb--mobile {
+  .shop-breadcrumb.shop-breadcrumb--mobile {
     display: none;
   }
 

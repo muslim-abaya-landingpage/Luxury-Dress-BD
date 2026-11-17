@@ -2,7 +2,8 @@
   const CONFIG = {
     homeHref: "/",
     callNumber: "+8801971642683",
-    loginHref: "signin.html"
+    loginHref: "signin.html",
+    wishlistHref: "/wishlist"
   };
 
   const siteHrefSafe = (route) =>
@@ -13,6 +14,7 @@
     category: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.2"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.2"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.2"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.2"/></svg>',
     cart: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.4 12.2A2 2 0 0 0 9.35 18H18a2 2 0 0 0 1.96-1.6L21.5 8H6"/><circle cx="9.5" cy="21" r="1.3"/><circle cx="18" cy="21" r="1.3"/></svg>',
     call: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5c0 8.5 6.9 15.3 15.4 15.4l.6-3.6-4.3-1.4-1.6 1.9a11.4 11.4 0 0 1-6.9-6.9l1.9-1.6L7.6 4 4 4.5Z"/><path d="M14.5 4.5a5.5 5.5 0 0 1 5 5"/><path d="M14.5 8a2 2 0 0 1 1.9 1.9"/></svg>',
+    heart: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 8 3.4 4.5 7 4.5c2 0 3.6 1.1 5 2.9 1.4-1.8 3-2.9 5-2.9 3.6 0 5.6 3.5 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2Z"/></svg>',
     login: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-3.6 3.1-6.3 7-6.3s7 2.7 7 6.3"/></svg>'
   };
 
@@ -47,9 +49,12 @@
         <span class="mbn-label">Call</span>
       </a>
 
-      <a class="mbn-item" data-mbn-route="login" href="${siteHrefSafe(CONFIG.loginHref)}">
-        ${ICONS.login}
-        <span class="mbn-label">Login</span>
+      <a class="mbn-item" data-mbn-route="wishlist" href="${siteHrefSafe(CONFIG.wishlistHref)}" aria-label="পছন্দের তালিকা">
+        <span class="mbn-cart-wrap">
+          ${ICONS.heart}
+          <span class="mbn-badge" id="mbn-wish-count" aria-hidden="true" style="display:none">0</span>
+        </span>
+        <span class="mbn-label">Wishlist</span>
       </a>
     `;
 
@@ -123,7 +128,7 @@
     const bar = document.getElementById("mobile-bottom-nav");
     if (!bar) return;
     setActive(bar.querySelector('[data-mbn-route="home"]'), isHomePage(path));
-    setActive(bar.querySelector('[data-mbn-route="login"]'), isLoginPage(path));
+    setActive(bar.querySelector('[data-mbn-route="wishlist"]'), /^\/wishlist(?:\.html)?\/?$/.test(path));
     syncCategoryState();
     syncCartState();
   };
@@ -222,4 +227,23 @@
     );
     setBadge(total);
   };
+  // Wishlist (♥): load its script once and keep the badge in step.
+  const syncWishBadge = () => {
+    const el = document.getElementById("mbn-wish-count");
+    if (!el) return;
+    const n = window.maWishlist ? window.maWishlist.count() : 0;
+    el.textContent = n > 99 ? "99+" : String(n);
+    el.style.display = n > 0 ? "flex" : "none";
+  };
+  window.addEventListener("ma-wishlist-change", syncWishBadge);
+  if (!window.maWishlist && !document.getElementById("ma-wishlist-script")) {
+    const ws = document.createElement("script");
+    ws.id = "ma-wishlist-script";
+    ws.src = "/wishlist.js?v=1";
+    ws.defer = true;
+    ws.onload = syncWishBadge;
+    document.head.appendChild(ws);
+  } else {
+    syncWishBadge();
+  }
 })();
