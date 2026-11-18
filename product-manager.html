@@ -1467,6 +1467,77 @@
       '</div>';
 
     var root = mainEl.querySelector(".pm-wp-edit");
+    // Simplified four-section product editor. Existing controls and IDs are moved,
+    // not recreated, so their current upload, validation, and save handlers remain intact.
+    (function organizeSimpleProductForm() {
+      if (!root || root.dataset.simpleLayoutReady === "1") return;
+      var columns = root.querySelector(".pm-wp-columns");
+      var oldMain = columns && columns.querySelector(".pm-wp-col-main");
+      var side = columns && columns.querySelector(".pm-wp-col-side");
+      if (!columns || !oldMain || !side) return;
+      root.dataset.simpleLayoutReady = "1";
+      var flow = document.createElement("div");
+      flow.className = "pm-wp-col-main pm-simple-product-flow";
+      columns.insertBefore(flow, oldMain);
+
+      function makeSection(id, title, hint, isOpen) {
+        var details = document.createElement("details");
+        details.className = "pm-simple-step";
+        details.id = id;
+        details.open = !!isOpen;
+        var summary = document.createElement("summary");
+        var copy = document.createElement("span");
+        copy.className = "pm-simple-step-copy";
+        var heading = document.createElement("strong");
+        heading.textContent = title;
+        var note = document.createElement("small");
+        note.textContent = hint;
+        copy.appendChild(heading);
+        copy.appendChild(note);
+        var chevron = document.createElement("span");
+        chevron.className = "pm-simple-step-chevron";
+        chevron.setAttribute("aria-hidden", "true");
+        chevron.textContent = "⌄";
+        summary.appendChild(copy);
+        summary.appendChild(chevron);
+        var body = document.createElement("div");
+        body.className = "pm-simple-step-body";
+        details.appendChild(summary);
+        details.appendChild(body);
+        flow.appendChild(details);
+        return body;
+      }
+      function move(id, target) {
+        var node = root.querySelector("#" + id);
+        if (node) target.appendChild(node);
+      }
+
+      var basic = makeSection("pmSimpleBasic", "1. Basic Information", "Product name, category and description", true);
+      var titleWrap = root.querySelector(".pm-woo-titlewrap");
+      if (titleWrap) basic.appendChild(titleWrap);
+      var permalink = root.querySelector(".pm-wp-permalink");
+      if (permalink) basic.appendChild(permalink);
+      move("pmDescBox", basic);
+      move("pmCatBox", basic);
+
+      var images = makeSection("pmSimpleImages", "2. Product Images", "Main image and gallery photos", false);
+      move("pmImgBox", images);
+      move("pmGalBox", images);
+
+      var options = makeSection("pmSimpleOptions", "3. Options & Stock", "Price, color, size, fabric, inventory and variations", false);
+      move("pmDataBox", options);
+
+      var extra = makeSection("pmSimpleAdditional", "4. Additional Information", "Short description, brand, tags and SEO", false);
+      move("pmShortBox", extra);
+      move("pmSeoBox", extra);
+      move("pmBrandBox", extra);
+      move("pmTagBox", extra);
+      move("pmSlugBox", extra);
+
+      oldMain.remove();
+      var redundantAdd = root.querySelector("#pmEditAddNew");
+      if (redundantAdd && editTarget && editTarget.isNew) redundantAdd.hidden = true;
+    })();
     if (managed) showLiveStockCount(p, editTarget);
     // One button publishes: messages point at "Publish" (new / draft) or "Update" (already live).
     function mainAction() { var b = document.getElementById("pmEditUpdate"); return (b && b.textContent.trim()) || "Publish"; }
