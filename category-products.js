@@ -1,6 +1,6 @@
 /**
  * প্রোডাক্ট ডেটা — product-manager.html থেকে এডিট করুন
- * আপডেট: 2026-11-15
+ * আপডেট: 2026-11-18
  */
 window.CATEGORY_PRODUCTS = {
   abaya: [
@@ -641,6 +641,7 @@ window.CATEGORY_PRODUCTS = {
       dressLengths: ["44"],
       palazzoLengths: ["40"],
       regularPrice: 950,
+      shortDescription: "<p><strong>Premium Linen Floral Two-Piece Set</strong></p><p>প্রিমিয়াম লিলেন কাপড়ে তৈরি আকর্ষণীয় ফ্লোরাল ডিজাইনের টু-পিস সেট। আরামদায়ক ও মার্জিত লুকের জন্য দৈনন্দিন ব্যবহার এবং বিভিন্ন অনুষ্ঠানে উপযোগী।</p>",
       descriptionHtml: "<p><strong>Premium Linen Floral Two-Piece Set</strong></p><p>প্রিমিয়াম লিলেন কাপড়ের সুন্দর ডিজাইনের আরামদায়ক টু-পিস সেট। দৈনন্দিন ব্যবহার ও বিভিন্ন অনুষ্ঠানের জন্য উপযোগী।</p><p><strong>Product Details:</strong></p><ul><li><p>Fabric: Premium Linen</p></li><li><p>Dress Length: 44 Inches</p></li><li><p>Pajama Length: 40 Inches</p></li><li><p>Sleeve Length: 18 Inches</p></li><li><p>Body Size: 48, 50, 52 Inches</p></li><li><p>Set: Two-Piece (Top &amp; Pajama)</p></li></ul><p><strong>Available Sizes:</strong> 48, 50, 52</p><p>আপনার পছন্দের সাইজটি অর্ডারের সময় জানিয়ে দিন।</p>",
       productType: "variable",
       backorders: "notify",
@@ -650,8 +651,7 @@ window.CATEGORY_PRODUCTS = {
       seoTitle: "Premium Linen Two Piece Set | Muslim Abaya",
       seoDescription: "Shop premium linen floral two-piece sets for women. Dress length 44\", pajama 40\", sleeve 18\". Available in body sizes 48, 50 and 52. Cash on delivery in Bangladesh.",
       productUrl: "/",
-      variationAttributes: [],
-      shortDescription: "<p><strong>Premium Linen Floral Two-Piece Set</strong></p><p>প্রিমিয়াম লিলেন কাপড়ে তৈরি আকর্ষণীয় ফ্লোরাল ডিজাইনের টু-পিস সেট। আরামদায়ক ও মার্জিত লুকের জন্য দৈনন্দিন ব্যবহার এবং বিভিন্ন অনুষ্ঠানে উপযোগী।</p>"
+      variationAttributes: []
     },
     {
       id: "DR-11",
@@ -980,6 +980,35 @@ window.CATEGORY_PRODUCTS = {
       descriptionHtml: "<p>🌸 লেপার্ড প্রিন্ট লিলেন কামিজ ও পায়জামা সেট</p><p>✨ আকর্ষণীয় ডিজাইন ও আরামদায়ক লিলেন ফেব্রিক।</p><p><strong>পণ্যের বিবরণ:</strong></p><ul><li><p>ফেব্রিক: লিলেন</p></li><li><p>কামিজ লং: ৪৪ ইঞ্চি</p></li><li><p>পায়জামা লং: ৪০ ইঞ্চি</p></li><li><p>বডি সাইজ: ৪৮, ৫০, ৫২</p></li><li><p>হাতার লং: ১৮ ইঞ্চি</p></li></ul><p><strong>মূল্য: ৭৫০ টাকা</strong></p><p>অর্ডার করতে:<br>Website: <a href=\"https://muslimabaya.com\" target=\"_blank\" rel=\"noopener\">https://muslimabaya.com</a></p><p>WhatsApp: 01971642683<br>(শুধু মেসেজ, কল নয়)</p>",
       dateAdded: "2026-11-14",
       productUrl: "/"
+    },
+    {
+      id: "premium-linen-floral-two-piece-set",
+      name: "Premium Linen Floral Two-Piece Set",
+      image: "https://images.muslimabaya.com/images/uploads/new-product-1795035293405-2-362eb67a661304269448.webp",
+      imageCard: "https://images.muslimabaya.com/images/uploads/new-product-1795035293405-2-card-1ab5527f1812daada6d4.webp",
+      images: ["https://images.muslimabaya.com/images/uploads/new-product-1795035292040-1-02d613747415285d2bdf.webp", "https://images.muslimabaya.com/images/uploads/new-product-1795035289632-0-ea850c80cda6cabf1370.webp"],
+      price: 760,
+      color: "multicolor-patchwork-royal-blue-olive-green",
+      colorLabel: "Multicolor Patchwork, Royal Blue, Olive Green",
+      fabric: "Linen",
+      detailNote: "🌸 Premium Linen Floral Two-Piece Set\n\nরুচিশীল ফ্লোরাল ডিজাইন ও প্রিমিয়াম লিলেন কাপড়ে তৈরি আরামদায়ক ও আকর্ষণীয় টু-পিস সেট। দৈনন্দিন ব্যবহার কিংবা বিভিন্ন অনুষ্ঠানে আপনাকে দেবে মার্জিত ও স্টাইলিশ লুক।\n\nProduct Details\n\n• Fabric: Premium Linen\n\n• Top Length: 44 Inches\n\n• Pajama Length: 39 Inches\n\n• Sleeve Length: 18 Inches\n\n• Available Body Sizes: 48, 50 & 52 Inches\n\n• Set Includes: 2 Pieces (Top & Pajama)\n\nAvailable Sizes\n\n48 / 50 / 52 Inches\n\nOrder Now from MUSLIM ABAYA.",
+      dateAdded: "2026-11-19",
+      productType: "variable",
+      bodySizes: ["48","50","52"],
+      variationAttributes: ["color","body","length","sleeve","palazzo","type"],
+      brand: "Muslim Abaya",
+      dressLengths: ["46"],
+      sleeveSizes: ["18"],
+      palazzoLengths: ["40"],
+      shortDescription: "<p>🌸 প্রিমিয়াম লিলেন কাপড়ে তৈরি আকর্ষণীয় ফ্লোরাল টু-পিস সেট।</p><p>✨ কাপড়: প্রিমিয়াম লিলেন<br>📏 জামার লম্বা: ৪৪ ইঞ্চি<br>📏 পায়জামার লম্বা: ৩৯ ইঞ্চি<br>📐 সাইজ: ৪৮ / ৫০ / ৫২ ইঞ্চি</p><p>🔥 বিশেষ অফার: ৳৭৬০ (নিয়মিত মূল্য ৳৯৫০)</p><p>🛍️ অর্ডার করুন MUSLIM ABAYA থেকে।</p>",
+      seoTitle: "Premium Linen Floral Two Piece | Muslim Abaya",
+      seoDescription: "Shop Premium Linen Floral Two Piece at Muslim Abaya. Elegant floral design, comfortable linen fabric, sizes 48, 50 & 52. Special offer ৳760.",
+      seoKeyword: "Premium Linen Two Piece",
+      seoKeywords: ["Linen Two Piece","Floral Two Piece","Women's Two Piece","Premium Linen Dress","Ladies Two Piece Set","Muslim Abaya"],
+      tags: ["Premium Linen","Floral Two Piece","Linen Two Piece","Women's Fashion","Two Piece Set"],
+      variations: [{"size":"Body 48 · Length 46 · Sleeve 18 · Palazzo 40","sku":"NEW-PRODUCT-48-46-18-40","price":760},{"size":"Body 50 · Length 46 · Sleeve 18 · Palazzo 40","sku":"NEW-PRODUCT-50-46-18-40","price":760},{"size":"Body 52 · Length 46 · Sleeve 18 · Palazzo 40","sku":"NEW-PRODUCT-52-46-18-40","price":760}],
+      colorVariants: [{"color":"multicolor-patchwork","colorLabel":"Multicolor Patchwork","image":"https://images.muslimabaya.com/images/uploads/new-product-1795035289632-0-ea850c80cda6cabf1370.webp"},{"color":"royal-blue","colorLabel":"Royal Blue","image":"https://images.muslimabaya.com/images/uploads/new-product-1795035292040-1-02d613747415285d2bdf.webp"},{"color":"olive-green","colorLabel":"Olive Green","image":"https://images.muslimabaya.com/images/uploads/new-product-1795035293405-2-362eb67a661304269448.webp"}],
+      descriptionHtml: "<p>🌸 <strong>Premium Linen Floral Two-Piece Set</strong></p><p>রুচিশীল ফ্লোরাল ডিজাইন ও প্রিমিয়াম লিলেন কাপড়ে তৈরি আরামদায়ক ও আকর্ষণীয় টু-পিস সেট। দৈনন্দিন ব্যবহার কিংবা বিভিন্ন অনুষ্ঠানে আপনাকে দেবে মার্জিত ও স্টাইলিশ লুক।</p><h3>Product Details</h3><ul><li><p>Fabric: Premium Linen</p></li><li><p>Top Length: 44 Inches</p></li><li><p>Pajama Length: 39 Inches</p></li><li><p>Sleeve Length: 18 Inches</p></li><li><p>Available Body Sizes: 48, 50 &amp; 52 Inches</p></li><li><p>Set Includes: 2 Pieces (Top &amp; Pajama)</p></li></ul><h3>Available Sizes</h3><p>48 / 50 / 52 Inches</p><p><strong>Order Now from MUSLIM ABAYA.</strong></p>"
     }
   ],
   "tops-kurti": [
