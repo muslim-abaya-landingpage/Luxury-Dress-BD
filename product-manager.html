@@ -1513,10 +1513,8 @@
       }
 
       var basic = makeSection("pmSimpleBasic", "1. Basic Information", "Product name, category and description", true);
-      move("pmWooTitle", basic);
       var titleWrap = root.querySelector(".pm-woo-titlewrap");
       if (titleWrap) basic.appendChild(titleWrap);
-      move("pmPermaView", basic);
       var permalink = root.querySelector(".pm-wp-permalink");
       if (permalink) basic.appendChild(permalink);
       move("pmDescBox", basic);
