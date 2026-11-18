@@ -281,3 +281,36 @@ body.pm-editing #pmSave { display: none !important; }
   .pm-ms-row > .pm-ms-name-fixed { grid-column: 1 / -1; }
 }
 body.ma-dark .pm-ms, html.ma-dark .pm-ms { background: #1b1f27; border-color: #313744; }
+
+
+/* Simple four-section Add/Edit Product layout */
+.pm-woo .pm-simple-product-flow{display:flex;flex-direction:column;gap:14px;min-width:0}
+.pm-woo .pm-simple-step{border:1px solid #dfe5ed;border-radius:10px;background:#fff;box-shadow:0 2px 8px rgba(20,35,55,.035);overflow:hidden}
+.pm-woo .pm-simple-step>summary{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:68px;padding:13px 16px;cursor:pointer;list-style:none;background:#fff}
+.pm-woo .pm-simple-step>summary::-webkit-details-marker{display:none}
+.pm-woo .pm-simple-step>summary::marker{content:""}
+.pm-woo .pm-simple-step[open]>summary{border-bottom:1px solid #e8edf3;background:#fbfcfe}
+.pm-woo .pm-simple-step-copy{display:flex;flex-direction:column;gap:3px;min-width:0}
+.pm-woo .pm-simple-step-copy strong{font-size:14px;font-weight:700;line-height:1.4;color:#1c2a3c}
+.pm-woo .pm-simple-step-copy small{font-size:12px;line-height:1.45;color:#6b7788}
+.pm-woo .pm-simple-step-chevron{display:flex;align-items:center;justify-content:center;width:28px;height:28px;flex:none;border:1px solid #e2e7ee;border-radius:50%;color:#53647a;font-size:18px;transition:transform .18s ease}
+.pm-woo .pm-simple-step[open] .pm-simple-step-chevron{transform:rotate(180deg)}
+.pm-woo .pm-simple-step-body{display:flex;flex-direction:column;gap:12px;padding:14px}
+.pm-woo .pm-simple-step-body>.pm-wp-box{margin:0}
+.pm-woo .pm-simple-step-body>.pm-woo-titlewrap{margin:0}
+.pm-woo .pm-simple-step-body>.pm-wp-permalink{margin:0;padding:0 2px 4px}
+.pm-woo .pm-simple-step-body #pmCatBox .pm-wp-box-body{max-height:260px;overflow:auto}
+.pm-woo .pm-simple-step-body #pmDataBox{margin:0}
+.pm-woo .pm-simple-step-body #pmDataBox .pm-wp-data-wrap{min-height:220px}
+@media(max-width:900px){
+  .pm-woo .pm-wp-columns{grid-template-columns:minmax(0,1fr)}
+  .pm-woo .pm-simple-step>summary{min-height:62px;padding:12px}
+  .pm-woo .pm-simple-step-body{padding:10px}
+}
+@media(max-width:560px){
+  .pm-woo .pm-simple-step-copy strong{font-size:13px}
+  .pm-woo .pm-simple-step-copy small{font-size:11px}
+  .pm-woo .pm-simple-step-body #pmDataBox .pm-wp-data-wrap{display:block}
+  .pm-woo .pm-simple-step-body #pmDataBox .pm-wp-data-tabs{display:flex;flex-wrap:wrap;max-width:none;min-width:0;width:100%;border-right:0;border-bottom:1px solid #eee}
+  .pm-woo .pm-simple-step-body #pmDataBox .pm-wp-data-tabs li{flex:1 1 33.333%;min-width:90px}
+}
