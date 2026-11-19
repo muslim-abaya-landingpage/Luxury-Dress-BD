@@ -46,3 +46,27 @@ test("Bangla onboarding guidance stays visible in the redesigned Product Manager
   assert.match(redesign, /Keep the Bangla onboarding hint visible/);
   assert.match(redesign, /\.pm-wp-admin \.pl-admin-header > \.adm-menu-btn/);
 });
+
+import vm from "node:vm";
+
+test("Product categories support safe one-level parent/subcategory hierarchy without changing legacy categories", () => {
+  const source = readFileSync(new URL("../../product-category-hierarchy.js", import.meta.url), "utf8");
+  const window = {};
+  vm.runInNewContext(source, { window });
+  const api = window.MaCategoryHierarchy;
+  const legacy = [{ key: "abaya" }, { key: "hijab" }];
+  assert.deepEqual(Array.from(api.ordered(legacy), (x) => x.key), ["abaya", "hijab"]);
+  const sections = [{ key: "abaya" }, { key: "hijab" }, { key: "premium-abaya", parentKey: "abaya" }];
+  assert.deepEqual(Array.from(api.parentOptions(sections, "hijab"), (x) => x.key), ["abaya", "hijab"]);
+  assert.equal(api.validateParent(sections, "hijab", "abaya"), "abaya");
+  assert.deepEqual(Array.from(api.ordered(sections), (x) => x.key), ["abaya", "premium-abaya", "hijab"]);
+  assert.throws(() => api.validateParent(sections, "abaya", "premium-abaya"), /valid top-level parent/);
+  assert.throws(() => api.validateParent(sections, "hijab", "missing"), /valid top-level parent/);
+  assert.throws(() => api.validateParent(sections.concat([{ key: "abaya-child", parentKey: "abaya" }]), "abaya", "hijab"), /must remain a top-level/);
+});
+
+test("Product Manager persists parentKey only for explicit subcategories", () => {
+  assert.ok(html.includes('id="pmCatParent"'));
+  assert.ok(html.includes('if (parentKey) entry.parentKey = parentKey;'));
+  assert.ok(html.includes('if (sec.parentKey) lines.push("    parentKey: " + jsStr(sec.parentKey));'));
+});
