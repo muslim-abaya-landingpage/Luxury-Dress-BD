@@ -149,6 +149,11 @@
         <input type="text" id="pmCatMenuBn" placeholder="Festive Special">
       </div>
       <div class="pm-field" style="margin-bottom:10px">
+        <label>Parent category (optional)</label>
+        <select id="pmCatParent"><option value="">None — top-level category</option></select>
+        <small>Choose a parent to make this a subcategory. Existing product URLs remain unchanged.</small>
+      </div>
+      <div class="pm-field" style="margin-bottom:10px">
         <label>Category page (generated automatically)</label>
         <input type="text" id="pmCatPage" placeholder="category.html" readonly>
       </div>
@@ -167,6 +172,7 @@
 
   <script src="product-catalog-sync.js?v=ab0c6a1d0c536477"></script>
   <script src="product-catalog-sections.js?v=9a1a7235e993644f"></script>
+  <script src="product-category-hierarchy.js?v=20261120-v1"></script>
   <script src="product-config.js?v=5deede3e1d0f29c3"></script>
   <script src="product-utils.js?v=92f41c343c3ca139"></script>
   <script src="category-products.js?v=a83aea9c4de1c143"></script>
@@ -598,11 +604,12 @@
     });
     allItem.appendChild(allButton);
     catListEl.appendChild(allItem);
-    sections.forEach(function (sec, idx) {
+    window.MaCategoryHierarchy.ordered(sections).forEach(function (sec, idx) {
       var li = document.createElement("li");
       var btn = document.createElement("button");
       btn.type = "button";
       btn.className = "pm-cat-btn" + (sec.key === activeKey ? " is-active" : "");
+      if (sec.parentKey) { btn.style.paddingLeft = "30px"; btn.setAttribute("aria-label", "Subcategory: " + enName(sec)); }
       var count = (products[sec.key] || []).length;
       btn.innerHTML =
         escapeHtml(enName(sec)) +
@@ -3985,6 +3992,12 @@
     document.getElementById("pmCatMenuBn").value = sec.menuBn || "";
     document.getElementById("pmCatPage").value = sec.page || "";
     document.getElementById("pmCatPath").value = sec.path || "";
+    var parentSelect = document.getElementById("pmCatParent");
+    var hasChildren = sections.some(function (item) { return item.parentKey === sec.key; });
+    parentSelect.innerHTML = '<option value="">None — top-level category</option>' + window.MaCategoryHierarchy.parentOptions(sections, sec.key).map(function (item) { return '<option value="' + escapeAttr(item.key) + '">' + escapeHtml(item.menu || item.menuBn || item.key) + '</option>'; }).join("");
+    parentSelect.value = sec.parentKey || "";
+    parentSelect.disabled = hasChildren;
+    parentSelect.title = hasChildren ? "A category with subcategories must remain a top-level category." : "";
 
     document.getElementById("pmCatMenu").oninput = document.getElementById(
       "pmCatMenuBn"
@@ -4023,7 +4036,11 @@
       if (!menuBn) menuBn = menu;
 
       var row = ROW_CIRCLES[sections.length] || String(sections.length + 1);
+      var parentKey = "";
+      try { parentKey = window.MaCategoryHierarchy.validateParent(sections, key, document.getElementById("pmCatParent").value); }
+      catch (parentError) { toast(parentError.message); return; }
       var entry = { key: key, row: row, menu: menu, menuBn: menuBn, page: page, path: path };
+      if (parentKey) entry.parentKey = parentKey;
 
       if (isNew) {
         if (sections.some(function (s) {
@@ -4135,7 +4152,8 @@
       lines.push("    menu: " + jsStr(sec.menu) + ",");
       lines.push("    menuBn: " + jsStr(sec.menuBn) + ",");
       lines.push("    page: " + jsStr(sec.page) + ",");
-      lines.push("    path: " + jsStr(sec.path) + "");
+      lines.push("    path: " + jsStr(sec.path) + (sec.parentKey ? "," : ""));
+      if (sec.parentKey) lines.push("    parentKey: " + jsStr(sec.parentKey));
       lines.push("  }" + (idx < sections.length - 1 ? "," : ""));
     });
     lines.push("];");
