@@ -17,7 +17,7 @@
  */
 import { isOwner, isOwnerCached } from '../_lib/owner-auth.js';
 import { CATALOG_FILES } from '../_lib/live-catalog.js';
-import { validatePayload, writeLiveState } from './live-publish.js';
+import { validatePayload, validateUniqueSkus, writeLiveState } from './live-publish.js';
 import { withGithubToken } from '../_lib/github-app.js';
 
 const MAX_BODY = 14 * 1024 * 1024;
@@ -53,6 +53,9 @@ export function validateSave(p) {
   if (!p.baseShas || CATALOG_FILES.some((path) => !/^[a-f0-9]{40}$/.test(String(p.baseShas[path] || '')))) throw Error('CATALOG_REFRESH_REQUIRED');
   if (Array.isArray(p.assets) && p.assets.length) throw Error('R2_REQUIRED');
   if (typeof p.validation !== 'string') throw Error('BAD_VALIDATION');
+  let validation;
+  try { validation = JSON.parse(p.validation); } catch (e) { throw Error('BAD_VALIDATION'); }
+  validateUniqueSkus(validation && validation.products);
   return p;
 }
 
