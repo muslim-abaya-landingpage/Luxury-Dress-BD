@@ -224,7 +224,7 @@ test('CSV export and import use the explicit product SKU while preserving legacy
     'SKU,Name,Category,Price',
     'REAL-SKU-1,Updated SKU product,,650',
     'LEGACY-1,Updated legacy product,,350'
-  ].join('\\n'), products, [{ key: 'tops-kurti', menu: 'Tops & Kurti' }], { today: '2026-11-19' });
+  ].join('\n'), products, [{ key: 'tops-kurti', menu: 'Tops & Kurti' }], { today: '2026-11-19' });
   assert.equal(plan.errors.length, 0);
   assert.equal(plan.updates.length, 2);
   assert.equal(plan.staged['tops-kurti'][0].id, 'product-slug-1');
