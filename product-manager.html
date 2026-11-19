@@ -41,6 +41,7 @@
 <meta name="theme-color" content="#1b2a41">
 <link rel="apple-touch-icon" href="/images/admin/admin-icon-192.png">
 <link rel="stylesheet" href="admin-wp.css?v=1">
+<link rel="stylesheet" href="product-manager-woo-native.css?v=20261119-native-layout">
 </head>
 <body class="pl-admin adm-body pm-wp-admin" data-admin-guard="1">
   <div class="adm-shell">
@@ -1470,7 +1471,7 @@
     // Simplified four-section product editor. Existing controls and IDs are moved,
     // not recreated, so their current upload, validation, and save handlers remain intact.
     (function organizeSimpleProductForm() {
-      if (!root || root.dataset.simpleLayoutReady === "1") return;
+      if (!root || root.dataset.simpleLayoutReady === "1" || new URLSearchParams(location.search).get("layout") !== "guided") return;
       var columns = root.querySelector(".pm-wp-columns");
       var oldMain = columns && columns.querySelector(".pm-wp-col-main");
       var side = columns && columns.querySelector(".pm-wp-col-side");
