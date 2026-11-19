@@ -57,7 +57,7 @@ test("Product categories support safe one-level parent/subcategory hierarchy wit
   const legacy = [{ key: "abaya" }, { key: "hijab" }];
   assert.deepEqual(Array.from(api.ordered(legacy), (x) => x.key), ["abaya", "hijab"]);
   const sections = [{ key: "abaya" }, { key: "hijab" }, { key: "premium-abaya", parentKey: "abaya" }];
-  assert.deepEqual(Array.from(api.parentOptions(sections, "hijab"), (x) => x.key), ["abaya", "hijab"]);
+  assert.deepEqual(Array.from(api.parentOptions(sections, "hijab"), (x) => x.key), ["abaya"]);
   assert.equal(api.validateParent(sections, "hijab", "abaya"), "abaya");
   assert.deepEqual(Array.from(api.ordered(sections), (x) => x.key), ["abaya", "premium-abaya", "hijab"]);
   assert.throws(() => api.validateParent(sections, "abaya", "premium-abaya"), /valid top-level parent/);
