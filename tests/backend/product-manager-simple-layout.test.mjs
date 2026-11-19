@@ -37,3 +37,12 @@ test("The four-step guided editor remains available only by explicit opt-in", ()
   assert.ok(css.includes("@media (max-width: 980px)"));
   assert.ok(css.includes("@media (max-width: 640px)"));
 });
+
+
+test("Bangla onboarding guidance stays visible in the redesigned Product Manager", () => {
+  const redesign = readFileSync(new URL("../../product-manager-redesign.css", import.meta.url), "utf8");
+  assert.ok(html.includes('class="pm-guide"'), "missing Bangla onboarding guidance");
+  assert.match(redesign, /\.pm-wp-admin \.pm-guide\s*\{[^}]*display:\s*flex\s*!important/s);
+  assert.match(redesign, /Keep the Bangla onboarding hint visible/);
+  assert.match(redesign, /\.pm-wp-admin \.pl-admin-header > \.adm-menu-btn/);
+});
