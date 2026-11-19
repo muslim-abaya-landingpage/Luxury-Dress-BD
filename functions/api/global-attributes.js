@@ -28,7 +28,7 @@ function cleanAttributes(input) {
     const terms = raw.terms.map((term) => {
       const termName = String(term && term.name || '').trim().replace(/\s+/g, ' ');
       const termId = String(term && term.id || '').trim().toLowerCase();
-      if (!termName || termName.length > 60 || !/^[\\p{L}\\p{N}][\\p{L}\\p{N}_-]{0,49}$/u.test(termId)) throw Error('INVALID_TERM');
+      if (!termName || termName.length > 60 || !/^[\p{L}\p{N}][\p{L}\p{N}_-]{0,49}$/u.test(termId)) throw Error('INVALID_TERM');
       if (termIds.has(termId) || termNames.has(termName.toLocaleLowerCase())) throw Error('DUPLICATE_TERM');
       termIds.add(termId); termNames.add(termName.toLocaleLowerCase());
       return { id: termId, name: termName };
