@@ -2,13 +2,21 @@
  * "Watch & Shop" — হোমপেজে একটা ভিডিও-ক্যারোসেল, Anzaar-এর মতো।
  *
  * ডেটা সোর্স: window.CATEGORY_PRODUCTS-এর যেকোনো প্রোডাক্টে videoUrl ফিল্ড থাকলে
- * (Product Manager-এর "YouTube ভিডিও লিংক" ফিল্ড দিয়ে বসানো যায়), সেটাই এখানে
- * দেখানো হয় — নাম, দাম, ছবি সব আসল ক্যাটালগ থেকে আসে, এখানে আলাদা করে কিছু
- * হার্ডকোড করা নেই। কোনো প্রোডাক্টে ভিডিও না থাকলে পুরো সেকশনটাই হাইড থাকে।
+ * (Product Manager-এর "ভিডিও লিংক" ফিল্ড দিয়ে YouTube বা Facebook — দুটোই বসানো
+ * যায়), সেটাই এখানে দেখানো হয় — নাম, দাম, ছবি সব আসল ক্যাটালগ থেকে আসে, এখানে
+ * আলাদা করে কিছু হার্ডকোড করা নেই। কোনো প্রোডাক্টে ভিডিও না থাকলে পুরো সেকশনটাই
+ * হাইড থাকে।
  *
- * ভিডিও প্লে করতে index-youtube-lazy.js-এর আগে থেকে থাকা click-delegation
- * (.lux-video-facade / data-video-id) পুনরায় ব্যবহার করা হচ্ছে, যাতে একই
- * লজিক দু'জায়গায় লিখতে না হয়।
+ * YouTube ভিডিও প্লে করতে index-youtube-lazy.js-এর আগে থেকে থাকা click-delegation
+ * (.lux-video-facade / data-video-id) পুনরায় ব্যবহার করা হচ্ছে, যাতে একই লজিক
+ * দু'জায়গায় লিখতে না হয়।
+ *
+ * Facebook ভিডিওর জন্য আলাদা কোনো অ্যাপ/SDK/অ্যাক্সেস-টোকেন লাগে না — Facebook-এর
+ * পাবলিক "Video Plugin" iframe (facebook.com/plugins/video.php?href=...) ব্যবহার
+ * করা হয়েছে, যা কোনো লগইন বা অ্যাপ আইডি ছাড়াই পাবলিক ভিডিও চালায়। শুধু সীমাবদ্ধতা:
+ * Facebook ভিডিওর থাম্বনেইল পাবলিকভাবে (টোকেন ছাড়া) আনার কোনো সহজ উপায় নেই, তাই
+ * ক্লিক করার আগে প্রোডাক্টের নিজের ছবিটাই প্রিভিউ হিসেবে দেখানো হয় (fake থাম্বনেইল
+ * বানানো হয়নি)।
  */
 (function () {
   "use strict";
@@ -36,15 +44,29 @@
     return m ? m[1] : "";
   }
 
+  function isFacebookVideoUrl(url) {
+    var s = String(url || "").trim();
+    if (!s) return false;
+    return /(^|\/\/)(www\.|m\.|web\.)?(facebook\.com|fb\.watch)\//i.test(s);
+  }
+
+  // provider+ref: {provider:'youtube', videoId:'...'} বা {provider:'facebook', href:'<full fb url>'}
+  function resolveVideo(url) {
+    var vid = extractYouTubeId(url);
+    if (vid) return { provider: "youtube", videoId: vid };
+    if (isFacebookVideoUrl(url)) return { provider: "facebook", href: String(url).trim() };
+    return null;
+  }
+
   function collectVideoProducts() {
     var secs = window.CATALOG_SECTIONS || [];
     var out = [];
     secs.forEach(function (sec) {
       var list = (window.CATEGORY_PRODUCTS || {})[sec.key] || [];
       list.forEach(function (p) {
-        var vid = extractYouTubeId(p.videoUrl);
-        if (!vid) return;
-        out.push({ sec: sec, p: p, videoId: vid });
+        var video = resolveVideo(p.videoUrl);
+        if (!video) return;
+        out.push({ sec: sec, p: p, video: video });
       });
     });
     return out;
@@ -60,6 +82,38 @@
     return "/product/" + encodeURIComponent(id);
   }
 
+  function videoRatioHtml(item, name) {
+    var v = item.video;
+    if (v.provider === "youtube") {
+      // index-youtube-lazy.js-এর গ্লোবাল click-delegation (.lux-video-facade + data-video-id)
+      // এটাকে ধরবে এবং YouTube iframe বসিয়ে দেবে।
+      return (
+        '<div class="wns-video-ratio" data-video-id="' + escapeHtml(v.videoId) + '">' +
+        '<button type="button" class="lux-video-facade wns-facade">' +
+        '<img src="https://i.ytimg.com/vi/' + escapeHtml(v.videoId) + '/hqdefault.jpg" alt="' + name + ' video" loading="lazy">' +
+        '<span class="lux-video-play wns-play" aria-hidden="true"></span>' +
+        "</button>" +
+        "</div>"
+      );
+    }
+    // Facebook — এই ভিডিও র‍্যাপারে data-video-id নেই (data-fb-href আছে), তাই
+    // index-youtube-lazy.js-এর গ্লোবাল লিসেনার .lux-video-facade ক্লাস দেখে ক্লিক
+    // ধরলেও data-video-id না পেয়ে কিছু করবে না — আসল প্লে হবে নিজের
+    // bindRailClicks()-এ (নিচে)। .lux-video-facade/.lux-video-play ক্লাস শুধু
+    // একই পজিশনিং/সাইজিং CSS রিইউজ করার জন্য রাখা হয়েছে।
+    var p = item.p;
+    var fallbackImg = escapeHtml(p.image || "");
+    return (
+      '<div class="wns-video-ratio" data-fb-href="' + escapeHtml(v.href) + '">' +
+      '<button type="button" class="lux-video-facade wns-facade wns-facade-fb">' +
+      '<img src="' + fallbackImg + '" alt="' + name + ' video" loading="lazy">' +
+      '<span class="lux-video-play wns-play" aria-hidden="true"></span>' +
+      '<span class="wns-fb-badge" aria-hidden="true">Facebook</span>' +
+      "</button>" +
+      "</div>"
+    );
+  }
+
   function cardHtml(item) {
     var p = item.p;
     var id = escapeHtml(p.id || "");
@@ -68,12 +122,7 @@
     var href = productHref(p.id);
     return (
       '<div class="wns-card">' +
-      '<div class="wns-video-ratio" data-video-id="' + escapeHtml(item.videoId) + '">' +
-      '<button type="button" class="lux-video-facade wns-facade">' +
-      '<img src="https://i.ytimg.com/vi/' + escapeHtml(item.videoId) + '/hqdefault.jpg" alt="' + name + ' video" loading="lazy">' +
-      '<span class="lux-video-play wns-play" aria-hidden="true"></span>' +
-      "</button>" +
-      "</div>" +
+      videoRatioHtml(item, name) +
       '<div class="wns-product-strip">' +
       '<a class="wns-product-link" href="' + escapeHtml(href) + '">' +
       '<img class="wns-thumb" src="' + img + '" alt="' + name + '" loading="lazy">' +
@@ -137,13 +186,41 @@
     return false;
   }
 
-  function bindCartButtons(rail) {
+  function activateFacebookVideo(wrap) {
+    if (!wrap || wrap.getAttribute("data-loaded") === "1") return;
+    var href = wrap.getAttribute("data-fb-href");
+    if (!href) return;
+    wrap.setAttribute("data-loaded", "1");
+    var iframe = document.createElement("iframe");
+    // Facebook-এর পাবলিক Video Plugin — কোনো অ্যাপ আইডি/SDK/লগইন লাগে না,
+    // পাবলিক ভিডিওর জন্য এই iframe-টাই যথেষ্ট।
+    iframe.src =
+      "https://www.facebook.com/plugins/video.php?href=" +
+      encodeURIComponent(href) +
+      "&show_text=false&autoplay=true";
+    iframe.title = "Luxury Dress Video Preview";
+    iframe.setAttribute("allow", "autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share");
+    iframe.allowFullscreen = true;
+    wrap.innerHTML = "";
+    wrap.appendChild(iframe);
+  }
+
+  function bindRailClicks(rail) {
     rail.addEventListener("click", function (e) {
-      var btn = e.target && e.target.closest && e.target.closest(".wns-cart-btn");
-      if (!btn) return;
-      e.preventDefault();
-      e.stopPropagation();
-      addToCartById(btn.getAttribute("data-pid"));
+      var cartBtn = e.target && e.target.closest && e.target.closest(".wns-cart-btn");
+      if (cartBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        addToCartById(cartBtn.getAttribute("data-pid"));
+        return;
+      }
+      var fbFacade = e.target && e.target.closest && e.target.closest(".wns-facade-fb");
+      if (fbFacade) {
+        var wrap = fbFacade.closest("[data-fb-href]");
+        if (wrap) activateFacebookVideo(wrap);
+      }
+      // YouTube facades (.lux-video-facade) are handled by index-youtube-lazy.js's
+      // own document-level listener — nothing to do here for those.
     });
   }
 
@@ -167,7 +244,7 @@
 
     var items = collectVideoProducts();
     rail.innerHTML = items.length ? items.map(cardHtml).join("") : "";
-    if (items.length) bindCartButtons(rail);
+    if (items.length) bindRailClicks(rail);
     section.hidden = !items.length;
     return true;
   }

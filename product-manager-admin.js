@@ -774,7 +774,7 @@
       field("id", "SKU / ID", p.id) +
       field("stock", "ক্যাটালগের পণ্য-স্তরের স্টক (সার্ভার স্টক-শিট/সাইজ-স্টক থাকলে তা অগ্রাধিকার পাবে)", p.stock == null ? "" : p.stock, "number") +
       fieldWide("image", "ছবির URL (অটো-পূরণ হয় আপলোড করলে, বা নিজে বসান)", p.image) +
-      fieldWide("videoUrl", "YouTube ভিডিও লিংক (অপশনাল — বসালেই হোমপেজের \"Watch & Shop\"-এ অটো দেখাবে)", p.videoUrl) +
+      fieldWide("videoUrl", "ভিডিও লিংক — YouTube অথবা Facebook (অপশনাল — বসালেই হোমপেজের \"Watch & Shop\"-এ অটো দেখাবে)", p.videoUrl) +
       "</div>";
 
     card.querySelectorAll("[data-f]").forEach(function (inp) {
