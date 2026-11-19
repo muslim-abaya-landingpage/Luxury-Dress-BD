@@ -2739,14 +2739,14 @@
           var pt = p.productType === "variable" || (Array.isArray(p.variations) && p.variations.length) ? "variable" : (p.productType === "grouped" || p.productType === "external") ? p.productType : "simple";
           if (overviewType === "virtual" ? !p.virtual : overviewType === "downloadable" ? !p.downloadable : pt !== overviewType) return false;
         }
-        return [p.name, p.id, s.key, s.menu, s.menuBn, p.brand || ""].concat(productTags(p)).join(" ").toLowerCase().indexOf(term) !== -1;
+        return [p.name, p.sku || "", p.id, s.key, s.menu, s.menuBn, p.brand || ""].concat(productTags(p)).join(" ").toLowerCase().indexOf(term) !== -1;
       });
       if (overviewSort.key) {
         var sk = overviewSort.key, dir = overviewSort.dir;
         var val = function (row) {
           var p = row.product;
           if (sk === "name") return String(p.name || "").toLowerCase();
-          if (sk === "sku") return String(p.id || "").toLowerCase();
+          if (sk === "sku") return String(p.sku || p.id || "").toLowerCase();
           if (sk === "price") return parseInt(p.price, 10) || 0;
           if (sk === "date") return String(p.dateAdded || "");
           if (sk === "stock") return managerOutOfStock(p) ? -1 : (p.stock == null || p.stock === "" ? 1e9 : parseInt(p.stock, 10) || 0);
@@ -2805,7 +2805,7 @@
               '<button type="button" class="pm-row-link" data-status-action="restore" data-status-cat="' + escapeAttr(s.key) + '" data-status-index="' + row.index + '">Restore</button> | ' +
               '<button type="button" class="pm-row-link pm-row-danger" data-status-action="delete" data-status-cat="' + escapeAttr(s.key) + '" data-status-index="' + row.index + '">Delete permanently</button>' +
               (p.trashedAt ? ' <span class="pm-row-id">· trashed ' + escapeHtml(formatDay(p.trashedAt)) + ' · deleted permanently on ' + escapeHtml(formatDay(window.MaProductPublishUtils.trashDeleteDay(p.trashedAt))) + '</span>' : '') + '</div></td>' +
-              '<td class="column-sku">' + escapeHtml(p.id || "") + '</td><td class="column-stock"></td><td class="column-price">' + priceText(p) + '</td>' +
+              '<td class="column-sku">' + escapeHtml(p.sku || p.id || "") + '</td><td class="column-stock"></td><td class="column-price">' + priceText(p) + '</td>' +
               '<td class="column-cats">' + escapeHtml(catName(s)) + '</td><td class="column-tags"></td><td class="column-brand"></td><td class="column-featured"></td>' +
               '<td class="column-date">Trash</td></tr>'
             : '') + (productStatus(p) === "trash" ? '' :
@@ -2816,7 +2816,7 @@
           '<button type="button" class="pm-row-link pm-overview-stock" data-stock-cat="' + escapeAttr(s.key) + '" data-stock-index="' + row.index + '" aria-pressed="' + out + '">' + (out ? 'Mark in stock' : 'Mark out of stock') + '</button>' +
           ' | <button type="button" class="pm-row-link pm-row-danger" data-status-action="trash" data-status-cat="' + escapeAttr(s.key) + '" data-status-index="' + row.index + '">Trash</button>' +
           (p.id ? ' | <a class="pm-row-link" href="/product/' + encodeURIComponent(p.id) + '" target="_blank" rel="noopener">View</a>' : '') + '</div></td>' +
-          '<td class="column-sku">' + (p.id ? escapeHtml(p.id) : '<span class="na">–</span>') + '</td>' +
+          '<td class="column-sku">' + (p.sku || p.id ? escapeHtml(p.sku || p.id) : '<span class="na">–</span>') + '</td>' +
           '<td class="column-stock">' + stockCell(p, out) + '</td>' +
           '<td class="column-price">' + priceText(p) + '</td>' +
           '<td class="column-cats"><button type="button" class="pm-row-link" data-filter-cat="' + escapeAttr(s.key) + '">' + escapeHtml(catName(s)) + '</button></td>' +
