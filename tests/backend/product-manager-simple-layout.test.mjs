@@ -22,8 +22,8 @@ test("Product editor defaults to the WooCommerce classic two-column layout", () 
   ]) assert.ok(html.includes('id="' + id + '"'), "missing WooCommerce product panel template: " + id);
 
   assert.ok(html.includes('root.querySelector(".pm-wp-columns")'));
-  assert.ok(html.includes('root.querySelector(".pm-wp-col-main")'));
-  assert.ok(html.includes('root.querySelector(".pm-wp-col-side")'));
+  assert.ok(html.includes('columns.querySelector(".pm-wp-col-main")'));
+  assert.ok(html.includes('columns.querySelector(".pm-wp-col-side")'));
 });
 
 test("The four-step guided editor remains available only by explicit opt-in", () => {
