@@ -66,6 +66,11 @@ test('card heart sits in the image top-right as a white circle (Anzaar style) an
     await heart.hover();
     await expect.poll(() => heart.evaluate((b) => getComputedStyle(b, '::after').opacity)).toBe('1');
     expect(await heart.evaluate((b) => getComputedStyle(b, '::after').content)).toBe('"Wishlist"');
+    await heart.click();
+    await expect(heart).toHaveAttribute('aria-pressed', 'true');
+    expect(await heart.locator('svg').evaluate((s) => getComputedStyle(s).fill)).toBe('rgb(224, 38, 45)'); // saved = red
+    await heart.click();
+    await expect(heart).toHaveAttribute('aria-pressed', 'false');
     const cardsText = await page.locator('article.ah-card, article.premium-card').evaluateAll((els) => els.map((e) => e.innerText).join('\n'));
     expect(cardsText).not.toMatch(/In Stock/i);
     await expect(page.locator('article .product-instock-badge')).toHaveCount(0);
