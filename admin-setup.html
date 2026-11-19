@@ -166,6 +166,19 @@
             <button type="submit" id="stGhKeySave" class="adm-btn">Key যাচাই করে Save করুন</button>
             <span id="stGhKeyResult" class="st-result" role="status"></span>
           </form>
+          <form id="stCourierRatesForm" class="st-ghkey" autocomplete="off" style="margin-top:18px">
+            <label><b>কুরিয়ার চার্জ তুলনা</b> — আপনার নিজের Pathao/RedX অ্যাকাউন্টে যে হার দেখায়, সেটাই এখানে বসান (খালি রাখলে সেই কুরিয়ারের তুলনা দেখানো হবে না)</label>
+            <table class="st-tokens" style="margin:8px 0">
+              <thead><tr><th></th><th>ঢাকার ভিতরে (৳)</th><th>ঢাকার বাইরে (৳)</th></tr></thead>
+              <tbody>
+                <tr><td>Steadfast</td><td><input type="number" min="0" max="2000" id="crSteadfastInside" class="st-rate-in"></td><td><input type="number" min="0" max="2000" id="crSteadfastOutside" class="st-rate-in"></td></tr>
+                <tr><td>Pathao</td><td><input type="number" min="0" max="2000" id="crPathaoInside" class="st-rate-in"></td><td><input type="number" min="0" max="2000" id="crPathaoOutside" class="st-rate-in"></td></tr>
+                <tr><td>RedX</td><td><input type="number" min="0" max="2000" id="crRedxInside" class="st-rate-in"></td><td><input type="number" min="0" max="2000" id="crRedxOutside" class="st-rate-in"></td></tr>
+              </tbody>
+            </table>
+            <button type="submit" id="stCourierRatesSave" class="adm-btn">হার Save করুন</button>
+            <span id="stCourierRatesResult" class="st-result" role="status"></span>
+          </form>
           <details class="st-howto">
             <summary>GitHub টোকেন বদলানোর ধাপ (মেয়াদ শেষ হলে বা ভুলে মুছে গেলে)</summary>
             <ol>

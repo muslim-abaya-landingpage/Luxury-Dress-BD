@@ -63,6 +63,24 @@ export async function onRequest(context) {
     headers.set('X-Content-Type-Options', 'nosniff');
     return new Response(request.method === 'HEAD' ? null : asset.body, { status: 200, headers });
   }
+  // Google Merchant Center feed: a static XML file rebuilt on every deploy from the same catalog
+  // as the Meta feed. No D1 live-sync — Google re-fetches on its own schedule, so same-day freshness
+  // is not needed the way it is for Meta's real-time pixel/CAPI events.
+  if (url.pathname === '/google-product-feed.xml') {
+    const assetUrl = new URL('/google-product-feed.xml', url.origin);
+    const assetRequest = new Request(assetUrl.toString(), { method: 'GET', headers: request.headers });
+    const asset = await env.ASSETS.fetch(assetRequest);
+    if (!asset.ok) return new Response('Google product feed is not present in this deployment.', {
+      status: 503,
+      headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' }
+    });
+    const headers = new Headers(asset.headers);
+    headers.set('Content-Type', 'application/xml; charset=utf-8');
+    headers.set('Content-Disposition', 'inline; filename="google-product-feed.xml"');
+    headers.set('Cache-Control', 'public, max-age=300, s-maxage=300');
+    headers.set('X-Content-Type-Options', 'nosniff');
+    return new Response(request.method === 'HEAD' ? null : asset.body, { status: 200, headers });
+  }
   const path = url.pathname.replace(/^\//, '');
   if (LIVE_FILES.indexOf(path) >= 0) return serveLiveFile(request, env, path);
   const m = /^product\/([^/]+?)(?:\.html)?$/.exec(path);

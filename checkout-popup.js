@@ -46,6 +46,21 @@
   }
   function isValidBdPhone(p) { return /^01[3-9]\d{8}$/.test(p); }
 
+  // Repeat-customer welcome note: asks the worker (not Apps Script) whether this phone has a
+  // past non-blocked order. Never blocks or changes the form; a failed/slow check just stays silent.
+  var repeatCheckLast = "";
+  function checkRepeatCustomer(phone, root) {
+    var note = $("#ma-cop-repeat", root);
+    if (!note) return;
+    if (!isValidBdPhone(phone)) { note.style.display = "none"; return; }
+    if (phone === repeatCheckLast) return;
+    repeatCheckLast = phone;
+    fetch("/_ma/repeat?phone=" + encodeURIComponent(phone), { credentials: "omit" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) { if (root && root.isConnected) note.style.display = (data && data.repeat) ? "" : "none"; })
+      .catch(function () {});
+  }
+
   function lineBaseName(line) {
     if (typeof window.getCartLineBaseName === "function") return window.getCartLineBaseName(line);
     return String(line.name || "").replace(/\s*\((Size|Body|Length)[^)]*\)\s*$/i, "");
@@ -209,7 +224,7 @@
       "<p class='ma-cop__h'>আপনার তথ্য</p>" +
       "<input type='text' name='_hp' tabindex='-1' autocomplete='off' aria-hidden='true' style='position:absolute;left:-9999px;width:1px;height:1px;opacity:0'>" +
       field("name", "আপনার পূর্ণ নাম", true, "<input id='ma-cop-name' name='name' type='text' autocomplete='name' maxlength='80' placeholder='যেমন: ফাতেমা আক্তার'>", "আপনার নাম লিখুন।") +
-      field("phone", "মোবাইল নম্বর", true, "<input id='ma-cop-phone' name='phone' type='tel' inputmode='numeric' autocomplete='tel' maxlength='17' placeholder='01XXXXXXXXX'>", "সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন (যেমন 017XXXXXXXX)।") +
+      field("phone", "মোবাইল নম্বর", true, "<input id='ma-cop-phone' name='phone' type='tel' inputmode='numeric' autocomplete='tel' maxlength='17' placeholder='01XXXXXXXXX'><p id='ma-cop-repeat' style='display:none;margin:6px 0 0;font-size:12px;color:#15803d;font-weight:600'>স্বাগতম, আবার এসেছেন! 🎉</p>", "সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন (যেমন 017XXXXXXXX)।") +
       "<div class='ma-cop__2'>" +
       field("district", "জেলা", true, "<select id='ma-cop-district' name='district'><option value=''>জেলা বাছাই করুন</option>" + opts + "</select>", "জেলা বাছাই করুন।") +
       field("area", "উপজেলা / এলাকা", true, "<select id='ma-cop-area' name='area' disabled><option value=''>আগে জেলা বাছাই করুন</option></select>", "উপজেলা / এলাকা বাছাই করুন।") +
@@ -688,6 +703,11 @@
       var p = normalizeBdPhone(this.value);
       if (p && isValidBdPhone(p)) this.value = p;
       if (this.value) setBad("phone", !isValidBdPhone(p));
+      checkRepeatCustomer(p, root);
+    });
+    $("#ma-cop-phone", root).addEventListener("input", function () {
+      var note = $("#ma-cop-repeat", root);
+      if (note) note.style.display = "none";
     });
     renderTotals();
     // Next frame: start the open animation.

@@ -478,6 +478,28 @@
     });
   }
 
+  function getCourierRates() {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return apiPost({ RecordType: "AdminCourierRatesGet", Token: s.token }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "COURIER_RATES_FETCH_FAILED");
+      return res.rates;
+    });
+  }
+
+  function saveCourierRates(rates) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    var payload = { RecordType: "AdminCourierRatesSave", Token: s.token };
+    ["steadfastInside", "steadfastOutside", "pathaoInside", "pathaoOutside", "redxInside", "redxOutside"].forEach(function (k) {
+      payload[k] = rates && rates[k] != null ? String(rates[k]) : "";
+    });
+    return apiPost(payload).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "COURIER_RATES_SAVE_FAILED");
+      return res.rates;
+    });
+  }
+
   function dismissGrowthItem(kind, key) {
     var s = getSession();
     if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
@@ -719,6 +741,8 @@
     runSetupAction: runSetupAction,
     saveMessengerPageToken: saveMessengerPageToken,
     saveGithubAppKey: saveGithubAppKey,
+    getCourierRates: getCourierRates,
+    saveCourierRates: saveCourierRates,
     getActivity: getActivity,
     getProductProfit: getProductProfit,
     saveProductCosts: saveProductCosts,

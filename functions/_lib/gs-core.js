@@ -254,6 +254,12 @@ function doPost(e) {
     if (type === 'AdminMessengerTokenSave') {
       return jsonOut_(saveMessengerPageToken_(e));
     }
+    if (type === 'AdminCourierRatesGet') {
+      return jsonOut_(getAdminCourierRates_(e));
+    }
+    if (type === 'AdminCourierRatesSave') {
+      return jsonOut_(saveAdminCourierRates_(e));
+    }
     if (type === 'AdminAnalyticsV2') {
       return jsonOut_(getAdminAnalyticsV2_(e));
     }
@@ -6153,6 +6159,55 @@ function saveCartCheckpoint_(e) {
     sheet.getRange(row, 2, 1, 6).setValues([[name, summary, value, createdAt, now, 'open']]);
   }
   return { ok: true };
+}
+
+// Hourly, from siteUptimeCheck: carts open >=1hr, worth >=500tk, not yet alerted get one
+// Telegram message with a ready WhatsApp follow-up link each, so the admin can send in one tap
+// from the phone without opening Admin → Growth. Marks Alerted so it is sent only once per cart.
+var CART_ALERT_MIN_VALUE_ = 500;
+var CART_ALERT_MIN_AGE_MS_ = 60 * 60 * 1000;
+function abandonedCartAlertCheck_() {
+  try {
+    var sheet = ensureAbandonedCartsSheet_();
+    if (sheet.getLastColumn() < 8) sheet.getRange(1, 8).setValue('Alerted');
+    var data = sheet.getDataRange().getValues();
+    var now = Date.now();
+    var lines = [];
+    for (var i = 1; i < data.length; i++) {
+      var r = data[i];
+      var status = String(r[6] || '');
+      var alerted = String(r[7] || '');
+      if (status !== 'open' || alerted) continue;
+      var value = Number(r[3]) || 0;
+      var createdAt = r[4] instanceof Date ? r[4].getTime() : Date.parse(r[4]);
+      if (value < CART_ALERT_MIN_VALUE_) continue;
+      if (!isFinite(createdAt) || now - createdAt < CART_ALERT_MIN_AGE_MS_) continue;
+      var phone = String(r[0] || '');
+      var name = String(r[1] || '');
+      var wa = typeof waWebLink_ === 'function' ? waWebLink_(phone) : 'https://wa.me/' + phone.replace(/\D/g, '');
+      lines.push('৳' + Math.round(value) + ' — ' + (name || phone) + ' (' + phone + ')\n' + wa);
+      sheet.getRange(i + 1, 8).setValue('alerted:' + new Date());
+    }
+    if (lines.length) {
+      sendTelegramText_('🛒 পরিত্যক্ত কার্ট (১ ঘণ্টা+, ৳' + CART_ALERT_MIN_VALUE_ + '+):\n\n' + lines.join('\n\n') +
+        '\n\nWhatsApp লিংকে চাপলে ফলো-আপ মেসেজ রেডি থাকবে। বিস্তারিত: Admin → Growth');
+    }
+    return { ok: true, alerted: lines.length };
+  } catch (err) {
+    return { ok: false, error: String(err && err.message || err) };
+  }
+}
+
+// Same digit-normalizing as the admin-growth.html waLink() helper, without the message text
+// (the Telegram line is short; the admin taps through to WhatsApp and types there).
+function waWebLink_(phone) {
+  var digits = String(phone || '').replace(/\D/g, '');
+  if (digits.indexOf('00880') === 0) digits = digits.slice(2);
+  if (digits.indexOf('880') !== 0) {
+    if (digits.indexOf('0') === 0) digits = '880' + digits.slice(1);
+    else if (digits.indexOf('1') === 0) digits = '880' + digits;
+  }
+  return 'https://wa.me/' + digits;
 }
 
 function markCartConverted_(phone) {

@@ -1878,6 +1878,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         <span class="phone-code" aria-hidden="true">88</span>
                         <input type="tel" id="userPhone" placeholder="01XXXXXXXXX" required pattern="^(01)[3-9][0-9]{8}$" title="দয়া করে একটি সঠিক ১১ ডিজিটের বাংলাদেশি মোবাইল নম্বর দিন (যেমন: 017XXXXXXXX)" autocomplete="tel">
                     </div>
+                    <p id="repeatCustomerNote" style="display:none;margin:8px 0 0;font-size:13px;color:#15803d;font-weight:600">স্বাগতম, আবার এসেছেন! 🎉</p>
                 </div>
                 <div class="form-group">
                     <label for="userEmail">Email <span style="font-size:13px;font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0;">(Optional)</span></label>
@@ -4316,5 +4317,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="site-footer-config.js?v=4997c01bf75eafe3"></script>
 <script src="site-footer.js?v=f71efd1257c38eed"></script>
 <script defer src="mobile-bottom-nav.js?v=a3bb651189199322"></script>
+<script>
+(function () {
+  // Repeat-customer welcome note: asks the worker (not Apps Script) whether this phone has a
+  // past non-blocked order, and shows a small note if so. Never blocks or changes the form.
+  var input = document.getElementById('userPhone');
+  var note = document.getElementById('repeatCustomerNote');
+  if (!input || !note) return;
+  var lastChecked = '';
+  var timer = null;
+  function check() {
+    var digits = String(input.value || '').replace(/\D/g, '');
+    if (!/^01[3-9]\d{8}$/.test(digits)) { note.style.display = 'none'; return; }
+    if (digits === lastChecked) return;
+    lastChecked = digits;
+    fetch('/_ma/repeat?phone=' + encodeURIComponent(digits), { credentials: 'omit' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) { note.style.display = (data && data.repeat) ? '' : 'none'; })
+      .catch(function () { note.style.display = 'none'; });
+  }
+  input.addEventListener('input', function () { note.style.display = 'none'; clearTimeout(timer); timer = setTimeout(check, 500); });
+  input.addEventListener('blur', check);
+})();
+</script>
 </body>
 </html>

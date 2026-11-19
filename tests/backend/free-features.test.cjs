@@ -351,3 +351,50 @@ test('order lookup finds the row and neighbour IDs from one read', () => {
   assert.equal(JSON.stringify(box.admLocateOrder_(rows, 'A')), JSON.stringify({ index: 0, prevId: '', nextId: 'B' }));
   assert.equal(box.admLocateOrder_(rows, 'Z').index, -1);
 });
+
+function fakeSheet_(rows) {
+  return {
+    rows,
+    getLastColumn() { return this.rows[0].length; },
+    getDataRange() { const self = this; return { getValues: () => self.rows }; },
+    getRange(r, c) {
+      const self = this;
+      return {
+        setValue(v) { while (self.rows.length <= r - 1) self.rows.push([]); self.rows[r - 1][c - 1] = v; },
+        getValue() { return (self.rows[r - 1] || [])[c - 1]; },
+      };
+    },
+  };
+}
+
+test('abandoned-cart alert: old high-value carts get one Telegram ping with a WhatsApp link, never twice', () => {
+  const now = Date.now();
+  const hourAgo = new Date(now - 61 * 60 * 1000);
+  const justNow = new Date(now - 5 * 60 * 1000);
+  const sheet = fakeSheet_([
+    ['Phone', 'Name', 'CartSummary', 'CartValue', 'CreatedAt', 'UpdatedAt', 'Status'],
+    ['01711111111', 'Rina', 'Abaya x1', 1200, hourAgo, hourAgo, 'open'],
+    ['01822222222', 'Mina', 'Hijab x1', 300, hourAgo, hourAgo, 'open'],   // below value threshold
+    ['01933333333', 'Tina', 'Abaya x2', 2000, justNow, justNow, 'open'], // too new
+    ['01944444444', 'Sina', 'Abaya x1', 1500, hourAgo, hourAgo, 'converted'], // not open
+  ]);
+  const sent = [];
+  const box = {
+    ensureAbandonedCartsSheet_: () => sheet,
+    sendTelegramText_: (msg) => { sent.push(msg); return { ok: true }; },
+  };
+  vm.createContext(box);
+  vm.runInContext(['var CART_ALERT_MIN_VALUE_ = 500;', 'var CART_ALERT_MIN_AGE_MS_ = 60 * 60 * 1000;', extractFrom(CODE, 'waWebLink_'), extractFrom(CODE, 'abandonedCartAlertCheck_')].join('\n'), box);
+  const res = box.abandonedCartAlertCheck_();
+  assert.equal(res.ok, true);
+  assert.equal(res.alerted, 1, 'only the old, high-value, open cart qualifies');
+  assert.equal(sent.length, 1);
+  assert.match(sent[0], /Rina/);
+  assert.match(sent[0], /01711111111/);
+  assert.match(sent[0], /wa\.me\/8801711111111/);
+  assert.doesNotMatch(sent[0], /Mina|Tina|Sina/);
+  assert.equal(sheet.rows[1][7].indexOf('alerted:'), 0, 'row is marked so it is not re-alerted');
+  const res2 = box.abandonedCartAlertCheck_();
+  assert.equal(res2.alerted, 0, 'already-alerted cart is skipped on the next hourly run');
+  assert.equal(sent.length, 1);
+});

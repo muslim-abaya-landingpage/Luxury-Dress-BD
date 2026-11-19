@@ -4,6 +4,7 @@
   "include": [
     "/api/*",
     "/meta-product-feed.csv",
+    "/google-product-feed.xml",
     "/category-products.js",
     "/product-links-data.js",
     "/product-catalog-sections.js",

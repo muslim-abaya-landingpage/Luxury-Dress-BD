@@ -155,6 +155,32 @@
     }).finally(function () { button.disabled = false; button.textContent = "Key যাচাই করে Save করুন"; });
   }
 
+  var CR_FIELDS = ["steadfastInside", "steadfastOutside", "pathaoInside", "pathaoOutside", "redxInside", "redxOutside"];
+  var CR_INPUT_ID = { steadfastInside: "crSteadfastInside", steadfastOutside: "crSteadfastOutside", pathaoInside: "crPathaoInside", pathaoOutside: "crPathaoOutside", redxInside: "crRedxInside", redxOutside: "crRedxOutside" };
+  function loadCourierRates() {
+    MaAdmin.getCourierRates().then(function (rates) {
+      CR_FIELDS.forEach(function (k) {
+        var el = byId(CR_INPUT_ID[k]);
+        if (el && rates && rates[k] !== "" && rates[k] != null) el.value = rates[k];
+      });
+    }).catch(function () {});
+  }
+  function saveCourierRates(event) {
+    event.preventDefault();
+    var button = byId("stCourierRatesSave"), out = byId("stCourierRatesResult");
+    var rates = {};
+    CR_FIELDS.forEach(function (k) { rates[k] = byId(CR_INPUT_ID[k]).value; });
+    button.disabled = true; button.textContent = "Save হচ্ছে…";
+    out.className = "st-result"; out.textContent = "";
+    MaAdmin.saveCourierRates(rates).then(function () {
+      out.className = "st-result is-ok";
+      out.textContent = "✓ হার Save হয়েছে।";
+    }).catch(function (err) {
+      out.className = "st-result is-bad";
+      out.textContent = "× " + String(err && err.message || err);
+    }).finally(function () { button.disabled = false; button.textContent = "হার Save করুন"; });
+  }
+
   function load() {
     if (busy) return;
     busy = true;
@@ -243,6 +269,8 @@
   if (messengerTokenForm) messengerTokenForm.addEventListener("submit", saveMessengerToken);
   var ghKeyForm = byId("stGhKeyForm");
   if (ghKeyForm) ghKeyForm.addEventListener("submit", saveGithubKey);
+  var courierRatesForm = byId("stCourierRatesForm");
+  if (courierRatesForm) courierRatesForm.addEventListener("submit", saveCourierRates);
 
-  MaAdminShell.start(function () { load(); });
+  MaAdminShell.start(function () { load(); loadCourierRates(); });
 })();

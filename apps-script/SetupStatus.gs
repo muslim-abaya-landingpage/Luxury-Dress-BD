@@ -362,3 +362,37 @@ function setupGithubConnection_(props) {
     return { id: 'publisher', label: label, ok: false, partial: true, help: 'GitHub-এ যাচাই করা যায়নি: ' + String(e.message || e).slice(0, 80) };
   }
 }
+
+// ================= Courier charge suggestion (Admin → Order) =================
+// A per-district rate table the owner fills in once, from the rates their own
+// Pathao/RedX accounts actually quote. Never invented numbers — if a courier's
+// rate is blank, that courier is simply not shown as a suggestion.
+var COURIER_RATES_PROP_ = 'COURIER_RATES_JSON';
+var COURIER_RATES_DEFAULT_ = { steadfastInside: 80, steadfastOutside: 150, pathaoInside: '', pathaoOutside: '', redxInside: '', redxOutside: '' };
+
+function getAdminCourierRates_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var raw = PropertiesService.getScriptProperties().getProperty(COURIER_RATES_PROP_);
+  var rates = COURIER_RATES_DEFAULT_;
+  if (raw) {
+    try { rates = Object.assign({}, COURIER_RATES_DEFAULT_, JSON.parse(raw)); } catch (err) {}
+  }
+  return { ok: true, rates: rates };
+}
+
+function saveAdminCourierRates_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var owner = requireOwnerAdmin_(v);
+  if (owner) return owner;
+  var rates = {};
+  ['steadfastInside', 'steadfastOutside', 'pathaoInside', 'pathaoOutside', 'redxInside', 'redxOutside'].forEach(function (k) {
+    var raw = String(param_(e, k) || '').trim();
+    if (!raw) { rates[k] = ''; return; }
+    var n = Number(raw);
+    rates[k] = (isFinite(n) && n >= 0 && n <= 2000) ? n : '';
+  });
+  PropertiesService.getScriptProperties().setProperty(COURIER_RATES_PROP_, JSON.stringify(rates));
+  return { ok: true, rates: rates };
+}

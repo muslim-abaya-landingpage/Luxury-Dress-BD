@@ -39,7 +39,9 @@ function siteUptimeCheck() {
   try { edge = edgeHealthCheck_(props); } catch (edgeErr) { edge = 'ERROR'; }
   var messenger = '';
   try { messenger = typeof messengerTokenDailyCheck_ === 'function' ? messengerTokenDailyCheck_(props) : ''; } catch (msgrErr) { messenger = 'ERROR'; }
-  var result = { ok: true, failures: failures, streak: streak, notified: notified, backup: backup, edge: edge, messenger: messenger };
+  var cartAlert = '';
+  try { cartAlert = typeof abandonedCartAlertCheck_ === 'function' ? abandonedCartAlertCheck_() : ''; } catch (cartErr) { cartAlert = 'ERROR'; }
+  var result = { ok: true, failures: failures, streak: streak, notified: notified, backup: backup, edge: edge, messenger: messenger, cartAlert: cartAlert };
   console.log('UPTIME ' + JSON.stringify(result));
   return result;
 }

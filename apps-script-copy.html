@@ -248,6 +248,12 @@ function doPost(e) {
     if (type === 'AdminMessengerTokenSave') {
       return jsonOut_(saveMessengerPageToken_(e));
     }
+    if (type === 'AdminCourierRatesGet') {
+      return jsonOut_(getAdminCourierRates_(e));
+    }
+    if (type === 'AdminCourierRatesSave') {
+      return jsonOut_(saveAdminCourierRates_(e));
+    }
     if (type === 'AdminAnalyticsV2') {
       return jsonOut_(getAdminAnalyticsV2_(e));
     }
@@ -6149,6 +6155,55 @@ function saveCartCheckpoint_(e) {
   return { ok: true };
 }
 
+// Hourly, from siteUptimeCheck: carts open >=1hr, worth >=500tk, not yet alerted get one
+// Telegram message with a ready WhatsApp follow-up link each, so the admin can send in one tap
+// from the phone without opening Admin → Growth. Marks Alerted so it is sent only once per cart.
+var CART_ALERT_MIN_VALUE_ = 500;
+var CART_ALERT_MIN_AGE_MS_ = 60 * 60 * 1000;
+function abandonedCartAlertCheck_() {
+  try {
+    var sheet = ensureAbandonedCartsSheet_();
+    if (sheet.getLastColumn() &lt; 8) sheet.getRange(1, 8).setValue('Alerted');
+    var data = sheet.getDataRange().getValues();
+    var now = Date.now();
+    var lines = [];
+    for (var i = 1; i &lt; data.length; i++) {
+      var r = data[i];
+      var status = String(r[6] || '');
+      var alerted = String(r[7] || '');
+      if (status !== 'open' || alerted) continue;
+      var value = Number(r[3]) || 0;
+      var createdAt = r[4] instanceof Date ? r[4].getTime() : Date.parse(r[4]);
+      if (value &lt; CART_ALERT_MIN_VALUE_) continue;
+      if (!isFinite(createdAt) || now - createdAt &lt; CART_ALERT_MIN_AGE_MS_) continue;
+      var phone = String(r[0] || '');
+      var name = String(r[1] || '');
+      var wa = typeof waWebLink_ === 'function' ? waWebLink_(phone) : 'https://wa.me/' + phone.replace(/\D/g, '');
+      lines.push('৳' + Math.round(value) + ' — ' + (name || phone) + ' (' + phone + ')\n' + wa);
+      sheet.getRange(i + 1, 8).setValue('alerted:' + new Date());
+    }
+    if (lines.length) {
+      sendTelegramText_('🛒 পরিত্যক্ত কার্ট (১ ঘণ্টা+, ৳' + CART_ALERT_MIN_VALUE_ + '+):\n\n' + lines.join('\n\n') +
+        '\n\nWhatsApp লিংকে চাপলে ফলো-আপ মেসেজ রেডি থাকবে। বিস্তারিত: Admin → Growth');
+    }
+    return { ok: true, alerted: lines.length };
+  } catch (err) {
+    return { ok: false, error: String(err &amp;&amp; err.message || err) };
+  }
+}
+
+// Same digit-normalizing as the admin-growth.html waLink() helper, without the message text
+// (the Telegram line is short; the admin taps through to WhatsApp and types there).
+function waWebLink_(phone) {
+  var digits = String(phone || '').replace(/\D/g, '');
+  if (digits.indexOf('00880') === 0) digits = digits.slice(2);
+  if (digits.indexOf('880') !== 0) {
+    if (digits.indexOf('0') === 0) digits = '880' + digits.slice(1);
+    else if (digits.indexOf('1') === 0) digits = '880' + digits;
+  }
+  return 'https://wa.me/' + digits;
+}
+
 function markCartConverted_(phone) {
   try {
     var p = normalizePhone_(phone);
@@ -9584,7 +9639,9 @@ function siteUptimeCheck() {
   try { edge = edgeHealthCheck_(props); } catch (edgeErr) { edge = 'ERROR'; }
   var messenger = '';
   try { messenger = typeof messengerTokenDailyCheck_ === 'function' ? messengerTokenDailyCheck_(props) : ''; } catch (msgrErr) { messenger = 'ERROR'; }
-  var result = { ok: true, failures: failures, streak: streak, notified: notified, backup: backup, edge: edge, messenger: messenger };
+  var cartAlert = '';
+  try { cartAlert = typeof abandonedCartAlertCheck_ === 'function' ? abandonedCartAlertCheck_() : ''; } catch (cartErr) { cartAlert = 'ERROR'; }
+  var result = { ok: true, failures: failures, streak: streak, notified: notified, backup: backup, edge: edge, messenger: messenger, cartAlert: cartAlert };
   console.log('UPTIME ' + JSON.stringify(result));
   return result;
 }
@@ -11572,6 +11629,40 @@ function setupGithubConnection_(props) {
   } catch (e) {
     return { id: 'publisher', label: label, ok: false, partial: true, help: 'GitHub-এ যাচাই করা যায়নি: ' + String(e.message || e).slice(0, 80) };
   }
+}
+
+// ================= Courier charge suggestion (Admin → Order) =================
+// A per-district rate table the owner fills in once, from the rates their own
+// Pathao/RedX accounts actually quote. Never invented numbers — if a courier's
+// rate is blank, that courier is simply not shown as a suggestion.
+var COURIER_RATES_PROP_ = 'COURIER_RATES_JSON';
+var COURIER_RATES_DEFAULT_ = { steadfastInside: 80, steadfastOutside: 150, pathaoInside: '', pathaoOutside: '', redxInside: '', redxOutside: '' };
+
+function getAdminCourierRates_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var raw = PropertiesService.getScriptProperties().getProperty(COURIER_RATES_PROP_);
+  var rates = COURIER_RATES_DEFAULT_;
+  if (raw) {
+    try { rates = Object.assign({}, COURIER_RATES_DEFAULT_, JSON.parse(raw)); } catch (err) {}
+  }
+  return { ok: true, rates: rates };
+}
+
+function saveAdminCourierRates_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var owner = requireOwnerAdmin_(v);
+  if (owner) return owner;
+  var rates = {};
+  ['steadfastInside', 'steadfastOutside', 'pathaoInside', 'pathaoOutside', 'redxInside', 'redxOutside'].forEach(function (k) {
+    var raw = String(param_(e, k) || '').trim();
+    if (!raw) { rates[k] = ''; return; }
+    var n = Number(raw);
+    rates[k] = (isFinite(n) &amp;&amp; n >= 0 &amp;&amp; n &lt;= 2000) ? n : '';
+  });
+  PropertiesService.getScriptProperties().setProperty(COURIER_RATES_PROP_, JSON.stringify(rates));
+  return { ok: true, rates: rates };
 }
 </textarea><br>
 <button type="button" id="copyFile20">SetupStatus.gs কপি</button>

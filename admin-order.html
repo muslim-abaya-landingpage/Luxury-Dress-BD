@@ -206,6 +206,7 @@
             <div class="pn-note-muted" id="oPayment"></div>
             <div id="oTrack" style="margin-top:8px"></div>
             <button type="button" class="pn-btn pn-btn-blue pn-btn-block" id="btnCourierSend" style="margin-top:10px">🚚 Send to Steadfast</button>
+            <p class="pn-note-muted" id="courierRateHint" style="margin-top:6px"></p>
           </section>
           <button type="button" class="pn-btn pn-btn-primary pn-btn-block" id="btnSave">✓ Update Order</button>
         </div>
@@ -793,6 +794,34 @@
         if (!s) return;
         if (!orderId) { $("oError").style.display = ""; $("oError").innerHTML = 'কোনো Order ID নেই। <a href="admin-orders.html">← সব অর্ডার</a>'; return; }
         load();
+      });
+    })();
+  </script>
+  <script>
+    // Courier charge suggestion: shows Pathao/RedX only when the owner has filled in real
+    // rates in Admin → Setup (never invented numbers). Steadfast's charge comes from the order.
+    (function () {
+      var hint = document.getElementById("courierRateHint");
+      if (!hint) return;
+      var ratesPromise = null;
+      function loadRates() {
+        if (!ratesPromise) ratesPromise = MaAdmin.getCourierRates().catch(function () { return null; });
+        return ratesPromise;
+      }
+      document.addEventListener("ma-order-rendered", function (ev) {
+        var o = ev.detail || {};
+        var inside = String(o.district || "").trim() === "ঢাকা";
+        loadRates().then(function (r) {
+          if (!r) { hint.textContent = ""; return; }
+          var parts = [];
+          var pathao = inside ? r.pathaoInside : r.pathaoOutside;
+          var redx = inside ? r.redxInside : r.redxOutside;
+          if (pathao !== "" && pathao != null) parts.push("Pathao ~৳" + pathao);
+          if (redx !== "" && redx != null) parts.push("RedX ~৳" + redx);
+          hint.textContent = parts.length
+            ? "তুলনা (" + (inside ? "ঢাকার ভিতরে" : "ঢাকার বাইরে") + "): " + parts.join(" · ") + " — Admin → Setup-এ হার বদলাতে পারেন।"
+            : "Pathao/RedX-এর হার এখনো যোগ করা হয়নি — Admin → Setup-এ যোগ করলে এখানে তুলনা দেখাবে।";
+        });
       });
     })();
   </script>

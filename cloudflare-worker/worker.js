@@ -23,6 +23,9 @@ export default {
     if (path === '/_ma/order') {
       return handleOrder(request, env, ctx);
     }
+    if (path === '/_ma/repeat') {
+      return handleRepeatCheck(request, env, url);
+    }
     if (path.startsWith('/_ma/')) {
       return handleEvent(request, env, ctx, url);
     }
@@ -236,6 +239,33 @@ function workerRiskAlert(env, eventId, pairs, risk, orderId) {
   const reason = (risk.reasons || []).join(' · ') || 'অল্প সময়ে একাধিক অর্ডার-চেষ্টা';
   return sendAlert(env, '⚠️ অর্ডারটি ম্যানুয়াল রিভিউ করুন (Worker ঝুঁকি ' + label + ', ' + risk.score + '/100)।\n' +
     'Order ID: ' + (orderId || 'পাওয়া যায়নি') + '\n' + reason + '\n' + orderSummaryFromPairs(eventId, pairs));
+}
+
+/**
+ * Repeat-customer check for the checkout page: as soon as a valid phone is typed, the page asks
+ * whether that number has a past non-blocked order (last 180 days, same window as order_ip_log's
+ * retention) and shows a small "স্বাগতম, আবার এসেছেন" note if so. Returns only a boolean — no name,
+ * no order count, no history — so this cannot be used to enumerate anything about a phone number
+ * beyond "has ordered here before".
+ */
+async function handleRepeatCheck(request, env, url) {
+  if (request.method !== 'GET') return textOut('Method not allowed', 405, { Allow: 'GET' });
+  const srcHost = hostOf(request.headers.get('Origin') || '') || hostOf(request.headers.get('Referer') || '');
+  if (srcHost && !ORDER_HOSTS.includes(srcHost)) return textOut('Forbidden', 403);
+  if (!env.DB) return jsonText({ ok: true, repeat: false });
+  const phone = localPhone(url.searchParams.get('phone') || '');
+  if (!phone) return jsonText({ ok: true, repeat: false });
+  try {
+    const row = await env.DB.prepare("SELECT 1 AS x FROM order_ip_log WHERE phone = ? AND outcome <> 'blocked' LIMIT 1").bind(phone).first();
+    return jsonText({ ok: true, repeat: !!row });
+  } catch (e) {
+    console.log('repeat_check_error', String(e).slice(0, 150));
+    return jsonText({ ok: true, repeat: false });
+  }
+}
+
+function jsonText(obj) {
+  return new Response(JSON.stringify(obj), { status: 200, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
 }
 
 async function handleOrder(request, env, ctx) {
