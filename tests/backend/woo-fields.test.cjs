@@ -114,11 +114,14 @@ test('catalog validation enforces unique product and variation SKUs case-insensi
   }));
   assert.throws(() => w.MaProductPublishUtils.validateCatalog({
     abaya: [valid('A', { sku: 'MA-001' }), valid('B', { sku: 'ma-001' })]
-  }), /unique SKU/);
+  }), /SKU আলাদা/);
   assert.throws(() => w.MaProductPublishUtils.validateCatalog({
     abaya: [valid('A', { variations: [{ sku: 'MA-V-1' }, { sku: 'ma-v-1' }] })]
-  }), /unique SKU/);
+  }), /SKU আলাদা/);
   assert.throws(() => w.MaProductPublishUtils.validateCatalog({
     abaya: [valid('A', { sku: 'MA-001' }), valid('B', { variations: [{ sku: 'MA-001' }] })]
-  }), /unique SKU/);
+  }), /SKU আলাদা/);
+  assert.throws(() => w.MaProductPublishUtils.validateCatalog({
+    abaya: [valid('A', { sku: '   ' }), valid('B', { sku: 'A' })]
+  }), /SKU আলাদা/);
 });
