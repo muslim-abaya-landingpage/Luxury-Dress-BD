@@ -123,6 +123,24 @@ test('a retry of the same request returns the first result without a second comm
   assert.equal((await r.json()).error, 'REQUEST_CHANGED');
 });
 
+test('catalog save rejects duplicate product and variation SKUs before any GitHub write', async () => {
+  const { validateSave } = await lib('api/catalog-save.js');
+  const p = body();
+  const v = JSON.parse(p.validation);
+  v.products = [
+    { id: 'P-1', sku: 'MA-001', variations: [{ sku: 'MA-001-BLACK-M' }] },
+    { id: 'P-2', sku: 'ma-001' },
+  ];
+  p.validation = JSON.stringify(v);
+  assert.throws(() => validateSave(p), /DUPLICATE_SKU/);
+
+  v.products = [
+    { id: 'P-1', sku: 'MA-001', variations: [{ sku: 'MA-V-1' }, { sku: 'ma-v-1' }] },
+  ];
+  p.validation = JSON.stringify(v);
+  assert.throws(() => validateSave(p), /DUPLICATE_SKU/);
+});
+
 test('catalog changed elsewhere since the panel loaded it: CATALOG_CONFLICT, nothing committed or made live', async () => {
   const { handleCatalogSave } = await lib('api/catalog-save.js');
   const p = body(); const db = fakeD1();

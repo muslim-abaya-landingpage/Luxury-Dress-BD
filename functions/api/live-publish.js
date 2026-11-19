@@ -17,6 +17,26 @@ function json(body, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });
 }
 
+/** Reject duplicate product and variation SKUs before a catalog can be committed or made live. */
+export function validateUniqueSkus(products) {
+  if (!Array.isArray(products)) throw Error('BAD_VALIDATION');
+  const seen = new Map();
+  const claim = (value, label) => {
+    const sku = String(value || '').trim();
+    if (!sku) return;
+    const key = sku.toLocaleUpperCase();
+    if (seen.has(key)) throw Error('DUPLICATE_SKU');
+    seen.set(key, label);
+  };
+  products.forEach((p) => {
+    if (!p || typeof p !== 'object') return;
+    claim(String(p.sku || '').trim() || p.id, p.name || p.id || 'product');
+    (Array.isArray(p.variations) ? p.variations : []).forEach((v, i) => {
+      if (v && v.sku) claim(v.sku, (p.name || p.id || 'product') + ' variation #' + (i + 1));
+    });
+  });
+}
+
 /** Checks the payload; returns {state, assets} or throws Error(code). */
 export function validatePayload(p) {
   if (!p || typeof p !== 'object') throw Error('BAD_REQUEST');
@@ -31,6 +51,7 @@ export function validatePayload(p) {
   let v;
   try { v = JSON.parse(p.validation); } catch (e) { throw Error('BAD_VALIDATION'); }
   if (!v || v.version !== 1 || v.releaseSha !== p.sha || !Array.isArray(v.products) || !v.products.length || !/^[a-f0-9]{64}$/.test(String(v.sourceSha256 || ''))) throw Error('BAD_VALIDATION');
+  validateUniqueSkus(v.products);
   const index = {};
   const names = {};
   Object.keys(p.index || {}).slice(0, 5000).forEach((id) => {
