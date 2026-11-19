@@ -63,13 +63,23 @@ test('desktop: Anzaar layout pieces are there, flat, in order; removed pieces ar
   await page.locator('.pqv-thumb').nth(1).click();
   await expect(page.locator('.pqv-counter')).toHaveText('02 / 02');
 
-  // accordion: description open, specification closed, both toggle
+  // four boxes like Anzaar; one open at a time; texts from our own policy + delivery settings
   const items = page.locator('.pqv-acc-item');
-  await expect(items).toHaveCount(2);
+  await expect(items.locator('summary')).toHaveText(['01. Product Description', '02. Fabric & Care', '03. Exchange, Return & Refund', '04. Delivery Details']);
   await expect(items.nth(0)).toHaveAttribute('open', '');
-  await expect(items.nth(1)).not.toHaveAttribute('open', '');
-  await items.nth(1).locator('summary').click();
-  await expect(items.nth(1)).toHaveAttribute('open', '');
+  await items.nth(2).locator('summary').click();
+  await expect(items.nth(2)).toHaveAttribute('open', '');
+  await expect(items.nth(0)).not.toHaveAttribute('open', '');
+  await expect(items.nth(2)).toContainText('24 hours');
+  await expect(items.nth(2).locator('a')).toHaveAttribute('href', /refund/);
+  expect(await items.nth(2).evaluate((e) => getComputedStyle(e).borderTopWidth)).toBe('2px');
+  expect(await items.nth(0).evaluate((e) => getComputedStyle(e).borderTopWidth)).toBe('1px');
+  await items.nth(3).locator('summary').click();
+  await expect(items.nth(3)).toContainText('Inside Dhaka');
+  const fees = await page.evaluate(() => window.maDelivery.settings());
+  await expect(items.nth(3)).toContainText('৳' + fees.dhaka);
+  await expect(items.nth(3)).toContainText('৳' + fees.outside);
+  await expect(items.nth(2)).not.toHaveAttribute('open', '');
 
   // tap to rate → review form opens with that rating picked
   await page.locator('[data-pqv-rate="4"]').click();

@@ -2626,6 +2626,13 @@ function bindPqvAnzaarExtras(modal) {
   }
   paintCounter();
   if (thumbsBox && window.MutationObserver) new MutationObserver(paintCounter).observe(thumbsBox, { subtree: true, childList: true, attributes: true, attributeFilter: ["class", "style"] });
+  // Description boxes: opening one closes the others.
+  modal.querySelectorAll(".pqv-acc-item").forEach(function (item) {
+    item.addEventListener("toggle", function () {
+      if (!item.open) return;
+      modal.querySelectorAll(".pqv-acc-item").forEach(function (o) { if (o !== item && o.open) o.open = false; });
+    });
+  });
   // "Color: Maroon" shows the chosen colour by name.
   function paintColorName() {
     var name = modal.querySelector(".pqv-color-name");
@@ -2656,6 +2663,30 @@ function bindPqvAnzaarExtras(modal) {
       (form || reviews).scrollIntoView({ behavior: categoryScrollBehavior(), block: "center" });
     });
   });
+}
+/* Description boxes (Anzaar style): one open at a time. Texts come from the site's own
+   Refund & Return Policy page and Store settings delivery charges, not from any other shop. */
+function pqvAccItem(title, bodyHtml, open) {
+  return '<details class="pqv-acc-item" name="pqv-acc"' + (open ? " open" : "") + '><summary><span>' + escapeHtml(title) +
+    '</span><span class="pqv-acc-icon" aria-hidden="true"></span></summary><div class="pqv-acc-body">' + bodyHtml + "</div></details>";
+}
+function pqvReturnPolicyHtml() {
+  return '<ul class="pqv-acc-list">' +
+    "<li>Please tell us about any problem within <strong>24 hours</strong> of receiving your parcel.</li>" +
+    "<li>Returned items must be unworn and unwashed, with the original packaging, tags and invoice.</li>" +
+    "<li>Exchange is available for size issues, design issues, or if a defective or wrong item was delivered.</li>" +
+    "<li>If the mistake is ours (defective or wrong item), Muslim Abaya pays the delivery charge. For a size change you request, you pay the delivery charge.</li>" +
+    "<li>Approved refunds are sent to your mobile banking or digital wallet within 7 working days.</li>" +
+    '</ul><p class="pqv-acc-more"><a href="' + escapeHtml(shopHref("/refund")) + '">Full Refund &amp; Return Policy</a></p>';
+}
+function pqvDeliveryHtml() {
+  var d = window.maDelivery && typeof window.maDelivery.settings === "function" ? window.maDelivery.settings() : { dhaka: 80, outside: 150, freeQty: 3 };
+  return '<ul class="pqv-spec-table pqv-delivery-table">' +
+    "<li><span>Inside Dhaka</span><strong>৳" + escapeHtml(String(d.dhaka)) + "</strong></li>" +
+    "<li><span>Outside Dhaka</span><strong>৳" + escapeHtml(String(d.outside)) + "</strong></li>" +
+    (d.freeQty > 0 ? "<li><span>Free delivery</span><strong>" + escapeHtml(String(d.freeQty)) + " or more pieces</strong></li>" : "") +
+    "<li><span>Payment</span><strong>Cash on Delivery</strong></li>" +
+    "</ul><p class=\"pqv-acc-more\">Home delivery all over Bangladesh.</p>";
 }
 function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
   var defaultType = getDefaultProductType(p, categoryKey);
@@ -2940,10 +2971,10 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     "</div>" +
     '<div class="pqv-browsing" id="pqvBrowsing" hidden><span class="pqv-live-dot"></span><span class="pqv-browsing-text"></span></div>' +
     '<div class="pqv-acc" id="pqvDescBlock">' +
-    '<details class="pqv-acc-item" open><summary><span>01. Product Description</span><span class="pqv-acc-icon" aria-hidden="true"></span></summary>' +
-    '<div class="pqv-acc-body">' + descHtml + "</div></details>" +
-    '<details class="pqv-acc-item"><summary><span>02. Specification</span><span class="pqv-acc-icon" aria-hidden="true"></span></summary>' +
-    '<div class="pqv-acc-body">' + specRows + "</div></details>" +
+    pqvAccItem("01. Product Description", descHtml, true) +
+    pqvAccItem("02. Fabric & Care", specRows, false) +
+    pqvAccItem("03. Exchange, Return & Refund", pqvReturnPolicyHtml(), false) +
+    pqvAccItem("04. Delivery Details", pqvDeliveryHtml(), false) +
     "</div>" +
     "</div>" +
     "</div>" +
