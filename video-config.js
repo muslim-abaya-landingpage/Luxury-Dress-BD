@@ -18,18 +18,6 @@ window.SITE_VIDEOS = [
     videoId: "Wyrw0gzKMqk",
     title: "Premium Two Piece",
     description: "Real fabric and finishing details."
-  },
-
-  {
-    videoId: "VIDEO_ID_2",
-    title: "Elegant Abaya",
-    description: "Premium quality showcase."
-  },
-
-  {
-    videoId: "VIDEO_ID_3",
-    title: "Latest Collection",
-    description: "See actual product before ordering."
   }
 
 ];

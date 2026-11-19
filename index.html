@@ -629,6 +629,116 @@ body {
   height: 100%;
   border: 0;
 }
+
+/* ==============================================================
+   "WATCH & SHOP" — horizontal video carousel, each card linked to a
+   real product (product-video-carousel.js fills #watchShopRail).
+   Hidden by the script itself when no product has a video set.
+================================================================= */
+.wns-section {
+  max-width: 1200px;
+  margin: 18px auto 8px;
+  padding: 0 16px;
+}
+.wns-title {
+  text-align: center;
+  font-size: clamp(18px, 2.4vw, 24px);
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 14px;
+}
+.wns-rail {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding-bottom: 6px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+.wns-card {
+  flex: 0 0 auto;
+  width: 170px;
+  scroll-snap-align: start;
+  border: 1px solid #ececec;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .05);
+}
+.wns-video-ratio {
+  position: relative;
+  padding-top: 177.78%; /* 9:16 */
+  background: #000;
+}
+.wns-facade { background: #000; }
+.wns-product-strip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+}
+.wns-product-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1 1 auto;
+  text-decoration: none;
+  color: inherit;
+}
+.wns-thumb {
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex: 0 0 auto;
+  background: #f3f3f3;
+}
+.wns-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.wns-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: #111;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90px;
+}
+.wns-price {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #111;
+}
+.wns-cart-btn {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  background: #fff;
+  color: #111;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+.wns-cart-btn svg { width: 14px; height: 14px; }
+.wns-arrow-link {
+  flex: 0 0 auto;
+  font-size: 15px;
+  color: #111;
+  text-decoration: none;
+  padding: 0 2px;
+}
+@media (max-width: 560px) {
+  .wns-card { width: 140px; }
+}
     </style>
     <!-- First-paint header height = the real mounted header height (measured 2026-11: 180px up to 449px wide, 164px up to 1023px, 158px above). The old 148px fallback made the hero and everything under it jump down ~31px when site-header.js mounted the header (layout shift). site-header.js still sets the exact value. -->
     <style id="header-height-fallback">:root{--site-header-h:158px}@media(max-width:1023px){:root{--site-header-h:164px}}@media(max-width:449px){:root{--site-header-h:180px}}#site-header-mount{min-height:var(--site-header-h,158px)}</style>
@@ -820,6 +930,14 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
   window.addEventListener('ma:catalog-ready',ensureThreePieceLink);
 })();
 </script>
+
+<!-- "Watch & Shop" — real product videos only (YouTube link set per-product in the admin
+     Product Manager). Hidden automatically when no product has a video set. -->
+<section id="watchShopSection" class="wns-section" hidden>
+  <h2 class="wns-title">ভিডিওতে দেখুন, তারপর কিনুন</h2>
+  <div id="watchShopRail" class="wns-rail"></div>
+</section>
+<script defer src="product-video-carousel.js?v=1"></script>
 
 <!-- Category product sections -->
 <main id="homeSections" class="home-sections"></main>

@@ -433,6 +433,12 @@ if (typeof window !== "undefined") window.cleanProductMeasures = cleanProductMea
       var stockN = parseInt(entry.stock, 10);
       if (!isNaN(stockN)) normalized.stock = Math.max(0, stockN);
     }
+    // Product Manager "YouTube ভিডিও লিংক" — homepage "Watch & Shop" carousel
+    // (product-video-carousel.js) reads this. Used to get dropped here like
+    // imageCard/images used to, so it's preserved explicitly.
+    if (entry.videoUrl) {
+      normalized.videoUrl = String(entry.videoUrl).trim();
+    }
 
     // WooCommerce-style fields from Product Manager: sale price, status, featured, tags, brand, SEO.
     var regularPrice = parseInt(entry.regularPrice, 10);
