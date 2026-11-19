@@ -26,7 +26,7 @@ window.__maBuildValidationProducts = function (w) {
       // order server picks the right one at order time (not at build time). See Operations.gs opsSaleOff_.
       var sale = p._saleRaw || null;
       products.push({
-        id: p.id, name: p.name, category: category, price: sale ? sale.price : p.price,
+        id: p.id, sku: String(p.sku || '').trim() || p.id, name: p.name, category: category, price: sale ? sale.price : p.price,
         prices: (sale ? sale.priceByType : p.priceByType) || null, sizes: p.sizes || [],
         bodySizes: (cfg && cfg.bodySizes) || [], bodyLabel: (cfg && cfg.bodySizeLabel) || '',
         lengths: ab ? (p.lengthSizes || p.sizes || cfg.lengthSizes) : [],
@@ -55,7 +55,7 @@ window.__maBuildValidationProducts = function (w) {
       if (Array.isArray(vlist) && vlist.length) {
         row0.variations = vlist.map(function (v) {
           var row = {};
-          ['type', 'color', 'size'].forEach(function (k) { if (v[k]) row[k] = v[k]; });
+          ['type', 'color', 'size', 'sku'].forEach(function (k) { if (v[k]) row[k] = v[k]; });
           if (v.price > 0) row.price = v.price;
           if (sale && v.regularPrice > 0) row.regularPrice = v.regularPrice;
           var vw = (v.saleFrom || v.saleTo) && w.maCatalog.saleWindow ? w.maCatalog.saleWindow(v) : null;
