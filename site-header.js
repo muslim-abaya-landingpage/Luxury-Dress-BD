@@ -227,6 +227,20 @@
     if (sec && sec.key && categoryHasProducts(sec.key)) return true;
     return sec.enabled !== false;
   }
+
+  /**
+   * মোবাইল "ক্যাটাগরি" মেগা-মেনুতে কোন মূল ক্যাটাগরির নিচে কোন সাব-ক্যাটাগরি দেখাবে।
+   * শুধু বাস্তব, ইতিমধ্যে থাকা ক্যাটাগরি-কী বসানো হয়েছে — কোনো কাল্পনিক সাব-ক্যাটাগরি নেই।
+   */
+  var MEGA_MENU_SUBCATS = {
+    abaya: ["embroidery", "karchupi"]
+  };
+
+  function escHtml(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
 function buildNavMenuItems() {
     var sections = window.CATALOG_SECTIONS || [];
     var extras = window.SITE_NAV_EXTRAS || [];
@@ -239,6 +253,7 @@ function buildNavMenuItems() {
     var items = sections.map(function (sec) {
       var href = sec.path || ("/" + String(sec.key || "").replace(/\.html$/i, "").trim());
       return {
+        key: sec.key,
         href: href,
         label: sec.menu,
         enabled: navItemEnabledForSection(sec)
@@ -248,6 +263,7 @@ function buildNavMenuItems() {
     extras.forEach(function (ex) {
       var href = ex.path || ("/" + String(ex.key || "").replace(/\.html$/i, "").trim());
       items.push({
+        key: ex.key,
         href: href,
         label: ex.menu,
         enabled: ex.enabled !== false
@@ -278,6 +294,95 @@ function buildNavMenuItems() {
     return '<li><a href="' + href + '">' + label + "</a></li>";
   }
 
+  /**
+   * একটা কালেকশন পিল — সবসময় বাটন, ক্লিক করলে সাব-ক্যাটাগরি অ্যাকর্ডিয়ন আপডেট হয়
+   * (সাবক্যাটাগরি না থাকলেও "সব <ক্যাটাগরি>" লিংকটা অ্যাকর্ডিয়নে দেখা যাবে — Anzaar-এর
+   * প্যাটার্নের মতোই প্রতিটা কালেকশনে একই রকম আচরণ)।
+   */
+  function renderMegaPill(it, isActive) {
+    var label = String(it.label || "");
+    if (it.enabled === false) {
+      return '<span class="mnp-pill mnp-pill-soon" aria-disabled="true" title="Coming Soon">' + escHtml(label) + "</span>";
+    }
+    var cls = "mnp-pill" + (isActive ? " mnp-pill-active" : "");
+    return (
+      '<button type="button" class="' + cls + '" data-mnp-key="' + escHtml(it.key) + '">' +
+      escHtml(label) +
+      "</button>"
+    );
+  }
+
+  /** একটা ক্যাটাগরির "সাব-ক্যাটাগরি সিলেক্ট করুন" অ্যাকর্ডিয়ন বডি */
+  function renderSubcatPanel(it, items) {
+    var subKeys = MEGA_MENU_SUBCATS[it.key] || [];
+    var subs = subKeys
+      .map(function (k) {
+        return items.filter(function (x) { return x.key === k && x.enabled !== false; })[0];
+      })
+      .filter(Boolean);
+    var bullets = subs
+      .map(function (s) {
+        return (
+          '<li><a href="' + siteHref(s.href) + '" onclick="window.toggleAbayaMenu()">' + escHtml(s.label) + "</a></li>"
+        );
+      })
+      .join("");
+    return (
+      '<div class="mnp-subcat-box" id="mnpSubcat">' +
+      '<div class="mnp-subcat-head">' +
+      "<span>সাব-ক্যাটাগরি সিলেক্ট করুন</span>" +
+      "</div>" +
+      '<a class="mnp-subcat-all" href="' + siteHref(it.href) + '" onclick="window.toggleAbayaMenu()">' +
+      "সব " + escHtml(it.label) +
+      "</a>" +
+      (bullets ? '<ul class="mnp-subcat-list">' + bullets + "</ul>" : "") +
+      "</div>"
+    );
+  }
+
+  function buildMegaMenuBodyHtml(items) {
+    var enabledItems = items.filter(function (it) { return it.enabled !== false; });
+    var defaultActive = enabledItems[0] || null;
+
+    var pillsHtml = items.map(function (it) {
+      return renderMegaPill(it, defaultActive && it.key === defaultActive.key);
+    }).join("");
+
+    return (
+      '<div class="mnp-section-label">কালেকশন</div>' +
+      '<div class="mnp-collections">' + pillsHtml + "</div>" +
+      (defaultActive ? renderSubcatPanel(defaultActive, items) : "") +
+      '<div class="mnp-section-label">তথ্য</div>' +
+      '<div class="mnp-info-grid">' +
+      '<a class="mnp-info-btn" href="' + siteHref("/about") + '" onclick="window.toggleAbayaMenu()">আমাদের সম্পর্কে</a>' +
+      '<a class="mnp-info-btn" href="' + siteHref("/help") + '" onclick="window.toggleAbayaMenu()">সাহায্য ও সাপোর্ট</a>' +
+      "</div>" +
+      '<div class="mnp-section-label">সাহায্য দরকার?</div>' +
+      '<a class="mnp-help-card" href="' + HEADER_WHATSAPP + '" target="_blank" rel="noopener">' +
+      ICON_CHAT +
+      '<span><strong>WhatsApp সাপোর্ট</strong><br><small>তাৎক্ষণিক উত্তর</small></span>' +
+      "</a>" +
+      '<div class="mnp-footer-tag">' + escHtml(HEADER_BRAND.name).toUpperCase() + " · প্রিমিয়াম মডেস্ট ফ্যাশন</div>"
+    );
+  }
+
+  function bindMegaMenuEvents(items) {
+    var body = document.getElementById("mnpBody");
+    if (!body || body._mnpBound) return;
+    body._mnpBound = true;
+    body.addEventListener("click", function (e) {
+      var btn = e.target.closest && e.target.closest(".mnp-pill[data-mnp-key]");
+      if (!btn || !body.contains(btn)) return;
+      var key = btn.getAttribute("data-mnp-key");
+      var it = items.filter(function (x) { return x.key === key; })[0];
+      if (!it) return;
+      body.querySelectorAll(".mnp-pill").forEach(function (p) { p.classList.remove("mnp-pill-active"); });
+      btn.classList.add("mnp-pill-active");
+      var existing = document.getElementById("mnpSubcat");
+      if (existing) existing.outerHTML = renderSubcatPanel(it, items);
+    });
+  }
+
   function applyDynamicNavMenu() {
     var items = buildNavMenuItems();
     if (!items.length) return;
@@ -287,20 +392,10 @@ function buildNavMenuItems() {
         return renderNavMenuItem(it, false);
       }).join("");
     }
-    var mobile = document.querySelector("#mobileMenuPanel ul");
+    var mobile = document.getElementById("mnpBody");
     if (mobile) {
-      mobile.innerHTML =
-        items
-          .map(function (it) {
-            return renderNavMenuItem(it, true);
-          })
-          .join("") +
-        '<li><a href="' +
-        siteHref("/category") +
-        '" onclick="window.toggleAbayaMenu()">ALL CATEGORIES</a></li>' +
-        '<li><a href="' +
-        siteHref("/") +
-        '" onclick="window.toggleAbayaMenu()">HOME</a></li>';
+      mobile.innerHTML = buildMegaMenuBodyHtml(items);
+      bindMegaMenuEvents(items);
     }
     fixAllPageLinks();
   }
@@ -415,8 +510,12 @@ function buildNavMenuItems() {
     '</header>' +
     '<div class="menu-overlay" id="menuOverlay" onclick="window.toggleAbayaMenu()"></div>' +
     '<div class="mobile-nav-panel" id="mobileMenuPanel">' +
-    '<div class="mobile-nav-top"><button type="button" onclick="window.toggleAbayaMenu()" style="background:none;border:none;font-size:26px;cursor:pointer">&times;</button></div>' +
-    '<ul></ul></div>'
+    '<div class="mobile-nav-top">' +
+    '<span class="mnp-brand">' + escHtml(HEADER_BRAND.name) + '</span>' +
+    '<button type="button" class="mnp-close" onclick="window.toggleAbayaMenu()" aria-label="Close menu">&times;</button>' +
+    '</div>' +
+    '<div class="mnp-body" id="mnpBody"></div>' +
+    '</div>'
     );
   }
   var annIdx = 0;
