@@ -12,7 +12,7 @@ function site() {
   const w = { location: { origin: 'https://muslimabaya.com', pathname: '/' } };
   w.window = w;
   const ctx = vm.createContext(w);
-  ['product-config.js', 'product-utils.js', 'catalog-validation-core.js'].forEach((f) => vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), ctx));
+  ['product-config.js', 'product-utils.js', 'product-publish-utils.js', 'catalog-validation-core.js'].forEach((f) => vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), ctx));
   return w;
 }
 function server() {
@@ -103,4 +103,25 @@ test('New fields are kept by the catalog; downloads need a web link', () => {
   assert.equal(p.sku, 'MA-1'); assert.deepEqual([...p.upsells], ['A']); assert.equal(p.weight, 0.5);
   assert.equal(p.reviewsAllowed, false); assert.equal(p.productType, 'external');
   assert.deepEqual(JSON.parse(JSON.stringify(p.downloads)), [{ name: 'Guide', file: 'https://x.test/a.pdf' }]);
+});
+
+
+test('catalog validation enforces unique product and variation SKUs case-insensitively', () => {
+  const w = site();
+  const valid = (id, extra) => base(id, Object.assign({ sku: id }, extra || {}));
+  assert.doesNotThrow(() => w.MaProductPublishUtils.validateCatalog({
+    abaya: [valid('SKU-A', { variations: [{ sku: 'SKU-A-NAVY-M' }, { sku: 'SKU-A-BLACK-L' }] }), valid('SKU-B')]
+  }));
+  assert.throws(() => w.MaProductPublishUtils.validateCatalog({
+    abaya: [valid('SKU-A', { sku: 'MA-001' }), valid('SKU-B', { sku: 'ma-001' })]
+  }), /SKU আলাদা/);
+  assert.throws(() => w.MaProductPublishUtils.validateCatalog({
+    abaya: [valid('SKU-A', { variations: [{ sku: 'MA-V-1' }, { sku: 'ma-v-1' }] })]
+  }), /SKU আলাদা/);
+  assert.throws(() => w.MaProductPublishUtils.validateCatalog({
+    abaya: [valid('SKU-A', { sku: 'MA-001' }), valid('SKU-B', { variations: [{ sku: 'MA-001' }] })]
+  }), /SKU আলাদা/);
+  assert.throws(() => w.MaProductPublishUtils.validateCatalog({
+    abaya: [valid('SKU-A', { sku: '   ' }), valid('SKU-B', { sku: 'SKU-A' })]
+  }), /SKU আলাদা/);
 });
