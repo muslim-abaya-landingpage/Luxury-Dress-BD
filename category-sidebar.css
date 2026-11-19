@@ -3007,3 +3007,135 @@ body.pqv-sc-open {
     min-width: 0;
   }
 }
+
+/* =====================================================================
+   Product page — Anzaar-style layout (Nov 2026). Flat corners everywhere
+   (owner's rule). Markup: buildQuickViewPanelHtml in category-renderer.js.
+   ===================================================================== */
+#list .pqv-muslim-abaya { --pz-ink:#111; --pz-mute:#8a8a8a; --pz-line:#e8e8e8; --pz-soft:#f6f6f6; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; }
+#list .pqv-muslim-abaya .pqv-top { gap:48px; align-items:start; }
+/* gallery: thumbnails in a column on the left, big photo on a soft grey stage */
+#list .pqv-muslim-abaya .pqv-thumb { border:1px solid var(--pz-line); border-radius:0; background:var(--pz-soft); opacity:.75; transition:opacity .15s ease,border-color .15s ease; }
+#list .pqv-muslim-abaya .pqv-thumb.is-active { border:1.5px solid var(--pz-ink); opacity:1; box-shadow:none; }
+#list .pqv-muslim-abaya .pqv-main { position:relative; background:linear-gradient(180deg,#f7f7f7,#ececec); border:1px solid var(--pz-line); border-radius:0; }
+#list .pqv-muslim-abaya .pqv-counter { position:absolute; right:16px; bottom:14px; z-index:3; font:700 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.2em; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.45); pointer-events:none; }
+#list .pqv-muslim-abaya .pqv-counter[hidden] { display:none; }
+#list .pqv-muslim-abaya .pqv-main .ma-wish { top:16px; right:16px; width:42px; height:42px; }
+#list .pqv-muslim-abaya .pqv-main .ma-wish svg { width:18px; height:18px; }
+/* right column */
+#list .pqv-muslim-abaya .pqv-panel { padding-top:6px; }
+#list .pqv-muslim-abaya .pqv-panel-back,
+#list .pqv-muslim-abaya .pqv-jump-desc,
+#list .pqv-muslim-abaya .pqv-act-msg,
+#list .pqv-muslim-abaya .ma-wish-inline { display:none !important; }
+#list .pqv-muslim-abaya .pqv-crumbs { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:0 0 16px; font-size:10px; font-weight:600; letter-spacing:.22em; text-transform:uppercase; color:#9a9a9a; }
+#list .pqv-muslim-abaya .pqv-crumbs a { color:#9a9a9a; text-decoration:none; }
+#list .pqv-muslim-abaya .pqv-crumbs a:hover { color:var(--pz-ink); }
+#list .pqv-muslim-abaya .pqv-crumb-here { color:var(--pz-ink); font-weight:700; }
+#list .pqv-muslim-abaya .pqv-badges { display:flex; flex-wrap:wrap; gap:10px; margin:0 0 12px; }
+#list .pqv-muslim-abaya .pqv-badge-dark,
+#list .pqv-muslim-abaya .pqv-live-viewing { display:inline-flex; align-items:center; gap:7px; height:24px; padding:0 14px; margin:0; font-size:9px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; border-radius:0; }
+#list .pqv-muslim-abaya .pqv-badge-dark { background:var(--pz-ink); color:#fff; }
+#list .pqv-muslim-abaya .pqv-live-viewing { background:#fff; color:#6b6b6b; border:1px solid var(--pz-line); font-weight:600; }
+#list .pqv-muslim-abaya .pqv-live-viewing[hidden] { display:none; }
+#list .pqv-muslim-abaya .pqv-title { font-family:inherit; font-size:36px; line-height:1.15; font-weight:800; letter-spacing:-.01em; color:var(--pz-ink); margin:0 0 18px; }
+#list .pqv-muslim-abaya .pqv-price-row { display:flex; align-items:flex-start; justify-content:space-between; gap:24px; margin:0 0 26px; padding:0; border:0; }
+#list .pqv-muslim-abaya .pqv-price-row .pqv-note { flex:1 1 auto; max-width:62%; margin:0; font-size:12px; line-height:1.6; color:#6b6b6b; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+#list .pqv-muslim-abaya .pqv-price-row .pqv-price { flex:0 0 auto; margin:0 0 0 auto; font-size:30px; font-weight:800; color:var(--pz-ink); line-height:1.1; }
+#list .pqv-muslim-abaya .pqv-oos-banner a { color:inherit; font-weight:700; text-decoration:underline; }
+/* options: left = type / colour / qty, right = sizes */
+#list .pqv-muslim-abaya .pqv-config { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.15fr); gap:22px 36px; align-items:start; margin:0 0 26px; }
+#list .pqv-muslim-abaya .pqv-config:has(.pqv-size-grid[data-cols="3"]) { grid-template-columns:minmax(0,1fr); }
+#list .pqv-muslim-abaya .pqv-config-left,
+#list .pqv-muslim-abaya .pqv-config-right { display:flex; flex-direction:column; gap:22px; min-width:0; }
+#list .pqv-muslim-abaya .pqv-config-right { position:relative; }
+#list .pqv-muslim-abaya .pqv-field { margin:0; padding:0; background:none; border:0; }
+#list .pqv-muslim-abaya .pqv-field-label { display:block; margin:0 0 12px; font-size:10px; font-weight:700; letter-spacing:.25em; text-transform:uppercase; color:#9a9a9a; }
+#list .pqv-muslim-abaya .pqv-field-label b { color:var(--pz-ink); letter-spacing:.04em; margin-left:4px; }
+#list .pqv-muslim-abaya .pqv-size-grid { display:flex; flex-direction:column; gap:18px; padding:0; background:none; border:0; }
+#list .pqv-muslim-abaya .pqv-size-grid[data-cols="3"] { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); }
+#list .pqv-muslim-abaya .pqv-size-grid > .pqv-field { padding:0; background:none; border:0; border-radius:0; }
+#list .pqv-muslim-abaya .pqv-opt-group { display:grid; grid-template-columns:repeat(auto-fill,minmax(104px,1fr)); gap:10px; }
+#list .pqv-muslim-abaya .pqv-opt-btn { height:46px; min-height:46px; padding:0 10px; border:1px solid var(--pz-line); border-radius:0; background:#fff; color:var(--pz-ink); font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; box-shadow:none; }
+#list .pqv-muslim-abaya .pqv-opt-btn:hover { border-color:var(--pz-ink); }
+#list .pqv-muslim-abaya .pqv-opt-btn.is-active { background:var(--pz-ink); color:#fff; border-color:var(--pz-ink); box-shadow:none; }
+#list .pqv-muslim-abaya .pqv-custom-size-btn { color:#c98a1a; background:#fffaf0; border-color:#f3dcae; text-transform:none; font-weight:600; }
+#list .pqv-muslim-abaya .pqv-custom-size-btn:hover { border-color:#c98a1a; }
+/* colour = swatches */
+#list .pqv-muslim-abaya .pqv-color-group,
+#list .pqv-muslim-abaya .pqv-field-color .pqv-opt-group { display:flex; flex-wrap:wrap; gap:12px; }
+#list .pqv-muslim-abaya .pqv-opt-btn.pqv-swatch { width:34px; height:34px; min-height:34px; padding:0; font-size:0; color:transparent; background:var(--sw); border:1px solid rgba(0,0,0,.12); }
+#list .pqv-muslim-abaya .pqv-opt-btn.pqv-swatch.is-active { background:var(--sw); box-shadow:0 0 0 3px #fff,0 0 0 4.5px var(--pz-ink); }
+/* size guide sits top-right of the size column; custom size next to it */
+#list .pqv-muslim-abaya .pqv-size-tools { display:flex; flex-wrap:wrap; gap:10px; margin:0; padding:0; border:0; }
+#list .pqv-muslim-abaya .pqv-size-tools .pqv-custom-size-btn { flex:0 0 auto; width:calc(50% - 5px); }
+#list .pqv-muslim-abaya .pqv-size-chart-link { position:absolute; top:-6px; right:0; display:inline-flex; align-items:center; gap:6px; height:26px; padding:0 12px; border:1px solid var(--pz-line); background:#fafafa; color:var(--pz-ink); font-size:9px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; text-decoration:none; border-radius:0; cursor:pointer; }
+#list .pqv-muslim-abaya .pqv-size-chart-link:hover { border-color:var(--pz-ink); }
+/* qty */
+#list .pqv-muslim-abaya .pqv-qty-row { display:block; margin:0; padding:0; border:0; }
+#list .pqv-muslim-abaya .pqv-qty-row .pqv-qty-label { margin-bottom:12px; }
+#list .pqv-muslim-abaya .pqv-qty-row .ma-qty-stepper.pqv-qty { display:inline-flex; height:40px; border:1px solid var(--pz-line); border-radius:0; background:#fff; box-shadow:none; }
+#list .pqv-muslim-abaya .pqv-qty-row .ma-qty-stepper__btn { width:36px; height:38px; border:0; border-radius:0; background:#fff; font-size:16px; }
+#list .pqv-muslim-abaya .pqv-qty-row .ma-qty-stepper__input { width:34px; height:38px; border:0; font-weight:700; }
+#list .pqv-muslim-abaya .pqv-stock { display:none; }
+#list .pqv-muslim-abaya .pqv-stock.is-oos { display:block; margin-top:8px; padding:0; background:none; border:0; color:#b91c1c; font-size:12px; font-weight:700; letter-spacing:0; text-transform:none; }
+/* buttons */
+#list .pqv-muslim-abaya .pqv-actions-row--two { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:0 0 24px; padding-bottom:24px; border-bottom:1px solid var(--pz-line); }
+#list .pqv-muslim-abaya .pqv-act { display:inline-flex; align-items:center; justify-content:center; gap:9px; height:48px; min-height:48px; padding:0 14px; border-radius:0; font-size:11px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; box-shadow:none; }
+#list .pqv-muslim-abaya .pqv-act-cart { background:#fff; color:var(--pz-ink); border:1.5px solid var(--pz-ink); }
+#list .pqv-muslim-abaya .pqv-act-cart::before { content:""; width:15px; height:15px; flex:0 0 15px; background:currentColor; -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8'%3E%3Cpath d='M5 7h14l-1 13H6L5 7Z'/%3E%3Cpath d='M9 7V5a3 3 0 0 1 6 0v2'/%3E%3Cpath d='M9 11a3 3 0 0 0 6 0'/%3E%3C/svg%3E") center/contain no-repeat; mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8'%3E%3Cpath d='M5 7h14l-1 13H6L5 7Z'/%3E%3Cpath d='M9 7V5a3 3 0 0 1 6 0v2'/%3E%3Cpath d='M9 11a3 3 0 0 0 6 0'/%3E%3C/svg%3E") center/contain no-repeat; }
+#list .pqv-muslim-abaya .pqv-act-cart:hover:not(:disabled) { background:var(--pz-ink); color:#fff; }
+#list .pqv-muslim-abaya .pqv-act-buy { background:var(--pz-ink); color:#fff; border:1.5px solid var(--pz-ink); }
+#list .pqv-muslim-abaya .pqv-act-buy:hover:not(:disabled) { background:#2a2a2a; }
+#list .pqv-muslim-abaya .pqv-act:disabled { opacity:.45; cursor:not-allowed; }
+/* "Your impression" + live browsing */
+#list .pqv-muslim-abaya .pqv-impression { border:1px solid #efefef; padding:20px 22px; margin:0 0 18px; background:#fff; }
+#list .pqv-muslim-abaya .pqv-impression-head,
+#list .pqv-muslim-abaya .pqv-impression-row { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+#list .pqv-muslim-abaya .pqv-impression-head { margin-bottom:14px; }
+#list .pqv-muslim-abaya .pqv-dot-label { display:inline-flex; align-items:center; gap:9px; font-size:10px; font-weight:800; letter-spacing:.24em; text-transform:uppercase; color:var(--pz-ink); }
+#list .pqv-muslim-abaya .pqv-dot-label::before { content:""; width:5px; height:5px; background:var(--pz-ink); border-radius:50%; }
+#list .pqv-muslim-abaya .pqv-impression-hint,
+#list .pqv-muslim-abaya .pqv-impression-note { font-size:9px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:#a5a5a5; }
+#list .pqv-muslim-abaya .pqv-impression-stars { display:flex; gap:6px; }
+#list .pqv-muslim-abaya .pqv-imp-star { width:28px; height:28px; padding:0; border:0; background:none; cursor:pointer; font-size:26px; line-height:1; color:transparent; -webkit-text-stroke:1.2px #c9c9c9; transition:color .12s ease,-webkit-text-stroke-color .12s ease; }
+#list .pqv-muslim-abaya .pqv-imp-star.is-lit { color:#f5b301; -webkit-text-stroke-color:#f5b301; }
+#list .pqv-muslim-abaya .pqv-imp-star:focus-visible { outline:2px solid var(--pz-ink); outline-offset:2px; }
+#list .pqv-muslim-abaya .pqv-browsing { display:flex; align-items:center; gap:9px; padding:13px 16px; margin:0 0 22px; border:1px solid #f1f1f1; background:#fcfcfc; font-size:9px; font-weight:800; letter-spacing:.22em; text-transform:uppercase; color:#555; }
+#list .pqv-muslim-abaya .pqv-browsing[hidden] { display:none; }
+#list .pqv-muslim-abaya .pqv-live-dot { width:7px; height:7px; border-radius:50%; background:#22b573; box-shadow:0 0 0 3px rgba(34,181,115,.15); }
+/* description / specification accordion */
+#list .pqv-muslim-abaya .pqv-acc { display:flex; flex-direction:column; gap:12px; scroll-margin-top:110px; }
+#list .pqv-muslim-abaya .pqv-acc-item { border:1.5px solid var(--pz-ink); background:#fff; }
+#list .pqv-muslim-abaya .pqv-acc-item > summary { list-style:none; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:18px 20px; cursor:pointer; font-size:10px; font-weight:800; letter-spacing:.24em; text-transform:uppercase; color:var(--pz-ink); }
+#list .pqv-muslim-abaya .pqv-acc-item > summary::-webkit-details-marker { display:none; }
+#list .pqv-muslim-abaya .pqv-acc-item > summary > span:first-child::before { content:""; display:inline-block; width:5px; height:5px; margin-right:12px; vertical-align:middle; background:var(--pz-ink); border-radius:50%; }
+#list .pqv-muslim-abaya .pqv-acc-icon { position:relative; width:24px; height:24px; flex:0 0 24px; background:var(--pz-ink); }
+#list .pqv-muslim-abaya .pqv-acc-icon::before,
+#list .pqv-muslim-abaya .pqv-acc-icon::after { content:""; position:absolute; left:50%; top:50%; width:10px; height:1.6px; background:#fff; transform:translate(-50%,-50%); transition:transform .2s ease; }
+#list .pqv-muslim-abaya .pqv-acc-icon::after { transform:translate(-50%,-50%) rotate(90deg); }
+#list .pqv-muslim-abaya .pqv-acc-item[open] .pqv-acc-icon::before { transform:translate(-50%,-50%) rotate(45deg); }
+#list .pqv-muslim-abaya .pqv-acc-item[open] .pqv-acc-icon::after { transform:translate(-50%,-50%) rotate(135deg); }
+#list .pqv-muslim-abaya .pqv-acc-body { padding:0 20px 20px; font-size:13px; line-height:1.7; color:#333; }
+#list .pqv-muslim-abaya .pqv-acc-body .pqv-spec-table { margin:0; }
+@media (max-width:900px) {
+  #list .pqv-muslim-abaya .pqv-top { gap:20px; }
+  #list .pqv-muslim-abaya .pqv-title { font-size:26px; margin-bottom:14px; }
+  #list .pqv-muslim-abaya .pqv-price-row .pqv-price { font-size:24px; }
+  #list .pqv-muslim-abaya .pqv-crumbs { font-size:9px; gap:7px; letter-spacing:.16em; margin-bottom:12px; }
+}
+@media (max-width:600px) {
+  #list .pqv-muslim-abaya .pqv-config { grid-template-columns:minmax(0,1fr); gap:20px; }
+  #list .pqv-muslim-abaya .pqv-opt-group { grid-template-columns:repeat(auto-fill,minmax(92px,1fr)); }
+  #list .pqv-muslim-abaya .pqv-price-row .pqv-note { max-width:58%; }
+  #list .pqv-muslim-abaya .pqv-actions-row--two { gap:8px; }
+  #list .pqv-muslim-abaya .pqv-act { letter-spacing:.1em; padding:0 8px; }
+  #list .pqv-muslim-abaya .pqv-impression { padding:16px; }
+}
+#list .pqv-muslim-abaya .pqv-price-row .pqv-price { border:0; padding:0; }
+#list .pqv-muslim-abaya .pqv-opt-btn { white-space:normal; line-height:1.25; letter-spacing:.04em; }
+#list .pqv-muslim-abaya .pqv-custom-size-btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; }
+#list .pqv-muslim-abaya .pqv-bottom-row { border-top:0; padding-top:0; }
+#list .pqv-muslim-abaya .pqv-opt-btn.pqv-swatch.is-soldout { opacity:.55; background:linear-gradient(135deg,transparent 46%,#fff 46%,#fff 54%,transparent 54%),var(--sw); }
+#list .pqv-muslim-abaya .pqv-size-grid[data-cols="3"] .pqv-opt-group { display:flex; flex-wrap:wrap; gap:8px; }
+#list .pqv-muslim-abaya .pqv-size-grid[data-cols="3"] .pqv-opt-btn { flex:1 1 auto; min-width:0; padding:0 8px; }

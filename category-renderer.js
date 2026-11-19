@@ -2067,6 +2067,7 @@ function bindPqvInteractions(p, idx, categoryKey, scopeRoot) {
     setPqvMainPhoto(mainImg, imgSrc);
   }
   bindPqvImageZoom(modal);
+  bindPqvAnzaarExtras(modal);
   bindPqvQtyInput(modal);
   bindPqvWholesale(modal);
   var activeType =
@@ -2303,11 +2304,17 @@ function pingLiveView(productId) {
       var badge = document.getElementById("pqvLiveViewing");
       if (!badge) return;
       var n = data && data.ok ? parseInt(data.viewing, 10) || 0 : 0;
+      var box = document.getElementById("pqvBrowsing");
+      var boxText = box && box.querySelector(".pqv-browsing-text");
+      // Real count from /_ma/view; shown only when 2+ people have the page open.
       if (n >= 2) {
         badge.hidden = false;
-        badge.textContent = "🟢 এই মুহূর্তে " + n + " জন এই প্রোডাক্টটি দেখছেন";
+        badge.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12Z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>' +
+          "<span>" + n + " জন এখন দেখছেন</span>";
+        if (box && boxText) { box.hidden = false; boxText.textContent = n + " browsing"; }
       } else {
         badge.hidden = true;
+        if (box) box.hidden = true;
       }
     })
     .catch(function () {});
@@ -2560,6 +2567,96 @@ function callMAReviewsMount(root, p, tries) {
   if (tries > 20) return;
   setTimeout(function () { callMAReviewsMount(root, p, tries + 1); }, 150);
 }
+/* Anzaar-style product page helpers (breadcrumb, category badge, image counter, colour swatches). */
+var PQV_BOLT_ICON = '<svg class="pqv-bolt" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z" fill="currentColor"/></svg>';
+function pqvSection(categoryKey) {
+  var secs = window.CATALOG_SECTIONS || [];
+  for (var i = 0; i < secs.length; i++) if (secs[i] && secs[i].key === categoryKey) return secs[i];
+  return null;
+}
+function pqvCategoryName(categoryKey) {
+  var sec = pqvSection(categoryKey);
+  return (sec && sec.menu) || String(categoryKey || "").replace(/[-_]+/g, " ");
+}
+function pqvBreadcrumbHtml(p, categoryKey) {
+  var sec = pqvSection(categoryKey);
+  var catName = pqvCategoryName(categoryKey);
+  return '<nav class="pqv-crumbs" aria-label="Breadcrumb"><a href="' + escapeHtml(shopHref("/")) + '">Home</a>' +
+    (catName ? '<span class="pqv-crumb-sep" aria-hidden="true">›</span><a href="' + escapeHtml(shopHref((sec && sec.path) || "/" + categoryKey)) + '">' + escapeHtml(catName) + "</a>" : "") +
+    '<span class="pqv-crumb-sep" aria-hidden="true">›</span><span class="pqv-crumb-here" aria-current="page">' + escapeHtml(p.name || "") + "</span></nav>";
+}
+function pqvCounterText(i, total) {
+  var pad = function (n) { return n < 10 ? "0" + n : String(n); };
+  return pad(Math.min(total, i + 1) || 1) + " / " + pad(Math.max(1, total || 1));
+}
+var PQV_SWATCH_HEX = {
+  black: "#141414", charcoal: "#36454f", grey: "#808080", gray: "#808080", silver: "#c0c0c0", white: "#f5f5f5",
+  "off white": "#f3efe6", offwhite: "#f3efe6", cream: "#fffad7", beige: "#dec4a0", camel: "#c19a6b", brown: "#6e4828",
+  chocolate: "#522d1e", coffee: "#78553c", maroon: "#6e0f23", "dubai cherry": "#6e0f23", cherry: "#7b1530", red: "#c81e28",
+  rust: "#b7410e", orange: "#f08228", mustard: "#e1ad01", yellow: "#fadc3c", olive: "#555f28", green: "#288c3c",
+  "bottle green": "#0f4d32", emerald: "#14785a", mint: "#aae1c8", teal: "#008080", "sky blue": "#87ceeb", blue: "#2864c8",
+  "royal blue": "#283caa", navy: "#141e50", "navy blue": "#141e50", purple: "#6e328c", lavender: "#bea9e1", mauve: "#966e82",
+  pink: "#f596b4", "baby pink": "#f8c8d7", rose: "#be5a6e", peach: "#ffd2b4", "dark grey": "#4a4a4a", "light grey": "#c8c8c8"
+};
+function pqvSwatchHex(label) {
+  var k = String(label || "").toLowerCase().replace(/[^a-z ]+/g, " ").replace(/\s+/g, " ").trim();
+  if (PQV_SWATCH_HEX[k]) return PQV_SWATCH_HEX[k];
+  var words = k.split(" ");
+  for (var n = words.length - 1; n >= 0; n--) {
+    var two = n > 0 ? words[n - 1] + " " + words[n] : "";
+    if (two && PQV_SWATCH_HEX[two]) return PQV_SWATCH_HEX[two];
+    if (PQV_SWATCH_HEX[words[n]]) return PQV_SWATCH_HEX[words[n]];
+  }
+  return "";
+}
+function bindPqvAnzaarExtras(modal) {
+  if (!modal || modal.getAttribute("data-pqv-anzaar") === "1") return;
+  modal.setAttribute("data-pqv-anzaar", "1");
+  // "01 / 02" image counter follows the active thumbnail.
+  var thumbsBox = modal.querySelector(".pqv-thumbs");
+  var counter = modal.querySelector(".pqv-counter");
+  function paintCounter() {
+    if (!counter) return;
+    // Broken photos get their thumbnail hidden; count only the ones people can see.
+    var thumbs = Array.prototype.filter.call(modal.querySelectorAll(".pqv-thumb"), function (t) { return t.style.display !== "none"; });
+    var i = 0;
+    thumbs.forEach(function (t, j) { if (t.classList.contains("is-active")) i = j; });
+    counter.textContent = pqvCounterText(i, thumbs.length);
+    counter.hidden = thumbs.length < 2;
+  }
+  paintCounter();
+  if (thumbsBox && window.MutationObserver) new MutationObserver(paintCounter).observe(thumbsBox, { subtree: true, childList: true, attributes: true, attributeFilter: ["class", "style"] });
+  // "Color: Maroon" shows the chosen colour by name.
+  function paintColorName() {
+    var name = modal.querySelector(".pqv-color-name");
+    var on = modal.querySelector(".pqv-color-opt.is-active") || modal.querySelector(".pqv-color-opt");
+    if (name && on) name.textContent = on.getAttribute("data-color-label") || on.textContent || "";
+  }
+  paintColorName();
+  var colorGroup = modal.querySelector(".pqv-color-group");
+  if (colorGroup && window.MutationObserver) new MutationObserver(paintColorName).observe(colorGroup, { subtree: true, attributes: true, attributeFilter: ["class"] });
+  // "Your impression · Tap to rate": picking a star opens the review form with that rating chosen.
+  var stars = modal.querySelectorAll("[data-pqv-rate]");
+  function lightStars(n) { stars.forEach(function (b) { b.classList.toggle("is-lit", Number(b.getAttribute("data-pqv-rate")) <= n); }); }
+  stars.forEach(function (b) {
+    var n = Number(b.getAttribute("data-pqv-rate")) || 0;
+    b.addEventListener("mouseenter", function () { lightStars(n); });
+    b.addEventListener("mouseleave", function () { lightStars(Number(modal.getAttribute("data-pqv-rated")) || 0); });
+    b.addEventListener("click", function () {
+      modal.setAttribute("data-pqv-rated", String(n));
+      lightStars(n);
+      var scope = modal.closest(".pqv-muslim-abaya") || modal;
+      var reviews = scope.querySelector(".pqv-reviews") || document.querySelector(".pqv-reviews");
+      if (!reviews) return;
+      var form = reviews.querySelector("form");
+      var toggle = reviews.querySelector("[data-ma-review-toggle]");
+      if (form && toggle && (form.hidden || getComputedStyle(form).display === "none")) toggle.click();
+      var pick = reviews.querySelector('.pqv-rate-star[data-rate="' + n + '"]');
+      if (pick) pick.click();
+      (form || reviews).scrollIntoView({ behavior: categoryScrollBehavior(), block: "center" });
+    });
+  });
+}
 function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
   var defaultType = getDefaultProductType(p, categoryKey);
   var productPrice = listingCardPrice(p);
@@ -2587,14 +2684,14 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
   var chartBtn = chartData
     ? '<button type="button" class="pqv-size-chart-link" data-pqv-size-chart="1" data-chart-category="' +
       escapeHtml(categoryKey || "") +
-      '">Size chart</button>'
+      '"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M3 17 17 3l4 4L7 21H3v-4Z M13 7l2 2 M10 10l2 2 M7 13l2 2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span>Size Guide</span></button>'
     : "";
   var customSizeBtn =
     chartData && Array.isArray(chartData.customSize) && chartData.customSize.length
       ? '<button type="button" class="pqv-opt-btn pqv-custom-size-btn" data-pqv-custom-size="1" ' +
         'data-product-id="' + escapeHtml(p.id || "") + '" data-product-name="' + escapeHtml(p.name || "") + '" ' +
         'data-product-price="' + productPrice + '" data-product-image="' + escapeHtml(imgSrc || "") + '" ' +
-        'data-category="' + escapeHtml(categoryKey || "") + '">Custom Size</button>'
+        'data-category="' + escapeHtml(categoryKey || "") + '">Custom <span aria-hidden="true">✎</span></button>'
       : "";
   var typeField =
     types.length > 1
@@ -2606,13 +2703,14 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
   var colorField = "";
   if (colorVariants.length > 1) {
     colorField =
-      '<div class="pqv-field"><span class="pqv-field-label">Color</span><div class="pqv-opt-group pqv-opt-group-wrap pqv-color-group">' +
+      '<div class="pqv-field pqv-field-color"><span class="pqv-field-label">Color: <b class="pqv-color-name"></b></span><div class="pqv-opt-group pqv-opt-group-wrap pqv-color-group">' +
       colorVariants
         .map(function (row, i) {
           return (
             '<button type="button" class="pqv-opt-btn pqv-color-opt' +
+            (pqvSwatchHex(row.colorLabel || row.color) ? " pqv-swatch" : "") +
             (i === 0 ? " is-active" : "") +
-            '" data-product-idx="' +
+            '"' + (pqvSwatchHex(row.colorLabel || row.color) ? ' style="--sw:' + pqvSwatchHex(row.colorLabel || row.color) + '" title="' + escapeHtml(row.colorLabel) + '"' : "") + ' data-product-idx="' +
             idx +
             '" data-color-value="' +
             escapeHtml(row.color) +
@@ -2631,8 +2729,8 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
       "</div></div>";
   } else if (colorLabel && colorLabelDiffersFromName(p, colorLabel)) {
     colorField =
-      '<div class="pqv-field"><span class="pqv-field-label">Color</span><div class="pqv-opt-group">' +
-      '<button type="button" class="pqv-opt-btn is-active" aria-pressed="true">' +
+      '<div class="pqv-field pqv-field-color"><span class="pqv-field-label">Color: <b class="pqv-color-name">' + colorLabel + '</b></span><div class="pqv-opt-group">' +
+      '<button type="button" class="pqv-opt-btn is-active' + (pqvSwatchHex(p.colorLabel || p.color) ? ' pqv-swatch" style="--sw:' + pqvSwatchHex(p.colorLabel || p.color) + '" title="' + colorLabel : "") + '" aria-pressed="true">' +
       colorLabel +
       "</button></div></div>";
   }
@@ -2738,7 +2836,8 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
   var showWholesale = !sizeTpl &&
     ((isAbaya && sizes.length > 1) ||
      (!isTwoPiece && !isPanjabi && sizes.length > 1));
-  var wholesaleHtml = showWholesale ? buildPqvWholesaleSectionHtml(sizes, idx, isAbaya) : "";
+  // Anzaar-style product page: no wholesale block (owner's choice, Nov 2026).
+  var wholesaleHtml = "";
   return (
     '<div class="pqv-muslim-abaya' + (stock.inStock ? "" : " pqv-is-oos") + '">' +
     '<div class="pqv-top">' +
@@ -2762,47 +2861,60 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     '\'">' +
     '<button type="button" class="pqv-nav pqv-nav-next" data-pqv-nav="next" aria-label="Next image" hidden>' +
     '<span aria-hidden="true">&#10095;</span></button>' +
+    '<span class="pqv-counter" aria-hidden="true">' + pqvCounterText(0, gallery.length) + "</span>" +
     "</div></div></div>" +
     '<div class="pqv-panel-col">' +
     '<div class="pqv-panel">' +
-    '<button type="button" class="pqv-panel-back" data-pqv-close="1">&lsaquo; Back to products</button>' +
+    pqvBreadcrumbHtml(p, categoryKey) +
+    '<div class="pqv-badges">' +
+    '<span class="pqv-badge-dark">' + escapeHtml(pqvCategoryName(categoryKey) || "Muslim Abaya") + "</span>" +
+    // Real live count only (shown when 2+ people have this page open); never a made-up number.
+    '<span class="pqv-live-viewing" id="pqvLiveViewing" hidden></span>' +
+    "</div>" +
     '<h1 id="pqvTitle" class="pqv-title" lang="en">' +
     escapeHtml(p.name) +
     "</h1>" +
-    '<p class="pqv-live-viewing" id="pqvLiveViewing" hidden></p>' +
+    '<div class="pqv-price-row">' +
+    (shortNoteRaw
+      ? (p.shortDescription && safeHtmlFn ? '<div class="pqv-note pqv-short-desc">' + safeHtmlFn(p.shortDescription) + "</div>" : '<p class="pqv-note">' + escapeHtml(shortNoteRaw) + "</p>")
+      : '<span class="pqv-note-empty"></span>') +
     '<p class="pqv-price" id="pqvPrice" data-price="' +
     productPrice +
     '">' +
     optionPriceHtml(p, defaultType, productPrice) +
     "</p>" +
+    "</div>" +
     '<div class="pqv-oos-banner" role="status">' +
     '<strong>Out of Stock · এই পণ্যটি এখন স্টকে নেই</strong>' +
-    '<span>এই মুহূর্তে অর্ডার নেওয়া যাচ্ছে না। নতুন স্টক কবে আসবে জানতে নিচের <b>Send Message</b> বাটনে আমাদের জানান।</span>' +
+    '<span>এই মুহূর্তে অর্ডার নেওয়া যাচ্ছে না। নতুন স্টক কবে আসবে জানতে <a href="' + waLink + "?text=" +
+    encodeURIComponent(p.name + " \u0995\u09AC\u09C7 \u09B8\u09CD\u099F\u0995\u09C7 \u0986\u09B8\u09AC\u09C7?") +
+    '" target="_blank" rel="noopener">আমাদের মেসেজ দিন</a>।</span>' +
     "</div>" +
-    (shortNoteRaw
-      ? (p.shortDescription && safeHtmlFn ? '<div class="pqv-note pqv-short-desc">' + safeHtmlFn(p.shortDescription) + "</div>" : '<p class="pqv-note">' + escapeHtml(shortNoteRaw) + "</p>")
-      : "") +
-    '<div class="pqv-options' + (isAbaya ? ' pqv-options--abaya' : '') + '">' +
+    '<div class="pqv-options pqv-config' + (isAbaya ? ' pqv-options--abaya' : '') + '">' +
+    '<div class="pqv-config-left">' +
     typeField +
     colorField +
-    sizeField +
-    wholesaleHtml +
-    "</div>" +
     '<div class="pqv-qty-row">' +
-    '<span class="pqv-field-label pqv-qty-label">Quantity</span>' +
+    '<span class="pqv-field-label pqv-qty-label">Qty</span>' +
     '<div class="ma-qty-stepper pqv-qty" role="group" aria-label="Quantity">' +
     '<button type="button" class="ma-qty-stepper__btn pqv-qty-btn" data-pqv-qty="minus" aria-label="Decrease quantity">−</button>' +
     '<input type="text" id="pqvQty" class="ma-qty-stepper__input pqv-qty-input" value="1" inputmode="numeric" pattern="[0-9]*" lang="en" autocomplete="off" aria-label="Quantity">' +
     '<button type="button" class="ma-qty-stepper__btn pqv-qty-btn" data-pqv-qty="plus" aria-label="Increase quantity">+</button>' +
     "</div>" +
+    // Only shows a message when something is not available ("In Stock" itself is not shown).
     '<span class="pqv-stock' +
     (stock.inStock ? "" : " is-oos") +
     '">' +
     escapeHtml(stock.label) +
     "</span>" +
-    '<button type="button" class="pqv-jump-desc" data-pqv-jump-desc="1">Jump to Description <span aria-hidden="true">↓</span></button>' +
     "</div>" +
-    '<div class="pqv-actions-row pqv-actions-row--three">' +
+    "</div>" +
+    '<div class="pqv-config-right">' +
+    sizeField +
+    wholesaleHtml +
+    "</div>" +
+    "</div>" +
+    '<div class="pqv-actions-row pqv-actions-row--two">' +
     '<button type="button" class="pqv-act pqv-act-cart" data-product-idx="' +
     idx +
     '" data-action="add"' +
@@ -2815,31 +2927,28 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     '" data-action="buy-now"' +
     (stock.inStock ? "" : " disabled") +
     ">" +
-    maShopBagIcon(16) +
-    '<span lang="bn">অর্ডার করুন</span></button>' +
-    '<a class="pqv-act pqv-act-msg" href="' +
-    waLink +
-    "?text=" +
-    encodeURIComponent(p.name + " \u0985\u09B0\u09CD\u09A1\u09BE\u09B0 \u0995\u09B0\u09A4\u09C7 \u099A\u09BE\u09AF\u09BC") +
-    '" target="_blank" rel="noopener">Send Message</a>' +
+    PQV_BOLT_ICON +
+    "<span>Buy Now</span></button>" +
+    "</div>" +
+    '<div class="pqv-impression">' +
+    '<div class="pqv-impression-head"><span class="pqv-dot-label">Your Impression</span><span class="pqv-impression-hint">Tap to rate</span></div>' +
+    '<div class="pqv-impression-row"><div class="pqv-impression-stars" role="group" aria-label="Rate this product">' +
+    [1, 2, 3, 4, 5].map(function (n) {
+      return '<button type="button" class="pqv-imp-star" data-pqv-rate="' + n + '" aria-label="' + n + ' star">★</button>';
+    }).join("") +
+    '</div><span class="pqv-impression-note">Verified customer feedback</span></div>' +
+    "</div>" +
+    '<div class="pqv-browsing" id="pqvBrowsing" hidden><span class="pqv-live-dot"></span><span class="pqv-browsing-text"></span></div>' +
+    '<div class="pqv-acc" id="pqvDescBlock">' +
+    '<details class="pqv-acc-item" open><summary><span>01. Product Description</span><span class="pqv-acc-icon" aria-hidden="true"></span></summary>' +
+    '<div class="pqv-acc-body">' + descHtml + "</div></details>" +
+    '<details class="pqv-acc-item"><summary><span>02. Specification</span><span class="pqv-acc-icon" aria-hidden="true"></span></summary>' +
+    '<div class="pqv-acc-body">' + specRows + "</div></details>" +
     "</div>" +
     "</div>" +
     "</div>" +
     "</div>" +
     '<div class="pqv-bottom-row">' +
-    '<div class="pqv-bottom" id="pqvDescBlock">' +
-    '<div class="pqv-bottom-main">' +
-    '<div class="pqv-tabs">' +
-    '<button type="button" class="pqv-tab is-active" data-tab="desc">Description</button>' +
-    '<button type="button" class="pqv-tab" data-tab="spec">Specification</button>' +
-    "</div>" +
-    '<div class="pqv-tab-panels">' +
-    '<div class="pqv-tab-panel is-active" data-panel="desc">' +
-    descHtml +
-    "</div>" +
-    '<div class="pqv-tab-panel" data-panel="spec">' +
-    specRows +
-    "</div></div></div></div>" +
     '<div class="pqv-reviews-section"><h3 class="pqv-reviews-title">Customer Reviews</h3><div class="pqv-reviews" data-ma-reviews="1"></div></div>' +
     relatedHtml +
     "</div>" +

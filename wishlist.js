@@ -1,5 +1,5 @@
 /* wishlist.js — "পছন্দের তালিকা" (♥). Saved in this browser only (localStorage, up to 100 products); no login needed.
-   Adds a heart to product cards (shop + home) and to the product page; the list is on /wishlist.
+   Adds a heart to product cards (shop + home) and to the big photo on the product page; the list is on /wishlist.
    Loaded by mobile-bottom-nav.js, so every storefront page gets it. API: window.maWishlist. */
 (function () {
   "use strict";
@@ -92,9 +92,13 @@
       host.classList.add("ma-wish-host");
       host.appendChild(makeBtn(id, false));
     });
+    // Product page: a round heart in the big photo's top-right corner (Anzaar style).
     var m = /^\/product\/([^/?#]+)/.exec(location.pathname);
-    var title = document.getElementById("pqvTitle");
-    if (m && title && !document.querySelector(".ma-wish-inline")) title.insertAdjacentElement("afterend", makeBtn(decodeURIComponent(m[1]), true));
+    var stage = document.querySelector(".pqv-main");
+    if (m && stage && !stage.querySelector(".ma-wish")) {
+      stage.classList.add("ma-wish-host");
+      stage.appendChild(makeBtn(decodeURIComponent(m[1]), false));
+    }
   }
   var noteTimer = null;
   function note(text) {

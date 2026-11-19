@@ -102,7 +102,7 @@ test('a Draft product is not sold: no card, not in search, product page shows no
 test('tags: product page links to the tag page, which lists only tagged products', async ({ page }) => {
   await useCatalog(page);
   await page.goto('/product/ABY-BLACK-3');
-  await page.locator('[data-tab="spec"]').first().click(); // Specification tab
+  await page.locator('.pqv-acc-item').nth(1).locator('summary').click(); // "02. Specification" box
   const tags = page.locator('.pqv-spec-tags a');
   await expect(tags).toHaveText(['eid', 'Black Abaya']);
   await tags.first().click();

@@ -32,13 +32,14 @@ test('heart on a category card saves the product; bottom bar shows the count; /w
   await expect(page.locator('#mbn-wish-count')).toBeHidden();
 });
 
-test('product page has a "পছন্দের তালিকায় রাখুন" button that stays in step with the cards', async ({ page }) => {
+test('product page heart sits on the big photo (Anzaar style) and stays in step with the cards', async ({ page }) => {
   await block(page);
   await page.goto('/product/ABY-MAROON-1');
-  const btn = page.locator('.ma-wish-inline');
-  await expect(btn).toContainText('পছন্দের তালিকায় রাখুন');
+  const btn = page.locator('.pqv-main .ma-wish');
+  await expect(btn).toBeVisible();
+  await expect(page.locator('.ma-wish-inline')).toHaveCount(0);
   await btn.click();
-  await expect(btn).toContainText('পছন্দের তালিকায় আছে');
+  await expect(btn).toHaveAttribute('aria-pressed', 'true');
   expect(await page.evaluate(() => window.maWishlist.list())).toEqual(['ABY-MAROON-1']);
   await page.goto('/');
   const homeHeart = page.locator('article.ah-card[data-pid="ABY-MAROON-1"] .ma-wish').first();
