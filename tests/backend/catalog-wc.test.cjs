@@ -61,6 +61,17 @@ test('order price check (catalog-validation) does not contain Draft or Trash pro
   eq(ids, ['K1', 'K3', 'K5']);
 });
 
+test('order validation catalog carries product and variation SKUs for server-side uniqueness checks', () => {
+  const w = load({ abaya: [P('P-1', { sku: 'MA-001', variations: [
+    { type: 'Full Set', color: 'Black', size: 'M', sku: 'MA-001-BLACK-M', price: 1200 }
+  ] })] });
+  const rows = w.__maBuildValidationProducts(w);
+  assert.equal(rows[0].sku, 'MA-001');
+  assert.equal(rows[0].variations[0].sku, 'MA-001-BLACK-M');
+  const fallback = load({ abaya: [P('P-2', { sku: '   ' })] });
+  assert.equal(fallback.__maBuildValidationProducts(fallback)[0].sku, 'P-2');
+});
+
 test('sale price: struck-through regular price only when it is higher than the selling price', () => {
   const w = load(fixture, links);
   const k5 = w.maCatalog.normalizeAll(w.CATEGORY_PRODUCTS, {})['tops-kurti'].find((p) => p.id === 'K5');
