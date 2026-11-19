@@ -272,26 +272,36 @@ function buildNavMenuItems() {
 
     return items;
 }
-  function renderNavMenuItem(it, mobile) {
+
+  /** ডেস্কটপ মেনু আইটেম — সাবক্যাটাগরি থাকলে hover-এ ড্রপডাউন দেখায় (শুধু আসল সাবক্যাটাগরি, Abaya) */
+  function renderDesktopMenuItem(it, items) {
     var label = String(it.label || "");
     if (it.enabled === false) {
-      return (
-        '<li><span class="nav-link-soon" aria-disabled="true" title="Coming Soon">' +
-        label +
-        "</span></li>"
-      );
+      return '<li><span class="nav-link-soon" aria-disabled="true" title="Coming Soon">' + label + "</span></li>";
     }
     var href = siteHref(it.href);
-    if (mobile) {
-      return (
-        '<li><a href="' +
-        href +
-        '" onclick="window.toggleAbayaMenu()">' +
-        label +
-        "</a></li>"
-      );
+    var subKeys = MEGA_MENU_SUBCATS[it.key] || [];
+    var subs = subKeys
+      .map(function (k) {
+        return items.filter(function (x) { return x.key === k && x.enabled !== false; })[0];
+      })
+      .filter(Boolean);
+    if (!subs.length) {
+      return '<li><a href="' + href + '">' + label + "</a></li>";
     }
-    return '<li><a href="' + href + '">' + label + "</a></li>";
+    var subLinksHtml = subs
+      .map(function (s) {
+        return '<a href="' + siteHref(s.href) + '">' + escHtml(s.label) + "</a>";
+      })
+      .join("");
+    return (
+      '<li class="nav-has-sub">' +
+      '<a href="' + href + '">' + label + ' <span class="nav-chev" aria-hidden="true">&#9662;</span></a>' +
+      '<div class="nav-submenu">' +
+      '<a href="' + href + '" class="nav-submenu-all">সব ' + escHtml(label) + "</a>" +
+      subLinksHtml +
+      "</div></li>"
+    );
   }
 
   /**
@@ -389,7 +399,7 @@ function buildNavMenuItems() {
     var desktop = document.querySelector(".desktop-menu ul");
     if (desktop) {
       desktop.innerHTML = items.map(function (it) {
-        return renderNavMenuItem(it, false);
+        return renderDesktopMenuItem(it, items);
       }).join("");
     }
     var mobile = document.getElementById("mnpBody");

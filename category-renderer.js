@@ -2280,6 +2280,56 @@ function closeProductQuickView(skipHistory) {
   }
   document.body.classList.remove("pqv-open", "shop-product-open");
 }
+/*
+ * আসল "এই মুহূর্তে কতজন দেখছে" কাউন্টার — কোনো বানানো সংখ্যা না, Cloudflare Worker + D1-এ
+ * প্রতি সেশনের heartbeat রেকর্ড হয়ে আসল active viewer গোনা হয়। শুধু আসল প্রোডাক্ট পেজে চলে
+ * (data-product-id থাকলে), ক্যাটাগরি গ্রিডের quick-view পপআপে না।
+ */
+var liveViewTimer = null;
+var liveViewSessionId = null;
+function getLiveViewSessionId() {
+  if (liveViewSessionId) return liveViewSessionId;
+  try {
+    liveViewSessionId = sessionStorage.getItem("ma_vsid");
+  } catch (e) {}
+  if (!liveViewSessionId) {
+    liveViewSessionId = "v" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+    try { sessionStorage.setItem("ma_vsid", liveViewSessionId); } catch (e) {}
+  }
+  return liveViewSessionId;
+}
+function pingLiveView(productId) {
+  fetch("/_ma/view", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ productId: productId, sessionId: getLiveViewSessionId() })
+  })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      var badge = document.getElementById("pqvLiveViewing");
+      if (!badge) return;
+      var n = data && data.ok ? parseInt(data.viewing, 10) || 0 : 0;
+      if (n >= 2) {
+        badge.hidden = false;
+        badge.textContent = "🟢 এই মুহূর্তে " + n + " জন এই প্রোডাক্টটি দেখছেন";
+      } else {
+        badge.hidden = true;
+      }
+    })
+    .catch(function () {});
+}
+function stopLiveViewHeartbeat() {
+  if (liveViewTimer) {
+    clearInterval(liveViewTimer);
+    liveViewTimer = null;
+  }
+}
+function startLiveViewHeartbeat(productId) {
+  stopLiveViewHeartbeat();
+  if (!productId) return;
+  pingLiveView(productId);
+  liveViewTimer = setInterval(function () { pingLiveView(productId); }, 25000);
+}
 function openProductQuickView(idx) {
   var products = shopCartCtx.products;
   if (!products || !products[idx]) return;
@@ -2323,6 +2373,11 @@ function openProductQuickView(idx) {
   }
   fireShopViewContent(p, categoryKey);
   updatePqvGalleryNav(root);
+  if (productId) {
+    startLiveViewHeartbeat(p.id);
+  } else {
+    stopLiveViewHeartbeat();
+  }
 }
 function buildPqvWholesaleSectionHtml(sizes, idx, isAbaya) {
   var sizeLabel = isAbaya ? "Length" : "Size";
@@ -2720,6 +2775,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     '<h1 id="pqvTitle" class="pqv-title" lang="en">' +
     escapeHtml(p.name) +
     "</h1>" +
+    '<p class="pqv-live-viewing" id="pqvLiveViewing" hidden></p>' +
     '<p class="pqv-price" id="pqvPrice" data-price="' +
     productPrice +
     '">' +

@@ -1,5 +1,22 @@
 const { test, expect } = require('@playwright/test');
 
+test.describe('desktop ABAYA dropdown', () => {
+  test('hovering ABAYA shows real subcategories; a category with none has no dropdown', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/index.html');
+    const abayaItem = page.locator('.desktop-menu li.nav-has-sub', { hasText: 'ABAYA' });
+    await expect(abayaItem).toBeVisible();
+    await abayaItem.hover();
+    const submenu = abayaItem.locator('.nav-submenu');
+    await expect(submenu).toBeVisible();
+    await expect(submenu).toContainText('EMBROIDERY');
+    await expect(submenu.locator('a').first()).toHaveAttribute('href', /\/abaya/);
+
+    const hijabItem = page.locator('.desktop-menu li', { hasText: 'HIJAB' });
+    await expect(hijabItem.locator('.nav-submenu')).toHaveCount(0);
+  });
+});
+
 // Mobile "Category" tab opens a mega-menu (Collections pills + a Subcategory
 // accordion for Abaya), styled after a competitor's app. Covers: opening the
 // panel, the default Abaya subcategory accordion, switching to a category

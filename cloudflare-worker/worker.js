@@ -26,6 +26,9 @@ export default {
     if (path === '/_ma/repeat') {
       return handleRepeatCheck(request, env, url);
     }
+    if (path === '/_ma/view') {
+      return handleLiveView(request, env, url);
+    }
     if (path.startsWith('/_ma/')) {
       return handleEvent(request, env, ctx, url);
     }
@@ -266,6 +269,47 @@ async function handleRepeatCheck(request, env, url) {
 
 function jsonText(obj) {
   return new Response(JSON.stringify(obj), { status: 200, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
+}
+
+// আসল "এই মুহূর্তে X জন দেখছেন" কাউন্টার — কোনো বানানো/র‍্যান্ডম সংখ্যা না।
+// প্রোডাক্ট পেজ খোলা থাকলে ব্রাউজার প্রতি ~25s এ একটা heartbeat পাঠায়; সেশন আইডি
+// sessionStorage-এ থাকা একটা র‍্যান্ডম আইডি মাত্র, কোনো ব্যক্তিগত তথ্য না।
+const VIEW_ACTIVE_MS = 90 * 1000;
+const VIEW_STALE_MS = 10 * 60 * 1000;
+const VIEW_ID_RE = /^[A-Za-z0-9_.-]{1,80}$/;
+
+async function handleLiveView(request, env, url) {
+  if (request.method !== 'POST') return textOut('Method not allowed', 405, { Allow: 'POST' });
+  const srcHost = hostOf(request.headers.get('Origin') || '') || hostOf(request.headers.get('Referer') || '');
+  if (srcHost && !ORDER_HOSTS.includes(srcHost)) return textOut('Forbidden', 403);
+  if (!env.DB) return jsonText({ ok: true, viewing: 0 });
+  let body;
+  try {
+    body = await request.json();
+  } catch (e) {
+    return jsonText({ ok: true, viewing: 0 });
+  }
+  const productId = String((body && body.productId) || '').slice(0, 80);
+  const sessionId = String((body && body.sessionId) || '').slice(0, 80);
+  if (!VIEW_ID_RE.test(productId) || !VIEW_ID_RE.test(sessionId)) {
+    return jsonText({ ok: true, viewing: 0 });
+  }
+  const now = Date.now();
+  try {
+    await env.DB.prepare(
+      'INSERT INTO product_live_views (session_id, product_id, last_seen) VALUES (?, ?, ?) ' +
+      'ON CONFLICT(session_id, product_id) DO UPDATE SET last_seen = excluded.last_seen'
+    ).bind(sessionId, productId, now).run();
+    // আলাদা cron ছাড়াই টেবিল ছোট রাখতে, সুযোগ পেলে পুরনো রো মুছে ফেলা হচ্ছে।
+    await env.DB.prepare('DELETE FROM product_live_views WHERE last_seen < ?').bind(now - VIEW_STALE_MS).run();
+    const row = await env.DB.prepare(
+      'SELECT COUNT(*) AS n FROM product_live_views WHERE product_id = ? AND last_seen >= ?'
+    ).bind(productId, now - VIEW_ACTIVE_MS).first();
+    return jsonText({ ok: true, viewing: (row && row.n) || 0 });
+  } catch (e) {
+    console.log('live_view_error', String(e).slice(0, 150));
+    return jsonText({ ok: true, viewing: 0 });
+  }
 }
 
 async function handleOrder(request, env, ctx) {

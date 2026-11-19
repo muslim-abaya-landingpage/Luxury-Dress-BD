@@ -142,6 +142,45 @@ body {
   .home-hero { margin: 0 auto 4px; }
 }
 
+/* ---------- Promo banner row (two real offers — free delivery + WhatsApp order) ---------- */
+.home-promo-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  max-width: 1200px;
+  margin: 14px auto;
+  padding: 0 16px;
+}
+.home-promo-tile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 18px;
+  text-decoration: none;
+  border: 1px solid #ece3d6;
+  background: #faf6ee;
+  color: #111;
+}
+.home-promo-tile.is-whatsapp { background: #eefaf1; border-color: #d7f0e0; }
+.home-promo-tile .home-promo-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.home-promo-tile .home-promo-cta {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+@media (max-width: 560px) {
+  .home-promo-row { grid-template-columns: 1fr; gap: 8px; margin: 10px auto; }
+  .home-promo-tile { padding: 12px 14px; }
+}
+
 .home-skeleton {
   max-width: 1440px;
   margin: 40px auto;
@@ -742,6 +781,17 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </div>
   </div>
+</div>
+
+<div class="home-promo-row">
+  <a class="home-promo-tile" href="/category">
+    <span class="home-promo-label">৩+ পণ্যে সারাদেশে ফ্রি ডেলিভারি</span>
+    <span class="home-promo-cta">কিনুন &rarr;</span>
+  </a>
+  <a class="home-promo-tile is-whatsapp" href="https://wa.me/8801971642683" target="_blank" rel="noopener">
+    <span class="home-promo-label">WhatsApp-এ সরাসরি অর্ডার করুন</span>
+    <span class="home-promo-cta">চ্যাট করুন &rarr;</span>
+  </a>
 </div>
 
 <!-- Quick category chips -->

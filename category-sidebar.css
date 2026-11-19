@@ -1911,6 +1911,13 @@ body.shop-product-open > main {
   font-family: Georgia, "Times New Roman", "Noto Serif Bengali", serif;
 }
 
+.pqv-live-viewing {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a7a3c;
+}
+
 .pqv-price {
   margin: 0 0 16px;
   padding: 0 0 16px;
