@@ -131,6 +131,8 @@ test('SKU column displays the WooCommerce SKU field and product search uses it',
   await open(page);
   const row = page.locator('#pmAllRows tr').first();
   await row.locator('.pm-row-title').click();
+  // SKU is a WooCommerce Inventory field, not part of the General tab.
+  await page.click('[data-etab="inventory"]');
   await page.fill('[data-ef="sku"]', 'TEST-SKU-900');
   await page.click('#pmEditUpdate');
   await expect.poll(() => productsFile(page)).toBeTruthy();
