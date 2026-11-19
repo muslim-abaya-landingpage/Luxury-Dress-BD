@@ -201,3 +201,57 @@
 :root[data-admin-theme="dark"] .pm-wp-admin .pm-wp-edit textarea {
   background:#171d27 !important; color:var(--pm-ui-text) !important; border-color:var(--pm-ui-line) !important;
 }
+
+
+/* Keep the Bangla onboarding hint visible; it is the quickest path for store operators. */
+.pm-wp-admin .pm-guide {
+  display: flex !important;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin: 0 0 16px !important;
+  padding: 12px 15px !important;
+  border: 1px solid #c9dff2 !important;
+  border-left: 3px solid var(--pm-ui-primary) !important;
+  border-radius: 7px !important;
+  background: #f0f7fd !important;
+  color: #344054 !important;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.pm-wp-admin .pm-guide strong { color: #174d78; white-space: nowrap; }
+.pm-wp-admin .pm-guide span { flex: 1 1 360px; }
+.pm-wp-admin .pm-guide a { color: var(--pm-ui-primary); font-weight: 650; white-space: nowrap; }
+@media (max-width:760px) {
+  .pm-wp-admin .pm-guide { align-items: flex-start; padding: 11px 12px !important; }
+  .pm-wp-admin .pm-guide span { flex-basis: 100%; }
+}
+
+/* Give the menu and navigation links stable slots instead of letting grid auto-place them
+   around the title/actions/status when the header wraps. */
+.pm-wp-admin .pl-admin-header > .adm-menu-btn {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+  align-self: start;
+}
+.pm-wp-admin .pl-admin-header > a.pl-back {
+  grid-row: 1;
+  justify-self: start;
+  align-self: start;
+  margin-left: 36px !important;
+}
+.pm-wp-admin .pl-admin-header > a.pl-back:nth-of-type(2) {
+  margin-left: 104px !important;
+}
+@media (max-width:760px) {
+  .pm-wp-admin .pl-admin-header > .adm-menu-btn { grid-column: 1; grid-row: 1; }
+  .pm-wp-admin .pl-admin-header > a.pl-back { grid-column: 1; grid-row: 1; }
+  .pm-wp-admin .pl-admin-header > a.pl-back:nth-of-type(2) { margin-left: 104px !important; }
+}
+:root[data-admin-theme="dark"] .pm-wp-admin .pm-guide {
+  background: #1c3043 !important;
+  border-color: #345b7b !important;
+  color: #d9e4ef !important;
+}
+:root[data-admin-theme="dark"] .pm-wp-admin .pm-guide strong { color: #b9dcf7; }
