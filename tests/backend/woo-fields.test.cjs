@@ -104,3 +104,21 @@ test('New fields are kept by the catalog; downloads need a web link', () => {
   assert.equal(p.reviewsAllowed, false); assert.equal(p.productType, 'external');
   assert.deepEqual(JSON.parse(JSON.stringify(p.downloads)), [{ name: 'Guide', file: 'https://x.test/a.pdf' }]);
 });
+
+
+test('catalog validation enforces unique product and variation SKUs case-insensitively', () => {
+  const w = site();
+  const valid = (id, extra) => base(id, Object.assign({ sku: id }, extra || {}));
+  assert.doesNotThrow(() => w.MaProductPublishUtils.validateCatalog({
+    abaya: [valid('A', { variations: [{ sku: 'A-NAVY-M' }, { sku: 'A-BLACK-L' }] }), valid('B')]
+  }));
+  assert.throws(() => w.MaProductPublishUtils.validateCatalog({
+    abaya: [valid('A', { sku: 'MA-001' }), valid('B', { sku: 'ma-001' })]
+  }), /unique SKU/);
+  assert.throws(() => w.MaProductPublishUtils.validateCatalog({
+    abaya: [valid('A', { variations: [{ sku: 'MA-V-1' }, { sku: 'ma-v-1' }] })]
+  }), /unique SKU/);
+  assert.throws(() => w.MaProductPublishUtils.validateCatalog({
+    abaya: [valid('A', { sku: 'MA-001' }), valid('B', { variations: [{ sku: 'MA-001' }] })]
+  }), /unique SKU/);
+});
