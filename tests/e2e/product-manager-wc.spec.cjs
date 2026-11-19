@@ -127,7 +127,7 @@ test('SEO box: preview and counters, the custom title and description are saved'
   expect(e).toContain('seoDescription: "Dubai cherry maroon abaya with hijab.');
 });
 
-test('SKU column displays the WooCommerce SKU field and search/sort use it', async ({ page }) => {
+test('SKU column displays the WooCommerce SKU field and product search uses it', async ({ page }) => {
   await open(page);
   const row = page.locator('#pmAllRows tr').first();
   await row.locator('.pm-row-title').click();
