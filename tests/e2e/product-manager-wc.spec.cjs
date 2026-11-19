@@ -127,6 +127,21 @@ test('SEO box: preview and counters, the custom title and description are saved'
   expect(e).toContain('seoDescription: "Dubai cherry maroon abaya with hijab.');
 });
 
+test('SKU column displays the WooCommerce SKU field and product search uses it', async ({ page }) => {
+  await open(page);
+  const row = page.locator('#pmAllRows tr').first();
+  await row.locator('.pm-row-title').click();
+  await page.fill('[data-ef="sku"]', 'TEST-SKU-900');
+  await page.click('#pmEditUpdate');
+  await expect.poll(() => productsFile(page)).toBeTruthy();
+  await page.click('#pmEditBack');
+  await expect(page.locator('#pmAllRows tr').first().locator('.column-sku')).toHaveText('TEST-SKU-900');
+  await page.fill('#pmAllSearch', 'TEST-SKU-900');
+  await page.click('#pmAllSearchBtn');
+  await expect(page.locator('#pmAllRows tr')).toHaveCount(1);
+  await expect(page.locator('#pmAllRows tr .column-sku')).toHaveText('TEST-SKU-900');
+});
+
 test('columns sort by price and name, both directions', async ({ page }) => {
   await open(page);
   const prices = async () => (await page.locator('#pmAllRows tr .column-price').allTextContents()).map((t) => parseInt(t.replace(/.*৳/, ''), 10));
