@@ -54,10 +54,8 @@ function stockImageBadgeHtml(p) {
   if (!st.inStock) {
     return '<span class="product-sale-badge product-soldout-badge">Sold Out</span>';
   }
-  return (
-    '<span class="product-sale-badge">Sale</span>' +
-    '<span class="product-instock-badge">In Stock</span>'
-  );
+  // No "In Stock" badge on cards (the top-right corner holds the wishlist heart).
+  return '<span class="product-sale-badge">Sale</span>';
 }
 
 function ensureCategoryStyles() {
@@ -1577,12 +1575,8 @@ function pqvHomeCardHtml(p) {
     formatCardPriceText(p) +
     "</span>" +
     "</div>" +
-    "<span class='ah-card-stock" +
-    (outOfStock ? " is-oos" : "") +
-    "'>" +
-    // Homepage cards only ever show "In Stock" / "Out of Stock".
-    (outOfStock ? "Out of Stock" : "In Stock") +
-    "</span>" +
+    // No "In Stock" line on cards; only an out-of-stock product gets a stock line.
+    (outOfStock ? "<span class='ah-card-stock is-oos'>Out of Stock</span>" : "") +
     "<div class='ah-actions'>" +
     (outOfStock
       ? "<button type='button' class='ah-btn ah-btn-cart' data-action='add' disabled>" +
@@ -4681,14 +4675,8 @@ function refreshVisibleShopStockCards() {
       saleBadge.classList.toggle("product-soldout-badge", !status.inStock);
       saleBadge.textContent = status.inStock ? "Sale" : "Sold Out";
     }
-    if (!status.inStock && inStockBadge) {
-      inStockBadge.remove();
-    } else if (status.inStock && saleBadge && !inStockBadge) {
-      inStockBadge = document.createElement("span");
-      inStockBadge.className = "product-instock-badge";
-      inStockBadge.textContent = "In Stock";
-      saleBadge.insertAdjacentElement("afterend", inStockBadge);
-    }
+    // Cards no longer show an "In Stock" badge; drop any left in older markup.
+    if (inStockBadge) inStockBadge.remove();
 
     var addButton = card.querySelector(".muslim-abaya-btn-cart, .detail-actions .btn-add-cart");
     if (addButton) {

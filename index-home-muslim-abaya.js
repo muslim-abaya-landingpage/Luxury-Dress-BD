@@ -324,11 +324,8 @@
       priceHtml(p) +
       "</span>" +
       "</div>" +
-      "<span class='ah-card-stock" +
-      (outOfStock ? " is-oos" : "") +
-      "'>" +
-      escapeHtml(st.label) +
-      "</span>" +
+      // No "In Stock" line on cards; only an out-of-stock product gets a stock line.
+      (outOfStock ? "<span class='ah-card-stock is-oos'>" + escapeHtml(st.label) + "</span>" : "") +
       "<div class='ah-actions'>" +
       (outOfStock
         ? "<button type='button' class='ah-btn ah-btn-cart' data-action='add' disabled>" +

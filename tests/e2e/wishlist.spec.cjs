@@ -44,3 +44,30 @@ test('product page has a "পছন্দের তালিকায় রা�
   const homeHeart = page.locator('article.ah-card[data-pid="ABY-MAROON-1"] .ma-wish').first();
   await expect(homeHeart).toHaveAttribute('aria-pressed', 'true');
 });
+
+test('card heart sits in the image top-right as a white circle (Anzaar style) and cards show no "In Stock"', async ({ page }) => {
+  await block(page);
+  await page.setViewportSize({ width: 1280, height: 900 });
+  for (const url of ['/', '/abaya']) {
+    await page.goto(url);
+    const card = page.locator('article.ah-card, article.premium-card').filter({ has: page.locator('.ma-wish') }).first();
+    const heart = card.locator('.ma-wish');
+    await expect(heart).toBeVisible();
+    const geo = await heart.evaluate((b) => {
+      const host = b.parentElement.getBoundingClientRect(), r = b.getBoundingClientRect(), cs = getComputedStyle(b);
+      return { top: r.top - host.top, right: host.right - r.right, bottomGap: host.bottom - r.bottom, radius: cs.borderRadius, bg: cs.backgroundColor, w: r.width };
+    });
+    expect(geo.top).toBeLessThan(20);
+    expect(geo.right).toBeLessThan(20);
+    expect(geo.bottomGap).toBeGreaterThan(100);
+    expect(geo.radius).toBe('50%');
+    expect(geo.bg).toBe('rgb(255, 255, 255)');
+    expect(geo.w).toBe(30);
+    await heart.hover();
+    await expect.poll(() => heart.evaluate((b) => getComputedStyle(b, '::after').opacity)).toBe('1');
+    expect(await heart.evaluate((b) => getComputedStyle(b, '::after').content)).toBe('"Wishlist"');
+    const cardsText = await page.locator('article.ah-card, article.premium-card').evaluateAll((els) => els.map((e) => e.innerText).join('\n'));
+    expect(cardsText).not.toMatch(/In Stock/i);
+    await expect(page.locator('article .product-instock-badge')).toHaveCount(0);
+  }
+});

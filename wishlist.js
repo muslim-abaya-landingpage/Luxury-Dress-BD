@@ -36,11 +36,19 @@
     var st = document.createElement("style");
     st.id = "ma-wish-style";
     st.textContent =
-      ".ma-wish{position:absolute;bottom:8px;right:8px;z-index:3;width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:0;background:rgba(255,255,255,.92);box-shadow:0 1px 3px rgba(0,0,0,.18);cursor:pointer;padding:0}" +
-      ".ma-wish svg{fill:none;stroke:#111;stroke-width:1.8}" +
-      ".ma-wish.is-on svg{fill:#c0262d;stroke:#c0262d}" +
+      /* Card heart — Anzaar style: small white circle in the image's top-right corner, thin outline heart,
+         "Wishlist" tooltip on hover. Filled black when saved. */
+      ".ma-wish{position:absolute;top:10px;right:10px;bottom:auto;left:auto;z-index:4;width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.14);cursor:pointer;padding:0;transition:transform .15s ease,box-shadow .15s ease}" +
+      ".ma-wish svg{width:15px;height:15px;fill:none;stroke:#111;stroke-width:1.6;transition:fill .15s ease}" +
+      ".ma-wish:hover{transform:scale(1.08);box-shadow:0 2px 8px rgba(0,0,0,.2)}" +
+      ".ma-wish.is-on svg{fill:#111;stroke:#111}" +
       ".ma-wish:focus-visible{outline:2px solid #111;outline-offset:2px}" +
-      ".ma-wish-inline{position:static;bottom:auto;right:auto;box-shadow:none;border:1px solid #d6d3d1;width:auto;height:38px;padding:0 12px;gap:6px;font-size:13px;font-weight:600;color:#111;margin:6px 0}" +
+      ".ma-wish:not(.ma-wish-inline)::after{content:'Wishlist';position:absolute;top:50%;right:calc(100% + 6px);transform:translateY(-50%);background:#fff;color:#111;border:1px solid #111;font:500 12px/1 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:5px 7px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s ease}" +
+      "@media (hover:hover){.ma-wish:not(.ma-wish-inline):hover::after{opacity:1}}" +
+      ".ma-wish-inline{position:static;top:auto;right:auto;bottom:auto;transform:none;border-radius:0;box-shadow:none;border:1px solid #d6d3d1;width:auto;height:38px;padding:0 12px;gap:6px;font-size:13px;font-weight:600;color:#111;margin:6px 0}" +
+      ".ma-wish-inline:hover{transform:none;box-shadow:none}" +
+      ".ma-wish-inline svg{width:18px;height:18px;stroke-width:1.8}" +
+      ".ma-wish-inline.is-on svg{fill:#c0262d;stroke:#c0262d}" +
       ".ma-wish-host{position:relative}";
     document.head.appendChild(st);
   }
