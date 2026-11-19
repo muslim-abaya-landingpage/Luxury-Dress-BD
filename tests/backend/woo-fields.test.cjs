@@ -110,18 +110,18 @@ test('catalog validation enforces unique product and variation SKUs case-insensi
   const w = site();
   const valid = (id, extra) => base(id, Object.assign({ sku: id }, extra || {}));
   assert.doesNotThrow(() => w.MaProductPublishUtils.validateCatalog({
-    abaya: [valid('A', { variations: [{ sku: 'A-NAVY-M' }, { sku: 'A-BLACK-L' }] }), valid('B')]
+    abaya: [valid('SKU-A', { variations: [{ sku: 'SKU-A-NAVY-M' }, { sku: 'SKU-A-BLACK-L' }] }), valid('SKU-B')]
   }));
   assert.throws(() => w.MaProductPublishUtils.validateCatalog({
-    abaya: [valid('A', { sku: 'MA-001' }), valid('B', { sku: 'ma-001' })]
+    abaya: [valid('SKU-A', { sku: 'MA-001' }), valid('SKU-B', { sku: 'ma-001' })]
   }), /SKU আলাদা/);
   assert.throws(() => w.MaProductPublishUtils.validateCatalog({
-    abaya: [valid('A', { variations: [{ sku: 'MA-V-1' }, { sku: 'ma-v-1' }] })]
+    abaya: [valid('SKU-A', { variations: [{ sku: 'MA-V-1' }, { sku: 'ma-v-1' }] })]
   }), /SKU আলাদা/);
   assert.throws(() => w.MaProductPublishUtils.validateCatalog({
-    abaya: [valid('A', { sku: 'MA-001' }), valid('B', { variations: [{ sku: 'MA-001' }] })]
+    abaya: [valid('SKU-A', { sku: 'MA-001' }), valid('SKU-B', { variations: [{ sku: 'MA-001' }] })]
   }), /SKU আলাদা/);
   assert.throws(() => w.MaProductPublishUtils.validateCatalog({
-    abaya: [valid('A', { sku: '   ' }), valid('B', { sku: 'A' })]
+    abaya: [valid('SKU-A', { sku: '   ' }), valid('SKU-B', { sku: 'SKU-A' })]
   }), /SKU আলাদা/);
 });
