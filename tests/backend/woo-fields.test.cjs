@@ -12,7 +12,7 @@ function site() {
   const w = { location: { origin: 'https://muslimabaya.com', pathname: '/' } };
   w.window = w;
   const ctx = vm.createContext(w);
-  ['product-config.js', 'product-utils.js', 'catalog-validation-core.js'].forEach((f) => vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), ctx));
+  ['product-config.js', 'product-utils.js', 'product-publish-utils.js', 'catalog-validation-core.js'].forEach((f) => vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), ctx));
   return w;
 }
 function server() {
