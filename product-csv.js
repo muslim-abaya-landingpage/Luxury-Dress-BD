@@ -78,7 +78,7 @@
     var status = p.status === 'draft' || p.status === 'trash' ? p.status : 'publish';
     var stock = p.stock != null && p.stock !== '' ? String(p.stock) : (p.inStock === false ? '0' : '');
     return [
-      p.id, safeText(p.name), categoryLabel(sec), STATUS[status], p.price, p.regularPrice || '',
+      p.sku || p.id, safeText(p.name), categoryLabel(sec), STATUS[status], p.price, p.regularPrice || '',
       pricesToText(p.priceByType, optionOrder(p, meta)), pricesToText(p.regularPriceByType, optionOrder(p, meta)),
       stock, p.featured ? 'yes' : '', safeText((p.tags || []).join(', ')), safeText(p.brand || ''),
       safeText(p.colorLabel || ''), safeText(p.color || ''), safeText(p.fabric || ''), safeText((p.sizes || []).join(', ')),
@@ -148,8 +148,21 @@
 
     function where(sku) {
       var hit = null;
-      Object.keys(staged).forEach(function (cat) {
-        (staged[cat] || []).forEach(function (p, index) { if (!hit && p && String(p.id) === sku) hit = { cat: cat, index: index, p: p }; });
+      // Prefer the explicit WooCommerce SKU; fall back to the historical product ID so older CSVs remain valid.
+      Object.keys(staged).some(function (cat) {
+        (staged[cat] || []).some(function (p, index) {
+          if (p && String(p.sku || "") === sku) { hit = { cat: cat, index: index, p: p }; return true; }
+          return false;
+        });
+        return !!hit;
+      });
+      if (hit) return hit;
+      Object.keys(staged).some(function (cat) {
+        (staged[cat] || []).some(function (p, index) {
+          if (p && String(p.id || "") === sku) { hit = { cat: cat, index: index, p: p }; return true; }
+          return false;
+        });
+        return !!hit;
       });
       return hit;
     }
