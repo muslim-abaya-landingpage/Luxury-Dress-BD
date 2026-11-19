@@ -213,3 +213,23 @@ test('Product Manager stores measurement sizes as plain numbers ("52 Inches" →
   eq(ctx.inputToSizes('Free Size, 42 (Free Size)', true), ['Free Size', '42 (Free Size)']);
   eq(ctx.inputToSizes('Body 42 Inches', false), ['Body 42 Inches']);
 });
+
+test('CSV export and import use the explicit product SKU while preserving legacy product-ID matching', () => {
+  const w = load(fixture, links);
+  const products = { 'tops-kurti': [{ id: 'product-slug-1', sku: 'REAL-SKU-1', name: 'SKU product', price: 500, image: '/sku.webp' }, { id: 'LEGACY-1', name: 'Legacy product', price: 300, image: '/legacy.webp' }] };
+  const csv = w.MaProductCsv.exportCsv(products, [{ key: 'tops-kurti', menu: 'Tops & Kurti' }]);
+  assert.match(csv, /REAL-SKU-1,SKU product/);
+  assert.match(csv, /LEGACY-1,Legacy product/);
+  const plan = w.MaProductCsv.planImport([
+    'SKU,Name,Category,Price',
+    'REAL-SKU-1,Updated SKU product,,650',
+    'LEGACY-1,Updated legacy product,,350'
+  ].join('\\n'), products, [{ key: 'tops-kurti', menu: 'Tops & Kurti' }], { today: '2026-11-19' });
+  assert.equal(plan.errors.length, 0);
+  assert.equal(plan.updates.length, 2);
+  assert.equal(plan.staged['tops-kurti'][0].id, 'product-slug-1');
+  assert.equal(plan.staged['tops-kurti'][0].sku, 'REAL-SKU-1');
+  assert.equal(plan.staged['tops-kurti'][0].price, 650);
+  assert.equal(plan.staged['tops-kurti'][1].id, 'LEGACY-1');
+  assert.equal(plan.staged['tops-kurti'][1].price, 350);
+});
