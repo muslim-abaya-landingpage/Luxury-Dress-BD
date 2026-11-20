@@ -1,6 +1,6 @@
 /**
  * সাইট কনফিগ — product-manager.html থেকে আপডেট
- * আপডেট: 2026-11-18
+ * আপডেট: 2026-11-20
  */
 window.SITE_LINKS = {
   "catalog": {

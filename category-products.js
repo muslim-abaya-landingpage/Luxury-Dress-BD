@@ -1,6 +1,6 @@
 /**
  * প্রোডাক্ট ডেটা — product-manager.html থেকে এডিট করুন
- * আপডেট: 2026-11-18
+ * আপডেট: 2026-11-20
  */
 window.CATEGORY_PRODUCTS = {
   abaya: [
@@ -74,6 +74,7 @@ window.CATEGORY_PRODUCTS = {
       name: "Premium Black Silver Stone Work Abaya Set",
       image: "/images/premium-black-silver-stone-work-abaya-1080x1350.webp",
       price: 1650,
+      stock: 6,
       color: "black",
       colorLabel: "Classic Black",
       fabric: "Original Cherry Clothing",
@@ -87,7 +88,8 @@ window.CATEGORY_PRODUCTS = {
       category: "abaya",
       categoryLabel: "আবায়া · বোরকা",
       dateAdded: "2026-07-17",
-      productUrl: "/"
+      productUrl: "/",
+      manageStock: true
     },
     {
       id: "ABY-BLACK-6",
@@ -991,24 +993,30 @@ window.CATEGORY_PRODUCTS = {
       color: "multicolor-patchwork-royal-blue-olive-green",
       colorLabel: "Multicolor Patchwork, Royal Blue, Olive Green",
       fabric: "Linen",
+      sizes: ["42 (Free size)"],
       detailNote: "🌸 Premium Linen Floral Two-Piece Set\n\nরুচিশীল ফ্লোরাল ডিজাইন ও প্রিমিয়াম লিলেন কাপড়ে তৈরি আরামদায়ক ও আকর্ষণীয় টু-পিস সেট। দৈনন্দিন ব্যবহার কিংবা বিভিন্ন অনুষ্ঠানে আপনাকে দেবে মার্জিত ও স্টাইলিশ লুক।\n\nProduct Details\n\n• Fabric: Premium Linen\n\n• Top Length: 44 Inches\n\n• Pajama Length: 39 Inches\n\n• Sleeve Length: 18 Inches\n\n• Available Body Sizes: 48, 50 & 52 Inches\n\n• Set Includes: 2 Pieces (Top & Pajama)\n\nAvailable Sizes\n\n48 / 50 / 52 Inches\n\nOrder Now from MUSLIM ABAYA.",
-      dateAdded: "2026-11-19",
-      productType: "variable",
+      isImageView: false,
+      imageViewOf: "",
+      category: "premium-two-piece",
+      categoryLabel: "প্রিমিয়াম টু-পিস",
+      colorVariants: [{"color":"multicolor-patchwork","colorLabel":"Multicolor Patchwork","image":"https://images.muslimabaya.com/images/uploads/new-product-1795035289632-0-ea850c80cda6cabf1370.webp"},{"color":"royal-blue","colorLabel":"Royal Blue","image":"https://images.muslimabaya.com/images/uploads/new-product-1795035292040-1-02d613747415285d2bdf.webp"},{"color":"olive-green","colorLabel":"Olive Green","image":"https://images.muslimabaya.com/images/uploads/new-product-1795035293405-2-362eb67a661304269448.webp"}],
       bodySizes: ["48","50","52"],
-      variationAttributes: ["color","body","length","sleeve","palazzo","type"],
-      brand: "Muslim Abaya",
-      dressLengths: ["46"],
       sleeveSizes: ["18"],
+      dressLengths: ["46"],
       palazzoLengths: ["40"],
+      variations: [{"size":"Body 48 · Length 46 · Sleeve 18 · Palazzo 40","sku":"NEW-PRODUCT-48-46-18-40","price":760},{"size":"Body 50 · Length 46 · Sleeve 18 · Palazzo 40","sku":"NEW-PRODUCT-50-46-18-40","price":760},{"size":"Body 52 · Length 46 · Sleeve 18 · Palazzo 40","sku":"NEW-PRODUCT-52-46-18-40","price":760}],
       shortDescription: "<p>🌸 প্রিমিয়াম লিলেন কাপড়ে তৈরি আকর্ষণীয় ফ্লোরাল টু-পিস সেট।</p><p>✨ কাপড়: প্রিমিয়াম লিলেন<br>📏 জামার লম্বা: ৪৪ ইঞ্চি<br>📏 পায়জামার লম্বা: ৩৯ ইঞ্চি<br>📐 সাইজ: ৪৮ / ৫০ / ৫২ ইঞ্চি</p><p>🔥 বিশেষ অফার: ৳৭৬০ (নিয়মিত মূল্য ৳৯৫০)</p><p>🛍️ অর্ডার করুন MUSLIM ABAYA থেকে।</p>",
+      descriptionHtml: "<p>🌸 <strong>Premium Linen Floral Two-Piece Set</strong></p><p>রুচিশীল ফ্লোরাল ডিজাইন ও প্রিমিয়াম লিলেন কাপড়ে তৈরি আরামদায়ক ও আকর্ষণীয় টু-পিস সেট। দৈনন্দিন ব্যবহার কিংবা বিভিন্ন অনুষ্ঠানে আপনাকে দেবে মার্জিত ও স্টাইলিশ লুক।</p><h3>Product Details</h3><ul><li><p>Fabric: Premium Linen</p></li><li><p>Top Length: 44 Inches</p></li><li><p>Pajama Length: 39 Inches</p></li><li><p>Sleeve Length: 18 Inches</p></li><li><p>Available Body Sizes: 48, 50 &amp; 52 Inches</p></li><li><p>Set Includes: 2 Pieces (Top &amp; Pajama)</p></li></ul><h3>Available Sizes</h3><p>48 / 50 / 52 Inches</p><p><strong>Order Now from MUSLIM ABAYA.</strong></p>",
+      productType: "variable",
+      tags: ["Premium Linen","Floral Two Piece","Linen Two Piece","Women's Fashion","Two Piece Set"],
+      brand: "Muslim Abaya",
+      dateAdded: "2026-11-19",
       seoTitle: "Premium Linen Floral Two Piece | Muslim Abaya",
       seoDescription: "Shop Premium Linen Floral Two Piece at Muslim Abaya. Elegant floral design, comfortable linen fabric, sizes 48, 50 & 52. Special offer ৳760.",
+      productUrl: "/",
+      variationAttributes: ["color","body","length","sleeve","palazzo","type"],
       seoKeyword: "Premium Linen Two Piece",
-      seoKeywords: ["Linen Two Piece","Floral Two Piece","Women's Two Piece","Premium Linen Dress","Ladies Two Piece Set","Muslim Abaya"],
-      tags: ["Premium Linen","Floral Two Piece","Linen Two Piece","Women's Fashion","Two Piece Set"],
-      variations: [{"size":"Body 48 · Length 46 · Sleeve 18 · Palazzo 40","sku":"NEW-PRODUCT-48-46-18-40","price":760},{"size":"Body 50 · Length 46 · Sleeve 18 · Palazzo 40","sku":"NEW-PRODUCT-50-46-18-40","price":760},{"size":"Body 52 · Length 46 · Sleeve 18 · Palazzo 40","sku":"NEW-PRODUCT-52-46-18-40","price":760}],
-      colorVariants: [{"color":"multicolor-patchwork","colorLabel":"Multicolor Patchwork","image":"https://images.muslimabaya.com/images/uploads/new-product-1795035289632-0-ea850c80cda6cabf1370.webp"},{"color":"royal-blue","colorLabel":"Royal Blue","image":"https://images.muslimabaya.com/images/uploads/new-product-1795035292040-1-02d613747415285d2bdf.webp"},{"color":"olive-green","colorLabel":"Olive Green","image":"https://images.muslimabaya.com/images/uploads/new-product-1795035293405-2-362eb67a661304269448.webp"}],
-      descriptionHtml: "<p>🌸 <strong>Premium Linen Floral Two-Piece Set</strong></p><p>রুচিশীল ফ্লোরাল ডিজাইন ও প্রিমিয়াম লিলেন কাপড়ে তৈরি আরামদায়ক ও আকর্ষণীয় টু-পিস সেট। দৈনন্দিন ব্যবহার কিংবা বিভিন্ন অনুষ্ঠানে আপনাকে দেবে মার্জিত ও স্টাইলিশ লুক।</p><h3>Product Details</h3><ul><li><p>Fabric: Premium Linen</p></li><li><p>Top Length: 44 Inches</p></li><li><p>Pajama Length: 39 Inches</p></li><li><p>Sleeve Length: 18 Inches</p></li><li><p>Available Body Sizes: 48, 50 &amp; 52 Inches</p></li><li><p>Set Includes: 2 Pieces (Top &amp; Pajama)</p></li></ul><h3>Available Sizes</h3><p>48 / 50 / 52 Inches</p><p><strong>Order Now from MUSLIM ABAYA.</strong></p>"
+      seoKeywords: ["Linen Two Piece","Floral Two Piece","Women's Two Piece","Premium Linen Dress","Ladies Two Piece Set","Muslim Abaya"]
     }
   ],
   "tops-kurti": [
