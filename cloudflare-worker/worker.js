@@ -340,6 +340,9 @@ async function handleOrder(request, env, ctx) {
   const deviceAttempts = await logDeviceOrderAttempt(env, eventId, device.hash, pairValue(pairs, 'Phone'), now);
   const risk = await assessWorkerOrderRisk(env, eventId, ipInfo.ip, pairValue(pairs, 'Phone'), now, device.hash);
   risk.sameDeviceAttempts24h = deviceAttempts;
+  // Recalculate the action after the authoritative insert/count. Updating only the
+  // signal field would leave score/action stale (e.g. allow with 3 prior device orders).
+  Object.assign(risk, scoreWorkerOrderRisk(risk));
   const storedPayload = encodeOrderPayload(pairs, risk, eventId);
   if (existing) {
     await env.DB.prepare("UPDATE order_inbox SET payload = ?, target = ?, status = 'sending', updated_at = ? WHERE event_id = ?")
