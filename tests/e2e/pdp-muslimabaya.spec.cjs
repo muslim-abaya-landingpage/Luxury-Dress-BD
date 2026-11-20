@@ -29,6 +29,7 @@ test('desktop: product page layout pieces are there, flat, in order; removed pie
 
   // colours: swatches, the label names the chosen one
   await expect(page.locator('.pqv-color-opt.pqv-swatch')).toHaveCount(2);
+  for (const r of await page.locator('.pqv-color-opt.pqv-swatch').evaluateAll((els) => els.map((e) => getComputedStyle(e).borderRadius))) expect(r).toBe('50%'); // round swatches
   await expect(page.locator('.pqv-color-name')).toHaveText('Maroon');
   await page.locator('.pqv-color-opt[data-color-label="Navy"]').click();
   await expect(page.locator('.pqv-color-name')).toHaveText('Navy');
@@ -50,7 +51,7 @@ test('desktop: product page layout pieces are there, flat, in order; removed pie
   await expect(page.locator('.pqv-stock')).toBeHidden(); // "In Stock" is not shown
   expect(await page.locator('.pqv-panel').innerText()).not.toMatch(/In Stock/i);
 
-  // flat corners on the main pieces
+  // flat corners on the main pieces (colour swatches are the one round thing)
   for (const sel of ['.pqv-main', '.pqv-opt-btn', '.pqv-act-cart', '.pqv-act-buy', '.pqv-impression', '.pqv-acc-item']) {
     expect(await page.locator(sel).first().evaluate((e) => getComputedStyle(e).borderRadius), sel).toBe('0px');
   }
@@ -101,4 +102,23 @@ test('phone: options stack in one column and nothing overflows the screen', asyn
   expect(overflow).toBeLessThanOrEqual(0);
   await expect(page.locator('.pqv-act-cart')).toBeVisible();
   await expect(page.locator('.pqv-act-buy')).toBeVisible();
+});
+
+test('every product with a colour gets a round swatch (all categories)', async ({ page }) => {
+  await page.goto('/product/ABY-MAROON-1');
+  await expect(page.locator('#pqvTitle')).toBeVisible();
+  const r = await page.evaluate(() => {
+    const all = [].concat(...Object.values(window.CATEGORY_PRODUCTS || {}));
+    const miss = [];
+    for (const p of all) {
+      const rows = p.colorVariants && p.colorVariants.length ? p.colorVariants.map((v) => [v.colorLabel || v.color, v.image]) : [[p.colorLabel || p.color, p.image]];
+      for (const [label, img] of rows) if (label && !pqvSwatchBg(label, img)) miss.push(p.id + ': ' + label);
+    }
+    return { count: all.length, miss, multi: pqvSwatchBg('12 Colors', ''), burgundy: pqvSwatchBg('Burgundy', ''), photo: pqvSwatchBg('Sea Foam', 'images/x.webp') };
+  });
+  expect(r.count).toBeGreaterThan(10);
+  expect(r.miss).toEqual([]);
+  expect(r.multi).toContain('conic-gradient');
+  expect(r.burgundy).toBe('#800020');
+  expect(r.photo).toContain('url(/images/x.webp)');
 });

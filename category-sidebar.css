@@ -3181,3 +3181,8 @@ body.pqv-sc-open {
 #list .pqv-muslim-abaya .pqv-reviews-inline .pqv-review-input { width:100%; max-width:none; border-color:#e5e5e5; }
 #list .pqv-muslim-abaya .pqv-reviews-inline .pqv-review-submit-btn { width:100%; height:46px; font-size:12px; letter-spacing:.12em; }
 #list .pqv-muslim-abaya .pqv-reviews-inline .pqv-review-form { max-width:none; width:100%; }
+/* Colour swatches: round, like the reference (owner's request) — every category. */
+#list .pqv-muslim-abaya .pqv-opt-btn.pqv-swatch { width:34px; height:34px; min-height:34px; border-radius:50%; background:var(--sw); border:1px solid rgba(0,0,0,.14); }
+#list .pqv-muslim-abaya .pqv-opt-btn.pqv-swatch.is-active { border-radius:50%; background:var(--sw); box-shadow:0 0 0 3px #fff,0 0 0 4.5px var(--pz-ink); }
+#list .pqv-muslim-abaya .pqv-opt-btn.pqv-swatch.is-soldout { border-radius:50%; background:linear-gradient(135deg,transparent 46%,#fff 46%,#fff 54%,transparent 54%),var(--sw); }
+#list .pqv-muslim-abaya .pqv-field-color .pqv-opt-group { padding:5px 0 5px 5px; margin-left:-5px; }

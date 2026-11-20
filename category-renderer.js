@@ -2596,7 +2596,7 @@ var PQV_SWATCH_HEX = {
   rust: "#b7410e", orange: "#f08228", mustard: "#e1ad01", yellow: "#fadc3c", olive: "#555f28", green: "#288c3c",
   "bottle green": "#0f4d32", emerald: "#14785a", mint: "#aae1c8", teal: "#008080", "sky blue": "#87ceeb", blue: "#2864c8",
   "royal blue": "#283caa", navy: "#141e50", "navy blue": "#141e50", purple: "#6e328c", lavender: "#bea9e1", mauve: "#966e82",
-  pink: "#f596b4", "baby pink": "#f8c8d7", rose: "#be5a6e", peach: "#ffd2b4", "dark grey": "#4a4a4a", "light grey": "#c8c8c8"
+  pink: "#f596b4", burgundy: "#800020", magenta: "#c2185b", wine: "#722f37", "dark maroon": "#4a0a17", "baby pink": "#f8c8d7", rose: "#be5a6e", peach: "#ffd2b4", "dark grey": "#4a4a4a", "light grey": "#c8c8c8"
 };
 function pqvSwatchHex(label) {
   var k = String(label || "").toLowerCase().replace(/[^a-z ]+/g, " ").replace(/\s+/g, " ").trim();
@@ -2607,6 +2607,19 @@ function pqvSwatchHex(label) {
     if (two && PQV_SWATCH_HEX[two]) return PQV_SWATCH_HEX[two];
     if (PQV_SWATCH_HEX[words[n]]) return PQV_SWATCH_HEX[words[n]];
   }
+  return "";
+}
+/* Round colour swatch background: the colour itself; a multi-colour wheel for "Multicolor" /
+   "12 Colors"; otherwise the colour's own photo. "" = no swatch (plain text button). */
+function pqvSwatchBg(label, image) {
+  var hex = pqvSwatchHex(label);
+  if (hex) return hex;
+  if (/multi|\d+\s*colou?rs?|colou?rful|patchwork/i.test(String(label || ""))) {
+    return "conic-gradient(#c81e28,#f08228,#fadc3c,#288c3c,#2864c8,#6e328c,#c81e28)";
+  }
+  var img = String(image || "").trim();
+  if (img && !/^(https?:)?\//.test(img)) img = "/" + img.replace(/^\.?\//, ""); // product pages live under /product/
+  if (img && !/["'()\s]/.test(img)) return "url(" + img + ") center 18%/cover no-repeat";
   return "";
 }
 function bindPqvMuslimAbayaExtras(modal) {
@@ -2739,9 +2752,9 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
         .map(function (row, i) {
           return (
             '<button type="button" class="pqv-opt-btn pqv-color-opt' +
-            (pqvSwatchHex(row.colorLabel || row.color) ? " pqv-swatch" : "") +
+            (pqvSwatchBg(row.colorLabel || row.color, row.image) ? " pqv-swatch" : "") +
             (i === 0 ? " is-active" : "") +
-            '"' + (pqvSwatchHex(row.colorLabel || row.color) ? ' style="--sw:' + pqvSwatchHex(row.colorLabel || row.color) + '" title="' + escapeHtml(row.colorLabel) + '"' : "") + ' data-product-idx="' +
+            '"' + (pqvSwatchBg(row.colorLabel || row.color, row.image) ? ' style="--sw:' + escapeHtml(pqvSwatchBg(row.colorLabel || row.color, row.image)) + '" title="' + escapeHtml(row.colorLabel || row.color) + '"' : "") + ' data-product-idx="' +
             idx +
             '" data-color-value="' +
             escapeHtml(row.color) +
@@ -2761,7 +2774,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
   } else if (colorLabel && colorLabelDiffersFromName(p, colorLabel)) {
     colorField =
       '<div class="pqv-field pqv-field-color"><span class="pqv-field-label">Color: <b class="pqv-color-name">' + colorLabel + '</b></span><div class="pqv-opt-group">' +
-      '<button type="button" class="pqv-opt-btn is-active' + (pqvSwatchHex(p.colorLabel || p.color) ? ' pqv-swatch" style="--sw:' + pqvSwatchHex(p.colorLabel || p.color) + '" title="' + colorLabel : "") + '" aria-pressed="true">' +
+      '<button type="button" class="pqv-opt-btn is-active' + (pqvSwatchBg(p.colorLabel || p.color, p.image) ? ' pqv-swatch" style="--sw:' + escapeHtml(pqvSwatchBg(p.colorLabel || p.color, p.image)) + '" title="' + colorLabel : "") + '" aria-pressed="true">' +
       colorLabel +
       "</button></div></div>";
   }
