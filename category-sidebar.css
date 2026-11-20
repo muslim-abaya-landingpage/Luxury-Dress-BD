@@ -188,6 +188,53 @@ html.category-ready #list {
   letter-spacing: 0.02em;
 }
 
+/* Anzaar-style accordion: each section's header is a button that collapses its own body. */
+.sidebar-filter-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+
+.sidebar-filter-toggle h4 {
+  margin: 0 0 14px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.filter-chevron {
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  margin-bottom: 14px;
+  border-right: 2px solid #777;
+  border-bottom: 2px solid #777;
+  transform: rotate(45deg);
+  transition: transform 0.2s ease;
+}
+
+.sidebar-filter.is-collapsed .filter-chevron {
+  transform: rotate(-135deg);
+  margin-bottom: 10px;
+}
+
+.sidebar-filter-body {
+  overflow: hidden;
+}
+
+.sidebar-filter.is-collapsed .sidebar-filter-body {
+  display: none;
+}
+
 .price-slider-wrap {
   position: relative;
   height: 28px;

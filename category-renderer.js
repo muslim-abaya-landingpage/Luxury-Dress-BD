@@ -3566,6 +3566,19 @@ function buildProductListHtml(products) {
     "</nav>"
   );
 }
+// Anzaar-style collapsible filter section: a header row with a chevron that toggles the body open/closed.
+// Starts open; the click handler (wired once per render in bindCategoryInteractions) toggles "is-collapsed".
+function sidebarFilterSection(key, label, bodyHtml) {
+  return (
+    "<div class='sidebar-filter sidebar-filter-" + key + "'>" +
+    "<button type='button' class='sidebar-filter-toggle' data-filter-toggle aria-expanded='true'>" +
+    "<h4>" + escapeHtml(label) + "</h4>" +
+    "<span class='filter-chevron' aria-hidden='true'></span>" +
+    "</button>" +
+    "<div class='sidebar-filter-body'>" + bodyHtml + "</div>" +
+    "</div>"
+  );
+}
 function buildShopSidebar(categoryKey, products) {
   var bounds = getPriceBounds(products);
   var colorOptions = getProductColorOptions(products);
@@ -3607,46 +3620,48 @@ function buildShopSidebar(categoryKey, products) {
     "</div>" +
     "<a class='sidebar-home' href='" + escapeHtml(shopHref("/")) + "'>&lsaquo; Home</a>" +
     "<a class='sidebar-all-category' href='" + escapeHtml(shopHref("/category")) + "'>All Categories</a>" +
-    (categoryChecks ? "<div class='sidebar-filter sidebar-filter-categories'><h4>Category</h4><div class='filter-check-list' id='categoryFilters'>" + categoryChecks + "</div></div>" : "") +
+    (categoryChecks
+      ? sidebarFilterSection("categories", "Category", "<div class='filter-check-list' id='categoryFilters'>" + categoryChecks + "</div>")
+      : "") +
     buildProductListHtml(products) +
-    "<div class='sidebar-filter sidebar-filter-price'>" +
-    "<h4>Price Range</h4>" +
-    "<div class='price-slider-wrap'>" +
-    "<div class='price-track'><div class='price-track-fill' id='priceTrackFill'></div></div>" +
-    "<input type='range' id='priceMin' min='" +
-    bounds.min +
-    "' max='" +
-    bounds.max +
-    "' value='" +
-    bounds.min +
-    "' aria-label='Minimum price'>" +
-    "<input type='range' id='priceMax' min='" +
-    bounds.min +
-    "' max='" +
-    bounds.max +
-    "' value='" +
-    bounds.max +
-    "' aria-label='Maximum price'>" +
-    "</div>" +
-    "<div class='price-labels'>" +
-    "<span>Min &#2547; <span id='priceMinLabel'>" +
-    bounds.min +
-    "</span></span>" +
-    "<span>Max &#2547; <span id='priceMaxLabel'>" +
-    bounds.max +
-    "</span></span>" +
-    "</div>" +
-    "</div>" +
-    "<div class='sidebar-filter sidebar-filter-colors'>" +
-    "<h4>Color</h4>" +
-    "<div class='color-filter-list' id='colorFilters'>" +
-    colorChecks +
-    "</div>" +
-    "</div>" +
-    "<div class='sidebar-filter sidebar-filter-sizes'><h4>Size</h4><div class='filter-check-list' id='sizeFilters'>" + sizeChecks + "</div></div>" +
-    "<div class='sidebar-filter sidebar-filter-availability'><h4>Availability</h4><div class='availability-filter-list' id='availabilityFilters'>" +
-    "<label class='availability-filter-option'><input type='checkbox' class='availability-filter-check' value='in-stock'><span class='availability-dot availability-dot-in'></span><span>In stock</span></label>" +
-    "<label class='availability-filter-option'><input type='checkbox' class='availability-filter-check' value='out-of-stock'><span class='availability-dot availability-dot-out'></span><span>Out of stock</span></label></div></div>" +
+    sidebarFilterSection(
+      "price",
+      "Price Range",
+      "<div class='price-slider-wrap'>" +
+      "<div class='price-track'><div class='price-track-fill' id='priceTrackFill'></div></div>" +
+      "<input type='range' id='priceMin' min='" +
+      bounds.min +
+      "' max='" +
+      bounds.max +
+      "' value='" +
+      bounds.min +
+      "' aria-label='Minimum price'>" +
+      "<input type='range' id='priceMax' min='" +
+      bounds.min +
+      "' max='" +
+      bounds.max +
+      "' value='" +
+      bounds.max +
+      "' aria-label='Maximum price'>" +
+      "</div>" +
+      "<div class='price-labels'>" +
+      "<span>Min &#2547; <span id='priceMinLabel'>" +
+      bounds.min +
+      "</span></span>" +
+      "<span>Max &#2547; <span id='priceMaxLabel'>" +
+      bounds.max +
+      "</span></span>" +
+      "</div>"
+    ) +
+    sidebarFilterSection("colors", "Color", "<div class='color-filter-list' id='colorFilters'>" + colorChecks + "</div>") +
+    sidebarFilterSection("sizes", "Size", "<div class='filter-check-list' id='sizeFilters'>" + sizeChecks + "</div>") +
+    sidebarFilterSection(
+      "availability",
+      "Availability",
+      "<div class='availability-filter-list' id='availabilityFilters'>" +
+      "<label class='availability-filter-option'><input type='checkbox' class='availability-filter-check' value='in-stock'><span class='availability-dot availability-dot-in'></span><span>In stock</span></label>" +
+      "<label class='availability-filter-option'><input type='checkbox' class='availability-filter-check' value='out-of-stock'><span class='availability-dot availability-dot-out'></span><span>Out of stock</span></label></div>"
+    ) +
     "<button type='button' class='shop-filter-reset' id='shopFilterReset'>Clear all filters</button>" +
     "</aside>"
   );
@@ -4455,6 +4470,15 @@ function bindShopCategoryControls(root, products) {
     }
     if (filterPanel) {
       filterPanel.addEventListener("click", function (ev) {
+        var sectionToggle = ev.target.closest("[data-filter-toggle]");
+        if (sectionToggle) {
+          var section = sectionToggle.closest(".sidebar-filter");
+          if (section) {
+            var collapsed = section.classList.toggle("is-collapsed");
+            sectionToggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
+          }
+          return;
+        }
         var productLink = ev.target.closest(".sidebar-product-link");
         if (productLink) {
           ev.preventDefault();
