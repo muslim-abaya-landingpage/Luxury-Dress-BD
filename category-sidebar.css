@@ -1216,6 +1216,17 @@ button.img-wrap {
     display: none;
   }
 
+  /* The Filter switch (Anzaar-style): off hides the whole sidebar column and lets the grid use the
+     freed-up width, same as the reference site. On is the default (no class), so the page looks and
+     works exactly the same with JS disabled. */
+  body.shop-filter-open .shop-sidebar-col {
+    display: none;
+  }
+
+  body.shop-filter-open .shop-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .shop-sidebar-col {
     position: sticky;
     top: var(--site-header-h, 72px);
@@ -2948,7 +2959,17 @@ body.pqv-sc-open {
 .shop-filter-reset { width:100%; border:1px solid #111; background:#fff; color:#111; border-radius:4px; padding:9px 12px; font:inherit; font-size:13px; cursor:pointer; }
 .shop-filter-reset:hover { background:#111; color:#fff; }
 .shop-mobile-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:0 0 14px; padding:0 2px; }
-.shop-filter-open { display:inline-flex; align-items:center; gap:8px; border:1px solid #ddd; background:#fff; border-radius:4px; font-size:14px; font-weight:600; color:#111; padding:8px 12px; cursor:pointer; font-family:inherit; }
+.shop-filter-open { display:inline-flex; align-items:center; gap:9px; border:1px solid #ddd; background:#fff; border-radius:4px; font-size:14px; font-weight:600; color:#111; padding:7px 12px; cursor:pointer; font-family:inherit; }
+
+/* Anzaar-style master filter switch: a small pill track with a sliding knob, green when on. */
+.shop-filter-switch { position:relative; display:inline-flex; align-items:center; flex:0 0 auto; width:40px; height:22px; border-radius:11px; background:#2fae4e; transition:background 0.2s ease; }
+.shop-filter-switch.is-off { background:#ccc; }
+.shop-filter-switch-knob { position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,0.25); transition:transform 0.2s ease; }
+.shop-filter-switch.is-off .shop-filter-switch-knob { transform:translateX(18px); }
+.shop-filter-switch-state { position:absolute; top:0; bottom:0; display:flex; align-items:center; font-size:9px; font-weight:700; letter-spacing:0.02em; color:#fff; }
+.shop-filter-switch:not(.is-off) .shop-filter-switch-state { left:5px; }
+.shop-filter-switch.is-off .shop-filter-switch-state { right:4px; color:#777; }
+.shop-filter-open-label { line-height:1; }
 .shop-sort-wrap { display:inline-flex; align-items:center; gap:8px; font-size:14px; font-weight:600; color:#111; }
 .shop-sort-select { border:1px solid #ddd; border-radius:4px; padding:8px 28px 8px 10px; font-size:13px; font-weight:500; color:#333; background:#fff; font-family:inherit; min-width:170px; }
 

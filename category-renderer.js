@@ -4439,6 +4439,22 @@ function bindShopCategoryControls(root, products) {
     var filterOpen = root.querySelector("#shopFilterOpen");
     var filterPanel = root.querySelector("#shopFilterPanel");
     var filterBackdrop = root.querySelector("#shopFilterBackdrop");
+    // Keeps the switch's ON/OFF text, aria-pressed and knob position correct for the current
+    // breakpoint. Called after every toggle, and again if the viewport crosses 961px without a
+    // click (e.g. rotating a tablet, or resizing a desktop window), via the matchMedia listener below.
+    function syncFilterSwitchVisual(open) {
+      var openBtn = root.querySelector("#shopFilterOpen");
+      if (!openBtn) return;
+      // On a phone, "open" is the drawer showing. On desktop the same click instead hides the
+      // always-visible sidebar column (see the CSS), so the switch reads the opposite way there.
+      var isDesktop = window.matchMedia("(min-width: 961px)").matches;
+      var visible = isDesktop ? !open : open;
+      openBtn.setAttribute("aria-pressed", visible ? "true" : "false");
+      var stateEl = openBtn.querySelector(".shop-filter-switch-state");
+      if (stateEl) stateEl.textContent = visible ? "ON" : "OFF";
+      var switchEl = openBtn.querySelector(".shop-filter-switch");
+      if (switchEl) switchEl.classList.toggle("is-off", !visible);
+    }
     function setFilterDrawer(open) {
       var panel = root.querySelector("#shopFilterPanel");
       var backdrop = root.querySelector("#shopFilterBackdrop");
@@ -4450,7 +4466,22 @@ function bindShopCategoryControls(root, products) {
         backdrop.hidden = !open;
         backdrop.classList.toggle("is-visible", open);
       }
-      if (openBtn) openBtn.setAttribute("aria-expanded", open ? "true" : "false");
+      if (openBtn) {
+        openBtn.setAttribute("aria-expanded", open ? "true" : "false");
+      }
+      syncFilterSwitchVisual(open);
+    }
+    if (window.matchMedia) {
+      var shopFilterBreakpoint = window.matchMedia("(min-width: 961px)");
+      var onShopFilterBreakpointChange = function () {
+        syncFilterSwitchVisual(document.body.classList.contains("shop-filter-open"));
+      };
+      if (typeof shopFilterBreakpoint.addEventListener === "function") {
+        shopFilterBreakpoint.addEventListener("change", onShopFilterBreakpointChange);
+      } else if (typeof shopFilterBreakpoint.addListener === "function") {
+        // Older Safari/WebView fallback.
+        shopFilterBreakpoint.addListener(onShopFilterBreakpointChange);
+      }
     }
     if (filterOpen) {
       filterOpen.addEventListener("click", function () {
@@ -4790,9 +4821,9 @@ return;
   root.innerHTML =
   crumbs.mobile +
     "<div class='shop-mobile-toolbar'>" +
-    "<button type='button' class='shop-filter-open' id='shopFilterOpen' aria-expanded='false' aria-controls='shopFilterPanel'>" +
-    "<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' aria-hidden='true'><path d='M4 6h16M7 12h10M10 18h4'/></svg>" +
-    "Filter</button>" +
+    "<button type='button' class='shop-filter-open' id='shopFilterOpen' aria-pressed='true' aria-expanded='false' aria-controls='shopFilterPanel'>" +
+    "<span class='shop-filter-switch'><span class='shop-filter-switch-state'>ON</span><span class='shop-filter-switch-knob'></span></span>" +
+    "<span class='shop-filter-open-label'>Filter</span></button>" +
     "<label class='shop-sort-wrap'>Sort By" +
     "<select id='shopSort' class='shop-sort-select' aria-label='Sort products'>" +
     "<option value='default'>Default</option>" +
