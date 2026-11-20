@@ -122,3 +122,26 @@ test('every product with a colour gets a round swatch (all categories)', async (
   expect(r.burgundy).toBe('#800020');
   expect(r.photo).toContain('url(/images/x.webp)');
 });
+
+test('big photo fills its frame with no side bars, whatever size the photo is', async ({ page }) => {
+  for (const width of [1280, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto('/product/ABY-MAROON-1');
+    await expect(page.locator('#pqvMainImg')).toBeVisible();
+    for (const [w, h, expectRatio] of [[800, 1200, 800 / 1200], [1000, 1000, 1], [1080, 1350, 0.8], [3000, 1000, 1.25], [600, 1800, 0.6]]) {
+      const r = await page.evaluate(async ([w, h]) => {
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        const g = c.getContext('2d'); g.fillStyle = '#7b1530'; g.fillRect(0, 0, w, h);
+        const img = document.getElementById('pqvMainImg');
+        img.removeAttribute('srcset'); img.removeAttribute('sizes');
+        await new Promise((ok) => { img.addEventListener('load', ok, { once: true }); img.src = c.toDataURL('image/png'); });
+        await new Promise((ok) => requestAnimationFrame(() => requestAnimationFrame(ok)));
+        const stage = img.closest('.pqv-main').getBoundingClientRect(), box = img.getBoundingClientRect();
+        return { ratio: stage.width / stage.height, fit: getComputedStyle(img).objectFit, gapL: box.left - stage.left, gapR: stage.right - box.right, gapT: box.top - stage.top, gapB: stage.bottom - box.bottom };
+      }, [w, h]);
+      expect(Math.abs(r.ratio - expectRatio), `${w}x${h} at ${width}px`).toBeLessThan(0.02);
+      expect(r.fit).toBe('cover'); // photo covers the whole frame: no white bars
+      for (const gap of [r.gapL, r.gapR, r.gapT, r.gapB]) expect(Math.abs(gap)).toBeLessThan(2);
+    }
+  }
+});

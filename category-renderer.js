@@ -2622,6 +2622,19 @@ function pqvSwatchBg(label, image) {
   if (img && !/["'()\s]/.test(img)) return "url(" + img + ") center 18%/cover no-repeat";
   return "";
 }
+function pqvFitStage(img) {
+  var stage = img && img.closest && img.closest(".pqv-main");
+  if (!stage || !img.naturalWidth || !img.naturalHeight) return;
+  var r = Math.max(0.6, Math.min(1.25, img.naturalWidth / img.naturalHeight));
+  stage.style.setProperty("--pqv-ratio", r.toFixed(4));
+  stage.classList.add("pqv-main--fit");
+}
+// One page-wide listener (load events don't bubble, so listen while capturing): catches every new
+// big photo, including after a thumbnail / colour change or when the page redraws the gallery.
+document.addEventListener("load", function (e) {
+  var t = e.target;
+  if (t && t.tagName === "IMG" && t.closest && t.closest(".pqv-main")) pqvFitStage(t);
+}, true);
 function bindPqvMuslimAbayaExtras(modal) {
   if (!modal || modal.getAttribute("data-pqv-muslimabaya") === "1") return;
   modal.setAttribute("data-pqv-muslimabaya", "1");
@@ -2639,6 +2652,10 @@ function bindPqvMuslimAbayaExtras(modal) {
   }
   paintCounter();
   if (thumbsBox && window.MutationObserver) new MutationObserver(paintCounter).observe(thumbsBox, { subtree: true, childList: true, attributes: true, attributeFilter: ["class", "style"] });
+  // Big photo always fills its frame (no white bars at the sides), whatever size was uploaded:
+  // the frame takes the photo's own shape, kept between 3:5 (tall) and 5:4 (wide); outside that
+  // range the photo is trimmed a little at the edges instead of showing bars.
+  modal.querySelectorAll(".pqv-main img").forEach(pqvFitStage);
   // Description boxes: opening one closes the others.
   modal.querySelectorAll(".pqv-acc-item").forEach(function (item) {
     item.addEventListener("toggle", function () {

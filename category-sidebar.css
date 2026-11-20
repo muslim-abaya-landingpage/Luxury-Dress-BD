@@ -3186,3 +3186,11 @@ body.pqv-sc-open {
 #list .pqv-muslim-abaya .pqv-opt-btn.pqv-swatch.is-active { border-radius:50%; background:var(--sw); box-shadow:0 0 0 3px #fff,0 0 0 4.5px var(--pz-ink); }
 #list .pqv-muslim-abaya .pqv-opt-btn.pqv-swatch.is-soldout { border-radius:50%; background:linear-gradient(135deg,transparent 46%,#fff 46%,#fff 54%,transparent 54%),var(--sw); }
 #list .pqv-muslim-abaya .pqv-field-color .pqv-opt-group { padding:5px 0 5px 5px; margin-left:-5px; }
+/* Big photo fills its frame edge to edge on every screen (no white bars left/right).
+   The frame's shape comes from the photo (--pqv-ratio, set in bindPqvMuslimAbayaExtras). */
+#list .pqv-muslim-abaya .pqv-main { aspect-ratio:var(--pqv-ratio, 4 / 5); max-height:none; height:auto; }
+#list .pqv-muslim-abaya .pqv-main img,
+#list .pqv-muslim-abaya .pqv-main .pqv-zoom-img { width:100%; height:100%; max-height:none; object-fit:cover; object-position:center 20%; }
+@media (max-width:900px) {
+  #list .pqv-muslim-abaya .pqv-main { aspect-ratio:var(--pqv-ratio, 4 / 5); max-height:none; }
+}
