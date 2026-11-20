@@ -41,7 +41,7 @@
   // The panels sit in a clipped box; focusing a field lower down must not scroll its top out of view.
   var viewport = form.closest(".si-viewport");
   function keepTop() { if (viewport) viewport.scrollTop = 0; }
-  if (viewport) viewport.addEventListener("scroll", keepTop);
+  if (viewport) viewport.addEventListener("scroll", keepTop, { passive: true });
 
   function cooldown() {
     var left = 60;
