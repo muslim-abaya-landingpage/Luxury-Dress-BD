@@ -197,3 +197,13 @@ test('photo descriptions (alt text): name, colour and fabric on the product view
   const thumbs = await page.locator('#pdThumbs img').evaluateAll((l) => l.map((i) => i.alt));
   if (thumbs.length > 1) expect(thumbs[1]).toBe(expected + ' (photo 2)');
 });
+
+test('home page: each card shows its real category label above the name (Anzaar-style)', async ({ page }) => {
+  await useCatalog(page);
+  await page.goto('/');
+  const maroon = page.locator('.ah-card').filter({ has: page.locator('a[href="/product/ABY-MAROON-1"]') }).first();
+  await expect(maroon.locator('.ah-card-cat')).toHaveText('ABAYA');
+  // The label is the section's own real name (shown in the row header too), not an invented tag.
+  const sectionTitle = page.locator('.home-section').filter({ has: maroon }).locator('.home-section-title');
+  await expect(sectionTitle).toHaveText('ABAYA');
+});

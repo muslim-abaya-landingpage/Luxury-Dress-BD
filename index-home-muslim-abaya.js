@@ -314,6 +314,7 @@
       "</picture>" +
       "</a>" +
       "<div class='ah-card-body'>" +
+      (sec.menu ? "<span class='ah-card-cat'>" + escapeHtml(sec.menu) + "</span>" : "") +
       "<div class='ah-card-row'>" +
       "<a class='ah-card-name' href='" +
       escapeHtml(dHref) +

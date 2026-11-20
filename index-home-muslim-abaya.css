@@ -409,6 +409,15 @@
   gap: 8px;
   flex: 1 1 auto;
 }
+.ah-card-cat {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #9a9a9a;
+  margin-bottom: -4px;
+}
 .ah-card-row {
   display: flex;
   align-items: baseline;
