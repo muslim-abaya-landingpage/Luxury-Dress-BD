@@ -572,11 +572,96 @@ button.img-wrap {
 
 .premium-card .card-meta {
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: flex-start;
+  flex-direction: column;
   gap: 4px;
   margin-bottom: 8px;
+}
+
+/* Category label + colour count (Anzaar-style): "ABAYA  3 COLORS" above the name. */
+.premium-card .card-cat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.premium-card .card-cat {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #9a9a9a;
+}
+
+.premium-card .card-color-count {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #9a9a9a;
+  white-space: nowrap;
+}
+
+/* Small round colour swatches under the name. */
+.premium-card .card-color-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.premium-card .card-color-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: var(--sw, #ddd);
+  border: 1px solid rgba(17, 17, 17, 0.15);
+  box-sizing: border-box;
+}
+
+.premium-card .card-color-more {
+  font-size: 10px;
+  font-weight: 600;
+  color: #9a9a9a;
+}
+
+/* Price + the single order button, pinned to the bottom of the card. */
+.premium-card .card-bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+
+.premium-card .card-cta {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #111;
+  color: #fff;
+  font-family: "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.premium-card .card-cta:hover:not(:disabled) {
+  background: #000;
+  transform: translateY(-1px);
+}
+
+.premium-card .card-cta:disabled {
+  background: #e5e5e5;
+  color: #9a9a9a;
+  cursor: not-allowed;
 }
 
 .premium-card .card-title-btn {
@@ -620,7 +705,6 @@ button.img-wrap {
   white-space: nowrap;
   flex-shrink: 0;
   letter-spacing: -0.02em;
-  padding: 0 0 0 8px;
   line-height: 1.2;
 }
 
@@ -1367,7 +1451,6 @@ button.img-wrap {
 
   .premium-card .card-meta {
     gap: 10px;
-    align-items: flex-start;
   }
 
   .premium-card .card-title-text {
@@ -1442,9 +1525,6 @@ button.img-wrap {
   }
 
   .premium-card .card-meta {
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: space-between;
     gap: 8px;
     margin-bottom: 8px;
   }
@@ -1474,8 +1554,6 @@ button.img-wrap {
     width: auto;
     flex: 0 0 auto;
     white-space: nowrap;
-    text-align: right;
-    padding: 0 0 0 8px;
     font-size: 22px;
     line-height: 1.2;
   }

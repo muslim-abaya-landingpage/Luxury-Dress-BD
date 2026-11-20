@@ -201,7 +201,7 @@ test('out of stock product: Order Now on the product page is disabled', async ({
 test('shop grid card "অর্ডার করুন" no longer leaves for WhatsApp: it opens the quick view or the popup', async ({ page }) => {
   await setup(page);
   await page.goto('/tops-kurti');
-  const btn = page.locator('.card-actions-muslim-abaya .muslim-abaya-btn-msg').first();
+  const btn = page.locator('.card-cta').first();
   await expect(btn).toBeVisible();
   expect(await btn.evaluate((el) => el.tagName)).toBe('BUTTON');
   await btn.click();
@@ -217,7 +217,7 @@ test('shop grid card "অর্ডার করুন" no longer leaves for What
 test('shop grid card for a one-size product opens the popup straight away', async ({ page }) => {
   await setup(page);
   await page.goto('/hijab');
-  const btn = page.locator('.card-actions-muslim-abaya .muslim-abaya-btn-msg').first();
+  const btn = page.locator('.card-cta').first();
   await btn.click();
   await expect(page.locator('.ma-cop.is-open')).toBeVisible();
   await expect(page.locator('.ma-cop__item')).toContainText('Free Size');

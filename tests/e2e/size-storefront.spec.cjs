@@ -105,7 +105,7 @@ test('category card: a product with the new fields opens its page instead of add
   await page.goto('/abaya');
   const card = page.locator('#productGrid .premium-card').filter({ has: page.locator('a[href="/product/ABY-MAROON-1"]') }).first();
   await expect(card).toBeVisible();
-  await card.locator('button[data-action="add"]').first().click();
+  await card.locator('.card-cta').first().click();
   await expect(page).toHaveURL(/\/product\/ABY-MAROON-1$/);
   expect(await cartLines(page)).toHaveLength(0);
 });

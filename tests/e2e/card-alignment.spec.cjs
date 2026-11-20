@@ -59,8 +59,8 @@ for (const vp of [{ name: 'desktop', width: 1280, height: 900 }, { name: 'phone'
     test('category grid: cards and buttons line up', async ({ page }) => {
       await prepare(page);
       await page.goto('/abaya.html');
-      await page.waitForSelector('.product-grid > .card .card-actions-muslim-abaya');
-      expectEven(await rows(page, '.product-grid > .card', '.card-actions-muslim-abaya'), 'category'); // phones now show two cards per row
+      await page.waitForSelector('.product-grid > .card .card-bottom-row');
+      expectEven(await rows(page, '.product-grid > .card', '.card-bottom-row'), 'category'); // phones now show two cards per row
     });
   });
 }

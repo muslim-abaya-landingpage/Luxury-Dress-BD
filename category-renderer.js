@@ -63,30 +63,24 @@ function ensureCategoryStyles() {
     var btnCss = document.createElement("style");
     btnCss.id = "ma-card-btn-row";
     btnCss.textContent =
-      ".card-actions-muslim-abaya{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:stretch;gap:8px;width:100%}" +
-      ".card-actions-muslim-abaya>.muslim-abaya-btn-cart,.card-actions-muslim-abaya>.muslim-abaya-btn-msg{flex:1 1 0!important;width:0!important;min-width:0!important;border:none!important}" +
-      ".card-actions-muslim-abaya>.muslim-abaya-btn-msg{background:#4a4a4a!important;color:#fff!important}" +
-      ".card-actions-muslim-abaya>.muslim-abaya-btn-msg:hover{background:#3a3a3a!important;color:#fff!important}" +
-      // Even cards (do not remove; tests/e2e/card-alignment.spec.cjs checks it): same height per row, the title
-      // always takes 2 lines and the buttons sit at the bottom, with or without a size box or a sale price.
+      // Even cards (do not remove; tests/e2e/card-alignment.spec.cjs checks it): same height per row, the
+      // price/order row sits at the bottom. The title keeps its own natural height (1 or 2 lines, whatever it
+      // needs) instead of always reserving 2 lines, so a short name does not leave an empty gap above the price.
       ".product-grid>.card{display:flex!important;flex-direction:column!important;height:100%}" +
       ".product-grid>.card>.card-foot{display:flex!important;flex-direction:column!important;flex:1 1 auto!important}" +
-      ".product-grid>.card .card-title-text{min-height:2.8em}" +
-      ".product-grid>.card .card-actions-muslim-abaya{margin-top:auto!important;padding-top:16px!important}" +
+      ".product-grid>.card .card-bottom-row{margin-top:auto!important;padding-top:16px!important}" +
       // Narrow screens: override this injected row rule after it is created.
       "@media(max-width:640px){" +
       "body.shop-page .product-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}" +
       "body.shop-page .product-grid>.card{min-width:0!important;max-width:100%!important;overflow:hidden!important;box-sizing:border-box!important}" +
       "body.shop-page .product-grid>.card>.card-foot{min-width:0!important;max-width:100%!important;box-sizing:border-box!important}" +
-      "body.shop-page .product-grid>.card .card-meta{display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:6px!important;min-width:0!important;flex-wrap:wrap!important}" +
       "body.shop-page .product-grid>.card .card-title-btn{min-width:0!important;max-width:100%!important;flex:1 1 100%!important}" +
       "body.shop-page .product-grid>.card .card-title-text{display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:2!important;overflow:hidden!important;overflow-wrap:anywhere!important;line-height:1.35!important;min-height:0!important}" +
-      "body.shop-page .product-grid>.card .card-price{flex:0 1 auto!important;white-space:nowrap!important}" +
-      "body.shop-page .product-grid>.card .card-actions-muslim-abaya{display:flex!important;flex-direction:column!important;flex-wrap:nowrap!important;align-items:stretch!important;gap:7px!important;width:100%!important;min-width:0!important;margin-top:auto!important;padding-top:12px!important;box-sizing:border-box!important}" +
-      "body.shop-page .product-grid>.card .card-actions-muslim-abaya>.muslim-abaya-btn-cart,body.shop-page .product-grid>.card .card-actions-muslim-abaya>.muslim-abaya-btn-msg{display:flex!important;flex:0 0 auto!important;width:100%!important;min-width:0!important;max-width:100%!important;height:auto!important;min-height:42px!important;padding:9px 6px!important;box-sizing:border-box!important;white-space:normal!important;overflow-wrap:anywhere!important;text-align:center!important;justify-content:center!important;line-height:1.25!important;font-size:12px!important}" +
+      "body.shop-page .product-grid>.card .card-bottom-row{min-width:0!important}" +
+      "body.shop-page .product-grid>.card .card-cta{flex:0 0 auto!important;min-height:40px!important;padding:0 14px!important;font-size:12px!important}" +
       "body.shop-page .wrap{padding-left:12px!important;padding-right:12px!important}" +
       "}" +
-      "@media(max-width:360px){body.shop-page .product-grid{gap:7px!important}body.shop-page .product-grid>.card .card-actions-muslim-abaya>.muslim-abaya-btn-cart,body.shop-page .product-grid>.card .card-actions-muslim-abaya>.muslim-abaya-btn-msg{font-size:11px!important;min-height:40px!important}}";
+      "@media(max-width:360px){body.shop-page .product-grid{gap:7px!important}body.shop-page .product-grid>.card .card-cta{font-size:11px!important;min-height:38px!important;padding:0 10px!important}}";
     document.head.appendChild(btnCss);
   }
   // ⚠️ SPEED FIX — this used to unconditionally overwrite .href on links
@@ -4010,6 +4004,33 @@ function buildProductCard(p, idx, waLink, detailMode, categoryKey, allProducts) 
   var waOrderText = encodeURIComponent(
     productCardWhatsAppOrderText(p, productPrice, resolveCardImageSrc(p))
   );
+  // Grid-card category label + colour dots (Anzaar-style): "ABAYA · 3 COLORS" above the name,
+  // small round swatches below it. Only shown when there is more than one saved colour.
+  var gridCatLabel = escapeHtml(pqvCategoryName(categoryKey));
+  var gridColorVariants = getProductColorVariants(p);
+  var GRID_COLOR_DOTS_MAX = 6;
+  var gridColorDotsHtml = "";
+  if (gridColorVariants.length > 1) {
+    gridColorDotsHtml =
+      '<div class="card-color-dots">' +
+      gridColorVariants
+        .slice(0, GRID_COLOR_DOTS_MAX)
+        .map(function (row) {
+          var label = row.colorLabel || row.color || "";
+          var bg = pqvSwatchBg(label, row.image);
+          return (
+            '<span class="card-color-dot"' +
+            (bg ? ' style="--sw:' + escapeHtml(bg) + '"' : "") +
+            (label ? ' title="' + escapeHtml(label) + '"' : "") +
+            "></span>"
+          );
+        })
+        .join("") +
+      (gridColorVariants.length > GRID_COLOR_DOTS_MAX
+        ? '<span class="card-color-more">+' + (gridColorVariants.length - GRID_COLOR_DOTS_MAX) + "</span>"
+        : "") +
+      "</div>";
+  }
 
   if (detailMode) {
     return (
@@ -4085,46 +4106,46 @@ waOrderText +
     buildCardImageBlock(p, idx, categoryKey, allProducts) +
     '<div class="card-foot">' +
     '<div class="card-meta">' +
+    (gridCatLabel
+      ? '<div class="card-cat-row"><span class="card-cat" lang="en">' +
+        gridCatLabel +
+        "</span>" +
+        (gridColorVariants.length > 1
+          ? '<span class="card-color-count">' + gridColorVariants.length + " COLORS</span>"
+          : "") +
+        "</div>"
+      : "") +
     '<a href="/product/' + encodeURIComponent(p.id) + '" class="card-title-btn" data-product-idx="' +
     idx +
     '"><span class="card-title-text" lang="en">' +
     escapeHtml(p.name) +
     "</span></a>" +
-    '<span class="card-price">' +
-    priceText +
-    "</span>" +
+    gridColorDotsHtml +
     "</div>" +
     "<select class='card-size-select card-size-mobile' data-size-idx='" +
     idx +
     "' aria-hidden='true' tabindex='-1'>" +
     sizeOptions +
     "</select>" +
-    // 👉 কার্ট বাটন + Send Message এখানে (গ্রিড কার্ড / non-detail মোড)
-    // ⚠️ .muslim-abaya-btn-cart ও .muslim-abaya-btn-msg কে .card-actions-muslim-abaya এর
-    // *সরাসরি সন্তান* (direct child) হতেই হবে — বামে Add to Cart, ডানে Send Message.
+    // Single order button (Anzaar-style): straight to the same on-site quick-view / popup checkout
+    // the old "অর্ডার করুন" button opened — only the separate "Add to Cart" button is gone.
     // 📝 এখানে কোয়ান্টিটি স্টেপার (+/-) বসানো হয় না ইচ্ছাকৃতভাবে — গ্রিড
     // কার্ডে সেটা shop-page.css দিয়ে সবসময় display:none করা থাকে (শুধু
     // quick-view/ডিটেইল পেজে দেখানো হয়)। আগে এখানেও stepper-এর HTML
     // বসানো হতো, যার ফলে পেজ রিফ্রেশ করলে CSS লোড হওয়ার আগের এক ঝলকের
     // জন্য stepper দেখা যেত, তারপর CSS লোড হলে হঠাৎ অদৃশ্য হয়ে যেত (এটাই
     // "রিফ্রেশ দিলে পরিমাণ দেখা যায় আবার নাই হয়ে যায়" সমস্যার কারণ ছিল)।
-    '<div class="card-actions-muslim-abaya">' +
-    '<button type="button" class="muslim-abaya-btn muslim-abaya-btn-cart' +
-    (inCart ? " is-active" : "") +
-    (stock.inStock ? "" : " is-oos") +
-    '" data-product-idx="' +
-    idx +
-    '" data-action="add"' +
-    (stock.inStock ? ' aria-label="Add to Cart"' : ' disabled aria-label="Out of Stock"') +
-    '><span class="muslim-abaya-btn-ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M6 6L5 3H2"/></svg></span><span class="ah-btn-spin" aria-hidden="true"></span><span data-cart-label>' +
-    (stock.inStock ? "Add to Cart" : "Out of Stock") +
-    "</span></button>" +
-    // Order Now → on-site popup checkout (the quick view opens first when a size/colour must be chosen).
-    '<button type="button" class="muslim-abaya-btn muslim-abaya-btn-msg" data-product-idx="' +
+    '<div class="card-bottom-row">' +
+    '<span class="card-price">' +
+    priceText +
+    "</span>" +
+    '<button type="button" class="card-cta" data-product-idx="' +
     idx +
     '" data-action="buy-now"' +
     (stock.inStock ? "" : " disabled") +
-    "><span lang='bn'>অর্ডার করুন</span></button>" +
+    "><span lang='bn'>" +
+    (stock.inStock ? "অর্ডার করুন" : "Out of Stock") +
+    "</span></button>" +
 "</div></div></article>"
 );
 
@@ -4862,6 +4883,13 @@ function refreshVisibleShopStockCards() {
 
     var buyButton = card.querySelector(".detail-actions .btn-buy-now");
     if (buyButton) buyButton.disabled = !status.inStock;
+
+    var cta = card.querySelector(".card-cta");
+    if (cta) {
+      cta.disabled = !status.inStock;
+      var ctaLabel = cta.querySelector("[lang='bn']");
+      if (ctaLabel) ctaLabel.textContent = status.inStock ? "অর্ডার করুন" : "Out of Stock";
+    }
   });
 }
 /** Stock of one colour from its own rows ("navy" or "navy · 52"); null when that colour has no counted rows. */
