@@ -87,11 +87,14 @@ jobs:
         run: |
           set -euo pipefail
           node --check cloudflare-worker/worker.js
-          curl -fsS -X PUT -H "Authorization: Bearer $CF_TOKEN" \
+          status=$(curl -sS -w '%{http_code}' -X PUT -H "Authorization: Bearer $CF_TOKEN" \
             -F 'metadata={"main_module":"worker.js"};type=application/json' \
             -F "worker.js=@cloudflare-worker/worker.js;type=application/javascript+module" \
-            "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/workers/scripts/$SCRIPT/content" -o deploy.json
-          node -e "const r=require('./deploy.json'); if(!r.success){console.error(JSON.stringify(r.errors)); process.exit(1)} console.log('Deployed', r.result && r.result.id || '')"
+            -F "fraud-risk.js=@cloudflare-worker/fraud-risk.js;type=application/javascript+module" \
+            "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/workers/scripts/$SCRIPT/content" -o deploy.json)
+          echo "Cloudflare upload HTTP status: $status"
+          node -e "const r=require('./deploy.json'); if(!r.success){console.error('Cloudflare deploy errors:', JSON.stringify(r.errors || r)); process.exit(1)} console.log('Deployed', r.result && r.result.id || '')"
+          test "$status" -ge 200 && test "$status" -lt 300
 
       - name: Verify live code and routes
         if: steps.creds.outputs.ready == 'true'
@@ -104,11 +107,12 @@ jobs:
           node -e "
             const fs=require('fs'), crypto=require('crypto');
             const raw=fs.readFileSync('live.multipart','utf8');
-            const live=raw.slice(raw.indexOf('\r\n\r\n')+4, raw.lastIndexOf('\r\n--'));
             const want=fs.readFileSync('cloudflare-worker/worker.js','utf8');
+            const moduleName='fraud-risk.js';
             const h=s=>crypto.createHash('sha256').update(s).digest('hex');
-            if(h(live)!==h(want)){console.error('Live Worker code differs from the repository'); process.exit(1)}
-            console.log('Live Worker code matches the repository:', h(want).slice(0,12));"
+            if(!raw.includes(want)){console.error('Live Worker response does not contain the current worker.js'); process.exit(1)}
+            if(!raw.includes(moduleName)){console.error('Live Worker response is missing '+moduleName); process.exit(1)}
+            console.log('Live Worker response contains worker.js and '+moduleName+':', h(want).slice(0,12));"
           sleep 5
           test "$(curl -s -o /dev/null -w '%{http_code}' https://muslimabaya.com/_ma/order)" = "405"
           test "$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Origin: https://evil.example' https://muslimabaya.com/_ma/order)" = "403"
