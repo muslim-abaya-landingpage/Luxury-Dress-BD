@@ -2067,7 +2067,7 @@ function bindPqvInteractions(p, idx, categoryKey, scopeRoot) {
     setPqvMainPhoto(mainImg, imgSrc);
   }
   bindPqvImageZoom(modal);
-  bindPqvAnzaarExtras(modal);
+  bindPqvMuslimAbayaExtras(modal);
   bindPqvQtyInput(modal);
   bindPqvWholesale(modal);
   var activeType =
@@ -2567,7 +2567,7 @@ function callMAReviewsMount(root, p, tries) {
   if (tries > 20) return;
   setTimeout(function () { callMAReviewsMount(root, p, tries + 1); }, 150);
 }
-/* Anzaar-style product page helpers (breadcrumb, category badge, image counter, colour swatches). */
+/* Muslim Abaya product page helpers (breadcrumb, category badge, image counter, colour swatches). */
 var PQV_BOLT_ICON = '<svg class="pqv-bolt" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z" fill="currentColor"/></svg>';
 function pqvSection(categoryKey) {
   var secs = window.CATALOG_SECTIONS || [];
@@ -2609,9 +2609,9 @@ function pqvSwatchHex(label) {
   }
   return "";
 }
-function bindPqvAnzaarExtras(modal) {
-  if (!modal || modal.getAttribute("data-pqv-anzaar") === "1") return;
-  modal.setAttribute("data-pqv-anzaar", "1");
+function bindPqvMuslimAbayaExtras(modal) {
+  if (!modal || modal.getAttribute("data-pqv-muslimabaya") === "1") return;
+  modal.setAttribute("data-pqv-muslimabaya", "1");
   // "01 / 02" image counter follows the active thumbnail.
   var thumbsBox = modal.querySelector(".pqv-thumbs");
   var counter = modal.querySelector(".pqv-counter");
@@ -2664,7 +2664,7 @@ function bindPqvAnzaarExtras(modal) {
     });
   });
 }
-/* Description boxes (Anzaar style): one open at a time. Texts come from the site's own
+/* Description boxes: one open at a time. Texts come from the site's own
    Refund & Return Policy page and Store settings delivery charges, not from any other shop. */
 function pqvAccItem(title, bodyHtml, open) {
   return '<details class="pqv-acc-item" name="pqv-acc"' + (open ? " open" : "") + '><summary><span>' + escapeHtml(title) +
@@ -2867,7 +2867,7 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
   var showWholesale = !sizeTpl &&
     ((isAbaya && sizes.length > 1) ||
      (!isTwoPiece && !isPanjabi && sizes.length > 1));
-  // Anzaar-style product page: no wholesale block (owner's choice, Nov 2026).
+  // Product page: no wholesale block (owner's choice, Nov 2026).
   var wholesaleHtml = "";
   return (
     '<div class="pqv-muslim-abaya' + (stock.inStock ? "" : " pqv-is-oos") + '">' +

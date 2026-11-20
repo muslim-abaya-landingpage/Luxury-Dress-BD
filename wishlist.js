@@ -36,7 +36,7 @@
     var st = document.createElement("style");
     st.id = "ma-wish-style";
     st.textContent =
-      /* Card heart — Anzaar style: small white circle in the image's top-right corner, thin outline heart,
+      /* Card heart: small white circle in the image's top-right corner, thin outline heart,
          "Wishlist" tooltip on hover. Filled red when saved. */
       ".ma-wish{position:absolute;top:10px;right:10px;bottom:auto;left:auto;z-index:4;width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.14);cursor:pointer;padding:0;transition:transform .15s ease,box-shadow .15s ease}" +
       ".ma-wish svg{width:15px;height:15px;fill:none;stroke:#111;stroke-width:1.6;transition:fill .15s ease}" +
@@ -92,7 +92,7 @@
       host.classList.add("ma-wish-host");
       host.appendChild(makeBtn(id, false));
     });
-    // Product page: a round heart in the big photo's top-right corner (Anzaar style).
+    // Product page: a round heart in the big photo's top-right corner.
     var m = /^\/product\/([^/?#]+)/.exec(location.pathname);
     var stage = document.querySelector(".pqv-main");
     if (m && stage && !stage.querySelector(".ma-wish")) {

@@ -1,5 +1,5 @@
 /**
- * "Watch & Shop" — হোমপেজে একটা ভিডিও-ক্যারোসেল, Anzaar-এর মতো।
+ * "Watch & Shop" — হোমপেজে একটা ভিডিও-ক্যারোসেল।
  *
  * ডেটা সোর্স: window.CATEGORY_PRODUCTS-এর যেকোনো প্রোডাক্টে videoUrl ফিল্ড থাকলে
  * (Product Manager-এর "ভিডিও লিংক" ফিল্ড দিয়ে YouTube বা Facebook — দুটোই বসানো

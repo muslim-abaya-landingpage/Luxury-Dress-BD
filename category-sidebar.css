@@ -3009,7 +3009,7 @@ body.pqv-sc-open {
 }
 
 /* =====================================================================
-   Product page — Anzaar-style layout (Nov 2026). Flat corners everywhere
+   Product page — Muslim Abaya layout (Nov 2026). Flat corners everywhere
    (owner's rule). Markup: buildQuickViewPanelHtml in category-renderer.js.
    ===================================================================== */
 #list .pqv-muslim-abaya { --pz-ink:#111; --pz-mute:#8a8a8a; --pz-line:#e8e8e8; --pz-soft:#f6f6f6; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; }
@@ -3139,7 +3139,7 @@ body.pqv-sc-open {
 #list .pqv-muslim-abaya .pqv-opt-btn.pqv-swatch.is-soldout { opacity:.55; background:linear-gradient(135deg,transparent 46%,#fff 46%,#fff 54%,transparent 54%),var(--sw); }
 #list .pqv-muslim-abaya .pqv-size-grid[data-cols="3"] .pqv-opt-group { display:flex; flex-wrap:wrap; gap:8px; }
 #list .pqv-muslim-abaya .pqv-size-grid[data-cols="3"] .pqv-opt-btn { flex:1 1 auto; min-width:0; padding:0 8px; }
-/* Description boxes, Anzaar look: closed = light grey border, grey dot, small "+" box;
+/* Description boxes, Muslim Abaya look: closed = light grey border, grey dot, small "+" box;
    open = thick black border, black dot, black "×" box, thin line under the heading. */
 #list .pqv-muslim-abaya .pqv-acc-item { border:1px solid #ececec; transition:border-color .2s ease; }
 #list .pqv-muslim-abaya .pqv-acc-item[open] { border:2px solid var(--pz-ink); }

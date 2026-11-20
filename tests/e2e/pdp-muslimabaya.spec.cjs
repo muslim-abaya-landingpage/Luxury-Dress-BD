@@ -1,4 +1,4 @@
-// Product page laid out like Anzaar (owner's request, Nov 2026), with flat corners:
+// Muslim Abaya product page layout (owner's request, Nov 2026), with flat corners:
 // breadcrumb, category badge, title, note + price row, colour swatches with "Color: <name>", sizes on the right
 // with Size Guide, Qty, Add to Cart + Buy Now only, "Your impression" tap-to-rate, description/spec accordion,
 // heart + "01 / 02" counter on the big photo. No "In Stock", wholesale, Send Message or Jump to Description.
@@ -19,7 +19,7 @@ async function open(page, width) {
   await expect(page.locator('#pqvTitle')).toHaveText('Maroon Abaya Set');
 }
 
-test('desktop: Anzaar layout pieces are there, flat, in order; removed pieces are gone', async ({ page }) => {
+test('desktop: product page layout pieces are there, flat, in order; removed pieces are gone', async ({ page }) => {
   await open(page, 1280);
   const crumbs = page.locator('.pqv-crumbs');
   await expect(crumbs).toContainText('Home');
@@ -63,7 +63,7 @@ test('desktop: Anzaar layout pieces are there, flat, in order; removed pieces ar
   await page.locator('.pqv-thumb').nth(1).click();
   await expect(page.locator('.pqv-counter')).toHaveText('02 / 02');
 
-  // four boxes like Anzaar; one open at a time; texts from our own policy + delivery settings
+  // four info boxes; one open at a time; texts from our own policy + delivery settings
   const items = page.locator('.pqv-acc-item');
   await expect(items.locator('summary')).toHaveText(['01. Product Description', '02. Fabric & Care', '03. Exchange, Return & Refund', '04. Delivery Details']);
   await expect(items.nth(0)).toHaveAttribute('open', '');

@@ -34,7 +34,7 @@ test('order form: the total says it has no delivery charge until a district is c
   await expect(page.locator('.ma-cop [data-cop-fee]')).toContainText('৳');
 });
 
-test('product page order button reads "Buy Now" (Anzaar-style product page, Nov 2026)', async ({ page }) => {
+test('product page order button reads "Buy Now" (Muslim Abaya product page, Nov 2026)', async ({ page }) => {
   await page.goto('/product/DR-02');
   await expect(page.locator('[data-action="buy-now"]:visible, #pdBuyNow:visible').first()).toContainText('Buy Now');
 });

@@ -32,7 +32,7 @@ test('heart on a category card saves the product; bottom bar shows the count; /w
   await expect(page.locator('#mbn-wish-count')).toBeHidden();
 });
 
-test('product page heart sits on the big photo (Anzaar style) and stays in step with the cards', async ({ page }) => {
+test('product page heart sits on the big photo and stays in step with the cards', async ({ page }) => {
   await block(page);
   await page.goto('/product/ABY-MAROON-1');
   const btn = page.locator('.pqv-main .ma-wish');
@@ -46,7 +46,7 @@ test('product page heart sits on the big photo (Anzaar style) and stays in step 
   await expect(homeHeart).toHaveAttribute('aria-pressed', 'true');
 });
 
-test('card heart sits in the image top-right as a white circle (Anzaar style) and cards show no "In Stock"', async ({ page }) => {
+test('card heart sits in the image top-right as a white circle and cards show no "In Stock"', async ({ page }) => {
   await block(page);
   await page.setViewportSize({ width: 1280, height: 900 });
   for (const url of ['/', '/abaya']) {
