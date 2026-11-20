@@ -50,7 +50,7 @@ test('homepage hides the redundant category rail and uses one customer-focused a
   const config = fs.readFileSync(path.join(root, 'site-header-config.js'), 'utf8');
   const header = fs.readFileSync(path.join(root, 'site-header.js'), 'utf8');
   assert.ok(html.includes('#homeCatnav{display:none!important}'));
-  assert.ok(config.includes('announcements: [\\n    "💳 Cash on Delivery Available Across Bangladesh"'));
+  assert.match(config, /announcements:\s*\[\s*"💳 Cash on Delivery Available Across Bangladesh"/);
   assert.ok(header.includes('"💳 Cash on Delivery Available Across Bangladesh"'));
   assert.doesNotMatch(config, /PREMIUM MODEST WEAR|Premium Modest Fashion/);
 });
