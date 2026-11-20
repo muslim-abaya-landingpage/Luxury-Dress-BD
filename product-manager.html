@@ -1348,6 +1348,7 @@
                 row("Product URL", inp("externalUrl", p.externalUrl, "url", ' placeholder="https://"'), "Enter the external URL to the product.") +
                 row("Button text", inp("buttonText", p.buttonText, "text", ' placeholder="Buy product"'), "This text will be shown on the button linking to the external product.") + '</div>' : "") +
               '<div class="pm-woo-group">' + buildOptionPriceRows(p, meta) + '</div>' +
+              '<div class="pm-woo-group">' + row("Video link", inp("videoUrl", p.videoUrl, "url", ' placeholder="https://www.youtube.com/watch?v=... or facebook.com/.../videos/..."'), 'YouTube বা Facebook-এর পাবলিক ভিডিও লিংক (অপশনাল) — দিলে এই প্রোডাক্ট হোমপেজের "Watch & Shop" ভিডিও ক্যারোসেলে অটো দেখাবে।') + '</div>' +
               (p.downloadable && ptype !== "grouped" && ptype !== "external" ? '<div class="pm-woo-group pm-woo-downloads"><div class="pm-woo-field"><label>Downloadable files</label><span class="pm-woo-ctl"><table class="pm-woo-dl"><thead><tr><th>Name' + tip("This is the name of the download shown to the customer.") + '</th><th>File URL' + tip("This is the URL or absolute path to the file which customers will get access to.") + '</th><th></th></tr></thead><tbody id="pmDlRows">' +
                 downloads.map(function (d, i) { return '<tr><td><input type="text" data-dl="name" data-dl-i="' + i + '" value="' + escapeAttr(d.name || "") + '" placeholder="File name"></td><td><input type="url" data-dl="file" data-dl-i="' + i + '" value="' + escapeAttr(d.file || "") + '" placeholder="https://"></td><td><a href="#" data-dl-del="' + i + '">Delete</a></td></tr>'; }).join("") +
                 '</tbody></table><button type="button" class="pm-wp-button" id="pmDlAdd">Add File</button></span></div>' +
@@ -1706,7 +1707,7 @@
           }
           if (inp.value) p.shippingClass = inp.value; else delete p.shippingClass;
         }
-        else if (f === "sku" || f === "gtin" || f === "externalUrl" || f === "buttonText" || f === "purchaseNote") { var tv = inp.value.trim(); if (tv) p[f] = tv; else delete p[f]; }
+        else if (f === "sku" || f === "gtin" || f === "externalUrl" || f === "buttonText" || f === "purchaseNote" || f === "videoUrl") { var tv = inp.value.trim(); if (tv) p[f] = tv; else delete p[f]; }
         else if (f === "id") {
           // Slug box: spaces → "-", Bangla → English letters, other characters dropped. An empty box does not
           // erase the link (the product keeps its current one until something valid is typed).

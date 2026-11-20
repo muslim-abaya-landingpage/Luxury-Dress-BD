@@ -307,3 +307,23 @@ test('one Publish button in the Publish box: no floating save bar, a draft goes 
   expect(e).toContain('E2E One Click Abaya');
   expect(e).not.toContain('status: "draft"');
 });
+
+test('General tab: "Video link" field saves videoUrl (YouTube or Facebook) and feeds the homepage "Watch & Shop" carousel', async ({ page }) => {
+  await open(page);
+  await page.locator('#pmAllRows tr').first().locator('.pm-row-title').click(); // ABY-MAROON-1
+  const field = page.locator('[data-ef="videoUrl"]');
+  await expect(field).toBeVisible();
+  await expect(page.locator('.pm-woo-field', { has: field })).toContainText('Video link');
+  await field.fill('https://www.facebook.com/100064510341377/videos/1191007932015057/');
+  await page.click('#pmEditUpdate');
+  await expect.poll(() => productsFile(page)).toBeTruthy();
+  const e = entry(await productsFile(page), 'ABY-MAROON-1');
+  expect(e).toContain('videoUrl: "https://www.facebook.com/100064510341377/videos/1191007932015057/"');
+
+  // Clearing the field removes it again rather than saving an empty string.
+  await field.fill('');
+  await page.click('#pmEditUpdate');
+  await expect.poll(() => productsFile(page)).toBeTruthy();
+  const e2 = entry(await productsFile(page), 'ABY-MAROON-1');
+  expect(e2).not.toContain('videoUrl');
+});
