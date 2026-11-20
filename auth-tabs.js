@@ -19,6 +19,8 @@
     opts = opts || {};
     if (!panels[name]) return;
     track.setAttribute("data-active", name);
+    var kicker = doc.getElementById("siKicker");
+    if (kicker) kicker.textContent = name === "signup" ? "Create your account" : "Sign in to your account";
     Object.keys(panels).forEach(function (key) {
       var on = key === name;
       tabs[key].setAttribute("aria-selected", on ? "true" : "false");

@@ -164,6 +164,15 @@ function doPost(e) {
     if (type === 'AuthFacebook') {
       return jsonOut_(facebookLogin_(e));
     }
+    if (type === 'CustomerCodeRequest') {
+      return jsonOut_(requestCustomerCode_(e));
+    }
+    if (type === 'CustomerCodeLogin') {
+      return jsonOut_(customerCodeLogin_(e));
+    }
+    if (type === 'CustomerPasswordReset') {
+      return jsonOut_(customerPasswordReset_(e));
+    }
     if (type === 'AuthVerify') {
       return jsonOut_(verifySession_(param_(e, 'Token')));
     }

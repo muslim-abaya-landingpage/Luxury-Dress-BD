@@ -60,6 +60,10 @@
     TOO_FAST: "Please wait a moment and try again.",
     RATE_LIMITED: "Too many attempts. Please wait a minute and try again.",
     NETWORK: "Could not connect. Check your internet and try again.",
+    INVALID_CODE: "That code is not right or has expired. Ask for a new code.",
+    EMAIL_LIMIT: "We cannot send codes right now. Please sign in with your password, or contact us on WhatsApp.",
+    EMAIL_FAILED: "The code could not be sent. Please try again in a minute.",
+    BUSY: "Please try again.",
     UNAVAILABLE: "Sign-in is not available right now. Please try again in a minute."
   };
 
@@ -212,6 +216,53 @@
     });
   }
 
+  /* One-time codes by email: purpose "login" (sign in without a password) or "reset" (forgot password).
+     Login can be the account's email or mobile number; the code always goes to the account email. */
+  function cleanLogin(raw) {
+    var S = sec();
+    var v = S.sanitizeText ? S.sanitizeText(raw, 120) : String(raw || "").trim();
+    if (!v) return "";
+    if (v.indexOf("@") !== -1) return (S.validateEmail ? S.validateEmail(v) : v.toLowerCase()) || "";
+    return (S.normalizePhoneBd ? S.normalizePhoneBd(v) : v) || "";
+  }
+
+  function requestCode(loginRaw, purpose) {
+    var loginId = cleanLogin(loginRaw);
+    if (!loginId) return Promise.reject(codeError("INVALID_LOGIN"));
+    return apiPost({ RecordType: "CustomerCodeRequest", Login: loginId, Purpose: purpose === "reset" ? "reset" : "login" })
+      .then(function (res) {
+        if (!res.ok) throw apiError(res, "CODE_FAILED");
+        return res;
+      });
+  }
+
+  function loginWithCode(loginRaw, code) {
+    var loginId = cleanLogin(loginRaw);
+    code = String(code || "").replace(/\D/g, "");
+    if (!loginId) return Promise.reject(codeError("INVALID_LOGIN"));
+    if (code.length !== 6) return Promise.reject(codeError("INVALID_CODE"));
+    return apiPost({ RecordType: "CustomerCodeLogin", Login: loginId, Code: code }).then(function (res) {
+      if (!res.ok) throw apiError(res, "INVALID_CODE");
+      saveSession(res);
+      return res;
+    });
+  }
+
+  function resetPassword(loginRaw, code, password) {
+    var loginId = cleanLogin(loginRaw);
+    code = String(code || "").replace(/\D/g, "");
+    var S = sec();
+    var passCheck = S.checkPasswordStrength ? S.checkPasswordStrength(password) : { ok: String(password || "").length >= 8 };
+    if (!loginId) return Promise.reject(codeError("INVALID_LOGIN"));
+    if (code.length !== 6) return Promise.reject(codeError("INVALID_CODE"));
+    if (!passCheck.ok) return Promise.reject(codeError("WEAK_PASSWORD"));
+    return apiPost({ RecordType: "CustomerPasswordReset", Login: loginId, Code: code, Password: password }).then(function (res) {
+      if (!res.ok) throw apiError(res, "INVALID_CODE");
+      saveSession(res);
+      return res;
+    });
+  }
+
   function verifySession() {
     var s = getSession();
     if (!s || !s.token) return Promise.resolve(null);
@@ -237,6 +288,9 @@
     login: login,
     loginWithGoogle: loginWithGoogle,
     loginWithFacebook: loginWithFacebook,
+    requestCode: requestCode,
+    loginWithCode: loginWithCode,
+    resetPassword: resetPassword,
     logout: logout,
     getSession: getSession,
     verifySession: verifySession,

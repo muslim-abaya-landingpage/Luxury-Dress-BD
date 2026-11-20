@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8"><title>Apps Script কোড</title><style>body { font-family: system-ui, sans-serif; margin: 16px; max-width: 960px; } textarea { width: 100%; height: 52vh; font: 11px Consolas, monospace; } button { margin-top: 10px; padding: 12px 20px; font-size: 15px; cursor: pointer; } .step { background: #fff8e1; border: 1px solid #f0d58a; padding: 10px 14px; border-radius: 6px; }</style></head><body><h1>Apps Script কোড (সম্পূর্ণ project)</h1><p>এই page-এ canonical project-এর সব source file আছে: Code.gs, AdminOrders.gs, FixSheetHeaders.gs, ActivityLog.gs, AdminPasswordRecovery.gs, BoostAutoDate.gs, CatalogPublish.gs, CourierIntegrationAudit.gs, DataFixes.gs, Fix-doGet.gs, GithubApp.gs, InstallDateTrigger.gs, LiveStock.gs, Monitor.gs, Operations.gs, OrderSync.gs, ProductPicker.html, ProductProfit.gs, ReviewPhotos.gs, SetupStatus.gs, SizeCore.gs</p><div class="step"><p><strong>গুরুত্বপূর্ণ:</strong> Admin dashboard-এর সব API চালাতে নিচের সব ফাইল একই Apps Script project-এ রাখতে হবে। <code>.gs</code> ফাইলের জন্য <strong>＋ → Script</strong>, আর <code>.html</code> ফাইলের জন্য <strong>＋ → HTML</strong> ব্যবহার করুন; একই নাম রেখে প্রতিটি কোড সংশ্লিষ্ট ফাইলে কপি করুন। একাধিক <code>doGet</code> function রাখবেন না—canonical router শুধু <code>Code.gs</code>-এ।</p><ol><li>প্রতিটি source file-এর নাম অনুযায়ী Apps Script file তৈরি বা update করুন।</li><li><strong>Save</strong> চাপুন এবং <code>npm run test:backend</code> parity test পাস হয়েছে কি নিশ্চিত করুন।</li><li><strong>Deploy → Manage deployments → Edit → Version: New version → Deploy</strong> করে বিদ্যমান Web App URL রাখুন।</li></ol></div><h2>1. Code.gs</h2>
+<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8"><title>Apps Script কোড</title><style>body { font-family: system-ui, sans-serif; margin: 16px; max-width: 960px; } textarea { width: 100%; height: 52vh; font: 11px Consolas, monospace; } button { margin-top: 10px; padding: 12px 20px; font-size: 15px; cursor: pointer; } .step { background: #fff8e1; border: 1px solid #f0d58a; padding: 10px 14px; border-radius: 6px; }</style></head><body><h1>Apps Script কোড (সম্পূর্ণ project)</h1><p>এই page-এ canonical project-এর সব source file আছে: Code.gs, AdminOrders.gs, FixSheetHeaders.gs, ActivityLog.gs, AdminPasswordRecovery.gs, BoostAutoDate.gs, CatalogPublish.gs, CourierIntegrationAudit.gs, CustomerAccountCodes.gs, DataFixes.gs, Fix-doGet.gs, GithubApp.gs, InstallDateTrigger.gs, LiveStock.gs, Monitor.gs, Operations.gs, OrderSync.gs, ProductPicker.html, ProductProfit.gs, ReviewPhotos.gs, SetupStatus.gs, SizeCore.gs</p><div class="step"><p><strong>গুরুত্বপূর্ণ:</strong> Admin dashboard-এর সব API চালাতে নিচের সব ফাইল একই Apps Script project-এ রাখতে হবে। <code>.gs</code> ফাইলের জন্য <strong>＋ → Script</strong>, আর <code>.html</code> ফাইলের জন্য <strong>＋ → HTML</strong> ব্যবহার করুন; একই নাম রেখে প্রতিটি কোড সংশ্লিষ্ট ফাইলে কপি করুন। একাধিক <code>doGet</code> function রাখবেন না—canonical router শুধু <code>Code.gs</code>-এ।</p><ol><li>প্রতিটি source file-এর নাম অনুযায়ী Apps Script file তৈরি বা update করুন।</li><li><strong>Save</strong> চাপুন এবং <code>npm run test:backend</code> parity test পাস হয়েছে কি নিশ্চিত করুন।</li><li><strong>Deploy → Manage deployments → Edit → Version: New version → Deploy</strong> করে বিদ্যমান Web App URL রাখুন।</li></ol></div><h2>1. Code.gs</h2>
 <textarea id="codeBox" readonly>/**
  * Muslim Abaya — সম্পূর্ণ Web App (এক ফাইলে পেস্ট করুন)
  * Code.gs → Ctrl+A → Ctrl+V → Save → Deploy → New version
@@ -164,6 +164,15 @@ function doPost(e) {
     }
     if (type === 'AuthFacebook') {
       return jsonOut_(facebookLogin_(e));
+    }
+    if (type === 'CustomerCodeRequest') {
+      return jsonOut_(requestCustomerCode_(e));
+    }
+    if (type === 'CustomerCodeLogin') {
+      return jsonOut_(customerCodeLogin_(e));
+    }
+    if (type === 'CustomerPasswordReset') {
+      return jsonOut_(customerPasswordReset_(e));
     }
     if (type === 'AuthVerify') {
       return jsonOut_(verifySession_(param_(e, 'Token')));
@@ -9313,8 +9322,159 @@ function courierIntegrationAudit() {
 }
 </textarea><br>
 <button type="button" id="copyFile8">CourierIntegrationAudit.gs কপি</button>
-<h2>9. DataFixes.gs</h2>
+<h2>9. CustomerAccountCodes.gs</h2>
 <textarea id="fileBox9" readonly>/**
+ * Customer one-time codes by email (free: sent with MailApp from the owner's Gmail).
+ *   CustomerCodeRequest  { Login, Purpose: 'login' | 'reset' }  -> emails a 6-digit code
+ *   CustomerCodeLogin    { Login, Code }                        -> signs the customer in
+ *   CustomerPasswordReset{ Login, Code, Password }              -> sets a new password and signs in
+ * Login may be the account email or mobile number; the code always goes to the account's email.
+ * Replies never say whether an account exists. Codes: 10 minutes, one use, 5 wrong tries,
+ * one new code per minute per account. Every sign-up has an email, so every account can use this.
+ */
+var CUSTOMER_CODE_TTL_MS_ = 10 * 60 * 1000;
+var CUSTOMER_CODE_RESEND_MS_ = 60 * 1000;
+var CUSTOMER_CODE_MAX_TRIES_ = 5;
+
+function customerCodeSentReply_() {
+  return { ok: true, message: 'If an account exists for this email or mobile number, a 6-digit code has been sent to its email. Check Inbox and Spam.' };
+}
+
+function customerCodeKey_(email) {
+  var bytes = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, normalizeEmail_(email), Utilities.Charset.UTF_8);
+  var hex = bytes.map(function (b) { return ('0' + ((b + 256) % 256).toString(16)).slice(-2); }).join('');
+  return 'CUST_CODE_' + hex;
+}
+
+/** Account for an email or mobile number typed into one box; null when none. */
+function findCustomerByLogin_(login) {
+  login = String(login || '').trim();
+  if (!login) return null;
+  if (login.indexOf('@') !== -1) {
+    var email = normalizeEmail_(login);
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? findCustomerByEmail_(email) : null;
+  }
+  var phone = normalizePhone_(login);
+  return /^01\d{9}$/.test(phone) ? findCustomerByPhone_(phone) : null;
+}
+
+function requestCustomerCode_(e) {
+  if (!getAuthSecret_()) return { ok: false, error: 'AUTH_NOT_CONFIGURED', message: 'Customer sign-in is not configured.' };
+  var purpose = String(param_(e, 'Purpose') || 'login') === 'reset' ? 'reset' : 'login';
+  var login = String(param_(e, 'Login') || '').trim();
+  if (!login) return { ok: false, error: 'MISSING_FIELDS', message: 'Enter your email or mobile number.' };
+  // Out of daily email quota: say so plainly (true for every account, so it reveals nothing).
+  try {
+    if (MailApp.getRemainingDailyQuota() &lt; 3) {
+      return { ok: false, error: 'EMAIL_LIMIT', message: 'We cannot send codes right now. Please sign in with your password, or contact us on WhatsApp.' };
+    }
+  } catch (quotaErr) {}
+
+  var user = findCustomerByLogin_(login);
+  var email = user ? normalizeEmail_(user.email) : '';
+  if (!user || !email || String(user.status || '').toLowerCase() === 'blocked') return customerCodeSentReply_();
+
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(5000)) return { ok: false, error: 'BUSY', message: 'Please try again.' };
+  var props = PropertiesService.getScriptProperties();
+  var key = customerCodeKey_(email);
+  try {
+    var old = null;
+    try { old = JSON.parse(props.getProperty(key) || 'null'); } catch (parseErr) {}
+    if (old &amp;&amp; Date.now() - Number(old.sentAt || 0) &lt; CUSTOMER_CODE_RESEND_MS_) return customerCodeSentReply_();
+
+    var code = ('000000' + (parseInt(Utilities.getUuid().replace(/-/g, '').slice(0, 8), 16) % 1000000)).slice(-6);
+    var hashed = hashPassword_(code);
+    props.setProperty(key, JSON.stringify({ hash: hashed.hash, salt: hashed.salt, purpose: purpose, expires: Date.now() + CUSTOMER_CODE_TTL_MS_, sentAt: Date.now(), attempts: 0 }));
+
+    var what = purpose === 'reset' ? 'reset your password' : 'sign in';
+    var subject = 'Muslim Abaya code: ' + code;
+    var body = 'Your Muslim Abaya code to ' + what + ' is: ' + code +
+      '\n\nIt expires in 10 minutes and works once. If you did not ask for it, ignore this email.';
+    var htmlBody = '&lt;div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;padding:24px;color:#111">' +
+      '&lt;h2 style="margin:0 0 12px">Muslim Abaya&lt;/h2>&lt;p>Your code to ' + what + ' is:&lt;/p>' +
+      '&lt;div style="font-size:30px;font-weight:700;letter-spacing:8px;padding:16px;background:#f4f4f4;text-align:center">' + code + '&lt;/div>' +
+      '&lt;p>It expires in 10 minutes and works once. If you did not ask for it, ignore this email.&lt;/p>&lt;/div>';
+    MailApp.sendEmail({ to: email, subject: subject, body: body, htmlBody: htmlBody, name: 'Muslim Abaya' });
+  } catch (err) {
+    props.deleteProperty(key);
+    console.error('Customer code email failed: ' + String(err &amp;&amp; err.message || err));
+    return { ok: false, error: 'EMAIL_FAILED', message: 'The code could not be sent. Please try again in a minute.' };
+  } finally {
+    lock.releaseLock();
+  }
+  return customerCodeSentReply_();
+}
+
+/** Checks a code; on success the code is used up. Returns { user } or an error reply. */
+function useCustomerCode_(login, code, purpose) {
+  if (!/^\d{6}$/.test(String(code || ''))) return { error: { ok: false, error: 'INVALID_CODE', message: 'Enter the 6-digit code from your email.' } };
+  var user = findCustomerByLogin_(login);
+  var bad = { error: { ok: false, error: 'INVALID_CODE', message: 'That code is not right or has expired. Ask for a new code.' } };
+  if (!user || !user.email) return bad;
+  if (String(user.status || '').toLowerCase() === 'blocked') return { error: { ok: false, error: 'BLOCKED', message: 'This account is unavailable.' } };
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(5000)) return { error: { ok: false, error: 'BUSY', message: 'Please try again.' } };
+  var props = PropertiesService.getScriptProperties();
+  var key = customerCodeKey_(user.email);
+  try {
+    var rec = null;
+    try { rec = JSON.parse(props.getProperty(key) || 'null'); } catch (parseErr) {}
+    if (!rec || rec.purpose !== purpose) return bad;
+    if (Date.now() > Number(rec.expires) || Number(rec.attempts || 0) >= CUSTOMER_CODE_MAX_TRIES_) {
+      props.deleteProperty(key);
+      return bad;
+    }
+    if (hashPassword_(String(code), rec.salt).hash !== rec.hash) {
+      rec.attempts = Number(rec.attempts || 0) + 1;
+      if (rec.attempts >= CUSTOMER_CODE_MAX_TRIES_) props.deleteProperty(key);
+      else props.setProperty(key, JSON.stringify(rec));
+      return bad;
+    }
+    props.deleteProperty(key);
+    return { user: user };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function customerCodeLogin_(e) {
+  if (!getAuthSecret_()) return { ok: false, error: 'AUTH_NOT_CONFIGURED', message: 'Customer sign-in is not configured.' };
+  var r = useCustomerCode_(param_(e, 'Login'), String(param_(e, 'Code') || '').trim(), 'login');
+  if (r.error) return r.error;
+  return createSession_({ email: r.user.email, phone: r.user.phone || '', name: r.user.name || '' }, 'customer');
+}
+
+function customerPasswordReset_(e) {
+  if (!getAuthSecret_()) return { ok: false, error: 'AUTH_NOT_CONFIGURED', message: 'Customer sign-in is not configured.' };
+  var password = String(param_(e, 'Password') || '');
+  if (password.length &lt; 8 || password.length > 128) return { ok: false, error: 'WEAK_PASSWORD', message: 'Use at least 8 characters for the new password.' };
+  var r = useCustomerCode_(param_(e, 'Login'), String(param_(e, 'Code') || '').trim(), 'reset');
+  if (r.error) return r.error;
+  var email = normalizeEmail_(r.user.email);
+  var sheet = getCustomersSheet_();
+  var rows = sheet.getDataRange().getValues();
+  var row = 0;
+  for (var i = 1; i &lt; rows.length; i++) if (normalizeEmail_(rows[i][0]) === email) { row = i + 1; break; }
+  if (!row) return { ok: false, error: 'INVALID_CODE', message: 'That code is not right or has expired. Ask for a new code.' };
+  var hashed = hashPassword_(password);
+  sheet.getRange(row, 4).setValue(hashed.hash);
+  sheet.getRange(row, 5).setValue(hashed.salt);
+  sheet.getRange(row, 8).setValue(new Date());
+  // Sign out every other device that was using the old password.
+  var sessions = getSessionsSheet_();
+  var srows = sessions.getDataRange().getValues();
+  for (var j = srows.length - 1; j >= 1; j--) {
+    if (normalizeEmail_(srows[j][1]) === email &amp;&amp; String(srows[j][6] || 'customer') === 'customer') sessions.deleteRow(j + 1);
+  }
+  var out = createSession_({ email: r.user.email, phone: r.user.phone || '', name: r.user.name || '' }, 'customer');
+  out.message = 'Your password has been changed.';
+  return out;
+}
+</textarea><br>
+<button type="button" id="copyFile9">CustomerAccountCodes.gs কপি</button>
+<h2>10. DataFixes.gs</h2>
+<textarea id="fileBox10" readonly>/**
  * One-off data corrections approved by the owner on 2026-10-21. Editor-only.
  * Run dataFix20261021DryRun() first (read-only; logs no names/phones), then dataFix20261021Apply().
  * Apply re-checks every cell before writing and records before/after in AutomationLogs.
@@ -9419,18 +9579,18 @@ function dataFix20261021Apply() {
   return done;
 }
 </textarea><br>
-<button type="button" id="copyFile9">DataFixes.gs কপি</button>
-<h2>10. Fix-doGet.gs</h2>
-<textarea id="fileBox10" readonly>/**
+<button type="button" id="copyFile10">DataFixes.gs কপি</button>
+<h2>11. Fix-doGet.gs</h2>
+<textarea id="fileBox11" readonly>/**
  * Compatibility note: this file intentionally defines no doGet().
  * A former fallback implementation here shadowed Code.gs and returned the
  * generic health text for StockStatus, OrderSchema, auth and other GET APIs.
  * The canonical GET router is the single doGet() in Code.gs.
  */
 </textarea><br>
-<button type="button" id="copyFile10">Fix-doGet.gs কপি</button>
-<h2>11. GithubApp.gs</h2>
-<textarea id="fileBox11" readonly>/**
+<button type="button" id="copyFile11">Fix-doGet.gs কপি</button>
+<h2>12. GithubApp.gs</h2>
+<textarea id="fileBox12" readonly>/**
  * GitHub App sign-in for Apps Script's own GitHub writes (the backup save path, image upload/list).
  *
  * The owner pastes the GitHub App's .pem once in Admin → Setup (stored in Script Properties as
@@ -9528,18 +9688,18 @@ function saveGithubAppKey_(e) {
   return { ok: true, message: 'GitHub App সংযুক্ত হয়েছে। বিকল্প পথের সেভও এখন নিজে থেকে নবায়ন হওয়া টোকেনে চলবে — আর কখনো নবায়ন লাগবে না।' };
 }
 </textarea><br>
-<button type="button" id="copyFile11">GithubApp.gs কপি</button>
-<h2>12. InstallDateTrigger.gs</h2>
-<textarea id="fileBox12" readonly>function installBoostAutoDateTriggerNow() {
+<button type="button" id="copyFile12">GithubApp.gs কপি</button>
+<h2>13. InstallDateTrigger.gs</h2>
+<textarea id="fileBox13" readonly>function installBoostAutoDateTriggerNow() {
   const triggers = ScriptApp.getProjectTriggers();
   const exists = triggers.some(t => t.getHandlerFunction() === 'boostAutoDateOnEdit' &amp;&amp; t.getEventType() === ScriptApp.EventType.ON_EDIT);
   if (!exists) {
     ScriptApp.newTrigger('boostAutoDateOnEdit').forSpreadsheet(SpreadsheetApp.getActive()).onEdit().create();
   }
 }</textarea><br>
-<button type="button" id="copyFile12">InstallDateTrigger.gs কপি</button>
-<h2>13. LiveStock.gs</h2>
-<textarea id="fileBox13" readonly>/**
+<button type="button" id="copyFile13">InstallDateTrigger.gs কপি</button>
+<h2>14. LiveStock.gs</h2>
+<textarea id="fileBox14" readonly>/**
  * Live Stock overrides: a fast, authenticated stock switch separate from GitHub catalog publishing.
  * Deploy this file alongside Code.gs in the SAME Apps Script project.
  * Stock quantities/variant reservations remain managed by the existing inventory workflow.
@@ -9596,9 +9756,9 @@ function assertLiveStockAvailable_(cartItems) {
   });
 }
 </textarea><br>
-<button type="button" id="copyFile13">LiveStock.gs কপি</button>
-<h2>14. Monitor.gs</h2>
-<textarea id="fileBox14" readonly>/**
+<button type="button" id="copyFile14">LiveStock.gs কপি</button>
+<h2>15. Monitor.gs</h2>
+<textarea id="fileBox15" readonly>/**
  * Free uptime monitor: checks the storefront every hour and e-mails the admin
  * (and Telegram, if configured) after 2 failed checks in a row, then once more
  * when the site is reachable again. One-time setup: run setupUptimeMonitorTrigger().
@@ -9737,9 +9897,9 @@ function ensureRecentBackup_(nowMs) {
   return 'RETRY_FAILED';
 }
 </textarea><br>
-<button type="button" id="copyFile14">Monitor.gs কপি</button>
-<h2>15. Operations.gs</h2>
-<textarea id="fileBox15" readonly>function opsNotifyVariant_(id,variant,available){
+<button type="button" id="copyFile15">Monitor.gs কপি</button>
+<h2>16. Operations.gs</h2>
+<textarea id="fileBox16" readonly>function opsNotifyVariant_(id,variant,available){
  if(available&lt;=0)return;
  var sh=SpreadsheetApp.getActiveSpreadsheet().getSheetByName('StockWaitlist');if(!sh||sh.getLastRow()&lt;2)return;
  var rows=sh.getRange(2,1,sh.getLastRow()-1,7).getValues(),sent=0;
@@ -9841,9 +10001,9 @@ function opsReviewVerification_(e,productId){var id=String(param_(e,'OrderID')||
 function opsSaveWaitlist_(e){try{var id=String(param_(e,'ProductId')||'').trim(),variant=String(param_(e,'Variant')||'').trim().slice(0,160),contact=normalizeSubscribeContact_(param_(e,'Contact'));if(!contact)throw Error('INVALID_CONTACT');var p=opsCatalog_().products.filter(function(x){return x.id===id;})[0];if(!p)throw Error('UNKNOWN_PRODUCT');opsLinePrice_({qty:1,size:variant,productType:param_(e,'ProductType')},p);rateLimit_('size_wait_'+contact.slice(0,40));var lock=LockService.getScriptLock();lock.waitLock(15000);try{var sh=ensureStockWaitlistSheet_(),h=sh.getRange(1,7).getValue();if(h&amp;&amp;h!=='Variant')throw Error('WAITLIST_HEADER_CONFLICT');sh.getRange(1,7).setValue('Variant');var rows=sh.getDataRange().getValues();for(var i=1;i&lt;rows.length;i++)if(String(rows[i][0])===id&amp;&amp;String(rows[i][2]).toLowerCase()===contact.toLowerCase()&amp;&amp;opsNorm_(rows[i][6])===opsNorm_(variant))return {ok:true,message:'এই সাইজের তালিকায় আছেন।'};sh.appendRow([admCellText_(id,100),admCellText_(p.name,200),admCellText_(contact,150),/@/.test(contact)?'yes':'',new Date(),'',admCellText_(variant,160)]);return {ok:true,message:'নির্বাচিত সাইজের অনুরোধ সংরক্ষিত হয়েছে।'};}finally{lock.releaseLock();}}catch(err){return {ok:false,error:String(err.message||err),message:'পণ্য, সাইজ ও যোগাযোগের তথ্য যাচাই করুন।'};}}
 function opsDhakaTime_(iso){if(!iso)return null;var d=new Date(iso);return isNaN(d.getTime())?String(iso):Utilities.formatDate(d,'Asia/Dhaka','yyyy-MM-dd HH:mm');}
 </textarea><br>
-<button type="button" id="copyFile15">Operations.gs কপি</button>
-<h2>16. OrderSync.gs</h2>
-<textarea id="fileBox16" readonly>/**
+<button type="button" id="copyFile16">Operations.gs কপি</button>
+<h2>17. OrderSync.gs</h2>
+<textarea id="fileBox17" readonly>/**
  * OrderSync — Online Order sheet mirror
  *
  * Setup:
@@ -10805,9 +10965,9 @@ function setupOperationsTriggersFromMenu() {
   );
 }
 </textarea><br>
-<button type="button" id="copyFile16">OrderSync.gs কপি</button>
-<h2>17. ProductPicker.html</h2>
-<textarea id="fileBox17" readonly>&lt;!DOCTYPE html>
+<button type="button" id="copyFile17">OrderSync.gs কপি</button>
+<h2>18. ProductPicker.html</h2>
+<textarea id="fileBox18" readonly>&lt;!DOCTYPE html>
 &lt;html>
 &lt;head>
   &lt;base target="_top">
@@ -11018,9 +11178,9 @@ function setupOperationsTriggersFromMenu() {
 &lt;/body>
 &lt;/html>
 </textarea><br>
-<button type="button" id="copyFile17">ProductPicker.html কপি</button>
-<h2>18. ProductProfit.gs</h2>
-<textarea id="fileBox18" readonly>/**
+<button type="button" id="copyFile18">ProductPicker.html কপি</button>
+<h2>19. ProductProfit.gs</h2>
+<textarea id="fileBox19" readonly>/**
  * Per-product profit (owner only).
  * Buying prices are private, so they live in the "Product Costs" sheet — never in the public catalog.
  * AdminProductProfit: for a date range, sold quantity, sales and (when a buying price is set) profit per product,
@@ -11178,9 +11338,9 @@ function adminProductCostsSave_(e) {
   }
 }
 </textarea><br>
-<button type="button" id="copyFile18">ProductProfit.gs কপি</button>
-<h2>19. ReviewPhotos.gs</h2>
-<textarea id="fileBox19" readonly>/**
+<button type="button" id="copyFile19">ProductProfit.gs কপি</button>
+<h2>20. ReviewPhotos.gs</h2>
+<textarea id="fileBox20" readonly>/**
  * Photo reviews: verified buyers may add up to 3 photos (uploaded first to images.muslimabaya.com/reviews/
  * by /api/review-photo). Nothing is public until the owner approves it in Admin → Reviews.
  * Sheet "Reviews": … col 9 VerifiedPurchase, col 10 VerifiedOrderId, col 11 Photos (JSON array of URLs).
@@ -11264,9 +11424,9 @@ function adminReviewStatus_(e) {
   return { ok: false, error: 'NO_REVIEW', message: 'রিভিউ পাওয়া যায়নি।' };
 }
 </textarea><br>
-<button type="button" id="copyFile19">ReviewPhotos.gs কপি</button>
-<h2>20. SetupStatus.gs</h2>
-<textarea id="fileBox20" readonly>/**
+<button type="button" id="copyFile20">ReviewPhotos.gs কপি</button>
+<h2>21. SetupStatus.gs</h2>
+<textarea id="fileBox21" readonly>/**
  * Admin → "Setup ও স্ট্যাটাস" page backend.
  * AdminSetupStatus: which connections and automatic jobs are ready (owner only).
  *   Only says whether a secret is SET — never returns any key, token or ID.
@@ -11665,9 +11825,9 @@ function saveAdminCourierRates_(e) {
   return { ok: true, rates: rates };
 }
 </textarea><br>
-<button type="button" id="copyFile20">SetupStatus.gs কপি</button>
-<h2>21. SizeCore.gs</h2>
-<textarea id="fileBox21" readonly>// AUTO-GENERATED by scripts/build-size-core.mjs from size-core.js — do not edit by hand.
+<button type="button" id="copyFile21">SetupStatus.gs কপি</button>
+<h2>22. SizeCore.gs</h2>
+<textarea id="fileBox22" readonly>// AUTO-GENERATED by scripts/build-size-core.mjs from size-core.js — do not edit by hand.
 /* Size Manager core: turns the published size configuration (from D1, served by /api/size-config) into the
    measurement fields one product shows, and checks a customer's choices against them.
    The same file runs in the browser (window.maSizeCore) and in Apps Script (apps-script/SizeCore.gs is
@@ -11820,7 +11980,7 @@ function saveAdminCourierRates_(e) {
   };
 })(typeof window !== "undefined" ? window : this);
 </textarea><br>
-<button type="button" id="copyFile21">SizeCore.gs কপি</button><script>function bind(btn, box) { document.getElementById(btn).onclick = function () { var t = document.getElementById(box).value; navigator.clipboard.writeText(t).then(function () { alert("কপি হয়েছে!"); }); }; }bind('copyBtn', 'codeBox');
+<button type="button" id="copyFile22">SizeCore.gs কপি</button><script>function bind(btn, box) { document.getElementById(btn).onclick = function () { var t = document.getElementById(box).value; navigator.clipboard.writeText(t).then(function () { alert("কপি হয়েছে!"); }); }; }bind('copyBtn', 'codeBox');
 bind('copyAdm', 'admBox');
 bind('copyFix', 'fixBox');
 bind('copyFile4', 'fileBox4');
@@ -11840,4 +12000,5 @@ bind('copyFile17', 'fileBox17');
 bind('copyFile18', 'fileBox18');
 bind('copyFile19', 'fileBox19');
 bind('copyFile20', 'fileBox20');
-bind('copyFile21', 'fileBox21');</script></body></html>
+bind('copyFile21', 'fileBox21');
+bind('copyFile22', 'fileBox22');</script></body></html>

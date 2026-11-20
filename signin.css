@@ -107,3 +107,58 @@ body.si-body { margin: 0; background: #f6f6f4; color: var(--si-ink); font-family
 .si-panel .si-sub { margin-bottom: 16px; }
 .si-card .am-social-login { margin-bottom: 14px; }
 @media (prefers-reduced-motion: reduce) { .si-track.is-ready, .si-viewport, .si-tab-ink, .si-panel { transition: none; } }
+
+/* ===== Layout like the reference (Nov 2026): big "Welcome", spaced caption, black active tab,
+   outlined primary button, OTP link, OR divider, Google + blue Facebook, card footer, legal line.
+   Flat corners (owner's rule). ===== */
+.si-main { max-width: 470px; padding-top: 44px; }
+.si-hero { text-align: center; margin: 0 0 26px; }
+.si-welcome { margin: 0 0 8px; font: 800 30px/1.1 "DM Sans", system-ui, sans-serif; letter-spacing: -.01em; color: #111; }
+.si-kicker { margin: 0; color: #9a9a9a; font-size: 11px; font-weight: 700; letter-spacing: .32em; text-transform: uppercase; }
+.si-card { padding: 24px 24px 0; border-color: #ececec; box-shadow: 0 10px 40px rgba(0,0,0,.05); }
+.si-tabs { gap: 8px; margin-bottom: 22px; border-bottom: 0; }
+.si-tab-ink { display: none; }
+.si-tab { padding: 13px 8px; color: #a5a5a5; font-size: 13px; font-weight: 800; letter-spacing: .22em; text-transform: uppercase; }
+.si-tab[aria-selected="true"] { background: #111; color: #fff; }
+.si-panel .si-sub { margin: 0 0 14px; color: #111; font-size: 13px; font-weight: 600; }
+.am-field { margin-bottom: 14px; }
+.am-input input { height: 46px; border-color: #d9d9d9; font-size: 15px; }
+.si-forgot-row { margin: -4px 0 16px; text-align: right; }
+.si-forgot { color: #555; font-size: 12px; font-weight: 600; text-decoration: underline; }
+.si-forgot:hover { color: #111; }
+#signinBtn, #otpBtn, #signupBtn { min-height: 52px; background: #fff; color: #111; border: 1.5px solid #d4d4d4; font-size: 13px; font-weight: 800; letter-spacing: .28em; text-transform: uppercase; }
+#signinBtn:hover:not(:disabled), #otpBtn:hover:not(:disabled), #signupBtn:hover:not(:disabled) { background: #111; color: #fff; border-color: #111; }
+#signinBtn .spinner, #otpBtn .spinner, #signupBtn .spinner { border-color: rgba(0,0,0,.2); border-top-color: #111; }
+#signinBtn:hover .spinner, #otpBtn:hover .spinner, #signupBtn:hover .spinner { border-color: rgba(255,255,255,.35); border-top-color: #fff; }
+.si-alt { margin: 16px 0 0; text-align: center; }
+.si-alt-link { padding: 4px; border: 0; background: none; color: #555; font: 600 12px "DM Sans", system-ui, sans-serif; text-decoration: underline; cursor: pointer; }
+.si-alt-link:hover:not(:disabled) { color: #111; }
+.si-alt-link:disabled { color: #aaa; text-decoration: none; cursor: default; }
+.si-otp-tools { margin: 8px 0 0; text-align: right; }
+.si-otp-tools .si-alt-link { padding: 0; }
+#otpForm[hidden], #signinForm[hidden], #otpCodeField[hidden] { display: none !important; }
+/* OR + social buttons under the forms */
+.si-card .am-social-login { margin: 18px 0 22px; }
+.am-social-divider { margin: 0 0 18px; color: #b5b5b5; font-size: 10px; font-weight: 700; letter-spacing: .3em; }
+.am-social-divider::before, .am-social-divider::after { background: #ececec; }
+.am-social-grid { gap: 14px; }
+.am-social-btn { min-height: 50px; border-color: #dcdcdc; font-size: 14px; font-weight: 700; color: #111; }
+.am-social-svg { flex: 0 0 18px; }
+.am-social-btn--facebook { background: #1877f2; border-color: #1877f2; color: #fff; }
+.am-social-btn--facebook:hover:not(:disabled) { background: #166fe5; border-color: #166fe5; color: #fff; }
+/* "Don't have an account? Register" as the card's footer strip */
+.si-switch { margin: 0 -24px; padding: 18px 24px; background: #fafafa; border-top: 1px solid #efefef; color: #777; font-size: 13px; }
+.si-switch a { margin-left: 6px; color: #111; font-weight: 800; text-decoration: underline; }
+.si-panel { padding-bottom: 20px; }
+.si-card > .am-social-login { order: 0; }
+.si-legal { margin: 22px 0 0; color: #b0b0b0; font-size: 11px; text-align: center; }
+.si-legal a { color: #9a9a9a; text-decoration: underline; }
+@media (max-width: 480px) {
+  .si-main { padding-top: 22px; }
+  .si-welcome { font-size: 26px; }
+  .si-card { padding: 18px 16px 0; }
+  .si-switch { margin: 0 -16px; padding: 16px; }
+  .si-tab { letter-spacing: .14em; }
+}
+.si-card:has(#authTrack[data-active="signup"]) .si-foot[data-for="signin"],
+.si-card:has(#authTrack[data-active="signin"]) .si-foot[data-for="signup"] { display: none; }

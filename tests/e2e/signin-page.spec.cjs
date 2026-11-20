@@ -103,7 +103,7 @@ test('sign in / sign up slide side by side without reloading, and the address fo
   await expect(page).toHaveTitle('Create an account | Muslim Abaya');
   await expect(page.locator('#su-name')).toBeVisible();
   await expect.poll(() => page.evaluate(() => { const r = document.getElementById('panel-signup').getBoundingClientRect(); const v = document.querySelector('.si-viewport').getBoundingClientRect(); return Math.round(r.left - v.left); })).toBeLessThan(4);
-  await page.click('#panel-signup [data-auth-tab="signin"]');
+  await page.click('.si-foot:visible [data-auth-tab="signin"]'); // "Already have an account? Sign in" under the card
   await expect(page.locator('#authTrack')).toHaveAttribute('data-active', 'signin');
   await expect(page.locator('#si-login')).toBeFocused();
   expect(await page.evaluate(() => window.__sameDoc)).toBe(true);
