@@ -54,9 +54,11 @@
         type: "standard",
         theme: "outline",
         size: "large",
-        text: "signin_with",
+        text: "continue_with",
         shape: "rectangular",
-        width: Math.max(120, Math.floor(host.getBoundingClientRect().width || 180))
+        // Full width of the card (Google allows 400px at most). The host itself is still hidden here,
+        // so measure the button row around it.
+        width: Math.min(400, Math.max(200, Math.floor(((host.closest(".am-social-grid") || host.parentNode).getBoundingClientRect().width) || 320)))
       });
       if (fallback) fallback.hidden = true;
       if (social) social.setProviderState("google", "ready");

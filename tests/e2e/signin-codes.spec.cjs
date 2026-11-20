@@ -96,3 +96,14 @@ test('forgot password: out of daily email quota shows a plain message', async ({
   await expect(page.locator('#forgotMsg')).toContainText('cannot send codes right now');
   await expect(page.locator('#fpStep2')).toBeHidden();
 });
+
+test('OTP: the panel top stays in view after the code box gets the cursor', async ({ page }) => {
+  await stubServer(page, () => SENT);
+  await page.goto('/signin.html');
+  await page.click('[data-si-mode="otp"]');
+  await page.fill('#otp-login', 'a@b.co');
+  await page.click('#otpBtn');
+  await expect(page.locator('#otp-code')).toBeFocused();
+  expect(await page.locator('.si-viewport').evaluate((v) => v.scrollTop)).toBe(0);
+  await expect(page.locator('#panel-signin .si-sub')).toBeInViewport();
+});

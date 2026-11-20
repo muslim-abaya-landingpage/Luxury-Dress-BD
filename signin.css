@@ -162,3 +162,4 @@ body.si-body { margin: 0; background: #f6f6f4; color: var(--si-ink); font-family
 }
 .si-card:has(#authTrack[data-active="signup"]) .si-foot[data-for="signin"],
 .si-card:has(#authTrack[data-active="signin"]) .si-foot[data-for="signup"] { display: none; }
+.am-social-google #maGoogleButtonHost > div { margin: 0 auto; }
