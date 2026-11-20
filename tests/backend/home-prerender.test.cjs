@@ -17,7 +17,7 @@ test('prerender renders the first section with the browser renderer', async () =
   assert.ok(cards.length >= 1 && cards.length <= 6, 'between 1 and 6 cards, got ' + cards.length);
   assert.match(parts.sections, /fetchpriority='high'/, 'first card keeps its high fetch priority');
   assert.match(parts.catnav, /class='home-catnav-inner'/);
-  assert.ok(parts.btnCss.includes('.ah-card .ah-actions'));
+  assert.ok(parts.btnCss.includes('.ah-card .ah-card-bottom'));
   assert.match(parts.categoryTiles, /id="ma-image-category-grid"/);
   assert.equal((parts.categoryTiles.match(/class="ma-image-category-card/g) || []).length, 8);
   assert.match(parts.categoryTiles, /loading="lazy" decoding="async" width="480" height="600"/);

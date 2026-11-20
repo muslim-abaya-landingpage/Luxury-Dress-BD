@@ -459,6 +459,32 @@
   color: var(--ah-muted);
   margin-left: 4px;
 }
+.ah-card-bottom {
+  margin-top: 10px;
+}
+.ah-card-bottom .ah-card-price {
+  padding-left: 0;
+}
+.ah-card-cta {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #111;
+  color: #fff;
+  font-family: var(--ah-sans);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 18px;
+  border-radius: 999px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.ah-card-cta:hover {
+  background: #000;
+  transform: translateY(-1px);
+}
 .ah-card .ah-actions {
   display: flex !important;
   flex-direction: row !important;

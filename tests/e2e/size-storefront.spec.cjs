@@ -174,7 +174,7 @@ test('per-size stock rows in the old text: fields shown, stock follows the choic
   await expect(page.locator('#pdAddCart')).toBeDisabled();
 });
 
-test('home page: quick add of a product with fields opens its page', async ({ page }) => {
+test('home page: a product with fields opens its page from the card (no blind add), same as one without fields', async ({ page }) => {
   await page.route(/googletagmanager|gtm\.js|analytics\.tiktok|connect\.facebook|script\.google\.com/, (r) => r.fulfill({ status: 204, body: '' }));
   await page.goto('/');
   const card = page.locator('.ah-card[data-pid]').first();
@@ -183,7 +183,10 @@ test('home page: quick add of a product with fields opens its page', async ({ pa
   await page.unrouteAll({ behavior: 'ignoreErrors' });
   await serve(page, await sizeConfig((c) => { c.products[pid] = { enabled: true }; }));
   await page.goto('/');
-  const target = page.locator('.ah-card[data-pid="' + pid + '"] button[data-action="add"]').first();
+  // Homepage cards have a single order link straight to the product page; a product with
+  // required size/measurement fields is no exception — there is no separate "add" button to
+  // bypass, so it never adds a default size blindly.
+  const target = page.locator('.ah-card[data-pid="' + pid + '"] .ah-card-cta').first();
   await expect(target).toBeVisible({ timeout: 15000 });
   await expect.poll(() => page.evaluate(() => !!(window.maSizeStore && window.MA_SIZE_CONFIG))).toBe(true);
   await target.click();

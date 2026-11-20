@@ -207,3 +207,18 @@ test('home page: each card shows its real category label above the name (Anzaar-
   const sectionTitle = page.locator('.home-section').filter({ has: maroon }).locator('.home-section-title');
   await expect(sectionTitle).toHaveText('ABAYA');
 });
+
+test('home page: one clean order button per card (Anzaar-style), no Add to Cart button', async ({ page }) => {
+  await useCatalog(page);
+  await page.goto('/');
+  const maroon = page.locator('.ah-card').filter({ has: page.locator('a[href="/product/ABY-MAROON-1"]') }).first();
+  await expect(maroon.locator('button[data-action="add"]')).toHaveCount(0);
+  const cta = maroon.locator('.ah-card-cta');
+  await expect(cta).toHaveCount(1);
+  await expect(cta).toHaveText('অর্ডার করুন');
+  await expect(cta).toHaveAttribute('href', '/product/ABY-MAROON-1');
+  // price and the button sit on the same bottom row, next to each other
+  const row = maroon.locator('.ah-card-bottom');
+  await expect(row.locator('.ah-card-price')).toBeVisible();
+  await expect(row.locator('.ah-card-cta')).toBeVisible();
+});

@@ -9,15 +9,13 @@
   "use strict";
 
   var homeBtnCssText =
-    ".ah-card .ah-actions{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:stretch;gap:8px;width:100%}" +
-    ".ah-card .ah-btn{flex:1 1 0!important;width:0!important;min-width:0!important;border:none!important}" +
-    ".ah-card .ah-btn-msg{background:#4a4a4a!important;color:#fff!important}" +
     // Even cards (do not remove; tests/e2e/card-alignment.spec.cjs checks it): every card in a row is the same
-    // height, the name always takes 2 lines and the buttons sit at the bottom, whatever the name or price length.
+    // height, the name always takes 2 lines and the price/order row sits at the bottom, whatever the name or
+    // price length.
     ".ah-card{display:flex!important;flex-direction:column!important;height:100%}" +
     ".ah-card-body{display:flex!important;flex-direction:column!important;flex:1 1 auto!important}" +
     ".ah-card-name{min-height:2.8em}" +
-    ".ah-card .ah-actions{margin-top:auto!important;padding-top:12px}";
+    ".ah-card .ah-card-bottom{margin-top:auto!important;padding-top:12px}";
   if (!document.getElementById("ma-home-btn-row")) {
     var homeBtnCss = document.createElement("style");
     homeBtnCss.id = "ma-home-btn-row";
@@ -315,32 +313,24 @@
       "</a>" +
       "<div class='ah-card-body'>" +
       (sec.menu ? "<span class='ah-card-cat'>" + escapeHtml(sec.menu) + "</span>" : "") +
-      "<div class='ah-card-row'>" +
       "<a class='ah-card-name' href='" +
       escapeHtml(dHref) +
       "'>" +
       escapeHtml(p.name) +
       "</a>" +
+      // No "In Stock" line on cards; only an out-of-stock product gets a stock line.
+      (outOfStock ? "<span class='ah-card-stock is-oos'>" + escapeHtml(st.label) + "</span>" : "") +
+      "<div class='ah-card-row ah-card-bottom'>" +
       "<span class='ah-card-price'>" +
       priceHtml(p) +
       "</span>" +
-      "</div>" +
-      // No "In Stock" line on cards; only an out-of-stock product gets a stock line.
-      (outOfStock ? "<span class='ah-card-stock is-oos'>" + escapeHtml(st.label) + "</span>" : "") +
-      "<div class='ah-actions'>" +
-      (outOfStock
-        ? "<button type='button' class='ah-btn ah-btn-cart' data-action='add' disabled>" +
-          "<span>Out of Stock</span></button>"
-        : "<button type='button' class='ah-btn ah-btn-cart' data-action='add'>" +
-          cartIconSvg +
-          "<span class='ah-btn-spin' aria-hidden='true'></span>" +
-          "<span data-cart-label>Add to Cart</span></button>") +
       (outOfStock
         ? ""
-        : // Order Now: the product page, where size/colour are chosen and the popup checkout opens.
-          "<a class='ah-btn ah-btn-msg' href='" +
+        : // One clean button, like Anzaar's card: straight to the product page, where size/colour
+          // are chosen and the popup checkout opens (cart stays available there too).
+          "<a class='ah-card-cta' href='" +
           escapeHtml(dHref) +
-          "'><span>অর্ডার করুন</span></a>") +
+          "'>অর্ডার করুন</a>") +
       "</div>" +
       "</div>" +
       "</article>"

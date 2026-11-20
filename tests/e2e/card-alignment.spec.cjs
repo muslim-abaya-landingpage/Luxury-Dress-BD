@@ -1,5 +1,5 @@
-// Product cards must line up: in every row the cards are the same height and the Add to Cart / অর্ডার করুন
-// buttons sit at the same height, whether a name takes one line or two and whether a sale price is shown.
+// Product cards must line up: in every row the cards are the same height and the price / অর্ডার করুন
+// row sits at the same height, whether a name takes one line or two and whether a sale price is shown.
 // Checked on the homepage rows, a category grid and the product-page "Related Products", on desktop and phone.
 const { test, expect } = require('@playwright/test');
 const fs = require('fs');
@@ -48,12 +48,12 @@ for (const vp of [{ name: 'desktop', width: 1280, height: 900 }, { name: 'phone'
     test('homepage rows: cards and buttons line up', async ({ page }) => {
       await prepare(page);
       await page.goto('/index.html');
-      await page.waitForSelector('.home-row .ah-card .ah-actions');
+      await page.waitForSelector('.home-row .ah-card .ah-card-bottom');
       if (vp.width < 600) {
         // One card per view on phones: compare the cards of a row side by side by widening the row.
         await page.addStyleTag({ content: '.home-row{grid-auto-columns:48%!important}' });
       }
-      expectEven(await rows(page, '.home-row > .ah-card', '.ah-actions'), 'home');
+      expectEven(await rows(page, '.home-row > .ah-card', '.ah-card-bottom'), 'home');
     });
 
     test('category grid: cards and buttons line up', async ({ page }) => {
