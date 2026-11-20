@@ -10,11 +10,11 @@
 
   var homeBtnCssText =
     // Even cards (do not remove; tests/e2e/card-alignment.spec.cjs checks it): every card in a row is the same
-    // height, the name always takes 2 lines and the price/order row sits at the bottom, whatever the name or
-    // price length.
+    // height and the price/order row sits at the bottom. The name keeps its own natural height (1 or 2 lines,
+    // whatever it needs) instead of always reserving 2 lines, so a short name does not leave a big empty gap
+    // above the price.
     ".ah-card{display:flex!important;flex-direction:column!important;height:100%}" +
     ".ah-card-body{display:flex!important;flex-direction:column!important;flex:1 1 auto!important}" +
-    ".ah-card-name{min-height:2.8em}" +
     ".ah-card .ah-card-bottom{margin-top:auto!important;padding-top:12px}";
   if (!document.getElementById("ma-home-btn-row")) {
     var homeBtnCss = document.createElement("style");

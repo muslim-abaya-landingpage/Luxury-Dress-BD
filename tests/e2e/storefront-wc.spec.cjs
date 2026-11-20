@@ -222,3 +222,18 @@ test('home page: one clean order button per card (Anzaar-style), no Add to Cart 
   await expect(row.locator('.ah-card-price')).toBeVisible();
   await expect(row.locator('.ah-card-cta')).toBeVisible();
 });
+
+test('home page: a short one-line name sits close to the price, no big empty gap', async ({ page }) => {
+  await useCatalog(page);
+  await page.goto('/');
+  // A category with just one product never gets stretched by a taller neighbour, so this isolates
+  // the name element's own reserved height: it must hug its actual (1-line) content, not always
+  // leave room for 2 lines.
+  const card = page.locator('.ah-card').filter({ has: page.locator('a[href="/product/ABY-MAROON-1"]') }).first();
+  const gap = await card.evaluate((el) => {
+    const name = el.querySelector('.ah-card-name').getBoundingClientRect();
+    const bottom = el.querySelector('.ah-card-bottom').getBoundingClientRect();
+    return Math.round(bottom.top - name.bottom);
+  });
+  expect(gap).toBeLessThanOrEqual(16);
+});
