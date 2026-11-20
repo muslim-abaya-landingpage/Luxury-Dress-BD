@@ -30,9 +30,7 @@
     Array.isArray(HEADER_CFG.announcements) && HEADER_CFG.announcements.length
       ? HEADER_CFG.announcements
       : [
-          '💎 PREMIUM MODEST WEAR | TIMELESS ELEGANCE & EVERYDAY COMFORT',
-          '💎 Premium Modest Fashion | Elegant Abayas & Two-Piece Collections',
-          '🚚 Buy 3 Dresses & Enjoy FREE Nationwide Delivery'
+          "💳 Cash on Delivery Available Across Bangladesh"
         ];
 
   (  function bootSiteSeo() {
