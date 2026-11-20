@@ -1,3 +1,4 @@
+import { scoreFraudRisk } from './fraud-risk.js';
 // Muslim Abaya first-party tracking worker.
 // Routes: muslimabaya.com/gtm.js*  (GTM loader, unchanged)
 //         muslimabaya.com/_ma/*    (Meta Conversions API endpoint, added 2026-10-23)
@@ -174,32 +175,12 @@ function orderSummaryFromPairs(eventId, pairs) {
 }
 
 function scoreWorkerOrderRisk(signals) {
-  let score = 0;
-  const reasons = [];
-  const samePhone = Number(signals.samePhoneAttempts10m) || 0;
-  const ipAttempts = Number(signals.ipAttempts30m) || 0;
-  const distinctPhones = Number(signals.distinctPhones30m) || 0;
-  if (samePhone >= 5) {
-    score += 50;
-    reasons.push('একই ফোন থেকে ১০ মিনিটে ' + samePhone + 'টি আগের অর্ডার-চেষ্টা');
-  } else if (samePhone >= 3) {
-    score += 35;
-    reasons.push('একই ফোন থেকে ১০ মিনিটে ' + samePhone + 'টি আগের অর্ডার-চেষ্টা');
-  } else if (samePhone >= 2) {
-    score += 25;
-    reasons.push('একই ফোন থেকে ১০ মিনিটে ' + samePhone + 'টি আগের অর্ডার-চেষ্টা');
-  }
-  if (ipAttempts >= 5 && distinctPhones >= 3) {
-    score += 15;
-    reasons.push('একই IP থেকে ৩০ মিনিটে ' + ipAttempts + 'টি চেষ্টা ও ' + distinctPhones + 'টি ফোন');
-  }
-  score = Math.min(100, score);
-  return { score, level: score >= 60 ? 'high' : score >= 30 ? 'review' : 'low', reasons };
+  return scoreFraudRisk(signals);
 }
 
-async function assessWorkerOrderRisk(env, eventId, ip, phoneRaw, now) {
+async function assessWorkerOrderRisk(env, eventId, ip, phoneRaw, now, deviceHash) {
   const phone = localPhone(phoneRaw);
-  const signals = { samePhoneAttempts10m: 0, ipAttempts30m: 0, distinctPhones30m: 0 };
+  const signals = { samePhoneAttempts10m: 0, ipAttempts30m: 0, distinctPhones30m: 0, sameDeviceAttempts24h: 0 };
   try {
     if (phone) {
       const own = await env.DB.prepare("SELECT COUNT(*) AS n FROM order_ip_log WHERE phone = ? AND created_at >= ? AND event_id <> ? AND outcome <> 'blocked'")
@@ -215,6 +196,13 @@ async function assessWorkerOrderRisk(env, eventId, ip, phoneRaw, now) {
   } catch (e) {
     // Risk telemetry is best-effort: a D1 issue must never prevent a customer order.
     console.log('order_risk_query_error', String(e).slice(0, 200));
+  }
+  if (deviceHash) {
+    try {
+      const device = await env.DB.prepare('SELECT COUNT(*) AS n FROM device_order_log WHERE device_hash = ? AND created_at >= ? AND event_id <> ?')
+        .bind(deviceHash, now - 24 * 60 * 60 * 1000, eventId).first();
+      signals.sameDeviceAttempts24h = Number(device && device.n) || 0;
+    } catch (e) { console.log('device_risk_query_error', String(e).slice(0, 160)); }
   }
   return Object.assign(scoreWorkerOrderRisk(signals), signals);
 }
@@ -336,9 +324,10 @@ async function handleOrder(request, env, ctx) {
   if (payload.length > ORDER_MAX_PAYLOAD) return textOut('Payload too large', 413);
 
   const now = Date.now();
+  const device = await resolveDeviceToken(request, env, now);
   const existing = await env.DB.prepare('SELECT status, attempts, order_id, last_response FROM order_inbox WHERE event_id = ?').bind(eventId).first();
   if (existing && existing.status === 'saved') {
-    return textOut(existing.last_response && existing.last_response.indexOf('Success') === 0 ? existing.last_response : 'Success|' + (existing.order_id || ''));
+    return withDeviceCookie(textOut(existing.last_response && existing.last_response.indexOf('Success') === 0 ? existing.last_response : 'Success|' + (existing.order_id || '')), device);
   }
   const ipInfo = clientIpInfo(request);
   const ipBlock = await findIpBlock(env, ipInfo.ip, now);
@@ -348,7 +337,12 @@ async function handleOrder(request, env, ctx) {
     return textOut('Error|' + IP_BLOCKED_MESSAGE);
   }
   await logOrderIp(env, eventId, ipInfo, pairs, 'received', now);
-  const risk = await assessWorkerOrderRisk(env, eventId, ipInfo.ip, pairValue(pairs, 'Phone'), now);
+  const deviceAttempts = await logDeviceOrderAttempt(env, eventId, device.hash, pairValue(pairs, 'Phone'), now);
+  const risk = await assessWorkerOrderRisk(env, eventId, ipInfo.ip, pairValue(pairs, 'Phone'), now, device.hash);
+  risk.sameDeviceAttempts24h = deviceAttempts;
+  // Recalculate the action after the authoritative insert/count. Updating only the
+  // signal field would leave score/action stale (e.g. allow with 3 prior device orders).
+  Object.assign(risk, scoreWorkerOrderRisk(risk));
   const storedPayload = encodeOrderPayload(pairs, risk, eventId);
   if (existing) {
     await env.DB.prepare("UPDATE order_inbox SET payload = ?, target = ?, status = 'sending', updated_at = ? WHERE event_id = ?")
@@ -368,7 +362,7 @@ async function handleOrder(request, env, ctx) {
     const review = risk.level !== 'low';
     ctx.waitUntil(setOrderIpOutcome(env, eventId, review ? 'risk_review' : 'saved', r.orderId));
     if (review) ctx.waitUntil(workerRiskAlert(env, eventId, pairs, risk, r.orderId));
-    return textOut(r.text);
+    return withDeviceCookie(textOut(r.text), device);
   }
   if (r.kind === 'duplicate' && priorAttempts > 0) {
     // The Apps Script sets its duplicate flag before writing the row, so this does
@@ -377,7 +371,7 @@ async function handleOrder(request, env, ctx) {
       .bind(attempts, r.text, done, eventId).run();
     ctx.waitUntil(sendAlert(env, '🔎 একটা অর্ডার শিটে আছে কিনা মিলিয়ে দেখুন (আগের চেষ্টার উত্তর আসেনি, এখন "ডুপ্লিকেট" বলছে)।\n' + orderSummaryFromPairs(eventId, pairs)));
     ctx.waitUntil(setOrderIpOutcome(env, eventId, 'needs_attention', ''));
-    return textOut('Success|');
+    return withDeviceCookie(textOut('Success|'), device);
   }
   if (r.kind === 'rejected' || r.kind === 'duplicate') {
     await env.DB.prepare("UPDATE order_inbox SET status = 'rejected', attempts = ?, last_response = ?, updated_at = ? WHERE event_id = ?")
@@ -389,7 +383,7 @@ async function handleOrder(request, env, ctx) {
   await env.DB.prepare("UPDATE order_inbox SET status = 'retry', attempts = ?, next_at = ?, last_response = ?, updated_at = ? WHERE event_id = ?")
     .bind(attempts, done + backoffMs(1), r.text, done, eventId).run();
   ctx.waitUntil(setOrderIpOutcome(env, eventId, 'queued', ''));
-  return textOut('Success|', 200, { 'X-MA-Queued': '1' });
+  return withDeviceCookie(textOut('Success|', 200, { 'X-MA-Queued': '1' }), device);
 }
 
 // ---------------- Landing page orders (added 2026-10-31) ----------------
@@ -698,9 +692,70 @@ async function setOrderIpOutcome(env, eventId, outcome, orderId) {
 async function cleanupIpTables(env, now) {
   try {
     await env.DB.prepare('DELETE FROM order_ip_log WHERE created_at < ?').bind(now - IP_LOG_KEEP_MS).run();
+    await env.DB.prepare('DELETE FROM device_order_log WHERE created_at < ?').bind(now - IP_LOG_KEEP_MS).run();
     await env.DB.prepare('DELETE FROM blocked_ips WHERE expires_at IS NOT NULL AND expires_at < ?').bind(now).run();
   } catch (e) {
     console.log('ip_cleanup_error', String(e).slice(0, 200));
+  }
+}
+
+
+// ---------------- Pseudonymous first-party device token ----------------
+// This is a rotating server-issued browser token, NOT a hardware fingerprint.
+// Clearing cookies / private browsing / another browser creates a new identifier.
+const DEVICE_COOKIE = 'ma_device';
+const DEVICE_TOKEN_TTL = 180 * 24 * 60 * 60;
+
+async function deviceHmac(secret, value) {
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(value));
+  return [...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function resolveDeviceToken(request, env, now) {
+  if (!env.DEVICE_TOKEN_SECRET || String(env.DEVICE_TOKEN_SECRET).length < 32) return { hash: '', cookie: '' };
+  const cookies = parseCookies(request.headers.get('Cookie') || '');
+  const token = String(cookies[DEVICE_COOKIE] || '');
+  const parts = token.split('.');
+  if (parts.length === 3 && /^[a-f0-9-]{20,80}$/i.test(parts[0]) && /^\d{10,13}$/.test(parts[1])) {
+    const expires = Number(parts[1]);
+    const payload = parts[0] + '.' + parts[1];
+    if (expires > Math.floor(now / 1000) && expires < Math.floor(now / 1000) + DEVICE_TOKEN_TTL + 86400) {
+      const expected = await deviceHmac(env.DEVICE_TOKEN_SECRET, payload);
+      if (parts[2].length === expected.length && parts[2] === expected) {
+        return { hash: await sha256('ma-device-v1:' + parts[0]), cookie: '' };
+      }
+    }
+  }
+  const id = crypto.randomUUID();
+  const expires = Math.floor(now / 1000) + DEVICE_TOKEN_TTL;
+  const payload = id + '.' + expires;
+  const signature = await deviceHmac(env.DEVICE_TOKEN_SECRET, payload);
+  const value = payload + '.' + signature;
+  return {
+    hash: await sha256('ma-device-v1:' + id),
+    cookie: DEVICE_COOKIE + '=' + value + '; Max-Age=' + DEVICE_TOKEN_TTL + '; Path=/; Domain=.muslimabaya.com; Secure; HttpOnly; SameSite=Lax'
+  };
+}
+
+function withDeviceCookie(response, device) {
+  if (!device || !device.cookie) return response;
+  const headers = new Headers(response.headers);
+  headers.append('Set-Cookie', device.cookie);
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
+
+async function logDeviceOrderAttempt(env, eventId, deviceHash, phone, now) {
+  if (!deviceHash) return 0;
+  try {
+    await env.DB.prepare('INSERT INTO device_order_log (event_id, device_hash, created_at, phone) VALUES (?, ?, ?, ?) ON CONFLICT(event_id) DO NOTHING')
+      .bind(eventId, deviceHash, now, localPhone(phone) || '').run();
+    const row = await env.DB.prepare('SELECT COUNT(*) AS n FROM device_order_log WHERE device_hash = ? AND created_at >= ? AND event_id <> ?')
+      .bind(deviceHash, now - 24 * 60 * 60 * 1000, eventId).first();
+    return Number(row && row.n) || 0;
+  } catch (e) {
+    console.log('device_order_log_error', String(e).slice(0, 160));
+    return 0;
   }
 }
 
