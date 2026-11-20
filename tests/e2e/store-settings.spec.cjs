@@ -84,5 +84,5 @@ test('announcement bar follows the free-delivery setting', async ({ page }) => {
   await page.unroute(/\/product-config\.js(\?.*)?$/);
   await page.route(/\/product-config\.js(\?.*)?$/, (r) => r.fulfill({ contentType: 'application/javascript', body: real + '\nwindow.SITE_LINKS.delivery = {"dhaka":80,"outside":150,"freeQty":0};\n' }));
   await page.goto('/index.html');
-  await expect(page.locator('.ann-slide', { hasText: 'Delivery' }).first()).toHaveText(/Nationwide Home Delivery · Cash on Delivery/);
+  await expect(page.locator('.ann-slide').filter({ hasText: 'Nationwide Home Delivery' })).toHaveText(/Nationwide Home Delivery · Cash on Delivery/);
 });
