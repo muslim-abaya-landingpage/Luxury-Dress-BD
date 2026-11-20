@@ -85,6 +85,11 @@ test('desktop: product page layout pieces are there, flat, in order; removed pie
   await page.locator('[data-pqv-rate="4"]').click();
   await expect(page.locator('.pqv-imp-star.is-lit')).toHaveCount(4);
   await expect(page.locator('.pqv-reviews input[name="rating"]')).toHaveValue('4');
+  await expect(page.locator('.pqv-impression [data-ma-review-form]')).toBeVisible();
+  // no separate reviews block lower down, and no "no reviews yet" text
+  await expect(page.locator('.pqv-reviews-section, .pqv-reviews-title')).toHaveCount(0);
+  await expect(page.locator('.pqv-reviews-count:visible')).toHaveCount(0);
+  await expect(page.locator('[data-ma-review-toggle]:visible')).toHaveCount(0);
 });
 
 test('phone: options stack in one column and nothing overflows the screen', async ({ page }) => {

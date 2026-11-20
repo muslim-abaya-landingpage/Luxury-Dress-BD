@@ -2968,6 +2968,9 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
       return '<button type="button" class="pqv-imp-star" data-pqv-rate="' + n + '" aria-label="' + n + ' star">★</button>';
     }).join("") +
     '</div><span class="pqv-impression-note">Verified customer feedback</span></div>' +
+    // Reviews live inside this box (no separate "Customer Reviews" section further down):
+    // approved reviews show here if there are any; the form opens when a star is tapped.
+    '<div class="pqv-reviews pqv-reviews-inline" data-ma-reviews="1"></div>' +
     "</div>" +
     '<div class="pqv-browsing" id="pqvBrowsing" hidden><span class="pqv-live-dot"></span><span class="pqv-browsing-text"></span></div>' +
     '<div class="pqv-acc" id="pqvDescBlock">' +
@@ -2980,7 +2983,6 @@ function buildQuickViewPanelHtml(p, idx, waLink, categoryKey, allProducts) {
     "</div>" +
     "</div>" +
     '<div class="pqv-bottom-row">' +
-    '<div class="pqv-reviews-section"><h3 class="pqv-reviews-title">Customer Reviews</h3><div class="pqv-reviews" data-ma-reviews="1"></div></div>' +
     relatedHtml +
     "</div>" +
     "</div>"
@@ -3263,7 +3265,7 @@ function applyPqvWooExtras(p, root, allProducts) {
     if (up && bottom) bottom.insertAdjacentHTML("beforebegin", "<section class='pqv-upsells' style='margin:24px 0'><h2 style='font-size:20px;margin:0 0 12px'>You may also like…</h2><div class='pqv-woo-row'>" + up + "</div></section>");
   }
   if (p.reviewsAllowed === false) {
-    var rev = root.querySelector(".pqv-reviews-section"); if (rev) rev.style.display = "none";
+    var rev = root.querySelector(".pqv-impression"); if (rev) rev.style.display = "none";
   }
   if (!document.getElementById("pqvWooCss")) {
     var st = document.createElement("style");

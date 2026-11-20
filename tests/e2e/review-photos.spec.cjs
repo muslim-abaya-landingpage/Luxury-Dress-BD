@@ -28,13 +28,16 @@ test('product page: review photos show, open full size, and a buyer can add phot
   await page.keyboard.press('Escape');
   await expect(page.locator('.pqv-photo-lightbox')).toHaveCount(0);
 
-  // the form is hidden until "রিভিউ লিখুন" is pressed (it used to show all the time)
+  // reviews sit inside the "Your Impression" box; there is no separate reviews section or "রিভিউ লিখুন" button
+  await expect(page.locator('.pqv-impression [data-ma-reviews]')).toHaveCount(1);
+  await expect(page.locator('.pqv-reviews-section, .pqv-reviews-title')).toHaveCount(0);
+  await expect(box.locator('[data-ma-review-toggle]')).toBeHidden();
+  // the form is hidden until a star is tapped; the tapped rating is already picked
   const form = box.locator('[data-ma-review-form]');
   await expect(form).toBeHidden();
-  await box.locator('[data-ma-review-toggle]').click();
+  await page.locator('[data-pqv-rate="5"]').click();
   await expect(form).toBeVisible();
-
-  await form.locator('.pqv-rate-star[data-rate="5"]').click();
+  await expect(form.locator('input[name="rating"]')).toHaveValue('5');
   await form.locator('input[name="name"]').fill('Sumi');
   await form.locator('[data-ma-photo-input]').setInputFiles({ name: 'a.png', mimeType: 'image/png', buffer: PNG });
   await expect(form.locator('[data-ma-photo-previews] img')).toHaveCount(1);
