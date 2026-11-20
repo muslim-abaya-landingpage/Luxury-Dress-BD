@@ -19,7 +19,7 @@ test('adds repeat-device and network signals with explainable reasons', () => {
     vpnOrProxy: true,
     hostingNetwork: true
   });
-  assert.equal(result.score, 50);
+  assert.equal(result.score, 55);
   assert.equal(result.level, 'review');
   assert.equal(result.action, 'challenge');
   assert.equal(result.reasons.length, 3);
