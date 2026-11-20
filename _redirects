@@ -39,3 +39,7 @@
 /register   /signup            302
 /dashboard  /admin-dashboard   302
 /contact    /help              302
+
+# BEGIN SEO Manager (Admin → SEO Manager; do not edit by hand)
+/product/premium-dubai-cherry-fabrics-abaya  /product/ABY-BUTTERFLY-14  301
+# END SEO Manager
