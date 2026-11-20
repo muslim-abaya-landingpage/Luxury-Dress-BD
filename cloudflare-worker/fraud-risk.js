@@ -33,7 +33,9 @@ export function scoreFraudRisk(signals = {}, policy = {}) {
     score += 35;
     reasons.push('একই ডিভাইস থেকে ২৪ ঘণ্টায় ' + sameDevice + 'টি অর্ডার-চেষ্টা');
   } else if (sameDevice >= 3) {
-    score += 25;
+    // Three orders from one signed first-party device merit a soft challenge,
+    // not a block; the 30-point threshold keeps the action proportionate.
+    score += 30;
     reasons.push('একই ডিভাইস থেকে ২৪ ঘণ্টায় ' + sameDevice + 'টি অর্ডার-চেষ্টা');
   } else if (sameDevice >= 2) {
     score += 15;
