@@ -1,3 +1,4 @@
+import { scoreFraudRisk } from './fraud-risk.js';
 // Muslim Abaya first-party tracking worker.
 // Routes: muslimabaya.com/gtm.js*  (GTM loader, unchanged)
 //         muslimabaya.com/_ma/*    (Meta Conversions API endpoint, added 2026-10-23)
@@ -174,27 +175,7 @@ function orderSummaryFromPairs(eventId, pairs) {
 }
 
 function scoreWorkerOrderRisk(signals) {
-  let score = 0;
-  const reasons = [];
-  const samePhone = Number(signals.samePhoneAttempts10m) || 0;
-  const ipAttempts = Number(signals.ipAttempts30m) || 0;
-  const distinctPhones = Number(signals.distinctPhones30m) || 0;
-  if (samePhone >= 5) {
-    score += 50;
-    reasons.push('একই ফোন থেকে ১০ মিনিটে ' + samePhone + 'টি আগের অর্ডার-চেষ্টা');
-  } else if (samePhone >= 3) {
-    score += 35;
-    reasons.push('একই ফোন থেকে ১০ মিনিটে ' + samePhone + 'টি আগের অর্ডার-চেষ্টা');
-  } else if (samePhone >= 2) {
-    score += 25;
-    reasons.push('একই ফোন থেকে ১০ মিনিটে ' + samePhone + 'টি আগের অর্ডার-চেষ্টা');
-  }
-  if (ipAttempts >= 5 && distinctPhones >= 3) {
-    score += 15;
-    reasons.push('একই IP থেকে ৩০ মিনিটে ' + ipAttempts + 'টি চেষ্টা ও ' + distinctPhones + 'টি ফোন');
-  }
-  score = Math.min(100, score);
-  return { score, level: score >= 60 ? 'high' : score >= 30 ? 'review' : 'low', reasons };
+  return scoreFraudRisk(signals);
 }
 
 async function assessWorkerOrderRisk(env, eventId, ip, phoneRaw, now) {
