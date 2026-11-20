@@ -44,6 +44,7 @@ function setup({ quota = 90, now = Date.parse('2026-11-21T00:00:00Z') } = {}) {
       getUuid: () => crypto.randomUUID(),
       computeDigest: (_a, s) => Array.from(crypto.createHash('sha256').update(s).digest()).map((b) => (b > 127 ? b - 256 : b)),
       DigestAlgorithm: { SHA_256: 'sha256' }, Charset: { UTF_8: 'utf8' },
+      formatDate: (d) => new Date(d.getTime() + 6 * 3600000).toISOString().slice(0, 10),
     },
   };
   ctx.findCustomerByEmail_ = (email) => { const r = customers.find((x, i) => i && x[0] === ctx.normalizeEmail_(email)); return r && { email: r[0], phone: r[1], name: r[2], status: r[5] }; };
@@ -123,4 +124,25 @@ test('Code.gs routes the three new requests through the normal per-account rate 
   for (const t of ['CustomerCodeRequest', 'CustomerCodeLogin', 'CustomerPasswordReset']) assert.ok(code.includes("type === '" + t + "'"), t);
   const rl = code.indexOf("rateLimit_(param_(e, 'Email') || param_(e, 'Phone') || param_(e, 'Login')");
   assert.ok(rl > 0 && rl < code.indexOf("type === 'CustomerCodeRequest'"));
+});
+
+test('Setup page row: counts codes per Dhaka day and warns when the free Gmail allowance runs low or busy days near it', () => {
+  const s = setup({ quota: 85 });
+  s.call('requestCustomerCode_', { Login: 'sumi@example.com' });
+  s.tick(61 * 1000);
+  s.call('requestCustomerCode_', { Login: '01712345678' });
+  s.call('requestCustomerCode_', { Login: 'nobody@example.com' }); // no account: nothing sent, not counted
+  const row = s.ctx.customerCodeSetupRow_();
+  assert.equal(row.ok, true);
+  assert.match(row.detail, /আজ 2টি কোড গেছে/);
+  assert.match(row.detail, /আজ আর 85টি ই-মেইল/);
+  const low = setup({ quota: 10 }).ctx.customerCodeSetupRow_();
+  assert.equal(low.ok, false); assert.equal(low.partial, true);
+  assert.match(low.help, /ফ্রি সীমা প্রায় শেষ/);
+  const busyDays = setup();
+  busyDays.props.set('CUST_CODES_DAILY', JSON.stringify({ [busyDays.ctx.customerCodeDay_(Date.now() - 86400000 * 0 + 0)]: 70 }));
+  const busy = busyDays.ctx.customerCodeSetupRow_();
+  assert.equal(busy.partial, true);
+  assert.match(busy.help, /পেইড/);
+  assert.ok(fs.readFileSync(path.join(__dirname, '../../apps-script/SetupStatus.gs'), 'utf8').includes('customerCodeSetupRow_()'));
 });

@@ -53,6 +53,7 @@ function getAdminSetupStatus_(e) {
     { id: 'steadfast', label: 'Steadfast কুরিয়ার', ok: has('STEADFAST_API_KEY') && has('STEADFAST_SECRET_KEY'),
       help: 'Script Properties-এ STEADFAST_API_KEY ও STEADFAST_SECRET_KEY বসান।' },
     setupGithubConnection_(props),
+    customerCodeSetupRow_(),
     { id: 'backup', label: 'ব্যাকআপ শিট', ok: has('SAFETY_BACKUP_SPREADSHEET_ID'),
       detail: props.getProperty('OPS_LAST_BACKUP_AT') ? 'শেষ ব্যাকআপ: ' + props.getProperty('OPS_LAST_BACKUP_AT') : 'এখনো কোনো ব্যাকআপ রেকর্ড নেই',
       help: 'প্রথম ব্যাকআপ চালু হলে এটি নিজে তৈরি হয়।' },

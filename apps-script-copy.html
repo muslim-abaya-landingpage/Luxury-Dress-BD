@@ -9396,6 +9396,7 @@ function requestCustomerCode_(e) {
       '&lt;div style="font-size:30px;font-weight:700;letter-spacing:8px;padding:16px;background:#f4f4f4;text-align:center">' + code + '&lt;/div>' +
       '&lt;p>It expires in 10 minutes and works once. If you did not ask for it, ignore this email.&lt;/p>&lt;/div>';
     MailApp.sendEmail({ to: email, subject: subject, body: body, htmlBody: htmlBody, name: 'Muslim Abaya' });
+    customerCodeCount_();
   } catch (err) {
     props.deleteProperty(key);
     console.error('Customer code email failed: ' + String(err &amp;&amp; err.message || err));
@@ -9470,6 +9471,58 @@ function customerPasswordReset_(e) {
   var out = createSession_({ email: r.user.email, phone: r.user.phone || '', name: r.user.name || '' }, 'customer');
   out.message = 'Your password has been changed.';
   return out;
+}
+
+/* Daily count of codes sent (Asia/Dhaka days, last 14 kept) for Admin → Setup ও স্ট্যাটাস. */
+function customerCodeDay_(ms) {
+  return Utilities.formatDate(new Date(ms == null ? Date.now() : ms), 'Asia/Dhaka', 'yyyy-MM-dd');
+}
+
+function customerCodeCount_() {
+  try {
+    var props = PropertiesService.getScriptProperties();
+    var days = {};
+    try { days = JSON.parse(props.getProperty('CUST_CODES_DAILY') || '{}') || {}; } catch (parseErr) { days = {}; }
+    var today = customerCodeDay_();
+    days[today] = (Number(days[today]) || 0) + 1;
+    Object.keys(days).sort().slice(0, -14).forEach(function (d) { delete days[d]; });
+    props.setProperty('CUST_CODES_DAILY', JSON.stringify(days));
+  } catch (err) {}
+}
+
+/** { today, peak7, avg7, quotaLeft } — numbers only, no customer data. */
+function customerCodeStats_() {
+  var days = {};
+  try { days = JSON.parse(PropertiesService.getScriptProperties().getProperty('CUST_CODES_DAILY') || '{}') || {}; } catch (err) { days = {}; }
+  var last7 = [];
+  for (var i = 0; i &lt; 7; i++) last7.push(Number(days[customerCodeDay_(Date.now() - i * 86400000)]) || 0);
+  var quota = null;
+  try { quota = MailApp.getRemainingDailyQuota(); } catch (quotaErr) {}
+  return {
+    today: last7[0],
+    peak7: Math.max.apply(null, last7),
+    avg7: Math.round(last7.reduce(function (a, b) { return a + b; }, 0) / 7),
+    quotaLeft: quota
+  };
+}
+
+/** Row for the Setup page; warns when today's free Gmail allowance (100) is nearly used, or busy days approach it. */
+function customerCodeSetupRow_() {
+  var st = customerCodeStats_();
+  var left = st.quotaLeft;
+  var line = 'আজ ' + st.today + 'টি কোড গেছে · গত ৭ দিনে সর্বোচ্চ ' + st.peak7 + 'টি/দিন, গড় ' + st.avg7 + 'টি/দিন' +
+    (left != null ? ' · আজ আর ' + left + 'টি ই-মেইল পাঠানো যাবে (ফ্রি Gmail-এ দিনে ১০০)' : '');
+  var low = left != null &amp;&amp; left &lt; 20;
+  var busy = st.peak7 >= 60;
+  return {
+    id: 'customerCodes',
+    label: 'ক্রেতার লগইন / পাসওয়ার্ড কোড (ই-মেইল)',
+    ok: !low &amp;&amp; !busy,
+    partial: low || busy,
+    detail: line,
+    help: line + (low ? ' — আজকের ফ্রি সীমা প্রায় শেষ। ক্রেতারা আজ পাসওয়ার্ড বা Google দিয়ে লগইন করতে পারবেন; কাল সীমা আবার পূর্ণ হবে।' : '') +
+      (busy ? ' — ব্যস্ত দিনে সীমার কাছাকাছি যাচ্ছে। এমন নিয়মিত হলে বেশি সীমার (পেইড) ই-মেইল সার্ভিস ভেবে দেখার সময়।' : '')
+  };
 }
 </textarea><br>
 <button type="button" id="copyFile9">CustomerAccountCodes.gs কপি</button>
@@ -11481,6 +11534,7 @@ function getAdminSetupStatus_(e) {
     { id: 'steadfast', label: 'Steadfast কুরিয়ার', ok: has('STEADFAST_API_KEY') &amp;&amp; has('STEADFAST_SECRET_KEY'),
       help: 'Script Properties-এ STEADFAST_API_KEY ও STEADFAST_SECRET_KEY বসান।' },
     setupGithubConnection_(props),
+    customerCodeSetupRow_(),
     { id: 'backup', label: 'ব্যাকআপ শিট', ok: has('SAFETY_BACKUP_SPREADSHEET_ID'),
       detail: props.getProperty('OPS_LAST_BACKUP_AT') ? 'শেষ ব্যাকআপ: ' + props.getProperty('OPS_LAST_BACKUP_AT') : 'এখনো কোনো ব্যাকআপ রেকর্ড নেই',
       help: 'প্রথম ব্যাকআপ চালু হলে এটি নিজে তৈরি হয়।' },
