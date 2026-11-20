@@ -32,8 +32,7 @@ window.SITE_HEADER_CONFIG = {
 
   /** উপরের ঘুরতে থাকা অ্যানাউন্সমেন্ট বার — যত খুশি স্লাইড যোগ/বাদ দিতে পারবেন */
   announcements: [
-    "💎 PREMIUM MODEST WEAR | TIMELESS ELEGANCE & EVERYDAY COMFORT",
-    "💎 Premium Modest Fashion | Elegant Abayas & Two-Piece Collections",
+    "💳 Cash on Delivery Available Across Bangladesh",
     "🚚 Buy 3 Dresses & Enjoy FREE Nationwide Delivery"
   ]
 };

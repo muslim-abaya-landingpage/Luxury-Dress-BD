@@ -875,6 +875,8 @@ body {
 #homeCatnav .home-catnav-inner>a:focus-visible{outline:2px solid #b68a52!important;outline-offset:-2px}
 @media(max-width:767px){#homeCatnav{margin:8px auto 16px!important;padding:0 10px!important}#homeCatnav .home-catnav-label{font-size:11px!important;padding-right:13px!important;margin-right:4px!important}#homeCatnav .home-catnav-inner>a{font-size:11px!important;padding:10px 12px!important;min-height:44px}}
 @media(prefers-reduced-motion:reduce){#homeCatnav .home-catnav-inner>a,#homeCatnav .home-catnav-inner>a:after{transition:none}}
+/* The main header already provides category navigation; avoid repeating the same links below the hero. */
+#homeCatnav{display:none!important}
 </style>
 
 </head>

@@ -45,6 +45,16 @@ test('prerenderIndex inlines the card CSS and fills the empty containers once', 
   assert.ok(out.includes('home-render.min.js'), 'renderer script still loads');
 });
 
+test('homepage hides the redundant category rail and uses one customer-focused announcement', () => {
+  const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  const config = fs.readFileSync(path.join(root, 'site-header-config.js'), 'utf8');
+  const header = fs.readFileSync(path.join(root, 'site-header.js'), 'utf8');
+  assert.ok(html.includes('#homeCatnav{display:none!important}'));
+  assert.match(config, /announcements:\s*\[\s*"💳 Cash on Delivery Available Across Bangladesh"/);
+  assert.ok(header.includes('"💳 Cash on Delivery Available Across Bangladesh"'));
+  assert.doesNotMatch(config, /PREMIUM MODEST WEAR|Premium Modest Fashion/);
+});
+
 test('Cloudflare build runs the prerender before content versioning', () => {
   const build = fs.readFileSync(path.join(root, 'scripts/build-cloudflare.mjs'), 'utf8');
   const a = build.indexOf('scripts/build-home-prerender.mjs');
