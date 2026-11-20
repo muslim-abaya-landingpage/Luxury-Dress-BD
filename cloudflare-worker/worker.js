@@ -689,6 +689,7 @@ async function setOrderIpOutcome(env, eventId, outcome, orderId) {
 async function cleanupIpTables(env, now) {
   try {
     await env.DB.prepare('DELETE FROM order_ip_log WHERE created_at < ?').bind(now - IP_LOG_KEEP_MS).run();
+    await env.DB.prepare('DELETE FROM device_order_log WHERE created_at < ?').bind(now - IP_LOG_KEEP_MS).run();
     await env.DB.prepare('DELETE FROM blocked_ips WHERE expires_at IS NOT NULL AND expires_at < ?').bind(now).run();
   } catch (e) {
     console.log('ip_cleanup_error', String(e).slice(0, 200));
