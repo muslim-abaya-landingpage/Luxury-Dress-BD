@@ -30,9 +30,9 @@ function makeDB() {
   };
 }
 const TARGET = 'https://script.google.com/macros/s/AKfycbxZv7KU0JMY90576HoRF8wtHmEgW2ggkTxAoQKjO/exec';
-function makeRequest(eventId, cookie = '') {
+function makeRequest(eventId, cookie = '', phone = '01712345678') {
   const fd = new FormData();
-  [['RecordType','Order'],['EventID',eventId],['Name','Test Buyer'],['Phone','01712345678'],['Total','1650'],['_ma_target',TARGET]].forEach(([k,v]) => fd.append(k,v));
+  [['RecordType','Order'],['EventID',eventId],['Name','Test Buyer'],['Phone',phone],['Total','1650'],['_ma_target',TARGET]].forEach(([k,v]) => fd.append(k,v));
   const headers = { Origin:'https://muslimabaya.com', 'CF-Connecting-IP':'103.4.5.6', 'User-Agent':'Mozilla/5.0 (Linux; Android 13) Chrome/130 Mobile' };
   if (cookie) headers.Cookie = cookie;
   const req = new Request('https://muslimabaya.com/_ma/order',{method:'POST',body:fd,headers});
@@ -52,7 +52,7 @@ test('issues a signed HttpOnly first-party device token and reuses it for subseq
   let cookie = '';
   for (let i=1;i<=4;i++) {
     const c = ctx();
-    const res = await worker.fetch(makeRequest('device_order_'+i,cookie),env,c);
+    const res = await worker.fetch(makeRequest('device_order_'+i,cookie,'0171234567'+i),env,c);
     await c.done();
     assert.match(await res.text(),/^Success\|/);
     if (i===1) {
