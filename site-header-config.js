@@ -32,7 +32,8 @@ window.SITE_HEADER_CONFIG = {
 
   /** উপরের ঘুরতে থাকা অ্যানাউন্সমেন্ট বার — যত খুশি স্লাইড যোগ/বাদ দিতে পারবেন */
   announcements: [
-    "💳 Cash on Delivery Available Across Bangladesh"
+    "💳 Cash on Delivery Available Across Bangladesh",
+    "🚚 Buy 3 Dresses & Enjoy FREE Nationwide Delivery"
   ]
 };
 
