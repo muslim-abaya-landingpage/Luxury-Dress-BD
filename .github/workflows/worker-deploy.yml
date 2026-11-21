@@ -18,6 +18,7 @@ on:
       - ".github/workflows/worker-deploy.yml"
       - "tests/backend/device-token.test.mjs"
       - "tests/backend/fraud-risk.test.mjs"
+      - "tests/backend/order-otp.test.mjs"
   workflow_dispatch:
 
 permissions:
@@ -61,7 +62,7 @@ jobs:
 
       - name: Worker tests (order queue, IP blocking, fraud risk, device token)
         if: steps.creds.outputs.ready == 'true'
-        run: node --test tests/backend/order-ip-guard.test.mjs tests/backend/landing-order-queue.test.mjs tests/backend/fraud-risk.test.mjs tests/backend/device-token.test.mjs
+        run: node --test tests/backend/order-ip-guard.test.mjs tests/backend/landing-order-queue.test.mjs tests/backend/fraud-risk.test.mjs tests/backend/device-token.test.mjs tests/backend/order-otp.test.mjs
 
       - name: Back up the live Worker code
         if: steps.creds.outputs.ready == 'true'

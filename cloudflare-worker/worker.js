@@ -9,6 +9,16 @@ import { scoreFraudRisk } from './fraud-risk.js';
 //   MA_DEBUG             (Text, opt.) "1" makes /_ma/e return Meta's/TikTok's response (for testing). Remove afterwards.
 //   TIKTOK_EAPI_TOKEN    (Secret)     TikTok Events API access token. Without it, TikTok sending is skipped.
 //   TIKTOK_TEST_EVENT_CODE (Text, opt.) TikTok test event code — events go to TikTok's Test Events only.
+//   WHATSAPP_ACCESS_TOKEN    (Secret)   Meta WhatsApp Cloud API token. Order OTP (added 2026-11-21) is
+//                                       fully OFF without this + WHATSAPP_PHONE_NUMBER_ID + OTP_TOKEN_SECRET.
+//   WHATSAPP_PHONE_NUMBER_ID (Text)     The sending number's Phone Number ID (NOT the WABA ID).
+//   OTP_TOKEN_SECRET         (Secret)   32+ random chars, same idea as DEVICE_TOKEN_SECRET. Signs the
+//                                       short-lived "verified" token checkout.html sends back after OTP.
+//   WHATSAPP_OTP_TEMPLATE        (Text, opt.) Approved AUTHENTICATION template name. Default "order_otp".
+//   WHATSAPP_OTP_TEMPLATE_LANG   (Text, opt.) Template language code. Default "bn".
+//   WHATSAPP_OTP_BUTTON_SUBTYPE  (Text, opt.) Only set if the template has a copy-code/one-tap OTP button
+//                                       (see docs/WHATSAPP-OTP-SETUP-BN.md) — most basic templates don't.
+// See docs/WHATSAPP-OTP-SETUP-BN.md for what to set these to and how to get them from Meta.
 
 const META_PIXEL_ID = '1465090315322833';
 const META_API_VERSION = 'v26.0';
@@ -23,6 +33,12 @@ export default {
 
     if (path === '/_ma/order') {
       return handleOrder(request, env, ctx);
+    }
+    if (path === '/_ma/otp/send') {
+      return handleOtpSend(request, env);
+    }
+    if (path === '/_ma/otp/verify') {
+      return handleOtpVerify(request, env);
     }
     if (path === '/_ma/repeat') {
       return handleRepeatCheck(request, env, url);
@@ -361,6 +377,21 @@ async function handleOrder(request, env, ctx) {
   // Recalculate the action after the authoritative insert/count. Updating only the
   // signal field would leave score/action stale (e.g. allow with 3 prior device orders).
   Object.assign(risk, scoreWorkerOrderRisk(risk));
+
+  // WhatsApp OTP gate: only for orders whose own score is already review/high, and only once
+  // configured (see handleOtpSend above) -- otherwise this never runs, same as before it existed.
+  if (otpConfigured(env) && risk.level !== 'low' && !(await verifyOtpToken(env, pairValue(pairs, 'OtpToken'), pairValue(pairs, 'Phone'), now))) {
+    const pendingPayload = encodeOrderPayload(pairs, risk, eventId);
+    if (existing) {
+      await env.DB.prepare("UPDATE order_inbox SET payload = ?, target = ?, status = 'awaiting_otp', updated_at = ? WHERE event_id = ?")
+        .bind(pendingPayload, target, now, eventId).run();
+    } else {
+      await env.DB.prepare("INSERT INTO order_inbox (event_id, created_at, updated_at, status, attempts, next_at, target, payload, name, phone, total) VALUES (?, ?, ?, 'awaiting_otp', 0, 0, ?, ?, ?, ?, ?)")
+        .bind(eventId, now, now, target, pendingPayload, pairValue(pairs, 'Name').slice(0, 120), pairValue(pairs, 'Phone').slice(0, 40), pairValue(pairs, 'Total').slice(0, 20)).run();
+    }
+    return withDeviceCookie(textOut('NeedsOtp|' + eventId), device);
+  }
+
   const storedPayload = encodeOrderPayload(pairs, risk, eventId);
   if (existing) {
     await env.DB.prepare("UPDATE order_inbox SET payload = ?, target = ?, status = 'sending', updated_at = ? WHERE event_id = ?")
@@ -871,6 +902,152 @@ async function logDeviceFpAttempt(env, eventId, fpHash, phone, now) {
   } catch (e) {
     console.log('device_fp_log_error', String(e).slice(0, 160));
     return 0;
+  }
+}
+
+// ---------------- WhatsApp order OTP (added 2026-11-21) ----------------
+// Only asked for when an order's own fraud-risk score (scoreFraudRisk, above) is already
+// review/high -- most orders never touch any of this. Needs three things set as Worker secrets/vars
+// before it does anything (see docs/WHATSAPP-OTP-SETUP-BN.md): WHATSAPP_ACCESS_TOKEN,
+// WHATSAPP_PHONE_NUMBER_ID and OTP_TOKEN_SECRET (32+ random chars, same idea as
+// DEVICE_TOKEN_SECRET above). Without all three, this feature is entirely inactive: handleOrder
+// never asks for a code, exactly like before this was added. Schema: cloudflare-worker/schema-otp.sql.
+const OTP_SEND_WINDOW_MS = 60 * 60 * 1000;
+const OTP_SEND_MAX_PER_WINDOW = 5;
+const OTP_RESEND_COOLDOWN_MS = 55 * 1000;
+const OTP_CODE_TTL_MS = 5 * 60 * 1000;
+const OTP_MAX_WRONG_ATTEMPTS = 5;
+const OTP_TOKEN_TTL_MS = 30 * 60 * 1000;
+const OTP_TEMPLATE_NAME = 'order_otp';
+const OTP_TEMPLATE_LANG = 'bn';
+
+function otpConfigured(env) {
+  return !!(env.WHATSAPP_ACCESS_TOKEN && env.WHATSAPP_PHONE_NUMBER_ID && env.OTP_TOKEN_SECRET && env.DB);
+}
+
+function toWhatsAppPhone(localPhoneDigits) {
+  // 01XXXXXXXXX -> 8801XXXXXXXXX (Bangladesh E.164 without the leading '+', as Cloud API expects).
+  return '880' + localPhoneDigits.slice(1);
+}
+
+function jsonOut(body, status) {
+  return new Response(JSON.stringify(body), {
+    status: status || 200,
+    headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' },
+  });
+}
+
+async function readFormOrigin(request) {
+  const origin = request.headers.get('Origin');
+  if (origin && origin !== new URL(request.url).origin) return null;
+  try {
+    const text = await request.text();
+    if (text.length > 2048) return null;
+    return new URLSearchParams(text);
+  } catch (e) {
+    return null;
+  }
+}
+
+async function sendWhatsAppOtpMessage(env, phoneDigits, code) {
+  const url = 'https://graph.facebook.com/v21.0/' + env.WHATSAPP_PHONE_NUMBER_ID + '/messages';
+  const templateName = env.WHATSAPP_OTP_TEMPLATE || OTP_TEMPLATE_NAME;
+  const lang = env.WHATSAPP_OTP_TEMPLATE_LANG || OTP_TEMPLATE_LANG;
+  const components = [{ type: 'body', parameters: [{ type: 'text', text: code }] }];
+  // Only add a button parameter if the template actually has a copy-code/one-tap OTP button --
+  // most basic AUTHENTICATION templates (body + footer only) don't, and sending a button
+  // parameter a template doesn't have makes the whole send fail.
+  if (env.WHATSAPP_OTP_BUTTON_SUBTYPE) {
+    components.push({ type: 'button', sub_type: env.WHATSAPP_OTP_BUTTON_SUBTYPE, index: '0', parameters: [{ type: 'text', text: code }] });
+  }
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + env.WHATSAPP_ACCESS_TOKEN, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messaging_product: 'whatsapp',
+      to: toWhatsAppPhone(phoneDigits),
+      type: 'template',
+      template: { name: templateName, language: { code: lang }, components },
+    }),
+  });
+  const text = await res.text();
+  if (!res.ok) throw new Error('whatsapp_send_failed:' + res.status + ':' + text.slice(0, 200));
+  return text;
+}
+
+async function handleOtpSend(request, env) {
+  if (request.method !== 'POST') return jsonOut({ ok: false, error: 'METHOD' }, 405);
+  if (!otpConfigured(env)) return jsonOut({ ok: false, error: 'NOT_CONFIGURED', message: 'ফোন ভেরিফিকেশন এখন চালু নেই।' }, 503);
+  const form = await readFormOrigin(request);
+  if (!form) return jsonOut({ ok: false, error: 'BAD_REQUEST' }, 400);
+  const phone = localPhone(form.get('Phone'));
+  if (!phone) return jsonOut({ ok: false, error: 'INVALID_PHONE', message: 'সঠিক ফোন নম্বর দিন।' }, 400);
+  const now = Date.now();
+  try {
+    const recent = await env.DB.prepare('SELECT COUNT(*) AS n, MAX(created_at) AS last FROM order_otp_log WHERE phone = ? AND created_at >= ?')
+      .bind(phone, now - OTP_SEND_WINDOW_MS).first();
+    if (recent && Number(recent.n) >= OTP_SEND_MAX_PER_WINDOW) {
+      return jsonOut({ ok: false, error: 'RATE_LIMIT', message: 'অনেকবার কোড চাওয়া হয়েছে, কিছুক্ষণ পর আবার চেষ্টা করুন।' }, 429);
+    }
+    if (recent && recent.last && now - Number(recent.last) < OTP_RESEND_COOLDOWN_MS) {
+      return jsonOut({ ok: false, error: 'COOLDOWN', message: 'একটু আগেই কোড পাঠানো হয়েছে, কিছুক্ষণ অপেক্ষা করুন।' }, 429);
+    }
+    const code = String(100000 + Math.floor(crypto.getRandomValues(new Uint32Array(1))[0] % 900000));
+    const otpHash = await deviceHmac(env.OTP_TOKEN_SECRET, phone + ':' + code);
+    await env.DB.prepare('INSERT INTO order_otp_log (phone, otp_hash, created_at, expires_at, attempts) VALUES (?, ?, ?, ?, 0)')
+      .bind(phone, otpHash, now, now + OTP_CODE_TTL_MS).run();
+    await sendWhatsAppOtpMessage(env, phone, code);
+    return jsonOut({ ok: true });
+  } catch (e) {
+    console.log('otp_send_error', String(e).slice(0, 300));
+    return jsonOut({ ok: false, error: 'SEND_FAILED', message: 'কোড পাঠানো যায়নি, একটু পর আবার চেষ্টা করুন।' }, 503);
+  }
+}
+
+async function issueOtpToken(env, phone, now) {
+  const expiry = now + OTP_TOKEN_TTL_MS;
+  const payload = phone + '.' + expiry;
+  const sig = await deviceHmac(env.OTP_TOKEN_SECRET, payload);
+  return payload + '.' + sig;
+}
+
+async function verifyOtpToken(env, token, phoneRaw, now) {
+  if (!otpConfigured(env) || !token) return false;
+  const phone = localPhone(phoneRaw);
+  const parts = String(token).split('.');
+  if (parts.length !== 3 || parts[0] !== phone) return false;
+  const expiry = Number(parts[1]);
+  if (!Number.isFinite(expiry) || expiry < now) return false;
+  const expected = await deviceHmac(env.OTP_TOKEN_SECRET, parts[0] + '.' + parts[1]);
+  return parts[2].length === expected.length && parts[2] === expected;
+}
+
+async function handleOtpVerify(request, env) {
+  if (request.method !== 'POST') return jsonOut({ ok: false, error: 'METHOD' }, 405);
+  if (!otpConfigured(env)) return jsonOut({ ok: false, error: 'NOT_CONFIGURED', message: 'ফোন ভেরিফিকেশন এখন চালু নেই।' }, 503);
+  const form = await readFormOrigin(request);
+  if (!form) return jsonOut({ ok: false, error: 'BAD_REQUEST' }, 400);
+  const phone = localPhone(form.get('Phone'));
+  const code = String(form.get('Code') || '').trim();
+  if (!phone || !/^\d{4,8}$/.test(code)) return jsonOut({ ok: false, error: 'BAD_REQUEST', message: 'সঠিক কোড দিন।' }, 400);
+  const now = Date.now();
+  try {
+    const row = await env.DB.prepare('SELECT id, otp_hash, expires_at, attempts FROM order_otp_log WHERE phone = ? ORDER BY created_at DESC LIMIT 1')
+      .bind(phone).first();
+    if (!row) return jsonOut({ ok: false, error: 'NO_CODE', message: 'আগে একটা কোড চান।' }, 400);
+    if (now > Number(row.expires_at)) return jsonOut({ ok: false, error: 'EXPIRED', message: 'কোডের মেয়াদ শেষ, নতুন কোড চান।' }, 400);
+    if (Number(row.attempts) >= OTP_MAX_WRONG_ATTEMPTS) return jsonOut({ ok: false, error: 'LOCKED', message: 'অনেকবার ভুল হয়েছে, নতুন কোড চান।' }, 400);
+    const candidate = await deviceHmac(env.OTP_TOKEN_SECRET, phone + ':' + code);
+    if (candidate.length !== row.otp_hash.length || candidate !== row.otp_hash) {
+      await env.DB.prepare('UPDATE order_otp_log SET attempts = attempts + 1 WHERE id = ?').bind(row.id).run();
+      return jsonOut({ ok: false, error: 'WRONG_CODE', message: 'ভুল কোড।' }, 400);
+    }
+    await env.DB.prepare('UPDATE order_otp_log SET verified_at = ? WHERE id = ?').bind(now, row.id).run();
+    const token = await issueOtpToken(env, phone, now);
+    return jsonOut({ ok: true, token });
+  } catch (e) {
+    console.log('otp_verify_error', String(e).slice(0, 300));
+    return jsonOut({ ok: false, error: 'VERIFY_FAILED', message: 'এই মুহূর্তে যাচাই করা যাচ্ছে না।' }, 503);
   }
 }
 

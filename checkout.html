@@ -2233,6 +2233,107 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (firstBtn) firstBtn.focus();
     }
 
+    // WhatsApp order OTP (added 2026-11-21): the Worker only asks for this when an order's own
+    // fraud-risk score is review/high -- most shoppers never see this modal at all. "NeedsOtp|" from
+    // /_ma/order is the signal to show it; the code itself is never visible to this page, only to
+    // WhatsApp, and the server tells us ok/not-ok.
+    function otpApiCall(path, fields) {
+        var body = new URLSearchParams(fields);
+        return fetch(path, { method: 'POST', body: body, credentials: 'same-origin', cache: 'no-store' })
+            .then(function (res) { return res.json().catch(function () { return { ok: false, message: 'HTTP ' + res.status }; }); })
+            .then(function (j) {
+                if (!j || !j.ok) throw new Error((j && j.message) || 'এই মুহূর্তে কাজ করছে না, একটু পর চেষ্টা করুন।');
+                return j;
+            });
+    }
+
+    function ensureOtpModal() {
+        if (document.getElementById('maOtpModal')) return;
+        var wrap = document.createElement('div');
+        wrap.id = 'maOtpModal';
+        wrap.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;align-items:center;justify-content:center;padding:16px;';
+        wrap.innerHTML =
+            '<div style="background:#fff;border-radius:12px;max-width:360px;width:100%;padding:22px 20px;text-align:center;">' +
+            '<h3 style="margin:0 0 8px;font-size:17px;">ফোন ভেরিফাই করুন</h3>' +
+            '<p style="margin:0 0 10px;font-size:13px;color:#555;">অর্ডারটি নিশ্চিত করতে WhatsApp-এ পাঠানো কোডটি লিখুন — <b id="maOtpPhone"></b></p>' +
+            '<p id="maOtpStatus" style="margin:0 0 8px;font-size:12px;color:#1a7a3c;min-height:16px;"></p>' +
+            '<input id="maOtpCode" type="tel" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="৬ সংখ্যার কোড" ' +
+            'style="width:100%;box-sizing:border-box;padding:12px;font-size:20px;text-align:center;letter-spacing:6px;border:1px solid #ccc;border-radius:8px;margin-bottom:8px;">' +
+            '<p id="maOtpError" style="margin:0 0 10px;font-size:12px;color:#c0392b;min-height:16px;"></p>' +
+            '<button type="button" id="maOtpVerifyBtn" class="checkout-modal-btn checkout-modal-btn--primary" style="width:100%;margin-bottom:8px;">ভেরিফাই করুন</button>' +
+            '<button type="button" id="maOtpResendBtn" class="checkout-modal-btn" style="width:100%;margin-bottom:8px;">আবার কোড পাঠান</button>' +
+            '<button type="button" id="maOtpCancelBtn" class="checkout-modal-btn" style="width:100%;background:transparent;box-shadow:none;">বাতিল</button>' +
+            '</div>';
+        document.body.appendChild(wrap);
+    }
+
+    function showOtpVerificationModal(phone, onVerified, onCancelled) {
+        ensureOtpModal();
+        var modal = document.getElementById('maOtpModal');
+        var phoneEl = document.getElementById('maOtpPhone');
+        var statusEl = document.getElementById('maOtpStatus');
+        var errorEl = document.getElementById('maOtpError');
+        var codeEl = document.getElementById('maOtpCode');
+        var verifyBtn = document.getElementById('maOtpVerifyBtn');
+        var resendBtn = document.getElementById('maOtpResendBtn');
+        var cancelBtn = document.getElementById('maOtpCancelBtn');
+        phoneEl.textContent = phone;
+        statusEl.textContent = '';
+        errorEl.textContent = '';
+        codeEl.value = '';
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        var cooldownTimer = null;
+
+        function startCooldown(seconds) {
+            var remaining = seconds;
+            resendBtn.disabled = true;
+            function tick() {
+                resendBtn.textContent = remaining > 0 ? ('আবার কোড পাঠান (' + remaining + ')') : 'আবার কোড পাঠান';
+                if (remaining <= 0) { clearInterval(cooldownTimer); resendBtn.disabled = false; return; }
+                remaining -= 1;
+            }
+            tick();
+            cooldownTimer = setInterval(tick, 1000);
+        }
+
+        function doSend() {
+            resendBtn.disabled = true;
+            errorEl.textContent = '';
+            otpApiCall('/_ma/otp/send', { Phone: phone }).then(function () {
+                statusEl.textContent = 'WhatsApp-এ কোড পাঠানো হয়েছে।';
+                startCooldown(60);
+            }).catch(function (err) {
+                resendBtn.disabled = false;
+                errorEl.textContent = err.message;
+            });
+        }
+
+        function cleanup() {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+            if (cooldownTimer) clearInterval(cooldownTimer);
+            resendBtn.onclick = null; verifyBtn.onclick = null; cancelBtn.onclick = null;
+        }
+
+        verifyBtn.onclick = function () {
+            var code = (codeEl.value || '').trim();
+            if (!/^\d{4,8}$/.test(code)) { errorEl.textContent = 'কোডটি সঠিকভাবে লিখুন।'; return; }
+            verifyBtn.disabled = true;
+            errorEl.textContent = '';
+            otpApiCall('/_ma/otp/verify', { Phone: phone, Code: code }).then(function (r) {
+                cleanup();
+                onVerified(r.token);
+            }).catch(function (err) {
+                verifyBtn.disabled = false;
+                errorEl.textContent = err.message;
+            });
+        };
+        resendBtn.onclick = doSend;
+        cancelBtn.onclick = function () { cleanup(); if (onCancelled) onCancelled(); };
+        doSend();
+    }
+
     function checkoutAlert(message, focusEl) {
         openCheckoutModal({
             title: 'Please check',
@@ -2450,7 +2551,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         }).then(function (res) {
             return res.text().then(function (text) {
                 var t = String(text || '').trim();
-                if (t.indexOf('Success') === 0 || t.indexOf('Error|') === 0) return { ok: res.ok, text: t };
+                if (t.indexOf('Success') === 0 || t.indexOf('Error|') === 0 || t.indexOf('NeedsOtp|') === 0) return { ok: res.ok, text: t };
                 throw new Error('EDGE_UNAVAILABLE');
             });
         });
@@ -2476,6 +2577,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             .catch(function () { return postOrderDirect(formData); })
             .then(function (result) {
                 var text = String(result.text || '').trim();
+                if (text.indexOf('NeedsOtp|') === 0) {
+                    showOtpVerificationModal(phoneValue, function onVerified(otpToken) {
+                        formData.set('OtpToken', otpToken);
+                        postOrderToSheet(formData, nameValue, phoneValue, emailValue, gTotal, btn, orderWa);
+                    }, function onCancelled() {
+                        resetOrderButton(btn);
+                    });
+                    return;
+                }
                 if (text.indexOf('Success') === 0) {
                     postOrderToSheet.__retries = 0;
                     var orderId = text.indexOf('|') !== -1 ? text.split('|')[1].trim() : '';
