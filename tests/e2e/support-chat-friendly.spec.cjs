@@ -193,7 +193,7 @@ test('chat panel: compact box on desktop, full screen that fits the visible area
       expect(box.height).toBeLessThanOrEqual(600);
     }
     expect(box.x).toBeGreaterThanOrEqual(0);
-    expect(box.x + box.width).toBeLessThanOrEqual(vp.width);
+    expect(box.x + box.width).toBeLessThanOrEqual(vp.width + 0.5); // sub-pixel rounding (e.g. 360.00006) is not a visible overflow
     // message box fits: image button, input and send on one row without sideways scrolling
     const row = await page.locator('.ma-chat-row').evaluate((el) => ({ width: el.clientWidth, scrollWidth: el.scrollWidth }));
     expect(row.scrollWidth).toBeLessThanOrEqual(row.width);
