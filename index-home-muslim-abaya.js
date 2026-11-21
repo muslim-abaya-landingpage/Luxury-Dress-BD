@@ -699,6 +699,7 @@
       "<span class='ms-card-text'>" +
       "<span class='ms-card-cat'>" + escapeHtml(row.sec.menu || row.sec.key) + "</span>" +
       "<span class='ms-card-name'>" + escapeHtml(p.name) + (ar ? " <i lang='ar' dir='rtl'>" + ar + "</i>" : "") + "</span>" +
+      "<span class='ms-card-price'>" + priceHtml(p) + "</span>" +
       "<span class='ms-card-cta'>Explore <span aria-hidden='true'>&rarr;</span></span>" +
       "</span></a>"
     );
@@ -707,10 +708,16 @@
   function storyListHtml(rows) {
     return rows.map(function (row, i) {
       var ar = STORY_ARABIC[row.sec.key] || "";
+      var pic = window.maHomeCardImage(row.p) || { src: resolveImg(row.p) };
       return (
         "<li><button type='button' class='ms-li" + (i === 0 ? " is-active" : "") + "' data-i='" + i + "'>" +
+        "<span class='ms-li-text'>" +
         "<span class='ms-li-meta'>" + storyPad(i + 1) + " · " + escapeHtml(row.sec.menu || row.sec.key) + "</span>" +
         "<span class='ms-li-name'>" + (ar ? "<i lang='ar' dir='rtl'>" + ar + "</i>" : "") + escapeHtml(row.p.name) + "</span>" +
+        "<span class='ms-li-price'>" + priceHtml(row.p) + "</span>" +
+        "</span>" +
+        "<img class='ms-li-thumb' src='" + escapeHtml(pic.src) + "' alt='' width='44' height='56' loading='lazy' decoding='async'" +
+        (pic.full && pic.full !== pic.src ? " data-full='" + escapeHtml(pic.full) + "' onerror=\"if(this.dataset.full&&this.src.indexOf(this.dataset.full)<0){this.src=this.dataset.full}\"" : "") + ">" +
         "</button></li>"
       );
     }).join("");
@@ -736,6 +743,11 @@
     });
     var count = board.querySelector(".ms-count");
     if (count) count.textContent = storyPad(idx + 1) + " / " + storyPad(n);
+    var big = board.querySelector(".ms-index-bg");
+    if (big) big.textContent = storyPad(idx + 1);
+    // thin line under the counter fills up until the next card comes
+    var bar = board.querySelector(".ms-progress");
+    if (bar) { bar.classList.remove("is-running"); void bar.offsetWidth; if (!prefersReducedMotion()) bar.classList.add("is-running"); }
     var items = board.querySelectorAll(".ms-li");
     items.forEach(function (b, i) { b.classList.toggle("is-active", i === idx); b.setAttribute("aria-current", i === idx ? "true" : "false"); });
     var list = board.querySelector(".ms-list-items");
@@ -783,10 +795,11 @@
         storyGo(board, b.classList.contains("ms-li") ? +b.getAttribute("data-i") : cur + (+b.getAttribute("data-ms-go")));
         storyStart(board);
       });
-      board.addEventListener("mouseenter", function () { board.__msPaused = true; });
-      board.addEventListener("mouseleave", function () { board.__msPaused = false; });
-      board.addEventListener("focusin", function () { board.__msPaused = true; });
-      board.addEventListener("focusout", function () { board.__msPaused = false; });
+      var pause = function (on) { board.__msPaused = on; board.classList.toggle("is-paused", on); };
+      board.addEventListener("mouseenter", function () { pause(true); });
+      board.addEventListener("mouseleave", function () { pause(false); });
+      board.addEventListener("focusin", function () { pause(true); });
+      board.addEventListener("focusout", function () { pause(false); });
       board.addEventListener("keydown", function (e) {
         if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
           storyGo(board, (board.__msIndex || 0) + (e.key === "ArrowRight" ? 1 : -1));

@@ -18,14 +18,8 @@ test('prerender renders the first section with the browser renderer', async () =
   assert.match(parts.sections, /fetchpriority='high'/, 'first card keeps its high fetch priority');
   assert.match(parts.catnav, /class='home-catnav-inner'/);
   assert.ok(parts.btnCss.includes('.ah-card .ah-card-bottom'));
-  assert.match(parts.categoryTiles, /id="ma-image-category-grid"/);
-  assert.equal((parts.categoryTiles.match(/class="ma-image-category-card/g) || []).length, 8);
-  assert.match(parts.categoryTiles, /loading="lazy" decoding="async" width="480" height="600"/);
-  // Small card thumbnails only (8 full-size photos were ~1 MB and slowed the hero on mobile), started after load.
-  const tileSrcs = [...parts.categoryTiles.matchAll(/data-tile-src="([^"]+)"/g)].map((m) => m[1]);
-  assert.equal(tileSrcs.length, 8);
-  tileSrcs.forEach((src) => assert.match(src, /(^|\/)images\/card\/|-card\.webp$/, 'tile uses a thumbnail: ' + src));
-  assert.doesNotMatch(parts.categoryTiles, /<img src=/, 'tile photos must not start before the page has loaded');
+  // "Shop by category" tiles were removed from the homepage (the card deck at the top replaced them).
+  assert.equal(parts.categoryTiles, undefined);
 });
 
 test('prerenderIndex inlines the card CSS and fills the empty containers once', async () => {
@@ -39,8 +33,8 @@ test('prerenderIndex inlines the card CSS and fills the empty containers once', 
   assert.equal((out.match(/data-prerendered="1"/g) || []).length, 1);
   assert.equal((out.match(/id="ma-home-btn-row"/g) || []).length, 1);
   assert.ok(!out.includes('<main id="homeSections" class="home-sections"></main>'));
-  assert.ok(out.indexOf('id="ma-image-category-grid"') < out.indexOf('<main id="homeSections"'), 'category tiles are in initial HTML before product sections');
-  assert.equal((out.match(/id="ma-image-category-grid"/g) || []).length, 1, 'category tiles are emitted once');
+  assert.ok(!out.includes('id="ma-image-category-grid"'), 'no Shop by category tiles on the homepage');
+  assert.ok(!out.includes('home-category-tiles.js'), 'tile script no longer loaded');
   assert.ok(!out.includes('<nav id="homeCatnav" class="home-catnav" aria-label="Shop categories"></nav>'));
   assert.ok(out.includes('home-render.min.js'), 'renderer script still loads');
 });

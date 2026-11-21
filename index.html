@@ -212,6 +212,62 @@ body {
   .ms-card, .ms-intro-slide, .ms-card-text { transition: none; }
 }
 
+
+/* ---- Premium look for the card deck (Nov 2026): cream panel, gold hairline frame, serif names, prices,
+   slow photo zoom, big faint number, progress line, thumbnails in the list. Still flat corners. ---- */
+.ms-board { position: relative; padding: 40px 44px 34px; background: linear-gradient(135deg, #faf7f1 0%, #f1e9dc 100%); border: 1px solid #e7dccb; }
+.ms-stage { position: relative; }
+.ms-index-bg { position: absolute; z-index: 5; left: -8px; top: -34px; font: 600 150px/1 "Cormorant Garamond", "Playfair Display", Georgia, "Times New Roman", serif; color: rgba(120, 92, 48, .14); pointer-events: none; user-select: none; }
+.ms-deck { height: 480px; }
+.ms-card { width: 360px; height: 480px; margin-left: -180px; border: 0; background: #e6dfd3; }
+.ms-card::after { content: ""; position: absolute; inset: 10px; border: 1px solid rgba(222, 190, 130, .75); pointer-events: none; opacity: 0; transition: opacity .5s ease .15s; }
+.ms-card.is-active::after { opacity: 1; }
+.ms-card img { transform: scale(1); transition: transform 6s ease-out; }
+.ms-card.is-active img { transform: scale(1.07); }
+.ms-card.is-active { box-shadow: 0 26px 60px rgba(60, 40, 10, .28); }
+.ms-card-shade { inset: 38% 0 0; background: linear-gradient(to top, rgba(20, 14, 6, .86) 0%, rgba(20, 14, 6, .45) 45%, rgba(20, 14, 6, 0) 100%); }
+.ms-card-text { left: 28px; right: 28px; bottom: 28px; gap: 7px; }
+.ms-card-cat { color: #dcbf8f; letter-spacing: .3em; }
+.ms-card-name { font: 600 25px/1.15 "Cormorant Garamond", "Playfair Display", Georgia, "Times New Roman", serif; letter-spacing: .01em; }
+.ms-card-price { font-size: 15px; font-weight: 700; color: #fff; }
+.ms-card-price del, .ms-card-price s { color: rgba(255,255,255,.6); font-weight: 400; margin-right: 6px; }
+.ms-card-price .ma-price-now, .ms-card-price ins { color: #f3d7a4; text-decoration: none; }
+.ms-card-price .ma-price-off { display: none; }
+.ms-card-cta { margin-top: 10px; padding: 10px 18px; background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.85); letter-spacing: .22em; transition: background .25s ease, color .25s ease; }
+.ms-card:hover .ms-card-cta { background: #fff; color: #111; }
+.ms-nav { position: relative; z-index: 4; }
+.ms-arrow { background: transparent; border-color: #cdbfa8; color: #6b5636; }
+.ms-arrow:hover { background: #111; border-color: #111; color: #fff; }
+.ms-count { color: #6b5636; }
+.ms-progress { display: block; width: 180px; height: 1px; margin-top: -10px; background: rgba(107, 86, 54, .2); overflow: hidden; }
+.ms-progress i { display: block; height: 100%; width: 0; background: #8a6d3b; }
+.ms-progress.is-running i { animation: ms-progress 5s linear forwards; }
+.ms-board.is-paused .ms-progress i { animation-play-state: paused; }
+@keyframes ms-progress { to { width: 100%; } }
+.ms-list-kicker { margin: 0 0 4px; text-align: right; font: italic 500 15px "Cormorant Garamond", Georgia, serif; color: #8a6d3b; }
+.ms-list-title { margin-bottom: 14px; }
+.ms-list-items { max-height: 420px; }
+.ms-li { flex-direction: row; justify-content: flex-end; align-items: center; gap: 14px; padding: 11px 0 11px 10px; border-bottom-color: rgba(107, 86, 54, .14); position: relative; }
+.ms-li-text { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; min-width: 0; }
+.ms-li-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.ms-li-price { font-size: 11px; font-weight: 700; color: #a08860; }
+.ms-li-price .ma-price-off { display: none; }
+.ms-li-price del, .ms-li-price s { margin-right: 4px; font-weight: 400; }
+.ms-li-thumb { flex: 0 0 44px; width: 44px; height: 56px; object-fit: cover; object-position: center 18%; opacity: .55; filter: grayscale(.35); transition: opacity .3s ease, filter .3s ease; }
+.ms-li.is-active .ms-li-thumb { opacity: 1; filter: none; outline: 1px solid #b8862f; outline-offset: 2px; }
+.ms-li.is-active::before { content: ""; position: absolute; left: 0; top: 50%; width: 22px; height: 1px; background: #b8862f; }
+.ms-li.is-active .ms-li-name { font-family: "Cormorant Garamond", Georgia, serif; font-size: 18px; }
+@media (max-width: 860px) {
+  .ms-board { padding: 22px 0 18px; border-left: 0; border-right: 0; }
+  .ms-index-bg { font-size: 96px; left: 8px; top: -8px; }
+  .ms-deck { height: 420px; }
+  .ms-card { width: 315px; height: 420px; margin-left: -157px; }
+  .ms-card-name { font-size: 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ms-card img, .ms-card.is-active img { transition: none; transform: none; }
+}
+
 /* ---------- Promo banner row (two real offers — free delivery + WhatsApp order) ---------- */
 .home-promo-row {
   display: grid;
@@ -982,14 +1038,17 @@ height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
   <div id="msBoard" class="ms-board" tabindex="-1">
     <div class="ms-stage">
+      <span class="ms-index-bg" aria-hidden="true">01</span>
       <div class="ms-deck" aria-live="polite"></div>
       <div class="ms-nav">
         <button type="button" class="ms-arrow" data-ms-go="-1" aria-label="Previous">&#8249;</button>
         <span class="ms-count">01 / 12</span>
         <button type="button" class="ms-arrow" data-ms-go="1" aria-label="Next">&#8250;</button>
       </div>
+      <span class="ms-progress" aria-hidden="true"><i></i></span>
     </div>
     <div class="ms-list">
+      <p class="ms-list-kicker">Fresh this season</p>
       <h2 class="ms-list-title">New Arrivals</h2>
       <ol class="ms-list-items"></ol>
     </div>
@@ -1160,6 +1219,5 @@ function toggleAndOpenVideo() {
 <script defer src="index-youtube-lazy.js?v=f45901e9efd1b92d"></script>
 <script defer src="mobile-bottom-nav.js?v=a3bb651189199322"></script>
 <script defer src="customer-photos.js"></script>
-    <script defer src="home-category-tiles.js?v=fb1f3fb15473b33f"></script>
 </body>
 </html>
