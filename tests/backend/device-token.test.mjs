@@ -81,3 +81,45 @@ test('does not issue or rely on a device token when its secret is absent', async
   assert.equal(res.headers.get('Set-Cookie'),null);
   assert.equal(DB.raw.prepare('SELECT COUNT(*) AS n FROM device_order_log').get().n,0);
 });
+
+test('a device past the hard limit is refused outright, not just flagged for review', async () => {
+  const DB = makeDB();
+  const env = { DB, DEVICE_TOKEN_SECRET: 'test-secret-that-is-at-least-thirty-two-characters-long', TELEGRAM_BOT_TOKEN: 'tok', TELEGRAM_CHAT_ID: 'chat' };
+  const alerts = [];
+  globalThis.fetch = async (url, opts) => {
+    if (String(url).startsWith('https://script.google.com/')) return new Response('Success|MA-DEVICE-TEST', { status: 200 });
+    if (String(url).includes('api.telegram.org')) { try { alerts.push(JSON.parse(opts.body).text); } catch (e) {} return new Response('{}', { status: 200 }); }
+    return realFetch(url, opts);
+  };
+  let cookie = '';
+  for (let i = 1; i <= 8; i++) {
+    const c = ctx();
+    const res = await worker.fetch(makeRequest('device_hard_' + i, cookie, '017100000' + String(i).padStart(2, '0')), env, c);
+    await c.done();
+    assert.match(await res.text(), /^Success\|/, 'attempt ' + i + ' should still go through');
+    if (i === 1) cookie = (res.headers.get('Set-Cookie') || '').split(';')[0];
+  }
+  // 9th attempt: 8 prior same-device orders already logged -> hard limit reached.
+  const c9 = ctx();
+  const res9 = await worker.fetch(makeRequest('device_hard_9', cookie, '0171000009'), env, c9);
+  await c9.done();
+  const text9 = await res9.text();
+  assert.match(text9, /^Error\|/);
+  assert.match(text9, /WhatsApp/);
+  assert.equal(DB.raw.prepare("SELECT status FROM order_inbox WHERE event_id='device_hard_9'").get(), undefined, 'a blocked attempt never reaches order_inbox / Apps Script');
+  const blockAlerts = alerts.filter((a) => /ডিভাইস-চেষ্টা/.test(a));
+  assert.equal(blockAlerts.length, 1, 'exactly one hard-block alert, for the 9th attempt');
+  // The blocked attempt is still logged, so a retry does not reset the count.
+  assert.equal(DB.raw.prepare('SELECT COUNT(*) AS n FROM device_order_log').get().n, 9);
+});
+
+test('a visitor with no device cookie (secret unset) is never hard-blocked by device alone', async () => {
+  const DB = makeDB();
+  const c = ctx();
+  for (let i = 1; i <= 10; i++) {
+    const cc = ctx();
+    const res = await worker.fetch(makeRequest('device_anon_' + i, '', '0181000000'), {DB}, cc);
+    await cc.done();
+    assert.match(await res.text(), /^Success\|/);
+  }
+});

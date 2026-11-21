@@ -345,6 +345,11 @@ async function handleOrder(request, env, ctx) {
   }
   await logOrderIp(env, eventId, ipInfo, pairs, 'received', now);
   const deviceAttempts = await logDeviceOrderAttempt(env, eventId, device.hash, pairValue(pairs, 'Phone'), now);
+  if (device.hash && deviceAttempts >= DEVICE_ORDER_HARD_LIMIT) {
+    const alertNeeded = await logOrderIp(env, eventId, ipInfo, pairs, 'blocked', now);
+    if (alertNeeded) ctx.waitUntil(sendAlert(env, '⛔ একই ডিভাইস থেকে ২৪ ঘণ্টায় অনেক অর্ডার-চেষ্টা, নতুন অর্ডার আটকানো হয়েছে।\n' + orderSummaryFromPairs(eventId, pairs) + '\nডিভাইস-চেষ্টা (২৪ ঘণ্টা): ' + (deviceAttempts + 1)));
+    return textOut('Error|' + DEVICE_BLOCKED_MESSAGE);
+  }
   const risk = await assessWorkerOrderRisk(env, eventId, ipInfo.ip, pairValue(pairs, 'Phone'), now, device.hash);
   risk.sameDeviceAttempts24h = deviceAttempts;
   // Recalculate the action after the authoritative insert/count. Updating only the
@@ -582,6 +587,16 @@ async function findEmailBlock(env, email, now) {
     return null;
   }
 }
+
+// ---------------- Device order limit (added 2026-11-21) ----------------
+// scoreFraudRisk already flags 3+ orders from one signed device as a soft "review" signal
+// (never rejects by itself). This is the hard stop above that: once the SAME device has made
+// this many order attempts in the last 24h (device_order_log, already written below), the next
+// attempt is refused outright, same shape as the IP/email checks above. A device with no signed
+// cookie (device.hash === '') is never hard-blocked here — it would be indistinguishable from
+// every other anonymous visitor.
+const DEVICE_ORDER_HARD_LIMIT = 8;
+const DEVICE_BLOCKED_MESSAGE = 'দুঃখিত, এই ডিভাইস থেকে আজ অনেক অর্ডারের চেষ্টা হয়েছে। WhatsApp-এ অর্ডার করুন।';
 
 // ip-guard:begin
 const IPV4_RE = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/;
