@@ -23,10 +23,10 @@ function json(body, status = 200) {
 }
 
 function safeReason(value) {
-  return String(value || '').replace(/[\\u0000-\\u001f\\u007f]/g, '')
-    .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/gi, '[redacted email]')
-    .replace(/\\b(?:\\+?880)?1[3-9]\\d{8}\\b|\\b01[3-9]\\d{8}\\b/g, '[redacted phone]')
-    .replace(/\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b/g, '[redacted IP]').trim().slice(0, 500);
+  return String(value || '').replace(/[\u0000-\u001f\u007f]/g, '')
+    .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[redacted email]')
+    .replace(/\b(?:\+?880)?1[3-9]\d{8}\b|\b01[3-9]\d{8}\b/g, '[redacted phone]')
+    .replace(/\b(?:\d{1,3}\.){3}\d{1,3}\b/g, '[redacted IP]').trim().slice(0, 500);
 }
 
 function decodeCursor(value) {
