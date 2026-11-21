@@ -100,6 +100,9 @@ export async function handleAdminOrderApproval(request, env, deps = {}) {
 
   const who = actor(context);
   const action = clean(params.Action || 'list', 30);
+  // Existing auth model has only admin/staff and grants admin.owner_actions to the entire admin role.
+  // It cannot distinguish the actual Owner, so never expose the Owner-only reopen operation yet.
+  if (action === 'reopen') return json({ ok: false, error: 'OWNER_ROLE_NOT_CONFIGURED' }, 403);
   try {
     if (action === 'create') {
       if (!canWrite(context)) return json({ ok: false, error: 'FORBIDDEN' }, 403);
@@ -111,7 +114,7 @@ export async function handleAdminOrderApproval(request, env, deps = {}) {
       await db.batch([
         db.prepare("INSERT OR IGNORE INTO order_approvals (approval_id, order_id, approval_status, version, created_at, updated_at) VALUES (?, ?, 'pending', 1, ?, ?)")
           .bind(approvalId, orderId, now, now),
-        db.prepare("INSERT INTO order_approval_events (event_id, approval_id, action, previous_status, new_status, actor_id, actor_role, created_at) SELECT ?, approval_id, 'created', NULL, 'pending', ?, ?, ? FROM order_approvals WHERE order_id = ? AND NOT EXISTS (SELECT 1 FROM order_approval_events WHERE event_id = ?)")
+        db.prepare("INSERT INTO order_approval_events (event_id, approval_id, action, previous_status, new_status, actor_id, actor_role, created_at) SELECT ?, approval_id, 'created', NULL, 'pending', ?, ?, ? FROM order_approvals WHERE order_id = ? AND NOT EXISTS (SELECT 1 FROM order_approval_events WHERE event_id = ?) AND changes() > 0")
           .bind('created:' + orderId, who.id, who.role, now, orderId, 'created:' + orderId)
       ]);
       const row = await db.prepare('SELECT * FROM order_approvals WHERE order_id = ?').bind(orderId).first();
@@ -162,7 +165,6 @@ export async function handleAdminOrderApproval(request, env, deps = {}) {
 
     if (['approve', 'reject', 'hold', 'reopen'].includes(action)) {
       if (!canWrite(context)) return json({ ok: false, error: 'FORBIDDEN' }, 403);
-      if (action === 'reopen' && who.role !== 'admin') return json({ ok: false, error: 'OWNER_ONLY' }, 403);
       const id = clean(params.ApprovalId, 100);
       const version = Number(params.ExpectedVersion);
       const reason = safeReason(params.Reason);
