@@ -1,4 +1,5 @@
 import { scoreFraudRisk } from './fraud-risk.js';
+import { persistFraudReview } from './fraud-review.js';
 // Muslim Abaya first-party tracking worker.
 // Routes: muslimabaya.com/gtm.js*  (GTM loader, unchanged)
 //         muslimabaya.com/_ma/*    (Meta Conversions API endpoint, added 2026-10-23)
@@ -510,6 +511,7 @@ async function handleOrder(request, env, ctx) {
     await env.DB.prepare("UPDATE order_inbox SET status = 'saved', attempts = ?, order_id = ?, last_response = ?, updated_at = ? WHERE event_id = ?")
       .bind(attempts, r.orderId || '', r.text, done, eventId).run();
     const review = risk.level !== 'low';
+    if (review) ctx.waitUntil(persistFraudReview(env.DB, { eventId, orderId: r.orderId, risk, now: done }).catch((e) => console.log('fraud_review_persist_error', String(e).slice(0, 160))));
     ctx.waitUntil(setOrderIpOutcome(env, eventId, review ? 'risk_review' : 'saved', r.orderId));
     if (review) ctx.waitUntil(workerRiskAlert(env, eventId, pairs, risk, r.orderId));
     return withDeviceCookie(textOut(r.text), device);
@@ -636,6 +638,7 @@ async function handleLandingOrder(request, env, ctx) {
   if (r.kind === 'success') {
     ctx.waitUntil(upd('saved', ', order_id = ?', [r.orderId]));
     const review = risk.level !== 'low';
+    if (review) ctx.waitUntil(persistFraudReview(env.DB, { eventId, orderId: r.orderId, risk, now: done }).catch((e) => console.log('fraud_review_persist_error', String(e).slice(0, 160))));
     ctx.waitUntil(setOrderIpOutcome(env, riskEventId, review ? 'risk_review' : 'saved', r.orderId));
     if (review) ctx.waitUntil(workerRiskAlert(env, eventId, pairs, risk, r.orderId));
   } else if (r.kind === 'rejected' || r.kind === 'duplicate') {
@@ -671,6 +674,7 @@ async function processOrderQueue(env) {
       await env.DB.prepare("UPDATE order_inbox SET status = 'saved', attempts = ?, order_id = ?, last_response = ?, updated_at = ? WHERE event_id = ?")
         .bind(attempts, r.orderId || '', r.text, t, row.event_id).run();
       const review = decoded.risk && decoded.risk.level !== 'low';
+      if (review) await persistFraudReview(env.DB, { eventId: row.event_id, orderId: r.orderId, risk: decoded.risk, now: t }).catch((e) => console.log('fraud_review_persist_error', String(e).slice(0, 160)));
       await setOrderIpOutcome(env, decoded.riskEventId || row.event_id, review ? 'risk_review' : 'saved', r.orderId);
       if (review) await workerRiskAlert(env, row.event_id, pairs, decoded.risk, r.orderId);
     } else if (r.kind === 'duplicate') {
@@ -690,6 +694,25 @@ async function processOrderQueue(env) {
       await env.DB.prepare("UPDATE order_inbox SET status = 'retry', attempts = ?, next_at = ?, last_response = ?, updated_at = ? WHERE event_id = ?")
         .bind(attempts, t + backoffMs(attempts), r.text, t, row.event_id).run();
     }
+  }
+  // Recover a review write that failed after the customer order was already saved.
+  // Limit reconciliation to recent records so deployment does not backfill the historical inbox.
+  try {
+    const missingReviews = await env.DB.prepare(
+      "SELECT o.event_id, o.order_id, o.payload, o.updated_at " +
+      "FROM order_inbox o LEFT JOIN fraud_reviews r ON r.event_id = o.event_id " +
+      "LEFT JOIN fraud_review_events e ON e.review_id = r.review_id AND e.action = 'created' " +
+      "WHERE o.status = 'saved' AND o.updated_at >= ? AND (r.review_id IS NULL OR e.event_record_id IS NULL) " +
+      "ORDER BY o.updated_at DESC LIMIT 50"
+    ).bind(now - 24 * 60 * 60 * 1000).all();
+    for (const row of (missingReviews.results || [])) {
+      const decoded = decodeOrderPayload(row.payload, row.event_id);
+      if (decoded.risk && decoded.risk.level !== 'low') {
+        await persistFraudReview(env.DB, { eventId: row.event_id, orderId: row.order_id, risk: decoded.risk, now: Number(row.updated_at) || now });
+      }
+    }
+  } catch (e) {
+    console.log('fraud_review_reconcile_error', String(e).slice(0, 160));
   }
   // Keep personal data only as long as needed.
   await env.DB.prepare("DELETE FROM order_inbox WHERE status IN ('saved', 'rejected') AND updated_at < ?").bind(now - 30 * 24 * 3600 * 1000).run();
