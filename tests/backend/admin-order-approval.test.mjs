@@ -62,7 +62,8 @@ const admin = { ok: true, role: 'admin', email: 'admin@example.test' };
 const ownerRoleSnapshot = {
   sheets: { Admins: { values: [
     ['Email', 'Phone', 'Name', 'PasswordHash', 'Salt', 'Status', 'CreatedAt', 'Role', 'UpdatedAt'],
-    ['admin@example.test', '01700000000', 'Admin', '', '', 'active', '', 'admin', '']
+    ['admin@example.test', '01700000000', 'Admin', '', '', 'active', '', 'admin', ''],
+    ['staff@example.test', '01700000001', 'Staff', '', '', 'active', '', 'staff', '']
   ] } }
 };
 let testClock = 1000;
