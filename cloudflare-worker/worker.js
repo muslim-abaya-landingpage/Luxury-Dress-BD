@@ -357,6 +357,7 @@ async function handleOrder(request, env, ctx) {
   // The fingerprint can only raise this signal, never lower it: a device with no cookie yet
   // (fresh browser) still gets scored by its fingerprint history, and vice versa.
   risk.sameDeviceAttempts24h = worstDeviceAttempts;
+  Object.assign(risk, classifyNetwork(request.cf));
   // Recalculate the action after the authoritative insert/count. Updating only the
   // signal field would leave score/action stale (e.g. allow with 3 prior device orders).
   Object.assign(risk, scoreWorkerOrderRisk(risk));
@@ -473,6 +474,8 @@ async function handleLandingOrder(request, env, ctx) {
     if (existing && existing.status === 'retry') return textOut('Success|' + landingRef(eventId), 200, { 'X-MA-Queued': '1' });
     await logOrderIp(env, riskEventId, ipInfo, pairs, 'received', now);
     risk = await assessWorkerOrderRisk(env, riskEventId, ipInfo.ip, pairValue(pairs, 'Phone'), now);
+    Object.assign(risk, classifyNetwork(request.cf));
+    Object.assign(risk, scoreWorkerOrderRisk(risk));
     const payload = encodeOrderPayload(pairs, risk, riskEventId);
     if (existing) {
       await env.DB.prepare("UPDATE order_inbox SET payload = ?, target = ?, status = 'sending', updated_at = ? WHERE event_id = ?").bind(payload, LANDING_TARGET, now, eventId).run();
@@ -695,6 +698,37 @@ function clientIpInfo(request) {
     asOrg: String(cf.asOrganization || '').slice(0, 120),
     ua: String(request.headers.get('User-Agent') || '').slice(0, 300)
   };
+}
+
+// ---------------- Network classification for fraud-risk.js (added 2026-11-21) ----------------
+// fraud-risk.js has had vpnOrProxy/hostingNetwork signal slots since it was written, but nothing
+// populated them ("remain inactive until trusted server-side evidence is available"). This fills
+// them from Cloudflare's own free request.cf.asn/asOrganization -- no paid IP-intelligence API.
+// It is a known-ASN/known-brand heuristic, not a lookup service: it under-detects (a VPN riding on
+// a generic cloud ASN only trips hostingNetwork, not vpnOrProxy) but never claims more than the ASN
+// data actually shows. Real Bangladeshi shoppers order from mobile/broadband ISPs (Grameenphone,
+// Banglalink, Robi, Link3, Carnival, BDCOM, Amber IT, etc.), never from a cloud compute ASN.
+const HOSTING_ASNS = new Set([
+  16509, 14618, 8987,       // Amazon (AWS, incl. AWS Global Accelerator)
+  15169, 396982,            // Google (incl. Google Cloud)
+  8075, 8068,                // Microsoft Azure
+  14061,                      // DigitalOcean
+  16276,                      // OVH
+  24940,                      // Hetzner
+  63949,                      // Linode (Akamai)
+  20473, 40021,               // Vultr (Choopa / The Constant Company)
+  31898, 60592,                // Oracle Cloud
+  45102,                       // Alibaba Cloud
+  9009,                        // M247 (hosting; also widely used by consumer VPN services)
+  60781, 51167,                 // Leaseweb, Contabo
+  202425                       // IP Volume (common low-cost VPS/proxy host)
+]);
+const VPN_ORG_RE = /nordvpn|expressvpn|protonvpn|surfshark|private internet access|\bpia\b|cyberghost|mullvad|ipvanish|tunnelbear|windscribe|purevpn|vyprvpn|hide\.?me|zenmate|hotspot ?shield|psiphon|betternet/i;
+
+function classifyNetwork(cf) {
+  const asn = Number(cf && cf.asn) || 0;
+  const org = String((cf && cf.asOrganization) || '');
+  return { hostingNetwork: HOSTING_ASNS.has(asn), vpnOrProxy: VPN_ORG_RE.test(org) };
 }
 
 // The block that covers this IP, or null. A D1 problem must never stop an order, so errors -> null.
