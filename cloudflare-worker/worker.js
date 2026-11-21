@@ -19,12 +19,88 @@ import { scoreFraudRisk } from './fraud-risk.js';
 //   WHATSAPP_OTP_BUTTON_SUBTYPE  (Text, opt.) Only set if the template has a copy-code/one-tap OTP button
 //                                       (see docs/WHATSAPP-OTP-SETUP-BN.md) — most basic templates don't.
 // See docs/WHATSAPP-OTP-SETUP-BN.md for what to set these to and how to get them from Meta.
+//
+// Admin-managed tracking IDs (added 2026-11-21): the Meta Pixel ID and TikTok Pixel ID can be
+// changed from the admin panel (admin-tracking-settings.html) without a code deploy. They are
+// stored in D1 (table site_settings) and read on every request that needs them — the /gtm.js
+// proxy below rewrites the browser pixel init call, and the CAPI sender below uses the same value
+// for server-side events. The constants below are only the fallback used before any value is saved.
+// ADMIN_API_URL (Text, opt.) overrides the Apps Script URL used to verify the admin session token
+// that authorizes GET/POST /_ma/admin/settings; defaults to the one baked into site-api-config.js.
 
 const META_PIXEL_ID = '1465090315322833';
 const META_API_VERSION = 'v26.0';
 const ALLOWED_HOSTS = ['muslimabaya.com', 'www.muslimabaya.com', 'shop.muslimabaya.com'];
 const ALLOWED_EVENTS = ['PageView', 'ViewContent', 'AddToCart', 'InitiateCheckout', 'Purchase', 'Lead'];
 const MAX_BODY_BYTES = 16384;
+const DEFAULT_ADMIN_API_URL = 'https://script.google.com/macros/s/AKfycbxZv7KU0JMY90576HoRF8wtHmEgW2ggkTxAoQKjO6on1cactlDgJDhoRLndCh3kK_hz/exec';
+
+// ---------------- Admin-managed site settings (D1 key/value) ----------------
+async function getSiteSetting(env, key) {
+  if (!env.DB) return '';
+  try {
+    const row = await env.DB.prepare('SELECT value FROM site_settings WHERE key = ?').bind(key).first();
+    return row && row.value ? String(row.value) : '';
+  } catch (e) { return ''; }
+}
+async function setSiteSetting(env, key, value, who) {
+  if (!env.DB) throw new Error('NO_DB');
+  await env.DB.prepare(
+    'INSERT INTO site_settings (key, value, updated_at, updated_by) VALUES (?, ?, ?, ?) ' +
+    'ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at, updated_by = excluded.updated_by'
+  ).bind(key, String(value), Math.floor(Date.now() / 1000), String(who || '')).run();
+}
+// Confirms the admin session token with the same Apps Script backend admin-login.html already
+// trusts (RecordType AdminVerify — the exact call admin-api.js's verifySession() makes), so this
+// worker never has to know the admin password or keep its own login system.
+async function verifyAdminToken(env, token) {
+  if (!token) return null;
+  const apiUrl = env.ADMIN_API_URL || DEFAULT_ADMIN_API_URL;
+  const body = new URLSearchParams({ RecordType: 'AdminVerify', Token: token });
+  try {
+    const r = await fetch(apiUrl, { method: 'POST', body });
+    const text = await r.text();
+    const res = JSON.parse(text);
+    if (res && res.ok) return res;
+    return null;
+  } catch (e) { return null; }
+}
+function isLikelyPixelId(v) {
+  // Meta/TikTok pixel IDs are plain numeric or alphanumeric tokens; this just keeps obviously
+  // wrong input (HTML, scripts, empty) out of a value that gets spliced into served JavaScript.
+  return typeof v === 'string' && v.length >= 6 && v.length <= 40 && /^[A-Za-z0-9_-]+$/.test(v);
+}
+async function handleAdminSettingsGet(request, env, url) {
+  const token = url.searchParams.get('token') || '';
+  const admin = await verifyAdminToken(env, token);
+  if (!admin) return json({ ok: false, error: 'INVALID_TOKEN' }, 401);
+  const [meta, tiktok] = await Promise.all([
+    getSiteSetting(env, 'meta_pixel_id'),
+    getSiteSetting(env, 'tiktok_pixel_id')
+  ]);
+  return json({ ok: true, meta_pixel_id: meta || META_PIXEL_ID, tiktok_pixel_id: tiktok || TIKTOK_PIXEL_ID, meta_pixel_is_default: !meta, tiktok_pixel_is_default: !tiktok });
+}
+async function handleAdminSettingsPost(request, env) {
+  let body;
+  try { body = await request.json(); } catch (e) { return json({ ok: false, error: 'BAD_JSON' }, 400); }
+  const admin = await verifyAdminToken(env, body && body.token);
+  if (!admin) return json({ ok: false, error: 'INVALID_TOKEN' }, 401);
+  const who = admin.email || admin.name || 'admin';
+  const updates = {};
+  if (body.meta_pixel_id != null && String(body.meta_pixel_id).trim() !== '') {
+    const v = String(body.meta_pixel_id).trim();
+    if (!isLikelyPixelId(v)) return json({ ok: false, error: 'INVALID_META_PIXEL_ID' }, 400);
+    updates.meta_pixel_id = v;
+  }
+  if (body.tiktok_pixel_id != null && String(body.tiktok_pixel_id).trim() !== '') {
+    const v = String(body.tiktok_pixel_id).trim();
+    if (!isLikelyPixelId(v)) return json({ ok: false, error: 'INVALID_TIKTOK_PIXEL_ID' }, 400);
+    updates.tiktok_pixel_id = v;
+  }
+  if (!Object.keys(updates).length) return json({ ok: false, error: 'NOTHING_TO_SAVE' }, 400);
+  for (const k of Object.keys(updates)) await setSiteSetting(env, k, updates[k], who);
+  return json({ ok: true, saved: updates });
+}
 
 export default {
   async fetch(request, env, ctx) {
@@ -45,6 +121,12 @@ export default {
     }
     if (path === '/_ma/view') {
       return handleLiveView(request, env, url);
+    }
+    if (path === '/_ma/admin/settings' && request.method === 'GET') {
+      return handleAdminSettingsGet(request, env, url);
+    }
+    if (path === '/_ma/admin/settings' && request.method === 'POST') {
+      return handleAdminSettingsPost(request, env);
     }
     if (path.startsWith('/_ma/')) {
       return handleEvent(request, env, ctx, url);
@@ -77,7 +159,26 @@ export default {
     if (path === '/gtm.js') {
       const gtmUrl = 'https://www.googletagmanager.com/gtm.js' + url.search;
       const upstream = await fetch(gtmUrl, { headers: { 'User-Agent': request.headers.get('User-Agent') || '' } });
-      resp = new Response(upstream.body, upstream);
+      let body = await upstream.text();
+      // Admin-managed pixel IDs (see handleAdminSettingsPost above): rewrite every occurrence of
+      // the GTM container's built-in Meta/TikTok pixel init calls to the currently saved ID, so
+      // the admin panel's "save" is the one place that changes the live pixel — no GTM edit, no
+      // redeploy. If nothing has been saved yet, the container's own hardcoded ID passes through
+      // unchanged (the regexes just rewrite digits-for-digits, same length rules as isLikelyPixelId).
+      const [metaOverride, tiktokOverride] = await Promise.all([
+        getSiteSetting(env, 'meta_pixel_id'),
+        getSiteSetting(env, 'tiktok_pixel_id')
+      ]);
+      if (metaOverride) {
+        body = body
+          .replace(/(fbq\(\s*"init"\s*,\s*")(\d+)(")/g, '$1' + metaOverride + '$3')
+          .replace(/(fbq\(\s*"set"\s*,\s*"agent"\s*,\s*"gtmss"\s*,\s*")(\d+)(")/g, '$1' + metaOverride + '$3')
+          .replace(/(facebook\.com\/tr\?id=)(\d+)/g, '$1' + metaOverride);
+      }
+      if (tiktokOverride) {
+        body = body.split(TIKTOK_PIXEL_ID).join(tiktokOverride);
+      }
+      resp = new Response(body, upstream);
       resp.headers.set('Cache-Control', 'public, max-age=300');
       resp.headers.set('Content-Type', 'application/javascript; charset=utf-8');
     } else if (path === '/gtag/js') {
@@ -1215,7 +1316,7 @@ async function handleEvent(request, env, ctx, url) {
   const payload = { data: [event] };
   if (env.META_TEST_EVENT_CODE) payload.test_event_code = env.META_TEST_EVENT_CODE;
 
-  const pixelId = env.META_PIXEL_ID || META_PIXEL_ID;
+  const pixelId = (await getSiteSetting(env, 'meta_pixel_id')) || env.META_PIXEL_ID || META_PIXEL_ID;
   const endpoint = 'https://graph.facebook.com/' + META_API_VERSION + '/' + pixelId + '/events?access_token=' + encodeURIComponent(env.META_CAPI_TOKEN);
   const send = fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
 
@@ -1362,7 +1463,7 @@ async function buildTikTok(request, env, body, u, cookies, customData, sourceUrl
 
   const payload = {
     event_source: 'web',
-    event_source_id: env.TIKTOK_PIXEL_ID || TIKTOK_PIXEL_ID,
+    event_source_id: (await getSiteSetting(env, 'tiktok_pixel_id')) || env.TIKTOK_PIXEL_ID || TIKTOK_PIXEL_ID,
     data: [{ event: ttEvent, event_time: Math.floor(Date.now() / 1000), event_id: ttEventId, user, page, properties }]
   };
   if (env.TIKTOK_TEST_EVENT_CODE) payload.test_event_code = env.TIKTOK_TEST_EVENT_CODE;
