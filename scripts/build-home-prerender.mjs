@@ -103,13 +103,46 @@ export function prerenderIndex(html, parts) {
   return out;
 }
 
+// The first storyboard photo is the mobile LCP. When it lives on the image host, the phone first has to open a
+// second connection (slow on 4G). At deploy time we copy that one photo next to the site (images/lcp/, not in
+// git) and point the first card and its preload at the copy. If the download fails, the remote photo is kept.
+export async function selfHostLcpPhoto(html, parts, {fetchImpl = globalThis.fetch, dir = path.join(root, 'images', 'lcp')} = {}) {
+  const src = parts && parts.story && parts.story.firstSrc;
+  if (!src || !/^https:\/\//.test(src) || typeof fetchImpl !== 'function') return html;
+  const name = (src.split('?')[0].split('/').pop() || '').replace(/[^A-Za-z0-9._-]/g, '');
+  if (!/\.(webp|avif|jpe?g|png)$/i.test(name)) return html;
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 15000);
+    const res = await fetchImpl(src, {signal: ctrl.signal});
+    clearTimeout(timer);
+    const type = String(res.headers && res.headers.get ? res.headers.get('content-type') || '' : '');
+    if (!res.ok || !/^image\//.test(type)) throw new Error('HTTP ' + res.status + ' ' + type);
+    const buf = Buffer.from(await res.arrayBuffer());
+    if (buf.length < 500 || buf.length > 600000) throw new Error('unexpected size ' + buf.length);
+    fs.mkdirSync(dir, {recursive: true});
+    fs.writeFileSync(path.join(dir, name), buf);
+  } catch (e) {
+    console.log('index.html prerender: LCP photo kept on the image host (' + String(e && e.message || e).slice(0, 120) + ')');
+    return html;
+  }
+  const local = '/images/lcp/' + name;
+  const esc = src.replace(/&/g, '&amp;');
+  let out = html.replace(`<link rel="preload" as="image" href="${esc}" fetchpriority="high">`, () => `<link rel="preload" as="image" href="${local}" fetchpriority="high">`);
+  out = out.replace(/<link rel="preconnect" href="https:\/\/[^"]+">\n\s*(?=<link rel="preload" as="image" href="\/images\/lcp\/)/, '');
+  out = out.replace(`<a class='ms-card is-active'`, '\u0000').replace(/\u0000([^>]*><img src=')([^']+)'/, (m, mid, old) => `<a class='ms-card is-active'${mid}${old === src ? local : old}'`);
+  console.log('index.html prerender: LCP photo served from ' + local);
+  return out;
+}
+
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const html = read('index.html');
   if (html.includes('data-prerendered="1"')) {
     console.log('index.html is already prerendered; skipping.');
   } else {
     const parts = renderHomeParts();
-    const out = prerenderIndex(html, parts);
+    let out = prerenderIndex(html, parts);
+    out = await selfHostLcpPhoto(out, parts);
     fs.writeFileSync(outFile, out);
     const cards = (parts.sections.match(/<article /g) || []).length;
     console.log(`index.html prerender: ${cards} cards in the first section, ${INLINE_CSS.length} stylesheets inlined, ${Buffer.byteLength(html)} -> ${Buffer.byteLength(out)} bytes -> ${path.relative(root, outFile)}`);

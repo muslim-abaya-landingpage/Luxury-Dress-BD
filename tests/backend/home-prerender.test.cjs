@@ -72,3 +72,23 @@ test('storyboard deck is in the first HTML and its first photo is preloaded (mob
   assert.ok(pre[0].includes(firstImg[1].replace(/&/g, '&amp;')), 'the preload is the first deck photo');
   assert.doesNotMatch(out, /<link rel="preload" as="image"[^>]*Maroon%20Abaya%20Set/, 'old banner photo is no longer preloaded');
 });
+
+test('the first storyboard photo is copied next to the site at deploy time (no second connection)', async () => {
+  const { renderHomeParts, prerenderIndex, selfHostLcpPhoto } = await load();
+  const os = require('node:os');
+  const parts = renderHomeParts();
+  const remote = 'https://images.muslimabaya.com/images/uploads/test-card.webp';
+  parts.story.firstSrc = remote;
+  parts.story.deck = parts.story.deck.replace(/(<a class='ms-card is-active'[^>]*><img src=')[^']+'/, `$1${remote}'`);
+  const html = prerenderIndex(fs.readFileSync(path.join(root, 'index.html'), 'utf8'), parts);
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'lcp-'));
+  const okFetch = async () => ({ ok: true, status: 200, headers: { get: () => 'image/webp' }, arrayBuffer: async () => new Uint8Array(4000).buffer });
+  const out = await selfHostLcpPhoto(html, parts, { fetchImpl: okFetch, dir });
+  assert.ok(fs.existsSync(path.join(dir, 'test-card.webp')));
+  assert.match(out, /<link rel="preload" as="image" href="\/images\/lcp\/test-card\.webp" fetchpriority="high">/);
+  assert.match(out, /<a class='ms-card is-active'[^>]*><img src='\/images\/lcp\/test-card\.webp'/);
+  assert.doesNotMatch(out, /<link rel="preconnect"[^>]*>\s*<link rel="preload" as="image" href="\/images\/lcp/);
+  // download fails: page is unchanged (remote photo kept)
+  const badFetch = async () => ({ ok: false, status: 404, headers: { get: () => 'text/html' } });
+  assert.equal(await selfHostLcpPhoto(html, parts, { fetchImpl: badFetch, dir }), html);
+});
