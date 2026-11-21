@@ -153,7 +153,7 @@ export async function handleAdminOrderApproval(request, env, deps = {}) {
       const update = db.prepare('UPDATE order_approvals SET assigned_to = ?, version = version + 1, updated_at = ? WHERE approval_id = ? AND version = ?')
         .bind(target, now, id, version);
       const event = db.prepare("INSERT INTO order_approval_events (event_id, approval_id, action, previous_status, new_status, actor_id, actor_role, assigned_to, created_at) SELECT ?, approval_id, 'assigned', ?, ?, ?, ?, ?, ? FROM order_approvals WHERE approval_id = ? AND version = ? AND changes() > 0")
-        .bind(crypto.randomUUID(), id, current.approval_status, current.approval_status, who.id, who.role, target, now, id, version + 1);
+        .bind(crypto.randomUUID(), current.approval_status, current.approval_status, who.id, who.role, target, now, id, version + 1);
       const results = await db.batch([update, event]);
       if (!(Number(results[0] && results[0].meta && results[0].meta.changes) > 0)) return json({ ok: false, error: 'VERSION_CONFLICT' }, 409);
       const row = await db.prepare('SELECT * FROM order_approvals WHERE approval_id = ?').bind(id).first();
@@ -179,7 +179,7 @@ export async function handleAdminOrderApproval(request, env, deps = {}) {
       const update = db.prepare('UPDATE order_approvals SET approval_status = ?, approved_by = ?, reviewer_role = ?, decision_reason = ?, reviewed_at = ?, version = version + 1, updated_at = ? WHERE approval_id = ? AND version = ? AND approval_status = ?')
         .bind(next, who.id, who.role, reason || null, now, now, id, version, previous);
       const event = db.prepare('INSERT INTO order_approval_events (event_id, approval_id, action, previous_status, new_status, actor_id, actor_role, reason, created_at) SELECT ?, approval_id, ?, ?, ?, ?, ?, ?, ? FROM order_approvals WHERE approval_id = ? AND version = ? AND approval_status = ? AND changes() > 0')
-        .bind(crypto.randomUUID(), id, action === 'reopen' ? 'reopened' : next, previous, next, who.id, who.role, reason || null, now, id, version + 1, next);
+        .bind(crypto.randomUUID(), action === 'reopen' ? 'reopened' : next, previous, next, who.id, who.role, reason || null, now, id, version + 1, next);
       const results = await db.batch([update, event]);
       if (!(Number(results[0] && results[0].meta && results[0].meta.changes) > 0)) return json({ ok: false, error: 'VERSION_CONFLICT' }, 409);
       const row = await db.prepare('SELECT * FROM order_approvals WHERE approval_id = ?').bind(id).first();
