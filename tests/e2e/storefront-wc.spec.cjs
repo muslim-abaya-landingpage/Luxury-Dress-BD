@@ -237,3 +237,27 @@ test('home page: a short one-line name sits close to the price, no big empty gap
   });
   expect(gap).toBeLessThanOrEqual(16);
 });
+
+test('product page Related Products cards work like the homepage cards: category, name, price + one "অর্ডার করুন" to the product page', async ({ page }) => {
+  await useCatalog(page);
+  await page.goto('/product/DR-8');
+  const cards = page.locator('.pqv-home-related article.ah-card');
+  await cards.first().scrollIntoViewIfNeeded();
+  const n = await cards.count();
+  expect(n).toBeGreaterThan(0);
+  for (let i = 0; i < n; i++) {
+    const card = cards.nth(i);
+    const pid = await card.getAttribute('data-pid');
+    await expect(card.locator('button[data-action="add"], .ah-btn-cart, .ah-btn-msg')).toHaveCount(0); // no Add to Cart
+    if (await card.locator('.ah-card-stock.is-oos').count()) continue; // sold out: no order button, like home
+    await expect(card.locator('.ah-card-cat')).not.toBeEmpty();
+    const cta = card.locator('.ah-card-bottom .ah-card-cta');
+    await expect(cta).toHaveText('অর্ডার করুন');
+    await expect(cta).toHaveAttribute('href', new RegExp('/product/' + encodeURIComponent(pid) + '$'));
+  }
+  // same look as the homepage button: black pill
+  const cta = page.locator('.pqv-home-related .ah-card-cta').first();
+  expect(await cta.evaluate((e) => getComputedStyle(e).backgroundColor)).toBe('rgb(17, 17, 17)');
+  await cta.click();
+  await expect(page).toHaveURL(/\/product\/[^/]+$/);
+});

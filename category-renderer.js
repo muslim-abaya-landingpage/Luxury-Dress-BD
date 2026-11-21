@@ -1496,7 +1496,7 @@ function buildPqvRelatedHtml(p, idx, allProducts, categoryKey) {
    index-home-muslim-abaya.js; styles come from related-home-cards.css
    (generated from the homepage CSS by scripts/build-related-home-cards.mjs).
    ---------------------------------------------------------------------- */
-var PQV_HOME_RELATED_CSS = "/related-home-cards.css?v=cb8b6c4965fce543";
+var PQV_HOME_RELATED_CSS = "/related-home-cards.css?v=f519ed71e16b9095";
 var PQV_HOME_ROW_INTERVAL = 4500;
 var PQV_HOME_CART_ICON =
   "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='M3 4h1.6l1.1 11.2A2 2 0 0 0 7.7 17h9.7a2 2 0 0 0 2-1.7L21 8H7'/><circle cx='9' cy='20' r='1.35'/><circle cx='18' cy='20' r='1.35'/></svg>";
@@ -1522,6 +1522,18 @@ function pqvHomeHref(path) {
 function pqvHomeWaLink() {
   return (window.SITE_MEDIA && window.SITE_MEDIA.whatsappOrderLink) || "https://wa.me/8801971642683";
 }
+/* Category label for a related card: the product's own category (it may differ from the page's). */
+function pqvProductCategoryName(p) {
+  var all = window.CATEGORY_PRODUCTS || {};
+  var keys = Object.keys(all);
+  for (var i = 0; i < keys.length; i++) {
+    var list = all[keys[i]] || [];
+    for (var j = 0; j < list.length; j++) {
+      if (list[j] && String(list[j].id) === String(p && p.id)) return pqvCategoryName(keys[i]);
+    }
+  }
+  return "";
+}
 function pqvHomeCardHtml(p) {
   var img = resolveCardImageSrc(p);
   var card = resolveCardImageCardSrc(p);
@@ -1530,6 +1542,7 @@ function pqvHomeCardHtml(p) {
   var dHref = pqvHomeHref("/product/" + encodeURIComponent(p.id || ""));
   var st = productStockStatus(p);
   var outOfStock = st.inStock === false;
+  var catName = pqvProductCategoryName(p);
   return (
     "<article class='ah-card" +
     (outOfStock ? " ah-card-oos" : "") +
@@ -1559,32 +1572,20 @@ function pqvHomeCardHtml(p) {
     "</picture>" +
     "</a>" +
     "<div class='ah-card-body'>" +
-    "<div class='ah-card-row'>" +
+    // Same layout as the homepage card (index-home-muslim-abaya.js cardHtml): category, name, then
+    // price + one "অর্ডার করুন" button that opens the product page (size/colour are chosen there).
+    (catName ? "<span class='ah-card-cat'>" + escapeHtml(catName) + "</span>" : "") +
     "<a class='ah-card-name' href='" +
     escapeHtml(dHref) +
     "'>" +
     escapeHtml(p.name) +
     "</a>" +
+    (outOfStock ? "<span class='ah-card-stock is-oos'>Out of Stock</span>" : "") +
+    "<div class='ah-card-row ah-card-bottom'>" +
     "<span class='ah-card-price'>" +
     formatCardPriceText(p) +
     "</span>" +
-    "</div>" +
-    // No "In Stock" line on cards; only an out-of-stock product gets a stock line.
-    (outOfStock ? "<span class='ah-card-stock is-oos'>Out of Stock</span>" : "") +
-    "<div class='ah-actions'>" +
-    (outOfStock
-      ? "<button type='button' class='ah-btn ah-btn-cart' data-action='add' disabled>" +
-        "<span>Out of Stock</span></button>"
-      : "<button type='button' class='ah-btn ah-btn-cart' data-action='add'>" +
-        PQV_HOME_CART_ICON +
-        "<span class='ah-btn-spin' aria-hidden='true'></span>" +
-        "<span data-cart-label>Add to Cart</span></button>") +
-    (outOfStock
-      ? ""
-      : // Order Now: the product page, where size/colour are chosen and the popup checkout opens.
-        '<a class="ah-btn ah-btn-msg" href="' +
-        escapeHtml(dHref) +
-        '"><span>অর্ডার করুন</span></a>') +
+    (outOfStock ? "" : "<a class='ah-card-cta' href='" + escapeHtml(dHref) + "'>অর্ডার করুন</a>") +
     "</div>" +
     "</div>" +
     "</article>"

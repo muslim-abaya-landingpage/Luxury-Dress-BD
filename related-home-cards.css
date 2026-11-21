@@ -105,6 +105,11 @@
 .pqv-home-related .ah-card-oos .ah-card-media:after{font-size:12px;padding:8px 0;letter-spacing:.16em}
 }
 .pqv-home-related .ah-card-stock{border-radius:0}
+.pqv-home-related .ah-card-cat{display:block;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#9a9a9a;margin-bottom:-4px}
+.pqv-home-related .ah-card-bottom{margin-top:10px}
+.pqv-home-related .ah-card-bottom .ah-card-price{padding-left:0}
+.pqv-home-related .ah-card-cta{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;background:#111;color:#fff;font-size:13px;font-weight:600;padding:9px 18px;border-radius:999px;text-decoration:none;white-space:nowrap;transition:background .2s ease,transform .2s ease}
+.pqv-home-related .ah-card-cta:hover{background:#000;transform:translateY(-1px)}
 /* --- from home-glass.css --- */
 .pqv-home-related{--home-glass: rgba(255, 255, 255, .66);--home-glass-strong: rgba(255, 255, 255, .86);--home-glass-border: rgba(255, 255, 255, .88);--home-ink: #252525;--home-muted: #707070;--home-shadow: 0 16px 42px rgba(70, 70, 70, .10), inset 0 1px rgba(255,255,255,.92)}
 .pqv-home-related .home-section-head{align-items: center;}
@@ -201,13 +206,9 @@
 .pqv-home-related .ah-card,.pqv-home-related .ah-btn{transform: none;will-change: auto;backface-visibility: visible;}
 }
 /* --- from index-home-muslim-abaya.js (injected style) --- */
-.pqv-home-related .ah-card .ah-actions{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:stretch;gap:8px;width:100%}
-.pqv-home-related .ah-card .ah-btn{flex:1 1 0!important;width:0!important;min-width:0!important;border:none!important}
-.pqv-home-related .ah-card .ah-btn-msg{background:#4a4a4a!important;color:#fff!important}
 .pqv-home-related .ah-card{display:flex!important;flex-direction:column!important;height:100%}
 .pqv-home-related .ah-card-body{display:flex!important;flex-direction:column!important;flex:1 1 auto!important}
-.pqv-home-related .ah-card-name{min-height:2.8em}
-.pqv-home-related .ah-card .ah-actions{margin-top:auto!important;padding-top:12px}
+.pqv-home-related .ah-card .ah-card-bottom{margin-top:auto!important;padding-top:12px}
 /* --- product page placement --- */
 .pqv-bottom-row>.pqv-home-related{grid-column:1 / -1;min-width:0;width:100%}
 @keyframes ah-spin{to{transform:rotate(360deg)}}
