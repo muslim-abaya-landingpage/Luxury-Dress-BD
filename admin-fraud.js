@@ -2,6 +2,7 @@
   "use strict";
   var selected = null;
   var busy = false;
+  var nextCursor = null;
   function byId(id) { return document.getElementById(id); }
   function esc(value) {
     return String(value == null ? "" : value).replace(/&/g, "&amp;").replace(/</g, "&lt;")
@@ -36,20 +37,25 @@
     el.textContent = String(error && error.message || error);
     el.hidden = false;
   }
-  function load() {
+  function load(append) {
     if (busy) return Promise.resolve();
     busy = true;
     byId("frError").hidden = true;
-    byId("frRows").innerHTML = '<tr><td colspan="6" class="adm-empty">Loading…</td></tr>';
-    return request({ Action: "list", Status: byId("frStatus").value, Limit: "50" }).then(function (data) {
+    if (!append) { nextCursor = null; byId("frRows").innerHTML = '<tr><td colspan="6" class="adm-empty">Loading…</td></tr>'; }
+    var fields = { Action: "list", Status: byId("frStatus").value, Limit: "50" };
+    if (append && nextCursor) fields.Cursor = nextCursor;
+    return request(fields).then(function (data) {
       var rows = data.reviews || [];
-      byId("frRows").innerHTML = rows.length ? rows.map(function (row) {
+      var markup = rows.length ? rows.map(function (row) {
         var reason = (row.reasons || []).slice(0, 2).join(" · ");
         return '<tr><td><strong>' + esc(row.orderId || "Order pending ID") + '</strong><small>' + esc(row.reviewId) + '</small></td>' +
           '<td><strong>' + esc(row.riskScore) + '/100</strong><small>' + esc(row.riskLevel) + ' · ' + esc(row.riskAction) + '</small></td>' +
           '<td>' + esc(reason || "Risk signals recorded") + '</td><td>' + esc(statusLabel(row.status)) + '</td>' +
           '<td>' + esc(date(row.createdAt)) + '</td><td><button type="button" class="adm-btn adm-btn-secondary fr-open" data-review="' + esc(row.reviewId) + '">Review</button></td></tr>';
-      }).join("") : '<tr><td colspan="6" class="adm-empty">No fraud reviews in this view.</td></tr>';
+      }).join("") : (append ? "" : '<tr><td colspan="6" class="adm-empty">No fraud reviews in this view.</td></tr>');
+      if (append) byId("frRows").insertAdjacentHTML("beforeend", markup); else byId("frRows").innerHTML = markup;
+      nextCursor = data.nextCursor || null;
+      byId("frMore").hidden = !nextCursor;
     }).catch(showError).finally(function () { busy = false; });
   }
   function openReview(id) {
@@ -95,7 +101,8 @@
     var button = event.target.closest("[data-review]");
     if (button) openReview(button.getAttribute("data-review"));
   });
-  byId("frStatus").addEventListener("change", load);
+  byId("frStatus").addEventListener("change", function () { load(false); });
+  byId("frMore").addEventListener("click", function () { if (nextCursor) load(true); });
   byId("frRefresh").addEventListener("click", load);
   byId("admRefresh").addEventListener("click", load);
   byId("frClose").addEventListener("click", function () { byId("frDetail").hidden = true; selected = null; });
