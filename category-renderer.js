@@ -2277,14 +2277,17 @@ function closeProductQuickView(skipHistory) {
  */
 var liveViewTimer = null;
 var liveViewSessionId = null;
+// One id per browser (localStorage, shared by all its tabs), so the same person with the product open in
+// two tabs is counted once in "X জন এখন দেখছেন". Falls back to a per-tab id if localStorage is blocked.
 function getLiveViewSessionId() {
   if (liveViewSessionId) return liveViewSessionId;
-  try {
-    liveViewSessionId = sessionStorage.getItem("ma_vsid");
-  } catch (e) {}
-  if (!liveViewSessionId) {
+  var store = null;
+  try { store = window.localStorage; store.getItem("ma_vid"); } catch (e) { store = null; }
+  if (!store) { try { store = window.sessionStorage; store.getItem("ma_vid"); } catch (e) { store = null; } }
+  try { liveViewSessionId = store && store.getItem("ma_vid"); } catch (e) {}
+  if (!liveViewSessionId || !/^[A-Za-z0-9_.-]{1,80}$/.test(liveViewSessionId)) {
     liveViewSessionId = "v" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
-    try { sessionStorage.setItem("ma_vsid", liveViewSessionId); } catch (e) {}
+    try { if (store) store.setItem("ma_vid", liveViewSessionId); } catch (e) {}
   }
   return liveViewSessionId;
 }
