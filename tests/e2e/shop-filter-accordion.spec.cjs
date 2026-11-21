@@ -49,3 +49,27 @@ test('a checkbox still filters the grid after its section was collapsed and reop
   const after = await page.locator('#productGrid .premium-card:visible').count();
   expect(after).toBeLessThanOrEqual(before);
 });
+
+test('desktop master switch and a section toggle still work on the All Categories page', async ({ page }) => {
+  // /category merges every category into one grid, via a different code path than a single
+  // category page. The switch and section toggles must keep working there too.
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto('/category.html');
+  await page.waitForSelector('#shopFilterOpen');
+  await page.waitForSelector('.product-grid .premium-card, .filter-empty');
+
+  await expect(page.locator('.shop-filter-switch-state')).toHaveText('ON');
+  await expect(page.locator('.shop-sidebar-col')).toBeVisible();
+
+  const priceSection = page.locator('.shop-sidebar .sidebar-filter-price');
+  await priceSection.locator('[data-filter-toggle]').click();
+  await expect(priceSection).toHaveClass(/is-collapsed/);
+
+  await page.locator('#shopFilterOpen').click();
+  await expect(page.locator('.shop-filter-switch-state')).toHaveText('OFF');
+  await expect(page.locator('.shop-sidebar-col')).toBeHidden();
+
+  await page.locator('#shopFilterOpen').click();
+  await expect(page.locator('.shop-filter-switch-state')).toHaveText('ON');
+  await expect(page.locator('.shop-sidebar-col')).toBeVisible();
+});

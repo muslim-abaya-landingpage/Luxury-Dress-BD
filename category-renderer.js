@@ -4436,9 +4436,6 @@ function bindShopCategoryControls(root, products) {
   refreshShopCardsAfterCartChange();
   if (!root.dataset.shopDrawerWired) {
     root.dataset.shopDrawerWired = "1";
-    var filterOpen = root.querySelector("#shopFilterOpen");
-    var filterPanel = root.querySelector("#shopFilterPanel");
-    var filterBackdrop = root.querySelector("#shopFilterBackdrop");
     // Keeps the switch's ON/OFF text, aria-pressed and knob position correct for the current
     // breakpoint. Called after every toggle, and again if the viewport crosses 961px without a
     // click (e.g. rotating a tablet, or resizing a desktop window), via the matchMedia listener below.
@@ -4483,52 +4480,52 @@ function bindShopCategoryControls(root, products) {
         shopFilterBreakpoint.addListener(onShopFilterBreakpointChange);
       }
     }
-    if (filterOpen) {
-      filterOpen.addEventListener("click", function () {
+    // Delegated on `root` (the persistent #list container) rather than on the individual
+    // buttons/panel, because a category switch (softSwitchShopCategory) or a second boot render
+    // replaces #shopFilterOpen/#shopFilterPanel/#shopFilterBackdrop with fresh elements — a
+    // listener bound directly to those would be left on the orphaned old node. `root` itself is
+    // never replaced, only its contents, so this keeps working across re-renders.
+    root.addEventListener("click", function (ev) {
+      if (ev.target.closest("#shopFilterOpen")) {
         setFilterDrawer(!document.body.classList.contains("shop-filter-open"));
-      });
-    }
-    var filterClose = root.querySelector("#shopFilterClose");
-    if (filterClose) {
-      filterClose.addEventListener("click", function () {
+        return;
+      }
+      if (ev.target.closest("#shopFilterClose")) {
         setFilterDrawer(false);
-      });
-    }
-    if (filterBackdrop) {
-      filterBackdrop.addEventListener("click", function () {
+        return;
+      }
+      if (ev.target.closest("#shopFilterBackdrop")) {
         setFilterDrawer(false);
-      });
-    }
-    if (filterPanel) {
-      filterPanel.addEventListener("click", function (ev) {
-        var sectionToggle = ev.target.closest("[data-filter-toggle]");
-        if (sectionToggle) {
-          var section = sectionToggle.closest(".sidebar-filter");
-          if (section) {
-            var collapsed = section.classList.toggle("is-collapsed");
-            sectionToggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
-          }
-          return;
+        return;
+      }
+      if (!ev.target.closest("#shopFilterPanel")) return;
+      var sectionToggle = ev.target.closest("[data-filter-toggle]");
+      if (sectionToggle) {
+        var section = sectionToggle.closest(".sidebar-filter");
+        if (section) {
+          var collapsed = section.classList.toggle("is-collapsed");
+          sectionToggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
         }
-        var productLink = ev.target.closest(".sidebar-product-link");
-        if (productLink) {
-          ev.preventDefault();
-          var idx = parseInt(productLink.getAttribute("data-idx"), 10);
-          if (!isNaN(idx) && typeof window.openProductQuickView === "function") {
-            window.openProductQuickView(idx);
-          }
-          if (window.matchMedia("(max-width: 960px)").matches) {
-            setFilterDrawer(false);
-          }
-          return;
+        return;
+      }
+      var productLink = ev.target.closest(".sidebar-product-link");
+      if (productLink) {
+        ev.preventDefault();
+        var idx = parseInt(productLink.getAttribute("data-idx"), 10);
+        if (!isNaN(idx) && typeof window.openProductQuickView === "function") {
+          window.openProductQuickView(idx);
         }
-        if (ev.target.closest(".color-filter-option, .sidebar-cat-link")) {
-          if (window.matchMedia("(max-width: 960px)").matches) {
-            setFilterDrawer(false);
-          }
+        if (window.matchMedia("(max-width: 960px)").matches) {
+          setFilterDrawer(false);
         }
-      });
-    }
+        return;
+      }
+      if (ev.target.closest(".color-filter-option, .sidebar-cat-link")) {
+        if (window.matchMedia("(max-width: 960px)").matches) {
+          setFilterDrawer(false);
+        }
+      }
+    });
   }
   var sortSelect = root.querySelector("#shopSort");
   if (sortSelect && !sortSelect.dataset.sortWired) {
