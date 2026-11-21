@@ -428,7 +428,7 @@
       "</h2>" +
       "<a class='home-section-viewall' href='" +
       escapeHtml(viewAll) +
-      "'>View All</a>" +
+      "'>View All <span class='home-viewall-arrow' aria-hidden='true'>&rarr;</span></a>" +
       "</div>" +
       "<div class='home-section-body'>" +
       "<button type='button' class='home-row-arrow prev' aria-label='Previous'>&#8249;</button>" +
@@ -437,6 +437,8 @@
       "</div>" +
       "<button type='button' class='home-row-arrow next' aria-label='Next'>&#8250;</button>" +
       "</div>" +
+      // Phones: an outlined "Explore collection" button under the row (hidden on wider screens).
+      "<a class='home-section-explore' href='" + escapeHtml(viewAll) + "'>Explore collection <span aria-hidden='true'>&rarr;</span></a>" +
       "</section>"
     );
   }

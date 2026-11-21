@@ -828,3 +828,41 @@
 @media (max-width:600px){.ah-card-oos .ah-card-media::after{font-size:12px;padding:8px 0;letter-spacing:.16em}}
 
 .ah-card-stock{border-radius:0}
+
+/* ---------- Phones (Nov 2026): sections laid out like the reference mobile homepage ----------
+   Big bold title, "VIEW ALL →" under it with a hairline, two cards side by side (swipe for more),
+   compact card text with price + order button on one line, and an outlined "EXPLORE COLLECTION →"
+   button under each row. Flat corners. */
+.home-viewall-arrow { display: none; }
+.home-section-explore { display: none; }
+@media (max-width: 720px) {
+  #homeSections .home-section { margin: 26px auto 34px; padding-left: 14px; padding-right: 14px; }
+  #homeSections .home-section-head {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 10px;
+    margin: 0 0 18px; padding-bottom: 14px; border-bottom: 1px solid #e8e8e8;
+  }
+  #homeSections .home-section-title { font-size: 26px; font-weight: 800; letter-spacing: .01em; text-align: left; text-transform: uppercase; line-height: 1.05; }
+  #homeSections .home-section-viewall {
+    padding: 0; border: 0; background: none; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none;
+    font-size: 12px; font-weight: 700; letter-spacing: .24em; color: #111;
+    display: inline-flex; align-items: center; gap: 10px;
+  }
+  .home-viewall-arrow { display: inline; font-size: 18px; letter-spacing: 0; }
+  .home-row { grid-auto-columns: calc((100% - 10px) / 2); gap: 10px; scroll-snap-type: x mandatory; }
+  .home-row > .ah-card { scroll-snap-align: start; }
+  .home-row-arrow { display: none; }
+  .ah-card-body { padding: 10px 8px 10px; gap: 4px; }
+  .ah-card-cat { font-size: 9px; letter-spacing: .16em; }
+  .ah-card-name { font-size: 13px; font-weight: 600; line-height: 1.3; -webkit-line-clamp: 1; }
+  .ah-card .ah-card-bottom { align-items: center; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid #f0f0f0; }
+  .ah-card .ah-card-bottom .ah-card-price { font-size: 14px; font-weight: 800; padding: 0; text-align: left; }
+  .ah-card .ah-card-bottom .ah-card-price del, .ah-card .ah-card-bottom .ah-card-price s { display: none; }
+  .ah-card .ah-card-cta { padding: 7px 9px; font-size: 11px; line-height: 1; white-space: nowrap; }
+  .home-section-explore {
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    width: fit-content; max-width: 100%; margin: 22px auto 0; padding: 14px 26px;
+    border: 1px solid #cfcfcf; background: #fff; color: #111; text-decoration: none;
+    font-size: 12px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; white-space: nowrap;
+  }
+  .home-section-explore:active { background: #111; color: #fff; border-color: #111; }
+}

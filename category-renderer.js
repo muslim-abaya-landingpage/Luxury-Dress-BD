@@ -1496,7 +1496,7 @@ function buildPqvRelatedHtml(p, idx, allProducts, categoryKey) {
    index-home-muslim-abaya.js; styles come from related-home-cards.css
    (generated from the homepage CSS by scripts/build-related-home-cards.mjs).
    ---------------------------------------------------------------------- */
-var PQV_HOME_RELATED_CSS = "/related-home-cards.css?v=f519ed71e16b9095";
+var PQV_HOME_RELATED_CSS = "/related-home-cards.css?v=e490b24d2333dac3";
 var PQV_HOME_ROW_INTERVAL = 4500;
 var PQV_HOME_CART_ICON =
   "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='M3 4h1.6l1.1 11.2A2 2 0 0 0 7.7 17h9.7a2 2 0 0 0 2-1.7L21 8H7'/><circle cx='9' cy='20' r='1.35'/><circle cx='18' cy='20' r='1.35'/></svg>";

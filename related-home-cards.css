@@ -14,7 +14,7 @@
 .pqv-home-related .home-row-arrow.next{right:0}
 .pqv-home-related .home-row-arrow:hover{background:#dedede;box-shadow:none;transform:translateY(-50%)}
 .pqv-home-related .ah-card{scroll-snap-align:start;background:#fff;display:flex;flex-direction:column;min-width:0;width:100%;height:100%;box-sizing:border-box;border:1px solid #ececec;border-radius:0;box-shadow:0 4px 16px #1111110a;overflow:hidden;transition:box-shadow .2s ease,border-color .2s ease}
-@media (hover: hover){
+@media(hover:hover){
 .pqv-home-related .ah-card:hover{box-shadow:0 8px 24px #11111114;border-color:#e2e2e2}
 }
 .pqv-home-related .ah-card-media{position:relative;display:block;border-radius:0;overflow:hidden;background:var(--ah-soft);aspect-ratio:4 / 5;margin:0}
@@ -24,16 +24,21 @@
 .pqv-home-related .ah-card-badge{position:absolute;top:10px;left:10px;background:#111;color:#fff;font-family:var(--ah-sans);font-size:11px;font-weight:600;letter-spacing:.04em;padding:3px 9px;border-radius:4px;z-index:2}
 .pqv-home-related .ah-card-badge:not(.ah-card-badge-oos){display:none}
 .pqv-home-related .ah-card-body{padding:16px;display:flex;flex-direction:column;gap:8px;flex:1 1 auto}
+.pqv-home-related .ah-card-cat{display:block;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#9a9a9a;margin-bottom:-4px}
 .pqv-home-related .ah-card-row{display:flex;align-items:baseline;justify-content:space-between;gap:4px}
 .pqv-home-related .ah-card-name{font-family:var(--ah-sans);font-size:16px;font-weight:500;color:#111;line-height:1.4;text-decoration:none;flex:1 1 auto;min-width:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;white-space:normal;overflow:hidden;text-overflow:ellipsis;transition:color .2s ease}
 .pqv-home-related .ah-card-name:hover{text-decoration:none;color:#000}
 .pqv-home-related .ah-card-price{flex:0 0 auto;white-space:nowrap;font-family:var(--ah-sans);font-size:22px;font-weight:700;color:#111;line-height:1.2;padding:0 0 0 8px;letter-spacing:-.02em}
 .pqv-home-related .ah-card-price .from{font-size:11px;font-weight:500;color:var(--ah-muted);margin-left:4px}
+.pqv-home-related .ah-card-bottom{margin-top:10px}
+.pqv-home-related .ah-card-bottom .ah-card-price{padding-left:0}
+.pqv-home-related .ah-card-cta{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;background:#111;color:#fff;font-family:var(--ah-sans);font-size:13px;font-weight:600;padding:9px 18px;border-radius:999px;text-decoration:none;white-space:nowrap;transition:background .2s ease,transform .2s ease}
+.pqv-home-related .ah-card-cta:hover{background:#000;transform:translateY(-1px)}
 .pqv-home-related .ah-card .ah-actions{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:stretch;gap:8px;width:100%;margin-top:16px;margin-bottom:24px;padding-top:0;flex-shrink:0}
 .pqv-home-related .ah-card .ah-btn{position:relative;font-family:var(--ah-sans)!important;font-size:15px;font-weight:600;letter-spacing:.01em;padding:0 10px;height:48px;min-height:48px;flex:1 1 0;width:0;max-width:none;border-radius:0!important;cursor:pointer;text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:background .25s ease,color .25s ease,box-shadow .25s ease,transform .25s ease;border:none!important;line-height:1;box-sizing:border-box;min-width:0;white-space:nowrap}
 .pqv-home-related .ah-card .ah-btn span{white-space:nowrap}
 .pqv-home-related .ah-card .ah-btn-cart{background:#111;color:#fff;font-weight:600}
-@media (hover: hover){
+@media(hover:hover){
 .pqv-home-related .ah-card .ah-btn-cart:hover:not(:disabled){background:#000;color:#fff;transform:translateY(-2px);box-shadow:0 8px 18px #1111112e}
 }
 .pqv-home-related .ah-card .ah-btn-cart:active:not(:disabled){transform:scale(.98);box-shadow:none}
@@ -41,17 +46,17 @@
 .pqv-home-related .ah-card .ah-btn svg{width:18px;height:18px;flex-shrink:0}
 .pqv-home-related .ah-card .ah-btn-cart svg{stroke:#fff}
 .pqv-home-related .ah-card .ah-btn-msg{background:#4a4a4a;color:#fff;font-weight:700;font-size:16px;text-shadow:0 1px 1px rgba(0,0,0,.24)}
-@media (hover: hover){
+@media(hover:hover){
 .pqv-home-related .ah-card .ah-btn-msg:hover{background:#3a3a3a;color:#fff}
 }
 .pqv-home-related .ah-card .ah-btn:focus-visible{outline:2px solid #111111;outline-offset:3px}
 .pqv-home-related .ah-card .ah-btn-spin{position:absolute;width:18px;height:18px;border:2px solid rgba(255,255,255,.28);border-top-color:#fff;border-radius:50%;opacity:0;pointer-events:none;animation:none}
 .pqv-home-related .ah-card .ah-btn-cart.is-adding .ah-btn-spin{opacity:1;animation:ah-spin .55s linear infinite}
 .pqv-home-related .ah-card .ah-btn-cart.is-adding>svg,.pqv-home-related .ah-card .ah-btn-cart.is-adding [data-cart-label]{opacity:0}
-@media (prefers-reduced-motion: reduce){
+@media(prefers-reduced-motion:reduce){
 .pqv-home-related .ah-card .ah-btn,.pqv-home-related .ah-card .ah-btn-spin,.pqv-home-related .ah-card .ah-btn-cart.is-adding .ah-btn-spin{transition:none;animation:none;transform:none}
 }
-@media (max-width: 900px),(pointer: coarse){
+@media(max-width:900px),(pointer:coarse){
 .pqv-home-related .home-row{touch-action:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity}
 .pqv-home-related .ah-card:hover .ah-card-media img{transform:none}
 }
@@ -64,11 +69,11 @@
 .pqv-home-related .ah-card-stock.is-oos{color:#6f675f;background:#f4f2ef;border-color:#e7e2dc}
 .pqv-home-related .ah-card-oos .ah-actions{display:flex}
 .pqv-home-related .ah-card-oos .ah-btn-cart{flex:1 1 0;width:0;max-width:none}
-@media (max-width: 900px){
+@media(max-width:900px){
 .pqv-home-related .home-row{grid-auto-columns:calc((100% - 8px)/2);gap:8px}
 .pqv-home-related .home-row-arrow{width:40px;height:40px;font-size:18px}
 }
-@media (max-width: 720px){
+@media(max-width:720px){
 .pqv-home-related .home-row{grid-auto-columns:100%;gap:10px}
 .pqv-home-related .ah-card-body{padding:14px 14px 16px;gap:8px}
 .pqv-home-related .ah-card-name{white-space:normal;font-size:15px;line-height:1.35}
@@ -77,7 +82,7 @@
 .pqv-home-related .ah-card .ah-btn,.pqv-home-related .ah-card .ah-btn-cart,.pqv-home-related .ah-card .ah-btn-msg{flex:1 1 0;width:0;min-width:0;height:46px;min-height:46px;font-size:14px;padding:0 8px;gap:6px}
 .pqv-home-related .ah-card .ah-btn-msg{font-size:16px;font-weight:700}
 }
-@media (max-width: 640px){
+@media(max-width:640px){
 .pqv-home-related .home-section-head{margin:0 0 12px;gap:8px}
 .pqv-home-related .home-section-viewall{font-size:10px;padding:8px 12px}
 .pqv-home-related .ah-card{height:100%}
@@ -89,7 +94,7 @@
 .pqv-home-related .ah-card .ah-btn,.pqv-home-related .ah-card .ah-btn-cart,.pqv-home-related .ah-card .ah-btn-msg{flex:1 1 0;width:0;max-width:none;height:46px;min-height:46px;font-size:14px;padding:0 8px;gap:6px;box-sizing:border-box}
 .pqv-home-related .ah-card .ah-btn-msg{font-size:16px;font-weight:700}
 }
-@media (max-width: 560px){
+@media(max-width:560px){
 .pqv-home-related .home-row{grid-auto-columns:100%;gap:10px}
 .pqv-home-related .home-row-arrow{width:36px;height:36px;font-size:16px;box-shadow:none}
 .pqv-home-related .home-row-arrow.prev{left:4px}
@@ -101,15 +106,25 @@
 .pqv-home-related .ah-card-badge.ah-card-badge-oos{background:#b91c1c;color:#fff}
 .pqv-home-related .ah-card-stock.is-oos{color:#b91c1c;background:#fdecec;border-color:#f5c2c2;font-weight:700}
 .pqv-home-related .ah-card-oos .ah-card-price{text-decoration:line-through}
-@media (max-width:600px){
+@media(max-width:600px){
 .pqv-home-related .ah-card-oos .ah-card-media:after{font-size:12px;padding:8px 0;letter-spacing:.16em}
 }
 .pqv-home-related .ah-card-stock{border-radius:0}
-.pqv-home-related .ah-card-cat{display:block;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#9a9a9a;margin-bottom:-4px}
-.pqv-home-related .ah-card-bottom{margin-top:10px}
-.pqv-home-related .ah-card-bottom .ah-card-price{padding-left:0}
-.pqv-home-related .ah-card-cta{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;background:#111;color:#fff;font-size:13px;font-weight:600;padding:9px 18px;border-radius:999px;text-decoration:none;white-space:nowrap;transition:background .2s ease,transform .2s ease}
-.pqv-home-related .ah-card-cta:hover{background:#000;transform:translateY(-1px)}
+@media(max-width:720px){
+.pqv-home-related #homeSections .home-section-head{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin:0 0 18px;padding-bottom:14px;border-bottom:1px solid #e8e8e8}
+.pqv-home-related #homeSections .home-section-title{font-size:26px;font-weight:800;letter-spacing:.01em;text-align:left;text-transform:uppercase;line-height:1.05}
+.pqv-home-related #homeSections .home-section-viewall{padding:0;border:0;background:none;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;font-size:12px;font-weight:700;letter-spacing:.24em;color:#111;display:inline-flex;align-items:center;gap:10px}
+.pqv-home-related .home-row{grid-auto-columns:calc((100% - 10px)/2);gap:10px;scroll-snap-type:x mandatory}
+.pqv-home-related .home-row>.ah-card{scroll-snap-align:start}
+.pqv-home-related .home-row-arrow{display:none}
+.pqv-home-related .ah-card-body{padding:10px 8px;gap:4px}
+.pqv-home-related .ah-card-cat{font-size:9px;letter-spacing:.16em}
+.pqv-home-related .ah-card-name{font-size:13px;font-weight:600;line-height:1.3;-webkit-line-clamp:1}
+.pqv-home-related .ah-card .ah-card-bottom{align-items:center;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid #f0f0f0}
+.pqv-home-related .ah-card .ah-card-bottom .ah-card-price{font-size:14px;font-weight:800;padding:0;text-align:left}
+.pqv-home-related .ah-card .ah-card-bottom .ah-card-price del,.pqv-home-related .ah-card .ah-card-bottom .ah-card-price s{display:none}
+.pqv-home-related .ah-card .ah-card-cta{padding:7px 9px;font-size:11px;line-height:1;white-space:nowrap}
+}
 /* --- from home-glass.css --- */
 .pqv-home-related{--home-glass: rgba(255, 255, 255, .66);--home-glass-strong: rgba(255, 255, 255, .86);--home-glass-border: rgba(255, 255, 255, .88);--home-ink: #252525;--home-muted: #707070;--home-shadow: 0 16px 42px rgba(70, 70, 70, .10), inset 0 1px rgba(255,255,255,.92)}
 .pqv-home-related .home-section-head{align-items: center;}

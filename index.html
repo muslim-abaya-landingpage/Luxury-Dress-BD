@@ -268,6 +268,28 @@ body {
   .ms-card img, .ms-card.is-active img { transition: none; transform: none; }
 }
 
+
+/* ---- Phones: deck like the reference mobile homepage — the front card about two-thirds of the screen
+   wide with the neighbours clearly peeking on both sides, plain background, big round arrows. ---- */
+@media (max-width: 860px) {
+  .ms-board { background: none; border: 0; padding: 4px 0 6px; }
+  .ms-index-bg { display: none; }
+  .ms-deck { height: calc(min(64vw, 300px) * 4 / 3); max-width: none; }
+  .ms-card { width: min(64vw, 300px); height: calc(min(64vw, 300px) * 4 / 3); margin-left: calc(min(64vw, 300px) / -2); }
+  .ms-card.is-prev { transform: translateX(-62%) scale(.84) rotateY(14deg); opacity: .55; }
+  .ms-card.is-next { transform: translateX(62%) scale(.84) rotateY(-14deg); opacity: .55; }
+  .ms-card::after { inset: 7px; }
+  .ms-card-text { left: 16px; right: 16px; bottom: 16px; gap: 4px; }
+  .ms-card-cat { font-size: 8px; }
+  .ms-card-name { font-size: 18px; }
+  .ms-card-price { font-size: 13px; }
+  .ms-card-cta { margin-top: 6px; padding: 8px 12px; font-size: 9px; background: #fff; color: #111; border-color: #fff; }
+  .ms-nav { gap: 26px; margin-top: 4px; }
+  .ms-arrow { width: 44px; height: 44px; font-size: 20px; background: #fff; border-color: #e2e2e2; box-shadow: 0 4px 12px rgba(0,0,0,.08); color: #333; }
+  .ms-count { font-size: 13px; }
+  .ms-progress { margin-top: -8px; width: 150px; }
+}
+
 /* ---------- Promo banner row (two real offers — free delivery + WhatsApp order) ---------- */
 .home-promo-row {
   display: grid;

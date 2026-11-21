@@ -62,3 +62,38 @@ test('phone: no list, deck fits, nothing sticks out sideways, swipe moves on', a
   await page.dispatchEvent('.ms-deck', 'touchend', { touches: [], changedTouches: [{ identifier: 1, clientX: box.x + 80, clientY: box.y + 105 }] });
   await expect(page.locator('.ms-count')).toHaveText('02 / 12');
 });
+
+test('phone: sections like the reference — big title, "VIEW ALL →" below, two cards side by side, Explore collection button', async ({ page }) => {
+  await open(page, 360);
+  const sec = page.locator('#homeSections .home-section').first();
+  await sec.scrollIntoViewIfNeeded();
+  const title = await sec.locator('.home-section-title').boundingBox();
+  const view = await sec.locator('.home-section-viewall').boundingBox();
+  expect(view.y).toBeGreaterThan(title.y + title.height - 1); // under the title, not beside it
+  expect(Math.abs(view.x - title.x)).toBeLessThan(4); // both left-aligned
+  expect(await sec.locator('.home-section-viewall').evaluate((e) => getComputedStyle(e).backgroundColor)).toBe('rgba(0, 0, 0, 0)');
+  const cards = sec.locator('.home-row > .ah-card');
+  const a = await cards.nth(0).boundingBox();
+  const b = await cards.nth(1).boundingBox();
+  expect(Math.abs(a.y - b.y)).toBeLessThan(2); // side by side
+  expect(a.width).toBeLessThan(200);
+  await expect(sec.locator('.home-row-arrow.next')).toBeHidden();
+  const explore = sec.locator('.home-section-explore');
+  await expect(explore).toBeVisible();
+  await expect(explore).toHaveAttribute('href', /\/abaya$|\/[a-z-]+$/);
+  // deck card about two-thirds of the screen, neighbours peeking on both sides
+  await page.evaluate(() => window.scrollTo(0, 0));
+  const front = await page.locator('.ms-card.is-active').boundingBox();
+  expect(front.width / 360).toBeGreaterThan(0.55);
+  expect(front.width / 360).toBeLessThan(0.72);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
+});
+
+test('desktop: Explore collection button stays hidden, View All stays beside the title', async ({ page }) => {
+  await open(page, 1280);
+  const sec = page.locator('#homeSections .home-section').first();
+  await expect(sec.locator('.home-section-explore')).toBeHidden();
+  const title = await sec.locator('.home-section-title').boundingBox();
+  const view = await sec.locator('.home-section-viewall').boundingBox();
+  expect(view.x).toBeGreaterThan(title.x + title.width);
+});
