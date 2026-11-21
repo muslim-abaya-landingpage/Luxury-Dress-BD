@@ -345,13 +345,18 @@ async function handleOrder(request, env, ctx) {
   }
   await logOrderIp(env, eventId, ipInfo, pairs, 'received', now);
   const deviceAttempts = await logDeviceOrderAttempt(env, eventId, device.hash, pairValue(pairs, 'Phone'), now);
-  if (device.hash && deviceAttempts >= DEVICE_ORDER_HARD_LIMIT) {
+  const deviceFp = normalizeDeviceFp(pairValue(pairs, 'DeviceFP'));
+  const fpAttempts = await logDeviceFpAttempt(env, eventId, deviceFp, pairValue(pairs, 'Phone'), now);
+  const worstDeviceAttempts = Math.max(deviceAttempts, fpAttempts);
+  if ((device.hash || deviceFp) && worstDeviceAttempts >= DEVICE_ORDER_HARD_LIMIT) {
     const alertNeeded = await logOrderIp(env, eventId, ipInfo, pairs, 'blocked', now);
-    if (alertNeeded) ctx.waitUntil(sendAlert(env, '⛔ একই ডিভাইস থেকে ২৪ ঘণ্টায় অনেক অর্ডার-চেষ্টা, নতুন অর্ডার আটকানো হয়েছে।\n' + orderSummaryFromPairs(eventId, pairs) + '\nডিভাইস-চেষ্টা (২৪ ঘণ্টা): ' + (deviceAttempts + 1)));
+    if (alertNeeded) ctx.waitUntil(sendAlert(env, '⛔ একই ডিভাইস থেকে ২৪ ঘণ্টায় অনেক অর্ডার-চেষ্টা, নতুন অর্ডার আটকানো হয়েছে।\n' + orderSummaryFromPairs(eventId, pairs) + '\nডিভাইস-চেষ্টা (২৪ ঘণ্টা): ' + (worstDeviceAttempts + 1)));
     return textOut('Error|' + DEVICE_BLOCKED_MESSAGE);
   }
   const risk = await assessWorkerOrderRisk(env, eventId, ipInfo.ip, pairValue(pairs, 'Phone'), now, device.hash);
-  risk.sameDeviceAttempts24h = deviceAttempts;
+  // The fingerprint can only raise this signal, never lower it: a device with no cookie yet
+  // (fresh browser) still gets scored by its fingerprint history, and vice versa.
+  risk.sameDeviceAttempts24h = worstDeviceAttempts;
   // Recalculate the action after the authoritative insert/count. Updating only the
   // signal field would leave score/action stale (e.g. allow with 3 prior device orders).
   Object.assign(risk, scoreWorkerOrderRisk(risk));
@@ -741,6 +746,7 @@ async function cleanupIpTables(env, now) {
   try {
     await env.DB.prepare('DELETE FROM order_ip_log WHERE created_at < ?').bind(now - IP_LOG_KEEP_MS).run();
     await env.DB.prepare('DELETE FROM device_order_log WHERE created_at < ?').bind(now - IP_LOG_KEEP_MS).run();
+    await env.DB.prepare('DELETE FROM device_fp_log WHERE created_at < ?').bind(now - IP_LOG_KEEP_MS).run();
     await env.DB.prepare('DELETE FROM blocked_ips WHERE expires_at IS NOT NULL AND expires_at < ?').bind(now).run();
   } catch (e) {
     console.log('ip_cleanup_error', String(e).slice(0, 200));
@@ -803,6 +809,33 @@ async function logDeviceOrderAttempt(env, eventId, deviceHash, phone, now) {
     return Number(row && row.n) || 0;
   } catch (e) {
     console.log('device_order_log_error', String(e).slice(0, 160));
+    return 0;
+  }
+}
+
+// ---------------- Device fingerprint (added 2026-11-21) ----------------
+// checkout.html computes this client-side (canvas/WebGL/screen/font-ish traits, hashed with
+// SHA-256 before it ever leaves the browser) and sends it as DeviceFP. It is a second, independent
+// device signal alongside the ma_device cookie above: this one survives a cleared cookie or a
+// private window, the cookie survives neither. Schema: cloudflare-worker/schema-device-fp.sql.
+// Same fail-open rule as every other D1-backed check here: an error never blocks an order.
+const DEVICE_FP_RE = /^[a-f0-9]{32,128}$/;
+
+function normalizeDeviceFp(v) {
+  const s = String(v || '').trim().toLowerCase();
+  return DEVICE_FP_RE.test(s) ? s : '';
+}
+
+async function logDeviceFpAttempt(env, eventId, fpHash, phone, now) {
+  if (!fpHash) return 0;
+  try {
+    await env.DB.prepare('INSERT INTO device_fp_log (event_id, fp_hash, created_at, phone) VALUES (?, ?, ?, ?) ON CONFLICT(event_id) DO NOTHING')
+      .bind(eventId, fpHash, now, localPhone(phone) || '').run();
+    const row = await env.DB.prepare('SELECT COUNT(*) AS n FROM device_fp_log WHERE fp_hash = ? AND created_at >= ? AND event_id <> ?')
+      .bind(fpHash, now - 24 * 60 * 60 * 1000, eventId).first();
+    return Number(row && row.n) || 0;
+  } catch (e) {
+    console.log('device_fp_log_error', String(e).slice(0, 160));
     return 0;
   }
 }

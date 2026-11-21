@@ -15,6 +15,7 @@ function makeDB() {
   db.exec(INBOX_SQL);
   db.exec(fs.readFileSync(path.join(root, 'cloudflare-worker/schema-ip.sql'), 'utf8'));
   db.exec(fs.readFileSync(path.join(root, 'cloudflare-worker/schema-device.sql'), 'utf8'));
+  db.exec(fs.readFileSync(path.join(root, 'cloudflare-worker/schema-device-fp.sql'), 'utf8'));
   return {
     raw: db,
     prepare(sql) {
@@ -30,15 +31,17 @@ function makeDB() {
   };
 }
 const TARGET = 'https://script.google.com/macros/s/AKfycbxZv7KU0JMY90576HoRF8wtHmEgW2ggkTxAoQKjO/exec';
-function makeRequest(eventId, cookie = '', phone = '01712345678') {
+function makeRequest(eventId, cookie = '', phone = '01712345678', deviceFp = '') {
   const fd = new FormData();
   [['RecordType','Order'],['EventID',eventId],['Name','Test Buyer'],['Phone',phone],['Total','1650'],['_ma_target',TARGET]].forEach(([k,v]) => fd.append(k,v));
+  if (deviceFp) fd.append('DeviceFP', deviceFp);
   const headers = { Origin:'https://muslimabaya.com', 'CF-Connecting-IP':'103.4.5.6', 'User-Agent':'Mozilla/5.0 (Linux; Android 13) Chrome/130 Mobile' };
   if (cookie) headers.Cookie = cookie;
   const req = new Request('https://muslimabaya.com/_ma/order',{method:'POST',body:fd,headers});
   Object.defineProperty(req,'cf',{value:{country:'BD',asn:24389,asOrganization:'Grameenphone'}});
   return req;
 }
+const FP_A = 'a'.repeat(64);
 function ctx() { const pending=[]; return { waitUntil(p){pending.push(p);}, async done(){await Promise.all(pending);} }; }
 const realFetch = globalThis.fetch;
 globalThis.fetch = async (url, opts) => {
@@ -122,4 +125,67 @@ test('a visitor with no device cookie (secret unset) is never hard-blocked by de
     await cc.done();
     assert.match(await res.text(), /^Success\|/);
   }
+});
+
+test('a malformed DeviceFP is ignored rather than stored or trusted', async () => {
+  const DB = makeDB();
+  const c = ctx();
+  const res = await worker.fetch(makeRequest('device_fp_bad', '', '0191000000', 'not-a-real-hash!!'), { DB }, c);
+  await c.done();
+  assert.match(await res.text(), /^Success\|/);
+  assert.equal(DB.raw.prepare('SELECT COUNT(*) AS n FROM device_fp_log').get().n, 0);
+});
+
+test('the fingerprint hard-blocks on its own, with no cookie at all', async () => {
+  const DB = makeDB();
+  const env = { DB }; // no DEVICE_TOKEN_SECRET -> cookie never issued or checked
+  for (let i = 1; i <= 8; i++) {
+    const c = ctx();
+    const res = await worker.fetch(makeRequest('fp_only_' + i, '', '019200000' + i, FP_A), env, c);
+    await c.done();
+    assert.match(await res.text(), /^Success\|/, 'attempt ' + i);
+  }
+  const c9 = ctx();
+  const res9 = await worker.fetch(makeRequest('fp_only_9', '', '0192000009', FP_A), env, c9);
+  await c9.done();
+  assert.match(await res9.text(), /^Error\|/);
+});
+
+test('clearing the ma_device cookie between orders does not reset the count when the fingerprint stays the same', async () => {
+  const DB = makeDB();
+  const env = { DB, DEVICE_TOKEN_SECRET: 'test-secret-that-is-at-least-thirty-two-characters-long' };
+  // Each request below sends NO cookie (as if cookies were cleared), so every attempt gets its
+  // own fresh ma_device identity -- but the same fingerprint, simulating a returning browser
+  // whose cookies were wiped between visits.
+  for (let i = 1; i <= 8; i++) {
+    const c = ctx();
+    const res = await worker.fetch(makeRequest('fp_cookiewipe_' + i, '', '019300000' + i, FP_A), env, c);
+    await c.done();
+    assert.match(await res.text(), /^Success\|/, 'attempt ' + i);
+  }
+  // Cookie-based count alone would see 0 prior attempts every time (each request is a fresh
+  // cookie identity); the fingerprint is what catches this on the 9th attempt.
+  const c9 = ctx();
+  const res9 = await worker.fetch(makeRequest('fp_cookiewipe_9', '', '0193000009', FP_A), env, c9);
+  await c9.done();
+  const text9 = await res9.text();
+  assert.match(text9, /^Error\|/);
+  // 9 distinct device_hash values (a fresh cookie identity every time, including the blocked
+  // attempt), but only 1 fingerprint throughout -- that single fingerprint is what caught it.
+  assert.equal(DB.raw.prepare('SELECT COUNT(DISTINCT device_hash) AS n FROM device_order_log').get().n, 9);
+  assert.equal(DB.raw.prepare('SELECT COUNT(DISTINCT fp_hash) AS n FROM device_fp_log').get().n, 1);
+});
+
+test('the fingerprint signal feeds scoreFraudRisk even when the cookie is fresh', async () => {
+  const DB = makeDB();
+  const env = { DB, DEVICE_TOKEN_SECRET: 'test-secret-that-is-at-least-thirty-two-characters-long' };
+  for (let i = 1; i <= 4; i++) {
+    const c = ctx();
+    const res = await worker.fetch(makeRequest('fp_risk_' + i, '', '019400000' + i, FP_A), env, c);
+    await c.done();
+    assert.match(await res.text(), /^Success\|/);
+  }
+  const payload = JSON.parse(DB.raw.prepare("SELECT payload FROM order_inbox WHERE event_id='fp_risk_4'").get().payload);
+  assert.equal(payload.risk.sameDeviceAttempts24h, 3);
+  assert.equal(payload.risk.action, 'challenge');
 });

@@ -3829,10 +3829,66 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         }
     })();
 
+    // Device fingerprint (added 2026-11-21): a handful of mostly-stable browser/device traits,
+    // hashed client-side so the raw values never leave the device, sent as DeviceFP. This is a
+    // second, independent device signal from the ma_device cookie — it survives clearing cookies
+    // or opening a private window, which the cookie cannot. Started early (not at submit time) so
+    // the canvas/font work never delays Place Order; if anything throws or the browser lacks
+    // crypto.subtle, it resolves to '' and the order still goes through exactly as before.
+    function computeDeviceFingerprint() {
+        try {
+            var parts = [];
+            parts.push(String(navigator.userAgent || ''));
+            parts.push(String(navigator.language || ''));
+            parts.push(String((navigator.languages || []).join(',')));
+            parts.push(String(navigator.platform || ''));
+            parts.push(String(navigator.hardwareConcurrency || ''));
+            parts.push(String(navigator.maxTouchPoints || ''));
+            parts.push(String(screen.width) + 'x' + String(screen.height) + 'x' + String(screen.colorDepth));
+            parts.push(String(window.devicePixelRatio || ''));
+            parts.push(String(Intl.DateTimeFormat().resolvedOptions().timeZone || ''));
+            parts.push(String(new Date().getTimezoneOffset()));
+            try {
+                var canvas = document.createElement('canvas');
+                canvas.width = 220; canvas.height = 40;
+                var ctx2d = canvas.getContext('2d');
+                if (ctx2d) {
+                    ctx2d.textBaseline = 'top';
+                    ctx2d.font = '14px Arial';
+                    ctx2d.fillStyle = '#f60';
+                    ctx2d.fillRect(0, 0, 100, 20);
+                    ctx2d.fillStyle = '#069';
+                    ctx2d.fillText('মুসলিম Abaya 🧕 ,./;\'', 2, 2);
+                    parts.push(canvas.toDataURL());
+                }
+            } catch (e) { parts.push('canvas:err'); }
+            try {
+                var gl = document.createElement('canvas').getContext('webgl') || document.createElement('canvas').getContext('experimental-webgl');
+                if (gl) {
+                    var dbg = gl.getExtension('WEBGL_debug_renderer_info');
+                    parts.push(dbg ? String(gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL)) + '|' + String(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)) : 'webgl:no-debug-info');
+                } else {
+                    parts.push('webgl:none');
+                }
+            } catch (e) { parts.push('webgl:err'); }
+            var raw = parts.join('||');
+            if (!(window.crypto && window.crypto.subtle && window.crypto.subtle.digest)) return Promise.resolve('');
+            return window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw)).then(function (buf) {
+                var bytes = new Uint8Array(buf);
+                var hex = '';
+                for (var i = 0; i < bytes.length; i++) hex += bytes[i].toString(16).padStart(2, '0');
+                return hex;
+            }).catch(function () { return ''; });
+        } catch (e) {
+            return Promise.resolve('');
+        }
+    }
+    var deviceFpPromise = computeDeviceFingerprint();
+
     var orderForm = document.getElementById('orderForm');
     var orderSubmitting = false;
     if (orderForm) {
-        orderForm.addEventListener('submit', function(e) {
+        orderForm.addEventListener('submit', async function(e) {
             e.preventDefault();
 
             // একটি অর্ডার পাঠানো চলাকালীন (sticky বাটন বা Enter চাপলেও) দ্বিতীয়বার পাঠানো হবে না।
@@ -4000,6 +4056,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             formData.append('Name', nameValue);
             formData.append('Phone', phoneValue);
             if (emailValue) formData.append('Email', emailValue);
+            try {
+                var deviceFp = await deviceFpPromise.catch(function () { return ''; });
+                if (deviceFp) formData.append('DeviceFP', deviceFp);
+            } catch (e) {}
             formData.append('Address', addrValue);
             formData.append('District', districtParam);
             formData.append('Thana', (document.getElementById('userThana').value || '').trim());
