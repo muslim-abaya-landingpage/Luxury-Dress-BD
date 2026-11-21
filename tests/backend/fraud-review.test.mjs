@@ -69,7 +69,7 @@ test('stores only allowlisted non-PII signals and bounded reasons', async () => 
     eventId: 'event-004',
     risk: {
       score: 30, level: 'review', action: 'challenge',
-      reasons: ['safe reason'],
+      reasons: ['safe reason', 'Call 01712345678 or user@example.com from 192.0.2.1'],
       sameDeviceAttempts24h: 3,
       phone: '01700000000',
       ip: '192.0.2.1',
@@ -83,6 +83,9 @@ test('stores only allowlisted non-PII signals and bounded reasons', async () => 
   assert.equal(serialized.includes('192.0.2.1'), false);
   assert.equal(serialized.includes('private@example.com'), false);
   assert.equal(serialized.includes('private browser data'), false);
+  assert.equal(serialized.includes('01712345678'), false);
+  assert.equal(serialized.includes('user@example.com'), false);
+  assert.equal(serialized.includes('192.0.2.1'), false);
   assert.deepEqual(JSON.parse(row.signals_json), { sameDeviceAttempts24h: 3 });
 });
 
