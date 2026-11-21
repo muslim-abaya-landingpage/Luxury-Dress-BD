@@ -336,6 +336,13 @@ async function handleOrder(request, env, ctx) {
     if (alertNeeded) ctx.waitUntil(sendAlert(env, '⛔ ব্লক করা IP থেকে অর্ডারের চেষ্টা আটকানো হয়েছে।\n' + orderSummaryFromPairs(eventId, pairs) + '\nIP: ' + ipInfo.ip + (ipBlock.reason ? '\nব্লকের কারণ: ' + ipBlock.reason : '')));
     return textOut('Error|' + IP_BLOCKED_MESSAGE);
   }
+  const orderEmail = normalizeEmail(pairValue(pairs, 'Email'));
+  const emailBlock = await findEmailBlock(env, orderEmail, now);
+  if (emailBlock) {
+    const alertNeeded = await logOrderIp(env, eventId, ipInfo, pairs, 'blocked', now);
+    if (alertNeeded) ctx.waitUntil(sendAlert(env, '⛔ ব্লক করা ইমেইল থেকে অর্ডারের চেষ্টা আটকানো হয়েছে।\n' + orderSummaryFromPairs(eventId, pairs) + '\nইমেইল: ' + orderEmail + (emailBlock.reason ? '\nব্লকের কারণ: ' + emailBlock.reason : '')));
+    return textOut('Error|' + EMAIL_BLOCKED_MESSAGE);
+  }
   await logOrderIp(env, eventId, ipInfo, pairs, 'received', now);
   const deviceAttempts = await logDeviceOrderAttempt(env, eventId, device.hash, pairValue(pairs, 'Phone'), now);
   const risk = await assessWorkerOrderRisk(env, eventId, ipInfo.ip, pairValue(pairs, 'Phone'), now, device.hash);
@@ -549,6 +556,32 @@ async function processOrderQueue(env) {
 const IP_BLOCKED_MESSAGE = 'দুঃখিত, এই ইন্টারনেট সংযোগ থেকে এখন অনলাইনে অর্ডার নেওয়া যাচ্ছে না। WhatsApp-এ অর্ডার করুন।';
 const IP_LOG_KEEP_MS = 180 * 24 * 3600 * 1000;
 const IP_ALERT_GAP_MS = 60 * 60 * 1000;
+
+// ---------------- Email blocking (added 2026-11-21) ----------------
+// Schema: cloudflare-worker/schema-email.sql. Any D1 error lets the order through unchanged,
+// same as the IP check above.
+
+const EMAIL_BLOCKED_MESSAGE = 'দুঃখিত, এই ইমেইল দিয়ে এখন অনলাইনে অর্ডার নেওয়া যাচ্ছে না। WhatsApp-এ অর্ডার করুন।';
+
+// email-guard:begin
+/** Normalised email (trimmed, lowercased), or '' when it doesn't look like an email. */
+function normalizeEmail(v) {
+  const s = String(v || '').trim().toLowerCase();
+  return s.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s) ? s : '';
+}
+// email-guard:end
+
+// The block that covers this email, or null. A D1 problem must never stop an order, so errors -> null.
+async function findEmailBlock(env, email, now) {
+  if (!email) return null;
+  try {
+    return await env.DB.prepare('SELECT email, reason, expires_at FROM blocked_emails WHERE email = ? AND (expires_at IS NULL OR expires_at > ?) LIMIT 1')
+      .bind(email, now).first();
+  } catch (e) {
+    console.log('email_block_check_error', String(e).slice(0, 200));
+    return null;
+  }
+}
 
 // ip-guard:begin
 const IPV4_RE = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/;

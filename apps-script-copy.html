@@ -8099,6 +8099,7 @@ function admRowToOrder_(r, rowNumber) {
     payment: String(r[14] || ''),
     txn: String(r[15] || ''),
     customerNote: String(r[16] || ''),
+    email: String(r[29] || '').trim(),
     adminNote: String(r[ADM_COL_ADMIN_NOTE - 1] || ''),
     courierNote: String(r[ADM_COL_COURIER_NOTE - 1] || ''),
     assignedTo: String(r[ADM_COL_ASSIGNED - 1] || ''),

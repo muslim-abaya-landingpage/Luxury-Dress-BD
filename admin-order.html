@@ -163,6 +163,11 @@
             <div id="ipBody"><p class="pn-note-muted">IP তথ্য লোড হচ্ছে…</p></div>
             <button type="button" class="pn-btn pn-btn-sm" id="ipBlockedList" style="margin-top:8px">ব্লক করা সব IP</button>
           </section>
+          <section class="pn-card wo-ip-card" id="emailPanel" aria-labelledby="emailPanelTitle">
+            <h2 id="emailPanelTitle"><i>✉</i> ইমেইল ব্লক</h2>
+            <div id="emailBody"><p class="pn-note-muted">ইমেইল তথ্য লোড হচ্ছে…</p></div>
+            <button type="button" class="pn-btn pn-btn-sm" id="emailBlockedList" style="margin-top:8px">ব্লক করা সব ইমেইল</button>
+          </section>
           <section class="pn-card wo-customer-history" id="customerHistoryPanel" aria-labelledby="customerHistoryTitle">
             <h2 id="customerHistoryTitle"><i>◷</i> Customer history</h2>
             <div class="wo-history-kpis" id="customerHistoryStats" aria-live="polite"></div>
@@ -482,6 +487,7 @@
           nav($("btnNext"), res.nextId);
           setStale(false);
           loadIpInfo();
+          loadEmailInfo();
         }).catch(function (err) {
           if (seed) setStale(false, true);
           var e = $("oError");
@@ -656,6 +662,7 @@
       // The order Worker logs each website order's IP in Cloudflare D1; /api/admin-ip reads it and manages
       // IP blocks. A risky order is "on hold": a banner lists why, and Confirm / Send to Steadfast ask first.
       var ipInfo = null;
+      var emailInfo = null;
       var IP_DAYS = [["1", "১ দিন"], ["7", "৭ দিন"], ["30", "৩০ দিন"], ["0", "স্থায়ী"]];
 
       function fmtTime(ms) {
@@ -687,6 +694,7 @@
             ", বাতিল/Fake/রিটার্ন " + ((s.cancelled || 0) + (s.fake || 0) + (s.returned || 0)) +
             (history.successRate == null ? "" : " (সফলতা " + history.successRate + "%)"));
         }
+        if (emailInfo && emailInfo.blocked) out.push("অর্ডারের ইমেইল ব্লক করা আছে (" + emailInfo.email + ")");
         if (ipInfo && ipInfo.ips) {
           ipInfo.ips.forEach(function (x) {
             if (x.blocked) out.push("অর্ডারের IP ব্লক করা আছে (" + x.ip + ")");
@@ -789,6 +797,91 @@
         }).catch(function (err) { notify(err.message, true); });
       }
       $("ipBlockedList").addEventListener("click", openBlockedList);
+
+      // ── Email blocking ──
+      function emailCall(fields) {
+        var s = MaAdmin.getSession && MaAdmin.getSession();
+        if (!s || !s.token) return Promise.reject(new Error("আবার লগ ইন করুন।"));
+        var body = new URLSearchParams();
+        body.set("Token", s.token);
+        Object.keys(fields).forEach(function (k) { body.set(k, String(fields[k] == null ? "" : fields[k])); });
+        return fetch("/api/admin-email", { method: "POST", body: body, credentials: "same-origin", cache: "no-store" })
+          .then(function (r) { return r.json().catch(function () { return { ok: false, message: "HTTP " + r.status }; }); })
+          .then(function (j) { if (!j || !j.ok) throw new Error((j && (j.message || j.error)) || "ইমেইল তথ্য পাওয়া যায়নি"); return j; });
+      }
+
+      function renderEmail() {
+        var body = $("emailBody");
+        if (!body) return;
+        var email = cur && cur.email;
+        if (!email) {
+          body.innerHTML = '<p class="pn-note-muted">এই অর্ডারে কোনো ইমেইল নেই।</p>';
+          return;
+        }
+        var blocked = emailInfo && emailInfo.blocked;
+        var state = blocked
+          ? '<div class="wo-ip-blocked">⛔ ব্লক করা · ' + (blocked.expiresAt ? esc(fmtTime(blocked.expiresAt)) + " পর্যন্ত" : "স্থায়ী") + (blocked.reason ? " · " + esc(blocked.reason) : "") + "</div>"
+          : "";
+        var actions = blocked
+          ? '<button type="button" class="pn-btn pn-btn-sm" data-email-unblock="' + esc(email) + '">✓ ইমেইল আনব্লক</button>'
+          : '<select id="emailDays" aria-label="ব্লকের মেয়াদ">' + IP_DAYS.map(function (d) { return '<option value="' + d[0] + '"' + (d[0] === "7" ? " selected" : "") + ">" + d[1] + "</option>"; }).join("") + "</select>" +
+            '<button type="button" class="pn-btn pn-btn-ghost-red pn-btn-sm" data-email-block="' + esc(email) + '">⛔ ইমেইল ব্লক</button>';
+        body.innerHTML = '<div class="wo-ip-row"><div class="wo-ip-addr">' + esc(email) + "</div>" + state + '<div class="wo-ip-actions">' + actions + "</div></div>";
+      }
+
+      function loadEmailInfo() {
+        if (!cur || !cur.email) { renderEmail(); return; }
+        emailCall({ Action: "check", Email: cur.email }).then(function (r) {
+          emailInfo = r;
+          renderEmail();
+          renderHold();
+        }).catch(function (err) {
+          $("emailBody").innerHTML = '<p class="pn-note-muted">ইমেইল তথ্য পাওয়া যায়নি: ' + esc(err.message) + "</p>";
+        });
+      }
+
+      document.addEventListener("click", function (event) {
+        var t = event.target;
+        var blockBtn = t.closest && t.closest("[data-email-block]");
+        var unblockBtn = t.closest && t.closest("[data-email-unblock]");
+        if (blockBtn) {
+          var email = blockBtn.getAttribute("data-email-block");
+          var sel = $("emailDays");
+          var days = sel ? sel.value : "7";
+          var label = (IP_DAYS.filter(function (d) { return d[0] === days; })[0] || [0, days])[1];
+          if (!confirm(email + " — " + label + " ব্লক করবেন?\n\nএই ইমেইল দিয়ে নতুন অর্ডার নেওয়া হবে না।")) return;
+          var reason = prompt("ব্লকের কারণ (ঐচ্ছিক)", "") || "";
+          blockBtn.disabled = true;
+          emailCall({ Action: "block", Email: email, Days: days, Reason: reason }).then(function () {
+            notify("ইমেইল ব্লক হয়েছে");
+            loadEmailInfo();
+          }).catch(function (err) { notify(err.message, true); blockBtn.disabled = false; });
+        } else if (unblockBtn) {
+          var key = unblockBtn.getAttribute("data-email-unblock");
+          if (!confirm(key + " আনব্লক করবেন?")) return;
+          unblockBtn.disabled = true;
+          emailCall({ Action: "unblock", Email: key }).then(function () {
+            notify("ইমেইল আনব্লক হয়েছে");
+            if (unblockBtn.closest("#pnModal")) openBlockedEmailList(); else loadEmailInfo();
+          }).catch(function (err) { notify(err.message, true); unblockBtn.disabled = false; });
+        }
+      });
+
+      function openBlockedEmailList() {
+        emailCall({ Action: "list" }).then(function (r) {
+          var list = r.blocked || [];
+          var html = list.length
+            ? '<table class="pn-hist">' + list.map(function (b) {
+                return "<tr><td><span class=\"wo-ip-addr\">" + esc(b.email) + "</span><br><span class=\"pn-note-muted\">" + esc(b.reason || "কারণ লেখা নেই") + " · " + esc(b.by || "") + "</span></td>" +
+                  "<td>" + (b.expiresAt ? esc(fmtTime(b.expiresAt)) + " পর্যন্ত" : "স্থায়ী") + "</td>" +
+                  '<td style="text-align:right"><button type="button" class="pn-btn pn-btn-sm" data-email-unblock="' + esc(b.email) + '">আনব্লক</button></td></tr>';
+              }).join("") + "</table>"
+            : '<div class="pn-note-muted">কোনো ইমেইল ব্লক করা নেই।</div>';
+          MaPanel.openModal("ব্লক করা ইমেইল (" + list.length + ")", html);
+          if (emailInfo) loadEmailInfo();
+        }).catch(function (err) { notify(err.message, true); });
+      }
+      $("emailBlockedList").addEventListener("click", openBlockedEmailList);
 
       MaPanel.init("orders").then(function (s) {
         if (!s) return;
