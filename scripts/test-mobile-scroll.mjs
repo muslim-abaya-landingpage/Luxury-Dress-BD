@@ -78,7 +78,7 @@ function environment({ width = 390, coarse = true, reduced = false, resizeObserv
     addEventListener: add(documentEvents),
     createElement: () => new El(),
     querySelector: () => null,
-    querySelectorAll: selector => selector === '.anz-foot-details' ? panels : [],
+    querySelectorAll: selector => selector === '.msf-foot-details' ? panels : [],
   };
   ids.set('ma-home-btn-row', new El());
   const ctx = {
@@ -261,7 +261,7 @@ test('touch screens: frosted-glass blur is off site-wide and footer animations s
   const block = css.match(/@media\s*\(hover:\s*none\),\s*\(pointer:\s*coarse\),\s*\(max-width:\s*900px\)\s*\{([\s\S]*?)\n\}/);
   assert.ok(block, 'site-header.css must keep the touch-screen performance block at the end');
   assert.match(block[1], /\*,\s*\*::before,\s*\*::after\s*\{\s*-webkit-backdrop-filter:\s*none\s*!important;\s*backdrop-filter:\s*none\s*!important;/);
-  assert.match(block[1], /\.anz-footer[^{]*\{\s*animation:\s*none\s*!important;/);
+  assert.match(block[1], /\.msf-footer[^{]*\{\s*animation:\s*none\s*!important;/);
   assert.match(css, /\.ah-btn-spin\s*\{\s*animation-play-state:\s*paused\s*!important;/);
 });
 

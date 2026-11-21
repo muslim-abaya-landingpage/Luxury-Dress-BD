@@ -21,3 +21,17 @@ test('no reference-shop name in any tracked file', () => {
   }
   assert.deepEqual(hits, [], 'remove the reference shop name from: ' + hits.join(', '));
 });
+
+test('no short form of the reference-shop name (e.g. as a CSS class prefix) in any tracked text file', () => {
+  const SHORT = NAME.slice(0, 3);
+  const re = new RegExp('(^|[^a-z])' + SHORT + '(?![a-z]*za)', 'i'); // fabric names like "Organza" are fine
+  const files = execSync('git ls-files', { cwd: root, encoding: 'utf8' }).split('\n').filter(Boolean);
+  const hits = [];
+  for (const f of files) {
+    if (/\.(png|jpe?g|webp|avif|gif|ico|woff2?|ttf|otf|mp4|webm|pdf|zip)$/i.test(f)) continue;
+    let text;
+    try { text = fs.readFileSync(path.join(root, f), 'utf8'); } catch (e) { continue; }
+    if (re.test(text)) hits.push(f);
+  }
+  assert.deepEqual(hits, [], 'remove the short reference-shop name from: ' + hits.join(', '));
+});

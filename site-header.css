@@ -1148,14 +1148,45 @@ body.site-search-open .site-search-drawer {
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;
   }
-  .anz-footer, .anz-footer::before, .anz-footer::after, .anz-footer-strip::before {
+  .msf-footer, .msf-footer::before, .msf-footer::after, .msf-footer-strip::before {
     animation: none !important;
   }
-  .anz-footer::before, .anz-footer::after { filter: none !important; }
+  .msf-footer::before, .msf-footer::after { filter: none !important; }
 }
 /* Spinners inside add-to-cart buttons only run while the button is busy. */
 .ah-btn-spin { animation-play-state: paused !important; }
 .is-adding .ah-btn-spin, .is-loading .ah-btn-spin { animation-play-state: running !important; }
 @media (prefers-reduced-motion: reduce) {
-  .anz-footer, .anz-footer::before, .anz-footer::after, .anz-footer-strip::before { animation: none !important; }
+  .msf-footer, .msf-footer::before, .msf-footer::after, .msf-footer-strip::before { animation: none !important; }
+}
+
+/* Desktop top menu: every item fully visible, nothing hidden off the edge.
+   - Embroidery is already inside the Abaya drop-down, and "coming soon" items (grey, not clickable) are
+     left out of the top bar (they stay in the phone menu).
+   - Between 1024px and 1199px there is not enough room for the categories, so the same ☰ menu as on
+     phones is used there. */
+@media (min-width: 1024px) {
+  .header-middle-nav .desktop-menu > ul > li:has(> a[href$="/embroidery"]),
+  .header-middle-nav .desktop-menu > ul > li:has(> .nav-link-soon) { display: none !important; }
+}
+@media (min-width: 1200px) and (max-width: 1365px) {
+  .header-middle-nav .desktop-menu ul { gap: 0 12px !important; }
+  .header-middle-nav .desktop-menu ul li a { font-size: 11.5px !important; letter-spacing: .03em !important; }
+}
+@media (min-width: 1024px) and (max-width: 1199px) {
+  .header-middle-nav .desktop-menu { display: none !important; }
+  .header-middle-nav .nav-menu-btn { display: inline-flex !important; }
+}
+
+/* Phones: the offer text never runs under the ‹ › arrows, and the top links (… | Sign In) stay on one line. */
+@media (max-width: 1023px) {
+  .announcement-slider.custom-container { padding-left: 42px !important; padding-right: 42px !important; }
+  .announcement-slider .ann-slide { white-space: normal; text-align: center; }
+  .top-bar-content { white-space: nowrap; }
+  .top-bar-content a { white-space: nowrap; }
+}
+@media (max-width: 420px) {
+  .top-bar-content { font-size: 12px; }
+  .top-bar-content a { margin: 0 2px; }
+  .announcement-slider .ann-slide { font-size: 11.5px; letter-spacing: 0; }
 }

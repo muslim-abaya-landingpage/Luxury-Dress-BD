@@ -61,10 +61,10 @@ body #ma-social-connect-mount {
   right: 0;
 }
 
-body #site-footer-mount .anz-footer,
-body #site-footer-mount .anz-footer-trust,
-body #site-footer-mount .anz-footer-main,
-body #site-footer-mount .anz-bottom {
+body #site-footer-mount .msf-footer,
+body #site-footer-mount .msf-footer-trust,
+body #site-footer-mount .msf-footer-main,
+body #site-footer-mount .msf-bottom {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
@@ -77,7 +77,7 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   max-width: 100%;
 }
 
-#site-footer-mount .anz-footer {
+#site-footer-mount .msf-footer {
   content-visibility: visible;
   contain-intrinsic-size: auto;
   min-height: 0;
@@ -89,7 +89,7 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   box-sizing: border-box;
 }
 
-#site-footer-mount .anz-footer svg {
+#site-footer-mount .msf-footer svg {
   display: block;
   width: 18px !important;
   height: 18px !important;
@@ -98,21 +98,21 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   flex-shrink: 0;
 }
 
-#site-footer-mount .anz-social-link svg {
+#site-footer-mount .msf-social-link svg {
   width: 16px !important;
   height: 16px !important;
   max-width: 16px !important;
   max-height: 16px !important;
 }
 
-#site-footer-mount .anz-wa-cta .anz-wa-icon svg {
+#site-footer-mount .msf-wa-cta .msf-wa-icon svg {
   width: 22px !important;
   height: 22px !important;
   max-width: 22px !important;
   max-height: 22px !important;
 }
 
-.anz-footer {
+.msf-footer {
   background: #0a0a0a;
   border-top: 1px solid rgba(201, 169, 98, 0.28);
   font-family: "Hind Siliguri", "Inter", "Helvetica Neue", Arial, sans-serif;
@@ -127,7 +127,7 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   align-items: stretch;
 }
 
-#ma-social-connect-mount + #site-footer-mount .anz-footer {
+#ma-social-connect-mount + #site-footer-mount .msf-footer {
   margin-top: 0;
   border-top: 2px solid rgba(201, 169, 98, 0.22);
 }
@@ -137,9 +137,9 @@ body #ma-social-connect-mount .ma-social-connect-inner {
 }
 
 /* Copyright strip — 0.5in tall, full width, text vertically centered */
-.anz-footer-strip,
-.anz-bottom.anz-footer-strip,
-#site-footer-mount .anz-bottom.anz-footer-strip {
+.msf-footer-strip,
+.msf-bottom.msf-footer-strip,
+#site-footer-mount .msf-bottom.msf-footer-strip {
   height: 0.5in;
   min-height: 0.5in;
   max-height: 0.5in;
@@ -159,7 +159,7 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   align-self: stretch;
 }
 
-.anz-bottom {
+.msf-bottom {
   border-top: none;
   width: 100%;
   max-width: 100%;
@@ -169,7 +169,7 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   overflow: hidden;
 }
 
-.anz-bottom p {
+.msf-bottom p {
   margin: 0;
   padding: 0;
   width: auto;
@@ -182,7 +182,7 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   flex: 0 0 auto;
 }
 
-.anz-footer-trust {
+.msf-footer-trust {
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   background: rgba(255, 255, 255, 0.02);
   width: 100%;
@@ -190,7 +190,7 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   box-sizing: border-box;
 }
 
-.anz-trust-inner {
+.msf-trust-inner {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -203,7 +203,7 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   width: 100%;
 }
 
-.anz-trust-item {
+.msf-trust-item {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -214,7 +214,7 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   white-space: nowrap;
 }
 
-.anz-trust-dot {
+.msf-trust-dot {
   width: 5px;
   height: 5px;
   border-radius: 50%;
@@ -222,8 +222,8 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   flex-shrink: 0;
 }
 
-.anz-footer-main,
-.anz-footer .anz-container {
+.msf-footer-main,
+.msf-footer .msf-container {
   max-width: 1280px;
   margin: 0 auto;
   display: grid;
@@ -235,15 +235,15 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   width: 100%;
 }
 
-.anz-col-brand,
-.anz-col-shop,
-.anz-col-links,
-.anz-col-contact,
-.anz-col-newsletter {
+.msf-col-brand,
+.msf-col-shop,
+.msf-col-links,
+.msf-col-contact,
+.msf-col-newsletter {
   min-width: 0;
 }
 
-.anz-logo {
+.msf-logo {
   font-size: 20px;
   font-weight: 800;
   margin: 0 0 8px;
@@ -253,7 +253,7 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   color: #fff;
 }
 
-.anz-title {
+.msf-title {
   font-size: 12px;
   font-weight: 700;
   margin: 0 0 10px;
@@ -262,13 +262,13 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   color: #c9a962;
 }
 
-.anz-foot-details {
+.msf-foot-details {
   border: none;
   margin: 0;
   padding: 0;
 }
 
-.anz-foot-details > summary.anz-title {
+.msf-foot-details > summary.msf-title {
   list-style: none;
   cursor: default;
   display: flex;
@@ -278,11 +278,11 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   user-select: none;
 }
 
-.anz-foot-details > summary.anz-title::-webkit-details-marker {
+.msf-foot-details > summary.msf-title::-webkit-details-marker {
   display: none;
 }
 
-.anz-foot-chevron {
+.msf-foot-chevron {
   display: none;
   width: 8px;
   height: 8px;
@@ -294,22 +294,22 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   margin-top: -3px;
 }
 
-.anz-foot-details[open] > summary.anz-title .anz-foot-chevron {
+.msf-foot-details[open] > summary.msf-title .msf-foot-chevron {
   transform: rotate(-135deg);
   margin-top: 3px;
 }
 
-.anz-foot-panel-body {
+.msf-foot-panel-body {
   padding: 0;
 }
 
 @media (min-width: 769px) {
-  .anz-foot-details > summary.anz-title {
+  .msf-foot-details > summary.msf-title {
     pointer-events: none;
   }
 }
 
-.anz-text {
+.msf-text {
   font-size: 15px;
   line-height: 1.55;
   color: #b8b4ac;
@@ -317,7 +317,7 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   max-width: 320px;
 }
 
-.anz-wa-cta {
+.msf-wa-cta {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -332,7 +332,7 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   box-shadow: 0 3px 10px rgba(37, 211, 102, 0.22);
 }
 
-.anz-wa-icon {
+.msf-wa-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -343,18 +343,18 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   background: #fff;
 }
 
-.anz-wa-icon svg {
+.msf-wa-icon svg {
   display: block;
   width: 20px;
   height: 20px;
 }
 
-.anz-wa-cta:hover {
+.msf-wa-cta:hover {
   transform: translateY(-1px);
   box-shadow: 0 5px 14px rgba(37, 211, 102, 0.32);
 }
 
-.anz-link-list {
+.msf-link-list {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -362,7 +362,7 @@ body #ma-social-connect-mount .ma-social-connect-inner {
 
 /* The Shop panel has the longest list. Two balanced columns prevent it from
    becoming much taller than the neighboring Brand, Contact, and Newsletter cards. */
-#site-footer-mount .anz-col-shop #anz-footer-shop {
+#site-footer-mount .msf-col-shop #msf-footer-shop {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   column-gap: 14px;
@@ -370,26 +370,26 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   align-content: start;
 }
 
-#site-footer-mount .anz-col-shop #anz-footer-shop li {
+#site-footer-mount .msf-col-shop #msf-footer-shop li {
   min-width: 0;
   margin: 0;
 }
 
-#site-footer-mount .anz-col-shop #anz-footer-shop a {
+#site-footer-mount .msf-col-shop #msf-footer-shop a {
   display: block;
   overflow-wrap: anywhere;
   word-break: normal;
 }
 
-.anz-link-list li {
+.msf-link-list li {
   margin-bottom: 3px;
 }
 
-.anz-link-list li:last-child {
+.msf-link-list li:last-child {
   margin-bottom: 0;
 }
 
-.anz-link-list a {
+.msf-link-list a {
   text-decoration: none;
   color: #d4d0c8;
   font-size: 15px;
@@ -398,17 +398,17 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   transition: color 0.2s ease;
 }
 
-.anz-link-list a:hover {
+.msf-link-list a:hover {
   color: #fff;
 }
 
-.anz-soon {
+.msf-soon {
   font-size: 12px;
   color: #6b6760;
   font-weight: 500;
 }
 
-.anz-contact-link {
+.msf-contact-link {
   display: flex;
   align-items: flex-start;
   gap: 8px;
@@ -420,19 +420,19 @@ body #ma-social-connect-mount .ma-social-connect-inner {
   transition: color 0.2s ease;
 }
 
-.anz-contact-link:last-child {
+.msf-contact-link:last-child {
   margin-bottom: 0;
 }
 
-a.anz-contact-link:hover {
+a.msf-contact-link:hover {
   color: #fff;
 }
 
-.anz-contact-static {
+.msf-contact-static {
   cursor: default;
 }
 
-.anz-contact-icon {
+.msf-contact-icon {
   width: 28px;
   height: 28px;
   flex-shrink: 0;
@@ -445,12 +445,12 @@ a.anz-contact-link:hover {
   color: #c9a962;
 }
 
-.anz-contact-icon svg {
+.msf-contact-icon svg {
   width: 16px;
   height: 16px;
 }
 
-.anz-contact-link > span:last-child {
+.msf-contact-link > span:last-child {
   flex: 1;
   min-width: 0;
   padding-top: 3px;
@@ -458,14 +458,14 @@ a.anz-contact-link:hover {
   word-break: break-word;
 }
 
-.anz-newsletter-note {
+.msf-newsletter-note {
   font-size: 14px;
   line-height: 1.5;
   color: #a8a49c;
   margin: 0 0 10px;
 }
 
-.anz-visually-hidden {
+.msf-visually-hidden {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -544,7 +544,7 @@ a.anz-contact-link:hover {
   cursor: wait;
 }
 
-.anz-socials {
+.msf-socials {
   display: flex;
   gap: 5px;
   margin-top: 7px;
@@ -552,11 +552,11 @@ a.anz-contact-link:hover {
 }
 /* Desktop: all icons stay on one line; they shrink a little (30px → 24px min) when the column is narrow. */
 @media (min-width: 769px) {
-  .anz-socials { flex-wrap: nowrap; }
-  .anz-socials .anz-social-link { flex: 0 1 30px; min-width: 24px; height: auto; aspect-ratio: 1 / 1; }
+  .msf-socials { flex-wrap: nowrap; }
+  .msf-socials .msf-social-link { flex: 0 1 30px; min-width: 24px; height: auto; aspect-ratio: 1 / 1; }
 }
 
-.anz-social-link {
+.msf-social-link {
   width: 30px;
   height: 30px;
   background: rgba(255, 255, 255, 0.06);
@@ -568,13 +568,13 @@ a.anz-contact-link:hover {
   transition: background 0.2s ease, transform 0.15s ease;
 }
 
-.anz-social-link:hover {
+.msf-social-link:hover {
   background: #c9a962;
   border-color: #c9a962;
   transform: translateY(-1px);
 }
 
-.anz-social-link svg {
+.msf-social-link svg {
   width: 16px;
   height: 16px;
   fill: #fff;
@@ -642,7 +642,7 @@ a.anz-contact-link:hover {
 }
 
 @media (max-width: 1100px) {
-  .anz-footer-main {
+  .msf-footer-main {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-areas:
       "brand brand"
@@ -652,27 +652,27 @@ a.anz-contact-link:hover {
     padding: 16px 18px 12px;
   }
 
-  .anz-col-brand {
+  .msf-col-brand {
     grid-area: brand;
   }
 
-  .anz-col-shop {
+  .msf-col-shop {
     grid-area: shop;
   }
 
-  .anz-col-links {
+  .msf-col-links {
     grid-area: about;
   }
 
-  .anz-col-contact {
+  .msf-col-contact {
     grid-area: contact;
   }
 
-  .anz-col-newsletter {
+  .msf-col-newsletter {
     grid-area: newsletter;
   }
 
-  .anz-text {
+  .msf-text {
     max-width: none;
   }
 }
@@ -694,7 +694,7 @@ a.anz-contact-link:hover {
     box-sizing: border-box !important;
   }
 
-  #site-footer-mount .anz-footer {
+  #site-footer-mount .msf-footer {
     width: 100% !important;
     max-width: 100% !important;
     height: auto !important;
@@ -706,11 +706,11 @@ a.anz-contact-link:hover {
     box-sizing: border-box !important;
   }
 
-  .anz-footer-trust {
+  .msf-footer-trust {
     flex: 0 0 auto;
   }
 
-  .anz-trust-inner {
+  .msf-trust-inner {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
@@ -718,18 +718,18 @@ a.anz-contact-link:hover {
     padding: 10px 16px !important;
   }
 
-  .anz-trust-item {
+  .msf-trust-item {
     font-size: 12px;
     white-space: normal;
     text-align: center;
   }
 
-  .anz-trust-dot {
+  .msf-trust-dot {
     width: 5px;
     height: 5px;
   }
 
-  .anz-footer-main {
+  .msf-footer-main {
     flex: 0 0 auto;
     min-height: 0 !important;
     overflow: visible !important;
@@ -746,53 +746,53 @@ a.anz-contact-link:hover {
     align-items: start;
   }
 
-  .anz-foot-details > summary.anz-title {
+  .msf-foot-details > summary.msf-title {
     cursor: pointer;
     margin-bottom: 0;
     padding: 10px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
 
-  .anz-foot-details[open] > summary.anz-title {
+  .msf-foot-details[open] > summary.msf-title {
     margin-bottom: 8px;
     border-bottom-color: rgba(201, 169, 98, 0.22);
   }
 
-  .anz-foot-chevron {
+  .msf-foot-chevron {
     display: inline-block;
   }
 
-  .anz-foot-details:not([open]) .anz-foot-panel-body {
+  .msf-foot-details:not([open]) .msf-foot-panel-body {
     display: none;
   }
 
-  .anz-col-brand {
+  .msf-col-brand {
     grid-area: brand;
     grid-column: auto;
     padding-left: 0 !important;
     text-align: left !important;
   }
 
-  .anz-col-shop {
+  .msf-col-shop {
     grid-area: shop;
     grid-column: auto;
     padding-left: 0 !important;
   }
 
-  .anz-col-links {
+  .msf-col-links {
     grid-area: about;
     grid-column: auto;
     padding-left: 0 !important;
   }
 
-  .anz-col-contact {
+  .msf-col-contact {
     grid-area: contact;
     grid-column: auto;
     display: block !important;
     padding-left: 0 !important;
   }
 
-  .anz-col-newsletter {
+  .msf-col-newsletter {
     grid-area: newsletter;
     grid-column: auto;
     display: block !important;
@@ -801,7 +801,7 @@ a.anz-contact-link:hover {
     padding-left: 0 !important;
   }
 
-  .anz-newsletter-note {
+  .msf-newsletter-note {
     display: none;
   }
 
@@ -829,21 +829,21 @@ a.anz-contact-link:hover {
     white-space: nowrap;
   }
 
-  .anz-col-brand,
-  .anz-col-shop,
-  .anz-col-links,
-  .anz-col-contact,
-  .anz-col-newsletter {
+  .msf-col-brand,
+  .msf-col-shop,
+  .msf-col-links,
+  .msf-col-contact,
+  .msf-col-newsletter {
     min-width: 0 !important;
   }
 
-  .anz-logo {
+  .msf-logo {
     font-size: 17px;
     margin-bottom: 8px;
     letter-spacing: 0.08em;
   }
 
-  .anz-text {
+  .msf-text {
     font-size: 12px;
     line-height: 1.45;
     margin-bottom: 10px;
@@ -853,7 +853,7 @@ a.anz-contact-link:hover {
     overflow: hidden;
   }
 
-  .anz-wa-cta {
+  .msf-wa-cta {
     display: flex;
     width: 100%;
     max-width: 320px;
@@ -864,83 +864,83 @@ a.anz-contact-link:hover {
     box-sizing: border-box;
   }
 
-  #site-footer-mount .anz-wa-cta .anz-wa-icon svg {
+  #site-footer-mount .msf-wa-cta .msf-wa-icon svg {
     width: 20px !important;
     height: 20px !important;
     max-width: 20px !important;
     max-height: 20px !important;
   }
 
-  .anz-title {
+  .msf-title {
     font-size: 11px;
     margin-bottom: 10px;
     letter-spacing: 0.1em;
   }
 
-  .anz-link-list {
+  .msf-link-list {
     margin: 0;
     padding: 0;
   }
 
-  #site-footer-mount .anz-col-shop #anz-footer-shop {
+  #site-footer-mount .msf-col-shop #msf-footer-shop {
     grid-template-columns: 1fr;
     column-gap: 0;
     row-gap: 4px;
   }
 
-  .anz-link-list a {
+  .msf-link-list a {
     font-size: 13px;
     line-height: 1.55;
   }
 
-  .anz-link-list li {
+  .msf-link-list li {
     margin-bottom: 4px;
   }
 
-  .anz-contact-link {
+  .msf-contact-link {
     font-size: 13px;
     margin-bottom: 8px;
     gap: 8px;
     line-height: 1.45;
   }
 
-  .anz-contact-static {
+  .msf-contact-static {
     font-size: 13px;
     margin-bottom: 0;
     line-height: 1.45;
   }
 
-  .anz-contact-static span:last-child {
+  .msf-contact-static span:last-child {
     display: block;
     overflow: visible;
     -webkit-line-clamp: unset;
   }
 
-  .anz-contact-icon {
+  .msf-contact-icon {
     width: 22px;
     height: 22px;
     flex-shrink: 0;
   }
 
-  #site-footer-mount .anz-contact-icon svg {
+  #site-footer-mount .msf-contact-icon svg {
     width: 14px !important;
     height: 14px !important;
     max-width: 14px !important;
     max-height: 14px !important;
   }
 
-  .anz-socials {
+  .msf-socials {
     margin-top: 10px;
     gap: 8px;
     flex-wrap: wrap;
   }
 
-  .anz-social-link {
+  .msf-social-link {
     width: 34px;
     height: 34px;
   }
 
-  #site-footer-mount .anz-social-link svg {
+  #site-footer-mount .msf-social-link svg {
     width: 16px !important;
     height: 16px !important;
     max-width: 16px !important;
@@ -952,9 +952,9 @@ a.anz-contact-link:hover {
     padding: 8px;
   }
 
-  .anz-footer-strip,
-  .anz-bottom.anz-footer-strip,
-  #site-footer-mount .anz-bottom.anz-footer-strip {
+  .msf-footer-strip,
+  .msf-bottom.msf-footer-strip,
+  #site-footer-mount .msf-bottom.msf-footer-strip {
     flex: 0 0 auto;
     height: auto !important;
     min-height: 44px !important;
@@ -963,46 +963,46 @@ a.anz-contact-link:hover {
     padding-bottom: 12px !important; /* এখানে পরিবর্তন করা হয়েছে */
 }
 
-  .anz-bottom p {
+  .msf-bottom p {
     font-size: 11px;
     line-height: 1.4;
   }
 
-  body.auth-page #site-footer-mount .anz-footer-trust,
-  body.help-page #site-footer-mount .anz-footer-trust {
+  body.auth-page #site-footer-mount .msf-footer-trust,
+  body.help-page #site-footer-mount .msf-footer-trust {
     display: none;
   }
 
-  body.auth-page #site-footer-mount .anz-col-brand .anz-text,
-  body.help-page #site-footer-mount .anz-col-brand .anz-text {
+  body.auth-page #site-footer-mount .msf-col-brand .msf-text,
+  body.help-page #site-footer-mount .msf-col-brand .msf-text {
     display: none;
   }
 
-  body.auth-page #site-footer-mount .anz-col-newsletter,
-  body.help-page #site-footer-mount .anz-col-newsletter {
+  body.auth-page #site-footer-mount .msf-col-newsletter,
+  body.help-page #site-footer-mount .msf-col-newsletter {
     display: none !important;
   }
 
-  body.auth-page #site-footer-mount .anz-footer-main,
-  body.help-page #site-footer-mount .anz-footer-main {
+  body.auth-page #site-footer-mount .msf-footer-main,
+  body.help-page #site-footer-mount .msf-footer-main {
     gap: 6px;
     padding: 10px 14px 8px !important;
   }
 
-  body.auth-page #site-footer-mount .anz-col-brand,
-  body.help-page #site-footer-mount .anz-col-brand {
+  body.auth-page #site-footer-mount .msf-col-brand,
+  body.help-page #site-footer-mount .msf-col-brand {
     text-align: center;
   }
 
-  body.auth-page #site-footer-mount .anz-wa-cta,
-  body.help-page #site-footer-mount .anz-wa-cta {
+  body.auth-page #site-footer-mount .msf-wa-cta,
+  body.help-page #site-footer-mount .msf-wa-cta {
     max-width: none;
     margin: 0 auto;
   }
 }
 
 @media (max-width: 380px) {
-  .anz-footer-main {
+  .msf-footer-main {
     grid-template-columns: 1fr;
     grid-template-areas:
       "brand"
@@ -1035,17 +1035,17 @@ a.anz-contact-link:hover {
    frosted glass cards for each column, shimmering bottom bar).
 ===================================================== */
 
-.anz-footer {
+.msf-footer {
   position: relative;
   isolation: isolate;
   background: linear-gradient(135deg, #0a0a0a 0%, #14100a 35%, #0a0a0a 65%, #120d08 100%);
   background-size: 240% 240%;
-  animation: anzFooterDrift 22s ease-in-out infinite;
+  animation: msfFooterDrift 22s ease-in-out infinite;
   overflow: hidden;
 }
 
-.anz-footer::before,
-.anz-footer::after {
+.msf-footer::before,
+.msf-footer::after {
   content: "";
   position: absolute;
   z-index: 0;
@@ -1055,46 +1055,46 @@ a.anz-contact-link:hover {
   opacity: 0.35;
 }
 
-.anz-footer::before {
+.msf-footer::before {
   width: 360px;
   height: 360px;
   left: -80px;
   top: -120px;
   background: radial-gradient(circle, rgba(201, 169, 98, 0.35), transparent 70%);
-  animation: anzOrbFloatA 16s ease-in-out infinite;
+  animation: msfOrbFloatA 16s ease-in-out infinite;
 }
 
-.anz-footer::after {
+.msf-footer::after {
   width: 420px;
   height: 420px;
   right: -100px;
   bottom: -140px;
   background: radial-gradient(circle, rgba(201, 169, 98, 0.22), transparent 70%);
-  animation: anzOrbFloatB 20s ease-in-out infinite;
+  animation: msfOrbFloatB 20s ease-in-out infinite;
 }
 
-.anz-footer > * {
+.msf-footer > * {
   position: relative;
   z-index: 1;
 }
 
-@keyframes anzFooterDrift {
+@keyframes msfFooterDrift {
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
 }
 
-@keyframes anzOrbFloatA {
+@keyframes msfOrbFloatA {
   0%, 100% { transform: translate(0, 0) scale(1); }
   50% { transform: translate(30px, 24px) scale(1.12); }
 }
 
-@keyframes anzOrbFloatB {
+@keyframes msfOrbFloatB {
   0%, 100% { transform: translate(0, 0) scale(1); }
   50% { transform: translate(-24px, -20px) scale(1.08); }
 }
 
 /* Trust strip → frosted glass bar */
-.anz-footer-trust {
+.msf-footer-trust {
   background: rgba(255, 255, 255, 0.045) !important;
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
@@ -1102,11 +1102,11 @@ a.anz-contact-link:hover {
 }
 
 /* Footer columns → frosted glass cards */
-.anz-col-brand,
-.anz-col-shop,
-.anz-col-links,
-.anz-col-contact,
-.anz-col-newsletter {
+.msf-col-brand,
+.msf-col-shop,
+.msf-col-links,
+.msf-col-contact,
+.msf-col-newsletter {
   background: rgba(255, 255, 255, 0.035);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 16px;
@@ -1116,18 +1116,18 @@ a.anz-contact-link:hover {
   transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
 }
 
-.anz-col-brand:hover,
-.anz-col-shop:hover,
-.anz-col-links:hover,
-.anz-col-contact:hover,
-.anz-col-newsletter:hover {
+.msf-col-brand:hover,
+.msf-col-shop:hover,
+.msf-col-links:hover,
+.msf-col-contact:hover,
+.msf-col-newsletter:hover {
   background: rgba(255, 255, 255, 0.06);
   border-color: rgba(201, 169, 98, 0.28);
   transform: translateY(-2px);
 }
 
 /* WhatsApp CTA — subtle glass glow */
-.anz-wa-cta {
+.msf-wa-cta {
   -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
 }
@@ -1145,9 +1145,9 @@ a.anz-contact-link:hover {
 }
 
 /* Bottom copyright strip → frosted glass with a shimmering gold hairline */
-.anz-footer-strip,
-.anz-bottom.anz-footer-strip,
-#site-footer-mount .anz-bottom.anz-footer-strip {
+.msf-footer-strip,
+.msf-bottom.msf-footer-strip,
+#site-footer-mount .msf-bottom.msf-footer-strip {
   background: rgba(6, 6, 6, 0.72) !important;
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
@@ -1155,7 +1155,7 @@ a.anz-contact-link:hover {
   overflow: hidden;
 }
 
-.anz-footer-strip::before {
+.msf-footer-strip::before {
   content: "";
   position: absolute;
   top: 0;
@@ -1163,29 +1163,29 @@ a.anz-contact-link:hover {
   width: 40%;
   height: 2px;
   background: linear-gradient(90deg, transparent, rgba(201, 169, 98, 0.9), transparent);
-  animation: anzStripShimmer 6s linear infinite;
+  animation: msfStripShimmer 6s linear infinite;
 }
 
-@keyframes anzStripShimmer {
+@keyframes msfStripShimmer {
   0% { left: -40%; }
   100% { left: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .anz-footer,
-  .anz-footer::before,
-  .anz-footer::after,
-  .anz-footer-strip::before {
+  .msf-footer,
+  .msf-footer::before,
+  .msf-footer::after,
+  .msf-footer-strip::before {
     animation: none !important;
   }
 }
 
 @media (max-width: 768px) {
-  .anz-col-brand,
-  .anz-col-shop,
-  .anz-col-links,
-  .anz-col-contact,
-  .anz-col-newsletter {
+  .msf-col-brand,
+  .msf-col-shop,
+  .msf-col-links,
+  .msf-col-contact,
+  .msf-col-newsletter {
     padding: 12px 14px 10px;
     border-radius: 12px;
   }
@@ -1194,36 +1194,36 @@ a.anz-contact-link:hover {
 /* The static dark/gold footer remains, without continuously repainting
    large blurred gradients while a phone scrolls past it. */
 @media (max-width: 900px), (pointer: coarse) {
-  .anz-footer,
-  .anz-footer::before,
-  .anz-footer::after,
-  .anz-footer-strip::before {
+  .msf-footer,
+  .msf-footer::before,
+  .msf-footer::after,
+  .msf-footer-strip::before {
     animation: none !important;
   }
-  .anz-footer::before,
-  .anz-footer::after {
+  .msf-footer::before,
+  .msf-footer::after {
     filter: none;
     display: none;
   }
-  .anz-footer-trust,
-  .anz-col-brand,
-  .anz-col-shop,
-  .anz-col-links,
-  .anz-col-contact,
-  .anz-col-newsletter,
-  .anz-wa-cta,
+  .msf-footer-trust,
+  .msf-col-brand,
+  .msf-col-shop,
+  .msf-col-links,
+  .msf-col-contact,
+  .msf-col-newsletter,
+  .msf-wa-cta,
   .newsletter-form input,
-  .anz-footer-strip,
-  .anz-bottom.anz-footer-strip,
-  #site-footer-mount .anz-bottom.anz-footer-strip {
+  .msf-footer-strip,
+  .msf-bottom.msf-footer-strip,
+  #site-footer-mount .msf-bottom.msf-footer-strip {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
-  .anz-col-brand:hover,
-  .anz-col-shop:hover,
-  .anz-col-links:hover,
-  .anz-col-contact:hover,
-  .anz-col-newsletter:hover {
+  .msf-col-brand:hover,
+  .msf-col-shop:hover,
+  .msf-col-links:hover,
+  .msf-col-contact:hover,
+  .msf-col-newsletter:hover {
     transform: none;
   }
 }

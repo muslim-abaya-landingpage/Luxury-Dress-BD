@@ -48,7 +48,7 @@
   var ICON_PIN =
     "<svg" + SVG_ATTR + ' viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>';
   var ICON_WA =
-    '<span class="anz-wa-icon" aria-hidden="true">' +
+    '<span class="msf-wa-icon" aria-hidden="true">' +
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">' +
     '<path fill="#25D366" d="M12.004 2a9.99 9.99 0 0 0-8.595 15.07L2.5 21.5l4.55-1.19A9.99 9.99 0 1 0 12.004 2zm5.35 14.01c-.24.67-1.4 1.31-2.02 1.39-.51.07-1.17.12-1.87-.06-.43-.1-.99-.36-1.72-.7-3.02-1.31-4.98-4.46-5.12-4.7-.14-.24-1.19-1.99-1.19-3.68 0-1.69.88-2.52 1.19-2.89.31-.37.68-.46.93-.46.25 0 .5.01.72.03.22.02.57-.04.88.44.31.48 1.05 1.67 1.15 1.8.1.13.17.3.04.48-.13.18-.21.3-.42.48-.21.18-.43.39-.62.56-.21.19-.43.4-.19.78.24.38 1.1 1.72 2.36 2.97 1.54 1.37 2.84 1.8 3.28 2.13.44.33.85.28 1.17.17.32-.11 2.02-.77 2.3-.9.28-.13.47-.2.54-.31.07-.11.07-.64-.17-1.28z"/></svg>' +
     "</span>";
@@ -130,11 +130,11 @@
       '<div class="' +
       colClass +
       '">' +
-      '<details class="anz-foot-details">' +
-      '<summary class="anz-title">' +
+      '<details class="msf-foot-details">' +
+      '<summary class="msf-title">' +
       esc(title) +
-      '<span class="anz-foot-chevron" aria-hidden="true"></span></summary>' +
-      '<div class="anz-foot-panel-body">' +
+      '<span class="msf-foot-chevron" aria-hidden="true"></span></summary>' +
+      '<div class="msf-foot-panel-body">' +
       innerHtml +
       "</div></details></div>"
     );
@@ -143,7 +143,7 @@
   function buildTrustBadgesHtml() {
     return TRUST_BADGES.map(function (label) {
       return (
-        '<div class="anz-trust-item"><span class="anz-trust-dot" aria-hidden="true"></span><span>' +
+        '<div class="msf-trust-item"><span class="msf-trust-dot" aria-hidden="true"></span><span>' +
         esc(label) +
         "</span></div>"
       );
@@ -152,16 +152,16 @@
 
   function buildFooterHtml() {
     return (
-      '<footer class="anz-footer">' +
-      '<div class="anz-footer-trust">' +
-      '<div class="anz-trust-inner">' +
+      '<footer class="msf-footer">' +
+      '<div class="msf-footer-trust">' +
+      '<div class="msf-trust-inner">' +
       buildTrustBadgesHtml() +
       "</div></div>" +
-      '<div class="anz-footer-main">' +
-      '<div class="anz-col-brand">' +
-      '<h2 class="anz-logo">' + esc(BRAND.name) + '</h2>' +
-      '<p class="anz-text">' + esc(BRAND.description) + '</p>' +
-      '<a class="anz-wa-cta" href="' +
+      '<div class="msf-footer-main">' +
+      '<div class="msf-col-brand">' +
+      '<h2 class="msf-logo">' + esc(BRAND.name) + '</h2>' +
+      '<p class="msf-text">' + esc(BRAND.description) + '</p>' +
+      '<a class="msf-wa-cta" href="' +
       esc(CONTACT.whatsapp) +
       '" target="_blank" rel="noopener">' +
       ICON_WA +
@@ -169,12 +169,12 @@
       "</div>" +
       footerPanel(
         "Shop",
-        '<ul class="anz-link-list" id="anz-footer-shop">' + buildShopLinksHtml() + "</ul>",
-        "anz-col-shop"
+        '<ul class="msf-link-list" id="msf-footer-shop">' + buildShopLinksHtml() + "</ul>",
+        "msf-col-shop"
       ) +
       footerPanel(
         "About Us",
-        '<ul class="anz-link-list">' +
+        '<ul class="msf-link-list">' +
           '<li><a href="' + esc(footerHref("/about")) + '">About Us</a></li>' +
           '<li><a href="' + esc(footerHref("/help")) + '#order-status">Order Help</a></li>' +
           '<li><a href="' + esc(footerHref("/privacy")) + '">Privacy Policy</a></li>' +
@@ -182,37 +182,37 @@
           '<li><a href="' + esc(footerHref("/terms")) + '">Terms &amp; Conditions</a></li>' +
           '<li><a href="' + esc(footerHref("/success")) + '">Order Success</a></li>' +
           "</ul>",
-        "anz-col-links"
+        "msf-col-links"
       ) +
       footerPanel(
         "Contact Us",
-        '<a class="anz-contact-link" href="mailto:' +
+        '<a class="msf-contact-link" href="mailto:' +
           esc(CONTACT.email) +
-          '"><span class="anz-contact-icon">' +
+          '"><span class="msf-contact-icon">' +
           ICON_MAIL +
           "</span><span>" +
           esc(CONTACT.email) +
           "</span></a>" +
-          '<a class="anz-contact-link" href="tel:' +
+          '<a class="msf-contact-link" href="tel:' +
           esc(CONTACT.phoneTel) +
-          '"><span class="anz-contact-icon">' +
+          '"><span class="msf-contact-icon">' +
           ICON_PHONE +
           "</span><span>" +
           esc(CONTACT.phone) +
           "</span></a>" +
-          '<div class="anz-contact-link anz-contact-static"><span class="anz-contact-icon">' +
+          '<div class="msf-contact-link msf-contact-static"><span class="msf-contact-icon">' +
           ICON_PIN +
           "</span><span>" +
           esc(CONTACT.address) +
           "</span></div>",
-        "anz-col-contact"
+        "msf-col-contact"
       ) +
-      '<div class="anz-col-newsletter">' +
+      '<div class="msf-col-newsletter">' +
       '<form id="newsletter-form" aria-labelledby="newsletter-heading" novalidate>' +
-      '<h3 class="anz-title" id="newsletter-heading">' + esc(NEWSLETTER.heading) + '</h3>' +
-      '<p class="anz-newsletter-note" id="newsletter-note">' + NEWSLETTER.note + '</p>' +
+      '<h3 class="msf-title" id="newsletter-heading">' + esc(NEWSLETTER.heading) + '</h3>' +
+      '<p class="msf-newsletter-note" id="newsletter-note">' + NEWSLETTER.note + '</p>' +
       '<div class="newsletter-form">' +
-      '<label for="subscriber-contact" class="anz-visually-hidden">Email or mobile number</label>' +
+      '<label for="subscriber-contact" class="msf-visually-hidden">Email or mobile number</label>' +
       '<input type="text" name="contact" id="subscriber-contact" placeholder="Email or mobile" required autocomplete="email" inputmode="email" aria-describedby="newsletter-note" aria-required="true">' +
       '<button type="submit" id="sub-btn" aria-label="Subscribe to newsletter">Subscribe</button>' +
       "</div>" +
@@ -223,35 +223,35 @@
       '<p class="subscribe-success-text">' + esc(NEWSLETTER.successText) + '</p>' +
       "</div>" +
       "</form>" +
-'<div class="anz-socials">' +
+'<div class="msf-socials">' +
 '<a href="' +
 esc(SOCIAL.facebook) +
-'" target="_blank" rel="noopener" class="anz-social-link" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 16.9913 5.65684 21.1283 10.4375 21.8785V14.8906H7.89844V12H10.4375V9.79688C10.4375 7.29063 11.9305 5.90625 14.2146 5.90625C15.3082 5.90625 16.4531 6.10156 16.4531 6.10156V8.5625H15.1922C13.95 8.5625 13.5625 9.33333 13.5625 10.1242V12H16.3359L15.8926 14.8906H13.5625V21.8785C18.3432 21.1283 22 16.9913 22 12Z"/></svg></a>' +
+'" target="_blank" rel="noopener" class="msf-social-link" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 16.9913 5.65684 21.1283 10.4375 21.8785V14.8906H7.89844V12H10.4375V9.79688C10.4375 7.29063 11.9305 5.90625 14.2146 5.90625C15.3082 5.90625 16.4531 6.10156 16.4531 6.10156V8.5625H15.1922C13.95 8.5625 13.5625 9.33333 13.5625 10.1242V12H16.3359L15.8926 14.8906H13.5625V21.8785C18.3432 21.1283 22 16.9913 22 12Z"/></svg></a>' +
 
 '<a href="' +
 esc(SOCIAL.youtube) +
-'" target="_blank" rel="noopener" class="anz-social-link" aria-label="YouTube"><svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>' +
+'" target="_blank" rel="noopener" class="msf-social-link" aria-label="YouTube"><svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>' +
 
 '<a href="' +
 esc(SOCIAL.instagram) +
-'" target="_blank" rel="noopener" class="anz-social-link" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" style="fill:none"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>' +
+'" target="_blank" rel="noopener" class="msf-social-link" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" style="fill:none"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>' +
 
 '<a href="' +
 esc(SOCIAL.tiktok) +
-'" target="_blank" rel="noopener" class="anz-social-link" aria-label="TikTok"><svg viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.28-2.26.74-4.63 2.58-5.91 1.05-.72 2.3-1.13 3.55-1.14 1.25-.01 2.5.3 3.59 1.01.01-1.24-.01-2.48.01-3.72-1.02-.69-2.22-1.03-3.45-1.01-1.41.02-2.81.48-3.92 1.36-1.62 1.25-2.58 3.24-2.54 5.27.02 2.21 1.23 4.31 3.12 5.47 1.22.76 2.66 1.15 4.1 1.05 2.15-.08 4.17-1.33 5.18-3.23.51-.95.77-2.03.78-3.11.02-4.99-.01-9.98.02-14.97z"/></svg></a>' +
+'" target="_blank" rel="noopener" class="msf-social-link" aria-label="TikTok"><svg viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.28-2.26.74-4.63 2.58-5.91 1.05-.72 2.3-1.13 3.55-1.14 1.25-.01 2.5.3 3.59 1.01.01-1.24-.01-2.48.01-3.72-1.02-.69-2.22-1.03-3.45-1.01-1.41.02-2.81.48-3.92 1.36-1.62 1.25-2.58 3.24-2.54 5.27.02 2.21 1.23 4.31 3.12 5.47 1.22.76 2.66 1.15 4.1 1.05 2.15-.08 4.17-1.33 5.18-3.23.51-.95.77-2.03.78-3.11.02-4.99-.01-9.98.02-14.97z"/></svg></a>' +
 
 '<a href="' +
 esc(SOCIAL.linkedin) +
-'" target="_blank" rel="noopener" class="anz-social-link" aria-label="LinkedIn"><svg viewBox="0 0 24 24"><path d="M4.98 3.5C4.98 4.88 3.86 6 2.48 6S0 4.88 0 3.5 1.12 1 2.48 1s2.5 1.12 2.5 2.5zM.5 8h4V24h-4V8zm7 0h3.8v2.2h.1c.5-1 1.9-2.2 4-2.2 4.3 0 5.1 2.8 5.1 6.5V24h-4v-7.4c0-1.8 0-4.1-2.5-4.1s-2.9 1.9-2.9 4V24h-4V8z"/></svg></a>' +
+'" target="_blank" rel="noopener" class="msf-social-link" aria-label="LinkedIn"><svg viewBox="0 0 24 24"><path d="M4.98 3.5C4.98 4.88 3.86 6 2.48 6S0 4.88 0 3.5 1.12 1 2.48 1s2.5 1.12 2.5 2.5zM.5 8h4V24h-4V8zm7 0h3.8v2.2h.1c.5-1 1.9-2.2 4-2.2 4.3 0 5.1 2.8 5.1 6.5V24h-4v-7.4c0-1.8 0-4.1-2.5-4.1s-2.9 1.9-2.9 4V24h-4V8z"/></svg></a>' +
 
 (SOCIAL.pinterest ? '<a href="' +
 esc(SOCIAL.pinterest) +
-'" target="_blank" rel="noopener" class="anz-social-link" aria-label="Pinterest"><svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.08 3.16 9.42 7.62 11.17-.1-.95-.2-2.4.04-3.44.22-.93 1.4-5.94 1.4-5.94s-.36-.72-.36-1.78c0-1.67.97-2.92 2.17-2.92 1.02 0 1.52.77 1.52 1.69 0 1.03-.66 2.57-1 4-.28 1.2.6 2.17 1.78 2.17 2.14 0 3.78-2.26 3.78-5.51 0-2.88-2.07-4.9-5.03-4.9-3.42 0-5.43 2.57-5.43 5.22 0 1.03.4 2.14.9 2.74.1.12.11.22.08.34l-.33 1.36c-.05.22-.18.27-.41.16-1.5-.7-2.44-2.9-2.44-4.66 0-3.79 2.75-7.28 7.94-7.28 4.17 0 7.41 2.97 7.41 6.94 0 4.14-2.61 7.48-6.24 7.48-1.22 0-2.36-.63-2.75-1.38l-.75 2.85c-.27 1.04-1 2.35-1.49 3.15A12 12 0 0 0 12 24c6.63 0 12-5.37 12-12S18.63 0 12 0z"/></svg></a>' : '') +
+'" target="_blank" rel="noopener" class="msf-social-link" aria-label="Pinterest"><svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.08 3.16 9.42 7.62 11.17-.1-.95-.2-2.4.04-3.44.22-.93 1.4-5.94 1.4-5.94s-.36-.72-.36-1.78c0-1.67.97-2.92 2.17-2.92 1.02 0 1.52.77 1.52 1.69 0 1.03-.66 2.57-1 4-.28 1.2.6 2.17 1.78 2.17 2.14 0 3.78-2.26 3.78-5.51 0-2.88-2.07-4.9-5.03-4.9-3.42 0-5.43 2.57-5.43 5.22 0 1.03.4 2.14.9 2.74.1.12.11.22.08.34l-.33 1.36c-.05.22-.18.27-.41.16-1.5-.7-2.44-2.9-2.44-4.66 0-3.79 2.75-7.28 7.94-7.28 4.17 0 7.41 2.97 7.41 6.94 0 4.14-2.61 7.48-6.24 7.48-1.22 0-2.36-.63-2.75-1.38l-.75 2.85c-.27 1.04-1 2.35-1.49 3.15A12 12 0 0 0 12 24c6.63 0 12-5.37 12-12S18.63 0 12 0z"/></svg></a>' : '') +
 
 "</div>" +
       "</div>" +
       "</div>" +
-      '<div class="anz-bottom anz-footer-strip"><p>' + COPYRIGHT_HTML + '</p></div>' +
+      '<div class="msf-bottom msf-footer-strip"><p>' + COPYRIGHT_HTML + '</p></div>' +
       "</footer>"
     );
   }
@@ -540,7 +540,7 @@ esc(SOCIAL.pinterest) +
   }
 
   function refreshFooterShopLinks() {
-    var ul = document.getElementById("anz-footer-shop");
+    var ul = document.getElementById("msf-footer-shop");
     if (!ul) return;
     var html = buildShopLinksHtml();
     if (ul.innerHTML !== html) ul.innerHTML = html;
@@ -564,7 +564,7 @@ esc(SOCIAL.pinterest) +
     var expand = footerWideMedia ? footerWideMedia.matches : window.innerWidth > 768;
     if (!force && expand === footerExpandedMode) return;
     footerExpandedMode = expand;
-    var panels = document.querySelectorAll(".anz-foot-details");
+    var panels = document.querySelectorAll(".msf-foot-details");
     panels.forEach(function (panel) {
       if (panel.open !== expand) panel.open = expand;
     });

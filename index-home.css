@@ -362,8 +362,8 @@ input, select { margin-bottom: 8px !important; }
 @keyframes premiumPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
 
 @media screen and (max-width: 600px) {
-    .anz-col-brand { padding-right: 0px !important; min-width: 100%; }
-    .anz-col-links, .anz-col-contact { min-width: 100%; text-align: left; }
+    .msf-col-brand { padding-right: 0px !important; min-width: 100%; }
+    .msf-col-links, .msf-col-contact { min-width: 100%; text-align: left; }
 }
 /* --- Wrapper Fix --- */
 .lux-video-wrap {
@@ -446,9 +446,9 @@ input, select { margin-bottom: 8px !important; }
 .call-btn-style { background: #1a1a1a !important; }
 
 /* --- Footer & Contact Styling --- */
-.footer-section, .footer-section ul, .anz-col-brand, .anz-col-contact { text-align: left !important; }
-.anz-col-contact ul { padding-left: 0 !important; list-style: none !important; }
-.anz-col-contact ul li { display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 10px; margin-bottom: 10px; }
+.footer-section, .footer-section ul, .msf-col-brand, .msf-col-contact { text-align: left !important; }
+.msf-col-contact ul { padding-left: 0 !important; list-style: none !important; }
+.msf-col-contact ul li { display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 10px; margin-bottom: 10px; }
 
 /* --- Tables & Lists --- */
 .astra-table { width: 100%; border-collapse: collapse; }
@@ -476,7 +476,7 @@ font-family:'Playfair Display', serif !important;
 }
 
 @media (max-width: 600px) {
-    #site-footer-mount .anz-col-brand, #site-footer-mount .anz-col-links, #site-footer-mount .anz-col-contact { text-align: left !important; padding-left: 0 !important; }
+    #site-footer-mount .msf-col-brand, #site-footer-mount .msf-col-links, #site-footer-mount .msf-col-contact { text-align: left !important; padding-left: 0 !important; }
 }
 
 @media (max-width: 480px) {
@@ -621,7 +621,7 @@ html, body {
     content-visibility: auto;
     contain-intrinsic-size: 1px 900px;
 }
-#site-footer-mount, #site-footer-mount .anz-footer {
+#site-footer-mount, #site-footer-mount .msf-footer {
     content-visibility: visible;
 }
 
@@ -790,7 +790,7 @@ html, body {
     line-height: 1.6 !important;
 }
 
-.anz-footer, .anz-text, .contact-row, .anz-col-links a {
+.msf-footer, .msf-text, .contact-row, .msf-col-links a {
     font-family: 'Hind Siliguri', 'Inter', sans-serif !important;
 }
 

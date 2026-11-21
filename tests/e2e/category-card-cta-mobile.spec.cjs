@@ -18,7 +18,7 @@ for (const width of [320, 360, 414, 1024]) {
           const card = btn.closest('article');
           if (!card.offsetParent) continue;
           const c = card.getBoundingClientRect(), b = btn.getBoundingClientRect();
-          if (b.left < c.left - 0.5 || b.right > c.right + 0.5 || b.width < 60) out.push(card.getAttribute('data-pid') || '?');
+          if (b.left < c.left - 0.5 || b.right > c.right + 0.5 || b.width < 44) out.push(card.getAttribute('data-pid') || '?');
         }
         return out;
       });
@@ -27,17 +27,17 @@ for (const width of [320, 360, 414, 1024]) {
   }
 }
 
-test('phone: sale card shows price on one line and a full-width flat button under it', async ({ page }) => {
+test('phone: sale card shows price and a small round black order pill on the same line, inside the card', async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 800 });
   await page.goto('/premium-two-piece');
   const card = page.locator('article.premium-card:has(.ma-price-was)').first();
   await expect(card).toBeVisible();
   const m = await card.evaluate((el) => {
-    const btn = el.querySelector('.card-cta'), price = el.querySelector('.card-price'), row = el.querySelector('.card-bottom-row');
-    const b = btn.getBoundingClientRect(), p = price.getBoundingClientRect(), r = row.getBoundingClientRect();
-    return { below: b.top >= p.bottom - 1, fill: b.width / r.width, radius: getComputedStyle(btn).borderTopLeftRadius };
+    const btn = el.querySelector('.card-cta'), now = el.querySelector('.ma-price-now');
+    const b = btn.getBoundingClientRect(), p = now.getBoundingClientRect(), c = el.getBoundingClientRect();
+    const cs = getComputedStyle(btn);
+    return { sameLine: Math.abs((b.top + b.bottom) / 2 - (p.top + p.bottom) / 2) < 8, rightOfPrice: b.left >= p.right,
+      inside: b.right <= c.right + 0.5, round: parseFloat(cs.borderTopLeftRadius) >= 12, black: cs.backgroundColor };
   });
-  expect(m.below).toBe(true);
-  expect(m.fill).toBeGreaterThan(0.98);
-  expect(m.radius).toBe('0px');
+  expect(m).toEqual({ sameLine: true, rightOfPrice: true, inside: true, round: true, black: 'rgb(17, 17, 17)' });
 });

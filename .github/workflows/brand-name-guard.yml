@@ -1,0 +1,27 @@
+name: brand-name-guard
+# Fails when a pushed commit message or tracked file contains the reference shop's name (see CLAUDE.md).
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 50
+      - name: Check commit messages and files
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          NAME=$(node -e "process.stdout.write(String.fromCharCode(97,110,122,97,97,114))")
+          RANGE="HEAD~1..HEAD"
+          if [ -n "$BEFORE" ] && git cat-file -e "$BEFORE" 2>/dev/null; then RANGE="$BEFORE..HEAD"; fi
+          if git log --format='%s%n%b' "$RANGE" | grep -qi "$NAME"; then
+            echo "::error::A commit message contains the reference shop name. See CLAUDE.md."; exit 1
+          fi
+          if git grep -qi "$NAME" -- . ':!*.png' ':!*.jpg' ':!*.jpeg' ':!*.webp' ':!*.avif' ':!*.gif' ':!*.woff2' ':!*.pdf'; then
+            echo "::error::A tracked file contains the reference shop name. See CLAUDE.md."; exit 1
+          fi
+          echo "OK: name not found"

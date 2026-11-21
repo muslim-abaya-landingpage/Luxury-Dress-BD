@@ -3341,23 +3341,46 @@ body.pqv-sc-open {
   #list .pqv-muslim-abaya .pqv-main { aspect-ratio:var(--pqv-ratio, 4 / 5); max-height:none; }
 }
 
-/* Phones (two narrow cards per row): price on its own line, "অর্ডার করুন" full width under it, so a sale
-   price (old + new) never pushes the button out of the card. Same on every category page. */
+/* Card bottom row like the reference store: price on the left, a small round black "অর্ডার করুন" pill on
+   the right, one line. On phones it is compact (like the homepage cards) so it always fits a narrow card. */
+.premium-card .card-bottom-row { flex-wrap: nowrap; }
+.premium-card .card-bottom-row .card-price { min-width: 0; }
 @media (max-width: 640px) {
-  .premium-card .card-bottom-row { flex-wrap: wrap; gap: 8px; }
-  .premium-card .card-bottom-row .card-price {
-    flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 6px;
-    font-size: 18px; white-space: normal; min-width: 0;
+  .premium-card .card-bottom-row {
+    gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid #f0f0f0;
   }
-  .premium-card .card-bottom-row .card-price .ma-price-was { font-size: 12px; font-weight: 500; }
+  .premium-card .card-bottom-row .card-price {
+    flex: 1 1 auto; font-size: 14px; font-weight: 800; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden;
+  }
+  .premium-card .card-bottom-row .card-price .ma-price-was { display: none; }
   .premium-card .card-bottom-row .card-cta {
-    flex: 1 1 100%; width: 100%; min-width: 0; padding: 11px 8px; font-size: 13px;
+    flex: 0 0 auto; padding: 6px 10px; font-size: 10.5px; line-height: 1.1; border-radius: 999px; white-space: nowrap;
   }
 }
+/* Mid widths (tablet / small laptop, 3-4 narrow cards): same compact row so a sale price never pushes the pill out. */
+@media (min-width: 641px) and (max-width: 1180px) {
+  .premium-card .card-bottom-row { gap: 6px; }
+  .premium-card .card-bottom-row .card-price { flex: 1 1 auto; font-size: 17px; white-space: nowrap; overflow: hidden; }
+  .premium-card .card-bottom-row .card-price .ma-price-was { display: none; }
+  .premium-card .card-bottom-row .card-cta { padding: 8px 12px; font-size: 12px; }
+}
+@media (max-width: 340px) {
+  .premium-card .card-bottom-row .card-price { font-size: 13px; }
+  .premium-card .card-bottom-row .card-cta { padding: 6px 7px; font-size: 10px; }
+}
 
-/* Any width: if price + button don't fit on one line (e.g. sale price in a narrow 4-column grid), the
-   button drops to its own line instead of spilling out of the card. */
-.premium-card .card-bottom-row { flex-wrap: wrap; row-gap: 8px; }
-.premium-card .card-bottom-row .card-cta { margin-left: auto; max-width: 100%; }
-/* Flat corners on the card order button, like the rest of the cards. */
-.premium-card .card-cta { border-radius: 0; }
+/* Size guide button never sits on a size label: when sizes are shown side by side (e.g. Body | Dress Length |
+   Palazzo Length), the guide gets its own line above them, on the right. */
+#list .pqv-muslim-abaya .pqv-config-right:has(> .pqv-size-grid[data-cols="3"]) { padding-top: 40px; }
+#list .pqv-muslim-abaya .pqv-config-right:has(> .pqv-size-grid[data-cols="3"]) .pqv-size-chart-link { top: 0; }
+#list .pqv-muslim-abaya .pqv-size-grid[data-cols="3"] { column-gap: 10px; }
+#list .pqv-muslim-abaya .pqv-size-grid[data-cols="3"] .pqv-field-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 640px) {
+  #list .pqv-muslim-abaya .pqv-size-grid[data-cols="3"] .pqv-field-label { letter-spacing: .12em; font-size: 9.5px; }
+  #list .pqv-muslim-abaya .pqv-size-grid[data-cols="3"] .pqv-opt-group { grid-template-columns: minmax(0,1fr); }
+}
+
+/* Breadcrumb stays on one neat line; a long product name ends with "…" instead of wrapping. */
+#list .pqv-muslim-abaya .pqv-crumbs { flex-wrap: nowrap; min-width: 0; white-space: nowrap; }
+#list .pqv-muslim-abaya .pqv-crumbs > a, #list .pqv-muslim-abaya .pqv-crumb-sep { flex: 0 0 auto; }
+#list .pqv-muslim-abaya .pqv-crumb-here { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
