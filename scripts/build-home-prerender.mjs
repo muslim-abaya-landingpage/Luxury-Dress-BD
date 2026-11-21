@@ -23,7 +23,7 @@ const read = (f) => fs.readFileSync(path.join(root, f), 'utf8');
 
 const INLINE_CSS = ['index-home-muslim-abaya.min.css', 'home-glass.css', 'liquid-glass-ui.min.css'];
 // Same order as the deferred catalog <script>s in index.html (network-only scripts left out).
-const SCRIPTS = ['product-config.js', 'home-catalog-utils.min.js', 'size-core.js', 'size-storefront.js', 'category-products.js', 'product-links-data.js', 'home-render.min.js'];
+const SCRIPTS = ['product-config.js', 'home-catalog-utils.min.js', 'size-core.js', 'size-storefront.js', 'category-products.js', 'product-links-data.js', 'product-catalog-loader.js', 'index-home-muslim-abaya.js', 'index-catalog-defer.js'];
 
 
 export function renderHomeParts() {
@@ -53,12 +53,13 @@ export function renderHomeParts() {
   for (const f of SCRIPTS) vm.runInContext(read(f), ctx, {filename: f});
   if (typeof ctx.__maHomePrerender !== 'function') throw new Error('home-render.min.js has no __maHomePrerender hook (rebuild with scripts/build-home-speed.mjs)');
   const parts = ctx.__maHomePrerender();
-  if (!parts || !parts.sections || !parts.catnav) throw new Error('Homepage prerender produced no sections');
+  if (!parts || !parts.sections || !parts.catnav || !parts.storyDeck || !parts.storyList || !parts.storyKey || !parts.storyLcp) throw new Error('Homepage prerender produced no sections/storyboard LCP');
   // No "Shop by category" tiles any more: the card deck at the top of the homepage replaced them (owner's choice, Nov 2026).
   return parts;
 }
 
 const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const escapeAttr = (text) => String(text || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 export function prerenderIndex(html, parts) {
   let out = html;
@@ -75,6 +76,20 @@ export function prerenderIndex(html, parts) {
   const main = '<main id="homeSections" class="home-sections"></main>';
   if (!out.includes(nav) || !out.includes(main)) throw new Error('index.html: empty #homeCatnav / #homeSections not found');
   out = out.replace(nav, () => nav.replace('></nav>', '>' + parts.catnav + '</nav>'));
+  // The first storyboard card is the actual mobile LCP element. Put it in the initial HTML response,
+  // and preserve the same nodes when the browser renderer starts so the LCP image is not restarted.
+  const board = '<div id="msBoard" class="ms-board" tabindex="-1">';
+  if (!out.includes(board)) throw new Error('index.html: empty #msBoard not found');
+  out = out.replace(board, '<div id="msBoard" class="ms-board is-ready" tabindex="-1" data-prerendered="1" data-story-key="' + escapeAttr(parts.storyKey) + '">');
+  const deck = '<div class="ms-deck" aria-live="polite"></div>';
+  const list = '<ol class="ms-list-items"></ol>';
+  if (!out.includes(deck) || !out.includes(list)) throw new Error('index.html: empty storyboard deck/list not found');
+  out = out.replace(deck, () => '<div class="ms-deck" aria-live="polite">' + parts.storyDeck + '</div>');
+  out = out.replace(list, () => '<ol class="ms-list-items">' + parts.storyList + '</ol>');
+  // The LCP preload is generated from the same catalog row as the prerendered first card; never hard-code a product URL.
+  const preloadMarker = '<!-- Homepage storyboard LCP preload is generated at build time from the first visible catalog item. -->';
+  if (!out.includes(preloadMarker)) throw new Error('index.html: storyboard LCP preload marker not found');
+  out = out.replace(preloadMarker, '<link rel="preload" as="image" href="' + escapeAttr(parts.storyLcp) + '" fetchpriority="high">');
   // The image-led category cards must be in the first HTML response. Injecting them after DOMContentLoaded
   // used to push the already-rendered first product section down by ~700px (CLS ~0.80 on mobile).
   out = out.replace(main, () => main.replace('></main>', ' data-prerendered="1">' + parts.sections + '</main>'));
