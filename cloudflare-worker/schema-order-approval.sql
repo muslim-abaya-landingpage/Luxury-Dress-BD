@@ -41,3 +41,16 @@ CREATE INDEX IF NOT EXISTS idx_order_approval_events_approval_created
   ON order_approval_events (approval_id, created_at DESC, event_id DESC);
 CREATE INDEX IF NOT EXISTS idx_order_approval_events_actor_created
   ON order_approval_events (actor_id, created_at DESC);
+
+-- Enforce append-only audit history at the database layer, not only in API convention.
+CREATE TRIGGER IF NOT EXISTS trg_order_approval_events_no_update
+BEFORE UPDATE ON order_approval_events
+BEGIN
+  SELECT RAISE(ABORT, 'ORDER_APPROVAL_EVENTS_APPEND_ONLY');
+END;
+
+CREATE TRIGGER IF NOT EXISTS trg_order_approval_events_no_delete
+BEFORE DELETE ON order_approval_events
+BEGIN
+  SELECT RAISE(ABORT, 'ORDER_APPROVAL_EVENTS_APPEND_ONLY');
+END;
