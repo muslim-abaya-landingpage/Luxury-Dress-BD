@@ -656,7 +656,18 @@
   window.__maHomePrerender = function () {
     var secs = activeSections();
     if (!secs.length) return null;
-    return { catnav: catnavHtml(secs), sections: sectionsHtml(secs, 1, PRERENDER_CARDS), btnCss: homeBtnCssText };
+    var stories = storyProducts();
+    var storyKey = stories.map(function (r) { return r.p.id; }).join("|");
+    var storyPic = stories.length ? (window.maHomeCardImage(stories[0].p) || { src: resolveImg(stories[0].p) }) : null;
+    return {
+      catnav: catnavHtml(secs),
+      sections: sectionsHtml(secs, 1, PRERENDER_CARDS),
+      btnCss: homeBtnCssText,
+      storyDeck: stories.map(storyCardHtml).join(""),
+      storyList: storyListHtml(stories),
+      storyKey: storyKey,
+      storyLcp: storyPic ? homeAbsoluteUrl(storyPic.src) : ""
+    };
   };
 
 
@@ -692,7 +703,7 @@
     var pic = window.maHomeCardImage(p) || { src: resolveImg(p) };
     var ar = STORY_ARABIC[row.sec.key] || "";
     return (
-      "<a class='ms-card' href='" + escapeHtml(detailHref(row.sec, p)) + "' data-i='" + i + "' tabindex='" + (i === 0 ? "0" : "-1") + "'>" +
+      "<a class='ms-card" + (i === 0 ? " is-active" : "") + "' href='" + escapeHtml(detailHref(row.sec, p)) + "' data-i='" + i + "' tabindex='" + (i === 0 ? "0" : "-1") + "'>" +
       "<img src='" + escapeHtml(pic.src) + "' alt='" + escapeHtml(p.name) + "' width='480' height='600' decoding='async'" +
       // card-size photo missing: fall back to the product's full photo once
       (pic.full && pic.full !== pic.src ? " data-full='" + escapeHtml(pic.full) + "' onerror=\"if(this.dataset.full&&this.src.indexOf(this.dataset.full)<0){this.src=this.dataset.full}\"" : "") +
@@ -777,9 +788,19 @@
     if (!rows.length) return;
     var key = rows.map(function (r) { return r.p.id; }).join("|");
     if (board.__msKey === key) return;
+    var deck = board.querySelector(".ms-deck");
+    var list = board.querySelector(".ms-list-items");
+    var prerendered = board.getAttribute("data-prerendered") === "1" &&
+      board.getAttribute("data-story-key") === key &&
+      deck && deck.querySelectorAll(".ms-card").length === rows.length &&
+      list && list.querySelectorAll(".ms-li").length === rows.length;
     board.__msKey = key;
-    board.querySelector(".ms-deck").innerHTML = rows.map(storyCardHtml).join("");
-    board.querySelector(".ms-list-items").innerHTML = storyListHtml(rows);
+    if (!prerendered) {
+      deck.innerHTML = rows.map(storyCardHtml).join("");
+      list.innerHTML = storyListHtml(rows);
+    }
+    board.removeAttribute("data-prerendered");
+    board.removeAttribute("data-story-key");
     board.classList.add("is-ready");
     storyGo(board, 0);
     if (!board.__msBound) {
