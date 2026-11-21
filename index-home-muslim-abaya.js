@@ -659,6 +659,7 @@
     var stories = storyProducts();
     var storyKey = stories.map(function (r) { return r.p.id; }).join("|");
     var storyPic = stories.length ? (window.maHomeCardImage(stories[0].p) || { src: resolveImg(stories[0].p) }) : null;
+    var storyPrevPic = stories.length ? (window.maHomeCardImage(stories[stories.length - 1].p) || { src: resolveImg(stories[stories.length - 1].p) }) : null;
     return {
       catnav: catnavHtml(secs),
       sections: sectionsHtml(secs, 1, PRERENDER_CARDS),
@@ -666,7 +667,8 @@
       storyDeck: stories.map(storyCardHtml).join(""),
       storyList: storyListHtml(stories),
       storyKey: storyKey,
-      storyLcp: storyPic ? homeAbsoluteUrl(storyPic.src) : ""
+      storyLcp: storyPic ? homeAbsoluteUrl(storyPic.src) : "",
+      storyPrevLcp: storyPrevPic ? homeAbsoluteUrl(storyPrevPic.src) : ""
     };
   };
 
@@ -698,16 +700,23 @@
 
   function storyPad(n) { return n < 10 ? "0" + n : String(n); }
 
-  function storyCardHtml(row, i) {
+  function storyCardHtml(row, i, rows) {
     var p = row.p;
+    var n = rows && rows.length || STORY_COUNT;
+    var d = i;
+    if (d > n / 2) d -= n;
+    if (d < -n / 2) d += n;
+    var positionClass = d === 0 ? " is-active" : d === -1 ? " is-prev" : d === 1 ? " is-next" : d < 0 ? " is-far-prev" : " is-far-next";
+    var eager = Math.abs(d) <= 1;
+    var priority = d === 0 || d === -1 ? "high" : "auto";
     var pic = window.maHomeCardImage(p) || { src: resolveImg(p) };
     var ar = STORY_ARABIC[row.sec.key] || "";
     return (
-      "<a class='ms-card" + (i === 0 ? " is-active" : "") + "' href='" + escapeHtml(detailHref(row.sec, p)) + "' data-i='" + i + "' tabindex='" + (i === 0 ? "0" : "-1") + "'>" +
+      "<a class='ms-card" + positionClass + "' href='" + escapeHtml(detailHref(row.sec, p)) + "' data-i='" + i + "' tabindex='" + (d === 0 ? "0" : "-1") + "' aria-hidden='" + (d === 0 ? "false" : "true") + "'>" +
       "<img src='" + escapeHtml(pic.src) + "' alt='" + escapeHtml(p.name) + "' width='480' height='600' decoding='async'" +
       // card-size photo missing: fall back to the product's full photo once
       (pic.full && pic.full !== pic.src ? " data-full='" + escapeHtml(pic.full) + "' onerror=\"if(this.dataset.full&&this.src.indexOf(this.dataset.full)<0){this.src=this.dataset.full}\"" : "") +
-      (i < 2 ? " fetchpriority='" + (i === 0 ? "high" : "auto") + "'" : " loading='lazy'") + ">" +
+      (eager ? " fetchpriority='" + priority + "'" : " loading='lazy'") + ">" +
       "<span class='ms-card-shade' aria-hidden='true'></span>" +
       "<span class='ms-card-text'>" +
       "<span class='ms-card-cat'>" + escapeHtml(row.sec.menu || row.sec.key) + "</span>" +
