@@ -17,7 +17,7 @@ test('prerender renders the first section with the browser renderer', async () =
   assert.ok(cards.length >= 1 && cards.length <= 6, 'between 1 and 6 cards, got ' + cards.length);
   assert.match(parts.sections, /fetchpriority='high'/, 'first section card keeps its high fetch priority');
   assert.match(parts.storyDeck, /class='ms-card is-active'/, 'first storyboard card is active in the initial HTML');
-  assert.match(parts.storyDeck, /fetchpriority='high'/, 'active and visible previous storyboard images keep high priority');
+  assert.equal((parts.storyDeck.match(/fetchpriority='high'/g) || []).length, 2, 'active and previous visible storyboard images are eager and high priority');
   assert.match(parts.storyDeck, /class='ms-card is-prev'/, 'last card is pre-positioned as the visible previous card');
   assert.match(parts.storyList, /class='ms-li is-active'/, 'first storyboard list item is active');
   assert.ok(parts.storyKey && parts.storyLcp && parts.storyPrevLcp, 'storyboard identity and both visible image URLs are derived from the catalog');
