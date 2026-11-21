@@ -53,7 +53,7 @@ export function renderHomeParts() {
   for (const f of SCRIPTS) vm.runInContext(read(f), ctx, {filename: f});
   if (typeof ctx.__maHomePrerender !== 'function') throw new Error('home-render.min.js has no __maHomePrerender hook (rebuild with scripts/build-home-speed.mjs)');
   const parts = ctx.__maHomePrerender();
-  if (!parts || !parts.sections || !parts.catnav || !parts.storyDeck || !parts.storyList || !parts.storyKey || !parts.storyLcp) throw new Error('Homepage prerender produced no sections/storyboard LCP');
+  if (!parts || !parts.sections || !parts.catnav || !parts.storyDeck || !parts.storyList || !parts.storyKey || !parts.storyLcp || !parts.storyPrevLcp) throw new Error('Homepage prerender produced no sections/storyboard LCP');
   // No "Shop by category" tiles any more: the card deck at the top of the homepage replaced them (owner's choice, Nov 2026).
   return parts;
 }
@@ -89,7 +89,7 @@ export function prerenderIndex(html, parts) {
   // The LCP preload is generated from the same catalog row as the prerendered first card; never hard-code a product URL.
   const preloadMarker = '<!-- Homepage storyboard LCP preload is generated at build time from the first visible catalog item. -->';
   if (!out.includes(preloadMarker)) throw new Error('index.html: storyboard LCP preload marker not found');
-  out = out.replace(preloadMarker, '<link rel="preload" as="image" href="' + escapeAttr(parts.storyLcp) + '" fetchpriority="high">');
+  out = out.replace(preloadMarker, '<link rel="preload" as="image" href="' + escapeAttr(parts.storyLcp) + '" fetchpriority="high">\\n    <link rel="preload" as="image" href="' + escapeAttr(parts.storyPrevLcp) + '" fetchpriority="high">');
   // The image-led category cards must be in the first HTML response. Injecting them after DOMContentLoaded
   // used to push the already-rendered first product section down by ~700px (CLS ~0.80 on mobile).
   out = out.replace(main, () => main.replace('></main>', ' data-prerendered="1">' + parts.sections + '</main>'));
