@@ -198,7 +198,7 @@ test('photo descriptions (alt text): name, colour and fabric on the product view
   if (thumbs.length > 1) expect(thumbs[1]).toBe(expected + ' (photo 2)');
 });
 
-test('home page: each card shows its real category label above the name (Anzaar-style)', async ({ page }) => {
+test('home page: each card shows its real category label above the name', async ({ page }) => {
   await useCatalog(page);
   await page.goto('/');
   const maroon = page.locator('.ah-card').filter({ has: page.locator('a[href="/product/ABY-MAROON-1"]') }).first();
@@ -208,7 +208,7 @@ test('home page: each card shows its real category label above the name (Anzaar-
   await expect(sectionTitle).toHaveText('ABAYA');
 });
 
-test('home page: one clean order button per card (Anzaar-style), no Add to Cart button', async ({ page }) => {
+test('home page: one clean order button per card, no Add to Cart button', async ({ page }) => {
   await useCatalog(page);
   await page.goto('/');
   const maroon = page.locator('.ah-card').filter({ has: page.locator('a[href="/product/ABY-MAROON-1"]') }).first();

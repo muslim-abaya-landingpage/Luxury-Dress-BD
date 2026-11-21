@@ -188,7 +188,7 @@ html.category-ready #list {
   letter-spacing: 0.02em;
 }
 
-/* Anzaar-style accordion: each section's header is a button that collapses its own body. */
+/* Accordion: each section's header is a button that collapses its own body. */
 .sidebar-filter-toggle {
   display: flex;
   align-items: center;
@@ -624,7 +624,7 @@ button.img-wrap {
   margin-bottom: 8px;
 }
 
-/* Category label + colour count (Anzaar-style): "ABAYA  3 COLORS" above the name. */
+/* Category label + colour count: "ABAYA  3 COLORS" above the name. */
 .premium-card .card-cat-row {
   display: flex;
   align-items: center;
@@ -1216,7 +1216,7 @@ button.img-wrap {
     display: none;
   }
 
-  /* The Filter switch (Anzaar-style): off hides the whole sidebar column and lets the grid use the
+  /* The Filter switch: off hides the whole sidebar column and lets the grid use the
      freed-up width, same as the reference site. On is the default (no class), so the page looks and
      works exactly the same with JS disabled. */
   body.shop-filter-open .shop-sidebar-col {
@@ -2961,7 +2961,7 @@ body.pqv-sc-open {
 .shop-mobile-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:0 0 14px; padding:0 2px; }
 .shop-filter-open { display:inline-flex; align-items:center; gap:9px; border:1px solid #ddd; background:#fff; border-radius:4px; font-size:14px; font-weight:600; color:#111; padding:7px 12px; cursor:pointer; font-family:inherit; }
 
-/* Anzaar-style master filter switch: a small pill track with a sliding knob, green when on. */
+/* Master filter switch: a small pill track with a sliding knob, green when on. */
 .shop-filter-switch { position:relative; display:inline-flex; align-items:center; flex:0 0 auto; width:40px; height:22px; border-radius:11px; background:#2fae4e; transition:background 0.2s ease; }
 .shop-filter-switch.is-off { background:#ccc; }
 .shop-filter-switch-knob { position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,0.25); transition:transform 0.2s ease; }

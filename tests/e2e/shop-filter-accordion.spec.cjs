@@ -1,4 +1,4 @@
-// Category/shop sidebar filter sections (Anzaar-style): each section's header is its own
+// Category/shop sidebar filter sections: each section's header is its own
 // collapse/expand toggle, independent of the others, on both desktop and the mobile drawer.
 const { test, expect } = require('@playwright/test');
 

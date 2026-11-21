@@ -1,14 +1,14 @@
 const { test, expect } = require('@playwright/test');
 
-test('home page shows the two real promo tiles (free delivery + WhatsApp), no invented offers', async ({ page }) => {
+test('home page shows the two real offer strips (free delivery + track order), no invented offers', async ({ page }) => {
   await page.goto('/index.html');
   const row = page.locator('.home-promo-row');
   await expect(row).toBeVisible();
   await expect(row.locator('.home-promo-tile')).toHaveCount(2);
-  await expect(row.locator('.home-promo-tile').first()).toContainText('ফ্রি ডেলিভারি');
-  const wa = row.locator('.home-promo-tile.is-whatsapp');
-  await expect(wa).toContainText('WhatsApp');
-  await expect(wa).toHaveAttribute('href', /wa\.me/);
+  await expect(row.locator('.home-promo-tile').first()).toContainText(/free delivery on 3\+ items/i);
+  const track = row.locator('.home-promo-tile').nth(1);
+  await expect(track).toContainText(/track your order/i);
+  await expect(track).toHaveAttribute('href', '/order-track');
 });
 
 test('product page: live viewer badge reflects the real worker count, not a random number', async ({ page }) => {

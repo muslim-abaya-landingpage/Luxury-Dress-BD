@@ -3567,7 +3567,7 @@ function buildProductListHtml(products) {
     "</nav>"
   );
 }
-// Anzaar-style collapsible filter section: a header row with a chevron that toggles the body open/closed.
+// Collapsible filter section: a header row with a chevron that toggles the body open/closed.
 // Starts open; the click handler (wired once per render in bindCategoryInteractions) toggles "is-collapsed".
 function sidebarFilterSection(key, label, bodyHtml) {
   return (
@@ -4020,7 +4020,7 @@ function buildProductCard(p, idx, waLink, detailMode, categoryKey, allProducts) 
   var waOrderText = encodeURIComponent(
     productCardWhatsAppOrderText(p, productPrice, resolveCardImageSrc(p))
   );
-  // Grid-card category label + colour dots (Anzaar-style): "ABAYA · 3 COLORS" above the name,
+  // Grid-card category label + colour dots: "ABAYA · 3 COLORS" above the name,
   // small round swatches below it. Only shown when there is more than one saved colour.
   var gridCatLabel = escapeHtml(pqvCategoryName(categoryKey));
   var gridColorVariants = getProductColorVariants(p);
@@ -4143,7 +4143,7 @@ waOrderText +
     "' aria-hidden='true' tabindex='-1'>" +
     sizeOptions +
     "</select>" +
-    // Single order button (Anzaar-style): straight to the same on-site quick-view / popup checkout
+    // Single order button: straight to the same on-site quick-view / popup checkout
     // the old "অর্ডার করুন" button opened — only the separate "Add to Cart" button is gone.
     // 📝 এখানে কোয়ান্টিটি স্টেপার (+/-) বসানো হয় না ইচ্ছাকৃতভাবে — গ্রিড
     // কার্ডে সেটা shop-page.css দিয়ে সবসময় display:none করা থাকে (শুধু

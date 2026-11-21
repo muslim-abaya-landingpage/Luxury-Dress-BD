@@ -326,7 +326,7 @@
       "</span>" +
       (outOfStock
         ? ""
-        : // One clean button, like Anzaar's card: straight to the product page, where size/colour
+        : // One clean button: straight to the product page, where size/colour
           // are chosen and the popup checkout opens (cart stays available there too).
           "<a class='ah-card-cta' href='" +
           escapeHtml(dHref) +
@@ -656,6 +656,167 @@
     if (!secs.length) return null;
     return { catnav: catnavHtml(secs), sections: sectionsHtml(secs, 1, PRERENDER_CARDS), btnCss: homeBtnCssText };
   };
+
+
+  /* ---------------- Storyboard (top of the homepage) ----------------
+     The 12 newest products as a deck of cards (the current one in front, neighbours tilted behind),
+     a numbered list beside it, arrows and a 01 / 12 counter. Newest = dateAdded. Flat corners. */
+  var STORY_COUNT = 12;
+  var STORY_INTERVAL = 5000;
+  var STORY_ARABIC = {
+    abaya: "عباية", "cover-up": "غطاء", "premium-two-piece": "طقم", "tops-kurti": "قميص", embroidery: "تطريز",
+    karchupi: "تطريز", kaftan: "قفطان", hijab: "حجاب", panjabi: "ثوب", "three-piece-dress": "طقم"
+  };
+  var storyTimer = null;
+
+  function storyProducts() {
+    var seen = {};
+    var rows = [];
+    activeSections().forEach(function (sec) {
+      sectionProducts(sec.key).forEach(function (p) {
+        if (!p || seen[p.id] || isOutOfStock(p)) return;
+        seen[p.id] = true;
+        rows.push({ p: p, sec: sec, t: Date.parse(p.dateAdded || "") || 0 });
+      });
+    });
+    rows.sort(function (a, b) { return b.t - a.t; });
+    return rows.slice(0, STORY_COUNT);
+  }
+
+  function storyPad(n) { return n < 10 ? "0" + n : String(n); }
+
+  function storyCardHtml(row, i) {
+    var p = row.p;
+    var pic = window.maHomeCardImage(p) || { src: resolveImg(p) };
+    var ar = STORY_ARABIC[row.sec.key] || "";
+    return (
+      "<a class='ms-card' href='" + escapeHtml(detailHref(row.sec, p)) + "' data-i='" + i + "' tabindex='" + (i === 0 ? "0" : "-1") + "'>" +
+      "<img src='" + escapeHtml(pic.src) + "' alt='" + escapeHtml(p.name) + "' width='480' height='600' decoding='async'" +
+      // card-size photo missing: fall back to the product's full photo once
+      (pic.full && pic.full !== pic.src ? " data-full='" + escapeHtml(pic.full) + "' onerror=\"if(this.dataset.full&&this.src.indexOf(this.dataset.full)<0){this.src=this.dataset.full}\"" : "") +
+      (i < 2 ? " fetchpriority='" + (i === 0 ? "high" : "auto") + "'" : " loading='lazy'") + ">" +
+      "<span class='ms-card-shade' aria-hidden='true'></span>" +
+      "<span class='ms-card-text'>" +
+      "<span class='ms-card-cat'>" + escapeHtml(row.sec.menu || row.sec.key) + "</span>" +
+      "<span class='ms-card-name'>" + escapeHtml(p.name) + (ar ? " <i lang='ar' dir='rtl'>" + ar + "</i>" : "") + "</span>" +
+      "<span class='ms-card-cta'>Explore <span aria-hidden='true'>&rarr;</span></span>" +
+      "</span></a>"
+    );
+  }
+
+  function storyListHtml(rows) {
+    return rows.map(function (row, i) {
+      var ar = STORY_ARABIC[row.sec.key] || "";
+      return (
+        "<li><button type='button' class='ms-li" + (i === 0 ? " is-active" : "") + "' data-i='" + i + "'>" +
+        "<span class='ms-li-meta'>" + storyPad(i + 1) + " · " + escapeHtml(row.sec.menu || row.sec.key) + "</span>" +
+        "<span class='ms-li-name'>" + (ar ? "<i lang='ar' dir='rtl'>" + ar + "</i>" : "") + escapeHtml(row.p.name) + "</span>" +
+        "</button></li>"
+      );
+    }).join("");
+  }
+
+  function storyGo(board, idx) {
+    var cards = board.querySelectorAll(".ms-card");
+    var n = cards.length;
+    if (!n) return;
+    idx = ((idx % n) + n) % n;
+    board.__msIndex = idx;
+    cards.forEach(function (c, i) {
+      var d = i - idx;
+      if (d > n / 2) d -= n;
+      if (d < -n / 2) d += n;
+      c.className = "ms-card" + (d === 0 ? " is-active" : d === -1 ? " is-prev" : d === 1 ? " is-next" : d < 0 ? " is-far-prev" : " is-far-next");
+      c.setAttribute("tabindex", d === 0 ? "0" : "-1");
+      c.setAttribute("aria-hidden", d === 0 ? "false" : "true");
+      if (Math.abs(d) <= 1) {
+        var im = c.querySelector("img[loading='lazy']");
+        if (im) im.removeAttribute("loading");
+      }
+    });
+    var count = board.querySelector(".ms-count");
+    if (count) count.textContent = storyPad(idx + 1) + " / " + storyPad(n);
+    var items = board.querySelectorAll(".ms-li");
+    items.forEach(function (b, i) { b.classList.toggle("is-active", i === idx); b.setAttribute("aria-current", i === idx ? "true" : "false"); });
+    var list = board.querySelector(".ms-list-items");
+    var on = items[idx];
+    if (list && on) {
+      var top = on.parentNode.offsetTop - list.clientHeight / 2 + on.parentNode.offsetHeight / 2;
+      list.scrollTo({ top: Math.max(0, top), behavior: prefersReducedMotion() ? "auto" : "smooth" });
+    }
+  }
+
+  function storyStop() { if (storyTimer) { clearInterval(storyTimer); storyTimer = null; } }
+  function storyStart(board) {
+    storyStop();
+    if (prefersReducedMotion()) return;
+    storyTimer = setInterval(function () {
+      if (board.__msPaused || document.hidden) return;
+      storyGo(board, (board.__msIndex || 0) + 1);
+    }, STORY_INTERVAL);
+  }
+
+  function renderStoryboard() {
+    var board = $("msBoard");
+    if (!board) return;
+    var rows = storyProducts();
+    if (!rows.length) return;
+    var key = rows.map(function (r) { return r.p.id; }).join("|");
+    if (board.__msKey === key) return;
+    board.__msKey = key;
+    board.querySelector(".ms-deck").innerHTML = rows.map(storyCardHtml).join("");
+    board.querySelector(".ms-list-items").innerHTML = storyListHtml(rows);
+    board.classList.add("is-ready");
+    storyGo(board, 0);
+    if (!board.__msBound) {
+      board.__msBound = true;
+      board.addEventListener("click", function (e) {
+        var b = e.target.closest("[data-ms-go], .ms-li");
+        if (!b) {
+          // a tilted card behind: bring it to the front instead of opening it
+          var c = e.target.closest(".ms-card");
+          if (c && !c.classList.contains("is-active")) { e.preventDefault(); storyGo(board, +c.getAttribute("data-i")); storyStart(board); }
+          return;
+        }
+        e.preventDefault();
+        var cur = board.__msIndex || 0;
+        storyGo(board, b.classList.contains("ms-li") ? +b.getAttribute("data-i") : cur + (+b.getAttribute("data-ms-go")));
+        storyStart(board);
+      });
+      board.addEventListener("mouseenter", function () { board.__msPaused = true; });
+      board.addEventListener("mouseleave", function () { board.__msPaused = false; });
+      board.addEventListener("focusin", function () { board.__msPaused = true; });
+      board.addEventListener("focusout", function () { board.__msPaused = false; });
+      board.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+          storyGo(board, (board.__msIndex || 0) + (e.key === "ArrowRight" ? 1 : -1));
+          storyStart(board);
+        }
+      });
+      // swipe on phones
+      var deck = board.querySelector(".ms-deck"), x0 = null, y0 = null;
+      deck.addEventListener("touchstart", function (e) { var t = e.touches[0]; x0 = t.clientX; y0 = t.clientY; }, { passive: true });
+      deck.addEventListener("touchend", function (e) {
+        if (x0 == null) return;
+        var t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0;
+        x0 = null;
+        if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { storyGo(board, (board.__msIndex || 0) + (dx < 0 ? 1 : -1)); storyStart(board); }
+      }, { passive: true });
+      // intro lines: two short slides
+      var intro = $("msIntro");
+      if (intro && !prefersReducedMotion()) {
+        var slides = intro.querySelectorAll(".ms-intro-slide"), dots = intro.querySelectorAll(".ms-intro-dots button"), k = 0;
+        var show = function (j) {
+          k = j;
+          slides.forEach(function (s, i) { s.classList.toggle("is-active", i === j); });
+          dots.forEach(function (d, i) { d.classList.toggle("is-active", i === j); d.setAttribute("aria-current", i === j ? "true" : "false"); });
+        };
+        dots.forEach(function (d, i) { d.addEventListener("click", function () { show(i); }); });
+        setInterval(function () { if (!document.hidden) show((k + 1) % slides.length); }, 6000);
+      }
+    }
+    storyStart(board);
+  }
 
   /* ---------------- Hero slider ---------------- */
   var HERO_LCP_FULL =
@@ -1011,6 +1172,7 @@
     if (!window.CATEGORY_PRODUCTS || !activeSections().length) return false;
     renderCatnav();
     renderSections();
+    renderStoryboard();
     var sk = $("homeSkeleton");
     if (sk) sk.style.display = "none";
     rendered = true;

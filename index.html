@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Meta domain verification in the HTML itself: Meta's crawler does not run GTM, so the GTM "FB Domain Verification" tag cannot verify the domain. -->
     <meta name="facebook-domain-verification" content="ba7orm18mosktstfmogeimusny9rht" />
-    <link rel="preload" as="image" href="images/hero-banner/hero-lcp-960.webp" imagesrcset="images/hero-banner/hero-lcp-640.webp 640w, images/hero-banner/hero-lcp-960.webp 960w, images/hero-banner/hero-lcp-1280.webp 1280w, images/hero-banner/premium-black-floral-embroidery-abaya-bangladesh-model-original-dubai-cherry-fabric-(2).webp 1920w" imagesizes="100vw" fetchpriority="high">
     <!-- First product card image (LCP candidate): AVIF for mobile, WebP fallback for desktop and unsupported formats. -->
     <link rel="preload" as="image" type="image/avif" media="(max-width: 767px)" href="images/card-avif/images/Maroon%20Abaya%20Set...jpeg.avif" fetchpriority="high">
     <link rel="preload" as="image" type="image/webp" media="(min-width: 768px)" href="images/card/images/Maroon%20Abaya%20Set...jpeg.webp" fetchpriority="high">
@@ -140,6 +139,77 @@ body {
   .home-hero-track { aspect-ratio: 16 / 9; }
   .home-hero-slide img { object-position: center top; }
   .home-hero { margin: 0 auto 4px; }
+}
+
+
+/* ---------- Top of homepage: intro + card deck + list + offer strips. Flat corners (owner's rule). ---------- */
+.ms-story { max-width: 1200px; margin: 0 auto; padding: 26px 16px 8px; overflow-x: hidden; overflow-x: clip; font-family: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif; color: #111; }
+.ms-intro { position: relative; display: grid; justify-items: center; min-height: 150px; margin-bottom: 26px; }
+.ms-intro-slide { grid-area: 1 / 1; display: flex; flex-direction: column; align-items: flex-start; line-height: 1.02; opacity: 0; transition: opacity .7s ease; pointer-events: none; }
+.ms-intro-slide.is-active { opacity: 1; pointer-events: auto; }
+.ms-l1 { margin: 0; font-size: 22px; font-weight: 400; color: #444; }
+.ms-big { margin: 0 0 2px 44px; font-size: 46px; font-weight: 500; letter-spacing: -.01em; color: #222; }
+.ms-ar { margin: 0 0 2px 44px; font: 400 24px/1.25 "Noto Naskh Arabic", "Amiri", "Segoe UI", serif; color: #8a6d3b; }
+.ms-l3 { margin: 0 0 0 44px; font-size: 19px; color: #555; }
+.ms-l3 b { color: #111; font-weight: 800; }
+.ms-intro-dots { grid-area: 2 / 1; display: flex; gap: 5px; margin-top: 12px; }
+.ms-intro-dots button { width: 6px; height: 4px; padding: 0; border: 0; background: #ccc; cursor: pointer; transition: width .3s ease, background .3s ease; }
+.ms-intro-dots button.is-active { width: 16px; background: #111; }
+.ms-board { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 40px; align-items: center; min-height: 520px; outline: none; }
+.ms-stage { display: flex; flex-direction: column; align-items: center; gap: 22px; }
+.ms-deck { position: relative; width: 100%; max-width: 560px; height: 440px; perspective: 1400px; }
+.ms-card { position: absolute; left: 50%; top: 0; width: 330px; height: 440px; margin-left: -165px; overflow: hidden; background: #e9e4dc; border: 1px solid #222; color: #fff; text-decoration: none;
+  transition: transform .65s cubic-bezier(.2,.7,.2,1), opacity .65s ease, filter .65s ease; will-change: transform; }
+.ms-card img { width: 100%; height: 100%; object-fit: cover; object-position: center 18%; display: block; }
+.ms-card-shade { position: absolute; inset: 45% 0 0; background: linear-gradient(to top, rgba(0,0,0,.72), rgba(0,0,0,0)); }
+.ms-card-text { position: absolute; left: 22px; right: 22px; bottom: 22px; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; opacity: 0; transition: opacity .4s ease .2s; }
+.ms-card.is-active .ms-card-text { opacity: 1; }
+.ms-card-cat { font-size: 9px; font-weight: 800; letter-spacing: .24em; text-transform: uppercase; color: rgba(255,255,255,.78); }
+.ms-card-name { font-size: 19px; font-weight: 800; line-height: 1.2; }
+.ms-card-name i { font: 400 13px "Noto Naskh Arabic", "Amiri", serif; color: #d9b98a; margin-left: 4px; }
+.ms-card-cta { margin-top: 6px; display: inline-flex; gap: 8px; align-items: center; padding: 8px 14px; background: #fff; color: #111; font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.ms-card.is-active { z-index: 3; transform: none; box-shadow: 0 18px 40px rgba(0,0,0,.22); }
+.ms-card.is-prev { z-index: 2; transform: translateX(-42%) scale(.86) rotateY(18deg); opacity: .75; filter: blur(1.5px); border-color: transparent; cursor: pointer; }
+.ms-card.is-next { z-index: 2; transform: translateX(42%) scale(.86) rotateY(-18deg); opacity: .75; filter: blur(1.5px); border-color: transparent; cursor: pointer; }
+.ms-card.is-far-prev { z-index: 1; transform: translateX(-60%) scale(.7); opacity: 0; pointer-events: none; }
+.ms-card.is-far-next { z-index: 1; transform: translateX(60%) scale(.7); opacity: 0; pointer-events: none; }
+.ms-board:not(.is-ready) .ms-deck { background: linear-gradient(90deg, #f1eee9, #e8e3db, #f1eee9); background-size: 200% 100%; animation: ms-shimmer 1.4s linear infinite; max-width: 330px; }
+@keyframes ms-shimmer { to { background-position: -200% 0; } }
+.ms-nav { display: flex; align-items: center; gap: 22px; }
+.ms-arrow { width: 34px; height: 34px; border: 1px solid #ddd; border-radius: 50%; background: #fff; color: #555; font-size: 18px; line-height: 1; cursor: pointer; }
+.ms-arrow:hover { border-color: #111; color: #111; }
+.ms-count { font: 700 11px ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; color: #777; min-width: 62px; text-align: center; }
+.ms-list { align-self: stretch; display: flex; flex-direction: column; justify-content: center; }
+.ms-list-title { margin: 0 0 8px; text-align: right; font-size: 10px; font-weight: 900; letter-spacing: .32em; text-transform: uppercase; }
+.ms-list-items { position: relative; list-style: none; margin: 0; padding: 0; max-height: 380px; overflow-y: auto; scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent); mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent); }
+.ms-list-items::-webkit-scrollbar { display: none; }
+.ms-li { width: 100%; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; padding: 13px 0; border: 0; border-bottom: 1px solid #eee; background: none; cursor: pointer; text-align: right; font: inherit; color: #999; }
+.ms-li-meta { font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #aaa; }
+.ms-li-name { font-size: 14px; font-weight: 600; }
+.ms-li-name i { font: 400 11px "Noto Naskh Arabic", "Amiri", serif; color: #c2a57a; margin-right: 8px; }
+.ms-li.is-active .ms-li-meta { color: #b8862f; }
+.ms-li.is-active .ms-li-name { color: #111; font-weight: 800; }
+.ms-li:hover .ms-li-name { color: #111; }
+.ms-story .home-promo-row { max-width: none; padding: 0; margin: 28px 0 8px; gap: 14px; }
+.ms-story .home-promo-tile { padding: 13px 18px; border: 1px solid #222; background: linear-gradient(90deg, #fff 0%, #fff 55%, #f1e6cf 100%); }
+.ms-story .home-promo-label, .ms-story .home-promo-cta { font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+@media (max-width: 860px) {
+  .ms-story { padding-top: 18px; }
+  .ms-intro { min-height: 118px; margin-bottom: 16px; }
+  .ms-l1 { font-size: 16px; } .ms-big { font-size: 34px; margin-left: 28px; } .ms-ar { font-size: 19px; margin-left: 28px; } .ms-l3 { font-size: 14px; margin-left: 28px; }
+  .ms-board { grid-template-columns: 1fr; gap: 14px; min-height: 0; }
+  .ms-deck { height: 400px; }
+  .ms-card { width: 300px; height: 400px; margin-left: -150px; }
+  .ms-card.is-prev { transform: translateX(-34%) scale(.84) rotateY(16deg); }
+  .ms-card.is-next { transform: translateX(34%) scale(.84) rotateY(-16deg); }
+  .ms-list { display: none; }
+}
+@media (max-width: 560px) {
+  .ms-story .home-promo-row { grid-template-columns: 1fr; gap: 8px; margin-top: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ms-card, .ms-intro-slide, .ms-card-text { transition: none; }
 }
 
 /* ---------- Promo banner row (two real offers — free delivery + WhatsApp order) ---------- */
@@ -892,31 +962,49 @@ body {
 <script defer src="site-header.js?v=eb7169f395bc4842"></script>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-ML7RL6BR"
 height="5" width="5" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- First slide is in HTML so LCP does not wait for catalog JS. Slider JS replaces this with the full track. -->
-<div id="homeHero" class="home-hero">
-  <div class="home-hero-track">
-    <div class="home-hero-slide is-active">
-      <img src="images/hero-banner/hero-lcp-960.webp" srcset="images/hero-banner/hero-lcp-640.webp 640w, images/hero-banner/hero-lcp-960.webp 960w, images/hero-banner/hero-lcp-1280.webp 1280w, images/hero-banner/premium-black-floral-embroidery-abaya-bangladesh-model-original-dubai-cherry-fabric-(2).webp 1920w" sizes="100vw" alt="Premium Abaya Collection" width="1920" height="840" fetchpriority="high" decoding="sync">
-      <div class="home-hero-cap">
-        <p class="eyebrow">Eid Collection 2026</p>
-        <h2 class="head">Experience<br>the Elegance</h2>
-        <p class="sub">Premium modest wear crafted with comfort &amp; purity.</p>
-        <a class="hero-btn" href="/abaya">Shop Now</a>
+<!-- Top of the homepage: intro lines, then the 12 newest products as a card deck with a list beside it
+     (rendered by index-home-muslim-abaya.js renderStoryboard), then two offer strips. -->
+<section id="msStory" class="ms-story" aria-label="Muslim Abaya new arrivals">
+  <div id="msIntro" class="ms-intro">
+    <div class="ms-intro-slide is-active">
+      <p class="ms-l1">Welcome to</p>
+      <h1 class="ms-big">Muslim Abaya</h1>
+      <p class="ms-ar" lang="ar" dir="rtl">مسلم عباية</p>
+      <p class="ms-l3">premium <b>modest wear</b> for every day</p>
+    </div>
+    <div class="ms-intro-slide" aria-hidden="true">
+      <p class="ms-l1">Elegance in every</p>
+      <p class="ms-big">Abaya</p>
+      <p class="ms-ar" lang="ar" dir="rtl">أناقة واحتشام</p>
+      <p class="ms-l3">cash on delivery <b>across Bangladesh</b></p>
+    </div>
+    <div class="ms-intro-dots" aria-label="Intro"><button type="button" class="is-active" aria-label="1" aria-current="true"></button><button type="button" aria-label="2"></button></div>
+  </div>
+  <div id="msBoard" class="ms-board" tabindex="-1">
+    <div class="ms-stage">
+      <div class="ms-deck" aria-live="polite"></div>
+      <div class="ms-nav">
+        <button type="button" class="ms-arrow" data-ms-go="-1" aria-label="Previous">&#8249;</button>
+        <span class="ms-count">01 / 12</span>
+        <button type="button" class="ms-arrow" data-ms-go="1" aria-label="Next">&#8250;</button>
       </div>
     </div>
+    <div class="ms-list">
+      <h2 class="ms-list-title">New Arrivals</h2>
+      <ol class="ms-list-items"></ol>
+    </div>
   </div>
-</div>
-
-<div class="home-promo-row">
-  <a class="home-promo-tile" href="/category">
-    <span class="home-promo-label">৩+ পণ্যে সারাদেশে ফ্রি ডেলিভারি</span>
-    <span class="home-promo-cta">কিনুন &rarr;</span>
-  </a>
-  <a class="home-promo-tile is-whatsapp" href="https://wa.me/8801971642683" target="_blank" rel="noopener">
-    <span class="home-promo-label">WhatsApp-এ সরাসরি অর্ডার করুন</span>
-    <span class="home-promo-cta">চ্যাট করুন &rarr;</span>
-  </a>
-</div>
+  <div class="home-promo-row">
+    <a class="home-promo-tile" href="/category">
+      <span class="home-promo-label">Free delivery on 3+ items</span>
+      <span class="home-promo-cta">Shop now</span>
+    </a>
+    <a class="home-promo-tile" href="/order-track">
+      <span class="home-promo-label">Track your order</span>
+      <span class="home-promo-cta">Track now</span>
+    </a>
+  </div>
+</section>
 
 <!-- Quick category chips -->
 <nav id="homeCatnav" class="home-catnav" aria-label="Shop categories"></nav>
