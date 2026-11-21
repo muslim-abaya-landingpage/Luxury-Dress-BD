@@ -83,12 +83,17 @@ test('the first storyboard photo is copied next to the site at deploy time (no s
   const html = prerenderIndex(fs.readFileSync(path.join(root, 'index.html'), 'utf8'), parts);
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'lcp-'));
   const okFetch = async () => ({ ok: true, status: 200, headers: { get: () => 'image/webp' }, arrayBuffer: async () => new Uint8Array(4000).buffer });
-  const out = await selfHostLcpPhoto(html, parts, { fetchImpl: okFetch, dir });
+  const out = await selfHostLcpPhoto(html, parts, { fetchImpl: okFetch, dir, shrink: () => null });
   assert.ok(fs.existsSync(path.join(dir, 'test-card.webp')));
   assert.match(out, /<link rel="preload" as="image" href="\/images\/lcp\/test-card\.webp" fetchpriority="high">/);
   assert.match(out, /<a class='ms-card is-active'[^>]*><img src='\/images\/lcp\/test-card\.webp'/);
   assert.doesNotMatch(out, /<link rel="preconnect"[^>]*>\s*<link rel="preload" as="image" href="\/images\/lcp/);
   // download fails: page is unchanged (remote photo kept)
   const badFetch = async () => ({ ok: false, status: 404, headers: { get: () => 'text/html' } });
-  assert.equal(await selfHostLcpPhoto(html, parts, { fetchImpl: badFetch, dir }), html);
+  assert.equal(await selfHostLcpPhoto(html, parts, { fetchImpl: badFetch, dir, shrink: () => null }), html);
+  // with a resizer: smaller file under a -480 name
+  const fakeSharp = () => () => (input) => ({ resize: () => ({ webp: () => ({ toBuffer: async () => Buffer.alloc(1200) }) }) });
+  const out2 = await selfHostLcpPhoto(html, parts, { fetchImpl: okFetch, dir, shrink: fakeSharp() });
+  assert.ok(fs.existsSync(path.join(dir, 'test-card-480.webp')));
+  assert.match(out2, /<a class='ms-card is-active'[^>]*><img src='\/images\/lcp\/test-card-480\.webp'/);
 });

@@ -15,6 +15,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import {fileURLToPath} from 'node:url';
+import {createRequire} from 'node:module';
+import {execFileSync} from 'node:child_process';
+import os from 'node:os';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outArg = process.argv.indexOf('--out');
@@ -106,10 +109,10 @@ export function prerenderIndex(html, parts) {
 // The first storyboard photo is the mobile LCP. When it lives on the image host, the phone first has to open a
 // second connection (slow on 4G). At deploy time we copy that one photo next to the site (images/lcp/, not in
 // git) and point the first card and its preload at the copy. If the download fails, the remote photo is kept.
-export async function selfHostLcpPhoto(html, parts, {fetchImpl = globalThis.fetch, dir = path.join(root, 'images', 'lcp')} = {}) {
+export async function selfHostLcpPhoto(html, parts, {fetchImpl = globalThis.fetch, dir = path.join(root, 'images', 'lcp'), shrink = loadSharp} = {}) {
   const src = parts && parts.story && parts.story.firstSrc;
   if (!src || !/^https:\/\//.test(src) || typeof fetchImpl !== 'function') return html;
-  const name = (src.split('?')[0].split('/').pop() || '').replace(/[^A-Za-z0-9._-]/g, '');
+  let name = (src.split('?')[0].split('/').pop() || '').replace(/[^A-Za-z0-9._-]/g, '');
   if (!/\.(webp|avif|jpe?g|png)$/i.test(name)) return html;
   try {
     const ctrl = new AbortController();
@@ -118,8 +121,14 @@ export async function selfHostLcpPhoto(html, parts, {fetchImpl = globalThis.fetc
     clearTimeout(timer);
     const type = String(res.headers && res.headers.get ? res.headers.get('content-type') || '' : '');
     if (!res.ok || !/^image\//.test(type)) throw new Error('HTTP ' + res.status + ' ' + type);
-    const buf = Buffer.from(await res.arrayBuffer());
-    if (buf.length < 500 || buf.length > 600000) throw new Error('unexpected size ' + buf.length);
+    let buf = Buffer.from(await res.arrayBuffer());
+    if (buf.length < 500 || buf.length > 2000000) throw new Error('unexpected size ' + buf.length);
+    const small = await shrinkForPhones(buf, shrink);
+    if (small && small.length < buf.length) {
+      console.log(`index.html prerender: LCP photo ${Math.round(buf.length / 1024)} KB -> ${Math.round(small.length / 1024)} KB (480 px wide)`);
+      buf = small;
+      name = name.replace(/\.(webp|avif|jpe?g|png)$/i, '') + '-480.webp';
+    }
     fs.mkdirSync(dir, {recursive: true});
     fs.writeFileSync(path.join(dir, name), buf);
   } catch (e) {
@@ -133,6 +142,34 @@ export async function selfHostLcpPhoto(html, parts, {fetchImpl = globalThis.fetc
   out = out.replace(`<a class='ms-card is-active'`, '\u0000').replace(/\u0000([^>]*><img src=')([^']+)'/, (m, mid, old) => `<a class='ms-card is-active'${mid}${old === src ? local : old}'`);
   console.log('index.html prerender: LCP photo served from ' + local);
   return out;
+}
+
+// sharp (free, open source) resizes the photo. It is not a site dependency, so the build installs it into a temp
+// folder when it is missing. Any failure just keeps the original photo.
+async function loadSharp() {
+  try { return (await import('sharp')).default; } catch (e) { /* not installed */ }
+  const prefix = path.join(os.tmpdir(), 'ma-build-sharp');
+  try {
+    const req = createRequire(path.join(prefix, 'package.json'));
+    try { return req('sharp'); } catch (e) { /* install below */ }
+    fs.mkdirSync(prefix, {recursive: true});
+    execFileSync('npm', ['install', '--no-save', '--no-audit', '--no-fund', '--silent', '--prefix', prefix, 'sharp@0.34.4'], {stdio: 'ignore', timeout: 120000});
+    return req('sharp');
+  } catch (e) {
+    console.log('index.html prerender: sharp not available (' + String(e && e.message || e).slice(0, 80) + ')');
+    return null;
+  }
+}
+
+async function shrinkForPhones(buf, shrink) {
+  try {
+    const sharp = typeof shrink === 'function' ? await shrink() : null;
+    if (!sharp) return null;
+    return await sharp(buf).resize({width: 480, withoutEnlargement: true}).webp({quality: 68, effort: 5}).toBuffer();
+  } catch (e) {
+    console.log('index.html prerender: could not shrink LCP photo (' + String(e && e.message || e).slice(0, 80) + ')');
+    return null;
+  }
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

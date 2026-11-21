@@ -715,7 +715,8 @@
       "<img src='" + escapeHtml(pic.src) + "' alt='" + escapeHtml(p.name) + "' width='480' height='600' decoding='async'" +
       // card-size photo missing: fall back to the product's full photo once
       (pic.full && pic.full !== pic.src ? " data-full='" + escapeHtml(pic.full) + "' onerror=\"if(this.dataset.full&&this.src.indexOf(this.dataset.full)<0){this.src=this.dataset.full}\"" : "") +
-      (i < 2 ? " fetchpriority='" + (i === 0 ? "high" : "auto") + "'" : " loading='lazy'") + ">" +
+      // only the front photo is urgent (mobile LCP); the one peeking out beside it waits, the rest load lazily
+      (i === 0 ? " fetchpriority='high'" : i === 1 ? " fetchpriority='low'" : " loading='lazy'") + ">" +
       "<span class='ms-card-shade' aria-hidden='true'></span>" +
       "<span class='ms-card-text'>" +
       "<span class='ms-card-cat'>" + escapeHtml(row.sec.menu || row.sec.key) + "</span>" +
