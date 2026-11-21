@@ -140,7 +140,7 @@ test('Setup page row: counts codes per Dhaka day and warns when the free Gmail a
   assert.equal(low.ok, false); assert.equal(low.partial, true);
   assert.match(low.help, /ফ্রি সীমা প্রায় শেষ/);
   const busyDays = setup();
-  busyDays.props.set('CUST_CODES_DAILY', JSON.stringify({ [busyDays.ctx.customerCodeDay_(Date.now() - 86400000 * 0 + 0)]: 70 }));
+  busyDays.props.set('CUST_CODES_DAILY', JSON.stringify({ [busyDays.ctx.customerCodeDay_()]: 70 }));
   const busy = busyDays.ctx.customerCodeSetupRow_();
   assert.equal(busy.partial, true);
   assert.match(busy.help, /পেইড/);
