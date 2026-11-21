@@ -17,9 +17,10 @@ test('prerender renders the first section with the browser renderer', async () =
   assert.ok(cards.length >= 1 && cards.length <= 6, 'between 1 and 6 cards, got ' + cards.length);
   assert.match(parts.sections, /fetchpriority='high'/, 'first section card keeps its high fetch priority');
   assert.match(parts.storyDeck, /class='ms-card is-active'/, 'first storyboard card is active in the initial HTML');
-  assert.match(parts.storyDeck, /fetchpriority='high'/, 'first storyboard image keeps high priority');
+  assert.match(parts.storyDeck, /fetchpriority='high'/, 'active and visible previous storyboard images keep high priority');
+  assert.match(parts.storyDeck, /class='ms-card is-prev'/, 'last card is pre-positioned as the visible previous card');
   assert.match(parts.storyList, /class='ms-li is-active'/, 'first storyboard list item is active');
-  assert.ok(parts.storyKey && parts.storyLcp, 'storyboard identity and LCP image are derived from the catalog');
+  assert.ok(parts.storyKey && parts.storyLcp && parts.storyPrevLcp, 'storyboard identity and both visible image URLs are derived from the catalog');
   assert.match(parts.catnav, /class='home-catnav-inner'/);
   assert.ok(parts.btnCss.includes('.ah-card .ah-card-bottom'));
   // "Shop by category" tiles were removed from the homepage (the card deck at the top replaced them).
@@ -38,7 +39,9 @@ test('prerenderIndex inlines the card CSS and fills the empty containers once', 
   assert.equal((out.match(/id="ma-home-btn-row"/g) || []).length, 1);
   assert.ok(!out.includes('<main id="homeSections" class="home-sections"></main>'));
   assert.ok(out.includes('data-story-key="' + renderHomeParts().storyKey + '"'));
-  assert.ok(out.includes('href="' + renderHomeParts().storyLcp + '" fetchpriority="high"'), 'LCP preload matches the first prerendered storyboard image');
+  const rendered = renderHomeParts();
+  assert.ok(out.includes('href="' + rendered.storyLcp + '" fetchpriority="high"'), 'preload matches the active storyboard image');
+  assert.ok(out.includes('href="' + rendered.storyPrevLcp + '" fetchpriority="high"'), 'preload matches the visible previous storyboard image');
   assert.ok(out.includes("<a class='ms-card is-active'"), 'first storyboard image is present in the initial HTML');
   assert.ok(!out.includes('<div class="ms-deck" aria-live="polite"></div>'));
   assert.ok(!out.includes('<ol class="ms-list-items"></ol>'));
