@@ -15,7 +15,9 @@ test('prerender renders the first section with the browser renderer', async () =
   assert.equal(sections.length, 1);
   const cards = parts.sections.match(/<article /g) || [];
   assert.ok(cards.length >= 1 && cards.length <= 6, 'between 1 and 6 cards, got ' + cards.length);
-  assert.match(parts.sections, /fetchpriority='high'/, 'first card keeps its high fetch priority');
+  // the storyboard photo is the LCP now; section cards sit below it and load lazily
+  assert.doesNotMatch(parts.sections, /fetchpriority='high'/, 'section cards do not compete with the storyboard photo');
+  assert.match(parts.sections, /loading='lazy'/);
   assert.match(parts.catnav, /class='home-catnav-inner'/);
   assert.ok(parts.btnCss.includes('.ah-card .ah-card-bottom'));
   // "Shop by category" tiles were removed from the homepage (the card deck at the top replaced them).

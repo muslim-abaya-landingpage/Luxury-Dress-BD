@@ -408,8 +408,9 @@
   function cardsHtml(entry, from, to) {
     var html = "";
     for (var i = from; i < to && i < entry.products.length; i++) {
-      /* first-viewport cards: eager (LCP candidate), first one high priority */
-      html += cardHtml(entry.sec, entry.products[i], entry.isFirst && i < 2 ? (i === 0 ? 2 : 1) : 0);
+      /* The storyboard card deck now fills the first screen (its front photo is the LCP), so section cards are
+         all below the fold: lazy, so they do not compete with that photo for a slow phone connection. */
+      html += cardHtml(entry.sec, entry.products[i], 0);
     }
     return html;
   }
