@@ -22,6 +22,13 @@ function json(body, status = 200) {
   });
 }
 
+function safeReason(value) {
+  return String(value || '').replace(/[\\u0000-\\u001f\\u007f]/g, '')
+    .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/gi, '[redacted email]')
+    .replace(/\\b(?:\\+?880)?1[3-9]\\d{8}\\b|\\b01[3-9]\\d{8}\\b/g, '[redacted phone]')
+    .replace(/\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b/g, '[redacted IP]').trim().slice(0, 500);
+}
+
 function decodeCursor(value) {
   if (!value) return null;
   try {
@@ -145,7 +152,7 @@ export async function handleAdminFraud(request, env, deps = {}) {
     if (action === 'decide') {
       const id = String(params.ReviewId || '').slice(0, 100);
       const next = String(params.Status || '');
-      const reason = String(params.Reason || '').trim().slice(0, 500);
+      const reason = safeReason(params.Reason);
       const version = Number(params.ExpectedVersion);
       if (!id || !Number.isSafeInteger(version) || version < 1) return json({ ok: false, error: 'INVALID_INPUT' }, 400);
       if (!['cleared', 'rejected', 'hold', 'pending'].includes(next)) return json({ ok: false, error: 'INVALID_DECISION' }, 400);
