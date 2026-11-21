@@ -113,6 +113,24 @@ function summarize(report) {
   };
 }
 
+// Prints what the LCP element is and where its time goes, so a slow run can be diagnosed from the job log alone.
+function explainLcp(report) {
+  try {
+    const a = report.audits;
+    const br = a['lcp-breakdown-insight']?.details?.items || [];
+    const parts = (br.find((x) => x.type === 'table')?.items || []).map((x) => `${x.label} ${Math.round(x.duration)} ms`).join(', ');
+    const node = br.find((x) => x.type === 'node');
+    console.log(`  LCP element: ${node ? node.selector + ' :: ' + String(node.snippet || '').slice(0, 160) : 'unknown'}`);
+    if (parts) console.log(`  LCP parts: ${parts}`);
+    const reqs = (a['network-requests']?.details?.items || [])
+      .slice().sort((x, y) => (y.transferSize || 0) - (x.transferSize || 0)).slice(0, 8)
+      .map((r) => `${Math.round((r.transferSize || 0) / 1024)} KB ${r.priority || ''} ${Math.round(r.networkRequestTime || 0)}-${Math.round(r.networkEndTime || 0)} ms ${String(r.url).replace(BASE, '').slice(0, 90)}`);
+    console.log('  Largest requests:\n    ' + reqs.join('\n    '));
+  } catch (e) {
+    console.log('  (could not explain LCP: ' + e.message + ')');
+  }
+}
+
 fs.rmSync(OUT, {recursive: true, force: true});
 fs.mkdirSync(OUT, {recursive: true});
 
@@ -143,6 +161,7 @@ for (const page of PAGES) {
     const s = summarize(report);
     runs.push(s);
     console.log(`${page.name} run ${i}/${RUNS}: score ${s.score}, LCP ${Math.round(s.lcp)} ms, TBT ${Math.round(s.tbt)} ms, CLS ${s.cls.toFixed(3)}`);
+    if (i === 1) explainLcp(report);
   }
 
   const m = {
