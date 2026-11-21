@@ -695,6 +695,25 @@ async function processOrderQueue(env) {
         .bind(attempts, t + backoffMs(attempts), r.text, t, row.event_id).run();
     }
   }
+  // Recover a review write that failed after the customer order was already saved.
+  // Limit reconciliation to recent records so deployment does not backfill the historical inbox.
+  try {
+    const missingReviews = await env.DB.prepare(
+      "SELECT o.event_id, o.order_id, o.payload, o.updated_at " +
+      "FROM order_inbox o LEFT JOIN fraud_reviews r ON r.event_id = o.event_id " +
+      "LEFT JOIN fraud_review_events e ON e.review_id = r.review_id AND e.action = 'created' " +
+      "WHERE o.status = 'saved' AND o.updated_at >= ? AND (r.review_id IS NULL OR e.event_record_id IS NULL) " +
+      "ORDER BY o.updated_at DESC LIMIT 50"
+    ).bind(now - 24 * 60 * 60 * 1000).all();
+    for (const row of (missingReviews.results || [])) {
+      const decoded = decodeOrderPayload(row.payload, row.event_id);
+      if (decoded.risk && decoded.risk.level !== 'low') {
+        await persistFraudReview(env.DB, { eventId: row.event_id, orderId: row.order_id, risk: decoded.risk, now: Number(row.updated_at) || now });
+      }
+    }
+  } catch (e) {
+    console.log('fraud_review_reconcile_error', String(e).slice(0, 160));
+  }
   // Keep personal data only as long as needed.
   await env.DB.prepare("DELETE FROM order_inbox WHERE status IN ('saved', 'rejected') AND updated_at < ?").bind(now - 30 * 24 * 3600 * 1000).run();
   await cleanupIpTables(env, now);
