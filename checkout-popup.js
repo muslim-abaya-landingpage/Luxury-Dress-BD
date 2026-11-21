@@ -415,6 +415,11 @@
         if (meta.content_ids && meta.content_ids.length) fd.append("ContentIDs", meta.content_ids.join(","));
       } catch (metaErr) {}
     }
+    try {
+      var gaIds = typeof window.maGaTrackingIds === "function" ? window.maGaTrackingIds() : {};
+      if (gaIds.client_id) fd.append("GaClientId", gaIds.client_id);
+      if (gaIds.session_id) fd.append("GaSessionId", gaIds.session_id);
+    } catch (gaIdErr) {}
     return fd;
   }
 

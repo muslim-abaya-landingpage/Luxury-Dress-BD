@@ -109,7 +109,11 @@ test('Apps Script stores and reads back the shopper IP + browser in "Tracking Cl
   const sheet = fakeSheet([Array(38).fill('h'), Array(38).fill('')]);
   assert.equal(ctx.saveOnlineOrderTrackingClient_(sheet, 2, '103.4.5.6', 'Mozilla/5.0 test'), true);
   assert.equal(sheet.rows[0][38], 'Tracking Client');
-  assert.deepEqual(JSON.parse(sheet.rows[1][38]), { ip: '103.4.5.6', ua: 'Mozilla/5.0 test' });
+  const saved = JSON.parse(sheet.rows[1][38]);
+  assert.equal(saved.ip, '103.4.5.6');
+  assert.equal(saved.ua, 'Mozilla/5.0 test');
+  assert.equal(saved.v, 2, 'v2 marks orders that get the server-side GA4 Purchase');
+  assert.ok(saved.t > 0);
   assert.equal(JSON.stringify(ctx.readOnlineOrderTrackingClient_(sheet, 2)), JSON.stringify({ ip: '103.4.5.6', ua: 'Mozilla/5.0 test' }));
   // Bad IP is ignored; a foreign header in that column is never overwritten.
   assert.equal(ctx.cleanTrackingClientIp_('1.2.3.4<script>'), '');

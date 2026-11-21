@@ -4257,6 +4257,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 if (metaPayload.content_ids && metaPayload.content_ids.length) {
                     formData.append('ContentIDs', metaPayload.content_ids.join(','));
                 }
+                try {
+                    var gaIds = typeof window.maGaTrackingIds === 'function' ? window.maGaTrackingIds() : {};
+                    if (gaIds.client_id) formData.append('GaClientId', gaIds.client_id);
+                    if (gaIds.session_id) formData.append('GaSessionId', gaIds.session_id);
+                } catch (gaIdErr) {}
             }
 
             var orderWa = {

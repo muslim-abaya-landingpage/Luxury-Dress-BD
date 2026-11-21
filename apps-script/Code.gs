@@ -2006,7 +2006,10 @@ function handleOnlineOrderPost_(e) {
 
   // Server-side tracking: keep the shopper's IP + browser for the Purchase event that is
   // sent later, when the order is Confirmed. Never blocks the order.
-  try { saveOnlineOrderTrackingClient_(sheet, newRow, param_(e, 'ClientIP'), param_(e, 'ClientUserAgent')); } catch (trackClientErr) {}
+  try {
+    saveOnlineOrderTrackingClient_(sheet, newRow, param_(e, 'ClientIP'), param_(e, 'ClientUserAgent'),
+      { clientId: param_(e, 'GaClientId'), sessionId: param_(e, 'GaSessionId') });
+  } catch (trackClientErr) {}
 
   // নতুন অর্ডারের ঝুঁকি-যাচাই: আগের Fake/বাতিল/রিটার্ন থাকলে Admin Note-এ সতর্কতা।
   var riskLine = '';
@@ -3073,20 +3076,47 @@ function cleanTrackingClientUa_(value) {
   return String(value || '').replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, 400);
 }
 
-function saveOnlineOrderTrackingClient_(sheet, row, ip, ua) {
+// ga = { clientId, sessionId } from the shopper's GA cookies (optional). v:2 + t mark orders
+// placed after server-side GA4 Purchase went live (see ServerConversions.gs).
+function saveOnlineOrderTrackingClient_(sheet, row, ip, ua, ga) {
   if (!sheet || !(row > 1)) return false;
   var cleanIp = cleanTrackingClientIp_(ip);
   var cleanUa = cleanTrackingClientUa_(ua);
-  if (!cleanIp && !cleanUa) return false;
   var col = onlineOrderColumn_(sheet, ONLINE_ORDER_TRACKING_CLIENT_COL);
   if (sheet.getMaxColumns() < col) sheet.insertColumnsAfter(sheet.getMaxColumns(), col - sheet.getMaxColumns());
   var head = sheet.getRange(1, col);
   var header = String(head.getValue() || '').trim();
   if (header && header !== ONLINE_ORDER_TRACKING_CLIENT_HEADER) return false;
   if (!header) head.setValue(ONLINE_ORDER_TRACKING_CLIENT_HEADER);
-  var info = {};
+  var info = { v: 2, t: Date.now() };
   if (cleanIp) info.ip = cleanIp;
   if (cleanUa) info.ua = cleanUa;
+  var gc = String(ga && ga.clientId || '').trim();
+  var gs = String(ga && ga.sessionId || '').trim();
+  if (/^\d{1,20}\.\d{1,20}$/.test(gc)) info.gc = gc;
+  if (/^\d{6,20}$/.test(gs)) info.gs = gs;
+  sheet.getRange(row, col).setValue(JSON.stringify(info));
+  return true;
+}
+
+// Full parsed "Tracking Client" JSON for a row ({} when missing).
+function readOnlineOrderTrackingInfo_(sheet, row) {
+  var col = onlineOrderColumn_(sheet, ONLINE_ORDER_TRACKING_CLIENT_COL);
+  if (sheet.getMaxColumns() < col) return {};
+  if (String(sheet.getRange(1, col).getValue() || '').trim() !== ONLINE_ORDER_TRACKING_CLIENT_HEADER) return {};
+  try {
+    var parsed = JSON.parse(String(sheet.getRange(row, col).getValue() || '') || '{}');
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+  } catch (err) { return {}; }
+}
+
+// Merge flags (e.g. {g4:1}) into the row's "Tracking Client" JSON.
+function setOnlineOrderTrackingFlags_(sheet, row, flags) {
+  var col = onlineOrderColumn_(sheet, ONLINE_ORDER_TRACKING_CLIENT_COL);
+  if (sheet.getMaxColumns() < col) return false;
+  if (String(sheet.getRange(1, col).getValue() || '').trim() !== ONLINE_ORDER_TRACKING_CLIENT_HEADER) return false;
+  var info = readOnlineOrderTrackingInfo_(sheet, row);
+  for (var k in flags) if (Object.prototype.hasOwnProperty.call(flags, k)) info[k] = flags[k];
   sheet.getRange(row, col).setValue(JSON.stringify(info));
   return true;
 }
@@ -3129,9 +3159,17 @@ function maybeSendConfirmedPurchaseCapiForRow_(sheet, row) {
     if (String(vals[9] || '').toLowerCase().trim() !== 'confirmed') return { ok: false, code: 'NOT_CONFIRMED' };
     var notes = String(vals[16] || '');
     if (notes.indexOf('Fake') !== -1) return { ok: false, code: 'SKIP_FAKE_OR_CANCEL' };
+    // GA4 Purchase (server-side, ServerConversions.gs). Has its own once-only flag.
+    var ga4Code = 'SKIP';
+    try {
+      if (typeof sendGa4ConfirmedPurchaseForRow_ === 'function') {
+        var ga4 = sendGa4ConfirmedPurchaseForRow_(sheet, row, vals);
+        ga4Code = (ga4 && ga4.code) || 'UNKNOWN';
+      }
+    } catch (ga4Err) { ga4Code = 'EXCEPTION'; }
     var metaSent = notes.indexOf('META_PURCHASE_SENT') !== -1;
     var tiktokSent = notes.indexOf('TIKTOK_PURCHASE_SENT') !== -1;
-    if (metaSent && tiktokSent) return { ok: true, code: 'ALREADY_SENT' };
+    if (metaSent && tiktokSent) return { ok: true, code: 'ALREADY_SENT', ga4Code: ga4Code };
     var metaVals = sheet.getRange(row, onlineOrderColumn_(sheet, 30), 1, 3).getValues()[0];
     var orderId = String(vals[8] || ('MA-ROW-' + row)).trim();
     var eventID = 'purchase_' + orderId;
@@ -3170,7 +3208,7 @@ function maybeSendConfirmedPurchaseCapiForRow_(sheet, row) {
         appendAutoCourierNote_(sheet, row, tiktokSent ? 'TIKTOK_PURCHASE_SENT' : 'TIKTOK_FAIL:' + tiktokCode);
       } catch (ttErr) { tiktokCode = 'EXCEPTION'; appendAutoCourierNote_(sheet, row, 'TIKTOK_ERR:EXCEPTION'); }
     }
-    return { ok: metaSent && tiktokSent, code: metaSent && tiktokSent ? 'SENT' : 'PARTIAL_FAILURE', metaCode: metaCode, tiktokCode: tiktokCode };
+    return { ok: metaSent && tiktokSent, code: metaSent && tiktokSent ? 'SENT' : 'PARTIAL_FAILURE', metaCode: metaCode, tiktokCode: tiktokCode, ga4Code: ga4Code };
   } finally { lock.releaseLock(); }
 }
 

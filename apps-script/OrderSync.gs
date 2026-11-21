@@ -604,6 +604,11 @@ function orderSyncTriggerHandler() {
   );
   try { if (typeof flushLowStockAlerts_ === 'function') flushLowStockAlerts_(); } catch (lowErr) {}
   try {
+    if (typeof serverConversionsRefundSweep_ === 'function') {
+      PropertiesService.getScriptProperties().setProperty('SC_REFUND_SWEEP_LAST', JSON.stringify(serverConversionsRefundSweep_()));
+    }
+  } catch (refundErr) { console.error('SC_REFUND_SWEEP_FAILED ' + String(refundErr && refundErr.stack || refundErr)); }
+  try {
     var result = runOrderSyncNow();
     PropertiesService.getScriptProperties().setProperty(
       'ORDERSYNC_LAST_TRIGGER_RESULT',

@@ -713,6 +713,18 @@
     return m ? decodeURIComponent(m[1]) : "";
   }
 
+  // GA4 ids for the server-side Purchase sent when the order is Confirmed (Apps Script).
+  // _ga = GA1.1.<client_id>; _ga_L2BNEXE0XG = GS1.1.<session_id>.… or GS2.1.s<session_id>$…
+  function readGaTrackingIds() {
+    var out = { client_id: "", session_id: "" };
+    var m = /^GA\d+\.\d+\.(\d+\.\d+)$/.exec(readCookieValue("_ga"));
+    if (m) out.client_id = m[1];
+    var s = readCookieValue("_ga_L2BNEXE0XG");
+    var sm = /^GS1\.\d+\.(\d{6,20})\./.exec(s) || /^GS2\.\d+\.s(\d{6,20})/.exec(s);
+    if (sm) out.session_id = sm[1];
+    return out;
+  }
+
   function writeCookieValue(name, value, days) {
     if (typeof document === "undefined" || !name || !value) return;
     var maxAge = Math.max(1, parseInt(days, 10) || 90) * 24 * 60 * 60;
@@ -1390,6 +1402,7 @@
   global.normalizePhoneE164 = normalizePhoneE164;
   global.buildCartTrackingSnapshot = buildCartTrackingSnapshot;
   global.applyMetaTrackingFields = applyMetaTrackingFields;
+  global.maGaTrackingIds = readGaTrackingIds;
   global.maOrderSource = orderSourceValue;
   global.maDetectVisitSource = detectVisitSource;
 })(typeof window !== "undefined" ? window : this);
