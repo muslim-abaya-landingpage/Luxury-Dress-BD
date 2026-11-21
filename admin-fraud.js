@@ -38,6 +38,7 @@
     el.hidden = false;
   }
   function load(append) {
+    append = append === true;
     if (busy) return Promise.resolve();
     busy = true;
     byId("frError").hidden = true;
