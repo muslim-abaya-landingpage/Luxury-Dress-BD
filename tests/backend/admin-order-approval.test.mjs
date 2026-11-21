@@ -65,10 +65,12 @@ const ownerRoleSnapshot = {
     ['admin@example.test', '01700000000', 'Admin', '', '', 'active', '', 'admin', '']
   ] } }
 };
+let testClock = 1000;
 async function call(env, fields, who = admin, snapshot = ownerRoleSnapshot) {
   return handleAdminOrderApproval(req(Object.assign({ Token: 'session' }, fields)), env, {
     verify: async () => who,
-    snapshot
+    snapshot,
+    now: () => ++testClock
   });
 }
 function savedOrder(env, orderId = 'MA-2026-0001') {
@@ -112,7 +114,7 @@ test('staff can read the queue but cannot mutate any approval state', async () =
 test('manager role is denied until the Admins role model supports it', async () => {
   const env = makeEnv();
   const r = await call(env, { Action: 'approve', ApprovalId: 'oa_x', ExpectedVersion: '1' }, { ok: true, role: 'manager', email: 'manager@example.test' });
-  assert.equal(r.status, 401);
+  assert.equal(r.status, 403);
 });
 test('admin cannot create an approval for an order that is not saved in order_inbox', async () => {
   const env = makeEnv();
