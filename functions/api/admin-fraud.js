@@ -97,7 +97,7 @@ export async function handleAdminFraud(request, env, deps = {}) {
   }
   if (auth) return json({ ok: false, error: auth === 'OWNER_ONLY' ? 'OWNER_ONLY' : 'NOT_LOGGED_IN' }, 403);
 
-  const actorId = String(params.ActorId || 'owner').slice(0, 120);
+  const actorId = 'owner';
   const now = deps.now ? deps.now() : Date.now();
   const action = String(params.Action || 'list');
 
@@ -167,7 +167,7 @@ export async function handleAdminFraud(request, env, deps = {}) {
       const eventAction = reopening ? 'reopened' : next;
       const event = db.prepare(
         'INSERT INTO fraud_review_events (event_record_id, review_id, action, previous_status, new_status, actor_id, actor_role, reason, created_at) ' +
-        'SELECT ?, review_id, ?, ?, ?, ?, ?, ?, ? FROM fraud_reviews WHERE review_id = ? AND version = ? AND review_status = ?'
+        'SELECT ?, review_id, ?, ?, ?, ?, ?, ?, ? FROM fraud_reviews WHERE review_id = ? AND version = ? AND review_status = ? AND changes() > 0'
       ).bind(crypto.randomUUID(), eventAction, previous, next, actorId, 'owner', reason || null, now, id, version + 1, next);
       const results = await db.batch([update, event]);
       const changed = Number(results && results[0] && results[0].meta && results[0].meta.changes) || 0;
