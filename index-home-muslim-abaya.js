@@ -656,8 +656,27 @@
   window.__maHomePrerender = function () {
     var secs = activeSections();
     if (!secs.length) return null;
-    return { catnav: catnavHtml(secs), sections: sectionsHtml(secs, 1, PRERENDER_CARDS), btnCss: homeBtnCssText };
+    return { catnav: catnavHtml(secs), sections: sectionsHtml(secs, 1, PRERENDER_CARDS), btnCss: homeBtnCssText, story: storyStaticParts() };
   };
+
+  // The storyboard deck/list exactly as renderStoryboard + storyGo(0) leave them, for the build-time
+  // prerender: the first card photo is the mobile LCP element, so it must be in the first HTML response.
+  function storyStaticParts() {
+    var rows = storyProducts();
+    if (!rows.length) return null;
+    var n = rows.length;
+    var deck = rows.map(function (row, i) {
+      var d = i;
+      if (d > n / 2) d -= n;
+      var cls = "ms-card" + (d === 0 ? " is-active" : d === -1 ? " is-prev" : d === 1 ? " is-next" : d < 0 ? " is-far-prev" : " is-far-next");
+      var html = storyCardHtml(row, i).replace("<a class='ms-card'", "<a class='" + cls + "' aria-hidden='" + (d === 0 ? "false" : "true") + "'");
+      if (Math.abs(d) <= 1) html = html.replace(" loading='lazy'", "");
+      return html;
+    }).join("");
+    var first = window.maHomeCardImage(rows[0].p) || { src: resolveImg(rows[0].p) };
+    return { key: storyKey(rows), deck: deck, list: storyListHtml(rows).replace("class='ms-li is-active' data-i='0'", "class='ms-li is-active' data-i='0' aria-current='true'"), firstSrc: first.src, count: storyPad(1) + " / " + storyPad(n) };
+  }
+  function storyKey(rows) { return rows.map(function (r) { return r.p.id; }).join("|"); }
 
 
   /* ---------------- Storyboard (top of the homepage) ----------------
@@ -775,11 +794,15 @@
     if (!board) return;
     var rows = storyProducts();
     if (!rows.length) return;
-    var key = rows.map(function (r) { return r.p.id; }).join("|");
+    var key = storyKey(rows);
     if (board.__msKey === key) return;
     board.__msKey = key;
-    board.querySelector(".ms-deck").innerHTML = rows.map(storyCardHtml).join("");
-    board.querySelector(".ms-list-items").innerHTML = storyListHtml(rows);
+    // Already in the HTML from the build step with the same products: keep those nodes (no image reload, no jump).
+    if (board.getAttribute("data-ms-key") !== key || !board.querySelector(".ms-card")) {
+      board.querySelector(".ms-deck").innerHTML = rows.map(storyCardHtml).join("");
+      board.querySelector(".ms-list-items").innerHTML = storyListHtml(rows);
+    }
+    board.removeAttribute("data-ms-key");
     board.classList.add("is-ready");
     storyGo(board, 0);
     if (!board.__msBound) {

@@ -55,3 +55,20 @@ test('Cloudflare build runs the prerender before content versioning', () => {
   const b = build.indexOf('scripts/build-catalog-asset-versions.mjs');
   assert.ok(a > -1 && a < b);
 });
+
+test('storyboard deck is in the first HTML and its first photo is preloaded (mobile LCP)', async () => {
+  const { renderHomeParts, prerenderIndex } = await load();
+  const parts = renderHomeParts();
+  assert.ok(parts.story && parts.story.deck, 'story parts rendered');
+  const out = prerenderIndex(fs.readFileSync(path.join(root, 'index.html'), 'utf8'), parts);
+  const cards = out.match(/<a class='ms-card[^']*'/g) || [];
+  assert.ok(cards.length >= 2 && cards.length <= 12, 'deck cards: ' + cards.length);
+  assert.equal(cards[0], "<a class='ms-card is-active'");
+  assert.match(out, /<div id="msBoard" class="ms-board is-ready" tabindex="-1" data-ms-key="[^"]+">/);
+  const firstImg = out.match(/<a class='ms-card is-active'[^>]*><img src='([^']+)'[^>]*fetchpriority='high'/);
+  assert.ok(firstImg, 'first deck photo has fetchpriority=high');
+  const pre = out.match(/<link rel="preload" as="image" href="([^"]+)" fetchpriority="high">/g) || [];
+  assert.equal(pre.length, 1, 'exactly one image preload');
+  assert.ok(pre[0].includes(firstImg[1].replace(/&/g, '&amp;')), 'the preload is the first deck photo');
+  assert.doesNotMatch(out, /<link rel="preload" as="image"[^>]*Maroon%20Abaya%20Set/, 'old banner photo is no longer preloaded');
+});

@@ -78,6 +78,26 @@ export function prerenderIndex(html, parts) {
   // The image-led category cards must be in the first HTML response. Injecting them after DOMContentLoaded
   // used to push the already-rendered first product section down by ~700px (CLS ~0.80 on mobile).
   out = out.replace(main, () => main.replace('></main>', ' data-prerendered="1">' + parts.sections + '</main>'));
+  // Storyboard at the top: the newest products' card deck and list, with the first photo preloaded (mobile LCP).
+  if (parts.story) {
+    const st = parts.story;
+    const deck = '<div class="ms-deck" aria-live="polite"></div>';
+    const list = '<ol class="ms-list-items"></ol>';
+    const board = '<div id="msBoard" class="ms-board" tabindex="-1">';
+    if (!out.includes(deck) || !out.includes(list) || !out.includes(board)) throw new Error('index.html: empty storyboard (#msBoard) not found');
+    const keyAttr = st.key.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+    out = out.replace(board, () => `<div id="msBoard" class="ms-board is-ready" tabindex="-1" data-ms-key="${keyAttr}">`);
+    out = out.replace(deck, () => deck.replace('></div>', '>' + st.deck + '</div>'));
+    out = out.replace(list, () => list.replace('></ol>', '>' + st.list + '</ol>'));
+    out = out.replace('<span class="ms-count">01 / 12</span>', () => `<span class="ms-count">${st.count}</span>`);
+    const href = st.firstSrc.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+    // Right after <meta viewport> at the very top of <head>, so the browser starts the photo before parsing
+    // the large inlined CSS. Photos from the image host also get an early connection.
+    const vp = '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
+    if (!out.includes(vp)) throw new Error('index.html: viewport meta not found');
+    const host = /^https:\/\/[^/]+/.exec(st.firstSrc);
+    out = out.replace(vp, () => vp + (host ? `\n    <link rel="preconnect" href="${host[0]}">` : '') + `\n    <link rel="preload" as="image" href="${href}" fetchpriority="high">`);
+  }
   // The card button-row rules index-home-muslim-abaya.js injects at runtime (same id, so it is not added twice).
   if (parts.btnCss && !out.includes('id="ma-home-btn-row"')) out = out.replace('</head>', () => '<style id="ma-home-btn-row">' + parts.btnCss + '</style>\n</head>');
   return out;
