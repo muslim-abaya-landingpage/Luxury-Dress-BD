@@ -192,7 +192,54 @@
     var p = ctx.product;
     resetShared(p, ctx);
     var defs = attributeDefs(p, ctx.category, ctx);
+    var globalState = box.__pmwGlobalAttributes || (box.__pmwGlobalAttributes = { loaded: false, loading: false, attributes: [], error: "" });
     var st = box.__pmwAttr || (box.__pmwAttr = { added: [], open: {}, notice: true, productId: "" });
+    function loadGlobalAttributes() {
+      if (globalState.loaded || globalState.loading) return;
+      var admin = ctx.admin || g.MaAdmin;
+      var session = admin && typeof admin.getSession === "function" ? admin.getSession() : null;
+      if (!session || !session.token) { globalState.loaded = true; globalState.error = "Owner login is required to load Global Attributes."; draw(); return; }
+      globalState.loading = true;
+      fetch("/api/global-attributes", { method: "POST", credentials: "same-origin", cache: "no-store", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ Token: session.token, action: "read" }) })
+        .then(function (response) { return response.json().catch(function () { return {}; }).then(function (data) { if (!response.ok || !data.ok) throw new Error(data.error || ("HTTP_" + response.status)); return data; }); })
+        .then(function (data) { globalState.attributes = Array.isArray(data.attributes) ? data.attributes : []; globalState.error = ""; })
+        .catch(function (error) { globalState.error = "Global Attributes could not be loaded: " + ((error && error.message) || "request failed"); })
+        .then(function () { globalState.loading = false; globalState.loaded = true; if (box.isConnected && box.__pmwAttrLive) draw(); });
+    }
+    function globalAssignment(id) {
+      var rows = Array.isArray(p.globalAttributes) ? p.globalAttributes : [];
+      return rows.filter(function (row) { return row && row.id === id; })[0] || null;
+    }
+    function renderGlobalAttributes() {
+      var rows = Array.isArray(p.globalAttributes) ? p.globalAttributes : [];
+      if (globalState.loading) return '<section class="pmw-box"><div class="pmw-box-head"><b>Global attributes</b></div><p class="pmw-hint">Loading saved Global Attributes…</p></section>';
+      if (globalState.error) return '<section class="pmw-box"><div class="pmw-box-head"><b>Global attributes</b></div><p class="pmw-hint">' + esc(globalState.error) + ' <a href="product-attributes.html" target="_blank" rel="noopener">Open registry</a></p></section>';
+      var html = '<section class="pmw-box" data-pga-panel><div class="pmw-box-head"><b>Global attributes</b><span class="pmw-hint">Reusable product details</span></div><div class="pmw-box-body" style="display:block">';
+      if (!globalState.attributes.length) html += '<p class="pmw-hint">No saved Global Attributes yet. Create them in <a href="product-attributes.html" target="_blank" rel="noopener">Attributes registry</a>.</p>';
+      globalState.attributes.forEach(function (attr) {
+        if (!attr || !attr.id) return;
+        var assignment = globalAssignment(attr.id), enabled = !!assignment;
+        var selected = assignment && Array.isArray(assignment.terms) ? assignment.terms : [];
+        html += '<div class="pmw-global-attribute" style="padding:10px 0;border-bottom:1px solid #eee"><label style="display:flex;gap:8px;align-items:center;font-weight:600"><input type="checkbox" data-pga-enable="' + esc(attr.id) + '"' + (enabled ? ' checked' : '') + '> ' + esc(attr.name) + '</label>';
+        if (enabled) {
+          html += '<div style="display:flex;gap:12px;flex-wrap:wrap;padding:8px 0 0 24px">';
+          (Array.isArray(attr.terms) ? attr.terms : []).forEach(function (term) {
+            if (!term || !term.id) return;
+            var checked = selected.some(function (item) { return item && item.id === term.id; });
+            html += '<label style="display:inline-flex;gap:5px;align-items:center"><input type="checkbox" data-pga-term="' + esc(attr.id) + '" data-term-id="' + esc(term.id) + '"' + (checked ? ' checked' : '') + '> ' + esc(term.name) + '</label>';
+          });
+          if (!Array.isArray(attr.terms) || !attr.terms.length) html += '<span class="pmw-hint">এই Attribute-এ এখনো কোনো Term নেই। Registry থেকে Term যোগ করুন।</span>';
+          html += '</div>';
+          if (attr.variation) html += '<p class="pmw-hint">Registry-তে এটি variation attribute হিসেবে চিহ্নিত, তবে custom variation-এর cart, stock ও checkout mapping এই ধাপে সক্রিয় নয়।</p>';
+        }
+        html += '</div>';
+      });
+      rows.filter(function (row) { return row && row.id && !globalState.attributes.some(function (attr) { return attr && attr.id === row.id; }); }).forEach(function (row) {
+        html += '<p class="pmw-hint">আগে যুক্ত "' + esc(row.name || row.id) + '" registry-তে আর পাওয়া যাচ্ছে না। পুরোনো assignment নিরাপত্তার জন্য সংরক্ষিত আছে; registry ঠিক না করা পর্যন্ত এটি পরিবর্তন করা হয়নি।</p>';
+      });
+      html += '<p class="pmw-hint">এখানে নির্বাচন করলে পণ্যের বিবরণে Attribute/Term দেখাবে। এটি বর্তমান variation, SKU বা stock পরিবর্তন করে না।</p></div></section>';
+      return html;
+    }
     if (st.productId !== String(p.id)) { st.added = []; st.open = {}; st.productId = String(p.id); }
     var used = usedAttrs(p, defs, ctx.category);
     var present = defs.filter(function (d) { return d.values.length || st.added.indexOf(d.id) !== -1; });
@@ -205,6 +252,7 @@
         '<select data-pa="global" aria-label="Add global attribute"><option value="">Add global</option>' + missing.map(function (d) { return '<option value="' + d.id + '">' + esc(d.name) + "</option>"; }).join("") + "</select>" +
         '<span class="pmw-right"><a data-pa="expand">Expand</a> / <a data-pa="close">Close</a></span></div>' +
         (st.showAdd ? '<div class="pmw-inline-add"><label for="pmw-new-attribute">Name</label><input id="pmw-new-attribute" type="text" data-pa="new-name" list="pmw-supported-attributes" placeholder="e.g. Long, Body, Size, Sleeve, Color or Option" autocomplete="off"><datalist id="pmw-supported-attributes">' + missing.map(function (d) { return '<option value="' + esc(d.name) + '"></option>'; }).join('') + '</datalist><button type="button" class="pmw-btn pmw-btn-primary" data-pa="add-selected">Add attribute</button><button type="button" class="pmw-btn" data-pa="cancel-new">Cancel</button><p class="pmw-hint">Type a name in English or Bangla (e.g. কামিজ লং, বডি, হাতা) — or tap one:</p><div class="pmw-quick">' + missing.map(function (d) { return '<button type="button" class="pmw-btn" data-pa="add-quick" data-id="' + d.id + '">+ ' + esc(d.name) + (ATTR_BN[d.id] ? " (" + ATTR_BN[d.id] + ")" : "") + "</button>"; }).join("") + '</div></div>' : '') +
+        renderGlobalAttributes() +
         present.map(function (d) {
           var open = st.open[d.id] !== false;
           var readonly = !d.field && !d.setter;
@@ -309,6 +357,35 @@
         else if (k === "save") save();
       },
       change: function (t) {
+        if (t.matches("[data-pga-enable]")) {
+          var id = t.getAttribute("data-pga-enable");
+          var attr = globalState.attributes.filter(function (item) { return item && item.id === id; })[0];
+          var assignments = Array.isArray(p.globalAttributes) ? p.globalAttributes.slice() : [];
+          var at = assignments.findIndex(function (item) { return item && item.id === id; });
+          if (t.checked && attr && at < 0) assignments.push({ id: attr.id, name: attr.name, terms: [], visible: attr.visible !== false });
+          else if (!t.checked && at >= 0) assignments.splice(at, 1);
+          if (assignments.length) p.globalAttributes = assignments; else delete p.globalAttributes;
+          if (ctx.changed) ctx.changed("Global attribute selection changed — click Save changes to publish.");
+          draw();
+          return;
+        }
+        if (t.matches("[data-pga-term]")) {
+          var aid = t.getAttribute("data-pga-term"), tid = t.getAttribute("data-term-id");
+          var definition = globalState.attributes.filter(function (item) { return item && item.id === aid; })[0];
+          var term = definition && Array.isArray(definition.terms) ? definition.terms.filter(function (item) { return item && item.id === tid; })[0] : null;
+          if (!term) return;
+          var next = Array.isArray(p.globalAttributes) ? p.globalAttributes.slice() : [];
+          var index = next.findIndex(function (item) { return item && item.id === aid; });
+          if (index < 0) { next.push({ id: definition.id, name: definition.name, terms: [], visible: definition.visible !== false }); index = next.length - 1; }
+          var assignment = Object.assign({}, next[index]), chosen = Array.isArray(assignment.terms) ? assignment.terms.slice() : [];
+          var termIndex = chosen.findIndex(function (item) { return item && item.id === tid; });
+          if (t.checked && termIndex < 0) chosen.push({ id: term.id, name: term.name });
+          else if (!t.checked && termIndex >= 0) chosen.splice(termIndex, 1);
+          assignment.name = definition.name; assignment.visible = definition.visible !== false; assignment.terms = chosen; next[index] = assignment;
+          p.globalAttributes = next;
+          if (ctx.changed) ctx.changed("Global attribute terms changed — click Save changes to publish.");
+          return;
+        }
         if (t.matches('[data-pa="used"], [data-pa="values"]')) this.dirty = true;
         if (t.matches('[data-pa="global"]') && t.value) addAttr(t.value);
       }
@@ -320,6 +397,7 @@
       box.addEventListener("input", function (e) { if (box.__pmwAttrLive && e.target.matches('[data-pa="values"]')) box.__pmwAttrLive.dirty = true; });
     }
     draw();
+    loadGlobalAttributes();
   }
 
   // ===================== Variations panel =====================
