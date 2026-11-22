@@ -27,11 +27,13 @@
       return [];
     }
     var selectedGlobal = globalRows(line.globalAttributes);
+    var requiredProductGlobal = globalRows(p.globalAttributes).filter(function (a) { return a.variation === true; });
     var best = null, top = -1;
     list.forEach(function (v) {
       if (!v || typeof v !== "object") return;
       var n = 0;
       var requiredGlobal = globalRows(v.globalAttributes);
+      if (requiredProductGlobal.some(function (a) { return !requiredGlobal.some(function (x) { return String(x.id) === String(a.id); }); })) return;
       if (requiredGlobal.some(function (a) {
         var selected = selectedGlobal.filter(function (x) { return String(x.id) === String(a.id); })[0];
         return !selected || String(selected.termId || selected.valueId) !== String(a.termId || a.valueId);
