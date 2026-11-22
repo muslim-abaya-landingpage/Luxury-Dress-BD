@@ -208,6 +208,12 @@
       categoryLabel: item.categoryLabel || (cat && cat.categoryLabel) || "",
       selected: isStoreCartLineSelected(item)
     };
+    if (Array.isArray(item.globalAttributes)) {
+      line.globalAttributes = item.globalAttributes.slice(0, 20).map(function (a) {
+        if (!a || !a.id || !(a.termId || a.valueId)) return null;
+        return { id: String(a.id).slice(0, 40), termId: String(a.termId || a.valueId).slice(0, 50), name: String(a.name || a.id).slice(0, 60), term: String(a.term || a.value || a.termId).slice(0, 60) };
+      }).filter(Boolean);
+    }
     if (item.lengthSize) line.lengthSize = String(item.lengthSize);
     if (item.bodySize) line.bodySize = String(item.bodySize);
     if (item.selectedSize) line.selectedSize = String(item.selectedSize);
@@ -230,6 +236,7 @@
       String(line.color || line.colorLabel || "").trim().toLowerCase(),
       String(line.productType || "").trim(),
       String(line.category || "").trim(),
+      (Array.isArray(line.globalAttributes) ? line.globalAttributes.slice().sort(function (a, b) { return String(a.id).localeCompare(String(b.id)); }).map(function (a) { return String(a.id) + "=" + String(a.termId || a.valueId); }).join(",") : ""),
       line.id ? "" : String(line.name || "").trim()
     ].join("|");
   }
@@ -427,7 +434,7 @@
     var inStockFn = global.isInStock || (global.maCatalog && global.maCatalog.isInStock);
     var stockQtyFn = global.getStockQty || (global.maCatalog && global.maCatalog.getStockQty);
     var variantTrackedFn = global.hasTrackedStockVariants || (global.maCatalog && global.maCatalog.hasTrackedStockVariants);
-    var variant = line.size || line.selectedSize || line.color || "";
+    var variant = catalogItem ? stockVariantForLine(line, catalogItem) : (line.size || line.selectedSize || line.color || "");
     if (catalogItem && typeof inStockFn === "function" && !inStockFn(catalogItem, variant, line.color)) {
       return list;
     }
