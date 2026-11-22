@@ -215,7 +215,27 @@
       globalState.loading = true;
       fetch("/api/global-attributes", { method: "POST", credentials: "same-origin", cache: "no-store", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ Token: session.token, action: "read" }) })
         .then(function (response) { return response.json().catch(function () { return {}; }).then(function (data) { if (!response.ok || !data.ok) throw new Error(data.error || ("HTTP_" + response.status)); return data; }); })
-        .then(function (data) { globalState.attributes = Array.isArray(data.attributes) ? data.attributes : []; globalState.error = ""; })
+        .then(function (data) {
+          globalState.attributes = Array.isArray(data.attributes) ? data.attributes : [];
+          globalState.error = "";
+          var assignments = Array.isArray(p.globalAttributes) ? p.globalAttributes.slice() : [];
+          var synced = false;
+          assignments.forEach(function (assignment) {
+            if (!assignment || !assignment.id) return;
+            var definition = globalState.attributes.filter(function (attr) { return attr && attr.id === assignment.id; })[0];
+            if (!definition) return; // Keep historical assignments if the registry entry was removed.
+            var variation = definition.variation === true;
+            if (assignment.variation !== variation || assignment.name !== definition.name) {
+              assignment.variation = variation;
+              assignment.name = definition.name;
+              synced = true;
+            }
+          });
+          if (synced) {
+            p.globalAttributes = assignments;
+            if (ctx.changed) ctx.changed("Global attribute settings refreshed from the registry — click Save changes to publish.");
+          }
+        })
         .catch(function (error) { globalState.error = "Global Attributes could not be loaded: " + ((error && error.message) || "request failed"); })
         .then(function () { globalState.loading = false; globalState.loaded = true; if (box.isConnected && box.__pmwAttrLive) draw(); });
     }
