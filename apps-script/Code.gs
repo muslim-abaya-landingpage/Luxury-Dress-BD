@@ -6588,10 +6588,12 @@ function cartItemVariantKey_(item) {
   var color = String((item && item.color) || '').trim();
   var base = size ? (color ? color + ' · ' + size : size) : color;
   var attrs = Array.isArray(item && item.globalAttributes) ? item.globalAttributes.filter(function (a) { return a && a.id && (a.termId || a.valueId); }) : [];
+  var type = String(item && item.productType || '').trim();
+  var typeKey = type ? 'Type[' + type.slice(0, 60) + ']' : '';
   var suffix = attrs.slice().sort(function (a, b) { return String(a.id).localeCompare(String(b.id)); }).map(function (a) {
     return 'Global[' + String(a.id).slice(0, 40) + '=' + String(a.termId || a.valueId).slice(0, 50) + ']';
   }).join(' · ');
-  return [base, suffix].filter(Boolean).join(' · ');
+  return [base, typeKey, suffix].filter(Boolean).join(' · ');
 }
 
 /** রং ও মাপ দুটোই থাকলে ভ্যারিয়েশনের স্টক সারির নাম, যেমন "Navy · Body 46"। একটা না থাকলে ফাঁকা। */
