@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="bn" class="wp-admin-shell"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Global Attributes | Muslim Abaya</title>
+<link rel="stylesheet" href="admin.css?v=d800d917a0c7b197"><link rel="stylesheet" href="admin-dashboard-design.css?v=76d87a7fcd8f0d87"><link rel="stylesheet" href="admin-design-system.css?v=1eaf4362bddc4ad0"><link rel="stylesheet" href="admin-responsive.css?v=1"><link rel="stylesheet" href="admin-theme.css?v=1"><link rel="stylesheet" href="admin-wp.css?v=1">
+<style>
+.ga-wrap{max-width:1100px;margin:24px auto;padding:0 20px}.ga-head,.ga-card,.ga-form{background:var(--adm-card,#fff);border:1px solid var(--adm-border,#ddd);border-radius:12px;padding:18px;margin-bottom:16px}.ga-head h1{margin:0 0 8px}.ga-muted{color:var(--adm-muted,#646970)}.ga-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.ga-field label{display:block;font-weight:600;margin-bottom:5px}.ga-field input,.ga-field textarea{width:100%;box-sizing:border-box;min-height:40px;padding:9px;border:1px solid #c3c4c7;border-radius:6px}.ga-field textarea{min-height:82px}.ga-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}.ga-btn{border:1px solid #8c8f94;border-radius:6px;padding:9px 14px;background:#fff;cursor:pointer}.ga-primary{background:#2271b1;border-color:#2271b1;color:#fff}.ga-danger{color:#b32d2e}.ga-check{display:flex;gap:8px;align-items:center;margin-top:10px}.ga-card h3{margin:0 0 12px}.ga-card-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.ga-status{padding:10px 12px;border-radius:8px;background:#f0f6fc;margin:12px 0}.ga-status.error{background:#fcf0f1;color:#8a2424}.ga-list{display:grid;gap:12px}@media(max-width:650px){.ga-grid{grid-template-columns:1fr}.ga-wrap{padding:0 12px}.ga-card,.ga-form{padding:14px}}
+</style></head><body data-admin-guard="1">
+<header class="pl-admin-header" style="padding:16px 22px"><a href="product-manager.html">← Products</a><span style="margin-left:18px;font-weight:700">Muslim Abaya / Product Settings</span><button type="button" id="gaLogout" style="float:right">Log out</button></header>
+<main class="ga-wrap"><section class="ga-head"><h1>Global Attributes</h1><p class="ga-muted">একবার Attribute ও তার Terms তৈরি করুন, পরে একাধিক পণ্যে পুনরায় ব্যবহার করুন। যেমন Fabric → Linen, Cotton; Pattern → Floral, Plain।</p><p class="ga-muted">এখানে পরিবর্তন করলে শুধু Global Attribute Registry আপডেট হবে; পুরোনো পণ্য, SKU, Stock বা Order পরিবর্তন হবে না।</p><div id="gaStatus" class="ga-status" role="status" aria-live="polite">লোড হচ্ছে…</div></section>
+<section class="ga-form"><h2>নতুন Attribute</h2><div class="ga-grid"><div class="ga-field"><label for="gaName">নাম</label><input id="gaName" maxlength="60" placeholder="যেমন Fabric"></div><div class="ga-field"><label for="gaId">Slug / ID</label><input id="gaId" maxlength="40" placeholder="fabric"></div><div class="ga-field" style="grid-column:1/-1"><label for="gaTerms">Terms (কমা দিয়ে আলাদা করুন)</label><textarea id="gaTerms" placeholder="Linen, Cotton, Georgette"></textarea></div></div><label class="ga-check"><input type="checkbox" id="gaVariation" checked> Used for variations</label><label class="ga-check"><input type="checkbox" id="gaVisible" checked> Visible on product page</label><div class="ga-actions"><button class="ga-btn ga-primary" id="gaAdd" type="button">Add attribute</button></div></section>
+<section><div class="ga-card-head"><h2>Saved Attributes</h2><button type="button" class="ga-btn" id="gaReload">Reload</button></div><div id="gaList" class="ga-list"></div><div class="ga-actions"><button type="button" class="ga-btn ga-primary" id="gaSave">Save changes</button><span id="gaCount" class="ga-muted"></span></div></section></main>
+<script src="site-api-config.js"></script><script src="admin-config.js"></script><script src="admin-api.js"></script><script src="admin-guard.js"></script>
+<script>
+(function(){
+'use strict';
+var state={revision:0,attributes:[]},$=function(id){return document.getElementById(id);};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function slug(s){return String(s||'').normalize('NFKD').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40);}
+function status(s,e){$('gaStatus').textContent=s;$('gaStatus').className='ga-status'+(e?' error':'');}
+function session(){return window.MaAdmin&&MaAdmin.getSession&&MaAdmin.getSession();}
+async function request(payload){var s=session();if(!s||!s.token)throw Error('LOGIN_REQUIRED');var r=await fetch('/api/global-attributes',{method:'POST',credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({Token:s.token},payload))});var d=await r.json().catch(function(){return {};});if(!r.ok||!d.ok)throw Error(d.error||('HTTP_'+r.status));return d;}
+function draw(){
+ var list=$('gaList');list.innerHTML='';
+ if(!state.attributes.length){list.innerHTML='<div class="ga-card ga-muted">এখনো কোনো Global Attribute তৈরি করা হয়নি।</div>';return;}
+ state.attributes.forEach(function(a,i){
+  var card=document.createElement('article');card.className='ga-card';card.innerHTML='<div class="ga-card-head"><h3>'+esc(a.name)+' <small class="ga-muted">('+esc(a.id)+')</small></h3><button type="button" class="ga-btn ga-danger" data-delete="'+i+'">Delete</button></div><div class="ga-grid"><div class="ga-field"><label>Name</label><input data-name="'+i+'" maxlength="60" value="'+esc(a.name)+'"></div><div class="ga-field"><label>Slug / ID</label><input data-id="'+i+'" maxlength="40" value="'+esc(a.id)+'"></div><div class="ga-field" style="grid-column:1/-1"><label>Terms (comma separated)</label><textarea data-terms="'+i+'">'+esc(a.terms.map(function(t){return t.name;}).join(', '))+'</textarea></div></div><label class="ga-check"><input type="checkbox" data-variation="'+i+'"'+(a.variation?' checked':'')+'> Used for variations</label><label class="ga-check"><input type="checkbox" data-visible="'+i+'"'+(a.visible?' checked':'')+'> Visible on product page</label>';
+  list.appendChild(card);
+ });
+ $('gaCount').textContent=state.attributes.length+' / 40 attributes';
+}
+function readCards(){
+ return Array.from($('gaList').querySelectorAll('.ga-card')).map(function(card){
+  var get=function(sel){return card.querySelector(sel);};
+  var id=get('[data-id]').value.trim().toLowerCase(),name=get('[data-name]').value.trim();
+  var terms=get('[data-terms]').value.split(/[,，\n]/).map(function(n){return n.trim();}).filter(Boolean),seen={};
+  return {id:id,name:name,terms:terms.map(function(n,i){var tid=slug(n)||('term-'+(i+1));if(seen[tid])throw Error('একই Term একাধিকবার আছে: '+n);seen[tid]=true;return {id:tid,name:n};}),variation:get('[data-variation]').checked,visible:get('[data-visible]').checked};
+ });
+}
+async function load(){status('Global Attributes লোড হচ্ছে…');try{var d=await request({action:'read'});state.revision=d.revision;state.attributes=d.attributes||[];draw();status('সর্বশেষ সংরক্ষিত তথ্য লোড হয়েছে।');}catch(e){status('লোড করা যায়নি: '+e.message,true);}}
+$('gaName').addEventListener('input',function(){if(!$('gaId').dataset.touched)$('gaId').value=slug(this.value);});
+$('gaId').addEventListener('input',function(){this.dataset.touched='1';});
+$('gaAdd').addEventListener('click',function(){try{var name=$('gaName').value.trim(),id=$('gaId').value.trim().toLowerCase(),terms=$('gaTerms').value.split(/[,，\n]/).map(function(n){return n.trim();}).filter(Boolean);if(!name||!id)throw Error('নাম ও Slug দিন।');if(state.attributes.some(function(a){return a.id===id||a.name.toLowerCase()===name.toLowerCase();}))throw Error('এই Attribute আগে থেকেই আছে।');state.attributes.push({id:id,name:name,terms:terms.map(function(n,i){return {id:slug(n)||('term-'+(i+1)),name:n};}),variation:$('gaVariation').checked,visible:$('gaVisible').checked});$('gaName').value='';$('gaId').value='';$('gaId').dataset.touched='';$('gaTerms').value='';draw();status('Attribute যোগ হয়েছে। সবশেষে Save changes চাপুন।');}catch(e){status(e.message,true);}});
+$('gaList').addEventListener('click',function(e){var b=e.target.closest('[data-delete]');if(b){state.attributes.splice(Number(b.dataset.delete),1);draw();status('Attribute বাদ দেওয়া হয়েছে। Save changes চাপলে স্থায়ী হবে।');}});
+$('gaSave').addEventListener('click',async function(){try{var attrs=readCards();this.disabled=true;var d=await request({action:'save',revision:state.revision,attributes:attrs});state.revision=d.revision;state.attributes=d.attributes;draw();status('Global Attributes সংরক্ষণ হয়েছে।');}catch(e){status(e.message==='REVISION_CONFLICT'?'অন্য একটি সেশন থেকে Registry পরিবর্তিত হয়েছে। Reload করে আবার চেষ্টা করুন।':'সংরক্ষণ হয়নি: '+e.message,true);}finally{this.disabled=false;}});
+$('gaReload').addEventListener('click',load);$('gaLogout').addEventListener('click',function(){if(window.MaAdmin&&MaAdmin.logout)MaAdmin.logout();else location.href='admin-login.html';});
+if(window.MaAdminGuard)MaAdminGuard.requireOwner().then(function(s){if(s)load();});
+})();
+</script></body></html>
