@@ -956,6 +956,7 @@
       return v.color === state.selectedColor && v.image;
     })[0];
     var img = (mappedColor && mappedColor.image) || activeGalleryImg || resolveImg(state.product.image || state.product.img);
+    var chosenVariation = currentVariation();
     var line = {
       id: state.product.id,
       name: state.product.name,
@@ -968,7 +969,8 @@
       fabric: state.product.fabric || "",
       size: selectedVariant(),
       productType: state.selectedType || "",
-      globalAttributes: selectedGlobalRows()
+      globalAttributes: selectedGlobalRows(),
+      variationSku: chosenVariation && chosenVariation.sku ? chosenVariation.sku : ""
     };
     if (state.sizeTemplate) {
       var sized = window.maSizeStore.check(state.sizeTemplate, $("pdSizeGroup"));
