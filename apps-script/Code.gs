@@ -587,7 +587,8 @@ function validateOrderInput_(e) {
             size: String((it && (it.size || it.selectedSize)) || '').trim().slice(0, 160),
             color: String((it && it.color) || '').trim().slice(0, 80),
             productType: String((it && it.productType) || '').trim().slice(0, 80),
-            category: String((it && it.category) || '').trim().slice(0, 80)
+            category: String((it && it.category) || '').trim().slice(0, 80),
+            variationSku: String((it && it.variationSku) || '').trim().slice(0, 60)
           };
           if (it && Array.isArray(it.globalAttributes) && it.globalAttributes.length) {
             line.globalAttributes = it.globalAttributes.slice(0, 20).map(function (a) {
