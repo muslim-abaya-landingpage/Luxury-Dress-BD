@@ -988,7 +988,8 @@
     if (requiredGlobal.length && (selectedGlobal.length !== requiredGlobal.length || !picked)) return { inStock: false, label: "Select an available option", buttonLabel: "Select options", qty: 0 };
     var baseVariant = selectedVariant() || state.selectedColor || "";
     var globalSuffix = selectedGlobalStockSuffix();
-    var variant = [state.selectedColor && baseVariant && state.selectedColor !== baseVariant ? state.selectedColor + " · " + baseVariant : baseVariant, globalSuffix].filter(Boolean).join(" · ");
+    var typeKey = state.selectedType ? "Type[" + state.selectedType + "]" : "";
+    var variant = [state.selectedColor && baseVariant && state.selectedColor !== baseVariant ? state.selectedColor + " · " + baseVariant : baseVariant, typeKey, globalSuffix].filter(Boolean).join(" · ");
     if (window.maCatalog && typeof window.maCatalog.getStockStatus === "function") {
       return window.maCatalog.getStockStatus(p, variant, state.selectedColor || "");
     }
