@@ -76,6 +76,8 @@
       else if (Number(p.regularPrice) > price) price = Number(p.regularPrice);
     }
     var variation = variationFor(p, line);
+    var requiredGlobal = Array.isArray(p.globalAttributes) ? p.globalAttributes.filter(function (a) { return a && a.variation === true; }) : [];
+    if (requiredGlobal.length && !variation) return null;
     if (variation) {
       if (variation.enabled === false) return null;
       if (Number(variation.price) > 0) price = Number(variation.price);
