@@ -27,7 +27,7 @@
       return [];
     }
     var selectedGlobal = globalRows(line.globalAttributes);
-    var requiredProductGlobal = globalRows(p.globalAttributes).filter(function (a) { return a.variation === true; });
+    var requiredProductGlobal = (Array.isArray(p.globalAttributes) ? p.globalAttributes : []).filter(function (a) { return a && a.id && a.variation === true; });
     var best = null, top = -1;
     list.forEach(function (v) {
       if (!v || typeof v !== "object") return;
