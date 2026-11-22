@@ -3313,8 +3313,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             return a && (a.name || a.id) && (a.term || a.termId) ? String(a.name || a.id) + ': ' + String(a.term || a.termId) : '';
         }).filter(Boolean);
         // Preserve the product-slot schema while including the selected variation terms.
-        return index + '. ' + base + (color ? ' [Color: ' + color.replace(/[\\[\\]\\r\\n]/g, ' ').trim() + ']' : '') +
-            (globalTerms.length ? ' [Attributes: ' + globalTerms.join(', ').replace(/[\\[\\]\\r\\n]/g, ' ') + ']' : '');
+        return index + '. ' + base + (color ? ' [Color: ' + color.replace(/[\[\]\r\n]/g, ' ').trim() + ']' : '') +
+            (globalTerms.length ? ' [Attributes: ' + globalTerms.join(', ').replace(/[\[\]\r\n]/g, ' ') + ']' : '');
     }
 
     function formatOrderSlotLineDetailed(index, item) {
