@@ -431,6 +431,13 @@
     var line = normalizeLine(item);
     if (!line) return list;
     var catalogItem = findCatalogProductFull(line.id, line.name);
+    var requiredGlobal = catalogItem && Array.isArray(catalogItem.globalAttributes) ? catalogItem.globalAttributes.filter(function (a) { return a && a.variation === true && Array.isArray(a.terms) && a.terms.length; }) : [];
+    if (requiredGlobal.some(function (a) {
+      return !(Array.isArray(line.globalAttributes) && line.globalAttributes.some(function (x) { return x && x.id === a.id && x.termId; }));
+    })) {
+      if (typeof global.alert === "function") global.alert("এই পণ্যের ভ্যারিয়েশন নির্বাচন করতে পণ্যের বিস্তারিত পেজ খুলুন।");
+      return list;
+    }
     var inStockFn = global.isInStock || (global.maCatalog && global.maCatalog.isInStock);
     var stockQtyFn = global.getStockQty || (global.maCatalog && global.maCatalog.getStockQty);
     var variantTrackedFn = global.hasTrackedStockVariants || (global.maCatalog && global.maCatalog.hasTrackedStockVariants);
