@@ -806,7 +806,9 @@ if (typeof window !== "undefined") window.cleanProductMeasures = cleanProductMea
       : null;
     if (!variants || !String(variant || "").trim()) return "";
     var keys = Object.keys(variants);
-    var wanted = [colorSizeStockVariant(color, variant), variant].concat(stockSizePartCandidates(color, variant), [color]).map(stockVariantKey).filter(Boolean);
+    // A global-attribute variant uses one exact composite key; never fall back to another term's stock.
+    var hasGlobalKey = String(variant || "").indexOf("Global[") !== -1;
+    var wanted = (hasGlobalKey ? [variant] : [colorSizeStockVariant(color, variant), variant].concat(stockSizePartCandidates(color, variant), [color])).map(stockVariantKey).filter(Boolean);
     var found = "";
     wanted.some(function (w) {
       return keys.some(function (key) {
