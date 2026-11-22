@@ -603,6 +603,10 @@ window.renderCartList = function (cartItems) {
       }).filter(Boolean).join(' | ').replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
       if (globalDetails) { if (sizeDetails) sizeDetails += ' | '; sizeDetails += globalDetails; }
     }
+    if (item.variationSku) {
+      if (sizeDetails) sizeDetails += ' | ';
+      sizeDetails += 'SKU: ' + String(item.variationSku).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
+    }
     if (item.customNote) {
       if (sizeDetails) sizeDetails += ' | ';
       sizeDetails += `Note: ${item.customNote}`;
