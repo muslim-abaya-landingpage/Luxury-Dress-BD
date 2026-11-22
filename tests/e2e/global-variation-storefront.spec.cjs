@@ -52,7 +52,7 @@ async function mockOrderApi(page) {
 test('Global Attribute variation keeps its own SKU and price through cart and mocked checkout order', async ({ page }) => {
   await installFixture(page);
   const orders = await mockOrderApi(page);
-  await page.goto('/product/ABY-MAROON-1');
+  await page.goto('/product.html?id=ABY-MAROON-1');
   await expect(page.locator('#pdGlobalAttributeGroup')).toBeVisible();
   await expect(page.locator('#pdGlobalAttributeGroup [data-global-term="cotton"]')).toBeVisible();
   await page.locator('#pdGlobalAttributeGroup [data-global-term="linen"]').click();
