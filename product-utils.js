@@ -902,8 +902,18 @@ if (typeof window !== "undefined") window.cleanProductMeasures = cleanProductMea
 
   /** Key for "do these cart lines share one stock row": lines with the same key draw from the same count. */
   function stockLineKey(product, line) {
-    var variant = (line && (line.size || line.selectedSize || line.color)) || "";
-    var row = product ? stockRowKey(product, variant, line && line.color) : "";
+    line = line || {};
+    var size = String(line.size || line.selectedSize || "").trim();
+    var color = String(line.color || "").trim();
+    var base = size ? (color ? color + " · " + size : size) : color;
+    var type = String(line.productType || "").trim();
+    var typeKey = type ? "Type[" + type + "]" : "";
+    var attrs = Array.isArray(line.globalAttributes) ? line.globalAttributes.filter(function (a) { return a && a.id && (a.termId || a.valueId); }) : [];
+    var globalKey = attrs.slice().sort(function (a, b) { return String(a.id).localeCompare(String(b.id)); }).map(function (a) {
+      return "Global[" + a.id + "=" + (a.termId || a.valueId) + "]";
+    }).join(" · ");
+    var variant = [base, typeKey, globalKey].filter(Boolean).join(" · ");
+    var row = product ? stockRowKey(product, variant, color) : "";
     return row ? stockVariantKey(row) : stockVariantKey(variant);
   }
 
