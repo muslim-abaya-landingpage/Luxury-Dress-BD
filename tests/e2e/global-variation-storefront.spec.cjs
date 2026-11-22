@@ -27,7 +27,7 @@ async function installFixture(page) {
 
 async function mockOrderApi(page) {
   const orders = [];
-  await page.route(/script.google.com/, async (route) =>
+  await page.route(/script.google.com/, async (route) => {
     const req = route.request();
     if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: {
       'access-control-allow-origin': '*', 'access-control-allow-methods': 'GET, POST, OPTIONS',
