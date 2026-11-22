@@ -223,6 +223,27 @@ test('renaming a color updates the selected variation key before publish', async
   expect(block).not.toContain('"color":"maroon"');
 });
 
+test('assigns saved Global Attribute terms to a product without changing variation or stock fields', async ({ page }) => {
+  await openMaroon(page);
+  await page.route('**/api/global-attributes', (route) => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({ ok: true, revision: 1, attributes: [
+      { id: 'fabric-type', name: 'Fabric Type', terms: [{ id: 'cotton', name: 'Cotton' }, { id: 'linen', name: 'Linen' }], variation: true, visible: true }
+    ] })
+  }));
+  await page.locator('[data-etab="attributes"]').click();
+  const mount = page.locator('#pmAttrMount');
+  await expect(mount.locator('[data-pga-enable="fabric-type"]')).toBeVisible();
+  await mount.locator('[data-pga-enable="fabric-type"]').check();
+  await mount.locator('[data-pga-term="fabric-type"][data-term-id="cotton"]').check();
+  await page.locator('#pmEditUpdate').click();
+  const block = await publishedBlock(page);
+  expect(block).toContain('globalAttributes: [{"id":"fabric-type","name":"Fabric Type","terms":[{"id":"cotton","name":"Cotton"}],"visible":true}]');
+  expect(block).toContain('variationAttributes: ["length"]');
+  expect(block).toContain('variations: [');
+  expect(block).not.toContain('stockVariants:');
+});
+
 test('variation price box on each row (no Edit needed) saves the variation price', async ({ page }) => {
   await openMaroon(page);
   await page.selectOption('#pmProductType', 'variable');
