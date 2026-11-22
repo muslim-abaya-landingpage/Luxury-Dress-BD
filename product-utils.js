@@ -187,6 +187,31 @@ if (typeof window !== "undefined") window.cleanProductMeasures = cleanProductMea
     return "";
   }
 
+  /** Keeps the reusable Global Attributes registry attached to the normalized product. */
+  function cleanGlobalAttributes(list) {
+    if (!Array.isArray(list)) return [];
+    return list.slice(0, 20).map(function (attribute) {
+      if (!attribute || typeof attribute !== "object") return null;
+      var id = String(attribute.id || "").trim().toLowerCase().slice(0, 40);
+      if (!/^[a-z0-9][a-z0-9_-]{0,39}$/.test(id) || !Array.isArray(attribute.terms)) return null;
+      var terms = attribute.terms.slice(0, 100).map(function (term) {
+        if (!term || typeof term !== "object") return null;
+        var termId = String(term.id || "").trim().toLowerCase().slice(0, 50);
+        var name = String(term.name || "").replace(/\\s+/g, " ").trim().slice(0, 80);
+        if (!/^[\\p{L}\\p{N}][\\p{L}\\p{N}_-]{0,49}$/u.test(termId) || !name) return null;
+        return { id: termId, name: name };
+      }).filter(Boolean);
+      if (!terms.length) return null;
+      return {
+        id: id,
+        name: String(attribute.name || id).replace(/\\s+/g, " ").trim().slice(0, 80) || id,
+        variation: attribute.variation === true,
+        visible: attribute.visible !== false,
+        terms: terms
+      };
+    }).filter(Boolean);
+  }
+
   /**
    * Cleans product.variations: [{type, color, size, price, regularPrice, sku, image, enabled}].
    * type/color/size empty = "any"; size uses the stock-row form ("52", "Body 46 · Length 54", "Length 54").
@@ -333,6 +358,11 @@ if (typeof window !== "undefined") window.cleanProductMeasures = cleanProductMea
       categoryLabel: categoryKey ? categoryLabelForKey(categoryKey) : (entry.categoryLabel || ""),
       _catalogNormalized: true
     };
+
+    // Product-level Global Attributes must survive catalog normalization so the
+    // product page can render variation selectors and match purchasable variations.
+    var globalAttributes = cleanGlobalAttributes(entry.globalAttributes);
+    if (globalAttributes.length) normalized.globalAttributes = globalAttributes;
 
     /** একাধিক গ্যালারি ছবি (category-products.js এর raw.images[]) — আগে এই
      *  ফিল্ডটা normalize করার সময় বাদ পড়ে যেত, তাই product.images সবসময়
