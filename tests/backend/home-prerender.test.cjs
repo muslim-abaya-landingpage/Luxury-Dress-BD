@@ -99,3 +99,16 @@ test('the first storyboard photo is copied next to the site at deploy time (no s
   assert.ok(fs.existsSync(path.join(dir, 'test-card-480.webp')));
   assert.match(out2, /<a class='ms-card is-active'[^>]*><img src='\/images\/lcp\/test-card-480\.webp'/);
 });
+
+test('only the front storyboard photo loads at first; the rest wait for it (same box size)', async () => {
+  const { renderHomeParts, prerenderIndex } = await load();
+  const out = prerenderIndex(fs.readFileSync(path.join(root, 'index.html'), 'utf8'), renderHomeParts());
+  const deck = out.slice(out.indexOf("<div class=\"ms-deck\""), out.indexOf('<div class="ms-nav">'));
+  const imgs = deck.match(/<img [^>]*>/g);
+  assert.ok(!/data-defer-src/.test(imgs[0]) && /fetchpriority='high'/.test(imgs[0]), 'front photo loads right away');
+  assert.ok(imgs.slice(1).every((t) => /src='data:image\/gif;base64,[^']+' data-defer-src='[^']+'/.test(t) && /width='480' height='600'/.test(t)));
+  const main = out.slice(out.indexOf('<main id="homeSections"'), out.indexOf('</main>'));
+  assert.doesNotMatch(main, /<img (?:[^>]*\s)?src='(?!data:)/, 'section photos wait');
+  assert.doesNotMatch(main, /<source (?:[^>]*\s)?srcset=/, 'section AVIF sources wait');
+  assert.match(out, /<script id="ma-defer-photos">[^<]+<\/script>\n<\/body>/);
+});

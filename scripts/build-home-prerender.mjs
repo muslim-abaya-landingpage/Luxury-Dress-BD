@@ -63,6 +63,27 @@ export function renderHomeParts() {
 
 const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+// Photos other than the storyboard's front photo wait until that photo has loaded: on a slow phone connection
+// they would otherwise share the bandwidth with it and push the LCP back by seconds. The boxes keep their
+// size (width/height attributes + CSS), so nothing moves when the real photos arrive.
+const BLANK = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+export function deferPhotos(html, {keepFirst = false} = {}) {
+  let first = keepFirst;
+  return html
+    .replace(/<source ([^>]*?)srcset='([^']*)'/g, (m, pre, set) => `<source ${pre}data-defer-srcset='${set}'`)
+    .replace(/<img ([^>]*?)src='([^']*)'/g, (m, pre, src) => {
+      if (first) { first = false; return m; }
+      if (/^data:/.test(src)) return m;
+      return `<img ${pre}src='${BLANK}' data-defer-src='${src}'`;
+    });
+}
+const DEFER_SCRIPT = "<script id=\"ma-defer-photos\">(function(){var done=false;function go(){if(done)return;done=true;" +
+  "var run=function(){document.querySelectorAll('source[data-defer-srcset]').forEach(function(s){s.srcset=s.getAttribute('data-defer-srcset');s.removeAttribute('data-defer-srcset')});" +
+  "document.querySelectorAll('img[data-defer-src]').forEach(function(i){i.src=i.getAttribute('data-defer-src');i.removeAttribute('data-defer-src')})};" +
+  "(window.requestAnimationFrame||setTimeout)(function(){setTimeout(run,0)})}" +
+  "var lcp=document.querySelector('#msBoard .ms-card.is-active img');if(!lcp||lcp.complete)go();else{lcp.addEventListener('load',go);lcp.addEventListener('error',go)}" +
+  "setTimeout(go,3000)})();</script>";
+
 export function prerenderIndex(html, parts) {
   let out = html;
   for (const css of INLINE_CSS) {
@@ -80,7 +101,7 @@ export function prerenderIndex(html, parts) {
   out = out.replace(nav, () => nav.replace('></nav>', '>' + parts.catnav + '</nav>'));
   // The image-led category cards must be in the first HTML response. Injecting them after DOMContentLoaded
   // used to push the already-rendered first product section down by ~700px (CLS ~0.80 on mobile).
-  out = out.replace(main, () => main.replace('></main>', ' data-prerendered="1">' + parts.sections + '</main>'));
+  out = out.replace(main, () => main.replace('></main>', ' data-prerendered="1">' + (parts.story ? deferPhotos(parts.sections) : parts.sections) + '</main>'));
   // Storyboard at the top: the newest products' card deck and list, with the first photo preloaded (mobile LCP).
   if (parts.story) {
     const st = parts.story;
@@ -90,8 +111,10 @@ export function prerenderIndex(html, parts) {
     if (!out.includes(deck) || !out.includes(list) || !out.includes(board)) throw new Error('index.html: empty storyboard (#msBoard) not found');
     const keyAttr = st.key.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
     out = out.replace(board, () => `<div id="msBoard" class="ms-board is-ready" tabindex="-1" data-ms-key="${keyAttr}">`);
-    out = out.replace(deck, () => deck.replace('></div>', '>' + st.deck + '</div>'));
-    out = out.replace(list, () => list.replace('></ol>', '>' + st.list + '</ol>'));
+    out = out.replace(deck, () => deck.replace('></div>', '>' + deferPhotos(st.deck, {keepFirst: true}) + '</div>'));
+    out = out.replace(list, () => list.replace('></ol>', '>' + deferPhotos(st.list) + '</ol>'));
+    if (!out.includes('</body>')) throw new Error('index.html: </body> not found');
+    out = out.replace('</body>', () => DEFER_SCRIPT + '\n</body>');
     out = out.replace('<span class="ms-count">01 / 12</span>', () => `<span class="ms-count">${st.count}</span>`);
     const href = st.firstSrc.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
     // Right after <meta viewport> at the very top of <head>, so the browser starts the photo before parsing
