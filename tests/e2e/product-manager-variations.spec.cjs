@@ -44,7 +44,7 @@ test('product type, attributes with "Used for variations", generate, edit variat
 
   // Attributes: one box per attribute; Long values edited with "|", Option not used for variations.
   const mount = page.locator('#pmAttrMount');
-  await expect(mount.locator('.pmw-box-head b')).toHaveText(['Option', 'Color', 'Body', 'Long']);
+  await expect(mount.locator('.pmw-box-head:not(.pmw-global-attributes-head) b')).toHaveText(['Option', 'Color', 'Body', 'Long']);
   await expect(mount.locator('[data-pa="used"][data-id="body"]')).not.toBeChecked();
   await expect(mount.locator('[data-pa="used"][data-id="length"]')).toBeChecked();
   await mount.locator('[data-pa="values"][data-id="length"]').fill('50 | 52 | 54 | 56');
