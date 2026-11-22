@@ -19,15 +19,15 @@ async function installFixture(page) {
   if (!realCatalog.includes(marker)) throw new Error('Maroon Abaya Set test fixture missing');
   const patchedCatalog = realCatalog.replace(marker, marker + '\n      globalAttributes: ' +
     JSON.stringify([ATTRIBUTE]) + ',\n      variations: ' + JSON.stringify(VARIATIONS) + ',');
-  await page.route(/\\/category-products\\.js(\\?\\.*)?$/, (route) =>
+  await page.route('**/category-products.js*', (route) =>
     route.fulfill({ contentType: 'application/javascript', body: patchedCatalog }));
-  await page.route(/googletagmanager|gtm\\.js|analytics\\.tiktok|connect\\.facebook|clarity\\.ms/, (route) =>
+  await page.route(/googletagmanager|gtm|analytics|connect.facebook|clarity/, (route) =>
     route.fulfill({ status: 204, body: '' }));
 }
 
 async function mockOrderApi(page) {
   const orders = [];
-  await page.route(/script\\.google\\.com/, async (route) => {
+  await page.route(/script.google.com/, async (route) =>
     const req = route.request();
     if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: {
       'access-control-allow-origin': '*', 'access-control-allow-methods': 'GET, POST, OPTIONS',
