@@ -681,9 +681,11 @@
         if (!v) return;
         if (k === "attr") {
           var r = parseRow(v, defs);
+          globalVariationRows(v).forEach(function (item) { r["global:" + item.id] = item.termId; });
           r[t.getAttribute("data-attr")] = t.value;
           var nv = rowFrom(r);
           ["type", "color", "size"].forEach(function (f) { if (nv[f]) v[f] = nv[f]; else delete v[f]; });
+          if (nv.globalAttributes && nv.globalAttributes.length) v.globalAttributes = nv.globalAttributes; else delete v.globalAttributes;
         } else if (k === "enabled") { if (t.checked) delete v.enabled; else v.enabled = false; }
         else if (k === "hprice") {
           // Price box on the row: the regular price; an existing sale price stays if it is still lower.
