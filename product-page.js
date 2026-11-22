@@ -990,8 +990,15 @@
     if (requiredGlobal.length && (selectedGlobal.length !== requiredGlobal.length || !picked)) return { inStock: false, label: "Select an available option", buttonLabel: "Select options", qty: 0 };
     var baseVariant = selectedVariant() || state.selectedColor || "";
     var globalSuffix = selectedGlobalStockSuffix();
-    var typeKey = state.selectedType ? "Type[" + state.selectedType + "]" : "";
-    var variant = [state.selectedColor && baseVariant && state.selectedColor !== baseVariant ? state.selectedColor + " · " + baseVariant : baseVariant, typeKey, globalSuffix].filter(Boolean).join(" · ");
+    var variant;
+    if (globalSuffix) {
+      var typeKey = state.selectedType ? "Type[" + state.selectedType + "]" : "";
+      var colorSize = state.selectedColor && baseVariant && state.selectedColor !== baseVariant ? state.selectedColor + " · " + baseVariant : baseVariant;
+      variant = [colorSize, typeKey, globalSuffix].filter(Boolean).join(" · ");
+    } else {
+      // Keep the legacy colour/size stock lookup unchanged for existing products.
+      variant = selectedVariant() || state.selectedColor || "";
+    }
     if (window.maCatalog && typeof window.maCatalog.getStockStatus === "function") {
       return window.maCatalog.getStockStatus(p, variant, state.selectedColor || "");
     }
