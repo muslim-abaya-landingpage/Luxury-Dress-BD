@@ -597,6 +597,12 @@ window.renderCartList = function (cartItems) {
       if (sizeDetails) sizeDetails += ' | ';
       sizeDetails += `Color: ${item.colorLabel || item.color}`;
     }
+    if (Array.isArray(item.globalAttributes) && item.globalAttributes.length) {
+      var globalDetails = item.globalAttributes.map(function (a) {
+        return a && (a.name || a.id) && (a.term || a.termId) ? String(a.name || a.id) + ': ' + String(a.term || a.termId) : '';
+      }).filter(Boolean).join(' | ').replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
+      if (globalDetails) { if (sizeDetails) sizeDetails += ' | '; sizeDetails += globalDetails; }
+    }
     if (item.customNote) {
       if (sizeDetails) sizeDetails += ' | ';
       sizeDetails += `Note: ${item.customNote}`;
