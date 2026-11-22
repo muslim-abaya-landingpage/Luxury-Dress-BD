@@ -3325,6 +3325,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var parts = [index + '. ' + base];
         if (size) parts.push('Size: ' + size);
         if (color) parts.push('Color: ' + color);
+        (Array.isArray(item.globalAttributes) ? item.globalAttributes : []).forEach(function (a) {
+            if (a && (a.name || a.id) && (a.term || a.termId)) parts.push(String(a.name || a.id) + ': ' + String(a.term || a.termId));
+        });
         parts.push('Qty: ' + qty);
         return parts.join(' | ');
     }
