@@ -6585,10 +6585,13 @@ function flushLowStockAlerts_() {
 /** কার্ট-আইটেম থেকে variant key বের করা (size অগ্রাধিকার পায়, না থাকলে color) */
 function cartItemVariantKey_(item) {
   var size = String((item && item.size) || '').trim();
-  if (size) return size;
   var color = String((item && item.color) || '').trim();
-  if (color) return color;
-  return '';
+  var base = size ? (color ? color + ' · ' + size : size) : color;
+  var attrs = Array.isArray(item && item.globalAttributes) ? item.globalAttributes.filter(function (a) { return a && a.id && (a.termId || a.valueId); }) : [];
+  var suffix = attrs.slice().sort(function (a, b) { return String(a.id).localeCompare(String(b.id)); }).map(function (a) {
+    return 'Global[' + String(a.id).slice(0, 40) + '=' + String(a.termId || a.valueId).slice(0, 50) + ']';
+  }).join(' · ');
+  return [base, suffix].filter(Boolean).join(' · ');
 }
 
 /** রং ও মাপ দুটোই থাকলে ভ্যারিয়েশনের স্টক সারির নাম, যেমন "Navy · Body 46"। একটা না থাকলে ফাঁকা। */
@@ -6627,6 +6630,8 @@ function stockSizePartCandidates_(color, size) {
  */
 function cartItemStockCandidates_(item) {
   var out = [];
+  var globalAttrs = Array.isArray(item && item.globalAttributes) ? item.globalAttributes.filter(function (a) { return a && a.id && (a.termId || a.valueId); }) : [];
+  if (globalAttrs.length) return [normStockVariant_(cartItemVariantKey_(item))];
   var color = item && item.color, size = item && item.size;
   [colorSizeStockVariant_(color, size), size].concat(stockSizePartCandidates_(color, size), [color]).forEach(function (v) {
     v = normStockVariant_(v);
