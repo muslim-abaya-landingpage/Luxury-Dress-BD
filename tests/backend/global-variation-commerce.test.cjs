@@ -93,6 +93,8 @@ test('stock ledger uses an exact global-term key and never mixes term stock', ()
   const key = ctx.cartItemVariantKey_(line);
   assert.equal(key, 'Navy · M · Global[fabric-type=cotton]');
   assert.deepEqual(Array.from(ctx.cartItemStockCandidates_(line)), [key]);
+  const typed = ctx.cartItemVariantKey_(Object.assign({}, line, { productType: 'Full Set' }));
+  assert.equal(typed, 'Navy · M · Type[Full Set] · Global[fabric-type=cotton]');
 
   const w = catalogClient();
   const stockProduct = { stockVariants: {
