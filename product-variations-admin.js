@@ -212,9 +212,9 @@
     }
     function renderGlobalAttributes() {
       var rows = Array.isArray(p.globalAttributes) ? p.globalAttributes : [];
-      if (globalState.loading) return '<section class="pmw-box"><div class="pmw-box-head"><b>Global attributes</b></div><p class="pmw-hint">Loading saved Global Attributes…</p></section>';
-      if (globalState.error) return '<section class="pmw-box"><div class="pmw-box-head"><b>Global attributes</b></div><p class="pmw-hint">' + esc(globalState.error) + ' <a href="product-attributes.html" target="_blank" rel="noopener">Open registry</a></p></section>';
-      var html = '<section class="pmw-box" data-pga-panel><div class="pmw-box-head"><b>Global attributes</b><span class="pmw-hint">Reusable product details</span></div><div class="pmw-box-body" style="display:block">';
+      if (globalState.loading) return '<section class="pmw-global-attributes-box"><div class="pmw-global-attributes-head"><b>Global attributes</b></div><p class="pmw-hint">Loading saved Global Attributes…</p></section>';
+      if (globalState.error) return '<section class="pmw-global-attributes-box"><div class="pmw-global-attributes-head"><b>Global attributes</b></div><p class="pmw-hint">' + esc(globalState.error) + ' <a href="product-attributes.html" target="_blank" rel="noopener">Open registry</a></p></section>';
+      var html = '<section class="pmw-global-attributes-box" data-pga-panel><div class="pmw-global-attributes-head"><b>Global attributes</b><span class="pmw-hint">Reusable product details</span></div><div class="pmw-global-attributes-body" style="display:block">';
       if (!globalState.attributes.length) html += '<p class="pmw-hint">No saved Global Attributes yet. Create them in <a href="product-attributes.html" target="_blank" rel="noopener">Attributes registry</a>.</p>';
       globalState.attributes.forEach(function (attr) {
         if (!attr || !attr.id) return;
@@ -256,9 +256,9 @@
         present.map(function (d) {
           var open = st.open[d.id] !== false;
           var readonly = !d.field && !d.setter;
-          return '<div class="pmw-box" data-attr="' + d.id + '"><div class="pmw-box-head" data-pa="toggle" data-id="' + d.id + '"><b>' + esc(d.name) + "</b>" +
+          return '<div class="pmw-global-attributes-box" data-attr="' + d.id + '"><div class="pmw-global-attributes-head" data-pa="toggle" data-id="' + d.id + '"><b>' + esc(d.name) + "</b>" +
             (readonly ? "" : '<button type="button" class="pmw-remove" data-pa="remove" data-id="' + d.id + '">Remove</button>') + "<span>≡</span><span>" + (open ? "▴" : "▾") + "</span></div>" +
-            (open ? '<div class="pmw-box-body"><div><label>Name:</label><input type="text" value="' + esc(d.name) + '" readonly aria-label="Attribute name">' +
+            (open ? '<div class="pmw-global-attributes-body"><div><label>Name:</label><input type="text" value="' + esc(d.name) + '" readonly aria-label="Attribute name">' +
               '<div class="pmw-checks"><label><input type="checkbox" checked disabled> Visible on the product page</label>' +
               '<label><input type="checkbox" data-pa="used" data-id="' + d.id + '"' + (used.indexOf(d.id) !== -1 ? " checked" : "") + (d.values.length ? "" : " disabled") + "> Used for variations</label></div></div>" +
               '<div><label>Value(s):</label><textarea data-pa="values" data-id="' + d.id + '"' + (readonly ? " readonly" : "") + ' placeholder="Enter some descriptive text. Use “|” to separate different values.">' +
