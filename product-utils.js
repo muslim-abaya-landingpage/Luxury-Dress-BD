@@ -909,6 +909,11 @@ if (typeof window !== "undefined") window.cleanProductMeasures = cleanProductMea
     var type = String(line.productType || "").trim();
     var typeKey = type ? "Type[" + type + "]" : "";
     var attrs = Array.isArray(line.globalAttributes) ? line.globalAttributes.filter(function (a) { return a && a.id && (a.termId || a.valueId); }) : [];
+    if (!attrs.length) {
+      var legacyVariant = size || color;
+      var legacyRow = product ? stockRowKey(product, legacyVariant, color) : "";
+      return legacyRow ? stockVariantKey(legacyRow) : stockVariantKey(legacyVariant);
+    }
     var globalKey = attrs.slice().sort(function (a, b) { return String(a.id).localeCompare(String(b.id)); }).map(function (a) {
       return "Global[" + a.id + "=" + (a.termId || a.valueId) + "]";
     }).join(" · ");
