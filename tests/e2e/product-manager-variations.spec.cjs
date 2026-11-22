@@ -44,7 +44,7 @@ test('product type, attributes with "Used for variations", generate, edit variat
 
   // Attributes: one box per attribute; Long values edited with "|", Option not used for variations.
   const mount = page.locator('#pmAttrMount');
-  await expect(mount.locator('.pmw-box-head b')).toHaveText(['Option', 'Color', 'Body', 'Long']);
+  await expect(mount.locator('.pmw-box-head:not(.pmw-global-attributes-head) b')).toHaveText(['Option', 'Color', 'Body', 'Long']);
   await expect(mount.locator('[data-pa="used"][data-id="body"]')).not.toBeChecked();
   await expect(mount.locator('[data-pa="used"][data-id="length"]')).toBeChecked();
   await mount.locator('[data-pa="values"][data-id="length"]').fill('50 | 52 | 54 | 56');
@@ -221,6 +221,35 @@ test('renaming a color updates the selected variation key before publish', async
   const block = await publishedBlock(page);
   expect(block).toContain('"color":"deep-maroon"');
   expect(block).not.toContain('"color":"maroon"');
+});
+
+test('assigns saved Global Attribute terms to a product without changing variation or stock fields', async ({ page }) => {
+  await openMaroon(page);
+  await page.route('**/api/global-attributes', (route) => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({ ok: true, revision: 1, attributes: [
+      { id: 'fabric-type', name: 'Fabric Type', terms: [{ id: 'cotton', name: 'Cotton' }, { id: 'linen', name: 'Linen' }], variation: true, visible: true }
+    ] })
+  }));
+  const before = await page.evaluate(() => {
+    const products = Object.values(window.CATEGORY_PRODUCTS || {}).flat();
+    const product = products.find((item) => item && item.id === 'ABY-MAROON-1');
+    return product ? { productType: product.productType || '', variations: product.variations || null, variationAttributes: product.variationAttributes || null, stock: product.stock, stockVariants: product.stockVariants || null } : null;
+  });
+  await page.locator('[data-etab="attributes"]').click();
+  const mount = page.locator('#pmAttrMount');
+  await expect(mount.locator('[data-pga-enable="fabric-type"]')).toBeVisible();
+  await mount.locator('[data-pga-enable="fabric-type"]').check();
+  await mount.locator('[data-pga-term="fabric-type"][data-term-id="cotton"]').check();
+  await page.locator('#pmEditUpdate').click();
+  const block = await publishedBlock(page);
+  expect(block).toContain('globalAttributes: [{"id":"fabric-type","name":"Fabric Type","terms":[{"id":"cotton","name":"Cotton"}],"visible":true}]');
+  const after = await page.evaluate(() => {
+    const products = Object.values(window.CATEGORY_PRODUCTS || {}).flat();
+    const product = products.find((item) => item && item.id === 'ABY-MAROON-1');
+    return product ? { productType: product.productType || '', variations: product.variations || null, variationAttributes: product.variationAttributes || null, stock: product.stock, stockVariants: product.stockVariants || null } : null;
+  });
+  expect(after).toEqual(before);
 });
 
 test('variation price box on each row (no Edit needed) saves the variation price', async ({ page }) => {
