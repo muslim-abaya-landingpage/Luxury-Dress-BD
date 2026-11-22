@@ -6595,8 +6595,10 @@ function flushLowStockAlerts_() {
 function cartItemVariantKey_(item) {
   var size = String((item && item.size) || '').trim();
   var color = String((item && item.color) || '').trim();
-  var base = size ? (color ? color + ' · ' + size : size) : color;
   var attrs = Array.isArray(item && item.globalAttributes) ? item.globalAttributes.filter(function (a) { return a && a.id && (a.termId || a.valueId); }) : [];
+  // Preserve the legacy size-first key exactly for all products without global variation terms.
+  if (!attrs.length) return size || color || '';
+  var base = size ? (color ? color + ' · ' + size : size) : color;
   var type = String(item && item.productType || '').trim();
   var typeKey = type ? 'Type[' + type.slice(0, 60) + ']' : '';
   var suffix = attrs.slice().sort(function (a, b) { return String(a.id).localeCompare(String(b.id)); }).map(function (a) {
