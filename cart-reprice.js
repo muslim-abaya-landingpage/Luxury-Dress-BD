@@ -85,7 +85,7 @@
       if (voff && Number(variation.regularPrice) > (Number(variation.price) || 0)) price = Number(variation.regularPrice);
     }
     var size = String(line.size || line.selectedSize || "").trim();
-    if (!size) return null;
+    if (!size && !requiredGlobal.length) return null;
     if (/^Custom/i.test(size)) {
       var custom = /^Custom\s*\(L:?([\d.]+)[\s/]+W:?([\d.]+)/i.exec(size);
       if (!custom) return null;
