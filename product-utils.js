@@ -197,14 +197,14 @@ if (typeof window !== "undefined") window.cleanProductMeasures = cleanProductMea
       var terms = attribute.terms.slice(0, 100).map(function (term) {
         if (!term || typeof term !== "object") return null;
         var termId = String(term.id || "").trim().toLowerCase().slice(0, 50);
-        var name = String(term.name || "").replace(/\\s+/g, " ").trim().slice(0, 80);
-        if (!/^[\\p{L}\\p{N}][\\p{L}\\p{N}_-]{0,49}$/u.test(termId) || !name) return null;
+        var name = String(term.name || "").replace(/\s+/g, " ").trim().slice(0, 80);
+        if (!/^[\p{L}\p{N}][\p{L}\p{N}_-]{0,49}$/u.test(termId) || !name) return null;
         return { id: termId, name: name };
       }).filter(Boolean);
       if (!terms.length) return null;
       return {
         id: id,
-        name: String(attribute.name || id).replace(/\\s+/g, " ").trim().slice(0, 80) || id,
+        name: String(attribute.name || id).replace(/\s+/g, " ").trim().slice(0, 80) || id,
         variation: attribute.variation === true,
         visible: attribute.visible !== false,
         terms: terms
