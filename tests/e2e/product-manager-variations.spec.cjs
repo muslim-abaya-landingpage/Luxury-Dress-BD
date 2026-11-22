@@ -231,6 +231,11 @@ test('assigns saved Global Attribute terms to a product without changing variati
       { id: 'fabric-type', name: 'Fabric Type', terms: [{ id: 'cotton', name: 'Cotton' }, { id: 'linen', name: 'Linen' }], variation: true, visible: true }
     ] })
   }));
+  const before = await page.evaluate(() => {
+    const products = Object.values(window.CATEGORY_PRODUCTS || {}).flat();
+    const product = products.find((item) => item && item.id === 'ABY-MAROON-1');
+    return product ? { productType: product.productType || '', variations: product.variations || null, variationAttributes: product.variationAttributes || null, stock: product.stock, stockVariants: product.stockVariants || null } : null;
+  });
   await page.locator('[data-etab="attributes"]').click();
   const mount = page.locator('#pmAttrMount');
   await expect(mount.locator('[data-pga-enable="fabric-type"]')).toBeVisible();
@@ -239,9 +244,12 @@ test('assigns saved Global Attribute terms to a product without changing variati
   await page.locator('#pmEditUpdate').click();
   const block = await publishedBlock(page);
   expect(block).toContain('globalAttributes: [{"id":"fabric-type","name":"Fabric Type","terms":[{"id":"cotton","name":"Cotton"}],"visible":true}]');
-  expect(block).toContain('variationAttributes: ["length"]');
-  expect(block).toContain('variations: [');
-  expect(block).not.toContain('stockVariants:');
+  const after = await page.evaluate(() => {
+    const products = Object.values(window.CATEGORY_PRODUCTS || {}).flat();
+    const product = products.find((item) => item && item.id === 'ABY-MAROON-1');
+    return product ? { productType: product.productType || '', variations: product.variations || null, variationAttributes: product.variationAttributes || null, stock: product.stock, stockVariants: product.stockVariants || null } : null;
+  });
+  expect(after).toEqual(before);
 });
 
 test('variation price box on each row (no Edit needed) saves the variation price', async ({ page }) => {
