@@ -218,6 +218,7 @@
     if (item.bodySize) line.bodySize = String(item.bodySize);
     if (item.selectedSize) line.selectedSize = String(item.selectedSize);
     if (item.productType) line.productType = String(item.productType);
+    if (item.variationSku) line.variationSku = String(item.variationSku).slice(0, 60);
     var measurements = cleanMeasurements(item.measurements);
     if (measurements) line.measurements = measurements;
     if (!line.size && line.lengthSize && typeof global.getCartLineSizeLabel === "function") {
