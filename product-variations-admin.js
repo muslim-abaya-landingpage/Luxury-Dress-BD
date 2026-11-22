@@ -115,7 +115,7 @@
   function stockKey(v) {
     var c = String(v.color || "").trim(), s = String(v.size || "").trim();
     var base = c && s ? c + " · " + s : (s || c);
-    var suffix = globalStockSuffix(v);
+    var suffix = [v.type ? "Type[" + v.type + "]" : "", globalStockSuffix(v)].filter(Boolean).join(" · ");
     return [base, suffix].filter(Boolean).join(" · ");
   }
   function rowKey(v) {
