@@ -104,13 +104,32 @@
   function composeSize(row) {
     return SIZE_ATTRS.map(function (id) { return row[id] || ""; }).filter(Boolean).join(" · ");
   }
+  function globalVariationRows(v) {
+    return (Array.isArray(v && v.globalAttributes) ? v.globalAttributes : []).filter(function (a) { return a && a.id && a.termId; });
+  }
+  function isGlobalVariationInUse(product, id) {
+    return (Array.isArray(product && product.variations) ? product.variations : []).some(function (variation) {
+      return globalVariationRows(variation).some(function (a) { return String(a.id) === String(id); });
+    });
+  }
+  function globalStockSuffix(v) {
+    return globalVariationRows(v).slice().sort(function (a, b) { return String(a.id).localeCompare(String(b.id)); }).map(function (a) {
+      return "Global[" + a.id + "=" + a.termId + "]";
+    }).join(" · ");
+  }
   function stockKey(v) {
     var c = String(v.color || "").trim(), s = String(v.size || "").trim();
-    return c && s ? c + " · " + s : (s || c);
+    var base = c && s ? c + " · " + s : (s || c);
+    var globalSuffix = globalStockSuffix(v);
+    var suffix = globalSuffix ? [v.type ? "Type[" + v.type + "]" : "", globalSuffix].filter(Boolean).join(" · ") : "";
+    return [base, suffix].filter(Boolean).join(" · ");
   }
-  function rowKey(v) { return [norm(v.type), norm(v.color), norm(v.size)].join("\u001f"); }
+  function rowKey(v) {
+    return [norm(v.type), norm(v.color), norm(v.size), globalStockSuffix(v)].join("\u001f");
+  }
   function skuFor(id, v) {
-    var tail = [v.type, v.color, String(v.size || "").replace(/body |length |sleeve |palazzo /gi, "")].filter(Boolean).join("-");
+    var globalTail = globalVariationRows(v).map(function (a) { return a.term || a.termId; });
+    var tail = [v.type, v.color, String(v.size || "").replace(/body |length |sleeve |palazzo /gi, "")].concat(globalTail).filter(Boolean).join("-");
     return (String(id || "SKU") + (tail ? "-" + tail : "")).replace(/[^A-Za-z0-9]+/g, "-").replace(/-+$/, "").toUpperCase().slice(0, 60);
   }
   /** Writes the two price boxes into a row: price = what the customer pays, regularPrice = before sale. */
@@ -202,7 +221,27 @@
       globalState.loading = true;
       fetch("/api/global-attributes", { method: "POST", credentials: "same-origin", cache: "no-store", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ Token: session.token, action: "read" }) })
         .then(function (response) { return response.json().catch(function () { return {}; }).then(function (data) { if (!response.ok || !data.ok) throw new Error(data.error || ("HTTP_" + response.status)); return data; }); })
-        .then(function (data) { globalState.attributes = Array.isArray(data.attributes) ? data.attributes : []; globalState.error = ""; })
+        .then(function (data) {
+          globalState.attributes = Array.isArray(data.attributes) ? data.attributes : [];
+          globalState.error = "";
+          var assignments = Array.isArray(p.globalAttributes) ? p.globalAttributes.slice() : [];
+          var synced = false;
+          assignments.forEach(function (assignment) {
+            if (!assignment || !assignment.id) return;
+            var definition = globalState.attributes.filter(function (attr) { return attr && attr.id === assignment.id; })[0];
+            if (!definition) return; // Keep historical assignments if the registry entry was removed.
+            var variation = definition.variation === true || isGlobalVariationInUse(p, assignment.id);
+            if (assignment.variation !== variation || assignment.name !== definition.name) {
+              assignment.variation = variation;
+              assignment.name = definition.name;
+              synced = true;
+            }
+          });
+          if (synced) {
+            p.globalAttributes = assignments;
+            if (ctx.changed) ctx.changed("Global attribute settings refreshed from the registry — click Save changes to publish.");
+          }
+        })
         .catch(function (error) { globalState.error = "Global Attributes could not be loaded: " + ((error && error.message) || "request failed"); })
         .then(function () { globalState.loading = false; globalState.loaded = true; if (box.isConnected && box.__pmwAttrLive) draw(); });
     }
@@ -230,14 +269,14 @@
           });
           if (!Array.isArray(attr.terms) || !attr.terms.length) html += '<span class="pmw-hint">এই Attribute-এ এখনো কোনো Term নেই। Registry থেকে Term যোগ করুন।</span>';
           html += '</div>';
-          if (attr.variation) html += '<p class="pmw-hint">Registry-তে এটি variation attribute হিসেবে চিহ্নিত, তবে custom variation-এর cart, stock ও checkout mapping এই ধাপে সক্রিয় নয়।</p>';
+          if (attr.variation) html += '<p class="pmw-hint">এই Attribute-এর Terms Variations tab-এ ক্রয়যোগ্য অপশন হিসেবে ব্যবহার করা যাবে।</p>';
         }
         html += '</div>';
       });
       rows.filter(function (row) { return row && row.id && !globalState.attributes.some(function (attr) { return attr && attr.id === row.id; }); }).forEach(function (row) {
         html += '<p class="pmw-hint">আগে যুক্ত "' + esc(row.name || row.id) + '" registry-তে আর পাওয়া যাচ্ছে না। পুরোনো assignment নিরাপত্তার জন্য সংরক্ষিত আছে; registry ঠিক না করা পর্যন্ত এটি পরিবর্তন করা হয়নি।</p>';
       });
-      html += '<p class="pmw-hint">এখানে নির্বাচন করলে পণ্যের বিবরণে Attribute/Term দেখাবে। এটি বর্তমান variation, SKU বা stock পরিবর্তন করে না।</p></div></section>';
+      html += '<p class="pmw-hint">Variation হিসেবে চিহ্নিত Attribute-এর নির্বাচিত Terms Variations tab-এ SKU, দাম ও স্টকসহ ব্যবহার করা যাবে।</p></div></section>';
       return html;
     }
     if (st.productId !== String(p.id)) { st.added = []; st.open = {}; st.productId = String(p.id); }
@@ -362,7 +401,7 @@
           var attr = globalState.attributes.filter(function (item) { return item && item.id === id; })[0];
           var assignments = Array.isArray(p.globalAttributes) ? p.globalAttributes.slice() : [];
           var at = assignments.findIndex(function (item) { return item && item.id === id; });
-          if (t.checked && attr && at < 0) assignments.push({ id: attr.id, name: attr.name, terms: [], visible: attr.visible !== false });
+          if (t.checked && attr && at < 0) assignments.push({ id: attr.id, name: attr.name, terms: [], variation: attr.variation === true || isGlobalVariationInUse(p, attr.id), visible: attr.visible !== false });
           else if (!t.checked && at >= 0) assignments.splice(at, 1);
           if (assignments.length) p.globalAttributes = assignments; else delete p.globalAttributes;
           if (ctx.changed) ctx.changed("Global attribute selection changed — click Save changes to publish.");
@@ -381,7 +420,7 @@
           var termIndex = chosen.findIndex(function (item) { return item && item.id === tid; });
           if (t.checked && termIndex < 0) chosen.push({ id: term.id, name: term.name });
           else if (!t.checked && termIndex >= 0) chosen.splice(termIndex, 1);
-          assignment.name = definition.name; assignment.visible = definition.visible !== false; assignment.terms = chosen; next[index] = assignment;
+          assignment.name = definition.name; assignment.visible = definition.visible !== false; assignment.variation = definition.variation === true || isGlobalVariationInUse(p, definition.id); assignment.terms = chosen; next[index] = assignment;
           p.globalAttributes = next;
           if (ctx.changed) ctx.changed("Global attribute terms changed — click Save changes to publish.");
           return;
@@ -407,7 +446,15 @@
     var p = ctx.product;
     resetShared(p, ctx);
     var defs = attributeDefs(p, ctx.category, ctx);
-    var used = usedAttrs(p, defs, ctx.category).map(function (id) { return defById(defs, id); }).filter(function (d) { return d && d.values.length; });
+    var globalDefs = (Array.isArray(p.globalAttributes) ? p.globalAttributes : []).filter(function (a) {
+      return a && a.variation === true && a.id && Array.isArray(a.terms) && a.terms.length;
+    }).map(function (a) {
+      return { id: "global:" + a.id, globalId: a.id, name: a.name, values: a.terms.map(function (term) {
+        return { key: term.id, label: term.name, termId: term.id, term: term.name };
+      }) };
+    });
+    defs = defs.concat(globalDefs);
+    var used = usedAttrs(p, defs.filter(function (d) { return !d.globalId; }), ctx.category).map(function (id) { return defById(defs, id); }).filter(function (d) { return d && d.values.length; }).concat(globalDefs);
     var photos = (ctx.photos || []).filter(Boolean);
     if (!Array.isArray(p.variations)) p.variations = [];
     var rows = p.variations;
@@ -431,6 +478,7 @@
 
     function card(v, i, dup, firstForStock) {
       var r = parseRow(v, defs);
+      globalVariationRows(v).forEach(function (a) { r["global:" + a.id] = a.termId; });
       var open = !!st.open[i];
       var sk = stockKey(v);
       var heads = used.map(function (d) {
@@ -510,6 +558,12 @@
       if (parts.color) v.color = parts.color;
       var size = defById(defs, "size") ? (parts.size || "") : composeSize(parts);
       if (size) v.size = size;
+      var selected = [];
+      globalDefs.forEach(function (d) {
+        var term = d.values.filter(function (x) { return x.key === parts[d.id]; })[0];
+        if (term) selected.push({ id: d.globalId, termId: term.termId, name: d.name, term: term.term });
+      });
+      if (selected.length) v.globalAttributes = selected;
       return v;
     }
     function generate() {
@@ -653,9 +707,11 @@
         if (!v) return;
         if (k === "attr") {
           var r = parseRow(v, defs);
+          globalVariationRows(v).forEach(function (item) { r["global:" + item.id] = item.termId; });
           r[t.getAttribute("data-attr")] = t.value;
           var nv = rowFrom(r);
           ["type", "color", "size"].forEach(function (f) { if (nv[f]) v[f] = nv[f]; else delete v[f]; });
+          if (nv.globalAttributes && nv.globalAttributes.length) v.globalAttributes = nv.globalAttributes; else delete v.globalAttributes;
         } else if (k === "enabled") { if (t.checked) delete v.enabled; else v.enabled = false; }
         else if (k === "hprice") {
           // Price box on the row: the regular price; an existing sale price stays if it is still lower.

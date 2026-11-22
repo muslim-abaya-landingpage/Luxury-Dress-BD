@@ -590,6 +590,15 @@ function validateOrderInput_(e) {
             productType: String((it &amp;&amp; it.productType) || '').trim().slice(0, 80),
             category: String((it &amp;&amp; it.category) || '').trim().slice(0, 80)
           };
+          if (it &amp;&amp; Array.isArray(it.globalAttributes) &amp;&amp; it.globalAttributes.length) {
+            line.globalAttributes = it.globalAttributes.slice(0, 20).map(function (a) {
+              if (!a || !a.id || !(a.termId || a.valueId)) return null;
+              var id = String(a.id).trim().toLowerCase().slice(0, 40);
+              var termId = String(a.termId || a.valueId).trim().toLowerCase().slice(0, 50);
+              if (!/^[a-z0-9][a-z0-9_-]{0,39}$/.test(id) || !/^[\p{L}\p{N}][\p{L}\p{N}_-]{0,49}$/u.test(termId)) return null;
+              return { id: id, termId: termId, name: String(a.name || id).trim().slice(0, 60), term: String(a.term || termId).trim().slice(0, 60) };
+            }).filter(Boolean);
+          }
           // Size Manager: measurement choices ({key, value}, up to 20 = the template field limit); checked in opsLinePrice_.
           if (it &amp;&amp; Array.isArray(it.measurements) &amp;&amp; it.measurements.length) {
             line.measurements = it.measurements.slice(0, 20).map(function (m) {
@@ -6586,10 +6595,17 @@ function flushLowStockAlerts_() {
 /** কার্ট-আইটেম থেকে variant key বের করা (size অগ্রাধিকার পায়, না থাকলে color) */
 function cartItemVariantKey_(item) {
   var size = String((item &amp;&amp; item.size) || '').trim();
-  if (size) return size;
   var color = String((item &amp;&amp; item.color) || '').trim();
-  if (color) return color;
-  return '';
+  var attrs = Array.isArray(item &amp;&amp; item.globalAttributes) ? item.globalAttributes.filter(function (a) { return a &amp;&amp; a.id &amp;&amp; (a.termId || a.valueId); }) : [];
+  // Preserve the legacy size-first key exactly for all products without global variation terms.
+  if (!attrs.length) return size || color || '';
+  var base = size ? (color ? color + ' · ' + size : size) : color;
+  var type = String(item &amp;&amp; item.productType || '').trim();
+  var typeKey = type ? 'Type[' + type.slice(0, 60) + ']' : '';
+  var suffix = attrs.slice().sort(function (a, b) { return String(a.id).localeCompare(String(b.id)); }).map(function (a) {
+    return 'Global[' + String(a.id).slice(0, 40) + '=' + String(a.termId || a.valueId).slice(0, 50) + ']';
+  }).join(' · ');
+  return [base, typeKey, suffix].filter(Boolean).join(' · ');
 }
 
 /** রং ও মাপ দুটোই থাকলে ভ্যারিয়েশনের স্টক সারির নাম, যেমন "Navy · Body 46"। একটা না থাকলে ফাঁকা। */
@@ -6628,6 +6644,8 @@ function stockSizePartCandidates_(color, size) {
  */
 function cartItemStockCandidates_(item) {
   var out = [];
+  var globalAttrs = Array.isArray(item &amp;&amp; item.globalAttributes) ? item.globalAttributes.filter(function (a) { return a &amp;&amp; a.id &amp;&amp; (a.termId || a.valueId); }) : [];
+  if (globalAttrs.length) return [normStockVariant_(cartItemVariantKey_(item))];
   var color = item &amp;&amp; item.color, size = item &amp;&amp; item.size;
   [colorSizeStockVariant_(color, size), size].concat(stockSizePartCandidates_(color, size), [color]).forEach(function (v) {
     v = normStockVariant_(v);
@@ -10044,7 +10062,7 @@ function opsNorm_(s){return String(s||'').trim().toLowerCase().replace(/[–—]
 /** WooCommerce-style variation for a cart line (product.variations from Product Manager), or null.
  * Each variation names any of type / color / size; an empty one means "any". The most specific match wins
  * (size counts one per " · " part, so "Body 46 · Length 54" beats "Length 54"). Mirrored in cart-reprice.js. */
-function opsVariation_(p,it){var vs=p&amp;&amp;p.variations;if(!Array.isArray(vs)||!vs.length)return null;var ck=function(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');},parts=function(s){return opsNorm_(s).split(/\s*·\s*/).filter(Boolean);},type=opsNorm_(it.productType).replace(/\s/g,''),color=String(it.color||''),size=parts(it.size),best=null,top=-1;vs.forEach(function(v){if(!v||typeof v!=='object')return;var n=0;if(v.type){if(opsNorm_(v.type).replace(/\s/g,'')!==type)return;n++;}if(v.color){if(!((ck(v.color)&amp;&amp;ck(v.color)===ck(color))||opsNorm_(v.color)===opsNorm_(color)))return;n++;}if(v.size){var t=parts(v.size);if(!t.every(function(x){return size.indexOf(x)>=0;}))return;n+=t.length;}if(n>top){best=v;top=n;}});return best;}
+function opsVariation_(p,it){var vs=p&amp;&amp;p.variations;if(!Array.isArray(vs)||!vs.length)return null;var ck=function(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');},parts=function(s){return opsNorm_(s).split(/\s*·\s*/).filter(Boolean);},type=opsNorm_(it.productType).replace(/\s/g,''),color=String(it.color||''),size=parts(it.size),globalRows=function(input){if(Array.isArray(input))return input.filter(function(a){return a&amp;&amp;a.id&amp;&amp;(a.termId||a.valueId);});if(input&amp;&amp;typeof input==='object')return Object.keys(input).map(function(id){return {id:id,termId:input[id]};});return [];},selectedGlobal=globalRows(it.globalAttributes),requiredProductGlobal=(Array.isArray(p.globalAttributes)?p.globalAttributes:[]).filter(function(a){return a&amp;&amp;a.id&amp;&amp;a.variation===true;}),best=null,top=-1;vs.forEach(function(v){if(!v||typeof v!=='object')return;var n=0,requiredGlobal=globalRows(v.globalAttributes);if(requiredProductGlobal.some(function(a){return !requiredGlobal.some(function(x){return String(x.id)===String(a.id);});}))return;if(requiredGlobal.some(function(a){var selected=selectedGlobal.filter(function(x){return String(x.id)===String(a.id);})[0];return !selected||String(selected.termId||selected.valueId)!==String(a.termId||a.valueId);}))return;n+=requiredGlobal.length;if(v.type){if(opsNorm_(v.type).replace(/\s/g,'')!==type)return;n++;}if(v.color){if(!((ck(v.color)&amp;&amp;ck(v.color)===ck(color))||opsNorm_(v.color)===opsNorm_(color)))return;n++;}if(v.size){var t=parts(v.size);if(!t.every(function(x){return size.indexOf(x)>=0;}))return;n+=t.length;}if(n>top){best=v;top=n;}});return best;}
 /** Scheduled sale (Product Manager → Schedule): true when the product has sale dates and now is outside them,
  * so the regular (before-sale) prices apply. saleFrom/saleTo are milliseconds from catalog-validation.json.
  * Mirrored in cart-reprice.js and product-utils.js. */
@@ -10054,15 +10072,15 @@ function opsSaleOff_(p,now){var f=p&amp;&amp;p.saleFrom!=null?Number(p.saleFrom)
  * so the usual size check sees the main size only. A missing one is allowed (custom size, older carts). */
 function opsLinePrice_(it,p){var opsOwnMeasures_=function(p,size){var ms=p&amp;&amp;Array.isArray(p.measures)?p.measures:[];var out=String(size);ms.forEach(function(m){var name=String(m&amp;&amp;m.name||'').trim();if(!name)return;var re=new RegExp('\\s*\u00b7\\s*'+name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&amp;')+':\\s*([^\u00b7]+)','i');var hit=re.exec(out);if(!hit)return;var val=hit[1].trim(),vals=Array.isArray(m.values)?m.values:[];if(!vals.some(function(v){return opsNorm_(v)===opsNorm_(val);}))throw Error('INVALID_SIZE');out=out.replace(hit[0],'').trim();});return out;};if(!Number.isSafeInteger(it.qty)||it.qty&lt;1||it.qty>500)throw Error('INVALID_QTY');if(p.soldIndividually&amp;&amp;it.qty>1)throw Error('SOLD_INDIVIDUALLY');var price=Number(p.price),type=String(it.productType||'');if(p.prices){var key=Object.keys(p.prices).filter(function(k){return k.replace(/\s/g,'').toLowerCase()===type.replace(/\s/g,'').toLowerCase();})[0];if(!key)throw Error('PRODUCT_TYPE_REQUIRED');price=Number(p.prices[key]);it.productType=key;}
  var off=opsSaleOff_(p,Date.now());if(off){if(p.prices){var rp=p.regularPrices&amp;&amp;Number(p.regularPrices[it.productType]);if(rp>price)price=rp;}else if(Number(p.regularPrice)>price)price=Number(p.regularPrice);}
- var variation=opsVariation_(p,it);if(variation){if(variation.enabled===false)throw Error('VARIATION_UNAVAILABLE');if(Number(variation.price)>0)price=Number(variation.price);var voff=(variation.saleFrom!=null||variation.saleTo!=null)?opsSaleOff_(variation,Date.now()):off;if(voff&amp;&amp;Number(variation.regularPrice)>(Number(variation.price)||0))price=Number(variation.regularPrice);}
+ delete it.variationSku;var variation=opsVariation_(p,it),requiredGlobal=(Array.isArray(p.globalAttributes)?p.globalAttributes:[]).filter(function(a){return a&amp;&amp;a.variation===true;});if(requiredGlobal.length&amp;&amp;!variation)throw Error('VARIATION_UNAVAILABLE');if(variation){if(variation.enabled===false)throw Error('VARIATION_UNAVAILABLE');if(variation.sku)it.variationSku=String(variation.sku).slice(0,60);if(Number(variation.price)>0)price=Number(variation.price);var voff=(variation.saleFrom!=null||variation.saleTo!=null)?opsSaleOff_(variation,Date.now()):off;if(voff&amp;&amp;Number(variation.regularPrice)>(Number(variation.price)||0))price=Number(variation.regularPrice);}
  var tpl=Array.isArray(it.measurements)&amp;&amp;it.measurements.length?opsTemplateSize_(it,p):'';
- var size=tpl||String(it.size||'').trim();if(!size)throw Error('SIZE_REQUIRED');if(!tpl)size=opsOwnMeasures_(p,size);var custom=!tpl&amp;&amp;/^Custom\s*\(L:?([\d.]+)[\s/]+W:?([\d.]+)/i.exec(size),direct=(p.sizes||[]).some(function(s){var v=typeof s==='object'?s.value:s;return opsNorm_(v)===opsNorm_(size);});
+ var size=tpl||String(it.size||'').trim();if(!size&amp;&amp;!(variation&amp;&amp;Array.isArray(variation.globalAttributes)&amp;&amp;variation.globalAttributes.length))throw Error('SIZE_REQUIRED');if(!tpl&amp;&amp;size)size=opsOwnMeasures_(p,size);var custom=!tpl&amp;&amp;/^Custom\s*\(L:?([\d.]+)[\s/]+W:?([\d.]+)/i.exec(size),direct=(p.sizes||[]).some(function(s){var v=typeof s==='object'?s.value:s;return opsNorm_(v)===opsNorm_(size);});
  if(!tpl&amp;&amp;/^Custom/i.test(size)&amp;&amp;!custom)throw Error('INVALID_CUSTOM_SIZE');
  if(tpl){}
  else if(custom){var l=Number(custom[1]),w=Number(custom[2]);if(!isFinite(l)||!isFinite(w)||l&lt;=0||w&lt;=0)throw Error('INVALID_CUSTOM_SIZE');[['length','lengthExtra',l],['width','widthExtra',w]].forEach(function(dim){var rows=p.custom.slice().sort(function(a,b){return a[dim[0]]-b[dim[0]];}),row=rows.filter(function(r){return Number(r[dim[0]])>=dim[2];})[0]||rows[rows.length-1];price+=row?(Number(row[dim[1]])||0):0;});}
- else if(p.kind==='abaya'){var b=/Body\s+(\d+)/i.exec(size),len=/Length\s+(\d+)/i.exec(size),bodies=p.bodySizes.length?p.bodySizes:[(p.bodyLabel.match(/\d+/)||[])[0]];if(!b||!len||bodies.map(String).indexOf(b[1])&lt;0||p.lengths.map(String).indexOf(len[1])&lt;0)throw Error('INVALID_SIZE');}
- else if(p.kind==='two-piece'&amp;&amp;!direct){var body=/Body\s+([^·]+)/i.exec(size),allowed=p.bodySizes.length?p.bodySizes:[(p.bodyLabel.match(/\d+/)||[])[0]];if(!body||!allowed.some(function(value){return opsNorm_(value)===opsNorm_(body[1]);}))throw Error('INVALID_SIZE');if(p.dressLengths.length){var dl=/Length\s+([\d.-]+)/i.exec(size),pl=/Palazzo(?: Length)?\s+([\d.-]+)/i.exec(size);if(!dl||!pl||p.dressLengths.map(String).indexOf(dl[1])&lt;0||p.palazzoLengths.map(String).indexOf(pl[1])&lt;0)throw Error('INVALID_SIZE');}else if(p.lengthLabel&amp;&amp;opsNorm_(size).indexOf(opsNorm_(p.lengthLabel))&lt;0)throw Error('INVALID_SIZE');}
- else if(p.kind==='simple'&amp;&amp;!direct&amp;&amp;!(p.category==='panjabi'&amp;&amp;(p.sizes||[]).some(function(s){return opsNorm_(s).split(' ')[0]===opsNorm_(size).split(' ')[0];})))throw Error('INVALID_SIZE');
+ else if(size&amp;&amp;p.kind==='abaya'){var b=/Body\s+(\d+)/i.exec(size),len=/Length\s+(\d+)/i.exec(size),bodies=p.bodySizes.length?p.bodySizes:[(p.bodyLabel.match(/\d+/)||[])[0]];if(!b||!len||bodies.map(String).indexOf(b[1])&lt;0||p.lengths.map(String).indexOf(len[1])&lt;0)throw Error('INVALID_SIZE');}
+ else if(size&amp;&amp;p.kind==='two-piece'&amp;&amp;!direct){var body=/Body\s+([^·]+)/i.exec(size),allowed=p.bodySizes.length?p.bodySizes:[(p.bodyLabel.match(/\d+/)||[])[0]];if(!body||!allowed.some(function(value){return opsNorm_(value)===opsNorm_(body[1]);}))throw Error('INVALID_SIZE');if(p.dressLengths.length){var dl=/Length\s+([\d.-]+)/i.exec(size),pl=/Palazzo(?: Length)?\s+([\d.-]+)/i.exec(size);if(!dl||!pl||p.dressLengths.map(String).indexOf(dl[1])&lt;0||p.palazzoLengths.map(String).indexOf(pl[1])&lt;0)throw Error('INVALID_SIZE');}else if(p.lengthLabel&amp;&amp;opsNorm_(size).indexOf(opsNorm_(p.lengthLabel))&lt;0)throw Error('INVALID_SIZE');}
+ else if(size&amp;&amp;p.kind==='simple'&amp;&amp;!direct&amp;&amp;!(p.category==='panjabi'&amp;&amp;(p.sizes||[]).some(function(s){return opsNorm_(s).split(' ')[0]===opsNorm_(size).split(' ')[0];})))throw Error('INVALID_SIZE');
  if(!isFinite(price)||price&lt;=0)throw Error('CATALOG_PRICE_INVALID');it.name=p.name;it.category=p.category;it.price=price;return price*it.qty;
 }
 // Size Manager: the published size configuration (Cloudflare D1, served by the website at /api/size-config).

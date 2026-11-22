@@ -21,10 +21,24 @@
     var list = p && p.variations;
     if (!Array.isArray(list) || !list.length || !line) return null;
     var type = norm(line.productType).replace(/\s/g, ""), color = String(line.color || ""), size = sizeParts(line.size || line.selectedSize);
+    function globalRows(input) {
+      if (Array.isArray(input)) return input.filter(function (a) { return a && a.id && (a.termId || a.valueId); });
+      if (input && typeof input === "object") return Object.keys(input).map(function (id) { return { id: id, termId: input[id] }; });
+      return [];
+    }
+    var selectedGlobal = globalRows(line.globalAttributes);
+    var requiredProductGlobal = (Array.isArray(p.globalAttributes) ? p.globalAttributes : []).filter(function (a) { return a && a.id && a.variation === true; });
     var best = null, top = -1;
     list.forEach(function (v) {
       if (!v || typeof v !== "object") return;
       var n = 0;
+      var requiredGlobal = globalRows(v.globalAttributes);
+      if (requiredProductGlobal.some(function (a) { return !requiredGlobal.some(function (x) { return String(x.id) === String(a.id); }); })) return;
+      if (requiredGlobal.some(function (a) {
+        var selected = selectedGlobal.filter(function (x) { return String(x.id) === String(a.id); })[0];
+        return !selected || String(selected.termId || selected.valueId) !== String(a.termId || a.valueId);
+      })) return;
+      n += requiredGlobal.length;
       if (v.type) { if (norm(v.type).replace(/\s/g, "") !== type) return; n++; }
       if (v.color) { if (!((colorKey(v.color) && colorKey(v.color) === colorKey(color)) || norm(v.color) === norm(color))) return; n++; }
       if (v.size) {
@@ -62,6 +76,8 @@
       else if (Number(p.regularPrice) > price) price = Number(p.regularPrice);
     }
     var variation = variationFor(p, line);
+    var requiredGlobal = Array.isArray(p.globalAttributes) ? p.globalAttributes.filter(function (a) { return a && a.variation === true; }) : [];
+    if (requiredGlobal.length && !variation) return null;
     if (variation) {
       if (variation.enabled === false) return null;
       if (Number(variation.price) > 0) price = Number(variation.price);
@@ -69,7 +85,7 @@
       if (voff && Number(variation.regularPrice) > (Number(variation.price) || 0)) price = Number(variation.regularPrice);
     }
     var size = String(line.size || line.selectedSize || "").trim();
-    if (!size) return null;
+    if (!size && !requiredGlobal.length) return null;
     if (/^Custom/i.test(size)) {
       var custom = /^Custom\s*\(L:?([\d.]+)[\s/]+W:?([\d.]+)/i.exec(size);
       if (!custom) return null;

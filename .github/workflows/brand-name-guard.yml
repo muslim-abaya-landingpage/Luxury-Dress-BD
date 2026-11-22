@@ -1,5 +1,5 @@
 name: brand-name-guard
-# Fails when a pushed commit message or tracked file contains the reference shop's name (see CLAUDE.md).
+# Check only the commits/files introduced by this change; PR merge refs also contain base-branch history.
 on:
   push:
     branches: [main]
@@ -14,14 +14,32 @@ jobs:
       - name: Check commit messages and files
         env:
           BEFORE: ${{ github.event.before }}
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
         run: |
           NAME=$(node -e "process.stdout.write(String.fromCharCode(97,110,122,97,97,114))")
-          RANGE="HEAD~1..HEAD"
-          if [ -n "$BEFORE" ] && git cat-file -e "$BEFORE" 2>/dev/null; then RANGE="$BEFORE..HEAD"; fi
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            RANGE="$PR_BASE..$PR_HEAD"
+          else
+            RANGE="HEAD~1..HEAD"
+            if [ -n "$BEFORE" ] && git cat-file -e "$BEFORE" 2>/dev/null; then RANGE="$BEFORE..HEAD"; fi
+          fi
           if git log --format='%s%n%b' "$RANGE" | grep -qi "$NAME"; then
             echo "::error::A commit message contains the reference shop name. See CLAUDE.md."; exit 1
           fi
-          if git grep -qi "$NAME" -- . ':!*.png' ':!*.jpg' ':!*.jpeg' ':!*.webp' ':!*.avif' ':!*.gif' ':!*.woff2' ':!*.pdf'; then
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT "$PR_BASE" "$PR_HEAD")
+            if [ -n "$CHANGED_FILES" ] && printf '%s\n' "$CHANGED_FILES" | while IFS= read -r file; do
+              if git grep -qi "$NAME" "$PR_HEAD" -- "$file"; then
+                echo "::error::A changed file contains the reference shop name. See CLAUDE.md."; exit 1
+              fi
+            done; then
+              :
+            else
+              exit 1
+            fi
+          elif git grep -qi "$NAME" -- . ':!*.png' ':!*.jpg' ':!*.jpeg' ':!*.webp' ':!*.avif' ':!*.gif' ':!*.woff2' ':!*.pdf'; then
             echo "::error::A tracked file contains the reference shop name. See CLAUDE.md."; exit 1
           fi
           echo "OK: name not found"

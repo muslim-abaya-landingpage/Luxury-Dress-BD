@@ -51,11 +51,20 @@ window.__maBuildValidationProducts = function (w) {
       }
       // Product Manager variations: only what the order price check needs (no SKU/photo; the before-sale
       // price only when the sale has dates).
+      if (Array.isArray(p.globalAttributes) && p.globalAttributes.length) {
+        row0.globalAttributes = p.globalAttributes.filter(function (a) { return a && a.variation === true && Array.isArray(a.terms) && a.terms.length; }).map(function (a) {
+          return { id: String(a.id || "").slice(0, 40), variation: true };
+        });
+      }
       var vlist = sale ? sale.variations : p.variations;
       if (Array.isArray(vlist) && vlist.length) {
         row0.variations = vlist.map(function (v) {
           var row = {};
           ['type', 'color', 'size', 'sku'].forEach(function (k) { if (v[k]) row[k] = v[k]; });
+          if (Array.isArray(v.globalAttributes)) row.globalAttributes = v.globalAttributes.slice(0, 20).map(function (a) {
+            if (!a || !a.id || !(a.termId || a.valueId)) return null;
+            return { id: String(a.id).slice(0, 40), termId: String(a.termId || a.valueId).slice(0, 50), name: String(a.name || a.id).slice(0, 60), term: String(a.term || a.value || a.termId).slice(0, 60) };
+          }).filter(Boolean);
           if (v.price > 0) row.price = v.price;
           if (sale && v.regularPrice > 0) row.regularPrice = v.regularPrice;
           var vw = (v.saleFrom || v.saleTo) && w.maCatalog.saleWindow ? w.maCatalog.saleWindow(v) : null;

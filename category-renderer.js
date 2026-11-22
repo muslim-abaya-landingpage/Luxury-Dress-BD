@@ -487,6 +487,11 @@ function buildShopTemplateCartLine(item, qtyToAdd, categoryKeyOpt, selectedTypeO
  * or null after telling the customer why it cannot be ordered.
  */
 function shopPrepareDirectOrderLine(item, qtyToAdd, sizeValue, categoryKeyOpt, bodyValueOpt, sizedOpt) {
+  var requiredGlobal = Array.isArray(item && item.globalAttributes) ? item.globalAttributes.filter(function (a) { return a && a.variation === true && Array.isArray(a.terms) && a.terms.length; }) : [];
+  if (requiredGlobal.length) {
+    alert("এই পণ্যের বিশেষ ভ্যারিয়েশন নির্বাচন করতে পণ্যের বিস্তারিত পেজ খুলুন।");
+    return null;
+  }
   if (!productIsInStock(item)) return null;
   var line = buildShopCartLineItem(item, qtyToAdd, sizeValue, categoryKeyOpt, item._cartType || "", bodyValueOpt, sizedOpt);
   var pickedVariation = shopLineVariation(item, line);

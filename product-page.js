@@ -23,6 +23,7 @@
     selectedPalazzoLength: "",
     selectedColor: "",
     selectedColorLabel: "",
+    selectedGlobalAttributes: {},
     qty: 1
   };
 
@@ -272,13 +273,30 @@
     return parseInt(p && p.price, 10) || siteDefaults(state.category).base.price || 550;
   }
 
+  function selectedGlobalRows() {
+    var p = state.product || {};
+    return (Array.isArray(p.globalAttributes) ? p.globalAttributes : []).filter(function (a) {
+      return a && a.variation === true && a.id && Array.isArray(a.terms) && a.terms.length;
+    }).map(function (a) {
+      var termId = state.selectedGlobalAttributes[a.id];
+      var term = a.terms.filter(function (t) { return t && t.id === termId; })[0];
+      return term ? { id: a.id, termId: term.id, name: a.name || a.id, term: term.name } : null;
+    }).filter(Boolean);
+  }
+
+  function selectedGlobalStockSuffix() {
+    return selectedGlobalRows().slice().sort(function (a, b) { return String(a.id).localeCompare(String(b.id)); }).map(function (a) {
+      return "Global[" + a.id + "=" + a.termId + "]";
+    }).join(" · ");
+  }
+
   /** Product Manager variation (own price / sale / on-off) for what is selected now, or null. */
   function currentVariation() {
     var p = state.product;
     if (!p || !Array.isArray(p.variations) || !p.variations.length || !window.maCatalog || typeof window.maCatalog.variationFor !== "function") return null;
     var size = "";
     try { size = selectedVariant() || ""; } catch (_) { size = ""; }
-    return window.maCatalog.variationFor(p, { productType: state.selectedType || "", color: state.selectedColor || p.color || "", size: size });
+    return window.maCatalog.variationFor(p, { productType: state.selectedType || "", color: state.selectedColor || p.color || "", size: size, globalAttributes: selectedGlobalRows() });
   }
 
   function currentPrice() {
@@ -293,7 +311,7 @@
     var html = TK + price;
     var variations = Array.isArray(state.product && state.product.variations) ? state.product.variations : [];
     var v = currentVariation();
-    if (variations.length && v && v.enabled !== false && (v.size || !variations.some(function (x) { return x && x.size; }))) {
+    if (variations.length && v && v.enabled !== false) {
       // A variation is chosen: its own price, crossed-out regular price when it is on sale.
       var was = parseInt(v.regularPrice, 10);
       html = was > price ? "<del class='ma-price-was'>" + TK + was + "</del> <span class='ma-price-now'>" + TK + price + "</span>" : TK + price;
@@ -492,8 +510,46 @@
       el.innerHTML = window.maSizeStore.html(tpl, {
         fieldClass: "pd-sz-field", labelClass: "pd-option-label", rowClass: "pd-option-row", btnClass: "pd-option-btn", values: keep
       });
-    } else if (!renderLegacySizeOptions(el)) return;
+    } else if (!renderLegacySizeOptions(el)) {
+      renderGlobalVariationOptions(el);
+      return;
+    }
     renderSizeHelpers(el, !!tpl);
+    renderGlobalVariationOptions(el);
+  }
+
+  function renderGlobalVariationOptions(el) {
+    var p = state.product || {};
+    var attrs = (Array.isArray(p.globalAttributes) ? p.globalAttributes : []).filter(function (a) {
+      return a && a.variation === true && a.id && Array.isArray(a.terms) && a.terms.length;
+    });
+    var holder = el.querySelector("#pdGlobalAttributeGroup");
+    if (!holder) { holder = document.createElement("div"); holder.id = "pdGlobalAttributeGroup"; el.appendChild(holder); }
+    holder.innerHTML = "";
+    attrs.forEach(function (attr) {
+      var terms = attr.terms.filter(function (term) { return term && term.id && term.name; });
+      if (!terms.length) return;
+      if (!state.selectedGlobalAttributes[attr.id] || !terms.some(function (term) { return term.id === state.selectedGlobalAttributes[attr.id]; })) {
+        state.selectedGlobalAttributes[attr.id] = terms[0].id;
+      }
+      var group = document.createElement("div");
+      group.className = "pd-global-variation-group";
+      group.id = "pdGlobalAttr-" + attr.id;
+      group.innerHTML = "<div class='pd-option-label'>" + escapeHtml(attr.name) + "</div><div class='pd-option-row'>" +
+        terms.map(function (term) {
+          return "<button type='button' class='pd-option-btn" + (term.id === state.selectedGlobalAttributes[attr.id] ? " is-active" : "") + "' data-global-term='" + escapeHtml(term.id) + "'>" + escapeHtml(term.name) + "</button>";
+        }).join("") + "</div>";
+      group.querySelectorAll("[data-global-term]").forEach(function (button) {
+        button.addEventListener("click", function () {
+          state.selectedGlobalAttributes[attr.id] = button.getAttribute("data-global-term");
+          renderGlobalVariationOptions(el);
+          renderPrice();
+          updateSendMessageLink();
+          applyStockUi();
+        });
+      });
+      holder.appendChild(group);
+    });
   }
 
   function renderLegacySizeOptions(el) {
@@ -900,6 +956,7 @@
       return v.color === state.selectedColor && v.image;
     })[0];
     var img = (mappedColor && mappedColor.image) || activeGalleryImg || resolveImg(state.product.image || state.product.img);
+    var chosenVariation = currentVariation();
     var line = {
       id: state.product.id,
       name: state.product.name,
@@ -911,7 +968,9 @@
       colorLabel: state.selectedColorLabel || state.product.colorLabel || "",
       fabric: state.product.fabric || "",
       size: selectedVariant(),
-      productType: state.selectedType || ""
+      productType: state.selectedType || "",
+      globalAttributes: selectedGlobalRows(),
+      variationSku: chosenVariation && chosenVariation.sku ? chosenVariation.sku : ""
     };
     if (state.sizeTemplate) {
       var sized = window.maSizeStore.check(state.sizeTemplate, $("pdSizeGroup"));
@@ -926,7 +985,20 @@
     // A variation switched off in Product Manager cannot be bought (the order server refuses it too).
     if (picked && picked.enabled === false) return { inStock: false, label: "Unavailable", buttonLabel: "Unavailable", qty: 0 };
     if (picked && picked.stockStatus === "outofstock") return { inStock: false, label: "Out of Stock", buttonLabel: "Out of Stock", qty: 0 };
-    var variant = selectedVariant() || state.selectedColor || "";
+    var requiredGlobal = (Array.isArray(p && p.globalAttributes) ? p.globalAttributes : []).filter(function (a) { return a && a.variation === true && Array.isArray(a.terms) && a.terms.length; });
+    var selectedGlobal = selectedGlobalRows();
+    if (requiredGlobal.length && (selectedGlobal.length !== requiredGlobal.length || !picked)) return { inStock: false, label: "Select an available option", buttonLabel: "Select options", qty: 0 };
+    var baseVariant = selectedVariant() || state.selectedColor || "";
+    var globalSuffix = selectedGlobalStockSuffix();
+    var variant;
+    if (globalSuffix) {
+      var typeKey = state.selectedType ? "Type[" + state.selectedType + "]" : "";
+      var colorSize = state.selectedColor && baseVariant && state.selectedColor !== baseVariant ? state.selectedColor + " · " + baseVariant : baseVariant;
+      variant = [colorSize, typeKey, globalSuffix].filter(Boolean).join(" · ");
+    } else {
+      // Keep the legacy colour/size stock lookup unchanged for existing products.
+      variant = selectedVariant() || state.selectedColor || "";
+    }
     if (window.maCatalog && typeof window.maCatalog.getStockStatus === "function") {
       return window.maCatalog.getStockStatus(p, variant, state.selectedColor || "");
     }
