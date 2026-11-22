@@ -594,7 +594,7 @@ function validateOrderInput_(e) {
               if (!a || !a.id || !(a.termId || a.valueId)) return null;
               var id = String(a.id).trim().toLowerCase().slice(0, 40);
               var termId = String(a.termId || a.valueId).trim().toLowerCase().slice(0, 50);
-              if (!/^[a-z0-9][a-z0-9_-]{0,39}$/.test(id) || !/^[\\p{L}\\p{N}][\\p{L}\\p{N}_-]{0,49}$/u.test(termId)) return null;
+              if (!/^[a-z0-9][a-z0-9_-]{0,39}$/.test(id) || !/^[\p{L}\p{N}][\p{L}\p{N}_-]{0,49}$/u.test(termId)) return null;
               return { id: id, termId: termId, name: String(a.name || id).trim().slice(0, 60), term: String(a.term || termId).trim().slice(0, 60) };
             }).filter(Boolean);
           }
