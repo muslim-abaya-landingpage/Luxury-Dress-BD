@@ -684,6 +684,13 @@
     if (state.selectedColorLabel || state.product.colorLabel) {
       rows.push(["Color", state.selectedColorLabel || state.product.colorLabel]);
     }
+    if (Array.isArray(state.product.globalAttributes)) {
+      state.product.globalAttributes.forEach(function (attribute) {
+        if (!attribute || attribute.visible === false || !attribute.name || !Array.isArray(attribute.terms)) return;
+        var values = attribute.terms.map(function (term) { return term && term.name ? String(term.name) : ""; }).filter(Boolean);
+        if (values.length) rows.push([attribute.name, values.join(", ")]);
+      });
+    }
     if (state.product.weight) rows.push(["Weight", state.product.weight + " kg"]);
     var dims = [state.product.dimLength, state.product.dimWidth, state.product.dimHeight].filter(function (x) { return x; });
     if (dims.length) rows.push(["Dimensions", dims.join(" × ") + " cm"]);
