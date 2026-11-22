@@ -243,7 +243,7 @@ test('assigns saved Global Attribute terms to a product without changing variati
   await mount.locator('[data-pga-term="fabric-type"][data-term-id="cotton"]').check();
   await page.locator('#pmEditUpdate').click();
   const block = await publishedBlock(page);
-  expect(block).toContain('globalAttributes: [{"id":"fabric-type","name":"Fabric Type","terms":[{"id":"cotton","name":"Cotton"}],"visible":true}]');
+  expect(block).toContain('globalAttributes: [{"id":"fabric-type","name":"Fabric Type","terms":[{"id":"cotton","name":"Cotton"}],"variation":true,"visible":true}]');
   const after = await page.evaluate(() => {
     const products = Object.values(window.CATEGORY_PRODUCTS || {}).flat();
     const product = products.find((item) => item && item.id === 'ABY-MAROON-1');
@@ -372,11 +372,15 @@ test('Global Attributes marked for variations generate purchasable term-specific
   await expect(selectors).toHaveCount(2);
   await expect(selectors.nth(0)).toHaveValue('cotton');
   await expect(selectors.nth(1)).toHaveValue('linen');
-  await rows.nth(0).locator('[data-pv="hprice"]').fill('1200');
-  await rows.nth(1).locator('[data-pv="hprice"]').fill('1400');
+  const cottonPrice = rows.nth(0).locator('[data-pv="hprice"]');
+  const linenPrice = rows.nth(1).locator('[data-pv="hprice"]');
+  await cottonPrice.fill('1200');
+  await cottonPrice.blur();
+  await linenPrice.fill('1400');
+  await linenPrice.blur();
   await page.locator('#pmEditUpdate').click();
   const block = await publishedBlock(page);
-  expect(block).toContain('variation: true');
+  expect(block).toContain('"variation":true');
   expect(block).toContain('"id":"fabric-type","termId":"cotton"');
   expect(block).toContain('"id":"fabric-type","termId":"linen"');
   expect(block).toContain('"price":1200');
