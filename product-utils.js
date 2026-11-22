@@ -206,11 +206,21 @@ if (typeof window !== "undefined") window.cleanProductMeasures = cleanProductMea
       if (price > 0) row.price = price;
       var regular = parseInt(v.regularPrice, 10);
       if (regular > 0 && (!row.price || regular > row.price)) row.regularPrice = regular;
+      if (Array.isArray(v.globalAttributes)) {
+        row.globalAttributes = v.globalAttributes.slice(0, 20).map(function (a) {
+          if (!a || typeof a !== "object") return null;
+          var id = String(a.id || "").trim().toLowerCase().slice(0, 40);
+          var termId = String(a.termId || a.valueId || "").trim().toLowerCase().slice(0, 50);
+          if (!/^[a-z0-9][a-z0-9_-]{0,39}$/.test(id) || !/^[\\p{L}\\p{N}][\\p{L}\\p{N}_-]{0,49}$/u.test(termId)) return null;
+          return { id: id, termId: termId, name: String(a.name || id).trim().slice(0, 60), term: String(a.term || a.value || termId).trim().slice(0, 60) };
+        }).filter(Boolean);
+        if (!row.globalAttributes.length) delete row.globalAttributes;
+      }
       if (v.enabled === false) row.enabled = false;
       if (v.stockStatus === "outofstock") row.stockStatus = "outofstock";
       // Own sale dates (Variations → Schedule); empty = the product's sale dates.
       ["saleFrom", "saleTo"].forEach(function (k) { if (/^\d{4}-\d{2}-\d{2}$/.test(String(v[k] || "").trim())) row[k] = String(v[k]).trim(); });
-      if (row.type || row.color || row.size) out.push(row);
+      if (row.type || row.color || row.size || (row.globalAttributes && row.globalAttributes.length)) out.push(row);
     });
     return out;
   }
@@ -227,10 +237,22 @@ if (typeof window !== "undefined") window.cleanProductMeasures = cleanProductMea
     var key = function (s) { return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); };
     var parts = function (s) { return norm(s).split(/\s*\u00b7\s*/).filter(Boolean); };
     var type = norm(line.productType).replace(/\s/g, ""), color = String(line.color || ""), size = parts(line.size);
+    function globalRows(input) {
+      if (Array.isArray(input)) return input.filter(function (a) { return a && a.id && (a.termId || a.valueId); });
+      if (input && typeof input === "object") return Object.keys(input).map(function (id) { return { id: id, termId: input[id] }; });
+      return [];
+    }
+    var selectedGlobal = globalRows(line.globalAttributes);
     var best = null, top = -1;
     list.forEach(function (v) {
       if (!v || typeof v !== "object") return;
       var n = 0;
+      var requiredGlobal = globalRows(v.globalAttributes);
+      if (requiredGlobal.some(function (a) {
+        var selected = selectedGlobal.filter(function (x) { return String(x.id) === String(a.id); })[0];
+        return !selected || String(selected.termId || selected.valueId) !== String(a.termId || a.valueId);
+      })) return;
+      n += requiredGlobal.length;
       if (v.type) { if (norm(v.type).replace(/\s/g, "") !== type) return; n++; }
       if (v.color) { if (!((key(v.color) && key(v.color) === key(color)) || norm(v.color) === norm(color))) return; n++; }
       if (v.size) {
