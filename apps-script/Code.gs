@@ -589,6 +589,15 @@ function validateOrderInput_(e) {
             productType: String((it && it.productType) || '').trim().slice(0, 80),
             category: String((it && it.category) || '').trim().slice(0, 80)
           };
+          if (it && Array.isArray(it.globalAttributes) && it.globalAttributes.length) {
+            line.globalAttributes = it.globalAttributes.slice(0, 20).map(function (a) {
+              if (!a || !a.id || !(a.termId || a.valueId)) return null;
+              var id = String(a.id).trim().toLowerCase().slice(0, 40);
+              var termId = String(a.termId || a.valueId).trim().toLowerCase().slice(0, 50);
+              if (!/^[a-z0-9][a-z0-9_-]{0,39}$/.test(id) || !/^[\\p{L}\\p{N}][\\p{L}\\p{N}_-]{0,49}$/u.test(termId)) return null;
+              return { id: id, termId: termId, name: String(a.name || id).trim().slice(0, 60), term: String(a.term || termId).trim().slice(0, 60) };
+            }).filter(Boolean);
+          }
           // Size Manager: measurement choices ({key, value}, up to 20 = the template field limit); checked in opsLinePrice_.
           if (it && Array.isArray(it.measurements) && it.measurements.length) {
             line.measurements = it.measurements.slice(0, 20).map(function (m) {
