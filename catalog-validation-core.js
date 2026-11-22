@@ -52,7 +52,7 @@ window.__maBuildValidationProducts = function (w) {
       // Product Manager variations: only what the order price check needs (no SKU/photo; the before-sale
       // price only when the sale has dates).
       if (Array.isArray(p.globalAttributes) && p.globalAttributes.length) {
-        row0.globalAttributes = p.globalAttributes.filter(function (a) { return a && a.variation === true; }).map(function (a) {
+        row0.globalAttributes = p.globalAttributes.filter(function (a) { return a && a.variation === true && Array.isArray(a.terms) && a.terms.length; }).map(function (a) {
           return { id: String(a.id || "").slice(0, 40), variation: true };
         });
       }
