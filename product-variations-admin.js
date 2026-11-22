@@ -107,6 +107,11 @@
   function globalVariationRows(v) {
     return (Array.isArray(v && v.globalAttributes) ? v.globalAttributes : []).filter(function (a) { return a && a.id && a.termId; });
   }
+  function isGlobalVariationInUse(product, id) {
+    return (Array.isArray(product && product.variations) ? product.variations : []).some(function (variation) {
+      return globalVariationRows(variation).some(function (a) { return String(a.id) === String(id); });
+    });
+  }
   function globalStockSuffix(v) {
     return globalVariationRows(v).slice().sort(function (a, b) { return String(a.id).localeCompare(String(b.id)); }).map(function (a) {
       return "Global[" + a.id + "=" + a.termId + "]";
@@ -225,7 +230,7 @@
             if (!assignment || !assignment.id) return;
             var definition = globalState.attributes.filter(function (attr) { return attr && attr.id === assignment.id; })[0];
             if (!definition) return; // Keep historical assignments if the registry entry was removed.
-            var variation = definition.variation === true;
+            var variation = definition.variation === true || isGlobalVariationInUse(p, assignment.id);
             if (assignment.variation !== variation || assignment.name !== definition.name) {
               assignment.variation = variation;
               assignment.name = definition.name;
@@ -396,7 +401,7 @@
           var attr = globalState.attributes.filter(function (item) { return item && item.id === id; })[0];
           var assignments = Array.isArray(p.globalAttributes) ? p.globalAttributes.slice() : [];
           var at = assignments.findIndex(function (item) { return item && item.id === id; });
-          if (t.checked && attr && at < 0) assignments.push({ id: attr.id, name: attr.name, terms: [], variation: attr.variation === true, visible: attr.visible !== false });
+          if (t.checked && attr && at < 0) assignments.push({ id: attr.id, name: attr.name, terms: [], variation: attr.variation === true || isGlobalVariationInUse(p, attr.id), visible: attr.visible !== false });
           else if (!t.checked && at >= 0) assignments.splice(at, 1);
           if (assignments.length) p.globalAttributes = assignments; else delete p.globalAttributes;
           if (ctx.changed) ctx.changed("Global attribute selection changed — click Save changes to publish.");
@@ -415,7 +420,7 @@
           var termIndex = chosen.findIndex(function (item) { return item && item.id === tid; });
           if (t.checked && termIndex < 0) chosen.push({ id: term.id, name: term.name });
           else if (!t.checked && termIndex >= 0) chosen.splice(termIndex, 1);
-          assignment.name = definition.name; assignment.visible = definition.visible !== false; assignment.variation = definition.variation === true; assignment.terms = chosen; next[index] = assignment;
+          assignment.name = definition.name; assignment.visible = definition.visible !== false; assignment.variation = definition.variation === true || isGlobalVariationInUse(p, definition.id); assignment.terms = chosen; next[index] = assignment;
           p.globalAttributes = next;
           if (ctx.changed) ctx.changed("Global attribute terms changed — click Save changes to publish.");
           return;
