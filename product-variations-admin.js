@@ -256,7 +256,7 @@
         present.map(function (d) {
           var open = st.open[d.id] !== false;
           var readonly = !d.field && !d.setter;
-          return '<div class="pmw-box pmw-global-attributes-box" data-attr="' + d.id + '"><div class="pmw-box-head pmw-global-attributes-head" data-pa="toggle" data-id="' + d.id + '"><b>' + esc(d.name) + "</b>" +
+          return '<div class="pmw-box" data-attr="' + d.id + '"><div class="pmw-box-head" data-pa="toggle" data-id="' + d.id + '"><b>' + esc(d.name) + "</b>" +
             (readonly ? "" : '<button type="button" class="pmw-remove" data-pa="remove" data-id="' + d.id + '">Remove</button>') + "<span>≡</span><span>" + (open ? "▴" : "▾") + "</span></div>" +
             (open ? '<div class="pmw-box-body pmw-global-attributes-body"><div><label>Name:</label><input type="text" value="' + esc(d.name) + '" readonly aria-label="Attribute name">' +
               '<div class="pmw-checks"><label><input type="checkbox" checked disabled> Visible on the product page</label>' +
