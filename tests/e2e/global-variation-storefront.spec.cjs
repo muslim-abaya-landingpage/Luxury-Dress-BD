@@ -6,7 +6,7 @@ const PRODUCT_ID = 'ABY-MAROON-1';
 const ATTRIBUTE = { id: 'fabric-type', name: 'Fabric Type', variation: true, visible: true,
   terms: [{ id: 'cotton', name: 'Cotton' }, { id: 'linen', name: 'Linen' }] };
 const VARIATIONS = [
-  { size: 'M', globalAttributes: [{ id: 'fabric-type', termId: 'cotton', name: 'Fabric Type', term: 'Cotton' }], sku: 'E2E-KURTI-COTTON', price: 1200 },
+  { size: '44', globalAttributes: [{ id: 'fabric-type', termId: 'cotton', name: 'Fabric Type', term: 'Cotton' }], sku: 'E2E-KURTI-COTTON', price: 1200 },
   { size: 'M', globalAttributes: [{ id: 'fabric-type', termId: 'linen', name: 'Fabric Type', term: 'Linen' }], sku: 'E2E-MAROON-LINEN', price: 1450 }
 ];
 const PRODUCT = { id: PRODUCT_ID, name: 'E2E Global Variation Kurti', category: 'tops-kurti', kind: 'simple',
