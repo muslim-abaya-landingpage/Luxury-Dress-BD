@@ -411,3 +411,70 @@ html.wp-admin-shell input[type=checkbox].ma-switch-pill:disabled { opacity: .5; 
 }
 html.wp-admin-shell label:has(> input.ma-switch-pill) { display: inline-flex; align-items: center; gap: 0; cursor: pointer; }
 html.wp-admin-shell[data-admin-theme="dark"] input[type=checkbox].ma-switch-pill:not(:checked) { background: #50575e; }
+
+
+/* MUSLIM ABAYA — Premium admin visual system
+   Ivory surfaces, deep emerald navigation and restrained champagne accents.
+   Presentation only: all existing links, forms, IDs and order actions remain intact. */
+html.wp-admin-shell{
+  --wp-menu:#123d32;
+  --wp-menu-dark:#0b3028;
+  --wp-menu-text:#f7f5ef;
+  --wp-menu-icon:rgba(247,245,239,.72);
+  --wp-sub-text:#d5e1da;
+  --wp-highlight:#b9955b;
+  --wp-page:#f6f4ee;
+  --wp-box-line:#e6e0d4;
+  --wp-text:#1d2d27;
+  --wp-muted:#718078;
+  --wp-link:#176b50;
+  --wp-link-hover:#0d513d;
+  --wp-primary:#145640;
+}
+html.wp-admin-shell body{background:var(--wp-page)!important;color:var(--wp-text)!important}
+html.wp-admin-shell .adm-sidebar{background:linear-gradient(180deg,#123d32 0%,#0d332b 100%)!important;box-shadow:5px 0 24px rgba(18,61,50,.08)!important}
+html.wp-admin-shell .adm-sidebar .adm-sidebar-item{min-height:40px!important;padding-left:13px!important;font-weight:550!important;transition:background .18s ease,color .18s ease}
+html.wp-admin-shell .adm-sidebar .adm-sidebar-item.is-current:not(.adm-nav-child),
+html.wp-admin-shell .adm-sidebar .adm-nav-group.has-current>.adm-nav-top{background:rgba(185,149,91,.24)!important;color:#f8f3e9!important;border-left:3px solid #c5a36b!important;padding-left:10px!important}
+html.wp-admin-shell .adm-sidebar .adm-nav-children{background:#0a2d26!important}
+html.wp-admin-shell .adm-sidebar .adm-nav-child.is-current{color:#e4c997!important}
+html.wp-admin-shell .wp-adminbar{background:#0d332b!important;border-bottom:1px solid rgba(255,255,255,.08)}
+html.wp-admin-shell .wp-adminbar li:hover>a,
+html.wp-admin-shell .wp-adminbar li:hover>button{background:#174a3d!important;color:#e4c997!important}
+html.wp-admin-shell .adm-sidebar-foot .adm-theme-toggle,
+html.wp-admin-shell .adm-sidebar-foot .wp-collapse{color:#d5e1da!important}
+html.wp-admin-shell .pn-head,
+html.wp-admin-shell .adm-topbar,
+html.wp-admin-shell .pl-admin-header{margin-bottom:16px!important}
+html.wp-admin-shell .pn-head h1,
+html.wp-admin-shell .adm-heading h1,
+html.wp-admin-shell .adm-topbar h1{font-weight:700!important;letter-spacing:-.035em!important;color:#1d332b!important}
+html.wp-admin-shell .adm-card,
+html.wp-admin-shell .adm-panel,
+html.wp-admin-shell .pn-card,
+html.wp-admin-shell .oi-panel,
+html.wp-admin-shell .pl-card,
+html.wp-admin-shell .pm-wp-box,
+html.wp-admin-shell .pm-wp-list,
+html.wp-admin-shell .adm-quick-card,
+html.wp-admin-shell .adm-stat,
+html.wp-admin-shell .wo-box,
+html.wp-admin-shell .om-panel,
+html.wp-admin-shell .sa-panel,
+html.wp-admin-shell .pn-table-wrap,
+html.wp-admin-shell .adm-table-wrap,
+html.wp-admin-shell .wo-advanced-filters{
+  border:1px solid #e7e1d6!important;border-radius:14px!important;
+  box-shadow:0 8px 26px rgba(32,48,39,.045)!important;background:#fffefa!important
+}
+html.wp-admin-shell .pn-btn-primary,
+html.wp-admin-shell .adm-btn-primary,
+html.wp-admin-shell .pl-btn-primary{background:#145640!important;border-color:#145640!important;color:#fff!important}
+html.wp-admin-shell .pn-btn-primary:hover,
+html.wp-admin-shell .adm-btn-primary:hover,
+html.wp-admin-shell .pl-btn-primary:hover{background:#0d4938!important}
+html.wp-admin-shell :is(button,a,input,select,textarea):focus-visible{outline:2px solid #b9955b!important;outline-offset:2px}
+html.wp-admin-shell .adm-sidebar .adm-sidebar-item:hover{background:rgba(255,255,255,.08)!important;color:#f3d9a8!important}
+@media(max-width:980px){
+ html.wp-admin-shell .adm-sidebar{box-shadow:12px 0 32px rgba(9,37,30,.2)!important}
+}
