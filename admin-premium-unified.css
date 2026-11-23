@@ -272,3 +272,54 @@ html.wp-admin-shell body:has(#wpAdminBar){
 @media (prefers-reduced-motion:reduce){
   .adm-sidebar,.pn-side,.adm-sidebar-backdrop{transition:none!important}
 }
+
+
+/* Hover stability: sidebar navigation must never change geometry under the pointer. */
+html.wp-admin-shell .adm-sidebar,
+html.wp-admin-shell .pn-side{
+  contain:layout paint;
+  transform:none!important;
+}
+html.wp-admin-shell .adm-sidebar-item,
+html.wp-admin-shell .pn-nav a{
+  box-sizing:border-box!important;
+  position:relative!important;
+  flex:0 0 auto!important;
+  min-height:42px!important;
+  margin:0!important;
+  border-width:1px!important;
+  border-style:solid!important;
+  border-color:transparent!important;
+  transform:none!important;
+  animation:none!important;
+  transition:background-color .16s ease,color .16s ease,border-color .16s ease,box-shadow .16s ease!important;
+  will-change:auto!important;
+}
+html.wp-admin-shell .adm-sidebar-item:hover,
+html.wp-admin-shell .adm-sidebar-item:focus-visible,
+html.wp-admin-shell .pn-nav a:hover,
+html.wp-admin-shell .pn-nav a:focus-visible{
+  transform:none!important;
+  margin:0!important;
+  min-height:42px!important;
+  border-color:rgba(255,255,255,.10)!important;
+}
+html.wp-admin-shell .adm-sidebar-item *,
+html.wp-admin-shell .pn-nav a *{
+  transition:none!important;
+  animation:none!important;
+}
+@media (min-width:981px){
+  html.wp-admin-shell .adm-sidebar,
+  html.wp-admin-shell .pn-side{
+    position:sticky!important;
+    top:20px!important;
+    left:auto!important;
+    right:auto!important;
+    flex-shrink:0!important;
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  html.wp-admin-shell .adm-sidebar-item,
+  html.wp-admin-shell .pn-nav a{transition:none!important}
+}
