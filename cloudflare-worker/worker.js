@@ -29,7 +29,7 @@ import { persistFraudReview } from './fraud-review.js';
 // ADMIN_API_URL (Text, opt.) overrides the Apps Script URL used to verify the admin session token
 // that authorizes GET/POST /_ma/admin/settings; defaults to the one baked into site-api-config.js.
 
-const META_PIXEL_ID = '1465090315322833';
+const META_PIXEL_ID = '1141629002088045';
 const META_API_VERSION = 'v26.0';
 const ALLOWED_HOSTS = ['muslimabaya.com', 'www.muslimabaya.com', 'shop.muslimabaya.com'];
 const ALLOWED_EVENTS = ['PageView', 'ViewContent', 'AddToCart', 'InitiateCheckout', 'Purchase', 'Lead'];
