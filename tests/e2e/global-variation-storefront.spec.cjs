@@ -9,7 +9,7 @@ const ATTRIBUTE = { id: 'fabric-type', name: 'Fabric Type', variation: true, vis
   terms: [{ id: 'cotton', name: 'Cotton' }, { id: 'linen', name: 'Linen' }] };
 const VARIATIONS = [
   { globalAttributes: [{ id: 'fabric-type', termId: 'cotton', name: 'Fabric Type', term: 'Cotton' }], sku: 'E2E-MAROON-COTTON', price: 1200 },
-  { size: '44', globalAttributes: [{ id: 'fabric-type', termId: 'linen', name: 'Fabric Type', term: 'Linen' }], sku: 'E2E-MAROON-LINEN', price: 1450 }
+  { globalAttributes: [{ id: 'fabric-type', termId: 'linen', name: 'Fabric Type', term: 'Linen' }], sku: 'E2E-MAROON-LINEN', price: 1450 }
 ];
 
 async function installFixture(page) {
