@@ -678,6 +678,8 @@
      a numbered list beside it, arrows and a 01 / 12 counter. Newest = dateAdded. Flat corners. */
   var STORY_COUNT = 12;
   var STORY_INTERVAL = 5000;
+  // Let the prerendered first card settle before autoplay can trigger a later LCP candidate.
+  var STORY_INITIAL_DELAY = 12000;
   var STORY_ARABIC = {
     abaya: "عباية", "cover-up": "غطاء", "premium-two-piece": "طقم", "tops-kurti": "قميص", embroidery: "تطريز",
     karchupi: "تطريز", kaftan: "قفطان", hijab: "حجاب", panjabi: "ثوب", "three-piece-dress": "طقم"
@@ -780,14 +782,30 @@
     }
   }
 
-  function storyStop() { if (storyTimer) { clearInterval(storyTimer); storyTimer = null; } }
-  function storyStart(board) {
+  function storyStop() {
+    if (storyTimer) {
+      clearTimeout(storyTimer);
+      clearInterval(storyTimer);
+      storyTimer = null;
+    }
+  }
+  function storyStart(board, initialDelay) {
     storyStop();
     if (prefersReducedMotion()) return;
-    storyTimer = setInterval(function () {
+    function advance() {
       if (board.__msPaused || document.hidden) return;
       storyGo(board, (board.__msIndex || 0) + 1);
-    }, STORY_INTERVAL);
+    }
+    if (initialDelay > 0) {
+      // Do not animate the LCP card during the initial rendering window.
+      storyTimer = setTimeout(function () {
+        storyTimer = null;
+        advance();
+        storyTimer = setInterval(advance, STORY_INTERVAL);
+      }, initialDelay);
+    } else {
+      storyTimer = setInterval(advance, STORY_INTERVAL);
+    }
   }
 
   function renderStoryboard() {
@@ -860,7 +878,7 @@
         setInterval(function () { if (!document.hidden) show((k + 1) % slides.length); }, 6000);
       }
     }
-    storyStart(board);
+    storyStart(board, STORY_INITIAL_DELAY);
   }
 
   /* ---------------- Hero slider ---------------- */
