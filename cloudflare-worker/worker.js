@@ -76,7 +76,7 @@ const ORDER_SETTINGS_DEFAULTS = Object.freeze({
   vpnProtection: true, duplicateBlock: true, duplicateWindowMinutes: 10,
   courierProtection: true, courierSuccessRatio: 50
 });
-function sanitizeOrderSettings(input) {
+export function sanitizeOrderSettings(input) {
   const v = input && typeof input === 'object' ? input : {};
   const out = {
     mobileVerification: v.mobileVerification !== false,
