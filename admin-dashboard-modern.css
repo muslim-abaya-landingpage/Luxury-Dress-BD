@@ -276,3 +276,61 @@ body.adm-body{background:var(--adm-bg);color:var(--adm-text);font-family:Inter,"
  .adm-body .adm-main{padding:16px 14px 44px}
  .adm-body .adm-main>.adm-jump{padding-inline:1px}
 }
+
+
+/* Final viewport containment: the WordPress admin shell must not inherit
+   intrinsic widths from the horizontally-scrollable jump nav or orders table. */
+html.wp-admin-shell,
+html.wp-admin-shell body.adm-body{
+  width:100%;
+  max-width:100vw!important;
+  overflow-x:clip!important;
+}
+html.wp-admin-shell .adm-shell,
+html.wp-admin-shell .adm-content,
+html.wp-admin-shell .adm-main{
+  max-width:100vw!important;
+  min-width:0!important;
+  overflow-x:clip!important;
+  box-sizing:border-box!important;
+}
+@media(min-width:981px){
+  html.wp-admin-shell .adm-content{
+    width:calc(100vw - var(--wp-menu-w,160px))!important;
+    max-width:calc(100vw - var(--wp-menu-w,160px))!important;
+  }
+  html.wp-admin-shell .adm-shell:has(.adm-sidebar.is-collapsed) .adm-content{
+    width:calc(100vw - 36px)!important;
+    max-width:calc(100vw - 36px)!important;
+  }
+}
+@media(max-width:980px){
+  html.wp-admin-shell .adm-content{
+    width:100vw!important;
+    max-width:100vw!important;
+  }
+}
+html.wp-admin-shell .adm-main>.adm-jump{
+  flex:0 1 100%!important;
+  width:100%!important;
+  min-width:0!important;
+}
+html.wp-admin-shell .adm-main>.adm-sec{
+  flex:0 1 100%!important;
+  width:100%!important;
+  min-width:0!important;
+}
+html.wp-admin-shell .adm-recent-table-wrap{
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  overflow-x:auto!important;
+}
+html.wp-admin-shell #admSyncText{
+  display:block;
+  min-width:0;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
