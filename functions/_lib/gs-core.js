@@ -145,7 +145,7 @@ function doPost(e) {
     }
 
     // Every order-panel action verifies the admin/staff token inside its handler.
-    var orderPanelTypes = ['AdminOrderList', 'AdminOrderGet', 'AdminOrderUpdate', 'AdminFraudCheck', 'AdminBlockCustomer', 'AdminSendCourier', 'AdminOrderStaff', 'AdminCourierTracking', 'AdminManualOrderCreate', 'AdminOrderCreate', 'AdminCustomerLookup', 'AdminCouponCheck'];
+    var orderPanelTypes = ['AdminOrderList', 'AdminOrderGet', 'AdminOrderUpdate', 'AdminFraudCheck', 'AdminCourierPerformance', 'AdminBlockCustomer', 'AdminSendCourier', 'AdminOrderStaff', 'AdminCourierTracking', 'AdminManualOrderCreate', 'AdminOrderCreate', 'AdminCustomerLookup', 'AdminCouponCheck'];
     if (orderPanelTypes.indexOf(type) !== -1) {
       var panelResult = handleAdminOrderRequest_(type, e);
       return jsonOut_(panelResult || { ok: false, error: 'UNKNOWN_TYPE' });
@@ -3396,12 +3396,20 @@ function getFacebookCapiConfig_() {
     props.getProperty('META_ACCESS_TOKEN') ||
     props.getProperty('FACEBOOK_ACCESS_TOKEN') ||
     '';
-  var pixelId =
+
+  // Canonical Muslim Abaya Meta Pixel. Keep the existing access token, but
+  // migrate any legacy Script Properties pixel ID to the owner-confirmed ID.
+  var pixelId = '1141629002088045';
+  var savedPixelId =
     props.getProperty('FB_PIXEL_ID') ||
     props.getProperty('META_PIXEL_ID') ||
     props.getProperty('PIXEL_ID') ||
     '';
-  return { accessToken: String(accessToken || '').trim(), pixelId: String(pixelId || '').trim() };
+  if (String(savedPixelId || '').trim() !== pixelId) {
+    props.setProperty('FB_PIXEL_ID', pixelId);
+  }
+
+  return { accessToken: String(accessToken || '').trim(), pixelId: pixelId };
 }
 
 /**
@@ -5830,7 +5838,14 @@ function sendMessengerPurchase_(psid, value, orderId, pageId) {
       custom_data: { currency: 'BDT', value: parseOrderValue_(value) }
     }]
   };
-  var datasetId = PropertiesService.getScriptProperties().getProperty('MSGR_DATASET_ID_' + page) || MSGR_DATASET_ID;
+  var props = PropertiesService.getScriptProperties();
+  var datasetProperty = 'MSGR_DATASET_ID_' + page;
+  var datasetId = props.getProperty(datasetProperty) || MSGR_DATASET_ID;
+  // The Muslim Abaya Page must use its owner-confirmed dataset. Preserve custom datasets for other Pages.
+  if (page === MSGR_PAGE_ID && String(datasetId || '').trim() !== MSGR_DATASET_ID) {
+    datasetId = MSGR_DATASET_ID;
+    props.setProperty(datasetProperty, datasetId);
+  }
   var res = UrlFetchApp.fetch('https://graph.facebook.com/v25.0/' + datasetId +
     '/events?access_token=' + encodeURIComponent(token), {
       method: 'post', contentType: 'application/json',
@@ -8323,6 +8338,37 @@ function adminFraudCheck_(e) {
   };
 }
 
+
+/** Courier delivery performance from Muslim Abaya's own Online Order records. */
+function adminCourierPerformance_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var sheet = admGetSheet_();
+  var lastRow = lastOnlineOrderDataRow_(sheet);
+  var rows = lastRow >= 2 ? readOnlineOrderRows_(sheet, 2, lastRow - 1, ADM_LAST_COL) : [];
+  var map = {};
+  rows.forEach(function (r) {
+    var courier = String(r[45] || '').trim();
+    if (!courier) return;
+    var key = courier.toLowerCase();
+    if (!map[key]) map[key] = { courier: courier, total: 0, delivered: 0, cancelled: 0, returned: 0, fake: 0, active: 0 };
+    var x = map[key], status = String(r[9] || 'Pending').trim().toLowerCase();
+    var courierStatus = String(r[12] || '').trim().toLowerCase();
+    x.total++;
+    if (status === 'delivered' || courierStatus === 'delivered') x.delivered++;
+    else if (status === 'fake') x.fake++;
+    else if (status === 'cancelled' || courierStatus === 'cancelled') x.cancelled++;
+    else if (courierStatus.indexOf('return') !== -1 || status.indexOf('return') !== -1) x.returned++;
+    else x.active++;
+  });
+  var result = Object.keys(map).map(function (key) {
+    var x = map[key], decided = x.delivered + x.cancelled + x.returned + x.fake;
+    x.successRate = decided ? Math.round(x.delivered * 100 / decided) : null;
+    return x;
+  }).sort(function (a, b) { return b.total - a.total; });
+  return { ok: true, source: 'own-orders', couriers: result, totalOrders: rows.length };
+}
+
 // ── List / Get ──
 
 function adminOrderList_(e) {
@@ -8688,6 +8734,7 @@ function handleAdminOrderRequest_(type, e) {
       case 'AdminOrderGet': return adminOrderGet_(e);
       case 'AdminOrderUpdate': return adminOrderUpdate_(e);
       case 'AdminFraudCheck': return adminFraudCheck_(e);
+      case 'AdminCourierPerformance': return adminCourierPerformance_(e);
       case 'AdminBlockCustomer': return adminBlockCustomer_(e);
       case 'AdminSendCourier': return adminSendCourier_(e);
       case 'AdminOrderStaff': return adminStaffList_(e);

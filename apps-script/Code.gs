@@ -138,7 +138,7 @@ function doPost(e) {
     }
 
     // Every order-panel action verifies the admin/staff token inside its handler.
-    var orderPanelTypes = ['AdminOrderList', 'AdminOrderGet', 'AdminOrderUpdate', 'AdminFraudCheck', 'AdminBlockCustomer', 'AdminSendCourier', 'AdminOrderStaff', 'AdminCourierTracking', 'AdminManualOrderCreate', 'AdminOrderCreate', 'AdminCustomerLookup', 'AdminCouponCheck'];
+    var orderPanelTypes = ['AdminOrderList', 'AdminOrderGet', 'AdminOrderUpdate', 'AdminFraudCheck', 'AdminCourierPerformance', 'AdminBlockCustomer', 'AdminSendCourier', 'AdminOrderStaff', 'AdminCourierTracking', 'AdminManualOrderCreate', 'AdminOrderCreate', 'AdminCustomerLookup', 'AdminCouponCheck'];
     if (orderPanelTypes.indexOf(type) !== -1) {
       var panelResult = handleAdminOrderRequest_(type, e);
       return jsonOut_(panelResult || { ok: false, error: 'UNKNOWN_TYPE' });
@@ -3389,12 +3389,20 @@ function getFacebookCapiConfig_() {
     props.getProperty('META_ACCESS_TOKEN') ||
     props.getProperty('FACEBOOK_ACCESS_TOKEN') ||
     '';
-  var pixelId =
+
+  // Canonical Muslim Abaya Meta Pixel. Keep the existing access token, but
+  // migrate any legacy Script Properties pixel ID to the owner-confirmed ID.
+  var pixelId = '1141629002088045';
+  var savedPixelId =
     props.getProperty('FB_PIXEL_ID') ||
     props.getProperty('META_PIXEL_ID') ||
     props.getProperty('PIXEL_ID') ||
     '';
-  return { accessToken: String(accessToken || '').trim(), pixelId: String(pixelId || '').trim() };
+  if (String(savedPixelId || '').trim() !== pixelId) {
+    props.setProperty('FB_PIXEL_ID', pixelId);
+  }
+
+  return { accessToken: String(accessToken || '').trim(), pixelId: pixelId };
 }
 
 /**
@@ -5823,7 +5831,14 @@ function sendMessengerPurchase_(psid, value, orderId, pageId) {
       custom_data: { currency: 'BDT', value: parseOrderValue_(value) }
     }]
   };
-  var datasetId = PropertiesService.getScriptProperties().getProperty('MSGR_DATASET_ID_' + page) || MSGR_DATASET_ID;
+  var props = PropertiesService.getScriptProperties();
+  var datasetProperty = 'MSGR_DATASET_ID_' + page;
+  var datasetId = props.getProperty(datasetProperty) || MSGR_DATASET_ID;
+  // The Muslim Abaya Page must use its owner-confirmed dataset. Preserve custom datasets for other Pages.
+  if (page === MSGR_PAGE_ID && String(datasetId || '').trim() !== MSGR_DATASET_ID) {
+    datasetId = MSGR_DATASET_ID;
+    props.setProperty(datasetProperty, datasetId);
+  }
   var res = UrlFetchApp.fetch('https://graph.facebook.com/v25.0/' + datasetId +
     '/events?access_token=' + encodeURIComponent(token), {
       method: 'post', contentType: 'application/json',
