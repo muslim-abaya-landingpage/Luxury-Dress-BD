@@ -149,91 +149,6 @@
   <script src="admin-config.js?v=765c69bebedc46a8"></script>
   <script src="admin-api.js?v=2823eb7bcff4e142"></script>
   <script src="admin-guard.js?v=42341dd9adc288ea"></script>
-  <script>
-    (function () {
-      var SETTINGS_URL = "https://muslimabaya.com/_ma/admin/settings";
-      var metaInput = document.getElementById("trkMeta");
-      var tiktokInput = document.getElementById("trkTiktok");
-      var metaBadge = document.getElementById("metaBadge");
-      var tiktokBadge = document.getElementById("tiktokBadge");
-      var msg = document.getElementById("trkMsg");
-      var saveBtn = document.getElementById("trkSaveBtn");
-      var session = null;
-
-      function badge(el, isDefault) {
-        el.textContent = isDefault ? "এখনো কাস্টম সেট করা হয়নি (ডিফল্ট দেখাচ্ছে)" : "কাস্টম (এই প্যানেল থেকে সেট করা)";
-        el.className = "trk-badge " + (isDefault ? "is-default" : "is-custom");
-      }
-
-      function showMsg(text, ok) {
-        msg.textContent = text;
-        msg.className = "trk-msg " + (ok ? "ok" : "err");
-      }
-
-      function loadCurrent() {
-        fetch(SETTINGS_URL + "?token=" + encodeURIComponent(session.token))
-          .then(function (r) { return r.json(); })
-          .then(function (res) {
-            if (!res || !res.ok) { showMsg("বর্তমান মান লোড করা যায়নি, তবুও নতুন মান Save করা যাবে।", false); return; }
-            metaInput.value = res.meta_pixel_id || "";
-            tiktokInput.value = res.tiktok_pixel_id || "";
-            badge(metaBadge, !!res.meta_pixel_is_default);
-            badge(tiktokBadge, !!res.tiktok_pixel_is_default);
-          })
-          .catch(function () { showMsg("বর্তমান মান লোড করা যায়নি, তবুও নতুন মান Save করা যাবে।", false); });
-      }
-
-      document.getElementById("trkForm").addEventListener("submit", function (ev) {
-        ev.preventDefault();
-        var metaVal = metaInput.value.trim();
-        var tiktokVal = tiktokInput.value.trim();
-        if (!metaVal && !tiktokVal) { showMsg("অন্তত একটা Pixel ID দিন।", false); return; }
-        saveBtn.disabled = true;
-        showMsg("সেভ হচ্ছে…", true);
-        fetch(SETTINGS_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token: session.token, meta_pixel_id: metaVal, tiktok_pixel_id: tiktokVal })
-        })
-          .then(function (r) { return r.json().then(function (j) { return { status: r.status, body: j }; }); })
-          .then(function (res) {
-            saveBtn.disabled = false;
-            if (res.body && res.body.ok) {
-              showMsg("✅ সেভ হয়েছে — কয়েক মিনিটের মধ্যে সব পেজে নতুন Pixel ID কাজ করবে (cache 5 মিনিট)।", true);
-              loadCurrent();
-            } else {
-              showMsg("❌ সেভ হয়নি: " + ((res.body && res.body.error) || "অজানা সমস্যা"), false);
-            }
-          })
-          .catch(function () {
-            saveBtn.disabled = false;
-            showMsg("❌ নেটওয়ার্ক সমস্যা — আবার চেষ্টা করুন।", false);
-          });
-      });
-
-      MaAdminGuard.require().then(function (s) {
-        if (!s) return;
-        session = s;
-        document.getElementById("admUserLabel").textContent = (s.name || "Admin") + (s.email ? " · " + s.email : "");
-        loadCurrent();
-      });
-
-      document.getElementById("admLogout").addEventListener("click", function () {
-        MaAdmin.logout();
-        location.href = "admin-login.html";
-      });
-
-      var sidebar = document.getElementById("admSidebar");
-      var backdrop = document.getElementById("admSbBackdrop");
-      var menuBtn = document.getElementById("admMenuBtn");
-      var closeBtn = document.getElementById("admSbClose");
-      function openDrawer() { sidebar.classList.add("is-open"); backdrop.classList.add("is-open"); }
-      function closeDrawer() { sidebar.classList.remove("is-open"); backdrop.classList.remove("is-open"); }
-      if (menuBtn) menuBtn.addEventListener("click", openDrawer);
-      if (closeBtn) closeBtn.addEventListener("click", closeDrawer);
-      if (backdrop) backdrop.addEventListener("click", closeDrawer);
-    })();
-  </script>
 <script src="admin-search.js?v=1" defer></script>
 <script src="admin-app.js?v=1" defer></script>
 <script src="admin-wp.js?v=1" defer></script>
@@ -249,6 +164,11 @@
  form.addEventListener("submit",e=>{e.preventDefault();const v=values();if(!Number.isInteger(v.duplicateWindowMinutes)||v.duplicateWindowMinutes<1||v.duplicateWindowMinutes>1440||!Number.isInteger(v.courierSuccessRatio)||v.courierSuccessRatio<0||v.courierSuccessRatio>100){setMessage("সময় ১–১৪৪০ মিনিট এবং Success Ratio ০–১০০ দিন।",false);return;}save.disabled=true;setMessage("সেভ হচ্ছে…",true);fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token:session.token,settings:v})}).then(r=>r.json()).then(j=>{if(!j.ok)throw Error(j.error||"SAVE_FAILED");setMessage("সেটিংস সফলভাবে সেভ হয়েছে।",true);}).catch(e=>setMessage("সেভ হয়নি: "+e.message,false)).finally(()=>save.disabled=false);});
  MaAdminGuard.require().then(s=>{if(!s)return;session=s;document.getElementById("admUserLabel").textContent=(s.name||"Admin")+(s.email?" · "+s.email:"");load();});
  document.getElementById("admLogout").addEventListener("click",()=>{MaAdmin.logout();location.href="admin-login.html";});
+ const sidebar=document.getElementById("admSidebar"),backdrop=document.getElementById("admSbBackdrop");
+ document.getElementById("admMenuBtn")?.addEventListener("click",()=>{sidebar.classList.add("is-open");backdrop.classList.add("is-open");});
+ document.getElementById("admSbClose")?.addEventListener("click",()=>{sidebar.classList.remove("is-open");backdrop.classList.remove("is-open");});
+ backdrop?.addEventListener("click",()=>{sidebar.classList.remove("is-open");backdrop.classList.remove("is-open");});
+
 })();
 </script>
   <script src="admin-page-shell.js?v=1"></script>
