@@ -9,9 +9,9 @@
 .adm-sidebar-brand-text .t2{color:#d4a72c !important;text-transform:uppercase;letter-spacing:.22em !important;font-size:9.5px !important;font-weight:700}
 .adm-sidebar-close{color:#fff !important;border-color:rgba(255,255,255,.25) !important}
 .adm-sidebar-nav{padding:14px 12px !important;gap:3px !important}
-.adm-sidebar-item,.pn-nav a{position:relative;color:#bdb6a4 !important;border-radius:11px !important;padding:10px 12px !important;font-weight:500;transition:background .15s,color .15s,transform .15s}
+.adm-sidebar-item,.pn-nav a{position:relative;color:#bdb6a4 !important;border-radius:11px !important;padding:10px 12px !important;font-weight:500;transition:background .15s,color .15s}
 .adm-sidebar-item svg{opacity:.8 !important;width:18px !important;height:18px !important}
-.adm-sidebar-item:hover,.pn-nav a:hover{background:rgba(255,255,255,.07) !important;color:#fff !important;transform:translateX(2px)}
+.adm-sidebar-item:hover,.pn-nav a:hover{background:rgba(255,255,255,.07) !important;color:#fff !important;transform:none}
 .adm-sidebar-item.is-current,.pn-nav a.active{
   background:linear-gradient(90deg,rgba(212,167,44,.26),rgba(212,167,44,.06)) !important;color:#f6e3a6 !important;font-weight:700 !important;
   box-shadow:inset 0 0 0 1px rgba(212,167,44,.28)}
