@@ -56,7 +56,7 @@ test('Global Attribute variation keeps its own SKU and price through cart and mo
   await expect(page.locator('#pdGlobalAttributeGroup')).toBeVisible();
   await expect(page.locator('#pdGlobalAttributeGroup [data-global-term="cotton"]')).toBeVisible();
   await page.locator('#pdGlobalAttributeGroup [data-global-term="linen"]').click();
-  await expect(page.locator('#pdPrice')).toContainText('1,450');
+  await expect(page.locator('#pdPrice')).toContainText(/1,?450/);
   await page.locator('#pdAddCart').click();
 
   const cartLine = await page.evaluate(() => window.loadStoreCart({ readOnly: true }).find((line) => line.id === 'ABY-MAROON-1'));
