@@ -38,7 +38,7 @@ test('dashboard on a phone: nothing wider than the screen', async ({ page }) => 
   await page.waitForTimeout(400);
   const m = await page.evaluate(() => {
     const vw = document.documentElement.clientWidth;
-    const wide = [...document.querySelectorAll('body *')].filter((el) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.right > vw + 1 && getComputedStyle(el).position !== 'fixed' && !el.closest('[hidden],details:not([open]),.adm-recent-table-wrap'); })
+    const wide = [...document.querySelectorAll('body *')].filter((el) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.right > vw + 1 && getComputedStyle(el).position !== 'fixed' && !el.closest('[hidden],details:not([open]),.adm-recent-table-wrap,.adm-jump,.adm-sidebar:not(.is-open)'); })
       .slice(0, 8).map((el) => el.tagName + '#' + el.id + '.' + String(el.className).split(' ')[0] + ' right=' + Math.round(el.getBoundingClientRect().right));
     return { scrollW: document.documentElement.scrollWidth, vw, wide };
   });

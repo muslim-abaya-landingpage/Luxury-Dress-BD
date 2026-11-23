@@ -39,7 +39,7 @@
 <link rel="manifest" href="/admin-manifest.webmanifest">
 <meta name="theme-color" content="#1b2a41">
 <link rel="apple-touch-icon" href="/images/admin/admin-icon-192.png">
-<link rel="stylesheet" href="admin-wp.css?v=1">
+<link rel="stylesheet" href="admin-wp.css?v=20261124-premium">
 <link rel="stylesheet" href="admin-dashboard-modern.css?v=20261123-premium">
 </head>
 <body class="adm-body">
@@ -109,7 +109,10 @@
       </header>
 
       <main class="adm-main">
-        <section class="dzc-overview" aria-labelledby="dzName">
+        <nav class="adm-jump" aria-label="ড্যাশবোর্ডের ধাপসমূহ">
+          <a href="#secOverview"><i>১</i>আজকের অবস্থা</a><a href="#secActions"><i>২</i>দ্রুত কাজ</a><a href="#secTasks"><i>৩</i>অর্ডারে কাজ বাকি</a><a href="#secAlerts"><i>৪</i>খেয়াল রাখুন</a><a href="#secOrders"><i>৫</i>সাম্প্রতিক অর্ডার</a><a href="#secBest"><i>৬</i>সেরা বিক্রি</a><a href="#secReports"><i>৭</i>রিপোর্ট</a>
+        </nav>
+        <section class="dzc-overview adm-sec" id="secOverview" data-step="ধাপ ১ · আজকের অবস্থা" aria-labelledby="dzName">
           <div class="dzc-greet">
             <div><span class="dzc-hello" id="dzHello">স্বাগতম,</span> <h2 id="dzName">Admin</h2></div>
             <span class="dzc-date" id="dzDate"></span>
@@ -137,17 +140,17 @@
           <p class="dzc-note" id="dzScopeNote">রাজস্ব ও মোট অর্ডার লাইফটাইম রিপোর্ট থেকে; অন্যান্য অর্ডার-ভিত্তিক হিসাব সর্বশেষ ১০০টি লোড করা অর্ডারের ওপর।</p>
         </section>
 
-        <section class="adm-daily" aria-labelledby="admDailyHeading">
+        <section class="adm-daily adm-sec" id="secActions" data-step="ধাপ ২ · দ্রুত কাজ" aria-labelledby="admDailyHeading">
           <h2 id="admDailyHeading">দ্রুত কাজ</h2>
           <div class="adm-daily-grid adm-daily-grid-6"><a class="adm-daily-action" href="admin-order-new.html"><span class="adm-daily-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg></span><strong>নতুন অর্ডার <span aria-hidden="true">→</span></strong><span>ফোন/মেসেজের অর্ডার তুলুন</span></a><a class="adm-daily-action" href="admin-orders.html"><span class="adm-daily-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></span><strong>অর্ডার প্যানেল <span aria-hidden="true">→</span></strong><span>কনফার্ম, কুরিয়ার, স্ট্যাটাস</span></a><a class="adm-daily-action" href="product-manager.html#pmQuickUpload"><span class="adm-daily-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="7" width="16" height="14" rx="3"/><path d="M9 7V5a3 3 0 0 1 6 0v2M9 12h6M12 9v6"/></svg></span><strong>নতুন পণ্য <span aria-hidden="true">→</span></strong><span>ছবি, দাম, সাইজ দিয়ে যোগ করুন</span></a><a class="adm-daily-action" href="stock-analytics.html"><span class="adm-daily-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m3 7 9-4 9 4-9 4-9-4ZM3 7v10l9 4 9-4V7M12 11v10"/></svg></span><strong>স্টক আপডেট <span aria-hidden="true">→</span></strong><span>কোনটা কম/শেষ দেখুন</span></a><a class="adm-daily-action" href="admin-customers.html"><span class="adm-daily-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.2-3.6 4-5.5 7-5.5s5.8 1.9 7 5.5"/></svg></span><strong>কাস্টমার খুঁজুন <span aria-hidden="true">→</span></strong><span>ফোন নম্বর দিয়ে ইতিহাস</span></a><a class="adm-daily-action" href="admin-profit.html"><span class="adm-daily-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16"/><path d="M7 15l3-4 3 2 4-6"/></svg></span><strong>লাভের হিসাব <span aria-hidden="true">→</span></strong><span>কোন পণ্যে কত লাভ</span></a></div>
         </section>
 
-        <section class="dz-card adm-best-sellers" aria-labelledby="admBestSellerHeading">
+        <section class="dz-card adm-best-sellers adm-sec" id="secBest" data-step="ধাপ ৬ · সেরা বিক্রি" aria-labelledby="admBestSellerHeading">
           <div class="adm-feature-head"><div><h3 id="admBestSellerHeading">সবচেয়ে বেশি বিক্রি</h3><small>লাইফটাইম রিপোর্ট · বিক্রিত পরিমাণ</small></div><a class="adm-feature-more" href="product-manager.html">পণ্য ম্যানেজ করুন →</a></div>
           <div id="admOverviewTopProducts" class="adm-report-list"><div class="adm-feature-empty">বিক্রির রিপোর্ট লোড হচ্ছে…</div></div>
         </section>
 
-        <section class="dz-card adm-feature-card" aria-labelledby="admAlertHeading">
+        <section class="dz-card adm-feature-card adm-sec" id="secAlerts" data-step="ধাপ ৪ · খেয়াল রাখুন" aria-labelledby="admAlertHeading">
           <div class="adm-feature-head">
             <div><h3 id="admAlertHeading">খেয়াল রাখুন</h3><small id="admAlertState" role="status" aria-live="polite">লোড হচ্ছে…</small></div>
             <div class="adm-feature-actions"><button type="button" class="adm-btn adm-btn-secondary" id="admDesktopAlerts" hidden>নোটিফিকেশন চালু করুন</button><button type="button" class="adm-btn adm-btn-secondary" id="admAlertsRefresh">Refresh</button></div>
@@ -159,7 +162,7 @@
           </div>
         </section>
 
-        <section class="dz-card adm-feature-card" aria-labelledby="admTasksHeading">
+        <section class="dz-card adm-feature-card adm-sec" id="secTasks" data-step="ধাপ ৩ · অর্ডারে কাজ বাকি" aria-labelledby="admTasksHeading">
           <div class="adm-feature-head">
             <div><h3 id="admTasksHeading">যে অর্ডারে কাজ বাকি</h3><small id="admTaskState" role="status" aria-live="polite">অর্ডার দেখা হচ্ছে…</small></div>
             <button type="button" class="adm-btn adm-btn-secondary" id="admTasksRefresh">Refresh</button>
@@ -168,7 +171,7 @@
           <div id="admPriorityTasks" aria-live="polite"><div class="adm-feature-empty">লোড হচ্ছে…</div></div>
         </section>
 
-        <section class="dz-card">
+        <section class="dz-card adm-sec" id="secOrders" data-step="ধাপ ৫ · সাম্প্রতিক অর্ডার">
           <div class="dz-orders-head">
             <h3>সাম্প্রতিক অর্ডার</h3>
             <a href="admin-orders.html">সব অর্ডার দেখুন →</a>
@@ -184,7 +187,7 @@
             </table>
           </div>
         </section>
-        <details class="adm-disclosure adm-dashboard-reports" open><summary>বিক্রির বিশ্লেষণ ও রিপোর্ট</summary><div class="adm-disclosure-body">
+        <details class="adm-disclosure adm-dashboard-reports adm-sec" id="secReports" data-step="ধাপ ৭ · বিশ্লেষণ ও রিপোর্ট" open><summary>বিক্রির বিশ্লেষণ ও রিপোর্ট</summary><div class="adm-disclosure-body">
         <p class="dzc-tools">দরকারি লিংক: <a id="admOpenSheet" href="#" target="_blank" rel="noopener" hidden>Google Sheet</a> <a id="admOpenScript" href="#" target="_blank" rel="noopener" hidden>Apps Script</a></p>
         <div class="dz-kpis" id="admStats" hidden>
           <div class="dz-kpi" style="--c:#d4a72c"><b id="admStatCount">—</b><span>Orders (latest 100)</span></div>
