@@ -1734,11 +1734,13 @@ function rateLimitOrder_(phone) {
   cache.put(k, String(n + 1), 1800);
 }
 
-function checkDuplicateOrder_(phone, total, design) {
+function checkDuplicateOrder_(phone, total, design, enabled, windowMinutes) {
+  if (enabled === false) return;
   var cache = CacheService.getScriptCache();
   var sig = Utilities.base64EncodeWebSafe(String(phone) + '|' + String(total) + '|' + String(design).slice(0, 48));
   if (cache.get('dup_' + sig)) throw new Error('DUPLICATE_ORDER');
-  cache.put('dup_' + sig, '1', 600);
+  var minutes = Math.max(1, Math.min(1440, parseInt(windowMinutes, 10) || 10));
+  cache.put('dup_' + sig, '1', minutes * 60);
 }
 
 /**
@@ -1907,7 +1909,7 @@ function handleOnlineOrderPost_(e) {
   assertLiveStockAvailable_(validated.cartItems);
   if (isPhoneBlocked_(validated.phone)) throw new Error('ORDER_BLOCKED');
   rateLimitOrder_(validated.phone);
-  checkDuplicateOrder_(validated.phone, validated.total, validated.design);
+  checkDuplicateOrder_(validated.phone, validated.total, validated.design, String(param_(e, 'DuplicateBlock') || 'true') !== 'false', param_(e, 'DuplicateWindowMinutes'));
 
   var SHEET_NAME = 'Online Order';
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -9002,5 +9004,5 @@ function adminCouponCheck_(e) {
   return res.ok ? { ok: true, discount: res.discount, message: res.message } : { ok: false, error: res.error, message: res.message };
 }
 
-  return { verifyAdminSessionUncached_: verifyAdminSessionUncached_, verifyAdminSession_: verifyAdminSession_, requireOwnerAdmin_: requireOwnerAdmin_, param_: param_, adminOrderList_: adminOrderList_, adminOrderGet_: adminOrderGet_, listAdminOrders_: listAdminOrders_, adminFraudCheck_: adminFraudCheck_, adminStaffList_: adminStaffList_, adminCustomerLookup_: adminCustomerLookup_, getAdminStockVariants_: getAdminStockVariants_, getAdminAnalyticsV2_: getAdminAnalyticsV2_, inboxList_: inboxList_, inboxThread_: inboxThread_, getAdminStockLedger_: getAdminStockLedger_, getAdminGrowthData_: getAdminGrowthData_ };
+  return { verifyAdminSessionUncached_, verifyAdminSession_, requireOwnerAdmin_, param_, adminOrderList_, adminOrderGet_, listAdminOrders_, adminFraudCheck_, adminStaffList_, adminCustomerLookup_, getAdminStockVariants_, getAdminAnalyticsV2_, inboxList_, inboxThread_, getAdminStockLedger_, getAdminGrowthData_ };
 }
