@@ -433,9 +433,9 @@ html.wp-admin-shell{
 }
 html.wp-admin-shell body{background:var(--wp-page)!important;color:var(--wp-text)!important}
 html.wp-admin-shell .adm-sidebar{background:linear-gradient(180deg,#123d32 0%,#0d332b 100%)!important;box-shadow:5px 0 24px rgba(18,61,50,.08)!important}
-html.wp-admin-shell .adm-sidebar .adm-sidebar-item{min-height:40px!important;padding-left:13px!important;font-weight:550!important;transition:background .18s ease,color .18s ease}
+html.wp-admin-shell .adm-sidebar .adm-sidebar-item{min-height:40px!important;padding-left:13px!important;border-left:3px solid transparent!important;font-weight:550!important;transition:background .18s ease,color .18s ease}
 html.wp-admin-shell .adm-sidebar .adm-sidebar-item.is-current:not(.adm-nav-child),
-html.wp-admin-shell .adm-sidebar .adm-nav-group.has-current>.adm-nav-top{background:rgba(185,149,91,.24)!important;color:#f8f3e9!important;border-left:3px solid #c5a36b!important;padding-left:10px!important}
+html.wp-admin-shell .adm-sidebar .adm-nav-group.has-current>.adm-nav-top{background:rgba(185,149,91,.24)!important;color:#f8f3e9!important;border-left-color:#c5a36b!important}
 html.wp-admin-shell .adm-sidebar .adm-nav-children{background:#0a2d26!important}
 html.wp-admin-shell .adm-sidebar .adm-nav-child.is-current{color:#e4c997!important}
 html.wp-admin-shell .wp-adminbar{background:#0d332b!important;border-bottom:1px solid rgba(255,255,255,.08)}
