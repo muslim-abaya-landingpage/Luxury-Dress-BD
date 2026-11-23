@@ -73,7 +73,12 @@ test('Global Attribute variation keeps its own SKU and price through cart and mo
   await page.locator('#userArea').selectOption('80');
   await expect(page.locator('#userThana option').nth(1)).toBeAttached();
   await page.locator('#userThana').selectOption({ index: 1 });
-  await page.locator('#agreeTerms').check({ force: true });
+  await page.locator('#agreeTerms').evaluate((el) => {
+    el.checked = true;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  await expect(page.locator('#agreeTerms')).toBeChecked();
   await page.locator('#submitBtn').click();
 
   await expect(page).toHaveURL(/thank-you/);
