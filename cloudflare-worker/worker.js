@@ -92,13 +92,17 @@ function sanitizeOrderSettings(input) {
   if (!Number.isInteger(out.courierSuccessRatio) || out.courierSuccessRatio < 0 || out.courierSuccessRatio > 100) return null;
   return out;
 }
+async function readOrderSettings(env) {
+  const raw = await getSiteSetting(env, 'order_settings');
+  let parsed = {};
+  try { parsed = raw ? JSON.parse(raw) : {}; } catch (e) {}
+  return Object.assign({}, ORDER_SETTINGS_DEFAULTS, sanitizeOrderSettings(parsed) || {});
+}
 async function handleOrderSettingsGet(request, env, url) {
   const admin = await verifyAdminToken(env, url.searchParams.get('token') || '');
   if (!admin) return json({ ok: false, error: 'INVALID_TOKEN' }, 401);
-  const raw = await getSiteSetting(env, 'order_settings');
-  let saved = {};
-  try { saved = raw ? JSON.parse(raw) : {}; } catch (e) {}
-  return json({ ok: true, settings: Object.assign({}, ORDER_SETTINGS_DEFAULTS, sanitizeOrderSettings(saved) || {}), integrations: { whatsappOtp: !!(env.WHATSAPP_ACCESS_TOKEN && env.WHATSAPP_PHONE_NUMBER_ID && env.OTP_TOKEN_SECRET), smsGateway: !!(env.SMS_GATEWAY_URL && env.SMS_GATEWAY_TOKEN) } });
+  const settings = await readOrderSettings(env);
+  return json({ ok: true, settings, integrations: { whatsappOtp: !!(env.WHATSAPP_ACCESS_TOKEN && env.WHATSAPP_PHONE_NUMBER_ID && env.OTP_TOKEN_SECRET), smsGateway: !!(env.SMS_GATEWAY_URL && env.SMS_GATEWAY_TOKEN) } });
 }
 async function handleOrderSettingsPost(request, env) {
   let body;
@@ -489,6 +493,7 @@ async function handleOrder(request, env, ctx) {
   if (payload.length > ORDER_MAX_PAYLOAD) return textOut('Payload too large', 413);
 
   const now = Date.now();
+  const orderSettings = await readOrderSettings(env);
   const device = await resolveDeviceToken(request, env, now);
   const existing = await env.DB.prepare('SELECT status, attempts, order_id, last_response FROM order_inbox WHERE event_id = ?').bind(eventId).first();
   if (existing && existing.status === 'saved') {
@@ -522,14 +527,14 @@ async function handleOrder(request, env, ctx) {
   // The fingerprint can only raise this signal, never lower it: a device with no cookie yet
   // (fresh browser) still gets scored by its fingerprint history, and vice versa.
   risk.sameDeviceAttempts24h = worstDeviceAttempts;
-  Object.assign(risk, classifyNetwork(request.cf));
+  if (orderSettings.vpnProtection) Object.assign(risk, classifyNetwork(request.cf));
   // Recalculate the action after the authoritative insert/count. Updating only the
   // signal field would leave score/action stale (e.g. allow with 3 prior device orders).
   Object.assign(risk, scoreWorkerOrderRisk(risk));
 
   // WhatsApp OTP gate: only for orders whose own score is already review/high, and only once
   // configured (see handleOtpSend above) -- otherwise this never runs, same as before it existed.
-  if (otpConfigured(env) && risk.level !== 'low' && !(await verifyOtpToken(env, pairValue(pairs, 'OtpToken'), pairValue(pairs, 'Phone'), now))) {
+  if (orderSettings.mobileVerification && otpConfigured(env) && risk.level !== 'low' && !(await verifyOtpToken(env, pairValue(pairs, 'OtpToken'), pairValue(pairs, 'Phone'), now))) {
     const pendingPayload = encodeOrderPayload(pairs, risk, eventId);
     if (existing) {
       await env.DB.prepare("UPDATE order_inbox SET payload = ?, target = ?, status = 'awaiting_otp', updated_at = ? WHERE event_id = ?")
@@ -541,6 +546,9 @@ async function handleOrder(request, env, ctx) {
     return withDeviceCookie(textOut('NeedsOtp|' + eventId), device);
   }
 
+  // Pass owner-controlled duplicate policy to the canonical Apps Script order handler.
+  pairs.push(['DuplicateBlock', orderSettings.duplicateBlock ? 'true' : 'false']);
+  pairs.push(['DuplicateWindowMinutes', String(orderSettings.duplicateWindowMinutes)]);
   const storedPayload = encodeOrderPayload(pairs, risk, eventId);
   if (existing) {
     await env.DB.prepare("UPDATE order_inbox SET payload = ?, target = ?, status = 'sending', updated_at = ? WHERE event_id = ?")
