@@ -20,6 +20,7 @@ function session(){return window.MaAdmin&&MaAdmin.getSession&&MaAdmin.getSession
 async function request(payload){var s=session();if(!s||!s.token)throw Error('LOGIN_REQUIRED');var r=await fetch('/api/global-attributes',{method:'POST',credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({Token:s.token},payload))});var d=await r.json().catch(function(){return {};});if(!r.ok||!d.ok)throw Error(d.error||('HTTP_'+r.status));return d;}
 function draw(){
  var list=$('gaList');list.innerHTML='';
+ $('gaCount').textContent=state.attributes.length+' / 40 attributes';
  if(!state.attributes.length){list.innerHTML='<div class="ga-card ga-muted">এখনো কোনো Global Attribute তৈরি করা হয়নি।</div>';return;}
  state.attributes.forEach(function(a,i){
   var card=document.createElement('article');card.className='ga-card';card.innerHTML='<div class="ga-card-head"><h3>'+esc(a.name)+' <small class="ga-muted">('+esc(a.id)+')</small></h3><button type="button" class="ga-btn ga-danger" data-delete="'+i+'">Delete</button></div><div class="ga-grid"><div class="ga-field"><label>Name</label><input data-name="'+i+'" maxlength="60" value="'+esc(a.name)+'"></div><div class="ga-field"><label>Slug / ID</label><input data-id="'+i+'" maxlength="40" value="'+esc(a.id)+'"></div><div class="ga-field" style="grid-column:1/-1"><label>Terms (comma separated)</label><textarea data-terms="'+i+'">'+esc(a.terms.map(function(t){return t.name;}).join(', '))+'</textarea></div></div><label class="ga-check"><input type="checkbox" data-variation="'+i+'"'+(a.variation?' checked':'')+'> Used for variations</label><label class="ga-check"><input type="checkbox" data-visible="'+i+'"'+(a.visible?' checked':'')+'> Visible on product page</label>';
@@ -28,7 +29,7 @@ function draw(){
  $('gaCount').textContent=state.attributes.length+' / 40 attributes';
 }
 function readCards(){
- return Array.from($('gaList').querySelectorAll('.ga-card')).map(function(card){
+ return Array.from($('gaList').querySelectorAll('article.ga-card')).map(function(card){
   var get=function(sel){return card.querySelector(sel);};
   var id=get('[data-id]').value.trim().toLowerCase(),name=get('[data-name]').value.trim();
   var terms=get('[data-terms]').value.split(/[,，\n]/).map(function(n){return n.trim();}).filter(Boolean),seen={};
