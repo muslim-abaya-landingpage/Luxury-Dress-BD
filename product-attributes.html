@@ -2,12 +2,63 @@
 <html lang="bn" class="wp-admin-shell"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Global Attributes | Muslim Abaya</title>
 <link rel="stylesheet" href="admin.css?v=d800d917a0c7b197"><link rel="stylesheet" href="admin-dashboard-design.css?v=76d87a7fcd8f0d87"><link rel="stylesheet" href="admin-design-system.css?v=1eaf4362bddc4ad0"><link rel="stylesheet" href="admin-responsive.css?v=1"><link rel="stylesheet" href="admin-theme.css?v=1"><link rel="stylesheet" href="admin-wp.css?v=1">
 <style>
-.ga-wrap{max-width:1100px;margin:24px auto;padding:0 20px}.ga-head,.ga-card,.ga-form{background:var(--adm-card,#fff);border:1px solid var(--adm-border,#ddd);border-radius:12px;padding:18px;margin-bottom:16px}.ga-head h1{margin:0 0 8px}.ga-muted{color:var(--adm-muted,#646970)}.ga-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.ga-field label{display:block;font-weight:600;margin-bottom:5px}.ga-field input,.ga-field textarea{width:100%;box-sizing:border-box;min-height:40px;padding:9px;border:1px solid #c3c4c7;border-radius:6px}.ga-field textarea{min-height:82px}.ga-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}.ga-btn{border:1px solid #8c8f94;border-radius:6px;padding:9px 14px;background:#fff;cursor:pointer}.ga-primary{background:#2271b1;border-color:#2271b1;color:#fff}.ga-danger{color:#b32d2e}.ga-check{display:flex;gap:8px;align-items:center;margin-top:10px}.ga-card h3{margin:0 0 12px}.ga-card-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.ga-status{padding:10px 12px;border-radius:8px;background:#f0f6fc;margin:12px 0}.ga-status.error{background:#fcf0f1;color:#8a2424}.ga-list{display:grid;gap:12px}@media(max-width:650px){.ga-grid{grid-template-columns:1fr}.ga-wrap{padding:0 12px}.ga-card,.ga-form{padding:14px}}
+:root{--ga-ink:#172033;--ga-muted:#687386;--ga-line:#e5e9f0;--ga-primary:#3157c8;--ga-radius:18px}
+body{background:#f5f7fb;color:var(--ga-ink)}
+.pl-admin-header{display:flex;align-items:center;gap:14px;background:#fff;border-bottom:1px solid var(--ga-line);box-shadow:0 2px 10px rgba(22,34,55,.035);position:sticky;top:0;z-index:20}
+.pl-admin-header>a{display:inline-flex;align-items:center;text-decoration:none;font-weight:650;color:#34415b;padding:9px 12px;border:1px solid var(--ga-line);border-radius:10px;background:#fff}
+.pl-admin-header>span{margin-left:0!important;font-size:14px;color:#596579}
+#gaLogout{margin-left:auto;float:none!important;border:1px solid var(--ga-line);border-radius:10px;padding:9px 13px;background:#fff;color:#4b5568;cursor:pointer}
+.ga-wrap{max-width:1040px;margin:30px auto 70px;padding:0 22px}
+.ga-head,.ga-form,.ga-card{background:#fff;border:1px solid var(--ga-line);border-radius:var(--ga-radius);box-shadow:0 5px 22px rgba(28,43,70,.045)}
+.ga-head{padding:28px 30px;margin-bottom:22px;position:relative;overflow:hidden}
+.ga-head:before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:linear-gradient(180deg,#5577e8,#3157c8)}
+.ga-head h1{font-size:28px;line-height:1.25;letter-spacing:-.035em;margin:0 0 10px;color:#172033}
+.ga-head p{font-size:14px;line-height:1.75;margin:5px 0;color:var(--ga-muted);max-width:760px}
+.ga-eyebrow{display:inline-block;font-size:11px;font-weight:750;letter-spacing:.08em;color:#3157c8;background:#eef2ff;border-radius:30px;padding:6px 10px;margin-bottom:12px}
+.ga-note{display:flex;gap:9px;margin-top:15px;padding:11px 13px;border-radius:11px;background:#f5f8ff;color:#435477;font-size:13px;line-height:1.6}
+.ga-status{padding:11px 14px;border-radius:11px;background:#f0f6fc;color:#36506c;font-size:13px;margin:16px 0 0}
+.ga-status.error{background:#fff0f0;color:#9a3030}
+.ga-form{padding:25px 28px;margin-bottom:24px}
+.ga-section-title{display:flex;align-items:flex-start;gap:13px;margin-bottom:22px}
+.ga-step{width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;border-radius:11px;background:#eef2ff;color:#3157c8;font-weight:800}
+.ga-section-title h2,.ga-card-head h2{font-size:19px;letter-spacing:-.02em;margin:0 0 5px;color:#1d293d}
+.ga-section-title p{font-size:13px;color:var(--ga-muted);margin:0;line-height:1.6}
+.ga-grid{display:grid;grid-template-columns:1fr 1fr;gap:17px 18px}
+.ga-field label{display:block;font-size:13px;font-weight:700;color:#34415b;margin-bottom:7px}
+.ga-field input,.ga-field textarea{width:100%;box-sizing:border-box;min-height:45px;padding:11px 13px;border:1px solid #d9e0ea;border-radius:11px;background:#fbfcfe;color:#1d293d;font:inherit;font-size:14px;outline:none;transition:border-color .15s,box-shadow .15s}
+.ga-field input:focus,.ga-field textarea:focus{border-color:#6682e2;background:#fff;box-shadow:0 0 0 3px rgba(75,106,213,.12)}
+.ga-field textarea{min-height:94px;resize:vertical;line-height:1.6}
+.ga-hint{display:block;margin-top:6px;font-size:12px;color:#8490a2}
+.ga-options{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.ga-check{display:flex;align-items:center;gap:9px;padding:11px 13px;border:1px solid var(--ga-line);border-radius:11px;background:#fafbfe;color:#44516a;font-size:13px;font-weight:600;cursor:pointer}
+.ga-check input{width:16px;height:16px;accent-color:var(--ga-primary);margin:0}
+.ga-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:20px}
+.ga-btn{border:1px solid #d8dfeb;border-radius:11px;padding:10px 15px;background:#fff;color:#34415b;font-size:13px;font-weight:700;cursor:pointer;transition:background .15s,border-color .15s}
+.ga-btn:hover{background:#f6f8fc;border-color:#b9c5d8}
+.ga-btn:disabled{opacity:.55;cursor:wait}
+.ga-primary{background:var(--ga-primary);border-color:var(--ga-primary);color:#fff;box-shadow:0 4px 10px rgba(49,87,200,.17)}
+.ga-primary:hover{background:#2445a9;border-color:#2445a9;color:#fff}
+.ga-danger{color:#b33a45;border-color:#f0d8dc;background:#fffafb}
+.ga-list-section{margin-top:4px}
+.ga-card-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin:0 0 13px}
+.ga-card-head h2{margin:0}
+.ga-card{padding:20px 22px;margin:0}
+.ga-card h3{margin:0;font-size:16px;color:#202c40}
+.ga-card-head small{font-size:12px;font-weight:500;color:#8490a2}
+.ga-card .ga-grid{margin-top:18px}
+.ga-list{display:grid;gap:13px}
+.ga-empty{padding:34px 20px;text-align:center;border:1px dashed #d5ddea;border-radius:15px;background:#fafbfd;color:#687386}
+.ga-empty strong{display:block;color:#34415b;font-size:14px;margin-bottom:5px}
+.ga-empty span{font-size:13px}
+.ga-savebar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:15px 18px;margin-top:16px;background:#fff;border:1px solid var(--ga-line);border-radius:14px;box-shadow:0 6px 22px rgba(28,43,70,.06)}
+.ga-savebar .ga-actions{margin:0}
+.ga-muted{color:var(--ga-muted)}
+@media(max-width:700px){.ga-wrap{margin:18px auto 45px;padding:0 13px}.ga-head{padding:22px 20px}.ga-head h1{font-size:24px}.ga-form{padding:20px 17px}.ga-grid{grid-template-columns:1fr;gap:14px}.ga-field[style*="grid-column"]{grid-column:auto!important}.ga-card{padding:17px}.ga-card-head{align-items:flex-start}.pl-admin-header{padding:12px 13px!important;gap:8px;flex-wrap:wrap}.pl-admin-header>span{font-size:12px}.ga-savebar{align-items:stretch}.ga-savebar .ga-actions{width:100%}.ga-savebar .ga-btn{flex:1}.ga-savebar #gaCount{width:100%}}
 </style></head><body>
-<header class="pl-admin-header" style="padding:16px 22px"><a href="product-manager.html">← Products</a><span style="margin-left:18px;font-weight:700">Muslim Abaya / Product Settings</span><button type="button" id="gaLogout" style="float:right">Log out</button></header>
-<main class="ga-wrap"><section class="ga-head"><h1>Global Attributes</h1><p class="ga-muted">একবার Attribute ও তার Terms তৈরি করুন, পরে একাধিক পণ্যে পুনরায় ব্যবহার করুন। যেমন Fabric → Linen, Cotton; Pattern → Floral, Plain।</p><p class="ga-muted">এখানে পরিবর্তন করলে শুধু Global Attribute Registry আপডেট হবে; পুরোনো পণ্য, SKU, Stock বা Order পরিবর্তন হবে না।</p><div id="gaStatus" class="ga-status" role="status" aria-live="polite">লোড হচ্ছে…</div></section>
-<section class="ga-form"><h2>নতুন Attribute</h2><div class="ga-grid"><div class="ga-field"><label for="gaName">নাম</label><input id="gaName" maxlength="60" placeholder="যেমন Fabric"></div><div class="ga-field"><label for="gaId">Slug / ID</label><input id="gaId" maxlength="40" placeholder="fabric"></div><div class="ga-field" style="grid-column:1/-1"><label for="gaTerms">Terms (কমা দিয়ে আলাদা করুন)</label><textarea id="gaTerms" placeholder="Linen, Cotton, Georgette"></textarea></div></div><label class="ga-check"><input type="checkbox" id="gaVariation" checked> Used for variations</label><label class="ga-check"><input type="checkbox" id="gaVisible" checked> Visible on product page</label><div class="ga-actions"><button class="ga-btn ga-primary" id="gaAdd" type="button">Add attribute</button></div></section>
-<section><div class="ga-card-head"><h2>Saved Attributes</h2><button type="button" class="ga-btn" id="gaReload">Reload</button></div><div id="gaList" class="ga-list"></div><div class="ga-actions"><button type="button" class="ga-btn ga-primary" id="gaSave">Save changes</button><span id="gaCount" class="ga-muted"></span></div></section></main>
+<header class="pl-admin-header" style="padding:13px 22px"><a href="product-manager.html">← পণ্যসমূহ</a><span>Muslim Abaya / Product Settings</span><button type="button" id="gaLogout">লগ আউট</button></header>
+<main class="ga-wrap"><section class="ga-head"><div class="ga-eyebrow">PRODUCT SETTINGS · ATTRIBUTES</div><h1>Global Attributes</h1><p>একবার পণ্যের বৈশিষ্ট্য তৈরি করুন, পরে একাধিক পণ্যে ব্যবহার করুন। যেমন Fabric → Linen, Cotton অথবা Pattern → Floral, Plain।</p><div class="ga-note"><span>✓</span><span>এখানে পরিবর্তন করলে শুধু Attribute Registry আপডেট হবে। পণ্যের SKU, স্টক, ছবি বা অর্ডারে কোনো পরিবর্তন হবে না।</span></div><div id="gaStatus" class="ga-status" role="status" aria-live="polite">লোড হচ্ছে…</div></section>
+<section class="ga-form"><div class="ga-section-title"><span class="ga-step">01</span><div><h2>নতুন Attribute তৈরি করুন</h2><p>নাম, পরিচিতি এবং এই বৈশিষ্ট্যের অপশনগুলো যোগ করুন।</p></div></div><div class="ga-grid"><div class="ga-field"><label for="gaName">Attribute-এর নাম</label><input id="gaName" maxlength="60" placeholder="যেমন Fabric"><span class="ga-hint">পণ্যে যে নামে বৈশিষ্ট্যটি দেখাবে</span></div><div class="ga-field"><label for="gaId">Slug / ID</label><input id="gaId" maxlength="40" placeholder="fabric"><span class="ga-hint">ইংরেজি ছোট হাতের অক্ষর ব্যবহার করুন</span></div><div class="ga-field" style="grid-column:1/-1"><label for="gaTerms">Terms / অপশনসমূহ</label><textarea id="gaTerms" placeholder="Linen, Cotton, Georgette"></textarea><span class="ga-hint">প্রতিটি অপশন কমা অথবা নতুন লাইনে আলাদা করুন</span></div></div><div class="ga-options"><label class="ga-check"><input type="checkbox" id="gaVariation" checked> ভ্যারিয়েশন হিসেবে ব্যবহার হবে</label><label class="ga-check"><input type="checkbox" id="gaVisible" checked> পণ্যের পাতায় দেখাবে</label></div><div class="ga-actions"><button class="ga-btn ga-primary" id="gaAdd" type="button">＋ Attribute যোগ করুন</button></div></section>
+<section class="ga-list-section"><div class="ga-section-title"><span class="ga-step">02</span><div><h2>তৈরি করা Attributes</h2><p>আগে যোগ করা বৈশিষ্ট্য ও অপশন সম্পাদনা বা মুছে ফেলুন।</p></div></div><div class="ga-card-head"><span class="ga-muted">আপনার Attribute তালিকা</span><button type="button" class="ga-btn" id="gaReload">↻ রিফ্রেশ</button></div><div id="gaList" class="ga-list"></div><div class="ga-savebar"><span id="gaCount" class="ga-muted"></span><div class="ga-actions"><button type="button" class="ga-btn ga-primary" id="gaSave">পরিবর্তন সংরক্ষণ করুন</button></div></div></section></main>
 <script src="site-api-config.js"></script><script src="admin-config.js"></script><script src="admin-api.js"></script><script src="admin-guard.js"></script>
 <script>
 (function(){
@@ -21,9 +72,9 @@ async function request(payload){var s=session();if(!s||!s.token)throw Error('LOG
 function draw(){
  var list=$('gaList');list.innerHTML='';
  $('gaCount').textContent=state.attributes.length+' / 40 attributes';
- if(!state.attributes.length){list.innerHTML='<div class="ga-card ga-muted">এখনো কোনো Global Attribute তৈরি করা হয়নি।</div>';return;}
+ if(!state.attributes.length){list.innerHTML='<div class="ga-empty"><strong>এখনো কোনো Attribute তৈরি করা হয়নি</strong><span>উপরের ফর্ম থেকে প্রথম Attribute যোগ করুন।</span></div>';return;}
  state.attributes.forEach(function(a,i){
-  var card=document.createElement('article');card.className='ga-card';card.innerHTML='<div class="ga-card-head"><h3>'+esc(a.name)+' <small class="ga-muted">('+esc(a.id)+')</small></h3><button type="button" class="ga-btn ga-danger" data-delete="'+i+'">Delete</button></div><div class="ga-grid"><div class="ga-field"><label>Name</label><input data-name="'+i+'" maxlength="60" value="'+esc(a.name)+'"></div><div class="ga-field"><label>Slug / ID</label><input data-id="'+i+'" maxlength="40" value="'+esc(a.id)+'"></div><div class="ga-field" style="grid-column:1/-1"><label>Terms (comma separated)</label><textarea data-terms="'+i+'">'+esc(a.terms.map(function(t){return t.name;}).join(', '))+'</textarea></div></div><label class="ga-check"><input type="checkbox" data-variation="'+i+'"'+(a.variation?' checked':'')+'> Used for variations</label><label class="ga-check"><input type="checkbox" data-visible="'+i+'"'+(a.visible?' checked':'')+'> Visible on product page</label>';
+  var card=document.createElement('article');card.className='ga-card';card.innerHTML='<div class="ga-card-head"><h3>'+esc(a.name)+' <small>('+esc(a.id)+')</small></h3><button type="button" class="ga-btn ga-danger" data-delete="'+i+'">মুছুন</button></div><div class="ga-grid"><div class="ga-field"><label>Attribute-এর নাম</label><input data-name="'+i+'" maxlength="60" value="'+esc(a.name)+'"></div><div class="ga-field"><label>Slug / ID</label><input data-id="'+i+'" maxlength="40" value="'+esc(a.id)+'"></div><div class="ga-field" style="grid-column:1/-1"><label>Terms / অপশনসমূহ</label><textarea data-terms="'+i+'">'+esc(a.terms.map(function(t){return t.name;}).join(', '))+'</textarea><span class="ga-hint">কমা অথবা নতুন লাইনে আলাদা করুন</span></div></div><div class="ga-options"><label class="ga-check"><input type="checkbox" data-variation="'+i+'"'+(a.variation?' checked':'')+'> ভ্যারিয়েশন হিসেবে ব্যবহার হবে</label><label class="ga-check"><input type="checkbox" data-visible="'+i+'"'+(a.visible?' checked':'')+'> পণ্যের পাতায় দেখাবে</label></div>';
   list.appendChild(card);
  });
  $('gaCount').textContent=state.attributes.length+' / 40 attributes';
