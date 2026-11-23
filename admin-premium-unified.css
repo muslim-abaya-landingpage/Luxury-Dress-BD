@@ -1,0 +1,87 @@
+/* Muslim Abaya — unified premium admin layer, phase 2.
+   Visual-only overrides. Keep page-specific markup, API hooks, forms and actions intact. */
+:root{
+  --ma-ivory:#f7f6f1;--ma-emerald:#123d32;--ma-emerald-2:#1b5546;
+  --ma-gold:#c4a36a;--ma-ink:#1d2c27;--ma-muted:#6e7d76;
+  --ma-line:#e5e8e1;--ma-paper:#fffefa;--ma-soft:#f0f2ec;
+  --adm-bg:var(--ma-ivory);--adm-bg-alt:var(--ma-soft);--adm-card:var(--ma-paper);
+  --adm-card-2:#fbfaf6;--adm-primary:var(--ma-emerald);--adm-primary-2:var(--ma-emerald-2);
+  --adm-text:var(--ma-ink);--adm-muted:var(--ma-muted);--adm-border:var(--ma-line);
+  --adm-border-strong:#d5ddd5;--adm-accent:var(--ma-gold);--adm-accent-light:#ddc99f;
+  --adm-accent-ink:#755d35;--adm-accent-wash:#f5f0e5;
+  --adm-radius:16px;--adm-shadow-sm:0 2px 10px rgba(18,61,50,.045);
+  --adm-shadow-md:0 16px 42px rgba(18,61,50,.09);
+}
+:root[data-admin-theme="dark"]{
+  --ma-ivory:#111a17;--ma-emerald:#0d2d25;--ma-emerald-2:#164638;
+  --ma-ink:#edf3ee;--ma-muted:#aab9b0;--ma-line:#2c4037;--ma-paper:#192720;--ma-soft:#202f28;
+  --adm-bg:var(--ma-ivory);--adm-bg-alt:var(--ma-soft);--adm-card:var(--ma-paper);
+  --adm-card-2:#1d2b24;--adm-primary:#e8efe9;--adm-primary-2:#cbd9cf;
+  --adm-text:var(--ma-ink);--adm-muted:var(--ma-muted);--adm-border:var(--ma-line);
+  --adm-border-strong:#40574a;--adm-accent:#d6bb86;--adm-accent-light:#e6d2a9;
+  --adm-accent-ink:#e6d2a9;--adm-accent-wash:#302e25;color-scheme:dark;
+}
+body.adm-body,body.pn-body,.pl-admin{
+  background:var(--adm-bg)!important;color:var(--adm-text)!important;
+  font-family:Inter,"Hind Siliguri",system-ui,sans-serif!important;
+}
+.adm-shell,.pn-app.adm-shell{gap:18px!important;padding:18px!important}
+.adm-sidebar,.pn-side{
+  background:linear-gradient(165deg,#17483b 0%,#10382f 58%,#0d2e27 100%)!important;
+  color:#eef4ef!important;border:1px solid rgba(196,163,106,.25)!important;
+  border-radius:18px!important;box-shadow:0 14px 36px rgba(13,46,39,.16)!important;
+}
+.adm-sidebar-brand,.pn-brand{border-color:rgba(255,255,255,.12)!important}
+.adm-sidebar-brand-text .t1,.pn-brand{color:#fff!important}
+.adm-sidebar-brand-text .t2{color:#ddc99f!important}
+.adm-sidebar-crest{background:linear-gradient(145deg,#ddc99f,#a8864e)!important;box-shadow:0 0 0 1px rgba(255,255,255,.15)!important}
+.adm-sidebar-profile{border:1px solid rgba(255,255,255,.12)!important;background:rgba(255,255,255,.055)!important;border-radius:12px!important}
+.adm-profile-copy strong{color:#fff!important}.adm-profile-copy small{color:#c4d2ca!important}
+.adm-sidebar-item,.pn-nav a{color:#d5e2da!important;border-radius:10px!important}
+.adm-sidebar-item:hover,.pn-nav a:hover{background:rgba(255,255,255,.09)!important;color:#fff!important;transform:none!important}
+.adm-sidebar-item.is-current,.adm-sidebar-item[aria-current=page],.pn-nav a.active{
+  color:#fff!important;background:rgba(196,163,106,.19)!important;
+  box-shadow:inset 3px 0 var(--ma-gold)!important;
+}
+.adm-sidebar-item.is-current:before,.pn-nav a.active:before{display:none!important}
+.adm-sidebar-foot{border-color:rgba(255,255,255,.12)!important}
+.adm-content,.adm-main,.pn-main,.pl-main{min-width:0!important}
+.adm-topbar,.pn-head,.pl-admin .pl-admin-header{
+  background:var(--adm-card)!important;color:var(--adm-text)!important;
+  border:1px solid var(--adm-border)!important;border-radius:16px!important;
+  box-shadow:var(--adm-shadow-sm)!important;
+}
+.adm-heading h1,.adm-topbar h1,.pn-head h1,.pl-admin .pl-admin-header h1{
+  color:var(--adm-text)!important;font-weight:750!important;letter-spacing:-.035em!important;
+}
+.adm-page-kicker{color:var(--adm-accent-ink)!important;letter-spacing:.1em!important}
+.adm-btn-primary,.pn-btn-primary,.pl-admin .pl-btn-primary,.adm-topbar .adm-btn-secondary{
+  background:var(--ma-emerald)!important;border-color:var(--ma-emerald)!important;color:#fff!important;
+}
+.adm-btn-primary:hover,.pn-btn-primary:hover,.pl-admin .pl-btn-primary:hover{background:var(--ma-emerald-2)!important}
+:where(.adm-card,.dz-card,.adm-panel,.pn-card,.oi-panel,.pl-card,.pl-panel,.pm-card){
+  border:1px solid var(--adm-border)!important;border-radius:15px!important;
+  background:var(--adm-card)!important;box-shadow:var(--adm-shadow-sm)!important;
+}
+:where(.adm-main,.pn-main,.pl-main) table{border-color:var(--adm-border)!important}
+:where(.adm-main,.pn-main,.pl-main) th{background:var(--adm-bg-alt)!important;color:var(--adm-muted)!important}
+:where(.adm-main,.pn-main,.pl-main) td{border-color:var(--adm-border)!important}
+:where(.adm-main,.pn-main,.pl-main) input:not([type=checkbox]):not([type=radio]),
+:where(.adm-main,.pn-main,.pl-main) select,
+:where(.adm-main,.pn-main,.pl-main) textarea{
+  border-color:var(--adm-border-strong)!important;border-radius:9px!important;
+  background:var(--adm-card)!important;color:var(--adm-text)!important;
+}
+:where(.adm-main,.pn-main,.pl-main) :where(button,a):focus-visible,
+:where(.adm-main,.pn-main,.pl-main) :where(input,select,textarea):focus-visible{
+  outline:2px solid var(--ma-gold)!important;outline-offset:3px!important;
+}
+:where(.adm-main,.pn-main,.pl-main) .is-current,
+:where(.adm-main,.pn-main,.pl-main) [aria-pressed=true]{accent-color:var(--ma-emerald)}
+@media(max-width:760px){
+  .adm-shell,.pn-app.adm-shell{padding:10px!important;gap:10px!important}
+  .adm-topbar,.pn-head{padding:14px!important;border-radius:13px!important}
+  .adm-main,.pn-main,.pl-main{padding:16px 0 30px!important}
+  .adm-sidebar{border-radius:0 16px 16px 0!important}
+}
+@media(prefers-reduced-motion:reduce){.adm-sidebar-item,.pn-nav a{transition:none!important}}
