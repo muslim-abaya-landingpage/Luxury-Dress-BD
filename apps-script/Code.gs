@@ -1727,11 +1727,13 @@ function rateLimitOrder_(phone) {
   cache.put(k, String(n + 1), 1800);
 }
 
-function checkDuplicateOrder_(phone, total, design) {
+function checkDuplicateOrder_(phone, total, design, enabled, windowMinutes) {
+  if (enabled === false) return;
   var cache = CacheService.getScriptCache();
   var sig = Utilities.base64EncodeWebSafe(String(phone) + '|' + String(total) + '|' + String(design).slice(0, 48));
   if (cache.get('dup_' + sig)) throw new Error('DUPLICATE_ORDER');
-  cache.put('dup_' + sig, '1', 600);
+  var minutes = Math.max(1, Math.min(1440, parseInt(windowMinutes, 10) || 10));
+  cache.put('dup_' + sig, '1', minutes * 60);
 }
 
 /**
@@ -1900,7 +1902,7 @@ function handleOnlineOrderPost_(e) {
   assertLiveStockAvailable_(validated.cartItems);
   if (isPhoneBlocked_(validated.phone)) throw new Error('ORDER_BLOCKED');
   rateLimitOrder_(validated.phone);
-  checkDuplicateOrder_(validated.phone, validated.total, validated.design);
+  checkDuplicateOrder_(validated.phone, validated.total, validated.design, String(param_(e, 'DuplicateBlock') || 'true') !== 'false', param_(e, 'DuplicateWindowMinutes'));
 
   var SHEET_NAME = 'Online Order';
   var ss = SpreadsheetApp.getActiveSpreadsheet();
