@@ -72,11 +72,15 @@ test("Product Manager persists parentKey only for explicit subcategories", () =>
 });
 
 
-test("The action=new route opens the product editor immediately after catalog initialization", () => {
+test("The action=new route opens the product editor after publisher catalog initialization", () => {
   const routeHandler = html.indexOf('openNewProductOnLoad = new URLSearchParams(location.search).get("action") === "new"');
-  const catalogInit = html.indexOf("  loadState();", html.indexOf("function reloadPublishingData"));
-  const reloadCallback = html.indexOf('if(new URLSearchParams(location.search).get("action")==="new")startNewProduct();');
+  const reloadFunction = html.indexOf("function reloadPublishingData()");
+  const publisherInit = html.indexOf("MaCatalogPublisher.init(", reloadFunction);
+  const initCallback = html.indexOf("function(){window.MA_RAW_CATEGORY_PRODUCTS", publisherInit);
+  const catalogInit = html.indexOf("loadState();", initCallback);
+  const editorOpen = html.indexOf('if(new URLSearchParams(location.search).get("action")==="new")startNewProduct();', catalogInit);
   assert.ok(routeHandler >= 0, "missing action=new route detection");
-  assert.ok(catalogInit >= 0 && reloadCallback > catalogInit, "new-product editor must open after publisher reload completes");
+  assert.ok(reloadFunction >= 0 && publisherInit > reloadFunction && initCallback > publisherInit, "missing publisher initialization callback");
+  assert.ok(catalogInit > initCallback && editorOpen > catalogInit, "new-product editor must open after publisher callback initializes the catalog");
   assert.ok(!html.includes('want = new URLSearchParams(location.search).get("action") === "new"'), "action=new must not use the legacy delayed route handler");
 });
