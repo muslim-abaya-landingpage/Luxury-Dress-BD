@@ -344,7 +344,7 @@
     document.querySelectorAll(".no-box-toggle").forEach(function (b) { b.addEventListener("click", function () { var box = b.closest(".no-box"); box.classList.toggle("is-closed"); b.setAttribute("aria-expanded", String(!box.classList.contains("is-closed"))); }); });
     loadCatalog();
     loadDistricts();
-    var start = root.MaPanel && root.MaPanel.init ? root.MaPanel.init("orders") : Promise.resolve(true);
+    var start = root.MaPanel && root.MaPanel.init ? root.MaPanel.init("orders", { localSessionOnly: true }) : Promise.resolve(true);
     Promise.resolve(start).then(function (s) { if (s) loadCustomers(); });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot); else boot();

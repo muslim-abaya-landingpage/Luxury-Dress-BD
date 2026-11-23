@@ -83,7 +83,26 @@
   }
 
   // লগইন যাচাই করে সাইডবার আঁকে; session না থাকলে লগইন পেজে পাঠায়
-  function init(active) {
+  function init(active, options) {
+    // Some pages (e.g. new-order) use the legacy Apps Script endpoint for writes.
+    // Its automatic AdminVerify request can return a misleading HTTP 403 even when
+    // the locally established session is valid. In this opt-in mode, use the local
+    // session only to render the shell; every data read/write still goes through
+    // MaAdmin.call and is authorized by the server.
+    if (options && options.localSessionOnly === true) {
+      var session = g.MaAdmin && g.MaAdmin.getSession ? g.MaAdmin.getSession() : null;
+      if (!session) {
+        var next = (g.location.pathname.split("/").pop() || "admin-dashboard.html") + (g.location.search || "");
+        g.location.href = "admin-login.html?next=" + encodeURIComponent(next);
+        return Promise.resolve(null);
+      }
+      if (["admin", "staff"].indexOf(session.role) === -1) {
+        g.location.href = "admin-dashboard.html";
+        return Promise.resolve(null);
+      }
+      renderSide(active, session);
+      return Promise.resolve(session);
+    }
     return MaAdminGuard.require().then(function (s) {
       if (s) renderSide(active, s);
       return s;
