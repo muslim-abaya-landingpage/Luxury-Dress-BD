@@ -71,6 +71,47 @@ function isLikelyPixelId(v) {
   // wrong input (HTML, scripts, empty) out of a value that gets spliced into served JavaScript.
   return typeof v === 'string' && v.length >= 6 && v.length <= 40 && /^[A-Za-z0-9_-]+$/.test(v);
 }
+const ORDER_SETTINGS_DEFAULTS = Object.freeze({
+  mobileVerification: true, confirmationSms: false, locationFields: true,
+  vpnProtection: true, duplicateBlock: true, duplicateWindowMinutes: 10,
+  courierProtection: true, courierSuccessRatio: 50
+});
+function sanitizeOrderSettings(input) {
+  const v = input && typeof input === 'object' ? input : {};
+  const out = {
+    mobileVerification: v.mobileVerification !== false,
+    confirmationSms: v.confirmationSms === true,
+    locationFields: v.locationFields !== false,
+    vpnProtection: v.vpnProtection !== false,
+    duplicateBlock: v.duplicateBlock !== false,
+    duplicateWindowMinutes: Number(v.duplicateWindowMinutes == null ? 10 : v.duplicateWindowMinutes),
+    courierProtection: v.courierProtection !== false,
+    courierSuccessRatio: Number(v.courierSuccessRatio == null ? 50 : v.courierSuccessRatio)
+  };
+  if (!Number.isInteger(out.duplicateWindowMinutes) || out.duplicateWindowMinutes < 1 || out.duplicateWindowMinutes > 1440) return null;
+  if (!Number.isInteger(out.courierSuccessRatio) || out.courierSuccessRatio < 0 || out.courierSuccessRatio > 100) return null;
+  return out;
+}
+async function handleOrderSettingsGet(request, env, url) {
+  const admin = await verifyAdminToken(env, url.searchParams.get('token') || '');
+  if (!admin) return json({ ok: false, error: 'INVALID_TOKEN' }, 401);
+  const raw = await getSiteSetting(env, 'order_settings');
+  let saved = {};
+  try { saved = raw ? JSON.parse(raw) : {}; } catch (e) {}
+  return json({ ok: true, settings: Object.assign({}, ORDER_SETTINGS_DEFAULTS, sanitizeOrderSettings(saved) || {}), integrations: { whatsappOtp: !!(env.WHATSAPP_ACCESS_TOKEN && env.WHATSAPP_PHONE_NUMBER_ID && env.OTP_TOKEN_SECRET), smsGateway: !!(env.SMS_GATEWAY_URL && env.SMS_GATEWAY_TOKEN) } });
+}
+async function handleOrderSettingsPost(request, env) {
+  let body;
+  try { body = await request.json(); } catch (e) { return json({ ok: false, error: 'BAD_JSON' }, 400); }
+  const admin = await verifyAdminToken(env, body && body.token);
+  if (!admin) return json({ ok: false, error: 'INVALID_TOKEN' }, 401);
+  const settings = sanitizeOrderSettings(body && body.settings);
+  if (!settings) return json({ ok: false, error: 'INVALID_SETTINGS' }, 400);
+  try {
+    await setSiteSetting(env, 'order_settings', JSON.stringify(settings), admin.email || admin.name || 'admin');
+    return json({ ok: true, settings });
+  } catch (e) { return json({ ok: false, error: 'SAVE_FAILED' }, 503); }
+}
 async function handleAdminSettingsGet(request, env, url) {
   const token = url.searchParams.get('token') || '';
   const admin = await verifyAdminToken(env, token);
@@ -122,6 +163,12 @@ export default {
     }
     if (path === '/_ma/view') {
       return handleLiveView(request, env, url);
+    }
+    if (path === '/_ma/admin/order-settings' && request.method === 'GET') {
+      return handleOrderSettingsGet(request, env, url);
+    }
+    if (path === '/_ma/admin/order-settings' && request.method === 'POST') {
+      return handleOrderSettingsPost(request, env);
     }
     if (path === '/_ma/admin/settings' && request.method === 'GET') {
       return handleAdminSettingsGet(request, env, url);
