@@ -61,6 +61,14 @@ test('homepage hides the redundant category rail and uses one customer-focused a
   assert.doesNotMatch(config, /PREMIUM MODEST WEAR|Premium Modest Fashion/);
 });
 
+test('storyboard autoplay waits until the initial LCP rendering window has settled', () => {
+  const renderer = fs.readFileSync(path.join(root, 'index-home-muslim-abaya.js'), 'utf8');
+  assert.match(renderer, /var STORY_INITIAL_DELAY = 12000;/, 'first autoplay is delayed beyond the initial LCP window');
+  assert.match(renderer, /storyStart\\(board, STORY_INITIAL_DELAY\\)/, 'initial render uses the protected delay');
+  assert.match(renderer, /if \\(initialDelay > 0\\)[\\s\\S]*setTimeout/, 'the initial delay uses a one-time timeout before recurring autoplay');
+  assert.match(renderer, /storyTimer = setInterval\\(advance, STORY_INTERVAL\\)/, 'normal autoplay cadence remains unchanged after the first transition');
+});
+
 test('Cloudflare build runs the prerender before content versioning', () => {
   const build = fs.readFileSync(path.join(root, 'scripts/build-cloudflare.mjs'), 'utf8');
   const a = build.indexOf('scripts/build-home-speed.mjs');
