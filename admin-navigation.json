@@ -47,6 +47,10 @@
         "label": "Sizes"
       },
       {
+        "label": "Attributes",
+        "href": "product-attributes.html"
+      },
+      {
         "href": "admin-reviews.html",
         "label": "Reviews"
       },
