@@ -3390,17 +3390,25 @@ function getFacebookCapiConfig_() {
     props.getProperty('META_ACCESS_TOKEN') ||
     props.getProperty('FACEBOOK_ACCESS_TOKEN') ||
     '';
-  var pixelId =
+
+  // Canonical Muslim Abaya Meta Pixel. Keep the existing access token, but
+  // migrate any legacy Script Properties pixel ID to the owner-confirmed ID.
+  var pixelId = '1141629002088045';
+  var savedPixelId =
     props.getProperty('FB_PIXEL_ID') ||
     props.getProperty('META_PIXEL_ID') ||
     props.getProperty('PIXEL_ID') ||
     '';
-  return { accessToken: String(accessToken || '').trim(), pixelId: String(pixelId || '').trim() };
+  if (String(savedPixelId || '').trim() !== pixelId) {
+    props.setProperty('FB_PIXEL_ID', pixelId);
+  }
+
+  return { accessToken: String(accessToken || '').trim(), pixelId: pixelId };
 }
 
 /**
  * Ops helper: set Meta CAPI keys via clasp run.
- * Example: clasp run setMetaCapiConfigForOps_ -p '["TOKEN","1465090315322833"]'
+ * Example: clasp run setMetaCapiConfigForOps_ -p '["TOKEN","1141629002088045"]'
  */
 function setMetaCapiConfigForOps_(accessToken, pixelId) {
   var token = String(accessToken || '').trim();
@@ -5408,7 +5416,7 @@ function parseSignedOrderAmount_(raw) {
 
 // ===== Messenger → Conversions API for Business Messaging =====
 var MSGR_PAGE_ID = '964928770039259';
-var MSGR_DATASET_ID = '1465090315322833';
+var MSGR_DATASET_ID = '1141629002088045';
 var MSGR_SHEET = 'MessengerContacts';
 
 function messengerVerify_(e) {
@@ -5610,7 +5618,7 @@ function setupMessengerProfileForAllPagesFromMenu() {
 }
 
 var MSGR_PAGE_ID = '964928770039259';
-var MSGR_DATASET_ID = '1465090315322833';
+var MSGR_DATASET_ID = '1141629002088045';
 var MSGR_SHEET = 'MessengerContacts';
 var MSGR_MSG_SHEET = 'MessengerMessages';
 
