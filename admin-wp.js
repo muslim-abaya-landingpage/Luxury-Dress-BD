@@ -128,6 +128,25 @@
       if (!collapse.querySelector('.wp-collapse-label')) collapse.insertAdjacentHTML('beforeend', '<span class="wp-collapse-label">Collapse menu</span>');
       foot.appendChild(collapse);
     }
+    // Keep Cache Manager reachable from the Settings group on every admin page.
+    var settingsGroup = Array.prototype.find.call(sidebar.querySelectorAll('.adm-nav-group'), function (group) {
+      var top = group.querySelector('.adm-nav-top');
+      return top && /settings|সেটিংস/i.test(top.textContent || '');
+    });
+    if (settingsGroup) {
+      var children = settingsGroup.querySelector('.adm-nav-children');
+      if (children && !children.querySelector('a[href="admin-cache-manager.html"]')) {
+        var cacheLink = doc.createElement('a');
+        cacheLink.className = 'adm-sidebar-item adm-nav-child';
+        cacheLink.href = 'admin-cache-manager.html';
+        cacheLink.textContent = 'Cache Manager';
+        if ((location.pathname.split('/').pop() || '') === 'admin-cache-manager.html') {
+          cacheLink.classList.add('is-current');
+          cacheLink.setAttribute('aria-current', 'page');
+        }
+        children.appendChild(cacheLink);
+      }
+    }
     // Keyboard: the flyout opens on focus (CSS :focus-within); Escape closes it.
     sidebar.addEventListener('keydown', function (e) {
       if (e.key !== 'Escape') return;
