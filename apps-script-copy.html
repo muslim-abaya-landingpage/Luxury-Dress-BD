@@ -8198,7 +8198,7 @@ function admFindRow_(sheet, orderId) {
   var lastRow = sheet.getLastRow();
   if (lastRow &lt; 2) return 0;
   var ids = sheet.getRange(2, onlineOrderColumn_(sheet, 9), lastRow - 1, 1).getValues();
-  for (var i = ids.length - 1; i &gt;= 0; i--) {
+  for (var i = ids.length - 1; i >= 0; i--) {
     if (String(ids[i][0] || '').trim() === id) return i + 2;
   }
   return 0;
@@ -8246,7 +8246,7 @@ function adminBlockCustomer_(e) {
     var sheet = admBlockedSheet_();
     var lastRow = sheet.getLastRow();
     var found = 0;
-    if (lastRow &gt;= 2) {
+    if (lastRow >= 2) {
       var phones = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
       for (var i = 0; i &lt; phones.length; i++) {
         if (normalizePhone_(phones[i][0]) === phone) { found = i + 2; break; }
@@ -8268,7 +8268,7 @@ function adminBlockCustomer_(e) {
 function admHistoryForPhone_(rows, phone, skipOrderId) {
   var stats = { total: 0, delivered: 0, cancelled: 0, fake: 0, returned: 0, pending: 0, active: 0 };
   var recent = [];
-  for (var i = rows.length - 1; i &gt;= 0; i--) {
+  for (var i = rows.length - 1; i >= 0; i--) {
     var r = rows[i];
     if (normalizePhone_(r[2]) !== phone) continue;
     var oid = String(r[8] || '');
@@ -8297,10 +8297,10 @@ function admHistoryForPhone_(rows, phone, skipOrderId) {
   var rate = decided ? Math.round((stats.delivered / decided) * 100) : null;
   var risk = 'new';
   if (decided) {
-    if (stats.fake &gt; 0 || (failed &gt;= 2 &amp;&amp; rate &lt; 50)) risk = 'high';
-    else if (failed &gt; 0 &amp;&amp; rate &lt; 80) risk = 'medium';
+    if (stats.fake > 0 || (failed >= 2 &amp;&amp; rate &lt; 50)) risk = 'high';
+    else if (failed > 0 &amp;&amp; rate &lt; 80) risk = 'medium';
     else risk = 'low';
-  } else if (stats.total &gt; 0) {
+  } else if (stats.total > 0) {
     risk = 'unknown';
   }
   return { stats: stats, successRate: rate, risk: risk, recent: recent };
@@ -8334,7 +8334,7 @@ function adminCourierPerformance_(e) {
   if (!v.ok) return v;
   var sheet = admGetSheet_();
   var lastRow = lastOnlineOrderDataRow_(sheet);
-  var rows = lastRow &gt;= 2 ? readOnlineOrderRows_(sheet, 2, lastRow - 1, ADM_LAST_COL) : [];
+  var rows = lastRow >= 2 ? readOnlineOrderRows_(sheet, 2, lastRow - 1, ADM_LAST_COL) : [];
   var map = {};
   rows.forEach(function (r) {
     var courier = String(r[45] || '').trim();
@@ -8374,12 +8374,12 @@ function adminOrderList_(e) {
   var rowCount = Math.max(0, lastRow - 1);
   // Keep older admin clients working: only clients that send paging params are capped.
   if (!limitValue &amp;&amp; !cursorValue) limit = Math.max(1, rowCount);
-  else if (limit &gt; 300) limit = 300;
+  else if (limit > 300) limit = 300;
   var cursor = parseInt(cursorValue, 10);
   if (!isFinite(cursor) || cursor &lt; 0) cursor = 0;
-  var endRow = cursor &gt; 0 ? Math.min(cursor, lastRow) : lastRow;
-  var startRow = endRow &gt;= 2 ? Math.max(2, endRow - limit + 1) : 2;
-  var pageRows = endRow &gt;= startRow
+  var endRow = cursor > 0 ? Math.min(cursor, lastRow) : lastRow;
+  var startRow = endRow >= 2 ? Math.max(2, endRow - limit + 1) : 2;
+  var pageRows = endRow >= startRow
     ? readOnlineOrderRows_(sheet, startRow, endRow - startRow + 1, ADM_LAST_COL)
     : [];
   // Counts need only the first ten logical fields; avoid reading notes, addresses, cart JSON and images.
@@ -8397,7 +8397,7 @@ function adminOrderList_(e) {
     if (counts.hasOwnProperty(status)) counts[status]++;
     if (dayKeyFromCell_(r[0]) === todayKey) counts.today++;
   }
-  for (var j = pageRows.length - 1; j &gt;= 0; j--) {
+  for (var j = pageRows.length - 1; j >= 0; j--) {
     var rowNumber = startRow + j;
     var pageRow = pageRows[j];
     if (!pageRow[1] &amp;&amp; !pageRow[2]) continue;
@@ -8411,7 +8411,7 @@ function adminOrderList_(e) {
     counts: counts,
     statuses: ADM_STATUSES,
     sheetUrl: v.sheetUrl,
-    nextCursor: startRow &gt; 2 ? startRow - 1 : 0,
+    nextCursor: startRow > 2 ? startRow - 1 : 0,
     limit: limit
   };
 }
@@ -8451,9 +8451,9 @@ function admOrderListSummary_(order) {
 /** Finds an Order ID in already-read rows (last match wins, like admFindRow_) plus the IDs of the rows around it. */
 function admLocateOrder_(rows, orderId) {
   var id = String(orderId || '').trim();
-  for (var i = rows.length - 1; i &gt;= 0; i--) {
+  for (var i = rows.length - 1; i >= 0; i--) {
     if (String(rows[i][8] || '').trim() === id) {
-      return { index: i, prevId: i &gt; 0 ? String(rows[i - 1][8] || '') : '', nextId: i &lt; rows.length - 1 ? String(rows[i + 1][8] || '') : '' };
+      return { index: i, prevId: i > 0 ? String(rows[i - 1][8] || '') : '', nextId: i &lt; rows.length - 1 ? String(rows[i + 1][8] || '') : '' };
     }
   }
   return { index: -1, prevId: '', nextId: '' };
@@ -8514,7 +8514,7 @@ function adminOrderUpdate_(e) {
 
     if (admHasParam_(e, 'Name')) {
       var name = String(param_(e, 'Name') || '').replace(/\s+/g, ' ').trim();
-      if (name.length &lt; 2 || name.length &gt; 80) return { ok: false, error: 'INVALID_NAME', message: 'সঠিক নাম দিন।' };
+      if (name.length &lt; 2 || name.length > 80) return { ok: false, error: 'INVALID_NAME', message: 'সঠিক নাম দিন।' };
       vals[1] = admCellText_(name, 80);
     }
     if (admHasParam_(e, 'Phone')) {
@@ -8524,7 +8524,7 @@ function adminOrderUpdate_(e) {
     }
     if (admHasParam_(e, 'Address')) {
       var address = String(param_(e, 'Address') || '').trim();
-      if (address.length &lt; 5 || address.length &gt; 400) return { ok: false, error: 'INVALID_ADDRESS', message: 'সঠিক ঠিকানা দিন।' };
+      if (address.length &lt; 5 || address.length > 400) return { ok: false, error: 'INVALID_ADDRESS', message: 'সঠিক ঠিকানা দিন।' };
       vals[5] = admCellText_(address, 400);
     }
 
@@ -8538,7 +8538,7 @@ function adminOrderUpdate_(e) {
     var discount = admMoneyParam_(e, 'Discount', oldDiscount);
     var advance = admMoneyParam_(e, 'Advance', admNum_(vals[ADM_COL_ADVANCE - 1]));
     var total = Math.max(0, subtotal + charge - discount - coupon);
-    if (advance &gt; total) return { ok: false, error: 'INVALID_ADVANCE', message: 'অ্যাডভান্স মোট টাকার বেশি হতে পারে না।' };
+    if (advance > total) return { ok: false, error: 'INVALID_ADVANCE', message: 'অ্যাডভান্স মোট টাকার বেশি হতে পারে না।' };
     vals[4] = charge;
     vals[7] = String(total);
     vals[ADM_COL_DISCOUNT - 1] = discount;
@@ -8702,7 +8702,7 @@ function adminStaffList_(e) {
   var sheet = getAdminsSheet_();
   var lastRow = sheet.getLastRow();
   var names = [];
-  if (lastRow &gt;= 2) {
+  if (lastRow >= 2) {
     var data = sheet.getRange(2, 1, lastRow - 1, 6).getValues();
     for (var i = 0; i &lt; data.length; i++) {
       var status = String(data[i][5] || 'active').toLowerCase();
@@ -8840,14 +8840,14 @@ function admParseCreateItems_(raw) {
   var list;
   try { list = JSON.parse(String(raw || '[]')); } catch (err) { list = null; }
   if (!Array.isArray(list) || !list.length) throw new Error('NO_ITEMS');
-  if (list.length &gt; 30) throw new Error('TOO_MANY_ITEMS');
+  if (list.length > 30) throw new Error('TOO_MANY_ITEMS');
   return list.map(function (it) {
     var name = String(it &amp;&amp; it.name || '').replace(/\s+/g, ' ').trim().slice(0, 150);
     var qty = Number(it &amp;&amp; it.qty);
     var price = Number(it &amp;&amp; it.price);
     if (!name) throw new Error('ITEM_NAME');
-    if (!isFinite(qty) || qty &lt; 1 || qty &gt; 100 || Math.floor(qty) !== qty) throw new Error('ITEM_QTY');
-    if (!isFinite(price) || price &lt; 0 || price &gt; 1000000) throw new Error('ITEM_PRICE');
+    if (!isFinite(qty) || qty &lt; 1 || qty > 100 || Math.floor(qty) !== qty) throw new Error('ITEM_QTY');
+    if (!isFinite(price) || price &lt; 0 || price > 1000000) throw new Error('ITEM_PRICE');
     return {
       id: String(it &amp;&amp; it.id || '').trim().slice(0, 80) || ('CUSTOM-' + name.toUpperCase().replace(/[^A-Z0-9]+/g, '-').slice(0, 30)),
       name: name,
@@ -8882,9 +8882,9 @@ function admCreateTimestamp_(dateStr, timeStr, nowMs) {
   if (!t) t = [null, '00', '00'];
   var y = +d[1], mo = +d[2], da = +d[3], h = +t[1], mi = +t[2];
   var check = new Date(Date.UTC(y, mo - 1, da));
-  if (check.getUTCFullYear() !== y || check.getUTCMonth() !== mo - 1 || check.getUTCDate() !== da || h &gt; 23 || mi &gt; 59) throw new Error('INVALID_DATE');
+  if (check.getUTCFullYear() !== y || check.getUTCMonth() !== mo - 1 || check.getUTCDate() !== da || h > 23 || mi > 59) throw new Error('INVALID_DATE');
   var whenMs = Date.UTC(y, mo - 1, da, h, mi) - 6 * 3600000;
-  if (whenMs &gt; now + 24 * 3600000) throw new Error('FUTURE_DATE');
+  if (whenMs > now + 24 * 3600000) throw new Error('FUTURE_DATE');
   if (whenMs &lt; now - 400 * 24 * 3600000) throw new Error('TOO_OLD_DATE');
   function p2(n) { return ('0' + n).slice(-2); }
   return { stamp: p2(da) + '-' + p2(mo) + '-' + y + ' ' + p2(h) + ':' + p2(mi) + ':00', ymd: '' + y + p2(mo) + p2(da) };
@@ -8905,11 +8905,11 @@ function adminOrderCreateFull_(e) {
   var by = String(v.name || v.email || v.phone || 'admin');
 
   var name = String(param_(e, 'Name') || '').replace(/\s+/g, ' ').trim();
-  if (name.length &lt; 2 || name.length &gt; 80) return { ok: false, error: 'INVALID_NAME', message: 'ক্রেতার সঠিক নাম দিন।' };
+  if (name.length &lt; 2 || name.length > 80) return { ok: false, error: 'INVALID_NAME', message: 'ক্রেতার সঠিক নাম দিন।' };
   var phone = normalizePhone_(param_(e, 'Phone'));
   if (!/^01\d{9}$/.test(phone)) return { ok: false, error: 'INVALID_PHONE', message: 'সঠিক ১১ ডিজিট মোবাইল নম্বর দিন।' };
   var address = String(param_(e, 'Address') || '').replace(/\s+/g, ' ').trim();
-  if (address.length &lt; 8 || address.length &gt; 400) return { ok: false, error: 'INVALID_ADDRESS', message: 'সম্পূর্ণ ঠিকানা দিন (কমপক্ষে ৮ অক্ষর)।' };
+  if (address.length &lt; 8 || address.length > 400) return { ok: false, error: 'INVALID_ADDRESS', message: 'সম্পূর্ণ ঠিকানা দিন (কমপক্ষে ৮ অক্ষর)।' };
   var district = admCellText_(String(param_(e, 'District') || '').trim(), 60);
   var status = String(param_(e, 'Status') || 'Pending').trim();
   if (ADM_CREATE_STATUSES.indexOf(status) === -1) return { ok: false, error: 'INVALID_STATUS', message: 'অবৈধ স্ট্যাটাস।' };
@@ -8942,7 +8942,7 @@ function adminOrderCreateFull_(e) {
   }
   var total = Math.max(0, Math.round((subtotal + charge - discount - coupon.discount) * 100) / 100);
   if (total &lt; 1) return { ok: false, error: 'INVALID_TOTAL', message: 'মোট টাকা শূন্যের বেশি হতে হবে।' };
-  if (advance &gt; total) return { ok: false, error: 'INVALID_ADVANCE', message: 'অ্যাডভান্স মোট টাকার বেশি হতে পারে না।' };
+  if (advance > total) return { ok: false, error: 'INVALID_ADVANCE', message: 'অ্যাডভান্স মোট টাকার বেশি হতে পারে না।' };
 
   var payment = admCellText_(String(param_(e, 'Payment') || 'Cash On Delivery').trim() || 'Cash On Delivery', 60);
   var txn = admCellText_(param_(e, 'Txn'), 80);
@@ -8982,7 +8982,7 @@ function adminOrderCreateFull_(e) {
     sheet.getRange(row, 3).setNumberFormat('@');
     sheet.getRange(row, onlineOrderColumn_(sheet, 30), 1, 3).setValues([[email, '', '']]);
     sheet.getRange(row, onlineOrderColumn_(sheet, 33), 1, 6).setValues([[
-      JSON.stringify(items), couponCode, coupon.discount, reserved &gt; 0 ? 'RESERVED' : 'NEW', source, 'admin_' + orderId
+      JSON.stringify(items), couponCode, coupon.discount, reserved > 0 ? 'RESERVED' : 'NEW', source, 'admin_' + orderId
     ]]);
     sheet.getRange(row, onlineOrderColumn_(sheet, ADM_COL_ADMIN_NOTE), 1, ADM_LAST_COL - ADM_COL_ADMIN_NOTE + 1).setValues([[
       adminNote, courierNote, advance, discount, '', source, 'Steadfast'
@@ -8998,7 +8998,7 @@ function adminOrderCreateFull_(e) {
     }
   } catch (err) {
     if (row) { try { sheet.getRange(row, 1, 1, sheet.getLastColumn()).clearContent(); } catch (clearErr) {} }
-    if (reserved &gt; 0) { try { releaseStockForOrderItems_(items, orderId, 'admin-create-rollback'); } catch (relErr) {} }
+    if (reserved > 0) { try { releaseStockForOrderItems_(items, orderId, 'admin-create-rollback'); } catch (relErr) {} }
     throw err;
   } finally {
     lock.releaseLock();
@@ -9022,7 +9022,7 @@ function adminCustomerLookup_(e) {
   var sheet = admGetSheet_();
   var rows = admReadAll_(sheet);
   var last = null;
-  for (var i = rows.length - 1; i &gt;= 0; i--) {
+  for (var i = rows.length - 1; i >= 0; i--) {
     if (normalizePhone_(rows[i][2]) === phone &amp;&amp; String(rows[i][1] || '').trim()) { last = rows[i]; break; }
   }
   var hist = admHistoryForPhone_(rows, phone, '');
