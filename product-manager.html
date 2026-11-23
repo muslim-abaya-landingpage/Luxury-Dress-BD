@@ -4485,7 +4485,7 @@
 
   function reloadPublishingData() {
     mainEl.inert=true;catListEl.inert=true;
-    return window.MaCatalogPublisher.init(function(text,error){setSaveStatus(text);document.getElementById("pmSaveStatus").classList.toggle("pm-quick-error",!!error);},function(){window.MA_RAW_CATEGORY_PRODUCTS=JSON.parse(JSON.stringify(window.CATEGORY_PRODUCTS||{}));loadState();overviewSelected={};renderCatList();renderMain();savedSnapshot=catalogSnapshot();rememberPhotoViews();}).then(function(){mainEl.inert=false;catListEl.inert=false;}).catch(function(err){mainEl.inert=false;catListEl.inert=false;setSaveStatus("Could not reach the publisher: "+err.message);});
+    return window.MaCatalogPublisher.init(function(text,error){setSaveStatus(text);document.getElementById("pmSaveStatus").classList.toggle("pm-quick-error",!!error);},function(){window.MA_RAW_CATEGORY_PRODUCTS=JSON.parse(JSON.stringify(window.CATEGORY_PRODUCTS||{}));loadState();overviewSelected={};renderCatList();if(new URLSearchParams(location.search).get("action")==="new")startNewProduct();else renderMain();savedSnapshot=catalogSnapshot();rememberPhotoViews();}).then(function(){mainEl.inert=false;catListEl.inert=false;}).catch(function(err){mainEl.inert=false;catListEl.inert=false;setSaveStatus("Could not reach the publisher: "+err.message);});
   }
   bindById("pmReload", "click",function(){if(savedSnapshot!==catalogSnapshot()&&!confirm("Discard unsaved changes and reload current data?"))return;reloadPublishingData();});
 
@@ -4501,8 +4501,7 @@
   renderCatList();
   var openNewProductOnLoad = false;
   try { openNewProductOnLoad = new URLSearchParams(location.search).get("action") === "new"; } catch (e) {}
-  if (openNewProductOnLoad) startNewProduct();
-  else renderMain();
+  renderMain();
   savedSnapshot = catalogSnapshot();
   rememberPhotoViews();
   quickUploadOptions = {sections:function(){return sections;},products:function(){return products;},status:setSaveStatus,isSaved:function(){return savedSnapshot===catalogSnapshot();},stage:function(category,product){
