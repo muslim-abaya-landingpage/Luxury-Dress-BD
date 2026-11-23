@@ -110,13 +110,22 @@ test('category card: a product with the new fields opens its page instead of add
   expect(await cartLines(page)).toHaveLength(0);
 });
 
-test('product.html page: fields, checked add to cart, WhatsApp text follows the choice', async ({ page }) => {
+test('product.html page: fields, internal product message carries the selected size, checked add to cart', async ({ page }) => {
   await serve(page, await sizeConfig((c) => { c.categories.abaya.enabled = true; }));
   await page.goto('/product.html?id=ABY-MAROON-1');
   const fields = page.locator('#pdSizeGroup .ma-sz-field');
   await expect(fields).toHaveCount(2);
   await fields.nth(1).locator('[data-sz-value]', { hasText: '50' }).click();
-  await expect.poll(async () => decodeURIComponent(await page.locator('#pdSendMsg').getAttribute('href'))).toContain('সাইজ: Body 42 · Length 50');
+
+  // The product CTA now opens the on-site support chat, not a WhatsApp href.
+  await expect(page.locator('#pdSendMsg')).not.toHaveAttribute('href', /.+/);
+  await page.evaluate(() => {
+    window.maOpenProductChat = (product) => { window.__capturedProductMessage = product; return true; };
+  });
+  await page.locator('#pdSendMsg').click();
+  await expect.poll(() => page.evaluate(() => window.__capturedProductMessage && window.__capturedProductMessage.size))
+    .toBe('Body 42 · Length 50');
+
   await page.locator('#pdAddCart').click();
   const lines = await cartLines(page);
   expect(lines).toHaveLength(1);
