@@ -85,3 +85,97 @@ body.adm-body,body.pn-body,.pl-admin{
   .adm-sidebar{border-radius:0 16px 16px 0!important}
 }
 @media(prefers-reduced-motion:reduce){.adm-sidebar-item,.pn-nav a{transition:none!important}}
+
+
+/* Phase 3 — layout polish: remove competing admin chrome and enforce one grid. */
+html.wp-admin-shell #wpadminbar,
+html.wp-admin-shell #wpfooter,
+html.wp-admin-shell #adminmenumain,
+html.wp-admin-shell #screen-meta,
+html.wp-admin-shell #screen-meta-links{display:none!important}
+html.wp-admin-shell body.admin-bar{margin-top:0!important;padding-top:0!important}
+html.wp-admin-shell #wpcontent,
+html.wp-admin-shell #wpbody,
+html.wp-admin-shell #wpbody-content{margin:0!important;padding:0!important;min-height:0!important}
+html.wp-admin-shell #wpcontent{margin-left:0!important}
+html.wp-admin-shell .wrap{margin:0!important;padding:0!important}
+html.wp-admin-shell body{padding-top:0!important}
+
+.adm-shell,.pn-app.adm-shell{
+  display:grid!important;
+  grid-template-columns:256px minmax(0,1fr)!important;
+  align-items:start!important;
+  gap:24px!important;
+  width:min(100% - 40px,1680px)!important;
+  max-width:1680px!important;
+  margin:20px auto!important;
+  padding:0!important;
+  box-sizing:border-box!important;
+}
+.adm-sidebar,.pn-side{
+  position:sticky!important;top:20px!important;
+  width:256px!important;min-width:0!important;max-width:256px!important;
+  height:calc(100vh - 40px)!important;max-height:calc(100vh - 40px)!important;
+  overflow-x:hidden!important;overflow-y:auto!important;
+  padding:18px 14px!important;box-sizing:border-box!important;
+}
+.adm-content,.pn-main{
+  width:100%!important;max-width:none!important;min-width:0!important;
+  margin:0!important;padding:0!important;
+}
+.adm-topbar,.pn-head{
+  min-height:78px!important;padding:18px 24px!important;
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  gap:18px!important;margin:0 0 22px!important;
+}
+.adm-main,.pn-main>main{
+  width:100%!important;max-width:1440px!important;
+  margin:0 auto!important;padding:0 0 40px!important;box-sizing:border-box!important;
+}
+.adm-main>*+*,.pn-main>*+*{margin-top:20px}
+.adm-main :where(h1,h2,h3,p),.pn-main :where(h1,h2,h3,p){overflow-wrap:anywhere}
+.adm-main :where(.adm-panel,.adm-card,.dz-card,.oi-panel,.pm-card,.pl-card,.pl-panel),
+.pn-main :where(.adm-panel,.adm-card,.dz-card,.oi-panel,.pm-card,.pl-card,.pl-panel){
+  min-width:0!important;margin-block:0 18px!important;padding:22px!important;
+}
+.adm-sidebar-nav,.adm-nav-children{display:flex!important;flex-direction:column!important;gap:5px!important}
+.adm-sidebar-item{min-height:42px!important;padding:10px 12px!important;display:flex!important;align-items:center!important;gap:11px!important}
+.adm-nav-children{padding:5px 0 8px 14px!important;margin:2px 0 6px 12px!important;border-left:1px solid rgba(255,255,255,.18)!important}
+.adm-nav-child{min-height:36px!important;font-size:13px!important}
+.adm-sidebar-foot{margin-top:auto!important;padding-top:14px!important}
+.adm-main :where(.adm-table-wrap,.pn-table-wrap,.adm-table-scroll){max-width:100%!important;overflow-x:auto!important}
+.adm-main table,.pn-main table{width:100%;border-collapse:separate!important;border-spacing:0!important}
+.adm-main :where(th,td),.pn-main :where(th,td){padding:13px 14px!important;vertical-align:middle!important}
+.adm-main :where(.grid,.cards,.stats-grid,.kpi-grid),.pn-main :where(.grid,.cards,.stats-grid,.kpi-grid){
+  min-width:0!important;gap:16px!important;
+}
+.adm-main :where(input,select,textarea,button),.pn-main :where(input,select,textarea,button){max-width:100%}
+.adm-main :where(.adm-btn,.pn-btn),.pn-main :where(.adm-btn,.pn-btn){min-height:40px!important}
+.adm-main :where(.adm-btn-primary,.pn-btn-primary){box-shadow:0 5px 14px rgba(18,61,50,.14)!important}
+.adm-main :where(.adm-panel h2,.adm-card h2,.dz-card h2,.oi-panel h2){margin-top:0!important}
+
+@media(max-width:1100px){
+  .adm-shell,.pn-app.adm-shell{grid-template-columns:232px minmax(0,1fr)!important;width:calc(100% - 28px)!important;gap:16px!important}
+  .adm-sidebar,.pn-side{width:232px!important;max-width:232px!important}
+}
+@media(max-width:760px){
+  .adm-shell,.pn-app.adm-shell{
+    display:block!important;width:100%!important;margin:0!important;padding:10px!important;
+  }
+  .adm-sidebar,.pn-side{
+    position:fixed!important;top:0!important;left:0!important;bottom:0!important;
+    width:min(300px,86vw)!important;max-width:min(300px,86vw)!important;
+    height:100dvh!important;max-height:100dvh!important;z-index:1002!important;
+    border-radius:0 18px 18px 0!important;
+  }
+  .adm-content,.pn-main{width:100%!important;min-width:0!important}
+  .adm-topbar,.pn-head{min-height:unset!important;padding:14px!important;margin-bottom:16px!important;gap:10px!important}
+  .adm-main,.pn-main>main{padding:0 2px 28px!important}
+  .adm-main :where(.adm-panel,.adm-card,.dz-card,.oi-panel,.pm-card,.pl-card,.pl-panel),
+  .pn-main :where(.adm-panel,.adm-card,.dz-card,.oi-panel,.pm-card,.pl-card,.pl-panel){padding:16px!important;margin-bottom:14px!important}
+  .adm-main :where(.adm-table-wrap,.pn-table-wrap,.adm-table-scroll){overflow-x:auto!important}
+  .adm-main table,.pn-main table{min-width:640px}
+}
+@media(min-width:761px) and (max-height:700px){
+  .adm-sidebar,.pn-side{height:calc(100vh - 24px)!important;max-height:calc(100vh - 24px)!important;top:12px!important}
+}
