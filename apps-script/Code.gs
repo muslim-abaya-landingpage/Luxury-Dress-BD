@@ -3383,12 +3383,20 @@ function getFacebookCapiConfig_() {
     props.getProperty('META_ACCESS_TOKEN') ||
     props.getProperty('FACEBOOK_ACCESS_TOKEN') ||
     '';
-  var pixelId =
+
+  // Canonical Muslim Abaya Meta Pixel. Keep the existing access token, but
+  // migrate any legacy Script Properties pixel ID to the owner-confirmed ID.
+  var pixelId = '1141629002088045';
+  var savedPixelId =
     props.getProperty('FB_PIXEL_ID') ||
     props.getProperty('META_PIXEL_ID') ||
     props.getProperty('PIXEL_ID') ||
     '';
-  return { accessToken: String(accessToken || '').trim(), pixelId: String(pixelId || '').trim() };
+  if (String(savedPixelId || '').trim() !== pixelId) {
+    props.setProperty('FB_PIXEL_ID', pixelId);
+  }
+
+  return { accessToken: String(accessToken || '').trim(), pixelId: pixelId };
 }
 
 /**
