@@ -75,8 +75,8 @@ test("Product Manager persists parentKey only for explicit subcategories", () =>
 test("The action=new route opens the product editor immediately after catalog initialization", () => {
   const routeHandler = html.indexOf('openNewProductOnLoad = new URLSearchParams(location.search).get("action") === "new"');
   const catalogInit = html.indexOf("  loadState();", html.indexOf("function reloadPublishingData"));
-  const openEditor = html.indexOf("if (openNewProductOnLoad) startNewProduct();");
+  const reloadCallback = html.indexOf('if(new URLSearchParams(location.search).get("action")==="new")startNewProduct();');
   assert.ok(routeHandler >= 0, "missing action=new route detection");
-  assert.ok(catalogInit >= 0 && openEditor > catalogInit, "new-product editor must open after catalog initialization");
+  assert.ok(catalogInit >= 0 && reloadCallback > catalogInit, "new-product editor must open after publisher reload completes");
   assert.ok(!html.includes("setTimeout(openWhenReady"), "action=new must not depend on a delayed retry");
 });
