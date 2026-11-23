@@ -5826,7 +5826,14 @@ function sendMessengerPurchase_(psid, value, orderId, pageId) {
       custom_data: { currency: 'BDT', value: parseOrderValue_(value) }
     }]
   };
-  var datasetId = PropertiesService.getScriptProperties().getProperty('MSGR_DATASET_ID_' + page) || MSGR_DATASET_ID;
+  var props = PropertiesService.getScriptProperties();
+  var datasetProperty = 'MSGR_DATASET_ID_' + page;
+  var datasetId = props.getProperty(datasetProperty) || MSGR_DATASET_ID;
+  // The Muslim Abaya Page must use its owner-confirmed dataset. Preserve custom datasets for other Pages.
+  if (page === MSGR_PAGE_ID &amp;&amp; String(datasetId || '').trim() !== MSGR_DATASET_ID) {
+    datasetId = MSGR_DATASET_ID;
+    props.setProperty(datasetProperty, datasetId);
+  }
   var res = UrlFetchApp.fetch('https://graph.facebook.com/v25.0/' + datasetId +
     '/events?access_token=' + encodeURIComponent(token), {
       method: 'post', contentType: 'application/json',
