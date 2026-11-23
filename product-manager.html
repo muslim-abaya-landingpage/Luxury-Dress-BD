@@ -1013,17 +1013,8 @@
     window.scrollTo(0, 0);
     var t = document.getElementById("pmWooTitle"); if (t) t.focus();
   }
-  // Menu link "Products › Add new product" opens product-manager.html?action=new once the catalog has loaded.
-  (function () {
-    var want = false;
-    try { want = new URLSearchParams(location.search).get("action") === "new"; } catch (e) {}
-    if (!want) return;
-    var tries = 0;
-    (function openWhenReady() {
-      if (sections.length) { startNewProduct(); return; }
-      if (++tries < 60) setTimeout(openWhenReady, 500);
-    })();
-  })();
+  // The action=new route is handled after loadState() initializes the catalog.
+  // This avoids rendering the product list first and then switching screens on a timer.
   // WooCommerce "Copy to a new draft": same details and photos, new link, Draft, no SKU.
   function duplicateProduct(p, catKey) {
     if (!p) return;
@@ -4508,7 +4499,10 @@
 
   loadState();
   renderCatList();
-  renderMain();
+  var openNewProductOnLoad = false;
+  try { openNewProductOnLoad = new URLSearchParams(location.search).get("action") === "new"; } catch (e) {}
+  if (openNewProductOnLoad) startNewProduct();
+  else renderMain();
   savedSnapshot = catalogSnapshot();
   rememberPhotoViews();
   quickUploadOptions = {sections:function(){return sections;},products:function(){return products;},status:setSaveStatus,isSaved:function(){return savedSnapshot===catalogSnapshot();},stage:function(category,product){
