@@ -179,3 +179,18 @@ html.wp-admin-shell body{padding-top:0!important}
 @media(min-width:761px) and (max-height:700px){
   .adm-sidebar,.pn-side{height:calc(100vh - 24px)!important;max-height:calc(100vh - 24px)!important;top:12px!important}
 }
+
+
+/* Phase 4 — hide the actual WordPress toolbar markup used by this admin shell. */
+html.wp-admin-shell #wpAdminBar,
+html.wp-admin-shell .wp-adminbar,
+html.wp-admin-shell [id="wpAdminBar"]{
+  display:none!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+html.wp-admin-shell body.admin-bar,
+html.wp-admin-shell body:has(#wpAdminBar){
+  margin-top:0!important;
+  padding-top:0!important;
+}
