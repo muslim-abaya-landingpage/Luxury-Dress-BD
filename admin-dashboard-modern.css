@@ -263,7 +263,7 @@ body.adm-body{background:var(--adm-bg);color:var(--adm-text);font-family:Inter,"
 @media(prefers-reduced-motion:reduce){.adm-body .adm-jump a{transition:none}}
 
 /* Responsive containment fix: keep wide navigation and data tables inside the content column. */
-.adm-body .adm-content{min-width:0;width:0;flex:1 1 0}
+.adm-body .adm-content{display:block;min-width:0;width:100%;max-width:100%;flex:none;box-sizing:border-box}
 .adm-body .adm-main{width:100%;max-width:1240px;min-width:0;box-sizing:border-box;overflow-x:clip}
 .adm-body .adm-main>.adm-jump,
 .adm-body .adm-main>.adm-sec{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
