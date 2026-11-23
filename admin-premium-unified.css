@@ -194,3 +194,81 @@ html.wp-admin-shell body:has(#wpAdminBar){
   margin-top:0!important;
   padding-top:0!important;
 }
+
+
+/* Sidebar repair — keep drawer breakpoints aligned with admin-dashboard-design.js (980px). */
+@media (min-width:981px){
+  .adm-sidebar-backdrop{display:none!important}
+  body:has(.adm-sidebar.is-collapsed) .adm-shell,
+  body:has(.pn-side.is-collapsed) .pn-app.adm-shell{
+    grid-template-columns:84px minmax(0,1fr)!important;
+  }
+  .adm-sidebar.is-collapsed,.pn-side.is-collapsed{
+    width:84px!important;min-width:84px!important;max-width:84px!important;
+    padding:16px 10px!important;overflow-x:hidden!important;
+  }
+  .adm-sidebar.is-collapsed .adm-sidebar-brand,
+  .pn-side.is-collapsed .adm-sidebar-brand{justify-content:center!important;padding-inline:0!important}
+  .adm-sidebar.is-collapsed .adm-sidebar-brand-text,
+  .pn-side.is-collapsed .adm-sidebar-brand-text,
+  .adm-sidebar.is-collapsed .adm-sidebar-profile,
+  .pn-side.is-collapsed .adm-sidebar-profile,
+  .adm-sidebar.is-collapsed .adm-nav-children,
+  .pn-side.is-collapsed .adm-nav-children,
+  .adm-sidebar.is-collapsed .adm-sidebar-foot .adm-profile-copy,
+  .pn-side.is-collapsed .adm-sidebar-foot .adm-profile-copy{display:none!important}
+  .adm-sidebar.is-collapsed .adm-sidebar-item,
+  .pn-side.is-collapsed .adm-sidebar-item{justify-content:center!important;padding:11px 8px!important;gap:0!important}
+  .adm-sidebar.is-collapsed .adm-sidebar-item span,
+  .pn-side.is-collapsed .adm-sidebar-item span{display:none!important}
+  .adm-sidebar.is-collapsed .adm-collapse-btn,
+  .pn-side.is-collapsed .adm-collapse-btn{transform:rotate(180deg)}
+  .adm-sidebar.is-collapsed .adm-sidebar-item:hover,
+  .pn-side.is-collapsed .adm-sidebar-item:hover{transform:none!important}
+}
+@media (max-width:980px){
+  .adm-shell,.pn-app.adm-shell{
+    display:block!important;width:100%!important;max-width:none!important;
+    margin:0!important;padding:12px!important;
+  }
+  .adm-content,.pn-main{width:100%!important;min-width:0!important}
+  .adm-sidebar,.pn-side{
+    position:fixed!important;inset:0 auto 0 0!important;
+    width:min(310px,88vw)!important;min-width:0!important;max-width:min(310px,88vw)!important;
+    height:100vh!important;height:100dvh!important;max-height:none!important;
+    margin:0!important;border-radius:0 18px 18px 0!important;
+    z-index:1002!important;overflow-x:hidden!important;overflow-y:auto!important;
+    transform:translateX(-105%)!important;visibility:hidden!important;
+    transition:transform .24s ease,visibility .24s ease!important;
+    box-shadow:0 18px 48px rgba(0,0,0,.24)!important;
+  }
+  .adm-sidebar.is-open,.pn-side.is-open{
+    transform:translateX(0)!important;visibility:visible!important;
+  }
+  .adm-sidebar-backdrop{
+    display:block!important;position:fixed!important;inset:0!important;
+    z-index:1001!important;background:rgba(9,20,16,.48)!important;
+    opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+    transition:opacity .24s ease,visibility .24s ease!important;
+  }
+  .adm-sidebar-backdrop.is-open{
+    opacity:1!important;visibility:visible!important;pointer-events:auto!important;
+  }
+  .adm-sidebar.is-collapsed,.pn-side.is-collapsed{
+    width:min(310px,88vw)!important;max-width:min(310px,88vw)!important;
+  }
+  .adm-sidebar.is-collapsed .adm-sidebar-brand-text,
+  .pn-side.is-collapsed .adm-sidebar-brand-text,
+  .adm-sidebar.is-collapsed .adm-sidebar-profile,
+  .pn-side.is-collapsed .adm-sidebar-profile,
+  .adm-sidebar.is-collapsed .adm-nav-children,
+  .pn-side.is-collapsed .adm-nav-children,
+  .adm-sidebar.is-collapsed .adm-sidebar-item span,
+  .pn-side.is-collapsed .adm-sidebar-item span{display:revert!important}
+  .adm-sidebar.is-collapsed .adm-sidebar-item,
+  .pn-side.is-collapsed .adm-sidebar-item{justify-content:flex-start!important}
+  .adm-topbar,.pn-head{margin-bottom:16px!important}
+}
+@media (prefers-reduced-motion:reduce){
+  .adm-sidebar,.pn-side,.adm-sidebar-backdrop{transition:none!important}
+}
