@@ -145,7 +145,7 @@ function doPost(e) {
     }
 
     // Every order-panel action verifies the admin/staff token inside its handler.
-    var orderPanelTypes = ['AdminOrderList', 'AdminOrderGet', 'AdminOrderUpdate', 'AdminFraudCheck', 'AdminBlockCustomer', 'AdminSendCourier', 'AdminOrderStaff', 'AdminCourierTracking', 'AdminManualOrderCreate', 'AdminOrderCreate', 'AdminCustomerLookup', 'AdminCouponCheck'];
+    var orderPanelTypes = ['AdminOrderList', 'AdminOrderGet', 'AdminOrderUpdate', 'AdminFraudCheck', 'AdminCourierPerformance', 'AdminBlockCustomer', 'AdminSendCourier', 'AdminOrderStaff', 'AdminCourierTracking', 'AdminManualOrderCreate', 'AdminOrderCreate', 'AdminCustomerLookup', 'AdminCouponCheck'];
     if (orderPanelTypes.indexOf(type) !== -1) {
       var panelResult = handleAdminOrderRequest_(type, e);
       return jsonOut_(panelResult || { ok: false, error: 'UNKNOWN_TYPE' });
@@ -1734,11 +1734,13 @@ function rateLimitOrder_(phone) {
   cache.put(k, String(n + 1), 1800);
 }
 
-function checkDuplicateOrder_(phone, total, design) {
+function checkDuplicateOrder_(phone, total, design, enabled, windowMinutes) {
+  if (enabled === false) return;
   var cache = CacheService.getScriptCache();
   var sig = Utilities.base64EncodeWebSafe(String(phone) + '|' + String(total) + '|' + String(design).slice(0, 48));
   if (cache.get('dup_' + sig)) throw new Error('DUPLICATE_ORDER');
-  cache.put('dup_' + sig, '1', 600);
+  var minutes = Math.max(1, Math.min(1440, parseInt(windowMinutes, 10) || 10));
+  cache.put('dup_' + sig, '1', minutes * 60);
 }
 
 /**
@@ -1907,7 +1909,7 @@ function handleOnlineOrderPost_(e) {
   assertLiveStockAvailable_(validated.cartItems);
   if (isPhoneBlocked_(validated.phone)) throw new Error('ORDER_BLOCKED');
   rateLimitOrder_(validated.phone);
-  checkDuplicateOrder_(validated.phone, validated.total, validated.design);
+  checkDuplicateOrder_(validated.phone, validated.total, validated.design, String(param_(e, 'DuplicateBlock') || 'true') !== 'false', param_(e, 'DuplicateWindowMinutes'));
 
   var SHEET_NAME = 'Online Order';
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -2055,6 +2057,8 @@ function handleOnlineOrderPost_(e) {
   setOrderProductImages_(sheet, newRow, imageUrls);
 
   maybeAutoCourierAfterWebOrder_(sheet, newRow, {
+    courierProtection: String(param_(e, 'CourierProtection') || 'true') !== 'false',
+    courierSuccessRatio: Math.max(0, Math.min(100, parseInt(param_(e, 'CourierSuccessRatio'), 10) || 50)),
     orderId: orderId,
     name: validated.name,
     phone: validated.phone,
@@ -2868,10 +2872,12 @@ function maybeAutoCourierAfterWebOrder_(sheet, row, ctx) {
   // sent to Steadfast automatically; the order stays Pending (on hold) until a person checks it.
   // Script property RISK_HOLD_LEVEL: 'medium' (default: hold medium + high risk), 'high', or 'off'.
   var holdLevel = String(PropertiesService.getScriptProperties().getProperty('RISK_HOLD_LEVEL') || 'medium').toLowerCase().trim();
-  if (holdLevel !== 'off' && ctx && ctx.phone && typeof admHistoryForPhone_ === 'function') {
+  if (ctx && ctx.courierProtection !== false && holdLevel !== 'off' && ctx.phone && typeof admHistoryForPhone_ === 'function') {
     try {
       var h = admHistoryForPhone_(admReadHistory_(sheet), normalizePhone_(ctx.phone), ctx.orderId);
-      if (h.risk === 'high' || (h.risk === 'medium' && holdLevel !== 'high')) {
+      var failed = h && h.stats ? (Number(h.stats.fake) || 0) + (Number(h.stats.cancelled) || 0) + (Number(h.stats.returned) || 0) : 0;
+      var belowConfiguredRatio = h && h.successRate !== null && h.successRate !== undefined && failed > 0 && Number(h.successRate) < (Number(ctx.courierSuccessRatio) || 50);
+      if (h.risk === 'high' || belowConfiguredRatio || (h.risk === 'medium' && holdLevel !== 'high')) {
         appendAutoCourierNote_(sheet, row, 'AUTO_COURIER_HOLD: ঝুঁকি ' + (h.risk === 'high' ? 'বেশি' : 'মাঝারি') +
           (h.successRate === null ? '' : ' (সফলতা ' + h.successRate + '%)') + ' — যাচাই করে নিজে পাঠান');
         return;
@@ -3390,17 +3396,25 @@ function getFacebookCapiConfig_() {
     props.getProperty('META_ACCESS_TOKEN') ||
     props.getProperty('FACEBOOK_ACCESS_TOKEN') ||
     '';
-  var pixelId =
+
+  // Canonical Muslim Abaya Meta Pixel. Keep the existing access token, but
+  // migrate any legacy Script Properties pixel ID to the owner-confirmed ID.
+  var pixelId = '1141629002088045';
+  var savedPixelId =
     props.getProperty('FB_PIXEL_ID') ||
     props.getProperty('META_PIXEL_ID') ||
     props.getProperty('PIXEL_ID') ||
     '';
-  return { accessToken: String(accessToken || '').trim(), pixelId: String(pixelId || '').trim() };
+  if (String(savedPixelId || '').trim() !== pixelId) {
+    props.setProperty('FB_PIXEL_ID', pixelId);
+  }
+
+  return { accessToken: String(accessToken || '').trim(), pixelId: pixelId };
 }
 
 /**
  * Ops helper: set Meta CAPI keys via clasp run.
- * Example: clasp run setMetaCapiConfigForOps_ -p '["TOKEN","1465090315322833"]'
+ * Example: clasp run setMetaCapiConfigForOps_ -p '["TOKEN","1141629002088045"]'
  */
 function setMetaCapiConfigForOps_(accessToken, pixelId) {
   var token = String(accessToken || '').trim();
@@ -5408,7 +5422,7 @@ function parseSignedOrderAmount_(raw) {
 
 // ===== Messenger → Conversions API for Business Messaging =====
 var MSGR_PAGE_ID = '964928770039259';
-var MSGR_DATASET_ID = '1465090315322833';
+var MSGR_DATASET_ID = '1141629002088045';
 var MSGR_SHEET = 'MessengerContacts';
 
 function messengerVerify_(e) {
@@ -5610,7 +5624,7 @@ function setupMessengerProfileForAllPagesFromMenu() {
 }
 
 var MSGR_PAGE_ID = '964928770039259';
-var MSGR_DATASET_ID = '1465090315322833';
+var MSGR_DATASET_ID = '1141629002088045';
 var MSGR_SHEET = 'MessengerContacts';
 var MSGR_MSG_SHEET = 'MessengerMessages';
 
@@ -5824,7 +5838,14 @@ function sendMessengerPurchase_(psid, value, orderId, pageId) {
       custom_data: { currency: 'BDT', value: parseOrderValue_(value) }
     }]
   };
-  var datasetId = PropertiesService.getScriptProperties().getProperty('MSGR_DATASET_ID_' + page) || MSGR_DATASET_ID;
+  var props = PropertiesService.getScriptProperties();
+  var datasetProperty = 'MSGR_DATASET_ID_' + page;
+  var datasetId = props.getProperty(datasetProperty) || MSGR_DATASET_ID;
+  // The Muslim Abaya Page must use its owner-confirmed dataset. Preserve custom datasets for other Pages.
+  if (page === MSGR_PAGE_ID && String(datasetId || '').trim() !== MSGR_DATASET_ID) {
+    datasetId = MSGR_DATASET_ID;
+    props.setProperty(datasetProperty, datasetId);
+  }
   var res = UrlFetchApp.fetch('https://graph.facebook.com/v25.0/' + datasetId +
     '/events?access_token=' + encodeURIComponent(token), {
       method: 'post', contentType: 'application/json',
@@ -8317,6 +8338,37 @@ function adminFraudCheck_(e) {
   };
 }
 
+
+/** Courier delivery performance from Muslim Abaya's own Online Order records. */
+function adminCourierPerformance_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var sheet = admGetSheet_();
+  var lastRow = lastOnlineOrderDataRow_(sheet);
+  var rows = lastRow >= 2 ? readOnlineOrderRows_(sheet, 2, lastRow - 1, ADM_LAST_COL) : [];
+  var map = {};
+  rows.forEach(function (r) {
+    var courier = String(r[45] || '').trim();
+    if (!courier) return;
+    var key = courier.toLowerCase();
+    if (!map[key]) map[key] = { courier: courier, total: 0, delivered: 0, cancelled: 0, returned: 0, fake: 0, active: 0 };
+    var x = map[key], status = String(r[9] || 'Pending').trim().toLowerCase();
+    var courierStatus = String(r[12] || '').trim().toLowerCase();
+    x.total++;
+    if (status === 'delivered' || courierStatus === 'delivered') x.delivered++;
+    else if (status === 'fake') x.fake++;
+    else if (status === 'cancelled' || courierStatus === 'cancelled') x.cancelled++;
+    else if (courierStatus.indexOf('return') !== -1 || status.indexOf('return') !== -1) x.returned++;
+    else x.active++;
+  });
+  var result = Object.keys(map).map(function (key) {
+    var x = map[key], decided = x.delivered + x.cancelled + x.returned + x.fake;
+    x.successRate = decided ? Math.round(x.delivered * 100 / decided) : null;
+    return x;
+  }).sort(function (a, b) { return b.total - a.total; });
+  return { ok: true, source: 'own-orders', couriers: result, totalOrders: rows.length };
+}
+
 // ── List / Get ──
 
 function adminOrderList_(e) {
@@ -8682,6 +8734,7 @@ function handleAdminOrderRequest_(type, e) {
       case 'AdminOrderGet': return adminOrderGet_(e);
       case 'AdminOrderUpdate': return adminOrderUpdate_(e);
       case 'AdminFraudCheck': return adminFraudCheck_(e);
+      case 'AdminCourierPerformance': return adminCourierPerformance_(e);
       case 'AdminBlockCustomer': return adminBlockCustomer_(e);
       case 'AdminSendCourier': return adminSendCourier_(e);
       case 'AdminOrderStaff': return adminStaffList_(e);

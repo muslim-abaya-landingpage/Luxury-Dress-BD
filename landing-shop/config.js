@@ -103,7 +103,7 @@ window.LANDING_CONFIG = {
     gtmId: 'GTM-ML7RL6BR', // শুধু trackingMode: 'gtm' হলে লোড হবে; direct mode-এ duplicate ঠেকাতে বন্ধ
     ga4MeasurementId: 'G-L2BNEXE0XG', // GA4 web data stream-এ ID মিলিয়ে নিন
     ga4LeadViaServer: false, // সার্ভার থেকে GA4 Lead পাঠানো চালু থাকলে true; browser+server-এ একই Lead পাঠাবেন না
-    metaPixelId: '1465090315322833', // ব্যবহারকারীর দেওয়া ID; Meta Pixel ID হিসেবে ধরে নেওয়া হয়েছে
+    metaPixelId: '1141629002088045', // ব্যবহারকারীর দেওয়া ID; Meta Pixel ID হিসেবে ধরে নেওয়া হয়েছে
     tiktokPixelId: 'D6FK9GBC77UC649NNCP0', // TikTok Ads Manager-এর Pixel ID
     trackingMode: 'direct', // direct: GA4/Meta/TikTok এখানে; gtm: সব ট্যাগ GTM-এ কনফিগ করতে হবে
 

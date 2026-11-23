@@ -283,6 +283,37 @@ function adminFraudCheck_(e) {
   };
 }
 
+
+/** Courier delivery performance from Muslim Abaya's own Online Order records. */
+function adminCourierPerformance_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var sheet = admGetSheet_();
+  var lastRow = lastOnlineOrderDataRow_(sheet);
+  var rows = lastRow >= 2 ? readOnlineOrderRows_(sheet, 2, lastRow - 1, ADM_LAST_COL) : [];
+  var map = {};
+  rows.forEach(function (r) {
+    var courier = String(r[45] || '').trim();
+    if (!courier) return;
+    var key = courier.toLowerCase();
+    if (!map[key]) map[key] = { courier: courier, total: 0, delivered: 0, cancelled: 0, returned: 0, fake: 0, active: 0 };
+    var x = map[key], status = String(r[9] || 'Pending').trim().toLowerCase();
+    var courierStatus = String(r[12] || '').trim().toLowerCase();
+    x.total++;
+    if (status === 'delivered' || courierStatus === 'delivered') x.delivered++;
+    else if (status === 'fake') x.fake++;
+    else if (status === 'cancelled' || courierStatus === 'cancelled') x.cancelled++;
+    else if (courierStatus.indexOf('return') !== -1 || status.indexOf('return') !== -1) x.returned++;
+    else x.active++;
+  });
+  var result = Object.keys(map).map(function (key) {
+    var x = map[key], decided = x.delivered + x.cancelled + x.returned + x.fake;
+    x.successRate = decided ? Math.round(x.delivered * 100 / decided) : null;
+    return x;
+  }).sort(function (a, b) { return b.total - a.total; });
+  return { ok: true, source: 'own-orders', couriers: result, totalOrders: rows.length };
+}
+
 // ── List / Get ──
 
 function adminOrderList_(e) {
@@ -648,6 +679,7 @@ function handleAdminOrderRequest_(type, e) {
       case 'AdminOrderGet': return adminOrderGet_(e);
       case 'AdminOrderUpdate': return adminOrderUpdate_(e);
       case 'AdminFraudCheck': return adminFraudCheck_(e);
+      case 'AdminCourierPerformance': return adminCourierPerformance_(e);
       case 'AdminBlockCustomer': return adminBlockCustomer_(e);
       case 'AdminSendCourier': return adminSendCourier_(e);
       case 'AdminOrderStaff': return adminStaffList_(e);

@@ -208,3 +208,71 @@ body.adm-body{background:var(--adm-bg);color:var(--adm-text);font-family:Inter,"
   .adm-feature-head h3,.dz-orders-head h3{font-size:14px!important}
 }
 @media(prefers-reduced-motion:reduce){.adm-sidebar,.adm-sidebar-backdrop,.adm-daily-action,.adm-sidebar-item{transition:none!important}}
+
+
+/* Serial dashboard layout — preserves existing IDs, data hooks and actions. */
+.adm-body .adm-main{max-width:1240px;margin:0 auto;padding:20px 24px 56px;display:flex;flex-direction:column;gap:28px;min-width:0}
+.adm-body .adm-jump{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:thin;overscroll-behavior-x:contain}
+.adm-body .adm-jump a{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;min-height:38px;padding:8px 14px;border:1px solid var(--adm-border);border-radius:999px;background:var(--adm-card);color:var(--adm-text);font-size:13px;font-weight:650;text-decoration:none;white-space:nowrap;transition:background .15s,border-color .15s}
+.adm-body .adm-jump a i{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--adm-primary);color:#fff;font-size:11px;font-style:normal}
+.adm-body .adm-jump a:hover{border-color:var(--adm-accent);background:var(--adm-accent-wash)}
+.adm-body .adm-jump a:focus-visible{outline:2px solid var(--adm-accent);outline-offset:2px}
+.adm-body .adm-main>.adm-sec{position:relative;order:0;margin:0!important;padding:26px 22px 22px!important;border:1px solid var(--adm-border)!important;border-radius:var(--adm-radius,16px)!important;background:var(--adm-card)!important;box-shadow:var(--adm-shadow-sm)!important;min-width:0;scroll-margin-top:18px}
+.adm-body .adm-main>#secOverview{order:1}
+.adm-body .adm-main>#secActions{order:2}
+.adm-body .adm-main>#secTasks{order:3}
+.adm-body .adm-main>#secAlerts{order:4}
+.adm-body .adm-main>#secOrders{order:5}
+.adm-body .adm-main>#secBest{order:6}
+.adm-body .adm-main>#secReports{order:7}
+.adm-body .adm-main>.adm-sec::before{content:attr(data-step);position:absolute;top:-12px;left:18px;z-index:1;padding:3px 12px;border:2px solid var(--adm-bg);border-radius:999px;background:var(--adm-primary);color:#fff;font-size:11px;font-weight:700;letter-spacing:.01em}
+.adm-body .adm-main>.adm-sec h2,.adm-body .adm-main>.adm-sec h3{color:var(--adm-text)}
+.adm-body .adm-main .dzc-overview{display:flex;flex-direction:column;gap:16px}
+.adm-body .adm-main .dzc-greet{margin:0}
+.adm-body .adm-main .dzc-todo{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.adm-body .adm-main .dzc-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0}
+.adm-body .adm-main .adm-daily-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.adm-body .adm-main .adm-alert-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.adm-body .adm-main .adm-dashboard-reports{padding:0!important;overflow:hidden}
+.adm-body .adm-main .adm-dashboard-reports>summary{padding:20px 22px!important}
+.adm-body .adm-main .adm-dashboard-reports>.adm-disclosure-body{padding:0 22px 22px;display:flex;flex-direction:column;gap:16px}
+.adm-body .adm-main .adm-dashboard-reports .dz-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:0}
+.adm-body .adm-main .adm-report-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.adm-body .adm-main .adm-report-grid>*{min-width:0}
+.adm-body .adm-main .adm-recent-table-wrap{max-width:100%;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+.adm-body .adm-main .adm-recent-table{min-width:760px}
+.adm-body .adm-main .adm-feature-head,.adm-body .adm-main .dz-orders-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.adm-body .adm-main .adm-feature-head h3,.adm-body .adm-main .dz-orders-head h3{margin:0;font-size:19px;font-weight:700}
+@media(max-width:1100px){
+ .adm-body .adm-main .dzc-todo,.adm-body .adm-main .dzc-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .adm-body .adm-main .adm-report-grid{grid-template-columns:1fr}
+}
+@media(max-width:720px){
+ .adm-body .adm-main{padding:16px 14px 44px;gap:24px}
+ .adm-body .adm-main>.adm-sec{padding:24px 14px 16px!important}
+ .adm-body .adm-topbar{padding:12px 14px!important}
+ .adm-body .adm-main .adm-daily-grid,.adm-body .adm-main .adm-alert-columns,.adm-body .adm-main .adm-dashboard-reports .dz-grid{grid-template-columns:1fr}
+ .adm-body .adm-main .adm-report-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .adm-body .adm-main .adm-dashboard-reports>summary{padding:20px 14px 14px!important}
+ .adm-body .adm-main .adm-dashboard-reports>.adm-disclosure-body{padding:0 14px 16px}
+}
+@media(max-width:420px){
+ .adm-body .adm-main .dzc-todo,.adm-body .adm-main .dzc-kpis{grid-template-columns:1fr}
+ .adm-body .adm-jump a{padding:7px 10px;font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){.adm-body .adm-jump a{transition:none}}
+
+/* Responsive containment fix: keep wide navigation and data tables inside the content column. */
+.adm-body .adm-content{min-width:0;width:0;flex:1 1 0}
+.adm-body .adm-main{width:100%;max-width:1240px;min-width:0;box-sizing:border-box;overflow-x:clip}
+.adm-body .adm-main>.adm-jump,
+.adm-body .adm-main>.adm-sec{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
+.adm-body .adm-main>.adm-jump{flex:0 1 auto;overflow-x:auto}
+.adm-body .adm-main .adm-recent-table-wrap{display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;overflow-x:auto;overscroll-behavior-x:contain}
+.adm-body .adm-main .adm-recent-table{width:100%;min-width:760px}
+.adm-body .adm-topbar,.adm-body .adm-topbar>*{min-width:0}
+.adm-body .adm-sync{min-width:0;max-width:100%}
+@media(max-width:720px){
+ .adm-body .adm-main{padding:16px 14px 44px}
+ .adm-body .adm-main>.adm-jump{padding-inline:1px}
+}

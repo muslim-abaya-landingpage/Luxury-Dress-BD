@@ -68,7 +68,7 @@ test('worker forwards the real shopper IP as ClientIP and drops a spoofed one', 
 // ---------- Apps Script ----------
 function loadCode() {
   const calls = [];
-  const props = { FB_ACCESS_TOKEN: 'tok', FB_PIXEL_ID: '1465090315322833', TIKTOK_ACCESS_TOKEN: 'tt' };
+  const props = { FB_ACCESS_TOKEN: 'tok', FB_PIXEL_ID: '1141629002088045', TIKTOK_ACCESS_TOKEN: 'tt' };
   const ctx = {
     console,
     PropertiesService: { getScriptProperties: () => ({ getProperty: (k) => props[k] || null }) },

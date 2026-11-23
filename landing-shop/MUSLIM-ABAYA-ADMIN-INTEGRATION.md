@@ -17,7 +17,7 @@
 
 বর্তমান `trackingMode: 'direct'`: GA4, Meta Pixel ও TikTok Pixel সাইটের কোড থেকে চলে; একই পেজে GTM লোড হয় না। Apps Script সফল অর্ডার ID দিলে Thank You পেজে একবার `Lead` / `SubmitForm` / `generate_lead` পাঠানো হয়। `Purchase` পাঠানো হয় না; বিদ্যমান backend-এ Confirmed অর্ডারে Purchase পাঠানোর আলাদা ব্যবস্থা আছে।
 
-প্রকাশের পর GA4 web stream-এ `G-L2BNEXE0XG`, Meta Events Manager-এ `1465090315322833`, TikTok Events Manager-এ `D6FK9GBC77UC649NNCP0` ID ও টেস্ট ইভেন্ট মিলিয়ে নিন। এই অ্যাকাউন্টগুলোর ভেতরে প্রবেশ করে ID বা সার্ভারে event পৌঁছানো যাচাই করা হয়নি। GTM চালাতে চাইলে `trackingMode: 'gtm'` দিয়ে সব ট্যাগ/ইভেন্ট GTM-এ সেট করুন।
+প্রকাশের পর GA4 web stream-এ `G-L2BNEXE0XG`, Meta Events Manager-এ `1141629002088045`, TikTok Events Manager-এ `D6FK9GBC77UC649NNCP0` ID ও টেস্ট ইভেন্ট মিলিয়ে নিন। এই অ্যাকাউন্টগুলোর ভেতরে প্রবেশ করে ID বা সার্ভারে event পৌঁছানো যাচাই করা হয়নি। GTM চালাতে চাইলে `trackingMode: 'gtm'` দিয়ে সব ট্যাগ/ইভেন্ট GTM-এ সেট করুন।
 
 ## সার্ভার ট্র্যাকিং
 

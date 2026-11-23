@@ -27,11 +27,12 @@
 <link rel="stylesheet" href="order-management-workspace.css?v=20261104-v1">
 <link rel="stylesheet" href="admin-responsive.css?v=1">
 <link rel="stylesheet" href="admin-theme.css?v=1">
-<link rel="stylesheet" href="admin-orders-wc-list.css?v=1">
+<link rel="stylesheet" href="admin-orders-wc-list.css?v=20261124-ref2">
 <link rel="manifest" href="/admin-manifest.webmanifest">
 <meta name="theme-color" content="#1b2a41">
 <link rel="apple-touch-icon" href="/images/admin/admin-icon-192.png">
-<link rel="stylesheet" href="admin-wp.css?v=1">
+<link rel="stylesheet" href="admin-wp.css?v=20261124-ref2">
+  <link rel="stylesheet" href="admin-orders-appbyte.css?v=20261124-v1">\n<link rel="stylesheet" href="admin-premium-unified.css?v=20261124-polish1">
 </head>
 <body class="pn-body wo-orders-page">
   <div class="pn-app adm-shell">
@@ -90,6 +91,14 @@
         <span class="pn-spacer"></span>
       </div>
 
+      <section class="ma-order-overview" aria-label="Order overview" aria-live="polite">
+        <article class="ma-order-metric"><span class="ma-order-metric-label">Total orders</span><strong id="maMetricTotal">—</strong><small>All order records</small></article>
+        <article class="ma-order-metric"><span class="ma-order-metric-label">Pending</span><strong id="maMetricPending">—</strong><small>Awaiting action</small></article>
+        <article class="ma-order-metric"><span class="ma-order-metric-label">Shipped</span><strong id="maMetricShipped">—</strong><small>Handed to courier</small></article>
+        <article class="ma-order-metric"><span class="ma-order-metric-label">Delivered</span><strong id="maMetricDelivered">—</strong><small>Successfully delivered</small></article>
+        <article class="ma-order-metric"><span class="ma-order-metric-label">Needs review</span><strong id="maMetricReview">—</strong><small>From loaded orders</small></article>
+      </section>
+      <div class="wc-subnav-tools"><button type="button" class="pn-btn pn-btn-sm" id="ordCourierPerformance">▥ Courier Performance</button></div>
       <div class="wc-subnav">
         <div class="pn-tabs wc-status-links" id="ordTabs" aria-label="Filter orders by status"></div>
         <form class="wc-search-box" id="ordSearchForm" role="search" onsubmit="return false">
@@ -370,6 +379,19 @@
 
       // WooCommerce-style status links: "All (3) | Processing (1) | …".
       // Like WooCommerce, statuses with no orders are left out (the active one always stays visible).
+      function renderOrderMetrics() {
+        var statusCount = function (name) {
+          var key = Object.keys(counts).find(function (k) { return k.toLowerCase() === name; });
+          if (key) return Number(counts[key]) || 0;
+          return all.filter(function (o) { return String(o.status || "").trim().toLowerCase() === name; }).length;
+        };
+        document.getElementById("maMetricTotal").textContent = Number(counts.all) || all.length;
+        document.getElementById("maMetricPending").textContent = statusCount("pending");
+        document.getElementById("maMetricShipped").textContent = statusCount("shipped");
+        document.getElementById("maMetricDelivered").textContent = statusCount("delivered");
+        document.getElementById("maMetricReview").textContent = insights ? insights.flagged : "—";
+      }
+
       function renderTabs() {
         var tabs = [["all", "All"], ["today", "Today"]].concat(statuses.map(function (s) { return [s, s]; }))
           .filter(function (t) { return t[0] === "all" || t[0] === filter || (counts[t[0]] || 0) > 0; });
@@ -506,6 +528,7 @@
         updateProductOptions();
         updateOriginOptions();
         renderInsights(res);
+        renderOrderMetrics();
         renderTabs();
         renderRows();
         renderPagination();
@@ -734,5 +757,22 @@ window.addEventListener("load",function(){var b=document.getElementById("moOpen"
 <script src="admin-search.js?v=1" defer></script>
 <script src="admin-app.js?v=1" defer></script>
 <script src="admin-wp.js?v=1" defer></script>
+<script>
+(function(){
+ var btn=document.getElementById('ordCourierPerformance');
+ if(!btn||!window.MaAdmin||!window.MaPanel)return;
+ btn.addEventListener('click',function(){
+  btn.disabled=true;
+  MaAdmin.call('AdminCourierPerformance',{}).then(function(r){
+   if(!r||!r.ok)throw new Error((r&&r.message)||'Courier data could not be loaded');
+   var rows=(r.couriers||[]).map(function(x){
+    return '<tr><td>'+MaPanel.esc(x.courier)+'</td><td>'+x.total+'</td><td>'+x.delivered+'</td><td>'+x.cancelled+'</td><td>'+x.returned+'</td><td>'+x.fake+'</td><td>'+(x.successRate==null?'—':x.successRate+'%')+'</td></tr>';
+   }).join('');
+   var body='<p class="pn-note-muted">Source: Muslim Abaya order records only · '+r.totalOrders+' orders scanned. Not a courier-wide industry rate.</p><div class="pn-table-wrap"><table class="pn-table"><thead><tr><th>Courier</th><th>Total</th><th>Delivered</th><th>Cancelled</th><th>Returned</th><th>Fake</th><th>Success rate</th></tr></thead><tbody>'+(rows||'<tr><td colspan="7">No courier records found</td></tr>')+'</tbody></table></div>';
+   MaPanel.openModal('Courier Performance',body);
+  }).catch(function(e){if(window.notify)notify(e.message,true);else alert(e.message);}).then(function(){btn.disabled=false;});
+ });
+})();
+</script>
 </body>
 </html>

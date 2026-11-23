@@ -1,0 +1,15 @@
+/* AppByte-inspired Fraud Check visual layer; existing calculations remain the source of truth. */
+.pn-modal .pn-risk{border-radius:12px!important;padding:13px 16px!important;font-weight:750!important;margin-bottom:14px!important}
+.pn-modal .pn-risk.low{background:#e9f8f2!important;color:#087b5a!important;border:1px solid #c6eadc!important}
+.pn-modal .pn-risk.medium{background:#fff7e8!important;color:#9a6500!important;border:1px solid #f2dfb5!important}
+.pn-modal .pn-risk.high{background:#fff0f1!important;color:#a52236!important;border:1px solid #f1cbd1!important}
+.pn-modal .pn-risk.new,.pn-modal .pn-risk.unknown{background:#f1f4f8!important;color:#5d6b80!important;border:1px solid #e0e6ee!important}
+.pn-modal .pn-stat-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important;margin:12px 0!important}
+.pn-modal .pn-stat{display:flex!important;flex-direction:column!important;gap:5px!important;padding:14px!important;background:#fff!important;border:1px solid #e5eaf1!important;border-radius:11px!important;min-width:0}
+.pn-modal .pn-stat b{font-size:23px!important;line-height:1.25!important;color:#1c2c46!important}.pn-modal .pn-stat span{font-size:11px!important;color:#748197!important}
+.pn-modal .ma-fraud-rate{display:flex;align-items:center;gap:14px;padding:14px 16px;margin:12px 0;background:#f1faf7;border:1px solid #d6eee6;border-radius:12px}
+.pn-modal .ma-fraud-ring{width:78px;height:78px;flex:0 0 78px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#31b397 calc(var(--rate,0)*1%),#e4eaf0 0);position:relative}
+.pn-modal .ma-fraud-ring:before{content:"";position:absolute;inset:8px;background:#fff;border-radius:50%}.pn-modal .ma-fraud-ring strong{position:relative;color:#168c72;font-size:17px;font-weight:850}
+.pn-modal .ma-fraud-rate b{display:block;font-size:15px;color:#146e5b}.pn-modal .ma-fraud-rate small{display:block;color:#718095;font-size:11px;margin-top:3px}
+.pn-modal .ma-fraud-source{font-size:11px;color:#7b8798;background:#f7f9fc;padding:9px 11px;border-radius:8px;margin:0 0 12px}
+@media(max-width:560px){.pn-modal .pn-stat-grid{grid-template-columns:1fr!important}.pn-modal .pn-stat{flex-direction:row!important;align-items:center!important;justify-content:space-between}}

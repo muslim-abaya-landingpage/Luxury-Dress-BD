@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html class="wp-admin-shell" lang="bn" data-admin-guard="1">
+<head>
+  <meta charset="UTF-8">
+  <link rel="preload" as="script" href="site-api-config.js?v=b4eb7cb7438aad24">
+  <link rel="preload" as="script" href="admin-config.js?v=765c69bebedc46a8">
+  <link rel="preload" as="script" href="admin-api.js?v=2823eb7bcff4e142">
+  <link rel="preload" as="script" href="admin-guard.js?v=42341dd9adc288ea">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <meta name="robots" content="noindex, nofollow">
+  <title>Order Settings | Muslim Abaya Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="admin.css?v=d800d917a0c7b197">
+<script src="config.js?v=00107b4d68a09227"></script>
+  <link rel="stylesheet" href="admin-sidebar.css?v=729b41e6cb4c74e8">
+
+<link rel="stylesheet" href="admin-dashboard-design.css?v=76d87a7fcd8f0d87">
+<script src="admin-dashboard-design.js?v=389d008aafabe1a6"></script>
+<link rel="stylesheet" href="admin-premium-layout.css?v=385b5e49870868f4">
+<link rel="stylesheet" href="admin-design-system.css?v=1eaf4362bddc4ad0">
+<link rel="stylesheet" href="admin-responsive.css?v=1">
+<link rel="stylesheet" href="admin-theme.css?v=1">
+<link rel="manifest" href="/admin-manifest.webmanifest">
+<meta name="theme-color" content="#1b2a41">
+<link rel="apple-touch-icon" href="/images/admin/admin-icon-192.png">
+<link rel="stylesheet" href="admin-wp.css?v=1">
+<style>
+  .trk-form{max-width:640px;display:grid;gap:18px;margin-top:6px}
+  .trk-field{display:grid;gap:6px}
+  .trk-field label{font-weight:700;font-size:13px}
+  .trk-field small{color:var(--adm-muted,#64748b);font-size:12px;line-height:1.5}
+  .trk-field input{padding:10px 12px;border:1px solid #d7dde6;border-radius:10px;font:14px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace}
+  .trk-field input:focus{outline:2px solid #2868d5;outline-offset:1px}
+  .trk-badge{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+  .trk-badge.is-default{background:#fff7e6;color:#9a5b00}
+  .trk-badge.is-custom{background:#eaf8ef;color:#18794e}
+  .trk-actions{display:flex;align-items:center;gap:12px}
+  .trk-msg{font-size:13px;font-weight:600;min-height:18px}
+  .trk-msg.ok{color:#18794e}
+  .trk-msg.err{color:#b42318}
+  .trk-note{background:#f8faff;border:1px solid #e1e8f5;border-radius:12px;padding:14px 16px;font-size:13px;line-height:1.7;color:#334155;margin-bottom:18px}
+</style>
+<link rel="stylesheet" href="admin-premium-unified.css?v=20261124-polish1">
+<style>
+.os-intro{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:24px!important;margin-bottom:18px}.os-eyebrow,.os-section-head span{font-size:10px;letter-spacing:.13em;font-weight:800;color:#a17c43}.os-intro h2{font-size:24px;margin:7px 0}.os-intro p,.os-section-head p{color:var(--adm-muted,#64748b);margin:0;font-size:13px}.os-live{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--adm-muted,#64748b);white-space:nowrap}.os-live i{width:8px;height:8px;border-radius:50%;background:#d6a84b}.os-tabs{display:flex;gap:8px;overflow:auto;margin:0 0 24px;padding:4px 0}.os-tabs a{padding:10px 15px;border:1px solid var(--adm-border,#e5e7eb);border-radius:10px;color:var(--adm-text,#243047);text-decoration:none;font-size:13px;font-weight:700;white-space:nowrap}.os-tabs a.is-active{background:#eaf3ed;border-color:#b8d2c1;color:#145c3e}.os-section{margin:0 0 28px;scroll-margin-top:20px}.os-section-head{margin:0 0 13px}.os-section-head h2{font-size:18px;margin:5px 0}.os-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.os-card{background:var(--adm-card,#fff);border:1px solid var(--adm-border,#e5e7eb);border-radius:15px;padding:18px;box-shadow:0 3px 12px rgba(22,43,32,.035);min-width:0}.os-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}.os-card h3{font-size:15px;margin:0 0 5px;color:var(--adm-text,#1f2937)}.os-card p{font-size:12px;line-height:1.6;color:var(--adm-muted,#64748b);margin:0}.os-foot{border-top:1px solid var(--adm-border,#edf0ed);margin-top:14px;padding-top:11px;font-size:11px;color:var(--adm-muted,#64748b);line-height:1.5}.os-warning{color:#986b28}.os-field{display:grid;gap:7px;margin-top:16px}.os-field label{font-size:12px;font-weight:700;color:var(--adm-text,#334155)}.os-field input{width:100%;padding:10px 12px;border:1px solid var(--adm-border,#d8e0da);border-radius:9px;background:var(--adm-card,#fff);color:var(--adm-text,#1f2937);font:inherit}.os-switch{position:relative;display:inline-flex;flex:0 0 auto;width:46px;height:26px}.os-switch input{position:absolute;opacity:0;width:1px;height:1px}.os-switch span{position:absolute;inset:0;border-radius:99px;background:#d7ded9;cursor:pointer;transition:.2s}.os-switch span:before{content:"";position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;box-shadow:0 1px 3px #0002;transition:.2s}.os-switch input:checked+span{background:#176345}.os-switch input:checked+span:before{transform:translateX(20px)}.os-switch input:focus-visible+span{outline:3px solid #d5b77b;outline-offset:2px}.os-savebar{position:sticky;bottom:12px;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:14px;margin:24px 0 0;padding:14px 16px;border:1px solid var(--adm-border,#dce5dd);border-radius:14px;background:var(--adm-card,#fff);box-shadow:0 8px 30px #172c2212}.os-savebar span{font-size:12px;color:var(--adm-muted,#64748b)}@media(max-width:760px){.os-grid{grid-template-columns:1fr}.os-intro{align-items:flex-start;flex-direction:column}.os-savebar{bottom:8px}.os-tabs{margin-bottom:18px}}
+</style>
+</head>
+<body class="adm-body">
+  <div class="adm-shell">
+    <div class="adm-sidebar-backdrop" id="admSbBackdrop"></div>
+    <aside class="adm-sidebar" id="admSidebar">
+      <div class="adm-sidebar-brand">
+        <div class="adm-sidebar-crest"></div>
+        <div class="adm-sidebar-brand-text"><div class="t1">Muslim Abaya</div><div class="t2">Admin Panel</div></div>
+        <button type="button" class="adm-collapse-btn" id="admCollapse" aria-controls="admSidebar" aria-expanded="true" aria-label="সাইডবার ছোট করুন"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="3" stroke="currentColor" stroke-width="1.6"/><path d="M9 4v16" stroke="currentColor" stroke-width="1.6"/></svg></button>
+        <button type="button" class="adm-sidebar-close" id="admSbClose" aria-label="মেনু বন্ধ করুন"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+      </div>
+      <div class="adm-sidebar-profile"><div class="adm-profile-avatar" aria-hidden="true">MA</div><div class="adm-profile-copy"><strong>আপনার কর্মক্ষেত্র</strong><small>স্টোর পরিচালনা</small></div></div>
+      <nav class="adm-sidebar-nav" aria-label="Admin menu">
+<a class="adm-sidebar-item" href="admin-dashboard.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Dashboard</span></a>
+<div class="adm-nav-group"><a class="adm-sidebar-item adm-nav-top" href="admin-orders.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z M9 7h6M9 11h6M9 15h4"/></svg><span>Orders</span></a><div class="adm-nav-children" role="group" aria-label="Orders">
+<a class="adm-sidebar-item adm-nav-child" href="admin-orders.html"><span>Orders</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-order-new.html"><span>Add order</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-operations.html"><span>Finance &amp; Returns</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-profit.html"><span>Product profit</span></a>
+</div></div>
+<div class="adm-nav-group"><a class="adm-sidebar-item adm-nav-top" href="product-manager.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="6" width="16" height="15" rx="2"/><path d="M9 6V5a3 3 0 0 1 6 0v1M9 10a3 3 0 0 0 6 0"/></svg><span>Products</span></a><div class="adm-nav-children" role="group" aria-label="Products">
+<a class="adm-sidebar-item adm-nav-child" href="product-manager.html"><span>All Products</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="product-manager.html?action=new"><span>Add new product</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-sizes.html"><span>Sizes</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-reviews.html"><span>Reviews</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="stock-analytics.html"><span>Stock &amp; Analytics</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="product-links.html"><span>Product links</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="product-manager.html#store-settings"><span>Store settings</span></a>
+</div></div>
+<div class="adm-nav-group"><a class="adm-sidebar-item adm-nav-top" href="admin-customers.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h18v13H8l-5 4V4ZM7 9h10M7 13h7"/></svg><span>Customers</span></a><div class="adm-nav-children" role="group" aria-label="Customers">
+<a class="adm-sidebar-item adm-nav-child" href="admin-customers.html"><span>Customers</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-inbox.html"><span>Inbox</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-support-inbox.html"><span>Live support</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="support-agent-telegram.html"><span>Telegram support</span></a>
+</div></div>
+<div class="adm-nav-group has-current"><a class="adm-sidebar-item adm-nav-top is-current" href="admin-setup.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 9v12"/></svg><span>Settings</span></a><div class="adm-nav-children" role="group" aria-label="Settings">
+<a class="adm-sidebar-item adm-nav-child" href="admin-setup.html"><span>Setup &amp; Status</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-seo.html"><span>SEO Manager</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-staff.html"><span>Staff</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-growth.html"><span>Growth tools</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-links.html"><span>Links</span></a>
+<a class="adm-sidebar-item adm-nav-child is-current" href="admin-order-settings.html" aria-current="page"><span>Order Settings</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-activity.html"><span>Activity log</span></a>
+</div></div>
+</nav>
+      <div class="adm-sidebar-foot">
+        <button type="button" id="admThemeToggle" class="adm-theme-toggle" role="switch" aria-checked="false" aria-label="ডার্ক মোড"><svg viewBox="0 0 24 24" fill="none"><path d="M20 14A8.5 8.5 0 0 1 10 4a8.5 8.5 0 1 0 10 10Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="adm-theme-label">ডার্ক মোড</span><span class="adm-theme-track" aria-hidden="true"></span></button>
+        <button type="button" class="adm-btn adm-btn-secondary" id="admLogout">লগআউট</button>
+      </div>
+    </aside>
+
+    <div class="adm-content">
+      <header class="adm-topbar">
+        <div>
+          <button type="button" class="adm-menu-btn" id="admMenuBtn" aria-label="মেনু খুলুন"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+          <div>
+            <div class="adm-heading"><span class="adm-page-kicker">মুসলিম আবায়া / সেটিংস ও অন্যান্য</span><h1>Order Settings</h1></div>
+            <div class="adm-topbar-user" id="admUserLabel">—</div>
+          </div>
+        </div>
+      </header>
+
+      <main class="adm-main">
+        <section class="os-intro adm-panel">
+          <div><span class="os-eyebrow">ORDER EXPERIENCE CONTROL</span><h2>অর্ডার সেটিংস</h2><p>Checkout, verification, duplicate protection এবং courier risk control এক জায়গা থেকে পরিচালনা করুন।</p></div>
+          <div class="os-live"><i></i><span id="osConnection">সেটিংস লোড হচ্ছে</span></div>
+        </section>
+        <nav class="os-tabs" aria-label="Order settings sections">
+          <a class="is-active" href="#verification">Verification</a><a href="#checkout">Checkout</a><a href="#protection">Protection</a><a href="#courier">Courier</a>
+        </nav>
+        <form id="orderSettingsForm">
+          <section id="verification" class="os-section"><div class="os-section-head"><div><span>01 / VERIFICATION</span><h2>Customer verification</h2><p>অর্ডার কনফার্ম করার আগে কাস্টমার যাচাই</p></div></div>
+            <div class="os-grid">
+              <article class="os-card"><div class="os-card-top"><div><h3>Mobile number verification</h3><p>ঝুঁকিপূর্ণ অর্ডারে WhatsApp OTP যাচাই</p></div><label class="os-switch"><input type="checkbox" name="mobileVerification"><span></span></label></div><div class="os-foot" id="otpStatus">WhatsApp API credentials প্রয়োজন</div></article>
+              <article class="os-card"><div class="os-card-top"><div><h3>Order confirmation SMS</h3><p>অর্ডার গ্রহণের পর SMS পাঠানো</p></div><label class="os-switch"><input type="checkbox" name="confirmationSms" disabled><span></span></label></div><div class="os-foot os-warning">SMS Gateway sender এখনো সংযুক্ত নয়; সংযোগ না হওয়া পর্যন্ত এই ফিচার বন্ধ</div></article>
+            </div>
+          </section>
+          <section id="checkout" class="os-section"><div class="os-section-head"><div><span>02 / CHECKOUT</span><h2>Checkout fields</h2><p>কাস্টমারের কাছ থেকে প্রয়োজনীয় তথ্য সংগ্রহ</p></div></div>
+            <div class="os-grid">
+              <article class="os-card"><div class="os-card-top"><div><h3>Location fields</h3><p>জেলা, উপজেলা/থানা ও ঠিকানা সংগ্রহ</p></div><label class="os-switch"><input type="checkbox" name="locationFields" checked disabled><span></span></label></div><div class="os-foot">জেলা/থানা ডেলিভারি চার্জ ও কুরিয়ার রুটের জন্য বাধ্যতামূলক; তাই বন্ধ করা যাবে না</div></article>
+            </div>
+          </section>
+          <section id="protection" class="os-section"><div class="os-section-head"><div><span>03 / ORDER PROTECTION</span><h2>Fraud & duplicate protection</h2><p>একই অর্ডার বারবার আসা এবং সন্দেহজনক নেটওয়ার্ক শনাক্ত</p></div></div>
+            <div class="os-grid">
+              <article class="os-card"><div class="os-card-top"><div><h3>VPN / Proxy protection</h3><p>Cloudflare network signals দিয়ে risk score</p></div><label class="os-switch"><input type="checkbox" name="vpnProtection"><span></span></label></div><div class="os-foot">সন্দেহজনক অর্ডার review-তে যাবে; শুধু VPN হলেই অটো ব্লক নয়</div></article>
+              <article class="os-card"><div class="os-card-top"><div><h3>Duplicate order block</h3><p>একই ফোন, মোট ও পণ্য দিয়ে পুনরাবৃত্তি আটকানো</p></div><label class="os-switch"><input type="checkbox" name="duplicateBlock"><span></span></label></div><div class="os-field"><label for="duplicateWindow">Duplicate block time (minutes)</label><input id="duplicateWindow" name="duplicateWindowMinutes" type="number" min="1" max="1440" value="10" required></div></article>
+            </div>
+          </section>
+          <section id="courier" class="os-section"><div class="os-section-head"><div><span>04 / COURIER SAFETY</span><h2>Courier protection</h2><p>আগের ডেলিভারি রেকর্ডের ভিত্তিতে অটো-কুরিয়ার নিয়ন্ত্রণ</p></div></div>
+            <div class="os-grid">
+              <article class="os-card"><div class="os-card-top"><div><h3>Courier protection</h3><p>ঝুঁকিপূর্ণ কাস্টমারের অর্ডার ম্যানুয়াল যাচাইয়ে রাখা</p></div><label class="os-switch"><input type="checkbox" name="courierProtection"><span></span></label></div><div class="os-field"><label for="courierSuccessRatio">Minimum delivery success ratio (%)</label><input id="courierSuccessRatio" name="courierSuccessRatio" type="number" min="0" max="100" value="50" required></div></article>
+            </div>
+          </section>
+          <div class="os-savebar"><span id="osMessage" role="status" aria-live="polite">পরিবর্তনগুলো Save করুন</span><button class="adm-btn adm-btn-primary" type="submit" id="osSave">Save settings</button></div>
+        </form>
+      </main>
+    </div>
+  </div>
+
+  <script src="site-api-config.js?v=b4eb7cb7438aad24"></script>
+  <script src="admin-config.js?v=765c69bebedc46a8"></script>
+  <script src="admin-api.js?v=2823eb7bcff4e142"></script>
+  <script src="admin-guard.js?v=42341dd9adc288ea"></script>
+<script src="admin-search.js?v=1" defer></script>
+<script src="admin-app.js?v=1" defer></script>
+<script src="admin-wp.js?v=1" defer></script>
+  <script>
+(function(){
+ const endpoint="/_ma/admin/order-settings", form=document.getElementById("orderSettingsForm");
+ const msg=document.getElementById("osMessage"), save=document.getElementById("osSave"), connection=document.getElementById("osConnection");
+ let session=null;
+ function setMessage(t,ok){msg.textContent=t;msg.style.color=ok?"#176345":"#b42318";}
+ function values(){return {mobileVerification:form.mobileVerification.checked,confirmationSms:form.confirmationSms.checked,locationFields:form.locationFields.checked,vpnProtection:form.vpnProtection.checked,duplicateBlock:form.duplicateBlock.checked,duplicateWindowMinutes:Number(form.duplicateWindowMinutes.value),courierProtection:form.courierProtection.checked,courierSuccessRatio:Number(form.courierSuccessRatio.value)};}
+ function apply(s){Object.keys(s).forEach(k=>{if(form.elements[k]){if(form.elements[k].type==="checkbox")form.elements[k].checked=!!s[k];else form.elements[k].value=s[k];}});}
+ function load(){fetch(endpoint+"?token="+encodeURIComponent(session.token),{cache:"no-store"}).then(r=>r.json()).then(j=>{if(!j.ok)throw Error(j.error||"LOAD_FAILED");apply(j.settings);connection.textContent="সেটিংস সংযুক্ত";connection.style.color="#176345";document.getElementById("otpStatus").textContent=j.integrations&&j.integrations.whatsappOtp?"WhatsApp OTP credentials পাওয়া গেছে":"WhatsApp API credentials প্রয়োজন"; form.confirmationSms.disabled=true; form.locationFields.disabled=true;}).catch(e=>{connection.textContent="লোড করা যায়নি";setMessage("সেটিংস লোড হয়নি: "+e.message,false);});}
+ form.addEventListener("submit",e=>{e.preventDefault();const v=values();if(!Number.isInteger(v.duplicateWindowMinutes)||v.duplicateWindowMinutes<1||v.duplicateWindowMinutes>1440||!Number.isInteger(v.courierSuccessRatio)||v.courierSuccessRatio<0||v.courierSuccessRatio>100){setMessage("সময় ১–১৪৪০ মিনিট এবং Success Ratio ০–১০০ দিন।",false);return;}save.disabled=true;setMessage("সেভ হচ্ছে…",true);fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token:session.token,settings:v})}).then(r=>r.json()).then(j=>{if(!j.ok)throw Error(j.error||"SAVE_FAILED");setMessage("সেটিংস সফলভাবে সেভ হয়েছে।",true);}).catch(e=>setMessage("সেভ হয়নি: "+e.message,false)).finally(()=>save.disabled=false);});
+ MaAdminGuard.require().then(s=>{if(!s)return;session=s;document.getElementById("admUserLabel").textContent=(s.name||"Admin")+(s.email?" · "+s.email:"");load();});
+ document.getElementById("admLogout").addEventListener("click",()=>{MaAdmin.logout();location.href="admin-login.html";});
+ const sidebar=document.getElementById("admSidebar"),backdrop=document.getElementById("admSbBackdrop");
+ document.getElementById("admMenuBtn")?.addEventListener("click",()=>{sidebar.classList.add("is-open");backdrop.classList.add("is-open");});
+ document.getElementById("admSbClose")?.addEventListener("click",()=>{sidebar.classList.remove("is-open");backdrop.classList.remove("is-open");});
+ backdrop?.addEventListener("click",()=>{sidebar.classList.remove("is-open");backdrop.classList.remove("is-open");});
+
+})();
+</script>
+  <script src="admin-page-shell.js?v=1"></script>
+  <script src="admin-search.js?v=1" defer></script><script src="admin-app.js?v=1" defer></script><script src="admin-wp.js?v=1" defer></script>
+</body></html>
