@@ -1734,11 +1734,13 @@ function rateLimitOrder_(phone) {
   cache.put(k, String(n + 1), 1800);
 }
 
-function checkDuplicateOrder_(phone, total, design) {
+function checkDuplicateOrder_(phone, total, design, enabled, windowMinutes) {
+  if (enabled === false) return;
   var cache = CacheService.getScriptCache();
   var sig = Utilities.base64EncodeWebSafe(String(phone) + '|' + String(total) + '|' + String(design).slice(0, 48));
   if (cache.get('dup_' + sig)) throw new Error('DUPLICATE_ORDER');
-  cache.put('dup_' + sig, '1', 600);
+  var minutes = Math.max(1, Math.min(1440, parseInt(windowMinutes, 10) || 10));
+  cache.put('dup_' + sig, '1', minutes * 60);
 }
 
 /**
@@ -1907,7 +1909,7 @@ function handleOnlineOrderPost_(e) {
   assertLiveStockAvailable_(validated.cartItems);
   if (isPhoneBlocked_(validated.phone)) throw new Error('ORDER_BLOCKED');
   rateLimitOrder_(validated.phone);
-  checkDuplicateOrder_(validated.phone, validated.total, validated.design);
+  checkDuplicateOrder_(validated.phone, validated.total, validated.design, String(param_(e, 'DuplicateBlock') || 'true') !== 'false', param_(e, 'DuplicateWindowMinutes'));
 
   var SHEET_NAME = 'Online Order';
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -2055,6 +2057,8 @@ function handleOnlineOrderPost_(e) {
   setOrderProductImages_(sheet, newRow, imageUrls);
 
   maybeAutoCourierAfterWebOrder_(sheet, newRow, {
+    courierProtection: String(param_(e, 'CourierProtection') || 'true') !== 'false',
+    courierSuccessRatio: Math.max(0, Math.min(100, parseInt(param_(e, 'CourierSuccessRatio'), 10) || 50)),
     orderId: orderId,
     name: validated.name,
     phone: validated.phone,
@@ -2868,10 +2872,12 @@ function maybeAutoCourierAfterWebOrder_(sheet, row, ctx) {
   // sent to Steadfast automatically; the order stays Pending (on hold) until a person checks it.
   // Script property RISK_HOLD_LEVEL: 'medium' (default: hold medium + high risk), 'high', or 'off'.
   var holdLevel = String(PropertiesService.getScriptProperties().getProperty('RISK_HOLD_LEVEL') || 'medium').toLowerCase().trim();
-  if (holdLevel !== 'off' && ctx && ctx.phone && typeof admHistoryForPhone_ === 'function') {
+  if (ctx && ctx.courierProtection !== false && holdLevel !== 'off' && ctx.phone && typeof admHistoryForPhone_ === 'function') {
     try {
       var h = admHistoryForPhone_(admReadHistory_(sheet), normalizePhone_(ctx.phone), ctx.orderId);
-      if (h.risk === 'high' || (h.risk === 'medium' && holdLevel !== 'high')) {
+      var failed = h && h.stats ? (Number(h.stats.fake) || 0) + (Number(h.stats.cancelled) || 0) + (Number(h.stats.returned) || 0) : 0;
+      var belowConfiguredRatio = h && h.successRate !== null && h.successRate !== undefined && failed > 0 && Number(h.successRate) < (Number(ctx.courierSuccessRatio) || 50);
+      if (h.risk === 'high' || belowConfiguredRatio || (h.risk === 'medium' && holdLevel !== 'high')) {
         appendAutoCourierNote_(sheet, row, 'AUTO_COURIER_HOLD: ঝুঁকি ' + (h.risk === 'high' ? 'বেশি' : 'মাঝারি') +
           (h.successRate === null ? '' : ' (সফলতা ' + h.successRate + '%)') + ' — যাচাই করে নিজে পাঠান');
         return;
