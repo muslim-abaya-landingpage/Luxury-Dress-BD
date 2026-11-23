@@ -549,6 +549,8 @@ async function handleOrder(request, env, ctx) {
   // Pass owner-controlled duplicate policy to the canonical Apps Script order handler.
   pairs.push(['DuplicateBlock', orderSettings.duplicateBlock ? 'true' : 'false']);
   pairs.push(['DuplicateWindowMinutes', String(orderSettings.duplicateWindowMinutes)]);
+  pairs.push(['CourierProtection', orderSettings.courierProtection ? 'true' : 'false']);
+  pairs.push(['CourierSuccessRatio', String(orderSettings.courierSuccessRatio)]);
   const storedPayload = encodeOrderPayload(pairs, risk, eventId);
   if (existing) {
     await env.DB.prepare("UPDATE order_inbox SET payload = ?, target = ?, status = 'sending', updated_at = ? WHERE event_id = ?")
