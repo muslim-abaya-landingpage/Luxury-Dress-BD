@@ -678,7 +678,7 @@
      a numbered list beside it, arrows and a 01 / 12 counter. Newest = dateAdded. Flat corners. */
   var STORY_COUNT = 12;
   var STORY_INTERVAL = 5000;
-  // Let the prerendered first card settle before autoplay can trigger a later LCP candidate.
+  // Keep the first card stable through initial LCP sampling; later autoplay retains the 5-second cadence.
   var STORY_INITIAL_DELAY = 12000;
   var STORY_ARABIC = {
     abaya: "عباية", "cover-up": "غطاء", "premium-two-piece": "طقم", "tops-kurti": "قميص", embroidery: "تطريز",
