@@ -261,3 +261,18 @@ body.adm-body{background:var(--adm-bg);color:var(--adm-text);font-family:Inter,"
  .adm-body .adm-jump a{padding:7px 10px;font-size:12px}
 }
 @media(prefers-reduced-motion:reduce){.adm-body .adm-jump a{transition:none}}
+
+/* Responsive containment fix: keep wide navigation and data tables inside the content column. */
+.adm-body .adm-content{min-width:0;width:0;flex:1 1 0}
+.adm-body .adm-main{width:100%;max-width:1240px;min-width:0;box-sizing:border-box;overflow-x:clip}
+.adm-body .adm-main>.adm-jump,
+.adm-body .adm-main>.adm-sec{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
+.adm-body .adm-main>.adm-jump{flex:0 1 auto;overflow-x:auto}
+.adm-body .adm-main .adm-recent-table-wrap{display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;overflow-x:auto;overscroll-behavior-x:contain}
+.adm-body .adm-main .adm-recent-table{width:100%;min-width:760px}
+.adm-body .adm-topbar,.adm-body .adm-topbar>*{min-width:0}
+.adm-body .adm-sync{min-width:0;max-width:100%}
+@media(max-width:720px){
+ .adm-body .adm-main{padding:16px 14px 44px}
+ .adm-body .adm-main>.adm-jump{padding-inline:1px}
+}
