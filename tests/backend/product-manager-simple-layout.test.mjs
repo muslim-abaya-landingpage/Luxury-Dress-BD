@@ -78,5 +78,5 @@ test("The action=new route opens the product editor immediately after catalog in
   const reloadCallback = html.indexOf('if(new URLSearchParams(location.search).get("action")==="new")startNewProduct();');
   assert.ok(routeHandler >= 0, "missing action=new route detection");
   assert.ok(catalogInit >= 0 && reloadCallback > catalogInit, "new-product editor must open after publisher reload completes");
-  assert.ok(!html.includes("setTimeout(openWhenReady"), "action=new must not depend on a delayed retry");
+  assert.ok(!html.includes('want = new URLSearchParams(location.search).get("action") === "new"'), "action=new must not use the legacy delayed route handler");
 });
