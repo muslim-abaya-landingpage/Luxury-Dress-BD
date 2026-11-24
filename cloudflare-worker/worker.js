@@ -214,6 +214,8 @@ export default {
     if (fbc) { ensureCookie('_fbc', fbc); }
     let resp;
     if (path === '/gtm.js') {
+      const mappedBrowserProfile = await resolveTrackingProfile(url.hostname, env);
+      if (!ALLOWED_HOSTS.includes(url.hostname.toLowerCase()) && !mappedBrowserProfile) return new Response('Forbidden', { status: 403 });
       const gtmUrl = 'https://www.googletagmanager.com/gtm.js' + url.search;
       const upstream = await fetch(gtmUrl, { headers: { 'User-Agent': request.headers.get('User-Agent') || '' } });
       let body = await upstream.text();
@@ -222,7 +224,6 @@ export default {
       // the admin panel's "save" is the one place that changes the live pixel — no GTM edit, no
       // redeploy. If nothing has been saved yet, the container's own hardcoded ID passes through
       // unchanged (the regexes just rewrite digits-for-digits, same length rules as isLikelyPixelId).
-      const mappedBrowserProfile = await resolveTrackingProfile(url.hostname, env);
       const [legacyMetaOverride, legacyTiktokOverride] = await Promise.all([
         getSiteSetting(env, 'meta_pixel_id'),
         getSiteSetting(env, 'tiktok_pixel_id')
