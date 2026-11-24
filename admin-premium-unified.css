@@ -375,3 +375,19 @@ html.wp-admin-shell .adm-sidebar .adm-nav-children > .adm-nav-child{
   }
   html.wp-admin-shell .adm-sidebar.is-collapsed .adm-nav-group.has-current > .adm-nav-children{display:none!important;}
 }
+
+
+/* Fix WordPress dashboard's duplicated sidebar offset.
+   The desktop shell uses a grid with an in-flow sticky sidebar, so the legacy
+   wp-admin margin-left must not be applied a second time to the content cell. */
+@media (min-width:981px){
+  html.wp-admin-shell .adm-shell > .adm-content:not(.adm-sidebar):not(.adm-sidebar-backdrop){
+    margin-left:0!important;
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+  }
+  html.wp-admin-shell .adm-shell:has(.adm-sidebar.is-collapsed) > .adm-content:not(.adm-sidebar):not(.adm-sidebar-backdrop):not(script):not(style){
+    margin-left:0!important;
+  }
+}
