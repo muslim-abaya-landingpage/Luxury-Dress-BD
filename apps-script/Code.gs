@@ -5026,8 +5026,7 @@ var GITHUB_PUBLISH_ALLOWED_PATHS_ = [
   'category-products.js',
   'product-links-data.js',
   'product-catalog-sections.js',
-  'product-config.js',
-  'site-header-config.js'
+  'product-config.js'
 ];
 
 function publishFileToGitHub_(e) {
