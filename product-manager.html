@@ -4425,6 +4425,7 @@
     var words = (Array.isArray(cfg.searchWords) ? cfg.searchWords : []).map(function (g) { return Array.isArray(g) ? g.join(", ") : String(g); }).join("\n");
     var brand = window.SITE_HEADER_CONFIG && window.SITE_HEADER_CONFIG.brand || {};
     var currentLogo = String(cfg.brand && cfg.brand.logoSrc || brand.logoSrc || "assets/logo-muslim-abaya.svg?v=20260603");
+    if (!/^https:\/\/images\.muslimabaya\.com\/images\/uploads\/[a-z0-9_-]+\.webp$/i.test(currentLogo) && !/^assets\/[a-z0-9._/-]+(?:\?v=[a-z0-9_-]+)?$/i.test(currentLogo)) currentLogo = "assets/logo-muslim-abaya.svg?v=20260603";
     var m = document.createElement("div");
     m.id = "pmStoreModal";
     m.setAttribute("role", "dialog"); m.setAttribute("aria-modal", "true"); m.setAttribute("aria-labelledby", "pmStoreTitle");
@@ -4442,7 +4443,7 @@
       '@media (max-width:600px){#pmStoreModal{padding:0}#pmStoreModal .ss-box{max-height:100vh;height:100%}#pmStoreModal .ss-row{grid-template-columns:1fr}}</style>' +
       '<div class="ss-box"><h1 id="pmStoreTitle">Store settings</h1>' +
       '<section><h2>Store logo</h2><p class="ss-help">আপনার প্রতিষ্ঠানের নিজস্ব লোগো আপলোড করুন। PNG, JPG অথবা WebP ছবি দিন; ওয়েবসাইটের হেডারে নতুন লোগো দেখাবে।</p>' +
-      '<div class="ss-logo"><img class="ss-logo-preview" id="ssLogoPreview" src="' + escapeHtml(currentLogo) + '" alt="Current store logo">' +
+      '<div class="ss-logo"><img class="ss-logo-preview" id="ssLogoPreview" alt="Current store logo">' +
       '<div class="ss-logo-controls"><input id="ssLogoFile" type="file" accept="image/png,image/jpeg,image/webp">' +
       '<button type="button" class="ss-go" id="ssLogoUpload">Upload &amp; save logo</button><span class="ss-help" id="ssLogoMsg" role="status" aria-live="polite">Maximum source size 12 MB. The image is optimized to WebP before upload.</span></div></div></section>' +
       '<section><h2>Delivery charge</h2><p class="ss-help">Used everywhere at once: product order form, checkout page, cart and the order server.</p>' +
@@ -4461,6 +4462,7 @@
     var pendingLogoUrl = "";
     var logoInput = m.querySelector("#ssLogoFile");
     var logoPreview = m.querySelector("#ssLogoPreview");
+    logoPreview.src = currentLogo;
     var logoMsg = m.querySelector("#ssLogoMsg");
     var logoButton = m.querySelector("#ssLogoUpload");
     var previewObjectUrl = "";
