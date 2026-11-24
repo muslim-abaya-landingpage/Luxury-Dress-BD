@@ -1,0 +1,120 @@
+/* Product Manager — Phase 2 header layout and hierarchy.
+   Presentation-only: preserves all existing buttons, IDs, handlers and workflows. */
+.pm-wp-admin .pl-admin-header{
+  box-sizing:border-box!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(280px,auto)!important;
+  grid-template-rows:auto auto auto auto!important;
+  align-items:center!important;
+  gap:5px 24px!important;
+  width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:24px clamp(20px,2.2vw,36px) 18px!important;
+  border:0!important;
+  border-bottom:1px solid #e2e7ee!important;
+  border-radius:0!important;
+  background:#fff!important;
+  box-shadow:none!important;
+}
+.pm-wp-admin .pl-admin-header > .pl-back{display:none!important}
+.pm-wp-admin .pl-admin-header > .adm-menu-btn{display:none!important}
+.pm-wp-admin .pl-admin-header > .adm-heading{
+  grid-column:1!important;grid-row:1!important;
+  min-width:0!important;margin:0!important;
+}
+.pm-wp-admin .pl-admin-header .adm-page-kicker{
+  display:block!important;margin:0 0 4px!important;
+  color:#667085!important;font-size:11px!important;
+  font-weight:650!important;letter-spacing:.075em!important;
+  line-height:1.4!important;text-transform:uppercase!important;
+}
+.pm-wp-admin .pl-admin-header h1{
+  margin:0!important;color:#1d2939!important;
+  font-size:27px!important;font-weight:700!important;
+  line-height:1.2!important;letter-spacing:-.035em!important;
+}
+.pm-wp-admin .pl-admin-header > p:not(#pmSaveStatus){
+  grid-column:1!important;grid-row:2!important;
+  max-width:760px!important;min-width:0!important;
+  margin:2px 0 0!important;color:#667085!important;
+  font-size:13px!important;line-height:1.55!important;
+}
+.pm-wp-admin .pl-admin-header > .pm-header-actions{
+  grid-column:2!important;grid-row:1 / span 2!important;
+  display:flex!important;align-items:center!important;
+  justify-content:flex-end!important;align-content:center!important;
+  flex-wrap:wrap!important;gap:8px!important;
+  min-width:0!important;margin:0!important;
+}
+.pm-wp-admin .pl-admin-header .pm-header-actions .pl-btn{
+  display:inline-flex!important;align-items:center!important;
+  justify-content:center!important;white-space:nowrap!important;
+  min-height:38px!important;padding:7px 13px!important;
+  border:1px solid #d0d7e2!important;border-radius:7px!important;
+  background:#fff!important;color:#344054!important;
+  font-size:12px!important;font-weight:650!important;
+  line-height:1.2!important;box-shadow:none!important;
+}
+.pm-wp-admin .pl-admin-header .pm-header-actions .pm-header-add,
+.pm-wp-admin .pl-admin-header .pm-header-actions #pmSave{
+  border-color:#203b59!important;background:#203b59!important;color:#fff!important;
+}
+.pm-wp-admin .pl-admin-header .pm-header-actions .pm-header-add:hover,
+.pm-wp-admin .pl-admin-header .pm-header-actions #pmSave:hover{
+  border-color:#142b43!important;background:#142b43!important;
+}
+.pm-wp-admin .pl-admin-header .pm-header-actions .pl-btn-secondary:hover{
+  border-color:#98a2b3!important;background:#f8fafc!important;
+}
+.pm-wp-admin .pl-admin-header #pmSaveStatus{
+  grid-column:1 / -1!important;grid-row:3!important;
+  margin:8px 0 0!important;padding:8px 11px!important;
+  border:1px solid #e8edf3!important;border-radius:6px!important;
+  background:#f8fafc!important;color:#667085!important;
+  font-size:11px!important;line-height:1.45!important;
+}
+.pm-wp-admin .pl-admin-header .adm-product-tools{
+  grid-column:1 / -1!important;grid-row:4!important;
+  min-width:0!important;margin:3px 0 0!important;
+}
+.pm-wp-admin .pl-admin-header .adm-product-tools > summary{
+  display:inline-flex!important;align-items:center!important;
+  min-height:28px!important;color:#475467!important;
+  font-size:12px!important;font-weight:600!important;cursor:pointer!important;
+}
+.pm-wp-admin .pl-admin-header .adm-product-tools .pl-toolbar{
+  display:flex!important;flex-wrap:wrap!important;gap:7px!important;
+  padding:10px 0 2px!important;
+}
+@media(max-width:980px){
+  .pm-wp-admin .pl-admin-header{
+    grid-template-columns:minmax(0,1fr)!important;
+    grid-template-rows:auto auto auto auto auto auto!important;
+    gap:8px!important;padding:18px 20px 15px!important;
+  }
+  .pm-wp-admin .pl-admin-header > .adm-menu-btn{
+    display:inline-flex!important;grid-column:1!important;grid-row:1!important;
+    justify-self:start!important;align-items:center!important;
+    min-width:38px!important;min-height:38px!important;
+  }
+  .pm-wp-admin .pl-admin-header > .adm-heading{grid-column:1!important;grid-row:2!important}
+  .pm-wp-admin .pl-admin-header > p:not(#pmSaveStatus){grid-column:1!important;grid-row:3!important}
+  .pm-wp-admin .pl-admin-header > .pm-header-actions{
+    grid-column:1!important;grid-row:4!important;
+    justify-content:flex-start!important;
+  }
+  .pm-wp-admin .pl-admin-header #pmSaveStatus{grid-column:1!important;grid-row:5!important}
+  .pm-wp-admin .pl-admin-header .adm-product-tools{grid-column:1!important;grid-row:6!important}
+}
+@media(max-width:600px){
+  .pm-wp-admin .pl-admin-header{padding:14px 14px 12px!important;gap:7px!important}
+  .pm-wp-admin .pl-admin-header h1{font-size:23px!important}
+  .pm-wp-admin .pl-admin-header > p:not(#pmSaveStatus){font-size:12px!important}
+  .pm-wp-admin .pl-admin-header > .pm-header-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;width:100%!important;gap:7px!important}
+  .pm-wp-admin .pl-admin-header .pm-header-actions .pl-btn{width:100%!important;min-width:0!important;padding:8px 7px!important;white-space:normal!important}
+  .pm-wp-admin .pl-admin-header #pmSaveStatus{margin-top:3px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .pm-wp-admin .pl-admin-header .pl-btn{transition:none!important}
+}
