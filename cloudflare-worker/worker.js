@@ -1,5 +1,6 @@
 import { scoreFraudRisk } from './fraud-risk.js';
 import { persistFraudReview } from './fraud-review.js';
+import { handleTrackingAdmin } from './tracking-admin.js';
 // Muslim Abaya first-party tracking worker.
 // Routes: muslimabaya.com/gtm.js*  (GTM loader, unchanged)
 //         muslimabaya.com/_ma/*    (Meta Conversions API endpoint, added 2026-10-23)
@@ -173,6 +174,9 @@ export default {
     }
     if (path === '/_ma/admin/order-settings' && request.method === 'POST') {
       return handleOrderSettingsPost(request, env);
+    }
+    if (path === '/_ma/admin/tracking') {
+      return handleTrackingAdmin(request, env, url, verifyAdminToken);
     }
     if (path === '/_ma/admin/settings' && request.method === 'GET') {
       return handleAdminSettingsGet(request, env, url);
