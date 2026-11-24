@@ -4424,7 +4424,7 @@
     var d = window.maDelivery ? window.maDelivery.settings() : { dhaka: 80, outside: 150, freeQty: 3 };
     var words = (Array.isArray(cfg.searchWords) ? cfg.searchWords : []).map(function (g) { return Array.isArray(g) ? g.join(", ") : String(g); }).join("\n");
     var brand = window.SITE_HEADER_CONFIG && window.SITE_HEADER_CONFIG.brand || {};
-    var currentLogo = String(brand.logoSrc || "assets/logo-muslim-abaya.svg?v=20260603");
+    var currentLogo = String(cfg.brand && cfg.brand.logoSrc || brand.logoSrc || "assets/logo-muslim-abaya.svg?v=20260603");
     var m = document.createElement("div");
     m.id = "pmStoreModal";
     m.setAttribute("role", "dialog"); m.setAttribute("aria-modal", "true"); m.setAttribute("aria-labelledby", "pmStoreTitle");
@@ -4457,6 +4457,7 @@
     document.body.appendChild(m);
     var close = function () { m.remove(); };
 
+
     var pendingLogoUrl = "";
     var logoInput = m.querySelector("#ssLogoFile");
     var logoPreview = m.querySelector("#ssLogoPreview");
@@ -4466,6 +4467,7 @@
     logoInput.addEventListener("change", function () {
       var file = logoInput.files && logoInput.files[0];
       if (!file) return;
+      pendingLogoUrl = "";
       if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
       previewObjectUrl = URL.createObjectURL(file);
       logoPreview.src = previewObjectUrl;
@@ -4516,6 +4518,7 @@
       if (!file && !pendingLogoUrl) { logoMsg.textContent = "Choose your company logo first."; return; }
       logoButton.disabled = true;
       logoMsg.style.color = "#646970";
+      var previousBrand = cfg.brand;
       try {
         if (!pendingLogoUrl) {
           logoMsg.textContent = "Optimizing and uploading logo…";
@@ -4530,17 +4533,13 @@
           pendingLogoUrl = upload.url;
         }
         logoMsg.textContent = "Saving logo settings…";
-        var response = await fetch("/site-header-config.js?logo_edit=" + Date.now(), { cache: "no-store" });
-        if (!response.ok) throw new Error("Could not load the current brand settings.");
-        var configText = await response.text();
-        var replaced = false;
-        var updatedConfig = configText.replace(/(brand\s*:\s*\{[\s\S]*?\blogoSrc\s*:\s*)(["'])(.*?)\2/, function (_match, prefix) {
-          replaced = true;
-          return prefix + JSON.stringify(pendingLogoUrl);
-        });
-        if (!replaced) throw new Error("Brand logo setting was not found in site-header-config.js.");
-        var saved = await window.MaAdmin.publishFile("site-header-config.js", updatedConfig, "Update company logo from Store settings");
-        if (!saved || !saved.ok) throw new Error(saved && (saved.message || saved.error) || "Could not save the logo settings.");
+        cfg.brand = Object.assign({}, cfg.brand || {}, { logoSrc: pendingLogoUrl });
+        try {
+          await saveAll(null);
+        } catch (saveError) {
+          if (previousBrand) cfg.brand = previousBrand; else delete cfg.brand;
+          throw saveError;
+        }
         if (window.SITE_HEADER_CONFIG && window.SITE_HEADER_CONFIG.brand) window.SITE_HEADER_CONFIG.brand.logoSrc = pendingLogoUrl;
         logoPreview.src = pendingLogoUrl;
         logoInput.value = "";
