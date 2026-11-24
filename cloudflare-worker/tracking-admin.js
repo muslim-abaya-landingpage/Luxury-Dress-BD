@@ -104,8 +104,13 @@ async function saveProfile(request, env, admin) {
   let metaCipher = null;
   let tiktokCipher = null;
   try {
-    if (body.metaAccessToken) metaCipher = await encryptToken(cleanText(body.metaAccessToken, 5000), env);
-    if (body.tiktokAccessToken) tiktokCipher = await encryptToken(cleanText(body.tiktokAccessToken, 5000), env);
+    for (const raw of [body.metaAccessToken, body.tiktokAccessToken]) {
+      if (raw != null && (typeof raw !== 'string' || raw.length > 5000 || !raw.trim())) {
+        return json({ ok: false, error: 'INVALID_ACCESS_TOKEN' }, 400);
+      }
+    }
+    if (body.metaAccessToken) metaCipher = await encryptToken(body.metaAccessToken.trim(), env);
+    if (body.tiktokAccessToken) tiktokCipher = await encryptToken(body.tiktokAccessToken.trim(), env);
   } catch (error) {
     const code = String(error && error.message || '');
     return json({ ok: false, error: code === 'TRACKING_ENCRYPTION_KEY_MISSING' ? code : 'TRACKING_ENCRYPTION_UNAVAILABLE' }, 503);
@@ -165,7 +170,14 @@ export async function handleTrackingAdmin(request, env, url, verifyAdminToken) {
   }
   let body = {};
   if (request.method === 'POST' || request.method === 'DELETE') {
-    try { body = await request.clone().json(); } catch (error) { return json({ ok: false, error: 'BAD_JSON' }, 400); }
+    const declaredLength = Number(request.headers.get('Content-Length') || 0);
+    if (declaredLength > 16384) return json({ ok: false, error: 'PAYLOAD_TOO_LARGE' }, 413);
+    try {
+      const raw = await request.clone().text();
+      if (raw.length > 16384) return json({ ok: false, error: 'PAYLOAD_TOO_LARGE' }, 413);
+      body = JSON.parse(raw);
+      if (!body || typeof body !== 'object' || Array.isArray(body)) return json({ ok: false, error: 'BAD_JSON' }, 400);
+    } catch (error) { return json({ ok: false, error: 'BAD_JSON' }, 400); }
   }
   const token = url.searchParams.get('token') || body.token || '';
   const admin = await verifyAdminToken(env, token);
