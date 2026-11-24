@@ -204,6 +204,9 @@ export async function resolveTrackingProfile(hostname, env) {
 export async function claimTrackingEvent(env, profileId, provider, eventId) {
   const dedupKey = String(profileId) + ':' + provider + ':' + String(eventId);
   const now = Math.floor(Date.now() / 1000);
+  await env.DB.prepare(
+    'DELETE FROM tracking_event_dedup WHERE profile_id = ? AND provider = ? AND event_id = ? AND expires_at <= ?'
+  ).bind(profileId, provider, eventId, now).run();
   const result = await env.DB.prepare(
     'INSERT OR IGNORE INTO tracking_event_dedup (dedup_key, profile_id, provider, event_id, expires_at, created_at) ' +
     'VALUES (?, ?, ?, ?, ?, ?)'
