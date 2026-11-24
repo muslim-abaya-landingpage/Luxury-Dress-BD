@@ -14,6 +14,7 @@ on:
     branches: [main]
     paths:
       - "cloudflare-worker/**"
+      - "tests/backend/tracking-admin-api.test.mjs"
       - "functions/_lib/ip-guard.js"
       - ".github/workflows/worker-deploy.yml"
       - "tests/backend/device-token.test.mjs"
@@ -63,7 +64,7 @@ jobs:
 
       - name: Worker tests (order queue, IP blocking, fraud risk, device token)
         if: steps.creds.outputs.ready == 'true'
-        run: node --test tests/backend/order-ip-guard.test.mjs tests/backend/landing-order-queue.test.mjs tests/backend/fraud-risk.test.mjs tests/backend/fraud-review.test.mjs tests/backend/device-token.test.mjs tests/backend/order-otp.test.mjs
+        run: node --test tests/backend/order-ip-guard.test.mjs tests/backend/landing-order-queue.test.mjs tests/backend/fraud-risk.test.mjs tests/backend/fraud-review.test.mjs tests/backend/device-token.test.mjs tests/backend/order-otp.test.mjs tests/backend/tracking-admin-api.test.mjs
 
       - name: Back up the live Worker code
         if: steps.creds.outputs.ready == 'true'
@@ -92,6 +93,7 @@ jobs:
           set -euo pipefail
           node --check cloudflare-worker/worker.js
           node --check cloudflare-worker/fraud-review.js
+          node --check cloudflare-worker/tracking-admin.js
           status=$(curl -sS -w '%{http_code}' -X PUT -H "Authorization: Bearer $CF_TOKEN" \
             -F 'metadata={"main_module":"worker.js"};type=application/json' \
             -F "worker.js=@cloudflare-worker/worker.js;type=application/javascript+module" \
@@ -119,6 +121,7 @@ jobs:
             if(!raw.includes(want)){console.error('Live Worker response does not contain the current worker.js'); process.exit(1)}
             if(!raw.includes(moduleName)){console.error('Live Worker response is missing '+moduleName); process.exit(1)}
             if(!raw.includes('fraud-review.js')){console.error('Live Worker response is missing fraud-review.js'); process.exit(1)}
+            if(!raw.includes('tracking-admin.js')){console.error('Live Worker response is missing tracking-admin.js'); process.exit(1)}
             console.log('Live Worker response contains worker.js and '+moduleName+':', h(want).slice(0,12));"
           sleep 5
           test "$(curl -s -o /dev/null -w '%{http_code}' https://muslimabaya.com/_ma/order)" = "405"
