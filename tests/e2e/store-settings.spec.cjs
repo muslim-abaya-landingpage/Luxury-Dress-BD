@@ -86,3 +86,43 @@ test('announcement bar follows the free-delivery setting', async ({ page }) => {
   await page.goto('/index.html');
   await expect(page.locator('.ann-slide', { hasText: 'Nationwide Home Delivery' })).toHaveText(/Nationwide Home Delivery · Cash on Delivery/);
 });
+
+
+test('owner uploads a company logo and saves the brand setting', async ({ page }) => {
+  await openManager(page);
+  await page.evaluate(() => {
+    window.__logoUpload = null;
+    window.__logoPublished = null;
+    window.MaAdmin.uploadImage = (path, content, mimeType) => {
+      window.__logoUpload = { path, contentLength: content.length, mimeType };
+      return Promise.resolve({ ok: true, url: 'https://images.muslimabaya.com/images/uploads/brand-logo-test-123.webp' });
+    };
+  });
+  await page.evaluate(() => window.pmOpenStoreSettings());
+  await page.locator('#ssLogoFile').setInputFiles({
+    name: 'company-logo.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64')
+  });
+  await page.locator('#ssLogoUpload').click();
+  await expect(page.locator('#ssLogoMsg')).toContainText('Logo saved', { timeout: 15000 });
+  const result = await page.evaluate(() => ({ upload: window.__logoUpload, files: window.__published }));
+  expect(result.upload.path).toMatch(/^images\/uploads\/brand-logo-[a-z0-9-]+\.webp$/);
+  expect(result.upload.mimeType).toBe('image/webp');
+  expect(result.upload.contentLength).toBeGreaterThan(0);
+  const config = result.files.find((file) => file.path === 'product-config.js');
+  expect(config).toBeTruthy();
+  expect(config.content).toContain('"brand"');
+  expect(config.content).toContain('https://images.muslimabaya.com/images/uploads/brand-logo-test-123.webp');
+});
+
+test('storefront renders an uploaded first-party CDN logo URL without rewriting it as a local path', async ({ page }) => {
+  const logo = 'https://images.muslimabaya.com/images/uploads/brand-logo-test-123.webp';
+  await page.route('**/site-header-config.js*', async (route) => {
+    const config = fs.readFileSync(path.join(__dirname, '../../site-header-config.js'), 'utf8');
+    const updated = config.replace(/(brand\s*:\s*\{[\s\S]*?\blogoSrc\s*:\s*)(["'])(.*?)\2/, (_match, prefix) => prefix + JSON.stringify(logo));
+    await route.fulfill({ contentType: 'application/javascript', body: updated });
+  });
+  await page.goto('/');
+  await expect(page.locator('.brand-logo-img')).toHaveAttribute('src', logo);
+});
