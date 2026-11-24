@@ -98,15 +98,14 @@
     var $=function(id){return document.getElementById(id);};
     function msg(id,text,ok){$(id).textContent=text;$(id).className='terp-status '+(ok?'ok':'err');}
     function request(method,body){
-      var options={method:method,headers:{'Content-Type':'application/json'}};
-      if(body) options.body=JSON.stringify(Object.assign({token:session.token},body));
-      var url=API+(method==='GET'?'?token='+encodeURIComponent(session.token):'');
-      return fetch(url,options).then(function(r){return r.json().then(function(j){if(!r.ok||!j.ok)throw new Error(j.error||'REQUEST_FAILED');return j;});});
+      var options={method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin'};
+      options.body=JSON.stringify(Object.assign({token:session.token},body||{}));
+      return fetch(API,options).then(function(r){return r.json().then(function(j){if(!r.ok||!j.ok)throw new Error(j.error||'REQUEST_FAILED');return j;});});
     }
     function escapeHtml(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
     function renderProfiles(){
       $('profileList').innerHTML=profiles.length?profiles.map(function(p){
-        var domains=p.domains.map(function(d){return '<span class="terp-domain">'+escapeHtml(d.hostname)+'</span>';}).join('');
+        var domains=p.domains.map(function(d){return '<span class="terp-domain">'+escapeHtml(d.hostname)+' <button type="button" data-remove-domain="'+d.id+'" aria-label="Remove '+escapeHtml(d.hostname)+'" style="border:0;background:transparent;color:#b42318;cursor:pointer">×</button></span>';}).join('');
         return '<article class="terp-profile"><div class="terp-profile-top"><div><strong>'+escapeHtml(p.name)+'</strong><div class="terp-muted">'+escapeHtml(p.key)+' · Meta: '+escapeHtml(p.metaPixelId||'—')+' · TikTok: '+escapeHtml(p.tiktokPixelId||'—')+'</div></div><span class="terp-pill '+(p.enabled?'on':'off')+'">'+(p.enabled?'Enabled':'Disabled')+'</span></div><div class="terp-muted">Meta Token: '+(p.metaTokenConfigured?'Configured':'Missing')+' · TikTok Token: '+(p.tiktokTokenConfigured?'Configured':'Missing')+'</div><div class="terp-domains">'+(domains||'<span class="terp-muted">কোনো Domain যুক্ত নেই</span>')+'</div><div class="terp-actions"><button type="button" class="adm-btn adm-btn-secondary" data-edit="'+p.id+'">Edit</button><button type="button" class="adm-btn adm-btn-secondary" data-toggle="'+p.id+'" data-enabled="'+(!p.enabled)+'">'+(p.enabled?'Disable':'Enable')+'</button></div></article>';
       }).join(''):'<div class="terp-muted">এখনো কোনো Profile নেই। প্রথম Profile তৈরি করুন।</div>';
       $('domainProfile').innerHTML='<option value="">Profile নির্বাচন করুন</option>'+profiles.filter(function(p){return p.enabled;}).map(function(p){return '<option value="'+p.id+'">'+escapeHtml(p.name)+'</option>';}).join('');
@@ -118,7 +117,7 @@
       }).catch(function(e){$('logsBody').innerHTML='<tr><td colspan="7">Logs পাওয়া যায়নি: '+escapeHtml(e.message)+'</td></tr>';});
     }
     function load(){
-      request('GET').then(function(r){profiles=r.profiles||[];renderProfiles();loadLogs();})
+      request('POST',{action:'list'}).then(function(r){profiles=r.profiles||[];renderProfiles();loadLogs();})
         .catch(function(e){$('profileList').textContent='Tracking API প্রস্তুত নয়: '+e.message+'. Preview D1 migration ও Worker configuration প্রয়োজন।';});
     }
     function clearForm(){
@@ -133,13 +132,14 @@
         .finally(function(){$('saveProfileBtn').disabled=false;});
     });
     $('profileList').addEventListener('click',function(e){
-      var edit=e.target.closest('[data-edit]'), toggle=e.target.closest('[data-toggle]');
+      var edit=e.target.closest('[data-edit]'), toggle=e.target.closest('[data-toggle]'), remove=e.target.closest('[data-remove-domain]');
       if(edit){var p=profiles.find(function(x){return String(x.id)===edit.getAttribute('data-edit');});if(!p)return;
         $('profileKey').value=p.key;$('profileKey').disabled=true;$('profileName').value=p.name;$('metaPixel').value=p.metaPixelId;$('tiktokPixel').value=p.tiktokPixelId;$('metaToken').value='';$('tiktokToken').value='';
         document.querySelectorAll('input[name="matching"]').forEach(function(x){x.checked=p.config.advancedMatching.indexOf(x.value)>=0;});
         $('formTitle').textContent='Profile সম্পাদনা: '+p.name;$('saveProfileBtn').textContent='Update Profile';window.scrollTo({top:0,behavior:'smooth'});
       }
       if(toggle){request('POST',{action:'profile.toggle',profileId:Number(toggle.getAttribute('data-toggle')),enabled:toggle.getAttribute('data-enabled')==='true'}).then(load).catch(function(err){alert('Update failed: '+err.message);});}
+      if(remove){var domainId=Number(remove.getAttribute('data-remove-domain'));if(confirm('এই Domain Mapping মুছে ফেলবেন?'))request('POST',{action:'domain.remove',domainId:domainId}).then(load).catch(function(err){alert('Domain remove failed: '+err.message);});}
     });
     $('domainForm').addEventListener('submit',function(e){e.preventDefault();request('POST',{action:'domain.add',profileId:Number($('domainProfile').value),hostname:$('domainHost').value.trim()}).then(function(){msg('domainMsg','Domain যুক্ত হয়েছে।',true);$('domainHost').value='';load();}).catch(function(err){msg('domainMsg','Domain যোগ হয়নি: '+err.message,false);});});
     $('resetBtn').addEventListener('click',clearForm);$('refreshBtn').addEventListener('click',load);$('loadLogsBtn').addEventListener('click',loadLogs);
