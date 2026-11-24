@@ -221,10 +221,18 @@ export default {
       // the admin panel's "save" is the one place that changes the live pixel — no GTM edit, no
       // redeploy. If nothing has been saved yet, the container's own hardcoded ID passes through
       // unchanged (the regexes just rewrite digits-for-digits, same length rules as isLikelyPixelId).
-      const [metaOverride, tiktokOverride] = await Promise.all([
+      const mappedBrowserProfile = await resolveTrackingProfile(url.hostname, env);
+      const [legacyMetaOverride, legacyTiktokOverride] = await Promise.all([
         getSiteSetting(env, 'meta_pixel_id'),
         getSiteSetting(env, 'tiktok_pixel_id')
       ]);
+      // Mapped domains must never inherit another profile's global Pixel IDs.
+      const metaOverride = mappedBrowserProfile
+        ? (mappedBrowserProfile.metaPixelId || '000000000000000000')
+        : legacyMetaOverride;
+      const tiktokOverride = mappedBrowserProfile
+        ? (mappedBrowserProfile.tiktokPixelId || '000000000000000000')
+        : legacyTiktokOverride;
       if (metaOverride) {
         body = body
           .replace(/(fbq\(\s*"init"\s*,\s*")(\d+)(")/g, '$1' + metaOverride + '$3')
@@ -235,7 +243,8 @@ export default {
         body = body.split(TIKTOK_PIXEL_ID).join(tiktokOverride);
       }
       resp = new Response(body, upstream);
-      resp.headers.set('Cache-Control', 'public, max-age=300');
+      resp.headers.set('Cache-Control', mappedBrowserProfile ? 'private, max-age=60' : 'public, max-age=300');
+      if (mappedBrowserProfile) resp.headers.set('Vary', 'Host');
       resp.headers.set('Content-Type', 'application/javascript; charset=utf-8');
     } else if (path === '/gtag/js') {
       const gtagUrl = 'https://www.googletagmanager.com/gtag/js' + url.search;
