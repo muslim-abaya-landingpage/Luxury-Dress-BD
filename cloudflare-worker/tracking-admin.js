@@ -105,12 +105,12 @@ async function saveProfile(request, env, admin) {
   let tiktokCipher = null;
   try {
     for (const raw of [body.metaAccessToken, body.tiktokAccessToken]) {
-      if (raw != null && (typeof raw !== 'string' || raw.length > 5000 || !raw.trim())) {
+      if (raw != null && raw !== '' && (typeof raw !== 'string' || raw.length > 5000 || !raw.trim())) {
         return json({ ok: false, error: 'INVALID_ACCESS_TOKEN' }, 400);
       }
     }
-    if (body.metaAccessToken) metaCipher = await encryptToken(body.metaAccessToken.trim(), env);
-    if (body.tiktokAccessToken) tiktokCipher = await encryptToken(body.tiktokAccessToken.trim(), env);
+    if (typeof body.metaAccessToken === 'string' && body.metaAccessToken.trim()) metaCipher = await encryptToken(body.metaAccessToken.trim(), env);
+    if (typeof body.tiktokAccessToken === 'string' && body.tiktokAccessToken.trim()) tiktokCipher = await encryptToken(body.tiktokAccessToken.trim(), env);
   } catch (error) {
     const code = String(error && error.message || '');
     return json({ ok: false, error: code === 'TRACKING_ENCRYPTION_KEY_MISSING' ? code : 'TRACKING_ENCRYPTION_UNAVAILABLE' }, 503);
