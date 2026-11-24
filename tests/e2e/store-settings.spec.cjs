@@ -97,10 +97,6 @@ test('owner uploads a company logo and saves the brand setting', async ({ page }
       window.__logoUpload = { path, contentLength: content.length, mimeType };
       return Promise.resolve({ ok: true, url: 'https://images.muslimabaya.com/images/uploads/brand-logo-test-123.webp' });
     };
-    window.MaAdmin.publishFile = (path, content, message) => {
-      window.__logoPublished = { path, content, message };
-      return Promise.resolve({ ok: true, commitUrl: 'https://github.com/example/commit/abc' });
-    };
   });
   await page.evaluate(() => window.pmOpenStoreSettings());
   await page.locator('#ssLogoFile').setInputFiles({
@@ -110,13 +106,14 @@ test('owner uploads a company logo and saves the brand setting', async ({ page }
   });
   await page.locator('#ssLogoUpload').click();
   await expect(page.locator('#ssLogoMsg')).toContainText('Logo saved', { timeout: 15000 });
-  const result = await page.evaluate(() => ({ upload: window.__logoUpload, publish: window.__logoPublished }));
+  const result = await page.evaluate(() => ({ upload: window.__logoUpload, files: window.__published }));
   expect(result.upload.path).toMatch(/^images\/uploads\/brand-logo-[a-z0-9-]+\.webp$/);
   expect(result.upload.mimeType).toBe('image/webp');
   expect(result.upload.contentLength).toBeGreaterThan(0);
-  expect(result.publish.path).toBe('site-header-config.js');
-  expect(result.publish.content).toContain('https://images.muslimabaya.com/images/uploads/brand-logo-test-123.webp');
-  expect(result.publish.message).toContain('company logo');
+  const config = result.files.find((file) => file.path === 'product-config.js');
+  expect(config).toBeTruthy();
+  expect(config.content).toContain('"brand"');
+  expect(config.content).toContain('https://images.muslimabaya.com/images/uploads/brand-logo-test-123.webp');
 });
 
 test('storefront renders an uploaded first-party CDN logo URL without rewriting it as a local path', async ({ page }) => {
