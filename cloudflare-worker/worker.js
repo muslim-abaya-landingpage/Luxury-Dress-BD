@@ -1,6 +1,6 @@
 import { scoreFraudRisk } from './fraud-risk.js';
 import { persistFraudReview } from './fraud-review.js';
-import { handleTrackingAdmin } from './tracking-admin.js';
+import { handleTrackingAdmin, resolveTrackingProfile, decryptTrackingToken, claimTrackingEvent, logTrackingEvent } from './tracking-admin.js';
 // Muslim Abaya first-party tracking worker.
 // Routes: muslimabaya.com/gtm.js*  (GTM loader, unchanged)
 //         muslimabaya.com/_ma/*    (Meta Conversions API endpoint, added 2026-10-23)
@@ -1320,15 +1320,156 @@ function cleanContents(list) {
   return out.length ? out : undefined;
 }
 
+
+async function handleProfileEvent(request, env, ctx, url, body, profile, hostname) {
+  const eventName = String(body.event_name || '');
+  const eventId = cleanStr(body.event_id, 120);
+  const cookies = parseCookies(request.headers.get('Cookie'));
+  const u = body.user_data && typeof body.user_data === 'object' ? body.user_data : {};
+  const cd = body.custom_data && typeof body.custom_data === 'object' ? body.custom_data : {};
+  const customData = {
+    currency: cleanStr(cd.currency, 3) || 'BDT',
+    value: num(cd.value),
+    contents: cleanContents(cd.contents),
+    content_type: cleanStr(cd.content_type, 20),
+    order_id: cleanStr(cd.order_id, 120),
+    num_items: num(cd.num_items)
+  };
+  if (customData.contents) customData.content_ids = customData.contents.map((item) => item.id);
+  for (const key of Object.keys(customData)) if (customData[key] === undefined) delete customData[key];
+  if (eventName === 'PageView' || eventName === 'Lead') delete customData.currency;
+
+  const sourceUrlCandidate = cleanStr(body.event_source_url, 1000);
+  const sourceUrl = sourceUrlCandidate && hostOf(sourceUrlCandidate) === hostname
+    ? sourceUrlCandidate
+    : (request.headers.get('Referer') || undefined);
+  const matching = new Set(profile.config.advancedMatching || []);
+  const userData = {
+    client_ip_address: request.headers.get('CF-Connecting-IP') || undefined,
+    client_user_agent: request.headers.get('User-Agent') || undefined,
+    fbp: cleanStr(cookies['_fbp'] || u.fbp, 200),
+    fbc: cleanStr(cookies['_fbc'] || u.fbc, 500)
+  };
+  if (matching.has('em')) {
+    const em = await hashField(u.em || u.email);
+    if (em) userData.em = [em];
+  }
+  if (matching.has('ph')) {
+    const ph = await hashField(u.ph || u.phone, normalizePhone);
+    if (ph) userData.ph = [ph];
+  }
+  if (matching.has('fn')) {
+    const fn = await hashField(u.fn || u.first_name, normalizeName);
+    if (fn) userData.fn = [fn];
+  }
+  if (matching.has('ln')) {
+    const ln = await hashField(u.ln || u.last_name, normalizeName);
+    if (ln) userData.ln = [ln];
+  }
+  if (matching.has('external_id')) {
+    const ext = await hashField(u.external_id, (value) => String(value).trim().toLowerCase());
+    if (ext) userData.external_id = [ext];
+  }
+  if (userData.em || userData.ph) userData.country = [await sha256('bd')];
+  for (const key of Object.keys(userData)) if (userData[key] === undefined) delete userData[key];
+
+  let metaToken = '';
+  let tiktokToken = '';
+  try {
+    if (profile.metaTokenCiphertext) metaToken = await decryptTrackingToken(profile.metaTokenCiphertext, env);
+    if (profile.tiktokTokenCiphertext) tiktokToken = await decryptTrackingToken(profile.tiktokTokenCiphertext, env);
+  } catch (error) {
+    const code = String(error && error.message || 'TOKEN_DECRYPT_FAILED').slice(0, 80);
+    if (profile.metaPixelId) ctx.waitUntil(logTrackingEvent(env, { profileId: profile.id, hostname, provider: 'meta', eventName, eventId, status: 'failed', errorCode: code }));
+    if (profile.tiktokPixelId) ctx.waitUntil(logTrackingEvent(env, { profileId: profile.id, hostname, provider: 'tiktok', eventName, eventId: body.tt_event_id, status: 'failed', errorCode: code }));
+    return noContent({ 'X-MA-TRACKING': 'credential-error' });
+  }
+
+  const tasks = [];
+  if (profile.config.events[eventName] === false) {
+    if (profile.metaPixelId) tasks.push(logTrackingEvent(env, { profileId: profile.id, hostname, provider: 'meta', eventName, eventId, status: 'skipped', errorCode: 'EVENT_DISABLED' }));
+    if (profile.tiktokPixelId) tasks.push(logTrackingEvent(env, { profileId: profile.id, hostname, provider: 'tiktok', eventName, eventId: body.tt_event_id, status: 'skipped', errorCode: 'EVENT_DISABLED' }));
+    ctx.waitUntil(Promise.all(tasks));
+    return noContent({ 'X-MA-TRACKING': 'event-disabled' });
+  }
+
+  if (profile.metaPixelId && metaToken) {
+    const claimed = await claimTrackingEvent(env, profile.id, 'meta', eventId);
+    if (!claimed) {
+      tasks.push(logTrackingEvent(env, { profileId: profile.id, hostname, provider: 'meta', eventName, eventId, status: 'duplicate', errorCode: 'DUPLICATE_EVENT' }));
+    } else {
+      const event = {
+        event_name: eventName,
+        event_time: Math.floor(Date.now() / 1000),
+        event_id: eventId,
+        action_source: 'website',
+        event_source_url: sourceUrl,
+        user_data: userData
+      };
+      if (Object.keys(customData).length) event.custom_data = customData;
+      const payload = { data: [event] };
+      if (env.META_TEST_EVENT_CODE) payload.test_event_code = env.META_TEST_EVENT_CODE;
+      const endpoint = 'https://graph.facebook.com/' + META_API_VERSION + '/' + encodeURIComponent(profile.metaPixelId) + '/events?access_token=' + encodeURIComponent(metaToken);
+      const send = fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+        .then(async (response) => {
+          let data = {};
+          try { data = await response.json(); } catch (error) {}
+          const ok = response.ok && !(data.error);
+          await logTrackingEvent(env, { profileId: profile.id, hostname, provider: 'meta', eventName, eventId,
+            status: ok ? 'sent' : 'failed', httpStatus: response.status,
+            errorCode: ok ? '' : cleanStr(data.error && data.error.code || 'META_API_ERROR', 80),
+            traceId: cleanStr(data.fbtrace_id, 120) });
+        }).catch(async () => {
+          await logTrackingEvent(env, { profileId: profile.id, hostname, provider: 'meta', eventName, eventId, status: 'failed', errorCode: 'NETWORK_ERROR' });
+        });
+      tasks.push(send);
+    }
+  } else if (profile.metaPixelId) {
+    tasks.push(logTrackingEvent(env, { profileId: profile.id, hostname, provider: 'meta', eventName, eventId, status: 'skipped', errorCode: 'META_TOKEN_NOT_CONFIGURED' }));
+  }
+
+  const ttEventId = cleanStr(body.tt_event_id || eventId, 120);
+  if (profile.tiktokPixelId && tiktokToken && ttEventId) {
+    const claimed = await claimTrackingEvent(env, profile.id, 'tiktok', ttEventId);
+    if (!claimed) {
+      tasks.push(logTrackingEvent(env, { profileId: profile.id, hostname, provider: 'tiktok', eventName, eventId: ttEventId, status: 'duplicate', errorCode: 'DUPLICATE_EVENT' }));
+    } else {
+      const profileEnv = Object.assign({}, env, { TIKTOK_EAPI_TOKEN: tiktokToken });
+      const ttRequest = await buildTikTok(request, profileEnv, body, u, cookies, customData, sourceUrl, profile);
+      if (ttRequest) {
+        const send = fetch(TIKTOK_ENDPOINT, ttRequest).then(async (response) => {
+          let data = {};
+          try { data = await response.json(); } catch (error) {}
+          const ok = response.ok && Number(data.code) === 0;
+          await logTrackingEvent(env, { profileId: profile.id, hostname, provider: 'tiktok', eventName, eventId: ttEventId,
+            status: ok ? 'sent' : 'failed', httpStatus: response.status,
+            errorCode: ok ? '' : cleanStr(data.code || 'TIKTOK_API_ERROR', 80),
+            traceId: cleanStr(data.request_id, 120) });
+        }).catch(async () => {
+          await logTrackingEvent(env, { profileId: profile.id, hostname, provider: 'tiktok', eventName, eventId: ttEventId, status: 'failed', errorCode: 'NETWORK_ERROR' });
+        });
+        tasks.push(send);
+      }
+    }
+  } else if (profile.tiktokPixelId) {
+    tasks.push(logTrackingEvent(env, { profileId: profile.id, hostname, provider: 'tiktok', eventName, eventId: ttEventId, status: 'skipped', errorCode: 'TIKTOK_TOKEN_OR_EVENT_ID_MISSING' }));
+  }
+  if (tasks.length) ctx.waitUntil(Promise.all(tasks));
+  return noContent({ 'X-MA-TRACKING': 'profile-routed' });
+}
+
 async function handleEvent(request, env, ctx, url) {
   if (url.pathname !== '/_ma/e') return new Response('Not found', { status: 404 });
   if (request.method !== 'POST') return new Response('Method not allowed', { status: 405, headers: { Allow: 'POST' } });
 
-  // Same-site check: Origin (or Referer) must be one of our hosts.
+  // Resolve a mapped hostname first. Unmapped legacy hosts keep the existing single-site route.
   const origin = request.headers.get('Origin') || '';
   const referer = request.headers.get('Referer') || '';
-  const srcHost = hostOf(origin) || hostOf(referer);
-  if (!ALLOWED_HOSTS.includes(srcHost)) return new Response('Forbidden', { status: 403 });
+  const srcHost = (hostOf(origin) || hostOf(referer)).toLowerCase();
+  const requestHost = url.hostname.toLowerCase();
+  if (!srcHost || srcHost !== requestHost) return new Response('Forbidden', { status: 403 });
+  const mappedProfile = await resolveTrackingProfile(srcHost, env);
+  if (!ALLOWED_HOSTS.includes(srcHost) && !mappedProfile) return new Response('Forbidden', { status: 403 });
 
   const len = parseInt(request.headers.get('Content-Length') || '0', 10);
   if (len > MAX_BODY_BYTES) return new Response('Payload too large', { status: 413 });
@@ -1341,6 +1482,12 @@ async function handleEvent(request, env, ctx, url) {
     return new Response('Bad request', { status: 400 });
   }
   if (!body || typeof body !== 'object') return new Response('Bad request', { status: 400 });
+  if (mappedProfile) {
+    const profileEventName = String(body.event_name || '');
+    const profileEventId = cleanStr(body.event_id, 120);
+    if (!ALLOWED_EVENTS.includes(profileEventName) || !profileEventId) return new Response('Bad request', { status: 400 });
+    return handleProfileEvent(request, env, ctx, url, body, mappedProfile, srcHost);
+  }
 
   const eventName = String(body.event_name || '');
   const eventId = cleanStr(body.event_id, 120);
@@ -1502,7 +1649,7 @@ function normalizePhoneE164(v) {
   return d ? '+' + d : '';
 }
 
-async function buildTikTok(request, env, body, u, cookies, customData, sourceUrl) {
+async function buildTikTok(request, env, body, u, cookies, customData, sourceUrl, trackingProfile) {
   if (!env.TIKTOK_EAPI_TOKEN) return null;
   const ttEvent = TIKTOK_EVENT_MAP[body.event_name];
   const ttEventId = cleanStr(body.tt_event_id, 120);
@@ -1547,7 +1694,7 @@ async function buildTikTok(request, env, body, u, cookies, customData, sourceUrl
 
   const payload = {
     event_source: 'web',
-    event_source_id: (await getSiteSetting(env, 'tiktok_pixel_id')) || env.TIKTOK_PIXEL_ID || TIKTOK_PIXEL_ID,
+    event_source_id: trackingProfile ? trackingProfile.tiktokPixelId : ((await getSiteSetting(env, 'tiktok_pixel_id')) || env.TIKTOK_PIXEL_ID || TIKTOK_PIXEL_ID),
     data: [{ event: ttEvent, event_time: Math.floor(Date.now() / 1000), event_id: ttEventId, user, page, properties }]
   };
   if (env.TIKTOK_TEST_EVENT_CODE) payload.test_event_code = env.TIKTOK_TEST_EVENT_CODE;
