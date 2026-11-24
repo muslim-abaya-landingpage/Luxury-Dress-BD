@@ -21,12 +21,16 @@ test('owner saves delivery charge and search words; they go into product-config.
   await openManager(page);
   await page.evaluate(() => window.pmOpenStoreSettings());
   const m = page.locator('#pmStoreModal');
+  await expect(m.locator('details.ss-extra').filter({ hasText: 'Delivery charge' })).not.toHaveAttribute('open', '');
+  await expect(m.locator('details.ss-extra').filter({ hasText: 'Search words' })).not.toHaveAttribute('open', '');
+  await m.locator('details.ss-extra').filter({ hasText: 'Delivery charge' }).locator('summary').click();
   await expect(m.locator('#ssDhaka')).toHaveValue('80');
   await expect(m.locator('#ssOutside')).toHaveValue('150');
   await expect(m.locator('#ssFree')).toHaveValue('3');
   await m.locator('#ssDhaka').fill('70');
   await m.locator('#ssOutside').fill('130');
   await m.locator('#ssFree').fill('4');
+  await m.locator('details.ss-extra').filter({ hasText: 'Search words' }).locator('summary').click();
   await m.locator('#ssWords').fill('গাউন, gown, maxi\nজামা, frock');
   await m.locator('#ssSave').click();
   await expect(m).toBeHidden();
@@ -42,6 +46,7 @@ test('wrong values are refused with a message and nothing is published', async (
   await openManager(page);
   await page.evaluate(() => window.pmOpenStoreSettings());
   const m = page.locator('#pmStoreModal');
+  await m.locator('details.ss-extra').filter({ hasText: 'Delivery charge' }).locator('summary').click();
   await m.locator('#ssDhaka').fill('-10');
   await m.locator('#ssSave').click();
   await expect(m.locator('#ssMsg')).toContainText('whole number');
