@@ -127,6 +127,12 @@
     return prefersCleanUrls() ? '/' + f : f;
   }
 
+  // Uploaded company logos are served from the first-party image CDN; local theme assets stay relative.
+  function brandLogoUrl(file) {
+    var value = String(file || '');
+    return /^(?:https?:)?\/\//i.test(value) ? value : siteAssetAbs(value);
+  }
+
   function routeToHtmlFile(route) {
     var full = String(route || '/');
     var query =
@@ -487,7 +493,7 @@ function buildNavMenuItems() {
     '</div></div></div>' +
     '<div class="header-middle-nav"><div class="custom-container nav-row">' +
     '<div class="brand-text-logo"><a href="/" class="brand-logo-link" aria-label="' + HEADER_BRAND.name + ' Home">' +
-    '<img class="brand-logo-img" src="' + siteAssetAbs(HEADER_BRAND.logoSrc) + '" alt="' + HEADER_BRAND.logoAlt + '" width="220" height="46" decoding="async" fetchpriority="high">' +
+    '<img class="brand-logo-img" src="' + brandLogoUrl(HEADER_BRAND.logoSrc) + '" alt="' + HEADER_BRAND.logoAlt + '" width="220" height="46" decoding="async" fetchpriority="high">' +
   '<span class="brand-logo-fallback" aria-hidden="true">' + HEADER_BRAND.fallbackText + '</span></a></div>' +
     '<nav class="desktop-menu" aria-label="Main"><ul></ul></nav>' +
     '<div class="nav-icons">' +
