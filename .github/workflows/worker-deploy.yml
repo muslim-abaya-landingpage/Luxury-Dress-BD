@@ -99,6 +99,7 @@ jobs:
             -F "worker.js=@cloudflare-worker/worker.js;type=application/javascript+module" \
             -F "fraud-risk.js=@cloudflare-worker/fraud-risk.js;type=application/javascript+module" \
             -F "fraud-review.js=@cloudflare-worker/fraud-review.js;type=application/javascript+module" \
+            -F "tracking-admin.js=@cloudflare-worker/tracking-admin.js;type=application/javascript+module" \
             "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/workers/scripts/$SCRIPT/content" -o deploy.json)
           echo "Cloudflare upload HTTP status: $status"
           node -e "const r=require('./deploy.json'); if(!r.success){console.error('Cloudflare deploy errors:', JSON.stringify(r.errors || r)); process.exit(1)} console.log('Deployed', r.result && r.result.id || '')"
