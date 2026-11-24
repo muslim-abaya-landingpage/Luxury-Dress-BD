@@ -375,3 +375,50 @@ html.wp-admin-shell .adm-sidebar .adm-nav-children > .adm-nav-child{
   }
   html.wp-admin-shell .adm-sidebar.is-collapsed .adm-nav-group.has-current > .adm-nav-children{display:none!important;}
 }
+
+
+/* Desktop admin shell root-cause fix:
+   admin-wp.css switches .adm-shell to block while the shared unified layer
+   changes the sidebar back to sticky. In block flow the sticky sidebar keeps
+   its full viewport height, pushing .adm-content below the fold. Restore a
+   two-column shell only when the standard admin sidebar is present. */
+@media (min-width:981px){
+  html.wp-admin-shell .adm-shell:has(> .adm-sidebar){
+    display:grid!important;
+    grid-template-columns:var(--wp-menu-w,246px) minmax(0,1fr)!important;
+    align-items:start!important;
+    column-gap:0!important;
+    row-gap:0!important;
+  }
+  html.wp-admin-shell .adm-shell:has(> .adm-sidebar.is-collapsed){
+    grid-template-columns:82px minmax(0,1fr)!important;
+  }
+  html.wp-admin-shell .adm-shell:has(> .adm-sidebar) > .adm-sidebar{
+    grid-column:1!important;
+    grid-row:1!important;
+    width:var(--wp-menu-w,246px)!important;
+    min-width:0!important;
+    max-width:none!important;
+  }
+  html.wp-admin-shell .adm-shell:has(> .adm-sidebar.is-collapsed) > .adm-sidebar{
+    width:82px!important;
+  }
+  html.wp-admin-shell .adm-shell:has(> .adm-sidebar) > .adm-content{
+    grid-column:2!important;
+    grid-row:1!important;
+    width:auto!important;
+    max-width:none!important;
+    min-width:0!important;
+    margin-left:0!important;
+  }
+}
+@media (max-width:980px){
+  html.wp-admin-shell .adm-shell:has(> .adm-sidebar){
+    display:block!important;
+  }
+  html.wp-admin-shell .adm-shell:has(> .adm-sidebar) > .adm-content{
+    width:100%!important;
+    min-width:0!important;
+    margin-left:0!important;
+  }
+}
