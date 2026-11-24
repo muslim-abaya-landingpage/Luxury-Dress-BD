@@ -1,6 +1,6 @@
 /**
  * প্রোডাক্ট ডেটা — product-manager.html থেকে এডিট করুন
- * আপডেট: 2026-11-20
+ * আপডেট: 2026-11-24
  */
 window.CATEGORY_PRODUCTS = {
   abaya: [
