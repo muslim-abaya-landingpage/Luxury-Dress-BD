@@ -51,6 +51,7 @@ test('wrong values are refused with a message and nothing is published', async (
   await m.locator('#ssSave').click();
   await expect(m.locator('#ssMsg')).toContainText('whole number');
   await m.locator('#ssDhaka').fill('80');
+  await m.locator('details.ss-extra').filter({ hasText: 'Search words' }).locator('summary').click();
   await m.locator('#ssWords').fill('একা');
   await m.locator('#ssSave').click();
   await expect(m.locator('#ssMsg')).toContainText('at least two words');
