@@ -1124,6 +1124,11 @@ function buildNavMenuItems() {
     });
   }
   function runHeaderBoot() {
+    // product-config.js is loaded as a deferred script before DOMContentLoaded;
+    // let the owner-managed store logo override the theme's default brand asset.
+    var storeBrand = window.SITE_LINKS && window.SITE_LINKS.brand;
+    if (storeBrand && storeBrand.logoSrc) HEADER_BRAND.logoSrc = storeBrand.logoSrc;
+    if (storeBrand && storeBrand.logoAlt) HEADER_BRAND.logoAlt = storeBrand.logoAlt;
     mountHeader();
     ensureCartDrawerAssets();
     scheduleDeferredGtm();
