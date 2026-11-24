@@ -483,3 +483,23 @@ html.wp-admin-shell body.pm-wp-admin .pl-admin-header > p:not(#pmSaveStatus){
 html.wp-admin-shell body.pm-wp-admin .pl-admin-header .pm-header-actions{
   grid-column:2!important;grid-row:1 / span 2!important;min-width:0!important;
 }
+
+
+/* Final PM-only override: admin-wp.css has a more-specific legacy
+   :not(...) selector that adds the sidebar width as a second margin.
+   Match/exceed that specificity so the content starts at the grid column. */
+@media (min-width:981px){
+  html.wp-admin-shell body.pm-wp-admin .adm-shell > .adm-content:not(.adm-sidebar):not(.adm-sidebar-backdrop):not(script):not(style){
+    margin-left:0!important;
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+  }
+}
+@media (max-width:980px){
+  html.wp-admin-shell body.pm-wp-admin .adm-shell > .adm-content:not(.adm-sidebar):not(.adm-sidebar-backdrop):not(script):not(style){
+    margin-left:0!important;
+    width:100%!important;
+    max-width:none!important;
+  }
+}
