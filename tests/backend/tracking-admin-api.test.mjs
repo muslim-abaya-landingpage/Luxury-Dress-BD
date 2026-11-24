@@ -44,8 +44,9 @@ test('tracking admin API rejects unauthenticated requests', async () => {
 
 test('tracking admin API returns a safe profile view without token values', async () => {
   const db = makeDb();
-  const url = new URL('https://muslimabaya.com/_ma/admin/tracking?token=valid-session');
-  const response = await handleTrackingAdmin(new Request(url), { DB: db }, url, verify);
+  const url = new URL('https://muslimabaya.com/_ma/admin/tracking');
+  const request = new Request(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: 'valid-session', action: 'list' }) });
+  const response = await handleTrackingAdmin(request, { DB: db }, url, verify);
   assert.equal(response.status, 200);
   const body = await response.json();
   assert.equal(body.ok, true);
