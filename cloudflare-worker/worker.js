@@ -203,7 +203,8 @@ export default {
     cookieHeader.split(';').forEach((c) => { const idx = c.indexOf('='); if (idx > -1) { const k = c.slice(0, idx).trim(); const v = c.slice(idx + 1).trim(); if (k) cookies[k] = v; } });
     const setCookies = [];
     const twoYears = 63072000;
-    function ensureCookie(name, value) { setCookies.push(name + '=' + value + '; Max-Age=' + twoYears + '; Path=/; Domain=.muslimabaya.com; Secure; SameSite=Lax'); }
+    const cookieDomain = ALLOWED_HOSTS.includes(url.hostname.toLowerCase()) ? '; Domain=.muslimabaya.com' : '';
+    function ensureCookie(name, value) { setCookies.push(name + '=' + value + '; Max-Age=' + twoYears + '; Path=/' + cookieDomain + '; Secure; SameSite=Lax'); }
     let fbp = cookies['_fbp'];
     if (!fbp) { fbp = 'fb.1.' + Date.now() + '.' + Math.floor(Math.random() * 10000000000); }
     ensureCookie('_fbp', fbp);
