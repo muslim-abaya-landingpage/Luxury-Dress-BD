@@ -276,3 +276,20 @@ body.adm-body{background:var(--adm-bg);color:var(--adm-text);font-family:Inter,"
  .adm-body .adm-main{padding:16px 14px 44px}
  .adm-body .adm-main>.adm-jump{padding-inline:1px}
 }
+
+/* Dashboard width correction: use the full content column instead of leaving a large right gutter. */
+.adm-body .adm-main{
+  width:100%!important;
+  max-width:none!important;
+  margin-inline:0!important;
+  box-sizing:border-box!important;
+}
+.adm-body .adm-main>.adm-jump,
+.adm-body .adm-main>.adm-sec{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+}
+@media(min-width:1101px){
+  .adm-body .adm-main{grid-template-columns:minmax(0,1.35fr) minmax(310px,1fr)!important}
+}
