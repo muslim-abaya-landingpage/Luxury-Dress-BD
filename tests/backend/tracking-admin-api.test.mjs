@@ -79,7 +79,7 @@ test('profile save creates a profile without exposing credentials', async () => 
     body: JSON.stringify({
       token: 'valid-session', action: 'profile.save', key: 'muslim-abaya',
       name: 'MUSLIM ABAYA', metaPixelId: '1141629002088045',
-      config: { advancedMatching: ['em', 'ph', 'not_allowed'], events: { Purchase: true } }
+      metaAccessToken: '', tiktokAccessToken: '', config: { advancedMatching: ['em', 'ph', 'not_allowed'], events: { Purchase: true } }
     })
   });
   const response = await handleTrackingAdmin(request, { DB: db }, url, verify);
