@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { handleTrackingAdmin } from '../../cloudflare-worker/tracking-admin.js';
+import { handleTrackingAdmin, resolveTrackingProfile, claimTrackingEvent, logTrackingEvent, decryptTrackingToken } from '../../cloudflare-worker/tracking-admin.js';
+import { webcrypto } from 'node:crypto';
+if (!globalThis.crypto) globalThis.crypto = webcrypto;
 
 function makeDb() {
   const calls = [];
@@ -121,4 +123,65 @@ test('saving an access token fails closed until the encryption secret is configu
   assert.equal(response.status, 503);
   assert.equal((await response.json()).error, 'TRACKING_ENCRYPTION_KEY_MISSING');
   assert.equal(db.calls.length, 0);
+});
+
+
+test('domain resolver returns only enabled mapped profile fields', async () => {
+  const db = {
+    prepare(sql) {
+      assert.match(sql, /tracking_domains d JOIN tracking_profiles p/);
+      return { bind(host) { assert.equal(host, 'shop.example.com'); return this; }, async first() {
+        return { id: 4, profile_key: 'client-a', name: 'Client A', meta_pixel_id: '1234567890',
+          tiktok_pixel_id: 'abcdefghij', meta_token_ciphertext: 'cipher', tiktok_token_ciphertext: '',
+          enabled: 1, config_json: JSON.stringify({ advancedMatching: ['em'], events: { Purchase: false } }) };
+      } };
+    }
+  };
+  const profile = await resolveTrackingProfile('SHOP.EXAMPLE.COM.', { DB: db });
+  assert.equal(profile.key, 'client-a');
+  assert.equal(profile.metaPixelId, '1234567890');
+  assert.equal(profile.metaTokenCiphertext, 'cipher');
+  assert.deepEqual(profile.config.advancedMatching, ['em']);
+  assert.equal(profile.config.events.Purchase, false);
+});
+
+test('domain resolver refuses malformed hostnames without querying D1', async () => {
+  let called = false;
+  const result = await resolveTrackingProfile('https://example.com/path', { DB: { prepare() { called = true; } } });
+  assert.equal(result, null);
+  assert.equal(called, false);
+});
+
+test('provider event claim uses unique profile/provider/event key', async () => {
+  const calls = [];
+  const env = { DB: { prepare(sql) { return { bind(...values) { calls.push({ sql, values }); return this; }, async run() { return { meta: { changes: 1 } }; } }; } } };
+  const claimed = await claimTrackingEvent(env, 9, 'meta', 'evt-123');
+  assert.equal(claimed, true);
+  assert.match(calls[0].sql, /INSERT OR IGNORE/);
+  assert.equal(calls[0].values[0], '9:meta:evt-123');
+  assert.equal(calls[0].values[2], 'meta');
+});
+
+test('event logs store only allow-listed operational metadata', async () => {
+  let inserted;
+  const env = { DB: { prepare(sql) { return { bind(...values) { inserted = { sql, values }; return this; }, async run() { return {}; } }; } } };
+  await logTrackingEvent(env, { profileId: 2, hostname: 'shop.example.com', provider: 'meta',
+    eventName: 'Purchase', eventId: 'evt-1', status: 'failed', httpStatus: 400,
+    errorCode: 'META_API_ERROR', traceId: 'trace-1', email: 'private@example.com', phone: '01700000000' });
+  assert.match(inserted.sql, /details_json/);
+  assert.equal(inserted.values.includes('private@example.com'), false);
+  assert.equal(inserted.values.includes('01700000000'), false);
+  assert.equal(inserted.values[4], 'evt-1');
+});
+
+test('AES-GCM encrypted tracking token decrypts only with the configured 32-byte key', async () => {
+  const rawKey = webcrypto.getRandomValues(new Uint8Array(32));
+  const iv = webcrypto.getRandomValues(new Uint8Array(12));
+  const key = await webcrypto.subtle.importKey('raw', rawKey, { name: 'AES-GCM' }, false, ['encrypt']);
+  const encrypted = await webcrypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode('test-provider-token'));
+  const toBase64 = (bytes) => Buffer.from(bytes).toString('base64');
+  const ciphertext = 'v1.' + toBase64(iv) + '.' + toBase64(new Uint8Array(encrypted));
+  const token = await decryptTrackingToken(ciphertext, { TRACKING_ENCRYPTION_KEY: toBase64(rawKey) });
+  assert.equal(token, 'test-provider-token');
+  await assert.rejects(() => decryptTrackingToken(ciphertext, { TRACKING_ENCRYPTION_KEY: toBase64(new Uint8Array(32)) }));
 });
