@@ -323,3 +323,55 @@ html.wp-admin-shell .pn-nav a *{
   html.wp-admin-shell .adm-sidebar-item,
   html.wp-admin-shell .pn-nav a{transition:none!important}
 }
+
+
+/* WordPress sidebar hover repair — keep non-active submenus out of layout flow.
+   admin-wp.css owns the flyout interaction; this layer must not force every submenu visible. */
+html.wp-admin-shell .adm-sidebar .adm-sidebar-nav{
+  display:block!important;
+  flex:1 1 auto!important;
+  gap:0!important;
+}
+html.wp-admin-shell .adm-sidebar .adm-nav-group{position:relative!important;}
+html.wp-admin-shell .adm-sidebar .adm-nav-children{
+  display:none!important;
+  flex-direction:column!important;
+  gap:0!important;
+  position:static!important;
+  width:auto!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:7px 0!important;
+  border:0!important;
+  background:var(--wp-menu-dark,#24201d)!important;
+  box-shadow:none!important;
+}
+html.wp-admin-shell .adm-sidebar .adm-nav-group.has-current > .adm-nav-children{
+  display:block!important;
+}
+html.wp-admin-shell .adm-sidebar .adm-nav-children > .adm-nav-child{
+  flex:0 0 auto!important;
+  min-height:30px!important;
+  margin:0!important;
+  transform:none!important;
+}
+@media(min-width:981px){
+  html.wp-admin-shell .adm-sidebar:not(.is-collapsed) .adm-nav-group:not(.has-current):hover > .adm-nav-children,
+  html.wp-admin-shell .adm-sidebar:not(.is-collapsed) .adm-nav-group:not(.has-current):focus-within > .adm-nav-children,
+  html.wp-admin-shell .adm-sidebar.is-collapsed .adm-nav-group:hover > .adm-nav-children,
+  html.wp-admin-shell .adm-sidebar.is-collapsed .adm-nav-group:focus-within > .adm-nav-children{
+    display:flex!important;
+    flex-direction:column!important;
+    position:absolute!important;
+    left:100%!important;
+    top:0!important;
+    width:190px!important;
+    min-width:190px!important;
+    margin:0!important;
+    padding:7px 0!important;
+    z-index:10010!important;
+    background:var(--wp-menu-dark,#24201d)!important;
+    box-shadow:0 8px 24px rgba(0,0,0,.24)!important;
+  }
+  html.wp-admin-shell .adm-sidebar.is-collapsed .adm-nav-group.has-current > .adm-nav-children{display:none!important;}
+}
