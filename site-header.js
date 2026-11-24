@@ -606,11 +606,29 @@ function buildNavMenuItems() {
     }, 25);
   }
 
+  function applyStoreBrandLogo() {
+    var brand = window.SITE_LINKS && window.SITE_LINKS.brand;
+    var src = brand && typeof brand.logoSrc === "string" ? brand.logoSrc.trim() : "";
+    var valid = /^https:\/\/images\.muslimabaya\.com\/images\/uploads\/[a-z0-9_-]+\.webp$/i.test(src) ||
+      /^assets\/[a-z0-9._/-]+(?:\?v=[a-z0-9_-]+)?$/i.test(src);
+    if (!valid) return;
+    var img = document.querySelector(".brand-logo-img");
+    if (!img) return;
+    var link = img.closest(".brand-logo-link");
+    img.onerror = function () {
+      img.style.display = "none";
+      if (link) link.classList.add("brand-logo-failed");
+    };
+    img.style.display = "";
+    if (img.getAttribute("src") !== brandLogoUrl(src)) img.src = brandLogoUrl(src);
+  }
+
   function ensureProductCatalog(cb) {
     function finish() {
       if (typeof window.syncCatalogFromSections === "function") {
         window.syncCatalogFromSections();
       }
+      applyStoreBrandLogo();
       if (typeof window.refreshFooterShopLinks === "function") {
         window.refreshFooterShopLinks();
       }
