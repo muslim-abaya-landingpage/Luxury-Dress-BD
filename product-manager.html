@@ -4447,15 +4447,20 @@
       '<div class="ss-logo-controls"><input id="ssLogoFile" type="file" accept="image/png,image/jpeg,image/webp">' +
       '<button type="button" class="ss-go" id="ssLogoUpload">Upload &amp; save logo</button><span class="ss-help" id="ssLogoMsg" role="status" aria-live="polite">Maximum source size 12 MB. The image is optimized to WebP before upload.</span></div></div></section>' +
       '<section><h2>Delivery charge</h2><p class="ss-help">Used everywhere at once: product order form, checkout page, cart and the order server.</p>' +
-      '<div class="ss-row"><label for="ssDhaka">Dhaka district (৳)</label><input id="ssDhaka" type="number" min="0" max="5000" step="1" inputmode="numeric" value="' + d.dhaka + '"></div>' +
-      '<div class="ss-row"><label for="ssOutside">Other districts (৳)</label><input id="ssOutside" type="number" min="0" max="5000" step="1" inputmode="numeric" value="' + d.outside + '"></div>' +
-      '<div class="ss-row"><label for="ssFree">Free delivery from (pieces)</label><input id="ssFree" type="number" min="0" max="99" step="1" inputmode="numeric" value="' + d.freeQty + '"></div>' +
+      '<div class="ss-row"><label for="ssDhaka">Dhaka district (৳)</label><input id="ssDhaka" type="number" min="0" max="5000" step="1" inputmode="numeric"></div>' +
+      '<div class="ss-row"><label for="ssOutside">Other districts (৳)</label><input id="ssOutside" type="number" min="0" max="5000" step="1" inputmode="numeric"></div>' +
+      '<div class="ss-row"><label for="ssFree">Free delivery from (pieces)</label><input id="ssFree" type="number" min="0" max="99" step="1" inputmode="numeric"></div>' +
       '<p class="ss-help">0 = no free delivery. Example: 3 → an order of 3 or more pieces has free delivery.</p></section>' +
       '<section><h2>Search words</h2><p class="ss-help">One group per line, words separated by commas. Every word in a line finds the same products. ' +
       'Built in already: বোরকা/burka/borka, আবায়া, টু পিস/two piece, থ্রি পিস, পাঞ্জাবি/পাঞ্জাবী, হিজাব/khimar, কুর্তি/tops, কাফতান, কারচুপি.</p>' +
-      '<textarea id="ssWords" placeholder="গাউন, gown, maxi&#10;জামা, frock, dress">' + escapeHtml(words) + '</textarea></section>' +
+      '<textarea id="ssWords" placeholder="গাউন, gown, maxi&#10;জামা, frock, dress"></textarea></section>' +
       '<div class="ss-foot"><span class="ss-msg" id="ssMsg" role="status"></span><button type="button" class="ss-cancel" id="ssCancel">Cancel</button><button type="button" class="ss-go" id="ssSave">Save &amp; publish</button></div></div>';
     document.body.appendChild(m);
+    // Populate user/config data through DOM properties, never by interpolating it into HTML.
+    m.querySelector("#ssDhaka").value = String(d.dhaka);
+    m.querySelector("#ssOutside").value = String(d.outside);
+    m.querySelector("#ssFree").value = String(d.freeQty);
+    m.querySelector("#ssWords").value = words;
     var close = function () { m.remove(); };
 
 
