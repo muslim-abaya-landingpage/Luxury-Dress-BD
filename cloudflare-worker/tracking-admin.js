@@ -24,13 +24,13 @@ function base64ToBytes(value) {
   return Uint8Array.from(binary, (char) => char.charCodeAt(0));
 }
 
-async function encryptionKey(env) {
+async function encryptionKey(env, usages = ['encrypt']) {
   const encoded = String(env.TRACKING_ENCRYPTION_KEY || '').trim();
   if (!encoded) throw new Error('TRACKING_ENCRYPTION_KEY_MISSING');
   let raw;
   try { raw = base64ToBytes(encoded); } catch (error) { throw new Error('TRACKING_ENCRYPTION_KEY_INVALID'); }
   if (raw.length !== 32) throw new Error('TRACKING_ENCRYPTION_KEY_INVALID');
-  return crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, ['encrypt']);
+  return crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, usages);
 }
 
 async function encryptToken(value, env) {
@@ -163,13 +163,83 @@ async function addDomain(request, env) {
   }
 }
 
+
+export async function decryptTrackingToken(ciphertext, env) {
+  if (!ciphertext || typeof ciphertext !== 'string') return '';
+  const parts = ciphertext.split('.');
+  if (parts.length !== 3 || parts[0] !== 'v1') throw new Error('TRACKING_TOKEN_FORMAT_INVALID');
+  const key = await encryptionKey(env, ['decrypt']);
+  const iv = base64ToBytes(parts[1]);
+  if (iv.length !== 12) throw new Error('TRACKING_TOKEN_FORMAT_INVALID');
+  const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, base64ToBytes(parts[2]));
+  return new TextDecoder().decode(plain);
+}
+
+export async function resolveTrackingProfile(hostname, env) {
+  if (!env.DB) return null;
+  const host = cleanText(hostname, 253).toLowerCase().replace(/\.$/, '');
+  if (!HOST_RE.test(host)) return null;
+  try {
+    const row = await env.DB.prepare(
+      'SELECT p.id, p.profile_key, p.name, p.meta_pixel_id, p.tiktok_pixel_id, ' +
+      'p.meta_token_ciphertext, p.tiktok_token_ciphertext, p.enabled, p.config_json ' +
+      'FROM tracking_domains d JOIN tracking_profiles p ON p.id = d.profile_id ' +
+      'WHERE d.hostname = ? AND d.enabled = 1 AND p.enabled = 1 LIMIT 1'
+    ).bind(host).first();
+    if (!row) return null;
+    let config = {};
+    try { config = JSON.parse(row.config_json || '{}'); } catch (error) {}
+    return {
+      id: row.id, key: row.profile_key, name: row.name,
+      metaPixelId: row.meta_pixel_id || '', tiktokPixelId: row.tiktok_pixel_id || '',
+      metaTokenCiphertext: row.meta_token_ciphertext || '',
+      tiktokTokenCiphertext: row.tiktok_token_ciphertext || '',
+      config: validateConfig(config)
+    };
+  } catch (error) {
+    return null;
+  }
+}
+
+export async function claimTrackingEvent(env, profileId, provider, eventId) {
+  const dedupKey = String(profileId) + ':' + provider + ':' + String(eventId);
+  const now = Math.floor(Date.now() / 1000);
+  const result = await env.DB.prepare(
+    'INSERT OR IGNORE INTO tracking_event_dedup (dedup_key, profile_id, provider, event_id, expires_at, created_at) ' +
+    'VALUES (?, ?, ?, ?, ?, ?)'
+  ).bind(dedupKey, profileId, provider, eventId, now + 48 * 60 * 60, now).run();
+  return Number(result.meta && result.meta.changes || 0) > 0;
+}
+
+export async function logTrackingEvent(env, record) {
+  if (!env.DB || !record || !['meta', 'tiktok', 'ga4'].includes(record.provider)) return;
+  const safe = {
+    profileId: Number.isSafeInteger(record.profileId) ? record.profileId : null,
+    hostname: cleanText(record.hostname, 253) || null,
+    provider: record.provider,
+    eventName: cleanText(record.eventName, 80) || 'Unknown',
+    eventId: cleanText(record.eventId, 120) || null,
+    status: ['accepted', 'sent', 'failed', 'skipped', 'duplicate'].includes(record.status) ? record.status : 'failed',
+    httpStatus: Number.isInteger(record.httpStatus) ? record.httpStatus : null,
+    errorCode: cleanText(record.errorCode, 80) || null,
+    traceId: cleanText(record.traceId, 120) || null
+  };
+  try {
+    await env.DB.prepare(
+      'INSERT INTO tracking_event_log (profile_id, hostname, provider, event_name, event_id, status, http_status, error_code, provider_trace_id, details_json, created_at) ' +
+      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, '{}', ?)"
+    ).bind(safe.profileId, safe.hostname, safe.provider, safe.eventName, safe.eventId, safe.status,
+      safe.httpStatus, safe.errorCode, safe.traceId, Math.floor(Date.now() / 1000)).run();
+  } catch (error) {}
+}
+
 export async function handleTrackingAdmin(request, env, url, verifyAdminToken) {
   if (!env.DB) return json({ ok: false, error: 'TRACKING_DB_UNAVAILABLE' }, 503);
-  if (request.method !== 'GET' && request.method !== 'POST' && request.method !== 'DELETE') {
+  if (request.method !== 'POST') {
     return json({ ok: false, error: 'METHOD_NOT_ALLOWED' }, 405);
   }
   let body = {};
-  if (request.method === 'POST' || request.method === 'DELETE') {
+  if (request.method === 'POST') {
     const declaredLength = Number(request.headers.get('Content-Length') || 0);
     if (declaredLength > 16384) return json({ ok: false, error: 'PAYLOAD_TOO_LARGE' }, 413);
     try {
@@ -179,11 +249,11 @@ export async function handleTrackingAdmin(request, env, url, verifyAdminToken) {
       if (!body || typeof body !== 'object' || Array.isArray(body)) return json({ ok: false, error: 'BAD_JSON' }, 400);
     } catch (error) { return json({ ok: false, error: 'BAD_JSON' }, 400); }
   }
-  const token = url.searchParams.get('token') || body.token || '';
+  const token = body.token || '';
   const admin = await verifyAdminToken(env, token);
   if (!admin) return json({ ok: false, error: 'INVALID_TOKEN' }, 401);
 
-  if (request.method === 'GET') {
+  if (request.method === 'POST' && cleanText(body.action, 40) === 'list') {
     try {
       const profiles = await readProfiles(env);
       const summary = await env.DB.prepare(
