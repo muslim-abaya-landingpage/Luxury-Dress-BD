@@ -1,9 +1,9 @@
 <?php
 
-namespace Tests\\Unit;
+namespace Tests\Unit;
 
-use App\\Support\\CatalogSnapshotValidator;
-use PHPUnit\\Framework\\TestCase;
+use App\Support\CatalogSnapshotValidator;
+use PHPUnit\Framework\TestCase;
 
 class CatalogSnapshotValidatorTest extends TestCase
 {
