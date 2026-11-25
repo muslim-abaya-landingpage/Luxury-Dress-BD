@@ -1,7 +1,7 @@
 /.phpunit.cache
 /.env
 /.env.*
-!/ .env.example
+!.env.example
 /.idea
 /.vscode
 /.fleet
