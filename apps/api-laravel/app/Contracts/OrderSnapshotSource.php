@@ -2,7 +2,7 @@
 
 namespace App\Contracts;
 
-use App\Data\OrderSnapshotPage;
+use App\Support\OrderSnapshotPage;
 
 /**
  * Read-only boundary for importing order lifecycle snapshots.
