@@ -17,7 +17,7 @@
     "test:cache-manager": "node --test tests/backend/cache-manager-worker.test.mjs tests/backend/cache-manager-auth.test.mjs tests/backend/cache-manager-ui.test.mjs",
     "test:fraud-risk": "node --test tests/backend/fraud-risk.test.mjs tests/backend/fraud-review.test.mjs tests/backend/device-token.test.mjs tests/backend/admin-fraud-api.test.mjs",
     "test:device-token": "node --test tests/backend/device-token.test.mjs",
-    "test:tracking-erp": "node --test tests/backend/tracking-admin-api.test.mjs"
+    "test:tracking-erp": "node --test tests/backend/tracking-admin-api.test.mjs tests/backend/tracking-retry-guard.test.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
