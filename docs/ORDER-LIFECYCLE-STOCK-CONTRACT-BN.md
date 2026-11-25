@@ -76,3 +76,30 @@
 4. Explicit `pending_reconciliation` state when compensation cannot be confirmed; never silently report success.
 5. Failure injection tests at each mutation boundary, including ledger write failure, row append failure, and rollback failure.
 6. Single lock/transaction coordinator; lower-level mutation helpers must not independently acquire nested locks.
+
+
+## Synthetic Order–Stock Reconciliation Engine
+
+Laravel migration branch-এ `OrderStockReconciliation` নামে একটি pure, read-only analyzer যোগ হয়েছে। এটি শুধু সরবরাহ করা snapshot পরীক্ষা করে; কোনো Google Sheet, Apps Script, D1 বা stock service-এ সংযোগ/পরিবর্তন করে না।
+
+### শনাক্ত করা anomaly
+
+- `orphaned_reservation`: Order row নেই, কিন্তু applied reserve operation আছে।
+- `stale_order_stock_stage`: Order row-এর StockStage এবং সর্বশেষ applied stock operation-এর resulting stage মেলে না।
+- `missing_ledger_entry`: applied stock operation-এর ledger record নেই।
+- `partial_compensation`: operation pending, failed বা compensation_failed অবস্থায় আছে।
+- `missing_stock_operation`: non-legacy/non-NEW stage আছে, কিন্তু তার applied operation পাওয়া যায়নি।
+- duplicate/invalid order বা operation identity এবং unknown operation state।
+
+ফলাফল `in_sync` অথবা `review_required`, সঙ্গে issue count ও reference list।
+
+### সীমাবদ্ধতা
+
+- এটি production reconciliation চালায় না এবং কোনো stock repair করে না।
+- Stock snapshot, operation log ও ledger data-এর canonical read adapter এখনো তৈরি হয়নি।
+- Operation ordering-এ timestamp/sequence contract যোগ না হওয়া পর্যন্ত input order-কে latest operation-এর ক্রম হিসেবে ধরা হয়। Production adapter-এর আগে monotonic sequence বা trusted timestamp বাধ্যতামূলক।
+- False positive এড়াতে blank/NEW/LEGACY_SKIPPED StockStage-এ missing operation alert তৈরি করা হয় না।
+
+### Synthetic tests
+
+Clean snapshot, orphaned reservation, missing ledger, stage mismatch, pending/failed compensation, duplicate operation ID, legacy/new exclusions, invalid identity এবং read-only behavior-এর test যোগ করা হয়েছে। CI ফলাফল আলাদাভাবে যাচাই করতে হবে।
