@@ -94,7 +94,7 @@
   </main>
   <script>
   (function(){
-    var API='https://muslimabaya.com/_ma/admin/tracking', session=null, profiles=[], editingEnabled=true;
+    var API='/_ma/admin/tracking', session=null, profiles=[], editingEnabled=true;
     var $=function(id){return document.getElementById(id);};
     function msg(id,text,ok){$(id).textContent=text;$(id).className='terp-status '+(ok?'ok':'err');}
     function request(method,body){
