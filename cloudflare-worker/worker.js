@@ -149,7 +149,7 @@ async function handleAdminSettingsPost(request, env) {
   return json({ ok: true, saved: updates });
 }
 
-async function processTrackingRetryQueue(env) {
+export async function processTrackingRetryQueue(env) {
   if (!env.DB) return;
   const now = Math.floor(Date.now() / 1000);
   // Recover leases left by an interrupted invocation.
