@@ -1,5 +1,5 @@
 const PROFILE_KEY_RE = /^[a-z0-9][a-z0-9_-]{1,47}$/;
-const PIXEL_ID_RE = /^[A-Za-z0-9_-]{6,40}$/;
+const PIXEL_ID_RE = /^\\d{6,40}$/;
 const HOST_RE = /^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)(?:\.(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?))+$/i;
 
 function json(data, status = 200) {
