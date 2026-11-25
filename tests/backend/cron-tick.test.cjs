@@ -108,14 +108,14 @@ test('shared check: sale boundaries and publish window; schedule.json keeps only
 
 test('the Worker cron calls /api/cron-tick separately from the order queue', () => {
   const src = require('node:fs').readFileSync(path.join(root, 'cloudflare-worker/worker.js'), 'utf8');
-  const scheduled = src.match(/async scheduled\\(event, env, ctx\\) \\{([\\s\\S]*?)\\n  \\}/);
+  const scheduled = src.match(/async scheduled\(event, env, ctx\) \{([\s\S]*?)\n  \}/);
   assert.ok(scheduled, 'Worker scheduled handler must exist');
   const body = scheduled[1];
-  assert.match(body, /ctx\\.waitUntil\\(processOrderQueue\\(env\\)\\);/);
-  assert.match(body, /ctx\\.waitUntil\\(processTrackingRetryQueue\\(env\\)\\);/);
-  assert.match(body, /if \\(!env\\.IS_PREVIEW\\) ctx\\.waitUntil\\(fetch\\('https:\\/\\/muslimabaya\\.com\\/api\\/cron-tick'/);
-  assert.match(body, /processOrderQueue\\(env\\)[\\s\\S]*processTrackingRetryQueue\\(env\\)[\\s\\S]*api\\/cron-tick/);
-  assert.match(body, /api\\/cron-tick[^;]*\\.catch\\(\\(\\) => \\{\\}\\)\\);/);
+  assert.match(body, /ctx\.waitUntil\(processOrderQueue\(env\)\);/);
+  assert.match(body, /ctx\.waitUntil\(processTrackingRetryQueue\(env\)\);/);
+  assert.match(body, /if \(!env\.IS_PREVIEW\) ctx\.waitUntil\(fetch\('https:\/\/muslimabaya\.com\/api\/cron-tick'/);
+  assert.match(body, /processOrderQueue\(env\)[\s\S]*processTrackingRetryQueue\(env\)[\s\S]*api\/cron-tick/);
+  assert.match(body, /api\/cron-tick[^;]*\.catch\(\(\) => \{\}\)\);/);
 });
 
 
