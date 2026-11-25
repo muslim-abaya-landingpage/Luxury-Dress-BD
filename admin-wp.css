@@ -662,3 +662,16 @@ html.wp-admin-shell body .adm-shell :is(.adm-main,.pn-main,.pl-main,.adm-content
   margin-inline:0!important;
   box-sizing:border-box!important;
 }
+
+
+/* Final geometry correction: the admin sidebar is fixed-position, so it does
+   not participate in flex sizing. Reserve its actual width for the page area. */
+html.wp-admin-shell body .adm-shell,
+html.wp-admin-shell body .pn-app.adm-shell{display:block!important;}
+html.wp-admin-shell body .adm-shell > .adm-sidebar{position:fixed!important;left:0!important;top:var(--wp-bar-h)!important;bottom:0!important;flex:none!important;width:240px!important;min-width:240px!important;max-width:240px!important;margin:0!important;}
+html.wp-admin-shell body .adm-shell:has(> .adm-sidebar.is-collapsed) > .adm-sidebar{width:36px!important;min-width:36px!important;max-width:36px!important;}
+html.wp-admin-shell body .adm-shell > :not(.adm-sidebar):not(.adm-sidebar-backdrop):not(script):not(style){
+  display:block!important;flex:none!important;margin-left:240px!important;width:calc(100% - 240px)!important;max-width:none!important;min-width:0!important;box-sizing:border-box!important;
+}
+html.wp-admin-shell body .adm-shell:has(> .adm-sidebar.is-collapsed) > :not(.adm-sidebar):not(.adm-sidebar-backdrop):not(script):not(style){margin-left:36px!important;width:calc(100% - 36px)!important;}
+html.wp-admin-shell body .adm-shell :is(.adm-main,.pn-main,.pl-main,.adm-content,.om-workspace){width:100%!important;max-width:none!important;margin-inline:0!important;min-width:0!important;box-sizing:border-box!important;}
