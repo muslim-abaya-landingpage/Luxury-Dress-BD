@@ -43,3 +43,45 @@ body.wo-orders-page{--ab-bg:#f4f6fa;--ab-card:#fff;--ab-ink:#17243a;--ab-muted:#
     max-width: 100% !important;
   }
 }
+
+
+/* Orders layout correction: use a real sidebar + content grid. The prior
+   margin-based offset combined with the centered max-width .pn-main and caused
+   the content to start around the middle of the viewport. */
+@media (min-width:981px){
+  html.wp-admin-shell body.wo-orders-page .adm-shell:has(> .adm-sidebar){
+    display:grid!important;
+    grid-template-columns:245px minmax(0,1fr)!important;
+    align-items:start!important;
+    column-gap:0!important;
+    row-gap:0!important;
+  }
+  html.wp-admin-shell body.wo-orders-page .adm-shell:has(> .adm-sidebar.is-collapsed){
+    grid-template-columns:68px minmax(0,1fr)!important;
+  }
+  html.wp-admin-shell body.wo-orders-page .adm-shell > .adm-sidebar{
+    grid-column:1!important;grid-row:1!important;width:245px!important;
+  }
+  html.wp-admin-shell body.wo-orders-page .adm-shell:has(> .adm-sidebar.is-collapsed) > .adm-sidebar{
+    width:68px!important;
+  }
+  html.wp-admin-shell body.wo-orders-page .adm-shell > .om-workspace.wc-list{
+    grid-column:2!important;grid-row:1!important;
+    margin:0!important;padding:0!important;
+    width:auto!important;max-width:none!important;min-width:0!important;
+  }
+  html.wp-admin-shell body.wo-orders-page .om-workspace.wc-list > .pn-main{
+    width:100%!important;max-width:none!important;
+    margin:0!important;padding:22px 24px 36px!important;
+    box-sizing:border-box!important;
+  }
+}
+@media (max-width:980px){
+  html.wp-admin-shell body.wo-orders-page .adm-shell{display:block!important;}
+  html.wp-admin-shell body.wo-orders-page .adm-shell > .om-workspace.wc-list{
+    margin:0!important;padding:0!important;width:100%!important;max-width:100%!important;
+  }
+  html.wp-admin-shell body.wo-orders-page .om-workspace.wc-list > .pn-main{
+    width:100%!important;max-width:none!important;margin:0!important;box-sizing:border-box!important;
+  }
+}
