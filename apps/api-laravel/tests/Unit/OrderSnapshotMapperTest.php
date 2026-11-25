@@ -83,7 +83,7 @@ class OrderSnapshotMapperTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         OrderSnapshotMapper::map(
             ['Order ID', 'Status', 'StockStage', 'Updated At'],
-            [['MA-1005', 'Pending', '', 'not-a-date']]
+            [['MA-1005', 'Pending', '', 'tomorrow']]
         );
     }
 
