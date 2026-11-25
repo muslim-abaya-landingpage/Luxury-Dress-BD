@@ -22,7 +22,7 @@
   min-height:30px!important;padding:5px 9px!important;
   border:1px solid transparent!important;border-radius:6px!important;
   background:transparent!important;color:#475467!important;
-  font:600 12px/1.3 inherit!important;cursor:pointer!important;
+  font-family:inherit!important;font-size:12px!important;font-weight:600!important;line-height:1.3!important;cursor:pointer!important;
 }
 .pm-wp-admin .pm-wp-list > .pm-wp-post-status li button.is-active,
 .pm-wp-admin .pm-wp-list > .pm-status-tabs li button.is-active{
