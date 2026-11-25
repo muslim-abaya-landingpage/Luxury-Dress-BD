@@ -15,7 +15,7 @@ php artisan key:generate
 php artisan serve
 ```
 
-Health check: `GET http://127.0.0.1:8000/api/health`
+Health check: `GET http://127.0.0.1:8000/api/health`\n\nRead-only fixture catalog:\n\n- `GET /api/v1/catalog/products` — paginated synthetic products; supports `category`, `page`, and `per_page`.\n- `GET /api/v1/catalog/products/{productId}` — published synthetic product detail.\n\nBoth catalog endpoints return `data_source: fixture`. They are intentionally disconnected from Google Sheets, Cloudflare D1, Supabase, R2 and all production credentials. Fixture records are not real products and must not be exposed as the live storefront catalog.
 
 Run tests:
 
@@ -36,7 +36,7 @@ Composer includes Laravel Sanctum. Authentication routes, token issuance, databa
 - `PATCH /api/v1/admin/orders/{orderId}` — explicit status transition and audit event.
 - `POST /api/v1/admin/catalog/import` — owner-only import; exact SKU/Product ID matching only.
 
-## Non-negotiable domain rules
+## Exact product identity validation\n\n`App\\Support\\ExactProductIdentity` is a pure, fixture-tested resolver for future import work. It permits only exact immutable Product ID or exact normalized SKU matching (trimmed and case-insensitive). If both identities point to different products, or an identity is duplicated, it returns `conflict`; if neither matches, it returns `create`. This resolver is not wired to a write endpoint and does not update any product.\n\n## Non-negotiable domain rules
 
 1. Product update is permitted only when the exact SKU or immutable Product ID matches. A different or missing match creates a separate product; no fuzzy matching.
 2. Order creation must be idempotent. A repeated request with the same idempotency key returns the original order.
