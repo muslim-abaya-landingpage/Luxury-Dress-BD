@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Contracts\OrderSnapshotSource;
+use App\Support\OrderSnapshotPage;
 use App\Repositories\FixtureOrderSnapshotSource;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
@@ -13,12 +14,13 @@ class OrderSnapshotSourceTest extends TestCase
     {
         $source = new FixtureOrderSnapshotSource();
         self::assertInstanceOf(OrderSnapshotSource::class, $source);
-        self::assertCount(3, $source->readOrderSnapshots());
+        self::assertInstanceOf(OrderSnapshotPage::class, $source->readOrderSnapshotPage());
+        self::assertCount(3, $source->readOrderSnapshotPage()->rows);
     }
 
-    public function test_snapshot_has_only_canonical_lifecycle_fields(): void
+    public function test_snapshot_page_has_only_canonical_lifecycle_fields(): void
     {
-        $rows = (new FixtureOrderSnapshotSource())->readOrderSnapshots();
+        $rows = (new FixtureOrderSnapshotSource())->readOrderSnapshotPage()->rows;
         self::assertSame(
             ['order_id', 'status', 'stock_stage', 'source_updated_at'],
             array_keys($rows[0])
@@ -27,20 +29,36 @@ class OrderSnapshotSourceTest extends TestCase
         self::assertSame('RESERVED', $rows[0]['stock_stage']);
     }
 
-    public function test_limit_is_applied_and_capped(): void
+    public function test_pages_are_bounded_and_cursor_returns_the_next_page(): void
     {
         $source = new FixtureOrderSnapshotSource();
-        self::assertCount(1, $source->readOrderSnapshots(1));
-        self::assertCount(3, $source->readOrderSnapshots(5000));
+        $first = $source->readOrderSnapshotPage(null, 2);
+
+        self::assertCount(2, $first->rows);
+        self::assertNotNull($first->nextCursor);
+
+        $second = $source->readOrderSnapshotPage($first->nextCursor, 2);
+        self::assertCount(1, $second->rows);
+        self::assertNull($second->nextCursor);
+        self::assertSame('MA-DEMO-ORDER-003', $second->rows[0]['order_id']);
     }
 
-    public function test_invalid_limits_are_rejected(): void
+    public function test_invalid_limits_and_cursors_are_rejected(): void
     {
         $source = new FixtureOrderSnapshotSource();
         foreach ([0, -1, 5001] as $limit) {
             try {
-                $source->readOrderSnapshots($limit);
+                $source->readOrderSnapshotPage(null, $limit);
                 self::fail('Expected invalid limit to throw.');
+            } catch (InvalidArgumentException) {
+                self::assertTrue(true);
+            }
+        }
+
+        foreach (['', 'not-a-cursor', 'eyJzb3VyY2UiOiJvdGhlciIsIm9mZnNldCI6MX0'] as $cursor) {
+            try {
+                $source->readOrderSnapshotPage($cursor, 2);
+                self::fail('Expected invalid cursor to throw.');
             } catch (InvalidArgumentException) {
                 self::assertTrue(true);
             }
@@ -50,8 +68,9 @@ class OrderSnapshotSourceTest extends TestCase
     public function test_reads_are_repeatable_and_do_not_mutate_fixture_data(): void
     {
         $source = new FixtureOrderSnapshotSource();
-        $first = $source->readOrderSnapshots();
-        $second = $source->readOrderSnapshots();
-        self::assertSame($first, $second);
+        self::assertSame(
+            $source->readOrderSnapshotPage(),
+            $source->readOrderSnapshotPage()
+        );
     }
 }

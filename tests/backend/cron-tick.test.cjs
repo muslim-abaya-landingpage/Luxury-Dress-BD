@@ -108,7 +108,14 @@ test('shared check: sale boundaries and publish window; schedule.json keeps only
 
 test('the Worker cron calls /api/cron-tick separately from the order queue', () => {
   const src = require('node:fs').readFileSync(path.join(root, 'cloudflare-worker/worker.js'), 'utf8');
-  assert.match(src, /ctx\.waitUntil\(processOrderQueue\(env\)\);\s*\/\/[^\n]*\n[^\n]*\n\s*(?:if \(!env\.IS_PREVIEW\) )?ctx\.waitUntil\(fetch\('https:\/\/muslimabaya\.com\/api\/cron-tick'[^)]*\)\.catch\(\(\) => \{\}\)\);/);
+  // Other independent queue consumers may be inserted between these calls;
+  // assert the two jobs remain separate and the cron endpoint stays preview-guarded.
+  const orderQueue = src.indexOf('ctx.waitUntil(processOrderQueue(env));');
+  const cronTick = src.indexOf("ctx.waitUntil(fetch('https://muslimabaya.com/api/cron-tick'");
+  assert.notEqual(orderQueue, -1, 'order queue must still be scheduled');
+  assert.notEqual(cronTick, -1, 'scheduled jobs clock must still be called');
+  assert.ok(orderQueue < cronTick, 'cron tick must remain separate after the order queue');
+  assert.match(src, /if \(!env\.IS_PREVIEW\) ctx\.waitUntil\(fetch\('https:\/\/muslimabaya\.com\/api\/cron-tick'/);
 });
 
 
