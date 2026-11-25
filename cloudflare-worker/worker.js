@@ -70,7 +70,7 @@ async function verifyAdminToken(env, token) {
 function isLikelyPixelId(v) {
   // Meta/TikTok pixel IDs are plain numeric or alphanumeric tokens; this just keeps obviously
   // wrong input (HTML, scripts, empty) out of a value that gets spliced into served JavaScript.
-  return typeof v === 'string' && /^\\d{6,40}$/.test(v);
+  return typeof v === 'string' && /^\d{6,40}$/.test(v);
 }
 const ORDER_SETTINGS_DEFAULTS = Object.freeze({
   mobileVerification: true, confirmationSms: false, locationFields: true,
