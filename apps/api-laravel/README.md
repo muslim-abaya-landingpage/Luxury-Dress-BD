@@ -1,22 +1,33 @@
-# Muslim Abaya — Laravel API foundation
+# Muslim Abaya — Laravel 13 API
 
-Target: Laravel 13, PHP 8.3+, PostgreSQL, Laravel Sanctum.
+Laravel 13 / PHP 8.3+ foundation for the staged storefront migration. This app is isolated from production and must not be connected to live databases or deployed until staging reconciliation and approval.
 
-This folder documents the isolated API boundary. Do not connect it to production databases or deploy it yet.
+## Local setup
 
-## Bootstrap the framework
-
-Use the official Laravel 13 application skeleton, then place the generated framework files in this directory:
+From this directory:
 
 ```bash
-composer create-project laravel/laravel:^13.0 /tmp/muslimabaya-api
+cp .env.example .env
+mkdir -p database
+touch database/database.sqlite
+composer update
+php artisan key:generate
+php artisan serve
 ```
 
-Copy the generated Laravel application into `apps/api-laravel/` (preserving this README), then install Sanctum using the Laravel 13-compatible release and publish its migrations. Commit the Composer lockfile after the framework install and run the test suite before adding production integration.
+Health check: `GET http://127.0.0.1:8000/api/health`
+
+Run tests:
+
+```bash
+composer test
+```
+
+Composer includes Laravel Sanctum. Authentication routes, token issuance, database migrations and role policies remain deliberately inactive until the identity model and authorization matrix are reviewed. Do not migrate active passwords or sessions.
 
 ## Initial API contract
 
-- `GET /api/health` — liveness only; must not expose secrets or database details.
+- `GET /api/health` — safe liveness response.
 - `GET /api/v1/catalog/products` — public, paginated product read.
 - `GET /api/v1/catalog/products/{productId}` — public product detail.
 - `POST /api/v1/orders` — validated order creation with idempotency key.
@@ -33,13 +44,10 @@ Copy the generated Laravel application into `apps/api-laravel/` (preserving this
 4. Stock reservation and order creation must be transactional; cancellation/delivery transitions must preserve the existing stock lifecycle.
 5. Every privileged action records actor, before/after values, timestamp and reason.
 6. Customers can only access their own orders. Staff permissions remain least-privilege; owner-only operations stay owner-only.
-7. Do not migrate active passwords or sessions until the credential strategy has been reviewed.
-8. Use environment variables/secrets manager for credentials. Never commit `.env`, service-role keys, Google service-account JSON, or courier/Meta tokens.
+7. Never commit `.env`, service-role keys, Google service-account JSON, or courier/Meta tokens.
 
-## Data-source boundary
+## Existing data-source boundary
 
 The current order master is the Google Sheets `Online Order` tab. The live product catalog is the GitHub catalog with the Cloudflare D1 live-catalog overlay. D1 also holds size settings and operational queues. Supabase currently holds support-chat records and a separate product projection. Keep those systems read-only from the new API until the staging reconciliation plan is complete.
 
-## Database decision gate
-
-Do not run Laravel migrations against the existing Supabase project yet. First compare its PostgreSQL schema and RLS rules with the target transactional model, verify backup/restore, and choose one authoritative write database. Do not create a paid database/hosting service without approval.
+Do not run migrations against the existing Supabase project yet. First compare its PostgreSQL schema and RLS rules with the target transactional model, verify backup/restore, and choose one authoritative write database. Do not create a paid database or hosting service without approval.
