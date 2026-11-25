@@ -20,7 +20,7 @@ Migration `migrations/d1/0005_tracking_erp.sql` নিচের টেবিল 
 2. `tracking_domains` — কোন hostname কোন profile ব্যবহার করবে।
 3. `tracking_event_dedup` — provider + profile + event ID-ভিত্তিক idempotency ledger।
 4. `tracking_event_log` — PII-বিহীন event delivery outcome, status ও provider trace ID।
-5. `tracking_event_queue` — encrypted payload-সহ retry queue foundation।
+5. `tracking_event_queue` — AES-GCM encrypted payload, bounded retry schedule এবং dead-letter state।
 
 ## নিরাপত্তা নীতি
 
@@ -30,7 +30,9 @@ Migration `migrations/d1/0005_tracking_erp.sql` নিচের টেবিল 
 - Admin API-তে বিদ্যমান AdminVerify session validation বাধ্যতামূলক হবে।
 - Domain resolver কেবল আগে থেকে নিবন্ধিত ও enabled hostname গ্রহণ করবে; client পাঠানো arbitrary Pixel ID বিশ্বাস করবে না।
 - Profile/Domain update-এ validation, audit metadata ও safe error response থাকবে।
-- Retry queue-তে কেবল authenticated encryption-এ সুরক্ষিত payload থাকবে; encryption secret অনুপস্থিত হলে queue write হবে না।
+- Retry queue-তে কেবল AES-GCM authenticated encryption-এ সুরক্ষিত event payload থাকবে; provider token queue payload-এ রাখা হবে না।
+- Retry worker প্রতি ৫ মিনিটে চলবে; transient network/HTTP 429/5xx failure-এ exponential backoff (১ মিনিট থেকে সর্বোচ্চ ১২ ঘণ্টা), সর্বোচ্চ ৬টি attempt; এরপর dead-letter।
+- Preview Worker-এ `IS_PREVIEW=1` guard আছে, তাই Preview cron Production `/api/cron-tick` endpoint কল করবে না।
 
 ## ধাপে ধাপে কাজ
 
@@ -46,9 +48,9 @@ Migration `migrations/d1/0005_tracking_erp.sql` নিচের টেবিল 
 
 ### Phase 3 — Event Router
 - Hostname → enabled profile resolve।
-- Meta/TikTok/GA4 provider routing।
+- Meta ও TikTok provider routing; GA4 routing আলাদা পরবর্তী কাজ।
 - Same event ID preservation and provider-level deduplication।
-- Existing single-profile behavior as a fallback during migration.
+- Existing single-profile behavior as a fallback during migration।
 
 ### Phase 4 — Monitoring
 - PII-free delivery logs, provider status, error codes, event counts।
