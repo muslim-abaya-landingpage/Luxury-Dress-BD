@@ -1,4 +1,4 @@
-name: Migration Laravel API Checks
+name: Migration Laravel and Next.js Validation
 
 on:
   push:
@@ -6,25 +6,27 @@ on:
       - migration/nextjs-laravel-foundation
     paths:
       - "apps/api-laravel/**"
+      - "apps/storefront-next/**"
       - ".github/workflows/migration-laravel.yml"
   pull_request:
     branches: [main]
     paths:
       - "apps/api-laravel/**"
+      - "apps/storefront-next/**"
       - ".github/workflows/migration-laravel.yml"
 
 permissions:
   contents: read
 
 concurrency:
-  group: migration-laravel-${{ github.ref }}
+  group: migration-validation-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   laravel:
     name: Laravel 13 install and feature tests
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     defaults:
       run:
         working-directory: apps/api-laravel
@@ -37,11 +39,40 @@ jobs:
           php-version: "8.3"
           extensions: ctype, curl, dom, fileinfo, mbstring, openssl, pdo, pdo_sqlite, tokenizer, xml
           coverage: none
+      - name: Prepare isolated environment
+        run: |
+          cp .env.example .env
+          mkdir -p database
+          touch database/database.sqlite
       - name: Validate Composer manifest
         run: composer validate --no-check-publish
-      - name: Resolve and install locked dependencies
+      - name: Resolve and install dependencies
         run: composer update --no-interaction --prefer-dist --no-progress
       - name: Generate application key
         run: php artisan key:generate
       - name: Run Laravel feature tests
         run: composer test
+
+  nextjs:
+    name: Next.js typecheck and production build
+    needs: laravel
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: apps/storefront-next
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/storefront-next/package-lock.json
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: TypeScript check
+        run: npm run typecheck
+      - name: Build Next.js app
+        run: npm run build
