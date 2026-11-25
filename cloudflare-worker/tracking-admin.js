@@ -214,6 +214,14 @@ export async function claimTrackingEvent(env, profileId, provider, eventId) {
   return Number(result.meta && result.meta.changes || 0) > 0;
 }
 
+export async function releaseTrackingEvent(env, profileId, provider, eventId) {
+  if (!env.DB || !profileId || !provider || !eventId) return;
+  try {
+    const key = String(profileId) + ':' + provider + ':' + String(eventId);
+    await env.DB.prepare('DELETE FROM tracking_event_dedup WHERE dedup_key = ?').bind(key).run();
+  } catch (error) {}
+}
+
 export async function logTrackingEvent(env, record) {
   if (!env.DB || !record || !['meta', 'tiktok', 'ga4'].includes(record.provider)) return;
   const safe = {
