@@ -10,6 +10,9 @@ final class OrderLifecycleContract
         'Delivered', 'Cancelled', 'Fake',
     ];
 
+    /** @var list<string> */
+    public const STOCK_STAGES = ['NEW', 'RESERVED', 'SOLD', 'RELEASED'];
+
     public static function normalizeStatus(?string $status): ?string
     {
         $candidate = trim((string) $status);
@@ -21,18 +24,107 @@ final class OrderLifecycleContract
         return null;
     }
 
+    /**
+     * Mirrors Apps Script orderIdempotencyKey_ and normalizePhone_.
+     * This is a deterministic fingerprint only, not a persistent idempotency store.
+     */
     public static function checkoutIdempotencyKey(?string $eventId, ?string $phone): ?string
     {
         $event = trim((string) $eventId);
-        $digits = preg_replace('/\D+/', '', (string) $phone) ?? '';
-        if (str_starts_with($digits, '88') && strlen($digits) === 13) {
-            $digits = substr($digits, 2);
-        }
-        if ($event === '' || preg_match('/^[A-Za-z0-9_-]{8,120}$/', $event) !== 1
-            || preg_match('/^01[0-9]{9}$/', $digits) !== 1) {
+        if (preg_match('/^[A-Za-z0-9_.:-]{6,100}$/', $event) !== 1) {
             return null;
         }
+
+        $digits = preg_replace('/\D+/', '', (string) $phone) ?? '';
+        if (str_starts_with($digits, '880') && strlen($digits) >= 12) {
+            $digits = '0' . substr($digits, 3);
+        }
+        if (strlen($digits) === 10 && str_starts_with($digits, '1')) {
+            $digits = '0' . $digits;
+        }
+
         return hash('sha256', $event . '|' . $digits);
+    }
+
+    /**
+     * Pure mirror of the existing Apps Script StockStage decision table.
+     * No stock mutation is performed here.
+     *
+     * @return array{status: string, stage_before?: string, stage_after?: string, action?: string}
+     */
+    public static function stockStagePlan(?string $status, ?string $stage): array
+    {
+        $normalizedStatus = trim((string) $status);
+        $rawStage = strtoupper(trim((string) $stage));
+        $legacy = $rawStage === '' || $rawStage === 'LEGACY_SKIPPED';
+        $current = $legacy ? 'LEGACY_UNKNOWN' : $rawStage;
+
+        if (!$legacy && !in_array($current, self::STOCK_STAGES, true)) {
+            return ['status' => 'manual_review', 'stage_before' => $current, 'action' => 'unknown_stage'];
+        }
+
+        $lower = strtolower($normalizedStatus);
+        $target = null;
+        if (str_contains($lower, 'return') || str_contains($lower, 'refund')
+            || str_contains($lower, 'ফেরত') || str_contains($lower, 'cancel')
+            || str_contains($lower, 'বাতিল') || $lower === 'fake') {
+            $target = 'RELEASED';
+        } elseif ($normalizedStatus === 'Confirmed') {
+            $target = 'RESERVED';
+        } elseif ($normalizedStatus === 'Delivered') {
+            $target = 'SOLD';
+        } elseif ($normalizedStatus === 'Pending' && $current === 'RESERVED') {
+            $target = 'RELEASED';
+        }
+
+        if ($target === null) {
+            return ['status' => 'no_transition', 'stage_before' => $current];
+        }
+
+        if ($legacy) {
+            return [
+                'status' => 'legacy_skipped',
+                'stage_before' => 'LEGACY_UNKNOWN',
+                'stage_after' => 'LEGACY_SKIPPED',
+                'action' => 'no_stock_mutation',
+            ];
+        }
+
+        if ($current === $target) {
+            return ['status' => 'unchanged', 'stage_before' => $current, 'stage_after' => $current, 'action' => 'none'];
+        }
+
+        if ($target === 'RESERVED') {
+            if ($current === 'SOLD') {
+                // Existing Apps Script logs REVIEW_NEEDED but still writes RESERVED.
+                return ['status' => 'manual_review', 'stage_before' => $current, 'stage_after' => 'RESERVED', 'action' => 'review_needed_no_reserve'];
+            }
+            return ['status' => 'transition', 'stage_before' => $current, 'stage_after' => 'RESERVED', 'action' => 'reserve'];
+        }
+
+        if ($target === 'RELEASED') {
+            if ($current === 'RESERVED') {
+                return ['status' => 'transition', 'stage_before' => $current, 'stage_after' => 'RELEASED', 'action' => 'release'];
+            }
+            if ($current === 'SOLD') {
+                return ['status' => 'manual_review', 'stage_before' => $current, 'stage_after' => 'RELEASED', 'action' => 'return_review_no_auto_restock'];
+            }
+            return ['status' => 'transition', 'stage_before' => $current, 'stage_after' => 'RELEASED', 'action' => 'stage_only'];
+        }
+
+        if ($target === 'SOLD') {
+            if ($current === 'RESERVED') {
+                return ['status' => 'transition', 'stage_before' => $current, 'stage_after' => 'SOLD', 'action' => 'finalize_reserved_sale'];
+            }
+            if ($current === 'NEW') {
+                return ['status' => 'transition', 'stage_before' => $current, 'stage_after' => 'SOLD', 'action' => 'sell_direct'];
+            }
+            if ($current === 'RELEASED') {
+                return ['status' => 'manual_review', 'stage_before' => $current, 'stage_after' => 'SOLD', 'action' => 'review_then_sell_direct'];
+            }
+        }
+
+        return ['status' => 'manual_review', 'stage_before' => $current, 'action' => 'unmapped_transition'];
     }
 
     /**
