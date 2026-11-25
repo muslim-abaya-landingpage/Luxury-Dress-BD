@@ -38,9 +38,8 @@
 
 ## Interface change দরকার হবে
 
-বর্তমান `readOrderSnapshots(int $limit = 500): array` interface-এ continuation cursor নেই। তাই adapter implementation-এর আগে contract-কে explicit page model-এ উন্নীত করতে হবে, যেমন:
-- `readOrderSnapshotPage(?string $cursor, int $limit): OrderSnapshotPage`
-- page payload: canonical rows + opaque next cursor + source snapshot metadata
+বর্তমান interface-কে explicit page model-এ উন্নীত করা হয়েছে: `readOrderSnapshotPage(?string $cursor = null, int $limit = 500): OrderSnapshotPage`। Fixture implementation-এ pagination contract ও সীমাবদ্ধতার synthetic test যোগ হয়েছে। Production adapter-এ cursor-কে authenticated/opaque করতে হবে। প্রস্তাবিত page payload:
+- canonical rows + opaque next cursor + source snapshot metadata
 - maximum page size 5000
 - cursor-এ spreadsheet ID, tab identity, row offset এবং snapshot version/fingerprint bind থাকবে; user-editable raw A1 range গ্রহণ করা হবে না।
 
