@@ -348,7 +348,7 @@ export default {
     ctx.waitUntil(processOrderQueue(env));
     // Reliable clock for the website's scheduled jobs (sale start/end and scheduled-publish rebuilds, daily SEO
     // audit): /api/cron-tick decides what is due. Separate from the order queue; a failure here changes nothing else.
-    ctx.waitUntil(fetch('https://muslimabaya.com/api/cron-tick', { method: 'POST', headers: { 'User-Agent': 'MuslimAbaya-Worker-Cron' } }).catch(() => {}));
+    if (!env.IS_PREVIEW) ctx.waitUntil(fetch('https://muslimabaya.com/api/cron-tick', { method: 'POST', headers: { 'User-Agent': 'MuslimAbaya-Worker-Cron' } }).catch(() => {}));
     // Tracking diagnostics use bounded retention; missing migration is intentionally non-fatal.
     if (env.DB) {
       const now = Math.floor(Date.now() / 1000);
