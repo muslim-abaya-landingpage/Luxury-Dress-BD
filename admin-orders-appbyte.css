@@ -13,3 +13,33 @@ body.wo-orders-page{--ab-bg:#f4f6fa;--ab-card:#fff;--ab-ink:#17243a;--ab-muted:#
 .wc-subnav-tools{display:flex;justify-content:flex-end;align-items:center;padding:8px 14px 0;background:#fff;border:1px solid var(--ab-line);border-bottom:0}
 #ordCourierPerformance{background:#edf2fb!important;color:#253b69!important;border:1px solid #d8e2f2!important;border-radius:8px!important;font-weight:750!important}
 #ordCourierPerformance:hover{background:#e2eaf7!important}
+
+
+/* Fix the extra left gutter on the standalone Orders workspace. The WordPress
+   shell reserves its legacy 160px menu offset even though this page uses the
+   custom fixed admin sidebar. */
+@media (min-width: 981px) {
+  body.wo-orders-page .adm-shell > .om-workspace.wc-list {
+    margin-left: 245px !important;
+    width: calc(100% - 245px) !important;
+    max-width: none !important;
+    min-width: 0 !important;
+  }
+  body.wo-orders-page .adm-shell:has(> .adm-sidebar.is-collapsed) > .om-workspace.wc-list {
+    margin-left: 68px !important;
+    width: calc(100% - 68px) !important;
+  }
+  body.wo-orders-page .om-workspace.wc-list > .pn-main {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+}
+@media (max-width: 980px) {
+  body.wo-orders-page .adm-shell > .om-workspace.wc-list {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
