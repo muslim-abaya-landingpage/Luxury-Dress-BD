@@ -14,6 +14,13 @@ final class OrderSnapshotMapper
 {
     private const MAX_ROWS = 5000;
 
+    private const HEADER_ALIASES = [
+        'order_id' => ['order id', 'অর্ডার আইডি'],
+        'status' => ['status', 'স্ট্যাটাস'],
+        'stock_stage' => ['stockstage'],
+        'updated_at' => ['updated at'],
+    ];
+
     /**
      * @param list<string> $headers
      * @param list<list<mixed>> $rows
@@ -25,18 +32,28 @@ final class OrderSnapshotMapper
             throw new InvalidArgumentException('Snapshot exceeds the maximum row limit.');
         }
 
-        $positions = [];
-        foreach ($headers as $index => $header) {
-            $key = self::normalizeHeader((string) $header);
-            if ($key !== '') {
-                if (isset($positions[$key])) {
-                    throw new InvalidArgumentException('Duplicate source column header.');
-                }
-                $positions[$key] = $index;
+        $aliasToField = [];
+        foreach (self::HEADER_ALIASES as $field => $aliases) {
+            foreach ($aliases as $alias) {
+                $aliasToField[self::normalizeHeader($alias)] = $field;
             }
         }
 
-        foreach (['order id', 'status', 'stockstage'] as $required) {
+        $positions = [];
+        foreach ($headers as $index => $header) {
+            $key = self::normalizeHeader((string) $header);
+            if ($key === '' || !isset($aliasToField[$key])) {
+                continue;
+            }
+
+            $field = $aliasToField[$key];
+            if (isset($positions[$field])) {
+                throw new InvalidArgumentException('Duplicate source column for a canonical field.');
+            }
+            $positions[$field] = $index;
+        }
+
+        foreach (['order_id', 'status', 'stock_stage'] as $required) {
             if (!array_key_exists($required, $positions)) {
                 throw new InvalidArgumentException('A required source column is missing.');
             }
@@ -50,9 +67,9 @@ final class OrderSnapshotMapper
                 throw new InvalidArgumentException('Invalid source row.');
             }
 
-            $orderId = trim((string) ($row[$positions['order id']] ?? ''));
+            $orderId = trim((string) ($row[$positions['order_id']] ?? ''));
             $status = trim((string) ($row[$positions['status']] ?? ''));
-            $stockStageRaw = trim((string) ($row[$positions['stockstage']] ?? ''));
+            $stockStageRaw = trim((string) ($row[$positions['stock_stage']] ?? ''));
 
             if ($orderId === '' && $status === '' && $stockStageRaw === '') {
                 continue;
@@ -66,10 +83,10 @@ final class OrderSnapshotMapper
             $seenOrderIds[$orderId] = true;
 
             $updatedAt = null;
-            if (isset($positions['updated at'])) {
-                $rawTimestamp = trim((string) ($row[$positions['updated at']] ?? ''));
+            if (isset($positions['updated_at'])) {
+                $rawTimestamp = trim((string) ($row[$positions['updated_at']] ?? ''));
                 if ($rawTimestamp !== '') {
-                    if (!preg_match('/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$/', $rawTimestamp)) {
+                    if (!preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/', $rawTimestamp)) {
                         throw new InvalidArgumentException('Source update timestamp must be ISO-8601.');
                     }
                     try {
