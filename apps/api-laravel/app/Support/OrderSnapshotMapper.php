@@ -1,6 +1,6 @@
 <?php
 
-namespace App\\Support;
+namespace App\Support;
 
 use DateTimeImmutable;
 use InvalidArgumentException;
@@ -90,6 +90,6 @@ final class OrderSnapshotMapper
 
     private static function normalizeHeader(string $header): string
     {
-        return strtolower(trim((string) preg_replace('/\\s+/', ' ', $header)));
+        return strtolower(trim((string) preg_replace('/\s+/', ' ', $header)));
     }
 }
