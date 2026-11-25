@@ -35,7 +35,7 @@ const verify = async (_env, token) => token === 'valid-session' ? { email: 'owne
 
 test('tracking admin API rejects unauthenticated requests', async () => {
   const response = await handleTrackingAdmin(
-    new Request('https://muslimabaya.com/_ma/admin/tracking'),
+    new Request('https://muslimabaya.com/_ma/admin/tracking', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }),
     { DB: makeDb() },
     new URL('https://muslimabaya.com/_ma/admin/tracking'),
     verify
@@ -132,7 +132,7 @@ test('domain resolver returns only enabled mapped profile fields', async () => {
       assert.match(sql, /tracking_domains d JOIN tracking_profiles p/);
       return { bind(host) { assert.equal(host, 'shop.example.com'); return this; }, async first() {
         return { id: 4, profile_key: 'client-a', name: 'Client A', meta_pixel_id: '1234567890',
-          tiktok_pixel_id: 'abcdefghij', meta_token_ciphertext: 'cipher', tiktok_token_ciphertext: '',
+          tiktok_pixel_id: '123456789012345', meta_token_ciphertext: 'cipher', tiktok_token_ciphertext: '',
           enabled: 1, config_json: JSON.stringify({ advancedMatching: ['em'], events: { Purchase: false } }) };
       } };
     }
@@ -158,8 +158,10 @@ test('provider event claim uses unique profile/provider/event key', async () => 
   const claimed = await claimTrackingEvent(env, 9, 'meta', 'evt-123');
   assert.equal(claimed, true);
   assert.match(calls[0].sql, /INSERT OR IGNORE/);
-  assert.equal(calls[0].values[0], '9:meta:evt-123');
-  assert.equal(calls[0].values[2], 'meta');
+  const insert = calls.find((call) => /INSERT OR IGNORE/.test(call.sql));
+  assert.ok(insert);
+  assert.equal(insert.values[0], '9:meta:evt-123');
+  assert.equal(insert.values[2], 'meta');
 });
 
 test('event logs store only allow-listed operational metadata', async () => {
