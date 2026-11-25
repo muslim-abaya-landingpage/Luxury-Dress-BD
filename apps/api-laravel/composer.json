@@ -1,0 +1,58 @@
+{
+  "$schema": "https://getcomposer.org/schema.json",
+  "name": "muslimabaya/api",
+  "type": "project",
+  "description": "Muslim Abaya staged Laravel API",
+  "keywords": ["laravel", "api", "muslimabaya"],
+  "license": "proprietary",
+  "require": {
+    "php": "^8.3",
+    "laravel/framework": "^13.0",
+    "laravel/sanctum": "^4.4"
+  },
+  "require-dev": {
+    "fakerphp/faker": "^1.23",
+    "mockery/mockery": "^1.6",
+    "nunomaduro/collision": "^8.6",
+    "phpunit/phpunit": "^11.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/",
+      "Database\\Factories\\": "database/factories/",
+      "Database\\Seeders\\": "database/seeders/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "post-autoload-dump": [
+      "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+      "@php artisan package:discover --ansi"
+    ],
+    "post-root-package-install": [
+      "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+    ],
+    "test": "@php artisan test",
+    "test:unit": "@php artisan test --testsuite=Unit",
+    "test:feature": "@php artisan test --testsuite=Feature"
+  },
+  "extra": {
+    "laravel": {
+      "dont-discover": []
+    }
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "preferred-install": "dist",
+    "sort-packages": true,
+    "allow-plugins": {
+      "php-http/discovery": true
+    }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}
