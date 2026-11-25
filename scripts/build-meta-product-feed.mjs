@@ -38,9 +38,19 @@ const cleanText = value => String(value == null ? '' : value)
   .trim();
 const seen = new Set();
 const rows = [];
-let skipped = 0;
+// Serial order: newest upload first (dateAdded desc). Products with the same or missing date keep their
+// catalog order, so the feed is stable between builds. A product added in the admin panel appears at the top.
+const flat = [];
 for (const [category, products] of Object.entries(catalog)) {
-  for (const product of products || []) {
+  for (const product of products || []) flat.push({ category, product, index: flat.length });
+}
+flat.sort((a, b) => {
+  const da = String(a.product && a.product.dateAdded || ''), db = String(b.product && b.product.dateAdded || '');
+  return da === db ? a.index - b.index : (da < db ? 1 : -1);
+});
+let skipped = 0;
+{
+  for (const { category, product } of flat) {
     if (!product || !product.id || !product.name || product.isImageView === true ||
         product.catalogVisibility === 'hidden' || seen.has(String(product.id))) continue;
     if (!w.maCatalog.isPublishedProduct(product)) continue;
