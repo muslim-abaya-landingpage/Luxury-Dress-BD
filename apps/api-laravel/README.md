@@ -15,7 +15,7 @@ php artisan key:generate
 php artisan serve
 ```
 
-Health check: `GET http://127.0.0.1:8000/api/health`\n\nRead-only fixture catalog:\n\n- `GET /api/v1/catalog/products` — paginated synthetic products; supports `category`, `page`, and `per_page`.\n- `GET /api/v1/catalog/products/{productId}` — published synthetic product detail.\n\nBoth catalog endpoints return `data_source: fixture`. They are intentionally disconnected from Google Sheets, Cloudflare D1, Supabase, R2 and all production credentials. Fixture records are not real products and must not be exposed as the live storefront catalog.
+Health check: `GET http://127.0.0.1:8000/api/health`\n\nRead-only fixture catalog:\n\n- `GET /api/v1/catalog/products` — paginated synthetic products; supports `category`, `page`, and `per_page`.\n- `GET /api/v1/catalog/products/{productId}` — published synthetic product detail.\n\nBoth catalog endpoints return `data_source: fixture`. Routes depend on the `App\\Contracts\\CatalogSource` interface, currently bound to `FixtureCatalogSource` in `AppServiceProvider`. This keeps the HTTP contract independent from any future data adapter. The fixture implementation is intentionally disconnected from Google Sheets, Cloudflare D1, Supabase, R2 and all production credentials. Fixture records are not real products and must not be exposed as the live storefront catalog. A future GitHub/D1 adapter must be separately implemented as read-only, validate source shape and identity uniqueness, and pass reconciliation tests before it can be bound.
 
 Run tests:
 
