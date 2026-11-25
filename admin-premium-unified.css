@@ -503,3 +503,44 @@ html.wp-admin-shell body.pm-wp-admin .pl-admin-header .pm-header-actions{
     max-width:none!important;
   }
 }
+
+
+/* Responsive shell fix — match the drawer breakpoint used by admin-dashboard-design.js.
+   At 761–980px the sidebar is fixed/off-canvas, so the shell must not keep a
+   reserved sidebar grid column or the main content collapses into that narrow track. */
+@media (max-width:980px){
+  .adm-shell,.pn-app.adm-shell{
+    display:block!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    width:100%!important;
+    max-width:none!important;
+    margin:0!important;
+    padding:10px!important;
+    gap:0!important;
+  }
+  .adm-sidebar,.pn-side{
+    position:fixed!important;
+    top:10px!important;
+    left:10px!important;
+    bottom:10px!important;
+    width:min(300px,calc(100vw - 32px))!important;
+    min-width:0!important;
+    max-width:min(300px,calc(100vw - 32px))!important;
+    height:calc(100dvh - 20px)!important;
+    max-height:calc(100dvh - 20px)!important;
+    z-index:1002!important;
+    transform:translateX(calc(-100% - 12px));
+  }
+  .adm-sidebar.is-open,.pn-side.is-open{transform:translateX(0)!important}
+  .adm-content,.pn-main{
+    display:block!important;
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+    margin:0!important;
+  }
+  .adm-main,.pn-main>main{
+    width:100%!important;
+    max-width:none!important;
+  }
+}
