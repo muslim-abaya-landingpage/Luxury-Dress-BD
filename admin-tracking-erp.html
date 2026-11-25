@@ -56,7 +56,7 @@
       <div><div class="adm-page-kicker">MUSLIM ABAYA / MARKETING DATA</div><h1>Tracking Management ERP</h1><div class="terp-muted">একাধিক Pixel Profile, Domain Mapping এবং Event Monitoring পরিচালনা করুন।</div></div>
       <div class="terp-actions"><a class="adm-btn adm-btn-secondary" href="admin-tracking-settings.html">পুরোনো Pixel Settings</a><button class="adm-btn adm-btn-secondary" id="refreshBtn" type="button">Refresh</button></div>
     </header>
-    <div class="terp-note"><strong>Preview / Staging:</strong> এই প্যানেলটি নতুন Tracking ERP API-এর প্রাথমিক সংস্করণ। D1 migration ও Worker routing সম্পূর্ণ না হওয়া পর্যন্ত এটি Live event routing পরিবর্তন করবে না। কোনো Token ব্রাউজারে ফেরত দেওয়া হয় না; Token save করার জন্য Worker encryption secret প্রয়োজন।</div>
+    <div class="terp-note"><strong>Preview / Staging:</strong> এটি নিরাপদ Preview / Staging পরিবেশ। Profile, Domain Mapping, Event Logs ও Retry Queue পর্যবেক্ষণ এখানে পরীক্ষা করুন। Preview-এর Meta/TikTok Provider Token কনফিগার করা নেই; তাই বাস্তব বিজ্ঞাপন অ্যাকাউন্টে Event পাঠানো হবে না। Production tracking অপরিবর্তিত।</div>
     <section class="terp-stats" aria-label="Tracking delivery overview">
       <article class="terp-stat"><span>Pending Retry</span><strong id="statPending">—</strong><small>পরবর্তী Attempt-এর অপেক্ষায়</small></article>
       <article class="terp-stat"><span>Processing</span><strong id="statProcessing">—</strong><small>Worker বর্তমানে প্রসেস করছে</small></article>
