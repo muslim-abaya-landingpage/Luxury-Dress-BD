@@ -2,6 +2,8 @@
   "version": 1,
   "description": "Only API, live catalog, Meta feed, product pages, and blocked non-website paths run through Pages Functions.",
   "include": [
+    "/gtm.js*",
+    "/_ma/*",
     "/api/*",
     "/meta-product-feed.csv",
     "/google-product-feed.xml",
