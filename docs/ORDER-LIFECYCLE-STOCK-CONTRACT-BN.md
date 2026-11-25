@@ -103,3 +103,31 @@ Laravel migration branch-এ `OrderStockReconciliation` নামে একট�
 ### Synthetic tests
 
 Clean snapshot, orphaned reservation, missing ledger, stage mismatch, pending/failed compensation, duplicate operation ID, legacy/new exclusions, invalid identity এবং read-only behavior-এর test যোগ করা হয়েছে। CI ফলাফল আলাদাভাবে যাচাই করতে হবে।
+
+
+## Read-only Google Sheets Order Adapter Contract
+
+পরবর্তী ধাপে Laravel-এর জন্য `OrderSnapshotSource` read-only interface যোগ হয়েছে। এটি Google Sheets-এর `Online Order` master-এর ভবিষ্যৎ adapter-এর সীমা নির্ধারণ করে; এখনো Google API client, credentials, network call বা production binding নেই।
+
+### Canonical snapshot fields
+
+- `order_id`: স্থায়ী Order ID
+- `status`: বর্তমান order status
+- `stock_stage`: StockStage; legacy হলে null/LEGACY_SKIPPED থাকতে পারে
+- `source_updated_at`: source timestamp থাকলে ISO-8601, নইলে null
+
+Interface-এ কোনো create/update/delete method নেই। Fixture implementation-এ synthetic rows এবং 1–5000 row limit validation রয়েছে। Customer name, phone, address, payment data বা অন্য PII snapshot contract-এ রাখা হয়নি।
+
+### ভবিষ্যৎ Google Sheets adapter-এর বাধ্যতামূলক শর্ত
+
+1. শুধু অনুমোদিত spreadsheet ID এবং নির্দিষ্ট `Online Order` tab পড়বে; spreadsheet ID/credentials environment secret-এ থাকবে।
+2. Header name দিয়ে column map করবে; column position অনুমান করবে না।
+3. Order ID trim করে blank/duplicate ID reject বা quarantine করবে; row number-কে Order ID হিসেবে ব্যবহার করবে না।
+4. Source timestamp অনুপস্থিত হলে ingestion time-কে source update time বলে চালাবে না।
+5. Bounded read, pagination/batch read, timeout এবং retry/backoff থাকবে।
+6. Read scope ছাড়া কোনো OAuth scope বা write permission চাইবে না।
+7. Raw row/log-এ customer PII ছাপাবে না; শুধু reconciliation-এর প্রয়োজনীয় fields রাখবে।
+8. Snapshot import-কে read-only রাখতে হবে; কোনো repair, stock adjustment বা status write নয়।
+9. Adapter চালুর আগে Google Sheet header mapping এবং synthetic fixture-এর বিরুদ্ধে contract tests বাধ্যতামূলক।
+
+`FixtureOrderSnapshotSource` এখন একমাত্র test implementation। Production service container-এ এটি bind করা হয়নি; API route-ও যোগ হয়নি।
