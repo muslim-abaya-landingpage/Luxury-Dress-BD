@@ -69,6 +69,9 @@ final class OrderSnapshotMapper
             if (isset($positions['updated at'])) {
                 $rawTimestamp = trim((string) ($row[$positions['updated at']] ?? ''));
                 if ($rawTimestamp !== '') {
+                    if (!preg_match('/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$/', $rawTimestamp)) {
+                        throw new InvalidArgumentException('Source update timestamp must be ISO-8601.');
+                    }
                     try {
                         $updatedAt = (new DateTimeImmutable($rawTimestamp))->format(DATE_ATOM);
                     } catch (Throwable) {
