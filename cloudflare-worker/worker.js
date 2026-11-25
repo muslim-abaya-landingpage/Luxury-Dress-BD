@@ -149,6 +149,86 @@ async function handleAdminSettingsPost(request, env) {
   return json({ ok: true, saved: updates });
 }
 
+async function processTrackingRetryQueue(env) {
+  if (!env.DB) return;
+  const now = Math.floor(Date.now() / 1000);
+  // Recover leases left by an interrupted invocation.
+  await env.DB.prepare(
+    "UPDATE tracking_event_queue SET status = 'pending', next_attempt_at = ?, updated_at = ? WHERE status = 'processing' AND updated_at < ?"
+  ).bind(now, now, now - 300).run().catch(() => {});
+  let due;
+  try {
+    due = await env.DB.prepare(
+      "SELECT q.id, q.profile_id, q.provider, q.event_id, q.encrypted_payload, q.attempt_count, " +
+      "p.meta_pixel_id, p.tiktok_pixel_id, p.meta_token_ciphertext, p.tiktok_token_ciphertext " +
+      "FROM tracking_event_queue q JOIN tracking_profiles p ON p.id = q.profile_id " +
+      "WHERE q.status = 'pending' AND q.next_attempt_at <= ? AND p.enabled = 1 ORDER BY q.next_attempt_at ASC LIMIT 20"
+    ).bind(now).all();
+  } catch (error) { return; }
+
+  const delays = [60, 300, 1800, 7200, 21600, 43200];
+  for (const row of (due.results || [])) {
+    const lease = await env.DB.prepare(
+      "UPDATE tracking_event_queue SET status = 'processing', attempt_count = attempt_count + 1, updated_at = ? WHERE id = ? AND status = 'pending'"
+    ).bind(now, row.id).run().catch(() => null);
+    if (!lease || Number(lease.meta && lease.meta.changes || 0) !== 1) continue;
+
+    const attempt = Number(row.attempt_count || 0) + 1;
+    let payload;
+    let token = '';
+    let response;
+    let responseData = {};
+    let errorCode = '';
+    try {
+      payload = await decryptTrackingPayload(row.encrypted_payload, env);
+      const ciphertext = row.provider === 'meta' ? row.meta_token_ciphertext : row.tiktok_token_ciphertext;
+      token = await decryptTrackingToken(ciphertext, env);
+      if (!token || typeof payload.body !== 'string' || payload.body.length > 180000) throw new Error('RETRY_PAYLOAD_INVALID');
+
+      if (row.provider === 'meta') {
+        if (!/^\d{6,40}$/.test(String(row.meta_pixel_id || ''))) throw new Error('META_PIXEL_NOT_CONFIGURED');
+        const endpoint = 'https://graph.facebook.com/' + META_API_VERSION + '/' + encodeURIComponent(row.meta_pixel_id) + '/events?access_token=' + encodeURIComponent(token);
+        response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload.body });
+        try { responseData = await response.json(); } catch (error) {}
+        if (response.ok && !responseData.error) errorCode = '';
+        else errorCode = cleanStr(responseData.error && responseData.error.code || 'META_API_ERROR', 80);
+      } else if (row.provider === 'tiktok') {
+        if (!/^\d{6,40}$/.test(String(row.tiktok_pixel_id || ''))) throw new Error('TIKTOK_PIXEL_NOT_CONFIGURED');
+        response = await fetch(TIKTOK_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Access-Token': token }, body: payload.body });
+        try { responseData = await response.json(); } catch (error) {}
+        if (response.ok && Number(responseData.code) === 0) errorCode = '';
+        else errorCode = cleanStr(responseData.code || 'TIKTOK_API_ERROR', 80);
+      } else {
+        throw new Error('RETRY_PROVIDER_UNSUPPORTED');
+      }
+    } catch (error) {
+      errorCode = cleanStr(error && error.message || 'RETRY_DELIVERY_ERROR', 80);
+    }
+
+    const ok = response ? response.ok && (row.provider === 'meta' ? !responseData.error : Number(responseData.code) === 0) : false;
+    const retryable = !ok && (!response || response.status === 429 || response.status >= 500);
+    const hostname = cleanStr(payload && payload.hostname, 253);
+    const eventName = cleanStr(payload && payload.eventName, 80) || 'Unknown';
+    const httpStatus = response ? response.status : null;
+
+    if (ok) {
+      await env.DB.prepare("UPDATE tracking_event_queue SET status = 'sent', last_error_code = NULL, updated_at = ? WHERE id = ?")
+        .bind(Math.floor(Date.now() / 1000), row.id).run();
+      await logTrackingEvent(env, { profileId: row.profile_id, hostname, provider: row.provider, eventName, eventId: row.event_id, status: 'sent', httpStatus });
+    } else if (retryable && attempt < delays.length) {
+      const retryAt = Math.floor(Date.now() / 1000) + delays[Math.min(attempt, delays.length - 1)];
+      await env.DB.prepare("UPDATE tracking_event_queue SET status = 'pending', next_attempt_at = ?, last_error_code = ?, updated_at = ? WHERE id = ?")
+        .bind(retryAt, errorCode || 'RETRYABLE_ERROR', Math.floor(Date.now() / 1000), row.id).run();
+      await logTrackingEvent(env, { profileId: row.profile_id, hostname, provider: row.provider, eventName, eventId: row.event_id, status: 'accepted', httpStatus, errorCode: 'RETRY_SCHEDULED' });
+    } else {
+      await env.DB.prepare("UPDATE tracking_event_queue SET status = 'dead', last_error_code = ?, updated_at = ? WHERE id = ?")
+        .bind(errorCode || 'RETRY_EXHAUSTED', Math.floor(Date.now() / 1000), row.id).run();
+      await releaseTrackingEvent(env, row.profile_id, row.provider, row.event_id);
+      await logTrackingEvent(env, { profileId: row.profile_id, hostname, provider: row.provider, eventName, eventId: row.event_id, status: 'failed', httpStatus, errorCode: errorCode || 'RETRY_EXHAUSTED' });
+    }
+  }
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
