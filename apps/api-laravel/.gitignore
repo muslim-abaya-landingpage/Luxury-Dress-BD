@@ -1,0 +1,20 @@
+/.phpunit.cache
+/.env
+/.env.*
+!/ .env.example
+/.idea
+/.vscode
+/.fleet
+/.zed
+/auth.json
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/logs/*
+/vendor
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+Thumbs.db
