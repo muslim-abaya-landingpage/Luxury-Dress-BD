@@ -116,7 +116,7 @@ async function saveProfile(request, env, admin) {
     return json({ ok: false, error: code === 'TRACKING_ENCRYPTION_KEY_MISSING' ? code : 'TRACKING_ENCRYPTION_UNAVAILABLE' }, 503);
   }
   try {
-    const existing = await env.DB.prepare('SELECT id FROM tracking_profiles WHERE profile_key = ?').bind(key).first();
+    const existing = await env.DB.prepare('SELECT id, enabled FROM tracking_profiles WHERE profile_key = ?').bind(key).first();
     if (existing) {
       await env.DB.prepare(
         'UPDATE tracking_profiles SET name = ?, meta_pixel_id = ?, tiktok_pixel_id = ?, ' +
@@ -126,7 +126,7 @@ async function saveProfile(request, env, admin) {
       ).bind(name, metaId || null, tiktokId || null,
         body.clearMetaToken === true ? 1 : 0, metaCipher, metaCipher,
         body.clearTiktokToken === true ? 1 : 0, tiktokCipher, tiktokCipher,
-        body.enabled === false ? 0 : 1, JSON.stringify(config), now, who, existing.id).run();
+        body.enabled === false ? 0 : (body.enabled === true ? 1 : Number(existing.enabled)), JSON.stringify(config), now, who, existing.id).run();
       return json({ ok: true, id: existing.id, updated: true });
     }
     const result = await env.DB.prepare(
