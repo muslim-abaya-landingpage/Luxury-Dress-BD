@@ -1,6 +1,6 @@
 import { scoreFraudRisk } from './fraud-risk.js';
 import { persistFraudReview } from './fraud-review.js';
-import { handleTrackingAdmin, resolveTrackingProfile, decryptTrackingToken, claimTrackingEvent, releaseTrackingEvent, logTrackingEvent } from './tracking-admin.js';
+import { handleTrackingAdmin, resolveTrackingProfile, decryptTrackingToken, claimTrackingEvent, releaseTrackingEvent, logTrackingEvent, enqueueTrackingRetry, decryptTrackingPayload } from './tracking-admin.js';
 // Muslim Abaya first-party tracking worker.
 // Routes: muslimabaya.com/gtm.js*  (GTM loader, unchanged)
 //         muslimabaya.com/_ma/*    (Meta Conversions API endpoint, added 2026-10-23)
@@ -1435,14 +1435,21 @@ async function handleProfileEvent(request, env, ctx, url, body, profile, hostnam
           let data = {};
           try { data = await response.json(); } catch (error) {}
           const ok = response.ok && !(data.error);
-          if (!ok) await releaseTrackingEvent(env, profile.id, 'meta', eventId);
+          const retryable = !ok && (response.status === 429 || response.status >= 500);
+          let queued = false;
+          if (retryable) {
+            try { queued = await enqueueTrackingRetry(env, { profileId: profile.id, provider: 'meta', eventId, payload: { hostname, eventName, body: JSON.stringify(payload) } }); } catch (error) {}
+          }
+          if (!ok && !queued) await releaseTrackingEvent(env, profile.id, 'meta', eventId);
           await logTrackingEvent(env, { profileId: profile.id, hostname, provider: 'meta', eventName, eventId,
-            status: ok ? 'sent' : 'failed', httpStatus: response.status,
-            errorCode: ok ? '' : cleanStr(data.error && data.error.code || 'META_API_ERROR', 80),
+            status: ok ? 'sent' : (queued ? 'accepted' : 'failed'), httpStatus: response.status,
+            errorCode: ok ? '' : (queued ? 'QUEUED_RETRY' : cleanStr(data.error && data.error.code || 'META_API_ERROR', 80)),
             traceId: cleanStr(data.fbtrace_id, 120) });
         }).catch(async () => {
-          await releaseTrackingEvent(env, profile.id, 'meta', eventId);
-          await logTrackingEvent(env, { profileId: profile.id, hostname, provider: 'meta', eventName, eventId, status: 'failed', errorCode: 'NETWORK_ERROR' });
+          let queued = false;
+          try { queued = await enqueueTrackingRetry(env, { profileId: profile.id, provider: 'meta', eventId, payload: { hostname, eventName, body: JSON.stringify(payload) } }); } catch (error) {}
+          if (!queued) await releaseTrackingEvent(env, profile.id, 'meta', eventId);
+          await logTrackingEvent(env, { profileId: profile.id, hostname, provider: 'meta', eventName, eventId, status: queued ? 'accepted' : 'failed', errorCode: queued ? 'QUEUED_RETRY' : 'NETWORK_ERROR' });
         });
       tasks.push(send);
     }
@@ -1463,14 +1470,21 @@ async function handleProfileEvent(request, env, ctx, url, body, profile, hostnam
           let data = {};
           try { data = await response.json(); } catch (error) {}
           const ok = response.ok && Number(data.code) === 0;
-          if (!ok) await releaseTrackingEvent(env, profile.id, 'tiktok', ttEventId);
+          const retryable = !ok && (response.status === 429 || response.status >= 500);
+          let queued = false;
+          if (retryable) {
+            try { queued = await enqueueTrackingRetry(env, { profileId: profile.id, provider: 'tiktok', eventId: ttEventId, payload: { hostname, eventName, body: ttRequest.body } }); } catch (error) {}
+          }
+          if (!ok && !queued) await releaseTrackingEvent(env, profile.id, 'tiktok', ttEventId);
           await logTrackingEvent(env, { profileId: profile.id, hostname, provider: 'tiktok', eventName, eventId: ttEventId,
-            status: ok ? 'sent' : 'failed', httpStatus: response.status,
-            errorCode: ok ? '' : cleanStr(data.code || 'TIKTOK_API_ERROR', 80),
+            status: ok ? 'sent' : (queued ? 'accepted' : 'failed'), httpStatus: response.status,
+            errorCode: ok ? '' : (queued ? 'QUEUED_RETRY' : cleanStr(data.code || 'TIKTOK_API_ERROR', 80)),
             traceId: cleanStr(data.request_id, 120) });
         }).catch(async () => {
-          await releaseTrackingEvent(env, profile.id, 'tiktok', ttEventId);
-          await logTrackingEvent(env, { profileId: profile.id, hostname, provider: 'tiktok', eventName, eventId: ttEventId, status: 'failed', errorCode: 'NETWORK_ERROR' });
+          let queued = false;
+          try { queued = await enqueueTrackingRetry(env, { profileId: profile.id, provider: 'tiktok', eventId: ttEventId, payload: { hostname, eventName, body: ttRequest.body } }); } catch (error) {}
+          if (!queued) await releaseTrackingEvent(env, profile.id, 'tiktok', ttEventId);
+          await logTrackingEvent(env, { profileId: profile.id, hostname, provider: 'tiktok', eventName, eventId: ttEventId, status: queued ? 'accepted' : 'failed', errorCode: queued ? 'QUEUED_RETRY' : 'NETWORK_ERROR' });
         });
         tasks.push(send);
       }
