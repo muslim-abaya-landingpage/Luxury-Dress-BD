@@ -247,3 +247,18 @@ test('editing a disabled profile preserves its disabled state unless explicitly 
   assert.equal(response.status, 200);
   assert.equal(updateValues[9], 0);
 });
+
+
+test('tracking stats endpoint returns aggregate queue and event health without PII', async () => {
+  const db = makeDb();
+  const url = new URL('https://muslimabaya.com/_ma/admin/tracking');
+  const request = new Request(url, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token: 'valid-session', action: 'stats' })
+  });
+  const response = await handleTrackingAdmin(request, { DB: db }, url, verify);
+  assert.equal(response.status, 200);
+  const body = await response.json();
+  assert.deepEqual(body, { ok: true, queue: {}, events24h: {}, providers24h: [] });
+  assert.equal(JSON.stringify(body).includes('email'), false);
+});
