@@ -21,6 +21,11 @@ const MANUS_ROUTES = JSON.stringify({ routes: [
 export async function onRequest(context) {
   const { request, env, next } = context;
   const url = new URL(request.url);
+  // Preview-only Pages service binding proxies tracking endpoints to the isolated preview Worker.
+  // Production requests continue through the existing zone Worker routes.
+  if ((url.pathname.startsWith('/_ma/') || url.pathname === '/gtm.js') && env.TRACKING_WORKER) {
+    return env.TRACKING_WORKER.fetch(request);
+  }
   if (url.pathname === '/manus-routes.json') {
     return new Response(MANUS_ROUTES, { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=300' } });
   }
