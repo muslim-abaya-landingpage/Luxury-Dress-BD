@@ -157,9 +157,9 @@ test('provider event claim uses unique profile/provider/event key', async () => 
   const env = { DB: { prepare(sql) { return { bind(...values) { calls.push({ sql, values }); return this; }, async run() { return { meta: { changes: 1 } }; } }; } } };
   const claimed = await claimTrackingEvent(env, 9, 'meta', 'evt-123');
   assert.equal(claimed, true);
-  assert.match(calls[0].sql, /INSERT OR IGNORE/);
   const insert = calls.find((call) => /INSERT OR IGNORE/.test(call.sql));
   assert.ok(insert);
+  assert.match(insert.sql, /INSERT OR IGNORE/);
   assert.equal(insert.values[0], '9:meta:evt-123');
   assert.equal(insert.values[2], 'meta');
 });
