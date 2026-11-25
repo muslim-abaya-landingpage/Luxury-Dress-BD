@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\\Foundation\\Application;
-use Illuminate\\Foundation\\Configuration\\Exceptions;
-use Illuminate\\Foundation\\Configuration\\Middleware;
+use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Configuration\Exceptions;
+use Illuminate\Foundation\Configuration\Middleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -12,8 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Keep API authentication explicit. Sanctum stateful-cookie mode will be
-        // enabled only after the final storefront/API origin strategy is approved.
+        // Keep API authentication explicit until the storefront/API origin strategy is approved.
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
