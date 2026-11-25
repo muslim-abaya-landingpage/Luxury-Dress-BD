@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { handleTrackingAdmin, resolveTrackingProfile, claimTrackingEvent, logTrackingEvent, decryptTrackingToken } from '../../cloudflare-worker/tracking-admin.js';
+import { handleTrackingAdmin, resolveTrackingProfile, claimTrackingEvent, releaseTrackingEvent, logTrackingEvent, decryptTrackingToken } from '../../cloudflare-worker/tracking-admin.js';
 import { webcrypto } from 'node:crypto';
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
 
@@ -184,4 +184,12 @@ test('AES-GCM encrypted tracking token decrypts only with the configured 32-byte
   const token = await decryptTrackingToken(ciphertext, { TRACKING_ENCRYPTION_KEY: toBase64(rawKey) });
   assert.equal(token, 'test-provider-token');
   await assert.rejects(() => decryptTrackingToken(ciphertext, { TRACKING_ENCRYPTION_KEY: toBase64(new Uint8Array(32)) }));
+});
+
+
+test('failed delivery can release its dedup claim for retry', async () => {
+  let deleted;
+  const env = { DB: { prepare(sql) { assert.match(sql, /DELETE FROM tracking_event_dedup/); return { bind(key) { deleted = key; return this; }, async run() { return {}; } }; } } };
+  await releaseTrackingEvent(env, 3, 'meta', 'event-retry');
+  assert.equal(deleted, '3:meta:event-retry');
 });
