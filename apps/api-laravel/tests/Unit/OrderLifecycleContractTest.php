@@ -1,9 +1,9 @@
 <?php
 
-namespace Tests\\Unit;
+namespace Tests\Unit;
 
-use App\\Support\\OrderLifecycleContract;
-use PHPUnit\\Framework\\TestCase;
+use App\Support\OrderLifecycleContract;
+use PHPUnit\Framework\TestCase;
 
 class OrderLifecycleContractTest extends TestCase
 {
@@ -46,7 +46,6 @@ class OrderLifecycleContractTest extends TestCase
     {
         $a = OrderLifecycleContract::checkoutIdempotencyKey('order_12345678_abcd', '01712345678');
         $b = OrderLifecycleContract::checkoutIdempotencyKey('order_12345678_abcd', '+8801712345678');
-
         self::assertNotNull($a);
         self::assertSame($a, $b);
     }
