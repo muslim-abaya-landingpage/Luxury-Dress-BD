@@ -16,7 +16,34 @@
     var backdrop = document.getElementById('admSbBackdrop');
     var mobile = window.matchMedia('(max-width: 980px)');
     var crest = sidebar.querySelector('.adm-sidebar-crest');
-    crest.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="7" width="16" height="14" rx="3"/><path d="M9 7V5a3 3 0 0 1 6 0v2M9 11a3 3 0 0 0 6 0"/></svg>';
+    function renderDefaultCrest() {
+      crest.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="7" width="16" height="14" rx="3"/><path d="M9 7V5a3 3 0 0 1 6 0v2M9 11a3 3 0 0 0 6 0"/></svg>';
+    }
+    function applyStoreLogo() {
+      var brand = window.SITE_LINKS && window.SITE_LINKS.brand;
+      var src = brand && typeof brand.logoSrc === 'string' ? brand.logoSrc.trim() : '';
+      var valid = /^https:\/\/images\.muslimabaya\.com\/images\/uploads\/[a-z0-9_-]+\.webp$/i.test(src) ||
+        /^assets\/[a-z0-9._/-]+(?:\?v=[a-z0-9_-]+)?$/i.test(src);
+      if (!valid) { renderDefaultCrest(); return; }
+      var img = document.createElement('img');
+      img.src = src;
+      img.alt = 'Muslim Abaya';
+      img.width = 32;
+      img.height = 32;
+      img.decoding = 'async';
+      img.style.cssText = 'display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;padding:3px;box-sizing:border-box';
+      img.onerror = renderDefaultCrest;
+      crest.replaceChildren(img);
+    }
+    renderDefaultCrest();
+    if (window.SITE_LINKS) applyStoreLogo();
+    else {
+      var brandConfig = document.createElement('script');
+      brandConfig.src = '/product-config.js?v=20261125-store-branding';
+      brandConfig.onload = applyStoreLogo;
+      brandConfig.onerror = renderDefaultCrest;
+      document.head.appendChild(brandConfig);
+    }
     function setCollapsed(value) {
       sidebar.classList.toggle('is-collapsed', value);
       collapse.setAttribute('aria-expanded', String(!value));
