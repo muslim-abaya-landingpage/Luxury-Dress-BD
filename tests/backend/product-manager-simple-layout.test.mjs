@@ -84,3 +84,18 @@ test("The action=new route opens the product editor after publisher catalog init
   assert.ok(catalogInit > initCallback && editorOpen > catalogInit, "new-product editor must open after publisher callback initializes the catalog");
   assert.ok(!html.includes('want = new URLSearchParams(location.search).get("action") === "new"'), "action=new must not use the legacy delayed route handler");
 });
+
+test("Product Manager stylesheet links close the document head with valid HTML whitespace", () => {
+  assert.ok(html.includes('product-manager-phase4-table.css?v=20261125-phase4-table'));
+  assert.match(html, /product-manager-phase4-table\.css\?v=20261125-phase4-table">\s*<\/head>/);
+  assert.ok(!html.includes('product-manager-phase4-table.css?v=20261125-phase4-table">\\n</head>'));
+});
+
+test("Product Manager product table remains horizontally scrollable on narrow screens", () => {
+  const phase3 = readFileSync(new URL("../../product-manager-phase3-filters.css", import.meta.url), "utf8");
+  const phase4 = readFileSync(new URL("../../product-manager-phase4-table.css", import.meta.url), "utf8");
+  assert.match(phase3, /\.pm-overview-wrap\s*\{[^}]*overflow:\s*auto\s*!important/s);
+  assert.match(phase3, /overscroll-behavior-x:\s*contain\s*!important/);
+  assert.match(phase4, /@media\s*\(max-width:\s*600px\)/);
+  assert.match(phase4, /min-width:\s*940px\s*!important/);
+});
