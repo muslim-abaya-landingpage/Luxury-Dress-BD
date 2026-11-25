@@ -1,0 +1,47 @@
+name: Migration Laravel API Checks
+
+on:
+  push:
+    branches:
+      - migration/nextjs-laravel-foundation
+    paths:
+      - "apps/api-laravel/**"
+      - ".github/workflows/migration-laravel.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/api-laravel/**"
+      - ".github/workflows/migration-laravel.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: migration-laravel-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  laravel:
+    name: Laravel 13 install and feature tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: apps/api-laravel
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Set up PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: ctype, curl, dom, fileinfo, mbstring, openssl, pdo, pdo_sqlite, tokenizer, xml
+          coverage: none
+      - name: Validate Composer manifest
+        run: composer validate --no-check-publish
+      - name: Resolve and install locked dependencies
+        run: composer update --no-interaction --prefer-dist --no-progress
+      - name: Generate application key
+        run: php artisan key:generate
+      - name: Run Laravel feature tests
+        run: composer test
