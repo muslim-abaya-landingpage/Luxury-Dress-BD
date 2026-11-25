@@ -36,8 +36,13 @@
     .terp-table-wrap{overflow:auto}
     .terp-table{width:100%;border-collapse:collapse;font-size:12px}
     .terp-table th,.terp-table td{text-align:left;padding:9px;border-bottom:1px solid var(--adm-border,#e2e8f0);white-space:nowrap}
+    .terp-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:0 0 18px}
+    .terp-stat{background:var(--adm-panel,#fff);border:1px solid var(--adm-border,#e2e8f0);border-radius:13px;padding:14px;min-width:0}
+    .terp-stat span{display:block;font-size:12px;color:var(--adm-muted,#64748b);font-weight:700}
+    .terp-stat strong{display:block;font-size:27px;line-height:1.25;margin:7px 0;font-variant-numeric:tabular-nums}
+    .terp-stat small{font-size:11px;color:var(--adm-muted,#64748b)}
     .terp-note{padding:13px 15px;border:1px solid #d8e4f5;border-radius:12px;background:#f7faff;color:#334155;font-size:13px;line-height:1.65;margin-bottom:18px}
-    @media(max-width:760px){.terp-grid{grid-template-columns:1fr}.terp-wrap{padding:16px 12px 40px}}
+    @media(max-width:900px){.terp-stats{grid-template-columns:repeat(3,minmax(0,1fr))}}\n    @media(max-width:760px){.terp-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.terp-grid{grid-template-columns:1fr}.terp-wrap{padding:16px 12px 40px}}
   </style>
   <script src="config.js?v=00107b4d68a09227"></script>
   <script src="site-api-config.js?v=b4eb7cb7438aad24"></script>
@@ -52,6 +57,13 @@
       <div class="terp-actions"><a class="adm-btn adm-btn-secondary" href="admin-tracking-settings.html">পুরোনো Pixel Settings</a><button class="adm-btn adm-btn-secondary" id="refreshBtn" type="button">Refresh</button></div>
     </header>
     <div class="terp-note"><strong>Preview / Staging:</strong> এই প্যানেলটি নতুন Tracking ERP API-এর প্রাথমিক সংস্করণ। D1 migration ও Worker routing সম্পূর্ণ না হওয়া পর্যন্ত এটি Live event routing পরিবর্তন করবে না। কোনো Token ব্রাউজারে ফেরত দেওয়া হয় না; Token save করার জন্য Worker encryption secret প্রয়োজন।</div>
+    <section class="terp-stats" aria-label="Tracking delivery overview">
+      <article class="terp-stat"><span>Pending Retry</span><strong id="statPending">—</strong><small>পরবর্তী Attempt-এর অপেক্ষায়</small></article>
+      <article class="terp-stat"><span>Processing</span><strong id="statProcessing">—</strong><small>Worker বর্তমানে প্রসেস করছে</small></article>
+      <article class="terp-stat"><span>Dead Letter</span><strong id="statDead">—</strong><small>সর্বোচ্চ Retry শেষ</small></article>
+      <article class="terp-stat"><span>Sent · 24h</span><strong id="statSent">—</strong><small>গত ২৪ ঘণ্টার সফল Event</small></article>
+      <article class="terp-stat"><span>Failed · 24h</span><strong id="statFailed">—</strong><small>গত ২৪ ঘণ্টার ব্যর্থ Event</small></article>
+    </section>
     <section class="terp-grid">
       <div class="terp-card">
         <h2 id="formTitle">নতুন Tracking Profile</h2>
@@ -110,6 +122,18 @@
       }).join(''):'<div class="terp-muted">এখনো কোনো Profile নেই। প্রথম Profile তৈরি করুন।</div>';
       $('domainProfile').innerHTML='<option value="">Profile নির্বাচন করুন</option>'+profiles.filter(function(p){return p.enabled;}).map(function(p){return '<option value="'+p.id+'">'+escapeHtml(p.name)+'</option>';}).join('');
     }
+    function loadStats(){
+      request('POST',{action:'stats'}).then(function(r){
+        var q=r.queue||{},e=r.events24h||{};
+        $('statPending').textContent=Number(q.pending||0);
+        $('statProcessing').textContent=Number(q.processing||0);
+        $('statDead').textContent=Number(q.dead||0)+Number(q.failed||0);
+        $('statSent').textContent=Number(e.sent||0);
+        $('statFailed').textContent=Number(e.failed||0);
+      }).catch(function(){
+        ['statPending','statProcessing','statDead','statSent','statFailed'].forEach(function(id){$(id).textContent='—';});
+      });
+    }
     function loadLogs(){
       $('logsBody').innerHTML='<tr><td colspan="7">লোড হচ্ছে…</td></tr>';
       request('POST',{action:'logs',limit:50}).then(function(r){
@@ -117,7 +141,7 @@
       }).catch(function(e){$('logsBody').innerHTML='<tr><td colspan="7">Logs পাওয়া যায়নি: '+escapeHtml(e.message)+'</td></tr>';});
     }
     function load(){
-      request('POST',{action:'list'}).then(function(r){profiles=r.profiles||[];renderProfiles();loadLogs();})
+      request('POST',{action:'list'}).then(function(r){profiles=r.profiles||[];renderProfiles();loadStats();loadLogs();})
         .catch(function(e){$('profileList').textContent='Tracking API প্রস্তুত নয়: '+e.message+'. Preview D1 migration ও Worker configuration প্রয়োজন।';});
     }
     function clearForm(){
