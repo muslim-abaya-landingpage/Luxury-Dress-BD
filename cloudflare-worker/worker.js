@@ -160,9 +160,10 @@ async function processTrackingRetryQueue(env) {
   try {
     due = await env.DB.prepare(
       "SELECT q.id, q.profile_id, q.provider, q.event_id, q.encrypted_payload, q.attempt_count, " +
-      "p.meta_pixel_id, p.tiktok_pixel_id, p.meta_token_ciphertext, p.tiktok_token_ciphertext " +
+      "p.meta_pixel_id, p.tiktok_pixel_id, p.meta_token_ciphertext, p.tiktok_token_ciphertext, " +
+      "p.enabled AS profile_enabled, p.config_json " +
       "FROM tracking_event_queue q JOIN tracking_profiles p ON p.id = q.profile_id " +
-      "WHERE q.status = 'pending' AND q.next_attempt_at <= ? AND p.enabled = 1 ORDER BY q.next_attempt_at ASC LIMIT 20"
+      "WHERE q.status = 'pending' AND q.next_attempt_at <= ? ORDER BY q.next_attempt_at ASC LIMIT 20"
     ).bind(now).all();
   } catch (error) { return; }
 
@@ -181,6 +182,31 @@ async function processTrackingRetryQueue(env) {
     let errorCode = '';
     try {
       payload = await decryptTrackingPayload(row.encrypted_payload, env);
+
+      // Re-check live profile, domain mapping, and event switches at retry time. A queued
+      // event must not outlive an admin disable action or move to an unmapped hostname.
+      let retryConfig = {};
+      try { retryConfig = JSON.parse(row.config_json || '{}'); } catch (error) {}
+      const retryHostname = cleanStr(payload.hostname, 253).toLowerCase().replace(/\\.$/, '');
+      const retryEvent = cleanStr(payload.eventName, 80);
+      let domainEnabled = false;
+      if (retryHostname) {
+        const domainRow = await env.DB.prepare(
+          'SELECT id FROM tracking_domains WHERE profile_id = ? AND hostname = ? AND enabled = 1 LIMIT 1'
+        ).bind(row.profile_id, retryHostname).first();
+        domainEnabled = !!domainRow;
+      }
+      const eventSwitches = retryConfig.events && typeof retryConfig.events === 'object' ? retryConfig.events : {};
+      if (Number(row.profile_enabled) !== 1 || !domainEnabled || eventSwitches[retryEvent] === false) {
+        const reason = Number(row.profile_enabled) !== 1 ? 'PROFILE_DISABLED' : (!domainEnabled ? 'DOMAIN_NOT_MAPPED' : 'EVENT_DISABLED');
+        await env.DB.prepare("UPDATE tracking_event_queue SET status = 'dead', last_error_code = ?, updated_at = ? WHERE id = ?")
+          .bind(reason, Math.floor(Date.now() / 1000), row.id).run();
+        await releaseTrackingEvent(env, row.profile_id, row.provider, row.event_id);
+        await logTrackingEvent(env, { profileId: row.profile_id, hostname: retryHostname, provider: row.provider,
+          eventName: retryEvent, eventId: row.event_id, status: 'skipped', errorCode: reason });
+        continue;
+      }
+
       const ciphertext = row.provider === 'meta' ? row.meta_token_ciphertext : row.tiktok_token_ciphertext;
       token = await decryptTrackingToken(ciphertext, env);
       if (!token || typeof payload.body !== 'string' || payload.body.length > 180000) throw new Error('RETRY_PAYLOAD_INVALID');
