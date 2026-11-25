@@ -83,7 +83,7 @@ for (const scenario of [
     assert.ok(DB.updates.some((item) => item.sql.includes('DELETE FROM tracking_event_dedup')), 'dedup claim should be released');
     const log = DB.logs[0];
     assert.ok(log, 'skip should be written to the operational event log');
-    assert.equal(log.values[6], 'skipped');
-    assert.equal(log.values[8], scenario.reason);
+    assert.equal(log.values[5], 'skipped');
+    assert.equal(log.values[7], scenario.reason);
   });
 }
