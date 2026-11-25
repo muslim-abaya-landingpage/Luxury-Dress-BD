@@ -1,0 +1,164 @@
+openapi: 3.1.0
+info:
+  title: Muslim Abaya API
+  version: 0.1.0
+  description: Staged Laravel API contract. No production data source is connected yet.
+servers:
+  - url: https://api-preview.muslimabaya.com
+    description: Reserved preview origin; not provisioned.
+security:
+  - sessionCookie: []
+paths:
+  /health:
+    get:
+      security: []
+      summary: API liveness check
+      responses:
+        "200":
+          description: API process is alive
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok, service]
+                properties:
+                  ok: { type: boolean, const: true }
+                  service: { type: string, const: muslimabaya-api }
+  /v1/catalog/products:
+    get:
+      security: []
+      summary: List published products
+      parameters:
+        - in: query
+          name: category
+          schema: { type: string }
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1, default: 1 }
+        - in: query
+          name: per_page
+          schema: { type: integer, minimum: 1, maximum: 100, default: 24 }
+      responses:
+        "200":
+          description: Paginated published catalog
+  /v1/catalog/products/{productId}:
+    get:
+      security: []
+      summary: Get a published product
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Product found }
+        "404": { description: Product not found }
+  /v1/orders:
+    post:
+      security: []
+      summary: Create an order with an idempotency key
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: { type: string, minLength: 16, maxLength: 128 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [customer, items, delivery]
+              properties:
+                customer:
+                  type: object
+                  required: [name, phone, address]
+                  properties:
+                    name: { type: string, maxLength: 80 }
+                    phone: { type: string, maxLength: 20 }
+                    address: { type: string, maxLength: 400 }
+                items:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: object
+                    required: [product_id, quantity]
+                    properties:
+                      product_id: { type: string }
+                      sku: { type: string }
+                      quantity: { type: integer, minimum: 1, maximum: 50 }
+                      selected_options: { type: object }
+                delivery:
+                  type: object
+                  required: [district]
+                  properties:
+                    district: { type: string }
+                coupon_code: { type: string, maxLength: 60 }
+                notes: { type: string, maxLength: 1000 }
+      responses:
+        "201": { description: Order created }
+        "200": { description: Idempotent replay; original order returned }
+        "409": { description: Stock or idempotency conflict }
+        "422": { description: Validation or server-side price check failed }
+  /v1/orders/{orderId}:
+    get:
+      security:
+        - customerBearer: []
+      summary: Track an order belonging to the authenticated customer
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Authorized order status }
+        "404": { description: Not found or not owned by customer }
+  /v1/admin/orders:
+    get:
+      security:
+        - sessionCookie: []
+      summary: List orders for authorized staff
+      responses:
+        "200": { description: Paginated order list }
+        "401": { description: Not authenticated }
+        "403": { description: Role not permitted }
+  /v1/admin/orders/{orderId}:
+    patch:
+      security:
+        - sessionCookie: []
+      summary: Update order fields or perform a valid status transition
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Updated order and audit event }
+        "409": { description: Invalid transition or stock ledger conflict }
+        "403": { description: Role not permitted }
+  /v1/admin/catalog/products:
+    post:
+      security:
+        - sessionCookie: []
+      summary: Create or update a product using exact identity only
+      description: |
+        Resolve by exact normalized SKU (trimmed, case-insensitive) or exact immutable Product ID.
+        Never use title, image, category, partial SKU, similarity, or row position as a match.
+        If supplied SKU and Product ID resolve to different existing products, return 409.
+        If neither identity matches, create a separate product. An unrelated existing product must
+        never be overwritten.
+      responses:
+        "200": { description: Existing exact identity updated }
+        "201": { description: No exact match; a new product was created }
+        "409": { description: SKU/Product ID conflict }
+        "422": { description: Invalid or duplicate identity }
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: muslimabaya_session
+    customerBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: Sanctum
