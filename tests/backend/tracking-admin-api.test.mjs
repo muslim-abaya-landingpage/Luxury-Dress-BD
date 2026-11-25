@@ -222,3 +222,28 @@ test('tracking retry queue rejects unsupported providers and malformed event IDs
   await assert.rejects(() => enqueueTrackingRetry(env, { profileId: 1, provider: 'unknown', eventId: 'evt', payload: {} }));
   await assert.rejects(() => enqueueTrackingRetry(env, { profileId: 1, provider: 'meta', eventId: 'bad id', payload: {} }));
 });
+
+
+test('editing a disabled profile preserves its disabled state unless explicitly enabled', async () => {
+  let updateValues;
+  const db = {
+    prepare(sql) {
+      return {
+        bind(...values) { this.values = values; return this; },
+        async first() {
+          if (/SELECT id, enabled FROM tracking_profiles/.test(sql)) return { id: 4, enabled: 0 };
+          return null;
+        },
+        async run() { if (/UPDATE tracking_profiles/.test(sql)) updateValues = this.values; return {}; }
+      };
+    }
+  };
+  const url = new URL('https://muslimabaya.com/_ma/admin/tracking');
+  const request = new Request(url, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token: 'valid-session', action: 'profile.save', key: 'disabled-profile', name: 'Disabled Profile' })
+  });
+  const response = await handleTrackingAdmin(request, { DB: db }, url, verify);
+  assert.equal(response.status, 200);
+  assert.equal(updateValues[9], 0);
+});
