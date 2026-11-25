@@ -3,6 +3,9 @@
  * আপডেট: 2026-11-24
  */
 window.SITE_LINKS = {
+  "brand": {
+    "logoSrc": "https://images.muslimabaya.com/images/uploads/brand-logo-1795560298860-xv2o86-c0f317f7edb5b7647d58.webp"
+  },
   "catalog": {
     "mode": "overlay"
   },
