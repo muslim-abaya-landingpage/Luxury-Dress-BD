@@ -358,3 +358,46 @@ body.adm-body{background:var(--adm-bg);color:var(--adm-text);font-family:Inter,"
     padding:16px 14px 32px!important;box-sizing:border-box!important;
   }
 }
+
+
+/* Dashboard section layout repair: use an actual grid, not grid-template-columns on a flex container. */
+@media (min-width: 981px) {
+  html.wp-admin-shell body.adm-body .adm-content > .adm-main {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    align-content: start !important;
+    align-items: start !important;
+    gap: 20px !important;
+  }
+  html.wp-admin-shell body.adm-body .adm-content > .adm-main > * {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+  html.wp-admin-shell body.adm-body .adm-content > .adm-main > #secOverview,
+  html.wp-admin-shell body.adm-body .adm-content > .adm-main > #secActions,
+  html.wp-admin-shell body.adm-body .adm-content > .adm-main > #secOrders,
+  html.wp-admin-shell body.adm-body .adm-content > .adm-main > #secBest,
+  html.wp-admin-shell body.adm-body .adm-content > .adm-main > #secReports,
+  html.wp-admin-shell body.adm-body .adm-content > .adm-main > .adm-jump {
+    grid-column: 1 / -1 !important;
+  }
+  html.wp-admin-shell body.adm-body .adm-content > .adm-main > #secTasks,
+  html.wp-admin-shell body.adm-body .adm-content > .adm-main > #secAlerts {
+    grid-column: auto !important;
+    align-self: stretch !important;
+  }
+}
+@media (max-width: 980px) {
+  html.wp-admin-shell body.adm-body .adm-content > .adm-main {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+  html.wp-admin-shell body.adm-body .adm-content > .adm-main > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+}
