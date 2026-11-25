@@ -2,6 +2,8 @@
 
 namespace App\Contracts;
 
+use App\Data\OrderSnapshotPage;
+
 /**
  * Read-only boundary for importing order lifecycle snapshots.
  *
@@ -11,14 +13,9 @@ namespace App\Contracts;
 interface OrderSnapshotSource
 {
     /**
-     * Return a bounded, canonical snapshot of order lifecycle fields.
+     * Return one bounded page of canonical order lifecycle fields.
      *
-     * @return list<array{
-     *   order_id: string,
-     *   status: string,
-     *   stock_stage: string|null,
-     *   source_updated_at: string|null
-     * }>
+     * @param string|null $cursor Opaque continuation cursor issued by this source.
      */
-    public function readOrderSnapshots(int $limit = 500): array;
+    public function readOrderSnapshotPage(?string $cursor = null, int $limit = 500): OrderSnapshotPage;
 }
