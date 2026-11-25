@@ -94,7 +94,7 @@
   </main>
   <script>
   (function(){
-    var API='https://muslimabaya.com/_ma/admin/tracking', session=null, profiles=[];
+    var API='https://muslimabaya.com/_ma/admin/tracking', session=null, profiles=[], editingEnabled=true;
     var $=function(id){return document.getElementById(id);};
     function msg(id,text,ok){$(id).textContent=text;$(id).className='terp-status '+(ok?'ok':'err');}
     function request(method,body){
@@ -121,11 +121,11 @@
         .catch(function(e){$('profileList').textContent='Tracking API প্রস্তুত নয়: '+e.message+'. Preview D1 migration ও Worker configuration প্রয়োজন।';});
     }
     function clearForm(){
-      $('profileForm').reset();$('profileKey').disabled=false;$('formTitle').textContent='নতুন Tracking Profile';$('saveProfileBtn').textContent='Profile Save';$('metaToken').value='';$('tiktokToken').value='';
+      $('profileForm').reset();editingEnabled=true;$('profileKey').disabled=false;$('formTitle').textContent='নতুন Tracking Profile';$('saveProfileBtn').textContent='Profile Save';$('metaToken').value='';$('tiktokToken').value='';
     }
     $('profileForm').addEventListener('submit',function(e){
       e.preventDefault();var matching=Array.prototype.slice.call(document.querySelectorAll('input[name="matching"]:checked')).map(function(x){return x.value;});
-      var body={action:'profile.save',key:$('profileKey').value.trim(),name:$('profileName').value.trim(),metaPixelId:$('metaPixel').value.trim(),tiktokPixelId:$('tiktokPixel').value.trim(),metaAccessToken:$('metaToken').value,tiktokAccessToken:$('tiktokToken').value,config:{advancedMatching:matching}};
+      var body={action:'profile.save',key:$('profileKey').value.trim(),name:$('profileName').value.trim(),metaPixelId:$('metaPixel').value.trim(),tiktokPixelId:$('tiktokPixel').value.trim(),metaAccessToken:$('metaToken').value,tiktokAccessToken:$('tiktokToken').value,enabled:editingEnabled,config:{advancedMatching:matching,events:(profiles.find(function(p){return p.key===$('profileKey').value;})||{}).config?.events}};
       $('saveProfileBtn').disabled=true;msg('profileMsg','সেভ হচ্ছে…',true);
       request('POST',body).then(function(){msg('profileMsg','Profile সংরক্ষিত হয়েছে।',true);clearForm();load();})
         .catch(function(err){msg('profileMsg','সংরক্ষণ হয়নি: '+err.message,false);})
@@ -134,7 +134,7 @@
     $('profileList').addEventListener('click',function(e){
       var edit=e.target.closest('[data-edit]'), toggle=e.target.closest('[data-toggle]'), remove=e.target.closest('[data-remove-domain]');
       if(edit){var p=profiles.find(function(x){return String(x.id)===edit.getAttribute('data-edit');});if(!p)return;
-        $('profileKey').value=p.key;$('profileKey').disabled=true;$('profileName').value=p.name;$('metaPixel').value=p.metaPixelId;$('tiktokPixel').value=p.tiktokPixelId;$('metaToken').value='';$('tiktokToken').value='';
+        editingEnabled=!!p.enabled;$('profileKey').value=p.key;$('profileKey').disabled=true;$('profileName').value=p.name;$('metaPixel').value=p.metaPixelId;$('tiktokPixel').value=p.tiktokPixelId;$('metaToken').value='';$('tiktokToken').value='';
         document.querySelectorAll('input[name="matching"]').forEach(function(x){x.checked=p.config.advancedMatching.indexOf(x.value)>=0;});
         $('formTitle').textContent='Profile সম্পাদনা: '+p.name;$('saveProfileBtn').textContent='Update Profile';window.scrollTo({top:0,behavior:'smooth'});
       }
