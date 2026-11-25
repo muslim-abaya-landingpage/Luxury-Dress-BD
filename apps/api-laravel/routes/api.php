@@ -1,6 +1,6 @@
 <?php
 
-use App\Support\CatalogFixture;
+use App\Contracts\CatalogSource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -13,21 +13,14 @@ Route::get('/health', function () {
 })->name('api.health');
 
 Route::prefix('/v1/catalog')->group(function (): void {
-    Route::get('/products', function (Request $request) {
+    Route::get('/products', function (Request $request, CatalogSource $catalog) {
         $validated = $request->validate([
             'category' => ['sometimes', 'string', 'max:80'],
             'page' => ['sometimes', 'integer', 'min:1'],
             'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
         ]);
 
-        $products = array_values(array_filter(
-            CatalogFixture::products(),
-            static fn (array $product): bool =>
-                $product['published']
-                && (! isset($validated['category'])
-                    || $product['category'] === $validated['category'])
-        ));
-
+        $products = $catalog->publishedProducts($validated['category'] ?? null);
         $perPage = (int) ($validated['per_page'] ?? 24);
         $page = (int) ($validated['page'] ?? 1);
         $total = count($products);
@@ -45,8 +38,8 @@ Route::prefix('/v1/catalog')->group(function (): void {
         ])->header('Cache-Control', 'no-store');
     })->name('catalog.products.index');
 
-    Route::get('/products/{productId}', function (string $productId) {
-        $product = CatalogFixture::findPublishedById($productId);
+    Route::get('/products/{productId}', function (string $productId, CatalogSource $catalog) {
+        $product = $catalog->findPublishedById($productId);
 
         if ($product === null) {
             return response()->json([
