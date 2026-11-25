@@ -108,7 +108,7 @@ test('shared check: sale boundaries and publish window; schedule.json keeps only
 
 test('the Worker cron calls /api/cron-tick separately from the order queue', () => {
   const src = require('node:fs').readFileSync(path.join(root, 'cloudflare-worker/worker.js'), 'utf8');
-  assert.match(src, /ctx\.waitUntil\(processOrderQueue\(env\)\);\s*\/\/[^\n]*\n[^\n]*\n\s*ctx\.waitUntil\(fetch\('https:\/\/muslimabaya\.com\/api\/cron-tick'[^)]*\)\.catch\(\(\) => \{\}\)\);/);
+  assert.match(src, /ctx\.waitUntil\(processOrderQueue\(env\)\);\s*\/\/[^\n]*\n[^\n]*\n\s*(?:if \(!env\.IS_PREVIEW\) )?ctx\.waitUntil\(fetch\('https:\/\/muslimabaya\.com\/api\/cron-tick'[^)]*\)\.catch\(\(\) => \{\}\)\);/);
 });
 
 

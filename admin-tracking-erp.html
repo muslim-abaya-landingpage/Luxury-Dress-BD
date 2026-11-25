@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="bn" class="wp-admin-shell" data-admin-guard="1">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Tracking ERP | Muslim Abaya Admin</title>
+  <link rel="stylesheet" href="admin.css?v=d800d917a0c7b197">
+  <link rel="stylesheet" href="admin-design-system.css?v=1eaf4362bddc4ad0">
+  <link rel="stylesheet" href="admin-wp.css?v=1">
+  <link rel="stylesheet" href="admin-premium-unified.css?v=20261125-sidebar-hover-stable">
+  <style>
+    .terp-wrap{max-width:1180px;margin:0 auto;padding:24px 18px 56px}
+    .terp-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+    .terp-head h1{margin:0 0 6px;font-size:clamp(23px,3vw,32px)}
+    .terp-muted{color:var(--adm-muted,#64748b);font-size:13px;line-height:1.6}
+    .terp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .terp-card{background:var(--adm-panel,#fff);border:1px solid var(--adm-border,#e2e8f0);border-radius:16px;padding:18px;min-width:0}
+    .terp-card h2{font-size:17px;margin:0 0 14px}
+    .terp-field{display:grid;gap:6px;margin:0 0 13px}
+    .terp-field label{font-size:13px;font-weight:700}
+    .terp-field input,.terp-field select{width:100%;min-width:0;padding:10px 12px;border:1px solid var(--adm-border,#d7dde6);border-radius:9px;background:var(--adm-input,#fff);color:inherit}
+    .terp-checks{display:flex;gap:12px;flex-wrap:wrap;margin:8px 0 14px}
+    .terp-checks label{display:flex;align-items:center;gap:7px;font-size:13px}
+    .terp-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+    .terp-status{min-height:20px;font-size:13px;font-weight:600;margin-top:8px}
+    .terp-status.ok{color:#16834b}.terp-status.err{color:#b42318}
+    .terp-list{display:grid;gap:10px}
+    .terp-profile{border:1px solid var(--adm-border,#e2e8f0);border-radius:12px;padding:13px;display:grid;gap:8px}
+    .terp-profile-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    .terp-profile strong{overflow-wrap:anywhere}
+    .terp-pill{display:inline-flex;padding:3px 8px;border-radius:999px;background:#eef2f7;color:#344054;font-size:11px;font-weight:700}
+    .terp-pill.on{background:#e8f7ef;color:#167044}.terp-pill.off{background:#fff2e5;color:#9a4e00}
+    .terp-domains{display:flex;gap:6px;flex-wrap:wrap}
+    .terp-domain{font-size:12px;background:var(--adm-soft,#f1f5f9);padding:4px 8px;border-radius:7px}
+    .terp-table-wrap{overflow:auto}
+    .terp-table{width:100%;border-collapse:collapse;font-size:12px}
+    .terp-table th,.terp-table td{text-align:left;padding:9px;border-bottom:1px solid var(--adm-border,#e2e8f0);white-space:nowrap}
+    .terp-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:0 0 18px}
+    .terp-stat{background:var(--adm-panel,#fff);border:1px solid var(--adm-border,#e2e8f0);border-radius:13px;padding:14px;min-width:0}
+    .terp-stat span{display:block;font-size:12px;color:var(--adm-muted,#64748b);font-weight:700}
+    .terp-stat strong{display:block;font-size:27px;line-height:1.25;margin:7px 0;font-variant-numeric:tabular-nums}
+    .terp-stat small{font-size:11px;color:var(--adm-muted,#64748b)}
+    .terp-note{padding:13px 15px;border:1px solid #d8e4f5;border-radius:12px;background:#f7faff;color:#334155;font-size:13px;line-height:1.65;margin-bottom:18px}
+    @media(max-width:900px){.terp-stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media(max-width:760px){.terp-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.terp-grid{grid-template-columns:1fr}.terp-wrap{padding:16px 12px 40px}}
+  </style>
+  <script src="config.js?v=00107b4d68a09227"></script>
+  <script src="site-api-config.js?v=b4eb7cb7438aad24"></script>
+  <script src="admin-config.js?v=765c69bebedc46a8"></script>
+  <script src="admin-api.js?v=2823eb7bcff4e142"></script>
+  <script src="admin-guard.js?v=42341dd9adc288ea"></script>
+</head>
+<body class="adm-body">
+  <main class="terp-wrap">
+    <header class="terp-head">
+      <div><div class="adm-page-kicker">MUSLIM ABAYA / MARKETING DATA</div><h1>Tracking Management ERP</h1><div class="terp-muted">একাধিক Pixel Profile, Domain Mapping এবং Event Monitoring পরিচালনা করুন।</div></div>
+      <div class="terp-actions"><a class="adm-btn adm-btn-secondary" href="admin-tracking-settings.html">পুরোনো Pixel Settings</a><button class="adm-btn adm-btn-secondary" id="refreshBtn" type="button">Refresh</button></div>
+    </header>
+    <div class="terp-note"><strong>Preview / Staging:</strong> এটি নিরাপদ Preview / Staging পরিবেশ। Profile, Domain Mapping, Event Logs ও Retry Queue পর্যবেক্ষণ এখানে পরীক্ষা করুন। Preview-এর Meta/TikTok Provider Token কনফিগার করা নেই; তাই বাস্তব বিজ্ঞাপন অ্যাকাউন্টে Event পাঠানো হবে না। Production tracking অপরিবর্তিত।</div>
+    <section class="terp-stats" aria-label="Tracking delivery overview">
+      <article class="terp-stat"><span>Pending Retry</span><strong id="statPending">—</strong><small>পরবর্তী Attempt-এর অপেক্ষায়</small></article>
+      <article class="terp-stat"><span>Processing</span><strong id="statProcessing">—</strong><small>Worker বর্তমানে প্রসেস করছে</small></article>
+      <article class="terp-stat"><span>Dead Letter</span><strong id="statDead">—</strong><small>সর্বোচ্চ Retry শেষ</small></article>
+      <article class="terp-stat"><span>Sent · 24h</span><strong id="statSent">—</strong><small>গত ২৪ ঘণ্টার সফল Event</small></article>
+      <article class="terp-stat"><span>Failed · 24h</span><strong id="statFailed">—</strong><small>গত ২৪ ঘণ্টার ব্যর্থ Event</small></article>
+    </section>
+    <section class="terp-grid">
+      <div class="terp-card">
+        <h2 id="formTitle">নতুন Tracking Profile</h2>
+        <form id="profileForm">
+          <div class="terp-field"><label for="profileKey">Profile Key</label><input id="profileKey" required maxlength="48" pattern="[a-z0-9][a-z0-9_-]{1,47}" placeholder="muslim-abaya"></div>
+          <div class="terp-field"><label for="profileName">Profile Name</label><input id="profileName" required maxlength="100" placeholder="MUSLIM ABAYA"></div>
+          <div class="terp-field"><label for="metaPixel">Meta Pixel ID</label><input id="metaPixel" maxlength="40" placeholder="Meta Pixel ID"></div>
+          <div class="terp-field"><label for="tiktokPixel">TikTok Pixel ID</label><input id="tiktokPixel" maxlength="40" placeholder="TikTok Pixel ID"></div>
+          <div class="terp-field"><label for="metaToken">Meta Conversions API Token</label><input id="metaToken" type="password" autocomplete="new-password" placeholder="নতুন Token দিন (ঐচ্ছিক)"></div>
+          <div class="terp-field"><label for="tiktokToken">TikTok Events API Token</label><input id="tiktokToken" type="password" autocomplete="new-password" placeholder="নতুন Token দিন (ঐচ্ছিক)"></div>
+          <div class="terp-muted">আগে সংরক্ষিত Token পুনরায় দেখানো হবে না। Token বদলাতে নতুন Token লিখুন।</div>
+          <h3 style="font-size:14px;margin:14px 0 6px">Event Tracking</h3>
+          <div class="terp-checks">
+            <label><input type="checkbox" name="event" value="PageView" checked> PageView</label>
+            <label><input type="checkbox" name="event" value="ViewContent" checked> ViewContent</label>
+            <label><input type="checkbox" name="event" value="AddToCart" checked> AddToCart</label>
+            <label><input type="checkbox" name="event" value="InitiateCheckout" checked> InitiateCheckout</label>
+            <label><input type="checkbox" name="event" value="Purchase" checked> Purchase</label>
+            <label><input type="checkbox" name="event" value="Lead" checked> Lead</label>
+          </div>
+          <h3 style="font-size:14px;margin:14px 0 6px">Advanced Matching</h3>
+          <div class="terp-checks">
+            <label><input type="checkbox" name="matching" value="em" checked> Email matching</label>
+            <label><input type="checkbox" name="matching" value="ph" checked> Phone matching</label>
+            <label><input type="checkbox" name="matching" value="fn"> First name</label>
+            <label><input type="checkbox" name="matching" value="ln"> Last name</label>
+            <label><input type="checkbox" name="matching" value="external_id"> External ID</label>
+          </div>
+          <div class="terp-actions"><button class="adm-btn adm-btn-primary" type="submit" id="saveProfileBtn">Profile Save</button><button class="adm-btn adm-btn-secondary" type="button" id="resetBtn">Clear</button></div>
+          <div class="terp-status" id="profileMsg" role="status"></div>
+        </form>
+      </div>
+      <div class="terp-card">
+        <h2>Profile ও Domain তালিকা</h2>
+        <div class="terp-list" id="profileList"><div class="terp-muted">লোড হচ্ছে…</div></div>
+        <hr style="border:0;border-top:1px solid var(--adm-border,#e2e8f0);margin:18px 0">
+        <h2>Domain Mapping যোগ করুন</h2>
+        <form id="domainForm">
+          <div class="terp-field"><label for="domainProfile">Tracking Profile</label><select id="domainProfile" required><option value="">Profile নির্বাচন করুন</option></select></div>
+          <div class="terp-field"><label for="domainHost">Domain / Hostname</label><input id="domainHost" required maxlength="253" placeholder="shop.example.com"></div>
+          <button class="adm-btn adm-btn-primary" type="submit">Domain যুক্ত করুন</button>
+          <div class="terp-status" id="domainMsg" role="status"></div>
+        </form>
+      </div>
+    </section>
+    <section class="terp-card" style="margin-top:16px">
+      <div class="terp-head" style="margin-bottom:10px"><div><h2 style="margin:0">শেষ ৭ দিনের Event Logs</h2><div class="terp-muted">PII ছাড়া provider response status এবং event reference দেখানো হবে।</div></div><button class="adm-btn adm-btn-secondary" id="loadLogsBtn" type="button">Logs Refresh</button></div>
+      <div class="terp-table-wrap"><table class="terp-table"><thead><tr><th>সময়</th><th>Domain</th><th>Provider</th><th>Event</th><th>Event ID</th><th>Status</th><th>Error</th></tr></thead><tbody id="logsBody"><tr><td colspan="7">লোড হচ্ছে…</td></tr></tbody></table></div>
+    </section>
+  </main>
+  <script>
+  (function(){
+    var API='/_ma/admin/tracking', session=null, profiles=[], editingEnabled=true;
+    var $=function(id){return document.getElementById(id);};
+    function msg(id,text,ok){$(id).textContent=text;$(id).className='terp-status '+(ok?'ok':'err');}
+    function request(method,body){
+      var options={method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin'};
+      options.body=JSON.stringify(Object.assign({token:session.token},body||{}));
+      return fetch(API,options).then(function(r){return r.json().then(function(j){if(!r.ok||!j.ok)throw new Error(j.error||'REQUEST_FAILED');return j;});});
+    }
+    function escapeHtml(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+    function renderProfiles(){
+      $('profileList').innerHTML=profiles.length?profiles.map(function(p){
+        var domains=p.domains.map(function(d){return '<span class="terp-domain">'+escapeHtml(d.hostname)+' <button type="button" data-remove-domain="'+d.id+'" aria-label="Remove '+escapeHtml(d.hostname)+'" style="border:0;background:transparent;color:#b42318;cursor:pointer">×</button></span>';}).join('');
+        return '<article class="terp-profile"><div class="terp-profile-top"><div><strong>'+escapeHtml(p.name)+'</strong><div class="terp-muted">'+escapeHtml(p.key)+' · Meta: '+escapeHtml(p.metaPixelId||'—')+' · TikTok: '+escapeHtml(p.tiktokPixelId||'—')+'</div></div><span class="terp-pill '+(p.enabled?'on':'off')+'">'+(p.enabled?'Enabled':'Disabled')+'</span></div><div class="terp-muted">Meta Token: '+(p.metaTokenConfigured?'Configured':'Missing')+' · TikTok Token: '+(p.tiktokTokenConfigured?'Configured':'Missing')+'</div><div class="terp-domains">'+(domains||'<span class="terp-muted">কোনো Domain যুক্ত নেই</span>')+'</div><div class="terp-actions"><button type="button" class="adm-btn adm-btn-secondary" data-edit="'+p.id+'">Edit</button><button type="button" class="adm-btn adm-btn-secondary" data-toggle="'+p.id+'" data-enabled="'+(!p.enabled)+'">'+(p.enabled?'Disable':'Enable')+'</button></div></article>';
+      }).join(''):'<div class="terp-muted">এখনো কোনো Profile নেই। প্রথম Profile তৈরি করুন।</div>';
+      $('domainProfile').innerHTML='<option value="">Profile নির্বাচন করুন</option>'+profiles.filter(function(p){return p.enabled;}).map(function(p){return '<option value="'+p.id+'">'+escapeHtml(p.name)+'</option>';}).join('');
+    }
+    function loadStats(){
+      request('POST',{action:'stats'}).then(function(r){
+        var q=r.queue||{},e=r.events24h||{};
+        $('statPending').textContent=Number(q.pending||0);
+        $('statProcessing').textContent=Number(q.processing||0);
+        $('statDead').textContent=Number(q.dead||0)+Number(q.failed||0);
+        $('statSent').textContent=Number(e.sent||0);
+        $('statFailed').textContent=Number(e.failed||0);
+      }).catch(function(){
+        ['statPending','statProcessing','statDead','statSent','statFailed'].forEach(function(id){$(id).textContent='—';});
+      });
+    }
+    function loadLogs(){
+      $('logsBody').innerHTML='<tr><td colspan="7">লোড হচ্ছে…</td></tr>';
+      request('POST',{action:'logs',limit:50}).then(function(r){
+        $('logsBody').innerHTML=r.logs.length?r.logs.map(function(x){return '<tr><td>'+new Date(x.created_at*1000).toLocaleString()+'</td><td>'+escapeHtml(x.hostname||'—')+'</td><td>'+escapeHtml(x.provider)+'</td><td>'+escapeHtml(x.event_name)+'</td><td>'+escapeHtml(x.event_id||'—')+'</td><td>'+escapeHtml(x.status)+'</td><td>'+escapeHtml(x.error_code||'—')+'</td></tr>';}).join(''):'<tr><td colspan="7">এখনো কোনো Event Log নেই।</td></tr>';
+      }).catch(function(e){$('logsBody').innerHTML='<tr><td colspan="7">Logs পাওয়া যায়নি: '+escapeHtml(e.message)+'</td></tr>';});
+    }
+    function load(){
+      request('POST',{action:'list'}).then(function(r){profiles=r.profiles||[];renderProfiles();loadStats();loadLogs();})
+        .catch(function(e){$('profileList').textContent='Tracking API প্রস্তুত নয়: '+e.message+'. Preview D1 migration ও Worker configuration প্রয়োজন।';});
+    }
+    function clearForm(){
+      $('profileForm').reset();editingEnabled=true;$('profileKey').disabled=false;$('formTitle').textContent='নতুন Tracking Profile';$('saveProfileBtn').textContent='Profile Save';$('metaToken').value='';$('tiktokToken').value='';
+    }
+    $('profileForm').addEventListener('submit',function(e){
+      e.preventDefault();var matching=Array.prototype.slice.call(document.querySelectorAll('input[name="matching"]:checked')).map(function(x){return x.value;}),events={};document.querySelectorAll('input[name="event"]').forEach(function(x){events[x.value]=x.checked;});
+      var body={action:'profile.save',key:$('profileKey').value.trim(),name:$('profileName').value.trim(),metaPixelId:$('metaPixel').value.trim(),tiktokPixelId:$('tiktokPixel').value.trim(),metaAccessToken:$('metaToken').value,tiktokAccessToken:$('tiktokToken').value,enabled:editingEnabled,config:{advancedMatching:matching,events:events}};
+      $('saveProfileBtn').disabled=true;msg('profileMsg','সেভ হচ্ছে…',true);
+      request('POST',body).then(function(){msg('profileMsg','Profile সংরক্ষিত হয়েছে।',true);clearForm();load();})
+        .catch(function(err){msg('profileMsg','সংরক্ষণ হয়নি: '+err.message,false);})
+        .finally(function(){$('saveProfileBtn').disabled=false;});
+    });
+    $('profileList').addEventListener('click',function(e){
+      var edit=e.target.closest('[data-edit]'), toggle=e.target.closest('[data-toggle]'), remove=e.target.closest('[data-remove-domain]');
+      if(edit){var p=profiles.find(function(x){return String(x.id)===edit.getAttribute('data-edit');});if(!p)return;
+        editingEnabled=!!p.enabled;$('profileKey').value=p.key;$('profileKey').disabled=true;$('profileName').value=p.name;$('metaPixel').value=p.metaPixelId;$('tiktokPixel').value=p.tiktokPixelId;$('metaToken').value='';$('tiktokToken').value='';
+        document.querySelectorAll('input[name="matching"]').forEach(function(x){x.checked=p.config.advancedMatching.indexOf(x.value)>=0;});document.querySelectorAll('input[name="event"]').forEach(function(x){x.checked=p.config.events[x.value]!==false;});
+        $('formTitle').textContent='Profile সম্পাদনা: '+p.name;$('saveProfileBtn').textContent='Update Profile';window.scrollTo({top:0,behavior:'smooth'});
+      }
+      if(toggle){request('POST',{action:'profile.toggle',profileId:Number(toggle.getAttribute('data-toggle')),enabled:toggle.getAttribute('data-enabled')==='true'}).then(load).catch(function(err){alert('Update failed: '+err.message);});}
+      if(remove){var domainId=Number(remove.getAttribute('data-remove-domain'));if(confirm('এই Domain Mapping মুছে ফেলবেন?'))request('POST',{action:'domain.remove',domainId:domainId}).then(load).catch(function(err){alert('Domain remove failed: '+err.message);});}
+    });
+    $('domainForm').addEventListener('submit',function(e){e.preventDefault();request('POST',{action:'domain.add',profileId:Number($('domainProfile').value),hostname:$('domainHost').value.trim()}).then(function(){msg('domainMsg','Domain যুক্ত হয়েছে।',true);$('domainHost').value='';load();}).catch(function(err){msg('domainMsg','Domain যোগ হয়নি: '+err.message,false);});});
+    $('resetBtn').addEventListener('click',clearForm);$('refreshBtn').addEventListener('click',load);$('loadLogsBtn').addEventListener('click',loadLogs);
+    MaAdminGuard.require().then(function(s){if(!s)return;session=s;load();});
+  })();
+  </script>
+</body>
+</html>
