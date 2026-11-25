@@ -23,6 +23,18 @@ class OrderSnapshotMapperTest extends TestCase
         ]], $mapped);
     }
 
+    public function test_maps_the_verified_bengali_online_order_headers(): void
+    {
+        $mapped = OrderSnapshotMapper::map(
+            ['স্ট্যাটাস', 'অর্ডার আইডি', 'StockStage'],
+            [['Confirmed', 'MA-1007', 'RESERVED']]
+        );
+
+        self::assertSame('MA-1007', $mapped[0]['order_id']);
+        self::assertSame('Confirmed', $mapped[0]['status']);
+        self::assertSame('RESERVED', $mapped[0]['stock_stage']);
+    }
+
     public function test_normalizes_header_whitespace_and_case(): void
     {
         $mapped = OrderSnapshotMapper::map(
