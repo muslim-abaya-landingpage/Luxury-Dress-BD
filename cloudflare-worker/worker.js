@@ -266,6 +266,9 @@ export default {
   // Cron trigger: deliver queued orders that could not reach the Apps Script yet.
   async scheduled(event, env, ctx) {
     ctx.waitUntil(processOrderQueue(env));
+    // Reliable clock for the website's scheduled jobs (sale start/end and scheduled-publish rebuilds, daily SEO
+    // audit): /api/cron-tick decides what is due. Separate from the order queue; a failure here changes nothing else.
+    ctx.waitUntil(fetch('https://muslimabaya.com/api/cron-tick', { method: 'POST', headers: { 'User-Agent': 'MuslimAbaya-Worker-Cron' } }).catch(() => {}));
     // Tracking diagnostics use bounded retention; missing migration is intentionally non-fatal.
     if (env.DB) {
       const now = Math.floor(Date.now() / 1000);
@@ -275,9 +278,6 @@ export default {
         env.DB.prepare("DELETE FROM tracking_event_queue WHERE status IN ('sent', 'dead') AND updated_at < ?").bind(now - 30 * 86400).run().catch(() => {})
       ]));
     }
-    // Reliable clock for the website's scheduled jobs (sale start/end and scheduled-publish rebuilds, daily SEO
-    // audit): /api/cron-tick decides what is due. Separate from the order queue; a failure here changes nothing else.
-    ctx.waitUntil(fetch('https://muslimabaya.com/api/cron-tick', { method: 'POST', headers: { 'User-Agent': 'MuslimAbaya-Worker-Cron' } }).catch(() => {}));
   }
 };
 
