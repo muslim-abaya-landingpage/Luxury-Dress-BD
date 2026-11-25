@@ -126,7 +126,7 @@ async function saveProfile(request, env, admin) {
       ).bind(name, metaId || null, tiktokId || null,
         body.clearMetaToken === true ? 1 : 0, metaCipher, metaCipher,
         body.clearTiktokToken === true ? 1 : 0, tiktokCipher, tiktokCipher,
-        body.enabled === false ? 0 : (body.enabled === true ? 1 : Number(existing.enabled)), JSON.stringify(config), now, who, existing.id).run();
+        body.enabled === false ? 0 : (body.enabled === true ? 1 : (Number(existing.enabled) === 0 ? 0 : 1)), JSON.stringify(config), now, who, existing.id).run();
       return json({ ok: true, id: existing.id, updated: true });
     }
     const result = await env.DB.prepare(
