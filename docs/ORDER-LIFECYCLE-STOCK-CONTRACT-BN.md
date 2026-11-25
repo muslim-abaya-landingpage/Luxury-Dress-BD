@@ -46,3 +46,33 @@
 - Synthetic PHPUnit tests চালানো এবং CI result যাচাই।
 - Stock ledger best-effort write, rollback semantics ও Apps Script lock boundaries আলাদা audit করা।
 - তারপর read-only adapter design; write route ও production rollout আলাদা অনুমোদন এবং QA ছাড়া নয়.
+
+
+## Stock failure / recovery audit (Apps Script source)
+
+| Failure point | Current production behavior | Laravel migration requirement |
+|---|---|---|
+| One variant reserve fails after earlier variants changed | Reverse rollback is attempted in reverse order; rollback errors are swallowed | Persist each mutation in a durable operation log; mark partial rollback for reconciliation |
+| Legacy product-total reserve fails after variant reserves | Legacy and variant rollback are attempted independently; rollback errors are swallowed | One serialized operation with a recoverable saga/compensation record |
+| Online Order row append fails after stock reserve | Checkout clears the partial row and attempts release; release failure is swallowed | Do not return success; durable retry/reconciliation must detect reserved stock with no order row |
+| Admin order row write fails after reserve | Admin path clears the row and attempts release; release failure is swallowed | Same reconciliation requirement as checkout |
+| Stock ledger append fails | `appendStockLedger_` catches and ignores the error; inventory mutation can succeed without a ledger row | Ledger/outbox durability must be part of the transaction boundary, not best-effort |
+| Status lifecycle operation fails while admin creates an order | Admin creation keeps status Pending and records a stock note | Preserve the safe Pending fallback and surface an actionable reconciliation alert |
+
+### Lock and atomicity findings
+
+- Checkout acquires the Apps Script global script lock before unique Order ID selection, stock reservation, Online Order row append and metadata/StockStage write.
+- Admin order creation also acquires the script lock before reserve and row append.
+- Status lifecycle wrapper acquires the same script lock before reading/updating StockStage and invoking reserve/release/sell helpers.
+- `reserveStockForOrderItems_`, `releaseStockForOrderItems_` and `mutateStockVariant_` do not acquire their own nested lock; they rely on the caller already holding the lock. Future adapters must preserve one outer serialization boundary and must not introduce nested lock acquisition.
+- Google Sheets row writes, variant rows, legacy product-total rows and ledger append are not one database transaction. Current rollback is best-effort, not atomic.
+- Checkout EventID retry record is written to Script Cache only after order/stock work succeeds; cache is temporary (six hours) and not a durable uniqueness constraint.
+
+### Required migration safety controls
+
+1. Durable operation ID per order + lifecycle action, with unique constraint to prevent duplicate reserve/release/sell.
+2. Transactional outbox or equivalent durable ledger write before acknowledging success.
+3. Reconciliation scanner for (a) stock reserved without an Online Order row, (b) order row with stale StockStage, (c) missing ledger entry, and (d) partial compensation.
+4. Explicit `pending_reconciliation` state when compensation cannot be confirmed; never silently report success.
+5. Failure injection tests at each mutation boundary, including ledger write failure, row append failure, and rollback failure.
+6. Single lock/transaction coordinator; lower-level mutation helpers must not independently acquire nested locks.
