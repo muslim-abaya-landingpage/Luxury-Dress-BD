@@ -75,6 +75,16 @@
           <div class="terp-field"><label for="metaToken">Meta Conversions API Token</label><input id="metaToken" type="password" autocomplete="new-password" placeholder="নতুন Token দিন (ঐচ্ছিক)"></div>
           <div class="terp-field"><label for="tiktokToken">TikTok Events API Token</label><input id="tiktokToken" type="password" autocomplete="new-password" placeholder="নতুন Token দিন (ঐচ্ছিক)"></div>
           <div class="terp-muted">আগে সংরক্ষিত Token পুনরায় দেখানো হবে না। Token বদলাতে নতুন Token লিখুন।</div>
+          <h3 style="font-size:14px;margin:14px 0 6px">Event Tracking</h3>
+          <div class="terp-checks">
+            <label><input type="checkbox" name="event" value="PageView" checked> PageView</label>
+            <label><input type="checkbox" name="event" value="ViewContent" checked> ViewContent</label>
+            <label><input type="checkbox" name="event" value="AddToCart" checked> AddToCart</label>
+            <label><input type="checkbox" name="event" value="InitiateCheckout" checked> InitiateCheckout</label>
+            <label><input type="checkbox" name="event" value="Purchase" checked> Purchase</label>
+            <label><input type="checkbox" name="event" value="Lead" checked> Lead</label>
+          </div>
+          <h3 style="font-size:14px;margin:14px 0 6px">Advanced Matching</h3>
           <div class="terp-checks">
             <label><input type="checkbox" name="matching" value="em" checked> Email matching</label>
             <label><input type="checkbox" name="matching" value="ph" checked> Phone matching</label>
@@ -148,8 +158,8 @@
       $('profileForm').reset();editingEnabled=true;$('profileKey').disabled=false;$('formTitle').textContent='নতুন Tracking Profile';$('saveProfileBtn').textContent='Profile Save';$('metaToken').value='';$('tiktokToken').value='';
     }
     $('profileForm').addEventListener('submit',function(e){
-      e.preventDefault();var matching=Array.prototype.slice.call(document.querySelectorAll('input[name="matching"]:checked')).map(function(x){return x.value;});
-      var body={action:'profile.save',key:$('profileKey').value.trim(),name:$('profileName').value.trim(),metaPixelId:$('metaPixel').value.trim(),tiktokPixelId:$('tiktokPixel').value.trim(),metaAccessToken:$('metaToken').value,tiktokAccessToken:$('tiktokToken').value,enabled:editingEnabled,config:{advancedMatching:matching,events:(profiles.find(function(p){return p.key===$('profileKey').value;})||{}).config?.events}};
+      e.preventDefault();var matching=Array.prototype.slice.call(document.querySelectorAll('input[name="matching"]:checked')).map(function(x){return x.value;}),events={};document.querySelectorAll('input[name="event"]').forEach(function(x){events[x.value]=x.checked;});
+      var body={action:'profile.save',key:$('profileKey').value.trim(),name:$('profileName').value.trim(),metaPixelId:$('metaPixel').value.trim(),tiktokPixelId:$('tiktokPixel').value.trim(),metaAccessToken:$('metaToken').value,tiktokAccessToken:$('tiktokToken').value,enabled:editingEnabled,config:{advancedMatching:matching,events:events}};
       $('saveProfileBtn').disabled=true;msg('profileMsg','সেভ হচ্ছে…',true);
       request('POST',body).then(function(){msg('profileMsg','Profile সংরক্ষিত হয়েছে।',true);clearForm();load();})
         .catch(function(err){msg('profileMsg','সংরক্ষণ হয়নি: '+err.message,false);})
@@ -159,7 +169,7 @@
       var edit=e.target.closest('[data-edit]'), toggle=e.target.closest('[data-toggle]'), remove=e.target.closest('[data-remove-domain]');
       if(edit){var p=profiles.find(function(x){return String(x.id)===edit.getAttribute('data-edit');});if(!p)return;
         editingEnabled=!!p.enabled;$('profileKey').value=p.key;$('profileKey').disabled=true;$('profileName').value=p.name;$('metaPixel').value=p.metaPixelId;$('tiktokPixel').value=p.tiktokPixelId;$('metaToken').value='';$('tiktokToken').value='';
-        document.querySelectorAll('input[name="matching"]').forEach(function(x){x.checked=p.config.advancedMatching.indexOf(x.value)>=0;});
+        document.querySelectorAll('input[name="matching"]').forEach(function(x){x.checked=p.config.advancedMatching.indexOf(x.value)>=0;});document.querySelectorAll('input[name="event"]').forEach(function(x){x.checked=p.config.events[x.value]!==false;});
         $('formTitle').textContent='Profile সম্পাদনা: '+p.name;$('saveProfileBtn').textContent='Update Profile';window.scrollTo({top:0,behavior:'smooth'});
       }
       if(toggle){request('POST',{action:'profile.toggle',profileId:Number(toggle.getAttribute('data-toggle')),enabled:toggle.getAttribute('data-enabled')==='true'}).then(load).catch(function(err){alert('Update failed: '+err.message);});}
