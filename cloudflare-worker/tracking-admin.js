@@ -320,6 +320,26 @@ export async function handleTrackingAdmin(request, env, url, verifyAdminToken) {
       .bind(body.enabled ? 1 : 0, Math.floor(Date.now() / 1000), cleanText(admin.email || admin.name || 'admin', 160), id).run();
     return json({ ok: true });
   }
+  if (action === 'stats' && request.method === 'POST') {
+    try {
+      const queue = await env.DB.prepare(
+        "SELECT status, COUNT(*) AS total FROM tracking_event_queue GROUP BY status"
+      ).all();
+      const events = await env.DB.prepare(
+        "SELECT status, COUNT(*) AS total FROM tracking_event_log WHERE created_at >= ? GROUP BY status"
+      ).bind(Math.floor(Date.now() / 1000) - 86400).all();
+      const providers = await env.DB.prepare(
+        "SELECT provider, status, COUNT(*) AS total FROM tracking_event_log WHERE created_at >= ? GROUP BY provider, status"
+      ).bind(Math.floor(Date.now() / 1000) - 86400).all();
+      const counts = {};
+      for (const row of (queue.results || [])) counts[row.status] = Number(row.total || 0);
+      const eventCounts = {};
+      for (const row of (events.results || [])) eventCounts[row.status] = Number(row.total || 0);
+      return json({ ok: true, queue: counts, events24h: eventCounts, providers24h: providers.results || [] });
+    } catch (error) {
+      return json({ ok: false, error: 'TRACKING_STATS_UNAVAILABLE' }, 503);
+    }
+  }
   if (action === 'logs' && request.method === 'POST') {
     const limit = Math.max(1, Math.min(100, Number(body.limit) || 50));
     const status = cleanText(body.status, 20);
