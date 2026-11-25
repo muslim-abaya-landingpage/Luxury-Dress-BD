@@ -1,0 +1,43 @@
+name: Migration Next.js Preview Checks
+
+on:
+  push:
+    branches:
+      - migration/nextjs-laravel-foundation
+    paths:
+      - "apps/storefront-next/**"
+      - ".github/workflows/migration-nextjs.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/storefront-next/**"
+      - ".github/workflows/migration-nextjs.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: migration-nextjs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  nextjs:
+    name: Next.js typecheck and production build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: apps/storefront-next
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: TypeScript check
+        run: npm run typecheck
+      - name: Build Next.js app
+        run: npm run build
