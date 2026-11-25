@@ -187,7 +187,7 @@ async function processTrackingRetryQueue(env) {
       // event must not outlive an admin disable action or move to an unmapped hostname.
       let retryConfig = {};
       try { retryConfig = JSON.parse(row.config_json || '{}'); } catch (error) {}
-      const retryHostname = cleanStr(payload.hostname, 253).toLowerCase().replace(/\\.$/, '');
+      const retryHostname = cleanStr(payload.hostname, 253).toLowerCase().replace(/\.$/, '');
       const retryEvent = cleanStr(payload.eventName, 80);
       let domainEnabled = false;
       if (retryHostname) {
