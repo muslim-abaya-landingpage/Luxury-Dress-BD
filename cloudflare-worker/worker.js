@@ -216,7 +216,7 @@ async function processTrackingRetryQueue(env) {
         .bind(Math.floor(Date.now() / 1000), row.id).run();
       await logTrackingEvent(env, { profileId: row.profile_id, hostname, provider: row.provider, eventName, eventId: row.event_id, status: 'sent', httpStatus });
     } else if (retryable && attempt < delays.length) {
-      const retryAt = Math.floor(Date.now() / 1000) + delays[Math.min(attempt, delays.length - 1)];
+      const retryAt = Math.floor(Date.now() / 1000) + delays[Math.min(attempt - 1, delays.length - 1)];
       await env.DB.prepare("UPDATE tracking_event_queue SET status = 'pending', next_attempt_at = ?, last_error_code = ?, updated_at = ? WHERE id = ?")
         .bind(retryAt, errorCode || 'RETRYABLE_ERROR', Math.floor(Date.now() / 1000), row.id).run();
       await logTrackingEvent(env, { profileId: row.profile_id, hostname, provider: row.provider, eventName, eventId: row.event_id, status: 'accepted', httpStatus, errorCode: 'RETRY_SCHEDULED' });
