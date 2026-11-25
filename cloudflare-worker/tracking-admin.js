@@ -164,6 +164,33 @@ async function addDomain(request, env) {
 }
 
 
+export async function encryptTrackingPayload(payload, env) {
+  const serialized = JSON.stringify(payload);
+  if (typeof serialized !== 'string' || serialized.length > 180000) throw new Error('TRACKING_RETRY_PAYLOAD_INVALID');
+  return encryptToken(serialized, env);
+}
+
+export async function decryptTrackingPayload(ciphertext, env) {
+  const serialized = await decryptTrackingToken(ciphertext, env);
+  const payload = JSON.parse(serialized);
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) throw new Error('TRACKING_RETRY_PAYLOAD_INVALID');
+  return payload;
+}
+
+export async function enqueueTrackingRetry(env, record) {
+  if (!env.DB || !record || !Number.isSafeInteger(record.profileId) ||
+      !['meta', 'tiktok'].includes(record.provider) ||
+      !/^[A-Za-z0-9_.:-]{1,120}$/.test(String(record.eventId || ''))) {
+    throw new Error('TRACKING_RETRY_RECORD_INVALID');
+  }
+  const encrypted = await encryptTrackingPayload(record.payload, env);
+  const now = Math.floor(Date.now() / 1000);
+  const result = await env.DB.prepare(
+    "INSERT OR IGNORE INTO tracking_event_queue (profile_id, provider, event_id, encrypted_payload, status, attempt_count, next_attempt_at, created_at, updated_at) VALUES (?, ?, ?, ?, 'pending', 0, ?, ?, ?)"
+  ).bind(record.profileId, record.provider, String(record.eventId), encrypted, now + 60, now, now).run();
+  return Number(result.meta && result.meta.changes || 0) > 0;
+}
+
 export async function decryptTrackingToken(ciphertext, env) {
   if (!ciphertext || typeof ciphertext !== 'string') return '';
   const parts = ciphertext.split('.');
