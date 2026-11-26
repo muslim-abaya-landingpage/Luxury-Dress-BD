@@ -33,3 +33,16 @@ test('unsupported Pathao and RedX parcel creation is not presented as enabled', 
   assert.match(html, /তুলনার জন্য/);
   assert.match(html, /API-তে পার্সেল পাঠানো এখনো সংযুক্ত নয়/);
 });
+
+
+test('COD settlement workspace exposes reconciled totals, partial settlement and recent ledger', () => {
+  const html = read('courier-management.html');
+  const js = read('courier-management.js');
+  for (const id of ['cmSetDue', 'cmSetReceived', 'cmSetOutstanding', 'cmSettlementRows', 'cmSettlementRecent', 'cmSettlementDialog']) {
+    assert.ok(html.includes('id="' + id + '"'), 'missing settlement UI: ' + id);
+  }
+  assert.ok(js.includes("'AdminCourierSettlementList'"));
+  assert.ok(js.includes("'AdminCourierSettlementSave'"));
+  assert.ok(js.includes('data-settle='));
+  assert.ok(js.includes('SettlementDate'));
+});
