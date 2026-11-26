@@ -534,6 +534,9 @@ function adminOrderUpdate_(e) {
         if (stockMessage.indexOf('VARIANT_NOT_TRACKED:') === 0) {
           return { ok: false, error: 'VARIANT_NOT_TRACKED', message: 'এই অর্ডারের নির্বাচিত সাইজের stock setup করা নেই। আগে Stock Analytics-এ সাইজটি track করুন।' };
         }
+        if (stockMessage === 'STOCK_RECONFIRM_REQUIRES_REVIEW') {
+          return { ok: false, error: 'STOCK_RECONFIRM_REQUIRES_REVIEW', message: 'এই অর্ডারটি ইতিমধ্যে Delivered/SOLD। পুনরায় Confirmed করতে হলে আগে Stock Ledger যাচাই করে ম্যানুয়াল সিদ্ধান্ত নিন; স্ট্যাটাস পরিবর্তন করা হয়নি।' };
+        }
         if (stockMessage.indexOf('STOCK_LEDGER_MISMATCH:') === 0) {
           return { ok: false, error: 'STOCK_LEDGER_MISMATCH', message: 'Reserved stock-এর হিসাব অর্ডারের সাথে মিলছে না। স্ট্যাটাস বদলানো হয়নি; Stock Ledger মিলিয়ে নিন।' };
         }
