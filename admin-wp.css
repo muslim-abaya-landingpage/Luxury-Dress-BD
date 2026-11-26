@@ -610,135 +610,119 @@ html.wp-admin-shell .adm-shell> :not(.adm-sidebar):not(.adm-sidebar-backdrop):no
 }
 
 
-/* Shared admin workspace fix (all WordPress-shell admin routes).
-   The old shell was block-level and added a 160px left margin to every
-   content child. Combined with the 240px sidebar and centered page wrappers,
-   this produced the large blank gutter seen across Orders, Profit, Setup,
-   Tracking and other admin pages. Use the sidebar as a flex column instead. */
-html.wp-admin-shell body .adm-shell,
-html.wp-admin-shell body .pn-app.adm-shell{
-  display:flex!important;
-  flex-flow:row nowrap!important;
-  align-items:stretch!important;
-  justify-content:flex-start!important;
-  gap:0!important;
-  width:100%!important;
-  max-width:none!important;
-  padding:0!important;
-  margin:0!important;
-  box-sizing:border-box!important;
-}
-html.wp-admin-shell body .adm-shell > .adm-sidebar{
-  position:sticky!important;
-  flex:0 0 240px!important;
-  width:240px!important;
-  min-width:240px!important;
-  max-width:240px!important;
-  margin:0!important;
-  left:auto!important;
-}
-html.wp-admin-shell body .adm-shell:has(> .adm-sidebar.is-collapsed) > .adm-sidebar{
-  flex-basis:36px!important;
-  width:36px!important;
-  min-width:36px!important;
-  max-width:36px!important;
-}
-html.wp-admin-shell body .adm-shell > :not(.adm-sidebar):not(.adm-sidebar-backdrop):not(script):not(style){
-  flex:1 1 0%!important;
-  width:auto!important;
-  min-width:0!important;
-  max-width:none!important;
-  margin:0!important;
-  box-sizing:border-box!important;
-}
-html.wp-admin-shell body .adm-shell > .adm-sidebar-backdrop{
-  flex:none!important;
-  margin:0!important;
-}
-html.wp-admin-shell body .adm-shell :is(.adm-main,.pn-main,.pl-main,.adm-content,.om-workspace){
-  width:100%!important;
-  min-width:0!important;
-  max-width:none!important;
-  margin-inline:0!important;
-  box-sizing:border-box!important;
-}
 
-
-/* Final geometry correction: the admin sidebar is fixed-position, so it does
-   not participate in flex sizing. Reserve its actual width for the page area. */
-html.wp-admin-shell body .adm-shell,
-html.wp-admin-shell body .pn-app.adm-shell{display:block!important;}
-html.wp-admin-shell body .adm-shell > .adm-sidebar{position:fixed!important;left:0!important;top:var(--wp-bar-h)!important;bottom:0!important;flex:none!important;width:240px!important;min-width:240px!important;max-width:240px!important;margin:0!important;}
-html.wp-admin-shell body .adm-shell:has(> .adm-sidebar.is-collapsed) > .adm-sidebar{width:36px!important;min-width:36px!important;max-width:36px!important;}
-html.wp-admin-shell body .adm-shell > :not(.adm-sidebar):not(.adm-sidebar-backdrop):not(script):not(style){
-  display:block!important;flex:none!important;margin-left:240px!important;width:calc(100% - 240px)!important;max-width:none!important;min-width:0!important;box-sizing:border-box!important;
-}
-html.wp-admin-shell body .adm-shell:has(> .adm-sidebar.is-collapsed) > :not(.adm-sidebar):not(.adm-sidebar-backdrop):not(script):not(style){margin-left:36px!important;width:calc(100% - 36px)!important;}
-html.wp-admin-shell body .adm-shell :is(.adm-main,.pn-main,.pl-main,.adm-content,.om-workspace){width:100%!important;max-width:none!important;margin-inline:0!important;min-width:0!important;box-sizing:border-box!important;}
-
-
-/* Admin panel Phase 1 — single shared shell geometry.
-   The sidebar is the first grid column. Never reserve its width again with
-   margin-left on the workspace (the previous fixed-offset rules doubled it). */
+/* Admin shell layout — one source of truth.
+   Desktop: sidebar occupies grid column 1; page content occupies column 2.
+   Mobile: sidebar becomes an off-canvas drawer; content uses full width. */
 @media (min-width:981px){
- html.wp-admin-shell body .adm-shell:has(> .adm-sidebar),
- html.wp-admin-shell body .pn-app.adm-shell:has(> .adm-sidebar){
-   display:grid!important;
-   grid-template-columns:246px minmax(0,1fr)!important;
-   align-items:start!important;
-   justify-content:stretch!important;
-   gap:0!important;
-   width:100%!important;
-   max-width:none!important;
-   min-width:0!important;
-   margin:0!important;
-   padding:0!important;
-   box-sizing:border-box!important;
- }
- html.wp-admin-shell body .adm-shell:has(> .adm-sidebar.is-collapsed),
- html.wp-admin-shell body .pn-app.adm-shell:has(> .adm-sidebar.is-collapsed){
-   grid-template-columns:82px minmax(0,1fr)!important;
- }
- html.wp-admin-shell body .adm-shell:has(> .adm-sidebar) > .adm-sidebar,
- html.wp-admin-shell body .pn-app.adm-shell:has(> .adm-sidebar) > .adm-sidebar{
-   grid-column:1!important;grid-row:1!important;
-   position:sticky!important;top:var(--wp-bar-h)!important;align-self:start!important;
-   width:246px!important;min-width:246px!important;max-width:246px!important;
-   height:calc(100vh - var(--wp-bar-h))!important;
-   max-height:calc(100vh - var(--wp-bar-h))!important;
-   margin:0!important;left:auto!important;bottom:auto!important;
-   box-sizing:border-box!important;
- }
- html.wp-admin-shell body .adm-shell:has(> .adm-sidebar.is-collapsed) > .adm-sidebar,
- html.wp-admin-shell body .pn-app.adm-shell:has(> .adm-sidebar.is-collapsed) > .adm-sidebar{
-   width:82px!important;min-width:82px!important;max-width:82px!important;
- }
- html.wp-admin-shell body .adm-shell:has(> .adm-sidebar) > :not(.adm-sidebar):not(.adm-sidebar-backdrop):not(script):not(style),
- html.wp-admin-shell body .pn-app.adm-shell:has(> .adm-sidebar) > :not(.adm-sidebar):not(.adm-sidebar-backdrop):not(script):not(style){
-   grid-column:2!important;grid-row:1!important;
-   display:block!important;position:relative!important;left:auto!important;
-   transform:none!important;flex:none!important;
-   width:100%!important;min-width:0!important;max-width:none!important;
-   margin:0!important;box-sizing:border-box!important;
- }
+  html.wp-admin-shell body .adm-shell:has(> .adm-sidebar),
+  html.wp-admin-shell body .pn-app.adm-shell:has(> .adm-sidebar){
+    display:grid!important;
+    grid-template-columns:246px minmax(0,1fr)!important;
+    align-items:start!important;
+    gap:0!important;
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+    margin:0!important;
+    padding:0!important;
+    box-sizing:border-box!important;
+  }
+  html.wp-admin-shell body .adm-shell:has(> .adm-sidebar.is-collapsed),
+  html.wp-admin-shell body .pn-app.adm-shell:has(> .adm-sidebar.is-collapsed){
+    grid-template-columns:82px minmax(0,1fr)!important;
+  }
+  html.wp-admin-shell body .adm-shell:has(> .adm-sidebar) > .adm-sidebar,
+  html.wp-admin-shell body .pn-app.adm-shell:has(> .adm-sidebar) > .adm-sidebar{
+    grid-column:1!important;
+    grid-row:1!important;
+    position:sticky!important;
+    top:var(--wp-bar-h)!important;
+    align-self:start!important;
+    width:246px!important;
+    min-width:246px!important;
+    max-width:246px!important;
+    height:calc(100vh - var(--wp-bar-h))!important;
+    max-height:calc(100vh - var(--wp-bar-h))!important;
+    margin:0!important;
+    box-sizing:border-box!important;
+  }
+  html.wp-admin-shell body .adm-shell:has(> .adm-sidebar.is-collapsed) > .adm-sidebar,
+  html.wp-admin-shell body .pn-app.adm-shell:has(> .adm-sidebar.is-collapsed) > .adm-sidebar{
+    width:82px!important;
+    min-width:82px!important;
+    max-width:82px!important;
+  }
+  html.wp-admin-shell body .adm-shell:has(> .adm-sidebar) > :not(.adm-sidebar):not(.adm-sidebar-backdrop):not(script):not(style),
+  html.wp-admin-shell body .pn-app.adm-shell:has(> .adm-sidebar) > :not(.adm-sidebar):not(.adm-sidebar-backdrop):not(script):not(style){
+    grid-column:2!important;
+    grid-row:1!important;
+    position:relative!important;
+    left:auto!important;
+    transform:none!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    margin:0!important;
+    box-sizing:border-box!important;
+  }
+  html.wp-admin-shell body .adm-shell :is(.adm-main,.pn-main,.pl-main,.adm-content,.om-workspace){
+    min-width:0!important;
+    max-width:none!important;
+    margin-inline:0!important;
+    box-sizing:border-box!important;
+  }
 }
 @media (max-width:980px){
- html.wp-admin-shell body .adm-shell:has(> .adm-sidebar),
- html.wp-admin-shell body .pn-app.adm-shell:has(> .adm-sidebar){
-   display:block!important;width:100%!important;max-width:none!important;
-   min-width:0!important;margin:0!important;padding:12px!important;
- }
- html.wp-admin-shell body .adm-shell:has(> .adm-sidebar) > :not(.adm-sidebar):not(.adm-sidebar-backdrop):not(script):not(style),
- html.wp-admin-shell body .pn-app.adm-shell:has(> .adm-sidebar) > :not(.adm-sidebar):not(.adm-sidebar-backdrop):not(script):not(style){
-   display:block!important;position:relative!important;left:auto!important;
-   transform:none!important;width:100%!important;min-width:0!important;
-   max-width:none!important;margin:0!important;box-sizing:border-box!important;
- }
- html.wp-admin-shell body .adm-shell:has(> .adm-sidebar) > .adm-sidebar,
- html.wp-admin-shell body .pn-app.adm-shell:has(> .adm-sidebar) > .adm-sidebar{
-   position:fixed!important;top:0!important;left:0!important;bottom:0!important;
-   height:100dvh!important;max-height:100dvh!important;
-   width:min(310px,88vw)!important;min-width:0!important;max-width:min(310px,88vw)!important;
-   margin:0!important;z-index:1002!important;
- }
+  html.wp-admin-shell body .adm-shell:has(> .adm-sidebar),
+  html.wp-admin-shell body .pn-app.adm-shell:has(> .adm-sidebar){
+    display:block!important;
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+    margin:0!important;
+    padding:0 12px 20px!important;
+    box-sizing:border-box!important;
+  }
+  html.wp-admin-shell body .adm-shell:has(> .adm-sidebar) > :not(.adm-sidebar):not(.adm-sidebar-backdrop):not(script):not(style),
+  html.wp-admin-shell body .pn-app.adm-shell:has(> .adm-sidebar) > :not(.adm-sidebar):not(.adm-sidebar-backdrop):not(script):not(style){
+    display:block!important;
+    position:relative!important;
+    left:auto!important;
+    transform:none!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    margin:0!important;
+    box-sizing:border-box!important;
+  }
+  html.wp-admin-shell body .adm-shell:has(> .adm-sidebar) > .adm-sidebar,
+  html.wp-admin-shell body .pn-app.adm-shell:has(> .adm-sidebar) > .adm-sidebar{
+    position:fixed!important;
+    top:var(--wp-bar-h)!important;
+    left:0!important;
+    bottom:0!important;
+    height:calc(100dvh - var(--wp-bar-h))!important;
+    max-height:calc(100dvh - var(--wp-bar-h))!important;
+    width:min(310px,88vw)!important;
+    min-width:0!important;
+    max-width:min(310px,88vw)!important;
+    margin:0!important;
+    z-index:1002!important;
+    transform:translateX(-100%);
+    transition:transform .2s ease;
+  }
+  html.wp-admin-shell body .adm-shell > .adm-sidebar.is-open,
+  html.wp-admin-shell body .pn-app.adm-shell > .adm-sidebar.is-open{
+    transform:translateX(0)!important;
+  }
+  html.wp-admin-shell body .adm-shell > .adm-sidebar-backdrop,
+  html.wp-admin-shell body .pn-app.adm-shell > .adm-sidebar-backdrop{
+    position:fixed!important;
+    inset:var(--wp-bar-h) 0 0!important;
+    z-index:1001!important;
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  html.wp-admin-shell body .adm-sidebar{transition:none!important;}
 }
