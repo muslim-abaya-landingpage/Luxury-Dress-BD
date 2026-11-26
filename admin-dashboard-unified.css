@@ -151,3 +151,33 @@ html.wp-admin-shell body.adm-body .adm-main{
  .adm-main #secReports .adm-report-kpis b{font-size:17px!important}
 }
 @media(prefers-reduced-motion:reduce){.adm-daily-action,.adm-jump a{transition:none!important}}
+
+
+/* Dashboard polish: retain the forest-green Muslim Abaya brand palette. */
+:root{
+ --dash-ink:#173b2f;--dash-muted:#6d7d74;--dash-line:#dfe9e2;--dash-paper:#fff;
+ --dash-canvas:#f3f7f4;--dash-gold:#176b4a;--dash-gold-soft:#eaf3ed;
+ --adm-primary:#173b2f;--adm-accent:#176b4a;--adm-accent-ink:#14543c;--adm-accent-wash:#eaf3ed;
+}
+:root[data-admin-theme="dark"]{
+ --dash-ink:#edf5ef;--dash-muted:#a9bdb0;--dash-line:#30473a;--dash-paper:#18271f;
+ --dash-canvas:#101b15;--dash-gold:#79bd96;--dash-gold-soft:#203b2e;
+ --adm-primary:#edf5ef;--adm-accent:#79bd96;--adm-accent-ink:#9bd4b0;--adm-accent-wash:#203b2e;
+}
+/* Keep the section shortcuts visible while navigating a long dashboard. */
+.adm-body .adm-main>.adm-jump{
+ position:sticky!important;top:8px!important;z-index:30!important;
+ padding:8px 10px!important;margin:0!important;border:1px solid var(--dash-line)!important;
+ border-radius:13px!important;background:var(--dash-paper)!important;
+ box-shadow:0 6px 20px rgba(20,55,38,.08)!important;
+}
+.adm-body .adm-main>.adm-sec{scroll-margin-top:86px!important}
+/* The report disclosure clips overflow; keep its step badge inside the card. */
+html.wp-admin-shell body.adm-body .adm-main>#secReports::before{
+ top:10px!important;left:18px!important;
+}
+html.wp-admin-shell body.adm-body .adm-main>#secReports>summary{
+ padding-top:48px!important;
+}
+.adm-order-id-missing{display:inline-block;padding:4px 8px;border-radius:8px;background:var(--dash-gold-soft);color:var(--dash-gold);font-size:11px;font-weight:700;white-space:nowrap}
+.adm-recent-total strong{font-variant-numeric:tabular-nums;white-space:nowrap}
