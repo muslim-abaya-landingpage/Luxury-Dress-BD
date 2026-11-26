@@ -132,6 +132,10 @@
         "label": "Tracking Pixels"
       },
       {
+        "href": "admin-sms-settings.html",
+        "label": "SMS গেটওয়ে"
+      },
+      {
         "href": "admin-activity.html",
         "label": "Activity log"
       }

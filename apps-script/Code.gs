@@ -268,6 +268,12 @@ function doPost(e) {
     if (type === 'AdminCourierZonesSave') {
       return jsonOut_(saveAdminCourierZones_(e));
     }
+    if (type === 'AdminSmsSettingsGet') {
+      return jsonOut_(getAdminSmsSettings_(e));
+    }
+    if (type === 'AdminSmsSettingsSave') {
+      return jsonOut_(saveAdminSmsSettings_(e));
+    }
     if (type === 'AdminExpenseList') {
       return jsonOut_(listAdminExpenses_(e));
     }

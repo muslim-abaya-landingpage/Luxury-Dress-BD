@@ -559,3 +559,55 @@ function getAdminAccountingSummary_(e) {
     expenses: expenseRes.expenses, categories: expenseRes.categories
   };
 }
+
+// ================= SMS gateway settings (scaffold — no sending) =================
+// This only stores the provider/API key/sender ID/toggle the owner will need
+// once they wire up a real SMS gateway themselves. It never sends an SMS and
+// never calls any outside SMS API — that integration is deliberately left for
+// the owner to add later, since every real SMS gateway in Bangladesh is paid.
+var SMS_SETTINGS_PROP_ = 'SMS_GATEWAY_SETTINGS_JSON';
+var SMS_SETTINGS_DEFAULT_ = { enabled: false, provider: '', apiKey: '', senderId: '', apiUrl: '' };
+
+function getAdminSmsSettings_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var owner = requireOwnerAdmin_(v);
+  if (owner) return owner;
+  var raw = PropertiesService.getScriptProperties().getProperty(SMS_SETTINGS_PROP_);
+  var settings = SMS_SETTINGS_DEFAULT_;
+  if (raw) {
+    try { settings = Object.assign({}, SMS_SETTINGS_DEFAULT_, JSON.parse(raw)); } catch (err) {}
+  }
+  // Mask the API key in responses — only a short hint is returned, never the
+  // full value, so it doesn't sit in network logs or screenshots.
+  var masked = Object.assign({}, settings);
+  if (masked.apiKey) masked.apiKeyHint = '•••' + String(masked.apiKey).slice(-4);
+  delete masked.apiKey;
+  return { ok: true, settings: masked, hasKey: !!settings.apiKey };
+}
+
+function saveAdminSmsSettings_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var owner = requireOwnerAdmin_(v);
+  if (owner) return owner;
+  var raw = PropertiesService.getScriptProperties().getProperty(SMS_SETTINGS_PROP_);
+  var current = SMS_SETTINGS_DEFAULT_;
+  if (raw) {
+    try { current = Object.assign({}, SMS_SETTINGS_DEFAULT_, JSON.parse(raw)); } catch (err) {}
+  }
+  var provider = admCellText_(param_(e, 'Provider'), 40).trim();
+  var senderId = admCellText_(param_(e, 'SenderId'), 20).trim();
+  var apiUrl = admCellText_(param_(e, 'ApiUrl'), 200).trim();
+  var enabled = String(param_(e, 'Enabled') || '').trim() === '1';
+  var apiKeyRaw = param_(e, 'ApiKey');
+  // Blank ApiKey field on save means "leave the stored key unchanged" (so the
+  // owner can update the sender ID without having to re-paste the key).
+  var apiKey = (apiKeyRaw == null || String(apiKeyRaw).trim() === '') ? current.apiKey : admCellText_(apiKeyRaw, 200).trim();
+  var settings = { enabled: enabled, provider: provider, apiKey: apiKey, senderId: senderId, apiUrl: apiUrl };
+  PropertiesService.getScriptProperties().setProperty(SMS_SETTINGS_PROP_, JSON.stringify(settings));
+  var masked = Object.assign({}, settings);
+  if (masked.apiKey) masked.apiKeyHint = '•••' + String(masked.apiKey).slice(-4);
+  delete masked.apiKey;
+  return { ok: true, settings: masked, hasKey: !!settings.apiKey };
+}

@@ -89,3 +89,10 @@
 @media(max-width:600px){.cm-zone-row{grid-template-columns:1fr 1fr}.cm-zone-pick{grid-column:1/-1}.cm-zone-dialog-list{grid-template-columns:1fr}}
 .cm-invoice-panel .cm-tools select{min-width:180px}
 .cm-invoice-check{width:16px;height:16px}
+
+/* SMS gateway settings scaffold (admin-sms-settings.html) */
+.cm-toggle-row{grid-column:1/-1;display:flex;align-items:flex-start;gap:10px;font-weight:600;cursor:pointer}
+.cm-toggle-row input{width:auto;min-height:0;margin-top:3px}
+.cm-toggle-row span{display:grid;gap:3px}
+.cm-toggle-row small{font-weight:400}
+.cm-note-list{margin:0;padding:0 0 0 18px;display:grid;gap:8px;font-size:13px;color:var(--adm-muted,#64748b)}
