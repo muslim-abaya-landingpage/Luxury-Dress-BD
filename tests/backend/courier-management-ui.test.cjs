@@ -10,7 +10,7 @@ test('courier management page is admin-guarded and links into existing admin wor
   const html = read('courier-management.html');
   assert.match(html, /data-admin-guard="1"/);
   assert.match(html, /admin-guard\.js/);
-  assert.match(html, /admin-api\\.js/);
+  assert.match(html, /admin-api\.js/);
   assert.match(html, /admin-orders\.html/);
   assert.match(html, /courier-management\.js/);
 });
