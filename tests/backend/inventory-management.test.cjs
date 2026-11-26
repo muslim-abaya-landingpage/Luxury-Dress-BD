@@ -34,9 +34,16 @@ function harness() {
   const items = makeSheet([['Purchase ID','Product ID','Product Name','Category','Variant','Qty','Unit Cost','Line Total']]);
   const payments = makeSheet([['Payment ID','Supplier ID','Purchase ID','Amount','Method','Reference','Payment Date','Notes','Created At','Created By']]);
   const calls = [];
-  const params = {};
+  suppliers.appendRow(['SUP1','Test Supplier','01700000000','','','active',new Date(),new Date(),'owner']);
+  const sheetMap = {
+    'Inventory Suppliers': suppliers,
+    'Inventory Purchases': purchases,
+    'Inventory Purchase Items': items,
+    'Inventory Supplier Payments': payments
+  };
   const ctx = {
     Object, Number, String, Math, JSON, Date, isFinite, parseInt, RegExp,
+    ensureSheet_: (name, headers) => sheetMap[name] || (sheetMap[name] = makeSheet([headers])),
     param_: (e, k) => e[k] == null ? '' : e[k],
     verifyAdminSession_: () => ({ ok: true, email: 'owner@example.com' }),
     invSupplierMap_: () => ({ SUP1: { id:'SUP1', name:'Test Supplier', status:'active' } }),
