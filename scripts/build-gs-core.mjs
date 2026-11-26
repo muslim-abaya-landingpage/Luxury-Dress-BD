@@ -29,7 +29,7 @@ ${body}
 const out = path.join(root, 'functions/_lib/gs-core.js');
 const next = build();
 if (process.argv.includes('--check')) {
-  const current = fs.existsSync(out) ? fs.readFileSync(out, 'utf8') : '';
+  const current = fs.existsSync(out) ? fs.readFileSync(out, 'utf8').replace(/\r\n/g, '\n') : '';
   if (current !== next) {
     let mismatch = 0;
     while (mismatch < Math.min(current.length, next.length) && current[mismatch] === next[mismatch]) mismatch++;
