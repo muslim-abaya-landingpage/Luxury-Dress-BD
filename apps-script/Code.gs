@@ -6576,11 +6576,12 @@ function appendStockLedgerOnce_(entry, operationId) {
   for (var i = 1; i < rows.length; i++) {
     if (String(rows[i][11] || '') === operationId) return { duplicate: true, row: i + 1 };
   }
-  appendRow_(sheet, [new Date(), entry.productId || '', entry.variant || '', entry.changeType || '',
+  var targetRow = sheet.getLastRow() + 1;
+  sheet.getRange(targetRow, 1, 1, 12).setValues([[new Date(), entry.productId || '', entry.variant || '', entry.changeType || '',
     entry.qtyBefore != null ? entry.qtyBefore : '', entry.qtyAfter != null ? entry.qtyAfter : '',
     entry.reservedBefore != null ? entry.reservedBefore : '', entry.reservedAfter != null ? entry.reservedAfter : '',
-    entry.reason || '', entry.orderId || '', entry.admin || 'system', operationId]);
-  return { duplicate: false, row: sheet.getLastRow() };
+    entry.reason || '', entry.orderId || '', entry.admin || 'system', operationId]]);
+  return { duplicate: false, row: targetRow };
 }
 function stockOperationId_(opts) {
   if (opts.operationId) return String(opts.operationId).trim();
@@ -6615,12 +6616,12 @@ function mutateStockVariant_(opts) {
   } else {
     var payload = { row: row, before: { available: before.available, reserved: before.reserved },
       after: { available: nextAvailable, reserved: nextReserved }, fields: {
-        tracked: !!(before.tracked || opts.setTracked), productName: opts.productName || '',
+        tracked: opts.setUntracked ? false : !!(before.tracked || opts.setTracked), productName: opts.productName || '',
         category: opts.category || '', threshold: typeof opts.threshold === 'undefined' ? undefined : opts.threshold,
         updatedBy: opts.admin || 'system'
       }, entry: entry };
-    appendRow_(journal, [operationId, 'PREPARED', 'StockVariants', row, JSON.stringify(payload), new Date(), new Date(), '']);
-    journalRow = journal.getLastRow();
+    journalRow = journal.getLastRow() + 1;
+    journal.getRange(journalRow, 1, 1, 8).setValues([[operationId, 'PREPARED', 'StockVariants', row, JSON.stringify(payload), new Date(), new Date(), '']]);
   }
   var current = readStockVariantRow_(sheet, row);
   if (current.operationId !== operationId) {
@@ -7391,10 +7392,8 @@ function getAdminStockVariants_(e) {
 }
 
 function saveAdminStockVariant_(e) {
-  var token = param_(e, 'Token');
-  var v = verifyAdminSession_(token);
+  var v = verifyAdminSession_(param_(e, 'Token'));
   if (!v.ok) return v;
-
   var productId = String(param_(e, 'ProductId') || '').trim();
   if (!productId) return { ok: false, error: 'MISSING_ID', message: 'Product ID প্রয়োজন।' };
   var productName = String(param_(e, 'ProductName') || '').trim();
@@ -7402,26 +7401,15 @@ function saveAdminStockVariant_(e) {
   var variant = normStockVariant_(param_(e, 'Variant'));
   var reason = String(param_(e, 'Reason') || '').trim();
   if (!reason) return { ok: false, error: 'REASON_REQUIRED', message: 'স্টক পরিবর্তনের কারণ লেখা বাধ্যতামূলক।' };
-
-  var qtyRaw = param_(e, 'Available');
-  var hasQty = qtyRaw !== '' && typeof qtyRaw !== 'undefined';
+  var qtyRaw = param_(e, 'Available'), hasQty = qtyRaw !== '' && typeof qtyRaw !== 'undefined';
   var qty = parseInt(qtyRaw, 10);
   if (hasQty && (isNaN(qty) || qty < 0)) return { ok: false, error: 'INVALID_QTY', message: 'সঠিক Available সংখ্যা দিন।' };
-
-  var thresholdRaw = param_(e, 'Threshold');
-  var threshold;
-  if (thresholdRaw === '' || typeof thresholdRaw === 'undefined') {
-    threshold = undefined;
-  } else {
-    var t = parseInt(thresholdRaw, 10);
-    threshold = isNaN(t) ? undefined : t;
-  }
-
+  var thresholdRaw = param_(e, 'Threshold'), threshold;
+  if (thresholdRaw === '' || typeof thresholdRaw === 'undefined') threshold = undefined;
+  else { var t = parseInt(thresholdRaw, 10); threshold = isNaN(t) ? undefined : t; }
   var trackedRaw = String(param_(e, 'Tracked') || '').trim().toLowerCase();
   var setTracked = hasQty || trackedRaw === 'true' || trackedRaw === '1';
-  // Tracked=false (no quantity) turns counting off for this row, e.g. Product Manager → untick "Track stock quantity".
   var setUntracked = !hasQty && trackedRaw === 'false';
-
   var lock = LockService.getScriptLock();
   lock.waitLock(15000);
   try {
@@ -7430,30 +7418,15 @@ function saveAdminStockVariant_(e) {
     var before = readStockVariantRow_(sheet, row);
     var nextAvailable = hasQty ? qty : before.available;
     var deltaAvailable = nextAvailable - before.available;
-    var fields = { available: nextAvailable, updatedBy: v.email || 'admin' };
-    if (setTracked) fields.tracked = true;
-    else if (setUntracked) fields.tracked = false;
-    if (productName) fields.productName = productName;
-    if (category) fields.category = category;
-    if (typeof threshold !== 'undefined') fields.threshold = threshold;
-    writeStockVariantRow_(sheet, row, fields);
-    appendStockLedger_({
-      productId: before.productId || productId,
-      variant: before.variant || variant,
-      changeType: 'MANUAL',
-      qtyBefore: before.available,
-      qtyAfter: nextAvailable,
-      reservedBefore: before.reserved,
-      reservedAfter: before.reserved,
-      reason: reason,
-      orderId: '',
-      admin: v.email || 'admin'
+    var result = mutateStockVariant_({
+      productId: productId, productName: productName, category: category, variant: variant,
+      deltaAvailable: deltaAvailable, deltaReserved: 0, changeType: 'MANUAL',
+      reason: reason, admin: v.email || 'admin', operationId: param_(e, 'OperationId'),
+      setTracked: setTracked, setUntracked: setUntracked, threshold: threshold
     });
     if (setTracked && nextAvailable > 0 && (deltaAvailable > 0 || !before.tracked)) { try { opsNotifyVariant_(productId, variant, nextAvailable); } catch (notifyErr) {} }
-    return { ok: true, productId: productId, variant: variant, available: nextAvailable, reserved: before.reserved, delta: deltaAvailable };
-  } finally {
-    lock.releaseLock();
-  }
+    return { ok: true, productId: productId, variant: variant, available: result.after.available, reserved: result.after.reserved, delta: deltaAvailable, operationId: result.operationId };
+  } finally { lock.releaseLock(); }
 }
 
 function getAdminStockLedger_(e) {
@@ -7496,42 +7469,18 @@ function getAdminStockLedger_(e) {
  * PreviewOnly না থাকলে যাচাই-সফল সারিগুলো প্রয়োগ করে।
  */
 function commitAdminStockCsvBatch_(e) {
-  var token = param_(e, 'Token');
-  var v = verifyAdminSession_(token);
+  var v = verifyAdminSession_(param_(e, 'Token'));
   if (!v.ok) return v;
-
-  var rowsRaw = param_(e, 'RowsJSON');
-  var previewOnly = String(param_(e, 'PreviewOnly') || '').trim().toLowerCase() === 'true';
-  var rows;
-  try {
-    rows = JSON.parse(rowsRaw || '[]');
-  } catch (pe) {
-    return { ok: false, error: 'INVALID_JSON', message: 'CSV ডেটা পড়া যায়নি।' };
-  }
-  if (!Array.isArray(rows) || !rows.length) {
-    return { ok: false, error: 'EMPTY', message: 'CSV-তে কোনো সারি পাওয়া যায়নি।' };
-  }
-
-  var sheet = ensureStockVariantsSheet_();
-  var data = sheet.getDataRange().getValues();
-  var knownIds = {};
-  var di;
-  for (di = 1; di < data.length; di++) {
-    var kid = String(data[di][0] || '').trim();
-    if (kid) knownIds[kid] = true;
-  }
-
-  var seen = {};
-  var results = [];
-  var validCount = 0;
+  var rowsRaw = param_(e, 'RowsJSON'), previewOnly = String(param_(e, 'PreviewOnly') || '').trim().toLowerCase() === 'true', rows;
+  try { rows = JSON.parse(rowsRaw || '[]'); } catch (pe) { return { ok: false, error: 'INVALID_JSON', message: 'CSV ডেটা পড়া যায়নি।' }; }
+  if (!Array.isArray(rows) || !rows.length) return { ok: false, error: 'EMPTY', message: 'CSV-তে কোনো সারি পাওয়া যায়নি।' };
+  var sheet = ensureStockVariantsSheet_(), data = sheet.getDataRange().getValues(), knownIds = {};
+  for (var di = 1; di < data.length; di++) { var kid = String(data[di][0] || '').trim(); if (kid) knownIds[kid] = true; }
+  var seen = {}, results = [], validCount = 0;
   rows.forEach(function (row, idx) {
-    var productId = String(row.productId || row.ProductId || '').trim();
-    var variant = normStockVariant_(row.variant || row.Variant);
-    var qtyRaw = row.qty != null ? row.qty : row.Qty;
-    var reason = String(row.reason || row.Reason || '').trim();
-    var productName = String(row.productName || row.ProductName || '').trim();
-    var category = String(row.category || row.Category || '').trim();
-    var issues = [];
+    var productId = String(row.productId || row.ProductId || '').trim(), variant = normStockVariant_(row.variant || row.Variant);
+    var qtyRaw = row.qty != null ? row.qty : row.Qty, reason = String(row.reason || row.Reason || '').trim();
+    var productName = String(row.productName || row.ProductName || '').trim(), category = String(row.category || row.Category || '').trim(), issues = [];
     if (!productId) issues.push('Product ID খালি');
     var qty = parseInt(qtyRaw, 10);
     if (qtyRaw === '' || typeof qtyRaw === 'undefined' || isNaN(qty) || qty < 0) issues.push('Qty সঠিক নয়');
@@ -7544,41 +7493,24 @@ function commitAdminStockCsvBatch_(e) {
     if (ok) validCount++;
     results.push({ rowIndex: idx, productId: productId, productName: productName, category: category, variant: variant, qty: qtyRaw, reason: reason, ok: !!ok, issues: issues });
   });
-
-  if (previewOnly) {
-    return { ok: true, preview: true, results: results, validCount: validCount, totalCount: rows.length };
-  }
-
-  var lock = LockService.getScriptLock();
-  lock.waitLock(20000);
-  var applied = 0;
-  var skipped = 0;
+  if (previewOnly) return { ok: true, preview: true, results: results, validCount: validCount, totalCount: rows.length };
+  var lock = LockService.getScriptLock(); lock.waitLock(20000);
+  var applied = 0, skipped = 0, batchId = String(param_(e, 'OperationId') || Utilities.getUuid());
   try {
     results.forEach(function (res) {
       if (!res.ok) { skipped++; return; }
       var row = getOrCreateStockVariantRow_(sheet, res.productId, res.productName, res.variant, res.category);
-      var before = readStockVariantRow_(sheet, row);
-      var nextAvailable = parseInt(res.qty, 10);
-      // Optional name/category (sent by the new-product upload form) only fill or refresh those columns.
-      writeStockVariantRow_(sheet, row, { available: nextAvailable, tracked: true, productName: res.productName, category: res.category, updatedBy: v.email || 'admin' });
-      appendStockLedger_({
-        productId: res.productId,
-        variant: res.variant,
-        changeType: 'CSV_IMPORT',
-        qtyBefore: before.available,
-        qtyAfter: nextAvailable,
-        reservedBefore: before.reserved,
-        reservedAfter: before.reserved,
-        reason: res.reason,
-        orderId: '',
-        admin: v.email || 'admin'
+      var before = readStockVariantRow_(sheet, row), nextAvailable = parseInt(res.qty, 10);
+      mutateStockVariant_({
+        productId: res.productId, productName: res.productName, category: res.category, variant: res.variant,
+        deltaAvailable: nextAvailable - before.available, deltaReserved: 0, setTracked: true,
+        changeType: 'CSV_IMPORT', reason: res.reason, admin: v.email || 'admin',
+        operationId: batchId + ':' + res.productId + ':' + stockVariantCompareKey_(res.variant)
       });
       applied++;
     });
-  } finally {
-    lock.releaseLock();
-  }
-  return { ok: true, preview: false, applied: applied, skipped: skipped, totalCount: rows.length };
+  } finally { lock.releaseLock(); }
+  return { ok: true, preview: false, applied: applied, skipped: skipped, totalCount: rows.length, operationId: batchId };
 }
 
 function bdIsValidDateKey_(value) {
@@ -7864,8 +7796,7 @@ function migrateLegacyStockCore_(adminLabel) {
 }
 
 function quickAdjustAdminStock_(e) {
-  var token = param_(e, 'Token');
-  var v = verifyAdminSession_(token);
+  var v = verifyAdminSession_(param_(e, 'Token'));
   if (!v.ok) return v;
   var productId = String(param_(e, 'ProductId') || '').trim();
   if (!productId) return { ok: false, error: 'MISSING_ID', message: 'Product ID প্রয়োজন।' };
@@ -7876,35 +7807,22 @@ function quickAdjustAdminStock_(e) {
   if (isNaN(delta) || delta === 0) return { ok: false, error: 'INVALID_DELTA', message: 'সঠিক পরিমাণ দিন।' };
   var reason = String(param_(e, 'Reason') || '').trim();
   if (!reason) return { ok: false, error: 'REASON_REQUIRED', message: 'কারণ লেখা বাধ্যতামূলক।' };
-
   var lock = LockService.getScriptLock();
   lock.waitLock(15000);
   try {
     var sheet = ensureStockVariantsSheet_();
     var row = getOrCreateStockVariantRow_(sheet, productId, productName, variant, category);
     var before = readStockVariantRow_(sheet, row);
-    if (delta < 0 && (before.available + delta) < 0) {
-      return { ok: false, error: 'INSUFFICIENT_STOCK', message: 'এত স্টক নেই। বর্তমান Available: ' + before.available };
-    }
-    var nextAvailable = Math.max(0, before.available + delta);
-    writeStockVariantRow_(sheet, row, { available: nextAvailable, tracked: true, updatedBy: v.email || 'admin' });
-    appendStockLedger_({
-      productId: before.productId || productId,
-      variant: before.variant || variant,
+    if (delta < 0 && (before.available + delta) < 0) return { ok: false, error: 'INSUFFICIENT_STOCK', message: 'এত স্টক নেই। বর্তমান Available: ' + before.available };
+    var result = mutateStockVariant_({
+      productId: productId, productName: productName, category: category, variant: variant,
+      deltaAvailable: delta, deltaReserved: 0, setTracked: true,
       changeType: delta < 0 ? 'MANUAL_SALE' : 'MANUAL_RESTOCK',
-      qtyBefore: before.available,
-      qtyAfter: nextAvailable,
-      reservedBefore: before.reserved,
-      reservedAfter: before.reserved,
-      reason: reason,
-      orderId: '',
-      admin: v.email || 'admin'
+      reason: reason, admin: v.email || 'admin', operationId: param_(e, 'OperationId')
     });
-    if (delta > 0) { try { opsNotifyVariant_(productId, variant, nextAvailable); } catch (notifyErr) {} }
-    return { ok: true, productId: productId, variant: variant, available: nextAvailable, delta: delta };
-  } finally {
-    lock.releaseLock();
-  }
+    if (delta > 0) { try { opsNotifyVariant_(productId, variant, result.after.available); } catch (notifyErr) {} }
+    return { ok: true, productId: productId, variant: variant, available: result.after.available, delta: delta, operationId: result.operationId };
+  } finally { lock.releaseLock(); }
 }
 
 
