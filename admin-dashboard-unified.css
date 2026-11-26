@@ -158,12 +158,26 @@ html.wp-admin-shell body.adm-body .adm-main{
  --dash-ink:#173b2f;--dash-muted:#6d7d74;--dash-line:#dfe9e2;--dash-paper:#fff;
  --dash-canvas:#f3f7f4;--dash-gold:#176b4a;--dash-gold-soft:#eaf3ed;
  --adm-primary:#173b2f;--adm-accent:#176b4a;--adm-accent-ink:#14543c;--adm-accent-wash:#eaf3ed;
+ --mt-bg:#f3f7f4;--mt-card:#fff;--mt-line:#dfe9e2;--mt-line-2:#c9d9ce;
+ --mt-ink:#173b2f;--mt-muted:#6d7d74;--mt-navy:#173b2f;--mt-navy-2:#24553e;
+ --mt-gold:#176b4a;--mt-gold-2:#8abf9e;--mt-gold-ink:#14543c;--mt-gold-wash:#eaf3ed;
+ --mt-ring:0 0 0 3px rgba(23,107,74,.18);
 }
 :root[data-admin-theme="dark"]{
  --dash-ink:#edf5ef;--dash-muted:#a9bdb0;--dash-line:#30473a;--dash-paper:#18271f;
  --dash-canvas:#101b15;--dash-gold:#79bd96;--dash-gold-soft:#203b2e;
  --adm-primary:#edf5ef;--adm-accent:#79bd96;--adm-accent-ink:#9bd4b0;--adm-accent-wash:#203b2e;
+ --mt-bg:#101b15;--mt-card:#18271f;--mt-line:#30473a;--mt-line-2:#405a49;
+ --mt-ink:#edf5ef;--mt-muted:#a9bdb0;--mt-navy:#2a5d42;--mt-navy-2:#34734f;
+ --mt-gold:#79bd96;--mt-gold-2:#9bd4b0;--mt-gold-ink:#c5ead2;--mt-gold-wash:#203b2e;
+ --mt-ring:0 0 0 3px rgba(121,189,150,.2);
 }
+.adm-sidebar{background:linear-gradient(180deg,#1b3a2d 0%,#12291f 100%)!important}
+.adm-sidebar .adm-sidebar-item.is-current,.adm-sidebar .adm-sidebar-item[aria-current="page"]{
+ background:linear-gradient(90deg,rgba(121,189,150,.2),rgba(121,189,150,.06))!important;
+ color:#c5ead2!important;box-shadow:inset 3px 0 #79bd96!important;
+}
+.adm-sidebar .adm-sidebar-item.is-current svg,.adm-sidebar .adm-sidebar-item[aria-current="page"] svg{color:#9bd4b0!important}
 /* Keep the section shortcuts visible while navigating a long dashboard. */
 .adm-body .adm-main>.adm-jump{
  position:sticky!important;top:8px!important;z-index:30!important;
