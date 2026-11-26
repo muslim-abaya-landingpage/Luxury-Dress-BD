@@ -690,7 +690,6 @@ function admCourierSettlementList_(e) {
     var id = String(r[1] || '').trim();
     var amount = admNum_(r[6]);
     if (id) paid[id] = (paid[id] || 0) + amount;
-    totalReceived += amount;
     recent.push({
       settlementId: String(r[0] || ''),
       orderId: id,
@@ -717,6 +716,7 @@ function admCourierSettlementList_(e) {
     var settled = Math.round((paid[o.orderId] || 0) * 100) / 100;
     var remaining = Math.max(0, Math.round((o.due - settled) * 100) / 100);
     totalDue += o.due;
+    totalReceived += settled;
     orders.push({
       orderId: o.orderId, date: o.time, customer: o.name, phone: o.phone,
       courier: o.courier || 'Steadfast', tracking: o.tracking,
