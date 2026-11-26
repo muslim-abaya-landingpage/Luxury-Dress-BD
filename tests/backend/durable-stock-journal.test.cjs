@@ -57,7 +57,7 @@ function runtime() {
     LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) }
   };
   vm.createContext(ctx);
-  ['stockVariantCompareKey_','readStockVariantRow_','writeStockVariantRow_','stockOperationJournalRow_',
+  ['normStockVariant_','stockVariantCompareKey_','readStockVariantRow_','writeStockVariantRow_','stockOperationJournalRow_',
    'stockOperationSetState_','appendStockLedgerOnce_','stockOperationId_','mutateStockVariant_',
    'recoverAdminStockOperations_'].forEach(name => vm.runInContext(extract(name), ctx));
   return { ctx, variants, journal, ledger };
