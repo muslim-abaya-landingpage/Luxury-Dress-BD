@@ -191,6 +191,8 @@ function invSummary_(e) {
   stockRows.forEach(function(r){if(!(r[4]===true||String(r[4]).toUpperCase()==='TRUE'))return;var qty=Math.max(0,(Number(r[5])||0)-(Number(r[6])||0)),threshold=r[7]===''?STOCK_LOW_DEFAULT_THRESHOLD_:Number(r[7]);totalQty+=qty;if(qty===0)out++;else if(qty<=threshold)low++;});
   var suppliers=invSupplierBalances_(), supplierList=Object.keys(suppliers).map(function(k){return suppliers[k];});
   var purchases=invRows_(invPurchasesSheet_(),16), purchaseTotal=0, due=0;
-  purchases.forEach(function(r){if(String(r[10])==='VOID')return;purchaseTotal+=Number(r[7])||0;due+=Number(r[9])||0;});
+  purchases.forEach(function(r){if(String(r[10])==='VOID')return;purchaseTotal+=Number(r[7])||0;});
+  // Sum supplier account balances, so unallocated supplier-level payments also reduce the dashboard due.
+  supplierList.forEach(function(s){due+=Number(s.due)||0;});
   return {ok:true,stockUnits:totalQty,lowStock:low,outOfStock:out,supplierCount:supplierList.length,purchaseTotal:Math.round(purchaseTotal*100)/100,supplierDue:Math.round(due*100)/100};
 }
