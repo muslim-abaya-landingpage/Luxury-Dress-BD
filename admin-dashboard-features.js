@@ -13,6 +13,7 @@
     inboxUnread: {},
     desktopEnabled: false,
     analyticsBusy: false,
+    lifetimeBusy: false,
     lastTaskRefresh: 0
   };
 
@@ -276,10 +277,10 @@
       return '<div class="adm-month-row"><span class="adm-month-label">' + escapeHtml(row.month || "—") + '</span><span class="adm-month-bar"><i style="width:' + width + '%"></i></span><b>' + money(value) + '</b><small>' + Number(row.orders || 0) + ' অর্ডার</small></div>';
     }).join("");
   }
-  function renderRanked(nodeId, rows, primary, secondary) {
+  function renderRanked(nodeId, rows, primary, secondary, emptyMessage) {
     var node = byId(nodeId);
     rows = Array.isArray(rows) ? rows.slice(0, 8) : [];
-    if (!rows.length) { node.innerHTML = '<div class="adm-feature-empty">এই সময়সীমায় তথ্য নেই।</div>'; return; }
+    if (!rows.length) { node.innerHTML = '<div class="adm-feature-empty">' + escapeHtml(emptyMessage || "এই সময়সীমায় তথ্য নেই।") + '</div>'; return; }
     node.innerHTML = rows.map(function (row) {
       return '<div class="adm-report-row"><span>' + escapeHtml(row[primary] || "—") + '</span><b>' + escapeHtml(row[secondary] || 0) + '</b></div>';
     }).join("");
@@ -301,7 +302,6 @@
     if (Number(data.undatedOrderCount) > 0) byId("admUndatedNote").textContent = Number(data.undatedOrderCount) + "টি তারিখহীন অর্ডার মোট lifetime সংখ্যা/মূল্যে অন্তর্ভুক্ত; মাসিক চার্টে নেই।";
     renderMonths(data.salesByMonth);
     renderRanked("admReportProducts", data.topProducts, "name", "qty");
-    renderRanked("admOverviewTopProducts", data.topProducts, "name", "qty");
     renderRanked("admReportSources", data.sourceBreakdown, "source", "orders");
     var note = data.sourceMessage || "";
     if (data.range === "all") note = "পূর্ণ সময়ের অর্ডার হিসাব" + (note ? " · " + note : "");
@@ -310,6 +310,18 @@
     byId("admReportError").hidden = true;
     window.__maDashboardSalesReport = data;
     byId("admReportExport").disabled = false;
+  }
+  function loadLifetimeTopProducts() {
+    if (state.lifetimeBusy || !window.MaAdmin || !MaAdmin.getAnalyticsV2) return Promise.resolve();
+    state.lifetimeBusy = true;
+    var node = byId("admOverviewTopProducts");
+    if (node) node.innerHTML = '<div class="adm-feature-empty">সব সময়ের বিক্রির তথ্য লোড হচ্ছে…</div>';
+    return MaAdmin.getAnalyticsV2({ range: "all" }).then(function (data) {
+      if (!data || data.range !== "all" || !Array.isArray(data.topProducts)) throw new Error("LIFETIME_REPORT_INVALID");
+      renderRanked("admOverviewTopProducts", data.topProducts, "name", "qty", "এখনো নিশ্চিত, পাঠানো বা ডেলিভারি সম্পন্ন অর্ডার থেকে পণ্যের বিক্রির তথ্য পাওয়া যায়নি।");
+    }).catch(function () {
+      if (node) node.innerHTML = '<div class="adm-feature-error">লাইফটাইম বিক্রির তালিকা লোড হয়নি। আপডেট চাপুন।</div>';
+    }).finally(function () { state.lifetimeBusy = false; });
   }
   var RANGE_NAMES = { today: "আজ", "7d": "গত ৭ দিন", "30d": "গত ৩০ দিন", month: "এই মাস", all: "সব সময়", custom: "" };
   /** Top KPI cards follow the chosen range when the server sends the full summary (pending/customers). */
@@ -454,11 +466,12 @@
     byId("admAlertsRefresh").addEventListener("click", function () { refreshAlerts(true); });
     byId("admTasksRefresh").addEventListener("click", function () { refreshTasks(true); });
     byId("admReportLoad").addEventListener("click", loadAnalytics);
-    byId("admRefresh").addEventListener("click", function () { refreshAlerts(true); refreshTasks(true); if (document.querySelector(".adm-dashboard-reports[open]")) loadAnalytics(); });
+    byId("admRefresh").addEventListener("click", function () { refreshAlerts(true); refreshTasks(true); loadLifetimeTopProducts(); if (document.querySelector(".adm-dashboard-reports[open]")) loadAnalytics(); });
     byId("admReportRange").addEventListener("change", function () { toggleCustomDates(); if (this.value !== "custom") loadAnalytics(); });
     byId("admReportExport").addEventListener("click", exportCsv);
     initRangeChips();
     toggleCustomDates();
+    loadLifetimeTopProducts();
     refreshAlerts();
     refreshTasks(false);
     var reportSection = document.querySelector(".adm-dashboard-reports");
