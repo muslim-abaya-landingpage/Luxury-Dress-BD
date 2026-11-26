@@ -262,6 +262,12 @@ function doPost(e) {
     if (type === 'AdminCourierRatesSave') {
       return jsonOut_(saveAdminCourierRates_(e));
     }
+    if (type === 'AdminCourierZonesGet') {
+      return jsonOut_(getAdminCourierZones_(e));
+    }
+    if (type === 'AdminCourierZonesSave') {
+      return jsonOut_(saveAdminCourierZones_(e));
+    }
     if (type === 'AdminAnalyticsV2') {
       return jsonOut_(getAdminAnalyticsV2_(e));
     }

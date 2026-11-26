@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="admin-wp.css?v=20261126-admin-shell-step2">
   <link rel="stylesheet" href="admin-premium-unified.css?v=20261125-sidebar-hover-stable">
   <link rel="stylesheet" href="admin-responsive.css?v=1">
-  <link rel="stylesheet" href="courier-management.css?v=20261127-scan">
+  <link rel="stylesheet" href="courier-management.css?v=20261127-zones">
   <script src="config.js?v=00107b4d68a09227"></script>
   <script src="site-api-config.js?v=b4eb7cb7438aad24"></script>
   <script src="admin-config.js?v=765c69bebedc46a8"></script>
@@ -141,6 +141,16 @@
         <div class="cm-table-wrap"><table class="cm-table cm-performance"><thead><tr><th>কুরিয়ার</th><th>মোট</th><th>Delivered</th><th>Return</th><th>Success</th></tr></thead><tbody id="cmPerformance"><tr><td colspan="5" class="cm-empty">লোড হচ্ছে…</td></tr></tbody></table></div>
       </article>
     </section>
+
+    <section class="cm-panel cm-zones-panel" aria-labelledby="cmZonesTitle">
+      <div class="cm-panel-head">
+        <div><h2 id="cmZonesTitle">ডেলিভারি চার্জ জোন (জেলাভিত্তিক)</h2><p>ঢাকার ভিতরে/বাইরে এই দুই ভাগের বদলে, নিজের ইচ্ছামতো যতগুলো খুশি জোন বানান—প্রতিটির আলাদা নাম, আলাদা জেলা তালিকা ও আলাদা চার্জ। অর্ডার পেজে জেলা মিলে গেলে এই চার্জই দেখানো হবে; না মিললে উপরের ফ্ল্যাট চার্জ দেখানো হবে।</p></div>
+        <button class="adm-btn adm-btn-secondary" type="button" id="cmZonesAdd">+ নতুন জোন যোগ করুন</button>
+      </div>
+      <div id="cmZonesList" class="cm-zones-list"><p class="cm-empty">জোন লোড হচ্ছে…</p></div>
+      <div class="cm-rate-actions"><button class="adm-btn adm-btn-primary" type="button" id="cmZonesSave">জোন সংরক্ষণ</button><span id="cmZonesMessage" role="status"></span></div>
+      <p class="cm-note">কোনো জোনে জেলা যোগ না করলে বা চার্জ ফাঁকা রাখলে সেই জোন অর্ডার পেজে দেখানো হবে না।</p>
+    </section>
     <p class="cm-footer-note">COD Due অর্ডারের বকেয়া অঙ্ক থেকে দেখানো হয়—এটি কুরিয়ারের settlement statement বা হাতে পাওয়া টাকার হিসাব নয়। Settlement reconciliation আলাদা backend integration হিসেবে পরবর্তী ধাপে যুক্ত হবে।</p>
   </main>
 
@@ -162,6 +172,16 @@
       <div class="cm-dialog-actions"><button type="button" class="adm-btn adm-btn-secondary" id="cmSettlementCancel">বাতিল</button><button type="submit" class="adm-btn adm-btn-primary" id="cmSettlementSave">জমা সংরক্ষণ</button></div>
     </form>
   </dialog>
-  <script src="courier-management.js?v=20261127-scan"></script>
+  <dialog id="cmZoneDialog" class="cm-dialog cm-zone-dialog">
+    <div class="cm-dialog-head"><div><h2>জেলা বাছাই করুন</h2><p id="cmZoneDialogName"></p></div><button type="button" id="cmZoneDialogClose" aria-label="বন্ধ করুন">×</button></div>
+    <input type="search" id="cmZoneDialogSearch" class="cm-zone-search" placeholder="জেলার নাম লিখে খুঁজুন">
+    <div class="cm-zone-dialog-actions">
+      <button type="button" class="adm-btn adm-btn-secondary" id="cmZoneDialogAll">সব বাছাই</button>
+      <button type="button" class="adm-btn adm-btn-secondary" id="cmZoneDialogNone">সব বাদ</button>
+    </div>
+    <div id="cmZoneDialogList" class="cm-zone-dialog-list"></div>
+    <div class="cm-dialog-actions"><button type="button" class="adm-btn adm-btn-primary" id="cmZoneDialogDone">হয়ে গেছে</button></div>
+  </dialog>
+  <script src="courier-management.js?v=20261127-zones"></script>
 </body>
 </html>

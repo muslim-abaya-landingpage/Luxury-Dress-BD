@@ -397,3 +397,77 @@ function saveAdminCourierRates_(e) {
   PropertiesService.getScriptProperties().setProperty(COURIER_RATES_PROP_, JSON.stringify(rates));
   return { ok: true, rates: rates };
 }
+
+// ================= Courier charge zones (district-based) =================
+// The reference admin panel lets the owner define named delivery-charge zones,
+// each covering a pick of districts with its own flat fee (e.g. "ঢাকার ভিতরে" ৳70,
+// "চট্টগ্রাম সিটি" ৳100, "দূরবর্তী জেলা" ৳150). This replaces the single
+// inside/outside-Dhaka split with as many zones as the owner wants, while the
+// flat per-courier rates above still work as a fallback when no zone matches.
+var COURIER_ZONES_PROP_ = 'COURIER_ZONES_JSON';
+var COURIER_ZONES_MAX_ = 30;
+var COURIER_ZONES_MAX_DISTRICTS_ = 80;
+
+function getAdminCourierZones_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var raw = PropertiesService.getScriptProperties().getProperty(COURIER_ZONES_PROP_);
+  var zones = [];
+  if (raw) {
+    try { zones = JSON.parse(raw); if (!Array.isArray(zones)) zones = []; } catch (err) { zones = []; }
+  }
+  return { ok: true, zones: zones };
+}
+
+function saveAdminCourierZones_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var owner = requireOwnerAdmin_(v);
+  if (owner) return owner;
+  var raw = String(param_(e, 'ZonesJson') || '[]');
+  var input;
+  try { input = JSON.parse(raw); } catch (err) { return { ok: false, error: 'BAD_INPUT', message: 'জোনের তথ্য পড়া যায়নি।' }; }
+  if (!Array.isArray(input)) return { ok: false, error: 'BAD_INPUT', message: 'জোনের তথ্য পড়া যায়নি।' };
+  if (input.length > COURIER_ZONES_MAX_) return { ok: false, error: 'TOO_MANY_ZONES', message: 'সর্বোচ্চ ' + COURIER_ZONES_MAX_ + 'টি জোন রাখা যাবে।' };
+  var zones = [];
+  for (var i = 0; i < input.length; i++) {
+    var z = input[i] || {};
+    var name = String(z.name || '').trim().slice(0, 60);
+    if (!name) continue;
+    var feeRaw = String(z.fee == null ? '' : z.fee).trim();
+    var fee = '';
+    if (feeRaw) {
+      var n = Number(feeRaw);
+      fee = (isFinite(n) && n >= 0 && n <= 2000) ? n : '';
+    }
+    var districts = Array.isArray(z.districts) ? z.districts : [];
+    districts = districts.map(function (d) { return String(d || '').trim().slice(0, 40); }).filter(function (d) { return !!d; });
+    districts = districts.slice(0, COURIER_ZONES_MAX_DISTRICTS_);
+    // de-dupe while preserving order
+    var seen = {};
+    districts = districts.filter(function (d) { if (seen[d]) return false; seen[d] = true; return true; });
+    zones.push({ name: name, fee: fee, districts: districts });
+  }
+  PropertiesService.getScriptProperties().setProperty(COURIER_ZONES_PROP_, JSON.stringify(zones));
+  return { ok: true, zones: zones };
+}
+
+// Looks up the fee for a given district from the saved zones. Returns null if
+// no zone is configured or none matches — callers should fall back to the
+// flat inside/outside rates in that case, never invent a number.
+function courierZoneFeeForDistrict_(district) {
+  var raw = PropertiesService.getScriptProperties().getProperty(COURIER_ZONES_PROP_);
+  if (!raw) return null;
+  var zones;
+  try { zones = JSON.parse(raw); } catch (err) { return null; }
+  if (!Array.isArray(zones)) return null;
+  var d = String(district || '').trim();
+  if (!d) return null;
+  for (var i = 0; i < zones.length; i++) {
+    var z = zones[i];
+    if (z && Array.isArray(z.districts) && z.districts.indexOf(d) !== -1 && z.fee !== '' && z.fee != null) {
+      return { zone: z.name, fee: z.fee };
+    }
+  }
+  return null;
+}

@@ -900,24 +900,43 @@
     (function () {
       var hint = document.getElementById("courierRateHint");
       if (!hint) return;
-      var ratesPromise = null;
+      var ratesPromise = null, zonesPromise = null;
       function loadRates() {
         if (!ratesPromise) ratesPromise = MaAdmin.getCourierRates().catch(function () { return null; });
         return ratesPromise;
       }
+      function loadZones() {
+        if (!zonesPromise) zonesPromise = MaAdmin.call("AdminCourierZonesGet", {}).then(function (r) { return r.zones || []; }).catch(function () { return []; });
+        return zonesPromise;
+      }
+      function findZone(zones, district) {
+        var d = String(district || "").trim();
+        if (!d) return null;
+        for (var i = 0; i < zones.length; i++) {
+          var z = zones[i];
+          if (z && Array.isArray(z.districts) && z.districts.indexOf(d) !== -1 && z.fee !== "" && z.fee != null) return z;
+        }
+        return null;
+      }
       document.addEventListener("ma-order-rendered", function (ev) {
         var o = ev.detail || {};
-        var inside = String(o.district || "").trim() === "ঢাকা";
-        loadRates().then(function (r) {
-          if (!r) { hint.textContent = ""; return; }
-          var parts = [];
-          var pathao = inside ? r.pathaoInside : r.pathaoOutside;
-          var redx = inside ? r.redxInside : r.redxOutside;
-          if (pathao !== "" && pathao != null) parts.push("Pathao ~৳" + pathao);
-          if (redx !== "" && redx != null) parts.push("RedX ~৳" + redx);
-          hint.textContent = parts.length
-            ? "তুলনা (" + (inside ? "ঢাকার ভিতরে" : "ঢাকার বাইরে") + "): " + parts.join(" · ") + " — Admin → Setup-এ হার বদলাতে পারেন।"
-            : "Pathao/RedX-এর হার এখনো যোগ করা হয়নি — Admin → Setup-এ যোগ করলে এখানে তুলনা দেখাবে।";
+        var district = String(o.district || "").trim();
+        var inside = district === "ঢাকা";
+        Promise.all([loadRates(), loadZones()]).then(function (res) {
+          var r = res[0], zones = res[1];
+          var zone = findZone(zones, district);
+          var lines = [];
+          if (zone) lines.push("ডেলিভারি চার্জ জোন — " + zone.name + ": ৳" + zone.fee);
+          if (r) {
+            var parts = [];
+            var pathao = inside ? r.pathaoInside : r.pathaoOutside;
+            var redx = inside ? r.redxInside : r.redxOutside;
+            if (pathao !== "" && pathao != null) parts.push("Pathao ~৳" + pathao);
+            if (redx !== "" && redx != null) parts.push("RedX ~৳" + redx);
+            if (parts.length) lines.push("তুলনা (" + (inside ? "ঢাকার ভিতরে" : "ঢাকার বাইরে") + "): " + parts.join(" · "));
+          }
+          if (!lines.length) { hint.textContent = "ডেলিভারি চার্জের তথ্য এখনো যোগ করা হয়নি — Admin → কুরিয়ার ম্যানেজমেন্টে যোগ করলে এখানে দেখাবে।"; return; }
+          hint.textContent = lines.join(" · ") + " — Admin → কুরিয়ার ম্যানেজমেন্টে হার বদলাতে পারেন।";
         });
       });
     })();
