@@ -267,7 +267,7 @@
     }).then(function () {
       btn.disabled = false;
       btn.setAttribute("aria-busy", "false");
-      btn.textContent = "Refresh";
+      btn.textContent = "আপডেট";
       document.getElementById("admOrdersBody").setAttribute("aria-busy", "false");
     });
   }
