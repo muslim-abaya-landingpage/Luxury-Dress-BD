@@ -565,7 +565,8 @@
       Available: (typeof opts.available === "undefined" || opts.available === null) ? "" : opts.available,
       Threshold: (typeof opts.threshold === "undefined" || opts.threshold === null) ? "" : opts.threshold,
       Tracked: opts.tracked ? "true" : "",
-      Reason: opts.reason || ""
+      Reason: opts.reason || "",
+      OperationId: opts.operationId || ""
     }).then(function (res) {
       if (!res.ok) throw new Error(res.message || res.error || "STOCK_VARIANT_SAVE_FAILED");
       return res;
@@ -581,14 +582,24 @@
     });
   }
 
-  function commitStockCsv(rows, previewOnly) {
+  function recoverStockJournal(limit) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return apiPost({ RecordType: "AdminStockJournalRecover", Token: s.token, Limit: limit || 50 }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "STOCK_JOURNAL_RECOVERY_FAILED");
+      return res;
+    });
+  }
+
+  function commitStockCsv(rows, previewOnly, operationId) {
     var s = getSession();
     if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
     return apiPost({
       RecordType: "AdminStockCsvCommit",
       Token: s.token,
       RowsJSON: JSON.stringify(rows || []),
-      PreviewOnly: previewOnly ? "true" : "false"
+      PreviewOnly: previewOnly ? "true" : "false",
+      OperationId: operationId || ""
     }).then(function (res) {
       if (!res.ok) throw new Error(res.message || res.error || "STOCK_CSV_FAILED");
       return res;
@@ -643,7 +654,8 @@
       Category: opts.category || "",
       Variant: opts.variant || "",
       Delta: opts.delta,
-      Reason: opts.reason || ""
+      Reason: opts.reason || "",
+      OperationId: opts.operationId || ""
     }).then(function (res) {
       if (!res.ok) throw new Error(res.message || res.error || "STOCK_QUICK_ADJUST_FAILED");
       return res;
@@ -735,6 +747,7 @@
     getStockVariants: getStockVariants,
     saveStockVariant: saveStockVariant,
     getStockLedger: getStockLedger,
+    recoverStockJournal: recoverStockJournal,
     commitStockCsv: commitStockCsv,
     getAnalyticsV2: getAnalyticsV2,
     getSetupStatus: getSetupStatus,
