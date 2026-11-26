@@ -12503,12 +12503,13 @@ function invCreatePurchase_(e) {
   var lines;
   try {lines=JSON.parse(param_(e,'ItemsJSON')||'[]');} catch(err){return {ok:false,error:'INVALID_ITEMS',message:'পণ্যের তালিকা পড়া যায়নি।'};}
   if(!Array.isArray(lines)||!lines.length||lines.length>100) return {ok:false,error:'INVALID_ITEMS',message:'১ থেকে ১০০টি পণ্য যোগ করুন।'};
-  var clean=[], subtotal=0;
+  var clean=[], subtotal=0, seenVariants={};
   try {
     lines.forEach(function(x){
       var productId=invText_(x.productId,100), productName=invText_(x.productName,160), category=invText_(x.category,100), variant=invText_(x.variant,180);
       var qty=Number(x.qty), unitCost=invMoney_(x.unitCost,'UNIT_COST');
       if(!/^[A-Za-z0-9][A-Za-z0-9_-]{0,99}$/.test(productId)||!productName||!isFinite(qty)||Math.floor(qty)!==qty||qty&lt;1||qty>100000) throw new Error('INVALID_ITEM');
+      var variantKey=productId+'|'+variant.toLowerCase(); if(seenVariants[variantKey]) throw new Error('DUPLICATE_VARIANT'); seenVariants[variantKey]=true;
       var line=Math.round(qty*unitCost*100)/100; subtotal+=line;
       clean.push({productId:productId,productName:productName,category:category,variant:variant,qty:qty,unitCost:unitCost,lineTotal:line});
     });
@@ -12541,8 +12542,16 @@ function invReceivePurchase_(e) {
     if(String(purchase[10])!=='DRAFT') return {ok:false,error:'INVALID_PURCHASE_STATUS',message:'এই ক্রয় গ্রহণ করা যাবে না।'};
     var items=invRows_(invPurchaseItemsSheet_(),8).filter(function(r){return String(r[0])===id;});
     if(!items.length) return {ok:false,error:'PURCHASE_ITEMS_MISSING',message:'ক্রয়ের পণ্য পাওয়া যায়নি।'};
+    // Use the existing append-only stock ledger as a retry guard if execution stops mid-receive.
+    var ledgerRows=invRows_(ensureStockLedgerSheet_(),11), received={};
+    ledgerRows.forEach(function(r){
+      if(String(r[9])===id &amp;&amp; String(r[3])==='PURCHASE') received[String(r[1])+'|'+String(r[2]).toLowerCase()]=true;
+    });
     items.forEach(function(r){
+      var key=String(r[1])+'|'+String(r[4]).toLowerCase();
+      if(received[key]) return;
       mutateStockVariant_({productId:String(r[1]),productName:String(r[2]),category:String(r[3]),variant:String(r[4]),deltaAvailable:Number(r[5])||0,deltaReserved:0,setTracked:true,changeType:'PURCHASE',reason:'Purchase received '+id,orderId:id,admin:auth.email||'admin'});
+      received[key]=true;
     });
     sh.getRange(rowNo,11,1,6).setValues([['RECEIVED',purchase[11],purchase[12],purchase[13],new Date(),auth.email||auth.phone||'admin']]);
     return {ok:true,purchaseId:id,status:'RECEIVED',itemsReceived:items.length,message:'ক্রয়ের পণ্য স্টকে যোগ হয়েছে।'};
@@ -12554,22 +12563,22 @@ function invCreateSupplierPayment_(e) {
   var amount;
   try {amount=invMoney_(param_(e,'Amount'),'AMOUNT');} catch(err){return {ok:false,error:'INVALID_AMOUNT',message:'পেমেন্টের পরিমাণ সঠিক নয়।'};}
   if(!supplierId||amount&lt;=0) return {ok:false,error:'INVALID_PAYMENT',message:'সাপ্লায়ার ও পেমেন্টের পরিমাণ দিন।'};
-  var suppliers=invSupplierBalances_(), supplier=suppliers[supplierId];
-  if(!supplier) return {ok:false,error:'SUPPLIER_NOT_FOUND'};
-  if(purchaseId){
-    var purchases=invRows_(invPurchasesSheet_(),16), purchase=null;
-    for(var i=0;i&lt;purchases.length;i++) if(String(purchases[i][0])===purchaseId){purchase=purchases[i];break;}
-    if(!purchase||String(purchase[1])!==supplierId) return {ok:false,error:'PURCHASE_NOT_FOUND',message:'এই সাপ্লায়ারের ক্রয় পাওয়া যায়নি।'};
-    if(amount>Number(purchase[9]||0)) return {ok:false,error:'OVERPAYMENT',message:'এই ক্রয়ের বকেয়ার বেশি পেমেন্ট করা যাবে না।'};
-  } else if(amount>supplier.due) return {ok:false,error:'OVERPAYMENT',message:'সাপ্লায়ারের মোট বকেয়ার বেশি পেমেন্ট করা যাবে না।'};
+  // Lock before checking the balance; concurrent payment requests must not both spend the same due.
   var lock=LockService.getScriptLock(); if(!lock.tryLock(15000)) return {ok:false,error:'BUSY'};
   try {
+    var suppliers=invSupplierBalances_(), supplier=suppliers[supplierId];
+    if(!supplier) return {ok:false,error:'SUPPLIER_NOT_FOUND'};
+    var purchase=null, purchaseRow=-1, purchases=invRows_(invPurchasesSheet_(),16);
+    if(purchaseId){
+      for(var i=0;i&lt;purchases.length;i++) if(String(purchases[i][0])===purchaseId){purchase=purchases[i];purchaseRow=i+2;break;}
+      if(!purchase||String(purchase[1])!==supplierId) return {ok:false,error:'PURCHASE_NOT_FOUND',message:'এই সাপ্লায়ারের ক্রয় পাওয়া যায়নি।'};
+      if(amount>Number(purchase[9]||0)) return {ok:false,error:'OVERPAYMENT',message:'এই ক্রয়ের বকেয়ার বেশি পেমেন্ট করা যাবে না।'};
+    } else if(amount>supplier.due) return {ok:false,error:'OVERPAYMENT',message:'সাপ্লায়ারের মোট বকেয়ার বেশি পেমেন্ট করা যাবে না।'};
     var now=new Date(), who=auth.email||auth.phone||'admin', paymentId='PAY-'+Utilities.getUuid().replace(/-/g,'').slice(0,12).toUpperCase();
     invPaymentsSheet_().appendRow([paymentId,supplierId,purchaseId,amount,invText_(param_(e,'Method'),40),invText_(param_(e,'Reference'),100),invText_(param_(e,'PaymentDate'),10)||now,invText_(param_(e,'Notes'),300),now,who]);
-    // Keep purchase-level paid/due columns in sync when payment is linked to a purchase.
-    if(purchaseId){
-      var ps=invPurchasesSheet_(), pr=invRows_(ps,16);
-      for(var j=0;j&lt;pr.length;j++) if(String(pr[j][0])===purchaseId){var paidNow=(Number(pr[j][8])||0)+amount;ps.getRange(j+2,9,1,2).setValues([[paidNow,Math.max(0,(Number(pr[j][7])||0)-paidNow)]]);break;}
+    if(purchaseId &amp;&amp; purchaseRow>0){
+      var paidNow=(Number(purchase[8])||0)+amount;
+      invPurchasesSheet_().getRange(purchaseRow,9,1,2).setValues([[paidNow,Math.max(0,(Number(purchase[7])||0)-paidNow)]]);
     }
     return {ok:true,paymentId:paymentId,amount:amount,message:'সাপ্লায়ার পেমেন্ট সেভ হয়েছে।'};
   } finally {lock.releaseLock();}
