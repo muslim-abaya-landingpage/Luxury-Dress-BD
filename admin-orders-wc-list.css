@@ -160,6 +160,13 @@ html[data-admin-theme="dark"] .wo-orders-page .wc-list .pn-sel { border-color: v
 .wo-orders-page .wc-col-status { white-space: nowrap; }
 .wo-orders-page .wc-col-total { white-space: nowrap; text-align: right !important; font-variant-numeric: tabular-nums; }
 .wo-orders-page .wc-col-origin { white-space: nowrap; color: var(--wc-muted) !important; }
+.wo-orders-page .wc-col-customer { white-space: nowrap; }
+.wo-orders-page .wc-col-products { min-width: 160px; max-width: 220px; overflow-wrap: anywhere; }
+.wo-orders-page .wc-col-courier { white-space: nowrap; font-size: .85em; }
+.wo-orders-page .wc-col-assigned { white-space: nowrap; }
+.wo-orders-page .wc-col-customer a { color: var(--wc-link); text-decoration: none; }
+.wo-orders-page .wc-col-customer a:hover { text-decoration: underline; }
+.wo-orders-page .wc-col-products .sub, .wo-orders-page .wc-col-customer .sub, .wo-orders-page .wc-col-courier .sub, .wo-orders-page .wc-col-assigned .sub { color: var(--wc-muted); }
 
 .wc-order-line { display: flex; align-items: center; gap: 6px; min-width: 0; }
 .wo-orders-page .wc-order-line > .wc-order-link { flex: 0 1 auto; min-width: 0; white-space: normal !important; overflow-wrap: break-word !important; word-break: normal !important; }
@@ -219,7 +226,7 @@ html[data-admin-theme="dark"] .wo-orders-page .wc-list .pn-sel { border-color: v
   .wo-orders-page .wc-tablenav .wc-displaying { grid-column: 1 / -1; }
   .wo-orders-page .wc-tablenav .pn-spacer { display: none; }
   .wo-orders-page .wc-status-links .pn-tab { min-height: 32px; }
-  .wo-orders-page .wc-orders-table { min-width: 600px; }
+  .wo-orders-page .wc-orders-table { min-width: 920px; }
   .wo-orders-page .wc-orders-table .wc-col-order { min-width: 190px !important; width: 190px; max-width: 190px; }
   .wo-orders-page .wc-orders-table tbody tr:nth-child(odd) td:first-child,
   .wo-orders-page .wc-orders-table tbody tr:nth-child(odd) td:nth-child(2) { background: var(--wc-stripe); }

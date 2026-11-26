@@ -27,7 +27,7 @@
 <link rel="stylesheet" href="order-management-workspace.css?v=20261104-v1">
 <link rel="stylesheet" href="admin-responsive.css?v=1">
 <link rel="stylesheet" href="admin-theme.css?v=1">
-<link rel="stylesheet" href="admin-orders-wc-list.css?v=20261124-ref2">
+<link rel="stylesheet" href="admin-orders-wc-list.css?v=20261127-cols1">
 <link rel="manifest" href="/admin-manifest.webmanifest">
 <meta name="theme-color" content="#1b2a41">
 <link rel="apple-touch-icon" href="/images/admin/admin-icon-192.png">
@@ -137,6 +137,21 @@
         <select class="pn-sel wo-filter" id="ordOriginFilter" aria-label="Filter by sales channel">
           <option value="all">All sales channels</option>
         </select>
+        <select class="pn-sel wo-filter" id="ordAssignedFilter" aria-label="Filter by assigned staff">
+          <option value="all">All Employee</option>
+          <option value="assigned">Assigned</option>
+          <option value="unassigned">Unassigned</option>
+        </select>
+        <select class="pn-sel wo-filter" id="ordCourierFilter" aria-label="Filter by courier">
+          <option value="all">All Courier</option>
+          <option value="sent">Sent to courier</option>
+          <option value="not-sent">Not sent</option>
+          <option value="Steadfast">Steadfast</option>
+          <option value="Pathao">Pathao</option>
+          <option value="RedX">RedX</option>
+          <option value="Paperfly">Paperfly</option>
+          <option value="Manual">Manual</option>
+        </select>
         <span class="pn-spacer"></span>
         <span class="wc-displaying" id="ordIssueCountTop" aria-hidden="true"></span>
       </div>
@@ -145,27 +160,12 @@
         <div class="pn-toolbar wo-secondary-toolbar">
           <select class="pn-sel wo-filter" id="ordCategoryFilter" aria-label="পণ্যের ক্যাটাগরি"><option value="all">সব ক্যাটাগরি</option><option value="abaya">আবায়া / বোরকা</option><option value="threepiece">থ্রি-পিস / সালোয়ার</option><option value="kurti">কুর্তি</option><option value="dress">ড্রেস / গাউন</option><option value="other">অন্যান্য / শনাক্ত হয়নি</option></select>
           <select class="pn-sel wo-filter" id="ordProductFilter" aria-label="নির্দিষ্ট প্রোডাক্ট"><option value="all">সব প্রোডাক্ট</option></select>
-          <select class="pn-sel wo-filter" id="ordCourierFilter" aria-label="Filter by courier">
-            <option value="all">All couriers</option>
-            <option value="sent">Sent to courier</option>
-            <option value="not-sent">Not sent</option>
-            <option value="Steadfast">Steadfast</option>
-            <option value="Pathao">Pathao</option>
-            <option value="RedX">RedX</option>
-            <option value="Paperfly">Paperfly</option>
-            <option value="Manual">Manual</option>
-          </select>
           <select class="pn-sel wo-filter" id="ordPaymentFilter" aria-label="Filter by payment">
             <option value="all">All payments</option>
             <option value="cod">COD</option>
             <option value="advance">Advance paid</option>
             <option value="paid">Fully paid</option>
             <option value="due">Due amount</option>
-          </select>
-          <select class="pn-sel wo-filter" id="ordAssignedFilter" aria-label="Filter by assigned staff">
-            <option value="all">All staff</option>
-            <option value="assigned">Assigned</option>
-            <option value="unassigned">Unassigned</option>
           </select>
           <select class="pn-sel wo-filter" id="ordPriorityFilter" aria-label="Order priority"><option value="all">All priorities</option><option value="attention">Needs attention</option><option value="unassigned">Unassigned orders</option><option value="courier">Courier pending</option></select>
           <select class="pn-sel wo-filter" id="ordSort" aria-label="Sort orders"><option value="original">Default order</option><option value="date-desc">Newest first</option><option value="date-asc">Oldest first</option><option value="id-desc">Order ID (high–low)</option><option value="id-asc">Order ID (low–high)</option><option value="value-desc">Highest value</option><option value="value-asc">Lowest value</option><option value="name">Customer A–Z</option></select>
@@ -187,7 +187,7 @@
         </section>
       </details>
 
-      <p id="ordersTableHint" class="wo-table-hint">↔ Order নম্বর স্থির থাকে। Date, Status, Total, Origin দেখতে পাশে স্ক্রল করুন। বাকি তথ্য 👁 প্রিভিউতে।</p>
+      <p id="ordersTableHint" class="wo-table-hint">↔ Order নম্বর স্থির থাকে। Customer, Products, Date, Status, Total, Courier, Assigned, Origin দেখতে পাশে স্ক্রল করুন। বাকি তথ্য 👁 প্রিভিউতে।</p>
       <dialog id="ordQuickPreview" class="wo-quick-preview" aria-labelledby="ordPreviewTitle"><div class="wo-preview-head"><h2 id="ordPreviewTitle">Order Quick Preview</h2><button type="button" class="pn-btn" id="ordPreviewClose">Close</button></div><div id="ordPreviewContent"></div><div class="wo-preview-foot"><a id="ordPreviewOpen" class="pn-btn pn-btn-primary" href="#">Open Order</a></div></dialog>
       <div class="pn-table-wrap wc-table-wrap" role="region" tabindex="0" aria-label="Full order list" aria-describedby="ordersTableHint">
         <table class="pn-table wc-orders-table" id="ordTable">
@@ -195,20 +195,28 @@
             <tr>
               <th class="wc-col-cb"><input type="checkbox" class="ot-sel" id="otSelAll" aria-label="দেখানো সব অর্ডার বাছুন"></th>
               <th class="wc-col-order" aria-sort="none"><button type="button" class="wc-sort" data-sort="id">Order <span class="wc-sort-ind" aria-hidden="true"></span></button></th>
+              <th class="wc-col-customer">Customer</th>
+              <th class="wc-col-products">Products</th>
               <th class="wc-col-date" aria-sort="none"><button type="button" class="wc-sort" data-sort="date">Date <span class="wc-sort-ind" aria-hidden="true"></span></button></th>
               <th class="wc-col-status">Status</th>
               <th class="wc-col-total" aria-sort="none"><button type="button" class="wc-sort" data-sort="value">Total <span class="wc-sort-ind" aria-hidden="true"></span></button></th>
+              <th class="wc-col-courier">Courier</th>
+              <th class="wc-col-assigned">Assigned</th>
               <th class="wc-col-origin">Origin</th>
             </tr>
           </thead>
-          <tbody id="ordBody" aria-live="polite"><tr class="pn-skeleton-row"><td colspan="6"><div class="pn-skeleton-stack"><i></i><i></i><i></i><i></i></div></td></tr></tbody>
+          <tbody id="ordBody" aria-live="polite"><tr class="pn-skeleton-row"><td colspan="10"><div class="pn-skeleton-stack"><i></i><i></i><i></i><i></i></div></td></tr></tbody>
           <tfoot>
             <tr>
               <th class="wc-col-cb"></th>
               <th class="wc-col-order" aria-sort="none"><button type="button" class="wc-sort" data-sort="id">Order <span class="wc-sort-ind" aria-hidden="true"></span></button></th>
+              <th class="wc-col-customer">Customer</th>
+              <th class="wc-col-products">Products</th>
               <th class="wc-col-date" aria-sort="none"><button type="button" class="wc-sort" data-sort="date">Date <span class="wc-sort-ind" aria-hidden="true"></span></button></th>
               <th class="wc-col-status">Status</th>
               <th class="wc-col-total" aria-sort="none"><button type="button" class="wc-sort" data-sort="value">Total <span class="wc-sort-ind" aria-hidden="true"></span></button></th>
+              <th class="wc-col-courier">Courier</th>
+              <th class="wc-col-assigned">Assigned</th>
               <th class="wc-col-origin">Origin</th>
             </tr>
           </tfoot>
@@ -373,7 +381,7 @@
           var name = String(o.assignedTo || "").trim();
           if (name && names.indexOf(name) === -1) names.push(name);
         });
-        select.innerHTML = '<option value="all">All staff</option><option value="assigned">Assigned</option><option value="unassigned">Unassigned</option>' + names.sort().map(function (name) {
+        select.innerHTML = '<option value="all">All Employee</option><option value="assigned">Assigned</option><option value="unassigned">Unassigned</option>' + names.sort().map(function (name) {
           return '<option value="' + esc(name) + '">' + esc(name) + '</option>';
         }).join("");
         select.value = names.indexOf(current) !== -1 || ["all", "assigned", "unassigned"].indexOf(current) !== -1 ? current : "all";
@@ -444,7 +452,7 @@
         try { window.MaOrdersState = { all: all, filtered: list, total: Number(counts.all) || all.length }; } catch (stateErr) {}
         var body = document.getElementById("ordBody");
         if (!list.length) {
-          body.innerHTML = '<tr><td colspan="6" class="pn-empty">কোনো অর্ডার পাওয়া যায়নি</td></tr>';
+          body.innerHTML = '<tr><td colspan="10" class="pn-empty">কোনো অর্ডার পাওয়া যায়নি</td></tr>';
           return;
         }
         var eyeSvg = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 5C6.5 5 2.7 9.4 1.6 11.4a1.3 1.3 0 0 0 0 1.2C2.7 14.6 6.5 19 12 19s9.3-4.4 10.4-6.4a1.3 1.3 0 0 0 0-1.2C21.3 9.4 17.5 5 12 5Zm0 11.5a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9Zm0-2.3a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4Z"/></svg>';
@@ -456,6 +464,14 @@
           var when = displayDate(o);
           var amount = MaOrderInsights.amount(o.total);
           var status = String(o.status || "Pending");
+          var phone = String(o.phone || "").trim();
+          var products = orderProducts(o);
+          var productsText = products.length ? esc(products.slice(0, 2).join(", ")) + (products.length > 2 ? ' <span class="sub">+' + (products.length - 2) + '</span>' : "") : '<span class="sub">—</span>';
+          var cStatus = MaOrderStatus.describe(o);
+          var courierCell = cStatus.hasCourier
+            ? esc(o.courier || "") + (o.courier ? "<br>" : "") + '<span class="sub">' + esc(cStatus.courierLabel) + '</span>'
+            : '<span class="sub">Not sent</span>';
+          var assigned = String(o.assignedTo || "").trim();
           return (
             '<tr class="' + (canOpen ? 'click' : '') + '" data-id="' + (canOpen ? esc(o.orderId) : '') + '"' + (canOpen ? ' data-oid="' + esc(o.orderId) + '"' : '') + '>' +
             '<td class="wc-col-cb">' + (canOpen ? '<input type="checkbox" class="ot-sel" data-oid="' + esc(o.orderId) + '" aria-label="' + esc(o.orderId) + ' বাছুন">' : '') + '</td>' +
@@ -464,9 +480,13 @@
               (o.blocked ? ' <span class="pn-badge blocked">Blocked</span>' : '') +
               '<button type="button" class="wc-eye wo-preview-btn" data-preview-id="' + esc(o.orderId || "") + '" data-preview-row="' + esc(o.row || "") + '" title="Preview" aria-label="' + esc(label) + ' প্রিভিউ">' + eyeSvg + '</button>' +
             '</div><div class="ot-wa-slot" hidden></div></td>' +
+            '<td class="wc-col-customer">' + (phone ? '<a href="tel:' + esc(phone) + '">' + esc(phone) + '</a>' : '<span class="sub">—</span>') + '</td>' +
+            '<td class="wc-col-products">' + productsText + '</td>' +
             '<td class="wc-col-date"><time title="' + esc(when.title) + '">' + esc(when.text) + '</time></td>' +
             '<td class="wc-col-status"><mark class="wc-status wc-status-' + MaPanel.statusClass(status) + '">' + esc(status) + '</mark></td>' +
             '<td class="wc-col-total">' + (amount === null ? '<span class="sub">অবৈধ মান</span>' : esc(MaPanel.money(o.total))) + '</td>' +
+            '<td class="wc-col-courier">' + courierCell + '</td>' +
+            '<td class="wc-col-assigned">' + (assigned ? esc(assigned) : '<span class="sub">—</span>') + '</td>' +
             '<td class="wc-col-origin">' + esc(o.source || "—") + '</td>' +
             "</tr>"
           );
@@ -554,7 +574,7 @@
           btn.disabled = true;
         }
         document.getElementById("ordCount").textContent = (ordersShown ? (counts.all || 0) + " orders · " : "") + "আপডেট হচ্ছে…";
-        if (!append && !ordersShown) document.getElementById("ordBody").innerHTML = '<tr><td colspan="6" class="pn-empty">অর্ডার আনা হচ্ছে…</td></tr>';
+        if (!append && !ordersShown) document.getElementById("ordBody").innerHTML = '<tr><td colspan="10" class="pn-empty">অর্ডার আনা হচ্ছে…</td></tr>';
         return MaAdmin.call("AdminOrderList", params, options).then(function (res) {
           if (append && typeof res.nextCursor !== "number") throw new Error("ORDER_PAGINATION_API_OLD");
           apply(res, append);
@@ -564,7 +584,7 @@
             return;
           }
           if (ordersShown) { MaPanel.toast("আপডেট করা যায়নি: " + err.message, true); return; }
-          document.getElementById("ordBody").innerHTML = '<tr><td colspan="6" class="pn-empty">Error: ' + esc(err.message) + "</td></tr>";
+          document.getElementById("ordBody").innerHTML = '<tr><td colspan="10" class="pn-empty">Error: ' + esc(err.message) + "</td></tr>";
         }).then(function () {
           btn.disabled = false;
           loadingMore = false;
