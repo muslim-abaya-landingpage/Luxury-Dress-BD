@@ -7280,12 +7280,11 @@ function applyStockLifecycleForStatusChangeLocked_(sheet, row, newStatus) {
   }
 
   if (target === 'RESERVED') {
-    if (currentStage === 'SOLD') {
-      // A delivered/sold order must never be marked RESERVED without a real reserve.
-      // Keep StockStage unchanged and let the admin order update fail safely for review.
+    if (currentStage === 'SOLD' || currentStage === 'RELEASED') {
+      // A completed or released order must not silently reuse a previous reserve cycle.
       appendStockLedger_({
         productId: '', variant: '', changeType: 'REVIEW_NEEDED',
-        reason: 'SOLD থেকে আবার Confirmed — স্টক পুনরায় Reserve করা হয়নি; ম্যানুয়াল যাচাই দরকার',
+        reason: currentStage + ' থেকে আবার Confirmed — নতুন Reserve স্বয়ংক্রিয়ভাবে করা হয়নি; ম্যানুয়াল যাচাই দরকার',
         orderId: orderId, admin: 'system'
       });
       throw new Error('STOCK_RECONFIRM_REQUIRES_REVIEW');
