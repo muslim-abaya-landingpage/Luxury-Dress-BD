@@ -7567,6 +7567,19 @@ function getAdminAnalyticsV2_(e) {
   var lastOrderDay = '';
   var anySourceData = false;
 
+  function addProductSale_(productId, name, qty, category, size) {
+    var pid = String(productId || '').trim();
+    var productName = String(name || pid).trim();
+    var quantity = parseInt(qty, 10) || 0;
+    if (!productName || quantity &lt;= 0) return false;
+    var key = pid || ('legacy:' + productName.toLowerCase().replace(/\s+/g, ' ').trim());
+    if (!productSales[key]) productSales[key] = { name: productName, qty: 0 };
+    productSales[key].qty += quantity;
+    if (category) categorySales[category] = (categorySales[category] || 0) + quantity;
+    if (size) sizeSales[size] = (sizeSales[size] || 0) + quantity;
+    return true;
+  }
+
   if (sheet) {
     var data = readOnlineOrderRows_(sheet);
     var i;
@@ -7625,29 +7638,44 @@ function getAdminAnalyticsV2_(e) {
       // Shipped মানে কুরিয়ারে পাঠানো হয়ে গেছে (Steadfast auto), তাই এটাও একটা প্রতিশ্রুত বিক্রি —
       // আগে শুধু Confirmed/Delivered গোনা হতো, ফলে ট্রানজিটে থাকা অর্ডারগুলোর পণ্য বেস্ট-সেলার/
       // ক্যাটাগরি/সাইজ পরিসংখ্যানে বাদ পড়ে যেত।
-      if (status === 'confirmed' || status === 'shipped' || status === 'delivered') {
+      if (status === 'confirmed' || status === 'processing' || status === 'shipped' || status === 'delivered') {
         var cartJsonCell = String(r[32] || '').trim(); // কলাম ৩৩
+        var countedItems = 0;
         if (cartJsonCell) {
           try {
             var items = JSON.parse(cartJsonCell);
+            if (!Array.isArray(items) &amp;&amp; items &amp;&amp; Array.isArray(items.items)) items = items.items;
             if (Array.isArray(items)) {
               items.forEach(function (it) {
-                var pid = String((it &amp;&amp; it.id) || '').trim();
-                if (!pid) return;
-                var qty = parseInt(it.qty, 10) || 0;
-                if (qty &lt;= 0) return;
-                var name = String((it &amp;&amp; it.name) || pid);
-                if (!productSales[pid]) productSales[pid] = { name: name, qty: 0 };
-                productSales[pid].qty += qty;
-
-                var cat = String((it &amp;&amp; it.category) || '').trim() || categoryMap[pid] || 'অজানা ক্যাটাগরি';
-                categorySales[cat] = (categorySales[cat] || 0) + qty;
-
-                var size = String((it &amp;&amp; it.size) || '').trim();
-                if (size) sizeSales[size] = (sizeSales[size] || 0) + qty;
+                it = it || {};
+                var pid = String(it.id || it.productId || it.productID || '').trim();
+                var name = String(it.name || it.productName || pid).trim();
+                var qty = parseInt(it.qty != null ? it.qty : it.quantity, 10) || 0;
+                var cat = String(it.category || '').trim() || (pid &amp;&amp; categoryMap[pid]) || '';
+                var size = String(it.size || '').trim();
+                if (addProductSale_(pid, name, qty, cat, size)) countedItems++;
               });
             }
           } catch (cartErr) {}
+        }
+
+        // Older manually-entered orders predate CartJSON. Use only explicit per-item
+        // quantities from the saved Design text; for a single item, the order Qty is safe.
+        // Never invent a split for multiple products when individual quantities are absent.
+        if (!countedItems) {
+          var designText = String(r[6] || '').trim();
+          var designParts = designText ? designText.split(/\r?\n|,\s*/) : [];
+          designParts = designParts.map(function (part) { return String(part || '').replace(/^\d+\.\s*/, '').trim(); }).filter(Boolean);
+          var parsedParts = designParts.map(function (part) {
+            var match = part.match(/^(.*?)(?:\s*[\(\[]\s*(\d+)\s*(?:টি|pcs?)?\s*[\)\]]|\s*[×x]\s*(\d+)\s*(?:টি|pcs?)?)$/i);
+            return match ? { name: match[1].trim(), qty: Number(match[2] || match[3]) } : { name: part, qty: 0 };
+          });
+          if (parsedParts.length === 1) {
+            var singleQty = parsedParts[0].qty || (parseInt(r[3], 10) || 0);
+            addProductSale_('', parsedParts[0].name, singleQty, '', '');
+          } else if (parsedParts.length > 1 &amp;&amp; parsedParts.every(function (part) { return part.qty > 0; })) {
+            parsedParts.forEach(function (part) { addProductSale_('', part.name, part.qty, '', ''); });
+          }
         }
       }
     }
@@ -8188,6 +8216,7 @@ function admRowToOrder_(r, rowNumber) {
     size: String(r.orderSizeText_ || ''),
     items: items,
     total: total,
+    totalMissing: String(r[7] == null ? '' : r[7]).trim() === '',
     subtotal: Math.max(0, total - charge + discount + coupon),
     couponCode: String(r[ADM_COL_COUPON_CODE - 1] || ''),
     couponDiscount: coupon,
