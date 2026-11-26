@@ -5,18 +5,18 @@ const fs = require('node:fs');
 const code = fs.readFileSync('apps-script/Code.gs', 'utf8');
 const adminOrders = fs.readFileSync('apps-script/AdminOrders.gs', 'utf8');
 
-test('SOLD to Confirmed never writes a false RESERVED stock stage', () => {
+test('SOLD or RELEASED to Confirmed never writes a false RESERVED stock stage', () => {
   const start = code.indexOf("if (target === 'RESERVED') {", code.indexOf('function applyStockLifecycleForStatusChangeLocked_'));
   const end = code.indexOf("} else if (target === 'RELEASED') {", start);
   assert.ok(start >= 0 && end > start, 'Could not locate SOLD-to-RESERVED lifecycle branch');
   const branch = code.slice(start, end);
-  assert.match(branch, /currentStage === 'SOLD'/);
+  assert.match(branch, /currentStage === 'SOLD' \|\| currentStage === 'RELEASED'/);
   assert.match(branch, /throw new Error\('STOCK_RECONFIRM_REQUIRES_REVIEW'\)/);
-  const soldStart = branch.indexOf("if (currentStage === 'SOLD') {");
-  const soldEnd = branch.indexOf("\n    }", soldStart);
-  assert.ok(soldStart >= 0 && soldEnd > soldStart, 'Could not isolate SOLD branch');
-  assert.doesNotMatch(branch.slice(soldStart, soldEnd), /reserveStockForOrderItems_\(items, orderId/);
-  assert.match(branch, /reserveStockForOrderItems_\(items, orderId/);
+  const guardStart = branch.indexOf("if (currentStage === 'SOLD' || currentStage === 'RELEASED') {");
+  const reserveStart = branch.indexOf("reserveStockForOrderItems_(items, orderId", guardStart);
+  assert.ok(guardStart >= 0 && reserveStart > guardStart, 'Could not isolate manual-review guard');
+  assert.doesNotMatch(branch.slice(guardStart, reserveStart), /reserveStockForOrderItems_\(items, orderId/);
+  assert.match(branch.slice(reserveStart), /reserveStockForOrderItems_\(items, orderId/);
 });
 
 test('admin order update surfaces a manual-review error and does not save the new status', () => {
