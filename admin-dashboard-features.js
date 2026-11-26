@@ -158,7 +158,7 @@
     if (!force && cachedStock && cachedInbox) {
       state.stockSignature = currentStock.map(stockKey).sort(); state.stockBaseline = true;
       state.inboxUnread = {}; currentInbox.forEach(function (contact) { state.inboxUnread[inboxKey(contact)] = Number(contact.unread) || 0; }); state.inboxBaseline = true;
-      setStatus("admAlertState", "সাম্প্রতিক সংরক্ষিত ডেটা দেখানো হচ্ছে · লাইভ যাচাই করতে Refresh চাপুন", false);
+      setStatus("admAlertState", "সাম্প্রতিক সংরক্ষিত ডেটা দেখানো হচ্ছে · লাইভ যাচাই করতে আপডেট চাপুন", false);
       return Promise.resolve();
     }
     state.alertBusy = true;
@@ -195,7 +195,7 @@
       }
       if (inboxResult.ok) {
         var newConversations = Object.keys(inboxMap).filter(function (key) { return !state.inboxUnread[key] || inboxMap[key] > state.inboxUnread[key]; });
-        if (state.inboxBaseline && newConversations.length) desktopNotify("Messenger-এ নতুন বার্তা", newConversations.length + "টি conversation-এ অপঠিত বার্তা আছে", "ma-inbox-unread");
+        if (state.inboxBaseline && newConversations.length) desktopNotify("Messenger-এ নতুন বার্তা", newConversations.length + "টি বার্তালাপে অপঠিত বার্তা আছে", "ma-inbox-unread");
         state.inboxUnread = inboxMap;
         state.inboxBaseline = true;
       }
@@ -251,7 +251,7 @@
     return MaAdmin.call("AdminOrderList", { Limit: TASK_LIMIT }, { timeoutMs: 15000, maxAgeMs: force ? 0 : DASHBOARD_CACHE_MS }).then(function (result) {
       renderTasks(result);
       state.lastTaskRefresh = Date.now();
-      setStatus("admTaskState", "সর্বশেষ যাচাই " + dateTimeDhaka() + " · দেরি ধরা হয়: Pending ১ ঘণ্টা, Confirmed ২৪ ঘণ্টা, Shipped ৪৮ ঘণ্টা পার হলে", false);
+      setStatus("admTaskState", "সর্বশেষ যাচাই " + dateTimeDhaka() + " · দেরি ধরা হয়: অপেক্ষমাণ ১ ঘণ্টা, নিশ্চিত ২৪ ঘণ্টা, কুরিয়ারে পাঠানো ৪৮ ঘণ্টা পার হলে", false);
     }).catch(function (error) {
       var message = errorText(error);
       setStatus("admTaskState", cached ? message + " · আগের ডেটা দেখানো হচ্ছে" : message, true);
@@ -299,7 +299,7 @@
     byId("admReportCancelRate").textContent = percent(summary.cancellationRate);
     byId("admReportDeliveryRate").textContent = percent(summary.deliverySuccessRate);
     byId("admUndatedNote").hidden = !(Number(data.undatedOrderCount) > 0);
-    if (Number(data.undatedOrderCount) > 0) byId("admUndatedNote").textContent = Number(data.undatedOrderCount) + "টি তারিখহীন অর্ডার মোট lifetime সংখ্যা/মূল্যে অন্তর্ভুক্ত; মাসিক চার্টে নেই।";
+    if (Number(data.undatedOrderCount) > 0) byId("admUndatedNote").textContent = Number(data.undatedOrderCount) + "টি তারিখহীন অর্ডার সব সময়ের মোট সংখ্যা/মূল্যে অন্তর্ভুক্ত; মাসিক চার্টে নেই।";
     renderMonths(data.salesByMonth);
     renderRanked("admReportProducts", data.topProducts, "name", "qty");
     renderRanked("admReportSources", data.sourceBreakdown, "source", "orders");
@@ -392,7 +392,7 @@
     var to = byId("admReportTo").value;
     if (range === "custom") {
       if (!from || !to || from > to) {
-        setStatus("admReportState", "Custom রিপোর্টের জন্য সঠিক From ও To তারিখ দিন।", true);
+        setStatus("admReportState", "নিজস্ব সময়সীমার জন্য সঠিক শুরুর ও শেষের তারিখ দিন।", true);
         return Promise.resolve();
       }
     }
@@ -433,12 +433,12 @@
       ["সময়সীমা", rangeLabel(data)].map(csvCell).join(","),
       ["মোট অর্ডার", summary.totalOrders || 0].map(csvCell).join(","),
       ["মোট অর্ডার মূল্য (৳)", summary.totalOrderValue || 0].map(csvCell).join(","),
-      ["Delivered অর্ডার মূল্য (৳)", summary.deliveredSalesValue || 0].map(csvCell).join(","),
-      ["Delivered অর্ডার", summary.deliveredCount || 0].map(csvCell).join(","),
+      ["ডেলিভারি সম্পন্ন অর্ডারের মূল্য (৳)", summary.deliveredSalesValue || 0].map(csvCell).join(","),
+      ["ডেলিভারি সম্পন্ন অর্ডার", summary.deliveredCount || 0].map(csvCell).join(","),
       ["বাতিল/রিটার্ন হার", percent(summary.cancellationRate)].map(csvCell).join(","),
       ["ডেলিভারি সফলতার হার", percent(summary.deliverySuccessRate)].map(csvCell).join(","),
       "",
-      ["মাস", "অর্ডার", "অর্ডার মূল্য (৳)", "Delivered অর্ডার", "Delivered মূল্য (৳)"].map(csvCell).join(",")
+      ["মাস", "অর্ডার", "অর্ডার মূল্য (৳)", "Delivered অর্ডার", "ডেলিভারি সম্পন্ন মূল্য (৳)"].map(csvCell).join(",")
     ];
     (data.salesByMonth || []).forEach(function (row) {
       lines.push([row.month, row.orders, row.revenue, row.deliveredOrders, row.deliveredSales].map(csvCell).join(","));
