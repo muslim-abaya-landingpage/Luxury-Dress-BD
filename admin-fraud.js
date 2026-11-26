@@ -104,7 +104,7 @@
     var rate = history && history.successRate;
     var blocked = !!(order && order.blocked);
     var recent = history && history.recent || [];
-    var kpis = [["মোট অর্ডার",stats.total||0],["ডেলিভার্ড",stats.delivered||0],["ক্যানসেল",stats.cancelled||0],["ফেক",stats.fake||0],["রিটার্ন",stats.returned||0],["সফলতার হার",rate==null?"N/A":rate+"%"]];
+    var kpis = [["মোট অর্ডার",stats.total||0],["ডেলিভার্ড",stats.delivered||0],["ক্যানসেল",stats.cancelled||0],["Fraud",stats.fake||0],["রিটার্ন",stats.returned||0],["সফলতার হার",rate==null?"N/A":rate+"%"]];
     var html = '<p><strong>ফোন:</strong> '+esc(order&&order.phone||"পাওয়া যায়নি")+' &nbsp; <strong>নিজস্ব হিস্ট্রি রিস্ক:</strong> '+esc(history&&history.risk||"N/A")+' &nbsp; <strong>Phone status:</strong> '+(blocked?"Blocked":"Active")+'</p>';
     html += '<div class="fr-customer-kpis">'+kpis.map(function(x){return '<div class="fr-customer-kpi"><strong>'+esc(x[1])+'</strong><small>'+esc(x[0])+'</small></div>';}).join("")+'</div>';
     if(blocked) html += '<p><strong>Block reason:</strong> '+esc(order.blockReason||"কারণ দেওয়া হয়নি")+'</p>';
