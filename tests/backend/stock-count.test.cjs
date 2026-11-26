@@ -50,7 +50,8 @@ test('products without a count keep using the switch as before', () => {
 test('Tracked=false (no quantity) turns counting off; a quantity turns it on', () => {
   const body = fnSource('saveAdminStockVariant_');
   assert.match(body, /var setUntracked = !hasQty && trackedRaw === 'false';/);
-  assert.match(body, /if \(setTracked\) fields\.tracked = true;\s*else if \(setUntracked\) fields\.tracked = false;/);
+  assert.match(body, /setTracked: setTracked, setUntracked: setUntracked/);
+  assert.match(fnSource('mutateStockVariant_'), /tracked: opts\.setUntracked \? false : !!\(before\.tracked \|\| opts\.setTracked\)/);
 });
 
 test('every website order reserves (takes off) stock inside the order lock', () => {
