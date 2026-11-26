@@ -96,3 +96,77 @@
 .cm-toggle-row span{display:grid;gap:3px}
 .cm-toggle-row small{font-weight:400}
 .cm-note-list{margin:0;padding:0 0 0 18px;display:grid;gap:8px;font-size:13px;color:var(--adm-muted,#64748b)}
+
+
+/* Courier Management page-only responsive polish.
+   Scoped to .cm-page so the shared stylesheet's other consumers are untouched. */
+.cm-page .cm-wrap{width:100%;max-width:1440px;box-sizing:border-box}
+.cm-page .cm-wrap *{box-sizing:border-box}
+.cm-page .cm-head{align-items:center}
+.cm-page .cm-head>div:first-child{flex:1 1 360px;min-width:0}
+.cm-page .cm-head-actions{flex:0 1 auto;align-items:center}
+.cm-page .cm-head-actions .adm-btn{min-height:40px;display:inline-flex;align-items:center;justify-content:center}
+.cm-page .cm-panel-head>div{min-width:0;flex:1 1 280px}
+.cm-page .cm-panel-head>button{flex:0 0 auto}
+.cm-page .cm-tools>*{min-width:0}
+.cm-page .cm-table-wrap{max-width:100%;border:1px solid var(--adm-border,#e2e8f0);border-radius:10px;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.cm-page .cm-table{margin:0}
+.cm-page .cm-lower{grid-template-columns:repeat(2,minmax(0,1fr))}
+.cm-page .cm-settlement-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+.cm-page .cm-settlement-stats article{min-width:0}
+.cm-page .cm-zone-row{grid-template-columns:minmax(0,1.4fr) minmax(90px,.7fr) minmax(0,1.4fr) auto}
+.cm-page .cm-zone-pick{max-width:100%}
+.cm-page .cm-rate-actions .adm-btn{min-height:40px}
+.cm-page .cm-dialog{max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px);overflow:auto}
+.cm-page .cm-dialog-actions{flex-wrap:wrap}
+.cm-page input,.cm-page select,.cm-page textarea{max-width:100%}
+.cm-page .cm-tabs{max-width:100%;scrollbar-width:thin}
+.cm-page .cm-tabs button{flex:0 0 auto;min-height:38px}
+.cm-page .cm-footer-note{overflow-wrap:anywhere}
+
+@media(max-width:1100px){
+  .cm-page .cm-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .cm-page .cm-lower{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:760px){
+  .cm-page .cm-wrap{padding:18px 14px 36px}
+  .cm-page .cm-head{gap:14px}
+  .cm-page .cm-head>div:first-child{flex-basis:100%}
+  .cm-page .cm-head-actions{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .cm-page .cm-head-actions>*{min-width:0;padding-inline:8px}
+  .cm-page .cm-panel{padding:14px;margin-bottom:12px}
+  .cm-page .cm-panel-head{gap:10px}
+  .cm-page .cm-panel-head h2{font-size:17px;line-height:1.45;overflow-wrap:anywhere}
+  .cm-page .cm-panel-head p{font-size:13px}
+  .cm-page .cm-tools{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+  .cm-page .cm-tools input,.cm-page .cm-tools select{width:100%;min-width:0}
+  .cm-page .cm-table-foot{flex-wrap:wrap}
+  .cm-page .cm-zone-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;padding:10px;border:1px solid var(--adm-border,#e2e8f0);border-radius:10px}
+  .cm-page .cm-zone-row>*{min-width:0}
+  .cm-page .cm-zone-pick{grid-column:1/-1;width:100%}
+  .cm-page .cm-zone-remove{justify-self:end}
+  .cm-page .cm-settlement-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cm-page .cm-settlement-stats article:last-child{grid-column:1/-1}
+  .cm-page .cm-settlement-stats strong{font-size:20px;overflow-wrap:anywhere}
+  .cm-page .cm-rate-actions{align-items:stretch}
+  .cm-page .cm-rate-actions .adm-btn{min-height:42px}
+  .cm-page .cm-rate-actions span{flex:1 1 100%}
+  .cm-page .cm-dialog-actions .adm-btn{flex:1 1 auto}
+}
+@media(max-width:480px){
+  .cm-page .cm-wrap{padding:14px 10px 30px}
+  .cm-page .cm-head h1{font-size:25px;line-height:1.35}
+  .cm-page .cm-head p{font-size:13px}
+  .cm-page .cm-head-actions{grid-template-columns:1fr 1fr}
+  .cm-page .cm-head-actions #cmRefresh{grid-column:1/-1}
+  .cm-page .cm-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .cm-page .cm-stat{padding:11px}
+  .cm-page .cm-stat span,.cm-page .cm-stat small{font-size:11px;line-height:1.5}
+  .cm-page .cm-stat strong{font-size:22px}
+  .cm-page .cm-panel{padding:12px}
+  .cm-page .cm-scan-form{grid-template-columns:minmax(0,1fr)}
+  .cm-page .cm-scan-form label:last-child{grid-column:auto}
+  .cm-page .cm-rates{grid-template-columns:minmax(0,1fr)}
+  .cm-page .cm-rate-actions{grid-column:auto}
+  .cm-page .cm-zone-dialog-list{grid-template-columns:minmax(0,1fr)}
+}
