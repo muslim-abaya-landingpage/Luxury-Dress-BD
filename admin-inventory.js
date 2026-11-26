@@ -98,6 +98,6 @@
   });
   byId("invRefreshPurchases").addEventListener("click",refreshAll);
   var today=new Date();byId("invPurchaseDate").value=today.getFullYear()+"-"+String(today.getMonth()+1).padStart(2,"0")+"-"+String(today.getDate()).padStart(2,"0");
-  addItemRow();
+  if(!byId("invPurchaseItems").querySelector(".inv-item-row")) addItemRow();
   MaAdminShell.start(function(){refreshAll();});
 })();
