@@ -383,3 +383,14 @@ test('canonical Apps Script matrix grants only declared owner permissions', () =
   assert.equal(context.requireOwnerAdmin_({ role: 'admin' }), null);
   assert.equal(context.requireOwnerAdmin_({ role: 'staff', isOwner: true }).error, 'OWNER_ONLY');
 });
+
+test('phone block handler validates Bangladesh mobile numbers and records append-only audit actions', () => {
+  const adminOrders = fs.readFileSync(path.join(root, 'apps-script/AdminOrders.gs'), 'utf8');
+  assert.ok(adminOrders.includes("if (!/^01\\d{9}$/.test(phone))"), 'phone regex must match exactly 11 digit 01xxxxxxxxx numbers');
+  assert.ok(adminOrders.includes("appendRow_(admBlockedAuditSheet_(), [phone, unblock ? 'UNBLOCK' : 'BLOCK'"), 'block/unblock changes must be audited');
+  assert.ok(adminOrders.includes("ensureSheet_('Blocked Audit', ['Phone', 'Action', 'Reason', 'ChangedAt', 'ChangedBy'])"));
+  const valid = /^01\d{9}$/;
+  assert.equal(valid.test('01712345678'), true);
+  assert.equal(valid.test('0171234567'), false);
+  assert.equal(valid.test('017123456789'), false);
+});
