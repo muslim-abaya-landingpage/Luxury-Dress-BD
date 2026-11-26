@@ -414,7 +414,7 @@
       }
 
       function renderTabs() {
-        var tabs = [["all", "All"], ["today", "Today"]].concat(statuses.map(function (s) { return [s, s]; }))
+        var tabs = [["all", "All"], ["today", "Today"]].concat(statuses.map(function (s) { return [s, s === "Fake" ? "Fraud" : s]; }))
           .filter(function (t) { return t[0] === "all" || t[0] === filter || (counts[t[0]] || 0) > 0; });
         document.getElementById("ordTabs").innerHTML = tabs.map(function (t) {
           return '<button type="button" class="pn-tab' + (filter === t[0] ? " active" : "") + '" data-f="' + esc(t[0]) + '"' + (filter === t[0] ? ' aria-current="true"' : '') + '>' + esc(t[1]) + " <em>(" + (counts[t[0]] || 0) + ")</em></button>";
@@ -474,6 +474,7 @@
           var when = displayDate(o);
           var amount = MaOrderInsights.amount(o.total);
           var status = String(o.status || "Pending");
+          var statusLabel = status === "Fake" ? "Fraud" : status;
           var phone = String(o.phone || "").trim();
           var products = orderProducts(o);
           var productsText = products.length ? esc(products.slice(0, 2).join(", ")) + (products.length > 2 ? ' <span class="sub">+' + (products.length - 2) + '</span>' : "") : '<span class="sub">—</span>';
@@ -493,7 +494,7 @@
             '<td class="wc-col-customer">' + (phone ? '<a href="tel:' + esc(phone) + '">' + esc(phone) + '</a>' : '<span class="sub">—</span>') + '</td>' +
             '<td class="wc-col-products">' + productsText + '</td>' +
             '<td class="wc-col-date"><time title="' + esc(when.title) + '">' + esc(when.text) + '</time></td>' +
-            '<td class="wc-col-status"><mark class="wc-status wc-status-' + MaPanel.statusClass(status) + '">' + esc(status) + '</mark></td>' +
+            '<td class="wc-col-status"><mark class="wc-status wc-status-' + MaPanel.statusClass(status) + '">' + esc(statusLabel) + '</mark></td>' +
             '<td class="wc-col-total">' + (amount === null ? '<span class="sub">অবৈধ মান</span>' : esc(MaPanel.money(o.total))) + '</td>' +
             '<td class="wc-col-courier">' + courierCell + '</td>' +
             '<td class="wc-col-assigned">' + (assigned ? esc(assigned) : '<span class="sub">—</span>') + '</td>' +

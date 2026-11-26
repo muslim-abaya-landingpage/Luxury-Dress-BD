@@ -274,7 +274,7 @@
         var list = options.slice();
         if (value && list.indexOf(value) === -1) list.push(value);
         el.innerHTML = (extra || "") + list.map(function (o) {
-          return '<option value="' + esc(o) + '"' + (o === value ? " selected" : "") + ">" + esc(o) + "</option>";
+          return '<option value="' + esc(o) + '"' + (o === value ? " selected" : "") + ">" + esc(o === "Fake" ? "Fraud" : o) + "</option>";
         }).join("");
       }
 
