@@ -268,6 +268,15 @@ function doPost(e) {
     if (type === 'AdminCourierZonesSave') {
       return jsonOut_(saveAdminCourierZones_(e));
     }
+    if (type === 'AdminExpenseList') {
+      return jsonOut_(listAdminExpenses_(e));
+    }
+    if (type === 'AdminExpenseSave') {
+      return jsonOut_(saveAdminExpense_(e));
+    }
+    if (type === 'AdminAccountingSummary') {
+      return jsonOut_(getAdminAccountingSummary_(e));
+    }
     if (type === 'AdminAnalyticsV2') {
       return jsonOut_(getAdminAnalyticsV2_(e));
     }

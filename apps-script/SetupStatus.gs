@@ -471,3 +471,91 @@ function courierZoneFeeForDistrict_(district) {
   }
   return null;
 }
+
+// ================= Accounting: Expenses ledger =================
+// Append-only, like Courier Settlements — a record once saved is never edited or
+// deleted here (keeps the books honest). Income for a range is simply the
+// delivered-sales figure Analytics v2 already computes (never re-derived here,
+// so the two numbers can never drift apart).
+var EXPENSE_CATEGORIES_ = ['Ad/Marketing', 'Salary', 'Rent', 'Packaging', 'Courier/Shipping', 'Utility', 'Other'];
+
+function admExpenseSheet_() {
+  return ensureSheet_('Expenses', ['Expense ID', 'Date', 'Category', 'Amount', 'Note', 'Recorded By', 'Recorded At']);
+}
+
+function admExpenseRows_() {
+  var sheet = admExpenseSheet_();
+  var last = sheet.getLastRow();
+  return last >= 2 ? sheet.getRange(2, 1, last - 1, 7).getValues() : [];
+}
+
+function listAdminExpenses_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var range = String(param_(e, 'Range') || '30d').trim().toLowerCase();
+  var fromStr = String(param_(e, 'From') || '').trim();
+  var toStr = String(param_(e, 'To') || '').trim();
+  var bounds = bdRangeBounds_(range, fromStr, toStr);
+  if (bounds.ok === false) return bounds;
+  var rows = admExpenseRows_();
+  var list = [];
+  var total = 0;
+  rows.forEach(function (r) {
+    var dateKey = String(r[1] || '').trim();
+    if (range !== 'all') {
+      if (!dateKey || dateKey < bounds.fromKey || dateKey > bounds.toKey) return;
+    }
+    var amount = admNum_(r[3]);
+    total += amount;
+    list.push({
+      id: String(r[0] || ''), date: dateKey, category: String(r[2] || ''),
+      amount: amount, note: String(r[4] || ''), recordedBy: String(r[5] || ''),
+      recordedAt: formatCell_(r[6])
+    });
+  });
+  list.reverse();
+  return { ok: true, expenses: list, total: Math.round(total * 100) / 100, categories: EXPENSE_CATEGORIES_, range: range, from: bounds.fromKey, to: bounds.toKey };
+}
+
+function saveAdminExpense_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var date = String(param_(e, 'Date') || '').trim();
+  if (!date) date = Utilities.formatDate(new Date(), 'GMT+6', 'yyyy-MM-dd');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { ok: false, error: 'INVALID_DATE', message: 'তারিখ YYYY-MM-DD ফরম্যাটে দিন।' };
+  var category = admCellText_(param_(e, 'Category') || 'Other', 40).trim() || 'Other';
+  var amount;
+  try { amount = admMoneyParam_(e, 'Amount', NaN); } catch (amtErr) { return { ok: false, error: 'INVALID_AMOUNT', message: 'সঠিক পরিমাণ দিন।' }; }
+  if (!(amount > 0)) return { ok: false, error: 'INVALID_AMOUNT', message: 'খরচের পরিমাণ শূন্যের বেশি হতে হবে।' };
+  var note = admCellText_(param_(e, 'Note'), 240);
+  var lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    var sheet = admExpenseSheet_();
+    var id = 'EXP-' + Utilities.getUuid().replace(/-/g, '').slice(0, 14).toUpperCase();
+    var actor = admCellText_(v.email || v.name || 'admin', 100);
+    appendRow_(sheet, [id, date, category, amount, note, actor, new Date()]);
+    return { ok: true, id: id };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// Net balance for a range: Analytics v2's delivered-sales figure (realized
+// revenue only — pending/unshipped orders are not counted as income) minus
+// expenses recorded in the same range.
+function getAdminAccountingSummary_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var analytics = getAdminAnalyticsV2_(e);
+  if (!analytics.ok) return analytics;
+  var expenseRes = listAdminExpenses_(e);
+  if (!expenseRes.ok) return expenseRes;
+  var income = Math.round((analytics.summary.deliveredSalesValue || 0) * 100) / 100;
+  var expense = expenseRes.total;
+  return {
+    ok: true, range: expenseRes.range, from: expenseRes.from, to: expenseRes.to,
+    income: income, expense: expense, net: Math.round((income - expense) * 100) / 100,
+    expenses: expenseRes.expenses, categories: expenseRes.categories
+  };
+}

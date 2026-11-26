@@ -31,6 +31,10 @@
       {
         "href": "admin-reports.html",
         "label": "Reports"
+      },
+      {
+        "href": "admin-accounting.html",
+        "label": "Accounting"
       }
     ]
   },
