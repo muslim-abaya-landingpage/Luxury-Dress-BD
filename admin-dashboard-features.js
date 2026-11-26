@@ -438,7 +438,7 @@
       ["বাতিল/রিটার্ন হার", percent(summary.cancellationRate)].map(csvCell).join(","),
       ["ডেলিভারি সফলতার হার", percent(summary.deliverySuccessRate)].map(csvCell).join(","),
       "",
-      ["মাস", "অর্ডার", "অর্ডার মূল্য (৳)", "Delivered অর্ডার", "ডেলিভারি সম্পন্ন মূল্য (৳)"].map(csvCell).join(",")
+      ["মাস", "অর্ডার", "অর্ডার মূল্য (৳)", "ডেলিভারি সম্পন্ন অর্ডার", "ডেলিভারি সম্পন্ন মূল্য (৳)"].map(csvCell).join(",")
     ];
     (data.salesByMonth || []).forEach(function (row) {
       lines.push([row.month, row.orders, row.revenue, row.deliveredOrders, row.deliveredSales].map(csvCell).join(","));
