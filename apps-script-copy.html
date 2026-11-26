@@ -6444,15 +6444,17 @@ function markGrowthItemDone_(e) {
 var STOCK_LOW_DEFAULT_THRESHOLD_ = 5;
 
 function ensureStockVariantsSheet_() {
-  var sheet = ensureSheet_('StockVariants', ['Product ID', 'Product Name', 'Category', 'Variant', 'Tracked', 'Available', 'Reserved', 'LowStockThreshold', 'UpdatedAt', 'UpdatedBy', 'OperationId']);
+  return ensureSheet_('StockVariants', ['Product ID', 'Product Name', 'Category', 'Variant', 'Tracked', 'Available', 'Reserved', 'LowStockThreshold', 'UpdatedAt', 'UpdatedBy', 'OperationId']);
+}
+function ensureStockVariantsOperationIdColumn_(sheet) {
   if (!sheet.getRange(1, 11).getValue()) sheet.getRange(1, 11).setValue('OperationId');
-  return sheet;
 }
 
 function ensureStockLedgerSheet_() {
-  var sheet = ensureSheet_('StockLedger', ['Timestamp', 'Product ID', 'Variant', 'ChangeType', 'QtyBefore', 'QtyAfter', 'ReservedBefore', 'ReservedAfter', 'Reason', 'OrderId', 'Admin', 'OperationId']);
+  return ensureSheet_('StockLedger', ['Timestamp', 'Product ID', 'Variant', 'ChangeType', 'QtyBefore', 'QtyAfter', 'ReservedBefore', 'ReservedAfter', 'Reason', 'OrderId', 'Admin', 'OperationId']);
+}
+function ensureStockLedgerOperationIdColumn_(sheet) {
   if (!sheet.getRange(1, 12).getValue()) sheet.getRange(1, 12).setValue('OperationId');
-  return sheet;
 }
 
 function ensureOnlineOrderStockStageHeader_(sheet) {
@@ -6573,6 +6575,7 @@ function stockOperationSetState_(sheet, row, state, error) {
 function appendStockLedgerOnce_(entry, operationId) {
   if (!operationId) throw new Error('STOCK_OPERATION_ID_REQUIRED');
   var sheet = ensureStockLedgerSheet_();
+  ensureStockLedgerOperationIdColumn_(sheet);
   var rows = sheet.getDataRange().getValues();
   for (var i = 1; i &lt; rows.length; i++) {
     if (String(rows[i][11] || '') === operationId) return { duplicate: true, row: i + 1 };
@@ -6615,6 +6618,7 @@ function reconcilePendingStockOperationsForRow_(variants, targetRow) {
 
 function mutateStockVariant_(opts) {
   var sheet = ensureStockVariantsSheet_();
+  ensureStockVariantsOperationIdColumn_(sheet);
   var row = getOrCreateStockVariantRow_(sheet, opts.productId, opts.productName, opts.variant, opts.category);
   reconcilePendingStockOperationsForRow_(sheet, row);
   var before = readStockVariantRow_(sheet, row);
@@ -6679,6 +6683,7 @@ function recoverAdminStockOperations_(e) {
     var limit = Math.min(100, Math.max(1, parseInt(param_(e, 'Limit'), 10) || 50));
     var recovered = 0, conflicts = 0, checked = 0, errors = [];
     var variants = ensureStockVariantsSheet_();
+    ensureStockVariantsOperationIdColumn_(variants);
     for (var i = 1; i &lt; rows.length &amp;&amp; checked &lt; limit; i++) {
       if (String(rows[i][1] || '') !== 'PREPARED') continue;
       checked++;
@@ -8644,7 +8649,7 @@ function adminOrderUpdate_(e) {
           return { ok: false, error: 'VARIANT_NOT_TRACKED', message: 'এই অর্ডারের নির্বাচিত সাইজের stock setup করা নেই। আগে Stock Analytics-এ সাইজটি track করুন।' };
         }
         if (stockMessage === 'STOCK_RECONFIRM_REQUIRES_REVIEW') {
-          return { ok: false, error: 'STOCK_RECONFIRM_REQUIRES_REVIEW', message: 'এই অর্ডারটি ইতিমধ্যে Delivered/SOLD। পুনরায় Confirmed করতে হলে আগে Stock Ledger যাচাই করে ম্যানুয়াল সিদ্ধান্ত নিন; স্ট্যাটাস পরিবর্তন করা হয়নি।' };
+          return { ok: false, error: 'STOCK_RECONFIRM_REQUIRES_REVIEW', message: 'এই অর্ডারের stock stage SOLD/RELEASED। পুনরায় Confirmed করতে হলে আগে Stock Ledger যাচাই করে ম্যানুয়াল সিদ্ধান্ত নিন; স্ট্যাটাস পরিবর্তন করা হয়নি।' };
         }
         if (stockMessage.indexOf('STOCK_LEDGER_MISMATCH:') === 0) {
           return { ok: false, error: 'STOCK_LEDGER_MISMATCH', message: 'Reserved stock-এর হিসাব অর্ডারের সাথে মিলছে না। স্ট্যাটাস বদলানো হয়নি; Stock Ledger মিলিয়ে নিন।' };
