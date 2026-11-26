@@ -6588,9 +6588,34 @@ function stockOperationId_(opts) {
   if (opts.orderId) return ['ORDER', opts.orderId, opts.changeType, opts.productId, stockVariantCompareKey_(opts.variant)].join(':');
   return 'MANUAL:' + Utilities.getUuid();
 }
+function reconcilePendingStockOperationsForRow_(variants, targetRow) {
+  var journal = ensureStockOperationJournalSheet_();
+  var rows = journal.getDataRange().getValues();
+  for (var i = 1; i < rows.length; i++) {
+    if (String(rows[i][1] || '') !== 'PREPARED' || String(rows[i][2] || '') !== 'StockVariants' || Number(rows[i][3]) !== targetRow) continue;
+    var id = String(rows[i][0] || ''), payload = JSON.parse(String(rows[i][4] || '{}'));
+    var current = readStockVariantRow_(variants, targetRow);
+    if (current.operationId !== id) {
+      if (current.available !== Number(payload.before.available) || current.reserved !== Number(payload.before.reserved)) {
+        stockOperationSetState_(journal, i + 1, 'CONFLICT', 'Pending operation could not be reconciled before a later mutation');
+        throw new Error('STOCK_OPERATION_CONFLICT:' + id);
+      }
+      writeStockVariantRow_(variants, targetRow, {
+        available: payload.after.available, reserved: payload.after.reserved, operationId: id,
+        tracked: payload.fields.tracked, productName: payload.fields.productName,
+        category: payload.fields.category, threshold: payload.fields.threshold,
+        updatedBy: payload.fields.updatedBy
+      });
+    }
+    appendStockLedgerOnce_(payload.entry, id);
+    stockOperationSetState_(journal, i + 1, 'COMMITTED', '');
+  }
+}
+
 function mutateStockVariant_(opts) {
   var sheet = ensureStockVariantsSheet_();
   var row = getOrCreateStockVariantRow_(sheet, opts.productId, opts.productName, opts.variant, opts.category);
+  reconcilePendingStockOperationsForRow_(sheet, row);
   var before = readStockVariantRow_(sheet, row);
   var operationId = stockOperationId_(opts);
   var nextAvailable = Math.max(0, before.available + (opts.deltaAvailable || 0));
