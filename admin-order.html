@@ -649,11 +649,11 @@
           var s = r.stats;
           var html = '<div class="pn-risk ' + esc(r.risk) + '">' + esc(riskLabel(r.risk)) + "</div>" +
             (r.blocked ? '<div class="pn-risk high">এই নম্বর ব্লক করা আছে' + (r.blockReason ? " — " + esc(r.blockReason) : "") + "</div>" : "") +
-            '<div class="ma-fraud-rate"><div class="ma-fraud-ring" style="--rate:' + (r.successRate == null ? 0 : Math.max(0, Math.min(100, Number(r.successRate)))) + '"><strong>' + (r.successRate == null ? "—" : esc(r.successRate) + "%") + '</strong></div><div><b>নিজস্ব অর্ডারের ডেলিভারি সাফল্য</b><small>Delivered ÷ (Delivered + Cancelled + Fake + Returned)</small></div></div>' +
+            '<div class="ma-fraud-rate"><div class="ma-fraud-ring" style="--rate:' + (r.successRate == null ? 0 : Math.max(0, Math.min(100, Number(r.successRate)))) + '"><strong>' + (r.successRate == null ? "—" : esc(r.successRate) + "%") + '</strong></div><div><b>নিজস্ব অর্ডারের ডেলিভারি সাফল্য</b><small>Delivered ÷ (Delivered + Cancelled + Fraud + Returned)</small></div></div>' +
             '<div class="pn-stat-grid">' +
             '<div class="pn-stat"><b>' + s.total + "</b><span>মোট অর্ডার</span></div>" +
             '<div class="pn-stat"><b>' + s.delivered + "</b><span>Delivered</span></div>" +
-            '<div class="pn-stat"><b>' + (s.cancelled + s.fake + s.returned) + "</b><span>Cancel / Fake / Return</span></div>" +
+            '<div class="pn-stat"><b>' + (s.cancelled + s.fake + s.returned) + "</b><span>Cancel / Fraud / Return</span></div>" +
             "</div>" +
             '<div class="ma-fraud-source">হিসাবের উৎস: Muslim Abaya-এর নিজস্ব অর্ডার ইতিহাস। এটি কুরিয়ার কোম্পানির সামগ্রিক Success Rate নয়।</div>' +
             histTable(r.recent);
@@ -695,7 +695,7 @@
         if (history && (history.risk === "high" || history.risk === "medium")) {
           var s = history.stats || {};
           out.push((history.risk === "high" ? "ঝুঁকি বেশি" : "সতর্কতা") + ": আগের অর্ডারে ডেলিভারি " + (s.delivered || 0) +
-            ", বাতিল/Fake/রিটার্ন " + ((s.cancelled || 0) + (s.fake || 0) + (s.returned || 0)) +
+            ", বাতিল/Fraud/রিটার্ন " + ((s.cancelled || 0) + (s.fake || 0) + (s.returned || 0)) +
             (history.successRate == null ? "" : " (সফলতা " + history.successRate + "%)"));
         }
         if (emailInfo && emailInfo.blocked) out.push("অর্ডারের ইমেইল ব্লক করা আছে (" + emailInfo.email + ")");

@@ -3,7 +3,7 @@
  *  - WhatsApp-এ কনফার্ম: wa.me লিংক, অর্ডারের বিবরণ আগে থেকে লেখা
  *  - অগ্রিম ডেলিভারি চার্জ চান: নতুন / ঝুঁকিপূর্ণ কাস্টমারের জন্য bKash নম্বরসহ মেসেজ
  *  - রিভিউ চান: Delivered অর্ডারে Google রিভিউ লিংকসহ ধন্যবাদ মেসেজ
- *  - বাতিল/Fake/রিটার্নের কারণ: Admin Note-এ "[কারণ: …]" ট্যাগ হিসেবে
+ *  - বাতিল/Fraud/রিটার্নের কারণ: Admin Note-এ "[কারণ: …]" ট্যাগ হিসেবে
  *  - একসাথে অনেক অর্ডার: প্যাকিং স্লিপ প্রিন্ট ও Steadfast-এ পাঠানো
  *  - রিপোর্ট: জেলা, পণ্য ও বাতিলের কারণ অনুযায়ী
  * Pure helpers are exported for tests; DOM wiring runs only when the page has the matching elements.
@@ -11,7 +11,7 @@
 (function (root) {
   "use strict";
 
-  var REASONS = ["সাইজ মেলেনি", "পছন্দ হয়নি", "ফোন ধরেনি", "ঠিকানা ভুল / পাওয়া যায়নি", "দাম বেশি মনে হয়েছে", "দেরিতে পৌঁছেছে", "ক্রেতা অর্ডার করেননি (Fake)", "অন্য কারণ"];
+  var REASONS = ["সাইজ মেলেনি", "পছন্দ হয়নি", "ফোন ধরেনি", "ঠিকানা ভুল / পাওয়া যায়নি", "দাম বেশি মনে হয়েছে", "দেরিতে পৌঁছেছে", "ক্রেতা অর্ডার করেননি (Fraud)", "অন্য কারণ"];
   var REASON_STATUSES = /^(cancelled|canceled|fake|returned|return)$/i;
   var REASON_TAG = /\[কারণ:\s*([^\]]+)\]/;
 
@@ -453,7 +453,7 @@
   function askBulkStatus(done) {
     pickFromModal("বাল্ক: Status আপডেট",
       selectedOrders().length + "টি নির্বাচিত অর্ডারের Status একসাথে বদলাবে।",
-      ORDER_STATUS_LIST.map(function (s) { return { value: s, label: s }; }), done);
+      ORDER_STATUS_LIST.map(function (s) { return { value: s, label: s === "Fake" ? "Fraud" : s }; }), done);
   }
 
   function askBulkCourierTag(done) {
@@ -553,7 +553,7 @@
         return "<tr><td>" + esc(p.label || p.key) + "</td><td>" + p.units + "</td><td>" + p.deliveredUnits + "</td><td>" + p.failedUnits + "</td><td>" + rateCell(done ? Math.round(p.failedUnits / done * 100) : null) + "</td></tr>";
       })) + '<p class="ot-note">পুরোনো অর্ডারে পণ্যের নাম একেক রকম লেখা থাকায় একই পণ্য আলাদা লাইনে আসতে পারে।</p></div><div><h3>বাতিল / ফেরতের কারণ</h3>' +
       table(["কারণ", "অর্ডার"], rep.reasons.map(function (r) { return "<tr><td>" + esc(r.reason) + "</td><td>" + r.count + "</td></tr>"; })) +
-      '<p class="ot-note">অর্ডার Cancelled, Fake বা Returned করার সময় কারণ বেছে নিলে এখানে যোগ হবে।</p></div></div>';
+      '<p class="ot-note">অর্ডার Cancelled, Fraud বা Returned করার সময় কারণ বেছে নিলে এখানে যোগ হবে।</p></div></div>';
   }
 
   function initListPage() {

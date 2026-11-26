@@ -534,7 +534,7 @@
           ["Delivered (" + g.delivered.count + ")", g.delivered.value, false, "delivered"],
           ["সক্রিয় অর্ডার (" + g.active.count + ")", g.active.value, false, ""],
           ["Cancelled (" + g.cancelled.count + ")", g.cancelled.value, false, ""],
-          ["Fake (" + g.fake.count + ")", g.fake.value, false, ""],
+          ["Fraud (" + g.fake.count + ")", g.fake.value, false, ""],
           ["Returned (" + g.returned.count + ")", g.returned.value, false, ""],
           ["অন্যান্য (" + g.unknown.count + ")", g.unknown.value, false, ""],
           ["যাচাই প্রয়োজন", insights.flagged, true, "review"]
@@ -801,7 +801,7 @@ window.addEventListener("load",function(){var b=document.getElementById("moOpen"
    var rows=(r.couriers||[]).map(function(x){
     return '<tr><td>'+MaPanel.esc(x.courier)+'</td><td>'+x.total+'</td><td>'+x.delivered+'</td><td>'+x.cancelled+'</td><td>'+x.returned+'</td><td>'+x.fake+'</td><td>'+(x.successRate==null?'—':x.successRate+'%')+'</td></tr>';
    }).join('');
-   var body='<p class="pn-note-muted">Source: Muslim Abaya order records only · '+r.totalOrders+' orders scanned. Not a courier-wide industry rate.</p><div class="pn-table-wrap"><table class="pn-table"><thead><tr><th>Courier</th><th>Total</th><th>Delivered</th><th>Cancelled</th><th>Returned</th><th>Fake</th><th>Success rate</th></tr></thead><tbody>'+(rows||'<tr><td colspan="7">No courier records found</td></tr>')+'</tbody></table></div>';
+   var body='<p class="pn-note-muted">Source: Muslim Abaya order records only · '+r.totalOrders+' orders scanned. Not a courier-wide industry rate.</p><div class="pn-table-wrap"><table class="pn-table"><thead><tr><th>Courier</th><th>Total</th><th>Delivered</th><th>Cancelled</th><th>Returned</th><th>Fraud</th><th>Success rate</th></tr></thead><tbody>'+(rows||'<tr><td colspan="7">No courier records found</td></tr>')+'</tbody></table></div>';
    MaPanel.openModal('Courier Performance',body);
   }).catch(function(e){if(window.notify)notify(e.message,true);else alert(e.message);}).then(function(){btn.disabled=false;});
  });
