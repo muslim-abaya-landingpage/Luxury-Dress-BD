@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
-  var state = { orders: [], cursor: 0, filter: 'all', search: '', provider: 'all', trackingOrder: null, settlementOrders: [], settlementOrder: null, loading: false };
+  var state = { orders: [], cursor: 0, filter: 'all', search: '', provider: 'all', trackingOrder: null, settlementOrders: [], settlementOrder: null, loading: false, scanMode: 'ship', scanLog: [], scanBusy: false };
   var RATE_KEYS = ['steadfastInside','steadfastOutside','pathaoInside','pathaoOutside','redxInside','redxOutside'];
   var RATE_IDS = ['cmSteadfastInside','cmSteadfastOutside','cmPathaoInside','cmPathaoOutside','cmRedxInside','cmRedxOutside'];
   function esc(value) { return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]); }); }
@@ -198,6 +198,74 @@
       $('cmSettlementSave').disabled = false;
     });
   }
+  // ── Scan to Shipping / Scan to Return ──
+  function nowClock() {
+    var d = new Date();
+    return [d.getHours(), d.getMinutes(), d.getSeconds()].map(function (n) { return String(n).padStart(2, '0'); }).join(':');
+  }
+  function renderScanLog() {
+    var rows = state.scanLog;
+    if (!rows.length) { $('cmScanLog').innerHTML = '<tr><td colspan="5" class="cm-empty">এখনো কিছু স্ক্যান করা হয়নি।</td></tr>'; return; }
+    $('cmScanLog').innerHTML = rows.map(function (r) {
+      return '<tr><td>' + esc(r.time) + '</td><td><strong>' + esc(r.orderId) + '</strong></td><td>' + esc(r.customer || '—') + '</td>' +
+        '<td>' + (r.mode === 'ship' ? 'Scan to Shipping' : 'Scan to Return') + '</td>' +
+        '<td><span class="cm-badge ' + (r.ok ? 'scan-ok' : 'scan-err') + '">' + esc(r.message) + '</span></td></tr>';
+    }).join('');
+  }
+  function logScan(mode, orderId, customer, ok, message) {
+    state.scanLog.unshift({ time: nowClock(), mode: mode, orderId: orderId, customer: customer, ok: ok, message: message });
+    if (state.scanLog.length > 50) state.scanLog.length = 50;
+    renderScanLog();
+  }
+  function scanMessage(text, ok) {
+    var el = $('cmScanMessage');
+    el.textContent = text;
+    el.className = ok == null ? '' : (ok ? 'ok' : 'err');
+  }
+  function runScan(event) {
+    event.preventDefault();
+    if (state.scanBusy) return;
+    var input = $('cmScanInput');
+    var raw = input.value.trim().replace(/^#/, '');
+    if (!raw) return;
+    var mode = state.scanMode, courier = $('cmScanCourier').value;
+    state.scanBusy = true;
+    $('cmScanGo').disabled = true;
+    scanMessage('যাচাই হচ্ছে…', null);
+    MaAdmin.call('AdminOrderGet', { OrderId: raw }).then(function (res) {
+      var o = res.order;
+      if (mode === 'ship') {
+        if (/^(shipped|delivered)$/i.test(o.status) || o.tracking || o.consignmentId) {
+          throw Object.assign(new Error('ইতিমধ্যে পাঠানো হয়েছে (' + o.status + ')'), { soft: true });
+        }
+        if (/^(cancelled|fake)$/i.test(o.status)) {
+          throw new Error('এই অর্ডার ' + o.status + ' — পাঠানো যাবে না');
+        }
+        return MaAdmin.call('AdminOrderUpdate', { OrderId: o.orderId, Status: 'Shipped', Courier: courier }).then(function () {
+          return { o: o, message: 'Shipped · ' + courier + ' হিসেবে সেট হয়েছে' };
+        });
+      }
+      // Scan to Return
+      var note = (o.adminNote ? o.adminNote + ' | ' : '') + 'ফেরত: কুরিয়ার থেকে প্যাকেজ ফেরত এসেছে (স্ক্যান)';
+      var soft = !(o.tracking || o.consignmentId || /shipped/i.test(o.status)) ? 'এই অর্ডার আগে কুরিয়ারে পাঠানো হয়েছে বলে রেকর্ড নেই — তবুও ' : '';
+      return MaAdmin.call('AdminOrderUpdate', { OrderId: o.orderId, Status: 'Cancelled', AdminNote: note }).then(function () {
+        return { o: o, message: soft + 'ফেরত হিসেবে রেকর্ড হয়েছে (Status: Cancelled)' };
+      });
+    }).then(function (result) {
+      logScan(mode, result.o.orderId, result.o.name, true, result.message);
+      scanMessage('✓ ' + result.o.orderId + ' — ' + result.message, true);
+      input.value = '';
+    }).catch(function (err) {
+      logScan(mode, raw, '', false, (err && err.message) || 'ব্যর্থ');
+      scanMessage('✗ ' + ((err && err.message) || 'ব্যর্থ'), false);
+      if (!(err && err.soft)) input.select();
+      else input.value = '';
+    }).finally(function () {
+      state.scanBusy = false;
+      $('cmScanGo').disabled = false;
+      input.focus();
+    });
+  }
   function bind() {
     $('cmRefresh').addEventListener('click', function () { load(false); loadPerformance(); loadSettlements(); });
     $('cmSettlementRefresh').addEventListener('click', loadSettlements);
@@ -224,6 +292,14 @@
     $('cmTrackingClose').addEventListener('click', function () { $('cmTrackingDialog').close(); });
     $('cmTrackingDone').addEventListener('click', function () { $('cmTrackingDialog').close(); });
     $('cmTrackingRefresh').addEventListener('click', function () { if (state.trackingOrder) showTracking(state.trackingOrder, true); });
+    $('cmScanTabs').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-mode]'); if (!b) return;
+      state.scanMode = b.getAttribute('data-mode');
+      Array.prototype.forEach.call($('cmScanTabs').querySelectorAll('button'), function (x) { x.classList.toggle('is-active', x === b); });
+      scanMessage('', null);
+      $('cmScanInput').focus();
+    });
+    $('cmScanForm').addEventListener('submit', runScan);
   }
   document.addEventListener('DOMContentLoaded', function () {
     bind();

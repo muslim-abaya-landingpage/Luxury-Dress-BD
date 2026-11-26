@@ -8575,6 +8575,7 @@ function adminOrderUpdate_(e) {
     if (admHasParam_(e, 'CourierNote')) vals[ADM_COL_COURIER_NOTE - 1] = admCellText_(param_(e, 'CourierNote'), 300);
     if (admHasParam_(e, 'AssignedTo')) vals[ADM_COL_ASSIGNED - 1] = admCellText_(param_(e, 'AssignedTo'), 80);
     if (admHasParam_(e, 'Courier')) vals[ADM_COL_COURIER - 1] = admCellText_(param_(e, 'Courier'), 40);
+    if (admHasParam_(e, 'Source')) vals[ADM_COL_SOURCE - 1] = admCellText_(param_(e, 'Source'), 40);
     if (!vals[ADM_COL_SOURCE - 1]) vals[ADM_COL_SOURCE - 1] = 'Website';
 
     newStatus = String(vals[9] || 'Pending');

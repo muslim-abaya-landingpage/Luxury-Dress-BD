@@ -68,3 +68,10 @@
 .cm-settlement-form label:last-child{grid-column:1/-1}
 .cm-settlement-message{min-height:18px;margin:0 0 10px;font-size:12px;color:var(--adm-muted,#64748b)}
 @media(max-width:600px){.cm-settlement-stats{grid-template-columns:1fr 1fr}.cm-settlement-stats article:last-child{grid-column:1/-1}.cm-settlement-form{grid-template-columns:1fr}.cm-settlement-form label:last-child{grid-column:auto}}
+.cm-scan-panel{border:1px solid #1f3555}
+.cm-scan-form select,.cm-scan-form input{min-height:40px;border:1px solid var(--adm-border,#d7dde6);border-radius:9px;padding:9px 11px;background:var(--adm-input,#fff);color:inherit;font:inherit;width:100%;box-sizing:border-box}
+.cm-scan-form label:last-child{grid-column:1/-1}
+#cmScanMessage{font-size:12px;font-weight:700}
+#cmScanMessage.ok{color:#15803d}#cmScanMessage.err{color:#b91c1c}
+.cm-badge.scan-ok{background:#dcfce7;color:#15803d}.cm-badge.scan-err{background:#fee2e2;color:#b91c1c}
+@media(max-width:600px){.cm-scan-form{grid-template-columns:1fr}}
