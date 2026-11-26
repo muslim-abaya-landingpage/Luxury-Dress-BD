@@ -107,3 +107,16 @@ test('receiving a purchase adds each variant to the existing stock service once'
   assert.equal(second.alreadyReceived, true);
   assert.equal(h.calls.length, 1);
 });
+
+
+test('inventory dashboard is wired to authenticated APIs and exposes the core Bengali workflows', () => {
+  const root = require('node:path').join(__dirname, '../..');
+  const html = fs.readFileSync(require('node:path').join(root, 'admin-inventory.html'), 'utf8');
+  const ui = fs.readFileSync(require('node:path').join(root, 'admin-inventory.js'), 'utf8');
+  const api = fs.readFileSync(require('node:path').join(root, 'admin-api.js'), 'utf8');
+  assert.doesNotThrow(() => new vm.Script(ui));
+  ['invSupplierForm','invPurchaseForm','invPaymentForm','invPurchaseBody','invSupplierBody'].forEach(id => assert.ok(html.includes('id="' + id + '"'), 'Missing dashboard control: ' + id));
+  ['getInventorySummary','listInventorySuppliers','saveInventorySupplier','listInventoryPurchases','createInventoryPurchase','receiveInventoryPurchase','createInventorySupplierPayment','listInventoryPayments'].forEach(name => assert.ok(api.includes(name), 'Missing Admin API method: ' + name));
+  assert.match(ui, /MaAdminShell\.start/);
+  assert.match(ui, /MaAdmin\.receiveInventoryPurchase/);
+});
