@@ -42,6 +42,15 @@ function fixture(opts) {
   };
   vm.createContext(ctx);
   vm.runInContext(src, ctx);
+  ctx.admGetSheet_ = () => ({ id: 'orders' });
+  ctx.admFindRow_ = () => 2;
+  ctx.readOnlineOrderRows_ = () => [[]];
+  ctx.admRowToOrder_ = () => order;
+  ctx.ensureSheet_ = () => ({ name: 'settlements' });
+  ctx.admCourierSettlementSheet_ = () => ({ name: 'settlements' });
+  ctx.admCourierSettlementData_ = () => ledger;
+  ctx.appendRow_ = (_, row) => { appended.push(row); ledger.push(row); };
+  ctx.formatCell_ = v => String(v || '');
   return { c: ctx, ledger, appended, order, get locked() { return locked; } };
 }
 
