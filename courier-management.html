@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="bn" class="wp-admin-shell" data-admin-guard="1">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Courier Management | Muslim Abaya Admin</title>
+  <link rel="stylesheet" href="admin.css?v=d800d917a0c7b197">
+  <link rel="stylesheet" href="admin-design-system.css?v=1eaf4362bddc4ad0">
+  <link rel="stylesheet" href="admin-wp.css?v=20261126-admin-shell-step2">
+  <link rel="stylesheet" href="admin-premium-unified.css?v=20261125-sidebar-hover-stable">
+  <link rel="stylesheet" href="admin-responsive.css?v=1">
+  <link rel="stylesheet" href="courier-management.css?v=1">
+  <script src="config.js?v=00107b4d68a09227"></script>
+  <script src="site-api-config.js?v=b4eb7cb7438aad24"></script>
+  <script src="admin-config.js?v=765c69bebedc46a8"></script>
+  <script src="admin-api.js?v=2823eb7bcff4e142"></script>
+  <script src="admin-guard.js?v=42341dd9adc288ea"></script>
+</head>
+<body class="adm-body">
+  <main class="cm-wrap">
+    <header class="cm-head">
+      <div>
+        <div class="adm-page-kicker">MUSLIM ABAYA / OPERATIONS</div>
+        <h1>কুরিয়ার ম্যানেজমেন্ট</h1>
+        <p>পার্সেল পাঠানো, ডেলিভারি ট্র্যাকিং, COD পর্যবেক্ষণ ও কুরিয়ার পারফরম্যান্স—এক জায়গায়।</p>
+      </div>
+      <div class="cm-head-actions">
+        <a class="adm-btn adm-btn-secondary" href="admin-dashboard.html">ড্যাশবোর্ড</a>
+        <a class="adm-btn adm-btn-secondary" href="admin-orders.html">অর্ডার</a>
+        <button class="adm-btn adm-btn-primary" id="cmRefresh" type="button">↻ রিফ্রেশ</button>
+      </div>
+    </header>
+
+    <section class="cm-stats" aria-label="Courier summary">
+      <article class="cm-stat"><span>মোট অর্ডার (লোড করা)</span><strong id="cmTotal">—</strong><small>সাম্প্রতিক অর্ডার</small></article>
+      <article class="cm-stat"><span>কুরিয়ারে পাঠানোর অপেক্ষায়</span><strong id="cmReady">—</strong><small>Confirmed / Processing</small></article>
+      <article class="cm-stat"><span>পথে / Shipped</span><strong id="cmShipped">—</strong><small>Tracking আছে</small></article>
+      <article class="cm-stat"><span>Delivered</span><strong id="cmDelivered">—</strong><small>কুরিয়ারের রিপোর্ট অনুযায়ী</small></article>
+      <article class="cm-stat"><span>Return / Cancel</span><strong id="cmReturns">—</strong><small>পর্যালোচনা প্রয়োজন</small></article>
+    </section>
+
+    <section class="cm-panel">
+      <div class="cm-panel-head">
+        <div><h2>পার্সেল ও অর্ডার</h2><p>অর্ডার তালিকা থেকে Steadfast-এ পাঠান অথবা বর্তমান ট্র্যাকিং স্ট্যাটাস আপডেট করুন।</p></div>
+        <span id="cmLoadState" class="cm-muted" aria-live="polite">ডেটা লোড হচ্ছে…</span>
+      </div>
+      <div class="cm-tools">
+        <input id="cmSearch" type="search" placeholder="অর্ডার, নাম বা ফোন দিয়ে খুঁজুন" aria-label="অর্ডার খুঁজুন">
+        <select id="cmProvider" aria-label="কুরিয়ার নির্বাচন"><option value="all">সব কুরিয়ার</option><option value="Steadfast">Steadfast</option><option value="Pathao">Pathao</option><option value="RedX">RedX</option><option value="none">কুরিয়ার দেওয়া হয়নি</option></select>
+      </div>
+      <nav class="cm-tabs" id="cmTabs" aria-label="অর্ডার ফিল্টার">
+        <button type="button" data-filter="all" class="is-active">সব</button>
+        <button type="button" data-filter="ready">পাঠানোর অপেক্ষায়</button>
+        <button type="button" data-filter="shipped">Shipped</button>
+        <button type="button" data-filter="delivered">Delivered</button>
+        <button type="button" data-filter="returned">Return / Cancel</button>
+      </nav>
+      <div class="cm-table-wrap">
+        <table class="cm-table">
+          <thead><tr><th>অর্ডার</th><th>কাস্টমার</th><th>ঠিকানা</th><th>COD / Due</th><th>কুরিয়ার</th><th>স্ট্যাটাস</th><th>কাজ</th></tr></thead>
+          <tbody id="cmRows"><tr><td colspan="7" class="cm-empty">ডেটা লোড হচ্ছে…</td></tr></tbody>
+        </table>
+      </div>
+      <div class="cm-table-foot"><span id="cmCount">—</span><button type="button" class="adm-btn adm-btn-secondary" id="cmLoadMore" hidden>আরও অর্ডার</button></div>
+      <p class="cm-note">নিরাপত্তা: কেবল Confirmed বা Processing অর্ডার Steadfast-এ পাঠানো যাবে। Pathao ও RedX-এর চার্জ এখানে তুলনার জন্য; তাদের API-তে পার্সেল পাঠানো এখনো সংযুক্ত নয়।</p>
+    </section>
+
+    <section class="cm-lower">
+      <article class="cm-panel">
+        <div class="cm-panel-head"><div><h2>কুরিয়ার চার্জ সেটিংস</h2><p>আপনার নিজস্ব কুরিয়ার অ্যাকাউন্টের নির্ধারিত চার্জ লিখুন।</p></div></div>
+        <form id="cmRatesForm" class="cm-rates">
+          <label>Steadfast · ঢাকার ভিতরে <input type="number" min="0" max="2000" step="1" id="cmSteadfastInside"></label>
+          <label>Steadfast · ঢাকার বাইরে <input type="number" min="0" max="2000" step="1" id="cmSteadfastOutside"></label>
+          <label>Pathao · ঢাকার ভিতরে <input type="number" min="0" max="2000" step="1" id="cmPathaoInside"></label>
+          <label>Pathao · ঢাকার বাইরে <input type="number" min="0" max="2000" step="1" id="cmPathaoOutside"></label>
+          <label>RedX · ঢাকার ভিতরে <input type="number" min="0" max="2000" step="1" id="cmRedxInside"></label>
+          <label>RedX · ঢাকার বাইরে <input type="number" min="0" max="2000" step="1" id="cmRedxOutside"></label>
+          <div class="cm-rate-actions"><button class="adm-btn adm-btn-primary" type="submit" id="cmSaveRates">চার্জ সংরক্ষণ</button><span id="cmRatesMessage" role="status"></span></div>
+        </form>
+      </article>
+      <article class="cm-panel">
+        <div class="cm-panel-head"><div><h2>কুরিয়ার পারফরম্যান্স</h2><p>আপনার নিজের অর্ডার রেকর্ড থেকে হিসাব; কুরিয়ার-ব্যাপী রেট নয়।</p></div><button class="adm-btn adm-btn-secondary" type="button" id="cmPerformanceRefresh">আপডেট</button></div>
+        <div class="cm-table-wrap"><table class="cm-table cm-performance"><thead><tr><th>কুরিয়ার</th><th>মোট</th><th>Delivered</th><th>Return</th><th>Success</th></tr></thead><tbody id="cmPerformance"><tr><td colspan="5" class="cm-empty">লোড হচ্ছে…</td></tr></tbody></table></div>
+      </article>
+    </section>
+    <p class="cm-footer-note">COD Due অর্ডারের বকেয়া অঙ্ক থেকে দেখানো হয়—এটি কুরিয়ারের settlement statement বা হাতে পাওয়া টাকার হিসাব নয়। Settlement reconciliation আলাদা backend integration হিসেবে পরবর্তী ধাপে যুক্ত হবে।</p>
+  </main>
+
+  <dialog id="cmTrackingDialog" class="cm-dialog">
+    <div class="cm-dialog-head"><div><h2>পার্সেল ট্র্যাকিং</h2><p id="cmTrackingOrder"></p></div><button type="button" id="cmTrackingClose" aria-label="বন্ধ করুন">×</button></div>
+    <div id="cmTrackingBody" class="cm-tracking-body">তথ্য আনা হচ্ছে…</div>
+    <div class="cm-dialog-actions"><button type="button" class="adm-btn adm-btn-secondary" id="cmTrackingRefresh">আবার যাচাই</button><button type="button" class="adm-btn adm-btn-primary" id="cmTrackingDone">বন্ধ</button></div>
+  </dialog>
+  <script src="courier-management.js?v=1"></script>
+</body>
+</html>

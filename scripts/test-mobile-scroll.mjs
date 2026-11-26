@@ -266,7 +266,7 @@ test('touch screens: frosted-glass blur is off site-wide and footer animations s
 });
 
 test('every storefront page loads site-header.css (where the phone performance rules live)', () => {
-  const skip = /^(admin|product-manager|product-attributes|stock-analytics|product-links|googlec|muslim-abaya-premium-modal|size-chart|support-agent-telegram|apps-script-copy)/;
+  const skip = /^(admin|product-manager|product-attributes|stock-analytics|product-links|courier-management|googlec|muslim-abaya-premium-modal|size-chart|support-agent-telegram|apps-script-copy)/;
   const pages = fs.readdirSync(root).filter(f => f.endsWith('.html') && !skip.test(f));
   const missing = pages.filter(f => !/site-header(\.min)?\.css/.test(fs.readFileSync(path.join(root, f), 'utf8')));
   assert.deepEqual(missing, []);
