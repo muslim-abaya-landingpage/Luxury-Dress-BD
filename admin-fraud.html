@@ -26,6 +26,9 @@
 <meta name="theme-color" content="#1b2a41">
 <link rel="apple-touch-icon" href="/images/admin/admin-icon-192.png">
 <link rel="stylesheet" href="admin-wp.css?v=20261126-admin-shell-step2">
+<style>
+.fr-customer-panel{margin-top:18px}.fr-customer-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:12px 0}.fr-customer-kpi{padding:12px;border:1px solid var(--adm-border,#e5e7eb);border-radius:10px}.fr-customer-kpi strong{display:block;font-size:20px}.fr-customer-kpi small{color:var(--adm-muted,#64748b)}.fr-customer-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.fr-customer-table{width:100%;border-collapse:collapse}.fr-customer-table th,.fr-customer-table td{padding:8px;border-bottom:1px solid var(--adm-border,#e5e7eb);text-align:left;font-size:12px}
+</style>
 </head>
 <body class="adm-body" data-admin-guard="1">
   <div class="adm-shell">
@@ -120,6 +123,10 @@
       <button type="button" class="adm-btn adm-btn-secondary" data-fr-decision="rejected">Mark suspicious</button>
       <button type="button" class="adm-btn adm-btn-secondary" data-fr-decision="pending" hidden>Reopen</button>
     </div>
+    <section class="adm-panel fr-customer-panel" id="frCustomerPanel" aria-live="polite">
+      <div class="fr-toolbar"><div><h3>Customer history &amp; phone protection</h3><p class="st-hint">নিজস্ব অর্ডার ডেটা থেকে হিসাব; এটি বাহ্যিক কুরিয়ার ডেটা নয়।</p></div></div>
+      <div id="frCustomerData"><p class="adm-empty">Review নির্বাচন করলে কাস্টমারের ইতিহাস দেখা যাবে।</p></div>
+    </section>
     <h3>Review history</h3>
     <ol id="frHistory" class="fr-history"></ol>
   </section>
