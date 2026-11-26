@@ -166,6 +166,10 @@ function admBlockedSheet_() {
   return ensureSheet_('Blocked', ['Phone', 'Reason', 'BlockedAt', 'BlockedBy']);
 }
 
+function admBlockedAuditSheet_() {
+  return ensureSheet_('Blocked Audit', ['Phone', 'Action', 'Reason', 'ChangedAt', 'ChangedBy']);
+}
+
 function admBlockedMap_() {
   var sheet = admBlockedSheet_();
   var map = {};
@@ -194,8 +198,10 @@ function adminBlockCustomer_(e) {
   var v = verifyAdminSession_(param_(e, 'Token'));
   if (!v.ok) return v;
   var phone = normalizePhone_(param_(e, 'Phone'));
-  if (!/^01\d{9}$/.test(phone)) return { ok: false, error: 'INVALID_PHONE', message: 'সঠিক ফোন নম্বর নয়।' };
+  if (!/^01\\d{9}$/.test(phone)) return { ok: false, error: 'INVALID_PHONE', message: 'সঠিক ফোন নম্বর নয়।' };
   var unblock = param_(e, 'Block') === '0';
+  var reason = admCellText_(param_(e, 'Reason'), 200);
+  var actor = admCellText_(v.email || v.name || 'admin', 100);
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
@@ -208,11 +214,15 @@ function adminBlockCustomer_(e) {
         if (normalizePhone_(phones[i][0]) === phone) { found = i + 2; break; }
       }
     }
+    var changed = false;
     if (unblock) {
-      if (found) sheet.deleteRow(found);
+      if (found) { sheet.deleteRow(found); changed = true; }
     } else if (!found) {
-      appendRow_(sheet, [phone, admCellText_(param_(e, 'Reason'), 200), new Date(), admCellText_(v.email || v.name || 'admin', 100)]);
+      appendRow_(sheet, [phone, reason, new Date(), actor]);
+      changed = true;
     }
+    // Append-only audit survives removal of the active Blocked row.
+    if (changed) appendRow_(admBlockedAuditSheet_(), [phone, unblock ? 'UNBLOCK' : 'BLOCK', reason, new Date(), actor]);
   } finally {
     lock.releaseLock();
   }
