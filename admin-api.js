@@ -595,6 +595,25 @@
     });
   }
 
+  // ===== Inventory management =====
+  function getInventorySummary() { return call("AdminInventorySummary", {}); }
+  function listInventorySuppliers(search) { return call("AdminInventorySuppliersList", { Search: search || "" }); }
+  function saveInventorySupplier(data) {
+    data = data || {};
+    return call("AdminInventorySupplierSave", { SupplierId:data.id || "", Name:data.name || "", Phone:data.phone || "", Address:data.address || "", Notes:data.notes || "" });
+  }
+  function listInventoryPurchases(limit) { return call("AdminInventoryPurchasesList", { Limit: limit || 100 }); }
+  function createInventoryPurchase(data) {
+    data = data || {};
+    return call("AdminInventoryPurchaseCreate", { SupplierId:data.supplierId || "", InvoiceNo:data.invoiceNo || "", PurchaseDate:data.date || "", OtherCost:data.otherCost || 0, Paid:data.paid || 0, Notes:data.notes || "", ItemsJSON:JSON.stringify(data.items || []) }, { timeoutMs:60000 });
+  }
+  function receiveInventoryPurchase(id) { return call("AdminInventoryPurchaseReceive", { PurchaseId:id || "" }, { timeoutMs:60000 }); }
+  function createInventorySupplierPayment(data) {
+    data = data || {};
+    return call("AdminInventorySupplierPaymentCreate", { SupplierId:data.supplierId || "", PurchaseId:data.purchaseId || "", Amount:data.amount || 0, Method:data.method || "", Reference:data.reference || "", PaymentDate:data.date || "", Notes:data.notes || "" });
+  }
+  function listInventoryPayments(limit) { return call("AdminInventoryPaymentsList", { Limit:limit || 100 }); }
+
   function getSetupStatus() { return call("AdminSetupStatus", {}); }
   function getActivity(opts) { opts = opts || {}; return call("AdminActivityList", { Limit: opts.limit || 200, Admin: opts.admin || "", Q: opts.q || "" }); }
   function getProductProfit(opts) { opts = opts || {}; return call("AdminProductProfit", { Range: opts.range || "30d", From: opts.from || "", To: opts.to || "", Basis: opts.basis || "delivered" }, { timeoutMs: 60000 }); }
@@ -744,6 +763,14 @@
     getCourierRates: getCourierRates,
     saveCourierRates: saveCourierRates,
     getActivity: getActivity,
+    getInventorySummary: getInventorySummary,
+    listInventorySuppliers: listInventorySuppliers,
+    saveInventorySupplier: saveInventorySupplier,
+    listInventoryPurchases: listInventoryPurchases,
+    createInventoryPurchase: createInventoryPurchase,
+    receiveInventoryPurchase: receiveInventoryPurchase,
+    createInventorySupplierPayment: createInventorySupplierPayment,
+    listInventoryPayments: listInventoryPayments,
     getProductProfit: getProductProfit,
     saveProductCosts: saveProductCosts,
     lookupCustomer: lookupCustomer,
