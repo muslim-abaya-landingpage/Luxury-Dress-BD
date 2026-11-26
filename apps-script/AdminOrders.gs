@@ -663,6 +663,137 @@ function adminSendCourier_(e) {
   }
 }
 
+// ── COD settlement ledger ──
+// Append-only records: partial payouts are supported; order totals are never overwritten.
+function admCourierSettlementSheet_() {
+  return ensureSheet_('Courier Settlements', [
+    'Settlement ID', 'Order ID', 'Courier', 'Consignment ID', 'Tracking Code',
+    'COD Due', 'Received Amount', 'Transaction Reference', 'Settlement Date',
+    'Note', 'Recorded At', 'Recorded By'
+  ]);
+}
+
+function admCourierSettlementData_() {
+  var sheet = admCourierSettlementSheet_();
+  var last = sheet.getLastRow();
+  return last >= 2 ? sheet.getRange(2, 1, last - 1, 12).getValues() : [];
+}
+
+function admCourierSettlementList_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var sheet = admGetSheet_();
+  var rows = admReadAll_(sheet);
+  var ledger = admCourierSettlementData_();
+  var paid = {}, recent = [], totalDue = 0, totalReceived = 0;
+  ledger.forEach(function (r) {
+    var id = String(r[1] || '').trim();
+    var amount = admNum_(r[6]);
+    if (id) paid[id] = (paid[id] || 0) + amount;
+    totalReceived += amount;
+    recent.push({
+      settlementId: String(r[0] || ''),
+      orderId: id,
+      courier: String(r[2] || ''),
+      amount: amount,
+      reference: String(r[7] || ''),
+      date: formatCell_(r[8]),
+      recordedAt: formatCell_(r[10])
+    });
+  });
+  recent.reverse();
+  recent = recent.slice(0, 50);
+  var orders = [];
+  rows.forEach(function (r, i) {
+    if (!r[1] && !r[2]) return;
+    var o = admRowToOrder_(r, i + 2);
+    var status = String(o.status || '').toLowerCase();
+    var courierStatus = String(o.courierStatus || '').toLowerCase();
+    var isDelivered = status === 'delivered' || courierStatus === 'delivered';
+    var isClosedBad = /cancel|return|fake/.test(status) || /cancel|return|fake/.test(courierStatus);
+    var payment = String(o.payment || '').trim();
+    var isCod = !payment || /cash\s*on\s*delivery|\bcod\b/i.test(payment);
+    if (!isDelivered || isClosedBad || !isCod || !o.orderId) return;
+    var settled = Math.round((paid[o.orderId] || 0) * 100) / 100;
+    var remaining = Math.max(0, Math.round((o.due - settled) * 100) / 100);
+    totalDue += o.due;
+    orders.push({
+      orderId: o.orderId, date: o.time, customer: o.name, phone: o.phone,
+      courier: o.courier || 'Steadfast', tracking: o.tracking,
+      consignmentId: o.consignmentId, codDue: o.due, received: settled,
+      remaining: remaining, status: remaining <= 0 ? 'Settled' : settled > 0 ? 'Partial' : 'Due'
+    });
+  });
+  orders.sort(function (a, b) { return b.remaining - a.remaining || String(b.date).localeCompare(String(a.date)); });
+  return {
+    ok: true, orders: orders, recent: recent,
+    summary: {
+      deliveredCodOrders: orders.length,
+      totalDue: Math.round(totalDue * 100) / 100,
+      totalReceived: Math.round(totalReceived * 100) / 100,
+      outstanding: Math.max(0, Math.round((totalDue - totalReceived) * 100) / 100)
+    }
+  };
+}
+
+function admCourierSettlementSave_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var orderId = admCellText_(param_(e, 'OrderId'), 80).trim();
+  var amount = admMoneyParam_(e, 'Amount', 0);
+  var reference = admCellText_(param_(e, 'Reference'), 100).trim();
+  var date = String(param_(e, 'SettlementDate') || '').trim();
+  var note = admCellText_(param_(e, 'Note'), 240);
+  if (!orderId) return { ok: false, error: 'ORDER_REQUIRED', message: 'অর্ডার নির্বাচন করুন।' };
+  if (!(amount > 0)) return { ok: false, error: 'INVALID_AMOUNT', message: 'প্রাপ্ত টাকার পরিমাণ শূন্যের বেশি হতে হবে।' };
+  if (reference.length < 3) return { ok: false, error: 'REFERENCE_REQUIRED', message: 'ব্যাংক/MFS ট্রানজ্যাকশন রেফারেন্স দিন।' };
+  if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) return { ok: false, error: 'INVALID_DATE', message: 'তারিখ YYYY-MM-DD ফরম্যাটে দিন।' };
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    var orderSheet = admGetSheet_();
+    var row = admFindRow_(orderSheet, orderId);
+    if (!row) return { ok: false, error: 'NOT_FOUND', message: 'অর্ডার পাওয়া যায়নি।' };
+    var order = admRowToOrder_(readOnlineOrderRows_(orderSheet, row, 1, ADM_LAST_COL)[0], row);
+    var status = String(order.status || '').toLowerCase();
+    var courierStatus = String(order.courierStatus || '').toLowerCase();
+    var delivered = status === 'delivered' || courierStatus === 'delivered';
+    var closedBad = /cancel|return|fake/.test(status) || /cancel|return|fake/.test(courierStatus);
+    var payment = String(order.payment || '').trim();
+    var isCod = !payment || /cash\s*on\s*delivery|\bcod\b/i.test(payment);
+    if (!delivered || closedBad) return { ok: false, error: 'NOT_DELIVERED', message: 'শুধু Delivered এবং Return/Cancel নয়—এমন অর্ডারের COD জমা নেওয়া যাবে।' };
+    if (!isCod) return { ok: false, error: 'NOT_COD', message: 'এটি Cash on Delivery অর্ডার নয়।' };
+    var ledgerSheet = admCourierSettlementSheet_();
+    var ledger = admCourierSettlementData_();
+    var paid = 0;
+    for (var i = 0; i < ledger.length; i++) {
+      if (String(ledger[i][1] || '').trim() !== orderId) continue;
+      paid += admNum_(ledger[i][6]);
+      if (String(ledger[i][7] || '').trim().toLowerCase() === reference.toLowerCase()) {
+        return { ok: false, error: 'DUPLICATE_REFERENCE', message: 'এই অর্ডারে একই ট্রানজ্যাকশন রেফারেন্স আগে সংরক্ষিত হয়েছে।' };
+      }
+    }
+    var remaining = Math.max(0, Math.round((order.due - paid) * 100) / 100);
+    if (remaining <= 0) return { ok: false, error: 'ALREADY_SETTLED', message: 'এই অর্ডারের COD সম্পূর্ণ জমা হয়েছে।' };
+    if (amount > remaining + 0.009) return { ok: false, error: 'AMOUNT_EXCEEDS_DUE', message: 'বাকি পাওনা ' + remaining + ' টাকার বেশি জমা দেখানো যাবে না।' };
+    var settlementId = 'CS-' + Utilities.getUuid().replace(/-/g, '').slice(0, 16).toUpperCase();
+    var actor = admCellText_(v.email || v.name || 'admin', 100);
+    appendRow_(ledgerSheet, [
+      settlementId, orderId, admCellText_(order.courier || 'Steadfast', 40),
+      admCellText_(order.consignmentId, 80), admCellText_(order.tracking, 80),
+      order.due, amount, reference, date || Utilities.formatDate(new Date(), 'GMT+6', 'yyyy-MM-dd'),
+      note, new Date(), actor
+    ]);
+    var received = Math.round((paid + amount) * 100) / 100;
+    return {
+      ok: true, settlementId: settlementId, orderId: orderId,
+      received: received, remaining: Math.max(0, Math.round((order.due - received) * 100) / 100)
+    };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 // ── Staff ──
 
 function adminStaffList_(e) {
@@ -688,6 +819,8 @@ function handleAdminOrderRequest_(type, e) {
   try {
     switch (type) {
       case 'AdminCourierTracking': return adminCourierTracking_(e);
+      case 'AdminCourierSettlementList': return admCourierSettlementList_(e);
+      case 'AdminCourierSettlementSave': return admCourierSettlementSave_(e);
       case 'AdminOrderList': return adminOrderList_(e);
       case 'AdminOrderGet': return adminOrderGet_(e);
       case 'AdminOrderUpdate': return adminOrderUpdate_(e);
