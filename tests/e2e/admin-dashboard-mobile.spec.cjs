@@ -20,7 +20,7 @@ async function stub(page, { inboxDelayMs = 0 } = {}) {
         { productId: 'P-LOW', productName: 'Black Abaya', variant: 'M', tracked: true, available: 2, threshold: 3, status: 'LOW' }] }); },
       inboxCall: function () { return new Promise(function (ok) { setTimeout(function () { ok({ ok: true, stats: { unread: 0 }, contacts: [] }); }, ${inboxDelayMs}); }); },
       call: function () { return Promise.resolve({ ok: true, orders: ORDERS, counts: { all: ORDERS.length } }); },
-      getAnalyticsV2: function () { return Promise.resolve({ ok: true, summary: { totalOrders: 0 }, salesByMonth: [], topProducts: [], sourceBreakdown: [] }); },
+      getAnalyticsV2: function (options) { return Promise.resolve({ ok: true, range: options && options.range, summary: { totalOrders: 0, totalOrderValue: 0, deliveredSalesValue: 0, deliveredCount: 0, cancellationRate: 0, deliverySuccessRate: 0 }, salesByMonth: [], topProducts: options && options.range === "all" ? [{ productId: "P-LIFE", name: "Lifetime Winner", qty: 9 }] : [], sourceBreakdown: [] }); },
       logout: function () {}
     };` }));
 }
@@ -30,7 +30,14 @@ test('dashboard on a phone: nothing wider than the screen', async ({ page }) => 
   await stub(page);
   await page.goto('/admin-dashboard.html');
   await expect(page.locator('.adm-recent-table')).toBeVisible();
-  await expect(page.locator('.adm-recent-table thead')).toContainText('Order');
+  await expect(page.locator('.adm-recent-table thead')).toContainText('অর্ডার নম্বর / ক্রম');
+  await expect(page.locator('#dzBars .dz-bar')).toHaveCount(7);
+  await expect(page.locator('#dzLegend')).toContainText('নিশ্চিত');
+  await expect(page.locator('#dzLegend')).toContainText('ডেলিভারি সম্পন্ন');
+  await expect(page.locator('#admOverviewTopProducts')).toContainText('Lifetime Winner');
+  await page.locator('#admReportRange').selectOption('7d');
+  await expect(page.locator('#admReportRangeLabel')).toContainText('2026');
+  await expect(page.locator('#admOverviewTopProducts')).toContainText('Lifetime Winner');
   await expect(page.locator('#admOrdersBody .adm-recent-order-row')).toHaveCount(8);
   await expect(page.locator('#admOrdersBody .adm-recent-order-row').first()).toContainText('Customer With A Fairly Long Name');
   const tableScroll = await page.locator('.adm-recent-table-wrap').evaluate(el => el.scrollWidth > el.clientWidth);
