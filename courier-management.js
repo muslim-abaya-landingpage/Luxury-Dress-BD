@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
-  var state = { orders: [], cursor: 0, filter: 'all', search: '', provider: 'all', trackingOrder: null, loading: false };
+  var state = { orders: [], cursor: 0, filter: 'all', search: '', provider: 'all', trackingOrder: null, settlementOrders: [], settlementOrder: null, loading: false };
   var RATE_KEYS = ['steadfastInside','steadfastOutside','pathaoInside','pathaoOutside','redxInside','redxOutside'];
   var RATE_IDS = ['cmSteadfastInside','cmSteadfastOutside','cmPathaoInside','cmPathaoOutside','cmRedxInside','cmRedxOutside'];
   function esc(value) { return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]); }); }
@@ -132,8 +132,79 @@
     }).catch(function (err) { $('cmTrackingBody').textContent = 'ট্র্যাকিং আনা যায়নি: ' + err.message; })
       .finally(function () { $('cmTrackingRefresh').disabled = false; });
   }
+  function localDate() {
+    var d = new Date();
+    return [d.getFullYear(), String(d.getMonth() + 1).padStart(2, '0'), String(d.getDate()).padStart(2, '0')].join('-');
+  }
+  function loadSettlements() {
+    $('cmSettlementRows').innerHTML = '<tr><td colspan="8" class="cm-empty">COD settlement লোড হচ্ছে…</td></tr>';
+    return MaAdmin.call('AdminCourierSettlementList', {}, { maxAgeMs: 0 }).then(function (res) {
+      var summary = res.summary || {};
+      $('cmSetDue').textContent = money(summary.totalDue);
+      $('cmSetReceived').textContent = money(summary.totalReceived);
+      $('cmSetOutstanding').textContent = money(summary.outstanding);
+      state.settlementOrders = Array.isArray(res.orders) ? res.orders : [];
+      $('cmSettlementRows').innerHTML = state.settlementOrders.length ? state.settlementOrders.map(function (o) {
+        var action = Number(o.remaining) > 0
+          ? '<button class="cm-action cm-settle" type="button" data-settle="' + esc(o.orderId) + '">জমা লিখুন</button>'
+          : '<span class="cm-muted">সম্পূর্ণ জমা</span>';
+        var badge = o.status === 'Settled' ? 'delivered' : o.status === 'Partial' ? 'shipped' : 'pending';
+        return '<tr><td><strong>' + esc(o.orderId) + '</strong><small>' + esc(o.date || '') + '</small></td>' +
+          '<td><strong>' + esc(o.customer || '') + '</strong><small>' + esc(o.phone || '') + '</small></td>' +
+          '<td>' + esc(o.courier || '—') + '<small>' + esc(o.consignmentId || o.tracking || '') + '</small></td>' +
+          '<td>' + money(o.codDue) + '</td><td>' + money(o.received) + '</td><td><strong>' + money(o.remaining) + '</strong></td>' +
+          '<td><span class="cm-badge ' + badge + '">' + esc(o.status) + '</span></td><td>' + action + '</td></tr>';
+      }).join('') : '<tr><td colspan="8" class="cm-empty">এখনো কোনো Delivered COD অর্ডার পাওয়া যায়নি।</td></tr>';
+      var recent = Array.isArray(res.recent) ? res.recent : [];
+      $('cmSettlementRecent').innerHTML = recent.length ? recent.map(function (x) {
+        return '<tr><td>' + esc(x.date || x.recordedAt || '') + '</td><td><strong>' + esc(x.orderId) + '</strong></td>' +
+          '<td>' + esc(x.courier || '—') + '</td><td>' + money(x.amount) + '</td><td>' + esc(x.reference || '—') + '</td></tr>';
+      }).join('') : '<tr><td colspan="5" class="cm-empty">এখনো কোনো COD জমার রেকর্ড নেই।</td></tr>';
+    }).catch(function (err) {
+      $('cmSettlementRows').innerHTML = '<tr><td colspan="8" class="cm-empty">Settlement লোড হয়নি: ' + esc(err.message) + '</td></tr>';
+    });
+  }
+  function openSettlement(order) {
+    state.settlementOrder = order;
+    $('cmSettlementOrder').textContent = order.orderId + ' · ' + (order.customer || '') + ' · বাকি ' + money(order.remaining);
+    $('cmSettlementAmount').value = Number(order.remaining).toFixed(2);
+    $('cmSettlementReference').value = '';
+    $('cmSettlementDate').value = localDate();
+    $('cmSettlementNote').value = '';
+    $('cmSettlementMessage').textContent = '';
+    $('cmSettlementSave').disabled = false;
+    $('cmSettlementDialog').showModal();
+  }
+  function saveSettlement(event) {
+    event.preventDefault();
+    var order = state.settlementOrder;
+    if (!order) return;
+    var payload = {
+      OrderId: order.orderId,
+      Amount: $('cmSettlementAmount').value,
+      Reference: $('cmSettlementReference').value.trim(),
+      SettlementDate: $('cmSettlementDate').value,
+      Note: $('cmSettlementNote').value.trim()
+    };
+    $('cmSettlementSave').disabled = true;
+    $('cmSettlementMessage').textContent = 'জমা যাচাই ও সংরক্ষণ হচ্ছে…';
+    MaAdmin.call('AdminCourierSettlementSave', payload, { maxAgeMs: 0 }).then(function (res) {
+      $('cmSettlementMessage').textContent = 'জমা সংরক্ষিত হয়েছে · বাকি ' + money(res.remaining);
+      return loadSettlements().then(function () {
+        window.setTimeout(function () { $('cmSettlementDialog').close(); }, 650);
+      });
+    }).catch(function (err) {
+      $('cmSettlementMessage').textContent = 'সংরক্ষণ হয়নি: ' + err.message;
+      $('cmSettlementSave').disabled = false;
+    });
+  }
   function bind() {
-    $('cmRefresh').addEventListener('click', function () { load(false); loadPerformance(); });
+    $('cmRefresh').addEventListener('click', function () { load(false); loadPerformance(); loadSettlements(); });
+    $('cmSettlementRefresh').addEventListener('click', loadSettlements);
+    $('cmSettlementRows').addEventListener('click', function (e) { var b = e.target.closest('[data-settle]'); if (!b) return; var o = state.settlementOrders.find(function (x) { return String(x.orderId) === b.getAttribute('data-settle'); }); if (o && Number(o.remaining) > 0) openSettlement(o); });
+    $('cmSettlementForm').addEventListener('submit', saveSettlement);
+    $('cmSettlementClose').addEventListener('click', function () { $('cmSettlementDialog').close(); });
+    $('cmSettlementCancel').addEventListener('click', function () { $('cmSettlementDialog').close(); });
     $('cmLoadMore').addEventListener('click', function () { load(true); });
     $('cmSearch').addEventListener('input', function (e) { state.search = e.target.value.trim().toLowerCase(); renderRows(); });
     $('cmProvider').addEventListener('change', function (e) { state.provider = e.target.value; renderRows(); });
@@ -158,7 +229,7 @@
     bind();
     MaAdminGuard.require().then(function (session) {
       if (!session) return;
-      load(false); loadRates(); loadPerformance();
+      load(false); loadRates(); loadPerformance(); loadSettlements();
     }).catch(function () { $('cmLoadState').textContent = 'Admin login প্রয়োজন।'; });
   });
 })();
