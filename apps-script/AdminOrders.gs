@@ -198,7 +198,7 @@ function adminBlockCustomer_(e) {
   var v = verifyAdminSession_(param_(e, 'Token'));
   if (!v.ok) return v;
   var phone = normalizePhone_(param_(e, 'Phone'));
-  if (!/^01\\d{9}$/.test(phone)) return { ok: false, error: 'INVALID_PHONE', message: 'সঠিক ফোন নম্বর নয়।' };
+  if (!/^01\d{9}$/.test(phone)) return { ok: false, error: 'INVALID_PHONE', message: 'সঠিক ফোন নম্বর নয়।' };
   var unblock = param_(e, 'Block') === '0';
   var reason = admCellText_(param_(e, 'Reason'), 200);
   var actor = admCellText_(v.email || v.name || 'admin', 100);
