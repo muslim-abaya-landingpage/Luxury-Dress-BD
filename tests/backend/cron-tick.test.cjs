@@ -106,9 +106,15 @@ test('shared check: sale boundaries and publish window; schedule.json keeps only
   assert.deepEqual(JSON.parse(JSON.stringify(scheduleSnapshot(cat))), { abaya: [{ id: 'A', saleFrom: '2026-11-16' }, { id: 'B', saleTo: '2026-11-15' }, { id: 'C', variations: [{ size: '52', color: '', type: '', saleFrom: '2026-11-16', saleTo: '' }] }] });
 });
 
-test('the Worker cron calls /api/cron-tick separately from the order queue', () => {
+test('the Worker cron runs order delivery, tracking retries, and the site clock independently', () => {
   const src = require('node:fs').readFileSync(path.join(root, 'cloudflare-worker/worker.js'), 'utf8');
-  assert.match(src, /ctx\.waitUntil\(processOrderQueue\(env\)\);\s*\/\/[^\n]*\n[^\n]*\n\s*(?:if \(!env\.IS_PREVIEW\) )?ctx\.waitUntil\(fetch\('https:\/\/muslimabaya\.com\/api\/cron-tick'[^)]*\)\.catch\(\(\) => \{\}\)\);/);
+  const scheduled = src.match(/async scheduled\(event, env, ctx\) \{([\s\S]*?)\n  \}\n\};/);
+  assert.ok(scheduled, 'Worker scheduled handler exists');
+  const body = scheduled[1];
+  assert.match(body, /ctx\.waitUntil\(processOrderQueue\(env\)\);/, 'order queue remains scheduled');
+  assert.match(body, /ctx\.waitUntil\(processTrackingRetryQueue\(env\)\);/, 'tracking retry queue remains scheduled independently');
+  assert.match(body, /(?:if \(!env\.IS_PREVIEW\) )?ctx\.waitUntil\(fetch\('https:\/\/muslimabaya\.com\/api\/cron-tick',\s*\{\s*method:\s*'POST'/, 'site clock is called as a separate scheduled task');
+  assert.match(body, /\.catch\(\(\) => \{\}\)\);/, 'site clock failure is isolated from the other scheduled tasks');
 });
 
 
