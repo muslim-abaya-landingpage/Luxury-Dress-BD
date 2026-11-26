@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html class="wp-admin-shell" lang="en" data-admin-guard="1">
+<head>
+  <meta charset="UTF-8">
+  <link rel="preload" as="script" href="site-api-config.js?v=b4eb7cb7438aad24">
+  <link rel="preload" as="script" href="admin-config.js?v=765c69bebedc46a8">
+  <link rel="preload" as="script" href="admin-api.js?v=2823eb7bcff4e142">
+  <link rel="preload" as="script" href="admin-guard.js?v=42341dd9adc288ea">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <meta name="robots" content="noindex, nofollow">
+  <title>Inventory &amp; Stock Management | Muslim Abaya Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="admin.css?v=d800d917a0c7b197">
+<script src="config.js?v=00107b4d68a09227"></script>
+  <link rel="stylesheet" href="admin-sidebar.css?v=20261124-hover-fix">
+
+<link rel="stylesheet" href="admin-dashboard-design.css?v=76d87a7fcd8f0d87">
+<script src="admin-dashboard-design.js?v=389d008aafabe1a6"></script>
+<link rel="stylesheet" href="admin-premium-layout.css?v=385b5e49870868f4">
+<link rel="stylesheet" href="admin-design-system.css?v=1eaf4362bddc4ad0">
+<link rel="stylesheet" href="admin-responsive.css?v=1">
+<link rel="stylesheet" href="admin-theme.css?v=1">
+<link rel="manifest" href="/admin-manifest.webmanifest">
+<meta name="theme-color" content="#1b2a41">
+<link rel="apple-touch-icon" href="/images/admin/admin-icon-192.png">
+<link rel="stylesheet" href="admin-wp.css?v=20261126-admin-shell-step2">
+<link rel="stylesheet" href="admin-premium-unified.css?v=20261125-sidebar-hover-stable">
+
+<style id="admin-profit-layout-final-fix">
+/* Keep profit workspace in the second shell column; neutralize legacy duplicate sidebar offset. */
+@media (min-width:981px){
+ html.wp-admin-shell body .adm-shell:has(> .adm-sidebar){display:grid!important;grid-template-columns:246px minmax(0,1fr)!important;column-gap:0!important;row-gap:0!important;width:100%!important;max-width:none!important;padding:0!important;margin:0!important;}
+ html.wp-admin-shell body .adm-shell:has(> .adm-sidebar.is-collapsed){grid-template-columns:82px minmax(0,1fr)!important;}
+ html.wp-admin-shell body .adm-shell:has(> .adm-sidebar) > .adm-sidebar{grid-column:1!important;grid-row:1!important;}
+ html.wp-admin-shell body .adm-shell:has(> .adm-sidebar) > .adm-content{grid-column:2!important;grid-row:1!important;position:relative!important;left:0!important;transform:none!important;margin:0!important;padding:0!important;width:auto!important;min-width:0!important;max-width:none!important;}
+ html.wp-admin-shell body .adm-shell:has(> .adm-sidebar.is-collapsed) > .adm-content{grid-column:2!important;margin:0!important;}
+}
+@media (max-width:980px){html.wp-admin-shell body .adm-shell:has(> .adm-sidebar) > .adm-content{margin:0!important;width:100%!important;max-width:none!important;}}
+</style>
+</head>
+<body class="adm-body">
+  <div class="adm-shell">
+    <div class="adm-sidebar-backdrop" id="admSbBackdrop"></div>
+    <aside class="adm-sidebar" id="admSidebar">
+      <div class="adm-sidebar-brand">
+        <div class="adm-sidebar-crest"></div>
+        <div class="adm-sidebar-brand-text"><div class="t1">Muslim Abaya</div><div class="t2">Admin Panel</div></div>
+        <button type="button" class="adm-collapse-btn" id="admCollapse" aria-controls="admSidebar" aria-expanded="true" aria-label="সাইডবার ছোট করুন"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="3" stroke="currentColor" stroke-width="1.6"/><path d="M9 4v16" stroke="currentColor" stroke-width="1.6"/></svg></button>
+        <button type="button" class="adm-sidebar-close" id="admSbClose" aria-label="মেনু বন্ধ করুন"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+      </div>
+      <div class="adm-sidebar-profile"><div class="adm-profile-avatar" aria-hidden="true">MA</div><div class="adm-profile-copy"><strong>আপনার কর্মক্ষেত্র</strong><small>স্টোর পরিচালনা</small></div></div>
+      <nav class="adm-sidebar-nav" aria-label="Admin menu">
+<a class="adm-sidebar-item" href="admin-dashboard.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Dashboard</span></a>
+<div class="adm-nav-group has-current"><a class="adm-sidebar-item adm-nav-top is-current" href="admin-orders.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z M9 7h6M9 11h6M9 15h4"/></svg><span>Orders</span></a><div class="adm-nav-children" role="group" aria-label="Orders">
+<a class="adm-sidebar-item adm-nav-child" href="admin-orders.html"><span>Orders</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-order-new.html"><span>Add order</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-operations.html"><span>Finance &amp; Returns</span></a>
+<a class="adm-sidebar-item adm-nav-child is-current" href="admin-profit.html" aria-current="page"><span>Product profit</span></a>
+</div></div>
+<div class="adm-nav-group"><a class="adm-sidebar-item adm-nav-top" href="product-manager.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="6" width="16" height="15" rx="2"/><path d="M9 6V5a3 3 0 0 1 6 0v1M9 10a3 3 0 0 0 6 0"/></svg><span>Products</span></a><div class="adm-nav-children" role="group" aria-label="Products">
+<a class="adm-sidebar-item adm-nav-child" href="product-manager.html"><span>All Products</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="product-manager.html?action=new"><span>Add new product</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-sizes.html"><span>Sizes</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-reviews.html"><span>Reviews</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="stock-analytics.html"><span>Stock &amp; Analytics</span></a>
+<a class="adm-sidebar-item adm-nav-child is-current" href="admin-inventory.html" aria-current="page"><span>Inventory &amp; Purchase</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="product-links.html"><span>Product links</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="product-manager.html#store-settings"><span>Store settings</span></a>
+</div></div>
+<div class="adm-nav-group"><a class="adm-sidebar-item adm-nav-top" href="admin-customers.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h18v13H8l-5 4V4ZM7 9h10M7 13h7"/></svg><span>Customers</span></a><div class="adm-nav-children" role="group" aria-label="Customers">
+<a class="adm-sidebar-item adm-nav-child" href="admin-customers.html"><span>Customers</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-inbox.html"><span>Inbox</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-support-inbox.html"><span>Live support</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="support-agent-telegram.html"><span>Telegram support</span></a>
+</div></div>
+<div class="adm-nav-group"><a class="adm-sidebar-item adm-nav-top" href="admin-setup.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 9v12"/></svg><span>Settings</span></a><div class="adm-nav-children" role="group" aria-label="Settings">
+<a class="adm-sidebar-item adm-nav-child" href="admin-setup.html"><span>Setup &amp; Status</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-seo.html"><span>SEO Manager</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-staff.html"><span>Staff</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-growth.html"><span>Growth tools</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-links.html"><span>Links</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-tracking-settings.html"><span>Tracking Pixels</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-activity.html"><span>Activity log</span></a>
+</div></div>
+</nav>
+      <div class="adm-sidebar-foot">
+        <button type="button" id="admThemeToggle" class="adm-theme-toggle" role="switch" aria-checked="false" aria-label="ডার্ক মোড"><svg viewBox="0 0 24 24" fill="none"><path d="M20 14A8.5 8.5 0 0 1 10 4a8.5 8.5 0 1 0 10 10Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="adm-theme-label">ডার্ক মোড</span><span class="adm-theme-track" aria-hidden="true"></span></button>
+        <button type="button" class="adm-btn adm-btn-secondary" id="admLogout">লগআউট</button>
+      </div>
+    </aside>
+
+    <div class="adm-content">
+      <header class="adm-topbar">
+        <div>
+          <button type="button" class="adm-menu-btn" id="admMenuBtn" aria-label="মেনু খুলুন"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+          <div>
+            <div class="adm-heading"><span class="adm-page-kicker">মুসলিম আবায়া / স্টক ও ক্রয়</span><h1>ইনভেন্টরি ম্যানেজমেন্ট</h1></div>
+            <div class="adm-topbar-user" id="admUserLabel">—</div>
+          </div>
+        </div>
+        <div class="adm-topbar-actions">
+          <button type="button" class="adm-btn adm-btn-secondary" id="admRefresh">Refresh</button>
+        </div>
+      </header>
+
+      <main class="adm-main">
+  <section class="adm-panel">
+    <div class="pf-kpis" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+      <div><span>মোট স্টক</span><b id="invStock">—</b><small>পিস</small></div>
+      <div><span>কম স্টক</span><b id="invLow">—</b><small>পণ্য / ভ্যারিয়েন্ট</small></div>
+      <div><span>মোট ক্রয়</span><b id="invPurchaseTotal">—</b><small>টাকা</small></div>
+      <div><span>সাপ্লায়ার বকেয়া</span><b id="invDue">—</b><small>টাকা</small></div>
+    </div>
+    <p class="st-hint">এই পেজ থেকে সাপ্লায়ার, পণ্য কেনা, স্টকে পণ্য যোগ এবং বকেয়া পেমেন্টের হিসাব রাখতে পারবেন।</p>
+  </section>
+  <div class="adm-feature-error" id="invError" role="alert" hidden></div>
+  <div class="adm-panel">
+    <div class="pf-head"><h2>১. সাপ্লায়ার যোগ করুন</h2></div>
+    <form id="invSupplierForm" class="pf-controls" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
+      <label>সাপ্লায়ারের নাম *<input id="invSupplierName" required maxlength="120" placeholder="যেমন: ঢাকা ফ্যাশন হাউস"></label>
+      <label>মোবাইল নম্বর<input id="invSupplierPhone" maxlength="30" placeholder="01XXXXXXXXX"></label>
+      <label>ঠিকানা<input id="invSupplierAddress" maxlength="300" placeholder="সাপ্লায়ারের ঠিকানা"></label>
+      <label>নোট<input id="invSupplierNotes" maxlength="500" placeholder="ঐচ্ছিক"></label>
+      <div style="align-self:end"><button class="adm-btn adm-btn-primary" type="submit" id="invSupplierSave">সাপ্লায়ার সেভ করুন</button></div>
+    </form>
+    <div class="adm-table-wrap" style="margin-top:14px"><table class="adm-table"><thead><tr><th>সাপ্লায়ার</th><th>ফোন</th><th>মোট ক্রয়</th><th>পরিশোধ</th><th>বকেয়া</th></tr></thead><tbody id="invSupplierBody"><tr><td colspan="5" class="adm-empty">লোড হচ্ছে…</td></tr></tbody></table></div>
+  </div>
+  <div class="adm-panel">
+    <div class="pf-head"><h2>২. নতুন পণ্য কেনা (Purchase)</h2></div>
+    <p class="st-hint">প্রথমে ক্রয়ের তথ্য Draft হিসেবে সেভ হবে। পণ্য হাতে পাওয়ার পর “স্টকে যোগ করুন” চাপলে স্টক বাড়বে।</p>
+    <form id="invPurchaseForm" style="display:grid;gap:12px">
+      <div class="pf-controls" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
+        <label>সাপ্লায়ার *<select id="invPurchaseSupplier" required><option value="">সাপ্লায়ার নির্বাচন করুন</option></select></label>
+        <label>ইনভয়েস নম্বর<input id="invInvoice" maxlength="100" placeholder="INV-001"></label>
+        <label>ক্রয়ের তারিখ<input id="invPurchaseDate" type="date"></label>
+        <label>অন্যান্য খরচ (৳)<input id="invOtherCost" type="number" min="0" step="0.01" value="0"></label>
+        <label>এখন পরিশোধ (৳)<input id="invPaid" type="number" min="0" step="0.01" value="0"></label>
+      </div>
+      <div class="adm-table-wrap"><table class="adm-table"><thead><tr><th>Product ID *</th><th>পণ্যের নাম *</th><th>Color / Size / Variation</th><th>পরিমাণ *</th><th>প্রতি পিস ক্রয়মূল্য *</th><th></th></tr></thead><tbody id="invPurchaseItems"><tr class="inv-item-row"><td><input class="inv-product-id" required placeholder="Product ID"></td><td><input class="inv-product-name" required placeholder="পণ্যের নাম"></td><td><input class="inv-variant" placeholder="Black · 52"></td><td><input class="inv-qty" type="number" min="1" step="1" required value="1"></td><td><input class="inv-unit-cost" type="number" min="0" step="0.01" required value="0"></td><td><button type="button" class="adm-btn adm-btn-secondary inv-remove" aria-label="সারি মুছুন">×</button></td></tr></tbody></table></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="adm-btn adm-btn-secondary" id="invAddItem">+ আরেকটি পণ্য</button><button type="submit" class="adm-btn adm-btn-primary" id="invPurchaseSave">Purchase Draft সেভ করুন</button></div>
+      <small class="st-hint">Product ID ও নাম Product Manager থেকে মিলিয়ে লিখুন। পরের ধাপে এখানে পণ্য খোঁজার তালিকা যুক্ত হবে।</small>
+    </form>
+  </div>
+  <div class="adm-panel">
+    <div class="pf-head"><h2>৩. ক্রয়ের তালিকা</h2><button class="adm-btn adm-btn-secondary" id="invRefreshPurchases" type="button">রিফ্রেশ</button></div>
+    <div class="adm-table-wrap"><table class="adm-table"><thead><tr><th>তারিখ / Invoice</th><th>সাপ্লায়ার</th><th>মোট</th><th>পরিশোধ</th><th>বকেয়া</th><th>অবস্থা</th><th>কাজ</th></tr></thead><tbody id="invPurchaseBody"><tr><td colspan="7" class="adm-empty">লোড হচ্ছে…</td></tr></tbody></table></div>
+  </div>
+  <div class="adm-panel">
+    <div class="pf-head"><h2>৪. সাপ্লায়ারকে টাকা পরিশোধ</h2></div>
+    <form id="invPaymentForm" class="pf-controls" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px">
+      <label>সাপ্লায়ার *<select id="invPaymentSupplier" required><option value="">সাপ্লায়ার নির্বাচন করুন</option></select></label>
+      <label>পরিমাণ (৳) *<input id="invPaymentAmount" type="number" min="0.01" step="0.01" required placeholder="1000"></label>
+      <label>পেমেন্ট পদ্ধতি<select id="invPaymentMethod"><option value="">নির্বাচন করুন</option><option>Cash</option><option>Bank</option><option>bKash</option><option>Nagad</option><option>Rocket</option></select></label>
+      <label>রেফারেন্স<input id="invPaymentReference" placeholder="Transaction ID"></label>
+      <label>তারিখ<input id="invPaymentDate" type="date"></label>
+      <div style="align-self:end"><button type="submit" class="adm-btn adm-btn-primary" id="invPaymentSave">পেমেন্ট সেভ করুন</button></div>
+    </form>
+    <div class="adm-table-wrap" style="margin-top:14px"><table class="adm-table"><thead><tr><th>তারিখ</th><th>সাপ্লায়ার</th><th>Purchase ID</th><th>পরিমাণ</th><th>পদ্ধতি</th><th>রেফারেন্স</th></tr></thead><tbody id="invPaymentBody"><tr><td colspan="6" class="adm-empty">লোড হচ্ছে…</td></tr></tbody></table></div>
+  </div>
+</main>
+    </div>
+  </div>
+
+  <script src="site-api-config.js?v=b4eb7cb7438aad24"></script>
+  <script src="admin-config.js?v=765c69bebedc46a8"></script>
+  <script src="admin-api.js?v=2823eb7bcff4e142"></script>
+  <script src="admin-guard.js?v=42341dd9adc288ea"></script>
+  <script src="admin-page-shell.js?v=1"></script>
+  <script src="admin-inventory.js?v=1"></script>
+<script src="admin-search.js?v=1" defer></script>
+<script src="admin-app.js?v=1" defer></script>
+<script src="admin-wp.js?v=20261124-cache-nav" defer></script>
+</body>
+</html>
