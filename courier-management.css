@@ -172,24 +172,44 @@
 }
 
 
-/* Let the shared admin-shell grid reserve the sidebar column exactly once.
-   Adding another sidebar margin here shifts the page off-screen at 100% zoom. */
-@media (min-width:981px){
-  html.wp-admin-shell .adm-shell > .cm-wrap{
-    box-sizing:border-box!important;
-    width:100%!important;
-    max-width:1440px!important;
-    min-width:0!important;
-    margin:0 auto!important;
-  }
+/* Courier page viewport guard.
+   This page's source markup places .cm-wrap directly inside body.cm-page,
+   unlike the newer .adm-shell pages. Keep the page in the viewport and
+   prevent a stale sidebar offset/transform from clipping the left edge. */
+html.wp-admin-shell body.cm-page{
+  display:block!important;
+  position:relative!important;
+  left:auto!important;
+  transform:none!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+  overflow-x:hidden!important;
+  box-sizing:border-box!important;
 }
-@media (max-width:980px){
-  html.wp-admin-shell .adm-shell > .cm-wrap{
-    box-sizing:border-box!important;
-    width:100%!important;
+html.wp-admin-shell body.cm-page > .cm-wrap{
+  display:block!important;
+  position:relative!important;
+  left:auto!important;
+  transform:none!important;
+  box-sizing:border-box!important;
+  width:100%!important;
+  max-width:1440px!important;
+  min-width:0!important;
+  margin:0 auto!important;
+}
+html.wp-admin-shell body.cm-page .cm-panel,
+html.wp-admin-shell body.cm-page .cm-stats,
+html.wp-admin-shell body.cm-page .cm-lower{
+  min-width:0!important;
+  max-width:100%!important;
+}
+@media(max-width:980px){
+  html.wp-admin-shell body.cm-page > .cm-wrap{
     max-width:100%!important;
-    margin:0!important;
-    min-width:0!important;
+    margin:0 auto!important;
+    padding-inline:clamp(10px,3vw,18px)!important;
   }
 }
 .cm-page,.cm-page .cm-wrap{min-width:0!important;max-width:100%}
