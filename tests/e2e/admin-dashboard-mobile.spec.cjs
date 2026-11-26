@@ -20,7 +20,7 @@ async function stub(page, { inboxDelayMs = 0 } = {}) {
         { productId: 'P-LOW', productName: 'Black Abaya', variant: 'M', tracked: true, available: 2, threshold: 3, status: 'LOW' }] }); },
       inboxCall: function () { return new Promise(function (ok) { setTimeout(function () { ok({ ok: true, stats: { unread: 0 }, contacts: [] }); }, ${inboxDelayMs}); }); },
       call: function () { return Promise.resolve({ ok: true, orders: ORDERS, counts: { all: ORDERS.length } }); },
-      getAnalyticsV2: function (options) { return Promise.resolve({ ok: true, range: options && options.range, summary: { totalOrders: 0, totalOrderValue: 0, deliveredSalesValue: 0, deliveredCount: 0, cancellationRate: 0, deliverySuccessRate: 0 }, salesByMonth: [], topProducts: options && options.range === "all" ? [{ productId: "P-LIFE", name: "Lifetime Winner", qty: 9 }] : [], sourceBreakdown: [] }); },
+      getAnalyticsV2: function (options) { return Promise.resolve({ ok: true, range: options && options.range, from: "2026-11-21", to: "2026-11-27", undatedOrderCount: 0, summary: { totalOrders: 0, totalOrderValue: 0, deliveredSalesValue: 0, deliveredCount: 0, cancellationRate: 0, deliverySuccessRate: 0 }, salesByMonth: [], topProducts: options && options.range === "all" ? [{ productId: "P-LIFE", name: "Lifetime Winner", qty: 9 }] : [], sourceBreakdown: [] }); },
       logout: function () {}
     };` }));
 }
