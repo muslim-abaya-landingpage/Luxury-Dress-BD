@@ -6692,7 +6692,7 @@ function recoverAdminStockOperations_(e) {
         if (String(rows[i][2]) !== 'StockVariants' || row < 2 || row > variants.getLastRow()) throw new Error('UNSUPPORTED_TARGET');
         var current = readStockVariantRow_(variants, row);
         if (current.operationId !== id) {
-          if (current.available !== Number(payload.before.available) || current.reserved !== Number(payload.before.reserved)) {
+          if (current.operationId !== String(payload.before.operationId || '') || current.available !== Number(payload.before.available) || current.reserved !== Number(payload.before.reserved)) {
             stockOperationSetState_(journal, i + 1, 'CONFLICT', 'Current stock differs from prepared before-state');
             conflicts++;
             continue;
