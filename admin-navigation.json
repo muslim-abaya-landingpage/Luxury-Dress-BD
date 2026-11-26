@@ -27,6 +27,10 @@
       {
         "href": "admin-profit.html",
         "label": "Product profit"
+      },
+      {
+        "href": "admin-reports.html",
+        "label": "Reports"
       }
     ]
   },

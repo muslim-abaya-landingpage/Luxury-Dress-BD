@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="bn" class="wp-admin-shell" data-admin-guard="1">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>রিপোর্ট | Muslim Abaya Admin</title>
+  <link rel="stylesheet" href="admin.css?v=d800d917a0c7b197">
+  <link rel="stylesheet" href="admin-design-system.css?v=1eaf4362bddc4ad0">
+  <link rel="stylesheet" href="admin-wp.css?v=20261126-admin-shell-step2">
+  <link rel="stylesheet" href="admin-premium-unified.css?v=20261125-sidebar-hover-stable">
+  <link rel="stylesheet" href="admin-responsive.css?v=1">
+  <link rel="stylesheet" href="courier-management.css?v=20261127-zones">
+  <link rel="stylesheet" href="admin-reports.css?v=20261127-reports">
+  <script src="config.js?v=00107b4d68a09227"></script>
+  <script src="site-api-config.js?v=b4eb7cb7438aad24"></script>
+  <script src="admin-config.js?v=765c69bebedc46a8"></script>
+  <script src="admin-api.js?v=2823eb7bcff4e142"></script>
+  <script src="admin-guard.js?v=42341dd9adc288ea"></script>
+</head>
+<body class="adm-body">
+  <main class="cm-wrap">
+    <header class="cm-head">
+      <div>
+        <div class="adm-page-kicker">MUSLIM ABAYA / OPERATIONS</div>
+        <h1>রিপোর্ট</h1>
+        <p>বিক্রি, পণ্য, কর্মী ও কাস্টমার—নিজের অর্ডার রেকর্ড থেকে হিসাব করা রিপোর্ট।</p>
+      </div>
+      <div class="cm-head-actions">
+        <a class="adm-btn adm-btn-secondary" href="admin-dashboard.html">ড্যাশবোর্ড</a>
+        <a class="adm-btn adm-btn-secondary" href="admin-orders.html">অর্ডার</a>
+        <button class="adm-btn adm-btn-primary" id="rpRefresh" type="button">↻ রিফ্রেশ</button>
+      </div>
+    </header>
+
+    <nav class="cm-tabs" id="rpTabs" aria-label="রিপোর্ট ধরন">
+      <button type="button" data-tab="sales" class="is-active">বিক্রয় (Sales)</button>
+      <button type="button" data-tab="product">পণ্য (Product)</button>
+      <button type="button" data-tab="customer">কাস্টমার (Customer)</button>
+      <button type="button" data-tab="employee">কর্মী (Employee)</button>
+    </nav>
+
+    <section class="cm-panel rp-controls">
+      <div class="cm-tools">
+        <select id="rpRange" aria-label="সময়সীমা">
+          <option value="today">আজ</option>
+          <option value="7d">৭ দিন</option>
+          <option value="30d" selected>৩০ দিন</option>
+          <option value="month">এই মাস</option>
+          <option value="all">সব সময়</option>
+        </select>
+        <span id="rpLoadState" class="cm-muted" aria-live="polite"></span>
+      </div>
+    </section>
+
+    <section class="cm-panel" id="rpSalesPanel">
+      <div class="cm-panel-head"><div><h2>বিক্রয় সারসংক্ষেপ</h2><p>Analytics v2 থেকে—তারিখভিত্তিক Bangladesh টাইমজোন হিসাব।</p></div></div>
+      <div class="cm-stats" id="rpSalesStats">
+        <article class="cm-stat"><span>মোট অর্ডার</span><strong id="rpTotalOrders">—</strong></article>
+        <article class="cm-stat"><span>মোট অর্ডার মূল্য</span><strong id="rpTotalValue">—</strong></article>
+        <article class="cm-stat"><span>Delivered</span><strong id="rpDeliveredCount">—</strong><small id="rpDeliveredValue"></small></article>
+        <article class="cm-stat"><span>Return/Cancel</span><strong id="rpReturnedCount">—</strong></article>
+        <article class="cm-stat"><span>কাস্টমার</span><strong id="rpCustomerCount">—</strong><small id="rpRepeatCount"></small></article>
+      </div>
+      <div class="cm-table-wrap">
+        <table class="cm-table">
+          <thead><tr><th>মাস</th><th>অর্ডার</th><th>মোট মূল্য</th><th>Delivered অর্ডার</th><th>Delivered বিক্রয়</th></tr></thead>
+          <tbody id="rpMonthRows"><tr><td colspan="5" class="cm-empty">লোড হচ্ছে…</td></tr></tbody>
+        </table>
+      </div>
+      <div class="cm-panel-head cm-recent-head"><div><h3>উৎস (Source)</h3></div></div>
+      <div class="cm-table-wrap">
+        <table class="cm-table">
+          <thead><tr><th>উৎস</th><th>অর্ডার</th><th>Delivered</th></tr></thead>
+          <tbody id="rpSourceRows"><tr><td colspan="3" class="cm-empty">—</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="cm-panel" id="rpProductPanel" hidden>
+      <div class="cm-panel-head"><div><h2>সেরা বিক্রিত পণ্য</h2><p>Confirmed/Shipped/Delivered অর্ডারের কার্ট আইটেম থেকে গণনা।</p></div></div>
+      <div class="cm-table-wrap"><table class="cm-table"><thead><tr><th>পণ্য</th><th>বিক্রি (পিস)</th></tr></thead><tbody id="rpProductRows"><tr><td colspan="2" class="cm-empty">লোড হচ্ছে…</td></tr></tbody></table></div>
+      <div class="cm-panel-head cm-recent-head"><div><h3>ক্যাটাগরি অনুযায়ী</h3></div></div>
+      <div class="cm-table-wrap"><table class="cm-table"><thead><tr><th>ক্যাটাগরি</th><th>বিক্রি (পিস)</th></tr></thead><tbody id="rpCategoryRows"><tr><td colspan="2" class="cm-empty">—</td></tr></tbody></table></div>
+      <div class="cm-panel-head cm-recent-head"><div><h3>সাইজ অনুযায়ী</h3></div></div>
+      <div class="cm-table-wrap"><table class="cm-table"><thead><tr><th>সাইজ</th><th>বিক্রি (পিস)</th></tr></thead><tbody id="rpSizeRows"><tr><td colspan="2" class="cm-empty">—</td></tr></tbody></table></div>
+    </section>
+
+    <section class="cm-panel" id="rpCustomerPanel" hidden>
+      <div class="cm-panel-head"><div><h2>কাস্টমার রিপোর্ট</h2><p id="rpCustomerNote">সাম্প্রতিক লোড করা অর্ডার থেকে—ফোন নম্বর অনুযায়ী গ্রুপ করা।</p></div></div>
+      <div class="cm-table-wrap">
+        <table class="cm-table">
+          <thead><tr><th>কাস্টমার</th><th>ফোন</th><th>অর্ডার সংখ্যা</th><th>Delivered</th><th>মোট মূল্য</th></tr></thead>
+          <tbody id="rpCustomerRows"><tr><td colspan="5" class="cm-empty">লোড হচ্ছে…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="cm-panel" id="rpEmployeePanel" hidden>
+      <div class="cm-panel-head"><div><h2>কর্মী রিপোর্ট</h2><p id="rpEmployeeNote">সাম্প্রতিক লোড করা অর্ডার থেকে—"Assigned" কর্মী অনুযায়ী গ্রুপ করা।</p></div></div>
+      <div class="cm-table-wrap">
+        <table class="cm-table">
+          <thead><tr><th>কর্মী</th><th>অর্ডার সংখ্যা</th><th>Delivered</th><th>Return/Cancel</th><th>Delivered বিক্রয়</th></tr></thead>
+          <tbody id="rpEmployeeRows"><tr><td colspan="5" class="cm-empty">লোড হচ্ছে…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+    <p class="cm-footer-note">কাস্টমার ও কর্মী রিপোর্ট সার্ভার থেকে একবারে আনা সাম্প্রতিক অর্ডার রেকর্ডের উপর ভিত্তি করে তৈরি (নিচে ঠিক কতটি অর্ডার স্ক্যান হয়েছে তা দেখানো আছে); বিক্রয় ও পণ্য রিপোর্ট পুরো তারিখ-সীমার সম্পূর্ণ হিসাব।</p>
+  </main>
+  <script src="admin-reports.js?v=20261127-reports"></script>
+</body>
+</html>
