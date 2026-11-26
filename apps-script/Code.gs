@@ -6574,6 +6574,7 @@ function stockOperationSetState_(sheet, row, state, error) {
 function appendStockLedgerOnce_(entry, operationId) {
   if (!operationId) throw new Error('STOCK_OPERATION_ID_REQUIRED');
   var sheet = ensureStockLedgerSheet_();
+  ensureStockLedgerOperationIdColumn_(sheet);
   var rows = sheet.getDataRange().getValues();
   for (var i = 1; i < rows.length; i++) {
     if (String(rows[i][11] || '') === operationId) return { duplicate: true, row: i + 1 };
