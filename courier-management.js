@@ -10,7 +10,7 @@
   function isDelivered(o) { return /deliver/i.test(statusOf(o)) || String(o.status).toLowerCase() === 'delivered'; }
   function isReturned(o) { return /return|cancel|fake/i.test(statusOf(o)) || /return|cancel|fake/i.test(String(o.status || '')); }
   function isShipped(o) { return !!(o.tracking || o.consignmentId) || /shipped|transit|delivered|return/i.test(statusOf(o)); }
-  function isReady(o) { return !isShipped(o) && !o.tracking && !o.consignmentId && /^(confirmed|processing)$/i.test(String(o.status || '')); }
+  function isReady(o) { return !o.blocked && !isShipped(o) && !o.tracking && !o.consignmentId && /^(confirmed|processing)$/i.test(String(o.status || '')); }
   function providerOf(o) { return String(o.courier || (o.tracking || o.consignmentId ? 'Steadfast' : '')).trim(); }
   function visibleOrders() {
     return state.orders.filter(function (o) {
