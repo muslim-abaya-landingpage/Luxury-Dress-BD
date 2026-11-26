@@ -37,6 +37,23 @@
     el.textContent = String(error && error.message || error);
     el.hidden = false;
   }
+  function loadProtectionStatus() {
+    var target=byId("frProtectionDetails"), state=byId("frProtectionState");
+    var s=window.MaAdmin&&MaAdmin.getSession?MaAdmin.getSession():null;
+    if(!s||!s.token){state.textContent="Login required";target.textContent="অ্যাডমিন সেশন পাওয়া যায়নি।";return;}
+    fetch("/_ma/admin/order-settings?token="+encodeURIComponent(s.token),{cache:"no-store"})
+      .then(function(r){return r.json().then(function(data){if(!r.ok||!data.ok)throw new Error(data.error||("HTTP_"+r.status));return data;});})
+      .then(function(data){
+        var settings=data.settings||{}, integrations=data.integrations||{};
+        var otp=!!integrations.whatsappOtp, courier=!!settings.courierProtection;
+        state.textContent="Connected";
+        target.innerHTML='<p><strong>WhatsApp OTP:</strong> '+(otp?"Credentials configured":"Not configured")+'</p>'+
+          '<p><strong>OTP policy:</strong> '+(settings.mobileVerification?"Enabled for eligible risk orders":"Disabled")+'</p>'+
+          '<p><strong>Courier protection:</strong> '+(courier?"Enabled":"Disabled")+'</p>'+
+          '<p><strong>Minimum delivery success ratio:</strong> '+esc(settings.courierSuccessRatio==null?"—":settings.courierSuccessRatio+"%")+'</p>'+
+          '<p><strong>Duplicate protection:</strong> '+(settings.duplicateBlock?"Enabled":"Disabled")+' · '+esc(settings.duplicateWindowMinutes||"—")+' minutes</p>';
+      }).catch(function(error){state.textContent="Unavailable";target.textContent="Worker configuration পাওয়া যায়নি: "+String(error.message||error)+". Secrets-এর মান এখানে দেখানো হয় না।";});
+  }
   function load(append) {
     append = append === true;
     if (busy) return Promise.resolve();
@@ -147,6 +164,6 @@
     button.addEventListener("click", function () { decide(button.getAttribute("data-fr-decision")); });
   });
   MaAdminGuard.requireOwner().then(function (owner) {
-    if (owner) MaAdminShell.start(load);
+    if (owner) { MaAdminShell.start(load); loadProtectionStatus(); }
   }).catch(showError);
 })();
