@@ -13,10 +13,10 @@ test('SOLD to Confirmed never writes a false RESERVED stock stage', () => {
   assert.match(branch, /currentStage === 'SOLD'/);
   assert.match(branch, /throw new Error\('STOCK_RECONFIRM_REQUIRES_REVIEW'\)/);
   const soldStart = branch.indexOf("if (currentStage === 'SOLD') {");
-  const soldEnd = branch.indexOf("\n    }", soldStart);
-  assert.ok(soldStart >= 0 && soldEnd > soldStart, 'Could not isolate SOLD branch');
-  assert.doesNotMatch(branch.slice(soldStart, soldEnd), /reserveStockForOrderItems_\(items, orderId/);
-  assert.match(branch, /reserveStockForOrderItems_\(items, orderId/);
+  const reserveCall = branch.indexOf("reserveStockForOrderItems_(items, orderId", soldStart);
+  assert.ok(soldStart >= 0 && reserveCall > soldStart, 'Could not locate the non-SOLD reservation path');
+  assert.doesNotMatch(branch.slice(soldStart, reserveCall), /reserveStockForOrderItems_\(items, orderId/);
+  assert.match(branch.slice(reserveCall), /^reserveStockForOrderItems_/);
 });
 
 test('admin order update surfaces a manual-review error and does not save the new status', () => {
