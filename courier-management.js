@@ -194,6 +194,46 @@
     $('cmZoneDialog').close();
     renderZones();
   }
+  function invoiceCandidate(o, courier) {
+    if (isDelivered(o) || isReturned(o)) return false;
+    if (!isShipped(o)) return false;
+    if (courier === 'all') return true;
+    return providerOf(o).toLowerCase() === courier.toLowerCase();
+  }
+  function renderInvoiceRows() {
+    var courier = $('cmInvoiceCourier').value;
+    var rows = state.orders.filter(function (o) { return invoiceCandidate(o, courier); });
+    state.invoiceRows = rows;
+    if (!rows.length) { $('cmInvoiceRows').innerHTML = '<tr><td colspan="6" class="cm-empty">এই কুরিয়ারে এখনো পাঠানো/পথে থাকা কোনো পার্সেল নেই।</td></tr>'; $('cmInvoiceCount').textContent = '—'; return; }
+    $('cmInvoiceRows').innerHTML = rows.map(function (o) {
+      return '<tr><td><input type="checkbox" class="cm-invoice-check" data-invoice-id="' + esc(o.orderId) + '" checked></td>' +
+        '<td><strong>' + esc(o.orderId || '') + '</strong></td>' +
+        '<td>' + esc(o.name) + '<small>' + esc(o.phone) + '</small></td>' +
+        '<td class="cm-address">' + esc(o.address || '—') + '</td>' +
+        '<td>' + esc(o.tracking || o.consignmentId || '—') + '</td>' +
+        '<td>' + money(o.due != null ? o.due : o.total) + '</td></tr>';
+    }).join('');
+    updateInvoiceCount();
+  }
+  function updateInvoiceCount() {
+    var checks = $('cmInvoiceRows').querySelectorAll('.cm-invoice-check:checked');
+    $('cmInvoiceCount').textContent = checks.length + 'টি পার্সেল নির্বাচিত (মোট ' + (state.invoiceRows || []).length + 'টি)';
+  }
+  function invoiceToggleAll() {
+    var checks = $('cmInvoiceRows').querySelectorAll('.cm-invoice-check');
+    var allChecked = Array.prototype.every.call(checks, function (c) { return c.checked; });
+    Array.prototype.forEach.call(checks, function (c) { c.checked = !allChecked; });
+    updateInvoiceCount();
+  }
+  function printInvoice() {
+    var checks = $('cmInvoiceRows').querySelectorAll('.cm-invoice-check:checked');
+    var ids = Array.prototype.map.call(checks, function (c) { return c.getAttribute('data-invoice-id'); });
+    var rows = (state.invoiceRows || []).filter(function (o) { return ids.indexOf(String(o.orderId)) !== -1; });
+    if (!rows.length) { $('cmInvoiceCount').textContent = 'অন্তত একটি পার্সেল বাছুন।'; return; }
+    var courierSel = $('cmInvoiceCourier');
+    var label = courierSel.options[courierSel.selectedIndex].textContent;
+    window.MaCourierInvoice.print(rows, { courier: label });
+  }
   function loadPerformance() {
     $('cmPerformance').innerHTML = '<tr><td colspan="5" class="cm-empty">লোড হচ্ছে…</td></tr>';
     MaAdmin.call('AdminCourierPerformance', {}).then(function (res) {
@@ -415,6 +455,10 @@
     $('cmZoneDialogAll').addEventListener('click', function () { zoneDialogSetAll(true); });
     $('cmZoneDialogNone').addEventListener('click', function () { zoneDialogSetAll(false); });
     $('cmZoneDialogSearch').addEventListener('input', function (e) { renderZoneDialogList(e.target.value); });
+    $('cmInvoiceLoad').addEventListener('click', renderInvoiceRows);
+    $('cmInvoiceAll').addEventListener('click', invoiceToggleAll);
+    $('cmInvoiceRows').addEventListener('change', function (e) { if (e.target.classList.contains('cm-invoice-check')) updateInvoiceCount(); });
+    $('cmInvoicePrint').addEventListener('click', printInvoice);
   }
   document.addEventListener('DOMContentLoaded', function () {
     bind();

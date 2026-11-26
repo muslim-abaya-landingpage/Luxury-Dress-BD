@@ -151,6 +151,31 @@
       <div class="cm-rate-actions"><button class="adm-btn adm-btn-primary" type="button" id="cmZonesSave">জোন সংরক্ষণ</button><span id="cmZonesMessage" role="status"></span></div>
       <p class="cm-note">কোনো জোনে জেলা যোগ না করলে বা চার্জ ফাঁকা রাখলে সেই জোন অর্ডার পেজে দেখানো হবে না।</p>
     </section>
+
+    <section class="cm-panel cm-invoice-panel" aria-labelledby="cmInvoiceTitle">
+      <div class="cm-panel-head">
+        <div><h2 id="cmInvoiceTitle">কুরিয়ার ইনভয়েস / ম্যানিফেস্ট</h2><p>একটি কুরিয়ারে পাঠানো একাধিক পার্সেলের একত্র তালিকা তৈরি করে প্রিন্ট করুন—কুরিয়ার অফিস/রাইডারকে হস্তান্তরের জন্য।</p></div>
+      </div>
+      <div class="cm-tools">
+        <select id="cmInvoiceCourier" aria-label="কুরিয়ার নির্বাচন">
+          <option value="all">সব কুরিয়ার (Shipped)</option>
+          <option value="Steadfast">Steadfast</option>
+          <option value="Pathao">Pathao</option>
+          <option value="RedX">RedX</option>
+          <option value="Paperfly">Paperfly</option>
+          <option value="Manual">Manual</option>
+        </select>
+        <button class="adm-btn adm-btn-secondary" type="button" id="cmInvoiceLoad">তালিকা লোড করুন</button>
+        <button class="adm-btn adm-btn-secondary" type="button" id="cmInvoiceAll">সব বাছাই/বাতিল</button>
+      </div>
+      <div class="cm-table-wrap">
+        <table class="cm-table">
+          <thead><tr><th></th><th>অর্ডার</th><th>কাস্টমার</th><th>ঠিকানা</th><th>ট্র্যাকিং</th><th>COD</th></tr></thead>
+          <tbody id="cmInvoiceRows"><tr><td colspan="6" class="cm-empty">কুরিয়ার বেছে "তালিকা লোড করুন" চাপুন।</td></tr></tbody>
+        </table>
+      </div>
+      <div class="cm-rate-actions"><span id="cmInvoiceCount">—</span><button class="adm-btn adm-btn-primary" type="button" id="cmInvoicePrint">🖨 ইনভয়েস প্রিন্ট করুন</button></div>
+    </section>
     <p class="cm-footer-note">COD Due অর্ডারের বকেয়া অঙ্ক থেকে দেখানো হয়—এটি কুরিয়ারের settlement statement বা হাতে পাওয়া টাকার হিসাব নয়। Settlement reconciliation আলাদা backend integration হিসেবে পরবর্তী ধাপে যুক্ত হবে।</p>
   </main>
 
@@ -182,6 +207,7 @@
     <div id="cmZoneDialogList" class="cm-zone-dialog-list"></div>
     <div class="cm-dialog-actions"><button type="button" class="adm-btn adm-btn-primary" id="cmZoneDialogDone">হয়ে গেছে</button></div>
   </dialog>
+  <script src="admin-courier-invoice.js?v=20261127-zones"></script>
   <script src="courier-management.js?v=20261127-zones"></script>
 </body>
 </html>

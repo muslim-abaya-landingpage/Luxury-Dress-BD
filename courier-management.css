@@ -87,3 +87,5 @@
 .cm-zone-dialog-list{max-height:280px;overflow:auto;display:grid;grid-template-columns:1fr 1fr;gap:4px;border:1px solid var(--adm-border,#e2e8f0);border-radius:10px;padding:10px}
 .cm-zone-district{display:flex;align-items:center;gap:6px;font-size:13px;padding:4px 2px}
 @media(max-width:600px){.cm-zone-row{grid-template-columns:1fr 1fr}.cm-zone-pick{grid-column:1/-1}.cm-zone-dialog-list{grid-template-columns:1fr}}
+.cm-invoice-panel .cm-tools select{min-width:180px}
+.cm-invoice-check{width:16px;height:16px}
