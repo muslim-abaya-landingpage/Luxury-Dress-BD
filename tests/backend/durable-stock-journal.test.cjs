@@ -87,6 +87,44 @@ test('failed ledger append is recoverable without applying stock twice', () => {
   assert.equal(r.ledger.rows.length, 2);
 });
 
+test('journal prepared before stock write is safely replayed from the exact prior marker', () => {
+  const r = runtime();
+  const write = r.ctx.writeStockVariantRow_;
+  r.ctx.writeStockVariantRow_ = () => { throw new Error('injected stock write outage'); };
+  assert.throws(() => r.ctx.mutateStockVariant_({
+    productId: 'AB-1', variant: 'Body 44', deltaAvailable: -2, deltaReserved: 2,
+    changeType: 'RESERVE', orderId: 'MA-ORDER-BEFORE', admin: 'system'
+  }), /injected stock write outage/);
+  assert.equal(r.variants.rows[1][5], 10);
+  assert.equal(r.journal.rows[1][1], 'PREPARED');
+  r.ctx.writeStockVariantRow_ = write;
+  const result = r.ctx.recoverAdminStockOperations_({ Token: 'admin' });
+  assert.equal(result.recovered, 1);
+  assert.equal(r.variants.rows[1][5], 8);
+  assert.equal(r.variants.rows[1][6], 2);
+  assert.equal(r.journal.rows[1][1], 'COMMITTED');
+  assert.equal(r.ledger.rows.length, 2);
+});
+
+test('different operation marker blocks replay even when quantities happen to match', () => {
+  const r = runtime();
+  const append = r.ctx.appendStockLedgerOnce_;
+  r.ctx.appendStockLedgerOnce_ = () => { throw new Error('injected ledger outage'); };
+  assert.throws(() => r.ctx.mutateStockVariant_({
+    productId: 'AB-1', variant: 'Body 44', deltaAvailable: -2, deltaReserved: 2,
+    changeType: 'RESERVE', orderId: 'MA-ORDER-SAME-QTY', admin: 'system'
+  }), /injected ledger outage/);
+  r.ctx.appendStockLedgerOnce_ = append;
+  r.variants.rows[1][5] = 10;
+  r.variants.rows[1][6] = 0;
+  r.variants.rows[1][10] = 'ANOTHER-OPERATION';
+  const result = r.ctx.recoverAdminStockOperations_({ Token: 'admin' });
+  assert.equal(result.conflicts, 1);
+  assert.equal(r.journal.rows[1][1], 'CONFLICT');
+  assert.equal(r.variants.rows[1][5], 10);
+  assert.equal(r.ledger.rows.length, 1);
+});
+
 test('a later mutation reconciles a pending ledger write before replacing the row marker', () => {
   const r = runtime();
   const append = r.ctx.appendStockLedgerOnce_;
