@@ -6599,7 +6599,7 @@ function reconcilePendingStockOperationsForRow_(variants, targetRow) {
     var id = String(rows[i][0] || ''), payload = JSON.parse(String(rows[i][4] || '{}'));
     var current = readStockVariantRow_(variants, targetRow);
     if (current.operationId !== id) {
-      if (current.available !== Number(payload.before.available) || current.reserved !== Number(payload.before.reserved)) {
+      if (current.operationId !== String(payload.before.operationId || '') || current.available !== Number(payload.before.available) || current.reserved !== Number(payload.before.reserved)) {
         stockOperationSetState_(journal, i + 1, 'CONFLICT', 'Pending operation could not be reconciled before a later mutation');
         throw new Error('STOCK_OPERATION_CONFLICT:' + id);
       }
@@ -6643,7 +6643,7 @@ function mutateStockVariant_(opts) {
     nextReserved = saved.after.reserved;
     entry = saved.entry;
   } else {
-    var payload = { row: row, before: { available: before.available, reserved: before.reserved },
+    var payload = { row: row, before: { available: before.available, reserved: before.reserved, operationId: before.operationId || '' },
       after: { available: nextAvailable, reserved: nextReserved }, fields: {
         tracked: opts.setUntracked ? false : !!(before.tracked || opts.setTracked), productName: opts.productName || '',
         category: opts.category || '', threshold: typeof opts.threshold === 'undefined' ? undefined : opts.threshold,
@@ -6654,7 +6654,7 @@ function mutateStockVariant_(opts) {
   }
   var current = readStockVariantRow_(sheet, row);
   if (current.operationId !== operationId) {
-    if (current.available !== Number(before.available) || current.reserved !== Number(before.reserved)) {
+    if (current.operationId !== String(before.operationId || '') || current.available !== Number(before.available) || current.reserved !== Number(before.reserved)) {
       stockOperationSetState_(journal, journalRow, 'CONFLICT', 'Stock row changed after PREPARED; automatic replay stopped');
       throw new Error('STOCK_OPERATION_CONFLICT:' + operationId);
     }
