@@ -6684,33 +6684,7 @@ function recoverAdminStockOperations_(e) {
   } finally { lock.releaseLock(); }
 }
 
-function mutateStockVariant_(opts) {
-  var sheet = ensureStockVariantsSheet_();
-  var row = getOrCreateStockVariantRow_(sheet, opts.productId, opts.productName, opts.variant, opts.category);
-  var before = readStockVariantRow_(sheet, row);
-  var nextAvailable = Math.max(0, before.available + (opts.deltaAvailable || 0));
-  var nextReserved = Math.max(0, before.reserved + (opts.deltaReserved || 0));
-  var fields = { available: nextAvailable, reserved: nextReserved, updatedBy: opts.admin || 'system' };
-  if (opts.setTracked) fields.tracked = true;
-  if (opts.productName) fields.productName = opts.productName;
-  if (opts.category) fields.category = opts.category;
-  if (typeof opts.threshold !== 'undefined') fields.threshold = opts.threshold;
-  writeStockVariantRow_(sheet, row, fields);
-  try { queueLowStockAlert_(before, nextAvailable, !!(before.tracked || opts.setTracked)); } catch (lowErr) {}
-  appendStockLedger_({
-    productId: before.productId || opts.productId,
-    variant: before.variant || opts.variant,
-    changeType: opts.changeType,
-    qtyBefore: before.available,
-    qtyAfter: nextAvailable,
-    reservedBefore: before.reserved,
-    reservedAfter: nextReserved,
-    reason: opts.reason || '',
-    orderId: opts.orderId || '',
-    admin: opts.admin || 'system'
-  });
-  return { before: before, after: { available: nextAvailable, reserved: nextReserved } };
-}
+
 
 var LOW_STOCK_DEFAULT_THRESHOLD_ = 2;
 var LOW_STOCK_QUEUE_KEY_ = 'LOW_STOCK_ALERT_QUEUE';
