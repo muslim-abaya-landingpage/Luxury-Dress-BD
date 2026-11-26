@@ -107,6 +107,30 @@ test('a later mutation reconciles a pending ledger write before replacing the ro
   assert.equal(r.ledger.rows.length, 3);
 });
 
+test('recovery marks diverged stock rows as conflict instead of overwriting newer stock', () => {
+  const r = runtime();
+  const append = r.ctx.appendStockLedgerOnce_;
+  r.ctx.appendStockLedgerOnce_ = () => { throw new Error('injected ledger outage'); };
+  assert.throws(() => r.ctx.mutateStockVariant_({
+    productId: 'AB-1', variant: 'Body 44', deltaAvailable: -2, deltaReserved: 2,
+    changeType: 'RESERVE', orderId: 'MA-ORDER-20', admin: 'system'
+  }), /injected ledger outage/);
+  r.ctx.appendStockLedgerOnce_ = append;
+  r.variants.rows[1][5] = 4;
+  r.variants.rows[1][10] = 'LATER-UNKNOWN-OP';
+  const result = r.ctx.recoverAdminStockOperations_({ Token: 'admin' });
+  assert.equal(result.conflicts, 1);
+  assert.equal(r.journal.rows[1][1], 'CONFLICT');
+  assert.equal(r.variants.rows[1][5], 4);
+  assert.equal(r.ledger.rows.length, 1);
+});
+
+test('all direct variant adjustment entry points route through the journal mutation', () => {
+  assert.match(extract('saveAdminStockVariant_'), /mutateStockVariant_\(/);
+  assert.match(extract('quickAdjustAdminStock_'), /mutateStockVariant_\(/);
+  assert.match(extract('commitAdminStockCsvBatch_'), /mutateStockVariant_\(/);
+});
+
 test('replaying a committed operation id does not mutate or duplicate its ledger row', () => {
   const r = runtime();
   const opts = { productId: 'AB-1', variant: 'Body 44', deltaAvailable: -1, deltaReserved: 1,
