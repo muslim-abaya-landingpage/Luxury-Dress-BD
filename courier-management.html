@@ -66,6 +66,32 @@
       <p class="cm-note">নিরাপত্তা: কেবল Confirmed বা Processing অর্ডার Steadfast-এ পাঠানো যাবে। Pathao ও RedX-এর চার্জ এখানে তুলনার জন্য; তাদের API-তে পার্সেল পাঠানো এখনো সংযুক্ত নয়।</p>
     </section>
 
+    <section class="cm-panel cm-settlement-panel" aria-labelledby="cmSettlementTitle">
+      <div class="cm-panel-head">
+        <div><h2 id="cmSettlementTitle">COD Settlement · কুরিয়ার থেকে টাকা বুঝে পাওয়া</h2><p>Delivered COD অর্ডারের বিপরীতে কুরিয়ার থেকে পাওয়া টাকা আংশিক বা সম্পূর্ণ জমা হিসেবে লিখুন।</p></div>
+        <button class="adm-btn adm-btn-secondary" type="button" id="cmSettlementRefresh">আপডেট</button>
+      </div>
+      <div class="cm-settlement-stats">
+        <article><span>মোট COD পাওনা</span><strong id="cmSetDue">—</strong></article>
+        <article><span>জমা পাওয়া</span><strong id="cmSetReceived">—</strong></article>
+        <article><span>এখনো বাকি</span><strong id="cmSetOutstanding">—</strong></article>
+      </div>
+      <div class="cm-table-wrap">
+        <table class="cm-table cm-settlement-table">
+          <thead><tr><th>অর্ডার</th><th>কাস্টমার</th><th>কুরিয়ার</th><th>COD পাওনা</th><th>জমা</th><th>বাকি</th><th>অবস্থা</th><th>কাজ</th></tr></thead>
+          <tbody id="cmSettlementRows"><tr><td colspan="8" class="cm-empty">Settlement ডেটা লোড হচ্ছে…</td></tr></tbody>
+        </table>
+      </div>
+      <div class="cm-panel-head cm-recent-head"><div><h3>সাম্প্রতিক COD জমা</h3><p>শেষ ৫০টি জমার রেকর্ড</p></div></div>
+      <div class="cm-table-wrap">
+        <table class="cm-table cm-recent-table">
+          <thead><tr><th>তারিখ</th><th>অর্ডার</th><th>কুরিয়ার</th><th>পরিমাণ</th><th>রেফারেন্স</th></tr></thead>
+          <tbody id="cmSettlementRecent"><tr><td colspan="5" class="cm-empty">কোনো রেকর্ড নেই।</td></tr></tbody>
+        </table>
+      </div>
+      <p class="cm-note">প্রতিটি জমা আলাদা append-only রেকর্ড হিসেবে থাকবে। একই অর্ডারে একাধিক আংশিক জমা করা যাবে; পাওনার বেশি জমা বা একই রেফারেন্স দ্বিতীয়বার গ্রহণ করা হবে না।</p>
+    </section>
+
     <section class="cm-lower">
       <article class="cm-panel">
         <div class="cm-panel-head"><div><h2>কুরিয়ার চার্জ সেটিংস</h2><p>আপনার নিজস্ব কুরিয়ার অ্যাকাউন্টের নির্ধারিত চার্জ লিখুন।</p></div></div>
@@ -91,6 +117,19 @@
     <div class="cm-dialog-head"><div><h2>পার্সেল ট্র্যাকিং</h2><p id="cmTrackingOrder"></p></div><button type="button" id="cmTrackingClose" aria-label="বন্ধ করুন">×</button></div>
     <div id="cmTrackingBody" class="cm-tracking-body">তথ্য আনা হচ্ছে…</div>
     <div class="cm-dialog-actions"><button type="button" class="adm-btn adm-btn-secondary" id="cmTrackingRefresh">আবার যাচাই</button><button type="button" class="adm-btn adm-btn-primary" id="cmTrackingDone">বন্ধ</button></div>
+  </dialog>
+  <dialog id="cmSettlementDialog" class="cm-dialog">
+    <form id="cmSettlementForm">
+      <div class="cm-dialog-head"><div><h2>COD জমা রেকর্ড</h2><p id="cmSettlementOrder"></p></div><button type="button" id="cmSettlementClose" aria-label="বন্ধ করুন">×</button></div>
+      <div class="cm-settlement-form">
+        <label>জমা পাওয়া টাকা (৳)<input id="cmSettlementAmount" type="number" min="0.01" step="0.01" required></label>
+        <label>ব্যাংক / bKash / Nagad Transaction Reference<input id="cmSettlementReference" type="text" maxlength="100" required placeholder="যেমন: TRX123456"></label>
+        <label>জমার তারিখ<input id="cmSettlementDate" type="date" required></label>
+        <label>নোট (ঐচ্ছিক)<textarea id="cmSettlementNote" rows="2" maxlength="240" placeholder="যেমন: Steadfast weekly payout"></textarea></label>
+      </div>
+      <p id="cmSettlementMessage" role="status" class="cm-settlement-message"></p>
+      <div class="cm-dialog-actions"><button type="button" class="adm-btn adm-btn-secondary" id="cmSettlementCancel">বাতিল</button><button type="submit" class="adm-btn adm-btn-primary" id="cmSettlementSave">জমা সংরক্ষণ</button></div>
+    </form>
   </dialog>
   <script src="courier-management.js?v=1"></script>
 </body>
