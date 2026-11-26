@@ -68,6 +68,7 @@
       byId("frTitle").textContent = "Order " + (r.orderId || "pending ID");
       byId("frMeta").textContent = "Risk " + r.riskScore + "/100 · " + r.riskLevel + " · " + statusLabel(r.status) + " · Version " + r.version;
       byId("frReasons").innerHTML = '<h3>Risk reasons</h3><ul>' + (r.reasons || []).map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + '</ul><h3>Signal summary</h3><pre>' + esc(JSON.stringify(r.signals || {}, null, 2)) + '</pre>';
+      loadCustomerContext(r);
       byId("frHistory").innerHTML = (data.history || []).map(function (item) {
         return '<li><strong>' + esc(item.action) + '</strong> · ' + esc(item.previousStatus || "—") + ' → ' + esc(item.newStatus) +
           '<small>' + esc(item.actorId) + ' · ' + esc(date(item.createdAt)) + '</small>' +
@@ -80,6 +81,41 @@
       });
       byId("frDetail").scrollIntoView({ behavior: "smooth", block: "start" });
     }).catch(showError);
+  }
+  function customerMarkup(order, history) {
+    var stats = history && history.stats || {};
+    var rate = history && history.successRate;
+    var blocked = !!(order && order.blocked);
+    var recent = history && history.recent || [];
+    var kpis = [["মোট অর্ডার",stats.total||0],["ডেলিভার্ড",stats.delivered||0],["ক্যানসেল",stats.cancelled||0],["ফেক",stats.fake||0],["রিটার্ন",stats.returned||0],["সফলতার হার",rate==null?"N/A":rate+"%"]];
+    var html = '<p><strong>ফোন:</strong> '+esc(order&&order.phone||"পাওয়া যায়নি")+' &nbsp; <strong>নিজস্ব হিস্ট্রি রিস্ক:</strong> '+esc(history&&history.risk||"N/A")+' &nbsp; <strong>Phone status:</strong> '+(blocked?"Blocked":"Active")+'</p>';
+    html += '<div class="fr-customer-kpis">'+kpis.map(function(x){return '<div class="fr-customer-kpi"><strong>'+esc(x[1])+'</strong><small>'+esc(x[0])+'</small></div>';}).join("")+'</div>';
+    if(blocked) html += '<p><strong>Block reason:</strong> '+esc(order.blockReason||"কারণ দেওয়া হয়নি")+'</p>';
+    html += '<div class="fr-customer-actions"><button type="button" class="adm-btn adm-btn-secondary" id="frTogglePhoneBlock">'+(blocked?"Unblock phone":"Block phone number")+'</button>'+(order&&order.orderId?'<a class="adm-btn adm-btn-secondary" href="admin-order.html?id='+encodeURIComponent(order.orderId)+'">Open order</a>':"")+'</div>';
+    html += '<h4>সাম্প্রতিক অর্ডার</h4><div class="adm-table-wrap"><table class="fr-customer-table"><thead><tr><th>Order</th><th>Date</th><th>Status</th><th>Courier</th><th>Total</th></tr></thead><tbody>';
+    html += recent.length?recent.map(function(x){return '<tr><td>'+(x.orderId?'<a href="admin-order.html?id='+encodeURIComponent(x.orderId)+'">'+esc(x.orderId)+'</a>':"—")+'</td><td>'+esc(x.time||"—")+'</td><td>'+esc(x.status||"—")+'</td><td>'+esc(x.courierStatus||"—")+'</td><td>'+esc(x.total==null?"—":x.total)+'</td></tr>';}).join(""):'<tr><td colspan="5">আগের অর্ডার পাওয়া যায়নি।</td></tr>';
+    return html+'</tbody></table></div>';
+  }
+  function loadCustomerContext(review) {
+    var target=byId("frCustomerData");
+    target.innerHTML='<p class="adm-empty">কাস্টমারের অর্ডার ইতিহাস লোড হচ্ছে…</p>';
+    if(!review||!review.orderId||!window.MaAdmin||!MaAdmin.call){target.innerHTML='<p class="adm-empty">এই রিভিউর সঙ্গে অর্ডার আইডি নেই; কাস্টমার ইতিহাস দেখানো যাচ্ছে না।</p>';return;}
+    MaAdmin.call("AdminOrderGet",{OrderId:review.orderId}).then(function(result){
+      if(!selected||selected.reviewId!==review.reviewId)return;
+      var order=result.order||{}, history=result.history||{};
+      target.innerHTML=customerMarkup(order,history);
+      var toggle=byId("frTogglePhoneBlock");
+      if(toggle&&order.phone)toggle.addEventListener("click",function(){
+        var blocking=!order.blocked;
+        var reason=blocking?window.prompt("এই নম্বর ব্লক করার কারণ লিখুন:"):"Admin fraud review unblock";
+        if(blocking&&(!reason||!reason.trim()))return;
+        if(!window.confirm(blocking?"এই ফোন নম্বরের নতুন অর্ডার ব্লক করবেন?":"এই ফোন নম্বরের ব্লক তুলে দেবেন?"))return;
+        toggle.disabled=true;
+        MaAdmin.call("AdminBlockCustomer",{Phone:order.phone,Block:blocking?"1":"0",Reason:reason||""})
+          .then(function(){return loadCustomerContext(review);})
+          .catch(function(error){showError(error);toggle.disabled=false;});
+      });
+    }).catch(function(error){target.innerHTML='<p class="adm-empty">কাস্টমার ইতিহাস লোড হয়নি: '+esc(error.message||error)+'</p>';});
   }
   function decide(status) {
     if (!selected) return;
