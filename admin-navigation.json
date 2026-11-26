@@ -59,6 +59,10 @@
         "label": "Stock & Analytics"
       },
       {
+        "href": "admin-inventory.html",
+        "label": "Inventory & Purchase"
+      },
+      {
         "href": "product-links.html",
         "label": "Product links"
       },

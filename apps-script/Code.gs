@@ -220,7 +220,15 @@ function doPost(e) {
     if (type === 'AdminStaffDelete') {
       return jsonOut_(deleteAdminStaff_(e));
     }
-    if (type === 'AdminStockSet') {
+
+    if (type === 'AdminInventorySuppliersList') return jsonOut_(invListSuppliers_(e));
+    if (type === 'AdminInventorySupplierSave') return jsonOut_(invSaveSupplier_(e));
+    if (type === 'AdminInventoryPurchasesList') return jsonOut_(invListPurchases_(e));
+    if (type === 'AdminInventoryPurchaseCreate') return jsonOut_(invCreatePurchase_(e));
+    if (type === 'AdminInventoryPurchaseReceive') return jsonOut_(invReceivePurchase_(e));
+    if (type === 'AdminInventorySupplierPaymentCreate') return jsonOut_(invCreateSupplierPayment_(e));
+    if (type === 'AdminInventoryPaymentsList') return jsonOut_(invListPayments_(e));
+    if (type === 'AdminInventorySummary') return jsonOut_(invSummary_(e));    if (type === 'AdminStockSet') {
       return jsonOut_(setAdminStock_(e));
     }
     if (type === 'AdminStockVariantsList') {
