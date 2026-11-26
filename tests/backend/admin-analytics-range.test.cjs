@@ -115,6 +115,47 @@ test('lifetime analytics includes all dated and undated orders and groups valid 
   assert.equal(result.summary.repeatCustomerCount, 0);
 });
 
+test('lifetime best sellers include legacy Design lines and Processing orders', () => {
+  const analytics = source.match(/function getAdminAnalyticsV2_\(e\)[\s\S]*?^\}/m);
+  assert.ok(analytics, 'Could not locate getAdminAnalyticsV2_');
+  const makeRow = ({ time, name, phone, total, status, qty, design, cart }) => {
+    const row = Array(37).fill('');
+    row[0] = time; row[1] = name; row[2] = phone; row[3] = qty || 1;
+    row[6] = design || ''; row[7] = String(total || 0); row[9] = status;
+    row[32] = cart ? JSON.stringify(cart) : '';
+    return row;
+  };
+  const rows = [Array(37).fill('header'),
+    makeRow({ time: '17-10-2026 11:00:00', name: 'Legacy buyer', phone: '01000000001', total: 1800, status: 'Delivered', qty: 3, design: 'Black Polka Dot(2), Royal Blue Plain(1)' }),
+    makeRow({ time: '17-10-2026 12:00:00', name: 'New buyer', phone: '01000000002', total: 2400, status: 'Processing', qty: 2, cart: [{ id: 'P-1', name: 'Navy Abaya', qty: 2 }] }),
+    makeRow({ time: '17-10-2026 13:00:00', name: 'Pending buyer', phone: '01000000003', total: 500, status: 'Pending', qty: 1, design: 'Should Not Count(1)' })
+  ];
+  const testSandbox = {
+    Date: FixedDate, Number, String, Math,
+    Utilities: { formatDate: formatDhaka },
+    SpreadsheetApp: { getActiveSpreadsheet: () => ({ getSheetByName: () => ({}) }) },
+    param_: (event, key) => event[key] || '',
+    verifyAdminSession_: () => ({ ok: true }),
+    readOnlineOrderRows_: () => rows,
+    dayKeyFromCell_: value => {
+      const match = String(value || '').match(/^(\d{1,2})-(\d{1,2})-(\d{4})/);
+      return match ? `${match[3]}-${String(match[2]).padStart(2, '0')}-${String(match[1]).padStart(2, '0')}` : '';
+    },
+    isReturnKeywordStatus_: value => /return|ফেরত|refund/i.test(String(value || '')),
+    isPlainCancelStatus_: value => /cancel|বাতিল/i.test(String(value || '')),
+    ensureStockVariantsSheet_: () => ({ getDataRange: () => ({ getValues: () => [['Product ID']] }) }),
+    STOCK_LOW_DEFAULT_THRESHOLD_: 5,
+    normalizePhone_: value => String(value || '').replace(/\D/g, '')
+  };
+  vm.runInNewContext(helpers[0] + '\n' + signedAmount[0] + '\n' + analytics[0] + '\nthis.runAnalytics = getAdminAnalyticsV2_;', testSandbox);
+  const result = testSandbox.runAnalytics({ Token: 'valid', Range: 'all' });
+  const quantities = Object.fromEntries(result.topProducts.map(product => [product.name, product.qty]));
+  assert.equal(quantities['Black Polka Dot'], 2);
+  assert.equal(quantities['Royal Blue Plain'], 1);
+  assert.equal(quantities['Navy Abaya'], 2);
+  assert.equal(quantities['Should Not Count'], undefined);
+});
+
 test('this-month range starts on the 1st of the Bangladesh month', () => {
   const result = sandbox.bdRangeBounds_('month', '', '');
   assert.equal(result.fromKey, today.slice(0, 8) + '01');

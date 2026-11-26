@@ -35,12 +35,12 @@
 
   function statusKey(s) {
     var x = String(s || "").toLowerCase();
-    if (!x || x.indexOf("pend") !== -1) return "pending";
-    if (x.indexOf("deliver") !== -1) return "delivered";
-    if (x.indexOf("ship") !== -1) return "shipped";
-    if (x.indexOf("confirm") !== -1 || x.indexOf("process") !== -1) return "confirmed";
-    if (x.indexOf("cancel") !== -1) return "cancelled";
-    if (x.indexOf("return") !== -1) return "returned";
+    if (!x || x.indexOf("pend") !== -1 || x.indexOf("অপেক্ষ") !== -1) return "pending";
+    if (x.indexOf("deliver") !== -1 || x.indexOf("ডেলিভারি") !== -1) return "delivered";
+    if (x.indexOf("ship") !== -1 || x.indexOf("কুরিয়ার") !== -1) return "shipped";
+    if (x.indexOf("confirm") !== -1 || x.indexOf("process") !== -1 || x.indexOf("নিশ্চিত") !== -1) return "confirmed";
+    if (x.indexOf("cancel") !== -1 || x.indexOf("বাতিল") !== -1) return "cancelled";
+    if (x.indexOf("return") !== -1 || x.indexOf("ফেরত") !== -1) return "returned";
     return "other";
   }
 
@@ -58,13 +58,28 @@
 
   var recentQuery = "";
   var recentOrders = [];
+  function dashboardStatusLabel(value) {
+    var raw = String(value || "").trim();
+    var key = raw.toLowerCase().replace(/[\s-]+/g, "_");
+    var labels = { pending: "অপেক্ষমাণ", confirmed: "নিশ্চিত", processing: "প্রক্রিয়াধীন", shipped: "কুরিয়ারে পাঠানো", delivered: "ডেলিভারি সম্পন্ন", cancelled: "বাতিল", canceled: "বাতিল", returned: "ফেরত", fake: "প্রতারণা", fraud: "প্রতারণা", not_sent: "পাঠানো হয়নি", in_transit: "কুরিয়ারে চলমান", partial_delivered: "আংশিক ডেলিভারি" };
+    if (labels[key]) return labels[key];
+    if (/return|refund|ফেরত/i.test(raw)) return "ফেরত";
+    if (/cancel|বাতিল/i.test(raw)) return "বাতিল";
+    if (/fake|fraud|প্রতারণা/i.test(raw)) return "প্রতারণা";
+    if (/deliver|ডেলিভারি/i.test(raw)) return "ডেলিভারি সম্পন্ন";
+    if (/ship|courier|কুরিয়ার/i.test(raw)) return "কুরিয়ারে পাঠানো";
+    if (/confirm|process|নিশ্চিত/i.test(raw)) return "নিশ্চিত";
+    if (/pend|অপেক্ষ/i.test(raw)) return "অপেক্ষমাণ";
+    return raw || "অন্যান্য";
+  }
+
   function renderOrders(orders) {
     recentOrders = Array.isArray(orders) ? orders : [];
     var filtered = recentOrders.filter(function(o){ return !recentQuery || [o.orderId,o.name,o.phone].join(" ").toLowerCase().indexOf(recentQuery)!==-1; });
     var count = document.getElementById("admRecentCount");
     if(count)count.textContent = recentOrders.length + "টির মধ্যে " + Math.min(8,filtered.length) + "টি দেখানো হচ্ছে";
     var body = document.getElementById("admOrdersBody");
-    if (!filtered.length) { body.innerHTML = '<tr><td colspan="7" class="dz-empty">' + (recentQuery ? 'No matching orders among the loaded records.' : 'No recent orders available.') + '</td></tr>'; return; }
+    if (!filtered.length) { body.innerHTML = '<tr><td colspan="7" class="dz-empty">' + (recentQuery ? 'লোড করা অর্ডারের মধ্যে মিল পাওয়া যায়নি।' : 'সাম্প্রতিক কোনো অর্ডার পাওয়া যায়নি।') + '</td></tr>'; return; }
     var stats = phoneStats(recentOrders);
     window.__admOrdersById = {};
     body.innerHTML = filtered.slice(0, 8).map(function (o, idx) {
@@ -72,23 +87,25 @@
       window.__admOrdersById[rowId] = o;
       var st = stats[String(o.phone || "").trim()] || { total: 0, badOutcome: 0 };
       var tags = "";
-      if (st.total >= 2) tags += "<em>Returning Customers (" + st.total + ")</em>";
+      if (st.total >= 2) tags += "<em>পুনরায় অর্ডার করেছেন (" + st.total + ")</em>";
       if (st.badOutcome >= 2) tags += '<em class="bad">⚠️ রিস্কি</em>';
       var key = statusKey(o.status);
       var displayStatus = MaOrderStatus.describe(o);
       key = displayStatus.badgeKey;
-      var confirmMsg = "আসসালামু আলাইকুম " + (o.name || "") + ", আপনার অর্ডার #" + (o.orderId || "") + " (৳" + (o.total || 0) + ") কনফার্ম হয়েছে। শীঘ্রই ডেলিভারি করা হবে, ধন্যবাদ।";
-      var orderLink = o.orderId ? '<a class="adm-order-open" href="admin-order.html?id=' + encodeURIComponent(o.orderId) + '">#' + escapeHtml(o.orderId) + '</a>' : '<span>—</span>';
-      var productText = (o.design || (Array.isArray(o.items) ? o.items.join(", ") : "") || "No product details").replace(/\s*\n\s*/g, " ").slice(0, 120);
+      var hasTotal = !o.totalMissing && o.total !== null && typeof o.total !== "undefined" && String(o.total).trim() !== "" && !(Number(o.total) === 0 && !o.orderId);
+      var totalLabel = hasTotal ? "৳" + num(o.total).toLocaleString("en-US") : "মূল্য সংরক্ষিত নেই";
+      var confirmMsg = "আসসালামু আলাইকুম " + (o.name || "") + ", আপনার অর্ডার #" + (o.orderId || "") + (hasTotal ? " (" + totalLabel + ")" : "") + " কনফার্ম হয়েছে। শীঘ্রই ডেলিভারি করা হবে, ধন্যবাদ।";
+      var orderLink = o.orderId ? '<a class="adm-order-open" href="admin-order.html?id=' + encodeURIComponent(o.orderId) + '">#' + escapeHtml(o.orderId) + '</a>' : '<span class="adm-order-id-missing">ক্রম ' + (idx + 1) + '</span>';
+      var productText = (o.design || (Array.isArray(o.items) ? o.items.join(", ") : "") || "পণ্যের বিবরণ নেই").replace(/\s*\n\s*/g, " ").slice(0, 120);
       var wa = waLink(o.phone, confirmMsg);
       return '<tr class="adm-recent-order-row" data-order-id="' + escapeHtml(o.orderId || "") + '">' +
         '<td class="adm-recent-order-id">' + orderLink + '</td>' +
         '<td class="adm-recent-date">' + escapeHtml(o.time || "—") + '</td>' +
         '<td class="adm-recent-customer"><strong>' + escapeHtml(o.name || "—") + '</strong><small>' + escapeHtml(o.phone || "—") + '</small>' + (tags ? '<span class="adm-recent-tags">' + tags + '</span>' : '') + '</td>' +
         '<td class="adm-recent-products">' + escapeHtml(productText) + '</td>' +
-        '<td class="adm-recent-total"><strong>৳' + escapeHtml(o.total) + '</strong><small>' + escapeHtml(o.payment || "") + (o.district ? " · " + escapeHtml(o.district) : "") + '</small></td>' +
-        '<td class="adm-recent-status" title="' + escapeHtml(displayStatus.note) + '"><span class="dz-chip ' + key + '">' + escapeHtml(displayStatus.orderRaw) + '</span><small class="adm-courier-state">Courier: ' + escapeHtml(displayStatus.hasCourier ? displayStatus.courierLabel : 'Not sent') + '</small></td>' +
-        '<td><div class="dz-row-actions">' + (wa ? '<a target="_blank" rel="noopener" href="' + wa + '">WhatsApp</a>' : '') + '<button type="button" onclick="printInvoice(window.__admOrdersById[\'' + rowId + '\'])">Print</button></div></td>' +
+        '<td class="adm-recent-total"><strong>' + escapeHtml(totalLabel) + '</strong><small>' + escapeHtml(o.payment || "") + (o.district ? " · " + escapeHtml(o.district) : "") + '</small></td>' +
+        '<td class="adm-recent-status" title="' + escapeHtml(displayStatus.note) + '"><span class="dz-chip ' + key + '">' + escapeHtml(dashboardStatusLabel(displayStatus.orderRaw)) + '</span><small class="adm-courier-state">কুরিয়ার: ' + escapeHtml(displayStatus.hasCourier ? dashboardStatusLabel(displayStatus.courierLabel) : 'পাঠানো হয়নি') + '</small></td>' +
+        '<td><div class="dz-row-actions">' + (wa ? '<a target="_blank" rel="noopener" href="' + wa + '">WhatsApp</a>' : '') + '<button type="button" onclick="printInvoice(window.__admOrdersById[\'' + rowId + '\'])">প্রিন্ট</button></div></td>' +
         '</tr>';
     }).join("");
   }
@@ -142,11 +159,11 @@
     document.getElementById("admStatDeliveredValue").textContent = "৳" + MaOrderInsights.analyze(orders).groups.delivered.value.toLocaleString("en-US");
     document.getElementById("admStatPending").textContent = pending;
     document.getElementById("admStatShipped").textContent = shipped;
-    document.getElementById("dzTodayCount").textContent = todayCount;
-    document.getElementById("dzTodayRev").textContent = "৳" + todayRev.toLocaleString("en-US");
+    var todayCountNode = document.getElementById("dzTodayCount"); if (todayCountNode) todayCountNode.textContent = todayCount;
+    var todayRevenueNode = document.getElementById("dzTodayRev"); if (todayRevenueNode) todayRevenueNode.textContent = "৳" + todayRev.toLocaleString("en-US");
     var ps = phoneStats(orders), rep = 0;
     Object.keys(ps).forEach(function (p) { if (ps[p].total >= 2) rep++; });
-    document.getElementById("dzRepeat").textContent = rep;
+    var repeatNode = document.getElementById("dzRepeat"); if (repeatNode) repeatNode.textContent = rep;
 
     var max = Math.max.apply(null, days.map(function (x) { return x.n; }).concat([1]));
     var names = ["রবি", "সোম", "মঙ্গল", "বুধ", "বৃহ", "শুক্র", "শনি"];
@@ -157,7 +174,7 @@
     }).join("");
 
     var order = ["pending", "confirmed", "shipped", "delivered", "cancelled", "returned", "other"];
-    var labels = { pending: "Pending", confirmed: "Confirmed", shipped: "Shipped", delivered: "Delivered", cancelled: "Cancelled", returned: "Returned", other: "অন্যান্য" };
+    var labels = { pending: "অপেক্ষমাণ", confirmed: "নিশ্চিত", shipped: "কুরিয়ারে পাঠানো", delivered: "ডেলিভারি সম্পন্ন", cancelled: "বাতিল", returned: "ফেরত", other: "অন্যান্য" };
     var present = order.filter(function (k) { return counts[k]; });
     document.getElementById("dzSplit").innerHTML = present.map(function (k) {
       return '<i style="width:' + (counts[k] / orders.length * 100) + "%;background:" + STATUS_COLORS[k] + '"></i>';
@@ -250,7 +267,7 @@
     }).then(function () {
       btn.disabled = false;
       btn.setAttribute("aria-busy", "false");
-      btn.textContent = "Refresh";
+      btn.textContent = "আপডেট";
       document.getElementById("admOrdersBody").setAttribute("aria-busy", "false");
     });
   }

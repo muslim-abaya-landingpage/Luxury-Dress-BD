@@ -3,7 +3,7 @@ const { test, expect } = require('@playwright/test');
 const ORDERS = Array.from({ length: 12 }, (_, i) => ({
   row: 60 - i, time: `${String(10 + i).padStart(2, '0')}-10-2026 12:00`, name: 'Customer With A Fairly Long Name ' + i, phone: '0171111111' + (i % 3),
   qty: 2, charge: 70, address: 'House 12, Road 7, Mirpur 10, Dhaka', design: '1. Premium Black Hafeza Set (Full Set) (Body 42 · Length 52) × 1\n2. Elegant Grey Leaf Print Kurti × 1',
-  total: 2885, orderId: 'MA-202610' + String(10 + i) + '-47' + i, status: i % 4 ? 'Confirmed' : 'Delivered', tracking: i % 2 ? 'SFR2610' + i : '',
+  total: i === 1 ? 0 : 2885, totalMissing: i === 1, orderId: i === 1 ? '' : 'MA-202610' + String(10 + i) + '-47' + i, status: i % 4 ? 'Confirmed' : 'Delivered', tracking: i % 2 ? 'SFR2610' + i : '',
   courierStatus: i % 2 ? 'partial_delivered' : '', district: 'ঢাকা', payment: 'Cash On Delivery',
 }));
 
@@ -20,7 +20,7 @@ async function stub(page, { inboxDelayMs = 0 } = {}) {
         { productId: 'P-LOW', productName: 'Black Abaya', variant: 'M', tracked: true, available: 2, threshold: 3, status: 'LOW' }] }); },
       inboxCall: function () { return new Promise(function (ok) { setTimeout(function () { ok({ ok: true, stats: { unread: 0 }, contacts: [] }); }, ${inboxDelayMs}); }); },
       call: function () { return Promise.resolve({ ok: true, orders: ORDERS, counts: { all: ORDERS.length } }); },
-      getAnalyticsV2: function () { return Promise.resolve({ ok: true, summary: { totalOrders: 0 }, salesByMonth: [], topProducts: [], sourceBreakdown: [] }); },
+      getAnalyticsV2: function (options) { return Promise.resolve({ ok: true, range: options && options.range, from: "2026-11-21", to: "2026-11-27", undatedOrderCount: 0, summary: { totalOrders: 0, totalOrderValue: 0, deliveredSalesValue: 0, deliveredCount: 0, cancellationRate: 0, deliverySuccessRate: 0 }, salesByMonth: [], topProducts: options && options.range === "all" ? [{ productId: "P-LIFE", name: "Lifetime Winner", qty: 9 }] : [], sourceBreakdown: [] }); },
       logout: function () {}
     };` }));
 }
@@ -30,9 +30,18 @@ test('dashboard on a phone: nothing wider than the screen', async ({ page }) => 
   await stub(page);
   await page.goto('/admin-dashboard.html');
   await expect(page.locator('.adm-recent-table')).toBeVisible();
-  await expect(page.locator('.adm-recent-table thead')).toContainText('Order');
+  await expect(page.locator('.adm-recent-table thead')).toContainText('অর্ডার নম্বর / ক্রম');
+  await expect(page.locator('#dzBars .dz-bar')).toHaveCount(7);
+  await expect(page.locator('#dzLegend')).toContainText('নিশ্চিত');
+  await expect(page.locator('#dzLegend')).toContainText('ডেলিভারি সম্পন্ন');
+  await expect(page.locator('#admOverviewTopProducts')).toContainText('Lifetime Winner');
+  await page.locator('#admReportRange').selectOption('7d');
+  await expect(page.locator('#admReportRangeLabel')).toContainText('2026');
+  await expect(page.locator('#admOverviewTopProducts')).toContainText('Lifetime Winner');
   await expect(page.locator('#admOrdersBody .adm-recent-order-row')).toHaveCount(8);
   await expect(page.locator('#admOrdersBody .adm-recent-order-row').first()).toContainText('Customer With A Fairly Long Name');
+  await expect(page.locator('#admOrdersBody .adm-recent-order-row').nth(1)).toContainText('ক্রম 2');
+  await expect(page.locator('#admOrdersBody .adm-recent-order-row').nth(1)).toContainText('মূল্য সংরক্ষিত নেই');
   const tableScroll = await page.locator('.adm-recent-table-wrap').evaluate(el => el.scrollWidth > el.clientWidth);
   expect(tableScroll).toBe(true);
   await page.waitForTimeout(400);

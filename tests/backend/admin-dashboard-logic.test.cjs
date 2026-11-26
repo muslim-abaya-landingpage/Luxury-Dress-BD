@@ -69,6 +69,6 @@ test('dashboard money parser preserves negative totals and Bengali digits', () =
 });
 test('recent dashboard orders render as table rows and orders without IDs are not linked', () => {
   assert.match(dashboardMainSource, /var orderLink = o\.orderId \? '<a class="adm-order-open" href="admin-order\.html\?id=' \+ encodeURIComponent\(o\.orderId\) \+ '\">#/);
-  assert.ok(dashboardMainSource.includes(": '<span>—</span>'"));
+  assert.ok(dashboardMainSource.includes('class="adm-order-id-missing">ক্রম '));
   assert.ok(dashboardMainSource.includes('return \'<tr class="adm-recent-order-row" data-order-id="'));
 });
