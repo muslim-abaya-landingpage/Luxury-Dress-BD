@@ -6450,15 +6450,17 @@ function markGrowthItemDone_(e) {
 var STOCK_LOW_DEFAULT_THRESHOLD_ = 5;
 
 function ensureStockVariantsSheet_() {
-  var sheet = ensureSheet_('StockVariants', ['Product ID', 'Product Name', 'Category', 'Variant', 'Tracked', 'Available', 'Reserved', 'LowStockThreshold', 'UpdatedAt', 'UpdatedBy', 'OperationId']);
+  return ensureSheet_('StockVariants', ['Product ID', 'Product Name', 'Category', 'Variant', 'Tracked', 'Available', 'Reserved', 'LowStockThreshold', 'UpdatedAt', 'UpdatedBy', 'OperationId']);
+}
+function ensureStockVariantsOperationIdColumn_(sheet) {
   if (!sheet.getRange(1, 11).getValue()) sheet.getRange(1, 11).setValue('OperationId');
-  return sheet;
 }
 
 function ensureStockLedgerSheet_() {
-  var sheet = ensureSheet_('StockLedger', ['Timestamp', 'Product ID', 'Variant', 'ChangeType', 'QtyBefore', 'QtyAfter', 'ReservedBefore', 'ReservedAfter', 'Reason', 'OrderId', 'Admin', 'OperationId']);
+  return ensureSheet_('StockLedger', ['Timestamp', 'Product ID', 'Variant', 'ChangeType', 'QtyBefore', 'QtyAfter', 'ReservedBefore', 'ReservedAfter', 'Reason', 'OrderId', 'Admin', 'OperationId']);
+}
+function ensureStockLedgerOperationIdColumn_(sheet) {
   if (!sheet.getRange(1, 12).getValue()) sheet.getRange(1, 12).setValue('OperationId');
-  return sheet;
 }
 
 function ensureOnlineOrderStockStageHeader_(sheet) {
@@ -6579,6 +6581,7 @@ function stockOperationSetState_(sheet, row, state, error) {
 function appendStockLedgerOnce_(entry, operationId) {
   if (!operationId) throw new Error('STOCK_OPERATION_ID_REQUIRED');
   var sheet = ensureStockLedgerSheet_();
+  ensureStockLedgerOperationIdColumn_(sheet);
   var rows = sheet.getDataRange().getValues();
   for (var i = 1; i < rows.length; i++) {
     if (String(rows[i][11] || '') === operationId) return { duplicate: true, row: i + 1 };
@@ -6621,6 +6624,7 @@ function reconcilePendingStockOperationsForRow_(variants, targetRow) {
 
 function mutateStockVariant_(opts) {
   var sheet = ensureStockVariantsSheet_();
+  ensureStockVariantsOperationIdColumn_(sheet);
   var row = getOrCreateStockVariantRow_(sheet, opts.productId, opts.productName, opts.variant, opts.category);
   reconcilePendingStockOperationsForRow_(sheet, row);
   var before = readStockVariantRow_(sheet, row);
@@ -6685,6 +6689,7 @@ function recoverAdminStockOperations_(e) {
     var limit = Math.min(100, Math.max(1, parseInt(param_(e, 'Limit'), 10) || 50));
     var recovered = 0, conflicts = 0, checked = 0, errors = [];
     var variants = ensureStockVariantsSheet_();
+    ensureStockVariantsOperationIdColumn_(variants);
     for (var i = 1; i < rows.length && checked < limit; i++) {
       if (String(rows[i][1] || '') !== 'PREPARED') continue;
       checked++;
@@ -9127,5 +9132,5 @@ function adminCouponCheck_(e) {
   return res.ok ? { ok: true, discount: res.discount, message: res.message } : { ok: false, error: res.error, message: res.message };
 }
 
-  return { verifyAdminSessionUncached_, verifyAdminSession_, requireOwnerAdmin_, param_, adminOrderList_, adminOrderGet_, listAdminOrders_, adminFraudCheck_, adminStaffList_, adminCustomerLookup_, getAdminStockVariants_, getAdminAnalyticsV2_, inboxList_, inboxThread_, getAdminStockLedger_, getAdminGrowthData_ };
+  return { verifyAdminSessionUncached_: verifyAdminSessionUncached_, verifyAdminSession_: verifyAdminSession_, requireOwnerAdmin_: requireOwnerAdmin_, param_: param_, adminOrderList_: adminOrderList_, adminOrderGet_: adminOrderGet_, listAdminOrders_: listAdminOrders_, adminFraudCheck_: adminFraudCheck_, adminStaffList_: adminStaffList_, adminCustomerLookup_: adminCustomerLookup_, getAdminStockVariants_: getAdminStockVariants_, getAdminAnalyticsV2_: getAdminAnalyticsV2_, inboxList_: inboxList_, inboxThread_: inboxThread_, getAdminStockLedger_: getAdminStockLedger_, getAdminGrowthData_: getAdminGrowthData_ };
 }
