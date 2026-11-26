@@ -423,6 +423,93 @@
     $("otBulkCount").textContent = n + "টি নির্বাচিত";
   }
 
+  // ── Bulk: Status / Source / Assign employee / Assign courier (free — শুধু শিটে লেখে, কোনো API খরচ নেই) ──
+  var ORDER_STATUS_LIST = ["Pending", "Confirmed", "Processing", "Shipped", "Delivered", "Cancelled", "Fake"];
+  var COURIER_NAME_LIST = ["Steadfast", "Pathao", "RedX", "Paperfly", "Manual"];
+
+  /** Shows a button-grid picker in the shared modal; "__other__" prompts for free text before done() runs. */
+  function pickFromModal(title, note, options, done) {
+    if (!(root.MaPanel && root.MaPanel.openModal)) {
+      var v = prompt(title + (note ? "\n" + note : ""), "");
+      if (v != null) done(v.trim());
+      return;
+    }
+    root.MaPanel.openModal(title,
+      (note ? '<p class="ot-note">' + esc(note) + "</p>" : "") +
+      '<div class="ot-reasons">' + options.map(function (o) {
+        return '<button type="button" class="pn-btn" data-pick="' + esc(o.value) + '">' + esc(o.label) + "</button>";
+      }).join("") + "</div>");
+    var body = $("pnModalBody"), bg = $("pnModal");
+    body.addEventListener("click", function pick(ev) {
+      var b = ev.target.closest("[data-pick]"); if (!b) return;
+      body.removeEventListener("click", pick);
+      var v = b.getAttribute("data-pick");
+      if (v === "__other__") v = (prompt("মান লিখুন", "") || "").trim();
+      if (bg) bg.classList.remove("open");
+      if (v != null) done(v);
+    });
+  }
+
+  function askBulkStatus(done) {
+    pickFromModal("বাল্ক: Status আপডেট",
+      selectedOrders().length + "টি নির্বাচিত অর্ডারের Status একসাথে বদলাবে।",
+      ORDER_STATUS_LIST.map(function (s) { return { value: s, label: s }; }), done);
+  }
+
+  function askBulkCourierTag(done) {
+    var opts = COURIER_NAME_LIST.map(function (c) { return { value: c, label: c }; });
+    opts.push({ value: "", label: "— ফাঁকা করুন —" });
+    pickFromModal("বাল্ক: কুরিয়ার সেট করুন",
+      selectedOrders().length + "টি অর্ডারের Courier ফিল্ডে নাম বসাবে (রেকর্ড রাখার জন্য — এটি Steadfast-এ পাঠায় না; সেজন্য 🚚 Steadfast-এ পাঠান বাটন ব্যবহার করুন)।",
+      opts, done);
+  }
+
+  function askBulkSource(done) {
+    var defaults = ["Website", "Phone", "Facebook", "Messenger", "Instagram", "Manual"];
+    var seen = ordersNow().map(function (o) { return text(o.source); }).filter(Boolean);
+    var names = []; defaults.concat(seen).forEach(function (n) { if (names.indexOf(n) === -1) names.push(n); });
+    var opts = names.map(function (n) { return { value: n, label: n }; });
+    opts.push({ value: "__other__", label: "✏️ অন্য একটি লিখুন" });
+    pickFromModal("বাল্ক: Source (বিক্রয়-চ্যানেল) আপডেট",
+      selectedOrders().length + "টি অর্ডারের Source একসাথে বদলাবে।", opts, done);
+  }
+
+  function askBulkAssign(done) {
+    var renderStaffPicker = function (staff) {
+      var opts = staff.map(function (n) { return { value: n, label: n }; });
+      opts.push({ value: "", label: "— Unassign —" });
+      opts.push({ value: "__other__", label: "✏️ অন্য নাম লিখুন" });
+      pickFromModal("বাল্ক: কর্মী অ্যাসাইন করুন",
+        selectedOrders().length + "টি অর্ডার এই কর্মীকে অ্যাসাইন করবে।", opts, done);
+    };
+    root.MaAdmin.call("AdminOrderStaff", {}).then(function (r) { renderStaffPicker((r && r.staff) || []); },
+      function () { renderStaffPicker([]); });
+  }
+
+  function askBulkSms() {
+    toast("SMS পাঠাতে একটি SMS গেটওয়ে (যেমন Bulk SMS BD, Alpha SMS ইত্যাদি) সংযুক্ত করতে হবে — এতে টাকা লাগে, তাই এখন বাকি আছে। অন্য ফিচারগুলো (Status/Source/অ্যাসাইন/কুরিয়ার) এখনই কাজ করছে।", true);
+  }
+
+  function applyBulkField(field, value, btn, idleLabel) {
+    var list = selectedOrders();
+    if (!list.length) { toast("আগে অন্তত একটি অর্ডার বাছুন।", true); return; }
+    btn.disabled = true;
+    var ok = 0, failed = [];
+    list.reduce(function (p, o, i) {
+      return p.then(function () {
+        btn.textContent = "আপডেট হচ্ছে " + (i + 1) + "/" + list.length + "…";
+        var fields = { OrderId: o.orderId }; fields[field] = value;
+        return root.MaAdmin.call("AdminOrderUpdate", fields).then(function () { ok++; }, function (err) {
+          failed.push((o.orderId || "?") + ": " + (err && err.message || "ব্যর্থ"));
+        });
+      });
+    }, Promise.resolve()).then(function () {
+      btn.disabled = false; btn.textContent = idleLabel;
+      toast(ok + "টি অর্ডার আপডেট হয়েছে" + (failed.length ? " · ব্যর্থ: " + failed.join("; ") : ""), failed.length > 0);
+      var r = $("ordRefresh"); if (r) r.click();
+    });
+  }
+
   function decorateRows() {
     var body = $("ordBody"); if (!body) return;
     var map = {}; ordersNow().forEach(function (o) { if (o.orderId) map[o.orderId] = o; });
@@ -479,6 +566,11 @@
       '<button type="button" class="pn-btn pn-btn-sm" id="otPrintSel">🖨 প্যাকিং স্লিপ প্রিন্ট</button>' +
       '<button type="button" class="pn-btn pn-btn-sm" id="otSyncSel">↻ Courier status sync</button>' +
       '<button type="button" class="pn-btn pn-btn-sm pn-btn-blue" id="otSendSel">🚚 Steadfast-এ পাঠান</button>' +
+      '<button type="button" class="pn-btn pn-btn-sm" id="otStatusSel">📦 Status আপডেট</button>' +
+      '<button type="button" class="pn-btn pn-btn-sm" id="otSourceSel">🔖 Source আপডেট</button>' +
+      '<button type="button" class="pn-btn pn-btn-sm" id="otAssignSel">🙍 কর্মী অ্যাসাইন</button>' +
+      '<button type="button" class="pn-btn pn-btn-sm" id="otCourierTagSel">🏷️ কুরিয়ার সেট করুন</button>' +
+      '<button type="button" class="pn-btn pn-btn-sm" id="otSmsSel" title="SMS গেটওয়ে প্রয়োজন (পরে যুক্ত হবে)">✉️ SMS পাঠান</button>' +
       '<button type="button" class="pn-btn pn-btn-sm" id="otClearSel">বাছাই মুছুন</button>';
     tableWrap.parentNode.insertBefore(bar, tableWrap);
     var rep = document.createElement("details");
@@ -505,6 +597,26 @@
     $("otPrintSel").addEventListener("click", function () { printSlips(selectedOrders()); });
     $("otSyncSel").addEventListener("click", function () { refreshBulkTracking(this); });
     $("otSendSel").addEventListener("click", function () { sendBulk(this); });
+    $("otStatusSel").addEventListener("click", function () {
+      if (!selectedOrders().length) { toast("আগে অন্তত একটি অর্ডার বাছুন।", true); return; }
+      var btn = this; askBulkStatus(function (v) { if (v) applyBulkField("Status", v, btn, "📦 Status আপডেট"); });
+    });
+    $("otSourceSel").addEventListener("click", function () {
+      if (!selectedOrders().length) { toast("আগে অন্তত একটি অর্ডার বাছুন।", true); return; }
+      var btn = this; askBulkSource(function (v) { if (v) applyBulkField("Source", v, btn, "🔖 Source আপডেট"); });
+    });
+    $("otAssignSel").addEventListener("click", function () {
+      if (!selectedOrders().length) { toast("আগে অন্তত একটি অর্ডার বাছুন।", true); return; }
+      var btn = this; askBulkAssign(function (v) { if (v != null) applyBulkField("AssignedTo", v, btn, "🙍 কর্মী অ্যাসাইন"); });
+    });
+    $("otCourierTagSel").addEventListener("click", function () {
+      if (!selectedOrders().length) { toast("আগে অন্তত একটি অর্ডার বাছুন।", true); return; }
+      var btn = this; askBulkCourierTag(function (v) { if (v != null) applyBulkField("Courier", v, btn, "🏷️ কুরিয়ার সেট করুন"); });
+    });
+    $("otSmsSel").addEventListener("click", function () {
+      if (!selectedOrders().length) { toast("আগে অন্তত একটি অর্ডার বাছুন।", true); return; }
+      askBulkSms();
+    });
     var exportBtn = $("ordExportFiltered");
     if (exportBtn) exportBtn.addEventListener("click", function () { exportCsv(filteredOrders()); });
     document.addEventListener("ma-orders-rendered", function () { if (all) all.checked = false; decorateRows(); paintReport(); });

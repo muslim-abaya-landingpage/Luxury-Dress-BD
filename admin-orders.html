@@ -124,6 +124,11 @@
           <option value="print">প্যাকিং স্লিপ প্রিন্ট</option>
           <option value="sync">Courier status sync</option>
           <option value="send">Steadfast-এ পাঠান</option>
+          <option value="status">Status আপডেট</option>
+          <option value="source">Source আপডেট</option>
+          <option value="assign">কর্মী অ্যাসাইন</option>
+          <option value="courierTag">কুরিয়ার সেট করুন</option>
+          <option value="sms">SMS পাঠান</option>
           <option value="clear">বাছাই মুছুন</option>
         </select>
         <button type="button" class="pn-btn" id="ordBulkApply">Apply</button>
@@ -229,6 +234,11 @@
           <option value="print">প্যাকিং স্লিপ প্রিন্ট</option>
           <option value="sync">Courier status sync</option>
           <option value="send">Steadfast-এ পাঠান</option>
+          <option value="status">Status আপডেট</option>
+          <option value="source">Source আপডেট</option>
+          <option value="assign">কর্মী অ্যাসাইন</option>
+          <option value="courierTag">কুরিয়ার সেট করুন</option>
+          <option value="sms">SMS পাঠান</option>
           <option value="clear">বাছাই মুছুন</option>
         </select>
         <button type="button" class="pn-btn" id="ordBulkApply2">Apply</button>
@@ -253,7 +263,7 @@
   <script src="admin-order-insights.js?v=ca41e34c5d460caf"></script>
   <script src="admin-manual-order.js?v=f3784836eb524fef" defer></script>
   <script src="admin-invoice.js?v=51d183cf995bbb51" defer></script>
-  <script src="admin-order-tools.js?v=6f9533a1b720f63b" defer></script>
+  <script src="admin-order-tools.js?v=20261127-bulk1" defer></script>
   <script>
     (function () {
       var esc = MaPanel.esc;
@@ -632,7 +642,7 @@
       // WooCommerce-style "Bulk actions + Apply": runs the existing selection buttons from admin-order-tools.js.
       function runBulk(selectId) {
         var select = document.getElementById(selectId);
-        var target = { print: "otPrintSel", sync: "otSyncSel", send: "otSendSel", clear: "otClearSel" }[select.value];
+        var target = { print: "otPrintSel", sync: "otSyncSel", send: "otSendSel", status: "otStatusSel", source: "otSourceSel", assign: "otAssignSel", courierTag: "otCourierTagSel", sms: "otSmsSel", clear: "otClearSel" }[select.value];
         if (!target) { MaPanel.toast("আগে একটি Bulk action বেছে নিন।", true); return; }
         if (target !== "otClearSel" && !document.querySelector("#ordBody .ot-sel:checked")) { MaPanel.toast("আগে অন্তত একটি অর্ডার বাছুন।", true); return; }
         var btn = document.getElementById(target);
