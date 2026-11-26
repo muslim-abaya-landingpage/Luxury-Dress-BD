@@ -33,6 +33,7 @@ function harness() {
   const purchases = makeSheet([['Purchase ID','Supplier ID','Supplier Name','Invoice No','Purchase Date','Subtotal','Other Cost','Total','Paid','Due','Status','Notes','Created At','Created By','Received At','Received By']]);
   const items = makeSheet([['Purchase ID','Product ID','Product Name','Category','Variant','Qty','Unit Cost','Line Total']]);
   const payments = makeSheet([['Payment ID','Supplier ID','Purchase ID','Amount','Method','Reference','Payment Date','Notes','Created At','Created By']]);
+  const ledger = makeSheet([['Timestamp','Product ID','Variant','ChangeType','QtyBefore','QtyAfter','ReservedBefore','ReservedAfter','Reason','OrderId','Admin']]);
   const calls = [];
   suppliers.appendRow(['SUP1','Test Supplier','01700000000','','','active',new Date(),new Date(),'owner']);
   const sheetMap = {
@@ -51,6 +52,7 @@ function harness() {
     invPurchasesSheet_: () => purchases,
     invPurchaseItemsSheet_: () => items,
     invPaymentsSheet_: () => payments,
+    ensureStockLedgerSheet_: () => ledger,
     invSupplierBalances_: () => ({ SUP1: { id:'SUP1', name:'Test Supplier', due:500 } }),
     invRows_: (sheet) => sheet.rows.slice(1).map(r => r.slice()),
     invText_: (v, max) => String(v == null ? '' : v).replace(/[\r\n\t]+/g, ' ').trim().slice(0, max || 200),
@@ -58,13 +60,13 @@ function harness() {
     LockService: { getScriptLock: () => ({ tryLock: () => true, releaseLock: () => {} }) },
     Utilities: { getUuid: () => '12345678-1234-1234-1234-123456789012' },
     formatCell_: v => String(v || ''),
-    mutateStockVariant_: opts => calls.push(opts),
+    mutateStockVariant_: opts => { calls.push(opts); ledger.appendRow([new Date(),opts.productId,opts.variant,opts.changeType,0,opts.deltaAvailable,0,0,opts.reason,opts.orderId,opts.admin]); },
     STOCK_LOW_DEFAULT_THRESHOLD_: 5,
     ensureStockVariantsSheet_: () => makeSheet([['Product ID','Product Name','Category','Variant','Tracked','Available','Reserved','Threshold','Updated At','Updated By']])
   };
   vm.createContext(ctx);
   vm.runInContext(source, ctx);
-  return { ctx, suppliers, purchases, items, payments, calls };
+  return { ctx, suppliers, purchases, items, payments, ledger, calls };
 }
 
 test('purchase creation saves a draft and does not change live stock before receiving', () => {
@@ -102,10 +104,12 @@ test('receiving a purchase adds each variant to the existing stock service once'
   assert.equal(h.calls.length, 1);
   assert.equal(h.calls[0].deltaAvailable, 2);
   assert.equal(h.calls[0].changeType, 'PURCHASE');
+  // Simulate a timeout after the stock write but before the purchase status update.
+  h.purchases.rows[1][10] = 'DRAFT';
   const second = h.ctx.invReceivePurchase_({PurchaseId:'PUR-1'});
   assert.equal(second.ok, true);
-  assert.equal(second.alreadyReceived, true);
-  assert.equal(h.calls.length, 1);
+  assert.equal(second.status, 'RECEIVED');
+  assert.equal(h.calls.length, 1, 'the existing PURCHASE ledger row must prevent a duplicate stock increase');
 });
 
 
