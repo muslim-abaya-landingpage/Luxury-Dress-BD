@@ -111,6 +111,7 @@ function admRowToOrder_(r, rowNumber) {
     size: String(r.orderSizeText_ || ''),
     items: items,
     total: total,
+    totalMissing: String(r[7] == null ? '' : r[7]).trim() === '',
     subtotal: Math.max(0, total - charge + discount + coupon),
     couponCode: String(r[ADM_COL_COUPON_CODE - 1] || ''),
     couponDiscount: coupon,
