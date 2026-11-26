@@ -172,20 +172,15 @@
 }
 
 
-/* Final page-shell alignment fix: reserve the fixed admin sidebar width
-   instead of letting the content exceed the viewport and get clipped. */
+/* Let the shared admin-shell grid reserve the sidebar column exactly once.
+   Adding another sidebar margin here shifts the page off-screen at 100% zoom. */
 @media (min-width:981px){
   html.wp-admin-shell .adm-shell > .cm-wrap{
     box-sizing:border-box!important;
-    margin-left:var(--wp-menu-w,260px)!important;
-    margin-right:0!important;
-    width:calc(100% - var(--wp-menu-w,260px))!important;
-    max-width:none!important;
+    width:100%!important;
+    max-width:1440px!important;
     min-width:0!important;
-  }
-  html.wp-admin-shell .adm-shell:has(.adm-sidebar.is-collapsed) > .cm-wrap{
-    margin-left:36px!important;
-    width:calc(100% - 36px)!important;
+    margin:0 auto!important;
   }
 }
 @media (max-width:980px){
