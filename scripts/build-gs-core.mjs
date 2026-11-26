@@ -30,7 +30,12 @@ const out = path.join(root, 'functions/_lib/gs-core.js');
 const next = build();
 if (process.argv.includes('--check')) {
   const current = fs.existsSync(out) ? fs.readFileSync(out, 'utf8') : '';
-  if (current !== next) { console.error('functions/_lib/gs-core.js is stale — run node scripts/build-gs-core.mjs'); process.exit(1); }
+  if (current !== next) {
+    let mismatch = 0;
+    while (mismatch < Math.min(current.length, next.length) && current[mismatch] === next[mismatch]) mismatch++;
+    console.error('functions/_lib/gs-core.js is stale — run node scripts/build-gs-core.mjs (first difference at ' + mismatch + ', committed length ' + current.length + ', generated length ' + next.length + ', committed codepoint ' + current.charCodeAt(mismatch) + ', generated codepoint ' + next.charCodeAt(mismatch) + ').');
+    process.exit(1);
+  }
   console.log('PASS: Cloudflare read core matches the Apps Script sources.');
 } else {
   fs.mkdirSync(path.dirname(out), { recursive: true });
