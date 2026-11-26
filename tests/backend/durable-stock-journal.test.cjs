@@ -58,7 +58,7 @@ function runtime() {
   };
   vm.createContext(ctx);
   ['normStockVariant_','stockVariantCompareKey_','readStockVariantRow_','writeStockVariantRow_','stockOperationJournalRow_',
-   'stockOperationSetState_','appendStockLedgerOnce_','stockOperationId_','mutateStockVariant_',
+   'stockOperationSetState_','appendStockLedgerOnce_','stockOperationId_','reconcilePendingStockOperationsForRow_','mutateStockVariant_',
    'recoverAdminStockOperations_'].forEach(name => vm.runInContext(extract(name), ctx));
   return { ctx, variants, journal, ledger };
 }
@@ -85,6 +85,26 @@ test('failed ledger append is recoverable without applying stock twice', () => {
   const again = r.ctx.recoverAdminStockOperations_({ Token: 'admin' });
   assert.equal(again.recovered, 0);
   assert.equal(r.ledger.rows.length, 2);
+});
+
+test('a later mutation reconciles a pending ledger write before replacing the row marker', () => {
+  const r = runtime();
+  const append = r.ctx.appendStockLedgerOnce_;
+  r.ctx.appendStockLedgerOnce_ = () => { throw new Error('injected ledger outage'); };
+  assert.throws(() => r.ctx.mutateStockVariant_({
+    productId: 'AB-1', variant: 'Body 44', deltaAvailable: -2, deltaReserved: 2,
+    changeType: 'RESERVE', orderId: 'MA-ORDER-10', admin: 'system'
+  }), /injected ledger outage/);
+  r.ctx.appendStockLedgerOnce_ = append;
+  r.ctx.mutateStockVariant_({
+    productId: 'AB-1', variant: 'Body 44', deltaAvailable: -1, deltaReserved: 1,
+    changeType: 'RESERVE', orderId: 'MA-ORDER-11', admin: 'system'
+  });
+  assert.equal(r.variants.rows[1][5], 7);
+  assert.equal(r.variants.rows[1][6], 3);
+  assert.equal(r.journal.rows[1][1], 'COMMITTED');
+  assert.equal(r.journal.rows[2][1], 'COMMITTED');
+  assert.equal(r.ledger.rows.length, 3);
 });
 
 test('replaying a committed operation id does not mutate or duplicate its ledger row', () => {
