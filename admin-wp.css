@@ -702,10 +702,10 @@ html.wp-admin-shell body .adm-shell :is(.adm-main,.pn-main,.pl-main,.adm-content
  html.wp-admin-shell body .adm-shell:has(> .adm-sidebar) > .adm-sidebar,
  html.wp-admin-shell body .pn-app.adm-shell:has(> .adm-sidebar) > .adm-sidebar{
    grid-column:1!important;grid-row:1!important;
-   position:sticky!important;top:0!important;align-self:start!important;
+   position:sticky!important;top:var(--wp-bar-h)!important;align-self:start!important;
    width:246px!important;min-width:246px!important;max-width:246px!important;
-   height:calc(100vh - var(--wp-bar-h,66px))!important;
-   max-height:calc(100vh - var(--wp-bar-h,66px))!important;
+   height:calc(100vh - var(--wp-bar-h))!important;
+   max-height:calc(100vh - var(--wp-bar-h))!important;
    margin:0!important;left:auto!important;bottom:auto!important;
    box-sizing:border-box!important;
  }
