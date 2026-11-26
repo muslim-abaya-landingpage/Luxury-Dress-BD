@@ -44,6 +44,30 @@
     .terp-note{padding:13px 15px;border:1px solid #d8e4f5;border-radius:12px;background:#f7faff;color:#334155;font-size:13px;line-height:1.65;margin-bottom:18px}
     @media(max-width:900px){.terp-stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
     @media(max-width:760px){.terp-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.terp-grid{grid-template-columns:1fr}.terp-wrap{padding:16px 12px 40px}}
+    /* Keep this standalone ERP page clear of the fixed WordPress-style admin menu. */
+    /* Preview verification pass: 2026-11-25 */
+    .terp-wrap{box-sizing:border-box;min-width:0}
+    @media(min-width:981px){
+      html.wp-admin-shell body > .terp-wrap{
+        width:calc(100% - var(--wp-menu-w,160px));
+        max-width:1180px;
+        margin-left:var(--wp-menu-w,160px)!important;
+        margin-right:auto!important;
+      }
+      html.wp-admin-shell body:has(.adm-sidebar.is-collapsed) > .terp-wrap,
+      html.wp-admin-shell body:has(.pn-side.is-collapsed) > .terp-wrap{
+        width:calc(100% - 36px);
+        margin-left:36px!important;
+      }
+    }
+    @media(max-width:980px){
+      html.wp-admin-shell body > .terp-wrap{
+        width:100%;
+        max-width:1180px;
+        margin-left:auto!important;
+        margin-right:auto!important;
+      }
+    }
   </style>
   <script src="config.js?v=00107b4d68a09227"></script>
   <script src="site-api-config.js?v=b4eb7cb7438aad24"></script>
