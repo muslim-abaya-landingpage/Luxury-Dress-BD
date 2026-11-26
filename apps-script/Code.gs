@@ -6443,15 +6443,17 @@ function markGrowthItemDone_(e) {
 var STOCK_LOW_DEFAULT_THRESHOLD_ = 5;
 
 function ensureStockVariantsSheet_() {
-  var sheet = ensureSheet_('StockVariants', ['Product ID', 'Product Name', 'Category', 'Variant', 'Tracked', 'Available', 'Reserved', 'LowStockThreshold', 'UpdatedAt', 'UpdatedBy', 'OperationId']);
+  return ensureSheet_('StockVariants', ['Product ID', 'Product Name', 'Category', 'Variant', 'Tracked', 'Available', 'Reserved', 'LowStockThreshold', 'UpdatedAt', 'UpdatedBy', 'OperationId']);
+}
+function ensureStockVariantsOperationIdColumn_(sheet) {
   if (!sheet.getRange(1, 11).getValue()) sheet.getRange(1, 11).setValue('OperationId');
-  return sheet;
 }
 
 function ensureStockLedgerSheet_() {
-  var sheet = ensureSheet_('StockLedger', ['Timestamp', 'Product ID', 'Variant', 'ChangeType', 'QtyBefore', 'QtyAfter', 'ReservedBefore', 'ReservedAfter', 'Reason', 'OrderId', 'Admin', 'OperationId']);
+  return ensureSheet_('StockLedger', ['Timestamp', 'Product ID', 'Variant', 'ChangeType', 'QtyBefore', 'QtyAfter', 'ReservedBefore', 'ReservedAfter', 'Reason', 'OrderId', 'Admin', 'OperationId']);
+}
+function ensureStockLedgerOperationIdColumn_(sheet) {
   if (!sheet.getRange(1, 12).getValue()) sheet.getRange(1, 12).setValue('OperationId');
-  return sheet;
 }
 
 function ensureOnlineOrderStockStageHeader_(sheet) {
@@ -6614,6 +6616,7 @@ function reconcilePendingStockOperationsForRow_(variants, targetRow) {
 
 function mutateStockVariant_(opts) {
   var sheet = ensureStockVariantsSheet_();
+  ensureStockVariantsOperationIdColumn_(sheet);
   var row = getOrCreateStockVariantRow_(sheet, opts.productId, opts.productName, opts.variant, opts.category);
   reconcilePendingStockOperationsForRow_(sheet, row);
   var before = readStockVariantRow_(sheet, row);
@@ -6678,6 +6681,7 @@ function recoverAdminStockOperations_(e) {
     var limit = Math.min(100, Math.max(1, parseInt(param_(e, 'Limit'), 10) || 50));
     var recovered = 0, conflicts = 0, checked = 0, errors = [];
     var variants = ensureStockVariantsSheet_();
+    ensureStockVariantsOperationIdColumn_(variants);
     for (var i = 1; i < rows.length && checked < limit; i++) {
       if (String(rows[i][1] || '') !== 'PREPARED') continue;
       checked++;
