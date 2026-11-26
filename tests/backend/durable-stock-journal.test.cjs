@@ -12,8 +12,8 @@ function extract(name) {
   let depth = 0, quote = '', escaped = false;
   for (let i = open; i < source.length; i++) {
     const c = source[i];
-    if (quote) { if (escaped) escaped = false; else if (c === '\\\\') escaped = true; else if (c === quote) quote = ''; continue; }
-    if (c === "'" || c === '"' || c === '`') { quote = c; continue; }
+    if (quote) { if (escaped) escaped = false; else if (c === '\\') escaped = true; else if (c === quote) quote = ''; continue; }
+    if (c === "'" || c === '"' || c === '\`') { quote = c; continue; }
     if (c === '{') depth++;
     else if (c === '}' && --depth === 0) return source.slice(start, i + 1);
   }
