@@ -7481,7 +7481,8 @@ function getAdminStockLedger_(e) {
       reservedAfter: r[7],
       reason: String(r[8] || ''),
       orderId: String(r[9] || ''),
-      admin: String(r[10] || '')
+      admin: String(r[10] || ''),
+      operationId: String(r[11] || '')
     });
     if (rows.length >= limit) break;
   }
