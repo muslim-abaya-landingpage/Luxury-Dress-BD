@@ -92,7 +92,7 @@
       var key = statusKey(o.status);
       var displayStatus = MaOrderStatus.describe(o);
       key = displayStatus.badgeKey;
-      var hasTotal = o.total !== null && typeof o.total !== "undefined" && String(o.total).trim() !== "";
+      var hasTotal = !o.totalMissing && o.total !== null && typeof o.total !== "undefined" && String(o.total).trim() !== "" && !(Number(o.total) === 0 && !o.orderId);
       var totalLabel = hasTotal ? "৳" + num(o.total).toLocaleString("en-US") : "মূল্য সংরক্ষিত নেই";
       var confirmMsg = "আসসালামু আলাইকুম " + (o.name || "") + ", আপনার অর্ডার #" + (o.orderId || "") + (hasTotal ? " (" + totalLabel + ")" : "") + " কনফার্ম হয়েছে। শীঘ্রই ডেলিভারি করা হবে, ধন্যবাদ।";
       var orderLink = o.orderId ? '<a class="adm-order-open" href="admin-order.html?id=' + encodeURIComponent(o.orderId) + '">#' + escapeHtml(o.orderId) + '</a>' : '<span class="adm-order-id-missing">ক্রম ' + (idx + 1) + '</span>';
