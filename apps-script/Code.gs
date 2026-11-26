@@ -229,6 +229,7 @@ function doPost(e) {
     if (type === 'AdminStockVariantSave') {
       return jsonOut_(saveAdminStockVariant_(e));
     }
+    if (type === 'AdminStockJournalRecover') return jsonOut_(recoverAdminStockOperations_(e));
     if (type === 'AdminStockLedgerList') {
       return jsonOut_(getAdminStockLedger_(e));
     }
@@ -6442,11 +6443,15 @@ function markGrowthItemDone_(e) {
 var STOCK_LOW_DEFAULT_THRESHOLD_ = 5;
 
 function ensureStockVariantsSheet_() {
-  return ensureSheet_('StockVariants', ['Product ID', 'Product Name', 'Category', 'Variant', 'Tracked', 'Available', 'Reserved', 'LowStockThreshold', 'UpdatedAt', 'UpdatedBy']);
+  var sheet = ensureSheet_('StockVariants', ['Product ID', 'Product Name', 'Category', 'Variant', 'Tracked', 'Available', 'Reserved', 'LowStockThreshold', 'UpdatedAt', 'UpdatedBy', 'OperationId']);
+  if (!sheet.getRange(1, 11).getValue()) sheet.getRange(1, 11).setValue('OperationId');
+  return sheet;
 }
 
 function ensureStockLedgerSheet_() {
-  return ensureSheet_('StockLedger', ['Timestamp', 'Product ID', 'Variant', 'ChangeType', 'QtyBefore', 'QtyAfter', 'ReservedBefore', 'ReservedAfter', 'Reason', 'OrderId', 'Admin']);
+  var sheet = ensureSheet_('StockLedger', ['Timestamp', 'Product ID', 'Variant', 'ChangeType', 'QtyBefore', 'QtyAfter', 'ReservedBefore', 'ReservedAfter', 'Reason', 'OrderId', 'Admin', 'OperationId']);
+  if (!sheet.getRange(1, 12).getValue()) sheet.getRange(1, 12).setValue('OperationId');
+  return sheet;
 }
 
 function ensureOnlineOrderStockStageHeader_(sheet) {
@@ -6486,36 +6491,37 @@ function getOrCreateStockVariantRow_(sheet, productId, productName, variant, cat
   var row = findStockVariantRowIndex_(data, productId, variant);
   if (row !== -1) return row;
   var now = new Date();
-  appendRow_(sheet, [String(productId).trim(), String(productName || ''), String(category || ''), normStockVariant_(variant), false, 0, 0, '', now, 'system']);
+  appendRow_(sheet, [String(productId).trim(), String(productName || ''), String(category || ''), normStockVariant_(variant), false, 0, 0, '', now, 'system', '']);
   return sheet.getLastRow();
 }
 
 function readStockVariantRow_(sheet, row) {
-  var r = sheet.getRange(row, 1, 1, 10).getValues()[0];
+  var r = sheet.getRange(row, 1, 1, 11).getValues()[0];
   return {
-    row: row,
-    productId: String(r[0] || ''),
-    productName: String(r[1] || ''),
-    category: String(r[2] || ''),
-    variant: String(r[3] || ''),
+    row: row, productId: String(r[0] || ''), productName: String(r[1] || ''),
+    category: String(r[2] || ''), variant: String(r[3] || ''),
     tracked: (String(r[4]).toUpperCase() === 'TRUE') || (r[4] === true),
-    available: Number(r[5]) || 0,
-    reserved: Number(r[6]) || 0,
+    available: Number(r[5]) || 0, reserved: Number(r[6]) || 0,
     threshold: (r[7] === '' || r[7] === null || typeof r[7] === 'undefined') ? null : Number(r[7]),
-    updatedAt: r[8],
-    updatedBy: String(r[9] || '')
+    updatedAt: r[8], updatedBy: String(r[9] || ''), operationId: String(r[10] || '')
   };
 }
 
 function writeStockVariantRow_(sheet, row, fields) {
-  if (typeof fields.tracked !== 'undefined') sheet.getRange(row, 5).setValue(!!fields.tracked);
-  if (typeof fields.available !== 'undefined') sheet.getRange(row, 6).setValue(Math.max(0, Number(fields.available) || 0));
-  if (typeof fields.reserved !== 'undefined') sheet.getRange(row, 7).setValue(Math.max(0, Number(fields.reserved) || 0));
-  if (typeof fields.threshold !== 'undefined') sheet.getRange(row, 8).setValue(fields.threshold === null ? '' : Number(fields.threshold));
-  if (typeof fields.productName !== 'undefined' && fields.productName) sheet.getRange(row, 2).setValue(fields.productName);
-  if (typeof fields.category !== 'undefined' && fields.category) sheet.getRange(row, 3).setValue(fields.category);
-  sheet.getRange(row, 9).setValue(new Date());
-  if (typeof fields.updatedBy !== 'undefined') sheet.getRange(row, 10).setValue(fields.updatedBy);
+  // One Sheets range write persists quantity + OperationId together.
+  var values = sheet.getRange(row, 1, 1, 11).getValues()[0];
+  if (typeof fields.productId !== 'undefined') values[0] = fields.productId;
+  if (typeof fields.productName !== 'undefined' && fields.productName) values[1] = fields.productName;
+  if (typeof fields.category !== 'undefined' && fields.category) values[2] = fields.category;
+  if (typeof fields.variant !== 'undefined') values[3] = fields.variant;
+  if (typeof fields.tracked !== 'undefined') values[4] = !!fields.tracked;
+  if (typeof fields.available !== 'undefined') values[5] = Math.max(0, Number(fields.available) || 0);
+  if (typeof fields.reserved !== 'undefined') values[6] = Math.max(0, Number(fields.reserved) || 0);
+  if (typeof fields.threshold !== 'undefined') values[7] = fields.threshold === null ? '' : Number(fields.threshold);
+  values[8] = new Date();
+  if (typeof fields.updatedBy !== 'undefined') values[9] = fields.updatedBy;
+  if (typeof fields.operationId !== 'undefined') values[10] = fields.operationId;
+  sheet.getRange(row, 1, 1, 11).setValues([values]);
 }
 
 function appendStockLedger_(entry) {
@@ -6548,6 +6554,136 @@ function appendStockLedger_(entry) {
  * Script-এ ডেডলক/টাইমআউট ঘটাতে পারে, তাই ইচ্ছাকৃতভাবে এখানে লক নেওয়া বাদ দেওয়া হয়েছে।
  * সরাসরি বাইরে থেকে কল করলে আগে LockService.getScriptLock().waitLock() করে নিন।
  */
+
+// Durable write-ahead journal. Script Lock must already be held by the caller.
+function ensureStockOperationJournalSheet_() {
+  return ensureSheet_('StockOperationJournal', ['OperationId', 'Status', 'Target', 'Row', 'PayloadJSON', 'CreatedAt', 'UpdatedAt', 'Error']);
+}
+function stockOperationJournalRow_(sheet, operationId) {
+  var rows = sheet.getDataRange().getValues();
+  for (var i = 1; i < rows.length; i++) if (String(rows[i][0] || '') === operationId) return i + 1;
+  return -1;
+}
+function stockOperationSetState_(sheet, row, state, error) {
+  sheet.getRange(row, 2).setValue(state);
+  sheet.getRange(row, 7).setValue(new Date());
+  sheet.getRange(row, 8).setValue(error || '');
+}
+function appendStockLedgerOnce_(entry, operationId) {
+  if (!operationId) throw new Error('STOCK_OPERATION_ID_REQUIRED');
+  var sheet = ensureStockLedgerSheet_();
+  var rows = sheet.getDataRange().getValues();
+  for (var i = 1; i < rows.length; i++) {
+    if (String(rows[i][11] || '') === operationId) return { duplicate: true, row: i + 1 };
+  }
+  appendRow_(sheet, [new Date(), entry.productId || '', entry.variant || '', entry.changeType || '',
+    entry.qtyBefore != null ? entry.qtyBefore : '', entry.qtyAfter != null ? entry.qtyAfter : '',
+    entry.reservedBefore != null ? entry.reservedBefore : '', entry.reservedAfter != null ? entry.reservedAfter : '',
+    entry.reason || '', entry.orderId || '', entry.admin || 'system', operationId]);
+  return { duplicate: false, row: sheet.getLastRow() };
+}
+function stockOperationId_(opts) {
+  if (opts.operationId) return String(opts.operationId).trim();
+  if (opts.orderId) return ['ORDER', opts.orderId, opts.changeType, opts.productId, stockVariantCompareKey_(opts.variant)].join(':');
+  return 'MANUAL:' + Utilities.getUuid();
+}
+function mutateStockVariant_(opts) {
+  var sheet = ensureStockVariantsSheet_();
+  var row = getOrCreateStockVariantRow_(sheet, opts.productId, opts.productName, opts.variant, opts.category);
+  var before = readStockVariantRow_(sheet, row);
+  var operationId = stockOperationId_(opts);
+  var nextAvailable = Math.max(0, before.available + (opts.deltaAvailable || 0));
+  var nextReserved = Math.max(0, before.reserved + (opts.deltaReserved || 0));
+  var entry = {
+    productId: before.productId || opts.productId, variant: before.variant || opts.variant,
+    changeType: opts.changeType, qtyBefore: before.available, qtyAfter: nextAvailable,
+    reservedBefore: before.reserved, reservedAfter: nextReserved, reason: opts.reason || '',
+    orderId: opts.orderId || '', admin: opts.admin || 'system'
+  };
+  var journal = ensureStockOperationJournalSheet_();
+  var journalRow = stockOperationJournalRow_(journal, operationId);
+  if (journalRow !== -1) {
+    var existing = journal.getRange(journalRow, 1, 1, 8).getValues()[0];
+    if (String(existing[1]) === 'COMMITTED') return { before: before, after: { available: before.available, reserved: before.reserved }, duplicate: true, operationId: operationId };
+    if (String(existing[1]) === 'CONFLICT') throw new Error('STOCK_OPERATION_CONFLICT:' + operationId);
+    var saved = JSON.parse(String(existing[4] || '{}'));
+    if (saved.row !== row) throw new Error('STOCK_OPERATION_ROW_MISMATCH:' + operationId);
+    before = saved.before;
+    nextAvailable = saved.after.available;
+    nextReserved = saved.after.reserved;
+    entry = saved.entry;
+  } else {
+    var payload = { row: row, before: { available: before.available, reserved: before.reserved },
+      after: { available: nextAvailable, reserved: nextReserved }, fields: {
+        tracked: !!(before.tracked || opts.setTracked), productName: opts.productName || '',
+        category: opts.category || '', threshold: typeof opts.threshold === 'undefined' ? undefined : opts.threshold,
+        updatedBy: opts.admin || 'system'
+      }, entry: entry };
+    appendRow_(journal, [operationId, 'PREPARED', 'StockVariants', row, JSON.stringify(payload), new Date(), new Date(), '']);
+    journalRow = journal.getLastRow();
+  }
+  var current = readStockVariantRow_(sheet, row);
+  if (current.operationId !== operationId) {
+    if (current.available !== Number(before.available) || current.reserved !== Number(before.reserved)) {
+      stockOperationSetState_(journal, journalRow, 'CONFLICT', 'Stock row changed after PREPARED; automatic replay stopped');
+      throw new Error('STOCK_OPERATION_CONFLICT:' + operationId);
+    }
+    var savedPayload = JSON.parse(String(journal.getRange(journalRow, 5).getValue() || '{}'));
+    writeStockVariantRow_(sheet, row, {
+      available: nextAvailable, reserved: nextReserved, operationId: operationId,
+      tracked: savedPayload.fields.tracked, productName: savedPayload.fields.productName,
+      category: savedPayload.fields.category, threshold: savedPayload.fields.threshold,
+      updatedBy: savedPayload.fields.updatedBy
+    });
+  }
+  appendStockLedgerOnce_(entry, operationId);
+  stockOperationSetState_(journal, journalRow, 'COMMITTED', '');
+  try { queueLowStockAlert_(before, nextAvailable, !!(before.tracked || opts.setTracked)); } catch (lowErr) {}
+  return { before: before, after: { available: nextAvailable, reserved: nextReserved }, operationId: operationId };
+}
+function recoverAdminStockOperations_(e) {
+  var auth = verifyAdminSession_(param_(e, 'Token'));
+  if (!auth.ok) return auth;
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    var journal = ensureStockOperationJournalSheet_();
+    var rows = journal.getDataRange().getValues();
+    var limit = Math.min(100, Math.max(1, parseInt(param_(e, 'Limit'), 10) || 50));
+    var recovered = 0, conflicts = 0, checked = 0, errors = [];
+    var variants = ensureStockVariantsSheet_();
+    for (var i = 1; i < rows.length && checked < limit; i++) {
+      if (String(rows[i][1] || '') !== 'PREPARED') continue;
+      checked++;
+      var id = String(rows[i][0] || ''), row = Number(rows[i][3]) || 0, payload;
+      try {
+        payload = JSON.parse(String(rows[i][4] || '{}'));
+        if (String(rows[i][2]) !== 'StockVariants' || row < 2 || row > variants.getLastRow()) throw new Error('UNSUPPORTED_TARGET');
+        var current = readStockVariantRow_(variants, row);
+        if (current.operationId !== id) {
+          if (current.available !== Number(payload.before.available) || current.reserved !== Number(payload.before.reserved)) {
+            stockOperationSetState_(journal, i + 1, 'CONFLICT', 'Current stock differs from prepared before-state');
+            conflicts++;
+            continue;
+          }
+          writeStockVariantRow_(variants, row, {
+            available: payload.after.available, reserved: payload.after.reserved, operationId: id,
+            tracked: payload.fields.tracked, productName: payload.fields.productName,
+            category: payload.fields.category, threshold: payload.fields.threshold,
+            updatedBy: payload.fields.updatedBy
+          });
+        }
+        appendStockLedgerOnce_(payload.entry, id);
+        stockOperationSetState_(journal, i + 1, 'COMMITTED', '');
+        recovered++;
+      } catch (err) {
+        errors.push({ operationId: id, error: String(err && err.message || err).slice(0, 180) });
+      }
+    }
+    return { ok: true, checked: checked, recovered: recovered, conflicts: conflicts, errors: errors };
+  } finally { lock.releaseLock(); }
+}
+
 function mutateStockVariant_(opts) {
   var sheet = ensureStockVariantsSheet_();
   var row = getOrCreateStockVariantRow_(sheet, opts.productId, opts.productName, opts.variant, opts.category);
