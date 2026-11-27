@@ -107,6 +107,15 @@ test('sending to Steadfast (single or bulk) checks fraud risk via the existing A
   assert.match(js, /Promise\.all\(ids\.map/);
 });
 
+test('courier performance table has an average-delivery-time column populated from the backend result', () => {
+  const html = read('courier-management.html');
+  const js = read('courier-management.js');
+  assert.match(html, /<th>Success<\/th><th>[^<]*<\/th><\/tr>/);
+  assert.match(js, /function formatAvgDeliveryHours\(hours, sampleSize\)/);
+  assert.match(js, /x\.avgDeliveryHours/);
+  assert.match(js, /x\.avgDeliverySampleSize/);
+});
+
 test('COD settlement workspace exposes reconciled totals, partial settlement and recent ledger', () => {
   const html = read('courier-management.html');
   const js = read('courier-management.js');

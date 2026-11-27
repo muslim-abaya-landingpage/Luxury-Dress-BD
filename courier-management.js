@@ -272,13 +272,20 @@
     window.MaCourierInvoice.print(rows, { courier: label });
   }
   function loadPerformance() {
-    $('cmPerformance').innerHTML = '<tr><td colspan="5" class="cm-empty">লোড হচ্ছে…</td></tr>';
+    $('cmPerformance').innerHTML = '<tr><td colspan="6" class="cm-empty">লোড হচ্ছে…</td></tr>';
     MaAdmin.call('AdminCourierPerformance', {}).then(function (res) {
       var items = res.couriers || [];
       $('cmPerformance').innerHTML = items.length ? items.map(function (x) {
-        return '<tr><td>' + esc(x.courier) + '</td><td>' + Number(x.total || 0) + '</td><td>' + Number(x.delivered || 0) + '</td><td>' + Number(x.returned || 0) + '</td><td>' + (x.successRate == null ? '—' : Number(x.successRate) + '%') + '</td></tr>';
-      }).join('') : '<tr><td colspan="5" class="cm-empty">এখনো কুরিয়ার পারফরম্যান্সের রেকর্ড নেই।</td></tr>';
-    }).catch(function (err) { $('cmPerformance').innerHTML = '<tr><td colspan="5" class="cm-empty">' + esc(err.message) + '</td></tr>'; });
+        var avg = formatAvgDeliveryHours(x.avgDeliveryHours, x.avgDeliverySampleSize);
+        return '<tr><td>' + esc(x.courier) + '</td><td>' + Number(x.total || 0) + '</td><td>' + Number(x.delivered || 0) + '</td><td>' + Number(x.returned || 0) + '</td><td>' + (x.successRate == null ? '—' : Number(x.successRate) + '%') + '</td><td>' + avg + '</td></tr>';
+      }).join('') : '<tr><td colspan="6" class="cm-empty">এখনো কুরিয়ার পারফরম্যান্সের রেকর্ড নেই।</td></tr>';
+    }).catch(function (err) { $('cmPerformance').innerHTML = '<tr><td colspan="6" class="cm-empty">' + esc(err.message) + '</td></tr>'; });
+  }
+  function formatAvgDeliveryHours(hours, sampleSize) {
+    if (hours == null || !sampleSize) return '<span class="cm-muted" title="Stock Ledger-এ এই কুরিয়ারের কোনো Delivered অর্ডারের ডেলিভারি-সময়ের হিসাব পাওয়া যায়নি (ট্র্যাক না করা পণ্য বা পুরনো অর্ডারে এই হিসাব থাকে না)।">—</span>';
+    var days = hours / 24;
+    var text = days >= 1 ? (Math.round(days * 10) / 10) + ' দিন' : Math.round(hours) + ' ঘণ্টা';
+    return '<span title="আনুমানিক — Stock Ledger-এ Delivered রেকর্ড হওয়ার সময় থেকে হিসাব করা (' + sampleSize + 'টি অর্ডারের ভিত্তিতে); কুরিয়ারের প্রকৃত ডেলিভারির সময়ের সাথে সামান্য পার্থক্য হতে পারে।">' + esc(text) + '</span>';
   }
   function riskLabel(risk) {
     return { high: 'উচ্চ ঝুঁকি', medium: 'মাঝারি ঝুঁকি', new: 'নতুন গ্রাহক', unknown: 'অজানা', low: 'নিম্ন ঝুঁকি' }[risk] || risk;

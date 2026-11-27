@@ -8436,6 +8436,30 @@ function adminFraudCheck_(e) {
 }
 
 
+/**
+ * StockLedger-এ প্রতিটি Delivered অর্ডারে একটি SELL/SELL_DIRECT/SELL_UNTRACKED_RESERVATION
+ * এন্ট্রি তৈরি হয় (applyStockLifecycleForStatusChangeLocked_ দেখুন), ঠিক যে মুহূর্তে অর্ডার
+ * Delivered হিসেবে রেকর্ড হয়। এটাই এখন পর্যন্ত একমাত্র সময়ের রেকর্ড — আলাদা কোনো
+ * "DeliveredAt" কলাম Online Order শিটে নেই, তাই এই লেজার-টাইমস্ট্যাম্পকেই প্রক্সি হিসেবে
+ * ব্যবহার করা হচ্ছে। সীমাবদ্ধতা: কার্টে কোনো ট্র্যাক করা আইটেম না থাকলে বা অর্ডারটি
+ * "LEGACY_SKIPPED" হলে এই হিসাব পাওয়া যাবে না — সেসব অর্ডার গড় থেকে বাদ পড়ে, অনুমান করা হয় না।
+ */
+function admDeliveredAtFromStockLedger_() {
+  var sheet = ensureStockLedgerSheet_();
+  var data = sheet.getDataRange().getValues();
+  var SELL_TYPES = { SELL: true, SELL_DIRECT: true, SELL_UNTRACKED_RESERVATION: true };
+  var map = {};
+  for (var i = 1; i < data.length; i++) {
+    var r = data[i];
+    if (!SELL_TYPES[String(r[3] || '')]) continue;
+    var orderId = String(r[9] || '');
+    var ts = r[0];
+    if (!orderId || !(ts instanceof Date)) continue;
+    if (!map[orderId] || ts.getTime() < map[orderId].getTime()) map[orderId] = ts;
+  }
+  return map;
+}
+
 /** Courier delivery performance from Muslim Abaya's own Online Order records. */
 function adminCourierPerformance_(e) {
   var v = verifyAdminSession_(param_(e, 'Token'));
@@ -8443,16 +8467,29 @@ function adminCourierPerformance_(e) {
   var sheet = admGetSheet_();
   var lastRow = lastOnlineOrderDataRow_(sheet);
   var rows = lastRow >= 2 ? readOnlineOrderRows_(sheet, 2, lastRow - 1, ADM_LAST_COL) : [];
+  var deliveredAtByOrderId = admDeliveredAtFromStockLedger_();
   var map = {};
   rows.forEach(function (r) {
     var courier = String(r[45] || '').trim();
     if (!courier) return;
     var key = courier.toLowerCase();
-    if (!map[key]) map[key] = { courier: courier, total: 0, delivered: 0, cancelled: 0, returned: 0, fake: 0, active: 0 };
+    if (!map[key]) map[key] = { courier: courier, total: 0, delivered: 0, cancelled: 0, returned: 0, fake: 0, active: 0, deliveryHoursSum: 0, deliveryHoursCount: 0 };
     var x = map[key], status = String(r[9] || 'Pending').trim().toLowerCase();
     var courierStatus = String(r[12] || '').trim().toLowerCase();
     x.total++;
-    if (status === 'delivered' || courierStatus === 'delivered') x.delivered++;
+    if (status === 'delivered' || courierStatus === 'delivered') {
+      x.delivered++;
+      var placedAt = r[0];
+      var deliveredAt = deliveredAtByOrderId[String(r[8] || '')];
+      if (deliveredAt && placedAt instanceof Date) {
+        var hours = (deliveredAt.getTime() - placedAt.getTime()) / 3600000;
+        // Guard against bad/legacy data (negative or implausibly large gaps) skewing the average.
+        if (hours >= 0 && hours <= 24 * 60) {
+          x.deliveryHoursSum += hours;
+          x.deliveryHoursCount++;
+        }
+      }
+    }
     else if (status === 'fake') x.fake++;
     else if (status === 'cancelled' || courierStatus === 'cancelled') x.cancelled++;
     else if (courierStatus.indexOf('return') !== -1 || status.indexOf('return') !== -1) x.returned++;
@@ -8461,6 +8498,10 @@ function adminCourierPerformance_(e) {
   var result = Object.keys(map).map(function (key) {
     var x = map[key], decided = x.delivered + x.cancelled + x.returned + x.fake;
     x.successRate = decided ? Math.round(x.delivered * 100 / decided) : null;
+    x.avgDeliveryHours = x.deliveryHoursCount ? Math.round((x.deliveryHoursSum / x.deliveryHoursCount) * 10) / 10 : null;
+    x.avgDeliverySampleSize = x.deliveryHoursCount;
+    delete x.deliveryHoursSum;
+    delete x.deliveryHoursCount;
     return x;
   }).sort(function (a, b) { return b.total - a.total; });
   return { ok: true, source: 'own-orders', couriers: result, totalOrders: rows.length };
