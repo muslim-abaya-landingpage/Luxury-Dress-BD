@@ -258,3 +258,55 @@ test('endpoint: full request through mocked Google APIs', async () => {
   _resetHealthCache();
   assert.equal((await handleHealth({}, { fetch: fakeFetch })).status, 503);
 });
+
+test('AdminOrderList labels each order from the same phone\'s EARLIER orders only', async () => {
+  const { edge } = await makeCores();
+  const res = withNow(() => edge.adminOrderList_({ parameter: { Token: 'tok-admin' } }));
+  const by = Object.fromEntries(res.orders.map((o) => [o.orderId, o]));
+  assert.equal(by['MA-1'].customerProfile.type, 'new');          // Rina's first order
+  assert.equal(by['MA-3'].customerProfile.type, 'returning');    // Rina again, MA-1 was delivered
+  assert.equal(by['MA-3'].customerProfile.delivered, 1);
+  assert.equal(by['MA-3'].reviewNeeded, false);
+  assert.equal(by['MA-2'].reviewNeeded, false);                  // blocked phone, but already Confirmed
+  assert.equal(res.counts.review, 0);
+});
+
+test('a Pending order from a phone with an earlier Fake order is flagged for review', async () => {
+  const { createCore } = await lib('_lib/gs-core.js');
+  const { buildEnv } = await lib('_lib/sheets-shim.js');
+  const data = fixture();
+  const orders = data['Online Order'];
+  const fakeRow = orders[1].slice(); fakeRow[2] = '01799999999'; fakeRow[9] = 'MA-F1'; fakeRow[10] = 'Fake'; fakeRow[13] = '';
+  const nextRow = orders[3].slice(); nextRow[2] = '01799999999'; nextRow[9] = 'MA-F2'; nextRow[10] = 'Pending';
+  orders.push(fakeRow, nextRow);
+  const snap = { spreadsheetId: 'SHEET', url: 'u', timeZone: 'Asia/Dhaka', scriptId: 'S', sheets: {} };
+  Object.keys(data).forEach((name, i) => { snap.sheets[name] = { id: i + 1, values: data[name], rowCount: 1000, columnCount: 50 }; });
+  const core = createCore(buildEnv(snap));
+  const res = withNow(() => core.adminOrderList_({ parameter: { Token: 'tok-admin' } }));
+  const f2 = res.orders.find((o) => o.orderId === 'MA-F2');
+  assert.equal(f2.risk, 'high');
+  assert.equal(f2.reviewNeeded, true);
+  assert.equal(f2.customerProfile.fake, 1);
+  assert.equal(res.orders.find((o) => o.orderId === 'MA-F1').customerProfile.type, 'new');
+  assert.equal(res.counts.review, 1);
+  assert.equal(res.counts.Fake, 1);
+});
+
+test('reports leave Fake orders out of order and revenue totals and count them separately', async () => {
+  const { createCore } = await lib('_lib/gs-core.js');
+  const { buildEnv } = await lib('_lib/sheets-shim.js');
+  const run = (extraRows) => {
+    const data = fixture();
+    data['Online Order'].push(...extraRows(data['Online Order']));
+    const snap = { spreadsheetId: 'SHEET', url: 'u', timeZone: 'Asia/Dhaka', scriptId: 'S', sheets: {} };
+    Object.keys(data).forEach((name, i) => { snap.sheets[name] = { id: i + 1, values: data[name], rowCount: 1000, columnCount: 50 }; });
+    return withNow(() => createCore(buildEnv(snap)).getAdminAnalyticsV2_({ parameter: { Token: 'tok-admin', Range: 'all' } }));
+  };
+  const base = run(() => []);
+  const withFake = run((orders) => { const r = orders[1].slice(); r[2] = '01799999999'; r[9] = 'MA-F1'; r[10] = 'Fake'; r[13] = ''; return [r]; });
+  assert.equal(base.ok, true);
+  assert.equal(withFake.summary.totalOrders, base.summary.totalOrders);
+  assert.equal(withFake.summary.totalOrderValue, base.summary.totalOrderValue);
+  assert.equal(withFake.summary.customerCount, base.summary.customerCount);
+  assert.equal(withFake.summary.fakeCount, 1);
+});

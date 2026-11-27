@@ -327,6 +327,7 @@
         if (issueFilter === "flagged" && !issues.length) return false;
         if (issueFilter !== "all" && issueFilter !== "flagged" && issues.indexOf(issueFilter) === -1) return false;
         if (filter === "today") { if (!isToday(o)) return false; }
+        else if (filter === "review") { if (!o.reviewNeeded) return false; }
         else if (filter !== "all" && o.status !== filter) return false;
         if (!matchesDate(o)) return false;
         if (!matchesCourier(o)) return false;
@@ -421,8 +422,24 @@
         var map={pending:"অপেক্ষমাণ",confirmed:"নিশ্চিত",processing:"প্রক্রিয়াধীন",shipped:"পাঠানো হয়েছে",delivered:"ডেলিভারি সম্পন্ন",cancelled:"বাতিল",canceled:"বাতিল",returned:"ফেরত",fake:"জাল/প্রতারণা",fraud:"প্রতারণা",not_sent:"পাঠানো হয়নি","not sent":"পাঠানো হয়নি","courier: not sent":"কুরিয়ারে পাঠানো হয়নি","not sent to courier":"কুরিয়ারে পাঠানো হয়নি","in transit":"পথে আছে",picked:"কুরিয়ার সংগ্রহ করেছে","partial delivery":"আংশিক ডেলিভারি","on hold":"স্থগিত","ready for delivery":"ডেলিভারির জন্য প্রস্তুত",completed:"সম্পন্ন"};
         return map[key]||String(value||"তথ্য নেই");
       }
+      // Customer and risk labels come from the same phone's earlier orders (Apps Script adminOrderList_).
+      // They are warnings for a person to check; they never change an order's status.
+      function customerBadge(o) {
+        var c = o.customerProfile;
+        if (!c) return "";
+        if (c.type === "new") return '<span class="ma-cust-badge is-new" title="এই নম্বর থেকে আগে কোনো অর্ডার নেই">নতুন কাস্টমার</span>';
+        if (c.type === "returning") return '<span class="ma-cust-badge is-returning" title="আগের অর্ডার ' + esc(c.previous) + 'টি · ডেলিভারি ' + esc(c.delivered) + ' · ব্যর্থ ' + esc(c.failed) + '">পুরাতন · ' + esc(c.delivered) + 'টি ডেলিভারি</span>';
+        return '<span class="ma-cust-badge is-repeat" title="আগের অর্ডার ' + esc(c.previous) + 'টি, এখনো কোনোটি ডেলিভারি হয়নি">আগে ' + esc(c.previous) + 'টি অর্ডার · ডেলিভারি হয়নি</span>';
+      }
+      function riskBadge(o) {
+        var c = o.customerProfile || {};
+        var why = "আগের অর্ডার " + (c.previous || 0) + "টি · ডেলিভারি " + (c.delivered || 0) + " · Fake " + (c.fake || 0) + " · মোট ব্যর্থ " + (c.failed || 0) + (c.successRate == null ? "" : " · সফলতা " + c.successRate + "%");
+        if (o.risk === "high") return ' <span class="ma-risk-badge is-high" title="' + esc(why) + '">ঝুঁকি বেশি</span>';
+        if (o.risk === "medium") return ' <span class="ma-risk-badge is-medium" title="' + esc(why) + '">সন্দেহজনক</span>';
+        return "";
+      }
       function renderTabs() {
-        var tabs = [["all", "সব"], ["today", "আজকের"]].concat(statuses.map(function (s) { return [s, statusBn(s)]; }))
+        var tabs = [["all", "সব"], ["today", "আজকের"], ["review", "রিভিউ দরকার"]].concat(statuses.map(function (s) { return [s, statusBn(s)]; }))
           .filter(function (t) { return t[0] === "all" || t[0] === filter || (counts[t[0]] || 0) > 0; });
         document.getElementById("ordTabs").innerHTML = tabs.map(function (t) {
           return '<button type="button" class="pn-tab' + (filter === t[0] ? " active" : "") + '" data-f="' + esc(t[0]) + '"' + (filter === t[0] ? ' aria-current="true"' : '') + '>' + esc(t[1]) + " <em>(" + (counts[t[0]] || 0) + ")</em></button>";
@@ -496,10 +513,10 @@
             '<td class="wc-col-cb">' + (canOpen ? '<input type="checkbox" class="ot-sel" data-oid="' + esc(o.orderId) + '" aria-label="' + esc(o.orderId) + ' বাছুন">' : '') + '</td>' +
             '<td class="wc-col-order" data-label="অর্ডার"><div class="wc-order-line">' +
               (canOpen ? '<a class="oi-link wc-order-link" href="admin-order.html?id=' + encodeURIComponent(o.orderId) + '">' + esc(label) + '</a>' : '<span class="wc-order-link is-plain">' + esc(label) + (o.row ? ' <span class="sub">(সারি ' + esc(o.row) + ')</span>' : '') + '</span>') +
-              (o.blocked ? ' <span class="pn-badge blocked">Blocked</span>' : '') +
+              (o.blocked ? ' <span class="pn-badge blocked">Blocked</span>' : '') + riskBadge(o) +
               '<button type="button" class="wc-eye wo-preview-btn" data-preview-id="' + esc(o.orderId || "") + '" data-preview-row="' + esc(o.row || "") + '" title="Preview" aria-label="' + esc(label) + ' প্রিভিউ">' + eyeSvg + '</button>' +
             '</div><div class="ot-wa-slot" hidden></div></td>' +
-            '<td class="wc-col-customer" data-label="কাস্টমার">' + (o.name ? '<strong class="wc-customer-name">' + esc(o.name) + '</strong>' : '') + (phone ? '<a class="wc-customer-phone" href="tel:' + esc(phone) + '">' + esc(phone) + '</a>' : '') + (!o.name && !phone ? '<span class="sub">তথ্য নেই</span>' : '') + '</td>' +
+            '<td class="wc-col-customer" data-label="কাস্টমার">' + (o.name ? '<strong class="wc-customer-name">' + esc(o.name) + '</strong>' : '') + (phone ? '<a class="wc-customer-phone" href="tel:' + esc(phone) + '">' + esc(phone) + '</a>' : '') + (!o.name && !phone ? '<span class="sub">তথ্য নেই</span>' : '') + customerBadge(o) + '</td>' +
             '<td class="wc-col-products" data-label="পণ্য">' + productsText + '</td>' +
             '<td class="wc-col-date" data-label="তারিখ"><time title="' + esc(when.title) + '">' + esc(when.text) + '</time></td>' +
             '<td class="wc-col-status" data-label="স্ট্যাটাস"><mark class="wc-status wc-status-' + MaPanel.statusClass(status) + '">' + esc(statusLabel) + '</mark></td>' +
@@ -784,6 +801,14 @@
   })();
   </script>
 <style>
+.ma-cust-badge{display:inline-block;margin-top:4px;padding:2px 8px;border-radius:999px;font-size:11.5px;font-weight:600;border:1px solid transparent;white-space:nowrap}
+.ma-cust-badge.is-new{background:#e2f0ff;color:#0f4c9c;border-color:#b9d6f8}
+.ma-cust-badge.is-returning{background:#dcf5e4;color:#166534;border-color:#a9e2bb}
+.ma-cust-badge.is-repeat{background:#f1f1f1;color:#4b4b4b;border-color:#d9d9d9}
+.ma-risk-badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11.5px;font-weight:700;border:1px solid transparent;white-space:nowrap}
+.ma-risk-badge.is-medium{background:#fff4d6;color:#8a5a00;border-color:#f3dc9b}
+.ma-risk-badge.is-high{background:#fde3e3;color:#a11919;border-color:#f4b4b4}
+.wc-col-customer .ma-cust-badge{display:table}
 .ma-product-section{margin-bottom:16px}.ma-product-section h3{font-size:1rem;margin:0 0 10px}
 .ma-product-detail{border:1px solid #e1e6ef;border-radius:12px;padding:12px;margin:8px 0;background:#f8fafc;overflow-wrap:anywhere}
 .ma-product-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px;font-size:.9rem}

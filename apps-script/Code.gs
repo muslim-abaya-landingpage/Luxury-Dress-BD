@@ -7588,7 +7588,7 @@ function getAdminAnalyticsV2_(e) {
   var summary = {
     totalOrders: 0, confirmedCount: 0, cancelledCount: 0, deliveredCount: 0, returnedCount: 0,
     totalOrderValue: 0, deliveredSalesValue: 0,
-    pendingCount: 0, shippedCount: 0, customerCount: 0, repeatCustomerCount: 0
+    pendingCount: 0, shippedCount: 0, customerCount: 0, repeatCustomerCount: 0, fakeCount: 0
   };
   var customerOrders = {}; // normalized phone -> orders in range
   var productSales = {}; // id -> { name, qty }
@@ -7630,8 +7630,11 @@ function getAdminAnalyticsV2_(e) {
         if (!firstOrderDay || dk < firstOrderDay) firstOrderDay = dk;
         if (!lastOrderDay || dk > lastOrderDay) lastOrderDay = dk;
       }
-      summary.totalOrders++;
       var status = String(r[9] || '').trim().toLowerCase();
+      // Orders marked Fake were never real sales: count them separately and keep them out of every
+      // order, revenue, customer and product total below.
+      if (status === 'fake') { summary.fakeCount++; continue; }
+      summary.totalOrders++;
       var total = parseSignedOrderAmount_(r[7]);
       summary.totalOrderValue += total;
       if (dk) {
