@@ -549,8 +549,9 @@ html.wp-admin-shell .adm-sidebar-brand{
 }
 html.wp-admin-shell .adm-sidebar-brand-text .t1{color:#f3f8f5!important;font-size:15px!important;font-weight:750!important}
 html.wp-admin-shell .adm-sidebar-brand-text .t2{color:#9fc2ad!important;font-size:10px!important;letter-spacing:.08em!important}
-html.wp-admin-shell .adm-sidebar-crest{background:transparent!important;border-radius:0!important;width:38px!important;height:38px!important;box-shadow:none!important}
-html.wp-admin-shell .adm-sidebar-crest img{width:100%!important;height:100%!important;object-fit:contain!important;filter:none!important}
+html.wp-admin-shell .adm-sidebar-crest{background:transparent!important;border-radius:0!important;width:48px!important;height:48px!important;flex:0 0 48px!important;box-shadow:none!important}
+html.wp-admin-shell .adm-sidebar-crest img{width:100%!important;height:100%!important;padding:0!important;object-fit:contain!important;filter:none!important}
+html.wp-admin-shell .adm-sidebar-crest svg{width:26px!important;height:26px!important}
 html.wp-admin-shell .adm-sidebar-nav{padding:14px 10px!important;overflow:visible!important}
 html.wp-admin-shell .adm-sidebar .adm-sidebar-item{
  min-height:42px!important;margin:3px 0!important;padding:0 12px!important;gap:11px!important;
