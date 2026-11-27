@@ -178,14 +178,13 @@ html.wp-admin-shell body.adm-body .adm-main{
  color:#c5ead2!important;box-shadow:inset 3px 0 #79bd96!important;
 }
 .adm-sidebar .adm-sidebar-item.is-current svg,.adm-sidebar .adm-sidebar-item[aria-current="page"] svg{color:#9bd4b0!important}
-/* Keep the section shortcuts visible while navigating a long dashboard. */
+/* Section-shortcut pills: part of the normal page flow, not a floating strip
+   pinned over the content (that made it look like a separate disconnected bar). */
 .adm-body .adm-main>.adm-jump{
- position:sticky!important;top:8px!important;z-index:30!important;
- padding:8px 10px!important;margin:0!important;border:1px solid var(--dash-line)!important;
- border-radius:13px!important;background:var(--dash-paper)!important;
- box-shadow:0 6px 20px rgba(20,55,38,.08)!important;
+ position:static!important;margin:0 0 4px!important;
+ padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;
 }
-.adm-body .adm-main>.adm-sec{scroll-margin-top:86px!important}
+.adm-body .adm-main>.adm-sec{scroll-margin-top:16px!important}
 /* The report disclosure clips overflow; keep its step badge inside the card. */
 html.wp-admin-shell body.adm-body .adm-main>#secReports::before{
  top:10px!important;left:18px!important;
