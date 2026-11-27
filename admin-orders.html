@@ -413,7 +413,12 @@
         document.getElementById("maMetricReview").textContent = insights ? insights.flagged : "—";
       }
 
-      function statusBn(value) {\n        var key=String(value||"").trim().toLowerCase();\n        var map={pending:"অপেক্ষমাণ",confirmed:"নিশ্চিত",processing:"প্রক্রিয়াধীন",shipped:"পাঠানো হয়েছে",delivered:"ডেলিভারি সম্পন্ন",cancelled:"বাতিল",canceled:"বাতিল",returned:"ফেরত",fake:"জাল/প্রতারণা",fraud:"প্রতারণা",not_sent:"পাঠানো হয়নি","not sent":"পাঠানো হয়নি"};\n        return map[key]||String(value||"তথ্য নেই");\n      }\n      function renderTabs() {
+      function statusBn(value) {
+        var key=String(value||"").trim().toLowerCase();
+        var map={pending:"অপেক্ষমাণ",confirmed:"নিশ্চিত",processing:"প্রক্রিয়াধীন",shipped:"পাঠানো হয়েছে",delivered:"ডেলিভারি সম্পন্ন",cancelled:"বাতিল",canceled:"বাতিল",returned:"ফেরত",fake:"জাল/প্রতারণা",fraud:"প্রতারণা",not_sent:"পাঠানো হয়নি","not sent":"পাঠানো হয়নি"};
+        return map[key]||String(value||"তথ্য নেই");
+      }
+      function renderTabs() {
         var tabs = [["all", "সব"], ["today", "আজকের"]].concat(statuses.map(function (s) { return [s, statusBn(s)]; }))
           .filter(function (t) { return t[0] === "all" || t[0] === filter || (counts[t[0]] || 0) > 0; });
         document.getElementById("ordTabs").innerHTML = tabs.map(function (t) {
