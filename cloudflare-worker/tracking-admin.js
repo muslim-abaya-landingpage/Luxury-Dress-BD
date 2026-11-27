@@ -289,7 +289,9 @@ export async function handleTrackingAdmin(request, env, url, verifyAdminToken) {
   }
   const token = body.token || '';
   const admin = await verifyAdminToken(env, token);
-  if (!admin) return json({ ok: false, error: 'INVALID_TOKEN' }, 401);
+  if (!admin || admin.ok === false) {
+    return json({ ok: false, error: (admin && admin.error) || 'INVALID_TOKEN' }, (admin && admin.status) || 401);
+  }
 
   if (request.method === 'POST' && cleanText(body.action, 40) === 'list') {
     try {
