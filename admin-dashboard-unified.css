@@ -51,6 +51,7 @@ html.wp-admin-shell body.adm-body .adm-main{
 .adm-main>#secOverview{grid-column:1/-1;min-width:0!important;margin:0!important;padding:24px!important;
  border:1px solid var(--dash-line)!important;border-radius:20px!important;background:var(--dash-paper)!important;
  box-shadow:var(--dash-shadow)!important}
+.adm-main>#secOverview{padding-top:48px!important}
 .dzc-greet{align-items:center!important;margin-bottom:18px!important}
 .dzc-hello{display:block!important;font-size:13px!important;line-height:1.4!important;color:var(--dash-muted)!important;margin:0 0 2px!important}
 .dzc-greet h2{display:block!important;margin:0!important;font-size:24px!important;letter-spacing:-.03em!important;color:var(--dash-ink)!important}
@@ -71,6 +72,7 @@ html.wp-admin-shell body.adm-body .adm-main{
 .adm-main .adm-commerce-kpis .dzc-kpi small{font-size:10px!important;color:var(--dash-muted)!important}
 .dzc-note{font-size:11px!important;color:var(--dash-muted)!important;margin:12px 0 0!important;line-height:1.6!important}
 .adm-main>#secActions{grid-column:1/-1;margin:0!important;padding:20px!important;border:1px solid var(--dash-line)!important;border-radius:var(--dash-radius)!important;background:var(--dash-paper)!important;box-shadow:var(--dash-shadow)!important}
+.adm-main>#secActions{padding-top:48px!important}
 .adm-main>#secActions h2{font-size:17px!important;margin:0 0 14px!important;color:var(--dash-ink)!important}
 .adm-daily-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important}
 .adm-daily-action{min-width:0!important;display:grid!important;grid-template-columns:38px minmax(0,1fr)!important;column-gap:11px!important;align-items:center!important;
@@ -86,6 +88,7 @@ html.wp-admin-shell body.adm-body .adm-main{
 .adm-main>#secReports{grid-column:1/-1}
 .adm-main>.adm-sec:not(#secOverview):not(#secActions){min-width:0!important;margin:0!important;padding:20px!important;
  border:1px solid var(--dash-line)!important;border-radius:var(--dash-radius)!important;background:var(--dash-paper)!important;box-shadow:var(--dash-shadow)!important}
+.adm-main>.adm-sec:not(#secOverview):not(#secActions){padding-top:48px!important}
 .adm-feature-head,.dz-orders-head{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;margin-bottom:14px!important}
 .adm-feature-head h3,.dz-orders-head h3{font-size:16px!important;font-weight:700!important;letter-spacing:-.02em!important;color:var(--dash-ink)!important;margin:0!important}
 .adm-feature-head small{display:block!important;margin-top:4px!important;font-size:11px!important;color:var(--dash-muted)!important}
@@ -139,6 +142,7 @@ html.wp-admin-shell body.adm-body .adm-main{
  .adm-sync{max-width:150px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
  .adm-main>#secOverview,.adm-main>.adm-sec:not(#secOverview):not(#secActions){padding:15px!important}
  .adm-main>#secActions{padding:15px!important}
+ .adm-main>#secOverview,.adm-main>#secActions,.adm-main>.adm-sec:not(#secOverview):not(#secActions){padding-top:44px!important}
  .dzc-greet h2{font-size:20px!important}
  .dzc-date{font-size:10px!important}
  .dzc-todo-item{padding:10px!important}
