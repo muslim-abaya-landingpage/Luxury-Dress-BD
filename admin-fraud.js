@@ -141,7 +141,7 @@
           '<td data-label="করণীয়"><div class="fr-row-actions">' +
             '<button type="button" class="adm-btn adm-btn-secondary fr-open" data-review="' + esc(row.reviewId) + '">বিস্তারিত</button>' +
             '<button type="button" class="adm-btn adm-btn-primary" data-fr-quick="cleared" data-review="' + esc(row.reviewId) + '"' + (terminal ? " disabled" : "") + '>ঠিক আছে (ছেড়ে দিন)</button>' +
-            '<button type="button" class="adm-btn adm-btn-danger" data-fr-quick="rejected" data-review="' + esc(row.reviewId) + '"' + (terminal ? " disabled" : "") + '>Fraud নিশ্চিত করুন</button>' +
+            '<button type="button" class="adm-btn adm-btn-danger" data-fr-quick="rejected" data-review="' + esc(row.reviewId) + '"' + (terminal ? " disabled" : "") + '>প্রতারণা নিশ্চিত করুন</button>' +
             '<button type="button" class="adm-btn adm-btn-secondary" data-fr-quick="block" data-review="' + esc(row.reviewId) + '"' + (!row.orderId ? " disabled" : "") + '>নম্বর ব্লক করুন</button>' +
           '</div></td></tr>';
       }).join("") : (append ? "" : '<tr><td colspan="6" class="adm-empty fr-empty-state"><strong>এই অবস্থায় কোনো রিভিউ পাওয়া যায়নি</strong><span>নতুন ঝুঁকিপূর্ণ অর্ডার এলে এখানে দেখা যাবে।</span></td></tr>');
@@ -170,10 +170,10 @@
       byId("frReasons").innerHTML = '<h3>ঝুঁকির কারণ</h3><ul>' + (r.reasons || []).map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + '</ul><h3>সংকেতের সারাংশ</h3><pre>' + esc(JSON.stringify(r.signals || {}, null, 2)) + '</pre>';
       loadCustomerContext(r);
       byId("frHistory").innerHTML = (data.history || []).map(function (item) {
-        return '<li><strong>' + esc(({created:"তৈরি",cleared:"ঝুঁকিমুক্ত",rejected:"প্রতারণা সন্দেহ",hold:"সাময়িক আটকে",reopened:"আবার চালু"}[item.action] || "পরিবর্তন")) + '</strong> · ' + esc(item.previousStatus || "—") + ' → ' + esc(item.newStatus) +
+        return '<li><strong>' + esc(({created:"তৈরি",cleared:"ঝুঁকিমুক্ত",rejected:"প্রতারণা সন্দেহ",hold:"সাময়িক আটকে",reopened:"আবার চালু"}[item.action] || "পরিবর্তন")) + '</strong> · ' + esc(item.previousStatus ? statusLabel(item.previousStatus) : "—") + ' → ' + esc(statusLabel(item.newStatus)) +
           '<small>' + esc(item.actorId) + ' · ' + esc(date(item.createdAt)) + '</small>' +
           (item.reason ? '<p>' + esc(item.reason) + '</p>' : '') + '</li>';
-      }).join("") || "<li>No history yet.</li>";
+      }).join("") || "<li>এখনো কোনো কার্যক্রমের ইতিহাস নেই।</li>";
       var terminal = r.status === "cleared" || r.status === "rejected";
       document.querySelectorAll("[data-fr-decision]").forEach(function (button) {
         var action = button.getAttribute("data-fr-decision");
@@ -188,9 +188,9 @@
     var blocked = !!(order && order.blocked);
     var recent = history && history.recent || [];
     var kpis = [["মোট অর্ডার",stats.total||0],["ডেলিভারি সম্পন্ন",stats.delivered||0],["বাতিল",stats.cancelled||0],["প্রতারণা",stats.fake||0],["ফেরত",stats.returned||0],["সফলতার হার",rate==null?"তথ্য নেই":rate+"%"]];
-    var html = '<p><strong>ফোন:</strong> '+esc(order&&order.phone||"পাওয়া যায়নি")+' &nbsp; <strong>নিজস্ব হিস্ট্রি রিস্ক:</strong> '+esc(history&&history.risk||"তথ্য নেই")+' &nbsp; <strong>Phone status:</strong> '+(blocked?"Blocked":"সক্রিয়")+'</p>';
+    var html = '<p><strong>ফোন:</strong> '+esc(order&&order.phone||"পাওয়া যায়নি")+' &nbsp; <strong>নিজস্ব হিস্ট্রি রিস্ক:</strong> '+esc(history&&history.risk||"তথ্য নেই")+' &nbsp; <strong>নম্বরের অবস্থা:</strong> '+(blocked?"ব্লক করা":"সক্রিয়")+'</p>';
     html += '<div class="fr-customer-kpis">'+kpis.map(function(x){return '<div class="fr-customer-kpi"><strong>'+esc(x[1])+'</strong><small>'+esc(x[0])+'</small></div>';}).join("")+'</div>';
-    if(blocked) html += '<p><strong>Block reason:</strong> '+esc(order.blockReason||"কারণ দেওয়া হয়নি")+'</p>';
+    if(blocked) html += '<p><strong>ব্লক করার কারণ:</strong> '+esc(order.blockReason||"কারণ দেওয়া হয়নি")+'</p>';
     html += '<div class="fr-customer-actions"><button type="button" class="adm-btn adm-btn-secondary" id="frTogglePhoneBlock">'+(blocked?"নম্বরের ব্লক তুলুন":"নম্বর ব্লক করুন")+'</button>'+(order&&order.orderId?'<a class="adm-btn adm-btn-secondary" href="admin-order.html?id='+encodeURIComponent(order.orderId)+'">অর্ডার খুলুন</a>':"")+'</div>';
     html += '<h4>সাম্প্রতিক অর্ডার</h4><div class="adm-table-wrap"><table class="fr-customer-table"><thead><tr><th>অর্ডার</th><th>তারিখ</th><th>অবস্থা</th><th>কুরিয়ার</th><th>মোট</th></tr></thead><tbody>';
     html += recent.length?recent.map(function(x){return '<tr><td>'+(x.orderId?'<a href="admin-order.html?id='+encodeURIComponent(x.orderId)+'">'+esc(x.orderId)+'</a>':"—")+'</td><td>'+esc(x.time||"—")+'</td><td>'+esc(x.status||"—")+'</td><td>'+esc(x.courierStatus||"—")+'</td><td>'+esc(x.total==null?"—":x.total)+'</td></tr>';}).join(""):'<tr><td colspan="5">আগের অর্ডার পাওয়া যায়নি।</td></tr>';
@@ -215,7 +215,7 @@
           .then(function(){return loadCustomerContext(review);})
           .catch(function(error){showError(error);toggle.disabled=false;});
       });
-    }).catch(function(error){target.innerHTML='<p class="adm-empty">কাস্টমার ইতিহাস লোড হয়নি: '+esc(error.message||error)+'</p>';});
+    }).catch(function(error){target.innerHTML='<p class="adm-empty">কাস্টমার ইতিহাস লোড হয়নি: '+esc(errorMessage(error))+'</p>';});
   }
   function runQuickAction(id, action) {
     if (action === "block") {
