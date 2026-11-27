@@ -36,6 +36,10 @@ test('UTM, click ids and social referrers become a readable source', () => {
   const long = d('?utm_source=an&utm_medium=paid&utm_campaign=' + longCampaign + '&utm_content=' + longAd, '', 'muslimabaya.com');
   assert.ok(long.endsWith(' · ' + longAd));
   assert.ok(long.length <= 120);
+  // an unknown 40-char utm_source label still leaves the ad name whole
+  const custom = d('?utm_source=' + 'S'.repeat(40) + '&utm_medium=paid&utm_campaign=' + longCampaign + '&utm_content=' + longAd, '', 'muslimabaya.com');
+  assert.ok(custom.endsWith(' · ' + longAd));
+  assert.ok(custom.length <= 120);
   assert.equal(d('?utm_source=ig&utm_medium=paid&utm_campaign=1202', '', 'muslimabaya.com'), 'Instagram Ads · 1202');
   assert.equal(d('?utm_source=msg&utm_medium=paid', '', 'muslimabaya.com'), 'Messenger Ads');
   assert.equal(d('?utm_source=an&utm_medium=paid', '', 'muslimabaya.com'), 'Audience Network Ads');

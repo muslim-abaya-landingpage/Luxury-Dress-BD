@@ -854,7 +854,7 @@
     try { qp = new URLSearchParams(search || ""); } catch (e) { return ""; }
     var label = sourceLabel(qp.get("utm_source") || qp.get("source"));
     var medium = String(qp.get("utm_medium") || "").toLowerCase();
-    var campaign = cleanSourcePart(qp.get("utm_campaign"), 54);
+    var campaign = cleanSourcePart(qp.get("utm_campaign"), 60);
     if (campaign.indexOf("{{") !== -1 || /^__[A-Z_]+__$/.test(campaign)) campaign = ""; // an ad macro that was not filled in
     // utm_content = the ad ({{ad.name}} in Meta, __CID_NAME__ in TikTok), so the report can tell ads apart.
     var ad = cleanSourcePart(qp.get("utm_content"), 40);
@@ -877,9 +877,14 @@
     if (!label) return "";
     var paid = /^(paid|cpc|ppc|ads?|paid_social|paidsocial|social_paid|cpm)/.test(medium);
     var out = label + (paid ? " Ads" : "");
+    // 120 = the Source cell limit in Apps Script. The campaign gets what is left after the label and the
+    // (whole) ad name, so a long custom label or campaign never cuts the ad name off.
+    if (campaign) {
+      var room = 120 - out.length - 3 - (ad ? 3 + ad.length : 0);
+      campaign = room > 0 ? campaign.slice(0, room).trim() : "";
+    }
     if (campaign) out += " · " + campaign;
     if (ad && campaign) out += " · " + ad;
-    // label ≤20 + campaign ≤54 + ad ≤40 + separators = 120, the Source cell limit in Apps Script, so the ad name is never cut off.
     return cleanSourcePart(out, 120);
   }
 

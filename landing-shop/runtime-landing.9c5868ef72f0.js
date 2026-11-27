@@ -574,12 +574,14 @@ if (typeof window !== 'undefined' && window.LANDING_CONFIG) maApplyDiscount(wind
       }
     }
     if (!label) return '';
-    let campaign = clean(a.utm_campaign, 54); if (macro(campaign)) campaign = '';
+    let campaign = clean(a.utm_campaign, 60); if (macro(campaign)) campaign = '';
     let ad = clean(a.utm_content, 40); if (macro(ad)) ad = '';
     let out = label + (/^(paid|cpc|ppc|ads?|paid_social|paidsocial|social_paid|cpm)/.test(medium) ? ' Ads' : '');
+    // campaign gets what is left of the 120-char Source cell after the label and the whole ad name
+    if (campaign) { const room = 120 - out.length - 3 - (ad ? 3 + ad.length : 0); campaign = room > 0 ? campaign.slice(0, room).trim() : ''; }
     if (campaign) out += ' · ' + campaign;
     if (ad && campaign) out += ' · ' + ad;
-    return clean(out, 120); // fits Apps Script's 120-char Source cell without cutting the ad name
+    return clean(out, 120);
   }
   async function submitToAdmin(v, eventId, signature) {
     const trackingSnapshot = trackingItems();
