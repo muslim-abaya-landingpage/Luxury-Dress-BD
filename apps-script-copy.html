@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8"><title>Apps Script কোড</title><style>body { font-family: system-ui, sans-serif; margin: 16px; max-width: 960px; } textarea { width: 100%; height: 52vh; font: 11px Consolas, monospace; } button { margin-top: 10px; padding: 12px 20px; font-size: 15px; cursor: pointer; } .step { background: #fff8e1; border: 1px solid #f0d58a; padding: 10px 14px; border-radius: 6px; }</style></head><body><h1>Apps Script কোড (সম্পূর্ণ project)</h1><p>এই page-এ canonical project-এর সব source file আছে: Code.gs, AdminOrders.gs, FixSheetHeaders.gs, ActivityLog.gs, AdminAudience.gs, AdminPasswordRecovery.gs, BoostAutoDate.gs, CatalogPublish.gs, CourierIntegrationAudit.gs, CustomerAccountCodes.gs, DataFixes.gs, Fix-doGet.gs, GithubApp.gs, InstallDateTrigger.gs, LiveStock.gs, Monitor.gs, Operations.gs, OrderSync.gs, ProductPicker.html, ProductProfit.gs, ReviewPhotos.gs, ServerConversions.gs, SetupStatus.gs, SizeCore.gs</p><div class="step"><p><strong>গুরুত্বপূর্ণ:</strong> Admin dashboard-এর সব API চালাতে নিচের সব ফাইল একই Apps Script project-এ রাখতে হবে। <code>.gs</code> ফাইলের জন্য <strong>＋ → Script</strong>, আর <code>.html</code> ফাইলের জন্য <strong>＋ → HTML</strong> ব্যবহার করুন; একই নাম রেখে প্রতিটি কোড সংশ্লিষ্ট ফাইলে কপি করুন। একাধিক <code>doGet</code> function রাখবেন না—canonical router শুধু <code>Code.gs</code>-এ।</p><ol><li>প্রতিটি source file-এর নাম অনুযায়ী Apps Script file তৈরি বা update করুন।</li><li><strong>Save</strong> চাপুন এবং <code>npm run test:backend</code> parity test পাস হয়েছে কি নিশ্চিত করুন।</li><li><strong>Deploy → Manage deployments → Edit → Version: New version → Deploy</strong> করে বিদ্যমান Web App URL রাখুন।</li></ol></div><h2>1. Code.gs</h2>
+<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8"><title>Apps Script কোড</title><style>body { font-family: system-ui, sans-serif; margin: 16px; max-width: 960px; } textarea { width: 100%; height: 52vh; font: 11px Consolas, monospace; } button { margin-top: 10px; padding: 12px 20px; font-size: 15px; cursor: pointer; } .step { background: #fff8e1; border: 1px solid #f0d58a; padding: 10px 14px; border-radius: 6px; }</style></head><body><h1>Apps Script কোড (সম্পূর্ণ project)</h1><p>এই page-এ canonical project-এর সব source file আছে: Code.gs, AdminOrders.gs, FixSheetHeaders.gs, ActivityLog.gs, AdminAudience.gs, AdminPasswordRecovery.gs, AudienceSync.gs, BoostAutoDate.gs, CatalogPublish.gs, CourierIntegrationAudit.gs, CustomerAccountCodes.gs, DataFixes.gs, Fix-doGet.gs, GithubApp.gs, InstallDateTrigger.gs, LiveStock.gs, Monitor.gs, Operations.gs, OrderSync.gs, ProductPicker.html, ProductProfit.gs, ReviewPhotos.gs, ServerConversions.gs, SetupStatus.gs, SizeCore.gs</p><div class="step"><p><strong>গুরুত্বপূর্ণ:</strong> Admin dashboard-এর সব API চালাতে নিচের সব ফাইল একই Apps Script project-এ রাখতে হবে। <code>.gs</code> ফাইলের জন্য <strong>＋ → Script</strong>, আর <code>.html</code> ফাইলের জন্য <strong>＋ → HTML</strong> ব্যবহার করুন; একই নাম রেখে প্রতিটি কোড সংশ্লিষ্ট ফাইলে কপি করুন। একাধিক <code>doGet</code> function রাখবেন না—canonical router শুধু <code>Code.gs</code>-এ।</p><ol><li>প্রতিটি source file-এর নাম অনুযায়ী Apps Script file তৈরি বা update করুন।</li><li><strong>Save</strong> চাপুন এবং <code>npm run test:backend</code> parity test পাস হয়েছে কি নিশ্চিত করুন।</li><li><strong>Deploy → Manage deployments → Edit → Version: New version → Deploy</strong> করে বিদ্যমান Web App URL রাখুন।</li></ol></div><h2>1. Code.gs</h2>
 <textarea id="codeBox" readonly>/**
  * Muslim Abaya — সম্পূর্ণ Web App (এক ফাইলে পেস্ট করুন)
  * Code.gs → Ctrl+A → Ctrl+V → Save → Deploy → New version
@@ -240,6 +240,9 @@ function doPost(e) {
     if (type === 'AdminStockCsvCommit') {
       return jsonOut_(commitAdminStockCsvBatch_(e));
     }
+    if (type === 'AdminAudienceSyncStatus') return jsonOut_(adminAudienceSyncStatus_(e));
+    if (type === 'AdminAudienceSyncSave') return jsonOut_(adminAudienceSyncSave_(e));
+    if (type === 'AdminAudienceSyncRun') return jsonOut_(adminAudienceSyncRun_(e));
     if (type === 'AdminAudienceCounts' || type === 'AdminAudienceExport') {
       return jsonOut_(adminAudienceExport_(e));
     }
@@ -9463,9 +9466,10 @@ var ADMIN_ACTIVITY_LABELS_ = {
   AdminStaffSave: 'স্টাফ যোগ/বদল', AdminStaffDelete: 'স্টাফ মুছে ফেলা', AdminGrowthDismiss: 'গ্রোথ আইটেম মুছে ফেলা',
   AdminSetupAction: 'সেটআপ কাজ', AdminOperationsSave: 'হিসাব/রিটার্ন সেভ', AdminProductCostsSave: 'পণ্যের কেনা দাম সেভ',
   AdminCourierRatesSave: 'কুরিয়ার রেট সেভ', AdminCourierZonesSave: 'কুরিয়ার জোন সেভ', AdminCourierSettlementSave: 'COD সেটেলমেন্ট সেভ',
-  AdminAudienceExport: 'অডিয়েন্স তালিকা ডাউনলোড'
+  AdminAudienceExport: 'অডিয়েন্স তালিকা ডাউনলোড',
+  AdminAudienceSyncSave: 'Meta অডিয়েন্স সিঙ্ক সেটিং', AdminAudienceSyncRun: 'Meta অডিয়েন্স সিঙ্ক চালানো'
 };
-var ADMIN_ACTIVITY_FIELDS_ = ['List', 'Months', 'OrderId', 'Status', 'CourierStatus', 'Block', 'Phone', 'ProductId', 'Variant', 'Available', 'Reason',
+var ADMIN_ACTIVITY_FIELDS_ = ['List', 'Months', 'Account', 'Weekly', 'OrderId', 'Status', 'CourierStatus', 'Block', 'Phone', 'ProductId', 'Variant', 'Available', 'Reason',
   'Path', 'Message', 'Action', 'Email', 'Role', 'Kind', 'Count', 'Amount', 'Reference'];
 
 function adminActivityText_(value, max) {
@@ -9571,13 +9575,8 @@ function audienceSplitName_(name) {
   return { fn: parts[0] || '', ln: parts.length > 1 ? parts.slice(1).join(' ') : '' };
 }
 
-function adminAudienceExport_(e) {
-  var v = verifyAdminSession_(param_(e, 'Token'));
-  if (!v.ok) return v;
-  var owner = requireOwnerAdmin_(v);
-  if (owner) return owner;
-  var list = String(param_(e, 'RecordType')) === 'AdminAudienceExport' ? String(param_(e, 'List') || '').trim() : '';
-  var months = Math.max(0, Math.min(60, parseInt(param_(e, 'Months'), 10) || 0));
+/** Builds every list for the period (0 = all time). Shared by the admin page and the weekly Meta sync. */
+function audienceBuildLists_(months) {
   var cutoffKey = '';
   if (months) {
     var c = new Date();
@@ -9643,6 +9642,18 @@ function adminAudienceExport_(e) {
     }
   } catch (err) {}
 
+  return { counts: counts, picked: picked };
+}
+
+function adminAudienceExport_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var owner = requireOwnerAdmin_(v);
+  if (owner) return owner;
+  var list = String(param_(e, 'RecordType')) === 'AdminAudienceExport' ? String(param_(e, 'List') || '').trim() : '';
+  var months = Math.max(0, Math.min(60, parseInt(param_(e, 'Months'), 10) || 0));
+  var built = audienceBuildLists_(months);
+  var counts = built.counts, picked = built.picked;
   var out = { ok: true, months: months, counts: counts };
   if (AUDIENCE_LISTS_.indexOf(list) === -1) return out; // counts only
   out.list = list;
@@ -9773,8 +9784,195 @@ function authorizeAdminPasswordRecoveryMail() {
 }
 </textarea><br>
 <button type="button" id="copyFile6">AdminPasswordRecovery.gs কপি</button>
-<h2>7. BoostAutoDate.gs</h2>
-<textarea id="fileBox7" readonly>function boostAutoDateOnEdit(e) {
+<h2>7. AudienceSync.gs</h2>
+<textarea id="fileBox7" readonly>/**
+ * Weekly Meta audience sync: keeps customer-list Custom Audiences in the chosen ad account in step with the
+ * shop's own orders (same lists as Admin → Ad audiences), so nobody has to download and upload CSV files.
+ *
+ * Uses the Meta Business System User token already stored for Messenger (MSGR_SYSTEM_TOKEN). It works only
+ * when that system user has the ad account assigned and the token includes the ads_management permission;
+ * otherwise status() says exactly what is missing. Only SHA-256 hashes of phone, first name and country are
+ * sent (Meta's customer-list format); nothing is stored at Meta in plain text.
+ *
+ * Script properties:
+ *   AUDIENCE_SYNC_ACCOUNT  ad account id (digits) chosen by the owner on the page
+ *   AUDIENCE_SYNC_IDS      JSON { list: audienceId } — audiences this sync created
+ *   AUDIENCE_SYNC_LAST     JSON { at, ok, message, counts }
+ */
+var AUDIENCE_SYNC_LISTS_ = {
+  buyers: 'MA auto · আসল ক্রেতা',
+  repeat: 'MA auto · বারবার কেনা',
+  all: 'MA auto · সব কাস্টমার',
+  abandoned: 'MA auto · চেকআউট থেমে গেছে',
+  exclude: 'MA auto · বাদ দেওয়ার তালিকা'
+};
+var AUDIENCE_SYNC_MONTHS_ = 6; // the same default period as the page
+var AUDIENCE_SYNC_BATCH_ = 5000;
+
+function audienceSyncGraph_(method, path, token, payload) {
+  var opt = { method: method, headers: { Authorization: 'Bearer ' + token }, muteHttpExceptions: true };
+  if (payload) { opt.contentType = 'application/json'; opt.payload = JSON.stringify(payload); }
+  var res = UrlFetchApp.fetch('https://graph.facebook.com/v25.0/' + path, opt);
+  var body = {};
+  try { body = JSON.parse(res.getContentText() || '{}'); } catch (err) {}
+  return { status: res.getResponseCode(), body: body };
+}
+
+function audienceSyncGraphError_(r) {
+  var e = r.body &amp;&amp; r.body.error;
+  return e ? String(e.error_user_msg || e.message || 'Meta error').slice(0, 300) : 'Meta HTTP ' + r.status;
+}
+
+function audienceSyncSha256_(text) {
+  var bytes = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, String(text), Utilities.Charset.UTF_8);
+  return bytes.map(function (b) { var h = (b &lt; 0 ? b + 256 : b).toString(16); return h.length === 1 ? '0' + h : h; }).join('');
+}
+
+/** Rows in Meta's ["PHONE","FN","COUNTRY"] schema, hashed. People without a valid BD mobile are skipped. */
+function audienceSyncRows_(people) {
+  var out = [];
+  people.forEach(function (p) {
+    var phone = audiencePhone880_(p.phone);
+    if (!phone) return;
+    var fn = audienceSplitName_(p.name).fn.toLowerCase();
+    out.push([audienceSyncSha256_(phone), fn ? audienceSyncSha256_(fn) : '', audienceSyncSha256_('bd')]);
+  });
+  return out;
+}
+
+/** What the token can do: { ok, accounts:[{id,name}], hasAdsPermission, message }. Never returns the token. */
+function audienceSyncTokenInfo_() {
+  var token = PropertiesService.getScriptProperties().getProperty('MSGR_SYSTEM_TOKEN');
+  if (!token) return { ok: false, code: 'NO_TOKEN', message: 'Meta System User Token বসানো নেই। Setup → Messenger অংশে "সব Page একসাথে" বেছে System User Token দিন।' };
+  var dbg = audienceSyncGraph_('get', 'debug_token?input_token=' + encodeURIComponent(token), token);
+  var scopes = (dbg.body &amp;&amp; dbg.body.data &amp;&amp; dbg.body.data.scopes) || [];
+  var hasAds = scopes.indexOf('ads_management') !== -1;
+  var acc = audienceSyncGraph_('get', 'me/adaccounts?fields=account_id,name&amp;limit=100', token);
+  var accounts = ((acc.body &amp;&amp; acc.body.data) || []).map(function (a) { return { id: String(a.account_id || ''), name: String(a.name || a.account_id || '') }; });
+  return { ok: hasAds &amp;&amp; accounts.length > 0, token: token, hasAdsPermission: hasAds, accounts: accounts,
+    message: !hasAds ? 'Token-এ ads_management অনুমতি নেই — নতুন System User Token বানানোর সময় ads_management টিক দিন।'
+      : !accounts.length ? 'এই System User-কে কোনো Ad account দেওয়া হয়নি — Business Settings → System Users → Assign assets → Ad accounts।' : '' };
+}
+
+function audienceSyncState_() {
+  var props = PropertiesService.getScriptProperties();
+  var parse = function (k) { try { return JSON.parse(props.getProperty(k) || '{}') || {}; } catch (e) { return {}; } };
+  return { account: String(props.getProperty('AUDIENCE_SYNC_ACCOUNT') || ''), ids: parse('AUDIENCE_SYNC_IDS'), last: parse('AUDIENCE_SYNC_LAST') };
+}
+
+function audienceSyncTriggerOn_() {
+  return ScriptApp.getProjectTriggers().some(function (t) { return t.getHandlerFunction() === 'audienceSyncWeekly'; });
+}
+
+/** Owner: status for the page. */
+function adminAudienceSyncStatus_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var owner = requireOwnerAdmin_(v);
+  if (owner) return owner;
+  var info = audienceSyncTokenInfo_();
+  var st = audienceSyncState_();
+  return { ok: true, ready: info.ok, message: info.message || '', hasAdsPermission: !!info.hasAdsPermission,
+    accounts: info.accounts || [], account: st.account, audiences: st.ids, last: st.last, weekly: audienceSyncTriggerOn_() };
+}
+
+/** Owner: choose the ad account (must be one the token can reach) and turn the weekly sync on or off. */
+function adminAudienceSyncSave_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var owner = requireOwnerAdmin_(v);
+  if (owner) return owner;
+  var account = String(param_(e, 'Account') || '').replace(/^act_/, '').trim();
+  var weekly = String(param_(e, 'Weekly') || '') === '1';
+  var info = audienceSyncTokenInfo_();
+  if (!info.ok) return { ok: false, error: 'NOT_READY', message: info.message };
+  if (!info.accounts.some(function (a) { return a.id === account; })) return { ok: false, error: 'BAD_ACCOUNT', message: 'তালিকা থেকে একটি Ad account বেছে নিন।' };
+  var props = PropertiesService.getScriptProperties();
+  if (props.getProperty('AUDIENCE_SYNC_ACCOUNT') !== account) props.deleteProperty('AUDIENCE_SYNC_IDS'); // new account → new audiences
+  props.setProperty('AUDIENCE_SYNC_ACCOUNT', account);
+  ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === 'audienceSyncWeekly') ScriptApp.deleteTrigger(t); });
+  if (weekly) ScriptApp.newTrigger('audienceSyncWeekly').timeBased().onWeekDay(ScriptApp.WeekDay.SATURDAY).atHour(5).create();
+  return { ok: true, account: account, weekly: weekly };
+}
+
+/** Owner: run the sync now. */
+function adminAudienceSyncRun_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var owner = requireOwnerAdmin_(v);
+  if (owner) return owner;
+  var r = audienceSyncRun_();
+  return r.ok ? { ok: true, last: r } : { ok: false, error: 'SYNC_FAILED', message: r.message };
+}
+
+/** Time trigger (weekly). */
+function audienceSyncWeekly() { audienceSyncRun_(); }
+
+function audienceSyncRun_() {
+  var props = PropertiesService.getScriptProperties();
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(30000)) return { ok: false, message: 'অন্য একটি সিঙ্ক চলছে।' };
+  var result;
+  try {
+    var info = audienceSyncTokenInfo_();
+    var st = audienceSyncState_();
+    if (!info.ok) result = { ok: false, message: info.message };
+    else if (!st.account) result = { ok: false, message: 'Ad account বেছে নেওয়া হয়নি।' };
+    else {
+      var built = audienceBuildLists_(AUDIENCE_SYNC_MONTHS_);
+      var ids = st.ids, counts = {}, errors = [];
+      Object.keys(AUDIENCE_SYNC_LISTS_).forEach(function (list) {
+        try {
+          var id = ids[list];
+          if (id) {
+            var chk = audienceSyncGraph_('get', id + '?fields=id', info.token);
+            if (chk.status !== 200) id = ''; // deleted in Ads Manager → make it again
+          }
+          if (!id) {
+            var made = audienceSyncGraph_('post', 'act_' + st.account + '/customaudiences', info.token, {
+              name: AUDIENCE_SYNC_LISTS_[list], subtype: 'CUSTOM', customer_file_source: 'USER_PROVIDED_ONLY',
+              description: 'muslimabaya.com অ্যাডমিন থেকে প্রতি সপ্তাহে নিজে থেকে হালনাগাদ হয়। হাতে বদলাবেন না।'
+            });
+            if (!made.body || !made.body.id) throw new Error(audienceSyncGraphError_(made));
+            id = String(made.body.id);
+            ids[list] = id;
+            props.setProperty('AUDIENCE_SYNC_IDS', JSON.stringify(ids));
+          }
+          var rows = audienceSyncRows_(built.picked[list] || []);
+          // Meta refuses an empty replace; an empty list keeps the last members until people appear again.
+          if (!rows.length) { counts[list] = 0; return; }
+          // usersreplace swaps the whole member list in one session (batches share session_id).
+          var session = { session_id: Math.floor(Math.random() * 9e15) + 1, estimated_num_total: rows.length };
+          var batches = Math.max(1, Math.ceil(rows.length / AUDIENCE_SYNC_BATCH_));
+          for (var b = 0; b &lt; batches; b++) {
+            var part = rows.slice(b * AUDIENCE_SYNC_BATCH_, (b + 1) * AUDIENCE_SYNC_BATCH_);
+            var r = audienceSyncGraph_('post', id + '/usersreplace', info.token, {
+              session: { session_id: session.session_id, batch_seq: b + 1, last_batch_flag: b === batches - 1, estimated_num_total: session.estimated_num_total },
+              payload: { schema: ['PHONE', 'FN', 'COUNTRY'], data: part }
+            });
+            if (r.status !== 200 || (r.body &amp;&amp; r.body.error)) throw new Error(audienceSyncGraphError_(r));
+          }
+          counts[list] = rows.length;
+        } catch (listErr) {
+          errors.push(AUDIENCE_SYNC_LISTS_[list] + ': ' + String(listErr &amp;&amp; listErr.message || listErr).slice(0, 200));
+        }
+      });
+      result = { ok: errors.length === 0, counts: counts,
+        message: errors.length ? 'কিছু তালিকা হয়নি — ' + errors.join(' · ') : 'সব তালিকা Meta-তে হালনাগাদ হয়েছে।' };
+    }
+  } catch (err) {
+    result = { ok: false, message: String(err &amp;&amp; err.message || err).slice(0, 300) };
+  } finally {
+    lock.releaseLock();
+  }
+  result.at = Utilities.formatDate(new Date(), 'Asia/Dhaka', 'yyyy-MM-dd HH:mm');
+  props.setProperty('AUDIENCE_SYNC_LAST', JSON.stringify(result));
+  return result;
+}
+</textarea><br>
+<button type="button" id="copyFile7">AudienceSync.gs কপি</button>
+<h2>8. BoostAutoDate.gs</h2>
+<textarea id="fileBox8" readonly>function boostAutoDateOnEdit(e) {
   if (!e || !e.range) return;
   const sheet = e.range.getSheet();
   const name = sheet.getName();
@@ -9803,9 +10001,9 @@ function authorizeAdminPasswordRecoveryMail() {
     }
   }
 }</textarea><br>
-<button type="button" id="copyFile7">BoostAutoDate.gs কপি</button>
-<h2>8. CatalogPublish.gs</h2>
-<textarea id="fileBox8" readonly>// Owner-only, atomic product publication. Reuses the existing repository token and access scope.
+<button type="button" id="copyFile8">BoostAutoDate.gs কপি</button>
+<h2>9. CatalogPublish.gs</h2>
+<textarea id="fileBox9" readonly>// Owner-only, atomic product publication. Reuses the existing repository token and access scope.
 var CP_FILES_ = ['category-products.js','product-links-data.js','product-catalog-sections.js','product-config.js'];
 function cpGit_(method,path,payload) {
   var token=githubToken_();
@@ -9880,9 +10078,9 @@ function catalogPublishHandle_(type,e) {
   }
 }
 </textarea><br>
-<button type="button" id="copyFile8">CatalogPublish.gs কপি</button>
-<h2>9. CourierIntegrationAudit.gs</h2>
-<textarea id="fileBox9" readonly>/** Editor-only, read-only audit. Never logs keys, tokens or customer data. */
+<button type="button" id="copyFile9">CatalogPublish.gs কপি</button>
+<h2>10. CourierIntegrationAudit.gs</h2>
+<textarea id="fileBox10" readonly>/** Editor-only, read-only audit. Never logs keys, tokens or customer data. */
 function courierIntegrationAudit() {
   var props = PropertiesService.getScriptProperties();
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
@@ -9910,9 +10108,9 @@ function courierIntegrationAudit() {
   return result;
 }
 </textarea><br>
-<button type="button" id="copyFile9">CourierIntegrationAudit.gs কপি</button>
-<h2>10. CustomerAccountCodes.gs</h2>
-<textarea id="fileBox10" readonly>/**
+<button type="button" id="copyFile10">CourierIntegrationAudit.gs কপি</button>
+<h2>11. CustomerAccountCodes.gs</h2>
+<textarea id="fileBox11" readonly>/**
  * Customer one-time codes by email (free: sent with MailApp from the owner's Gmail).
  *   CustomerCodeRequest  { Login, Purpose: 'login' | 'reset' }  -> emails a 6-digit code
  *   CustomerCodeLogin    { Login, Code }                        -> signs the customer in
@@ -10114,9 +10312,9 @@ function customerCodeSetupRow_() {
   };
 }
 </textarea><br>
-<button type="button" id="copyFile10">CustomerAccountCodes.gs কপি</button>
-<h2>11. DataFixes.gs</h2>
-<textarea id="fileBox11" readonly>/**
+<button type="button" id="copyFile11">CustomerAccountCodes.gs কপি</button>
+<h2>12. DataFixes.gs</h2>
+<textarea id="fileBox12" readonly>/**
  * One-off data corrections approved by the owner on 2026-10-21. Editor-only.
  * Run dataFix20261021DryRun() first (read-only; logs no names/phones), then dataFix20261021Apply().
  * Apply re-checks every cell before writing and records before/after in AutomationLogs.
@@ -10221,18 +10419,18 @@ function dataFix20261021Apply() {
   return done;
 }
 </textarea><br>
-<button type="button" id="copyFile11">DataFixes.gs কপি</button>
-<h2>12. Fix-doGet.gs</h2>
-<textarea id="fileBox12" readonly>/**
+<button type="button" id="copyFile12">DataFixes.gs কপি</button>
+<h2>13. Fix-doGet.gs</h2>
+<textarea id="fileBox13" readonly>/**
  * Compatibility note: this file intentionally defines no doGet().
  * A former fallback implementation here shadowed Code.gs and returned the
  * generic health text for StockStatus, OrderSchema, auth and other GET APIs.
  * The canonical GET router is the single doGet() in Code.gs.
  */
 </textarea><br>
-<button type="button" id="copyFile12">Fix-doGet.gs কপি</button>
-<h2>13. GithubApp.gs</h2>
-<textarea id="fileBox13" readonly>/**
+<button type="button" id="copyFile13">Fix-doGet.gs কপি</button>
+<h2>14. GithubApp.gs</h2>
+<textarea id="fileBox14" readonly>/**
  * GitHub App sign-in for Apps Script's own GitHub writes (the backup save path, image upload/list).
  *
  * The owner pastes the GitHub App's .pem once in Admin → Setup (stored in Script Properties as
@@ -10330,18 +10528,18 @@ function saveGithubAppKey_(e) {
   return { ok: true, message: 'GitHub App সংযুক্ত হয়েছে। বিকল্প পথের সেভও এখন নিজে থেকে নবায়ন হওয়া টোকেনে চলবে — আর কখনো নবায়ন লাগবে না।' };
 }
 </textarea><br>
-<button type="button" id="copyFile13">GithubApp.gs কপি</button>
-<h2>14. InstallDateTrigger.gs</h2>
-<textarea id="fileBox14" readonly>function installBoostAutoDateTriggerNow() {
+<button type="button" id="copyFile14">GithubApp.gs কপি</button>
+<h2>15. InstallDateTrigger.gs</h2>
+<textarea id="fileBox15" readonly>function installBoostAutoDateTriggerNow() {
   const triggers = ScriptApp.getProjectTriggers();
   const exists = triggers.some(t => t.getHandlerFunction() === 'boostAutoDateOnEdit' &amp;&amp; t.getEventType() === ScriptApp.EventType.ON_EDIT);
   if (!exists) {
     ScriptApp.newTrigger('boostAutoDateOnEdit').forSpreadsheet(SpreadsheetApp.getActive()).onEdit().create();
   }
 }</textarea><br>
-<button type="button" id="copyFile14">InstallDateTrigger.gs কপি</button>
-<h2>15. LiveStock.gs</h2>
-<textarea id="fileBox15" readonly>/**
+<button type="button" id="copyFile15">InstallDateTrigger.gs কপি</button>
+<h2>16. LiveStock.gs</h2>
+<textarea id="fileBox16" readonly>/**
  * Live Stock overrides: a fast, authenticated stock switch separate from GitHub catalog publishing.
  * Deploy this file alongside Code.gs in the SAME Apps Script project.
  * Stock quantities/variant reservations remain managed by the existing inventory workflow.
@@ -10398,9 +10596,9 @@ function assertLiveStockAvailable_(cartItems) {
   });
 }
 </textarea><br>
-<button type="button" id="copyFile15">LiveStock.gs কপি</button>
-<h2>16. Monitor.gs</h2>
-<textarea id="fileBox16" readonly>/**
+<button type="button" id="copyFile16">LiveStock.gs কপি</button>
+<h2>17. Monitor.gs</h2>
+<textarea id="fileBox17" readonly>/**
  * Free uptime monitor: checks the storefront every hour and e-mails the admin
  * (and Telegram, if configured) after 2 failed checks in a row, then once more
  * when the site is reachable again. One-time setup: run setupUptimeMonitorTrigger().
@@ -10539,9 +10737,9 @@ function ensureRecentBackup_(nowMs) {
   return 'RETRY_FAILED';
 }
 </textarea><br>
-<button type="button" id="copyFile16">Monitor.gs কপি</button>
-<h2>17. Operations.gs</h2>
-<textarea id="fileBox17" readonly>function opsNotifyVariant_(id,variant,available){
+<button type="button" id="copyFile17">Monitor.gs কপি</button>
+<h2>18. Operations.gs</h2>
+<textarea id="fileBox18" readonly>function opsNotifyVariant_(id,variant,available){
  if(available&lt;=0)return;
  var sh=SpreadsheetApp.getActiveSpreadsheet().getSheetByName('StockWaitlist');if(!sh||sh.getLastRow()&lt;2)return;
  var rows=sh.getRange(2,1,sh.getLastRow()-1,7).getValues(),sent=0;
@@ -10643,9 +10841,9 @@ function opsReviewVerification_(e,productId){var id=String(param_(e,'OrderID')||
 function opsSaveWaitlist_(e){try{var id=String(param_(e,'ProductId')||'').trim(),variant=String(param_(e,'Variant')||'').trim().slice(0,160),contact=normalizeSubscribeContact_(param_(e,'Contact'));if(!contact)throw Error('INVALID_CONTACT');var p=opsCatalog_().products.filter(function(x){return x.id===id;})[0];if(!p)throw Error('UNKNOWN_PRODUCT');opsLinePrice_({qty:1,size:variant,productType:param_(e,'ProductType')},p);rateLimit_('size_wait_'+contact.slice(0,40));var lock=LockService.getScriptLock();lock.waitLock(15000);try{var sh=ensureStockWaitlistSheet_(),h=sh.getRange(1,7).getValue();if(h&amp;&amp;h!=='Variant')throw Error('WAITLIST_HEADER_CONFLICT');sh.getRange(1,7).setValue('Variant');var rows=sh.getDataRange().getValues();for(var i=1;i&lt;rows.length;i++)if(String(rows[i][0])===id&amp;&amp;String(rows[i][2]).toLowerCase()===contact.toLowerCase()&amp;&amp;opsNorm_(rows[i][6])===opsNorm_(variant))return {ok:true,message:'এই সাইজের তালিকায় আছেন।'};sh.appendRow([admCellText_(id,100),admCellText_(p.name,200),admCellText_(contact,150),/@/.test(contact)?'yes':'',new Date(),'',admCellText_(variant,160)]);return {ok:true,message:'নির্বাচিত সাইজের অনুরোধ সংরক্ষিত হয়েছে।'};}finally{lock.releaseLock();}}catch(err){return {ok:false,error:String(err.message||err),message:'পণ্য, সাইজ ও যোগাযোগের তথ্য যাচাই করুন।'};}}
 function opsDhakaTime_(iso){if(!iso)return null;var d=new Date(iso);return isNaN(d.getTime())?String(iso):Utilities.formatDate(d,'Asia/Dhaka','yyyy-MM-dd HH:mm');}
 </textarea><br>
-<button type="button" id="copyFile17">Operations.gs কপি</button>
-<h2>18. OrderSync.gs</h2>
-<textarea id="fileBox18" readonly>/**
+<button type="button" id="copyFile18">Operations.gs কপি</button>
+<h2>19. OrderSync.gs</h2>
+<textarea id="fileBox19" readonly>/**
  * OrderSync — Online Order sheet mirror
  *
  * Setup:
@@ -11612,9 +11810,9 @@ function setupOperationsTriggersFromMenu() {
   );
 }
 </textarea><br>
-<button type="button" id="copyFile18">OrderSync.gs কপি</button>
-<h2>19. ProductPicker.html</h2>
-<textarea id="fileBox19" readonly>&lt;!DOCTYPE html>
+<button type="button" id="copyFile19">OrderSync.gs কপি</button>
+<h2>20. ProductPicker.html</h2>
+<textarea id="fileBox20" readonly>&lt;!DOCTYPE html>
 &lt;html>
 &lt;head>
   &lt;base target="_top">
@@ -11825,9 +12023,9 @@ function setupOperationsTriggersFromMenu() {
 &lt;/body>
 &lt;/html>
 </textarea><br>
-<button type="button" id="copyFile19">ProductPicker.html কপি</button>
-<h2>20. ProductProfit.gs</h2>
-<textarea id="fileBox20" readonly>/**
+<button type="button" id="copyFile20">ProductPicker.html কপি</button>
+<h2>21. ProductProfit.gs</h2>
+<textarea id="fileBox21" readonly>/**
  * Per-product profit (owner only).
  * Buying prices are private, so they live in the "Product Costs" sheet — never in the public catalog.
  * AdminProductProfit: for a date range, sold quantity, sales and (when a buying price is set) profit per product,
@@ -11985,9 +12183,9 @@ function adminProductCostsSave_(e) {
   }
 }
 </textarea><br>
-<button type="button" id="copyFile20">ProductProfit.gs কপি</button>
-<h2>21. ReviewPhotos.gs</h2>
-<textarea id="fileBox21" readonly>/**
+<button type="button" id="copyFile21">ProductProfit.gs কপি</button>
+<h2>22. ReviewPhotos.gs</h2>
+<textarea id="fileBox22" readonly>/**
  * Photo reviews: verified buyers may add up to 3 photos (uploaded first to images.muslimabaya.com/reviews/
  * by /api/review-photo). Nothing is public until the owner approves it in Admin → Reviews.
  * Sheet "Reviews": … col 9 VerifiedPurchase, col 10 VerifiedOrderId, col 11 Photos (JSON array of URLs).
@@ -12071,9 +12269,9 @@ function adminReviewStatus_(e) {
   return { ok: false, error: 'NO_REVIEW', message: 'রিভিউ পাওয়া যায়নি।' };
 }
 </textarea><br>
-<button type="button" id="copyFile21">ReviewPhotos.gs কপি</button>
-<h2>22. ServerConversions.gs</h2>
-<textarea id="fileBox22" readonly>/**
+<button type="button" id="copyFile22">ReviewPhotos.gs কপি</button>
+<h2>23. ServerConversions.gs</h2>
+<textarea id="fileBox23" readonly>/**
  * Server-side conversions that run after an order's status changes.
  *
  * 1) GA4 Purchase (Measurement Protocol): sent once, when an order becomes Confirmed,
@@ -12264,9 +12462,9 @@ function scParseTrackingInfo_(raw) {
   } catch (err) { return {}; }
 }
 </textarea><br>
-<button type="button" id="copyFile22">ServerConversions.gs কপি</button>
-<h2>23. SetupStatus.gs</h2>
-<textarea id="fileBox23" readonly>/**
+<button type="button" id="copyFile23">ServerConversions.gs কপি</button>
+<h2>24. SetupStatus.gs</h2>
+<textarea id="fileBox24" readonly>/**
  * Admin → "Setup ও স্ট্যাটাস" page backend.
  * AdminSetupStatus: which connections and automatic jobs are ready (owner only).
  *   Only says whether a secret is SET — never returns any key, token or ID.
@@ -12880,9 +13078,9 @@ function saveAdminSmsSettings_(e) {
   return { ok: true, settings: masked, hasKey: !!settings.apiKey };
 }
 </textarea><br>
-<button type="button" id="copyFile23">SetupStatus.gs কপি</button>
-<h2>24. SizeCore.gs</h2>
-<textarea id="fileBox24" readonly>// AUTO-GENERATED by scripts/build-size-core.mjs from size-core.js — do not edit by hand.
+<button type="button" id="copyFile24">SetupStatus.gs কপি</button>
+<h2>25. SizeCore.gs</h2>
+<textarea id="fileBox25" readonly>// AUTO-GENERATED by scripts/build-size-core.mjs from size-core.js — do not edit by hand.
 /* Size Manager core: turns the published size configuration (from D1, served by /api/size-config) into the
    measurement fields one product shows, and checks a customer's choices against them.
    The same file runs in the browser (window.maSizeCore) and in Apps Script (apps-script/SizeCore.gs is
@@ -13035,7 +13233,7 @@ function saveAdminSmsSettings_(e) {
   };
 })(typeof window !== "undefined" ? window : this);
 </textarea><br>
-<button type="button" id="copyFile24">SizeCore.gs কপি</button><script>function bind(btn, box) { document.getElementById(btn).onclick = function () { var t = document.getElementById(box).value; navigator.clipboard.writeText(t).then(function () { alert("কপি হয়েছে!"); }); }; }bind('copyBtn', 'codeBox');
+<button type="button" id="copyFile25">SizeCore.gs কপি</button><script>function bind(btn, box) { document.getElementById(btn).onclick = function () { var t = document.getElementById(box).value; navigator.clipboard.writeText(t).then(function () { alert("কপি হয়েছে!"); }); }; }bind('copyBtn', 'codeBox');
 bind('copyAdm', 'admBox');
 bind('copyFix', 'fixBox');
 bind('copyFile4', 'fileBox4');
@@ -13058,4 +13256,5 @@ bind('copyFile20', 'fileBox20');
 bind('copyFile21', 'fileBox21');
 bind('copyFile22', 'fileBox22');
 bind('copyFile23', 'fileBox23');
-bind('copyFile24', 'fileBox24');</script></body></html>
+bind('copyFile24', 'fileBox24');
+bind('copyFile25', 'fileBox25');</script></body></html>
