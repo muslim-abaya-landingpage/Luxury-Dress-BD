@@ -280,9 +280,28 @@
       }).join('') : '<tr><td colspan="5" class="cm-empty">এখনো কুরিয়ার পারফরম্যান্সের রেকর্ড নেই।</td></tr>';
     }).catch(function (err) { $('cmPerformance').innerHTML = '<tr><td colspan="5" class="cm-empty">' + esc(err.message) + '</td></tr>'; });
   }
+  function riskLabel(risk) {
+    return { high: 'উচ্চ ঝুঁকি', medium: 'মাঝারি ঝুঁকি', new: 'নতুন গ্রাহক', unknown: 'অজানা', low: 'নিম্ন ঝুঁকি' }[risk] || risk;
+  }
+  function riskWarningLines(fraud) {
+    if (!fraud || !fraud.ok) return '';
+    var lines = '';
+    if (fraud.blocked) lines += '\n⚠️ এই নম্বরটি ব্লকলিস্টে আছে' + (fraud.blockReason ? (': ' + fraud.blockReason) : '') + '।';
+    else if (fraud.risk === 'high' || fraud.risk === 'medium') {
+      lines += '\n⚠️ ফ্রড ঝুঁকি: ' + riskLabel(fraud.risk) + ' (সফল ডেলিভারি ' + (fraud.successRate == null ? '—' : fraud.successRate + '%') +
+        ', মোট আগের অর্ডার ' + (fraud.stats ? fraud.stats.total : 0) + 'টি, fake/cancel/return আছে)।';
+    }
+    return lines;
+  }
   function sendToCourier(order) {
     var due = money(order.due);
-    if (!window.confirm('অর্ডার ' + order.orderId + ' Steadfast-এ পাঠাবেন?\nগ্রাহক: ' + order.name + '\nCOD / Due: ' + due + '\n\nSteadfast-এ পার্সেল তৈরি হলে অর্ডারের courier status আপডেট হবে।')) return;
+    MaAdmin.call('AdminFraudCheck', { Phone: order.phone, OrderId: order.orderId }).catch(function () { return null; }).then(function (fraud) {
+      var warn = riskWarningLines(fraud);
+      if (!window.confirm('অর্ডার ' + order.orderId + ' Steadfast-এ পাঠাবেন?\nগ্রাহক: ' + order.name + '\nCOD / Due: ' + due + warn + '\n\nSteadfast-এ পার্সেল তৈরি হলে অর্ডারের courier status আপডেট হবে।')) return;
+      doSendToCourier(order);
+    });
+  }
+  function doSendToCourier(order) {
     var button = document.querySelector('[data-send="' + CSS.escape(String(order.orderId)) + '"]');
     if (button) { button.disabled = true; button.textContent = 'পাঠানো হচ্ছে…'; }
     MaAdmin.call('AdminSendCourier', { OrderId: order.orderId }).then(function (res) {
@@ -298,7 +317,28 @@
     if (state.bulkBusy) return;
     var ids = Object.keys(state.bulkSelected).filter(function (k) { return state.bulkSelected[k]; });
     if (!ids.length) { $('cmBulkMessage').textContent = 'অন্তত একটি অর্ডার বাছুন।'; return; }
-    if (!window.confirm(ids.length + 'টি অর্ডার একে একে Steadfast-এ পাঠানো হবে। এগিয়ে যাবেন?')) return;
+    state.bulkBusy = true;
+    $('cmBulkMessage').textContent = 'ফ্রড ঝুঁকি যাচাই হচ্ছে…';
+    Promise.all(ids.map(function (id) {
+      var o = state.orders.find(function (x) { return String(x.orderId) === id; });
+      if (!o || !o.phone) return null;
+      return MaAdmin.call('AdminFraudCheck', { Phone: o.phone, OrderId: id }).catch(function () { return null; });
+    })).then(function (fraudResults) {
+      var risky = [];
+      fraudResults.forEach(function (fraud, i) {
+        if (fraud && fraud.ok && (fraud.blocked || fraud.risk === 'high' || fraud.risk === 'medium')) {
+          risky.push(ids[i] + ' (' + (fraud.blocked ? 'ব্লকলিস্টে' : riskLabel(fraud.risk)) + ')');
+        }
+      });
+      state.bulkBusy = false;
+      var msg = ids.length + 'টি অর্ডার একে একে Steadfast-এ পাঠানো হবে।';
+      if (risky.length) msg += '\n\n⚠️ ঝুঁকিপূর্ণ (' + risky.length + 'টি): ' + risky.join(', ') + '\nএগুলো বাদ দিতে বাতিল করে বাছাই পরিবর্তন করুন।';
+      msg += '\n\nএগিয়ে যাবেন?';
+      if (!window.confirm(msg)) { $('cmBulkMessage').textContent = ''; return; }
+      runBulkSend(ids);
+    });
+  }
+  function runBulkSend(ids) {
     state.bulkBusy = true;
     $('cmBulkSend').disabled = true;
     $('cmBulkToggleAll').disabled = true;

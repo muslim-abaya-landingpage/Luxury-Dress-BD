@@ -86,14 +86,25 @@ test('orders table supports selecting ready orders and bulk-sending them to Stea
   assert.match(js, /function bulkSendSelected\(\)/);
   assert.match(js, /cm-bulk-check/);
   assert.match(js, /'AdminSendCourier'/);
-  // sequential, not parallel: each send is chained via .then(next), no Promise.all of the id list
-  assert.doesNotMatch(js, /Promise\.all\(ids/);
+  // the actual sends are sequential, chained via .then(next) inside runBulkSend, not a Promise.all of AdminSendCourier calls
+  assert.match(js, /function runBulkSend\(ids\)/);
+  assert.doesNotMatch(js, /Promise\.all\(ids\.map\(function \(id\) \{\s*return MaAdmin\.call\('AdminSendCourier'/);
   assert.match(js, /cmBulkSend'\)\.addEventListener\('click', bulkSendSelected\)/);
 });
 
 test('bulk selection only ever targets ready (not-yet-shipped) orders', () => {
   const js = read('courier-management.js');
   assert.match(js, /check = ready\s*\n\s*\? '<input type="checkbox" class="cm-bulk-check"/);
+});
+
+test('sending to Steadfast (single or bulk) checks fraud risk via the existing AdminFraudCheck endpoint and surfaces it before sending', () => {
+  const js = read('courier-management.js');
+  assert.match(js, /'AdminFraudCheck'/);
+  assert.match(js, /function riskWarningLines\(fraud\)/);
+  assert.match(js, /fraud\.blocked \|\| fraud\.risk === 'high' \|\| fraud\.risk === 'medium'/);
+  // the fraud check happens before the confirm/send, not after
+  assert.match(js, /MaAdmin\.call\('AdminFraudCheck', \{ Phone: order\.phone, OrderId: order\.orderId \}\)[\s\S]{0,200}window\.confirm/);
+  assert.match(js, /Promise\.all\(ids\.map/);
 });
 
 test('COD settlement workspace exposes reconciled totals, partial settlement and recent ledger', () => {
