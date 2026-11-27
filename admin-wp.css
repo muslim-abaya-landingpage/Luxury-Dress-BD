@@ -549,11 +549,8 @@ html.wp-admin-shell .adm-sidebar-brand{
 }
 html.wp-admin-shell .adm-sidebar-brand-text .t1{color:#f3f8f5!important;font-size:15px!important;font-weight:750!important}
 html.wp-admin-shell .adm-sidebar-brand-text .t2{color:#9fc2ad!important;font-size:10px!important;letter-spacing:.08em!important}
-html.wp-admin-shell .adm-sidebar-crest{background:linear-gradient(135deg,#1f8f63,#14543c)!important;border-radius:10px!important;width:38px!important;height:38px!important}
-html.wp-admin-shell .adm-sidebar-profile{display:flex!important;padding:14px 18px!important;border-bottom:1px solid rgba(255,255,255,.06)!important;background:rgba(255,255,255,.03)!important}
-html.wp-admin-shell .adm-profile-avatar{background:rgba(121,189,150,.16)!important;color:#bfe6d1!important}
-html.wp-admin-shell .adm-profile-copy strong{color:#eaf6ef!important}
-html.wp-admin-shell .adm-profile-copy small{color:#9fc2ad!important}
+html.wp-admin-shell .adm-sidebar-crest{background:transparent!important;border-radius:0!important;width:38px!important;height:38px!important;box-shadow:none!important}
+html.wp-admin-shell .adm-sidebar-crest img{width:100%!important;height:100%!important;object-fit:contain!important;filter:none!important}
 html.wp-admin-shell .adm-sidebar-nav{padding:14px 10px!important;overflow:visible!important}
 html.wp-admin-shell .adm-sidebar .adm-sidebar-item{
  min-height:42px!important;margin:3px 0!important;padding:0 12px!important;gap:11px!important;
@@ -581,6 +578,43 @@ html.wp-admin-shell .adm-sidebar .adm-nav-child.is-current{color:#eaf6ef!importa
 html.wp-admin-shell .adm-sidebar-foot{padding:12px 14px!important;border-top:1px solid rgba(255,255,255,.08)!important}
 html.wp-admin-shell .adm-sidebar .adm-theme-toggle,
 html.wp-admin-shell .adm-sidebar .adm-btn-secondary{color:#bcd3c4!important}
+
+/* Premium status-tab bar (orders list "All / Pending / Shipped / ..." filter),
+   modelled on the clean pill-tab bar in the reference admin panel screenshot,
+   in our own forest-green brand rather than its colors. Replaces the old
+   underlined WooCommerce-style text links scattered across several legacy
+   stylesheets. */
+html.wp-admin-shell .wo-orders-page .wc-subnav{
+ background:#fff!important;border:1px solid #e3ece6!important;border-radius:14px!important;
+ padding:10px!important;box-shadow:0 1px 2px rgba(23,59,47,.04)!important
+}
+html.wp-admin-shell .wo-orders-page .wc-status-links{
+ display:flex!important;gap:6px!important;flex-wrap:nowrap!important;overflow-x:auto!important;
+ scrollbar-width:thin!important;padding:0!important;margin:0 0 2px!important;border:0!important
+}
+html.wp-admin-shell .wo-orders-page .wc-status-links .pn-tab{
+ flex:0 0 auto!important;border:1px solid transparent!important;border-radius:999px!important;
+ padding:9px 16px!important;font-size:12.5px!important;font-weight:700!important;white-space:nowrap!important;
+ color:#4e6459!important;background:#f3f7f4!important;box-shadow:none!important
+}
+html.wp-admin-shell .wo-orders-page .wc-status-links .pn-tab::before,
+html.wp-admin-shell .wo-orders-page .wc-status-links .pn-tab::after{display:none!important;content:none!important}
+html.wp-admin-shell .wo-orders-page .wc-status-links .pn-tab:hover{
+ background:#eaf3ed!important;color:#14543c!important;text-decoration:none!important
+}
+html.wp-admin-shell .wo-orders-page .wc-status-links .pn-tab.active{
+ background:#176b4a!important;color:#fff!important;box-shadow:0 6px 14px -8px rgba(23,107,74,.55)!important
+}
+html.wp-admin-shell .wo-orders-page .wc-status-links .pn-tab em{
+ font-style:normal!important;margin-left:5px!important;padding:1px 7px!important;border-radius:999px!important;
+ font-size:11px!important;background:rgba(23,59,47,.08)!important;color:inherit!important;opacity:1!important
+}
+html.wp-admin-shell .wo-orders-page .wc-status-links .pn-tab.active em{background:rgba(255,255,255,.22)!important}
+html.wp-admin-shell .wo-orders-page .wc-search-box{margin-top:4px!important}
+html.wp-admin-shell .wo-orders-page .wo-primary-toolbar.wc-tablenav{
+ background:#f8faf9!important;border:1px solid #e3ece6!important;border-radius:12px!important;
+ padding:10px 12px!important;align-items:center!important
+}
 html.wp-admin-shell .wp-adminbar{
  position:fixed!important;top:0!important;left:var(--wp-menu-w)!important;right:0!important;
  height:var(--wp-bar-h)!important;background:#fff!important;color:#1f3a30!important;
