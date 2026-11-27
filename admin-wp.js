@@ -81,7 +81,10 @@
         if (res.ok) notice('Purge All শুরু হয়েছে। পুরো সাইট নতুন করে তৈরি হচ্ছে — ২–৪ মিনিট পর সব পেজে সর্বশেষ সংস্করণ দেখাবে।', 'ok');
         else if (res.error === 'TOO_SOON') notice('একটু আগেই Purge All চালানো হয়েছে। ' + Math.ceil((res.retryAfter || 60) / 60) + ' মিনিট পর আবার চেষ্টা করুন।', 'error');
         else if (res.error === 'NOT_LOGGED_IN' || res.error === 'OWNER_ONLY') notice('শুধু মালিকের অ্যাকাউন্ট Purge All চালাতে পারে। আবার লগইন করে দেখুন।', 'error');
-        else notice('Purge All চালু করা যায়নি (' + (res.error || 'error') + ')। কিছুক্ষণ পর আবার চেষ্টা করুন।', 'error');
+        else if (res.error === 'AUTH_UNAVAILABLE') notice('অ্যাডমিন পরিচয় যাচাই করা যাচ্ছে না। কিছুক্ষণ পর আবার চেষ্টা করুন; সমস্যা থাকলে Google সংযোগ যাচাই করুন।', 'error');
+        else if (res.error === 'NOT_CONFIGURED') notice('Purge All-এর সার্ভার সেটআপ সম্পূর্ণ নয়। Cloudflare-এর GitHub সংযোগ ও প্রয়োজনীয় সেটিংস যাচাই করুন।', 'error');
+        else if (res.error === 'COMMIT_ERROR' || res.error === 'GITHUB_ERROR') notice('সাইট আপডেট শুরু করা যায়নি। GitHub সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।', 'error');
+        else notice('Purge All চালু করা যায়নি। কিছুক্ষণ পর আবার চেষ্টা করুন।', 'error');
       })
       .catch(function () { notice('ইন্টারনেট সংযোগ পাওয়া যায়নি। আবার চেষ্টা করুন।', 'error'); })
       .then(function () { purging = false; });
@@ -195,7 +198,7 @@
   function boot() {
     doc.documentElement.classList.add('wp-admin-shell');
     watchSwitches();
-    buildAdminBar();
+    if (!doc.body.classList.contains("adm-no-wpbar")) buildAdminBar();
     tuneSidebar();
   }
   if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', boot); else boot();
