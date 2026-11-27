@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8"><title>Apps Script কোড</title><style>body { font-family: system-ui, sans-serif; margin: 16px; max-width: 960px; } textarea { width: 100%; height: 52vh; font: 11px Consolas, monospace; } button { margin-top: 10px; padding: 12px 20px; font-size: 15px; cursor: pointer; } .step { background: #fff8e1; border: 1px solid #f0d58a; padding: 10px 14px; border-radius: 6px; }</style></head><body><h1>Apps Script কোড (সম্পূর্ণ project)</h1><p>এই page-এ canonical project-এর সব source file আছে: Code.gs, AdminOrders.gs, FixSheetHeaders.gs, ActivityLog.gs, AdminPasswordRecovery.gs, BoostAutoDate.gs, CatalogPublish.gs, CourierIntegrationAudit.gs, CustomerAccountCodes.gs, DataFixes.gs, Fix-doGet.gs, GithubApp.gs, InstallDateTrigger.gs, LiveStock.gs, Monitor.gs, Operations.gs, OrderSync.gs, ProductPicker.html, ProductProfit.gs, ReviewPhotos.gs, ServerConversions.gs, SetupStatus.gs, SizeCore.gs</p><div class="step"><p><strong>গুরুত্বপূর্ণ:</strong> Admin dashboard-এর সব API চালাতে নিচের সব ফাইল একই Apps Script project-এ রাখতে হবে। <code>.gs</code> ফাইলের জন্য <strong>＋ → Script</strong>, আর <code>.html</code> ফাইলের জন্য <strong>＋ → HTML</strong> ব্যবহার করুন; একই নাম রেখে প্রতিটি কোড সংশ্লিষ্ট ফাইলে কপি করুন। একাধিক <code>doGet</code> function রাখবেন না—canonical router শুধু <code>Code.gs</code>-এ।</p><ol><li>প্রতিটি source file-এর নাম অনুযায়ী Apps Script file তৈরি বা update করুন।</li><li><strong>Save</strong> চাপুন এবং <code>npm run test:backend</code> parity test পাস হয়েছে কি নিশ্চিত করুন।</li><li><strong>Deploy → Manage deployments → Edit → Version: New version → Deploy</strong> করে বিদ্যমান Web App URL রাখুন।</li></ol></div><h2>1. Code.gs</h2>
+<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8"><title>Apps Script কোড</title><style>body { font-family: system-ui, sans-serif; margin: 16px; max-width: 960px; } textarea { width: 100%; height: 52vh; font: 11px Consolas, monospace; } button { margin-top: 10px; padding: 12px 20px; font-size: 15px; cursor: pointer; } .step { background: #fff8e1; border: 1px solid #f0d58a; padding: 10px 14px; border-radius: 6px; }</style></head><body><h1>Apps Script কোড (সম্পূর্ণ project)</h1><p>এই page-এ canonical project-এর সব source file আছে: Code.gs, AdminOrders.gs, FixSheetHeaders.gs, ActivityLog.gs, AdminAudience.gs, AdminPasswordRecovery.gs, BoostAutoDate.gs, CatalogPublish.gs, CourierIntegrationAudit.gs, CustomerAccountCodes.gs, DataFixes.gs, Fix-doGet.gs, GithubApp.gs, InstallDateTrigger.gs, LiveStock.gs, Monitor.gs, Operations.gs, OrderSync.gs, ProductPicker.html, ProductProfit.gs, ReviewPhotos.gs, ServerConversions.gs, SetupStatus.gs, SizeCore.gs</p><div class="step"><p><strong>গুরুত্বপূর্ণ:</strong> Admin dashboard-এর সব API চালাতে নিচের সব ফাইল একই Apps Script project-এ রাখতে হবে। <code>.gs</code> ফাইলের জন্য <strong>＋ → Script</strong>, আর <code>.html</code> ফাইলের জন্য <strong>＋ → HTML</strong> ব্যবহার করুন; একই নাম রেখে প্রতিটি কোড সংশ্লিষ্ট ফাইলে কপি করুন। একাধিক <code>doGet</code> function রাখবেন না—canonical router শুধু <code>Code.gs</code>-এ।</p><ol><li>প্রতিটি source file-এর নাম অনুযায়ী Apps Script file তৈরি বা update করুন।</li><li><strong>Save</strong> চাপুন এবং <code>npm run test:backend</code> parity test পাস হয়েছে কি নিশ্চিত করুন।</li><li><strong>Deploy → Manage deployments → Edit → Version: New version → Deploy</strong> করে বিদ্যমান Web App URL রাখুন।</li></ol></div><h2>1. Code.gs</h2>
 <textarea id="codeBox" readonly>/**
  * Muslim Abaya — সম্পূর্ণ Web App (এক ফাইলে পেস্ট করুন)
  * Code.gs → Ctrl+A → Ctrl+V → Save → Deploy → New version
@@ -239,6 +239,9 @@ function doPost(e) {
     }
     if (type === 'AdminStockCsvCommit') {
       return jsonOut_(commitAdminStockCsvBatch_(e));
+    }
+    if (type === 'AdminAudienceCounts' || type === 'AdminAudienceExport') {
+      return jsonOut_(adminAudienceExport_(e));
     }
     if (type === 'AdminActivityList') {
       return jsonOut_(adminActivityList_(e));
@@ -9459,9 +9462,10 @@ var ADMIN_ACTIVITY_LABELS_ = {
   AdminStockQuickAdjust: 'স্টক দ্রুত বদল', AdminStockCsvCommit: 'স্টক CSV ইমপোর্ট', AdminStockMigrate: 'স্টক মাইগ্রেশন',
   AdminStaffSave: 'স্টাফ যোগ/বদল', AdminStaffDelete: 'স্টাফ মুছে ফেলা', AdminGrowthDismiss: 'গ্রোথ আইটেম মুছে ফেলা',
   AdminSetupAction: 'সেটআপ কাজ', AdminOperationsSave: 'হিসাব/রিটার্ন সেভ', AdminProductCostsSave: 'পণ্যের কেনা দাম সেভ',
-  AdminCourierRatesSave: 'কুরিয়ার রেট সেভ', AdminCourierZonesSave: 'কুরিয়ার জোন সেভ', AdminCourierSettlementSave: 'COD সেটেলমেন্ট সেভ'
+  AdminCourierRatesSave: 'কুরিয়ার রেট সেভ', AdminCourierZonesSave: 'কুরিয়ার জোন সেভ', AdminCourierSettlementSave: 'COD সেটেলমেন্ট সেভ',
+  AdminAudienceExport: 'অডিয়েন্স তালিকা ডাউনলোড'
 };
-var ADMIN_ACTIVITY_FIELDS_ = ['OrderId', 'Status', 'CourierStatus', 'Block', 'Phone', 'ProductId', 'Variant', 'Available', 'Reason',
+var ADMIN_ACTIVITY_FIELDS_ = ['List', 'Months', 'OrderId', 'Status', 'CourierStatus', 'Block', 'Phone', 'ProductId', 'Variant', 'Available', 'Reason',
   'Path', 'Message', 'Action', 'Email', 'Role', 'Kind', 'Count', 'Amount', 'Reference'];
 
 function adminActivityText_(value, max) {
@@ -9538,8 +9542,120 @@ function adminActivityList_(e) {
 }
 </textarea><br>
 <button type="button" id="copyFile4">ActivityLog.gs কপি</button>
-<h2>5. AdminPasswordRecovery.gs</h2>
+<h2>5. AdminAudience.gs</h2>
 <textarea id="fileBox5" readonly>/**
+ * Admin → বিজ্ঞাপনের অডিয়েন্স (AdminAudienceExport): ready-made customer lists from the shop's OWN orders,
+ * downloadable as a Meta "Customer list" CSV (Ads Manager → Audiences → Custom audience → Customer list).
+ * Owner only, read only: nothing in the sheet changes. Meta does not let anyone download pixel data, so
+ * these lists are built from the order sheet instead.
+ *
+ * Lists (all by normalised phone number):
+ *   buyers     at least one delivered order            → Lookalike source (value = delivered ৳)
+ *   repeat     two or more delivered orders            → new-collection ads to loyal customers
+ *   all        every customer except the exclude list  → general retargeting
+ *   abandoned  started checkout (AbandonedCarts open), no order from that phone afterwards
+ *   exclude    any Fake order, a blocked phone, or 2+ cancelled/returned with nothing delivered
+ * Months: 0 = all time, otherwise only orders/carts from the last N months count.
+ * AdminAudienceCounts returns only the numbers (not logged); AdminAudienceExport returns one list's rows and is
+ * recorded in the Activity log (who downloaded which list).
+ */
+var AUDIENCE_LISTS_ = ['buyers', 'repeat', 'all', 'abandoned', 'exclude'];
+
+function audiencePhone880_(phone) {
+  var p = normalizePhone_(phone);
+  return /^01[3-9]\d{8}$/.test(p) ? '88' + p : '';
+}
+
+function audienceSplitName_(name) {
+  var parts = String(name || '').replace(/\s+/g, ' ').trim().split(' ');
+  return { fn: parts[0] || '', ln: parts.length > 1 ? parts.slice(1).join(' ') : '' };
+}
+
+function adminAudienceExport_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var owner = requireOwnerAdmin_(v);
+  if (owner) return owner;
+  var list = String(param_(e, 'RecordType')) === 'AdminAudienceExport' ? String(param_(e, 'List') || '').trim() : '';
+  var months = Math.max(0, Math.min(60, parseInt(param_(e, 'Months'), 10) || 0));
+  var cutoffKey = '';
+  if (months) {
+    var c = new Date();
+    c.setMonth(c.getMonth() - months);
+    cutoffKey = Utilities.formatDate(c, 'GMT+6', 'yyyy-MM-dd');
+  }
+  var inRange = function (cell) { if (!cutoffKey) return true; var k = dayKeyFromCell_(cell); return !!k &amp;&amp; k >= cutoffKey; };
+
+  // One pass over the orders: per phone, counts and delivered value.
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
+  var rowCount = sheet ? Math.max(0, sheet.getLastRow() - 1) : 0;
+  var rows = rowCount ? readOnlineOrderRows_(sheet, 2, rowCount, 13) : [];
+  var blocked = admBlockedMap_();
+  var people = {};
+  var lastOrderKey = {};
+  for (var i = 0; i &lt; rows.length; i++) {
+    var r = rows[i];
+    var phone = normalizePhone_(r[2]);
+    if (!phone) continue;
+    var key = dayKeyFromCell_(r[0]) || '';
+    if (!lastOrderKey[phone] || key > lastOrderKey[phone]) lastOrderKey[phone] = key;
+    var p = people[phone] || (people[phone] = { phone: phone, name: '', orders: 0, delivered: 0, failed: 0, fake: 0, value: 0, everFake: false });
+    var bucket = admHistoryBucket_(r[9], r[12]);
+    if (bucket === 'fake') p.everFake = true; // a Fake order excludes the phone whatever the date range
+    if (!inRange(r[0])) continue;
+    if (String(r[1] || '').trim()) p.name = String(r[1]).trim();
+    p.orders++;
+    if (bucket === 'delivered') { p.delivered++; p.value += Math.max(0, admNum_(r[7])); }
+    else if (bucket === 'fake') p.fake++;
+    else if (bucket === 'cancelled' || bucket === 'returned') p.failed++;
+  }
+  var isExcluded = function (p) {
+    return p.everFake || Object.prototype.hasOwnProperty.call(blocked, p.phone) || (p.failed >= 2 &amp;&amp; p.delivered === 0);
+  };
+
+  var counts = { buyers: 0, repeat: 0, all: 0, abandoned: 0, exclude: 0 };
+  var picked = { buyers: [], repeat: [], all: [], abandoned: [], exclude: [] };
+  Object.keys(people).forEach(function (ph) {
+    var p = people[ph];
+    if (isExcluded(p)) { counts.exclude++; picked.exclude.push(p); return; }
+    if (!p.orders) return;
+    counts.all++; picked.all.push(p);
+    if (p.delivered >= 1) { counts.buyers++; picked.buyers.push(p); }
+    if (p.delivered >= 2) { counts.repeat++; picked.repeat.push(p); }
+  });
+
+  // Started checkout but no order from that phone on or after that day.
+  try {
+    var cData = ensureAbandonedCartsSheet_().getDataRange().getValues();
+    var seen = {};
+    for (var j = 1; j &lt; cData.length; j++) {
+      var cr = cData[j];
+      var cp = normalizePhone_(cr[0]);
+      if (!cp || seen[cp] || String(cr[6] || '') !== 'open' || !inRange(cr[5] || cr[4])) continue;
+      var cartKey = dayKeyFromCell_(cr[5] || cr[4]) || '';
+      if (lastOrderKey[cp] &amp;&amp; lastOrderKey[cp] >= cartKey) continue;
+      var known = people[cp];
+      if (known &amp;&amp; isExcluded(known)) continue;
+      if (Object.prototype.hasOwnProperty.call(blocked, cp)) continue;
+      seen[cp] = true;
+      counts.abandoned++;
+      picked.abandoned.push({ phone: cp, name: String(cr[1] || '').trim(), value: 0 });
+    }
+  } catch (err) {}
+
+  var out = { ok: true, months: months, counts: counts };
+  if (AUDIENCE_LISTS_.indexOf(list) === -1) return out; // counts only
+  out.list = list;
+  out.rows = picked[list].map(function (p) {
+    var n = audienceSplitName_(p.name);
+    return { phone: audiencePhone880_(p.phone), fn: n.fn, ln: n.ln, country: 'bd', value: list === 'buyers' ? Math.round(p.value) : '' };
+  }).filter(function (x) { return x.phone; });
+  return out;
+}
+</textarea><br>
+<button type="button" id="copyFile5">AdminAudience.gs কপি</button>
+<h2>6. AdminPasswordRecovery.gs</h2>
+<textarea id="fileBox6" readonly>/**
  * Admin password recovery for the Google Sheets Admins account.
  * Uses a short-lived email OTP; never exposes whether an account exists.
  */
@@ -9656,9 +9772,9 @@ function authorizeAdminPasswordRecoveryMail() {
   return { ok: true, remainingDailyQuota: remaining };
 }
 </textarea><br>
-<button type="button" id="copyFile5">AdminPasswordRecovery.gs কপি</button>
-<h2>6. BoostAutoDate.gs</h2>
-<textarea id="fileBox6" readonly>function boostAutoDateOnEdit(e) {
+<button type="button" id="copyFile6">AdminPasswordRecovery.gs কপি</button>
+<h2>7. BoostAutoDate.gs</h2>
+<textarea id="fileBox7" readonly>function boostAutoDateOnEdit(e) {
   if (!e || !e.range) return;
   const sheet = e.range.getSheet();
   const name = sheet.getName();
@@ -9687,9 +9803,9 @@ function authorizeAdminPasswordRecoveryMail() {
     }
   }
 }</textarea><br>
-<button type="button" id="copyFile6">BoostAutoDate.gs কপি</button>
-<h2>7. CatalogPublish.gs</h2>
-<textarea id="fileBox7" readonly>// Owner-only, atomic product publication. Reuses the existing repository token and access scope.
+<button type="button" id="copyFile7">BoostAutoDate.gs কপি</button>
+<h2>8. CatalogPublish.gs</h2>
+<textarea id="fileBox8" readonly>// Owner-only, atomic product publication. Reuses the existing repository token and access scope.
 var CP_FILES_ = ['category-products.js','product-links-data.js','product-catalog-sections.js','product-config.js'];
 function cpGit_(method,path,payload) {
   var token=githubToken_();
@@ -9764,9 +9880,9 @@ function catalogPublishHandle_(type,e) {
   }
 }
 </textarea><br>
-<button type="button" id="copyFile7">CatalogPublish.gs কপি</button>
-<h2>8. CourierIntegrationAudit.gs</h2>
-<textarea id="fileBox8" readonly>/** Editor-only, read-only audit. Never logs keys, tokens or customer data. */
+<button type="button" id="copyFile8">CatalogPublish.gs কপি</button>
+<h2>9. CourierIntegrationAudit.gs</h2>
+<textarea id="fileBox9" readonly>/** Editor-only, read-only audit. Never logs keys, tokens or customer data. */
 function courierIntegrationAudit() {
   var props = PropertiesService.getScriptProperties();
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Online Order');
@@ -9794,9 +9910,9 @@ function courierIntegrationAudit() {
   return result;
 }
 </textarea><br>
-<button type="button" id="copyFile8">CourierIntegrationAudit.gs কপি</button>
-<h2>9. CustomerAccountCodes.gs</h2>
-<textarea id="fileBox9" readonly>/**
+<button type="button" id="copyFile9">CourierIntegrationAudit.gs কপি</button>
+<h2>10. CustomerAccountCodes.gs</h2>
+<textarea id="fileBox10" readonly>/**
  * Customer one-time codes by email (free: sent with MailApp from the owner's Gmail).
  *   CustomerCodeRequest  { Login, Purpose: 'login' | 'reset' }  -> emails a 6-digit code
  *   CustomerCodeLogin    { Login, Code }                        -> signs the customer in
@@ -9998,9 +10114,9 @@ function customerCodeSetupRow_() {
   };
 }
 </textarea><br>
-<button type="button" id="copyFile9">CustomerAccountCodes.gs কপি</button>
-<h2>10. DataFixes.gs</h2>
-<textarea id="fileBox10" readonly>/**
+<button type="button" id="copyFile10">CustomerAccountCodes.gs কপি</button>
+<h2>11. DataFixes.gs</h2>
+<textarea id="fileBox11" readonly>/**
  * One-off data corrections approved by the owner on 2026-10-21. Editor-only.
  * Run dataFix20261021DryRun() first (read-only; logs no names/phones), then dataFix20261021Apply().
  * Apply re-checks every cell before writing and records before/after in AutomationLogs.
@@ -10105,18 +10221,18 @@ function dataFix20261021Apply() {
   return done;
 }
 </textarea><br>
-<button type="button" id="copyFile10">DataFixes.gs কপি</button>
-<h2>11. Fix-doGet.gs</h2>
-<textarea id="fileBox11" readonly>/**
+<button type="button" id="copyFile11">DataFixes.gs কপি</button>
+<h2>12. Fix-doGet.gs</h2>
+<textarea id="fileBox12" readonly>/**
  * Compatibility note: this file intentionally defines no doGet().
  * A former fallback implementation here shadowed Code.gs and returned the
  * generic health text for StockStatus, OrderSchema, auth and other GET APIs.
  * The canonical GET router is the single doGet() in Code.gs.
  */
 </textarea><br>
-<button type="button" id="copyFile11">Fix-doGet.gs কপি</button>
-<h2>12. GithubApp.gs</h2>
-<textarea id="fileBox12" readonly>/**
+<button type="button" id="copyFile12">Fix-doGet.gs কপি</button>
+<h2>13. GithubApp.gs</h2>
+<textarea id="fileBox13" readonly>/**
  * GitHub App sign-in for Apps Script's own GitHub writes (the backup save path, image upload/list).
  *
  * The owner pastes the GitHub App's .pem once in Admin → Setup (stored in Script Properties as
@@ -10214,18 +10330,18 @@ function saveGithubAppKey_(e) {
   return { ok: true, message: 'GitHub App সংযুক্ত হয়েছে। বিকল্প পথের সেভও এখন নিজে থেকে নবায়ন হওয়া টোকেনে চলবে — আর কখনো নবায়ন লাগবে না।' };
 }
 </textarea><br>
-<button type="button" id="copyFile12">GithubApp.gs কপি</button>
-<h2>13. InstallDateTrigger.gs</h2>
-<textarea id="fileBox13" readonly>function installBoostAutoDateTriggerNow() {
+<button type="button" id="copyFile13">GithubApp.gs কপি</button>
+<h2>14. InstallDateTrigger.gs</h2>
+<textarea id="fileBox14" readonly>function installBoostAutoDateTriggerNow() {
   const triggers = ScriptApp.getProjectTriggers();
   const exists = triggers.some(t => t.getHandlerFunction() === 'boostAutoDateOnEdit' &amp;&amp; t.getEventType() === ScriptApp.EventType.ON_EDIT);
   if (!exists) {
     ScriptApp.newTrigger('boostAutoDateOnEdit').forSpreadsheet(SpreadsheetApp.getActive()).onEdit().create();
   }
 }</textarea><br>
-<button type="button" id="copyFile13">InstallDateTrigger.gs কপি</button>
-<h2>14. LiveStock.gs</h2>
-<textarea id="fileBox14" readonly>/**
+<button type="button" id="copyFile14">InstallDateTrigger.gs কপি</button>
+<h2>15. LiveStock.gs</h2>
+<textarea id="fileBox15" readonly>/**
  * Live Stock overrides: a fast, authenticated stock switch separate from GitHub catalog publishing.
  * Deploy this file alongside Code.gs in the SAME Apps Script project.
  * Stock quantities/variant reservations remain managed by the existing inventory workflow.
@@ -10282,9 +10398,9 @@ function assertLiveStockAvailable_(cartItems) {
   });
 }
 </textarea><br>
-<button type="button" id="copyFile14">LiveStock.gs কপি</button>
-<h2>15. Monitor.gs</h2>
-<textarea id="fileBox15" readonly>/**
+<button type="button" id="copyFile15">LiveStock.gs কপি</button>
+<h2>16. Monitor.gs</h2>
+<textarea id="fileBox16" readonly>/**
  * Free uptime monitor: checks the storefront every hour and e-mails the admin
  * (and Telegram, if configured) after 2 failed checks in a row, then once more
  * when the site is reachable again. One-time setup: run setupUptimeMonitorTrigger().
@@ -10423,9 +10539,9 @@ function ensureRecentBackup_(nowMs) {
   return 'RETRY_FAILED';
 }
 </textarea><br>
-<button type="button" id="copyFile15">Monitor.gs কপি</button>
-<h2>16. Operations.gs</h2>
-<textarea id="fileBox16" readonly>function opsNotifyVariant_(id,variant,available){
+<button type="button" id="copyFile16">Monitor.gs কপি</button>
+<h2>17. Operations.gs</h2>
+<textarea id="fileBox17" readonly>function opsNotifyVariant_(id,variant,available){
  if(available&lt;=0)return;
  var sh=SpreadsheetApp.getActiveSpreadsheet().getSheetByName('StockWaitlist');if(!sh||sh.getLastRow()&lt;2)return;
  var rows=sh.getRange(2,1,sh.getLastRow()-1,7).getValues(),sent=0;
@@ -10527,9 +10643,9 @@ function opsReviewVerification_(e,productId){var id=String(param_(e,'OrderID')||
 function opsSaveWaitlist_(e){try{var id=String(param_(e,'ProductId')||'').trim(),variant=String(param_(e,'Variant')||'').trim().slice(0,160),contact=normalizeSubscribeContact_(param_(e,'Contact'));if(!contact)throw Error('INVALID_CONTACT');var p=opsCatalog_().products.filter(function(x){return x.id===id;})[0];if(!p)throw Error('UNKNOWN_PRODUCT');opsLinePrice_({qty:1,size:variant,productType:param_(e,'ProductType')},p);rateLimit_('size_wait_'+contact.slice(0,40));var lock=LockService.getScriptLock();lock.waitLock(15000);try{var sh=ensureStockWaitlistSheet_(),h=sh.getRange(1,7).getValue();if(h&amp;&amp;h!=='Variant')throw Error('WAITLIST_HEADER_CONFLICT');sh.getRange(1,7).setValue('Variant');var rows=sh.getDataRange().getValues();for(var i=1;i&lt;rows.length;i++)if(String(rows[i][0])===id&amp;&amp;String(rows[i][2]).toLowerCase()===contact.toLowerCase()&amp;&amp;opsNorm_(rows[i][6])===opsNorm_(variant))return {ok:true,message:'এই সাইজের তালিকায় আছেন।'};sh.appendRow([admCellText_(id,100),admCellText_(p.name,200),admCellText_(contact,150),/@/.test(contact)?'yes':'',new Date(),'',admCellText_(variant,160)]);return {ok:true,message:'নির্বাচিত সাইজের অনুরোধ সংরক্ষিত হয়েছে।'};}finally{lock.releaseLock();}}catch(err){return {ok:false,error:String(err.message||err),message:'পণ্য, সাইজ ও যোগাযোগের তথ্য যাচাই করুন।'};}}
 function opsDhakaTime_(iso){if(!iso)return null;var d=new Date(iso);return isNaN(d.getTime())?String(iso):Utilities.formatDate(d,'Asia/Dhaka','yyyy-MM-dd HH:mm');}
 </textarea><br>
-<button type="button" id="copyFile16">Operations.gs কপি</button>
-<h2>17. OrderSync.gs</h2>
-<textarea id="fileBox17" readonly>/**
+<button type="button" id="copyFile17">Operations.gs কপি</button>
+<h2>18. OrderSync.gs</h2>
+<textarea id="fileBox18" readonly>/**
  * OrderSync — Online Order sheet mirror
  *
  * Setup:
@@ -11496,9 +11612,9 @@ function setupOperationsTriggersFromMenu() {
   );
 }
 </textarea><br>
-<button type="button" id="copyFile17">OrderSync.gs কপি</button>
-<h2>18. ProductPicker.html</h2>
-<textarea id="fileBox18" readonly>&lt;!DOCTYPE html>
+<button type="button" id="copyFile18">OrderSync.gs কপি</button>
+<h2>19. ProductPicker.html</h2>
+<textarea id="fileBox19" readonly>&lt;!DOCTYPE html>
 &lt;html>
 &lt;head>
   &lt;base target="_top">
@@ -11709,9 +11825,9 @@ function setupOperationsTriggersFromMenu() {
 &lt;/body>
 &lt;/html>
 </textarea><br>
-<button type="button" id="copyFile18">ProductPicker.html কপি</button>
-<h2>19. ProductProfit.gs</h2>
-<textarea id="fileBox19" readonly>/**
+<button type="button" id="copyFile19">ProductPicker.html কপি</button>
+<h2>20. ProductProfit.gs</h2>
+<textarea id="fileBox20" readonly>/**
  * Per-product profit (owner only).
  * Buying prices are private, so they live in the "Product Costs" sheet — never in the public catalog.
  * AdminProductProfit: for a date range, sold quantity, sales and (when a buying price is set) profit per product,
@@ -11869,9 +11985,9 @@ function adminProductCostsSave_(e) {
   }
 }
 </textarea><br>
-<button type="button" id="copyFile19">ProductProfit.gs কপি</button>
-<h2>20. ReviewPhotos.gs</h2>
-<textarea id="fileBox20" readonly>/**
+<button type="button" id="copyFile20">ProductProfit.gs কপি</button>
+<h2>21. ReviewPhotos.gs</h2>
+<textarea id="fileBox21" readonly>/**
  * Photo reviews: verified buyers may add up to 3 photos (uploaded first to images.muslimabaya.com/reviews/
  * by /api/review-photo). Nothing is public until the owner approves it in Admin → Reviews.
  * Sheet "Reviews": … col 9 VerifiedPurchase, col 10 VerifiedOrderId, col 11 Photos (JSON array of URLs).
@@ -11955,9 +12071,9 @@ function adminReviewStatus_(e) {
   return { ok: false, error: 'NO_REVIEW', message: 'রিভিউ পাওয়া যায়নি।' };
 }
 </textarea><br>
-<button type="button" id="copyFile20">ReviewPhotos.gs কপি</button>
-<h2>21. ServerConversions.gs</h2>
-<textarea id="fileBox21" readonly>/**
+<button type="button" id="copyFile21">ReviewPhotos.gs কপি</button>
+<h2>22. ServerConversions.gs</h2>
+<textarea id="fileBox22" readonly>/**
  * Server-side conversions that run after an order's status changes.
  *
  * 1) GA4 Purchase (Measurement Protocol): sent once, when an order becomes Confirmed,
@@ -12148,9 +12264,9 @@ function scParseTrackingInfo_(raw) {
   } catch (err) { return {}; }
 }
 </textarea><br>
-<button type="button" id="copyFile21">ServerConversions.gs কপি</button>
-<h2>22. SetupStatus.gs</h2>
-<textarea id="fileBox22" readonly>/**
+<button type="button" id="copyFile22">ServerConversions.gs কপি</button>
+<h2>23. SetupStatus.gs</h2>
+<textarea id="fileBox23" readonly>/**
  * Admin → "Setup ও স্ট্যাটাস" page backend.
  * AdminSetupStatus: which connections and automatic jobs are ready (owner only).
  *   Only says whether a secret is SET — never returns any key, token or ID.
@@ -12764,9 +12880,9 @@ function saveAdminSmsSettings_(e) {
   return { ok: true, settings: masked, hasKey: !!settings.apiKey };
 }
 </textarea><br>
-<button type="button" id="copyFile22">SetupStatus.gs কপি</button>
-<h2>23. SizeCore.gs</h2>
-<textarea id="fileBox23" readonly>// AUTO-GENERATED by scripts/build-size-core.mjs from size-core.js — do not edit by hand.
+<button type="button" id="copyFile23">SetupStatus.gs কপি</button>
+<h2>24. SizeCore.gs</h2>
+<textarea id="fileBox24" readonly>// AUTO-GENERATED by scripts/build-size-core.mjs from size-core.js — do not edit by hand.
 /* Size Manager core: turns the published size configuration (from D1, served by /api/size-config) into the
    measurement fields one product shows, and checks a customer's choices against them.
    The same file runs in the browser (window.maSizeCore) and in Apps Script (apps-script/SizeCore.gs is
@@ -12919,7 +13035,7 @@ function saveAdminSmsSettings_(e) {
   };
 })(typeof window !== "undefined" ? window : this);
 </textarea><br>
-<button type="button" id="copyFile23">SizeCore.gs কপি</button><script>function bind(btn, box) { document.getElementById(btn).onclick = function () { var t = document.getElementById(box).value; navigator.clipboard.writeText(t).then(function () { alert("কপি হয়েছে!"); }); }; }bind('copyBtn', 'codeBox');
+<button type="button" id="copyFile24">SizeCore.gs কপি</button><script>function bind(btn, box) { document.getElementById(btn).onclick = function () { var t = document.getElementById(box).value; navigator.clipboard.writeText(t).then(function () { alert("কপি হয়েছে!"); }); }; }bind('copyBtn', 'codeBox');
 bind('copyAdm', 'admBox');
 bind('copyFix', 'fixBox');
 bind('copyFile4', 'fileBox4');
@@ -12941,4 +13057,5 @@ bind('copyFile19', 'fileBox19');
 bind('copyFile20', 'fileBox20');
 bind('copyFile21', 'fileBox21');
 bind('copyFile22', 'fileBox22');
-bind('copyFile23', 'fileBox23');</script></body></html>
+bind('copyFile23', 'fileBox23');
+bind('copyFile24', 'fileBox24');</script></body></html>

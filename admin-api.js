@@ -500,6 +500,25 @@
     });
   }
 
+  // Admin → বিজ্ঞাপনের অডিয়েন্স (owner only). Counts for the page; one list's rows for a CSV download.
+  function getAudienceCounts(months) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return apiPost({ RecordType: "AdminAudienceCounts", Token: s.token, Months: String(months || 0) }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "AUDIENCE_FETCH_FAILED");
+      return res;
+    });
+  }
+
+  function exportAudience(list, months) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return apiPost({ RecordType: "AdminAudienceExport", Token: s.token, List: String(list || ""), Months: String(months || 0) }).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "AUDIENCE_EXPORT_FAILED");
+      return res;
+    });
+  }
+
   function dismissGrowthItem(kind, key) {
     var s = getSession();
     if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
@@ -752,6 +771,8 @@
     quickAdjustStock: quickAdjustStock,
     getGrowthData: getGrowthData,
     dismissGrowthItem: dismissGrowthItem,
+    getAudienceCounts: getAudienceCounts,
+    exportAudience: exportAudience,
     getStaffList: getStaffList,
     saveStaff: saveStaff,
     deleteStaff: deleteStaff,
