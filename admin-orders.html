@@ -791,6 +791,42 @@
 .pn-table-wrap{max-width:100%;overflow-x:auto}
 .pn-table th,.pn-table td{vertical-align:middle;overflow-wrap:anywhere}
 @media(max-width:600px){.ma-product-fields{grid-template-columns:1fr}}
+
+/* Premium bulk-selection bar: a prominent forest-green bar replacing the quiet
+   lavender box, closer to the bold "Selected (N)" toolbar pattern the owner asked
+   to match, in our own brand color rather than copying anyone else's palette. */
+.ot-bulk{
+  background:var(--mt-navy,#173b2f)!important;
+  border-radius:12px!important;
+  padding:10px 14px!important;
+  box-shadow:0 8px 20px -10px rgba(23,59,47,.45);
+}
+.ot-bulk #otBulkCount{
+  color:#fff;font-size:14px;font-weight:800;margin-right:8px;
+  background:rgba(255,255,255,.14);padding:4px 12px;border-radius:999px;
+}
+.ot-bulk button.pn-btn{
+  border-radius:999px!important;
+  background:rgba(255,255,255,.08)!important;
+  border:1px solid rgba(255,255,255,.22)!important;
+  color:#eaf3ed!important;
+}
+.ot-bulk button.pn-btn:hover{ background:rgba(255,255,255,.18)!important; }
+.ot-bulk button.pn-btn-blue{
+  background:var(--mt-gold,#176b4a)!important;
+  border-color:var(--mt-gold,#176b4a)!important;
+  color:#fff!important;
+}
+#otClearSel{ margin-left:auto!important; background:transparent!important; border-color:rgba(255,255,255,.3)!important; }
+
+/* Order table: rounded card, airier rows, softer header, hover highlight — same
+   premium polish already applied to the order-detail page. */
+.pn-table-wrap{ border-radius:14px; border:1px solid #e7ece9; overflow:hidden; }
+.pn-table thead th{ background:var(--mt-gold-wash,#eaf3ed)!important; color:var(--mt-gold-ink,#14543c)!important; font-size:12px; }
+.pn-table tbody tr:hover{ background:#f6faf8; }
+.wc-customer-phone{ display:inline-flex; align-items:center; gap:4px; color:#4e5661; text-decoration:none; font-size:12.5px; }
+.wc-customer-phone:before{ content:"\260E"; font-size:11px; color:var(--mt-gold,#176b4a); }
+.wc-customer-phone:hover{ text-decoration:underline; }
 </style>
 <script>
 // "+ হাতে অর্ডার" (admin-manual-order.js) attaches itself beside Refresh; on this page keep it next to "Add order" in the title row.
