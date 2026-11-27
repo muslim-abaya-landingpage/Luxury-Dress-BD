@@ -1,9 +1,9 @@
 /**
  * POST /api/admin-email — email blocking for the admin order page.
  *
- * Login: the same admin/staff session token the panel already uses, verified with the Apps Script's own
- * verifyAdminSession_ (functions/_lib/gs-core.js) against the Sessions/Admins tabs read through the
- * read-only service account — exactly as /api/admin-ip does.
+ * Login: the same admin/staff session token the panel already uses, verified the same lightweight way
+ * as the tracking Worker and the browser itself (functions/_lib/admin-verify.js) — one HTTPS call to the
+ * Apps Script backend, no Google service-account secret needed.
  * Data: D1 database ma-orders (binding ORDERS_DB), written by the order Worker (cloudflare-worker/worker.js).
  *
  * Actions (form field Action):
@@ -12,14 +12,9 @@
  *   unblock  Email
  *   list     currently blocked emails
  */
-import { createCore } from '../_lib/gs-core.js';
-import { buildEnv } from '../_lib/sheets-shim.js';
-import { loadSnapshot } from '../_lib/sheet-snapshot.js';
-import { getAccessToken } from '../_lib/google-auth.js';
+import { verifyAdminSession } from '../_lib/admin-verify.js';
 import { normalizeEmail } from '../_lib/email-guard.js';
 
-const DEFAULT_SHEET_ID = '1kHt7Bdd4OnpX0jb1ApBXMZIIYqvmv5q2EyOnPV9HJKo';
-const AUTH_SHEETS = ['Sessions', 'Admins'];
 const FIELDS = ['Action', 'Token', 'Email', 'Reason', 'Days'];
 const DAY = 24 * 3600 * 1000;
 const ALLOWED_DAYS = [1, 7, 30, 0];
@@ -31,10 +26,8 @@ function json(body, status = 200) {
   });
 }
 
-async function defaultVerify(env, token, fetchImpl, nowMs) {
-  const access = await getAccessToken(env.GOOGLE_SA_JSON, fetchImpl, nowMs);
-  const snapshot = await loadSnapshot({ spreadsheetId: env.SHEET_ID || DEFAULT_SHEET_ID, token: access, sheets: AUTH_SHEETS, fetchImpl, nowMs });
-  return createCore(buildEnv(snapshot)).verifyAdminSession_(token);
+async function defaultVerify(env, token, fetchImpl) {
+  return verifyAdminSession(token, env, fetchImpl);
 }
 
 function blockView(row) {
@@ -53,7 +46,7 @@ export async function handleAdminEmail(request, env, deps = {}) {
   const origin = request.headers.get('Origin');
   if (origin && origin !== new URL(request.url).origin) return json({ ok: false, error: 'ORIGIN' }, 403);
   const db = env && env.ORDERS_DB;
-  if (!db || (!env.GOOGLE_SA_JSON && !deps.verify)) return json({ ok: false, error: 'NOT_CONFIGURED', message: 'ইমেইল ব্লকের সংযোগ এখনো চালু হয়নি।' }, 503);
+  if (!db) return json({ ok: false, error: 'NOT_CONFIGURED', message: 'ইমেইল ব্লকের সংযোগ এখনো চালু হয়নি।' }, 503);
 
   let params;
   try {

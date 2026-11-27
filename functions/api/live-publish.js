@@ -4,13 +4,9 @@
  * they must be uploaded to R2 through /api/image-upload first. Only the owner admin may call it.
  * Body: JSON {Token, sha, files:{path:text}, validation, index, names, assets:[]}
  */
-import { createCore } from '../_lib/gs-core.js';
-import { buildEnv } from '../_lib/sheets-shim.js';
-import { loadSnapshot } from '../_lib/sheet-snapshot.js';
-import { getAccessToken } from '../_lib/google-auth.js';
+import { verifyAdminSession } from '../_lib/admin-verify.js';
 import { CATALOG_FILES, ensureTables, rememberState } from '../_lib/live-catalog.js';
 
-const DEFAULT_SHEET_ID = '1kHt7Bdd4OnpX0jb1ApBXMZIIYqvmv5q2EyOnPV9HJKo';
 const MAX_BODY = 14 * 1024 * 1024;
 
 function json(body, status = 200) {
@@ -85,7 +81,7 @@ export async function handleLivePublish(request, env, deps = {}) {
   if (request.method !== 'POST') return json({ ok: false, error: 'METHOD' }, 405);
   const origin = request.headers.get('Origin');
   if (origin && origin !== new URL(request.url).origin) return json({ ok: false, error: 'ORIGIN' }, 403);
-  if (!env || !env.STOCK_DB || !env.GOOGLE_SA_JSON) return json({ ok: false, error: 'NOT_CONFIGURED' }, 503);
+  if (!env || !env.STOCK_DB) return json({ ok: false, error: 'NOT_CONFIGURED' }, 503);
   const len = Number(request.headers.get('Content-Length') || 0);
   if (len > MAX_BODY) return json({ ok: false, error: 'TOO_LARGE' }, 413);
   let payload;
@@ -97,15 +93,13 @@ export async function handleLivePublish(request, env, deps = {}) {
   const token = String(payload && payload.Token || '').trim();
   if (!token) return json({ ok: false, error: 'NO_TOKEN' }, 401);
 
-  // Owner login check, same rules as Apps Script (AdminCatalogPublish is owner-only).
+  // Owner login check, the same lightweight way as the tracking Worker and the browser itself
+  // (functions/_lib/admin-verify.js — one HTTPS call to the Apps Script backend, no Google
+  // service-account secret needed). AdminCatalogPublish is owner-only.
   try {
-    const access = await getAccessToken(env.GOOGLE_SA_JSON, fetchImpl, now);
-    const snapshot = await loadSnapshot({ spreadsheetId: env.SHEET_ID || DEFAULT_SHEET_ID, token: access, sheets: ['Sessions', 'Admins'], fetchImpl, nowMs: now });
-    const core = createCore(buildEnv(snapshot));
-    const who = core.verifyAdminSession_(token);
+    const who = await verifyAdminSession(token, env, fetchImpl);
     if (!who || !who.ok) return json({ ok: false, error: 'NOT_LOGGED_IN' }, 401);
-    const denied = core.requireOwnerAdmin_(who);
-    if (denied) return json({ ok: false, error: 'OWNER_ONLY' }, 403);
+    if (!who.isOwner) return json({ ok: false, error: 'OWNER_ONLY' }, 403);
   } catch (e) {
     return json({ ok: false, error: 'AUTH_UNAVAILABLE' }, 503);
   }

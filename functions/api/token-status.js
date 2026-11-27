@@ -5,7 +5,9 @@
  * GITHUB_TOKEN is checked against GitHub; its expiry comes from the "github-authentication-token-expiration"
  * response header (absent when the token was made with "No expiration").
  */
-import { isOwner, isOwnerCached } from '../_lib/owner-auth.js';
+import { isOwnerCached } from '../_lib/owner-auth.js';
+import { isOwnerViaAppsScript } from '../_lib/admin-verify.js';
+import { getAccessToken } from '../_lib/google-auth.js';
 import { withGithubToken } from '../_lib/github-app.js';
 
 const DEFAULT_REPO = 'muslim-abaya-landingpage/Luxury-Dress-BD';
@@ -61,6 +63,19 @@ export async function checkGithubToken(env, fetchImpl, now) {
   return Object.assign(out, { state: 'ok', message: 'ঠিক আছে · মেয়াদ শেষ ' + date + ' (' + days + ' দিন বাকি)' });
 }
 
+/** Actually tries to mint a Google access token with the stored secret, instead of assuming it works. */
+export async function checkGoogleSecret(env, fetchImpl, now) {
+  const out = { id: 'cf-google', name: 'GOOGLE_SA_JSON', where: 'Cloudflare → luxury-dress-bd → Settings → Variables and Secrets', configured: !!(env && env.GOOGLE_SA_JSON) };
+  if (!out.configured) return Object.assign(out, { state: 'off', message: 'বসানো নেই — লগইন যাচাই আলাদা পথে (Apps Script) হচ্ছে, তাই প্যানেল থেমে নেই।' });
+  try {
+    await getAccessToken(env.GOOGLE_SA_JSON, fetchImpl, now);
+    return Object.assign(out, { state: 'ok', message: 'ঠিক আছে · Google Sheet পড়া যাচ্ছে' });
+  } catch (e) {
+    const why = String(e.message) === 'SA_JSON_INVALID' ? 'এই Secret-এর লেখা ঠিক নেই (সম্পূর্ণ .json ফাইলের লেখা বসাতে হবে)' : 'Google থেকে টোকেন পাওয়া যায়নি';
+    return Object.assign(out, { state: 'warn', message: 'কাজ করছে না — ' + why + '। লগইন যাচাই আলাদা পথে (Apps Script) হচ্ছে বলে প্যানেল থেমে নেই, কিন্তু এটি ঠিক করা ভালো।' });
+  }
+}
+
 export async function handleTokenStatus(request, env, deps = {}) {
   const fetchImpl = deps.fetch || fetch;
   const now = deps.now ? deps.now() : Date.now();
@@ -71,14 +86,12 @@ export async function handleTokenStatus(request, env, deps = {}) {
   try { payload = JSON.parse(await request.text()); } catch (e) { return json({ ok: false, error: 'BAD_REQUEST' }, 400); }
   const token = String(payload && payload.Token || '').trim();
   if (!token) return json({ ok: false, error: 'NO_TOKEN' }, 401);
-  if (!env || !env.GOOGLE_SA_JSON) return json({ ok: false, error: 'NOT_CONFIGURED' }, 503);
   try {
-    const error = deps.authorize ? await deps.authorize(token, env) : await isOwnerCached(token, now, () => isOwner(token, env, fetchImpl, now));
+    const error = deps.authorize ? await deps.authorize(token, env) : await isOwnerCached(token, now, () => isOwnerViaAppsScript(token, env, fetchImpl));
     if (error) return json({ ok: false, error }, error === 'NOT_LOGGED_IN' ? 401 : 403);
   } catch (e) { return json({ ok: false, error: 'AUTH_UNAVAILABLE' }, 503); }
 
-  const items = [await checkGithubToken(env, fetchImpl, now)];
-  items.push({ id: 'cf-google', name: 'GOOGLE_SA_JSON', where: 'Cloudflare → luxury-dress-bd → Settings → Variables and Secrets', configured: true, state: 'ok', message: 'বসানো আছে (Google Sheet পড়া চলছে বলেই এই পেজ খুলেছে)' });
+  const items = [await checkGithubToken(env, fetchImpl, now), await checkGoogleSecret(env, fetchImpl, now)];
   items.push({ id: 'cf-db', name: 'STOCK_DB / PRODUCT_IMAGES', where: 'Cloudflare → luxury-dress-bd → Settings → Bindings', configured: !!(env.STOCK_DB && env.PRODUCT_IMAGES), state: env.STOCK_DB && env.PRODUCT_IMAGES ? 'ok' : 'bad', message: env.STOCK_DB && env.PRODUCT_IMAGES ? 'যুক্ত আছে' : 'D1 বা R2 সংযোগ নেই' });
   return json({ ok: true, checkedAt: new Date(now).toISOString(), items });
 }

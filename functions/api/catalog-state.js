@@ -4,7 +4,8 @@
  * Owner only. Read only. Without GITHUB_TOKEN it answers NOT_CONFIGURED and the panel asks Apps Script.
  * Body: {Token}
  */
-import { isOwner, isOwnerCached } from '../_lib/owner-auth.js';
+import { isOwnerCached } from '../_lib/owner-auth.js';
+import { isOwnerViaAppsScript } from '../_lib/admin-verify.js';
 import { CATALOG_FILES } from '../_lib/live-catalog.js';
 import { readHead, githubClient } from './catalog-save.js';
 import { withGithubToken } from '../_lib/github-app.js';
@@ -19,7 +20,7 @@ export async function handleCatalogState(request, env, deps = {}) {
   if (request.method !== 'POST') return json({ ok: false, error: 'METHOD' }, 405);
   const origin = request.headers.get('Origin');
   if (origin && origin !== new URL(request.url).origin) return json({ ok: false, error: 'ORIGIN' }, 403);
-  if (!env || !env.GITHUB_TOKEN || !env.GOOGLE_SA_JSON) return json({ ok: false, error: 'NOT_CONFIGURED' }, 503);
+  if (!env || !env.GITHUB_TOKEN) return json({ ok: false, error: 'NOT_CONFIGURED' }, 503);
   let token = '';
   try { token = String((await request.json()).Token || '').trim(); } catch (e) { return json({ ok: false, error: 'BAD_REQUEST' }, 400); }
   if (!token) return json({ ok: false, error: 'NO_TOKEN' }, 401);
@@ -27,7 +28,7 @@ export async function handleCatalogState(request, env, deps = {}) {
   const headRead = readHead(githubClient(env, fetchImpl));
   headRead.catch(() => {});
   try {
-    const error = deps.authorize ? await deps.authorize(token, env) : await isOwnerCached(token, now, () => isOwner(token, env, fetchImpl, now));
+    const error = deps.authorize ? await deps.authorize(token, env) : await isOwnerCached(token, now, () => isOwnerViaAppsScript(token, env, fetchImpl));
     if (error === 'NOT_LOGGED_IN') return json({ ok: false, error }, 401);
     if (error) return json({ ok: false, error }, 403);
   } catch (e) { return json({ ok: false, error: 'AUTH_UNAVAILABLE' }, 503); }

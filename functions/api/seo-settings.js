@@ -6,7 +6,8 @@
  * Same protections as /api/catalog-save: owner login, same-origin check, size limit, and the file's SHA so a
  * save made from another tab is reported (SEO_CONFLICT) instead of overwritten.
  */
-import { isOwner, isOwnerCached } from '../_lib/owner-auth.js';
+import { isOwnerCached } from '../_lib/owner-auth.js';
+import { isOwnerViaAppsScript } from '../_lib/admin-verify.js';
 import { githubClient } from './catalog-save.js';
 import { SEO_FILE, DEFAULT_SETTINGS, sanitizeSettings } from '../_lib/seo-settings.js';
 import { withGithubToken } from '../_lib/github-app.js';
@@ -44,7 +45,7 @@ export async function ownerRequest(request, env, deps = {}) {
   const token = String(payload && payload.Token || '').trim();
   if (!token) return { response: json({ ok: false, error: 'NOT_LOGGED_IN' }, 401) };
   try {
-    const error = deps.authorize ? await deps.authorize(token, env) : await isOwnerCached(token, now, () => isOwner(token, env, fetchImpl, now));
+    const error = deps.authorize ? await deps.authorize(token, env) : await isOwnerCached(token, now, () => isOwnerViaAppsScript(token, env, fetchImpl));
     if (error === 'NOT_LOGGED_IN') return { response: json({ ok: false, error }, 401) };
     if (error) return { response: json({ ok: false, error }, 403) };
   } catch (e) { return { response: json({ ok: false, error: 'AUTH_UNAVAILABLE' }, 503) }; }

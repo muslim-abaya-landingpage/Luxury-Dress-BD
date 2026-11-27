@@ -15,7 +15,8 @@
  *
  * Body: {Token, requestId, baseShas:{path:sha}, files:[{path,content}×4], validation, index, names}
  */
-import { isOwner, isOwnerCached } from '../_lib/owner-auth.js';
+import { isOwnerCached } from '../_lib/owner-auth.js';
+import { isOwnerViaAppsScript } from '../_lib/admin-verify.js';
 import { CATALOG_FILES } from '../_lib/live-catalog.js';
 import { validatePayload, validateUniqueSkus, writeLiveState } from './live-publish.js';
 import { withGithubToken } from '../_lib/github-app.js';
@@ -120,7 +121,7 @@ export async function handleCatalogSave(request, env, deps = {}) {
   const origin = request.headers.get('Origin');
   const site = new URL(request.url).origin;
   if (origin && origin !== site) return json({ ok: false, error: 'ORIGIN' }, 403);
-  if (!env || !env.GITHUB_TOKEN || !env.STOCK_DB || !env.GOOGLE_SA_JSON) return json({ ok: false, error: 'NOT_CONFIGURED' }, 503);
+  if (!env || !env.GITHUB_TOKEN || !env.STOCK_DB) return json({ ok: false, error: 'NOT_CONFIGURED' }, 503);
   if (Number(request.headers.get('Content-Length') || 0) > MAX_BODY) return json({ ok: false, error: 'TOO_LARGE' }, 413);
 
   let payload;
@@ -137,7 +138,7 @@ export async function handleCatalogSave(request, env, deps = {}) {
   const headRead = readHead(gh);
   headRead.catch(() => {});
   try {
-    const error = deps.authorize ? await deps.authorize(token, env) : await isOwnerCached(token, now, () => isOwner(token, env, fetchImpl, now));
+    const error = deps.authorize ? await deps.authorize(token, env) : await isOwnerCached(token, now, () => isOwnerViaAppsScript(token, env, fetchImpl));
     if (error === 'NOT_LOGGED_IN') return json({ ok: false, error }, 401);
     if (error) return json({ ok: false, error }, 403);
   } catch (e) { return json({ ok: false, error: 'AUTH_UNAVAILABLE' }, 503); }

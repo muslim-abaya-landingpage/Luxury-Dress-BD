@@ -5,7 +5,7 @@
  * Actions: list, detail, decide. This endpoint never changes order status, stock,
  * payment or courier state. All decisions use optimistic version locking.
  */
-import { isOwner } from '../_lib/owner-auth.js';
+import { isOwnerViaAppsScript } from '../_lib/admin-verify.js';
 
 const MAX_BODY = 8192;
 const DEFAULT_LIMIT = 25;
@@ -85,7 +85,7 @@ export async function handleAdminFraud(request, env, deps = {}) {
   const origin = request.headers.get('Origin');
   if (origin && origin !== new URL(request.url).origin) return json({ ok: false, error: 'ORIGIN' }, 403);
   const db = env && env.ORDERS_DB;
-  if (!db || !env.GOOGLE_SA_JSON) return json({ ok: false, error: 'NOT_CONFIGURED' }, 503);
+  if (!db) return json({ ok: false, error: 'NOT_CONFIGURED' }, 503);
 
   let params;
   try {
@@ -97,7 +97,7 @@ export async function handleAdminFraud(request, env, deps = {}) {
   if (!params.Token) return json({ ok: false, error: 'NO_TOKEN' }, 401);
   let auth;
   try {
-    const check = deps.isOwner || isOwner;
+    const check = deps.isOwner || isOwnerViaAppsScript;
     auth = await check(params.Token, env, deps.fetch || fetch, deps.now ? deps.now() : Date.now());
   } catch (e) {
     return json({ ok: false, error: 'AUTH_UNAVAILABLE' }, 503);

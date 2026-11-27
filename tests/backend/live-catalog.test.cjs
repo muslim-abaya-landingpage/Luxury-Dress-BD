@@ -69,8 +69,18 @@ async function signedEnv(db) {
       ['owner@example.com', '01700000000', 'Owner', 'h', 's', 'active', serial(new Date(NOW - 9e9)), 'admin'],
       ['staff@example.com', '01800000000', 'Staff', 'h', 's', 'active', serial(new Date(NOW - 9e9)), 'staff']],
   };
-  const fakeFetch = async (url) => {
-    const ok = (body) => ({ ok: true, status: 200, json: async () => body });
+  // Apps Script AdminVerify: the same lightweight session check /api/live-publish now uses
+  // (functions/_lib/admin-verify.js), derived from the same Sessions/Admins rows above.
+  const ADMINS_BY_TOKEN = {
+    'tok-owner': { ok: true, role: 'admin', email: 'owner@example.com', phone: '01700000000', name: 'Owner', isOwner: true },
+    'tok-staff': { ok: true, role: 'staff', email: 'staff@example.com', phone: '01800000000', name: 'Staff', isOwner: false },
+  };
+  const fakeFetch = async (url, opts) => {
+    const ok = (body) => ({ ok: true, status: 200, json: async () => body, text: async () => JSON.stringify(body) });
+    if (String(url).includes('script.google.com')) {
+      const token = new URLSearchParams(opts && opts.body).get('Token') || '';
+      return ok(ADMINS_BY_TOKEN[token] || { ok: false, error: 'NOT_LOGGED_IN' });
+    }
     if (String(url).startsWith('https://oauth2.googleapis.com/token')) return ok({ access_token: 'AT', expires_in: 3600 });
     if (/values:batchGet/.test(url)) {
       const asked = new URL(url).searchParams.getAll('ranges').map((r) => r.replace(/^'|'$/g, ''));

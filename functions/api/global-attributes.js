@@ -3,7 +3,8 @@
  * Actions: {Token, action:"read"} or {Token, action:"save", revision, attributes}.
  * This registry is additive and separate from the live product catalog.
  */
-import { isOwner, isOwnerCached } from '../_lib/owner-auth.js';
+import { isOwnerCached } from '../_lib/owner-auth.js';
+import { isOwnerViaAppsScript } from '../_lib/admin-verify.js';
 
 const MAX_ATTRIBUTES = 40;
 const MAX_TERMS = 100;
@@ -42,7 +43,7 @@ export async function handleGlobalAttributes(request, env, deps = {}) {
   if (request.method !== 'POST') return json({ ok: false, error: 'METHOD' }, 405);
   const origin = request.headers.get('Origin');
   if (origin && origin !== new URL(request.url).origin) return json({ ok: false, error: 'ORIGIN' }, 403);
-  if (!env || !env.STOCK_DB || !env.GOOGLE_SA_JSON) return json({ ok: false, error: 'NOT_CONFIGURED' }, 503);
+  if (!env || !env.STOCK_DB) return json({ ok: false, error: 'NOT_CONFIGURED' }, 503);
   let payload;
   try { payload = await request.json(); } catch (e) { return json({ ok: false, error: 'BAD_REQUEST' }, 400); }
   const token = String(payload && payload.Token || '').trim();
@@ -50,7 +51,7 @@ export async function handleGlobalAttributes(request, env, deps = {}) {
   try {
     const denied = deps.authorize
       ? await deps.authorize(token, env)
-      : await isOwnerCached(token, now, () => isOwner(token, env, fetchImpl, now));
+      : await isOwnerCached(token, now, () => isOwnerViaAppsScript(token, env, fetchImpl));
     if (denied === 'NOT_LOGGED_IN') return json({ ok: false, error: denied }, 401);
     if (denied) return json({ ok: false, error: denied }, 403);
   } catch (e) { return json({ ok: false, error: 'AUTH_UNAVAILABLE' }, 503); }

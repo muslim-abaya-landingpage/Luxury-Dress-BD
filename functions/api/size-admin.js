@@ -15,13 +15,9 @@
  *   publish {note?}                         → {version}
  *   rollback {version}                      → {version}
  */
-import { createCore } from '../_lib/gs-core.js';
-import { buildEnv } from '../_lib/sheets-shim.js';
-import { loadSnapshot } from '../_lib/sheet-snapshot.js';
-import { getAccessToken } from '../_lib/google-auth.js';
+import { verifyAdminSession } from '../_lib/admin-verify.js';
 import * as store from '../_lib/size-store.js';
 
-const DEFAULT_SHEET_ID = '1kHt7Bdd4OnpX0jb1ApBXMZIIYqvmv5q2EyOnPV9HJKo';
 const MAX_BODY = 256 * 1024;
 // Errors the admin panel can show; anything else is reported as SAVE_FAILED without details.
 const USER_ERRORS = /^(BAD_[A-Z_]+|NO_FIELDS|TOO_MANY_[A-Z]+|FIELD_HAS_NO_CHOICES|UNKNOWN_[A-Z]+|TEMPLATE_IN_USE|FIELD_KEY_REMOVED|CONFLICT|[A-Z_]+_TEMPLATE_MISSING|TEMPLATE_EXISTS)$/;
@@ -30,15 +26,13 @@ function json(body, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });
 }
 
-/** Owner login check (same rules as Apps Script). Returns {who} or {response}. */
-async function checkOwner(token, env, fetchImpl, now) {
+/** Owner login check, the same lightweight way as /api/live-publish (functions/_lib/admin-verify.js — one
+ * HTTPS call to the Apps Script backend, no Google service-account secret needed). Returns {who} or {response}. */
+async function checkOwner(token, env, fetchImpl) {
   try {
-    const access = await getAccessToken(env.GOOGLE_SA_JSON, fetchImpl, now);
-    const snapshot = await loadSnapshot({ spreadsheetId: env.SHEET_ID || DEFAULT_SHEET_ID, token: access, sheets: ['Sessions', 'Admins'], fetchImpl, nowMs: now });
-    const core = createCore(buildEnv(snapshot));
-    const who = core.verifyAdminSession_(token);
+    const who = await verifyAdminSession(token, env, fetchImpl);
     if (!who || !who.ok) return { response: json({ ok: false, error: 'NOT_LOGGED_IN' }, 401) };
-    if (core.requireOwnerAdmin_(who)) return { response: json({ ok: false, error: 'OWNER_ONLY' }, 403) };
+    if (!who.isOwner) return { response: json({ ok: false, error: 'OWNER_ONLY' }, 403) };
     return { who };
   } catch (e) {
     return { response: json({ ok: false, error: 'AUTH_UNAVAILABLE' }, 503) };
@@ -89,7 +83,7 @@ export async function handleSizeAdmin(request, env, deps = {}) {
   if (request.method !== 'POST') return json({ ok: false, error: 'METHOD' }, 405);
   const origin = request.headers.get('Origin');
   if (origin && origin !== new URL(request.url).origin) return json({ ok: false, error: 'ORIGIN' }, 403);
-  if (!env || !env.STOCK_DB || !env.GOOGLE_SA_JSON) return json({ ok: false, error: 'NOT_CONFIGURED' }, 503);
+  if (!env || !env.STOCK_DB) return json({ ok: false, error: 'NOT_CONFIGURED' }, 503);
   let payload;
   try {
     const body = await request.text();
