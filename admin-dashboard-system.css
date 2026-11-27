@@ -9,6 +9,12 @@
   --dash-shadow:0 8px 24px rgba(16,45,36,.07);
   color:var(--dash-ink);
 }
+html[data-admin-theme="dark"] .adm-body{
+  --dash-green-950:#d7f0df;--dash-green-900:#173b2f;--dash-green-800:#20513f;
+  --dash-green-100:#1c2f24;--dash-green-50:#17251e;
+  --dash-ink:#e5f1e8;--dash-muted:#9db7a5;--dash-line:#314a3a;
+  --dash-surface:#192a21;--dash-canvas:#0f1b15;
+}
 .adm-body .adm-content{min-width:0}
 .adm-body .adm-topbar{display:flex;align-items:center;justify-content:space-between;gap:var(--dash-space-5);flex-wrap:wrap;padding-bottom:var(--dash-space-4)}
 .adm-body .adm-topbar>div:first-child{display:flex;align-items:center;gap:var(--dash-space-3);min-width:220px;flex:1 1 280px}

@@ -1,0 +1,90 @@
+/* Muslim Abaya admin — cross-page dark-mode patch.
+   Loaded LAST on every admin page (after admin-theme.css and every page-specific
+   stylesheet) so these overrides always win, regardless of specificity or the
+   order other stylesheets happen to load in. Covers components that were left
+   with only their light-mode colours by the page-specific CSS files, producing
+   a "patchy" look when Dark Mode is switched on. Visual only — no layout or
+   markup changes. */
+
+/* ---------------------------------------------------------------
+   Sitewide: admin-wp.css gives a huge, widely-reused list of card,
+   panel and button classes a flat white background with !important
+   and NO dark-mode variant at all — this is the single biggest
+   source of "white box" bugs across every admin page (dashboard,
+   customers, orders, reports, products...), since every page loads
+   admin-wp.css. Fixing it once here fixes most pages at once.
+--------------------------------------------------------------- */
+html[data-admin-theme="dark"].wp-admin-shell .adm-card,
+html[data-admin-theme="dark"].wp-admin-shell .adm-panel,
+html[data-admin-theme="dark"].wp-admin-shell .pn-card,
+html[data-admin-theme="dark"].wp-admin-shell .oi-panel,
+html[data-admin-theme="dark"].wp-admin-shell .pl-card,
+html[data-admin-theme="dark"].wp-admin-shell .pm-wp-box,
+html[data-admin-theme="dark"].wp-admin-shell .pm-wp-list,
+html[data-admin-theme="dark"].wp-admin-shell .adm-quick-card,
+html[data-admin-theme="dark"].wp-admin-shell .adm-stat,
+html[data-admin-theme="dark"].wp-admin-shell .wo-box,
+html[data-admin-theme="dark"].wp-admin-shell .om-panel,
+html[data-admin-theme="dark"].wp-admin-shell .sa-panel,
+html[data-admin-theme="dark"].wp-admin-shell .pn-table-wrap,
+html[data-admin-theme="dark"].wp-admin-shell .adm-table-wrap,
+html[data-admin-theme="dark"].wp-admin-shell .wo-advanced-filters{
+  background:#192a21!important;border-color:#314a3a!important;color:#e5f1e8!important;
+}
+html[data-admin-theme="dark"].wp-admin-shell .pn-btn,
+html[data-admin-theme="dark"].wp-admin-shell .adm-btn,
+html[data-admin-theme="dark"].wp-admin-shell .pl-btn{
+  background:#192a21!important;border-color:#3fa377!important;color:#7fd0a6!important;
+}
+html[data-admin-theme="dark"].wp-admin-shell .pn-btn:hover,
+html[data-admin-theme="dark"].wp-admin-shell .adm-btn:hover,
+html[data-admin-theme="dark"].wp-admin-shell .pl-btn:hover{background:#20332a!important;}
+/* Courier Management (and the report pages that share its CSS): .cm-stat/.cm-panel
+   use a --adm-panel CSS variable that is never actually defined anywhere, so it
+   always falls back to its own #fff default regardless of theme. */
+html[data-admin-theme="dark"] .cm-stat,
+html[data-admin-theme="dark"] .cm-panel{background:#192a21!important;border-color:#314a3a!important;color:#e5f1e8!important;}
+html[data-admin-theme="dark"].wp-admin-shell input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]),
+html[data-admin-theme="dark"].wp-admin-shell select,
+html[data-admin-theme="dark"].wp-admin-shell textarea{
+  background:#132019!important;color:#e5f1e8!important;border-color:#3c434a!important;
+}
+/* thead/table generic header that several pages leave unguarded */
+html[data-admin-theme="dark"].wp-admin-shell .pn-table thead th,
+html[data-admin-theme="dark"].wp-admin-shell table thead th{background:#22392c!important;color:#d4e8da!important;border-color:#314a3a!important;}
+
+/* ---------------------------------------------------------------
+   Product Manager (product-manager.html) — matches the slate-dark
+   palette already used by this page's own CSS (#1d2327/#2c3338/#23282d).
+--------------------------------------------------------------- */
+html[data-admin-theme="dark"] .pm-wp-admin .pl-admin-header{background:#1d2327!important;border-color:#3c434a!important;}
+html[data-admin-theme="dark"] .pm-wp-admin .pl-admin-header .adm-page-kicker,
+html[data-admin-theme="dark"] .pm-wp-admin .pl-admin-header > p:not(#pmSaveStatus){color:#a7aaad!important;}
+html[data-admin-theme="dark"] .pm-wp-admin .pl-admin-header h1{color:#f0f0f1!important;}
+html[data-admin-theme="dark"] .pm-wp-admin .pl-admin-header .pm-header-actions .pl-btn{background:#2c3338!important;border-color:#3c434a!important;color:#f0f0f1!important;}
+html[data-admin-theme="dark"] .pm-wp-admin .pl-admin-header .pm-header-actions .pl-btn-secondary:hover{background:#23282d!important;border-color:#50575e!important;}
+html[data-admin-theme="dark"] .pm-wp-admin .pl-admin-header #pmSaveStatus{background:#23282d!important;border-color:#3c434a!important;color:#a7aaad!important;}
+html[data-admin-theme="dark"] .pm-wp-admin .pl-admin-header .adm-product-tools>summary{color:#a7aaad!important;}
+
+html[data-admin-theme="dark"] .pm-wp-admin .pm-wp-list>.pm-wp-post-status li button.is-active,
+html[data-admin-theme="dark"] .pm-wp-admin .pm-wp-list>.pm-status-tabs li button.is-active{background:#2c3338!important;border-color:#3c434a!important;color:#f0f0f1!important;}
+html[data-admin-theme="dark"] .pm-wp-admin .pm-wp-list>.pm-wp-post-status li button,
+html[data-admin-theme="dark"] .pm-wp-admin .pm-wp-list>.pm-status-tabs li button{color:#a7aaad!important;}
+html[data-admin-theme="dark"] .pm-wp-admin .pm-wp-list .pm-wp-tablenav.top{background:#23282d!important;border-color:#3c434a!important;}
+
+html[data-admin-theme="dark"] .pm-wp-admin .pm-wp-table thead th,
+html[data-admin-theme="dark"] .pm-wp-admin .pm-wp-table thead td,
+html[data-admin-theme="dark"] .pm-wp-admin .pm-wp-table tfoot th,
+html[data-admin-theme="dark"] .pm-wp-admin .pm-wp-table tfoot td{background:#23282d!important;color:#f0f0f1!important;}
+html[data-admin-theme="dark"] .pm-wp-admin .pm-wp-table tbody tr{background:#1d2327!important;}
+html[data-admin-theme="dark"] .pm-wp-admin .pm-wp-table tbody tr:nth-child(odd){background:#20262b!important;}
+html[data-admin-theme="dark"] .pm-wp-admin .pm-wp-table tbody tr:hover{background:#263037!important;}
+html[data-admin-theme="dark"] .pm-wp-admin .pm-wp-table tbody td,
+html[data-admin-theme="dark"] .pm-wp-admin .pm-wp-table tbody th{color:#d0d5dd!important;}
+
+html[data-admin-theme="dark"] .pm-wp-admin .pm-pager{background:#23282d!important;border-color:#3c434a!important;color:#a7aaad!important;}
+html[data-admin-theme="dark"] .pm-wp-admin .pm-pager button{background:#2c3338!important;border-color:#3c434a!important;color:#72aee6!important;}
+html[data-admin-theme="dark"] .pm-wp-admin .pm-wp-subsubsub .count{color:#a7aaad!important;}
+html[data-admin-theme="dark"] .pm-wp-admin .pm-overview.pm-wp-table td.column-name{background:#1d2327!important;}
+html[data-admin-theme="dark"] .pm-wp-admin .pm-overview.pm-wp-table thead th.column-name,
+html[data-admin-theme="dark"] .pm-wp-admin .pm-overview.pm-wp-table tfoot th.column-name{background:#23282d!important;}
