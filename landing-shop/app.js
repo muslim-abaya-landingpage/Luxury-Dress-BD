@@ -325,12 +325,12 @@
       }
     }
     if (!label) return '';
-    let campaign = clean(a.utm_campaign, 60); if (macro(campaign)) campaign = '';
+    let campaign = clean(a.utm_campaign, 54); if (macro(campaign)) campaign = '';
     let ad = clean(a.utm_content, 40); if (macro(ad)) ad = '';
     let out = label + (/^(paid|cpc|ppc|ads?|paid_social|paidsocial|social_paid|cpm)/.test(medium) ? ' Ads' : '');
     if (campaign) out += ' · ' + campaign;
     if (ad && campaign) out += ' · ' + ad;
-    return clean(out, 100);
+    return clean(out, 120); // fits Apps Script's 120-char Source cell without cutting the ad name
   }
   async function submitToAdmin(v, eventId, signature) {
     const trackingSnapshot = trackingItems();
