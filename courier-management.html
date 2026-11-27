@@ -69,8 +69,8 @@
         <div class="cm-rate-actions"><button type="submit" class="adm-btn adm-btn-primary" id="cmScanGo">আপডেট করুন</button><span id="cmScanMessage" role="status"></span></div>
       </form>
       <div class="cm-table-wrap">
-        <table class="cm-table"><thead><tr><th>সময়</th><th>অর্ডার</th><th>কাস্টমার</th><th>মোড</th><th>ফলাফল</th></tr></thead>
-          <tbody id="cmScanLog"><tr><td colspan="5" class="cm-empty">এখনো কিছু স্ক্যান করা হয়নি।</td></tr></tbody>
+        <table class="cm-table"><thead><tr><th>সময়</th><th>অর্ডার</th><th>কাস্টমার</th><th>মোড</th><th>ফলাফল</th><th></th></tr></thead>
+          <tbody id="cmScanLog"><tr><td colspan="6" class="cm-empty">এখনো কিছু স্ক্যান করা হয়নি।</td></tr></tbody>
         </table>
       </div>
       <p class="cm-note">Scan to Shipping শুধু Pending/Confirmed/Processing অর্ডারে কাজ করবে এবং Status "Shipped" করে উপরে বাছাই করা কুরিয়ারের নাম বসাবে (Steadfast-এর API কল হয় না — এটি অন্য কুরিয়ার/ম্যানুয়াল ডেলিভারির জন্যও ব্যবহার করা যাবে)। Scan to Return অর্ডারটিকে "Cancelled" করে Admin Note-এ ফেরতের নোট যোগ করবে; অর্ডারটি আগে Delivered না হয়ে থাকলে স্টক আবার ফিরে আসবে — কিন্তু অর্ডারটি আগে Delivered থাকলে স্টক অটো ফেরত আসে না, তখন ম্যানুয়ালি Stock Ledger-এ সমন্বয় করতে হবে।</p>

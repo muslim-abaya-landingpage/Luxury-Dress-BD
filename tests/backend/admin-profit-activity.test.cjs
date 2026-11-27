@@ -64,6 +64,29 @@ test('activity log only records whitelisted changes and never the token or file 
   assert.match(appended[0][5], /Status='=HYPERLINK/);
 });
 
+test('activity log now also whitelists courier rates/zones/settlement saves, with amount and reference captured for settlements', () => {
+  assert.match(activitySrc, /AdminCourierRatesSave: /);
+  assert.match(activitySrc, /AdminCourierZonesSave: /);
+  assert.match(activitySrc, /AdminCourierSettlementSave: /);
+  assert.match(activitySrc.match(/ADMIN_ACTIVITY_FIELDS_ = \[[\s\S]*?\];/)[0], /'Amount'/);
+  assert.match(activitySrc.match(/ADMIN_ACTIVITY_FIELDS_ = \[[\s\S]*?\];/)[0], /'Reference'/);
+  const appended = [];
+  const sheet = { appendRow: r => appended.push(r), getRange: () => ({ setValues() {} }), setFrozenRows() {} };
+  const sandbox = { String, Object, JSON, Array, console,
+    param_: (e, k) => (e.parameter[k] == null ? '' : e.parameter[k]),
+    verifyAdminSession_: () => ({ ok: true, email: 'owner@x.com', role: 'owner' }),
+    SpreadsheetApp: { getActiveSpreadsheet: () => ({ getSheetByName: () => sheet }) },
+    Utilities: { formatDate: () => '2026-11-27 10:00:00' } };
+  vm.runInNewContext(activitySrc + '\nthis.log = adminActivityLog_; this.setReq = function (e) { adminActivityRequest_ = e; adminActivityDone_ = false; };', sandbox);
+  sandbox.setReq({ parameter: { RecordType: 'AdminCourierSettlementSave', Token: 'secret', OrderId: 'MA-7', Amount: '500', Reference: 'TXN-9' } });
+  sandbox.log({ ok: true });
+  assert.equal(appended.length, 1);
+  assert.equal(appended[0][3], 'AdminCourierSettlementSave');
+  assert.equal(appended[0][4], 'MA-7');
+  assert.match(appended[0][5], /Amount=500/);
+  assert.match(appended[0][5], /Reference=TXN-9/);
+});
+
 test('setup status reports whether secrets are set, never their values', () => {
   const fn = pick(setupSrc, 'getAdminSetupStatus_');
   assert.doesNotMatch(fn, /getProperty\('(TELEGRAM_BOT_TOKEN|STEADFAST_API_KEY|GITHUB_TOKEN|META_ACCESS_TOKEN)'\)/);

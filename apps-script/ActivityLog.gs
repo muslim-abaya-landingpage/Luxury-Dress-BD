@@ -16,10 +16,11 @@ var ADMIN_ACTIVITY_LABELS_ = {
   AdminLiveStockSet: 'লাইভ স্টক বদল', AdminStockSet: 'স্টক বদল', AdminStockVariantSave: 'স্টক (রং/সাইজ) বদল',
   AdminStockQuickAdjust: 'স্টক দ্রুত বদল', AdminStockCsvCommit: 'স্টক CSV ইমপোর্ট', AdminStockMigrate: 'স্টক মাইগ্রেশন',
   AdminStaffSave: 'স্টাফ যোগ/বদল', AdminStaffDelete: 'স্টাফ মুছে ফেলা', AdminGrowthDismiss: 'গ্রোথ আইটেম মুছে ফেলা',
-  AdminSetupAction: 'সেটআপ কাজ', AdminOperationsSave: 'হিসাব/রিটার্ন সেভ', AdminProductCostsSave: 'পণ্যের কেনা দাম সেভ'
+  AdminSetupAction: 'সেটআপ কাজ', AdminOperationsSave: 'হিসাব/রিটার্ন সেভ', AdminProductCostsSave: 'পণ্যের কেনা দাম সেভ',
+  AdminCourierRatesSave: 'কুরিয়ার রেট সেভ', AdminCourierZonesSave: 'কুরিয়ার জোন সেভ', AdminCourierSettlementSave: 'COD সেটেলমেন্ট সেভ'
 };
 var ADMIN_ACTIVITY_FIELDS_ = ['OrderId', 'Status', 'CourierStatus', 'Block', 'Phone', 'ProductId', 'Variant', 'Available', 'Reason',
-  'Path', 'Message', 'Action', 'Email', 'Role', 'Kind', 'Count'];
+  'Path', 'Message', 'Action', 'Email', 'Role', 'Kind', 'Count', 'Amount', 'Reference'];
 
 function adminActivityText_(value, max) {
   var s = String(value == null ? '' : value).replace(/[\r\n\t]+/g, ' ').trim();

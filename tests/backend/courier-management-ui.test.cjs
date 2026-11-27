@@ -116,6 +116,18 @@ test('courier performance table has an average-delivery-time column populated fr
   assert.match(js, /x\.avgDeliverySampleSize/);
 });
 
+test('a successful scan can be undone (most recent one only), reverting status via AdminOrderUpdate', () => {
+  const js = read('courier-management.js');
+  assert.match(js, /function undoScan\(index\)/);
+  assert.match(js, /var canUndo = i === 0 && r\.ok && r\.revert && !r\.undone;/);
+  assert.match(js, /logScan\(mode, result\.o\.orderId, result\.o\.name, true, result\.message, result\.revert\)/);
+  assert.match(js, /revert: \{ status: o\.status, courier: o\.courier \}/);
+  assert.match(js, /revert: \{ status: o\.status, adminNote: o\.adminNote \}/);
+  assert.match(js, /cmScanLog'\)\.addEventListener\('click'/);
+  // undoing a return-scan warns that stock was not automatically re-reserved
+  assert.match(js, /স্টক স্বয়ংক্রিয়ভাবে আবার Reserve হবে না/);
+});
+
 test('COD settlement workspace exposes reconciled totals, partial settlement and recent ledger', () => {
   const html = read('courier-management.html');
   const js = read('courier-management.js');

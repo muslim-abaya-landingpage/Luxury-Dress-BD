@@ -463,17 +463,40 @@
   }
   function renderScanLog() {
     var rows = state.scanLog;
-    if (!rows.length) { $('cmScanLog').innerHTML = '<tr><td colspan="5" class="cm-empty">এখনো কিছু স্ক্যান করা হয়নি।</td></tr>'; return; }
-    $('cmScanLog').innerHTML = rows.map(function (r) {
+    if (!rows.length) { $('cmScanLog').innerHTML = '<tr><td colspan="6" class="cm-empty">এখনো কিছু স্ক্যান করা হয়নি।</td></tr>'; return; }
+    $('cmScanLog').innerHTML = rows.map(function (r, i) {
+      var canUndo = i === 0 && r.ok && r.revert && !r.undone;
+      var undoCell = r.undone
+        ? '<span class="cm-muted">ফেরানো হয়েছে</span>'
+        : (canUndo ? '<button type="button" class="cm-action" data-undo="' + i + '">Undo</button>' : '');
       return '<tr><td>' + esc(r.time) + '</td><td><strong>' + esc(r.orderId) + '</strong></td><td>' + esc(r.customer || '—') + '</td>' +
         '<td>' + (r.mode === 'ship' ? 'Scan to Shipping' : 'Scan to Return') + '</td>' +
-        '<td><span class="cm-badge ' + (r.ok ? 'scan-ok' : 'scan-err') + '">' + esc(r.message) + '</span></td></tr>';
+        '<td><span class="cm-badge ' + (r.ok ? 'scan-ok' : 'scan-err') + '">' + esc(r.message) + '</span></td>' +
+        '<td>' + undoCell + '</td></tr>';
     }).join('');
   }
-  function logScan(mode, orderId, customer, ok, message) {
-    state.scanLog.unshift({ time: nowClock(), mode: mode, orderId: orderId, customer: customer, ok: ok, message: message });
+  function logScan(mode, orderId, customer, ok, message, revert) {
+    state.scanLog.unshift({ time: nowClock(), mode: mode, orderId: orderId, customer: customer, ok: ok, message: message, revert: revert || null, undone: false });
     if (state.scanLog.length > 50) state.scanLog.length = 50;
     renderScanLog();
+  }
+  function undoScan(index) {
+    var entry = state.scanLog[index];
+    if (!entry || !entry.ok || !entry.revert || entry.undone) return;
+    var warn = entry.mode === 'return'
+      ? '\n\n⚠️ এই স্ক্যানে স্টক আগেই রিলিজ হয়ে থাকতে পারে (অর্ডার আগে Delivered থাকলে); স্ট্যাটাস ফেরালেও স্টক স্বয়ংক্রিয়ভাবে আবার Reserve হবে না — দরকার হলে Stock Ledger-এ ম্যানুয়ালি মিলিয়ে নিন।'
+      : '';
+    if (!window.confirm('অর্ডার ' + entry.orderId + ' — এই স্ক্যানটি পূর্বাবস্থায় ফেরাবেন? (Status: ' + entry.revert.status + ')' + warn)) return;
+    var payload = { OrderId: entry.orderId, Status: entry.revert.status };
+    if (entry.mode === 'ship') payload.Courier = entry.revert.courier || '';
+    else payload.AdminNote = entry.revert.adminNote || '';
+    MaAdmin.call('AdminOrderUpdate', payload).then(function () {
+      entry.undone = true;
+      renderScanLog();
+      return load(false);
+    }).catch(function (err) {
+      window.alert('ফেরানো যায়নি: ' + err.message);
+    });
   }
   function scanMessage(text, ok) {
     var el = $('cmScanMessage');
@@ -500,7 +523,7 @@
           throw new Error('এই অর্ডার ' + o.status + ' — পাঠানো যাবে না');
         }
         return MaAdmin.call('AdminOrderUpdate', { OrderId: o.orderId, Status: 'Shipped', Courier: courier }).then(function () {
-          return { o: o, message: 'Shipped · ' + courier + ' হিসেবে সেট হয়েছে' };
+          return { o: o, message: 'Shipped · ' + courier + ' হিসেবে সেট হয়েছে', revert: { status: o.status, courier: o.courier } };
         });
       }
       // Scan to Return
@@ -514,10 +537,10 @@
       return MaAdmin.call('AdminOrderUpdate', { OrderId: o.orderId, Status: 'Cancelled', AdminNote: note }).then(function () {
         var msg = soft + 'ফেরত হিসেবে রেকর্ড হয়েছে (Status: Cancelled)';
         if (wasDelivered) msg += ' · ⚠️ এই অর্ডার আগে Delivered ছিল — স্টক স্বয়ংক্রিয়ভাবে ফেরত আসেনি, দরকার হলে ম্যানুয়ালি Stock Ledger-এ সমন্বয় করুন।';
-        return { o: o, message: msg };
+        return { o: o, message: msg, revert: { status: o.status, adminNote: o.adminNote } };
       });
     }).then(function (result) {
-      logScan(mode, result.o.orderId, result.o.name, true, result.message);
+      logScan(mode, result.o.orderId, result.o.name, true, result.message, result.revert);
       scanMessage('✓ ' + result.o.orderId + ' — ' + result.message, true);
       input.value = '';
     }).catch(function (err) {
@@ -580,6 +603,10 @@
       $('cmScanInput').focus();
     });
     $('cmScanForm').addEventListener('submit', runScan);
+    $('cmScanLog').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-undo]'); if (!b) return;
+      undoScan(Number(b.getAttribute('data-undo')));
+    });
     $('cmZonesAdd').addEventListener('click', addZone);
     $('cmZonesSave').addEventListener('click', saveZones);
     $('cmZonesList').addEventListener('click', function (e) {
