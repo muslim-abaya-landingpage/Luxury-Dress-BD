@@ -25,7 +25,12 @@ test('UTM, click ids and social referrers become a readable source', () => {
   assert.equal(d('?utm_source=ig&utm_medium=paid', '', 'muslimabaya.com'), 'Instagram Ads');
   assert.equal(d('?fbclid=abc', '', 'muslimabaya.com'), 'Facebook');
   // what Meta adds by itself when an ad has no URL parameters: utm_source=fb|ig|msg|an, utm_medium=paid, utm_campaign=<campaign id>
-  assert.equal(d('?utm_source=fb&utm_medium=paid&utm_campaign=120211234567890&utm_content=120211234567999', '', 'muslimabaya.com'), 'Facebook Ads · 120211234567890');
+  assert.equal(d('?utm_source=fb&utm_medium=paid&utm_campaign=120211234567890&utm_content=120211234567999', '', 'muslimabaya.com'), 'Facebook Ads · 120211234567890 · 120211234567999');
+  // utm_content = the ad name, so orders can be told apart per ad
+  assert.equal(d('?utm_source=facebook&utm_medium=paid&utm_campaign=Hafeza%20Sales&utm_content=Video%201', '', 'muslimabaya.com'), 'Facebook Ads · Hafeza Sales · Video 1');
+  assert.equal(d('?utm_source=facebook&utm_medium=paid&utm_campaign=Eid&utm_content=%7B%7Bad.name%7D%7D', '', 'muslimabaya.com'), 'Facebook Ads · Eid');
+  assert.equal(d('?utm_source=tiktok&utm_medium=paid&utm_campaign=__CAMPAIGN_NAME__&utm_content=__CID_NAME__', '', 'muslimabaya.com'), 'TikTok Ads');
+  assert.equal(d('?utm_source=facebook&utm_medium=paid&utm_content=Video%201', '', 'muslimabaya.com'), 'Facebook Ads');
   assert.equal(d('?utm_source=ig&utm_medium=paid&utm_campaign=1202', '', 'muslimabaya.com'), 'Instagram Ads · 1202');
   assert.equal(d('?utm_source=msg&utm_medium=paid', '', 'muslimabaya.com'), 'Messenger Ads');
   assert.equal(d('?utm_source=an&utm_medium=paid', '', 'muslimabaya.com'), 'Audience Network Ads');

@@ -285,6 +285,39 @@
       return '<div class="adm-report-row"><span>' + escapeHtml(row[primary] || "—") + '</span><b>' + escapeHtml(row[secondary] || 0) + '</b></div>';
     }).join("");
   }
+  // Order source report: orders, delivered and delivery success % per platform (Facebook/TikTok/Google…)
+  // and per campaign/ad. Success % = delivered ÷ orders, so orders still on the way pull it down for now.
+  function sourcePlatform(source) {
+    var s = String(source || "").trim();
+    var cut = s.search(/ Ads\b| · /);
+    return (cut > 0 ? s.slice(0, cut) : s) || "—";
+  }
+  function sourceRow(label, orders, delivered, strong) {
+    orders = Number(orders) || 0; delivered = Number(delivered) || 0;
+    var rate = orders ? percent(delivered / orders) : "—";
+    return '<div class="adm-report-row adm-source-row' + (strong ? ' adm-source-total' : '') + '"><span title="' + escapeHtml(label) + '">' + escapeHtml(label) + '</span>' +
+      '<b>' + orders.toLocaleString("en-US") + ' অর্ডার · ' + delivered.toLocaleString("en-US") + ' ডেলিভার্ড · ' + rate + '</b></div>';
+  }
+  function renderSources(rows) {
+    var node = byId("admReportSources");
+    rows = Array.isArray(rows) ? rows.filter(function (r) { return r && Number(r.orders) > 0; }) : [];
+    if (!rows.length) { node.innerHTML = '<div class="adm-feature-empty">এই সময়সীমায় সোর্সের তথ্য নেই।</div>'; return; }
+    var platforms = {};
+    rows.forEach(function (r) {
+      var p = sourcePlatform(r.source);
+      if (!platforms[p]) platforms[p] = { orders: 0, delivered: 0 };
+      platforms[p].orders += Number(r.orders) || 0;
+      platforms[p].delivered += Number(r.delivered) || 0;
+    });
+    var platformRows = Object.keys(platforms).map(function (p) { return { name: p, orders: platforms[p].orders, delivered: platforms[p].delivered }; })
+      .sort(function (a, b) { return b.orders - a.orders; });
+    var detail = rows.slice().sort(function (a, b) { return (Number(b.orders) || 0) - (Number(a.orders) || 0); }).slice(0, 12);
+    node.innerHTML = '<div class="adm-source-head">প্ল্যাটফর্ম অনুযায়ী</div>' +
+      platformRows.map(function (p) { return sourceRow(p.name, p.orders, p.delivered, true); }).join("") +
+      '<div class="adm-source-head">ক্যাম্পেইন / বিজ্ঞাপন অনুযায়ী</div>' +
+      detail.map(function (r) { return sourceRow(r.source || "—", r.orders, r.delivered, false); }).join("") +
+      '<div class="adm-source-note">ডেলিভারি % = ডেলিভার্ড ÷ মোট অর্ডার। পথে থাকা অর্ডার ডেলিভার হলে হার বাড়বে।</div>';
+  }
   function renderAnalytics(data) {
     if (!data || data.range !== byId("admReportRange").value || !Array.isArray(data.salesByMonth) || typeof data.undatedOrderCount !== "number") {
       throw new Error("RANGE_NOT_SUPPORTED");
@@ -302,7 +335,7 @@
     if (Number(data.undatedOrderCount) > 0) byId("admUndatedNote").textContent = Number(data.undatedOrderCount) + "টি তারিখহীন অর্ডার সব সময়ের মোট সংখ্যা/মূল্যে অন্তর্ভুক্ত; মাসিক চার্টে নেই।";
     renderMonths(data.salesByMonth);
     renderRanked("admReportProducts", data.topProducts, "name", "qty");
-    renderRanked("admReportSources", data.sourceBreakdown, "source", "orders");
+    renderSources(data.sourceBreakdown);
     var note = data.sourceMessage || "";
     if (data.range === "all") note = "পূর্ণ সময়ের অর্ডার হিসাব" + (note ? " · " + note : "");
     setStatus("admReportState", note || ("রিপোর্ট আপডেট " + dateTimeDhaka() + " (বাংলাদেশ সময়)"), false);
