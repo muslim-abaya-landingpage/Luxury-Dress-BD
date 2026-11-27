@@ -35,7 +35,7 @@
   function errorMessage(error) {
     var code = String(error && error.message || error || "");
     var messages = {
-      NOT_CONFIGURED: "Fraud Review-এর সার্ভার সংযোগ এখনো সম্পূর্ণ সেটআপ হয়নি। Cloudflare Pages-এর ORDERS_DB ও GOOGLE_SA_JSON সেটিংস যাচাই করতে হবে।",
+      NOT_CONFIGURED: "ঝুঁকি যাচাই পেজের সার্ভার সংযোগ এখনো সম্পূর্ণ সেটআপ হয়নি। Cloudflare Pages-এর ORDERS_DB ও GOOGLE_SA_JSON সেটিংস যাচাই করতে হবে।",
       AUTH_UNAVAILABLE: "অ্যাডমিন পরিচয় যাচাই করা যাচ্ছে না। কিছুক্ষণ পর আবার চেষ্টা করুন; সমস্যা থাকলে Google সংযোগ যাচাই করতে হবে।",
       LOGIN_REQUIRED: "আপনার অ্যাডমিন লগইনের মেয়াদ শেষ হয়েছে। আবার লগইন করুন।",
       NO_TOKEN: "অ্যাডমিন সেশন পাওয়া যায়নি। আবার লগইন করুন।",
@@ -140,7 +140,7 @@
           '<td data-label="তৈরির সময়">' + esc(date(row.createdAt)) + '</td>' +
           '<td data-label="করণীয়"><div class="fr-row-actions">' +
             '<button type="button" class="adm-btn adm-btn-secondary fr-open" data-review="' + esc(row.reviewId) + '">বিস্তারিত</button>' +
-            '<button type="button" class="adm-btn adm-btn-primary" data-fr-quick="cleared" data-review="' + esc(row.reviewId) + '"' + (terminal ? " disabled" : "") + '>ঠিক আছে (ছেড়ে দিন)</button>' +
+            '<button type="button" class="adm-btn adm-btn-primary" data-fr-quick="cleared" data-review="' + esc(row.reviewId) + '"' + (terminal ? " disabled" : "") + '>ঠিক আছে (ছাড়ুন)</button>' +
             '<button type="button" class="adm-btn adm-btn-danger" data-fr-quick="rejected" data-review="' + esc(row.reviewId) + '"' + (terminal ? " disabled" : "") + '>প্রতারণা নিশ্চিত করুন</button>' +
             '<button type="button" class="adm-btn adm-btn-secondary" data-fr-quick="block" data-review="' + esc(row.reviewId) + '"' + (!row.orderId ? " disabled" : "") + '>নম্বর ব্লক করুন</button>' +
           '</div></td></tr>';
