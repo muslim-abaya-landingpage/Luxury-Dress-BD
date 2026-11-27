@@ -310,3 +310,22 @@ test('reports leave Fake orders out of order and revenue totals and count them s
   assert.equal(withFake.summary.customerCount, base.summary.customerCount);
   assert.equal(withFake.summary.fakeCount, 1);
 });
+
+test('report source breakdown counts fake, failed and real delivered revenue per ad source', async () => {
+  const { createCore } = await lib('_lib/gs-core.js');
+  const { buildEnv } = await lib('_lib/sheets-shim.js');
+  const data = fixture();
+  const orders = data['Online Order'];
+  const fakeRow = orders[2].slice(); fakeRow[2] = '01799999999'; fakeRow[9] = 'MA-F1'; fakeRow[10] = 'Fake'; fakeRow[13] = '';
+  // Logical column 37 (Source) is raw index 37 here: this fixture has an extra Size column at index 7.
+  orders[2][37] = 'Facebook'; fakeRow[37] = 'Facebook';
+  orders.push(fakeRow);
+  const snap = { spreadsheetId: 'SHEET', url: 'u', timeZone: 'Asia/Dhaka', scriptId: 'S', sheets: {} };
+  Object.keys(data).forEach((name, i) => { snap.sheets[name] = { id: i + 1, values: data[name], rowCount: 1000, columnCount: 50 }; });
+  const res = withNow(() => createCore(buildEnv(snap)).getAdminAnalyticsV2_({ parameter: { Token: 'tok-admin', Range: 'all' } }));
+  const fb = res.sourceBreakdown.find((s) => s.source === 'Facebook');
+  assert.ok(fb, JSON.stringify(res.sourceBreakdown));
+  assert.equal(fb.fake, 1);
+  assert.equal(typeof fb.deliveredValue, 'number');
+  assert.ok('successRate' in fb && 'failed' in fb);
+});

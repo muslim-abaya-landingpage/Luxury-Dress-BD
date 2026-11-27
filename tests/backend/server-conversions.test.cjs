@@ -134,6 +134,23 @@ test('refund sweep skips delivered orders, never-reported orders and old (pre-v2
   api.saveOnlineOrderTrackingClient_(sheet, notReported, '', '', {});
   const old = addOrder(sheet, 'Cancelled', 'META_PURCHASE_SENT');
   sheet.rows[old - 1][38] = JSON.stringify({ ip: '1.2.3.4' });
-  assert.equal(api.serverConversionsRefundSweep_().sent, 0);
-  assert.equal(calls.length, 0);
+  const res = api.serverConversionsRefundSweep_();
+  assert.equal(res.sent, 0);
+  // The delivered order gets only its OrderDelivered event, never a cancel/refund.
+  assert.deepEqual(calls.map((c) => c.meta), ['OrderDelivered']);
+});
+
+test('delivered orders send OrderDelivered once, also when only the courier says Delivered; old orders never', () => {
+  const { sheet, calls, api } = setup();
+  const byStatus = addOrder(sheet, 'Delivered', '');
+  api.saveOnlineOrderTrackingClient_(sheet, byStatus, '', '', {});
+  const byCourier = addOrder(sheet, 'Shipped', '');
+  sheet.rows[byCourier - 1][8] = 'MA-101'; sheet.rows[byCourier - 1][12] = 'Delivered';
+  api.saveOnlineOrderTrackingClient_(sheet, byCourier, '', '', {});
+  const old = addOrder(sheet, 'Delivered', '');
+  sheet.rows[old - 1][38] = JSON.stringify({ ip: '1.2.3.4' });
+  assert.equal(api.serverConversionsRefundSweep_().delivered, 2);
+  assert.deepEqual(calls.map((c) => c.id).sort(), ['delivered_MA-100', 'delivered_MA-101']);
+  assert.equal(api.serverConversionsRefundSweep_().delivered, 0); // flag dv stops a second send
+  assert.equal(calls.length, 2);
 });

@@ -34,8 +34,11 @@
     }).join('') : '<tr><td colspan="5" class="cm-empty">এই সময়সীমায় কোনো অর্ডার নেই।</td></tr>';
     var sources = a.sourceBreakdown || [];
     $('rpSourceRows').innerHTML = sources.length ? sources.map(function (x) {
-      return '<tr><td>' + esc(x.source) + '</td><td>' + (x.orders || 0) + '</td><td>' + (x.delivered || 0) + '</td></tr>';
-    }).join('') : '<tr><td colspan="3" class="cm-empty">' + esc(a.sourceMessage || 'উৎসের তথ্য নেই।') + '</td></tr>';
+      var rate = x.successRate == null ? '—' : x.successRate + '%';
+      var low = x.successRate != null && x.successRate < 60 ? ' style="color:#b42318;font-weight:700"' : '';
+      return '<tr><td>' + esc(x.source) + '</td><td>' + (x.orders || 0) + '</td><td>' + (x.delivered || 0) + '</td><td>' + (x.failed || 0) +
+        '</td><td>' + (x.fake || 0) + '</td><td' + low + '>' + rate + '</td><td>' + money(x.deliveredValue || 0) + '</td></tr>';
+    }).join('') : '<tr><td colspan="7" class="cm-empty">' + esc(a.sourceMessage || 'উৎসের তথ্য নেই।') + '</td></tr>';
   }
 
   function renderProduct() {
