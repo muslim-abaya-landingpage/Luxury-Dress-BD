@@ -60,6 +60,32 @@
     }).join('');
   }
   function render() { renderStats(); renderRows(); $('cmLoadMore').hidden = !state.cursor; }
+  function csvCell(value) {
+    var s = String(value == null ? '' : value).replace(/"/g, '""');
+    return '"' + s + '"';
+  }
+  function exportCsv() {
+    var rows = visibleOrders();
+    if (!rows.length) { window.alert('এই ফিল্টারে কোনো অর্ডার নেই — এক্সপোর্ট করার কিছু নেই।'); return; }
+    var header = ['Order ID', 'Customer', 'Phone', 'Address', 'Due/COD', 'Payment', 'Courier', 'Tracking/Consignment', 'Status'];
+    var lines = [header.map(csvCell).join(',')];
+    rows.forEach(function (o) {
+      lines.push([
+        o.orderId || '', o.name || '', o.phone || '', o.address || '',
+        o.due != null ? o.due : '', o.payment || '', providerOf(o) || '',
+        o.tracking || o.consignmentId || '', statusOf(o)
+      ].map(csvCell).join(','));
+    });
+    var blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'courier-orders-' + localDate() + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
   function load(append) {
     if (state.loading) return Promise.resolve();
     state.loading = true;
@@ -424,6 +450,7 @@
     $('cmSettlementClose').addEventListener('click', function () { $('cmSettlementDialog').close(); });
     $('cmSettlementCancel').addEventListener('click', function () { $('cmSettlementDialog').close(); });
     $('cmLoadMore').addEventListener('click', function () { load(true); });
+    $('cmExportCsv').addEventListener('click', exportCsv);
     $('cmSearch').addEventListener('input', function (e) { state.search = e.target.value.trim().toLowerCase(); renderRows(); });
     $('cmProvider').addEventListener('change', function (e) { state.provider = e.target.value; renderRows(); });
     $('cmTabs').addEventListener('click', function (e) {

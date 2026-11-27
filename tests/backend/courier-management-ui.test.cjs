@@ -67,6 +67,16 @@ test('Scan to Return offers a return-reason selector that is only shown in Retur
   assert.match(js, /cmReturnReason'\)/);
 });
 
+test('orders table offers a client-side CSV export of the currently filtered/visible rows', () => {
+  const html = read('courier-management.html');
+  const js = read('courier-management.js');
+  assert.ok(html.includes('id="cmExportCsv"'));
+  assert.match(js, /function exportCsv\(\)/);
+  assert.match(js, /visibleOrders\(\)/);
+  assert.match(js, /text\/csv/);
+  assert.match(js, /cmExportCsv'\)\.addEventListener\('click', exportCsv\)/);
+});
+
 test('COD settlement workspace exposes reconciled totals, partial settlement and recent ledger', () => {
   const html = read('courier-management.html');
   const js = read('courier-management.js');
