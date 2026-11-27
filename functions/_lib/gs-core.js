@@ -246,6 +246,9 @@ function doPost(e) {
     if (type === 'AdminStockCsvCommit') {
       return jsonOut_(commitAdminStockCsvBatch_(e));
     }
+    if (type === 'AdminAudienceCounts' || type === 'AdminAudienceExport') {
+      return jsonOut_(adminAudienceExport_(e));
+    }
     if (type === 'AdminActivityList') {
       return jsonOut_(adminActivityList_(e));
     }

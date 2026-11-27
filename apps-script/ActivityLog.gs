@@ -17,9 +17,10 @@ var ADMIN_ACTIVITY_LABELS_ = {
   AdminStockQuickAdjust: 'স্টক দ্রুত বদল', AdminStockCsvCommit: 'স্টক CSV ইমপোর্ট', AdminStockMigrate: 'স্টক মাইগ্রেশন',
   AdminStaffSave: 'স্টাফ যোগ/বদল', AdminStaffDelete: 'স্টাফ মুছে ফেলা', AdminGrowthDismiss: 'গ্রোথ আইটেম মুছে ফেলা',
   AdminSetupAction: 'সেটআপ কাজ', AdminOperationsSave: 'হিসাব/রিটার্ন সেভ', AdminProductCostsSave: 'পণ্যের কেনা দাম সেভ',
-  AdminCourierRatesSave: 'কুরিয়ার রেট সেভ', AdminCourierZonesSave: 'কুরিয়ার জোন সেভ', AdminCourierSettlementSave: 'COD সেটেলমেন্ট সেভ'
+  AdminCourierRatesSave: 'কুরিয়ার রেট সেভ', AdminCourierZonesSave: 'কুরিয়ার জোন সেভ', AdminCourierSettlementSave: 'COD সেটেলমেন্ট সেভ',
+  AdminAudienceExport: 'অডিয়েন্স তালিকা ডাউনলোড'
 };
-var ADMIN_ACTIVITY_FIELDS_ = ['OrderId', 'Status', 'CourierStatus', 'Block', 'Phone', 'ProductId', 'Variant', 'Available', 'Reason',
+var ADMIN_ACTIVITY_FIELDS_ = ['List', 'Months', 'OrderId', 'Status', 'CourierStatus', 'Block', 'Phone', 'ProductId', 'Variant', 'Available', 'Reason',
   'Path', 'Message', 'Action', 'Email', 'Role', 'Kind', 'Count', 'Amount', 'Reference'];
 
 function adminActivityText_(value, max) {

@@ -90,6 +90,10 @@
         "label": "Customers"
       },
       {
+        "href": "admin-audience.html",
+        "label": "Ad audiences"
+      },
+      {
         "href": "admin-inbox.html",
         "label": "Inbox"
       },
