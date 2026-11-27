@@ -118,8 +118,21 @@
 .au-steps{margin:0;padding-left:20px;line-height:1.75;font-size:14px}
 .au-steps li{margin-bottom:4px}
 .au-note{font-size:13px;color:#646970}
+.au-card h3,.au-card .au-count{color:#1d2327}
+.au-panel,.au-panel .st-hint,.au-panel h2,.au-panel li,.au-panel label{color:#1d2327}
+.au-panel{background:#fff}
+/* Dark mode (Admin → ডার্ক মোড): keep text readable on dark cards. */
+html[data-admin-theme="dark"] .au-panel{background:#14271f!important;border-color:#2b4a3d!important}
+html[data-admin-theme="dark"] .au-panel,html[data-admin-theme="dark"] .au-panel .st-hint,html[data-admin-theme="dark"] .au-panel h2,
+html[data-admin-theme="dark"] .au-panel li,html[data-admin-theme="dark"] .au-panel label{color:#e7efea!important}
+html[data-admin-theme="dark"] .au-card{background:#14271f!important;border-color:#2b4a3d!important}
+html[data-admin-theme="dark"] .au-card h3,html[data-admin-theme="dark"] .au-card .au-count,html[data-admin-theme="dark"] .au-card p{color:#e7efea!important}
+html[data-admin-theme="dark"] .au-card .au-count small,html[data-admin-theme="dark"] .au-note{color:#a9bdb2!important}
+html[data-admin-theme="dark"] .au-use{background:rgba(121,189,150,.14)!important;color:#e7efea!important}
+html[data-admin-theme="dark"] .au-card.is-exclude{background:#2a1b1b!important;border-color:#6b3434!important}
+html[data-admin-theme="dark"] .au-card.is-exclude .au-use{background:rgba(230,110,110,.16)!important}
 </style>
-<section class="adm-panel">
+<section class="adm-panel au-panel">
   <div class="au-top">
     <p class="st-hint" style="margin:0;max-width:720px">আপনার নিজের অর্ডার থেকে বানানো কাস্টমার তালিকা। এক ক্লিকে CSV ডাউনলোড করে Meta (Facebook) বিজ্ঞাপনে আপলোড করতে পারবেন। ফাইলে শুধু ফোন নম্বর, নাম আর দেশ থাকে — ঠিকানা থাকে না।</p>
     <label>সময়সীমা
@@ -170,7 +183,7 @@
     <button type="button" class="button" data-download>CSV ডাউনলোড</button>
   </article>
 </section>
-<section class="adm-panel">
+<section class="adm-panel au-panel">
   <h2 style="margin-top:0">Meta-তে কীভাবে ব্যবহার করবেন (একবার শিখলেই হবে)</h2>
   <ol class="au-steps">
     <li>উপরে তালিকা বেছে <b>CSV ডাউনলোড</b> করুন।</li>
