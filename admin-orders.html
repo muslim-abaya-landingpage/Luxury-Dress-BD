@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="wp-admin-shell" lang="en">
+<html class="wp-admin-shell" lang="bn">
 <head>
   <meta charset="UTF-8">
   <link rel="preload" as="script" href="site-api-config.js?v=b4eb7cb7438aad24">
@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <meta name="robots" content="noindex, nofollow">
-  <title>Orders | Muslim Abaya Admin</title>
+  <title>অর্ডার ব্যবস্থাপনা | Muslim Abaya Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="admin-panel.css?v=b85c7689d18e083d">
   <link rel="stylesheet" href="admin-order-insights.css?v=e12466bc51ea4d72">
@@ -89,31 +89,31 @@
       <main class="pn-main">
       <div class="pn-head">
         <button type="button" class="pn-btn pn-menu-btn" id="pnMenuBtn" aria-label="Menu">☰</button>
-        <div class="adm-heading"><span class="adm-page-kicker">Muslim Abaya / Orders</span><h1>Orders</h1></div>
-        <a class="pn-btn wc-add-order" href="admin-order-new.html" id="ordNewOrder">Add order</a>
+        <div class="adm-heading"><span class="adm-page-kicker">Muslim Abaya / অর্ডার</span><h1>অর্ডার ব্যবস্থাপনা</h1></div>
+        <a class="pn-btn wc-add-order" href="admin-order-new.html" id="ordNewOrder">নতুন অর্ডার</a>
         <span class="pn-spacer"></span>
       </div>
 
       <section class="ma-order-overview" aria-label="Order overview" aria-live="polite">
-        <article class="ma-order-metric"><span class="ma-order-metric-label">Total orders</span><strong id="maMetricTotal">—</strong><small>All order records</small></article>
-        <article class="ma-order-metric"><span class="ma-order-metric-label">Pending</span><strong id="maMetricPending">—</strong><small>Awaiting action</small></article>
-        <article class="ma-order-metric"><span class="ma-order-metric-label">Shipped</span><strong id="maMetricShipped">—</strong><small>Handed to courier</small></article>
-        <article class="ma-order-metric"><span class="ma-order-metric-label">Delivered</span><strong id="maMetricDelivered">—</strong><small>Successfully delivered</small></article>
-        <article class="ma-order-metric"><span class="ma-order-metric-label">Needs review</span><strong id="maMetricReview">—</strong><small>From loaded orders</small></article>
+        <article class="ma-order-metric"><span class="ma-order-metric-label">মোট অর্ডার</span><strong id="maMetricTotal">—</strong><small>সব অর্ডারের রেকর্ড</small></article>
+        <article class="ma-order-metric"><span class="ma-order-metric-label">অপেক্ষমাণ</span><strong id="maMetricPending">—</strong><small>কাজের অপেক্ষায়</small></article>
+        <article class="ma-order-metric"><span class="ma-order-metric-label">পাঠানো হয়েছে</span><strong id="maMetricShipped">—</strong><small>কুরিয়ারের কাছে দেওয়া হয়েছে</small></article>
+        <article class="ma-order-metric"><span class="ma-order-metric-label">ডেলিভারি সম্পন্ন</span><strong id="maMetricDelivered">—</strong><small>সফলভাবে পৌঁছেছে</small></article>
+        <article class="ma-order-metric"><span class="ma-order-metric-label">যাচাই দরকার</span><strong id="maMetricReview">—</strong><small>লোড করা অর্ডার থেকে</small></article>
       </section>
-      <div class="wc-subnav-tools"><button type="button" class="pn-btn pn-btn-sm" id="ordCourierPerformance">▥ Courier Performance</button></div>
+      <div class="wc-subnav-tools"><button type="button" class="pn-btn pn-btn-sm" id="ordCourierPerformance">▥ কুরিয়ার পারফরম্যান্স</button></div>
       <div class="wc-subnav">
         <div class="pn-tabs wc-status-links" id="ordTabs" aria-label="Filter orders by status"></div>
         <form class="wc-search-box" id="ordSearchForm" role="search" onsubmit="return false">
           <label class="wc-sr-only" for="ordSearch">Search orders</label>
           <input class="pn-in" id="ordSearch" type="search" placeholder="নাম, ফোন বা অর্ডার নম্বর" autocomplete="off">
           <select class="pn-sel" id="ordSearchField" aria-label="কোথায় খুঁজবেন">
-            <option value="all">All</option>
-            <option value="id">Order ID</option>
-            <option value="name">Customer name</option>
-            <option value="phone">Phone</option>
+            <option value="all">সব তথ্য</option>
+            <option value="id">অর্ডার নম্বর</option>
+            <option value="name">কাস্টমারের নাম</option>
+            <option value="phone">ফোন নম্বর</option>
           </select>
-          <button type="submit" class="pn-btn" id="ordSearchBtn">Search orders</button>
+          <button type="submit" class="pn-btn" id="ordSearchBtn">খুঁজুন</button>
         </form>
       </div>
 
@@ -199,15 +199,15 @@
           <thead>
             <tr>
               <th class="wc-col-cb"><input type="checkbox" class="ot-sel" id="otSelAll" aria-label="দেখানো সব অর্ডার বাছুন"></th>
-              <th class="wc-col-order" aria-sort="none"><button type="button" class="wc-sort" data-sort="id">Order <span class="wc-sort-ind" aria-hidden="true"></span></button></th>
-              <th class="wc-col-customer">Customer</th>
-              <th class="wc-col-products">Products</th>
-              <th class="wc-col-date" aria-sort="none"><button type="button" class="wc-sort" data-sort="date">Date <span class="wc-sort-ind" aria-hidden="true"></span></button></th>
-              <th class="wc-col-status">Status</th>
-              <th class="wc-col-total" aria-sort="none"><button type="button" class="wc-sort" data-sort="value">Total <span class="wc-sort-ind" aria-hidden="true"></span></button></th>
-              <th class="wc-col-courier">Courier</th>
-              <th class="wc-col-assigned">Assigned</th>
-              <th class="wc-col-origin">Origin</th>
+              <th class="wc-col-order" aria-sort="none"><button type="button" class="wc-sort" data-sort="id">অর্ডার <span class="wc-sort-ind" aria-hidden="true"></span></button></th>
+              <th class="wc-col-customer">কাস্টমার</th>
+              <th class="wc-col-products">পণ্য</th>
+              <th class="wc-col-date" aria-sort="none"><button type="button" class="wc-sort" data-sort="date">তারিখ <span class="wc-sort-ind" aria-hidden="true"></span></button></th>
+              <th class="wc-col-status">স্ট্যাটাস</th>
+              <th class="wc-col-total" aria-sort="none"><button type="button" class="wc-sort" data-sort="value">মোট মূল্য <span class="wc-sort-ind" aria-hidden="true"></span></button></th>
+              <th class="wc-col-courier">কুরিয়ার</th>
+              <th class="wc-col-assigned">দায়িত্বপ্রাপ্ত</th>
+              <th class="wc-col-origin">উৎস</th>
             </tr>
           </thead>
           <tbody id="ordBody" aria-live="polite"><tr class="pn-skeleton-row"><td colspan="10"><div class="pn-skeleton-stack"><i></i><i></i><i></i><i></i></div></td></tr></tbody>
@@ -413,8 +413,8 @@
         document.getElementById("maMetricReview").textContent = insights ? insights.flagged : "—";
       }
 
-      function renderTabs() {
-        var tabs = [["all", "All"], ["today", "Today"]].concat(statuses.map(function (s) { return [s, s === "Fake" ? "Fraud" : s]; }))
+      function statusBn(value) {\n        var key=String(value||"").trim().toLowerCase();\n        var map={pending:"অপেক্ষমাণ",confirmed:"নিশ্চিত",processing:"প্রক্রিয়াধীন",shipped:"পাঠানো হয়েছে",delivered:"ডেলিভারি সম্পন্ন",cancelled:"বাতিল",canceled:"বাতিল",returned:"ফেরত",fake:"জাল/প্রতারণা",fraud:"প্রতারণা",not_sent:"পাঠানো হয়নি","not sent":"পাঠানো হয়নি"};\n        return map[key]||String(value||"তথ্য নেই");\n      }\n      function renderTabs() {
+        var tabs = [["all", "সব"], ["today", "আজকের"]].concat(statuses.map(function (s) { return [s, statusBn(s)]; }))
           .filter(function (t) { return t[0] === "all" || t[0] === filter || (counts[t[0]] || 0) > 0; });
         document.getElementById("ordTabs").innerHTML = tabs.map(function (t) {
           return '<button type="button" class="pn-tab' + (filter === t[0] ? " active" : "") + '" data-f="' + esc(t[0]) + '"' + (filter === t[0] ? ' aria-current="true"' : '') + '>' + esc(t[1]) + " <em>(" + (counts[t[0]] || 0) + ")</em></button>";
@@ -456,8 +456,8 @@
             return orderSort === "value-desc" ? vb-va : va-vb;
           });
         }
-        document.getElementById("ordIssueCount").textContent = "Showing " + list.length + " of " + all.length + " loaded orders";
-        document.getElementById("ordIssueCountTop").textContent = document.getElementById("ordIssueCountBottom").textContent = list.length + (list.length === 1 ? " item" : " items");
+        document.getElementById("ordIssueCount").textContent = "লোড করা " + all.length + "টির মধ্যে " + list.length + "টি দেখানো হচ্ছে";
+        document.getElementById("ordIssueCountTop").textContent = document.getElementById("ordIssueCountBottom").textContent = list.length + "টি অর্ডার";
         paintSortHeaders();
         try { window.MaOrdersState = { all: all, filtered: list, total: Number(counts.all) || all.length }; } catch (stateErr) {}
         var body = document.getElementById("ordBody");
@@ -469,36 +469,36 @@
         body.innerHTML = list.map(function (o) {
           var issues = issueRows.get(o) || [];
           var canOpen = o.orderId && issues.indexOf("duplicate_id") === -1;
-          var label = (o.orderId ? "#" + o.orderId : "ID নেই") + " " + (o.name || "");
+          var label = (o.orderId ? "#" + o.orderId : o.row ? "ক্রম " + o.row : "অর্ডার নম্বর নেই");
           var flagTitle = issues.map(function (key) { return MaOrderInsights.labels[key] || key; }).join(", ");
           var when = displayDate(o);
           var amount = MaOrderInsights.amount(o.total);
           var status = String(o.status || "Pending");
-          var statusLabel = status === "Fake" ? "Fraud" : status;
+          var statusLabel = statusBn(status === "Fake" ? "Fraud" : status);
           var phone = String(o.phone || "").trim();
           var products = orderProducts(o);
           var productsText = products.length ? esc(products.slice(0, 2).join(", ")) + (products.length > 2 ? ' <span class="sub">+' + (products.length - 2) + '</span>' : "") : '<span class="sub">—</span>';
           var cStatus = MaOrderStatus.describe(o);
           var courierCell = cStatus.hasCourier
-            ? esc(o.courier || "") + (o.courier ? "<br>" : "") + '<span class="sub">' + esc(cStatus.courierLabel) + '</span>'
-            : '<span class="sub">Not sent</span>';
+            ? esc(o.courier || "") + (o.courier ? "<br>" : "") + '<span class="sub">' + esc(statusBn(cStatus.courierLabel)) + '</span>'
+            : '<span class="sub">পাঠানো হয়নি</span>';
           var assigned = String(o.assignedTo || "").trim();
           return (
             '<tr class="' + (canOpen ? 'click' : '') + '" data-id="' + (canOpen ? esc(o.orderId) : '') + '"' + (canOpen ? ' data-oid="' + esc(o.orderId) + '"' : '') + '>' +
             '<td class="wc-col-cb">' + (canOpen ? '<input type="checkbox" class="ot-sel" data-oid="' + esc(o.orderId) + '" aria-label="' + esc(o.orderId) + ' বাছুন">' : '') + '</td>' +
-            '<td class="wc-col-order"><div class="wc-order-line">' +
+            '<td class="wc-col-order" data-label="অর্ডার"><div class="wc-order-line">' +
               (canOpen ? '<a class="oi-link wc-order-link" href="admin-order.html?id=' + encodeURIComponent(o.orderId) + '">' + esc(label) + '</a>' : '<span class="wc-order-link is-plain">' + esc(label) + (o.row ? ' <span class="sub">(সারি ' + esc(o.row) + ')</span>' : '') + '</span>') +
               (o.blocked ? ' <span class="pn-badge blocked">Blocked</span>' : '') +
               '<button type="button" class="wc-eye wo-preview-btn" data-preview-id="' + esc(o.orderId || "") + '" data-preview-row="' + esc(o.row || "") + '" title="Preview" aria-label="' + esc(label) + ' প্রিভিউ">' + eyeSvg + '</button>' +
             '</div><div class="ot-wa-slot" hidden></div></td>' +
-            '<td class="wc-col-customer">' + (phone ? '<a href="tel:' + esc(phone) + '">' + esc(phone) + '</a>' : '<span class="sub">—</span>') + '</td>' +
-            '<td class="wc-col-products">' + productsText + '</td>' +
-            '<td class="wc-col-date"><time title="' + esc(when.title) + '">' + esc(when.text) + '</time></td>' +
-            '<td class="wc-col-status"><mark class="wc-status wc-status-' + MaPanel.statusClass(status) + '">' + esc(statusLabel) + '</mark></td>' +
-            '<td class="wc-col-total">' + (amount === null ? '<span class="sub">অবৈধ মান</span>' : esc(MaPanel.money(o.total))) + '</td>' +
-            '<td class="wc-col-courier">' + courierCell + '</td>' +
-            '<td class="wc-col-assigned">' + (assigned ? esc(assigned) : '<span class="sub">—</span>') + '</td>' +
-            '<td class="wc-col-origin">' + esc(o.source || "—") + '</td>' +
+            '<td class="wc-col-customer" data-label="কাস্টমার">' + (o.name ? '<strong class="wc-customer-name">' + esc(o.name) + '</strong>' : '') + (phone ? '<a class="wc-customer-phone" href="tel:' + esc(phone) + '">' + esc(phone) + '</a>' : '') + (!o.name && !phone ? '<span class="sub">তথ্য নেই</span>' : '') + '</td>' +
+            '<td class="wc-col-products" data-label="পণ্য">' + productsText + '</td>' +
+            '<td class="wc-col-date" data-label="তারিখ"><time title="' + esc(when.title) + '">' + esc(when.text) + '</time></td>' +
+            '<td class="wc-col-status" data-label="স্ট্যাটাস"><mark class="wc-status wc-status-' + MaPanel.statusClass(status) + '">' + esc(statusLabel) + '</mark></td>' +
+            '<td class="wc-col-total" data-label="মোট মূল্য">' + (amount === null ? '<span class="sub">মূল্য সংরক্ষিত নেই</span>' : esc(MaPanel.money(o.total))) + '</td>' +
+            '<td class="wc-col-courier" data-label="কুরিয়ার">' + courierCell + '</td>' +
+            '<td class="wc-col-assigned" data-label="দায়িত্বপ্রাপ্ত">' + (assigned ? esc(assigned) : '<span class="sub">—</span>') + '</td>' +
+            '<td class="wc-col-origin" data-label="উৎস">' + esc(o.source || "তথ্য নেই") + '</td>' +
             "</tr>"
           );
         }).join("");
