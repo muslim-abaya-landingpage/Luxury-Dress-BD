@@ -1,0 +1,98 @@
+/* Premium polish for the single-order edit page (admin-order.html), modelled on the
+   clean rounded-card / pill-badge look requested by the owner, in our own forest-green
+   brand colors (matching admin-dashboard-unified.css) rather than copying anyone else's
+   palette or branding. Loaded after admin-orders-woocommerce.css and
+   admin-order-appbyte.css so these rules win. */
+
+.wo-edit-page .pn-card {
+  border-radius: 14px !important;
+  border: 1px solid #e7ece9 !important;
+  box-shadow: 0 1px 2px rgba(23, 59, 47, .04), 0 10px 24px -18px rgba(23, 59, 47, .18) !important;
+  padding: 20px !important;
+}
+.wo-edit-page .pn-card h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+}
+.wo-edit-page .pn-card h2 i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: var(--mt-gold-wash, #eaf3ed);
+  color: var(--mt-gold, #176b4a) !important;
+  font-style: normal;
+  font-size: 14px;
+  flex: none;
+}
+
+/* Header row: pills instead of the squared-off header badges */
+.wo-edit-page .pn-head .pn-badge {
+  border-radius: 999px !important;
+  padding: 5px 14px !important;
+  font-weight: 700 !important;
+}
+.wo-edit-page .pn-head .pn-btn {
+  border-radius: 999px !important;
+}
+.wo-edit-page .pn-head .pn-btn-blue {
+  color: var(--mt-gold, #176b4a) !important;
+  background: var(--mt-gold-wash, #eaf3ed) !important;
+  border-color: #cfe6d9 !important;
+}
+.wo-edit-page .pn-head .pn-btn-ghost-red {
+  background: #fff7ed !important;
+  color: #9a4a00 !important;
+  border-color: #f3dfc0 !important;
+}
+.wo-edit-page .pn-head #btnPrev,
+.wo-edit-page .pn-head #btnNext {
+  border-radius: 999px !important;
+}
+
+/* Inputs, selects, textareas: softer corners, forest-green focus ring */
+.wo-edit-page .pn-in,
+.wo-edit-page .pn-sel,
+.wo-edit-page .pn-ta {
+  border-radius: 10px !important;
+  border-color: #dfe6e2 !important;
+}
+.wo-edit-page .pn-in:focus,
+.wo-edit-page .pn-sel:focus,
+.wo-edit-page .pn-ta:focus {
+  outline: 3px solid rgba(23, 107, 74, .18) !important;
+  border-color: var(--mt-gold, #176b4a) !important;
+}
+
+/* Totals block */
+.wo-edit-page .pn-sum.total {
+  border-top-color: #dfe6e2 !important;
+}
+.wo-edit-page .pn-sum.total b {
+  color: var(--mt-gold-ink, #14543c) !important;
+  font-size: 18px !important;
+}
+
+/* Primary actions in forest-green, matching the rest of the panel */
+.wo-edit-page #btnSave {
+  background: var(--mt-gold, #176b4a) !important;
+  border-radius: 12px !important;
+}
+.wo-edit-page #btnSave:hover { background: var(--mt-gold-ink, #14543c) !important; }
+.wo-edit-page #btnCourierSend {
+  border-radius: 12px !important;
+}
+
+/* IP address shown as a clear, clickable-looking link */
+.wo-ip-addr { color: #b3261e; text-decoration: underline; text-underline-offset: 2px; }
+
+/* Order items table: match the rounder, airier card style */
+.wo-edit-page .wo-items-table-wrap { border-radius: 10px !important; }
+
+@media (max-width: 760px) {
+  .wo-edit-page .pn-card { border-radius: 12px !important; }
+}
