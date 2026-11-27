@@ -264,22 +264,13 @@
     }).catch(showError);
   }
   byId("frRows").addEventListener("click", function (event) {
-    var button = event.target.closest("[data-review]");
-    if (button) openReview(button.getAttribute("data-review"));
     var quick = event.target.closest("[data-fr-quick]");
-    if (quick) { event.preventDefault(); runQuickAction(quick.getAttribute("data-review"), quick.getAttribute("data-fr-quick")); }
+    if (quick) { event.preventDefault(); runQuickAction(quick.getAttribute("data-review"), quick.getAttribute("data-fr-quick")); return; }
+    var button = event.target.closest("[data-review]");
+    if (button) { openReview(button.getAttribute("data-review")); return; }
     if (event.target.closest("[data-fr-retry]")) load(false);
   });
-  byId("frStatus").addEventListener("change", function () { load(false); });
-  byId("frMore").addEventListener("click", function () { if (nextCursor) load(true); });
-  byId("frRefresh").addEventListener("click", function () { load(false); });
-  byId("frProtectionRetry").addEventListener("click", loadProtectionStatus);
-  byId("admRefresh").addEventListener("click", load);
-  byId("frClose").addEventListener("click", function () { byId("frDetail").hidden = true; selected = null; });
-  document.querySelectorAll("[data-fr-decision]").forEach(function (button) {
-    button.addEventListener("click", function () { decide(button.getAttribute("data-fr-decision")); });
-  });
-  byId("frRows").addEventListener("click", function (event) {\n    var button = event.target.closest("[data-review]");\n    if (button && !event.target.closest("[data-fr-quick]")) openReview(button.getAttribute("data-review"));\n    var quick = event.target.closest("[data-fr-quick]");\n    if (quick) { event.preventDefault(); runQuickAction(quick.getAttribute("data-review"), quick.getAttribute("data-fr-quick")); }\n    if (event.target.closest("[data-fr-retry]")) load(false);\n  });\n  MaAdminGuard.requireOwner().then(function (owner) {
+  MaAdminGuard.requireOwner().then(function (owner) {
     if (owner) { MaAdminShell.start(load); loadProtectionStatus(); }
   }).catch(showError);
 })();
