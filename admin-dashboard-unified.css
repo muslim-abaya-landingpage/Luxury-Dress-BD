@@ -16,9 +16,9 @@ html.wp-admin-shell body.adm-body{background:var(--dash-canvas)!important;color:
   gap:0!important;padding:0!important;margin:0!important;max-width:none!important;min-height:100vh!important
  }
  html.wp-admin-shell body.adm-body .adm-shell>.adm-sidebar{
-  grid-column:1;grid-row:1;position:sticky!important;top:44px!important;left:auto!important;
-  width:228px!important;height:calc(100vh - 64px)!important;margin:12px 0 12px 12px!important;
-  border:1px solid var(--dash-line)!important;border-radius:18px!important;box-shadow:var(--dash-shadow)!important
+  grid-column:1;grid-row:1;position:sticky!important;top:0!important;left:auto!important;
+  width:246px!important;height:100vh!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important
  }
  html.wp-admin-shell body.adm-body .adm-shell>.adm-content{
   grid-column:2;grid-row:1;min-width:0!important;width:100%!important;max-width:none!important;
