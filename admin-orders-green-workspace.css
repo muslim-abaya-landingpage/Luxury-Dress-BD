@@ -73,3 +73,29 @@
 
 /* Dark theme overrides */
 html[data-admin-theme="dark"] .wo-orders-page .ma-order-metric,html[data-admin-theme="dark"] .wo-orders-page .wc-subnav,html[data-admin-theme="dark"] .wo-orders-page .wo-primary-toolbar,html[data-admin-theme="dark"] .wo-orders-page .wo-advanced-filters,html[data-admin-theme="dark"] .wo-orders-page .wc-table-wrap{background:#192a21!important;border-color:#314a3a!important;color:#e5f1e8!important;}html[data-admin-theme="dark"] .wo-orders-page .ma-order-metric strong,html[data-admin-theme="dark"] .wo-orders-page .wc-customer-name{color:#d7f0df!important;}html[data-admin-theme="dark"] .wo-orders-page .pn-table thead th{background:#22392c!important;color:#d4e8da!important;border-color:#314a3a!important;}html[data-admin-theme="dark"] .wo-orders-page .pn-table td{background:#192a21!important;color:#e5f1e8!important;border-color:#2c4335!important;}html[data-admin-theme="dark"] .wo-orders-page .wc-orders-table tbody tr{background:#192a21!important;border-color:#314a3a!important;}html[data-admin-theme="dark"] .wo-orders-page .wc-orders-table tbody td::before{color:#9db7a5!important;}html[data-admin-theme="dark"] .wo-orders-page .wc-orders-table tbody td.wc-col-order{border-color:#2c4335!important;}html[data-admin-theme="dark"] .wo-orders-page .pn-toolbar .pn-sel,html[data-admin-theme="dark"] .wo-orders-page .wc-search-box .pn-in,html[data-admin-theme="dark"] .wo-orders-page .wc-search-box .pn-sel{background:#132019!important;color:#e5f1e8!important;border-color:#314a3a!important;}
+
+/* Dark theme: cover what the block above missed — the page background behind the
+   header/filters (so it doesn't stay white around the already-dark cards), the
+   courier-performance pill, the collapsed "More Filters" bar, and the zebra-striped
+   order rows (which hardcode #fff regardless of theme in admin-orders-wc-list.css). */
+html[data-admin-theme="dark"] body.wo-orders-page{background:#0f1b15!important;color:#e5f1e8!important;}
+html[data-admin-theme="dark"] #ordCourierPerformance{background:#1c2f24!important;color:#cfe3d5!important;border-color:#314a3a!important;}
+html[data-admin-theme="dark"].wp-admin-shell .wo-orders-page .wc-list .wo-advanced-filters>summary,
+html[data-admin-theme="dark"] .wo-orders-page .wo-advanced-filters>summary{background:transparent!important;color:#d4e8da!important;}
+html[data-admin-theme="dark"] .wo-orders-page .wc-orders-table tbody tr:nth-child(odd) td{background:#192a21!important;}
+html[data-admin-theme="dark"] .wo-orders-page .wc-orders-table tbody tr:nth-child(even) td{background:#17251e!important;}
+html[data-admin-theme="dark"] .wo-orders-page .wc-orders-table tbody tr:hover td{background:#223829!important;}
+
+/* Dark theme: the "More Filters" panel's own sub-panels (order-overview stats,
+   the district/product/cancel-reason report, the CSV export button) and the
+   page title, which all kept their light-mode colors too. */
+html[data-admin-theme="dark"] .wo-orders-page .wc-subnav-tools{background:#192a21!important;border-color:#314a3a!important;}
+html[data-admin-theme="dark"] .wo-orders-page .pn-head h1{color:#eaf4ec!important;}
+html[data-admin-theme="dark"] .wo-orders-page .pn-toolbar{background:#192a21!important;border-color:#314a3a!important;color:#e5f1e8!important;}
+html[data-admin-theme="dark"] .wo-orders-page .oi-panel{background:#192a21!important;border-color:#314a3a!important;color:#e5f1e8!important;}
+html[data-admin-theme="dark"] .wo-orders-page .oi-panel .oi-card{background:#17251e!important;border-color:#2c4335!important;}
+html[data-admin-theme="dark"] .wo-orders-page .oi-panel .oi-controls select{background:#132019!important;border-color:#314a3a!important;color:#e5f1e8!important;}
+html[data-admin-theme="dark"] .wo-orders-page .oi-note{color:#a7b8ae!important;}
+html[data-admin-theme="dark"] .wo-orders-page .oi-link{color:#7fd0a6!important;}
+html[data-admin-theme="dark"] .wo-orders-page .wo-export-btn{background:#192a21!important;border-color:#314a3a!important;color:#e5f1e8!important;}
+html[data-admin-theme="dark"] .wo-orders-page .wo-advanced-filters .ot-report{background:#17251e!important;border-color:#2c4335!important;color:#e5f1e8!important;}

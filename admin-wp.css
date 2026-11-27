@@ -616,6 +616,12 @@ html.wp-admin-shell .wo-orders-page .wo-primary-toolbar.wc-tablenav{
  background:#f8faf9!important;border:1px solid #e3ece6!important;border-radius:12px!important;
  padding:10px 12px!important;align-items:center!important
 }
+/* Dark theme: this compound-class selector is more specific than the generic
+   .wo-primary-toolbar dark override in admin-orders-green-workspace.css, so it
+   needs its own dark pair here. */
+html[data-admin-theme="dark"].wp-admin-shell .wo-orders-page .wo-primary-toolbar.wc-tablenav{
+ background:#192a21!important;border-color:#314a3a!important;color:#e5f1e8!important
+}
 html.wp-admin-shell .wp-adminbar{
  position:fixed!important;top:0!important;left:var(--wp-menu-w)!important;right:0!important;
  height:var(--wp-bar-h)!important;background:#fff!important;color:#1f3a30!important;
