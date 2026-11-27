@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="wp-admin-shell" lang="en" data-admin-guard="1">
+<html class="wp-admin-shell" lang="bn" data-admin-guard="1">
 <head>
   <meta charset="UTF-8">
   <link rel="preload" as="script" href="site-api-config.js?v=b4eb7cb7438aad24">
@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <meta name="robots" content="noindex, nofollow">
-  <title>Fraud Review Queue | Muslim Abaya Admin</title>
+  <title>ফ্রড রিভিউ কিউ | Muslim Abaya</title>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="admin.css?v=d800d917a0c7b197">
 <script src="config.js?v=00107b4d68a09227"></script>
@@ -26,6 +26,9 @@
 <meta name="theme-color" content="#1b2a41">
 <link rel="apple-touch-icon" href="/images/admin/admin-icon-192.png">
 <link rel="stylesheet" href="admin-wp.css?v=20261126-admin-shell-step2">
+<link rel="stylesheet" href="admin-dashboard-modern.css?v=20261126-dashboard-offset-final-v4">
+<link rel="stylesheet" href="admin-premium-unified.css?v=20261125-sidebar-hover-stable">
+<link rel="stylesheet" href="admin-dashboard-unified.css?v=20261127-forest-green-brand">
 <style>
 .fr-customer-panel{margin-top:18px}.fr-customer-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:12px 0}.fr-customer-kpi{padding:12px;border:1px solid var(--adm-border,#e5e7eb);border-radius:10px}.fr-customer-kpi strong{display:block;font-size:20px}.fr-customer-kpi small{color:var(--adm-muted,#64748b)}.fr-customer-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.fr-customer-table{width:100%;border-collapse:collapse}.fr-customer-table th,.fr-customer-table td{padding:8px;border-bottom:1px solid var(--adm-border,#e5e7eb);text-align:left;font-size:12px}
 </style>
@@ -36,44 +39,44 @@
     <aside class="adm-sidebar" id="admSidebar">
       <div class="adm-sidebar-brand">
         <div class="adm-sidebar-crest"></div>
-        <div class="adm-sidebar-brand-text"><div class="t1">Muslim Abaya</div><div class="t2">Admin Panel</div></div>
+        <div class="adm-sidebar-brand-text"><div class="t1">Muslim Abaya</div><div class="t2">অ্যাডমিন প্যানেল</div></div>
         <button type="button" class="adm-collapse-btn" id="admCollapse" aria-controls="admSidebar" aria-expanded="true" aria-label="সাইডবার ছোট করুন"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="3" stroke="currentColor" stroke-width="1.6"/><path d="M9 4v16" stroke="currentColor" stroke-width="1.6"/></svg></button>
         <button type="button" class="adm-sidebar-close" id="admSbClose" aria-label="মেনু বন্ধ করুন"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
       </div>
-      <div class="adm-sidebar-profile"><div class="adm-profile-avatar" aria-hidden="true">MA</div><div class="adm-profile-copy"><strong>আপনার কর্মক্ষেত্র</strong><small>স্টোর পরিচালনা</small></div></div>
-      <nav class="adm-sidebar-nav" aria-label="Admin menu">
-<a class="adm-sidebar-item" href="admin-dashboard.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Dashboard</span></a>
-<div class="adm-nav-group has-current"><a class="adm-sidebar-item adm-nav-top" href="admin-orders.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z M9 7h6M9 11h6M9 15h4"/></svg><span>Orders</span></a><div class="adm-nav-children" role="group" aria-label="Orders">
-<a class="adm-sidebar-item adm-nav-child" href="admin-orders.html"><span>Orders</span></a>
-<a class="adm-sidebar-item adm-nav-child is-current" href="admin-fraud.html" aria-current="page"><span>Fraud review</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="admin-order-new.html"><span>Add order</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="admin-operations.html"><span>Finance &amp; Returns</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="admin-profit.html"><span>Product profit</span></a>
+      <div class="adm-sidebar-profile"><div class="adm-profile-avatar" aria-hidden="true">MA</div><div class="adm-profile-copy"><strong>কর্মক্ষেত্র</strong><small>স্টোর ব্যবস্থাপনা</small></div></div>
+      <nav class="adm-sidebar-nav" aria-label="অ্যাডমিন মেনু">
+<a class="adm-sidebar-item" href="admin-dashboard.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>ড্যাশবোর্ড</span></a>
+<div class="adm-nav-group has-current"><a class="adm-sidebar-item adm-nav-top" href="admin-orders.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z M9 7h6M9 11h6M9 15h4"/></svg><span>অর্ডার</span></a><div class="adm-nav-children" role="group" aria-label="অর্ডার">
+<a class="adm-sidebar-item adm-nav-child" href="admin-orders.html"><span>অর্ডার</span></a>
+<a class="adm-sidebar-item adm-nav-child is-current" href="admin-fraud.html" aria-current="page"><span>ফ্রড রিভিউ</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-order-new.html"><span>নতুন অর্ডার</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-operations.html"><span>হিসাব ও রিটার্ন</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-profit.html"><span>পণ্যের লাভ</span></a>
 </div></div>
-<div class="adm-nav-group"><a class="adm-sidebar-item adm-nav-top" href="product-manager.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="6" width="16" height="15" rx="2"/><path d="M9 6V5a3 3 0 0 1 6 0v1M9 10a3 3 0 0 0 6 0"/></svg><span>Products</span></a><div class="adm-nav-children" role="group" aria-label="Products">
-<a class="adm-sidebar-item adm-nav-child" href="product-manager.html"><span>All Products</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="product-manager.html?action=new"><span>Add new product</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="admin-sizes.html"><span>Sizes</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="product-attributes.html"><span>Attributes</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="admin-reviews.html"><span>Reviews</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="stock-analytics.html"><span>Stock &amp; Analytics</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="product-links.html"><span>Product links</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="product-manager.html#store-settings"><span>Store settings</span></a>
+<div class="adm-nav-group"><a class="adm-sidebar-item adm-nav-top" href="product-manager.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="6" width="16" height="15" rx="2"/><path d="M9 6V5a3 3 0 0 1 6 0v1M9 10a3 3 0 0 0 6 0"/></svg><span>পণ্য</span></a><div class="adm-nav-children" role="group" aria-label="পণ্য">
+<a class="adm-sidebar-item adm-nav-child" href="product-manager.html"><span>সব পণ্য</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="product-manager.html?action=new"><span>নতুন পণ্য যোগ</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-sizes.html"><span>সাইজ</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="product-attributes.html"><span>অ্যাট্রিবিউট</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-reviews.html"><span>রিভিউ</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="stock-analytics.html"><span>স্টক ও অ্যানালিটিক্স</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="product-links.html"><span>প্রোডাক্ট লিংক</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="product-manager.html#store-settings"><span>স্টোর সেটিংস</span></a>
 </div></div>
-<div class="adm-nav-group"><a class="adm-sidebar-item adm-nav-top" href="admin-customers.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h18v13H8l-5 4V4ZM7 9h10M7 13h7"/></svg><span>Customers</span></a><div class="adm-nav-children" role="group" aria-label="Customers">
-<a class="adm-sidebar-item adm-nav-child" href="admin-customers.html"><span>Customers</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="admin-inbox.html"><span>Inbox</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="admin-support-inbox.html"><span>Live support</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="support-agent-telegram.html"><span>Telegram support</span></a>
+<div class="adm-nav-group"><a class="adm-sidebar-item adm-nav-top" href="admin-customers.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h18v13H8l-5 4V4ZM7 9h10M7 13h7"/></svg><span>গ্রাহক</span></a><div class="adm-nav-children" role="group" aria-label="গ্রাহক">
+<a class="adm-sidebar-item adm-nav-child" href="admin-customers.html"><span>গ্রাহক</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-inbox.html"><span>ইনবক্স</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-support-inbox.html"><span>লাইভ সাপোর্ট</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="support-agent-telegram.html"><span>টেলিগ্রাম সাপোর্ট</span></a>
 </div></div>
-<div class="adm-nav-group has-current"><a class="adm-sidebar-item adm-nav-top is-current" href="admin-setup.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 9v12"/></svg><span>Settings</span></a><div class="adm-nav-children" role="group" aria-label="Settings">
-<a class="adm-sidebar-item adm-nav-child" href="admin-setup.html"><span>Setup &amp; Status</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="admin-seo.html"><span>SEO Manager</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="admin-staff.html"><span>Staff</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="admin-growth.html"><span>Growth tools</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="admin-links.html"><span>Links</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="admin-tracking-settings.html"><span>Tracking Pixels</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="admin-activity.html"><span>Activity log</span></a>
+<div class="adm-nav-group has-current"><a class="adm-sidebar-item adm-nav-top is-current" href="admin-setup.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 9v12"/></svg><span>সেটিংস</span></a><div class="adm-nav-children" role="group" aria-label="সেটিংস">
+<a class="adm-sidebar-item adm-nav-child" href="admin-setup.html"><span>সেটআপ ও স্ট্যাটাস</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-seo.html"><span>SEO ম্যানেজার</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-staff.html"><span>স্টাফ</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-growth.html"><span>গ্রোথ টুলস</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-links.html"><span>লিংকস</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-tracking-settings.html"><span>ট্র্যাকিং পিক্সেল</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-activity.html"><span>অ্যাক্টিভিটি লগ</span></a>
 </div></div>
 </nav>
       <div class="adm-sidebar-foot">
@@ -87,51 +90,51 @@
         <div>
           <button type="button" class="adm-menu-btn" id="admMenuBtn" aria-label="মেনু খুলুন"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
           <div>
-            <div class="adm-heading"><span class="adm-page-kicker">Orders / Risk Management</span><h1>Fraud Review Queue</h1></div>
+            <div class="adm-heading"><span class="adm-page-kicker">অর্ডার / ঝুঁকি ব্যবস্থাপনা</span><h1>ফ্রড রিভিউ কিউ</h1></div>
             <div class="adm-topbar-user" id="admUserLabel">—</div>
           </div>
         </div>
         <div class="adm-topbar-actions">
-          <button type="button" class="adm-btn adm-btn-secondary" id="admRefresh">Refresh</button>
+          <button type="button" class="adm-btn adm-btn-secondary" id="admRefresh">রিফ্রেশ</button>
         </div>
       </header>
 
       <main class="adm-main">
   <section class="adm-panel">
     <div class="fr-toolbar">
-      <div><h2>Manual risk review</h2><p class="st-hint">Risk review decisions do not confirm, cancel, or otherwise change the order.</p></div>
+      <div><h2>ম্যানুয়াল রিস্ক রিভিউ</h2><p class="st-hint">ঝুঁকি পর্যালোচনার সিদ্ধান্ত অর্ডার কনফার্ম, বাতিল বা অন্য কোনোভাবে পরিবর্তন করে না।</p></div>
       <div class="fr-controls">
-        <label>Status <select id="frStatus"><option value="pending">Pending</option><option value="hold">On hold</option><option value="cleared">Cleared</option><option value="rejected">Rejected</option><option value="all">All reviews</option></select></label>
-        <button type="button" class="adm-btn adm-btn-secondary" id="frRefresh">Refresh</button>
+        <label>স্ট্যাটাস <select id="frStatus"><option value="pending">অপেক্ষমান</option><option value="hold">হোল্ডে</option><option value="cleared">ক্লিয়ার করা</option><option value="rejected">প্রত্যাখ্যাত</option><option value="all">সব রিভিউ</option></select></label>
+        <button type="button" class="adm-btn adm-btn-secondary" id="frRefresh">রিফ্রেশ</button>
       </div>
     </div>
   </section>
   <div class="adm-feature-error" id="frError" role="alert" hidden></div>
   <section class="adm-panel" id="frProtectionStatus">
-    <div class="fr-toolbar"><div><h2>Protection configuration</h2><p class="st-hint">লাইভ Worker configuration status</p></div><span id="frProtectionState">Checking…</span></div>
+    <div class="fr-toolbar"><div><h2>প্রোটেকশন কনফিগারেশন</h2><p class="st-hint">লাইভ Worker configuration status</p></div><span id="frProtectionState">যাচাই হচ্ছে…</span></div>
     <div id="frProtectionDetails" class="fr-reasons">কনফিগারেশন যাচাই হচ্ছে…</div>
   </section>
   <section class="adm-panel">
     <div class="adm-table-wrap">
-      <table class="adm-table"><thead><tr><th>Order</th><th>Risk</th><th>Signals / Reasons</th><th>Status</th><th>Created</th><th></th></tr></thead>
-      <tbody id="frRows"><tr><td colspan="6" class="adm-empty">Loading…</td></tr></tbody></table>
+      <table class="adm-table"><thead><tr><th>অর্ডার</th><th>ঝুঁকি</th><th>সিগন্যাল / কারণ</th><th>স্ট্যাটাস</th><th>তৈরি</th><th></th></tr></thead>
+      <tbody id="frRows"><tr><td colspan="6" class="adm-empty">লোড হচ্ছে…</td></tr></tbody></table>
     </div>
-    <div class="fr-more-wrap"><button type="button" class="adm-btn adm-btn-secondary" id="frMore" hidden>Load more reviews</button></div>
+    <div class="fr-more-wrap"><button type="button" class="adm-btn adm-btn-secondary" id="frMore" hidden>আরও রিভিউ</button></div>
   </section>
   <section class="adm-panel" id="frDetail" hidden>
-    <div class="fr-toolbar"><div><h2 id="frTitle">Review details</h2><p class="st-hint" id="frMeta"></p></div><button type="button" class="adm-btn adm-btn-secondary" id="frClose">Close</button></div>
+    <div class="fr-toolbar"><div><h2 id="frTitle">রিভিউ বিস্তারিত</h2><p class="st-hint" id="frMeta"></p></div><button type="button" class="adm-btn adm-btn-secondary" id="frClose">বন্ধ করুন</button></div>
     <div id="frReasons" class="fr-reasons"></div>
     <div class="fr-actions">
-      <button type="button" class="adm-btn adm-btn-primary" data-fr-decision="cleared">Clear review</button>
-      <button type="button" class="adm-btn adm-btn-secondary" data-fr-decision="hold">Put on hold</button>
-      <button type="button" class="adm-btn adm-btn-secondary" data-fr-decision="rejected">Mark suspicious</button>
-      <button type="button" class="adm-btn adm-btn-secondary" data-fr-decision="pending" hidden>Reopen</button>
+      <button type="button" class="adm-btn adm-btn-primary" data-fr-decision="cleared">ক্লিয়ার করুন</button>
+      <button type="button" class="adm-btn adm-btn-secondary" data-fr-decision="hold">হোল্ডে রাখুন</button>
+      <button type="button" class="adm-btn adm-btn-secondary" data-fr-decision="rejected">সন্দেহজনক চিহ্নিত করুন</button>
+      <button type="button" class="adm-btn adm-btn-secondary" data-fr-decision="pending" hidden>আবার খুলুন</button>
     </div>
     <section class="adm-panel fr-customer-panel" id="frCustomerPanel" aria-live="polite">
-      <div class="fr-toolbar"><div><h3>Customer history &amp; phone protection</h3><p class="st-hint">নিজস্ব অর্ডার ডেটা থেকে হিসাব; এটি বাহ্যিক কুরিয়ার ডেটা নয়।</p></div></div>
+      <div class="fr-toolbar"><div><h3>কাস্টমার হিস্ট্রি ও ফোন প্রোটেকশন</h3><p class="st-hint">নিজস্ব অর্ডার ডেটা থেকে হিসাব; এটি বাহ্যিক কুরিয়ার ডেটা নয়।</p></div></div>
       <div id="frCustomerData"><p class="adm-empty">Review নির্বাচন করলে কাস্টমারের ইতিহাস দেখা যাবে।</p></div>
     </section>
-    <h3>Review history</h3>
+    <h3>রিভিউ হিস্ট্রি</h3>
     <ol id="frHistory" class="fr-history"></ol>
   </section>
 </main>
