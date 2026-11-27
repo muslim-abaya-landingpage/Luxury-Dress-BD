@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="wp-admin-shell" lang="en">
+<html class="wp-admin-shell" lang="bn">
 <head>
   <meta charset="UTF-8">
   <link rel="preload" as="script" href="site-api-config.js?v=b4eb7cb7438aad24">
@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <meta name="robots" content="noindex, nofollow">
-  <title>Orders | Muslim Abaya Admin</title>
+  <title>অর্ডার ব্যবস্থাপনা | Muslim Abaya Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="admin-panel.css?v=b85c7689d18e083d">
   <link rel="stylesheet" href="admin-order-insights.css?v=e12466bc51ea4d72">
@@ -27,13 +27,14 @@
 <link rel="stylesheet" href="order-management-workspace.css?v=20261104-v1">
 <link rel="stylesheet" href="admin-responsive.css?v=1">
 <link rel="stylesheet" href="admin-theme.css?v=1">
-<link rel="stylesheet" href="admin-orders-wc-list.css?v=20261127-cols1">
+<link rel="stylesheet" href="admin-orders-wc-list.css?v=20261127-bengali-order-workspace">
 <link rel="manifest" href="/admin-manifest.webmanifest">
 <meta name="theme-color" content="#1b2a41">
 <link rel="apple-touch-icon" href="/images/admin/admin-icon-192.png">
 <link rel="stylesheet" href="admin-wp.css?v=20261126-admin-shell-step2">
   <link rel="stylesheet" href="admin-orders-appbyte.css?v=20261126-orders-grid-layout-v2">
 <link rel="stylesheet" href="admin-premium-unified.css?v=20261126-orders-double-offset-fix">
+<link rel="stylesheet" href="admin-orders-green-workspace.css?v=20261127-green-mobile-cards">
 </head>
 <body class="pn-body wo-orders-page">
   <div class="pn-app adm-shell">
@@ -46,16 +47,16 @@
       </div>
       <div class="adm-sidebar-profile"><div class="adm-profile-avatar" aria-hidden="true">MA</div><div class="adm-profile-copy"><strong>Workspace</strong><small>Store Operations</small></div></div>
       <nav class="adm-sidebar-nav" aria-label="Admin menu">
-<a class="adm-sidebar-item" href="admin-dashboard.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Dashboard</span></a>
-<div class="adm-nav-group has-current"><a class="adm-sidebar-item adm-nav-top is-current" href="admin-orders.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z M9 7h6M9 11h6M9 15h4"/></svg><span>Orders</span></a><div class="adm-nav-children" role="group" aria-label="Orders">
-<a class="adm-sidebar-item adm-nav-child is-current" href="admin-orders.html" aria-current="page"><span>Orders</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="admin-fraud.html"><span>Fraud review</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="admin-order-new.html"><span>Add order</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="admin-operations.html"><span>Finance &amp; Returns</span></a>
-<a class="adm-sidebar-item adm-nav-child" href="admin-profit.html"><span>Product profit</span></a>
+<a class="adm-sidebar-item" href="admin-dashboard.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>ড্যাশবোর্ড</span></a>
+<div class="adm-nav-group has-current"><a class="adm-sidebar-item adm-nav-top is-current" href="admin-orders.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z M9 7h6M9 11h6M9 15h4"/></svg><span>অর্ডার</span></a><div class="adm-nav-children" role="group" aria-label="Orders">
+<a class="adm-sidebar-item adm-nav-child is-current" href="admin-orders.html" aria-current="page"><span>অর্ডার</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-fraud.html"><span>প্রতারণা যাচাই</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-order-new.html"><span>নতুন অর্ডার</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-operations.html"><span>হিসাব ও ফেরত</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-profit.html"><span>পণ্যের লাভ</span></a>
 </div></div>
-<a class="adm-sidebar-item" href="courier-management.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 6h12v12H3zM15 10h4l3 3v5h-7z"/><circle cx="7.5" cy="18" r="1.5"/><circle cx="18.5" cy="18" r="1.5"/></svg><span>Courier Management</span></a>
-<div class="adm-nav-group"><a class="adm-sidebar-item adm-nav-top" href="product-manager.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="6" width="16" height="15" rx="2"/><path d="M9 6V5a3 3 0 0 1 6 0v1M9 10a3 3 0 0 0 6 0"/></svg><span>Products</span></a><div class="adm-nav-children" role="group" aria-label="Products">
+<a class="adm-sidebar-item" href="courier-management.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 6h12v12H3zM15 10h4l3 3v5h-7z"/><circle cx="7.5" cy="18" r="1.5"/><circle cx="18.5" cy="18" r="1.5"/></svg><span>কুরিয়ার ব্যবস্থাপনা</span></a>
+<div class="adm-nav-group"><a class="adm-sidebar-item adm-nav-top" href="product-manager.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="6" width="16" height="15" rx="2"/><path d="M9 6V5a3 3 0 0 1 6 0v1M9 10a3 3 0 0 0 6 0"/></svg><span>পণ্য</span></a><div class="adm-nav-children" role="group" aria-label="Products">
 <a class="adm-sidebar-item adm-nav-child" href="product-manager.html"><span>All Products</span></a>
 <a class="adm-sidebar-item adm-nav-child" href="product-manager.html?action=new"><span>Add new product</span></a>
 <a class="adm-sidebar-item adm-nav-child" href="admin-sizes.html"><span>Sizes</span></a>
@@ -65,13 +66,13 @@
 <a class="adm-sidebar-item adm-nav-child" href="product-links.html"><span>Product links</span></a>
 <a class="adm-sidebar-item adm-nav-child" href="product-manager.html#store-settings"><span>Store settings</span></a>
 </div></div>
-<div class="adm-nav-group"><a class="adm-sidebar-item adm-nav-top" href="admin-customers.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h18v13H8l-5 4V4ZM7 9h10M7 13h7"/></svg><span>Customers</span></a><div class="adm-nav-children" role="group" aria-label="Customers">
-<a class="adm-sidebar-item adm-nav-child" href="admin-customers.html"><span>Customers</span></a>
+<div class="adm-nav-group"><a class="adm-sidebar-item adm-nav-top" href="admin-customers.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h18v13H8l-5 4V4ZM7 9h10M7 13h7"/></svg><span>কাস্টমার</span></a><div class="adm-nav-children" role="group" aria-label="Customers">
+<a class="adm-sidebar-item adm-nav-child" href="admin-customers.html"><span>কাস্টমার</span></a>
 <a class="adm-sidebar-item adm-nav-child" href="admin-inbox.html"><span>Inbox</span></a>
 <a class="adm-sidebar-item adm-nav-child" href="admin-support-inbox.html"><span>Live support</span></a>
 <a class="adm-sidebar-item adm-nav-child" href="support-agent-telegram.html"><span>Telegram support</span></a>
 </div></div>
-<div class="adm-nav-group"><a class="adm-sidebar-item adm-nav-top" href="admin-setup.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 9v12"/></svg><span>Settings</span></a><div class="adm-nav-children" role="group" aria-label="Settings">
+<div class="adm-nav-group"><a class="adm-sidebar-item adm-nav-top" href="admin-setup.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 9v12"/></svg><span>সেটিংস</span></a><div class="adm-nav-children" role="group" aria-label="Settings">
 <a class="adm-sidebar-item adm-nav-child" href="admin-setup.html"><span>Setup &amp; Status</span></a>
 <a class="adm-sidebar-item adm-nav-child" href="admin-seo.html"><span>SEO Manager</span></a>
 <a class="adm-sidebar-item adm-nav-child" href="admin-staff.html"><span>Staff</span></a>
@@ -89,31 +90,31 @@
       <main class="pn-main">
       <div class="pn-head">
         <button type="button" class="pn-btn pn-menu-btn" id="pnMenuBtn" aria-label="Menu">☰</button>
-        <div class="adm-heading"><span class="adm-page-kicker">Muslim Abaya / Orders</span><h1>Orders</h1></div>
-        <a class="pn-btn wc-add-order" href="admin-order-new.html" id="ordNewOrder">Add order</a>
+        <div class="adm-heading"><span class="adm-page-kicker">Muslim Abaya / অর্ডার</span><h1>অর্ডার ব্যবস্থাপনা</h1></div>
+        <a class="pn-btn wc-add-order" href="admin-order-new.html" id="ordNewOrder">নতুন অর্ডার</a>
         <span class="pn-spacer"></span>
       </div>
 
       <section class="ma-order-overview" aria-label="Order overview" aria-live="polite">
-        <article class="ma-order-metric"><span class="ma-order-metric-label">Total orders</span><strong id="maMetricTotal">—</strong><small>All order records</small></article>
-        <article class="ma-order-metric"><span class="ma-order-metric-label">Pending</span><strong id="maMetricPending">—</strong><small>Awaiting action</small></article>
-        <article class="ma-order-metric"><span class="ma-order-metric-label">Shipped</span><strong id="maMetricShipped">—</strong><small>Handed to courier</small></article>
-        <article class="ma-order-metric"><span class="ma-order-metric-label">Delivered</span><strong id="maMetricDelivered">—</strong><small>Successfully delivered</small></article>
-        <article class="ma-order-metric"><span class="ma-order-metric-label">Needs review</span><strong id="maMetricReview">—</strong><small>From loaded orders</small></article>
+        <article class="ma-order-metric"><span class="ma-order-metric-label">মোট অর্ডার</span><strong id="maMetricTotal">—</strong><small>সব অর্ডারের রেকর্ড</small></article>
+        <article class="ma-order-metric"><span class="ma-order-metric-label">অপেক্ষমাণ</span><strong id="maMetricPending">—</strong><small>কাজের অপেক্ষায়</small></article>
+        <article class="ma-order-metric"><span class="ma-order-metric-label">পাঠানো হয়েছে</span><strong id="maMetricShipped">—</strong><small>কুরিয়ারের কাছে দেওয়া হয়েছে</small></article>
+        <article class="ma-order-metric"><span class="ma-order-metric-label">ডেলিভারি সম্পন্ন</span><strong id="maMetricDelivered">—</strong><small>সফলভাবে পৌঁছেছে</small></article>
+        <article class="ma-order-metric"><span class="ma-order-metric-label">যাচাই দরকার</span><strong id="maMetricReview">—</strong><small>লোড করা অর্ডার থেকে</small></article>
       </section>
-      <div class="wc-subnav-tools"><button type="button" class="pn-btn pn-btn-sm" id="ordCourierPerformance">▥ Courier Performance</button></div>
+      <div class="wc-subnav-tools"><button type="button" class="pn-btn pn-btn-sm" id="ordCourierPerformance">▥ কুরিয়ার পারফরম্যান্স</button></div>
       <div class="wc-subnav">
         <div class="pn-tabs wc-status-links" id="ordTabs" aria-label="Filter orders by status"></div>
         <form class="wc-search-box" id="ordSearchForm" role="search" onsubmit="return false">
           <label class="wc-sr-only" for="ordSearch">Search orders</label>
           <input class="pn-in" id="ordSearch" type="search" placeholder="নাম, ফোন বা অর্ডার নম্বর" autocomplete="off">
           <select class="pn-sel" id="ordSearchField" aria-label="কোথায় খুঁজবেন">
-            <option value="all">All</option>
-            <option value="id">Order ID</option>
-            <option value="name">Customer name</option>
-            <option value="phone">Phone</option>
+            <option value="all">সব তথ্য</option>
+            <option value="id">অর্ডার নম্বর</option>
+            <option value="name">কাস্টমারের নাম</option>
+            <option value="phone">ফোন নম্বর</option>
           </select>
-          <button type="submit" class="pn-btn" id="ordSearchBtn">Search orders</button>
+          <button type="submit" class="pn-btn" id="ordSearchBtn">খুঁজুন</button>
         </form>
       </div>
 
@@ -133,24 +134,24 @@
         </select>
         <button type="button" class="pn-btn" id="ordBulkApply">Apply</button>
         <select class="pn-sel wo-filter" id="ordDateFilter" aria-label="Filter by date">
-          <option value="all">All dates</option>
-          <option value="today">Today</option>
-          <option value="yesterday">Yesterday</option>
-          <option value="7d">Last 7 days</option>
-          <option value="month">This month</option>
+          <option value="all">সব তারিখ</option>
+          <option value="today">আজ</option>
+          <option value="yesterday">গতকাল</option>
+          <option value="7d">গত ৭ দিন</option>
+          <option value="month">এই মাস</option>
         </select>
         <select class="pn-sel wo-filter" id="ordOriginFilter" aria-label="Filter by sales channel">
-          <option value="all">All sales channels</option>
+          <option value="all">সব বিক্রয় মাধ্যম</option>
         </select>
         <select class="pn-sel wo-filter" id="ordAssignedFilter" aria-label="Filter by assigned staff">
-          <option value="all">All Employee</option>
-          <option value="assigned">Assigned</option>
-          <option value="unassigned">Unassigned</option>
+          <option value="all">সব কর্মী</option>
+          <option value="assigned">দায়িত্ব দেওয়া হয়েছে</option>
+          <option value="unassigned">দায়িত্ব দেওয়া হয়নি</option>
         </select>
         <select class="pn-sel wo-filter" id="ordCourierFilter" aria-label="Filter by courier">
-          <option value="all">All Courier</option>
-          <option value="sent">Sent to courier</option>
-          <option value="not-sent">Not sent</option>
+          <option value="all">সব কুরিয়ার</option>
+          <option value="sent">কুরিয়ারে পাঠানো হয়েছে</option>
+          <option value="not-sent">পাঠানো হয়নি</option>
           <option value="Steadfast">Steadfast</option>
           <option value="Pathao">Pathao</option>
           <option value="RedX">RedX</option>
@@ -172,8 +173,8 @@
             <option value="paid">Fully paid</option>
             <option value="due">Due amount</option>
           </select>
-          <select class="pn-sel wo-filter" id="ordPriorityFilter" aria-label="Order priority"><option value="all">All priorities</option><option value="attention">Needs attention</option><option value="unassigned">Unassigned orders</option><option value="courier">Courier pending</option></select>
-          <select class="pn-sel wo-filter" id="ordSort" aria-label="Sort orders"><option value="original">Default order</option><option value="date-desc">Newest first</option><option value="date-asc">Oldest first</option><option value="id-desc">Order ID (high–low)</option><option value="id-asc">Order ID (low–high)</option><option value="value-desc">Highest value</option><option value="value-asc">Lowest value</option><option value="name">Customer A–Z</option></select>
+          <select class="pn-sel wo-filter" id="ordPriorityFilter" aria-label="Order priority"><option value="all">সব অগ্রাধিকার</option><option value="attention">মনোযোগ দরকার</option><option value="unassigned">দায়িত্বহীন অর্ডার</option><option value="courier">কুরিয়ারে পাঠানো বাকি</option></select>
+          <select class="pn-sel wo-filter" id="ordSort" aria-label="Sort orders"><option value="original">আগের ক্রম</option><option value="date-desc">নতুন আগে</option><option value="date-asc">পুরোনো আগে</option><option value="id-desc">অর্ডার নম্বর (বড়–ছোট)</option><option value="id-asc">অর্ডার নম্বর (ছোট–বড়)</option><option value="value-desc">দাম বেশি আগে</option><option value="value-asc">দাম কম আগে</option><option value="name">কাস্টমার নাম (ক–হ)</option></select>
         </div>
         <p class="wc-filter-note">প্রোডাক্ট তালিকা বর্তমানে লোড করা অর্ডার থেকে তৈরি।</p>
         <div class="wo-toolbar-actions"><button type="button" class="pn-btn pn-btn-sm" id="ordResetFilters">Clear Filters</button>
@@ -185,29 +186,29 @@
           <p class="oi-note">Order totals include charges; they do not represent profit or courier payouts.</p>
           <div class="oi-controls">
             <label for="ordIssueFilter">Review Queue</label>
-            <select id="ordIssueFilter"><option value="all">All Orders</option><option value="flagged">Needs Review</option></select>
+            <select id="ordIssueFilter"><option value="all">সব অর্ডার</option><option value="flagged">যাচাই দরকার</option></select>
             <span class="oi-note" id="ordIssueCount" role="status" aria-live="polite"></span>
           </div>
           <details><summary>Review Guidance</summary><p class="oi-note">Open flagged orders to review. When IDs are missing or duplicated, refer to the source sheet row. An empty size does not always mean an error.</p></details>
         </section>
       </details>
 
-      <p id="ordersTableHint" class="wo-table-hint">↔ Order নম্বর স্থির থাকে। Customer, Products, Date, Status, Total, Courier, Assigned, Origin দেখতে পাশে স্ক্রল করুন। বাকি তথ্য 👁 প্রিভিউতে।</p>
+      <p id="ordersTableHint" class="wo-table-hint">↔ অর্ডার নম্বর স্থির থাকে। ডেস্কটপে অন্যান্য তথ্য দেখতে পাশে স্ক্রল করুন; মোবাইলে অর্ডার কার্ডে তথ্য সাজানো থাকবে। বিস্তারিত 👁 প্রিভিউতে।</p>
       <dialog id="ordQuickPreview" class="wo-quick-preview" aria-labelledby="ordPreviewTitle"><div class="wo-preview-head"><h2 id="ordPreviewTitle">Order Quick Preview</h2><button type="button" class="pn-btn" id="ordPreviewClose">Close</button></div><div id="ordPreviewContent"></div><div class="wo-preview-foot"><a id="ordPreviewOpen" class="pn-btn pn-btn-primary" href="#">Open Order</a></div></dialog>
       <div class="pn-table-wrap wc-table-wrap" role="region" tabindex="0" aria-label="Full order list" aria-describedby="ordersTableHint">
         <table class="pn-table wc-orders-table" id="ordTable">
           <thead>
             <tr>
               <th class="wc-col-cb"><input type="checkbox" class="ot-sel" id="otSelAll" aria-label="দেখানো সব অর্ডার বাছুন"></th>
-              <th class="wc-col-order" aria-sort="none"><button type="button" class="wc-sort" data-sort="id">Order <span class="wc-sort-ind" aria-hidden="true"></span></button></th>
-              <th class="wc-col-customer">Customer</th>
-              <th class="wc-col-products">Products</th>
-              <th class="wc-col-date" aria-sort="none"><button type="button" class="wc-sort" data-sort="date">Date <span class="wc-sort-ind" aria-hidden="true"></span></button></th>
-              <th class="wc-col-status">Status</th>
-              <th class="wc-col-total" aria-sort="none"><button type="button" class="wc-sort" data-sort="value">Total <span class="wc-sort-ind" aria-hidden="true"></span></button></th>
-              <th class="wc-col-courier">Courier</th>
-              <th class="wc-col-assigned">Assigned</th>
-              <th class="wc-col-origin">Origin</th>
+              <th class="wc-col-order" aria-sort="none"><button type="button" class="wc-sort" data-sort="id">অর্ডার <span class="wc-sort-ind" aria-hidden="true"></span></button></th>
+              <th class="wc-col-customer">কাস্টমার</th>
+              <th class="wc-col-products">পণ্য</th>
+              <th class="wc-col-date" aria-sort="none"><button type="button" class="wc-sort" data-sort="date">তারিখ <span class="wc-sort-ind" aria-hidden="true"></span></button></th>
+              <th class="wc-col-status">স্ট্যাটাস</th>
+              <th class="wc-col-total" aria-sort="none"><button type="button" class="wc-sort" data-sort="value">মোট মূল্য <span class="wc-sort-ind" aria-hidden="true"></span></button></th>
+              <th class="wc-col-courier">কুরিয়ার</th>
+              <th class="wc-col-assigned">দায়িত্বপ্রাপ্ত</th>
+              <th class="wc-col-origin">উৎস</th>
             </tr>
           </thead>
           <tbody id="ordBody" aria-live="polite"><tr class="pn-skeleton-row"><td colspan="10"><div class="pn-skeleton-stack"><i></i><i></i><i></i><i></i></div></td></tr></tbody>
@@ -391,7 +392,7 @@
           var name = String(o.assignedTo || "").trim();
           if (name && names.indexOf(name) === -1) names.push(name);
         });
-        select.innerHTML = '<option value="all">All Employee</option><option value="assigned">Assigned</option><option value="unassigned">Unassigned</option>' + names.sort().map(function (name) {
+        select.innerHTML = '<option value="all">সব কর্মী</option><option value="assigned">দায়িত্ব দেওয়া হয়েছে</option><option value="unassigned">দায়িত্ব দেওয়া হয়নি</option>' + names.sort().map(function (name) {
           return '<option value="' + esc(name) + '">' + esc(name) + '</option>';
         }).join("");
         select.value = names.indexOf(current) !== -1 || ["all", "assigned", "unassigned"].indexOf(current) !== -1 ? current : "all";
@@ -413,8 +414,13 @@
         document.getElementById("maMetricReview").textContent = insights ? insights.flagged : "—";
       }
 
+      function statusBn(value) {
+        var key=String(value||"").trim().toLowerCase();
+        var map={pending:"অপেক্ষমাণ",confirmed:"নিশ্চিত",processing:"প্রক্রিয়াধীন",shipped:"পাঠানো হয়েছে",delivered:"ডেলিভারি সম্পন্ন",cancelled:"বাতিল",canceled:"বাতিল",returned:"ফেরত",fake:"জাল/প্রতারণা",fraud:"প্রতারণা",not_sent:"পাঠানো হয়নি","not sent":"পাঠানো হয়নি","courier: not sent":"কুরিয়ারে পাঠানো হয়নি","not sent to courier":"কুরিয়ারে পাঠানো হয়নি","in transit":"পথে আছে",picked:"কুরিয়ার সংগ্রহ করেছে","partial delivery":"আংশিক ডেলিভারি","on hold":"স্থগিত","ready for delivery":"ডেলিভারির জন্য প্রস্তুত",completed:"সম্পন্ন"};
+        return map[key]||String(value||"তথ্য নেই");
+      }
       function renderTabs() {
-        var tabs = [["all", "All"], ["today", "Today"]].concat(statuses.map(function (s) { return [s, s === "Fake" ? "Fraud" : s]; }))
+        var tabs = [["all", "সব"], ["today", "আজকের"]].concat(statuses.map(function (s) { return [s, statusBn(s)]; }))
           .filter(function (t) { return t[0] === "all" || t[0] === filter || (counts[t[0]] || 0) > 0; });
         document.getElementById("ordTabs").innerHTML = tabs.map(function (t) {
           return '<button type="button" class="pn-tab' + (filter === t[0] ? " active" : "") + '" data-f="' + esc(t[0]) + '"' + (filter === t[0] ? ' aria-current="true"' : '') + '>' + esc(t[1]) + " <em>(" + (counts[t[0]] || 0) + ")</em></button>";
@@ -422,7 +428,7 @@
       }
 
       // Order times arrive as "dd-MM-yyyy HH:mm" in Dhaka time (GMT+6).
-      var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      var MONTHS = ["জানু","ফেব্রু","মার্চ","এপ্রিল","মে","জুন","জুলাই","আগস্ট","সেপ্টে","অক্টো","নভে","ডিসে"];
       function orderTimestamp(o) {
         var m = /^(\d{1,2})-(\d{1,2})-(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/.exec(String(o.time || "").trim());
         if (m) return Date.UTC(+m[3], +m[2] - 1, +m[1], +(m[4] || 0) - 6, +(m[5] || 0));
@@ -435,10 +441,10 @@
         var diff = Date.now() - ts, title = String(o.time || "");
         if (diff >= 0 && diff < 86400000) {
           var mins = Math.floor(diff / 60000);
-          if (mins < 1) return { text: "Just now", title: title };
-          if (mins < 60) return { text: mins + (mins === 1 ? " minute ago" : " minutes ago"), title: title };
+          if (mins < 1) return { text: "এইমাত্র", title: title };
+          if (mins < 60) return { text: mins + " মিনিট আগে", title: title };
           var hrs = Math.floor(mins / 60);
-          return { text: hrs + (hrs === 1 ? " hour ago" : " hours ago"), title: title };
+          return { text: hrs + " ঘণ্টা আগে", title: title };
         }
         var d = new Date(ts + 6 * 3600000);
         return { text: MONTHS[d.getUTCMonth()] + " " + d.getUTCDate() + ", " + d.getUTCFullYear(), title: title };
@@ -456,8 +462,8 @@
             return orderSort === "value-desc" ? vb-va : va-vb;
           });
         }
-        document.getElementById("ordIssueCount").textContent = "Showing " + list.length + " of " + all.length + " loaded orders";
-        document.getElementById("ordIssueCountTop").textContent = document.getElementById("ordIssueCountBottom").textContent = list.length + (list.length === 1 ? " item" : " items");
+        document.getElementById("ordIssueCount").textContent = "লোড করা " + all.length + "টির মধ্যে " + list.length + "টি দেখানো হচ্ছে";
+        document.getElementById("ordIssueCountTop").textContent = document.getElementById("ordIssueCountBottom").textContent = list.length + "টি অর্ডার";
         paintSortHeaders();
         try { window.MaOrdersState = { all: all, filtered: list, total: Number(counts.all) || all.length }; } catch (stateErr) {}
         var body = document.getElementById("ordBody");
@@ -469,36 +475,36 @@
         body.innerHTML = list.map(function (o) {
           var issues = issueRows.get(o) || [];
           var canOpen = o.orderId && issues.indexOf("duplicate_id") === -1;
-          var label = (o.orderId ? "#" + o.orderId : "ID নেই") + " " + (o.name || "");
+          var label = (o.orderId ? "#" + o.orderId : o.row ? "ক্রম " + o.row : "অর্ডার নম্বর নেই");
           var flagTitle = issues.map(function (key) { return MaOrderInsights.labels[key] || key; }).join(", ");
           var when = displayDate(o);
           var amount = MaOrderInsights.amount(o.total);
           var status = String(o.status || "Pending");
-          var statusLabel = status === "Fake" ? "Fraud" : status;
+          var statusLabel = statusBn(status === "Fake" ? "Fraud" : status);
           var phone = String(o.phone || "").trim();
           var products = orderProducts(o);
           var productsText = products.length ? esc(products.slice(0, 2).join(", ")) + (products.length > 2 ? ' <span class="sub">+' + (products.length - 2) + '</span>' : "") : '<span class="sub">—</span>';
           var cStatus = MaOrderStatus.describe(o);
           var courierCell = cStatus.hasCourier
-            ? esc(o.courier || "") + (o.courier ? "<br>" : "") + '<span class="sub">' + esc(cStatus.courierLabel) + '</span>'
-            : '<span class="sub">Not sent</span>';
+            ? esc(o.courier || "") + (o.courier ? "<br>" : "") + '<span class="sub">' + esc(statusBn(cStatus.courierLabel)) + '</span>'
+            : '<span class="sub">পাঠানো হয়নি</span>';
           var assigned = String(o.assignedTo || "").trim();
           return (
             '<tr class="' + (canOpen ? 'click' : '') + '" data-id="' + (canOpen ? esc(o.orderId) : '') + '"' + (canOpen ? ' data-oid="' + esc(o.orderId) + '"' : '') + '>' +
             '<td class="wc-col-cb">' + (canOpen ? '<input type="checkbox" class="ot-sel" data-oid="' + esc(o.orderId) + '" aria-label="' + esc(o.orderId) + ' বাছুন">' : '') + '</td>' +
-            '<td class="wc-col-order"><div class="wc-order-line">' +
+            '<td class="wc-col-order" data-label="অর্ডার"><div class="wc-order-line">' +
               (canOpen ? '<a class="oi-link wc-order-link" href="admin-order.html?id=' + encodeURIComponent(o.orderId) + '">' + esc(label) + '</a>' : '<span class="wc-order-link is-plain">' + esc(label) + (o.row ? ' <span class="sub">(সারি ' + esc(o.row) + ')</span>' : '') + '</span>') +
               (o.blocked ? ' <span class="pn-badge blocked">Blocked</span>' : '') +
               '<button type="button" class="wc-eye wo-preview-btn" data-preview-id="' + esc(o.orderId || "") + '" data-preview-row="' + esc(o.row || "") + '" title="Preview" aria-label="' + esc(label) + ' প্রিভিউ">' + eyeSvg + '</button>' +
             '</div><div class="ot-wa-slot" hidden></div></td>' +
-            '<td class="wc-col-customer">' + (phone ? '<a href="tel:' + esc(phone) + '">' + esc(phone) + '</a>' : '<span class="sub">—</span>') + '</td>' +
-            '<td class="wc-col-products">' + productsText + '</td>' +
-            '<td class="wc-col-date"><time title="' + esc(when.title) + '">' + esc(when.text) + '</time></td>' +
-            '<td class="wc-col-status"><mark class="wc-status wc-status-' + MaPanel.statusClass(status) + '">' + esc(statusLabel) + '</mark></td>' +
-            '<td class="wc-col-total">' + (amount === null ? '<span class="sub">অবৈধ মান</span>' : esc(MaPanel.money(o.total))) + '</td>' +
-            '<td class="wc-col-courier">' + courierCell + '</td>' +
-            '<td class="wc-col-assigned">' + (assigned ? esc(assigned) : '<span class="sub">—</span>') + '</td>' +
-            '<td class="wc-col-origin">' + esc(o.source || "—") + '</td>' +
+            '<td class="wc-col-customer" data-label="কাস্টমার">' + (o.name ? '<strong class="wc-customer-name">' + esc(o.name) + '</strong>' : '') + (phone ? '<a class="wc-customer-phone" href="tel:' + esc(phone) + '">' + esc(phone) + '</a>' : '') + (!o.name && !phone ? '<span class="sub">তথ্য নেই</span>' : '') + '</td>' +
+            '<td class="wc-col-products" data-label="পণ্য">' + productsText + '</td>' +
+            '<td class="wc-col-date" data-label="তারিখ"><time title="' + esc(when.title) + '">' + esc(when.text) + '</time></td>' +
+            '<td class="wc-col-status" data-label="স্ট্যাটাস"><mark class="wc-status wc-status-' + MaPanel.statusClass(status) + '">' + esc(statusLabel) + '</mark></td>' +
+            '<td class="wc-col-total" data-label="মোট মূল্য">' + (amount === null ? '<span class="sub">মূল্য সংরক্ষিত নেই</span>' : esc(MaPanel.money(o.total))) + '</td>' +
+            '<td class="wc-col-courier" data-label="কুরিয়ার">' + courierCell + '</td>' +
+            '<td class="wc-col-assigned" data-label="দায়িত্বপ্রাপ্ত">' + (assigned ? esc(assigned) : '<span class="sub">দায়িত্ব দেওয়া হয়নি</span>') + '</td>' +
+            '<td class="wc-col-origin" data-label="উৎস">' + esc(o.source || "তথ্য নেই") + '</td>' +
             "</tr>"
           );
         }).join("");
@@ -532,11 +538,11 @@
         var g = insights.groups;
         var cards = [
           ["মোট অর্ডার মূল্য", insights.totalValue, false, ""],
-          ["Delivered (" + g.delivered.count + ")", g.delivered.value, false, "delivered"],
+          ["ডেলিভারি (" + g.delivered.count + ")", g.delivered.value, false, "delivered"],
           ["সক্রিয় অর্ডার (" + g.active.count + ")", g.active.value, false, ""],
-          ["Cancelled (" + g.cancelled.count + ")", g.cancelled.value, false, ""],
-          ["Fraud (" + g.fake.count + ")", g.fake.value, false, ""],
-          ["Returned (" + g.returned.count + ")", g.returned.value, false, ""],
+          ["বাতিল (" + g.cancelled.count + ")", g.cancelled.value, false, ""],
+          ["প্রতারণা (" + g.fake.count + ")", g.fake.value, false, ""],
+          ["ফেরত (" + g.returned.count + ")", g.returned.value, false, ""],
           ["অন্যান্য (" + g.unknown.count + ")", g.unknown.value, false, ""],
           ["যাচাই প্রয়োজন", insights.flagged, true, "review"]
         ];
@@ -679,7 +685,7 @@
       function updateOriginOptions() {
         var names = Array.from(new Set(all.map(function (o) { return String(o.source || "").trim(); }).filter(Boolean))).sort();
         var select = document.getElementById("ordOriginFilter");
-        select.innerHTML = '<option value="all">All sales channels</option>' + names.map(function (n) { return '<option value="' + esc(n) + '">' + esc(n) + '</option>'; }).join("");
+        select.innerHTML = '<option value="all">সব বিক্রয় মাধ্যম</option>' + names.map(function (n) { return '<option value="' + esc(n) + '">' + esc(n) + '</option>'; }).join("");
         if (names.indexOf(originFilter) < 0) originFilter = "all";
         select.value = originFilter;
       }
@@ -693,8 +699,8 @@
         if(!o)return;
         var box=document.getElementById("ordQuickPreview"), status=MaOrderStatus.describe(o);
         var flags=(issueRows.get(o)||[]).map(function(k){return MaOrderInsights.labels[k]||k;}).join(", ");
-        var rows=[["Order ID",o.orderId],["Date",o.time],["Customer",o.name],["Phone",o.phone],["District",o.district],["Address",o.address],["Size",o.size],["Total",MaPanel.money(o.total)],["Payment",o.payment],["Order Status",status.orderRaw],["Courier Status",status.hasCourier?status.courierLabel:"Not sent"],["Tracking",status.hasCourier?((o.tracking||o.consignmentId||"—")+(o.courier?" · "+o.courier:"")):""],["Assigned Staff",o.assignedTo],["Origin",o.source],["Review Flags",flags||"None"]];
-        document.getElementById("ordPreviewContent").innerHTML='<section class="ma-product-section"><h3>অর্ডারকৃত পণ্য</h3>'+previewItems(o)+'</section>'+'<dl class="wo-preview-grid">'+rows.map(function(pair){return '<div><dt>'+esc(pair[0])+'</dt><dd>'+esc(pair[1]==null||pair[1]===""?"—":pair[1])+'</dd></div>';}).join("")+'</dl><p class="wo-preview-note">Courier status is the last recorded value, not a live location update.</p>';
+        var rows=[["অর্ডার নম্বর",o.orderId],["তারিখ",o.time],["কাস্টমার",o.name],["ফোন",o.phone],["জেলা",o.district],["ঠিকানা",o.address],["সাইজ",o.size],["মোট মূল্য",MaPanel.money(o.total)],["পেমেন্ট",o.payment],["অর্ডারের স্ট্যাটাস",statusBn(status.orderRaw)],["কুরিয়ারের স্ট্যাটাস",status.hasCourier?statusBn(status.courierLabel):"পাঠানো হয়নি"],["ট্র্যাকিং",status.hasCourier?((o.tracking||o.consignmentId||"তথ্য নেই")+(o.courier?" · "+o.courier:"")):""],["দায়িত্বপ্রাপ্ত কর্মী",o.assignedTo],["অর্ডারের উৎস",o.source],["যাচাইয়ের কারণ",flags||"নেই"]];
+        document.getElementById("ordPreviewContent").innerHTML='<section class="ma-product-section"><h3>অর্ডারকৃত পণ্য</h3>'+previewItems(o)+'</section>'+'<dl class="wo-preview-grid">'+rows.map(function(pair){return '<div><dt>'+esc(pair[0])+'</dt><dd>'+esc(pair[1]==null||pair[1]===""?"—":pair[1])+'</dd></div>';}).join("")+'</dl><p class="wo-preview-note">কুরিয়ারের স্ট্যাটাস সর্বশেষ সংরক্ষিত তথ্য; এটি সরাসরি লাইভ অবস্থান নয়।</p>';
         var tr=o.orderId?document.querySelector('#ordBody tr[data-oid="'+(window.CSS&&CSS.escape?CSS.escape(String(o.orderId)):String(o.orderId))+'"]'):null;
         var wa=tr&&tr.querySelector(".ot-wa-slot");
         if(wa&&wa.innerHTML.trim())document.getElementById("ordPreviewContent").insertAdjacentHTML("afterbegin",'<p class="wc-preview-wa">'+wa.innerHTML+'</p>');

@@ -146,24 +146,25 @@ for (const spec of paths) {
           expect(sizes).toHaveLength(2);
           sizes.forEach(font => expect(font, 'orders filter font').toBeGreaterThanOrEqual(16));
           await expect(page.locator('#ordersTableHint')).toBeVisible();
-          const table = page.locator('.pn-table-wrap');
-          await expect(table).toHaveAttribute('tabindex', '0');
-          const geometry = await table.evaluate(el => {
-            const first = el.querySelector('thead th:first-child');
-            const second = el.querySelector('thead th:nth-child(2)');
-            el.scrollLeft = 160;
+          // Mobile intentionally switches the order table rows into cards.
+          // Do not require the desktop sticky-column / horizontal-scroll behavior
+          // at phone widths; verify the card layout and that it fits the viewport.
+          const mobileOrderRow = page.locator('#ordBody tr.click').first();
+          await expect(mobileOrderRow).toBeVisible();
+          const card = await mobileOrderRow.evaluate(el => {
+            const r = el.getBoundingClientRect();
+            const css = getComputedStyle(el);
             return {
-              moved: el.scrollLeft,
-              firstSticky: getComputedStyle(first).position === 'sticky',
-              secondSticky: getComputedStyle(second).position === 'sticky',
-              firstLeft: Math.round(first.getBoundingClientRect().left),
-              secondLeft: Math.round(second.getBoundingClientRect().left)
+              display: css.display,
+              width: Math.round(r.width),
+              right: Math.round(r.right),
+              gridColumns: css.gridTemplateColumns
             };
           });
-          expect(geometry.moved, 'order list can scroll independently').toBeGreaterThan(0);
-          expect(geometry.firstSticky).toBe(true);
-          expect(geometry.secondSticky).toBe(true);
-          expect(geometry.secondLeft).toBeGreaterThan(geometry.firstLeft);
+          expect(card.display, 'mobile order row uses card grid').toBe('grid');
+          expect(card.width).toBeLessThanOrEqual(width + 2);
+          expect(card.right).toBeLessThanOrEqual(width + 2);
+          expect(card.gridColumns).not.toBe('none');
         }
       }
 
