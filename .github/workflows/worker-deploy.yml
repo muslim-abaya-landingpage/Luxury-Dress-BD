@@ -15,6 +15,7 @@ on:
     paths:
       - "cloudflare-worker/**"
       - "tests/backend/tracking-admin-api.test.mjs"
+      - "tests/backend/worker-admin-verify.test.mjs"
       - "functions/_lib/ip-guard.js"
       - ".github/workflows/worker-deploy.yml"
       - "tests/backend/device-token.test.mjs"
@@ -64,7 +65,7 @@ jobs:
 
       - name: Worker tests (order queue, IP blocking, fraud risk, device token)
         if: steps.creds.outputs.ready == 'true'
-        run: node --test tests/backend/order-ip-guard.test.mjs tests/backend/landing-order-queue.test.mjs tests/backend/fraud-risk.test.mjs tests/backend/fraud-review.test.mjs tests/backend/device-token.test.mjs tests/backend/order-otp.test.mjs tests/backend/tracking-admin-api.test.mjs
+        run: node --test tests/backend/order-ip-guard.test.mjs tests/backend/landing-order-queue.test.mjs tests/backend/fraud-risk.test.mjs tests/backend/fraud-review.test.mjs tests/backend/device-token.test.mjs tests/backend/order-otp.test.mjs tests/backend/tracking-admin-api.test.mjs tests/backend/worker-admin-verify.test.mjs
 
       - name: Back up the live Worker code
         if: steps.creds.outputs.ready == 'true'

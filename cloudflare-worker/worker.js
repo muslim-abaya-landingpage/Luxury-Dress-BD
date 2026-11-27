@@ -55,17 +55,50 @@ async function setSiteSetting(env, key, value, who) {
 // Confirms the admin session token with the same Apps Script backend admin-login.html already
 // trusts (RecordType AdminVerify — the exact call admin-api.js's verifySession() makes), so this
 // worker never has to know the admin password or keep its own login system.
-async function verifyAdminToken(env, token) {
-  if (!token) return null;
+// Successful checks are remembered for 2 minutes per Worker instance, so a burst of panel requests does
+// not send one Apps Script call each (Apps Script rate-limits admin calls per token).
+const ADMIN_VERIFY_CACHE_MS = 120000;
+const adminVerifyCache = new Map();
+const ADMIN_HARD_FAILURES = ['INVALID_TOKEN', 'EXPIRED', 'NOT_ADMIN', 'NO_TOKEN', 'BLOCKED'];
+async function adminCacheKey(token) {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(token)));
+  return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+// Returns the admin record ({ ok: true, ... }) or { ok: false, error, status } with the REAL reason:
+// a rate limit or an Apps Script outage is no longer reported as INVALID_TOKEN.
+async function verifyAdminToken(env, token, deps = {}) {
+  if (!token) return { ok: false, error: 'NO_TOKEN', status: 401 };
+  const fetchImpl = deps.fetch || fetch;
+  const now = deps.now ? deps.now() : Date.now();
+  let key = '';
+  try { key = await adminCacheKey(token); } catch (e) { key = ''; }
+  const hit = key && adminVerifyCache.get(key);
+  if (hit && hit.until > now && (!hit.res.expires || now < Number(hit.res.expires))) return hit.res;
   const apiUrl = env.ADMIN_API_URL || DEFAULT_ADMIN_API_URL;
   const body = new URLSearchParams({ RecordType: 'AdminVerify', Token: token });
+  let res;
   try {
-    const r = await fetch(apiUrl, { method: 'POST', body });
-    const text = await r.text();
-    const res = JSON.parse(text);
-    if (res && res.ok) return res;
-    return null;
-  } catch (e) { return null; }
+    const r = await fetchImpl(apiUrl, { method: 'POST', body });
+    res = JSON.parse(await r.text());
+  } catch (e) { return { ok: false, error: 'VERIFY_UNAVAILABLE', status: 503 }; }
+  if (res && res.ok) {
+    if (key) {
+      if (adminVerifyCache.size > 100) adminVerifyCache.clear();
+      adminVerifyCache.set(key, { res, until: now + ADMIN_VERIFY_CACHE_MS });
+    }
+    return res;
+  }
+  if (key) adminVerifyCache.delete(key);
+  const error = res && res.error ? String(res.error) : 'VERIFY_UNAVAILABLE';
+  if (ADMIN_HARD_FAILURES.includes(error)) return { ok: false, error, status: 401 };
+  if (error === 'RATE_LIMIT') return { ok: false, error, status: 429 };
+  return { ok: false, error: 'VERIFY_UNAVAILABLE', status: 503 };
+}
+export { verifyAdminToken, adminVerifyCache };
+// JSON reply for a failed check, or null when the admin is verified.
+function adminDenied(admin) {
+  if (admin && admin.ok !== false) return null;
+  return json({ ok: false, error: (admin && admin.error) || 'INVALID_TOKEN' }, (admin && admin.status) || 401);
 }
 function isLikelyPixelId(v) {
   // Meta/TikTok pixel IDs are plain numeric or alphanumeric tokens; this just keeps obviously
@@ -101,7 +134,7 @@ async function readOrderSettings(env) {
 }
 async function handleOrderSettingsGet(request, env, url) {
   const admin = await verifyAdminToken(env, url.searchParams.get('token') || '');
-  if (!admin) return json({ ok: false, error: 'INVALID_TOKEN' }, 401);
+  { const denied = adminDenied(admin); if (denied) return denied; }
   const settings = await readOrderSettings(env);
   return json({ ok: true, settings, integrations: { whatsappOtp: !!(env.WHATSAPP_ACCESS_TOKEN && env.WHATSAPP_PHONE_NUMBER_ID && env.OTP_TOKEN_SECRET), smsGateway: !!(env.SMS_GATEWAY_URL && env.SMS_GATEWAY_TOKEN) } });
 }
@@ -109,7 +142,7 @@ async function handleOrderSettingsPost(request, env) {
   let body;
   try { body = await request.json(); } catch (e) { return json({ ok: false, error: 'BAD_JSON' }, 400); }
   const admin = await verifyAdminToken(env, body && body.token);
-  if (!admin) return json({ ok: false, error: 'INVALID_TOKEN' }, 401);
+  { const denied = adminDenied(admin); if (denied) return denied; }
   const settings = sanitizeOrderSettings(body && body.settings);
   if (!settings) return json({ ok: false, error: 'INVALID_SETTINGS' }, 400);
   try {
@@ -120,7 +153,7 @@ async function handleOrderSettingsPost(request, env) {
 async function handleAdminSettingsGet(request, env, url) {
   const token = url.searchParams.get('token') || '';
   const admin = await verifyAdminToken(env, token);
-  if (!admin) return json({ ok: false, error: 'INVALID_TOKEN' }, 401);
+  { const denied = adminDenied(admin); if (denied) return denied; }
   const [meta, tiktok] = await Promise.all([
     getSiteSetting(env, 'meta_pixel_id'),
     getSiteSetting(env, 'tiktok_pixel_id')
@@ -131,7 +164,7 @@ async function handleAdminSettingsPost(request, env) {
   let body;
   try { body = await request.json(); } catch (e) { return json({ ok: false, error: 'BAD_JSON' }, 400); }
   const admin = await verifyAdminToken(env, body && body.token);
-  if (!admin) return json({ ok: false, error: 'INVALID_TOKEN' }, 401);
+  { const denied = adminDenied(admin); if (denied) return denied; }
   const who = admin.email || admin.name || 'admin';
   const updates = {};
   if (body.meta_pixel_id != null && String(body.meta_pixel_id).trim() !== '') {

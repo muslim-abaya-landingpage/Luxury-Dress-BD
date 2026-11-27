@@ -146,7 +146,11 @@ function doPost(e) {
 
     // Admin panel calls: token-gated with a higher shared limit (dashboard/stock/growth
     // pages can fire many calls quickly); must run before the generic 12-per-10-min limiter.
-    if (type && type.indexOf('Admin') === 0) {
+    // AdminVerify only checks a token (cached for a short time), so it has its own counter and does not use
+    // up the admin quota; otherwise a busy panel would make every later login check fail.
+    if (type === 'AdminVerify') {
+      windowRateLimit_('rl_adminverify_', String(param_(e, 'Token') || 'x').slice(0, 48), 300);
+    } else if (type && type.indexOf('Admin') === 0) {
       adminRateLimit_(param_(e, 'Token') || 'admin_global');
     } else if (!isOrder && !isSubscribe) {
       rateLimit_(param_(e, 'Email') || param_(e, 'Phone') || param_(e, 'Login') || param_(e, 'Token') || (type === 'AuthGoogle' ? 'g_' + String(param_(e, 'IdToken')).slice(-24) : type === 'AuthFacebook' ? 'f_' + String(param_(e, 'AccessToken')).slice(-24) : '') || 'global');
@@ -3715,12 +3719,20 @@ function getAuthSecret_() {
   return PropertiesService.getScriptProperties().getProperty('AUTH_SECRET') || '';
 }
 
-function rateLimit_(key) {
+// Fixed 10-minute windows: the counter key includes the window number, so a limit always lifts when the
+// window ends. (Re-putting one key on every call used to restart its 10-minute expiry, so an admin panel
+// that kept polling could stay blocked indefinitely.)
+function windowRateLimit_(prefix, key, max) {
   var cache = CacheService.getScriptCache();
-  var k = 'rl_' + String(key || 'x').slice(0, 64);
+  var windowNo = Math.floor(Date.now() / 600000);
+  var k = prefix + String(key || 'x').slice(0, 64) + '_' + windowNo;
   var n = parseInt(cache.get(k) || '0', 10);
-  if (n >= 12) throw new Error('RATE_LIMIT');
-  cache.put(k, String(n + 1), 600);
+  if (n >= max) throw new Error('RATE_LIMIT');
+  cache.put(k, String(n + 1), 660);
+}
+
+function rateLimit_(key) {
+  windowRateLimit_('rl_', key, 12);
 }
 
 function normalizePhone_(value) {
@@ -5902,19 +5914,11 @@ function sendMessengerPurchase_(psid, value, orderId, pageId) {
 // ── Inbox admin API (RecordType = Inbox*) ──
 
 function inboxRateLimit_(token) {
-  var cache = CacheService.getScriptCache();
-  var k = 'rl_inbox_' + String(token || 'x').slice(0, 48);
-  var n = parseInt(cache.get(k) || '0', 10);
-  if (n >= 600) throw new Error('RATE_LIMIT');
-  cache.put(k, String(n + 1), 600);
+  windowRateLimit_('rl_inbox_', String(token || 'x').slice(0, 48), 600);
 }
 
 function adminRateLimit_(token) {
-  var cache = CacheService.getScriptCache();
-  var k = 'rl_admin_' + String(token || 'x').slice(0, 48);
-  var n = parseInt(cache.get(k) || '0', 10);
-  if (n >= 300) throw new Error('RATE_LIMIT');
-  cache.put(k, String(n + 1), 600);
+  windowRateLimit_('rl_admin_', String(token || 'x').slice(0, 48), 300);
 }
 
 // Admin or staff accounts from the Admins sheet can use the inbox.
