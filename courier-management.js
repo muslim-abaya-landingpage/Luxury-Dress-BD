@@ -389,10 +389,17 @@
         });
       }
       // Scan to Return
-      var note = (o.adminNote ? o.adminNote + ' | ' : '') + 'ফেরত: কুরিয়ার থেকে প্যাকেজ ফেরত এসেছে (স্ক্যান)';
+      if (/^(cancelled|fake)$/i.test(o.status)) {
+        throw Object.assign(new Error('ইতিমধ্যে ফেরত/বাতিল হিসেবে রেকর্ড করা আছে — আবার স্ক্যান করার দরকার নেই'), { soft: true });
+      }
+      var wasDelivered = /^delivered$/i.test(o.status);
+      var reason = $('cmReturnReason') ? $('cmReturnReason').value : '';
+      var note = (o.adminNote ? o.adminNote + ' | ' : '') + 'ফেরত' + (reason ? ' (' + reason + ')' : '') + ': কুরিয়ার থেকে প্যাকেজ ফেরত এসেছে (স্ক্যান)';
       var soft = !(o.tracking || o.consignmentId || /shipped/i.test(o.status)) ? 'এই অর্ডার আগে কুরিয়ারে পাঠানো হয়েছে বলে রেকর্ড নেই — তবুও ' : '';
       return MaAdmin.call('AdminOrderUpdate', { OrderId: o.orderId, Status: 'Cancelled', AdminNote: note }).then(function () {
-        return { o: o, message: soft + 'ফেরত হিসেবে রেকর্ড হয়েছে (Status: Cancelled)' };
+        var msg = soft + 'ফেরত হিসেবে রেকর্ড হয়েছে (Status: Cancelled)';
+        if (wasDelivered) msg += ' · ⚠️ এই অর্ডার আগে Delivered ছিল — স্টক স্বয়ংক্রিয়ভাবে ফেরত আসেনি, দরকার হলে ম্যানুয়ালি Stock Ledger-এ সমন্বয় করুন।';
+        return { o: o, message: msg };
       });
     }).then(function (result) {
       logScan(mode, result.o.orderId, result.o.name, true, result.message);
@@ -439,6 +446,7 @@
       var b = e.target.closest('[data-mode]'); if (!b) return;
       state.scanMode = b.getAttribute('data-mode');
       Array.prototype.forEach.call($('cmScanTabs').querySelectorAll('button'), function (x) { x.classList.toggle('is-active', x === b); });
+      $('cmReturnReasonLabel').hidden = state.scanMode !== 'return';
       scanMessage('', null);
       $('cmScanInput').focus();
     });

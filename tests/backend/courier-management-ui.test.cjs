@@ -35,6 +35,38 @@ test('unsupported Pathao and RedX parcel creation is not presented as enabled', 
 });
 
 
+test('Scan to Return refuses to re-record an order that is already Cancelled/Fake instead of duplicating the admin note', () => {
+  const js = read('courier-management.js');
+  assert.match(js, /\^\(cancelled\|fake\)\$/);
+  assert.match(js, /ইতিমধ্যে ফেরত\/বাতিল হিসেবে রেকর্ড করা আছে/);
+});
+
+test('Scan to Return warns when stock was not auto-restored (order was already Delivered)', () => {
+  const js = read('courier-management.js');
+  assert.match(js, /wasDelivered/);
+  assert.match(js, /স্টক স্বয়ংক্রিয়ভাবে ফেরত আসেনি/);
+});
+
+test('the on-page Scan to Return note no longer overclaims unconditional stock restore', () => {
+  const html = read('courier-management.html');
+  assert.doesNotMatch(html, /Scan to Return অর্ডারটিকে "Cancelled" করে Admin Note-এ ফেরতের নোট যোগ করবে এবং স্টক আবার ফিরিয়ে দেবে।/);
+  assert.match(html, /আগে Delivered থাকলে স্টক অটো ফেরত আসে না/);
+});
+
+test('the COD footer note no longer claims settlement reconciliation is still unbuilt', () => {
+  const html = read('courier-management.html');
+  assert.doesNotMatch(html, /পরবর্তী ধাপে যুক্ত হবে/);
+});
+
+test('Scan to Return offers a return-reason selector that is only shown in Return mode, and is folded into the admin note', () => {
+  const html = read('courier-management.html');
+  const js = read('courier-management.js');
+  assert.ok(html.includes('id="cmReturnReason"'));
+  assert.match(html, /id="cmReturnReasonLabel" hidden/);
+  assert.match(js, /cmReturnReasonLabel'\)\.hidden = state\.scanMode !== 'return'/);
+  assert.match(js, /cmReturnReason'\)/);
+});
+
 test('COD settlement workspace exposes reconciled totals, partial settlement and recent ledger', () => {
   const html = read('courier-management.html');
   const js = read('courier-management.js');
