@@ -1,4 +1,5 @@
-import { isOwner, isOwnerCached } from '../_lib/owner-auth.js';
+import { isOwnerCached } from '../_lib/owner-auth.js';
+import { isOwnerViaAppsScript } from '../_lib/admin-verify.js';
 import { ASSET_PATH } from '../_lib/live-catalog.js';
 
 const MAX_BODY = 6_000_000;
@@ -32,7 +33,7 @@ export async function handleImageUpload(request, env, deps = {}) {
   if (request.method !== 'POST') return json({ ok: false, error: 'METHOD' }, 405);
   const origin = request.headers.get('Origin');
   if (origin && origin !== new URL(request.url).origin) return json({ ok: false, error: 'ORIGIN' }, 403);
-  if (!env || !env.PRODUCT_IMAGES || !env.GOOGLE_SA_JSON) return json({ ok: false, error: 'NOT_CONFIGURED' }, 503);
+  if (!env || !env.PRODUCT_IMAGES) return json({ ok: false, error: 'NOT_CONFIGURED' }, 503);
   const length = Number(request.headers.get('Content-Length') || 0);
   if (length > MAX_BODY) return json({ ok: false, error: 'TOO_LARGE' }, 413);
 
@@ -46,7 +47,7 @@ export async function handleImageUpload(request, env, deps = {}) {
   if (!token) return json({ ok: false, error: 'NO_TOKEN' }, 401);
 
   try {
-    const error = deps.authorize ? await deps.authorize(token, env) : await isOwnerCached(token, now, () => isOwner(token, env, fetchImpl, now));
+    const error = deps.authorize ? await deps.authorize(token, env) : await isOwnerCached(token, now, () => isOwnerViaAppsScript(token, env, fetchImpl));
     if (error === 'NOT_LOGGED_IN') return json({ ok: false, error }, 401);
     if (error) return json({ ok: false, error }, 403);
   } catch (e) { return json({ ok: false, error: 'AUTH_UNAVAILABLE' }, 503); }

@@ -9,7 +9,8 @@
  * Delete safety: the key must be a panel upload, and the current catalog (instant live copy in D1 and the
  * deployed category-products.js) must not mention it. If the catalog cannot be read, nothing is deleted.
  */
-import { isOwner, isOwnerCached } from '../_lib/owner-auth.js';
+import { isOwnerCached } from '../_lib/owner-auth.js';
+import { isOwnerViaAppsScript } from '../_lib/admin-verify.js';
 
 const CDN_BASE = 'https://images.muslimabaya.com/';
 const UPLOAD_KEY = /^images\/uploads\/[a-z0-9_-]+-[0-9a-f]{20}\.webp$/;
@@ -79,14 +80,14 @@ export async function handleMediaLibrary(request, env, deps = {}) {
   const site = new URL(request.url).origin;
   const origin = request.headers.get('Origin');
   if (origin && origin !== site) return json({ ok: false, error: 'ORIGIN' }, 403);
-  if (!env || !env.PRODUCT_IMAGES || !env.GOOGLE_SA_JSON) return json({ ok: false, error: 'NOT_CONFIGURED' }, 503);
+  if (!env || !env.PRODUCT_IMAGES) return json({ ok: false, error: 'NOT_CONFIGURED' }, 503);
 
   let payload;
   try { payload = JSON.parse(await request.text()); } catch (e) { return json({ ok: false, error: 'BAD_REQUEST' }, 400); }
   const token = String(payload && payload.Token || '').trim();
   if (!token) return json({ ok: false, error: 'NO_TOKEN' }, 401);
   try {
-    const error = deps.authorize ? await deps.authorize(token, env) : await isOwnerCached(token, now, () => isOwner(token, env, fetchImpl, now));
+    const error = deps.authorize ? await deps.authorize(token, env) : await isOwnerCached(token, now, () => isOwnerViaAppsScript(token, env, fetchImpl));
     if (error === 'NOT_LOGGED_IN') return json({ ok: false, error }, 401);
     if (error) return json({ ok: false, error }, 403);
   } catch (e) { return json({ ok: false, error: 'AUTH_UNAVAILABLE' }, 503); }
