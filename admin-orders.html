@@ -416,7 +416,7 @@
 
       function statusBn(value) {
         var key=String(value||"").trim().toLowerCase();
-        var map={pending:"অপেক্ষমাণ",confirmed:"নিশ্চিত",processing:"প্রক্রিয়াধীন",shipped:"পাঠানো হয়েছে",delivered:"ডেলিভারি সম্পন্ন",cancelled:"বাতিল",canceled:"বাতিল",returned:"ফেরত",fake:"জাল/প্রতারণা",fraud:"প্রতারণা",not_sent:"পাঠানো হয়নি","not sent":"পাঠানো হয়নি","in transit":"পথে আছে",picked:"কুরিয়ার সংগ্রহ করেছে","partial delivery":"আংশিক ডেলিভারি","on hold":"স্থগিত","ready for delivery":"ডেলিভারির জন্য প্রস্তুত",completed:"সম্পন্ন"};
+        var map={pending:"অপেক্ষমাণ",confirmed:"নিশ্চিত",processing:"প্রক্রিয়াধীন",shipped:"পাঠানো হয়েছে",delivered:"ডেলিভারি সম্পন্ন",cancelled:"বাতিল",canceled:"বাতিল",returned:"ফেরত",fake:"জাল/প্রতারণা",fraud:"প্রতারণা",not_sent:"পাঠানো হয়নি","not sent":"পাঠানো হয়নি","courier: not sent":"কুরিয়ারে পাঠানো হয়নি","not sent to courier":"কুরিয়ারে পাঠানো হয়নি","in transit":"পথে আছে",picked:"কুরিয়ার সংগ্রহ করেছে","partial delivery":"আংশিক ডেলিভারি","on hold":"স্থগিত","ready for delivery":"ডেলিভারির জন্য প্রস্তুত",completed:"সম্পন্ন"};
         return map[key]||String(value||"তথ্য নেই");
       }
       function renderTabs() {
