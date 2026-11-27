@@ -7589,7 +7589,7 @@ function getAdminAnalyticsV2_(e) {
   var summary = {
     totalOrders: 0, confirmedCount: 0, cancelledCount: 0, deliveredCount: 0, returnedCount: 0,
     totalOrderValue: 0, deliveredSalesValue: 0,
-    pendingCount: 0, shippedCount: 0, customerCount: 0, repeatCustomerCount: 0
+    pendingCount: 0, shippedCount: 0, customerCount: 0, repeatCustomerCount: 0, fakeCount: 0
   };
   var customerOrders = {}; // normalized phone -> orders in range
   var productSales = {}; // id -> { name, qty }
@@ -7631,8 +7631,11 @@ function getAdminAnalyticsV2_(e) {
         if (!firstOrderDay || dk &lt; firstOrderDay) firstOrderDay = dk;
         if (!lastOrderDay || dk > lastOrderDay) lastOrderDay = dk;
       }
-      summary.totalOrders++;
       var status = String(r[9] || '').trim().toLowerCase();
+      // Orders marked Fake were never real sales: count them separately and keep them out of every
+      // order, revenue, customer and product total below.
+      if (status === 'fake') { summary.fakeCount++; continue; }
+      summary.totalOrders++;
       var total = parseSignedOrderAmount_(r[7]);
       summary.totalOrderValue += total;
       if (dk) {
@@ -8372,6 +8375,39 @@ function adminBlockCustomer_(e) {
 
 // ── Fraud check (নিজের অর্ডার ইতিহাস থেকে) ──
 
+// One earlier order's outcome, from its status and courier status — the same rules as admHistoryForPhone_
+// (kept separate because tests and the order page load that function on its own).
+function admHistoryBucket_(status, courierStatus) {
+  var st = String(status || 'Pending').toLowerCase();
+  var cs = String(courierStatus || '').toLowerCase();
+  if (st === 'delivered' || cs === 'delivered') return 'delivered';
+  if (st === 'fake') return 'fake';
+  if (st === 'cancelled' || cs === 'cancelled') return 'cancelled';
+  if (cs.indexOf('return') !== -1) return 'returned';
+  if (st === 'pending') return 'pending';
+  return 'active';
+}
+
+// Delivery success rate and history risk ('new', 'unknown', 'low', 'medium', 'high') from earlier orders.
+function admRiskFromStats_(stats) {
+  var failed = stats.cancelled + stats.fake + stats.returned;
+  var decided = stats.delivered + failed;
+  var rate = decided ? Math.round((stats.delivered / decided) * 100) : null;
+  var risk = 'new';
+  if (decided) {
+    if (stats.fake > 0 || (failed >= 2 &amp;&amp; rate &lt; 50)) risk = 'high';
+    else if (failed > 0 &amp;&amp; rate &lt; 80) risk = 'medium';
+    else risk = 'low';
+  } else if (stats.total > 0) {
+    risk = 'unknown';
+  }
+  return { successRate: rate, risk: risk };
+}
+
+function admEmptyHistoryStats_() {
+  return { total: 0, delivered: 0, cancelled: 0, fake: 0, returned: 0, pending: 0, active: 0 };
+}
+
 function admHistoryForPhone_(rows, phone, skipOrderId) {
   var stats = { total: 0, delivered: 0, cancelled: 0, fake: 0, returned: 0, pending: 0, active: 0 };
   var recent = [];
@@ -8411,6 +8447,31 @@ function admHistoryForPhone_(rows, phone, skipOrderId) {
     risk = 'unknown';
   }
   return { stats: stats, successRate: rate, risk: risk, recent: recent };
+}
+
+/**
+ * Customer label and history risk for one order, from the same phone's EARLIER orders only:
+ * type 'new' (no earlier order), 'returning' (at least one delivered) or 'repeat' (earlier orders, none
+ * delivered yet). reviewNeeded marks a still-Pending order whose history is risky or whose phone is blocked.
+ * This is a warning for a person to check; it never changes the order's status.
+ */
+function admCustomerProfile_(prior, status, blocked) {
+  var stats = prior || admEmptyHistoryStats_();
+  var rr = admRiskFromStats_(stats);
+  var st = String(status || 'Pending').trim().toLowerCase();
+  var pending = !st || st === 'pending';
+  return {
+    customer: {
+      type: stats.total === 0 ? 'new' : stats.delivered > 0 ? 'returning' : 'repeat',
+      previous: stats.total,
+      delivered: stats.delivered,
+      failed: stats.cancelled + stats.fake + stats.returned,
+      fake: stats.fake,
+      successRate: rr.successRate
+    },
+    risk: rr.risk,
+    reviewNeeded: pending &amp;&amp; (rr.risk === 'high' || rr.risk === 'medium' || !!blocked)
+  };
 }
 
 function adminFraudCheck_(e) {
@@ -8530,13 +8591,17 @@ function adminOrderList_(e) {
   var pageRows = endRow >= startRow
     ? readOnlineOrderRows_(sheet, startRow, endRow - startRow + 1, ADM_LAST_COL)
     : [];
-  // Counts need only the first ten logical fields; avoid reading notes, addresses, cart JSON and images.
-  var countRows = rowCount ? readOnlineOrderRows_(sheet, 2, rowCount, 10) : [];
+  // Counts and customer history need only the first 13 logical fields (up to courier status);
+  // avoid reading notes, addresses, cart JSON and images.
+  var countRows = rowCount ? readOnlineOrderRows_(sheet, 2, rowCount, 13) : [];
   var blockedMap = admBlockedMap_();
   var todayKey = Utilities.formatDate(new Date(), 'GMT+6', 'yyyy-MM-dd');
-  var counts = { all: 0, today: 0 };
+  var counts = { all: 0, today: 0, review: 0 };
   ADM_STATUSES.forEach(function (s) { counts[s] = 0; });
   var orders = [];
+  // Oldest to newest, so each order only sees the same phone's EARLIER orders.
+  var priorByPhone = {};
+  var profiles = {};
   for (var i = 0; i &lt; countRows.length; i++) {
     var r = countRows[i];
     if (!r[1] &amp;&amp; !r[2]) continue;
@@ -8544,6 +8609,17 @@ function adminOrderList_(e) {
     counts.all++;
     if (counts.hasOwnProperty(status)) counts[status]++;
     if (dayKeyFromCell_(r[0]) === todayKey) counts.today++;
+    var rowPhone = normalizePhone_(r[2]);
+    var prior = rowPhone ? priorByPhone[rowPhone] : null;
+    var profile = admCustomerProfile_(prior, status, rowPhone &amp;&amp; Object.prototype.hasOwnProperty.call(blockedMap, rowPhone));
+    if (profile.reviewNeeded) counts.review++;
+    var rowNo = i + 2;
+    if (rowNo >= startRow &amp;&amp; rowNo &lt;= endRow) profiles[rowNo] = profile;
+    if (rowPhone) {
+      if (!prior) prior = priorByPhone[rowPhone] = admEmptyHistoryStats_();
+      prior.total++;
+      prior[admHistoryBucket_(r[9], r[12])]++;
+    }
   }
   for (var j = pageRows.length - 1; j >= 0; j--) {
     var rowNumber = startRow + j;
@@ -8551,6 +8627,10 @@ function adminOrderList_(e) {
     if (!pageRow[1] &amp;&amp; !pageRow[2]) continue;
     var order = admRowToOrder_(pageRow, rowNumber);
     order.blocked = Object.prototype.hasOwnProperty.call(blockedMap, order.phone);
+    var prof = profiles[rowNumber] || admCustomerProfile_(null, order.status, order.blocked);
+    order.customerProfile = prof.customer;
+    order.risk = prof.risk;
+    order.reviewNeeded = prof.reviewNeeded;
     orders.push(admOrderListSummary_(order));
   }
   return {
@@ -8592,7 +8672,10 @@ function admOrderListSummary_(order) {
     assignedTo: order.assignedTo,
     courier: order.courier,
     source: order.source,
-    blocked: order.blocked
+    blocked: order.blocked,
+    customerProfile: order.customerProfile || null,
+    risk: order.risk || '',
+    reviewNeeded: !!order.reviewNeeded
   };
 }
 
