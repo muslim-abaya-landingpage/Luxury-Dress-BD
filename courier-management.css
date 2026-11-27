@@ -213,3 +213,6 @@ html.wp-admin-shell body.cm-page .cm-lower{
   }
 }
 .cm-page,.cm-page .cm-wrap{min-width:0!important;max-width:100%}
+.cm-bulk-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.cm-bulk-bar span{font-size:12px;color:var(--adm-muted,#64748b)}
+.cm-orders-table td:first-child{text-align:center;width:28px}

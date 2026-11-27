@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
-  var state = { orders: [], cursor: 0, filter: 'all', search: '', provider: 'all', trackingOrder: null, settlementOrders: [], settlementOrder: null, loading: false, scanMode: 'ship', scanLog: [], scanBusy: false };
+  var state = { orders: [], cursor: 0, filter: 'all', search: '', provider: 'all', trackingOrder: null, settlementOrders: [], settlementOrder: null, loading: false, scanMode: 'ship', scanLog: [], scanBusy: false, bulkSelected: {}, bulkBusy: false };
   var RATE_KEYS = ['steadfastInside','steadfastOutside','pathaoInside','pathaoOutside','redxInside','redxOutside'];
   var RATE_IDS = ['cmSteadfastInside','cmSteadfastOutside','cmPathaoInside','cmPathaoOutside','cmRedxInside','cmRedxOutside'];
   var BD_DISTRICTS = ["কক্সবাজার","কিশোরগঞ্জ","কুড়িগ্রাম","কুমিল্লা","কুষ্টিয়া","খাগড়াছড়ি","খুলনা","গাইবান্ধা","গাজীপুর","গোপালগঞ্জ","চট্টগ্রাম","চাঁদপুর","চাঁপাইনবাবগঞ্জ","চুয়াডাঙ্গা","জয়পুরহাট","জামালপুর","ঝালকাঠি","ঝিনাইদহ","টাঙ্গাইল","ঠাকুরগাঁও","ঢাকা","দিনাজপুর","নওগাঁ","নড়াইল","নরসিংদী","নাটোর","নারায়ণগঞ্জ","নীলফামারী","নেত্রকোণা","নোয়াখালী","পঞ্চগড়","পটুয়াখালী","পাবনা","পিরোজপুর","ফরিদপুর","ফেনী","বগুড়া","বরগুনা","বরিশাল","বাগেরহাট","বান্দরবান","ব্রাহ্মণবাড়িয়া","ভোলা","ময়মনসিংহ","মাগুরা","মাদারীপুর","মানিকগঞ্জ","মুন্সিগঞ্জ","মেহেরপুর","মৌলভীবাজার","যশোর","রংপুর","রাঙ্গামাটি","রাজবাড়ী","রাজশাহী","লক্ষ্মীপুর","লালমনিরহাট","শরীয়তপুর","শেরপুর","সাতক্ষীরা","সিরাজগঞ্জ","সিলেট","সুনামগঞ্জ","হবিগঞ্জ"];
@@ -40,24 +40,35 @@
     $('cmDelivered').textContent = a.filter(isDelivered).length;
     $('cmReturns').textContent = a.filter(isReturned).length;
   }
+  function updateBulkMessage() {
+    var n = Object.keys(state.bulkSelected).filter(function (k) { return state.bulkSelected[k]; }).length;
+    if (!state.bulkBusy) $('cmBulkMessage').textContent = n ? (n + 'টি অর্ডার নির্বাচিত') : '';
+  }
   function renderRows() {
     var rows = visibleOrders();
     $('cmCount').textContent = rows.length + 'টি অর্ডার দেখানো হচ্ছে · ' + state.orders.length + 'টি লোড';
-    if (!rows.length) { $('cmRows').innerHTML = '<tr><td colspan="7" class="cm-empty">এই ফিল্টারে কোনো অর্ডার পাওয়া যায়নি।</td></tr>'; return; }
+    var stillReady = {};
+    rows.forEach(function (o) { if (isReady(o)) stillReady[o.orderId] = true; });
+    Object.keys(state.bulkSelected).forEach(function (id) { if (!stillReady[id]) delete state.bulkSelected[id]; });
+    if (!rows.length) { $('cmRows').innerHTML = '<tr><td colspan="8" class="cm-empty">এই ফিল্টারে কোনো অর্ডার পাওয়া যায়নি।</td></tr>'; updateBulkMessage(); return; }
     $('cmRows').innerHTML = rows.map(function (o) {
       var ready = isReady(o), tracking = String(o.tracking || o.consignmentId || '');
       var provider = providerOf(o) || '—';
       var badge = isDelivered(o) ? 'delivered' : isReturned(o) ? 'returned' : isShipped(o) ? 'shipped' : ready ? 'ready' : 'pending';
-      var label = isDelivered(o) ? 'Delivered' : isReturned(o) ? statusOf(o) : isShipped(o) ? statusOf(o) : ready ? 'পাঠানোর অপেক্ষায়' : String(o.status || 'Pending');
+      var label = isDelivered(o) ? 'Delivered' : isReturned(o) ? statusOf(o) : isShipped(o) ? statusOf(o) : ready ? 'পাঠানোর অপেক্ষায়' : String(o.status || 'Pending');
       var action = ready
         ? '<button class="cm-action cm-send" type="button" data-send="' + esc(o.orderId) + '">Steadfast-এ পাঠান</button>'
         : tracking ? '<button class="cm-action cm-track" type="button" data-track="' + esc(o.orderId) + '">ট্র্যাক করুন</button>' : '<span class="cm-muted">—</span>';
-      return '<tr><td><strong>' + esc(o.orderId || ('Row ' + o.row)) + '</strong><small>' + esc(o.time || '') + '</small></td>' +
+      var check = ready
+        ? '<input type="checkbox" class="cm-bulk-check" data-bulk-id="' + esc(o.orderId) + '"' + (state.bulkSelected[o.orderId] ? ' checked' : '') + '>'
+        : '';
+      return '<tr><td>' + check + '</td><td><strong>' + esc(o.orderId || ('Row ' + o.row)) + '</strong><small>' + esc(o.time || '') + '</small></td>' +
         '<td><strong>' + esc(o.name) + '</strong><small>' + esc(o.phone) + '</small></td>' +
         '<td class="cm-address">' + esc(o.address || '—') + '</td><td>' + money(o.due) + '<small>' + esc(o.payment || 'COD') + '</small></td>' +
         '<td>' + esc(provider) + (tracking ? '<small>' + esc(tracking) + '</small>' : '') + '</td>' +
         '<td><span class="cm-badge ' + badge + '">' + esc(label) + '</span></td><td>' + action + '</td></tr>';
     }).join('');
+    updateBulkMessage();
   }
   function render() { renderStats(); renderRows(); $('cmLoadMore').hidden = !state.cursor; }
   function csvCell(value) {
@@ -282,6 +293,37 @@
       if (button) { button.disabled = false; button.textContent = 'Steadfast-এ পাঠান'; }
     });
   }
+  function sleep(ms) { return new Promise(function (resolve) { window.setTimeout(resolve, ms); }); }
+  function bulkSendSelected() {
+    if (state.bulkBusy) return;
+    var ids = Object.keys(state.bulkSelected).filter(function (k) { return state.bulkSelected[k]; });
+    if (!ids.length) { $('cmBulkMessage').textContent = 'অন্তত একটি অর্ডার বাছুন।'; return; }
+    if (!window.confirm(ids.length + 'টি অর্ডার একে একে Steadfast-এ পাঠানো হবে। এগিয়ে যাবেন?')) return;
+    state.bulkBusy = true;
+    $('cmBulkSend').disabled = true;
+    $('cmBulkToggleAll').disabled = true;
+    var done = 0, failed = [];
+    function next() {
+      if (done >= ids.length) {
+        state.bulkBusy = false;
+        $('cmBulkSend').disabled = false;
+        $('cmBulkToggleAll').disabled = false;
+        state.bulkSelected = {};
+        $('cmBulkMessage').textContent = (ids.length - failed.length) + '/' + ids.length + 'টি পাঠানো সম্পন্ন' +
+          (failed.length ? (' · ব্যর্থ: ' + failed.join(', ')) : '');
+        return load(false);
+      }
+      var id = ids[done];
+      $('cmBulkMessage').textContent = 'পাঠানো হচ্ছে ' + (done + 1) + '/' + ids.length + ' (' + id + ')…';
+      return MaAdmin.call('AdminSendCourier', { OrderId: id }).catch(function (err) {
+        failed.push(id + ': ' + (err && err.message || 'ব্যর্থ'));
+      }).then(function () {
+        done++;
+        return sleep(250).then(next);
+      });
+    }
+    return next();
+  }
   function showTracking(order, refresh) {
     state.trackingOrder = order;
     $('cmTrackingOrder').textContent = (order.orderId || '') + ' · ' + (order.tracking || order.consignmentId || '');
@@ -464,6 +506,19 @@
       if (send) { var o = state.orders.find(function (x) { return String(x.orderId) === send.getAttribute('data-send'); }); if (o && isReady(o)) sendToCourier(o); }
       if (track) { var t = state.orders.find(function (x) { return String(x.orderId) === track.getAttribute('data-track'); }); if (t) showTracking(t, false); }
     });
+    $('cmRows').addEventListener('change', function (e) {
+      if (!e.target.classList.contains('cm-bulk-check')) return;
+      var id = e.target.getAttribute('data-bulk-id');
+      if (e.target.checked) state.bulkSelected[id] = true; else delete state.bulkSelected[id];
+      updateBulkMessage();
+    });
+    $('cmBulkToggleAll').addEventListener('click', function () {
+      var ready = visibleOrders().filter(isReady);
+      var allSelected = ready.length > 0 && ready.every(function (o) { return state.bulkSelected[o.orderId]; });
+      ready.forEach(function (o) { if (allSelected) delete state.bulkSelected[o.orderId]; else state.bulkSelected[o.orderId] = true; });
+      renderRows();
+    });
+    $('cmBulkSend').addEventListener('click', bulkSendSelected);
     $('cmRatesForm').addEventListener('submit', saveRates);
     $('cmPerformanceRefresh').addEventListener('click', loadPerformance);
     $('cmTrackingClose').addEventListener('click', function () { $('cmTrackingDialog').close(); });

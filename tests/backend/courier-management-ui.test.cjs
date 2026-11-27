@@ -77,6 +77,25 @@ test('orders table offers a client-side CSV export of the currently filtered/vis
   assert.match(js, /cmExportCsv'\)\.addEventListener\('click', exportCsv\)/);
 });
 
+test('orders table supports selecting ready orders and bulk-sending them to Steadfast one at a time', () => {
+  const html = read('courier-management.html');
+  const js = read('courier-management.js');
+  assert.ok(html.includes('id="cmBulkToggleAll"'));
+  assert.ok(html.includes('id="cmBulkSend"'));
+  assert.ok(html.includes('id="cmBulkMessage"'));
+  assert.match(js, /function bulkSendSelected\(\)/);
+  assert.match(js, /cm-bulk-check/);
+  assert.match(js, /'AdminSendCourier'/);
+  // sequential, not parallel: each send is chained via .then(next), no Promise.all of the id list
+  assert.doesNotMatch(js, /Promise\.all\(ids/);
+  assert.match(js, /cmBulkSend'\)\.addEventListener\('click', bulkSendSelected\)/);
+});
+
+test('bulk selection only ever targets ready (not-yet-shipped) orders', () => {
+  const js = read('courier-management.js');
+  assert.match(js, /check = ready\s*\n\s*\? '<input type="checkbox" class="cm-bulk-check"/);
+});
+
 test('COD settlement workspace exposes reconciled totals, partial settlement and recent ledger', () => {
   const html = read('courier-management.html');
   const js = read('courier-management.js');

@@ -100,14 +100,20 @@
         <button type="button" data-filter="delivered">Delivered</button>
         <button type="button" data-filter="returned">Return / Cancel</button>
       </nav>
+      <div class="cm-bulk-bar">
+        <button type="button" class="adm-btn adm-btn-secondary" id="cmBulkToggleAll">সব বাছাই/বাতিল (পাঠানোর অপেক্ষায়)</button>
+        <button type="button" class="adm-btn adm-btn-primary" id="cmBulkSend">নির্বাচিত অর্ডার Steadfast-এ পাঠান</button>
+        <span id="cmBulkMessage" role="status"></span>
+      </div>
       <div class="cm-table-wrap">
-        <table class="cm-table">
-          <thead><tr><th>অর্ডার</th><th>কাস্টমার</th><th>ঠিকানা</th><th>COD / Due</th><th>কুরিয়ার</th><th>স্ট্যাটাস</th><th>কাজ</th></tr></thead>
-          <tbody id="cmRows"><tr><td colspan="7" class="cm-empty">ডেটা লোড হচ্ছে…</td></tr></tbody>
+        <table class="cm-table cm-orders-table">
+          <thead><tr><th></th><th>অর্ডার</th><th>কাস্টমার</th><th>ঠিকানা</th><th>COD / Due</th><th>কুরিয়ার</th><th>স্ট্যাটাস</th><th>কাজ</th></tr></thead>
+          <tbody id="cmRows"><tr><td colspan="8" class="cm-empty">ডেটা লোড হচ্ছে…</td></tr></tbody>
         </table>
       </div>
       <div class="cm-table-foot"><span id="cmCount">—</span><button type="button" class="adm-btn adm-btn-secondary" id="cmExportCsv">⬇ CSV এক্সপোর্ট</button><button type="button" class="adm-btn adm-btn-secondary" id="cmLoadMore" hidden>আরও অর্ডার</button></div>
       <p class="cm-note">নিরাপত্তা: কেবল Confirmed বা Processing অর্ডার Steadfast-এ পাঠানো যাবে। Pathao ও RedX-এর চার্জ এখানে তুলনার জন্য; তাদের API-তে পার্সেল পাঠানো এখনো সংযুক্ত নয়।</p>
+      <p class="cm-note">বাল্ক পাঠানো একে একে (sequential) হয় যাতে কোনো request miss না হয়; মাঝে কোনো একটায় সমস্যা হলে বাকিগুলো চলতে থাকবে, শেষে কোনটায় সমস্যা হয়েছে তা জানানো হবে।</p>
     </section>
 
     <section class="cm-panel cm-settlement-panel" aria-labelledby="cmSettlementTitle">
