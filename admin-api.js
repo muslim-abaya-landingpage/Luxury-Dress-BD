@@ -519,6 +519,16 @@
     });
   }
 
+  // Weekly Meta audience sync (owner only).
+  function audienceSync(recordType, fields) {
+    var s = getSession();
+    if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
+    return apiPost(Object.assign({ RecordType: recordType, Token: s.token }, fields || {})).then(function (res) {
+      if (!res.ok) throw new Error(res.message || res.error || "AUDIENCE_SYNC_FAILED");
+      return res;
+    });
+  }
+
   function dismissGrowthItem(kind, key) {
     var s = getSession();
     if (!s) return Promise.reject(new Error("NOT_LOGGED_IN"));
@@ -773,6 +783,9 @@
     dismissGrowthItem: dismissGrowthItem,
     getAudienceCounts: getAudienceCounts,
     exportAudience: exportAudience,
+    audienceSyncStatus: function () { return audienceSync("AdminAudienceSyncStatus"); },
+    audienceSyncSave: function (account, weekly) { return audienceSync("AdminAudienceSyncSave", { Account: String(account || ""), Weekly: weekly ? "1" : "0" }); },
+    audienceSyncRun: function () { return audienceSync("AdminAudienceSyncRun"); },
     getStaffList: getStaffList,
     saveStaff: saveStaff,
     deleteStaff: deleteStaff,

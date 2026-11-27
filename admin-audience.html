@@ -183,6 +183,27 @@ html[data-admin-theme="dark"] .au-card.is-exclude .au-use{background:rgba(230,11
     <button type="button" class="button" data-download>CSV ডাউনলোড</button>
   </article>
 </section>
+<section class="adm-panel au-panel" id="auSync">
+  <h2 style="margin-top:0">Meta-তে নিজে থেকে হালনাগাদ (প্রতি শনিবার)</h2>
+  <p class="au-note" style="margin-top:0">চালু করলে উপরের ৫টি তালিকা (গত ৬ মাস) প্রতি সপ্তাহে নিজে থেকে আপনার Ad account-এর অডিয়েন্সে বসে যাবে — "MA auto · …" নামে। ফাইল ডাউনলোড/আপলোড লাগবে না। Meta-তে শুধু ফোন, নামের প্রথম অংশ ও দেশের এনক্রিপ্ট করা (hash) রূপ যায়।</p>
+  <div id="auSyncState" class="au-note">লোড হচ্ছে…</div>
+  <div id="auSyncSetup" hidden>
+    <p><b>চালু করতে একবার যা করতে হবে</b> (Meta Business Settings-এ):</p>
+    <ol class="au-steps">
+      <li><b>Business Settings → Users → System Users</b> → আপনার যে System User দিয়ে Messenger চালু আছে সেটি খুলুন।</li>
+      <li><b>Assign assets → Ad accounts</b> → যে Ad account-এ বিজ্ঞাপন দেন সেটি বেছে <b>Manage campaigns</b> অনুমতি দিন।</li>
+      <li><b>Generate new token</b> → মেয়াদ <b>Never</b> → অনুমতিতে আগের সবগুলোর সাথে <b>ads_management</b> টিক দিন।</li>
+      <li>নতুন Token অ্যাডমিন <b>Setup → Messenger → "সব Page একসাথে"</b> ঘরে বসিয়ে সেভ করুন। তারপর এই পেজ রিফ্রেশ করুন।</li>
+    </ol>
+  </div>
+  <div id="auSyncForm" hidden style="display:none;flex-wrap:wrap;gap:12px;align-items:center">
+    <label>Ad account <select id="auSyncAccount"></select></label>
+    <label><input type="checkbox" id="auSyncWeekly"> প্রতি শনিবার নিজে থেকে</label>
+    <button type="button" class="button button-primary" id="auSyncSave">সেভ করুন</button>
+    <button type="button" class="button" id="auSyncRun">এখনই সিঙ্ক করুন</button>
+  </div>
+  <div id="auSyncLast" class="au-note" style="margin-top:10px"></div>
+</section>
 <section class="adm-panel au-panel">
   <h2 style="margin-top:0">Meta-তে কীভাবে ব্যবহার করবেন (একবার শিখলেই হবে)</h2>
   <ol class="au-steps">

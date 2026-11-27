@@ -26,13 +26,8 @@ function audienceSplitName_(name) {
   return { fn: parts[0] || '', ln: parts.length > 1 ? parts.slice(1).join(' ') : '' };
 }
 
-function adminAudienceExport_(e) {
-  var v = verifyAdminSession_(param_(e, 'Token'));
-  if (!v.ok) return v;
-  var owner = requireOwnerAdmin_(v);
-  if (owner) return owner;
-  var list = String(param_(e, 'RecordType')) === 'AdminAudienceExport' ? String(param_(e, 'List') || '').trim() : '';
-  var months = Math.max(0, Math.min(60, parseInt(param_(e, 'Months'), 10) || 0));
+/** Builds every list for the period (0 = all time). Shared by the admin page and the weekly Meta sync. */
+function audienceBuildLists_(months) {
   var cutoffKey = '';
   if (months) {
     var c = new Date();
@@ -98,6 +93,18 @@ function adminAudienceExport_(e) {
     }
   } catch (err) {}
 
+  return { counts: counts, picked: picked };
+}
+
+function adminAudienceExport_(e) {
+  var v = verifyAdminSession_(param_(e, 'Token'));
+  if (!v.ok) return v;
+  var owner = requireOwnerAdmin_(v);
+  if (owner) return owner;
+  var list = String(param_(e, 'RecordType')) === 'AdminAudienceExport' ? String(param_(e, 'List') || '').trim() : '';
+  var months = Math.max(0, Math.min(60, parseInt(param_(e, 'Months'), 10) || 0));
+  var built = audienceBuildLists_(months);
+  var counts = built.counts, picked = built.picked;
   var out = { ok: true, months: months, counts: counts };
   if (AUDIENCE_LISTS_.indexOf(list) === -1) return out; // counts only
   out.list = list;
