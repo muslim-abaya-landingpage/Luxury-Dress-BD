@@ -302,7 +302,7 @@
     var node = byId("admReportSources");
     rows = Array.isArray(rows) ? rows.filter(function (r) { return r && Number(r.orders) > 0; }) : [];
     if (!rows.length) { node.innerHTML = '<div class="adm-feature-empty">এই সময়সীমায় সোর্সের তথ্য নেই।</div>'; return; }
-    var platforms = {};
+    var platforms = Object.create(null); // source text is data: "__proto__" must be an ordinary key
     rows.forEach(function (r) {
       var p = sourcePlatform(r.source);
       if (!platforms[p]) platforms[p] = { orders: 0, delivered: 0 };

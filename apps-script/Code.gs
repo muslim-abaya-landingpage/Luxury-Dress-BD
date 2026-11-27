@@ -7590,7 +7590,7 @@ function getAdminAnalyticsV2_(e) {
   var productSales = {}; // id -> { name, qty }
   var categorySales = {}; // category -> qty
   var sizeSales = {}; // size -> qty
-  var sourceStats = {}; // source -> { orders, delivered }
+  var sourceStats = Object.create(null); // source -> { orders, delivered }; prototype-free so a Source like "__proto__" is counted
   var monthStats = {}; // yyyy-MM -> order and sales totals
   var undatedOrderCount = 0;
   var firstOrderDay = '';

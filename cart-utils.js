@@ -877,9 +877,15 @@
     if (!label) return "";
     var paid = /^(paid|cpc|ppc|ads?|paid_social|paidsocial|social_paid|cpm)/.test(medium);
     var out = label + (paid ? " Ads" : "");
+    // 120 = the Source cell limit in Apps Script. The campaign gets what is left after the label and the
+    // (whole) ad name, so a long custom label or campaign never cuts the ad name off.
+    if (campaign) {
+      var room = 120 - out.length - 3 - (ad ? 3 + ad.length : 0);
+      campaign = room > 0 ? campaign.slice(0, room).trim() : "";
+    }
     if (campaign) out += " · " + campaign;
     if (ad && campaign) out += " · " + ad;
-    return cleanSourcePart(out, 100);
+    return cleanSourcePart(out, 120);
   }
 
   function rememberVisitSource() {
