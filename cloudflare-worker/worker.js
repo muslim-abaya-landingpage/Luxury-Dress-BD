@@ -55,25 +55,14 @@ async function setSiteSetting(env, key, value, who) {
 // Confirms the admin session token with the same Apps Script backend admin-login.html already
 // trusts (RecordType AdminVerify — the exact call admin-api.js's verifySession() makes), so this
 // worker never has to know the admin password or keep its own login system.
-// Successful checks are remembered for 2 minutes per Worker instance, so a burst of panel requests does
-// not send one Apps Script call each (Apps Script rate-limits admin calls per token).
-const ADMIN_VERIFY_CACHE_MS = 120000;
-const adminVerifyCache = new Map();
 const ADMIN_HARD_FAILURES = ['INVALID_TOKEN', 'EXPIRED', 'NOT_ADMIN', 'NO_TOKEN', 'BLOCKED'];
-async function adminCacheKey(token) {
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(token)));
-  return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('');
-}
 // Returns the admin record ({ ok: true, ... }) or { ok: false, error, status } with the REAL reason:
 // a rate limit or an Apps Script outage is no longer reported as INVALID_TOKEN.
+// No Worker-side cache: Apps Script caches verified sessions itself and invalidates them at once when
+// a staff account is blocked or changed, so every check here sees revocations immediately.
 async function verifyAdminToken(env, token, deps = {}) {
   if (!token) return { ok: false, error: 'NO_TOKEN', status: 401 };
   const fetchImpl = deps.fetch || fetch;
-  const now = deps.now ? deps.now() : Date.now();
-  let key = '';
-  try { key = await adminCacheKey(token); } catch (e) { key = ''; }
-  const hit = key && adminVerifyCache.get(key);
-  if (hit && hit.until > now && (!hit.res.expires || now < Number(hit.res.expires))) return hit.res;
   const apiUrl = env.ADMIN_API_URL || DEFAULT_ADMIN_API_URL;
   const body = new URLSearchParams({ RecordType: 'AdminVerify', Token: token });
   let res;
@@ -81,20 +70,13 @@ async function verifyAdminToken(env, token, deps = {}) {
     const r = await fetchImpl(apiUrl, { method: 'POST', body });
     res = JSON.parse(await r.text());
   } catch (e) { return { ok: false, error: 'VERIFY_UNAVAILABLE', status: 503 }; }
-  if (res && res.ok) {
-    if (key) {
-      if (adminVerifyCache.size > 100) adminVerifyCache.clear();
-      adminVerifyCache.set(key, { res, until: now + ADMIN_VERIFY_CACHE_MS });
-    }
-    return res;
-  }
-  if (key) adminVerifyCache.delete(key);
+  if (res && res.ok) return res;
   const error = res && res.error ? String(res.error) : 'VERIFY_UNAVAILABLE';
   if (ADMIN_HARD_FAILURES.includes(error)) return { ok: false, error, status: 401 };
   if (error === 'RATE_LIMIT') return { ok: false, error, status: 429 };
   return { ok: false, error: 'VERIFY_UNAVAILABLE', status: 503 };
 }
-export { verifyAdminToken, adminVerifyCache };
+export { verifyAdminToken };
 // JSON reply for a failed check, or null when the admin is verified.
 function adminDenied(admin) {
   if (admin && admin.ok !== false) return null;
