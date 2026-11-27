@@ -4,14 +4,22 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
-  <title>Courier Management | Muslim Abaya Admin</title>
+  <title>কুরিয়ার ব্যবস্থাপনা | Muslim Abaya Admin</title>
   <link rel="stylesheet" href="admin.css?v=d800d917a0c7b197">
+  <link rel="stylesheet" href="admin-sidebar.css?v=20261128-color-icons">
+  <link rel="stylesheet" href="admin-dashboard-design.css?v=76d87a7fcd8f0d87">
+  <script src="admin-dashboard-design.js?v=20261125-central-branding"></script>
+  <link rel="stylesheet" href="admin-premium-layout.css?v=385b5e49870868f4">
   <link rel="stylesheet" href="admin-design-system.css?v=1eaf4362bddc4ad0">
+  <link rel="stylesheet" href="admin-theme.css?v=1">
   <link rel="stylesheet" href="admin-wp.css?v=20261126-admin-shell-step2">
   <link rel="stylesheet" href="admin-premium-unified.css?v=20261125-sidebar-hover-stable">
   <link rel="stylesheet" href="admin-responsive.css?v=1">
   <link rel="stylesheet" href="admin-dashboard-modern.css?v=20261126-dashboard-offset-final-v4">
-  <link rel="stylesheet" href="admin-dashboard-unified.css?v=20261127-forest-green-brand">
+  <link rel="stylesheet" href="admin-dashboard-unified.css?v=20261128-courier-shell">
+  <link rel="manifest" href="/admin-manifest.webmanifest">
+  <meta name="theme-color" content="#173b2f">
+  <link rel="apple-touch-icon" href="/images/admin/admin-icon-192.png">
   <link rel="stylesheet" href="courier-management.css?v=20261127-viewportfix1">
   <script src="config.js?v=00107b4d68a09227"></script>
   <script src="site-api-config.js?v=b4eb7cb7438aad24"></script>
@@ -20,17 +28,79 @@
   <script src="admin-guard.js?v=42341dd9adc288ea"></script>
 </head>
 <body class="adm-body cm-page">
-  <main class="cm-wrap">
+  <div class="adm-shell">
+    <div class="adm-sidebar-backdrop" id="admSbBackdrop"></div>
+    <aside class="adm-sidebar" id="admSidebar">
+      <div class="adm-sidebar-brand">
+        <div class="adm-sidebar-crest"></div>
+        <div class="adm-sidebar-brand-text"><div class="t1">Muslim Abaya</div><div class="t2">অ্যাডমিন প্যানেল</div></div>
+        <button type="button" class="adm-collapse-btn" id="admCollapse" aria-controls="admSidebar" aria-expanded="true" aria-label="সাইডবার ছোট করুন"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="3" stroke="currentColor" stroke-width="1.6"/><path d="M9 4v16" stroke="currentColor" stroke-width="1.6"/></svg></button>
+        <button type="button" class="adm-sidebar-close" id="admSbClose" aria-label="মেনু বন্ধ করুন"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+      </div>
+
+      <nav class="adm-sidebar-nav" aria-label="অ্যাডমিন মেনু">
+<a class="adm-sidebar-item" href="admin-dashboard.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>ড্যাশবোর্ড</span></a>
+<div class="adm-nav-group"><a class="adm-sidebar-item adm-nav-top" href="admin-orders.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z M9 7h6M9 11h6M9 15h4"/></svg><span>অর্ডার</span></a><div class="adm-nav-children" role="group" aria-label="অর্ডার">
+<a class="adm-sidebar-item adm-nav-child" href="admin-orders.html"><span>অর্ডার</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-fraud.html"><span>প্রতারণা পর্যালোচনা</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-order-new.html"><span>নতুন অর্ডার</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-operations.html"><span>অর্থ ও ফেরত</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-profit.html"><span>পণ্যের লাভ</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-reports.html"><span>রিপোর্ট</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-accounting.html"><span>হিসাব</span></a>
+</div></div>
+<a class="adm-sidebar-item is-current" href="courier-management.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 6h12v12H3zM15 10h4l3 3v5h-7z"/><circle cx="7.5" cy="18" r="1.5"/><circle cx="18.5" cy="18" r="1.5"/></svg><span>কুরিয়ার ব্যবস্থাপনা</span></a>
+<div class="adm-nav-group"><a class="adm-sidebar-item adm-nav-top" href="product-manager.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="6" width="16" height="15" rx="2"/><path d="M9 6V5a3 3 0 0 1 6 0v1M9 10a3 3 0 0 0 6 0"/></svg><span>পণ্য</span></a><div class="adm-nav-children" role="group" aria-label="পণ্য">
+<a class="adm-sidebar-item adm-nav-child" href="product-manager.html"><span>সব পণ্য</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="product-manager.html?action=new"><span>নতুন পণ্য যোগ করুন</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-sizes.html"><span>সাইজ</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="product-attributes.html"><span>বৈশিষ্ট্য</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-reviews.html"><span>রিভিউ</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="stock-analytics.html"><span>স্টক ও বিশ্লেষণ</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="product-links.html"><span>পণ্যের লিংক</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="product-manager.html#store-settings"><span>স্টোর সেটিংস</span></a>
+</div></div>
+<div class="adm-nav-group"><a class="adm-sidebar-item adm-nav-top" href="admin-customers.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h18v13H8l-5 4V4ZM7 9h10M7 13h7"/></svg><span>গ্রাহক</span></a><div class="adm-nav-children" role="group" aria-label="গ্রাহক">
+<a class="adm-sidebar-item adm-nav-child" href="admin-customers.html"><span>গ্রাহক</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-inbox.html"><span>ইনবক্স</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-support-inbox.html"><span>সরাসরি সহায়তা</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="support-agent-telegram.html"><span>টেলিগ্রাম সহায়তা</span></a>
+</div></div>
+<div class="adm-nav-group"><a class="adm-sidebar-item adm-nav-top" href="admin-setup.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 9v12"/></svg><span>সেটিংস</span></a><div class="adm-nav-children" role="group" aria-label="সেটিংস">
+<a class="adm-sidebar-item adm-nav-child" href="admin-setup.html"><span>সেটআপ ও অবস্থা</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-seo.html"><span>SEO ব্যবস্থাপক</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-staff.html"><span>কর্মী</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-growth.html"><span>ব্যবসায় বৃদ্ধির টুল</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-links.html"><span>লিংক</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-tracking-settings.html"><span>ট্র্যাকিং পিক্সেল</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-sms-settings.html"><span>SMS গেটওয়ে</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-activity.html"><span>কার্যক্রমের লগ</span></a>
+</div></div></nav>
+      <div class="adm-sidebar-foot">
+        <button type="button" id="admThemeToggle" class="adm-theme-toggle" role="switch" aria-checked="false" aria-label="ডার্ক মোড"><svg viewBox="0 0 24 24" fill="none"><path d="M20 14A8.5 8.5 0 0 1 10 4a8.5 8.5 0 1 0 10 10Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="adm-theme-label">ডার্ক মোড</span><span class="adm-theme-track" aria-hidden="true"></span></button>
+        <button type="button" class="adm-btn adm-btn-secondary" id="admLogout">লগ আউট</button>
+      </div>
+    </aside>
+
+    <div class="adm-content">
+      <header class="adm-topbar">
+        <div>
+          <button type="button" class="adm-menu-btn" id="admMenuBtn" aria-label="মেনু খুলুন"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+          <div>
+            <div class="adm-heading"><span class="adm-page-kicker">মুসলিম আবায়া / অপারেশন্স</span><h1>কুরিয়ার ম্যানেজমেন্ট</h1></div>
+            <div class="adm-topbar-user" id="admUserLabel">—</div>
+          </div>
+        </div>
+        <div class="adm-topbar-actions">
+          <button class="adm-btn adm-btn-primary" id="cmRefresh" type="button">↻ রিফ্রেশ</button>
+        </div>
+      </header>
+
+      <main class="adm-main">
+  <div class="cm-wrap">
     <header class="cm-head">
       <div>
-        <div class="adm-page-kicker">MUSLIM ABAYA / OPERATIONS</div>
-        <h1>কুরিয়ার ম্যানেজমেন্ট</h1>
         <p>পার্সেল পাঠানো, ডেলিভারি ট্র্যাকিং, COD পর্যবেক্ষণ ও কুরিয়ার পারফরম্যান্স—এক জায়গায়।</p>
-      </div>
-      <div class="cm-head-actions">
-        <a class="adm-btn adm-btn-secondary" href="admin-dashboard.html">ড্যাশবোর্ড</a>
-        <a class="adm-btn adm-btn-secondary" href="admin-orders.html">অর্ডার</a>
-        <button class="adm-btn adm-btn-primary" id="cmRefresh" type="button">↻ রিফ্রেশ</button>
       </div>
     </header>
 
@@ -198,7 +268,10 @@
       <div class="cm-rate-actions"><span id="cmInvoiceCount">—</span><button class="adm-btn adm-btn-primary" type="button" id="cmInvoicePrint">🖨 ইনভয়েস প্রিন্ট করুন</button></div>
     </section>
     <p class="cm-footer-note">COD Due অর্ডারের বকেয়া অঙ্ক থেকে দেখানো হয়—এটি কুরিয়ারের settlement statement বা হাতে পাওয়া টাকার হিসাব নয়। উপরের "COD Settlement" অংশে প্রতিটি জমা হাতে লিখে এই হিসাব মিলিয়ে নিন।</p>
-  </main>
+  </div>
+      </main>
+    </div>
+  </div>
 
   <dialog id="cmTrackingDialog" class="cm-dialog">
     <div class="cm-dialog-head"><div><h2>পার্সেল ট্র্যাকিং</h2><p id="cmTrackingOrder"></p></div><button type="button" id="cmTrackingClose" aria-label="বন্ধ করুন">×</button></div>
@@ -228,7 +301,10 @@
     <div id="cmZoneDialogList" class="cm-zone-dialog-list"></div>
     <div class="cm-dialog-actions"><button type="button" class="adm-btn adm-btn-primary" id="cmZoneDialogDone">হয়ে গেছে</button></div>
   </dialog>
+  <script src="admin-page-shell.js?v=1"></script>
   <script src="admin-courier-invoice.js?v=20261127-zones"></script>
   <script src="courier-management.js?v=20261127-zones"></script>
+  <script>MaAdminShell.start(function () {});</script>
+  <script src="admin-wp.js?v=20261124-cache-nav" defer></script>
 </body>
 </html>
