@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="admin-design-system.css?v=1eaf4362bddc4ad0">
   <link rel="stylesheet" href="admin-wp.css?v=20261126-admin-shell-step2">
   <link rel="stylesheet" href="admin-premium-unified.css?v=20261125-sidebar-hover-stable">
+  <link rel="stylesheet" href="admin-dashboard-modern.css?v=20261126-dashboard-offset-final-v4">
+  <link rel="stylesheet" href="admin-dashboard-unified.css?v=20261127-forest-green-brand">
   <style>
     .terp-wrap{max-width:1180px;margin:0 auto;padding:24px 18px 56px}
     .terp-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
@@ -52,7 +54,70 @@
   <script src="admin-guard.js?v=42341dd9adc288ea"></script>
 </head>
 <body class="adm-body">
-  <main class="terp-wrap">
+  <div class="adm-shell">
+    <div class="adm-sidebar-backdrop" id="admSbBackdrop"></div>
+    <aside class="adm-sidebar" id="admSidebar">
+      <div class="adm-sidebar-brand">
+        <div class="adm-sidebar-crest"></div>
+        <div class="adm-sidebar-brand-text"><div class="t1">Muslim Abaya</div><div class="t2">অ্যাডমিন প্যানেল</div></div>
+        <button type="button" class="adm-collapse-btn" id="admCollapse" aria-controls="admSidebar" aria-expanded="true" aria-label="সাইডবার ছোট করুন"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="3" stroke="currentColor" stroke-width="1.6"/><path d="M9 4v16" stroke="currentColor" stroke-width="1.6"/></svg></button>
+        <button type="button" class="adm-sidebar-close" id="admSbClose" aria-label="মেনু বন্ধ করুন"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+      </div>
+      <div class="adm-sidebar-profile"><div class="adm-profile-avatar" aria-hidden="true">MA</div><div class="adm-profile-copy"><strong>কর্মক্ষেত্র</strong><small>স্টোর ব্যবস্থাপনা</small></div></div>
+      <nav class="adm-sidebar-nav" aria-label="অ্যাডমিন মেনু">
+<a class="adm-sidebar-item" href="admin-dashboard.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>ড্যাশবোর্ড</span></a>
+<div class="adm-nav-group"><a class="adm-sidebar-item adm-nav-top" href="admin-orders.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z M9 7h6M9 11h6M9 15h4"/></svg><span>অর্ডার</span></a><div class="adm-nav-children" role="group" aria-label="অর্ডার">
+<a class="adm-sidebar-item adm-nav-child" href="admin-orders.html"><span>অর্ডার</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-fraud.html"><span>ফ্রড রিভিউ</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-order-new.html"><span>নতুন অর্ডার</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-operations.html"><span>হিসাব ও রিটার্ন</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-profit.html"><span>পণ্যের লাভ</span></a>
+</div></div>
+<div class="adm-nav-group"><a class="adm-sidebar-item adm-nav-top" href="product-manager.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="6" width="16" height="15" rx="2"/><path d="M9 6V5a3 3 0 0 1 6 0v1M9 10a3 3 0 0 0 6 0"/></svg><span>পণ্য</span></a><div class="adm-nav-children" role="group" aria-label="পণ্য">
+<a class="adm-sidebar-item adm-nav-child" href="product-manager.html"><span>সব পণ্য</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="product-manager.html?action=new"><span>নতুন পণ্য যোগ</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-sizes.html"><span>সাইজ</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-reviews.html"><span>রিভিউ</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="stock-analytics.html"><span>স্টক ও অ্যানালিটিক্স</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="product-links.html"><span>প্রোডাক্ট লিংক</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="product-manager.html#store-settings"><span>স্টোর সেটিংস</span></a>
+</div></div>
+<div class="adm-nav-group"><a class="adm-sidebar-item adm-nav-top" href="admin-customers.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h18v13H8l-5 4V4ZM7 9h10M7 13h7"/></svg><span>গ্রাহক</span></a><div class="adm-nav-children" role="group" aria-label="গ্রাহক">
+<a class="adm-sidebar-item adm-nav-child" href="admin-customers.html"><span>গ্রাহক</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-inbox.html"><span>ইনবক্স</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-support-inbox.html"><span>লাইভ সাপোর্ট</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="support-agent-telegram.html"><span>টেলিগ্রাম সাপোর্ট</span></a>
+</div></div>
+<div class="adm-nav-group has-current"><a class="adm-sidebar-item adm-nav-top is-current" href="admin-setup.html" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 9v12"/></svg><span>সেটিংস</span></a><div class="adm-nav-children" role="group" aria-label="সেটিংস">
+<a class="adm-sidebar-item adm-nav-child" href="admin-setup.html"><span>সেটআপ ও স্ট্যাটাস</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-seo.html"><span>SEO ম্যানেজার</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-staff.html"><span>স্টাফ</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-growth.html"><span>গ্রোথ টুলস</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-links.html"><span>লিংকস</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-tracking-settings.html"><span>Tracking Pixels</span></a>
+<a class="adm-sidebar-item adm-nav-child is-current" href="admin-tracking-erp.html" aria-current="page"><span>Tracking ERP</span></a>
+<a class="adm-sidebar-item adm-nav-child" href="admin-activity.html"><span>অ্যাক্টিভিটি লগ</span></a>
+</div></div>
+</nav>
+      <div class="adm-sidebar-foot">
+        <button type="button" id="admThemeToggle" class="adm-theme-toggle" role="switch" aria-checked="false" aria-label="ডার্ক মোড"><svg viewBox="0 0 24 24" fill="none"><path d="M20 14A8.5 8.5 0 0 1 10 4a8.5 8.5 0 1 0 10 10Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="adm-theme-label">ডার্ক মোড</span><span class="adm-theme-track" aria-hidden="true"></span></button>
+        <button type="button" class="adm-btn adm-btn-secondary" id="admLogout">লগআউট</button>
+      </div>
+    </aside>
+
+    <div class="adm-content">
+      <header class="adm-topbar">
+        <div>
+          <button type="button" class="adm-menu-btn" id="admMenuBtn" aria-label="মেনু খুলুন"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+          <div>
+            <div class="adm-heading"><span class="adm-page-kicker">মুসলিম আবায়া / মার্কেটিং ডেটা</span><h1>ট্র্যাকিং ম্যানেজমেন্ট ERP</h1></div>
+            <div class="adm-topbar-user" id="admUserLabel">—</div>
+          </div>
+        </div>
+      </header>
+
+      <main class="adm-main">
+
     <header class="terp-head">
       <div><div class="adm-page-kicker">MUSLIM ABAYA / MARKETING DATA</div><h1>Tracking Management ERP</h1><div class="terp-muted">একাধিক Pixel Profile, Domain Mapping এবং Event Monitoring পরিচালনা করুন।</div></div>
       <div class="terp-actions"><a class="adm-btn adm-btn-secondary" href="admin-dashboard.html">অ্যাডমিন ড্যাশবোর্ড</a><a class="adm-btn adm-btn-secondary" href="admin-tracking-settings.html">পুরোনো Pixel Settings</a><button class="adm-btn adm-btn-secondary" id="refreshBtn" type="button">Refresh</button></div>
@@ -114,7 +179,14 @@
       <div class="terp-head" style="margin-bottom:10px"><div><h2 style="margin:0">শেষ ৭ দিনের Event Logs</h2><div class="terp-muted">PII ছাড়া provider response status এবং event reference দেখানো হবে।</div></div><button class="adm-btn adm-btn-secondary" id="loadLogsBtn" type="button">Logs Refresh</button></div>
       <div class="terp-table-wrap"><table class="terp-table"><thead><tr><th>সময়</th><th>Domain</th><th>Provider</th><th>Event</th><th>Event ID</th><th>Status</th><th>Error</th></tr></thead><tbody id="logsBody"><tr><td colspan="7">লোড হচ্ছে…</td></tr></tbody></table></div>
     </section>
-  </main>
+      </main>
+    </div>
+  </div>
+  <script src="admin-page-shell.js?v=1"></script>
+  <script>MaAdminShell.start(function(){});</script>
+  <script src="admin-search.js?v=1" defer></script>
+  <script src="admin-app.js?v=1" defer></script>
+  <script src="admin-wp.js?v=20261124-cache-nav" defer></script>
   <script>
   (function(){
     var API='/_ma/admin/tracking', session=null, profiles=[], editingEnabled=true;
