@@ -9,6 +9,9 @@
  *    a custom "OrderCancelled" event (Meta has no way to subtract a Purchase; the custom event can
  *    be used for audiences and custom conversions). Runs from orderSyncTriggerHandler (every 15 min).
  *
+ * 3) Delivered: when the parcel is delivered, Meta gets a custom "OrderDelivered" event (once per order),
+ *    for a "real sale" Custom Conversion in Ads Manager. Same 15-minute sweep.
+ *
  * Script properties:
  *   GA4_API_SECRET       — GA4 → Admin → Data streams → muslimabaya.com → Measurement Protocol API secrets
  *   GA4_MEASUREMENT_ID   — optional, default G-L2BNEXE0XG
@@ -128,19 +131,35 @@ function scSendCancelEventsForRow_(sheet, row, vals, info, status) {
     if (!g.ok) return { ok: false, detail: out };
   }
   if (notes.indexOf('META_PURCHASE_SENT') !== -1 || notes.indexOf('CAPI_OK') !== -1) {
-    var metaVals = sheet.getRange(row, onlineOrderColumn_(sheet, 30), 1, 3).getValues()[0];
-    var data = {
-      Name: String(vals[1] || ''), Phone: String(vals[2] || ''), Email: String(metaVals[0] || '').trim(),
-      FBC: String(metaVals[1] || '').trim(), FBP: String(metaVals[2] || '').trim(),
-      Total: String(vals[7] || '0'), Design: String(vals[6] || ''),
-      ExternalID: normalizePhone_(String(vals[2] || '')), EventSourceUrl: 'https://muslimabaya.com/checkout',
-      ClientIP: info.ip || '', ClientUserAgent: info.ua || ''
-    };
-    var m = sendToFacebookCAPI(data, 'cancel_' + orderId, 'OrderCancelled');
+    var m = sendToFacebookCAPI(scMetaDataForRow_(sheet, row, vals, info), 'cancel_' + orderId, 'OrderCancelled');
     out.meta = m && m.code;
     if (!(m && m.ok)) return { ok: false, detail: out };
   }
   return { ok: true, detail: out, status: status };
+}
+
+/** Customer data Meta needs to match an order's server event to the person (hashed in sendToFacebookCAPI). */
+function scMetaDataForRow_(sheet, row, vals, info) {
+  var metaVals = sheet.getRange(row, onlineOrderColumn_(sheet, 30), 1, 3).getValues()[0];
+  return {
+    Name: String(vals[1] || ''), Phone: String(vals[2] || ''), Email: String(metaVals[0] || '').trim(),
+    FBC: String(metaVals[1] || '').trim(), FBP: String(metaVals[2] || '').trim(),
+    Total: String(vals[7] || '0'), Design: String(vals[6] || ''),
+    ExternalID: normalizePhone_(String(vals[2] || '')), EventSourceUrl: 'https://muslimabaya.com/checkout',
+    ClientIP: info.ip || '', ClientUserAgent: info.ua || ''
+  };
+}
+
+/**
+ * "OrderDelivered" to Meta when the customer actually received the parcel (status or courier status
+ * Delivered). In Ads Manager it becomes a Custom Conversion, so ads can be judged — and, once there are
+ * enough, optimised — on real deliveries instead of placed orders (cash-on-delivery has many fakes).
+ * Sent once per order (flag dv); event_id delivered_<orderId> so a retry is de-duplicated by Meta.
+ */
+function scSendDeliveredEventForRow_(sheet, row, vals, info) {
+  var orderId = String(vals[8] || ('MA-ROW-' + row)).trim();
+  var m = sendToFacebookCAPI(scMetaDataForRow_(sheet, row, vals, info), 'delivered_' + orderId, 'OrderDelivered');
+  return { ok: !!(m && m.ok), code: m && m.code };
 }
 
 /**
@@ -179,7 +198,21 @@ function serverConversionsRefundSweep_() {
     } catch (err) { failed++; }
     if (sent + failed >= 30) break;
   }
-  return { ok: true, sent: sent, failed: failed };
+  // Delivered orders → OrderDelivered (once each; only orders placed after server tracking began, v2).
+  var delivered = 0;
+  for (var k = 0; k < rows.length && sent + failed + delivered < 60; k++) {
+    var st = String(rows[k][9] || '').toLowerCase().trim();
+    var cs = String(rows[k][12] || '').toLowerCase().trim();
+    if (st !== 'delivered' && cs !== 'delivered') continue;
+    var dInfo = scParseTrackingInfo_(cells[k][0]);
+    if (dInfo.dv || !(Number(dInfo.v) >= 2)) continue;
+    try {
+      var d = scSendDeliveredEventForRow_(sheet, first + k, rows[k], dInfo);
+      if (d.ok) { setOnlineOrderTrackingFlags_(sheet, first + k, { dv: 1 }); delivered++; }
+      else failed++;
+    } catch (dErr) { failed++; }
+  }
+  return { ok: true, sent: sent, failed: failed, delivered: delivered };
 }
 
 function scParseTrackingInfo_(raw) {

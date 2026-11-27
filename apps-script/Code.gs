@@ -7597,7 +7597,11 @@ function getAdminAnalyticsV2_(e) {
   var productSales = {}; // id -> { name, qty }
   var categorySales = {}; // category -> qty
   var sizeSales = {}; // size -> qty
-  var sourceStats = {}; // source -> { orders, delivered }
+  var sourceStats = {}; // source -> { orders, delivered, failed (cancel/return), fake, deliveredValue }
+  var srcStat = function (name) {
+    if (!sourceStats[name]) sourceStats[name] = { orders: 0, delivered: 0, failed: 0, fake: 0, deliveredValue: 0 };
+    return sourceStats[name];
+  };
   var monthStats = {}; // yyyy-MM -> order and sales totals
   var undatedOrderCount = 0;
   var firstOrderDay = '';
@@ -7636,7 +7640,13 @@ function getAdminAnalyticsV2_(e) {
       var status = String(r[9] || '').trim().toLowerCase();
       // Orders marked Fake were never real sales: count them separately and keep them out of every
       // order, revenue, customer and product total below.
-      if (status === 'fake') { summary.fakeCount++; continue; }
+      if (status === 'fake') {
+        summary.fakeCount++;
+        // Still counted per source, so the report can show which ads bring fake orders.
+        var fakeSource = String(r[36] || '').trim();
+        if (fakeSource) { anySourceData = true; srcStat(fakeSource).fake++; }
+        continue;
+      }
       summary.totalOrders++;
       var total = parseSignedOrderAmount_(r[7]);
       summary.totalOrderValue += total;
@@ -7669,9 +7679,10 @@ function getAdminAnalyticsV2_(e) {
       var sourceVal = String(r[36] || '').trim(); // কলাম ৩৭ (0-ইনডেক্স ৩৬)
       if (sourceVal) {
         anySourceData = true;
-        if (!sourceStats[sourceVal]) sourceStats[sourceVal] = { orders: 0, delivered: 0 };
-        sourceStats[sourceVal].orders++;
-        if (status === 'delivered') sourceStats[sourceVal].delivered++;
+        var st = srcStat(sourceVal);
+        st.orders++;
+        if (status === 'delivered') { st.delivered++; st.deliveredValue += total; }
+        else if (isReturn || isPlainCancel) st.failed++;
       }
 
       // best-seller হিসাব Confirmed/Shipped/Delivered অর্ডার থেকে (বাতিল/পেন্ডিং বাদ) —
@@ -7741,8 +7752,15 @@ function getAdminAnalyticsV2_(e) {
   }).sort(function (a, b) { return b.qty - a.qty; });
 
   var sourceBreakdown = Object.keys(sourceStats).map(function (s) {
-    return { source: s, orders: sourceStats[s].orders, delivered: sourceStats[s].delivered };
-  }).sort(function (a, b) { return b.orders - a.orders; });
+    var x = sourceStats[s];
+    var decided = x.delivered + x.failed + x.fake;
+    return {
+      source: s, orders: x.orders, delivered: x.delivered, failed: x.failed, fake: x.fake,
+      deliveredValue: Math.round(x.deliveredValue),
+      // Of the orders that are finished (delivered, cancelled/returned or fake), the share delivered.
+      successRate: decided ? Math.round((x.delivered / decided) * 100) : null
+    };
+  }).sort(function (a, b) { return (b.orders + b.fake) - (a.orders + a.fake); });
   var salesByMonth = Object.keys(monthStats).sort().map(function (month) { return monthStats[month]; });
 
   // কম স্টক / স্টক শেষ — বর্তমান স্ন্যাপশট (তারিখ-নির্ভর নয়)
