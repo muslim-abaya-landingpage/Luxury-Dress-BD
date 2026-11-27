@@ -11,6 +11,13 @@
 .adm-sidebar-nav{padding:14px 12px !important;gap:3px !important}
 .adm-sidebar-item,.pn-nav a{position:relative;color:#bdb6a4 !important;border-radius:11px !important;padding:10px 12px !important;font-weight:500;transition:background .15s,color .15s}
 .adm-sidebar-item svg{opacity:.8 !important;width:18px !important;height:18px !important}
+/* per-item icon colors (reference-store style: each menu icon its own colour; active state below still wins) */
+.adm-sidebar-item[href="admin-dashboard.html"]:not(.adm-nav-child):not(.is-current) svg{color:#7dc4f0 !important}
+.adm-sidebar-item[href="admin-orders.html"]:not(.adm-nav-child):not(.is-current) svg{color:#f0a84e !important}
+.adm-sidebar-item[href="courier-management.html"]:not(.adm-nav-child):not(.is-current) svg{color:#5fd3b0 !important}
+.adm-sidebar-item[href="product-manager.html"]:not(.adm-nav-child):not(.is-current) svg{color:#c79bf0 !important}
+.adm-sidebar-item[href="admin-customers.html"]:not(.adm-nav-child):not(.is-current) svg{color:#f28fb0 !important}
+.adm-sidebar-item[href="admin-setup.html"]:not(.adm-nav-child):not(.is-current) svg{color:#9fb3d9 !important}
 .adm-sidebar-item:hover,.pn-nav a:hover{background:rgba(255,255,255,.07) !important;color:#fff !important;transform:none}
 .adm-sidebar-item.is-current,.pn-nav a.active{
   background:linear-gradient(90deg,rgba(212,167,44,.26),rgba(212,167,44,.06)) !important;color:#f6e3a6 !important;font-weight:700 !important;
