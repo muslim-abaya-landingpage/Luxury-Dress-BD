@@ -12,7 +12,20 @@ test("auth bridge rejects unapproved origin",async()=>{
   const r=await handleCacheManagerAuth(post("https://evil.example"),{GOOGLE_SA_JSON:"{}"});
   assert.equal(r.status,403);
 });
-test("auth bridge fails closed without Pages service-account secret",async()=>{
-  const r=await handleCacheManagerAuth(post(),{});
+const appsScript=(reply)=>({fetch:async()=>new Response(JSON.stringify(reply)),now:()=>0});
+test("without the service-account secret, the owner is verified through Apps Script",async()=>{
+  const r=await handleCacheManagerAuth(post(),{},appsScript({ok:true,role:"admin",isOwner:true}));
+  assert.equal(r.status,200);
+});
+test("staff sessions are refused as OWNER_ONLY",async()=>{
+  const r=await handleCacheManagerAuth(post(),{},appsScript({ok:true,role:"staff",isOwner:false}));
+  assert.deepEqual([r.status,(await r.json()).error],[403,"OWNER_ONLY"]);
+});
+test("an invalid session is NOT_LOGGED_IN",async()=>{
+  const r=await handleCacheManagerAuth(post(),{},appsScript({ok:false,error:"INVALID_TOKEN"}));
+  assert.deepEqual([r.status,(await r.json()).error],[401,"NOT_LOGGED_IN"]);
+});
+test("Apps Script outage fails closed",async()=>{
+  const r=await handleCacheManagerAuth(post(),{},{fetch:async()=>{throw new Error("down");},now:()=>0});
   assert.equal(r.status,503);
 });
