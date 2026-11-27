@@ -2570,25 +2570,56 @@ function steadfastGetStatusForOrder_(row) {
   return { response: null, status: '', error: lastError };
 }
 
+/**
+ * Applies a courier-reported status to the sheet AND keeps the stock ledger
+ * (StockStage: NEW/RESERVED/SOLD/RELEASED) in sync with it. Without this, an
+ * order whose Delivered/Cancelled status is learned automatically from the
+ * courier (rather than through the admin panel) would flip in the sheet but
+ * never finalize/release its stock — the ledger would silently drift from
+ * reality. Runs under its own script lock (per row) so the 40-row sync batch
+ * doesn't hold one lock for its whole duration and block the admin panel.
+ */
 function applySteadfastStatusToRow_(sheet, row, payload) {
   if (!sheet || !row || row &lt; 2 || !payload) return false;
-  var current = readOnlineOrderRows_(sheet, row, 1, 17)[0];
-  var tracking = String(payload.tracking_code || current[10] || '').trim();
-  var cid = String(payload.consignment_id || current[11] || '').trim();
-  var courierStatus = normalizeSteadfastDeliveryStatus_(payload.status || payload.delivery_status || '');
-  if (!courierStatus) return false;
-  var prevOrderStatus = String(current[9] || '');
-  var orderStatus = sheetOrderStatusFromCourier_(courierStatus, current[9]);
-  sheet.getRange(row, onlineOrderColumn_(sheet, 10), 1, 4).setValues([[
-    orderStatus,
-    tracking,
-    cid,
-    courierStatus
-  ]]);
-  if (orderStatus === 'Delivered' &amp;&amp; prevOrderStatus !== 'Delivered') {
-    try { createReorderOffer_(String(current[8] || ''), String(current[2] || ''), String(current[1] || '')); } catch (roErr) {}
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(15000)) return false;
+  try {
+    var current = readOnlineOrderRows_(sheet, row, 1, 17)[0];
+    var tracking = String(payload.tracking_code || current[10] || '').trim();
+    var cid = String(payload.consignment_id || current[11] || '').trim();
+    var courierStatus = normalizeSteadfastDeliveryStatus_(payload.status || payload.delivery_status || '');
+    if (!courierStatus) return false;
+    var prevOrderStatus = String(current[9] || '');
+    var orderStatus = sheetOrderStatusFromCourier_(courierStatus, current[9]);
+    sheet.getRange(row, onlineOrderColumn_(sheet, 10), 1, 4).setValues([[
+      orderStatus,
+      tracking,
+      cid,
+      courierStatus
+    ]]);
+    if (orderStatus !== prevOrderStatus &amp;&amp; typeof applyStockLifecycleForStatusChangeLocked_ === 'function') {
+      try {
+        applyStockLifecycleForStatusChangeLocked_(sheet, row, orderStatus);
+      } catch (stockErr) {
+        // Never let a stock-ledger problem stop the courier-status write above or
+        // crash the rest of the sync batch — just leave a note for manual review.
+        try {
+          appendStockLedger_({
+            productId: '', variant: '', changeType: 'AUTO_SYNC_STOCK_FAILED',
+            reason: 'অটো কুরিয়ার-সিঙ্কে স্ট্যাটাস \'' + prevOrderStatus + '\' → \'' + orderStatus + '\' হয়েছে কিন্তু স্টক আপডেট ব্যর্থ: ' +
+              String(stockErr &amp;&amp; stockErr.message || stockErr) + ' — ম্যানুয়ালি যাচাই করুন।',
+            orderId: String(current[8] || ('row' + row)), admin: 'system'
+          });
+        } catch (logErr) {}
+      }
+    }
+    if (orderStatus === 'Delivered' &amp;&amp; prevOrderStatus !== 'Delivered') {
+      try { createReorderOffer_(String(current[8] || ''), String(current[2] || ''), String(current[1] || '')); } catch (roErr) {}
+    }
+    return true;
+  } finally {
+    lock.releaseLock();
   }
-  return true;
 }
 
 function syncSteadfastStatusForRow_(sheet, row, vals) {
