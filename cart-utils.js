@@ -854,7 +854,7 @@
     try { qp = new URLSearchParams(search || ""); } catch (e) { return ""; }
     var label = sourceLabel(qp.get("utm_source") || qp.get("source"));
     var medium = String(qp.get("utm_medium") || "").toLowerCase();
-    var campaign = cleanSourcePart(qp.get("utm_campaign"), 60);
+    var campaign = cleanSourcePart(qp.get("utm_campaign"), 54);
     if (campaign.indexOf("{{") !== -1 || /^__[A-Z_]+__$/.test(campaign)) campaign = ""; // an ad macro that was not filled in
     // utm_content = the ad ({{ad.name}} in Meta, __CID_NAME__ in TikTok), so the report can tell ads apart.
     var ad = cleanSourcePart(qp.get("utm_content"), 40);
@@ -879,7 +879,8 @@
     var out = label + (paid ? " Ads" : "");
     if (campaign) out += " · " + campaign;
     if (ad && campaign) out += " · " + ad;
-    return cleanSourcePart(out, 100);
+    // label ≤20 + campaign ≤54 + ad ≤40 + separators = 120, the Source cell limit in Apps Script, so the ad name is never cut off.
+    return cleanSourcePart(out, 120);
   }
 
   function rememberVisitSource() {

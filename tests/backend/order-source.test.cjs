@@ -31,6 +31,11 @@ test('UTM, click ids and social referrers become a readable source', () => {
   assert.equal(d('?utm_source=facebook&utm_medium=paid&utm_campaign=Eid&utm_content=%7B%7Bad.name%7D%7D', '', 'muslimabaya.com'), 'Facebook Ads · Eid');
   assert.equal(d('?utm_source=tiktok&utm_medium=paid&utm_campaign=__CAMPAIGN_NAME__&utm_content=__CID_NAME__', '', 'muslimabaya.com'), 'TikTok Ads');
   assert.equal(d('?utm_source=facebook&utm_medium=paid&utm_content=Video%201', '', 'muslimabaya.com'), 'Facebook Ads');
+  // long campaign + long ad name: the ad name is kept whole and the whole label fits the 120-char Source cell
+  const longCampaign = 'C'.repeat(80), longAd = 'A'.repeat(40);
+  const long = d('?utm_source=an&utm_medium=paid&utm_campaign=' + longCampaign + '&utm_content=' + longAd, '', 'muslimabaya.com');
+  assert.ok(long.endsWith(' · ' + longAd));
+  assert.ok(long.length <= 120);
   assert.equal(d('?utm_source=ig&utm_medium=paid&utm_campaign=1202', '', 'muslimabaya.com'), 'Instagram Ads · 1202');
   assert.equal(d('?utm_source=msg&utm_medium=paid', '', 'muslimabaya.com'), 'Messenger Ads');
   assert.equal(d('?utm_source=an&utm_medium=paid', '', 'muslimabaya.com'), 'Audience Network Ads');
