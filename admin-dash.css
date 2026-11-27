@@ -148,6 +148,11 @@
 .adm-report-row:last-child{border-bottom:0}
 .adm-report-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .adm-report-row b{white-space:nowrap}
+.adm-report-grid>section.adm-report-wide{grid-column:1/-1}
+.adm-source-head{margin-top:4px;color:var(--adm-muted);font-size:11px;font-weight:700}
+.adm-source-total span{font-weight:700}
+.adm-source-row b{font-weight:600}
+.adm-source-note{color:var(--adm-muted);font-size:10.5px;line-height:1.5}
 .adm-feature-error{padding:12px;border-radius:9px;background:var(--adm-danger-wash);font-size:12.5px;line-height:1.5}
 .adm-feature-error button{margin-left:8px;padding:5px 8px;border:1px solid currentColor;border-radius:7px;background:var(--adm-card);color:inherit;cursor:pointer}
 .adm-feature-error[hidden],.adm-report-body[hidden]{display:none}

@@ -855,7 +855,10 @@
     var label = sourceLabel(qp.get("utm_source") || qp.get("source"));
     var medium = String(qp.get("utm_medium") || "").toLowerCase();
     var campaign = cleanSourcePart(qp.get("utm_campaign"), 60);
-    if (campaign.indexOf("{{") !== -1) campaign = ""; // an Ads Manager macro that was not filled in
+    if (campaign.indexOf("{{") !== -1 || /^__[A-Z_]+__$/.test(campaign)) campaign = ""; // an ad macro that was not filled in
+    // utm_content = the ad ({{ad.name}} in Meta, __CID_NAME__ in TikTok), so the report can tell ads apart.
+    var ad = cleanSourcePart(qp.get("utm_content"), 40);
+    if (ad.indexOf("{{") !== -1 || /^__[A-Z_]+__$/.test(ad)) ad = "";
     if (!label && qp.get("fbclid")) { label = "Facebook"; }
     if (!label && qp.get("ttclid")) { label = "TikTok"; medium = medium || "paid"; }
     if (!label && qp.get("gclid")) { label = "Google"; medium = medium || "cpc"; }
@@ -875,6 +878,7 @@
     var paid = /^(paid|cpc|ppc|ads?|paid_social|paidsocial|social_paid|cpm)/.test(medium);
     var out = label + (paid ? " Ads" : "");
     if (campaign) out += " · " + campaign;
+    if (ad && campaign) out += " · " + ad;
     return cleanSourcePart(out, 100);
   }
 

@@ -290,6 +290,48 @@
     $('supportWhatsapp').href = `https://wa.me/${supportNumber}?text=${encodeURIComponent(message)}`;
     track('contact',{value:v.picked.length?v.total:0,items:trackingItems()});
   });
+  // Order "Source" for the admin's ad-source report — same format as the main site (cart-utils.js):
+  // "Facebook Ads · <campaign> · <ad>", "TikTok", "Google Ads · <campaign>", "" when direct.
+  function landingOrderSource() {
+    const a = window.landingAttribution || {};
+    const clean = (x, max) => String(x || '').replace(/[\u0000-\u001f\u007f<>"]/g, ' ').replace(/\s+/g, ' ').trim().replace(/^[=+\-@]+/, '').slice(0, max);
+    const macro = x => x.indexOf('{{') !== -1 || /^__[A-Z_]+__$/.test(x);
+    const name = String(a.utm_source || '').trim().toLowerCase();
+    let label = '';
+    if (name) {
+      if (/^(facebook|fb|meta)$/.test(name) || name.indexOf('facebook') === 0) label = 'Facebook';
+      else if (/^(instagram|ig)$/.test(name)) label = 'Instagram';
+      else if (/^(messenger|msgr|msg)$/.test(name)) label = 'Messenger';
+      else if (name === 'an' || name === 'audience_network') label = 'Audience Network';
+      else if (/^(whatsapp|wa)$/.test(name)) label = 'WhatsApp';
+      else if (name.indexOf('tiktok') === 0) label = 'TikTok';
+      else if (name.indexOf('google') === 0) label = 'Google';
+      else if (name.indexOf('youtube') === 0) label = 'YouTube';
+      else label = clean(a.utm_source, 40);
+    }
+    let medium = String(a.utm_medium || '').toLowerCase();
+    if (!label && a.fbclid) label = 'Facebook';
+    if (!label && a.ttclid) { label = 'TikTok'; medium = medium || 'paid'; }
+    if (!label && document.referrer) {
+      let ref = '';
+      try { ref = new URL(document.referrer).hostname.toLowerCase(); } catch {}
+      if (ref && ref !== location.hostname.toLowerCase()) {
+        if (/(^|\.)(facebook\.com|fb\.com|fb\.me)$/.test(ref)) label = 'Facebook';
+        else if (/(^|\.)instagram\.com$/.test(ref)) label = 'Instagram';
+        else if (/(^|\.)messenger\.com$/.test(ref)) label = 'Messenger';
+        else if (/(^|\.)tiktok\.com$/.test(ref)) label = 'TikTok';
+        else if (/(^|\.)google\./.test(ref)) label = 'Google';
+        else if (/(^|\.)(youtube\.com|youtu\.be)$/.test(ref)) label = 'YouTube';
+      }
+    }
+    if (!label) return '';
+    let campaign = clean(a.utm_campaign, 60); if (macro(campaign)) campaign = '';
+    let ad = clean(a.utm_content, 40); if (macro(ad)) ad = '';
+    let out = label + (/^(paid|cpc|ppc|ads?|paid_social|paidsocial|social_paid|cpm)/.test(medium) ? ' Ads' : '');
+    if (campaign) out += ' · ' + campaign;
+    if (ad && campaign) out += ' · ' + ad;
+    return clean(out, 100);
+  }
   async function submitToAdmin(v, eventId, signature) {
     const trackingSnapshot = trackingItems();
     const apiUrl = String(c.order.apiUrl || '');
@@ -306,6 +348,7 @@
     fields.set('FBC',(cookie('_fbc') || (window.landingAttribution?.fbclid ? `fb.1.${timestamp}.${window.landingAttribution.fbclid}` : '')).slice(0,300));
     fields.set('TTCLID',(window.landingAttribution?.ttclid||'').slice(0,300));
     fields.set('TTP',cookie('_ttp').slice(0,200));
+    fields.set('Source',landingOrderSource());
     fields.set('Site',site); fields.set('DeliveryArea',v.area.id); fields.set('Coupon',String($('coupon')?.dataset.applied||''));
     fields.set('EventSourceUrl',location.href);
     detail.forEach((line,i)=>fields.set(`Product_${i+1}`,line));
